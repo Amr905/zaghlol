@@ -9,7 +9,7 @@
 ## Blockers
 | ID | Blocker | Impact | Owner |
 |---|---|---|---|
-| BLK-01 | **No build toolchain reachable**: the cloud workspace and the linked VM cannot download Flutter/Dart, pub.dev packages, Android SDK/Gradle/Maven, .NET SDK or NuGet (network allowlist); no GitHub account linked for CI; iOS needs macOS. | All code tasks can't be built or tested → can't be verified. | Product owner |
+| ~~BLK-01~~ | **Resolved 2026-11-03**: builds & tests run on GitHub Actions (repo Amr905/zaghlol). Was: no build toolchain reachable**: the cloud workspace and the linked VM cannot download Flutter/Dart, pub.dev packages, Android SDK/Gradle/Maven, .NET SDK or NuGet (network allowlist); no GitHub account linked for CI; iOS needs macOS. | All code tasks can't be built or tested → can't be verified. | Product owner |
 | BLK-02 | Real SMS/notification/statement samples (OQ-04/18) | T-031, T-156, T-157 | Product owner |
 | BLK-03 | Gold-feed provider contract (D-41) | T-127 go-live only | Product owner |
 | BLK-04 | Hosting region + PDPL licence (CR-03/OQ-16) | T-140 | Product owner + legal |
@@ -29,11 +29,11 @@
 ## Tasks
 | ID | Title | MS | Class | Model | Agent | Depends on | Status | Verification evidence | Notes |
 |---|---|---|---|---|---|---|---|---|---|
-| T-001 | Create mono-repo scaffold with pub workspace, app flavors and pure-Dart packages | M0 | C2 | Sonnet | flutter-core-engineer | — | TODO | — |  |
+| T-001 | Create mono-repo scaffold with pub workspace, app flavors and pure-Dart packages | M0 | C2 | Sonnet | flutter-core-engineer | — | IN_PROGRESS | — |  |
 | T-002 | Add custom lint rules (no double in money, no UI string literals, no print) | M0 | C2 | Sonnet | flutter-core-engineer | T-001 | TODO | — |  |
 | T-003 | App CI pipeline (format, analyze, unit, golden, native unit) | M0 | C2 | Sonnet | flutter-core-engineer | T-001 | TODO | — |  |
 | T-004 | Pigeon setup and stale-generation check | M0 | C2 | Sonnet | flutter-core-engineer | T-001 | TODO | — |  |
-| T-005 | Backend solution scaffold, Docker Compose and CI | M0 | C2 | Sonnet | backend-engineer | — | TODO | — |  |
+| T-005 | Backend solution scaffold, Docker Compose and CI | M0 | C2 | Sonnet | backend-engineer | — | IN_PROGRESS | — |  |
 | T-006 | OpenAPI v1 spec and contract-test harness | M0 | C2 | Sonnet | backend-engineer | T-005 | TODO | — |  |
 | T-007 | SPK-05: encrypted SQLite (SQLite3MultipleCiphers) + FTS5 trigram on both platforms | M0 | C4 | Opus | flutter-core-engineer | T-001 | TODO | — |  |
 | T-008 | SPK-01: Android receiver → spool → WorkManager → headless engine latency | M0 | C4 | Opus | native-platform-engineer | T-001, T-004 | TODO | — |  |
@@ -211,3 +211,4 @@
 | Date | Event |
 |---|---|
 | 2026-11-03 | Phase 4 plan approved; Phase 5 opened. Toolchain check: blocked (BLK-01). |
+| 2026-11-03 | BLK-01 resolved via GitHub Actions. T-001 and T-005 started in parallel (separate worktrees, lanes A/B). |
