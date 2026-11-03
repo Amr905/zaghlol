@@ -17,7 +17,7 @@
 ## Summary
 | Milestone | Total | DONE | IN_PROGRESS | BLOCKED |
 |---|---|---|---|---|
-| M0 | 28 | 0 | 0 | 0 |
+| M0 | 28 | 1 | 1 | 0 |
 | M1 | 29 | 0 | 0 | 0 |
 | M2 | 29 | 0 | 0 | 0 |
 | M3 | 18 | 0 | 0 | 0 |
@@ -33,7 +33,7 @@
 | T-002 | Add custom lint rules (no double in money, no UI string literals, no print) | M0 | C2 | Sonnet | flutter-core-engineer | T-001 | TODO | — |  |
 | T-003 | App CI pipeline (format, analyze, unit, golden, native unit) | M0 | C2 | Sonnet | flutter-core-engineer | T-001 | TODO | — |  |
 | T-004 | Pigeon setup and stale-generation check | M0 | C2 | Sonnet | flutter-core-engineer | T-001 | TODO | — |  |
-| T-005 | Backend solution scaffold, Docker Compose and CI | M0 | C2 | Sonnet | backend-engineer | — | IN_PROGRESS | — |  |
+| T-005 | Backend solution scaffold, Docker Compose and CI | M0 | C2 | Sonnet | backend-engineer | — | DONE | CI run 41720361381 (4/4 green) @ d98b37d; review [T-005](05-reviews/T-005.md) APPROVED | Squash-merged; follow-ups FU-001…005 |
 | T-006 | OpenAPI v1 spec and contract-test harness | M0 | C2 | Sonnet | backend-engineer | T-005 | TODO | — |  |
 | T-007 | SPK-05: encrypted SQLite (SQLite3MultipleCiphers) + FTS5 trigram on both platforms | M0 | C4 | Opus | flutter-core-engineer | T-001 | TODO | — |  |
 | T-008 | SPK-01: Android receiver → spool → WorkManager → headless engine latency | M0 | C4 | Opus | native-platform-engineer | T-001, T-004 | TODO | — |  |
@@ -207,8 +207,18 @@
 | T-176 | Android release pipeline, Play listings, Data safety and SMS declaration package | M7 | C3 | Sonnet | flutter-core-engineer | T-172, T-171 | TODO | — |  |
 | T-177 | iOS release pipeline, privacy labels and App Review notes | M7 | C3 | Sonnet | flutter-core-engineer | T-172, T-171 | TODO | — |  |
 
+## Follow-ups (from reviews)
+| ID | From | Item | Owner / target | Status |
+|---|---|---|---|---|
+| FU-001 | T-005 #1, #8 | Add NOT_FOUND, METHOD_NOT_ALLOWED, UNAUTHORIZED (fallback only), PAYLOAD_TOO_LARGE, UNSUPPORTED_MEDIA_TYPE to `backend-api.md` §6; Dockerfile location in `project-structure.md` | solution-architect (docs) | OPEN |
+| FU-002 | T-005 #2 | Align log field names with observability §3.2 (or update the doc) before any alerting | T-138 | OPEN |
+| FU-003 | T-005 #3 | DB readiness check on health/readiness probe, tested against Testcontainers | T-122 | OPEN |
+| FU-004 | T-005 #4–7, #9–10, #12–13 | Backend hardening: real body-not-logged test, SHA-pinned actions, Trivy by digest, 4xx mapping + test, single trace id, Production env in tests, stale-heartbeat test, compose loopback | backend-engineer (small C2 pass, before M5) | OPEN |
+| FU-005 | T-005 #11 | `serverTime` as UTC `Z` and fixed in OpenAPI | T-006 | OPEN |
+
 ## Log
 | Date | Event |
 |---|---|
 | 2026-11-03 | Phase 4 plan approved; Phase 5 opened. Toolchain check: blocked (BLK-01). |
 | 2026-11-03 | BLK-01 resolved via GitHub Actions. T-001 and T-005 started in parallel (separate worktrees, lanes A/B). |
+| 2026-11-03 | T-005 DONE: code-reviewer APPROVED (14 minor/nit findings → FU-001…005), CI green, squash-merged to main. T-006 unblocked. |

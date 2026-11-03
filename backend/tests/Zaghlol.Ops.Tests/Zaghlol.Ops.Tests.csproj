@@ -1,0 +1,7 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <ItemGroup>
+    <ProjectReference Include="..\..\src\Zaghlol.Ops\Zaghlol.Ops.csproj" />
+  </ItemGroup>
+
+</Project>

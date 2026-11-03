@@ -38,7 +38,7 @@ Every task file has: ID, description, technical details, dependencies, affected 
 | [T-002](tasks/T-002.md) | Add custom lint rules (no double in money, no UI string literals, no print) | US-01-1 | Medium | Sonnet | flutter-core-engineer | T-001 | A | 2 | TODO |
 | [T-003](tasks/T-003.md) | App CI pipeline (format, analyze, unit, golden, native unit) | US-01-1 | Medium | Sonnet | flutter-core-engineer | T-001 | A | 2 | TODO |
 | [T-004](tasks/T-004.md) | Pigeon setup and stale-generation check | US-01-1 | Medium | Sonnet | flutter-core-engineer | T-001 | A | 2 | TODO |
-| [T-005](tasks/T-005.md) | Backend solution scaffold, Docker Compose and CI | US-01-1 | Medium | Sonnet | backend-engineer | — | B | 1 | TODO |
+| [T-005](tasks/T-005.md) | Backend solution scaffold, Docker Compose and CI | US-01-1 | Medium | Sonnet | backend-engineer | — | B | 1 | DONE |
 | [T-006](tasks/T-006.md) | OpenAPI v1 spec and contract-test harness | US-13-1 | Medium | Sonnet | backend-engineer | T-005 | B | 2 | TODO |
 | [T-007](tasks/T-007.md) | SPK-05: encrypted SQLite (SQLite3MultipleCiphers) + FTS5 trigram on both platforms | US-01-2 | High* | Opus | flutter-core-engineer | T-001 | A | 2 | TODO |
 | [T-008](tasks/T-008.md) | SPK-01: Android receiver → spool → WorkManager → headless engine latency | US-01-2 | High* | Opus | native-platform-engineer | T-001, T-004 | D | 3 | TODO |
