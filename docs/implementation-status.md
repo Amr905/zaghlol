@@ -17,7 +17,7 @@
 ## Summary
 | Milestone | Total | DONE | IN_PROGRESS | BLOCKED |
 |---|---|---|---|---|
-| M0 | 28 | 1 | 1 | 0 |
+| M0 | 28 | 1 | 2 | 0 |
 | M1 | 29 | 0 | 0 | 0 |
 | M2 | 29 | 0 | 0 | 0 |
 | M3 | 18 | 0 | 0 | 0 |
@@ -34,7 +34,7 @@
 | T-003 | App CI pipeline (format, analyze, unit, golden, native unit) | M0 | C2 | Sonnet | flutter-core-engineer | T-001 | TODO | — |  |
 | T-004 | Pigeon setup and stale-generation check | M0 | C2 | Sonnet | flutter-core-engineer | T-001 | TODO | — |  |
 | T-005 | Backend solution scaffold, Docker Compose and CI | M0 | C2 | Sonnet | backend-engineer | — | DONE | CI run 41720361381 (4/4 green) @ d98b37d; review [T-005](05-reviews/T-005.md) APPROVED | Squash-merged; follow-ups FU-001…005 |
-| T-006 | OpenAPI v1 spec and contract-test harness | M0 | C2 | Sonnet | backend-engineer | T-005 | TODO | — |  |
+| T-006 | OpenAPI v1 spec and contract-test harness | M0 | C2 | Sonnet | backend-engineer | T-005 | IN_PROGRESS | — | Branch task/T-006-openapi; includes FU-001, FU-005; no app/ changes until T-001 merges |
 | T-007 | SPK-05: encrypted SQLite (SQLite3MultipleCiphers) + FTS5 trigram on both platforms | M0 | C4 | Opus | flutter-core-engineer | T-001 | TODO | — |  |
 | T-008 | SPK-01: Android receiver → spool → WorkManager → headless engine latency | M0 | C4 | Opus | native-platform-engineer | T-001, T-004 | TODO | — |  |
 | T-009 | SPK-03: can an iOS App Intent process immediately with a headless Flutter engine? | M0 | C4 | Opus | native-platform-engineer | T-001, T-004 | TODO | — |  |
@@ -222,3 +222,4 @@
 | 2026-11-03 | Phase 4 plan approved; Phase 5 opened. Toolchain check: blocked (BLK-01). |
 | 2026-11-03 | BLK-01 resolved via GitHub Actions. T-001 and T-005 started in parallel (separate worktrees, lanes A/B). |
 | 2026-11-03 | T-005 DONE: code-reviewer APPROVED (14 minor/nit findings → FU-001…005), CI green, squash-merged to main. T-006 unblocked. |
+| 2026-11-03 | T-006 started (backend-engineer, Sonnet), scoped to backend/** + backend-api.md §6 to avoid conflict with T-001. |
