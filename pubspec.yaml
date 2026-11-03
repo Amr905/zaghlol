@@ -3,7 +3,7 @@ description: Pub workspace root for the Zaghlol mono-repo (app + pure-Dart packa
 publish_to: none
 
 environment:
-  sdk: ^3.6.0
+  sdk: ^3.13.7
 
 # The sqlite3 build hook (sqlite3mc) is added in T-007.
 workspace:

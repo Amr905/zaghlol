@@ -1,4 +1,4 @@
-package app.zaghlol.zaghlol
+package app.zaghlol
 
 import io.flutter.embedding.android.FlutterActivity
 

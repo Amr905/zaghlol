@@ -20,5 +20,4 @@ linter:
     - avoid_print
     - prefer_final_locals
     - prefer_single_quotes
-    - require_trailing_commas
     - unawaited_futures

@@ -5,7 +5,7 @@ plugins {
 }
 
 android {
-    namespace = "app.zaghlol.zaghlol"
+    namespace = "app.zaghlol"
     compileSdk = flutter.compileSdkVersion
     ndkVersion = flutter.ndkVersion
 
@@ -15,18 +15,40 @@ android {
     }
 
     defaultConfig {
-        // TODO: Specify your own unique Application ID (https://developer.android.com/studio/build/application-id.html).
-        applicationId = "app.zaghlol.zaghlol"
-        // You can update the following values to match your application needs.
-        // For more information, see: https://flutter.dev/to/review-gradle-config.
-        minSdk = flutter.minSdkVersion
-        targetSdk = flutter.targetSdkVersion
-        // Uses the version code from pubspec.yaml. When using split APKs, 1000 * ABI_VERSION
-        // is added automatically by Flutter. (https://developer.android.com/studio/build/configure-apk-splits#configure-APK-versions)
-        // You can force using the value of versionCode by specifying the `-P force-version-code-ignoring-abi=true`
-        // flag during build.
+        // Prod applicationId; dev/staging add a suffix below (deployment.md section 1).
+        applicationId = "app.zaghlol"
+        // ADR-019: minSdk 26 (Android 8.0), targetSdk 36.
+        minSdk = 26
+        targetSdk = 36
         versionCode = flutter.versionCode
         versionName = flutter.versionName
+    }
+
+    // Dimension order matters: variants are named <env><Sms|NoSms>, e.g. prodNoSms.
+    flavorDimensions += listOf("env", "sms")
+
+    productFlavors {
+        create("dev") {
+            dimension = "env"
+            applicationIdSuffix = ".dev"
+            resValue("string", "app_name", "Zaghlol Dev")
+        }
+        create("staging") {
+            dimension = "env"
+            applicationIdSuffix = ".staging"
+            resValue("string", "app_name", "Zaghlol Staging")
+        }
+        create("prod") {
+            dimension = "env"
+            resValue("string", "app_name", "Zaghlol")
+        }
+        // ADR-004: READ_SMS / RECEIVE_SMS live only in src/sms/AndroidManifest.xml.
+        create("sms") {
+            dimension = "sms"
+        }
+        create("noSms") {
+            dimension = "sms"
+        }
     }
 
     buildTypes {
