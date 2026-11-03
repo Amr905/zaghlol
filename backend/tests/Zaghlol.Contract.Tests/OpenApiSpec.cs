@@ -22,7 +22,7 @@ internal sealed class OpenApiSpec
 {
     private static readonly string[] HttpMethods = ["get", "put", "post", "delete", "patch"];
 
-    private static readonly string[] SchemaChildKeywords = ["items", "additionalProperties", "if", "then", "else"];
+    private static readonly string[] SchemaChildKeywords = ["items", "additionalProperties"];
 
     private static readonly string[] SchemaBranchKeywords = ["oneOf", "anyOf", "allOf"];
 
