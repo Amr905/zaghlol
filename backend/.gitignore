@@ -1,0 +1,21 @@
+# .NET build output
+bin/
+obj/
+out/
+publish/
+
+# Test output
+TestResults/
+test-results/
+*.trx
+coverage/
+
+# IDE / OS
+.vs/
+.idea/
+*.user
+*.suo
+
+# Local env
+.env
+*.local

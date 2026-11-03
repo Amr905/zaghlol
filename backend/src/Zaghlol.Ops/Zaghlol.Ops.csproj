@@ -1,0 +1,13 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <OutputType>Exe</OutputType>
+    <AssemblyName>zaghlol-ops</AssemblyName>
+    <RootNamespace>Zaghlol.Ops</RootNamespace>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <InternalsVisibleTo Include="Zaghlol.Ops.Tests" />
+  </ItemGroup>
+
+</Project>

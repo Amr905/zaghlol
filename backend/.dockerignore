@@ -1,0 +1,8 @@
+**/bin
+**/obj
+**/.vs
+tests
+docker-compose.yml
+Dockerfile
+.dockerignore
+README.md

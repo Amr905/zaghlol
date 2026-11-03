@@ -1,0 +1,68 @@
+# Local development stack: `docker compose up --build` then `curl http://localhost:8080/v1/health`.
+# The password below is a throwaway local-development value; real secrets come from the secrets manager.
+name: zaghlol-backend
+
+services:
+  postgres:
+    image: postgres:17
+    environment:
+      POSTGRES_DB: zaghlol
+      POSTGRES_USER: zaghlol
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-zaghlol_dev_only}
+    ports:
+      - "127.0.0.1:${POSTGRES_PORT:-5432}:5432"
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U zaghlol -d zaghlol"]
+      interval: 5s
+      timeout: 3s
+      retries: 10
+      start_period: 5s
+
+  api:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    image: zaghlol-backend:local
+    depends_on:
+      postgres:
+        condition: service_healthy
+    environment:
+      ConnectionStrings__Postgres: Host=postgres;Port=5432;Database=zaghlol;Username=zaghlol;Password=${POSTGRES_PASSWORD:-zaghlol_dev_only}
+    ports:
+      - "${API_PORT:-8080}:8080"
+    read_only: true
+    tmpfs:
+      - /tmp
+    healthcheck:
+      test: ["CMD", "dotnet", "/app/api/Zaghlol.Api.dll", "--healthcheck"]
+      interval: 10s
+      timeout: 10s
+      retries: 5
+      start_period: 10s
+
+  worker:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    image: zaghlol-backend:local
+    entrypoint: ["dotnet", "/app/worker/Zaghlol.Workers.dll"]
+    depends_on:
+      postgres:
+        condition: service_healthy
+    environment:
+      ConnectionStrings__Postgres: Host=postgres;Port=5432;Database=zaghlol;Username=zaghlol;Password=${POSTGRES_PASSWORD:-zaghlol_dev_only}
+      Worker__HeartbeatFile: /tmp/zaghlol-worker.heartbeat
+    read_only: true
+    tmpfs:
+      - /tmp
+    healthcheck:
+      test: ["CMD", "dotnet", "/app/worker/Zaghlol.Workers.dll", "--healthcheck"]
+      interval: 10s
+      timeout: 10s
+      retries: 5
+      start_period: 20s
+
+volumes:
+  pgdata:
