@@ -81,10 +81,10 @@ jobs:
 
       - name: TEMP probe versions
         run: |
-          curl -s https://api.nuget.org/v3-flatcontainer/ssh.net/index.json | tr -d ' \n'; echo
-          curl -s https://api.nuget.org/v3-flatcontainer/testcontainers.postgresql/index.json | tr -d ' \n'; echo
-          curl -s https://api.nuget.org/v3-flatcontainer/testcontainers/4.10.0/testcontainers.nuspec | grep -i dependency || true
-          curl -s https://api.nuget.org/v3-flatcontainer/testcontainers/4.9.0/testcontainers.nuspec | grep -i "ssh" || true
+          echo "PROBE sshnet: $(curl -s https://api.nuget.org/v3-flatcontainer/ssh.net/index.json | grep -o '"[0-9][^"]*"' | tail -6 | tr '\n' ' ')"
+          echo "PROBE testcontainers: $(curl -s https://api.nuget.org/v3-flatcontainer/testcontainers.postgresql/index.json | grep -o '"[0-9][^"]*"' | tail -6 | tr '\n' ' ')"
+          echo "PROBE npgsql: $(curl -s https://api.nuget.org/v3-flatcontainer/npgsql/index.json | grep -o '"[0-9][^"]*"' | grep -v -- - | tail -4 | tr '\n' ' ')"
+          for v in $(curl -s https://api.nuget.org/v3-flatcontainer/testcontainers/index.json | grep -o '"4\.[0-9]*\.[0-9]*"' | tr -d '"' | tail -4); do echo "PROBE tc $v: $(curl -s https://api.nuget.org/v3-flatcontainer/testcontainers/$v/testcontainers.nuspec | grep -o 'SSH.NET" version="[^"]*"' | head -1)"; done
 
       - name: Fail on any vulnerable package (direct or transitive)
         run: |
