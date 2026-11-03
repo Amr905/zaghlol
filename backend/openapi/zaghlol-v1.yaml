@@ -2229,7 +2229,6 @@ components:
           $ref: '#/components/schemas/UtcTimestamp'
     FlagUpdateRequest:
       type: object
-      additionalProperties: false
       required: [value]
       properties:
         value:
@@ -2312,6 +2311,8 @@ components:
       type: object
       required: [date, activeInstalls]
       properties:
+        balance:
+          type: number
         date:
           type: string
           format: date
