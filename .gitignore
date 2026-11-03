@@ -1,0 +1,38 @@
+# Flutter / Dart
+app/.dart_tool/
+app/build/
+app/.flutter-plugins
+app/.flutter-plugins-dependencies
+app/.packages
+app/pubspec.lock.bak
+**/*.g.dart.bak
+
+# Android
+app/android/.gradle/
+app/android/local.properties
+app/android/key.properties
+*.jks
+*.keystore
+
+# iOS
+app/ios/Pods/
+app/ios/.symlinks/
+app/ios/Flutter/Generated.xcconfig
+app/ios/Runner/GoogleService-Info.plist
+*.mobileprovision
+
+# Secrets & local data
+.env
+*.zaghlol.enc
+*.db
+*.sqlite
+
+# Editors / OS
+.idea/
+.vscode/
+*.iml
+.DS_Store
+Thumbs.db
+
+# Claude local settings
+.claude/settings.local.json

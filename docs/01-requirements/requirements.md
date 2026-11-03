@@ -1,0 +1,1027 @@
+# Zaghlol (زغلول) — Software Requirements Specification
+
+| | |
+|---|---|
+| Document | `docs/01-requirements/requirements.md` |
+| Version | 1.3 — APPROVED (+ changes D-34, D-36…D-44) |
+| Phase | 1 — Requirements refinement |
+| Author | requirements-analyst (Lead session) |
+| Date | 2026-10-31 |
+| Related | `research/competitor-capture.md` (Say & FinArt capture research) · `institutions.md` (supported institutions list) |
+| Source | `Zaghlol_Feature_and_Product_Specification_v4.docx` (title page says v3.0; file named v4 — treated as one source, referred to as "the spec") |
+| Status | Approved by product owner 2026-11-01; D-34 approved change 2026-11-01 |
+
+**How to read this document.** Every requirement has an ID. Anything not stated in the spec or decided by the product owner is recorded as an **Assumption (A-##)** in §14 or an **Open Question (OQ-##)** in §15 — nothing is assumed silently. Priorities use MoSCoW (**M**ust / **S**hould / **C**ould). Tier: **F** = Free, **G** = Zaghlol Gold, **F/G** = both with different limits.
+
+### Change log
+| Version | Date | Changes |
+|---------|------|---------|
+| 0.1 | 2026-10-31 | First draft from interview rounds 1–3 (D-01…D-12). |
+| 0.2 | 2026-10-31 | Product-owner review round 1 (D-13…D-24): **introduces a .NET + PostgreSQL backend** for purchase verification, merchant/category catalog sync, price feed and remote feature flags; optional sign-in; opt-in anonymous merchant contribution; full-device encryption of all local data; backup now includes all settings & customizations; reimbursement of expenses by incoming transfers; frictionless onboarding; 8 currencies; competitor capture research. |
+| 0.3 | 2026-11-01 | Product-owner review round 2 (D-25…D-31): **per-card spending breakdown**; **ignore SMS / notifications / Apple Pay per card** (never stored); **online & foreign banks** (Wise, Revolut, Monzo, bunq, N26, Paytm, HDFC; Klivvr already covered) for Egyptians with foreign accounts; **native multi-currency** — any ISO 4217 currency, everything reported per currency, optional approximate-EGP view (supersedes D-22's 8-currency list and EGP-equivalent rules). |
+| 0.4 | 2026-11-01 | Review round 3 (D-32, D-33): **Payoneer, Emirates NBD Liv, Al Rajhi** added at launch; GCC and more Egyptian fintechs proposed; institution coverage moved to `institutions.md`; **generic parser + "request my bank"** for unlisted banks; **one free cloud backup** (Google Drive / iCloud) for Free users. Resolves OQ-13, OQ-17; mitigates R-14. |
+| 1.0 | 2026-11-01 | Approved by product owner. |
+| 1.1 | 2026-11-01 | Approved change D-34: whole Arabic UI in Egyptian colloquial, fun & easy (FR-L10N-02 rewritten, FR-L10N-04 added); new logo = Captain Zaghlol holding coins. |
+| 1.2 | 2026-11-02 | Design-review decisions: **D-36** bulk edit of transactions (FR-TXN-06); **D-37** operator admin web app, delivered after the first release (FR-BE-08, OQ-12 resolved); **D-38** Smart ROI gives general advice only at first, named products later (FR-ROI-05). |
+| 1.3 | 2026-11-03 | Phase 3 answers: D-39…D-44 (iOS approach, Tesseract OCR, local gold feed, online speech with consent, min OS, Apple sign-in on Android). OQ-02/03/06/15 resolved; OQ-16 still open. |
+
+---
+
+## 1. Purpose & product summary
+
+Zaghlol is a personal-finance app for Egyptian consumers that captures spending automatically from bank, InstaPay, mobile-wallet and BNPL messages, categorizes it against an Egyptian merchant map, and coaches the user in Egyptian colloquial Arabic through a cartoon pigeon mascot, Captain Zaghlol. **All financial data — messages, transactions, balances, budgets, assets and the user's own rules — is processed and stored only on the user's phone.** A small Zaghlol backend (.NET + PostgreSQL) provides non-financial services: purchase verification, the shared merchant & category catalog, gold/FX prices, and feature flags (D-13).
+
+## 2. Product-owner decisions (Phase 1 interview, 2026-10-31)
+
+| ID | Decision | Effect |
+|----|----------|--------|
+| D-01 | Launch on **Android and iOS together**. | iOS capture is weaker by platform design; requirements cover both. |
+| D-02 | Android capture: **apply for the Google Play SMS exception ("SMS-based money management") and build fallbacks** (bank-app notifications, share/paste). | App must remain useful if Play denies SMS permission. |
+| D-03 | Release scope: **full spec** (not a reduced MVP). | All modules in §7 are in the launch release unless flagged. |
+| D-04 | **One person per phone.** No household sharing, no multi-profile. | Single local user; "family budget" = the user's household spending. |
+| D-05 | Gold & currency prices: **fetched automatically** (via the Zaghlol backend since v0.2, D-13), sending no user data; manual override; last-known price used offline. | See NFR-PRIV-03, FR-BE-04. |
+| D-06 | "Ask Zaghlol" chat: **rules/templates engine**, fully offline. No LLM. | Chat answers a defined set of question types (FR-CHAT). |
+| D-07 | Zakah: **build behind a feature flag, disabled at launch**, enabled only after scholar review; shows "estimate — consult a scholar" disclaimer. | FR-ZAK is built and tested but not user-visible at launch. |
+| D-08 | Primary first-year goal: **user growth**. Paid tier is light-touch. | Success metrics favour activation & retention (§3). |
+| D-09 | iOS: **keep all 5 capture channels as specified**, including the message-filter extension, subject to architect feasibility study. | Risk R-02 recorded. |
+| D-10 | Smart ROI coach: **build behind a feature flag, disabled at launch**. | FR-ROI built but not user-visible at launch. |
+| D-11 | Google Drive backup goes to the **hidden app-data folder** (`drive.appdata`). | User does not see the file in Drive; restore is via Zaghlol only. |
+| D-12 | Paid tier: name **Zaghlol Gold**, structure monthly / yearly / lifetime and free-tier limits as in spec; **final prices TBD before launch**. | Spec prices (49 / 399 / 899 EGP) are placeholders. |
+| D-13 | **Introduce a backend: .NET + PostgreSQL.** Jobs: (1) purchase verification & entitlements, (2) merchant & category catalog, (3) gold/FX price feed, (4) remote feature flags. It never receives transactions, messages, balances, budgets, assets or the user's own rules. | Replaces spec's "zero backend". New module BE (§7.27). Marketing claim "no server at all" must change (R-11). |
+| D-14 | **Identity: anonymous by default, optional sign-in** (Google / Apple) used only to carry Gold across Android ↔ iOS. | New role R-04; FR-ACCT. |
+| D-15 | **Catalog sync**: merchants, categories, keywords stored in the encrypted local DB; on app open, refresh from backend **at most once per 24 h**; app works fully with the last downloaded version. | FR-SYNC. |
+| D-16 | **Opt-in anonymous merchant contribution**: if the user agrees, unknown merchant names are sent (no amounts, dates, accounts, or person names). Off by default. | FR-CAT-09, BR-SYNC-04. |
+| D-17 | **SMS templates are not updated from the backend**; they ship with app releases. | FR-PAR-08 unchanged; OTA templates recorded as later option (OOS-15). |
+| D-18 | **Everything stored on the phone is encrypted** and inaccessible outside the app (DB, preferences, files, caches). | FR-SEC-03…07, NFR-SEC. |
+| D-19 | **Backup contains everything needed to continue on a new phone**: data, preferences, settings, custom categories, rules and every other customization. | FR-BAK-06. |
+| D-20 | **Incoming transfers (InstaPay, wallet, cash) can be assigned as reimbursements of an expense** — e.g. user paid the restaurant bill, friends sent their share. | FR-XFR-06…09, BR-XFR-05…08. |
+| D-21 | **Onboarding must be as easy as possible.** | FR-ONB rewritten (§7.1). |
+| D-22 | ~~Supported currencies: EGP, USD, SAR, EUR, AED, QAR, KWD, BHD.~~ **Superseded by D-28/D-29.** These 8 remain the *featured* currencies (shown first in pickers). | — |
+| D-23 | **No email capture for now**; recorded as a later option. | OOS-14. |
+| D-24 | Capture design informed by Say/FinArt research. | `research/competitor-capture.md`; FR-ING updates. |
+| D-25 | **Per-card breakdown**: every list, chart and the home screen can be filtered by card/account, and each card shows its own category split. (Per-card budgets, card default categories and card groups were *not* selected.) | FR-CARD (§7.30); OOS-17. |
+| D-26 | **Ignore capture per card**, separately for SMS, app notifications and Apple Pay. Ignored messages are **never stored**. | FR-CAP (§7.31), BR-CAP. |
+| D-27 | **Online & foreign banks** supported for **Egyptians with foreign accounts** (not new markets): Wise, Revolut, Monzo, bunq, N26, Paytm, HDFC Bank (+ Klivvr, already covered). The list is extensible. | FR-PAR-10, FR-ING-A-07, FR-ING-I-08, FR-EXP-06; persona P-06. Market stays Egypt (OOS-06). |
+| D-28 | **Currencies are tracked natively** — balances, transactions, assets and budgets stay in their own currency; nothing is converted to EGP for storage. **Any active ISO 4217 currency** is supported. | BR-MON-03, BR-FX-01, FR-CUR (§7.32). |
+| D-29 | **Reporting is per currency with a currency switcher**; an **optional, clearly labelled "≈ in EGP" view** (user setting, off by default — A-54) combines currencies using the latest backend rates. | FR-CUR-02…05. |
+| D-30 | Online-bank users on iOS are captured only where Apple allows: Apple Pay (Wallet automation), screenshot OCR, statement import. App notifications from these banks cannot be read on iOS. | FR-ING-I-08; R-15. |
+| D-31 | Ignoring a card applies to future messages; Android users can re-run a historical scan after un-ignoring. | BR-CAP-04. |
+| D-32 | **Institution coverage expanded**: Payoneer, Emirates NBD (incl. Liv) and Al Rajhi added as launch musts; other international, GCC and Egyptian institutions supported through `institutions.md` (proposed rows to confirm) plus a generic parser and a "request my bank" flow for anything unlisted. | `institutions.md`; FR-PAR-13, FR-PAR-14. |
+| D-33 | **Free users get one cloud backup** on Google Drive or iCloud. | FR-BAK-08 rewritten; §5.2; BR-BAK-02. Gold keeps automatic schedules and backup history. |
+| D-34 | **The Arabic app speaks Egyptian colloquial throughout** (العامية المصرية) — labels, buttons, messages and Captain Zaghlol — fun and easy for most users. Standard Arabic only for legal texts and disclaimers. Logo = the funny Captain Zaghlol holding coins. | FR-L10N-02/04; `docs/02-design/06-voice-and-tone.md`. |
+| D-36 | **Bulk edit**: the user can select several transactions and change them in one action. | FR-TXN-06. Resolves DQ-01. |
+| D-37 | **Operator admin web app** for the Zaghlol team (catalog, contributed merchants, feature flags, entitlement lookup), **out of scope for the first delivery**; v1 operates with scripts. | FR-BE-08; resolves OQ-12 / DQ-02. Designed and built in a later release. |
+| D-38 | **Smart ROI tips start with general advice only** (e.g. "a bank savings certificate", "gold") — no bank, fund or product names and no named yields. Naming real products is a future option. | FR-ROI-05; resolves DQ-03. |
+| D-39 | **iOS capture follows the FinArt / Say approach** (CR-01): Shortcuts **Message** automations + Shortcuts **Transaction (Wallet/Apple Pay)** automation, plus voice, manual, share/screenshot OCR and statement import. The message filter extension is **dropped** (Apple blocks it from sharing data with the app). | FR-ING-I-03 removed; R-02 closed. |
+| D-40 | Android Arabic OCR uses Tesseract alongside ML Kit (CR-02). | ADR-009. |
+| D-41 | Gold prices come from a **local Egyptian gold-market feed** (OQ-02); provider contract TBD; FX from a licensed source. | ADR-014. |
+| D-42 | If on-device Egyptian Arabic speech isn't available, the OS online recognizer may be used **with explicit consent** (OQ-06). | ADR-010. |
+| D-43 | Minimum OS: Android 8.0 (API 26), iOS 17.0 (CR-04, OQ-03). | ADR-019. |
+| D-44 | Sign in with Apple is also offered on Android via Apple's web flow (CR-05). | ADR-016, FR-ACCT-01. |
+
+## 3. Business goals & success metrics
+
+### 3.1 Goals
+| ID | Goal | Source |
+|----|------|--------|
+| BG-01 | Become the default expense tracker for Egyptian smartphone users by removing manual entry (auto-capture from 38 banks, InstaPay, wallets, BNPL). | Spec §1, §3 |
+| BG-02 | Win trust through privacy: no account, no bank password, no server. | Spec §1, §2, Campaign #3 |
+| BG-03 | Grow through word of mouth: shareable achievement cards and humorous Egyptian persona. | Spec §5 Screen 14, §6 |
+| BG-04 | Minimal hosting cost (backend serves only small, non-financial services, D-13); monetize power features via in-app purchase. | Spec §2, D-13 |
+| BG-05 | Outperform competitors Say and FinArt on Egypt-specific intelligence (self-transfer detection, colloquial voice entry, gold/CD tracking). | Spec §3 |
+
+### 3.2 Success metrics (first 12 months)
+Targets are **proposed** (A-01) — the spec gives none.
+
+| ID | Metric | Proposed target |
+|----|--------|-----------------|
+| SM-01 | Activation: % of installs that capture ≥ 5 transactions within 48 h | ≥ 50% Android, ≥ 25% iOS |
+| SM-02 | D30 retention | ≥ 25% |
+| SM-03 | Auto-capture parse accuracy on the reference SMS corpus (correct amount, direction, account, merchant) | ≥ 98% amount/direction, ≥ 90% merchant |
+| SM-04 | Auto-categorization rate (no manual fix needed) | ≥ 80% of captured transactions |
+| SM-05 | Crash-free sessions | ≥ 99.5% (measured via store consoles only — no in-app telemetry) |
+| SM-06 | Gold conversion | Tracked, not targeted in year 1 (D-08) |
+| SM-07 | Store rating | ≥ 4.4 on both stores |
+
+Note: the app has no analytics SDK (NFR-PRIV-01). SM-01/02/04 can be measured through store-console statistics, opt-in surveys, or anonymous aggregate counters on the backend (e.g. count of distinct anonymous IDs calling catalog sync per day). How to measure is OQ-01.
+
+## 4. Target users
+
+Personas are derived from the spec's examples (A-02).
+
+| ID | Persona | Profile | Key needs |
+|----|---------|---------|-----------|
+| P-01 | **Salaried professional** ("Ahmed") | 25–40, Cairo/Alexandria, salary on day 25, NBE + CIB cards, uses InstaPay, Talabat, Uber. Android or iPhone. | Know where salary goes; safe daily spend until payday; no double-counting self-transfers. |
+| P-02 | **Household manager** | Runs family groceries and bills, much spending in cash, Vodafone Cash, gameya (جمعية). Prefers Arabic. | Fast cash logging by voice; budget per category; bill & installment reminders. |
+| P-03 | **Saver / investor** | Holds 21K/24K gold, bank CDs (شهادات), USD/SAR cash. | Net worth in one place; later: Zakah per asset. |
+| P-04 | **iPhone user** | Same needs as P-01, frustrated that iOS apps can't read SMS. | Setup of Shortcuts/Apple Pay automations in minutes; screenshot OCR for InstaPay. |
+| P-05 | **Privacy-sceptic** | Refuses apps that need bank login. | Proof nothing leaves the phone. |
+| P-06 | **Egyptian with foreign accounts** (freelancer, expat, returning worker, student abroad) | Paid in USD/GBP/EUR via Wise or Revolut; may keep a Monzo/N26/bunq account from living abroad, or HDFC/Paytm from India; also has NBE/CIB at home. Several cards. | See spending per card and per currency without forced conversion; ignore cards they don't want tracked (e.g. a company card). |
+
+Market: Egypt. Currencies: any ISO 4217 currency, tracked natively (D-28); featured: EGP, USD, SAR, EUR, AED, QAR, KWD, BHD.
+
+## 5. User roles & permissions
+
+### 5.1 Roles
+Single local user per installation (D-04). No account is required (D-14).
+
+| Role | How obtained | Capabilities |
+|------|--------------|--------------|
+| R-01 Free user | Install | All Free-tier features (§7 tier column). Identified to the backend only by a random anonymous install ID. |
+| R-02 Gold subscriber | Valid monthly / yearly / lifetime purchase **verified by the backend** (FR-GOLD-02) | All Free features + Gold features on the platform where purchased. |
+| R-03 Expired Gold user | Subscription lapsed, refunded or revoked | Reverts to Free limits; **data created with Gold features remains readable** (BR-GOLD-04). |
+| R-04 Signed-in user (optional) | Signs in with Google or Apple (FR-ACCT) | Same as R-01/R-02, plus Gold follows the account across Android ↔ iOS. Sign-in links **only the entitlement**; no financial data is attached to the account. |
+| R-05 Zaghlol operator (internal) | Zaghlol staff | Manages catalog (merchants, categories, keywords), reviews contributed merchants, sets feature flags and prices source; views entitlement status for support. No access to any user financial data (none exists on the backend). Tooling is OQ-12. |
+
+Feature flags (D-07, D-10) are controlled remotely by R-05 through the backend (FR-BE-05), with a safe default of OFF when the app has never reached the backend.
+
+### 5.2 Entitlement matrix
+
+| Capability | Free | Gold |
+|------------|------|------|
+| Automatic capture, all supported institutions | ✔ unlimited | ✔ unlimited |
+| Custom SMS regex builder for unsupported senders | — | ✔ |
+| 14 system categories, manual re-categorization | ✔ | ✔ |
+| Save "always apply" merchant rules | ✔ (A-05) | ✔ |
+| Custom categories & subcategories | — | ✔ unlimited |
+| Voice cash entry | 15 / month | Unlimited |
+| Manual cash entry | ✔ unlimited | ✔ unlimited |
+| Charts | 4 core (A-06) | All 12 |
+| Captain Zaghlol chart explanations | Basic tips | Deep coaching |
+| Net worth: bank, wallet, cash balances | ✔ | ✔ |
+| Net worth: gold, CDs, real estate, stocks, multi-currency | — | ✔ |
+| CSV / Excel export | Preview only | ✔ |
+| CSV import / restore | — | ✔ |
+| Bank PDF statement import | — | ✔ |
+| Encrypted Google Drive / iCloud backup | 1 backup slot, manual "Back up now" (D-33) | ✔ automatic schedule + last 5 versions |
+| Ask Zaghlol chat + roast mode | ✔ (A-07) | ✔ |
+| Share cards | ✔ | ✔ |
+| Automatic merchant catalog updates | ✔ | ✔ |
+| Per-card breakdown (filters + per-card category split) | ✔ | ✔ |
+| Ignore capture per card / channel | ✔ | ✔ |
+| Online & foreign banks capture (SMS / notifications / Apple Pay / OCR) | ✔ | ✔ |
+| Online-bank statement import (CSV/PDF) | — | ✔ |
+| Multi-currency tracking & per-currency reports | ✔ (A-55) | ✔ |
+| Backup includes all settings & customizations | ✔ | ✔ |
+| Gold on both Android and iOS | — | ✔ with optional sign-in |
+
+### 5.3 Device permissions
+
+| Permission | Platform | Requested when | Purpose | If denied |
+|------------|----------|----------------|---------|-----------|
+| READ_SMS, RECEIVE_SMS | Android | Onboarding capture step, after explanation | Historical scan + live capture | Fall back to notification listener + share/paste (FR-ING-A-05) |
+| Notification access (NotificationListenerService) | Android | Capture setup | Read bank/wallet app push notifications | Capture limited to SMS/manual |
+| POST_NOTIFICATIONS | Android 13+ / iOS | First alert-worthy event or onboarding | Budget alerts, reminders | No alerts; in-app banners only |
+| Microphone + speech recognition | Both | First tap on mic | Voice cash entry | Manual entry only |
+| Photos / screenshot access | iOS (and Android share) | First OCR use | Receipt / InstaPay screenshot OCR | Feature unavailable |
+| Biometrics (Face ID / Touch ID / fingerprint) | Both | Onboarding toggle | App lock | PIN/device passcode fallback (A-08) |
+| Google account (Drive appdata scope) | Both | First Drive backup | Backup | Backup unavailable |
+| iCloud | iOS | First iCloud backup | Backup | Backup unavailable |
+| Google / Apple sign-in | Both | Only when user chooses to link Gold across platforms | Cross-platform entitlement | Gold stays on the purchasing platform |
+| Network | Both | Catalog sync, price refresh, flags, purchases, backup | See D-13 | App works fully offline with last-known catalog, prices and flags |
+
+## 6. Scope overview
+
+| Module | ID prefix | Launch state |
+|--------|-----------|--------------|
+| Onboarding, settings & privacy | ONB | On |
+| Android capture | ING-A | On |
+| iOS capture (5 channels) | ING-I | On (filter extension subject to feasibility, R-02) |
+| Message parsing engine | PAR | On |
+| Accounts & cards | ACC | On |
+| Transactions | TXN | On |
+| Categorization & merchant rules | CAT | On |
+| Voice cash entry | VOI | On |
+| Self-transfers, refunds & bill splits | XFR | On |
+| Budget & payday cycle | BUD | On |
+| Subscriptions & BNPL / installments | SUB | On |
+| Home dashboard | HOME | On |
+| Charts & explanations | CHT | On |
+| Captain Zaghlol mascot & coaching | MAS | On |
+| Ask Zaghlol chat & roast mode | CHAT | On |
+| Wealth & net worth | WLT | On |
+| Zakah calculator | ZAK | **Flag OFF** (D-07), switchable remotely |
+| Smart ROI coach | ROI | **Flag OFF** (D-10), switchable remotely |
+| Zaghlol Gold & purchases | GOLD | On |
+| Optional account (sign-in) | ACCT | On |
+| Per-card breakdown | CARD | On |
+| Capture controls (ignore per card) | CAP | On |
+| Multi-currency | CUR | On |
+| Catalog sync | SYNC | On |
+| Backend services (.NET + PostgreSQL) | BE | On |
+| Export / import | EXP | On |
+| Backup & restore | BAK | On |
+| Social share cards | SHR | On |
+| Notifications | NTF | On |
+| Security & app lock | SEC | On |
+| Localization | L10N | On |
+| Home/lock-screen widgets | WID | On (Should) |
+
+Canonical screen set: the spec's §13 16-screen set, with §5 content mapped onto it (A-09). The UX phase will reconcile numbering.
+
+---
+
+## 7. Functional requirements
+
+### 7.1 Onboarding, settings & privacy (ONB)
+| ID | Requirement | Pri | Tier | Acceptance criteria |
+|----|-------------|-----|------|---------------------|
+**Onboarding principle (D-21):** the user sees their own transactions as fast as possible; every question that isn't needed for that is skipped, defaulted, or asked later in context.
+
+| ID | Requirement | Pri | Tier | Acceptance criteria |
+|----|-------------|-----|------|---------------------|
+| FR-ONB-01 | First launch shows a single welcome + privacy screen: "your financial data stays on your phone, no bank password, no ads". | M | F | One screen, one primary button. Wording must stay true with the backend (no "no server" claim). |
+| FR-ONB-02 | App works without any account or sign-in; sign-in is never part of onboarding. | M | F | No onboarding screen asks for email, phone, password or social sign-in. |
+| FR-ONB-03 | Payday day, income target and language are **optional** during onboarding. Language defaults to device language; payday defaults to day 1 (calendar month) until set (A-43). | M | F | User can reach the home screen without entering any number. Values editable in Settings; payday input accepts 1–28 only (BR-BUD-01). |
+| FR-ONB-04 | Biometric app lock is offered after the first transactions are visible (not before), as a one-tap toggle. | M | F | When enabled, requires biometric/passcode on cold start and after background timeout (A-10). |
+| FR-ONB-05 | Capture setup in ≤ 3 taps per platform. Android: one explanation screen → system SMS permission → optional notification access. iOS: one-tap Shortcut install + setup checker. | M | F | Measured: ≤ 3 user actions from welcome to first permission granted; each permission has one plain-language reason line. |
+| FR-ONB-06 | Android: historical SMS scan starts automatically right after permission, in the background, with live progress, and the home screen fills as transactions are found. | M | F | First parsed transactions visible within 10 s of permission grant on a reference device; scan depth per A-11; no duplicates. |
+| FR-ONB-09 | **Time to first value**: a new Android user with bank SMS sees categorized transactions on the home screen in ≤ 60 s from first launch; iOS user sees a guided "log your first expense" (voice or manual) in ≤ 60 s. | M | F | Verified in usability test with 5 users per platform (target: 4 of 5 succeed unaided). |
+| FR-ONB-10 | Contextual setup later: suggest payday when a salary-like credit is detected; suggest budgets after the first full cycle; suggest the free backup after 7 days of data (A-65). | S | F | Each suggestion appears once and can be dismissed permanently. |
+| FR-ONB-11 | Every onboarding step except the welcome screen can be skipped and resumed from Settings → "Finish setup". | M | F | — |
+| FR-ONB-12 | Restoring on a new phone is offered on the welcome screen ("I already use Zaghlol"). | M | F | Leads to FR-BAK-03 restore flow; works for Free and Gold backups. |
+| FR-ONB-07 | Settings screen exposes: language, digits, payday, income target, app lock, capture sources, categories & rules, merchant contribution opt-in, notification preferences, backup, Gold & optional account, privacy info ("what Zaghlol's server knows about you"), data deletion. | M | F | All items reachable within 2 taps of Settings. |
+| FR-ONB-08 | User can delete all data. | M | F | "Delete everything" with confirmation wipes DB, keys and cached files and asks the backend to delete the install record; app returns to first-launch state. |
+
+### 7.2 Android capture (ING-A)
+| ID | Requirement | Pri | Tier | Acceptance criteria |
+|----|-------------|-----|------|---------------------|
+| FR-ING-A-01 | Capture incoming SMS from supported financial senders in real time, including when the app is closed. | M | F | Given SMS permission, a supported bank SMS creates a transaction within 10 s of receipt with the app killed. |
+| FR-ING-A-02 | Only messages from recognized financial senders are processed; all other SMS are ignored and never stored. | M | F | Personal SMS never appear in DB, logs or backups (Play spyware policy). |
+| FR-ING-A-03 | Capture bank / wallet / InstaPay app push notifications via notification listener — a **primary** channel alongside SMS (competitors use both; see research note). | M | F | Given notification access, a supported app notification creates a transaction; same event received via SMS and notification is stored once (BR-ING-02). Only notifications from apps in the institution registry are read. |
+| FR-ING-A-04 | Clipboard / share-to-Zaghlol: user shares or pastes an SMS text to parse. | M | F | Shared text is parsed and shown for confirmation before saving. |
+| FR-ING-A-05 | Degraded mode when SMS permission is unavailable (denied by user or not granted by Play). | M | F | App states which capture methods are active and offers notification + share/paste + manual + voice. |
+| FR-ING-A-06 | Unrecognized messages from known financial senders go to a review queue. | M | F | User can view raw text, enter fields manually, or dismiss. |
+| FR-ING-A-07 | **Online & foreign banks** (D-27): capture Wise, Revolut, Payoneer, Monzo, bunq, N26 from their **app notifications** (they don't send SMS for payments — A-56); capture HDFC Bank, Paytm and GCC banks (Al Rajhi, Emirates NBD/Liv, and others in `institutions.md`) from **SMS and notifications**. | M | F | Each institution has notification/SMS templates with fixtures (FR-PAR-10). Amounts captured in their native currency (FR-CUR-01). |
+| FR-ING-A-08 | All capture channels respect per-card ignore rules (FR-CAP) before anything is stored. | M | F | — |
+
+### 7.3 iOS capture (ING-I)
+| ID | Requirement | Pri | Tier | Acceptance criteria |
+|----|-------------|-----|------|---------------------|
+| FR-ING-I-01 | Shortcuts **Message** automations ("Message Contains" an Arabic/English bank keyword, set to Run Immediately) pass the message text to Zaghlol via an App Intent. | M | F | With the provided automations installed, a bank SMS containing a configured keyword creates a transaction without opening the app. Keyword set covers ≥ 95% of reference-corpus messages. |
+| FR-ING-I-02 | Shortcuts **Transaction** (Wallet) automation passes Amount, Merchant and Card to Zaghlol. | M | F | An Apple Pay payment creates a transaction; if the same payment also arrives by SMS it is stored once (BR-ING-02). Only Apple Pay payments are covered (not physical-card or online card use). |
+| ~~FR-ING-I-03~~ | ~~Message filter extension~~ **Removed by D-39** (technically infeasible). | — | — | — |
+| FR-ING-I-04 | Screenshot OCR: Back-Tap / share a screenshot (e.g. InstaPay receipt) → parsed transaction. | M | F | On-device OCR extracts amount, counterparty, reference; user confirms. Arabic and English receipts. |
+| FR-ING-I-05 | Bank PDF statement import (also on Android). | M | G | See FR-EXP-04. |
+| FR-ING-I-06 | One-tap install of the ready-made Shortcut package (all keyword Message automations + Wallet automation) with setup instructions. | M | F | User reaches a working automation in ≤ 3 steps (spec Screen 2). |
+| FR-ING-I-07 | Setup checker: detects missing or inactive automations (e.g. no captures for 7 days while the user is active) and guides the user to fix them. | M | F | — |
+| FR-ING-I-08 | **Online & foreign banks on iOS** (D-30): Apple Pay payments with Wise/Revolut/Monzo/bunq/N26/HDFC cards via the Wallet automation; HDFC/Paytm SMS via Message automations (if the SIM receives them); screenshot OCR of in-app transaction screens; statement import (FR-EXP-06). The app explains that iOS can't read these banks' notifications. | M | F | Setup screen for each online bank lists the channels that work on iOS. |
+
+### 7.4 Message parsing engine (PAR)
+| ID | Requirement | Pri | Tier | Acceptance criteria |
+|----|-------------|-----|------|---------------------|
+| FR-PAR-01 | Support every institution in `institutions.md` at its stated priority: the 53 spec formats (38 Egyptian banks, 6 InstaPay scenarios, 6 wallets/cards, 3 BNPL groups), plus added international, GCC and Egyptian fintech institutions (D-27, D-32), in Arabic and English. | M | F | Each format has ≥ 4 test fixtures (AR, EN, edge variants) passing. |
+| FR-PAR-02 | Extract: institution, direction, amount, currency, card/account last-4, merchant or counterparty (name / IPA / phone), balance or available limit, reference no., transaction date/time. | M | F | Missing optional fields are null, not guessed. |
+| FR-PAR-03 | Classify direction: expense, income, transfer-out, transfer-in, refund/reversal, declined. | M | F | Declined transactions are recorded as declined and excluded from spend (BR-TXN-03). |
+| FR-PAR-04 | Normalize Arabic-Indic digits, Arabic decimal separator, tatweel and thousands separators before extraction. | M | F | `١٬٢٥٠٫٠٠` parses as 1250.00. |
+| FR-PAR-05 | Clean merchant strings (strip POS terminal codes, city/country suffixes). | M | F | `CARREFOUR MAADI EG 041` → Carrefour. |
+| FR-PAR-06 | Each parse returns a confidence and the matched template; low-confidence results go to review. | M | F | Threshold configurable in code (A-12). |
+| FR-PAR-07 | Custom regex builder for unsupported senders. | S | G | User highlights amount/merchant in a sample message; Zaghlol generates and tests a template before saving. |
+| FR-PAR-08 | Templates are versioned data bundled with the app; formats are updated with app releases, **not** from the backend (D-17). | M | — | Adding a bank needs only template + fixtures. |
+| FR-PAR-09 | Parse a message in < 10 ms on a reference mid-range device. | M | — | See NFR-PERF-01. |
+| FR-PAR-10 | **Online & foreign bank templates** (D-27) for Wise, Revolut, Monzo, bunq, N26, Paytm, HDFC Bank — English (and Hindi/English for HDFC/Paytm SMS where relevant, A-57). Covers card payments, transfers in/out, currency conversions within the app (e.g. Wise USD→EGP), top-ups, refunds, declines. | M | F | ≥ 4 fixtures per institution per event type from real samples (OQ-04). |
+| FR-PAR-11 | Parse international amount formats: currency symbols and codes (`$ £ € ₹ ₺ ﷼`, `USD`, `GBP`…), symbol before or after the amount, `1,234.56` and `1.234,56` (EU) and Indian grouping `1,23,456.78`, and currencies with 0, 2 or 3 decimals. | M | F | Table-driven tests for each format. |
+| FR-PAR-13 | **Generic parser** for financial messages from senders/apps not in the registry but identified as financial (e.g. sender or app name contains "bank", known financial keywords in AR/EN): heuristic extraction of amount, currency, direction, last-4, merchant. Output always goes to the review queue for confirmation; once confirmed, the user can choose "always capture this sender" (A-66). | M | F | On a test set of unseen bank formats, ≥ 80% have correct amount and currency in the review queue suggestion. |
+| FR-PAR-14 | **"Request my bank"**: from the review queue or Settings, user can ask Zaghlol to support an institution. Sends only institution name, country and channel type (SMS/notification) — **never the message** (BR-SYNC-03). | S | F | Backend aggregates requests for operator prioritization (FR-BE-10). |
+| FR-PAR-15 | Payoneer, Emirates NBD/Liv and Al Rajhi templates at launch (D-32): card payments, transfers in/out, currency conversions, refunds, declines; Al Rajhi and Emirates NBD in Arabic and English. | M | F | ≥ 4 fixtures per event type from real samples (OQ-18). |
+| FR-PAR-12 | Currency conversion events (e.g. "You converted 500 USD to 24,600 EGP" in Wise/Revolut) are recorded as an internal transfer between two same-institution balances in different currencies, not as spend. | M | F | Spend totals unchanged by a conversion. |
+
+### 7.5 Accounts & cards (ACC)
+| ID | Requirement | Pri | Tier | Acceptance criteria |
+|----|-------------|-----|------|---------------------|
+| FR-ACC-01 | Auto-create an account/card the first time an institution + last-4 is seen. | M | F | Types: Debit, Credit, Account, Wallet, BNPL, Cash, **Multi-currency account** (Wise/Revolut-style, holding several currency balances). User can rename and set type. |
+| FR-ACC-06 | A multi-currency account keeps a separate balance per currency (e.g. Wise: USD 1,200.00, EUR 300.00, EGP 5,000.00). | M | F | Balances never summed across currencies except in the optional ≈EGP view. |
+| FR-ACC-02 | Track current balance from the latest message's balance field; credit cards track available limit. | M | F | Balance shown with "as of" timestamp. |
+| FR-ACC-03 | A default Cash account exists for manual and voice entries. | M | F | — |
+| FR-ACC-04 | User can merge duplicate accounts and hide accounts. | S | F | Merging re-links transactions. |
+| FR-ACC-05 | Credit cards: user can set statement due day and credit limit. | S | F | Used by SUB reminders and chart 10 utilisation. |
+
+### 7.6 Transactions (TXN)
+| ID | Requirement | Pri | Tier | Acceptance criteria |
+|----|-------------|-----|------|---------------------|
+| FR-TXN-01 | Transaction list with filters (date range, account, category, type) and full-text search (merchant, note, amount). | M | F | Search returns results in < 200 ms on 50k transactions. |
+| FR-TXN-02 | Manual add / edit / delete of any transaction. | M | F | Edited auto-captured transactions are marked user-verified. |
+| FR-TXN-03 | Record source of every transaction (SMS, notification, shortcut, Apple Pay, OCR, PDF, CSV, voice, manual). | M | F | Visible in transaction details. |
+| FR-TXN-04 | Every transaction is stored in its **original currency** (any ISO 4217 code, D-28); no EGP amount is stored as the transaction's value. If a message states both a foreign amount and the billed amount (e.g. "USD 20.00 charged EGP 1,010.00" on an Egyptian card), both are kept: the billed amount in the card's currency counts for that card. | M | F | KWD 1.250, BHD 0.375, JPY 1500 stored and shown with the correct decimals (BR-MON-03). |
+| FR-TXN-05 | Attach a note to a transaction. | C | F | — |
+| FR-TXN-06 | **Bulk edit** (D-36): select several transactions (Select button or long-press) and in one action change category, change card/account, or delete. | M | F | Selecting 10 transactions and changing their category updates all 10 and every total; one **Undo** restores all of them; a bulk delete asks for confirmation first. Optional "always use this category for these merchants" creates rules (FR-CAT). |
+
+### 7.7 Categorization & merchant rules (CAT)
+| ID | Requirement | Pri | Tier | Acceptance criteria |
+|----|-------------|-----|------|---------------------|
+| FR-CAT-01 | Ship the 14 system categories with subcategories, budget bucket and colour from spec §4. | M | F | Names in AR and EN exactly as spec. |
+| FR-CAT-02 | Ship 600+ seeded Egyptian merchant mappings **bundled in the app** (works on first launch offline) and kept current through catalog sync (FR-SYNC). | M | F | Spec lists ~150 examples; the full 600+ list must be compiled (OQ-05). |
+| FR-CAT-03 | Categorize using precedence: user rule → seeded map → keyword heuristics → "needs classification" (BR-CAT-01). | M | F | — |
+| FR-CAT-04 | "Needs classification" queue with one-tap category chips (swipe). | M | F | Spec Screen 5. |
+| FR-CAT-05 | After a manual re-categorization, ask "always apply for this merchant/counterparty?" and save a rule if yes. | M | F | Rule applies to future and, optionally, past transactions (A-13). |
+| FR-CAT-06 | Fuzzy merchant matching (handles spelling variants and Arabic/English names). | M | F | `ELEZABY`, `EL EZABY`, `صيدليات العزبي` → El Ezaby. |
+| FR-CAT-07 | Create, edit, delete custom categories and subcategories. | M | G | Deleting a category requires choosing a replacement for its transactions. |
+| FR-CAT-08 | Manage saved rules (list, edit, delete). User rules are stored only in the local encrypted DB and are never uploaded. | M | F | — |
+| FR-CAT-09 | **Opt-in anonymous merchant contribution** (D-16): Settings toggle, off by default, explained in one sentence. When on, unknown merchant names the user categorizes are sent to the backend per BR-SYNC-04. | S | F | Payload contains only normalized merchant string, institution code, and chosen system category; inspected in tests to contain no amount, date, card, account, phone, IPA or person name. |
+
+### 7.8 Voice cash entry (VOI)
+| ID | Requirement | Pri | Tier | Acceptance criteria |
+|----|-------------|-----|------|---------------------|
+| FR-VOI-01 | Record a spoken phrase in Egyptian Arabic or English and convert to text on device. | M | F/G | Works offline where the device supports on-device ar-EG recognition (R-05). |
+| FR-VOI-02 | Split one phrase into multiple transactions with amounts and categories. | M | F/G | "دفعت ١٥٠ جنيه خضار وفاكهة و ٤٥ جنيه قهوة و ٣٠ جنيه تاكسي" → 3 items: 150 Groceries, 45 Dining, 30 Transport. |
+| FR-VOI-03 | Show parsed items for confirmation/edit before saving. | M | F/G | Nothing saved without confirmation. |
+| FR-VOI-04 | Free users: 15 voice logs per month; Gold unlimited. | M | F/G | A "log" = one confirmed recording, regardless of item count (A-14). Counter resets on calendar month (A-15). |
+| FR-VOI-05 | Understand spoken Egyptian number forms ("ميت وخمسين", "ربع", "نص"). | S | F/G | Covered by test phrase list to be built in Phase 3. |
+
+### 7.9 Self-transfers, refunds & bill splits (XFR)
+| ID | Requirement | Pri | Tier | Acceptance criteria |
+|----|-------------|-----|------|---------------------|
+| FR-XFR-01 | Auto-pair an outgoing and incoming transfer between the user's own accounts (BR-XFR-01) and mark both internal. | M | F | Spec example: −1,000 NBE *4567 and +1,000 CIB *1234 within 2 min → 0 EGP spend. |
+| FR-XFR-02 | User can manually link / unlink transfers. | M | F | — |
+| FR-XFR-03 | Refunds offset the original expense where matched (BR-XFR-03). | M | F | — |
+| FR-XFR-04 | Bill split: user marks an expense as shared, adds participants and shares, and links incoming repayments. | M | F | Spec example: paid 1,200, received 800 → net personal spend 400. |
+| FR-XFR-05 | Track unsettled split amounts per person. | S | F | — |
+| FR-XFR-06 | **Assign an incoming transfer as a reimbursement** (D-20): from any incoming InstaPay / wallet / bank transfer or manual cash-in, user picks "This is money back for…" and selects an expense. | M | F | After assigning +400 to a 1,200 restaurant expense, the expense's net spend shows 800 and the incoming transfer is excluded from income (BR-XFR-05). |
+| FR-XFR-07 | Multiple incoming transfers can reimburse one expense; one incoming transfer can be split across several expenses. | M | F | 1,200 bill + 400 from Ahmed + 400 from Karim → net 400. |
+| FR-XFR-08 | Suggest reimbursements: when an incoming person-to-person transfer arrives within 7 days (A-45) after an expense in Dining / Entertainment / Travel (or one already marked shared) and is ≤ the remaining amount, show a one-tap "Is this from the [merchant] bill?" prompt. | S | F | Suggestion never auto-applies without a tap. |
+| FR-XFR-09 | Reimbursements can be unassigned; the incoming transfer then returns to normal income classification. | M | F | — |
+
+### 7.10 Budget & payday cycle (BUD)
+| ID | Requirement | Pri | Tier | Acceptance criteria |
+|----|-------------|-----|------|---------------------|
+| FR-BUD-01 | Budget cycle runs from payday to the day before next payday (BR-BUD-01). | M | F | Payday 25 → cycle 25 Oct – 24 Nov. |
+| FR-BUD-02 | Monthly limit per category; overall budget = sum of limits or user-set total (A-16). Each budget is set **in one currency** and counts only transactions in that currency (D-28). | M | F | An EGP Dining budget ignores a GBP restaurant payment; the user can create a separate GBP Dining budget. |
+| FR-BUD-03 | Alerts at configurable thresholds (default 80% and 100%). | M | F | One alert per threshold per category per cycle. |
+| FR-BUD-04 | "Safe to spend per day" figure (BR-BUD-03). | M | F | Spec: 2,200 left, 7 days → 314/day. |
+| FR-BUD-05 | Optional rollover of unused budget to next cycle. | C | F | — |
+| FR-BUD-06 | Annual budgets (e.g. school fees). | C | F | Spec field `is_annual`. |
+
+### 7.11 Subscriptions & BNPL / installments (SUB)
+| ID | Requirement | Pri | Tier | Acceptance criteria |
+|----|-------------|-----|------|---------------------|
+| FR-SUB-01 | Detect recurring subscriptions from transaction history (BR-SUB-01). | M | F | User confirms or dismisses detected subscriptions. |
+| FR-SUB-02 | Show monthly cost and ×12 annual cost per subscription and total. | M | F | — |
+| FR-SUB-03 | Track installments (valU, Sympl, Souhoola, etc.), credit card due payments and gameya: amount, due day, paid/remaining count. | M | F | Spec Screen 10. Gameya entered manually (A-17). |
+| FR-SUB-04 | Reminder 3 days before each due date (configurable). | M | F | — |
+| FR-SUB-05 | Mark an installment paid automatically when a matching payment is captured. | S | F | — |
+
+### 7.12 Home dashboard (HOME)
+| ID | Requirement | Pri | Tier | Acceptance criteria |
+|----|-------------|-----|------|---------------------|
+| FR-HOME-01 | Show liquid balance, days to payday, cycle income, cycle spend, safe daily spend — **per currency** (primary currency first, other currencies as swipeable cards); optional ≈EGP total when enabled (FR-CUR-04). | M | F | Excludes internal transfers. A user with only EGP sees no currency UI at all. |
+| FR-HOME-05 | Card filter on the home screen (FR-CARD-01). | M | F | — |
+| FR-HOME-02 | Mascot banner with contextual message (MAS rules). | M | F | — |
+| FR-HOME-03 | Feed of recent captured transactions with account, category, amount; internal transfers labelled "excluded". | M | F | — |
+| FR-HOME-04 | Quick-add button (centre FAB) for voice / manual / asset entry. | M | F | — |
+
+### 7.13 Charts & explanations (CHT)
+| ID | Requirement | Pri | Tier | Acceptance criteria |
+|----|-------------|-----|------|---------------------|
+| FR-CHT-01 | 12 charts as in spec §7: 1 Cash flow, 2 Category donut, 3 Payday burn-rate curve, 4 50/30/20 balance, 5 Day-of-week (and hour) pattern, 6 Top merchants, 7 Month vs 3-month average, 8 6-month installment timeline, 9 Subscriptions ×12, 10 Cards & wallets split, 11 Net worth growth, 12 Personal inflation tracker. | M | F/G | Each chart has empty state and works RTL/LTR. |
+| FR-CHT-02 | Free users get 4 core charts: Cash flow (1), Category donut (2), Top merchants (6, top 5), Budget progress bars (A-06). Others show a Gold-locked preview. | M | F/G | — |
+| FR-CHT-03 | "Explain this chart" (اشرحلي يا زغلول): a dynamic Egyptian Arabic / English explanation and one actionable tip computed from the user's data. | M | F/G | Text is generated from templates with real values; Free = basic tip, Gold = deep coaching (definition in Phase 2, OQ-07). |
+| FR-CHT-04 | Charts filter by cycle / month / custom range. | S | F | — |
+| FR-CHT-05 | Every chart filters by **card/account** (FR-CARD-01) and by **currency**; a chart never mixes currencies unless the ≈EGP view is on, in which case it is labelled "approximate". | M | F | — |
+| FR-CHT-06 | Chart 10 (Cards & wallets) shows spend per card **per currency** and lets the user tap a card to open its breakdown (FR-CARD-02). | M | F/G | — |
+
+### 7.14 Captain Zaghlol mascot & coaching (MAS)
+| ID | Requirement | Pri | Tier | Acceptance criteria |
+|----|-------------|-----|------|---------------------|
+| FR-MAS-01 | Animated mascot with states: Tour guide, Proud coach, Shocked, Detective, Chart professor, Voice listener (+ ROI and Zakah states when flags on). | M | F | Triggers per BR-MAS-*. |
+| FR-MAS-02 | Mascot speech in Egyptian colloquial Arabic (AR locale) or friendly English (EN locale). | M | F | All lines from approved copy deck (Phase 2). |
+| FR-MAS-03 | User can reduce mascot animation (respects OS reduce-motion). | M | F | — |
+
+### 7.15 Ask Zaghlol chat & roast mode (CHAT)
+| ID | Requirement | Pri | Tier | Acceptance criteria |
+|----|-------------|-----|------|---------------------|
+| FR-CHAT-01 | Answer typed questions in Arabic (incl. colloquial) and English using an offline rules/templates engine (D-06). | M | F | Supported intents (minimum): spend on category/merchant over period; compare periods; top merchants; balance of account; remaining budget; upcoming dues; biggest expense; savings this month; **spend on a specific card** ("صرفت كام بكارت CIB الشهر ده؟"). Answers give one figure per currency. |
+| FR-CHAT-02 | Answers can include a small inline chart. | M | F | — |
+| FR-CHAT-03 | Unsupported questions get a helpful fallback with example questions. | M | F | Never fabricates numbers. |
+| FR-CHAT-04 | Roast mode ("إقصف جبهتي يا زغلول"): humorous critique of spending. | S | F | Humour rules: no insults about the person, religion, body, family; only about spending (A-18). |
+| FR-CHAT-05 | Suggested-question chips. | S | F | — |
+
+### 7.16 Wealth & net worth (WLT)
+| ID | Requirement | Pri | Tier | Acceptance criteria |
+|----|-------------|-----|------|---------------------|
+| FR-WLT-01 | Net worth = liquid accounts + assets − liabilities (BR-WLT-01), **shown per currency / unit** (e.g. EGP 54,000 · USD 1,200 · GBP 300 · Gold 24K 5 g · Gold 21K 24 g); the single combined figure appears only in the optional ≈EGP view (D-29). | M | F/G | Free: accounts/wallets/cash only. |
+| FR-WLT-02 | Track gold by karat (24K, 21K, 18K) in grams and gold coins; bank certificates (principal, rate, payout frequency, maturity, currency); cash and balances in **any ISO currency**; stocks/funds (in their trading currency); real estate; car (A-19). | M | G | Each asset stored in its native unit/currency. |
+| FR-WLT-03 | Get current gold (per karat, per gram, in EGP and USD — A-58) and FX rates for all supported currencies from the Zaghlol backend (FR-BE-04); manual override; last-known price used offline with its date (D-05). Prices are used only to value gold and for the optional ≈EGP view. | M | G | Request carries no holdings or user data (NFR-PRIV-03). Prices older than 24 h are labelled stale. |
+| FR-WLT-04 | Upcoming CD payout dates and amounts. | S | G | Spec: "+3,375 EGP on day 28". |
+| FR-WLT-05 | Net worth history (chart 11) from monthly snapshots. | M | G | Snapshot taken at least monthly (A-20). |
+
+### 7.17 Zakah calculator (ZAK) — **feature flag OFF at launch** (D-07)
+| ID | Requirement | Pri | Tier | Acceptance criteria |
+|----|-------------|-----|------|---------------------|
+| FR-ZAK-01 | Per-asset hawl tracking from acquisition date (Hijri). | M | G | — |
+| FR-ZAK-02 | Nisab check on combined zakatable wealth net of short-term due debts (BR-ZAK-*). | M | G | — |
+| FR-ZAK-03 | Output Zakah per asset in its native unit plus its EGP cost, without forced conversion. | M | G | Spec §11 table reproduced as test cases. |
+| FR-ZAK-04 | Track Zakah payment status per item (pending / partial / paid). | S | G | — |
+| FR-ZAK-05 | Prominent disclaimer: estimate only, consult a scholar. | M | G | — |
+| FR-ZAK-06 | Hidden unless the remote feature flag is on (FR-BE-05); the user cannot enable it. Default OFF if flags have never been fetched. | M | — | Turning the flag on at the backend shows the feature within one sync, no app update. |
+
+### 7.18 Smart ROI coach (ROI) — **feature flag OFF at launch** (D-10)
+| ID | Requirement | Pri | Tier | Acceptance criteria |
+|----|-------------|-----|------|---------------------|
+| FR-ROI-01 | Evaluate the 8 rules in spec §12 against the user's spending and show qualifying suggestions with 1- and 2-year projections. | M | G (A-21) | Spec numbers become test cases. |
+| FR-ROI-02 | "Not financial advice" disclaimer on every suggestion. | M | — | — |
+| FR-ROI-03 | Share a projection card. | C | F | — |
+| FR-ROI-04 | Hidden unless the remote feature flag is on (same mechanism as FR-ZAK-06). | M | — | — |
+| FR-ROI-05 | **General advice only at first** (D-38): suggestions name kinds of products (savings certificate, gold, money-market fund) and use clearly labelled example rates; no bank, fund or brand names. Named products are a later option behind a separate flag. | M | — | No suggestion text contains an institution or product name. |
+
+### 7.19 Zaghlol Gold & purchases (GOLD)
+| ID | Requirement | Pri | Tier | Acceptance criteria |
+|----|-------------|-----|------|---------------------|
+| FR-GOLD-01 | Paywall showing monthly, yearly and lifetime plans with store-localized prices. | M | — | Prices from store (final TBD, D-12). |
+| FR-GOLD-02 | Purchase via Google Play Billing and StoreKit 2; **every purchase is verified by the backend** (FR-BE-02) before Gold is granted; Android purchases are acknowledged by the backend. | M | — | A forged or replayed purchase token is rejected; a pending purchase does not grant Gold (BR-GOLD-05). |
+| FR-GOLD-03 | Restore purchases (store restore → backend re-verification). | M | — | Restore works on a new phone without sign-in for the same store account. |
+| FR-GOLD-04 | Entitlement works offline: the app caches a backend-signed entitlement and honours it until its expiry + grace period (BR-GOLD-03). | M | — | Airplane mode for 5 days does not lose Gold. |
+| FR-GOLD-05 | Locked features show a preview and a non-intrusive upgrade prompt (D-08). | M | — | Max one unsolicited paywall per week (A-22). |
+| FR-GOLD-06 | Renewals, cancellations, refunds and revocations reported by the stores update the entitlement (via store server notifications, FR-BE-03) and reach the app on next contact. | M | — | A refunded purchase removes Gold at next app open after grace. |
+| FR-GOLD-07 | Cross-platform Gold: a signed-in user (R-04) who bought Gold on one platform gets Gold on the other after signing in there. | M | — | Buy on Android, sign in on iPhone with same account → Gold active. |
+
+### 7.20 Export / import (EXP)
+| ID | Requirement | Pri | Tier | Acceptance criteria |
+|----|-------------|-----|------|---------------------|
+| FR-EXP-01 | Export transactions to CSV (UTF-8 with BOM) and Excel (.xlsx) with date-range and category filters. | M | G | Arabic text opens correctly in Excel on Windows. |
+| FR-EXP-02 | Free users see an export preview table only. | M | F | — |
+| FR-EXP-03 | Import / restore transactions from Zaghlol CSV with duplicate detection. | M | G | Column mapping for non-Zaghlol CSV is OQ-08. |
+| FR-EXP-04 | Import bank PDF statements from CIB, NBE, QNB, Banque Misr, parsed on device. | M | G | Requires real sample statements (OQ-04). |
+| FR-EXP-05 | Warn that exported files are not encrypted. | M | G | — |
+| FR-EXP-06 | **Import statements from online banks** (D-27): Wise, Revolut, Monzo, bunq, N26 CSV exports (and PDF where CSV isn't offered), via share sheet or file picker; multi-currency rows kept in their currency; duplicates with already-captured notifications removed (BR-ING-02). | M | G | Requires real sample statements (OQ-04). |
+| FR-EXP-07 | Exports include currency code per row and optional card filter; never convert amounts. | M | G | — |
+
+### 7.21 Backup & restore (BAK)
+| ID | Requirement | Pri | Tier | Acceptance criteria |
+|----|-------------|-----|------|---------------------|
+| FR-BAK-01 | Encrypted full backup (`.zaghlol.enc`, AES-256-GCM) to Google Drive app-data folder (D-11) or iCloud. | M | F/G | File unreadable without the user's backup passphrase/key (A-23). |
+| FR-BAK-02 | Automatic backup schedule (daily / weekly / monthly). | M | G | — |
+| FR-BAK-03 | Restore on a new or reset device, including cross-platform (Android ↔ iOS via Drive) (A-24). | M | F/G | Restored data identical to source. |
+| FR-BAK-04 | Show last backup time and status. | M | F/G | — |
+| FR-BAK-05 | Keep the last N backups (A-25). | S | G | Free keeps exactly one (FR-BAK-08). |
+| FR-BAK-06 | **Backup contents** (D-19): all transactions (incl. raw message text, A-46), accounts & cards, budgets, subscriptions & installments, splits & reimbursements, wealth assets & price overrides, Zakah ledger, **all user preferences and settings** (language, digits, payday, income target, theme, notification types & quiet hours, app-lock settings, capture-source settings, hide-amounts choices, contribution opt-in), **custom categories & subcategories, merchant rules, custom SMS templates, review-queue state, per-card ignore rules, card labels, primary currency and ≈EGP setting**, and voice-log counter for the current month. | M | G | Restore on a different phone (same or other platform) reproduces every listed item; a checklist test compares source and restored device. |
+| FR-BAK-07 | Backup **excludes**: the database encryption key (new device generates its own), store entitlements (restored from store/backend), the downloaded merchant catalog (re-synced), and device-specific permissions/Shortcut installs (re-done via setup checker after restore). | M | G | After restore the app prompts once to re-grant capture permissions. |
+| FR-BAK-08 | **Free backup (D-33)**: Free users get **one** encrypted backup slot on Google Drive or iCloud with the same contents as Gold (FR-BAK-06). "Back up now" replaces the previous free backup. No automatic schedule; a reminder is shown when the free backup is older than 30 days (A-67). | M | F | Free user backs up on phone A, installs on phone B, restores → identical data and settings. Backing up again replaces the old file (only one exists). |
+| FR-BAK-09 | Upgrading to Gold keeps the existing free backup as the first version of the Gold history; downgrading keeps only the newest backup. | M | F/G | — |
+
+### 7.22 Social share cards (SHR)
+| ID | Requirement | Pri | Tier | Acceptance criteria |
+|----|-------------|-----|------|---------------------|
+| FR-SHR-01 | Generate shareable achievement images (e.g. savings %, delivery cut) from templates. | M | F | PNG via system share sheet. |
+| FR-SHR-02 | "Hide amounts" option, on by default (A-26). | M | F | Hidden mode shows percentages only. |
+| FR-SHR-03 | Card includes Zaghlol branding and hashtag. | M | F | — |
+
+### 7.23 Notifications (NTF)
+| ID | Requirement | Pri | Tier | Acceptance criteria |
+|----|-------------|-----|------|---------------------|
+| FR-NTF-01 | Local notifications for: budget thresholds, spending spikes, upcoming dues, detected duplicate charge, detected subscription renewal, backup failure, weekly summary. | M | F | Each type can be switched off. |
+| FR-NTF-02 | Quiet hours (default 23:00–08:00) (A-27). | S | F | — |
+| FR-NTF-03 | Notification content hides amounts on lock screen when the user chooses. | S | F | — |
+
+### 7.24 Security & app lock (SEC)
+| ID | Requirement | Pri | Tier | Acceptance criteria |
+|----|-------------|-----|------|---------------------|
+| FR-SEC-01 | Local database encrypted (SQLCipher, AES-256) from the first write. | M | — | Copying the DB file off a device (e.g. via adb backup / file manager on a rooted device) yields unreadable data without the key. |
+| FR-SEC-02 | App lock with biometrics/passcode; app content hidden in OS app switcher. | M | F | — |
+| FR-SEC-03 | **All locally stored data is encrypted** (D-18): database, preferences/settings, cached catalog, entitlement cache, queued contributions, generated images awaiting share, and temp files. Nothing financial is kept in plain SharedPreferences / UserDefaults or plain files. | M | — | Static scan of app sandbox after a test session finds no plaintext amounts, merchant names, card digits or message text. |
+| FR-SEC-04 | The encryption key is generated on the device and held in Android Keystore / iOS Keychain (device-only, not synced to other devices). | M | — | Key never appears in DB, preferences, logs or backups. |
+| FR-SEC-05 | App data is excluded from OS-level backups and device-to-device transfer (Android Auto Backup, iCloud device backup of the app container) — Zaghlol's own encrypted backup (FR-BAK) is the only supported transfer path. | M | — | Restoring an OS backup to a new phone does not produce a half-readable Zaghlol database. |
+| FR-SEC-06 | Exports (CSV/Excel) and share images are written only to a location the user picks, after a warning that they are not encrypted (FR-EXP-05). | M | — | — |
+| FR-SEC-07 | Warn (not block) when the device is rooted / jailbroken that data protection is weaker. | S | — | — |
+| FR-SEC-08 | All app ↔ backend traffic over TLS 1.2+; certificate pinning per architect decision (OQ-15). | M | — | — |
+
+### 7.25 Localization (L10N)
+| ID | Requirement | Pri | Tier | Acceptance criteria |
+|----|-------------|-----|------|---------------------|
+| FR-L10N-01 | Full Arabic (RTL) and English (LTR) UI; default follows device language (A-28). | M | F | — |
+| FR-L10N-02 | **All Arabic UI copy is Egyptian colloquial** (العامية المصرية): navigation, labels, buttons, messages, notifications and Captain Zaghlol (D-34). Legal texts and financial disclaimers use simple standard Arabic with an Egyptian one-line summary. | M | F | Copy deck reviewed by a native Egyptian speaker; follows `06-voice-and-tone.md`. |
+| FR-L10N-04 | Tone is fun and friendly, but jokes never appear on errors, payments, purchases, permissions or destructive confirmations; humour never shames the user. | M | F | Copy review checklist passes. |
+| FR-L10N-03 | Numbers display with Arabic-Indic or Western digits per user preference (A-29); currency shown as ج.م / EGP. | M | F | — |
+
+### 7.26 Widgets (WID)
+| ID | Requirement | Pri | Tier | Acceptance criteria |
+|----|-------------|-----|------|---------------------|
+| FR-WID-01 | Home-screen widget: safe daily spend + days to payday. | S | F | Respects "hide amounts" setting. |
+| FR-WID-02 | Quick-add voice widget / lock-screen widget. | C | F | — |
+
+### 7.27 Optional account (ACCT)
+| ID | Requirement | Pri | Tier | Acceptance criteria |
+|----|-------------|-----|------|---------------------|
+| FR-ACCT-01 | Optional "Sign in with Google" (both platforms) and "Sign in with Apple" (iOS; also offered on Android if feasible) from Settings → Gold (D-14). | M | — | Never required for any feature except cross-platform Gold. |
+| FR-ACCT-02 | Signing in links the current install's entitlement(s) to the account; the backend stores only account ID, provider, email if the provider returns it (A-47), linked purchase tokens and install IDs. | M | — | No financial data sent at sign-in. |
+| FR-ACCT-03 | Sign out keeps all local data; Gold from another platform stops after cache expiry. | M | — | — |
+| FR-ACCT-04 | Delete account from inside the app removes account record and links on the backend (store purchases remain with the store account). | M | — | Required by App Store guideline for apps with sign-in. |
+
+### 7.28 Catalog sync (SYNC)
+| ID | Requirement | Pri | Tier | Acceptance criteria |
+|----|-------------|-----|------|---------------------|
+| FR-SYNC-01 | On app open (foreground), if the last successful catalog sync is older than 24 h, fetch updates in the background (D-15). Never more than one successful sync per 24 h. | M | F | Opening the app 10 times in a day produces at most 1 successful sync (+ retries after failures, BR-SYNC-02). |
+| FR-SYNC-02 | Catalog = system categories & subcategories (names AR/EN, icons, colours, buckets), canonical merchants, merchant aliases/patterns, keyword heuristics. Delivered as versioned deltas since the app's current version. | M | F | — |
+| FR-SYNC-03 | Updates are applied atomically into the local encrypted DB; a failed or partial download leaves the previous version intact. | M | F | Kill the app mid-download → previous catalog still works. |
+| FR-SYNC-04 | Catalog payloads are signed by the backend and verified by the app before applying. | M | F | Tampered payload is rejected. |
+| FR-SYNC-05 | After an update, re-categorize only transactions that were categorized by the seeded map or are in "needs classification" — never user-verified transactions or those matched by user rules (BR-CAT-01). | M | F | — |
+| FR-SYNC-06 | Sync never blocks the UI and never shows errors to the user; status visible in Settings → About ("Merchant list updated: <date>"). | M | F | — |
+| FR-SYNC-07 | The same daily call also refreshes feature flags and (Gold) prices and entitlement status, to minimize network use. | S | F | — |
+
+### 7.29 Backend services (BE) — .NET + PostgreSQL (D-13)
+| ID | Requirement | Pri | Tier | Acceptance criteria |
+|----|-------------|-----|------|---------------------|
+| FR-BE-01 | Anonymous install registration: app generates a random install ID on first launch; backend stores it with platform, app version and first/last-seen dates only. | M | — | No device identifiers (IMEI, advertising ID, phone number). |
+| FR-BE-02 | Purchase verification: receive purchase token (Android) / signed transaction (iOS) with install ID; verify with Google Play Developer API (`purchases.subscriptionsv2` / `products`) and App Store Server API; acknowledge Android purchases; return a signed entitlement (plan, expiry). | M | — | Follows store best practice: server-side verify & acknowledge; grant only on PURCHASED state; purchase token as unique key. |
+| FR-BE-03 | Store server notifications: Google Real-time Developer Notifications (Pub/Sub) and App Store Server Notifications V2 update entitlements (renew, cancel, grace, refund, revoke). | M | — | Refund notification marks entitlement revoked within minutes. |
+| FR-BE-04 | Price feed: periodically fetch gold (24K/21K/18K per gram) and FX rates for all supported ISO currencies from a licensed source (OQ-02), cache, and serve one shared response to all apps. | M | — | Apps never call the third-party price source directly. |
+| FR-BE-05 | Feature flags: named flags (e.g. `zakah`, `smart_roi`) with on/off and optional minimum app version / platform / percentage rollout. | M | — | Flag change visible to apps within 24 h. |
+| FR-BE-06 | Catalog service: versioned catalog with delta endpoint (FR-SYNC-02), signed payloads. | M | — | — |
+| FR-BE-10 | "Request my bank" intake (FR-PAR-14): store institution name, country, channel type and count of distinct installs; operators see a ranked list. | S | — | No message content accepted. |
+| FR-BE-07 | Contribution intake (D-16): accept anonymous merchant suggestions, aggregate by normalized name, require ≥ N distinct installs (A-48) before an operator reviews and promotes them into the catalog. | S | — | No single contribution goes live without operator approval. |
+| FR-BE-08 | Operator tools (R-05): manage catalog, review contributions, set flags, look up entitlement by install ID / account for support. | M | — | Operator access protected by strong auth (MFA). Form: admin web app **after the first release** (D-37); v1 uses scripts with the same MFA protection. |
+| FR-BE-09 | Account linking for optional sign-in (FR-ACCT): verify Google / Apple ID tokens; link entitlements; delete on request. | M | — | — |
+
+### 7.30 Per-card breakdown (CARD) — D-25
+| ID | Requirement | Pri | Tier | Acceptance criteria |
+|----|-------------|-----|------|---------------------|
+| FR-CARD-01 | A **card/account filter** (single or multi-select, default "All") is available on the home screen, transaction list, budgets view, subscriptions view, chat answers and every chart. The filter persists while navigating until cleared. | M | F | Selecting "CIB Credit *1234" updates all totals, lists and charts to that card only. |
+| FR-CARD-02 | **Card detail screen** for each card/account: spend by category (donut + list) for the selected period, top merchants, monthly trend, income/refunds, balance or available limit, and recent transactions. | M | F | Category totals on the card screen sum to the card's total spend for the period. |
+| FR-CARD-03 | **Compare cards**: a table of categories × cards for the selected period and currency. | S | F | e.g. Dining: NBE 2,100 · CIB 1,750 · Wise USD 40. |
+| FR-CARD-04 | A transaction's card is shown everywhere it appears (list, details, chat answers) with the card's label and last-4. | M | F | — |
+| FR-CARD-05 | Cash, voice and manual entries belong to a selectable account (default: Cash) so they appear correctly in per-card views. | M | F | — |
+
+### 7.31 Capture controls — ignore per card (CAP) — D-26
+| ID | Requirement | Pri | Tier | Acceptance criteria |
+|----|-------------|-----|------|---------------------|
+| FR-CAP-01 | For each card/account, the user can switch off capture **per channel**: SMS, app notifications (Android), Apple Pay / Wallet (iOS). Each channel is a separate toggle; turning all off = card fully ignored. | M | F | Ignoring SMS for NBE *4567 while notifications stay on still captures its notifications. |
+| FR-CAP-02 | Ignored messages are **never stored** (BR-CAP-01): not in the DB, review queue, logs, backups or contributions. | M | F | After ignoring a card, a test SMS for it leaves no trace in the sandbox (inspection test). |
+| FR-CAP-03 | Ignore can be set before a card is ever seen by entering institution + last-4 (e.g. a company card). | M | F | — |
+| FR-CAP-04 | When ignoring a card, the user chooses what to do with its **existing** transactions: keep them (default) or delete them. | M | F | Delete removes them and updates all totals. |
+| FR-CAP-05 | Ignoring is also available at institution level (e.g. "ignore all Revolut notifications"). | S | F | — |
+| FR-CAP-06 | Settings → Capture shows a list of ignored cards/institutions and channels, with one-tap undo. | M | F | — |
+| FR-CAP-07 | After un-ignoring on Android, offer to re-scan the SMS inbox for that card (BR-CAP-04). | S | F | Re-scan imports without duplicates. |
+| FR-CAP-08 | Ignore rules are included in backups (FR-BAK-06). | M | G | — |
+
+### 7.32 Multi-currency (CUR) — D-28, D-29
+| ID | Requirement | Pri | Tier | Acceptance criteria |
+|----|-------------|-----|------|---------------------|
+| FR-CUR-01 | Support **any active ISO 4217 currency** for capture, manual entry, accounts, assets, budgets and exports, with correct decimals and symbol; featured currencies (EGP, USD, SAR, EUR, AED, QAR, KWD, BHD, + GBP, INR — A-59) listed first. | M | F | A GBP Monzo payment, an INR HDFC payment and a JOD manual entry are each stored and shown in their own currency. |
+| FR-CUR-02 | User sets a **primary currency** (default EGP) used to order views; it is never used to convert stored data. | M | F | — |
+| FR-CUR-03 | Every screen with totals (home, budgets, charts, card detail, net worth, chat answers, share cards) shows **one figure per currency** and offers a currency switcher when more than one currency exists in the current filter. | M | F | No screen silently adds amounts of different currencies. |
+| FR-CUR-04 | **Optional "≈ in EGP" view** (Settings toggle, off by default — A-54): adds an approximate combined total converted at the latest backend rate, always marked "≈" with the rate date. Applies to home, net worth and charts. | M | F | Turning it off removes every combined figure. Offline: uses last known rates, labelled stale after 24 h. |
+| FR-CUR-05 | The ≈EGP target currency can be changed to any supported currency (e.g. ≈ in USD) (A-60). | C | F | — |
+| FR-CUR-06 | Self-transfers between accounts in **different currencies** (e.g. Wise USD → NBE EGP) can be paired manually; auto-suggested when the amounts match within ±3% at the day's rate and timestamps are within 3 days (A-61). | S | F | Paired cross-currency transfers are excluded from spend and income in both currencies. |
+
+---
+
+## 8. Business rules
+
+### Money & currency
+- **BR-MON-01** Amounts are stored exactly (integer minor units), never as floating point.
+- **BR-MON-02** Every amount carries its currency. EGP is the reporting currency.
+- **BR-MON-03** Minor units follow each currency's ISO 4217 exponent: most currencies 2 decimals; **KWD, BHD, OMR, JOD, TND, LYD, IQD = 3**; JPY, KRW and others = 0. Parsing, storage, display, CSV and backup must respect the exponent.
+- **BR-FX-01** ~~Store an EGP equivalent per transaction.~~ Superseded (D-28): amounts are stored only in their original currency (plus billed amount/currency when the message states one). Conversion happens **only at display time** in the optional ≈ view, using the latest backend rate (A-62).
+- **BR-FX-02** Totals, budgets, averages, charts and alerts are always computed **within one currency**. Mixing currencies is allowed only in the ≈ view and must be labelled approximate.
+- **BR-FX-03** A transaction counts toward the card it was charged to in the **billed currency** (e.g. a USD purchase on an EGP card counts as EGP for that card and its EGP budgets; the original USD amount is kept for display).
+
+### Capture & deduplication
+- **BR-ING-01** Only messages from senders in the institution registry (or user-defined Gold templates) are processed.
+- **BR-ING-02** Duplicates: same message body hash → ignore. Same institution + last-4 + amount + direction within 2 minutes from different channels (SMS vs notification) → treat as one (A-30).
+- **BR-ING-03** OTP and promotional messages from bank senders are ignored and not stored.
+
+### Capture controls
+- **BR-CAP-01** Order of processing: receive message → identify institution, channel and card (in memory only) → if an ignore rule matches (card + channel, or institution + channel) → discard immediately; nothing is written anywhere. Only non-ignored messages continue to parsing, storage and dedupe.
+- **BR-CAP-02** If the card can't be identified from the message (no last-4), only institution-level ignore rules apply; otherwise the message is processed normally.
+- **BR-CAP-03** Ignore rules apply to automatic channels only (SMS, notifications, Apple Pay). Manual, voice, OCR and statement imports for that card are allowed; statement import asks whether to skip ignored cards (default: skip).
+- **BR-CAP-04** Un-ignoring affects only future messages; past ignored messages are gone. Android may recover them by re-scanning the SMS inbox (FR-CAP-07); notifications and Apple Pay events can't be recovered.
+
+### Transactions
+- **BR-TXN-01** Spend = expenses − matched merchant refunds − assigned reimbursements (splits); internal transfers excluded.
+- **BR-TXN-02** Income includes salary, transfer-in from others, interest, cashback; excludes internal transfers and incoming transfers assigned as reimbursements.
+- **BR-TXN-03** Declined transactions are stored for reference but excluded from all totals.
+- **BR-TXN-04** Credit card settlement payments are transfers (not new spend), to avoid double counting with the original card purchases (A-31).
+
+### Self-transfers, refunds & splits
+- **BR-XFR-01** An outgoing and incoming transaction are paired as internal when: both accounts belong to the user, amounts are equal (same currency), directions are opposite, and timestamps are within 5 minutes. Cross-currency pairs are only suggested, never auto-paired (FR-CUR-06).
+- **BR-XFR-02** If more than one candidate matches, no auto-pair; ask the user.
+- **BR-XFR-03** A refund is matched to the most recent expense at the same merchant with amount ≥ refund within 60 days (A-32); unmatched refunds count as income-type "refund".
+- **BR-XFR-04** Net personal spend for a split = paid amount − linked repayments; cannot go below 0.
+- **BR-XFR-05** A **reimbursement** is an incoming transfer the user assigns to an expense (D-20). It reduces that expense's net spend in its category and cycle, and is not counted as income.
+- **BR-XFR-06** Total reimbursements for an expense cannot exceed the expense amount; any excess of an incoming transfer stays as normal income (or can be assigned to another expense).
+- **BR-XFR-07** A reimbursement arriving in a later budget cycle reduces the **original expense's** cycle (restating that cycle's totals), not the current one (A-49).
+- **BR-XFR-08** Reimbursements differ from merchant refunds (BR-XFR-03): refunds come from the merchant/bank; reimbursements come from people. Both reduce net spend; they are labelled differently.
+
+### Categorization
+- **BR-CAT-01** Precedence: user rule > merchant catalog (bundled seed + synced updates) > keyword heuristics > "needs classification". A catalog update never overrides a user rule or a user-verified transaction.
+- **BR-CAT-02** Every category belongs to one bucket: Needs, Wants, Obligations, Savings, Income, Giving. For the 50/30/20 chart: Needs + Obligations → 50%; Wants + Giving → 30%; Savings → 20% (A-33).
+- **BR-CAT-03** Transfers to a person (IPA / phone) with no rule go to "needs classification".
+
+### Budget
+- **BR-BUD-01** Payday day is 1–28. Cycle = payday … day before next payday.
+- **BR-BUD-02** Alert thresholds default 80% and 100%; each fires once per category per cycle.
+- **BR-BUD-03** Safe daily spend = max(0, total budget − cycle spend) ÷ days remaining including today.
+- **BR-BUD-04** Ideal burn line on day *d* = total budget × *d* ÷ cycle length.
+
+### Mascot triggers
+- **BR-MAS-01** Shocked: a category passes 85% of its budget before day 20 of the cycle, or dining/delivery spend is > 30% above the user's 3-cycle average.
+- **BR-MAS-02** Proud: user is under the ideal burn line, or meets a monthly goal.
+- **BR-MAS-03** Detective: duplicate POS debit (same merchant, amount, card within 10 minutes (A-34)), subscription renewal detected, or self-transfer paired.
+
+### Subscriptions & installments
+- **BR-SUB-01** A subscription is suggested when the same merchant is charged a similar amount (±10%) at roughly monthly intervals (25–35 days) at least 2 times (A-35).
+- **BR-SUB-02** Annualized cost = monthly cost × 12.
+- **BR-SUB-03** Reminder default: 3 days before due date.
+
+### Wealth
+- **BR-WLT-01** Net worth = account balances + asset values − credit card balances − remaining installments − other liabilities (A-36), **computed separately per currency/unit**; combined only in the ≈ view (D-29).
+- **BR-WLT-02** Gold value = grams × current price for that karat; CD value = principal (accrued interest not added until paid) (A-37).
+
+### Zakah (flagged)
+- **BR-ZAK-01** Nisab = value of 85 g of 24K gold.
+- **BR-ZAK-02** Hawl = 354 days per asset lot.
+- **BR-ZAK-03** Rate 2.5% per eligible item in its native unit; 21K gold counts as 87.5% purity toward nisab.
+- **BR-ZAK-04** Short-term debts due now are deducted from cash before Zakah.
+- **BR-ZAK-05** All Zakah rules subject to scholar review before the flag is turned on (D-07).
+
+### Gold tier
+- **BR-GOLD-01** Plans: monthly, yearly, lifetime. Prices TBD (D-12).
+- **BR-GOLD-02** Free voice limit: 15 confirmed voice logs per calendar month.
+- **BR-GOLD-03** The backend-signed entitlement is cached securely on device; the app honours it offline until expiry + 7-day grace (A-38). Lifetime entitlements don't expire but are re-checked when online.
+- **BR-GOLD-04** On downgrade, Gold-created data (custom categories, assets, rules) stays visible and usable for reading; creating new Gold items is blocked.
+- **BR-GOLD-05** Gold is granted only after backend verification of a purchase in PURCHASED state; PENDING purchases (e.g. cash-payment methods) show "pending" and grant nothing until completed.
+- **BR-GOLD-06** If the backend is unreachable at purchase time, the app keeps the purchase and retries verification; the store's own refund-on-no-acknowledgement window (3 days on Google Play) must not be missed — retries continue in the background.
+
+### Sync & backend
+- **BR-SYNC-01** Catalog, flags and prices are fetched at most once per 24 h after a successful sync, triggered on app open.
+- **BR-SYNC-02** After a failed sync, retry on next app open with exponential back-off (max 1 attempt per hour).
+- **BR-SYNC-03** The backend receives only: anonymous install ID, platform, app version, catalog version, purchase tokens/transactions, optional account ID token, (if opted in) merchant contributions, and (if the user asks) bank-support requests (name, country, channel type). Never: messages, transactions, amounts, balances, budgets, assets, user rules, contacts, location.
+- **BR-SYNC-04** A merchant contribution = {normalized merchant string, institution code, chosen system category}. Excluded: person-to-person transfers, phone numbers, IPAs, anything matching a person-name pattern, user-defined category names. Contributions are batched and sent with the daily sync.
+
+### Backup & export
+- **BR-BAK-01** Backups are encrypted before leaving the device; the key is never uploaded.
+- **BR-BAK-02** Free: one backup slot, manual only. Gold: automatic schedule and the last 5 versions (A-25). Both include all data, settings and customizations (FR-BAK-06).
+- **BR-EXP-01** CSV is UTF-8 with BOM; dates ISO 8601; amounts with `.` decimal.
+
+---
+
+## 9. Non-functional requirements
+
+### Privacy (PRIV)
+- **NFR-PRIV-01** No analytics, advertising or third-party crash-reporting SDKs. The Zaghlol backend (D-13) receives only the data listed in BR-SYNC-03.
+- **NFR-PRIV-02** Financial data leaves the device only (a) as an encrypted backup to the user's own Drive/iCloud, (b) as files the user explicitly exports or shares. Purchase data goes to the stores and the Zaghlol backend for verification.
+- **NFR-PRIV-03** Price and flag requests carry no holdings or financial data.
+- **NFR-PRIV-06** Backend data retention: install records deleted after 12 months of inactivity; request logs kept ≤ 30 days without full IP addresses (A-50).
+- **NFR-PRIV-04** Non-financial SMS are never read into storage (Play spyware policy).
+- **NFR-PRIV-05** Comply with Egypt's Personal Data Protection Law No. 151/2020 and store privacy disclosures (Play Data safety, Apple privacy labels) (A-39).
+
+### Security (SEC)
+- **NFR-SEC-01** Database encrypted at rest with AES-256 (SQLCipher); key generated on device, protected by Android Keystore / iOS Keychain.
+- **NFR-SEC-02** Backup files AES-256-GCM, authenticated.
+- **NFR-SEC-03** No sensitive data (message bodies, balances, card digits, names, phone/IPA) in logs.
+- **NFR-SEC-04** App switcher snapshot hidden when app lock is on.
+- **NFR-SEC-05** Gold entitlement can't be unlocked by editing local files: the cached entitlement is signed by the backend and verified by the app.
+- **NFR-SEC-06** All local data encrypted (FR-SEC-03); no plaintext copies outside the app sandbox except user-initiated exports.
+- **NFR-SEC-07** Backend: TLS only; secrets (store API keys, signing keys) in a secrets manager; operator access with MFA; OWASP ASVS L2 as baseline (A-51).
+
+### Backend operations (BE)
+- **NFR-BE-01** The app must remain fully usable when the backend is down (only new purchases verification, cross-platform Gold, catalog/price/flag freshness are delayed).
+- **NFR-BE-02** Availability target 99.5% monthly (A-52).
+- **NFR-BE-03** Daily sync response for a client already on the latest catalog ≤ 2 KB; full catalog ≤ 1 MB compressed.
+- **NFR-BE-04** Capacity: 500k registered installs, 100k daily syncs at launch +12 months (A-53).
+- **NFR-BE-05** Stack: .NET (current LTS) Web API + PostgreSQL; hosting provider and region decided in Phase 3 (OQ-16).
+
+### Performance (PERF) — proposed targets (A-40)
+- **NFR-PERF-01** Parse one message < 10 ms (reference mid-range Android, e.g. 2023 Samsung A-series).
+- **NFR-PERF-02** Cold start to home < 2 s.
+- **NFR-PERF-03** Historical scan of 10,000 SMS < 60 s, with progress.
+- **NFR-PERF-04** Charts render < 300 ms with 2 years of data; 60 fps scrolling.
+- **NFR-PERF-05** Voice phrase → parsed items < 2 s after speech ends.
+- **NFR-PERF-06** Background capture must not noticeably affect battery (< 1% per day attributable).
+
+### Reliability (REL)
+- **NFR-REL-01** No transaction loss when the app is killed during capture; capture is idempotent.
+- **NFR-REL-02** Database migrations are tested and never lose data.
+- **NFR-REL-03** All features except catalog/price/flag refresh, backup, purchases and sign-in work fully offline.
+
+### Usability & accessibility (UX)
+- **NFR-UX-01** Arabic-first RTL layouts, fully mirrored LTR for English.
+- **NFR-UX-02** WCAG 2.1 AA contrast; touch targets ≥ 48 dp; supports text scaling to 130% without breaking layout; screen-reader labels in both languages.
+- **NFR-UX-03** Material 3 conventions on Android, iOS conventions on iOS.
+- **NFR-UX-04** Light and dark mode.
+
+### Compatibility (COMP)
+- **NFR-COMP-01** Minimum OS versions: TBD (OQ-03). Proposed Android 8.0+ (API 26), iOS 17+ (needed for silent message automations — to verify in Phase 3).
+- **NFR-COMP-02** Phones only; tablets supported in portrait without dedicated layout (A-41).
+
+### Maintainability (MAINT)
+- **NFR-MAINT-01** Institution templates and merchant seeds are data, updatable per release.
+- **NFR-MAINT-02** Domain logic (parsing, categorization, budgets, Zakah) unit-tested independently of UI.
+
+### Compliance (COMP-L)
+- **NFR-LEGAL-01** Google Play: SMS permission declaration form for "SMS-based money management"; app must remain functional without it (D-02).
+- **NFR-LEGAL-02** App Store: in-app purchase for digital features; privacy nutrition label accurate.
+- **NFR-LEGAL-03** Disclaimers: coaching and ROI are not financial advice; Zakah is an estimate.
+- **NFR-LEGAL-04** Use of bank names/logos in UI requires a trademark review (OQ-09).
+
+---
+
+## 10. Edge cases
+
+**Capture & parsing**
+- EC-01 Same transaction arrives by SMS and app notification → one record (BR-ING-02).
+- EC-02 Two genuinely identical purchases (same amount, merchant, minute) → must not be merged when bodies differ by reference/time; if bodies are identical, user can split duplicates manually.
+- EC-03 Arabic-Indic digits, mixed digit systems, missing decimals, thousands separators in either script.
+- EC-04 Message missing balance, merchant or last-4.
+- EC-05 Foreign-currency purchase (USD at AMAZON) with or without EGP equivalent in message.
+- EC-06 Declined / reversed / pending authorisation messages.
+- EC-07 OTPs, promos and statement notices from bank senders → ignored.
+- EC-08 Bank changes its SMS format → parse fails → message goes to review queue; not lost.
+- EC-09 Multi-part (concatenated) SMS.
+- EC-10 Phone clock wrong or timezone changes; message date vs receipt time disagree.
+- EC-11 Dual-SIM devices.
+- EC-12 Historical scan finds thousands of messages from years ago → only within configured depth.
+- EC-13 SMS permission revoked later → app detects and switches to degraded mode with a banner.
+- EC-14 iOS Shortcut automation disabled or asks for confirmation → app detects absence of captures and nudges.
+
+**Transfers, refunds, splits**
+- EC-15 Self-transfer where only one side is captured (other bank not sending SMS) → no pair; user can mark as internal.
+- EC-16 Two transfers of the same amount within 5 minutes → ambiguous; ask user (BR-XFR-02).
+- EC-17 Partial refunds; refund larger than original.
+- EC-18 Split repayment arrives before the expense is marked as split.
+- EC-19 Credit card bill payment via InstaPay (InstaPay sample 5) → transfer, not spend.
+
+**Budget & dates**
+- EC-20 Payday falls on Friday/holiday and salary arrives early — cycle stays on configured day (A-42).
+- EC-21 User changes payday mid-cycle → current cycle ends early; new cycle starts next payday.
+- EC-22 Months shorter than payday day (not possible since max 28).
+- EC-23 First cycle after install has partial data → charts and averages state "not enough data".
+- EC-24 Zero budget set → no percentage alerts; safe daily spend hidden.
+
+**Gold tier & data**
+- EC-25 Subscription expires while offline → grace period then downgrade.
+- EC-26 Restore a backup made with a newer app version → refuse with update prompt.
+- EC-27 Forgotten backup passphrase → backup unrecoverable; warned at setup.
+- EC-28 Device storage full during backup/export.
+- EC-29 Delete-all-data while backup is running.
+
+**Voice & chat**
+- EC-30 Voice phrase with no amount, or amount with no item.
+- EC-31 Mixed Arabic-English speech ("دفعت 200 Uber").
+- EC-32 Device lacks on-device Arabic recognition → clear message; manual entry offered.
+- EC-33 Chat question about a period with no data → explicit "no data" answer.
+
+**Wealth**
+- EC-34 Price fetch fails / stale for > 24 h → show last price with date.
+- EC-35 Asset recorded in a currency without a fetched rate.
+- EC-36 KWD/BHD amounts with 3 decimals in SMS (`KWD 12.345`) — must not be truncated to 2.
+
+**Multi-currency & online banks**
+- EC-50 Same amount format ambiguity: `1.234` = one thousand two hundred thirty-four (EU grouping) or 1.234 KWD → resolved by the institution template's locale and the currency's exponent.
+- EC-51 Indian grouping `₹1,23,456.78` (HDFC/Paytm).
+- EC-52 Wise/Revolut in-app conversion USD→EGP → internal transfer, not spend (FR-PAR-12).
+- EC-53 Foreign purchase on an Egyptian card: message shows USD 20.00 and EGP 1,010.00 → card total counts EGP 1,010.00; USD shown as original (BR-FX-03).
+- EC-54 Revolut card payment notification followed later by a "payment settled" with a slightly different amount (FX settlement) → update the original, don't create a second transaction (A-63).
+- EC-55 User has only one currency → no currency switcher or ≈ UI appears.
+- EC-56 ≈ view on while a currency has no fetched rate → that currency is listed separately as "not included".
+- EC-57 Notification text from an online bank is in a language other than English (app language set to German/Dutch) → unrecognized → review queue; setup tells user to set the bank app to English (A-57).
+
+**Per-card & ignore rules**
+- EC-58 Ignored card appears in a message together with a non-ignored card (e.g. transfer from ignored card to tracked account) → the transfer is captured from the tracked side's message only.
+- EC-59 Two cards share the same last-4 at different institutions → ignore rules match institution + last-4, never last-4 alone.
+- EC-60 Card is replaced (new last-4) → new card appears; user can merge (FR-ACC-04) and copy ignore settings.
+- EC-61 Card filter selected and the user opens a chart with no data for that card → empty state names the card.
+- EC-62 Historical scan runs while a card is ignored → its messages skipped.
+- EC-63 User ignores a card while it has pending reimbursements or split links → links kept on existing transactions (unless user chose delete).
+
+**Reimbursements**
+- EC-37 Friends reimburse more than their share, or reimburse total > expense → excess stays income (BR-XFR-06).
+- EC-38 Reimbursement arrives before the expense is captured (e.g. friend pays first) → can be assigned later.
+- EC-39 Same friend's single transfer covers two different outings → split across expenses (FR-XFR-07).
+- EC-40 Expense deleted or edited after reimbursements were assigned → reimbursements unassigned with a notice if they'd exceed the new amount.
+
+**Backend, sync & accounts**
+- EC-41 Backend unreachable for weeks → app runs on last catalog/prices/flags; prices marked stale.
+- EC-42 Catalog update renames or merges a merchant used by a user rule → user rule still wins and keeps working.
+- EC-43 Device clock wrong → 24 h sync throttle uses server time from the last response.
+- EC-44 Purchase made with no network → verification retried; Gold shown as "pending verification".
+- EC-45 User buys Gold on Android and iOS separately and then signs in on both → both entitlements linked; no double charge handling needed by app (store handles refunds).
+- EC-46 User signs into a different account on the same phone → entitlements from previous account removed after confirmation.
+- EC-47 Restoring a backup on a phone whose catalog is newer/older than the backup's → restored rules apply; catalog re-syncs.
+- EC-48 Contribution opt-in turned off while a batch is queued → queued batch is deleted, not sent.
+- EC-49 Feature flag turned off after a user has created Zakah data → data kept, feature hidden.
+
+## 11. External integrations
+
+| ID | Integration | Platform | Purpose | Network? | Notes |
+|----|-------------|----------|---------|----------|-------|
+| INT-01 | SMS provider / BroadcastReceiver | Android | SMS capture | No | Play declaration required. |
+| INT-02 | NotificationListenerService | Android | Bank/wallet notifications | No | Special access setting. |
+| INT-03 | Share intent / clipboard | Both | Manual message import | No | — |
+| INT-04 | Shortcuts + App Intents (Message & Transaction automations) | iOS | SMS & Apple Pay capture | No | Automation behaviour to verify per iOS version. |
+| INT-05 | Message filter extension | iOS | SMS capture (D-09) | No | Feasibility risk R-02. |
+| INT-06 | Vision OCR / ML Kit text recognition | Both | Screenshot & receipt OCR | No | Arabic OCR support to verify (R-06). |
+| INT-07 | On-device speech recognition (ar-EG, en) | Both | Voice entry | No (on-device) | Availability varies (R-05). |
+| INT-08 | Google Play Billing | Android | Gold purchases | Yes | — |
+| INT-09 | StoreKit 2 | iOS | Gold purchases | Yes | — |
+| INT-10 | Google Sign-In + Drive API v3 (`drive.appdata`) | Both | Encrypted backup | Yes | OAuth client IDs needed. |
+| INT-11 | iCloud (Drive or CloudKit private DB) | iOS | Encrypted backup | Yes | — |
+| INT-12 | Gold & FX price source | Backend | Asset valuation | Yes | Called by backend only; source TBD (OQ-02). |
+| INT-17 | Zaghlol backend API (.NET) | Both | Sync, entitlements, prices, flags, contributions, accounts | Yes | D-13. |
+| INT-18 | Google Play Developer API (purchases, voided purchases) | Backend | Verify & acknowledge purchases | Yes | Service account. |
+| INT-19 | Google Cloud Pub/Sub — Real-time Developer Notifications | Backend | Subscription lifecycle events | Yes | — |
+| INT-20 | App Store Server API + App Store Server Notifications V2 | Backend | Verify transactions, lifecycle events | Yes | Signed JWS. |
+| INT-21 | Sign in with Google / Sign in with Apple | App + Backend | Optional account (FR-ACCT) | Yes | Apple requires Sign in with Apple if other social logins are offered on iOS. |
+| INT-13 | Local notifications | Both | Alerts & reminders | No | — |
+| INT-14 | Biometrics (BiometricPrompt / LocalAuthentication) | Both | App lock | No | — |
+| INT-15 | System share sheet | Both | Share cards & exports | No | — |
+| INT-16 | Home-screen widgets (App Widgets / WidgetKit) | Both | Glanceable info | No | — |
+
+## 12. Out of scope
+
+| ID | Item | Reason |
+|----|------|--------|
+| OOS-01 | Storing or syncing any user financial data on the Zaghlol backend; mandatory accounts; cross-device data sync (only Gold entitlement syncs) | D-13, D-14 |
+| OOS-02 | Sharing budgets across people/devices; multiple profiles on one device | D-04 |
+| OOS-03 | Bank login / open-banking APIs / screen-scraping | Privacy promise |
+| OOS-04 | Making payments, transfers or purchases of gold/funds from the app | Not in spec; regulatory |
+| OOS-05 | Cloud or on-device LLM chat | D-06 |
+| OOS-06 | Markets outside Egypt (UK, EU, India launches, local languages, local store listings/marketing). Foreign banks are supported only for Egyptians who hold them. | D-27 |
+| OOS-07 | Web, desktop, tablet-optimized or wearable apps | A-41 |
+| OOS-08 | Advertising | Spec Screen 1 ("no ads") |
+| OOS-09 | Producing the 8 / 10 social-media marketing campaigns (spec §6, §13.3) — they are marketing assets, not app features | Separate marketing workstream |
+| OOS-10 | Zakah and Smart ROI **visible** at launch | D-07, D-10 (built, flagged off) |
+| OOS-11 | Tax filing, credit scoring, loan offers | Not in spec |
+| OOS-12 | PDF statement import for banks other than CIB, NBE, QNB, Banque Misr | Spec §2 |
+| OOS-13 | Distributing an APK outside Google Play | D-02 (not chosen) |
+| OOS-14 | Email capture (Gmail / Outlook bank alerts) — later option | D-23; Gmail restricted scope needs annual security assessment |
+| OOS-15 | Over-the-air SMS template updates from the backend — later option | D-17 |
+| OOS-16 | Third-party subscription platforms (e.g. RevenueCat) — own backend chosen | D-13 |
+| OOS-17 | Per-card budgets, default category per card, card groups/tags (Personal/Business) | Not selected in D-25 — later options |
+| OOS-18 | Open-banking APIs of online banks (e.g. Wise/Revolut/Monzo APIs) | Privacy promise (OOS-03); capture stays message/notification/statement-based |
+| OOS-19 | Crypto assets | Not requested |
+
+## 13. Risks
+
+| ID | Risk | Impact | Mitigation |
+|----|------|--------|-----------|
+| R-01 | Google Play refuses the SMS permission exception. | Android auto-capture limited to notifications. | D-02 fallbacks; prepare declaration and demo video; notification capture as first-class channel. |
+| R-02 | iOS message filter extension cannot capture or persist bank SMS (it only sees unknown senders and has no shared storage). | Channel unusable. | Architect feasibility spike in Phase 3; Shortcuts remains primary iOS channel. |
+| R-03 | Spec SMS samples are prototype-generated, not real bank formats. | Parsing fails on real messages. | Collect anonymized real samples per institution (OQ-04). |
+| R-04 | Full-spec scope at launch on two platforms. | Long timeline, quality risk. | Phase 4 milestones deliver vertical slices; flags allow holding back unstable features. |
+| R-05 | On-device Egyptian Arabic speech recognition unavailable or poor on many devices. | Voice entry degraded. | Detect support; offer online system recognizer only with user consent (OQ-06). |
+| R-06 | Arabic OCR quality for screenshots. | OCR channel weak. | Spike in Phase 3; templates for InstaPay receipts. |
+| R-07 | iOS Shortcuts automations may require user confirmation or break across iOS updates. | iOS capture friction. | Setup checker; in-app guidance; screenshot OCR backup. |
+| R-08 | Religious accuracy of Zakah. | Reputation. | D-07 flag + scholar review. |
+| R-09 | No analytics → hard to measure success metrics. | Blind product decisions. | OQ-01. |
+| R-10 | Trademark use of bank names/logos. | Store rejection / legal. | OQ-09. |
+| R-11 | Spec marketing ("we didn't build a server at all", Campaign #3) is no longer true. | Trust damage if claimed. | Reword to "your financial data never leaves your phone"; store privacy labels must declare backend data (install ID, purchases, optional account). |
+| R-12 | Backend adds operating cost, on-call and security exposure. | Cost / outage / breach. | Minimal data held (BR-SYNC-03); app works when backend is down (NFR-BE-01). |
+| R-13 | Contributed merchant names could contain personal names or data. | Privacy leak. | BR-SYNC-04 filters, k-anonymity threshold (A-48), operator review. |
+| R-14 | ~~Free users lose all data when changing phones.~~ Mitigated by D-33 (one free cloud backup). | — | — |
+| R-18 | Institution list (≈ 80 institutions incl. proposed) is large for a full-scope launch on two platforms. | Schedule; parse quality. | M/S priorities in `institutions.md`; S rows can ship in the first update; generic parser (FR-PAR-13) covers gaps. |
+| R-15 | iOS can't read online-bank app notifications; Wise/Revolut/Monzo/bunq/N26 capture on iOS limited to Apple Pay, OCR and statements. | Weaker iOS experience for P-06. | Clear per-bank setup guidance; statement import; OCR templates for these apps' screens. |
+| R-16 | Online banks change notification wording often and send them in the app's UI language. | Parse failures. | Review queue; templates per language; fixtures from real samples (OQ-04); prompt to use English in bank app. |
+| R-17 | Per-currency reporting adds UI complexity for a mostly-EGP audience. | Confusing screens. | Currency UI appears only when a second currency exists (EC-55). |
+
+## 14. Assumptions (to be confirmed at review)
+
+| ID | Assumption |
+|----|-----------|
+| A-01 | Success-metric targets in §3.2 are proposals; the spec gives none. |
+| A-02 | Personas derived from spec examples; no user research exists. |
+| A-03 | ~~Egypt only; supported currencies EGP, USD, SAR, EUR.~~ Superseded by D-22. |
+| A-04 | ~~Flags compile-time only.~~ Superseded: flags are remote via backend (FR-BE-05), default OFF. |
+| A-05 | Saving "always apply" merchant rules is **Free** (spec Screen 5 shows it to everyone; spec §2 lists the "Always Apply Rule engine" as Gold). Recommended Free for growth and accuracy — **please confirm**. |
+| A-06 | Free charts = Cash flow (1), Category donut (2), Top merchants top-5 (6), Budget progress bars (Screen 9). The spec's "Basic Budget Bar" is not one of the 12 charts. |
+| A-07 | Ask Zaghlol chat and roast mode are Free (spec doesn't tier them). |
+| A-08 | If biometrics unavailable, device passcode is used; no separate app PIN. |
+| A-09 | §13's 16-screen set is canonical; §5's 14 screens' content maps into it. |
+| A-10 | App lock re-prompts after 1 minute in background (configurable). |
+| A-11 | Historical SMS scan depth default 6 months, user-selectable up to 24 months. |
+| A-12 | Parse confidence threshold defined during Phase 3 from fixture results. |
+| A-13 | New rules apply to future transactions and offer "apply to past N matching transactions" with a count. |
+| A-14 | One voice log = one confirmed recording regardless of how many items it contains. |
+| A-15 | Voice limit resets on the 1st of each calendar month, not on payday. |
+| A-16 | Overall cycle budget defaults to sum of category limits; user may set a total instead. |
+| A-17 | Gameya (جمعية) is entered manually (no SMS source). |
+| A-18 | Roast-mode humour targets spending only; content reviewed in copy deck. |
+| A-19 | Wealth asset list = spec §2/§11 types + car (spec §3 mentions car). |
+| A-20 | Net-worth snapshot saved automatically at each cycle end and on demand. |
+| A-21 | Smart ROI is a Gold feature (spec places it in "Smart Coach" tab without tier). |
+| A-22 | Growth-first paywall frequency: max one unsolicited prompt per week. |
+| A-23 | Backup encryption key derived from a user-chosen passphrase (needed for restore on a new device); Phase 3 decides KDF. |
+| A-24 | Cross-platform restore supported via Google Drive (iCloud is iOS-only). |
+| A-25 | Keep last 5 backups. |
+| A-26 | Share cards hide amounts by default. |
+| A-27 | Quiet hours 23:00–08:00 by default. |
+| A-28 | Default language follows device; Arabic if device is Arabic. |
+| A-29 | Arabic locale shows Arabic-Indic digits by default; user can switch to Western digits. |
+| A-30 | Cross-channel duplicate window = 2 minutes. |
+| A-31 | Credit card settlement is a transfer, not spend (purchases already counted). |
+| A-32 | Refund matching window 60 days. |
+| A-33 | 50/30/20 mapping in BR-CAT-02. |
+| A-34 | Duplicate POS debit window 10 minutes. |
+| A-35 | Subscription detection thresholds in BR-SUB-01. |
+| A-36 | Liabilities in net worth include credit card balances and remaining BNPL installments. |
+| A-37 | CD accrued interest is not added to value until paid out. |
+| A-38 | Offline Gold grace period 7 days. |
+| A-39 | Egyptian PDPL applies; legal review is outside this document. |
+| A-40 | Performance targets in §9 are proposals. |
+| A-41 | Phones only; no tablet-specific layouts. |
+| A-42 | Budget cycle follows configured payday, not actual salary arrival date. |
+| A-43 | Until the user sets a payday, the budget cycle is the calendar month (day 1). |
+| A-44 | Catalog updates re-categorize only non-user-verified, catalog-categorized transactions (FR-SYNC-05). |
+| A-45 | Reimbursement suggestion window: 7 days after the expense. |
+| A-46 | Raw message text is included in backups (encrypted) so parsing can be re-run after app updates. |
+| A-47 | For optional sign-in, the backend may store the email the provider returns (Apple may give a relay address); used only for support lookup. |
+| A-48 | A contributed merchant needs ≥ 5 distinct installs before operator review. |
+| A-49 | Late reimbursements restate the original expense's cycle. |
+| A-50 | Backend retention: inactive installs deleted after 12 months; logs ≤ 30 days, IPs truncated. |
+| A-51 | OWASP ASVS Level 2 as backend security baseline. |
+| A-52 | Backend availability target 99.5%. |
+| A-53 | Capacity sizing: 500k installs / 100k daily syncs in year 1. |
+| A-54 | The "≈ in EGP" combined view is **off by default** (your instruction: no conversion), user can turn it on. |
+| A-55 | Multi-currency tracking is Free (needed for correct capture); only foreign-asset tracking in Wealth stays Gold (§5.2). |
+| A-56 | Wise, Revolut, Monzo, bunq and N26 notify payments via app push notifications, not SMS — to verify with real samples. |
+| A-57 | Online-bank templates cover English notifications at launch (plus HDFC/Paytm SMS in English); other bank-app languages go to the review queue. |
+| A-58 | Gold is priced per gram in EGP and USD; gold holdings are shown in grams and valued in the user's chosen gold-pricing currency (default EGP). |
+| A-59 | Featured currencies: EGP, USD, SAR, EUR, AED, QAR, KWD, BHD, GBP, INR (GBP/INR added for Monzo/HDFC/Paytm). |
+| A-60 | ≈ target currency selectable (default EGP). |
+| A-61 | Cross-currency self-transfer suggestion: ±3% at day's rate, within 3 days. |
+| A-62 | The ≈ view uses the **current** rate (not historical rates) for simplicity; labelled with rate date. |
+| A-63 | Pending vs settled card notifications (e.g. Revolut) are merged into one transaction when merchant matches and amount differs by ≤ 5%. |
+| A-64 | Rows marked *Proposed* in `institutions.md` (GCC banks beyond Al Rajhi/Emirates NBD, MNT-Halan, Khazna, Lucky, bank wallets) are in scope at **S** priority unless you strike them at approval. |
+| A-65 | Free backup is first suggested after 7 days of data. |
+| A-66 | "Always capture this sender" for generically parsed messages still sends each message to the review queue until the user has confirmed 3 parses from that sender. |
+| A-67 | "One free backup" = one backup **slot** (the user can refresh it anytime), not a single lifetime backup. Reminder when older than 30 days. |
+
+## 15. Open questions (non-blocking for approval unless marked)
+
+| ID | Question | Owner | Needed by |
+|----|----------|-------|-----------|
+| OQ-01 | How will success metrics be measured without analytics? Options: store-console data only; anonymous aggregate counts on the backend (installs, daily syncs); in-app surveys. | Product owner | Phase 3 |
+| OQ-02 | Which source for gold (24K/21K/18K EGP) and FX prices (7 currencies) will the backend use? Must be licensable for commercial redistribution. | Architect + product owner | Phase 3 |
+| OQ-03 | Minimum Android and iOS versions. | Architect | Phase 3 |
+| OQ-04 | **Can you provide anonymized real SMS / notification samples and PDF statements for each supported institution?** The spec's 53 samples look prototype-generated. | Product owner | Before Phase 5 parsing tasks |
+| OQ-05 | Who compiles the full 600+ merchant seed list (spec lists ~150)? | Product owner / content | Phase 4 |
+| OQ-06 | If offline Arabic speech isn't available on a device, may the app use the OS's online recognizer with explicit consent? | Product owner | Phase 3 |
+| OQ-07 | What distinguishes "basic tips" (Free) from "deep coaching" (Gold) in chart explanations? | UX (Phase 2) | Phase 2 |
+| OQ-08 | Should CSV import support other apps' formats (column mapping), or only Zaghlol's own? | Product owner | Phase 2 |
+| OQ-09 | Are bank names/logos used in UI cleared for trademark use? | Product owner / legal | Before launch |
+| OQ-10 | Who is the scholar / body to review Zakah rules, and the target date? | Product owner | Before enabling flag |
+| OQ-11 | Final Gold prices. | Product owner | Before launch |
+| OQ-12 | Operator tools: a small admin web app (recommended) or scripts/direct DB access? | Product owner | **Resolved (D-37)**: admin web app after the first release |
+| OQ-13 | ~~Free backup?~~ **Resolved: D-33.** | — | — |
+| OQ-14 | Later: on-device ML fallback for unrecognized message formats (competitors market "AI" parsing)? | Product owner | Post-launch |
+| OQ-15 | Certificate pinning for the backend (stronger, but risky on certificate rotation)? | Architect | Phase 3 |
+| OQ-16 | Backend hosting provider and region (Egyptian data-residency needs, if any, under PDPL). | Architect + product owner | Phase 3 |
+| OQ-17 | ~~More online banks?~~ **Resolved: D-32**; confirm *Proposed* rows in `institutions.md` (A-64). | Product owner | At approval |
+| OQ-18 | OQ-04 extended: anonymized real notification/SMS samples and statements for every institution in `institutions.md` (priority: M rows first). | Product owner | Before Phase 5 parsing tasks |
+
+## 16. Traceability to spec
+
+| Spec section | Requirements |
+|--------------|--------------|
+| §1 Brand & mascot | FR-MAS, FR-L10N, NFR-UX |
+| §2 Architecture & pay model | §5.2, FR-GOLD, FR-EXP, FR-BAK, NFR-PRIV |
+| §3 Competitors & iOS | FR-ING-A, FR-ING-I, FR-VOI, FR-XFR, FR-WLT, FR-CHAT |
+| §4 Categories | FR-CAT, BR-CAT |
+| §5 Screens 1–14 | FR-ONB, ING, PAR, CAT, VOI, CHT, XFR, BUD, SUB, WLT, CHAT, GOLD, SHR |
+| §6 Marketing campaigns | OOS-09 |
+| §7 12 charts | FR-CHT, BR-BUD-04 |
+| §8 SMS lab & regex | FR-PAR, BR-ING |
+| §9 Stack & schema | Input to Phase 3 (not requirements); "zero backend" superseded by D-13 |
+| v0.4 review (D-32, D-33) | `institutions.md`, FR-PAR-01/13/14/15, FR-ING-A-07, FR-BE-10, FR-BAK-01…05/08/09, BR-BAK-02, BR-SYNC-03 |
+| v0.3 review (D-25…D-31) | FR-CARD, FR-CAP, FR-CUR, FR-ING-A-07/08, FR-ING-I-08, FR-PAR-10…12, FR-ACC-06, FR-EXP-06/07, FR-CHT-05/06, FR-HOME-05, BR-CAP, BR-FX-02/03, P-06 |
+| v0.2 review (D-13…D-24) | FR-ACCT, FR-SYNC, FR-BE, FR-SEC-03…08, FR-BAK-06…08, FR-XFR-06…09, FR-ONB-09…12, BR-MON-03, BR-XFR-05…08, BR-SYNC, BR-GOLD-05/06, NFR-BE |
+| §10 Nav bar & animation | Input to Phase 2 |
+| §11 Zakah | FR-ZAK, BR-ZAK |
+| §12 Smart ROI | FR-ROI |
+| §13 16 screens | A-09, Phase 2 |
+
+## 17. Glossary
+
+| Term | Meaning |
+|------|---------|
+| InstaPay (إنستاباي) | Egypt's instant payment network; addresses look like `name@instapay`. |
+| IPA | Instant Payment Address (InstaPay handle). |
+| BNPL | Buy now, pay later (valU, Sympl, Souhoola, Shahry, Aman, Forsa, Contact). |
+| Gameya (جمعية) | Rotating savings circle among friends/family. |
+| Shahada (شهادة) | Bank savings certificate (CD), e.g. 27% certificate. |
+| 21K / 24K | Gold karat (purity 87.5% / 99.9%). |
+| Nisab (نصاب) | Minimum wealth threshold for Zakah (85 g of 24K gold). |
+| Hawl (حول) | One lunar year (354 days) an asset must be held before Zakah is due. |
+| Payday cycle | Budget period from payday to the day before next payday. |
+| Safe daily spend | Remaining budget ÷ remaining days in cycle. |
+| Self-transfer | Money moved between two of the user's own accounts. |
+| Roast mode (قصف الجبهة) | Humorous critique of spending. |
+| Zaghlol Gold | Paid tier. |
+| Reimbursement | Money a person sends back for their share of an expense the user paid (D-20). |
+| Primary currency | The currency shown first in views (default EGP); never used to convert stored data. |
+| ≈ view | Optional combined total converted to one currency at the latest rate, always labelled approximate. |
+| Billed amount | The amount actually charged to a card in the card's currency, which may differ from the original purchase currency. |
+| Ignore rule | A per-card (or per-institution) setting that discards SMS, notifications or Apple Pay events before anything is stored. |
+| Online bank | App-first bank or money account (Wise, Revolut, Monzo, bunq, N26, Paytm, HDFC app) captured via notifications/statements. |
+| Catalog | Shared, non-personal list of merchants, categories and keywords maintained by Zaghlol and synced daily. |
+| Install ID | Random identifier generated by the app on first launch; not linked to the person or device hardware. |
+| Entitlement | The backend-signed record that a user has Gold (plan + expiry). |
+| RTDN | Google Play Real-time Developer Notifications. |
+| ASSN V2 | App Store Server Notifications version 2. |
+
+## 18. Approval
+
+| Role | Name | Decision | Date |
+|------|------|----------|------|
+| Product owner | amr905 | ☑ Approved | 2026-11-01 |
+
+On approval, Phase 2 (UI/UX design) may start.
