@@ -202,6 +202,18 @@ If the install was linked to a different account, the response is **409 `INSTALL
 ### 4.7 Delete install (FR-ONB-08)
 `DELETE /v1/installs/me` returns 202 and tombstones the install; its tokens stop working at once. The app wipes local data **before** calling this endpoint and does not depend on it succeeding. A failure is retried once, then given up, because the install expires after 12 months of no syncs anyway.
 
+### 4.8 Shapes fixed by the OpenAPI file (T-006)
+These details were not spelled out above. `backend/openapi/zaghlol-v1.yaml` is authoritative for field names, limits and patterns.
+- **Success statuses without a body:** `DELETE /v1/installs/me` returns 202; `POST /v1/accounts/signout` and `DELETE /v1/accounts/me` return 204; `POST /v1/notifications/google` returns 204; `POST /v1/notifications/apple` returns 200.
+- **Restore response:** `{status, restoredCount, entitlement, serverTime}`. `status` is the aggregate over all submitted purchases, with the same values as verify.
+- **Full catalog snapshot** (`GET /v1/catalog/{version}/full`): `{version, ops[]}` where `ops` are upserts of the same shape as in `/v1/sync`. The signature is the `Zaghlol-Signature` header and the `.sig` file next to the snapshot.
+- **`rotateInstallToken`:** an optional string in the sync, verify, restore and entitlement response bodies. Absent or `null` means keep the current token.
+- **Apple Android callback** (`GET /v1/apple/android-callback`): query `state` (required), `code`, `id_token`, `error`. It answers 302 to an app link. Apple's `user` parameter (name, e-mail) is ignored and never stored.
+- **Pub/Sub push body:** `{message: {data, messageId, publishTime, attributes?, orderingKey?}, subscription, deliveryAttempt?}`. The envelope is closed to the fields Pub/Sub documents.
+- **Money and prices** are decimal strings (for example `"4820.00"`) with a separate ISO 4217 `currency`. They are never JSON numbers.
+- **Timestamps** are RFC 3339 UTC and always end in `Z`.
+- **`osMajor`** in `POST /v1/installs` is optional and is the only field beyond the BR-SYNC-03 wording (the OS major version, a diagnostic). Confirm it against BR-SYNC-03 or drop it.
+
 ## 5. Admin API (operators, v1 used by `zaghlol-ops`; web admin later per D-37)
 
 | Method & path | Role | Purpose |
@@ -216,18 +228,29 @@ If the install was linked to a different account, the response is **409 `INSTALL
 | `GET /admin/v1/bank-requests` | catalog_editor | Ranked list |
 | `GET /admin/v1/metrics/daily-active` | any | Aggregate counters |
 
+Concrete paths (OpenAPI): `GET /admin/v1/catalog/draft/{entity}` (list) and `PUT /admin/v1/catalog/draft/{entity}/{id}` (upsert), where `entity` is `categories`, `merchants`, `aliases` or `keywords`. The promote and reject actions are `POST /admin/v1/contributions/{merchantNorm}/{institutionCode}:promote` and `...:reject`. All admin calls use an operator bearer token (`operatorOidc`); every operation declares its role in `x-required-roles`.
+
 ## 6. Error codes
+
+Every error is `application/problem+json` with one of these `code` values. The same list is the `ProblemCode` enum in `backend/openapi/zaghlol-v1.yaml`, and a contract test fails if the two differ. Generated clients must treat an unknown code as its HTTP status class (for example, an unknown 4xx code is a client bug, and an unknown 5xx code is retried with back-off).
 
 | HTTP | `code` | Meaning / client action |
 |---|---|---|
 | 400 | `VALIDATION_FAILED`, `UNKNOWN_FIELD` | Bug; log a local diag code, don't retry |
 | 401 | `INSTALL_TOKEN_INVALID` | Re-register silently (new install ID); keep local data |
 | 401 | `ACCOUNT_TOKEN_EXPIRED` | Clear the account token and show "sign in again" in Settings only |
+| 401 | `UNAUTHORIZED` | Fallback for endpoints that have no specific 401 code (store notifications, operator API). Not sent to the app's install-scoped calls, which always use one of the two codes above. Don't retry; for the operator CLI, sign in again |
 | 403 | `FORBIDDEN` | Not retried |
 | 404 | `CATALOG_VERSION_UNKNOWN` | Request a full catalog |
+| 404 | `NOT_FOUND` | The path or resource doesn't exist. A bug in the app (or an operator typo); don't retry |
+| 405 | `METHOD_NOT_ALLOWED` | The HTTP method isn't supported on this path. A bug in the app; don't retry |
 | 409 | `INSTALL_EXISTS`, `INSTALL_LINKED_TO_OTHER_ACCOUNT` | See §4.1 / §4.6 |
+| 413 | `PAYLOAD_TOO_LARGE` | The body is over the size limit (§1). A bug in the app; don't retry |
+| 415 | `UNSUPPORTED_MEDIA_TYPE` | The request wasn't `application/json`. A bug in the app; don't retry |
 | 422 | `PURCHASE_TOKEN_INVALID`, `PURCHASE_NOT_OWNED`, `PURCHASE_WRONG_APP` | Show "couldn't verify purchase" + Restore; no Gold |
 | 422 | `ID_TOKEN_INVALID` | Sign-in failed message |
 | 429 | `RATE_LIMITED` | Respect `Retry-After` |
 | 502/503 | `STORE_UNAVAILABLE`, `UPSTREAM_UNAVAILABLE` | Keep purchase pending, retry with back-off (BR-GOLD-06) |
 | 500 | `INTERNAL` | Retry with back-off |
+
+`404`, `405`, `413` and `415` with their generic codes can be returned by any endpoint, including paths that don't exist, so the OpenAPI file describes them once in the info section. It also lists `413` and `415` on every operation that takes a body.

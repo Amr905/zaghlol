@@ -36,6 +36,7 @@ public class ApiTests(ApiFixture fixture) : IClassFixture<ApiFixture>
         var serverTime = json.RootElement.GetProperty("serverTime").GetDateTimeOffset();
         Assert.InRange(serverTime, before, DateTimeOffset.UtcNow.AddMinutes(5));
         Assert.Equal(TimeSpan.Zero, serverTime.Offset);
+        Assert.EndsWith("Z", json.RootElement.GetProperty("serverTime").GetString(), StringComparison.Ordinal);
     }
 
     [Fact]
