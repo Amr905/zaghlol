@@ -79,6 +79,13 @@ jobs:
       - name: Restore
         run: dotnet restore Zaghlol.sln -p:NuGetAudit=false
 
+      - name: TEMP probe versions
+        run: |
+          curl -s https://api.nuget.org/v3-flatcontainer/ssh.net/index.json | tr -d ' \n'; echo
+          curl -s https://api.nuget.org/v3-flatcontainer/testcontainers.postgresql/index.json | tr -d ' \n'; echo
+          curl -s https://api.nuget.org/v3-flatcontainer/testcontainers/4.10.0/testcontainers.nuspec | grep -i dependency || true
+          curl -s https://api.nuget.org/v3-flatcontainer/testcontainers/4.9.0/testcontainers.nuspec | grep -i "ssh" || true
+
       - name: Fail on any vulnerable package (direct or transitive)
         run: |
           dotnet list Zaghlol.sln package --vulnerable --include-transitive --no-restore 2>&1 | tee vulnerable.txt
