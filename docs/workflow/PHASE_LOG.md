@@ -28,6 +28,7 @@ The Lead updates this file at every gate. Newest entry at the bottom.
 | 2026-11-03 | 4 — Task breakdown | Plan v0.1 delivered: 21 epics, 48 user stories, 177 tasks in 8 milestones (M0–M7), 13 dependency waves, 7 parallel lanes; blocked: samples (OQ-04/18), gold-feed contract, hosting region (CR-03/OQ-16) | Awaiting product-owner approval of the implementation plan. |
 | 2026-11-03 | 4 — Task breakdown | GATE APPROVED — implementation plan (177 tasks, M0–M7) | Phase 5 may start. |
 | 2026-11-03 | 5 — Implementation | Phase opened; status tracked in `docs/implementation-status.md`. Toolchain blocker BLK-01 raised (no Flutter/.NET/package access; no CI). | Waiting for product-owner choice of build environment. |
+| 2026-11-03 | 5 — Implementation | BLK-01 resolved: product owner chose GitHub (Amr905/zaghlol) + GitHub Actions CI as the build/verification environment. T-001 and T-005 started. | Implementation running; per-task status in `docs/implementation-status.md`. |
 
 ## Current phase
-**Phase 5 — Implementation: OPEN (blocked on build environment, BLK-01)**
+**Phase 5 — Implementation: RUNNING (CI on GitHub Actions)**
