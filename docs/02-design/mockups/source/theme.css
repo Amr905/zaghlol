@@ -1,0 +1,96 @@
+/* Zaghlol theme 2026 — "Cloud Dancer & Nile Teal": warm off-white, deep teal, jade, soft gold, terracotta. Easy on the eyes. */
+@font-face{font-family:Dubai;src:url(assets/DUBAI-BOLD.TTF);font-weight:700}
+:root{
+ --bg:#F5F3EF;--surface:#FFFDFA;--surfaceAlt:#EFEBE4;--outline:#ECE7DF;--text:#1C2B2D;--muted:#5E6B6A;
+ --primary:#145A5C;--onPrimary:#fff;--primaryC:#E2EFEC;--accent:#E9B44C;--onAccent:#1C2B2D;
+ --exp:var(--text);--inc:#2E7356;--warnT:#835C0B;--warnB:#FBEFD6;--dangerT:#A8482F;--dangerB:#F8E6DF;
+ --lavT:#5B4FA0;--lavB:#ECE9F8;--jadeB:#E4F1EA;
+ --cExp:#D9765F;--cInc:#3E8A86;--cSave:#7DB89A;--cGuide:#B9B2A6;
+ --glass:rgba(255,253,250,.78);--glassB:rgba(28,43,45,.06);
+ --shadow:0 1px 2px rgba(28,43,45,.03),0 6px 20px rgba(28,43,45,.05);
+ --heroBg:radial-gradient(120% 90% at 100% 0%,#D3E8DD 0%,rgba(211,232,221,0) 55%),radial-gradient(90% 80% at 0% 100%,#FBEFD6 0%,rgba(251,239,214,0) 60%),#E6F0EC;
+}
+.dark{
+ --bg:#0F1A1C;--surface:#17262A;--surfaceAlt:#1F3236;--outline:#243A3E;--text:#E8EDEA;--muted:#A3B2AF;
+ --primary:#8CCFC8;--onPrimary:#0F1A1C;--primaryC:#1D3B3E;--inc:#93D1B2;--warnT:#E9B44C;--warnB:#352B14;
+ --dangerT:#F2A08B;--dangerB:#3A2420;--lavT:#B9B0EE;--lavB:#262440;--jadeB:#1C3329;
+ --cExp:#F09A86;--cInc:#8CCFC8;--cSave:#93D1B2;--cGuide:#5F716D;
+ --glass:rgba(23,38,42,.78);--glassB:rgba(255,255,255,.06);--shadow:none;
+ --heroBg:radial-gradient(120% 90% at 100% 0%,#24493F 0%,rgba(36,73,63,0) 55%),radial-gradient(90% 80% at 0% 100%,#3A3218 0%,rgba(58,50,24,0) 60%),#17363A;
+}
+body{background:#E4E1DB}
+.phone{box-shadow:0 0 0 11px #121a1b,0 0 0 12px #3b4446,0 30px 60px rgba(0,0,0,.22)}
+.ltitle{font-size:30px;font-weight:700;letter-spacing:-.3px}
+/* surfaces: no hard borders, soft depth */
+.card,.list,.grp,.mas{border:none!important;box-shadow:var(--shadow);border-radius:24px}
+.list .row+.row::before,.grp .li+.li::before{background:var(--outline);opacity:.8}
+.navbtn{border:none;background:var(--surface);box-shadow:var(--shadow)}
+.chip{border:none;background:var(--surface);box-shadow:0 1px 2px rgba(28,43,45,.05);height:34px;padding:0 14px;border-radius:17px}
+.dark .chip{background:var(--surfaceAlt);box-shadow:none}
+.chip.on{background:var(--primaryC);color:var(--primary);box-shadow:none}
+.seg{background:var(--surfaceAlt);border-radius:14px;height:38px;padding:3px}
+.seg div{border-radius:11px}
+.seg .on{background:var(--surface);box-shadow:0 1px 4px rgba(28,43,45,.08)}
+/* hero: light mesh, dark ink — calm, not heavy */
+.hero{background:var(--heroBg)!important;color:var(--text)!important;border-radius:28px;padding:20px}
+.hero .lbl{opacity:1;color:var(--muted);font-weight:600}
+.hero .big{color:var(--primary);font-weight:700;font-size:46px}
+.hero .big small{color:var(--primary);opacity:.8}
+.hero .sub{opacity:1;color:var(--muted)}
+.hero .bar{background:rgba(20,90,92,.12);height:10px;border-radius:5px}
+.dark .hero .bar{background:rgba(140,207,200,.16)}
+.hero .bar i{background:linear-gradient(90deg,var(--accent),#F0C46A);border-radius:5px}
+.hero .kpis{margin-top:6px;background:rgba(255,253,250,.55);border-radius:16px;padding:10px 12px}
+.dark .hero .kpis{background:rgba(15,26,28,.35)}
+.hero .kpis .k{opacity:1;color:var(--muted)}
+.hero .kpis .v{font-size:16px}
+.hbadge{display:inline-flex;align-items:center;height:26px;padding:0 10px;border-radius:13px;background:rgba(255,253,250,.7);color:var(--text);font-size:12px;font-weight:600}
+.dark .hbadge{background:rgba(15,26,28,.4)}
+/* tiles: soft circles */
+.tile{border-radius:50%!important}
+.row{min-height:66px}
+.row .t{font-weight:600}
+/* amounts: neutral ink for spending (calm), green for money in */
+.amt.exp{color:var(--text)}
+.amt.inc{color:var(--inc)}
+.amt small{color:var(--muted);font-weight:500}
+/* Zaghlol speaks in lavender — one consistent voice colour */
+.mas{background:var(--lavB)!important}
+.mas p{color:var(--text)}
+.bubble{border:none;background:var(--lavB);border-radius:22px}
+.pill{border-radius:18px}
+.pill.info{background:var(--primaryC)}
+/* progress */
+.prog{height:10px;border-radius:5px;background:var(--surfaceAlt)}
+.prog i{border-radius:5px}
+[dir=rtl] .prog i{margin-inline-start:0}
+/* buttons */
+.btn{border-radius:28px;height:54px}
+.btn.s{background:var(--primaryC);color:var(--primary)}
+.btn.sm{height:38px;border-radius:19px}
+.fab{background:linear-gradient(145deg,#F0C46A,#E2A93E);box-shadow:0 10px 26px rgba(233,180,76,.38);border:none}
+.m3fab{background:linear-gradient(145deg,#F0C46A,#E2A93E)}
+.tabs{background:var(--glass);border:1px solid var(--glassB);box-shadow:0 10px 30px rgba(28,43,45,.10)}
+.tab.on{background:var(--primaryC);color:var(--primary)}
+.dark .tab.on{background:var(--primaryC)}
+.m3nav{background:var(--surfaceAlt)}
+.fade{background:linear-gradient(to bottom,rgba(245,243,239,0),var(--bg) 70%)}
+.dark .fade{background:linear-gradient(to bottom,rgba(15,26,28,0),var(--bg) 70%)}
+.sheet{border:none}
+.sheet.solid{background:var(--surface)}
+.dim{background:rgba(28,43,45,.28)}
+.li .lic{border-radius:10px}
+.sw{background:#3E8A86}
+.badge.gold{background:var(--warnB);color:var(--warnT)}
+.badge.src{background:var(--surfaceAlt)}
+.lockov{background:rgba(245,243,239,.6)}
+.brandar{font-family:Dubai,UI;font-weight:700}
+.content > div[style*="position:absolute"]{z-index:15}
+/* hero overridable vars (defaults = Nile Teal) */
+.hero{color:var(--heroInk,var(--text))!important}
+.hero .big,.hero .big small{color:var(--heroNum,var(--primary))!important}
+.hero .lbl,.hero .sub,.hero .kpis .k{color:var(--heroMuted,var(--muted))!important}
+.hero .kpis{background:var(--kpiBg,rgba(255,253,250,.55))!important}
+.hero .kpis .v{color:var(--heroInk,var(--text))}
+.hero .bar{background:var(--heroTrack,rgba(20,90,92,.12))!important}
+.phone{background:var(--pageBg,var(--bg))}

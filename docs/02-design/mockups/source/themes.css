@@ -1,0 +1,95 @@
+/* ===== Variant themes for comparison ===== */
+/* B — Mint Pop: fresh emerald gradient, coral accent */
+.th-mint{--bg:#F4FBF8;--surface:#FFFFFF;--surfaceAlt:#E8F5EF;--outline:#E1EFE8;--text:#0F2A22;--muted:#4E6B62;
+ --primary:#087F5B;--primaryC:#DDF4EA;--accent:#FF8A65;--onAccent:#2A120B;--inc:#087F5B;--lavB:#FFF0EA;--warnB:#FFF3E3;--warnT:#8A4B00;
+ --heroBg:linear-gradient(135deg,#056B50 0%,#0A8A73 55%,#14A08A 100%);--heroInk:#fff;--heroNum:#fff;--heroMuted:rgba(255,255,255,.88);--kpiBg:rgba(0,0,0,.14);--heroTrack:rgba(255,255,255,.22);
+ --glass:rgba(255,255,255,.82)}
+.th-mint .fab,.th-mint .m3fab{background:linear-gradient(145deg,#FFA284,#FF7A59);box-shadow:0 10px 26px rgba(255,122,89,.4)}
+.th-mint .hero .bar i{background:linear-gradient(90deg,#FFD166,#FFB347)}
+/* C — Sunset Nile: warm sunset gradient, plum primary */
+.th-sunset{--bg:#FFF7F1;--surface:#FFFFFF;--surfaceAlt:#FBEDE4;--outline:#F3E3D9;--text:#2B1B1F;--muted:#6D5A5E;
+ --primary:#9B2C5C;--primaryC:#FBE3EC;--accent:#FFB347;--inc:#2E7D5B;--lavB:#F3EAFB;--warnB:#FFF1DC;
+ --heroBg:linear-gradient(135deg,#5E2A93 0%,#A63A79 50%,#D9584A 100%);--heroInk:#fff;--heroNum:#fff;--heroMuted:rgba(255,255,255,.9);--kpiBg:rgba(0,0,0,.16);--heroTrack:rgba(255,255,255,.25);
+ --pageBg:radial-gradient(80% 40% at 100% 0%,#FFE3D3 0%,rgba(255,227,211,0) 70%),#FFF7F1}
+.th-sunset .hero .bar i{background:linear-gradient(90deg,#FFE29A,#FFB347)}
+.th-sunset .tab.on{background:#FBE3EC;color:#9B2C5C}
+/* D — Lavender Dream: soft violet + peach, pastel mesh */
+.th-lav{--bg:#F7F5FF;--surface:#FFFFFF;--surfaceAlt:#EEEBFB;--outline:#E8E4FA;--text:#1E1B3A;--muted:#5F5B7D;
+ --primary:#5B47D6;--primaryC:#ECE9FF;--accent:#FFB4A2;--onAccent:#3A1A12;--inc:#2E7D5B;--lavB:#FFF0EA;--warnB:#FFF4E0;
+ --heroBg:radial-gradient(120% 100% at 100% 0%,#C9BFFB 0%,rgba(201,191,251,0) 60%),radial-gradient(100% 90% at 0% 100%,#FFD3C4 0%,rgba(255,211,196,0) 60%),#E9E4FF;
+ --heroNum:#4B37C4;--kpiBg:rgba(255,255,255,.6);--heroTrack:rgba(91,71,214,.14)}
+.th-lav .fab,.th-lav .m3fab{background:linear-gradient(145deg,#FFC9B9,#FF9F87);box-shadow:0 10px 26px rgba(255,159,135,.45)}
+.th-lav .hero .bar i{background:linear-gradient(90deg,#7C6CF2,#A78BFA)}
+/* E — Ocean Glass: blue→cyan gradient, glassmorphism over soft blobs */
+.th-ocean{--bg:#EEF5FB;--surface:rgba(255,255,255,.72);--surfaceAlt:rgba(255,255,255,.6);--outline:rgba(11,34,57,.06);--text:#0B2239;--muted:#4D6378;
+ --primary:#0B63CE;--primaryC:#DCEBFC;--accent:#FFC857;--inc:#0F7B63;--lavB:rgba(236,233,248,.8);--warnB:rgba(255,243,214,.9);
+ --heroBg:linear-gradient(135deg,#0A3F9E 0%,#0B63CE 50%,#1384B5 100%);--heroInk:#fff;--heroNum:#fff;--heroMuted:rgba(255,255,255,.9);--kpiBg:rgba(255,255,255,.14);--heroTrack:rgba(255,255,255,.22);
+ --pageBg:radial-gradient(50% 30% at 90% 20%,#BFE3FF 0%,rgba(191,227,255,0) 100%),radial-gradient(60% 30% at 0% 70%,#C7F2E8 0%,rgba(199,242,232,0) 100%),#EEF5FB;--glass:rgba(255,255,255,.6)}
+.th-ocean .card,.th-ocean .list,.th-ocean .grp,.th-ocean .mas,.th-ocean .chip,.th-ocean .navbtn{backdrop-filter:blur(18px) saturate(1.4);border:1px solid rgba(255,255,255,.7)!important}
+.th-ocean .hero .bar i{background:linear-gradient(90deg,#FFE08A,#FFC857)}
+/* F — Midnight Gold: dark-first, aurora gradient, gold numbers */
+.th-midnight{--bg:#0B1020;--surface:#141B2E;--surfaceAlt:#1C2540;--outline:#232D4B;--text:#EEF1F8;--muted:#9AA4BF;
+ --primary:#F5C451;--onPrimary:#1A1405;--primaryC:#2E2A1C;--accent:#F5C451;--inc:#6EE7B7;--exp:var(--text);--lavB:#211D3D;--lavT:#C4B8FF;
+ --warnB:#2E2614;--warnT:#F5C451;--dangerB:#3A1E26;--dangerT:#FF9AA8;--cExp:#FF8A9A;--cInc:#7C9CFF;--cSave:#6EE7B7;
+ --heroBg:radial-gradient(120% 80% at 100% 0%,#6A3FD1 0%,rgba(106,63,209,0) 60%),radial-gradient(90% 80% at 0% 100%,#0E8F8A 0%,rgba(14,143,138,0) 60%),#1A1F45;
+ --heroInk:#fff;--heroNum:#F5C451;--heroMuted:rgba(238,241,248,.8);--kpiBg:rgba(0,0,0,.25);--heroTrack:rgba(255,255,255,.14);
+ --glass:rgba(20,27,46,.78);--glassB:rgba(255,255,255,.06);--shadow:none}
+.th-midnight .card,.th-midnight .list,.th-midnight .grp,.th-midnight .mas{box-shadow:none;background:var(--surface)}
+.th-midnight .mas{background:#211D3D!important}
+.th-midnight .tab.on{background:#2E2A1C;color:#F5C451}
+.th-midnight .btn.p{background:#F5C451;color:#1A1405}
+.th-midnight .fade{background:linear-gradient(to bottom,rgba(11,16,32,0),#0B1020 70%)}
+.th-midnight .homeind{background:#fff}
+.th-mint .hbadge,.th-sunset .hbadge,.th-ocean .hbadge,.th-midnight .hbadge{background:rgba(255,255,255,.18);color:#fff}
+/* ===== Green family samples ===== */
+/* G1 Forest & Lime — deep forest + electric lime (neo-fintech) */
+.th-forest{--bg:#F5F8F1;--surface:#FFFFFF;--surfaceAlt:#ECF2E4;--outline:#E2EADA;--text:#14211A;--muted:#4F6155;
+ --primary:#14532D;--primaryC:#E3F0D9;--accent:#C6F432;--onAccent:#14211A;--inc:#1E7B45;--lavB:#F1F7E2;--warnB:#FBF6D9;--warnT:#6B5A00;
+ --heroBg:radial-gradient(90% 80% at 0% 100%,rgba(198,244,50,.35) 0%,rgba(198,244,50,0) 55%),linear-gradient(135deg,#0F3F22 0%,#14532D 55%,#1E7B45 100%);
+ --heroInk:#fff;--heroNum:#C6F432;--heroMuted:rgba(255,255,255,.88);--kpiBg:rgba(0,0,0,.18);--heroTrack:rgba(255,255,255,.18)}
+.th-forest .fab,.th-forest .m3fab{background:#C6F432;color:#14211A;box-shadow:0 10px 26px rgba(150,200,20,.4)}
+.th-forest .hero .bar i{background:#C6F432}
+.th-forest .tab.on{background:#E3F0D9;color:#14532D}
+/* G2 Sage & Cream — muted, earthy, calm */
+.th-sage{--bg:#F7F5EF;--surface:#FFFDF8;--surfaceAlt:#EEEBE1;--outline:#E7E2D6;--text:#232A22;--muted:#5E665B;
+ --primary:#3F5E45;--primaryC:#E4ECDF;--accent:#D98E5F;--onAccent:#2A160A;--inc:#3F5E45;--lavB:#F4ECE2;--warnB:#F8EEDC;
+ --heroBg:radial-gradient(100% 90% at 100% 0%,rgba(255,255,255,.12) 0%,rgba(255,255,255,0) 60%),linear-gradient(135deg,#3F5A44 0%,#4E6B53 60%,#5B7860 100%);
+ --heroInk:#fff;--heroNum:#FFF3DF;--heroMuted:rgba(255,255,255,.88);--kpiBg:rgba(0,0,0,.15);--heroTrack:rgba(255,255,255,.2)}
+.th-sage .fab,.th-sage .m3fab{background:linear-gradient(145deg,#E4A27A,#D98E5F)}
+.th-sage .hero .bar i{background:#F2C79E}
+/* G3 Mint Fresh — pastel mint, dark text, airy */
+.th-mintfresh{--bg:#F3FBF7;--surface:#FFFFFF;--surfaceAlt:#E5F5EC;--outline:#DDF0E5;--text:#0F2A20;--muted:#4D695C;
+ --primary:#0F7A55;--primaryC:#D7F3E5;--accent:#FFB86B;--onAccent:#2E1600;--inc:#0F7A55;--lavB:#FFF3E6;--warnB:#FFF4E2;
+ --heroBg:radial-gradient(110% 90% at 100% 0%,#B8EED3 0%,rgba(184,238,211,0) 60%),radial-gradient(90% 80% at 0% 100%,#E2F9C9 0%,rgba(226,249,201,0) 60%),#D4F4E4;
+ --heroNum:#0F5E43;--kpiBg:rgba(255,255,255,.6);--heroTrack:rgba(15,122,85,.14)}
+.th-mintfresh .fab,.th-mintfresh .m3fab{background:linear-gradient(145deg,#FFCB8E,#FFA94D);box-shadow:0 10px 26px rgba(255,169,77,.4)}
+.th-mintfresh .hero .bar i{background:linear-gradient(90deg,#0F7A55,#34B27D)}
+/* G4 Emerald Teal — emerald→teal gradient, sunny yellow */
+.th-emerald{--bg:#F2FAF8;--surface:#FFFFFF;--surfaceAlt:#E3F3EF;--outline:#DAEEE8;--text:#0B2724;--muted:#4A6662;
+ --primary:#0F766E;--primaryC:#D5F0EA;--accent:#FACC15;--onAccent:#2A2100;--inc:#0F766E;--lavB:#FEF9E1;--warnB:#FEF6D6;
+ --heroBg:linear-gradient(135deg,#0B5C56 0%,#0F766E 50%,#0B8A64 100%);--heroInk:#fff;--heroNum:#fff;--heroMuted:rgba(255,255,255,.9);--kpiBg:rgba(0,0,0,.15);--heroTrack:rgba(255,255,255,.2)}
+.th-emerald .fab,.th-emerald .m3fab{background:linear-gradient(145deg,#FDE047,#FACC15);box-shadow:0 10px 26px rgba(250,204,21,.45)}
+.th-emerald .hero .bar i{background:#FDE047}
+/* G5 Olive & Gold — olive + gold, Egyptian earthy premium */
+.th-olive{--bg:#FAF8EF;--surface:#FFFEF8;--surfaceAlt:#F1EEDF;--outline:#E9E5D3;--text:#24261A;--muted:#5D604C;
+ --primary:#4B5E23;--primaryC:#E9EDD5;--accent:#E0B13A;--onAccent:#241A00;--inc:#4B5E23;--lavB:#F6EFD9;--warnB:#FBF1D6;
+ --heroBg:radial-gradient(90% 80% at 0% 100%,rgba(224,177,58,.4) 0%,rgba(224,177,58,0) 60%),linear-gradient(135deg,#3D4D1C 0%,#4B5E23 55%,#5C7028 100%);
+ --heroInk:#fff;--heroNum:#F6D77C;--heroMuted:rgba(255,255,255,.88);--kpiBg:rgba(0,0,0,.18);--heroTrack:rgba(255,255,255,.2)}
+.th-olive .fab,.th-olive .m3fab{background:linear-gradient(145deg,#EBC45A,#D9A42C)}
+.th-olive .hero .bar i{background:#F6D77C}
+/* G6 Jade Night — dark-first, glowing jade */
+.th-jade{--bg:#08130F;--surface:#10211A;--surfaceAlt:#163026;--outline:#1C3A2E;--text:#E6F4EE;--muted:#93AFA3;
+ --primary:#34D399;--onPrimary:#06140E;--primaryC:#123B2C;--accent:#34D399;--onAccent:#06140E;--inc:#6EE7B7;--exp:var(--text);--lavB:#14302A;
+ --warnB:#2A2A12;--warnT:#F5D86B;--dangerB:#3A1E22;--dangerT:#FF9AA8;--cExp:#FF8A9A;--cInc:#34D399;--cSave:#A7F3D0;
+ --heroBg:radial-gradient(120% 80% at 100% 0%,rgba(52,211,153,.45) 0%,rgba(52,211,153,0) 60%),radial-gradient(90% 80% at 0% 100%,rgba(20,184,166,.35) 0%,rgba(20,184,166,0) 60%),#0E2A20;
+ --heroInk:#fff;--heroNum:#6EE7B7;--heroMuted:rgba(230,244,238,.82);--kpiBg:rgba(0,0,0,.28);--heroTrack:rgba(255,255,255,.14);
+ --glass:rgba(16,33,26,.8);--glassB:rgba(255,255,255,.06);--shadow:none}
+.th-jade .card,.th-jade .list,.th-jade .grp{box-shadow:none;background:var(--surface)}
+.th-jade .mas{background:#14302A!important}
+.th-jade .tab.on{background:#123B2C;color:#34D399}
+.th-jade .btn.p{background:#34D399;color:#06140E}
+.th-jade .fade{background:linear-gradient(to bottom,rgba(8,19,15,0),#08130F 70%)}
+.th-jade .homeind{background:#fff}
+.th-jade .hero .bar i{background:linear-gradient(90deg,#34D399,#A7F3D0)}
+.th-forest .hbadge,.th-sage .hbadge,.th-emerald .hbadge,.th-olive .hbadge,.th-jade .hbadge{background:rgba(255,255,255,.18);color:#fff}
+.th-jade .fab,.th-jade .m3fab{background:linear-gradient(145deg,#6EE7B7,#34D399);color:#06140E;box-shadow:0 10px 26px rgba(52,211,153,.35)}
