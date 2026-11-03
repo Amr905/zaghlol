@@ -51,7 +51,7 @@ public class SpecContractTests
         var checkedSchemas = 0;
         foreach (var operation in Spec.Operations())
         {
-            var schema = Spec.RequestSchema(operation);
+            var schema = OpenApiSpec.RequestSchema(operation);
             if (schema is null)
             {
                 continue;
@@ -71,7 +71,7 @@ public class SpecContractTests
         var failures = new List<string>();
         foreach (var operation in Spec.Operations())
         {
-            var schema = Spec.RequestSchema(operation);
+            var schema = OpenApiSpec.RequestSchema(operation);
             if (schema is null)
             {
                 continue;

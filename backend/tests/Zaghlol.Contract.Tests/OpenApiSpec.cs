@@ -98,7 +98,7 @@ internal sealed class OpenApiSpec
         return response["content"]?[contentType]?["schema"];
     }
 
-    public JsonNode? RequestSchema(SpecOperation operation)
+    public static JsonNode? RequestSchema(SpecOperation operation)
     {
         return operation.Body["requestBody"]?["content"]?["application/json"]?["schema"];
     }
@@ -204,7 +204,7 @@ internal sealed class OpenApiSpec
         }
     }
 
-    private static JsonNode? ConvertScalar(YamlScalarNode scalar)
+    private static JsonValue? ConvertScalar(YamlScalarNode scalar)
     {
         if (scalar.Style != YamlDotNet.Core.ScalarStyle.Plain)
         {
