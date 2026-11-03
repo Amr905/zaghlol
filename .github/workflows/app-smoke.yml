@@ -66,8 +66,7 @@ jobs:
         working-directory: app
         run: |
           if ! flutter build apk --debug --flavor ${{ matrix.flavor }} > build.log 2>&1; then
-            grep -iE "error|fail|what went wrong|exception" build.log | head -n 40 | while read -r line; do echo "::error::build: $line"; done
-            tail -n 40 build.log | while read -r line; do echo "::error::build-tail: $line"; done
+            echo "::error::build failed: $(grep -v -E 'Unzipping|^\[' build.log | grep -A25 -E 'What went wrong|Error|error:' | head -n 40 | tr '\n' '|')"
             exit 1
           fi
           tail -n 5 build.log
@@ -126,6 +125,9 @@ jobs:
           channel: stable
           cache: true
       - run: flutter pub get
+      - name: Generate Gradle wrapper
+        working-directory: app
+        run: flutter build apk --config-only --flavor devNoSms
       - name: Verify every variant exists
         working-directory: app/android
         run: |
@@ -152,8 +154,7 @@ jobs:
         working-directory: app
         run: |
           if ! flutter build ios --flavor dev --no-codesign --debug > build.log 2>&1; then
-            grep -iE "error|fail" build.log | head -n 40 | while read -r line; do echo "::error::build: $line"; done
-            tail -n 40 build.log | while read -r line; do echo "::error::build-tail: $line"; done
+            echo "::error::ios build failed: $(grep -iE -B2 -A6 'error:|xcodebuild|schemes|configuration' build.log | head -n 40 | tr '\n' '|')"
             exit 1
           fi
           tail -n 5 build.log
