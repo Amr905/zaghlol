@@ -24,6 +24,11 @@ android {
         versionName = flutter.versionName
     }
 
+    buildFeatures {
+        // AGP 9 disables resValue by default; used for the per-flavor app_name.
+        resValues = true
+    }
+
     // Dimension order matters: variants are named <env><Sms|NoSms>, e.g. prodNoSms.
     flavorDimensions += listOf("env", "sms")
 
