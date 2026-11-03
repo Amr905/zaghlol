@@ -1,0 +1,11 @@
+name: zaghlol_domain
+description: Pure-Dart domain logic for Zaghlol (money, entities, budgets). No Flutter dependency.
+publish_to: none
+resolution: workspace
+
+environment:
+  sdk: ^3.6.0
+
+dev_dependencies:
+  lints: ">=5.0.0 <7.0.0"
+  test: ^1.25.0

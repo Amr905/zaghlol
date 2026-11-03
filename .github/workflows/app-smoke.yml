@@ -1,0 +1,159 @@
+name: app-smoke
+
+# Focused T-001 smoke checks. The full CI pipeline arrives in T-003.
+on:
+  push:
+    branches:
+      - 'task/**'
+      - main
+  pull_request:
+
+permissions:
+  contents: read
+
+jobs:
+  static:
+    name: format, analyze, package tests
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: subosito/flutter-action@v2
+        with:
+          channel: stable
+          cache: true
+      - name: Resolve workspace
+        run: flutter pub get
+      - name: dart format
+        run: |
+          if ! dart format --output=none --set-exit-if-changed . > format.log 2>&1; then
+            while read -r line; do echo "::error::format: $line"; done < format.log
+            exit 1
+          fi
+      - name: flutter analyze
+        run: |
+          if ! flutter analyze > analyze.log 2>&1; then
+            grep -E "^\s*(info|warning|error)" analyze.log | while read -r line; do echo "::error::analyze: $line"; done
+            tail -n 5 analyze.log | while read -r line; do echo "::error::analyze: $line"; done
+            exit 1
+          fi
+      - name: dart test (zaghlol_domain)
+        working-directory: packages/zaghlol_domain
+        run: dart test
+      - name: dart test (zaghlol_parsing)
+        working-directory: packages/zaghlol_parsing
+        run: dart test
+
+  android:
+    name: android ${{ matrix.flavor }}
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        flavor: [prodNoSms, prodSms]
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '17'
+      - uses: subosito/flutter-action@v2
+        with:
+          channel: stable
+          cache: true
+      - name: Resolve workspace
+        run: flutter pub get
+      - name: Build debug APK
+        working-directory: app
+        run: |
+          if ! flutter build apk --debug --flavor ${{ matrix.flavor }} > build.log 2>&1; then
+            grep -iE "error|fail|what went wrong|exception" build.log | head -n 40 | while read -r line; do echo "::error::build: $line"; done
+            tail -n 40 build.log | while read -r line; do echo "::error::build-tail: $line"; done
+            exit 1
+          fi
+          tail -n 5 build.log
+      - name: Assert SMS permissions match the flavor
+        run: |
+          AAPT2=$(ls -d "$ANDROID_HOME"/build-tools/*/aapt2 | sort -V | tail -n 1)
+          APK=$(find app/build/app/outputs -iname "*${{ matrix.flavor }}*debug.apk" | head -n 1)
+          if [ -z "$APK" ]; then
+            echo "::error::APK for ${{ matrix.flavor }} not found"
+            find app/build/app/outputs -name '*.apk' | while read -r f; do echo "::error::found $f"; done
+            exit 1
+          fi
+          echo "APK: $APK"
+          "$AAPT2" dump permissions "$APK" | tee perms.txt
+          "$AAPT2" dump badging "$APK" > badging.txt
+          grep -E "^package:" badging.txt
+          HAS_SMS=false
+          if grep -qE "android.permission.(READ_SMS|RECEIVE_SMS)" perms.txt; then HAS_SMS=true; fi
+          if [ "${{ matrix.flavor }}" = "prodNoSms" ]; then
+            if [ "$HAS_SMS" = true ]; then
+              echo "::error::prodNoSms contains READ_SMS/RECEIVE_SMS"
+              exit 1
+            fi
+          else
+            for p in READ_SMS RECEIVE_SMS; do
+              if ! grep -q "android.permission.$p" perms.txt; then
+                echo "::error::prodSms is missing $p"
+                exit 1
+              fi
+            done
+          fi
+          if ! grep -q "name='app.zaghlol'" badging.txt; then
+            echo "::error::prod applicationId is not app.zaghlol: $(grep -E '^package:' badging.txt)"
+            exit 1
+          fi
+          if ! grep -qE "minSdkVersion:'26'" badging.txt; then
+            echo "::error::minSdkVersion is not 26"
+            exit 1
+          fi
+          if ! grep -qE "targetSdkVersion:'36'" badging.txt; then
+            echo "::error::targetSdkVersion is not 36"
+            exit 1
+          fi
+
+  android-variants:
+    name: android all variants defined
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '17'
+      - uses: subosito/flutter-action@v2
+        with:
+          channel: stable
+          cache: true
+      - run: flutter pub get
+      - name: Verify every variant exists
+        working-directory: app/android
+        run: |
+          ./gradlew -q app:tasks --all > tasks.log 2>&1 || { tail -n 40 tasks.log | while read -r l; do echo "::error::$l"; done; exit 1; }
+          for v in DevSms DevNoSms StagingSms StagingNoSms ProdSms ProdNoSms; do
+            if ! grep -q "assemble${v}Debug" tasks.log; then
+              echo "::error::variant $v missing"
+              exit 1
+            fi
+          done
+
+  ios:
+    name: ios dev (no codesign)
+    runs-on: macos-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: subosito/flutter-action@v2
+        with:
+          channel: stable
+          cache: true
+      - name: Resolve workspace
+        run: flutter pub get
+      - name: Build iOS dev
+        working-directory: app
+        run: |
+          if ! flutter build ios --flavor dev --no-codesign --debug > build.log 2>&1; then
+            grep -iE "error|fail" build.log | head -n 40 | while read -r line; do echo "::error::build: $line"; done
+            tail -n 40 build.log | while read -r line; do echo "::error::build-tail: $line"; done
+            exit 1
+          fi
+          tail -n 5 build.log
