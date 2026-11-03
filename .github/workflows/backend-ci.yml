@@ -128,8 +128,8 @@ jobs:
           fi
           cat health.json; echo
           grep -q '"status":"ok"' health.json || { echo "::error title=Container health::Unexpected /v1/health body."; exit 1; }
-          docker top "$cid" -eo uid,args
-          uid=$(docker top "$cid" -eo uid,args | grep 'Zaghlol.Api.dll' | awk '{print $1}' | head -n1)
+          docker top "$cid" -eo pid,uid,args
+          uid=$(docker top "$cid" -eo pid,uid,args | grep 'Zaghlol.Api.dll' | awk '{print $2}' | head -n1)
           echo "Process uid=$uid"
           if [ -z "$uid" ] || [ "$uid" = "0" ] || [ "$uid" = "root" ]; then
             docker rm -f "$cid" >/dev/null
