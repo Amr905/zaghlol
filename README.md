@@ -42,3 +42,7 @@ flutter build ios --flavor dev --no-codesign
 iOS has `dev` / `staging` / `prod` schemes (and matching build configurations).
 
 Minimum OS: Android 8.0 (minSdk 26, targetSdk 36), iOS 17.0 (ADR-019).
+
+### CI
+
+Pull requests run `app-ci` (format, analyze, unit and golden tests, Kotlin and Swift unit tests, all flavor builds). Lockfile and golden regeneration for agents without a local Flutter: see `.github/workflows/README.md`.

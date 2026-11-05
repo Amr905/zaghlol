@@ -38,3 +38,6 @@ Thumbs.db
 
 # Claude local settings
 .claude/settings.local.json
+
+# Golden failure output (uploaded as CI artifacts)
+**/test/**/failures/

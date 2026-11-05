@@ -1,0 +1,195 @@
+name: app-regen
+
+# Regenerates pubspec.lock and/or golden PNGs in CI and commits them back to the
+# same task/** branch. See .github/workflows/README.md.
+#
+# Safety design (two jobs, so repository code never runs next to a write token):
+#   1. regenerate  - permissions: contents: read. Installs Flutter from a pinned
+#                    git tag, runs `pub get` / `flutter test --update-goldens`
+#                    (this executes branch code) and uploads the candidate files
+#                    as an artifact.
+#   2. commit      - permissions: contents: write. Runs NO repo code and uses no
+#                    third-party action. Copies only whitelisted paths from the
+#                    artifact (pubspec.lock, app/test/**/goldens/*.png, PNG magic
+#                    checked, no symlinks) and pushes a fast-forward commit.
+# Every ${{ }} value reaches shell code through env:, never run: interpolation.
+on:
+  workflow_dispatch:
+    inputs:
+      target:
+        description: 'What to regenerate'
+        required: true
+        type: choice
+        options:
+          - lock
+          - goldens
+  push:
+    branches:
+      - 'task/**'
+
+permissions:
+  contents: read
+
+concurrency:
+  group: app-regen-${{ github.ref }}
+  cancel-in-progress: false
+
+env:
+  # Keep in sync with FLUTTER_VERSION in app-ci.yml. FLUTTER_SHA is the commit
+  # the tag must resolve to (guards against a moved tag).
+  FLUTTER_VERSION: '3.47.9'
+  FLUTTER_SHA: 'c197ca5199e9ee5661e865596c9c07294dfab51c'
+
+jobs:
+  regenerate:
+    name: regenerate (${{ github.event_name }})
+    runs-on: ubuntu-latest
+    if: >-
+      startsWith(github.ref, 'refs/heads/task/') &&
+      (github.event_name == 'workflow_dispatch' ||
+       contains(github.event.head_commit.message, '[regen-goldens]') ||
+       contains(github.event.head_commit.message, '[regen-lock]'))
+    permissions:
+      contents: read
+    outputs:
+      lock: ${{ steps.targets.outputs.lock }}
+      goldens: ${{ steps.targets.outputs.goldens }}
+    env:
+      REF_NAME: ${{ github.ref_name }}
+      EVENT_NAME: ${{ github.event_name }}
+      INPUT_TARGET: ${{ inputs.target }}
+      COMMIT_MESSAGE: ${{ github.event.head_commit.message }}
+    steps:
+      - name: Refuse anything but task branches
+        run: |
+          case "$REF_NAME" in
+            task/*) ;;
+            *) echo "::error::app-regen only runs on task/** branches (got '$REF_NAME')"; exit 1 ;;
+          esac
+      - name: Decide targets
+        id: targets
+        run: |
+          lock=false; goldens=false
+          if [ "$EVENT_NAME" = "workflow_dispatch" ]; then
+            [ "$INPUT_TARGET" = "lock" ] && lock=true
+            [ "$INPUT_TARGET" = "goldens" ] && goldens=true
+          else
+            case "$COMMIT_MESSAGE" in *'[regen-lock]'*) lock=true ;; esac
+            case "$COMMIT_MESSAGE" in *'[regen-goldens]'*) goldens=true ;; esac
+          fi
+          echo "lock=$lock" >> "$GITHUB_OUTPUT"
+          echo "goldens=$goldens" >> "$GITHUB_OUTPUT"
+          echo "targets: lock=$lock goldens=$goldens"
+      - uses: actions/checkout@fbc6f3992d24b796d5a048ff273f7fcc4a7b6c09 # v5.1.0
+        with:
+          persist-credentials: false
+      - name: Install Flutter (pinned tag, verified commit)
+        run: |
+          git clone --depth 1 --branch "$FLUTTER_VERSION" https://github.com/flutter/flutter.git "$RUNNER_TEMP/flutter"
+          actual=$(git -C "$RUNNER_TEMP/flutter" rev-parse HEAD)
+          if [ "$actual" != "$FLUTTER_SHA" ]; then
+            echo "::error::Flutter $FLUTTER_VERSION resolved to $actual, expected $FLUTTER_SHA"
+            exit 1
+          fi
+          echo "$RUNNER_TEMP/flutter/bin" >> "$GITHUB_PATH"
+      - name: Flutter version
+        run: flutter --version
+      - name: Regenerate pubspec.lock
+        if: steps.targets.outputs.lock == 'true'
+        run: flutter pub get
+      - name: Resolve workspace (goldens only; lockfile must already match)
+        if: steps.targets.outputs.lock != 'true'
+        run: flutter pub get --enforce-lockfile
+      - name: Regenerate goldens
+        if: steps.targets.outputs.goldens == 'true'
+        working-directory: app
+        run: flutter test --tags golden --update-goldens
+      - name: Collect candidate files
+        run: |
+          mkdir -p "$RUNNER_TEMP/out"
+          if [ "$LOCK" = "true" ]; then
+            cp pubspec.lock "$RUNNER_TEMP/out/pubspec.lock"
+          fi
+          if [ "$GOLDENS" = "true" ]; then
+            find app/test -type f -path '*/goldens/*.png' -print0 |
+              while IFS= read -r -d '' f; do
+                mkdir -p "$RUNNER_TEMP/out/$(dirname "$f")"
+                cp "$f" "$RUNNER_TEMP/out/$f"
+              done
+          fi
+          find "$RUNNER_TEMP/out" -type f | sed "s#^$RUNNER_TEMP/out/##"
+        env:
+          LOCK: ${{ steps.targets.outputs.lock }}
+          GOLDENS: ${{ steps.targets.outputs.goldens }}
+      - uses: actions/upload-artifact@b7c566a772e6b6bfb58ed0dc250532a479d7789f # v6.0.0
+        with:
+          name: regen-output
+          path: ${{ runner.temp }}/out
+          if-no-files-found: error
+          retention-days: 3
+
+  commit:
+    name: commit regenerated files
+    needs: regenerate
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    env:
+      REF_NAME: ${{ github.ref_name }}
+      TRIGGER_SHA: ${{ github.sha }}
+      LOCK: ${{ needs.regenerate.outputs.lock }}
+      GOLDENS: ${{ needs.regenerate.outputs.goldens }}
+    steps:
+      - name: Refuse anything but task branches
+        run: |
+          case "$REF_NAME" in
+            task/*) ;;
+            *) echo "::error::app-regen only runs on task/** branches (got '$REF_NAME')"; exit 1 ;;
+          esac
+      # Exact triggering commit: if the branch moved meanwhile, the push below
+      # is not a fast-forward and fails instead of clobbering newer work.
+      - uses: actions/checkout@fbc6f3992d24b796d5a048ff273f7fcc4a7b6c09 # v5.1.0
+        with:
+          ref: ${{ github.sha }}
+      - uses: actions/download-artifact@018cc2cf5baa6db3ef3c5f8a56943fffe632ef53 # v6.0.0
+        with:
+          name: regen-output
+          path: ${{ runner.temp }}/in
+      - name: Copy whitelisted files only
+        shell: bash
+        run: |
+          IN="$RUNNER_TEMP/in"
+          if find "$IN" -type l | grep -q .; then
+            echo "::error::artifact contains symlinks"; exit 1
+          fi
+          if [ "$LOCK" = "true" ] && [ -f "$IN/pubspec.lock" ]; then
+            cp "$IN/pubspec.lock" pubspec.lock
+          fi
+          if [ "$GOLDENS" = "true" ]; then
+            (cd "$IN" && find app/test -type f -print0 2>/dev/null) |
+              while IFS= read -r -d '' f; do
+                if ! printf '%s' "$f" | grep -Eq '^app/test/([A-Za-z0-9_.-]+/)*goldens/[A-Za-z0-9_.-]+\.png$'; then
+                  echo "::error::refusing non-whitelisted path: $f"; exit 1
+                fi
+                if ! head -c 8 "$IN/$f" | od -An -tx1 | tr -d ' \n' | grep -q '^89504e470d0a1a0a$'; then
+                  echo "::error::not a PNG: $f"; exit 1
+                fi
+                mkdir -p "$(dirname "$f")"
+                cp "$IN/$f" "$f"
+              done
+          fi
+      - name: Commit and push
+        run: |
+          git add -- pubspec.lock app/test
+          if git diff --cached --quiet; then
+            echo "Nothing changed; no commit created."
+            exit 0
+          fi
+          git diff --cached --stat
+          parts=""
+          [ "$LOCK" = "true" ] && parts="pubspec.lock"
+          [ "$GOLDENS" = "true" ] && parts="${parts:+$parts and }goldens"
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git commit -m "chore(ci): regenerate $parts" -m "Generated by the app-regen workflow from $TRIGGER_SHA."
+          git push origin "HEAD:refs/heads/$REF_NAME"

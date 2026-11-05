@@ -1,0 +1,4 @@
+tags:
+  # Golden (screenshot) tests. CI runs them in a separate job and uploads diffs;
+  # regenerate with the app-regen workflow, never locally (platform-specific).
+  golden:

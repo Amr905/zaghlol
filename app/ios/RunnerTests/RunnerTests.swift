@@ -4,9 +4,10 @@ import XCTest
 
 class RunnerTests: XCTestCase {
 
-  func testExample() {
-    // If you add code to the Runner application, consider adding tests here.
-    // See https://developer.apple.com/documentation/xctest for more information about using XCTest.
+  /// Placeholder proving the XCTest lane runs in CI. Capture Guard and App Intents
+  /// tests arrive with the native tasks.
+  func testHostBundleIsTheZaghlolApp() {
+    XCTAssertTrue(Bundle.main.bundleIdentifier?.hasPrefix("app.zaghlol") == true)
   }
 
 }
