@@ -34,7 +34,7 @@
 | T-003 | App CI pipeline (format, analyze, unit, golden, native unit) | M0 | C2 | Sonnet | flutter-core-engineer | T-001 | TODO | — |  |
 | T-004 | Pigeon setup and stale-generation check | M0 | C2 | Sonnet | flutter-core-engineer | T-001 | TODO | — |  |
 | T-005 | Backend solution scaffold, Docker Compose and CI | M0 | C2 | Sonnet | backend-engineer | — | DONE | CI run 41720361381 (4/4 green) @ d98b37d; review [T-005](05-reviews/T-005.md) APPROVED | Squash-merged; follow-ups FU-001…005 |
-| T-006 | OpenAPI v1 spec and contract-test harness | M0 | C2 | Sonnet | backend-engineer | T-005 | IN_REVIEW | CI run 41724793615 (5/5 green) @ 1ec35fd | code-reviewer running; includes FU-001, FU-005 |
+| T-006 | OpenAPI v1 spec and contract-test harness | M0 | C2 | Sonnet | backend-engineer | T-005 | CHANGES_REQUESTED | CI run 41724793615 (5/5 green) @ 1ec35fd; review round 1: 1 major (osMajor outside BR-SYNC-03) | Round 1 fix in progress: drop osMajor (+ #10, #13, #14) |
 | T-007 | SPK-05: encrypted SQLite (SQLite3MultipleCiphers) + FTS5 trigram on both platforms | M0 | C4 | Opus | flutter-core-engineer | T-001 | TODO | — |  |
 | T-008 | SPK-01: Android receiver → spool → WorkManager → headless engine latency | M0 | C4 | Opus | native-platform-engineer | T-001, T-004 | TODO | — |  |
 | T-009 | SPK-03: can an iOS App Intent process immediately with a headless Flutter engine? | M0 | C4 | Opus | native-platform-engineer | T-001, T-004 | TODO | — |  |
@@ -210,11 +210,18 @@
 ## Follow-ups (from reviews)
 | ID | From | Item | Owner / target | Status |
 |---|---|---|---|---|
-| FU-001 | T-005 #1, #8 | Add NOT_FOUND, METHOD_NOT_ALLOWED, UNAUTHORIZED (fallback only), PAYLOAD_TOO_LARGE, UNSUPPORTED_MEDIA_TYPE to `backend-api.md` §6; Dockerfile location in `project-structure.md` | solution-architect (docs) | OPEN |
+| FU-001 | T-005 #1, #8 (partly done on T-006 branch; Dockerfile line + architect sign-off of §4.8/§6 remain) | Add NOT_FOUND, METHOD_NOT_ALLOWED, UNAUTHORIZED (fallback only), PAYLOAD_TOO_LARGE, UNSUPPORTED_MEDIA_TYPE to `backend-api.md` §6; Dockerfile location in `project-structure.md` | solution-architect (docs) | OPEN |
 | FU-002 | T-005 #2 | Align log field names with observability §3.2 (or update the doc) before any alerting | T-138 | OPEN |
 | FU-003 | T-005 #3 | DB readiness check on health/readiness probe, tested against Testcontainers | T-122 | OPEN |
 | FU-004 | T-005 #4–7, #9–10, #12–13 | Backend hardening: real body-not-logged test, SHA-pinned actions, Trivy by digest, 4xx mapping + test, single trace id, Production env in tests, stale-heartbeat test, compose loopback | backend-engineer (small C2 pass, before M5) | OPEN |
-| FU-005 | T-005 #11 | `serverTime` as UTC `Z` and fixed in OpenAPI | T-006 | OPEN |
+| FU-005 | T-005 #11 | `serverTime` as UTC `Z` and fixed in OpenAPI | T-006 (done on branch); global UTC-`Z` JSON converter → T-124 | PARTIAL |
+| FU-006 | T-006 #2 | Android restore: `{productId, purchaseToken}` items or commit to `productsv2` | solution-architect → T-130/T-132 | OPEN (architect decision) |
+| FU-007 | T-006 #3 | Open (ignore-unknown) schemas for server-to-server envelopes (Pub/Sub RTDN, ASSN V2) | solution-architect → T-133/T-134 | OPEN (architect decision) |
+| FU-008 | T-006 #4, #5 | Apple Android callback transport (query vs form_post); support lookup e-mail out of query string; never log query strings | solution-architect → T-135/T-136/T-138 | OPEN (architect decision) |
+| FU-009 | T-006 #8 | Admin draft DELETE + per-entity key format (keywords: keyword+lang) | T-125 | OPEN |
+| FU-010 | T-006 #9, #11, #12 | Spectral via package.json + lockfile + pinned Node; YAML float scalars as numbers; Spectral `type[*]` rule | FU-004 hardening pass | OPEN |
+| FU-011 | T-006 #14 | Each endpoint task adds a live response-vs-spec test incl. `400 UNKNOWN_FIELD` | T-124, T-128, T-130…T-136 | OPEN |
+| FU-012 | T-006 decision 2 | Record that server-issued version cursors (flagsVersion, pricesAsOf, entitlementIssuedAt, registryVersion) fall under BR-SYNC-03 "catalog/app version" | product owner | OPEN (PO confirm) |
 
 ## Log
 | Date | Event |
@@ -226,3 +233,4 @@
 | 2026-11-03 | T-001 implementation finished; Lead verified CI (5/5 green) and diff; code review started. |
 | 2026-11-03 | T-001 review round 1: CHANGES_REQUESTED (F1–F3 majors; F4/F6/F8/F12/F15 cheap fixes added; others deferred to T-002/T-003/T-023/T-141/T-165/T-176). T-006 implemented, CI green, in review. |
 | 2026-11-05 | Both agents paused by a usage limit; resumed. |
+| 2026-11-05 | T-006 review round 1: CHANGES_REQUESTED (1 major: `osMajor` not in BR-SYNC-03 → dropped per SRS precedence). Follow-ups FU-006…012 logged. |
