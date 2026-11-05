@@ -109,7 +109,14 @@ jobs:
       # one debug build is needed before invoking Gradle directly.
       - name: Prepare Android project
         working-directory: app
-        run: flutter build apk --debug --flavor devNoSms > prepare.log 2>&1 || { tail -n 40 prepare.log; exit 1; }
+        # One retry: the runner's SDK/NDK download occasionally returns a corrupt zip.
+        run: |
+          for attempt in 1 2; do
+            if flutter build apk --debug --flavor devNoSms > prepare.log 2>&1; then exit 0; fi
+            echo "attempt $attempt failed"; tail -n 20 prepare.log
+          done
+          echo "::error::could not prepare the Android project"
+          exit 1
       - name: Gradle unit tests
         working-directory: app/android
         run: ./gradlew --no-daemon testDevNoSmsDebugUnitTest
