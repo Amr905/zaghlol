@@ -39,17 +39,17 @@
 | [009](adr/ADR-009-ocr.md) | iOS Vision; Android ML Kit Latin + Tesseract Arabic (CR-02) | ML Kit only, cloud OCR | Proposed |
 | [010](adr/ADR-010-speech-recognition.md) | Platform speech recognizers, on-device first; online only with consent | Bundled ASR model | Proposed: **confirm OQ-06** |
 | [011](adr/ADR-011-backup-format-kdf.md) | Random backup key wrapped by Argon2id(passphrase); chunked AES-256-GCM | Per-backup passphrase KDF, PBKDF2 | Proposed |
-| [012](adr/ADR-012-purchase-verification-entitlements.md) | Backend store verification + ES256-signed entitlement, 7-day offline grace | Client-side receipts, online check each launch | Proposed |
-| [013](adr/ADR-013-catalog-sync-protocol.md) | One signed daily `POST /v1/sync`; deltas; full snapshots on CDN | Separate calls, push | Proposed |
+| [012](adr/ADR-012-purchase-verification-entitlements.md) | Backend store verification + ES256-signed entitlement, 7-day offline grace; *amended 2026-11-05:* Android restore `{productId, purchaseToken}` + Play v2 endpoints | Client-side receipts, online check each launch | Proposed |
+| [013](adr/ADR-013-catalog-sync-protocol.md) | One signed daily `POST /v1/sync`; deltas; full snapshots on CDN; *amended 2026-11-05:* draft keys, tombstones, keyword key = keyword + lang | Separate calls, push | Proposed |
 | [014](adr/ADR-014-price-data-source.md) | Pluggable price providers; local Egyptian gold feed preferred, spot-derived fallback | Scraping | Proposed: **pick provider (OQ-02)** |
 | [015](adr/ADR-015-backend-hosting-region.md) | Provider-neutral; recommend EU region + PDPL licence/cross-border permit | Egypt-local host, Gulf region | Proposed: **decide region + start PDPL licence (CR-03, OQ-16)** |
-| [016](adr/ADR-016-optional-sign-in.md) | Native Google/Apple sign-in, own account JWT; Apple on Android via web flow (CR-05) | Firebase Auth | Proposed |
+| [016](adr/ADR-016-optional-sign-in.md) | Native Google/Apple sign-in, own account JWT; Apple on Android via web flow (CR-05); *amended 2026-11-05:* `form_post` callback | Firebase Auth | Proposed |
 | [017](adr/ADR-017-localization.md) | Flutter gen-l10n, Arabic template locale, digits preference | easy_localization, slang | Proposed |
 | [018](adr/ADR-018-transport-security-pinning.md) | No TLS pinning; ES256-signed responses (answers OQ-15) | Certificate pinning | Proposed |
 | [019](adr/ADR-019-minimum-os-versions.md) | Android 8.0 (API 26) / target 36; iOS 17.0 (answers OQ-03, CR-04) | Android 10 / iOS 18 | Proposed |
 | [020](adr/ADR-020-mascot-animation-runtime.md) | Rive state machine from the traced vector rig | Lottie, Flutter-native | Proposed |
 | [021](adr/ADR-021-success-metrics-measurement.md) | Backend aggregate counters + store consoles + CI accuracy (answers OQ-01) | Telemetry | Proposed |
-| [022](adr/ADR-022-backend-architecture.md) | .NET 10 modular monolith + PostgreSQL 17 | Microservices, serverless | Proposed |
+| [022](adr/ADR-022-backend-architecture.md) | .NET 10 modular monolith + PostgreSQL 17; *amended 2026-11-05:* open third-party bodies, no query logging, `backend/Dockerfile` | Microservices, serverless | Proposed |
 
 ## Change requests raised by this phase (need product-owner approval)
 

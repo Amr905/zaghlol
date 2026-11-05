@@ -19,6 +19,10 @@ public class SpecContractTests
 
     private static readonly string[] IdempotentOperations = ["registerInstall", "verifyPurchase", "signIn"];
 
+    /// <summary>Operations whose body shape Google or Apple define; these, and only these, have open schemas.</summary>
+    private static readonly string[] ThirdPartyBodyOperations =
+        ["ingestGoogleNotification", "ingestAppleNotification", "appleAndroidCallback"];
+
     [Fact]
     public void SpecIsOpenApi31WithVersionedPaths()
     {
@@ -52,7 +56,7 @@ public class SpecContractTests
         foreach (var operation in Spec.Operations())
         {
             var schema = OpenApiSpec.RequestSchema(operation);
-            if (schema is null)
+            if (schema is null || IsThirdPartyBody(operation))
             {
                 continue;
             }
@@ -72,7 +76,7 @@ public class SpecContractTests
         foreach (var operation in Spec.Operations())
         {
             var schema = OpenApiSpec.RequestSchema(operation);
-            if (schema is null)
+            if (schema is null || IsThirdPartyBody(operation))
             {
                 continue;
             }
@@ -96,6 +100,58 @@ public class SpecContractTests
                 if (Spec.Validate(schema, mutated) is null)
                 {
                     failures.Add($"{operation.Label}: an unknown field at '{where}' was accepted");
+                }
+            }
+        }
+
+        Assert.Empty(failures);
+    }
+
+    [Fact]
+    public void OnlyThirdPartyBodiesAreOpenAndTheyIgnoreUnknownFields()
+    {
+        var marked = Spec.Operations().Where(IsThirdPartyBody).Select(o => o.Id).Order(StringComparer.Ordinal).ToList();
+        Assert.Equal(ThirdPartyBodyOperations.Order(StringComparer.Ordinal).ToList(), marked);
+
+        var failures = new List<string>();
+        foreach (var operation in Spec.Operations().Where(IsThirdPartyBody))
+        {
+            var schemes = (operation.Body["security"] as JsonArray ?? new JsonArray())
+                .OfType<JsonObject>()
+                .SelectMany(r => r.Select(p => p.Key))
+                .ToList();
+            if (schemes.Any(s => s is "installToken" or "accountToken" or "operatorOidc"))
+            {
+                failures.Add($"{operation.Label}: a third-party body must not be an app or operator call");
+            }
+
+            if (operation.Body["requestBody"]?["content"] is not JsonObject content || content.Count != 1)
+            {
+                failures.Add($"{operation.Label}: expected exactly one request media type");
+                continue;
+            }
+
+            var (mediaType, media) = content.Single();
+            var schema = media!["schema"];
+            var example = media["example"];
+            if (schema is null || example is null)
+            {
+                failures.Add($"{operation.Label} {mediaType}: request body needs a schema and an example");
+                continue;
+            }
+
+            var problem = Spec.Validate(schema, example);
+            if (problem is not null)
+            {
+                failures.Add($"{operation.Label}: example is invalid: {problem}");
+                continue;
+            }
+
+            foreach (var (where, mutated) in WithUnknownField(example))
+            {
+                if (Spec.Validate(schema, mutated) is not null)
+                {
+                    failures.Add($"{operation.Label}: an unknown field at '{where}' was rejected, but third-party bodies must ignore it");
                 }
             }
         }
@@ -324,6 +380,11 @@ public class SpecContractTests
             Assert.DoesNotContain("installToken", schemes);
             Assert.DoesNotContain("accountToken", schemes);
         }
+    }
+
+    private static bool IsThirdPartyBody(SpecOperation operation)
+    {
+        return operation.Body["x-third-party-body"] is JsonValue flag && flag.TryGetValue<bool>(out var open) && open;
     }
 
     private static void Require(List<string> failures, SpecOperation operation, JsonObject responses, string status)

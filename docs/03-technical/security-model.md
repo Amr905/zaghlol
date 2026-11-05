@@ -23,7 +23,7 @@ Out of scope: protecting a fully compromised, unlocked device in an attacker's h
 ## 2. Data boundary enforcement (BR-SYNC-03)
 
 1. **One client:** `BackendClient` is the only HTTP client in the app. Its request DTOs are generated from the OpenAPI spec and are the only types it can serialize. There is no "send map" API.
-2. **Server rejects extras:** the server rejects unknown fields (`backend-api.md` §1), so any accidental extra field fails loudly in testing.
+2. **Server rejects extras:** the server rejects unknown fields in every app and operator request (`backend-api.md` §1), so any accidental extra field fails loudly in testing. The only open bodies are the three that Google and Apple define (Pub/Sub, ASSN V2, the Apple `form_post`). They never come from the app, and the server ignores their unlisted fields and never stores them (ADR-022 amendment).
 3. **Contributions are filtered twice** (BR-SYNC-04), on device before queuing and on the server again. A contribution is dropped if it:
    - has a person-to-person counterparty;
    - contains a digit run of 5 or more, `@`, `+20` or a phone pattern;
@@ -106,7 +106,7 @@ plaintext = tar-like stream: db.snapshot, settings.json, manifest.json
 |---|---|
 | Transport | TLS 1.2+ only (1.3 preferred), HSTS, modern ciphers; managed certificates |
 | Pinning (OQ-15) | **No TLS certificate pinning** (ADR-018). Integrity of security-relevant data comes from ES256 response signatures with keys embedded in the app, which survive certificate rotation. |
-| Input validation | FluentValidation on every DTO; unknown fields rejected; size limits; regex timeouts |
+| Input validation | FluentValidation on every DTO; unknown fields rejected (except the three third-party bodies, which ignore them); size limits; regex timeouts; no personal data or credentials in query strings, and query strings never logged |
 | Rate limiting & abuse | Token bucket per install and per /24; registration limited per IP; WAF managed rules |
 | Secrets | Cloud secrets manager; no secrets in config files or images; CI uses OIDC federation (no long-lived keys) |
 | Signing keys | ES256 keys in KMS/HSM (`sign` permission for the API identity only). Each `kid` has a 12-month active life. The app embeds current + next public keys, and rotation ships in an app release before activation. |

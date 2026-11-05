@@ -25,3 +25,22 @@ D-13 and FR-BE-02: our own backend verifies purchases (no RevenueCat, OOS-16). G
 
 ## Consequences
 The backend becomes critical for **new** purchases only. A background retry protects Google's 3-day acknowledge window (BR-GOLD-06). Signing keys live in the KMS with rotation via embedded next keys.
+
+## Amendment (2026-11-05): Android restore payload and Play endpoints (FU-006)
+**Context.** The T-006 review found that `POST /v1/purchases/restore` sent bare Android purchase tokens. The v1 `purchases.products.get` call needs the product ID in its path, so the server couldn't verify a lifetime purchase from a token alone. Google now documents `purchases.productsv2.getproductpurchasev2` (`GET …/applications/{packageName}/purchases/productsv2/tokens/{token}`) for one-time products. Like `subscriptionsv2.get`, it needs only the token and returns the product ID in `productLineItem[]`.
+
+**Options.**
+1. Keep bare tokens and rely on the v2 endpoints. The server can't tell a subscription token from a product token, so it has to try `subscriptionsv2.get` and then `productsv2`. That doubles Play quota use on misses and makes error mapping ambiguous.
+2. Send `{productId, purchaseToken}` items and keep the v1 calls. This works, but stays on the older one-time product endpoint.
+3. **Send `{productId, purchaseToken}` items and use the token-only v2 endpoints.** The product ID only routes the call and is cross-checked against what Play returns.
+
+**Decision: option 3.**
+- Android restore items are `{productId, purchaseToken}` (1–20). The app already has both from Play Billing `queryPurchasesAsync`. `productId` already appears in verify, so BR-SYNC-03 "purchase tokens/transactions" covers it.
+- The server routes by its own product table: subscriptions go to `purchases.subscriptionsv2.get`, lifetime goes to `purchases.productsv2.getproductpurchasev2`. The v1 `purchases.products.get` is not used.
+- The returned product ID must equal the claimed one (`PURCHASE_TOKEN_INVALID` otherwise). An unknown product ID gives `PURCHASE_WRONG_APP`.
+- Acknowledgement still uses `purchases.subscriptions.acknowledge` / `purchases.products.acknowledge` with the product ID that Play returned.
+- **Restore** skips the install-binding check (`obfuscatedExternalAccountId` / `appAccountToken`), because after a phone change the binding names the old install. Proof of ownership is that the device's store account could produce the token or transaction.
+- Re-binding is capped at 3 moves per purchase in 30 days; past that the item is `invalid` and an alert fires.
+- Per-item failures fold into an aggregate `status` (active > pending > expired > refunded > invalid), and restore has no 422.
+
+**Consequences.** T-130 implements the v2 calls. T-132 implements the restore rules, the rebind cap and the aggregate. T-145 sends items instead of bare tokens. Sources: Google Play Developer API reference for [`purchases.productsv2.getproductpurchasev2`](https://developers.google.com/android-publisher/api-ref/rest/v3/purchases.productsv2/getproductpurchasev2) and the [one-time product lifecycle guide](https://developer.android.com/google/play/billing/lifecycle/one-time), checked 2026-11-05.

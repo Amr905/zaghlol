@@ -19,7 +19,8 @@ The source of truth during Phase 5 is `backend/openapi/zaghlol-v1.yaml`, generat
 | Errors | RFC 9457 `application/problem+json`: `{type, title, status, code, detail?, retryAfterSeconds?}`. `code` is a stable `UPPER_SNAKE` string (§6). Error bodies never echo request data. |
 | Rate limits | Per install token and per /24 IP (token bucket). `429` with `Retry-After`. |
 | Request size | ≤ 64 KB, except `/v1/notifications/*` (≤ 256 KB). |
-| Unknown fields in requests | **Rejected** (`400 UNKNOWN_FIELD`), so the app can't accidentally send more than BR-SYNC-03 allows. |
+| Unknown fields in requests | **Rejected** (`400 UNKNOWN_FIELD`) in every body whose shape Zaghlol defines (app and operator calls), so the app can't accidentally send more than BR-SYNC-03 allows. **Ignored** in the three bodies whose shape Google or Apple define: the Pub/Sub push envelope (`/v1/notifications/google`), the ASSN V2 body (`/v1/notifications/apple`) and Apple's `form_post` (`/v1/apple/android-callback`). The server reads only the listed fields there and never stores or logs the rest. These operations carry `x-third-party-body: true` in the OpenAPI file, and a contract test checks that no other operation does (ADR-022 amendment). |
+| Query strings | Never carry personal data or credentials (e-mails, tokens, ID tokens, codes). The server never logs query strings or raw paths, only the route template (`error-handling-and-observability.md` §3.2). |
 
 ## 2. Endpoint summary
 
@@ -35,7 +36,7 @@ The source of truth during Phase 5 is `backend/openapi/zaghlol-v1.yaml`, generat
 | `POST /v1/accounts/signin` | install | Verify Google/Apple ID token; link; return account token + entitlement | FR-ACCT-01/02, FR-GOLD-07 |
 | `POST /v1/accounts/signout` | install + account | Unlink this install from the account | FR-ACCT-03 |
 | `DELETE /v1/accounts/me` | install + account | Delete account and links (and revoke Apple token) | FR-ACCT-04 |
-| `GET /v1/apple/android-callback` | none | Sign in with Apple web-flow callback for Android (CR-05) | FR-ACCT-01 |
+| `POST /v1/apple/android-callback` | none (Apple `form_post`) | Sign in with Apple web-flow callback for Android (CR-05) | FR-ACCT-01 |
 | `POST /v1/notifications/google` | Google OIDC (Pub/Sub push) | RTDN ingest | FR-BE-03 |
 | `POST /v1/notifications/apple` | JWS signature | App Store Server Notifications V2 ingest (prod + sandbox URLs) | FR-BE-03 |
 | `GET /v1/health` | none | Liveness / readiness | — |
@@ -55,7 +56,7 @@ Authorization rules:
 - A call may only read or write rows of its own `installId`, plus rows of `accountId` when the account token matches **and** the install is linked to that account.
 - `/v1/notifications/*` never accept bearer tokens.
 - Operators have no endpoint that returns installs in bulk.
-- Support lookup takes an exact install ID or account e-mail and returns entitlement status only.
+- Support lookup takes an exact install ID or account e-mail **in a POST body** (never a query string) and returns entitlement status only.
 
 ## 4. Contracts
 
@@ -141,12 +142,15 @@ Authorization rules:
 ```
 
 **Server procedure (Android):**
-1. `purchases.subscriptionsv2.get`, or `purchases.products.get` for lifetime.
-2. Require `subscriptionState = ACTIVE | IN_GRACE_PERIOD`, or a product `purchaseState = PURCHASED`. Pending gives `pending`, and nothing is granted (BR-GOLD-05).
-3. Check `obfuscatedExternalAccountId == HMAC(installId)`, set by the app at purchase.
-4. Upsert `purchases`, keyed by the purchase token.
-5. `acknowledge` if not yet acknowledged; on failure, retry from the `ix_purchases_unacked` sweeper every 15 min.
-6. Sign and return the entitlement.
+1. Look up `productId` in the server's product table. Unknown → **422 `PURCHASE_WRONG_APP`**. The product type picks the call; both calls take only the package name and the token:
+   - subscriptions (`zaghlol_gold_monthly`, `_yearly`): `purchases.subscriptionsv2.get`;
+   - lifetime (`zaghlol_gold_lifetime`): `purchases.productsv2.getproductpurchasev2`. This is Google's current endpoint for one-time products; the v1 `purchases.products.get` is not used.
+2. Require the product ID Play returns (`lineItems[].productId`, or `productLineItem[].productId`) to equal `productId`; otherwise **422 `PURCHASE_TOKEN_INVALID`**.
+3. Require `subscriptionState = ACTIVE | IN_GRACE_PERIOD`, or `purchaseStateContext.purchaseState = PURCHASED`. Pending gives `pending`, and nothing is granted (BR-GOLD-05). `environment` is `sandbox` when Play returns `testPurchase` (subscriptions) or `testPurchaseContext` (products).
+4. Check `obfuscatedExternalAccountId == HMAC(installId)`, set by the app at purchase (verify only; see Restore).
+5. Upsert `purchases`, keyed by the purchase token.
+6. If `acknowledgementState` is not acknowledged, acknowledge with `purchases.subscriptions.acknowledge` or `purchases.products.acknowledge`. Both still need the product ID in the path; the server uses the one Play returned in step 2. On failure, retry from the `ix_purchases_unacked` sweeper every 15 min.
+7. Sign and return the entitlement.
 
 **Server procedure (iOS):**
 1. Verify the JWS x5c chain against Apple Root CA G3.
@@ -154,7 +158,18 @@ Authorization rules:
 3. Call App Store Server API `Get Transaction Info` and `Get All Subscription Statuses` for the authoritative state.
 4. Upsert by `originalTransactionId`.
 
-**Restore** (`POST /v1/purchases/restore`) takes `{platform, purchaseTokens[] | signedTransactions[]}` and runs the same procedure for each. For tokens bound to another install, if the store says they're valid for the same store account, the purchase is **re-bound** to the calling install (FR-GOLD-03), and `purchase_events` records the move.
+**Restore** (`POST /v1/purchases/restore`, FU-006):
+```json
+// Android: the items the app gets from Play Billing queryPurchasesAsync (1–20)
+{ "platform": "android", "purchases": [ { "productId": "zaghlol_gold_lifetime", "purchaseToken": "opaque-token-from-play" } ] }
+// iOS: StoreKit 2 signed transactions (1–20)
+{ "platform": "ios", "signedTransactions": [ "eyJ…" ] }
+// 200 (signed)
+{ "status": "active", "restoredCount": 1, "entitlement": { "token": "eyJ…" }, "serverTime": "…" }
+```
+- Each item runs the verify procedure above, except the install-binding check (step 4 on Android; `appAccountToken` on iOS). Only the store account that owns a purchase can obtain its token or signed transaction, and the binding still names the **old** install after a phone change.
+- A valid purchase bound to another install is **re-bound** to the calling install (FR-GOLD-03), and `purchase_events` records the move (`cause = restore_rebind`). A purchase re-bound more than 3 times in 30 days is not moved again: the item counts as `invalid` and an alert fires (token-sharing abuse).
+- Per-item failures never fail the call, so restore has no 422. `status` is the best item outcome by the precedence `active > pending > expired > refunded > invalid`; `restoredCount` counts `active` items; `entitlement` is the merged entitlement after the restore, or `null`.
 
 **Entitlement token** (JWS compact, ES256, `kid` header):
 ```json
@@ -177,6 +192,7 @@ Returns `{entitlement: {token}, serverTime}`, merging install and account purcha
   1. The chain is verified and `notificationUUID` is deduped.
   2. Types handled: `SUBSCRIBED`, `DID_RENEW`, `DID_FAIL_TO_RENEW` (grace), `EXPIRED`, `GRACE_PERIOD_EXPIRED`, `REFUND`, `REVOKE`, `DID_CHANGE_RENEWAL_STATUS`.
   3. The handler returns 200 after storing; Apple retries otherwise.
+- **Both envelopes are open** (FU-007): a field Google or Apple add later is ignored, not rejected. Authenticity comes from the OIDC token and the JWS chain, not from the envelope shape. Only `payload_digest` and the extracted fields are stored (`backend-schema.md` `store_notifications`).
 
 ### 4.6 Accounts
 ```json
@@ -197,35 +213,44 @@ Returns `{entitlement: {token}, serverTime}`, merging install and account purcha
 
 If the install was linked to a different account, the response is **409 `INSTALL_LINKED_TO_OTHER_ACCOUNT`** and the app asks the user (EC-46). Re-sending with `"replaceLink": true` confirms.
 
+**Sign in with Apple on Android** (CR-05, FU-008):
+1. The app opens a Custom Tab to `https://appleid.apple.com/auth/authorize` with `client_id` = our Services ID, `redirect_uri` = `https://api.zaghlol.app/v1/apple/android-callback`, `response_type=code id_token`, `response_mode=form_post`, `scope=email`, a random `state` (≥ 128 bits, base64url) and `nonce` = SHA-256 of a random client nonce.
+2. Apple POSTs `code`, `id_token`, `state` (and on the first authorization `user`) as `application/x-www-form-urlencoded` to the callback. On cancel it posts `error=user_cancelled_authorize` and `state`.
+3. The callback checks that `state` is present and well formed, drops `user` and any unlisted field, stores nothing, and answers **303** to `intent://callback?<code, id_token, state | error, state>#Intent;package=<applicationId>;scheme=signinwithapple;end`. That is the format the `sign_in_with_apple` package expects. Chrome resolves an `intent://` URL on the device and only for that package, so the tokens never travel in an HTTP URL.
+4. The app compares `state` with its own value, then calls `POST /v1/accounts/signin` with `{provider: "apple", idToken, nonce, authorizationCode}`. That call does all verification (aud = Services ID, iss, exp, nonce).
+
+`form_post` is required, not a choice. Apple accepts `response_mode=query` only with `response_type=code` and no scopes. That mode would give us no `id_token` and no e-mail for support lookup (A-47), and it would put the code in a URL. The callback body and the `Location` header are never logged.
+
 `DELETE /v1/accounts/me` removes the account and its links. Purchases stay bound to their installs.
 
 ### 4.7 Delete install (FR-ONB-08)
 `DELETE /v1/installs/me` returns 202 and tombstones the install; its tokens stop working at once. The app wipes local data **before** calling this endpoint and does not depend on it succeeding. A failure is retried once, then given up, because the install expires after 12 months of no syncs anyway.
 
-### 4.8 Shapes fixed by the OpenAPI file (T-006)
-These details were not spelled out above. `backend/openapi/zaghlol-v1.yaml` is authoritative for field names, limits and patterns.
-- **Success statuses without a body:** `DELETE /v1/installs/me` returns 202; `POST /v1/accounts/signout` and `DELETE /v1/accounts/me` return 204; `POST /v1/notifications/google` returns 204; `POST /v1/notifications/apple` returns 200.
-- **Restore response:** `{status, restoredCount, entitlement, serverTime}`. `status` is the aggregate over all submitted purchases, with the same values as verify.
-- **Full catalog snapshot** (`GET /v1/catalog/{version}/full`): `{version, ops[]}` where `ops` are upserts of the same shape as in `/v1/sync`. The signature is the `Zaghlol-Signature` header and the `.sig` file next to the snapshot.
-- **`rotateInstallToken`:** an optional string in the sync, verify, restore and entitlement response bodies. Absent or `null` means keep the current token.
-- **Apple Android callback** (`GET /v1/apple/android-callback`): query `state` (required), `code`, `id_token`, `error`. It answers 302 to an app link. Apple's `user` parameter (name, e-mail) is ignored and never stored.
-- **Pub/Sub push body:** `{message: {data, messageId, publishTime, attributes?, orderingKey?}, subscription, deliveryAttempt?}`. The envelope is closed to the fields Pub/Sub documents.
+### 4.8 Shapes fixed by the OpenAPI file (T-006; architect sign-off 2026-11-05)
+These details were not spelled out above. `backend/openapi/zaghlol-v1.yaml` is authoritative for field names, limits and patterns. The solution-architect reviewed the T-006 inferences on 2026-11-05. The items below are signed off as written or corrected as noted.
+- **Success statuses without a body:** `DELETE /v1/installs/me` returns 202; `POST /v1/accounts/signout` and `DELETE /v1/accounts/me` return 204; `POST /v1/notifications/google` returns 204; `POST /v1/notifications/apple` returns 200; `DELETE /admin/v1/catalog/draft/{entity}/{id}` returns 204. *Signed off.*
+- **Restore:** request and response as in §4.3. *Corrected:* Android items are `{productId, purchaseToken}` (FU-006); the aggregate precedence is defined; restore no longer declares 422.
+- **Full catalog snapshot** (`GET /v1/catalog/{version}/full`): `{version, ops[]}` where `ops` are upserts of the same shape as in `/v1/sync`. The signature is the `Zaghlol-Signature` header and the `.sig` file next to the snapshot. *Signed off.*
+- **`rotateInstallToken`:** an optional string in the sync, verify, restore and entitlement response bodies. Absent or `null` means keep the current token. *Signed off.*
+- **Apple Android callback:** *Corrected* (FU-008) from a `GET` with query parameters to `POST /v1/apple/android-callback` with an `application/x-www-form-urlencoded` body `{state, code?, id_token?, error?, user?}`. It answers **303** to an `intent://` URL (§4.6). `user` is dropped unread.
+- **Pub/Sub push body:** `{message: {data, messageId, publishTime, attributes?, orderingKey?}, subscription, deliveryAttempt?}`. *Corrected* (FU-007): the envelope is **open**, and so are the ASSN body and the Apple callback form.
 - **Money and prices** are decimal strings (for example `"4820.00"`) with a separate ISO 4217 `currency`. They are never JSON numbers.
 - **Timestamps** are RFC 3339 UTC and always end in `Z`.
 - **Request limits:** `POST /v1/sync` accepts at most 50 `contributions` and at most 10 `bankRequests` per call.
-- **`x-required-roles: [any]`** (used by `GET /admin/v1/metrics/daily-active`) means any authenticated operator role.
+- **`x-required-roles: [any]`** (used by `GET /admin/v1/metrics/daily-active`) means any authenticated operator role. *Signed off.*
+- **Admin bodies:** `PUT /admin/v1/prices/override` `{symbol, currency, price, reason, expiresAt?}` and `POST /admin/v1/catalog/publish` `{note?}` are *signed off*. `expiresAt` defaults to 24 h and is capped at 7 days (new column `price_quotes.override_expires_at`). *Corrected:* `PUT /admin/v1/flags/{key}` takes `{value, rules?}`, where `rules = {platforms?, minAppVersion?, rolloutPercent?}` per `feature_flags.rules`, and `FlagState` returns `rules`. The draft, contribution and support bodies are in §5.2.
 
 ## 5. Admin API (operators, v1 used by `zaghlol-ops`; web admin later per D-37)
 
 | Method & path | Role | Purpose |
 |---|---|---|
-| `GET/PUT /admin/v1/catalog/draft/...` | catalog_editor | Edit draft categories/merchants/aliases/keywords |
+| `GET/POST/PUT/DELETE /admin/v1/catalog/draft/...` | catalog_editor | Edit draft categories/merchants/aliases/keywords; DELETE tombstones (§5.2) |
 | `POST /admin/v1/catalog/publish` | catalog_editor | Publish draft → new immutable version, build + sign full snapshot, upload to CDN |
-| `GET /admin/v1/contributions?status=ready_for_review` | catalog_editor | Review queue (aggregates only) |
-| `POST /admin/v1/contributions/{merchantNorm}/{inst}:promote \| :reject` | catalog_editor | Promote into the draft |
-| `GET/PUT /admin/v1/flags/{key}` | flags_admin | View / change a flag (audited, takes effect on next sync) |
+| `GET /admin/v1/contributions?status=ready_for_review` | catalog_editor | Review queue (aggregates only; `collecting` never shown) |
+| `POST /admin/v1/contributions:promote \| :reject` | catalog_editor | Promote into the draft / reject; key in the body |
+| `GET/PUT /admin/v1/flags/{key}` | flags_admin | View / change a flag and its targeting rules (audited, takes effect on next sync) |
 | `PUT /admin/v1/prices/override` | prices_admin | Override a price when the feed is wrong |
-| `GET /admin/v1/support/entitlement?installId=… \| email=…` | support_viewer | Entitlement status only |
+| `POST /admin/v1/support/entitlement:lookup` | support_viewer | Entitlement status only; install ID or e-mail in the body |
 | `GET /admin/v1/bank-requests` | catalog_editor | Ranked list |
 | `GET /admin/v1/metrics/daily-active` | any | Aggregate counters |
 
@@ -236,17 +261,38 @@ The table above uses shorthand. These are the exact operations in `zaghlol-v1.ya
 | Operation | Role |
 |---|---|
 | `GET /admin/v1/catalog/draft/{entity}` | catalog_editor |
+| `POST /admin/v1/catalog/draft/{entity}` | catalog_editor (`entity` = `merchants` only) |
 | `PUT /admin/v1/catalog/draft/{entity}/{id}` | catalog_editor |
+| `DELETE /admin/v1/catalog/draft/{entity}/{id}` | catalog_editor |
 | `POST /admin/v1/catalog/publish` | catalog_editor |
 | `GET /admin/v1/contributions` | catalog_editor |
-| `POST /admin/v1/contributions/{merchantNorm}/{institutionCode}:promote` | catalog_editor |
-| `POST /admin/v1/contributions/{merchantNorm}/{institutionCode}:reject` | catalog_editor |
+| `POST /admin/v1/contributions:promote` | catalog_editor |
+| `POST /admin/v1/contributions:reject` | catalog_editor |
 | `GET /admin/v1/flags/{key}` | flags_admin |
 | `PUT /admin/v1/flags/{key}` | flags_admin |
 | `PUT /admin/v1/prices/override` | prices_admin |
-| `GET /admin/v1/support/entitlement` | support_viewer |
+| `POST /admin/v1/support/entitlement:lookup` | support_viewer |
 | `GET /admin/v1/bank-requests` | catalog_editor |
 | `GET /admin/v1/metrics/daily-active` | any |
+
+### 5.2 Draft catalog keys, tombstones and body-keyed admin calls (FU-008, FU-009)
+
+**Entry keys.** The path `{id}` of `PUT`/`DELETE /admin/v1/catalog/draft/{entity}/{id}` is the entity's natural key. Its form must match `entity`. `b64u(s)` is base64url without padding of the UTF-8 bytes of `s`, so free text (spaces, Arabic, `/`, `%`, `:`) never needs path escaping, and ASP.NET Core's `%2F` handling can't corrupt it.
+
+| Entity | Identity (= sync op key) | `{id}` form | Example | Body (non-key fields only) |
+|---|---|---|---|---|
+| categories | `code` | `<code>` | `dining` | `{nameAr, nameEn, icon, color, bucket, sort}` |
+| merchants | `id` (integer, server-allocated, never reused) | `<id>` | `812` | `{canonical, nameAr, category}` |
+| aliases | `merchantId` + `alias` (normalized) | `<merchantId>:<b64u(alias)>` | `812:a29zaGFyeSBlbCB0YWhyaXI` | `{match}` (`exact \| prefix \| token`) |
+| keywords | `keyword` (normalized) + `lang` | `<lang>:<b64u(keyword)>` | `ar:2LXZitiv2YTZitip` (صيدلية) | `{category, weight}` |
+
+- **Keys only in the path.** Key fields are never in the body, so changing a key means `DELETE` plus `PUT`. A keyword has exactly one category per language. `catalog_keywords` is keyed `(keyword_norm, lang)` on both server and device, which matches the sync `keyword` op whose delete carries only `keyword` + `lang`.
+- **Create.** Categories, aliases and keywords are created by `PUT`. Merchants are created by `POST /admin/v1/catalog/draft/merchants`, which allocates the id and returns `201` with the `MerchantOp`. `PUT` on an unknown merchant id gives `404`.
+- **Delete = tombstone.** `DELETE` marks the draft entry deleted and returns `204`. The next publish writes it with the new version and `deleted = true`, so deltas `(a, b]` carry `op: delete` (ADR-013). An entry that was never published is removed outright. A `PUT` on a tombstoned key revives it.
+- **Cascades and conflicts.** Deleting a merchant tombstones its aliases too, and the delta lists those alias deletes before the merchant delete. Deleting a category still referenced by a live category, merchant or keyword gives **409 `ADMIN_CONFLICT`**, as does a `PUT`/`POST` that references a category or merchant that isn't live in the draft. A missing or already-deleted key gives `404`.
+- **Contributions.** `:promote` takes `{merchantNorm, institutionCode, merchantId?, categoryCode?}`. With `merchantId` the string becomes an `exact` alias of that merchant; without it a new draft merchant (`canonical` = `merchantNorm`) is created. `categoryCode` defaults to the top vote. `:reject` takes `{merchantNorm, institutionCode}`. Both return `{merchantNorm, institutionCode, status, merchantId?}`. A key with no aggregate gives `404`; an aggregate that isn't `ready_for_review` gives `409 ADMIN_CONFLICT`. The key moved from the path to the body because `merchantNorm` is free text.
+- **Review queue privacy.** Aggregates still `collecting` (fewer than 5 distinct installs, A-48) are never returned. The API status enum is `ready_for_review | promoted | rejected`.
+- **Support lookup.** `POST /admin/v1/support/entitlement:lookup` takes `{installId}` or `{email}` (exactly one) and returns `SupportEntitlement`. The audit row stores the install ID, or SHA-256 of the lower-cased e-mail, never the e-mail.
 
 ## 6. Error codes
 
@@ -263,8 +309,9 @@ Every error is `application/problem+json` with one of these `code` values. The s
 | 404 | `NOT_FOUND` | The path or resource doesn't exist. A bug in the app (or an operator typo); don't retry |
 | 405 | `METHOD_NOT_ALLOWED` | The HTTP method isn't supported on this path. A bug in the app; don't retry |
 | 409 | `INSTALL_EXISTS`, `INSTALL_LINKED_TO_OTHER_ACCOUNT` | See §4.1 / §4.6 |
+| 409 | `ADMIN_CONFLICT` | Operator API only (§5.2): the edit conflicts with the current draft catalog or review queue. Reload and retry. Never sent to the app |
 | 413 | `PAYLOAD_TOO_LARGE` | The body is over the size limit (§1). A bug in the app; don't retry |
-| 415 | `UNSUPPORTED_MEDIA_TYPE` | The request wasn't `application/json`. A bug in the app; don't retry |
+| 415 | `UNSUPPORTED_MEDIA_TYPE` | The body wasn't the declared media type (`application/json`; the Apple callback takes `application/x-www-form-urlencoded`). A bug in the app; don't retry |
 | 422 | `PURCHASE_TOKEN_INVALID`, `PURCHASE_NOT_OWNED`, `PURCHASE_WRONG_APP` | Show "couldn't verify purchase" + Restore; no Gold |
 | 422 | `ID_TOKEN_INVALID` | Sign-in failed message |
 | 429 | `RATE_LIMITED` | Respect `Retry-After` |

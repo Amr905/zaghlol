@@ -54,6 +54,8 @@ Constraint: the app ships **no analytics or crash SDKs** (NFR-PRIV-01). Raw SMS 
 ### 3.2 Backend
 - **Structured JSON logs** (Serilog → OpenTelemetry → provider log store), with fields `ts, level, msg, traceId, route, status, durationMs, installHash, code`.
   - Never logged: request or response bodies, tokens, ID tokens, purchase tokens (only `sha256[:8]`), e-mails, or full IPs (truncated before ingestion).
+  - **Query strings are never logged** (FU-008). `route` is the matched route template (`/admin/v1/catalog/draft/{entity}/{id}`), never the raw path or the query. This applies to our request logging, OpenTelemetry HTTP spans (`url.query` and `url.full` are dropped, and `url.path` is replaced by the template), the reverse proxy / load balancer / CDN access logs we configure (query logging off), and exception messages. `Location` response headers are never logged, because the Apple callback's `Location` carries tokens. The API contract backs this up: no endpoint takes personal data or credentials in a query string (`backend-api.md` §1).
+  - Test (T-138): call an endpoint with a sentinel in the query and in a path key, then assert that neither appears in the captured log or span output.
   - Retention: 30 days (NFR-PRIV-06).
 - **Audit log:** operator actions in the `audit_log` table, retained 3 years.
 - **Tracing:** OpenTelemetry traces for API and workers, sampled at 10% in production (100% on errors).

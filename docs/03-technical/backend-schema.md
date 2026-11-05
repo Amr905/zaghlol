@@ -37,7 +37,7 @@ CREATE TABLE installs (
   id uuid PRIMARY KEY,                         -- generated on device (random, not hardware-derived)
   token_hash bytea NOT NULL,                   -- SHA-256 of the install token issued at registration
   platform text NOT NULL CHECK (platform IN ('android','ios')),
-  app_version text NOT NULL, os_major smallint,
+  app_version text NOT NULL,                   -- no OS version: not on the BR-SYNC-03 allow-list (FU-013)
   catalog_version integer NOT NULL DEFAULT 0,
   first_seen_at timestamptz NOT NULL DEFAULT now(),
   last_seen_at timestamptz NOT NULL DEFAULT now(),
@@ -88,7 +88,7 @@ CREATE INDEX ix_purchases_unacked ON purchases(created_at) WHERE store = 'google
 
 CREATE TABLE purchase_events (                 -- audit trail of state transitions (no raw receipts)
   id uuid PRIMARY KEY, purchase_id uuid NOT NULL REFERENCES purchases(id) ON DELETE CASCADE,
-  from_state text, to_state text NOT NULL, cause text NOT NULL,   -- verify | rtdn:<type> | assn:<type> | sweep
+  from_state text, to_state text NOT NULL, cause text NOT NULL,   -- verify | restore | restore_rebind | rtdn:<type> | assn:<type> | sweep
   occurred_at timestamptz NOT NULL DEFAULT now()
 );
 
@@ -126,9 +126,12 @@ CREATE TABLE catalog_merchants (id integer PRIMARY KEY GENERATED ALWAYS AS IDENT
 CREATE TABLE catalog_aliases (merchant_id integer NOT NULL REFERENCES catalog_merchants(id), alias_norm text NOT NULL,
   match text NOT NULL, version integer NOT NULL, deleted boolean NOT NULL DEFAULT false, PRIMARY KEY (alias_norm, merchant_id));
 CREATE TABLE catalog_keywords (keyword_norm text NOT NULL, lang text NOT NULL, category_code text NOT NULL,
-  weight integer NOT NULL, version integer NOT NULL, deleted boolean NOT NULL DEFAULT false, PRIMARY KEY (keyword_norm, category_code));
+  weight integer NOT NULL, version integer NOT NULL, deleted boolean NOT NULL DEFAULT false, PRIMARY KEY (keyword_norm, lang));
+-- Keyword identity is (keyword, lang), the same key the sync `keyword` op uses (FU-009): one category per keyword per language.
 -- A delta from version a→b = all rows with version in (a, b], including tombstones (deleted = true).
 -- Published versions are immutable; edits happen in a draft workspace (catalog_drafts, not shown) and publish atomically.
+-- Draft keys and tombstones: backend-api.md §5.2. A draft DELETE becomes deleted = true at publish; merchant ids come from
+-- the identity sequence (allocated by POST /admin/v1/catalog/draft/merchants) and are never reused.
 
 -- Feature flags (FR-BE-05)
 CREATE TABLE feature_flags (
@@ -141,6 +144,7 @@ CREATE TABLE feature_flags (
 -- Prices (FR-BE-04)
 CREATE TABLE price_quotes (symbol text NOT NULL, currency text NOT NULL, price numeric(20,6) NOT NULL,
   per_unit text NOT NULL, as_of timestamptz NOT NULL, source text NOT NULL, is_override boolean NOT NULL DEFAULT false,
+  override_expires_at timestamptz,              -- set when is_override; default now() + 24 h, at most 7 days; then the feed applies again
   PRIMARY KEY (symbol, currency));
 CREATE TABLE fx_rates (base text NOT NULL, quote text NOT NULL, rate numeric(24,12) NOT NULL,
   as_of timestamptz NOT NULL, source text NOT NULL, PRIMARY KEY (base, quote));
@@ -159,7 +163,7 @@ CREATE TABLE contribution_aggregates (
   status text NOT NULL CHECK (status IN ('collecting','ready_for_review','promoted','rejected')),
   reviewed_by uuid, reviewed_at timestamptz,
   PRIMARY KEY (merchant_norm, institution_code)
-);   -- ready_for_review when distinct_installs ≥ 5 (A-48)
+);   -- ready_for_review when distinct_installs ≥ 5 (A-48); 'collecting' rows are never returned by the admin API
 
 -- "Request my bank" (FR-BE-10)
 CREATE TABLE bank_requests (
@@ -187,6 +191,8 @@ CREATE TABLE audit_log (id bigint GENERATED ALWAYS AS IDENTITY PRIMARY KEY, oper
 | Distinct counts without tracking | `install_hash` = HMAC-SHA256 with a pepper held in the KMS; it can't be joined back to `installs` without the pepper |
 | No device identifiers | No column exists for IMEI, ad ID or phone number; DTOs reject unknown fields |
 | Purchase link to a person | Store receives `obfuscatedAccountId`/`appAccountToken` = HMAC(install_id), never e-mail |
+| Support lookups by e-mail | The e-mail travels only in a POST body (`backend-api.md` §5.2), and `audit_log.details` stores SHA-256 of the lower-cased e-mail, never the e-mail |
+| Third-party envelopes | Pub/Sub, ASSN and Apple callback bodies are open, but only the listed fields are read; unlisted fields are never stored (`store_notifications` keeps `payload_digest` only) |
 
 ## 4. Retention (NFR-PRIV-06, A-50)
 
