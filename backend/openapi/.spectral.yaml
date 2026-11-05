@@ -1,0 +1,35 @@
+# Spectral ruleset for backend/openapi/zaghlol-v1.yaml (T-006). Run from backend/openapi:
+#   npx --yes @stoplight/spectral-cli@6.15.0 lint zaghlol-v1.yaml --ruleset .spectral.yaml --fail-severity=warn
+extends: ["spectral:oas"]
+rules:
+  # Proprietary API: no public license URL to publish.
+  info-license: off
+  license-url: off
+
+  # Money is never a JSON number or a binary float (CLAUDE.md constraint 4). Use DecimalString or integer minor units.
+  zaghlol-no-number-type:
+    description: Use a decimal string or an integer for money and prices, never `number`.
+    severity: error
+    given: "$..type"
+    then:
+      function: pattern
+      functionOptions:
+        notMatch: "^number$"
+  zaghlol-no-float-format:
+    description: Floating point formats are not allowed anywhere in the contract.
+    severity: error
+    given: "$..format"
+    then:
+      function: pattern
+      functionOptions:
+        notMatch: "^(float|double)$"
+
+  # Every operation documents how it fails.
+  zaghlol-operation-has-problem-response:
+    description: Every operation must declare a problem+json error response.
+    severity: error
+    given: "$.paths[*][get,post,put,delete,patch].responses"
+    then:
+      field: "500"
+      function: defined
+

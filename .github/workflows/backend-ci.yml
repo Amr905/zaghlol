@@ -5,10 +5,12 @@ on:
     branches: [main, "task/**"]
     paths:
       - "backend/**"
+      - "docs/03-technical/backend-api.md"
       - ".github/workflows/backend-ci.yml"
   pull_request:
     paths:
       - "backend/**"
+      - "docs/03-technical/backend-api.md"
       - ".github/workflows/backend-ci.yml"
 
 permissions:
@@ -61,6 +63,21 @@ jobs:
           name: test-results
           path: test-results/*.trx
           if-no-files-found: ignore
+
+  openapi-lint:
+    name: OpenAPI lint (Spectral)
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    defaults:
+      run:
+        working-directory: backend/openapi
+    steps:
+      - uses: actions/checkout@v4
+
+      # Node is preinstalled on ubuntu-latest, so no extra action is needed. The CLI is pinned to an exact version.
+      - name: Lint zaghlol-v1.yaml (errors and warnings fail the job)
+        run: |
+          npx --yes @stoplight/spectral-cli@6.15.0 lint zaghlol-v1.yaml --ruleset .spectral.yaml --fail-severity=warn || { echo "::error title=Spectral::OpenAPI lint failed; see the step log."; exit 1; }
 
   dependency-audit:
     name: vulnerable packages

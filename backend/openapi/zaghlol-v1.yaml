@@ -1,0 +1,2323 @@
+openapi: 3.1.0
+info:
+  title: Zaghlol backend API
+  version: 1.0.0
+  summary: Non-financial services for the Zaghlol app (purchases, catalog sync, prices, flags, accounts).
+  description: |
+    Source of truth for the v1 wire contract, written from `docs/03-technical/backend-api.md`
+    (sections 1 to 6). When the two differ, fix the document and this file together; the contract tests in
+    `backend/tests/Zaghlol.Contract.Tests` fail if they drift.
+
+    **Privacy rule (SRS BR-SYNC-03).** The backend accepts only the fields listed in this file. Every request
+    schema is closed (`additionalProperties: false`) and the server answers `400 UNKNOWN_FIELD` to any other
+    field. There is no field for messages, transactions, amounts, balances, budgets, assets or user rules, and
+    none may be added without a requirements change.
+
+    **Conventions.**
+    - Responses are open: clients must ignore unknown response fields (additive changes within v1).
+    - Money and prices are decimal strings (`DecimalString`) with an ISO 4217 currency, never JSON numbers.
+    - Timestamps are RFC 3339 in UTC with a `Z` suffix (`UtcTimestamp`).
+    - Errors are `application/problem+json` (RFC 9457) with a stable `code` (see `ProblemCode`). Error bodies
+      never echo request data. Besides the errors listed per operation, any endpoint can answer the generic
+      `404 NOT_FOUND`, `405 METHOD_NOT_ALLOWED`, `413 PAYLOAD_TOO_LARGE` and `415 UNSUPPORTED_MEDIA_TYPE`.
+    - Signed responses carry `Zaghlol-Signature`, an ES256 signature over the exact response body bytes after
+      decompression. The app drops unsigned or invalid bodies.
+    - Request size is at most 64 KB, except `/v1/notifications/*` (256 KB).
+  contact:
+    name: Zaghlol backend team
+  license:
+    name: Proprietary
+    identifier: LicenseRef-Proprietary
+servers:
+  - url: https://api.zaghlol.app
+    description: Production
+  - url: https://api.staging.zaghlol.app
+    description: Staging
+tags:
+  - name: Health
+    description: Liveness and readiness.
+  - name: Installs
+    description: Anonymous install registration and deletion.
+  - name: Sync
+    description: The daily catalog, flags, prices and entitlement sync.
+  - name: Catalog
+    description: Full signed catalog snapshots.
+  - name: Purchases
+    description: Server-side store purchase verification and restore.
+  - name: Entitlement
+    description: Signed Gold entitlement.
+  - name: Accounts
+    description: Optional Google or Apple sign-in used only to carry Gold across devices.
+  - name: Notifications
+    description: Store server-to-server notifications (Google RTDN, App Store Server Notifications V2).
+  - name: Admin
+    description: Operator API. Requires an operator OIDC token with MFA and a role. Not used by the app.
+
+paths:
+  /v1/health:
+    get:
+      tags: [Health]
+      operationId: getHealth
+      summary: Liveness and readiness
+      description: Unauthenticated. Never cached.
+      responses:
+        '200':
+          description: The service is up.
+          headers:
+            Cache-Control:
+              $ref: '#/components/headers/CacheControlNoStore'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HealthResponse'
+              example:
+                status: ok
+                serverTime: '2026-11-03T18:22:01Z'
+        '429':
+          $ref: '#/components/responses/RateLimited'
+        '500':
+          $ref: '#/components/responses/InternalError'
+
+  /v1/installs:
+    post:
+      tags: [Installs]
+      operationId: registerInstall
+      summary: Register an install and get an install token
+      description: |
+        Called lazily on the first sync or first purchase. If `installId` already exists the server answers
+        `409 INSTALL_EXISTS` and the client regenerates the ID (only happens after an interrupted delete).
+        Rate limited per /24 IP. Idempotent for 24 hours per `Idempotency-Key`.
+      parameters:
+        - $ref: '#/components/parameters/ZaghlolApp'
+        - $ref: '#/components/parameters/IdempotencyKey'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/InstallRequest'
+            example:
+              installId: 0193f2c4-7a10-4c52-9d3e-5b1f8a2c6e77
+              platform: android
+              appVersion: 1.0.0
+      responses:
+        '201':
+          description: Install registered.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/InstallResponse'
+              example:
+                installToken: q3VqY0xvYm5kQ3V0ZVBpZ2VvblRva2VuMTIzNDU2Nzg
+                serverTime: '2026-11-03T18:22:01Z'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '409':
+          $ref: '#/components/responses/InstallExists'
+        '413':
+          $ref: '#/components/responses/PayloadTooLarge'
+        '415':
+          $ref: '#/components/responses/UnsupportedMediaType'
+        '429':
+          $ref: '#/components/responses/RateLimited'
+        '500':
+          $ref: '#/components/responses/InternalError'
+
+  /v1/installs/me:
+    delete:
+      tags: [Installs]
+      operationId: deleteInstall
+      summary: Delete this install (Delete everything)
+      description: |
+        Tombstones the install; its tokens stop working at once. The app wipes local data before calling this
+        and does not depend on it succeeding.
+      security:
+        - installToken: []
+      parameters:
+        - $ref: '#/components/parameters/ZaghlolApp'
+        - $ref: '#/components/parameters/ZaghlolInstall'
+      responses:
+        '202':
+          description: Accepted. No body.
+        '401':
+          $ref: '#/components/responses/InstallTokenInvalid'
+        '429':
+          $ref: '#/components/responses/RateLimited'
+        '500':
+          $ref: '#/components/responses/InternalError'
+
+  /v1/sync:
+    post:
+      tags: [Sync]
+      operationId: sync
+      summary: Daily sync (catalog delta, flags, prices, entitlement, outbox upload)
+      description: |
+        At most one effective sync per 24 hours; a call inside the window returns 200 with only `serverTime`
+        and `nextSyncNotBefore`. Unchanged blocks are `null` so an up-to-date response stays under 2 KB.
+        `mode: full` is returned when `catalogVersion` is 0 or more than 20 versions behind. The response is
+        signed. `contributions` are sent only if the user opted in (D-16) and the server silently drops any
+        that fail BR-SYNC-04, reporting counts in `accepted`.
+      security:
+        - installToken: []
+        - installToken: []
+          accountToken: []
+      parameters:
+        - $ref: '#/components/parameters/ZaghlolApp'
+        - $ref: '#/components/parameters/ZaghlolInstall'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/SyncRequest'
+            example:
+              catalogVersion: 41
+              flagsVersion: 7
+              pricesAsOf: '2026-11-02T09:00:00Z'
+              entitlementIssuedAt: '2026-10-30T10:00:00Z'
+              registryVersion: 12
+              contributions:
+                - merchantNorm: koshary el tahrir
+                  institutionCode: nbe
+                  categoryCode: dining
+              bankRequests:
+                - institutionName: Banque du Caire
+                  country: EG
+                  channel: sms
+      responses:
+        '200':
+          description: Sync result (signed).
+          headers:
+            Zaghlol-Signature:
+              $ref: '#/components/headers/ZaghlolSignature'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SyncResponse'
+              examples:
+                throttled:
+                  summary: Inside the 24 h window
+                  value:
+                    serverTime: '2026-11-03T18:22:02Z'
+                    nextSyncNotBefore: '2026-11-04T18:22:02Z'
+                changed:
+                  summary: Delta with flags and prices
+                  value:
+                    serverTime: '2026-11-03T18:22:02Z'
+                    nextSyncNotBefore: '2026-11-04T18:22:02Z'
+                    catalog:
+                      fromVersion: 41
+                      toVersion: 43
+                      mode: delta
+                      fullUrl: null
+                      ops:
+                        - t: merchant
+                          op: upsert
+                          id: 812
+                          canonical: Koshary El Tahrir
+                          nameAr: كشري التحرير
+                          category: dining
+                        - t: alias
+                          op: delete
+                          merchantId: 77
+                          alias: old alias
+                    flags:
+                      version: 8
+                      values:
+                        zakah: false
+                        smart_roi: false
+                    prices:
+                      asOf: '2026-11-03T15:00:00Z'
+                      stale: false
+                      gold:
+                        - symbol: XAU24_G
+                          currency: EGP
+                          price: '4820.00'
+                      fx:
+                        base: USD
+                        rates:
+                          EGP: '48.9500'
+                    entitlement: null
+                    accepted:
+                      contributions: 1
+                      bankRequests: 1
+                    accountToken: null
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/InstallTokenInvalidOrAccountExpired'
+        '413':
+          $ref: '#/components/responses/PayloadTooLarge'
+        '415':
+          $ref: '#/components/responses/UnsupportedMediaType'
+        '429':
+          $ref: '#/components/responses/RateLimited'
+        '500':
+          $ref: '#/components/responses/InternalError'
+        '503':
+          $ref: '#/components/responses/UpstreamUnavailable'
+
+  /v1/catalog/{version}/full:
+    get:
+      tags: [Catalog]
+      operationId: getFullCatalog
+      summary: Full signed catalog snapshot
+      description: |
+        Served from the CDN. Used on first sync or when the client is far behind. The body is signed; the
+        signature is the `Zaghlol-Signature` header and also the `.sig` file stored next to the snapshot.
+        The client verifies it before applying.
+      parameters:
+        - name: version
+          in: path
+          required: true
+          description: 'Immutable catalog version to fetch, as announced by a `mode: full` sync response.'
+          schema:
+            type: integer
+            format: int32
+            minimum: 1
+      responses:
+        '200':
+          description: The snapshot (signed).
+          headers:
+            Zaghlol-Signature:
+              $ref: '#/components/headers/ZaghlolSignature'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CatalogSnapshot'
+        '404':
+          $ref: '#/components/responses/CatalogVersionUnknown'
+        '429':
+          $ref: '#/components/responses/RateLimited'
+        '500':
+          $ref: '#/components/responses/InternalError'
+
+  /v1/purchases/verify:
+    post:
+      tags: [Purchases]
+      operationId: verifyPurchase
+      summary: Verify a new purchase, acknowledge it and return the entitlement
+      description: |
+        Android sends the Play purchase token; iOS sends the StoreKit 2 signed transaction (JWS). The server
+        verifies with the store (Play Developer API or App Store Server API), checks the store-side binding
+        equals HMAC(installId), upserts keyed by purchase token (Android) or originalTransactionId (iOS),
+        acknowledges Android purchases, and grants Gold only for a purchased and active state. A pending
+        purchase returns `status: pending` and grants nothing. Idempotent for 24 hours per `Idempotency-Key`.
+      security:
+        - installToken: []
+        - installToken: []
+          accountToken: []
+      parameters:
+        - $ref: '#/components/parameters/ZaghlolApp'
+        - $ref: '#/components/parameters/ZaghlolInstall'
+        - $ref: '#/components/parameters/IdempotencyKey'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PurchaseVerifyRequest'
+            example:
+              platform: android
+              productId: zaghlol_gold_yearly
+              purchaseToken: opaque-token-from-play
+      responses:
+        '200':
+          description: Verification result (signed).
+          headers:
+            Zaghlol-Signature:
+              $ref: '#/components/headers/ZaghlolSignature'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PurchaseVerifyResponse'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/InstallTokenInvalidOrAccountExpired'
+        '413':
+          $ref: '#/components/responses/PayloadTooLarge'
+        '415':
+          $ref: '#/components/responses/UnsupportedMediaType'
+        '422':
+          $ref: '#/components/responses/PurchaseRejected'
+        '429':
+          $ref: '#/components/responses/RateLimited'
+        '500':
+          $ref: '#/components/responses/InternalError'
+        '502':
+          $ref: '#/components/responses/StoreUnavailable'
+        '503':
+          $ref: '#/components/responses/UpstreamUnavailable'
+
+  /v1/purchases/restore:
+    post:
+      tags: [Purchases]
+      operationId: restorePurchases
+      summary: Re-verify store purchases on a new phone
+      description: |
+        Runs the verify procedure for each token or transaction. A valid purchase bound to another install is
+        re-bound to the calling install when the store confirms the same store account (FR-GOLD-03).
+      security:
+        - installToken: []
+        - installToken: []
+          accountToken: []
+      parameters:
+        - $ref: '#/components/parameters/ZaghlolApp'
+        - $ref: '#/components/parameters/ZaghlolInstall'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PurchaseRestoreRequest'
+            example:
+              platform: ios
+              signedTransactions:
+                - eyJhbGciOiJFUzI1NiJ9.eyJ0eCI6IjEifQ.c2ln
+      responses:
+        '200':
+          description: Restore result (signed).
+          headers:
+            Zaghlol-Signature:
+              $ref: '#/components/headers/ZaghlolSignature'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PurchaseRestoreResponse'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/InstallTokenInvalidOrAccountExpired'
+        '413':
+          $ref: '#/components/responses/PayloadTooLarge'
+        '415':
+          $ref: '#/components/responses/UnsupportedMediaType'
+        '422':
+          $ref: '#/components/responses/PurchaseRejected'
+        '429':
+          $ref: '#/components/responses/RateLimited'
+        '500':
+          $ref: '#/components/responses/InternalError'
+        '502':
+          $ref: '#/components/responses/StoreUnavailable'
+        '503':
+          $ref: '#/components/responses/UpstreamUnavailable'
+
+  /v1/entitlement:
+    get:
+      tags: [Entitlement]
+      operationId: getEntitlement
+      summary: Fetch a fresh signed entitlement
+      description: |
+        Merges install and account purchases. Called after a restore, after sign-in, and when the cached token
+        is within 3 days of `exp`.
+      security:
+        - installToken: []
+        - installToken: []
+          accountToken: []
+      parameters:
+        - $ref: '#/components/parameters/ZaghlolApp'
+        - $ref: '#/components/parameters/ZaghlolInstall'
+      responses:
+        '200':
+          description: The entitlement (signed).
+          headers:
+            Zaghlol-Signature:
+              $ref: '#/components/headers/ZaghlolSignature'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/EntitlementResponse'
+        '401':
+          $ref: '#/components/responses/InstallTokenInvalidOrAccountExpired'
+        '429':
+          $ref: '#/components/responses/RateLimited'
+        '500':
+          $ref: '#/components/responses/InternalError'
+
+  /v1/accounts/signin:
+    post:
+      tags: [Accounts]
+      operationId: signIn
+      summary: Verify a Google or Apple ID token, link this install, return the account token
+      description: |
+        Links the install and attaches its purchases to the account. If the install is linked to a different
+        account the server answers `409 INSTALL_LINKED_TO_OTHER_ACCOUNT`; resend with `replaceLink: true` to
+        confirm. For Apple the `authorizationCode` is exchanged for a refresh token that is stored encrypted
+        and used only to revoke on deletion. Idempotent for 24 hours per `Idempotency-Key`.
+      security:
+        - installToken: []
+      parameters:
+        - $ref: '#/components/parameters/ZaghlolApp'
+        - $ref: '#/components/parameters/ZaghlolInstall'
+        - $ref: '#/components/parameters/IdempotencyKey'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/SignInRequest'
+            example:
+              provider: apple
+              idToken: eyJhbGciOiJSUzI1NiJ9.eyJzdWIiOiIxIn0.c2ln
+              nonce: 9f86d081884c7d659a2feaa0c55ad015
+              authorizationCode: c1a0b2d3e4f5
+      responses:
+        '200':
+          description: Signed in (signed response).
+          headers:
+            Zaghlol-Signature:
+              $ref: '#/components/headers/ZaghlolSignature'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SignInResponse'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/InstallTokenInvalid'
+        '409':
+          $ref: '#/components/responses/InstallLinkedToOtherAccount'
+        '413':
+          $ref: '#/components/responses/PayloadTooLarge'
+        '415':
+          $ref: '#/components/responses/UnsupportedMediaType'
+        '422':
+          $ref: '#/components/responses/IdTokenInvalid'
+        '429':
+          $ref: '#/components/responses/RateLimited'
+        '500':
+          $ref: '#/components/responses/InternalError'
+        '503':
+          $ref: '#/components/responses/UpstreamUnavailable'
+
+  /v1/accounts/signout:
+    post:
+      tags: [Accounts]
+      operationId: signOut
+      summary: Unlink this install from its account
+      description: Removes the link between this install and its account. Purchases stay bound to the install.
+      security:
+        - installToken: []
+          accountToken: []
+      parameters:
+        - $ref: '#/components/parameters/ZaghlolApp'
+        - $ref: '#/components/parameters/ZaghlolInstall'
+      responses:
+        '204':
+          description: Unlinked. No body.
+        '401':
+          $ref: '#/components/responses/InstallTokenInvalidOrAccountExpired'
+        '429':
+          $ref: '#/components/responses/RateLimited'
+        '500':
+          $ref: '#/components/responses/InternalError'
+
+  /v1/accounts/me:
+    delete:
+      tags: [Accounts]
+      operationId: deleteAccount
+      summary: Delete the account and its links
+      description: Revokes the stored Apple token if any. Purchases stay bound to their installs.
+      security:
+        - installToken: []
+          accountToken: []
+      parameters:
+        - $ref: '#/components/parameters/ZaghlolApp'
+        - $ref: '#/components/parameters/ZaghlolInstall'
+      responses:
+        '204':
+          description: Deleted. No body.
+        '401':
+          $ref: '#/components/responses/InstallTokenInvalidOrAccountExpired'
+        '429':
+          $ref: '#/components/responses/RateLimited'
+        '500':
+          $ref: '#/components/responses/InternalError'
+        '503':
+          $ref: '#/components/responses/UpstreamUnavailable'
+
+  /v1/apple/android-callback:
+    get:
+      tags: [Accounts]
+      operationId: appleAndroidCallback
+      summary: Sign in with Apple web-flow callback for Android
+      description: |
+        Apple redirects the Android browser flow here. The server validates `state`, then redirects to the app
+        with the result. No body is returned on success. The `user` (name and e-mail) parameter Apple may send
+        is ignored and never stored.
+      parameters:
+        - name: code
+          in: query
+          required: false
+          description: Apple authorization code.
+          schema:
+            type: string
+            minLength: 1
+            maxLength: 2048
+        - name: id_token
+          in: query
+          required: false
+          description: Apple ID token (JWT).
+          schema:
+            type: string
+            minLength: 1
+            maxLength: 8192
+        - name: state
+          in: query
+          required: true
+          description: Opaque value issued by the app to bind the flow.
+          schema:
+            type: string
+            minLength: 8
+            maxLength: 512
+        - name: error
+          in: query
+          required: false
+          description: Apple error code when the user cancelled or Apple failed.
+          schema:
+            type: string
+            maxLength: 64
+      responses:
+        '302':
+          description: Redirect to the app link carrying the sign-in result.
+          headers:
+            Location:
+              description: App link the browser is sent to.
+              schema:
+                type: string
+                maxLength: 2048
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '429':
+          $ref: '#/components/responses/RateLimited'
+        '500':
+          $ref: '#/components/responses/InternalError'
+
+  /v1/notifications/google:
+    post:
+      tags: [Notifications]
+      operationId: ingestGoogleNotification
+      summary: Google Play RTDN ingest (Pub/Sub push)
+      description: |
+        Authenticated with a Google-signed OIDC token (audience and service account pinned). Never accepts
+        install or account tokens. Stores the message (deduplicated on `messageId`) and answers 204
+        immediately; a worker re-reads the authoritative state from the Play API. The envelope is Google's
+        Pub/Sub push format, closed to the fields Pub/Sub documents. Request size limit is 256 KB.
+      security:
+        - googlePubSubOidc: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/GoogleNotificationRequest'
+            example:
+              message:
+                data: eyJ2ZXJzaW9uIjoiMS4wIn0=
+                messageId: '136969346945'
+                publishTime: '2026-11-03T18:22:01.000Z'
+              subscription: projects/zaghlol/subscriptions/rtdn-push
+      responses:
+        '204':
+          description: Stored. Pub/Sub treats any 2xx as an ack.
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/UnauthorizedGeneric'
+        '413':
+          $ref: '#/components/responses/PayloadTooLarge'
+        '415':
+          $ref: '#/components/responses/UnsupportedMediaType'
+        '429':
+          $ref: '#/components/responses/RateLimited'
+        '500':
+          $ref: '#/components/responses/InternalError'
+
+  /v1/notifications/apple:
+    post:
+      tags: [Notifications]
+      operationId: ingestAppleNotification
+      summary: App Store Server Notifications V2 ingest
+      description: |
+        Authenticated by the JWS signature inside `signedPayload` (x5c chain verified to Apple Root CA G3,
+        bundle ID and environment checked). Used for both the production and sandbox URLs. Deduplicated on
+        `notificationUUID`. Answers 200 after storing; Apple retries otherwise. Request size limit is 256 KB.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/AppleNotificationRequest'
+            example:
+              signedPayload: eyJhbGciOiJFUzI1NiJ9.eyJub3RpZmljYXRpb25UeXBlIjoiU1VCU0NSSUJFRCJ9.c2ln
+      responses:
+        '200':
+          description: Stored. No body.
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/UnauthorizedGeneric'
+        '413':
+          $ref: '#/components/responses/PayloadTooLarge'
+        '415':
+          $ref: '#/components/responses/UnsupportedMediaType'
+        '429':
+          $ref: '#/components/responses/RateLimited'
+        '500':
+          $ref: '#/components/responses/InternalError'
+
+  /admin/v1/catalog/draft/{entity}:
+    get:
+      tags: [Admin]
+      operationId: adminListCatalogDraft
+      summary: List draft catalog entries of one kind
+      description: Role `catalog_editor`.
+      x-required-roles: [catalog_editor]
+      security:
+        - operatorOidc: []
+      parameters:
+        - $ref: '#/components/parameters/CatalogEntity'
+        - name: cursor
+          in: query
+          required: false
+          description: Opaque cursor from the previous page.
+          schema:
+            type: string
+            maxLength: 256
+        - name: limit
+          in: query
+          required: false
+          description: Page size.
+          schema:
+            type: integer
+            format: int32
+            minimum: 1
+            maximum: 500
+            default: 100
+      responses:
+        '200':
+          description: One page of draft entries.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CatalogDraftPage'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/UnauthorizedGeneric'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '429':
+          $ref: '#/components/responses/RateLimited'
+        '500':
+          $ref: '#/components/responses/InternalError'
+
+  /admin/v1/catalog/draft/{entity}/{id}:
+    put:
+      tags: [Admin]
+      operationId: adminPutCatalogDraftEntry
+      summary: Create or replace one draft catalog entry
+      description: Role `catalog_editor`. Audited.
+      x-required-roles: [catalog_editor]
+      security:
+        - operatorOidc: []
+      parameters:
+        - $ref: '#/components/parameters/CatalogEntity'
+        - name: id
+          in: path
+          required: true
+          description: Entry key. A merchant id, a category code, or `merchantId:alias` for aliases and keywords.
+          schema:
+            type: string
+            minLength: 1
+            maxLength: 160
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CatalogDraftEntryRequest'
+            example:
+              canonical: Koshary El Tahrir
+              nameAr: كشري التحرير
+              category: dining
+      responses:
+        '200':
+          description: The stored draft entry.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CatalogOp'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/UnauthorizedGeneric'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '413':
+          $ref: '#/components/responses/PayloadTooLarge'
+        '415':
+          $ref: '#/components/responses/UnsupportedMediaType'
+        '429':
+          $ref: '#/components/responses/RateLimited'
+        '500':
+          $ref: '#/components/responses/InternalError'
+
+  /admin/v1/catalog/publish:
+    post:
+      tags: [Admin]
+      operationId: adminPublishCatalog
+      summary: Publish the draft as a new immutable catalog version
+      description: Role `catalog_editor`. Builds and signs the full snapshot and uploads it to the CDN. Audited.
+      x-required-roles: [catalog_editor]
+      security:
+        - operatorOidc: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CatalogPublishRequest'
+            example:
+              note: November merchant refresh
+      responses:
+        '200':
+          description: Published.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CatalogPublishResponse'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/UnauthorizedGeneric'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '413':
+          $ref: '#/components/responses/PayloadTooLarge'
+        '415':
+          $ref: '#/components/responses/UnsupportedMediaType'
+        '429':
+          $ref: '#/components/responses/RateLimited'
+        '500':
+          $ref: '#/components/responses/InternalError'
+
+  /admin/v1/contributions:
+    get:
+      tags: [Admin]
+      operationId: adminListContributions
+      summary: Merchant contribution review queue (aggregates only)
+      description: Role `catalog_editor`. Returns counts per normalized merchant, never per install.
+      x-required-roles: [catalog_editor]
+      security:
+        - operatorOidc: []
+      parameters:
+        - name: status
+          in: query
+          required: false
+          description: Queue filter.
+          schema:
+            $ref: '#/components/schemas/ContributionStatus'
+      responses:
+        '200':
+          description: The queue.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ContributionQueue'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/UnauthorizedGeneric'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '429':
+          $ref: '#/components/responses/RateLimited'
+        '500':
+          $ref: '#/components/responses/InternalError'
+
+  /admin/v1/contributions/{merchantNorm}/{institutionCode}:promote:
+    post:
+      tags: [Admin]
+      operationId: adminPromoteContribution
+      summary: Promote a contribution into the draft catalog
+      description: Role `catalog_editor`. Audited.
+      x-required-roles: [catalog_editor]
+      security:
+        - operatorOidc: []
+      parameters:
+        - $ref: '#/components/parameters/MerchantNorm'
+        - $ref: '#/components/parameters/InstitutionCode'
+      responses:
+        '200':
+          description: Promoted.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ContributionDecision'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/UnauthorizedGeneric'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '429':
+          $ref: '#/components/responses/RateLimited'
+        '500':
+          $ref: '#/components/responses/InternalError'
+
+  /admin/v1/contributions/{merchantNorm}/{institutionCode}:reject:
+    post:
+      tags: [Admin]
+      operationId: adminRejectContribution
+      summary: Reject a contribution
+      description: Role `catalog_editor`. Audited.
+      x-required-roles: [catalog_editor]
+      security:
+        - operatorOidc: []
+      parameters:
+        - $ref: '#/components/parameters/MerchantNorm'
+        - $ref: '#/components/parameters/InstitutionCode'
+      responses:
+        '200':
+          description: Rejected.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ContributionDecision'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/UnauthorizedGeneric'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '429':
+          $ref: '#/components/responses/RateLimited'
+        '500':
+          $ref: '#/components/responses/InternalError'
+
+  /admin/v1/flags/{key}:
+    get:
+      tags: [Admin]
+      operationId: adminGetFlag
+      summary: View a feature flag
+      description: Role `flags_admin`.
+      x-required-roles: [flags_admin]
+      security:
+        - operatorOidc: []
+      parameters:
+        - $ref: '#/components/parameters/FlagKey'
+      responses:
+        '200':
+          description: The flag.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/FlagState'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/UnauthorizedGeneric'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '429':
+          $ref: '#/components/responses/RateLimited'
+        '500':
+          $ref: '#/components/responses/InternalError'
+    put:
+      tags: [Admin]
+      operationId: adminPutFlag
+      summary: Change a feature flag
+      description: Role `flags_admin`. Audited. Takes effect on each install's next sync.
+      x-required-roles: [flags_admin]
+      security:
+        - operatorOidc: []
+      parameters:
+        - $ref: '#/components/parameters/FlagKey'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/FlagUpdateRequest'
+            example:
+              value: true
+      responses:
+        '200':
+          description: The updated flag.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/FlagState'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/UnauthorizedGeneric'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '413':
+          $ref: '#/components/responses/PayloadTooLarge'
+        '415':
+          $ref: '#/components/responses/UnsupportedMediaType'
+        '429':
+          $ref: '#/components/responses/RateLimited'
+        '500':
+          $ref: '#/components/responses/InternalError'
+
+  /admin/v1/prices/override:
+    put:
+      tags: [Admin]
+      operationId: adminOverridePrice
+      summary: Override a price when the feed is wrong
+      description: Role `prices_admin`. Audited.
+      x-required-roles: [prices_admin]
+      security:
+        - operatorOidc: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PriceOverrideRequest'
+            example:
+              symbol: XAU21_G
+              currency: EGP
+              price: '4217.50'
+              reason: Feed outage, using bullion dealer quote
+      responses:
+        '200':
+          description: The override now in effect.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PriceOverrideResponse'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/UnauthorizedGeneric'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '413':
+          $ref: '#/components/responses/PayloadTooLarge'
+        '415':
+          $ref: '#/components/responses/UnsupportedMediaType'
+        '429':
+          $ref: '#/components/responses/RateLimited'
+        '500':
+          $ref: '#/components/responses/InternalError'
+
+  /admin/v1/support/entitlement:
+    get:
+      tags: [Admin]
+      operationId: adminLookupEntitlement
+      summary: Look up an entitlement status
+      description: |
+        Role `support_viewer`. Exactly one of `installId` or `email` is required. Returns entitlement status
+        only; there is no endpoint that lists installs.
+      x-required-roles: [support_viewer]
+      security:
+        - operatorOidc: []
+      parameters:
+        - name: installId
+          in: query
+          required: false
+          description: Exact install ID.
+          schema:
+            $ref: '#/components/schemas/InstallId'
+        - name: email
+          in: query
+          required: false
+          description: Exact account e-mail.
+          schema:
+            type: string
+            format: email
+            maxLength: 254
+      responses:
+        '200':
+          description: Entitlement status.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SupportEntitlement'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/UnauthorizedGeneric'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '429':
+          $ref: '#/components/responses/RateLimited'
+        '500':
+          $ref: '#/components/responses/InternalError'
+
+  /admin/v1/bank-requests:
+    get:
+      tags: [Admin]
+      operationId: adminListBankRequests
+      summary: Ranked list of "request my bank" submissions
+      description: Role `catalog_editor`. Aggregated counts per institution.
+      x-required-roles: [catalog_editor]
+      security:
+        - operatorOidc: []
+      responses:
+        '200':
+          description: Ranked institutions.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BankRequestRanking'
+        '401':
+          $ref: '#/components/responses/UnauthorizedGeneric'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '429':
+          $ref: '#/components/responses/RateLimited'
+        '500':
+          $ref: '#/components/responses/InternalError'
+
+  /admin/v1/metrics/daily-active:
+    get:
+      tags: [Admin]
+      operationId: adminDailyActive
+      summary: Daily active install counters
+      description: 'Any authenticated operator role (`x-required-roles: [any]`). Aggregate counters only.'
+      x-required-roles: [any]
+      security:
+        - operatorOidc: []
+      parameters:
+        - name: days
+          in: query
+          required: false
+          description: Number of days to return, ending today (UTC).
+          schema:
+            type: integer
+            format: int32
+            minimum: 1
+            maximum: 90
+            default: 14
+      responses:
+        '200':
+          description: Counters.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/DailyActiveMetrics'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/UnauthorizedGeneric'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '429':
+          $ref: '#/components/responses/RateLimited'
+        '500':
+          $ref: '#/components/responses/InternalError'
+
+components:
+  securitySchemes:
+    installToken:
+      type: http
+      scheme: bearer
+      description: |
+        Opaque install token (32 random bytes, base64url) issued by `POST /v1/installs`. The server stores only
+        its SHA-256.
+    accountToken:
+      type: apiKey
+      in: header
+      name: Zaghlol-Account
+      description: Account token (ES256 JWT, 30 days) sent in addition to the install token when signed in.
+    googlePubSubOidc:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+      description: Google-signed OIDC token on Pub/Sub push; audience and service-account e-mail are pinned.
+    operatorOidc:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+      description: |
+        Operator OIDC access token (Google Workspace or Entra ID, at most 1 hour) obtained by device-code flow
+        in `zaghlol-ops`. MFA is enforced at the identity provider and the `amr` claim is checked. The role
+        required by each operation is in `x-required-roles`.
+
+  headers:
+    ZaghlolSignature:
+      description: |
+        `kid=<kid>; alg=ES256; sig=<base64url>`. ECDSA P-256 signature over the exact response body bytes after
+        decompression, verified by the app against embedded public keys.
+      required: true
+      schema:
+        type: string
+        pattern: '^kid=[A-Za-z0-9_-]+; alg=ES256; sig=[A-Za-z0-9_-]+$'
+    CacheControlNoStore:
+      description: Always `no-store`.
+      schema:
+        type: string
+        const: no-store
+    RetryAfter:
+      description: Seconds to wait before retrying.
+      schema:
+        type: integer
+        format: int32
+        minimum: 0
+
+  parameters:
+    ZaghlolApp:
+      name: Zaghlol-App
+      in: header
+      required: true
+      description: '`<platform>/<appVersion> (<build>)`, for example `android/1.0.0 (42)`.'
+      schema:
+        type: string
+        pattern: '^(android|ios)/\S+ \(\S+\)$'
+        maxLength: 64
+    ZaghlolInstall:
+      name: Zaghlol-Install
+      in: header
+      required: true
+      description: Anonymous install ID (the same value registered with `POST /v1/installs`).
+      schema:
+        $ref: '#/components/schemas/InstallId'
+    IdempotencyKey:
+      name: Idempotency-Key
+      in: header
+      required: true
+      description: A ULID. Replays within 24 hours return the stored result.
+      schema:
+        type: string
+        pattern: '^[0-9A-HJKMNP-TV-Z]{26}$'
+    CatalogEntity:
+      name: entity
+      in: path
+      required: true
+      description: Kind of catalog entry.
+      schema:
+        type: string
+        enum: [categories, merchants, aliases, keywords]
+    MerchantNorm:
+      name: merchantNorm
+      in: path
+      required: true
+      description: URL-encoded normalized merchant string.
+      schema:
+        type: string
+        minLength: 1
+        maxLength: 120
+    InstitutionCode:
+      name: institutionCode
+      in: path
+      required: true
+      description: Institution code.
+      schema:
+        $ref: '#/components/schemas/InstitutionCode'
+    FlagKey:
+      name: key
+      in: path
+      required: true
+      description: Feature flag key.
+      schema:
+        $ref: '#/components/schemas/FlagKey'
+
+  responses:
+    BadRequest:
+      description: |
+        `VALIDATION_FAILED` (a field is missing or invalid) or `UNKNOWN_FIELD` (a field outside the allow-list
+        was sent). A client bug; do not retry.
+      content:
+        application/problem+json:
+          schema:
+            $ref: '#/components/schemas/Problem'
+          example:
+            type: https://zaghlol.app/problems/unknown-field
+            title: Request contains a field that is not allowed.
+            status: 400
+            code: UNKNOWN_FIELD
+    InstallTokenInvalid:
+      description: '`INSTALL_TOKEN_INVALID`. Re-register silently with a new install ID and keep local data.'
+      content:
+        application/problem+json:
+          schema:
+            $ref: '#/components/schemas/Problem'
+          example:
+            type: https://zaghlol.app/problems/install-token-invalid
+            title: Install token is not valid.
+            status: 401
+            code: INSTALL_TOKEN_INVALID
+    InstallTokenInvalidOrAccountExpired:
+      description: |
+        `INSTALL_TOKEN_INVALID` (re-register silently) or `ACCOUNT_TOKEN_EXPIRED` (clear the account token and
+        ask the user to sign in again in Settings only).
+      content:
+        application/problem+json:
+          schema:
+            $ref: '#/components/schemas/Problem'
+    UnauthorizedGeneric:
+      description: |
+        `UNAUTHORIZED`. Fallback for endpoints that have no specific 401 code (store notifications and the
+        operator API): the credential is missing or invalid.
+      content:
+        application/problem+json:
+          schema:
+            $ref: '#/components/schemas/Problem'
+    Forbidden:
+      description: '`FORBIDDEN`. The caller is authenticated but not allowed (missing role or MFA). Not retried.'
+      content:
+        application/problem+json:
+          schema:
+            $ref: '#/components/schemas/Problem'
+    NotFound:
+      description: '`NOT_FOUND`. The resource does not exist.'
+      content:
+        application/problem+json:
+          schema:
+            $ref: '#/components/schemas/Problem'
+    CatalogVersionUnknown:
+      description: '`CATALOG_VERSION_UNKNOWN`. Request a full catalog.'
+      content:
+        application/problem+json:
+          schema:
+            $ref: '#/components/schemas/Problem'
+    InstallExists:
+      description: '`INSTALL_EXISTS`. Regenerate the install ID and retry.'
+      content:
+        application/problem+json:
+          schema:
+            $ref: '#/components/schemas/Problem'
+    InstallLinkedToOtherAccount:
+      description: '`INSTALL_LINKED_TO_OTHER_ACCOUNT`. Ask the user; resend with `replaceLink: true` to confirm.'
+      content:
+        application/problem+json:
+          schema:
+            $ref: '#/components/schemas/Problem'
+    PayloadTooLarge:
+      description: '`PAYLOAD_TOO_LARGE`. The body exceeds the size limit. A client bug; do not retry.'
+      content:
+        application/problem+json:
+          schema:
+            $ref: '#/components/schemas/Problem'
+    UnsupportedMediaType:
+      description: '`UNSUPPORTED_MEDIA_TYPE`. The request must be `application/json`. A client bug; do not retry.'
+      content:
+        application/problem+json:
+          schema:
+            $ref: '#/components/schemas/Problem'
+    PurchaseRejected:
+      description: |
+        `PURCHASE_TOKEN_INVALID`, `PURCHASE_NOT_OWNED` or `PURCHASE_WRONG_APP`. Show "couldn't verify purchase"
+        with a Restore option; no Gold is granted.
+      content:
+        application/problem+json:
+          schema:
+            $ref: '#/components/schemas/Problem'
+    IdTokenInvalid:
+      description: '`ID_TOKEN_INVALID`. Show the sign-in failed message.'
+      content:
+        application/problem+json:
+          schema:
+            $ref: '#/components/schemas/Problem'
+    RateLimited:
+      description: '`RATE_LIMITED`. Respect `Retry-After`.'
+      headers:
+        Retry-After:
+          $ref: '#/components/headers/RetryAfter'
+      content:
+        application/problem+json:
+          schema:
+            $ref: '#/components/schemas/Problem'
+    InternalError:
+      description: '`INTERNAL`. Retry with back-off. The body never contains exception details.'
+      content:
+        application/problem+json:
+          schema:
+            $ref: '#/components/schemas/Problem'
+          example:
+            type: https://tools.ietf.org/html/rfc9110#section-15.6.1
+            title: An unexpected error occurred.
+            status: 500
+            code: INTERNAL
+    StoreUnavailable:
+      description: '`STORE_UNAVAILABLE`. Keep the purchase pending and retry with back-off.'
+      content:
+        application/problem+json:
+          schema:
+            $ref: '#/components/schemas/Problem'
+    UpstreamUnavailable:
+      description: '`UPSTREAM_UNAVAILABLE`. Retry with back-off.'
+      content:
+        application/problem+json:
+          schema:
+            $ref: '#/components/schemas/Problem'
+
+  schemas:
+    # ---- shared primitives -------------------------------------------------
+    UtcTimestamp:
+      type: string
+      format: date-time
+      description: RFC 3339 instant in UTC. Always ends in `Z`.
+      pattern: '^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}(\.\d+)?Z$'
+      examples: ['2026-11-03T18:22:01Z']
+    InstallId:
+      type: string
+      format: uuid
+      description: Anonymous install ID, a UUID v4 generated on the device.
+    Platform:
+      type: string
+      enum: [android, ios]
+    DecimalString:
+      type: string
+      description: Non-negative decimal as a string. Never a JSON number.
+      pattern: '^\d{1,15}(\.\d{1,8})?$'
+      examples: ['4820.00']
+    CurrencyCode:
+      type: string
+      description: ISO 4217 alpha-3 currency code.
+      pattern: '^[A-Z]{3}$'
+    InstitutionCode:
+      type: string
+      description: Institution code from the bundled institution list.
+      pattern: '^[a-z0-9_]{2,32}$'
+    CategoryCode:
+      type: string
+      description: System category code.
+      pattern: '^[a-z][a-z0-9_]{1,31}$'
+    FlagKey:
+      type: string
+      pattern: '^[a-z][a-z0-9_]{1,63}$'
+    Jws:
+      type: string
+      description: JWS or JWT in compact serialization.
+      pattern: '^[A-Za-z0-9_-]+\.[A-Za-z0-9_-]+\.[A-Za-z0-9_-]+$'
+      maxLength: 16384
+    Entitlement:
+      type: object
+      description: |
+        Wrapper for the signed entitlement. The token claims are
+        `{iss, sub, acct, plan, status, exp, graceUntil, iat, src[], v}` and are read only after the app
+        verifies the signature.
+      required: [token]
+      properties:
+        token:
+          $ref: '#/components/schemas/Jws'
+    Problem:
+      type: object
+      description: RFC 9457 problem details with a stable `code`.
+      required: [type, title, status, code]
+      properties:
+        type:
+          type: string
+          maxLength: 256
+        title:
+          type: string
+          maxLength: 256
+        status:
+          type: integer
+          format: int32
+          minimum: 400
+          maximum: 599
+        code:
+          $ref: '#/components/schemas/ProblemCode'
+        detail:
+          type: string
+          maxLength: 512
+        retryAfterSeconds:
+          type: integer
+          format: int32
+          minimum: 0
+        correlationId:
+          type: string
+          maxLength: 64
+          description: Opaque id to quote when contacting support. Contains no request data.
+    ProblemCode:
+      type: string
+      description: |
+        Stable error code. Clients must tolerate codes they do not know (generated clients should enable an
+        unknown-enum fallback).
+      enum:
+        - VALIDATION_FAILED
+        - UNKNOWN_FIELD
+        - UNAUTHORIZED
+        - INSTALL_TOKEN_INVALID
+        - ACCOUNT_TOKEN_EXPIRED
+        - FORBIDDEN
+        - NOT_FOUND
+        - CATALOG_VERSION_UNKNOWN
+        - METHOD_NOT_ALLOWED
+        - INSTALL_EXISTS
+        - INSTALL_LINKED_TO_OTHER_ACCOUNT
+        - PAYLOAD_TOO_LARGE
+        - UNSUPPORTED_MEDIA_TYPE
+        - PURCHASE_TOKEN_INVALID
+        - PURCHASE_NOT_OWNED
+        - PURCHASE_WRONG_APP
+        - ID_TOKEN_INVALID
+        - RATE_LIMITED
+        - STORE_UNAVAILABLE
+        - UPSTREAM_UNAVAILABLE
+        - INTERNAL
+
+    # ---- health ------------------------------------------------------------
+    HealthResponse:
+      type: object
+      required: [status, serverTime]
+      properties:
+        status:
+          type: string
+          enum: [ok]
+        serverTime:
+          $ref: '#/components/schemas/UtcTimestamp'
+
+    # ---- installs ----------------------------------------------------------
+    InstallRequest:
+      type: object
+      additionalProperties: false
+      required: [installId, platform, appVersion]
+      properties:
+        installId:
+          $ref: '#/components/schemas/InstallId'
+        platform:
+          $ref: '#/components/schemas/Platform'
+        appVersion:
+          type: string
+          pattern: '^\d{1,4}\.\d{1,4}\.\d{1,4}([-+][0-9A-Za-z.-]{1,32})?$'
+          maxLength: 48
+    InstallResponse:
+      type: object
+      required: [installToken, serverTime]
+      properties:
+        installToken:
+          type: string
+          description: 32 random bytes, base64url without padding.
+          pattern: '^[A-Za-z0-9_-]{43}$'
+        serverTime:
+          $ref: '#/components/schemas/UtcTimestamp'
+
+    # ---- sync --------------------------------------------------------------
+    ContributionInput:
+      type: object
+      description: One opt-in merchant contribution (BR-SYNC-04). No amounts, dates, accounts or person names.
+      additionalProperties: false
+      required: [merchantNorm, institutionCode, categoryCode]
+      properties:
+        merchantNorm:
+          type: string
+          minLength: 2
+          maxLength: 80
+        institutionCode:
+          $ref: '#/components/schemas/InstitutionCode'
+        categoryCode:
+          $ref: '#/components/schemas/CategoryCode'
+    BankRequestInput:
+      type: object
+      description: A "request my bank" submission (FR-PAR-14). Never carries a message.
+      additionalProperties: false
+      required: [institutionName, country, channel]
+      properties:
+        institutionName:
+          type: string
+          minLength: 2
+          maxLength: 80
+        country:
+          type: string
+          pattern: '^[A-Z]{2}$'
+        channel:
+          type: string
+          enum: [sms, notification]
+    SyncRequest:
+      type: object
+      additionalProperties: false
+      required: [catalogVersion, flagsVersion]
+      properties:
+        catalogVersion:
+          type: integer
+          format: int32
+          minimum: 0
+        flagsVersion:
+          type: integer
+          format: int32
+          minimum: 0
+        pricesAsOf:
+          $ref: '#/components/schemas/UtcTimestamp'
+        entitlementIssuedAt:
+          $ref: '#/components/schemas/UtcTimestamp'
+        registryVersion:
+          type: integer
+          format: int32
+          minimum: 0
+          description: Bundled SMS-template registry version (diagnostic; BR-SYNC-03 app-version class).
+        contributions:
+          type: array
+          maxItems: 50
+          items:
+            $ref: '#/components/schemas/ContributionInput'
+        bankRequests:
+          type: array
+          maxItems: 10
+          items:
+            $ref: '#/components/schemas/BankRequestInput'
+    OpKind:
+      type: string
+      enum: [upsert, delete]
+    MerchantOp:
+      type: object
+      required: [t, op, id]
+      properties:
+        t:
+          type: string
+          const: merchant
+        op:
+          $ref: '#/components/schemas/OpKind'
+        id:
+          type: integer
+          format: int32
+        canonical:
+          type: string
+        nameAr:
+          type: string
+        category:
+          $ref: '#/components/schemas/CategoryCode'
+      if:
+        properties:
+          op:
+            const: upsert
+      then:
+        required: [canonical, nameAr, category]
+    AliasOp:
+      type: object
+      required: [t, op, merchantId, alias]
+      properties:
+        t:
+          type: string
+          const: alias
+        op:
+          $ref: '#/components/schemas/OpKind'
+        merchantId:
+          type: integer
+          format: int32
+        alias:
+          type: string
+        match:
+          type: string
+          description: Match mode, for example `exact`. Required on upsert.
+      if:
+        properties:
+          op:
+            const: upsert
+      then:
+        required: [match]
+    KeywordOp:
+      type: object
+      required: [t, op, keyword, lang]
+      properties:
+        t:
+          type: string
+          const: keyword
+        op:
+          $ref: '#/components/schemas/OpKind'
+        keyword:
+          type: string
+        lang:
+          type: string
+          pattern: '^[a-z]{2}$'
+        category:
+          $ref: '#/components/schemas/CategoryCode'
+        weight:
+          type: integer
+          format: int32
+          minimum: 0
+          maximum: 100
+      if:
+        properties:
+          op:
+            const: upsert
+      then:
+        required: [category, weight]
+    CategoryOp:
+      type: object
+      required: [t, op, code]
+      properties:
+        t:
+          type: string
+          const: category
+        op:
+          $ref: '#/components/schemas/OpKind'
+        code:
+          $ref: '#/components/schemas/CategoryCode'
+        nameAr:
+          type: string
+        nameEn:
+          type: string
+        icon:
+          type: string
+        color:
+          type: string
+          pattern: '^#[0-9A-Fa-f]{6}$'
+        bucket:
+          type: string
+        sort:
+          type: integer
+          format: int32
+      if:
+        properties:
+          op:
+            const: upsert
+      then:
+        required: [nameAr, nameEn, icon, color, bucket, sort]
+    CatalogOp:
+      description: One catalog change. `t` selects the entity; deletes are tombstones.
+      oneOf:
+        - $ref: '#/components/schemas/MerchantOp'
+        - $ref: '#/components/schemas/AliasOp'
+        - $ref: '#/components/schemas/KeywordOp'
+        - $ref: '#/components/schemas/CategoryOp'
+      discriminator:
+        propertyName: t
+        mapping:
+          merchant: '#/components/schemas/MerchantOp'
+          alias: '#/components/schemas/AliasOp'
+          keyword: '#/components/schemas/KeywordOp'
+          category: '#/components/schemas/CategoryOp'
+    CatalogDelta:
+      type: object
+      required: [fromVersion, toVersion, mode]
+      properties:
+        fromVersion:
+          type: integer
+          format: int32
+          minimum: 0
+        toVersion:
+          type: integer
+          format: int32
+          minimum: 0
+        mode:
+          type: string
+          enum: [delta, full]
+        fullUrl:
+          type: [string, 'null']
+          format: uri
+          description: Set when `mode` is `full`; the client fetches and verifies the snapshot there.
+        ops:
+          type: array
+          items:
+            $ref: '#/components/schemas/CatalogOp'
+    CatalogSnapshot:
+      type: object
+      description: Full catalog at one version, expressed as upserts applied to an empty catalog.
+      required: [version, ops]
+      properties:
+        version:
+          type: integer
+          format: int32
+          minimum: 1
+        ops:
+          type: array
+          items:
+            $ref: '#/components/schemas/CatalogOp'
+    FlagsBlock:
+      type: object
+      required: [version, values]
+      properties:
+        version:
+          type: integer
+          format: int32
+          minimum: 0
+        values:
+          type: object
+          additionalProperties:
+            type: boolean
+    GoldPrice:
+      type: object
+      required: [symbol, currency, price]
+      properties:
+        symbol:
+          type: string
+          pattern: '^[A-Z0-9_]{3,16}$'
+        currency:
+          $ref: '#/components/schemas/CurrencyCode'
+        price:
+          $ref: '#/components/schemas/DecimalString'
+    FxBlock:
+      type: object
+      required: [base, rates]
+      properties:
+        base:
+          $ref: '#/components/schemas/CurrencyCode'
+        rates:
+          type: object
+          propertyNames:
+            pattern: '^[A-Z]{3}$'
+          additionalProperties:
+            $ref: '#/components/schemas/DecimalString'
+    PricesBlock:
+      type: object
+      required: [asOf, stale, gold, fx]
+      properties:
+        asOf:
+          $ref: '#/components/schemas/UtcTimestamp'
+        stale:
+          type: boolean
+        gold:
+          type: array
+          items:
+            $ref: '#/components/schemas/GoldPrice'
+        fx:
+          $ref: '#/components/schemas/FxBlock'
+    AcceptedCounts:
+      type: object
+      required: [contributions, bankRequests]
+      properties:
+        contributions:
+          type: integer
+          format: int32
+          minimum: 0
+        bankRequests:
+          type: integer
+          format: int32
+          minimum: 0
+    InstallToken:
+      type: string
+      description: 32 random bytes, base64url without padding.
+      pattern: '^[A-Za-z0-9_-]{43}$'
+    SyncResponse:
+      type: object
+      description: |
+        Always has `serverTime` and `nextSyncNotBefore`. The other blocks are absent or `null` when unchanged.
+      required: [serverTime, nextSyncNotBefore]
+      properties:
+        serverTime:
+          $ref: '#/components/schemas/UtcTimestamp'
+        nextSyncNotBefore:
+          $ref: '#/components/schemas/UtcTimestamp'
+        catalog:
+          oneOf:
+            - $ref: '#/components/schemas/CatalogDelta'
+            - type: 'null'
+        flags:
+          oneOf:
+            - $ref: '#/components/schemas/FlagsBlock'
+            - type: 'null'
+        prices:
+          oneOf:
+            - $ref: '#/components/schemas/PricesBlock'
+            - type: 'null'
+        entitlement:
+          oneOf:
+            - $ref: '#/components/schemas/Entitlement'
+            - type: 'null'
+        accepted:
+          oneOf:
+            - $ref: '#/components/schemas/AcceptedCounts'
+            - type: 'null'
+        accountToken:
+          oneOf:
+            - $ref: '#/components/schemas/Jws'
+            - type: 'null'
+        rotateInstallToken:
+          description: A replacement install token when the server suspects compromise.
+          oneOf:
+            - $ref: '#/components/schemas/InstallToken'
+            - type: 'null'
+
+    # ---- purchases ---------------------------------------------------------
+    PurchaseVerifyAndroidRequest:
+      type: object
+      additionalProperties: false
+      required: [platform, productId, purchaseToken]
+      properties:
+        platform:
+          type: string
+          const: android
+        productId:
+          type: string
+          pattern: '^[a-z0-9_.]{3,100}$'
+        purchaseToken:
+          type: string
+          minLength: 1
+          maxLength: 2048
+    PurchaseVerifyIosRequest:
+      type: object
+      additionalProperties: false
+      required: [platform, signedTransaction]
+      properties:
+        platform:
+          type: string
+          const: ios
+        signedTransaction:
+          $ref: '#/components/schemas/Jws'
+    PurchaseVerifyRequest:
+      oneOf:
+        - $ref: '#/components/schemas/PurchaseVerifyAndroidRequest'
+        - $ref: '#/components/schemas/PurchaseVerifyIosRequest'
+      discriminator:
+        propertyName: platform
+        mapping:
+          android: '#/components/schemas/PurchaseVerifyAndroidRequest'
+          ios: '#/components/schemas/PurchaseVerifyIosRequest'
+    PurchaseStatus:
+      type: string
+      enum: [active, pending, expired, refunded, invalid]
+    PurchaseVerifyResponse:
+      type: object
+      required: [status, serverTime]
+      properties:
+        status:
+          $ref: '#/components/schemas/PurchaseStatus'
+        entitlement:
+          oneOf:
+            - $ref: '#/components/schemas/Entitlement'
+            - type: 'null'
+        serverTime:
+          $ref: '#/components/schemas/UtcTimestamp'
+        rotateInstallToken:
+          oneOf:
+            - $ref: '#/components/schemas/InstallToken'
+            - type: 'null'
+    PurchaseRestoreAndroidRequest:
+      type: object
+      additionalProperties: false
+      required: [platform, purchaseTokens]
+      properties:
+        platform:
+          type: string
+          const: android
+        purchaseTokens:
+          type: array
+          minItems: 1
+          maxItems: 20
+          items:
+            type: string
+            minLength: 1
+            maxLength: 2048
+    PurchaseRestoreIosRequest:
+      type: object
+      additionalProperties: false
+      required: [platform, signedTransactions]
+      properties:
+        platform:
+          type: string
+          const: ios
+        signedTransactions:
+          type: array
+          minItems: 1
+          maxItems: 20
+          items:
+            $ref: '#/components/schemas/Jws'
+    PurchaseRestoreRequest:
+      oneOf:
+        - $ref: '#/components/schemas/PurchaseRestoreAndroidRequest'
+        - $ref: '#/components/schemas/PurchaseRestoreIosRequest'
+      discriminator:
+        propertyName: platform
+        mapping:
+          android: '#/components/schemas/PurchaseRestoreAndroidRequest'
+          ios: '#/components/schemas/PurchaseRestoreIosRequest'
+    PurchaseRestoreResponse:
+      type: object
+      description: Aggregate result over all submitted purchases. `restoredCount` is how many were valid.
+      required: [status, restoredCount, serverTime]
+      properties:
+        status:
+          $ref: '#/components/schemas/PurchaseStatus'
+        restoredCount:
+          type: integer
+          format: int32
+          minimum: 0
+        entitlement:
+          oneOf:
+            - $ref: '#/components/schemas/Entitlement'
+            - type: 'null'
+        serverTime:
+          $ref: '#/components/schemas/UtcTimestamp'
+        rotateInstallToken:
+          oneOf:
+            - $ref: '#/components/schemas/InstallToken'
+            - type: 'null'
+    EntitlementResponse:
+      type: object
+      required: [entitlement, serverTime]
+      properties:
+        entitlement:
+          $ref: '#/components/schemas/Entitlement'
+        serverTime:
+          $ref: '#/components/schemas/UtcTimestamp'
+        rotateInstallToken:
+          oneOf:
+            - $ref: '#/components/schemas/InstallToken'
+            - type: 'null'
+
+    # ---- accounts ----------------------------------------------------------
+    SignInRequest:
+      type: object
+      additionalProperties: false
+      required: [provider, idToken]
+      properties:
+        provider:
+          type: string
+          enum: [google, apple]
+        idToken:
+          $ref: '#/components/schemas/Jws'
+        nonce:
+          type: string
+          minLength: 8
+          maxLength: 128
+          description: SHA-256 of the client nonce. Required for Apple.
+        authorizationCode:
+          type: string
+          minLength: 1
+          maxLength: 2048
+          description: Apple authorization code, exchanged server-side only to allow revocation on deletion.
+        replaceLink:
+          type: boolean
+          description: Confirms replacing a link to a different account after a 409.
+      if:
+        properties:
+          provider:
+            const: apple
+      then:
+        required: [nonce]
+    SignInResponse:
+      type: object
+      required: [accountId, accountToken, entitlement, linkedInstalls, serverTime]
+      properties:
+        accountId:
+          type: string
+          format: uuid
+        accountToken:
+          $ref: '#/components/schemas/Jws'
+        entitlement:
+          $ref: '#/components/schemas/Entitlement'
+        linkedInstalls:
+          type: integer
+          format: int32
+          minimum: 1
+        serverTime:
+          $ref: '#/components/schemas/UtcTimestamp'
+
+    # ---- store notifications -----------------------------------------------
+    PubSubMessageInput:
+      type: object
+      additionalProperties: false
+      required: [data, messageId]
+      properties:
+        data:
+          type: string
+          description: Base64 payload holding the RTDN notification.
+          maxLength: 65536
+        messageId:
+          type: string
+          maxLength: 64
+        message_id:
+          type: string
+          maxLength: 64
+        publishTime:
+          type: string
+          maxLength: 64
+        publish_time:
+          type: string
+          maxLength: 64
+        attributes:
+          type: object
+          additionalProperties:
+            type: string
+            maxLength: 1024
+        orderingKey:
+          type: string
+          maxLength: 1024
+    GoogleNotificationRequest:
+      type: object
+      additionalProperties: false
+      required: [message, subscription]
+      properties:
+        message:
+          $ref: '#/components/schemas/PubSubMessageInput'
+        subscription:
+          type: string
+          maxLength: 512
+        deliveryAttempt:
+          type: integer
+          format: int32
+          minimum: 0
+    AppleNotificationRequest:
+      type: object
+      additionalProperties: false
+      required: [signedPayload]
+      properties:
+        signedPayload:
+          $ref: '#/components/schemas/Jws'
+
+    # ---- admin -------------------------------------------------------------
+    MerchantDraftRequest:
+      type: object
+      additionalProperties: false
+      required: [canonical, nameAr, category]
+      properties:
+        canonical:
+          type: string
+          minLength: 1
+          maxLength: 120
+        nameAr:
+          type: string
+          minLength: 1
+          maxLength: 120
+        category:
+          $ref: '#/components/schemas/CategoryCode'
+    AliasDraftRequest:
+      type: object
+      additionalProperties: false
+      required: [merchantId, alias, match]
+      properties:
+        merchantId:
+          type: integer
+          format: int32
+        alias:
+          type: string
+          minLength: 1
+          maxLength: 120
+        match:
+          type: string
+          maxLength: 32
+    KeywordDraftRequest:
+      type: object
+      additionalProperties: false
+      required: [keyword, lang, category, weight]
+      properties:
+        keyword:
+          type: string
+          minLength: 1
+          maxLength: 120
+        lang:
+          type: string
+          pattern: '^[a-z]{2}$'
+        category:
+          $ref: '#/components/schemas/CategoryCode'
+        weight:
+          type: integer
+          format: int32
+          minimum: 0
+          maximum: 100
+    CategoryDraftRequest:
+      type: object
+      additionalProperties: false
+      required: [nameAr, nameEn, icon, color, bucket, sort]
+      properties:
+        nameAr:
+          type: string
+          minLength: 1
+          maxLength: 80
+        nameEn:
+          type: string
+          minLength: 1
+          maxLength: 80
+        icon:
+          type: string
+          maxLength: 64
+        color:
+          type: string
+          pattern: '^#[0-9A-Fa-f]{6}$'
+        bucket:
+          type: string
+          maxLength: 32
+        sort:
+          type: integer
+          format: int32
+    CatalogDraftEntryRequest:
+      description: The entry body; its shape must match the `entity` path segment.
+      oneOf:
+        - $ref: '#/components/schemas/MerchantDraftRequest'
+        - $ref: '#/components/schemas/AliasDraftRequest'
+        - $ref: '#/components/schemas/KeywordDraftRequest'
+        - $ref: '#/components/schemas/CategoryDraftRequest'
+    CatalogDraftPage:
+      type: object
+      required: [items]
+      properties:
+        items:
+          type: array
+          items:
+            $ref: '#/components/schemas/CatalogOp'
+        nextCursor:
+          type: [string, 'null']
+    CatalogPublishRequest:
+      type: object
+      additionalProperties: false
+      properties:
+        note:
+          type: string
+          maxLength: 200
+    CatalogPublishResponse:
+      type: object
+      required: [version, publishedAt, snapshotUrl]
+      properties:
+        version:
+          type: integer
+          format: int32
+          minimum: 1
+        publishedAt:
+          $ref: '#/components/schemas/UtcTimestamp'
+        snapshotUrl:
+          type: string
+          format: uri
+    ContributionStatus:
+      type: string
+      enum: [pending, ready_for_review, promoted, rejected]
+      default: ready_for_review
+    ContributionAggregate:
+      type: object
+      required: [merchantNorm, institutionCode, categoryCode, distinctInstalls, status]
+      properties:
+        merchantNorm:
+          type: string
+        institutionCode:
+          $ref: '#/components/schemas/InstitutionCode'
+        categoryCode:
+          $ref: '#/components/schemas/CategoryCode'
+        distinctInstalls:
+          type: integer
+          format: int32
+          minimum: 0
+          description: Number of distinct installs that contributed (k-anonymity threshold input).
+        status:
+          $ref: '#/components/schemas/ContributionStatus'
+    ContributionQueue:
+      type: object
+      required: [items]
+      properties:
+        items:
+          type: array
+          items:
+            $ref: '#/components/schemas/ContributionAggregate'
+    ContributionDecision:
+      type: object
+      required: [merchantNorm, institutionCode, status]
+      properties:
+        merchantNorm:
+          type: string
+        institutionCode:
+          $ref: '#/components/schemas/InstitutionCode'
+        status:
+          $ref: '#/components/schemas/ContributionStatus'
+    FlagState:
+      type: object
+      required: [key, value, version, updatedAt]
+      properties:
+        key:
+          $ref: '#/components/schemas/FlagKey'
+        value:
+          type: boolean
+        version:
+          type: integer
+          format: int32
+          minimum: 0
+        updatedAt:
+          $ref: '#/components/schemas/UtcTimestamp'
+    FlagUpdateRequest:
+      type: object
+      additionalProperties: false
+      required: [value]
+      properties:
+        value:
+          type: boolean
+    PriceOverrideRequest:
+      type: object
+      additionalProperties: false
+      required: [symbol, currency, price, reason]
+      properties:
+        symbol:
+          type: string
+          pattern: '^[A-Z0-9_]{3,16}$'
+        currency:
+          $ref: '#/components/schemas/CurrencyCode'
+        price:
+          $ref: '#/components/schemas/DecimalString'
+        reason:
+          type: string
+          minLength: 3
+          maxLength: 200
+        expiresAt:
+          $ref: '#/components/schemas/UtcTimestamp'
+    PriceOverrideResponse:
+      type: object
+      required: [symbol, currency, price, asOf]
+      properties:
+        symbol:
+          type: string
+        currency:
+          $ref: '#/components/schemas/CurrencyCode'
+        price:
+          $ref: '#/components/schemas/DecimalString'
+        asOf:
+          $ref: '#/components/schemas/UtcTimestamp'
+    SupportEntitlement:
+      type: object
+      description: Entitlement status only. No purchase tokens, no personal data beyond the looked-up key.
+      required: [status]
+      properties:
+        status:
+          type: string
+          enum: [active, grace, expired, refunded, none]
+        plan:
+          type: [string, 'null']
+        exp:
+          oneOf:
+            - $ref: '#/components/schemas/UtcTimestamp'
+            - type: 'null'
+        graceUntil:
+          oneOf:
+            - $ref: '#/components/schemas/UtcTimestamp'
+            - type: 'null'
+    BankRequestRank:
+      type: object
+      required: [institutionName, country, channel, count, lastRequestedAt]
+      properties:
+        institutionName:
+          type: string
+        country:
+          type: string
+          pattern: '^[A-Z]{2}$'
+        channel:
+          type: string
+          enum: [sms, notification]
+        count:
+          type: integer
+          format: int32
+          minimum: 1
+        lastRequestedAt:
+          $ref: '#/components/schemas/UtcTimestamp'
+    BankRequestRanking:
+      type: object
+      required: [items]
+      properties:
+        items:
+          type: array
+          items:
+            $ref: '#/components/schemas/BankRequestRank'
+    DailyActiveDay:
+      type: object
+      required: [date, activeInstalls]
+      properties:
+        date:
+          type: string
+          format: date
+        activeInstalls:
+          type: integer
+          format: int32
+          minimum: 0
+    DailyActiveMetrics:
+      type: object
+      required: [days]
+      properties:
+        days:
+          type: array
+          items:
+            $ref: '#/components/schemas/DailyActiveDay'
