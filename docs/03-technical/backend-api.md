@@ -62,7 +62,7 @@ Authorization rules:
 ### 4.1 `POST /v1/installs`
 ```json
 // request
-{ "installId": "0193f2c4-…-uuid", "platform": "android", "appVersion": "1.0.0", "osMajor": 15 }
+{ "installId": "0193f2c4-…-uuid", "platform": "android", "appVersion": "1.0.0" }
 // 201 response
 { "installToken": "q3V…base64url", "serverTime": "2026-11-03T18:22:01Z" }
 ```
@@ -212,7 +212,8 @@ These details were not spelled out above. `backend/openapi/zaghlol-v1.yaml` is a
 - **Pub/Sub push body:** `{message: {data, messageId, publishTime, attributes?, orderingKey?}, subscription, deliveryAttempt?}`. The envelope is closed to the fields Pub/Sub documents.
 - **Money and prices** are decimal strings (for example `"4820.00"`) with a separate ISO 4217 `currency`. They are never JSON numbers.
 - **Timestamps** are RFC 3339 UTC and always end in `Z`.
-- **`osMajor`** in `POST /v1/installs` is optional and is the only field beyond the BR-SYNC-03 wording (the OS major version, a diagnostic). Confirm it against BR-SYNC-03 or drop it.
+- **Request limits:** `POST /v1/sync` accepts at most 50 `contributions` and at most 10 `bankRequests` per call.
+- **`x-required-roles: [any]`** (used by `GET /admin/v1/metrics/daily-active`) means any authenticated operator role.
 
 ## 5. Admin API (operators, v1 used by `zaghlol-ops`; web admin later per D-37)
 
@@ -228,7 +229,24 @@ These details were not spelled out above. `backend/openapi/zaghlol-v1.yaml` is a
 | `GET /admin/v1/bank-requests` | catalog_editor | Ranked list |
 | `GET /admin/v1/metrics/daily-active` | any | Aggregate counters |
 
-Concrete paths (OpenAPI): `GET /admin/v1/catalog/draft/{entity}` (list) and `PUT /admin/v1/catalog/draft/{entity}/{id}` (upsert), where `entity` is `categories`, `merchants`, `aliases` or `keywords`. The promote and reject actions are `POST /admin/v1/contributions/{merchantNorm}/{institutionCode}:promote` and `...:reject`. All admin calls use an operator bearer token (`operatorOidc`); every operation declares its role in `x-required-roles`.
+### 5.1 Concrete operations (OpenAPI)
+
+The table above uses shorthand. These are the exact operations in `zaghlol-v1.yaml`; a contract test compares this list to the spec exactly. `entity` is `categories`, `merchants`, `aliases` or `keywords`. All admin calls use an operator bearer token (`operatorOidc`) and each operation declares its role in `x-required-roles`.
+
+| Operation | Role |
+|---|---|
+| `GET /admin/v1/catalog/draft/{entity}` | catalog_editor |
+| `PUT /admin/v1/catalog/draft/{entity}/{id}` | catalog_editor |
+| `POST /admin/v1/catalog/publish` | catalog_editor |
+| `GET /admin/v1/contributions` | catalog_editor |
+| `POST /admin/v1/contributions/{merchantNorm}/{institutionCode}:promote` | catalog_editor |
+| `POST /admin/v1/contributions/{merchantNorm}/{institutionCode}:reject` | catalog_editor |
+| `GET /admin/v1/flags/{key}` | flags_admin |
+| `PUT /admin/v1/flags/{key}` | flags_admin |
+| `PUT /admin/v1/prices/override` | prices_admin |
+| `GET /admin/v1/support/entitlement` | support_viewer |
+| `GET /admin/v1/bank-requests` | catalog_editor |
+| `GET /admin/v1/metrics/daily-active` | any |
 
 ## 6. Error codes
 

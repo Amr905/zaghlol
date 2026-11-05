@@ -17,8 +17,8 @@ public partial class DocumentationConsistencyTests
     [GeneratedRegex("`((?:GET|POST|PUT|DELETE)(?:/(?:GET|POST|PUT|DELETE))*) (/v1/[^`\\s]+)`")]
     private static partial Regex PublicEndpointCell();
 
-    [GeneratedRegex("`((?:GET|POST|PUT|DELETE)(?:/(?:GET|POST|PUT|DELETE))*) (/admin/v1/[A-Za-z0-9/_-]*)")]
-    private static partial Regex AdminEndpointCell();
+    [GeneratedRegex("`(GET|POST|PUT|DELETE) (/admin/v1/[^`\\s]+)`")]
+    private static partial Regex AdminOperationCell();
 
     [GeneratedRegex("`([A-Z][A-Z0-9_]*)`")]
     private static partial Regex CodeToken();
@@ -36,6 +36,7 @@ public partial class DocumentationConsistencyTests
     [Fact]
     public void EveryCodeDefinedInSourceIsDocumentedAndInTheSpec()
     {
+        var inSpec = Spec.Schemas["ProblemCode"]!["enum"]!.AsArray().Select(n => n!.GetValue<string>()).ToHashSet(StringComparer.Ordinal);
         var inSource = typeof(ErrorCodes)
             .GetFields(BindingFlags.Public | BindingFlags.Static)
             .Select(f => (string)f.GetRawConstantValue()!)
@@ -44,6 +45,7 @@ public partial class DocumentationConsistencyTests
 
         Assert.NotEmpty(inSource);
         Assert.Empty(inSource.Except(documented, StringComparer.Ordinal));
+        Assert.Empty(inSource.Except(inSpec, StringComparer.Ordinal));
     }
 
     [Fact]
@@ -75,33 +77,26 @@ public partial class DocumentationConsistencyTests
     }
 
     [Fact]
-    public void AdminEndpointTableMatchesTheSpecOperations()
+    public void AdminOperationTableMatchesTheSpecOperationForOperation()
     {
-        var rows = new List<(string[] Methods, string Prefix)>();
-        foreach (var line in Section("## 5.", "## 6.").Split('\n'))
+        var documented = new HashSet<string>(StringComparer.Ordinal);
+        foreach (var line in Section("### 5.1", "## 6.").Split('\n'))
         {
-            var match = AdminEndpointCell().Match(FirstCell(line));
+            var match = AdminOperationCell().Match(FirstCell(line));
             if (match.Success)
             {
-                rows.Add((match.Groups[1].Value.Split('/').Select(m => m.ToLowerInvariant()).ToArray(), match.Groups[2].Value));
+                documented.Add($"{match.Groups[1].Value.ToLowerInvariant()} {match.Groups[2].Value}");
             }
         }
 
-        Assert.NotEmpty(rows);
-        var adminOperations = Spec.Operations().Where(o => o.Path.StartsWith("/admin/v1/", StringComparison.Ordinal)).ToList();
+        var inSpec = Spec.Operations()
+            .Where(o => o.Path.StartsWith("/admin/v1/", StringComparison.Ordinal))
+            .Select(o => $"{o.Method} {o.Path}")
+            .ToHashSet(StringComparer.Ordinal);
 
-        var missingInSpec = rows
-            .SelectMany(r => r.Methods.Select(m => (Method: m, r.Prefix)))
-            .Where(r => !adminOperations.Any(o => o.Method == r.Method && o.Path.StartsWith(r.Prefix, StringComparison.Ordinal)))
-            .Select(r => $"{r.Method} {r.Prefix}*")
-            .ToList();
-        var missingInDocument = adminOperations
-            .Where(o => !rows.Any(r => r.Methods.Contains(o.Method) && o.Path.StartsWith(r.Prefix, StringComparison.Ordinal)))
-            .Select(o => o.Label)
-            .ToList();
-
-        Assert.Empty(missingInSpec);
-        Assert.Empty(missingInDocument);
+        Assert.NotEmpty(documented);
+        Assert.Empty(documented.Except(inSpec, StringComparer.Ordinal));
+        Assert.Empty(inSpec.Except(documented, StringComparer.Ordinal));
     }
 
     private static HashSet<string> DocumentedCodes()

@@ -100,7 +100,6 @@ paths:
               installId: 0193f2c4-7a10-4c52-9d3e-5b1f8a2c6e77
               platform: android
               appVersion: 1.0.0
-              osMajor: 15
       responses:
         '201':
           description: Install registered.
@@ -1093,7 +1092,7 @@ paths:
       tags: [Admin]
       operationId: adminDailyActive
       summary: Daily active install counters
-      description: Any operator role. Aggregate counters only.
+      description: Any authenticated operator role (`x-required-roles: [any]`). Aggregate counters only.
       x-required-roles: [any]
       security:
         - operatorOidc: []
@@ -1493,11 +1492,6 @@ components:
           type: string
           pattern: '^\d{1,4}\.\d{1,4}\.\d{1,4}([-+][0-9A-Za-z.-]{1,32})?$'
           maxLength: 48
-        osMajor:
-          type: integer
-          format: int32
-          minimum: 1
-          maximum: 99
     InstallResponse:
       type: object
       required: [installToken, serverTime]
