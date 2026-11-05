@@ -71,8 +71,8 @@ CREATE TABLE purchases (
   -- Google: purchase token (unique key per Google guidance). Apple: originalTransactionId.
   store_key text NOT NULL,
   linked_purchase_token text,                  -- Google upgrade/downgrade chain
-  install_id uuid REFERENCES installs(id) ON DELETE SET NULL,
-  account_id uuid REFERENCES accounts(id) ON DELETE SET NULL,
+  install_id uuid REFERENCES installs(id) ON DELETE SET NULL,  -- purchasing install (set by verify, never by restore)
+  account_id uuid REFERENCES accounts(id) ON DELETE SET NULL,  -- set only at sign-in (backend-api §4.6); restore never changes it
   state text NOT NULL CHECK (state IN ('pending','active','in_grace','on_hold','paused','canceled_active','expired','refunded','revoked')),
   expires_at timestamptz,                      -- NULL for lifetime
   acknowledged boolean NOT NULL DEFAULT false, -- Google; must be true within 3 days (BR-GOLD-06)
@@ -88,7 +88,7 @@ CREATE INDEX ix_purchases_unacked ON purchases(created_at) WHERE store = 'google
 
 CREATE TABLE purchase_events (                 -- audit trail of state transitions (no raw receipts)
   id uuid PRIMARY KEY, purchase_id uuid NOT NULL REFERENCES purchases(id) ON DELETE CASCADE,
-  from_state text, to_state text NOT NULL, cause text NOT NULL,   -- verify | restore | restore_rebind | rtdn:<type> | assn:<type> | sweep
+  from_state text, to_state text NOT NULL, cause text NOT NULL,   -- verify | restore | restore_rebind | seat_evict | seat_reclaim | account_seat | rtdn:<type> | assn:<type> | sweep
   occurred_at timestamptz NOT NULL DEFAULT now()
 );
 
@@ -110,14 +110,39 @@ CREATE TABLE store_notifications (             -- FR-BE-03, idempotent ingest
      -- fields not listed above (including unknown third-party fields) are not persisted anywhere.
 
 -- Effective entitlement is computed, not stored: view over purchases for an install or account
-CREATE VIEW v_entitlements AS
-  SELECT COALESCE(p.account_id::text, p.install_id::text) AS subject, p.plan, p.state, p.expires_at, p.store
-  FROM purchases p WHERE p.state IN ('active','in_grace','canceled_active');
+-- Seats (D-46, FR-GOLD-08): which installs may hold Gold from a purchase. At most 3 rows per purchase, enforced in the
+-- restore / verify / sign-in transaction (SELECT … FOR UPDATE on the purchase row), across platforms (FR-GOLD-07).
+CREATE TABLE purchase_seats (
+  purchase_id uuid NOT NULL REFERENCES purchases(id) ON DELETE CASCADE,
+  install_id uuid NOT NULL REFERENCES installs(id) ON DELETE CASCADE,       -- install deletion releases the seat
+  proof text NOT NULL CHECK (proof IN ('binding','attested','basic','account')), -- verify | full attestation | Play basic integrity | sign-in
+  bound_at timestamptz NOT NULL DEFAULT now(),
+  last_active_at timestamptz NOT NULL DEFAULT now(),  -- updated by sync / GET entitlement / restore; eviction order
+  token_grace_until timestamptz NOT NULL,             -- graceUntil of the newest token issued to this install; past it = dormant
+  PRIMARY KEY (purchase_id, install_id)
+);
+CREATE INDEX ix_purchase_seats_install ON purchase_seats(install_id);
+-- Invariants: count(*) ≤ 3 per purchase; count(*) FILTER (WHERE proof = 'basic') ≤ 1 per purchase.
 
-CREATE TABLE signin_replay (                   -- single-use ID tokens (ADR-016 amendment 2)
-  key_hash bytea PRIMARY KEY,                   -- SHA-256(nonce claim), or SHA-256(id_token) for a Google token without nonce
-  provider text NOT NULL CHECK (provider IN ('google','apple')),
-  expires_at timestamptz NOT NULL               -- token exp; rows purged after expiry
+-- App Attest keys (iOS restore attestation, ADR-012 Amendment (2026-11-05) Part B). No device identifier is stored (FR-GOLD-09).
+CREATE TABLE app_attest_keys (
+  key_id bytea PRIMARY KEY,                     -- SHA-256 of the credential public key (= keyId)
+  install_id uuid NOT NULL UNIQUE REFERENCES installs(id) ON DELETE CASCADE,  -- one key per install; re-attest replaces it
+  public_key bytea NOT NULL, sign_count bigint NOT NULL,
+  environment text NOT NULL CHECK (environment IN ('production','development')),
+  attested_at timestamptz NOT NULL DEFAULT now()
+);
+
+-- Effective entitlement is computed, not stored: purchases in which the install holds a live seat
+CREATE VIEW v_entitlements AS
+  SELECT s.install_id, p.id AS purchase_id, p.plan, p.state, p.expires_at, p.store, s.proof
+  FROM purchase_seats s JOIN purchases p ON p.id = s.purchase_id
+  WHERE p.state IN ('active','in_grace','canceled_active');
+
+CREATE TABLE replay_guard (                    -- single-use proofs (ADR-016 amendment 2, ADR-012 Amendment (2026-11-05) Part B)
+  key_hash bytea PRIMARY KEY,                   -- SHA-256(nonce claim) | SHA-256(Google id_token without nonce) | SHA-256(Play Integrity token)
+  kind text NOT NULL CHECK (kind IN ('signin_google','signin_apple','play_integrity')),
+  expires_at timestamptz NOT NULL               -- token exp, or +15 min for Play Integrity; rows purged after expiry
 );
 
 CREATE TABLE signing_keys (                    -- metadata; private keys live in the KMS
@@ -208,7 +233,8 @@ CREATE TABLE audit_log (id bigint GENERATED ALWAYS AS IDENTITY PRIMARY KEY, oper
 | No device identifiers | No column exists for IMEI, ad ID or phone number; DTOs reject unknown fields |
 | Purchase link to a person | Store receives `obfuscatedAccountId`/`appAccountToken` = HMAC(install_id), never e-mail |
 | Support lookups by e-mail | The e-mail travels only in a POST body (`backend-api.md` §5.2). The audit row stores `HMAC-SHA256(K_audit, NFC(trim(lower(email))))` plus the matched `account_id`, never the e-mail. `K_audit` is a dedicated KMS key, separate from the `install_hash` pepper, so the value can't be reversed by a dictionary attack without the KMS. It is still **pseudonymous personal data** and falls under the audit retention (§4) |
-| ID token replay | `signin_replay` keeps only hashes, until the token's `exp` |
+| ID token / attestation replay | `replay_guard` keeps only hashes, until the token's `exp` (Play Integrity: 15 min) |
+| Device attestation (D-45) | Only `app_attest_keys` (public key, counter) and Play verdict checks; no device identifier (IMEI, ad ID, serial, phone number) and no verdict payload is stored (FR-GOLD-09) |
 | Third-party envelopes | Pub/Sub, ASSN and Apple callback bodies are open, but only the listed fields are read, after authentication. `store_notifications` stores only its explicit extracted columns and `payload_digest`, never the raw envelope or unknown fields |
 
 ## 4. Retention (NFR-PRIV-06, A-50)
@@ -221,8 +247,10 @@ CREATE TABLE audit_log (id bigint GENERATED ALWAYS AS IDENTITY PRIMARY KEY, oper
 | `merchant_contributions` raw rows | Deleted when the aggregate is promoted/rejected, or after 180 days | same |
 | `bank_requests` | 24 months (aggregate counts kept) | same |
 | Request logs | ≤ 30 days, IPs truncated to /24 (v4) or /48 (v6) | logging pipeline |
-| `audit_log` (incl. HMAC'd support-lookup keys and `account_id`, pseudonymous personal data) | 3 years unless PO decides otherwise (D2) | `RetentionPurger` |
-| `signin_replay` | Until the token's `exp` | `RetentionPurger` |
+| `audit_log`, support-lookup rows (HMAC e-mail pseudonym + `account_id`, pseudonymous personal data) | **Exactly 1 year from creation, then deleted** (D-47, FR-BE-11, NFR-PRIV-07). Account deletion neither shortens nor extends it: the row stays until its own 1-year mark (FR-ACCT-04), so it is gone at most 1 year after the account is deleted | `RetentionPurger` daily (`action = 'support_lookup' AND at < now() - interval '1 year'`) |
+| `audit_log`, all other operator actions | 3 years | `RetentionPurger` |
+| `replay_guard` | Until `expires_at` | `RetentionPurger` |
+| `purchase_seats` | While live; dormant seats (past `token_grace_until`) are reclaimed on the next restore or sign-in, and rows go with their install | restore / install purge |
 | DB backups (PITR) | 14 days | provider |
 
 ## 5. Capacity check (NFR-BE-04)

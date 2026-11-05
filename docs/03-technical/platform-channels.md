@@ -177,6 +177,30 @@ class OcrLine { String text; double confidence; List<double> box; /* x,y,w,h nor
 - **Android:** ML Kit Text Recognition v2 (Latin) **plus** Tesseract4Android with `ara` (fast model, bundled) for Arabic lines. Results are merged by bounding box (ADR-009).
 - The image is decrypted in memory only. Its temp file is deleted in a `finally` block, and receipt images are never persisted (FR-SEC-03).
 
+## 4a. Device attestation (`AttestationHostApi`, both platforms; D-45/D-46, FR-GOLD-09)
+
+```dart
+@HostApi()
+abstract class AttestationHostApi {
+  /// Android: Play Integrity StandardIntegrityManager.prepareIntegrityToken (cached provider). iOS: no-op.
+  @async void prepare();
+  /// requestHash = base64url(SHA-256(JCS(restore body without "attestation"))), computed in Dart.
+  /// Android: StandardIntegrityTokenProvider.request(requestHash) → token.
+  /// iOS: DCAppAttestService.generateAssertion(keyId, clientDataHash = SHA-256 bytes); on a new key also attestKey(...).
+  @async AttestationProof attest(Uint8List bodyHash, bool forceNewKey);
+}
+class AttestationProof {
+  String type;               // 'play_integrity' | 'app_attest'
+  String? token;             // Android
+  String? keyId;             // iOS, base64
+  String? assertion;         // iOS, base64
+  String? attestationObject; // iOS, base64, only for a newly generated key
+}
+```
+- **Android:** `com.google.android.play:integrity` (standard request). The cloud project number comes from build config. Errors map to `ATTEST_TRANSIENT` (`NETWORK_ERROR`, `TOO_MANY_REQUESTS`, `GOOGLE_SERVER_UNAVAILABLE`, `INTEGRITY_TOKEN_PROVIDER_INVALID` → re-prepare once), `ATTEST_PLAY_SERVICES_OUTDATED` and `ATTEST_UNAVAILABLE`.
+- **iOS:** `DeviceCheck.DCAppAttestService`. If `isSupported == false`, the result is `ATTEST_UNAVAILABLE`. The `keyId` is stored in the Keychain with `kSecAttrAccessibleAfterFirstUnlockThisDeviceOnly`, not synchronizable. `forceNewKey`, or an `invalidKey` error, deletes it, generates a new key and returns an `attestationObject` too. `serverUnavailable` maps to `ATTEST_TRANSIENT`.
+- **Nothing else is collected or returned:** no device identifiers, and no verdicts on device. The proof goes straight into the restore body (BR-SYNC-03 amended, D-45). Proofs are never written to the diag log.
+
 ## 5. Other hosts
 
 | API | Methods | Notes |
@@ -189,4 +213,4 @@ class OcrLine { String text; double confidence; List<double> box; /* x,y,w,h nor
 
 ## 6. Error codes (native → Dart)
 
-`PERMISSION_DENIED`, `NOT_AVAILABLE`, `SPOOL_DECRYPT_FAILED` (entry quarantined and deleted after 3 failures, with a diag code logged), `KEY_INVALIDATED` (Keystore key lost after a security change: regenerate it, re-write the Guard config, and accept that pending spool entries are lost; this is user-visible in Settings as "re-scan" on Android), `CONFIG_INVALID`, `ICLOUD_UNAVAILABLE`, `OCR_FAILED`, `IO_ERROR`.
+`PERMISSION_DENIED`, `NOT_AVAILABLE`, `SPOOL_DECRYPT_FAILED` (entry quarantined and deleted after 3 failures, with a diag code logged), `KEY_INVALIDATED` (Keystore key lost after a security change: regenerate it, re-write the Guard config, and accept that pending spool entries are lost; this is user-visible in Settings as "re-scan" on Android), `CONFIG_INVALID`, `ICLOUD_UNAVAILABLE`, `OCR_FAILED`, `IO_ERROR`, `ATTEST_TRANSIENT`, `ATTEST_PLAY_SERVICES_OUTDATED`, `ATTEST_UNAVAILABLE`.

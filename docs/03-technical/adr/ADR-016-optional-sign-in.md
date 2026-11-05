@@ -54,6 +54,6 @@ An extra endpoint for the Android Apple callback. Account deletion revokes the A
 **Decision: option 2.**
 - **Raw nonce:** `SignInRequest.nonce` is the raw nonce, ≥ 128 bits from a CSPRNG, base64url (`^[A-Za-z0-9_-]{22,128}$`). The provider receives only `hex(SHA-256(raw))`, the lower-case hex of SHA-256 over the raw string's ASCII bytes. This is the convention the `sign_in_with_apple` package and Apple's iOS samples use.
 - **Server check:** the server compares in constant time and rejects tokens with `iat` older than 10 minutes (`422 ID_TOKEN_INVALID`).
-- **Single use:** the server stores SHA-256 of the nonce claim in `signin_replay` until `exp`, so every ID token is single-use. A Google token without a nonce is keyed by the hash of the token itself. The same rules apply to Google wherever the platform flow supports a nonce.
+- **Single use:** the server stores SHA-256 of the nonce claim in `replay_guard` until `exp`, so every ID token is single-use. A Google token without a nonce is keyed by the hash of the token itself. The same rules apply to Google wherever the platform flow supports a nonce.
 
 **Consequences.** T-135 adds the replay table and checks. T-147 generates the raw nonce, keeps it in memory only and sends it once. Idempotency-Key replays return the stored response, so legitimate client retries are unaffected.

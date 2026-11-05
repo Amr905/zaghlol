@@ -22,6 +22,9 @@ Constraint: the app ships **no analytics or crash SDKs** (NFR-PRIV-01). Raw SMS 
 | Signature invalid on sync | Drop the response, keep the current data, diag code, retry next day | Nothing |
 | Purchase verify unreachable | `outbox(purchase_verify)` + WorkManager/BGTask retries (15 min → 6 h, until verified or 3 days pass, then keep retrying daily); Gold shown as "pending verification" (EC-44, BR-GOLD-06) | «بنتأكد من الدفع…» |
 | Purchase invalid | No Gold; offer Restore & Support | Clear message |
+| Restore attestation fails (`DEVICE_ATTESTATION_FAILED`) / can't attest (EC-66) | iOS: one retry with a fresh App Attest key; Android: one retry with a fresh token. Platform transient errors are retried 3× within 1 min. No restore call without a proof. Existing Gold untouched | Help message «مقدرناش نتأكد من الموبايل ده»; offer Sign in (account-linked Gold) and Support |
+| Restore item `account_required` (EC-65) | No Gold on this install | «اعمل تسجيل دخول بالحساب اللي اشتريت بيه» (no account details revealed) |
+| Entitlement `status: moved` | Gold off on this install | «الجولد اتنقل لموبايل تاني», with Restore / Sign in |
 | Backup fails | Notification (FR-NTF-01) + Settings status; Gold schedule retries next window | «النسخة الاحتياطية ماتعملتش — جرب تاني» |
 | Restore: newer backup (EC-26) / wrong passphrase / corrupt | Specific errors per design S-04 | As designed |
 | Speech unavailable (EC-32) | Manual entry offered; online recognizer only with consent (ADR-010) | Explanation sheet |
@@ -53,7 +56,7 @@ Constraint: the app ships **no analytics or crash SDKs** (NFR-PRIV-01). Raw SMS 
 
 ### 3.2 Backend
 - **Structured JSON logs** (Serilog → OpenTelemetry → provider log store), with fields `ts, level, msg, traceId, route, status, durationMs, installHash, code`.
-  - Never logged: request or response bodies, tokens, ID tokens, purchase tokens (only `sha256[:8]`), e-mails, or full IPs (truncated before ingestion).
+  - Never logged: request or response bodies, tokens, ID tokens, purchase tokens (only `sha256[:8]`), Play Integrity tokens or decoded verdict payloads, App Attest assertions, attestation objects or key IDs, e-mails, or full IPs (truncated before ingestion). Attestation failures are logged as a reason code only (`hash_mismatch`, `stale`, `replayed`, `app_unrecognized`, `no_integrity`, `counter`, `key_unknown`, `chain`).
   - **Query strings are never logged** (FU-008). `route` is the matched route template (`/admin/v1/catalog/draft/{entity}/{id}`), never the raw path or the query. This applies to our request logging, OpenTelemetry HTTP spans (`url.query` and `url.full` are dropped, and `url.path` is replaced by the template), the reverse proxy / load balancer / CDN access logs we configure (query logging off), and exception messages. `Location` response headers are never logged, because the Apple callback's `Location` carries tokens. The API contract backs this up: no endpoint takes personal data or credentials in a query string (`backend-api.md` §1).
   - **Default and framework log sources:**
     - The `Microsoft.AspNetCore.Hosting.Diagnostics`, `Microsoft.AspNetCore.Server.Kestrel`, `Microsoft.AspNetCore.Routing` and `System.Net.Http.HttpClient` categories are set to `Warning` in every environment, or filtered by a Serilog enricher that drops `QueryString`, `Path`, `RequestUri` and `Uri` properties. At `Information` these categories log full request and outbound URLs.

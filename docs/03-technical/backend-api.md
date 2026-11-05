@@ -17,7 +17,7 @@ The source of truth during Phase 5 is `backend/openapi/zaghlol-v1.yaml`, generat
 | Response signing | Security-relevant responses carry `Zaghlol-Signature: kid=<kid>; alg=ES256; sig=<base64url>`, an ECDSA P-256 signature over the **exact response body bytes** after decompression. The app verifies it against embedded public keys (ADR-012/013) and drops unsigned or invalid bodies. |
 | Time | `serverTime` (RFC 3339 UTC) in every response body. The app stores it to drive the 24 h throttle (EC-43). |
 | Errors | RFC 9457 `application/problem+json`: `{type, title, status, code, detail?, retryAfterSeconds?}`. `code` is a stable `UPPER_SNAKE` string (§6). Error bodies never echo request data. |
-| Rate limits | Per install token and per /24 IP (token bucket). `429` with `Retry-After`. Extra buckets: `POST /v1/purchases/restore` 5/hour per install, plus 10 restore attempts/day per purchase (keyed by SHA-256 of the token or `originalTransactionId`). Outbound Play and App Store calls share a global budget in which verify and the acknowledge sweeper have priority over restore (§4.3). |
+| Rate limits | Per install token and per /24 IP (token bucket). `429` with `Retry-After`. Extra buckets: `POST /v1/purchases/restore` 5/hour per install (1/day for basic-integrity seats), plus 10 restore attempts/day per purchase (keyed by SHA-256 of the token or `originalTransactionId`). Outbound Play and App Store calls share a global budget in which verify and the acknowledge sweeper have priority over restore (§4.3). |
 | Request size | ≤ 64 KB, except `/v1/notifications/*` (≤ 256 KB). |
 | Unknown fields in requests | **Rejected** (`400 UNKNOWN_FIELD`) in every body whose shape Zaghlol defines (app and operator calls), so the app can't accidentally send more than BR-SYNC-03 allows. **Ignored** in the three bodies whose shape Google or Apple define: the Pub/Sub push envelope (`/v1/notifications/google`), the ASSN V2 body (`/v1/notifications/apple`) and Apple's `form_post` (`/v1/apple/android-callback`). The server reads only the listed fields there and never stores or logs the rest. These operations carry `x-third-party-body: true` in the OpenAPI file, and a contract test checks that no other operation does (ADR-022 amendment). |
 | Query strings | Never carry personal data or credentials (e-mails, tokens, ID tokens, codes). The server never logs query strings or raw paths, only the route template (`error-handling-and-observability.md` §3.2). |
@@ -158,19 +158,64 @@ Authorization rules:
 3. Call App Store Server API `Get Transaction Info` and `Get All Subscription Statuses` for the authoritative state.
 4. Upsert by `originalTransactionId`.
 
-**Restore** (`POST /v1/purchases/restore`, FU-006):
+**Restore** (`POST /v1/purchases/restore`): FU-006, plus anti-sharing and attestation per D-45/D-46 (FR-GOLD-02/03/07/08/09). Design: ADR-012 Amendment (2026-11-05) and Amendment 2.
 ```json
-// Android: the items the app gets from Play Billing queryPurchasesAsync (1–20)
-{ "platform": "android", "purchases": [ { "productId": "zaghlol_gold_lifetime", "purchaseToken": "opaque-token-from-play" } ] }
-// iOS: StoreKit 2 signed transactions (1–20)
-{ "platform": "ios", "signedTransactions": [ "eyJ…" ] }
+// Android: items from Play Billing queryPurchasesAsync (1–20) + Play Integrity standard-request token
+{ "platform": "android",
+  "purchases": [ { "productId": "zaghlol_gold_lifetime", "purchaseToken": "opaque-token-from-play" } ],
+  "attestation": { "type": "play_integrity", "token": "eyJ…" } }
+// iOS: StoreKit 2 signed transactions (1–20) + App Attest assertion (attestationObject only on a new key's first use)
+{ "platform": "ios", "signedTransactions": [ "eyJ…" ],
+  "attestation": { "type": "app_attest", "keyId": "…=", "assertion": "o2lzaWduYXR1cmVY…", "attestationObject": "o2NmbXRv…" } }
 // 200 (signed)
-{ "status": "active", "restoredCount": 1, "entitlement": { "token": "eyJ…" }, "serverTime": "…" }
+{ "status": "active", "restoredCount": 1, "seatsReleased": 0, "entitlement": { "token": "eyJ…" }, "serverTime": "…" }
 ```
-- Each item runs the verify procedure above, except the install-binding check (step 4 on Android; `appAccountToken` on iOS). Only the store account that owns a purchase can obtain its token or signed transaction, and the binding still names the **old** install after a phone change.
-- A valid purchase bound to another install is **re-bound** to the calling install (FR-GOLD-03), and `purchase_events` records the move (`cause = restore_rebind`). A purchase re-bound more than 3 times in 30 days is not moved again: the item counts as `invalid` and an alert fires (token-sharing abuse).
-- Per-item failures never fail the call, so restore has no 422. `status` is the best item outcome by the precedence `active > pending > expired > refunded > invalid`; `restoredCount` counts `active` items; `entitlement` is the merged entitlement after the restore, or `null`.
-- **Abuse limits:** restore has its own bucket (5/hour per install) and a per-purchase limit (10 attempts/day across installs). Both give `429`. Store calls draw on a global Play / App Store budget that reserves capacity for verify and the ack sweeper. When the budget is short, restore gets `503 UPSTREAM_UNAVAILABLE` with `Retry-After` and never delays an acknowledgement.
+Possession of a genuine token is **not** proof of ownership. A token presented without valid attestation, or from an install the seat or account rules exclude, counts as replayed (FR-GOLD-02) and grants nothing. The checks run in this order:
+
+1. **Request binding.** `bodyHash = SHA-256(JCS(request body without "attestation"))`, using RFC 8785 canonical JSON. The app computes it before asking the platform for a proof; the server recomputes it from the bytes it received.
+2. **Attestation** (FR-GOLD-09; BR-SYNC-03 amended, D-45: the proof is the only device data sent, and no device identifier is stored). It is required on every restore. A missing, invalid, stale, replayed or unbound proof fails the whole call with **422 `DEVICE_ATTESTATION_FAILED`**, and nothing is written.
+   - **Android (Play Integrity, standard request).**
+     - The app calls `prepareIntegrityToken` (warm-up, only when the user starts a restore) and then `request` with `requestHash = b64u(bodyHash)`.
+     - The server calls `decodeIntegrityToken` and requires all of: `requestDetails.requestHash == b64u(bodyHash)`; `requestPackageName` = our package; `timestampMillis` no more than 5 min old; `appIntegrity.appRecognitionVerdict = PLAY_RECOGNIZED`; and `deviceIntegrity.deviceRecognitionVerdict` containing `MEETS_DEVICE_INTEGRITY`, or else `MEETS_BASIC_INTEGRITY` (see *Basic seats* below).
+     - Each token is single-use: its SHA-256 goes into `replay_guard` for 15 min.
+   - **iOS (App Attest).**
+     - The app sends `assertion = generateAssertion(keyId, clientDataHash = bodyHash)`.
+     - The server loads the key registered to this install (`app_attest_keys`) and checks: the signature over `nonce = SHA-256(authenticatorData ‖ clientDataHash)` with the stored public key; the RP ID hash = SHA-256(`<TeamID>.<bundleId>`); and a counter strictly greater than the stored one, which is then updated.
+     - **First use of a key:** the body also carries `attestationObject` over the same `clientDataHash`. The server validates it per Apple's App Attest rules: the x5c chain to the Apple App Attestation Root CA; the nonce extension equals `SHA-256(authData ‖ clientDataHash)`; `keyId` = SHA-256 of the credential public key; App ID; counter 0; `aaguid` = production (or development in staging). It then registers the key to this install. A key ID already registered to another install is refused.
+     - There is no separate server challenge. Replaying an attestation object only registers a public key whose private key the replayer doesn't hold, and assertions are counter-protected. This saves a round trip and server-side challenge state.
+     - **Key lifecycle:** one App Attest key per install. It is generated lazily at the first restore. The `keyId` is kept in the Keychain (`kSecAttrAccessibleAfterFirstUnlockThisDeviceOnly`, not synchronizable, so it never travels in backups or to a new phone). The app re-attests (new key plus `attestationObject`) when `generateAssertion` fails with `invalidKey`, when the server answers `DEVICE_ATTESTATION_FAILED` to a request without `attestationObject` (key unknown, for example after the server purged the install), and on every new install. "Delete everything" deletes the key row together with the install.
+3. **Store verification** of each item, as in verify, except the install-binding check (step 4 on Android; `appAccountToken` on iOS), which names the old install after a phone change.
+4. **Account rule** (FR-GOLD-08b). A purchase with `account_id` set is bound only to an install presenting a valid account token for **that** account. Otherwise the item's outcome is `account_required`, and the app says "sign in with the account that bought Gold", without revealing which account (EC-65). Re-binding never changes `account_id`, and restore never sets it (§4.6 says when it is set).
+5. **Seats** (FR-GOLD-08a, `purchase_seats`).
+   - A *move* is a binding change to a different install. Restoring on an install that already holds the seat only refreshes `last_active_at`.
+   - At most **3 live seats** per purchase, counting installs on both platforms and account-derived seats (FR-GOLD-07).
+   - **Reclaim first:** a seat whose holder's newest token is past `graceUntil` is dormant and is released before anything else.
+   - **Then evict:** if all 3 seats are live, the server evicts the **least recently active** seat, never the caller's (`basic` seats go first). The caller gets the seat, and `seatsReleased` reports how many seats were taken over.
+   - **Why evict rather than refuse:** a real owner who changed phones is never locked out by a stale or stolen seat; a sharer just pushes someone else out.
+   - **What the evicted install sees:** its entitlement is not renewed. At its next sync or `GET /v1/entitlement` (online, so within 24 h), it receives a token with `status: "moved"` and no Gold source, and the app shows "Gold moved to another phone". Offline, its cached token lapses at `graceUntil`, at most 30 + 7 = 37 days (D-46).
+   - **Other releases:** `DELETE /v1/installs/me` (cascade), and the 12-month inactive-install purge.
+   - Every move and eviction is a `purchase_events` row (`restore_rebind`, `seat_evict`, `seat_reclaim`).
+6. **Basic seats** (R-19). A Play verdict with `MEETS_BASIC_INTEGRITY` but not `MEETS_DEVICE_INTEGRITY` (often a custom ROM) still counts as a valid attestation, with limits:
+   - the seat is marked `proof = basic`;
+   - at most **one** basic seat per purchase, and it never evicts a stronger seat (if none can be freed, the item's outcome is `invalid`);
+   - its token has `exp` ≤ `iat` + 7 days;
+   - 1 such restore per install per day.
+   - A device with no integrity label at all (rooted, emulator) gets `422 DEVICE_ATTESTATION_FAILED`, as do devices where App Attest is unsupported. Their way to Gold is sign-in (below).
+- **Aggregate.** Per-item outcomes fold into `status` by the precedence `active > pending > account_required > expired > refunded > invalid`. `restoredCount` counts `active` items. `entitlement` is the merged entitlement after the restore, or `null`. The only 422 is `DEVICE_ATTESTATION_FAILED`.
+- **Lock-out mitigations (R-19):**
+  - **Sign in.** An account-linked purchase reaches any of the owner's phones through sign-in (§4.6, FR-GOLD-07). The ID token is the proof there, so no attestation is needed. After purchase, the app suggests "sign in to protect your Gold" once (optional, never blocking).
+  - **Outages are not failures.**
+    - Platform-side transient errors (Play Integrity `NETWORK_ERROR`, `TOO_MANY_REQUESTS`, `GOOGLE_SERVER_UNAVAILABLE`, outdated Play services; App Attest `serverUnavailable`) are retried by the app with back-off: 3 tries within 1 min, then a "try again later" message that also offers to update Play services when that's the cause. The app doesn't call restore without a proof.
+    - A server-side decode failure (Google or Apple 5xx, timeouts, our quota) is **`503 UPSTREAM_UNAVAILABLE`** with `Retry-After`, never `422`.
+    - Existing installs keep their cached Gold throughout.
+  - **Quota.** Restores are rare (phone changes), and `prepareIntegrityToken` runs only when a restore starts. T-140 checks the Play Integrity daily quota in Play Console before launch and alerts at 50 % use, with a quota-increase request as the runbook action.
+  - **Help.** A clear help message (EC-66) and the operator support lookup (FR-BE-08) show the entitlement status, so support can confirm the purchase and point the user to sign-in.
+- **Abuse limits:** restore has its own bucket (5/hour per install, 1/day for basic seats) and a per-purchase limit (10 attempts/day across installs). Both give `429`. Store and attestation calls draw on a global Play / App Store budget that reserves capacity for verify and the ack sweeper. When the budget is short, restore gets `503 UPSTREAM_UNAVAILABLE` with `Retry-After` and never delays an acknowledgement.
+- **Alerts** carry the purchase UUID only, never a token, transaction ID, install ID or account ID:
+  - more than 3 seat evictions for one purchase in 30 days;
+  - an attestation-failure rate spike, by reason code;
+  - Play Integrity quota above 50 %.
+- **Verify needs no attestation** (the decision FR-GOLD-09 leaves open). The store-side binding (`obfuscatedExternalAccountId` / `appAccountToken` = HMAC(installId)) already proves that this install made the purchase. A token bound to another install fails with `PURCHASE_NOT_OWNED`, which already rejects the replay FR-GOLD-02 describes. Attestation would add latency and new failure modes to the payment path, which has to keep retrying (BR-GOLD-06), with no security gain. Verify creates the purchase's first seat (`proof = binding`).
 
 **Entitlement token** (JWS compact, ES256, `kid` header):
 ```json
@@ -178,7 +223,9 @@ Authorization rules:
   "status": "active", "exp": 1798790400, "graceUntil": 1799395200, "iat": 1793570520,
   "src": [ { "store": "google_play", "product": "zaghlol_gold_yearly" } ], "v": 1 }
 ```
-The app grants Gold while `now < graceUntil`, where graceUntil = `exp` + 7 days (BR-GOLD-03, A-38). For lifetime, `exp` = `iat` + 30 days, rolling, so a revoked lifetime purchase still loses Gold.
+The app grants Gold while `now < graceUntil`, where graceUntil = `exp` + 7 days (BR-GOLD-03, A-38). `status` ∈ `active | grace | expired | refunded | moved | none`. `moved` means a seat on this install was taken over by another install (FR-GOLD-08); the app then shows "Gold moved to another phone" copy and offers Restore and Sign in.
+- **Lifetime rule (D-46):** for **every** plan, `exp` ≤ `iat` + 30 days; for a subscription, also ≤ the store expiry; for a token covering a `basic` seat, ≤ `iat` + 7 days. Seats therefore free up, and a revoked or moved-away purchase loses Gold within 37 days.
+- **Which purchases count:** the token covers only purchases in which this install holds a live seat. The app refreshes the token through the daily sync and `GET /v1/entitlement` (within 3 days of `exp`), which also keeps `last_active_at` current.
 
 ### 4.4 `GET /v1/entitlement`
 Returns `{entitlement: {token}, serverTime}`, merging install and account purchases. It is called after a purchase restore, after sign-in, and when the cached token is within 3 days of `exp`.
@@ -219,13 +266,18 @@ Returns `{entitlement: {token}, serverTime}`, merging install and account purcha
   - The app generates a **raw** nonce: ≥ 128 bits from a CSPRNG, base64url without padding (`^[A-Za-z0-9_-]{22,128}$`). It gives the provider only `hex(SHA-256(raw))`, the lower-case hex SHA-256 of the raw string's ASCII bytes. It sends the **raw** value in `nonce`.
   - The server computes `hex(SHA-256(nonce))` and compares it with the token's `nonce` claim in constant time. Someone holding only the token knows the claim but not its pre-image, so a copied claim doesn't pass.
   - A token whose `iat` is more than 10 minutes old gives `422 ID_TOKEN_INVALID`.
-  - Single use: the server inserts the nonce claim's hash into `signin_replay` (`backend-schema.md`), kept until the token's `exp`. A second use of the same token gives `422 ID_TOKEN_INVALID`. A Google token without a nonce is keyed by SHA-256 of the whole token.
+  - Single use: the server inserts the nonce claim's hash into `replay_guard` (`backend-schema.md`), kept until the token's `exp`. A second use of the same token gives `422 ID_TOKEN_INVALID`. A Google token without a nonce is keyed by SHA-256 of the whole token.
   - Required for Apple. For Google it is used wherever `google_sign_in` supports a nonce, and then the same checks apply. An `Idempotency-Key` replay returns the stored result before this check runs, so legitimate retries still work.
 
 **After verification:**
 1. Upsert the account.
 2. Link the install.
-3. Attach the install's purchases to the account.
+3. Attach purchases to the account (set `account_id`). This happens only for purchases with no account yet where either:
+   - this install is the purchasing install (`purchases.install_id`, bound by verify); or
+   - the purchasing install no longer exists (`install_id IS NULL`), and this install holds the purchase's only live seat with `proof = attested`.
+
+   Restore-acquired seats never attach a purchase to an account. Otherwise someone with a leaked token could lock the owner out.
+4. Give this install a seat (`proof = account`, no attestation needed: the ID token is the proof) in each purchase linked to the account. Seats count toward N = 3 and follow the same evict-least-recently-active rule as restore.
 
 If the install was linked to a different account, the response is **409 `INSTALL_LINKED_TO_OTHER_ACCOUNT`** and the app asks the user (EC-46). Re-sending with `"replaceLink": true` confirms.
 
@@ -254,7 +306,7 @@ If the install was linked to a different account, the response is **409 `INSTALL
 ### 4.8 Shapes fixed by the OpenAPI file (T-006; architect sign-off 2026-11-05)
 These details were not spelled out above. `backend/openapi/zaghlol-v1.yaml` is authoritative for field names, limits and patterns. The solution-architect reviewed the T-006 inferences on 2026-11-05. The items below are signed off as written or corrected as noted.
 - **Success statuses without a body:** `DELETE /v1/installs/me` returns 202; `POST /v1/accounts/signout` and `DELETE /v1/accounts/me` return 204; `POST /v1/notifications/google` returns 204; `POST /v1/notifications/apple` returns 200; `DELETE /admin/v1/catalog/draft/{entity}/{id}` returns 204. *Signed off.*
-- **Restore:** request and response as in §4.3. *Corrected:* Android items are `{productId, purchaseToken}` (FU-006); the aggregate precedence is defined; restore no longer declares 422.
+- **Restore:** request and response as in §4.3. *Corrected:* Android items are `{productId, purchaseToken}` (FU-006); the aggregate precedence is defined. Per D-45/D-46, restore now requires `attestation`, returns `seatsReleased`, adds the item outcome `account_required`, and declares 422 only for `DEVICE_ATTESTATION_FAILED`.
 - **Full catalog snapshot** (`GET /v1/catalog/{version}/full`): `{version, ops[]}` where `ops` are upserts of the same shape as in `/v1/sync`. The signature is the `Zaghlol-Signature` header and the `.sig` file next to the snapshot. *Signed off.*
 - **`rotateInstallToken`:** an optional string in the sync, verify, restore and entitlement response bodies. Absent or `null` means keep the current token. *Signed off.*
 - **Apple Android callback:** *Corrected* (FU-008) from a `GET` with query parameters to `POST /v1/apple/android-callback` with an `application/x-www-form-urlencoded` body `{state, code?, id_token?, error?, user?}`. It answers **303** to an `intent://` URL (§4.6). `user` is dropped unread.
@@ -322,7 +374,7 @@ The table above uses shorthand. These are the exact operations in `zaghlol-v1.ya
 - **Cascades and conflicts.** Deleting a merchant tombstones its aliases too, and the delta lists those alias deletes before the merchant delete. Deleting a category still referenced by a live category, merchant or keyword gives **409 `ADMIN_CONFLICT`**, as does a `PUT`/`POST` that references a category or merchant that isn't live in the draft. A missing or already-deleted key gives `404`.
 - **Contributions.** `:promote` takes `{merchantNorm, institutionCode, merchantId?, categoryCode?}`. With `merchantId` the string becomes an `exact` alias of that merchant; without it a new draft merchant (`canonical` = `merchantNorm`) is created. `categoryCode` defaults to the top vote. `:reject` takes `{merchantNorm, institutionCode}`. Both return `{merchantNorm, institutionCode, status, merchantId?}`. A key with no aggregate **and** a key whose aggregate is still `collecting` both give `404 NOT_FOUND`, indistinguishably: same status and body, and one query that excludes `collecting`, so there is no timing difference. `409 ADMIN_CONFLICT` is returned only for an aggregate already `promoted` or `rejected`, or for a draft conflict. **Test requirement (T-129):** a `collecting` key and an absent key return byte-identical responses on both `:promote` and `:reject`. The key moved from the path to the body because `merchantNorm` is free text.
 - **Review queue privacy.** Aggregates still `collecting` (fewer than 5 distinct installs, A-48) are never returned. The API status enum is `ready_for_review | promoted | rejected`.
-- **Support lookup.** `POST /admin/v1/support/entitlement:lookup` takes `{installId}` or `{email}` (exactly one) and returns `SupportEntitlement`. The audit row stores the install ID, or `HMAC-SHA256(K_audit, NFC(trim(lower(email))))`, plus the matched `account_id` when the lookup hits an account. It never stores the e-mail. A plain SHA-256 of an e-mail can be reversed by dictionary, so a keyed HMAC is used. `K_audit` is a dedicated KMS key, separate from the `install_hash` pepper. The audit value is pseudonymous personal data under the `audit_log` retention: 3 years unless the PO decides otherwise (D2).
+- **Support lookup.** `POST /admin/v1/support/entitlement:lookup` takes `{installId}` or `{email}` (exactly one) and returns `SupportEntitlement`. The audit row stores the install ID, or `HMAC-SHA256(K_audit, NFC(trim(lower(email))))`, plus the matched `account_id` when the lookup hits an account. It never stores the e-mail. A plain SHA-256 of an e-mail can be reversed by dictionary, so a keyed HMAC is used. `K_audit` is a dedicated KMS key, separate from the `install_hash` pepper. The audit value is pseudonymous personal data kept **exactly 1 year from creation, then deleted**, even if the account is deleted earlier (D-47, FR-BE-11, NFR-PRIV-07).
 
 ## 6. Error codes
 
@@ -339,6 +391,7 @@ Every error is `application/problem+json` with one of these `code` values. The s
 | 404 | `NOT_FOUND` | The path or resource doesn't exist. A bug in the app (or an operator typo); don't retry |
 | 405 | `METHOD_NOT_ALLOWED` | The HTTP method isn't supported on this path. A bug in the app; don't retry |
 | 409 | `INSTALL_EXISTS`, `INSTALL_LINKED_TO_OTHER_ACCOUNT` | See §4.1 / §4.6 |
+| 422 | `DEVICE_ATTESTATION_FAILED` | Restore only: the Play Integrity token or App Attest assertion is missing, invalid, stale, replayed or not bound to the body. iOS: if no `attestationObject` was sent, generate a new App Attest key and retry once with it; Android: retry once with a fresh token. Then stop, show the help message (EC-66) and offer sign-in (an account-linked purchase reaches the phone through sign-in without attestation, R-19). Gold is unchanged. Attestation-service outages are `503 UPSTREAM_UNAVAILABLE`, not this code |
 | 409 | `ADMIN_CONFLICT` | Operator API only (§5.2): the edit conflicts with the current draft catalog or review queue. Reload and retry. Never sent to the app |
 | 413 | `PAYLOAD_TOO_LARGE` | The body is over the size limit (§1). A bug in the app; don't retry |
 | 415 | `UNSUPPORTED_MEDIA_TYPE` | The body wasn't the declared media type (`application/json`; the Apple callback takes `application/x-www-form-urlencoded`). A bug in the app; don't retry |

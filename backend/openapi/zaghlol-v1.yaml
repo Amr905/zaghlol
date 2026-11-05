@@ -313,6 +313,8 @@ paths:
         equals HMAC(installId), upserts keyed by purchase token (Android) or originalTransactionId (iOS),
         acknowledges Android purchases, and grants Gold only for a purchased and active state. A pending
         purchase returns `status: pending` and grants nothing. Idempotent for 24 hours per `Idempotency-Key`.
+        No device attestation here: the store-side binding to HMAC(installId) already ties a new purchase to
+        the buying install (ADR-012 Amendment (2026-11-05) Part B). Verify gives the purchase its first seat.
       security:
         - installToken: []
         - installToken: []
@@ -367,11 +369,27 @@ paths:
       summary: Re-verify store purchases on a new phone
       description: |
         Runs the verify procedure for each purchase (Android `{productId, purchaseToken}` items, iOS signed
-        transactions). A valid purchase bound to another install is re-bound to the calling install
-        (FR-GOLD-03); the store-side install binding is not required to match on restore, because only the
-        store account that owns a purchase can obtain its token or signed transaction. Per-item failures never
-        fail the call: they fold into the aggregate `status` (precedence active > pending > expired >
-        refunded > invalid), so there is no 422 here.
+        transactions), without the store-side install-binding check, which names the old install after a
+        phone change. Possession of a genuine token is **not** proof of ownership (FR-GOLD-02, D-46). Instead:
+
+        - **Device attestation (FR-GOLD-09; BR-SYNC-03 amended, D-45).** `attestation` is required on every
+          restore. Android sends a Play Integrity standard-request token and iOS an App Attest assertion, both
+          bound to `SHA-256(JCS(body without attestation))` (RFC 8785 canonical JSON): the Play `requestHash`
+          is its base64url form, the App Attest `clientDataHash` is the raw digest. A missing, invalid, stale
+          (> 5 min), replayed or unbound proof fails the whole call with `422 DEVICE_ATTESTATION_FAILED`. A
+          Play verdict with only `MEETS_BASIC_INTEGRITY` gets a limited `basic` seat (one per purchase,
+          entitlement `exp` at most 7 days). An attestation-service outage is `503`, never `422`.
+        - **Seats (FR-GOLD-08a).** At most 3 installs, on either platform, hold a live seat per purchase.
+          Restoring on an install that already holds the seat changes nothing. A 4th install first reclaims a
+          dormant seat (its token past `graceUntil`), else evicts the least recently active one (`basic`
+          first, never the caller). The evicted install gets a `status: moved` token at its next refresh and
+          offline loses Gold at `graceUntil` (at most 37 days). `seatsReleased` counts the seats taken over.
+        - **Account-linked purchases (FR-GOLD-08b)** re-bind only to an install signed in to that account
+          (send the account token); otherwise the item's outcome is `account_required`. Re-binding never
+          changes `account_id`.
+
+        Per-item outcomes fold into the aggregate `status` (precedence active > pending > account_required >
+        expired > refunded > invalid). The only 422 is `DEVICE_ATTESTATION_FAILED`.
 
         **Abuse limits.** Restore has its own rate-limit bucket (5 calls per hour per install, on top of the
         general per-install and per-/24 buckets) and a per-purchase limit keyed by SHA-256 of the token or
@@ -396,6 +414,9 @@ paths:
               purchases:
                 - productId: zaghlol_gold_lifetime
                   purchaseToken: opaque-token-from-play
+              attestation:
+                type: play_integrity
+                token: eyJhbGciOiJBMjU2S1ciLCJlbmMiOiJBMjU2R0NNIn0.ZW5jcnlwdGVkLWtleQ.aXY.Y2lwaGVydGV4dA.dGFn
       responses:
         '200':
           description: Restore result (signed).
@@ -414,6 +435,8 @@ paths:
           $ref: '#/components/responses/PayloadTooLarge'
         '415':
           $ref: '#/components/responses/UnsupportedMediaType'
+        '422':
+          $ref: '#/components/responses/DeviceAttestationFailed'
         '429':
           $ref: '#/components/responses/RateLimited'
         '500':
@@ -1215,7 +1238,8 @@ paths:
         URL, so neither reaches access logs, proxies or CDN logs. Returns entitlement status only; there is no
         endpoint that lists installs. Audited: the audit row stores the install ID, or
         `HMAC-SHA256(K_audit, NFC(trim(lower(email))))` with a dedicated KMS key, plus the matched
-        `account_id`; never the e-mail itself. Not idempotency-keyed (read-only).
+        `account_id`; never the e-mail itself. The row is deleted exactly 1 year after creation (D-47,
+        FR-BE-11). Not idempotency-keyed (read-only).
       x-required-roles: [support_viewer]
       security:
         - operatorOidc: []
@@ -1489,6 +1513,18 @@ components:
         application/problem+json:
           schema:
             $ref: '#/components/schemas/Problem'
+    DeviceAttestationFailed:
+      description: |
+        `DEVICE_ATTESTATION_FAILED`. The restore's Play Integrity token or App Attest assertion is missing,
+        invalid, stale, replayed or not bound to the request body. iOS: if no `attestationObject` was sent,
+        generate a new App Attest key, attest it and retry once; Android: retry once with a fresh token. Then
+        stop and show the help message (EC-66) with the sign-in option: an account-linked purchase reaches a
+        signed-in phone through sign-in, which needs no attestation (R-19). Gold is not changed. An outage of
+        the attestation service is `503 UPSTREAM_UNAVAILABLE`, not this code.
+      content:
+        application/problem+json:
+          schema:
+            $ref: '#/components/schemas/Problem'
     AdminConflict:
       description: |
         `ADMIN_CONFLICT`. Operator API only: the change conflicts with the current draft catalog or review
@@ -1668,6 +1704,7 @@ components:
         - INSTALL_EXISTS
         - INSTALL_LINKED_TO_OTHER_ACCOUNT
         - ADMIN_CONFLICT
+        - DEVICE_ATTESTATION_FAILED
         - PAYLOAD_TOO_LARGE
         - UNSUPPORTED_MEDIA_TYPE
         - PURCHASE_TOKEN_INVALID
@@ -2078,7 +2115,10 @@ components:
           ios: '#/components/schemas/PurchaseVerifyIosRequest'
     PurchaseStatus:
       type: string
-      enum: [active, pending, expired, refunded, invalid]
+      description: |
+        `account_required` (restore only): the purchase is linked to an account and the caller is not signed in
+        to it; ask the user to sign in, then restore again.
+      enum: [active, pending, account_required, expired, refunded, invalid]
     PurchaseVerifyResponse:
       type: object
       required: [status, serverTime]
@@ -2110,10 +2150,47 @@ components:
           type: string
           minLength: 1
           maxLength: 2048
+    PlayIntegrityProof:
+      type: object
+      description: |
+        Play Integrity standard-request token (an encrypted JWS), requested with
+        `requestHash = b64u(SHA-256(JCS(body without attestation)))`. Decoded server-side with
+        `decodeIntegrityToken`. BR-SYNC-03 (amended, D-45): no other device data is sent.
+      additionalProperties: false
+      required: [type, token]
+      properties:
+        type:
+          type: string
+          const: play_integrity
+        token:
+          type: string
+          pattern: '^[A-Za-z0-9_.-]{16,16384}$'
+    AppAttestProof:
+      type: object
+      description: |
+        App Attest assertion over `clientDataHash = SHA-256(JCS(body without attestation))`, with the install's
+        App Attest key. `attestationObject` is sent once, on the first use of a new key, attested over the same
+        `clientDataHash`.
+      additionalProperties: false
+      required: [type, keyId, assertion]
+      properties:
+        type:
+          type: string
+          const: app_attest
+        keyId:
+          type: string
+          description: Base64 key identifier from `DCAppAttestService.generateKey`.
+          pattern: '^[A-Za-z0-9+/]{43}=$'
+        assertion:
+          type: string
+          pattern: '^[A-Za-z0-9+/]{16,8192}={0,2}$'
+        attestationObject:
+          type: string
+          pattern: '^[A-Za-z0-9+/]{16,16384}={0,2}$'
     PurchaseRestoreAndroidRequest:
       type: object
       additionalProperties: false
-      required: [platform, purchases]
+      required: [platform, purchases, attestation]
       properties:
         platform:
           type: string
@@ -2124,10 +2201,12 @@ components:
           maxItems: 20
           items:
             $ref: '#/components/schemas/AndroidPurchaseRef'
+        attestation:
+          $ref: '#/components/schemas/PlayIntegrityProof'
     PurchaseRestoreIosRequest:
       type: object
       additionalProperties: false
-      required: [platform, signedTransactions]
+      required: [platform, signedTransactions, attestation]
       properties:
         platform:
           type: string
@@ -2138,6 +2217,8 @@ components:
           maxItems: 20
           items:
             $ref: '#/components/schemas/Jws'
+        attestation:
+          $ref: '#/components/schemas/AppAttestProof'
     PurchaseRestoreRequest:
       oneOf:
         - $ref: '#/components/schemas/PurchaseRestoreAndroidRequest'
@@ -2151,7 +2232,7 @@ components:
       type: object
       description: |
         Aggregate result over all submitted purchases. `status` is the best item outcome by the precedence
-        active > pending > expired > refunded > invalid. `restoredCount` is how many items are `active`.
+        active > pending > account_required > expired > refunded > invalid. `restoredCount` is how many items are `active`.
         `entitlement` is the merged entitlement after the restore, or `null` if nothing grants Gold.
       required: [status, restoredCount, serverTime]
       properties:
@@ -2161,6 +2242,13 @@ components:
           type: integer
           format: int32
           minimum: 0
+        seatsReleased:
+          type: integer
+          format: int32
+          minimum: 0
+          description: |
+            Seats this restore took over from other installs (dormant or least recently active, FR-GOLD-08).
+            The app tells the user that Gold left another phone.
         entitlement:
           oneOf:
             - $ref: '#/components/schemas/Entitlement'

@@ -49,12 +49,20 @@ Out of scope: protecting a fully compromised, unlocked device in an attacker's h
 ### 4.1 App ↔ backend
 - **Default anonymous.** An install token (opaque bearer) is scoped to its own install. There are no user passwords anywhere (FR-ONB-02).
 - **Optional account** (FR-ACCT, ADR-016):
-  - Google or Apple ID tokens are verified server-side with JWKS, audience, issuer and expiry checks. They also need: `iat` no more than 10 minutes old; a nonce pre-image check, where the app sends the raw nonce and the server compares `hex(SHA-256(raw))` with the claim in constant time; and single use (`signin_replay`) (ADR-016 amendment 2).
+  - Google or Apple ID tokens are verified server-side with JWKS, audience, issuer and expiry checks. They also need: `iat` no more than 10 minutes old; a nonce pre-image check, where the app sends the raw nonce and the server compares `hex(SHA-256(raw))` with the claim in constant time; and single use (`replay_guard`) (ADR-016 amendment 2).
   - The server issues its own ES256 account JWT (30 d).
   - An account only *links* entitlements, and grants no access to any data other than entitlement status.
 - **Purchase authorization:**
-  - A purchase is honoured only if store verification succeeds **and** the store-side binding (`obfuscatedExternalAccountId` / `appAccountToken`) equals HMAC(installId), or the account linkage authorizes it.
-  - On restore, a valid token re-binds to the new install (store account = proof of ownership).
+  - **Verify:** a purchase is honoured only if store verification succeeds **and** the store-side binding (`obfuscatedExternalAccountId` / `appAccountToken`) equals HMAC(installId). Verify needs no device attestation, because the binding is the proof (ADR-012 Amendment (2026-11-05) Part B).
+  - **Restore** (D-45/D-46, FR-GOLD-08/09): possession of a genuine token is **not** proof of ownership. A restore is honoured only when all of these hold:
+    - a valid device attestation (Play Integrity standard request / App Attest assertion) is bound to the request body;
+    - store verification succeeds;
+    - for an account-linked purchase, the caller is signed in to that account;
+    - the purchase gets one of at most **3 seats**. A 4th install reclaims a dormant seat or evicts the least recently active one.
+
+    Moved-away installs stop receiving Gold at their next refresh, and offline they lose it within 37 days (`exp` ≤ `iat` + 30 d, plus 7 d grace).
+  - **Sign-in** gives an install a seat in its account's purchases with the verified ID token as the proof (FR-GOLD-07). A purchase is attached to an account only from its purchasing install (`backend-api.md` §4.6), never from a restore-acquired seat.
+  - Seat changes are audited in `purchase_events`. Alerts carry only the purchase UUID.
 - **Server-to-server:**
   - Pub/Sub push carries Google-signed OIDC (audience + service-account e-mail pinned).
   - Apple notifications are JWS-verified to Apple Root CA G3 with bundle and environment checks.
@@ -67,7 +75,7 @@ Out of scope: protecting a fully compromised, unlocked device in an attacker's h
 |---|---|---|---|---|
 | Own install record (delete) | ✔ | — | support_viewer (read) | — |
 | Sync payload | ✔ | ✔ (adds account entitlement) | — | Same for everyone |
-| Purchases verify/restore | ✔ own | ✔ | — | Store is source of truth |
+| Purchases verify/restore | ✔ own (restore: attestation + seat rules) | ✔ (account-linked purchases move only between the account's installs) | — | Store is source of truth for state; seats and attestation decide which installs get Gold |
 | Entitlement read | ✔ own | ✔ | support_viewer | Status only |
 | Account delete | — | ✔ own | — | Revokes the Apple token |
 | Catalog draft/publish | — | — | catalog_editor | Publish needs a second operator's approval in the web admin later; v1 CLI logs the operator |
