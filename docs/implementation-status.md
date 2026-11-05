@@ -222,7 +222,7 @@
 | FU-010 | T-006 #9, #11, #12 | Spectral via package.json + lockfile + pinned Node; YAML float scalars as numbers; Spectral `type[*]` rule | FU-004 hardening pass | OPEN |
 | FU-011 | T-006 #14 | Each endpoint task adds a live response-vs-spec test incl. `400 UNKNOWN_FIELD` | T-124, T-128, T-130…T-136 | OPEN |
 | FU-013 | T-006 #6, #13, #15, #16 | Remove `installs.os_major` from backend-schema.md (**before T-122**); global UTC-`Z` JSON converter + InstallId UUID v4 pattern (T-124); pin openapi-generator version (T-141) | solution-architect / T-124 / T-141 | OPEN |
-| FU-012 | T-006 decision 2 | Record that server-issued version cursors (flagsVersion, pricesAsOf, entitlementIssuedAt, registryVersion) fall under BR-SYNC-03 "catalog/app version" | product owner | OPEN (PO confirm) |
+| FU-012 | T-006 decision 2 (PO APPROVED 2026-11-05; recording in SRS v1.4) | Record that server-issued version cursors (flagsVersion, pricesAsOf, entitlementIssuedAt, registryVersion) fall under BR-SYNC-03 "catalog/app version" | product owner | OPEN (PO confirm) |
 
 ## Log
 | Date | Event |
@@ -239,3 +239,5 @@
 | 2026-11-05 | T-001 DONE: re-review APPROVED (round 2), CI 10/10 green, squash-merged. Deferred findings appended to the owning task files. T-165 to run before T-015/T-016. |
 | 2026-11-05 | Wave 2 started: T-003 (app CI + regen workflow). Design notes for T-012, T-165 in progress. Held: T-002/T-004/T-022 (need T-003 lockfile/golden regen; T-002 and T-004 both change pubspec.lock → serialize), T-014 (same package as T-012), T-122 (needs FU-013), T-123/T-138 (after architect API decisions). |
 | 2026-11-05 | Design notes for T-012 and T-165 merged. Their follow-ups were added to T-015/T-016 (orphaned-DB wipe) and T-017/T-019 (money CHECK constraints). The FU-api-decisions branch (CI green) is in security-privacy review. |
+| 2026-11-05 | FU-api-decisions security review: CHANGES_REQUESTED (2 blockers: restore token sharing, Apple nonce; 4 majors). Findings 2–8, 10–12 fixed at 8fe1251 (CI green). |
+| 2026-11-05 | PO decisions: D1 Gold restore = 3-seat limit + device attestation (Play Integrity / App Attest; BR-SYNC-03 amended); D2 support-lookup audit rows kept 1 year; D3/FU-012/A-47/Smart-Switch outcome approved; funds currency codes shown at end of picker. Architect applying D1/D2; requirements-analyst recording SRS v1.4. |
