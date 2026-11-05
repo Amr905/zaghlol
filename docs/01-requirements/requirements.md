@@ -3,7 +3,7 @@
 | | |
 |---|---|
 | Document | `docs/01-requirements/requirements.md` |
-| Version | 1.3 — APPROVED (+ changes D-34, D-36…D-44) |
+| Version | 1.4 — APPROVED (+ changes D-34, D-36…D-51) |
 | Phase | 1 — Requirements refinement |
 | Author | requirements-analyst (Lead session) |
 | Date | 2026-10-31 |
@@ -24,6 +24,7 @@
 | 1.1 | 2026-11-01 | Approved change D-34: whole Arabic UI in Egyptian colloquial, fun & easy (FR-L10N-02 rewritten, FR-L10N-04 added); new logo = Captain Zaghlol holding coins. |
 | 1.2 | 2026-11-02 | Design-review decisions: **D-36** bulk edit of transactions (FR-TXN-06); **D-37** operator admin web app, delivered after the first release (FR-BE-08, OQ-12 resolved); **D-38** Smart ROI gives general advice only at first, named products later (FR-ROI-05). |
 | 1.3 | 2026-11-03 | Phase 3 answers: D-39…D-44 (iOS approach, Tesseract OCR, local gold feed, online speech with consent, min OS, Apple sign-in on Android). OQ-02/03/06/15 resolved; OQ-16 still open. |
+| 1.4 | 2026-11-05 | Product-owner decisions D-45…D-51: **device attestation** (Play Integrity / App Attest) added to BR-SYNC-03; **Gold restore anti-sharing** — max 3 installs per purchase, account-linked purchases move only between that account's installs, attestation required on restore (FR-GOLD-08/09, ADR-012 Amendment (2026-11-05)); **support-lookup audit** with HMAC e-mail pseudonym kept 1 year (NFR-PRIV-07, FR-BE-11); BR-SYNC-03 classification of version cursors, restore `productId` and sign-in `nonce`; A-47 narrowed to the ID-token `email` claim; **OEM transfer outcome** for FR-SEC-05 (keyless DB wiped → fresh Welcome + restore offer); **ISO 4217 funds codes** shown last in the currency picker, X-codes excluded (FR-CUR-07). New EC-64…EC-67, R-19/R-20, INT-22. |
 
 ---
 
@@ -78,6 +79,13 @@ Zaghlol is a personal-finance app for Egyptian consumers that captures spending 
 | D-42 | If on-device Egyptian Arabic speech isn't available, the OS online recognizer may be used **with explicit consent** (OQ-06). | ADR-010. |
 | D-43 | Minimum OS: Android 8.0 (API 26), iOS 17.0 (CR-04, OQ-03). | ADR-019. |
 | D-44 | Sign in with Apple is also offered on Android via Apple's web flow (CR-05). | ADR-016, FR-ACCT-01. |
+| D-45 | *(2026-11-05)* **BR-SYNC-03 amended: device attestation.** The app may also send a device attestation token or assertion — **Play Integrity** (Android) or **App Attest** (iOS) — used for purchase restore and possibly purchase verification. It carries no other device data. Reason: stop sharing of Gold purchase tokens. | BR-SYNC-03, FR-GOLD-09, INT-22, R-19. |
+| D-46 | *(2026-11-05)* **Gold restore anti-sharing.** At most **3 installs** may hold Gold from one purchase at the same time. A purchase **linked to an account** moves only between installs signed in to that account. **Device attestation is required on restore.** Technical design: ADR-012 Amendment (2026-11-05), by the architect. | FR-GOLD-02/03/07, FR-GOLD-08/09, EC-64…EC-66. |
+| D-47 | *(2026-11-05)* **Support-lookup audit retention.** Every operator support lookup leaves an audit row holding a **keyed (HMAC) pseudonym of the e-mail** plus the account ID. The row is kept **1 year, then deleted** — also when the account has been deleted in the meantime. | FR-BE-08, FR-BE-11, FR-ACCT-04, NFR-PRIV-07. |
+| D-48 | *(2026-11-05)* **BR-SYNC-03 classification** (no new data class): the server-issued version cursors `flagsVersion`, `pricesAsOf`, `entitlementIssuedAt`, `registryVersion` count as **"catalog/app version"**; the restore `productId` counts as **"purchase tokens/transactions"**; the raw sign-in `nonce` counts as **"optional account ID token"**. | BR-SYNC-03. |
+| D-49 | *(2026-11-05)* **A-47 narrowed.** The support e-mail comes **only** from the Apple/Google ID token's `email` claim. For Sign in with Apple on Android, `scope=email` is requested; Apple's `user` form field is **never read**. | A-47, FR-ACCT-02. |
+| D-50 | *(2026-11-05)* **FR-SEC-05 outcome accepted.** If an OEM transfer tool (e.g. Samsung Smart Switch) copies app data despite the exclusion rules, the app detects a database without its key, **wipes it**, and starts at a **fresh Welcome screen with the restore offer**. | FR-SEC-05, EC-67, R-20. |
+| D-51 | *(2026-11-05)* **Currency picker: funds codes shown, X-codes not.** ISO 4217 "funds" codes (e.g. BOV, CLF, UYW) are supported and listed **at the end** of the currency picker, after featured and regular currencies. Non-currency X-codes (e.g. XAU, XDR, XTS) are not offered. | FR-CUR-01, FR-CUR-07. |
 
 ## 3. Business goals & success metrics
 
@@ -427,12 +435,14 @@ Canonical screen set: the spec's §13 16-screen set, with §5 content mapped ont
 | ID | Requirement | Pri | Tier | Acceptance criteria |
 |----|-------------|-----|------|---------------------|
 | FR-GOLD-01 | Paywall showing monthly, yearly and lifetime plans with store-localized prices. | M | — | Prices from store (final TBD, D-12). |
-| FR-GOLD-02 | Purchase via Google Play Billing and StoreKit 2; **every purchase is verified by the backend** (FR-BE-02) before Gold is granted; Android purchases are acknowledged by the backend. | M | — | A forged or replayed purchase token is rejected; a pending purchase does not grant Gold (BR-GOLD-05). |
-| FR-GOLD-03 | Restore purchases (store restore → backend re-verification). | M | — | Restore works on a new phone without sign-in for the same store account. |
+| FR-GOLD-02 | Purchase via Google Play Billing and StoreKit 2; **every purchase is verified by the backend** (FR-BE-02) before Gold is granted; Android purchases are acknowledged by the backend. | M | — | A forged or replayed purchase token is rejected; a pending purchase does not grant Gold (BR-GOLD-05). "Replayed" includes a genuine token presented from an install that is not entitled to it under FR-GOLD-08 (cap or account rule) or without valid device attestation where FR-GOLD-09 requires it — such a request grants nothing. |
+| FR-GOLD-03 | Restore purchases (store restore → backend re-verification), subject to the anti-sharing rules (FR-GOLD-08) and device attestation (FR-GOLD-09) (D-46). | M | — | Restore works on a new phone without sign-in for the same store account, as long as the purchase is not account-linked to a different account and the install-limit rule of FR-GOLD-08 is applied. |
 | FR-GOLD-04 | Entitlement works offline: the app caches a backend-signed entitlement and honours it until its expiry + grace period (BR-GOLD-03). | M | — | Airplane mode for 5 days does not lose Gold. |
 | FR-GOLD-05 | Locked features show a preview and a non-intrusive upgrade prompt (D-08). | M | — | Max one unsolicited paywall per week (A-22). |
 | FR-GOLD-06 | Renewals, cancellations, refunds and revocations reported by the stores update the entitlement (via store server notifications, FR-BE-03) and reach the app on next contact. | M | — | A refunded purchase removes Gold at next app open after grace. |
-| FR-GOLD-07 | Cross-platform Gold: a signed-in user (R-04) who bought Gold on one platform gets Gold on the other after signing in there. | M | — | Buy on Android, sign in on iPhone with same account → Gold active. |
+| FR-GOLD-07 | Cross-platform Gold: a signed-in user (R-04) who bought Gold on one platform gets Gold on the other after signing in there. | M | — | Buy on Android, sign in on iPhone with same account → Gold active. Cross-platform installs count toward the FR-GOLD-08 limit. |
+| FR-GOLD-08 | **Anti-sharing (D-46).** (a) At most **3 installs** may hold Gold from one purchase at the same time. (b) A purchase **linked to an account** (FR-ACCT-02) moves only between installs **signed in to that account**. Which install gives up Gold when the limit is reached, how the user is told, and how installs are released are defined in **ADR-012 Amendment (2026-11-05)**. | M | — | **Given** a yearly Gold purchase already holding Gold on 3 installs, **when** a 4th install restores it, **then** at no moment do more than 3 installs hold a valid entitlement for that purchase (outcome per ADR-012 Amendment). **Given** a purchase linked to account A, **when** an install that is signed out, or signed in to account B, presents its token, **then** no Gold is granted and the user is told to sign in with the account that owns it (Egyptian colloquial copy, no account details revealed). **Given** the same purchase restored on a 2nd install, **then** Gold is granted (sharing within the limit is not treated as replay). |
+| FR-GOLD-09 | **Device attestation on restore (D-45, D-46).** A restore request carries a Play Integrity token (Android) or App Attest assertion (iOS); the backend verifies it before granting Gold. Whether purchase *verification* also requires it is decided in ADR-012 Amendment (2026-11-05). The attestation carries no other device data (BR-SYNC-03). | M | — | **Given** a restore with a missing, invalid, expired or replayed attestation, **then** no Gold is granted and the app shows a retry/help message. **Given** a valid attestation and a valid token within the FR-GOLD-08 rules, **then** Gold is granted. No device identifier (IMEI, advertising ID, serial, phone number) is stored by the backend from the attestation. |
 
 ### 7.20 Export / import (EXP)
 | ID | Requirement | Pri | Tier | Acceptance criteria |
@@ -479,7 +489,7 @@ Canonical screen set: the spec's §13 16-screen set, with §5 content mapped ont
 | FR-SEC-02 | App lock with biometrics/passcode; app content hidden in OS app switcher. | M | F | — |
 | FR-SEC-03 | **All locally stored data is encrypted** (D-18): database, preferences/settings, cached catalog, entitlement cache, queued contributions, generated images awaiting share, and temp files. Nothing financial is kept in plain SharedPreferences / UserDefaults or plain files. | M | — | Static scan of app sandbox after a test session finds no plaintext amounts, merchant names, card digits or message text. |
 | FR-SEC-04 | The encryption key is generated on the device and held in Android Keystore / iOS Keychain (device-only, not synced to other devices). | M | — | Key never appears in DB, preferences, logs or backups. |
-| FR-SEC-05 | App data is excluded from OS-level backups and device-to-device transfer (Android Auto Backup, iCloud device backup of the app container) — Zaghlol's own encrypted backup (FR-BAK) is the only supported transfer path. | M | — | Restoring an OS backup to a new phone does not produce a half-readable Zaghlol database. |
+| FR-SEC-05 | App data is excluded from OS-level backups and device-to-device transfer (Android Auto Backup, iCloud device backup of the app container) — Zaghlol's own encrypted backup (FR-BAK) is the only supported transfer path. | M | — | Restoring an OS backup to a new phone does not produce a half-readable Zaghlol database. **(D-50)** **Given** an OEM transfer tool (e.g. Samsung Smart Switch) has copied Zaghlol's app data to a new phone despite the exclusion rules, **when** the app starts and finds a database whose key is not in this device's Keystore/Keychain, **then** it wipes the database and all other encrypted local data, and opens a fresh Welcome screen offering restore from Zaghlol's own backup (FR-BAK-03) — no crash, no error loop, no partial data shown. |
 | FR-SEC-06 | Exports (CSV/Excel) and share images are written only to a location the user picks, after a warning that they are not encrypted (FR-EXP-05). | M | — | — |
 | FR-SEC-07 | Warn (not block) when the device is rooted / jailbroken that data protection is weaker. | S | — | — |
 | FR-SEC-08 | All app ↔ backend traffic over TLS 1.2+; certificate pinning per architect decision (OQ-15). | M | — | — |
@@ -502,9 +512,9 @@ Canonical screen set: the spec's §13 16-screen set, with §5 content mapped ont
 | ID | Requirement | Pri | Tier | Acceptance criteria |
 |----|-------------|-----|------|---------------------|
 | FR-ACCT-01 | Optional "Sign in with Google" (both platforms) and "Sign in with Apple" (iOS; also offered on Android if feasible) from Settings → Gold (D-14). | M | — | Never required for any feature except cross-platform Gold. |
-| FR-ACCT-02 | Signing in links the current install's entitlement(s) to the account; the backend stores only account ID, provider, email if the provider returns it (A-47), linked purchase tokens and install IDs. | M | — | No financial data sent at sign-in. |
+| FR-ACCT-02 | Signing in links the current install's entitlement(s) to the account; the backend stores only account ID, provider, email taken only from the ID token's `email` claim when present (A-47, D-49), linked purchase tokens and install IDs. | M | — | No financial data sent at sign-in. Sign in with Apple on Android requests `scope=email`; Apple's `user` form field is never read or stored. |
 | FR-ACCT-03 | Sign out keeps all local data; Gold from another platform stops after cache expiry. | M | — | — |
-| FR-ACCT-04 | Delete account from inside the app removes account record and links on the backend (store purchases remain with the store account). | M | — | Required by App Store guideline for apps with sign-in. |
+| FR-ACCT-04 | Delete account from inside the app removes account record and links on the backend (store purchases remain with the store account). **Exception (D-47):** support-lookup audit rows (FR-BE-11) — HMAC e-mail pseudonym + account ID, no plain e-mail — are kept until their own 1-year retention ends, then deleted (NFR-PRIV-07). The privacy notice states this. | M | — | Required by App Store guideline for apps with sign-in. After deletion, no backend table holds the plain e-mail or the account record; only audit rows younger than 1 year remain, and they are gone 1 year after their creation. |
 
 ### 7.28 Catalog sync (SYNC)
 | ID | Requirement | Pri | Tier | Acceptance criteria |
@@ -528,8 +538,9 @@ Canonical screen set: the spec's §13 16-screen set, with §5 content mapped ont
 | FR-BE-06 | Catalog service: versioned catalog with delta endpoint (FR-SYNC-02), signed payloads. | M | — | — |
 | FR-BE-10 | "Request my bank" intake (FR-PAR-14): store institution name, country, channel type and count of distinct installs; operators see a ranked list. | S | — | No message content accepted. |
 | FR-BE-07 | Contribution intake (D-16): accept anonymous merchant suggestions, aggregate by normalized name, require ≥ N distinct installs (A-48) before an operator reviews and promotes them into the catalog. | S | — | No single contribution goes live without operator approval. |
-| FR-BE-08 | Operator tools (R-05): manage catalog, review contributions, set flags, look up entitlement by install ID / account for support. | M | — | Operator access protected by strong auth (MFA). Form: admin web app **after the first release** (D-37); v1 uses scripts with the same MFA protection. |
+| FR-BE-08 | Operator tools (R-05): manage catalog, review contributions, set flags, look up entitlement by install ID / account for support. | M | — | Operator access protected by strong auth (MFA). Form: admin web app **after the first release** (D-37); v1 uses scripts with the same MFA protection. Every support lookup is audited (FR-BE-11, D-47). |
 | FR-BE-09 | Account linking for optional sign-in (FR-ACCT): verify Google / Apple ID tokens; link entitlements; delete on request. | M | — | — |
+| FR-BE-11 | **Support-lookup audit (D-47).** Every operator lookup (FR-BE-08) writes an audit row with a **keyed HMAC pseudonym of the e-mail** (key held in the secrets manager, NFR-SEC-07) plus the account ID, and no plain e-mail. Rows are deleted **1 year** after creation, regardless of later account deletion (FR-ACCT-04). | M | — | Audit table contains no plain e-mail. A row older than 1 year is deleted by the retention job; a row for a deleted account is still deleted at 1 year, not earlier or later. |
 
 ### 7.30 Per-card breakdown (CARD) — D-25
 | ID | Requirement | Pri | Tier | Acceptance criteria |
@@ -555,12 +566,13 @@ Canonical screen set: the spec's §13 16-screen set, with §5 content mapped ont
 ### 7.32 Multi-currency (CUR) — D-28, D-29
 | ID | Requirement | Pri | Tier | Acceptance criteria |
 |----|-------------|-----|------|---------------------|
-| FR-CUR-01 | Support **any active ISO 4217 currency** for capture, manual entry, accounts, assets, budgets and exports, with correct decimals and symbol; featured currencies (EGP, USD, SAR, EUR, AED, QAR, KWD, BHD, + GBP, INR — A-59) listed first. | M | F | A GBP Monzo payment, an INR HDFC payment and a JOD manual entry are each stored and shown in their own currency. |
+| FR-CUR-01 | Support **any active ISO 4217 currency** for capture, manual entry, accounts, assets, budgets and exports, with correct decimals and symbol; featured currencies (EGP, USD, SAR, EUR, AED, QAR, KWD, BHD, + GBP, INR — A-59) listed first; ISO funds codes supported and listed last; non-currency X-codes excluded (FR-CUR-07, D-51). | M | F | A GBP Monzo payment, an INR HDFC payment and a JOD manual entry are each stored and shown in their own currency. |
 | FR-CUR-02 | User sets a **primary currency** (default EGP) used to order views; it is never used to convert stored data. | M | F | — |
 | FR-CUR-03 | Every screen with totals (home, budgets, charts, card detail, net worth, chat answers, share cards) shows **one figure per currency** and offers a currency switcher when more than one currency exists in the current filter. | M | F | No screen silently adds amounts of different currencies. |
 | FR-CUR-04 | **Optional "≈ in EGP" view** (Settings toggle, off by default — A-54): adds an approximate combined total converted at the latest backend rate, always marked "≈" with the rate date. Applies to home, net worth and charts. | M | F | Turning it off removes every combined figure. Offline: uses last known rates, labelled stale after 24 h. |
 | FR-CUR-05 | The ≈EGP target currency can be changed to any supported currency (e.g. ≈ in USD) (A-60). | C | F | — |
 | FR-CUR-06 | Self-transfers between accounts in **different currencies** (e.g. Wise USD → NBE EGP) can be paired manually; auto-suggested when the amounts match within ±3% at the day's rate and timestamps are within 3 days (A-61). | S | F | Paired cross-currency transfers are excluded from spend and income in both currencies. |
+| FR-CUR-07 | **Currency picker order and coverage (D-51).** Order: (1) featured currencies (A-59), (2) all other active ISO 4217 currencies, (3) ISO 4217 **funds codes** (e.g. BOV, CLF, CHE, CHW, COU, MXV, USN, UYI, UYW) at the end. ISO **non-currency X-codes** (precious metals XAU/XAG/XPT/XPD, XDR, XSU, XUA, bond-market units XBA…XBD, testing XTS, no-currency XXX) are not offered. X-codes that are real circulating currencies (XOF, XAF, XCD, XPF) are regular currencies and are offered. | M | F | **Given** the picker is open, **then** the featured currencies appear first, BOV/CLF/UYW appear after every regular currency, and XAU, XDR, XTS are absent; searching "XOF" finds the West African CFA franc. A CLF manual entry is stored with CLF's ISO exponent (4) and shown in CLF (BR-MON-03). |
 
 ---
 
@@ -569,7 +581,7 @@ Canonical screen set: the spec's §13 16-screen set, with §5 content mapped ont
 ### Money & currency
 - **BR-MON-01** Amounts are stored exactly (integer minor units), never as floating point.
 - **BR-MON-02** Every amount carries its currency. EGP is the reporting currency.
-- **BR-MON-03** Minor units follow each currency's ISO 4217 exponent: most currencies 2 decimals; **KWD, BHD, OMR, JOD, TND, LYD, IQD = 3**; JPY, KRW and others = 0. Parsing, storage, display, CSV and backup must respect the exponent.
+- **BR-MON-03** Minor units follow each currency's ISO 4217 exponent: most currencies 2 decimals; **KWD, BHD, OMR, JOD, TND, LYD, IQD = 3**; JPY, KRW and others = 0; funds codes CLF and UYW = 4 (D-51). Parsing, storage, display, CSV and backup must respect the exponent.
 - **BR-FX-01** ~~Store an EGP equivalent per transaction.~~ Superseded (D-28): amounts are stored only in their original currency (plus billed amount/currency when the message states one). Conversion happens **only at display time** in the optional ≈ view, using the latest backend rate (A-62).
 - **BR-FX-02** Totals, budgets, averages, charts and alerts are always computed **within one currency**. Mixing currencies is allowed only in the ≈ view and must be labelled approximate.
 - **BR-FX-03** A transaction counts toward the card it was charged to in the **billed currency** (e.g. a USD purchase on an EGP card counts as EGP for that card and its EGP budgets; the original USD amount is kept for display).
@@ -644,7 +656,8 @@ Canonical screen set: the spec's §13 16-screen set, with §5 content mapped ont
 ### Sync & backend
 - **BR-SYNC-01** Catalog, flags and prices are fetched at most once per 24 h after a successful sync, triggered on app open.
 - **BR-SYNC-02** After a failed sync, retry on next app open with exponential back-off (max 1 attempt per hour).
-- **BR-SYNC-03** The backend receives only: anonymous install ID, platform, app version, catalog version, purchase tokens/transactions, optional account ID token, (if opted in) merchant contributions, and (if the user asks) bank-support requests (name, country, channel type). Never: messages, transactions, amounts, balances, budgets, assets, user rules, contacts, location.
+- **BR-SYNC-03** The backend receives only: anonymous install ID, platform, app version, catalog version, purchase tokens/transactions, optional account ID token, **a device attestation token/assertion (Play Integrity on Android, App Attest on iOS) for purchase restore and, if ADR-012 Amendment (2026-11-05) requires it, purchase verification — carrying no other device data (D-45)**, (if opted in) merchant contributions, and (if the user asks) bank-support requests (name, country, channel type). Never: messages, transactions, amounts, balances, budgets, assets, user rules, contacts, location.
+  - *Classification (D-48)* — these fall under existing classes and are not new data: the server-issued cursors `flagsVersion`, `pricesAsOf`, `entitlementIssuedAt`, `registryVersion` → "catalog/app version"; the restore `productId` → "purchase tokens/transactions"; the raw sign-in `nonce` → "optional account ID token".
 - **BR-SYNC-04** A merchant contribution = {normalized merchant string, institution code, chosen system category}. Excluded: person-to-person transfers, phone numbers, IPAs, anything matching a person-name pattern, user-defined category names. Contributions are batched and sent with the daily sync.
 
 ### Backup & export
@@ -663,6 +676,7 @@ Canonical screen set: the spec's §13 16-screen set, with §5 content mapped ont
 - **NFR-PRIV-06** Backend data retention: install records deleted after 12 months of inactivity; request logs kept ≤ 30 days without full IP addresses (A-50).
 - **NFR-PRIV-04** Non-financial SMS are never read into storage (Play spyware policy).
 - **NFR-PRIV-05** Comply with Egypt's Personal Data Protection Law No. 151/2020 and store privacy disclosures (Play Data safety, Apple privacy labels) (A-39).
+- **NFR-PRIV-07** Support-lookup audit (D-47, FR-BE-11): audit rows hold only a keyed HMAC pseudonym of the e-mail and the account ID; retention is exactly 1 year from creation, then deletion, including for accounts deleted earlier (FR-ACCT-04). The HMAC key is a backend secret (NFR-SEC-07) and never leaves the backend. Purpose (support accountability) and retention are stated in the privacy notice as required by PDPL 151/2020 (NFR-PRIV-05). Store disclosures (Play Data safety, Apple privacy labels) list device attestation (D-45) where the stores require it.
 
 ### Security (SEC)
 - **NFR-SEC-01** Database encrypted at rest with AES-256 (SQLCipher); key generated on device, protected by Android Keystore / iOS Keychain.
@@ -799,6 +813,10 @@ Canonical screen set: the spec's §13 16-screen set, with §5 content mapped ont
 - EC-47 Restoring a backup on a phone whose catalog is newer/older than the backup's → restored rules apply; catalog re-syncs.
 - EC-48 Contribution opt-in turned off while a batch is queued → queued batch is deleted, not sent.
 - EC-49 Feature flag turned off after a user has created Zakah data → data kept, feature hidden.
+- EC-64 A Gold purchase token is shared to a 4th phone while 3 installs already hold Gold → never more than 3 at once (FR-GOLD-08; outcome per ADR-012 Amendment (2026-11-05)).
+- EC-65 Account-linked purchase restored on a phone that is signed out or signed in to another account → no Gold; user asked to sign in with the owning account (FR-GOLD-08).
+- EC-66 Restore on a device where attestation fails or is unavailable (rooted phone, custom ROM, Play services missing, App Attest unsupported) → no Gold; help message (FR-GOLD-09, R-19).
+- EC-67 OEM transfer tool (e.g. Samsung Smart Switch) copies the encrypted DB to a new phone without its Keystore key → DB wiped, fresh Welcome with restore offer (FR-SEC-05, D-50).
 
 ## 11. External integrations
 
@@ -821,6 +839,7 @@ Canonical screen set: the spec's §13 16-screen set, with §5 content mapped ont
 | INT-19 | Google Cloud Pub/Sub — Real-time Developer Notifications | Backend | Subscription lifecycle events | Yes | — |
 | INT-20 | App Store Server API + App Store Server Notifications V2 | Backend | Verify transactions, lifecycle events | Yes | Signed JWS. |
 | INT-21 | Sign in with Google / Sign in with Apple | App + Backend | Optional account (FR-ACCT) | Yes | Apple requires Sign in with Apple if other social logins are offered on iOS. |
+| INT-22 | Play Integrity API / App Attest (DeviceCheck) | App + Backend | Device attestation for Gold restore (and possibly verify) (D-45) | Yes | No other device data sent (BR-SYNC-03); design in ADR-012 Amendment (2026-11-05). |
 | INT-13 | Local notifications | Both | Alerts & reminders | No | — |
 | INT-14 | Biometrics (BiometricPrompt / LocalAuthentication) | Both | App lock | No | — |
 | INT-15 | System share sheet | Both | Share cards & exports | No | — |
@@ -872,6 +891,8 @@ Canonical screen set: the spec's §13 16-screen set, with §5 content mapped ont
 | R-15 | iOS can't read online-bank app notifications; Wise/Revolut/Monzo/bunq/N26 capture on iOS limited to Apple Pay, OCR and statements. | Weaker iOS experience for P-06. | Clear per-bank setup guidance; statement import; OCR templates for these apps' screens. |
 | R-16 | Online banks change notification wording often and send them in the app's UI language. | Parse failures. | Review queue; templates per language; fixtures from real samples (OQ-04); prompt to use English in bank app. |
 | R-17 | Per-currency reporting adds UI complexity for a mostly-EGP audience. | Confusing screens. | Currency UI appears only when a second currency exists (EC-55). |
+| R-19 | Attestation required on restore (D-46) locks out legitimate buyers whose device can't attest (rooted, custom ROM, no Play services, App Attest unsupported) or when the attestation service is down; attestation quotas/cost. | Paying users lose Gold after a phone change; support load; store complaints. | Clear help copy; operator support path (FR-BE-08); ADR-012 Amendment to define retry and outage behaviour and quota sizing. |
+| R-20 | OEM transfer tools (D-50) silently copy app data; user expects data to arrive and sees a fresh Welcome. | Perceived data loss. | Welcome offers restore from Zaghlol backup; backup reminders (FR-BAK-08); copy explains that only Zaghlol's own backup moves data. |
 
 ## 14. Assumptions (to be confirmed at review)
 
@@ -923,7 +944,7 @@ Canonical screen set: the spec's §13 16-screen set, with §5 content mapped ont
 | A-44 | Catalog updates re-categorize only non-user-verified, catalog-categorized transactions (FR-SYNC-05). |
 | A-45 | Reimbursement suggestion window: 7 days after the expense. |
 | A-46 | Raw message text is included in backups (encrypted) so parsing can be re-run after app updates. |
-| A-47 | For optional sign-in, the backend may store the email the provider returns (Apple may give a relay address); used only for support lookup. |
+| A-47 | For optional sign-in, the backend may store the email taken **only from the Apple/Google ID token's `email` claim** (Apple may give a relay address); used only for support lookup. For Sign in with Apple on Android, `scope=email` is requested and Apple's `user` field is never read (D-49). Lookups are audited with an HMAC pseudonym, kept 1 year (D-47). |
 | A-48 | A contributed merchant needs ≥ 5 distinct installs before operator review. |
 | A-49 | Late reimbursements restate the original expense's cycle. |
 | A-50 | Backend retention: inactive installs deleted after 12 months; logs ≤ 30 days, IPs truncated. |
@@ -981,6 +1002,7 @@ Canonical screen set: the spec's §13 16-screen set, with §5 content mapped ont
 | §7 12 charts | FR-CHT, BR-BUD-04 |
 | §8 SMS lab & regex | FR-PAR, BR-ING |
 | §9 Stack & schema | Input to Phase 3 (not requirements); "zero backend" superseded by D-13 |
+| v1.4 PO decisions (D-45…D-51) | BR-SYNC-03, FR-GOLD-02/03/07/08/09, FR-SEC-05, FR-ACCT-02/04, FR-BE-11, FR-CUR-01/07, BR-MON-03, NFR-PRIV-07, A-47, EC-64…67, R-19/20, INT-22; ADR-012 Amendment (2026-11-05) |
 | v0.4 review (D-32, D-33) | `institutions.md`, FR-PAR-01/13/14/15, FR-ING-A-07, FR-BE-10, FR-BAK-01…05/08/09, BR-BAK-02, BR-SYNC-03 |
 | v0.3 review (D-25…D-31) | FR-CARD, FR-CAP, FR-CUR, FR-ING-A-07/08, FR-ING-I-08, FR-PAR-10…12, FR-ACC-06, FR-EXP-06/07, FR-CHT-05/06, FR-HOME-05, BR-CAP, BR-FX-02/03, P-06 |
 | v0.2 review (D-13…D-24) | FR-ACCT, FR-SYNC, FR-BE, FR-SEC-03…08, FR-BAK-06…08, FR-XFR-06…09, FR-ONB-09…12, BR-MON-03, BR-XFR-05…08, BR-SYNC, BR-GOLD-05/06, NFR-BE |
@@ -1017,6 +1039,9 @@ Canonical screen set: the spec's §13 16-screen set, with §5 content mapped ont
 | Entitlement | The backend-signed record that a user has Gold (plan + expiry). |
 | RTDN | Google Play Real-time Developer Notifications. |
 | ASSN V2 | App Store Server Notifications version 2. |
+| Device attestation | A platform-signed statement that a request comes from a genuine, unmodified copy of Zaghlol on a real device: Play Integrity (Android) or App Attest (iOS) (D-45). |
+| HMAC pseudonym | A keyed hash of a value (here the e-mail) that lets operators match records without storing the value itself (D-47). |
+| Funds code | ISO 4217 code for a fund or accounting unit rather than circulating cash (e.g. BOV, CLF, UYW); shown last in the currency picker (D-51). |
 
 ## 18. Approval
 
