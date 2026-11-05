@@ -21,13 +21,8 @@ jobs:
         with:
           channel: stable
           cache: true
-      - name: Resolve workspace
-        run: flutter pub get
-      - name: TEMP emit lockfile
-        run: |
-          gzip -9c pubspec.lock | base64 -w0 | fold -w 3000 > lock.chunks
-          n=0
-          while read -r c || [ -n "$c" ]; do n=$((n+1)); echo "::notice::LOCKB64 $n $c"; done < lock.chunks
+      - name: Resolve workspace (lockfile must be up to date)
+        run: flutter pub get --enforce-lockfile
       - name: dart format
         run: |
           if ! dart format --output=none --set-exit-if-changed . > format.log 2>&1; then
