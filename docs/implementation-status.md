@@ -29,12 +29,12 @@
 ## Tasks
 | ID | Title | MS | Class | Model | Agent | Depends on | Status | Verification evidence | Notes |
 |---|---|---|---|---|---|---|---|---|---|
-| T-001 | Create mono-repo scaffold with pub workspace, app flavors and pure-Dart packages | M0 | C2 | Sonnet | flutter-core-engineer | — | IN_REVIEW | CI run 41720291844 (5/5 green) @ e859d26 | code-reviewer running |
+| T-001 | Create mono-repo scaffold with pub workspace, app flavors and pure-Dart packages | M0 | C2 | Sonnet | flutter-core-engineer | — | CHANGES_REQUESTED | CI run 41720291844 (5/5 green) @ e859d26; review round 1: 3 majors | Round 1 fixes in progress (F1 release builds, F2 all flavors, F3 delete bootstrap workflow) |
 | T-002 | Add custom lint rules (no double in money, no UI string literals, no print) | M0 | C2 | Sonnet | flutter-core-engineer | T-001 | TODO | — |  |
 | T-003 | App CI pipeline (format, analyze, unit, golden, native unit) | M0 | C2 | Sonnet | flutter-core-engineer | T-001 | TODO | — |  |
 | T-004 | Pigeon setup and stale-generation check | M0 | C2 | Sonnet | flutter-core-engineer | T-001 | TODO | — |  |
 | T-005 | Backend solution scaffold, Docker Compose and CI | M0 | C2 | Sonnet | backend-engineer | — | DONE | CI run 41720361381 (4/4 green) @ d98b37d; review [T-005](05-reviews/T-005.md) APPROVED | Squash-merged; follow-ups FU-001…005 |
-| T-006 | OpenAPI v1 spec and contract-test harness | M0 | C2 | Sonnet | backend-engineer | T-005 | IN_PROGRESS | — | Branch task/T-006-openapi; includes FU-001, FU-005; no app/ changes until T-001 merges |
+| T-006 | OpenAPI v1 spec and contract-test harness | M0 | C2 | Sonnet | backend-engineer | T-005 | IN_REVIEW | CI run 41724793615 (5/5 green) @ 1ec35fd | code-reviewer running; includes FU-001, FU-005 |
 | T-007 | SPK-05: encrypted SQLite (SQLite3MultipleCiphers) + FTS5 trigram on both platforms | M0 | C4 | Opus | flutter-core-engineer | T-001 | TODO | — |  |
 | T-008 | SPK-01: Android receiver → spool → WorkManager → headless engine latency | M0 | C4 | Opus | native-platform-engineer | T-001, T-004 | TODO | — |  |
 | T-009 | SPK-03: can an iOS App Intent process immediately with a headless Flutter engine? | M0 | C4 | Opus | native-platform-engineer | T-001, T-004 | TODO | — |  |
@@ -224,3 +224,5 @@
 | 2026-11-03 | T-005 DONE: code-reviewer APPROVED (14 minor/nit findings → FU-001…005), CI green, squash-merged to main. T-006 unblocked. |
 | 2026-11-03 | T-006 started (backend-engineer, Sonnet), scoped to backend/** + backend-api.md §6 to avoid conflict with T-001. |
 | 2026-11-03 | T-001 implementation finished; Lead verified CI (5/5 green) and diff; code review started. |
+| 2026-11-03 | T-001 review round 1: CHANGES_REQUESTED (F1–F3 majors; F4/F6/F8/F12/F15 cheap fixes added; others deferred to T-002/T-003/T-023/T-141/T-165/T-176). T-006 implemented, CI green, in review. |
+| 2026-11-05 | Both agents paused by a usage limit; resumed. |
