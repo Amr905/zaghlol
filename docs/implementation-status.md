@@ -17,7 +17,7 @@
 ## Summary
 | Milestone | Total | DONE | IN_PROGRESS | BLOCKED |
 |---|---|---|---|---|
-| M0 | 28 | 2 | 1 | 0 |
+| M0 | 28 | 3 | 0 | 0 |
 | M1 | 29 | 0 | 0 | 0 |
 | M2 | 29 | 0 | 0 | 0 |
 | M3 | 18 | 0 | 0 | 0 |
@@ -29,7 +29,7 @@
 ## Tasks
 | ID | Title | MS | Class | Model | Agent | Depends on | Status | Verification evidence | Notes |
 |---|---|---|---|---|---|---|---|---|---|
-| T-001 | Create mono-repo scaffold with pub workspace, app flavors and pure-Dart packages | M0 | C2 | Sonnet | flutter-core-engineer | — | CHANGES_REQUESTED | CI run 41720291844 (5/5 green) @ e859d26; review round 1: 3 majors | Round 1 fixes in progress (F1 release builds, F2 all flavors, F3 delete bootstrap workflow) |
+| T-001 | Create mono-repo scaffold with pub workspace, app flavors and pure-Dart packages | M0 | C2 | Sonnet | flutter-core-engineer | — | DONE | CI run 42103098253 (10/10 green) @ ec6214e; review [T-001](05-reviews/T-001.md) APPROVED (round 2) | Squash-merged; deferred findings appended to T-002/003/022/023/141/165/176 |
 | T-002 | Add custom lint rules (no double in money, no UI string literals, no print) | M0 | C2 | Sonnet | flutter-core-engineer | T-001 | TODO | — |  |
 | T-003 | App CI pipeline (format, analyze, unit, golden, native unit) | M0 | C2 | Sonnet | flutter-core-engineer | T-001 | TODO | — |  |
 | T-004 | Pigeon setup and stale-generation check | M0 | C2 | Sonnet | flutter-core-engineer | T-001 | TODO | — |  |
@@ -236,3 +236,4 @@
 | 2026-11-05 | Both agents paused by a usage limit; resumed. |
 | 2026-11-05 | T-006 review round 1: CHANGES_REQUESTED (1 major: `osMajor` not in BR-SYNC-03 → dropped per SRS precedence). Follow-ups FU-006…012 logged. |
 | 2026-11-05 | T-006 DONE: re-review APPROVED (round 2), CI green, squash-merged to main. Unblocks T-124, T-141 (with other deps). FU-013 logged. |
+| 2026-11-05 | T-001 DONE: re-review APPROVED (round 2), CI 10/10 green, squash-merged. Deferred findings appended to the owning task files. T-165 to run before T-015/T-016. |
