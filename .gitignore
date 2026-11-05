@@ -1,4 +1,6 @@
 # Flutter / Dart
+.dart_tool/
+packages/*/build/
 app/.dart_tool/
 app/build/
 app/.flutter-plugins

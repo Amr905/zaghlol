@@ -17,7 +17,7 @@
 ## Summary
 | Milestone | Total | DONE | IN_PROGRESS | BLOCKED |
 |---|---|---|---|---|
-| M0 | 28 | 2 | 1 | 0 |
+| M0 | 28 | 3 | 1 | 0 |
 | M1 | 29 | 0 | 0 | 0 |
 | M2 | 29 | 0 | 0 | 0 |
 | M3 | 18 | 0 | 0 | 0 |
@@ -29,9 +29,9 @@
 ## Tasks
 | ID | Title | MS | Class | Model | Agent | Depends on | Status | Verification evidence | Notes |
 |---|---|---|---|---|---|---|---|---|---|
-| T-001 | Create mono-repo scaffold with pub workspace, app flavors and pure-Dart packages | M0 | C2 | Sonnet | flutter-core-engineer | — | CHANGES_REQUESTED | CI run 41720291844 (5/5 green) @ e859d26; review round 1: 3 majors | Round 1 fixes in progress (F1 release builds, F2 all flavors, F3 delete bootstrap workflow) |
+| T-001 | Create mono-repo scaffold with pub workspace, app flavors and pure-Dart packages | M0 | C2 | Sonnet | flutter-core-engineer | — | DONE | CI run 42103098253 (10/10 green) @ ec6214e; review [T-001](05-reviews/T-001.md) APPROVED (round 2) | Squash-merged; deferred findings appended to T-002/003/022/023/141/165/176 |
 | T-002 | Add custom lint rules (no double in money, no UI string literals, no print) | M0 | C2 | Sonnet | flutter-core-engineer | T-001 | TODO | — |  |
-| T-003 | App CI pipeline (format, analyze, unit, golden, native unit) | M0 | C2 | Sonnet | flutter-core-engineer | T-001 | TODO | — |  |
+| T-003 | App CI pipeline (format, analyze, unit, golden, native unit) | M0 | C2 | Sonnet | flutter-core-engineer | T-001 | IN_PROGRESS | — | Branch task/T-003-app-ci; also builds the safe regen workflow (lockfile/goldens) needed by T-002/T-004/T-022 |
 | T-004 | Pigeon setup and stale-generation check | M0 | C2 | Sonnet | flutter-core-engineer | T-001 | TODO | — |  |
 | T-005 | Backend solution scaffold, Docker Compose and CI | M0 | C2 | Sonnet | backend-engineer | — | DONE | CI run 41720361381 (4/4 green) @ d98b37d; review [T-005](05-reviews/T-005.md) APPROVED | Squash-merged; follow-ups FU-001…005 |
 | T-006 | OpenAPI v1 spec and contract-test harness | M0 | C2 | Sonnet | backend-engineer | T-005 | DONE | CI run 42102066749 (5/5 green) @ 8d60381; review [T-006](05-reviews/T-006.md) APPROVED (round 2) | Squash-merged; osMajor dropped per BR-SYNC-03 |
@@ -40,7 +40,7 @@
 | T-009 | SPK-03: can an iOS App Intent process immediately with a headless Flutter engine? | M0 | C4 | Opus | native-platform-engineer | T-001, T-004 | TODO | — |  |
 | T-010 | SPK-02: OCR accuracy on synthetic InstaPay/wallet receipts | M0 | C3 | Sonnet | native-platform-engineer | T-001 | TODO | — |  |
 | T-011 | SPK-04: on-device ar-EG speech availability across the device matrix | M0 | C2 | Sonnet | native-platform-engineer | T-001 | TODO | — |  |
-| T-012 | Money and Currency value types with ISO 4217 table | M0 | C4 | Opus | flutter-core-engineer | T-001 | TODO | — |  |
+| T-012 | Money and Currency value types with ISO 4217 table | M0 | C4 | Opus | flutter-core-engineer | T-001 | READY | — | Design note merged; starts after T-003 merges (adds glados → needs lockfile regen) |
 | T-013 | Text & amount normalization utilities (digits, separators, groupings) | M0 | C3 | Sonnet | parsing-engine-engineer | T-012 | TODO | — |  |
 | T-014 | Result/Failure types, SafeException and domain event bus | M0 | C2 | Sonnet | flutter-core-engineer | T-001 | TODO | — |  |
 | T-015 | Secure key bootstrap for the database key | M0 | C4 | Opus | flutter-core-engineer | T-007 | TODO | — |  |
@@ -193,7 +193,7 @@
 | T-162 | Settings S-60 incl. privacy info and About | M6 | C2 | Sonnet | flutter-ui-engineer | T-020, T-087, T-115 | TODO | — |  |
 | T-163 | Categories & rules S-63/S-64 incl. custom categories (Gold) | M6 | C2 | Sonnet | flutter-ui-engineer | T-074, T-119 | TODO | — |  |
 | T-164 | Custom message template builder engine and screen S-65 (Gold) | M6 | C3 | Sonnet | parsing-engine-engineer | T-033, T-119 | TODO | — |  |
-| T-165 | Exclude app data from OS backups and device transfer | M6 | C4 | Opus | native-platform-engineer | T-001 | TODO | — |  |
+| T-165 | Exclude app data from OS backups and device transfer | M6 | C4 | Opus | native-platform-engineer | T-001 | READY | — | Design note merged; starts after T-003 merges (adds iOS test target + macOS CI job → same files as T-003) |
 | T-166 | Delete everything (local wipe + backend install delete) | M6 | C4 | Opus | flutter-core-engineer | T-015, T-141, T-152 | TODO | — |  |
 | T-167 | Zakah engine (hawl, nisab, native-unit dues) | M7 | C4 | Opus | flutter-core-engineer | T-113 | TODO | — |  |
 | T-168 | Zakah screen S-46 behind flag with disclaimer | M7 | C2 | Sonnet | flutter-ui-engineer | T-167, T-025, T-087 | TODO | — |  |
@@ -222,7 +222,7 @@
 | FU-010 | T-006 #9, #11, #12 | Spectral via package.json + lockfile + pinned Node; YAML float scalars as numbers; Spectral `type[*]` rule | FU-004 hardening pass | OPEN |
 | FU-011 | T-006 #14 | Each endpoint task adds a live response-vs-spec test incl. `400 UNKNOWN_FIELD` | T-124, T-128, T-130…T-136 | OPEN |
 | FU-013 | T-006 #6, #13, #15, #16 | Remove `installs.os_major` from backend-schema.md (**before T-122**); global UTC-`Z` JSON converter + InstallId UUID v4 pattern (T-124); pin openapi-generator version (T-141) | solution-architect / T-124 / T-141 | OPEN |
-| FU-012 | T-006 decision 2 | Record that server-issued version cursors (flagsVersion, pricesAsOf, entitlementIssuedAt, registryVersion) fall under BR-SYNC-03 "catalog/app version" | product owner | OPEN (PO confirm) |
+| FU-012 | T-006 decision 2 (PO APPROVED 2026-11-05; recording in SRS v1.4) | Record that server-issued version cursors (flagsVersion, pricesAsOf, entitlementIssuedAt, registryVersion) fall under BR-SYNC-03 "catalog/app version" | product owner | OPEN (PO confirm) |
 
 ## Log
 | Date | Event |
@@ -236,3 +236,8 @@
 | 2026-11-05 | Both agents paused by a usage limit; resumed. |
 | 2026-11-05 | T-006 review round 1: CHANGES_REQUESTED (1 major: `osMajor` not in BR-SYNC-03 → dropped per SRS precedence). Follow-ups FU-006…012 logged. |
 | 2026-11-05 | T-006 DONE: re-review APPROVED (round 2), CI green, squash-merged to main. Unblocks T-124, T-141 (with other deps). FU-013 logged. |
+| 2026-11-05 | T-001 DONE: re-review APPROVED (round 2), CI 10/10 green, squash-merged. Deferred findings appended to the owning task files. T-165 to run before T-015/T-016. |
+| 2026-11-05 | Wave 2 started: T-003 (app CI + regen workflow). Design notes for T-012, T-165 in progress. Held: T-002/T-004/T-022 (need T-003 lockfile/golden regen; T-002 and T-004 both change pubspec.lock → serialize), T-014 (same package as T-012), T-122 (needs FU-013), T-123/T-138 (after architect API decisions). |
+| 2026-11-05 | Design notes for T-012 and T-165 merged. Their follow-ups were added to T-015/T-016 (orphaned-DB wipe) and T-017/T-019 (money CHECK constraints). The FU-api-decisions branch (CI green) is in security-privacy review. |
+| 2026-11-05 | FU-api-decisions security review: CHANGES_REQUESTED (2 blockers: restore token sharing, Apple nonce; 4 majors). Findings 2–8, 10–12 fixed at 8fe1251 (CI green). |
+| 2026-11-05 | PO decisions: D1 Gold restore = 3-seat limit + device attestation (Play Integrity / App Attest; BR-SYNC-03 amended); D2 support-lookup audit rows kept 1 year; D3/FU-012/A-47/Smart-Switch outcome approved; funds currency codes shown at end of picker. Architect applying D1/D2; requirements-analyst recording SRS v1.4. |
