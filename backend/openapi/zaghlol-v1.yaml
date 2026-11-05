@@ -1092,7 +1092,7 @@ paths:
       tags: [Admin]
       operationId: adminDailyActive
       summary: Daily active install counters
-      description: Any authenticated operator role (`x-required-roles: [any]`). Aggregate counters only.
+      description: 'Any authenticated operator role (`x-required-roles: [any]`). Aggregate counters only.'
       x-required-roles: [any]
       security:
         - operatorOidc: []
