@@ -39,6 +39,9 @@ The catalog is versioned monotonically by operator publishes. The app needs sign
 - **Merchant cascades.** Deleting a merchant cascades to its aliases; the alias tombstones come first in the delta.
 - **Conflicts.** Removing or referencing a non-live category or merchant gives `409 ADMIN_CONFLICT`.
 - **Contribution keys move to the body** (`POST /admin/v1/contributions:promote|:reject`), because `merchantNorm` is free text.
+- *Security review (2026-11-05):*
+  - **Collecting looks absent:** a `collecting` aggregate gets the same `404` as a missing one (same body, one query, no timing difference). `409` is only for `promoted`/`rejected` aggregates or draft conflicts. T-129 tests that the two responses are byte-identical.
+  - **Canonical `b64u` keys:** no padding; re-encoding must round-trip; the decoded text must equal its normalized form; at most 64 characters. Anything else gives `400`.
 
 **Consequences.**
 - T-125 builds the draft workspace with these keys and cascades, and adds `ADMIN_CONFLICT` to `ErrorCodes`.

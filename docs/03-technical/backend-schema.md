@@ -95,16 +95,30 @@ CREATE TABLE purchase_events (                 -- audit trail of state transitio
 CREATE TABLE store_notifications (             -- FR-BE-03, idempotent ingest
   id uuid PRIMARY KEY,
   store text NOT NULL, external_id text NOT NULL,   -- Pub/Sub messageId | ASSN notificationUUID
-  type text NOT NULL, received_at timestamptz NOT NULL DEFAULT now(),
-  processed_at timestamptz, attempts integer NOT NULL DEFAULT 0, last_error text,
-  payload_digest bytea NOT NULL,                    -- SHA-256; raw payload not retained after processing
+  type text NOT NULL,                               -- RTDN notificationType / ASSN notificationType
+  subtype text,                                     -- ASSN subtype
+  product_id text,                                  -- subscriptionId / sku / productId
+  store_key text,                                   -- purchase token (Google) | originalTransactionId (Apple), to re-read state
+  environment text CHECK (environment IN ('production','sandbox')),
+  event_time timestamptz,                           -- eventTimeMillis / signedDate
+  received_at timestamptz NOT NULL DEFAULT now(),
+  processed_at timestamptz, attempts integer NOT NULL DEFAULT 0,
+  last_error text,                                  -- error code only; never payload text
+  payload_digest bytea NOT NULL,                    -- SHA-256 of the received body, for dedupe/forensics
   UNIQUE (store, external_id)
-);
+);   -- Only these extracted columns are written, after authentication (backend-api §4.5). The raw envelope is NEVER stored;
+     -- fields not listed above (including unknown third-party fields) are not persisted anywhere.
 
 -- Effective entitlement is computed, not stored: view over purchases for an install or account
 CREATE VIEW v_entitlements AS
   SELECT COALESCE(p.account_id::text, p.install_id::text) AS subject, p.plan, p.state, p.expires_at, p.store
   FROM purchases p WHERE p.state IN ('active','in_grace','canceled_active');
+
+CREATE TABLE signin_replay (                   -- single-use ID tokens (ADR-016 amendment 2)
+  key_hash bytea PRIMARY KEY,                   -- SHA-256(nonce claim), or SHA-256(id_token) for a Google token without nonce
+  provider text NOT NULL CHECK (provider IN ('google','apple')),
+  expires_at timestamptz NOT NULL               -- token exp; rows purged after expiry
+);
 
 CREATE TABLE signing_keys (                    -- metadata; private keys live in the KMS
   kid text PRIMARY KEY, purpose text NOT NULL CHECK (purpose IN ('entitlement','sync')),
@@ -181,6 +195,8 @@ CREATE TABLE operators (id uuid PRIMARY KEY, oidc_subject text NOT NULL UNIQUE, 
   roles text[] NOT NULL, disabled_at timestamptz);
 CREATE TABLE audit_log (id bigint GENERATED ALWAYS AS IDENTITY PRIMARY KEY, operator_id uuid NOT NULL,
   action text NOT NULL, target text NOT NULL, details jsonb NOT NULL, at timestamptz NOT NULL DEFAULT now());
+-- Support lookups: target = install id, or 'email:' || hex(HMAC-SHA256(K_audit, NFC(trim(lower(email))))); details.account_id
+-- = the matched account. Never the e-mail. Pseudonymous personal data (see §3, §4).
 ```
 
 ## 3. Constraints that protect privacy
@@ -191,8 +207,9 @@ CREATE TABLE audit_log (id bigint GENERATED ALWAYS AS IDENTITY PRIMARY KEY, oper
 | Distinct counts without tracking | `install_hash` = HMAC-SHA256 with a pepper held in the KMS; it can't be joined back to `installs` without the pepper |
 | No device identifiers | No column exists for IMEI, ad ID or phone number; DTOs reject unknown fields |
 | Purchase link to a person | Store receives `obfuscatedAccountId`/`appAccountToken` = HMAC(install_id), never e-mail |
-| Support lookups by e-mail | The e-mail travels only in a POST body (`backend-api.md` §5.2), and `audit_log.details` stores SHA-256 of the lower-cased e-mail, never the e-mail |
-| Third-party envelopes | Pub/Sub, ASSN and Apple callback bodies are open, but only the listed fields are read; unlisted fields are never stored (`store_notifications` keeps `payload_digest` only) |
+| Support lookups by e-mail | The e-mail travels only in a POST body (`backend-api.md` §5.2). The audit row stores `HMAC-SHA256(K_audit, NFC(trim(lower(email))))` plus the matched `account_id`, never the e-mail. `K_audit` is a dedicated KMS key, separate from the `install_hash` pepper, so the value can't be reversed by a dictionary attack without the KMS. It is still **pseudonymous personal data** and falls under the audit retention (§4) |
+| ID token replay | `signin_replay` keeps only hashes, until the token's `exp` |
+| Third-party envelopes | Pub/Sub, ASSN and Apple callback bodies are open, but only the listed fields are read, after authentication. `store_notifications` stores only its explicit extracted columns and `payload_digest`, never the raw envelope or unknown fields |
 
 ## 4. Retention (NFR-PRIV-06, A-50)
 
@@ -204,7 +221,8 @@ CREATE TABLE audit_log (id bigint GENERATED ALWAYS AS IDENTITY PRIMARY KEY, oper
 | `merchant_contributions` raw rows | Deleted when the aggregate is promoted/rejected, or after 180 days | same |
 | `bank_requests` | 24 months (aggregate counts kept) | same |
 | Request logs | ≤ 30 days, IPs truncated to /24 (v4) or /48 (v6) | logging pipeline |
-| `audit_log` | 3 years | — |
+| `audit_log` (incl. HMAC'd support-lookup keys and `account_id`, pseudonymous personal data) | 3 years unless PO decides otherwise (D2) | `RetentionPurger` |
+| `signin_replay` | Until the token's `exp` | `RetentionPurger` |
 | DB backups (PITR) | 14 days | provider |
 
 ## 5. Capacity check (NFR-BE-04)

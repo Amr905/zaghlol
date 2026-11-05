@@ -42,5 +42,9 @@ The backend becomes critical for **new** purchases only. A background retry prot
 - **Restore** skips the install-binding check (`obfuscatedExternalAccountId` / `appAccountToken`), because after a phone change the binding names the old install. Proof of ownership is that the device's store account could produce the token or transaction.
 - Re-binding is capped at 3 moves per purchase in 30 days; past that the item is `invalid` and an alert fires.
 - Per-item failures fold into an aggregate `status` (active > pending > expired > refunded > invalid), and restore has no 422.
+- *Abuse limits (security review, 2026-11-05):*
+  - a restore bucket of 5/hour per install;
+  - a per-purchase limit of 10 attempts/day, keyed by SHA-256 of the token or `originalTransactionId`;
+  - a global Play / App Store call budget with priority for verify and the ack sweeper. When the budget is short, restore gets `503` with `Retry-After`.
 
 **Consequences.** T-130 implements the v2 calls. T-132 implements the restore rules, the rebind cap and the aggregate. T-145 sends items instead of bare tokens. Sources: Google Play Developer API reference for [`purchases.productsv2.getproductpurchasev2`](https://developers.google.com/android-publisher/api-ref/rest/v3/purchases.productsv2/getproductpurchasev2) and the [one-time product lifecycle guide](https://developer.android.com/google/play/billing/lifecycle/one-time), checked 2026-11-05.

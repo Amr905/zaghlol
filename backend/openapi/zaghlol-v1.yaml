@@ -372,6 +372,12 @@ paths:
         store account that owns a purchase can obtain its token or signed transaction. Per-item failures never
         fail the call: they fold into the aggregate `status` (precedence active > pending > expired >
         refunded > invalid), so there is no 422 here.
+
+        **Abuse limits.** Restore has its own rate-limit bucket (5 calls per hour per install, on top of the
+        general per-install and per-/24 buckets) and a per-purchase limit keyed by SHA-256 of the token or
+        `originalTransactionId` (10 restore attempts per day across all installs). Store calls draw on a
+        global Play / App Store call budget in which verify and the acknowledge sweeper have priority; when
+        the budget is short, restore answers `503 UPSTREAM_UNAVAILABLE` with `Retry-After`.
       security:
         - installToken: []
         - installToken: []
@@ -459,6 +465,14 @@ paths:
         account the server answers `409 INSTALL_LINKED_TO_OTHER_ACCOUNT`; resend with `replaceLink: true` to
         confirm. For Apple the `authorizationCode` is exchanged for a refresh token that is stored encrypted
         and used only to revoke on deletion. Idempotent for 24 hours per `Idempotency-Key`.
+
+        Replay protection (ADR-016 amendment 2). The app sends the **raw** client nonce (at least 128 bits,
+        base64url); the provider saw only `hex(SHA-256(raw))`, the lower-case hex SHA-256 of the raw nonce's
+        ASCII bytes. The server recomputes that value and compares it with the token's `nonce` claim in
+        constant time, so a copied claim does not pass. A token whose `iat` is more than 10 minutes old is
+        rejected (`422 ID_TOKEN_INVALID`). Every accepted token is single-use: the server stores the hash of its
+        nonce (or, for a Google token without a nonce, the SHA-256 of the token) until the token's `exp`, and
+        a second use is rejected. The rule applies to Google whenever the app sends a nonce.
       security:
         - installToken: []
       parameters:
@@ -474,7 +488,7 @@ paths:
             example:
               provider: apple
               idToken: eyJhbGciOiJSUzI1NiJ9.eyJzdWIiOiIxIn0.c2ln
-              nonce: 9f86d081884c7d659a2feaa0c55ad015
+              nonce: Q2FwdGFpblphZ2hsb2xOb25jZTEyMzQ
               authorizationCode: c1a0b2d3e4f5
       responses:
         '200':
@@ -566,6 +580,14 @@ paths:
         with the value it generated and then calls `POST /v1/accounts/signin`, which verifies the ID token and
         nonce. Apple's `user` field (name, e-mail) and any field not listed are ignored, never forwarded,
         never stored and never logged. The request body and the `Location` header are never logged.
+
+        **Location construction (no injection).** Every forwarded value must first match its pattern
+        (`code`, `id_token`, `state`, `error`), otherwise `400`. The URL is then built with a URI builder from
+        constants only (scheme `intent`, host `callback`, the configured package and the
+        `signinwithapple` scheme), with each forwarded value added as a percent-encoded query parameter.
+        Raw input is never concatenated. Test requirement (T-135): for each field, inputs containing `#`, `;`,
+        `%23`, CR/LF and `&` either get a `400` or yield a `Location` with exactly one
+        `#Intent;package=<applicationId>;scheme=signinwithapple;end` tail and no extra parameter.
       x-third-party-body: true
       requestBody:
         required: true
@@ -610,6 +632,14 @@ paths:
         immediately; a worker re-reads the authoritative state from the Play API. The envelope is Google's
         Pub/Sub push format and is open: fields Google adds later are ignored, never stored and never logged.
         Request size limit is 256 KB.
+
+        **Order of checks.** The authentication handler verifies the OIDC JWT **before the body is read**:
+        signature (Google JWKS), `iss` (`https://accounts.google.com` or `accounts.google.com`), `aud` equal
+        to the pinned push audience, `email` equal to the push service account, `email_verified = true`, and
+        `exp`. On failure it answers `401` without buffering the body. Only then is the body bound to a DTO
+        with exactly the listed fields (no `[JsonExtensionData]` or `JsonElement` catch-all), `message.data`
+        is decoded, and the extracted columns are written to `store_notifications`. The raw envelope is never
+        stored.
       x-third-party-body: true
       security:
         - googlePubSubOidc: []
@@ -651,6 +681,12 @@ paths:
         bundle ID and environment checked). Used for both the production and sandbox URLs. Deduplicated on
         `notificationUUID`. Answers 200 after storing; Apple retries otherwise. The body is open: fields Apple
         adds later are ignored, never stored and never logged. Request size limit is 256 KB.
+
+        **Order of checks.** Only `signedPayload` is read (DTO with that one field, no catch-all). The server
+        verifies the x5c chain to Apple Root CA G3 and the ES256 signature, then `bundleId` and `environment`,
+        then the nested `signedTransactionInfo` / `signedRenewalInfo` JWS the same way. Nothing is written
+        before all of these pass; a failure answers `401`. Then the extracted columns are written to
+        `store_notifications`. The raw body is never stored.
       x-third-party-body: true
       requestBody:
         required: true
@@ -953,9 +989,11 @@ paths:
         Role `catalog_editor`. Audited. The aggregate key travels in the body, not the path, because
         `merchantNorm` is free text. With `merchantId` the string becomes an `exact` alias of that live draft
         merchant; without it a new draft merchant is created (`canonical` = `merchantNorm`) with the string as
-        its `exact` alias. `categoryCode` defaults to the top-voted category. Answers `404` if no aggregate has
-        the key and `409 ADMIN_CONFLICT` if it is not `ready_for_review` or the merchant or category is not
-        live in the draft.
+        its `exact` alias. `categoryCode` defaults to the top-voted category. Answers `404 NOT_FOUND` if no
+        aggregate has the key **or the aggregate is still `collecting`**. The two cases are indistinguishable:
+        same status, same body, and one lookup that filters out `collecting`, so timing does not differ either.
+        `409 ADMIN_CONFLICT` only if the aggregate is already `promoted` or `rejected`, or the merchant or
+        category is not live in the draft.
       x-required-roles: [catalog_editor]
       security:
         - operatorOidc: []
@@ -1006,8 +1044,9 @@ paths:
       operationId: adminRejectContribution
       summary: Reject a contribution
       description: |
-        Role `catalog_editor`. Audited. The aggregate key travels in the body. Answers `404` if no aggregate
-        has the key and `409 ADMIN_CONFLICT` if it is not `ready_for_review`.
+        Role `catalog_editor`. Audited. The aggregate key travels in the body. Answers `404 NOT_FOUND` if no
+        aggregate has the key or it is still `collecting` (indistinguishable, as for promote), and
+        `409 ADMIN_CONFLICT` only if it is already `promoted` or `rejected`.
       x-required-roles: [catalog_editor]
       security:
         - operatorOidc: []
@@ -1174,8 +1213,9 @@ paths:
       description: |
         Role `support_viewer`. The body holds exactly one of `installId` or `email`; neither ever appears in a
         URL, so neither reaches access logs, proxies or CDN logs. Returns entitlement status only; there is no
-        endpoint that lists installs. Audited: the audit row stores the install ID or the SHA-256 of the
-        lower-cased e-mail, never the e-mail itself. Not idempotency-keyed (read-only).
+        endpoint that lists installs. Audited: the audit row stores the install ID, or
+        `HMAC-SHA256(K_audit, NFC(trim(lower(email))))` with a dedicated KMS key, plus the matched
+        `account_id`; never the e-mail itself. Not idempotency-keyed (read-only).
       x-required-roles: [support_viewer]
       security:
         - operatorOidc: []
@@ -1362,13 +1402,15 @@ components:
       description: |
         Entry key; its form must match `entity`. `categories`: the category code (`dining`). `merchants`: the
         merchant id (`812`). `aliases`: `<merchantId>:<b64u(aliasNorm)>`. `keywords`:
-        `<lang>:<b64u(keywordNorm)>`. `b64u` is base64url without padding of the UTF-8 string, so free text
+        `<lang>:<b64u(keywordNorm)>`. `b64u` is canonical base64url without padding of the UTF-8 string
+        (padding and non-canonical encodings are rejected; the decoded text must equal its own normalized form
+        and be at most 64 characters), so free text
         (spaces, Arabic, `/`, `%`, `:`) never needs path escaping. Keyword identity is `keyword` + `lang`.
       schema:
         type: string
         minLength: 1
-        maxLength: 700
-        pattern: '^([a-z][a-z0-9_]{1,31}|[0-9]{1,9}|[0-9]{1,9}:[A-Za-z0-9_-]+|[a-z]{2}:[A-Za-z0-9_-]+)$'
+        maxLength: 360
+        pattern: '^([a-z][a-z0-9_]{1,31}|[0-9]{1,9}|[0-9]{1,9}:[A-Za-z0-9_-]{2,342}|[a-z]{2}:[A-Za-z0-9_-]{2,342})$'
       examples:
         category:
           value: dining
@@ -2155,9 +2197,11 @@ components:
           $ref: '#/components/schemas/Jws'
         nonce:
           type: string
-          minLength: 8
-          maxLength: 128
-          description: SHA-256 of the client nonce. Required for Apple.
+          pattern: '^[A-Za-z0-9_-]{22,128}$'
+          description: |
+            The raw client nonce (at least 128 bits of CSPRNG output, base64url without padding), never its
+            hash. The server checks `hex(SHA-256(nonce)) == id_token.nonce` in constant time. Required for
+            Apple; required for Google whenever the platform flow supports a nonce.
         authorizationCode:
           type: string
           minLength: 1
@@ -2255,8 +2299,7 @@ components:
       properties:
         code:
           type: string
-          minLength: 1
-          maxLength: 2048
+          pattern: '^[A-Za-z0-9._-]{1,2048}$'
         id_token:
           $ref: '#/components/schemas/Jws'
         state:
@@ -2265,7 +2308,8 @@ components:
           pattern: '^[A-Za-z0-9_-]{16,128}$'
         error:
           type: string
-          maxLength: 64
+          description: Apple error code; today only `user_cancelled_authorize`.
+          pattern: '^[a-z_]{1,64}$'
         user:
           type: string
           maxLength: 4096

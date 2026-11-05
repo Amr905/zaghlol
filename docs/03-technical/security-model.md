@@ -49,7 +49,7 @@ Out of scope: protecting a fully compromised, unlocked device in an attacker's h
 ### 4.1 App ↔ backend
 - **Default anonymous.** An install token (opaque bearer) is scoped to its own install. There are no user passwords anywhere (FR-ONB-02).
 - **Optional account** (FR-ACCT, ADR-016):
-  - Google or Apple ID tokens are verified server-side with JWKS, audience, issuer, expiry and nonce checks.
+  - Google or Apple ID tokens are verified server-side with JWKS, audience, issuer and expiry checks. They also need: `iat` no more than 10 minutes old; a nonce pre-image check, where the app sends the raw nonce and the server compares `hex(SHA-256(raw))` with the claim in constant time; and single use (`signin_replay`) (ADR-016 amendment 2).
   - The server issues its own ES256 account JWT (30 d).
   - An account only *links* entitlements, and grants no access to any data other than entitlement status.
 - **Purchase authorization:**

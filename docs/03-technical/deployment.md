@@ -51,7 +51,7 @@ tag vX:  build prodSms + prodNoSms AAB (signed via Play App Signing upload key f
 - API service: 2+ stateless replicas (0.5 vCPU / 512 MB each), autoscaling to 6.
 - Worker service: 1 replica (singleton leases via PostgreSQL advisory locks).
 - Managed PostgreSQL 17: 2 vCPU, zone-redundant HA, PITR 14 days, private networking only.
-- KMS: ES256 signing keys, HMAC pepper, envelope keys.
+- KMS: ES256 signing keys, HMAC pepper (`install_hash`), a separate audit HMAC key (`K_audit`, support-lookup e-mails), envelope keys.
 - Object storage + CDN: catalog snapshots, the signed `.shortcut` file and store-review media.
 - Managed TLS certificates; WAF/rate limiting at the edge.
 - Google Cloud project for the Play Developer API service account and the Pub/Sub topic + push subscription to `/v1/notifications/google`.

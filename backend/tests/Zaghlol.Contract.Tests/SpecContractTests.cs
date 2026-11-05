@@ -125,6 +125,12 @@ public class SpecContractTests
                 failures.Add($"{operation.Label}: a third-party body must not be an app or operator call");
             }
 
+            string[] expectedSchemes = operation.Id == "ingestGoogleNotification" ? ["googlePubSubOidc"] : [];
+            if (!schemes.SequenceEqual(expectedSchemes, StringComparer.Ordinal))
+            {
+                failures.Add($"{operation.Label}: security must be exactly [{string.Join(", ", expectedSchemes)}]");
+            }
+
             if (operation.Body["requestBody"]?["content"] is not JsonObject content || content.Count != 1)
             {
                 failures.Add($"{operation.Label}: expected exactly one request media type");

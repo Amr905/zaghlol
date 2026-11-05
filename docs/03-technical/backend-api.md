@@ -17,7 +17,7 @@ The source of truth during Phase 5 is `backend/openapi/zaghlol-v1.yaml`, generat
 | Response signing | Security-relevant responses carry `Zaghlol-Signature: kid=<kid>; alg=ES256; sig=<base64url>`, an ECDSA P-256 signature over the **exact response body bytes** after decompression. The app verifies it against embedded public keys (ADR-012/013) and drops unsigned or invalid bodies. |
 | Time | `serverTime` (RFC 3339 UTC) in every response body. The app stores it to drive the 24 h throttle (EC-43). |
 | Errors | RFC 9457 `application/problem+json`: `{type, title, status, code, detail?, retryAfterSeconds?}`. `code` is a stable `UPPER_SNAKE` string (§6). Error bodies never echo request data. |
-| Rate limits | Per install token and per /24 IP (token bucket). `429` with `Retry-After`. |
+| Rate limits | Per install token and per /24 IP (token bucket). `429` with `Retry-After`. Extra buckets: `POST /v1/purchases/restore` 5/hour per install, plus 10 restore attempts/day per purchase (keyed by SHA-256 of the token or `originalTransactionId`). Outbound Play and App Store calls share a global budget in which verify and the acknowledge sweeper have priority over restore (§4.3). |
 | Request size | ≤ 64 KB, except `/v1/notifications/*` (≤ 256 KB). |
 | Unknown fields in requests | **Rejected** (`400 UNKNOWN_FIELD`) in every body whose shape Zaghlol defines (app and operator calls), so the app can't accidentally send more than BR-SYNC-03 allows. **Ignored** in the three bodies whose shape Google or Apple define: the Pub/Sub push envelope (`/v1/notifications/google`), the ASSN V2 body (`/v1/notifications/apple`) and Apple's `form_post` (`/v1/apple/android-callback`). The server reads only the listed fields there and never stores or logs the rest. These operations carry `x-third-party-body: true` in the OpenAPI file, and a contract test checks that no other operation does (ADR-022 amendment). |
 | Query strings | Never carry personal data or credentials (e-mails, tokens, ID tokens, codes). The server never logs query strings or raw paths, only the route template (`error-handling-and-observability.md` §3.2). |
@@ -170,6 +170,7 @@ Authorization rules:
 - Each item runs the verify procedure above, except the install-binding check (step 4 on Android; `appAccountToken` on iOS). Only the store account that owns a purchase can obtain its token or signed transaction, and the binding still names the **old** install after a phone change.
 - A valid purchase bound to another install is **re-bound** to the calling install (FR-GOLD-03), and `purchase_events` records the move (`cause = restore_rebind`). A purchase re-bound more than 3 times in 30 days is not moved again: the item counts as `invalid` and an alert fires (token-sharing abuse).
 - Per-item failures never fail the call, so restore has no 422. `status` is the best item outcome by the precedence `active > pending > expired > refunded > invalid`; `restoredCount` counts `active` items; `entitlement` is the merged entitlement after the restore, or `null`.
+- **Abuse limits:** restore has its own bucket (5/hour per install) and a per-purchase limit (10 attempts/day across installs). Both give `429`. Store calls draw on a global Play / App Store budget that reserves capacity for verify and the ack sweeper. When the budget is short, restore gets `503 UPSTREAM_UNAVAILABLE` with `Retry-After` and never delays an acknowledgement.
 
 **Entitlement token** (JWS compact, ES256, `kid` header):
 ```json
@@ -192,19 +193,34 @@ Returns `{entitlement: {token}, serverTime}`, merging install and account purcha
   1. The chain is verified and `notificationUUID` is deduped.
   2. Types handled: `SUBSCRIBED`, `DID_RENEW`, `DID_FAIL_TO_RENEW` (grace), `EXPIRED`, `GRACE_PERIOD_EXPIRED`, `REFUND`, `REVOKE`, `DID_CHANGE_RENEWAL_STATUS`.
   3. The handler returns 200 after storing; Apple retries otherwise.
-- **Both envelopes are open** (FU-007): a field Google or Apple add later is ignored, not rejected. Authenticity comes from the OIDC token and the JWS chain, not from the envelope shape. Only `payload_digest` and the extracted fields are stored (`backend-schema.md` `store_notifications`).
+- **Both envelopes are open** (FU-007): a field Google or Apple add later is ignored, not rejected. Authenticity comes from the OIDC token and the JWS chain, not from the envelope shape.
+- **Order of checks (Google):**
+  1. The authentication handler verifies the OIDC JWT **before the body is read**: JWKS signature, `iss` = `https://accounts.google.com` (or `accounts.google.com`), `aud` = the pinned push audience, `email` = the push service account, `email_verified = true`, and `exp`. On failure it returns `401` without buffering the body.
+  2. Only then is the body bound.
+- **Order of checks (Apple):**
+  1. Only `signedPayload` is read.
+  2. The x5c chain to Apple Root CA G3, the signature, `bundleId` and `environment` are verified, then the nested `signedTransactionInfo` / `signedRenewalInfo` JWS.
+  3. Nothing is written before all of these pass; a failure returns `401`.
+- **What is stored:** only the explicit extracted columns of `store_notifications` and `payload_digest`. The raw envelope is never stored. DTOs list exactly the fields read. `[JsonExtensionData]`, `JsonElement`/`JsonNode` catch-all members and dictionary "rest" properties are forbidden (a review checklist item for T-133/T-134).
+- **Test requirement (T-133/T-134):** post a valid notification with a sentinel unknown field (and a sentinel value inside `message.attributes`) and assert the sentinel is absent from the database, the logs and the trace spans.
 
 ### 4.6 Accounts
 ```json
 // POST /v1/accounts/signin
-{ "provider": "apple", "idToken": "eyJ…", "nonce": "sha256-of-client-nonce", "authorizationCode": "c1a…" }
+{ "provider": "apple", "idToken": "eyJ…", "nonce": "<raw client nonce, ≥128-bit base64url>", "authorizationCode": "c1a…" }
 // 200 (signed)
 { "accountId": "uuid", "accountToken": "eyJ…", "entitlement": { "token": "eyJ…" }, "linkedInstalls": 2, "serverTime": "…" }
 ```
 
 **Verification:**
 - **Google:** `aud` must be one of our OAuth client IDs; check `iss` and `exp`; JWKS from Google.
-- **Apple:** `aud` must be our Services ID or bundle ID; `iss = https://appleid.apple.com`; the nonce must match. The `authorizationCode` is exchanged for a refresh token, stored encrypted and used **only** to revoke on deletion.
+- **Apple:** `aud` must be our Services ID or bundle ID; `iss = https://appleid.apple.com`. The `authorizationCode` is exchanged for a refresh token, stored encrypted and used **only** to revoke on deletion.
+- **Nonce and replay (both providers, ADR-016 amendment 2):**
+  - The app generates a **raw** nonce: ≥ 128 bits from a CSPRNG, base64url without padding (`^[A-Za-z0-9_-]{22,128}$`). It gives the provider only `hex(SHA-256(raw))`, the lower-case hex SHA-256 of the raw string's ASCII bytes. It sends the **raw** value in `nonce`.
+  - The server computes `hex(SHA-256(nonce))` and compares it with the token's `nonce` claim in constant time. Someone holding only the token knows the claim but not its pre-image, so a copied claim doesn't pass.
+  - A token whose `iat` is more than 10 minutes old gives `422 ID_TOKEN_INVALID`.
+  - Single use: the server inserts the nonce claim's hash into `signin_replay` (`backend-schema.md`), kept until the token's `exp`. A second use of the same token gives `422 ID_TOKEN_INVALID`. A Google token without a nonce is keyed by SHA-256 of the whole token.
+  - Required for Apple. For Google it is used wherever `google_sign_in` supports a nonce, and then the same checks apply. An `Idempotency-Key` replay returns the stored result before this check runs, so legitimate retries still work.
 
 **After verification:**
 1. Upsert the account.
@@ -214,10 +230,19 @@ Returns `{entitlement: {token}, serverTime}`, merging install and account purcha
 If the install was linked to a different account, the response is **409 `INSTALL_LINKED_TO_OTHER_ACCOUNT`** and the app asks the user (EC-46). Re-sending with `"replaceLink": true` confirms.
 
 **Sign in with Apple on Android** (CR-05, FU-008):
-1. The app opens a Custom Tab to `https://appleid.apple.com/auth/authorize` with `client_id` = our Services ID, `redirect_uri` = `https://api.zaghlol.app/v1/apple/android-callback`, `response_type=code id_token`, `response_mode=form_post`, `scope=email`, a random `state` (≥ 128 bits, base64url) and `nonce` = SHA-256 of a random client nonce.
+1. The app opens a Custom Tab to `https://appleid.apple.com/auth/authorize` with `client_id` = our Services ID, `redirect_uri` = `https://api.zaghlol.app/v1/apple/android-callback`, `response_type=code id_token`, `response_mode=form_post`, `scope=email`, a random `state` (≥ 128 bits, base64url; single-use, expires after ≤ 10 minutes, held only by the app) and `nonce` = `hex(SHA-256(raw nonce))`. When Chrome is installed, the Custom Tab is opened with an explicit Chrome package.
 2. Apple POSTs `code`, `id_token`, `state` (and on the first authorization `user`) as `application/x-www-form-urlencoded` to the callback. On cancel it posts `error=user_cancelled_authorize` and `state`.
-3. The callback checks that `state` is present and well formed, drops `user` and any unlisted field, stores nothing, and answers **303** to `intent://callback?<code, id_token, state | error, state>#Intent;package=<applicationId>;scheme=signinwithapple;end`. That is the format the `sign_in_with_apple` package expects. Chrome resolves an `intent://` URL on the device and only for that package, so the tokens never travel in an HTTP URL.
-4. The app compares `state` with its own value, then calls `POST /v1/accounts/signin` with `{provider: "apple", idToken, nonce, authorizationCode}`. That call does all verification (aud = Services ID, iss, exp, nonce).
+3. The callback first checks every forwarded field against its pattern; any mismatch gives `400`:
+   - `state`: `^[A-Za-z0-9_-]{16,128}$`
+   - `code`: `^[A-Za-z0-9._-]{1,2048}$`
+   - `id_token`: compact JWS
+   - `error`: `^[a-z_]{1,64}$`
+
+   It drops `user` and any unlisted field and stores nothing. It then answers **303** to `intent://callback?<code, id_token, state | error, state>#Intent;package=<applicationId>;scheme=signinwithapple;end`, the format the `sign_in_with_apple` package expects. Chrome resolves an `intent://` URL on the device and only for that package, so the tokens never travel in an HTTP URL.
+   - **Building the `Location`:** use a URI builder. Scheme `intent`, host `callback`, the configured package and the `signinwithapple` scheme are constants; each forwarded value is added as a percent-encoded query parameter. Raw input is never concatenated.
+   - **Test requirement (T-135):** for each field, inputs containing `#`, `;`, `%23`, CR/LF or `&` must either get `400` or produce a `Location` with exactly one `#Intent;package=…;scheme=signinwithapple;end` tail and no injected parameter.
+4. The app checks `state` against its unexpired, unused value and then discards it. It then calls `POST /v1/accounts/signin` with `{provider: "apple", idToken, nonce (raw), authorizationCode}`. That call does all verification (aud = Services ID, iss, exp, iat ≤ 10 min, nonce pre-image, single use).
+5. **Browser caveat (T-147, T-172):** device tests must cover Samsung Internet and Firefox as the default browser. If a browser ignores `package=` in the intent URL, record it as a known limitation, or move the return leg to a verified Android App Link (`https://zaghlol.app/auth/apple`, with the parameters in the fragment) for that case.
 
 `form_post` is required, not a choice. Apple accepts `response_mode=query` only with `response_type=code` and no scopes. That mode would give us no `id_token` and no e-mail for support lookup (A-47), and it would put the code in a URL. The callback body and the `Location` header are never logged.
 
@@ -277,7 +302,12 @@ The table above uses shorthand. These are the exact operations in `zaghlol-v1.ya
 
 ### 5.2 Draft catalog keys, tombstones and body-keyed admin calls (FU-008, FU-009)
 
-**Entry keys.** The path `{id}` of `PUT`/`DELETE /admin/v1/catalog/draft/{entity}/{id}` is the entity's natural key. Its form must match `entity`. `b64u(s)` is base64url without padding of the UTF-8 bytes of `s`, so free text (spaces, Arabic, `/`, `%`, `:`) never needs path escaping, and ASP.NET Core's `%2F` handling can't corrupt it.
+**Entry keys.** The path `{id}` of `PUT`/`DELETE /admin/v1/catalog/draft/{entity}/{id}` is the entity's natural key. Its form must match `entity`. `b64u(s)` is base64url without padding of the UTF-8 bytes of `s`, so free text (spaces, Arabic, `/`, `%`, `:`) never needs path escaping, and ASP.NET Core's `%2F` handling can't corrupt it. Keys must be **canonical**, and anything else gives `400 VALIDATION_FAILED`:
+  - no `=` padding;
+  - re-encoding the decoded bytes must reproduce the input exactly (rejects non-zero trailing bits and other non-canonical forms);
+  - the bytes must be valid UTF-8;
+  - the decoded text must equal its own normalized form (`merchant_norm` normalization for aliases, keyword normalization for keywords, `parsing-engine.md` §5);
+  - the decoded text is at most 64 characters, matching the backend `merchant_norm` cap.
 
 | Entity | Identity (= sync op key) | `{id}` form | Example | Body (non-key fields only) |
 |---|---|---|---|---|
@@ -290,9 +320,9 @@ The table above uses shorthand. These are the exact operations in `zaghlol-v1.ya
 - **Create.** Categories, aliases and keywords are created by `PUT`. Merchants are created by `POST /admin/v1/catalog/draft/merchants`, which allocates the id and returns `201` with the `MerchantOp`. `PUT` on an unknown merchant id gives `404`.
 - **Delete = tombstone.** `DELETE` marks the draft entry deleted and returns `204`. The next publish writes it with the new version and `deleted = true`, so deltas `(a, b]` carry `op: delete` (ADR-013). An entry that was never published is removed outright. A `PUT` on a tombstoned key revives it.
 - **Cascades and conflicts.** Deleting a merchant tombstones its aliases too, and the delta lists those alias deletes before the merchant delete. Deleting a category still referenced by a live category, merchant or keyword gives **409 `ADMIN_CONFLICT`**, as does a `PUT`/`POST` that references a category or merchant that isn't live in the draft. A missing or already-deleted key gives `404`.
-- **Contributions.** `:promote` takes `{merchantNorm, institutionCode, merchantId?, categoryCode?}`. With `merchantId` the string becomes an `exact` alias of that merchant; without it a new draft merchant (`canonical` = `merchantNorm`) is created. `categoryCode` defaults to the top vote. `:reject` takes `{merchantNorm, institutionCode}`. Both return `{merchantNorm, institutionCode, status, merchantId?}`. A key with no aggregate gives `404`; an aggregate that isn't `ready_for_review` gives `409 ADMIN_CONFLICT`. The key moved from the path to the body because `merchantNorm` is free text.
+- **Contributions.** `:promote` takes `{merchantNorm, institutionCode, merchantId?, categoryCode?}`. With `merchantId` the string becomes an `exact` alias of that merchant; without it a new draft merchant (`canonical` = `merchantNorm`) is created. `categoryCode` defaults to the top vote. `:reject` takes `{merchantNorm, institutionCode}`. Both return `{merchantNorm, institutionCode, status, merchantId?}`. A key with no aggregate **and** a key whose aggregate is still `collecting` both give `404 NOT_FOUND`, indistinguishably: same status and body, and one query that excludes `collecting`, so there is no timing difference. `409 ADMIN_CONFLICT` is returned only for an aggregate already `promoted` or `rejected`, or for a draft conflict. **Test requirement (T-129):** a `collecting` key and an absent key return byte-identical responses on both `:promote` and `:reject`. The key moved from the path to the body because `merchantNorm` is free text.
 - **Review queue privacy.** Aggregates still `collecting` (fewer than 5 distinct installs, A-48) are never returned. The API status enum is `ready_for_review | promoted | rejected`.
-- **Support lookup.** `POST /admin/v1/support/entitlement:lookup` takes `{installId}` or `{email}` (exactly one) and returns `SupportEntitlement`. The audit row stores the install ID, or SHA-256 of the lower-cased e-mail, never the e-mail.
+- **Support lookup.** `POST /admin/v1/support/entitlement:lookup` takes `{installId}` or `{email}` (exactly one) and returns `SupportEntitlement`. The audit row stores the install ID, or `HMAC-SHA256(K_audit, NFC(trim(lower(email))))`, plus the matched `account_id` when the lookup hits an account. It never stores the e-mail. A plain SHA-256 of an e-mail can be reversed by dictionary, so a keyed HMAC is used. `K_audit` is a dedicated KMS key, separate from the `install_hash` pepper. The audit value is pseudonymous personal data under the `audit_log` retention: 3 years unless the PO decides otherwise (D2).
 
 ## 6. Error codes
 

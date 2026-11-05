@@ -39,6 +39,9 @@ Scale by adding API replicas. A module can be split out later if needed.
 - Decision: (b).
   - The support lookup becomes `POST /admin/v1/support/entitlement:lookup` with `{installId}` or `{email}`.
   - Logs and spans carry the route template only. Query strings, raw paths and `Location` headers are never logged (`error-handling-and-observability.md` §3.2).
+  - *Security review (2026-11-05):* the rule also covers framework log categories (hosting diagnostics, Kestrel, HttpClient at `Warning` or filtered), HttpLogging (off or allow-listed), outbound spans (redacted URL template, because Play v2 URLs carry the purchase token) and edge body logging for `/v1/apple/*` and `/v1/notifications/*`.
+  - The lookup audit row stores `HMAC-SHA256(K_audit, NFC(trim(lower(email))))` with a dedicated KMS key, plus `account_id`. It is pseudonymous personal data, retained 3 years unless the PO decides otherwise (D2).
+  - Third-party bodies: authenticate before reading (Pub/Sub OIDC in the auth handler) or before writing (ASSN JWS chain). Store only extracted columns. No catch-all DTO members.
 
 **3. Dockerfile location (FU-001).**
 - Options:
