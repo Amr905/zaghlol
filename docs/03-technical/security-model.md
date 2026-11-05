@@ -123,7 +123,11 @@ plaintext = tar-like stream: db.snapshot, settings.json, manifest.json
   - `debugPrint` is stripped in release builds.
   - The local diagnostic log stores **codes + non-sensitive fields only**, through a typed `DiagEvent` API with an allow-listed field set.
   - Exceptions in parsing paths wrap the original exception without its message text.
-- **No OS backups:** Android `allowBackup=false` + extraction rules; iOS `isExcludedFromBackup` on the data dirs; secure storage `ThisDeviceOnly` (FR-SEC-05).
+- **No OS backups** (FR-SEC-05; T-165 design note):
+  - Android: `allowBackup=false`, `fullBackupContent` and `dataExtractionRules` exclude every domain for both `cloud-backup` and `device-transfer` (on API 31+, `allowBackup=false` alone does not stop D2D), and `hasFragileUserData=false`.
+  - iOS: `isExcludedFromBackup` is set natively in `AppDelegate` before the engine starts, on the `Library/Application Support`, `Documents`, `Caches` and `tmp` roots and on the App Group `spool/`, `Library/Application Support` and `Caches` directories. No app data goes in `UserDefaults`.
+  - Secure storage is `ThisDeviceOnly`.
+  - **Orphaned data:** a DB without its key (an OEM transfer or a leaked restore) is deleted at startup, and the app starts in first-launch state offering restore. It is never partially opened.
 - **IPC:**
   - The share intent and extension accept only declared MIME types.
   - Exported Android components are limited to the SMS receiver (permission-protected `BROADCAST_SMS`), the notification listener (`BIND_NOTIFICATION_LISTENER_SERVICE`) and the share activity.
