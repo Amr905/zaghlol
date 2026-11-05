@@ -156,7 +156,13 @@ jobs:
             tail -n 30 xcodebuild.log
             exit 1
           fi
-          grep -E "Test Case|Executed" xcodebuild.log | tail -n 10
+          grep -iE "test case|test suite|executed" xcodebuild.log | tail -n 10
+          # A green build must also prove the test bundle actually ran.
+          if ! grep -qiE "test case.*RunnerTests.*passed" xcodebuild.log; then
+            echo "::error::no passing RunnerTests test case found in xcodebuild output"
+            tail -n 40 xcodebuild.log
+            exit 1
+          fi
 
   android:
     name: android ${{ matrix.flavor }} (${{ matrix.mode }})
