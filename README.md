@@ -8,7 +8,7 @@ On-device, zero-backend personal finance and SMS expense analyzer for Egypt, wit
 
 ## Developer setup
 
-Prerequisites: Flutter stable (Dart >= 3.6), JDK 17, Android SDK (API 36) and, for iOS, Xcode with an iOS 17+ SDK.
+Prerequisites: Flutter stable with Dart ≥ 3.13.7, JDK 17, Android SDK (API 36) and, for iOS, Xcode with an iOS 17+ SDK.
 
 The repo is a Dart **pub workspace** (`app`, `packages/zaghlol_domain`, `packages/zaghlol_parsing`). Resolve everything once from the repo root:
 
