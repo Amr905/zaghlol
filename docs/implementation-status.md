@@ -31,7 +31,7 @@
 |---|---|---|---|---|---|---|---|---|---|
 | T-001 | Create mono-repo scaffold with pub workspace, app flavors and pure-Dart packages | M0 | C2 | Sonnet | flutter-core-engineer | — | DONE | CI run 42103098253 (10/10 green) @ ec6214e; review [T-001](05-reviews/T-001.md) APPROVED (round 2) | Squash-merged; deferred findings appended to T-002/003/022/023/141/165/176 |
 | T-002 | Add custom lint rules (no double in money, no UI string literals, no print) | M0 | C2 | Sonnet | flutter-core-engineer | T-001 | TODO | — |  |
-| T-003 | App CI pipeline (format, analyze, unit, golden, native unit) | M0 | C2 | Sonnet | flutter-core-engineer | T-001 | IN_PROGRESS | — | Branch task/T-003-app-ci; also builds the safe regen workflow (lockfile/goldens) needed by T-002/T-004/T-022 |
+| T-003 | App CI pipeline (format, analyze, unit, golden, native unit) | M0 | C2 | Sonnet | flutter-core-engineer | T-001 | IN_REVIEW | app-ci run 42108003250 (13/13 green) @ e7f8871; red-proof runs 42109138605, 42110243502; regen runs 42106485380, 42106719845 | code-reviewer running (incl. regen write-token security) |
 | T-004 | Pigeon setup and stale-generation check | M0 | C2 | Sonnet | flutter-core-engineer | T-001 | TODO | — |  |
 | T-005 | Backend solution scaffold, Docker Compose and CI | M0 | C2 | Sonnet | backend-engineer | — | DONE | CI run 41720361381 (4/4 green) @ d98b37d; review [T-005](05-reviews/T-005.md) APPROVED | Squash-merged; follow-ups FU-001…005 |
 | T-006 | OpenAPI v1 spec and contract-test harness | M0 | C2 | Sonnet | backend-engineer | T-005 | DONE | CI run 42102066749 (5/5 green) @ 8d60381; review [T-006](05-reviews/T-006.md) APPROVED (round 2) | Squash-merged; osMajor dropped per BR-SYNC-03 |
@@ -241,3 +241,4 @@
 | 2026-11-05 | Design notes for T-012 and T-165 merged. Their follow-ups were added to T-015/T-016 (orphaned-DB wipe) and T-017/T-019 (money CHECK constraints). The FU-api-decisions branch (CI green) is in security-privacy review. |
 | 2026-11-05 | FU-api-decisions security review: CHANGES_REQUESTED (2 blockers: restore token sharing, Apple nonce; 4 majors). Findings 2–8, 10–12 fixed at 8fe1251 (CI green). |
 | 2026-11-05 | PO decisions: D1 Gold restore = 3-seat limit + device attestation (Play Integrity / App Attest; BR-SYNC-03 amended); D2 support-lookup audit rows kept 1 year; D3/FU-012/A-47/Smart-Switch outcome approved; funds currency codes shown at end of picker. Architect applying D1/D2; requirements-analyst recording SRS v1.4. |
+| 2026-11-05 | T-003 implemented (app-ci + two-job app-regen), CI green; in review. FU-api-decisions round 2 (D-45/46/47 design) in security re-review. Throwaway branch task/T-003-throwaway-red can't be deleted through the agent proxy; left for the owner. |
