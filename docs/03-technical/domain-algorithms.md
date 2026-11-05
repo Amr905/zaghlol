@@ -9,10 +9,11 @@ final class Money implements Comparable<Money> {
   final int minor;            // exact integer minor units (BR-MON-01)
   final Currency currency;    // ISO 4217 code + exponent from bundled table (BR-MON-03)
   Money operator +(Money o)   // throws CurrencyMismatch if currencies differ (BR-FX-02)
-  Money allocate(List<int> weights) → List<Money>   // remainder distribution for splits
+  List<Money> allocate(List<int> weights)   // largest-remainder distribution for splits
 }
 ```
-- **Exponents:** the ISO 4217 table (`currencies.json`, about 180 active codes) is bundled. Exponent 3 for KWD, BHD, OMR, JOD, TND, LYD and IQD; 0 for JPY, KRW and others.
+- **Range:** |minor| ≤ 2^53 − 1; arithmetic is overflow-checked and throws `MoneyOverflow` (never wraps or clamps). Full API, allocation and test design: T-012 design note.
+- **Exponents:** the ISO 4217 table (`currencies.json`, generated from the SIX List One snapshot, about 180 codes) is bundled. Exponent 3 for KWD, BHD, OMR, JOD, TND, LYD and IQD; 0 for JPY, KRW and others. Exponents follow ISO, not CLDR. The table is append-only: withdrawn codes stay as `historic` so stored data still loads. Non-currency `X` codes (XAU, XDR, XTS …) are excluded, and gold is a gram quantity in `wealth/`.
 - **No implicit conversion:** there is no `Money` → `double` conversion anywhere. `MoneyFormat` renders using the locale's digits (A-29) and symbol rules (`ج.م`/`EGP`).
 - **`MultiCurrencyTotal`:** a `Map<Currency, Money>` used by every total (FR-CUR-03). The UI shows the currency switcher only when there are 2 or more keys (EC-55).
 - **≈ view** (FR-CUR-04/05, A-62): `approx(total, target, rates)` converts each currency at the **latest** rate, computed in integer arithmetic (`rate_e9`) with banker's rounding at the end. It returns `{value, rateDate, excludedCurrencies}`, where currencies without a rate are listed as "not included" (EC-56). The output is display-only and never stored.
