@@ -53,8 +53,8 @@ CREATE TABLE installs (
   -- with another element 0 gets 400 SEAT_KEY_MISMATCH. Cleared when the install is tombstoned. Never a raw key.
   seat_key_hash bytea,
   seat_key_trusted boolean NOT NULL DEFAULT false  -- set ONLY by an App Attest-covered request (R5-2): a restore whose assertion
-                                               -- covered this key as element 0 (and an attested iOS sign-in only if the PO
-                                               -- approves R5-3(a)). Verify and plain sign-in register the key UNTRUSTED. Only
+                                               -- covered this key as element 0. iOS sign-in has no App Attest (D-66), so
+                                               -- it never sets it. Verify and sign-in register the key UNTRUSTED. Only
                                                -- false -> true. Gates the over-cap sign-in rebind (D-65(a), backend-api §4.3)
 );
 CREATE INDEX ix_installs_last_seen ON installs(last_seen_at);

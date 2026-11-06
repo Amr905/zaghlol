@@ -2794,7 +2794,7 @@ components:
           description: |
             D-65(a): an over-cap same-iPhone sign-in could not pass the seat because the seat's key isn't trusted
             (only an App Attest-covered request makes a key trusted, R5-2). The app offers Restore when StoreKit
-            on this iPhone has a transaction for the purchase, and otherwise the support path (R5-3(b)).
+            on this iPhone has a transaction for the purchase, and otherwise the support path (accepted residual D-66, R5-3(b)).
         nextMoveAt:
           description: Set with `moveRefused`. Always a whole UTC hour (R3-4).
           oneOf:

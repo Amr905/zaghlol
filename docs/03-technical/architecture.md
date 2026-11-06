@@ -280,7 +280,7 @@ Backend dependencies:
 - ASP.NET Core 10, EF Core 10 + Npgsql;
 - `Google.Apis.AndroidPublisher.v3`;
 - `Google.Apis.PlayIntegrity.v1`, for `decodeIntegrityToken` (restore attestation; same Google client stack, so no new auth code);
-- App Attest attestation/assertion validation: in-house, with `System.Formats.Cbor` + `System.Security.Cryptography` (X.509 chain to the Apple App Attestation Root CA, ES256). Apple ships no .NET library, and this is about 250 lines, reviewed under T-131;
+- App Attest attestation/assertion validation: in-house, with `System.Formats.Cbor` + `System.Security.Cryptography` (X.509 chain to the Apple App Attestation Root CA, ES256). Apple ships no .NET library, and this is about 250 lines, reviewed under T-181;
 - `Google.Apis.Auth`, for Pub/Sub OIDC and Google ID token verification;
 - Apple JWS verification: `Enjna.AppStoreServerLibrary` (MIT, community, last updated 2026-09) **or** an in-house verifier of about 200 lines. ADR-012 decides; the Phase 5 task compares both;
 - `Microsoft.IdentityModel.JsonWebTokens` (Apple ID token, our own JWTs);
