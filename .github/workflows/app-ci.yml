@@ -133,11 +133,19 @@ jobs:
           exit 1
       - name: Gradle unit tests
         working-directory: app/android
-        run: ./gradlew --no-daemon testDevNoSmsDebugUnitTest
+        run: |
+          set -o pipefail
+          ./gradlew --no-daemon testDevNoSmsDebugUnitTest 2>&1 | tee ../gradle-test.log
       # Guard against a green run with zero tests (for example an emptied test dir).
+      # Flutter redirects Gradle's buildDir to app/build/app/.
       - name: Assert Kotlin tests actually ran
         run: |
-          n=$(cat app/android/app/build/test-results/testDevNoSmsDebugUnitTest/*.xml 2>/dev/null | grep -c "<testcase " || true)
+          if ! grep -E "^> Task :app:testDevNoSmsDebugUnitTest$" app/gradle-test.log; then
+            echo "::error::testDevNoSmsDebugUnitTest did not execute (NO-SOURCE, UP-TO-DATE or missing)"
+            grep -E "testDevNoSmsDebugUnitTest" app/gradle-test.log || true
+            exit 1
+          fi
+          n=$(cat app/build/app/test-results/testDevNoSmsDebugUnitTest/*.xml 2>/dev/null | grep -c "<testcase " || true)
           echo "kotlin testcases: $n"
           if [ "$n" -lt 1 ]; then
             echo "::error::no Kotlin <testcase> found in Gradle results"
@@ -148,7 +156,7 @@ jobs:
         uses: actions/upload-artifact@b7c566a772e6b6bfb58ed0dc250532a479d7789f # v6.0.0
         with:
           name: kotlin-test-reports
-          path: app/android/app/build/reports/tests/**
+          path: app/build/app/reports/tests/**
           if-no-files-found: warn
           retention-days: 14
 
