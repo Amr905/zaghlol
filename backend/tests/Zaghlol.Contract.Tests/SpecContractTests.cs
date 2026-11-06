@@ -15,7 +15,11 @@ public class SpecContractTests
     private static readonly OpenApiSpec Spec = OpenApiSpec.Load();
 
     private static readonly string[] SignedOperations =
-        ["sync", "verifyPurchase", "restorePurchases", "getEntitlement", "signIn", "getFullCatalog"];
+        ["sync", "verifyPurchase", "restorePurchases", "getEntitlement", "signIn", "signOut", "getFullCatalog"];
+
+    /// <summary>Operations whose signed 200 may re-anchor the app's trusted time (backend-api.md section 1, R4-2).</summary>
+    private static readonly string[] AnchoringOperations =
+        ["sync", "verifyPurchase", "restorePurchases", "getEntitlement", "signIn", "signOut"];
 
     private static readonly string[] IdempotentOperations = ["registerInstall", "verifyPurchase", "signIn"];
 
@@ -306,6 +310,32 @@ public class SpecContractTests
             .ToList();
 
         Assert.Equal(IdempotentOperations.Order(StringComparer.Ordinal).ToList(), withKey);
+    }
+
+    /// <summary>
+    /// R4-2: the time nonce is accepted exactly on the anchoring operations, and each of their signed 200 bodies
+    /// has a <c>timeNonce</c> echo, so only a response to the app's own outstanding request can lower trusted time.
+    /// </summary>
+    [Fact]
+    public void TimeNonceIsSentAndEchoedExactlyOnAnchoringOperations()
+    {
+        var withNonce = Spec.Operations()
+            .Where(o => ParameterRefs(o).Contains("#/components/parameters/ZaghlolTimeNonce"))
+            .Select(o => o.Id)
+            .Order(StringComparer.Ordinal)
+            .ToList();
+        Assert.Equal(AnchoringOperations.Order(StringComparer.Ordinal).ToList(), withNonce);
+
+        var operations = Spec.Operations().ToDictionary(o => o.Id, StringComparer.Ordinal);
+        foreach (var id in AnchoringOperations)
+        {
+            var response = Spec.Resolve(operations[id].Body["responses"]!["200"]!);
+            var schema = Spec.Resolve(response["content"]!["application/json"]!["schema"]!);
+            Assert.True(
+                schema["properties"]?["timeNonce"]?["$ref"]?.GetValue<string>() == "#/components/schemas/TimeNonceEcho",
+                $"{id}: 200 body lacks the timeNonce echo");
+            Assert.True(response["headers"]?["Zaghlol-Signature"] is not null, $"{id}: 200 response is not signed");
+        }
     }
 
     [Fact]

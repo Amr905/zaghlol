@@ -176,6 +176,7 @@ paths:
       parameters:
         - $ref: '#/components/parameters/ZaghlolApp'
         - $ref: '#/components/parameters/ZaghlolInstall'
+        - $ref: '#/components/parameters/ZaghlolTimeNonce'
       requestBody:
         required: true
         content:
@@ -212,6 +213,7 @@ paths:
                   value:
                     serverTime: '2026-11-03T18:22:02Z'
                     nextSyncNotBefore: '2026-11-04T18:22:02Z'
+                    timeNonce: kq3V9w0bQ2FwdGFpblphZw
                 changed:
                   summary: Delta with flags and prices
                   value:
@@ -323,7 +325,9 @@ paths:
         (a Google `linkedPurchaseToken` successor, or a new Apple transaction with `transactionReason = PURCHASE`)
         for a seat another install holds moves the seat here and counts as the move when no cooldown is running
         (D-59); inside the cooldown the seat stays on the holder and the response has `seatHeldElsewhere: true`
-        and `nextMoveAt` (D-61(a)). The payment is verified and acknowledged in every case and is never refused
+        and `nextMoveAt` (D-61(a)). For an account-linked purchase the move also needs a valid account token for
+        that account on this request; without it the seat stays and the response adds `accountRequired: true`
+        (R4-4). The payment is verified and acknowledged in every case and is never refused
         because of the seat. iOS may send `seatKeys` (this install's Secure Enclave seat key, D-55).
         A replay with the same `Idempotency-Key` but a different body is `409 IDEMPOTENCY_KEY_REUSED`.
       security:
@@ -333,6 +337,7 @@ paths:
       parameters:
         - $ref: '#/components/parameters/ZaghlolApp'
         - $ref: '#/components/parameters/ZaghlolInstall'
+        - $ref: '#/components/parameters/ZaghlolTimeNonce'
         - $ref: '#/components/parameters/IdempotencyKey'
       requestBody:
         required: true
@@ -395,15 +400,19 @@ paths:
           binds. Shared vectors: `backend/tests/Zaghlol.Contract.Tests/vectors/restore-binding-v1.json`.
         - **Device attestation (FR-GOLD-09, D-53; BR-SYNC-03 amended, D-45).** `attestation` is required on
           every restore. Android sends a Play Integrity standard-request token with `requestHash = b64u(bodyHash)`;
-          iOS sends an App Attest assertion with `clientDataHash = bodyHash`, plus, on a new key's first use, an
-          `attestationObject` over the same hash, which registers the key to this install only. A missing,
+          iOS sends an App Attest assertion over `clientDataHash`, which covers `bodyHash` and the seat public keys
+          (R4-1(3); see `AppAttestProof`), plus, on a new key's first use, an `attestationObject` over the same
+          hash, which registers the key to this install only. A missing,
           invalid, replayed or unbound proof, or a Play token older than 5 minutes, fails the whole call with
           `422 DEVICE_ATTESTATION_FAILED`. Optional Play verdicts are ignored. A Play verdict with only
           `MEETS_BASIC_INTEGRITY` may hold the seat with entitlement `exp` at most 2 days (6-day window). An
           attestation-service outage is `503`, never `422`. There is no server challenge. iOS adds
           `attestation.seatKeys` (D-55), Secure Enclave seat-key proofs over the same hash.
         - **One seat (FR-GOLD-08, BR-GOLD-07).** Each purchase has exactly one seat, on Android or iOS. A restore
-          by the current holder is never a move, and neither is a same-iPhone rebind proven by a seat key (D-55).
+          by the current holder is never a move, and neither is a same-iPhone rebind proven by a seat key at
+          position 1 or later of `seatKeys`, whose element 0 must be this install's registered key (D-55, R4-1(1)),
+          at most 2 per purchase per rolling 30 days (D-63). Over that cap the seat still passes to the caller but
+          the 30-day window restarts (D-65(a)).
           Otherwise the seat moves to the caller only if `now >= next_move_at` (`movedFromOtherPhone: true`);
           the move sets `next_move_at` to 30 days later rounded up to the whole UTC hour. The old holder gets a
           `status: moved` token at its next refresh and, offline, loses Gold within 7 days (D-60, trusted time).
@@ -431,6 +440,7 @@ paths:
       parameters:
         - $ref: '#/components/parameters/ZaghlolApp'
         - $ref: '#/components/parameters/ZaghlolInstall'
+        - $ref: '#/components/parameters/ZaghlolTimeNonce'
       requestBody:
         required: true
         content:
@@ -493,6 +503,7 @@ paths:
       parameters:
         - $ref: '#/components/parameters/ZaghlolApp'
         - $ref: '#/components/parameters/ZaghlolInstall'
+        - $ref: '#/components/parameters/ZaghlolTimeNonce'
       responses:
         '200':
           description: The entitlement (signed).
@@ -503,6 +514,8 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/EntitlementResponse'
+        '400':
+          $ref: '#/components/responses/BadRequest'
         '401':
           $ref: '#/components/responses/InstallTokenInvalidOrAccountExpired'
         '429':
@@ -521,7 +534,7 @@ paths:
         once per purchase without the cooldown (free reclaim, D-58), which still restarts the 30-day window
         (D-61(b)). Then moves the seat of each account-linked purchase to this install under the 30-day
         cooldown (D-52, FR-GOLD-07), or rebinds it without the cooldown when `seatKeys` proves the same iPhone
-        (D-55). A move refused for the cooldown never undoes the link: the call still returns 200 with
+        (D-55), at most 2 times per purchase per rolling 30 days (D-63); over the cap it is an ordinary move. A move refused for the cooldown never undoes the link: the call still returns 200 with
         `moveRefused: true` and `nextMoveAt` (R3-5). The nonce's single-use record is committed before and
         outside that transaction. If the install is linked to a different account the server
         answers `409 INSTALL_LINKED_TO_OTHER_ACCOUNT`; resend with `replaceLink: true` to confirm. For Apple the `authorizationCode` is exchanged for a refresh token that is stored encrypted
@@ -541,6 +554,7 @@ paths:
       parameters:
         - $ref: '#/components/parameters/ZaghlolApp'
         - $ref: '#/components/parameters/ZaghlolInstall'
+        - $ref: '#/components/parameters/ZaghlolTimeNonce'
         - $ref: '#/components/parameters/IdempotencyKey'
       requestBody:
         required: true
@@ -602,6 +616,7 @@ paths:
       parameters:
         - $ref: '#/components/parameters/ZaghlolApp'
         - $ref: '#/components/parameters/ZaghlolInstall'
+        - $ref: '#/components/parameters/ZaghlolTimeNonce'
       responses:
         '200':
           description: Unlinked; the fresh entitlement (signed).
@@ -612,6 +627,8 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/EntitlementResponse'
+        '400':
+          $ref: '#/components/responses/BadRequest'
         '401':
           $ref: '#/components/responses/InstallTokenInvalidOrAccountExpired'
         '429':
@@ -1351,7 +1368,11 @@ paths:
         `attachToAccount` needs an unlinked purchase, a target linked to an account and a buying install that is
         gone or unseen for at least 30 days; otherwise `409 ADMIN_CONFLICT`. A move restarts the 30-day window
         (`nextMoveAt` = 30 days later, rounded up to the whole UTC hour), and the losing install gets
-        `status: moved` with `movedBy: support`. Moving to the current holder changes nothing. Every call writes
+        `status: moved` with `movedBy: support`. Moving to the current holder changes nothing. **Dispute freeze
+        (D-64):** for 30 days after a correction on the purchase (each correction restarts it), any call with a
+        `reasonCode` other than `correction` is `409 ADMIN_CONFLICT`, checked before the ownership check and
+        audited (`outcome: dispute_frozen`). A support attach makes the buying install, if it reappears, get a
+        one-time notice (`supportNotice`). Every call writes
         one audit row (`support_seat_move`: purchase, from and to install, reason code, ticket reference,
         ownership-check outcome, corrected row, outcome; never an e-mail, an order ID or free text), deleted
         exactly 1 year after creation. Interim client: `zaghlol-ops support move`.
@@ -1417,7 +1438,8 @@ paths:
         purchase's current account, and the link must have been made by support (a link made from the buying
         phone can't be detached); otherwise `409 ADMIN_CONFLICT`. Checks `ownershipCheck` live like
         `adminMoveSeat`. Sets the purchase's account to none and leaves the seat where it is; re-linking is a
-        `seat:move` with `attachToAccount`. Writes one `support_detach` audit row that references the corrected
+        `seat:move` with `attachToAccount`. A detach is a correction: it is allowed during a dispute freeze and
+        restarts it (D-64). Writes one `support_detach` audit row that references the corrected
         row (never an e-mail, an order ID or free text), deleted exactly 1 year after creation.
       x-required-roles: [support_agent]
       security:
@@ -1556,9 +1578,11 @@ components:
       description: |
         Operator OIDC access token (Google Workspace or Entra ID, at most 1 hour) obtained by `zaghlol-ops` with
         the authorization-code flow, PKCE and a loopback redirect (RFC 8252); the device-code grant is disabled
-        for its client. MFA is enforced at the identity provider and the `amr` claim is checked; operations
-        requiring `support_agent` also require phishing-resistant MFA (FIDO2) in `amr` / `acr`. The role
-        required by each operation is in `x-required-roles`.
+        for its client. MFA is enforced at the identity provider. Operations requiring `support_agent` also
+        require phishing-resistant MFA (FIDO2), enforced by an IdP conditional-access policy scoped to the
+        `zaghlol-ops` and admin clients (R4-6); the API additionally checks the claim that proves it (Entra
+        `acrs` authentication context) where T-136 confirms the IdP emits one, and otherwise treats its check as
+        advisory. The role required by each operation is in `x-required-roles`.
 
   headers:
     ZaghlolSignature:
@@ -1611,6 +1635,18 @@ components:
       schema:
         type: string
         pattern: '^[0-9A-HJKMNP-TV-Z]{26}$'
+    ZaghlolTimeNonce:
+      name: Zaghlol-Time-Nonce
+      in: header
+      required: false
+      description: |
+        R4-2, NFR-SEC-08. 128 bits fresh from a CSPRNG for every anchoring request, base64url without padding.
+        The server copies it into the signed 200 body as `timeNonce`; only an echo of the app's single
+        outstanding nonce, within 60 s, may lower the app's trusted time or clear its tamper flag. A random
+        per-request value with no device data (D-48 classification); never stored, logged or traced. Malformed:
+        `400 VALIDATION_FAILED`.
+      schema:
+        $ref: '#/components/schemas/TimeNonce'
     CatalogEntity:
       name: entity
       in: path
@@ -1658,7 +1694,9 @@ components:
     BadRequest:
       description: |
         `VALIDATION_FAILED` (a field is missing or invalid) or `UNKNOWN_FIELD` (a field outside the allow-list
-        was sent). A client bug; do not retry.
+        was sent): a client bug, do not retry. iOS restore and sign-in may also return `SEAT_KEY_MISMATCH`
+        (element 0 of `seatKeys` is not this install's registered seat key, R4-1(1)): nothing was written; retry
+        once without `seatKeys`.
       content:
         application/problem+json:
           schema:
@@ -1740,18 +1778,6 @@ components:
         `OWNERSHIP_CHECK_FAILED`. Operator API only (D-57): the store order ID did not match this purchase in a
         live check with Google Play or the App Store, or the order is refunded or cancelled. Nothing changed;
         the attempt is audited without the order ID.
-      content:
-        application/problem+json:
-          schema:
-            $ref: '#/components/schemas/Problem'
-    InstallExists:
-      description: '`INSTALL_EXISTS`. Regenerate the install ID and retry.'
-      content:
-        application/problem+json:
-          schema:
-            $ref: '#/components/schemas/Problem'
-    InstallLinkedToOtherAccount:
-      description: '`INSTALL_LINKED_TO_OTHER_ACCOUNT`. Ask the user; resend with `replaceLink: true` to confirm.'
       content:
         application/problem+json:
           schema:
@@ -1952,6 +1978,7 @@ components:
       enum:
         - VALIDATION_FAILED
         - UNKNOWN_FIELD
+        - SEAT_KEY_MISMATCH
         - UNAUTHORIZED
         - INSTALL_TOKEN_INVALID
         - ACCOUNT_TOKEN_EXPIRED
@@ -2295,6 +2322,25 @@ components:
           type: integer
           format: int32
           minimum: 0
+    TimeNonce:
+      type: string
+      description: 16 random bytes (128 bits), base64url without padding (R4-2).
+      pattern: '^[A-Za-z0-9_-]{21}[AQgw]$'
+    TimeNonceEcho:
+      description: |
+        The request's `Zaghlol-Time-Nonce`, copied unchanged into the signed body; `null` when the request had none
+        (R4-2). The app re-anchors trusted time only on an echo of its single outstanding nonce within 60 s.
+      oneOf:
+        - $ref: '#/components/schemas/TimeNonce'
+        - type: 'null'
+    SupportNotice:
+      description: |
+        R4-7(2): `gold_linked_by_support` is sent once to a purchase's buying install after support linked that
+        purchase to an account; `null` otherwise.
+      oneOf:
+        - type: string
+          enum: [gold_linked_by_support]
+        - type: 'null'
     InstallToken:
       type: string
       description: 32 random bytes, base64url without padding.
@@ -2302,7 +2348,8 @@ components:
     SyncResponse:
       type: object
       description: |
-        Always has `serverTime` and `nextSyncNotBefore`. The other blocks are absent or `null` when unchanged.
+        Always has `serverTime` and `nextSyncNotBefore`, and `timeNonce` when the request sent one (also in the
+        throttle answer, R4-2). The other blocks are absent or `null` when unchanged.
       required: [serverTime, nextSyncNotBefore]
       properties:
         serverTime:
@@ -2338,6 +2385,10 @@ components:
           oneOf:
             - $ref: '#/components/schemas/InstallToken'
             - type: 'null'
+        supportNotice:
+          $ref: '#/components/schemas/SupportNotice'
+        timeNonce:
+          $ref: '#/components/schemas/TimeNonceEcho'
 
     # ---- purchases ---------------------------------------------------------
     PurchaseVerifyAndroidRequest:
@@ -2369,7 +2420,8 @@ components:
           type: array
           description: |
             D-55: this install's own seat key only, signed over `op = verify`, `challenge = SHA-256(signedTransaction)`.
-            Omitted when the Secure Enclave is unavailable.
+            Omitted when the Secure Enclave is unavailable. After the store checks pass, a valid key registers as this
+            install's seat key if it has none (R4-1(1)); an invalid or non-registered key is ignored, never an error.
           minItems: 1
           maxItems: 1
           items:
@@ -2404,13 +2456,21 @@ components:
           description: |
             D-61(a): the payment is valid, but the purchase's Gold seat stays on another install because this
             month's move is already used. Gold can move here at `nextMoveAt` (restore, or support).
+        accountRequired:
+          type: boolean
+          description: |
+            R4-4 (D-46): set with `seatHeldElsewhere` when the purchase is account-linked and this verify carried
+            no valid account token for that account, so the seat stayed on the holder whatever the cooldown. The
+            payment is valid; ask the user to sign in here with the account that owns Gold.
         nextMoveAt:
-          description: Set with `seatHeldElsewhere`. Always a whole UTC hour (R3-4).
+          description: Set with `seatHeldElsewhere` when a cooldown is running. Always a whole UTC hour (R3-4).
           oneOf:
             - $ref: '#/components/schemas/UtcTimestamp'
             - type: 'null'
         serverTime:
           $ref: '#/components/schemas/UtcTimestamp'
+        timeNonce:
+          $ref: '#/components/schemas/TimeNonceEcho'
         rotateInstallToken:
           oneOf:
             - $ref: '#/components/schemas/InstallToken'
@@ -2422,8 +2482,10 @@ components:
         Zaghlol install on this iPhone (X9.63 uncompressed point, 65 bytes, base64url without padding).
         `signature` is ECDSA P-256 / SHA-256 in IEEE P1363 form (r||s, 64 bytes, base64url) over
         `"zaghlol-seat-v1" || 0x00 || op || 0x00 || installId || 0x00 || challenge`, with `installId` taken from
-        the install token. The server stores only `HMAC-SHA256(K_seat, purchase_id || publicKey)` per seat.
-        iOS installs only. Vectors: `backend/tests/Zaghlol.Contract.Tests/vectors/seat-proof-v1.json`.
+        the install token. The server stores only keyed hashes: `HMAC-SHA256(K_seat, purchase_id || publicKey)` per
+        seat, and `HMAC-SHA256(K_seat, "install" || 0x00 || installId || publicKey)` for the install's registered
+        key (element 0, R4-1(1)). Raw keys are never stored or logged (D-62). iOS installs only. Vectors:
+        `backend/tests/Zaghlol.Contract.Tests/vectors/seat-proof-v1.json`.
       additionalProperties: false
       required: [publicKey, signature]
       properties:
@@ -2467,10 +2529,13 @@ components:
     AppAttestProof:
       type: object
       description: |
-        App Attest assertion over `clientDataHash = bodyHash`, the install-bound restore hash (see
-        `restorePurchases`), with this install's App Attest key. `attestationObject` is sent once, on the first use
-        of a new key, attested over the same install-bound `clientDataHash`, so the key registers to this install
-        only.
+        App Attest assertion with this install's App Attest key over
+        `clientDataHash = SHA-256("zaghlol-restore-attest-v1" || 0x00 || bodyHash || seatKeysDigest)`, where
+        `bodyHash` is the install-bound restore hash (see `restorePurchases`) and
+        `seatKeysDigest = SHA-256(publicKey_0 || ... || publicKey_n-1)` over the raw 65-byte points of `seatKeys` in
+        order (SHA-256 of the empty string without `seatKeys`), so the assertion covers the seat public keys
+        (R4-1(3)). `attestationObject` is sent once, on the first use of a new key, attested over the same
+        `clientDataHash`, so the key registers to this install only. Vectors: `restore-binding-v1.json`.
       additionalProperties: false
       required: [type, keyId, assertion]
       properties:
@@ -2490,9 +2555,11 @@ components:
         seatKeys:
           type: array
           description: |
-            D-55: element 0 is this install's seat key, the others are keys of up to 4 earlier installs on this
-            iPhone. Each signs `op = restore` with `challenge = bodyHash`. Inside `attestation`, so outside the
-            hash, which it signs.
+            D-55, D-62: element 0 is this install's registered seat key (otherwise `400 SEAT_KEY_MISMATCH`), the
+            others are distinct keys of up to 4 earlier installs on this iPhone. Each signs `op = restore` with
+            `challenge = bodyHash`. Inside `attestation`, so outside `bodyHash`, which it signs; the public keys
+            are covered by the assertion's `clientDataHash`. Only a key at position 1 or later can rebind a seat,
+            at most 2 times per purchase per 30 days (D-63).
           minItems: 1
           maxItems: 5
           items:
@@ -2564,18 +2631,25 @@ components:
             - type: 'null'
         serverTime:
           $ref: '#/components/schemas/UtcTimestamp'
+        timeNonce:
+          $ref: '#/components/schemas/TimeNonceEcho'
         rotateInstallToken:
           oneOf:
             - $ref: '#/components/schemas/InstallToken'
             - type: 'null'
     EntitlementResponse:
       type: object
+      description: Used by `getEntitlement` and `signOut`. `supportNotice` is only sent by `getEntitlement`.
       required: [entitlement, serverTime]
       properties:
         entitlement:
           $ref: '#/components/schemas/Entitlement'
         serverTime:
           $ref: '#/components/schemas/UtcTimestamp'
+        timeNonce:
+          $ref: '#/components/schemas/TimeNonceEcho'
+        supportNotice:
+          $ref: '#/components/schemas/SupportNotice'
         rotateInstallToken:
           oneOf:
             - $ref: '#/components/schemas/InstallToken'
@@ -2610,9 +2684,11 @@ components:
         seatKeys:
           type: array
           description: |
-            D-55, iOS installs only (`400 VALIDATION_FAILED` from an Android install): element 0 is this install's
-            seat key, the others are keys of up to 4 earlier installs on this iPhone, each signed over
-            `op = signin` with `challenge = SHA-256(nonce)`.
+            D-55, D-62, iOS installs only (`400 VALIDATION_FAILED` from an Android install): element 0 is this
+            install's registered seat key (otherwise `400 SEAT_KEY_MISMATCH`), the others are distinct keys of up
+            to 4 earlier installs on this iPhone, each signed over `op = signin` with `challenge = SHA-256(nonce)`.
+            Sign-in has no device attestation; a rebind from a key at position 1 or later is capped at 2 per
+            purchase per 30 days, after which it is an ordinary move under the cooldown (D-63).
           minItems: 1
           maxItems: 5
           items:
@@ -2647,6 +2723,8 @@ components:
             - type: 'null'
         serverTime:
           $ref: '#/components/schemas/UtcTimestamp'
+        timeNonce:
+          $ref: '#/components/schemas/TimeNonceEcho'
 
     # ---- store notifications -----------------------------------------------
     PubSubMessageInput:
@@ -3068,6 +3146,25 @@ components:
         buyingInstallSilent:
           type: boolean
           description: True when the buying install is gone or unseen for at least 30 days (the attach gate, D-57(d)).
+        isBuyingInstall:
+          type: [boolean, 'null']
+          description: |
+            Install lookup: whether the looked-up install is the purchase's buying install, which the runbook prefers
+            among claimants (R4-7(3)). `null` for an e-mail lookup.
+        disputeFrozenUntil:
+          description: |
+            D-64: until this time only corrections are allowed on this purchase (`seat:move` with
+            `reasonCode: correction`, and `purchase:detach`); other support moves and links are `409 ADMIN_CONFLICT`.
+            `null` when no freeze is running.
+          oneOf:
+            - $ref: '#/components/schemas/UtcTimestamp'
+            - type: 'null'
+        rebindsLast30Days:
+          type: integer
+          format: int32
+          minimum: 0
+          maximum: 2
+          description: Same-iPhone rebinds of this purchase in the rolling 30 days (D-63 cap is 2).
         lastMovedAt:
           oneOf:
             - $ref: '#/components/schemas/UtcTimestamp'
