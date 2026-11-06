@@ -159,7 +159,7 @@ Authorization rules:
 2. Check `bundleId`, `environment` and `appAccountToken == HMAC(installId)`.
 3. Call App Store Server API `Get Transaction Info` and `Get All Subscription Statuses` for the authoritative state.
 4. Upsert by `originalTransactionId`.
-5. If `seatKeys` is present, verify its single element over `op = verify` with `challenge = SHA-256(signedTransaction)` (§4.3 *Same-iPhone recognition*); an invalid proof is `400 VALIDATION_FAILED`. When this install binds or holds the seat, store its key hash.
+5. If `seatKeys` is present, verify its single element over `op = verify` with `challenge = SHA-256(signedTransaction)` (§4.3 *Same-iPhone recognition*). When this install binds or holds the seat, store its key hash. A proof that fails verification is **ignored** (no key hash stored, a diag counter incremented), never an error, because verify is the payment path (BR-GOLD-06).
 
 **Seat at verify** (ADR-012 Part B (a), D-59, D-61(a)):
 - A purchase with no seat yet: bind it to this (buying) install, `proof = binding`. Not a move.
@@ -254,7 +254,7 @@ Possession of a genuine token is **not** proof of ownership. A token presented w
     | `POST /v1/purchases/restore` (inside `attestation`, so outside the hash) | `restore` | the install-bound `bodyHash` | 5 |
     | `POST /v1/accounts/signin` (top level) | `signin` | SHA-256 of the raw `nonce` | 5 |
   - **Binding:** every signature covers this install and a single-use challenge (the attested body, or the single-use sign-in nonce), so a proof can't be replayed elsewhere. The private key can't be extracted from the Secure Enclave, so a key can't be cloned to another phone.
-  - **iOS installs only:** the Android request schemas have no such member, and `seatKeys` on sign-in from an Android install is `400 VALIDATION_FAILED`. A malformed point or an invalid signature is `400 VALIDATION_FAILED`.
+  - **iOS installs only:** the Android request schemas have no such member, and `seatKeys` on sign-in from an Android install is `400 VALIDATION_FAILED`. On restore and sign-in, a point that isn't on the curve or an invalid signature is `400 VALIDATION_FAILED`. On verify it is ignored instead (payment path, BR-GOLD-06).
   - **Shared vectors:** `backend/tests/Zaghlol.Contract.Tests/vectors/seat-proof-v1.json`, checked by a contract test. The app task and T-132 must pass them.
 - **On the server:** `purchase_seats.device_key_hash = HMAC-SHA256(K_seat, purchase_id ‖ publicKey)`, where `K_seat` is a dedicated KMS key.
   - It is written from element 0 whenever an iOS install becomes or stays the holder with a valid proof. It is set to `NULL` when a holder without seat keys takes the seat, and kept when the seat goes vacant.
