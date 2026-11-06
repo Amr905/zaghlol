@@ -42,7 +42,11 @@ CREATE TABLE installs (
   catalog_version integer NOT NULL DEFAULT 0,
   first_seen_at timestamptz NOT NULL DEFAULT now(),
   last_seen_at timestamptz NOT NULL DEFAULT now(),
-  deleted_at timestamptz                       -- FR-ONB-08 tombstone (row purged after 30 days)
+  deleted_at timestamptz,                      -- FR-ONB-08 tombstone (row purged after 30 days)
+  -- Registration retry (backend-api §4.1, R3-6): no response with a token is ever stored. Both columns are cleared at the
+  -- install's first authenticated call or after 24 h; while set, a same-key same-body replay gets a fresh token.
+  registration_key_hash bytea,                 -- SHA-256(Idempotency-Key)
+  registration_body_sha256 bytea
 );
 CREATE INDEX ix_installs_last_seen ON installs(last_seen_at);
 
@@ -73,7 +77,9 @@ CREATE TABLE purchases (
   store_key text NOT NULL,
   linked_purchase_token text,                  -- Google upgrade/downgrade chain
   install_id uuid REFERENCES installs(id) ON DELETE SET NULL,  -- purchasing install (set by verify, never by restore)
-  account_id uuid REFERENCES accounts(id) ON DELETE SET NULL,  -- set only at sign-in (backend-api §4.6); restore never changes it
+  account_id uuid REFERENCES accounts(id) ON DELETE SET NULL,  -- set at sign-in from the buying install or by a support attach; restore never changes it
+  account_linked_by text CHECK (account_linked_by IN ('signin','support')),  -- NULL when unlinked; only 'support' links can be detached (§5.3)
+  attach_reclaim_used_at timestamptz,          -- D-58: the free account-attach reclaim happened; NEVER cleared, not even when the account is deleted
   state text NOT NULL CHECK (state IN ('pending','active','in_grace','on_hold','paused','canceled_active','expired','refunded','revoked')),
   expires_at timestamptz,                      -- NULL for lifetime
   acknowledged boolean NOT NULL DEFAULT false, -- Google; must be true within 3 days (BR-GOLD-06)
@@ -81,15 +87,19 @@ CREATE TABLE purchases (
   obfuscated_install_ref text,                 -- Play obfuscatedAccountId / Apple appAccountToken = hash(install_id)
   last_verified_at timestamptz NOT NULL,
   created_at timestamptz NOT NULL DEFAULT now(),
-  UNIQUE (store, store_key)
+  UNIQUE (store, store_key),
+  CHECK ((account_id IS NULL) = (account_linked_by IS NULL))
 );
+-- ON DELETE SET NULL on account_id must also clear account_linked_by: done by the account-deletion service in the same
+-- transaction (a BEFORE DELETE trigger on accounts enforces it as a backstop).
 CREATE INDEX ix_purchases_install ON purchases(install_id);
 CREATE INDEX ix_purchases_account ON purchases(account_id);
 CREATE INDEX ix_purchases_unacked ON purchases(created_at) WHERE store = 'google_play' AND acknowledged = false;
 
 CREATE TABLE purchase_events (                 -- audit trail of state transitions (no raw receipts)
   id uuid PRIMARY KEY, purchase_id uuid NOT NULL REFERENCES purchases(id) ON DELETE CASCADE,
-  from_state text, to_state text NOT NULL, cause text NOT NULL,   -- verify | restore | seat_bind | seat_move:<restore|signin|support|account_attach> | rtdn:<type> | assn:<type> | sweep
+  from_state text, to_state text NOT NULL, cause text NOT NULL,   -- verify | restore | seat_bind | seat_move:<restore|signin|support|account_attach|verify>
+                                                                    -- | seat_rebind:<restore|signin> | rtdn:<type> | assn:<type> | sweep
   occurred_at timestamptz NOT NULL DEFAULT now()
 );
 
@@ -112,23 +122,41 @@ CREATE TABLE store_notifications (             -- FR-BE-03, idempotent ingest
 
 -- Effective entitlement is computed, not stored: view over purchases for an install or account
 -- Seat (D-52, FR-GOLD-08, BR-GOLD-07): the ONE install that may hold Gold from a purchase, across platforms (FR-GOLD-07).
--- Exactly one row per purchase (created by the first verify). Every change runs in the restore / sign-in / support
--- transaction under SELECT … FOR UPDATE on this row (backend-api §4.3 step 5, §4.6, §5.3).
+-- Exactly one row per purchase (created by the first verify). Every change runs in the verify / restore / sign-in / support
+-- transaction under SELECT … FOR UPDATE on this row (backend-api §4.3, §4.6, §5.3).
 CREATE TABLE purchase_seats (
   purchase_id uuid PRIMARY KEY REFERENCES purchases(id) ON DELETE CASCADE,
   install_id uuid REFERENCES installs(id) ON DELETE SET NULL,   -- holder; NULL = vacant (install deleted or purged)
-  proof text CHECK (proof IN ('binding','attested','basic','account','support')), -- how the holder got it; NULL when vacant
+  proof text CHECK (proof IN ('binding','attested','basic','account','support','device')), -- how the holder got it; NULL when vacant
   bound_at timestamptz,                               -- when the current holder got the seat
-  last_moved_at timestamptz,                          -- last restore/sign-in move (cooldown: next move ≥ +30 d); NULL = never moved.
-                                                      -- Not changed by the first bind, the support move or the account-attach reclaim.
-                                                      -- An upgrade successor (linked_purchase_token) copies its predecessor's value.
-  claimant_install_id uuid REFERENCES installs(id) ON DELETE SET NULL,  -- last install refused only by the cooldown
-  claimant_at timestamptz,                            -- (passed attestation, store and account checks); the only valid support-move
-                                                      -- target besides the holder; ignored after 7 days
-  CHECK ((install_id IS NULL) = (proof IS NULL))
+  last_moved_at timestamptz,                          -- exact time of the last move; server-side only, never sent to the app
+  next_move_at timestamptz,                           -- ceil_hour(last_moved_at + 30 d); the ONLY value the cooldown check uses and
+                                                      -- the only one returned (409, tokens, verify, sign-in) (R3-4). NULL = never moved.
+                                                      -- Set by restore/sign-in/verify(plan change) moves, support moves (D-56) and the
+                                                      -- account-attach reclaim (D-61(b)). Unchanged by the first bind, a same-holder refresh
+                                                      -- and a same-iPhone rebind (D-55). A Google upgrade successor copies its predecessor's.
+  device_key_hash bytea,                              -- D-55: HMAC-SHA256(K_seat, purchase_id || seat-key public key) of the holder's
+                                                      -- seatKeys[0]; NULL when the holder sent none. KEPT when the seat goes vacant
+                                                      -- (so "Delete everything" + restore on the same iPhone is a rebind)
+  CHECK ((install_id IS NULL) = (proof IS NULL)),
+  CHECK ((last_moved_at IS NULL) = (next_move_at IS NULL)),
+  CHECK (next_move_at IS NULL OR date_trunc('hour', next_move_at) = next_move_at)
 );
 CREATE INDEX ix_purchase_seats_install ON purchase_seats(install_id);
 -- Invariant (FR-GOLD-08 acceptance): at most one holder per purchase, by construction (primary key).
+
+-- Pending claimants (R3-4): installs refused ONLY by the cooldown (they passed attestation, store and account checks).
+-- The only valid support-move targets besides the holder (attach only) and a correction's source install (backend-api §5.3).
+CREATE TABLE seat_claimants (
+  purchase_id uuid NOT NULL REFERENCES purchases(id) ON DELETE CASCADE,
+  install_id uuid NOT NULL REFERENCES installs(id) ON DELETE CASCADE,
+  claimed_at timestamptz NOT NULL,                    -- refreshed when the same install is refused again; ignored after 7 days
+  channel text NOT NULL CHECK (channel IN ('restore','signin','verify')),
+  device_key_hash bytea,                              -- the claimant's seat-key hash, copied to the seat by a support move
+  PRIMARY KEY (purchase_id, install_id)
+);
+-- At most 3 rows per purchase: the insert runs under the seat's FOR UPDATE lock and deletes the oldest row when a fourth
+-- install is refused. Rows older than 7 days are ignored by every read and deleted by the purger.
 
 -- App Attest keys (iOS restore attestation, ADR-012 Amendment (2026-11-05) Part B). No device identifier is stored (FR-GOLD-09).
 CREATE TABLE app_attest_keys (
@@ -140,8 +168,10 @@ CREATE TABLE app_attest_keys (
 );
 
 -- Effective entitlement is computed, not stored: purchases whose seat the install holds
+-- The entitlement service includes a row with account_id set only when the request carries a valid account token for
+-- that account; otherwise the purchase is reported 'paused' (D-61(c)).
 CREATE VIEW v_entitlements AS
-  SELECT s.install_id, p.id AS purchase_id, p.plan, p.state, p.expires_at, p.store, s.proof, s.last_moved_at
+  SELECT s.install_id, p.id AS purchase_id, p.plan, p.state, p.expires_at, p.store, p.account_id, s.proof, s.next_move_at
   FROM purchase_seats s JOIN purchases p ON p.id = s.purchase_id
   WHERE s.install_id IS NOT NULL AND p.state IN ('active','in_grace','canceled_active');
 
@@ -151,17 +181,20 @@ CREATE TABLE replay_guard (                    -- single-use proofs (ADR-016 ame
   expires_at timestamptz NOT NULL               -- token exp, or +15 min for Play Integrity; rows purged after expiry
 );
 
--- Idempotency (backend-api §1, R2-8): a stored result is returned only for the same install, operation, key and body.
+-- Idempotency (backend-api §1, R2-8, R3-6): verify and sign-in only (registerInstall uses installs.registration_* instead).
+-- A stored result is returned only for the same install, operation, key and body, and only while expires_at > now().
 CREATE TABLE idempotency_records (
-  install_id uuid NOT NULL,                     -- from the install token (POST /v1/installs: from the body); no FK, so a replay of a
-                                                -- deleted install still finds nothing to return
-  operation_id text NOT NULL,                   -- registerInstall | verifyPurchase | signIn
-  idempotency_key text NOT NULL,                -- ULID from the Idempotency-Key header
+  install_id uuid NOT NULL,                     -- from the install token; no FK, but DELETE /v1/installs/me deletes the rows
+  operation_id text NOT NULL CHECK (operation_id IN ('verifyPurchase','signIn')),
+  idempotency_key text NOT NULL,                -- ULID from the Idempotency-Key header (CSPRNG random part)
   body_sha256 bytea NOT NULL,                   -- SHA-256 of the request body bytes; a mismatch gives 409 IDEMPOTENCY_KEY_REUSED
   status integer NOT NULL, response_body_enc bytea NOT NULL,  -- final result only (2xx/409/422), KMS-envelope-encrypted (holds tokens)
-  expires_at timestamptz NOT NULL,              -- created + 24 h
+  account_id uuid,                              -- signIn: the account whose token the stored body holds; DELETE /v1/accounts/me
+                                                -- deletes these rows
+  expires_at timestamptz NOT NULL,              -- created + 24 h; every lookup requires expires_at > now()
   PRIMARY KEY (install_id, operation_id, idempotency_key)
 );
+CREATE INDEX ix_idempotency_account ON idempotency_records(account_id) WHERE account_id IS NOT NULL;
 
 CREATE TABLE signing_keys (                    -- metadata; private keys live in the KMS
   kid text PRIMARY KEY, purpose text NOT NULL CHECK (purpose IN ('entitlement','sync')),
@@ -240,8 +273,10 @@ CREATE TABLE audit_log (id bigint GENERATED ALWAYS AS IDENTITY PRIMARY KEY, oper
   action text NOT NULL, target text NOT NULL, details jsonb NOT NULL, at timestamptz NOT NULL DEFAULT now());
 -- Support lookups: target = install id, or 'email:' || hex(HMAC-SHA256(K_audit, NFC(trim(lower(email))))); details.account_id
 -- = the matched account. Never the e-mail. Pseudonymous personal data (see §3, §4).
--- Support seat moves (backend-api §5.3): action = 'support_seat_move', target = purchase id, details = {from_install, to_install,
--- reason_code, ticket_ref, attached_account_id?, outcome}. Never an e-mail or free text. Same 1-year retention as lookups.
+-- Support seat moves and detaches (backend-api §5.3, D-57, FR-BE-11): action IN ('support_seat_move','support_detach'),
+-- target = purchase id, details = {from_install, to_install, reason_code, ticket_ref, attached_account_id?, detached_account_id?,
+-- corrects_audit_id?, ownership_check: 'order_id', ownership_outcome: pass|fail|unavailable, outcome}. Exactly one row per call,
+-- naming the operator. Never an e-mail, an ORDER ID or free text. Same 1-year retention as lookups.
 ```
 
 ## 3. Constraints that protect privacy
@@ -254,7 +289,9 @@ CREATE TABLE audit_log (id bigint GENERATED ALWAYS AS IDENTITY PRIMARY KEY, oper
 | Purchase link to a person | Store receives `obfuscatedAccountId`/`appAccountToken` = HMAC(install_id), never e-mail |
 | Support lookups by e-mail | The e-mail travels only in a POST body (`backend-api.md` §5.2). The audit row stores `HMAC-SHA256(K_audit, NFC(trim(lower(email))))` plus the matched `account_id`, never the e-mail. `K_audit` is a dedicated KMS key, separate from the `install_hash` pepper, so the value can't be reversed by a dictionary attack without the KMS. It is still **pseudonymous personal data** and falls under the audit retention (§4) |
 | ID token / attestation replay | `replay_guard` keeps only hashes, until the token's `exp` (Play Integrity: 15 min) |
-| Idempotent replays | `idempotency_records` returns a stored result only for the same install, operation, key and body hash; bodies are encrypted and purged after 24 h |
+| Idempotent replays | `idempotency_records` returns a stored result only for the same install, operation, key and body hash, and only while `expires_at > now()`; bodies are encrypted and purged after 24 h, and deleted at once with their install or account. `POST /v1/installs` stores no token-bearing response at all (R3-6) |
+| Same-iPhone recognition (D-55) | Only `purchase_seats.device_key_hash` / `seat_claimants.device_key_hash` = HMAC-SHA256(`K_seat`, purchase_id ‖ public key), with `K_seat` a dedicated KMS key. No raw public key, no Secure Enclave data, nothing that joins across purchases |
+| Store order IDs (D-57) | Never stored: no column, no audit field, no log; checked live with the store and dropped |
 | Device attestation (D-45) | Only `app_attest_keys` (public key, counter) and Play verdict checks; no device identifier (IMEI, ad ID, serial, phone number) and no verdict payload is stored (FR-GOLD-09) |
 | Third-party envelopes | Pub/Sub, ASSN and Apple callback bodies are open, but only the listed fields are read, after authentication. `store_notifications` stores only its explicit extracted columns and `payload_digest`, never the raw envelope or unknown fields |
 
@@ -268,11 +305,13 @@ CREATE TABLE audit_log (id bigint GENERATED ALWAYS AS IDENTITY PRIMARY KEY, oper
 | `merchant_contributions` raw rows | Deleted when the aggregate is promoted/rejected, or after 180 days | same |
 | `bank_requests` | 24 months (aggregate counts kept) | same |
 | Request logs | ≤ 30 days, IPs truncated to /24 (v4) or /48 (v6) | logging pipeline |
-| `audit_log`, support-lookup and support-seat-move rows (HMAC e-mail pseudonym, install IDs, `account_id`: pseudonymous personal data) | **Exactly 1 year from creation, then deleted** (D-47, FR-BE-11, NFR-PRIV-07). Account deletion neither shortens nor extends it: the row stays until its own 1-year mark (FR-ACCT-04), so it is gone at most 1 year after the account is deleted | `RetentionPurger` daily (`action IN ('support_lookup','support_seat_move') AND at < now() - interval '1 year'`) |
+| `audit_log`, support-lookup, support-seat-move and support-detach rows (HMAC e-mail pseudonym, install IDs, `account_id`: pseudonymous personal data) | **Exactly 1 year from creation, then deleted** (D-47, FR-BE-11, NFR-PRIV-07). Account deletion neither shortens nor extends it: the row stays until its own 1-year mark (FR-ACCT-04), so it is gone at most 1 year after the account is deleted | `RetentionPurger` daily (`action IN ('support_lookup','support_seat_move','support_detach') AND at < now() - interval '1 year'`) |
 | `audit_log`, all other operator actions | 3 years | `RetentionPurger` |
 | `replay_guard` | Until `expires_at` | `RetentionPurger` |
-| `purchase_seats` | With its purchase. The holder and claimant become NULL when their install is deleted or purged; the claimant is ignored after 7 days and cleared by the purger | `RetentionPurger` |
-| `idempotency_records` | 24 h | `RetentionPurger` |
+| `purchase_seats` | With its purchase. The holder becomes NULL when its install is deleted or purged; `device_key_hash` stays with the seat (D-55) and is deleted with the purchase | — |
+| `seat_claimants` | 7 days (ignored after that by every read); deleted with the install | `RetentionPurger` |
+| `idempotency_records` | 24 h (never served after `expires_at`); deleted at once with its install or account | `RetentionPurger` + delete endpoints |
+| `installs.registration_*` | Cleared at first authenticated call or after 24 h | API + `RetentionPurger` |
 | DB backups (PITR) | 14 days | provider |
 
 ## 5. Capacity check (NFR-BE-04)
