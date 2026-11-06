@@ -51,7 +51,7 @@ The source of truth during Phase 5 is `backend/openapi/zaghlol-v1.yaml`, generat
 | **Account** | `accountToken`: ES256 JWT `{sub: accountId, iid: installId, iat, exp: +30 d, kid}` | `POST /v1/accounts/signin` | 30 days, silently refreshed in `/v1/sync` responses. A token whose account no longer exists, or whose install is no longer linked to it, is rejected with `401 ACCOUNT_TOKEN_EXPIRED` even before `exp` (R3-6) | Link/unlink/delete own account; read account entitlements; required for account-linked Gold (D-61(c)) |
 | **Google Pub/Sub** | Google-signed OIDC JWT (`aud` = our push endpoint, `email` = our push service account) | Google | per request | `/v1/notifications/google` only |
 | **Apple ASSN** | `signedPayload` JWS, x5c chain verified to Apple Root CA G3, bundle ID + environment checked | Apple | per request | `/v1/notifications/apple` only |
-| **Operator** | OIDC (Google Workspace or Entra ID) with enforced MFA; short-lived access token (≤ 1 h). `zaghlol-ops` signs in with **authorization code + PKCE and a loopback redirect** (RFC 8252); the device-code grant is disabled for its client (R3-9). `support_agent` additionally requires **phishing-resistant MFA (FIDO2 / passkey)**. **The IdP is the enforcement point** (R4-6): a conditional-access policy scoped to the `zaghlol-ops` and admin-app clients requires phishing-resistant MFA for the support group (Entra: an authentication-strength policy, ideally bound to an authentication context so the token carries it in `acrs`; Google Workspace: security-key-only 2SV enforcement for the support OU). The API also checks the claim that proves it **only if** T-136 confirms the chosen IdP emits one (Entra `acrs` containing the configured context ID; Entra's documented `amr` values have no FIDO2-specific value, only `mfa`/`rsa`/`ngcmfa`; Google Workspace OIDC tokens generally carry neither). Without such a claim the API check is **advisory** (it requires the MFA signal the IdP does emit and logs a diag counter) and the runbook records the IdP policy as the control | Company IdP | 1 h | Role-based: `catalog_editor`, `flags_admin`, `support_viewer` (read-only lookup), `support_agent` (audited support seat move and detach, §5.3; named staff only, reviewed quarterly), `prices_admin`; every write audited |
+| **Operator** | OIDC (Google Workspace or Entra ID) with enforced MFA; short-lived access token (≤ 1 h). `zaghlol-ops` signs in with **authorization code + PKCE and a loopback redirect** (RFC 8252); the device-code grant is disabled for its client (R3-9). `support_agent` and `support_lead` additionally require **phishing-resistant MFA (FIDO2 / passkey)**. **The IdP is the enforcement point** (R4-6): a conditional-access policy scoped to the `zaghlol-ops` and admin-app clients requires phishing-resistant MFA for the support group (Entra: an authentication-strength policy, ideally bound to an authentication context so the token carries it in `acrs`; Google Workspace: security-key-only 2SV enforcement for the support OU). The API also checks the claim that proves it **only if** T-136 confirms the chosen IdP emits one (Entra `acrs` containing the configured context ID; Entra's documented `amr` values have no FIDO2-specific value, only `mfa`/`rsa`/`ngcmfa`; Google Workspace OIDC tokens generally carry neither). Without such a claim the API check is **advisory** (it requires the MFA signal the IdP does emit and logs a diag counter) and the runbook records the IdP policy as the control | Company IdP | 1 h | Role-based: `catalog_editor`, `flags_admin`, `support_viewer` (read-only lookup), `support_agent` (audited support seat move and detach, §5.3; named staff only, reviewed quarterly), `support_lead` (audited dispute-freeze unfreeze only, §5.3, R5-5(b); named support leads only, reviewed quarterly), `prices_admin`; every write audited |
 
 Authorization rules:
 - A call may only read or write rows of its own `installId`, plus rows of `accountId` when the account token matches **and** the install is linked to that account.
@@ -473,6 +473,7 @@ These details were not spelled out above. `backend/openapi/zaghlol-v1.yaml` is a
 | `POST /admin/v1/support/entitlement:lookup` | support_viewer | Entitlement and seat status only; install ID or e-mail in the body |
 | `POST /admin/v1/support/seat:move` | support_agent | Audited seat move past the cooldown (restarts the window), optional attach, correction move-back; live order-ID check (§5.3) |
 | `POST /admin/v1/support/purchase:detach` | support_agent | Audited correction: remove an account link that support made (§5.3) |
+| `POST /admin/v1/support/purchase:unfreeze` | support_lead | Audited early end of a dispute freeze by a different operator; moves nothing (§5.3, R5-5(b)) |
 | `GET /admin/v1/bank-requests` | catalog_editor | Ranked list |
 | `GET /admin/v1/metrics/daily-active` | any | Aggregate counters |
 
@@ -496,6 +497,7 @@ The table above uses shorthand. These are the exact operations in `zaghlol-v1.ya
 | `POST /admin/v1/support/entitlement:lookup` | support_viewer |
 | `POST /admin/v1/support/seat:move` | support_agent |
 | `POST /admin/v1/support/purchase:detach` | support_agent |
+| `POST /admin/v1/support/purchase:unfreeze` | support_lead |
 | `GET /admin/v1/bank-requests` | catalog_editor |
 | `GET /admin/v1/metrics/daily-active` | any |
 
@@ -525,7 +527,7 @@ The table above uses shorthand. These are the exact operations in `zaghlol-v1.ya
 
 ### 5.3 Support seat move, link and correction (D-52, D-54, D-56, D-57, EC-68, FR-ACCT-05, FR-BE-08/11)
 
-`POST /admin/v1/support/seat:move` and `POST /admin/v1/support/purchase:detach`, role **`support_agent`** (phishing-resistant MFA, §3). `seat:move` is the only way past the 30-day cooldown and the only way to link a purchase whose buying install is gone; `purchase:detach` only reverses a support link. **One agent may act; there is no second approver** (D-57(c)).
+`POST /admin/v1/support/seat:move` and `POST /admin/v1/support/purchase:detach`, role **`support_agent`** (phishing-resistant MFA, §3); `POST /admin/v1/support/purchase:unfreeze`, role **`support_lead`** (below). `seat:move` is the only way past the 30-day cooldown and the only way to link a purchase whose buying install is gone; `purchase:detach` only reverses a support link. **One agent may act; there is no second approver** (D-57(c)).
 
 - **`seat:move` request:** `{purchaseId, toInstallId, reasonCode, ticketRef, ownershipCheck, attachToAccount?, correctsAuditId?}`.
   - `reasonCode` ∈ `lost_or_broken_phone | reinstall | buying_phone_gone | correction | other`. `correction` requires `correctsAuditId`, and `correctsAuditId` is allowed only with `correction`.
@@ -543,7 +545,13 @@ The table above uses shorthand. These are the exact operations in `zaghlol-v1.ya
   - corrections (`reasonCode: correction`, `purchase:detach`) stay allowed;
   - self-service is unchanged: restore, sign-in, verify and rebinds follow their own rules (D-65(b)).
 
-  The support lookup shows `disputeFrozenUntil`. A dispute that needs more than a correction goes to a support lead through the ticket.
+  The support lookup shows `disputeFrozenUntil`. A dispute that needs more than a correction goes to a support lead through the ticket, who can end the freeze early with `purchase:unfreeze` (below).
+- **Unfreeze (R5-5(b), adopted as the default).** `POST /admin/v1/support/purchase:unfreeze`, role **`support_lead`** (phishing-resistant MFA like `support_agent`, §3; named support leads only, reviewed quarterly). It exists for an owner who lost the phone during a freeze, who would otherwise have neither self-service (the correction restarted the window) nor support for up to 30 days, and against a wrongful correction used to freeze support for the real owner.
+  - **Request:** `{purchaseId, ticketRef, ownershipCheck}`. `ticketRef` and `ownershipCheck` as for `seat:move`.
+  - **Order of checks:** (1) no freeze running (`dispute_frozen_until IS NULL` or `≤ now`): nothing changes, `200` with `unfrozen: false`, audited `outcome: "noop"`, `ownership_outcome: "not_run"`; (2) **different operator:** the caller must not be the operator of the correction that started the current freeze (the newest successful correction row, `support_seat_move` with `reason_code = correction` and outcome `moved`/`moved_and_attached`, or `support_detach` with outcome `detached`, for this purchase). The same operator is **`409 ADMIN_CONFLICT`**, audited `outcome: "refused"`, `ownership_outcome: "not_run"`, with no store call; (3) the live ownership check, exactly as for `seat:move` (`422 OWNERSHIP_CHECK_FAILED`, `503 UPSTREAM_UNAVAILABLE`); (4) set `dispute_frozen_until = NULL`.
+  - **Effect:** it ends the freeze and **moves nothing**: the seat, `account_id`, `next_move_at`, `recent_rebinds` and the claimants are untouched. An ordinary support move (by any `support_agent`, the lead included if they hold that role) can then follow. A later correction starts a new freeze as usual. It isn't a second approver on ordinary actions (D-57(c) unchanged).
+  - **Response:** `{purchaseId, unfrozen, auditId}`.
+  - **Audit and alert:** one `support_unfreeze` row per call (below), and every call raises the `support_unfreeze` alert to the support-lead group (purchase UUID only).
 - **Who can receive the seat** (`toInstallId`). Any other target is `409 ADMIN_CONFLICT`. The target must be:
   1. one of the purchase's **pending claimants**: an install whose own restore, sign-in or plan-change verify for this purchase passed attestation (restore) and store verification, but was refused for the cooldown, or (plan-change verify only) kept off the seat by the account rule (R4-4), within the last 7 days. There are up to 3 (`seat_claimants`), and the agent picks one explicitly. **Runbook preference (R4-7(3)):** when several claimants could be the owner, prefer the one that is the purchase's **buying install** (`isBuyingInstall` in the lookup), the install whose HMAC the store binding names; or
   2. the **current holder**, for `attachToAccount` alone (no move), and only under the attach gate below; or
@@ -564,12 +572,14 @@ The table above uses shorthand. These are the exact operations in `zaghlol-v1.ya
 - **Idempotent by nature:** moving to the install that already holds the seat, or detaching an unlinked purchase, changes nothing and returns the current state. It is still audited, with `outcome: "noop"`.
 - **Responses:**
   - `seat:move`: `{purchaseId, moved, attached, nextMoveAt, auditId}`;
-  - `purchase:detach`: `{purchaseId, detached, auditId}`.
+  - `purchase:detach`: `{purchaseId, detached, auditId}`;
+  - `purchase:unfreeze`: `{purchaseId, unfrozen, auditId}`.
 
   `auditId` is the audit row's ID, which a later correction quotes.
 - **Audit** (D-47 rules, FR-BE-11): every call, successful or refused, writes **exactly one** `audit_log` row naming the operator.
-  - `action ∈ {support_seat_move, support_detach}`, `target` = the purchase UUID.
+  - `action ∈ {support_seat_move, support_detach, support_unfreeze}`, `target` = the purchase UUID.
   - `details = {from_install, to_install, reason_code, ticket_ref, attached_account_id?, detached_account_id?, corrects_audit_id?, ownership_check: "order_id", ownership_outcome: "pass" | "fail" | "unavailable" | "not_run", outcome}`. `outcome` ∈ `moved | attached | moved_and_attached | detached | noop | refused | dispute_frozen | ownership_failed | upstream_unavailable`; a `dispute_frozen` refusal has `ownership_outcome: "not_run"`.
+  - `support_unfreeze` rows: `details = {ticket_ref, freeze_audit_id, frozen_until, ownership_check: "order_id", ownership_outcome, outcome}`, where `freeze_audit_id` is the correction row that started the freeze (`null` for a `noop`), `frozen_until` the value that was cleared, and `outcome` ∈ `unfrozen | noop | refused | ownership_failed | upstream_unavailable`.
   - It never holds an e-mail, an order ID or free text.
   - Install IDs are pseudonymous personal data, so the row is kept **exactly 1 year from creation, then deleted**, like support-lookup rows.
 - **Alerts and runbook actions** (`error-handling-and-observability.md` §4; T-137 runbook):
@@ -577,10 +587,11 @@ The table above uses shorthand. These are the exact operations in `zaghlol-v1.ya
   - more than 20 support actions by one operator in a day. **Action:** suspend that operator's `support_agent` role pending review;
   - more than 5 `ownership_outcome: fail` rows for one operator in a day. **Action:** review for social-engineering attempts;
   - any `dispute_frozen` refusal (D-64). **Action:** the support lead takes over the ticket;
+  - any `support_unfreeze` call (R5-5(b)). **Action:** a second support lead checks the ticket within 2 business days; an unfreeze followed by a move is also reviewed under the >2-moves rule;
   - **`seat_rebind`**: a purchase reached the D-63 rebind cap and had an over-cap rebind (§4.3). **Action:** check the purchase's events for a relay pattern (rebinds alternating between the same installs); if found, note it on any ticket for that purchase. No automatic action: the cap already bounds it.
-- **Operators** (R3-9): `support_agent` is assigned only to named staff, never to shared or service accounts, and the assignments are reviewed every quarter (T-137).
+- **Operators** (R3-9): `support_agent` and `support_lead` are assigned only to named staff, never to shared or service accounts, and the assignments are reviewed every quarter (T-137).
 - **Helpdesk privacy (info, T-137, OQ-16):** a ticket links the support code (install ID) and the order ID to the user's contact details in the helpdesk tool. The privacy notice says so. T-137 records whether the helpdesk vendor is a PDPL processor and sets ticket retention.
-- **Interim tooling** (D-37, R-21): until the admin web app ships after launch, operators use `zaghlol-ops support move --purchase <uuid> --to <installId> --reason <code> --ticket <ref> [--attach] [--corrects <auditId>]` and `zaghlol-ops support detach --purchase <uuid> --ticket <ref> --corrects <auditId>`. Both prompt for the order ID without echo, and both sign in with OIDC authorization code + PKCE (loopback) and FIDO2. T-136 owns the endpoints, role, `amr` check and audit, T-137 the CLI and the support runbook, and T-132 the seat service they call.
+- **Interim tooling** (D-37, R-21): until the admin web app ships after launch, operators use `zaghlol-ops support move --purchase <uuid> --to <installId> --reason <code> --ticket <ref> [--attach] [--corrects <auditId>]`, `zaghlol-ops support detach --purchase <uuid> --ticket <ref> --corrects <auditId>` and `zaghlol-ops support unfreeze --purchase <uuid> --ticket <ref>`. All three prompt for the order ID without echo, and both sign in with OIDC authorization code + PKCE (loopback) and FIDO2. T-136 owns the endpoints (unfreeze included), roles, `amr` check and audit, T-137 the CLI and the support runbook, and T-132 the seat service they call.
 
 ## 6. Error codes
 
@@ -601,7 +612,7 @@ Every error is `application/problem+json` with one of these `code` values. The s
 | 409 | `MOVE_COOLDOWN` | Restore only (§4.3, D-52): Gold was moved in the last 30 days, so it can't move to this phone yet. The body carries `nextMoveAt`, always a whole UTC hour. Show the date, formatted for the locale, and the support link (EC-68). Nothing that affects Gold was written (this install became a pending claimant); don't retry before `nextMoveAt`. Sign-in reports a refused move in a 200 instead (`moveRefused`, §4.6) |
 | 409 | `IDEMPOTENCY_KEY_REUSED` | The same install sent the same `Idempotency-Key` for the same operation with a different body (§1). A bug in the app: generate a new key for a new request; don't retry with this one |
 | 422 | `DEVICE_ATTESTATION_FAILED` | Restore only: the Play Integrity token or App Attest assertion is missing, invalid, stale, replayed or not bound to the body. iOS: if no `attestationObject` was sent, generate a new App Attest key and retry once with it; Android: retry once with a fresh token. Then stop, show the help message (EC-66) and offer sign-in (an account-linked purchase reaches the phone through sign-in without attestation, R-19). Gold is unchanged. Attestation-service outages are `503 UPSTREAM_UNAVAILABLE`, not this code |
-| 409 | `ADMIN_CONFLICT` | Operator API only (§5.2, §5.3): the edit conflicts with the current draft catalog or review queue, or a support move, attach or detach isn't allowed (target not a claimant, holder or correction source; account rule; attach gate closed; detach of a link support didn't make; a non-correction action during a dispute freeze, D-64). Reload and check. Never sent to the app |
+| 409 | `ADMIN_CONFLICT` | Operator API only (§5.2, §5.3): the edit conflicts with the current draft catalog or review queue, or a support move, attach or detach isn't allowed (target not a claimant, holder or correction source; account rule; attach gate closed; detach of a link support didn't make; a non-correction action during a dispute freeze, D-64; an unfreeze by the operator of the correction that started the freeze, R5-5(b)). Reload and check. Never sent to the app |
 | 422 | `OWNERSHIP_CHECK_FAILED` | Operator API only (§5.3, D-57): the store order ID didn't match this purchase live at Google or Apple, or the order is refunded or cancelled. Nothing changed; the attempt is audited. Ask the user to check the order ID. Never sent to the app |
 | 413 | `PAYLOAD_TOO_LARGE` | The body is over the size limit (§1). A bug in the app; don't retry |
 | 415 | `UNSUPPORTED_MEDIA_TYPE` | The body wasn't the declared media type (`application/json`; the Apple callback takes `application/x-www-form-urlencoded`). A bug in the app; don't retry |

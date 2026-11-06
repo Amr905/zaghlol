@@ -1373,7 +1373,8 @@ paths:
         `status: moved` with `movedBy: support`. Moving to the current holder changes nothing. **Dispute freeze
         (D-64):** for 30 days after a correction on the purchase (each correction restarts it), any call with a
         `reasonCode` other than `correction` is `409 ADMIN_CONFLICT`, checked before the ownership check and
-        audited (`outcome: dispute_frozen`). A support attach makes the buying install, if it reappears, get a
+        audited (`outcome: dispute_frozen`); a support lead, other than that correction's agent, can end the
+        freeze early with `adminUnfreezePurchase`. A support attach makes the buying install, if it reappears, get a
         one-time notice (`supportNotice`). Every call writes
         one audit row (`support_seat_move`: purchase, from and to install, reason code, ticket reference,
         ownership-check outcome, corrected row, outcome; never an e-mail, an order ID or free text), deleted
@@ -1492,6 +1493,70 @@ paths:
         '503':
           $ref: '#/components/responses/UpstreamUnavailable'
 
+  /admin/v1/support/purchase:unfreeze:
+    post:
+      tags: [Admin]
+      operationId: adminUnfreezePurchase
+      summary: End a purchase's dispute freeze early (support lead, audited, moves nothing)
+      description: |
+        Role `support_lead` with phishing-resistant MFA (R5-5(b), D-64, D-65(b), FR-BE-08/11; backend-api.md
+        section 5.3). Clears the purchase's dispute freeze so that an ordinary support move can follow, for an
+        owner who lost the phone during the freeze. It moves no seat, links no account and leaves the 30-day
+        window as it is. The caller must be a different operator from the agent of the correction that started
+        the current freeze; otherwise `409 ADMIN_CONFLICT`, checked before the ownership check and audited.
+        Checks `ownershipCheck` live like `adminMoveSeat` (`422 OWNERSHIP_CHECK_FAILED`, `503` on an outage).
+        A purchase with no running freeze changes nothing and is audited as `noop`. Every call writes one
+        `support_unfreeze` audit row (purchase, ticket reference, the correction row that started the freeze,
+        ownership-check outcome, outcome; never an e-mail, an order ID or free text), deleted exactly 1 year
+        after creation, and raises the `support_unfreeze` alert. Not idempotency-keyed (idempotent by nature).
+        Interim client: `zaghlol-ops support unfreeze`.
+      x-required-roles: [support_lead]
+      security:
+        - operatorOidc: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/SupportUnfreezeRequest'
+            example:
+              purchaseId: 0193f2c4-7a10-7c52-9d3e-5b1f8a2c6e01
+              ticketRef: ZG-10457
+              ownershipCheck: GPA.3312-5208-4571-04923
+      responses:
+        '200':
+          description: The purchase's freeze state after the call.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SupportUnfreezeResult'
+              example:
+                purchaseId: 0193f2c4-7a10-7c52-9d3e-5b1f8a2c6e01
+                unfrozen: true
+                auditId: 48247
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/UnauthorizedGeneric'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '409':
+          $ref: '#/components/responses/AdminConflict'
+        '413':
+          $ref: '#/components/responses/PayloadTooLarge'
+        '415':
+          $ref: '#/components/responses/UnsupportedMediaType'
+        '422':
+          $ref: '#/components/responses/OwnershipCheckFailed'
+        '429':
+          $ref: '#/components/responses/RateLimited'
+        '500':
+          $ref: '#/components/responses/InternalError'
+        '503':
+          $ref: '#/components/responses/UpstreamUnavailable'
+
   /admin/v1/bank-requests:
     get:
       tags: [Admin]
@@ -1580,8 +1645,8 @@ components:
       description: |
         Operator OIDC access token (Google Workspace or Entra ID, at most 1 hour) obtained by `zaghlol-ops` with
         the authorization-code flow, PKCE and a loopback redirect (RFC 8252); the device-code grant is disabled
-        for its client. MFA is enforced at the identity provider. Operations requiring `support_agent` also
-        require phishing-resistant MFA (FIDO2), enforced by an IdP conditional-access policy scoped to the
+        for its client. MFA is enforced at the identity provider. Operations requiring `support_agent` or
+        `support_lead` also require phishing-resistant MFA (FIDO2), enforced by an IdP conditional-access policy scoped to the
         `zaghlol-ops` and admin clients (R4-6); the API additionally checks the claim that proves it (Entra
         `acrs` authentication context) where T-136 confirms the IdP emits one, and otherwise treats its check as
         advisory. The role required by each operation is in `x-required-roles`.
@@ -1770,7 +1835,8 @@ components:
         `ADMIN_CONFLICT`. Operator API only: the change conflicts with the current draft catalog or review
         queue (for example a referenced category is not live, or the aggregate is not `ready_for_review`), or a
         support move, attach or detach is not allowed (target not a claimant, holder or correction source;
-        account rule; attach gate closed; detach of a link support did not make). Reload and check.
+        account rule; attach gate closed; detach of a link support did not make; a non-correction action during
+        a dispute freeze; an unfreeze by the agent of the correction that started the freeze). Reload and check.
       content:
         application/problem+json:
           schema:
@@ -1935,7 +2001,9 @@ components:
         paused, none; `movedBy` (`user` or `support`) is set with `moved`. For every plan `exp <= iat + 3 d`
         (2 d for a basic-integrity seat) and `graceUntil = exp + 4 d` (D-60, BR-GOLD-03/07). The app evaluates
         `exp` and `graceUntil` against its trusted-time high-water mark, never the raw device clock
-        (NFR-SEC-08; backend-api.md section 4.3).
+        (NFR-SEC-08; backend-api.md section 4.3). The app honours a token only when `sub` equals its own
+        current install ID (and, with `acct` set, only with an account token whose `iid` is its own install ID);
+        a validly signed token for another install grants nothing and never re-anchors trusted time (R5-1).
       required: [token]
       properties:
         token:
@@ -2337,8 +2405,9 @@ components:
         - type: 'null'
     SupportNotice:
       description: |
-        R4-7(2): `gold_linked_by_support` is sent once to a purchase's buying install after support linked that
-        purchase to an account; `null` otherwise.
+        R4-7(2): `gold_linked_by_support` is sent to a purchase's buying install after support linked that
+        purchase to an account, in every signed sync or entitlement 200 until that install makes its next
+        authenticated request after one was sent (the implicit acknowledgement, R5-7); `null` otherwise.
       oneOf:
         - type: string
           enum: [gold_linked_by_support]
@@ -2722,8 +2791,9 @@ components:
         restoreSuggested:
           type: boolean
           description: |
-            D-65(a): an over-cap same-iPhone sign-in could not pass the seat because the seat's key isn't trusted;
-            offer Restore on this phone, which can.
+            D-65(a): an over-cap same-iPhone sign-in could not pass the seat because the seat's key isn't trusted
+            (only an App Attest-covered request makes a key trusted, R5-2). The app offers Restore when StoreKit
+            on this iPhone has a transaction for the purchase, and otherwise the support path (R5-3(b)).
         nextMoveAt:
           description: Set with `moveRefused`. Always a whole UTC hour (R3-4).
           oneOf:
@@ -3163,7 +3233,7 @@ components:
           description: |
             D-64: until this time only corrections are allowed on this purchase (`seat:move` with
             `reasonCode: correction`, and `purchase:detach`); other support moves and links are `409 ADMIN_CONFLICT`.
-            `null` when no freeze is running.
+            A support lead can end it early (`purchase:unfreeze`, R5-5(b)). `null` when no freeze is running.
           oneOf:
             - $ref: '#/components/schemas/UtcTimestamp'
             - type: 'null'
@@ -3266,6 +3336,33 @@ components:
           format: uuid
         detached:
           type: boolean
+        auditId:
+          type: integer
+          format: int64
+    SupportUnfreezeRequest:
+      type: object
+      additionalProperties: false
+      required: [purchaseId, ticketRef, ownershipCheck]
+      properties:
+        purchaseId:
+          type: string
+          format: uuid
+        ticketRef:
+          type: string
+          description: Support ticket number. Never free text, so no personal data reaches the audit row.
+          pattern: '^[A-Za-z0-9_-]{1,32}$'
+        ownershipCheck:
+          $ref: '#/components/schemas/OwnershipCheck'
+    SupportUnfreezeResult:
+      type: object
+      required: [purchaseId, unfrozen, auditId]
+      properties:
+        purchaseId:
+          type: string
+          format: uuid
+        unfrozen:
+          type: boolean
+          description: True when a running dispute freeze was ended; false for a purchase that had none (`noop`).
         auditId:
           type: integer
           format: int64

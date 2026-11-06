@@ -89,7 +89,8 @@ CREATE TABLE purchases (
   account_linked_by text CHECK (account_linked_by IN ('signin','support')),  -- NULL when unlinked; only 'support' links can be detached (§5.3)
   attach_reclaim_used_at timestamptz,          -- D-58: the free account-attach reclaim happened; NEVER cleared, not even when the account is deleted
   dispute_frozen_until timestamptz,            -- D-64/D-65(b): set to now + 30 d by every successful support correction (restarts);
-                                               -- while in the future, non-correction support moves and links get 409 ADMIN_CONFLICT
+                                               -- while in the future, non-correction support moves and links get 409 ADMIN_CONFLICT;
+                                               -- set to NULL only by a support_lead unfreeze from a different operator (R5-5(b))
   support_link_notice_pending boolean NOT NULL DEFAULT false,  -- R4-7(2): set by a support attach; cleared once the buying
                                                -- install received supportNotice, or by a detach
   state text NOT NULL CHECK (state IN ('pending','active','in_grace','on_hold','paused','canceled_active','expired','refunded','revoked')),
@@ -303,6 +304,9 @@ CREATE TABLE audit_log (id bigint GENERATED ALWAYS AS IDENTITY PRIMARY KEY, oper
 -- corrects_audit_id?, ownership_check: 'order_id', ownership_outcome: pass|fail|unavailable|not_run, outcome}; outcome includes
 -- 'dispute_frozen' for a refusal during a D-64 freeze (audited, D-65(b)). Exactly one row per call,
 -- naming the operator. Never an e-mail, an ORDER ID or free text. Same 1-year retention as lookups.
+-- Support-lead unfreeze (backend-api §5.3, R5-5(b)): action = 'support_unfreeze', target = purchase id, details =
+-- {ticket_ref, freeze_audit_id, frozen_until, ownership_check: 'order_id', ownership_outcome, outcome: unfrozen|noop|
+-- refused|ownership_failed|upstream_unavailable}. operator_id must differ from freeze_audit_id's operator. Same 1-year retention.
 ```
 
 ## 3. Constraints that protect privacy
@@ -332,7 +336,7 @@ CREATE TABLE audit_log (id bigint GENERATED ALWAYS AS IDENTITY PRIMARY KEY, oper
 | `merchant_contributions` raw rows | Deleted when the aggregate is promoted/rejected, or after 180 days | same |
 | `bank_requests` | 24 months (aggregate counts kept) | same |
 | Request logs | ≤ 30 days, IPs truncated to /24 (v4) or /48 (v6) | logging pipeline |
-| `audit_log`, support-lookup, support-seat-move and support-detach rows (HMAC e-mail pseudonym, install IDs, `account_id`: pseudonymous personal data) | **Exactly 1 year from creation, then deleted** (D-47, FR-BE-11, NFR-PRIV-07). Account deletion neither shortens nor extends it: the row stays until its own 1-year mark (FR-ACCT-04), so it is gone at most 1 year after the account is deleted | `RetentionPurger` daily (`action IN ('support_lookup','support_seat_move','support_detach') AND at < now() - interval '1 year'`) |
+| `audit_log`, support-lookup, support-seat-move, support-detach and support-unfreeze rows (HMAC e-mail pseudonym, install IDs, `account_id`: pseudonymous personal data) | **Exactly 1 year from creation, then deleted** (D-47, FR-BE-11, NFR-PRIV-07). Account deletion neither shortens nor extends it: the row stays until its own 1-year mark (FR-ACCT-04), so it is gone at most 1 year after the account is deleted | `RetentionPurger` daily (`action IN ('support_lookup','support_seat_move','support_detach','support_unfreeze') AND at < now() - interval '1 year'`) |
 | `audit_log`, all other operator actions | 3 years | `RetentionPurger` |
 | `replay_guard` | Until `expires_at` | `RetentionPurger` |
 | `purchase_seats` | With its purchase. The holder becomes NULL when its install is deleted or purged; `device_key_hash` stays with the seat (D-55) and is deleted with the purchase | — |
