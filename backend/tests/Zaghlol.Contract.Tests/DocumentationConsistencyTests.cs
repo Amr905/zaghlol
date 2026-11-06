@@ -1,4 +1,5 @@
 using System.Reflection;
+using System.Text.Json.Nodes;
 using System.Text.RegularExpressions;
 using Zaghlol.Domain;
 
@@ -97,6 +98,61 @@ public partial class DocumentationConsistencyTests
         Assert.NotEmpty(documented);
         Assert.Empty(documented.Except(inSpec, StringComparer.Ordinal));
         Assert.Empty(inSpec.Except(documented, StringComparer.Ordinal));
+    }
+
+    [Fact]
+    public void AdminOperationRolesMatchTheSpecRequiredRoles()
+    {
+        var documented = new Dictionary<string, string>(StringComparer.Ordinal);
+        foreach (var line in Section("### 5.1", "### 5.2").Split('\n'))
+        {
+            var match = AdminOperationCell().Match(FirstCell(line));
+            if (!match.Success)
+            {
+                continue;
+            }
+
+            var role = RoleToken().Match(SecondCell(line));
+            Assert.True(role.Success, $"no role in the section 5.1 row for {match.Value}");
+            documented[$"{match.Groups[1].Value.ToLowerInvariant()} {match.Groups[2].Value}"] = role.Groups[1].Value;
+        }
+
+        var failures = new List<string>();
+        var operatorRow = Section("## 3.", "## 4.").Split('\n').Single(l => l.StartsWith("| **Operator**", StringComparison.Ordinal));
+        foreach (var operation in Spec.Operations().Where(o => o.Path.StartsWith("/admin/v1/", StringComparison.Ordinal)))
+        {
+            var key = $"{operation.Method} {operation.Path}";
+            var roles = (operation.Body["x-required-roles"] as JsonArray ?? new JsonArray())
+                .Select(n => n!.GetValue<string>())
+                .ToList();
+            if (roles.Count != 1)
+            {
+                failures.Add($"{key}: expected exactly one x-required-roles entry, found {roles.Count}");
+                continue;
+            }
+
+            if (!documented.TryGetValue(key, out var role) || role != roles[0])
+            {
+                failures.Add($"{key}: section 5.1 says '{role}', the spec says '{roles[0]}'");
+            }
+
+            if (roles[0] != "any" && !operatorRow.Contains($"`{roles[0]}`", StringComparison.Ordinal))
+            {
+                failures.Add($"{key}: role '{roles[0]}' is not listed in the section 3 Operator row");
+            }
+        }
+
+        Assert.Empty(failures);
+    }
+
+    [GeneratedRegex("^\\s*([a-z_]+)")]
+    private static partial Regex RoleToken();
+
+    /// <summary>The second table cell of a markdown row.</summary>
+    private static string SecondCell(string line)
+    {
+        var cells = line.Replace("\\|", "\u0001", StringComparison.Ordinal).Split('|');
+        return cells.Length > 2 ? cells[2] : string.Empty;
     }
 
     private static HashSet<string> DocumentedCodes()

@@ -65,9 +65,11 @@ The repository is a mono-repo with a **Dart pub workspace** for the app and its 
 │  │  ├─ Zaghlol.Infrastructure/    EF Core DbContext + Migrations/, GooglePlay/, AppStore/, Kms/, Prices/
 │  │  ├─ Zaghlol.Workers/           PriceFetcher, NotificationProcessor, EntitlementSweeper, RetentionPurger, ContributionAggregator
 │  │  └─ Zaghlol.Ops/               `zaghlol-ops` CLI (operator, OIDC device flow)
-│  ├─ tests/                        Zaghlol.*.Tests (xUnit + Testcontainers PostgreSQL)
-│  ├─ openapi/zaghlol-v1.yaml       source of truth for the public API
-│  └─ deploy/                       Dockerfile, IaC (OpenTofu), environment configs
+│  ├─ tests/                        Zaghlol.*.Tests (xUnit + Testcontainers PostgreSQL; Zaghlol.Contract.Tests checks the spec)
+│  ├─ openapi/                      zaghlol-v1.yaml (source of truth for the API) + .spectral.yaml
+│  ├─ Dockerfile                    one image for API and workers (ADR-022); build context = backend/
+│  ├─ docker-compose.yml            local dev: postgres + api + worker
+│  └─ deploy/                       IaC (OpenTofu) and environment configs only (no Dockerfile)
 ├─ docs/                            (this documentation)
 └─ .github/workflows/               app-ci.yml, backend-ci.yml, release-android.yml, release-ios.yml
 ```

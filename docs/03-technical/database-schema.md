@@ -174,7 +174,7 @@ CREATE TABLE catalog_aliases (merchant_id INTEGER NOT NULL REFERENCES catalog_me
   alias_norm TEXT NOT NULL, match TEXT NOT NULL CHECK (match IN ('exact','prefix','token')), PRIMARY KEY (alias_norm, merchant_id));
 CREATE VIRTUAL TABLE catalog_alias_fts USING fts5(alias_norm, content='catalog_aliases', tokenize='trigram');
 CREATE TABLE catalog_keywords (keyword_norm TEXT NOT NULL, lang TEXT NOT NULL, category_code TEXT NOT NULL,
-  weight INTEGER NOT NULL, PRIMARY KEY (keyword_norm, category_code));
+  weight INTEGER NOT NULL, PRIMARY KEY (keyword_norm, lang));   -- identity = sync keyword op key (backend-api §5.2)
 CREATE TABLE catalog_meta (id INTEGER PRIMARY KEY CHECK (id = 1), version INTEGER NOT NULL,
   applied_at INTEGER NOT NULL, signature_kid TEXT NOT NULL);
 

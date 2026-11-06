@@ -19,3 +19,57 @@ D-14 / FR-ACCT: anonymous by default; Google/Apple sign-in only to carry Gold ac
 
 ## Consequences
 An extra endpoint for the Android Apple callback. Account deletion revokes the Apple token and removes links.
+
+## Amendment (2026-11-05): Android web-flow callback transport (FU-008)
+**Context.** T-006 modelled `/v1/apple/android-callback` as a `GET` with `code` and `id_token` in the query string. Tokens in URLs end up in browser history and in proxy, CDN and access logs. Apple's REST docs say that when `id_token` is requested, `response_mode` must be `fragment` or `form_post`, and that any requested scope (name, e-mail) requires `form_post`.
+
+**Options.**
+1. `response_mode=query` with `response_type=code` only and no scopes. The server would exchange the code itself. But we'd get no `id_token` in the callback and no e-mail claim for support lookup (A-47). The code would still sit in a URL, and the server would need to tie the callback to an install it can't see.
+2. `fragment`. The browser never sends a fragment to the server, so the callback endpoint gets nothing.
+3. **`form_post` (`response_type=code id_token`, `scope=email`, `nonce`).** Apple POSTs a form body to the callback. The callback is a stateless bounce: it answers `303` to `intent://callback?…#Intent;package=<applicationId>;scheme=signinwithapple;end`, which the `sign_in_with_apple` package (v8.x) expects and Chrome resolves on the device.
+
+**Decision: option 3.**
+- The route becomes `POST /v1/apple/android-callback` (`application/x-www-form-urlencoded`).
+- `user` and any unlisted field are dropped unread. The body is an open third-party schema (ADR-022 amendment).
+- The callback stores nothing and never logs the body or the `Location` header.
+- `state` is compared by the app, and all token verification stays in `POST /v1/accounts/signin` (nonce, aud = Services ID).
+- *Hardening after the security review (2026-11-05):*
+  - **Field patterns:** every forwarded field must match its pattern (`error` `^[a-z_]{1,64}$`, `code` `^[A-Za-z0-9._-]{1,2048}$`).
+  - **`Location`:** built with a URI builder from constants plus percent-encoded values, never by concatenation.
+  - **T-135 injection test:** `#`, `;`, `%23`, CR/LF and `&` in every field.
+  - **`state`:** single-use, expires after ≤ 10 minutes.
+  - **Custom Tab:** opened with an explicit Chrome package when Chrome is available.
+  - **Device tests (T-147/T-172):** Samsung Internet and Firefox as the default browser. If a browser ignores `package=`, record it as a limitation or fall back to a verified App Link.
+
+**Consequences.** T-135 implements the POST bounce. T-147 configures the Android web flow with `form_post`, `scope=email`, the Services ID and the intent package. Sources: Apple, [Request an authorization to the Sign in with Apple server](https://developer.apple.com/documentation/signinwithapplerestapi/request-an-authorization-to-the-sign-in-with-apple-server.), and the Apple Developer Forums threads [121760](https://developer.apple.com/forums/thread/121760) and [660531](https://developer.apple.com/forums/thread/660531) quoting the `response_type`/`response_mode` rules, checked 2026-11-05.
+
+## Amendment 2 (2026-11-05): nonce verification and single-use ID tokens (security review, Finding 2)
+**Context.** The contract had the app send `nonce` = SHA-256 of its client nonce, which is the same value as the ID token's `nonce` claim. Anyone holding a token could copy the claim and pass the check, so it proved nothing. Tokens could also be replayed.
+
+**Options.**
+1. Keep comparing the claim with a value the client sends. This proves nothing.
+2. **Send the pre-image.** The app sends the raw nonce, and the server checks `hex(SHA-256(raw)) == claim`, adds an age limit, and records each token's nonce for single use.
+3. Server-issued nonces (`POST /v1/accounts/nonce`, then sign-in). This is stronger binding, but costs an extra round trip and server state before the provider flow.
+
+**Decision: option 2.**
+- **Raw nonce:** `SignInRequest.nonce` is the raw nonce, ≥ 128 bits from a CSPRNG, base64url (`^[A-Za-z0-9_-]{22,128}$`). The provider receives only `hex(SHA-256(raw))`, the lower-case hex of SHA-256 over the raw string's ASCII bytes. This is the convention the `sign_in_with_apple` package and Apple's iOS samples use.
+- **Server check:** the server compares in constant time and rejects tokens with `iat` older than 10 minutes (`422 ID_TOKEN_INVALID`).
+- **Single use:** the server stores SHA-256 of the nonce claim in `replay_guard` until `exp`, so every ID token is single-use. A Google token without a nonce is keyed by the hash of the token itself. The same rules apply to Google wherever the platform flow supports a nonce. *(Superseded by Amendment 3: the nonce is required for Google too.)*
+
+**Consequences.** T-135 adds the replay table and checks. T-147 generates the raw nonce, keeps it in memory only and sends it once. Idempotency-Key replays return the stored response, so legitimate client retries are unaffected.
+
+## Amendment 3 (2026-11-06): nonce required for Google; sign-in under one-phone Gold (security re-review R2-8, R2-9; D-52, D-54)
+**Context.** Amendment 2 made the nonce optional for Google "wherever the platform flow supports it", and keyed a nonce-less Google token by its own hash. A copied Google ID token without a nonce could therefore be spent once by anyone holding it. Every flow we use does support a nonce: `google_sign_in` 7.x has `initialize(nonce:)`; on Android it maps to Credential Manager's `GetGoogleIdOption` / `GetSignInWithGoogleOption.setNonce`, and on iOS to GoogleSignIn-iOS `signIn(withPresenting:hint:additionalScopes:nonce:)`. Separately, D-52 makes sign-in a way to **move** Gold, and D-54 limits linking to the buying phone.
+
+**Options.**
+1. Keep the nonce optional for Google. This leaves the bearer-token replay open.
+2. **Require the nonce for both providers.** This is chosen.
+3. A server-issued nonce. Same objection as in Amendment 2.
+
+**Decision.**
+- `nonce` is required for both providers. A missing `nonce`, or an ID token without a `nonce` claim, gives `422 ID_TOKEN_INVALID`. `replay_guard` is keyed only by the nonce claim's hash.
+- T-147 must show that a **fresh** nonce can be set for every attempt with `google_sign_in` (re-`initialize`, or a narrow host API over Credential Manager / GoogleSignIn-iOS if the plugin can't); it must not reuse a nonce.
+- **Idempotency:** a stored sign-in result is returned only for the same install, `Idempotency-Key` and request-body SHA-256. A different body gives `409 IDEMPOTENCY_KEY_REUSED` (`backend-api.md` §1).
+- **Seats:** sign-in attaches purchases only from their buying install, then moves the seat of the account's purchases to this install under the 30-day cooldown (`409 MOVE_COOLDOWN`). ADR-012 Part B (c) has the details.
+
+**Consequences.** T-135: reject nonce-less tokens; body-hash idempotency; attach and seat rules. T-147: nonce for Google on both platforms; `MOVE_COOLDOWN` UX; "sign in on this phone" guidance. Sources: [`GoogleSignIn.initialize`](https://pub.dev/documentation/google_sign_in/latest/google_sign_in/GoogleSignIn/initialize.html) (google_sign_in 7.2.0, `nonce` parameter) and [Android: Implement Sign in with Google](https://developer.android.com/identity/sign-in/credential-manager-siwg-implementation), checked 2026-11-06.

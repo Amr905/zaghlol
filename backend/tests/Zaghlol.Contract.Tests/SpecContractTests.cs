@@ -15,9 +15,17 @@ public class SpecContractTests
     private static readonly OpenApiSpec Spec = OpenApiSpec.Load();
 
     private static readonly string[] SignedOperations =
-        ["sync", "verifyPurchase", "restorePurchases", "getEntitlement", "signIn", "getFullCatalog"];
+        ["sync", "verifyPurchase", "restorePurchases", "getEntitlement", "signIn", "signOut", "getFullCatalog"];
+
+    /// <summary>Operations whose signed 200 may re-anchor the app's trusted time (backend-api.md section 1, R4-2).</summary>
+    private static readonly string[] AnchoringOperations =
+        ["sync", "verifyPurchase", "restorePurchases", "getEntitlement", "signIn", "signOut"];
 
     private static readonly string[] IdempotentOperations = ["registerInstall", "verifyPurchase", "signIn"];
+
+    /// <summary>Operations whose body shape Google or Apple define; these, and only these, have open schemas.</summary>
+    private static readonly string[] ThirdPartyBodyOperations =
+        ["ingestGoogleNotification", "ingestAppleNotification", "appleAndroidCallback"];
 
     [Fact]
     public void SpecIsOpenApi31WithVersionedPaths()
@@ -52,7 +60,7 @@ public class SpecContractTests
         foreach (var operation in Spec.Operations())
         {
             var schema = OpenApiSpec.RequestSchema(operation);
-            if (schema is null)
+            if (schema is null || IsThirdPartyBody(operation))
             {
                 continue;
             }
@@ -72,7 +80,7 @@ public class SpecContractTests
         foreach (var operation in Spec.Operations())
         {
             var schema = OpenApiSpec.RequestSchema(operation);
-            if (schema is null)
+            if (schema is null || IsThirdPartyBody(operation))
             {
                 continue;
             }
@@ -96,6 +104,64 @@ public class SpecContractTests
                 if (Spec.Validate(schema, mutated) is null)
                 {
                     failures.Add($"{operation.Label}: an unknown field at '{where}' was accepted");
+                }
+            }
+        }
+
+        Assert.Empty(failures);
+    }
+
+    [Fact]
+    public void OnlyThirdPartyBodiesAreOpenAndTheyIgnoreUnknownFields()
+    {
+        var marked = Spec.Operations().Where(IsThirdPartyBody).Select(o => o.Id).Order(StringComparer.Ordinal).ToList();
+        Assert.Equal(ThirdPartyBodyOperations.Order(StringComparer.Ordinal).ToList(), marked);
+
+        var failures = new List<string>();
+        foreach (var operation in Spec.Operations().Where(IsThirdPartyBody))
+        {
+            var schemes = (operation.Body["security"] as JsonArray ?? new JsonArray())
+                .OfType<JsonObject>()
+                .SelectMany(r => r.Select(p => p.Key))
+                .ToList();
+            if (schemes.Any(s => s is "installToken" or "accountToken" or "operatorOidc"))
+            {
+                failures.Add($"{operation.Label}: a third-party body must not be an app or operator call");
+            }
+
+            string[] expectedSchemes = operation.Id == "ingestGoogleNotification" ? ["googlePubSubOidc"] : [];
+            if (!schemes.SequenceEqual(expectedSchemes, StringComparer.Ordinal))
+            {
+                failures.Add($"{operation.Label}: security must be exactly [{string.Join(", ", expectedSchemes)}]");
+            }
+
+            if (operation.Body["requestBody"]?["content"] is not JsonObject content || content.Count != 1)
+            {
+                failures.Add($"{operation.Label}: expected exactly one request media type");
+                continue;
+            }
+
+            var (mediaType, media) = content.Single();
+            var schema = media!["schema"];
+            var example = media["example"];
+            if (schema is null || example is null)
+            {
+                failures.Add($"{operation.Label} {mediaType}: request body needs a schema and an example");
+                continue;
+            }
+
+            var problem = Spec.Validate(schema, example);
+            if (problem is not null)
+            {
+                failures.Add($"{operation.Label}: example is invalid: {problem}");
+                continue;
+            }
+
+            foreach (var (where, mutated) in WithUnknownField(example))
+            {
+                if (Spec.Validate(schema, mutated) is not null)
+                {
+                    failures.Add($"{operation.Label}: an unknown field at '{where}' was rejected, but third-party bodies must ignore it");
                 }
             }
         }
@@ -246,6 +312,32 @@ public class SpecContractTests
         Assert.Equal(IdempotentOperations.Order(StringComparer.Ordinal).ToList(), withKey);
     }
 
+    /// <summary>
+    /// R4-2: the time nonce is accepted exactly on the anchoring operations, and each of their signed 200 bodies
+    /// has a <c>timeNonce</c> echo, so only a response to the app's own outstanding request can lower trusted time.
+    /// </summary>
+    [Fact]
+    public void TimeNonceIsSentAndEchoedExactlyOnAnchoringOperations()
+    {
+        var withNonce = Spec.Operations()
+            .Where(o => ParameterRefs(o).Contains("#/components/parameters/ZaghlolTimeNonce"))
+            .Select(o => o.Id)
+            .Order(StringComparer.Ordinal)
+            .ToList();
+        Assert.Equal(AnchoringOperations.Order(StringComparer.Ordinal).ToList(), withNonce);
+
+        var operations = Spec.Operations().ToDictionary(o => o.Id, StringComparer.Ordinal);
+        foreach (var id in AnchoringOperations)
+        {
+            var response = Spec.Resolve(operations[id].Body["responses"]!["200"]!);
+            var schema = Spec.Resolve(response["content"]!["application/json"]!["schema"]!);
+            Assert.True(
+                schema["properties"]?["timeNonce"]?["$ref"]?.GetValue<string>() == "#/components/schemas/TimeNonceEcho",
+                $"{id}: 200 body lacks the timeNonce echo");
+            Assert.True(response["headers"]?["Zaghlol-Signature"] is not null, $"{id}: 200 response is not signed");
+        }
+    }
+
     [Fact]
     public void InstallScopedOperationsRequireTheAppAndInstallHeaders()
     {
@@ -324,6 +416,11 @@ public class SpecContractTests
             Assert.DoesNotContain("installToken", schemes);
             Assert.DoesNotContain("accountToken", schemes);
         }
+    }
+
+    private static bool IsThirdPartyBody(SpecOperation operation)
+    {
+        return operation.Body["x-third-party-body"] is JsonValue flag && flag.TryGetValue<bool>(out var open) && open;
     }
 
     private static void Require(List<string> failures, SpecOperation operation, JsonObject responses, string status)

@@ -22,6 +22,18 @@ Constraint: the app ships **no analytics or crash SDKs** (NFR-PRIV-01). Raw SMS 
 | Signature invalid on sync | Drop the response, keep the current data, diag code, retry next day | Nothing |
 | Purchase verify unreachable | `outbox(purchase_verify)` + WorkManager/BGTask retries (15 min → 6 h, until verified or 3 days pass, then keep retrying daily); Gold shown as "pending verification" (EC-44, BR-GOLD-06) | «بنتأكد من الدفع…» |
 | Purchase invalid | No Gold; offer Restore & Support | Clear message |
+| Restore attestation fails (`DEVICE_ATTESTATION_FAILED`) / can't attest (EC-66) | iOS: one retry with a fresh App Attest key; Android: one retry with a fresh token. Platform transient errors are retried 3× within 1 min. No restore call without a proof. Existing Gold untouched | Help message «مقدرناش نتأكد من الموبايل ده»; offer Sign in (account-linked Gold) and Support |
+| Restore item `account_required` (EC-65) | No Gold on this install | «اعمل تسجيل دخول بالحساب اللي اشتريت بيه» (no account details revealed) |
+| Entitlement `status: moved` | Gold off on this install | `movedBy: user`: «الجولد اتنقل لموبايل تاني», with Restore / Sign in. `movedBy: support`: «الدعم نقل الجولد لموبايل تاني», with the support link and the support code (D-57(f)) |
+| Entitlement `status: paused` (D-61(c)) | Gold paused on this install; the seat stays reserved; signing in again here is not a move | «اعمل تسجيل دخول عشان تستخدم الجولد على الموبايل ده» |
+| Trusted time: clock set back (`tampered`, D-60, NFR-SEC-08, EC-70) | No Gold until the signed echo of the app's own time nonce arrives (R4-2); local data stays readable | «اتصل بالنت عشان نتأكد من الجولد» |
+| Verify `seatHeldElsewhere` (D-61(a), EC-71) | Payment done; Gold stays on the other phone; `nextMoveAt` stored | «الدفع تم. الجولد لسه على الموبايل التاني، وتقدر تنقله يوم {date}» |
+| Verify `seatHeldElsewhere` + `accountRequired` (R4-4) | Payment done; Gold stays on the other phone because this phone isn't signed in to the account that owns it | Draft for UX: «الدفع تم. عشان الجولد ييجي هنا، اعمل تسجيل دخول بالحساب اللي عليه الجولد» |
+| `400 SEAT_KEY_MISMATCH` (iOS restore / sign-in, R4-1) | Silent: one retry without `seatKeys` (sign-in with a fresh nonce); diag code only | None |
+| `supportNotice: gold_linked_by_support` (R4-7(2)) | Shown once on the buying phone | Draft for UX: «الدعم ربط الجولد بتاعك بحساب. لو ده مش انت، كلّم الدعم», with the support link and the support code |
+| Sign-in `moveRefused` (R3-5) | Signed in and linked; no Gold here yet; `nextMoveAt` stored | Same copy as `MOVE_COOLDOWN`. With `restoreSuggested: true` (D-65(a)), offer Restore first: draft «جرّب "استرجاع المشتريات"، الجولد هيرجع على الموبايل ده» |
+| Android "Delete everything" while holding a seat (D-55, EC-69) | Confirmation warns first | «لو مسحت كل حاجة ورجعت الجولد، ده هيتحسب نقلة الشهر ده» (+ next-move date when a cooldown is running) |
+| Restore `409 MOVE_COOLDOWN` (D-52, EC-68) | No Gold on this install; no automatic retry; the `nextMoveAt` date is stored for the Gold screen. Not a move (EC-66) | Next-move date formatted for the locale, plus the support link and the support code (install ID); draft copy for UX: «نقلت الجولد من قريب. تقدر تنقله تاني يوم {date}، أو كلّم الدعم» |
 | Backup fails | Notification (FR-NTF-01) + Settings status; Gold schedule retries next window | «النسخة الاحتياطية ماتعملتش — جرب تاني» |
 | Restore: newer backup (EC-26) / wrong passphrase / corrupt | Specific errors per design S-04 | As designed |
 | Speech unavailable (EC-32) | Manual entry offered; online recognizer only with consent (ADR-010) | Explanation sheet |
@@ -53,9 +65,16 @@ Constraint: the app ships **no analytics or crash SDKs** (NFR-PRIV-01). Raw SMS 
 
 ### 3.2 Backend
 - **Structured JSON logs** (Serilog → OpenTelemetry → provider log store), with fields `ts, level, msg, traceId, route, status, durationMs, installHash, code`.
-  - Never logged: request or response bodies, tokens, ID tokens, purchase tokens (only `sha256[:8]`), e-mails, or full IPs (truncated before ingestion).
+  - Never logged: request or response bodies, tokens, ID tokens, purchase tokens (only `sha256[:8]`), Play Integrity tokens or decoded verdict payloads, App Attest assertions, attestation objects or key IDs, e-mails, or full IPs (truncated before ingestion). Attestation failures are logged as a reason code only (`hash_mismatch`, `stale`, `replayed`, `app_unrecognized`, `no_integrity`, `counter`, `key_unknown`, `chain`).
+  - **Query strings are never logged** (FU-008). `route` is the matched route template (`/admin/v1/catalog/draft/{entity}/{id}`), never the raw path or the query. This applies to our request logging, OpenTelemetry HTTP spans (`url.query` and `url.full` are dropped, and `url.path` is replaced by the template), the reverse proxy / load balancer / CDN access logs we configure (query logging off), and exception messages. `Location` response headers are never logged, because the Apple callback's `Location` carries tokens. The API contract backs this up: no endpoint takes personal data or credentials in a query string (`backend-api.md` §1).
+  - **Default and framework log sources:**
+    - The `Microsoft.AspNetCore.Hosting.Diagnostics`, `Microsoft.AspNetCore.Server.Kestrel`, `Microsoft.AspNetCore.Routing` and `System.Net.Http.HttpClient` categories are set to `Warning` in every environment, or filtered by a Serilog enricher that drops `QueryString`, `Path`, `RequestUri` and `Uri` properties. At `Information` these categories log full request and outbound URLs.
+    - `HttpLogging` / `UseHttpLogging` is off. If it is ever enabled, it must use an explicit allow-list (`Method`, `StatusCode`, `Duration`) with `RequestPath`, `RequestQuery`, headers and bodies excluded.
+  - **Outbound calls:** Play v2 URLs carry the purchase token in the path (`…/purchases/productsv2/tokens/{token}`, `…/subscriptionsv2/tokens/{token}`), and App Store URLs carry transaction IDs. Outbound OpenTelemetry spans and logs use a redacted URL template (`…/tokens/{token}`, `…/transactions/{id}`) set by a `HttpClient` enrichment/filter. `url.full`, `url.query` and the raw path are dropped. Polly retry logs carry the template only.
+  - **Edge:** the WAF / load balancer / CDN logs no query strings. Request-body logging or inspection-sample capture is disabled or redacted for `/v1/apple/*` and `/v1/notifications/*`, where bodies hold ID tokens, codes and signed payloads.
+  - **Test (T-138):** a sentinel string is placed in the query, in a path key, in an outbound Play URL (through a fake Play handler) and in the Apple callback's `Location`. The test asserts that the sentinel appears in none of the captured logs, spans or HTTP-logging output, with all categories at their production levels.
   - Retention: 30 days (NFR-PRIV-06).
-- **Audit log:** operator actions in the `audit_log` table, retained 3 years.
+- **Audit log:** operator actions in the `audit_log` table, retained 3 years, **except** support-lookup, support-seat-move and support-detach rows, which hold pseudonymous personal data (HMAC e-mail pseudonym, install IDs, account ID) and are deleted **exactly 1 year** after creation, even if the account was deleted earlier (D-47, FR-BE-11, NFR-PRIV-07; `backend-schema.md` §4).
 - **Tracing:** OpenTelemetry traces for API and workers, sampled at 10% in production (100% on errors).
 
 ## 4. Monitoring & alerting (backend)
@@ -66,6 +85,7 @@ Constraint: the app ships **no analytics or crash SDKs** (NFR-PRIV-01). Raw SMS 
 | SLO 99.5% monthly (NFR-BE-02) | Successful `/v1/*` ratio, excluding 4xx | Burn-rate alerts (2% in 1 h, 5% in 6 h) |
 | Latency | p95 `/v1/sync` < 300 ms, `/v1/purchases/verify` < 2 s | p95 over target for 15 min |
 | Purchases | verify success/failure by `code`; unacked count; time-to-ack | Any unacked > 48 h; failure rate > 5% |
+| Gold seats (D-52, D-55…D-57) | seat moves and rebinds by channel; `MOVE_COOLDOWN` refusals; support moves, detaches and ownership-check outcomes per purchase and per operator; attestation failures by reason code | `MOVE_COOLDOWN` spike; > 2 support moves for one purchase in 90 days (runbook: a support lead other than the agent reviews within 2 business days and corrects if needed); > 20 support actions by one operator in a day (runbook: suspend the role pending review); > 5 failed ownership checks by one operator in a day; any `dispute_frozen` refusal (D-64; runbook: a support lead takes the ticket); any `support_unfreeze` call (R5-5(b); runbook: a second support lead checks the ticket within 2 business days); `seat_rebind`, an over-cap same-iPhone rebind (D-63/D-65(a); runbook: check for a relay pattern); attestation-failure spike. Alerts carry the purchase UUID only |
 | Store notifications | ingest rate, processing lag, dead-letters | Lag > 15 min; any dead-letter |
 | Prices | age of newest quote per symbol | Older than 6 h → warn; 24 h → page |
 | Catalog | publish events; full-snapshot CDN 2xx | Snapshot 404 |

@@ -1,0 +1,129 @@
+{
+  "description": "Shared vectors for the install-bound restore hash (backend-api.md section 4.3 step 1, ADR-012 Part B (d)). bodyHash = SHA-256(prefix || 0x00 || installId || 0x00 || JCS(body without attestation)). JCS is RFC 8785. Android: Play Integrity requestHash = b64u(bodyHash). iOS (R4-1(3)): seatKeysDigest = SHA-256(publicKey_0 || ... || publicKey_n-1), the raw 65-byte points of attestation.seatKeys in request order (SHA-256 of the empty string when seatKeys is absent), and the App Attest clientDataHash = SHA-256(clientDataPrefix || 0x00 || bodyHash || seatKeysDigest), used for both generateAssertion and attestKey. So attestation.seatKeys stays outside bodyHash (its jcs and bodyHash equal 'ios-member-order'), and each seat-key signature still signs challenge = bodyHash, but its public keys are covered by the App Attest assertion: a proxy can't add, drop, reorder or replace a key. The Dart (T-145) and .NET (T-132) implementations must reproduce every 'valid' vector exactly and reject every 'invalid' one with 400 VALIDATION_FAILED, at any nesting depth (the strict parse runs over the whole body, attestation included). All values are synthetic.",
+  "prefix": "zaghlol-restore-v1",
+  "clientDataPrefix": "zaghlol-restore-attest-v1",
+  "valid": [
+    {
+      "name": "android-lifetime",
+      "installId": "0193f2c4-7a10-4c52-9d3e-5b1f8a2c6e77",
+      "body": {
+        "platform": "android",
+        "purchases": [
+          {
+            "productId": "zaghlol_gold_lifetime",
+            "purchaseToken": "synthetic-play-token/0001"
+          }
+        ],
+        "attestation": {
+          "type": "play_integrity",
+          "token": "ignored-for-the-hash"
+        }
+      },
+      "jcs": "{\"platform\":\"android\",\"purchases\":[{\"productId\":\"zaghlol_gold_lifetime\",\"purchaseToken\":\"synthetic-play-token/0001\"}]}",
+      "bodyHashHex": "40f8f33ed0a1b6c6f8f7ff46b3cb5084841b1c6e09a93083a7c52da862eca16f",
+      "requestHashB64u": "QPjzPtChtsb49_9Gs8tQhIQbHG4JqTCDp8UtqGLsoW8"
+    },
+    {
+      "name": "ios-member-order",
+      "installId": "0193f2c4-7a10-4c52-9d3e-5b1f8a2c6e77",
+      "body": {
+        "signedTransactions": [
+          "eyJhbGciOiJFUzI1NiJ9.eyJzeW50aGV0aWMiOnRydWV9.c2ln"
+        ],
+        "attestation": {
+          "type": "app_attest",
+          "keyId": "ignored",
+          "assertion": "ignored"
+        },
+        "platform": "ios"
+      },
+      "jcs": "{\"platform\":\"ios\",\"signedTransactions\":[\"eyJhbGciOiJFUzI1NiJ9.eyJzeW50aGV0aWMiOnRydWV9.c2ln\"]}",
+      "bodyHashHex": "b086de78734a02cbda6c4f4d0d9c7117a344c7c4cd8126db00236e6552e6ade6",
+      "requestHashB64u": "sIbeeHNKAsvabE9NDZxxF6NEx8TNgSbbACNuZVLmreY",
+      "seatKeysDigestHex": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "clientDataHashHex": "61919458bfe2397960031bf51653e610d5a05c35c69651126b36ea14db329d33"
+    },
+    {
+      "name": "ios-seat-keys-not-hashed",
+      "installId": "0193f2c4-7a10-4c52-9d3e-5b1f8a2c6e77",
+      "body": {
+        "platform": "ios",
+        "signedTransactions": [
+          "eyJhbGciOiJFUzI1NiJ9.eyJzeW50aGV0aWMiOnRydWV9.c2ln"
+        ],
+        "attestation": {
+          "type": "app_attest",
+          "keyId": "ignored",
+          "assertion": "ignored",
+          "seatKeys": [
+            {
+              "publicKey": "BKw-hZOelhI7Qqz1u2fvEeenXV7sdJXBqF8DBH1C87-1EVRGa-CMMTOjVMX8Hlomdv0syufgIhH1vIY-jnxNauk",
+              "signature": "hMssrOYuxgIEKASji4runsYFtcZbeW_gPstqad5t2QmTduz9n-oAxPN5gEgkMHteRclrfbIDLGGHZ8taoKU7ow"
+            }
+          ]
+        }
+      },
+      "jcs": "{\"platform\":\"ios\",\"signedTransactions\":[\"eyJhbGciOiJFUzI1NiJ9.eyJzeW50aGV0aWMiOnRydWV9.c2ln\"]}",
+      "bodyHashHex": "b086de78734a02cbda6c4f4d0d9c7117a344c7c4cd8126db00236e6552e6ade6",
+      "requestHashB64u": "sIbeeHNKAsvabE9NDZxxF6NEx8TNgSbbACNuZVLmreY",
+      "seatKeysDigestHex": "b04ff75f69339a57f566030de709a36218ed628f3d2405c27410afd71fc4d941",
+      "clientDataHashHex": "95bf0cb84050405b7f93d27c05233eed24b64a595df6a46acc61e03a2650011a"
+    },
+    {
+      "name": "ios-two-seat-keys",
+      "installId": "0193f2c4-7a10-4c52-9d3e-5b1f8a2c6e77",
+      "body": {
+        "platform": "ios",
+        "signedTransactions": [
+          "eyJhbGciOiJFUzI1NiJ9.eyJzeW50aGV0aWMiOnRydWV9.c2ln"
+        ],
+        "attestation": {
+          "type": "app_attest",
+          "keyId": "ignored",
+          "assertion": "ignored",
+          "seatKeys": [
+            {
+              "publicKey": "BDZhWK9ECx5Ap46cyKLMv98yM_SCvjmmfD52jB7LSG3jcBbb5Uw-n-mNYmNXemOE1Y03RzDy88Kc_XV2ABJRSkE",
+              "signature": "qjkDNZsopxdjmjyYc4M0UUQWKV0B6eZPNePRxWY1a_hz2zEDFMqacWxul6kGOfyX0An5jJSDBpRgP1-wOwv8mA"
+            },
+            {
+              "publicKey": "BKw-hZOelhI7Qqz1u2fvEeenXV7sdJXBqF8DBH1C87-1EVRGa-CMMTOjVMX8Hlomdv0syufgIhH1vIY-jnxNauk",
+              "signature": "7wJY8K-mCx70OCJfeT8jmc-wCdFHTmOfbkOVjItJovqNX8dLs9slQlxunzV1ejvg-WRbNARG4z3BSLv_99ochg"
+            }
+          ]
+        }
+      },
+      "jcs": "{\"platform\":\"ios\",\"signedTransactions\":[\"eyJhbGciOiJFUzI1NiJ9.eyJzeW50aGV0aWMiOnRydWV9.c2ln\"]}",
+      "bodyHashHex": "b086de78734a02cbda6c4f4d0d9c7117a344c7c4cd8126db00236e6552e6ade6",
+      "requestHashB64u": "sIbeeHNKAsvabE9NDZxxF6NEx8TNgSbbACNuZVLmreY",
+      "seatKeysDigestHex": "8c16221f3928f1f7f6ee93277910617da8200fc1caf22c38fb4f237933590bfb",
+      "clientDataHashHex": "45ab252741595cbd9d32f6390ae2a37e840a3b01867776fd20bf2583fc885e17"
+    }
+  ],
+  "invalid": [
+    {
+      "name": "duplicate-member",
+      "raw": "{\"platform\":\"android\",\"platform\":\"ios\",\"purchases\":[]}"
+    },
+    {
+      "name": "lone-high-surrogate",
+      "raw": "{\"platform\":\"android\",\"purchases\":[{\"productId\":\"zaghlol_gold_lifetime\",\"purchaseToken\":\"\\ud800\"}]}"
+    },
+    {
+      "name": "lone-low-surrogate",
+      "raw": "{\"platform\":\"android\",\"purchases\":[{\"productId\":\"zaghlol_gold_lifetime\",\"purchaseToken\":\"\\udc00x\"}]}"
+    },
+    {
+      "name": "duplicate-member-in-purchase-item",
+      "raw": "{\"platform\":\"android\",\"purchases\":[{\"productId\":\"zaghlol_gold_lifetime\",\"purchaseToken\":\"synthetic-play-token/0001\",\"purchaseToken\":\"synthetic-play-token/0002\"}],\"attestation\":{\"type\":\"play_integrity\",\"token\":\"ignored-for-the-hash\"}}"
+    },
+    {
+      "name": "duplicate-member-in-attestation",
+      "raw": "{\"platform\":\"ios\",\"signedTransactions\":[\"eyJhbGciOiJFUzI1NiJ9.eyJzeW50aGV0aWMiOnRydWV9.c2ln\"],\"attestation\":{\"type\":\"app_attest\",\"keyId\":\"ignored\",\"keyId\":\"other\",\"assertion\":\"ignored\"}}"
+    },
+    {
+      "name": "duplicate-member-in-seat-key",
+      "raw": "{\"platform\":\"ios\",\"signedTransactions\":[\"eyJhbGciOiJFUzI1NiJ9.eyJzeW50aGV0aWMiOnRydWV9.c2ln\"],\"attestation\":{\"type\":\"app_attest\",\"keyId\":\"ignored\",\"assertion\":\"ignored\",\"seatKeys\":[{\"publicKey\":\"a\",\"publicKey\":\"b\",\"signature\":\"c\"}]}}"
+    }
+  ]
+}
