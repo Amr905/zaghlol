@@ -1,5 +1,5 @@
 {
-  "description": "Shared vectors for the install-bound restore hash (backend-api.md section 4.3 step 1, ADR-012 Part B (d)). bodyHash = SHA-256(prefix || 0x00 || installId || 0x00 || JCS(body without attestation)). JCS is RFC 8785. The Dart (T-145) and .NET (T-132) implementations must reproduce every 'valid' vector exactly and reject every 'invalid' one with 400 VALIDATION_FAILED. All values are synthetic.",
+  "description": "Shared vectors for the install-bound restore hash (backend-api.md section 4.3 step 1, ADR-012 Part B (d)). bodyHash = SHA-256(prefix || 0x00 || installId || 0x00 || JCS(body without attestation)). JCS is RFC 8785. The Dart (T-145) and .NET (T-132) implementations must reproduce every 'valid' vector exactly and reject every 'invalid' one with 400 VALIDATION_FAILED, at any nesting depth (the strict parse runs over the whole body, attestation included, even though attestation is excluded from the hash). 'ios-seat-keys-not-hashed' shows that attestation.seatKeys (D-55) is outside the hash: its jcs and bodyHash equal 'ios-member-order'. All values are synthetic.",
   "prefix": "zaghlol-restore-v1",
   "valid": [
     {
@@ -17,11 +17,22 @@
       "jcs": "{\"platform\":\"ios\",\"signedTransactions\":[\"eyJhbGciOiJFUzI1NiJ9.eyJzeW50aGV0aWMiOnRydWV9.c2ln\"]}",
       "bodyHashHex": "b086de78734a02cbda6c4f4d0d9c7117a344c7c4cd8126db00236e6552e6ade6",
       "requestHashB64u": "sIbeeHNKAsvabE9NDZxxF6NEx8TNgSbbACNuZVLmreY"
+    },
+    {
+      "name": "ios-seat-keys-not-hashed",
+      "installId": "0193f2c4-7a10-4c52-9d3e-5b1f8a2c6e77",
+      "body": { "platform": "ios", "signedTransactions": [ "eyJhbGciOiJFUzI1NiJ9.eyJzeW50aGV0aWMiOnRydWV9.c2ln" ], "attestation": { "type": "app_attest", "keyId": "ignored", "assertion": "ignored", "seatKeys": [ { "publicKey": "BKw-hZOelhI7Qqz1u2fvEeenXV7sdJXBqF8DBH1C87-1EVRGa-CMMTOjVMX8Hlomdv0syufgIhH1vIY-jnxNauk", "signature": "hMssrOYuxgIEKASji4runsYFtcZbeW_gPstqad5t2QmTduz9n-oAxPN5gEgkMHteRclrfbIDLGGHZ8taoKU7ow" } ] } },
+      "jcs": "{\"platform\":\"ios\",\"signedTransactions\":[\"eyJhbGciOiJFUzI1NiJ9.eyJzeW50aGV0aWMiOnRydWV9.c2ln\"]}",
+      "bodyHashHex": "b086de78734a02cbda6c4f4d0d9c7117a344c7c4cd8126db00236e6552e6ade6",
+      "requestHashB64u": "sIbeeHNKAsvabE9NDZxxF6NEx8TNgSbbACNuZVLmreY"
     }
   ],
   "invalid": [
     { "name": "duplicate-member", "raw": "{\"platform\":\"android\",\"platform\":\"ios\",\"purchases\":[]}" },
     { "name": "lone-high-surrogate", "raw": "{\"platform\":\"android\",\"purchases\":[{\"productId\":\"zaghlol_gold_lifetime\",\"purchaseToken\":\"\\ud800\"}]}" },
-    { "name": "lone-low-surrogate", "raw": "{\"platform\":\"android\",\"purchases\":[{\"productId\":\"zaghlol_gold_lifetime\",\"purchaseToken\":\"\\udc00x\"}]}" }
+    { "name": "lone-low-surrogate", "raw": "{\"platform\":\"android\",\"purchases\":[{\"productId\":\"zaghlol_gold_lifetime\",\"purchaseToken\":\"\\udc00x\"}]}" },
+    { "name": "duplicate-member-in-purchase-item", "raw": "{\"platform\":\"android\",\"purchases\":[{\"productId\":\"zaghlol_gold_lifetime\",\"purchaseToken\":\"synthetic-play-token/0001\",\"purchaseToken\":\"synthetic-play-token/0002\"}],\"attestation\":{\"type\":\"play_integrity\",\"token\":\"ignored-for-the-hash\"}}" },
+    { "name": "duplicate-member-in-attestation", "raw": "{\"platform\":\"ios\",\"signedTransactions\":[\"eyJhbGciOiJFUzI1NiJ9.eyJzeW50aGV0aWMiOnRydWV9.c2ln\"],\"attestation\":{\"type\":\"app_attest\",\"keyId\":\"ignored\",\"keyId\":\"other\",\"assertion\":\"ignored\"}}" },
+    { "name": "duplicate-member-in-seat-key", "raw": "{\"platform\":\"ios\",\"signedTransactions\":[\"eyJhbGciOiJFUzI1NiJ9.eyJzeW50aGV0aWMiOnRydWV9.c2ln\"],\"attestation\":{\"type\":\"app_attest\",\"keyId\":\"ignored\",\"assertion\":\"ignored\",\"seatKeys\":[{\"publicKey\":\"a\",\"publicKey\":\"b\",\"signature\":\"c\"}]}}" }
   ]
 }

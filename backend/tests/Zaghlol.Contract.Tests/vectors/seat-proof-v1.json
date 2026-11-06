@@ -1,0 +1,62 @@
+{
+  "description": "Shared vectors for the iOS seat-key proof (D-55; backend-api.md section 4.3 'Same-iPhone recognition', ADR-012 Part B (g)). message = 'zaghlol-seat-v1' || 0x00 || op || 0x00 || installId || 0x00 || challenge (32 bytes). signature = ECDSA P-256 with SHA-256 over message, IEEE P1363 r||s (64 bytes), base64url without padding. publicKey = X9.63 uncompressed point (65 bytes), base64url without padding. The key is synthetic and exists only for these tests. The Swift/Dart app side (seat-key task) and the .NET verifier (T-132) must accept every 'valid' vector and reject every 'invalid' one.",
+  "prefix": "zaghlol-seat-v1",
+  "valid": [
+    {
+      "name": "restore",
+      "op": "restore",
+      "installId": "0193f2c4-7a10-4c52-9d3e-5b1f8a2c6e77",
+      "challengeHex": "b086de78734a02cbda6c4f4d0d9c7117a344c7c4cd8126db00236e6552e6ade6",
+      "challengeIs": "bodyHash of restore-binding-v1 'ios-member-order'",
+      "messageHex": "7a6167686c6f6c2d736561742d763100726573746f72650030313933663263342d376131302d346335322d396433652d35623166386132633665373700b086de78734a02cbda6c4f4d0d9c7117a344c7c4cd8126db00236e6552e6ade6",
+      "publicKey": "BKw-hZOelhI7Qqz1u2fvEeenXV7sdJXBqF8DBH1C87-1EVRGa-CMMTOjVMX8Hlomdv0syufgIhH1vIY-jnxNauk",
+      "signature": "hMssrOYuxgIEKASji4runsYFtcZbeW_gPstqad5t2QmTduz9n-oAxPN5gEgkMHteRclrfbIDLGGHZ8taoKU7ow"
+    },
+    {
+      "name": "verify",
+      "op": "verify",
+      "installId": "0193f2c4-7a10-4c52-9d3e-5b1f8a2c6e77",
+      "challengeHex": "f6a6da2492a056739f9bcafe3e186d1f4c3aba2c7cac20c90375bcd0c418c950",
+      "challengeIs": "SHA-256 of the UTF-8 signedTransaction",
+      "messageHex": "7a6167686c6f6c2d736561742d7631007665726966790030313933663263342d376131302d346335322d396433652d35623166386132633665373700f6a6da2492a056739f9bcafe3e186d1f4c3aba2c7cac20c90375bcd0c418c950",
+      "publicKey": "BKw-hZOelhI7Qqz1u2fvEeenXV7sdJXBqF8DBH1C87-1EVRGa-CMMTOjVMX8Hlomdv0syufgIhH1vIY-jnxNauk",
+      "signature": "HvXGOePu8P1kp9jNeGKLtpymg7V-dKERU0AKW0Up8JvfWNCwBXpjRmXiLyPMNgTBKDAE7tZBtqDyEIVvvCER-g"
+    },
+    {
+      "name": "signin",
+      "op": "signin",
+      "installId": "0193f2c4-7a10-4c52-9d3e-5b1f8a2c6e77",
+      "challengeHex": "696d94c94ec055da83672207fcf5d19a9031226822c2f145a6a79e379ff53676",
+      "challengeIs": "SHA-256 of the ASCII raw nonce",
+      "messageHex": "7a6167686c6f6c2d736561742d7631007369676e696e0030313933663263342d376131302d346335322d396433652d35623166386132633665373700696d94c94ec055da83672207fcf5d19a9031226822c2f145a6a79e379ff53676",
+      "publicKey": "BKw-hZOelhI7Qqz1u2fvEeenXV7sdJXBqF8DBH1C87-1EVRGa-CMMTOjVMX8Hlomdv0syufgIhH1vIY-jnxNauk",
+      "signature": "wKd0PG5pUbefl4GNNR_m185T50MIOmk5IyVrLwYJHJadQw81lWtyOsVwtq6lYiYR_-4gztwNTxVvqRc2jmF-1g"
+    }
+  ],
+  "invalid": [
+    {
+      "name": "other-install",
+      "op": "restore",
+      "installId": "0193f2c4-7a10-4c52-9d3e-5b1f8a2c6e78",
+      "challengeHex": "b086de78734a02cbda6c4f4d0d9c7117a344c7c4cd8126db00236e6552e6ade6",
+      "publicKey": "BKw-hZOelhI7Qqz1u2fvEeenXV7sdJXBqF8DBH1C87-1EVRGa-CMMTOjVMX8Hlomdv0syufgIhH1vIY-jnxNauk",
+      "signature": "hMssrOYuxgIEKASji4runsYFtcZbeW_gPstqad5t2QmTduz9n-oAxPN5gEgkMHteRclrfbIDLGGHZ8taoKU7ow"
+    },
+    {
+      "name": "other-op",
+      "op": "signin",
+      "installId": "0193f2c4-7a10-4c52-9d3e-5b1f8a2c6e77",
+      "challengeHex": "b086de78734a02cbda6c4f4d0d9c7117a344c7c4cd8126db00236e6552e6ade6",
+      "publicKey": "BKw-hZOelhI7Qqz1u2fvEeenXV7sdJXBqF8DBH1C87-1EVRGa-CMMTOjVMX8Hlomdv0syufgIhH1vIY-jnxNauk",
+      "signature": "hMssrOYuxgIEKASji4runsYFtcZbeW_gPstqad5t2QmTduz9n-oAxPN5gEgkMHteRclrfbIDLGGHZ8taoKU7ow"
+    },
+    {
+      "name": "flipped-signature-bit",
+      "op": "restore",
+      "installId": "0193f2c4-7a10-4c52-9d3e-5b1f8a2c6e77",
+      "challengeHex": "b086de78734a02cbda6c4f4d0d9c7117a344c7c4cd8126db00236e6552e6ade6",
+      "publicKey": "BKw-hZOelhI7Qqz1u2fvEeenXV7sdJXBqF8DBH1C87-1EVRGa-CMMTOjVMX8Hlomdv0syufgIhH1vIY-jnxNauk",
+      "signature": "hcssrOYuxgIEKASji4runsYFtcZbeW_gPstqad5t2QmTduz9n-oAxPN5gEgkMHteRclrfbIDLGGHZ8taoKU7ow"
+    }
+  ]
+}

@@ -69,6 +69,27 @@ public class RestoreBindingVectorTests
         }
     }
 
+    /// <summary>
+    /// R3-8: production rejection of duplicate member names must be explicit, because System.Text.Json accepts them by
+    /// default (last one wins). .NET 10's <c>AllowDuplicateProperties = false</c> must reject every duplicate vector,
+    /// at any depth, including inside <c>attestation</c>, which is excluded from the hash but bound to the DTO.
+    /// </summary>
+    [Fact]
+    public void DuplicateVectorsAreRejectedByTheFrameworkStrictOption()
+    {
+        var duplicates = Vectors["invalid"]!.AsArray()
+            .Where(v => v!["name"]!.GetValue<string>().StartsWith("duplicate-", StringComparison.Ordinal))
+            .ToList();
+        Assert.True(duplicates.Count >= 3, "expected top-level and nested duplicate vectors");
+
+        var options = new JsonDocumentOptions { AllowDuplicateProperties = false };
+        foreach (var vector in duplicates)
+        {
+            var raw = vector!["raw"]!.GetValue<string>();
+            Assert.ThrowsAny<JsonException>(() => JsonDocument.Parse(raw, options).Dispose());
+        }
+    }
+
     /// <summary>RFC 8785 for the value kinds the vectors use (objects, arrays, strings, booleans, null).</summary>
     private static void WriteCanonical(JsonNode? node, StringBuilder output)
     {
