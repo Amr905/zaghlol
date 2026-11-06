@@ -6,11 +6,11 @@ Tasks in the same **wave** have all their dependencies done at the same point an
 ## Lanes
 | Lane | Owner | Tasks |
 |---|---|---|
-| A | App core/data (flutter-core) | 67 |
-| B | Backend (.NET) | 21 |
+| A | App core/data (flutter-core) | 68 |
+| B | Backend (.NET) | 26 |
 | C | Content & assets | 8 |
-| D | Native Android | 14 |
-| E | Native iOS | 9 |
+| D | Native Android (plus cross-platform host APIs T-178, T-180) | 16 |
+| E | Native iOS | 10 |
 | F | Parsing & NLP (pure Dart) | 21 |
 | G | UI (flutter-ui) | 37 |
 
@@ -27,6 +27,10 @@ T-001 (Create mono-repo scaffold with pub wor…) → T-007 (SPK-05: encrypted S
 
 Length: 13 sequential tasks.
 
+**Gold chains (plan v1.1, not on the overall critical path):**
+- Backend: T-122 → T-182 → T-184 → T-132 → T-185 / T-186 → T-137 (waves 2–7).
+- App: T-019 → T-141 → T-179 → T-145 → T-147 → T-172 (waves 5–11); T-180 → T-144 and T-178 / T-183 → T-145 start in wave 3 and are off the critical path.
+
 
 ## Waves
 
@@ -42,17 +46,17 @@ Length: 13 sequential tasks.
 - **D** (Native Android): T-010 SPK-02: OCR accuracy on synthetic InstaPay/wallet receipts; T-011 SPK-04: on-device ar-EG speech availability across the device matrix; T-165 Exclude app data from OS backups and device transfer
 - **G** (UI (flutter-ui)): T-022 Design tokens, Mint Fresh/Jade Night themes and base components
 
-### Wave 3 — 15 task(s)
-- **A** (App core/data (flutter-core)): T-015 Secure key bootstrap for the database key
-- **B** (Backend (.NET)): T-124 Install registration, install-token auth, rate limits, idempotency, strict DTOs; T-125 Catalog versions, deltas, signed full snapshots and admin draft/publish; T-126 Feature flags with targeting rules and admin endpoints; T-127 Price service: local Egyptian gold-market adapter, FX adapter, worker, override; T-136 Operator auth (OIDC + MFA), roles, audit log and support lookup; T-139 Retention purger and log privacy settings; T-140 Infrastructure as code and deployment pipeline (staging, prod)
-- **D** (Native Android): T-008 SPK-01: Android receiver → spool → WorkManager → headless engine latency; T-060 Android share/paste intake (text, image, PDF, CSV); T-159 Android OCR host (ML Kit Latin + Tesseract Arabic)
+### Wave 3 — 20 task(s)
+- **A** (App core/data (flutter-core)): T-015 Secure key bootstrap for the database key; T-183 Dart request-binding library: JCS, strict JSON parser, restore and seat-key hashes over shared vectors
+- **B** (Backend (.NET)): T-124 Install registration, install-token auth, rate limits, idempotency, strict DTOs; T-125 Catalog versions, deltas, signed full snapshots and admin draft/publish; T-126 Feature flags with targeting rules and admin endpoints; T-127 Price service: local Egyptian gold-market adapter, FX adapter, worker, override; T-136 Operator auth (OIDC + MFA), roles, audit log and support lookup; T-139 Retention purger and log privacy settings; T-140 Infrastructure as code and deployment pipeline (staging, prod); T-181 Backend attestation verifiers: Play Integrity decode and App Attest attestation/assertion, with fakes; T-182 Backend seat-key proof verifier and keyed hashes (K_seat), with fakes
+- **D** (Native Android): T-008 SPK-01: Android receiver → spool → WorkManager → headless engine latency; T-060 Android share/paste intake (text, image, PDF, CSV); T-159 Android OCR host (ML Kit Latin + Tesseract Arabic); T-178 AttestationHostApi (Play Integrity standard request, App Attest) and release network security config; T-180 TrustedClockHostApi (monotonic clock with sleep, boot reference) on both platforms
 - **E** (Native iOS): T-009 SPK-03: can an iOS App Intent process immediately with a headless Flutter engine?; T-160 iOS OCR host (Vision)
 - **F** (Parsing & NLP (pure Dart)): T-013 Text & amount normalization utilities (digits, separators, groupings)
 - **G** (UI (flutter-ui)): T-053 ZaghlolAvatar widget with static fallback and reduce-motion
 
-### Wave 4 — 11 task(s)
+### Wave 4 — 12 task(s)
 - **A** (App core/data (flutter-core)): T-016 AppDatabase v1 skeleton: encrypted open, isolate, migration harness; T-148 Backup file format: Argon2id-wrapped key and chunked AES-256-GCM
-- **B** (Backend (.NET)): T-128 Daily POST /v1/sync with throttle, contributions and bank-request intake; T-130 Google Play purchase verification, acknowledgement and sweeper; T-131 App Store verification (JWS chain, Server API status, appAccountToken)
+- **B** (Backend (.NET)): T-128 Daily POST /v1/sync with throttle, contributions and bank-request intake; T-130 Google Play purchase verification, acknowledgement and sweeper; T-131 App Store verification (JWS chain, Server API status, appAccountToken); T-184 Seat service: bind, move, same-iPhone rebind with cap, claimants, reclaim and support-move primitive
 - **D** (Native Android): T-039 Android encrypted spool + spool host API
 - **E** (Native iOS): T-062 iOS encrypted spool, host API and background refresh
 - **F** (Parsing & NLP (pure Dart)): T-031 Convert real SMS/notification/statement samples into synthetic fixtures (OQ-04/18); T-032 Template registry format, loader and registry_lint CLI; T-034 Merchant cleaning and normalized merchant key
@@ -60,23 +64,24 @@ Length: 13 sequential tasks.
 
 ### Wave 5 — 11 task(s)
 - **A** (App core/data (flutter-core)): T-017 Schema batch A: accounts, balances, raw messages, transactions (+FTS), transfers, offsets, splits; T-018 Schema batch B: categories, catalog, rules, budgets, alerts, summaries, recurring; T-019 Schema batch C: wealth, prices, Zakah, capture controls, review, settings, outbox, misc
-- **B** (Backend (.NET)): T-129 Contribution aggregation, review list and promote/reject; T-132 Entitlement computation, signed tokens, GET /v1/entitlement and restore; T-133 Google RTDN push endpoint, processing worker and voided reconciliation; T-134 App Store Server Notifications V2 endpoint and reconciliation
+- **B** (Backend (.NET)): T-129 Contribution aggregation, review list and promote/reject; T-132 Entitlement tokens, GET /v1/entitlement, seat at verify and sync entitlement block; T-133 Google RTDN push endpoint, processing worker and voided reconciliation; T-134 App Store Server Notifications V2 endpoint and reconciliation
 - **D** (Native Android): T-041 IngestionWorker with headless Flutter engine and foreground events
 - **E** (Native iOS): T-065 iOS Share Extension (text, image, PDF)
 - **F** (Parsing & NLP (pure Dart)): T-033 Parsing pipeline stages 1–7 and ParseResult; T-035 Capture Guard rules in Dart, shared golden cases and config generator
 
-### Wave 6 — 22 task(s)
+### Wave 6 — 23 task(s)
 - **A** (App core/data (flutter-core)): T-020 Settings repository with typed accessors and defaults; T-021 Redacting local diagnostic log; T-025 Feature flags service (default OFF); T-030 Catalog seed pipeline and 14 system categories; T-045 Accounts repository: auto-create, default cash, per-currency balances; T-050 Transactions repository: query, search, CRUD, soft delete; T-112 Prices and FX store in app (sync-fed, manual override, stale); T-141 App BackendClient: generated DTOs, ES256 verification, lazy install registration
-- **B** (Backend (.NET)): T-135 Accounts: Google/Apple ID token sign-in, linking, sign-out, delete, Android Apple callback; T-137 zaghlol-ops CLI for catalog, flags, prices, contributions and support
+- **B** (Backend (.NET)): T-135 Accounts: Google/Apple ID token sign-in, linking, sign-out, delete, Android Apple callback; T-185 POST /v1/purchases/restore: strict parse, install binding, attestation, seat outcomes and limits; T-186 Support seat:move, purchase:detach and purchase:unfreeze endpoints with dispute freeze
 - **D** (Native Android): T-038 Android Capture Guard (Kotlin) with config reader
 - **E** (Native iOS): T-061 iOS Capture Guard (Swift) with config reader
 - **F** (Parsing & NLP (pure Dart)): T-036 Templates + fixtures: NBE, CIB, Banque Misr, QNB; T-037 Templates + fixtures: InstaPay scenarios and mobile wallets; T-068 Templates + fixtures: Egyptian banks batch 1; T-069 Templates + fixtures: Egyptian banks batch 2; T-070 Templates + fixtures: BNPL (valU, Sympl, Souhoola, Shahry, Aman, Forsa, Contact); T-071 Templates + fixtures: Wise, Revolut, Monzo, bunq, N26, Payoneer; T-072 Templates + fixtures: HDFC, Paytm, Al Rajhi, Emirates NBD/Liv, GCC (S rows); T-073 Generic parser for unknown financial senders; T-156 Bank PDF statement import (CIB, NBE, QNB, Banque Misr); T-161 Receipt/screen OCR templates and confirmation screen S-32
 
-### Wave 7 — 14 task(s)
+### Wave 7 — 16 task(s)
 - **A** (App core/data (flutter-core)): T-023 Localization scaffold, digits mode and money/date formatting; T-046 IngestRawMessages use case (dedupe, merge, persist, ack, events); T-051 Payday cycle engine, safe-to-spend, burn line and cycle summaries; T-074 Merchant rules repository and apply-to-past; T-094 Local notifications service (types, quiet hours, redaction); T-115 ≈ combined view service (target currency, rate date, exclusions); T-119 Gold gate matrix and entitlement state (local); T-149 Backup snapshot and restore swap with schema checks
+- **B** (Backend (.NET)): T-137 zaghlol-ops CLI for catalog, flags, prices, contributions and support, plus support runbook
 - **C** (Content & assets): T-059 Compile the 600+ Egyptian merchant seed list (OQ-05)
 - **D** (Native Android): T-040 SMS receiver (multipart, Guard, spool, enqueue) in prodSms flavor; T-042 Inbox reader for historical scan (sender-filtered, paged); T-043 Bank notification listener service; T-103 App lock, privacy overlay and screenshot hiding
-- **E** (Native iOS): T-063 App Intents for Message and Wallet automations
+- **E** (Native iOS): T-063 App Intents for Message and Wallet automations; T-179 SeatKeyHostApi (iOS Secure Enclave seat keys) and Dart seat-key service
 
 ### Wave 8 — 20 task(s)
 - **A** (App core/data (flutter-core)): T-047 Capture module (app side): guard config writer, spool orchestrator, degraded mode; T-049 Review queue domain and repository; T-076 Re-parse job after registry version bump; T-077 Bulk edit and undo use case; T-089 Self-transfer pairing, FX conversions and card settlements; T-095 Budgets per category and currency with threshold alerts; T-096 Subscriptions detection, installments, gameya, card dues and reminders; T-100 Duplicate-charge and weekly-summary notifications; T-144 Entitlement token verification, offline cache and grace; T-150 Google Drive appDataFolder backend; T-154 CSV and Excel export with preview for Free
@@ -86,16 +91,16 @@ Length: 13 sequential tasks.
 - **F** (Parsing & NLP (pure Dart)): T-075 Categorizer with fuzzy merchant matching; T-164 Custom message template builder engine and screen S-65 (Gold)
 - **G** (UI (flutter-ui)): T-024 App shell: routing, platform tab bars, Add button, deep links; T-163 Categories & rules S-63/S-64 incl. custom categories (Gold)
 
-### Wave 9 — 20 task(s)
-- **A** (App core/data (flutter-core)): T-048 Historical inbox scan with progress (Android); T-052 Home read model and persistent card filter; T-066 Capture module iOS integration (drain, BG refresh, checker state); T-078 Ignore rules domain: per card/channel, before-seen, keep/delete, re-scan; T-090 Refund matching and offset links; T-097 Contextual setup suggestions (payday, budgets, backup); T-098 Mascot trigger policy (shocked, detective, proud, tour guide); T-113 Assets, liabilities, net worth per unit and snapshots; T-142 Merchant contribution opt-in and outbox with on-device filters; T-145 In-app purchase flow, backend verify, background retry and restore; T-147 Optional sign-in, account screen S-69, sign-out and delete account; T-152 Backup schedules, slots and reminders (Free 1 slot, Gold 5 versions); T-155 Zaghlol CSV import with duplicate detection
+### Wave 9 — 19 task(s)
+- **A** (App core/data (flutter-core)): T-048 Historical inbox scan with progress (Android); T-052 Home read model and persistent card filter; T-066 Capture module iOS integration (drain, BG refresh, checker state); T-078 Ignore rules domain: per card/channel, before-seen, keep/delete, re-scan; T-090 Refund matching and offset links; T-097 Contextual setup suggestions (payday, budgets, backup); T-098 Mascot trigger policy (shocked, detective, proud, tour guide); T-113 Assets, liabilities, net worth per unit and snapshots; T-142 Merchant contribution opt-in and outbox with on-device filters; T-145 In-app purchase flow, backend verify, background retry and restore; T-152 Backup schedules, slots and reminders (Free 1 slot, Gold 5 versions); T-155 Zaghlol CSV import with duplicate detection
 - **C** (Content & assets): T-087 Generate ARB files from copy deck (parts 2–3)
 - **F** (Parsing & NLP (pure Dart)): T-109 Egyptian Arabic voice-phrase parser and 200-phrase fixtures
 - **G** (UI (flutter-ui)): T-055 Welcome screen S-01 with language toggle and restore entry; T-079 Transactions list S-11 with filters, search and selection mode; T-080 Transaction detail S-12 and add/edit sheet S-13; T-081 Review queue S-14; T-082 Quick add sheet S-30
 
-### Wave 10 — 16 task(s)
-- **A** (App core/data (flutter-core)): T-091 Splits and reimbursements with allocation and unassign; T-143 Daily sync orchestrator: throttle, back-off, atomic apply, re-categorize; T-166 Delete everything (local wipe + backend install delete); T-167 Zakah engine (hawl, nisab, native-unit dues)
+### Wave 10 — 17 task(s)
+- **A** (App core/data (flutter-core)): T-091 Splits and reimbursements with allocation and unassign; T-143 Daily sync orchestrator: throttle, back-off, atomic apply, re-categorize; T-147 Optional sign-in, account screen S-69, sign-out and delete account; T-166 Delete everything (local wipe + backend install delete); T-167 Zakah engine (hawl, nisab, native-unit dues)
 - **F** (Parsing & NLP (pure Dart)): T-157 Online-bank statement import (Wise, Revolut, Monzo, bunq, N26)
-- **G** (UI (flutter-ui)): T-054 Home screen S-10 (iOS and Android variants); T-056 Android capture setup S-02 with live scan and degraded variant; T-067 iOS capture setup S-03 (add Shortcut, check setup, first expense); T-083 Money tab S-40 (accounts per currency); T-086 Capture settings S-61 and card capture sheet S-62; T-101 Insights shell and Budget S-22 (+ edit budgets); T-102 Bills & installments S-24 and add/edit recurring item; T-120 Voice logger S-31 with on-device-first recognition and monthly limit; T-146 Paywall S-68, locked previews and upgrade prompt cap; T-153 Backup & restore screens S-66 and S-04; T-162 Settings S-60 incl. privacy info and About
+- **G** (UI (flutter-ui)): T-054 Home screen S-10 (iOS and Android variants); T-056 Android capture setup S-02 with live scan and degraded variant; T-067 iOS capture setup S-03 (add Shortcut, check setup, first expense); T-083 Money tab S-40 (accounts per currency); T-086 Capture settings S-61 and card capture sheet S-62; T-101 Insights shell and Budget S-22 (+ edit budgets); T-102 Bills & installments S-24 and add/edit recurring item; T-120 Voice logger S-31 with on-device-first recognition and monthly limit; T-146 Paywall S-68, locked previews, upgrade prompt cap and Gold status messages; T-153 Backup & restore screens S-66 and S-04; T-162 Settings S-60 incl. privacy info and About
 
 ### Wave 11 — 13 task(s)
 - **A** (App core/data (flutter-core)): T-092 Reimbursement and cross-currency pair suggestions; T-105 Chart query layer for all 12 charts; T-171 Privacy verification suite (sandbox scan, data-boundary proxy, ignore no-trace); T-172 Device end-to-end suites (Android killed-app capture, iOS intents, backup, purchases)
@@ -115,3 +120,6 @@ Length: 13 sequential tasks.
 - T-026, T-027, T-028: edit copy-deck.md — run one at a time or in separate files merged by the Lead
 - T-036, T-037, T-068, T-069, T-070, T-071, T-072: separate institution files — parallel OK; registry_manifest.json version bump merged by the Lead
 - T-130, T-131: both touch Application/Purchases — coordinate the shared Purchase aggregate; parallel OK after be_installs
+- T-178, T-179, T-180: register Pigeon host APIs in `MainActivity` / `AppDelegate` — serialize those registration edits or let the Lead merge them (plan v1.1)
+- T-132, T-185: both add files under Api/Endpoints/Purchases — separate files, Lead merges (plan v1.1)
+- T-132, T-135, T-185, T-186: all call the seat service of T-184 and must not change its public API; a needed change goes back to T-184's owner (plan v1.1)

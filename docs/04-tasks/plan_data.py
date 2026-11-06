@@ -1,4 +1,6 @@
 # Zaghlol Phase 4 plan data. Keys are symbolic; generator assigns T-### in order.
+# FROZEN AT PLAN v1.0 (2026-11-03). Since v1.1 (2026-11-06) the task markdown in docs/04-tasks/ is edited by hand
+# (T-178…T-186 added, T-132/T-136 split, review follow-ups appended by the Lead). Do NOT regenerate from this file.
 
 MILESTONES = {
  "M0": ("Foundations & spikes", "Repo, CI, encrypted DB, money/l10n/theme/routing core, backend skeleton, risk spikes."),

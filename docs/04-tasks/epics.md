@@ -2,6 +2,8 @@
 
 Each user story lists the tasks that deliver it. Task details: `tasks/T-###.md`.
 
+*Plan v1.1 (2026-11-06): T-178…T-185 added to US-14-1 and T-186 to US-13-2 for the merged FU-api-decisions design.*
+
 
 ## E01 — Foundations & tooling
 
@@ -260,8 +262,8 @@ As the app, I get catalog, flags and prices in one small signed daily call, and 
 ### US-13-2
 As an operator, I can manage the catalog, flags, prices and contributions securely.
 
-*Traces:* FR-BE-07/08/10, D-37  
-*Tasks:* T-129, T-136, T-137
+*Traces:* FR-BE-07/08/10/11, D-37, D-47, D-56, D-57, D-64, D-65(b)  
+*Tasks:* T-129, T-136, T-137, T-186
 
 
 ## E14 — Zaghlol Gold — purchases & entitlements
@@ -269,8 +271,8 @@ As an operator, I can manage the catalog, flags, prices and contributions secure
 ### US-14-1
 As a user, I can buy, restore and keep Gold (even offline for days), verified by the backend.
 
-*Traces:* FR-GOLD-*, BR-GOLD-*  
-*Tasks:* T-119, T-130, T-131, T-132, T-133, T-134, T-144, T-145, T-146
+*Traces:* FR-GOLD-*, BR-GOLD-*, NFR-SEC-05, NFR-SEC-08, D-45, D-46, D-52…D-63, D-65(a)  
+*Tasks:* T-119, T-130, T-131, T-132, T-133, T-134, T-144, T-145, T-146, T-178, T-179, T-180, T-181, T-182, T-183, T-184, T-185
 
 
 ## E15 — Optional account (sign-in)
@@ -278,7 +280,7 @@ As a user, I can buy, restore and keep Gold (even offline for days), verified by
 ### US-15-1
 As a user, I can optionally sign in with Google or Apple to carry Gold across Android and iPhone, and delete that account.
 
-*Traces:* FR-ACCT-*, D-14, D-44  
+*Traces:* FR-ACCT-*, D-14, D-44, D-54, D-58, D-61  
 *Tasks:* T-135, T-147
 
 

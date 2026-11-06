@@ -1,5 +1,7 @@
 # FU-api-decisions round 4: task impacts (from the architect's report, 2026-11-06)
 
+> **Applied 2026-11-06 in task plan v1.1** (task-planner): rounds 4, 5 and 6 are reflected in T-122…T-147 and the new tasks T-178…T-186. This file can move to `docs/05-reviews/FU-api-history/`.
+
 Branch `task/FU-api-decisions` @ `9ae53aa`. Not CI-verified (BLK-05). Apply these impacts to the task files when the branch merges.
 
 ## Existing tasks

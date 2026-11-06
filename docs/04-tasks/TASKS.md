@@ -2,13 +2,17 @@
 
 | | |
 |---|---|
-| Version | 1.0 — **APPROVED 2026-11-03** |
-| Phase | 4 — Task breakdown |
-| Inputs | SRS v1.3, Phase 2 design (approved), Phase 3 technical spec v1.0 (approved) |
-| Date | 2026-11-03 |
+| Version | 1.1 — revision of the approved v1.0 (2026-11-03) for the merged FU-api-decisions design; **pending PO approval of the revision** |
+| Phase | 4 — Task breakdown (revision during Phase 5) |
+| Inputs | SRS v1.7 (D-45…D-65), Phase 2 design (approved), Phase 3 technical spec with FU-api-decisions merged at `be7dcd1` (ADR-012, backend-api, backend-schema, platform-channels, security-model), final security review `docs/05-reviews/FU-api-decisions.md` (APPROVED) |
+| Date | 2026-11-06 |
 
 
-**177 tasks · 48 user stories · 21 epics · 8 milestones.** Complexity: Low 3 · Medium 75 · High 49 · High-critical 47 · external/human 3. Models: Haiku 3 · Opus 53 · Sonnet 118 · — (human) 3.
+**186 tasks · 48 user stories · 21 epics · 8 milestones.** Complexity: Low 3 · Medium 73 · High 50 · High-critical 57 · external/human 3. Models: Haiku 3 · Opus 62 · Sonnet 118 · — (human) 3.
+
+**v1.1 changes (2026-11-06):** 9 new M5 tasks (T-178…T-186); T-132 and T-136 split; T-145 lost its binding library to T-183; classes changed: T-137 C2→C3, T-138 C2→C3, T-140 C3→C4. Every changed task file ends with a "Plan revision v1.1" section that says what changed and why. `plan_data.py` / `gen.py` are frozen at v1.0: **do not regenerate** (it would drop v1.1 and the Lead's review follow-ups).
+
+**Open PO decisions carried in task files:** R5-3 (iOS sign-in attestation; criteria written for option (b), with "if (a)" notes in T-131, T-135, T-147, T-145, T-178, T-181, T-183); R6-1 (server-side rule in T-186 by default, disjoint roles alternative in T-137).
 
 
 Status legend: TODO · IN_PROGRESS · IN_REVIEW · CHANGES_REQUESTED · DONE · BLOCKED
@@ -26,7 +30,7 @@ Every task file has: ID, description, technical details, dependencies, affected 
 | **M2 — iOS capture, transactions & categorization** | Shortcuts/Apple Pay/share capture on iOS; full transactions, review queue, accounts & cards, all institution templates. | 29 |
 | **M3 — Money brain** | Transfers, refunds, splits, reimbursements, budgets & payday cycle, recurring, notifications, mascot. | 18 |
 | **M4 — Insights, chat, voice & wealth** | 12 charts + explanations, Ask Zaghlol, voice logging, wealth & net worth, multi-currency ≈ view, share cards, widgets. | 17 |
-| **M5 — Backend services & Zaghlol Gold** | Install/sync/catalog/flags/prices, purchases & entitlements, store notifications, optional sign-in, operator CLI. | 26 |
+| **M5 — Backend services & Zaghlol Gold** | Install/sync/catalog/flags/prices, purchases & entitlements with one-phone Gold (seat service, attestation, same-iPhone seat keys, trusted time), store notifications, optional sign-in, support path, operator CLI. | 35 |
 | **M6 — Backup, import/export, OCR, settings & security** | Encrypted Drive/iCloud backup & restore, CSV/XLSX/PDF/online statements, OCR, settings, app lock, delete everything. | 19 |
 | **M7 — Flagged features, hardening & launch** | Zakah & ROI behind flags, privacy/perf/a11y/security verification, store release pipelines. | 11 |
 
@@ -36,7 +40,7 @@ Every task file has: ID, description, technical details, dependencies, affected 
 |---|---|---|---|---|---|---|---|---|---|
 | [T-001](tasks/T-001.md) | Create mono-repo scaffold with pub workspace, app flavors and pure-Dart packages | US-01-1 | Medium | Sonnet | flutter-core-engineer | — | A | 1 | DONE |
 | [T-002](tasks/T-002.md) | Add custom lint rules (no double in money, no UI string literals, no print) | US-01-1 | Medium | Sonnet | flutter-core-engineer | T-001 | A | 2 | TODO |
-| [T-003](tasks/T-003.md) | App CI pipeline (format, analyze, unit, golden, native unit) | US-01-1 | Medium | Sonnet | flutter-core-engineer | T-001 | A | 2 | TODO |
+| [T-003](tasks/T-003.md) | App CI pipeline (format, analyze, unit, golden, native unit) | US-01-1 | Medium | Sonnet | flutter-core-engineer | T-001 | A | 2 | IN_PROGRESS |
 | [T-004](tasks/T-004.md) | Pigeon setup and stale-generation check | US-01-1 | Medium | Sonnet | flutter-core-engineer | T-001 | A | 2 | TODO |
 | [T-005](tasks/T-005.md) | Backend solution scaffold, Docker Compose and CI | US-01-1 | Medium | Sonnet | backend-engineer | — | B | 1 | DONE |
 | [T-006](tasks/T-006.md) | OpenAPI v1 spec and contract-test harness | US-13-1 | Medium | Sonnet | backend-engineer | T-005 | B | 2 | DONE |
@@ -190,22 +194,31 @@ Every task file has: ID, description, technical details, dependencies, affected 
 | [T-129](tasks/T-129.md) | Contribution aggregation, review list and promote/reject | US-13-2 | Medium | Sonnet | backend-engineer | T-128, T-125 | B | 5 | TODO |
 | [T-130](tasks/T-130.md) | Google Play purchase verification, acknowledgement and sweeper | US-14-1 | High* | Opus | backend-engineer | T-124, T-123 | B | 4 | TODO |
 | [T-131](tasks/T-131.md) | App Store verification (JWS chain, Server API status, appAccountToken) | US-14-1 | High* | Opus | backend-engineer | T-124, T-123 | B | 4 | TODO |
-| [T-132](tasks/T-132.md) | Entitlement computation, signed tokens, GET /v1/entitlement and restore | US-14-1 | High* | Opus | backend-engineer | T-130, T-131 | B | 5 | TODO |
+| [T-132](tasks/T-132.md) | Entitlement tokens, GET /v1/entitlement, seat at verify and sync entitlement block | US-14-1 | High* | Opus | backend-engineer | T-128, T-130, T-131, T-184 | B | 5 | TODO |
 | [T-133](tasks/T-133.md) | Google RTDN push endpoint, processing worker and voided reconciliation | US-14-1 | High* | Opus | backend-engineer | T-130 | B | 5 | TODO |
 | [T-134](tasks/T-134.md) | App Store Server Notifications V2 endpoint and reconciliation | US-14-1 | High* | Opus | backend-engineer | T-131 | B | 5 | TODO |
-| [T-135](tasks/T-135.md) | Accounts: Google/Apple ID token sign-in, linking, sign-out, delete, Android Apple callback | US-15-1 | High* | Opus | backend-engineer | T-132 | B | 6 | TODO |
+| [T-135](tasks/T-135.md) | Accounts: Google/Apple ID token sign-in, linking, sign-out, delete, Android Apple callback | US-15-1 | High* | Opus | backend-engineer | T-132, T-182, T-184 | B | 6 | TODO |
 | [T-136](tasks/T-136.md) | Operator auth (OIDC + MFA), roles, audit log and support lookup | US-13-2 | High* | Opus | backend-engineer | T-122 | B | 3 | TODO |
-| [T-137](tasks/T-137.md) | zaghlol-ops CLI for catalog, flags, prices, contributions and support | US-13-2 | Medium | Sonnet | backend-engineer | T-136, T-125, T-126, T-127, T-129 | B | 6 | TODO |
-| [T-138](tasks/T-138.md) | Backend observability: OpenTelemetry, metrics, dashboards, alert rules | US-21-1 | Medium | Sonnet | backend-engineer | T-005 | B | 2 | TODO |
+| [T-137](tasks/T-137.md) | zaghlol-ops CLI for catalog, flags, prices, contributions and support, plus support runbook | US-13-2 | High | Sonnet | backend-engineer | T-136, T-186, T-125, T-126, T-127, T-129 | B | 7 | TODO |
+| [T-138](tasks/T-138.md) | Backend observability: OpenTelemetry, metrics, dashboards, alert rules | US-21-1 | High | Sonnet | backend-engineer | T-005 | B | 2 | TODO |
 | [T-139](tasks/T-139.md) | Retention purger and log privacy settings | US-13-1 | Medium | Sonnet | backend-engineer | T-122, T-138 | B | 3 | TODO |
-| [T-140](tasks/T-140.md) | Infrastructure as code and deployment pipeline (staging, prod) | US-13-1 | High | Opus | backend-engineer | T-138 | B | 3 | BLOCKED |
+| [T-140](tasks/T-140.md) | Infrastructure as code and deployment pipeline (staging, prod) | US-13-1 | High* | Opus | backend-engineer | T-138 | B | 3 | BLOCKED |
 | [T-141](tasks/T-141.md) | App BackendClient: generated DTOs, ES256 verification, lazy install registration | US-13-1 | High* | Opus | flutter-core-engineer | T-006, T-019 | A | 6 | TODO |
 | [T-142](tasks/T-142.md) | Merchant contribution opt-in and outbox with on-device filters | US-07-2 | High* | Opus | flutter-core-engineer | T-075, T-019 | A | 9 | TODO |
-| [T-143](tasks/T-143.md) | Daily sync orchestrator: throttle, back-off, atomic apply, re-categorize | US-13-1 | High | Opus | flutter-core-engineer | T-141, T-075, T-142, T-112, T-025 | A | 10 | TODO |
-| [T-144](tasks/T-144.md) | Entitlement token verification, offline cache and grace | US-14-1 | High* | Opus | flutter-core-engineer | T-119, T-141 | A | 8 | TODO |
-| [T-145](tasks/T-145.md) | In-app purchase flow, backend verify, background retry and restore | US-14-1 | High* | Opus | flutter-core-engineer | T-144, T-141 | A | 9 | TODO |
-| [T-146](tasks/T-146.md) | Paywall S-68, locked previews and upgrade prompt cap | US-14-1 | Medium | Sonnet | flutter-ui-engineer | T-145, T-087 | G | 10 | TODO |
-| [T-147](tasks/T-147.md) | Optional sign-in, account screen S-69, sign-out and delete account | US-15-1 | High* | Opus | flutter-core-engineer | T-141, T-144 | A | 9 | TODO |
+| [T-143](tasks/T-143.md) | Daily sync orchestrator: throttle, back-off, atomic apply, re-categorize | US-13-1 | High | Opus | flutter-core-engineer | T-141, T-075, T-142, T-112, T-025, T-144 | A | 10 | TODO |
+| [T-144](tasks/T-144.md) | Entitlement token verification, trusted time, offline cache and grace | US-14-1 | High* | Opus | flutter-core-engineer | T-119, T-141, T-180 | A | 8 | TODO |
+| [T-145](tasks/T-145.md) | In-app purchase flow, backend verify, background retry and restore | US-14-1 | High* | Opus | flutter-core-engineer | T-144, T-141, T-178, T-179, T-183 | A | 9 | TODO |
+| [T-146](tasks/T-146.md) | Paywall S-68, locked previews, upgrade prompt cap and Gold status messages | US-14-1 | Medium | Sonnet | flutter-ui-engineer | T-145, T-144, T-087 | G | 10 | TODO |
+| [T-147](tasks/T-147.md) | Optional sign-in, account screen S-69, sign-out and delete account | US-15-1 | High* | Opus | flutter-core-engineer | T-141, T-144, T-145, T-179, T-183 | A | 10 | TODO |
+| [T-178](tasks/T-178.md) | AttestationHostApi (Play Integrity standard request, App Attest) and release network security config | US-14-1 | High* | Opus | native-platform-engineer | T-004 | D | 3 | TODO |
+| [T-179](tasks/T-179.md) | SeatKeyHostApi (iOS Secure Enclave seat keys) and Dart seat-key service | US-14-1 | High* | Opus | native-platform-engineer | T-004, T-141 | E | 7 | TODO |
+| [T-180](tasks/T-180.md) | TrustedClockHostApi (monotonic clock with sleep, boot reference) on both platforms | US-14-1 | High* | Opus | native-platform-engineer | T-004 | D | 3 | TODO |
+| [T-181](tasks/T-181.md) | Backend attestation verifiers: Play Integrity decode and App Attest attestation/assertion, with fakes | US-14-1 | High* | Opus | backend-engineer | T-122 | B | 3 | TODO |
+| [T-182](tasks/T-182.md) | Backend seat-key proof verifier and keyed hashes (K_seat), with fakes | US-14-1 | High* | Opus | backend-engineer | T-122, T-123 | B | 3 | TODO |
+| [T-183](tasks/T-183.md) | Dart request-binding library: JCS, strict JSON parser, restore and seat-key hashes over shared vectors | US-14-1 | High* | Opus | flutter-core-engineer | T-001, T-014 | A | 3 | TODO |
+| [T-184](tasks/T-184.md) | Seat service: bind, move, same-iPhone rebind with cap, claimants, reclaim and support-move primitive | US-14-1 | High* | Opus | backend-engineer | T-122, T-182 | B | 4 | TODO |
+| [T-185](tasks/T-185.md) | POST /v1/purchases/restore: strict parse, install binding, attestation, seat outcomes and limits | US-14-1 | High* | Opus | backend-engineer | T-132, T-181, T-182, T-184 | B | 6 | TODO |
+| [T-186](tasks/T-186.md) | Support seat:move, purchase:detach and purchase:unfreeze endpoints with dispute freeze | US-13-2 | High* | Opus | backend-engineer | T-136, T-184, T-130, T-131, T-132 | B | 6 | TODO |
 
 ## M6 — Backup, import/export, OCR, settings & security
 
@@ -229,7 +242,7 @@ Every task file has: ID, description, technical details, dependencies, affected 
 | [T-163](tasks/T-163.md) | Categories & rules S-63/S-64 incl. custom categories (Gold) | US-18-1 | Medium | Sonnet | flutter-ui-engineer | T-074, T-119 | G | 8 | TODO |
 | [T-164](tasks/T-164.md) | Custom message template builder engine and screen S-65 (Gold) | US-05-3 | High | Sonnet | parsing-engine-engineer | T-033, T-119 | F | 8 | TODO |
 | [T-165](tasks/T-165.md) | Exclude app data from OS backups and device transfer | US-18-2 | High* | Opus | native-platform-engineer | T-001 | D | 2 | TODO |
-| [T-166](tasks/T-166.md) | Delete everything (local wipe + backend install delete) | US-18-2 | High* | Opus | flutter-core-engineer | T-015, T-141, T-152 | A | 10 | TODO |
+| [T-166](tasks/T-166.md) | Delete everything (local wipe + backend install delete) | US-18-2 | High* | Opus | flutter-core-engineer | T-015, T-141, T-152, T-145, T-179 | A | 10 | TODO |
 
 ## M7 — Flagged features, hardening & launch
 
@@ -240,7 +253,7 @@ Every task file has: ID, description, technical details, dependencies, affected 
 | [T-169](tasks/T-169.md) | Smart ROI general-advice rules with no-names check | US-19-2 | High | Sonnet | flutter-core-engineer | T-105 | A | 12 | TODO |
 | [T-170](tasks/T-170.md) | Smart ROI screen S-51 behind flag | US-19-2 | Medium | Sonnet | flutter-ui-engineer | T-169, T-025, T-087 | G | 13 | TODO |
 | [T-171](tasks/T-171.md) | Privacy verification suite (sandbox scan, data-boundary proxy, ignore no-trace) | US-21-1 | High* | Opus | test-engineer | T-166, T-143, T-078, T-149, T-165 | A | 11 | TODO |
-| [T-172](tasks/T-172.md) | Device end-to-end suites (Android killed-app capture, iOS intents, backup, purchases) | US-21-1 | High | Sonnet | test-engineer | T-056, T-067, T-153, T-145 | A | 11 | TODO |
+| [T-172](tasks/T-172.md) | Device end-to-end suites (Android killed-app capture, iOS intents, backup, purchases) | US-21-1 | High | Sonnet | test-engineer | T-056, T-067, T-153, T-145, T-147 | A | 11 | TODO |
 | [T-173](tasks/T-173.md) | Performance benchmarks and CI budgets | US-21-1 | Medium | Sonnet | test-engineer | T-033, T-050, T-105, T-048 | A | 12 | TODO |
 | [T-174](tasks/T-174.md) | Accessibility and golden coverage pass (130% text, both themes, screen readers) | US-21-1 | Medium | Sonnet | test-engineer | T-054, T-079, T-162, T-107 | G | 13 | TODO |
 | [T-175](tasks/T-175.md) | Security assessment: MobSF, ZAP, dependency scans, pen test | US-21-1 | High* | Opus | security-privacy-reviewer | T-171, T-140 | A | 12 | TODO |
@@ -273,6 +286,7 @@ Every task file has: ID, description, technical details, dependencies, affected 
 ## Approval
 | Role | Name | Decision | Date |
 |---|---|---|---|
-| Product owner | amr905 | ☑ Approved | 2026-11-03 |
+| Product owner | amr905 | ☑ Approved (v1.0) | 2026-11-03 |
+| Product owner | amr905 | ☐ v1.1 revision (FU-api-decisions task impacts) | — |
 
 On approval, Phase 5 (implementation) starts with M0 wave 1.
