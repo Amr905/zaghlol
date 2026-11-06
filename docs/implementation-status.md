@@ -13,7 +13,7 @@
 | BLK-02 | Real SMS/notification/statement samples (OQ-04/18) | T-031, T-156, T-157 | Product owner |
 | BLK-03 | Gold-feed provider contract (D-41) | T-127 go-live only | Product owner |
 | BLK-04 | Hosting region + PDPL licence (CR-03/OQ-16) | T-140 | Product owner + legal |
-| BLK-05 | **GitHub Actions blocked by account billing (2026-11-06)**: "recent account payments have failed or your spending limit needs to be increased". No job starts. | All CI verification (T-003, FU-api-decisions, every later task) | Product owner: fix the payment method or raise the spending limit, or make the repo public (free Actions minutes) |
+| ~~BLK-05~~ | **Resolved 2026-11-06: the repo was made public, so Actions is free.** Was: GitHub Actions blocked by account billing (2026-11-06): "recent account payments have failed or your spending limit needs to be increased". No job starts. | All CI verification (T-003, FU-api-decisions, every later task) | Product owner: fix the payment method or raise the spending limit, or make the repo public (free Actions minutes) |
 
 ## Summary
 | Milestone | Total | DONE | IN_PROGRESS | BLOCKED |
@@ -253,3 +253,4 @@
 | 2026-11-06 | FU-api security round 4 (@ 9ae53aa): CHANGES_REQUESTED. Majors: R4-1, the iPhone seat-key proof can be relayed from a jailbroken phone; R4-2, a replayed signed server time defeats trusted time. PO: D-62 keep multi-key seatKeys, linkability accepted; D-63 at most 2 same-iPhone rebinds per 30 days; D-64 30-day dispute freeze after a support correction. Architect round 5 and SRS v1.7 in progress. |
 | 2026-11-06 | FU-api round 5 pushed at d296a7f (R4-1 element-0 binding + rebind cap + keys in clientDataHash; R4-2 time nonce; R4-3 lb state; D-62…D-65). Architect deviation: a sign-in over-cap rebind is never refused only for a trusted seat key (PO to confirm). Security round 5 running. BLK-05 still open (rechecked 06:19Z). |
 | 2026-11-06 | PO: stop using GitHub Actions; iOS verification deferred. New build environment: a local CI runner on the PO's Windows PC (C:\Projects\Zaghlol\.zaghlol-local-ci). It runs a fixed app+backend pipeline on a separate clone, the Lead queues jobs, and results come back as logs. Waiting for the PO to start it once. |
+| 2026-11-06 | PO made the repo public: GitHub Actions runs again for free, including macOS/iOS (BLK-05 resolved). The local Windows runner stays as a fallback. FU-api security round 5: one blocker (R5-1: the app doesn't check that the token's `sub` is its own install). Architect fixing R5-1/R5-2 and adding the support-lead unfreeze (R5-5, PO no preference, so the recommended option was taken). The R5-3 decision on iOS sign-in attestation is still open. T-003 CI re-run started. |
