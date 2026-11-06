@@ -13,7 +13,10 @@ Conventions:
 - **Time:** `timestamptz` everywhere.
 - **Naming:** snake_case.
 - **Migrations:** EF Core, applied by a deploy job.
-- **Database roles:** separate roles for API (`app_rw`), workers (`worker_rw`), operators (`ops_ro` + audited `ops_rw` via the admin API only) and migrations (`migrator`).
+- **Schema:** all objects live in schema `zaghlol` (not `public`), owned by `migrator`.
+- **Database roles:** separate roles for API (`app_rw`), workers (`worker_rw`), operators (`ops_ro` + audited `ops_rw` via the admin API only) and migrations (`migrator`). The API uses `app_rw` for `/v1/*` and `ops_rw` for `/admin/v1/*` (two connection strings). Roles are created by `backend/deploy/db/bootstrap-roles.sql` (not by migrations); per-table grants are in the migrations (T-122 design note).
+- **Hardening CHECKs not repeated below:** every SHA-256 / HMAC `bytea` column has `CHECK (octet_length(col) = 32)`; `idempotency_key` has `char_length = 26`; `purchase_events.cause` has a regex CHECK for exactly the listed values (`rtdn:` / `assn:` + `[A-Za-z0-9_]{1,64}`); `audit_log.details` has `CHECK (NOT (details ?| array['email','order_id','orderId']))`.
+- **Crypto is computed in the application, never in the DB:** no `pgcrypto`; hashes, keyed hashes (`IKeyedHasher`) and envelope ciphertexts (`IEnvelopeCipher`) arrive as `bytea`.
 
 ## 1. ER overview
 
@@ -107,7 +110,8 @@ CREATE TABLE purchases (
   CHECK ((account_id IS NULL) = (account_linked_by IS NULL))
 );
 -- ON DELETE SET NULL on account_id must also clear account_linked_by: done by the account-deletion service in the same
--- transaction (a BEFORE DELETE trigger on accounts enforces it as a backstop).
+-- transaction (a BEFORE DELETE trigger on accounts enforces it as a backstop; it clears account_id AND account_linked_by,
+-- because the FK action fires only after the row is gone and would violate the CHECK, and never touches attach_reclaim_used_at).
 CREATE INDEX ix_purchases_install ON purchases(install_id);
 CREATE INDEX ix_purchases_account ON purchases(account_id);
 CREATE INDEX ix_purchases_unacked ON purchases(created_at) WHERE store = 'google_play' AND acknowledged = false;
@@ -171,6 +175,8 @@ CREATE TABLE purchase_seats (
   CHECK (cardinality(recent_rebinds) <= 2)
 );
 CREATE INDEX ix_purchase_seats_install ON purchase_seats(install_id);
+-- A BEFORE DELETE trigger on installs vacates the seat (install_id, proof, bound_at := NULL) so the holder/proof CHECK holds;
+-- device_key_hash, device_key_trusted, last_moved_at, next_move_at and recent_rebinds are kept (D-55).
 -- Invariant (FR-GOLD-08 acceptance): at most one holder per purchase, by construction (primary key).
 
 -- Pending claimants (R3-4, R4-4): installs refused ONLY by the cooldown (they passed attestation, store and account checks),
@@ -227,11 +233,9 @@ CREATE TABLE idempotency_records (
 );
 CREATE INDEX ix_idempotency_account ON idempotency_records(account_id) WHERE account_id IS NOT NULL;
 
-CREATE TABLE signing_keys (                    -- metadata; private keys live in the KMS
-  kid text PRIMARY KEY, purpose text NOT NULL CHECK (purpose IN ('entitlement','sync')),
-  alg text NOT NULL DEFAULT 'ES256', public_jwk jsonb NOT NULL,
-  status text NOT NULL CHECK (status IN ('next','active','retired')), activated_at timestamptz, retired_at timestamptz
-);
+-- Signing keys: NOT a table (T-123 design note, 2026-11-06). The key ring (kid, purpose sync|entitlement, status
+-- next|active|retired, KMS key reference, public JWK) is deploy-time configuration managed with the KMS keys (T-140), so no
+-- DB write can change which key signs.
 
 -- Catalog (FR-BE-06, FR-SYNC-02)
 CREATE TABLE catalog_versions (
@@ -276,7 +280,9 @@ CREATE TABLE merchant_contributions (
   merchant_norm text NOT NULL, institution_code text NOT NULL, category_code text NOT NULL,
   install_hash bytea NOT NULL,                  -- HMAC(install_id, pepper) — counts distinct installs without joining
   received_at timestamptz NOT NULL DEFAULT now(),
-  UNIQUE (merchant_norm, institution_code, install_hash)
+  UNIQUE (merchant_norm, institution_code, install_hash),
+  CHECK (char_length(merchant_norm) <= 64 AND merchant_norm !~ '[0-9]{6,}'),
+  CHECK (char_length(institution_code) <= 64 AND char_length(category_code) <= 64)
 );
 CREATE TABLE contribution_aggregates (
   merchant_norm text NOT NULL, institution_code text NOT NULL,
@@ -288,7 +294,7 @@ CREATE TABLE contribution_aggregates (
 
 -- "Request my bank" (FR-BE-10)
 CREATE TABLE bank_requests (
-  institution_name_norm text NOT NULL, country text NOT NULL, channel text NOT NULL CHECK (channel IN ('sms','notification')),
+  institution_name_norm text NOT NULL CHECK (char_length(institution_name_norm) <= 64 AND institution_name_norm !~ '[0-9]{6,}'), country text NOT NULL, channel text NOT NULL CHECK (channel IN ('sms','notification')),
   install_hash bytea NOT NULL, received_at timestamptz NOT NULL DEFAULT now(),
   PRIMARY KEY (institution_name_norm, country, channel, install_hash)
 );
@@ -318,7 +324,7 @@ CREATE TABLE audit_log (id bigint GENERATED ALWAYS AS IDENTITY PRIMARY KEY, oper
 
 | Concern | Mechanism |
 |---|---|
-| Contributions can't contain people or amounts | API validation (BR-SYNC-04 filters, `security-model.md` §6), plus a DB `CHECK (merchant_norm !~ '[0-9]{6,}')` and a length cap of 64 |
+| Contributions can't contain people or amounts | API validation (BR-SYNC-04 filters, `security-model.md` §6), plus a DB `CHECK (merchant_norm !~ '[0-9]{6,}')` and a length cap of 64 (the same two CHECKs on `bank_requests.institution_name_norm`) |
 | Distinct counts without tracking | `install_hash` = HMAC-SHA256 with a pepper held in the KMS; it can't be joined back to `installs` without the pepper |
 | No device identifiers | No column exists for IMEI, ad ID or phone number; DTOs reject unknown fields |
 | Purchase link to a person | Store receives `obfuscatedAccountId`/`appAccountToken` = HMAC(install_id), never e-mail |
@@ -351,6 +357,8 @@ CREATE TABLE audit_log (id bigint GENERATED ALWAYS AS IDENTITY PRIMARY KEY, oper
 | `idempotency_records` | 24 h (never served after `expires_at`); deleted at once with its install or account | `RetentionPurger` + delete endpoints |
 | `installs.registration_*` | Cleared at first authenticated call or after 24 h | API + `RetentionPurger` |
 | DB backups (PITR) | 14 days | provider |
+
+**Retention indexes (T-122):** `installs(last_seen_at)`; `installs(deleted_at) WHERE deleted_at IS NOT NULL`; `installs(first_seen_at) WHERE registration_key_hash IS NOT NULL`; `store_notifications(received_at)`; `merchant_contributions(received_at)`; `bank_requests(received_at)`; `audit_log(at)` plus `audit_log(at) WHERE action IN ('support_lookup','support_seat_move','support_detach','support_unfreeze')`; `replay_guard(expires_at)`; `seat_claimants(claimed_at)`; `idempotency_records(expires_at)`.
 
 ## 5. Capacity check (NFR-BE-04)
 

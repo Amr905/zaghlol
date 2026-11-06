@@ -208,7 +208,7 @@ sequenceDiagram
 | `Installs` | Register install, issue install token, last-seen, delete | `installs` | FR-BE-01, FR-ONB-08 |
 | `Purchases` | Verify Google/Apple purchases, acknowledge, persist purchase state | `purchases`, `purchase_events` | FR-BE-02, FR-GOLD-02/03 |
 | `StoreNotifications` | Ingest RTDN (Pub/Sub push) and ASSN V2; idempotent processing; refresh purchase state | `store_notifications` | FR-BE-03, FR-GOLD-06 |
-| `Entitlements` | Compute an install's/account's effective Gold; sign tokens; key rotation | `entitlements` (view), `signing_keys` | FR-GOLD-04, NFR-SEC-05 |
+| `Entitlements` | Compute an install's/account's effective Gold; sign tokens; key rotation | `entitlements` (view); signing key ring in configuration (no table) | FR-GOLD-04, NFR-SEC-05 |
 | `Accounts` | Verify Google/Apple ID tokens; link installs & purchases; delete | `accounts`, `account_installs` | FR-BE-09, FR-ACCT-* |
 | `Catalog` | Versioned catalog, change log, deltas, full snapshots to CDN, signing | `catalog_*` | FR-BE-06, FR-SYNC-02/04 |
 | `Flags` | Flag definitions & targeting rules (platform, min version, percentage) | `feature_flags` | FR-BE-05 |
