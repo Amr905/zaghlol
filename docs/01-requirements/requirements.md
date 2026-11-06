@@ -3,7 +3,7 @@
 | | |
 |---|---|
 | Document | `docs/01-requirements/requirements.md` |
-| Version | 1.5 — APPROVED (+ changes D-34, D-36…D-54) |
+| Version | 1.6 — APPROVED (+ changes D-34, D-36…D-60) |
 | Phase | 1 — Requirements refinement |
 | Author | requirements-analyst (Lead session) |
 | Date | 2026-10-31 |
@@ -26,6 +26,7 @@
 | 1.3 | 2026-11-03 | Phase 3 answers: D-39…D-44 (iOS approach, Tesseract OCR, local gold feed, online speech with consent, min OS, Apple sign-in on Android). OQ-02/03/06/15 resolved; OQ-16 still open. |
 | 1.4 | 2026-11-05 | Product-owner decisions D-45…D-51: **device attestation** (Play Integrity / App Attest) added to BR-SYNC-03; **Gold restore anti-sharing** — max 3 installs per purchase, account-linked purchases move only between that account's installs, attestation required on restore (FR-GOLD-08/09, ADR-012 Amendment (2026-11-05)); **support-lookup audit** with HMAC e-mail pseudonym kept 1 year (NFR-PRIV-07, FR-BE-11); BR-SYNC-03 classification of version cursors, restore `productId` and sign-in `nonce`; A-47 narrowed to the ID-token `email` claim; **OEM transfer outcome** for FR-SEC-05 (keyless DB wiped → fresh Welcome + restore offer); **ISO 4217 funds codes** shown last in the currency picker, X-codes excluded (FR-CUR-07). New EC-64…EC-67, R-19/R-20, INT-22. |
 | 1.5 | 2026-11-06 | Product-owner decisions D-52…D-54: **Gold on one phone at a time, moved at most once per rolling 30 days** (D-52, supersedes D-46's 3-install limit; attestation on restore and the account rule stay) — FR-GOLD-02/03/07/08/09, BR-GOLD-03, new BR-GOLD-07, R-04 role, EC-64…EC-66, new EC-68, R-19, new R-21, new OQ-19 (same-phone recognition, support move vs. window); **FR-GOLD-09 attestation wording** per platform (D-53: "expired" is Android-only, iOS App Attest uses per-install key + counter); **no self-service relinking after a phone change** — link only from the buying phone, otherwise support (D-54) — FR-ACCT-01/02, new FR-ACCT-05, EC-65. |
+| 1.6 | 2026-11-06 | Product-owner decisions D-55…D-60, **OQ-19 closed**: **same-iPhone reinstall recognised** via a ThisDeviceOnly Keychain install secret, sent only as a derived non-reversible proof (D-55, amends BR-SYNC-03); Android reinstall / "Delete everything" = new install that spends the move, with a warning; **support move restarts the 30-day window** (D-56); **support ownership check** by live store order-ID verification (order ID never stored), single agent, link only if the buying phone is gone or unseen ≥ 30 days, audited and reversible, losing phone told (D-57); **free reclaim once per purchase** on first account link (D-58); **plan change from another phone counts as the move**, payment never blocked (D-59); **offline window for a phone that lost Gold cut to 7 days** (3-day token + 4-day grace; amends A-38, BR-GOLD-03/07) and **clock-rollback withholding** with trusted time (D-60). Changed: FR-GOLD-03/07/08, FR-ACCT-03/05, FR-BE-08/11, BR-GOLD-03/07, BR-SYNC-03 (+ D-48 classification list), A-38, EC-64…EC-68, new EC-69…EC-73, R-19, R-21, NFR-PRIV-07, OQ-19. |
 
 ---
 
