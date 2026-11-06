@@ -2,7 +2,7 @@
 
 | | |
 |---|---|
-| Version | 1.1 — revision of the approved v1.0 (2026-11-03) for the merged FU-api-decisions design; **pending PO approval of the revision** |
+| Version | 1.1 — revision of the approved v1.0 (2026-11-03) for the merged FU-api-decisions design; **APPROVED 2026-11-06** |
 | Phase | 4 — Task breakdown (revision during Phase 5) |
 | Inputs | SRS v1.7 (D-45…D-65), Phase 2 design (approved), Phase 3 technical spec with FU-api-decisions merged at `be7dcd1` (ADR-012, backend-api, backend-schema, platform-channels, security-model), final security review `docs/05-reviews/FU-api-decisions.md` (APPROVED) |
 | Date | 2026-11-06 |
@@ -287,6 +287,6 @@ Every task file has: ID, description, technical details, dependencies, affected 
 | Role | Name | Decision | Date |
 |---|---|---|---|
 | Product owner | amr905 | ☑ Approved (v1.0) | 2026-11-03 |
-| Product owner | amr905 | ☐ v1.1 revision (FU-api-decisions task impacts) | — |
+| Product owner | amr905 | ☑ v1.1 revision (FU-api-decisions task impacts) — APPROVED | 2026-11-06 |
 
 On approval, Phase 5 (implementation) starts with M0 wave 1.

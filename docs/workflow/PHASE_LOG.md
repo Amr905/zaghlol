@@ -29,6 +29,7 @@ The Lead updates this file at every gate. Newest entry at the bottom.
 | 2026-11-03 | 4 — Task breakdown | GATE APPROVED — implementation plan (177 tasks, M0–M7) | Phase 5 may start. |
 | 2026-11-03 | 5 — Implementation | Phase opened; status tracked in `docs/implementation-status.md`. Toolchain blocker BLK-01 raised (no Flutter/.NET/package access; no CI). | Waiting for product-owner choice of build environment. |
 | 2026-11-03 | 5 — Implementation | BLK-01 resolved: product owner chose GitHub (Amr905/zaghlol) + GitHub Actions CI as the build/verification environment. T-001 and T-005 started. | Implementation running; per-task status in `docs/implementation-status.md`. |
+| 2026-11-06 | 5 — Implementation | Gold design approved (FU-api-decisions, SRS v1.8 D-45…D-66). Task plan v1.1 APPROVED by the product owner: 186 tasks, T-178…T-186 added. Repo made public; CI on GitHub Actions incl. iOS. | Implementation continues on plan v1.1. |
 
 ## Current phase
 **Phase 5 — Implementation: RUNNING (CI on GitHub Actions)**
