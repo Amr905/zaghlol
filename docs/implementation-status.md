@@ -151,8 +151,8 @@
 | T-119 | Gold gate matrix and entitlement state (local) | M4 | C2 | Sonnet | flutter-core-engineer | T-025, T-020 | TODO | — |  |
 | T-120 | Voice logger S-31 with on-device-first recognition and monthly limit | M4 | C3 | Sonnet | flutter-ui-engineer | T-109, T-119, T-011 | TODO | — |  |
 | T-121 | Money tab assets, Add asset S-44 and Prices S-45 | M4 | C2 | Sonnet | flutter-ui-engineer | T-113, T-083, T-119 | TODO | — |  |
-| T-122 | EF Core model and initial migration for all backend tables + DB roles | M5 | C4 | Opus | backend-engineer | T-005 | TODO | — |  |
-| T-123 | Signing service (ES256 via KMS abstraction) and response-signature middleware | M5 | C4 | Opus | backend-engineer | T-005 | TODO | — |  |
+| T-122 | EF Core model and initial migration for all backend tables + DB roles | M5 | C4 | Opus | backend-engineer | T-005 | DESIGN | — | solution-architect writing design note (branch task/design-notes-T122-T123-T138) |
+| T-123 | Signing service (ES256 via KMS abstraction) and response-signature middleware | M5 | C4 | Opus | backend-engineer | T-005 | DESIGN | — | solution-architect writing design note (branch task/design-notes-T122-T123-T138) |
 | T-124 | Install registration, install-token auth, rate limits, idempotency, strict DTOs | M5 | C4 | Opus | backend-engineer | T-122, T-006 | TODO | — |  |
 | T-125 | Catalog versions, deltas, signed full snapshots and admin draft/publish | M5 | C3 | Opus | backend-engineer | T-122, T-123 | TODO | — |  |
 | T-126 | Feature flags with targeting rules and admin endpoints | M5 | C2 | Sonnet | backend-engineer | T-122 | TODO | — |  |
@@ -167,7 +167,7 @@
 | T-135 | Accounts: Google/Apple ID token sign-in, linking, sign-out, delete, Android Apple callback | M5 | C4 | Opus | backend-engineer | T-132, T-182, T-184 | TODO | — | Plan v1.1: R5-3(a) note |
 | T-136 | Operator auth (OIDC + MFA), roles, audit log and support lookup | M5 | C4 | Opus | backend-engineer | T-122 | TODO | — | Plan v1.1: support write endpoints → T-186 |
 | T-137 | zaghlol-ops CLI for catalog, flags, prices, contributions and support, plus support runbook | M5 | C3 | Sonnet | backend-engineer | T-136, T-186, T-125, T-126, T-127, T-129 | TODO | — | Plan v1.1: C2→C3 (order IDs, operator login) |
-| T-138 | Backend observability: OpenTelemetry, metrics, dashboards, alert rules | M5 | C3 | Sonnet | backend-engineer | T-005 | TODO | — | Plan v1.1: C2→C3 (log-privacy controls) |
+| T-138 | Backend observability: OpenTelemetry, metrics, dashboards, alert rules | M5 | C3 | Sonnet | backend-engineer | T-005 | DESIGN | — | solution-architect writing design note (branch task/design-notes-T122-T123-T138) |
 | T-139 | Retention purger and log privacy settings | M5 | C2 | Sonnet | backend-engineer | T-122, T-138 | TODO | — |  |
 | T-140 | Infrastructure as code and deployment pipeline (staging, prod) | M5 | C4 | Opus | backend-engineer | T-138 | BLOCKED | — | CR-03 / OQ-16: hosting provider & region + PDPL licence decision. Plan v1.1: C3→C4 (KMS keys) |
 | T-141 | App BackendClient: generated DTOs, ES256 verification, lazy install registration | M5 | C4 | Opus | flutter-core-engineer | T-006, T-019 | TODO | — |  |
@@ -266,3 +266,4 @@
 | 2026-11-06 | FU-api-decisions MERGED (be7dcd1): security-privacy review APPROVED after 5 rounds plus a delta check; backend-ci green (42207189180, 34/34 contract tests). Residuals listed in docs/05-reviews/FU-api-decisions.md. Open: R5-3 PO choice (iOS sign-in attestation), R6-1 (T-136). Next: task-planner applies the task impacts and adds the 2 new C4 tasks. |
 | 2026-11-06 | Task plan v1.1 (task-planner): FU-api round 4–6 impacts and the final review's owner-task criteria applied to T-122…T-147 plus T-004/T-014/T-028/T-162/T-166/T-171/T-172/T-176/T-177. New M5 tasks T-178…T-186 (all C4/Opus): native attestation, seat keys, trusted clock; backend attestation and seat-key verifiers; Dart binding library; seat service and restore (split from T-132); support write endpoints (split from T-136). Class changes: T-137 C2→C3, T-138 C2→C3, T-140 C3→C4. 186 tasks. Awaiting PO approval of v1.1; R5-3 and R6-1 PO choices still open. |
 | 2026-11-06 | PO APPROVED task plan v1.1. T-003 round 2 in review. |
+| 2026-11-06 | Design notes started for backend lane B: T-122 (C4), T-123 (C4), T-138 (C3). They run alongside the T-003 review; no file overlap. |
