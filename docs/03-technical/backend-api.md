@@ -14,8 +14,9 @@ The source of truth during Phase 5 is `backend/openapi/zaghlol-v1.yaml`, generat
 | Client headers | `Zaghlol-App: <platform>/<appVersion> (<build>)`, `Zaghlol-Install: <installId>`, `Accept-Language` **not** sent (copy is localized on device). |
 | Authentication | `Authorization: Bearer <installToken>` on all install-scoped calls; `Zaghlol-Account: <accountToken>` additionally when signed in. See §3. |
 | Idempotency | `Idempotency-Key: <ULID>` on `POST /v1/purchases/verify`, `/v1/installs`, `/v1/accounts/signin`. The app generates every key with a CSPRNG (`Random.secure()` for the 80 random bits of the ULID), never reuses one for a different request, and never logs it (R3-6). **Authenticated operations** (verify, sign-in): a stored result is keyed by **(installId, operationId, Idempotency-Key)** and records **SHA-256 of the request body bytes**. `installId` is the install that the install token authenticates. A replay within 24 h returns the stored result only when all four match and the record has not expired: every lookup requires `expires_at > now()`, so a row the daily purger hasn't reached yet is never served. The same key from a **different install** is a different key: it is processed as a new request and never sees another install's stored body. The same install, operation and key with a **different body hash** gives **`409 IDEMPOTENCY_KEY_REUSED`**, never the stored body (R2-8). Only final results are stored (2xx, 409 and 422); `429` and 5xx are not, so a retry runs again. `DELETE /v1/installs/me` deletes that install's records, and `DELETE /v1/accounts/me` deletes every sign-in record that holds that account's token. **`POST /v1/installs`** stores no response: see §4.1 (R3-6). Records live in `idempotency_records` (`backend-schema.md`). |
-| Response signing | Security-relevant responses carry `Zaghlol-Signature: kid=<kid>; alg=ES256; sig=<base64url>`, an ECDSA P-256 signature over the **exact response body bytes** after decompression. The app verifies it against embedded public keys (ADR-012/013) and drops unsigned or invalid bodies. |
+| Response signing | Security-relevant responses carry `Zaghlol-Signature: kid=<kid>; alg=ES256; sig=<base64url>`, an ECDSA P-256 signature over the **exact response body bytes** after decompression. The app verifies it against embedded public keys (ADR-012/013) and drops unsigned or invalid bodies. The signature binds the body only, not the request or the install, so a signed body proves *what the server said*, not *to whom or when it was asked*; the time nonce below adds that binding where trusted time needs it (R4-2). Every 200 of the six anchoring operations is signed, the sync throttle answer included. |
 | Time | `serverTime` (RFC 3339 UTC) in every response body. The app stores it to drive the 24 h throttle (EC-43). |
+| Time nonce (R4-2, NFR-SEC-08) | The app sends `Zaghlol-Time-Nonce: <22 base64url chars>`, 128 bits fresh from a CSPRNG, on every **anchoring request**: `POST /v1/sync`, `GET /v1/entitlement`, `POST /v1/purchases/verify`, `POST /v1/purchases/restore`, `POST /v1/accounts/signin` and `POST /v1/accounts/signout`. The server copies it unchanged into the signed 200 body as `timeNonce` (`null` when the header was absent), so the echo is covered by `Zaghlol-Signature`. It is a random per-request value with no device data, never stored, logged or traced on either side, and never reused (D-48 classification, SRS v1.7). A malformed value is `400 VALIDATION_FAILED`. Only a body echoing the app's single outstanding nonce, within 60 s, may lower trusted time or clear `tampered` (§4.3 *Trusted time*). An `Idempotency-Key` replay returns the stored body, whose echo is the original request's nonce, so it can only raise trusted time. |
 | Errors | RFC 9457 `application/problem+json`: `{type, title, status, code, detail?, retryAfterSeconds?}`. `code` is a stable `UPPER_SNAKE` string (§6). Error bodies never echo request data. |
 | Rate limits | Per install token and per /24 IP (token bucket). `429` with `Retry-After`. Extra buckets: `POST /v1/purchases/restore` 5/hour per install, plus 10 restore attempts/day per purchase (keyed by SHA-256 of the token or `originalTransactionId`). Outbound Play and App Store calls share a global budget in which verify and the acknowledge sweeper have priority over restore (§4.3). |
 | Request size | ≤ 64 KB, except `/v1/notifications/*` (≤ 256 KB). |
@@ -50,7 +51,7 @@ The source of truth during Phase 5 is `backend/openapi/zaghlol-v1.yaml`, generat
 | **Account** | `accountToken`: ES256 JWT `{sub: accountId, iid: installId, iat, exp: +30 d, kid}` | `POST /v1/accounts/signin` | 30 days, silently refreshed in `/v1/sync` responses. A token whose account no longer exists, or whose install is no longer linked to it, is rejected with `401 ACCOUNT_TOKEN_EXPIRED` even before `exp` (R3-6) | Link/unlink/delete own account; read account entitlements; required for account-linked Gold (D-61(c)) |
 | **Google Pub/Sub** | Google-signed OIDC JWT (`aud` = our push endpoint, `email` = our push service account) | Google | per request | `/v1/notifications/google` only |
 | **Apple ASSN** | `signedPayload` JWS, x5c chain verified to Apple Root CA G3, bundle ID + environment checked | Apple | per request | `/v1/notifications/apple` only |
-| **Operator** | OIDC (Google Workspace or Entra ID) with enforced MFA; short-lived access token (≤ 1 h). `zaghlol-ops` signs in with **authorization code + PKCE and a loopback redirect** (RFC 8252); the device-code grant is disabled for its client (R3-9). `support_agent` additionally requires **phishing-resistant MFA (FIDO2 / passkey)**, enforced by the IdP and checked by the API in the token's `amr` / `acr` claim | Company IdP | 1 h | Role-based: `catalog_editor`, `flags_admin`, `support_viewer` (read-only lookup), `support_agent` (audited support seat move and detach, §5.3; named staff only, reviewed quarterly), `prices_admin`; every write audited |
+| **Operator** | OIDC (Google Workspace or Entra ID) with enforced MFA; short-lived access token (≤ 1 h). `zaghlol-ops` signs in with **authorization code + PKCE and a loopback redirect** (RFC 8252); the device-code grant is disabled for its client (R3-9). `support_agent` additionally requires **phishing-resistant MFA (FIDO2 / passkey)**. **The IdP is the enforcement point** (R4-6): a conditional-access policy scoped to the `zaghlol-ops` and admin-app clients requires phishing-resistant MFA for the support group (Entra: an authentication-strength policy, ideally bound to an authentication context so the token carries it in `acrs`; Google Workspace: security-key-only 2SV enforcement for the support OU). The API also checks the claim that proves it **only if** T-136 confirms the chosen IdP emits one (Entra `acrs` containing the configured context ID; Entra's documented `amr` values have no FIDO2-specific value, only `mfa`/`rsa`/`ngcmfa`; Google Workspace OIDC tokens generally carry neither). Without such a claim the API check is **advisory** (it requires the MFA signal the IdP does emit and logs a diag counter) and the runbook records the IdP policy as the control | Company IdP | 1 h | Role-based: `catalog_editor`, `flags_admin`, `support_viewer` (read-only lookup), `support_agent` (audited support seat move and detach, §5.3; named staff only, reviewed quarterly), `prices_admin`; every write audited |
 
 Authorization rules:
 - A call may only read or write rows of its own `installId`, plus rows of `accountId` when the account token matches **and** the install is linked to that account.
@@ -112,7 +113,9 @@ Authorization rules:
   },
   "entitlement": { "token": "eyJhbGciOiJFUzI1NiIsImtpZCI6ImUxIn0…" },   // present if changed since entitlementIssuedAt
   "accepted": { "contributions": 1, "bankRequests": 1 },
-  "accountToken": null                                                    // refreshed token when signed in & < 7 d to expiry
+  "accountToken": null,                                                   // refreshed token when signed in & < 7 d to expiry
+  "supportNotice": null,                                                  // "gold_linked_by_support" once, to the buying install (R4-7(2))
+  "timeNonce": "kq3V9w0bQ2FwdGFpblphZw"                                   // echo of Zaghlol-Time-Nonce (§1, R4-2)
 }
 ```
 
@@ -120,7 +123,8 @@ Authorization rules:
 - **Size:** the response is ≤ 2 KB when nothing changed (NFR-BE-03). Unchanged blocks are `null`.
 - **Server checks:** the server validates every contribution against BR-SYNC-04, and silently drops non-conforming ones (counted in `accepted`).
 - **Full catalog:** `mode: "full"` is returned when `catalogVersion` is 0 or more than 20 versions behind. The full snapshot is about 1 MB compressed and signed (`.sig` file next to it).
-- **Throttle:** the 24 h rule is applied by the server too. A sync within the window returns **200** with only `serverTime` and `nextSyncNotBefore`, so a wrong device clock can't hammer the API.
+- **Throttle:** the 24 h rule is applied by the server too. A sync within the window returns **200** with only `serverTime`, `nextSyncNotBefore` and `timeNonce`, so a wrong device clock can't hammer the API. The throttle answer is signed like every sync 200, and it carries the caller's nonce echo, so a throttle answer harvested by another install can't re-anchor this one (R4-2).
+- **Support-link notice (R4-7(2), SRS v1.7):** when support attached a purchase to an account (§5.3), the purchase's **buying install** (`purchases.install_id`) gets `supportNotice: "gold_linked_by_support"` in its next signed sync or entitlement 200, once. The server then clears `purchases.support_link_notice_pending`. The app shows a one-time message ("support linked your Gold to an account"), with the support link and the support code. A detach of that link clears the flag too. Other installs never see it.
 - **Client apply:** steps 1–5 below run in one DB transaction (FR-SYNC-03).
   1. Verify the signature.
   2. Apply `ops` in order.
@@ -139,7 +143,8 @@ Authorization rules:
 { "platform": "ios", "signedTransaction": "eyJhbGciOiJFUzI1NiIsIng1YyI6W…",
   "seatKeys": [ { "publicKey": "BPx…(65 bytes, base64url)", "signature": "Mz…(64 bytes, base64url)" } ] }
 // 200 (signed)
-{ "status": "active", "entitlement": { "token": "eyJ…" }, "seatHeldElsewhere": false, "nextMoveAt": null, "serverTime": "…" }
+{ "status": "active", "entitlement": { "token": "eyJ…" }, "seatHeldElsewhere": false, "accountRequired": false, "nextMoveAt": null,
+  "serverTime": "…", "timeNonce": "…" }
 // status ∈ active | pending | expired | refunded | invalid
 ```
 
@@ -159,16 +164,17 @@ Authorization rules:
 2. Check `bundleId`, `environment` and `appAccountToken == HMAC(installId)`.
 3. Call App Store Server API `Get Transaction Info` and `Get All Subscription Statuses` for the authoritative state.
 4. Upsert by `originalTransactionId`.
-5. If `seatKeys` is present, verify its single element over `op = verify` with `challenge = SHA-256(signedTransaction)` (§4.3 *Same-iPhone recognition*). When this install binds or holds the seat, store its key hash. A proof that fails verification is **ignored** (no key hash stored, a diag counter incremented), never an error, because verify is the payment path (BR-GOLD-06).
+5. If `seatKeys` is present, verify its single element over `op = verify` with `challenge = SHA-256(signedTransaction)` (§4.3 *Same-iPhone recognition*), and only after steps 1–4 succeeded. A valid key **registers** as this install's key if the install has none yet (`installs.seat_key_hash`, R4-1(1)); when this install binds or holds the seat, its key hash is stored on the seat. A proof that fails verification, or whose key isn't this install's registered key, is **ignored** (nothing registered or stored, a diag counter incremented), never an error, because verify is the payment path (BR-GOLD-06).
 
 **Seat at verify** (ADR-012 Part B (a), D-59, D-61(a)):
 - A purchase with no seat yet: bind it to this (buying) install, `proof = binding`. Not a move.
 - An existing seat held by this install: refresh; nothing moves.
 - An existing seat held by another install, for a verify that is **not** a new payment from this install (for example a re-verify of an old transaction): the holder is unchanged, and this install gets no Gold from it.
 - **A new payment from this install** for a purchase whose seat another install holds. This is a Google successor (`linkedPurchaseToken` names an existing purchase, whose seat, `account_id`, `attach_reclaim_used_at` and `next_move_at` the successor inherits), or an Apple transaction whose `transactionId` is new for its `originalTransactionId` with `transactionReason = PURCHASE`: an upgrade, downgrade, crossgrade or re-subscription. Then:
-  - **no cooldown running:** the seat moves here (`seat_move:verify`, `next_move_at = ceil_hour(now + 30 d)`), and the old holder gets `status: moved`;
+  - **account rule first (R4-4, D-46):** if the purchase is account-linked (`account_id` set, for Google also inherited by the successor), the move also requires a valid `Zaghlol-Account` token **for that account** on this verify request. Without it the seat **stays** on the holder whatever the cooldown, this install becomes a pending claimant (`channel = verify`), and the response is `200` with `seatHeldElsewhere: true`, **`accountRequired: true`** and `nextMoveAt` (or `null` when no cooldown runs). The app says the payment worked and asks the user to sign in here with the account that owns Gold; that sign-in is then an ordinary sign-in move (§4.6). So someone with access to the store account can't pull an account-linked seat to an install that isn't signed in to the account, and can't restart the owner's window that way;
+  - **no cooldown running** (and the account rule met): the seat moves here (`seat_move:verify`, `next_move_at = ceil_hour(now + 30 d)`), and the old holder gets `status: moved`;
   - **cooldown running:** the seat stays on the holder, which keeps Gold on the new plan. This install becomes a pending claimant. The response is `200` with `seatHeldElsewhere: true`, `nextMoveAt`, and a token without that purchase; the app says the payment worked, Gold is on the other phone, and when it can move.
-  - **Never refused:** in both cases the purchase is verified and acknowledged before the seat decision. The seat decision never turns a valid payment into an error (BR-GOLD-06).
+  - **Never refused:** in every case the purchase is verified and acknowledged before the seat decision. The seat decision never turns a valid payment into an error (BR-GOLD-06).
 
 **Restore** (`POST /v1/purchases/restore`): FU-006, plus one-phone Gold and attestation per D-45, D-46, D-52…D-54 (FR-GOLD-02/03/07/08/09). Design: ADR-012 Amendment (2026-11-05), Part B as revised 2026-11-06.
 ```json
@@ -176,12 +182,12 @@ Authorization rules:
 { "platform": "android",
   "purchases": [ { "productId": "zaghlol_gold_lifetime", "purchaseToken": "opaque-token-from-play" } ],
   "attestation": { "type": "play_integrity", "token": "eyJ…" } }
-// iOS: StoreKit 2 signed transactions (1–20) + App Attest assertion (attestationObject only on a new key's first use)
+// iOS: StoreKit 2 signed transactions (1–20) + App Attest assertion over clientDataHash (attestationObject only on a new key's first use)
 { "platform": "ios", "signedTransactions": [ "eyJ…" ],
   "attestation": { "type": "app_attest", "keyId": "…=", "assertion": "o2lzaWduYXR1cmVY…", "attestationObject": "o2NmbXRv…",
                    "seatKeys": [ { "publicKey": "BPx…", "signature": "Mz…" }, { "publicKey": "BKq…", "signature": "Rt…" } ] } }
 // 200 (signed)
-{ "status": "active", "restoredCount": 1, "movedFromOtherPhone": true, "entitlement": { "token": "eyJ…" }, "serverTime": "…" }
+{ "status": "active", "restoredCount": 1, "movedFromOtherPhone": true, "entitlement": { "token": "eyJ…" }, "serverTime": "…", "timeNonce": "…" }
 // 409 (problem+json): every move was refused by the 30-day cooldown and nothing else grants Gold
 { "type": "https://api.zaghlol.app/problems/move-cooldown", "title": "Move not yet possible", "status": 409,
   "code": "MOVE_COOLDOWN", "nextMoveAt": "2026-12-06T10:00:00Z" }   // always a whole UTC hour (R3-4)
@@ -201,11 +207,12 @@ Possession of a genuine token is **not** proof of ownership. A token presented w
      - **Optional verdicts are off** (R2-7): `deviceAttributes`, `recentDeviceActivity`, `appAccessRiskVerdict` and `environmentDetails` stay disabled in Play Console (T-140 checklist). If a decoded payload carries them anyway, the server ignores them: the DTO has no member for them, and they are never stored or logged.
      - Each token is single-use: its SHA-256 goes into `replay_guard` for 15 min.
    - **iOS (App Attest).**
-     - The app sends `assertion = generateAssertion(keyId, clientDataHash = bodyHash)`.
+     - **`clientDataHash` covers the seat public keys (R4-1(3)).** `seatKeysDigest = SHA-256(pk₀ ‖ … ‖ pkₙ₋₁)`, the raw 65-byte points of `attestation.seatKeys` in request order (SHA-256 of the empty string when `seatKeys` is absent), and `clientDataHash = SHA-256("zaghlol-restore-attest-v1" ‖ 0x00 ‖ bodyHash ‖ seatKeysDigest)`. The signatures stay outside it (each one signs `bodyHash`), so there is no circularity: the app signs `bodyHash` with its seat keys first, then asks App Attest for the assertion. A proxy with a user-installed CA therefore can't add, drop, reorder or replace a public key in a genuine install's restore (the R4-1 relay), because the assertion would no longer verify. Vectors: `restore-binding-v1.json` (`seatKeysDigestHex`, `clientDataHashHex`).
+     - The app sends `assertion = generateAssertion(keyId, clientDataHash)`.
      - The server loads the key registered to **this** install (`app_attest_keys`) and checks: the signature over `nonce = SHA-256(authenticatorData ‖ clientDataHash)` with the stored public key; the RP ID hash = SHA-256(`<TeamID>.<bundleId>`); and a counter strictly greater than the stored one, which is then updated. iOS failure cases are an unknown or unattested key, a bad signature and a counter that doesn't increase (D-53).
-     - **First use of a key:** the body also carries `attestationObject`, made with the **same install-bound** `clientDataHash`. The server validates it per Apple's App Attest rules: the x5c chain to the Apple App Attestation Root CA; the nonce extension equals `SHA-256(authData ‖ clientDataHash)`; `keyId` = SHA-256 of the credential public key; App ID; counter 0; `aaguid` = production (or development in staging). Only then does it register the key, to the install named in the hash. A key therefore only ever registers to its own install. A key ID already registered to another install is refused.
+     - **First use of a key:** the body also carries `attestationObject`, made with the **same** install-bound `clientDataHash` as the assertion. The server validates it per Apple's App Attest rules: the x5c chain to the Apple App Attestation Root CA; the nonce extension equals `SHA-256(authData ‖ clientDataHash)`; `keyId` = SHA-256 of the credential public key; App ID; counter 0; `aaguid` = production (or development in staging). Only then does it register the key, to the install named in the hash. A key therefore only ever registers to its own install. A key ID already registered to another install is refused.
      - **No server challenge** (D-53). Every proof is bound to the install whose token authenticates the request, so it is useless anywhere else. Within that install, Play tokens are single-use and expire after 5 minutes, assertions are counter-protected, and a replayed `attestationObject` only registers a key to the install it was made for, without the private key. A stored, unused proof could only be spent by the install that could make a fresh one anyway, so a challenge would add a round trip and server state and no security.
-     - **Seat keys (D-55):** `attestation.seatKeys` carries the seat-key proofs over `op = restore` and `challenge = bodyHash` (*Same-iPhone recognition* below). Like the assertion, it is outside the hash and signs it.
+     - **Seat keys (D-55, D-62):** `attestation.seatKeys` carries the seat-key proofs over `op = restore` and `challenge = bodyHash` (*Same-iPhone recognition* below). Like the assertion, it is outside `bodyHash` and signs it; its public keys are inside `clientDataHash`.
      - **Key lifecycle:** one App Attest key per install. It is generated lazily at the first restore. The `keyId` is kept in the Keychain (`kSecAttrAccessibleAfterFirstUnlockThisDeviceOnly`, not synchronizable, so it never travels in backups or to a new phone). The app re-attests (new key plus `attestationObject`) when `generateAssertion` fails with `invalidKey`, when the server answers `DEVICE_ATTESTATION_FAILED` to a request without `attestationObject` (key unknown, for example after the server purged the install), and on every new install. "Delete everything" deletes the key row together with the install.
    - **Transport:** release Android builds trust only system CAs (`network_security_config`), so a user-installed CA can't read or rewrite restore bodies and proofs (ADR-012 Part B (d)).
 3. **Store verification** of each item, as in verify, except the install-binding check (step 4 on Android; `appAccountToken` on iOS), which names the old install after a phone change.
@@ -213,9 +220,9 @@ Possession of a genuine token is **not** proof of ownership. A token presented w
 5. **The seat** (FR-GOLD-08a–d/f, BR-GOLD-07, `purchase_seats`).
    - Each purchase has **one** seat, held by one install or vacant. Verify binds it to the buying install; that bind is not a move.
    - **Same holder:** if the caller already holds the seat, nothing changes and Gold is granted. A restore on the same install is never a move.
-   - **Same iPhone, new install (D-55):** if the caller presents in `attestation.seatKeys` a key whose keyed hash equals the seat's `device_key_hash` (see *Same-iPhone recognition* below), the seat passes to the caller as a **rebind**: no cooldown check, `next_move_at` unchanged, `seat_rebind:restore`, `movedFromOtherPhone: false`.
+   - **Same iPhone, new install (D-55, D-63, D-65(a)):** if the caller presents in `attestation.seatKeys`, at a position **other than 0**, a key whose keyed hash equals the seat's `device_key_hash`, and element 0 is the caller's registered key (see *Same-iPhone recognition* below), the seat passes to the caller as a **rebind**: no cooldown check, `next_move_at` unchanged, `seat_rebind:restore`, `movedFromOtherPhone: false`. At most **2 rebinds per purchase per rolling 30 days** (D-63). Over the cap the same match is an **over-cap rebind** (D-65(a)): the seat still passes to the caller and is never refused, but the window restarts (`last_moved_at = now`, `next_move_at = ceil_hour(now + 30 d)`), `seat_rebind_over_cap:restore`, and the `seat_rebind` alert fires.
    - **Move:** otherwise (another holder, or vacant), the seat moves to the caller only if `next_move_at` is null or `now ≥ next_move_at`. The move sets `last_moved_at = now` and `next_move_at = ceil_hour(now + 30 d)`, the next whole UTC hour (R3-4), and writes `seat_move:restore`. The response's `movedFromOtherPhone` is `true`, and the app says Gold left the other phone.
-   - **Cooldown:** if the move isn't allowed, that item is refused. Nothing that affects Gold is written. The server only records the caller as one of the purchase's **pending claimants** (`seat_claimants`: up to 3 per purchase, each kept 7 days; a fourth replaces the oldest; a repeat by the same install refreshes its entry). The entry also keeps the keyed hash of the caller's `seatKeys[0]`, if any. A support move may target a claimant (§5.3). If no item ends `active` or `pending` and at least one was refused for the cooldown, the whole call fails with **`409 MOVE_COOLDOWN`** and `nextMoveAt` = the stored, hour-rounded `next_move_at` (the earliest one if several). The server enforces exactly that value. The app shows the date, formatted for the locale, and a support link (EC-68). A refused restore is never a move (EC-66).
+   - **Cooldown:** if the move isn't allowed, that item is refused. Nothing that affects Gold is written. The server only records the caller as one of the purchase's **pending claimants** (`seat_claimants`: up to 3 per purchase, each kept 7 days; a fourth replaces the oldest; a repeat by the same install refreshes its entry). The entry also keeps the keyed hash of the caller's registered seat key, if any. A support move may target a claimant (§5.3). If no item ends `active` or `pending` and at least one was refused for the cooldown, the whole call fails with **`409 MOVE_COOLDOWN`** and `nextMoveAt` = the stored, hour-rounded `next_move_at` (the earliest one if several). The server enforces exactly that value. The app shows the date, formatted for the locale, and a support link (EC-68). A refused restore is never a move (EC-66).
    - **Android reinstall:** "Delete everything" or reinstalling creates a new install ID, so restoring afterwards **is** a move, even on the same phone (D-55). The app warns before "Delete everything" while it holds a seat.
    - **The old holder** isn't issued Gold for that purchase again. At its next sync or `GET /v1/entitlement` it receives a token with `status: "moved"` (and `movedBy`). If it stays offline, its cached token lapses at its `graceUntil` in trusted time: **at most 7 days after the move** (6 days for a `basic` seat).
    - **Vacant seats** come from `DELETE /v1/installs/me` and the 12-month inactive-install purge. Taking a vacant seat is a move, unless it is a same-iPhone rebind.
@@ -234,13 +241,14 @@ Possession of a genuine token is **not** proof of ownership. A token presented w
 - **Alerts** carry the purchase UUID only, never a token, transaction ID, install ID or account ID:
   - a spike in `MOVE_COOLDOWN` refusals;
   - more than 2 support moves for one purchase in 90 days, with the runbook action of §5.3;
+  - `seat_rebind`: an over-cap same-iPhone rebind (D-63, D-65(a)), with the runbook action of §5.3;
   - an attestation-failure rate spike, by reason code;
   - Play Integrity quota above 50 %.
 - **Verify needs no attestation** (the decision FR-GOLD-09 leaves open). The store-side binding (`obfuscatedExternalAccountId` / `appAccountToken` = HMAC(installId)) already proves that this install made the purchase. A token bound to another install fails with `PURCHASE_NOT_OWNED`, which already rejects the replay FR-GOLD-02 describes. Attestation would add latency and new failure modes to the payment path, which has to keep retrying (BR-GOLD-06), with no security gain. Verify **binds** the purchase's seat to the buying install (`proof = binding`) when the purchase has no seat yet. It changes an existing holder only for a new payment from this install (D-59), and only when no cooldown is running (D-61(a)); see *Seat at verify*.
 
-**Same-iPhone recognition** (D-55, ADR-012 Part B (g); BR-SYNC-03 amended).
+**Same-iPhone recognition** (D-55, D-62, D-63, D-65(a); ADR-012 Part B (g); BR-SYNC-03 amended).
 - **On the phone:** each iOS install creates one Secure Enclave P-256 **seat key**. Its wrapped key is kept in a Keychain item with `kSecAttrAccessibleAfterFirstUnlockThisDeviceOnly`, not synchronizable, so it survives an app reinstall but no device erase, and never moves to another device. The app keeps its own key and the keys of up to 4 earlier installs on the same iPhone, newest first. "Delete everything" keeps the seat keys and deletes everything else.
-- **Field `seatKeys`:** an array of `{publicKey, signature}`. Element 0 is the calling install's own key; the others are earlier installs' keys.
+- **Field `seatKeys`:** an array of `{publicKey, signature}`. Element 0 is the calling install's own key; the others are earlier installs' keys (D-62 keeps this multi-key design). The public keys are distinct; a repeated key is `400 VALIDATION_FAILED`.
   - `publicKey`: X9.63 uncompressed P-256 point, 65 bytes, base64url without padding.
   - `signature`: ECDSA P-256 / SHA-256, IEEE P1363 `r‖s` (64 bytes), base64url, over
 
@@ -248,17 +256,36 @@ Possession of a genuine token is **not** proof of ownership. A token presented w
 
     `installId` is the lower-case UUID text of the install that the install token authenticates. `op` and `challenge` (32 bytes) are:
 
-    | Where | `op` | `challenge` | Max keys |
-    |---|---|---|---|
-    | `POST /v1/purchases/verify` (top level) | `verify` | SHA-256 of the `signedTransaction` string | 1 |
-    | `POST /v1/purchases/restore` (inside `attestation`, so outside the hash) | `restore` | the install-bound `bodyHash` | 5 |
-    | `POST /v1/accounts/signin` (top level) | `signin` | SHA-256 of the raw `nonce` | 5 |
-  - **Binding:** every signature covers this install and a single-use challenge (the attested body, or the single-use sign-in nonce), so a proof can't be replayed elsewhere. The private key can't be extracted from the Secure Enclave, so a key can't be cloned to another phone.
+    | Where | `op` | `challenge` | Max keys | Public keys covered by |
+    |---|---|---|---|---|
+    | `POST /v1/purchases/verify` (top level) | `verify` | SHA-256 of the `signedTransaction` string | 1 | — (verify never rebinds) |
+    | `POST /v1/purchases/restore` (inside `attestation`, outside `bodyHash`) | `restore` | the install-bound `bodyHash` | 5 | the App Attest `clientDataHash` (step 2, R4-1(3)) |
+    | `POST /v1/accounts/signin` (top level) | `signin` | SHA-256 of the raw `nonce` | 5 | nothing: sign-in has no device attestation (bounded below) |
+  - **Binding:** every signature covers this install and a single-use challenge (the attested body, or the single-use sign-in nonce), so a proof can't be replayed for another install or request. The private key can't be extracted from the Secure Enclave, so a key can't be **cloned** to another phone. It can still be **used remotely**: on a jailbroken iPhone a hooked app can sign any message a relay asks for (a *signing oracle*). The rules below bound what an oracle gains.
   - **iOS installs only:** the Android request schemas have no such member, and `seatKeys` on sign-in from an Android install is `400 VALIDATION_FAILED`. On restore and sign-in, a point that isn't on the curve or an invalid signature is `400 VALIDATION_FAILED`. On verify it is ignored instead (payment path, BR-GOLD-06).
-  - **Shared vectors:** `backend/tests/Zaghlol.Contract.Tests/vectors/seat-proof-v1.json`, checked by a contract test. The app task and T-132 must pass them.
-- **On the server:** `purchase_seats.device_key_hash = HMAC-SHA256(K_seat, purchase_id ‖ publicKey)`, where `K_seat` is a dedicated KMS key.
-  - It is written from element 0 whenever an iOS install becomes or stays the holder with a valid proof. It is set to `NULL` when a holder without seat keys takes the seat, and kept when the seat goes vacant.
-  - A non-holder whose valid key matches gets a **rebind** (above, and §4.6 step 5). Matching runs only against the purchases in the request. The raw public key is never stored or logged.
+  - **Shared vectors:** `backend/tests/Zaghlol.Contract.Tests/vectors/seat-proof-v1.json` (signatures) and `restore-binding-v1.json` (the restore `clientDataHash`), checked by contract tests. The app task and T-132 must pass them.
+- **Element 0 is bound to the install (R4-1(1)).** `installs.seat_key_hash = HMAC-SHA256(K_seat, "install" ‖ 0x00 ‖ installId ‖ publicKey)` (the `"install"` label keeps it apart from the per-purchase hash, which starts with a UUID).
+  - **Registration:** the first request from an install that carries a valid `seatKeys` (verify after its store checks pass, restore after attestation passes, or sign-in after the ID token is verified) stores the hash of **element 0**. It is never replaced while the install exists. The registered key is the only key that can become a seat's key for this install.
+  - **Mismatch:** a later restore or sign-in whose element 0 isn't the registered key gets **`400 SEAT_KEY_MISMATCH`**, and nothing is written. The app retries once without `seatKeys`, which is then an ordinary request (no rebind possible). This happens only if the install's own key became unusable; a relay that puts someone else's key in element 0 is refused. On verify a mismatching proof is ignored.
+  - **Deletion:** the column goes with the install row (it is cleared when the install is tombstoned).
+- **On the seat:** `purchase_seats.device_key_hash = HMAC-SHA256(K_seat, purchase_id ‖ publicKey)`, where `K_seat` is a dedicated KMS key.
+  - It is written from the caller's **registered** key (element 0) whenever an iOS install becomes or stays the holder. It is set to `NULL` when a holder without a registered key takes the seat, and kept when the seat goes vacant.
+  - Matching runs only against the purchases in the request. The raw public keys are never stored or logged (D-62).
+- **Rebind** (restore step 5, sign-in step 5). A non-holder caller rebinds a seat only if all of these hold:
+  1. element 0 is the caller's registered key (registered in this same request if it had none);
+  2. some element **at position 1 or later** has a valid signature and a keyed hash equal to the seat's `device_key_hash`. A match on element 0 is never a rebind: the caller's own key can't name a seat it doesn't hold, so it is handled as an ordinary move;
+  3. attestation (restore), the ID token (sign-in) and the account rule pass, as for any move;
+  4. **the cap (D-63):** fewer than 2 rebinds of this purchase in the last 30 days (`purchase_seats.recent_rebinds`, pruned under the seat lock).
+
+  The seat then passes to the caller without checking or restarting the cooldown, `device_key_hash` becomes the hash of the **caller's registered key**, the rebind time is appended to `recent_rebinds`, and `seat_rebind:<restore|signin>` is written. The old holder, if it still exists, gets `status: moved`. Because the seat's key is now the new install's own Secure Enclave key, a relayed key can pull the seat **once**; the next hop needs the new holder's Secure Enclave as an oracle too.
+- **Over the cap** (2 rebinds already in the rolling 30 days), conditions 1–3 holding:
+  - **restore, D-65(a):** the seat passes to the caller (**never refused**, so an owner who reinstalls a third time on the phone that holds Gold keeps it), but it is charged as the window: `last_moved_at = now`, `next_move_at = ceil_hour(now + 30 d)`, `device_key_hash` as above, `seat_rebind_over_cap:restore`, `recent_rebinds` unchanged. The server can tell "same iPhone" only by the key match, so this applies to every over-cap match on restore;
+  - **sign-in, D-63:** an **ordinary move** under the cooldown (allowed if no cooldown runs, otherwise `moveRefused` and a pending claimant), written as `seat_rebind_over_cap:signin` next to the move or refusal. Sign-in has no device attestation, so its proofs can come from any client (below); the owner on the holding iPhone can still restore, which D-65(a) covers;
+  - both raise the **`seat_rebind`** alert (purchase UUID only; runbook: check the purchase's events for a relay pattern).
+- **How far a relay gets (R4-1, accepted residuals):**
+  - **Restore:** the public keys are covered by App Attest, so on a **stock** iPhone a proxy can't insert a relayed key. Inserting one needs a modified app on a jailbroken iPhone that still passes App Attest. Two jailbroken iPhones that act as oracles for each other can swap Gold by restore without the cooldown, but only one of them holds it at a time, each over-cap swap restarts the window, and every swap is a `seat_rebind` event for review (D-65(a), R-19).
+  - **Sign-in:** there is no device attestation, so a modified client holding the account's credentials can send any proofs, including a software key as element 0 (registered on that install's first sign-in) and an oracle-signed or software key at position 1. It is bounded by the account rule (only the account's own credentials work), the element-0 registration (each install can name only its one key) and the cap: **at most 2 cooldown-free rebinds per purchase per 30 days**, after which sign-in is an ordinary move.
+- **What the server sees (D-62, accepted):** every iOS restore and sign-in sends, inside TLS, the raw public keys of the calling install and of up to 4 earlier Zaghlol installs on that iPhone, also when no seat can match. Anyone with code-level access to the running API could therefore link installs of the same iPhone **in transit**. At rest there are only keyed hashes (one per install, one per seat), the keys are never logged (the redacting logger drops `seatKeys`, and request-body logging is off), and the privacy notice says so (security-model §2a).
 - **Loss:** after a device erase or Keychain reset, or if the Secure Enclave fails, the app sends a new key or none, and the request is handled as on Android: an ordinary move under the cooldown. Nothing locks the owner out.
 
 **Entitlement token** (JWS compact, ES256, `kid` header):
@@ -281,48 +308,58 @@ Possession of a genuine token is **not** proof of ownership. A token presented w
   - A token with `acct` set is honoured only while the app holds an unexpired account token whose `sub` equals `acct`.
   - At sign-out the app deletes the cached entitlement token at once, whether or not the network call succeeds, and stores the fresh token the sign-out response returns (§4.6).
 
-**Trusted time** (R3-1, D-60(c), NFR-SEC-08; T-144 contract). The device's wall clock never decides Gold on its own.
+**Trusted time** (R3-1, R4-2, R4-3, D-60(c), NFR-SEC-08; T-144 contract). The device's wall clock never decides Gold on its own.
 - **State** (one record in the encrypted `secure_state`, never in preferences or files):
-  - `hw`: the trusted-time high-water mark, epoch ms;
-  - `mono`, `boot`: the monotonic reading and the boot reference when `hw` was last written;
-  - `lastServerTime`: the newest signed server time accepted;
+  - `hw`: the trusted-time high-water mark, epoch ms. It includes the reboot charges and is what Gold is judged against;
+  - `lb`: the **uncharged lower bound**, epoch ms: the latest time the device can prove has passed, without the reboot charges. Invariant `lb ≤ hw`. The tamper test uses `lb` (R4-3);
+  - `mono`, `boot`: the monotonic reading and the boot reference when the state was last written;
+  - `lastServerTime`: the newest signed server time seen;
   - `tampered`: a flag.
+
+  In memory only (lost on process death, which is safe): `pending = {nonce, sentMono, sentBoot}`, the time nonce of the single outstanding anchoring request.
 - **Clock sources** (`TrustedClockHostApi`, `platform-channels.md` §4b):
   - **monotonic** `m`, which includes deep sleep:
     - Android `SystemClock.elapsedRealtime()`;
     - iOS `clock_gettime_nsec_np(CLOCK_MONOTONIC_RAW)` (`mach_continuous_time`), which keeps counting in sleep, unlike `systemUptime` and `CLOCK_UPTIME_RAW`. T-144's device test confirms this;
   - **boot reference** `b`:
     - Android `Settings.Global.BOOT_COUNT`;
-    - iOS: none is public. The app uses `wall − m` and treats a change of more than 10 minutes, or `m < mono`, as a reboot;
+    - iOS: none is public. The app uses `wall − m`;
   - **wall** `w`: the epoch clock.
-- **Anchor** (signed time only): after verifying the signature of any signed response (sync, entitlement, verify, restore, sign-in, sign-out), the app reads its `serverTime` *S*, and the token's `iat` when it stores a new token.
-  - If *S* > `lastServerTime`, the app sets `lastServerTime = S`, `hw = S`, `mono = m`, `boot = b` and `tampered = false`. Only a **newer** server time re-anchors, so replaying an old signed response can't lower `hw`.
-  - Otherwise it sets `hw = max(hw, S, iat)`.
+- **Sending an anchoring request (R4-2).** Before each anchoring request (§1) the app draws a fresh 128-bit nonce from a CSPRNG, sends it in `Zaghlol-Time-Nonce`, and sets `pending` to it, **replacing** any earlier one: only the most recent anchoring request can re-anchor, and older nonces are discarded. The app never sends two anchoring requests with the same nonce and serializes them through one time-anchor service.
+- **Receiving a signed response.** Only after its signature verifies. Let *S* be its `serverTime`, and `iat` the token's issue time when it carries a new token.
+  - **Fresh echo** (re-anchor): the body's `timeNonce` equals `pending.nonce`, the response arrived on the same boot as `pending` and within **60 s** of `sentMono` by the monotonic clock. Then `hw = lb = S`, `mono = m`, `boot = b`, `tampered = false`, `lastServerTime = max(lastServerTime, S)`, and `pending` is cleared (single use). This is the **only** way to lower `hw` or `lb` or to clear `tampered`.
+  - **Any other signed body** (no echo, another nonce, a stale or reused echo, an `Idempotency-Key` replay, a body from another install, a response the network withheld and released later): **raise only**. `hw = max(hw, S, iat)`, `lb = max(lb, S, iat)`, `lastServerTime = max(lastServerTime, S)`. `tampered` is left as it is. A signed time is real time that has passed, so raising is always safe; only its freshness was unproven.
   - An unsigned or unverified response never touches the state.
 - **Advance** (at app start and resume, every 60 s while in the foreground, in background tasks, and before every Gold check):
-  1. **Elapsed time:**
-     - on the same boot (`b` unchanged and `m ≥ mono`), `elapsed = m − mono`;
-     - after a detected reboot, `elapsed = max(m, 6 h)`. The 6-hour minimum charge per reboot bounds "reboot before each use" (ADR-012 Part B (h)).
-  2. `cand = hw + elapsed`.
-  3. If `w < cand − 10 min`, set `tampered = true` and `hw = cand`. Otherwise set `hw = max(cand, w)`.
-  4. Persist `hw`, `mono = m`, `boot = b`.
+  1. **Classify the interval** since the last write:
+     - **same boot:** Android `b = boot` and `m ≥ mono`; iOS `m ≥ mono` and `|b − boot| ≤ 10 min`. Then `lower = m − mono` and `charge = lower`;
+     - **reboot proven by the clock:** Android `b ≠ boot` or `m < mono`; iOS `m < mono`. Then `lower = m` (at least the uptime has passed) and `charge = max(m, 6 h)`;
+     - **iOS boot reference shifted, monotonic not behind** (`m ≥ mono`, `|b − boot| > 10 min`): either a reboot whose uptime already passed `mono`, or a wall-clock correction (NITZ or NTP after a long offline spell) with no reboot. Both are consistent with `lower = m − mono`, and the charge is `max(m − mono, 6 h)`, so `mono` isn't counted twice (R4-3(b)).
+  2. **Tamper test on the uncharged bound:** if `w < lb + lower − 10 min`, set `tampered = true`. The 6-hour charge is not part of this test, so an honest quick reboot is never flagged (R4-3(a)).
+  3. **Update:** `lb = max(lb + lower, w)` unless the test just failed (then `lb = lb + lower`); `hw = max(hw + charge, lb)`.
+  4. Persist `hw`, `lb`, `mono = m`, `boot = b` (and `tampered`).
 - **Decision:**
-  - **No Gold** while `tampered`: "connect to check Gold". Local data stays readable (BR-GOLD-04). Only a successful re-anchor clears the flag.
+  - **No Gold** while `tampered`: "connect to check Gold". Local data stays readable (BR-GOLD-04). Only a fresh echo clears the flag.
   - Otherwise, Gold while `hw < graceUntil`.
   - A token whose `iat` is more than 10 minutes ahead of `hw` after anchoring is not trusted.
-  - Moving the clock forward only raises `hw`, so it never extends Gold. Time-zone and DST changes don't affect the epoch clock (EC-70).
-- **Required unit tests (T-144):** each runs on fake clock sources.
-  - rollback while offline (withheld; recovered by a fresh anchor);
+  - Moving the clock forward only raises `lb` and `hw`, so it never extends Gold. Time-zone and DST changes don't affect the epoch clock (EC-70).
+- **Required unit tests (T-144):** each runs on fake clock sources and a fake signer.
+  - rollback while offline (withheld; recovered by a fresh echo);
   - small backward NTP adjustments under 10 minutes (no effect);
   - a forward jump, then an honest correction (expires early, recovers online);
-  - reboot on Android (`BOOT_COUNT` change) and on iOS (`m < mono`, and boot-reference shift), including the 6-hour minimum charge;
+  - reboot on Android (`BOOT_COUNT` change) and on iOS (`m < mono`), including the 6-hour minimum charge to `hw`;
+  - **honest quick offline reboot (R4-3(a)):** used at *t*, rebooted at *t* + 5 min, opened at *t* + 7 min with a correct wall clock: not tampered, `hw` charged 6 h, `lb ≈ w`; and still not tampered on every following 60 s advance;
+  - **iOS wall correction without reboot (R4-3(b)):** `m ≥ mono`, boot reference shifted by 2 h: charge `max(m − mono, 6 h)`, not `m`; tamper decided against `lb + (m − mono)`;
+  - **another install's signed body (R4-2):** a validly signed sync or throttle body with a larger *S* below `hw` and a nonce this app never sent: `hw` and `lb` not lowered, `tampered` not cleared;
+  - **withheld older response (R4-2):** the app's own earlier request, answered with its own nonce but delivered after a newer request was sent, or more than 60 s after sending: raise only;
+  - a fresh echo used twice (second time raise only), and an `Idempotency-Key` replay whose body echoes an older nonce (raise only);
   - a long offline period with the clock untouched (Gold until exactly `graceUntil`);
   - an old signed response replayed (doesn't lower `hw`);
   - an unsigned response (ignored);
   - the 12 h refresh boundary, and the 5-day holder guarantee with one reboot.
 
 ### 4.4 `GET /v1/entitlement`
-Returns `{entitlement: {token}, serverTime}`, covering the purchases whose seat this install holds. Account-linked purchases count only with a valid `Zaghlol-Account` token for their account; otherwise they are `paused` (D-61(c)). The app calls it after a restore, after sign-in, and whenever it runs online with a cached token at least 12 h old (§4.3). It never moves a seat: only verify (a new payment, D-59), restore, sign-in and the support move do. If this install lost a seat since its last token, the new token has `status: moved` and `movedBy`.
+Returns `{entitlement: {token}, serverTime, timeNonce, supportNotice}` (`timeNonce` echoes `Zaghlol-Time-Nonce`, §1; `supportNotice` as in §4.2), covering the purchases whose seat this install holds. Account-linked purchases count only with a valid `Zaghlol-Account` token for their account; otherwise they are `paused` (D-61(c)). The app calls it after a restore, after sign-in, and whenever it runs online with a cached token at least 12 h old (§4.3). It never moves a seat: only verify (a new payment, D-59), restore, sign-in and the support move do. If this install lost a seat since its last token, the new token has `status: moved` and `movedBy`.
 
 ### 4.5 Store notifications
 - **Google RTDN:** Pub/Sub **push** subscription, authenticated with an OIDC token.
@@ -352,7 +389,7 @@ Returns `{entitlement: {token}, serverTime}`, covering the purchases whose seat 
   "seatKeys": [ { "publicKey": "BPx…", "signature": "Mz…" } ] }          // iOS installs only, optional (D-55)
 // 200 (signed); also when a move was refused for the cooldown (R3-5): then "moveRefused": true and "nextMoveAt" is set
 { "accountId": "uuid", "accountToken": "eyJ…", "entitlement": { "token": "eyJ…" }, "linkedInstalls": 2,
-  "movedFromOtherPhone": false, "moveRefused": false, "nextMoveAt": null, "serverTime": "…" }
+  "movedFromOtherPhone": false, "moveRefused": false, "nextMoveAt": null, "serverTime": "…", "timeNonce": "…" }
 ```
 
 **Verification:**
@@ -374,13 +411,15 @@ Returns `{entitlement: {token}, serverTime}`, covering the purchases whose seat 
    - if `purchases.attach_reclaim_used_at IS NULL`, the seat moves to this (buying) install even inside a running cooldown: the **account-attach reclaim**. It sets `attach_reclaim_used_at = now`, `last_moved_at = now` and `next_move_at = ceil_hour(now + 30 d)`, so it counts as the move (D-61(b)), and writes `seat_move:account_attach`. The previous holder gets `status: moved`. `attach_reclaim_used_at` is never cleared, account deletion included, so this happens **once per purchase** (D-58, EC-72);
    - otherwise it is an ordinary step-5 move under the cooldown.
 5. **Seat moves** (FR-GOLD-07/08, D-52, D-55). For each purchase linked to the account whose seat is on another install (or vacant):
-   - a same-iPhone **rebind** if a valid `seatKeys` proof (`op = signin`, `challenge = SHA-256(nonce)`) matches the seat's `device_key_hash` (`seat_rebind:signin`, no cooldown, §4.3);
-   - otherwise a move under the 30-day cooldown of §4.3 step 5 (`proof = account`; the ID token is the proof, so no attestation is needed). When this install becomes or stays the holder, the hash of its `seatKeys[0]` is stored.
+   - first the element-0 rule of §4.3 *Same-iPhone recognition*: an element 0 that isn't this install's registered key is `400 SEAT_KEY_MISMATCH`. This check runs before step 1 so that nothing is linked by a rejected request; the `replay_guard` insert has already been committed, so the app retries with a fresh ID token and nonce, without `seatKeys`;
+   - a same-iPhone **rebind** if a valid `seatKeys` proof (`op = signin`, `challenge = SHA-256(nonce)`) at position 1 or later matches the seat's `device_key_hash`, within the D-63 cap (`seat_rebind:signin`, no cooldown, §4.3). Over the cap it is an ordinary move (`seat_rebind_over_cap:signin`, `seat_rebind` alert);
+   - otherwise a move under the 30-day cooldown of §4.3 step 5 (`proof = account`; the ID token is the proof, so no attestation is needed). When this install becomes or stays the holder, the hash of its registered key is stored.
+   - **Bound on relayed proofs (R4-1(5)):** sign-in has no device attestation, so a modified client with the account's credentials controls `seatKeys` completely. What it can gain is bounded by the account rule, the element-0 registration and the D-63 cap: at most 2 cooldown-free rebinds per purchase per rolling 30 days, then ordinary moves under the cooldown (§4.3).
 
    The response's `movedFromOtherPhone` is `true` when a seat moved. A purchase that isn't linked to the account is never moved by sign-in: on a new phone it is reached only through restore (FR-ACCT-05).
 6. **Refused moves don't undo the link (R3-5).** A move refused for the cooldown records this install as a pending claimant and changes nothing else. Steps 1–4 stay committed. The call returns **200** with the account token, `moveRefused: true`, `nextMoveAt` (the earliest refused one) and an entitlement without those purchases. Sign-in never answers `409 MOVE_COOLDOWN`, so the owner can always link and protect the purchase from the buying phone during a cooldown.
 
-**Sign-out** (`POST /v1/accounts/signout`, D-61(c), FR-ACCT-03) unlinks the install and doesn't change, release or move seats. It returns **200** (signed) `{entitlement, serverTime}`: a fresh token without account-linked purchases, which are now `paused` on this phone until the user signs in again here (EC-73, not a move). Unlinked purchases are unaffected. The app deletes its cached token at sign-out even if the call fails, so account-linked Gold pauses offline too.
+**Sign-out** (`POST /v1/accounts/signout`, D-61(c), FR-ACCT-03) unlinks the install and doesn't change, release or move seats. It returns **200** (signed) `{entitlement, serverTime, timeNonce}`: a fresh token without account-linked purchases, which are now `paused` on this phone until the user signs in again here (EC-73, not a move). Unlinked purchases are unaffected. The app deletes its cached token at sign-out even if the call fails, so account-linked Gold pauses offline too.
 
 If the install was linked to a different account, the response is **409 `INSTALL_LINKED_TO_OTHER_ACCOUNT`** and the app asks the user (EC-46). Re-sending with `"replaceLink": true` confirms.
 
@@ -481,7 +520,7 @@ The table above uses shorthand. These are the exact operations in `zaghlol-v1.ya
 - **Cascades and conflicts.** Deleting a merchant tombstones its aliases too, and the delta lists those alias deletes before the merchant delete. Deleting a category still referenced by a live category, merchant or keyword gives **409 `ADMIN_CONFLICT`**, as does a `PUT`/`POST` that references a category or merchant that isn't live in the draft. A missing or already-deleted key gives `404`.
 - **Contributions.** `:promote` takes `{merchantNorm, institutionCode, merchantId?, categoryCode?}`. With `merchantId` the string becomes an `exact` alias of that merchant; without it a new draft merchant (`canonical` = `merchantNorm`) is created. `categoryCode` defaults to the top vote. `:reject` takes `{merchantNorm, institutionCode}`. Both return `{merchantNorm, institutionCode, status, merchantId?}`. A key with no aggregate **and** a key whose aggregate is still `collecting` both give `404 NOT_FOUND`, indistinguishably: same status and body, and one query that excludes `collecting`, so there is no timing difference. `409 ADMIN_CONFLICT` is returned only for an aggregate already `promoted` or `rejected`, or for a draft conflict. **Test requirement (T-129):** a `collecting` key and an absent key return byte-identical responses on both `:promote` and `:reject`. The key moved from the path to the body because `merchantNorm` is free text.
 - **Review queue privacy.** Aggregates still `collecting` (fewer than 5 distinct installs, A-48) are never returned. The API status enum is `ready_for_review | promoted | rejected`.
-- **Support lookup.** `POST /admin/v1/support/entitlement:lookup` takes `{installId}` or `{email}` (exactly one) and returns `SupportEntitlement`: the status plus, per related purchase, `{purchaseId, plan, state, store, seat, accountLinked, linkedBy, lastMovedAt, nextMoveAt, pendingClaimants, buyingInstallSilent}`. `seat` says whether the looked-up install is the `holder`, one of the pending `claimant`s (§5.3) or `none`. `pendingClaimants` is how many unexpired claimants the purchase has (0–3), and `buyingInstallSilent` tells the agent whether the attach gate of §5.3 is open. An e-mail lookup lists the account's purchases. No tokens, transaction IDs or other installs' IDs are returned. The audit row stores the install ID, or `HMAC-SHA256(K_audit, NFC(trim(lower(email))))`, plus the matched `account_id` when the lookup hits an account. It never stores the e-mail. A plain SHA-256 of an e-mail can be reversed by dictionary, so a keyed HMAC is used. `K_audit` is a dedicated KMS key, separate from the `install_hash` pepper. The audit value is pseudonymous personal data kept **exactly 1 year from creation, then deleted**, even if the account is deleted earlier (D-47, FR-BE-11, NFR-PRIV-07).
+- **Support lookup.** `POST /admin/v1/support/entitlement:lookup` takes `{installId}` or `{email}` (exactly one) and returns `SupportEntitlement`: the status plus, per related purchase, `{purchaseId, plan, state, store, seat, accountLinked, linkedBy, lastMovedAt, nextMoveAt, pendingClaimants, buyingInstallSilent, isBuyingInstall, disputeFrozenUntil, rebindsLast30Days}`. `seat` says whether the looked-up install is the `holder`, one of the pending `claimant`s (§5.3) or `none`. `pendingClaimants` is how many unexpired claimants the purchase has (0–3), and `buyingInstallSilent` tells the agent whether the attach gate of §5.3 is open. `isBuyingInstall` says whether the looked-up install is the purchase's buying install (the runbook preference of §5.3; `null` for an e-mail lookup). `disputeFrozenUntil` is the end of the dispute freeze (D-64), or `null`. `rebindsLast30Days` (0–2) is how many same-iPhone rebinds the purchase had in the rolling 30 days (D-63). An e-mail lookup lists the account's purchases. No tokens, transaction IDs or other installs' IDs are returned. The audit row stores the install ID, or `HMAC-SHA256(K_audit, NFC(trim(lower(email))))`, plus the matched `account_id` when the lookup hits an account. It never stores the e-mail. A plain SHA-256 of an e-mail can be reversed by dictionary, so a keyed HMAC is used. `K_audit` is a dedicated KMS key, separate from the `install_hash` pepper. The audit value is pseudonymous personal data kept **exactly 1 year from creation, then deleted**, even if the account is deleted earlier (D-47, FR-BE-11, NFR-PRIV-07).
 
 ### 5.3 Support seat move, link and correction (D-52, D-54, D-56, D-57, EC-68, FR-ACCT-05, FR-BE-08/11)
 
@@ -494,12 +533,18 @@ The table above uses shorthand. These are the exact operations in `zaghlol-v1.ya
   - The operator gets `purchaseId` from a support lookup (§5.2), and `toInstallId` from the user, who reads it from the app's help screen (the support code).
 - **`purchase:detach` request:** `{purchaseId, reasonCode: "correction", ticketRef, ownershipCheck, correctsAuditId}`.
 - **Ownership check, live (D-57(a)(b), FR-BE-08).** It runs first. On failure nothing changes, and the call is still audited.
-  - **Google Play:** Play Developer API `orders.get` for the order ID. The order's `purchaseToken` must be this purchase's token or one in its `linkedPurchaseToken` chain, and its `state` must not be `CANCELED`, `REFUNDED` or `PENDING_REFUND`.
+  - **Google Play:** Play Developer API `orders.get` for the order ID. The order's `purchaseToken` must be this purchase's token or one in its `linkedPurchaseToken` chain, and its `state` must not be `CANCELED`, `REFUNDED` or `PENDING_REFUND`. **Fallback (R4-7, T-130):** if T-130 finds `orders.get` unavailable for the app's developer account, or not returning `purchaseToken`, the check compares the order ID with what the purchase's own token returns instead: `purchases.subscriptionsv2.get` `latestOrderId` (and the `latestOrderId` of each token in the `linkedPurchaseToken` chain) for subscriptions, and `purchases.productsv2.getproductpurchasev2`'s order ID for lifetime, together with the purchase state. That proves the same thing for the current and chained orders, though not for an older renewal order of the same subscription, so the runbook asks for the latest receipt.
   - **Apple:** App Store Server API **Look Up Order ID** (`GET /inApps/v1/lookup/{orderId}`). It must return `status = 0`, and one signed transaction, verified like any other, must carry this purchase's `originalTransactionId`.
   - A mismatch, an unknown order or a refunded order is **`422 OWNERSHIP_CHECK_FAILED`**. A store outage is `503 UPSTREAM_UNAVAILABLE`.
   - **The order ID is never stored**: not in a table, a log, a trace span, the audit row or the idempotency store (these calls aren't idempotency-keyed). The request-body logging ban already covers it; the admin DTO marks it `[Sensitive]` so the redacting logger drops it even from exceptions. `zaghlol-ops` reads it from a no-echo prompt, never from an argument, so it can't reach shell history.
+- **Dispute freeze (D-64, D-65(b)).** After a successful **correction** on a purchase (a `seat:move` with `reasonCode: correction` that moved the seat, or a `purchase:detach` that detached), `purchases.dispute_frozen_until = now + 30 d`. Each later correction **restarts** it. While `now < dispute_frozen_until`:
+  - every **non-correction** `seat:move` on that purchase (any move or `attachToAccount` with another `reasonCode`) is **`409 ADMIN_CONFLICT`**. The check runs before the ownership check, so no store call is made, and the refusal is audited (`outcome: "dispute_frozen"`);
+  - corrections (`reasonCode: correction`, `purchase:detach`) stay allowed;
+  - self-service is unchanged: restore, sign-in, verify and rebinds follow their own rules (D-65(b)).
+
+  The support lookup shows `disputeFrozenUntil`. A dispute that needs more than a correction goes to a support lead through the ticket.
 - **Who can receive the seat** (`toInstallId`). Any other target is `409 ADMIN_CONFLICT`. The target must be:
-  1. one of the purchase's **pending claimants**: an install whose own restore, sign-in or plan-change verify for this purchase passed attestation (restore), store verification and the account rule, but was refused for the cooldown, within the last 7 days. There are up to 3 (`seat_claimants`), and the agent picks one explicitly; or
+  1. one of the purchase's **pending claimants**: an install whose own restore, sign-in or plan-change verify for this purchase passed attestation (restore) and store verification, but was refused for the cooldown, or (plan-change verify only) kept off the seat by the account rule (R4-4), within the last 7 days. There are up to 3 (`seat_claimants`), and the agent picks one explicitly. **Runbook preference (R4-7(3)):** when several claimants could be the owner, prefer the one that is the purchase's **buying install** (`isBuyingInstall` in the lookup), the install whose HMAC the store binding names; or
   2. the **current holder**, for `attachToAccount` alone (no move), and only under the attach gate below; or
   3. for `reasonCode: correction`, the `from_install` of the `support_seat_move` audit row named by `correctsAuditId`. That row must be for the same purchase and less than 1 year old (audit retention), and the install must still exist. This is the **move back**.
 - **Account rule** (D-46): for an account-linked purchase, the target must be linked to that account. Otherwise `409 ADMIN_CONFLICT`.
@@ -508,13 +553,13 @@ The table above uses shorthand. These are the exact operations in `zaghlol-v1.ya
   - the target is linked to an account;
   - the **buying install is gone or silent**: `purchases.install_id IS NULL`, or that install is tombstoned, or its `last_seen_at` ≤ now − 30 days.
 
-  A support attach sets `account_id` and `account_linked_by = 'support'`. It is not a reclaim and doesn't touch `attach_reclaim_used_at`.
+  A support attach sets `account_id` and `account_linked_by = 'support'`. It is not a reclaim and doesn't touch `attach_reclaim_used_at`. It also sets `purchases.support_link_notice_pending = true`, so the buying install, if it reappears, is told once (§4.2 *Support-link notice*, R4-7(2)).
 - **Effect of a move** (D-56):
   - the seat moves to the target (`seat_move:support`) and the window restarts: `last_moved_at = now`, `next_move_at = ceil_hour(now + 30 d)`. A correction move does the same;
   - the target's claimant entry is removed;
   - the previous holder gets `status: moved` with **`movedBy: "support"`** at its next refresh, and the app shows that support moved Gold, with the support link and the support code (D-57(f));
   - `device_key_hash` takes the seat-key hash stored with the target's claimant entry (from its refused request), or `NULL` if it had none or for a move back. The new holder's next restore or sign-in with seat keys stores it again.
-- **Detach (correction, D-57(e)).** `correctsAuditId` must name a `support_seat_move` row for this purchase with `attached_account_id` equal to the purchase's current `account_id`, and `account_linked_by` must be `'support'`. A link the owner made from the buying phone can't be detached by support. Detach sets `account_id = NULL` and `account_linked_by = NULL`, and the seat stays where it is. Re-linking is an ordinary `seat:move` with `attachToAccount` under the attach gate.
+- **Detach (correction, D-57(e)).** `correctsAuditId` must name a `support_seat_move` row for this purchase with `attached_account_id` equal to the purchase's current `account_id`, and `account_linked_by` must be `'support'`. A link the owner made from the buying phone can't be detached by support. Detach sets `account_id = NULL`, `account_linked_by = NULL` and `support_link_notice_pending = false`, and the seat stays where it is. Re-linking is an ordinary `seat:move` with `attachToAccount` under the attach gate.
 - **Idempotent by nature:** moving to the install that already holds the seat, or detaching an unlinked purchase, changes nothing and returns the current state. It is still audited, with `outcome: "noop"`.
 - **Responses:**
   - `seat:move`: `{purchaseId, moved, attached, nextMoveAt, auditId}`;
@@ -523,13 +568,15 @@ The table above uses shorthand. These are the exact operations in `zaghlol-v1.ya
   `auditId` is the audit row's ID, which a later correction quotes.
 - **Audit** (D-47 rules, FR-BE-11): every call, successful or refused, writes **exactly one** `audit_log` row naming the operator.
   - `action ∈ {support_seat_move, support_detach}`, `target` = the purchase UUID.
-  - `details = {from_install, to_install, reason_code, ticket_ref, attached_account_id?, detached_account_id?, corrects_audit_id?, ownership_check: "order_id", ownership_outcome: "pass" | "fail" | "unavailable", outcome}`.
+  - `details = {from_install, to_install, reason_code, ticket_ref, attached_account_id?, detached_account_id?, corrects_audit_id?, ownership_check: "order_id", ownership_outcome: "pass" | "fail" | "unavailable" | "not_run", outcome}`. `outcome` ∈ `moved | attached | moved_and_attached | detached | noop | refused | dispute_frozen | ownership_failed | upstream_unavailable`; a `dispute_frozen` refusal has `ownership_outcome: "not_run"`.
   - It never holds an e-mail, an order ID or free text.
   - Install IDs are pseudonymous personal data, so the row is kept **exactly 1 year from creation, then deleted**, like support-lookup rows.
 - **Alerts and runbook actions** (`error-handling-and-observability.md` §4; T-137 runbook):
   - more than 2 support moves for one purchase in 90 days. Each one already costs the cooldown (D-56). **Action:** within 2 business days a support lead other than the acting agent reviews the tickets and audit rows. If the lead finds error or abuse, they reverse it through the correction path and record the finding on the ticket;
   - more than 20 support actions by one operator in a day. **Action:** suspend that operator's `support_agent` role pending review;
-  - more than 5 `ownership_outcome: fail` rows for one operator in a day. **Action:** review for social-engineering attempts.
+  - more than 5 `ownership_outcome: fail` rows for one operator in a day. **Action:** review for social-engineering attempts;
+  - any `dispute_frozen` refusal (D-64). **Action:** the support lead takes over the ticket;
+  - **`seat_rebind`**: a purchase reached the D-63 rebind cap and had an over-cap rebind (§4.3). **Action:** check the purchase's events for a relay pattern (rebinds alternating between the same installs); if found, note it on any ticket for that purchase. No automatic action: the cap already bounds it.
 - **Operators** (R3-9): `support_agent` is assigned only to named staff, never to shared or service accounts, and the assignments are reviewed every quarter (T-137).
 - **Helpdesk privacy (info, T-137, OQ-16):** a ticket links the support code (install ID) and the order ID to the user's contact details in the helpdesk tool. The privacy notice says so. T-137 records whether the helpdesk vendor is a PDPL processor and sets ticket retention.
 - **Interim tooling** (D-37, R-21): until the admin web app ships after launch, operators use `zaghlol-ops support move --purchase <uuid> --to <installId> --reason <code> --ticket <ref> [--attach] [--corrects <auditId>]` and `zaghlol-ops support detach --purchase <uuid> --ticket <ref> --corrects <auditId>`. Both prompt for the order ID without echo, and both sign in with OIDC authorization code + PKCE (loopback) and FIDO2. T-136 owns the endpoints, role, `amr` check and audit, T-137 the CLI and the support runbook, and T-132 the seat service they call.
@@ -541,6 +588,7 @@ Every error is `application/problem+json` with one of these `code` values. The s
 | HTTP | `code` | Meaning / client action |
 |---|---|---|
 | 400 | `VALIDATION_FAILED`, `UNKNOWN_FIELD` | Bug; log a local diag code, don't retry |
+| 400 | `SEAT_KEY_MISMATCH` | iOS restore or sign-in only (§4.3 *Same-iPhone recognition*, R4-1(1)): element 0 of `seatKeys` isn't the seat key this install registered. Nothing was written. Retry once without `seatKeys` (for sign-in with a fresh ID token and nonce); the request is then an ordinary one, without a same-iPhone rebind. Never sent for verify, which ignores a mismatching proof |
 | 401 | `INSTALL_TOKEN_INVALID` | Re-register silently (new install ID); keep local data |
 | 401 | `ACCOUNT_TOKEN_EXPIRED` | Clear the account token and show "sign in again" in Settings only |
 | 401 | `UNAUTHORIZED` | Fallback for endpoints that have no specific 401 code (store notifications, operator API). Not sent to the app's install-scoped calls, which always use one of the two codes above. Don't retry; for the operator CLI, sign in again |
@@ -552,7 +600,7 @@ Every error is `application/problem+json` with one of these `code` values. The s
 | 409 | `MOVE_COOLDOWN` | Restore only (§4.3, D-52): Gold was moved in the last 30 days, so it can't move to this phone yet. The body carries `nextMoveAt`, always a whole UTC hour. Show the date, formatted for the locale, and the support link (EC-68). Nothing that affects Gold was written (this install became a pending claimant); don't retry before `nextMoveAt`. Sign-in reports a refused move in a 200 instead (`moveRefused`, §4.6) |
 | 409 | `IDEMPOTENCY_KEY_REUSED` | The same install sent the same `Idempotency-Key` for the same operation with a different body (§1). A bug in the app: generate a new key for a new request; don't retry with this one |
 | 422 | `DEVICE_ATTESTATION_FAILED` | Restore only: the Play Integrity token or App Attest assertion is missing, invalid, stale, replayed or not bound to the body. iOS: if no `attestationObject` was sent, generate a new App Attest key and retry once with it; Android: retry once with a fresh token. Then stop, show the help message (EC-66) and offer sign-in (an account-linked purchase reaches the phone through sign-in without attestation, R-19). Gold is unchanged. Attestation-service outages are `503 UPSTREAM_UNAVAILABLE`, not this code |
-| 409 | `ADMIN_CONFLICT` | Operator API only (§5.2, §5.3): the edit conflicts with the current draft catalog or review queue, or a support move, attach or detach isn't allowed (target not a claimant, holder or correction source; account rule; attach gate closed; detach of a link support didn't make). Reload and check. Never sent to the app |
+| 409 | `ADMIN_CONFLICT` | Operator API only (§5.2, §5.3): the edit conflicts with the current draft catalog or review queue, or a support move, attach or detach isn't allowed (target not a claimant, holder or correction source; account rule; attach gate closed; detach of a link support didn't make; a non-correction action during a dispute freeze, D-64). Reload and check. Never sent to the app |
 | 422 | `OWNERSHIP_CHECK_FAILED` | Operator API only (§5.3, D-57): the store order ID didn't match this purchase live at Google or Apple, or the order is refunded or cancelled. Nothing changed; the attempt is audited. Ask the user to check the order ID. Never sent to the app |
 | 413 | `PAYLOAD_TOO_LARGE` | The body is over the size limit (§1). A bug in the app; don't retry |
 | 415 | `UNSUPPORTED_MEDIA_TYPE` | The body wasn't the declared media type (`application/json`; the Apple callback takes `application/x-www-form-urlencoded`). A bug in the app; don't retry |
