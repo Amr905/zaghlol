@@ -44,6 +44,41 @@ public class RestoreBindingVectorTests
         }
     }
 
+    /// <summary>
+    /// R4-1(3): on iOS the App Attest <c>clientDataHash</c> also covers the seat-key public keys, which stay outside
+    /// <c>bodyHash</c>: <c>SHA-256(clientDataPrefix || 0x00 || bodyHash || SHA-256(pk_0 || ... || pk_n-1))</c>.
+    /// </summary>
+    [Fact]
+    public void IosClientDataHashCoversTheSeatPublicKeysInOrder()
+    {
+        var clientDataPrefix = Vectors["clientDataPrefix"]!.GetValue<string>();
+        var ios = Vectors["valid"]!.AsArray()
+            .Where(v => v!["body"]!["platform"]!.GetValue<string>() == "ios")
+            .ToList();
+        Assert.True(ios.Count >= 3, "expected iOS vectors without, with one and with two seat keys");
+
+        foreach (var vector in ios)
+        {
+            var name = vector!["name"]!.GetValue<string>();
+            var keys = vector["body"]!["attestation"]!["seatKeys"]?.AsArray() ?? new JsonArray();
+            var points = keys.SelectMany(k => Base64Url.DecodeFromChars(k!["publicKey"]!.GetValue<string>())).ToArray();
+            Assert.True(65 * keys.Count == points.Length, $"{name}: seat keys are not 65-byte points");
+
+            var digest = SHA256.HashData(points);
+            Assert.Equal(vector["seatKeysDigestHex"]!.GetValue<string>(), Convert.ToHexStringLower(digest));
+
+            byte[] clientData = [.. Encoding.ASCII.GetBytes(clientDataPrefix), 0, .. Convert.FromHexString(vector["bodyHashHex"]!.GetValue<string>()), .. digest];
+            Assert.Equal(vector["clientDataHashHex"]!.GetValue<string>(), Convert.ToHexStringLower(SHA256.HashData(clientData)));
+
+            if (keys.Count > 1)
+            {
+                // Reordering the keys must change the hash the assertion signs.
+                var reversed = keys.Reverse().SelectMany(k => Base64Url.DecodeFromChars(k!["publicKey"]!.GetValue<string>())).ToArray();
+                Assert.False(digest.AsSpan().SequenceEqual(SHA256.HashData(reversed)), $"{name}: key order not covered");
+            }
+        }
+    }
+
     [Fact]
     public void TheSameBodyGivesADifferentHashOnAnotherInstall()
     {
