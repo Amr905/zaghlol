@@ -13,6 +13,7 @@
 | BLK-02 | Real SMS/notification/statement samples (OQ-04/18) | T-031, T-156, T-157 | Product owner |
 | BLK-03 | Gold-feed provider contract (D-41) | T-127 go-live only | Product owner |
 | BLK-04 | Hosting region + PDPL licence (CR-03/OQ-16) | T-140 | Product owner + legal |
+| BLK-05 | **GitHub Actions blocked by account billing (2026-11-06)**: "recent account payments have failed or your spending limit needs to be increased". No job starts. | All CI verification (T-003, FU-api-decisions, every later task) | Product owner: fix the payment method or raise the spending limit, or make the repo public (free Actions minutes) |
 
 ## Summary
 | Milestone | Total | DONE | IN_PROGRESS | BLOCKED |
@@ -31,7 +32,7 @@
 |---|---|---|---|---|---|---|---|---|---|
 | T-001 | Create mono-repo scaffold with pub workspace, app flavors and pure-Dart packages | M0 | C2 | Sonnet | flutter-core-engineer | — | DONE | CI run 42103098253 (10/10 green) @ ec6214e; review [T-001](05-reviews/T-001.md) APPROVED (round 2) | Squash-merged; deferred findings appended to T-002/003/022/023/141/165/176 |
 | T-002 | Add custom lint rules (no double in money, no UI string literals, no print) | M0 | C2 | Sonnet | flutter-core-engineer | T-001 | TODO | — |  |
-| T-003 | App CI pipeline (format, analyze, unit, golden, native unit) | M0 | C2 | Sonnet | flutter-core-engineer | T-001 | IN_REVIEW | app-ci run 42108003250 (13/13 green) @ e7f8871; red-proof runs 42109138605, 42110243502; regen runs 42106485380, 42106719845 | code-reviewer running (incl. regen write-token security) |
+| T-003 | App CI pipeline (format, analyze, unit, golden, native unit) | M0 | C2 | Sonnet | flutter-core-engineer | T-001 | BLOCKED | app-ci run 42108003250 (13/13 green) @ e7f8871; red-proof runs 42109138605, 42110243502; regen runs 42106485380, 42106719845 | Round-1 fixes pushed at 34bebab (F1/F2/F3 guard/F5/F6/F7/F10), unverified: CI blocked. (BLK-05) Owed: F1 symlink proof, F3 red proofs, green run, regen re-test |
 | T-004 | Pigeon setup and stale-generation check | M0 | C2 | Sonnet | flutter-core-engineer | T-001 | TODO | — |  |
 | T-005 | Backend solution scaffold, Docker Compose and CI | M0 | C2 | Sonnet | backend-engineer | — | DONE | CI run 41720361381 (4/4 green) @ d98b37d; review [T-005](05-reviews/T-005.md) APPROVED | Squash-merged; follow-ups FU-001…005 |
 | T-006 | OpenAPI v1 spec and contract-test harness | M0 | C2 | Sonnet | backend-engineer | T-005 | DONE | CI run 42102066749 (5/5 green) @ 8d60381; review [T-006](05-reviews/T-006.md) APPROVED (round 2) | Squash-merged; osMajor dropped per BR-SYNC-03 |
@@ -244,3 +245,7 @@
 | 2026-11-05 | T-003 implemented (app-ci + two-job app-regen), CI green; in review. FU-api-decisions round 2 (D-45/46/47 design) in security re-review. Throwaway branch task/T-003-throwaway-red can't be deleted through the agent proxy; left for the owner. |
 | 2026-11-05 | FU-api-decisions security re-review (round 2): CHANGES_REQUESTED. 1 blocker (R2-1: attestation not bound to install), 3 majors. Round-1 findings 2–12 confirmed resolved. |
 | 2026-11-06 | PO decisions: D-52 Gold on ONE phone, movable once per 30 days (replaces 3 seats); D-53 FR-GOLD-09 "expired" = Play only; D-54 no self-service relink after phone change (support only). Container restart lost the architect's round-2 work and the T-003 review; both restarted. requirements-analyst recording SRS v1.5. |
+| 2026-11-06 | SRS v1.5 merged (D-52…D-54; OQ-19 opened). T-003 review round 1: CHANGES_REQUESTED (F1 major: regen commit job could be made to run repo code through a symlinked destination); fixes in progress. |
+| 2026-11-06 | BLK-05: all GitHub Actions jobs are refused because of an account billing block (Lead verified the annotation on run 42164778967). Verification is paused for T-003 and FU-api-decisions. |
+| 2026-11-06 | FU-api-decisions security round 3 (@ e00fd92): CHANGES_REQUESTED. All R2 findings resolved; 2 majors: R3-1 device-clock rollback defeats the offline bound, R3-2 weak support-move ownership proof. Report saved in docs/05-reviews/in-progress/. |
+| 2026-11-06 | PO decisions: D-55 recognise iPhone reinstall via Keychain secret (Android reinstall = move); D-56 support move restarts the 30-day window; D-57 support requires a live-checked store order ID, one agent, audited undo; D-58 free reclaim once per purchase; D-59 plan change from another phone = move; D-60 offline window 7 days (3 d token + 4 d grace). Architect on round 4; analyst writing SRS v1.6. |
