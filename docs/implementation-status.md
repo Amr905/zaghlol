@@ -18,7 +18,7 @@
 ## Summary
 | Milestone | Total | DONE | IN_PROGRESS | BLOCKED |
 |---|---|---|---|---|
-| M0 | 28 | 3 | 1 | 0 |
+| M0 | 28 | 4 | 0 | 0 |
 | M1 | 29 | 0 | 0 | 0 |
 | M2 | 29 | 0 | 0 | 0 |
 | M3 | 18 | 0 | 0 | 0 |
@@ -32,7 +32,7 @@
 |---|---|---|---|---|---|---|---|---|---|
 | T-001 | Create mono-repo scaffold with pub workspace, app flavors and pure-Dart packages | M0 | C2 | Sonnet | flutter-core-engineer | — | DONE | CI run 42103098253 (10/10 green) @ ec6214e; review [T-001](05-reviews/T-001.md) APPROVED (round 2) | Squash-merged; deferred findings appended to T-002/003/022/023/141/165/176 |
 | T-002 | Add custom lint rules (no double in money, no UI string literals, no print) | M0 | C2 | Sonnet | flutter-core-engineer | T-001 | TODO | — |  |
-| T-003 | App CI pipeline (format, analyze, unit, golden, native unit) | M0 | C2 | Sonnet | flutter-core-engineer | T-001 | BLOCKED | app-ci run 42108003250 (13/13 green) @ e7f8871; red-proof runs 42109138605, 42110243502; regen runs 42106485380, 42106719845 | Round-1 fixes pushed at 34bebab (F1/F2/F3 guard/F5/F6/F7/F10), unverified: CI blocked. (BLK-05) Owed: F1 symlink proof, F3 red proofs, green run, regen re-test |
+| T-003 | App CI pipeline (format, analyze, unit, golden, native unit) | M0 | C2 | Sonnet | flutter-core-engineer | T-001 | DONE | app-ci run 42213382460 (13/13 green) @ b186d1d; red/no-test proofs 42211250792, 42212487800; symlink proofs 42209342928, 42209963798; regen runs 42213382374, 42207136110; review [T-003](05-reviews/T-003.md) APPROVED (round 2) | Squash-merged; nits deferred to T-007/T-008/T-022/T-023 |
 | T-004 | Pigeon setup and stale-generation check | M0 | C2 | Sonnet | flutter-core-engineer | T-001 | TODO | — |  |
 | T-005 | Backend solution scaffold, Docker Compose and CI | M0 | C2 | Sonnet | backend-engineer | — | DONE | CI run 41720361381 (4/4 green) @ d98b37d; review [T-005](05-reviews/T-005.md) APPROVED | Squash-merged; follow-ups FU-001…005 |
 | T-006 | OpenAPI v1 spec and contract-test harness | M0 | C2 | Sonnet | backend-engineer | T-005 | DONE | CI run 42102066749 (5/5 green) @ 8d60381; review [T-006](05-reviews/T-006.md) APPROVED (round 2) | Squash-merged; osMajor dropped per BR-SYNC-03 |
@@ -267,3 +267,4 @@
 | 2026-11-06 | Task plan v1.1 (task-planner): FU-api round 4–6 impacts and the final review's owner-task criteria applied to T-122…T-147 plus T-004/T-014/T-028/T-162/T-166/T-171/T-172/T-176/T-177. New M5 tasks T-178…T-186 (all C4/Opus): native attestation, seat keys, trusted clock; backend attestation and seat-key verifiers; Dart binding library; seat service and restore (split from T-132); support write endpoints (split from T-136). Class changes: T-137 C2→C3, T-138 C2→C3, T-140 C3→C4. 186 tasks. Awaiting PO approval of v1.1; R5-3 and R6-1 PO choices still open. |
 | 2026-11-06 | PO APPROVED task plan v1.1. T-003 round 2 in review. |
 | 2026-11-06 | Design notes started for backend lane B: T-122 (C4), T-123 (C4), T-138 (C3). They run alongside the T-003 review; no file overlap. |
+| 2026-11-06 | T-003 DONE: review APPROVED in round 2; CI 13/13 green, including iOS dev/staging/prod; squash-merged. Unblocks T-002, T-004, T-012, T-022, T-165. After merge: dispatch app-regen once (workflow_dispatch) and enable branch protection on main (PO). |

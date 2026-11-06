@@ -1,0 +1,273 @@
+name: app-regen
+
+# Regenerates pubspec.lock and/or golden PNGs in CI and commits them back to the
+# same task/** branch. See .github/workflows/README.md.
+#
+# Safety design (two jobs, so repository code never runs next to a write token):
+#   1. regenerate  - permissions: contents: read. Installs Flutter from a pinned
+#                    git tag, runs `pub get` / `flutter test --update-goldens`
+#                    (this executes branch code) and uploads the candidate files
+#                    as an artifact.
+#   2. commit      - permissions: contents: write. Runs NO repo code and uses no
+#                    third-party action. Rejects tracked symlinks, validates the
+#                    artifact (pubspec.lock: size cap, hosted/sdk sources only;
+#                    app/test/**/goldens/*.png: path regex, no dot components,
+#                    2 MB cap, PNG magic), vets every destination path, copies with
+#                    --remove-destination, and pushes a fast-forward commit. The
+#                    token is not persisted in .git/config; only the push sees it.
+# Every ${{ }} value reaches shell code through env:, never run: interpolation.
+on:
+  workflow_dispatch:
+    inputs:
+      target:
+        description: 'What to regenerate'
+        required: true
+        type: choice
+        options:
+          - lock
+          - goldens
+  push:
+    branches:
+      - 'task/**'
+
+permissions:
+  contents: read
+
+env:
+  # Keep in sync with FLUTTER_VERSION in app-ci.yml. FLUTTER_SHA is the commit
+  # the tag must resolve to (guards against a moved tag).
+  FLUTTER_VERSION: '3.47.9'
+  FLUTTER_SHA: 'c197ca5199e9ee5661e865596c9c07294dfab51c'
+
+jobs:
+  regenerate:
+    name: regenerate (${{ github.event_name }})
+    runs-on: ubuntu-latest
+    if: >-
+      startsWith(github.ref, 'refs/heads/task/') &&
+      (github.event_name == 'workflow_dispatch' ||
+       contains(github.event.head_commit.message, '[regen-goldens]') ||
+       contains(github.event.head_commit.message, '[regen-lock]'))
+    permissions:
+      contents: read
+    # Job-level (not workflow-level) so that plain pushes, which skip this job,
+    # never cancel a pending regen run.
+    concurrency:
+      group: app-regen-${{ github.ref }}
+      cancel-in-progress: false
+    outputs:
+      lock: ${{ steps.targets.outputs.lock }}
+      goldens: ${{ steps.targets.outputs.goldens }}
+    env:
+      REF_NAME: ${{ github.ref_name }}
+      EVENT_NAME: ${{ github.event_name }}
+      INPUT_TARGET: ${{ inputs.target }}
+      COMMIT_MESSAGE: ${{ github.event.head_commit.message }}
+    steps:
+      - name: Refuse anything but task branches
+        run: |
+          case "$REF_NAME" in
+            task/*) ;;
+            *) echo "::error::app-regen only runs on task/** branches (got '$REF_NAME')"; exit 1 ;;
+          esac
+      - name: Decide targets
+        id: targets
+        run: |
+          lock=false; goldens=false
+          if [ "$EVENT_NAME" = "workflow_dispatch" ]; then
+            [ "$INPUT_TARGET" = "lock" ] && lock=true
+            [ "$INPUT_TARGET" = "goldens" ] && goldens=true
+          else
+            case "$COMMIT_MESSAGE" in *'[regen-lock]'*) lock=true ;; esac
+            case "$COMMIT_MESSAGE" in *'[regen-goldens]'*) goldens=true ;; esac
+          fi
+          echo "lock=$lock" >> "$GITHUB_OUTPUT"
+          echo "goldens=$goldens" >> "$GITHUB_OUTPUT"
+          echo "targets: lock=$lock goldens=$goldens"
+      - uses: actions/checkout@fbc6f3992d24b796d5a048ff273f7fcc4a7b6c09 # v5.1.0
+        with:
+          persist-credentials: false
+      - name: Install Flutter (pinned tag, verified commit)
+        run: |
+          git clone --depth 1 --branch "$FLUTTER_VERSION" https://github.com/flutter/flutter.git "$RUNNER_TEMP/flutter"
+          actual=$(git -C "$RUNNER_TEMP/flutter" rev-parse HEAD)
+          if [ "$actual" != "$FLUTTER_SHA" ]; then
+            echo "::error::Flutter $FLUTTER_VERSION resolved to $actual, expected $FLUTTER_SHA"
+            exit 1
+          fi
+          echo "$RUNNER_TEMP/flutter/bin" >> "$GITHUB_PATH"
+      - name: Flutter version
+        run: flutter --version
+      - name: Regenerate pubspec.lock
+        if: steps.targets.outputs.lock == 'true'
+        run: flutter pub get
+      - name: Resolve workspace (goldens only; lockfile must already match)
+        if: steps.targets.outputs.lock != 'true'
+        run: flutter pub get --enforce-lockfile
+      - name: Regenerate goldens
+        if: steps.targets.outputs.goldens == 'true'
+        working-directory: app
+        run: flutter test --tags golden --update-goldens
+      - name: Collect candidate files
+        run: |
+          mkdir -p "$RUNNER_TEMP/out"
+          if [ "$LOCK" = "true" ]; then
+            cp pubspec.lock "$RUNNER_TEMP/out/pubspec.lock"
+          fi
+          if [ "$GOLDENS" = "true" ]; then
+            find app/test -type f -path '*/goldens/*.png' -print0 |
+              while IFS= read -r -d '' f; do
+                mkdir -p "$RUNNER_TEMP/out/$(dirname "$f")"
+                cp "$f" "$RUNNER_TEMP/out/$f"
+              done
+          fi
+          find "$RUNNER_TEMP/out" -type f | sed "s#^$RUNNER_TEMP/out/##"
+        env:
+          LOCK: ${{ steps.targets.outputs.lock }}
+          GOLDENS: ${{ steps.targets.outputs.goldens }}
+      - uses: actions/upload-artifact@b7c566a772e6b6bfb58ed0dc250532a479d7789f # v6.0.0
+        with:
+          name: regen-output
+          path: ${{ runner.temp }}/out
+          if-no-files-found: error
+          retention-days: 3
+
+
+  commit:
+    name: commit regenerated files
+    needs: regenerate
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    concurrency:
+      group: app-regen-${{ github.ref }}
+      cancel-in-progress: false
+    env:
+      REF_NAME: ${{ github.ref_name }}
+      TRIGGER_SHA: ${{ github.sha }}
+      LOCK: ${{ needs.regenerate.outputs.lock }}
+      GOLDENS: ${{ needs.regenerate.outputs.goldens }}
+    steps:
+      - name: Refuse anything but task branches
+        run: |
+          case "$REF_NAME" in
+            task/*) ;;
+            *) echo "::error::app-regen only runs on task/** branches (got '$REF_NAME')"; exit 1 ;;
+          esac
+      # Exact triggering commit: if the branch moved meanwhile, the push below
+      # is not a fast-forward and fails instead of clobbering newer work.
+      # No credentials are persisted in .git/config; the token is handed only to
+      # the final push step.
+      - uses: actions/checkout@fbc6f3992d24b796d5a048ff273f7fcc4a7b6c09 # v5.1.0
+        with:
+          ref: ${{ github.sha }}
+          persist-credentials: false
+      - uses: actions/download-artifact@37930b1c2abaa49bbe596cd826c3c89aef350131 # v7.0.0
+        with:
+          name: regen-output
+          path: ${{ runner.temp }}/in
+      # Nothing below executes repository code. The checked-out tree is
+      # untrusted data: a symlink there could redirect a copy into .git/config
+      # (for example to set core.fsmonitor), so every destination is vetted.
+      - name: Reject symlinks in the tracked tree
+        shell: bash
+        run: |
+          bad=$(git ls-files -s -- pubspec.lock app | awk '$1 == "120000" { print $4 }')
+          if [ -n "$bad" ]; then
+            echo "::error::tracked symlink(s) under pubspec.lock/app: $bad"
+            exit 1
+          fi
+      - name: Validate artifact
+        shell: bash
+        run: |
+          IN="$RUNNER_TEMP/in"
+          if [ -n "$(find "$IN" ! -type f ! -type d)" ]; then
+            echo "::error::artifact contains entries that are neither files nor directories"; exit 1
+          fi
+          while IFS= read -r -d '' f; do
+            rel=${f#"$IN"/}
+            size=$(stat -c %s "$f")
+            if [ "$rel" = "pubspec.lock" ]; then
+              [ "$LOCK" = "true" ] || { echo "::error::unexpected pubspec.lock"; exit 1; }
+              [ "$size" -le 204800 ] || { echo "::error::pubspec.lock larger than 200 KB"; exit 1; }
+              grep -qE '^packages:$' "$f" || { echo "::error::pubspec.lock lacks top-level packages:"; exit 1; }
+              grep -qE '^sdks:$' "$f" || { echo "::error::pubspec.lock lacks top-level sdks:"; exit 1; }
+              if grep -E '^    source: ' "$f" | grep -vE '^    source: (hosted|sdk)$'; then
+                echo "::error::pubspec.lock has a source other than hosted/sdk (git/path refused)"; exit 1
+              fi
+              if grep -E '^      url: ' "$f" | grep -vE '^      url: "https://pub\.dev"$'; then
+                echo "::error::pubspec.lock has a hosted url other than https://pub.dev"; exit 1
+              fi
+              continue
+            fi
+            [ "$GOLDENS" = "true" ] || { echo "::error::unexpected file $rel"; exit 1; }
+            if printf '%s' "$rel" | grep -Eq '(^|/)\.\.?(/|$)'; then
+              echo "::error::dot path component: $rel"; exit 1
+            fi
+            if ! printf '%s' "$rel" | grep -Eq '^app/test/([A-Za-z0-9_.-]+/)*goldens/[A-Za-z0-9_.-]+\.png$'; then
+              echo "::error::refusing non-whitelisted path: $rel"; exit 1
+            fi
+            [ "$size" -le 2097152 ] || { echo "::error::PNG larger than 2 MB: $rel"; exit 1; }
+            if [ "$(head -c 8 "$f" | od -An -tx1 | tr -d ' \n')" != "89504e470d0a1a0a" ]; then
+              echo "::error::not a PNG: $rel"; exit 1
+            fi
+          done < <(find "$IN" -type f -print0)
+      - name: Copy validated files into the tree
+        shell: bash
+        run: |
+          IN="$RUNNER_TEMP/in"
+          WS=$(realpath -- "$GITHUB_WORKSPACE")
+          while IFS= read -r -d '' f; do
+            rel=${f#"$IN"/}
+            dest="$WS/$rel"
+            # 1. the lexically normalized destination must stay inside the workspace, outside .git
+            norm=$(realpath -m -s -- "$dest")
+            case "$norm" in
+              "$WS/.git"|"$WS/.git/"*) echo "::error::destination in .git: $rel"; exit 1 ;;
+              "$WS/"*) ;;
+              *) echo "::error::destination outside workspace: $rel"; exit 1 ;;
+            esac
+            # 2. neither the file nor any existing parent may be a symlink
+            p="$WS"
+            IFS=/ read -ra parts <<< "$rel"
+            for c in "${parts[@]}"; do
+              p="$p/$c"
+              if [ -L "$p" ]; then echo "::error::symlink in destination path: $rel"; exit 1; fi
+            done
+            # 3. the fully resolved destination must equal the normalized one
+            if [ "$(realpath -m -- "$dest")" != "$norm" ]; then
+              echo "::error::destination resolves elsewhere: $rel"; exit 1
+            fi
+            mkdir -p -- "$(dirname -- "$dest")"
+            cp --remove-destination -- "$f" "$dest"
+            chmod 0644 -- "$dest"
+          done < <(find "$IN" -type f -print0)
+      - name: Commit
+        shell: bash
+        run: |
+          g() { git -c core.hooksPath=/dev/null -c core.fsmonitor=false "$@"; }
+          g add -- pubspec.lock app/test
+          if g diff --cached --quiet; then
+            echo "Nothing changed; no commit created."
+            exit 0
+          fi
+          g diff --cached --stat
+          parts=""
+          [ "$LOCK" = "true" ] && parts="pubspec.lock"
+          [ "$GOLDENS" = "true" ] && parts="${parts:+$parts and }goldens"
+          g config user.name "github-actions[bot]"
+          g config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          g commit -m "chore(ci): regenerate $parts" -m "Generated by the app-regen workflow from $TRIGGER_SHA."
+      - name: Push (token used only here)
+        shell: bash
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          if [ "$(git rev-parse HEAD)" = "$TRIGGER_SHA" ]; then
+            echo "No commit to push."
+            exit 0
+          fi
+          b64=$(printf 'x-access-token:%s' "$GH_TOKEN" | base64 -w0)
+          echo "::add-mask::$b64"
+          git -c core.hooksPath=/dev/null -c http.extraheader="AUTHORIZATION: basic $b64" \
+            push origin "HEAD:refs/heads/$REF_NAME"

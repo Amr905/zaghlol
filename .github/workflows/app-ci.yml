@@ -1,0 +1,318 @@
+name: app-ci
+
+# App CI (T-003): the checks the Definition of Done requires on every PR.
+# Supersedes app-smoke.yml; every smoke check (9 flavor builds, aapt2 SMS
+# assertions) is kept below.
+on:
+  push:
+    branches:
+      - 'task/**'
+      - main
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: app-ci-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: ${{ github.ref != 'refs/heads/main' }}
+
+env:
+  # Exact Flutter version: keeps builds reproducible together with pubspec.lock.
+  # Keep in sync with FLUTTER_VERSION / FLUTTER_SHA in app-regen.yml.
+  FLUTTER_VERSION: '3.47.9'
+  # Set to 'true' once custom_lint is added to the workspace (T-002).
+  RUN_CUSTOM_LINT: 'false'
+
+jobs:
+  static:
+    name: format, analyze, unit tests
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@fbc6f3992d24b796d5a048ff273f7fcc4a7b6c09 # v5.1.0
+        with:
+          persist-credentials: false
+      - uses: subosito/flutter-action@1a449444c387b1966244ae4d4f8c696479add0b2 # v2.23.0
+        with:
+          flutter-version: ${{ env.FLUTTER_VERSION }}
+          channel: stable
+          cache: true
+      - name: Resolve workspace (lockfile must be up to date)
+        run: flutter pub get --enforce-lockfile
+      - name: Flutter version must match app-regen.yml
+        run: |
+          ci=$(grep -E "^  FLUTTER_VERSION:" .github/workflows/app-ci.yml | grep -oE "[0-9]+\.[0-9]+\.[0-9]+")
+          regen=$(grep -E "^  FLUTTER_VERSION:" .github/workflows/app-regen.yml | grep -oE "[0-9]+\.[0-9]+\.[0-9]+")
+          if [ -z "$ci" ] || [ "$ci" != "$regen" ]; then
+            echo "::error::FLUTTER_VERSION differs: app-ci.yml='$ci' app-regen.yml='$regen'"
+            exit 1
+          fi
+      - name: dart format
+        run: |
+          if ! dart format --output=none --set-exit-if-changed . > format.log 2>&1; then
+            while read -r line; do echo "::error::format: $line"; done < format.log
+            exit 1
+          fi
+      - name: flutter analyze
+        run: |
+          if ! flutter analyze > analyze.log 2>&1; then
+            grep -iE "^\s*(info|warning|error)" analyze.log | while read -r line; do echo "::error::analyze: $line"; done
+            tail -n 5 analyze.log | while read -r line; do echo "::error::analyze: $line"; done
+            exit 1
+          fi
+      - name: custom_lint (enabled by RUN_CUSTOM_LINT, see T-002)
+        if: env.RUN_CUSTOM_LINT == 'true'
+        run: dart run custom_lint
+      - name: flutter test (app, non-golden)
+        working-directory: app
+        run: flutter test --exclude-tags golden
+      - name: dart test (zaghlol_domain)
+        working-directory: packages/zaghlol_domain
+        run: dart test
+      - name: dart test (zaghlol_parsing)
+        working-directory: packages/zaghlol_parsing
+        run: dart test
+
+  golden:
+    name: widget golden tests
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@fbc6f3992d24b796d5a048ff273f7fcc4a7b6c09 # v5.1.0
+        with:
+          persist-credentials: false
+      - uses: subosito/flutter-action@1a449444c387b1966244ae4d4f8c696479add0b2 # v2.23.0
+        with:
+          flutter-version: ${{ env.FLUTTER_VERSION }}
+          channel: stable
+          cache: true
+      - name: Resolve workspace
+        run: flutter pub get --enforce-lockfile
+      - name: flutter test (golden)
+        working-directory: app
+        run: flutter test --tags golden
+      # flutter_test writes <golden dir>/failures/*_{masterImage,testImage,isolatedDiff,maskedDiff}.png
+      - name: Upload golden diffs
+        if: failure()
+        uses: actions/upload-artifact@b7c566a772e6b6bfb58ed0dc250532a479d7789f # v6.0.0
+        with:
+          name: golden-diffs
+          path: app/test/**/failures/**
+          if-no-files-found: warn
+          retention-days: 14
+
+  kotlin-unit:
+    name: kotlin unit tests (Gradle)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@fbc6f3992d24b796d5a048ff273f7fcc4a7b6c09 # v5.1.0
+        with:
+          persist-credentials: false
+      - uses: actions/setup-java@b6effb05e454b25005698d916606bdc6ffcbf961 # v5.7.0
+        with:
+          distribution: temurin
+          java-version: '17'
+      - uses: subosito/flutter-action@1a449444c387b1966244ae4d4f8c696479add0b2 # v2.23.0
+        with:
+          flutter-version: ${{ env.FLUTTER_VERSION }}
+          channel: stable
+          cache: true
+      - name: Resolve workspace
+        run: flutter pub get --enforce-lockfile
+      # The Flutter tool generates the Gradle wrapper and local.properties, so
+      # one debug build is needed before invoking Gradle directly.
+      - name: Prepare Android project
+        working-directory: app
+        # One retry: the runner's SDK/NDK download occasionally returns a corrupt zip.
+        run: |
+          for attempt in 1 2; do
+            if flutter build apk --debug --flavor devNoSms > prepare.log 2>&1; then exit 0; fi
+            echo "attempt $attempt failed"; tail -n 20 prepare.log
+          done
+          echo "::error::could not prepare the Android project"
+          exit 1
+      - name: Gradle unit tests
+        working-directory: app/android
+        run: |
+          set -o pipefail
+          ./gradlew --no-daemon testDevNoSmsDebugUnitTest 2>&1 | tee ../gradle-test.log
+      # Guard against a green run with zero tests (for example an emptied test dir).
+      # Flutter redirects Gradle's buildDir to app/build/app/.
+      - name: Assert Kotlin tests actually ran
+        run: |
+          if ! grep -E "^> Task :app:testDevNoSmsDebugUnitTest$" app/gradle-test.log; then
+            echo "::error::testDevNoSmsDebugUnitTest did not execute (NO-SOURCE, UP-TO-DATE or missing)"
+            grep -E "testDevNoSmsDebugUnitTest" app/gradle-test.log || true
+            exit 1
+          fi
+          n=$(cat app/build/app/test-results/testDevNoSmsDebugUnitTest/*.xml 2>/dev/null | grep -c "<testcase " || true)
+          echo "kotlin testcases: $n"
+          if [ "$n" -lt 1 ]; then
+            echo "::error::no Kotlin <testcase> found in Gradle results"
+            exit 1
+          fi
+      - name: Upload Gradle test reports
+        if: failure()
+        uses: actions/upload-artifact@b7c566a772e6b6bfb58ed0dc250532a479d7789f # v6.0.0
+        with:
+          name: kotlin-test-reports
+          path: app/build/app/reports/tests/**
+          if-no-files-found: warn
+          retention-days: 14
+
+  swift-unit:
+    name: swift unit tests (xcodebuild)
+    runs-on: macos-latest
+    steps:
+      - uses: actions/checkout@fbc6f3992d24b796d5a048ff273f7fcc4a7b6c09 # v5.1.0
+        with:
+          persist-credentials: false
+      - uses: subosito/flutter-action@1a449444c387b1966244ae4d4f8c696479add0b2 # v2.23.0
+        with:
+          flutter-version: ${{ env.FLUTTER_VERSION }}
+          channel: stable
+          cache: true
+      - name: Resolve workspace
+        run: flutter pub get --enforce-lockfile
+      - name: Generate iOS config
+        working-directory: app
+        run: flutter build ios --config-only --no-codesign --flavor dev > config.log 2>&1 || { tail -n 40 config.log; exit 1; }
+      - name: xcodebuild test
+        working-directory: app/ios
+        run: |
+          UDID=$(xcrun simctl list devices available iPhone | grep -Eo '[0-9A-F]{8}(-[0-9A-F]{4}){3}-[0-9A-F]{12}' | head -n 1)
+          if [ -z "$UDID" ]; then
+            echo "::error::no iPhone simulator available"
+            xcrun simctl list devices available
+            exit 1
+          fi
+          if ! xcodebuild test \
+            -workspace Runner.xcworkspace \
+            -scheme dev \
+            -configuration Debug-dev \
+            -destination "id=$UDID" \
+            CODE_SIGNING_ALLOWED=NO > xcodebuild.log 2>&1; then
+            grep -E "error:|Test Case.*failed|\*\* TEST FAILED" xcodebuild.log | head -n 30 | while read -r line; do echo "::error::xcodebuild: $line"; done
+            tail -n 30 xcodebuild.log
+            exit 1
+          fi
+          grep -iE "test case|test suite|executed" xcodebuild.log | tail -n 10
+          # A green build must also prove the test bundle actually ran.
+          if ! grep -qiE "test case.*RunnerTests.*passed" xcodebuild.log; then
+            echo "::error::no passing RunnerTests test case found in xcodebuild output"
+            tail -n 40 xcodebuild.log
+            exit 1
+          fi
+
+  android:
+    name: android ${{ matrix.flavor }} (${{ matrix.mode }})
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - { flavor: devSms, mode: debug, env: dev, sms: true }
+          - { flavor: devNoSms, mode: debug, env: dev, sms: false }
+          - { flavor: stagingSms, mode: debug, env: staging, sms: true }
+          - { flavor: stagingNoSms, mode: debug, env: staging, sms: false }
+          - { flavor: prodSms, mode: release, env: prod, sms: true }
+          - { flavor: prodNoSms, mode: release, env: prod, sms: false }
+    env:
+      FLAVOR: ${{ matrix.flavor }}
+      MODE: ${{ matrix.mode }}
+      APP_ENV: ${{ matrix.env }}
+      EXPECT_SMS: ${{ matrix.sms }}
+    steps:
+      - uses: actions/checkout@fbc6f3992d24b796d5a048ff273f7fcc4a7b6c09 # v5.1.0
+        with:
+          persist-credentials: false
+      - uses: actions/setup-java@b6effb05e454b25005698d916606bdc6ffcbf961 # v5.7.0
+        with:
+          distribution: temurin
+          java-version: '17'
+      - uses: subosito/flutter-action@1a449444c387b1966244ae4d4f8c696479add0b2 # v2.23.0
+        with:
+          flutter-version: ${{ env.FLUTTER_VERSION }}
+          channel: stable
+          cache: true
+      - name: Resolve workspace
+        run: flutter pub get --enforce-lockfile
+      - name: Build APK
+        working-directory: app
+        run: |
+          if ! flutter build apk --"$MODE" --flavor "$FLAVOR" > build.log 2>&1; then
+            echo "::error::build failed: $(grep -v -E 'Unzipping|^\[' build.log | grep -A25 -E 'What went wrong|Error|error:' | head -n 40 | tr '\n' '|')"
+            exit 1
+          fi
+          tail -n 5 build.log
+      - name: Assert SMS permissions, applicationId and SDK levels
+        run: |
+          AAPT2=$(ls -d "$ANDROID_HOME"/build-tools/*/aapt2 | sort -V | tail -n 1)
+          APK=$(find app/build/app/outputs -iname "*${FLAVOR}*${MODE}.apk" | head -n 1)
+          if [ -z "$APK" ]; then
+            echo "::error::APK for $FLAVOR ($MODE) not found: $(find app/build/app/outputs -name '*.apk' | tr '\n' ' ')"
+            exit 1
+          fi
+          echo "APK: $APK"
+          "$AAPT2" dump permissions "$APK" | tee perms.txt
+          "$AAPT2" dump badging "$APK" > badging.txt
+          grep -iE "^package:|sdkversion" badging.txt
+          RESTRICTED="READ_SMS|RECEIVE_SMS|SEND_SMS|RECEIVE_MMS|RECEIVE_WAP_PUSH|READ_CELL_BROADCASTS"
+          if [ "$EXPECT_SMS" = "false" ]; then
+            if grep -E "android\.permission\.($RESTRICTED)" perms.txt; then
+              echo "::error::$FLAVOR contains restricted SMS permissions: $(grep -E "android\.permission\.($RESTRICTED)" perms.txt | tr '\n' ' ')"
+              exit 1
+            fi
+          else
+            for p in READ_SMS RECEIVE_SMS; do
+              if ! grep -q "android.permission.$p" perms.txt; then
+                echo "::error::$FLAVOR is missing $p"
+                exit 1
+              fi
+            done
+          fi
+          case "$APP_ENV" in
+            prod) ID=app.zaghlol ;;
+            *) ID="app.zaghlol.$APP_ENV" ;;
+          esac
+          if ! grep -q "package: name='$ID' " badging.txt; then
+            echo "::error::applicationId is not $ID: $(grep -E '^package:' badging.txt)"
+            exit 1
+          fi
+          if ! grep -qE "minSdkVersion:'26'" badging.txt; then
+            echo "::error::minSdkVersion is not 26"
+            exit 1
+          fi
+          if ! grep -qE "targetSdkVersion:'36'" badging.txt; then
+            echo "::error::targetSdkVersion is not 36"
+            exit 1
+          fi
+
+  ios:
+    name: ios ${{ matrix.flavor }} (no codesign)
+    runs-on: macos-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        flavor: [dev, staging, prod]
+    env:
+      FLAVOR: ${{ matrix.flavor }}
+    steps:
+      - uses: actions/checkout@fbc6f3992d24b796d5a048ff273f7fcc4a7b6c09 # v5.1.0
+        with:
+          persist-credentials: false
+      - uses: subosito/flutter-action@1a449444c387b1966244ae4d4f8c696479add0b2 # v2.23.0
+        with:
+          flutter-version: ${{ env.FLUTTER_VERSION }}
+          channel: stable
+          cache: true
+      - name: Resolve workspace
+        run: flutter pub get --enforce-lockfile
+      - name: Build iOS release
+        working-directory: app
+        run: |
+          if ! flutter build ios --flavor "$FLAVOR" --no-codesign > build.log 2>&1; then
+            echo "::error::ios build failed: $(grep -iE -B2 -A6 'error:|xcodebuild|schemes|configuration' build.log | head -n 40 | tr '\n' '|')"
+            exit 1
+          fi
+          tail -n 5 build.log
