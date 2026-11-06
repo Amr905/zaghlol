@@ -12,10 +12,13 @@ Covers authentication and authorization (§4), key management (§3), backup cryp
 | Financial data (messages, transactions, balances, assets, rules) | Phone DB, spool, backups | Device theft or forensic copy; malware with root; OS cloud backup leakage; lost backup file; developer logging | SQLite3MultipleCiphers AES-256 with a device-bound key (§3). Spool AES-GCM. OS backups excluded. Backup AES-256-GCM under a passphrase-wrapped key (§5). Redacting logger (§7). No telemetry SDKs. |
 | DB / spool / backup keys | Keystore / Keychain | Extraction from secure storage; key copied into backups | Non-exportable Keystore key; Keychain `ThisDeviceOnly`; keys never written to the DB, files, logs or backups (FR-SEC-04) |
 | Gold entitlement | Phone cache, backend | Local tampering to unlock Gold; replayed or forged purchase tokens | ES256-signed token verified on device (NFR-SEC-05); server-side store verification; token = unique key; `obfuscatedAccountId`/`appAccountToken` binding |
+| Gold offline bound (D-52(d), D-60) | Phone clock, `secure_state` | **Clock rollback** on a phone Gold moved away from, kept offline so `now < graceUntil` stays true (R3-1); replaying an old signed response to pull trusted time back; reboots to reset the monotonic clock | Expiry evaluated against the trusted-time high-water mark `hw` in the encrypted `secure_state`: advanced by the sleep-inclusive monotonic clock, re-anchored only by a **newer** signed `serverTime`, never lowered by the wall clock. A wall clock > 10 min below `hw` withholds Gold until reconnect. A reboot charges at least 6 h. Tokens live 3 d + 4 d grace (basic 2 d + 4 d). Residual: an undetectable iOS reboot gains only time the app didn't run, so use after a move stays ≤ 7 days of app-running time (ADR-012 Part B (h)); a rooted device editing `secure_state` is out of scope (`backend-api.md` §4.3 *Trusted time*) |
+| Gold seat (D-52, D-55) | Backend, iOS Keychain | Sharing one purchase across phones; cloning the iOS same-phone proof to another phone | One seat per purchase, move once per 30 days (rounded `next_move_at`), install-bound attestation. The same-iPhone proof is a Secure Enclave key (not extractable, even on a jailbroken phone), signed over a single-use, install-bound challenge; the server keeps only a per-purchase keyed hash |
+| Support move and link (D-57) | Admin API, helpdesk | Social engineering of support by a family member, ex-partner or second-hand buyer with store-account access; insider misuse; lock-out by a fraudulent link | Live order-ID check with Google/Apple (`422 OWNERSHIP_CHECK_FAILED`; order ID never stored); target limited to proven claimants, the holder (attach only) or a correction source; attach only when the buying install is gone or silent ≥ 30 days; every move restarts the cooldown (D-56); audited correction (move back, detach); the losing phone is told (`movedBy: support`); alerts with runbook actions; FIDO2 for `support_agent` |
 | Catalog & flags | Phone, backend, network | MITM injecting categories or enabling a flag | TLS + ES256 response signatures; atomic apply after verification (FR-SYNC-04) |
 | Backend personal data (install ID, account e-mail, purchase IDs) | PostgreSQL | Breach; over-collection; insider access | Minimal schema; KMS encryption; RBAC + MFA; audit log; retention; no bulk export endpoints |
 | Store credentials & signing keys | Backend | Leak gives forged entitlements or Play API abuse | KMS/HSM-held signing keys (sign API only); secrets manager; workload identity; rotation (§8) |
-| Operator access | Admin API | Phished operator | IdP-enforced MFA (phishing-resistant FIDO2 preferred), 1 h tokens, least-privilege roles, audit |
+| Operator access | Admin API | Phished operator; a phished OAuth device code | IdP-enforced MFA; **FIDO2 / passkey required for `support_agent`** (checked in `amr`/`acr`, R3-9); CLI sign-in by authorization code + PKCE with a loopback redirect, device-code grant disabled; 1 h tokens; least-privilege roles; `support_agent` for named staff only, reviewed quarterly; audit |
 | Users' privacy vs Play policy | Android SMS | Reading personal SMS (spyware policy) | Native Guard reads only allowlisted financial senders; inbox query filtered in SQL by sender; non-financial messages never leave memory (FR-ING-A-02) |
 
 Out of scope: protecting a fully compromised, unlocked device in an attacker's hands. App lock reduces casual access; the root/jailbreak warning covers FR-SEC-07.
@@ -40,7 +43,9 @@ Out of scope: protecting a fully compromised, unlocked device in an attacker's h
 | `K_spool` | AES-256-GCM | First launch | Android Keystore (non-exportable, StrongBox if present); iOS Keychain (shared access group with the Share Extension) | Spool entries, Guard config, encrypted temp files (images, PDFs, export staging) | Rotated if invalidated; pending spool is lost (rare, logged) |
 | `K_bk` (backup data key) | 256-bit random | First backup setup | Secure storage (for automatic backups) **and** wrapped inside each backup file header | AES-256-GCM chunks of the backup | Re-wrapped when the passphrase changes. A new `K_bk` only if the user resets backup (old backups then need the old passphrase). |
 | `KEK_pass` | Argon2id(passphrase, salt 16 B, m = 64 MiB, t = 3, p = 1) → 256-bit | At passphrase set / restore | Never stored | Wraps `K_bk` (AES-256-GCM key wrap) | Parameters stored in the header for future upgrades |
-| Install token, account token, entitlement token | — | Backend | `secure_state` table in the encrypted DB | API auth / Gold | Cleared on Delete everything / sign-out |
+| Install token, account token, entitlement token | — | Backend | `secure_state` table in the encrypted DB | API auth / Gold | Cleared on Delete everything; the account token and the cached entitlement are dropped at sign-out (D-61(c)) |
+| Trusted-time state (`hw`, monotonic and boot reference, `lastServerTime`, `tampered`) | — | App | `secure_state` in the encrypted DB | Gold expiry against trusted time (NFR-SEC-08) | Re-anchored by newer signed server time; cleared on Delete everything |
+| Seat keys (iOS, D-55) | P-256, Secure Enclave | Per install, at first need | Keychain generic-password item holding the SE-wrapped key, `kSecAttrAccessibleAfterFirstUnlockThisDeviceOnly`, not synchronizable; up to 5 (this install + 4 earlier) | Same-iPhone recognition proofs (`seatKeys`) | Never leave the Secure Enclave. **Kept by "Delete everything"** (D-55: same-iPhone Delete everything is not a move) and by app deletion; lost on device erase. Hold no financial or account data |
 
 **Background access:** iOS Keychain items use the *AfterFirstUnlock* class so Shortcuts and BG tasks can open the DB while the phone is locked after first unlock. Android Keystore keys don't require user authentication, for the same reason. The app lock is a UI gate (§4.3), not a crypto gate, because capture must keep working while the app is locked.
 
@@ -60,9 +65,10 @@ Out of scope: protecting a fully compromised, unlocked device in an attacker's h
     - for an account-linked purchase, the caller is signed in to that account;
     - the purchase's **single seat** is already on this install, or may move to it because the last move was at least 30 days ago. Otherwise `409 MOVE_COOLDOWN` with `nextMoveAt`.
 
-    The install that lost the seat stops receiving Gold at its next refresh, and offline loses it within 14 days of the move (`exp` ≤ `iat` + 7 d, plus 7 d grace; 10 days for a basic-integrity seat). That is the worst-case overlap of two phones showing Gold.
+    The install that lost the seat stops receiving Gold at its next refresh, and offline loses it within 7 days of the move in trusted time (`exp` ≤ `iat` + 3 d, plus 4 d grace; 6 days for a basic-integrity seat; D-60). That is the worst-case overlap of two phones showing Gold. On iOS, a new install on the **same iPhone** that proves a seat key the seat recognises is a rebind, not a move (D-55).
   - **Sign-in** moves the seat of the account's purchases to this install, under the same cooldown, with the verified ID token as the proof (FR-GOLD-07). A purchase is attached to an account **only from its buying install** (`purchases.install_id`, D-54, FR-ACCT-05); there is no other self-service link path, and a purchase whose buying install is gone is linked only by an audited support action (`backend-api.md` §4.6, §5.3). At attach time the seat must be on an install linked to the account, or it returns to the buying install.
-  - **Support move** (`support_agent` role): bypasses the cooldown, may target only the holder or the purchase's pending claimant (an install that already passed attestation, store and account checks), and is audited for exactly 1 year (D-47 rules).
+  - **Account-linked Gold needs the account token** (D-61(c)): a signed-out holder keeps the seat, but its account-linked purchases are `paused` until it signs in again.
+  - **Support move and link** (`support_agent`, FIDO2): a live order-ID check first (D-57); it bypasses the cooldown but restarts it (D-56); it may target only a pending claimant (up to 3, each from the last 7 days), the holder for attach alone under the attach gate (buying install gone or silent ≥ 30 days), or a correction's source install; links made by support can be detached; every call is audited for exactly 1 year (D-47 rules).
   - Seat changes are recorded in `purchase_events`. Alerts carry only the purchase UUID.
 - **Server-to-server:**
   - Pub/Sub push carries Google-signed OIDC (audience + service-account e-mail pinned).
@@ -76,7 +82,7 @@ Out of scope: protecting a fully compromised, unlocked device in an attacker's h
 |---|---|---|---|---|
 | Own install record (delete) | ✔ | — | support_viewer (read) | — |
 | Sync payload | ✔ | ✔ (adds account entitlement) | — | Same for everyone |
-| Purchases verify/restore | ✔ own (restore: install-bound attestation + one seat + 30-day cooldown) | ✔ (account-linked purchases move only between the account's installs) | support_agent (seat move, audited) | Store is source of truth for state; the seat decides which single install gets Gold |
+| Purchases verify/restore | ✔ own (restore: install-bound attestation + one seat + 30-day cooldown; iOS seat-key rebind) | ✔ (account-linked purchases move between, and are granted only on, the account's signed-in installs) | support_agent (seat move, link, detach; live order-ID check; audited) | Store is source of truth for state; the seat decides which single install gets Gold |
 | Entitlement read | ✔ own | ✔ | support_viewer | Status and seat state only |
 | Account delete | — | ✔ own | — | Revokes the Apple token |
 | Catalog draft/publish | — | — | catalog_editor | Publish needs a second operator's approval in the web admin later; v1 CLI logs the operator |
@@ -123,7 +129,7 @@ plaintext = tar-like stream: db.snapshot, settings.json, manifest.json
 | DB access | Separate least-privilege roles; no public IP (private networking); operator access only through the admin API |
 | Dependencies | Dependabot/Renovate; `dotnet list package --vulnerable` and SCA in CI; container image scanning; SBOM per release |
 | Logging privacy | IP truncation at ingestion; no request bodies logged; install IDs hashed in logs |
-| PDPL | DPO appointed; PDPC licence (and cross-border permit if hosted abroad, CR-03); records of processing; breach notification to the PDPC within 72 h and users within 3 days of that (the Executive Regulations rule) |
+| PDPL | DPO appointed; PDPC licence (and cross-border permit if hosted abroad, CR-03); records of processing; breach notification to the PDPC within 72 h and users within 3 days of that (the Executive Regulations rule). **Support tickets** link the support code (install ID) and the order ID to the user's contact details in the helpdesk tool: the privacy notice says so, and T-137 records whether the helpdesk vendor is a PDPL processor (OQ-16) and sets ticket retention |
 
 ## 7. Mobile hardening checklist (MASVS mapping)
 
@@ -148,6 +154,6 @@ plaintext = tar-like stream: db.snapshot, settings.json, manifest.json
   1. Cancel jobs (backup, WorkManager).
   2. Close the DB.
   3. Delete the DB, spool, temp files and widget snapshot.
-  4. Delete the Keystore/Keychain items.
+  4. Delete the Keystore/Keychain items, **except the iOS seat keys** (D-55: so that restoring on the same iPhone is not a move; they hold no financial or account data, and the "Delete everything" copy says that Gold can come back to this iPhone).
   5. Call `DELETE /v1/installs/me` (best effort).
   6. Restart in first-launch state.

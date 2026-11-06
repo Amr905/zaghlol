@@ -206,6 +206,40 @@ class AttestationProof {
 - **Play Console:** the optional integrity verdicts (`deviceAttributes`, `recentDeviceActivity`, `appAccessRiskVerdict`, `environmentDetails`) stay off (T-140 checklist, D-45).
 - **Nothing else is collected or returned:** no device identifiers, and no verdicts on device. The proof goes straight into the restore body (BR-SYNC-03 amended, D-45). Proofs are never written to the diag log.
 
+## 4b. Trusted clock and seat keys (`TrustedClockHostApi` both platforms, `SeatKeyHostApi` iOS; D-55, D-60, R3-1)
+
+The Dart side (T-144) owns the trusted-time algorithm of `backend-api.md` §4.3 *Trusted time* and the state in `secure_state`. Native code only reads clocks and holds Secure Enclave keys.
+
+```dart
+@HostApi()
+abstract class TrustedClockHostApi {
+  /// One consistent sample. Never sent off the device (Apple required-reason API 35F9.1: elapsed time inside the app).
+  ClockSample sample();
+}
+class ClockSample {
+  int wallMs;          // epoch ms (System.currentTimeMillis / Date().timeIntervalSince1970)
+  int monotonicMs;     // Android SystemClock.elapsedRealtime(); iOS clock_gettime_nsec_np(CLOCK_MONOTONIC_RAW) / 1e6 (counts sleep)
+  int? bootCount;      // Android Settings.Global.BOOT_COUNT; iOS null (no public boot identifier)
+}
+
+@HostApi()   // iOS only; Android has no implementation (D-55)
+abstract class SeatKeyHostApi {
+  /// Ensures this install has a seat key (creates one in the Secure Enclave on first call) and returns
+  /// [own, earlier…] public keys (X9.63, 65 bytes), newest first, at most 5. Empty list when the Secure Enclave is unavailable.
+  List<Uint8List> publicKeys();
+  /// Signs `message` (built in Dart: "zaghlol-seat-v1" ‖ 0 ‖ op ‖ 0 ‖ installId ‖ 0 ‖ challenge) with every key, same order.
+  /// Returns IEEE P1363 r‖s signatures (64 bytes). A key that can't be used is dropped from the Keychain and from the result.
+  List<SeatSignature> sign(Uint8List message);
+  /// Called once when a new install is created: the current key becomes an "earlier" key; a new one is made lazily.
+  void rotateForNewInstall();
+}
+class SeatSignature { Uint8List publicKey; Uint8List signature; }
+```
+- **Storage:** `SecureEnclave.P256.Signing.PrivateKey`; its `dataRepresentation` (an SE-wrapped blob, useless off this device) is stored in a generic-password Keychain item, service `app.zaghlol.seatkey`, `kSecAttrAccessibleAfterFirstUnlockThisDeviceOnly`, `kSecAttrSynchronizable = false`, no access group shared with extensions. FIFO cap of 5 keys.
+- **Lifecycle:** "Delete everything" calls `rotateForNewInstall()` instead of deleting the items (D-55); app deletion leaves them in place (current iOS behaviour, not a documented guarantee); a device erase removes them.
+- **No identifiers leave native code** other than the public keys and signatures Dart puts into `seatKeys`. Neither is ever written to the diag log.
+- **Device tests (new app task, C4):** the key survives delete-and-reinstall; it survives "Delete everything"; a sign/verify round trip against `seat-proof-v1.json`'s message format; `CLOCK_MONOTONIC_RAW` advances across sleep; `BOOT_COUNT` increments after a reboot.
+
 ## 5. Other hosts
 
 | API | Methods | Notes |
@@ -218,4 +252,4 @@ class AttestationProof {
 
 ## 6. Error codes (native → Dart)
 
-`PERMISSION_DENIED`, `NOT_AVAILABLE`, `SPOOL_DECRYPT_FAILED` (entry quarantined and deleted after 3 failures, with a diag code logged), `KEY_INVALIDATED` (Keystore key lost after a security change: regenerate it, re-write the Guard config, and accept that pending spool entries are lost; this is user-visible in Settings as "re-scan" on Android), `CONFIG_INVALID`, `ICLOUD_UNAVAILABLE`, `OCR_FAILED`, `IO_ERROR`, `ATTEST_TRANSIENT`, `ATTEST_PLAY_SERVICES_OUTDATED`, `ATTEST_UNAVAILABLE`.
+`PERMISSION_DENIED`, `NOT_AVAILABLE`, `SPOOL_DECRYPT_FAILED` (entry quarantined and deleted after 3 failures, with a diag code logged), `KEY_INVALIDATED` (Keystore key lost after a security change: regenerate it, re-write the Guard config, and accept that pending spool entries are lost; this is user-visible in Settings as "re-scan" on Android), `CONFIG_INVALID`, `ICLOUD_UNAVAILABLE`, `OCR_FAILED`, `IO_ERROR`, `ATTEST_TRANSIENT`, `ATTEST_PLAY_SERVICES_OUTDATED`, `ATTEST_UNAVAILABLE`, `SEAT_KEY_UNAVAILABLE` (no Secure Enclave or Keychain error: send no `seatKeys`).

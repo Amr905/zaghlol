@@ -25,6 +25,7 @@ erDiagram
   accounts ||--o{ purchases : "linked to"
   purchases ||--o{ purchase_events : history
   purchases ||--|| purchase_seats : "one seat"
+  purchases ||--o{ seat_claimants : "pending claimants"
   store_notifications }o--o| purchases : updates
   catalog_versions ||--o{ catalog_changes : contains
   merchant_contributions }o--|| contribution_aggregates : "rolls up"

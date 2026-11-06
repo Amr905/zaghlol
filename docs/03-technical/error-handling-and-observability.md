@@ -24,8 +24,13 @@ Constraint: the app ships **no analytics or crash SDKs** (NFR-PRIV-01). Raw SMS 
 | Purchase invalid | No Gold; offer Restore & Support | Clear message |
 | Restore attestation fails (`DEVICE_ATTESTATION_FAILED`) / can't attest (EC-66) | iOS: one retry with a fresh App Attest key; Android: one retry with a fresh token. Platform transient errors are retried 3× within 1 min. No restore call without a proof. Existing Gold untouched | Help message «مقدرناش نتأكد من الموبايل ده»; offer Sign in (account-linked Gold) and Support |
 | Restore item `account_required` (EC-65) | No Gold on this install | «اعمل تسجيل دخول بالحساب اللي اشتريت بيه» (no account details revealed) |
-| Entitlement `status: moved` | Gold off on this install | «الجولد اتنقل لموبايل تاني», with Restore / Sign in |
-| Restore or sign-in `409 MOVE_COOLDOWN` (D-52, EC-68) | No Gold on this install; no automatic retry; the `nextMoveAt` date is stored for the Gold screen. Not a move (EC-66) | Next-move date formatted for the locale, plus the support link and the support code (install ID); draft copy for UX: «نقلت الجولد من قريب. تقدر تنقله تاني يوم {date}، أو كلّم الدعم» |
+| Entitlement `status: moved` | Gold off on this install | `movedBy: user`: «الجولد اتنقل لموبايل تاني», with Restore / Sign in. `movedBy: support`: «الدعم نقل الجولد لموبايل تاني», with the support link and the support code (D-57(f)) |
+| Entitlement `status: paused` (D-61(c)) | Gold paused on this install; the seat stays reserved; signing in again here is not a move | «اعمل تسجيل دخول عشان تستخدم الجولد على الموبايل ده» |
+| Trusted time: clock set back (`tampered`, D-60, NFR-SEC-08, EC-70) | No Gold until a fresh signed server time; local data stays readable | «اتصل بالنت عشان نتأكد من الجولد» |
+| Verify `seatHeldElsewhere` (D-61(a), EC-71) | Payment done; Gold stays on the other phone; `nextMoveAt` stored | «الدفع تم. الجولد لسه على الموبايل التاني، وتقدر تنقله يوم {date}» |
+| Sign-in `moveRefused` (R3-5) | Signed in and linked; no Gold here yet; `nextMoveAt` stored | Same copy as `MOVE_COOLDOWN` |
+| Android "Delete everything" while holding a seat (D-55, EC-69) | Confirmation warns first | «لو مسحت كل حاجة ورجعت الجولد، ده هيتحسب نقلة الشهر ده» (+ next-move date when a cooldown is running) |
+| Restore `409 MOVE_COOLDOWN` (D-52, EC-68) | No Gold on this install; no automatic retry; the `nextMoveAt` date is stored for the Gold screen. Not a move (EC-66) | Next-move date formatted for the locale, plus the support link and the support code (install ID); draft copy for UX: «نقلت الجولد من قريب. تقدر تنقله تاني يوم {date}، أو كلّم الدعم» |
 | Backup fails | Notification (FR-NTF-01) + Settings status; Gold schedule retries next window | «النسخة الاحتياطية ماتعملتش — جرب تاني» |
 | Restore: newer backup (EC-26) / wrong passphrase / corrupt | Specific errors per design S-04 | As designed |
 | Speech unavailable (EC-32) | Manual entry offered; online recognizer only with consent (ADR-010) | Explanation sheet |
@@ -66,7 +71,7 @@ Constraint: the app ships **no analytics or crash SDKs** (NFR-PRIV-01). Raw SMS 
   - **Edge:** the WAF / load balancer / CDN logs no query strings. Request-body logging or inspection-sample capture is disabled or redacted for `/v1/apple/*` and `/v1/notifications/*`, where bodies hold ID tokens, codes and signed payloads.
   - **Test (T-138):** a sentinel string is placed in the query, in a path key, in an outbound Play URL (through a fake Play handler) and in the Apple callback's `Location`. The test asserts that the sentinel appears in none of the captured logs, spans or HTTP-logging output, with all categories at their production levels.
   - Retention: 30 days (NFR-PRIV-06).
-- **Audit log:** operator actions in the `audit_log` table, retained 3 years, **except** support-lookup and support-seat-move rows, which hold pseudonymous personal data (HMAC e-mail pseudonym, install IDs, account ID) and are deleted **exactly 1 year** after creation, even if the account was deleted earlier (D-47, FR-BE-11, NFR-PRIV-07; `backend-schema.md` §4).
+- **Audit log:** operator actions in the `audit_log` table, retained 3 years, **except** support-lookup, support-seat-move and support-detach rows, which hold pseudonymous personal data (HMAC e-mail pseudonym, install IDs, account ID) and are deleted **exactly 1 year** after creation, even if the account was deleted earlier (D-47, FR-BE-11, NFR-PRIV-07; `backend-schema.md` §4).
 - **Tracing:** OpenTelemetry traces for API and workers, sampled at 10% in production (100% on errors).
 
 ## 4. Monitoring & alerting (backend)
@@ -77,7 +82,7 @@ Constraint: the app ships **no analytics or crash SDKs** (NFR-PRIV-01). Raw SMS 
 | SLO 99.5% monthly (NFR-BE-02) | Successful `/v1/*` ratio, excluding 4xx | Burn-rate alerts (2% in 1 h, 5% in 6 h) |
 | Latency | p95 `/v1/sync` < 300 ms, `/v1/purchases/verify` < 2 s | p95 over target for 15 min |
 | Purchases | verify success/failure by `code`; unacked count; time-to-ack | Any unacked > 48 h; failure rate > 5% |
-| Gold seats (D-52) | seat moves by channel; `MOVE_COOLDOWN` refusals; support moves per purchase and per operator; attestation failures by reason code | `MOVE_COOLDOWN` spike; > 2 support moves for one purchase in 90 days; > 20 support moves by one operator in a day; attestation-failure spike. Alerts carry the purchase UUID only |
+| Gold seats (D-52, D-55…D-57) | seat moves and rebinds by channel; `MOVE_COOLDOWN` refusals; support moves, detaches and ownership-check outcomes per purchase and per operator; attestation failures by reason code | `MOVE_COOLDOWN` spike; > 2 support moves for one purchase in 90 days (runbook: a support lead other than the agent reviews within 2 business days and corrects if needed); > 20 support actions by one operator in a day (runbook: suspend the role pending review); > 5 failed ownership checks by one operator in a day; attestation-failure spike. Alerts carry the purchase UUID only |
 | Store notifications | ingest rate, processing lag, dead-letters | Lag > 15 min; any dead-letter |
 | Prices | age of newest quote per symbol | Older than 6 h → warn; 24 h → page |
 | Catalog | publish events; full-snapshot CDN 2xx | Snapshot 404 |
