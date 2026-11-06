@@ -4,9 +4,9 @@
 
 | Job | What it checks |
 |-----|----------------|
-| `static` | `pub get --enforce-lockfile`, `dart format`, `flutter analyze`, custom_lint slot, app non-golden tests, `dart test` for both packages |
+| `static` | `pub get --enforce-lockfile`, `dart format`, `flutter analyze`, custom_lint slot, app non-golden tests, `dart test` for both packages, and a check that `FLUTTER_VERSION` is identical in `app-ci.yml` and `app-regen.yml` |
 | `golden` | `flutter test --tags golden`; on failure uploads artifact `golden-diffs` |
-| `kotlin-unit` | Gradle JVM unit tests (`app/android/app/src/test`) |
+| `kotlin-unit` | Gradle JVM unit tests (`app/android/app/src/test`); fails when no `<testcase>` result exists |
 | `swift-unit` | `xcodebuild test` of `RunnerTests` on an iOS simulator (macOS runner) |
 | `android` (x6) | all flavors built (prod in release) plus aapt2 assertions on SMS permissions, applicationId, minSdk/targetSdk |
 | `ios` (x3) | all flavors built with `--no-codesign` |
@@ -34,7 +34,9 @@ After it finishes:
 - Commits pushed by `GITHUB_TOKEN` do **not** trigger other workflows, so `app-ci` does not run on the bot commit. Push any follow-up commit (an empty one is fine, without the markers) to get CI on the final head.
 - If the branch moved while the job ran, the push is rejected (fast-forward only) and the job fails; just trigger it again.
 
-Safety properties: refuses to run outside `task/**`; never on `main`; concurrency guard per branch; no third-party action ever sees the write token (Flutter comes from a `git clone` of the pinned tag, verified against a commit SHA); `${{ }}` values only reach shell code via `env:`; the artifact is path-whitelisted and PNG-magic-checked before commit.
+Safety properties: refuses to run outside `task/**` (never on `main`); concurrency guard per branch, set on the two regen jobs so ordinary pushes cannot cancel a pending regen; no third-party action ever sees the write token (Flutter comes from a `git clone` of the pinned tag, verified against a commit SHA); `${{ }}` values only reach shell code via `env:`. The `commit` job runs no repo code: it fails if any tracked path under `pubspec.lock` or `app` is a symlink, validates the artifact (lockfile at most 200 KB, top-level `packages:` and `sdks:`, only `hosted` from `https://pub.dev` or `sdk` sources; PNGs at most 2 MB, PNG magic, path regex without `.` or `..` components), vets each destination (inside the workspace, outside `.git`, no symlinked file or parent), copies with `cp --remove-destination`, and persists no credentials: the token reaches only the final push.
+
+**Reviewers: treat a bot-made `pubspec.lock` diff as a dependency change** and review it like any other (new packages, version bumps, removed hashes).
 
 Golden diffs from a failing `app-ci` run are in the run's `golden-diffs` artifact (`*_masterImage.png`, `*_testImage.png`, `*_isolatedDiff.png`, `*_maskedDiff.png`). To accept a new look, trigger `[regen-goldens]`.
 
