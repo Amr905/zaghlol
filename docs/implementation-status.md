@@ -151,9 +151,9 @@
 | T-119 | Gold gate matrix and entitlement state (local) | M4 | C2 | Sonnet | flutter-core-engineer | T-025, T-020 | TODO | — |  |
 | T-120 | Voice logger S-31 with on-device-first recognition and monthly limit | M4 | C3 | Sonnet | flutter-ui-engineer | T-109, T-119, T-011 | TODO | — |  |
 | T-121 | Money tab assets, Add asset S-44 and Prices S-45 | M4 | C2 | Sonnet | flutter-ui-engineer | T-113, T-083, T-119 | TODO | — |  |
-| T-122 | EF Core model and initial migration for all backend tables + DB roles | M5 | C4 | Opus | backend-engineer | T-005 | DESIGN | — | solution-architect writing design note (branch task/design-notes-T122-T123-T138) |
-| T-123 | Signing service (ES256 via KMS abstraction) and response-signature middleware | M5 | C4 | Opus | backend-engineer | T-005 | DESIGN | — | solution-architect writing design note (branch task/design-notes-T122-T123-T138) |
-| T-124 | Install registration, install-token auth, rate limits, idempotency, strict DTOs | M5 | C4 | Opus | backend-engineer | T-122, T-006 | TODO | — |  |
+| T-122 | EF Core model and initial migration for all backend tables + DB roles | M5 | C4 | Opus | backend-engineer | T-005 | READY | — | Design note merged (1c68de5) |
+| T-123 | Signing service (ES256 via KMS abstraction) and response-signature middleware | M5 | C4 | Opus | backend-engineer | T-005 | READY | — | Design note merged (1c68de5) |
+| T-124 | Install registration, install-token auth, rate limits, idempotency, strict DTOs | M5 | C4 | Opus | backend-engineer | T-122, T-123, T-006 | TODO | — |  |
 | T-125 | Catalog versions, deltas, signed full snapshots and admin draft/publish | M5 | C3 | Opus | backend-engineer | T-122, T-123 | TODO | — |  |
 | T-126 | Feature flags with targeting rules and admin endpoints | M5 | C2 | Sonnet | backend-engineer | T-122 | TODO | — |  |
 | T-127 | Price service: local Egyptian gold-market adapter, FX adapter, worker, override | M5 | C3 | Sonnet | backend-engineer | T-122 | BLOCKED | — | Provider contract for local gold feed (D-41) needed before go-live; build continues with fakes |
@@ -167,7 +167,7 @@
 | T-135 | Accounts: Google/Apple ID token sign-in, linking, sign-out, delete, Android Apple callback | M5 | C4 | Opus | backend-engineer | T-132, T-182, T-184 | TODO | — | Plan v1.1: R5-3(a) note |
 | T-136 | Operator auth (OIDC + MFA), roles, audit log and support lookup | M5 | C4 | Opus | backend-engineer | T-122 | TODO | — | Plan v1.1: support write endpoints → T-186 |
 | T-137 | zaghlol-ops CLI for catalog, flags, prices, contributions and support, plus support runbook | M5 | C3 | Sonnet | backend-engineer | T-136, T-186, T-125, T-126, T-127, T-129 | TODO | — | Plan v1.1: C2→C3 (order IDs, operator login) |
-| T-138 | Backend observability: OpenTelemetry, metrics, dashboards, alert rules | M5 | C3 | Sonnet | backend-engineer | T-005 | DESIGN | — | solution-architect writing design note (branch task/design-notes-T122-T123-T138) |
+| T-138 | Backend observability: OpenTelemetry, metrics, dashboards, alert rules | M5 | C3 | Sonnet | backend-engineer | T-005 | READY | — | Design note merged (1c68de5) |
 | T-139 | Retention purger and log privacy settings | M5 | C2 | Sonnet | backend-engineer | T-122, T-138 | TODO | — |  |
 | T-140 | Infrastructure as code and deployment pipeline (staging, prod) | M5 | C4 | Opus | backend-engineer | T-138 | BLOCKED | — | CR-03 / OQ-16: hosting provider & region + PDPL licence decision. Plan v1.1: C3→C4 (KMS keys) |
 | T-141 | App BackendClient: generated DTOs, ES256 verification, lazy install registration | M5 | C4 | Opus | flutter-core-engineer | T-006, T-019 | TODO | — |  |
@@ -269,3 +269,4 @@
 | 2026-11-06 | Design notes started for backend lane B: T-122 (C4), T-123 (C4), T-138 (C3). They run alongside the T-003 review; no file overlap. |
 | 2026-11-06 | T-003 DONE: review APPROVED in round 2; CI 13/13 green, including iOS dev/staging/prod; squash-merged. Unblocks T-002, T-004, T-012, T-022, T-165. After merge: dispatch app-regen once (workflow_dispatch) and enable branch protection on main (PO). |
 | 2026-11-06 | T-012 and T-165 started in parallel (no shared files). Held: T-002 and T-004 (both change pubspec.lock; run after T-012), T-022 (after T-002 lints). |
+| 2026-11-07 | Design notes for T-122/T-123/T-138 merged (1c68de5). Lead decisions: IEnvelopeCipher goes in T-123 (T-124 now depends on T-123); the cloud KMS adapter goes in T-140; the signing-key ring is configuration, not a `signing_keys` table; accounts are hard-deleted (T-135 to fix the retention wording); operator UUIDs are allowed in operator alerts. |
