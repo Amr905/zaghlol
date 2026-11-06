@@ -18,7 +18,7 @@
 ## Summary
 | Milestone | Total | DONE | IN_PROGRESS | BLOCKED |
 |---|---|---|---|---|
-| M0 | 28 | 4 | 0 | 0 |
+| M0 | 28 | 4 | 1 | 0 |
 | M1 | 29 | 0 | 0 | 0 |
 | M2 | 29 | 0 | 0 | 0 |
 | M3 | 18 | 0 | 0 | 0 |
@@ -41,7 +41,7 @@
 | T-009 | SPK-03: can an iOS App Intent process immediately with a headless Flutter engine? | M0 | C4 | Opus | native-platform-engineer | T-001, T-004 | TODO | — |  |
 | T-010 | SPK-02: OCR accuracy on synthetic InstaPay/wallet receipts | M0 | C3 | Sonnet | native-platform-engineer | T-001 | TODO | — |  |
 | T-011 | SPK-04: on-device ar-EG speech availability across the device matrix | M0 | C2 | Sonnet | native-platform-engineer | T-001 | TODO | — |  |
-| T-012 | Money and Currency value types with ISO 4217 table | M0 | C4 | Opus | flutter-core-engineer | T-001 | READY | — | Design note merged; starts after T-003 merges (adds glados → needs lockfile regen) |
+| T-012 | Money and Currency value types with ISO 4217 table | M0 | C4 | Opus | flutter-core-engineer | T-001 | IN_PROGRESS | — | Branch task/T-012-money (flutter-core-engineer, Opus) |
 | T-013 | Text & amount normalization utilities (digits, separators, groupings) | M0 | C3 | Sonnet | parsing-engine-engineer | T-012 | TODO | — |  |
 | T-014 | Result/Failure types, SafeException and domain event bus | M0 | C2 | Sonnet | flutter-core-engineer | T-001 | TODO | — |  |
 | T-015 | Secure key bootstrap for the database key | M0 | C4 | Opus | flutter-core-engineer | T-007 | TODO | — |  |
@@ -194,7 +194,7 @@
 | T-162 | Settings S-60 incl. privacy info and About | M6 | C2 | Sonnet | flutter-ui-engineer | T-020, T-087, T-115 | TODO | — |  |
 | T-163 | Categories & rules S-63/S-64 incl. custom categories (Gold) | M6 | C2 | Sonnet | flutter-ui-engineer | T-074, T-119 | TODO | — |  |
 | T-164 | Custom message template builder engine and screen S-65 (Gold) | M6 | C3 | Sonnet | parsing-engine-engineer | T-033, T-119 | TODO | — |  |
-| T-165 | Exclude app data from OS backups and device transfer | M6 | C4 | Opus | native-platform-engineer | T-001 | READY | — | Design note merged; starts after T-003 merges (adds iOS test target + macOS CI job → same files as T-003) |
+| T-165 | Exclude app data from OS backups and device transfer | M6 | C4 | Opus | native-platform-engineer | T-001 | IN_PROGRESS | — | Branch task/T-165-no-os-backup (native-platform-engineer, Opus) |
 | T-166 | Delete everything (local wipe + backend install delete) | M6 | C4 | Opus | flutter-core-engineer | T-015, T-141, T-152, T-145, T-179 | TODO | — |  |
 | T-167 | Zakah engine (hawl, nisab, native-unit dues) | M7 | C4 | Opus | flutter-core-engineer | T-113 | TODO | — |  |
 | T-168 | Zakah screen S-46 behind flag with disclaimer | M7 | C2 | Sonnet | flutter-ui-engineer | T-167, T-025, T-087 | TODO | — |  |
@@ -268,3 +268,4 @@
 | 2026-11-06 | PO APPROVED task plan v1.1. T-003 round 2 in review. |
 | 2026-11-06 | Design notes started for backend lane B: T-122 (C4), T-123 (C4), T-138 (C3). They run alongside the T-003 review; no file overlap. |
 | 2026-11-06 | T-003 DONE: review APPROVED in round 2; CI 13/13 green, including iOS dev/staging/prod; squash-merged. Unblocks T-002, T-004, T-012, T-022, T-165. After merge: dispatch app-regen once (workflow_dispatch) and enable branch protection on main (PO). |
+| 2026-11-06 | T-012 and T-165 started in parallel (no shared files). Held: T-002 and T-004 (both change pubspec.lock; run after T-012), T-022 (after T-002 lints). |
