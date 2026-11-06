@@ -120,7 +120,7 @@ BR-SYNC-03 is amended to allow the attestation proof (D-45). FR-GOLD-02 counts a
 **(e) Data.** Only the proof is sent (BR-SYNC-03 amended, D-45). The server stores the App Attest public key and counter, and hashes in `replay_guard`. It stores no device identifier and no verdict payload. Proofs are never logged.
 
 **(f) Support move and alerts.**
-- `POST /admin/v1/support/seat:move` (role **`support_agent`**, distinct from read-only `support_viewer`) moves a seat to a named install, bypassing the cooldown, and can attach an unlinked purchase to the target install's account (FR-ACCT-05). The account rule still applies. It is audited in `audit_log` with the install IDs and a reason code, never an e-mail, and the row is kept **exactly 1 year** (D-47 rules).
+- `POST /admin/v1/support/seat:move` (role **`support_agent`**, distinct from read-only `support_viewer`) moves a seat past the cooldown, and can attach an unlinked purchase to the target install's account (FR-ACCT-05). The target must be the purchase's **pending claimant**: an install whose own restore or sign-in passed attestation, store and account checks but was refused for the cooldown in the last 7 days. So an operator can't send Gold to an arbitrary install. The account rule still applies. It is audited in `audit_log` with the install IDs and a reason code, never an e-mail, and the row is kept **exactly 1 year** (D-47 rules).
 - **Interim path (D-37, R-21):** until the admin web app ships after launch, support uses this endpoint through the `zaghlol-ops` CLI (`zaghlol-ops support move …`), which needs operator OIDC with MFA. Owners: T-136 (endpoint, role and audit), T-137 (CLI command and runbook), T-132 (seat service).
 - **Alerts** carry the purchase UUID only:
   - more than 2 support moves for one purchase in 90 days, or more than 20 support moves by one operator in a day;
@@ -138,7 +138,7 @@ BR-SYNC-03 is amended to allow the attestation proof (D-45). FR-GOLD-02 counts a
 | 4. App Attest key reuse | Look up the old key | No new data | Keys don't survive reinstall or restore | Not feasible |
 | 5. `ANDROID_ID`, identifierForVendor or another device identifier | Read from the OS | A device identifier: forbidden by FR-GOLD-09 and BR-SYNC-03 | — | **Rejected** |
 
-Recommendation: option 1, stated in the help copy ("لو مسحت الأبلكيشن ونزّلته تاني، نقل زغلول جولد هيتحسب نقلة الشهر") and in the "Delete everything" confirmation when this install holds a seat and the cooldown is running. The entitlement token's `nextMoveAt` claim drives that copy. Revisit option 2 if support volume (R-21) shows reinstall moves are common.
+Recommendation: option 1, stated in the help copy (UX owns the wording; the gist: "reinstalling and restoring counts as this month's move") and in the "Delete everything" confirmation when this install holds a seat and the cooldown is running. The entitlement token's `nextMoveAt` claim drives that copy. Revisit option 2 if support volume (R-21) shows reinstall moves are common.
 
 **Consequences.**
 - **T-122:** `purchase_seats` (one row per purchase, `last_moved_at`), `app_attest_keys`, `replay_guard`, `idempotency_records`.
