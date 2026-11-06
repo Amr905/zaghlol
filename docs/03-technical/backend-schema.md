@@ -51,7 +51,10 @@ CREATE TABLE installs (
   -- iOS seat key registered by this install (backend-api §4.3, R4-1(1), D-62): HMAC-SHA256(K_seat, 'install' || 0x00 ||
   -- installId || publicKey) of element 0 of its first valid seatKeys. Set once, never replaced; a later restore or sign-in
   -- with another element 0 gets 400 SEAT_KEY_MISMATCH. Cleared when the install is tombstoned. Never a raw key.
-  seat_key_hash bytea
+  seat_key_hash bytea,
+  seat_key_trusted boolean NOT NULL DEFAULT false  -- true once the key was registered or sent as element 0 in a verify that passed
+                                               -- the store checks or a restore whose App Attest assertion covered it; gates the
+                                               -- over-cap sign-in rebind (D-65(a), backend-api §4.3)
 );
 CREATE INDEX ix_installs_last_seen ON installs(last_seen_at);
 
@@ -150,9 +153,12 @@ CREATE TABLE purchase_seats (
                                                       -- none. KEPT when the seat goes vacant (so "Delete everything" + restore on
                                                       -- the same iPhone is a rebind). Only a seatKeys element at position >= 1 can
                                                       -- match it for a rebind
+  device_key_trusted boolean NOT NULL DEFAULT false,  -- copied from the holder's installs.seat_key_trusted when device_key_hash is
+                                                      -- written; an over-cap SIGN-IN rebind needs it (restore doesn't)
   recent_rebinds timestamptz[] NOT NULL DEFAULT '{}', -- D-63: times of same-iPhone rebinds in the rolling 30 days; pruned under the
-                                                      -- seat lock before each check; at most 2. Over the cap: restore = over-cap
-                                                      -- rebind that restarts the window (D-65(a)), sign-in = ordinary move
+                                                      -- seat lock before each check; at most 2. Over the cap: over-cap rebind that
+                                                      -- restarts the window and is never refused (D-65(a)); for sign-in only when
+                                                      -- device_key_trusted, otherwise an ordinary move
   CHECK ((install_id IS NULL) = (proof IS NULL)),
   CHECK ((last_moved_at IS NULL) = (next_move_at IS NULL)),
   CHECK (next_move_at IS NULL OR date_trunc('hour', next_move_at) = next_move_at),

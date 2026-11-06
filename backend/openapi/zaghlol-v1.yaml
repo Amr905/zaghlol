@@ -534,7 +534,9 @@ paths:
         once per purchase without the cooldown (free reclaim, D-58), which still restarts the 30-day window
         (D-61(b)). Then moves the seat of each account-linked purchase to this install under the 30-day
         cooldown (D-52, FR-GOLD-07), or rebinds it without the cooldown when `seatKeys` proves the same iPhone
-        (D-55), at most 2 times per purchase per rolling 30 days (D-63); over the cap it is an ordinary move. A move refused for the cooldown never undoes the link: the call still returns 200 with
+        (D-55), at most 2 times per purchase per rolling 30 days (D-63). Over the cap the seat still passes and the
+        window restarts when the seat's key is trusted (D-65(a)); otherwise it is an ordinary move and the response
+        sets `restoreSuggested`. A move refused for the cooldown never undoes the link: the call still returns 200 with
         `moveRefused: true` and `nextMoveAt` (R3-5). The nonce's single-use record is committed before and
         outside that transaction. If the install is linked to a different account the server
         answers `409 INSTALL_LINKED_TO_OTHER_ACCOUNT`; resend with `replaceLink: true` to confirm. For Apple the `authorizationCode` is exchanged for a refresh token that is stored encrypted
@@ -2688,7 +2690,8 @@ components:
             install's registered seat key (otherwise `400 SEAT_KEY_MISMATCH`), the others are distinct keys of up
             to 4 earlier installs on this iPhone, each signed over `op = signin` with `challenge = SHA-256(nonce)`.
             Sign-in has no device attestation; a rebind from a key at position 1 or later is capped at 2 per
-            purchase per 30 days, after which it is an ordinary move under the cooldown (D-63).
+            purchase per 30 days (D-63). Over the cap it passes the seat and restarts the window only when the
+            seat's key is trusted (D-65(a)); otherwise it is an ordinary move under the cooldown.
           minItems: 1
           maxItems: 5
           items:
@@ -2716,6 +2719,11 @@ components:
           description: |
             True when at least one seat move was refused for the 30-day cooldown (R3-5). The link and attach are
             still done; this install is a pending claimant. Show `nextMoveAt` and the support link.
+        restoreSuggested:
+          type: boolean
+          description: |
+            D-65(a): an over-cap same-iPhone sign-in could not pass the seat because the seat's key isn't trusted;
+            offer Restore on this phone, which can.
         nextMoveAt:
           description: Set with `moveRefused`. Always a whole UTC hour (R3-4).
           oneOf:

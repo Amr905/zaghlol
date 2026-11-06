@@ -31,7 +31,7 @@ Constraint: the app ships **no analytics or crash SDKs** (NFR-PRIV-01). Raw SMS 
 | Verify `seatHeldElsewhere` + `accountRequired` (R4-4) | Payment done; Gold stays on the other phone because this phone isn't signed in to the account that owns it | Draft for UX: «الدفع تم. عشان الجولد ييجي هنا، اعمل تسجيل دخول بالحساب اللي عليه الجولد» |
 | `400 SEAT_KEY_MISMATCH` (iOS restore / sign-in, R4-1) | Silent: one retry without `seatKeys` (sign-in with a fresh nonce); diag code only | None |
 | `supportNotice: gold_linked_by_support` (R4-7(2)) | Shown once on the buying phone | Draft for UX: «الدعم ربط الجولد بتاعك بحساب. لو ده مش انت، كلّم الدعم», with the support link and the support code |
-| Sign-in `moveRefused` (R3-5) | Signed in and linked; no Gold here yet; `nextMoveAt` stored | Same copy as `MOVE_COOLDOWN` |
+| Sign-in `moveRefused` (R3-5) | Signed in and linked; no Gold here yet; `nextMoveAt` stored | Same copy as `MOVE_COOLDOWN`. With `restoreSuggested: true` (D-65(a)), offer Restore first: draft «جرّب "استرجاع المشتريات"، الجولد هيرجع على الموبايل ده» |
 | Android "Delete everything" while holding a seat (D-55, EC-69) | Confirmation warns first | «لو مسحت كل حاجة ورجعت الجولد، ده هيتحسب نقلة الشهر ده» (+ next-move date when a cooldown is running) |
 | Restore `409 MOVE_COOLDOWN` (D-52, EC-68) | No Gold on this install; no automatic retry; the `nextMoveAt` date is stored for the Gold screen. Not a move (EC-66) | Next-move date formatted for the locale, plus the support link and the support code (install ID); draft copy for UX: «نقلت الجولد من قريب. تقدر تنقله تاني يوم {date}، أو كلّم الدعم» |
 | Backup fails | Notification (FR-NTF-01) + Settings status; Gold schedule retries next window | «النسخة الاحتياطية ماتعملتش — جرب تاني» |
