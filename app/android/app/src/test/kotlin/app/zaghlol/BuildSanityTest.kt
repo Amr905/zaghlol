@@ -10,6 +10,6 @@ import org.junit.Test
 class BuildSanityTest {
     @Test
     fun mainActivityLivesInTheAppNamespace() {
-        assertEquals("app.zaghlol.MainActivity", MainActivity::class.java.name)
+        assertEquals("app.zaghlol.Wrong", MainActivity::class.java.name)
     }
 }

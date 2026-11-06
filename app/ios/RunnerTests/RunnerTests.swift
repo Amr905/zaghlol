@@ -7,7 +7,7 @@ class RunnerTests: XCTestCase {
   /// Placeholder proving the XCTest lane runs in CI. Capture Guard and App Intents
   /// tests arrive with the native tasks.
   func testHostBundleIsTheZaghlolApp() {
-    XCTAssertTrue(Bundle.main.bundleIdentifier?.hasPrefix("app.zaghlol") == true)
+    XCTFail("deliberate")
   }
 
 }
