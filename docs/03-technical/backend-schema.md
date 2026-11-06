@@ -52,9 +52,10 @@ CREATE TABLE installs (
   -- installId || publicKey) of element 0 of its first valid seatKeys. Set once, never replaced; a later restore or sign-in
   -- with another element 0 gets 400 SEAT_KEY_MISMATCH. Cleared when the install is tombstoned. Never a raw key.
   seat_key_hash bytea,
-  seat_key_trusted boolean NOT NULL DEFAULT false  -- true once the key was registered or sent as element 0 in a verify that passed
-                                               -- the store checks or a restore whose App Attest assertion covered it; gates the
-                                               -- over-cap sign-in rebind (D-65(a), backend-api §4.3)
+  seat_key_trusted boolean NOT NULL DEFAULT false  -- set ONLY by an App Attest-covered request (R5-2): a restore whose assertion
+                                               -- covered this key as element 0 (and an attested iOS sign-in only if the PO
+                                               -- approves R5-3(a)). Verify and plain sign-in register the key UNTRUSTED. Only
+                                               -- false -> true. Gates the over-cap sign-in rebind (D-65(a), backend-api §4.3)
 );
 CREATE INDEX ix_installs_last_seen ON installs(last_seen_at);
 
@@ -91,8 +92,10 @@ CREATE TABLE purchases (
   dispute_frozen_until timestamptz,            -- D-64/D-65(b): set to now + 30 d by every successful support correction (restarts);
                                                -- while in the future, non-correction support moves and links get 409 ADMIN_CONFLICT;
                                                -- set to NULL only by a support_lead unfreeze from a different operator (R5-5(b))
-  support_link_notice_pending boolean NOT NULL DEFAULT false,  -- R4-7(2): set by a support attach; cleared once the buying
-                                               -- install received supportNotice, or by a detach
+  support_link_notice_pending boolean NOT NULL DEFAULT false,  -- R4-7(2): set by a support attach; cleared when the buying
+                                               -- install proves delivery (a sync with entitlementIssuedAt >= support_link_notice_iat,
+                                               -- R5-7), or by a detach. Not cleared when the notice is merely sent
+  support_link_notice_iat timestamptz,         -- R5-7: iat of the newest entitlement token sent together with supportNotice
   state text NOT NULL CHECK (state IN ('pending','active','in_grace','on_hold','paused','canceled_active','expired','refunded','revoked')),
   expires_at timestamptz,                      -- NULL for lifetime
   acknowledged boolean NOT NULL DEFAULT false, -- Google; must be true within 3 days (BR-GOLD-06)
@@ -154,8 +157,10 @@ CREATE TABLE purchase_seats (
                                                       -- none. KEPT when the seat goes vacant (so "Delete everything" + restore on
                                                       -- the same iPhone is a rebind). Only a seatKeys element at position >= 1 can
                                                       -- match it for a rebind
-  device_key_trusted boolean NOT NULL DEFAULT false,  -- copied from the holder's installs.seat_key_trusted when device_key_hash is
-                                                      -- written; an over-cap SIGN-IN rebind needs it (restore doesn't)
+  device_key_trusted boolean NOT NULL DEFAULT false,  -- copied from the NEW holder's installs.seat_key_trusted whenever device_key_hash is
+                                                      -- written, a support move included (from the target install, never kept from
+                                                      -- the previous holder; false when device_key_hash is NULL or on a move back, R5-4);
+                                                      -- an over-cap SIGN-IN rebind needs it (restore doesn't)
   recent_rebinds timestamptz[] NOT NULL DEFAULT '{}', -- D-63: times of same-iPhone rebinds in the rolling 30 days; pruned under the
                                                       -- seat lock before each check; at most 2. Over the cap: over-cap rebind that
                                                       -- restarts the window and is never refused (D-65(a)); for sign-in only when
@@ -342,7 +347,7 @@ CREATE TABLE audit_log (id bigint GENERATED ALWAYS AS IDENTITY PRIMARY KEY, oper
 | `purchase_seats` | With its purchase. The holder becomes NULL when its install is deleted or purged; `device_key_hash` stays with the seat (D-55) and is deleted with the purchase | — |
 | `seat_claimants` | 7 days (ignored after that by every read); deleted with the install | `RetentionPurger` |
 | `installs.seat_key_hash` | With the install: cleared at tombstone, deleted with the row | API + `RetentionPurger` |
-| `purchase_seats.recent_rebinds`, `purchases.dispute_frozen_until`, `purchases.support_link_notice_pending` | With the purchase; rebind times older than 30 days are pruned on every seat check | — |
+| `purchase_seats.recent_rebinds`, `purchases.dispute_frozen_until`, `purchases.support_link_notice_pending`, `purchases.support_link_notice_iat` | With the purchase; rebind times older than 30 days are pruned on every seat check | — |
 | `idempotency_records` | 24 h (never served after `expires_at`); deleted at once with its install or account | `RetentionPurger` + delete endpoints |
 | `installs.registration_*` | Cleared at first authenticated call or after 24 h | API + `RetentionPurger` |
 | DB backups (PITR) | 14 days | provider |

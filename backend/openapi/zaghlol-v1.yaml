@@ -2406,8 +2406,9 @@ components:
     SupportNotice:
       description: |
         R4-7(2): `gold_linked_by_support` is sent to a purchase's buying install after support linked that
-        purchase to an account, in every signed sync or entitlement 200 until that install makes its next
-        authenticated request after one was sent (the implicit acknowledgement, R5-7); `null` otherwise.
+        purchase to an account, with a fresh entitlement token, in every signed sync or entitlement 200 until
+        that install's next sync proves delivery (`entitlementIssuedAt` at or after that token's `iat`; the
+        implicit acknowledgement, R5-7); `null` otherwise.
       oneOf:
         - type: string
           enum: [gold_linked_by_support]
