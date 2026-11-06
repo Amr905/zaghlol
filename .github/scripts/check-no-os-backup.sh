@@ -35,7 +35,10 @@ _parse_rules() {
       flush()
       match($0, /^ */); ind = RLENGTH; name = $2
       if (root == "") { root = name; rootind = ind; section = name; print "ROOT", name; next }
-      if (ind == rootind + 2) {
+      # aapt2 indentation width varies by version: depth 1 is the indent of
+      # the first element nested under the root.
+      if (childind == "" && ind > rootind) childind = ind
+      if (ind == childind) {
         if (name == "exclude" || name == "include") section = root
         else { section = name; print "SECTION", name; next }
       }

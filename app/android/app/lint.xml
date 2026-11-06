@@ -1,9 +1,17 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<!-- T-165 (FR-SEC-05): backup-rule checks are release blockers. "fatal" is at
-     least "error" and also stops lintVital on release builds. CI runs
-     :app:lintDevNoSmsDebug with abortOnError. -->
 <lint>
+    <!-- T-165 (FR-SEC-05): backup-rule checks are release blockers. "fatal" is
+         at least "error" and also stops lintVital on release builds. CI runs
+         :app:lintDevNoSmsDebug with abortOnError. -->
     <issue id="AllowBackup" severity="fatal" />
     <issue id="DataExtractionRules" severity="fatal" />
     <issue id="FullBackupContent" severity="fatal" />
+
+    <!-- False positive: src/noSms/AndroidManifest.xml lists the SMS permissions
+         only with tools:node="remove" (ADR-004), so the merged manifest has no
+         telephony permission and needs no telephony <uses-feature>. Scoped to
+         that one file; the check still runs everywhere else. -->
+    <issue id="PermissionImpliesUnsupportedChromeOsHardware">
+        <ignore path="src/noSms/AndroidManifest.xml" />
+    </issue>
 </lint>

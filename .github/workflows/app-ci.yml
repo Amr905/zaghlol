@@ -159,7 +159,11 @@ jobs:
         working-directory: app/android
         run: |
           set -o pipefail
-          ./gradlew --no-daemon :app:lintDevNoSmsDebug 2>&1 | tee ../gradle-lint.log
+          if ! ./gradlew --no-daemon :app:lintDevNoSmsDebug 2>&1 | tee ../gradle-lint.log; then
+            report=$(find ../build/app -name 'lint-results-devNoSmsDebug.txt' | head -n 1)
+            if [ -n "$report" ]; then cat "$report"; fi
+            exit 1
+          fi
       - name: Assert lint ran with the T-165 config
         run: |
           if ! grep -E "^> Task :app:lintDevNoSmsDebug$" app/gradle-lint.log; then

@@ -24,9 +24,9 @@ N: android=http://schemas.android.com/apk/res/android (line=0)
         A: http://schemas.android.com/apk/res/android:label(0x01010001)=@0x7f0f0000
         A: http://schemas.android.com/apk/res/android:icon(0x01010002)=@0x7f0d0000
         A: http://schemas.android.com/apk/res/android:allowBackup(0x01010280)=$1
-        A: http://schemas.android.com/apk/res/android:fullBackupContent(0x01010473)=@0x7f120000
-        A: http://schemas.android.com/apk/res/android:dataExtractionRules(0x0101063e)=@0x7f120001
-        A: http://schemas.android.com/apk/res/android:hasFragileUserData(0x01010573)=$2
+        A: http://schemas.android.com/apk/res/android:fullBackupContent(0x010104eb)=@0x7f0e0000
+        A: http://schemas.android.com/apk/res/android:hasFragileUserData(0x0101059a)=$2
+        A: http://schemas.android.com/apk/res/android:dataExtractionRules(0x0101063e)=@0x7f0e0001
 ${3:-}
 EOF
 }
@@ -40,18 +40,18 @@ excludes() { # $1 indent, $2 domains (default: all 9), $3 path
 }
 
 der() { # $1 cloud domains, $2 transfer domains, $3 extra lines inside device-transfer
-  echo 'E: data-extraction-rules (line=5)'
-  echo '  E: cloud-backup (line=6)'
-  echo '    A: disableIfNoEncryptionCapabilities="true" (Raw: "true")'
-  excludes '    ' "${1:-}"
-  echo '  E: device-transfer (line=16)'
-  excludes '    ' "${2:-}"
+  echo 'E: data-extraction-rules (line=6)'
+  echo '    E: cloud-backup (line=7)'
+  echo '      A: disableIfNoEncryptionCapabilities=true'
+  excludes '        ' "${1:-}"
+  echo '    E: device-transfer (line=18)'
+  excludes '        ' "${2:-}"
   if [ -n "${3:-}" ]; then echo "$3"; fi
 }
 
 fbc() { # $1 domains, $2 path
-  echo 'E: full-backup-content (line=4)'
-  excludes '  ' "${1:-}" "${2:-}"
+  echo 'E: full-backup-content (line=5)'
+  excludes '    ' "${1:-}" "${2:-}"
 }
 
 expect() { # expect pass|fail <description> <command...>
@@ -70,6 +70,9 @@ expect() { # expect pass|fail <description> <command...>
 }
 
 all_but() { tr ' ' '\n' <<< "$EXPECTED_DOMAINS" | grep -vx "$1" | tr '\n' ' '; }
+
+# Fixture layout copied from real aapt2 output (build-tools 36, app-ci run
+# 42314155525): 4 spaces per nesting level, attributes 2 deeper.
 
 # Positive controls.
 manifest false false > "$work/m_ok"
@@ -99,20 +102,25 @@ der "" "$(all_but device_sharedpref)" > "$work/d1"
 expect fail "device-transfer misses device_sharedpref" check_rules_xmltree data-extraction-rules "cloud-backup device-transfer" "$work/d1"
 der "$(all_but database)" > "$work/d2"
 expect fail "cloud-backup misses database" check_rules_xmltree data-extraction-rules "cloud-backup device-transfer" "$work/d2"
-der "" "" '    E: include (line=30)
-      A: domain="file" (Raw: "file")
-      A: path="." (Raw: ".")' > "$work/d3"
+der "" "" '        E: include (line=30)
+          A: domain="file" (Raw: "file")
+          A: path="." (Raw: ".")' > "$work/d3"
 expect fail "<include> present" check_rules_xmltree data-extraction-rules "cloud-backup device-transfer" "$work/d3"
 der | awk '/E: device-transfer/ { stop = 1 } !stop' > "$work/d4"
 expect fail "device-transfer section missing" check_rules_xmltree data-extraction-rules "cloud-backup device-transfer" "$work/d4"
 der | sed '0,/path="\."/s//path="databases" (Raw: "databases")/' > "$work/d5"
 expect fail "an exclude path is not '.'" check_rules_xmltree data-extraction-rules "cloud-backup device-transfer" "$work/d5"
-{ der; echo '  E: device-transfer (line=40)'; } > "$work/d6"
+{ der; echo '    E: device-transfer (line=40)'; } > "$work/d6"
 expect fail "duplicate device-transfer section" check_rules_xmltree data-extraction-rules "cloud-backup device-transfer" "$work/d6"
 der | sed 's/A: domain="\([a-z_]*\)" (Raw: "[a-z_]*")/A: domain=\1/' > "$work/d7"
 expect fail "unparseable attribute format fails closed" check_rules_xmltree data-extraction-rules "cloud-backup device-transfer" "$work/d7"
 der "$EXPECTED_DOMAINS bogus" > "$work/d8"
 expect fail "extra unknown domain" check_rules_xmltree data-extraction-rules "cloud-backup device-transfer" "$work/d8"
+
+der | awk '{ match($0, /^ */); p = ""; for (i = 0; i < RLENGTH / 2; i++) p = p " "; print p substr($0, RLENGTH + 1) }' > "$work/d9"
+expect pass "older 2-space aapt2 layout still parses" check_rules_xmltree data-extraction-rules "cloud-backup device-transfer" "$work/d9"
+der "" "" '        E: exclude-all (line=31)' > "$work/d10"
+expect fail "unknown element inside a section" check_rules_xmltree data-extraction-rules "cloud-backup device-transfer" "$work/d10"
 
 # Negative controls: backup_rules.
 fbc "$(all_but root) file" > "$work/f1"
