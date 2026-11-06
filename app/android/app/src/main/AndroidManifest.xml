@@ -1,8 +1,21 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android">
+    <!-- FR-SEC-05 / T-165: no OS mechanism may copy app data off the phone.
+         allowBackup=false stops Auto Backup, key/value backup and adb backup
+         (API 26-30) and cloud backup (API 31+). On API 31+ only
+         dataExtractionRules <device-transfer> stops device-to-device transfer,
+         so both rule files exclude every domain. fullBackupContent is defense
+         in depth if a merged manifest ever flips allowBackup.
+         hasFragileUserData=false: never offer "keep app data" on uninstall
+         (the Keystore key is deleted, leaving an unreadable DB).
+         CI (app-ci.yml) asserts all of this on every final APK. -->
     <application
         android:label="@string/app_name"
         android:name="${applicationName}"
-        android:icon="@mipmap/ic_launcher">
+        android:icon="@mipmap/ic_launcher"
+        android:allowBackup="false"
+        android:fullBackupContent="@xml/backup_rules"
+        android:dataExtractionRules="@xml/data_extraction_rules"
+        android:hasFragileUserData="false">
         <activity
             android:name=".MainActivity"
             android:exported="true"

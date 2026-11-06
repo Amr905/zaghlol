@@ -4,11 +4,11 @@
 
 | Job | What it checks |
 |-----|----------------|
-| `static` | `pub get --enforce-lockfile`, `dart format`, `flutter analyze`, custom_lint slot, app non-golden tests, `dart test` for both packages, and a check that `FLUTTER_VERSION` is identical in `app-ci.yml` and `app-regen.yml` |
+| `static` | `pub get --enforce-lockfile`, `dart format`, `flutter analyze`, custom_lint slot, app non-golden tests, `dart test` for both packages, a check that `FLUTTER_VERSION` is identical in `app-ci.yml` and `app-regen.yml`, and the negative-control self-test of the T-165 backup assertions (`.github/scripts/test-check-no-os-backup.sh`) |
 | `golden` | `flutter test --tags golden`; on failure uploads artifact `golden-diffs` |
-| `kotlin-unit` | Gradle JVM unit tests (`app/android/app/src/test`); fails when no `<testcase>` result exists |
-| `swift-unit` | `xcodebuild test` of `RunnerTests` on an iOS simulator (macOS runner) |
-| `android` (x6) | all flavors built (prod in release) plus aapt2 assertions on SMS permissions, applicationId, minSdk/targetSdk |
+| `kotlin-unit` | Gradle JVM unit tests (`app/android/app/src/test`); fails when no `<testcase>` result exists; then `:app:lintDevNoSmsDebug` with `AllowBackup`, `DataExtractionRules` and `FullBackupContent` fatal (`app/android/app/lint.xml`, T-165) |
+| `swift-unit` | `xcodebuild test` of `RunnerTests` on an iOS simulator (macOS runner); each T-165 `BackupExclusionTests` case must be reported as passed |
+| `android` (x6) | all flavors built (prod in release) plus aapt2 assertions on SMS permissions, applicationId, minSdk/targetSdk, and T-165 no-OS-backup assertions on the final APK (`.github/scripts/check-no-os-backup.sh`: `allowBackup=false`, `hasFragileUserData=false`, both rule files referenced and each excluding exactly the 9 domains with `path="."`, no `<include>`) |
 | `ios` (x3) | all flavors built with `--no-codesign` |
 
 Flutter is pinned to the exact version in `FLUTTER_VERSION` (3.47.9), matching `pubspec.lock`. All actions are pinned to commit SHAs.

@@ -56,6 +56,12 @@ android {
         }
     }
 
+    // T-165: AllowBackup / DataExtractionRules / FullBackupContent are fatal (lint.xml).
+    lint {
+        lintConfig = file("lint.xml")
+        abortOnError = true
+    }
+
     buildTypes {
         release {
             // TODO: Add your own signing config for the release build.

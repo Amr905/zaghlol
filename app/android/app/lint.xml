@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- T-165 (FR-SEC-05): backup-rule checks are release blockers. "fatal" is at
+     least "error" and also stops lintVital on release builds. CI runs
+     :app:lintDevNoSmsDebug with abortOnError. -->
+<lint>
+    <issue id="AllowBackup" severity="fatal" />
+    <issue id="DataExtractionRules" severity="fatal" />
+    <issue id="FullBackupContent" severity="fatal" />
+</lint>
