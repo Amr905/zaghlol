@@ -14,6 +14,8 @@
   <ItemGroup>
     <!-- The spec under test is copied next to the test assembly. -->
     <Content Include="..\..\openapi\zaghlol-v1.yaml" Link="openapi\zaghlol-v1.yaml" CopyToOutputDirectory="PreserveNewest" />
+    <!-- Shared install-bound restore hash vectors (backend-api.md section 4.3), also used by the Dart tests. -->
+    <None Update="vectors\restore-binding-v1.json" CopyToOutputDirectory="PreserveNewest" />
   </ItemGroup>
 
 </Project>

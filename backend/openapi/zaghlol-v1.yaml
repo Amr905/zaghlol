@@ -121,7 +121,7 @@ paths:
         '400':
           $ref: '#/components/responses/BadRequest'
         '409':
-          $ref: '#/components/responses/InstallExists'
+          $ref: '#/components/responses/InstallConflict'
         '413':
           $ref: '#/components/responses/PayloadTooLarge'
         '415':
@@ -314,7 +314,9 @@ paths:
         acknowledges Android purchases, and grants Gold only for a purchased and active state. A pending
         purchase returns `status: pending` and grants nothing. Idempotent for 24 hours per `Idempotency-Key`.
         No device attestation here: the store-side binding to HMAC(installId) already ties a new purchase to
-        the buying install (ADR-012 Amendment (2026-11-05) Part B). Verify gives the purchase its first seat.
+        the buying install (ADR-012 Amendment (2026-11-05) Part B). Verify binds the purchase's single seat to the
+        buying install when the purchase has no seat yet (not a move, D-52); it never changes an existing holder.
+        A replay with the same `Idempotency-Key` but a different body is `409 IDEMPOTENCY_KEY_REUSED`.
       security:
         - installToken: []
         - installToken: []
@@ -351,6 +353,8 @@ paths:
           $ref: '#/components/responses/PayloadTooLarge'
         '415':
           $ref: '#/components/responses/UnsupportedMediaType'
+        '409':
+          $ref: '#/components/responses/IdempotencyKeyReused'
         '422':
           $ref: '#/components/responses/PurchaseRejected'
         '429':
@@ -370,26 +374,36 @@ paths:
       description: |
         Runs the verify procedure for each purchase (Android `{productId, purchaseToken}` items, iOS signed
         transactions), without the store-side install-binding check, which names the old install after a
-        phone change. Possession of a genuine token is **not** proof of ownership (FR-GOLD-02, D-46). Instead:
+        phone change. Possession of a genuine token is **not** proof of ownership (FR-GOLD-02, D-46, D-52).
+        Instead:
 
-        - **Device attestation (FR-GOLD-09; BR-SYNC-03 amended, D-45).** `attestation` is required on every
-          restore. Android sends a Play Integrity standard-request token and iOS an App Attest assertion, both
-          bound to `SHA-256(JCS(body without attestation))` (RFC 8785 canonical JSON): the Play `requestHash`
-          is its base64url form, the App Attest `clientDataHash` is the raw digest. A missing, invalid, stale
-          (> 5 min), replayed or unbound proof fails the whole call with `422 DEVICE_ATTESTATION_FAILED`. A
-          Play verdict with only `MEETS_BASIC_INTEGRITY` gets a limited `basic` seat (one per purchase,
-          entitlement `exp` at most 7 days). An attestation-service outage is `503`, never `422`.
-        - **Seats (FR-GOLD-08a).** At most 3 installs, on either platform, hold a live seat per purchase.
-          Restoring on an install that already holds the seat changes nothing. A 4th install first reclaims a
-          dormant seat (its token past `graceUntil`), else evicts the least recently active one (`basic`
-          first, never the caller). The evicted install gets a `status: moved` token at its next refresh and
-          offline loses Gold at `graceUntil` (at most 37 days). `seatsReleased` counts the seats taken over.
-        - **Account-linked purchases (FR-GOLD-08b)** re-bind only to an install signed in to that account
-          (send the account token); otherwise the item's outcome is `account_required`. Re-binding never
-          changes `account_id`.
+        - **Strict JSON and install binding (R2-1, R2-6).** The body is parsed once; duplicate member names and
+          lone UTF-16 surrogates are `400 VALIDATION_FAILED`. The proof is bound to
+          `bodyHash = SHA-256("zaghlol-restore-v1" || 0x00 || installId || 0x00 || JCS(body without attestation))`
+          (RFC 8785), where `installId` is the lower-case UUID text of the install that the install token
+          authenticates, never a body field or header. JCS is computed over the same parsed object the handler
+          binds. Shared vectors: `backend/tests/Zaghlol.Contract.Tests/vectors/restore-binding-v1.json`.
+        - **Device attestation (FR-GOLD-09, D-53; BR-SYNC-03 amended, D-45).** `attestation` is required on
+          every restore. Android sends a Play Integrity standard-request token with `requestHash = b64u(bodyHash)`;
+          iOS sends an App Attest assertion with `clientDataHash = bodyHash`, plus, on a new key's first use, an
+          `attestationObject` over the same hash, which registers the key to this install only. A missing,
+          invalid, replayed or unbound proof, or a Play token older than 5 minutes, fails the whole call with
+          `422 DEVICE_ATTESTATION_FAILED`. Optional Play verdicts are ignored. A Play verdict with only
+          `MEETS_BASIC_INTEGRITY` may hold the seat with entitlement `exp` at most 3 days. An
+          attestation-service outage is `503`, never `422`. There is no server challenge.
+        - **One seat (FR-GOLD-08, BR-GOLD-07).** Each purchase has exactly one seat, on Android or iOS. A restore
+          by the current holder is never a move. Otherwise the seat moves to the caller only if the last move
+          was at least 30 days ago (`movedFromOtherPhone: true`); the old holder gets a `status: moved` token at
+          its next refresh and, offline, loses Gold within 14 days. If no item ends `active` or `pending` and at
+          least one was refused for the cooldown, the call is `409 MOVE_COOLDOWN` with `nextMoveAt`, and
+          nothing that affects Gold is written. A reinstall is a new install, so its restore is a move.
+        - **Account-linked purchases (FR-GOLD-08e)** move only to an install signed in to that account (send
+          the account token); otherwise the item's outcome is `account_required`. Restore never changes
+          `account_id`.
 
         Per-item outcomes fold into the aggregate `status` (precedence active > pending > account_required >
-        expired > refunded > invalid). The only 422 is `DEVICE_ATTESTATION_FAILED`.
+        expired > refunded > invalid). The only 422 is `DEVICE_ATTESTATION_FAILED` and the only 409 is
+        `MOVE_COOLDOWN`.
 
         **Abuse limits.** Restore has its own rate-limit bucket (5 calls per hour per install, on top of the
         general per-install and per-/24 buckets) and a per-purchase limit keyed by SHA-256 of the token or
@@ -435,6 +449,8 @@ paths:
           $ref: '#/components/responses/PayloadTooLarge'
         '415':
           $ref: '#/components/responses/UnsupportedMediaType'
+        '409':
+          $ref: '#/components/responses/MoveCooldown'
         '422':
           $ref: '#/components/responses/DeviceAttestationFailed'
         '429':
@@ -452,8 +468,9 @@ paths:
       operationId: getEntitlement
       summary: Fetch a fresh signed entitlement
       description: |
-        Merges install and account purchases. Called after a restore, after sign-in, and when the cached token
-        is within 3 days of `exp`.
+        Covers the purchases whose seat this install holds. Called after a restore, after sign-in, and when the
+        cached token is within 3 days of `exp`. Never moves a seat; an install that lost a seat gets
+        `status: moved`.
       security:
         - installToken: []
         - installToken: []
@@ -484,18 +501,23 @@ paths:
       operationId: signIn
       summary: Verify a Google or Apple ID token, link this install, return the account token
       description: |
-        Links the install and attaches its purchases to the account. If the install is linked to a different
-        account the server answers `409 INSTALL_LINKED_TO_OTHER_ACCOUNT`; resend with `replaceLink: true` to
-        confirm. For Apple the `authorizationCode` is exchanged for a refresh token that is stored encrypted
+        Links the install. Attaches to the account only purchases bought on this install (D-54, FR-ACCT-05);
+        after attach the seat must be on an install linked to the account, or it returns to the buying install.
+        Then moves the seat of each account-linked purchase to this install under the 30-day cooldown (D-52,
+        FR-GOLD-07); if every such move is refused and nothing grants Gold, the call is `409 MOVE_COOLDOWN` with
+        `nextMoveAt` and nothing is written. If the install is linked to a different account the server
+        answers `409 INSTALL_LINKED_TO_OTHER_ACCOUNT`; resend with `replaceLink: true` to confirm. For Apple the `authorizationCode` is exchanged for a refresh token that is stored encrypted
         and used only to revoke on deletion. Idempotent for 24 hours per `Idempotency-Key`.
 
         Replay protection (ADR-016 amendment 2). The app sends the **raw** client nonce (at least 128 bits,
         base64url); the provider saw only `hex(SHA-256(raw))`, the lower-case hex SHA-256 of the raw nonce's
         ASCII bytes. The server recomputes that value and compares it with the token's `nonce` claim in
         constant time, so a copied claim does not pass. A token whose `iat` is more than 10 minutes old is
-        rejected (`422 ID_TOKEN_INVALID`). Every accepted token is single-use: the server stores the hash of its
-        nonce (or, for a Google token without a nonce, the SHA-256 of the token) until the token's `exp`, and
-        a second use is rejected. The rule applies to Google whenever the app sends a nonce.
+        rejected (`422 ID_TOKEN_INVALID`). The nonce is required for both providers (ADR-016 amendment 3); a
+        token without a `nonce` claim is rejected. Every accepted token is single-use: the server stores the
+        hash of its nonce until the token's `exp`, and a second use is rejected. An `Idempotency-Key` replay
+        returns the stored result only to the same install for an identical body; a different body is
+        `409 IDEMPOTENCY_KEY_REUSED`.
       security:
         - installToken: []
       parameters:
@@ -528,7 +550,7 @@ paths:
         '401':
           $ref: '#/components/responses/InstallTokenInvalid'
         '409':
-          $ref: '#/components/responses/InstallLinkedToOtherAccount'
+          $ref: '#/components/responses/SignInConflict'
         '413':
           $ref: '#/components/responses/PayloadTooLarge'
         '415':
@@ -1235,8 +1257,10 @@ paths:
       summary: Look up an entitlement status
       description: |
         Role `support_viewer`. The body holds exactly one of `installId` or `email`; neither ever appears in a
-        URL, so neither reaches access logs, proxies or CDN logs. Returns entitlement status only; there is no
-        endpoint that lists installs. Audited: the audit row stores the install ID, or
+        URL, so neither reaches access logs, proxies or CDN logs. Returns entitlement and seat status only
+        (per related purchase: its UUID, plan, state, whether the looked-up install holds the seat or is the
+        pending claimant, account-linked or not, and the cooldown dates); there is no endpoint that lists
+        installs, and no tokens or other installs' IDs are returned. Audited: the audit row stores the install ID, or
         `HMAC-SHA256(K_audit, NFC(trim(lower(email))))` with a dedicated KMS key, plus the matched
         `account_id`; never the e-mail itself. The row is deleted exactly 1 year after creation (D-47,
         FR-BE-11). Not idempotency-keyed (read-only).
@@ -1266,6 +1290,66 @@ paths:
           $ref: '#/components/responses/Forbidden'
         '404':
           $ref: '#/components/responses/NotFound'
+        '413':
+          $ref: '#/components/responses/PayloadTooLarge'
+        '415':
+          $ref: '#/components/responses/UnsupportedMediaType'
+        '429':
+          $ref: '#/components/responses/RateLimited'
+        '500':
+          $ref: '#/components/responses/InternalError'
+
+  /admin/v1/support/seat:move:
+    post:
+      tags: [Admin]
+      operationId: adminMoveSeat
+      summary: Move a purchase's Gold seat past the 30-day cooldown (audited)
+      description: |
+        Role `support_agent` (D-52, D-54, EC-68, FR-ACCT-05; backend-api.md section 5.3). Moves the single seat of
+        `purchaseId` to `toInstallId`, which must be the purchase's pending claimant (an install whose own restore
+        or sign-in passed attestation, store and account checks but was refused for the cooldown in the last
+        7 days) or, for `attachToAccount` alone, the current holder. Any other target, a target that breaks the
+        account rule, or an attach that is not possible is `409 ADMIN_CONFLICT`. The move neither checks nor
+        restarts the cooldown. `attachToAccount` links an unlinked purchase to the target install's account.
+        Moving to the current holder changes nothing. Every call is audited (`support_seat_move`: purchase,
+        from and to install, reason code, ticket reference, outcome; never an e-mail or free text) and the row
+        is deleted exactly 1 year after creation (D-47 rules). Interim client: `zaghlol-ops support move`.
+      x-required-roles: [support_agent]
+      security:
+        - operatorOidc: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/SupportSeatMoveRequest'
+            example:
+              purchaseId: 0193f2c4-7a10-7c52-9d3e-5b1f8a2c6e01
+              toInstallId: 0193f2c4-7a10-4c52-9d3e-5b1f8a2c6e77
+              reasonCode: lost_or_broken_phone
+              ticketRef: ZG-10422
+      responses:
+        '200':
+          description: The seat after the call.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SupportSeatMoveResult'
+              example:
+                purchaseId: 0193f2c4-7a10-7c52-9d3e-5b1f8a2c6e01
+                moved: true
+                attached: false
+                nextMoveAt: '2026-12-06T09:12:00Z'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/UnauthorizedGeneric'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '409':
+          $ref: '#/components/responses/AdminConflict'
         '413':
           $ref: '#/components/responses/PayloadTooLarge'
         '415':
@@ -1407,7 +1491,10 @@ components:
       name: Idempotency-Key
       in: header
       required: true
-      description: A ULID. Replays within 24 hours return the stored result.
+      description: |
+        A ULID. A stored result is keyed by (installId from the install token, operationId, this key) and records
+        the SHA-256 of the request body. A replay within 24 hours returns it only when the body hash matches;
+        otherwise `409 IDEMPOTENCY_KEY_REUSED`. Another install's request with the same key is a new request.
       schema:
         type: string
         pattern: '^[0-9A-HJKMNP-TV-Z]{26}$'
@@ -1516,7 +1603,7 @@ components:
     DeviceAttestationFailed:
       description: |
         `DEVICE_ATTESTATION_FAILED`. The restore's Play Integrity token or App Attest assertion is missing,
-        invalid, stale, replayed or not bound to the request body. iOS: if no `attestationObject` was sent,
+        invalid, replayed or not bound to this install and request body, or (Android) stale. iOS: if no `attestationObject` was sent,
         generate a new App Attest key, attest it and retry once; Android: retry once with a fresh token. Then
         stop and show the help message (EC-66) with the sign-in option: an account-linked purchase reaches a
         signed-in phone through sign-in, which needs no attestation (R-19). Gold is not changed. An outage of
@@ -1542,6 +1629,46 @@ components:
             $ref: '#/components/schemas/Problem'
     InstallLinkedToOtherAccount:
       description: '`INSTALL_LINKED_TO_OTHER_ACCOUNT`. Ask the user; resend with `replaceLink: true` to confirm.'
+      content:
+        application/problem+json:
+          schema:
+            $ref: '#/components/schemas/Problem'
+    InstallConflict:
+      description: |
+        `INSTALL_EXISTS`: regenerate the install ID and retry. `IDEMPOTENCY_KEY_REUSED`: the same
+        `Idempotency-Key` was used with a different body; a client bug, use a new key.
+      content:
+        application/problem+json:
+          schema:
+            $ref: '#/components/schemas/Problem'
+    IdempotencyKeyReused:
+      description: |
+        `IDEMPOTENCY_KEY_REUSED`. The same install sent this `Idempotency-Key` for this operation with a different
+        body. The stored result is never returned. A client bug: use a new key for a new request.
+      content:
+        application/problem+json:
+          schema:
+            $ref: '#/components/schemas/Problem'
+    MoveCooldown:
+      description: |
+        `MOVE_COOLDOWN` (D-52). Gold from this purchase moved to another phone less than 30 days ago, so it can't
+        move here yet. `nextMoveAt` says when it can. Show that date and the support link (EC-68); do not retry
+        before it. Nothing that affects Gold was written, and this refusal is not a move.
+      content:
+        application/problem+json:
+          schema:
+            $ref: '#/components/schemas/Problem'
+          example:
+            type: https://api.zaghlol.app/problems/move-cooldown
+            title: Move not yet possible
+            status: 409
+            code: MOVE_COOLDOWN
+            nextMoveAt: '2026-12-06T09:12:00Z'
+    SignInConflict:
+      description: |
+        `INSTALL_LINKED_TO_OTHER_ACCOUNT`: ask the user; resend with `replaceLink: true` to confirm.
+        `MOVE_COOLDOWN`: the account's Gold moved less than 30 days ago; show `nextMoveAt` and the support link;
+        nothing was written. `IDEMPOTENCY_KEY_REUSED`: same key, different body; a client bug.
       content:
         application/problem+json:
           schema:
@@ -1651,8 +1778,9 @@ components:
       type: object
       description: |
         Wrapper for the signed entitlement. The token claims are
-        `{iss, sub, acct, plan, status, exp, graceUntil, iat, src[], v}` and are read only after the app
-        verifies the signature.
+        `{iss, sub, acct, plan, status, exp, graceUntil, iat, nextMoveAt, src[], v}` and are read only after the
+        app verifies the signature. `status` is one of active, grace, expired, refunded, moved, none. For every
+        plan `exp <= iat + 7 d` (3 d for a basic-integrity seat) and `graceUntil = exp + 7 d` (D-52, BR-GOLD-07).
       required: [token]
       properties:
         token:
@@ -1682,6 +1810,9 @@ components:
           type: integer
           format: int32
           minimum: 0
+        nextMoveAt:
+          description: '`MOVE_COOLDOWN` only: the earliest time the seat can move to another install (D-52).'
+          $ref: '#/components/schemas/UtcTimestamp'
         correlationId:
           type: string
           maxLength: 64
@@ -1703,6 +1834,8 @@ components:
         - METHOD_NOT_ALLOWED
         - INSTALL_EXISTS
         - INSTALL_LINKED_TO_OTHER_ACCOUNT
+        - MOVE_COOLDOWN
+        - IDEMPOTENCY_KEY_REUSED
         - ADMIN_CONFLICT
         - DEVICE_ATTESTATION_FAILED
         - PAYLOAD_TOO_LARGE
@@ -2153,9 +2286,10 @@ components:
     PlayIntegrityProof:
       type: object
       description: |
-        Play Integrity standard-request token (an encrypted JWS), requested with
-        `requestHash = b64u(SHA-256(JCS(body without attestation)))`. Decoded server-side with
-        `decodeIntegrityToken`. BR-SYNC-03 (amended, D-45): no other device data is sent.
+        Play Integrity standard-request token (an encrypted JWS), requested with `requestHash = b64u(bodyHash)`,
+        where `bodyHash` is the install-bound restore hash (see `restorePurchases`). Decoded server-side with
+        `decodeIntegrityToken`; optional verdict fields are ignored. BR-SYNC-03 (amended, D-45): no other device
+        data is sent.
       additionalProperties: false
       required: [type, token]
       properties:
@@ -2168,9 +2302,10 @@ components:
     AppAttestProof:
       type: object
       description: |
-        App Attest assertion over `clientDataHash = SHA-256(JCS(body without attestation))`, with the install's
-        App Attest key. `attestationObject` is sent once, on the first use of a new key, attested over the same
-        `clientDataHash`.
+        App Attest assertion over `clientDataHash = bodyHash`, the install-bound restore hash (see
+        `restorePurchases`), with this install's App Attest key. `attestationObject` is sent once, on the first use
+        of a new key, attested over the same install-bound `clientDataHash`, so the key registers to this install
+        only.
       additionalProperties: false
       required: [type, keyId, assertion]
       properties:
@@ -2234,6 +2369,7 @@ components:
         Aggregate result over all submitted purchases. `status` is the best item outcome by the precedence
         active > pending > account_required > expired > refunded > invalid. `restoredCount` is how many items are `active`.
         `entitlement` is the merged entitlement after the restore, or `null` if nothing grants Gold.
+        A cooldown refusal of every move is `409 MOVE_COOLDOWN`, not a 200.
       required: [status, restoredCount, serverTime]
       properties:
         status:
@@ -2242,13 +2378,11 @@ components:
           type: integer
           format: int32
           minimum: 0
-        seatsReleased:
-          type: integer
-          format: int32
-          minimum: 0
+        movedFromOtherPhone:
+          type: boolean
           description: |
-            Seats this restore took over from other installs (dormant or least recently active, FR-GOLD-08).
-            The app tells the user that Gold left another phone.
+            True when this restore moved a seat from another install (D-52). The app tells the user that Gold
+            left the other phone and that the next move is possible in 30 days.
         entitlement:
           oneOf:
             - $ref: '#/components/schemas/Entitlement'
@@ -2276,7 +2410,7 @@ components:
     SignInRequest:
       type: object
       additionalProperties: false
-      required: [provider, idToken]
+      required: [provider, idToken, nonce]
       properties:
         provider:
           type: string
@@ -2288,8 +2422,8 @@ components:
           pattern: '^[A-Za-z0-9_-]{22,128}$'
           description: |
             The raw client nonce (at least 128 bits of CSPRNG output, base64url without padding), never its
-            hash. The server checks `hex(SHA-256(nonce)) == id_token.nonce` in constant time. Required for
-            Apple; required for Google whenever the platform flow supports a nonce.
+            hash. The server checks `hex(SHA-256(nonce)) == id_token.nonce` in constant time. Required for both
+            providers (ADR-016 amendment 3).
         authorizationCode:
           type: string
           minLength: 1
@@ -2298,12 +2432,6 @@ components:
         replaceLink:
           type: boolean
           description: Confirms replacing a link to a different account after a 409.
-      if:
-        properties:
-          provider:
-            const: apple
-      then:
-        required: [nonce]
     SignInResponse:
       type: object
       required: [accountId, accountToken, entitlement, linkedInstalls, serverTime]
@@ -2319,6 +2447,9 @@ components:
           type: integer
           format: int32
           minimum: 1
+        movedFromOtherPhone:
+          type: boolean
+          description: True when sign-in moved the seat of an account-linked purchase from another install (D-52).
         serverTime:
           $ref: '#/components/schemas/UtcTimestamp'
 
@@ -2683,12 +2814,17 @@ components:
         - $ref: '#/components/schemas/SupportLookupByEmail'
     SupportEntitlement:
       type: object
-      description: Entitlement status only. No purchase tokens, no personal data beyond the looked-up key.
+      description: Entitlement and seat status only. No purchase tokens, no personal data beyond the looked-up key.
       required: [status]
       properties:
         status:
           type: string
-          enum: [active, grace, expired, refunded, none]
+          enum: [active, grace, expired, refunded, moved, none]
+        purchases:
+          type: array
+          maxItems: 20
+          items:
+            $ref: '#/components/schemas/SupportPurchase'
         plan:
           type: [string, 'null']
         exp:
@@ -2696,6 +2832,74 @@ components:
             - $ref: '#/components/schemas/UtcTimestamp'
             - type: 'null'
         graceUntil:
+          oneOf:
+            - $ref: '#/components/schemas/UtcTimestamp'
+            - type: 'null'
+    SupportPurchase:
+      type: object
+      description: One purchase related to the looked-up install or account (D-52). No store keys or tokens.
+      required: [purchaseId, plan, state, store, seat, accountLinked]
+      properties:
+        purchaseId:
+          type: string
+          format: uuid
+        plan:
+          type: string
+          enum: [monthly, yearly, lifetime]
+        state:
+          type: string
+          enum: [pending, active, in_grace, on_hold, paused, canceled_active, expired, refunded, revoked]
+        store:
+          type: string
+          enum: [google_play, app_store]
+        seat:
+          type: string
+          description: |
+            The looked-up install's relation to the seat: `holder`, pending `claimant` (refused only by the
+            cooldown in the last 7 days), or `none`. For an e-mail lookup, `held` or `vacant`.
+          enum: [holder, claimant, none, held, vacant]
+        accountLinked:
+          type: boolean
+        lastMovedAt:
+          oneOf:
+            - $ref: '#/components/schemas/UtcTimestamp'
+            - type: 'null'
+        nextMoveAt:
+          oneOf:
+            - $ref: '#/components/schemas/UtcTimestamp'
+            - type: 'null'
+    SupportSeatMoveRequest:
+      type: object
+      additionalProperties: false
+      required: [purchaseId, toInstallId, reasonCode, ticketRef]
+      properties:
+        purchaseId:
+          type: string
+          format: uuid
+        toInstallId:
+          $ref: '#/components/schemas/InstallId'
+        reasonCode:
+          type: string
+          enum: [lost_or_broken_phone, reinstall, buying_phone_gone, other]
+        ticketRef:
+          type: string
+          description: Support ticket number. Never free text, so no personal data reaches the audit row.
+          pattern: '^[A-Za-z0-9_-]{1,32}$'
+        attachToAccount:
+          type: boolean
+          description: Link an unlinked purchase to the target install's account (FR-ACCT-05).
+    SupportSeatMoveResult:
+      type: object
+      required: [purchaseId, moved, attached]
+      properties:
+        purchaseId:
+          type: string
+          format: uuid
+        moved:
+          type: boolean
+        attached:
+          type: boolean
+        nextMoveAt:
           oneOf:
             - $ref: '#/components/schemas/UtcTimestamp'
             - type: 'null'

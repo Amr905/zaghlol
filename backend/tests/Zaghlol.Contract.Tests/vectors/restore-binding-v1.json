@@ -1,0 +1,27 @@
+{
+  "description": "Shared vectors for the install-bound restore hash (backend-api.md section 4.3 step 1, ADR-012 Part B (d)). bodyHash = SHA-256(prefix || 0x00 || installId || 0x00 || JCS(body without attestation)). JCS is RFC 8785. The Dart (T-145) and .NET (T-132) implementations must reproduce every 'valid' vector exactly and reject every 'invalid' one with 400 VALIDATION_FAILED. All values are synthetic.",
+  "prefix": "zaghlol-restore-v1",
+  "valid": [
+    {
+      "name": "android-lifetime",
+      "installId": "0193f2c4-7a10-4c52-9d3e-5b1f8a2c6e77",
+      "body": { "platform": "android", "purchases": [ { "productId": "zaghlol_gold_lifetime", "purchaseToken": "synthetic-play-token/0001" } ], "attestation": { "type": "play_integrity", "token": "ignored-for-the-hash" } },
+      "jcs": "{\"platform\":\"android\",\"purchases\":[{\"productId\":\"zaghlol_gold_lifetime\",\"purchaseToken\":\"synthetic-play-token/0001\"}]}",
+      "bodyHashHex": "40f8f33ed0a1b6c6f8f7ff46b3cb5084841b1c6e09a93083a7c52da862eca16f",
+      "requestHashB64u": "QPjzPtChtsb49_9Gs8tQhIQbHG4JqTCDp8UtqGLsoW8"
+    },
+    {
+      "name": "ios-member-order",
+      "installId": "0193f2c4-7a10-4c52-9d3e-5b1f8a2c6e77",
+      "body": { "signedTransactions": [ "eyJhbGciOiJFUzI1NiJ9.eyJzeW50aGV0aWMiOnRydWV9.c2ln" ], "attestation": { "type": "app_attest", "keyId": "ignored", "assertion": "ignored" }, "platform": "ios" },
+      "jcs": "{\"platform\":\"ios\",\"signedTransactions\":[\"eyJhbGciOiJFUzI1NiJ9.eyJzeW50aGV0aWMiOnRydWV9.c2ln\"]}",
+      "bodyHashHex": "b086de78734a02cbda6c4f4d0d9c7117a344c7c4cd8126db00236e6552e6ade6",
+      "requestHashB64u": "sIbeeHNKAsvabE9NDZxxF6NEx8TNgSbbACNuZVLmreY"
+    }
+  ],
+  "invalid": [
+    { "name": "duplicate-member", "raw": "{\"platform\":\"android\",\"platform\":\"ios\",\"purchases\":[]}" },
+    { "name": "lone-high-surrogate", "raw": "{\"platform\":\"android\",\"purchases\":[{\"productId\":\"zaghlol_gold_lifetime\",\"purchaseToken\":\"\\ud800\"}]}" },
+    { "name": "lone-low-surrogate", "raw": "{\"platform\":\"android\",\"purchases\":[{\"productId\":\"zaghlol_gold_lifetime\",\"purchaseToken\":\"\\udc00x\"}]}" }
+  ]
+}
