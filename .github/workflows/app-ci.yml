@@ -31,6 +31,8 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@fbc6f3992d24b796d5a048ff273f7fcc4a7b6c09 # v5.1.0
+        with:
+          persist-credentials: false
       - uses: subosito/flutter-action@1a449444c387b1966244ae4d4f8c696479add0b2 # v2.23.0
         with:
           flutter-version: ${{ env.FLUTTER_VERSION }}
@@ -38,6 +40,14 @@ jobs:
           cache: true
       - name: Resolve workspace (lockfile must be up to date)
         run: flutter pub get --enforce-lockfile
+      - name: Flutter version must match app-regen.yml
+        run: |
+          ci=$(grep -E "^  FLUTTER_VERSION:" .github/workflows/app-ci.yml | grep -oE "[0-9]+\.[0-9]+\.[0-9]+")
+          regen=$(grep -E "^  FLUTTER_VERSION:" .github/workflows/app-regen.yml | grep -oE "[0-9]+\.[0-9]+\.[0-9]+")
+          if [ -z "$ci" ] || [ "$ci" != "$regen" ]; then
+            echo "::error::FLUTTER_VERSION differs: app-ci.yml='$ci' app-regen.yml='$regen'"
+            exit 1
+          fi
       - name: dart format
         run: |
           if ! dart format --output=none --set-exit-if-changed . > format.log 2>&1; then
@@ -69,6 +79,8 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@fbc6f3992d24b796d5a048ff273f7fcc4a7b6c09 # v5.1.0
+        with:
+          persist-credentials: false
       - uses: subosito/flutter-action@1a449444c387b1966244ae4d4f8c696479add0b2 # v2.23.0
         with:
           flutter-version: ${{ env.FLUTTER_VERSION }}
@@ -94,6 +106,8 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@fbc6f3992d24b796d5a048ff273f7fcc4a7b6c09 # v5.1.0
+        with:
+          persist-credentials: false
       - uses: actions/setup-java@b6effb05e454b25005698d916606bdc6ffcbf961 # v5.7.0
         with:
           distribution: temurin
@@ -120,6 +134,15 @@ jobs:
       - name: Gradle unit tests
         working-directory: app/android
         run: ./gradlew --no-daemon testDevNoSmsDebugUnitTest
+      # Guard against a green run with zero tests (for example an emptied test dir).
+      - name: Assert Kotlin tests actually ran
+        run: |
+          n=$(cat app/android/app/build/test-results/testDevNoSmsDebugUnitTest/*.xml 2>/dev/null | grep -c "<testcase " || true)
+          echo "kotlin testcases: $n"
+          if [ "$n" -lt 1 ]; then
+            echo "::error::no Kotlin <testcase> found in Gradle results"
+            exit 1
+          fi
       - name: Upload Gradle test reports
         if: failure()
         uses: actions/upload-artifact@b7c566a772e6b6bfb58ed0dc250532a479d7789f # v6.0.0
@@ -134,6 +157,8 @@ jobs:
     runs-on: macos-latest
     steps:
       - uses: actions/checkout@fbc6f3992d24b796d5a048ff273f7fcc4a7b6c09 # v5.1.0
+        with:
+          persist-credentials: false
       - uses: subosito/flutter-action@1a449444c387b1966244ae4d4f8c696479add0b2 # v2.23.0
         with:
           flutter-version: ${{ env.FLUTTER_VERSION }}
@@ -191,6 +216,8 @@ jobs:
       EXPECT_SMS: ${{ matrix.sms }}
     steps:
       - uses: actions/checkout@fbc6f3992d24b796d5a048ff273f7fcc4a7b6c09 # v5.1.0
+        with:
+          persist-credentials: false
       - uses: actions/setup-java@b6effb05e454b25005698d916606bdc6ffcbf961 # v5.7.0
         with:
           distribution: temurin
@@ -264,6 +291,8 @@ jobs:
       FLAVOR: ${{ matrix.flavor }}
     steps:
       - uses: actions/checkout@fbc6f3992d24b796d5a048ff273f7fcc4a7b6c09 # v5.1.0
+        with:
+          persist-credentials: false
       - uses: subosito/flutter-action@1a449444c387b1966244ae4d4f8c696479add0b2 # v2.23.0
         with:
           flutter-version: ${{ env.FLUTTER_VERSION }}

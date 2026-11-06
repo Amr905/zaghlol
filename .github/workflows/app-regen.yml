@@ -9,9 +9,12 @@ name: app-regen
 #                    (this executes branch code) and uploads the candidate files
 #                    as an artifact.
 #   2. commit      - permissions: contents: write. Runs NO repo code and uses no
-#                    third-party action. Copies only whitelisted paths from the
-#                    artifact (pubspec.lock, app/test/**/goldens/*.png, PNG magic
-#                    checked, no symlinks) and pushes a fast-forward commit.
+#                    third-party action. Rejects tracked symlinks, validates the
+#                    artifact (pubspec.lock: size cap, hosted/sdk sources only;
+#                    app/test/**/goldens/*.png: path regex, no dot components,
+#                    2 MB cap, PNG magic), vets every destination path, copies with
+#                    --remove-destination, and pushes a fast-forward commit. The
+#                    token is not persisted in .git/config; only the push sees it.
 # Every ${{ }} value reaches shell code through env:, never run: interpolation.
 on:
   workflow_dispatch:
@@ -30,10 +33,6 @@ on:
 permissions:
   contents: read
 
-concurrency:
-  group: app-regen-${{ github.ref }}
-  cancel-in-progress: false
-
 env:
   # Keep in sync with FLUTTER_VERSION in app-ci.yml. FLUTTER_SHA is the commit
   # the tag must resolve to (guards against a moved tag).
@@ -51,6 +50,11 @@ jobs:
        contains(github.event.head_commit.message, '[regen-lock]'))
     permissions:
       contents: read
+    # Job-level (not workflow-level) so that plain pushes, which skip this job,
+    # never cancel a pending regen run.
+    concurrency:
+      group: app-regen-${{ github.ref }}
+      cancel-in-progress: false
     outputs:
       lock: ${{ steps.targets.outputs.lock }}
       goldens: ${{ steps.targets.outputs.goldens }}
@@ -128,12 +132,16 @@ jobs:
           if-no-files-found: error
           retention-days: 3
 
+
   commit:
     name: commit regenerated files
     needs: regenerate
     runs-on: ubuntu-latest
     permissions:
       contents: write
+    concurrency:
+      group: app-regen-${{ github.ref }}
+      cancel-in-progress: false
     env:
       REF_NAME: ${{ github.ref_name }}
       TRIGGER_SHA: ${{ github.sha }}
@@ -148,48 +156,118 @@ jobs:
           esac
       # Exact triggering commit: if the branch moved meanwhile, the push below
       # is not a fast-forward and fails instead of clobbering newer work.
+      # No credentials are persisted in .git/config; the token is handed only to
+      # the final push step.
       - uses: actions/checkout@fbc6f3992d24b796d5a048ff273f7fcc4a7b6c09 # v5.1.0
         with:
           ref: ${{ github.sha }}
+          persist-credentials: false
       - uses: actions/download-artifact@018cc2cf5baa6db3ef3c5f8a56943fffe632ef53 # v6.0.0
         with:
           name: regen-output
           path: ${{ runner.temp }}/in
-      - name: Copy whitelisted files only
+      # Nothing below executes repository code. The checked-out tree is
+      # untrusted data: a symlink there could redirect a copy into .git/config
+      # (for example to set core.fsmonitor), so every destination is vetted.
+      - name: Reject symlinks in the tracked tree
+        shell: bash
+        run: |
+          bad=$(git ls-files -s -- pubspec.lock app | awk '$1 == "120000" { print $4 }')
+          if [ -n "$bad" ]; then
+            echo "::error::tracked symlink(s) under pubspec.lock/app: $bad"
+            exit 1
+          fi
+      - name: Validate artifact
         shell: bash
         run: |
           IN="$RUNNER_TEMP/in"
-          if find "$IN" -type l | grep -q .; then
-            echo "::error::artifact contains symlinks"; exit 1
+          if [ -n "$(find "$IN" ! -type f ! -type d)" ]; then
+            echo "::error::artifact contains entries that are neither files nor directories"; exit 1
           fi
-          if [ "$LOCK" = "true" ] && [ -f "$IN/pubspec.lock" ]; then
-            cp "$IN/pubspec.lock" pubspec.lock
-          fi
-          if [ "$GOLDENS" = "true" ]; then
-            (cd "$IN" && find app/test -type f -print0 2>/dev/null) |
-              while IFS= read -r -d '' f; do
-                if ! printf '%s' "$f" | grep -Eq '^app/test/([A-Za-z0-9_.-]+/)*goldens/[A-Za-z0-9_.-]+\.png$'; then
-                  echo "::error::refusing non-whitelisted path: $f"; exit 1
-                fi
-                if ! head -c 8 "$IN/$f" | od -An -tx1 | tr -d ' \n' | grep -q '^89504e470d0a1a0a$'; then
-                  echo "::error::not a PNG: $f"; exit 1
-                fi
-                mkdir -p "$(dirname "$f")"
-                cp "$IN/$f" "$f"
-              done
-          fi
-      - name: Commit and push
+          while IFS= read -r -d '' f; do
+            rel=${f#"$IN"/}
+            size=$(stat -c %s "$f")
+            if [ "$rel" = "pubspec.lock" ]; then
+              [ "$LOCK" = "true" ] || { echo "::error::unexpected pubspec.lock"; exit 1; }
+              [ "$size" -le 204800 ] || { echo "::error::pubspec.lock larger than 200 KB"; exit 1; }
+              grep -qE '^packages:$' "$f" || { echo "::error::pubspec.lock lacks top-level packages:"; exit 1; }
+              grep -qE '^sdks:$' "$f" || { echo "::error::pubspec.lock lacks top-level sdks:"; exit 1; }
+              if grep -E '^    source: ' "$f" | grep -vE '^    source: (hosted|sdk)$'; then
+                echo "::error::pubspec.lock has a source other than hosted/sdk (git/path refused)"; exit 1
+              fi
+              if grep -E '^      url: ' "$f" | grep -vE '^      url: "https://pub\.dev"$'; then
+                echo "::error::pubspec.lock has a hosted url other than https://pub.dev"; exit 1
+              fi
+              continue
+            fi
+            [ "$GOLDENS" = "true" ] || { echo "::error::unexpected file $rel"; exit 1; }
+            if printf '%s' "$rel" | grep -Eq '(^|/)\.\.?(/|$)'; then
+              echo "::error::dot path component: $rel"; exit 1
+            fi
+            if ! printf '%s' "$rel" | grep -Eq '^app/test/([A-Za-z0-9_.-]+/)*goldens/[A-Za-z0-9_.-]+\.png$'; then
+              echo "::error::refusing non-whitelisted path: $rel"; exit 1
+            fi
+            [ "$size" -le 2097152 ] || { echo "::error::PNG larger than 2 MB: $rel"; exit 1; }
+            if [ "$(head -c 8 "$f" | od -An -tx1 | tr -d ' \n')" != "89504e470d0a1a0a" ]; then
+              echo "::error::not a PNG: $rel"; exit 1
+            fi
+          done < <(find "$IN" -type f -print0)
+      - name: Copy validated files into the tree
+        shell: bash
         run: |
-          git add -- pubspec.lock app/test
-          if git diff --cached --quiet; then
+          IN="$RUNNER_TEMP/in"
+          WS=$(realpath -- "$GITHUB_WORKSPACE")
+          while IFS= read -r -d '' f; do
+            rel=${f#"$IN"/}
+            dest="$WS/$rel"
+            # 1. the lexically normalized destination must stay inside the workspace, outside .git
+            norm=$(realpath -m -s -- "$dest")
+            case "$norm" in
+              "$WS/.git"|"$WS/.git/"*) echo "::error::destination in .git: $rel"; exit 1 ;;
+              "$WS/"*) ;;
+              *) echo "::error::destination outside workspace: $rel"; exit 1 ;;
+            esac
+            # 2. neither the file nor any existing parent may be a symlink
+            p="$WS"
+            IFS=/ read -ra parts <<< "$rel"
+            for c in "${parts[@]}"; do
+              p="$p/$c"
+              if [ -L "$p" ]; then echo "::error::symlink in destination path: $rel"; exit 1; fi
+            done
+            # 3. the fully resolved destination must equal the normalized one
+            if [ "$(realpath -m -- "$dest")" != "$norm" ]; then
+              echo "::error::destination resolves elsewhere: $rel"; exit 1
+            fi
+            mkdir -p -- "$(dirname -- "$dest")"
+            cp --remove-destination -- "$f" "$dest"
+            chmod 0644 -- "$dest"
+          done < <(find "$IN" -type f -print0)
+      - name: Commit
+        shell: bash
+        run: |
+          g() { git -c core.hooksPath=/dev/null -c core.fsmonitor=false "$@"; }
+          g add -- pubspec.lock app/test
+          if g diff --cached --quiet; then
             echo "Nothing changed; no commit created."
             exit 0
           fi
-          git diff --cached --stat
+          g diff --cached --stat
           parts=""
           [ "$LOCK" = "true" ] && parts="pubspec.lock"
           [ "$GOLDENS" = "true" ] && parts="${parts:+$parts and }goldens"
-          git config user.name "github-actions[bot]"
-          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git commit -m "chore(ci): regenerate $parts" -m "Generated by the app-regen workflow from $TRIGGER_SHA."
-          git push origin "HEAD:refs/heads/$REF_NAME"
+          g config user.name "github-actions[bot]"
+          g config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          g commit -m "chore(ci): regenerate $parts" -m "Generated by the app-regen workflow from $TRIGGER_SHA."
+      - name: Push (token used only here)
+        shell: bash
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          if [ "$(git rev-parse HEAD)" = "$TRIGGER_SHA" ]; then
+            echo "No commit to push."
+            exit 0
+          fi
+          b64=$(printf 'x-access-token:%s' "$GH_TOKEN" | base64 -w0)
+          echo "::add-mask::$b64"
+          git -c core.hooksPath=/dev/null -c http.extraheader="AUTHORIZATION: basic $b64" \
+            push origin "HEAD:refs/heads/$REF_NAME"
