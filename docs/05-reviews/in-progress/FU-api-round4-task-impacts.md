@@ -114,3 +114,35 @@ Branch `task/FU-api-decisions` @ `2b8ccfd` (main merged at `8e77ece`). Not CI-ve
 - `RestoreBindingVectorTests.IosClientDataHashCoversTheSeatPublicKeysInOrder` (new) and the existing vector tests against the extended `restore-binding-v1.json`.
 - `SpecContractTests.TimeNonceIsSentAndEchoedExactlyOnAnchoringOperations` (new) and `SignedResponsesCarryTheSignatureHeader` with `signOut` added.
 - `DocumentationConsistencyTests` with the new `SEAT_KEY_MISMATCH` code.
+
+## Round 6 delta (R5-1…R5-9, architect response to the round-5 security review)
+
+Branch `task/FU-api-decisions` (design docs, OpenAPI and contract tests). The PO has not yet chosen between R5-3(a) and (b); the docs carry (b) as the current text and (a) as a draft marked "pending PO (R5-3a)" in ADR-012 (g).
+
+### Task impacts
+- **T-144** (app entitlement and trusted time), **R5-1, blocking**:
+  - honour an entitlement token only if `sub` equals this install's current install ID (exact string), and an account token only if `iid` equals it; a token with `acct` set needs an account token that passes the `iid` check and whose `sub` equals `acct`
+  - a failing token is ignored: not cached, grants nothing, doesn't replace the cached token, and the body **never re-anchors** trusted time (raise only, even with a fresh nonce echo); a mismatch only increments the diag counter `entitlement_sub_mismatch` / `account_iid_mismatch`
+  - on re-registration (`INSTALL_TOKEN_INVALID` → new install ID) delete the cached entitlement and account tokens before registering
+  - required unit tests: **"a validly signed token for another install grants nothing"** (with this app's own fresh echo: no Gold, cached token unchanged, no re-anchor, `tampered` not cleared, counter incremented); **"an account token with a foreign `iid` is not honoured"**; an old-`sub` body after re-registration grants nothing
+  - `supportNotice` (R5-7): persist in `secure_state` when the response is stored, delete after the user dismisses it; ignore a repeat of a notice already shown
+- **T-132** (seat service):
+  - `seat_key_trusted` set **only** by an App Attest-covered request (restore; attested sign-in only if R5-3(a) is approved); verify and sign-in register element 0 **untrusted** (R5-2)
+  - on restore, the element-0 check runs after App Attest in the same transaction as the counter update; a mismatch rolls back (R5-6)
+  - support move: `device_key_trusted` from the target install's `seat_key_trusted`; false when `device_key_hash` is NULL and on a move back (R5-4); tests: trusted holder → untrusted claimant gives false; move back gives NULL/false; trusted claimant gives true
+  - `supportNotice` re-sent with a fresh token until a sync with `entitlementIssuedAt` ≥ `support_link_notice_iat` (R5-7)
+- **T-122**: new column `purchases.support_link_notice_iat` (R5-7); `seat_key_trusted` comment (R5-2).
+- **T-130**: ownership-check fallback uses `lineItems[].latestSuccessfulOrderId`, not the deprecated `latestOrderId` (R5-8).
+- **T-135**: sign-in registers element 0 untrusted (R5-2); `restoreSuggested` as before.
+- **T-136**:
+  - new role `support_lead` (FIDO2 like `support_agent`) and `POST /admin/v1/support/purchase:unfreeze` (R5-5(b)): order of checks (no freeze → `noop`; same operator as the freeze's correction → `409 ADMIN_CONFLICT`, no store call; live ownership check; clear `dispute_frozen_until`); moves nothing; one `support_unfreeze` audit row (1 year); `support_unfreeze` alert; test that seat, account, `next_move_at`, rebinds and claimants are unchanged
+  - the R5-4 support-move trust test (shared with T-132)
+  - `supportNotice` clear-on-delivery (shared with T-132)
+- **T-137**: `zaghlol-ops support unfreeze`; runbook for the `support_unfreeze` alert (second lead checks within 2 business days); quarterly review covers `support_lead`.
+- **T-139**: purge `support_unfreeze` audit rows after 1 year.
+- **T-145** / **T-147**: on `restoreSuggested`, offer Restore only when StoreKit has a transaction for the purchase; otherwise show `nextMoveAt` and the support path (R5-3(b)); after a confirmed `SEAT_KEY_MISMATCH`, persist "own seat key unusable" and stop sending `seatKeys` (R5-6).
+- **New app seat-key task (C4)**: the R5-6 flag lives with the install ID and is dropped on re-registration.
+- **SRS (next revision, PO)**: R5-9.1 per-install keyed hash and R5-9.2 verify-time `seatKeys` in BR-SYNC-03 / D-62 / NFR-PRIV-07; R5-3 choice; R5-5(b) `support_lead` in D-64.
+
+### CI
+- First real `backend-ci` run on this branch (after BLK-05): green, including `RestoreBindingVectorTests` (with `IosClientDataHashCoversTheSeatPublicKeysInOrder`), `SeatProofVectorTests`, `DuplicateVectorsAreRejectedByTheFrameworkStrictOption`, `TimeNonceIsSentAndEchoedExactlyOnAnchoringOperations` and the new `AdminOperationRolesMatchTheSpecRequiredRoles` (34/34 contract tests).
