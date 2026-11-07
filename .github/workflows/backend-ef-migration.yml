@@ -100,8 +100,9 @@ jobs:
           dotnet tool run dotnet-ef migrations add "$NAME" \
             --project src/Zaghlol.Infrastructure \
             --startup-project src/Zaghlol.Infrastructure \
-            --output-dir Persistence/Migrations \
-            --namespace Zaghlol.Infrastructure.Persistence.Migrations
+            --output-dir Persistence/Migrations
+          # No --namespace: with it, EF places the model snapshot by namespace path (Zaghlol/Infrastructure/...).
+          # The default namespace is derived from --output-dir: Zaghlol.Infrastructure.Persistence.Migrations.
 
       - name: Collect new and changed migration files
         run: |
@@ -177,7 +178,7 @@ jobs:
           count=0
           while IFS= read -r -d '' f; do
             rel=${f#"$IN"/}
-            if ! printf '%s' "$rel" | grep -Eq '^backend/src/Zaghlol\.Infrastructure/(Persistence/)?Migrations/([0-9]{14}_[A-Za-z0-9]{1,64}(\.Designer)?|ZaghlolDbContextModelSnapshot)\.cs$'; then
+            if ! printf '%s' "$rel" | grep -Eq '^backend/src/Zaghlol\.Infrastructure/Persistence/Migrations/([0-9]{14}_[A-Za-z0-9]{1,64}(\.Designer)?|ZaghlolDbContextModelSnapshot)\.cs$'; then
               echo "::error::refusing non-whitelisted path: $rel"; exit 1
             fi
             size=$(stat -c %s "$f")
@@ -185,7 +186,7 @@ jobs:
             [ "$(tr -d '\000' < "$f" | wc -c)" = "$size" ] || { echo "::error::NUL byte in $rel"; exit 1; }
             count=$((count + 1))
           done < <(find "$IN" -type f -print0)
-          [ "$count" -ge 2 ] && [ "$count" -le 3 ] || { echo "::error::expected 2 or 3 files (migration, designer, snapshot), got $count"; exit 1; }
+          [ "$count" -eq 3 ] || { echo "::error::expected exactly 3 files (migration, designer, snapshot), got $count"; exit 1; }
 
       - name: Copy validated files into the tree
         shell: bash
