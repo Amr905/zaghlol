@@ -86,11 +86,25 @@ final class BackupExclusionTests: XCTestCase {
     XCTAssertTrue(try isExcluded(scratch))
   }
 
-  func testApplyAllSucceedsAndKeepsRootsExcluded() throws {
-    XCTAssertTrue(ZaghlolDirectories.applyAll())
-    for url in ZaghlolDirectories.appContainerDirectories() {
-      XCTAssertTrue(try isExcluded(url), "\(url.lastPathComponent) is not excluded")
+  // applyAll() is the launch path, so no test calls it on the real roots:
+  // testAppContainerDirectoriesAreExcludedAtLaunch must prove AppDelegate did.
+  func testExcludeMarksEveryDirectory() throws {
+    let dirs = ["x", "y/z"].map { scratch.appendingPathComponent($0, isDirectory: true) }
+    XCTAssertTrue(ZaghlolDirectories.exclude(dirs))
+    for dir in dirs {
+      XCTAssertTrue(try isExcluded(dir))
     }
+  }
+
+  func testExcludeReportsFailureWithoutStoppingOrCrashing() throws {
+    try FileManager.default.createDirectory(at: scratch, withIntermediateDirectories: true)
+    let file = scratch.appendingPathComponent("plain-file")
+    try Data([0x00]).write(to: file)
+    // A directory cannot be created below a regular file.
+    let impossible = file.appendingPathComponent("sub", isDirectory: true)
+    let fine = scratch.appendingPathComponent("fine", isDirectory: true)
+    XCTAssertFalse(ZaghlolDirectories.exclude([impossible, fine]))
+    XCTAssertTrue(try isExcluded(fine), "a failure must not stop the remaining directories")
   }
 
   // 3. Files created later (including atomic writes, as SQLite/restore do)

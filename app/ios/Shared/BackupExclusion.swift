@@ -88,8 +88,15 @@ enum ZaghlolDirectories {
   /// after "Delete everything" recreates the directories.
   @discardableResult
   static func applyAll(appGroupIdentifier: String? = ZaghlolDirectories.appGroupIdentifier) -> Bool {
+    exclude(appContainerDirectories() + appGroupDirectories(appGroupIdentifier: appGroupIdentifier))
+  }
+
+  /// `ensureExcluded` on each URL; one failure does not stop the others.
+  /// Returns `false` (and records the diagnostic code) if any URL failed.
+  @discardableResult
+  static func exclude(_ urls: [URL]) -> Bool {
     var allExcluded = true
-    for url in appContainerDirectories() + appGroupDirectories(appGroupIdentifier: appGroupIdentifier) {
+    for url in urls {
       do {
         try ensureExcluded(url)
       } catch {

@@ -235,7 +235,8 @@ jobs:
           for t in testAppContainerDirectoriesAreExcludedAtLaunch testDirectorySetCoversTheFlutterDataRoots \
             testFreshDirectoryIsNotExcludedByDefault testEnsureExcludedCreatesAndExcludes \
             testEnsureExcludedIsIdempotent testEnsureExcludedSurvivesDeleteAndRecreate \
-            testApplyAllSucceedsAndKeepsRootsExcluded testFilesCreatedLaterStayUnderAnExcludedDirectory \
+            testExcludeMarksEveryDirectory testExcludeReportsFailureWithoutStoppingOrCrashing \
+            testFilesCreatedLaterStayUnderAnExcludedDirectory \
             testAppGroupDirectoriesAreSkippedWithoutAContainer; do
             if ! grep -qiE "test case.*BackupExclusionTests.*$t.*passed" xcodebuild.log; then
               echo "::error::BackupExclusionTests.$t did not pass"
