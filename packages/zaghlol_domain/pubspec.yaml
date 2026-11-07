@@ -7,5 +7,7 @@ environment:
   sdk: ^3.13.7
 
 dev_dependencies:
+  # Property-based tests for money arithmetic and allocation (T-012).
+  glados: ^1.1.7
   lints: ">=5.0.0 <7.0.0"
   test: ^1.25.0
