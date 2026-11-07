@@ -190,8 +190,11 @@ void main() {
       expect(split(m(egp, 5), [1, 1]), [3, 2]);
       // 7 * [1, 2] / 3: quotas 2.33, 4.67 -> index 1 has the larger rest.
       expect(split(m(egp, 7), [1, 2]), [2, 5]);
-      // 10 * [3, 3, 1] / 7: rests 2, 2, 3 -> index 2 first, then index 0.
-      expect(split(m(egp, 10), [3, 3, 1]), [5, 4, 1]);
+      // 10 * [3, 3, 1] / 7: quotas 4.29, 4.29, 1.43 -> the one leftover unit
+      // goes to index 2 (largest rest), not to the lower index 0.
+      expect(split(m(egp, 10), [3, 3, 1]), [4, 4, 2]);
+      // 5 * [1, 1, 1] / 3: equal rests, two leftover units -> indices 0, 1.
+      expect(split(m(egp, 5), [1, 1, 1]), [2, 2, 1]);
     });
 
     test('negative amounts and zero weights', () {
