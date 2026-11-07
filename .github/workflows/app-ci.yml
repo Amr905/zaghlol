@@ -56,6 +56,12 @@ jobs:
             while read -r line; do echo "::error::format: $line"; done < format.log
             exit 1
           fi
+      - name: TMP inspect custom_lint api
+        if: always()
+        run: |
+          d=$(ls -d ~/.pub-cache/hosted/pub.dev/custom_lint_builder-0.8.1 ~/.pub-cache/hosted/pub.dev/custom_lint_core-* | head -n 3)
+          for x in $d; do grep -rnE "class (ErrorReporter|DiagnosticReporter)|ErrorReporter|DiagnosticReporter|^import|^export" $x/lib/src/lint_rule.dart $x/lib/custom_lint_builder.dart $x/lib/src/*.dart 2>/dev/null | head -n 40 | while read -r l; do echo "::error::$l"; done; done
+          grep -rn "void atNode\|void atToken\|class DiagnosticReporter\|class ErrorReporter" ~/.pub-cache/hosted/pub.dev/analyzer-8.4.0/lib 2>/dev/null | head -n 8 | while read -r l; do echo "::error::$l"; done
       - name: flutter analyze
         run: |
           if ! flutter analyze > analyze.log 2>&1; then
