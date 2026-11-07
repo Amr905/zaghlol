@@ -126,7 +126,10 @@ internal sealed partial class DatabaseRoleGuardService(
                 }
                 catch (Exception ex) when (ex is DbException or TimeoutException or SocketException or InvalidOperationException)
                 {
-                    LogUnreachable(logger, role, ex.GetType().Name);
+                    if (logger.IsEnabled(LogLevel.Debug))
+                    {
+                        LogUnreachable(logger, role, ex.GetType().Name);
+                    }
                 }
             }
 

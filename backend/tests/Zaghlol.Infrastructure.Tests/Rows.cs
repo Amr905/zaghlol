@@ -3,8 +3,8 @@ using Zaghlol.Testing;
 
 namespace Zaghlol.Infrastructure.Tests;
 
-/// <summary>A foreign key to a new, valid parent row of <paramref name="Table"/> (created as the API role).</summary>
-public sealed record Ref(string Table);
+/// <summary>A foreign key to a new, valid parent row of <paramref name="Table"/> (created by that table's writer).</summary>
+public sealed record Ref(string Table, string KeyColumn = "id");
 
 /// <summary>Valid synthetic rows per table, and the least-privilege login that writes each table in production.</summary>
 public static class Rows
@@ -137,9 +137,40 @@ public static class Rows
             ["channel"] = "sms",
             ["install_hash"] = Bytes(),
         },
+        "daily_active_counts" => new(StringComparer.Ordinal)
+        {
+            ["day"] = DateOnly.FromDateTime(DateTime.UtcNow).AddDays(-RandomNumberGenerator.GetInt32(1, 100_000)),
+            ["platform"] = "android",
+            ["app_version"] = "1.4.0",
+            ["installs"] = 1,
+        },
+        "catalog_categories" => new(StringComparer.Ordinal)
+        {
+            ["code"] = "c_" + Guid.NewGuid().ToString("N")[..12],
+            ["name_ar"] = "بقالة",
+            ["name_en"] = "Groceries",
+            ["icon"] = "cart",
+            ["color"] = "#0F7A55",
+            ["bucket"] = "needs",
+            ["sort"] = 1,
+            ["version"] = 1,
+        },
+        "catalog_merchants" => new(StringComparer.Ordinal)
+        {
+            ["canonical"] = "m_" + Guid.NewGuid().ToString("N")[..12],
+            ["category_code"] = new Ref("catalog_categories", "code"),
+            ["version"] = 1,
+        },
+        "operators" => new(StringComparer.Ordinal)
+        {
+            ["id"] = Guid.CreateVersion7(),
+            ["oidc_subject"] = Guid.NewGuid().ToString("N"),
+            ["display_name"] = "Support Operator",
+            ["roles"] = new[] { "support" },
+        },
         "audit_log" => new(StringComparer.Ordinal)
         {
-            ["operator_id"] = Guid.CreateVersion7(),
+            ["operator_id"] = new Ref("operators"),
             ["action"] = "support_lookup",
             ["target"] = Guid.CreateVersion7().ToString(),
             ["details"] = new Jsonb("{\"account_id\": null}"),
@@ -150,8 +181,9 @@ public static class Rows
     /// <summary>The login that writes the table in production (see GrantMatrix).</summary>
     public static string Writer(ZaghlolTestDatabase database, string table) => table switch
     {
-        "catalog_versions" or "audit_log" => database.Admin,
-        "contribution_aggregates" => database.Worker,
+        "catalog_versions" or "catalog_categories" or "catalog_merchants" or "audit_log" => database.Admin,
+        "contribution_aggregates" or "daily_active_counts" => database.Worker,
+        "operators" => database.Migrator, // no runtime role writes operators yet (T-136)
         _ => database.Api,
     };
 
@@ -163,8 +195,8 @@ public static class Rows
             if (value is Ref reference)
             {
                 var parent = await ResolveAsync(database, Base(reference.Table));
-                await Db.InsertAsync(database.Api, reference.Table, parent);
-                row[column] = parent["id"];
+                await Db.InsertAsync(Writer(database, reference.Table), reference.Table, parent);
+                row[column] = parent[reference.KeyColumn];
             }
         }
 

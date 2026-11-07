@@ -79,27 +79,69 @@ public class CheckConstraintTests(SchemaFixture fixture)
             // catalog_versions
             ["catalog_versions: full_snapshot_sha256 not 32 bytes"] = ("catalog_versions", Set("full_snapshot_sha256", Rows.Bytes(31)), "ck_catalog_versions_full_snapshot_sha256_length"),
 
-            // merchant_contributions (privacy CHECKs)
+            // merchant_contributions (privacy CHECKs, SEC F2): digit runs in every script, separators, "@", slug codes
             ["merchant_contributions: merchant_norm over 64 characters"] = ("merchant_contributions", Set("merchant_norm", LongText), "ck_merchant_contributions_merchant_norm"),
             ["merchant_contributions: merchant_norm with a 6-digit run"] = ("merchant_contributions", Set("merchant_norm", "transfer 123456"), "ck_merchant_contributions_merchant_norm"),
             ["merchant_contributions: merchant_norm with a phone number"] = ("merchant_contributions", Set("merchant_norm", "pay 01001234567"), "ck_merchant_contributions_merchant_norm"),
-            ["merchant_contributions: institution_code over 64 characters"] = ("merchant_contributions", Set("institution_code", LongText), "ck_merchant_contributions_code_lengths"),
-            ["merchant_contributions: category_code over 64 characters"] = ("merchant_contributions", Set("category_code", LongText), "ck_merchant_contributions_code_lengths"),
+            ["merchant_contributions: Arabic-Indic digits"] = ("merchant_contributions", Set("merchant_norm", "تحويل ٠١٠١٢٣٤٥٦٧"), "ck_merchant_contributions_merchant_norm"),
+            ["merchant_contributions: Extended Arabic-Indic digits"] = ("merchant_contributions", Set("merchant_norm", "pay ۰۱۲۳۴۵۶"), "ck_merchant_contributions_merchant_norm"),
+            ["merchant_contributions: fullwidth digits"] = ("merchant_contributions", Set("merchant_norm", "pay ０１２３４５６"), "ck_merchant_contributions_merchant_norm"),
+            ["merchant_contributions: mixed-script digits"] = ("merchant_contributions", Set("merchant_norm", "pay 01٢٣45۶"), "ck_merchant_contributions_merchant_norm"),
+            ["merchant_contributions: digits separated by spaces"] = ("merchant_contributions", Set("merchant_norm", "pay 010 1234 5678"), "ck_merchant_contributions_merchant_norm"),
+            ["merchant_contributions: digits separated by dashes"] = ("merchant_contributions", Set("merchant_norm", "card 41-11-11-11"), "ck_merchant_contributions_merchant_norm"),
+            ["merchant_contributions: digits separated by dots"] = ("merchant_contributions", Set("merchant_norm", "acct 12.34.56"), "ck_merchant_contributions_merchant_norm"),
+            ["merchant_contributions: an InstaPay address"] = ("merchant_contributions", Set("merchant_norm", "ahmed@instapay"), "ck_merchant_contributions_merchant_norm"),
+            ["merchant_contributions: an e-mail"] = ("merchant_contributions", Set("merchant_norm", "someone@example.com"), "ck_merchant_contributions_merchant_norm"),
+            ["merchant_contributions: institution_code over 64 characters"] = ("merchant_contributions", Set("institution_code", LongText), "ck_merchant_contributions_institution_code"),
+            ["merchant_contributions: institution_code upper case"] = ("merchant_contributions", Set("institution_code", "CIB"), "ck_merchant_contributions_institution_code"),
+            ["merchant_contributions: institution_code with a space"] = ("merchant_contributions", Set("institution_code", "banque misr"), "ck_merchant_contributions_institution_code"),
+            ["merchant_contributions: institution_code with a dash"] = ("merchant_contributions", Set("institution_code", "vodafone-cash"), "ck_merchant_contributions_institution_code"),
+            ["merchant_contributions: institution_code empty"] = ("merchant_contributions", Set("institution_code", string.Empty), "ck_merchant_contributions_institution_code"),
+            ["merchant_contributions: institution_code in Arabic"] = ("merchant_contributions", Set("institution_code", "البنك"), "ck_merchant_contributions_institution_code"),
+            ["merchant_contributions: category_code over 64 characters"] = ("merchant_contributions", Set("category_code", LongText), "ck_merchant_contributions_category_code"),
+            ["merchant_contributions: category_code with a dot"] = ("merchant_contributions", Set("category_code", "food.groceries"), "ck_merchant_contributions_category_code"),
+            ["merchant_contributions: category_code free text"] = ("merchant_contributions", Set("category_code", "My Rent"), "ck_merchant_contributions_category_code"),
             ["merchant_contributions: install_hash not 32 bytes"] = ("merchant_contributions", Set("install_hash", Rows.Bytes(16)), "ck_merchant_contributions_install_hash_length"),
 
             // contribution_aggregates
             ["contribution_aggregates: unknown status"] = ("contribution_aggregates", Set("status", "approved"), "ck_contribution_aggregates_status"),
 
-            // bank_requests (privacy CHECKs)
+            // bank_requests (privacy CHECKs, SEC F2/F8)
             ["bank_requests: name over 64 characters"] = ("bank_requests", Set("institution_name_norm", LongText), "ck_bank_requests_institution_name_norm"),
             ["bank_requests: name with a 6-digit run"] = ("bank_requests", Set("institution_name_norm", "acct 9876543"), "ck_bank_requests_institution_name_norm"),
+            ["bank_requests: name with Arabic-Indic digits"] = ("bank_requests", Set("institution_name_norm", "بنك ٩٨٧٦٥٤"), "ck_bank_requests_institution_name_norm"),
+            ["bank_requests: name with fullwidth digits"] = ("bank_requests", Set("institution_name_norm", "bank ９８７６５４"), "ck_bank_requests_institution_name_norm"),
+            ["bank_requests: name with spaced digits"] = ("bank_requests", Set("institution_name_norm", "bank 98 76 54"), "ck_bank_requests_institution_name_norm"),
+            ["bank_requests: name with an @"] = ("bank_requests", Set("institution_name_norm", "help@bank"), "ck_bank_requests_institution_name_norm"),
+            ["bank_requests: country lower case"] = ("bank_requests", Set("country", "eg"), "ck_bank_requests_country"),
+            ["bank_requests: country of three letters"] = ("bank_requests", Set("country", "EGY"), "ck_bank_requests_country"),
+            ["bank_requests: country free text"] = ("bank_requests", Set("country", "Egypt"), "ck_bank_requests_country"),
             ["bank_requests: unknown channel"] = ("bank_requests", Set("channel", "email"), "ck_bank_requests_channel"),
             ["bank_requests: install_hash not 32 bytes"] = ("bank_requests", Set("install_hash", Rows.Bytes(31)), "ck_bank_requests_install_hash_length"),
 
-            // audit_log
-            ["audit_log: details with email"] = ("audit_log", Set("details", new Jsonb("{\"email\": \"someone@example.com\"}")), "ck_audit_log_details_no_identifiers"),
+            // Format CHECKs (SEC F8)
+            ["installs: app_version not a version"] = ("installs", Set("app_version", "latest"), "ck_installs_app_version"),
+            ["installs: app_version with one part"] = ("installs", Set("app_version", "1"), "ck_installs_app_version"),
+            ["installs: app_version with a v prefix"] = ("installs", Set("app_version", "v1.4.0"), "ck_installs_app_version"),
+            ["installs: app_version with free text"] = ("installs", Set("app_version", "1.4.0 (Samsung SM-A515F)"), "ck_installs_app_version"),
+            ["installs: app_version suffix too long"] = ("installs", Set("app_version", "1.4.0-" + new string('a', 33)), "ck_installs_app_version"),
+            ["daily_active_counts: app_version not a version"] = ("daily_active_counts", Set("app_version", "abc"), "ck_daily_active_counts_app_version"),
+            ["store_notifications: last_error with free text"] = ("store_notifications", Set("last_error", "Timeout talking to api.example"), "ck_store_notifications_last_error"),
+            ["store_notifications: last_error lower case"] = ("store_notifications", Set("last_error", "store_unavailable"), "ck_store_notifications_last_error"),
+            ["store_notifications: store_key over 512 characters"] = ("store_notifications", Set("store_key", new string('k', 513)), "ck_store_notifications_store_key_length"),
+            ["purchases: store_key over 512 characters"] = ("purchases", Set("store_key", new string('k', 513)), "ck_purchases_store_key_length"),
+
+            // audit_log (SEC F3): any depth, any letter case, values with "@", and the target
+            ["audit_log: details with email"] = ("audit_log", Set("details", new Jsonb("{\"email\": \"x\"}")), "ck_audit_log_details_no_identifiers"),
             ["audit_log: details with order_id"] = ("audit_log", Set("details", new Jsonb("{\"order_id\": \"GPA.0000-0000-0000-00000\"}")), "ck_audit_log_details_no_identifiers"),
             ["audit_log: details with orderId"] = ("audit_log", Set("details", new Jsonb("{\"orderId\": \"GPA.0000-0000-0000-00000\"}")), "ck_audit_log_details_no_identifiers"),
+            ["audit_log: nested email"] = ("audit_log", Set("details", new Jsonb("{\"x\": {\"email\": \"x\"}}")), "ck_audit_log_details_no_identifiers"),
+            ["audit_log: email in an array"] = ("audit_log", Set("details", new Jsonb("{\"x\": [{\"orderId\": \"GPA.1\"}]}")), "ck_audit_log_details_no_identifiers"),
+            ["audit_log: Email capitalised"] = ("audit_log", Set("details", new Jsonb("{\"Email\": \"x\"}")), "ck_audit_log_details_no_identifiers"),
+            ["audit_log: ORDER_ID upper case"] = ("audit_log", Set("details", new Jsonb("{\"ORDER_ID\": \"GPA.1\"}")), "ck_audit_log_details_no_identifiers"),
+            ["audit_log: e-mail spelling"] = ("audit_log", Set("details", new Jsonb("{\"e-mail\": \"x\"}")), "ck_audit_log_details_no_identifiers"),
+            ["audit_log: an address in another value"] = ("audit_log", Set("details", new Jsonb("{\"ticket_ref\": \"someone@example.com\"}")), "ck_audit_log_details_no_identifiers"),
+            ["audit_log: target is an e-mail"] = ("audit_log", Set("target", "someone@example.com"), "ck_audit_log_target_no_email"),
         };
 
     public static TheoryData<string> CaseNames => [.. Cases.Keys];
