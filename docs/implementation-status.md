@@ -41,7 +41,7 @@
 | T-009 | SPK-03: can an iOS App Intent process immediately with a headless Flutter engine? | M0 | C4 | Opus | native-platform-engineer | T-001, T-004 | TODO | — |  |
 | T-010 | SPK-02: OCR accuracy on synthetic InstaPay/wallet receipts | M0 | C3 | Sonnet | native-platform-engineer | T-001 | TODO | — |  |
 | T-011 | SPK-04: on-device ar-EG speech availability across the device matrix | M0 | C2 | Sonnet | native-platform-engineer | T-001 | TODO | — |  |
-| T-012 | Money and Currency value types with ISO 4217 table | M0 | C4 | Opus | flutter-core-engineer | T-001 | IN_PROGRESS | — | Branch task/T-012-money (flutter-core-engineer, Opus) |
+| T-012 | Money and Currency value types with ISO 4217 table | M0 | C4 | Opus | flutter-core-engineer | T-001 | IN_REVIEW | app-ci 42315952269 (13/13 green, 121 tests) @ e36b9d5 | code-reviewer, test-engineer and security-privacy-reviewer running. Merge blocked until the genuine SIX ISO 4217 list-one.xml replaces the reconstructed snapshot (PO to download) |
 | T-013 | Text & amount normalization utilities (digits, separators, groupings) | M0 | C3 | Sonnet | parsing-engine-engineer | T-012 | TODO | — |  |
 | T-014 | Result/Failure types, SafeException and domain event bus | M0 | C2 | Sonnet | flutter-core-engineer | T-001 | TODO | — |  |
 | T-015 | Secure key bootstrap for the database key | M0 | C4 | Opus | flutter-core-engineer | T-007 | TODO | — |  |
@@ -270,3 +270,4 @@
 | 2026-11-06 | T-003 DONE: review APPROVED in round 2; CI 13/13 green, including iOS dev/staging/prod; squash-merged. Unblocks T-002, T-004, T-012, T-022, T-165. After merge: dispatch app-regen once (workflow_dispatch) and enable branch protection on main (PO). |
 | 2026-11-06 | T-012 and T-165 started in parallel (no shared files). Held: T-002 and T-004 (both change pubspec.lock; run after T-012), T-022 (after T-002 lints). |
 | 2026-11-07 | Design notes for T-122/T-123/T-138 merged (1c68de5). Lead decisions: IEnvelopeCipher goes in T-123 (T-124 now depends on T-123); the cloud KMS adapter goes in T-140; the signing-key ring is configuration, not a `signing_keys` table; accounts are hard-deleted (T-135 to fix the retention wording); operator UUIDs are allowed in operator alerts. |
+| 2026-11-07 | T-012 implemented (CI green), in C4 review. Blocker: the ISO 4217 snapshot was rebuilt from memory because the build environment can't reach six-group.com; PO asked to download it. |
