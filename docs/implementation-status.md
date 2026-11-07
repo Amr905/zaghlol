@@ -194,7 +194,7 @@
 | T-162 | Settings S-60 incl. privacy info and About | M6 | C2 | Sonnet | flutter-ui-engineer | T-020, T-087, T-115 | TODO | — |  |
 | T-163 | Categories & rules S-63/S-64 incl. custom categories (Gold) | M6 | C2 | Sonnet | flutter-ui-engineer | T-074, T-119 | TODO | — |  |
 | T-164 | Custom message template builder engine and screen S-65 (Gold) | M6 | C3 | Sonnet | parsing-engine-engineer | T-033, T-119 | TODO | — |  |
-| T-165 | Exclude app data from OS backups and device transfer | M6 | C4 | Opus | native-platform-engineer | T-001 | IN_REVIEW | app-ci 42316116828 (13/13 green) @ 13ef486; negative proof 42316160887 (task/T-165-proof, red as intended) | code, security and test reviews running. Device script docs/05-reviews/T-165-device.md still to be run on real hardware |
+| T-165 | Exclude app data from OS backups and device transfer | M6 | C4 | Opus | native-platform-engineer | T-001 | CHANGES_REQUESTED | app-ci 42316116828 (13/13 green) @ 13ef486; negative proof 42316160887 (task/T-165-proof, red as intended) | Round 1: code APPROVED, tests SUFFICIENT, security CHANGES_REQUESTED (F1: assert no backupAgent; F2: device-script allow-list + API 31+ dev row). Fixes in progress. After merge it stays open until the device run on a release candidate passes (security review F3) |
 | T-166 | Delete everything (local wipe + backend install delete) | M6 | C4 | Opus | flutter-core-engineer | T-015, T-141, T-152, T-145, T-179 | TODO | — |  |
 | T-167 | Zakah engine (hawl, nisab, native-unit dues) | M7 | C4 | Opus | flutter-core-engineer | T-113 | TODO | — |  |
 | T-168 | Zakah screen S-46 behind flag with disclaimer | M7 | C2 | Sonnet | flutter-ui-engineer | T-167, T-025, T-087 | TODO | — |  |
@@ -273,3 +273,4 @@
 | 2026-11-07 | T-012 implemented (CI green), in C4 review. Blocker: the ISO 4217 snapshot was rebuilt from memory because the build environment can't reach six-group.com; PO asked to download it. |
 | 2026-11-07 | T-012 round 1 reviews done: code and security CHANGES_REQUESTED, tests SUFFICIENT. All fixes sent to the implementer in one round. Follow-ups routed to T-021, T-046, T-149, T-155. |
 | 2026-11-07 | T-165 implemented. Lead verified CI: green run, and the negative proof is red in 7 jobs as intended. C4 reviews started. |
+| 2026-11-07 | T-165 round 1: code APPROVED, tests SUFFICIENT, security CHANGES_REQUESTED. Fixes sent. Follow-ups routed to T-008/015/016/021/062/063/065/149/150/166/171/176. |
