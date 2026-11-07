@@ -47,7 +47,7 @@ public sealed class ReadinessProbeTests : IDisposable
 
     [Theory]
     [InlineData("Host=db.invalid;Database=zaghlol;Username=zaghlol_api")]
-    [InlineData("Host=db.invalid;Database=zaghlol;Username=zaghlol_api;Max Pool Size=100;Minimum Pool Size=10")]
+    [InlineData("Host=db.invalid;Database=zaghlol;Username=zaghlol_api;Maximum Pool Size=100;Minimum Pool Size=10")]
     public void TheProductionProbeHasAPoolOfOneWhateverTheAppStringSays(string app)
     {
         var settings = new Npgsql.NpgsqlConnectionStringBuilder(PostgresDatabaseReadiness.ProbeConnectionString(app));
