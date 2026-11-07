@@ -64,3 +64,38 @@ None of G1-G10 weakens a stated acceptance criterion. The three criteria and the
 Conditions:
 - Add G1 (a Hamilton reference property) and G2/G3 (the extra parsing and `fromJson` cases) before or soon after merge. They are cheap and strengthen the C4 coverage.
 - Re-run the ISO table tests on the real SIX snapshot before merge (G11).
+
+---
+
+## Test verification, round 3 (delta 1e44bb9..cb1859c)
+
+**Verdict: TESTS_SUFFICIENT.** The earlier verdict stands, and G11 (real ISO snapshot) is now closed, with one caveat on provenance.
+
+**Evidence.** app-ci run 42407200685 is green on all 13 jobs. In job "format, analyze, unit tests" (id 128507348387) the format and analyze steps pass and the log ends "162 tests passed". That is 121 plus 41 new tests, including 7 from the delta groups. I read the code and the log. I did not re-run anything locally, because there is no Dart SDK.
+
+### Delta items
+
+| Delta item | Test (CI-green) | Does it pin the behaviour? |
+|---|---|---|
+| Real snapshot, snapshot gate | `iso4217_snapshot_gate_test`: published is a real SIX date on or after 2025-09-01. `iso4217_table_test`: "every List One code with numeric minor units is active" (asserts `table.published == listOne.published`). | Yes. The gate no longer fails on purpose and now blocks a sentinel `2000-01-01` or pre-Amendment-180 date. The published-equality assertion ties the JSON to the XML header. |
+| Oracle against real data | 25 "has exponent N" tests (KWD/BHD/OMR/JOD/TND/LYD/IQD = 3; JPY/KRW/VND/CLP/ISK/XOF/XAF/UGX/PYG = 0; EGP/USD/EUR/SAR/AED/QAR/GBP = 2; CLF/UYW = 4). They call `Currency.of(...)`, so they exercise the generated table. The expected values are hard-coded and independent of the XML. | Yes. I re-derived the data independently with a separate Python parse of `list-one.xml`. It gives 165 numeric-unit codes, which is 164 after XAD. The numeric and exponent values for those 164 codes match `currencies.json` exactly. The set also equals the 164 codes in `_baselineCodes`. |
+| Funds set | "funds codes are active, flagged and not featured". It asserts `flagged.toSet() == {BOV, CHE, CHW, CLF, COU, MXV, USN, UYI, UYW}`, which is exactly 9. | Yes. This is a strict set equality. Raw List One flags 10 codes IsFund, the 9 plus XAD, so the test would fail if XAD leaked back in. |
+| Exclusions (D-67) | "non-currency X-codes are excluded" now includes XAD, checked through `Currency.tryOf`, which is null. "the genuine snapshot lists XAD; the table does not" asserts the raw XML contains `<Ccy>XAD</Ccy>` and that neither the parsed snapshot nor the committed table contains it. "XAD is skipped even though List One flags it IsFund" uses a synthetic entry. "a committed XAD row is dropped, not kept as historic" checks the row count equals `committed.rows.length`. "render refuses a table containing XAD" checks `renderJson` and `renderDart` both throw `FormatException`. | Yes, at four layers (parse, merge, render, runtime). Each would fail if the corresponding guard were removed. |
+| `_baselineCodes` (164) | "no baseline code was deleted". | Yes. Its 164 entries have no duplicates and equal the JSON code set. It only catches deletions, not additions. That is acceptable, since the rule is append-only. |
+| Byte-identical regeneration | "iso4217_table.g.dart is byte-identical to a fresh render" (`renderDart(table) == committed .g.dart`). "currencies.json == merge(List One snapshot, committed table)" (`renderJson(merged) == committed JSON`). "the runtime table equals currencies.json" (row by row, including `isFund` and status). | Yes. These run the Dart generator inside CI against the committed Python-produced files. They pass, so this is the proof that the Python port matches the Dart renderer. Together with the "every active entry equals List One" and "every List One code is active" tests, the committed data is also tied to the XML. The one weakness is G-R3-1 below. |
+| `--fresh` guard | `freshAllowed` is tested for four cases: genuine committed table without `--i-know` is refused, with `--i-know` is allowed, placeholder is allowed, null (no table) is allowed, and a different date such as `2000-01-02` is refused. | Yes for the predicate. The `main()` wiring and exit code 64 are not tested, which is acceptable for tool glue. |
+| Interpolation-aware no-double scanner | New must-catch samples: `'${a / b}'`, `'EGP ${minor / 100}'`, and a nested `'${x ? 'a' : '${0.5}'}'`. New must-ignore samples: `'${a ~/ b} is 1.5 / 2 text'`, `'${x ? 'a/b' : '0.5'}'`, `'$name / ${map['k']}'`. The main scan over `lib/money` passes. | Yes. The must-catch cases prove interpolated code is scanned, including nested strings. The must-ignore cases prove string text is not scanned (false-positive control). |
+
+### Gaps (all non-blocking)
+
+| ID | Gap | Severity |
+|---|---|---|
+| G-R3-1 | No test renders `merge(listOne, null)` and compares it with the committed JSON. The existing JSON-sync test merges against the committed table, so it is idempotent by construction. Today there are no historic rows, so a from-scratch render should be identical. This is a one-line test to add. | Non-blocking |
+| G-R3-2 | Provenance of `list-one.xml` cannot be verified by any test, and I could not reach `six-group.com` (the proxy refused). The content is internally consistent. It has Pblshd 2026-09-17, and BGN, CUC and HRK are absent, which fits the euro adoption and CUC retirement. XCG and ZWG are present. A SHA-256 pin of the file is the only mechanical check available, so record it in the PR. Its value for the record is `33139b438657d1cee116ba737807ea71d19d6de4b90f799a09c56f0cc6a1b0ff`, with 45520 chars and no CR bytes. Someone with network access should also diff it against SIX. | Non-blocking, but a human must confirm before merge |
+| G-R3-3 | `.gitattributes` `-text` keeps the XML byte-stable. No test asserts that the XML has no CR. Low risk, since CI runs on Linux. | Non-blocking |
+| G-R3-4 | The scanner's raw-string detection looks at the previous character (`s[start-1]=='r'`). An identifier ending in `r` directly followed by a quote could be misread as a raw string. This is a latent weakness in the test tool, not a regression, and no such code exists in `lib/money` today. | Non-blocking |
+| G-R3-5 | The round-1 gaps G1 to G10 were not re-reviewed. The delta renamed two allocation property tests ("weights 0..10^6 and edges", "weights to maxMinor and edges") and added a `_hamilton` reference. That addresses G1 in principle, but I did not audit the new oracle in this round. | Non-blocking |
+
+Files read: `/home/claude/zaghlol/packages/zaghlol_domain/test/money/` (`iso4217_table_test.dart`, `iso4217_merge_test.dart`, `iso4217_snapshot_gate_test.dart`, `iso4217_test_support.dart`, `no_floating_point_test.dart`) and `/home/claude/zaghlol/packages/zaghlol_domain/tool/gen_currencies.dart`, all at `origin/t012` (cb1859c).
+
+> **Lead note on G-R3-2 (provenance):** the product owner downloaded `list-one.xml` from SIX themselves and placed it in the project folder on 2026-11-07. The file's sha256 is `33139b438657d1cee116ba737807ea71d19d6de4b90f799a09c56f0cc6a1b0ff`, and this hash is recorded in the merge commit.
