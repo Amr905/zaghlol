@@ -1,3 +1,5 @@
+import 'dart:io';
+
 import 'package:analyzer/error/listener.dart';
 import 'package:custom_lint_builder/custom_lint_builder.dart';
 
@@ -21,6 +23,7 @@ class NoPrintOutsideDebug extends DartLintRule {
     DiagnosticReporter reporter,
     CustomLintContext context,
   ) {
+    File('/tmp/zl_run.txt').writeAsStringSync('${resolver.path}\n', mode: FileMode.append);
     final scope = FileScope.of(resolver.path);
     if (scope == null || scope.isDebugOnly) return;
 
