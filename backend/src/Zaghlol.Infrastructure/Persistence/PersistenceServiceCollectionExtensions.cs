@@ -3,6 +3,7 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.DependencyInjection.Extensions;
+using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Options;
 using Npgsql;
 using Zaghlol.Application.Health;
@@ -65,15 +66,27 @@ public static class PersistenceServiceCollectionExtensions
         }
 
         services.TryAddSingleton<IZaghlolDbContextFactory, ZaghlolDbContextFactory>();
+
+        // SEC F11: stop the process if any of these logins is privileged, the owner, or in the wrong group.
+        services.TryAddSingleton(TimeProvider.System);
+        services.TryAddEnumerable(ServiceDescriptor.Singleton<IHostedService, DatabaseRoleGuardService>());
         return services;
     }
 
-    /// <summary>Readiness of the <see cref="DatabaseRole.App"/> database for <c>GET /v1/health</c> (FU-003).</summary>
+    /// <summary>
+    /// Readiness of the <see cref="DatabaseRole.App"/> database for <c>GET /v1/health</c> (FU-003), probed on a
+    /// one-connection pool of its own built from <c>ConnectionStrings:App</c>. Call after
+    /// <see cref="AddZaghlolDatabase"/> with <see cref="DatabaseRole.App"/>.
+    /// </summary>
     public static IServiceCollection AddDatabaseReadiness(this IServiceCollection services)
     {
         ArgumentNullException.ThrowIfNull(services);
 
         services.TryAddSingleton(TimeProvider.System);
+        services.TryAddKeyedSingleton(PostgresDatabaseReadiness.DataSourceKey, (provider, _) =>
+            PostgresDatabaseReadiness.CreateProbeSource(
+                provider.GetRequiredService<IOptions<DatabaseConnectionOptions>>().Value.For(DatabaseRole.App)
+                ?? throw new InvalidOperationException("ConnectionStrings:App must be set for the readiness probe.")));
         services.TryAddSingleton<IDatabaseReadiness, PostgresDatabaseReadiness>();
         return services;
     }

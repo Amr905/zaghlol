@@ -201,10 +201,16 @@ jobs:
               continue
             fi
             [ "$GOLDENS" = "true" ] || { echo "::error::unexpected file $rel"; exit 1; }
-            if printf '%s' "$rel" | grep -Eq '(^|/)\.\.?(/|$)'; then
+            # Whole-string bash matches: grep matches line by line, so a path containing a newline could pass it.
+            if [[ "$rel" =~ [^A-Za-z0-9._/-] ]]; then
+              echo "::error::unexpected character in artifact path"; exit 1
+            fi
+            re_dot='(^|/)\.\.?(/|$)'
+            if [[ "$rel" =~ $re_dot ]]; then
               echo "::error::dot path component: $rel"; exit 1
             fi
-            if ! printf '%s' "$rel" | grep -Eq '^app/test/([A-Za-z0-9_.-]+/)*goldens/[A-Za-z0-9_.-]+\.png$'; then
+            re_golden='^app/test/([A-Za-z0-9_.-]+/)*goldens/[A-Za-z0-9_.-]+\.png$'
+            if ! [[ "$rel" =~ $re_golden ]]; then
               echo "::error::refusing non-whitelisted path: $rel"; exit 1
             fi
             [ "$size" -le 2097152 ] || { echo "::error::PNG larger than 2 MB: $rel"; exit 1; }

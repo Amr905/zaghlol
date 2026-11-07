@@ -45,20 +45,23 @@ internal sealed class MerchantContributionConfiguration : IEntityTypeConfigurati
     {
         builder.ToTable("merchant_contributions", t =>
         {
-            // Privacy CHECKs (backend-schema.md section 3): no long digit runs (account/phone/card numbers) and length caps.
+            // Privacy CHECKs (backend-schema.md section 3): no digit runs (phone/card/account numbers, any script), no "@",
+            // a length cap, and the code columns restricted to their slug alphabets.
+            t.HasCheckConstraint("ck_merchant_contributions_merchant_norm", CheckSql.PrivacySafeNorm("merchant_norm"));
             t.HasCheckConstraint(
-                "ck_merchant_contributions_merchant_norm",
-                "char_length(merchant_norm) <= 64 AND merchant_norm !~ '[0-9]{6,}'");
-            t.HasCheckConstraint(
-                "ck_merchant_contributions_code_lengths",
-                "char_length(institution_code) <= 64 AND char_length(category_code) <= 64");
+                "ck_merchant_contributions_institution_code",
+                $"institution_code ~ '{CheckSql.InstitutionCodeAlphabet}'");
+            t.HasCheckConstraint("ck_merchant_contributions_category_code", $"category_code ~ '{CheckSql.CategoryCodeAlphabet}'");
             t.HasCheckConstraint("ck_merchant_contributions_install_hash_length", "octet_length(install_hash) = 32");
         });
 
         builder.HasKey(x => x.Id);
         builder.Property(x => x.Id).ValueGeneratedNever();
         builder.Property(x => x.ReceivedAt).HasDefaultValueSql("now()");
-        builder.HasIndex(x => new { x.MerchantNorm, x.InstitutionCode, x.InstallHash }).IsUnique();
+        // Named explicitly: the convention name would be 69 characters, over PostgreSQL's 63-byte identifier limit.
+        builder.HasIndex(x => new { x.MerchantNorm, x.InstitutionCode, x.InstallHash })
+            .IsUnique()
+            .HasDatabaseName("ux_merchant_contributions_identity");
         builder.HasIndex(x => x.ReceivedAt).HasDatabaseName("ix_merchant_contributions_received_at");
     }
 }
@@ -85,9 +88,8 @@ internal sealed class BankRequestConfiguration : IEntityTypeConfiguration<BankRe
     {
         builder.ToTable("bank_requests", t =>
         {
-            t.HasCheckConstraint(
-                "ck_bank_requests_institution_name_norm",
-                "char_length(institution_name_norm) <= 64 AND institution_name_norm !~ '[0-9]{6,}'");
+            t.HasCheckConstraint("ck_bank_requests_institution_name_norm", CheckSql.PrivacySafeNorm("institution_name_norm"));
+            t.HasCheckConstraint("ck_bank_requests_country", "country ~ '^[A-Z]{2}$'");
             t.HasCheckConstraint("ck_bank_requests_channel", "channel IN ('sms','notification')");
             t.HasCheckConstraint("ck_bank_requests_install_hash_length", "octet_length(install_hash) = 32");
         });
@@ -103,7 +105,9 @@ internal sealed class DailyActiveCountConfiguration : IEntityTypeConfiguration<D
 {
     public void Configure(EntityTypeBuilder<DailyActiveCount> builder)
     {
-        builder.ToTable("daily_active_counts");
+        builder.ToTable(
+            "daily_active_counts",
+            t => t.HasCheckConstraint("ck_daily_active_counts_app_version", CheckSql.AppVersion("app_version")));
 
         builder.HasKey(x => new { x.Day, x.Platform, x.AppVersion });
     }
@@ -123,16 +127,30 @@ internal sealed class OperatorAccountConfiguration : IEntityTypeConfiguration<Op
 
 internal sealed class AuditLogEntryConfiguration : IEntityTypeConfiguration<AuditLogEntry>
 {
+    /// <summary>
+    /// No e-mail or order ID under any key at any depth, in any letter case, and no "@" in any value (D-57, NFR-PRIV-07).
+    /// <c>jsonb_path_exists</c> without <c>_tz</c> is immutable.
+    /// </summary>
+    public const string DetailsNoIdentifiers =
+        "NOT jsonb_path_exists(details, 'lax $.** ? (@.type() == \"object\").keyvalue() "
+        + "? (@.key like_regex \"^(e-?mail|order_?id)$\" flag \"i\")') AND details::text !~ '@'";
+
     public void Configure(EntityTypeBuilder<AuditLogEntry> builder)
     {
-        builder.ToTable(
-            "audit_log",
-            t => t.HasCheckConstraint("ck_audit_log_details_no_identifiers", "NOT (details ?| array['email','order_id','orderId'])"));
+        builder.ToTable("audit_log", t =>
+        {
+            t.HasCheckConstraint("ck_audit_log_details_no_identifiers", DetailsNoIdentifiers);
+            t.HasCheckConstraint("ck_audit_log_target_no_email", "position('@' in target) = 0");
+        });
 
         builder.HasKey(x => x.Id);
         builder.Property(x => x.Id).UseIdentityAlwaysColumn();
         builder.Property(x => x.Details).HasColumnType("jsonb");
         builder.Property(x => x.At).HasDefaultValueSql("now()");
+
+        // Rows can only name a real operator (operators are disabled, never deleted). Append-only and the retention-gated
+        // DELETE are enforced by row-level security (InitialCreateSql.AuditLogRowLevelSecurity).
+        builder.HasOne<OperatorAccount>().WithMany().HasForeignKey(x => x.OperatorId).OnDelete(DeleteBehavior.NoAction);
 
         // Retention (backend-schema.md section 4): support rows after exactly 1 year, all others after 3 years.
         // Two indexes on the same column, so both are named in the model too.

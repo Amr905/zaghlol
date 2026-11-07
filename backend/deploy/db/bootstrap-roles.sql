@@ -12,6 +12,11 @@
 --   ops_rw           NOLOGIN group: /admin/v1/* endpoints      <- login zaghlol_admin
 --   worker_rw        NOLOGIN group: background jobs            <- login zaghlol_worker
 --   ops_ro           NOLOGIN group: read-only operators        <- login zaghlol_ops_ro
+--
+-- zaghlol_ops_ro is a direct database login, so its reads leave no audit row. It is BREAK-GLASS ONLY: credentials stay
+-- unissued until T-140 documents the procedure (who may request it, approval, time-boxed credentials, pgaudit on, review
+-- afterwards). Day-to-day operator access goes through the audited admin API (security-model.md). ops_ro can't read
+-- e-mails, provider subjects, store keys, tokens or stored responses (GrantMatrix.cs).
 
 DO $bootstrap$
 DECLARE
@@ -42,9 +47,12 @@ GRANT ops_ro TO zaghlol_ops_ro;
 -- Nothing in public; nobody but migrator creates objects.
 REVOKE ALL ON SCHEMA public FROM PUBLIC;
 
+-- Only the five logins may connect; nobody else may create schemas or temporary tables.
 DO $db$
 BEGIN
-  EXECUTE format('REVOKE CREATE, TEMPORARY ON DATABASE %I FROM PUBLIC', current_database());
+  EXECUTE format('REVOKE CONNECT, CREATE, TEMPORARY ON DATABASE %I FROM PUBLIC', current_database());
+  EXECUTE format('GRANT CONNECT ON DATABASE %I TO migrator, zaghlol_api, zaghlol_admin, zaghlol_worker, zaghlol_ops_ro',
+                 current_database());
 END
 $db$;
 

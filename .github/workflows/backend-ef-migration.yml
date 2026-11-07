@@ -10,9 +10,11 @@ name: backend-ef-migration
 #   1. generate - permissions: contents: read. Runs branch code (`dotnet ef` builds the project) and uploads the new or
 #                 changed files under backend/src/Zaghlol.Infrastructure/Persistence/Migrations as an artifact.
 #   2. commit   - permissions: contents: write; push events only. Runs NO repository code and no third-party action
-#                 besides pinned checkout/download-artifact. Rejects tracked symlinks, validates every artifact path
-#                 against a strict regex (migration, designer or model snapshot .cs files only), caps sizes, rejects NUL
-#                 bytes, vets every destination path, copies with --remove-destination and pushes a fast-forward commit.
+#                 besides pinned checkout/download-artifact. Rejects tracked symlinks and any artifact path with a
+#                 character outside [A-Za-z0-9._/-]; requires exactly <ts>_<Name>.cs and <ts>_<Name>.Designer.cs (same
+#                 <ts>, matched as whole strings) plus the model snapshot; refuses to overwrite any existing migration;
+#                 caps sizes, rejects NUL bytes, vets every destination path, copies with --remove-destination and
+#                 pushes a fast-forward commit.
 #                 The token is not persisted in .git/config; only the push step sees it.
 # Every ${{ }} value reaches shell code through env:, never run: interpolation.
 # A push made with GITHUB_TOKEN does not trigger other workflows: push a follow-up commit to run backend-ci.
@@ -82,7 +84,8 @@ jobs:
         with:
           persist-credentials: false
 
-      - uses: actions/setup-dotnet@v4
+      # SHA that @v4 resolved to on this repo's runners (2026-11-07); this job's output is committed by a bot.
+      - uses: actions/setup-dotnet@67a3573c9a986a3f9c594539f4ab511d57bb3ce9 # v4
         with:
           dotnet-version: 10.0.x
 
@@ -175,18 +178,42 @@ jobs:
           if [ -n "$(find "$IN" ! -type f ! -type d)" ]; then
             echo "::error::artifact contains entries that are neither files nor directories"; exit 1
           fi
-          count=0
+          DIR=backend/src/Zaghlol.Infrastructure/Persistence/Migrations
+          # Whole-string matches with bash [[ =~ ]] (grep matches line by line, so a path with a newline could pass).
+          re_designer="^${DIR//./\\.}/([0-9]{14})_([A-Za-z0-9]{1,64})\\.Designer\\.cs\$"
+          re_migration="^${DIR//./\\.}/([0-9]{14})_([A-Za-z0-9]{1,64})\\.cs\$"
+          # Exactly one new migration named $NAME: refuse to replace any existing migration (shipped history).
+          if compgen -G "$DIR/*_${NAME}.cs" > /dev/null; then
+            echo "::error::a migration named $NAME already exists in the tree; refusing to overwrite it"; exit 1
+          fi
+          count=0; migration=""; designer=""; snapshot=0
           while IFS= read -r -d '' f; do
             rel=${f#"$IN"/}
-            if ! printf '%s' "$rel" | grep -Eq '^backend/src/Zaghlol\.Infrastructure/Persistence/Migrations/([0-9]{14}_[A-Za-z0-9]{1,64}(\.Designer)?|ZaghlolDbContextModelSnapshot)\.cs$'; then
+            if [[ "$rel" =~ [^A-Za-z0-9._/-] ]]; then
+              echo "::error::unexpected character in artifact path"; exit 1
+            fi
+            if [[ "$rel" =~ $re_designer ]]; then
+              [ "${BASH_REMATCH[2]}" = "$NAME" ] && [ -z "$designer" ] || { echo "::error::unexpected designer file: $rel"; exit 1; }
+              designer=${BASH_REMATCH[1]}
+            elif [[ "$rel" =~ $re_migration ]]; then
+              [ "${BASH_REMATCH[2]}" = "$NAME" ] && [ -z "$migration" ] || { echo "::error::unexpected migration file: $rel"; exit 1; }
+              migration=${BASH_REMATCH[1]}
+            elif [ "$rel" = "$DIR/ZaghlolDbContextModelSnapshot.cs" ]; then
+              snapshot=$((snapshot + 1))
+            else
               echo "::error::refusing non-whitelisted path: $rel"; exit 1
+            fi
+            if [ "$rel" != "$DIR/ZaghlolDbContextModelSnapshot.cs" ] && [ -e "$rel" ]; then
+              echo "::error::refusing to overwrite existing file: $rel"; exit 1
             fi
             size=$(stat -c %s "$f")
             [ "$size" -le 2097152 ] || { echo "::error::file larger than 2 MB: $rel"; exit 1; }
             [ "$(tr -d '\000' < "$f" | wc -c)" = "$size" ] || { echo "::error::NUL byte in $rel"; exit 1; }
             count=$((count + 1))
           done < <(find "$IN" -type f -print0)
-          [ "$count" -eq 3 ] || { echo "::error::expected exactly 3 files (migration, designer, snapshot), got $count"; exit 1; }
+          if [ "$count" -ne 3 ] || [ -z "$migration" ] || [ "$migration" != "$designer" ] || [ "$snapshot" -ne 1 ]; then
+            echo "::error::expected exactly <ts>_$NAME.cs, <ts>_$NAME.Designer.cs (same <ts>) and the model snapshot"; exit 1
+          fi
 
       - name: Copy validated files into the tree
         shell: bash

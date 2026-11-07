@@ -18,6 +18,7 @@ internal sealed class PurchaseConfiguration : IEntityTypeConfiguration<Purchase>
                 "state IN ('pending','active','in_grace','on_hold','paused','canceled_active','expired','refunded','revoked')");
             t.HasCheckConstraint("ck_purchases_environment", "environment IN ('production','sandbox')");
             t.HasCheckConstraint("ck_purchases_account_link_pair", "(account_id IS NULL) = (account_linked_by IS NULL)");
+            t.HasCheckConstraint("ck_purchases_store_key_length", $"char_length(store_key) <= {CheckSql.StoreKeyMaxLength}");
         });
 
         builder.HasKey(x => x.Id);
@@ -159,6 +160,12 @@ internal sealed class StoreNotificationConfiguration : IEntityTypeConfiguration<
         {
             t.HasCheckConstraint("ck_store_notifications_environment", "environment IN ('production','sandbox')");
             t.HasCheckConstraint("ck_store_notifications_payload_digest_length", "octet_length(payload_digest) = 32");
+
+            // "error code only; never payload text"
+            t.HasCheckConstraint("ck_store_notifications_last_error", "last_error ~ '^[A-Z0-9_]{1,64}$'");
+            t.HasCheckConstraint(
+                "ck_store_notifications_store_key_length",
+                $"char_length(store_key) <= {CheckSql.StoreKeyMaxLength}");
         });
 
         builder.HasKey(x => x.Id);

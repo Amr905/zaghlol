@@ -8,19 +8,35 @@ using Zaghlol.Application.Health;
 namespace Zaghlol.Infrastructure.Persistence;
 
 /// <summary>
-/// Readiness for <c>GET /v1/health</c> (FU-003): <c>SELECT 1</c> as the API's <c>app_rw</c> login, with a 1 s timeout,
-/// the answer cached for 2 s, and at most one probe in flight.
+/// Readiness for <c>GET /v1/health</c> (FU-003). The probe runs as the API's <c>app_rw</c> login on a pool of its own
+/// with one connection (<see cref="DataSourceKey"/>), so it never competes with or disturbs the <c>/v1</c> pool: a slow
+/// or exhausted App pool isn't reported as "database down", and a failed probe never clears anybody's connections.
+/// The probe query is the login check of <see cref="DatabaseRoleGuard"/>, so the API is never "ready" as the wrong
+/// role (SEC F11). 1 s timeout, answer cached for 2 s, at most one probe in flight.
 /// </summary>
 internal sealed partial class PostgresDatabaseReadiness(
-    [FromKeyedServices(DatabaseRole.App)] NpgsqlDataSource dataSource,
+    [FromKeyedServices(PostgresDatabaseReadiness.DataSourceKey)] NpgsqlDataSource probeSource,
     TimeProvider clock,
     ILogger<PostgresDatabaseReadiness> logger) : IDatabaseReadiness, IDisposable
 {
+    /// <summary>Keyed-service key of the probe's own one-connection data source.</summary>
+    public const string DataSourceKey = "zaghlol-readiness";
+
     public static readonly TimeSpan ProbeTimeout = TimeSpan.FromSeconds(1);
     public static readonly TimeSpan CacheDuration = TimeSpan.FromSeconds(2);
 
     private readonly SemaphoreSlim gate = new(1, 1);
     private Snapshot? last;
+
+    /// <summary>The probe's data source: the App connection string with a pool of one and its own application name.</summary>
+    public static NpgsqlDataSource CreateProbeSource(string appConnectionString)
+    {
+        var builder = new NpgsqlDataSourceBuilder(appConnectionString);
+        builder.ConnectionStringBuilder.MaxPoolSize = 1;
+        builder.ConnectionStringBuilder.MinPoolSize = 0;
+        builder.ConnectionStringBuilder.ApplicationName = "zaghlol-api-readiness";
+        return builder.Build();
+    }
 
     public async ValueTask<bool> IsReadyAsync(CancellationToken cancellationToken)
     {
@@ -65,7 +81,14 @@ internal sealed partial class PostgresDatabaseReadiness(
         {
             // The driver doesn't honour cancellation in every phase (a server that accepts TCP but never answers the
             // startup handshake holds OpenAsync until the connection Timeout), so the 1 s bound is enforced here too.
-            return await probe.WaitAsync(ProbeTimeout, clock);
+            var reason = await probe.WaitAsync(ProbeTimeout, clock);
+            if (reason is not null)
+            {
+                LogWrongLogin(logger, reason);
+                return false;
+            }
+
+            return true;
         }
         catch (Exception ex) when (ex is DbException or OperationCanceledException or TimeoutException or SocketException
                                        or InvalidOperationException)
@@ -77,24 +100,24 @@ internal sealed partial class PostgresDatabaseReadiness(
                 TaskContinuationOptions.OnlyOnFaulted | TaskContinuationOptions.ExecuteSynchronously,
                 TaskScheduler.Default);
 
-            // Only the exception type: messages can carry host names or other connection details.
+            // Only the exception type: messages can carry host names or other connection details. No pool is cleared:
+            // Npgsql discards broken connections itself, and the probe's pool holds at most one.
             LogNotReady(logger, ex.GetType().Name);
-
-            // Pooled connections are likely dead (server restart, failover); don't hand them out after recovery.
-            dataSource.Clear();
             return false;
         }
     }
 
-    private async Task<bool> QueryAsync(CancellationToken cancellationToken)
+    private async Task<string?> QueryAsync(CancellationToken cancellationToken)
     {
-        await using var connection = await dataSource.OpenConnectionAsync(cancellationToken);
-        await using var command = new NpgsqlCommand("SELECT 1", connection);
-        return await command.ExecuteScalarAsync(cancellationToken) is 1;
+        await using var connection = await probeSource.OpenConnectionAsync(cancellationToken);
+        return await DatabaseRoleGuard.CheckAsync(connection, DatabaseRole.App, cancellationToken);
     }
 
     [LoggerMessage(Level = LogLevel.Warning, Message = "Database readiness probe failed ({ExceptionType})")]
     private static partial void LogNotReady(ILogger logger, string exceptionType);
+
+    [LoggerMessage(Level = LogLevel.Error, Message = "Database readiness: the App login is not acceptable ({Reason})")]
+    private static partial void LogWrongLogin(ILogger logger, string reason);
 
     private sealed record Snapshot(DateTimeOffset ValidUntil, bool Ready);
 }

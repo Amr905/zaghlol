@@ -19,6 +19,7 @@ internal sealed class InstallConfiguration : IEntityTypeConfiguration<Install>
         builder.ToTable("installs", t =>
         {
             t.HasCheckConstraint("ck_installs_platform", "platform IN ('android','ios')");
+            t.HasCheckConstraint("ck_installs_app_version", CheckSql.AppVersion("app_version"));
             t.HasCheckConstraint("ck_installs_token_hash_length", "octet_length(token_hash) = 32");
             t.HasCheckConstraint("ck_installs_registration_key_hash_length", "octet_length(registration_key_hash) = 32");
             t.HasCheckConstraint("ck_installs_registration_body_sha256_length", "octet_length(registration_body_sha256) = 32");
