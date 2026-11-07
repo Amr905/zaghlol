@@ -45,14 +45,18 @@ public sealed class ReadinessProbeTests : IDisposable
         Assert.Equal(2, server.Connections);
     }
 
-    [Fact]
-    public void TheProductionProbeSourceHasAPoolOfOne()
+    [Theory]
+    [InlineData("Host=db.invalid;Database=zaghlol;Username=zaghlol_api")]
+    [InlineData("Host=db.invalid;Database=zaghlol;Username=zaghlol_api;Max Pool Size=100;Minimum Pool Size=10")]
+    public void TheProductionProbeHasAPoolOfOneWhateverTheAppStringSays(string app)
     {
-        using var source = PostgresDatabaseReadiness.CreateProbeSource("Host=db.invalid;Database=zaghlol;Username=zaghlol_api;Max Pool Size=100");
-        var settings = new Npgsql.NpgsqlConnectionStringBuilder(source.ConnectionString);
+        var settings = new Npgsql.NpgsqlConnectionStringBuilder(PostgresDatabaseReadiness.ProbeConnectionString(app));
 
         Assert.Equal(1, settings.MaxPoolSize);
+        Assert.Equal(0, settings.MinPoolSize);
         Assert.Equal("zaghlol-api-readiness", settings.ApplicationName);
+        Assert.Equal("zaghlol_api", settings.Username);
+        using var source = PostgresDatabaseReadiness.CreateProbeSource(app);
     }
 
     private sealed class ManualClock(DateTimeOffset start) : TimeProvider

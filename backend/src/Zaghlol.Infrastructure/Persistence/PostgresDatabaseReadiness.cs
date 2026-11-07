@@ -26,14 +26,17 @@ internal sealed partial class PostgresDatabaseReadiness(
     private Snapshot? last;
 
     /// <summary>The probe's data source: the App connection string with a pool of one and its own application name.</summary>
-    public static NpgsqlDataSource CreateProbeSource(string appConnectionString)
-    {
-        var builder = new NpgsqlDataSourceBuilder(appConnectionString);
-        builder.ConnectionStringBuilder.MaxPoolSize = 1;
-        builder.ConnectionStringBuilder.MinPoolSize = 0;
-        builder.ConnectionStringBuilder.ApplicationName = "zaghlol-api-readiness";
-        return builder.Build();
-    }
+    public static NpgsqlDataSource CreateProbeSource(string appConnectionString) =>
+        NpgsqlDataSource.Create(ProbeConnectionString(appConnectionString));
+
+    /// <summary>The App connection string with the pool forced to one connection, whatever the App string says.</summary>
+    public static string ProbeConnectionString(string appConnectionString) =>
+        new NpgsqlConnectionStringBuilder(appConnectionString)
+        {
+            MaxPoolSize = 1,
+            MinPoolSize = 0,
+            ApplicationName = "zaghlol-api-readiness",
+        }.ConnectionString;
 
     public async ValueTask<bool> IsReadyAsync(CancellationToken cancellationToken)
     {

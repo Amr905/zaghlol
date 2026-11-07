@@ -14,13 +14,13 @@ public class InitialCreateGoldenTests
 {
     private static readonly Dictionary<string, string> Pinned = new(StringComparer.Ordinal)
     {
-        [nameof(InitialCreateSql.CreateEntitlementView)] = "pending",
-        [nameof(InitialCreateSql.CreateTriggers)] = "pending",
-        [nameof(InitialCreateSql.CreateInvariantTriggers)] = "pending",
-        [nameof(InitialCreateSql.Grants)] = "pending",
-        [nameof(InitialCreateSql.AuditLogRowLevelSecurity)] = "pending",
-        [nameof(InitialCreateSql.Comments)] = "pending",
-        [nameof(InitialCreateSql.DropViewAndTriggers)] = "pending",
+        [nameof(InitialCreateSql.CreateEntitlementView)] = "a64ebd4e02cdd7c5da65ba56815be54a91ebae6814dfe5412adb5f7d26597e2e",
+        [nameof(InitialCreateSql.CreateTriggers)] = "9add43021e788a9d583e16b7496d52780b5af23846109551cdc64f1e1ec49fdc",
+        [nameof(InitialCreateSql.CreateInvariantTriggers)] = "08983c0aaf18bbf5182fde14466270eb7b8135f0ee7c03fa9e15cd0a62b5703b",
+        [nameof(InitialCreateSql.Grants)] = "3267f3499b643226d5495b7ed35f52ca7d09162995553449aacba45478e480d6",
+        [nameof(InitialCreateSql.AuditLogRowLevelSecurity)] = "6b3bf5e4f378ba82ec624848dc3c1a0dc20983309c97dda9e5eebcd62c6a74fe",
+        [nameof(InitialCreateSql.Comments)] = "26ec38e147466988df3e544424e5ef0c7dccb8016783926b4aa11a0d16510a09",
+        [nameof(InitialCreateSql.DropViewAndTriggers)] = "8ed0e92ce88096e9cab6202f1424665fa4e5301b2d5ce5e195a84c3266458aa0",
     };
 
     public static TheoryData<string> Blocks => [.. Pinned.Keys];
