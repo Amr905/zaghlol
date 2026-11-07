@@ -160,9 +160,9 @@ void main() {
       }
     });
 
-    test('featured codes are active, in D-22 order', () {
+    test('featured codes are active, in A-59 order', () {
       final featured = Currency.featuredCodes.join(' ');
-      expect(featured, 'EGP USD SAR EUR AED QAR KWD BHD');
+      expect(featured, 'EGP USD SAR EUR AED QAR KWD BHD GBP INR');
       for (final c in Currency.featuredCodes) {
         expect(Currency.of(c).status, CurrencyStatus.active);
       }

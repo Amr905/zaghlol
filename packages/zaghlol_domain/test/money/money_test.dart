@@ -80,14 +80,42 @@ void main() {
       (egp, '-'),
       (egp, '--1'),
       (egp, '90071992547409.92'), // maxMinor + 1
+      (egp, '-90071992547409.92'), // -(maxMinor + 1)
       (egp, '100000000000000000000'),
+      (egp, '1.00\n'), // `$` must not match before a trailing newline
+      (egp, '\n1.00'),
+      (egp, '1.00\t'),
+      (egp, '1\u00a0000.00'), // NBSP grouping
+      (egp, '\uff11\uff12'), // fullwidth digits
+      (egp, '\u06f1\u06f2'), // Persian (Extended Arabic-Indic) digits
+      (egp, '1\u0662'), // ASCII mixed with Arabic-Indic
+      (jpy, '1.0'), // exponent 0: even a zero fraction is rejected
+      (egp, '00000000000000000090071992547409.92'), // zeros do not hide range
     ];
-    for (final (currency, text) in rejected) {
-      test('${currency.code} "$text" is rejected', () {
+    for (var i = 0; i < rejected.length; i++) {
+      final (currency, text) = rejected[i];
+      test('${currency.code} case $i is rejected', () {
         expect(Money.tryParse(text, currency), isNull);
         expect(() => Money.parse(text, currency), throwsFormatException);
       });
     }
+
+    test('leading zeros do not count toward the 16-digit cap', () {
+      final zeros = '0' * 17;
+      expect(Money.parse('${zeros}1', jpy).minor, 1);
+      expect(Money.parse('${zeros}1.50', egp).minor, 150);
+    });
+
+    test('inputs longer than maxParseLength are rejected up front', () {
+      final atLimit = '${'0' * (Money.maxParseLength - 4)}1.00';
+      expect(atLimit.length, Money.maxParseLength);
+      expect(Money.tryParse(atLimit, egp), m(egp, 100));
+      expect(Money.tryParse('0$atLimit', egp), isNull);
+      final megabyte = 1 << 20;
+      expect(Money.tryParse('0' * megabyte, egp), isNull);
+      expect(Money.tryParse('7' * megabyte, egp), isNull);
+      expect(() => Money.parse('9' * megabyte, egp), throwsFormatException);
+    });
 
     test('fewer fraction digits are padded', () {
       expect(Money.parse('1.5', egp).minor, 150);
@@ -165,6 +193,8 @@ void main() {
       expect(half(-5, MoneyRounding.towardZero), -2);
       const floor = MoneyRounding.floor;
       expect(() => m(egp, 1).mulDiv(1, 0, floor), throwsArgumentError);
+      expect(() => m(egp, 1).mulDiv(1, -3, floor), throwsArgumentError);
+      expect(m(egp, 6).mulDiv(-1, 3, floor), m(egp, -2));
     });
 
     test('mulDiv uses exact intermediates beyond int64', () {
@@ -211,6 +241,14 @@ void main() {
       final tooMany = List<int>.filled(maxAllocationParts + 1, 1);
       expect(() => m(egp, 1).allocate(tooMany), throwsArgumentError);
       expect(() => m(egp, 1).allocateEven(0), throwsArgumentError);
+      expect(() => m(egp, 1).allocateEven(-1), throwsArgumentError);
+    });
+
+    test('allocateEven checks the part limit before allocating', () {
+      final over = maxAllocationParts + 1;
+      expect(() => m(egp, 1).allocateEven(over), throwsArgumentError);
+      expect(() => m(egp, 1).allocateEven(1 << 40), throwsArgumentError);
+      expect(() => m(egp, 1).allocateEven(1 << 62), throwsArgumentError);
     });
 
     test('allocation accepts exactly the maximum number of parts', () {
@@ -247,17 +285,65 @@ void main() {
       expect(() => Money.fromStorage(tooBig, 'EGP'), throwsCorrupt);
     });
 
-    test('fromJson rejects non-integer minor and missing fields', () {
+    test('fromJson rejects bad types, missing keys and bad values', () {
       final bad = <Map<String, Object?>>[
         {'minor': 1.5, 'currency': 'EGP'},
+        {'minor': 1.0, 'currency': 'EGP'},
         {'minor': '150', 'currency': 'EGP'},
+        {'minor': null, 'currency': 'EGP'},
+        {'minor': true, 'currency': 'EGP'},
         {'currency': 'EGP'},
         {'minor': 150},
+        {'minor': 150, 'currency': null},
+        {'minor': 150, 'currency': false},
+        {'minor': 150, 'currency': 818},
         {'minor': 150, 'currency': 'XAU'},
+        {'minor': 150, 'currency': 'egp'},
+        {'minor': Money.maxMinor + 1, 'currency': 'EGP'},
+        {'minor': -Money.maxMinor - 1, 'currency': 'EGP'},
+        <String, Object?>{},
       ];
-      for (final json in bad) {
-        expect(() => Money.fromJson(json), throwsCorrupt);
+      for (var i = 0; i < bad.length; i++) {
+        expect(() => Money.fromJson(bad[i]), throwsCorrupt, reason: '$i');
+        expect(Money.tryFromJson(bad[i]), isNull, reason: '$i');
       }
+    });
+
+    test('fromJson reports a typed reason', () {
+      CorruptMoneyReason? reasonOf(Map<String, Object?> json) {
+        try {
+          Money.fromJson(json);
+        } on CorruptMoney catch (e) {
+          return e.reason;
+        }
+        return null;
+      }
+
+      final missing = reasonOf({'minor': 1});
+      expect(missing, CorruptMoneyReason.missingCurrency);
+      final nonInteger = reasonOf({'minor': 1.5, 'currency': 'EGP'});
+      expect(nonInteger, CorruptMoneyReason.nonIntegerMinor);
+      final unknown = reasonOf({'minor': 1, 'currency': 'ZZZ'});
+      expect(unknown, CorruptMoneyReason.unknownCurrency);
+      final range = reasonOf({'minor': 1 << 60, 'currency': 'EGP'});
+      expect(range, CorruptMoneyReason.outOfRange);
+    });
+
+    test('fromJson ignores extra keys (lenient, pinned)', () {
+      final json = {'minor': 1250, 'currency': 'KWD', 'note': 'x', 'v': 2};
+      expect(Money.fromJson(json), m(kwd, 1250));
+      expect(Money.tryFromJson(json), m(kwd, 1250));
+    });
+
+    test('tryFromStorage returns null instead of throwing', () {
+      expect(Money.tryFromStorage(1250, 'KWD'), m(kwd, 1250));
+      expect(Money.tryFromStorage(1, 'ZZZ'), isNull);
+      expect(Money.tryFromStorage(1, 'egp'), isNull);
+      expect(Money.tryFromStorage(1, ' EGP'), isNull);
+      expect(Money.tryFromStorage(1, ''), isNull);
+      expect(Money.tryFromStorage(Money.maxMinor + 1, 'EGP'), isNull);
+      expect(Money.tryFromStorage(-Money.maxMinor - 1, 'EGP'), isNull);
+      expect(Money.tryFromStorage(1 << 63, 'EGP'), isNull);
     });
   });
 
@@ -270,10 +356,12 @@ void main() {
       expect(big.toString(), isNot(matches(digits)));
       final errors = <Object>[
         CurrencyMismatch(egp, usd),
-        MoneyOverflow(egp, 'add'),
+        MoneyOverflow(egp, MoneyOp.add),
         UnknownCurrency('EGP'),
-        CorruptMoney('EGP', 'minor out of range'),
       ];
+      for (final reason in CorruptMoneyReason.values) {
+        errors.add(CorruptMoney('EGP', reason));
+      }
       for (final error in errors) {
         expect(error.toString(), isNot(matches(digits)));
       }
@@ -282,7 +370,8 @@ void main() {
     test('invalid codes are not echoed', () {
       final secret = 'card 1234 balance 5000';
       expect(UnknownCurrency(secret).toString(), isNot(contains('1234')));
-      expect(CorruptMoney(secret, 'x').toString(), isNot(contains('1234')));
+      final corrupt = CorruptMoney(secret, CorruptMoneyReason.outOfRange);
+      expect(corrupt.toString(), isNot(contains('1234')));
     });
 
     test('overflow from a real operation has no amount', () {
@@ -329,7 +418,46 @@ void main() {
       final total = MultiCurrencyTotal.of(items);
       final ordered = total.orderedFor(Currency.of('AED'));
       final orderedCodes = ordered.map((c) => c.code).join(' ');
-      expect(orderedCodes, 'AED EGP USD SAR CHF GBP');
+      expect(orderedCodes, 'AED EGP USD SAR GBP CHF');
+    });
+
+    test('empty-total edges', () {
+      const empty = MultiCurrencyTotal.empty();
+      expect(empty[egp], Money.zero(egp));
+      expect(empty + empty, empty);
+      expect((empty + empty).currencies, isEmpty);
+      expect(empty.nonZero(), empty);
+      expect(empty.orderedFor(egp), isEmpty);
+      expect(empty.isEmpty, isTrue);
+      expect(MultiCurrencyTotal.of(const []), empty);
+      expect(MultiCurrencyTotal.of(const []).hashCode, empty.hashCode);
+    });
+
+    test('orderedFor with a primary that is not present', () {
+      final total = MultiCurrencyTotal.of([m(usd, 1), m(egp, 1)]);
+      final ordered = total.orderedFor(kwd).map((c) => c.code);
+      expect(ordered, ['EGP', 'USD']);
+    });
+
+    test('equal totals have equal hash codes', () {
+      final a = MultiCurrencyTotal.of([m(egp, 1), m(usd, 2), m(egp, 3)]);
+      final b = MultiCurrencyTotal.of([m(usd, 2), m(egp, 4)]);
+      expect(a, b);
+      expect(a.hashCode, b.hashCode);
+      expect(a == MultiCurrencyTotal.of([m(egp, 4)]), isFalse);
+    });
+
+    test('totals are range-checked once at the end (order-independent)', () {
+      final top = m(egp, Money.maxMinor);
+      final one = m(egp, 1);
+      final minusOne = m(egp, -1);
+      expect(MultiCurrencyTotal.of([top, one, minusOne])[egp], top);
+      expect(MultiCurrencyTotal.of([top, minusOne, one])[egp], top);
+      expect(() => MultiCurrencyTotal.of([top, one]), throwsOverflow);
+      final big = MultiCurrencyTotal.of([top]);
+      expect(() => big + MultiCurrencyTotal.of([one]), throwsOverflow);
+      expect(() => big.add(one), throwsOverflow);
+      expect(big.add(minusOne)[egp], m(egp, Money.maxMinor - 1));
     });
 
     test('toString has codes only', () {

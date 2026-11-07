@@ -1,4 +1,5 @@
-/// Maximum number of weights accepted by [largestRemainderSplit].
+/// Maximum number of weights accepted by `Money.allocate` and parts by
+/// `Money.allocateEven`.
 const int maxAllocationParts = 10000;
 
 /// Splits the integer [amount] into `weights.length` integer shares in

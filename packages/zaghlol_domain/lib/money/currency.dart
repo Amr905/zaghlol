@@ -36,7 +36,8 @@ final class Currency {
   /// last (FR-CUR-07, D-51).
   final bool isFund;
 
-  /// Featured currencies in D-22 order (shown first in pickers).
+  /// Featured currencies in A-59 order, shown first in pickers (FR-CUR-01,
+  /// FR-CUR-07): the D-22 eight plus GBP and INR.
   static const List<String> featuredCodes = [
     'EGP',
     'USD',
@@ -46,6 +47,8 @@ final class Currency {
     'QAR',
     'KWD',
     'BHD',
+    'GBP',
+    'INR',
   ];
 
   static final Map<String, Currency> _byCode = _buildTable();

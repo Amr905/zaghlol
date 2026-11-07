@@ -1,8 +1,20 @@
 import 'currency.dart';
 
 // These are programming or data-integrity bugs, not user errors, so they
-// extend Error. Their toString() carries currency codes and the operation
-// name only, never an amount (NFR-SEC-03: balances are sensitive).
+// extend Error. Their toString() carries currency codes and enum names only,
+// never an amount (NFR-SEC-03: balances are sensitive). The operation and
+// reason are enums so no caller can put free text (or an amount) in them.
+
+/// The operation that overflowed, reported by [MoneyOverflow].
+enum MoneyOp { create, add, subtract, times, mulDiv, sum }
+
+/// Why a stored or serialized amount could not be loaded.
+enum CorruptMoneyReason {
+  unknownCurrency,
+  outOfRange,
+  missingCurrency,
+  nonIntegerMinor,
+}
 
 /// Arithmetic or ordering across two different currencies (BR-FX-02).
 final class CurrencyMismatch extends Error {
@@ -21,11 +33,10 @@ final class MoneyOverflow extends Error {
 
   final Currency currency;
 
-  /// Operation name, e.g. `add`, `times`, `mulDiv`.
-  final String op;
+  final MoneyOp op;
 
   @override
-  String toString() => 'MoneyOverflow: ${currency.code} in $op';
+  String toString() => 'MoneyOverflow: ${currency.code} in ${op.name}';
 }
 
 /// A currency code that is not in the bundled ISO 4217 table.
@@ -48,11 +59,10 @@ final class CorruptMoney extends Error {
   /// The stored currency code (may be invalid).
   final String code;
 
-  /// Short fixed description, e.g. `unknown currency`. Never an amount.
-  final String reason;
+  final CorruptMoneyReason reason;
 
   @override
-  String toString() => 'CorruptMoney: ${_safeCode(code)} ($reason)';
+  String toString() => 'CorruptMoney: ${_safeCode(code)} (${reason.name})';
 }
 
 final RegExp _isoShape = RegExp(r'^[A-Z]{3}$');

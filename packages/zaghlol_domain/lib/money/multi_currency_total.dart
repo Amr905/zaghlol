@@ -1,5 +1,6 @@
 import 'currency.dart';
 import 'money.dart';
+import 'money_errors.dart';
 
 /// An immutable set of per-currency totals (FR-CUR-03). Amounts in different
 /// currencies are never combined here; the approximate (≈) view lives
@@ -9,32 +10,26 @@ final class MultiCurrencyTotal {
 
   const MultiCurrencyTotal._(this._totals);
 
-  /// Sums [items] per currency. Throws [MoneyOverflow] if a per-currency
-  /// running total leaves the supported range.
+  /// Sums [items] per currency.
+  ///
+  /// Each per-currency sum is computed exactly and range-checked once at the
+  /// end, so the result does not depend on the order of [items]. Throws
+  /// [MoneyOverflow] if a final per-currency total is out of range.
   factory MultiCurrencyTotal.of(Iterable<Money> items) {
-    final totals = <Currency, Money>{};
-    for (final item in items) {
-      totals[item.currency] = _plus(totals[item.currency], item);
-    }
-    return MultiCurrencyTotal._(Map<Currency, Money>.unmodifiable(totals));
+    return MultiCurrencyTotal._(_sum(items));
   }
 
   final Map<Currency, Money> _totals;
 
   /// A new total with [money] added to its currency.
   MultiCurrencyTotal add(Money money) {
-    final totals = Map<Currency, Money>.of(_totals);
-    totals[money.currency] = _plus(totals[money.currency], money);
-    return MultiCurrencyTotal._(Map<Currency, Money>.unmodifiable(totals));
+    return MultiCurrencyTotal._(_sum([..._totals.values, money]));
   }
 
-  /// Per-currency sum of two totals.
+  /// Per-currency sum of two totals, range-checked once per currency.
   MultiCurrencyTotal operator +(MultiCurrencyTotal other) {
-    final totals = Map<Currency, Money>.of(_totals);
-    for (final money in other._totals.values) {
-      totals[money.currency] = _plus(totals[money.currency], money);
-    }
-    return MultiCurrencyTotal._(Map<Currency, Money>.unmodifiable(totals));
+    final items = [..._totals.values, ...other._totals.values];
+    return MultiCurrencyTotal._(_sum(items));
   }
 
   /// The total in [currency]; zero when there is none.
@@ -51,7 +46,7 @@ final class MultiCurrencyTotal {
   }
 
   /// Currencies present, ordered for display: [primary] first (when
-  /// present), then the featured currencies in D-22 order, then by code.
+  /// present), then the featured currencies in A-59 order, then by code.
   List<Currency> orderedFor(Currency primary) {
     int rank(Currency c) {
       if (c == primary) {
@@ -106,7 +101,21 @@ final class MultiCurrencyTotal {
     return 'MultiCurrencyTotal($codes)';
   }
 
-  static Money _plus(Money? total, Money money) {
-    return total == null ? money : total + money;
+  static final BigInt _max = BigInt.from(Money.maxMinor);
+
+  static Map<Currency, Money> _sum(Iterable<Money> items) {
+    final sums = <Currency, BigInt>{};
+    for (final item in items) {
+      final previous = sums[item.currency] ?? BigInt.zero;
+      sums[item.currency] = previous + BigInt.from(item.minor);
+    }
+    final totals = <Currency, Money>{};
+    for (final MapEntry(key: currency, value: sum) in sums.entries) {
+      if (sum.abs() > _max) {
+        throw MoneyOverflow(currency, MoneyOp.sum);
+      }
+      totals[currency] = Money(currency, sum.toInt());
+    }
+    return Map<Currency, Money>.unmodifiable(totals);
   }
 }
