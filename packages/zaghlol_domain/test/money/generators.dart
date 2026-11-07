@@ -1,6 +1,4 @@
 // glados generators for money property tests (T-012 design note).
-import 'dart:math';
-
 import 'package:glados/glados.dart';
 import 'package:zaghlol_domain/zaghlol_domain.dart';
 
