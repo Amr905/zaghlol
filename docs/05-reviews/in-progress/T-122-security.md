@@ -125,3 +125,60 @@ Four schema/grant problems (F1–F4) are cheap to fix now, because `InitialCreat
 17. **Connection strings: separation and fail-closed?** They are separated, and startup fails closed when a string is missing. Add the role assertion in F11.
 
 **Required before APPROVED:** F1, F2, F3 and F4 fixed in this task, or F4 explicitly moved to T-139 by the Lead. A recorded Lead decision on F5(a) and the `main` ruleset for F5(b). F6–F14 can be fixed here or tracked in the named tasks.
+
+---
+
+## Security & privacy review: T-122, round 2 (delta `0b73ac5..d5943be`)
+
+**Branch:** `task/T-122-ef-model` @ `d5943be` · **CI:** backend-ci run 42407789072 (green, per the coordinator)
+**Method:** I read the whole delta: the 11 commits, `InitialCreateSql.cs`, `CheckSql.cs`, `GrantMatrix.cs`, `DatabaseRoleGuard.cs`, `PostgresDatabaseReadiness.cs`, both workflows, bootstrap, and the new and changed tests. I also checked the repo settings through the GitHub API. I re-ran nothing; the predicates were already validated in round 1.
+
+### Verdict: **APPROVED**, with one condition before merge
+
+The condition is F5(b). The `main` ruleset now exists (id 26756600: pull_request, non_fast_forward, deletion; no bypass actors), but its **`enforcement` is `disabled`**. Branch protection still answers 404. The Lead's F5(a) approval (T-122.md, "Lead decision (2026-11-07)") lists an active ruleset as a condition, so **the PO must switch the ruleset to Active before this branch merges**. That is a repo setting, not a code change.
+
+All round-1 Medium findings (F1 to F4) are fixed and covered by tests. Round 2 adds three Low findings (R2-1 to R2-3). They are cheap to fix while `InitialCreate` is still unshipped, but none of them blocks.
+
+### Round-1 findings: verification
+
+| # | Claim | Verified | Status |
+|---|---|---|---|
+| F1 | ops_ro excludes e-mail, subject, store keys and tokens; break-glass only | `GrantMatrix.cs`: `AccountsReadOnly` = id, provider, created_at, last_sign_in_at. `PurchasesReadOnly` and `StoreNotificationsReadOnly` drop `store_key` and `linked_purchase_token`. `token_hash`, `apple_refresh_token_enc` and `response_body_enc` are still excluded. `ops_rw` keeps e-mail, subject and store_key for the audited lookup and the ownership check. Bootstrap documents break-glass (credentials unissued until T-140, pgaudit). `GrantTests.Denied` adds 6 ops_ro probes, including `SELECT *` on accounts. | **Closed** |
+| F2 | Digit runs in any script, separators, `@`, slug codes | `CheckSql.PrivacySafeNorm` matches `([0-9٠-٩۰-۹０-９][[:space:].-]?){6,}` and adds `position('@')=0`. `institution_code` and `category_code` must match `^[a-z0-9_]{1,64}$`, the same alphabet as OpenAPI. Negative cases cover Arabic-Indic, Extended, fullwidth, mixed, space/dash/dot-separated, InstaPay, e-mail and the code alphabets. Accept cases cover 5-digit and Arabic names. | **Closed**. Residual gap in R2-3 |
+| F3 | jsonpath CHECK plus target CHECK | `AuditLogEntryConfiguration.DetailsNoIdentifiers` is the predicate validated in round 1, plus `ck_audit_log_target_no_email`. Negative cases cover nested, array, `Email`, `ORDER_ID`, `e-mail`, `@` in another value, and `@` in target. | **Closed** |
+| F4 | RLS on audit_log, operator FK | `InitialCreateSql.AuditLogRowLevelSecurity` has SELECT for ops_ro, ops_rw and worker_rw; INSERT for ops_rw with `at` within ±1 min of `now()` (no backdating into the purge window); DELETE for worker_rw only past 1 y (support actions) or 3 y (others); no UPDATE policy; no FORCE, so the owner can still migrate. No role has BYPASSRLS (the test asserts it). The FK `fk_audit_log_operators_operator_id` is in place. `AuditLogSecurityTests` asserts the exact policy set, that a fresh row survives a worker DELETE, the age table at 360/370/1090/1100 days, that backdating fails, and the FK. | **Closed**. Note: the app must let `at` default to `now()` and not stamp it from the .NET clock. A long transaction or clock skew would otherwise trip the ±1 min window (T-186) |
+| F5(a) | Push-mode deviation recorded | T-122.md line 154 (on `main`, commit 18c32fa) records the approval with conditions. | **Closed** |
+| F5(b) | `main` ruleset | Exists but **disabled** (see the verdict). | **Open: PO** |
+| F6 | Workflow hardening | `setup-dotnet` pinned to `67a3573c…`. A character-set reject `[^A-Za-z0-9._/-]` runs first, and every match is a whole-string `[[ =~ ]]`. The job needs exactly `<ts>_$NAME.cs` and `<ts>_$NAME.Designer.cs` with the same `<ts>`, plus one snapshot. It refuses an existing `*_$NAME.cs` and the overwrite of any non-snapshot file. The same newline-safe matching is in `app-regen.yml:204-214`. The write job still runs no repo code, and the token is used only at the push. The README now tells reviewers to treat bot migrations as code. | **Closed** |
+| F7 | Server log verbosity (T-140); API-first validation (T-127); `Include Error Detail` startup guard | Not done, as routed. The `Include Error Detail` startup guard is still owed, either here or in T-123. | **Carried** (T-140, T-127, T-123) |
+| F8 | Format CHECKs | `country ^[A-Z]{2}$`, `last_error ^[A-Z0-9_]{1,64}$` and `store_key ≤ 512` (both tables) are in place. `app_version` uses the same suffix alphabet as OpenAPI (`[-+][0-9A-Za-z.-]{1,32}`, `openapi/zaghlol-v1.yaml:2106`), loosened only to 2–4 numeric parts. | **Closed** |
+| F9 | One-way invariant triggers | `installs_before_update` and `purchases_before_update` are SECURITY INVOKER, with `search_path = zaghlol, pg_temp`, EXECUTE revoked, SQLSTATE 23514 and no values in the message. `InvariantTriggerTests` runs them as api, admin and worker. | **Closed**, with a gap (R2-1) |
+| F10 | Least-privilege trims, CONNECT | worker_rw UPDATE is column-level (installs: registration_*, seat_key_hash, deleted_at; purchases: state, expires_at, acknowledged, last_verified_at, linked_purchase_token). app_rw `purchases` UPDATE is column-level and excludes `dispute_frozen_until`. app_rw contributions and bank requests are `INSERT` plus `SELECT(received_at)`. app_rw loses `daily_active_counts`, and ops_rw loses `replay_guard`. Bootstrap revokes `CONNECT` from PUBLIC and grants it to the 5 logins. The denial probes are in `GrantTests`. | **Closed** |
+| F11 | Login guard | `DatabaseRoleGuard.Query` rejects super, bypassrls, createrole, createdb, replication, the schema owner and migrator membership, and requires exactly the expected group. `DatabaseRoleGuardService` stops the host on a mismatch. The readiness probe uses its own one-connection pool and runs the guard query, so a wrong App login is never "ready". | **Closed**, with a gap (R2-2) |
+| F12 | Denylist | Adds `(^\|_)ip(_\|$)\|user_agent\|verdict\|receipt\|jws\|raw_\|_payload\|signature`. The allowed set is still exactly e-mail and public_key. | **Closed** |
+| F13, F14 | Doc and handler tests; liveness | Not touched, as routed. | **Carried** (Lead doc, T-124/T-135, T-140) |
+
+### New findings (round 2)
+
+| # | Severity | Where | Issue and exploit path | Required change | Owner |
+|---|---|---|---|---|---|
+| R2-1 | Low | `InitialCreateSql.cs:61-62` (`installs_before_update`) | The set-once rule lets `seat_key_hash` change whenever `NEW.deleted_at IS NOT NULL`, to **any** value, not only to NULL. Nothing stops `deleted_at` from going back to NULL. Two UPDATEs therefore replace a registered seat key: `SET deleted_at = now(), seat_key_hash = X`, then `SET deleted_at = NULL`. app_rw (table-level UPDATE on installs) and worker_rw (both columns granted) can each do this, so a bug or an injection could defeat R4-1(1) and "same-iPhone" rebinds. | In the tombstone branch, require `NEW.seat_key_hash IS NULL`. Make `deleted_at` one-way: raise when `OLD.deleted_at IS NOT NULL AND NEW.deleted_at IS DISTINCT FROM OLD.deleted_at`. Add negative tests for both steps. It is cheapest to fix now, while `InitialCreate` is unshipped; the golden hash changes with it. | backend-engineer (T-122, or T-182) |
+| R2-2 | Low | `DatabaseRoleGuard.cs:25-33` | The guard checks `current_user` only. Take a superuser or migrator login configured with `Options=-c role=zaghlol_api`: `current_user` is `zaghlol_api`, so the guard and readiness pass. An injection can then run `SELECT set_config('role','none',false)` (or `RESET ROLE`) and get the session user's full rights back. That reopens the misconfiguration F11 was meant to close. | Also check `session_user`. Require `session_user = current_user` and run the same flag, owner, migrator and group checks on `session_user`. Add a test with a superuser login and `role=zaghlol_api` that expects `privileged_login`. | backend-engineer (T-122) |
+| R2-3 | Low | `CheckSql.cs:20` | The separator class allows **at most one** space, dot or dash between digits. `"010  1234  5678"` (double spaces), `"010/1234/5678"`, `"010_1234_5678"` and `"٠١٠،١٢٣٤"` (Arabic comma) all pass. So does a no-break space, depending on locale `[[:space:]]`. This is only a backstop (the API filter is primary, security-model §6), but these are realistic SMS forms. | Use `([AnyDigit][[:space:] .,/_،-]{0,3}){6,}` (up to 3 separator characters). Add cases for a double space, `/`, `_` and the Arabic comma, and keep the existing 5-digit accept cases. | backend-engineer (T-122, or T-127 test) |
+
+### Checked in the delta, no finding
+
+- **New INVOKER triggers:** EXECUTE isn't checked at fire time, the search_path is fixed, and the bodies read only OLD and NEW, so there is no privilege effect. The function-list test now expects the four functions.
+- **RLS and RETURNING:** ops_rw's INSERT … RETURNING works because ops_rw has a SELECT policy. The worker's `DELETE … WHERE` relies on its read policy.
+- **Golden test:** `InitialCreateGoldenTests` pins the SHA-256 of each raw-SQL block. A later silent edit to a shipped migration now fails CI, which also helps against smuggled migration SQL.
+- **Readiness pool:** the probe pool is forced to `MaxPoolSize = 1` whatever the App string says, and `dataSource.Clear()` was removed. A probe can no longer drop live `/v1` connections. The 503 body and logs are unchanged (exception type only).
+- **Startup window:** the guard service doesn't block Kestrel startup. Traffic is gated by readiness, which runs the guard for App. A bad Admin or Worker login stops the host on the first successful check. The window is acceptable.
+- **CONNECT revoke:** the provider's admin role must keep CONNECT, as owner or superuser. T-140 should confirm this on the managed instance.
+- **Npgsql 10 `Maximum Pool Size` keyword:** no security impact. The code sets `MaxPoolSize` through the builder, so T-140 only needs to use that keyword in deployed strings.
+
+### Required before merge
+- The PO sets ruleset 26756600 to **Active** (F5(b), the Lead's own condition).
+
+### Recommended in T-122, or tracked in the named task
+- R2-1, R2-2 and R2-3.
+- The `Include Error Detail` startup guard (F7, T-122 or T-123).
