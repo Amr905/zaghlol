@@ -21,7 +21,7 @@ class NoUiStringLiterals extends DartLintRule {
   @override
   void run(
     CustomLintResolver resolver,
-    ErrorReporter reporter,
+    DiagnosticReporter reporter,
     CustomLintContext context,
   ) {
     final scope = FileScope.of(resolver.path);
