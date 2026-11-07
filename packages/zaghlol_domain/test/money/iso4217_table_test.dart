@@ -26,6 +26,18 @@ gen.CurrencyTable merge(gen.CurrencyTable next, gen.CurrencyTable? previous) {
   return gen.mergeAppendOnly(listOne: next, previous: previous);
 }
 
+gen.CurrencyTable mergeAllowing(
+  gen.CurrencyTable next,
+  gen.CurrencyTable previous,
+  Set<String> codes,
+) {
+  return gen.mergeAppendOnly(
+    listOne: next,
+    previous: previous,
+    allowChanged: codes,
+  );
+}
+
 gen.CurrencyRow row(String code, int numeric, int exponent) {
   return gen.CurrencyRow(
     code: code,
@@ -389,16 +401,11 @@ void main() {
       final newNumeric = gen.CurrencyTable('2026-01-01', [row('EUR', 979, 2)]);
       expect(() => merge(newExponent, previous), throwsFormatException);
       expect(() => merge(newNumeric, previous), throwsFormatException);
-      gen.CurrencyTable allowing(Set<String> codes) {
-        return gen.mergeAppendOnly(
-          listOne: newExponent,
-          previous: previous,
-          allowChanged: codes,
-        );
-      }
-
-      expect(allowing({'EUR'}).rows.single.exponent, 3);
-      expect(() => allowing({'USD'}), throwsFormatException);
+      final allowed = mergeAllowing(newExponent, previous, {'EUR'});
+      expect(allowed.rows.single.exponent, 3);
+      final usd = {'USD'};
+      final throws = throwsFormatException;
+      expect(() => mergeAllowing(newExponent, previous, usd), throws);
       final same = gen.CurrencyTable('2026-01-01', [row('EUR', 978, 2)]);
       expect(merge(same, previous).rows.single.exponent, 2);
     });
