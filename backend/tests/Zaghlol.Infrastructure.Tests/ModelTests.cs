@@ -133,6 +133,7 @@ public partial class ModelTests
         [
             "catalog_versions", "catalog_categories", "catalog_merchants", "catalog_aliases", "catalog_keywords",
             "feature_flags", "price_quotes", "fx_rates", "operators", "audit_log", "contribution_aggregates",
+            "daily_active_counts",
         ];
         const TablePrivileges writes = TablePrivileges.Insert | TablePrivileges.Update | TablePrivileges.Delete;
 
@@ -151,13 +152,57 @@ public partial class ModelTests
 
         Assert.All(opsRo, g => Assert.Equal(TablePrivileges.None, g.Privileges & ~TablePrivileges.Select));
         Assert.All(opsRo, g => Assert.Null(g.UpdateColumns));
-        foreach (var (table, column) in new[] { ("installs", "token_hash"), ("accounts", "apple_refresh_token_enc"), ("idempotency_records", "response_body_enc") })
+        foreach (var (table, column) in HiddenFromOpsRo)
         {
             var grant = opsRo.Single(g => g.Table == table);
             Assert.Equal(TablePrivileges.None, grant.Privileges);
             Assert.DoesNotContain(column, grant.SelectColumns!);
         }
     }
+
+    // SEC F1: secrets and personal identifiers a direct DB login must not bulk-read.
+    private static readonly (string Table, string Column)[] HiddenFromOpsRo =
+    [
+        ("installs", "token_hash"),
+        ("accounts", "apple_refresh_token_enc"),
+        ("accounts", "email"),
+        ("accounts", "provider_subject"),
+        ("purchases", "store_key"),
+        ("purchases", "linked_purchase_token"),
+        ("store_notifications", "store_key"),
+        ("idempotency_records", "response_body_enc"),
+    ];
+
+    [Fact]
+    public void ThePublicApiCantTouchTheDisputeFreezeOrReadOtherInstallsContributions()
+    {
+        var app = GrantMatrix.Current.Where(g => g.Role == GrantMatrix.AppRw).ToDictionary(g => g.Table, StringComparer.Ordinal);
+
+        Assert.Equal(TablePrivileges.Select | TablePrivileges.Insert, app["purchases"].Privileges);
+        Assert.DoesNotContain("dispute_frozen_until", app["purchases"].UpdateColumns!);
+        foreach (var table in new[] { "merchant_contributions", "bank_requests" })
+        {
+            Assert.Equal(TablePrivileges.Insert, app[table].Privileges);
+            Assert.Equal(ReceivedAtOnly, app[table].SelectColumns);
+        }
+
+        Assert.False(app.ContainsKey("daily_active_counts"));
+    }
+
+    [Fact]
+    public void TheWorkerUpdatesOnlyItsOwnInstallAndPurchaseColumns()
+    {
+        var worker = GrantMatrix.Current.Where(g => g.Role == GrantMatrix.WorkerRw).ToDictionary(g => g.Table, StringComparer.Ordinal);
+
+        Assert.False(worker["installs"].Privileges.HasFlag(TablePrivileges.Update));
+        Assert.DoesNotContain("token_hash", worker["installs"].UpdateColumns!);
+        Assert.DoesNotContain("seat_key_trusted", worker["installs"].UpdateColumns!);
+        Assert.False(worker["purchases"].Privileges.HasFlag(TablePrivileges.Update));
+        Assert.DoesNotContain("account_id", worker["purchases"].UpdateColumns!);
+        Assert.DoesNotContain("account_linked_by", worker["purchases"].UpdateColumns!);
+    }
+
+    private static readonly string[] ReceivedAtOnly = ["received_at"];
 
     [Fact]
     public void GrantSqlIsRenderedSchemaQualified()

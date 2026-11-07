@@ -114,6 +114,8 @@ public partial class SchemaTests(SchemaFixture fixture)
                 "SELECT table_name, column_name FROM information_schema.columns WHERE table_schema = 'zaghlol'"))
             .Select(r => $"{r[0]}.{r[1]}")
             .ToList();
+        // accounts.email: A-47/D-49 (support lookup only, hidden from ops_ro). app_attest_keys.public_key: the App
+        // Attest credential needed to verify assertions; not a seat key and not a device identifier.
         string[] allowed = ["accounts.email", "app_attest_keys.public_key"];
 
         var flagged = columns.Where(c => ForbiddenColumn().IsMatch(c.Split('.')[1])).ToList();
@@ -121,6 +123,27 @@ public partial class SchemaTests(SchemaFixture fixture)
         Assert.NotEmpty(columns);
         Assert.Equal(allowed.Order(StringComparer.Ordinal), flagged.Order(StringComparer.Ordinal));
     }
+
+    [Theory]
+    [InlineData("client_ip")]
+    [InlineData("ip")]
+    [InlineData("ip_prefix")]
+    [InlineData("user_agent")]
+    [InlineData("integrity_verdict")]
+    [InlineData("receipt_data")]
+    [InlineData("signed_jws")]
+    [InlineData("raw_envelope")]
+    [InlineData("notification_payload")]
+    [InlineData("request_signature")]
+    [InlineData("order_id")]
+    [InlineData("time_nonce")]
+    public void TheDenylistCatchesTheseNames(string column) => Assert.Matches(ForbiddenColumn(), column);
+
+    [Theory]
+    [InlineData("payload_digest")]
+    [InlineData("shipping_status")]
+    [InlineData("description")]
+    public void TheDenylistLeavesTheseNamesAlone(string column) => Assert.DoesNotMatch(ForbiddenColumn(), column);
 
     [Fact]
     public async Task OnlyPlpgsqlIsInstalledSoNoCryptoRunsInTheDatabase()
@@ -216,6 +239,10 @@ public partial class SchemaTests(SchemaFixture fixture)
         }
     }
 
-    [GeneratedRegex("order_id|nonce|seat_key$|public_key|imei|android_id|idfa|idfv|ad_id|serial|phone|device_id|email")]
+    // Raw seat keys, order IDs, time nonces, device identifiers (D-45, D-57, R4-2), plus (SEC F12) IP addresses, user
+    // agents, attestation verdicts, receipts, JWS bodies, raw payloads and signatures. Legitimate hits are allow-listed.
+    [GeneratedRegex(
+        "order_id|nonce|seat_key$|public_key|imei|android_id|idfa|idfv|ad_id|serial|phone|device_id|email"
+        + "|(^|_)ip(_|$)|user_agent|verdict|receipt|jws|raw_|_payload|signature")]
     private static partial Regex ForbiddenColumn();
 }

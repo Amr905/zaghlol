@@ -804,11 +804,23 @@ namespace Zaghlol.Infrastructure.Persistence.Migrations
                 table: "store_notifications",
                 columns: new[] { "store", "external_id" },
                 unique: true);
+
+            // Hand-added (T-122 design note, step 7 of the migration order): what EF can't model. The SQL is frozen in
+            // InitialCreateSql and pinned by InitialCreateGoldenTests.
+            migrationBuilder.Sql(InitialCreateSql.CreateEntitlementView);
+            migrationBuilder.Sql(InitialCreateSql.CreateTriggers);
+            migrationBuilder.Sql(InitialCreateSql.CreateInvariantTriggers);
+            migrationBuilder.Sql(InitialCreateSql.Grants);
+            migrationBuilder.Sql(InitialCreateSql.AuditLogRowLevelSecurity);
+            migrationBuilder.Sql(InitialCreateSql.Comments);
         }
 
         /// <inheritdoc />
         protected override void Down(MigrationBuilder migrationBuilder)
         {
+            // Hand-added: the view depends on purchases and purchase_seats, so it goes before EF drops the tables.
+            migrationBuilder.Sql(InitialCreateSql.DropViewAndTriggers);
+
             migrationBuilder.DropTable(
                 name: "account_installs",
                 schema: "zaghlol");

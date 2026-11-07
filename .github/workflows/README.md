@@ -40,6 +40,35 @@ Safety properties: refuses to run outside `task/**` (never on `main`); concurren
 
 Golden diffs from a failing `app-ci` run are in the run's `golden-diffs` artifact (`*_masterImage.png`, `*_testImage.png`, `*_isolatedDiff.png`, `*_maskedDiff.png`). To accept a new look, trigger `[regen-goldens]`.
 
+## backend-ef-migration.yml: generating an EF Core migration in CI
+
+Agents without a local .NET SDK use this to run `dotnet ef migrations add`. Push mode was approved by the Lead for T-122 (recorded in `docs/04-tasks/tasks/T-122.md`).
+
+How to trigger:
+
+1. Push a commit to your `task/**` branch whose **head commit message** contains `[ef-migration-add:<Name>]`, where `<Name>` is PascalCase (`^[A-Z][A-Za-z0-9]{0,63}$`), for example `[ef-migration-add:AddCatalogDrafts]`. The workflow generates the migration and commits it back.
+2. Or run it from the Actions tab or `gh workflow run backend-ef-migration.yml --ref task/T-xxx -f name=<Name>`. This dispatch mode only uploads the files as the `ef-migration` artifact and never pushes.
+
+What happens: job `generate` (read-only token) builds `Zaghlol.Infrastructure` (compiler errors appear in its log), runs `dotnet ef migrations add <Name> --output-dir Persistence/Migrations` and uploads the new and changed files. Job `commit` (write token, push mode only, runs no repo code) copies exactly three files into `backend/src/Zaghlol.Infrastructure/Persistence/Migrations/`: `<ts>_<Name>.cs`, `<ts>_<Name>.Designer.cs` (same `<ts>`) and `ZaghlolDbContextModelSnapshot.cs`. It pushes `chore(ci): add EF migration <Name>` as `github-actions[bot]`.
+
+After it finishes:
+
+- `git pull --rebase` to get the commit, then add any hand-written SQL call to `Up()` / `Down()` (the SQL itself lives in a class under `Persistence/`, like `InitialCreateSql.cs`, not in the generated file).
+- Commits pushed by `GITHUB_TOKEN` do **not** trigger other workflows, so `backend-ci` does not run on the bot commit. Push a follow-up commit to get CI on the final head. `backend-ci` fails if the model and the snapshot differ (`dotnet ef migrations has-pending-model-changes`).
+- To regenerate an unshipped migration, delete its three files in the trigger commit. The workflow refuses to overwrite an existing migration.
+
+Safety properties:
+- It refuses to run outside `task/**`, so it never runs on `main`. A per-branch concurrency guard is set on both jobs. `${{ }}` values reach shell code only through `env:`, and every action is pinned to a commit SHA.
+- The `commit` job runs no repo code. It fails if any tracked path under `backend/` is a symlink.
+- It validates the artifact:
+  - Every path must use only `[A-Za-z0-9._/-]` and match the whole-string patterns above (`[[ =~ ]]`, not line-based `grep`).
+  - There must be exactly one migration pair named `<Name>` with matching timestamps, plus the snapshot.
+  - The workflow refuses if a migration named `<Name>` exists in the tree, or if any non-snapshot file would be overwritten.
+  - Files are at most 2 MB, with no NUL bytes.
+- It vets each destination (inside the workspace, outside `.git`, no symlinked file or parent) and copies with `cp --remove-destination`. No credentials persist; the token reaches only the final push.
+
+**Reviewers: treat a bot-made migration as code.** It is ordinary C#, compiled into the API, the workers and the migration job, and its `Up()` runs as the schema owner in production. Read the whole diff: the `CreateTable`/`AddColumn` calls against the model change, and anything unexpected (raw SQL, attributes, static code). "Generated" is not a review exemption. The grant-equality, function-list and drift checks in `backend-ci` catch extra privileges, extra functions and snapshot drift, but not everything.
+
 ## Pinned actions
 
 Update by looking up the tag's commit SHA (`git ls-remote --tags <repo-url>`; for annotated tags use the `^{}` line) and changing the SHA and the `# vX.Y.Z` comment together in both workflows.
