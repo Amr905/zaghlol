@@ -43,3 +43,7 @@ Golden diffs from a failing `app-ci` run are in the run's `golden-diffs` artifac
 ## Pinned actions
 
 Update by looking up the tag's commit SHA (`git ls-remote --tags <repo-url>`; for annotated tags use the `^{}` line) and changing the SHA and the `# vX.Y.Z` comment together in both workflows.
+
+## custom_lint (T-002)
+
+The `static` job runs `dart run custom_lint` in `app/`, `packages/zaghlol_parsing/` and `tools/lints_example/` (the fixture package), then `dart test` in `tools/lints/`. Rules live in `tools/lints` (see its README). `flutter analyze` does not run them. `packages/zaghlol_domain` is not wired yet: add `custom_lint` and `zaghlol_lints` (path `../../tools/lints`) to its dev dependencies, add its directory to the loop in `app-ci.yml`, and regenerate the lock with `[regen-lock]`.

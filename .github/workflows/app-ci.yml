@@ -22,8 +22,8 @@ env:
   # Exact Flutter version: keeps builds reproducible together with pubspec.lock.
   # Keep in sync with FLUTTER_VERSION / FLUTTER_SHA in app-regen.yml.
   FLUTTER_VERSION: '3.47.9'
-  # Set to 'true' once custom_lint is added to the workspace (T-002).
-  RUN_CUSTOM_LINT: 'false'
+  # custom_lint (T-002) runs in the app, zaghlol_parsing and the fixture package.
+  RUN_CUSTOM_LINT: 'true'
 
 jobs:
   static:
@@ -65,7 +65,22 @@ jobs:
           fi
       - name: custom_lint (enabled by RUN_CUSTOM_LINT, see T-002)
         if: env.RUN_CUSTOM_LINT == 'true'
-        run: dart run custom_lint
+        run: |
+          status=0
+          for dir in app packages/zaghlol_parsing tools/lints_example; do
+            echo "== custom_lint in $dir"
+            if ! (cd "$dir" && dart run custom_lint > "$GITHUB_WORKSPACE/custom_lint.log" 2>&1); then
+              cat "$GITHUB_WORKSPACE/custom_lint.log"
+              grep -E "lint|error|Error|expect" "$GITHUB_WORKSPACE/custom_lint.log" | head -n 20 | while read -r line; do echo "::error::custom_lint($dir): $line"; done
+              status=1
+            else
+              cat "$GITHUB_WORKSPACE/custom_lint.log"
+            fi
+          done
+          exit $status
+      - name: dart test (zaghlol_lints)
+        working-directory: tools/lints
+        run: dart test
       - name: flutter test (app, non-golden)
         working-directory: app
         run: flutter test --exclude-tags golden
