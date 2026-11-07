@@ -60,15 +60,23 @@ internal sealed partial class PostgresDatabaseReadiness(
     private async Task<bool> ProbeAsync()
     {
         using var timeout = new CancellationTokenSource(ProbeTimeout, clock);
+        var probe = QueryAsync(timeout.Token);
         try
         {
-            await using var connection = await dataSource.OpenConnectionAsync(timeout.Token);
-            await using var command = new NpgsqlCommand("SELECT 1", connection);
-            return await command.ExecuteScalarAsync(timeout.Token) is 1;
+            // The driver doesn't honour cancellation in every phase (a server that accepts TCP but never answers the
+            // startup handshake holds OpenAsync until the connection Timeout), so the 1 s bound is enforced here too.
+            return await probe.WaitAsync(ProbeTimeout, clock);
         }
         catch (Exception ex) when (ex is DbException or OperationCanceledException or TimeoutException or SocketException
                                        or InvalidOperationException)
         {
+            // An abandoned probe finishes (or fails) on its own; observe it so its exception is never unobserved.
+            _ = probe.ContinueWith(
+                static t => _ = t.Exception,
+                CancellationToken.None,
+                TaskContinuationOptions.OnlyOnFaulted | TaskContinuationOptions.ExecuteSynchronously,
+                TaskScheduler.Default);
+
             // Only the exception type: messages can carry host names or other connection details.
             LogNotReady(logger, ex.GetType().Name);
 
@@ -76,6 +84,13 @@ internal sealed partial class PostgresDatabaseReadiness(
             dataSource.Clear();
             return false;
         }
+    }
+
+    private async Task<bool> QueryAsync(CancellationToken cancellationToken)
+    {
+        await using var connection = await dataSource.OpenConnectionAsync(cancellationToken);
+        await using var command = new NpgsqlCommand("SELECT 1", connection);
+        return await command.ExecuteScalarAsync(cancellationToken) is 1;
     }
 
     [LoggerMessage(Level = LogLevel.Warning, Message = "Database readiness probe failed ({ExceptionType})")]

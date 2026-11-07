@@ -31,7 +31,8 @@ public partial class SchemaTests(SchemaFixture fixture)
         var documented = SchemaDocument.Tables().Keys.ToHashSet(StringComparer.Ordinal);
         var actual = (await Db.QueryAsync(Superuser, ColumnsSql)).Select(r => (string)r[0]!).ToHashSet(StringComparer.Ordinal);
 
-        Assert.True(documented.Count >= 26, $"parser found only {documented.Count} tables in backend-schema.md");
+        // 25 tables (v_entitlements is a view); a parser regression that drops tables fails here.
+        Assert.Equal(25, documented.Count);
         Assert.Empty(documented.Except(actual));
         Assert.Empty(actual.Except(documented));
     }
