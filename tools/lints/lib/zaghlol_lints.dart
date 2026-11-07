@@ -18,10 +18,14 @@ PluginBase createPlugin() {
 
 class _ZaghlolLints extends PluginBase {
   @override
-  List<LintRule> getLintRules(CustomLintConfigs configs) => const [
-    NoDoubleMoney(),
-    NoUiStringLiterals(),
-    NoPrintOutsideDebug(),
-    SafeExceptionRequired(),
-  ];
+  List<LintRule> getLintRules(CustomLintConfigs configs) {
+    File('/tmp/zl_plugin.txt')
+        .writeAsStringSync('rules\n', mode: FileMode.append);
+    return const [
+      NoDoubleMoney(),
+      NoUiStringLiterals(),
+      NoPrintOutsideDebug(),
+      SafeExceptionRequired(),
+    ];
+  }
 }
