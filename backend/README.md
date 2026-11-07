@@ -53,5 +53,8 @@ UPSTREAM_UNAVAILABLE` while the `App` database is unreachable.
 
 **New migration:** there is no local SDK requirement. Push a commit whose message contains
 `[ef-migration-add:<Name>]` to a `task/**` branch; the `backend-ef-migration` workflow runs `dotnet ef migrations add`
-and commits the generated files back. Raw SQL that EF can't model goes in a class next to the migration, called from
-`Up()`. `backend-ci` fails when the model and the snapshot differ (`dotnet ef migrations has-pending-model-changes`).
+and commits the generated files back (see `.github/workflows/README.md`). Raw SQL that EF can't model lives in a
+style-checked class under `Persistence/` (InitialCreate's is `Persistence/InitialCreateSql.cs`, pinned by a golden
+test); the generated migration only calls it from `Up()` / `Down()`. `backend-ci` fails when the model and the
+snapshot differ (`dotnet ef migrations has-pending-model-changes`). A shipped migration is never edited: changes go in
+a new one.
