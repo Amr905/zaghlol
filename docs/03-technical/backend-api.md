@@ -40,7 +40,7 @@ The source of truth during Phase 5 is `backend/openapi/zaghlol-v1.yaml`, generat
 | `POST /v1/apple/android-callback` | none (Apple `form_post`) | Sign in with Apple web-flow callback for Android (CR-05) | FR-ACCT-01 |
 | `POST /v1/notifications/google` | Google OIDC (Pub/Sub push) | RTDN ingest | FR-BE-03 |
 | `POST /v1/notifications/apple` | JWS signature | App Store Server Notifications V2 ingest (prod + sandbox URLs) | FR-BE-03 |
-| `GET /v1/health` | none | Liveness / readiness | — |
+| `GET /v1/health` | none | Readiness: `SELECT 1` as `app_rw` (1 s timeout, cached 2 s); `503 UPSTREAM_UNAVAILABLE` while the DB is unreachable (FU-003). Liveness is a process check | — |
 | `/admin/v1/*` | Operator OIDC + MFA + role | Operator API (§5) | FR-BE-08 |
 
 ## 3. Authentication & authorization (API level)

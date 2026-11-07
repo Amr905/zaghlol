@@ -1,0 +1,243 @@
+name: backend-ef-migration
+
+# Generates an EF Core migration with `dotnet ef migrations add` (there is no local .NET SDK). See T-122.
+#
+#   * workflow_dispatch (input `name`): uploads the generated files as an artifact only; nothing is pushed.
+#   * push to task/** whose head commit message contains `[ef-migration-add:<Name>]`: also commits the generated files
+#     back to the same branch (the T-122 implementer can't dispatch workflows or download artifacts).
+#
+# Safety design, mirroring app-regen.yml (two jobs, so repository code never runs next to a write token):
+#   1. generate - permissions: contents: read. Runs branch code (`dotnet ef` builds the project) and uploads the new or
+#                 changed files under backend/src/Zaghlol.Infrastructure/Persistence/Migrations as an artifact.
+#   2. commit   - permissions: contents: write; push events only. Runs NO repository code and no third-party action
+#                 besides pinned checkout/download-artifact. Rejects tracked symlinks, validates every artifact path
+#                 against a strict regex (migration, designer or model snapshot .cs files only), caps sizes, rejects NUL
+#                 bytes, vets every destination path, copies with --remove-destination and pushes a fast-forward commit.
+#                 The token is not persisted in .git/config; only the push step sees it.
+# Every ${{ }} value reaches shell code through env:, never run: interpolation.
+# A push made with GITHUB_TOKEN does not trigger other workflows: push a follow-up commit to run backend-ci.
+on:
+  workflow_dispatch:
+    inputs:
+      name:
+        description: 'Migration name (PascalCase, e.g. InitialCreate)'
+        required: true
+        type: string
+  push:
+    branches:
+      - 'task/**'
+
+permissions:
+  contents: read
+
+env:
+  DOTNET_NOLOGO: "1"
+  DOTNET_CLI_TELEMETRY_OPTOUT: "1"
+
+jobs:
+  generate:
+    name: dotnet ef migrations add
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    if: >-
+      startsWith(github.ref, 'refs/heads/task/') &&
+      (github.event_name == 'workflow_dispatch' ||
+       contains(github.event.head_commit.message, '[ef-migration-add:'))
+    permissions:
+      contents: read
+    concurrency:
+      group: backend-ef-migration-${{ github.ref }}
+      cancel-in-progress: false
+    outputs:
+      name: ${{ steps.name.outputs.name }}
+    env:
+      REF_NAME: ${{ github.ref_name }}
+      EVENT_NAME: ${{ github.event_name }}
+      INPUT_NAME: ${{ inputs.name }}
+      COMMIT_MESSAGE: ${{ github.event.head_commit.message }}
+    steps:
+      - name: Refuse anything but task branches
+        run: |
+          case "$REF_NAME" in
+            task/*) ;;
+            *) echo "::error::backend-ef-migration only runs on task/** branches (got '$REF_NAME')"; exit 1 ;;
+          esac
+
+      - name: Decide the migration name
+        id: name
+        run: |
+          if [ "$EVENT_NAME" = "workflow_dispatch" ]; then
+            name="$INPUT_NAME"
+          else
+            name=$(printf '%s' "$COMMIT_MESSAGE" | grep -oE '\[ef-migration-add:[A-Za-z0-9]+\]' | head -n1 | sed -E 's/^\[ef-migration-add:([A-Za-z0-9]+)\]$/\1/')
+          fi
+          if ! printf '%s' "$name" | grep -Eq '^[A-Z][A-Za-z0-9]{0,63}$'; then
+            echo "::error::migration name must match ^[A-Z][A-Za-z0-9]{0,63}\$"
+            exit 1
+          fi
+          echo "name=$name" >> "$GITHUB_OUTPUT"
+          echo "migration name: $name"
+
+      - uses: actions/checkout@fbc6f3992d24b796d5a048ff273f7fcc4a7b6c09 # v5.1.0
+        with:
+          persist-credentials: false
+
+      - uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: 10.0.x
+
+      - name: Restore tools and packages
+        working-directory: backend
+        run: |
+          dotnet tool restore
+          dotnet restore Zaghlol.sln
+
+      - name: dotnet ef migrations add
+        working-directory: backend
+        env:
+          NAME: ${{ steps.name.outputs.name }}
+        run: |
+          dotnet tool run dotnet-ef migrations add "$NAME" \
+            --project src/Zaghlol.Infrastructure \
+            --startup-project src/Zaghlol.Infrastructure \
+            --output-dir Persistence/Migrations \
+            --namespace Zaghlol.Infrastructure.Persistence.Migrations
+
+      - name: Collect new and changed migration files
+        run: |
+          mkdir -p "$RUNNER_TEMP/out"
+          dir=backend/src/Zaghlol.Infrastructure/Persistence/Migrations
+          git -c core.fsmonitor=false ls-files --others --modified --exclude-standard -z -- "$dir" |
+            while IFS= read -r -d '' f; do
+              mkdir -p "$RUNNER_TEMP/out/$(dirname "$f")"
+              cp "$f" "$RUNNER_TEMP/out/$f"
+              echo "$f"
+            done
+
+      - uses: actions/upload-artifact@b7c566a772e6b6bfb58ed0dc250532a479d7789f # v6.0.0
+        with:
+          name: ef-migration
+          path: ${{ runner.temp }}/out
+          if-no-files-found: error
+          retention-days: 3
+
+  commit:
+    name: commit generated migration
+    needs: generate
+    if: github.event_name == 'push'
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    permissions:
+      contents: write
+    concurrency:
+      group: backend-ef-migration-${{ github.ref }}-commit
+      cancel-in-progress: false
+    env:
+      REF_NAME: ${{ github.ref_name }}
+      TRIGGER_SHA: ${{ github.sha }}
+      NAME: ${{ needs.generate.outputs.name }}
+    steps:
+      - name: Refuse anything but task branches
+        run: |
+          case "$REF_NAME" in
+            task/*) ;;
+            *) echo "::error::backend-ef-migration only runs on task/** branches (got '$REF_NAME')"; exit 1 ;;
+          esac
+          printf '%s' "$NAME" | grep -Eq '^[A-Z][A-Za-z0-9]{0,63}$' || { echo "::error::bad migration name"; exit 1; }
+
+      # Exact triggering commit: if the branch moved meanwhile, the push below is not a fast-forward and fails.
+      - uses: actions/checkout@fbc6f3992d24b796d5a048ff273f7fcc4a7b6c09 # v5.1.0
+        with:
+          ref: ${{ github.sha }}
+          persist-credentials: false
+
+      - uses: actions/download-artifact@37930b1c2abaa49bbe596cd826c3c89aef350131 # v7.0.0
+        with:
+          name: ef-migration
+          path: ${{ runner.temp }}/in
+
+      # Nothing below executes repository code. The checked-out tree is untrusted data.
+      - name: Reject symlinks in the tracked tree
+        shell: bash
+        run: |
+          bad=$(git ls-files -s -- backend | awk '$1 == "120000" { print $4 }')
+          if [ -n "$bad" ]; then
+            echo "::error::tracked symlink(s) under backend/: $bad"
+            exit 1
+          fi
+
+      - name: Validate artifact
+        shell: bash
+        run: |
+          IN="$RUNNER_TEMP/in"
+          if [ -n "$(find "$IN" ! -type f ! -type d)" ]; then
+            echo "::error::artifact contains entries that are neither files nor directories"; exit 1
+          fi
+          count=0
+          while IFS= read -r -d '' f; do
+            rel=${f#"$IN"/}
+            if ! printf '%s' "$rel" | grep -Eq '^backend/src/Zaghlol\.Infrastructure/Persistence/Migrations/([0-9]{14}_[A-Za-z0-9]{1,64}(\.Designer)?|ZaghlolDbContextModelSnapshot)\.cs$'; then
+              echo "::error::refusing non-whitelisted path: $rel"; exit 1
+            fi
+            size=$(stat -c %s "$f")
+            [ "$size" -le 2097152 ] || { echo "::error::file larger than 2 MB: $rel"; exit 1; }
+            [ "$(tr -d '\000' < "$f" | wc -c)" = "$size" ] || { echo "::error::NUL byte in $rel"; exit 1; }
+            count=$((count + 1))
+          done < <(find "$IN" -type f -print0)
+          [ "$count" -ge 1 ] && [ "$count" -le 3 ] || { echo "::error::expected 1 to 3 files, got $count"; exit 1; }
+
+      - name: Copy validated files into the tree
+        shell: bash
+        run: |
+          IN="$RUNNER_TEMP/in"
+          WS=$(realpath -- "$GITHUB_WORKSPACE")
+          while IFS= read -r -d '' f; do
+            rel=${f#"$IN"/}
+            dest="$WS/$rel"
+            norm=$(realpath -m -s -- "$dest")
+            case "$norm" in
+              "$WS/.git"|"$WS/.git/"*) echo "::error::destination in .git: $rel"; exit 1 ;;
+              "$WS/"*) ;;
+              *) echo "::error::destination outside workspace: $rel"; exit 1 ;;
+            esac
+            p="$WS"
+            IFS=/ read -ra parts <<< "$rel"
+            for c in "${parts[@]}"; do
+              p="$p/$c"
+              if [ -L "$p" ]; then echo "::error::symlink in destination path: $rel"; exit 1; fi
+            done
+            if [ "$(realpath -m -- "$dest")" != "$norm" ]; then
+              echo "::error::destination resolves elsewhere: $rel"; exit 1
+            fi
+            mkdir -p -- "$(dirname -- "$dest")"
+            cp --remove-destination -- "$f" "$dest"
+            chmod 0644 -- "$dest"
+          done < <(find "$IN" -type f -print0)
+
+      - name: Commit
+        shell: bash
+        run: |
+          g() { git -c core.hooksPath=/dev/null -c core.fsmonitor=false "$@"; }
+          g add -- backend/src/Zaghlol.Infrastructure/Persistence/Migrations
+          if g diff --cached --quiet; then
+            echo "Nothing changed; no commit created."
+            exit 0
+          fi
+          g diff --cached --stat
+          g config user.name "github-actions[bot]"
+          g config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          g commit -m "chore(ci): add EF migration $NAME" -m "Generated by the backend-ef-migration workflow from $TRIGGER_SHA."
+
+      - name: Push (token used only here)
+        shell: bash
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          if [ "$(git rev-parse HEAD)" = "$TRIGGER_SHA" ]; then
+            echo "No commit to push."
+            exit 0
+          fi
+          b64=$(printf 'x-access-token:%s' "$GH_TOKEN" | base64 -w0)
+          echo "::add-mask::$b64"
+          git -c core.hooksPath=/dev/null -c http.extraheader="AUTHORIZATION: basic $b64" \
+            push origin "HEAD:refs/heads/$REF_NAME"

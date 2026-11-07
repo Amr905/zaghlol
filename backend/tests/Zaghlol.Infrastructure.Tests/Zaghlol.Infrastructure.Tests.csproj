@@ -1,0 +1,20 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <ItemGroup>
+    <ProjectReference Include="..\..\src\Zaghlol.Infrastructure\Zaghlol.Infrastructure.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Npgsql" />
+    <PackageReference Include="Testcontainers.PostgreSql" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Compile Include="..\Shared\ZaghlolTestDatabase.cs" Link="Shared\ZaghlolTestDatabase.cs" />
+    <!-- The same role bootstrap the provider admin and docker compose run. -->
+    <None Include="..\..\deploy\db\bootstrap-roles.sql" Link="db\bootstrap-roles.sql" CopyToOutputDirectory="PreserveNewest" />
+    <!-- The authoritative table list the schema is diffed against. -->
+    <None Include="..\..\..\docs\03-technical\backend-schema.md" Link="docs\backend-schema.md" CopyToOutputDirectory="PreserveNewest" />
+  </ItemGroup>
+
+</Project>

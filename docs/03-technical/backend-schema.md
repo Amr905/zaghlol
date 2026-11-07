@@ -14,7 +14,7 @@ Conventions:
 - **Naming:** snake_case.
 - **Migrations:** EF Core, applied by a deploy job.
 - **Schema:** all objects live in schema `zaghlol` (not `public`), owned by `migrator`.
-- **Database roles:** separate roles for API (`app_rw`), workers (`worker_rw`), operators (`ops_ro` + audited `ops_rw` via the admin API only) and migrations (`migrator`). The API uses `app_rw` for `/v1/*` and `ops_rw` for `/admin/v1/*` (two connection strings). Roles are created by `backend/deploy/db/bootstrap-roles.sql` (not by migrations); per-table grants are in the migrations (T-122 design note).
+- **Database roles:** separate roles for API (`app_rw`), workers (`worker_rw`), operators (`ops_ro` + audited `ops_rw` via the admin API only) and migrations (`migrator`). The API uses `app_rw` for `/v1/*` and `ops_rw` for `/admin/v1/*` (two connection strings). Roles are created by `backend/deploy/db/bootstrap-roles.sql` (not by migrations); per-table grants are in the migrations (T-122 design note, `GrantMatrix.cs`). Each group has its own login (`zaghlol_api` → `app_rw`, `zaghlol_admin` → `ops_rw`, `zaghlol_worker` → `worker_rw`, `zaghlol_ops_ro` → `ops_ro`), so the two API connection strings really are two privilege sets.
 - **Hardening CHECKs not repeated below:** every SHA-256 / HMAC `bytea` column has `CHECK (octet_length(col) = 32)`; `idempotency_key` has `char_length = 26`; `purchase_events.cause` has a regex CHECK for exactly the listed values (`rtdn:` / `assn:` + `[A-Za-z0-9_]{1,64}`); `audit_log.details` has `CHECK (NOT (details ?| array['email','order_id','orderId']))`.
 - **Crypto is computed in the application, never in the DB:** no `pgcrypto`; hashes, keyed hashes (`IKeyedHasher`) and envelope ciphertexts (`IEnvelopeCipher`) arrive as `bytea`.
 
@@ -171,7 +171,7 @@ CREATE TABLE purchase_seats (
                                                       -- device_key_trusted, otherwise an ordinary move
   CHECK ((install_id IS NULL) = (proof IS NULL)),
   CHECK ((last_moved_at IS NULL) = (next_move_at IS NULL)),
-  CHECK (next_move_at IS NULL OR date_trunc('hour', next_move_at) = next_move_at),
+  CHECK (next_move_at IS NULL OR date_trunc('hour', next_move_at, 'UTC') = next_move_at),  -- whole UTC hour in any session time zone
   CHECK (cardinality(recent_rebinds) <= 2)
 );
 CREATE INDEX ix_purchase_seats_install ON purchase_seats(install_id);
