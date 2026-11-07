@@ -17,7 +17,7 @@ class NoPrintOutsideDebug extends DartLintRule {
   @override
   void run(
     CustomLintResolver resolver,
-    DiagnosticReporter reporter,
+    ErrorReporter reporter,
     CustomLintContext context,
   ) {
     final scope = FileScope.of(resolver.path);
