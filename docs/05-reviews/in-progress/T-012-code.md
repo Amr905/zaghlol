@@ -1,87 +1,153 @@
-I reviewed T-012 at `e36b9d55`. The verdict is **CHANGES_REQUESTED** because of two major findings.
-
-- **Featured list is out of date:** `featuredCodes` misses GBP and INR, which A-59 / FR-CUR-01 / FR-CUR-07 now require.
-- **Snapshot swap would lock in bad data:** replacing the reconstructed XML with the real SIX file goes through the append-only merge. Any wrong codes from the reconstruction would stay in the table permanently as `historic`.
-
-The arithmetic, `roundDiv`, allocation, equality, the parsing boundary and the no-amounts-in-errors rule are all correct. I accept all eight declared deviations. Full markdown for `/home/claude/zaghlol/docs/05-reviews/T-012.md` follows; I did not write any files.
-
----
-
 # Review — T-012 Money and Currency value types with ISO 4217 table
 
 | Field | Value |
 |-------|-------|
 | Reviewer(s) | code-reviewer |
 | Date | 2026-11-07 |
-| Commit / diff | `task/T-012-money` @ `e36b9d55`, reviewed as `git diff origin/main...origin/t012` (18 files, +3874). CI `app-ci` run 42315952269 at the same SHA: 13/13 jobs green; `zaghlol_domain` `dart test` passes 121 tests; `dart format --set-exit-if-changed` and `flutter analyze` pass. |
-| Verdict | **CHANGES_REQUESTED** |
+| Commit / diff | Round 1: `e36b9d55` (`git diff origin/main...origin/t012`). Round 2: `1e44bb9` (`git diff e36b9d5 origin/t012`, 9 commits, 20 files, +945/−145). |
+| CI | Round 1: run 42315952269, 13/13 green, 121 domain tests. Round 2: run 42352828411, 12/13 green. In the job "format, analyze, unit tests", format and analyze pass, 155 domain tests pass and 1 fails. The failure is the intended merge gate `iso4217_snapshot_gate_test.dart:17`, with the message "placeholder snapshot still in place". Because of it, the `zaghlol_parsing` test step is skipped; that package is unchanged since main. |
+| Verdict | **APPROVED pending genuine SIX snapshot.** The only blocking item is the snapshot gate (see "Merge conditions"). |
 
 ## Acceptance criteria
 | Criterion | Result | Evidence |
 |-----------|--------|----------|
-| KWD 1.250, BHD 0.375, JPY 1500 round-trip exactly | PASS | `money_test.dart:24-44` covers parse ↔ canonical ↔ storage ↔ JSON, plus CLF 1.2345 and EGP -0.05. Property 8 (`money_property_test.dart:327-341`) runs 1000 inputs per path. |
-| Adding EGP to USD throws CurrencyMismatch | PASS | `money_test.dart:51-63`. Property 3 (`money_property_test.dart:260-269`) covers `+`, `−`, `compareTo` and `<`, and `==` returns false. |
-| allocate never loses or creates a minor unit | PASS | Property 4 (`money_property_test.dart:271-315`) checks the sum in BigInt, for small weights and for weights up to maxMinor. `allocateEven` is also checked. |
-| DoD: analyze clean, formatted, tests added, no `double` money, no raw SMS in logs | PASS | CI job "format, analyze, unit tests" passes. `no_floating_point_test.dart` passes. No SMS handling in this task. No UI, so RTL and goldens do not apply. |
-| Design note: API shapes, error classes, `toString` without amounts | PASS | It matches the note, apart from the declared deviations below and finding 10. |
-| Design note: canonical ASCII parse, too many decimals rejected, `-0` → 0, Arabic-Indic digits rejected | PASS | `money.dart:40-89`. The regex is anchored and ASCII-only, `e=0` rejects any `.`, and lengths over 16 digits are rejected before `int.parse`. Tests are at `money_test.dart:65-119`. |
-| Design note: overflow at ±(2^53−1), never wrap or clamp | PASS | `money.dart:109-153`. `times` handles a factor of int64 min safely (`factor < -maxMinor` short-circuits). Property 2 is exact against a BigInt oracle, and the factor generator includes the int64 extremes. |
-| Design note: largest-remainder allocation (ties go to the lower index, zero weights get zero, sign-symmetric, ≤10,000 parts) | PASS | `allocation.dart:18-70`. Leftover < number of positive weights, so zero weights never receive a unit. The tie-break is in the comparator at `:60-63`. |
-| Design note: `roundDiv`, five modes | PASS | `rounding.dart:26-61`. BigInt `~/` truncates and the remainder takes the sign of n. Property 10 checks it against an independent floor-based oracle, with about a third of inputs being exact .5 ties and negative n and d. |
-| Design note: `==` and `hashCode` | PASS | `money.dart:218-224` uses code + minor. `Currency` equality uses the code only. `MultiCurrencyTotal` uses `hashAllUnordered`, which is consistent with its `==`. |
-| Design note: ISO table pipeline (codegen byte-identical, XML verification, independent oracle, uniqueness, append-only) | PASS with findings 2 and 3 | See `iso4217_table_test.dart`. |
-| Design note: featured codes | **FAIL** | Finding 1. |
-| Pure-Dart package; only new dependency is dev `glados` | PASS | `lib/money` has no package imports. `dart:io` is used only in `tool/`. `pubspec.yaml` adds `glados: ^1.1.7` under dev_dependencies, and the `pubspec.lock` diff is only the `glados 1.1.7` entry (8 lines). |
+| KWD 1.250, BHD 0.375, JPY 1500 round-trip exactly | PASS | `money_test.dart` "AC: exact round trips". Property 8 covers canonical string, storage, `fromJson` and `tryFromJson`. |
+| Adding EGP to USD throws CurrencyMismatch | PASS | `money_test.dart` "AC: currency mismatch". Property 3. |
+| allocate never loses or creates a minor unit | PASS | Properties 4–7. Round 2 adds an exact comparison with a Hamilton oracle, edge weights including Σw > 2^63, and an equal-weights tie property. |
+| DoD: analyze clean, formatted, tests, no `double`, no raw SMS in logs | PASS | CI format and analyze steps pass. The scanner is hardened (CR6). There is no UI, so RTL and goldens do not apply. |
+| Design note: overflow, `roundDiv`, allocation, equality, parsing boundary, serialization | PASS | Traced by hand in round 1. Round 2 changes re-traced (see the Round 2 section). |
+| Design note: ISO table pipeline | PASS, gated | Codegen is byte-identical, XML verification and the independent oracle pass, and the append-only, exponent-guard and `--fresh` tests pass. The gate test fails on purpose until the genuine snapshot is committed. |
+| Featured codes per SRS (A-59, FR-CUR-01/07) | PASS (round 2) | `currency.dart:41-52` lists the 10 codes in A-59 order; test `iso4217_table_test.dart` "featured codes are active, in A-59 order". |
 
-## Declared deviations (judged against the design note)
-| Deviation | Ruling |
-|-----------|--------|
-| `Currency.isFund` + JSON `fund` key | **Accept.** D-51 / FR-CUR-07 need it so pickers can list funds codes last. It is parsed from List One `IsFund="true"` and checked against a hard-coded set of 9. The architect should add it to the note's JSON format. |
-| `Currency.all` | **Accept.** Historic codes must stay reachable, and `active` is defined in terms of it. |
-| `CorruptMoney(code, reason)` | **Accept in principle.** `reason` should become an enum (finding 9). |
-| `fromJson` throws `CorruptMoney` | **Accept.** This matches `fromStorage`, and a malformed backup is a data-integrity error. |
-| Generated table as records | **Accept.** The list is still const, instances are canonical (built once into `_byCode`), and the test confirms the runtime table equals the JSON row by row. |
-| `allocate` always uses BigInt | **Accept.** Exactness is unconditional, and the cost is negligible at ≤10,000 parts. |
-| `orderedFor` includes primary only if present | **Accept.** Callers can still get `total[primary]`, which returns zero, and the doc comment states the behaviour. FR-HOME-01 / EC-55 leave the decision about showing an empty primary card to the UI layer. |
-| No-double scan uses `\bnum\b` | **Accept.** It is stricter than `num ` because it also catches `num?`, `<num>` and `num.parse`. Finding 6 covers the scan's remaining gaps. |
-| (undeclared) numeric uniqueness checked only for active rows | **Accept.** ISO does reuse numerics of withdrawn codes. Record it in the note. |
-| (undeclared) public `largestRemainderSplit`, `maxAllocationParts`, `MultiCurrencyTotal.isEmpty` | See finding 10. |
+## Findings (round 1, at `e36b9d55`)
+| # | Severity | File:line (round 1) | Issue | Required change | Owner | Round 2 status |
+|---|----------|---------------------|-------|-----------------|-------|----------------|
+| CR1 | major | `lib/money/currency.dart:39-49` | `featuredCodes` used the D-22 eight; A-59 adds GBP and INR. | Use A-59 order; update the tests. | T-012 + architect | **Resolved** |
+| CR2 | major | `tool/gen_currencies.dart:126-135, 209-218` | Replacing the reconstructed snapshot through an append-only merge would keep invented codes as permanent historic rows, and no mechanical gate existed. | Add `--fresh`, a published-date gate test, and a procedure for `_baselineCodes` and the code diff. | T-012 | **Resolved** (procedure items at swap time) |
+| CR3 | minor | `tool/gen_currencies.dart:126-135` | A changed exponent or numeric was overwritten silently. | Throw unless the code is explicitly allowed; add a test. | T-012 | **Resolved** |
+| CR4 | minor | `lib/money/money.dart:165-170` | `allocateEven` allocated the list before checking the part cap. | Check the cap first; add a test. | T-012 | **Resolved** |
+| CR5 | minor | `lib/money/multi_currency_total.dart:14-38` | Overflow behaviour depended on input order at the range bound. | Sum exactly and check the range once; add a full-range property. | T-012 | **Resolved** |
+| CR6 | minor | `test/money/no_floating_point_test.dart:7` | The scanner missed `/`, float literals, `toStringAsFixed` and `pow`. | Strip comments and strings, then extend the patterns. | T-012 | **Resolved** (one gap left: R2-1) |
+| CR7 | minor | `test/money/generators.dart:8` | One shared `ExploreConfig` meant shared random state between properties. | Create a fresh config per property. | T-012 | **Resolved** |
+| CR8 | minor | `test/money/generators.dart:147-179` | No edge pool for weights and no tie-break property. | Add an edge pool, a tie property and a Hamilton oracle. | T-012 | **Resolved** |
+| CR9 | minor | `lib/money/money_errors.dart:20-55` | `reason` and `op` were free strings. | Make them enums. | T-012 | **Resolved** |
+| CR10 | nit | `lib/zaghlol_domain.dart:4` | `largestRemainderSplit` was exported publicly. | Move it to `src/`, or declare it in the note. | T-012 | **Resolved** |
+| CR11 | nit | `lib/money/money.dart:163-164` | The "larger shares first" wording was wrong for negative amounts. | Reword. | T-012 | **Resolved** |
+| CR12 | nit | `test/money/money_test.dart:167` | No test for a negative denominator. | Add one. | T-012 | **Resolved** |
+| CR13 | nit | `docs/04-tasks/tasks/T-012.md` | Accepted deviations are not recorded in the design note. | Amend the note. | solution-architect | **Open** (doc-only; the branch changes no docs) |
 
-## Findings
+## Round 2 (at `1e44bb9`)
+
+### Verification of round 1 findings
+- **CR1:** `currency.dart:41-52` has the D-22 eight plus `'GBP', 'INR'`, with doc comments citing A-59. The `orderedFor` expectation is now `AED EGP USD SAR GBP CHF`, and the doc comment in `multi_currency_total.dart` is updated.
+- **CR2:** Covered by five changes:
+  - `main` accepts `--fresh` (`gen_currencies.dart:319, 331`), which skips the committed JSON.
+  - The header comment documents the swap: use `--fresh` exactly once, regenerate `_baselineCodes`, and list changed codes in the PR.
+  - `iso4217_merge_test.dart` checks that a merge with no previous table returns exactly the snapshot.
+  - `iso4217_snapshot_gate_test.dart` requires `YYYY-MM-DD` and a date ≥ 2025-09-01. The sentinel `2000-01-01` makes it fail.
+  - Comment stripping happens before matching, so the sentinel text inside the XML header comment cannot be picked up as the `Pblshd` attribute.
+- **CR3:** `mergeAppendOnly` throws `FormatException` when an existing code's exponent or numeric changes, unless the code is in `allowChanged` (`--allow-change=`). The test covers exponent, numeric, the allowed case, a wrong allow-list and the no-change case.
+- **CR4 / F1:** `allocateEven` rejects `parts <= 0 || parts > maxAllocationParts` before calling `List.filled`. Tests cover `maxAllocationParts + 1`, `1 << 40`, `1 << 62` and −1.
+- **CR5:** `_sum` adds per currency in `BigInt` and range-checks once, throwing `MoneyOverflow(…, MoneyOp.sum)`. `of`, `add` and `+` all use it. Coverage:
+  - The example test `[max, +1, −1]` / `[max, −1, +1]` covers order, and also `add` and `+` overflow.
+  - A full-range property asserts that the outcome (value or overflow) is the same under reversal and shuffling, and that the result is non-null exactly when the BigInt per-currency sums fit.
+- **CR6 / F4:** The scanner now removes comments and string literals (`//`, `/* */`, single, double, triple-quoted and raw strings). It then forbids:
+  - `double` and `num`;
+  - `toDouble`, `parseDouble` and `toStringAsFixed`;
+  - `pow(`;
+  - a lone `/`, including `/=`;
+  - `\d+.\d+`, `.\d` and exponent literals.
+
+  Self-tests cover both catching forbidden forms and ignoring comments, strings and safe forms. One gap is left: R2-1.
+- **CR7:** `explore()` returns `ExploreConfig(numRuns: 1000, random: Random(42))` for each property.
+- **CR8:** The weights generators now draw from `edgeWeights` 25% of the time: a single weight, all-equal weights, `maxMinor` weights, `[int64Max, int64Max, 1]` (Σw > 2^63) and `[2^62, 2^62, 0, 2^62, 3]`. `checkAllocation` adds two checks:
+  - an equal-weights, non-increasing-by-index check;
+  - an exact match against `_hamilton`, an independently written BigInt reference.
+
+  A separate `equalWeights` property covers ties.
+- **CR9:** `MoneyOp {create, add, subtract, times, mulDiv, sum}` and `CorruptMoneyReason {unknownCurrency, outOfRange, missingCurrency, nonIntegerMinor}`; `toString` prints `.name`. A test runs over every reason.
+- **CR10:** `allocation.dart` moved to `lib/money/src/`. The barrel exports `src/allocation.dart show maxAllocationParts` only.
+- **CR11:** The doc now says "lower indices receive the extra unit", and `allocate` lists its guarantees in its own doc comment.
+- **CR12:** Tests cover `mulDiv(1, -3, …)` throwing `ArgumentError` and `mulDiv(-1, 3, floor)` returning −2.
+- **CR13:** Still open. The design note is unchanged on the branch. This is non-blocking doc work for the architect; record the rulings below.
+
+### Verification of security findings in my areas
+- **F1 (allocateEven cap):** Resolved, as CR4.
+- **F2 (`Pblshd` reaching generated source):** Resolved.
+  - `checkPublished` requires `^\d{4}-\d{2}(-\d{2})?$` in `parseListOne`, `parseJson` and `mergeAppendOnly`.
+  - Both renderers call `_validate`, which re-checks the date and every row, so a hand-built `CurrencyTable` cannot inject into source either.
+  - Tests reject a newline, `*/`, a trailing space, `2026-1-1` and an empty value through both parsers and both renderers.
+- **F3 (parse length):** Resolved. `maxParseLength = 64` (`money.dart:46`) is checked before the regex or any copy. Tests cover exactly 64 characters (accepted), 65 (rejected), and 1 MB inputs of zeros, sevens and nines.
+- **F6 (non-throwing entry points):** Resolved. `tryFromStorage` and `tryFromJson` return null on:
+  - unknown codes, lowercase codes, codes with spaces, and empty codes;
+  - out-of-range values, including `1 << 63`;
+  - wrong types and missing keys.
+
+  `fromStorage` now calls `tryFromStorage` and maps null to the right reason. Both pairs are tested against the same bad-input table, and property 8 covers `tryFromJson`.
+- **F9 (generator stripping and range checks):** Resolved. `_ignored` strips comments, CDATA and the DOCTYPE including any internal subset. `parseListOne` rejects minor units longer than one digit and numerics longer than three, then calls `checkRow` (numeric 1..999, exponent 0..4, code `^[A-Z]{3}$`). `parseJson` checks every field's type and the optional `fund` key's type. Tests cover hidden entries in comments and CDATA, a DOCTYPE, and bad rows (`978:5`, `978:10`, `000:2`, `1000:2`, lowercase codes, codes with a newline, exponent 9 or −1, numeric `'978'` or 0, bad status, `fund: 'yes'`). The quadratic rescan on a missing `</CcyNtry>` remains; it is a dev-time tool only, so I accept it.
+- **Also checked:**
+  - F5 (doc wording): `parse` doc now says it normalizes and that dedup must key on `toStorage`.
+  - F7: "never log" warnings added to `toStorage` and `toJson`.
+
+### Deviations from the design note (rulings)
+| # | Deviation | Ruling |
+|---|-----------|--------|
+| 1 | `Currency.isFund` | Accept. D-51 / FR-CUR-07 need it to list funds last. |
+| 2 | JSON `fund` key, written only when true; `parseJson` defaults it to false and type-checks it | Accept. |
+| 3 | `Currency.all` (active and historic, sorted) | Accept. |
+| 4 | `CorruptMoney(code, CorruptMoneyReason)` | Accept. The enum makes "no amounts in errors" hold by type. |
+| 5 | `MoneyOverflow(currency, MoneyOp)`, including `sum` | Accept. |
+| 6 | `fromJson` throws `CorruptMoney` and ignores extra keys (pinned by a test) | Accept. Being lenient about extra keys suits backup forward-compatibility. |
+| 7 | `Money.tryFromJson` | Accept. This is the boundary API that F6 asked for. |
+| 8 | `Money.tryFromStorage` | Accept. Same reason as 7. |
+| 9 | Generated table is a const list of records | Accept. |
+| 10 | `allocate` always uses BigInt | Accept. |
+| 11 | `orderedFor` includes the primary currency only when it is present (pinned by a test) | Accept. Callers can still read `total[primary]`, which returns zero. |
+| 12 | No-double scan: `\bnum\b` plus the extended pattern set | Accept. |
+| 13 | Numeric uniqueness asserted for active rows only | Accept. ISO reuses withdrawn numerics. |
+| 14 | `allocation.dart` under `src/`; only `maxAllocationParts` exported | Accept. |
+| 15 | `MultiCurrencyTotal.isEmpty`, plus value `==`, `hashCode` and `toString` (codes only) | Accept. |
+| 16 | `Money.maxParseLength = 64` | Accept. |
+| 17 | `featuredCodes` = A-59's 10 codes | Accept. This is required by the SRS; the note is out of date. |
+| 18 | `checkPublished` accepts `YYYY-MM` as well as `YYYY-MM-DD` | Accept. The gate test separately requires `YYYY-MM-DD` for the committed snapshot. |
+| 19 | Generator CLI `--fresh` and `--allow-change=` | Accept; see R2-2 for a hardening suggestion. |
+| 20 | `Money.toString()` returns `Money(<code>)` | Accept. |
+
+**Leading zeros (more than 16 within the 64-character cap):** Accept. The note's grammar `-?[0-9]+` allows leading zeros, and the range check runs on the digits after the zeros are stripped. A test covers zero-padded `maxMinor + 1` being rejected. The input-length cap from F3 bounds the cost, and the behaviour is pinned by "leading zeros do not count toward the 16-digit cap". The non-canonical-input risk (F5) is documented on `parse`, and dedup must key on `toStorage` (T-046, T-155).
+
+### New findings (round 2)
 | # | Severity | File:line | Issue | Required change | Owner |
 |---|----------|-----------|-------|-----------------|-------|
-| 1 | **major** | `packages/zaghlol_domain/lib/money/currency.dart:39-49`; `test/money/iso4217_table_test.dart:163-169`; `test/money/money_test.dart:326-333` | `featuredCodes` has the 8 D-22 codes, as the design note says. The SRS is the source of truth and differs: FR-CUR-01, FR-CUR-07 and A-59 make the featured list `EGP, USD, SAR, EUR, AED, QAR, KWD, BHD, GBP, INR`, adding GBP and INR for Monzo/HDFC/Paytm. Pickers (FR-CUR-07) and `orderedFor` (FR-HOME-01) will use this constant, so GBP and INR users get the wrong order. | Append `'GBP', 'INR'` in A-59 order. Update the doc comment from "D-22 order" to "A-59 order". Update the test that asserts the exact list, and update the `orderedFor` expectation (it becomes `AED EGP USD SAR GBP CHF`). The architect should correct the design note. | T-012 (impl); solution-architect (note) |
-| 2 | **major** | `packages/zaghlol_domain/tool/gen_currencies.dart:126-135, 209-218`; `test/money/iso4217_table_test.dart:12-22, 69` | **Pipeline robustness when the genuine SIX file arrives.** `main()` always merges the new List One into the committed JSON, append-only. When the reconstructed XML is replaced, any code that exists only in the reconstruction (an invented code, or one already withdrawn) becomes a permanent `historic` row. `_baselineCodes` then forces it to stay. `tryOf` would accept those codes, so a parser could treat a bogus code as valid. Nothing mechanical stops a merge while `published` still reads `UNVERIFIED-RECONSTRUCTION-…`. | (a) Add a `--fresh` mode (or an explicit documented step that deletes `currencies.json`) so the first genuine snapshot is generated with no previous table. Regenerate `_baselineCodes` from that output. (b) Add a test that `published` matches `^\d{4}-\d{2}-\d{2}$` and is ≥ 2025-09-01 (Amendment 180). It fails today on purpose and blocks merge until the real file is committed. (c) In the PR, list the codes that changed versus the reconstruction. | T-012 |
-| 3 | minor | `packages/zaghlol_domain/tool/gen_currencies.dart:126-135` | In future refreshes, `mergeAppendOnly` silently overwrites an existing code's `exponent` (or `numeric`) when List One changes it. Stored `*_minor` values for that code would then be read at the wrong scale (×10^k), which breaks CLAUDE.md §2.4. | Throw from `mergeAppendOnly` when an existing code's exponent or numeric changes, unless an explicit override for that code is passed. Add a test. An exponent change needs a data migration task, not just a table refresh. | T-012 |
-| 4 | minor | `packages/zaghlol_domain/lib/money/money.dart:165-170` | `allocateEven(parts)` runs `List<int>.filled(parts, 1)` before the 10,000-part limit is checked. A large `parts` value (e.g. `1 << 40`) tries to allocate terabytes and fails with an out-of-memory error instead of `ArgumentError`. | Check `parts > maxAllocationParts` in `allocateEven` before allocating. Add a test with a large `parts` value. | T-012 |
-| 5 | minor | `packages/zaghlol_domain/lib/money/multi_currency_total.dart:14-38` | `of(xs)` depends on input order at the range edges. For example, `[max, +1, −1]` throws `MoneyOverflow` while `[max, −1, +1]` returns `max`, because each running total is range-checked. Property 9 claims order independence, but the generator `smallMinor` (`generators.dart:94-108`) never reaches the bound. | Accumulate each currency's total exactly (BigInt, or int64 with a bounded count) and range-check once at the end; do the same for `+`. Add a property test that uses full-range `any.minor`. Alternatively, document that the result depends on order at the bound and narrow the property. | T-012 |
-| 6 | minor | `packages/zaghlol_domain/test/money/no_floating_point_test.dart:7` | The scan misses the usual ways a double appears in Dart without the word `double`. These include int `/` int, which returns a double, double literals such as `1.5`, `.round()`, `.toStringAsFixed`, and `pow(`. `minor / 100` would pass. | Strip `//` and `///` comments and string literals, then also forbid `[^~/]/[^/*=]`, `\b\d+\.\d+\b`, `toStringAsFixed`, `\bpow\(`. Add matching cases to the self-test. | T-012 |
-| 7 | minor | `packages/zaghlol_domain/test/money/generators.dart:8` | One `ExploreConfig` instance is shared by every property in the file. In glados 1.1.7 the config owns its `Random` (default seed 42). Each test's inputs therefore depend on how many tests ran before it, so a failure may not reproduce under `--name`. Not verified locally; CI does not show it. | Build a fresh config for each test, e.g. `ExploreConfig explore() => ExploreConfig(numRuns: 1000);`, so each test gets its own fixed seed. | T-012 |
-| 8 | minor | `packages/zaghlol_domain/test/money/generators.dart:147-179`; `test/money/money_property_test.dart:271-325` | Allocation generators lack edge cases. With random weights in 0..10^6, equal remainders almost never occur, so the lower-index tie-break is checked only by examples. There is no property that equal weights give non-increasing shares by index. There is no weight edge pool (single weight, all equal, a weight of `maxMinor`, int64-scale weights where Σw > 2^63), even though the implementation supports them. | Add a weight edge pool to `_weights`. Add properties: equal weights give shares non-increasing by index; the extra units go to the R largest remainders (checked with a BigInt oracle); Σw > int64 still splits exactly. | T-012 |
-| 9 | minor | `packages/zaghlol_domain/lib/money/money_errors.dart:20-28, 45-55` | `CorruptMoney.reason` and `MoneyOverflow.op` are free-form public `String`s that `toString()` prints as-is. The "never an amount" rule (NFR-SEC-03) depends on every future caller writing safe text. | Make `reason` an enum (`unknownCurrency`, `outOfRange`, `missingCurrency`, `nonIntegerMinor`) and `op` an enum. The guarantee then holds by type. | T-012 |
-| 10 | nit | `packages/zaghlol_domain/lib/zaghlol_domain.dart:4`; `lib/money/allocation.dart:1-18`; `lib/money/multi_currency_total.dart:76` | Undeclared public API. `largestRemainderSplit(int, List<int>)` and `maxAllocationParts` are exported, which gives a bare-int split with no currency. `MultiCurrencyTotal.isEmpty` was added. | Move `allocation.dart` to `lib/money/src/` and stop exporting it (keep `maxAllocationParts` only if callers need it), or declare these in the design note. | T-012 |
-| 11 | nit | `packages/zaghlol_domain/lib/money/money.dart:163-164` | "the larger shares come first" is wrong for negative amounts: −34 comes before −33. | Reword to "lower indices receive the extra unit". | T-012 |
-| 12 | nit | `packages/zaghlol_domain/test/money/money_test.dart:167` | `mulDiv` is tested only with denominator 0; a negative denominator is not tested. | Add a case with a negative denominator. | T-012 |
-| 13 | nit | `docs/04-tasks/tasks/T-012.md` (design note) | The accepted deviations are not yet recorded in the note. | Amend the note: `isFund` / `fund` key, `Currency.all`, `CorruptMoney` reason, `fromJson` error type, the record table, active-only numeric uniqueness, `orderedFor` semantics, and the featured list fix from finding 1. | solution-architect |
+| R2-1 | minor | `test/money/no_floating_point_test.dart:23-60` | `stripCommentsAndStrings` drops interpolated expressions together with the string. So `'${minor / 100}'`, the most likely way a display-formatting double would sneak in, passes the scan. The doc comment admits this, but nothing enforces "interpolations stay plain identifiers". | Scan the bodies of `${…}` (keep the expression and drop only the literal text), or fail on any `${` whose body contains `/` or a float literal. Add `"'\${a / b}'"` to the must-catch samples. | T-012 (can be done after merge) |
+| R2-2 | minor | `tool/gen_currencies.dart:319, 331` | `--fresh` skips both the append-only rule and the exponent guard. It is documented as one-time use, but nothing stops a later run from silently dropping codes or changing exponents. The `_baselineCodes` test catches deletions; it does not catch exponent changes beyond the oracle's 25 codes. | Make `--fresh` refuse unless the committed JSON's `published` is the sentinel `2000-01-01`, or unless an explicit `--i-know` flag is also given. Alternatively, after the swap, delete `--fresh` in a follow-up commit. | T-012 |
+| R2-3 | nit | `tool/iso4217/list-one.xml:11` | The header comment says the date gate lives in `test/money/iso4217_table_test.dart`. It now lives in `iso4217_snapshot_gate_test.dart`. | Fix the path, or let it go when the file is replaced. | T-012 |
+| R2-4 | nit | `lib/money/money.dart:18, 132, 293-294` | The `_create` and `_subtract` aliases for `MoneyOp.create` and `MoneyOp.subtract` exist only to keep lines short, while `add`, `times` and `mulDiv` use `MoneyOp.x` directly. The inconsistency is a small indirection. | Optional: inline them and let `dart format` wrap the lines. | T-012 |
+| R2-5 | nit | `test/money/money_property_test.dart:357, 361` | The property names "weights 0..10^6" and "weights up to maxMinor" are no longer accurate, because both generators now also draw int64-scale edge weights. | Rename, e.g. "weights 0..10^6 + edges". | T-012 |
+| R2-6 | nit | (process) | While the gate test is red, the CI job stops before `zaghlol_parsing` tests and any later steps run. A regression elsewhere in that job would be hidden until the swap. | Acceptable for now, since `zaghlol_parsing` is untouched. Do not merge other work onto this branch while it is gated. | Lead |
+
+### Merge conditions
+1. Commit the genuine SIX `list-one.xml` (Pblshd ≥ 2025-09-01, Amendment 180 or later).
+2. Run `dart run tool/gen_currencies.dart --fresh` and commit the regenerated `currencies.json` and `iso4217_table.g.dart`.
+3. Regenerate `_baselineCodes` in `test/money/iso4217_table_test.dart` from the new JSON.
+4. In the PR, list the codes added, removed or changed versus the placeholder. Any exponent difference on a featured or oracle code needs reviewer sign-off.
+5. Confirm the oracle, funds-set, exclusion and featured-active tests still pass on the real data. These tests are independent of the XML, so a wrong real-world assumption fails loudly rather than being absorbed.
+6. CI fully green, with the gate test passing and `zaghlol_parsing` running.
+7. The architect amends the design note (CR13) using the deviation rulings above. This should be done but does not block the code.
+
+No re-review of the code is needed for items 1–6 if only those files change. Because this is a C4 task, the security-privacy-reviewer and test-engineer sign-offs are still needed.
 
 ## Checklist
-- [x] `flutter analyze` clean (CI run 42315952269)
-- [x] Tests added and passing (121 in `zaghlol_domain`; 10 glados properties at 1000 runs each)
+- [x] `flutter analyze` clean (run 42352828411)
+- [x] Tests added and passing: 155 pass; 1 intended gate failure
 - [x] RTL + LTR verified: N/A (no UI)
-- [x] No hard-coded strings: N/A for user-facing text; error text is developer-facing only
-- [x] No `double` money, explicit currency (subject to the scan gaps in finding 6)
-- [x] No sensitive data in logs: `Money`, `MultiCurrencyTotal` and all four errors leave out amounts; `UnknownCurrency` and `CorruptMoney` hide input that does not look like an ISO code; `FormatException` does not echo its input (tested)
-- [x] Stays within the task's scope: only `lib/money/**`, the export, `tool/`, tests, the dev dependency and the lock file changed
+- [x] No hard-coded strings: N/A (developer-facing errors only)
+- [x] No `double` money, explicit currency (hardened scanner; R2-1 gap)
+- [x] No sensitive data in logs (typed enums; codes only; never-log warnings on `toStorage` / `toJson`)
+- [x] Stays within the task's scope (only `lib/money/**`, the barrel, `tool/` and `test/money/**` changed)
 
 ## Notes for the Lead
-- **Two questions about the reconstructed XML.**
-  - *Is the generator robust?* The regex parser fits SIX's real structure: the `Pblshd` attribute, repeated `CcyNtry` per country, code-less entries, `N.A.` minor units and `IsFund="true"`. Conflicting repeats fail loudly, as do a changed fund set (the hard-coded set of 9) or a missing exclusion. The weak point is the replacement step itself, finding 2: run it as a fresh build, not a merge, and add the date-format guard so the reconstruction cannot reach `main`.
-  - *Are the exponent checks independent?* Yes. The oracle (`iso4217_table_test.dart:73-87`) checks the runtime `Currency` table against hard-coded values: KWD/BHD/OMR/JOD/TND/LYD/IQD = 3; JPY/KRW/VND/CLP/ISK/XOF/XAF/UGX/PYG = 0; EGP/USD/EUR/SAR/AED/QAR/GBP = 2; CLF/UYW = 4. It does not read the XML, so it stands even if the XML is wrong.
-- Finding 1 comes from the design note, not the implementer: the note still uses the D-22 list, which A-59 has replaced. The architect should correct the note at the same time.
-- Arithmetic I checked by hand and found correct:
-  - `times` at the int64 minimum;
-  - `mulDiv` products beyond int64 (tested with maxMinor × 1000000007);
-  - the bound R < number of positive weights, which guarantees zero weights never get a unit;
-  - allocation stays monotonic, because equal quotients with w_i > w_j imply r_i > r_j;
-  - `roundDiv` in all five modes, including negative denominators.
-- After fixes, this needs re-review by code-reviewer. As C4, the security-privacy-reviewer and test-engineer sections are also still required.
+- Answers to the two snapshot questions from round 1, as of round 2:
+  - *Is the pipeline robust?* Yes. It strips comments, CDATA and the DOCTYPE, validates every row, validates the date before any value reaches Dart source, guards exponent and numeric changes, and offers a fresh-build path plus a red gate until the real file lands. R2-2 is the remaining hardening.
+  - *Are the exponent checks independent?* Still yes: the hard-coded oracle reads the runtime table, never the XML.
+- The 15-item deviation list was not in the repo or in your message. The 20 rulings above come from my own comparison of the diff and the design note; please map the implementer's list onto them.
+- R2-1 and R2-2 are minors and can ride with the snapshot-swap commit or go in a small follow-up. They do not block approval.

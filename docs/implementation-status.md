@@ -41,7 +41,7 @@
 | T-009 | SPK-03: can an iOS App Intent process immediately with a headless Flutter engine? | M0 | C4 | Opus | native-platform-engineer | T-001, T-004 | TODO | — |  |
 | T-010 | SPK-02: OCR accuracy on synthetic InstaPay/wallet receipts | M0 | C3 | Sonnet | native-platform-engineer | T-001 | TODO | — |  |
 | T-011 | SPK-04: on-device ar-EG speech availability across the device matrix | M0 | C2 | Sonnet | native-platform-engineer | T-001 | TODO | — |  |
-| T-012 | Money and Currency value types with ISO 4217 table | M0 | C4 | Opus | flutter-core-engineer | T-001 | CHANGES_REQUESTED | app-ci 42315952269 (13/13 green, 121 tests) @ e36b9d5 | Round 1: code CHANGES_REQUESTED (featured GBP/INR; snapshot-swap safety), security CHANGES_REQUESTED (allocateEven cap; generator injection), tests SUFFICIENT. Fixes in progress. Merge also needs the genuine SIX list-one.xml (PO) |
+| T-012 | Money and Currency value types with ISO 4217 table | M0 | C4 | Opus | flutter-core-engineer | T-001 | IN_REVIEW | app-ci 42352828411 (12/13; only the intended snapshot gate red) @ 1e44bb9 | Round 2: code APPROVED pending genuine SIX snapshot, security APPROVED, tests SUFFICIENT. Merge blocked on the genuine SIX list-one.xml (PO). Minors R2-1 (scan ${} bodies), R2-2 (guard --fresh) ride with the swap; CR13 design-note amendment (architect) |
 | T-013 | Text & amount normalization utilities (digits, separators, groupings) | M0 | C3 | Sonnet | parsing-engine-engineer | T-012 | TODO | — |  |
 | T-014 | Result/Failure types, SafeException and domain event bus | M0 | C2 | Sonnet | flutter-core-engineer | T-001 | TODO | — |  |
 | T-015 | Secure key bootstrap for the database key | M0 | C4 | Opus | flutter-core-engineer | T-007 | TODO | — |  |
@@ -194,7 +194,7 @@
 | T-162 | Settings S-60 incl. privacy info and About | M6 | C2 | Sonnet | flutter-ui-engineer | T-020, T-087, T-115 | TODO | — |  |
 | T-163 | Categories & rules S-63/S-64 incl. custom categories (Gold) | M6 | C2 | Sonnet | flutter-ui-engineer | T-074, T-119 | TODO | — |  |
 | T-164 | Custom message template builder engine and screen S-65 (Gold) | M6 | C3 | Sonnet | parsing-engine-engineer | T-033, T-119 | TODO | — |  |
-| T-165 | Exclude app data from OS backups and device transfer | M6 | C4 | Opus | native-platform-engineer | T-001 | CHANGES_REQUESTED | app-ci 42316116828 (13/13 green) @ 13ef486; negative proof 42316160887 (task/T-165-proof, red as intended) | Round 1: code APPROVED, tests SUFFICIENT, security CHANGES_REQUESTED (F1: assert no backupAgent; F2: device-script allow-list + API 31+ dev row). Fixes in progress. After merge it stays open until the device run on a release candidate passes (security review F3) |
+| T-165 | Exclude app data from OS backups and device transfer | M6 | C4 | Opus | native-platform-engineer | T-001 | IN_REVIEW | app-ci 42352212541 (13/13 green) @ eebeaa0, merged as 189acf7; negative proofs 42316160887, 42352248954 | MERGED, device run pending. Code APPROVED, tests SUFFICIENT, security APPROVED (r2). Done only when docs/05-reviews/T-165-device.md passes on a release candidate (F3); F9: add iOS canaries and finish onboarding before steps 5a/5c |
 | T-166 | Delete everything (local wipe + backend install delete) | M6 | C4 | Opus | flutter-core-engineer | T-015, T-141, T-152, T-145, T-179 | TODO | — |  |
 | T-167 | Zakah engine (hawl, nisab, native-unit dues) | M7 | C4 | Opus | flutter-core-engineer | T-113 | TODO | — |  |
 | T-168 | Zakah screen S-46 behind flag with disclaimer | M7 | C2 | Sonnet | flutter-ui-engineer | T-167, T-025, T-087 | TODO | — |  |
@@ -276,3 +276,4 @@
 | 2026-11-07 | T-165 round 1: code APPROVED, tests SUFFICIENT, security CHANGES_REQUESTED. Fixes sent. Follow-ups routed to T-008/015/016/021/062/063/065/149/150/166/171/176. |
 | 2026-11-07 | T-122 implemented: 25 tables, 39 CHECKs (each with a negative test), grants matrix, readiness 503, push-triggered migration workflow. CI green; C4 reviews started. |
 | 2026-11-07 | T-122 round 1: code + security CHANGES_REQUESTED, tests SUFFICIENT. Fixes folded into a regenerated InitialCreate (unshipped). Lead approved the push-mode migration workflow. PO asked to add a ruleset on main. |
+| 2026-11-07 | T-165 merged (189acf7) after all three approvals; stays IN_REVIEW until the device run. T-012 round-2 code review APPROVED pending the SIX snapshot. |

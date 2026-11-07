@@ -47,7 +47,7 @@ Every task file has: ID, description, technical details, dependencies, affected 
 | [T-007](tasks/T-007.md) | SPK-05: encrypted SQLite (SQLite3MultipleCiphers) + FTS5 trigram on both platforms | US-01-2 | High* | Opus | flutter-core-engineer | T-001 | A | 2 | TODO |
 | [T-008](tasks/T-008.md) | SPK-01: Android receiver → spool → WorkManager → headless engine latency | US-01-2 | High* | Opus | native-platform-engineer | T-001, T-004 | D | 3 | TODO |
 | [T-009](tasks/T-009.md) | SPK-03: can an iOS App Intent process immediately with a headless Flutter engine? | US-01-2 | High* | Opus | native-platform-engineer | T-001, T-004 | E | 3 | TODO |
-| [T-010](tasks/T-010.md) | SPK-02: OCR accuracy on synthetic InstaPay/wallet receipts | US-01-2 | High | Sonnet | native-platform-engineer | T-001 | D | 2 | TODO |
+| [T-010](tasks/T-010.md) | SPK-02: OCR accuracy on synthetic InstaPay/wallet receipts | US-01-2 | High | Sonnet | native-platform-engineer | T-001 | D | 2 | MERGED (device run pending) |
 | [T-011](tasks/T-011.md) | SPK-04: on-device ar-EG speech availability across the device matrix | US-01-2 | Medium | Sonnet | native-platform-engineer | T-001 | D | 2 | TODO |
 | [T-012](tasks/T-012.md) | Money and Currency value types with ISO 4217 table | US-02-2 | High* | Opus | flutter-core-engineer | T-001 | A | 2 | TODO |
 | [T-013](tasks/T-013.md) | Text & amount normalization utilities (digits, separators, groupings) | US-05-1 | High | Sonnet | parsing-engine-engineer | T-012 | F | 3 | TODO |
