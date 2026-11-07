@@ -41,7 +41,7 @@
 | T-009 | SPK-03: can an iOS App Intent process immediately with a headless Flutter engine? | M0 | C4 | Opus | native-platform-engineer | T-001, T-004 | TODO | — |  |
 | T-010 | SPK-02: OCR accuracy on synthetic InstaPay/wallet receipts | M0 | C3 | Sonnet | native-platform-engineer | T-001 | TODO | — |  |
 | T-011 | SPK-04: on-device ar-EG speech availability across the device matrix | M0 | C2 | Sonnet | native-platform-engineer | T-001 | TODO | — |  |
-| T-012 | Money and Currency value types with ISO 4217 table | M0 | C4 | Opus | flutter-core-engineer | T-001 | IN_REVIEW | app-ci 42315952269 (13/13 green, 121 tests) @ e36b9d5 | code-reviewer, test-engineer and security-privacy-reviewer running. Merge blocked until the genuine SIX ISO 4217 list-one.xml replaces the reconstructed snapshot (PO to download) |
+| T-012 | Money and Currency value types with ISO 4217 table | M0 | C4 | Opus | flutter-core-engineer | T-001 | CHANGES_REQUESTED | app-ci 42315952269 (13/13 green, 121 tests) @ e36b9d5 | Round 1: code CHANGES_REQUESTED (featured GBP/INR; snapshot-swap safety), security CHANGES_REQUESTED (allocateEven cap; generator injection), tests SUFFICIENT. Fixes in progress. Merge also needs the genuine SIX list-one.xml (PO) |
 | T-013 | Text & amount normalization utilities (digits, separators, groupings) | M0 | C3 | Sonnet | parsing-engine-engineer | T-012 | TODO | — |  |
 | T-014 | Result/Failure types, SafeException and domain event bus | M0 | C2 | Sonnet | flutter-core-engineer | T-001 | TODO | — |  |
 | T-015 | Secure key bootstrap for the database key | M0 | C4 | Opus | flutter-core-engineer | T-007 | TODO | — |  |
@@ -271,3 +271,4 @@
 | 2026-11-06 | T-012 and T-165 started in parallel (no shared files). Held: T-002 and T-004 (both change pubspec.lock; run after T-012), T-022 (after T-002 lints). |
 | 2026-11-07 | Design notes for T-122/T-123/T-138 merged (1c68de5). Lead decisions: IEnvelopeCipher goes in T-123 (T-124 now depends on T-123); the cloud KMS adapter goes in T-140; the signing-key ring is configuration, not a `signing_keys` table; accounts are hard-deleted (T-135 to fix the retention wording); operator UUIDs are allowed in operator alerts. |
 | 2026-11-07 | T-012 implemented (CI green), in C4 review. Blocker: the ISO 4217 snapshot was rebuilt from memory because the build environment can't reach six-group.com; PO asked to download it. |
+| 2026-11-07 | T-012 round 1 reviews done: code and security CHANGES_REQUESTED, tests SUFFICIENT. All fixes sent to the implementer in one round. Follow-ups routed to T-021, T-046, T-149, T-155. |
