@@ -1,0 +1,6 @@
+# Enables the custom_lint plugin (zaghlol_lints, T-002) for this package.
+include: ../../analysis_options.yaml
+
+analyzer:
+  plugins:
+    - custom_lint
