@@ -1,6 +1,6 @@
 // GENERATED CODE - DO NOT MODIFY BY HAND.
 // Source: lib/money/data/currencies.json
-// (ISO 4217 List One, published UNVERIFIED-RECONSTRUCTION-2026-11-07).
+// (ISO 4217 List One, published 2000-01-01).
 // Regenerate: dart run tool/gen_currencies.dart
 
 /// ISO 4217 rows (code, numeric, exponent, active, fund),

@@ -6,9 +6,12 @@
   structure as SIX list-one.xml (one CcyNtry per country, IsFund flags,
   N.A. minor units), but country coverage is partial and the content is
   unverified. Replace this file with the downloaded SIX snapshot and run
-  `dart run tool/gen_currencies.dart` before release.
+  `dart run tool/gen_currencies.dart --fresh` before release.
+  Pblshd="2000-01-01" is a deliberate sentinel: the snapshot-date test in
+  test/money/iso4217_table_test.dart fails until a genuine snapshot
+  (published on or after 2025-09-01) replaces this file.
 -->
-<ISO_4217 Pblshd="UNVERIFIED-RECONSTRUCTION-2026-11-07">
+<ISO_4217 Pblshd="2000-01-01">
 	<CcyTbl>
 		<CcyNtry>
 			<CtryNm>AFGHANISTAN</CtryNm>

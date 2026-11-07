@@ -1,6 +1,6 @@
 {
   "source": "ISO 4217 List One",
-  "published": "UNVERIFIED-RECONSTRUCTION-2026-11-07",
+  "published": "2000-01-01",
   "currencies": [
     {"code": "AED", "numeric": 784, "exponent": 2, "status": "active"},
     {"code": "AFN", "numeric": 971, "exponent": 2, "status": "active"},
