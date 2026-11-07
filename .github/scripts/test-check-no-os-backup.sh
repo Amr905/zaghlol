@@ -96,6 +96,23 @@ expect fail "allowBackup missing (defaults to true)" check_manifest_xmltree "$wo
 manifest false false \
   '        A: http://schemas.android.com/apk/res/android:allowBackup(0x01010280)=true' > "$work/m6"
 expect fail "allowBackup declared twice" check_manifest_xmltree "$work/m6"
+manifest false false \
+  '        A: http://schemas.android.com/apk/res/android:backupAgent(0x0101027f)="app.zaghlol.LeakyAgent" (Raw: "app.zaghlol.LeakyAgent")' > "$work/m7"
+expect fail "backupAgent present (custom agent bypasses D2D rules)" check_manifest_xmltree "$work/m7"
+manifest false false \
+  '        A: http://schemas.android.com/apk/res/android:fullBackupOnly(0x01010473)=true' > "$work/m8"
+expect fail "fullBackupOnly=true" check_manifest_xmltree "$work/m8"
+manifest false false \
+  '        A: http://schemas.android.com/apk/res/android:fullBackupOnly(0x01010473)=false' > "$work/m9"
+expect pass "fullBackupOnly=false is allowed" check_manifest_xmltree "$work/m9"
+child='        E: activity (line=20)
+          A: http://schemas.android.com/apk/res/android:allowBackup(0x01010280)=false'
+{ manifest false false | grep -v allowBackup; printf '%s\n' "$child"; } > "$work/m10"
+expect fail "allowBackup=false only on a child of <application>" check_manifest_xmltree "$work/m10"
+manifest false false | sed 's/E: application/E: not-application/' > "$work/m11"
+expect fail "no <application> element" check_manifest_xmltree "$work/m11"
+{ manifest false false; echo '      E: application (line=40)'; } > "$work/m12"
+expect fail "two <application> elements" check_manifest_xmltree "$work/m12"
 
 # Negative controls: data_extraction_rules.
 der "" "$(all_but device_sharedpref)" > "$work/d1"
@@ -129,6 +146,69 @@ fbc > "$work/f2"
 expect fail "backup_rules checked as data-extraction-rules" check_rules_xmltree data-extraction-rules "cloud-backup device-transfer" "$work/f2"
 der > "$work/f3"
 expect fail "data-extraction-rules where full-backup-content expected" check_rules_xmltree full-backup-content - "$work/f3"
+
+# check_apk end to end with a stub aapt2 serving fixtures: covers resolving
+# the manifest IDs through `aapt2 dump resources`, including R8-shortened
+# file names (res/Qq.xml, as in the real release APKs).
+resources() {
+  cat << 'EOF'
+Binary APK
+Package name=app.zaghlol id=7f
+  type mipmap id=0d entryCount=1
+    resource 0x7f0d0000 mipmap/ic_launcher
+      (mdpi) (file) res/mipmap-mdpi-v4/ic_launcher.png type=PNG
+  type xml id=0e entryCount=2
+    resource 0x7f0e0000 xml/backup_rules
+      () (file) res/Qq.xml type=XML
+    resource 0x7f0e0001 xml/data_extraction_rules
+      () (file) res/4j.xml type=XML
+EOF
+}
+
+stub_apk() { # stub_apk <dir> <resources-text>: fixtures + a stub aapt2 in <dir>
+  mkdir -p "$1"
+  manifest false false > "$1/AndroidManifest.xml"
+  fbc > "$1/res_Qq.xml"
+  der > "$1/res_4j.xml"
+  printf '%s\n' "$2" > "$1/resources"
+  cat > "$1/aapt2" << EOF
+#!/usr/bin/env bash
+# stub: "dump resources <apk>" or "dump xmltree --file <path> <apk>"
+case "\$2" in
+  resources) cat "$1/resources" ;;
+  xmltree) f="$1/\$(tr / _ <<< "\$4")"; [ -f "\$f" ] && cat "\$f" || exit 1 ;;
+  *) exit 2 ;;
+esac
+EOF
+  chmod +x "$1/aapt2"
+}
+
+stub_apk "$work/a_ok" "$(resources)"
+expect pass "check_apk: obfuscated res/Qq.xml + res/4j.xml resolve and pass" check_apk "$work/a_ok/aapt2" fake.apk
+stub_apk "$work/a1" "$(resources | sed 's#xml/backup_rules#xml/TMP#; s#xml/data_extraction_rules#xml/backup_rules#; s#xml/TMP#xml/data_extraction_rules#')"
+expect fail "check_apk: resource names swapped" check_apk "$work/a1/aapt2" fake.apk
+stub_apk "$work/a2" "$(resources | grep -v 'resource 0x7f0e0001')"
+expect fail "check_apk: dataExtractionRules ID missing from the resource table" check_apk "$work/a2/aapt2" fake.apk
+stub_apk "$work/a3" "$(resources | grep -v 'res/Qq.xml')"
+expect fail "check_apk: (file) line missing for backup_rules" check_apk "$work/a3/aapt2" fake.apk
+stub_apk "$work/a4" "$(resources)"
+rm "$work/a4/res_4j.xml"
+expect fail "check_apk: rules file missing from the APK" check_apk "$work/a4/aapt2" fake.apk
+mkdir -p "$work/a5"
+printf '#!/usr/bin/env bash\nexit 1\n' > "$work/a5/aapt2"
+chmod +x "$work/a5/aapt2"
+expect fail "check_apk: aapt2 exits non-zero with empty output" check_apk "$work/a5/aapt2" fake.apk
+before=$(find "${TMPDIR:-/tmp}" -maxdepth 1 -name 'tmp.*' -type d 2> /dev/null | wc -l)
+check_apk "$work/a5/aapt2" fake.apk > /dev/null 2>&1
+check_apk "$work/a_ok/aapt2" fake.apk > /dev/null 2>&1
+after=$(find "${TMPDIR:-/tmp}" -maxdepth 1 -name 'tmp.*' -type d 2> /dev/null | wc -l)
+cases=$((cases + 1))
+if [ "$after" -le "$before" ]; then
+  echo "ok   - check_apk removes its work directory on success and failure"
+else
+  echo "::error::self-test: check_apk left $((after - before)) work directories behind"
+  failures=$((failures + 1))
+fi
 
 echo "$cases cases, $failures failed"
 [ "$failures" -eq 0 ]
