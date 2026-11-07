@@ -76,7 +76,7 @@ jobs:
             else
               cat "$GITHUB_WORKSPACE/custom_lint.log"
               if [ "$dir" = tools/lints_example ]; then
-                (cd "$dir" && dart run custom_lint --verbose > "$GITHUB_WORKSPACE/cl2.log" 2>&1 || true)
+                (cd "$dir" && dart run custom_lint --help > "$GITHUB_WORKSPACE/cl2.log" 2>&1; echo "exit=$?" >> "$GITHUB_WORKSPACE/cl2.log")
                 echo "::notice::DBG $(tr '\n' '|' < "$GITHUB_WORKSPACE/cl2.log" | head -c 3500)"
               fi
             fi
