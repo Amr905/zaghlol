@@ -48,6 +48,8 @@ jobs:
             echo "::error::FLUTTER_VERSION differs: app-ci.yml='$ci' app-regen.yml='$regen'"
             exit 1
           fi
+      - name: T-165 backup assertion self-test (negative controls)
+        run: bash .github/scripts/test-check-no-os-backup.sh
       - name: dart format
         run: |
           if ! dart format --output=none --set-exit-if-changed . > format.log 2>&1; then
@@ -151,12 +153,38 @@ jobs:
             echo "::error::no Kotlin <testcase> found in Gradle results"
             exit 1
           fi
+      # T-165: AllowBackup / DataExtractionRules / FullBackupContent are fatal
+      # in app/android/app/lint.xml; abortOnError fails the task on any of them.
+      - name: Android lint (backup rules fatal)
+        working-directory: app/android
+        run: |
+          set -o pipefail
+          if ! ./gradlew --no-daemon :app:lintDevNoSmsDebug 2>&1 | tee ../gradle-lint.log; then
+            report=$(find ../build/app -name 'lint-results-devNoSmsDebug.txt' | head -n 1)
+            if [ -n "$report" ]; then cat "$report"; fi
+            exit 1
+          fi
+      - name: Assert lint ran with the T-165 config
+        run: |
+          if ! grep -E "^> Task :app:lintDevNoSmsDebug$" app/gradle-lint.log; then
+            echo "::error::lintDevNoSmsDebug did not execute"
+            grep -E "lintDevNoSmsDebug" app/gradle-lint.log || true
+            exit 1
+          fi
+          for id in AllowBackup DataExtractionRules FullBackupContent; do
+            if ! grep -qE "<issue id=\"$id\" severity=\"(fatal|error)\"" app/android/app/lint.xml; then
+              echo "::error::lint.xml does not raise $id to error/fatal"
+              exit 1
+            fi
+          done
       - name: Upload Gradle test reports
         if: failure()
         uses: actions/upload-artifact@b7c566a772e6b6bfb58ed0dc250532a479d7789f # v6.0.0
         with:
           name: kotlin-test-reports
-          path: app/build/app/reports/tests/**
+          path: |
+            app/build/app/reports/tests/**
+            app/build/app/reports/lint-results*
           if-no-files-found: warn
           retention-days: 14
 
@@ -203,6 +231,20 @@ jobs:
             tail -n 40 xcodebuild.log
             exit 1
           fi
+          # T-165 (FR-SEC-05): each isExcludedFromBackup test must have run and passed.
+          for t in testAppContainerDirectoriesAreExcludedAtLaunch testDirectorySetCoversTheFlutterDataRoots \
+            testFreshDirectoryIsNotExcludedByDefault testEnsureExcludedCreatesAndExcludes \
+            testEnsureExcludedIsIdempotent testEnsureExcludedSurvivesDeleteAndRecreate \
+            testExcludeMarksEveryDirectory testExcludeReportsFailureWithoutStoppingOrCrashing \
+            testFilesCreatedLaterStayUnderAnExcludedDirectory \
+            testAppGroupDirectoriesAreSkippedWithoutAContainer; do
+            if ! grep -qiE "test case.*BackupExclusionTests.*$t.*passed" xcodebuild.log; then
+              echo "::error::BackupExclusionTests.$t did not pass"
+              grep -iE "BackupExclusionTests" xcodebuild.log | head -n 30
+              exit 1
+            fi
+          done
+          grep -iE "BackupExclusionTests.*(passed|skipped)" xcodebuild.log
 
   android:
     name: android ${{ matrix.flavor }} (${{ matrix.mode }})
@@ -287,6 +329,13 @@ jobs:
             echo "::error::targetSdkVersion is not 36"
             exit 1
           fi
+      # T-165 (FR-SEC-05): on the final APK, backup is off and both rule files
+      # exclude every domain for cloud backup and device-to-device transfer.
+      - name: Assert no OS backup or device transfer
+        run: |
+          AAPT2=$(ls -d "$ANDROID_HOME"/build-tools/*/aapt2 | sort -V | tail -n 1)
+          APK=$(find app/build/app/outputs -iname "*${FLAVOR}*${MODE}.apk" | head -n 1)
+          bash .github/scripts/check-no-os-backup.sh "$AAPT2" "$APK"
 
   ios:
     name: ios ${{ matrix.flavor }} (no codesign)
