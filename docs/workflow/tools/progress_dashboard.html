@@ -1,0 +1,187 @@
+<meta name="dash-one-writer">
+<style>
+  .zp { display: flex; flex-direction: column; gap: var(--cds-gap-lg); font-family: var(--font-anthropic-sans); }
+  .zp h1 { font-family: var(--font-anthropic-serif); font-weight: 400; font-size: var(--cds-font-size-title); margin: 0; }
+  .zp .lede { color: var(--color-fg-muted); margin: 0; font-size: var(--cds-font-size-body); }
+  .zp .lede b { font-weight: 600; color: var(--color-fg); font-variant-numeric: tabular-nums; }
+  .zp .tiles { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 9.5rem), 1fr)); gap: var(--cds-gap-md); }
+  .zp .tile, .zp .card { background: var(--color-panel); border: 1px solid var(--color-border-line); border-radius: var(--cds-radius); padding: var(--cds-pad-lg); }
+  .zp .tile .lbl { font-size: var(--cds-font-size-caption); color: var(--color-fg-muted); }
+  .zp .tile .num { font-family: var(--font-anthropic-serif); font-weight: 400; font-size: var(--cds-font-size-title); font-variant-numeric: tabular-nums; display: block; margin-top: var(--cds-gap-xs); min-height: 1.2em; }
+  .zp .tile.main .num { color: var(--color-ok); }
+  .zp .card h2 { font-size: var(--cds-font-size-heading); font-weight: var(--cds-font-weight-medium); margin: 0; }
+  .zp .card .note { font-size: var(--cds-font-size-caption); color: var(--color-fg-muted); margin: var(--cds-gap-xs) 0 var(--cds-gap-md); }
+  .zp .bar { height: 10px; border-radius: 999px; background: var(--cds-chart-grid); overflow: hidden; margin-top: var(--cds-gap-sm); }
+  .zp .bar span { display: block; height: 100%; background: var(--color-ok); border-radius: 999px; }
+  .zp .ms { min-height: 300px; }
+  .zp .ms svg text { fill: var(--color-fg-muted); font-size: 12px; font-family: var(--font-anthropic-sans); }
+  .zp .legend { display: flex; flex-wrap: wrap; gap: var(--cds-gap-md); font-size: var(--cds-font-size-caption); color: var(--color-fg-muted); margin-bottom: var(--cds-gap-sm); }
+  .zp .legend i { display: inline-block; width: 10px; height: 10px; border-radius: 2px; margin-right: 6px; vertical-align: -1px; }
+  .zp .sw-done { background: var(--color-ok); }
+  .zp .sw-review { background: var(--color-warn); }
+  .zp .sw-progress { background: var(--cds-chart-reference); }
+  .zp .sw-blocked { background: var(--color-bad); }
+  .zp .sw-todo { background: var(--cds-chart-grid); }
+  .zp .tbl { overflow: auto; max-height: 28rem; }
+  .zp table { width: 100%; border-collapse: collapse; font-size: var(--cds-font-size-caption); font-variant-numeric: tabular-nums; }
+  .zp th { text-align: left; color: var(--color-fg-muted); font-weight: var(--cds-font-weight-medium); padding: var(--cds-pad-xs) var(--cds-pad-sm); border-bottom: 1px solid var(--color-border-line); position: sticky; top: 0; background: var(--color-panel); }
+  .zp td { padding: var(--cds-pad-xs) var(--cds-pad-sm); border-bottom: 1px solid var(--color-border-line); vertical-align: top; }
+  .zp .tip { position: absolute; pointer-events: none; background: var(--cds-surface-popover); border: 1px solid var(--cds-border); border-radius: var(--cds-radius); box-shadow: var(--cds-shadow-popover); padding: var(--cds-pad-xs) var(--cds-pad-sm); font-size: var(--cds-font-size-caption); white-space: nowrap; }
+  .zp .tip .h { color: var(--cds-text-secondary); }
+  .zp .wrap { position: relative; }
+  [data-dash-source-state=refreshing] { opacity: .5; transition: opacity var(--cds-dur-slow); }
+</style>
+
+<div class="zp">
+  <header>
+    <h1>Zaghlol build progress</h1>
+    <p class="lede"><b data-draw="done-n" data-source="summary" data-field="done" data-row="0">—</b> of <b data-draw="total-n" data-source="summary" data-field="total" data-row="0">—</b> implementation tasks are done (<b data-draw="pct-lede" data-source="summary" data-field="pct" data-row="0">—</b>), and <b data-draw="review-lede" data-source="summary" data-field="review" data-row="0">—</b> more are built and in review.</p>
+  </header>
+
+  <section class="tiles" id="summary">
+    <div class="tile main">
+      <div class="lbl">Tasks done</div>
+      <span class="num" data-draw="pct" data-source="summary" data-field="pct" data-row="0">—</span>
+      <div class="bar" data-draw="pct-bar" data-source="summary"></div>
+    </div>
+    <div class="tile"><div class="lbl">Done</div><span class="num" data-draw="done" data-source="summary" data-field="done" data-row="0">—</span></div>
+    <div class="tile"><div class="lbl">In review</div><span class="num" data-draw="review" data-source="summary" data-field="review" data-row="0">—</span></div>
+    <div class="tile"><div class="lbl">In progress</div><span class="num" data-draw="progress" data-source="summary" data-field="progress" data-row="0">—</span></div>
+    <div class="tile"><div class="lbl">Blocked</div><span class="num" data-draw="blocked" data-source="summary" data-field="blocked" data-row="0">—</span></div>
+    <div class="tile"><div class="lbl">Not started</div><span class="num" data-draw="todo" data-source="summary" data-field="notStarted" data-row="0">—</span></div>
+  </section>
+
+  <section class="card" id="milestones">
+    <h2>Progress by milestone</h2>
+    <p class="note">Tasks in each milestone by stage. M0 is the foundation; M5 is the backend and Gold.</p>
+    <div class="legend">
+      <span><i class="sw-done"></i>Done</span>
+      <span><i class="sw-review"></i>In review</span>
+      <span><i class="sw-progress"></i>In progress</span>
+      <span><i class="sw-blocked"></i>Blocked</span>
+      <span><i class="sw-todo"></i>Not started</span>
+    </div>
+    <div class="wrap ms" data-draw="milestones" data-source="by_milestone"></div>
+  </section>
+
+  <section class="card" id="active">
+    <h2>Tasks in flight and done</h2>
+    <p class="note">Every task that has started, by stage. "In review" includes tasks sent back for fixes.</p>
+    <div class="tbl">
+      <table data-source="active" data-row-key="task">
+        <thead><tr><th data-field="task">Task</th><th data-field="title">What it builds</th><th data-field="milestone">Milestone</th><th data-field="class">Class</th><th data-field="stage">Stage</th><th data-field="status">Status</th></tr></thead>
+        <tbody data-draw="active-rows"></tbody>
+      </table>
+    </div>
+  </section>
+</div>
+
+<script>
+  const ORDER = ['Done', 'In review', 'In progress', 'Blocked', 'Not started'];
+  const count = (rows, st) => rows.filter((r) => r.stage === st).length;
+
+  dash.calc('summary', {
+    title: 'Overall task counts',
+    description: 'Tasks per stage across the whole plan, and the share done.',
+    inputs: ['tasks'],
+    fn: (tasks) => [{
+      total: tasks.length,
+      done: count(tasks, 'Done'),
+      review: count(tasks, 'In review'),
+      progress: count(tasks, 'In progress'),
+      blocked: count(tasks, 'Blocked'),
+      notStarted: count(tasks, 'Not started'),
+      pct: tasks.length ? count(tasks, 'Done') / tasks.length : 0,
+    }],
+  });
+
+  dash.calc('by_milestone', {
+    title: 'Tasks per milestone by stage',
+    description: 'Each milestone\'s task count split by stage.',
+    inputs: ['tasks'],
+    fn: (tasks) => {
+      const ms = [...new Set(tasks.map((t) => t.milestone))].sort();
+      return ms.map((m) => {
+        const rs = tasks.filter((t) => t.milestone === m);
+        return {milestone: m, total: rs.length, done: count(rs, 'Done'), review: count(rs, 'In review'),
+          progress: count(rs, 'In progress'), blocked: count(rs, 'Blocked'), notStarted: count(rs, 'Not started')};
+      });
+    },
+  });
+
+  dash.calc('active', {
+    title: 'Started tasks',
+    description: 'Every task not in "Not started", ordered by stage.',
+    inputs: ['tasks'],
+    fn: (tasks) => tasks.filter((t) => t.stage !== 'Not started')
+      .sort((a, b) => ORDER.indexOf(b.stage) - ORDER.indexOf(a.stage) || a.task.localeCompare(b.task))
+      .map((t) => ({task: t.task, title: t.title, milestone: t.milestone, class: t.class, stage: t.stage, status: t.status})),
+  });
+
+  const one = () => { const d = dash.data('summary'); return d.status === 'ok' && d.data.length ? d.data[0] : null; };
+  const num = (field, fmt) => (el) => { const r = one(); el.textContent = r ? fmt(r[field]) : '—'; };
+  const int = d3.format(',');
+  const pct = d3.format('.1%');
+  dash.draw('done-n', num('done', int));
+  dash.draw('total-n', num('total', int));
+  dash.draw('pct-lede', num('pct', pct));
+  dash.draw('review-lede', num('review', int));
+  dash.draw('pct', num('pct', pct));
+  dash.draw('done', num('done', int));
+  dash.draw('review', num('review', int));
+  dash.draw('progress', num('progress', int));
+  dash.draw('blocked', num('blocked', int));
+  dash.draw('todo', num('notStarted', int));
+  dash.draw('pct-bar', (el) => {
+    const r = one();
+    const s = document.createElement('span');
+    s.style.width = r ? `${Math.max(r.pct * 100, r.pct > 0 ? 1.5 : 0)}%` : '0%';
+    el.replaceChildren(s);
+  });
+
+  dash.draw('milestones', (el) => {
+    const d = dash.data('by_milestone');
+    if (d.status !== 'ok') { el.replaceChildren(); return; }
+    const rows = d.data;
+    const keys = [['done', 'Done', '--color-ok'], ['review', 'In review', '--color-warn'], ['progress', 'In progress', '--cds-chart-reference'], ['blocked', 'Blocked', '--color-bad'], ['notStarted', 'Not started', '--cds-chart-grid']];
+    const cs = getComputedStyle(el);
+    const col = (v) => cs.getPropertyValue(v).trim() || '#999';
+    const W = el.clientWidth || 600, rowH = 30, left = 44, right = 64, top = 4;
+    const H = top + rows.length * rowH;
+    const x = d3.scaleLinear([0, d3.max(rows, (r) => r.total) || 1], [left, W - right]);
+    const svg = d3.create('svg').attr('width', '100%').attr('viewBox', `0 0 ${W} ${H}`).attr('role', 'img').attr('aria-label', 'Tasks per milestone by stage');
+    const tip = document.createElement('div'); tip.className = 'tip'; tip.hidden = true;
+    rows.forEach((r, i) => {
+      const y = top + i * rowH;
+      const g = svg.append('g');
+      g.append('text').attr('x', 0).attr('y', y + 18).text(r.milestone);
+      let acc = 0;
+      keys.forEach(([k, , v]) => {
+        if (!r[k]) return;
+        g.append('rect').attr('x', x(acc)).attr('y', y + 6).attr('height', 16).attr('width', Math.max(0, x(acc + r[k]) - x(acc))).attr('fill', col(v));
+        acc += r[k];
+      });
+      g.append('text').attr('x', x(r.total) + 8).attr('y', y + 18).text(`${r.done}/${r.total}`);
+      g.append('rect').attr('x', 0).attr('y', y).attr('width', W).attr('height', rowH).attr('fill', 'transparent')
+        .on('pointermove', (ev) => {
+          const lines = keys.filter(([k]) => r[k]).map(([k, n]) => `<div>${n}: ${r[k]}</div>`).join('');
+          tip.innerHTML = `<div class="h"></div>${lines}`;
+          tip.firstChild.textContent = `${r.milestone}: ${r.total} tasks`;
+          tip.hidden = false;
+          const [px, py] = d3.pointer(ev, el);
+          tip.style.left = `${Math.min(px + 12, W - 160)}px`; tip.style.top = `${py + 12}px`;
+        })
+        .on('pointerleave', () => { tip.hidden = true; });
+    });
+    el.replaceChildren(svg.node(), tip);
+  });
+
+  dash.draw('active-rows', (tb) => {
+    const d = dash.data('active');
+    tb.replaceChildren(...(d.status === 'ok' ? d.data : []).map((r) => {
+      const tr = document.createElement('tr');
+      ['task', 'title', 'milestone', 'class', 'stage', 'status'].forEach((k) => { const td = document.createElement('td'); td.textContent = r[k]; tr.append(td); });
+      return tr;
+    }));
+  });
+</script>
