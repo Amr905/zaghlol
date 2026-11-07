@@ -17,3 +17,7 @@ class CompliantMoney {
 
   BigInt get wide => BigInt.from(minorUnits);
 }
+
+class NegativeControl {
+  double x = 1;
+}
