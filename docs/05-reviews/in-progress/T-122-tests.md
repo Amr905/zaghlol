@@ -104,3 +104,84 @@ All eight acceptance criteria and all the design-note test items have a correspo
 Every acceptance criterion and every design-note test item maps to a test. The CI run is green: Infrastructure 168/168, Api 7/7, and the model drift check clean. The CHECK guard and the doc diff are real. Excess grants are detected.
 
 I recommend G1 to G5 as follow-up tests, by the T-122 closing review or in T-124/T-184, whichever first touches those columns. None of them blocks the acceptance criteria.
+
+---
+
+## Test verification, round 2 (delta): T-122 @ `d5943be`
+
+**Evidence.** backend-ci run 42407789072, job "build, format, test" (128509135065), plus a read of the new and changed tests. All 5 jobs are green. Totals: Infrastructure 341/0 failed (13 s), Api 7/0, Contract 35, Application 3, Workers 3, Ops 2 (391 total). `has-pending-model-changes` reports "No changes". The log shows only per-assembly totals, so per-test PASS evidence is indirect, as in round 1. I did not run anything locally.
+
+I was not given the F1 to F12 definitions. I mapped them from the SQL, the doc diff, the test comments and the `GrantTests` comments:
+
+| Finding | What I took it to mean |
+|---|---|
+| F1 | `ops_ro` column hiding |
+| F2 | privacy CHECK widening (digit runs in every script, `@`, slug codes) |
+| F3 | `audit_log` details and target CHECKs |
+| F4 | `audit_log` RLS |
+| F8 | format CHECKs |
+| F9 | invariant triggers |
+| F10 | `app_rw` and worker column narrowing |
+| F11 | login guard |
+| F12 | forbidden-column denylist |
+
+### 1. G1 to G3: closed
+
+| Gap | Test | Verdict |
+|---|---|---|
+| G1 (unique / PK, `23505`) | `ConstraintBehaviourTests.ASecondRowWithTheSameKeyIsRejected` (13 cases) | Closed. It asserts SQLSTATE and constraint name. Cases: accounts, purchases, store_notifications, app_attest_keys (unique install and PK), catalog_merchants, contributions, operators, seat_claimants, purchase_seats, idempotency_records, replay_guard, bank_requests. |
+| G2 (FK actions) | `AnOrphanRowIsRejected` (6, `23503`), `AMerchantNeedsAnExistingCategory`, `DeletingAnAccountCascadesItsInstallLinks`, `ACatalogRowStillReferencedCannotBeDeleted`, `ACategoryWithAChildCategoryCannotBeDeleted` | Closed. The NO ACTION deletes run as the owner, so only the FK can stop them. |
+| G3 (single-column corrections) | `ASupportDetachMustClearTheLinkAndItsSourceTogether`, `ASupportSeatMoveMustKeepTheSeatPairsConsistent` (as `ops_rw`); `DeletingAnInstallLeavesOtherSeatsAndInstallsUntouched`; `DeletingAnInstallWithoutASeatSucceeds` | Closed. Both halves are rejected, and the paired update is accepted. |
+| G5 (Arabic-Indic digits) | 26 contribution cases, including Arabic-Indic, Extended, fullwidth, mixed-script, spaced, dashed, dotted, `@`. `ValuesJustInsideTheLimitsAreAccepted` adds accepted values such as Arabic-digit `١٢٣٤٥` (5 digits) and `shop 12 34 5`. | Closed. |
+| G7 (audit nesting and case) | 7 audit cases: nested, in an array, `Email`, `ORDER_ID`, `e-mail`, `@` in another value, `@` in target. | Closed. |
+| G4 (grants circular) | Partly addressed. `GrantTests` now has about 30 new denied cases and a database-level CONNECT ACL equality test. `ModelTests` pins the hidden columns and the `app_rw`/worker narrowing. `InitialCreateGoldenTests` pins SHA-256 of each frozen block. | Better. The comparison oracle is still the matrix itself (see "Remaining gaps"). |
+
+### 2. Security fixes: does a negative test fail if the fix is reverted?
+
+| Fix | Negative test | Fails on revert? |
+|---|---|---|
+| F1 `ops_ro` can't read email, provider_subject, store_key, linked_purchase_token, store_notifications.store_key | `GrantTests.RoleIsDenied` ×6 live `42501` probes; `ModelTests.ReadOnlyOperatorsNeverSee...` (8 columns); matrix equality | Yes. |
+| F2 privacy CHECK widening | `CheckConstraintTests` cases above, with constraint names asserted | Yes. The accepted-value cases pin false positives. |
+| F3 audit CHECK depth, case, `@` | 7 cases plus `AuditDetailsWithTheDocumentedShapesAreAccepted` (the documented support-move shape is still accepted) | Yes. |
+| F4 audit RLS | `AuditLogSecurityTests`: exact policy list and RLS flag. The worker cannot delete a fresh row (returns 0 rows). Age theory ×7. `OperatorsAppendFreshRowsButCannotBackdateThem` (`42501`). `ARowMustNameARealOperator` (FK). `ReadersSeeTheLog`. | Yes. A removed policy or RLS flag fails the exact-policy test, and the fresh-row delete would return 1. |
+| F8 format CHECKs | 5 `app_version` cases, `daily_active_counts`, `last_error` ×2, `store_key` length ×2, `country` ×3, plus accepted values (including `1.4.0-beta.1`, `1.4.0+42`) | Yes. |
+| F9 invariant triggers | `InvariantTriggerTests`: seat_key_hash replace and clear rejected, same value allowed, tombstone allowed; trusted true to false rejected; `attach_reclaim_used_at` clear or move rejected as both `api` and `admin`; `23514` plus constraint name. `GrantTests.TriggerFunctions...` now lists 4 functions. | Yes, with one hole below. |
+| F10 `app_rw` / worker column narrowing | `GrantTests` denied: `app_rw` can't update `dispute_frozen_until` or `daily_active_counts`, can't SELECT other installs' contributions; the worker can't update `token_hash`, `seat_key_trusted`, `account_id`, `account_linked_by`. `ModelTests` pins the matrix; allowed probes pin the worker's legitimate columns. | Yes (grant equality also guards). |
+| F11 login guard | `DatabaseRoleGuardTests`: 9-row accept/reject matrix, superuser rejected, host stop with the migrator login, right login keeps running, readiness 503 for the wrong login. | Mostly. Gaps below. |
+| F12 denylist | `TheDenylistCatchesTheseNames` ×12 and `TheDenylistLeavesTheseNamesAlone` ×3, plus the schema-wide column scan | Yes. Note the regex `_payload` and `raw_`; the "leave alone" cases show `payload_digest` is intentionally untouched. |
+
+### 3. Isolation change (Serilog)
+
+- Cause of the flake: `Log.Logger` is process-wide and each `WebApplicationFactory` host replaces it. `ApiTests` and `ReadinessTests` were separate collections, so xunit ran them in parallel, and `RequestBodiesAreNeverLogged` could see no logs.
+- `ApiHostGroup` has `DisableParallelization = true`, and both classes use it. xunit runs non-parallel collections alone, one after another, so each class's fixture and tests run without another host being built or replaced.
+- The only two classes in `Zaghlol.Api.Tests` that build a host are those two (no other `WebApplicationFactory` in the folder). `ContractApiFixture` is in another assembly, hence another process. This addresses the cause for this test assembly.
+- It is a workaround of the process-global logger and not a fix of it. A future third host-building class has to remember to join `ApiHostGroup`. Suggest a comment, or a guard test that fails when a class using a host fixture lacks the collection.
+- `ApiHostGroup` has no assertion enforcing membership.
+
+### 4. Determinism
+
+- **RLS cases.** Age margins are 10 days for the 1-year rule (360 vs 370), 5 days below and 5 days above for the 3-year rule (1090 vs 1100), and `interval '1 year'` / `'3 years'` is at most 366 / 1096 days. The values are fixed offsets from `Rows.Now()` (the owner inserts backdated rows), so there is no wall-clock sensitivity. The "backdate" test uses a two-year offset. Not tested: the +1 minute upper bound of the append policy, so a future-stamped row is untested.
+- **Readiness timing.** The black-hole server is now shared (`BlackHoleServer`). Timer waits are 1 s with assertions of 0.8 to 5 s; the cache window is moved with a manual `GetUtcNow` only. The accepted-connection count is read after the 1 s timeout. The residual risk is a loaded CI runner, but the margins are wide. `FreeTcpPort` TOCTOU in `Api.Tests.ReadinessFixture` is unchanged. The 5 s recovery budget in `HealthIs503...` is unchanged and still the likeliest flake.
+- **Role guard host test.** Success path awaits `StopApplication` with a 20 s ceiling; the failure case is slow but not flaky.
+- **Pool test.** `AProbeTimeoutLeavesTheAppPoolAlone` depends on Npgsql's lazy `DISCARD ALL` leaving `application_name` visible on the idle backend. That behaviour is documented in the comment and passed in CI. It is a driver-behaviour dependency, but it is deterministic here. The test is nearly tautological, though: the probe source and the App source are independent objects, so one cannot affect the other. The DI test `ReadinessUsesItsOwnOneConnectionPool...` (`NotSame`, `MaxPoolSize == 1`) is the one that would catch a revert.
+- **Isolation.** The shared container is still used, with random IDs. The new audit rows accumulate, but only `>= 1` and per-id counts are asserted.
+
+### Remaining gaps
+
+| # | Gap | Severity |
+|---|-----|----------|
+| N1 | **Trigger tombstone hole (production).** `installs_before_update` allows any change of `seat_key_hash` when `NEW.deleted_at IS NOT NULL`. `UPDATE ... SET deleted_at = now(), seat_key_hash = <other value>` is therefore accepted. The doc says the tombstone clears it. The test only exercises the clear-to-NULL case, so this is untested and wrong in principle. The trigger should require `NEW.seat_key_hash IS NULL` when the tombstone exempts the change. Which logins can reach it is limited by column grants (worker has `deleted_at` and `seat_key_hash`). | Medium |
+| N2 | Role-guard group tests miss the "member of own group plus another" case (extra membership) and the non-superuser privileged flags (`createrole`, `createdb`, `bypassrls`). Only `ops_ro` under App, `worker` under App and similar are covered. | Low to Medium |
+| N3 | The grants oracle is still the matrix. Mitigated by the invariant tests, the live probes, the golden hashes and the DB CONNECT ACL. Sequences are still unchecked. | Low |
+| N4 | `AProbeTimeoutLeavesTheAppPoolAlone` is tautological on its own (see Determinism). | Low |
+| N5 | Golden test hashes: a pinned hash blocks any later edit, including legitimate comment fixes. It is also circular for correctness: it asserts the file is unchanged, not that it is right. That is its stated purpose. | Info |
+| N6 | No test that the RLS append policy rejects future-dated rows, or at the exact one-minute boundary. | Low |
+| N7 | `ApiHostGroup` membership is not enforced for future host-building tests. | Low |
+| N8 | No explicit test that other login-guard role reasons (`RejectMigrator` via membership rather than being the owner) fire. `migrator` hits `RejectOwner` first. | Low |
+| N9 | From round 1, still open: sequence privileges, success-path readiness caching, and cancellation behaviour. | Low |
+
+### Verdict: **TESTS_SUFFICIENT**
+
+G1 to G3 and the other round-1 requests (G5, G7) are closed. Every security fix I could map has a negative test that fails when the fix is reverted. The isolation change addresses the cause for this test assembly. The timing cases use wide margins.
+
+Recommend fixing N1 before merge (production trigger plus one added test: `deleted_at` set and `seat_key_hash` replaced with a different value must fail), and adding N2's extra-membership case. Neither changes the verdict on test sufficiency, but N1 is a real weakness that the current tests do not detect.
