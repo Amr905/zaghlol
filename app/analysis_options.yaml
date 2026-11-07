@@ -6,11 +6,6 @@
 include: package:flutter_lints/flutter.yaml
 
 analyzer:
-  plugins:
-    - custom_lint
-  errors:
-    # custom_lint still uses the legacy plugin system; see tools/lints/README.md.
-    analysis_options_deprecated_plugins: ignore
   language:
     strict-casts: true
     strict-inference: true

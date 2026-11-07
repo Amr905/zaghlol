@@ -4,7 +4,7 @@
 
 | Job | What it checks |
 |-----|----------------|
-| `static` | `pub get --enforce-lockfile`, `dart format`, `flutter analyze`, custom_lint slot, app non-golden tests, `dart test` for both packages, a check that `FLUTTER_VERSION` is identical in `app-ci.yml` and `app-regen.yml`, and the negative-control self-test of the T-165 backup assertions (`.github/scripts/test-check-no-os-backup.sh`) |
+| `static` | `pub get --enforce-lockfile`, `dart format`, `flutter analyze`, zaghlol_lints, app non-golden tests, `dart test` for both packages, a check that `FLUTTER_VERSION` is identical in `app-ci.yml` and `app-regen.yml`, and the negative-control self-test of the T-165 backup assertions (`.github/scripts/test-check-no-os-backup.sh`) |
 | `golden` | `flutter test --tags golden`; on failure uploads artifact `golden-diffs` |
 | `kotlin-unit` | Gradle JVM unit tests (`app/android/app/src/test`); fails when no `<testcase>` result exists; then `:app:lintDevNoSmsDebug` with `AllowBackup`, `DataExtractionRules` and `FullBackupContent` fatal (`app/android/app/lint.xml`, T-165) |
 | `swift-unit` | `xcodebuild test` of `RunnerTests` on an iOS simulator (macOS runner); each T-165 `BackupExclusionTests` case must be reported as passed |
@@ -44,6 +44,6 @@ Golden diffs from a failing `app-ci` run are in the run's `golden-diffs` artifac
 
 Update by looking up the tag's commit SHA (`git ls-remote --tags <repo-url>`; for annotated tags use the `^{}` line) and changing the SHA and the `# vX.Y.Z` comment together in both workflows.
 
-## custom_lint (T-002)
+## zaghlol_lints (T-002)
 
-The `static` job runs `dart run custom_lint` in `app/`, `packages/zaghlol_parsing/` and `tools/lints_example/` (the fixture package), then `dart test` in `tools/lints/`. Rules live in `tools/lints` (see its README). `flutter analyze` does not run them. `packages/zaghlol_domain` is not wired yet: add `custom_lint` and `zaghlol_lints` (path `../../tools/lints`) to its dev dependencies, add its directory to the loop in `app-ci.yml`, and regenerate the lock with `[regen-lock]`.
+The `static` job runs `dart run bin/zaghlol_lints.dart ../../app ../../packages/zaghlol_parsing` in `tools/lints` (rules: no double money, no UI string literals in build, no print outside debug files, SafeException in parsing/db), then `dart test` there (fixtures with `// expect_lint:` comments). `flutter analyze` does not run them. See `tools/lints/README.md` for why this is a standalone checker and not a `custom_lint` plugin. `packages/zaghlol_domain` is not scanned yet: add its path to the command in `app-ci.yml` once T-012 has landed (money rules matter most there).

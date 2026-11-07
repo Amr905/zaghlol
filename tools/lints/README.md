@@ -1,8 +1,21 @@
 # zaghlol_lints (T-002)
 
-`custom_lint` plugin with four rules. Run with `dart run custom_lint` inside a
-package that lists `zaghlol_lints` and `custom_lint` as dev dependencies
-(`app/`, `packages/zaghlol_parsing/`, `tools/lints_example/`).
+Four project rules, run as a command-line checker over `lib/` trees:
+
+```
+cd tools/lints && dart run bin/zaghlol_lints.dart ../../app ../../packages/zaghlol_parsing
+```
+
+Exit code 1 and one `path:line: [rule] message` line per violation. CI runs this
+in the `static` job (`.github/workflows/app-ci.yml`).
+
+Why not a `custom_lint` plugin: on the pinned toolchain (Flutter 3.47.9 / Dart
+3.13, `custom_lint` 0.8.1, `analyzer` 8.4) the plugin loaded but was never asked
+to analyze any file (probe: `run` was never called, and a deliberate violation
+passed), and enabling it makes `dart analyze` warn that legacy plugins are
+deprecated. The checker parses with `package:analyzer` (syntax only, no type
+resolution) so it does not depend on the plugin system. Consequence: types are
+matched by name (see the rule notes below).
 
 | Rule | Fires on | Scope |
 |------|----------|-------|
@@ -35,12 +48,24 @@ Only files under `lib/` are linted (tests, tools and generated code are skipped:
 the parsing or db layer has `SafeException` among its supertypes, by name. Once
 T-014 lands, no rule change is needed.
 
-Suppress a single case with `// ignore: <rule>` and a reason.
+Suppress a single case with `// ignore: <rule>` (same or previous line) or
+`// ignore_for_file: <rule>`, with a reason.
+
+Rule 4 follows supertypes by class name across all scanned files, so a class
+extending another project class that extends `SafeException` is fine. Roots
+that count as throwable: `Exception`, `Error` and the core subclasses
+`FormatException`, `StateError`, `ArgumentError`, `RangeError`,
+`UnsupportedError`, `UnimplementedError`, `TypeError`, `AssertionError`,
+`TimeoutException`.
 
 ## Tests
 
-- `dart test` in this package covers the pure helpers (`file_scope`,
-  `string_allowlist`).
-- `tools/lints_example/lib/**` holds the fixtures. Each violation has an
-  `// expect_lint: <rule>` comment; `dart run custom_lint` there fails if a rule
-  does not fire, or fires somewhere not annotated (compliant code).
+`dart test` in this package:
+
+- `test/fixtures/lib/**` are fixtures. Each violation has an
+  `// expect_lint: <rule>` comment on the line above; the test fails if a rule
+  does not fire there or fires anywhere not annotated (compliant files).
+- `test/comments_test.dart` covers `// ignore:` / `// ignore_for_file:`,
+  scoping, money names, Arabic text and digits, and supertype following.
+- `test/file_scope_test.dart` and `test/string_allowlist_test.dart` cover the
+  pure helpers.

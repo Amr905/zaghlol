@@ -22,8 +22,6 @@ env:
   # Exact Flutter version: keeps builds reproducible together with pubspec.lock.
   # Keep in sync with FLUTTER_VERSION / FLUTTER_SHA in app-regen.yml.
   FLUTTER_VERSION: '3.47.9'
-  # custom_lint (T-002) runs in the app, zaghlol_parsing and the fixture package.
-  RUN_CUSTOM_LINT: 'true'
 
 jobs:
   static:
@@ -63,26 +61,15 @@ jobs:
             tail -n 5 analyze.log | while read -r line; do echo "::error::analyze: $line"; done
             exit 1
           fi
-      - name: custom_lint (enabled by RUN_CUSTOM_LINT, see T-002)
-        if: env.RUN_CUSTOM_LINT == 'true'
+      - name: zaghlol_lints (T-002: money, UI strings, print, SafeException)
+        working-directory: tools/lints
         run: |
-          status=0
-          for dir in app packages/zaghlol_parsing tools/lints_example; do
-            echo "== custom_lint in $dir"
-            if ! (cd "$dir" && dart run custom_lint > "$GITHUB_WORKSPACE/custom_lint.log" 2>&1); then
-              cat "$GITHUB_WORKSPACE/custom_lint.log"
-              grep -E "lint|error|Error|expect" "$GITHUB_WORKSPACE/custom_lint.log" | head -n 20 | while read -r line; do echo "::error::custom_lint($dir): $line"; done
-              status=1
-            else
-              cat "$GITHUB_WORKSPACE/custom_lint.log"
-              if [ "$dir" = tools/lints_example ]; then
-                (cd "$dir" && dart run custom_lint > "$GITHUB_WORKSPACE/cl2.log" 2>&1; echo "exit=$?" >> "$GITHUB_WORKSPACE/cl2.log")
-                echo "::notice::DBG2 $(cat /tmp/zl_plugin.txt /tmp/zl_run.txt 2>&1 | tr '\n' '|' | head -c 1500)"
-                echo "::notice::DBG $(tr '\n' '|' < "$GITHUB_WORKSPACE/cl2.log" | head -c 3500)"
-              fi
-            fi
-          done
-          exit $status
+          if ! dart run bin/zaghlol_lints.dart ../../app ../../packages/zaghlol_parsing > lints.log 2>&1; then
+            cat lints.log
+            grep -E "^\S+:[0-9]+:" lints.log | head -n 20 | while read -r line; do echo "::error::zaghlol_lints: $line"; done
+            exit 1
+          fi
+          cat lints.log
       - name: dart test (zaghlol_lints)
         working-directory: tools/lints
         run: dart test
