@@ -225,6 +225,7 @@
 | FU-003 | T-005 #3 | DB readiness check on health/readiness probe, tested against Testcontainers | T-122 | OPEN |
 | FU-004 | T-005 #4–7, #9–10, #12–13 | Backend hardening: real body-not-logged test, SHA-pinned actions, Trivy by digest, 4xx mapping + test, single trace id, Production env in tests, stale-heartbeat test, compose loopback | backend-engineer (small C2 pass, before M5) | OPEN |
 | FU-005 | T-005 #11 | `serverTime` as UTC `Z` and fixed in OpenAPI | T-006 (done); global converter tracked in FU-013 | CLOSED |
+- **FU-014** (from T-012 security R3-2, low): BGN and CUC are not in the current ISO table, so pre-2026 Bulgarian lev amounts from imports or SMS go to review. Decide whether a later table refresh re-adds withdrawn codes as historic (D-28). Owner: requirements-analyst.
 | FU-006 | T-006 #2 | Android restore: `{productId, purchaseToken}` items or commit to `productsv2` | solution-architect → T-130/T-132 | OPEN (architect decision) |
 | FU-007 | T-006 #3 | Open (ignore-unknown) schemas for server-to-server envelopes (Pub/Sub RTDN, ASSN V2) | solution-architect → T-133/T-134 | OPEN (architect decision) |
 | FU-008 | T-006 #4, #5 | Apple Android callback transport (query vs form_post); support lookup e-mail out of query string; never log query strings | solution-architect → T-135/T-136/T-138 | OPEN (architect decision) |

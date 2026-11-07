@@ -157,3 +157,115 @@ Two Medium findings (F1, F2) block approval. Each fix is a few lines. F3–F6 ar
 - `/home/claude/zaghlol/pubspec.lock`
 
 All files are as of `origin/t012`.
+
+---
+
+## Security & privacy review (security-privacy-reviewer, Opus) — Round 3 delta
+
+**Scope:** `git diff 1e44bb9 origin/t012`, with `origin/t012` at `cb1859cc`. That covers commits `fc658da`, `01a4b63` and `cb1859c` (11 files).
+- I checked locally that the committed `tool/iso4217/list-one.xml` has sha256 `33139b438657d1cee116ba737807ea71d19d6de4b90f799a09c56f0cc6a1b0ff`. That matches the stated `33139b43…`.
+- **Not done:** I did not compare the file with a fresh SIX download, and I ran nothing in Dart (the sandbox has no Dart SDK). The findings below come from reading the code and file contents, plus the CI results reported for run 42407200685.
+
+### Verdict: **APPROVED** (security & privacy, round 3)
+
+Nothing in this delta weakens F2, F9 or F11, the round-2 fixes to the generator and the no-double scanner. F11 is now mostly fixed. Two new Info items (R3-1, R3-2) concern where the snapshot came from and a product data question. Neither blocks the merge.
+
+### Was the snapshot used as data only? Yes.
+- **Structure:**
+  - The XML has 280 `<CcyNtry>`, and the only element names in it are `ISO_4217`, `CcyTbl`, `CcyNtry`, `CtryNm`, `CcyNm`, `Ccy`, `CcyNbr` and `CcyMnrUnts`.
+  - It has no `<!DOCTYPE`, comments, CDATA or `&` entities.
+  - Non-ASCII text appears only in `CtryNm` (for example `ÅLAND ISLANDS`, `CURAÇAO`), and the generator never emits that field.
+- **Generated output:** the change to the generated files is small and fully explained. `published` goes from `2000-01-01` to `2026-09-17`, and two placeholder-only rows are removed (BGN and CUC, see R3-2). That leaves 164 rows, none historic. Every value still passes `checkRow` and `checkPublished` before rendering (`gen_currencies.dart` `_validate`), so the F2 guarantee still holds: nothing from the file can become Dart source.
+- **The Python port:**
+  - It was not committed, so no new tooling entered the repo.
+  - The implementer ran it with `python3 -I`.
+  - Its output is checked by Dart, not trusted on its own. `iso4217_table_test.dart:35-41` re-derives `currencies.json` from the XML with the Dart generator, as `renderJson(merge(listOne, table)) == json`, and re-renders the `.g.dart` byte for byte.
+  - The independent exponent check (KWD/BHD/…=3, JPY/KRW/…=0, EGP/USD/…=2) is unchanged and passes.
+- **`.gitattributes`:** `tool/iso4217/.gitattributes` contains `list-one.xml -text`. This stops line-ending conversion, so the committed bytes, and therefore the sha256, stay stable. It applies to that one file only and has no security effect beyond that.
+
+### `--fresh` guard (R2-2): sound as a guard against accidents
+`freshAllowed` (`gen_currencies.dart`, near `main`) allows `--fresh` only in three cases:
+- there is no committed table;
+- the committed table still has the placeholder date `2000-01-01`;
+- `--i-know` is passed.
+
+The committed JSON is now parsed even in `--fresh` mode, and is therefore validated. It is still not used as the previous table in that mode. `iso4217_merge_test.dart` checks that `--fresh` is refused on the genuine table, allowed on the placeholder and when there is no table, and refused on a near-miss date.
+
+`--i-know` is a deliberate one-flag bypass. The guard prevents accidents; it is not a control an attacker would have to beat. Table integrity rests on the CI checks:
+- **`_baselineCodes` test** (`iso4217_table_test.dart:15-26, 184-197`): any code deleted by `--fresh --i-know` fails CI unless the baseline list is also edited. That second edit shows up in review.
+- **Exponent/numeric check** in `mergeAppendOnly`.
+- **Independent exponent check.**
+- **Byte-identical regeneration.**
+
+Together these are adequate.
+
+### `excludedCodes` (D-67): sound, and it fails safe
+- XAD is dropped at three points:
+  - in `parseListOne`, before validation;
+  - in `mergeAppendOnly`, for rows from the previous table;
+  - in `checkRow`, which every renderer calls. So no generated file can contain an excluded code, whatever path built the table.
+- Tests cover all of these (`iso4217_merge_test.dart`, "excluded codes (D-67)"), and `Currency.tryOf('XAD') == null` is asserted (`iso4217_table_test.dart`).
+- Excluded codes are deleted rather than marked historic, which bypasses the append-only rule. Two things contain this:
+  - `parseJson` → `_parseRow` → `checkRow` throws on a committed excluded row. If someone later adds an already-shipped code to `excludedCodes`, the generator stops instead of silently dropping it.
+  - The `_baselineCodes` test fails as well.
+
+  The merge-time skip for previous rows can therefore only be reached through a hand-built table, which is what the test does. That is harmless.
+- The other X-codes in the snapshot are either real currencies kept as active (XAF, XCD, XCG, XOF, XPF) or entries with `N.A.` minor units, which are skipped as before (XAG, XAU, XBA–XBD, XDR, XPD, XPT, XSU, XTS, XUA, XXX).
+
+### Round-2 findings: status in round 3
+
+| # | Severity | Location | Status (round 3) | Owner |
+|---|----------|----------|------------------|-------|
+| F1 | Medium | `lib/money/money.dart` `allocateEven` | Fixed in R2; not touched by this delta | T-012 |
+| F2 | Medium | `tool/gen_currencies.dart` `checkPublished`/`checkRow`/`_validate` | Fixed in R2; **still intact**. `checkRow` is now stricter (excluded codes) and `checkPublished` is unchanged. The genuine `Pblshd="2026-09-17"` passes. | T-012 |
+| F3 | Low | `money.dart` `maxParseLength` | Fixed in R2; not touched | T-012 |
+| F4 | Low | `test/money/no_floating_point_test.dart` | Fixed in R2 | T-012 |
+| F5 | Low | `money.dart` parse dartdoc | Documented. T-046 and T-155 must still key dedup on `(minor, currency)` | T-046, T-155 |
+| F6 | Low | `money.dart` `tryFromJson`/`tryFromStorage` | Fixed in R2; not touched | T-012 / used by T-149, T-155 |
+| F7 | Info | `money.dart` `toStorage`/`toJson` warnings | Fixed in R2. The redactor still needs to handle these shapes | T-021 |
+| F8 | Info | `money_errors.dart` raw `code` field | Open, no change required | T-021 |
+| F9 | Info | `gen_currencies.dart` `_ignored`, range checks | Fixed in R2; **still intact** (`_ignored` is unchanged). The genuine file contains none of the constructs it strips anyway. | T-012 |
+| F10 | Info | `pubspec.lock` glados hash | Unchanged; no dependency changes in this delta | Lead |
+| F11 | Info | `no_floating_point_test.dart` `_copyCode`/`_skipString` | **Mostly fixed (R2-1).** Expressions inside `${…}` are now scanned, including nested strings and braces. New test cases include `'EGP ${minor / 100}'` and a nested `${0.5}`, and they pass on known-safe forms such as `${a ~/ b}`. **Remaining:** the import URI is still a string literal, so `import 'dart:math'` with `sqrt(`/`log(` still gets past the scanner. lib/money imports no `dart:math` today. Optional: fail on `dart:math` in the raw source. | T-012 (optional) |
+
+### New in round 3
+
+**R3-1 — Info — the snapshot's origin rests on the implementer's word**
+- **Location:** `packages/zaghlol_domain/tool/iso4217/list-one.xml`
+- **Problem:**
+  - CI proves that the XML, the JSON and the `.g.dart` agree with each other. It cannot prove that the XML is the file SIX published. A substituted file whose values pass validation would produce a wrong table, though never code.
+  - Today this risk is reduced by the independent exponent check, the baseline-code test and a small, reviewable diff to the generated files (two removals plus the date).
+- **Suggested:** record the download URL, the download date and the sha256 next to the file, for example in a header line of `currencies.json` or a `tool/iso4217/SOURCE.md`. The Lead could also spot-check the hash against a fresh SIX download when network access allows.
+- **Owner:** Lead / T-012 (optional).
+
+**R3-2 — Info — BGN and CUC were removed outright, not kept as historic**
+- **Location:** `lib/money/data/currencies.json`, `lib/money/src/iso4217_table.g.dart`
+- **Assessment:** this is acceptable from a security standpoint.
+  - These rows existed only in the unmerged placeholder table, so no installed data or backup can reference them, and `--fresh` was the documented way to clear them.
+  - Both removals match the real List One (Bulgaria joined the euro on 2026-01-01, and CUC has been withdrawn).
+- **Consequence:** `Currency.tryOf('BGN')` now returns `null`. Pre-2026 Bulgarian amounts from SMS, CSV or backups will go to review or be rejected rather than load. That is a product question for D-28 ("any ISO currency"), not a data-integrity defect.
+- **Owner:** requirements-analyst / Lead (decide whether to re-add BGN as historic in a later refresh).
+
+### Round 3 note (2026-11-07, `cb1859cc`)
+- The genuine snapshot was used as data only and was confirmed by the Dart generator, not by the uncommitted Python port.
+- The `--fresh` guard and `excludedCodes` are sound controls for table integrity. Both fail safe, and the baseline-code test backs both of them up.
+- **No regressions:**
+  - F2 and F9 are intact.
+  - F11 is fixed apart from the optional `dart:math` check.
+  - No application logic under `lib/money/` changed in this delta, only generated data.
+  - No dependency changes.
+- **Open items (all non-blocking):** R3-1, R3-2, the `dart:math` part of F11, F5 (T-046/T-155), F7/F8 (T-021) and F10.
+
+**Final status: APPROVED** from security & privacy for T-012. The snapshot-date gate is now green.
+
+### Files reviewed (all at `origin/t012` = `cb1859cc`)
+- `/home/claude/zaghlol/packages/zaghlol_domain/tool/gen_currencies.dart`
+- `/home/claude/zaghlol/packages/zaghlol_domain/tool/iso4217/list-one.xml`
+- `/home/claude/zaghlol/packages/zaghlol_domain/tool/iso4217/.gitattributes`
+- `/home/claude/zaghlol/packages/zaghlol_domain/lib/money/data/currencies.json`
+- `/home/claude/zaghlol/packages/zaghlol_domain/lib/money/src/iso4217_table.g.dart`
+- `/home/claude/zaghlol/packages/zaghlol_domain/test/money/no_floating_point_test.dart`
+- `/home/claude/zaghlol/packages/zaghlol_domain/test/money/iso4217_table_test.dart`
+- `/home/claude/zaghlol/packages/zaghlol_domain/test/money/iso4217_merge_test.dart`
+- `/home/claude/zaghlol/packages/zaghlol_domain/test/money/iso4217_snapshot_gate_test.dart`
+- `/home/claude/zaghlol/packages/zaghlol_domain/test/money/iso4217_test_support.dart`
