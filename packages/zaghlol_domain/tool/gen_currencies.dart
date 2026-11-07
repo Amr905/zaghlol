@@ -2,7 +2,7 @@
 // packages/zaghlol_domain:
 //
 //   dart run tool/gen_currencies.dart                  normal refresh
-//   dart run tool/gen_currencies.dart --fresh          first genuine snapshot
+//   dart run tool/gen_currencies.dart --fresh          placeholder only
 //   dart run tool/gen_currencies.dart --allow-change=ABC,DEF
 //
 // 1. Reads the pinned SIX List One snapshot, tool/iso4217/list-one.xml.
@@ -15,13 +15,13 @@
 //    because pure Dart cannot read assets at runtime.
 //
 // --fresh ignores the committed JSON and builds the table from the snapshot
-// alone. Use it exactly once: when the reconstructed placeholder snapshot is
-// replaced by the first genuine SIX download, so no code that exists only
-// in the placeholder survives as "historic". After that run, regenerate
-// `_baselineCodes` in test/money/iso4217_table_test.dart from the new JSON
-// (every code, active and historic), and list the codes that changed
-// versus the placeholder in the PR. All later refreshes run without
-// --fresh.
+// alone, skipping the append-only rule and the exponent guard. It refuses
+// to run unless the committed JSON is the reconstructed placeholder
+// (published 2000-01-01) or --i-know is also given. It was used once, on
+// 2026-11-07, to replace the placeholder with the genuine SIX snapshot
+// published 2026-09-17; `_baselineCodes` in
+// test/money/iso4217_table_test.dart was regenerated from that output. All
+// later refreshes run without --fresh.
 //
 // Every value written into Dart source is validated (codes ^[A-Z]{3}$,
 // numeric 1..999, exponent 0..4, published YYYY-MM[-DD]). Tests regenerate
@@ -311,29 +311,54 @@ String renderDart(CurrencyTable table) {
   return out.toString();
 }
 
+/// Published date of the reconstructed placeholder table that the first
+/// genuine snapshot replaced.
+const String sentinelPublished = '2000-01-01';
+
+/// Whether `--fresh` may run. It skips the append-only rule and the
+/// exponent guard, so it is allowed only when there is no committed table,
+/// when the committed table is still the placeholder ([sentinelPublished]),
+/// or when the caller passes `--i-know`.
+bool freshAllowed(CurrencyTable? committed, {required bool iKnow}) {
+  if (iKnow || committed == null) {
+    return true;
+  }
+  return committed.published == sentinelPublished;
+}
+
 void main(List<String> args) {
   var fresh = false;
+  var iKnow = false;
   var allowChanged = <String>{};
   for (final arg in args) {
     if (arg == '--fresh') {
       fresh = true;
+    } else if (arg == '--i-know') {
+      iKnow = true;
     } else if (arg.startsWith(_allowFlag)) {
       allowChanged = arg.substring(_allowFlag.length).split(',').toSet();
     } else {
-      stderr.writeln('usage: gen_currencies.dart [--fresh] [$_allowFlag...]');
+      stderr.writeln('usage: gen_currencies.dart [--fresh [--i-know]]');
+      stderr.writeln('       [${_allowFlag}CODE,...]');
       exitCode = 64;
       return;
     }
   }
   final listOne = parseListOne(File(xmlPath).readAsStringSync());
   final jsonFile = File(jsonPath);
-  CurrencyTable? previous;
-  if (!fresh && jsonFile.existsSync()) {
-    previous = parseJson(jsonFile.readAsStringSync());
+  CurrencyTable? committed;
+  if (jsonFile.existsSync()) {
+    committed = parseJson(jsonFile.readAsStringSync());
+  }
+  if (fresh && !freshAllowed(committed, iKnow: iKnow)) {
+    stderr.writeln('--fresh refused: $jsonPath is a genuine table.');
+    stderr.writeln('Refresh without --fresh, or add --i-know.');
+    exitCode = 64;
+    return;
   }
   final merged = mergeAppendOnly(
     listOne: listOne,
-    previous: previous,
+    previous: fresh ? null : committed,
     allowChanged: allowChanged,
   );
   jsonFile.writeAsStringSync(renderJson(merged));

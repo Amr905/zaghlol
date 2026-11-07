@@ -20,43 +20,74 @@ final List<RegExp> _forbidden = [
   RegExp(r'\b\d+(\.\d+)?[eE][+-]?\d+\b'),
 ];
 
-/// Replaces comments with a space and string literals with `''`.
+/// Replaces comments with a space and string literal text with `''`, but
+/// keeps the expressions inside `${...}` interpolations (wrapped in
+/// parentheses) so they are scanned like any other code.
 ///
-/// Handles `//`, `/* */`, single, double, triple-quoted and raw strings.
-/// Interpolated expressions inside strings are dropped with the string;
-/// lib/money keeps interpolations to plain identifiers and calls.
+/// Handles `//`, `/* */`, single, double, triple-quoted and raw strings,
+/// and strings nested inside interpolations.
 String stripCommentsAndStrings(String source) {
   final out = StringBuffer();
-  var i = 0;
-  while (i < source.length) {
-    if (source.startsWith('//', i)) {
-      final end = source.indexOf('\n', i);
-      i = end < 0 ? source.length : end;
+  _copyCode(source, 0, out, false);
+  return out.toString();
+}
+
+/// Copies code from [start] into [out]. In interpolation mode it stops after
+/// the `}` that closes the interpolation and returns the index after it.
+int _copyCode(String s, int start, StringBuffer out, bool interpolation) {
+  var i = start;
+  var depth = 0;
+  while (i < s.length) {
+    if (s.startsWith('//', i)) {
+      final end = s.indexOf('\n', i);
+      i = end < 0 ? s.length : end;
       continue;
     }
-    if (source.startsWith('/*', i)) {
-      final end = source.indexOf('*/', i + 2);
-      i = end < 0 ? source.length : end + 2;
+    if (s.startsWith('/*', i)) {
+      final end = s.indexOf('*/', i + 2);
+      i = end < 0 ? s.length : end + 2;
       out.write(' ');
       continue;
     }
-    final char = source[i];
+    final char = s[i];
     if (char == "'" || char == '"') {
-      final raw = i > 0 && source[i - 1] == 'r';
-      final triple = source.startsWith(char * 3, i);
-      final quote = triple ? char * 3 : char;
-      var j = i + quote.length;
-      while (j < source.length && !source.startsWith(quote, j)) {
-        j += !raw && source[j] == r'\' ? 2 : 1;
-      }
-      i = j + quote.length;
-      out.write("''");
+      i = _skipString(s, i, out);
       continue;
+    }
+    if (interpolation && char == '{') {
+      depth++;
+    } else if (interpolation && char == '}') {
+      if (depth == 0) {
+        return i + 1;
+      }
+      depth--;
     }
     out.write(char);
     i++;
   }
-  return out.toString();
+  return i;
+}
+
+/// Skips the string literal at [start], writing `''` plus the code of each
+/// `${...}` interpolation; returns the index after the closing quote.
+int _skipString(String s, int start, StringBuffer out) {
+  final raw = start > 0 && s[start - 1] == 'r';
+  final char = s[start];
+  final quote = s.startsWith(char * 3, start) ? char * 3 : char;
+  var j = start + quote.length;
+  out.write("''");
+  while (j < s.length && !s.startsWith(quote, j)) {
+    if (!raw && s[j] == r'\') {
+      j += 2;
+    } else if (!raw && s.startsWith(r'${', j)) {
+      out.write(' (');
+      j = _copyCode(s, j + 2, out, true);
+      out.write(') ');
+    } else {
+      j++;
+    }
+  }
+  return j + quote.length;
 }
 
 List<String> violations(String source) {
@@ -104,6 +135,9 @@ void main() {
       'final big = 2.5E-3;',
       'amount.toStringAsFixed(2)',
       'pow(10, exponent)',
+      "final s = '\${a / b}';",
+      "final s = 'EGP \${minor / 100}';",
+      "final s = '\${x ? 'a' : '\${0.5}'}';",
     ];
     for (final sample in samples) {
       expect(violations(sample), isNotEmpty, reason: sample);
@@ -126,6 +160,9 @@ void main() {
       "final t = '''multi / line 0.5''';",
       'final x = record.\$1;',
       'final y = list[0].isEven;',
+      "final s = '\${a ~/ b} is 1.5 / 2 text';",
+      "final s = '\${x ? 'a/b' : '0.5'}';",
+      "final s = '\$name / \${map['k']}';",
     ];
     for (final sample in samples) {
       expect(violations(sample), isEmpty, reason: sample);

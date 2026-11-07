@@ -6,6 +6,23 @@ import 'iso4217_test_support.dart';
 
 void main() {
   final listOne = loadListOne();
+  final committed = loadTable();
+
+  group('--fresh guard (R2-2)', () {
+    test('refused on a genuine committed table without --i-know', () {
+      expect(committed.published, isNot(gen.sentinelPublished));
+      expect(gen.freshAllowed(committed, iKnow: false), isFalse);
+      expect(gen.freshAllowed(committed, iKnow: true), isTrue);
+    });
+
+    test('allowed for the placeholder table or when there is none', () {
+      final placeholder = gen.CurrencyTable('2000-01-01', committed.rows);
+      expect(gen.freshAllowed(placeholder, iKnow: false), isTrue);
+      expect(gen.freshAllowed(null, iKnow: false), isTrue);
+      final other = gen.CurrencyTable('2000-01-02', committed.rows);
+      expect(gen.freshAllowed(other, iKnow: false), isFalse);
+    });
+  });
 
   group('merge guards (CR2, CR3)', () {
     test('without a previous table (--fresh) the result is the snapshot', () {

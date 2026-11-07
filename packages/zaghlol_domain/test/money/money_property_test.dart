@@ -354,11 +354,11 @@ void main() {
       expect(actual, _hamilton(amount.minor, weights));
     }
 
-    Glados(_allocSmall, explore()).test('weights 0..10^6', (input) {
+    Glados(_allocSmall, explore()).test('weights 0..10^6 and edges', (input) {
       checkAllocation(input.$1, input.$2);
     });
 
-    Glados(_allocBig, explore()).test('weights up to maxMinor', (input) {
+    Glados(_allocBig, explore()).test('weights to maxMinor and edges', (input) {
       checkAllocation(input.$1, input.$2);
     });
 
