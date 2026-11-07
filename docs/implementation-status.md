@@ -41,7 +41,7 @@
 | T-009 | SPK-03: can an iOS App Intent process immediately with a headless Flutter engine? | M0 | C4 | Opus | native-platform-engineer | T-001, T-004 | TODO | — |  |
 | T-010 | SPK-02: OCR accuracy on synthetic InstaPay/wallet receipts | M0 | C3 | Sonnet | native-platform-engineer | T-001 | TODO | — |  |
 | T-011 | SPK-04: on-device ar-EG speech availability across the device matrix | M0 | C2 | Sonnet | native-platform-engineer | T-001 | TODO | — |  |
-| T-012 | Money and Currency value types with ISO 4217 table | M0 | C4 | Opus | flutter-core-engineer | T-001 | IN_REVIEW | app-ci 42407200685 (13/13 green, 162 domain tests, gate passes) @ cb1859c | Round 3: genuine SIX snapshot (2026-09-17), XAD excluded (D-67), 164 codes / 9 funds; R2-1, R2-2, R2-5 done. Delta re-reviews (code, security, tests) running |
+| T-012 | Money and Currency value types with ISO 4217 table | M0 | C4 | Opus | flutter-core-engineer | T-001 | DONE | app-ci 42407200685 (13/13) @ cb1859c; merged to main | All three reviews APPROVED (round 3). Review: docs/05-reviews/T-012.md. Follow-ups: FU-014; optional F11 dart:math check, R3 nits |
 | T-013 | Text & amount normalization utilities (digits, separators, groupings) | M0 | C3 | Sonnet | parsing-engine-engineer | T-012 | TODO | — |  |
 | T-014 | Result/Failure types, SafeException and domain event bus | M0 | C2 | Sonnet | flutter-core-engineer | T-001 | TODO | — |  |
 | T-015 | Secure key bootstrap for the database key | M0 | C4 | Opus | flutter-core-engineer | T-007 | TODO | — |  |
@@ -281,3 +281,4 @@
 | 2026-11-07 | PO supplied the genuine SIX list-one.xml; T-012 round 3 (snapshot swap + R2-1/R2-2) started. T-002 and T-026 started. PO created ruleset 'main requirs PR' (PR required, no force-push/deletion, no bypass), enforcement still disabled; once active the Lead merges via PRs. |
 | 2026-11-07 | Container restart stopped the T-122, T-002 and T-026 agents. Lead saved the uncommitted worktree changes as WIP commits (T-122 4021a31, T-026 5c7b38a) and resumed all three. T-012 round 3: the genuine snapshot added XAD as a funds code; PO decided to hide it (D-67); the exclusion fix is in progress. |
 | 2026-11-07 | T-012 r3 green (cb1859c) and T-122 r2 green (d5943be); delta re-reviews sent. T-026 code review CHANGES_REQUESTED (F-1 to F-3), tests SUFFICIENT; round 2 in progress. PO decisions D-68 (late-month salary suggests the 1st) and D-69 (hidden accounts still count). |
+| 2026-11-07 | T-012 DONE: merged after round 3 (all three reviews APPROVED). |
