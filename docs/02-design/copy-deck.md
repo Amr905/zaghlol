@@ -633,7 +633,7 @@ States: loading · populated · foreign currency · internal transfer · decline
 | `transactions_detail_howTemplate` | القالب {templateId} | Template {templateId} | C · Latin ID, e.g. `nbe.card_purchase.ar.v2` |
 | `transactions_detail_howNone` | مفيش رسالة للحركة دي. | There's no message for this one. | S · manual, voice, CSV |
 | `transactions_detail_categoryChanged` | اتغير التصنيف | Category changed | N + `common_action_undo` |
-| `transactions_detail_deleteTitle` | تمسح الحركة دي؟ | Delete this transaction?" | T · C-18 destructive |
+| `transactions_detail_deleteTitle` | تمسح الحركة دي؟ | Delete this transaction? | T · C-18 destructive |
 | `transactions_detail_deleteBodyAuto` | `{platform, select, android{جت من رسالة، ومش هترجع غير لو دوّرت في الرسايل من جديد.} other{مش هتقدر ترجعها بعد كده.}}` | `{platform, select, android{It came from a message and won't come back unless you re-scan.} other{You won't be able to get it back.}}` | S · auto-captured; re-scan is Android only |
 | `transactions_detail_deleteBodyManual` | مش هتقدر ترجعها بعد كده. | You won't be able to get it back. | S |
 | `transactions_detail_deleted` | اتمسحت | Deleted | N |
@@ -670,4 +670,364 @@ States: add (per type) · edit · prefilled from a shared message · prefilled f
 | `transactions_edit_fromShared` | ده اللي فهمته من الرسالة اللي بعتها. راجعه واحفظ. | Here's what I got from the message you shared. Check it and save. | S · FR-ING-A-04 confirm-before-save |
 | `transactions_edit_rawTitle` | نص الرسالة | Message text | L · prefilled from S-14 "Enter details" |
 
-<!-- PART 1 CONTINUES -->
+## 1.14 S-14 Review queue — `ingestion_review_*`, `ingestion_alwaysSender_*`, `ingestion_requestBank_*`
+States: loading (skeleton) · populated (category card, generic-parser card, unreadable-message card, ambiguous transfer) · empty · request-bank sheet: sending, sent, failed or offline (kept as a draft).
+
+| Key | AR | EN | Notes |
+|---|---|---|---|
+| `ingestion_review_title` | مستني رأيك 👀 | Needs your review | T · glossary (emoji only in AR, where the glossary has it) |
+| `ingestion_review_filterAll` | الكل {n} | All {n} | C · n = formatted count |
+| `ingestion_review_filterCategory` | تصنيف | Category | C |
+| `ingestion_review_filterMessages` | رسايل جديدة | New messages | C · unread or unrecognized |
+| `ingestion_review_filterTransfers` | تحويلات | Transfers | C |
+| `ingestion_review_catOut` | {amount} لـ {counterparty} | {amount} to {counterparty} | L · counterparty may be an IPA handle (LTR, isolated) |
+| `ingestion_review_catIn` | {amount} من {counterparty} | {amount} from {counterparty} | L |
+| `ingestion_review_catAt` | {amount} عند {merchant} | {amount} at {merchant} | L |
+| `ingestion_review_catQuestion` | كانت إيه دي؟ | What was this? | L · followed by category chips (catalog names) and `common_action_more` |
+| `ingestion_review_rememberCounterparty` | افتكر ده لأي تحويلة لـ {counterparty} | Remember this for {counterparty} | L · checkbox |
+| `ingestion_review_rememberMerchant` | افتكر ده لـ {merchant} على طول | Always use this for {merchant} | L · checkbox |
+| `ingestion_review_categorized` | اتحطت في {category} | Filed under {category} | N + `common_action_undo` |
+| `ingestion_review_newBank` | بنك جديد | New bank | C · badge |
+| `ingestion_review_genFrom` | من {sender} | From {sender} | L |
+| `ingestion_review_genGuessOut` | توقعنا: {amount} عند {merchant} | Our guess: {amount} at {merchant} | S · FR-PAR-13 |
+| `ingestion_review_genGuessNoMerchant` | توقعنا: {amount} | Our guess: {amount} | S |
+| `ingestion_review_genGuessIn` | توقعنا: {amount} دخلوا | Our guess: {amount} in | S |
+| `ingestion_review_genLowConfidence` | مش متأكد أوي، بص عليها قبل ما أسجلها | Not totally sure — check it before I log it | S · FR-PAR-06 |
+| `ingestion_review_genConfirm` | تمام | Confirm | B |
+| `ingestion_review_genEdit` | عدّل | Edit | B · opens S-13 prefilled |
+| `ingestion_review_genDismiss` | سيبها | Dismiss | B |
+| `ingestion_review_requestBank` | اطلب دعم البنك ده | Ask us to support this bank | B · text (FR-PAR-14) |
+| `ingestion_review_unreadTitle` | رسالة من {sender} مقدرتش أفهمها | A message from {sender} I couldn't read | L · FR-ING-A-06 |
+| `ingestion_review_unreadShow` | شوف الرسالة | Show message | B · raw text on screen only |
+| `ingestion_review_unreadEnter` | اكتب التفاصيل | Enter details | B · opens S-13 with `transactions_edit_rawTitle` |
+| `ingestion_review_xferTitle` | {amount} في {card}، تبع أنهي تحويلة؟ | {amount} into {card} — which transfer was it? | L · BR-XFR-02 / EC-16 |
+| `ingestion_review_xferOption` | {amount} من {card} · {time} | {amount} from {card} · {time} | L · radio |
+| `ingestion_review_xferNotMine` | مش تحويلة مني | Not my transfer | L · radio |
+| `ingestion_review_swipeAcceptA11y` | وافق على الاقتراح | Accept suggestion | A · swipe from the start edge; the button is always visible |
+| `ingestion_review_swipeDismissA11y` | سيبها | Dismiss | A · swipe from the end edge, with undo |
+| `ingestion_review_dismissed` | اتشالت من المراجعة | Removed from review | N + `common_action_undo` |
+| `ingestion_review_emptyTitle` | كله تمام! مفيش حاجة مستنية رأيك ✨ | All clear! Nothing to review ✨ | T · C-28, Rive `proud` |
+| `ingestion_alwaysSender_title` | أقرا رسايل {sender} على طول؟ | Always capture messages from {sender}? | T · A-66 sheet, after confirming a generic parse |
+| `ingestion_alwaysSender_body` | `{count, plural, =1{هتفضل توصلك هنا للمراجعة لحد ما تأكد رسالة واحدة منه، وبعد كده هسجلها لوحدي.} =2{هتفضل توصلك هنا للمراجعة لحد ما تأكد رسالتين منه، وبعد كده هسجلها لوحدي.} few{هتفضل توصلك هنا للمراجعة لحد ما تأكد {n} رسايل منه، وبعد كده هسجلها لوحدي.} many{هتفضل توصلك هنا للمراجعة لحد ما تأكد {n} رسالة منه، وبعد كده هسجلها لوحدي.} other{هتفضل توصلك هنا للمراجعة لحد ما تأكد {n} رسالة منه، وبعد كده هسجلها لوحدي.}}` | `{count, plural, =1{They'll still come here for review until you've confirmed 1, then I'll log them myself.} other{They'll still come here for review until you've confirmed {n}, then I'll log them myself.}}` | S · count:int = remaining confirmations (A-66: 3), n |
+| `ingestion_alwaysSender_yes` | أيوه، على طول | Yes, always | B |
+| `ingestion_requestBank_title` | اطلب دعم بنكك | Request your bank | T · shared by S-14 and S-61 |
+| `ingestion_requestBank_name` | اسم البنك | Bank name | L · prefilled with the sender in S-14 |
+| `ingestion_requestBank_country` | البلد | Country | L |
+| `ingestion_requestBank_channel` | تنبيهاته بتوصل إزاي؟ | How do its alerts arrive? | L · options `common_source_sms` / `common_source_notification` |
+| `ingestion_requestBank_privacy` | هنبعت اسم البنك وبلده ونوع التنبيه بس. عمرنا ما هنبعت الرسالة نفسها. | We send only the bank's name, country and alert type — never the message itself. | S · FR-PAR-14 / BR-SYNC-03 (SRS adds the channel, see Q-09) |
+| `ingestion_requestBank_send` | ابعت | Send | B |
+| `ingestion_requestBank_sent` | وصل طلبك ✓ شكراً! | Request sent ✓ Thanks! | N · no promise of a date |
+| `ingestion_requestBank_failed` | مقدرتش أبعته دلوقتي. حفظته، وتقدر تبعته تاني بعدين. | Couldn't send it right now. I've kept it so you can send it later. | S · network or offline; draft kept |
+| `ingestion_requestBank_nameLength` | اسم البنك لازم يكون من {min} لـ {max} حرف | Bank name must be {min}–{max} characters | S · min = 2, max = 60, both formatted Strings |
+| `ingestion_requestBank_countryRequired` | اختار البلد | Choose a country | S |
+
+## 1.15 S-15 Split & reimbursements — `transfers_split_*` (Mode A), `transfers_assign_*` (Mode B)
+States: Mode A editing · suggestion · Mode B assigning · no candidate expenses · validation · save failed (`common_error_saveFailed`) · saved.
+
+| Key | AR | EN | Notes |
+|---|---|---|---|
+| `transfers_split_title` | تقسيم العزومة | Split the bill | T · glossary |
+| `transfers_split_header` | {merchant} · {amount} | {merchant} · {amount} | L |
+| `transfers_split_people` | الناس | People | L |
+| `transfers_split_addPerson` | ضيف حد | Add person | B |
+| `transfers_split_personHint` | الاسم | Name | L · 1–30 characters |
+| `transfers_split_shareA11y` | نصيب {name} | {name}'s share | A |
+| `transfers_split_equal` | قسّم بالتساوي | Split evenly | B · this is the default |
+| `transfers_split_paidBack` | رجع | Paid back | C · status |
+| `transfers_split_waiting` | مستني | Waiting | C · status (FR-XFR-05) |
+| `transfers_split_paidDetail` | {amount} · {source} · {date} | {amount} · {source} · {date} | L |
+| `transfers_split_yourShare` | دفعت إنت فعلاً | Your share | L · glossary «دفعت إنت فعلاً» (BR-XFR-04) |
+| `transfers_split_suggestions` | اقتراحات | Suggestions | L |
+| `transfers_split_suggestion` | {amount} من {person} · {date}، من العزومة دي؟ | {amount} from {person} · {date} — from this bill? | S · + `common_action_link`; never auto (FR-XFR-08) |
+| `transfers_split_saved` | اتحفظ التقسيم ✓ | Split saved ✓ | N |
+| `transfers_assign_header` | {amount} من {person} | {amount} from {person} | L |
+| `transfers_assign_title` | وزّعها على مصاريف | Assign to expenses | T |
+| `transfers_assign_search` | دوّر في المصاريف الأخيرة | Search recent expenses | L |
+| `transfers_assign_unassigned` | مش متوزع: {amount}، هيفضل دخل | Not assigned: {amount} — stays as income | S · BR-XFR-06 |
+| `transfers_assign_empty` | `{count, plural, =1{مفيش مصاريف من امبارح} =2{مفيش مصاريف في آخر يومين} few{مفيش مصاريف في آخر {n} أيام} many{مفيش مصاريف في آخر {n} يوم} other{مفيش مصاريف في آخر {n} يوم}}` | `{count, plural, =1{No expenses since yesterday} other{No expenses in the last {n} days}}` | S · count:int = 60, n |
+| `transfers_assign_searchAll` | دوّر في كل المصاريف | Search all expenses | B |
+| `transfers_assign_saved` | اتوزعت ✓ | Assigned ✓ | N |
+| `transfers_split_errorShareZero` | النصيب لازم يكون أكبر من صفر | Each share must be more than zero | S |
+| `transfers_split_errorSharesExceed` | مجموع الأنصبة أكبر من المصروف | Shares add up to more than the expense | S |
+| `transfers_assign_errorExceedsIncoming` | وزعت أكتر من المبلغ اللي جالك | You've assigned more than you received | S |
+| `transfers_assign_errorExceedsExpense` | الفلوس الراجعة أكتر من المصروف نفسه | Money back can't be more than the expense | S · BR-XFR-06 |
+| `transfers_split_errorCurrency` | عملة مختلفة، مينفعش تربطهم | Different currency — can't link these | S · amounts are never converted |
+
+## 1.16 S-16 Link as my transfer — `transfers_link_*`
+States: candidates · cross-currency candidate · empty (EC-15) · validation · linked.
+
+| Key | AR | EN | Notes |
+|---|---|---|---|
+| `transfers_link_title` | ربط تحويلة لنفسي | Link my own transfer | T |
+| `transfers_link_source` | {amount} · {card} · {date} | {amount} · {card} · {date} | L |
+| `transfers_link_pick` | اختار الحركة اللي تقابلها | Pick the matching transaction | L |
+| `transfers_link_afterMinutes` | `{count, plural, =1{بعدها بدقيقة} =2{بعدها بدقيقتين} few{بعدها بـ {n} دقايق} many{بعدها بـ {n} دقيقة} other{بعدها بـ {n} دقيقة}}` | `{count, plural, =1{1 min later} other{{n} min later}}` | C · count:int, n |
+| `transfers_link_beforeMinutes` | `{count, plural, =1{قبلها بدقيقة} =2{قبلها بدقيقتين} few{قبلها بـ {n} دقايق} many{قبلها بـ {n} دقيقة} other{قبلها بـ {n} دقيقة}}` | `{count, plural, =1{1 min earlier} other{{n} min earlier}}` | C |
+| `transfers_link_afterDays` | `{count, plural, =1{بعدها بيوم} =2{بعدها بيومين} few{بعدها بـ {n} أيام} many{بعدها بـ {n} يوم} other{بعدها بـ {n} يوم}}` | `{count, plural, =1{1 day later} other{{n} days later}}` | C |
+| `transfers_link_beforeDays` | `{count, plural, =1{قبلها بيوم} =2{قبلها بيومين} few{قبلها بـ {n} أيام} many{قبلها بـ {n} يوم} other{قبلها بـ {n} يوم}}` | `{count, plural, =1{1 day earlier} other{{n} days earlier}}` | C |
+| `transfers_link_impliedRate` | سعر التحويل ≈ {rate} لكل {fromCurrency} | Implied rate ≈ {rate} per {fromCurrency} | L · cross-currency (A-61); rate includes the target currency |
+| `transfers_link_link` | اربط | Link | B |
+| `transfers_link_linked` | اتربطوا ✓ ومش هيتحسبوا مصروف | Linked ✓ Not counted as spending | N + `common_action_undo` |
+| `transfers_link_emptyTitle` | ملقيتش حركة تقابلها | No matching transaction found | T · C-28 |
+| `transfers_link_emptyBody` | ممكن البنك التاني مش بيبعت رسايل. تقدر تعلّمها تحويلة لنفسك برضه، ومش هتتحسب مصروف. | The other bank may not send messages. You can still mark this as your own transfer so it isn't counted as spending. | S · EC-15 |
+| `transfers_link_markAnyway` | علّمها تحويلة لنفسي | Mark as my transfer | B · one-sided internal |
+| `transfers_link_errorAmounts` | المبلغين لازم يكونوا زي بعض | Amounts must match | S · same currency |
+| `transfers_link_errorAccount` | اختار حساب تاني | Pick a different account | S |
+| `transfers_link_errorDirection` | لازم واحدة خارجة وواحدة داخلة | One must be money out, the other money in | S |
+
+## 1.17 S-40 Money overview — `accounts_overview_*`, add flow `accounts_addType_*`, `accounts_addBank_*`, `accounts_added_*`
+States: loading (skeleton) · empty · populated · multi-currency · ≈ view · stale prices (`common_badge_stale`) · Free assets locked · Zakah entry (flag only) · error. Asset row content (karat, grams, certificates) belongs to Part 2 (S-44/45).
+
+| Key | AR | EN | Notes |
+|---|---|---|---|
+| `accounts_overview_title` | فلوسي | Money | T |
+| `accounts_overview_add` | ضيف | Add | B · opens menu |
+| `accounts_overview_addAccount` | كارت أو حساب | Card or account | L · opens `accounts_addType_*` |
+| `accounts_overview_addAsset` | أصل (دهب، شهادة…) | Asset (gold, certificate…) | L · with `common_gold_badge`; Free opens S-68 |
+| `accounts_overview_netWorth` | اللي حيلتك كله | Net worth | L · glossary; one figure per currency, no cross-currency sum |
+| `accounts_overview_otherCurrenciesA11y` | عملات تانية | Other currencies | A |
+| `accounts_overview_accountsTitle` | كروتك وحساباتك | Cards & accounts | L |
+| `accounts_overview_compare` | قارن | Compare | B · text, opens S-42 |
+| `accounts_overview_asOf` | آخر تحديث {when} | as of {when} | C · when = `common_date_minutesAgo` or a date (FR-ACC-02) |
+| `accounts_overview_creditAvailable` | متاح من {limit} | available of {limit} | C |
+| `accounts_overview_moreCurrencies` | `{count, plural, =1{وكمان عملة واحدة} =2{وكمان عملتين} few{وكمان {n} عملات} many{وكمان {n} عملة} other{وكمان {n} عملة}}` | `{count, plural, =1{+1 more currency} other{+{n} more currencies}}` | C · count:int, n · multi-currency row (FR-ACC-06) |
+| `accounts_overview_cashSub` | يدوي وصوت | Manual & voice | C |
+| `accounts_overview_notTracked` | مش متتبع | Not tracked | C · ignored card (C-07) |
+| `accounts_overview_assetsTitle` | دهبك وشهاداتك | Your assets | L · glossary, + `common_gold_badge` |
+| `accounts_overview_prices` | الأسعار | Prices | B · text, opens S-45 |
+| `accounts_overview_assetsLocked` | تابع دهبك وشهاداتك وكل أصولك في مكان واحد | Track your gold, certificates and more in one place | S · locked preview + `common_gold_unlock` |
+| `accounts_overview_zakah` | الزكاة | Zakah | L · only when the `zakah` flag is on |
+| `accounts_overview_emptyTitle` | الحسابات بتظهر لوحدها من رسايل البنك | Accounts show up by themselves from your bank messages | T · C-28, Rive `sleep` |
+| `accounts_overview_emptyAdd` | ضيف حساب بإيدك | Add one yourself | B |
+| `accounts_addType_title` | تضيف إيه؟ | What are you adding? | T · sheet |
+| `accounts_addType_info` | الكروت بتتضاف لوحدها أول ما توصل رسالة. ضيف بإيدك لو لسه مفيش رسايل. | Cards are added automatically when a message arrives. Add one yourself if none has come yet. | S |
+| `accounts_addType_credit` | كريدت كارد | Credit card | L |
+| `accounts_addType_creditSub` | الليميت وميعاد السداد | Limit and due date | S |
+| `accounts_addType_debit` | كارت ديبت / حساب بنك | Debit card / bank account | L |
+| `accounts_addType_debitSub` | مرتب ومصاريف | Salary and spending | S |
+| `accounts_addType_wallet` | محفظة | Wallet | L |
+| `accounts_addType_walletSub` | فودافون كاش، إنستاباي، فوري | Vodafone Cash, InstaPay, Fawry | S · examples, see Q-10 |
+| `accounts_addType_multi` | حساب بأكتر من عملة | Multi-currency account | L |
+| `accounts_addType_multiSub` | Wise، Revolut، Payoneer | Wise, Revolut, Payoneer | S |
+| `accounts_addType_bnpl` | تقسيط | Buy now, pay later | L |
+| `accounts_addType_bnplSub` | فاليو، سيمبل، كونتكت | valU, Sympl, Contact | S |
+| `accounts_addBank_title` | من أنهي بنك؟ | Which bank? | T |
+| `accounts_addBank_search` | دوّر على بنك… | Search banks… | L |
+| `accounts_addBank_egypt` | بنوك مصر | Banks in Egypt | L · section |
+| `accounts_addBank_abroad` | بنوك برّه وأونلاين | Foreign & online banks | L · section |
+| `accounts_addBank_notListed` | بنكي مش موجود | My bank isn't listed | L |
+| `accounts_addBank_notListedSub` | ضيفه باسمه، وزغلول هيحاول يفهم رسايله | Add it by name — Zaghlol will try to read its messages | S · generic parser (FR-PAR-13); no promise |
+| `accounts_addBank_noResults` | مفيش بنك بالاسم ده | No bank by that name | S · + not-listed row |
+| `accounts_addBank_required` | اختار بنك | Choose a bank | S |
+| `accounts_added_title` | الكارت اتضاف! ✨ | Card added! ✨ | N · success |
+| `accounts_added_dueDay` | السداد يوم {day} كل شهر | Due on day {day} each month | L |
+| `accounts_added_waitingBalance` | هيتحدث مع أول رسالة فيها الرصيد المتاح | Updates with the first message that shows your available balance | S · value shows "—" |
+| `accounts_added_emptyBody` | أول ما توصلك رسالة من {bank} على {last4} هتظهر هنا لوحدها. | As soon as {bank} messages you about {last4}, it'll show up here. | S · S-41 empty state, Rive `sleep` |
+| `accounts_added_import` | ضيف كشف حساب الكارت | Import this card's statement | L · `common_gold_badge`; Free opens S-68 |
+| `accounts_added_importSub` | PDF من تطبيق البنك | A PDF from your bank's app | S |
+| `accounts_added_manual` | سجّل حركة بإيدك | Add a transaction | L · opens S-13 on this card (FR-CARD-05) |
+| `accounts_added_manualSub` | على الكارت ده | On this card | S |
+
+## 1.18 S-41 Card / account detail — `accounts_detail_*`
+States: loading · populated · multi-currency (C-09 chips) · empty period · ignored card · balance unknown · error. The trend chart's time axis mirrors in AR (UX-D-01).
+
+| Key | AR | EN | Notes |
+|---|---|---|---|
+| `accounts_detail_available` | فاضل في الكارت | Available | L · glossary, credit |
+| `accounts_detail_availableOf` | {available} من {limit} | {available} of {limit} | L |
+| `accounts_detail_limitUsed` | مستخدم {percent} من الليميت | {percent} of your limit used | C |
+| `accounts_detail_balance` | الرصيد | Balance | L · debit / account |
+| `accounts_detail_asOf` | آخر تحديث {when} | As of {when} | C |
+| `accounts_detail_balanceUnknown` | هيظهر مع أول رسالة فيها رصيد | Shows up with the first message that has a balance | S |
+| `accounts_detail_due` | ميعاد السداد {date} | Statement due {date} | L |
+| `accounts_detail_spent` | صرفت | Spent | L · + period chip `common_period_*` |
+| `accounts_detail_donutA11y` | توزيع الصرف على التصنيفات | Spending by category | A |
+| `accounts_detail_topMerchants` | أكتر أماكن صرفت فيها | Top merchants | L |
+| `accounts_detail_trend` | الصرف شهر بشهر | Monthly trend | L · subtitle `common_period_lastMonths` |
+| `accounts_detail_incomeRefunds` | دخل ومرتجعات | Income & refunds | L |
+| `accounts_detail_recent` | آخر الحركات | Recent | L |
+| `accounts_detail_allTransactions` | كل حركات الكارت | All card transactions | L · sets the card filter, opens S-11 |
+| `accounts_detail_capture` | زغلول بيقرا إيه | What Zaghlol reads | L · value lists `common_channel_*Short` + ✓/✗, opens S-62 |
+| `accounts_detail_menuCapture` | زغلول يقرا إيه من الكارت | Capture controls | L · ⋮ menu |
+| `accounts_detail_menuMerge` | ادمجه مع كارت تاني | Merge with another card | L |
+| `accounts_detail_menuHide` | اخفي الحساب | Hide account | L · see Q-11 |
+| `accounts_detail_empty` | مفيش صرف على الكارت ده في الفترة دي | No spending on this card in this period | S · Rive `sleep` |
+| `accounts_detail_ignoredBanner` | `{platform, select, ios{مش متتبع: الرسايل وApple Pay مقفولين للكارت ده} other{مش متتبع: الرسايل والإشعارات مقفولة للكارت ده}}` | `{platform, select, ios{Not tracked: messages and Apple Pay are off for this card} other{Not tracked: messages and notifications are off for this card}}` | N |
+| `accounts_detail_trackAgain` | تابعه تاني | Track again | B · Android then offers `capture_rescanOffer_*` |
+
+## 1.19 S-42 Compare cards — `accounts_compare_*`
+| Key | AR | EN | Notes |
+|---|---|---|---|
+| `accounts_compare_title` | مقارنة الكروت | Compare cards | T |
+| `accounts_compare_total` | الإجمالي | Total | L · same currency only |
+| `accounts_compare_choose` | اختار الكروت | Choose cards | B |
+| `accounts_compare_max` | `{count, plural, =1{تقدر تختار كارت واحد} =2{تقدر تختار لحد كارتين} few{تقدر تختار لحد {n} كروت} many{تقدر تختار لحد {n} كارت} other{تقدر تختار لحد {n} كارت}}` | `{count, plural, =1{Pick 1 card} other{Pick up to {n} cards}}` | S · count:int = 6 (UX-A-03), n |
+| `accounts_compare_otherCurrency` | الكروت اللي بعملة تانية بتظهر لما تختار عملتها | Cards in other currencies appear when you pick that currency | S |
+| `accounts_compare_empty` | المقارنة محتاجة كارتين على الأقل فيهم صرف | Compare needs at least two cards with spending | S · C-28 |
+| `accounts_compare_cellA11y` | {category}، {card}: {amount} | {category}, {card}: {amount} | A |
+
+## 1.20 S-43 Edit card / account — `accounts_edit_*`, `accounts_merge_*`
+States: edit · create (after type and bank) · credit fields · multi-currency balances · duplicate last-4 · merge picker / confirm / different-bank warning · validation · saved · error.
+
+| Key | AR | EN | Notes |
+|---|---|---|---|
+| `accounts_edit_titleEdit` | تفاصيل الكارت | Card details | T |
+| `accounts_edit_titleNew` | كارت جديد | New card | T |
+| `accounts_edit_name` | اسم الكارت | Card name | L · 1–30, unique |
+| `accounts_edit_bank` | البنك | Bank | L |
+| `accounts_edit_bankAuto` | اتعرف من الرسايل | Detected from messages | C · read-only when auto-created |
+| `accounts_edit_last4` | آخر أربع أرقام | Last four digits | L · LTR input, Western digits shown |
+| `accounts_edit_last4Hint` | في الرسالة بيبان كده: «{sample}»، عشان زغلول يعرف الكارت. | In messages it looks like "{sample}" — that's how Zaghlol spots the card. | S · sample = a synthetic pattern from the institution template, e.g. `**1234` (never a real SMS) |
+| `accounts_edit_type` | النوع | Type | L · `common_accountType_*` |
+| `accounts_edit_currency` | العملة | Currency | L |
+| `accounts_edit_balances` | الأرصدة | Balances | L · multi-currency |
+| `accounts_edit_addCurrency` | ضيف عملة | Add currency | B |
+| `accounts_edit_limit` | الليميت | Credit limit | L · credit only, ≥ 0 |
+| `accounts_edit_dueDay` | يوم السداد | Statement due day | L · credit only, 1–31 |
+| `accounts_edit_dueReminder` | `{count, plural, =0{هفكرك يوم السداد نفسه.} =1{هفكرك قبل ميعاد السداد بيوم.} =2{هفكرك قبل ميعاد السداد بيومين.} few{هفكرك قبل ميعاد السداد بـ {n} أيام.} many{هفكرك قبل ميعاد السداد بـ {n} يوم.} other{هفكرك قبل ميعاد السداد بـ {n} يوم.}}` | `{count, plural, =0{I'll remind you on the due day.} =1{I'll remind you 1 day before it's due.} other{I'll remind you {n} days before it's due.}}` | S · count:int (default 3, BR-SUB-03), n |
+| `accounts_edit_captureTitle` | زغلول يقرا إيه من الكارت ده؟ | What should Zaghlol read for this card? | L · create mode inline toggles (`common_channel_*`) |
+| `accounts_edit_captureLink` | زغلول بيقرا إيه | What Zaghlol reads | L · edit mode, opens S-62 |
+| `accounts_edit_merge` | ادمجه مع كارت تاني | Merge with another card | L |
+| `accounts_edit_hide` | اخفي الحساب ده | Hide this account | L · switch |
+| `accounts_edit_hideHint` | مش هيظهر في قايمة الكروت | It won't appear in your card list | S · see Q-11 |
+| `accounts_edit_duplicate` | الكارت ده موجود، افتحه؟ | This card already exists — open it? | S · same bank + last-4 |
+| `accounts_edit_openExisting` | افتحه | Open it | B |
+| `accounts_edit_errorLimit` | الليميت ميكونش بالسالب | The limit can't be negative | S |
+| `accounts_edit_errorDueDay` | اختار يوم من {min} لـ {max} | Pick a day from {min} to {max} | S · min = 1, max = 31 |
+| `accounts_edit_saved` | اتحفظ ✓ | Saved ✓ | N |
+| `accounts_merge_pickTitle` | تدمجه مع أنهي كارت؟ | Merge into which card? | T |
+| `accounts_merge_confirmTitle` | `{count, plural, =0{تدمج {fromCard} في {toCard}؟} =1{تنقل حركة واحدة من {fromCard} لـ {toCard}؟} =2{تنقل حركتين من {fromCard} لـ {toCard}؟} few{تنقل {n} حركات من {fromCard} لـ {toCard}؟} many{تنقل {n} حركة من {fromCard} لـ {toCard}؟} other{تنقل {n} حركة من {fromCard} لـ {toCard}؟}}` | `{count, plural, =0{Merge {fromCard} into {toCard}?} =1{Move 1 transaction from {fromCard} into {toCard}?} other{Move {n} transactions from {fromCard} into {toCard}?}}` | T · count:int, n · see Q-12 |
+| `accounts_merge_confirmBody` | الكارتين هيبقوا كارت واحد. | The two cards will become one. | S |
+| `accounts_merge_copyCapture` | انقل إعدادات القراية كمان | Also copy capture settings | L · checkbox (EC-60) |
+| `accounts_merge_confirm` | ادمج | Merge | B |
+| `accounts_merge_differentBank` | الكارتين من بنكين مختلفين. متأكد إنهم نفس الكارت؟ | These cards are from different banks. Sure they're the same card? | S · warning dialog |
+| `accounts_merge_differentBankConfirm` | أيوه، ادمج | Yes, merge | B |
+| `accounts_merge_errorSelf` | مينفعش تدمج الكارت في نفسه | A card can't be merged into itself | S |
+| `accounts_merge_done` | اتدمجوا ✓ | Merged ✓ | N |
+
+## 1.21 S-61 Capture settings — `capture_settings_*`, `capture_ignore_*`, `capture_rescan_*`, `capture_rescanOffer_*`, `capture_banks_*`, `capture_shareHow_*`
+States: all on · permission revoked (✖ + Fix) · iOS checker result · not-tracked list / empty · re-scan running / done · some messages unreadable · Gold-locked templates · error.
+
+| Key | AR | EN | Notes |
+|---|---|---|---|
+| `capture_settings_title` | زغلول بيقرا منين | Capture | T · glossary |
+| `capture_settings_sources` | المصادر | Sources | L · section |
+| `capture_settings_on` | شغال | On | C |
+| `capture_settings_off` | مقفول | Off | C · + `common_action_fix` when a permission is revoked |
+| `capture_settings_smsIos` | عن طريق الاختصارات | Via Shortcuts | C · iOS SMS row subtitle |
+| `capture_settings_checkSetup` | اتأكد من الإعداد | Check setup | B · iOS, opens S-03 step 2 |
+| `capture_settings_share` | ابعت أو الزق رسالة | Share or paste a message | L · opens `capture_shareHow_*` |
+| `capture_settings_notTracked` | مش متتبعين | Not tracked | L · section (FR-CAP-06) |
+| `capture_settings_notTrackedEmpty` | كل كروتك متتبعة | All your cards are tracked | S |
+| `capture_settings_ignoredChannels` | {channels} مقفولة | {channels} off | C · channels = list of `common_channel_*Short` joined by the locale's list format. Row title = card or bank. + `common_action_undo` |
+| `capture_settings_addIgnore` | متتابعش كارت أو بنك | Don't track a card or bank | L · FR-CAP-03 |
+| `capture_settings_tools` | أدوات | Tools | L · section |
+| `capture_settings_rescan` | دوّر في الرسايل القديمة تاني | Re-scan SMS inbox | L · Android |
+| `capture_settings_banks` | البنوك اللي زغلول بيفهمها | Supported banks | L |
+| `capture_settings_requestBank` | اطلب دعم بنكك | Request my bank | L · opens `ingestion_requestBank_*` |
+| `capture_settings_templates` | قوالب رسايل خاصة بيك | Custom message templates | L · `common_gold_badge`; Free opens S-68 |
+| `capture_settings_unreadable` | في رسايل مقدرتش أقراها. دوّر في الرسايل تاني عشان ميفوتكش حاجة. | Some messages couldn't be read. Re-scan so nothing's missed. | N · Android `SPOOL_DECRYPT_FAILED` |
+| `capture_ignore_title` | متتابعش كارت أو بنك | Don't track a card or bank | T · sheet |
+| `capture_ignore_bank` | البنك | Bank | L |
+| `capture_ignore_last4` | آخر أربع أرقام (اختياري) | Last four digits (optional) | L |
+| `capture_ignore_last4Hint` | سيبه فاضي عشان تبطّل تتابع البنك كله | Leave it empty to stop tracking the whole bank | S · FR-CAP-05 |
+| `capture_ignore_channels` | متقراش من: | Stop reading: | L · `common_channel_*` checkboxes |
+| `capture_ignore_privacy` | اللي تقفله، زغلول مش هيبص عليه خالص ولا هيحفظ منه حاجة. | Whatever you switch off, Zaghlol won't look at or save — at all. | S · BR-CAP-01 |
+| `capture_ignore_errorBank` | اختار البنك | Choose the bank | S |
+| `capture_ignore_errorChannel` | اختار مصدر واحد على الأقل | Pick at least one source | S |
+| `capture_ignore_errorLast4` | سيبه فاضي أو اكتب أربع أرقام | Leave it empty or enter four digits | S |
+| `capture_ignore_saved` | تمام، مش هتابعه | Done — no longer tracking it | N + `common_action_undo` |
+| `capture_rescan_title` | دوّر في الرسايل القديمة | Re-scan old messages | T · FR-CAP-07 |
+| `capture_rescan_depth` | لحد إمتى؟ | How far back? | L · options `common_period_lastMonths` 6–24 (A-11) |
+| `capture_rescan_start` | ابدأ | Start | B |
+| `capture_rescan_running` | `{count, plural, =0{بدوّر…} =1{بدوّر… لقيت حركة جديدة} =2{بدوّر… لقيت حركتين جداد} few{بدوّر… لقيت {n} حركات جديدة} many{بدوّر… لقيت {n} حركة جديدة} other{بدوّر… لقيت {n} حركة جديدة}}` | `{count, plural, =0{Searching…} =1{Searching… 1 new found} other{Searching… {n} new found}}` | L · Rive `scanning`, C-27 with cancel |
+| `capture_rescan_done` | `{count, plural, =0{ملقيتش حركات جديدة ✓} =1{ضفت حركة جديدة ✓} =2{ضفت حركتين جداد ✓} few{ضفت {n} حركات جديدة ✓} many{ضفت {n} حركة جديدة ✓} other{ضفت {n} حركة جديدة ✓}}` | `{count, plural, =0{No new transactions ✓} =1{Added 1 new transaction ✓} other{Added {n} new transactions ✓}}` | N |
+| `capture_rescan_noDuplicates` | اللي اتسجل قبل كده مش هيتكرر | Nothing already saved will be added twice | S |
+| `capture_rescanOffer_title` | أدوّر في الرسايل القديمة على حركات {card}؟ | Look through old messages for {card}? | T · after un-ignoring (Android) |
+| `capture_rescanOffer_body` | الرسايل اللي اتقفلت قبل كده متحفظتش، بس ممكن ألاقيها لسه في صندوق الرسايل. | Messages were not saved while it was off, but they may still be in your inbox. | S · BR-CAP-04 |
+| `capture_rescanOffer_yes` | دوّر | Search | B |
+| `capture_banks_title` | البنوك اللي زغلول بيفهمها | Supported banks | T |
+| `capture_banks_search` | دوّر على بنك… | Search banks… | L |
+| `capture_banks_noResults` | مفيش بنك بالاسم ده | No bank by that name | S · + `capture_settings_requestBank` |
+| `capture_banks_iosNote` | على الآيفون، {bank} بيتسجل من Apple Pay والسكرين شوت وكشوف الحساب. الآيفون مش بيسمح لزغلول يقرا إشعارات التطبيقات التانية. | On iPhone, {bank} is tracked through Apple Pay, screenshots and statements. iOS doesn't let Zaghlol read other apps' notifications. | S · FR-ING-I-08 |
+| `capture_shareHow_title` | إزاي تبعت رسالة لزغلول | How to share a message | T · shared by S-02 and S-61 |
+| `capture_shareHow_step1` | افتح رسالة البنك في تطبيق الرسايل | Open the bank message in your messages app | S |
+| `capture_shareHow_step2` | دوس عليها شوية واختار «مشاركة» أو «نسخ» | Long-press it and choose Share or Copy | S · OS labels may differ, see Q-04 |
+| `capture_shareHow_step3` | اختار زغلول، أو افتح زغلول والزقها | Pick Zaghlol — or open Zaghlol and paste it | S |
+| `capture_shareHow_note` | هتشوفها قبل ما تتسجل. | You'll check it before it's saved. | S · FR-ING-A-04 |
+
+## 1.22 S-62 Card capture controls — `capture_cardControls_*`, `capture_stopTracking_*`
+| Key | AR | EN | Notes |
+|---|---|---|---|
+| `capture_cardControls_title` | زغلول يقرا إيه من {card}؟ | What should Zaghlol read from {card}? | T · sheet; switches use `common_channel_*` |
+| `capture_cardControls_subtitle` | اختار براحتك، وتقدر تغير في أي وقت | Your choice — change it any time | S |
+| `capture_cardControls_smsIos` | عن طريق اختصارات الآيفون | Through iPhone Shortcuts | C |
+| `capture_cardControls_applePaySub` | الدفع بالموبايل | Phone payments | C |
+| `capture_cardControls_info` | اللي تقفله، زغلول مش هيبص عليه خالص ولا هيحفظ منه حاجة. | Whatever you switch off, Zaghlol won't look at or save — at all. | S · BR-CAP-01 |
+| `capture_stopTracking_title` | تبطّل تتابع {card}؟ | Stop tracking {card}? | T · last channel switched off (FR-CAP-04). Serious, no emoji |
+| `capture_stopTracking_existing` | الحركات اللي اتسجلت قبل كده: | Transactions already saved: | L |
+| `capture_stopTracking_keep` | سيبهم زي ما هم | Keep them | L · radio, default |
+| `capture_stopTracking_delete` | `{count, plural, =1{امسح حركة واحدة} =2{امسح الحركتين} few{امسح الـ {n} حركات} many{امسح الـ {n} حركة} other{امسح الـ {n} حركة}}` | `{count, plural, =1{Delete 1 transaction} other{Delete {n} transactions}}` | L · radio; count:int, n |
+| `capture_stopTracking_confirm` | بطّل المتابعة | Stop tracking | B |
+| `capture_stopTracking_deleteTitle` | `{count, plural, =1{تمسح حركة واحدة نهائي؟} =2{تمسح الحركتين نهائي؟} few{تمسح {n} حركات نهائي؟} many{تمسح {n} حركة نهائي؟} other{تمسح {n} حركة نهائي؟}}` | `{count, plural, =1{Delete 1 transaction for good?} other{Delete {n} transactions for good?}}` | T · second confirmation |
+| `capture_stopTracking_deleteBody` | مفيش رجوع. الحركات دي هتتمسح من الموبايل وكل الأرقام هتتحدث. | This can't be undone. These transactions will be deleted from this phone and every total will update. | S |
+| `capture_stopTracking_deleteConfirm` | امسح نهائي | Delete for good | B · destructive |
+| `capture_stopTracking_done` | مش هتابع {card} تاني | No longer tracking {card} | N + `common_action_undo` (restores the switches only; deleted data stays deleted) |
+
+---
+
+## 1.K Key count (Part 1)
+| Section | Screens | Keys |
+|---|---|---|
+| 1.1 `common_*` | shared | 123 |
+| 1.2 `mascot_*` | shared | 13 |
+| 1.3 Welcome | S-01 | 10 |
+| 1.4 Android setup | S-02 | 29 |
+| 1.5 iOS setup | S-03 | 41 |
+| 1.6 Restore | S-04 | 29 |
+| 1.7 App lock | S-05 | 7 |
+| 1.8 Scan results | S-06 | 14 |
+| 1.9 Home | S-10 | 57 |
+| 1.10 Transaction row | C-05 | 10 |
+| 1.11 Transactions | S-11 | 28 |
+| 1.12 Detail + rule sheet | S-12 | 41 |
+| 1.13 Add / edit | S-13 | 20 |
+| 1.14 Review queue + request bank | S-14 | 45 |
+| 1.15 Split & reimbursements | S-15 | 26 |
+| 1.16 Link transfer | S-16 | 16 |
+| 1.17 Money overview + add flow | S-40, S-43 create | 47 |
+| 1.18 Card detail | S-41 | 21 |
+| 1.19 Compare | S-42 | 7 |
+| 1.20 Edit card + merge | S-43 | 33 |
+| 1.21 Capture settings | S-61 | 45 |
+| 1.22 Card capture controls | S-62 | 14 |
+| **Total** | | **676** |
+
+Plural messages: 35. Select messages: 8. Each row is one ARB key in both `app_ar.arb` and `app_en.arb`.
+
+## 1.Q Open questions and spec gaps (Part 1)
+| ID | Where | Issue | Draft used | Needs |
+|---|---|---|---|---|
+| Q-01 | Tab 2 label | `03-navigation.md` says «التحليلات»; the glossary (D-34) says «الحسبة». | «الحسبة» | Confirm the glossary wins and update `03-navigation.md` |
+| Q-02 | Source badge | FR-TXN-03's source list has no value for share/paste (FR-ING-A-04). | `common_source_shared` «رسالة اتبعتت» | Confirm a separate source value, or reuse SMS / Notification |
+| Q-03 | S-02 | No screen spec covers the build without the Play SMS exception (FR-ING-A-05 "not granted by Play"). | `onboarding_androidSetup_playUnavailable` | Confirm the state exists (a store flavour without SMS?) and whether S-02 step 1 is skipped there |
+| Q-04 | S-03, share how-to | iOS and Android OS labels ("Shortcuts", "Automation", "Run Immediately", "Share") differ by device language and OEM. | English OS labels kept in Latin | Verify on Arabic-language iOS; decide whether to show localized OS labels |
+| Q-05 | Home greeting | Spec gives only «صباح الفل / مساء الفل» by time. Hour boundaries and the English afternoon form aren't defined. | Morning 05–12, afternoon 12–17, evening 17–05 | Confirm the boundaries |
+| Q-06 | Home hero | No spec state for safe-to-spend ≤ 0 (budget used up). | `home_hero_budgetUsedUp` (calm, no joke) | Confirm the state and its copy |
+| Q-07 | Payday prompt | A salary detected on day 29–31 can't be set (payday is 1–28, BR-BUD-01). | Not handled | Decide: suggest 28, use calendar month, or skip the prompt |
+| Q-08 | S-11 bulk delete | The spec says every bulk change shows Undo, but bulk delete says it can't be undone. | Delete: confirmation, no Undo. Other bulk changes: Undo | Confirm |
+| Q-09 | S-14 request bank | The screen spec says "only the bank's name and country"; FR-PAR-14 also sends the channel type. | The SRS (name, country, alert type) | Update the S-14 spec text |
+| Q-10 | Add type sheet | The mockup lists InstaPay as a wallet example; InstaPay is a transfer rail, not a wallet. | Kept as mocked | Confirm the examples (and that brand names are cleared, OQ-09) |
+| Q-11 | S-41/S-43 Hide | It isn't specified whether a hidden account's transactions still count in totals (FR-ACC-04). | Hint says only "won't appear in your card list" | Define what hiding does |
+| Q-12 | S-43 Merge | Whether a merge can be undone isn't specified. | No undo claimed, no "can't undo" claimed | Decide: Undo snackbar, or a "can't be undone" line |
+| Q-13 | C-05 | The design system lists a "pending verification" row variant but no spec defines it for transactions. | No copy | Define or remove the variant |
+| Q-14 | Process | The task asks for the design note in the task file, but the brief limited edits to `copy-deck.md`. | Design note in §1.0 | Lead to copy it into `T-026.md` if wanted |
+| Q-15 | Plural/digits convention | §0.3/§0.4 make every number a pre-formatted String and use `count` only to select. That needs the architect to confirm it against `DigitsMode` (ADR-017). | As written | Architect confirmation before T-029 |
+| Q-16 | Bidi isolates | §0.6 puts FSI/PDI wrapping in the presentation layer, not in ARB text. | As written | Architect confirmation (`MoneyFormat` / l10n helper) |
+
+## 1.C Changelog (Part 1)
+- 2026-11-07 — first draft (T-026).
+
+<!-- ===================== PART 2 (T-027) appends below ===================== -->
+
+<!-- ===================== PART 3 (T-028) appends below ===================== -->
