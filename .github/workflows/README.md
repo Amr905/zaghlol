@@ -13,8 +13,6 @@
 
 Flutter is pinned to the exact version in `FLUTTER_VERSION` (3.47.9), matching `pubspec.lock`. All actions are pinned to commit SHAs.
 
-To enable custom_lint (T-002), add it to the workspace and set `RUN_CUSTOM_LINT: 'true'` in `app-ci.yml`.
-
 Tag golden tests with `@Tags(['golden'])` and put their PNGs in a `goldens/` directory next to the test (for example `app/test/goldens/`). Never generate goldens locally: pixels differ per platform, so CI (ubuntu) is the only source of truth.
 
 ## app-regen.yml: getting generated files back from CI
