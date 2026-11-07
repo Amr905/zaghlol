@@ -15,16 +15,13 @@ namespace Zaghlol.Infrastructure.Persistence;
 /// </summary>
 public static class DatabaseRoleGuard
 {
-    /// <summary>Why a login was rejected. Stable values, safe to log (no names or secrets).</summary>
-    public static class Reasons
-    {
-        public const string Privileged = "privileged_login";
-        public const string Owner = "schema_owner";
-        public const string Migrator = "migrator_member";
-        public const string WrongGroups = "wrong_group_membership";
-    }
+    // Why a login was rejected. Stable values, safe to log (no names or secrets).
+    public const string RejectPrivileged = "privileged_login";
+    public const string RejectOwner = "schema_owner";
+    public const string RejectMigrator = "migrator_member";
+    public const string RejectWrongGroups = "wrong_group_membership";
 
-    /// <summary>One row about <c>current_user</c>: privilege flags, then membership of each group in <see cref="Groups"/>.</summary>
+    /// <summary>One row about <c>current_user</c>: privilege flags, owner, migrator, then each group membership.</summary>
     public const string Query = """
         SELECT r.rolsuper OR r.rolbypassrls OR r.rolcreaterole OR r.rolcreatedb OR r.rolreplication,
                coalesce((SELECT n.nspowner = r.oid FROM pg_catalog.pg_namespace n WHERE n.nspname = 'zaghlol'), false),
@@ -47,7 +44,7 @@ public static class DatabaseRoleGuard
         _ => throw new ArgumentOutOfRangeException(nameof(role), role, "the migrator is not a runtime role"),
     };
 
-    /// <summary>Null when the connection's login is acceptable for <paramref name="role"/>; otherwise a <see cref="Reasons"/> value.</summary>
+    /// <summary>Null when the connection's login is acceptable for <paramref name="role"/>; otherwise one of the <c>Reject*</c> values.</summary>
     public static async Task<string?> CheckAsync(NpgsqlConnection connection, DatabaseRole role, CancellationToken cancellationToken)
     {
         ArgumentNullException.ThrowIfNull(connection);
@@ -57,29 +54,29 @@ public static class DatabaseRoleGuard
         await using var reader = await command.ExecuteReaderAsync(cancellationToken);
         if (!await reader.ReadAsync(cancellationToken))
         {
-            return Reasons.WrongGroups;
+            return RejectWrongGroups;
         }
 
         if (reader.GetBoolean(0))
         {
-            return Reasons.Privileged;
+            return RejectPrivileged;
         }
 
         if (reader.GetBoolean(1))
         {
-            return Reasons.Owner;
+            return RejectOwner;
         }
 
         if (reader.GetBoolean(2))
         {
-            return Reasons.Migrator;
+            return RejectMigrator;
         }
 
         for (var i = 0; i < Groups.Length; i++)
         {
             if (reader.GetBoolean(3 + i) != string.Equals(Groups[i], expected, StringComparison.Ordinal))
             {
-                return Reasons.WrongGroups;
+                return RejectWrongGroups;
             }
         }
 

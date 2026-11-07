@@ -100,7 +100,9 @@ jobs:
         env:
           NAME: ${{ steps.name.outputs.name }}
         run: |
-          dotnet tool run dotnet-ef migrations add "$NAME" \
+          # Build first so compiler errors appear in the log (dotnet ef only says "Build failed").
+          dotnet build src/Zaghlol.Infrastructure --no-restore
+          dotnet tool run dotnet-ef migrations add "$NAME" --no-build \
             --project src/Zaghlol.Infrastructure \
             --startup-project src/Zaghlol.Infrastructure \
             --output-dir Persistence/Migrations

@@ -48,6 +48,9 @@ public sealed class ZaghlolDesignTimeDbContextFactory : IDesignTimeDbContextFact
 /// <summary>Configuration names of <see cref="DatabaseRole"/>.</summary>
 public static class DatabaseRoles
 {
+    /// <summary>Keyed-service key of the readiness probe's own one-connection data source (App credentials).</summary>
+    public const string ReadinessDataSourceKey = "zaghlol-readiness";
+
     /// <summary>The <c>ConnectionStrings</c> key of a role.</summary>
     public static string ConnectionStringName(DatabaseRole role) => role switch
     {

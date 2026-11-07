@@ -9,19 +9,16 @@ namespace Zaghlol.Infrastructure.Persistence;
 
 /// <summary>
 /// Readiness for <c>GET /v1/health</c> (FU-003). The probe runs as the API's <c>app_rw</c> login on a pool of its own
-/// with one connection (<see cref="DataSourceKey"/>), so it never competes with or disturbs the <c>/v1</c> pool: a slow
-/// or exhausted App pool isn't reported as "database down", and a failed probe never clears anybody's connections.
-/// The probe query is the login check of <see cref="DatabaseRoleGuard"/>, so the API is never "ready" as the wrong
-/// role (SEC F11). 1 s timeout, answer cached for 2 s, at most one probe in flight.
+/// with one connection (keyed <see cref="DatabaseRoles.ReadinessDataSourceKey"/>), so it never competes with or
+/// disturbs the <c>/v1</c> pool: a slow or exhausted App pool isn't reported as "database down", and a failed probe
+/// never clears anybody's connections. The probe query is the login check of <see cref="DatabaseRoleGuard"/>, so the
+/// API is never "ready" as the wrong role (SEC F11). 1 s timeout, answer cached for 2 s, at most one probe in flight.
 /// </summary>
 internal sealed partial class PostgresDatabaseReadiness(
-    [FromKeyedServices(PostgresDatabaseReadiness.DataSourceKey)] NpgsqlDataSource probeSource,
+    [FromKeyedServices(DatabaseRoles.ReadinessDataSourceKey)] NpgsqlDataSource probeSource,
     TimeProvider clock,
     ILogger<PostgresDatabaseReadiness> logger) : IDatabaseReadiness, IDisposable
 {
-    /// <summary>Keyed-service key of the probe's own one-connection data source.</summary>
-    public const string DataSourceKey = "zaghlol-readiness";
-
     public static readonly TimeSpan ProbeTimeout = TimeSpan.FromSeconds(1);
     public static readonly TimeSpan CacheDuration = TimeSpan.FromSeconds(2);
 

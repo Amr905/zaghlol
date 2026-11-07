@@ -83,7 +83,7 @@ public static class PersistenceServiceCollectionExtensions
         ArgumentNullException.ThrowIfNull(services);
 
         services.TryAddSingleton(TimeProvider.System);
-        services.TryAddKeyedSingleton(PostgresDatabaseReadiness.DataSourceKey, (provider, _) =>
+        services.TryAddKeyedSingleton(DatabaseRoles.ReadinessDataSourceKey, (provider, _) =>
             PostgresDatabaseReadiness.CreateProbeSource(
                 provider.GetRequiredService<IOptions<DatabaseConnectionOptions>>().Value.For(DatabaseRole.App)
                 ?? throw new InvalidOperationException("ConnectionStrings:App must be set for the readiness probe.")));
