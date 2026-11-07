@@ -55,7 +55,7 @@
 | T-023 | Localization scaffold, digits mode and money/date formatting | M0 | C2 | Sonnet | flutter-core-engineer | T-012, T-020 | TODO | — |  |
 | T-024 | App shell: routing, platform tab bars, Add button, deep links | M0 | C2 | Sonnet | flutter-ui-engineer | T-022, T-023 | TODO | — |  |
 | T-025 | Feature flags service (default OFF) | M0 | C2 | Sonnet | flutter-core-engineer | T-019 | TODO | — |  |
-| T-026 | Copy deck part 1: onboarding, capture, Home, transactions, review, accounts | M0 | C3 | Opus | ux-designer | — | IN_PROGRESS | — | Opus ux-designer started 2026-11-07 (docs only; T-027/T-028 follow, same file) |
+| T-026 | Copy deck part 1: onboarding, capture, Home, transactions, review, accounts | M0 | C3 | Opus | ux-designer | — | IN_REVIEW | task/T-026-copy-deck-1 @ f43b6e1 (676 keys, docs only) | Reviews running: code-reviewer + test-engineer. 16 open copy questions (Q-01…Q-16) to triage for PO/architect |
 | T-027 | Copy deck part 2: insights, budget, bills, money, chat, voice, roast, explanations | M0 | C3 | Opus | ux-designer | — | TODO | — |  |
 | T-028 | Copy deck part 3: settings, Gold, backup, import/export, notifications, errors, legal | M0 | C3 | Opus | ux-designer | — | TODO | — |  |
 | T-029 | Generate ARB files from copy deck (part 1) | M1 | C1 | Haiku | boilerplate-engineer | T-023, T-026 | TODO | — |  |
