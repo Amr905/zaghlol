@@ -11,7 +11,8 @@ import 'src/no_ui_string_literals.dart';
 import 'src/safe_exception_required.dart';
 
 PluginBase createPlugin() {
-  File('/tmp/zl_plugin.txt').writeAsStringSync('created\n', mode: FileMode.append);
+  File('/tmp/zl_plugin.txt')
+      .writeAsStringSync('created\n', mode: FileMode.append);
   return _ZaghlolLints();
 }
 
