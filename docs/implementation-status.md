@@ -31,7 +31,7 @@
 | ID | Title | MS | Class | Model | Agent | Depends on | Status | Verification evidence | Notes |
 |---|---|---|---|---|---|---|---|---|---|
 | T-001 | Create mono-repo scaffold with pub workspace, app flavors and pure-Dart packages | M0 | C2 | Sonnet | flutter-core-engineer | — | DONE | CI run 42103098253 (10/10 green) @ ec6214e; review [T-001](05-reviews/T-001.md) APPROVED (round 2) | Squash-merged; deferred findings appended to T-002/003/022/023/141/165/176 |
-| T-002 | Add custom lint rules (no double in money, no UI string literals, no print) | M0 | C2 | Sonnet | flutter-core-engineer | T-001 | TODO | — |  |
+| T-002 | Add custom lint rules (no double in money, no UI string literals, no print) | M0 | C2 | Sonnet | flutter-core-engineer | T-001 | IN_PROGRESS | — | Sonnet implementer started 2026-11-07 |
 | T-003 | App CI pipeline (format, analyze, unit, golden, native unit) | M0 | C2 | Sonnet | flutter-core-engineer | T-001 | DONE | app-ci run 42213382460 (13/13 green) @ b186d1d; red/no-test proofs 42211250792, 42212487800; symlink proofs 42209342928, 42209963798; regen runs 42213382374, 42207136110; review [T-003](05-reviews/T-003.md) APPROVED (round 2) | Squash-merged; nits deferred to T-007/T-008/T-022/T-023 |
 | T-004 | Pigeon setup and stale-generation check | M0 | C2 | Sonnet | flutter-core-engineer | T-001 | TODO | — |  |
 | T-005 | Backend solution scaffold, Docker Compose and CI | M0 | C2 | Sonnet | backend-engineer | — | DONE | CI run 41720361381 (4/4 green) @ d98b37d; review [T-005](05-reviews/T-005.md) APPROVED | Squash-merged; follow-ups FU-001…005 |
@@ -41,7 +41,7 @@
 | T-009 | SPK-03: can an iOS App Intent process immediately with a headless Flutter engine? | M0 | C4 | Opus | native-platform-engineer | T-001, T-004 | TODO | — |  |
 | T-010 | SPK-02: OCR accuracy on synthetic InstaPay/wallet receipts | M0 | C3 | Sonnet | native-platform-engineer | T-001 | TODO | — |  |
 | T-011 | SPK-04: on-device ar-EG speech availability across the device matrix | M0 | C2 | Sonnet | native-platform-engineer | T-001 | TODO | — |  |
-| T-012 | Money and Currency value types with ISO 4217 table | M0 | C4 | Opus | flutter-core-engineer | T-001 | IN_REVIEW | app-ci 42352828411 (12/13; only the intended snapshot gate red) @ 1e44bb9 | Round 2: code APPROVED pending genuine SIX snapshot, security APPROVED, tests SUFFICIENT. Merge blocked on the genuine SIX list-one.xml (PO). Minors R2-1 (scan ${} bodies), R2-2 (guard --fresh) ride with the swap; CR13 design-note amendment (architect) |
+| T-012 | Money and Currency value types with ISO 4217 table | M0 | C4 | Opus | flutter-core-engineer | T-001 | IN_REVIEW | app-ci 42352828411 (12/13; only the intended snapshot gate red) @ 1e44bb9 | Round 2: code APPROVED pending genuine SIX snapshot, security APPROVED, tests SUFFICIENT. Genuine SIX list-one.xml (Pblshd 2026-09-17, 280 entries) received from PO; round 3 swap in progress. Minors R2-1 (scan ${} bodies), R2-2 (guard --fresh) ride with the swap; CR13 design-note amendment (architect) |
 | T-013 | Text & amount normalization utilities (digits, separators, groupings) | M0 | C3 | Sonnet | parsing-engine-engineer | T-012 | TODO | — |  |
 | T-014 | Result/Failure types, SafeException and domain event bus | M0 | C2 | Sonnet | flutter-core-engineer | T-001 | TODO | — |  |
 | T-015 | Secure key bootstrap for the database key | M0 | C4 | Opus | flutter-core-engineer | T-007 | TODO | — |  |
@@ -55,7 +55,7 @@
 | T-023 | Localization scaffold, digits mode and money/date formatting | M0 | C2 | Sonnet | flutter-core-engineer | T-012, T-020 | TODO | — |  |
 | T-024 | App shell: routing, platform tab bars, Add button, deep links | M0 | C2 | Sonnet | flutter-ui-engineer | T-022, T-023 | TODO | — |  |
 | T-025 | Feature flags service (default OFF) | M0 | C2 | Sonnet | flutter-core-engineer | T-019 | TODO | — |  |
-| T-026 | Copy deck part 1: onboarding, capture, Home, transactions, review, accounts | M0 | C3 | Opus | ux-designer | — | TODO | — |  |
+| T-026 | Copy deck part 1: onboarding, capture, Home, transactions, review, accounts | M0 | C3 | Opus | ux-designer | — | IN_PROGRESS | — | Opus ux-designer started 2026-11-07 (docs only; T-027/T-028 follow, same file) |
 | T-027 | Copy deck part 2: insights, budget, bills, money, chat, voice, roast, explanations | M0 | C3 | Opus | ux-designer | — | TODO | — |  |
 | T-028 | Copy deck part 3: settings, Gold, backup, import/export, notifications, errors, legal | M0 | C3 | Opus | ux-designer | — | TODO | — |  |
 | T-029 | Generate ARB files from copy deck (part 1) | M1 | C1 | Haiku | boilerplate-engineer | T-023, T-026 | TODO | — |  |
@@ -277,3 +277,4 @@
 | 2026-11-07 | T-122 implemented: 25 tables, 39 CHECKs (each with a negative test), grants matrix, readiness 503, push-triggered migration workflow. CI green; C4 reviews started. |
 | 2026-11-07 | T-122 round 1: code + security CHANGES_REQUESTED, tests SUFFICIENT. Fixes folded into a regenerated InitialCreate (unshipped). Lead approved the push-mode migration workflow. PO asked to add a ruleset on main. |
 | 2026-11-07 | T-165 merged (189acf7) after all three approvals; stays IN_REVIEW until the device run. T-012 round-2 code review APPROVED pending the SIX snapshot. |
+| 2026-11-07 | PO supplied the genuine SIX list-one.xml; T-012 round 3 (snapshot swap + R2-1/R2-2) started. T-002 and T-026 started. PO created ruleset 'main requirs PR' (PR required, no force-push/deletion, no bypass), enforcement still disabled; once active the Lead merges via PRs. |
