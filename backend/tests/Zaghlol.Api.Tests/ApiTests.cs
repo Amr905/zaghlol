@@ -5,6 +5,7 @@ using Npgsql;
 
 namespace Zaghlol.Api.Tests;
 
+[Collection(ApiHostGroup.Name)]
 public class ApiTests(ApiFixture fixture) : IClassFixture<ApiFixture>
 {
     private static readonly string[] StackTraceMarkers = ["   at ", "StackTrace", "InvalidOperationException"];

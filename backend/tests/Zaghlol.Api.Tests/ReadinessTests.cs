@@ -50,6 +50,7 @@ public sealed class ReadinessFixture : IAsyncLifetime
 }
 
 /// <summary>FU-003: <c>GET /v1/health</c> is a readiness probe backed by the database.</summary>
+[Collection(ApiHostGroup.Name)]
 public class ReadinessTests(ReadinessFixture fixture) : IClassFixture<ReadinessFixture>
 {
     private static readonly Uri Health = new("/v1/health", UriKind.Relative);
