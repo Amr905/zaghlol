@@ -15,22 +15,118 @@
 `<feature>_<screen>_<element>` (`project-structure.md`), exactly three underscore-separated segments, all camelCase within a segment. Example: `home_hero_safeToSpend`.
 - **feature**: an app feature folder from `architecture.md` (`onboarding`, `capture`, `ingestion`, `home`, `transactions`, `transfers`, `accounts`, `backup`, `security`, …). There are two extras: `common` for strings shared by several features, and `mascot` for Captain Zaghlol lines that aren't tied to one screen.
 - **screen**: the screen, sheet or region inside the feature, e.g. `welcome`, `androidSetup`, `hero`, `detail`. On Home the middle segment names the region (`hero`, `banner`, `mascot`, …), following the `home_hero_safeToSpend` precedent.
-- **element**: what the string is, e.g. `title`, `body`, `smsAllow`, `errorNetwork`, `a11yRow`. Screen-reader-only strings end in `A11y`.
+- **element**: what the string is, e.g. `title`, `body`, `smsAllow`, `errorNetwork`, `labelA11y`. Screen-reader-only strings always end in `A11y`; a bare `a11y` element is not allowed.
+- **native** strings (§1.23) use the reserved feature `native` and live outside the ARB files.
 - Keys are stable. If wording changes, keep the key. If meaning changes, add a new key and retire the old one in the changelog at the end of the part.
 
 ### 0.2 Table format
 Each section has a table: **Key | AR (عامية مصرية) | EN | Notes**. Notes hold the length class (§0.7), the placeholders and, for mascot lines, the Rive state and trigger.
 
 ### 0.3 Placeholders
-- Every placeholder is a **String that code has already formatted** (`MoneyFormat` / digits layer / date formatter). The ARB text never formats numbers itself, because the Arabic UI can show either Arabic-Indic or Western digits (A-29, FR-L10N-03), and ICU number formatting can't follow that preference.
-- `{amount}` is a complete money string including the currency, per `04-design-system.md` §2.3. AR: `٤٥٠ ج.م`, `١٬٢٠٠ USD`. EN: `EGP 450`, `USD 1,200`. Signs (`−`/`+`) are added by the money layer, never written in copy.
-- `{percent}` includes its sign (`٩٦٪` / `96%`). `{date}`, `{time}`, `{when}` are locale-formatted (`٢٣ أكتوبر` / `23 Oct`).
-- `{card}` is the card label plus last-4 (`الأهلي فيزا •4567`). `{merchant}`, `{bank}`, `{sender}`, `{counterparty}` are data values and may be Latin.
+- Every placeholder except a plural's `count` is a **String that code has already formatted**. The ARB text never formats numbers itself, because the Arabic UI can show either Arabic-Indic or Western digits (A-29, FR-L10N-03), and ICU number formatting can't follow that preference.
+- **The registry in §0.3a is the single source** for each placeholder's ARB type, its formatter and whether it needs a bidi isolate. T-029 generates `@key.placeholders` from the ICU text plus this registry. A new placeholder name in any part must be added to the registry first.
 - **No literal digits in Arabic strings.** Fixed small numbers are written as words («آخر أربع أرقام», «نص دقيقة»). Any other number is a placeholder. English strings may contain literal digits, because English always uses Western digits.
+- Money: signs (`−`/`+`) are added by `MoneyFormat`, never written in copy. Money placeholders follow `04-design-system.md` §2.3 (AR `٤٥٠ ج.م`, `١٬٢٠٠ USD`; EN `EGP 450`, `USD 1,200`).
+
+### 0.3a Placeholder registry (all parts)
+Formatters:
+- **Money** = `MoneyFormat`: amount plus currency, sign, per-currency exponent, digits mode.
+- **Digits** = the digits layer: an integer or decimal formatted per `DigitsMode`, with no unit.
+- **Date** = the locale date/time formatter, with digits per `DigitsMode`.
+- **Data** = a raw user or registry value, inserted unchanged.
+- **Copy** = another copy-deck string, already resolved by the caller.
+- **Select** = a fixed enum value that only chooses a branch and is never displayed.
+
+Isolate = the presentation layer wraps the value in FSI U+2068 … PDI U+2069 (§0.6).
+
+| Name | ARB type | Formatter | Isolate | Meaning / example |
+|---|---|---|---|---|
+| `amount` | String | Money | yes | any money value: `−٤٥٠ ج.م` / `EGP −450` |
+| `available` | String | Money | yes | credit available |
+| `back` | String | Money | yes | money received back |
+| `income` | String | Money | yes | cycle income (KPI) |
+| `left` | String | Money | yes | left this cycle (KPI) |
+| `limit` | String | Money | yes | credit limit |
+| `net` | String | Money | yes | net after refund |
+| `paid` | String | Money | yes | amount the user paid |
+| `rate` | String | Money | yes | implied FX rate in the target currency, e.g. `٤٩٫٩ ج.م` |
+| `share` | String | Money | yes | the user's net share |
+| `spent` | String | Money | yes | cycle spend (KPI) |
+| `percent` | String | Digits (+ `٪`/`%`) | yes | `٩٦٪` / `96%` |
+| `n` | String | Digits | yes | the printed number of a plural (§0.4) |
+| `count` | **int** | — | — | plural selector only, never printed |
+| `day` | String | Digits | yes | day of month, 1–31 |
+| `done` | String | Digits | yes | automations found |
+| `index` | String | Digits | yes | pager position |
+| `max` | String | Digits | yes | upper bound in a validation message |
+| `min` | String | Digits | yes | lower bound in a validation message |
+| `step` | String | Digits | yes | stepper position |
+| `total` | String | Digits | yes | stepper / pager total |
+| `size` | String | Copy (`common_fileSize_*`) | yes | `٢٫٤ ميجا` / `2.4 MB` |
+| `date` | String | Date | yes | `٢٣ أكتوبر` / `23 Oct` |
+| `start` | String | Date | yes | range start |
+| `end` | String | Date | yes | range end |
+| `time` | String | Date | yes | `٢:١٤ م` / `2:14 pm` |
+| `when` | String | Date or Copy (`common_date_minutesAgo`) | yes | "as of" moment |
+| `period` | String | Copy (`common_period_*`) | no | Arabic or English words only |
+| `payday` | String | Copy (`home_hero_daysToPayday`) | yes | contains a number |
+| `cards` | String | Copy or Data: a card label, or `common_cardFilter_count` | yes | — |
+| `type` | String | Copy (`common_accountType_*`) in S-06; **Select** (`expense`/`income`/`transfer`) in S-13 | no | — |
+| `category` | String | Data (catalog name, already localized) | yes | may be a custom Latin name |
+| `channels` | String | Copy: `common_channel_*Short` joined with the locale list format (AR «و», EN "and") | yes | contains "Apple Pay" |
+| `label` | String | Copy (a filter chip label) | no | — |
+| `card` | String | Data: card label + `•` + last-4 | yes | `الأهلي فيزا •4567` |
+| `fromCard` | String | Data, as `card` | yes | — |
+| `toCard` | String | Data, as `card` | yes | — |
+| `last4` | String | Data, as `•4567`, Western digits always | yes | never mirrored |
+| `bank` | String | Data (registry name per locale, or user-typed) | yes | — |
+| `sender` | String | Data (SMS sender ID / app name) | yes | Latin |
+| `merchant` | String | Data | yes | often Latin |
+| `counterparty` | String | Data: IPA handle, wallet number or name | yes | LTR |
+| `person` | String | Data (sender name or a split participant) | yes | — |
+| `name` | String | Data (a split participant's name) | yes | — |
+| `query` | String | Data (the user's search text) | yes | — |
+| `currency` | String | Data: ISO code, or `ج.م` for EGP in AR | yes | — |
+| `fromCurrency` | String | Data: ISO code | yes | — |
+| `provider` | String | Data: `Google Drive` / `iCloud` | yes | brand, never translated |
+| `automationName` | String | Data: the shortcut automation name, e.g. `Zaghlol – Wallet` | yes | Latin |
+| `templateId` | String | Data: e.g. `nbe.card_purchase.ar.v2` | yes | Latin, LTR |
+| `appVersion` | String | Data: e.g. `1.0`, Western digits always | yes | — |
+| `sample` | String | Data: a synthetic last-4 pattern from the institution template, e.g. `**1234` | yes | never a real SMS |
+| `source` | String | Copy (`common_source_*`) or Data (`InstaPay`) | yes | — |
+| `platform` | String | **Select** (`ios` / `other`) | — | — |
+| `method` | String | **Select** (`faceId` / `touchId` / `fingerprint` / `face` / `other`) | — | — |
+| `part` | String | **Select** (`morning` / `afternoon` / `evening` / `other`) | — | — |
+
+ARB type for every Select placeholder is String (gen-l10n requirement).
 
 ### 0.4 Plurals (ICU, gen-l10n)
 - A plural message takes two placeholders. `count` (**int**) only selects the form and is **never printed**. `n` (**String**, formatted by the digits layer) is printed.
-- **Arabic must supply all six forms**: `=0`, `=1`, `=2`, `few` (3–10, 103–110, …), `many` (11–99, …), `other` (100–102, …). Egyptian noun forms used throughout:
+- **Arabic must supply `=1`, `=2`, `few` (3–10, 103–110, …), `many` (11–99, …) and `other` (100–102, …)** on every plural. Write `=1`/`=2` as exact matches rather than CLDR `one`/`two`. gen-l10n maps `=0`/`=1`/`=2` to `Intl.plural`'s zero/one/two arguments, which match exactly before CLDR rules apply.
+- **`=0` is required, in both AR and EN, on every plural whose count can be 0.** Without it, zero falls through to `other` («٠ حركة» / "0 transactions").
+- **Plurals where 0 can't occur** (no `=0` branch, and the T-029 parity test exempts them from the zero check):
+
+| Key | Why 0 is impossible |
+|---|---|
+| `common_cardFilter_count` | shown only when 2+ cards are selected |
+| `common_period_lastMonths`, `common_period_inLastMonths` | depth 6–24 (A-11); trend window 6 |
+| `common_validation_nameLength`, `common_validation_noteLength` | count = the fixed maximum (30 / 200) |
+| `onboarding_iosSetup_checkCount` | count = automations in the package, ≥ 1 |
+| `onboarding_scanResults_found` | S-06 is skipped when the scan found 0 |
+| `onboarding_scanResults_cardSubtitle` | a card is auto-created from ≥ 1 message |
+| `home_prompt_finishSetupSteps` | the card shows only while ≥ 1 step is skipped |
+| `home_banner_review` | the pill shows only when count > 0 |
+| `home_banner_shortcutsQuiet` | shown only after ≥ 7 quiet days (FR-ING-I-07) |
+| `transactions_list_bulkChanged`, `transactions_list_bulkDeleteTitle`, `transactions_list_bulkDeleted` | selection mode needs ≥ 1 selected row |
+| `categorization_rule_applyPast` | the checkbox is hidden when count = 0 |
+| `transfers_assign_empty` | count = the fixed window (60 days) |
+| `accounts_overview_moreCurrencies` | shown only when an account holds 2+ currencies |
+| `accounts_compare_max` | count = the fixed maximum (6, UX-A-03) |
+| `common_date_hoursAgo`, `transfers_link_afterHours`, `transfers_link_beforeHours` | hours are used only for gaps of 1–23 h; a smaller gap uses minutes |
+| `capture_stopTracking_delete`, `capture_stopTracking_deleteTitle` | the delete option is hidden when the card has no transactions |
+
+- Every plural row's note states `count:int, n` plus its other placeholders.
+- Egyptian noun forms used throughout:
 
 | Noun | =1 | =2 | few | many / other |
 |---|---|---|---|---|
@@ -41,6 +137,7 @@ Each section has a table: **Key | AR (عامية مصرية) | EN | Notes**. Not
 | دقيقة | دقيقة | دقيقتين | {n} دقايق | {n} دقيقة |
 | خطوة | خطوة واحدة | خطوتين | {n} خطوات | {n} خطوة |
 | رسالة | رسالة واحدة | رسالتين | {n} رسايل | {n} رسالة |
+| ساعة | ساعة | ساعتين | {n} ساعات | {n} ساعة |
 | حرف | حرف واحد | حرفين | {n} حروف | {n} حرف |
 | عملة | عملة واحدة | عملتين | {n} عملات | {n} عملة |
 
@@ -56,7 +153,7 @@ Each section has a table: **Key | AR (عامية مصرية) | EN | Notes**. Not
 
 ### 0.6 RTL and bidi
 - Arabic is the reference layout. Copy that sits inside a mirrored layout must not depend on the direction of arrows. Avoid `←`/`→` in Arabic body text: write «وبعدين» or «لـ» instead. English may use `→`.
-- **Every placeholder that can hold Latin text or numbers** (`amount`, `card`, `merchant`, `sender`, `counterparty`, `bank`, `percent`, `date`, `time`, `n`) is wrapped in a Unicode first-strong isolate (U+2068 … U+2069) by the presentation layer, **not** in the ARB text. That keeps `−٤٥٠ ج.م` and `•4567` from reordering inside Arabic sentences (`04-design-system.md` §2.3 "Bidi").
+- Every placeholder marked **Isolate: yes** in the registry (§0.3a) is wrapped in a Unicode first-strong isolate (U+2068 … U+2069) by the presentation layer, **not** in the ARB text. That keeps `−٤٥٠ ج.م` and `•4567` from reordering inside Arabic sentences (`04-design-system.md` §2.3 "Bidi").
 - Latin brand names written literally in Arabic strings (Wise, Revolut, Payoneer, Apple Pay, Google Drive, iCloud, Shortcuts, Face ID) are single runs and safe without isolates. If a string ends with a Latin word followed by punctuation, check it in the RTL golden test.
 - Elements that **do not mirror**: the mascot, checkmarks ✓, clock icons, card last-4, phone numbers, chart values. **Chart time axes do mirror** (UX-D-01).
 
@@ -65,8 +162,7 @@ Measured in characters, including spaces, at 100% text scale. Layouts must still
 
 | Class | Use | AR max | EN max |
 |---|---|---|---|
-| **B** | Button (≤ 3 words, `06-voice-and-tone.md` §1.3) | 20 | 22 |
-| **C** | Chip, badge, tab, segment | 16 | 16 |
+| **B** | Filled or outlined button (≤ 3 words, `06-voice-and-tone.md` §1.3) | 20 | 22 || **C** | Chip, badge, tab, segment | 16 | 16 |
 | **L** | Field label, list-row title, KPI label | 28 | 30 |
 | **T** | Screen or sheet title, headline | 40 | 44 |
 | **S** | Sentence or body (one to two lines) | 120 | 130 |
@@ -74,7 +170,7 @@ Measured in characters, including spaces, at 100% text scale. Layouts must still
 | **N** | Snackbar, toast or banner (one line plus action) | 70 | 75 |
 | **A** | Screen-reader only (not shown) | — | — |
 
-Placeholder values aren't counted. Where a placeholder is long (a merchant or card name), the UI truncates the placeholder, not the copy.
+Text buttons and links (no fill or outline) use class **L**. A string tagged with two classes ("T · M") must fit the smaller limit. Placeholder values aren't counted. Where a placeholder is long (a merchant or card name), the UI truncates the placeholder, not the copy.
 
 ### 0.8 Tone gates (checked per string in review)
 1. **No jokes and no emoji** on errors, permissions, payments or money confirmations, destructive dialogs, backup passphrases, or the Gold purchase (FR-L10N-04).
@@ -89,7 +185,9 @@ A mascot line names its **Rive state** (`ZaghlolAvatar` input: `tourGuide`, `pro
 ### 0.10 How the parts fit together
 - **Part 1 (T-026)** owns §0, the `common_*` and `mascot_*` keys defined below, and screens S-01…S-06, S-10…S-16, S-40…S-43, S-61, S-62.
 - **Part 2 (T-027)** and **Part 3 (T-028)** append their sections below their markers. They reuse `common_*` keys and don't redefine them; a new shared key goes into that part's own `common_*` subsection.
-- **Part 3** owns the error catalogue that maps `Failure` codes to copy. The three `common_error_*` keys in Part 1 are the generic fallbacks used by Part 1 screens, and Part 3 may point Failure codes at them.
+- **Reuse rule:** a generic action ("Save", "Cancel", "Delete", "Confirm", "Edit", "Dismiss", "Send", "Link", "Yes/No", "Undo", "Try again") always uses its `common_action_*` key. A screen key with the same text as a common key is allowed only for a **field, section or bar label that belongs to that screen** and may be reworded separately (e.g. `transactions_edit_category` and `transactions_list_bulkCategory` both read «التصنيف»).
+- **Part 3** owns the error catalogue that maps `Failure` codes to copy.
+- **ARB generation (T-029/T-087):** keep gen-l10n `use-escaping: false` (the default), so apostrophes in EN ("doesn't", "{name}'s") stay literal. Run `flutter gen-l10n` early on `transfers_split_shareA11y`, which puts an apostrophe right after a closing brace. The three `common_error_*` keys in Part 1 are the generic fallbacks used by Part 1 screens, and Part 3 may point Failure codes at them.
 
 ---
 
@@ -189,7 +287,7 @@ A mascot line names its **Rive state** (`ZaghlolAvatar` input: `tourGuide`, `pro
 | `common_source_csv` | ملف CSV | CSV | C |
 | `common_source_voice` | صوت | Voice | C |
 | `common_source_manual` | بإيدك | Manual | C |
-| `common_source_shared` | رسالة اتبعتت | Shared message | C · share/paste, FR-ING-A-04. See Q-02 |
+| `common_source_shared` | رسالة اتبعتت | Shared message | C · share/paste, FR-ING-A-04. Maps to DB `source = 'share'` (`database-schema.md`; Q-02 closed) |
 
 ### Transaction types
 | Key | AR | EN | Notes |
@@ -230,7 +328,8 @@ A mascot line names its **Rive state** (`ZaghlolAvatar` input: `tourGuide`, `pro
 | `common_date_today` | النهارده | Today | C |
 | `common_date_yesterday` | امبارح | Yesterday | C |
 | `common_date_justNow` | دلوقتي | Just now | C |
-| `common_date_minutesAgo` | `{count, plural, =1{من دقيقة} =2{من دقيقتين} few{من {n} دقايق} many{من {n} دقيقة} other{من {n} دقيقة}}` | `{count, plural, =1{1 min ago} other{{n} min ago}}` | C · count:int, n |
+| `common_date_minutesAgo` | `{count, plural, =0{دلوقتي} =1{من دقيقة} =2{من دقيقتين} few{من {n} دقايق} many{من {n} دقيقة} other{من {n} دقيقة}}` | `{count, plural, =0{Just now} =1{1 min ago} other{{n} min ago}}` | C · count:int, n · whole minutes, 0–59. `=0` (under one minute) reads the same as `common_date_justNow`, so callers pass 0 rather than switching keys. 60 or more → `common_date_hoursAgo` |
+| `common_date_hoursAgo` | `{count, plural, =1{من ساعة} =2{من ساعتين} few{من {n} ساعات} many{من {n} ساعة} other{من {n} ساعة}}` | `{count, plural, =1{1 hr ago} other{{n} hr ago}}` | C · count:int, n · whole hours, 1–23; 24 or more → `{date}`. 0 can't occur (that's minutes), so no `=0` (listed in §0.4) |
 | `common_date_dateTime` | {date}، {time} | {date}, {time} | L |
 | `common_date_range` | {start} – {end} | {start} – {end} | L · en dash; RTL reads start first (from the right) |
 | `common_period_thisCycle` | الدورة دي | This cycle | C |
@@ -281,14 +380,14 @@ A mascot line names its **Rive state** (`ZaghlolAvatar` input: `tourGuide`, `pro
 ## 1.2 Shared mascot lines — `mascot_*`
 | Key | AR | EN | Notes |
 |---|---|---|---|
-| `mascot_avatar_a11y` | الكابتن زغلول | Captain Zaghlol | A · label on every `ZaghlolAvatar` |
+| `mascot_avatar_labelA11y` | الكابتن زغلول | Captain Zaghlol | A · label on every `ZaghlolAvatar` |
 | `mascot_pull_refreshingA11y` | بحدّث… | Refreshing… | A · Rive `pull`, pull to refresh on Home and lists |
 | `mascot_saved_line1` | اتسجلت ✓ | Saved ✓ | N · Rive `saved` · after saving a transaction (S-13 or Quick add). Picked at random from line1…3 |
 | `mascot_saved_line2` | تمام، حطيتها في الحسبة ✓ | Done — it's in the books ✓ | N · Rive `saved` |
 | `mascot_saved_line3` | اتقيدت يا كبير ✓ | Logged it ✓ | N · Rive `saved` |
 | `mascot_tap_line1` | إيه يا عم، بتزغزغني؟ 😄 | Hey, that tickles! 😄 | M · Rive `tap` · user taps Zaghlol. The next unused line rotates each tap |
 | `mascot_tap_line2` | أنا هنا يا كبير، وفلوسك في عينيّا | Still here, keeping an eye on your money | M · Rive `tap` |
-| `mascot_tap_line3` | كل جنيه بتحوشه بيطلّعلي ريشة جديدة 🪶 | Every pound you save grows me a new feather 🪶 | M · Rive `tap` |
+| `mascot_tap_line3` | كل قرش بتحوشه بيطلّعلي ريشة جديدة 🪶 | Every bit you save grows me a new feather 🪶 | M · Rive `tap` · currency-neutral (F-20) |
 | `mascot_tap_line4` | الكابتن جاهز، وإنت القائد | Captain reporting. You're the boss. | M · Rive `tap` |
 | `mascot_tap_line5` | اللي يحوش النهارده يتفسح بكره | Save today, treat yourself tomorrow | M · Rive `tap` |
 | `mascot_tap_line6` | أنا بقرا رسايل البنوك بس، الباقي مش شغلي | I only read bank messages. The rest is none of my business. | M · Rive `tap` · also restates the privacy promise |
@@ -308,12 +407,12 @@ States: static. Language switches immediately (FR-L10N-01). No "no server" claim
 | `onboarding_welcome_languageToggleA11y` | غيّر اللغة للإنجليزي | Switch to Arabic | A |
 | `onboarding_welcome_title` | أهلاً بيك! أنا الكابتن زغلول | Hi! I'm Captain Zaghlol. | T · M · Rive `tourGuide`, first launch (FR-MAS-01). Waves once; still pose with reduce motion |
 | `onboarding_welcome_subtitle` | هعرفك فلوسك بتروح فين من رسايل البنك، من غير ما تكتب حاجة. | I'll show you where your money goes — straight from your bank messages, no typing needed. | S |
-| `onboarding_welcome_pointOnPhone` | بيانات فلوسك بتفضل على موبايلك | Your money data stays on your phone | L · FR-ONB-01, with a lock icon (not an emoji) |
-| `onboarding_welcome_pointNoPassword` | مش هنطلب باسورد البنك أبداً | We'll never ask for your bank password | L |
+| `onboarding_welcome_pointOnPhone` | بيانات فلوسك بتفضل على موبايلك | Your money data stays on your phone | S · FR-ONB-01, with a lock icon (not an emoji) |
+| `onboarding_welcome_pointNoPassword` | مش هنطلب باسورد البنك أبداً | We'll never ask for your bank password | S |
 | `onboarding_welcome_pointNoAds` | من غير إعلانات | No ads | L |
 | `onboarding_welcome_start` | يلا نبدأ | Let's go | B · primary. Opens S-02 or S-03 |
-| `onboarding_welcome_restore` | أنا مستخدم زغلول قبل كده | I already use Zaghlol | B · text button, opens S-04 (FR-ONB-12) |
-| `onboarding_welcome_privacyLink` | تفاصيل الخصوصية | Privacy details | B · text link, opens S-71 read-only |
+| `onboarding_welcome_restore` | استخدمت زغلول قبل كده | I already use Zaghlol | L · text button, opens S-04 (FR-ONB-12). Gender-neutral (F-15) |
+| `onboarding_welcome_privacyLink` | تفاصيل الخصوصية | Privacy details | L · text link, opens S-71 read-only |
 
 ## 1.4 S-02 Capture setup — Android — `onboarding_androidSetup_*`
 States: step 1 (SMS) · granted · denied/degraded · Play-unavailable · step 2 (notifications + live scan) · notification access returned on/off · scan error (shown on Home).
@@ -325,7 +424,7 @@ States: step 1 (SMS) · granted · denied/degraded · Play-unavailable · step 2
 | `onboarding_androidSetup_smsSubtitle` | وهرتبلك كل مصاريفك لوحدي. | I'll sort out all your spending for you. | S |
 | `onboarding_androidSetup_smsPointSenders` | بقرا رسايل البنوك والمحافظ وإنستاباي بس | I only read messages from banks, wallets and InstaPay | S · what is read (FR-ING-A-02) |
 | `onboarding_androidSetup_smsPointPersonal` | رسايلك الشخصية عمرها ما بتتقري ولا بتتحفظ | Your personal messages are never read or saved | S |
-| `onboarding_androidSetup_smsPointOnPhone` | كل حاجة بتفضل على الموبايل ده | Everything stays on this phone | S · financial data, true per CLAUDE.md §2.1 |
+| `onboarding_androidSetup_smsPointOnPhone` | بيانات فلوسك بتفضل على الموبايل ده | Your money data stays on this phone | S · claim limited to financial data (tone gate 4, R-11, BR-SYNC-03) |
 | `onboarding_androidSetup_smsAllow` | اسمح بقراية الرسايل | Allow bank texts | B · primary, opens the system SMS dialog |
 | `onboarding_androidSetup_smsGranted` | الرسايل اتسمحت ✓ | SMS allowed ✓ | N · success |
 | `onboarding_androidSetup_scanTitle` | بقرا رسايلك القديمة… | Reading your past messages… | L · Rive `scanning` (loops while the scan runs) |
@@ -343,12 +442,12 @@ States: step 1 (SMS) · granted · denied/degraded · Play-unavailable · step 2
 | `onboarding_androidSetup_degradedBody` | لسه تقدر تتابع مصاريفك بطرق تانية: | You can still track your spending: | S |
 | `onboarding_androidSetup_degradedNotif` | إشعارات تطبيقات البنوك | Bank app notifications | L · row action `onboarding_androidSetup_degradedNotifOn` |
 | `onboarding_androidSetup_degradedNotifOn` | شغّلها | Turn on | B |
-| `onboarding_androidSetup_degradedShare` | ابعت أو الزق رسالة البنك لزغلول | Share or paste a bank message | L · row action `onboarding_androidSetup_degradedShareHow` |
-| `onboarding_androidSetup_degradedShareHow` | إزاي؟ | How? | B · opens the `capture_shareHow_*` sheet |
+| `onboarding_androidSetup_degradedShare` | ابعت أو الزق رسالة البنك لزغلول | Share or paste a bank message | S · row action `onboarding_androidSetup_degradedShareHow` |
+| `onboarding_androidSetup_degradedShareHow` | إزاي؟ | How? | L · text button · opens the `capture_shareHow_*` sheet |
 | `onboarding_androidSetup_degradedManual` | سجّل الكاش بصوتك أو بإيدك | Log cash by voice or typing | L |
 | `onboarding_androidSetup_degradedRetry` | اسمح تاني | Ask again | B · when the OS still allows a prompt |
 | `onboarding_androidSetup_degradedSettingsHint` | علشان تشغلها، افتح الإعدادات واسمح لزغلول بالرسايل. | To turn it on, open Settings and allow Zaghlol to read SMS. | S · when the OS blocks re-prompting; with `common_action_openSettings` |
-| `onboarding_androidSetup_playUnavailable` | النسخة دي من زغلول مش بتقرا SMS، بس الإشعارات والمشاركة شغالين تمام. | This version of Zaghlol can't read SMS, but notifications and sharing work fine. | S · when the build doesn't have the Play SMS exception (FR-ING-A-05). See Q-03 |
+| `onboarding_androidSetup_playUnavailable` | النسخة دي من زغلول مش بتقرا SMS، بس الإشعارات والمشاركة شغالين تمام. | This version of Zaghlol can't read SMS, but notifications and sharing work fine. | S · `prodNoSms` flavour (ADR-004, `deployment.md`) (FR-ING-A-05). Where it appears is open, see Q-03 |
 
 ## 1.5 S-03 Capture setup — iOS — `onboarding_iosSetup_*`
 States: step 1 · returned and checking (≤ 2 s) · Shortcuts app missing · step 2 all good / something missing / can't tell · step 3 first expense. iOS labels such as "Run Immediately" stay in English (see Q-04).
@@ -356,7 +455,8 @@ States: step 1 · returned and checking (≤ 2 s) · Shortcuts app missing · st
 | Key | AR | EN | Notes |
 |---|---|---|---|
 | `onboarding_iosSetup_step` | خطوة {step} من {total} | Step {step} of {total} | C |
-| `onboarding_iosSetup_shortcutTitle` | الآيفون مش بيسمح للتطبيقات تقرا الرسايل… فهنستخدم الاختصارات | iPhone doesn't let apps read texts — so we use Shortcuts | T · M · Rive `tourGuide` |
+| `onboarding_iosSetup_shortcutTitle` | هنستخدم الاختصارات | We'll use Shortcuts | T · M · Rive `tourGuide` |
+| `onboarding_iosSetup_shortcutWhy` | الآيفون مش بيسمح للتطبيقات تقرا الرسايل، فالاختصارات هي اللي هتبعتهالي. | iPhone doesn't let apps read texts, so Shortcuts pass them to me. | S · under the title. Split out of the title for length (F-7) |
 | `onboarding_iosSetup_shortcutLead` | ضغطة واحدة بتضيف: | One tap adds: | L |
 | `onboarding_iosSetup_shortcutSmsTitle` | رسايل البنك | Bank texts | L |
 | `onboarding_iosSetup_shortcutSmsSub` | بيلقط رسايل البنوك وإنستاباي، عربي وإنجليزي | Catches bank and InstaPay texts, in Arabic and English | S |
@@ -364,18 +464,18 @@ States: step 1 · returned and checking (≤ 2 s) · Shortcuts app missing · st
 | `onboarding_iosSetup_shortcutApplePaySub` | بيسجل أي دفع بالموبايل في ساعتها | Logs every tap-to-pay as it happens | S |
 | `onboarding_iosSetup_shortcutOnce` | مرة واحدة بس، وبعدها كل حاجة بتتسجل لوحدها. | Just once — then everything logs itself. | S |
 | `onboarding_iosSetup_shortcutAdd` | ضيف اختصار زغلول | Add Zaghlol shortcut | B · primary, opens the Shortcuts import |
-| `onboarding_iosSetup_howItWorks` | إزاي بيشتغل؟ (نص دقيقة) | How it works (30 sec) | B · text, expands the steps below |
+| `onboarding_iosSetup_howItWorks` | إزاي بيشتغل؟ (نص دقيقة) | How it works (30 sec) | L · text button, expands the steps below |
 | `onboarding_iosSetup_howStep1` | لما توصلك رسالة من بنك، الآيفون بيشغّل الاختصار لوحده. | When a bank text arrives, your iPhone runs the shortcut by itself. | S · list numbers are drawn by the UI, not the copy |
 | `onboarding_iosSetup_howStep2` | الاختصار بيدّي نص الرسالة لزغلول على نفس الموبايل، مش بيبعته لأي حد. | The shortcut hands the text to Zaghlol on this same phone — it isn't sent anywhere. | S · precise claim about the message, not "no server" |
 | `onboarding_iosSetup_howStep3` | زغلول يقرا المبلغ والتاجر ويسجلها. خلاص كده. | Zaghlol reads the amount and merchant and logs it. That's it. | S |
-| `onboarding_iosSetup_checking` | ثانية، بشوف الاختصارات اتضافت ولا لأ… | One sec — checking your shortcuts… | L · spinner, ≤ 2 s |
+| `onboarding_iosSetup_checking` | ثانية، بشوف الاختصارات اتضافت ولا لأ… | One sec — checking your shortcuts… | S · spinner, ≤ 2 s |
 | `onboarding_iosSetup_shortcutsMissing` | مقدرتش أفتح تطبيق الاختصارات. نزّله من الـ App Store وجرّب تاني. | Couldn't open the Shortcuts app. Get it from the App Store and try again. | S · error, no joke |
 | `onboarding_iosSetup_checkTitle` | تعالى نتأكد إن كله تمام | Let's make sure it all works | T |
 | `onboarding_iosSetup_checkSubtitle` | زغلول بيبص على الاختصارات اللي اتضافت. | Zaghlol is checking which automations were added. | S |
 | `onboarding_iosSetup_checkSmsAr` | رسايل البنوك (عربي) | Bank texts (Arabic) | L |
 | `onboarding_iosSetup_checkSmsEn` | رسايل البنوك (إنجليزي) | Bank texts (English) | L |
 | `onboarding_iosSetup_checkApplePay` | مدفوعات Apple Pay | Apple Pay payments | L |
-| `onboarding_iosSetup_checkCount` | `{count, plural, =1{{done} من {n} أوتوميشن} other{{done} من {n} أوتوميشن}}` | `{count, plural, =1{{done} of 1 automation} other{{done} of {n} automations}}` | L · count:int = total, n, done. «أوتوميشن» doesn't change in AR, but the plural is kept so both locales share placeholders |
+| `onboarding_iosSetup_checkCount` | `{count, plural, =1{{done} من {n} أوتوميشن} =2{{done} من {n} أوتوميشن} few{{done} من {n} أوتوميشن} many{{done} من {n} أوتوميشن} other{{done} من {n} أوتوميشن}}` | `{count, plural, =1{{done} of 1 automation} other{{done} of {n} automations}}` | L · count:int = total, n, done. «أوتوميشن» doesn't change in AR; every form is written out for the parity test. Can't be 0 (§0.4) |
 | `onboarding_iosSetup_checkNeedsRun` | محتاجة «Run Immediately» | Needs "Run Immediately" | L |
 | `onboarding_iosSetup_checkOkA11y` | شغال | Working | A |
 | `onboarding_iosSetup_checkMissingA11y` | ناقص | Missing | A |
@@ -389,13 +489,13 @@ States: step 1 · returned and checking (≤ 2 s) · Shortcuts app missing · st
 | `onboarding_iosSetup_firstTitle` | يلا نسجل أول مصروف! | Let's log your first expense! | T · M · Rive `tourGuide` (FR-ONB-09) |
 | `onboarding_iosSetup_firstBody` | لحد ما توصل أول رسالة بنك، قولي صرفت إيه النهارده. | Until your first bank text comes in, tell me what you spent today. | S |
 | `onboarding_iosSetup_firstSay` | قولها | Say it | B · opens S-31 |
-| `onboarding_iosSetup_firstSayHint` | «دفعت خمسة وأربعين قهوة» | "45 on coffee" | C · spoken example. AR uses number words (§0.3) |
+| `onboarding_iosSetup_firstSayHint` | «دفعت خمسة وأربعين قهوة» | "45 on coffee" | L · spoken example. AR uses number words (§0.3) |
 | `onboarding_iosSetup_firstType` | اكتبها | Type it | B · opens S-13 |
-| `onboarding_iosSetup_firstTypeHint` | المبلغ والتصنيف | Amount and category | C |
-| `onboarding_iosSetup_firstOnlineBanks` | بتستخدم Wise أو Revolut أو Payoneer؟ | Use Wise, Revolut or Payoneer? | L · opens S-61 supported banks (FR-ING-I-08) |
+| `onboarding_iosSetup_firstTypeHint` | المبلغ والتصنيف | Amount and category | L |
+| `onboarding_iosSetup_firstOnlineBanks` | بتستخدم Wise أو Revolut أو Payoneer؟ | Use Wise, Revolut or Payoneer? | S · opens S-61 supported banks (FR-ING-I-08) |
 | `onboarding_iosSetup_firstOnlineBanksSub` | شوف إزاي تتابعهم على الآيفون | See how to track them on iPhone | S |
-| `onboarding_iosSetup_firstStatement` | عندك كشف حساب؟ | Got a bank statement? | L · with the Gold badge (FR-EXP-06); Free opens S-68 |
-| `onboarding_iosSetup_firstStatementSub` | ضيف شهور فاتت مرة واحدة | Add past months in one go | S |
+| `onboarding_iosSetup_firstStatement` | عندك كشف حساب؟ | Got a bank statement? | L · the `common_gold_badge` must show on this row (FR-EXP-04/06); Free opens S-68 |
+| `onboarding_iosSetup_firstStatementSub` | ضيف شهور فاتت مرة واحدة مع جولد | Add past months in one go with Gold | S · says Gold in the text too, so Free users aren't promised it (F-8) |
 
 ## 1.6 S-04 Restore from backup — `backup_restore_*`
 States: choose storage · signing in · searching · found (Free: one; Gold: up to 5) · passphrase wrong · restoring · empty · network error · newer version (EC-26) · corrupted · forgot passphrase (EC-27) · done (shown on Home). No jokes anywhere on this screen.
@@ -406,7 +506,8 @@ States: choose storage · signing in · searching · found (Free: one; Gold: up 
 | `backup_restore_whereTitle` | النسخة بتاعتك فين؟ | Where's your backup? | T |
 | `backup_restore_optionDrive` | Google Drive | Google Drive | L |
 | `backup_restore_optionICloud` | iCloud | iCloud | L · iOS only |
-| `backup_restore_searching` | بدوّر على نسخة زغلول… | Looking for your Zaghlol backup… | L · spinner |
+| `backup_restore_signingIn` | بدخل على {provider}… | Signing in to {provider}… | S · button loading state during provider sign-in (F-5a) |
+| `backup_restore_searching` | بدوّر على نسخة زغلول… | Looking for your Zaghlol backup… | S · spinner |
 | `backup_restore_foundTitle` | لقيت نسخة | Backup found | T |
 | `backup_restore_foundMeta` | {date} · {size} | {date} · {size} | L · size = `common_fileSize_mb` |
 | `backup_restore_foundFrom` | من: {platform} · إصدار {appVersion} | From: {platform} · v{appVersion} | L · appVersion stays Latin, e.g. `1.0` |
@@ -416,8 +517,8 @@ States: choose storage · signing in · searching · found (Free: one; Gold: up 
 | `backup_restore_restore` | استرجع | Restore | B · primary |
 | `backup_restore_passphraseRequired` | اكتب كلمة السر | Enter the passphrase | S |
 | `backup_restore_passphraseWrong` | كلمة السر دي مش بتفتح النسخة دي | That passphrase doesn't open this backup | S · unlimited retries |
-| `backup_restore_forgotLink` | نسيت كلمة السر؟ | Forgot the passphrase? | B · text |
-| `backup_restore_forgotBody` | للأسف مفيش طريقة نرجّعها. النسخة متقفلة بكلمة السر دي بس، ومحدش، ولا حتى إحنا، يقدر يفتحها من غيرها. تقدر تبدأ من جديد. | Sorry — there's no way to recover it. The backup is locked with that passphrase only, and nobody, not even us, can open it without it. You can start fresh. | S · EC-27, calm and plain |
+| `backup_restore_forgotLink` | نسيت كلمة السر؟ | Forgot the passphrase? | L · text button |
+| `backup_restore_forgotBody` | للأسف مش هينفع نرجّعها. النسخة مبتتفتحش غير بكلمة السر دي، ومحدش يقدر يفتحها من غيرها، ولا حتى إحنا. تقدر تبدأ من جديد. | Sorry, it can't be recovered. Only that passphrase opens this backup — nobody else can, not even us. You can start fresh. | S · EC-27, calm and plain |
 | `backup_restore_restoring` | بسترجع بياناتك… | Restoring your data… | L · Rive `counting` + C-27 with `common_progress_percent` |
 | `backup_restore_keepOpen` | سيب زغلول مفتوح لحد ما يخلص | Keep Zaghlol open until this finishes | S · no cancel once decryption has started |
 | `backup_restore_emptyTitle` | مفيش نسخة زغلول على الحساب ده | No Zaghlol backup on this account | T · C-28 |
@@ -438,8 +539,8 @@ States: prompt on appear · failed · biometrics removed (passcode only). The ap
 | Key | AR | EN | Notes |
 |---|---|---|---|
 | `security_lock_title` | زغلول مقفول | Zaghlol is locked | T |
-| `security_lock_unlock` | `{method, select, faceId{افتح بالـ Face ID} touchId{افتح بالـ Touch ID} fingerprint{افتح ببصمتك} face{افتح ببصمة الوش} other{افتح القفل}}` | `{method, select, faceId{Unlock with Face ID} touchId{Unlock with Touch ID} fingerprint{Unlock with fingerprint} face{Unlock with face} other{Unlock}}` | B · method from the available biometric |
-| `security_lock_usePasscode` | `{platform, select, ios{استخدم كود الآيفون} other{استخدم قفل الموبايل}}` | `{platform, select, ios{Use passcode} other{Use phone lock}}` | B · text (A-08) |
+| `security_lock_unlock` | `{method, select, faceId{افتح بالـ Face ID} touchId{افتح بالـ Touch ID} fingerprint{افتح ببصمتك} face{افتح ببصمة الوش} other{افتح القفل}}` | `{method, select, faceId{Unlock with Face ID} touchId{Unlock with Touch ID} fingerprint{Use fingerprint} face{Use face unlock} other{Unlock}}` | B · method from the available biometric |
+| `security_lock_usePasscode` | `{platform, select, ios{استخدم كود الآيفون} other{استخدم قفل الموبايل}}` | `{platform, select, ios{Use passcode} other{Use phone lock}}` | L · text button (A-08) |
 | `security_lock_promptReason` | افتح زغلول | Unlock Zaghlol | L · OS biometric prompt title / iOS localizedReason |
 | `security_lock_promptSubtitle` | علشان محدش يشوف فلوسك غيرك | So only you can see your money | S · Android BiometricPrompt subtitle |
 | `security_lock_failed` | مفتحش. جرّب تاني. | Didn't unlock. Try again. | N · OS shows its own detail |
@@ -485,12 +586,12 @@ States: loading (skeleton, no copy) · scanning · empty · no budget · budget 
 | `home_hero_spentThisCycle` | صرفت الدورة دي | Spent this cycle | L · payday set, no budget (EC-24) |
 | `home_hero_setBudgetHint` | حط ميزانية عشان تعرف تصرف كام في اليوم | Set a budget to see what's safe to spend each day | S · replaces safe-to-spend, never shows zeros |
 | `home_hero_setBudget` | حط ميزانية | Set a budget | B · opens S-23 |
-| `home_hero_budgetUsedUp` | ميزانية الدورة دي خلصت، حاسب على الباقي | This cycle's budget is used up — go easy on the rest | S · safe-to-spend ≤ 0. Calm, no joke. See Q-06 |
+| `home_hero_budgetUsedUp` | ميزانية الدورة دي خلصت، حاسب على الباقي | This cycle's budget is used up — go easy on the rest | S · safe-to-spend = 0 with budget > 0 (BR-BUD-03 clamps it with `max(0, …)`, so it's never negative). The hero still shows the amount `0`, with this as its caption. Calm, no joke. See Q-06 |
 | `home_hero_kpiIncome` | دخلك | Income | C · C-10 |
 | `home_hero_kpiSpent` | صرفت | Spent | C · tap opens S-11 filtered |
 | `home_hero_kpiLeft` | فاضلك | Left | C |
 | `home_hero_approxTitle` | كله تقريباً بالـ {currency} | Everything, roughly in {currency} | L · last pager page, only when the ≈ view is on (FR-CUR-04) |
-| `home_hero_a11y` | مسموحلك تصرف {amount} النهارده. {payday}. دخلك {income}، صرفت {spent}، فاضلك {left}. | Safe to spend today: {amount}. {payday}. Income {income}, spent {spent}, left {left}. | A · payday = `home_hero_daysToPayday` text |
+| `home_hero_summaryA11y` | مسموحلك تصرف {amount} النهارده. {payday}. دخلك {income}، صرفت {spent}، فاضلك {left}. | Safe to spend today: {amount}. {payday}. Income {income}, spent {spent}, left {left}. | A · payday = `home_hero_daysToPayday` text |
 
 ### Mascot banner (C-14, one at a time, dismissible per message ID, at most once per cycle)
 | Key | AR | EN | Notes |
@@ -507,20 +608,21 @@ States: loading (skeleton, no copy) · scanning · empty · no budget · budget 
 | `home_mascot_proudOnTrack` | عاش يا وحش! صارف أقل من خطتك لحد دلوقتي 👏 | Nice one! You're spending under plan so far 👏 | M · Rive `proud` · BR-MAS-02: under the ideal burn line, ≥ 7 days into the cycle |
 | `home_mascot_proudSavedMore` | عاش يا وحش! وفرت {amount} زيادة عن الدورة اللي فاتت 👏 | Look at you! {amount} more saved than last cycle 👏 | M · Rive `proud` · BR-MAS-02, only when the computed delta is > 0 |
 | `home_mascot_proudGoal` | هدف الدورة اتحقق! 🎯 إنت قدها | Goal hit this cycle! 🎯 You've got this | M · Rive `proud` · BR-MAS-02 goal met |
-| `home_mascot_payday` | المرتب نزل! {amount} 🎉 يلا نخطط له من أوله | Payday! {amount} just landed 🎉 Let's plan it from day one | M · Rive `payday` · salary detected (D-35), once per payday |
+| `home_mascot_payday` | المرتب نزل! {amount} 🎉 يلا نخطط له من أوله | Payday! {amount} just landed 🎉 Let's plan it from day one | M · Rive `payday` · salary detected (D-35), once per payday. `domain-algorithms.md` §7 treats `payday` as motion-only, and the C-14 priority list has no payday slot. Proposed slot: above `proud`, below `detective`. See Q-18 |
 | `home_mascot_dismissA11y` | اقفل الرسالة | Dismiss message | A · × on C-14 |
 
 ### Contextual prompts (each appears once and can be dismissed for good, FR-ONB-10 / FR-ONB-04)
 | Key | AR | EN | Notes |
 |---|---|---|---|
 | `home_prompt_payday` | لقيت مرتب {amount} بينزل يوم {day} كل شهر. ده ميعاد قبضك؟ | I spotted a salary of {amount} landing on day {day} each month. Is that your payday? | M · Rive `detective` · salary-like credit detected |
-| `home_prompt_paydayYes` | أيوه، يوم {day} | Yes, day {day} | B · day 1–28 only, see Q-07 |
-| `home_prompt_paydayNo` | لأ | No | B |
+| `home_prompt_paydayYes` | أيوه، يوم {day} | Yes, day {day} | B · only when the detected day is 1–28 (BR-BUD-01). The second button is `common_action_no` |
+| `home_prompt_paydayMonthStart` | لقيت مرتب {amount} بينزل آخر الشهر. نحسب الدورة من أول الشهر لآخره؟ | I spotted a salary of {amount} arriving at the end of the month. Shall we track each calendar month, from the 1st? | M · Rive `detective` · D-68: salary detected on day 29, 30 or 31 → suggest payday = 1 (calendar month). The salary counts in the month it arrives; no copy needed for that |
+| `home_prompt_paydayMonthStartYes` | أيوه، من أول الشهر | Yes, from the 1st | B · D-68; the second button is `common_action_no` |
 | `home_prompt_budget` | خلصت أول دورة معايا! تحب نحط ميزانية للدورة الجاية؟ | First full cycle done! Want to set a budget for the next one? | M · Rive `tourGuide` · first full cycle completed |
 | `home_prompt_budgetYes` | يلا | Let's do it | B · opens S-23 |
 | `home_prompt_backup` | بقالك أسبوع بتسجل معايا. اعمل نسخة احتياطية ببلاش عشان بياناتك تفضل في أمان لو حصل حاجة للموبايل. | A week of data so far. Make a free backup so it's safe if anything happens to your phone. | M · Rive `tourGuide` · A-65, 7 days of data |
 | `home_prompt_backupYes` | اعمل نسخة | Back up | B · opens S-66 |
-| `home_prompt_appLockTitle` | `{method, select, faceId{اقفل زغلول بالـ Face ID؟} touchId{اقفل زغلول بالـ Touch ID؟} fingerprint{اقفل زغلول ببصمتك؟} face{اقفل زغلول ببصمة الوش؟} other{اقفل زغلول بقفل الموبايل؟}}` | `{method, select, faceId{Lock Zaghlol with Face ID?} touchId{Lock Zaghlol with Touch ID?} fingerprint{Lock Zaghlol with your fingerprint?} face{Lock Zaghlol with face unlock?} other{Lock Zaghlol with your phone lock?}}` | L · FR-ONB-04, a one-tap switch, offered only once transactions are visible |
+| `home_prompt_appLockTitle` | `{method, select, faceId{اقفل زغلول بالـ Face ID؟} touchId{اقفل زغلول بالـ Touch ID؟} fingerprint{اقفل زغلول ببصمتك؟} face{اقفل زغلول ببصمة الوش؟} other{اقفل زغلول بقفل الموبايل؟}}` | `{method, select, faceId{Lock Zaghlol with Face ID?} touchId{Lock Zaghlol with Touch ID?} fingerprint{Lock Zaghlol with your fingerprint?} face{Lock Zaghlol with face unlock?} other{Lock Zaghlol with your phone lock?}}` | S · card title, may wrap · FR-ONB-04, a one-tap switch, offered only once transactions are visible |
 | `home_prompt_appLockSub` | محدش يشوف فلوسك غيرك | Keep your money for your eyes only | S |
 | `home_prompt_appLockOn` | القفل اشتغل ✓ | App lock is on ✓ | N · success |
 | `home_prompt_finishSetup` | كمّل الإعداد | Finish setup | L · card at the top, FR-ONB-11 |
@@ -559,9 +661,9 @@ States: loading (skeleton, no copy) · scanning · empty · no budget · budget 
 | `transactions_row_reimbursed` | دفعت {paid} · رجعلك {back} | You paid {paid} · got back {back} | L |
 | `transactions_row_refund` | مرتجع من {merchant} | Refund from {merchant} | L |
 | `transactions_row_needsReviewA11y` | مستنية رأيك | Needs your review | A · dot indicator |
-| `transactions_row_a11y` | {merchant}، {amount}، {category}، {card}، {time} | {merchant}, {amount}, {category}, {card}, {time} | A · whole-row label |
+| `transactions_row_labelA11y` | {merchant}، {amount}، {category}، {card}، {time} | {merchant}, {amount}, {category}, {card}, {time} | A · whole-row label |
 | `transactions_row_swipeCategory` | غيّر التصنيف | Change category | C · swipe from the start edge; also an a11y action |
-| `transactions_row_swipeSplit` | تقسيم / فلوس راجعة | Split / money back | C · swipe from the end edge; also an a11y action |
+| `transactions_row_swipeSplit` | تقسيم / فلوس راجعة | Split / money back | L · swipe from the end edge; also an a11y action |
 
 ## 1.11 S-11 Transactions — `transactions_list_*`
 States: loading (skeleton) · empty · no results · filtered · selection mode · bulk delete confirm · error (`common_error_loadFailed`).
@@ -569,7 +671,7 @@ States: loading (skeleton) · empty · no results · filtered · selection mode 
 | Key | AR | EN | Notes |
 |---|---|---|---|
 | `transactions_list_title` | الحركات | Transactions | T |
-| `transactions_list_searchHint` | دوّر على تاجر، ملاحظة أو مبلغ | Search merchant, note or amount | L · FTS, debounced 250 ms; Arabic-Indic digits accepted (CLAUDE.md §2.5) |
+| `transactions_list_searchHint` | تاجر، ملاحظة أو مبلغ… | Merchant, note or amount… | L · next to a search icon, whose label is `common_action_searchA11y` · FTS, debounced 250 ms; Arabic-Indic digits accepted (CLAUDE.md §2.5) |
 | `transactions_list_filterPeriod` | المدة | Dates | C · chip; shows the selected `common_period_*` once set |
 | `transactions_list_filterCategory` | التصنيف | Category | C |
 | `transactions_list_filterType` | النوع | Type | C · options = `common_txnType_*` |
@@ -587,17 +689,15 @@ States: loading (skeleton) · empty · no results · filtered · selection mode 
 | `transactions_list_clearAll` | امسح البحث والفلاتر | Clear search & filters | B |
 | `transactions_list_selectedTitle` | اخترت {n} | {n} selected | T · selection mode; n = formatted count |
 | `transactions_list_bulkCategory` | التصنيف | Category | C · bottom action bar |
-| `transactions_list_bulkAccount` | الكارت | Card | C |
-| `transactions_list_bulkDelete` | امسح | Delete | C |
-| `transactions_list_bulkCancel` | إلغاء | Cancel | C |
-| `transactions_list_bulkRule` | استخدم ده دايماً للتجار دول | Always use this for these merchants | L · switch after a category change; creates rules (FR-CAT) |
+| `transactions_list_bulkAccount` | الكارت | Card | C · the bar's other actions are `common_action_delete` and `common_action_cancel` (§0.10 reuse rule) |
+| `transactions_list_bulkRule` | استخدم ده دايماً للتجار دول | Always use this for these merchants | S · switch after a category change; creates rules (FR-CAT) |
 | `transactions_list_bulkChanged` | `{count, plural, =1{اتغيرت حركة واحدة} =2{اتغيرت حركتين} few{اتغيرت {n} حركات} many{اتغيرت {n} حركة} other{اتغيرت {n} حركة}}` | `{count, plural, =1{1 transaction updated} other{{n} transactions updated}}` | N · count:int, n + `common_action_undo` (restores all) |
 | `transactions_list_bulkDeleteTitle` | `{count, plural, =1{تمسح حركة واحدة؟} =2{تمسح الحركتين؟} few{تمسح {n} حركات؟} many{تمسح {n} حركة؟} other{تمسح {n} حركة؟}}` | `{count, plural, =1{Delete 1 transaction?} other{Delete {n} transactions?}}` | T · count:int, n · C-18 destructive |
-| `transactions_list_bulkDeleteBody` | مش هتقدر ترجعها بعد كده. | You won't be able to get them back. | S · see Q-08 |
+| `transactions_list_bulkDeleteBody` | مش هتقدر ترجعها بعد كده. | You won't be able to get them back. | S · delete asks first and has no Undo; other bulk changes have Undo (FR-TXN-06; Q-08 closed) |
 | `transactions_list_bulkDeleted` | `{count, plural, =1{اتمسحت حركة واحدة} =2{اتمسحت حركتين} few{اتمسحت {n} حركات} many{اتمسحت {n} حركة} other{اتمسحت {n} حركة}}` | `{count, plural, =1{1 transaction deleted} other{{n} transactions deleted}}` | N · count:int, n · no Undo |
 | `transactions_list_selectRowA11y` | اختار {merchant} | Select {merchant} | A · check circle |
 
-## 1.12 S-12 Transaction detail — `transactions_detail_*` and rule sheet `transactions_rule_*`
+## 1.12 S-12 Transaction detail — `transactions_detail_*` and rule sheet `categorization_rule_*`
 States: loading · populated · foreign currency · internal transfer · declined · refund linked · reimbursement suggestion · duplicate warning · reimbursed summary · deleted elsewhere · error.
 
 | Key | AR | EN | Notes |
@@ -609,9 +709,9 @@ States: loading · populated · foreign currency · internal transfer · decline
 | `transactions_detail_fieldSource` | جت منين | Source | L |
 | `transactions_detail_fieldReference` | رقم العملية | Reference | L · empty shows "—" (not localized) |
 | `transactions_detail_fieldNote` | ملاحظة | Note | L |
-| `transactions_detail_noteAdd` | ضيف ملاحظة | Add a note | B · text |
+| `transactions_detail_noteAdd` | ضيف ملاحظة | Add a note | L · text button |
 | `transactions_detail_noteHint` | اكتب ملاحظة… | Write a note… | L · ≤ 200 (`common_validation_noteLength`) |
-| `transactions_detail_split` | تقسيم / فلوس راجعة من صحابك | Split / money back from friends | L · expenses, opens S-15 Mode A |
+| `transactions_detail_split` | تقسيم / فلوس راجعة | Split / money back | L · expenses, opens S-15 Mode A |
 | `transactions_detail_linkTransfer` | دي تحويلة لنفسي | This is my own transfer | L · opens S-16 |
 | `transactions_detail_moneyBackFor` | دي فلوس راجعة عن… | This is money back for… | L · incoming only, opens S-15 Mode B (FR-XFR-06) |
 | `transactions_detail_linkedWith` | مربوطة مع {amount} في {card} | Linked with {amount} on {card} | L · internal; + `common_action_unlink` |
@@ -634,15 +734,15 @@ States: loading · populated · foreign currency · internal transfer · decline
 | `transactions_detail_howNone` | مفيش رسالة للحركة دي. | There's no message for this one. | S · manual, voice, CSV |
 | `transactions_detail_categoryChanged` | اتغير التصنيف | Category changed | N + `common_action_undo` |
 | `transactions_detail_deleteTitle` | تمسح الحركة دي؟ | Delete this transaction? | T · C-18 destructive |
-| `transactions_detail_deleteBodyAuto` | `{platform, select, android{جت من رسالة، ومش هترجع غير لو دوّرت في الرسايل من جديد.} other{مش هتقدر ترجعها بعد كده.}}` | `{platform, select, android{It came from a message and won't come back unless you re-scan.} other{You won't be able to get it back.}}` | S · auto-captured; re-scan is Android only |
+| `transactions_detail_deleteBodyAuto` | `{platform, select, ios{مش هتقدر ترجعها بعد كده.} other{جت من رسالة، ومش هترجع غير لو دوّرت في الرسايل من جديد.}}` | `{platform, select, ios{You won't be able to get it back.} other{It came from a message and won't come back unless you re-scan.}}` | S · auto-captured; re-scan is Android only. Uses the standard `ios`/`other` select (§0.4) |
 | `transactions_detail_deleteBodyManual` | مش هتقدر ترجعها بعد كده. | You won't be able to get it back. | S |
 | `transactions_detail_deleted` | اتمسحت | Deleted | N |
 | `transactions_detail_gone` | الحركة دي مبقتش موجودة | This transaction no longer exists | N · deleted elsewhere; goes back |
-| `transactions_rule_title` | أستخدم {category} دايماً لـ {merchant}؟ | Always use {category} for {merchant}? | T · FR-CAT-05 sheet |
-| `transactions_rule_always` | دايماً | Always | B |
-| `transactions_rule_once` | المرة دي بس | Just this once | B |
-| `transactions_rule_applyPast` | `{count, plural, =1{وكمان غيّر الحركة القديمة} =2{وكمان غيّر الحركتين القدام} few{وكمان غيّر الـ {n} حركات القديمة} many{وكمان غيّر الـ {n} حركة القديمة} other{وكمان غيّر الـ {n} حركة القديمة}}` | `{count, plural, =1{Also update 1 past transaction} other{Also update {n} past transactions}}` | L · count:int, n · checkbox (A-13), hidden when count = 0 |
-| `transactions_rule_saved` | تمام، هفتكر ده ✓ | Got it — I'll remember ✓ | N + `common_action_undo` |
+| `categorization_rule_title` | أستخدم {category} دايماً لـ {merchant}؟ | Always use {category} for {merchant}? | T · FR-CAT-05 sheet, owned by the `categorization` module (F-19) |
+| `categorization_rule_always` | دايماً | Always | B |
+| `categorization_rule_once` | المرة دي بس | Just this once | B |
+| `categorization_rule_applyPast` | `{count, plural, =1{وكمان غيّر الحركة القديمة} =2{وكمان غيّر الحركتين القدام} few{وكمان غيّر الـ {n} حركات القديمة} many{وكمان غيّر الـ {n} حركة القديمة} other{وكمان غيّر الـ {n} حركة القديمة}}` | `{count, plural, =1{Also update 1 past transaction} other{Also update {n} past transactions}}` | S · count:int, n · checkbox (A-13), hidden when count = 0 (§0.4) |
+| `categorization_rule_saved` | تمام، هفتكر ده ✓ | Got it — I'll remember ✓ | N + `common_action_undo` |
 
 ## 1.13 S-13 Add / edit transaction — `transactions_edit_*`
 States: add (per type) · edit · prefilled from a shared message · prefilled from the review queue · validation · save failed (`common_error_saveFailed`) · unsaved changes (`common_discard_*`) · saved (`mascot_saved_*`).
@@ -675,7 +775,7 @@ States: loading (skeleton) · populated (category card, generic-parser card, unr
 
 | Key | AR | EN | Notes |
 |---|---|---|---|
-| `ingestion_review_title` | مستني رأيك 👀 | Needs your review | T · glossary (emoji only in AR, where the glossary has it) |
+| `ingestion_review_title` | مستني رأيك 👀 | Needs your review 👀 | T · glossary. The spec's "(5)" count isn't in the title: the "All" chip (`ingestion_review_filterAll`) shows it instead (F-5f) |
 | `ingestion_review_filterAll` | الكل {n} | All {n} | C · n = formatted count |
 | `ingestion_review_filterCategory` | تصنيف | Category | C |
 | `ingestion_review_filterMessages` | رسايل جديدة | New messages | C · unread or unrecognized |
@@ -692,15 +792,12 @@ States: loading (skeleton) · populated (category card, generic-parser card, unr
 | `ingestion_review_genGuessOut` | توقعنا: {amount} عند {merchant} | Our guess: {amount} at {merchant} | S · FR-PAR-13 |
 | `ingestion_review_genGuessNoMerchant` | توقعنا: {amount} | Our guess: {amount} | S |
 | `ingestion_review_genGuessIn` | توقعنا: {amount} دخلوا | Our guess: {amount} in | S |
-| `ingestion_review_genLowConfidence` | مش متأكد أوي، بص عليها قبل ما أسجلها | Not totally sure — check it before I log it | S · FR-PAR-06 |
-| `ingestion_review_genConfirm` | تمام | Confirm | B |
-| `ingestion_review_genEdit` | عدّل | Edit | B · opens S-13 prefilled |
-| `ingestion_review_genDismiss` | سيبها | Dismiss | B |
-| `ingestion_review_requestBank` | اطلب دعم البنك ده | Ask us to support this bank | B · text (FR-PAR-14) |
-| `ingestion_review_unreadTitle` | رسالة من {sender} مقدرتش أفهمها | A message from {sender} I couldn't read | L · FR-ING-A-06 |
+| `ingestion_review_genLowConfidence` | مش متأكد أوي، بص عليها قبل ما أسجلها | Not totally sure — check it before I log it | S · FR-PAR-06. The card's buttons are `common_action_confirm`, `common_action_edit` (opens S-13 prefilled) and `common_action_dismiss` |
+| `ingestion_review_requestBank` | اطلب دعم البنك ده | Ask us to support this bank | L · text button (FR-PAR-14) |
+| `ingestion_review_unreadTitle` | رسالة من {sender} مقدرتش أفهمها | A message from {sender} I couldn't read | S · FR-ING-A-06 |
 | `ingestion_review_unreadShow` | شوف الرسالة | Show message | B · raw text on screen only |
 | `ingestion_review_unreadEnter` | اكتب التفاصيل | Enter details | B · opens S-13 with `transactions_edit_rawTitle` |
-| `ingestion_review_xferTitle` | {amount} في {card}، تبع أنهي تحويلة؟ | {amount} into {card} — which transfer was it? | L · BR-XFR-02 / EC-16 |
+| `ingestion_review_xferTitle` | {amount} في {card}، تبع أنهي تحويلة؟ | {amount} into {card} — which transfer was it? | S · BR-XFR-02 / EC-16; confirm with `common_action_confirm` |
 | `ingestion_review_xferOption` | {amount} من {card} · {time} | {amount} from {card} · {time} | L · radio |
 | `ingestion_review_xferNotMine` | مش تحويلة مني | Not my transfer | L · radio |
 | `ingestion_review_swipeAcceptA11y` | وافق على الاقتراح | Accept suggestion | A · swipe from the start edge; the button is always visible |
@@ -708,14 +805,13 @@ States: loading (skeleton) · populated (category card, generic-parser card, unr
 | `ingestion_review_dismissed` | اتشالت من المراجعة | Removed from review | N + `common_action_undo` |
 | `ingestion_review_emptyTitle` | كله تمام! مفيش حاجة مستنية رأيك ✨ | All clear! Nothing to review ✨ | T · C-28, Rive `proud` |
 | `ingestion_alwaysSender_title` | أقرا رسايل {sender} على طول؟ | Always capture messages from {sender}? | T · A-66 sheet, after confirming a generic parse |
-| `ingestion_alwaysSender_body` | `{count, plural, =1{هتفضل توصلك هنا للمراجعة لحد ما تأكد رسالة واحدة منه، وبعد كده هسجلها لوحدي.} =2{هتفضل توصلك هنا للمراجعة لحد ما تأكد رسالتين منه، وبعد كده هسجلها لوحدي.} few{هتفضل توصلك هنا للمراجعة لحد ما تأكد {n} رسايل منه، وبعد كده هسجلها لوحدي.} many{هتفضل توصلك هنا للمراجعة لحد ما تأكد {n} رسالة منه، وبعد كده هسجلها لوحدي.} other{هتفضل توصلك هنا للمراجعة لحد ما تأكد {n} رسالة منه، وبعد كده هسجلها لوحدي.}}` | `{count, plural, =1{They'll still come here for review until you've confirmed 1, then I'll log them myself.} other{They'll still come here for review until you've confirmed {n}, then I'll log them myself.}}` | S · count:int = remaining confirmations (A-66: 3), n |
+| `ingestion_alwaysSender_body` | `{count, plural, =0{من هنا ورايح هسجل رسايله لوحدي.} =1{هتفضل توصلك هنا للمراجعة لحد ما تأكد رسالة واحدة منه، وبعد كده هسجلها لوحدي.} =2{هتفضل توصلك هنا للمراجعة لحد ما تأكد رسالتين منه، وبعد كده هسجلها لوحدي.} few{هتفضل توصلك هنا للمراجعة لحد ما تأكد {n} رسايل منه، وبعد كده هسجلها لوحدي.} many{هتفضل توصلك هنا للمراجعة لحد ما تأكد {n} رسالة منه، وبعد كده هسجلها لوحدي.} other{هتفضل توصلك هنا للمراجعة لحد ما تأكد {n} رسالة منه، وبعد كده هسجلها لوحدي.}}` | `{count, plural, =0{From now on I'll log its messages myself.} =1{They'll still come here for review until you've confirmed 1, then I'll log them myself.} other{They'll still come here for review until you've confirmed {n}, then I'll log them myself.}}` | S · count:int, n · count = confirmations still needed (A-66: 3 in total); 0 once all are done |
 | `ingestion_alwaysSender_yes` | أيوه، على طول | Yes, always | B |
 | `ingestion_requestBank_title` | اطلب دعم بنكك | Request your bank | T · shared by S-14 and S-61 |
 | `ingestion_requestBank_name` | اسم البنك | Bank name | L · prefilled with the sender in S-14 |
 | `ingestion_requestBank_country` | البلد | Country | L |
 | `ingestion_requestBank_channel` | تنبيهاته بتوصل إزاي؟ | How do its alerts arrive? | L · options `common_source_sms` / `common_source_notification` |
-| `ingestion_requestBank_privacy` | هنبعت اسم البنك وبلده ونوع التنبيه بس. عمرنا ما هنبعت الرسالة نفسها. | We send only the bank's name, country and alert type — never the message itself. | S · FR-PAR-14 / BR-SYNC-03 (SRS adds the channel, see Q-09) |
-| `ingestion_requestBank_send` | ابعت | Send | B |
+| `ingestion_requestBank_privacy` | هنبعت اسم البنك وبلده ونوع التنبيه بس. عمرنا ما هنبعت الرسالة نفسها. | We send only the bank's name, country and alert type — never the message itself. | S · FR-PAR-14 / BR-SYNC-03 (SRS adds the channel, see Q-09). Sent with `common_action_send` |
 | `ingestion_requestBank_sent` | وصل طلبك ✓ شكراً! | Request sent ✓ Thanks! | N · no promise of a date |
 | `ingestion_requestBank_failed` | مقدرتش أبعته دلوقتي. حفظته، وتقدر تبعته تاني بعدين. | Couldn't send it right now. I've kept it so you can send it later. | S · network or offline; draft kept |
 | `ingestion_requestBank_nameLength` | اسم البنك لازم يكون من {min} لـ {max} حرف | Bank name must be {min}–{max} characters | S · min = 2, max = 60, both formatted Strings |
@@ -731,7 +827,8 @@ States: Mode A editing · suggestion · Mode B assigning · no candidate expense
 | `transfers_split_people` | الناس | People | L |
 | `transfers_split_addPerson` | ضيف حد | Add person | B |
 | `transfers_split_personHint` | الاسم | Name | L · 1–30 characters |
-| `transfers_split_shareA11y` | نصيب {name} | {name}'s share | A |
+| `transfers_split_shareA11y` | نصيب {name} | {name}'s share | A · apostrophe right after a brace: see §0.10 ARB note |
+| `transfers_split_removePerson` | شيل {name} | Remove {name} | L · row action / a11y action (F-5d) |
 | `transfers_split_equal` | قسّم بالتساوي | Split evenly | B · this is the default |
 | `transfers_split_paidBack` | رجع | Paid back | C · status |
 | `transfers_split_waiting` | مستني | Waiting | C · status (FR-XFR-05) |
@@ -739,6 +836,8 @@ States: Mode A editing · suggestion · Mode B assigning · no candidate expense
 | `transfers_split_yourShare` | دفعت إنت فعلاً | Your share | L · glossary «دفعت إنت فعلاً» (BR-XFR-04) |
 | `transfers_split_suggestions` | اقتراحات | Suggestions | L |
 | `transfers_split_suggestion` | {amount} من {person} · {date}، من العزومة دي؟ | {amount} from {person} · {date} — from this bill? | S · + `common_action_link`; never auto (FR-XFR-08) |
+| `transfers_split_unassign` | شيلها من العزومة دي | Remove from this bill | L · on a linked repayment (FR-XFR-09) (F-5d) |
+| `transfers_split_unassigned` | اتشالت، ورجعت تتحسب دخل عادي | Removed — it counts as income again | N + `common_action_undo` · FR-XFR-09 |
 | `transfers_split_saved` | اتحفظ التقسيم ✓ | Split saved ✓ | N |
 | `transfers_assign_header` | {amount} من {person} | {amount} from {person} | L |
 | `transfers_assign_title` | وزّعها على مصاريف | Assign to expenses | T |
@@ -761,12 +860,13 @@ States: candidates · cross-currency candidate · empty (EC-15) · validation ·
 | `transfers_link_title` | ربط تحويلة لنفسي | Link my own transfer | T |
 | `transfers_link_source` | {amount} · {card} · {date} | {amount} · {card} · {date} | L |
 | `transfers_link_pick` | اختار الحركة اللي تقابلها | Pick the matching transaction | L |
-| `transfers_link_afterMinutes` | `{count, plural, =1{بعدها بدقيقة} =2{بعدها بدقيقتين} few{بعدها بـ {n} دقايق} many{بعدها بـ {n} دقيقة} other{بعدها بـ {n} دقيقة}}` | `{count, plural, =1{1 min later} other{{n} min later}}` | C · count:int, n |
-| `transfers_link_beforeMinutes` | `{count, plural, =1{قبلها بدقيقة} =2{قبلها بدقيقتين} few{قبلها بـ {n} دقايق} many{قبلها بـ {n} دقيقة} other{قبلها بـ {n} دقيقة}}` | `{count, plural, =1{1 min earlier} other{{n} min earlier}}` | C |
-| `transfers_link_afterDays` | `{count, plural, =1{بعدها بيوم} =2{بعدها بيومين} few{بعدها بـ {n} أيام} many{بعدها بـ {n} يوم} other{بعدها بـ {n} يوم}}` | `{count, plural, =1{1 day later} other{{n} days later}}` | C |
-| `transfers_link_beforeDays` | `{count, plural, =1{قبلها بيوم} =2{قبلها بيومين} few{قبلها بـ {n} أيام} many{قبلها بـ {n} يوم} other{قبلها بـ {n} يوم}}` | `{count, plural, =1{1 day earlier} other{{n} days earlier}}` | C |
-| `transfers_link_impliedRate` | سعر التحويل ≈ {rate} لكل {fromCurrency} | Implied rate ≈ {rate} per {fromCurrency} | L · cross-currency (A-61); rate includes the target currency |
-| `transfers_link_link` | اربط | Link | B |
+| `transfers_link_afterMinutes` | `{count, plural, =0{في نفس الدقيقة} =1{بعدها بدقيقة} =2{بعدها بدقيقتين} few{بعدها بـ {n} دقايق} many{بعدها بـ {n} دقيقة} other{بعدها بـ {n} دقيقة}}` | `{count, plural, =0{Same minute} =1{1 min later} other{{n} min later}}` | C · count:int, n · gap under 60 min (0 = same minute) |
+| `transfers_link_beforeMinutes` | `{count, plural, =0{في نفس الدقيقة} =1{قبلها بدقيقة} =2{قبلها بدقيقتين} few{قبلها بـ {n} دقايق} many{قبلها بـ {n} دقيقة} other{قبلها بـ {n} دقيقة}}` | `{count, plural, =0{Same minute} =1{1 min earlier} other{{n} min earlier}}` | C · count:int, n · gap under 60 min |
+| `transfers_link_afterHours` | `{count, plural, =1{بعدها بساعة} =2{بعدها بساعتين} few{بعدها بـ {n} ساعات} many{بعدها بـ {n} ساعة} other{بعدها بـ {n} ساعة}}` | `{count, plural, =1{1 hr later} other{{n} hr later}}` | C · count:int, n · gap of 1–23 h (F-5e); can't be 0 (§0.4) |
+| `transfers_link_beforeHours` | `{count, plural, =1{قبلها بساعة} =2{قبلها بساعتين} few{قبلها بـ {n} ساعات} many{قبلها بـ {n} ساعة} other{قبلها بـ {n} ساعة}}` | `{count, plural, =1{1 hr earlier} other{{n} hr earlier}}` | C · count:int, n · gap of 1–23 h |
+| `transfers_link_afterDays` | `{count, plural, =0{في نفس اليوم} =1{بعدها بيوم} =2{بعدها بيومين} few{بعدها بـ {n} أيام} many{بعدها بـ {n} يوم} other{بعدها بـ {n} يوم}}` | `{count, plural, =0{Same day} =1{1 day later} other{{n} days later}}` | C · count:int, n · whole calendar days, gap of 24 h or more. `=0` covers a calendar-day count of 0 if a caller passes it |
+| `transfers_link_beforeDays` | `{count, plural, =0{في نفس اليوم} =1{قبلها بيوم} =2{قبلها بيومين} few{قبلها بـ {n} أيام} many{قبلها بـ {n} يوم} other{قبلها بـ {n} يوم}}` | `{count, plural, =0{Same day} =1{1 day earlier} other{{n} days earlier}}` | C · count:int, n · as above |
+| `transfers_link_impliedRate` | سعر التحويل ≈ {rate} لكل {fromCurrency} | Implied rate ≈ {rate} per {fromCurrency} | L · cross-currency (A-61); rate includes the target currency. The sheet's button is `common_action_link` |
 | `transfers_link_linked` | اتربطوا ✓ ومش هيتحسبوا مصروف | Linked ✓ Not counted as spending | N + `common_action_undo` |
 | `transfers_link_emptyTitle` | ملقيتش حركة تقابلها | No matching transaction found | T · C-28 |
 | `transfers_link_emptyBody` | ممكن البنك التاني مش بيبعت رسايل. تقدر تعلّمها تحويلة لنفسك برضه، ومش هتتحسب مصروف. | The other bank may not send messages. You can still mark this as your own transfer so it isn't counted as spending. | S · EC-15 |
@@ -787,17 +887,18 @@ States: loading (skeleton) · empty · populated · multi-currency · ≈ view �
 | `accounts_overview_netWorth` | اللي حيلتك كله | Net worth | L · glossary; one figure per currency, no cross-currency sum |
 | `accounts_overview_otherCurrenciesA11y` | عملات تانية | Other currencies | A |
 | `accounts_overview_accountsTitle` | كروتك وحساباتك | Cards & accounts | L |
-| `accounts_overview_compare` | قارن | Compare | B · text, opens S-42 |
+| `accounts_overview_compare` | قارن | Compare | L · text button, opens S-42 |
 | `accounts_overview_asOf` | آخر تحديث {when} | as of {when} | C · when = `common_date_minutesAgo` or a date (FR-ACC-02) |
 | `accounts_overview_creditAvailable` | متاح من {limit} | available of {limit} | C |
-| `accounts_overview_moreCurrencies` | `{count, plural, =1{وكمان عملة واحدة} =2{وكمان عملتين} few{وكمان {n} عملات} many{وكمان {n} عملة} other{وكمان {n} عملة}}` | `{count, plural, =1{+1 more currency} other{+{n} more currencies}}` | C · count:int, n · multi-currency row (FR-ACC-06) |
+| `accounts_overview_moreCurrencies` | `{count, plural, =1{وكمان عملة واحدة} =2{وكمان عملتين} few{وكمان {n} عملات} many{وكمان {n} عملة} other{وكمان {n} عملة}}` | `{count, plural, =1{+1 more currency} other{+{n} more currencies}}` | L · count:int, n · multi-currency row (FR-ACC-06) |
 | `accounts_overview_cashSub` | يدوي وصوت | Manual & voice | C |
 | `accounts_overview_notTracked` | مش متتبع | Not tracked | C · ignored card (C-07) |
+| `accounts_overview_hiddenEntry` | الحسابات المخفية | Hidden accounts | L · row at the end of the list, only when at least one account is hidden. Opens the hidden list, where each account opens S-43 to switch "hide" off (D-69). The way back is a UX choice, see Q-11 |
 | `accounts_overview_assetsTitle` | دهبك وشهاداتك | Your assets | L · glossary, + `common_gold_badge` |
-| `accounts_overview_prices` | الأسعار | Prices | B · text, opens S-45 |
+| `accounts_overview_prices` | الأسعار | Prices | L · text button, opens S-45 |
 | `accounts_overview_assetsLocked` | تابع دهبك وشهاداتك وكل أصولك في مكان واحد | Track your gold, certificates and more in one place | S · locked preview + `common_gold_unlock` |
 | `accounts_overview_zakah` | الزكاة | Zakah | L · only when the `zakah` flag is on |
-| `accounts_overview_emptyTitle` | الحسابات بتظهر لوحدها من رسايل البنك | Accounts show up by themselves from your bank messages | T · C-28, Rive `sleep` |
+| `accounts_overview_emptyTitle` | الحسابات بتظهر لوحدها من رسايل البنك | Accounts appear from your bank messages | T · C-28, Rive `sleep` |
 | `accounts_overview_emptyAdd` | ضيف حساب بإيدك | Add one yourself | B |
 | `accounts_addType_title` | تضيف إيه؟ | What are you adding? | T · sheet |
 | `accounts_addType_info` | الكروت بتتضاف لوحدها أول ما توصل رسالة. ضيف بإيدك لو لسه مفيش رسايل. | Cards are added automatically when a message arrives. Add one yourself if none has come yet. | S |
@@ -806,7 +907,7 @@ States: loading (skeleton) · empty · populated · multi-currency · ≈ view �
 | `accounts_addType_debit` | كارت ديبت / حساب بنك | Debit card / bank account | L |
 | `accounts_addType_debitSub` | مرتب ومصاريف | Salary and spending | S |
 | `accounts_addType_wallet` | محفظة | Wallet | L |
-| `accounts_addType_walletSub` | فودافون كاش، إنستاباي، فوري | Vodafone Cash, InstaPay, Fawry | S · examples, see Q-10 |
+| `accounts_addType_walletSub` | فودافون كاش، أورانج كاش، إي آند كاش | Vodafone Cash, Orange Cash, e& cash | S · mobile-wallet examples; InstaPay removed because it's a transfer rail (Q-10). Brand names still need OQ-09 clearance |
 | `accounts_addType_multi` | حساب بأكتر من عملة | Multi-currency account | L |
 | `accounts_addType_multiSub` | Wise، Revolut، Payoneer | Wise, Revolut, Payoneer | S |
 | `accounts_addType_bnpl` | تقسيط | Buy now, pay later | L |
@@ -835,7 +936,7 @@ States: loading · populated · multi-currency (C-09 chips) · empty period · i
 |---|---|---|---|
 | `accounts_detail_available` | فاضل في الكارت | Available | L · glossary, credit |
 | `accounts_detail_availableOf` | {available} من {limit} | {available} of {limit} | L |
-| `accounts_detail_limitUsed` | مستخدم {percent} من الليميت | {percent} of your limit used | C |
+| `accounts_detail_limitUsed` | مستخدم {percent} من الليميت | {percent} of your limit used | L |
 | `accounts_detail_balance` | الرصيد | Balance | L · debit / account |
 | `accounts_detail_asOf` | آخر تحديث {when} | As of {when} | C |
 | `accounts_detail_balanceUnknown` | هيظهر مع أول رسالة فيها رصيد | Shows up with the first message that has a balance | S |
@@ -850,7 +951,7 @@ States: loading · populated · multi-currency (C-09 chips) · empty period · i
 | `accounts_detail_capture` | زغلول بيقرا إيه | What Zaghlol reads | L · value lists `common_channel_*Short` + ✓/✗, opens S-62 |
 | `accounts_detail_menuCapture` | زغلول يقرا إيه من الكارت | Capture controls | L · ⋮ menu |
 | `accounts_detail_menuMerge` | ادمجه مع كارت تاني | Merge with another card | L |
-| `accounts_detail_menuHide` | اخفي الحساب | Hide account | L · see Q-11 |
+| `accounts_detail_menuHide` | اخفي الحساب | Hide account | L · D-69: hides from lists and pickers only |
 | `accounts_detail_empty` | مفيش صرف على الكارت ده في الفترة دي | No spending on this card in this period | S · Rive `sleep` |
 | `accounts_detail_ignoredBanner` | `{platform, select, ios{مش متتبع: الرسايل وApple Pay مقفولين للكارت ده} other{مش متتبع: الرسايل والإشعارات مقفولة للكارت ده}}` | `{platform, select, ios{Not tracked: messages and Apple Pay are off for this card} other{Not tracked: messages and notifications are off for this card}}` | N |
 | `accounts_detail_trackAgain` | تابعه تاني | Track again | B · Android then offers `capture_rescanOffer_*` |
@@ -875,7 +976,7 @@ States: edit · create (after type and bank) · credit fields · multi-currency 
 | `accounts_edit_titleNew` | كارت جديد | New card | T |
 | `accounts_edit_name` | اسم الكارت | Card name | L · 1–30, unique |
 | `accounts_edit_bank` | البنك | Bank | L |
-| `accounts_edit_bankAuto` | اتعرف من الرسايل | Detected from messages | C · read-only when auto-created |
+| `accounts_edit_bankAuto` | اتعرف من الرسايل | Detected from messages | L · read-only when auto-created |
 | `accounts_edit_last4` | آخر أربع أرقام | Last four digits | L · LTR input, Western digits shown |
 | `accounts_edit_last4Hint` | في الرسالة بيبان كده: «{sample}»، عشان زغلول يعرف الكارت. | In messages it looks like "{sample}" — that's how Zaghlol spots the card. | S · sample = a synthetic pattern from the institution template, e.g. `**1234` (never a real SMS) |
 | `accounts_edit_type` | النوع | Type | L · `common_accountType_*` |
@@ -885,11 +986,12 @@ States: edit · create (after type and bank) · credit fields · multi-currency 
 | `accounts_edit_limit` | الليميت | Credit limit | L · credit only, ≥ 0 |
 | `accounts_edit_dueDay` | يوم السداد | Statement due day | L · credit only, 1–31 |
 | `accounts_edit_dueReminder` | `{count, plural, =0{هفكرك يوم السداد نفسه.} =1{هفكرك قبل ميعاد السداد بيوم.} =2{هفكرك قبل ميعاد السداد بيومين.} few{هفكرك قبل ميعاد السداد بـ {n} أيام.} many{هفكرك قبل ميعاد السداد بـ {n} يوم.} other{هفكرك قبل ميعاد السداد بـ {n} يوم.}}` | `{count, plural, =0{I'll remind you on the due day.} =1{I'll remind you 1 day before it's due.} other{I'll remind you {n} days before it's due.}}` | S · count:int (default 3, BR-SUB-03), n |
-| `accounts_edit_captureTitle` | زغلول يقرا إيه من الكارت ده؟ | What should Zaghlol read for this card? | L · create mode inline toggles (`common_channel_*`) |
+| `accounts_edit_captureTitle` | زغلول يقرا إيه من الكارت ده؟ | What should Zaghlol read for this card? | T · section heading, create mode inline toggles (`common_channel_*`) |
 | `accounts_edit_captureLink` | زغلول بيقرا إيه | What Zaghlol reads | L · edit mode, opens S-62 |
 | `accounts_edit_merge` | ادمجه مع كارت تاني | Merge with another card | L |
 | `accounts_edit_hide` | اخفي الحساب ده | Hide this account | L · switch |
-| `accounts_edit_hideHint` | مش هيظهر في قايمة الكروت | It won't appear in your card list | S · see Q-11 |
+| `accounts_edit_hideHint` | مش هيظهر في القوايم، بس حركاته لسه محسوبة في الأرقام والميزانية والشارتات. | It won't appear in lists, but its transactions still count in totals, budgets and charts. | S · D-69 |
+| `accounts_edit_hidden` | الحساب اتخفى. حركاته لسه محسوبة. | Account hidden. Its transactions still count. | N + `common_action_undo` · D-69 |
 | `accounts_edit_duplicate` | الكارت ده موجود، افتحه؟ | This card already exists — open it? | S · same bank + last-4 |
 | `accounts_edit_openExisting` | افتحه | Open it | B |
 | `accounts_edit_errorLimit` | الليميت ميكونش بالسالب | The limit can't be negative | S |
@@ -912,14 +1014,16 @@ States: all on · permission revoked (✖ + Fix) · iOS checker result · not-tr
 |---|---|---|---|
 | `capture_settings_title` | زغلول بيقرا منين | Capture | T · glossary |
 | `capture_settings_sources` | المصادر | Sources | L · section |
-| `capture_settings_on` | شغال | On | C |
+| `capture_settings_on` | شغال | On | C · Android permission granted |
 | `capture_settings_off` | مقفول | Off | C · + `common_action_fix` when a permission is revoked |
+| `capture_settings_active` | شغال | Active | C · iOS Apple Pay / Shortcuts row when the setup checker passes (F-5b) |
+| `capture_settings_unknown` | لسه مش متأكدين | Not sure yet | C · iOS checker can't tell (FR-ING-I-07). Never shown as a failure; + `capture_settings_checkSetup` |
 | `capture_settings_smsIos` | عن طريق الاختصارات | Via Shortcuts | C · iOS SMS row subtitle |
 | `capture_settings_checkSetup` | اتأكد من الإعداد | Check setup | B · iOS, opens S-03 step 2 |
 | `capture_settings_share` | ابعت أو الزق رسالة | Share or paste a message | L · opens `capture_shareHow_*` |
 | `capture_settings_notTracked` | مش متتبعين | Not tracked | L · section (FR-CAP-06) |
 | `capture_settings_notTrackedEmpty` | كل كروتك متتبعة | All your cards are tracked | S |
-| `capture_settings_ignoredChannels` | {channels} مقفولة | {channels} off | C · channels = list of `common_channel_*Short` joined by the locale's list format. Row title = card or bank. + `common_action_undo` |
+| `capture_settings_ignoredChannels` | {channels} مقفولة | {channels} off | L · channels = list of `common_channel_*Short` joined by the locale's list format. Row title = card or bank. + `common_action_undo` |
 | `capture_settings_addIgnore` | متتابعش كارت أو بنك | Don't track a card or bank | L · FR-CAP-03 |
 | `capture_settings_tools` | أدوات | Tools | L · section |
 | `capture_settings_rescan` | دوّر في الرسايل القديمة تاني | Re-scan SMS inbox | L · Android |
@@ -932,7 +1036,7 @@ States: all on · permission revoked (✖ + Fix) · iOS checker result · not-tr
 | `capture_ignore_last4` | آخر أربع أرقام (اختياري) | Last four digits (optional) | L |
 | `capture_ignore_last4Hint` | سيبه فاضي عشان تبطّل تتابع البنك كله | Leave it empty to stop tracking the whole bank | S · FR-CAP-05 |
 | `capture_ignore_channels` | متقراش من: | Stop reading: | L · `common_channel_*` checkboxes |
-| `capture_ignore_privacy` | اللي تقفله، زغلول مش هيبص عليه خالص ولا هيحفظ منه حاجة. | Whatever you switch off, Zaghlol won't look at or save — at all. | S · BR-CAP-01 |
+| `capture_ignore_privacy` | اللي تقفله، زغلول هيتجاهل رسايله ومش هيحفظ منها حاجة. | Messages for anything you switch off are ignored and never saved. | S · BR-CAP-01; spec wording (`screens/70`). It doesn't claim "won't look", because the institution and card are identified in memory before the message is discarded (F-4) |
 | `capture_ignore_errorBank` | اختار البنك | Choose the bank | S |
 | `capture_ignore_errorChannel` | اختار مصدر واحد على الأقل | Pick at least one source | S |
 | `capture_ignore_errorLast4` | سيبه فاضي أو اكتب أربع أرقام | Leave it empty or enter four digits | S |
@@ -940,8 +1044,8 @@ States: all on · permission revoked (✖ + Fix) · iOS checker result · not-tr
 | `capture_rescan_title` | دوّر في الرسايل القديمة | Re-scan old messages | T · FR-CAP-07 |
 | `capture_rescan_depth` | لحد إمتى؟ | How far back? | L · options `common_period_lastMonths` 6–24 (A-11) |
 | `capture_rescan_start` | ابدأ | Start | B |
-| `capture_rescan_running` | `{count, plural, =0{بدوّر…} =1{بدوّر… لقيت حركة جديدة} =2{بدوّر… لقيت حركتين جداد} few{بدوّر… لقيت {n} حركات جديدة} many{بدوّر… لقيت {n} حركة جديدة} other{بدوّر… لقيت {n} حركة جديدة}}` | `{count, plural, =0{Searching…} =1{Searching… 1 new found} other{Searching… {n} new found}}` | L · Rive `scanning`, C-27 with cancel |
-| `capture_rescan_done` | `{count, plural, =0{ملقيتش حركات جديدة ✓} =1{ضفت حركة جديدة ✓} =2{ضفت حركتين جداد ✓} few{ضفت {n} حركات جديدة ✓} many{ضفت {n} حركة جديدة ✓} other{ضفت {n} حركة جديدة ✓}}` | `{count, plural, =0{No new transactions ✓} =1{Added 1 new transaction ✓} other{Added {n} new transactions ✓}}` | N |
+| `capture_rescan_running` | `{count, plural, =0{بدوّر…} =1{بدوّر… لقيت حركة جديدة} =2{بدوّر… لقيت حركتين جداد} few{بدوّر… لقيت {n} حركات جديدة} many{بدوّر… لقيت {n} حركة جديدة} other{بدوّر… لقيت {n} حركة جديدة}}` | `{count, plural, =0{Searching…} =1{Searching… 1 new found} other{Searching… {n} new found}}` | L · count:int, n · Rive `scanning`, C-27 with cancel |
+| `capture_rescan_done` | `{count, plural, =0{ملقيتش حركات جديدة ✓} =1{ضفت حركة جديدة ✓} =2{ضفت حركتين جداد ✓} few{ضفت {n} حركات جديدة ✓} many{ضفت {n} حركة جديدة ✓} other{ضفت {n} حركة جديدة ✓}}` | `{count, plural, =0{No new transactions ✓} =1{Added 1 new transaction ✓} other{Added {n} new transactions ✓}}` | N · count:int, n |
 | `capture_rescan_noDuplicates` | اللي اتسجل قبل كده مش هيتكرر | Nothing already saved will be added twice | S |
 | `capture_rescanOffer_title` | أدوّر في الرسايل القديمة على حركات {card}؟ | Look through old messages for {card}? | T · after un-ignoring (Android) |
 | `capture_rescanOffer_body` | الرسايل اللي اتقفلت قبل كده متحفظتش، بس ممكن ألاقيها لسه في صندوق الرسايل. | Messages were not saved while it was off, but they may still be in your inbox. | S · BR-CAP-04 |
@@ -949,7 +1053,8 @@ States: all on · permission revoked (✖ + Fix) · iOS checker result · not-tr
 | `capture_banks_title` | البنوك اللي زغلول بيفهمها | Supported banks | T |
 | `capture_banks_search` | دوّر على بنك… | Search banks… | L |
 | `capture_banks_noResults` | مفيش بنك بالاسم ده | No bank by that name | S · + `capture_settings_requestBank` |
-| `capture_banks_iosNote` | على الآيفون، {bank} بيتسجل من Apple Pay والسكرين شوت وكشوف الحساب. الآيفون مش بيسمح لزغلول يقرا إشعارات التطبيقات التانية. | On iPhone, {bank} is tracked through Apple Pay, screenshots and statements. iOS doesn't let Zaghlol read other apps' notifications. | S · FR-ING-I-08 |
+| `capture_banks_channels` | بيتسجل من: {channels} | Tracked via: {channels} | L · per-bank line on both platforms. channels = `common_channel_*Short` from the registry (F-5c) |
+| `capture_banks_iosNote` | على الآيفون، {bank} بيتسجل من Apple Pay والسكرين شوت، وكشوف الحساب مع جولد. الآيفون مش بيسمح لزغلول يقرا إشعارات التطبيقات التانية. | On iPhone, {bank} is tracked through Apple Pay and screenshots, and statements with Gold. iOS doesn't let Zaghlol read other apps' notifications. | S · FR-ING-I-08. Statements are Gold (FR-EXP-04/06), so the copy says so (F-8) |
 | `capture_shareHow_title` | إزاي تبعت رسالة لزغلول | How to share a message | T · shared by S-02 and S-61 |
 | `capture_shareHow_step1` | افتح رسالة البنك في تطبيق الرسايل | Open the bank message in your messages app | S |
 | `capture_shareHow_step2` | دوس عليها شوية واختار «مشاركة» أو «نسخ» | Long-press it and choose Share or Copy | S · OS labels may differ, see Q-04 |
@@ -961,72 +1066,109 @@ States: all on · permission revoked (✖ + Fix) · iOS checker result · not-tr
 |---|---|---|---|
 | `capture_cardControls_title` | زغلول يقرا إيه من {card}؟ | What should Zaghlol read from {card}? | T · sheet; switches use `common_channel_*` |
 | `capture_cardControls_subtitle` | اختار براحتك، وتقدر تغير في أي وقت | Your choice — change it any time | S |
-| `capture_cardControls_smsIos` | عن طريق اختصارات الآيفون | Through iPhone Shortcuts | C |
+| `capture_cardControls_smsIos` | عن طريق اختصارات الآيفون | Through iPhone Shortcuts | L · switch subtitle |
 | `capture_cardControls_applePaySub` | الدفع بالموبايل | Phone payments | C |
-| `capture_cardControls_info` | اللي تقفله، زغلول مش هيبص عليه خالص ولا هيحفظ منه حاجة. | Whatever you switch off, Zaghlol won't look at or save — at all. | S · BR-CAP-01 |
+| `capture_cardControls_info` | لما تقفل حاجة هنا، رسايل الكارت ده هتتجاهل ومش هتتحفظ. | When a switch is off, messages for this card are ignored and never saved. | S · BR-CAP-01; spec wording (`screens/70:60-61`) (F-4) |
 | `capture_stopTracking_title` | تبطّل تتابع {card}؟ | Stop tracking {card}? | T · last channel switched off (FR-CAP-04). Serious, no emoji |
 | `capture_stopTracking_existing` | الحركات اللي اتسجلت قبل كده: | Transactions already saved: | L |
 | `capture_stopTracking_keep` | سيبهم زي ما هم | Keep them | L · radio, default |
-| `capture_stopTracking_delete` | `{count, plural, =1{امسح حركة واحدة} =2{امسح الحركتين} few{امسح الـ {n} حركات} many{امسح الـ {n} حركة} other{امسح الـ {n} حركة}}` | `{count, plural, =1{Delete 1 transaction} other{Delete {n} transactions}}` | L · radio; count:int, n |
+| `capture_stopTracking_delete` | `{count, plural, =1{امسح حركة واحدة} =2{امسح الحركتين} few{امسح الـ {n} حركات} many{امسح الـ {n} حركة} other{امسح الـ {n} حركة}}` | `{count, plural, =1{Delete 1 transaction} other{Delete {n} transactions}}` | L · radio; count:int, n · hidden when the card has no transactions (§0.4) |
 | `capture_stopTracking_confirm` | بطّل المتابعة | Stop tracking | B |
-| `capture_stopTracking_deleteTitle` | `{count, plural, =1{تمسح حركة واحدة نهائي؟} =2{تمسح الحركتين نهائي؟} few{تمسح {n} حركات نهائي؟} many{تمسح {n} حركة نهائي؟} other{تمسح {n} حركة نهائي؟}}` | `{count, plural, =1{Delete 1 transaction for good?} other{Delete {n} transactions for good?}}` | T · second confirmation |
+| `capture_stopTracking_deleteTitle` | `{count, plural, =1{تمسح حركة واحدة نهائي؟} =2{تمسح الحركتين نهائي؟} few{تمسح {n} حركات نهائي؟} many{تمسح {n} حركة نهائي؟} other{تمسح {n} حركة نهائي؟}}` | `{count, plural, =1{Delete 1 transaction for good?} other{Delete {n} transactions for good?}}` | T · count:int, n · second confirmation |
 | `capture_stopTracking_deleteBody` | مفيش رجوع. الحركات دي هتتمسح من الموبايل وكل الأرقام هتتحدث. | This can't be undone. These transactions will be deleted from this phone and every total will update. | S |
 | `capture_stopTracking_deleteConfirm` | امسح نهائي | Delete for good | B · destructive |
 | `capture_stopTracking_done` | مش هتابع {card} تاني | No longer tracking {card} | N + `common_action_undo` (restores the switches only; deleted data stays deleted) |
+
+## 1.23 Native (OS-surfaced) strings — `native_*` (not in ARB)
+These strings are shown by iOS or Android, outside Flutter. **T-029 skips this table.** The native capture/security tasks transcribe them into `InfoPlist.strings` / AppIntents string catalogs (iOS) and `res/values{,-ar}/strings.xml` (Android). Same rules as the rest of the deck: no digits in AR, financial-data-only privacy claim, no jokes. Shortcut-package automation names (e.g. `Zaghlol – Wallet`) live in the signed `.shortcut` file and stay Latin (Q-04).
+
+| Key | AR | EN | Notes |
+|---|---|---|---|
+| `native_ios_faceIdUsage` | زغلول بيستخدم Face ID عشان يفتح التطبيق، ومحدش يشوف فلوسك غيرك. | Zaghlol uses Face ID to unlock the app, so only you can see your money. | S · `NSFaceIDUsageDescription` (S-05, app lock) |
+| `native_ios_shareExtensionName` | زغلول | Zaghlol | C · share-extension display name (FR-ING-A-04 on iOS) |
+| `native_ios_intentLogMessageTitle` | سجّل رسالة بنك في زغلول | Log bank message in Zaghlol | L · `LogBankMessageIntent` title (S-03) |
+| `native_ios_intentLogMessageDesc` | بيدّي نص رسالة البنك لزغلول على الموبايل ده عشان يسجل الحركة. | Hands a bank message to Zaghlol on this phone so it can log it. | S · intent description shown in Shortcuts |
+| `native_ios_intentMessageParam` | نص الرسالة | Message text | L · intent parameter |
+| `native_ios_intentLogWalletTitle` | سجّل دفع Apple Pay في زغلول | Log Apple Pay payment in Zaghlol | L · `LogWalletTransactionIntent` title |
+| `native_ios_intentLogWalletDesc` | بيدّي تفاصيل دفع Apple Pay لزغلول على الموبايل ده عشان يسجله. | Hands an Apple Pay payment to Zaghlol on this phone so it can log it. | S |
+| `native_ios_intentMerchantParam` | التاجر | Merchant | L · Wallet automation parameter |
+| `native_ios_intentAmountParam` | المبلغ | Amount | L |
+| `native_ios_intentCardParam` | الكارت | Card | L |
+| `native_android_notifListenerLabel` | زغلول: إشعارات البنوك | Zaghlol: bank notifications | L · `NotificationListenerService` label; this is the row that `onboarding_androidSetup_notifOsHint` tells the user to find |
+| `native_android_notifListenerDesc` | بيقرا إشعارات تطبيقات البنوك والمحافظ بس، وبيانات فلوسك بتفضل على الموبايل ده. | Reads notifications from bank and wallet apps only. Your money data stays on this phone. | S · service description where the OS shows one. Financial-data-only claim (tone gate 4) |
 
 ---
 
 ## 1.K Key count (Part 1)
 | Section | Screens | Keys |
 |---|---|---|
-| 1.1 `common_*` | shared | 123 |
+| 1.1 `common_*` | shared | 124 |
 | 1.2 `mascot_*` | shared | 13 |
 | 1.3 Welcome | S-01 | 10 |
 | 1.4 Android setup | S-02 | 29 |
-| 1.5 iOS setup | S-03 | 41 |
-| 1.6 Restore | S-04 | 29 |
+| 1.5 iOS setup | S-03 | 42 |
+| 1.6 Restore | S-04 | 30 |
 | 1.7 App lock | S-05 | 7 |
 | 1.8 Scan results | S-06 | 14 |
-| 1.9 Home | S-10 | 57 |
+| 1.9 Home | S-10 | 58 |
 | 1.10 Transaction row | C-05 | 10 |
-| 1.11 Transactions | S-11 | 28 |
-| 1.12 Detail + rule sheet | S-12 | 41 |
+| 1.11 Transactions | S-11 | 26 |
+| 1.12 Detail + rule sheet (`categorization_rule_*`) | S-12 | 41 |
 | 1.13 Add / edit | S-13 | 20 |
-| 1.14 Review queue + request bank | S-14 | 45 |
-| 1.15 Split & reimbursements | S-15 | 26 |
-| 1.16 Link transfer | S-16 | 16 |
-| 1.17 Money overview + add flow | S-40, S-43 create | 47 |
+| 1.14 Review queue + request bank | S-14 | 41 |
+| 1.15 Split & reimbursements | S-15 | 29 |
+| 1.16 Link transfer | S-16 | 17 |
+| 1.17 Money overview + add flow | S-40, S-43 create | 48 |
 | 1.18 Card detail | S-41 | 21 |
 | 1.19 Compare | S-42 | 7 |
-| 1.20 Edit card + merge | S-43 | 33 |
-| 1.21 Capture settings | S-61 | 45 |
+| 1.20 Edit card + merge | S-43 | 34 |
+| 1.21 Capture settings | S-61 | 48 |
 | 1.22 Card capture controls | S-62 | 14 |
-| **Total** | | **676** |
+| **ARB total** | | **683** |
+| 1.23 Native (not ARB) | S-03, S-05, S-02 | 12 |
 
-Plural messages: 35. Select messages: 8. Each row is one ARB key in both `app_ar.arb` and `app_en.arb`.
+Plural messages: 38 (15 with `=0`, 23 on the no-zero list in §0.4). Select messages: 8. Each ARB row is one key in both `app_ar.arb` and `app_en.arb`. Note for scripted counts: the §0.4 no-zero table also starts rows with backticked key names. Count only rows that have four cells.
 
 ## 1.Q Open questions and spec gaps (Part 1)
 | ID | Where | Issue | Draft used | Needs |
 |---|---|---|---|---|
 | Q-01 | Tab 2 label | `03-navigation.md` says «التحليلات»; the glossary (D-34) says «الحسبة». | «الحسبة» | Confirm the glossary wins and update `03-navigation.md` |
-| Q-02 | Source badge | FR-TXN-03's source list has no value for share/paste (FR-ING-A-04). | `common_source_shared` «رسالة اتبعتت» | Confirm a separate source value, or reuse SMS / Notification |
-| Q-03 | S-02 | No screen spec covers the build without the Play SMS exception (FR-ING-A-05 "not granted by Play"). | `onboarding_androidSetup_playUnavailable` | Confirm the state exists (a store flavour without SMS?) and whether S-02 step 1 is skipped there |
+| Q-02 | Source badge | **Closed.** `database-schema.md` already has `source = 'share'` (channel `share`/`paste`). | `common_source_shared` maps to `share` | Requirements analyst: wording fix in FR-TXN-03 only |
+| Q-03 | S-02 | **Narrowed.** The `prodNoSms` flavour exists (ADR-004, `deployment.md`). Still open: the S-02 flow in that flavour, i.e. whether step 1 is skipped and where `playUnavailable` appears. | `onboarding_androidSetup_playUnavailable` | Architect + UX: the S-02 flow for `prodNoSms` |
 | Q-04 | S-03, share how-to | iOS and Android OS labels ("Shortcuts", "Automation", "Run Immediately", "Share") differ by device language and OEM. | English OS labels kept in Latin | Verify on Arabic-language iOS; decide whether to show localized OS labels |
 | Q-05 | Home greeting | Spec gives only «صباح الفل / مساء الفل» by time. Hour boundaries and the English afternoon form aren't defined. | Morning 05–12, afternoon 12–17, evening 17–05 | Confirm the boundaries |
-| Q-06 | Home hero | No spec state for safe-to-spend ≤ 0 (budget used up). | `home_hero_budgetUsedUp` (calm, no joke) | Confirm the state and its copy |
-| Q-07 | Payday prompt | A salary detected on day 29–31 can't be set (payday is 1–28, BR-BUD-01). | Not handled | Decide: suggest 28, use calendar month, or skip the prompt |
-| Q-08 | S-11 bulk delete | The spec says every bulk change shows Undo, but bulk delete says it can't be undone. | Delete: confirmation, no Undo. Other bulk changes: Undo | Confirm |
+| Q-06 | Home hero | **Narrowed.** BR-BUD-03 clamps safe-to-spend at 0. The only open point is the display: the amount `0` with a caption. | `home_hero_budgetUsedUp` as the caption under `0` | UX: confirm the "0 + caption" display |
+| Q-07 | Payday prompt | **Closed by D-68.** A salary on day 29–31 → suggest payday = 1 (calendar month); the salary counts in the month it arrives; payday stays 1–28. | `home_prompt_paydayMonthStart` / `…MonthStartYes` | — |
+| Q-08 | S-11 bulk delete | **Closed, not a gap.** FR-TXN-06: changes get Undo; delete asks first and can't be undone. The deck already matches. | — | — |
 | Q-09 | S-14 request bank | The screen spec says "only the bank's name and country"; FR-PAR-14 also sends the channel type. | The SRS (name, country, alert type) | Update the S-14 spec text |
-| Q-10 | Add type sheet | The mockup lists InstaPay as a wallet example; InstaPay is a transfer rail, not a wallet. | Kept as mocked | Confirm the examples (and that brand names are cleared, OQ-09) |
-| Q-11 | S-41/S-43 Hide | It isn't specified whether a hidden account's transactions still count in totals (FR-ACC-04). | Hint says only "won't appear in your card list" | Define what hiding does |
-| Q-12 | S-43 Merge | Whether a merge can be undone isn't specified. | No undo claimed, no "can't undo" claimed | Decide: Undo snackbar, or a "can't be undone" line |
-| Q-13 | C-05 | The design system lists a "pending verification" row variant but no spec defines it for transactions. | No copy | Define or remove the variant |
+| Q-10 | Add type sheet | InstaPay is a transfer rail, not a wallet. | Replaced with Vodafone Cash, Orange Cash, e& cash | PO/legal: brand clearance (OQ-09, already open) |
+| Q-11 | S-41/S-43 Hide | **Closed by D-69.** Hiding removes the account from lists and pickers only; its transactions still count in totals, budgets and charts; unhiding restores it to lists. | `accounts_edit_hideHint`, `accounts_edit_hidden`, `accounts_overview_hiddenEntry` | UX: confirm that the "Hidden accounts" row is the way back (a new entry point, implied by D-69) |
+| Q-12 | S-43 Merge | Whether a merge can be undone isn't specified. | No undo claimed, no "can't undo" claimed | Architect (`merged_into_id`, reversible?) + UX |
+| Q-13 | C-05 / S-12 | Wider than first stated: EC-06, A-63 and the schema's `status IN ('posted','pending','declined','reversed')` mean pending and reversed rows can exist. The S-12 spec says pending is n/a. | No copy for pending/reversed | Architect + UX: define the row and detail states; the copy follows in a later Part 1 revision |
 | Q-14 | Process | The task asks for the design note in the task file, but the brief limited edits to `copy-deck.md`. | Design note in §1.0 | Lead to copy it into `T-026.md` if wanted |
 | Q-15 | Plural/digits convention | §0.3/§0.4 make every number a pre-formatted String and use `count` only to select. That needs the architect to confirm it against `DigitsMode` (ADR-017). | As written | Architect confirmation before T-029 |
-| Q-16 | Bidi isolates | §0.6 puts FSI/PDI wrapping in the presentation layer, not in ARB text. | As written | Architect confirmation (`MoneyFormat` / l10n helper) |
+| Q-16 | Bidi isolates | §0.6 puts FSI/PDI wrapping in the presentation layer, not in ARB text; the §0.3a registry marks which placeholders get it. | As written | Architect confirmation (`MoneyFormat` / l10n helper) |
+| Q-17 | Glossary | `06-voice-and-tone.md` §3 maps Notifications → «التنبيهات», but the deck uses «الإشعارات». | **Proposed split:** «التنبيهات» for Zaghlol's own notifications (S-70, Part 3); «الإشعارات» for other apps' notifications that Zaghlol captures, because that's the OS term users see in Android settings. Part 1 strings are all of the second kind. | UX lead / PO: confirm the split, then add it to the glossary |
+| Q-18 | Home payday banner | `home_mascot_payday` is a C-14 banner, but `domain-algorithms.md` §7 treats `payday` as motion-only, and the priority list (shocked > detective > proud > tourGuide) has no payday slot. | Proposed: shocked > detective > payday > proud > tourGuide | Architect: place `payday` in `MascotPolicy`, or move the line off the banner |
 
 ## 1.C Changelog (Part 1)
-- 2026-11-07 — first draft (T-026).
+- 2026-11-07 — first draft (T-026), 676 keys.
+- 2026-11-07 — round 2 (code review F-1…F-20, test check D-1…D-6, PO decisions D-68/D-69), 683 ARB keys plus 12 native. Nothing had shipped yet (T-029 not started), so keys were retired and renamed in place.
+  - **Retired** (now use `common_action_*`, per the §0.10 reuse rule): `transactions_list_bulkDelete`, `transactions_list_bulkCancel`, `ingestion_review_genConfirm`, `ingestion_review_genEdit`, `ingestion_review_genDismiss`, `ingestion_requestBank_send`, `transfers_link_link`, `home_prompt_paydayNo`.
+  - **Renamed:**
+    - `mascot_avatar_a11y` → `mascot_avatar_labelA11y`
+    - `home_hero_a11y` → `home_hero_summaryA11y`
+    - `transactions_row_a11y` → `transactions_row_labelA11y`
+    - `transactions_rule_{title,always,once,applyPast,saved}` → `categorization_rule_*`
+  - **Added:**
+    - `common_date_hoursAgo`, `onboarding_iosSetup_shortcutWhy`, `backup_restore_signingIn`
+    - `home_prompt_paydayMonthStart`, `home_prompt_paydayMonthStartYes`
+    - `transfers_split_removePerson`, `transfers_split_unassign`, `transfers_split_unassigned`
+    - `transfers_link_afterHours`, `transfers_link_beforeHours`
+    - `accounts_overview_hiddenEntry`, `accounts_edit_hidden`
+    - `capture_settings_active`, `capture_settings_unknown`, `capture_banks_channels`
+    - §1.23 `native_*` (12)
+  - **Conventions:** §0.3a placeholder registry; zero-form rule in §0.4; text buttons use class L.
 
 <!-- ===================== PART 2 (T-027) appends below ===================== -->
 
