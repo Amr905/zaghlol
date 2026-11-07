@@ -10,7 +10,6 @@ analyzer:
     - custom_lint
   errors:
     # custom_lint still uses the legacy plugin system; see tools/lints/README.md.
-    analysis_options_deprecated_plugin: ignore
     analysis_options_deprecated_plugins: ignore
   language:
     strict-casts: true
