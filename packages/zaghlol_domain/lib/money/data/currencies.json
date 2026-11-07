@@ -157,7 +157,6 @@
     {"code": "VND", "numeric": 704, "exponent": 0, "status": "active"},
     {"code": "VUV", "numeric": 548, "exponent": 0, "status": "active"},
     {"code": "WST", "numeric": 882, "exponent": 2, "status": "active"},
-    {"code": "XAD", "numeric": 396, "exponent": 2, "status": "active", "fund": true},
     {"code": "XAF", "numeric": 950, "exponent": 0, "status": "active"},
     {"code": "XCD", "numeric": 951, "exponent": 2, "status": "active"},
     {"code": "XCG", "numeric": 532, "exponent": 2, "status": "active"},

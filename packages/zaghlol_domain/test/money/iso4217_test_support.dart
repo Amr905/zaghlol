@@ -3,10 +3,11 @@ import 'dart:io';
 
 import '../../tool/gen_currencies.dart' as gen;
 
+/// The committed List One snapshot, as text.
+String loadListOneSource() => File(gen.xmlPath).readAsStringSync();
+
 /// The committed List One snapshot, parsed.
-gen.CurrencyTable loadListOne() {
-  return gen.parseListOne(File(gen.xmlPath).readAsStringSync());
-}
+gen.CurrencyTable loadListOne() => gen.parseListOne(loadListOneSource());
 
 /// The committed `currencies.json`, parsed.
 gen.CurrencyTable loadTable() {

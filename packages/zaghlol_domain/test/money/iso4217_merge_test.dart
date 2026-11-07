@@ -24,6 +24,40 @@ void main() {
     });
   });
 
+  group('excluded codes (D-67)', () {
+    test('XAD is skipped even though List One flags it IsFund', () {
+      expect(gen.excludedCodes, contains('XAD'));
+      const name = '<CcyNm IsFund="true">Arab Accounting Dinar</CcyNm>';
+      final xad = '$name<Ccy>XAD</Ccy><CcyNbr>396</CcyNbr>';
+      final entry = '<CcyNtry>$xad<CcyMnrUnts>2</CcyMnrUnts></CcyNtry>';
+      final eur = entryXml('EUR', '978', '2');
+      final xml = listOneXml('2026-09-17', '$eur$entry');
+      final parsed = gen.parseListOne(xml);
+      expect(parsed.rows.map((r) => r.code), ['EUR']);
+    });
+
+    test('the genuine snapshot lists XAD; the table does not', () {
+      final raw = loadListOneSource();
+      expect(raw, contains('<Ccy>XAD</Ccy>'));
+      expect(listOne.rows.map((r) => r.code), isNot(contains('XAD')));
+      expect(committed.rows.map((r) => r.code), isNot(contains('XAD')));
+    });
+
+    test('a committed XAD row is dropped, not kept as historic', () {
+      final withXad = [...committed.rows, row('XAD', 396, 2)];
+      final previous = gen.CurrencyTable('2026-09-17', withXad);
+      final merged = merge(listOne, previous);
+      expect(merged.rows.map((r) => r.code), isNot(contains('XAD')));
+      expect(merged.rows.length, committed.rows.length);
+    });
+
+    test('render refuses a table containing XAD', () {
+      final bad = gen.CurrencyTable('2026-09-17', [row('XAD', 396, 2)]);
+      expect(() => gen.renderJson(bad), throwsFormatException);
+      expect(() => gen.renderDart(bad), throwsFormatException);
+    });
+  });
+
   group('merge guards (CR2, CR3)', () {
     test('without a previous table (--fresh) the result is the snapshot', () {
       final fresh = merge(listOne, null);

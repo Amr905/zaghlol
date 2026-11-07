@@ -161,7 +161,6 @@ const List<(String, int, int, bool, bool)> iso4217Table = [
   ('VND', 704, 0, true, false),
   ('VUV', 548, 0, true, false),
   ('WST', 882, 2, true, false),
-  ('XAD', 396, 2, true, true),
   ('XAF', 950, 0, true, false),
   ('XCD', 951, 2, true, false),
   ('XCG', 532, 2, true, false),

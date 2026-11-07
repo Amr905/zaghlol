@@ -9,8 +9,9 @@ import '../../tool/gen_currencies.dart' as gen;
 import 'iso4217_test_support.dart';
 
 /// Every code of the first genuine table (SIX List One published
-/// 2026-09-17, generated with --fresh). A refresh may add codes or mark them
-/// historic, never delete them; extend this list when codes are added.
+/// 2026-09-17, generated with --fresh, minus XAD per D-67). A refresh may
+/// add codes or mark them historic, never delete them; extend this list when
+/// codes are added.
 const String _baselineCodes = '''
 AED AFN ALL AMD AOA ARS AUD AWG AZN BAM BBD BDT BHD BIF BMD BND BOB BOV BRL
 BSD BTN BWP BYN BZD CAD CDF CHE CHF CHW CLF CLP CNY COP COU CRC CUP CVE CZK
@@ -20,7 +21,7 @@ KYD KZT LAK LBP LKR LRD LSL LYD MAD MDL MGA MKD MMK MNT MOP MRU MUR MVR MWK
 MXN MXV MYR MZN NAD NGN NIO NOK NPR NZD OMR PAB PEN PGK PHP PKR PLN PYG QAR
 RON RSD RUB RWF SAR SBD SCR SDG SEK SGD SHP SLE SOS SRD SSP STN SVC SYP SZL
 THB TJS TMT TND TOP TRY TTD TWD TZS UAH UGX USD USN UYI UYU UYW UZS VED VES
-VND VUV WST XAD XAF XCD XCG XOF XPF YER ZAR ZMW ZWG
+VND VUV WST XAF XCD XCG XOF XPF YER ZAR ZMW ZWG
 ''';
 
 void main() {
@@ -128,6 +129,7 @@ void main() {
         'XBD',
         'XTS',
         'XXX',
+        'XAD', // D-67: List One flags it IsFund, Zaghlol excludes it
       ];
       for (final c in excluded) {
         expect(Currency.tryOf(c), isNull, reason: c);

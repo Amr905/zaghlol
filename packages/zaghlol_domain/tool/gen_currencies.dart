@@ -113,10 +113,22 @@ String checkPublished(String value) {
   return value;
 }
 
-/// Validates a row before it is used or emitted: an ISO-shaped code,
-/// numeric 1..999 and exponent 0..4.
+/// Codes on List One that Zaghlol never offers or stores, even though they
+/// have numeric minor units (the N.A. units are skipped anyway).
+///
+/// - XAD, Arab Accounting Dinar: an accounting unit of the Arab Monetary
+///   Fund. List One flags it IsFund with minor units 2, but it is a
+///   non-currency X-code (D-67, FR-CUR-07).
+///
+/// An excluded code is dropped from the table rather than kept as historic.
+/// That is only safe for a code that never shipped (XAD never did); adding
+/// a shipped code here needs a data migration task first.
+const Set<String> excludedCodes = {'XAD'};
+
+/// Validates a row before it is used or emitted: an ISO-shaped code that is
+/// not in [excludedCodes], numeric 1..999 and exponent 0..4.
 CurrencyRow checkRow(CurrencyRow row) {
-  final okCode = _code.hasMatch(row.code);
+  final okCode = _code.hasMatch(row.code) && !excludedCodes.contains(row.code);
   final okNumeric = row.numeric >= 1 && row.numeric <= 999;
   final okExponent = row.exponent >= 0 && row.exponent <= 4;
   if (!okCode || !okNumeric || !okExponent) {
@@ -130,7 +142,7 @@ CurrencyRow checkRow(CurrencyRow row) {
 /// Keeps every code with a numeric minor unit, once (List One repeats codes
 /// per country). Entries without a code (e.g. Antarctica) and entries with
 /// `N.A.` minor units (precious metals, XDR, XSU, XUA, XBA..XBD, XTS, XXX)
-/// are skipped. Conflicting repeats, a malformed `Pblshd` date and values
+/// are skipped, and so are [excludedCodes] (XAD, D-67). Conflicting repeats, a malformed `Pblshd` date and values
 /// out of range are errors.
 CurrencyTable parseListOne(String source) {
   final xml = source.replaceAll(_ignored, '');
@@ -143,7 +155,7 @@ CurrencyTable parseListOne(String source) {
   for (final entry in _entry.allMatches(xml)) {
     final body = entry.group(1)!;
     final code = _ccy.firstMatch(body)?.group(1);
-    if (code == null) {
+    if (code == null || excludedCodes.contains(code)) {
       continue;
     }
     final minorUnits = _mnr.firstMatch(body)?.group(1) ?? '';
@@ -176,7 +188,8 @@ CurrencyTable parseListOne(String source) {
 
 /// Merges a List One snapshot into the previous table, append-only: every
 /// code in [listOne] is active with its List One data, and every previous
-/// code missing from [listOne] is kept as historic. Nothing is ever deleted.
+/// code missing from [listOne] is kept as historic. Nothing is deleted,
+/// except codes in [excludedCodes], which are dropped (see there).
 ///
 /// Throws [FormatException] when an existing code's exponent or numeric
 /// changes, unless the code is in [allowChanged]: stored `*_minor` values
@@ -195,6 +208,9 @@ CurrencyTable mergeAppendOnly({
     byCode[checkRow(row).code] = row;
   }
   for (final row in previous?.rows ?? const <CurrencyRow>[]) {
+    if (excludedCodes.contains(row.code)) {
+      continue;
+    }
     final next = byCode[row.code];
     if (next == null) {
       byCode[row.code] = checkRow(row).asHistoric();
