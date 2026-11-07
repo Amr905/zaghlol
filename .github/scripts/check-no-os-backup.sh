@@ -6,6 +6,8 @@
 # Checks the compiled manifest and the compiled rule files inside the APK (not
 # the sources), so manifest merging, flavors and resource shrinking are covered:
 #   - <application> allowBackup=false and hasFragileUserData=false
+#   - no android:backupAgent anywhere and no fullBackupOnly=true (a custom
+#     agent ignores dataExtractionRules on D2D)
 #   - fullBackupContent -> @xml/backup_rules, dataExtractionRules -> @xml/data_extraction_rules
 #   - data_extraction_rules: exactly <cloud-backup> and <device-transfer>, each
 #     with exactly the 9 domains below as <exclude path=".">, no <include>
@@ -103,29 +105,65 @@ check_rules_xmltree() {
   return $fail
 }
 
+# _application_attrs <xmltree-file>: prints the attribute lines of the
+# <application> element itself (not of its children). Exits non-zero unless
+# the manifest has exactly one <application>.
+_application_attrs() {
+  awk '
+    /^ *E: / {
+      match($0, /^ */); ind = RLENGTH
+      if ($2 == "application") { apps++; inapp = 1; appind = ind; next }
+      inapp = 0
+      next
+    }
+    inapp && /^ *A: / { match($0, /^ */); if (RLENGTH > appind) print }
+    END { if (apps != 1) { print "APPLICATION_COUNT=" apps + 0; exit 1 } }
+  ' "$1"
+}
+
 # check_manifest_xmltree <xmltree-file>: prints "<fullBackupContent id> <dataExtractionRules id>".
 check_manifest_xmltree() {
-  local file=$1 fail=0 n attr fbc der
-  # Each attribute must appear exactly once (only <application> declares them).
+  local file=$1 fail=0 n attr fbc der app
+  if ! app=$(_application_attrs "$file"); then
+    _err "manifest: expected exactly one <application> element ($(tail -n 1 <<< "$app"))"
+    return 1
+  fi
+  # A custom BackupAgent (for example merged in from a library manifest) can
+  # stream any file during D2D: dataExtractionRules only drive the default
+  # FullBackupAgent. Forbidden anywhere in the merged manifest.
+  if grep -qE 'android:backupAgent\(0x[0-9a-f]{8}\)=' "$file"; then
+    _err "manifest: android:backupAgent is declared (bypasses dataExtractionRules on D2D): $(grep -E 'android:backupAgent' "$file" | xargs)"
+    fail=1
+  fi
+  if grep -qE 'android:fullBackupOnly\(0x[0-9a-f]{8}\)=true( |$)' "$file"; then
+    _err "manifest: android:fullBackupOnly is true"
+    fail=1
+  fi
+  # Each attribute must appear exactly once in the manifest, on <application>.
   for attr in allowBackup hasFragileUserData fullBackupContent dataExtractionRules; do
     n=$(grep -cE "android:${attr}\(0x[0-9a-f]{8}\)=" "$file" || true)
     if [ "$n" != "1" ]; then
       _err "manifest: android:$attr appears $n times, expected exactly 1"
       fail=1
     fi
+    n=$(grep -cE "android:${attr}\(0x[0-9a-f]{8}\)=" <<< "$app" || true)
+    if [ "$n" != "1" ]; then
+      _err "manifest: android:$attr is not an attribute of <application>"
+      fail=1
+    fi
   done
-  if ! grep -qE 'android:allowBackup\(0x01010280\)=false( |$)' "$file"; then
-    _err "manifest: android:allowBackup is not false: $(grep -E 'android:allowBackup' "$file" || echo missing)"
+  if ! grep -qE 'android:allowBackup\(0x01010280\)=false( |$)' <<< "$app"; then
+    _err "manifest: <application> android:allowBackup is not false: $(grep -E 'android:allowBackup' <<< "$app" || echo missing)"
     fail=1
   fi
-  if ! grep -qE 'android:hasFragileUserData\(0x[0-9a-f]{8}\)=false( |$)' "$file"; then
-    _err "manifest: android:hasFragileUserData is not false: $(grep -E 'android:hasFragileUserData' "$file" || echo missing)"
+  if ! grep -qE 'android:hasFragileUserData\(0x[0-9a-f]{8}\)=false( |$)' <<< "$app"; then
+    _err "manifest: <application> android:hasFragileUserData is not false: $(grep -E 'android:hasFragileUserData' <<< "$app" || echo missing)"
     fail=1
   fi
-  fbc=$(grep -oE 'android:fullBackupContent\(0x[0-9a-f]{8}\)=@0x[0-9a-fA-F]{8}' "$file" | head -n 1 | sed 's/.*=@//' || true)
-  der=$(grep -oE 'android:dataExtractionRules\(0x[0-9a-f]{8}\)=@0x[0-9a-fA-F]{8}' "$file" | head -n 1 | sed 's/.*=@//' || true)
-  if [ -z "$fbc" ]; then _err "manifest: android:fullBackupContent is not a resource reference"; fail=1; fi
-  if [ -z "$der" ]; then _err "manifest: android:dataExtractionRules is not a resource reference"; fail=1; fi
+  fbc=$(grep -oE 'android:fullBackupContent\(0x[0-9a-f]{8}\)=@0x[0-9a-fA-F]{8}' <<< "$app" | head -n 1 | sed 's/.*=@//' || true)
+  der=$(grep -oE 'android:dataExtractionRules\(0x[0-9a-f]{8}\)=@0x[0-9a-fA-F]{8}' <<< "$app" | head -n 1 | sed 's/.*=@//' || true)
+  if [ -z "$fbc" ]; then _err "manifest: <application> android:fullBackupContent is not a resource reference"; fail=1; fi
+  if [ -z "$der" ]; then _err "manifest: <application> android:dataExtractionRules is not a resource reference"; fail=1; fi
   [ $fail -eq 0 ] || return 1
   echo "$fbc $der"
 }
@@ -139,22 +177,36 @@ resolve_resource() {
   ' "$1"
 }
 
-# check_apk <aapt2> <apk>
-check_apk() {
-  local aapt2=$1 apk=$2 work ids fbc der res name path fail=0
+# check_apk <aapt2> <apk>. The body is a subshell, so its EXIT trap removes
+# the work directory on every return path.
+check_apk() (
+  aapt2=$1
+  apk=$2
+  fail=0
   work=$(mktemp -d)
-  "$aapt2" dump xmltree --file AndroidManifest.xml "$apk" > "$work/manifest.txt"
-  "$aapt2" dump resources "$apk" > "$work/resources.txt"
-  grep -E 'allowBackup|hasFragileUserData|fullBackupContent|dataExtractionRules' "$work/manifest.txt" || true
+  trap 'rm -rf "$work"' EXIT
+  if ! "$aapt2" dump xmltree --file AndroidManifest.xml "$apk" > "$work/manifest.txt" \
+    || [ ! -s "$work/manifest.txt" ]; then
+    _err "aapt2 dump xmltree AndroidManifest.xml failed or printed nothing"
+    exit 1
+  fi
+  if ! "$aapt2" dump resources "$apk" > "$work/resources.txt" || [ ! -s "$work/resources.txt" ]; then
+    _err "aapt2 dump resources failed or printed nothing"
+    exit 1
+  fi
+  grep -E 'allowBackup|hasFragileUserData|fullBackupContent|dataExtractionRules|backupAgent|fullBackupOnly' \
+    "$work/manifest.txt" || true
   if ! ids=$(check_manifest_xmltree "$work/manifest.txt"); then
     echo "$ids"
-    return 1
+    exit 1
   fi
   read -r fbc der <<< "$ids"
   for pair in "$fbc:xml/backup_rules:full-backup-content:-" \
     "$der:xml/data_extraction_rules:data-extraction-rules:cloud-backup device-transfer"; do
     IFS=: read -r id want_name want_root want_sections <<< "$pair"
     res=$(resolve_resource "$work/resources.txt" "$id")
+    name=""
+    path=""
     read -r name path <<< "$res" || true
     if [ "$name" != "$want_name" ] || [ -z "$path" ]; then
       _err "$id resolves to '${name:-?}' (file '${path:-?}'), expected $want_name"
@@ -162,13 +214,16 @@ check_apk() {
       continue
     fi
     echo "$want_name -> $path"
-    "$aapt2" dump xmltree --file "$path" "$apk" > "$work/rules.txt"
+    if ! "$aapt2" dump xmltree --file "$path" "$apk" > "$work/rules.txt" || [ ! -s "$work/rules.txt" ]; then
+      _err "aapt2 dump xmltree $path failed or printed nothing"
+      fail=1
+      continue
+    fi
     cat "$work/rules.txt"
     check_rules_xmltree "$want_root" "$want_sections" "$work/rules.txt" || fail=1
   done
-  rm -rf "$work"
-  return $fail
-}
+  exit $fail
+)
 
 if [ "${BASH_SOURCE[0]}" = "$0" ]; then
   if [ $# -ne 2 ]; then
