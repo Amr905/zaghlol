@@ -4,9 +4,11 @@ using Zaghlol.Infrastructure.Persistence;
 namespace Zaghlol.Infrastructure.Tests;
 
 /// <summary>The privileges in the database equal <see cref="GrantMatrix.Current"/> exactly, and the roles can't exceed them.</summary>
-[Collection(SchemaCollection.Name)]
+[Collection(SchemaGroup.Name)]
 public class GrantTests(SchemaFixture fixture)
 {
+    private static readonly string[] TriggerFunctions = ["accounts_before_delete", "installs_before_delete"];
+
     public static TheoryData<string, string> Denied => new()
     {
         { "zaghlol_api", "UPDATE zaghlol.audit_log SET target = 'x'" },
@@ -126,7 +128,7 @@ public class GrantTests(SchemaFixture fixture)
             WHERE n.nspname = 'zaghlol' ORDER BY p.proname
             """);
 
-        Assert.Equal(new[] { "accounts_before_delete", "installs_before_delete" }, functions.Select(f => (string)f[0]!));
+        Assert.Equal(TriggerFunctions, functions.Select(f => (string)f[0]!));
         Assert.All(functions, f =>
         {
             Assert.True((bool)f[1]!);

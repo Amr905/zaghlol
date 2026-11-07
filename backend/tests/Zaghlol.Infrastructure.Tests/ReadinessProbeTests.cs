@@ -10,7 +10,7 @@ namespace Zaghlol.Infrastructure.Tests;
 /// The readiness probe against a "black hole" server that accepts TCP connections and never answers: proves the 1 s
 /// timeout, the 2 s cache and that concurrent callers share one probe (each probe is one accepted connection).
 /// </summary>
-public sealed class ReadinessProbeTests : IAsyncLifetime
+public sealed class ReadinessProbeTests : IAsyncLifetime, IDisposable
 {
     private readonly TcpListener listener = new(IPAddress.Loopback, 0);
     private readonly List<TcpClient> accepted = [];
@@ -57,8 +57,12 @@ public sealed class ReadinessProbeTests : IAsyncLifetime
         {
             accepted.ForEach(c => c.Dispose());
         }
+    }
 
+    public void Dispose()
+    {
         stop.Dispose();
+        listener.Dispose();
     }
 
     [Fact]

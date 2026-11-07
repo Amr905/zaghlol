@@ -106,7 +106,8 @@ jobs:
       - name: Collect new and changed migration files
         run: |
           mkdir -p "$RUNNER_TEMP/out"
-          dir=backend/src/Zaghlol.Infrastructure/Persistence/Migrations
+          git -c core.fsmonitor=false status --porcelain=v1 --untracked-files=all
+          dir=backend/src/Zaghlol.Infrastructure
           git -c core.fsmonitor=false ls-files --others --modified --exclude-standard -z -- "$dir" |
             while IFS= read -r -d '' f; do
               mkdir -p "$RUNNER_TEMP/out/$(dirname "$f")"
@@ -176,7 +177,7 @@ jobs:
           count=0
           while IFS= read -r -d '' f; do
             rel=${f#"$IN"/}
-            if ! printf '%s' "$rel" | grep -Eq '^backend/src/Zaghlol\.Infrastructure/Persistence/Migrations/([0-9]{14}_[A-Za-z0-9]{1,64}(\.Designer)?|ZaghlolDbContextModelSnapshot)\.cs$'; then
+            if ! printf '%s' "$rel" | grep -Eq '^backend/src/Zaghlol\.Infrastructure/(Persistence/)?Migrations/([0-9]{14}_[A-Za-z0-9]{1,64}(\.Designer)?|ZaghlolDbContextModelSnapshot)\.cs$'; then
               echo "::error::refusing non-whitelisted path: $rel"; exit 1
             fi
             size=$(stat -c %s "$f")
@@ -184,7 +185,7 @@ jobs:
             [ "$(tr -d '\000' < "$f" | wc -c)" = "$size" ] || { echo "::error::NUL byte in $rel"; exit 1; }
             count=$((count + 1))
           done < <(find "$IN" -type f -print0)
-          [ "$count" -ge 1 ] && [ "$count" -le 3 ] || { echo "::error::expected 1 to 3 files, got $count"; exit 1; }
+          [ "$count" -ge 2 ] && [ "$count" -le 3 ] || { echo "::error::expected 2 or 3 files (migration, designer, snapshot), got $count"; exit 1; }
 
       - name: Copy validated files into the tree
         shell: bash
@@ -218,7 +219,8 @@ jobs:
         shell: bash
         run: |
           g() { git -c core.hooksPath=/dev/null -c core.fsmonitor=false "$@"; }
-          g add -- backend/src/Zaghlol.Infrastructure/Persistence/Migrations
+          # Only validated files were copied in, so adding the project subtree adds exactly those.
+          g add -A -- backend/src/Zaghlol.Infrastructure
           if g diff --cached --quiet; then
             echo "Nothing changed; no commit created."
             exit 0

@@ -21,7 +21,7 @@ public sealed class SchemaFixture : IAsyncLifetime
 }
 
 [CollectionDefinition(Name)]
-public sealed class SchemaCollection : ICollectionFixture<SchemaFixture>
+public sealed class SchemaGroup : ICollectionFixture<SchemaFixture>
 {
     public const string Name = "schema";
 }

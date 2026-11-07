@@ -6,7 +6,7 @@ using Zaghlol.Testing;
 
 namespace Zaghlol.Infrastructure.Tests;
 
-[Collection(SchemaCollection.Name)]
+[Collection(SchemaGroup.Name)]
 public class MigrationTests(SchemaFixture fixture)
 {
     private const string ObjectCountSql = """

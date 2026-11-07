@@ -1,7 +1,7 @@
 namespace Zaghlol.Infrastructure.Tests;
 
 /// <summary>FK actions plus the two BEFORE DELETE triggers keep the documented CHECKs true (T-122 design note).</summary>
-[Collection(SchemaCollection.Name)]
+[Collection(SchemaGroup.Name)]
 public class CascadeTests(SchemaFixture fixture)
 {
     [Fact]

@@ -6,7 +6,7 @@ namespace Zaghlol.Infrastructure.Tests;
 /// One negative test per CHECK (SQLSTATE 23514 and the constraint's name), written by the role that writes the table in
 /// production. A guard test fails if a CHECK exists that no case here exercises.
 /// </summary>
-[Collection(SchemaCollection.Name)]
+[Collection(SchemaGroup.Name)]
 public class CheckConstraintTests(SchemaFixture fixture)
 {
     private static readonly string LongText = new('a', 65);

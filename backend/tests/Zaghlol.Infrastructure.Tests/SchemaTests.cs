@@ -4,7 +4,7 @@ using Zaghlol.Infrastructure.Persistence.Configurations;
 namespace Zaghlol.Infrastructure.Tests;
 
 /// <summary>The migrated schema against backend-schema.md section 2, column by column, for every table.</summary>
-[Collection(SchemaCollection.Name)]
+[Collection(SchemaGroup.Name)]
 public partial class SchemaTests(SchemaFixture fixture)
 {
     // Acceptance criterion: these six are named explicitly; the diff below covers every documented table.
@@ -20,6 +20,8 @@ public partial class SchemaTests(SchemaFixture fixture)
           AND c.relname NOT LIKE '\_\_EF%'
         ORDER BY c.relname, a.attnum
         """;
+
+    private static readonly string[] OnlyPlpgsql = ["plpgsql"];
 
     private string Superuser => fixture.Database.Superuser;
 
@@ -124,7 +126,7 @@ public partial class SchemaTests(SchemaFixture fixture)
     {
         var extensions = (await Db.QueryAsync(Superuser, "SELECT extname FROM pg_extension")).Select(r => (string)r[0]!);
 
-        Assert.Equal(new[] { "plpgsql" }, extensions);
+        Assert.Equal(OnlyPlpgsql, extensions);
     }
 
     [Fact]
