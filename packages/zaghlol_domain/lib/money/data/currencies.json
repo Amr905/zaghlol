@@ -1,6 +1,6 @@
 {
   "source": "ISO 4217 List One",
-  "published": "2000-01-01",
+  "published": "2026-09-17",
   "currencies": [
     {"code": "AED", "numeric": 784, "exponent": 2, "status": "active"},
     {"code": "AFN", "numeric": 971, "exponent": 2, "status": "active"},
@@ -14,7 +14,6 @@
     {"code": "BAM", "numeric": 977, "exponent": 2, "status": "active"},
     {"code": "BBD", "numeric": 52, "exponent": 2, "status": "active"},
     {"code": "BDT", "numeric": 50, "exponent": 2, "status": "active"},
-    {"code": "BGN", "numeric": 975, "exponent": 2, "status": "active"},
     {"code": "BHD", "numeric": 48, "exponent": 3, "status": "active"},
     {"code": "BIF", "numeric": 108, "exponent": 0, "status": "active"},
     {"code": "BMD", "numeric": 60, "exponent": 2, "status": "active"},
@@ -38,7 +37,6 @@
     {"code": "COP", "numeric": 170, "exponent": 2, "status": "active"},
     {"code": "COU", "numeric": 970, "exponent": 2, "status": "active", "fund": true},
     {"code": "CRC", "numeric": 188, "exponent": 2, "status": "active"},
-    {"code": "CUC", "numeric": 931, "exponent": 2, "status": "active"},
     {"code": "CUP", "numeric": 192, "exponent": 2, "status": "active"},
     {"code": "CVE", "numeric": 132, "exponent": 2, "status": "active"},
     {"code": "CZK", "numeric": 203, "exponent": 2, "status": "active"},
@@ -159,6 +157,7 @@
     {"code": "VND", "numeric": 704, "exponent": 0, "status": "active"},
     {"code": "VUV", "numeric": 548, "exponent": 0, "status": "active"},
     {"code": "WST", "numeric": 882, "exponent": 2, "status": "active"},
+    {"code": "XAD", "numeric": 396, "exponent": 2, "status": "active", "fund": true},
     {"code": "XAF", "numeric": 950, "exponent": 0, "status": "active"},
     {"code": "XCD", "numeric": 951, "exponent": 2, "status": "active"},
     {"code": "XCG", "numeric": 532, "exponent": 2, "status": "active"},

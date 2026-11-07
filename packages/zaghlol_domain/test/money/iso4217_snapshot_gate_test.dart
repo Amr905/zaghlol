@@ -7,9 +7,8 @@ void main() {
   final table = loadTable();
 
   group('snapshot gate (CR2)', () {
-    // Fails on purpose while tool/iso4217/list-one.xml is the reconstructed
-    // placeholder (published 2000-01-01). It blocks merge until a genuine
-    // SIX snapshot (Amendment 180 or later) is committed with --fresh.
+    // Guards against the reconstructed placeholder (sentinel published date
+    // 2000-01-01) or any pre-Amendment-180 snapshot coming back.
     test('published is a real SIX date on or after 2025-09-01', () {
       final day = RegExp(r'^\d{4}-\d{2}-\d{2}$');
       expect(day.hasMatch(table.published), isTrue);

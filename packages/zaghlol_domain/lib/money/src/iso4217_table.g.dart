@@ -1,6 +1,6 @@
 // GENERATED CODE - DO NOT MODIFY BY HAND.
 // Source: lib/money/data/currencies.json
-// (ISO 4217 List One, published 2000-01-01).
+// (ISO 4217 List One, published 2026-09-17).
 // Regenerate: dart run tool/gen_currencies.dart
 
 /// ISO 4217 rows (code, numeric, exponent, active, fund),
@@ -18,7 +18,6 @@ const List<(String, int, int, bool, bool)> iso4217Table = [
   ('BAM', 977, 2, true, false),
   ('BBD', 52, 2, true, false),
   ('BDT', 50, 2, true, false),
-  ('BGN', 975, 2, true, false),
   ('BHD', 48, 3, true, false),
   ('BIF', 108, 0, true, false),
   ('BMD', 60, 2, true, false),
@@ -42,7 +41,6 @@ const List<(String, int, int, bool, bool)> iso4217Table = [
   ('COP', 170, 2, true, false),
   ('COU', 970, 2, true, true),
   ('CRC', 188, 2, true, false),
-  ('CUC', 931, 2, true, false),
   ('CUP', 192, 2, true, false),
   ('CVE', 132, 2, true, false),
   ('CZK', 203, 2, true, false),
@@ -163,6 +161,7 @@ const List<(String, int, int, bool, bool)> iso4217Table = [
   ('VND', 704, 0, true, false),
   ('VUV', 548, 0, true, false),
   ('WST', 882, 2, true, false),
+  ('XAD', 396, 2, true, true),
   ('XAF', 950, 0, true, false),
   ('XCD', 951, 2, true, false),
   ('XCG', 532, 2, true, false),
