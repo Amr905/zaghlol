@@ -15,7 +15,10 @@ Map<String, Object> jsonRow() {
 }
 
 String jsonDoc(Map<String, Object> item) {
-  final doc = {'published': '2025-09-01', 'currencies': [item]};
+  // Built step by step: a collection literal nested in another one makes
+  // dart format split the outer literal.
+  final doc = <String, Object>{'published': '2025-09-01'};
+  doc['currencies'] = [item];
   return jsonEncode(doc);
 }
 
