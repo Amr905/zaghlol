@@ -75,6 +75,7 @@ jobs:
               status=1
             else
               cat "$GITHUB_WORKSPACE/custom_lint.log"
+              head -n 15 "$GITHUB_WORKSPACE/custom_lint.log" | while read -r line; do echo "::notice::custom_lint($dir) ok-run: $line"; done
             fi
           done
           exit $status
