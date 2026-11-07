@@ -191,7 +191,8 @@ public class CheckConstraintTests(SchemaFixture fixture)
             .ToHashSet(StringComparer.Ordinal);
         var tested = Cases.Values.Select(c => c.Constraint).ToHashSet(StringComparer.Ordinal);
 
-        Assert.Equal(39, inSchema.Count);
+        // 23 documented + 24 hardening (octet/char lengths, cause regex, audit, codes, formats).
+        Assert.Equal(47, inSchema.Count);
         Assert.Empty(inSchema.Except(tested));
         Assert.Empty(tested.Except(inSchema));
     }
@@ -203,12 +204,59 @@ public class CheckConstraintTests(SchemaFixture fixture)
         await Rows.InsertAsync(fixture.Database, "purchase_events", Set("cause", cause));
     }
 
-    [Fact]
-    public async Task ContributionsJustInsideThePrivacyLimitsAreAccepted()
+    public static TheoryData<string, string, string> AcceptedValues => new()
     {
-        await Rows.InsertAsync(fixture.Database, "merchant_contributions", Set("merchant_norm", new string('b', 64)));
-        await Rows.InsertAsync(fixture.Database, "merchant_contributions", Set("merchant_norm", "branch 12345"));
-        await Rows.InsertAsync(fixture.Database, "bank_requests", Set("institution_name_norm", new string('c', 64)));
+        { "merchant_contributions", "merchant_norm", new string('b', 64) },
+        { "merchant_contributions", "merchant_norm", "branch 12345" },
+        { "merchant_contributions", "merchant_norm", "فرع ١٢٣٤٥" },
+        { "merchant_contributions", "merchant_norm", "كارفور المعادي" },
+        { "merchant_contributions", "merchant_norm", "shop 12 34 5" },
+        { "merchant_contributions", "merchant_norm", "7 eleven 2024" },
+        { "merchant_contributions", "institution_code", "vodafone_cash" },
+        { "merchant_contributions", "institution_code", new string('a', 64) },
+        { "merchant_contributions", "category_code", "dining_out" },
+        { "bank_requests", "institution_name_norm", new string('c', 64) },
+        { "bank_requests", "institution_name_norm", "banque du caire" },
+        { "bank_requests", "country", "AE" },
+        { "installs", "app_version", "1.4.0" },
+        { "installs", "app_version", "1.4.0-beta.1" },
+        { "installs", "app_version", "1.4.0+42" },
+        { "installs", "app_version", "10.2" },
+        { "installs", "app_version", "1.2.3.4" },
+        { "store_notifications", "last_error", "STORE_UNAVAILABLE" },
+        { "store_notifications", "store_key", new string('k', 512) },
+        { "purchases", "store_key", new string('k', 512) },
+    };
+
+    [Theory]
+    [MemberData(nameof(AcceptedValues))]
+    public async Task ValuesJustInsideTheLimitsAreAccepted(string table, string column, string value)
+    {
+        await Rows.InsertAsync(fixture.Database, table, Set(column, value));
+    }
+
+    [Fact]
+    public async Task AuditDetailsWithTheDocumentedShapesAreAccepted()
+    {
+        // backend-schema.md section 2: support move details (no e-mail, order ID or free text) and a lookup target.
+        await Rows.InsertAsync(
+            fixture.Database,
+            "audit_log",
+            new Dictionary<string, object?>
+            {
+                ["action"] = "support_seat_move",
+                ["target"] = Guid.CreateVersion7().ToString(),
+                ["details"] = new Jsonb(
+                    """
+                    {"from_install": "0193a0c4-0000-7000-8000-000000000001", "to_install": "0193a0c4-0000-7000-8000-000000000002",
+                     "reason_code": "correction", "ticket_ref": "ZG-1234", "ownership_check": "order_id",
+                     "ownership_outcome": "pass", "outcome": "moved"}
+                    """),
+            });
+        await Rows.InsertAsync(
+            fixture.Database,
+            "audit_log",
+            new Dictionary<string, object?> { ["target"] = "email:" + Convert.ToHexStringLower(Rows.Bytes()) });
     }
 
     [Fact]
