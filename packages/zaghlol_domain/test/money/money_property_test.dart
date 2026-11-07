@@ -172,14 +172,54 @@ Generator<(Money, int)> get _allocEven {
   );
 }
 
+/// Reference Hamilton split: floor quotas, then one extra unit each to the
+/// R largest remainders (ties: lower index), never to a zero weight.
+List<BigInt> _hamilton(int amount, List<int> weights) {
+  final a = BigInt.from(amount).abs();
+  var total = BigInt.zero;
+  for (final w in weights) {
+    total += BigInt.from(w);
+  }
+  final shares = <BigInt>[];
+  final rests = <BigInt>[];
+  final positive = <int>[];
+  for (var i = 0; i < weights.length; i++) {
+    final quota = a * BigInt.from(weights[i]);
+    final floor = quota ~/ total;
+    shares.add(floor);
+    rests.add(quota - floor * total);
+    if (weights[i] > 0) {
+      positive.add(i);
+    }
+  }
+  final assigned = shares.fold(BigInt.zero, (s, x) => s + x);
+  final leftover = (a - assigned).toInt();
+  positive.sort((i, j) {
+    final byRest = rests[j].compareTo(rests[i]);
+    return byRest != 0 ? byRest : i - j;
+  });
+  for (final i in positive.take(leftover)) {
+    shares[i] += BigInt.one;
+  }
+  return [for (final s in shares) amount < 0 ? -s : s];
+}
+
+Generator<(Money, List<int>)> get _allocEqual {
+  return any.combine2(
+    any.money,
+    any.equalWeights,
+    (Money m, List<int> w) => (m, w),
+  );
+}
+
 void main() {
   group('1. addition laws', () {
-    Glados(any.samePair, explore).test('+ is commutative', (p) {
+    Glados(any.samePair, explore()).test('+ is commutative', (p) {
       final (a, b) = p;
       expect(_tryAdd(a, b), _tryAdd(b, a));
     });
 
-    Glados(any.sameTriple, explore).test('+ is associative', (t) {
+    Glados(any.sameTriple, explore()).test('+ is associative', (t) {
       final (a, b, c) = t;
       final left = _tryAdd(_tryAdd(a, b), c);
       final right = _tryAdd(a, _tryAdd(b, c));
@@ -188,17 +228,17 @@ void main() {
       }
     });
 
-    Glados(any.money, explore).test('zero is the identity', (a) {
+    Glados(any.money, explore()).test('zero is the identity', (a) {
       expect(a + Money.zero(a.currency), a);
       expect(Money.zero(a.currency) + a, a);
     });
 
-    Glados(any.money, explore).test('a + (-a) == 0', (a) {
+    Glados(any.money, explore()).test('a + (-a) == 0', (a) {
       expect((a + -a).isZero, isTrue);
       expect(-(-a), a);
     });
 
-    Glados(any.samePair, explore).test('a - b == a + (-b)', (p) {
+    Glados(any.samePair, explore()).test('a - b == a + (-b)', (p) {
       final (a, b) = p;
       Money? difference;
       try {
@@ -211,7 +251,7 @@ void main() {
   });
 
   group('2. overflow is exact', () {
-    Glados(any.samePair, explore).test('+ throws iff out of range', (p) {
+    Glados(any.samePair, explore()).test('+ throws iff out of range', (p) {
       final (a, b) = p;
       final exact = BigInt.from(a.minor) + BigInt.from(b.minor);
       if (_inRange(exact)) {
@@ -221,7 +261,7 @@ void main() {
       }
     });
 
-    Glados(any.samePair, explore).test('- throws iff out of range', (p) {
+    Glados(any.samePair, explore()).test('- throws iff out of range', (p) {
       final (a, b) = p;
       final exact = BigInt.from(a.minor) - BigInt.from(b.minor);
       if (_inRange(exact)) {
@@ -231,7 +271,7 @@ void main() {
       }
     });
 
-    Glados(_moneyFactor, explore).test('times throws iff overflow', (input) {
+    Glados(_moneyFactor, explore()).test('times throws iff overflow', (input) {
       final (m, f) = input;
       final exact = BigInt.from(m.minor) * BigInt.from(f);
       if (_inRange(exact)) {
@@ -241,7 +281,7 @@ void main() {
       }
     });
 
-    Glados(_mulDivInput, explore).test('mulDiv throws iff overflow', (input) {
+    Glados(_mulDivInput, explore()).test('mulDiv throws iff overflow', (input) {
       final (m, numerator, denominator, mode) = input;
       final product = BigInt.from(m.minor) * BigInt.from(numerator);
       final exact = _oracle(product, BigInt.from(denominator), mode);
@@ -258,7 +298,7 @@ void main() {
   });
 
   group('3. different currencies', () {
-    Glados(_mismatched, explore).test('mismatch throws, == is false', (p) {
+    Glados(_mismatched, explore()).test('mismatch throws, == is false', (p) {
       final (a, b) = p;
       expect(() => a + b, throwsA(isA<CurrencyMismatch>()));
       expect(() => a - b, throwsA(isA<CurrencyMismatch>()));
@@ -301,20 +341,36 @@ void main() {
           if (weights[i] > weights[j] && positive[i] < positive[j]) {
             monotonic = false;
           }
+          // Equal weights: shares never increase with the index.
+          final equal = weights[i] == weights[j];
+          if (equal && i < j && positive[i] < positive[j]) {
+            monotonic = false;
+          }
         }
       }
       expect(monotonic, isTrue);
+      // Hamilton reference: exactly the shares of the BigInt oracle.
+      final actual = shares.map((s) => BigInt.from(s.minor)).toList();
+      expect(actual, _hamilton(amount.minor, weights));
     }
 
-    Glados(_allocSmall, explore).test('weights 0..10^6', (input) {
+    Glados(_allocSmall, explore()).test('weights 0..10^6', (input) {
       checkAllocation(input.$1, input.$2);
     });
 
-    Glados(_allocBig, explore).test('weights up to maxMinor', (input) {
+    Glados(_allocBig, explore()).test('weights up to maxMinor', (input) {
       checkAllocation(input.$1, input.$2);
     });
 
-    Glados(_allocEven, explore).test('7. allocateEven spread <= 1', (input) {
+    Glados(_allocEqual, explore()).test('equal weights', (input) {
+      checkAllocation(input.$1, input.$2);
+      final shares = input.$1.abs().allocate(input.$2);
+      for (var i = 1; i < shares.length; i++) {
+        expect(shares[i] <= shares[i - 1], isTrue);
+      }
+    });
+
+    Glados(_allocEven, explore()).test('7. allocateEven spread <= 1', (input) {
       final (amount, parts) = input;
       final shares = amount.allocateEven(parts);
       expect(shares.length, parts);
@@ -325,30 +381,54 @@ void main() {
   });
 
   group('8. round trips', () {
-    Glados(any.money, explore).test('canonical string', (m) {
+    Glados(any.money, explore()).test('canonical string', (m) {
       expect(Money.parse(m.toCanonicalString(), m.currency), m);
       expect(Money.tryParse(m.toCanonicalString(), m.currency), m);
     });
 
-    Glados(any.money, explore).test('storage', (m) {
+    Glados(any.money, explore()).test('storage', (m) {
       final row = m.toStorage();
       expect(Money.fromStorage(row.minor, row.currency), m);
     });
 
-    Glados(any.money, explore).test('json', (m) {
+    Glados(any.money, explore()).test('json', (m) {
       expect(Money.fromJson(m.toJson()), m);
+      expect(Money.tryFromJson(m.toJson()), m);
+    });
+  });
+
+  group('equality and hashing', () {
+    Glados(any.money, explore()).test('equal copies hash equally', (m) {
+      final copies = [
+        Money(m.currency, m.minor),
+        Money.parse(m.toCanonicalString(), m.currency),
+        Money.fromStorage(m.minor, m.currency.code),
+        Money.fromJson(m.toJson()),
+      ];
+      for (final copy in copies) {
+        expect(copy, m);
+        expect(copy.hashCode, m.hashCode);
+      }
+    });
+
+    Glados(any.samePair, explore()).test('a == b iff same minor', (p) {
+      final (a, b) = p;
+      expect(a == b, a.minor == b.minor);
+      if (a == b) {
+        expect(a.hashCode, b.hashCode);
+      }
     });
   });
 
   group('9. MultiCurrencyTotal', () {
-    Glados(any.moneyList, explore).test('independent of input order', (xs) {
+    Glados(any.moneyList, explore()).test('independent of input order', (xs) {
       final total = MultiCurrencyTotal.of(xs);
       expect(MultiCurrencyTotal.of(xs.reversed), total);
       final shuffled = [...xs]..shuffle(Random(xs.length));
       expect(MultiCurrencyTotal.of(shuffled), total);
     });
 
-    Glados(any.moneyList, explore).test('of(xs)[c] is the sum in c', (xs) {
+    Glados(any.moneyList, explore()).test('of(xs)[c] is the sum in c', (xs) {
       final total = MultiCurrencyTotal.of(xs);
       for (final c in total.currencies) {
         final inC = xs.where((m) => m.currency == c);
@@ -357,7 +437,31 @@ void main() {
       expect(total.currencies.toSet(), xs.map((m) => m.currency).toSet());
     });
 
-    Glados(any.moneyList, explore).test('+ is associative', (xs) {
+    Glados(any.fullRangeMoneyList, explore()).test('full range', (xs) {
+      // Exact sums, range-checked once: the outcome (value or overflow)
+      // depends only on the multiset of items, never on their order.
+      MultiCurrencyTotal? tryOf(Iterable<Money> items) {
+        try {
+          return MultiCurrencyTotal.of(items);
+        } on MoneyOverflow {
+          return null;
+        }
+      }
+
+      final total = tryOf(xs);
+      expect(tryOf(xs.reversed), total);
+      final shuffled = [...xs]..shuffle(Random(xs.length));
+      expect(tryOf(shuffled), total);
+      final egp = Currency.of('EGP');
+      final kwd = Currency.of('KWD');
+      final fits = [egp, kwd].every((c) {
+        final sum = _sumMinor(xs.where((m) => m.currency == c));
+        return _inRange(sum);
+      });
+      expect(total != null, fits);
+    });
+
+    Glados(any.moneyList, explore()).test('+ is associative', (xs) {
       final third = xs.length ~/ 3;
       final a = MultiCurrencyTotal.of(xs.sublist(0, third));
       final b = MultiCurrencyTotal.of(xs.sublist(third, 2 * third));
@@ -368,7 +472,7 @@ void main() {
   });
 
   group('10. roundDiv', () {
-    Glados(any.division, explore).test('matches the oracle', (input) {
+    Glados(any.division, explore()).test('matches the oracle', (input) {
       final (n, d, mode) = input;
       expect(roundDiv(n, d, mode), _oracle(n, d, mode));
     });

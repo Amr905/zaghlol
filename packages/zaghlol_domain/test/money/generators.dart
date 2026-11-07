@@ -4,8 +4,31 @@ import 'package:zaghlol_domain/zaghlol_domain.dart';
 
 const int maxMinor = Money.maxMinor;
 
-/// Property runs per test (design note: 1000, default fixed seed).
-final ExploreConfig explore = ExploreConfig(numRuns: 1000);
+/// A fresh config for every property (design note: 1000 runs), each with
+/// its own fixed seed, so a failing property reproduces when run alone with
+/// `--name`. glados 1.1.7 takes the seed through `ExploreConfig.random`.
+ExploreConfig explore() => ExploreConfig(numRuns: 1000, random: Random(42));
+
+/// The int64 maximum (Dart VM / AOT).
+const int int64Max = 0x7FFFFFFFFFFFFFFF;
+
+/// Allocation weight edge cases: a single weight, all-equal weights,
+/// weights of maxMinor, and int64-scale weights whose sum exceeds 2^63.
+List<int> edgeWeights(Random random) {
+  final length = 1 + random.nextInt(20);
+  switch (random.nextInt(5)) {
+    case 0:
+      return [1 + random.nextInt(1000000)];
+    case 1:
+      return List<int>.filled(length, 1 + random.nextInt(1000));
+    case 2:
+      return List<int>.filled(length, maxMinor);
+    case 3:
+      return [int64Max, int64Max, 1];
+    default:
+      return [1 << 62, 1 << 62, 0, 1 << 62, 3];
+  }
+}
 
 final List<Currency> _exp0 = _withExponent(0);
 final List<Currency> _exp2 = _withExponent(2);
@@ -161,6 +184,9 @@ extension MoneyAnys on Any {
   Generator<List<int>> _weights(int Function(Random random) entry) {
     return simple(
       generate: (random, size) {
+        if (random.nextInt(4) == 0) {
+          return edgeWeights(random);
+        }
         final length = 1 + random.nextInt(50);
         final result = [for (var i = 0; i < length; i++) entry(random)];
         if (result.every((w) => w == 0)) {
@@ -175,6 +201,37 @@ extension MoneyAnys on Any {
         final shorter = list.sublist(0, list.length - 1);
         return shorter.any((w) => w > 0) ? [shorter] : const [];
       },
+    );
+  }
+
+  /// All-equal weights (length 1-50): 1, a random value or maxMinor.
+  Generator<List<int>> get equalWeights {
+    return simple(
+      generate: (random, size) {
+        final length = 1 + random.nextInt(50);
+        final values = [1, 1 + random.nextInt(1000000), maxMinor];
+        final value = values[random.nextInt(values.length)];
+        return List<int>.filled(length, value);
+      },
+      shrink: (list) => list.length <= 1 ? const [] : [list.sublist(1)],
+    );
+  }
+
+  /// Lists of 0-30 full-range amounts in two currencies, so per-currency
+  /// totals often leave the range.
+  Generator<List<Money>> get fullRangeMoneyList {
+    return simple(
+      generate: (random, size) {
+        const codes = ['EGP', 'KWD'];
+        final length = random.nextInt(31);
+        final result = <Money>[];
+        for (var i = 0; i < length; i++) {
+          final currency = Currency.of(codes[random.nextInt(codes.length)]);
+          result.add(Money(currency, minor(random, size).value));
+        }
+        return result;
+      },
+      shrink: (list) => list.isEmpty ? const [] : [list.sublist(1)],
     );
   }
 
