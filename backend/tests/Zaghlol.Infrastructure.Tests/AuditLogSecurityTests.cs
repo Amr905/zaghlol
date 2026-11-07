@@ -19,15 +19,15 @@ public class AuditLogSecurityTests(SchemaFixture fixture)
             .ToList();
 
         Assert.True((bool)enabled!);
-        Assert.Equal(
-            new[]
-            {
-                "audit_log_append:INSERT:ops_rw",
-                "audit_log_read:SELECT:ops_ro,ops_rw,worker_rw",
-                "audit_log_retention_delete:DELETE:worker_rw",
-            },
-            policies);
+        Assert.Equal(ExpectedPolicies, policies);
     }
+
+    private static readonly string[] ExpectedPolicies =
+    [
+        "audit_log_append:INSERT:ops_rw",
+        "audit_log_read:SELECT:ops_ro,ops_rw,worker_rw",
+        "audit_log_retention_delete:DELETE:worker_rw",
+    ];
 
     [Fact]
     public async Task TheWorkerCannotDeleteAFreshRow()

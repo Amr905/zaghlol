@@ -7,7 +7,8 @@ namespace Zaghlol.Infrastructure.Tests;
 [Collection(SchemaGroup.Name)]
 public class GrantTests(SchemaFixture fixture)
 {
-    private static readonly string[] TriggerFunctions = ["accounts_before_delete", "installs_before_delete"];
+    private static readonly string[] TriggerFunctions =
+        ["accounts_before_delete", "installs_before_delete", "installs_before_update", "purchases_before_update"];
 
     public static TheoryData<string, string> Denied => new()
     {
@@ -35,17 +36,76 @@ public class GrantTests(SchemaFixture fixture)
         { "zaghlol_ops_ro", "UPDATE zaghlol.feature_flags SET enabled = true" },
         { "migrator", "CREATE ROLE t122_probe" },
         { "migrator", "CREATE DATABASE t122_probe" },
+
+        // SEC F1: the direct read-only login can't bulk-read personal identifiers or bearer-like store tokens.
+        { "zaghlol_ops_ro", "SELECT email FROM zaghlol.accounts" },
+        { "zaghlol_ops_ro", "SELECT provider_subject FROM zaghlol.accounts" },
+        { "zaghlol_ops_ro", "SELECT * FROM zaghlol.accounts" },
+        { "zaghlol_ops_ro", "SELECT store_key FROM zaghlol.purchases" },
+        { "zaghlol_ops_ro", "SELECT linked_purchase_token FROM zaghlol.purchases" },
+        { "zaghlol_ops_ro", "SELECT store_key FROM zaghlol.store_notifications" },
+
+        // SEC F10 / CR#11-12
+        { "zaghlol_api", "SELECT merchant_norm, install_hash FROM zaghlol.merchant_contributions" },
+        { "zaghlol_api", "SELECT institution_name_norm FROM zaghlol.bank_requests" },
+        { "zaghlol_api", "UPDATE zaghlol.purchases SET dispute_frozen_until = NULL" },
+        { "zaghlol_api", "INSERT INTO zaghlol.daily_active_counts (day, platform, app_version, installs) VALUES (current_date, 'ios', '1.0.0', 1)" },
+        { "zaghlol_api", "SELECT * FROM zaghlol.daily_active_counts" },
+        { "zaghlol_worker", "UPDATE zaghlol.installs SET token_hash = NULL" },
+        { "zaghlol_worker", "UPDATE zaghlol.installs SET seat_key_trusted = true" },
+        { "zaghlol_worker", "UPDATE zaghlol.purchases SET account_id = NULL" },
+        { "zaghlol_worker", "UPDATE zaghlol.purchases SET account_linked_by = NULL" },
+        { "zaghlol_admin", "SELECT * FROM zaghlol.replay_guard" },
+        { "zaghlol_admin", "DELETE FROM zaghlol.installs" },
+        { "zaghlol_admin", "SELECT apple_refresh_token_enc FROM zaghlol.accounts" },
     };
 
     public static TheoryData<string, string> Allowed => new()
     {
         { "zaghlol_ops_ro", "SELECT id, platform, seat_key_trusted FROM zaghlol.installs" },
         { "zaghlol_ops_ro", "SELECT * FROM zaghlol.v_entitlements" },
+        { "zaghlol_ops_ro", "SELECT id, provider, created_at FROM zaghlol.accounts" },
+        { "zaghlol_ops_ro", "SELECT id, state, store FROM zaghlol.purchases" },
         { "zaghlol_admin", "UPDATE zaghlol.purchases SET dispute_frozen_until = NULL WHERE false" },
         { "zaghlol_admin", "UPDATE zaghlol.purchase_seats SET next_move_at = NULL, last_moved_at = NULL WHERE false" },
+        { "zaghlol_admin", "SELECT email, provider_subject FROM zaghlol.accounts" },
+        { "zaghlol_admin", "SELECT store_key, linked_purchase_token FROM zaghlol.purchases" },
         { "zaghlol_api", "SELECT * FROM zaghlol.v_entitlements" },
+        { "zaghlol_api", "UPDATE zaghlol.purchases SET state = 'active', support_link_notice_pending = false WHERE false" },
+        {
+            "zaghlol_api",
+            "INSERT INTO zaghlol.merchant_contributions (id, merchant_norm, institution_code, category_code, install_hash) "
+            + "VALUES (gen_random_uuid(), 'grant probe', 'cib', 'groceries', decode(md5(random()::text) || md5(random()::text), 'hex')) "
+            + "RETURNING received_at"
+        },
         { "zaghlol_worker", "DELETE FROM zaghlol.audit_log WHERE false" },
+        { "zaghlol_worker", "UPDATE zaghlol.installs SET deleted_at = now(), registration_key_hash = NULL WHERE false" },
+        { "zaghlol_worker", "UPDATE zaghlol.purchases SET state = 'expired', acknowledged = true WHERE false" },
     };
+
+    [Fact]
+    public async Task OnlyTheFiveLoginsMayConnectToTheDatabase()
+    {
+        var acl = (await Db.QueryAsync(
+                fixture.Database.Superuser,
+                """
+                SELECT coalesce(r.rolname, 'PUBLIC') || '|' || a.privilege_type
+                FROM pg_database d
+                CROSS JOIN LATERAL aclexplode(coalesce(d.datacl, acldefault('d', d.datdba))) a
+                LEFT JOIN pg_roles r ON r.oid = a.grantee
+                WHERE d.datname = current_database() AND a.grantee <> d.datdba
+                """))
+            .Select(r => (string)r[0]!)
+            .Order(StringComparer.Ordinal)
+            .ToList();
+
+        Assert.Equal(ExpectedDatabaseAcl, acl);
+    }
+
+    private static readonly string[] ExpectedDatabaseAcl =
+    [
+        "migrator|CONNECT", "zaghlol_admin|CONNECT", "zaghlol_api|CONNECT", "zaghlol_ops_ro|CONNECT", "zaghlol_worker|CONNECT",
+    ];
 
     [Fact]
     public async Task TableAndColumnPrivilegesEqualTheGrantMatrix()
@@ -117,7 +177,7 @@ public class GrantTests(SchemaFixture fixture)
     }
 
     [Fact]
-    public async Task TriggerFunctionsAreSecurityDefinerWithAFixedSearchPathAndNotExecutableByAnyone()
+    public async Task TriggerFunctionsHaveAFixedSearchPathAndOnlyTheDeleteBackstopsAreSecurityDefiner()
     {
         var functions = await Db.QueryAsync(
             fixture.Database.Superuser,
@@ -131,7 +191,9 @@ public class GrantTests(SchemaFixture fixture)
         Assert.Equal(TriggerFunctions, functions.Select(f => (string)f[0]!));
         Assert.All(functions, f =>
         {
-            Assert.True((bool)f[1]!);
+            // The delete backstops update another table, so they run as the owner; the update invariants only read
+            // OLD and NEW and run as the caller.
+            Assert.Equal(((string)f[0]!).EndsWith("_before_delete", StringComparison.Ordinal), (bool)f[1]!);
             Assert.Equal("search_path=zaghlol, pg_temp", f[2]);
             Assert.Equal(0L, f[3]);
         });
