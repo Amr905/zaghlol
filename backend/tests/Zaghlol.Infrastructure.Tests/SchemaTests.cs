@@ -217,6 +217,7 @@ public partial class SchemaTests(SchemaFixture fixture)
             ["ix_installs_last_seen"] = "(last_seen_at)",
             ["ix_installs_deleted_at"] = "WHERE (deleted_at IS NOT NULL)",
             ["ix_installs_registration_pending"] = "WHERE (registration_key_hash IS NOT NULL)",
+            ["ux_installs_token_hash"] = "CREATE UNIQUE INDEX ux_installs_token_hash ON zaghlol.installs USING btree (token_hash)",
             ["ix_purchases_install"] = "(install_id)",
             ["ix_purchases_account"] = "(account_id)",
             ["ix_purchases_unacked"] = "WHERE ((store = 'google_play'::text) AND (acknowledged = false))",

@@ -34,6 +34,9 @@ internal sealed class InstallConfiguration : IEntityTypeConfiguration<Install>
         builder.Property(x => x.LastSeenAt).HasDefaultValueSql("now()");
         builder.Property(x => x.SeatKeyTrusted).HasDefaultValue(false).HasComment(SeatKeyTrustedComment);
 
+        // T-124: install-token auth is one indexed lookup by SHA-256(token); two installs can never share a token hash.
+        builder.HasIndex(x => x.TokenHash).IsUnique().HasDatabaseName("ux_installs_token_hash");
+
         // Retention indexes (backend-schema.md section 4).
         builder.HasIndex(x => x.LastSeenAt).HasDatabaseName("ix_installs_last_seen");
         builder.HasIndex(x => x.DeletedAt).HasDatabaseName("ix_installs_deleted_at").HasFilter("deleted_at IS NOT NULL");

@@ -66,6 +66,7 @@ CREATE TABLE installs (
                                                -- false -> true. Gates the over-cap sign-in rebind (D-65(a), backend-api §4.3)
 );
 CREATE INDEX ix_installs_last_seen ON installs(last_seen_at);
+CREATE UNIQUE INDEX ux_installs_token_hash ON installs(token_hash);  -- T-124 (migration InstallTokenHashUnique): install auth is one lookup by hash
 
 -- Optional accounts (FR-ACCT, FR-BE-09)
 CREATE TABLE accounts (
