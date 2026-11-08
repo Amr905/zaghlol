@@ -12,7 +12,7 @@ environment:
 hooks:
   user_defines:
     sqlite3:
-      source: sqlite3mc
+      source: sqlite3
 
 workspace:
   - app
