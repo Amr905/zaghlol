@@ -58,6 +58,10 @@ jobs:
           fi
       - name: T-165 backup assertion self-test (negative controls)
         run: bash .github/scripts/test-check-no-os-backup.sh
+      # R2-N1 (T-003 review, landed in T-007): the app-regen commit job's
+      # pubspec.lock validator, run against the current lock and bad fixtures.
+      - name: pubspec.lock validator self-test (app-regen)
+        run: bash .github/scripts/test-lock-validator.sh
       - name: dart format
         run: |
           if ! dart format --output=none --set-exit-if-changed . > format.log 2>&1; then

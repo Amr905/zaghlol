@@ -190,14 +190,105 @@ jobs:
             if [ "$rel" = "pubspec.lock" ]; then
               [ "$LOCK" = "true" ] || { echo "::error::unexpected pubspec.lock"; exit 1; }
               [ "$size" -le 204800 ] || { echo "::error::pubspec.lock larger than 200 KB"; exit 1; }
-              grep -qE '^packages:$' "$f" || { echo "::error::pubspec.lock lacks top-level packages:"; exit 1; }
-              grep -qE '^sdks:$' "$f" || { echo "::error::pubspec.lock lacks top-level sdks:"; exit 1; }
-              if grep -E '^    source: ' "$f" | grep -vE '^    source: (hosted|sdk)$'; then
-                echo "::error::pubspec.lock has a source other than hosted/sdk (git/path refused)"; exit 1
-              fi
-              if grep -E '^      url: ' "$f" | grep -vE '^      url: "https://pub\.dev"$'; then
-                echo "::error::pubspec.lock has a hosted url other than https://pub.dev"; exit 1
-              fi
+              # R2-N1: structural check with the runner's system Python and
+              # PyYAML (python3-yaml), isolated (-I: no repo code, no user
+              # site, no PYTHON* env). No pip: a missing yaml module fails
+              # closed. The static job of app-ci self-tests the code between
+              # the markers against .github/scripts/fixtures/pubspec-lock/.
+              /usr/bin/python3 -I - "$f" <<'PY' || { echo "::error::pubspec.lock failed validation"; exit 1; }
+          # BEGIN lock-validator
+          import re
+          import sys
+
+          try:
+              import yaml
+          except ImportError:
+              print("::error::PyYAML (python3-yaml) is not installed on the runner")
+              sys.exit(1)
+
+
+          class StrictLoader(yaml.SafeLoader):
+              """SafeLoader that refuses anchors, aliases, merge keys and duplicate keys."""
+
+              def compose_node(self, parent, index):
+                  event = self.peek_event()
+                  if isinstance(event, yaml.AliasEvent) or getattr(event, "anchor", None) is not None:
+                      raise yaml.YAMLError("anchors and aliases are not allowed")
+                  return super().compose_node(parent, index)
+
+              def construct_mapping(self, node, deep=False):
+                  if not isinstance(node, yaml.MappingNode):
+                      raise yaml.YAMLError("expected a mapping")
+                  seen = set()
+                  for key_node, _ in node.value:
+                      if key_node.tag == "tag:yaml.org,2002:merge":
+                          raise yaml.YAMLError("merge keys are not allowed")
+                      key = self.construct_object(key_node, deep=True)
+                      if not isinstance(key, str):
+                          raise yaml.YAMLError("non-string key")
+                      if key in seen:
+                          raise yaml.YAMLError("duplicate key: " + key)
+                      seen.add(key)
+                  return super().construct_mapping(node, deep=deep)
+
+
+          def fail(message):
+              print("::error::pubspec.lock: " + message)
+              sys.exit(1)
+
+
+          NAME = re.compile(r"^[a-z_][a-z0-9_]*$")
+          SHA256 = re.compile(r"^[0-9a-f]{64}$")
+          DEPENDENCY = {"direct main", "direct dev", "direct overridden", "transitive"}
+          ENTRY_KEYS = {"dependency", "description", "source", "version"}
+
+          with open(sys.argv[1], "rb") as handle:
+              raw = handle.read()
+          try:
+              lock = yaml.load(raw.decode("utf-8"), Loader=StrictLoader)
+          except (UnicodeDecodeError, yaml.YAMLError) as error:
+              fail("not valid strict YAML (" + type(error).__name__ + ": " + str(error).splitlines()[0][:200] + ")")
+
+          if not isinstance(lock, dict):
+              fail("top level is not a mapping")
+          if set(lock) != {"packages", "sdks"}:
+              fail("top-level keys must be exactly packages and sdks, got " + ", ".join(sorted(map(str, lock))))
+          packages = lock["packages"]
+          if not isinstance(packages, dict):
+              fail("packages is not a mapping")
+          for name, entry in packages.items():
+              if not NAME.match(name):
+                  fail("invalid package name")
+              if not isinstance(entry, dict) or set(entry) != ENTRY_KEYS:
+                  fail(name + ": entry must have exactly dependency, description, source, version")
+              if entry["dependency"] not in DEPENDENCY:
+                  fail(name + ": unexpected dependency kind")
+              if not isinstance(entry["version"], str):
+                  fail(name + ": version is not a string")
+              source = entry["source"]
+              description = entry["description"]
+              if source == "hosted":
+                  if not isinstance(description, dict) or set(description) != {"name", "sha256", "url"}:
+                      fail(name + ": hosted description must have exactly name, sha256, url")
+                  if description["name"] != name:
+                      fail(name + ": description.name does not match the package")
+                  if description["url"] != "https://pub.dev":
+                      fail(name + ": hosted url is not https://pub.dev")
+                  if not isinstance(description["sha256"], str) or not SHA256.match(description["sha256"]):
+                      fail(name + ": missing or malformed sha256")
+              elif source == "sdk":
+                  if description != "flutter":
+                      fail(name + ": sdk description is not flutter")
+              else:
+                  fail(name + ": source must be hosted or sdk (git/path refused)")
+          sdks = lock["sdks"]
+          if not isinstance(sdks, dict) or "dart" not in sdks or not set(sdks) <= {"dart", "flutter"}:
+              fail("sdks must have dart and may have flutter, nothing else")
+          if not all(isinstance(value, str) for value in sdks.values()):
+              fail("sdk constraints must be strings")
+          print("pubspec.lock valid: %d packages (PyYAML %s)" % (len(packages), yaml.__version__))
+          # END lock-validator
+          PY
               continue
             fi
             [ "$GOLDENS" = "true" ] || { echo "::error::unexpected file $rel"; exit 1; }
