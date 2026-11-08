@@ -50,7 +50,7 @@ Step 1 — SMS
 │    wallets and InstaPay       │
 │  ✔ Personal messages are      │
 │    never read or saved        │
-│  ✔ Everything stays on this   │
+│  ✔ Money data stays on this   │
 │    phone                      │
 │                              │
 │  [ Allow reading bank SMS ]  │  Primary → system dialog
