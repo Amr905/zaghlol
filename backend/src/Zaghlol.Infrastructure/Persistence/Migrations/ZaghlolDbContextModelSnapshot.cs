@@ -770,6 +770,10 @@ namespace Zaghlol.Infrastructure.Persistence.Migrations
                     b.HasIndex("LastSeenAt")
                         .HasDatabaseName("ix_installs_last_seen");
 
+                    b.HasIndex("TokenHash")
+                        .IsUnique()
+                        .HasDatabaseName("ux_installs_token_hash");
+
                     b.ToTable("installs", "zaghlol", t =>
                         {
                             t.HasCheckConstraint("ck_installs_app_version", "app_version ~ '^[0-9]{1,4}(\\.[0-9]{1,4}){1,3}([+-][0-9A-Za-z.-]{1,32})?$'");
