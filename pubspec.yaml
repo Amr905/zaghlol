@@ -10,3 +10,4 @@ workspace:
   - app
   - packages/zaghlol_domain
   - packages/zaghlol_parsing
+  - tools/lints

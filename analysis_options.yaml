@@ -1,5 +1,5 @@
 # Shared analysis options for the whole workspace (app + packages).
-# riverpod_lint / custom_lint plugins are added in T-002.
+# The zaghlol_lints rules (T-002) run via tools/lints/bin/zaghlol_lints.dart.
 include: package:lints/recommended.yaml
 
 analyzer:
