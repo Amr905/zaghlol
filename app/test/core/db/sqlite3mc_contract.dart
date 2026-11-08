@@ -241,14 +241,8 @@ void applyOpenSequence(
 }) {
   _rawExec(raw, "PRAGMA cipher = 'sqlcipher'", 'pragma_cipher');
   _rawExec(raw, 'PRAGMA legacy = 4', 'pragma_legacy');
-  switch (key) {
-    case RawKey(:final hex):
-      _rawExecSecret(raw, 'PRAGMA key = "x\'$hex\'"', 'pragma_key');
-    case PassphraseKey(:final passphrase):
-      _rawExecSecret(raw, "PRAGMA key = '$passphrase'", 'pragma_key');
-    case NoKey():
-      break;
-  }
+  // NEGATIVE PROOF (b): PRAGMA key removed.
+  key.hashCode;
   _rawExec(raw, 'PRAGMA temp_store = 2', 'pragma_temp_store');
   _rawExec(raw, 'PRAGMA journal_mode = WAL', 'pragma_journal_mode');
   _rawExec(raw, 'PRAGMA synchronous = NORMAL', 'pragma_synchronous');
