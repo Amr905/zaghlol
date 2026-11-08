@@ -8,6 +8,8 @@ public sealed class SensitiveTests
 {
     private const string Secret = "ZgHlSentinelQ7x2Vn9w";
 
+    private static readonly JsonSerializerOptions Web = new(JsonSerializerDefaults.Web);
+
     private sealed record Body(Sensitive<string> OrderId, Sensitive<string[]> SeatKeys, string Plain);
 
     [Fact]
@@ -37,7 +39,7 @@ public sealed class SensitiveTests
     {
         var body = JsonSerializer.Deserialize<Body>(
             "{\"orderId\":\"" + Secret + "\",\"seatKeys\":[\"" + Secret + "\",\"b\"],\"plain\":\"p\"}",
-            new JsonSerializerOptions(JsonSerializerDefaults.Web))!;
+            Web)!;
 
         Assert.Equal(Secret, body.OrderId.Reveal());
         Assert.Equal([Secret, "b"], body.SeatKeys.Reveal());

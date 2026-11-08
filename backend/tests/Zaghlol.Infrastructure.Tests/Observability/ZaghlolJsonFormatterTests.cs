@@ -11,6 +11,8 @@ public sealed partial class ZaghlolJsonFormatterTests
 {
     private const string Sentinel = "ZgHlSentinelQ7x2Vn9w";
 
+    private static readonly int[] Pair = [1, 2];
+
     [GeneratedRegex("^\\d{4}-\\d{2}-\\d{2}T\\d{2}:\\d{2}:\\d{2}\\.\\d{3}Z$")]
     private static partial Regex Timestamp();
 
@@ -150,7 +152,7 @@ public sealed partial class ZaghlolJsonFormatterTests
         var line = LogCapture.Single(LogCapture.Run(log => log
             .ForContext("Status", "200")
             .ForContext("Count", 3)
-            .ForContext("DurationMs", new[] { 1, 2 }, destructureObjects: true)
+            .ForContext("DurationMs", Pair, destructureObjects: true)
             .Information("x")));
 
         Assert.Equal(LogFieldPolicy.InvalidValue, line.GetProperty("status").GetString());

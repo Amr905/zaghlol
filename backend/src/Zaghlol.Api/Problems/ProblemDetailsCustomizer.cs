@@ -17,12 +17,13 @@ internal static class ProblemDetailsCustomizer
         problem.Status = status;
         problem.Instance = null;
 
-        if (!problem.Extensions.ContainsKey("code"))
+        if (!problem.Extensions.TryGetValue("code", out var existing))
         {
-            problem.Extensions["code"] = ProblemCodes.ForStatus(status);
+            existing = ProblemCodes.ForStatus(status);
+            problem.Extensions["code"] = existing;
         }
 
-        if (problem.Extensions["code"] is string code)
+        if (existing is string code)
         {
             context.HttpContext.Items[RequestLogItems.ProblemCode] = code;
         }
