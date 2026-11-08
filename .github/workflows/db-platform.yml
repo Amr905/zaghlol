@@ -13,6 +13,10 @@ name: db-platform
 #
 # No key, sentinel or row text is ever printed: the tests print only
 # numbers/flags/codes, and the interop key stays in $RUNNER_TEMP (masked).
+#
+# The push `paths` filter sees only the pushed range. After an app-regen
+# `[regen-lock]` bot commit (which triggers nothing), the follow-up push must
+# touch one of these paths, or dispatch the workflow (once it is on main).
 on:
   workflow_dispatch:
   push:
