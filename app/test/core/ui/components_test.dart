@@ -16,7 +16,8 @@ Widget _app(
     darkTheme: ZaghlolTheme.dark,
     themeMode: dark ? ThemeMode.dark : ThemeMode.light,
     builder: (context, app) => MediaQuery(
-      data: MediaQuery.of(context).copyWith(textScaler: TextScaler.linear(scale)),
+      data: MediaQuery.of(context)
+          .copyWith(textScaler: TextScaler.linear(scale)),
       child: app!,
     ),
     home: Scaffold(body: Center(child: child)),
@@ -31,12 +32,23 @@ void main() {
     testWidgets('light and dark expose the right tokens', (tester) async {
       late ZColors seen;
       await tester.pumpWidget(
-        _app(Builder(builder: (c) => Text('x', style: TextStyle(color: (seen = ZColors.of(c)).text)))),
+        _app(
+          Builder(
+            builder: (c) =>
+                Text('x', style: TextStyle(color: (seen = ZColors.of(c)).text)),
+          ),
+        ),
       );
       expect(seen.bg, const Color(0xFFF3FBF7));
       expect(seen.primary, const Color(0xFF0F7A55));
       await tester.pumpWidget(
-        _app(Builder(builder: (c) => Text('x', style: TextStyle(color: (seen = ZColors.of(c)).text))), dark: true),
+        _app(
+          Builder(
+            builder: (c) =>
+                Text('x', style: TextStyle(color: (seen = ZColors.of(c)).text)),
+          ),
+          dark: true,
+        ),
       );
       await tester.pumpAndSettle();
       expect(seen.bg, const Color(0xFF08130F));
@@ -59,14 +71,16 @@ void main() {
       expect(taps, 1);
     });
 
-    testWidgets('disabled: no tap, 38% opacity, label kept', (
-      tester,
-    ) async {
+    testWidgets('disabled: no tap, 38% opacity, label kept', (tester) async {
       final handle = tester.ensureSemantics();
-      await tester.pumpWidget(_app(const ZButton(label: 'Go', onPressed: null)));
+      await tester.pumpWidget(
+        _app(const ZButton(label: 'Go', onPressed: null)),
+      );
       await tester.tap(find.text('Go'), warnIfMissed: false);
       expect(
-        tester.widgetList<Opacity>(find.byType(Opacity)).any((o) => o.opacity == 0.38),
+        tester
+            .widgetList<Opacity>(find.byType(Opacity))
+            .any((o) => o.opacity == 0.38),
         isTrue,
       );
       expect(tester.getSemantics(find.byType(ZButton)).label, 'Go');
@@ -108,7 +122,10 @@ void main() {
       await tester.pumpWidget(
         _app(ZButton(label: 'Go', onPressed: () {}, size: ZButtonSize.small)),
       );
-      expect(tester.getSize(find.byType(ZButton)).height, greaterThanOrEqualTo(48));
+      expect(
+        tester.getSize(find.byType(ZButton)).height,
+        greaterThanOrEqualTo(48),
+      );
     });
 
     testWidgets('icon sits at the start edge in RTL and LTR', (tester) async {
@@ -149,9 +166,7 @@ void main() {
   });
 
   group('ZChip and ZPill', () {
-    testWidgets('selected chip keeps its label and taps', (
-      tester,
-    ) async {
+    testWidgets('selected chip keeps its label and taps', (tester) async {
       final handle = tester.ensureSemantics();
       var taps = 0;
       await tester.pumpWidget(
@@ -203,12 +218,18 @@ void main() {
           ),
         ),
       );
-      expect(_textColor(tester, find.textContaining('-450')), ZColors.light.text);
+      expect(
+        _textColor(tester, find.textContaining('-450')),
+        ZColors.light.text,
+      );
       expect(
         _textColor(tester, find.textContaining('+3500')),
         ZColors.light.incomeText,
       );
-      expect(_textColor(tester, find.text('⁨450⁩')), ZColors.light.textMuted);
+      expect(
+        _textColor(tester, find.text('\u2068450\u2069')),
+        ZColors.light.textMuted,
+      );
     });
 
     testWidgets('masked mode shows the mask, never the amount', (tester) async {
@@ -226,7 +247,10 @@ void main() {
         _app(
           const SizedBox(
             width: 120,
-            child: ZMoneyText(text: '-123,456,789.00 EGP', size: ZMoneySize.display),
+            child: ZMoneyText(
+              text: '-123,456,789.00 EGP',
+              size: ZMoneySize.display,
+            ),
           ),
           scale: 1.3,
         ),
@@ -238,7 +262,9 @@ void main() {
   group('ZBanner', () {
     for (final t in ZBannerTone.values) {
       testWidgets('tone ${t.name} renders message', (tester) async {
-        await tester.pumpWidget(_app(ZBanner(message: 'msg ${t.name}', tone: t)));
+        await tester.pumpWidget(
+          _app(ZBanner(message: 'msg ${t.name}', tone: t)),
+        );
         expect(find.text('msg ${t.name}'), findsOneWidget);
       });
     }

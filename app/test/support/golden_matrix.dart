@@ -51,9 +51,8 @@ Widget goldenHarness(GoldenVariant v, Widget child) {
     darkTheme: ZaghlolTheme.dark,
     themeMode: v.dark ? ThemeMode.dark : ThemeMode.light,
     builder: (context, app) => MediaQuery(
-      data: MediaQuery.of(context).copyWith(
-        textScaler: TextScaler.linear(v.textScale),
-      ),
+      data: MediaQuery.of(context)
+          .copyWith(textScaler: TextScaler.linear(v.textScale)),
       child: Directionality(
         textDirection: v.isRtl ? TextDirection.rtl : TextDirection.ltr,
         child: app!,
@@ -65,10 +64,7 @@ Widget goldenHarness(GoldenVariant v, Widget child) {
         child: Builder(
           builder: (context) => ColoredBox(
             color: Theme.of(context).scaffoldBackgroundColor,
-            child: Padding(
-              padding: const EdgeInsets.all(16),
-              child: child,
-            ),
+            child: Padding(padding: const EdgeInsets.all(16), child: child),
           ),
         ),
       ),

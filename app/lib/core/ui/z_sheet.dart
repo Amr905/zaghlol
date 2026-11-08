@@ -19,13 +19,12 @@ Future<T?> showZSheet<T>({
       duration: ZMotion.sheet,
       curve: ZMotion.curve,
     ),
-    builder: (ctx) =>
-        ZSheetBody(
-          title: title,
-          actions: actions,
-          fullHeight: fullHeight,
-          child: builder(ctx),
-        ),
+    builder: (ctx) => ZSheetBody(
+      title: title,
+      actions: actions,
+      fullHeight: fullHeight,
+      child: builder(ctx),
+    ),
   );
 }
 
