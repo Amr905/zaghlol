@@ -1,4 +1,4 @@
-#pragma warning disable CA1848, CA2254 // Test endpoints log through the logger on purpose, with values in placeholders.
+#pragma warning disable CA1848, CA1873, CA2254 // Test endpoints log through the logger on purpose, with values in placeholders.
 
 using System.Buffers.Text;
 using System.Collections.Concurrent;
@@ -215,6 +215,7 @@ public abstract class ObservabilityHostFixture : IAsyncLifetime, IDisposable
     {
         meterListener?.Dispose();
         Kms.Dispose();
+        GC.SuppressFinalize(this);
     }
 
     public async Task DisposeAsync()

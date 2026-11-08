@@ -4,6 +4,7 @@ using System.Text.Json;
 using Microsoft.AspNetCore.HttpLogging;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Options;
+using Zaghlol.Api.Observability;
 using Zaghlol.Api.Signing;
 using Zaghlol.Infrastructure.Logging;
 using Zaghlol.Infrastructure.Observability;
