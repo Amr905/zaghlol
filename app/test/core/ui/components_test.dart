@@ -11,15 +11,18 @@ Widget _app(
   double scale = 1.0,
 }) {
   return MaterialApp(
-    locale: rtl ? const Locale('ar', 'EG') : const Locale('en'),
-    supportedLocales: [rtl ? const Locale('ar', 'EG') : const Locale('en')],
     theme: ZaghlolTheme.light,
     darkTheme: ZaghlolTheme.dark,
     themeMode: dark ? ThemeMode.dark : ThemeMode.light,
+    // Material's built-in delegate only knows `en`, so direction is forced
+    // here instead of coming from an `ar` locale (l10n lands with T-0xx).
     builder: (context, app) => MediaQuery(
       data: MediaQuery.of(context)
           .copyWith(textScaler: TextScaler.linear(scale)),
-      child: app!,
+      child: Directionality(
+        textDirection: rtl ? TextDirection.rtl : TextDirection.ltr,
+        child: app!,
+      ),
     ),
     home: Scaffold(body: Center(child: child)),
   );

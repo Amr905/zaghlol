@@ -45,8 +45,7 @@ const goldenVariantsScaled = <GoldenVariant>[
 Widget goldenHarness(GoldenVariant v, Widget child) {
   return MaterialApp(
     debugShowCheckedModeBanner: false,
-    locale: v.locale,
-    supportedLocales: [v.locale],
+    // Direction is forced below: Material's built-in delegate only knows `en`.
     theme: ZaghlolTheme.light,
     darkTheme: ZaghlolTheme.dark,
     themeMode: v.dark ? ThemeMode.dark : ThemeMode.light,
