@@ -150,7 +150,7 @@ Widget _sheet() => ZSheetBody(
 
 void main() {
   goldenMatrix('buttons', _buttons, size: const Size(390, 560));
-  goldenMatrix('chips_pills', _chips, size: const Size(390, 200));
+  goldenMatrix('chips_pills', _chips, size: const Size(390, 240));
   goldenMatrix('cards_rows', _cards, size: const Size(390, 360));
   goldenMatrix('money_text', _money, size: const Size(390, 240));
   goldenMatrix('banners', _banners, size: const Size(390, 420));
