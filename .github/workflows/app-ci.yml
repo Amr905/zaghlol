@@ -54,12 +54,6 @@ jobs:
             while read -r line; do echo "::error::format: $line"; done < format.log
             exit 1
           fi
-      - name: TEMP show format diff
-        if: always()
-        continue-on-error: true
-        run: |
-          dart format . > /dev/null 2>&1 || true
-          git diff -- app tools | base64 -w0 | fold -w 3000 | nl -ba -w2 -s: | while read -r l; do echo "::error::FD$l"; done
       - name: flutter analyze
         run: |
           if ! flutter analyze > analyze.log 2>&1; then
@@ -82,6 +76,12 @@ jobs:
       - name: flutter test (app, non-golden)
         working-directory: app
         run: flutter test --exclude-tags golden
+      - name: TEMP show test failures
+        if: always()
+        working-directory: app
+        continue-on-error: true
+        run: |
+          flutter test --exclude-tags golden --reporter expanded 2>&1 | grep -v "^\s*$" | grep -B2 -A25 -E "EXCEPTION|FAILED|Expected|Actual" | head -c 24000 | base64 -w0 | fold -w 3000 | nl -ba -w2 -s: | while read -r l; do echo "::error::FD$l"; done
       - name: dart test (zaghlol_domain)
         working-directory: packages/zaghlol_domain
         run: dart test
