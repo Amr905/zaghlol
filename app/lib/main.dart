@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 
+import 'core/theme/app_theme.dart';
+
 void main() {
   runApp(const ZaghlolApp());
 }
@@ -12,10 +14,8 @@ class ZaghlolApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      theme: ThemeData(
-        colorScheme: ColorScheme.fromSeed(seedColor: const Color(0xFF0F7A55)),
-        scaffoldBackgroundColor: const Color(0xFFF3FBF7),
-      ),
+      theme: ZaghlolTheme.light,
+      darkTheme: ZaghlolTheme.dark,
       home: const Scaffold(body: SizedBox.shrink()),
     );
   }
