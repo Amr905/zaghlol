@@ -1,1 +1,198 @@
 ﻿auto task/T-007-sqlcipher 3e00b718049ca1188a642307cffd4b3b067a9cc7 2026-11-08T23:33:12.3655586+02:00
+
+
+
+[23:33:17] === STEP pub-get (in C:\Users\amr90\zaghlol-ci\repo)
+Resolving dependencies...
+flutter : The current Dart SDK version is 3.13.5.
+At C:\Projects\Zaghlol\.zaghlol-local-ci\runner.ps1:67 char:39
++ ... r += Step $log 'pub-get' $Repo { flutter pub get --enforce-lockfile }
++                                      ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    + CategoryInfo          : NotSpecified: (The current Dart SDK version is 3.13.5.:String) [], RemoteException
+    + FullyQualifiedErrorId : NativeCommandError
+ 
+
+Because zaghlol_workspace requires SDK version ^3.13.7, version solving failed.
+Failed to update packages.
+
+[23:33:18] === RESULT pub-get exit=1
+[23:33:18] === STEP format (in C:\Users\amr90\zaghlol-ci\repo)
+dart : Warning: Package resolution error when reading "analysis_options.yaml" file for 
+".\app\integration_test\db_platform_test.dart":
+At C:\Projects\Zaghlol\.zaghlol-local-ci\runner.ps1:68 char:39
++ ... 'format'  $Repo { dart format --output=none --set-exit-if-changed . }
++                       ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    + CategoryInfo          : NotSpecified: (Warning: Packag...orm_test.dart"::String) [], RemoteException
+    + FullyQualifiedErrorId : NativeCommandError
+ 
+Failed to resolve package URI "package:flutter_lints/flutter.yaml" in include at 
+"C:\Users\amr90\zaghlol-ci\repo\app\analysis_options.yaml".
+Warning: Package resolution error when reading "analysis_options.yaml" file for 
+".\app\lib\core\platform\attestation_api.g.dart":
+Failed to resolve package URI "package:flutter_lints/flutter.yaml" in include at 
+"C:\Users\amr90\zaghlol-ci\repo\app\analysis_options.yaml".
+Warning: Package resolution error when reading "analysis_options.yaml" file for ".\app\lib\main.dart":
+Failed to resolve package URI "package:flutter_lints/flutter.yaml" in include at 
+"C:\Users\amr90\zaghlol-ci\repo\app\analysis_options.yaml".
+Warning: Package resolution error when reading "analysis_options.yaml" file for ".\app\pigeons\attestation_api.dart":
+Failed to resolve package URI "package:flutter_lints/flutter.yaml" in include at 
+"C:\Users\amr90\zaghlol-ci\repo\app\analysis_options.yaml".
+Warning: Package resolution error when reading "analysis_options.yaml" file for 
+".\app\test\core\db\fts_benchmark.dart":
+Failed to resolve package URI "package:flutter_lints/flutter.yaml" in include at 
+"C:\Users\amr90\zaghlol-ci\repo\app\analysis_options.yaml".
+Warning: Package resolution error when reading "analysis_options.yaml" file for ".\app\test\flutter_test_config.dart":
+Failed to resolve package URI "package:flutter_lints/flutter.yaml" in include at 
+"C:\Users\amr90\zaghlol-ci\repo\app\analysis_options.yaml".
+Warning: Package resolution error when reading "analysis_options.yaml" file for 
+".\app\test\goldens\placeholder_app_golden_test.dart":
+Failed to resolve package URI "package:flutter_lints/flutter.yaml" in include at 
+"C:\Users\amr90\zaghlol-ci\repo\app\analysis_options.yaml".
+Warning: Package resolution error when reading "analysis_options.yaml" file for 
+".\app\test_driver\integration_test.dart":
+Failed to resolve package URI "package:flutter_lints/flutter.yaml" in include at 
+"C:\Users\amr90\zaghlol-ci\repo\app\analysis_options.yaml".
+Warning: Package resolution error when reading "analysis_options.yaml" file for 
+".\packages\zaghlol_domain\lib\core\domain_event.dart":
+Failed to resolve package URI "package:lints/recommended.yaml" in include at 
+"C:\Users\amr90\zaghlol-ci\repo\analysis_options.yaml".
+Warning: Package resolution error when reading "analysis_options.yaml" file for 
+".\packages\zaghlol_domain\lib\money\currency.dart":
+Failed to resolve package URI "package:lints/recommended.yaml" in include at 
+"C:\Users\amr90\zaghlol-ci\repo\analysis_options.yaml".
+Warning: Package resolution error when reading "analysis_options.yaml" file for 
+".\packages\zaghlol_domain\lib\money\src\allocation.dart":
+Failed to resolve package URI "package:lints/recommended.yaml" in include at 
+"C:\Users\amr90\zaghlol-ci\repo\analysis_options.yaml".
+Warning: Package resolution error when reading "analysis_options.yaml" file for 
+".\packages\zaghlol_domain\lib\zaghlol_domain.dart":
+Failed to resolve package URI "package:lints/recommended.yaml" in include at 
+"C:\Users\amr90\zaghlol-ci\repo\analysis_options.yaml".
+Warning: Package resolution error when reading "analysis_options.yaml" file for 
+".\packages\zaghlol_domain\test\core\core_test.dart":
+Failed to resolve package URI "package:lints/recommended.yaml" in include at 
+"C:\Users\amr90\zaghlol-ci\repo\analysis_options.yaml".
+Warning: Package resolution error when reading "analysis_options.yaml" file for 
+".\packages\zaghlol_domain\test\money\generators.dart":
+Failed to resolve package URI "package:lints/recommended.yaml" in include at 
+"C:\Users\amr90\zaghlol-ci\repo\analysis_options.yaml".
+Warning: Package resolution error when reading "analysis_options.yaml" file for 
+".\packages\zaghlol_domain\test\zaghlol_domain_test.dart":
+Failed to resolve package URI "package:lints/recommended.yaml" in include at 
+"C:\Users\amr90\zaghlol-ci\repo\analysis_options.yaml".
+Warning: Package resolution error when reading "analysis_options.yaml" file for 
+".\packages\zaghlol_domain\tool\gen_currencies.dart":
+Failed to resolve package URI "package:lints/recommended.yaml" in include at 
+"C:\Users\amr90\zaghlol-ci\repo\analysis_options.yaml".
+Warning: Package resolution error when reading "analysis_options.yaml" file for 
+".\packages\zaghlol_parsing\lib\zaghlol_parsing.dart":
+Failed to resolve package URI "package:lints/recommended.yaml" in include at 
+"C:\Users\amr90\zaghlol-ci\repo\analysis_options.yaml".
+Warning: Package resolution error when reading "analysis_options.yaml" file for 
+".\packages\zaghlol_parsing\test\zaghlol_parsing_test.dart":
+Failed to resolve package URI "package:lints/recommended.yaml" in include at 
+"C:\Users\amr90\zaghlol-ci\repo\analysis_options.yaml".
+Warning: Package resolution error when reading "analysis_options.yaml" file for ".\tools\lints\bin\zaghlol_lints.dart":
+Failed to resolve package URI "package:lints/recommended.yaml" in include at 
+"C:\Users\amr90\zaghlol-ci\repo\tools\lints\../../analysis_options.yaml".
+Warning: Package resolution error when reading "analysis_options.yaml" file for ".\tools\lints\lib\src\checker.dart":
+Failed to resolve package URI "package:lints/recommended.yaml" in include at 
+"C:\Users\amr90\zaghlol-ci\repo\tools\lints\../../analysis_options.yaml".
+Warning: Package resolution error when reading "analysis_options.yaml" file for 
+".\tools\lints\test\comments_test.dart":
+Failed to resolve package URI "package:lints/recommended.yaml" in include at 
+"C:\Users\amr90\zaghlol-ci\repo\tools\lints\../../analysis_options.yaml".
+Warning: Package resolution error when reading "analysis_options.yaml" file for 
+".\tools\lints\test\fixtures\lib\core\inspector_debug.dart":
+Failed to resolve package URI "package:lints/recommended.yaml" in include at 
+"C:\Users\amr90\zaghlol-ci\repo\tools\lints\../../analysis_options.yaml".
+Warning: Package resolution error when reading "analysis_options.yaml" file for 
+".\tools\lints\test\fixtures\lib\db\db_exceptions.dart":
+Failed to resolve package URI "package:lints/recommended.yaml" in include at 
+"C:\Users\amr90\zaghlol-ci\repo\tools\lints\../../analysis_options.yaml".
+Warning: Package resolution error when reading "analysis_options.yaml" file for 
+".\tools\lints\test\fixtures\lib\debug\debug_dump.dart":
+Failed to resolve package URI "package:lints/recommended.yaml" in include at 
+"C:\Users\amr90\zaghlol-ci\repo\tools\lints\../../analysis_options.yaml".
+Warning: Package resolution error when reading "analysis_options.yaml" file for 
+".\tools\lints\test\fixtures\lib\features\home\amount_names.dart":
+Failed to resolve package URI "package:lints/recommended.yaml" in include at 
+"C:\Users\amr90\zaghlol-ci\repo\tools\lints\../../analysis_options.yaml".
+Warning: Package resolution error when reading "analysis_options.yaml" file for 
+".\tools\lints\test\fixtures\lib\features\home\presentation\ui_strings_compliant.dart":
+Failed to resolve package URI "package:lints/recommended.yaml" in include at 
+"C:\Users\amr90\zaghlol-ci\repo\tools\lints\../../analysis_options.yaml".
+Warning: Package resolution error when reading "analysis_options.yaml" file for 
+".\tools\lints\test\fixtures\lib\money\money_compliant.dart":
+Failed to resolve package URI "package:lints/recommended.yaml" in include at 
+"C:\Users\amr90\zaghlol-ci\repo\tools\lints\../../analysis_options.yaml".
+Warning: Package resolution error when reading "analysis_options.yaml" file for 
+".\tools\lints\test\fixtures\lib\parsing\parsing_exceptions.dart":
+Failed to resolve package URI "package:lints/recommended.yaml" in include at 
+"C:\Users\amr90\zaghlol-ci\repo\tools\lints\../../analysis_options.yaml".
+Formatted 74 files (0 changed) in 0.12 seconds.
+
+[23:33:20] === RESULT format exit=0
+[23:33:20] === STEP analyze (in C:\Users\amr90\zaghlol-ci\repo)
+Resolving dependencies...
+flutter : The current Dart SDK version is 3.13.5.
+At C:\Projects\Zaghlol\.zaghlol-local-ci\runner.ps1:69 char:39
++     $r += Step $log 'analyze' $Repo { flutter analyze }
++                                       ~~~~~~~~~~~~~~~
+    + CategoryInfo          : NotSpecified: (The current Dart SDK version is 3.13.5.:String) [], RemoteException
+    + FullyQualifiedErrorId : NativeCommandError
+ 
+
+Because zaghlol_workspace requires SDK version ^3.13.7, version solving failed.
+Failed to update packages.
+
+[23:33:21] === RESULT analyze exit=1
+[23:33:21] === STEP app-test (in C:\Users\amr90\zaghlol-ci\repo\app)
+Resolving dependencies in `C:\Users\amr90\zaghlol-ci\repo`...
+flutter : The current Dart SDK version is 3.13.5.
+At C:\Projects\Zaghlol\.zaghlol-local-ci\runner.ps1:70 char:58
++ ...   $r += Step $log 'app-test' (Join-Path $Repo 'app') { flutter test }
++                                                            ~~~~~~~~~~~~
+    + CategoryInfo          : NotSpecified: (The current Dart SDK version is 3.13.5.:String) [], RemoteException
+    + FullyQualifiedErrorId : NativeCommandError
+ 
+
+Because zaghlol_workspace requires SDK version ^3.13.7, version solving failed.
+Failed to update packages.
+
+[23:33:23] === RESULT app-test exit=1
+[23:33:23] === STEP dart-test-zaghlol_domain (in C:\Users\amr90\zaghlol-ci\repo\packages\zaghlol_domain)
+dart : The current Dart SDK version is 3.13.5.
+At C:\Projects\Zaghlol\.zaghlol-local-ci\runner.ps1:72 char:64
++ ...  $r += Step $log "dart-test-$($pkg.Name)" $pkg.FullName { dart test }
++                                                               ~~~~~~~~~
+    + CategoryInfo          : NotSpecified: (The current Dart SDK version is 3.13.5.:String) [], RemoteException
+    + FullyQualifiedErrorId : NativeCommandError
+ 
+
+Because zaghlol_workspace requires SDK version ^3.13.7, version solving failed.
+
+The current Dart SDK version is 3.13.5.
+
+Because zaghlol_workspace requires SDK version ^3.13.7, version solving failed.
+
+
+[23:33:24] === RESULT dart-test-zaghlol_domain exit=65
+[23:33:24] === STEP dart-test-zaghlol_parsing (in C:\Users\amr90\zaghlol-ci\repo\packages\zaghlol_parsing)
+dart : The current Dart SDK version is 3.13.5.
+At C:\Projects\Zaghlol\.zaghlol-local-ci\runner.ps1:72 char:64
++ ...  $r += Step $log "dart-test-$($pkg.Name)" $pkg.FullName { dart test }
++                                                               ~~~~~~~~~
+    + CategoryInfo          : NotSpecified: (The current Dart SDK version is 3.13.5.:String) [], RemoteException
+    + FullyQualifiedErrorId : NativeCommandError
+ 
+
+Because zaghlol_workspace requires SDK version ^3.13.7, version solving failed.
+
+The current Dart SDK version is 3.13.5.
+
+Because zaghlol_workspace requires SDK version ^3.13.7, version solving failed.
+
+
+[23:33:25] === RESULT dart-test-zaghlol_parsing exit=65
+[23:33:25] SUMMARY FAIL sha=3e00b718049ca1188a642307cffd4b3b067a9cc7 pipeline=quick-app pub-get=1 format=0 analyze=1 app-test=1 dart-test-zaghlol_domain=65 dart-test-zaghlol_parsing=65
