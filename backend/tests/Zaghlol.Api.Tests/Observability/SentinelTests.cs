@@ -167,7 +167,7 @@ public abstract class SentinelTests<TFixture>(TFixture fixture)
     protected static JsonElement Parse(string line) => JsonDocument.Parse(line).RootElement.Clone();
 }
 
-[Collection(ObservabilityCollection.Name)]
+[Collection(ApiHostGroup.Name)]
 public sealed class ProductionLevelSentinelTests(ProductionLevelsFixture fixture)
     : SentinelTests<ProductionLevelsFixture>(fixture), IClassFixture<ProductionLevelsFixture>
 {
@@ -193,12 +193,12 @@ public sealed class ProductionLevelSentinelTests(ProductionLevelsFixture fixture
     {
         await Fixture.EnsureScenarioAsync();
 
-        Assert.Contains(Fixture.Spans, a => a.GetTagItem("db.system") is "postgresql");
+        Assert.Contains(Fixture.Spans, a => a.Source.Name == "Npgsql");
         Assert.DoesNotContain(Fixture.Sentinel, Fixture.LogOutput, StringComparison.Ordinal);
     }
 }
 
-[Collection(ObservabilityCollection.Name)]
+[Collection(ApiHostGroup.Name)]
 public sealed class VerboseLevelSentinelTests(VerboseLevelsFixture fixture)
     : SentinelTests<VerboseLevelsFixture>(fixture), IClassFixture<VerboseLevelsFixture>
 {
@@ -217,10 +217,4 @@ public sealed class VerboseLevelSentinelTests(VerboseLevelsFixture fixture)
         Assert.Contains(categories, c => c!.StartsWith("System.Net.Http.HttpClient.google-play", StringComparison.Ordinal));
         Assert.Contains(categories, c => c == "Test.Retry");
     }
-}
-
-/// <summary>The two hosts share process-wide listeners (activity sources, meters), so their tests run one after the other.</summary>
-internal static class ObservabilityCollection
-{
-    public const string Name = "observability-host";
 }

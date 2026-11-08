@@ -12,7 +12,7 @@ public static class SpanTagPolicy
     private static readonly FrozenSet<string> Allowed = new[]
     {
         "http.request.method", "http.response.status_code", "http.route", "url.scheme", "url.template", "server.address",
-        "server.port", "network.protocol.version", "db.system", "db.operation.name", "db.query.text", "error.type",
+        "server.port", "network.protocol.version", "db.system", "db.system.name", "db.operation.name", "db.query.text", "error.type",
         "otel.status_code", "url.path",
     }.Concat(ZaghlolKeys).ToFrozenSet(StringComparer.Ordinal);
 

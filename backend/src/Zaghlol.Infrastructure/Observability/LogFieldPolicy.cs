@@ -144,6 +144,6 @@ public static partial class LogFieldPolicy
     [GeneratedRegex("^[a-z0-9-]{1,32}$", RegexOptions.CultureInvariant)]
     private static partial Regex ServiceRegex();
 
-    [GeneratedRegex("^[A-Za-z0-9_.]{1,200}$", RegexOptions.CultureInvariant)]
+    [GeneratedRegex("^[A-Za-z0-9_.-]{1,200}$", RegexOptions.CultureInvariant)]
     private static partial Regex CategoryRegex();
 }

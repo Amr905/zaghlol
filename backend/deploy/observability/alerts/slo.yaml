@@ -12,7 +12,7 @@ groups:
           severity: page
         annotations:
           summary: "Synthetic check {{ $labels.check }} failed 3 times in a row"
-          description: "GET /v1/health or POST /v1/sync (test install) fails from at least one region. Check the API and the database first."
+          description: "GET /v1/health or POST /v1/sync (synthetic client) fails from at least one region. Check the API and the database first."
 
       - alert: ZaghlolSloBurnRateFast
         # 2% of the 99.5% monthly budget in 1 hour: burn rate 14.4. Successful ratio excludes 4xx.

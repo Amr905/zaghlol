@@ -49,6 +49,8 @@ public sealed class RedactingActivityProcessor : BaseProcessor<Activity>
             }
         }
 
+        // The raw path never leaves; server spans get the route template instead.
+        data.SetTag("url.path", null);
         var method = Text(data, "http.request.method");
         var route = Text(data, "http.route");
         if (data.Kind == ActivityKind.Server)
