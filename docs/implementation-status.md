@@ -55,7 +55,7 @@
 | T-023 | Localization scaffold, digits mode and money/date formatting | M0 | C2 | Sonnet | flutter-core-engineer | T-012, T-020 | TODO | — |  |
 | T-024 | App shell: routing, platform tab bars, Add button, deep links | M0 | C2 | Sonnet | flutter-ui-engineer | T-022, T-023 | TODO | — |  |
 | T-025 | Feature flags service (default OFF) | M0 | C2 | Sonnet | flutter-core-engineer | T-019 | TODO | — |  |
-| T-026 | Copy deck part 1: onboarding, capture, Home, transactions, review, accounts | M0 | C3 | Opus | ux-designer | — | IN_REVIEW | task/T-026-copy-deck-1 @ f43b6e1 (676 keys, docs only) | Reviews running: code-reviewer + test-engineer. 16 open copy questions (Q-01…Q-16) to triage for PO/architect |
+| T-026 | Copy deck part 1: onboarding, capture, Home, transactions, review, accounts | M0 | C3 | Opus | ux-designer | — | DONE | task/T-026-copy-deck-1 @ fc404b7; merged to main | Code APPROVED, tests SUFFICIENT (round 2). Minors carried to T-029; R2-4 to UX (S-40 hidden-accounts row) |
 | T-027 | Copy deck part 2: insights, budget, bills, money, chat, voice, roast, explanations | M0 | C3 | Opus | ux-designer | — | TODO | — |  |
 | T-028 | Copy deck part 3: settings, Gold, backup, import/export, notifications, errors, legal | M0 | C3 | Opus | ux-designer | — | TODO | — |  |
 | T-029 | Generate ARB files from copy deck (part 1) | M1 | C1 | Haiku | boilerplate-engineer | T-023, T-026 | TODO | — |  |
@@ -151,7 +151,7 @@
 | T-119 | Gold gate matrix and entitlement state (local) | M4 | C2 | Sonnet | flutter-core-engineer | T-025, T-020 | TODO | — |  |
 | T-120 | Voice logger S-31 with on-device-first recognition and monthly limit | M4 | C3 | Sonnet | flutter-ui-engineer | T-109, T-119, T-011 | TODO | — |  |
 | T-121 | Money tab assets, Add asset S-44 and Prices S-45 | M4 | C2 | Sonnet | flutter-ui-engineer | T-113, T-083, T-119 | TODO | — |  |
-| T-122 | EF Core model and initial migration for all backend tables + DB roles | M5 | C4 | Opus | backend-engineer | T-005 | IN_REVIEW | backend-ci 42407789072 (5/5 green, 391 tests) @ d5943be | Round 2: all round-1 findings in scope fixed; InitialCreate regenerated via the hardened workflow. Delta re-reviews (code, security, tests) running. T-140 note: Npgsql 10 needs "Maximum Pool Size" |
+| T-122 | EF Core model and initial migration for all backend tables + DB roles | M5 | C4 | Opus | backend-engineer | T-005 | IN_REVIEW | backend-ci 42407789072 (5/5, 391 tests) @ d5943be | ALL THREE APPROVED (round 2). Merge waits only on the PO activating the main ruleset (security F5(b)); then merge through a PR. Follow-ups FU-015 to FU-026; FU-020 before T-184 |
 | T-123 | Signing service (ES256 via KMS abstraction) and response-signature middleware | M5 | C4 | Opus | backend-engineer | T-005 | READY | — | Design note merged (1c68de5) |
 | T-124 | Install registration, install-token auth, rate limits, idempotency, strict DTOs | M5 | C4 | Opus | backend-engineer | T-122, T-123, T-006 | TODO | — |  |
 | T-125 | Catalog versions, deltas, signed full snapshots and admin draft/publish | M5 | C3 | Opus | backend-engineer | T-122, T-123 | TODO | — |  |
@@ -226,6 +226,18 @@
 | FU-004 | T-005 #4–7, #9–10, #12–13 | Backend hardening: real body-not-logged test, SHA-pinned actions, Trivy by digest, 4xx mapping + test, single trace id, Production env in tests, stale-heartbeat test, compose loopback | backend-engineer (small C2 pass, before M5) | OPEN |
 | FU-005 | T-005 #11 | `serverTime` as UTC `Z` and fixed in OpenAPI | T-006 (done); global converter tracked in FU-013 | CLOSED |
 - **FU-014** (from T-012 security R3-2, low): BGN and CUC are not in the current ISO table, so pre-2026 Bulgarian lev amounts from imports or SMS go to review. Decide whether a later table refresh re-adds withdrawn codes as historic (D-28). Owner: requirements-analyst.
+- **FU-015** (T-122 code #6): EF `SetNull` on tracked dependents breaks the `account_linked_by` pairing. Account and install deletes must go through `ExecuteDeleteAsync`/SQL, never tracked graphs. Owner: T-135, T-139.
+- **FU-016** (T-122 code #7, #24; Npgsql note): `bootstrap-roles.sql` attribute clauses may need superuser on managed PG; grant CONNECT to the provider's monitoring role if needed; deployed connection strings must use `Maximum Pool Size`. Owner: T-140.
+- **FU-017** (T-122 code #8, security F14): `--healthcheck` and the container HEALTHCHECK probe readiness. Liveness must be a process-only check. Owner: T-140.
+- **FU-018** (T-122 security R2-3): the digit-run backstop allows only one separator character. Widen it to `[[:space:] .,/_،-]{0,3}` with cases for double spaces, `/`, `_` and the Arabic comma, and fold digits in the API filter first. Owner: T-127 (new migration).
+- **FU-019** (T-122 security R2-2): `DatabaseRoleGuard` checks only `current_user`. Also require `session_user = current_user` and run the flag, owner and group checks on `session_user`; add a test with a superuser login and `role=zaghlol_api`. Owner: T-123.
+- **FU-020** (T-122 tests N1, security R2-1, code #22; **must land before T-184**): the `installs_before_update` tombstone exemption lets `seat_key_hash` change to any value, and `deleted_at` can be reset. Require `NEW.seat_key_hash IS NULL` in the tombstone branch, make `deleted_at` one-way, and add negative tests. Needs a new migration, because InitialCreate is frozen. Also from code #11/#12: done in round 2. Owner: T-182 or T-184.
+- **FU-021** (T-122 code #13): `CreateDbContext(DatabaseRole)` lets any `/v1` handler ask for Admin. Bind the role per endpoint group and test that `/v1` can't get Admin. Owner: T-124, T-136.
+- **FU-022** (T-122 code #18): the one-connection readiness pool can stay blocked for Npgsql's connect timeout (15 s). Set `Timeout=2` on the probe string, and add a recovery test against BlackHoleServer. Owner: T-123 or T-140.
+- **FU-023** (T-122 code #19, #20; tests N2, N8): the login guard should check full transitive membership (e.g. `pg_write_all_data`, provider admin groups) and exit with a non-zero code on rejection. Owner: T-123 or T-140.
+- **FU-024** (T-122 code #21): no runtime role can write `operators`, so audit rows can't be written until operator provisioning adds a grant in its own migration. Owner: T-136.
+- **FU-025** (T-122 security F7, F13): an `Include Error Detail` startup guard and server log verbosity for CHECK failures (T-123/T-140); doc fix for account hard delete vs tombstone (architect).
+- **FU-026** (T-122 tests N3, N6, N7, N9): sequence privileges, the future-dated audit insert boundary, enforcement of `ApiHostGroup` membership, readiness caching and cancellation tests. Owner: backend test follow-up with T-123.
 | FU-006 | T-006 #2 | Android restore: `{productId, purchaseToken}` items or commit to `productsv2` | solution-architect → T-130/T-132 | OPEN (architect decision) |
 | FU-007 | T-006 #3 | Open (ignore-unknown) schemas for server-to-server envelopes (Pub/Sub RTDN, ASSN V2) | solution-architect → T-133/T-134 | OPEN (architect decision) |
 | FU-008 | T-006 #4, #5 | Apple Android callback transport (query vs form_post); support lookup e-mail out of query string; never log query strings | solution-architect → T-135/T-136/T-138 | OPEN (architect decision) |
