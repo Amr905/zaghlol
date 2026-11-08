@@ -62,15 +62,8 @@ jobs:
           dotnet format Zaghlol.sln --no-restore --verify-no-changes --verbosity normal || { echo "::error title=dotnet format::Code is not formatted. Run 'dotnet format' in backend/ and commit."; exit 1; }
 
       - name: Test (unit + Testcontainers PostgreSQL 17 integration)
-        env:
-          ZAGHLOL_GEN_VECTORS: "1"
         run: |
           dotnet test Zaghlol.sln -c Release --no-build --logger "trx;LogFileName=test-results.trx" --results-directory "$GITHUB_WORKSPACE/test-results" || { echo "::error title=dotnet test::One or more tests failed."; exit 1; }
-
-      - name: TEMP dump generated vectors
-        if: always()
-        run: |
-          echo "VECTORS-BEGIN"; tar -czf - tests/Zaghlol.Contract.Tests/vectors/response-signature-v1.json tests/Zaghlol.Contract.Tests/vectors/jws-es256-v1.json | base64 -w0; echo; echo "VECTORS-END"
 
       - name: Upload test results
         if: always()

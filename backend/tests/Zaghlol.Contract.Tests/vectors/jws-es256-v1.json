@@ -1,0 +1,66 @@
+{
+  "version": 1,
+  "description": "Compact JWS vectors for entitlement and account tokens (T-123). Header exactly {\u0022alg\u0022:\u0022ES256\u0022,\u0022kid\u0022:\u003Ce kid\u003E,\u0022typ\u0022:\u0022JWT\u0022}; payload UTF-8 JSON; signature ECDSA P-256 / SHA-256, IEEE P1363, over ASCII(b64u(header) \u0027.\u0027 b64u(payload)); base64url without padding. Only \u0027e\u0027 kids sign tokens. Synthetic test keys; only their public JWKs are here.",
+  "jwks": {
+    "keys": [
+      {
+        "kty": "EC",
+        "crv": "P-256",
+        "x": "yvDCxdX3dFSMrAEOvQC1yRE6bD3i1elPhgcXAYRVguo",
+        "y": "kHFZHaFWktTiI2EqhGXi6lmK_DRjAHKIXrcsrdSjWvw",
+        "kid": "s0000t",
+        "use": "sig",
+        "alg": "ES256"
+      },
+      {
+        "kty": "EC",
+        "crv": "P-256",
+        "x": "vwM4vmHPox1JtEqqvPOD2xEma_6Z7HPFZSa4Ad90c0Q",
+        "y": "hJHwvbg1lhRCSG2eSw26WyBw18pi7EzlR6O_SQVhCIM",
+        "kid": "e0000t",
+        "use": "sig",
+        "alg": "ES256"
+      }
+    ]
+  },
+  "valid": [
+    {
+      "name": "entitlement",
+      "token": "eyJhbGciOiJFUzI1NiIsImtpZCI6ImUwMDAwdCIsInR5cCI6IkpXVCJ9.eyJpbnN0YWxsSWQiOiIwMUpaMDAwMDAwMDAwMDAwMDAwMFRFU1QwMSIsInN0YXR1cyI6ImFjdGl2ZSIsInByb2R1Y3QiOiJnb2xkX3llYXJseSIsImV4cGlyZXNBdCI6IjIwMjctMTEtMDhUMTI6MDA6MDBaIiwic2VydmVyVGltZSI6IjIwMjYtMTEtMDhUMTI6MDA6MDBaIn0.1lqcIAY7tiUwcNGmHHUFZ6kHrw4UCKHa9z_mCwGBSVXZ6Y4P3nMGnA76W8MQJESjwumX82XpHGg8TN9Lwohryg"
+    },
+    {
+      "name": "account",
+      "token": "eyJhbGciOiJFUzI1NiIsImtpZCI6ImUwMDAwdCIsInR5cCI6IkpXVCJ9.eyJhY2NvdW50SWQiOiIwMTkzYTNjMC0wMDAwLTcwMDAtODAwMC0wMDAwMDAwMDAwMDEiLCJwcm92aWRlciI6Imdvb2dsZSIsInNlcnZlclRpbWUiOiIyMDI2LTExLTA4VDEyOjAwOjAwWiJ9._SACkp85EDl5UEwX-YYyhEM_NX9qKi8khUaM9Jcgt3bgG3XuC2aKQsj-qwKTAjdR7dXR2_2nVp0p7wiGSqV66Q"
+    }
+  ],
+  "invalid": [
+    {
+      "name": "alg-none",
+      "token": "eyJhbGciOiJub25lIiwia2lkIjoiZTAwMDB0IiwidHlwIjoiSldUIn0.eyJpbnN0YWxsSWQiOiIwMUpaMDAwMDAwMDAwMDAwMDAwMFRFU1QwMSIsInN0YXR1cyI6ImFjdGl2ZSIsInByb2R1Y3QiOiJnb2xkX3llYXJseSIsImV4cGlyZXNBdCI6IjIwMjctMTEtMDhUMTI6MDA6MDBaIiwic2VydmVyVGltZSI6IjIwMjYtMTEtMDhUMTI6MDA6MDBaIn0."
+    },
+    {
+      "name": "hs256-with-public-key-as-secret",
+      "token": "eyJhbGciOiJIUzI1NiIsImtpZCI6ImUwMDAwdCIsInR5cCI6IkpXVCJ9.eyJpbnN0YWxsSWQiOiIwMUpaMDAwMDAwMDAwMDAwMDAwMFRFU1QwMSIsInN0YXR1cyI6ImFjdGl2ZSIsInByb2R1Y3QiOiJnb2xkX3llYXJseSIsImV4cGlyZXNBdCI6IjIwMjctMTEtMDhUMTI6MDA6MDBaIiwic2VydmVyVGltZSI6IjIwMjYtMTEtMDhUMTI6MDA6MDBaIn0.ijkLrv2sOacQ1eNBVZPeE9m82BA6lVIzlr0iBTTrhEQ"
+    },
+    {
+      "name": "unknown-kid",
+      "token": "eyJhbGciOiJFUzI1NiIsImtpZCI6ImUwMDAwdSIsInR5cCI6IkpXVCJ9.eyJpbnN0YWxsSWQiOiIwMUpaMDAwMDAwMDAwMDAwMDAwMFRFU1QwMSIsInN0YXR1cyI6ImFjdGl2ZSIsInByb2R1Y3QiOiJnb2xkX3llYXJseSIsImV4cGlyZXNBdCI6IjIwMjctMTEtMDhUMTI6MDA6MDBaIiwic2VydmVyVGltZSI6IjIwMjYtMTEtMDhUMTI6MDA6MDBaIn0.dv7cFNBiV1BqIRGHe0HNSbNQ0wOLd9MaKJ9liH5aA753FFGtR2MuI3qT34bILGfUXyPtwhDrdhyboplRB5yj9w"
+    },
+    {
+      "name": "sync-kid",
+      "token": "eyJhbGciOiJFUzI1NiIsImtpZCI6InMwMDAwdCIsInR5cCI6IkpXVCJ9.eyJpbnN0YWxsSWQiOiIwMUpaMDAwMDAwMDAwMDAwMDAwMFRFU1QwMSIsInN0YXR1cyI6ImFjdGl2ZSIsInByb2R1Y3QiOiJnb2xkX3llYXJseSIsImV4cGlyZXNBdCI6IjIwMjctMTEtMDhUMTI6MDA6MDBaIiwic2VydmVyVGltZSI6IjIwMjYtMTEtMDhUMTI6MDA6MDBaIn0.pI7xnyh4yY7B8X9o4duhLHLQ0EegGO2kAb_kmD3a3TdmjXGHOknPduXoZaEAaDXpSvWtR_rzfxmnDeIUDw0qBw"
+    },
+    {
+      "name": "der-signature",
+      "token": "eyJhbGciOiJFUzI1NiIsImtpZCI6ImUwMDAwdCIsInR5cCI6IkpXVCJ9.eyJpbnN0YWxsSWQiOiIwMUpaMDAwMDAwMDAwMDAwMDAwMFRFU1QwMSIsInN0YXR1cyI6ImFjdGl2ZSIsInByb2R1Y3QiOiJnb2xkX3llYXJseSIsImV4cGlyZXNBdCI6IjIwMjctMTEtMDhUMTI6MDA6MDBaIiwic2VydmVyVGltZSI6IjIwMjYtMTEtMDhUMTI6MDA6MDBaIn0.MEUCIGls4sQSzoFSuW3dnpcvnfCtPMrvSKq7uIyjGqaXUxQfAiEAk2hdI3QNUISSv_lY4d3_4zzD7zJo7rc-p9A--LNvF0k"
+    },
+    {
+      "name": "padded-signature",
+      "token": "eyJhbGciOiJFUzI1NiIsImtpZCI6ImUwMDAwdCIsInR5cCI6IkpXVCJ9.eyJpbnN0YWxsSWQiOiIwMUpaMDAwMDAwMDAwMDAwMDAwMFRFU1QwMSIsInN0YXR1cyI6ImFjdGl2ZSIsInByb2R1Y3QiOiJnb2xkX3llYXJseSIsImV4cGlyZXNBdCI6IjIwMjctMTEtMDhUMTI6MDA6MDBaIiwic2VydmVyVGltZSI6IjIwMjYtMTEtMDhUMTI6MDA6MDBaIn0.1lqcIAY7tiUwcNGmHHUFZ6kHrw4UCKHa9z_mCwGBSVXZ6Y4P3nMGnA76W8MQJESjwumX82XpHGg8TN9Lwohryg=="
+    },
+    {
+      "name": "modified-payload",
+      "token": "eyJhbGciOiJFUzI1NiIsImtpZCI6ImUwMDAwdCIsInR5cCI6IkpXVCJ9.eyJpbnN0YWxsSWQiOiIwMUpaMDAwMDAwMDAwMDAwMDAwMFRFU1QwMSIsInN0YXR1cyI6InJlZnVuZGVkIiwicHJvZHVjdCI6ImdvbGRfeWVhcmx5IiwiZXhwaXJlc0F0IjoiMjAyNy0xMS0wOFQxMjowMDowMFoiLCJzZXJ2ZXJUaW1lIjoiMjAyNi0xMS0wOFQxMjowMDowMFoifQ.1lqcIAY7tiUwcNGmHHUFZ6kHrw4UCKHa9z_mCwGBSVXZ6Y4P3nMGnA76W8MQJESjwumX82XpHGg8TN9Lwohryg"
+    }
+  ]
+}
