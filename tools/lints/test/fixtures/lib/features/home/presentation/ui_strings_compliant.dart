@@ -32,3 +32,20 @@ class GoodView extends StatelessWidget {
 
   String describe() => 'Developer-facing text outside build';
 }
+
+/// Widget helpers that take their text from outside, and non-widget helpers
+/// with strings, stay silent.
+class GoodHelperView extends StatelessWidget {
+  const GoodHelperView({super.key, required this.title});
+
+  final String title;
+
+  @override
+  Widget build(BuildContext context) => _header();
+
+  Widget _header() => Text(title, key: const ValueKey('header_text'));
+
+  String debugName() => 'Not a widget helper';
+}
+
+Widget topLevelGood(String text) => Text(text);

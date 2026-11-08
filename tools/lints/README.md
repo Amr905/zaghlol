@@ -20,7 +20,7 @@ matched by name (see the rule notes below).
 | Rule | Fires on | Scope |
 |------|----------|-------|
 | `no_double_money` | `double` / `num` types and `double` literals | every file under a `money/` directory; elsewhere only declarations (field, variable, parameter, method or getter return) whose name contains `amount` or `minor` |
-| `no_ui_string_literals` | string literals containing letters | inside methods named `build` (including closures within them) |
+| `no_ui_string_literals` | string literals containing letters | inside methods named `build`, and any method, getter or function returning a widget (`Widget`, `PreferredSizeWidget`, `Widget?`, `List<Widget>`), including closures within them |
 | `no_print_outside_debug` | `print(...)` and `debugPrint(...)` | all `lib/` files except debug-only files |
 | `safe_exception_required` | classes that are an `Exception` or `Error` but not a `SafeException` | files in a `parsing/` or `db/` directory, or in package `zaghlol_parsing` |
 
