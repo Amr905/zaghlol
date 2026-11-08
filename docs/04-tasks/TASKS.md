@@ -39,9 +39,9 @@ Every task file has: ID, description, technical details, dependencies, affected 
 | ID | Title | Story | Cx | Model | Agent | Depends on | Lane | Wave | Status |
 |---|---|---|---|---|---|---|---|---|---|
 | [T-001](tasks/T-001.md) | Create mono-repo scaffold with pub workspace, app flavors and pure-Dart packages | US-01-1 | Medium | Sonnet | flutter-core-engineer | — | A | 1 | DONE |
-| [T-002](tasks/T-002.md) | Add custom lint rules (no double in money, no UI string literals, no print) | US-01-1 | Medium | Sonnet | flutter-core-engineer | T-001 | A | 2 | TODO |
+| [T-002](tasks/T-002.md) | Add custom lint rules (no double in money, no UI string literals, no print) | US-01-1 | Medium | Sonnet | flutter-core-engineer | T-001 | A | 2 | DONE |
 | [T-003](tasks/T-003.md) | App CI pipeline (format, analyze, unit, golden, native unit) | US-01-1 | Medium | Sonnet | flutter-core-engineer | T-001 | A | 2 | DONE |
-| [T-004](tasks/T-004.md) | Pigeon setup and stale-generation check | US-01-1 | Medium | Sonnet | flutter-core-engineer | T-001 | A | 2 | TODO |
+| [T-004](tasks/T-004.md) | Pigeon setup and stale-generation check | US-01-1 | Medium | Sonnet | flutter-core-engineer | T-001 | A | 2 | IN_PROGRESS |
 | [T-005](tasks/T-005.md) | Backend solution scaffold, Docker Compose and CI | US-01-1 | Medium | Sonnet | backend-engineer | — | B | 1 | DONE |
 | [T-006](tasks/T-006.md) | OpenAPI v1 spec and contract-test harness | US-13-1 | Medium | Sonnet | backend-engineer | T-005 | B | 2 | DONE |
 | [T-007](tasks/T-007.md) | SPK-05: encrypted SQLite (SQLite3MultipleCiphers) + FTS5 trigram on both platforms | US-01-2 | High* | Opus | flutter-core-engineer | T-001 | A | 2 | TODO |
@@ -51,7 +51,7 @@ Every task file has: ID, description, technical details, dependencies, affected 
 | [T-011](tasks/T-011.md) | SPK-04: on-device ar-EG speech availability across the device matrix | US-01-2 | Medium | Sonnet | native-platform-engineer | T-001 | D | 2 | TODO |
 | [T-012](tasks/T-012.md) | Money and Currency value types with ISO 4217 table | US-02-2 | High* | Opus | flutter-core-engineer | T-001 | A | 2 | DONE |
 | [T-013](tasks/T-013.md) | Text & amount normalization utilities (digits, separators, groupings) | US-05-1 | High | Sonnet | parsing-engine-engineer | T-012 | F | 3 | TODO |
-| [T-014](tasks/T-014.md) | Result/Failure types, SafeException and domain event bus | US-02-1 | Medium | Sonnet | flutter-core-engineer | T-001 | A | 2 | TODO |
+| [T-014](tasks/T-014.md) | Result/Failure types, SafeException and domain event bus | US-02-1 | Medium | Sonnet | flutter-core-engineer | T-001 | A | 2 | DONE |
 | [T-015](tasks/T-015.md) | Secure key bootstrap for the database key | US-02-1 | High* | Opus | flutter-core-engineer | T-007 | A | 3 | TODO |
 | [T-016](tasks/T-016.md) | AppDatabase v1 skeleton: encrypted open, isolate, migration harness | US-02-1 | High* | Opus | flutter-core-engineer | T-015 | A | 4 | TODO |
 | [T-017](tasks/T-017.md) | Schema batch A: accounts, balances, raw messages, transactions (+FTS), transfers, offsets, splits | US-06-1 | High* | Opus | flutter-core-engineer | T-016 | A | 5 | TODO |
@@ -59,13 +59,13 @@ Every task file has: ID, description, technical details, dependencies, affected 
 | [T-019](tasks/T-019.md) | Schema batch C: wealth, prices, Zakah, capture controls, review, settings, outbox, misc | US-02-1 | High* | Opus | flutter-core-engineer | T-016 | A | 5 | TODO |
 | [T-020](tasks/T-020.md) | Settings repository with typed accessors and defaults | US-18-1 | Medium | Sonnet | flutter-core-engineer | T-019 | A | 6 | TODO |
 | [T-021](tasks/T-021.md) | Redacting local diagnostic log | US-21-1 | High | Sonnet | flutter-core-engineer | T-019, T-014 | A | 6 | TODO |
-| [T-022](tasks/T-022.md) | Design tokens, Mint Fresh/Jade Night themes and base components | US-02-3 | Medium | Sonnet | flutter-ui-engineer | T-001 | G | 2 | TODO |
+| [T-022](tasks/T-022.md) | Design tokens, Mint Fresh/Jade Night themes and base components | US-02-3 | Medium | Sonnet | flutter-ui-engineer | T-001 | G | 2 | IN_PROGRESS |
 | [T-023](tasks/T-023.md) | Localization scaffold, digits mode and money/date formatting | US-02-2 | Medium | Sonnet | flutter-core-engineer | T-012, T-020 | A | 7 | TODO |
 | [T-024](tasks/T-024.md) | App shell: routing, platform tab bars, Add button, deep links | US-02-3 | Medium | Sonnet | flutter-ui-engineer | T-022, T-023 | G | 8 | TODO |
 | [T-025](tasks/T-025.md) | Feature flags service (default OFF) | US-13-1 | Medium | Sonnet | flutter-core-engineer | T-019 | A | 6 | TODO |
 | [T-026](tasks/T-026.md) | Copy deck part 1: onboarding, capture, Home, transactions, review, accounts | US-20-1 | High | Opus | ux-designer | — | C | 1 | DONE |
 | [T-027](tasks/T-027.md) | Copy deck part 2: insights, budget, bills, money, chat, voice, roast, explanations | US-20-1 | High | Opus | ux-designer | — | C | 1 | DONE |
-| [T-028](tasks/T-028.md) | Copy deck part 3: settings, Gold, backup, import/export, notifications, errors, legal | US-20-1 | High | Opus | ux-designer | — | C | 1 | TODO |
+| [T-028](tasks/T-028.md) | Copy deck part 3: settings, Gold, backup, import/export, notifications, errors, legal | US-20-1 | High | Opus | ux-designer | — | C | 1 | DONE |
 
 ## M1 — Android capture → Home (vertical slice)
 
@@ -184,8 +184,8 @@ Every task file has: ID, description, technical details, dependencies, affected 
 
 | ID | Title | Story | Cx | Model | Agent | Depends on | Lane | Wave | Status |
 |---|---|---|---|---|---|---|---|---|---|
-| [T-122](tasks/T-122.md) | EF Core model and initial migration for all backend tables + DB roles | US-13-1 | High* | Opus | backend-engineer | T-005 | B | 2 | TODO |
-| [T-123](tasks/T-123.md) | Signing service (ES256 via KMS abstraction) and response-signature middleware | US-13-1 | High* | Opus | backend-engineer | T-005 | B | 2 | TODO |
+| [T-122](tasks/T-122.md) | EF Core model and initial migration for all backend tables + DB roles | US-13-1 | High* | Opus | backend-engineer | T-005 | B | 2 | DONE |
+| [T-123](tasks/T-123.md) | Signing service (ES256 via KMS abstraction) and response-signature middleware | US-13-1 | High* | Opus | backend-engineer | T-005 | B | 2 | IN_REVIEW |
 | [T-124](tasks/T-124.md) | Install registration, install-token auth, rate limits, idempotency, strict DTOs | US-13-1 | High* | Opus | backend-engineer | T-122, T-123, T-006 | B | 3 | TODO |
 | [T-125](tasks/T-125.md) | Catalog versions, deltas, signed full snapshots and admin draft/publish | US-13-1 | High | Opus | backend-engineer | T-122, T-123 | B | 3 | TODO |
 | [T-126](tasks/T-126.md) | Feature flags with targeting rules and admin endpoints | US-13-1 | Medium | Sonnet | backend-engineer | T-122 | B | 3 | TODO |
