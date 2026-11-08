@@ -56,4 +56,4 @@ T-001, T-003, T-005, T-006, T-012 and T-026 are DONE. T-165 is merged but needs 
 ## Progress page
 
 - Dashboard artifact: https://claude.ai/artifact/JLtixDQ3FQ7aogVaWxRoEG. Refresh it per `docs/workflow/tools/README.md`.
-- The `datasets/tasks` document is at version 4.
+- The `datasets/tasks` document is at version 5.
