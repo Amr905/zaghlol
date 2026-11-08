@@ -41,10 +41,10 @@ Every task file has: ID, description, technical details, dependencies, affected 
 | [T-001](tasks/T-001.md) | Create mono-repo scaffold with pub workspace, app flavors and pure-Dart packages | US-01-1 | Medium | Sonnet | flutter-core-engineer | — | A | 1 | DONE |
 | [T-002](tasks/T-002.md) | Add custom lint rules (no double in money, no UI string literals, no print) | US-01-1 | Medium | Sonnet | flutter-core-engineer | T-001 | A | 2 | DONE |
 | [T-003](tasks/T-003.md) | App CI pipeline (format, analyze, unit, golden, native unit) | US-01-1 | Medium | Sonnet | flutter-core-engineer | T-001 | A | 2 | DONE |
-| [T-004](tasks/T-004.md) | Pigeon setup and stale-generation check | US-01-1 | Medium | Sonnet | flutter-core-engineer | T-001 | A | 2 | IN_PROGRESS |
+| [T-004](tasks/T-004.md) | Pigeon setup and stale-generation check | US-01-1 | Medium | Sonnet | flutter-core-engineer | T-001 | A | 2 | DONE |
 | [T-005](tasks/T-005.md) | Backend solution scaffold, Docker Compose and CI | US-01-1 | Medium | Sonnet | backend-engineer | — | B | 1 | DONE |
 | [T-006](tasks/T-006.md) | OpenAPI v1 spec and contract-test harness | US-13-1 | Medium | Sonnet | backend-engineer | T-005 | B | 2 | DONE |
-| [T-007](tasks/T-007.md) | SPK-05: encrypted SQLite (SQLite3MultipleCiphers) + FTS5 trigram on both platforms | US-01-2 | High* | Opus | flutter-core-engineer | T-001 | A | 2 | TODO |
+| [T-007](tasks/T-007.md) | SPK-05: encrypted SQLite (SQLite3MultipleCiphers) + FTS5 trigram on both platforms | US-01-2 | High* | Opus | flutter-core-engineer | T-001 | A | 2 | IN_PROGRESS |
 | [T-008](tasks/T-008.md) | SPK-01: Android receiver → spool → WorkManager → headless engine latency | US-01-2 | High* | Opus | native-platform-engineer | T-001, T-004 | D | 3 | TODO |
 | [T-009](tasks/T-009.md) | SPK-03: can an iOS App Intent process immediately with a headless Flutter engine? | US-01-2 | High* | Opus | native-platform-engineer | T-001, T-004 | E | 3 | TODO |
 | [T-010](tasks/T-010.md) | SPK-02: OCR accuracy on synthetic InstaPay/wallet receipts | US-01-2 | High | Sonnet | native-platform-engineer | T-001 | D | 2 | MERGED (device run pending) |
@@ -59,7 +59,7 @@ Every task file has: ID, description, technical details, dependencies, affected 
 | [T-019](tasks/T-019.md) | Schema batch C: wealth, prices, Zakah, capture controls, review, settings, outbox, misc | US-02-1 | High* | Opus | flutter-core-engineer | T-016 | A | 5 | TODO |
 | [T-020](tasks/T-020.md) | Settings repository with typed accessors and defaults | US-18-1 | Medium | Sonnet | flutter-core-engineer | T-019 | A | 6 | TODO |
 | [T-021](tasks/T-021.md) | Redacting local diagnostic log | US-21-1 | High | Sonnet | flutter-core-engineer | T-019, T-014 | A | 6 | TODO |
-| [T-022](tasks/T-022.md) | Design tokens, Mint Fresh/Jade Night themes and base components | US-02-3 | Medium | Sonnet | flutter-ui-engineer | T-001 | G | 2 | IN_PROGRESS |
+| [T-022](tasks/T-022.md) | Design tokens, Mint Fresh/Jade Night themes and base components | US-02-3 | Medium | Sonnet | flutter-ui-engineer | T-001 | G | 2 | DONE |
 | [T-023](tasks/T-023.md) | Localization scaffold, digits mode and money/date formatting | US-02-2 | Medium | Sonnet | flutter-core-engineer | T-012, T-020 | A | 7 | TODO |
 | [T-024](tasks/T-024.md) | App shell: routing, platform tab bars, Add button, deep links | US-02-3 | Medium | Sonnet | flutter-ui-engineer | T-022, T-023 | G | 8 | TODO |
 | [T-025](tasks/T-025.md) | Feature flags service (default OFF) | US-13-1 | Medium | Sonnet | flutter-core-engineer | T-019 | A | 6 | TODO |
@@ -185,8 +185,8 @@ Every task file has: ID, description, technical details, dependencies, affected 
 | ID | Title | Story | Cx | Model | Agent | Depends on | Lane | Wave | Status |
 |---|---|---|---|---|---|---|---|---|---|
 | [T-122](tasks/T-122.md) | EF Core model and initial migration for all backend tables + DB roles | US-13-1 | High* | Opus | backend-engineer | T-005 | B | 2 | DONE |
-| [T-123](tasks/T-123.md) | Signing service (ES256 via KMS abstraction) and response-signature middleware | US-13-1 | High* | Opus | backend-engineer | T-005 | B | 2 | IN_REVIEW |
-| [T-124](tasks/T-124.md) | Install registration, install-token auth, rate limits, idempotency, strict DTOs | US-13-1 | High* | Opus | backend-engineer | T-122, T-123, T-006 | B | 3 | TODO |
+| [T-123](tasks/T-123.md) | Signing service (ES256 via KMS abstraction) and response-signature middleware | US-13-1 | High* | Opus | backend-engineer | T-005 | B | 2 | DONE |
+| [T-124](tasks/T-124.md) | Install registration, install-token auth, rate limits, idempotency, strict DTOs | US-13-1 | High* | Opus | backend-engineer | T-122, T-123, T-006 | B | 3 | IN_PROGRESS |
 | [T-125](tasks/T-125.md) | Catalog versions, deltas, signed full snapshots and admin draft/publish | US-13-1 | High | Opus | backend-engineer | T-122, T-123 | B | 3 | TODO |
 | [T-126](tasks/T-126.md) | Feature flags with targeting rules and admin endpoints | US-13-1 | Medium | Sonnet | backend-engineer | T-122 | B | 3 | TODO |
 | [T-127](tasks/T-127.md) | Price service: local Egyptian gold-market adapter, FX adapter, worker, override | US-12-1 | High | Sonnet | backend-engineer | T-122 | B | 3 | BLOCKED |
@@ -200,7 +200,7 @@ Every task file has: ID, description, technical details, dependencies, affected 
 | [T-135](tasks/T-135.md) | Accounts: Google/Apple ID token sign-in, linking, sign-out, delete, Android Apple callback | US-15-1 | High* | Opus | backend-engineer | T-132, T-182, T-184 | B | 6 | TODO |
 | [T-136](tasks/T-136.md) | Operator auth (OIDC + MFA), roles, audit log and support lookup | US-13-2 | High* | Opus | backend-engineer | T-122 | B | 3 | TODO |
 | [T-137](tasks/T-137.md) | zaghlol-ops CLI for catalog, flags, prices, contributions and support, plus support runbook | US-13-2 | High | Sonnet | backend-engineer | T-136, T-186, T-125, T-126, T-127, T-129 | B | 7 | TODO |
-| [T-138](tasks/T-138.md) | Backend observability: OpenTelemetry, metrics, dashboards, alert rules | US-21-1 | High | Sonnet | backend-engineer | T-005 | B | 2 | TODO |
+| [T-138](tasks/T-138.md) | Backend observability: OpenTelemetry, metrics, dashboards, alert rules | US-21-1 | High | Sonnet | backend-engineer | T-005 | B | 2 | DONE |
 | [T-139](tasks/T-139.md) | Retention purger and log privacy settings | US-13-1 | Medium | Sonnet | backend-engineer | T-122, T-138 | B | 3 | TODO |
 | [T-140](tasks/T-140.md) | Infrastructure as code and deployment pipeline (staging, prod) | US-13-1 | High* | Opus | backend-engineer | T-138 | B | 3 | BLOCKED |
 | [T-141](tasks/T-141.md) | App BackendClient: generated DTOs, ES256 verification, lazy install registration | US-13-1 | High* | Opus | flutter-core-engineer | T-006, T-019 | A | 6 | TODO |
