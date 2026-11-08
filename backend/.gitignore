@@ -19,3 +19,6 @@ coverage/
 # Local env
 .env
 *.local
+
+# Development KMS keys (tools/dev-keys.sh); never committed
+.dev-keys/

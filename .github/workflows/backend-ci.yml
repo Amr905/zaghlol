@@ -139,11 +139,33 @@ jobs:
               ;;
           esac
 
+      # T-123: the Production image has no KMS adapter configured, so it must refuse to start (fail closed).
+      - name: Production image refuses to start without a KMS
+        run: |
+          set +e
+          timeout 60 docker run --rm \
+            -e 'ConnectionStrings__App=Host=127.0.0.1;Port=1;Database=none;Username=none' \
+            -e 'ConnectionStrings__Admin=Host=127.0.0.1;Port=1;Database=none;Username=none' \
+            "$IMAGE" > prod.log 2>&1
+          code=$?
+          set -e
+          tail -n 20 prod.log
+          if [ "$code" = "0" ] || [ "$code" = "124" ]; then
+            echo "::error title=KMS fail-closed::The Production image did not refuse to start without a KMS (exit $code)."
+            exit 1
+          fi
+          grep -q 'KmsConfigurationException' prod.log || { echo "::error title=KMS fail-closed::The Production image exited for another reason (exit $code)."; exit 1; }
+
       # No database here, so readiness must fail closed: 503 UPSTREAM_UNAVAILABLE (FU-003). The 200 path with a real
-      # database is covered by compose-smoke and the Testcontainers tests.
+      # database is covered by compose-smoke and the Testcontainers tests. The Local KMS (Development only) signs
+      # with throwaway keys made by tools/dev-keys.sh.
       - name: Container process runs as non-root and serves /v1/health (503 without a database)
         run: |
+          sh backend/tools/dev-keys.sh
           cid=$(docker run -d -p 8080:8080 \
+            -e 'ASPNETCORE_ENVIRONMENT=Development' \
+            --env-file backend/.dev-keys/kms.env \
+            -v "$PWD/backend/.dev-keys:/run/zaghlol-dev-keys:ro" \
             -e 'ConnectionStrings__App=Host=127.0.0.1;Port=1;Database=none;Username=none' \
             -e 'ConnectionStrings__Admin=Host=127.0.0.1;Port=1;Database=none;Username=none' \
             "$IMAGE")
@@ -202,6 +224,7 @@ jobs:
 
       - name: Compose up (waits for healthchecks of postgres, api, worker)
         run: |
+          sh tools/dev-keys.sh
           docker compose up -d --build --wait --wait-timeout 240 || {
             docker compose ps
             docker compose logs --no-color

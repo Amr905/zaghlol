@@ -27,10 +27,22 @@ public static class ZaghlolDbContextOptions
     {
         ArgumentException.ThrowIfNullOrWhiteSpace(connectionString);
 
+        if (IncludesErrorDetail(connectionString))
+        {
+            throw new ArgumentException("Include Error Detail must not be set: server error details carry row values (FU-025).", nameof(connectionString));
+        }
+
         var builder = new NpgsqlDataSourceBuilder(connectionString);
         builder.ConnectionStringBuilder.ApplicationName = DatabaseRoles.ApplicationName(role);
         return builder.Build();
     }
+
+    /// <summary>
+    /// FU-025: <c>Include Error Detail=true</c> makes Npgsql put the server's DETAIL (for a CHECK failure, "Failing row
+    /// contains (…)", i.e. row values) into exception messages, which the API logs. Runtime and migration logins never set it.
+    /// </summary>
+    public static bool IncludesErrorDetail(string? connectionString) =>
+        !string.IsNullOrWhiteSpace(connectionString) && new NpgsqlConnectionStringBuilder(connectionString).IncludeErrorDetail;
 
     private static void ConfigureNpgsql(NpgsqlDbContextOptionsBuilder npgsql) =>
         npgsql.MigrationsHistoryTable(HistoryRepository.DefaultTableName, ZaghlolDbContext.Schema);

@@ -29,14 +29,24 @@ internal sealed partial class PostgresDatabaseReadiness(
     public static NpgsqlDataSource CreateProbeSource(string appConnectionString) =>
         NpgsqlDataSource.Create(ProbeConnectionString(appConnectionString));
 
-    /// <summary>The App connection string with the pool forced to one connection, whatever the App string says.</summary>
+    /// <summary>
+    /// The App connection string with the pool forced to one connection, whatever the App string says. The connect
+    /// timeout is forced to <see cref="ConnectTimeoutSeconds"/> (FU-022): an abandoned probe against a server that never
+    /// answers holds the only pool slot until Npgsql gives up, so with the default 15 s every later probe would wait
+    /// for the slot and readiness couldn't recover for 15 s.
+    /// </summary>
     public static string ProbeConnectionString(string appConnectionString) =>
         new NpgsqlConnectionStringBuilder(appConnectionString)
         {
             MaxPoolSize = 1,
             MinPoolSize = 0,
+            Timeout = ConnectTimeoutSeconds,
+            IncludeErrorDetail = false,
             ApplicationName = "zaghlol-api-readiness",
         }.ConnectionString;
+
+    /// <summary>Npgsql's connect timeout for the probe pool (FU-022).</summary>
+    public const int ConnectTimeoutSeconds = 2;
 
     public async ValueTask<bool> IsReadyAsync(CancellationToken cancellationToken)
     {

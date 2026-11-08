@@ -1,0 +1,95 @@
+{
+  "version": 1,
+  "description": "Zaghlol-Signature vectors (T-123, backend-api.md section 1). The header is exactly \u0027kid=\u003Ckid\u003E; alg=ES256; sig=\u003C86 base64url chars\u003E\u0027; the signature is ECDSA P-256 / SHA-256 in IEEE P1363 form (r||s) over the exact body bytes (bodyB64u, uncompressed). Only \u0027s\u0027 kids sign headers; high-S must be accepted. Synthetic test keys; only their public JWKs are here.",
+  "jwks": {
+    "keys": [
+      {
+        "kty": "EC",
+        "crv": "P-256",
+        "x": "yvDCxdX3dFSMrAEOvQC1yRE6bD3i1elPhgcXAYRVguo",
+        "y": "kHFZHaFWktTiI2EqhGXi6lmK_DRjAHKIXrcsrdSjWvw",
+        "kid": "s0000t",
+        "use": "sig",
+        "alg": "ES256"
+      },
+      {
+        "kty": "EC",
+        "crv": "P-256",
+        "x": "vwM4vmHPox1JtEqqvPOD2xEma_6Z7HPFZSa4Ad90c0Q",
+        "y": "hJHwvbg1lhRCSG2eSw26WyBw18pi7EzlR6O_SQVhCIM",
+        "kid": "e0000t",
+        "use": "sig",
+        "alg": "ES256"
+      }
+    ]
+  },
+  "valid": [
+    {
+      "name": "anchored-json",
+      "bodyB64u": "eyJzZXJ2ZXJUaW1lIjoiMjAyNi0xMS0wOFQxMjowMDowMFoiLCJuZXh0U3luY05vdEJlZm9yZSI6IjIwMjYtMTEtMDlUMTI6MDA6MDBaIiwidGltZU5vbmNlIjoia3EzVjl3MGJRMkZ3ZEdGcGJscGhadyJ9",
+      "header": "kid=s0000t; alg=ES256; sig=5EGNdyXYZu-ZiFRrFYt5FsRo_R0f4vcdgDB15PVsjZQg4pQlnoNz4CH-NVj0T8ceUuIcGDPBSN2Ql4JaaHfwWw"
+    },
+    {
+      "name": "empty-object",
+      "bodyB64u": "e30",
+      "header": "kid=s0000t; alg=ES256; sig=kidwSccjtUhAv98wUX-SmfA5_ooWaNzpXHDgUxDnXOqAv7xj27--xBlr0vzyTdQnsl_oVV8lNPbYOjWrmTGVJA"
+    },
+    {
+      "name": "utf8-arabic",
+      "bodyB64u": "eyJtZXNzYWdlIjoi2LLYutmE2YjZhCDYqNmK2YLZiNmE2YMg2KPZh9mE2KfZiyIsInRpbWVOb25jZSI6bnVsbH0",
+      "header": "kid=s0000t; alg=ES256; sig=K18viymTjfp2O-giUX94kzhATX4YG5OEKNDkOAJQ5XlTbO8qXyQjGTPriWz4OWWB7wuRVlPS7FA2j_L5uC6sXA"
+    },
+    {
+      "name": "high-s",
+      "bodyB64u": "eyJzZXJ2ZXJUaW1lIjoiMjAyNi0xMS0wOFQxMjowMDowMFoiLCJuZXh0U3luY05vdEJlZm9yZSI6IjIwMjYtMTEtMDlUMTI6MDA6MDBaIiwidGltZU5vbmNlIjoia3EzVjl3MGJRMkZ3ZEdGcGJscGhadyJ9",
+      "header": "kid=s0000t; alg=ES256; sig=ToBPUq0pVjyteVb-fLTAp2785LR0Dm9QWkorm5Gas4n0GwJfRWJm4ONGGFvy_5YG5RRj8ts9-VZcgwvK54SICg"
+    }
+  ],
+  "invalid": [
+    {
+      "name": "flipped-body-byte",
+      "bodyB64u": "eyJzZXJ3ZXJUaW1lIjoiMjAyNi0xMS0wOFQxMjowMDowMFoiLCJuZXh0U3luY05vdEJlZm9yZSI6IjIwMjYtMTEtMDlUMTI6MDA6MDBaIiwidGltZU5vbmNlIjoia3EzVjl3MGJRMkZ3ZEdGcGJscGhadyJ9",
+      "header": "kid=s0000t; alg=ES256; sig=ToBPUq0pVjyteVb-fLTAp2785LR0Dm9QWkorm5Gas4kL5P2fup2ZIBy556QNAGn419KWusvZpS6XNr74FN6dRw"
+    },
+    {
+      "name": "unknown-kid",
+      "bodyB64u": "eyJzZXJ2ZXJUaW1lIjoiMjAyNi0xMS0wOFQxMjowMDowMFoiLCJuZXh0U3luY05vdEJlZm9yZSI6IjIwMjYtMTEtMDlUMTI6MDA6MDBaIiwidGltZU5vbmNlIjoia3EzVjl3MGJRMkZ3ZEdGcGJscGhadyJ9",
+      "header": "kid=s0000u; alg=ES256; sig=ToBPUq0pVjyteVb-fLTAp2785LR0Dm9QWkorm5Gas4kL5P2fup2ZIBy556QNAGn419KWusvZpS6XNr74FN6dRw"
+    },
+    {
+      "name": "entitlement-kid-on-header",
+      "bodyB64u": "eyJzZXJ2ZXJUaW1lIjoiMjAyNi0xMS0wOFQxMjowMDowMFoiLCJuZXh0U3luY05vdEJlZm9yZSI6IjIwMjYtMTEtMDlUMTI6MDA6MDBaIiwidGltZU5vbmNlIjoia3EzVjl3MGJRMkZ3ZEdGcGJscGhadyJ9",
+      "header": "kid=e0000t; alg=ES256; sig=-E1qpkE_CT4bzCqROXZi12hVABexU9Oyq4_tgCD31aphOqpbiO4Q345z-FYjRsAM7AVfaZXUfm2VYYZDKprIiw"
+    },
+    {
+      "name": "der-signature",
+      "bodyB64u": "eyJzZXJ2ZXJUaW1lIjoiMjAyNi0xMS0wOFQxMjowMDowMFoiLCJuZXh0U3luY05vdEJlZm9yZSI6IjIwMjYtMTEtMDlUMTI6MDA6MDBaIiwidGltZU5vbmNlIjoia3EzVjl3MGJRMkZ3ZEdGcGJscGhadyJ9",
+      "header": "kid=s0000t; alg=ES256; sig=MEYCIQCMwFoAEwoNTOOf2O9wHibHz2Xn8wWxel5_TVAhp-aVywIhAOThOHLXdeg__8W_YRg6rMi19R3Qt9beesCMaP-0BS4x"
+    },
+    {
+      "name": "alg-es384",
+      "bodyB64u": "eyJzZXJ2ZXJUaW1lIjoiMjAyNi0xMS0wOFQxMjowMDowMFoiLCJuZXh0U3luY05vdEJlZm9yZSI6IjIwMjYtMTEtMDlUMTI6MDA6MDBaIiwidGltZU5vbmNlIjoia3EzVjl3MGJRMkZ3ZEdGcGJscGhadyJ9",
+      "header": "kid=s0000t; alg=ES384; sig=ToBPUq0pVjyteVb-fLTAp2785LR0Dm9QWkorm5Gas4kL5P2fup2ZIBy556QNAGn419KWusvZpS6XNr74FN6dRw"
+    },
+    {
+      "name": "padded-signature",
+      "bodyB64u": "eyJzZXJ2ZXJUaW1lIjoiMjAyNi0xMS0wOFQxMjowMDowMFoiLCJuZXh0U3luY05vdEJlZm9yZSI6IjIwMjYtMTEtMDlUMTI6MDA6MDBaIiwidGltZU5vbmNlIjoia3EzVjl3MGJRMkZ3ZEdGcGJscGhadyJ9",
+      "header": "kid=s0000t; alg=ES256; sig=ToBPUq0pVjyteVb-fLTAp2785LR0Dm9QWkorm5Gas4kL5P2fup2ZIBy556QNAGn419KWusvZpS6XNr74FN6dRw=="
+    },
+    {
+      "name": "reordered-params",
+      "bodyB64u": "eyJzZXJ2ZXJUaW1lIjoiMjAyNi0xMS0wOFQxMjowMDowMFoiLCJuZXh0U3luY05vdEJlZm9yZSI6IjIwMjYtMTEtMDlUMTI6MDA6MDBaIiwidGltZU5vbmNlIjoia3EzVjl3MGJRMkZ3ZEdGcGJscGhadyJ9",
+      "header": "alg=ES256; kid=s0000t; sig=ToBPUq0pVjyteVb-fLTAp2785LR0Dm9QWkorm5Gas4kL5P2fup2ZIBy556QNAGn419KWusvZpS6XNr74FN6dRw"
+    },
+    {
+      "name": "extra-spaces",
+      "bodyB64u": "eyJzZXJ2ZXJUaW1lIjoiMjAyNi0xMS0wOFQxMjowMDowMFoiLCJuZXh0U3luY05vdEJlZm9yZSI6IjIwMjYtMTEtMDlUMTI6MDA6MDBaIiwidGltZU5vbmNlIjoia3EzVjl3MGJRMkZ3ZEdGcGJscGhadyJ9",
+      "header": "kid=s0000t;  alg=ES256; sig=ToBPUq0pVjyteVb-fLTAp2785LR0Dm9QWkorm5Gas4kL5P2fup2ZIBy556QNAGn419KWusvZpS6XNr74FN6dRw"
+    },
+    {
+      "name": "signature-over-gzip-bytes",
+      "bodyB64u": "eyJzZXJ2ZXJUaW1lIjoiMjAyNi0xMS0wOFQxMjowMDowMFoiLCJuZXh0U3luY05vdEJlZm9yZSI6IjIwMjYtMTEtMDlUMTI6MDA6MDBaIiwidGltZU5vbmNlIjoia3EzVjl3MGJRMkZ3ZEdGcGJscGhadyJ9",
+      "header": "kid=s0000t; alg=ES256; sig=_7ZFerJtwLO1rpziz9ew-9whr99WnsHb5POcac6gV588zg-g_qE7jvvh_c5HXWXP4QH0KdvhCzX5pHGMZfX6Fw"
+    }
+  ]
+}

@@ -11,9 +11,10 @@ Never stores user financial data (SRS BR-SYNC-03).
 | `src/Zaghlol.Api` | ASP.NET Core Minimal API (`GET /v1/health`, RFC 9457 Problem Details, Serilog JSON logs) |
 | `src/Zaghlol.Application` | Handlers per module |
 | `src/Zaghlol.Domain` | Pure domain rules and stable error codes |
-| `src/Zaghlol.Infrastructure` | Logging setup, DI wiring, EF Core model + migrations (`Persistence/`, T-122) |
+| `src/Zaghlol.Infrastructure` | Logging setup, DI wiring, EF Core model + migrations (`Persistence/`, T-122), KMS abstraction: signer, keyed hasher, envelope cipher (`Kms/`, T-123) |
 | `src/Zaghlol.Workers` | BackgroundService host (no jobs yet; writes a heartbeat file); `--migrate` is the migration job |
 | `src/Zaghlol.Ops` | `zaghlol-ops` operator CLI (stub) |
+| `tools/dev-keys.sh` | Creates development KMS keys and the matching key-ring config for compose (T-123) |
 | `deploy/db/` | `bootstrap-roles.sql` (roles + schema, run once by an admin), `dev-passwords.sql` (compose only) |
 | `tests/` | xUnit unit tests and Testcontainers PostgreSQL 17 integration tests (schema, CHECKs, grants, readiness) |
 
@@ -21,11 +22,14 @@ Never stores user financial data (SRS BR-SYNC-03).
 
 ```sh
 cd backend
+tools/dev-keys.sh                # throwaway Local KMS keys in .dev-keys/ (git-ignored)
 docker compose up --build        # api on :8080, worker, postgres 17
 curl http://localhost:8080/v1/health
 ```
 
-Without Docker: `dotnet run --project src/Zaghlol.Api`.
+Without Docker: `tools/dev-keys.sh`, then run `src/Zaghlol.Api` as `Development` with the variables of
+`.dev-keys/kms.env` and `Kms__Local__KeyDirectory` pointing at `.dev-keys`. The API refuses to start without a valid key
+ring, and refuses the Local KMS outside Development/Testing (T-123; `docs/03-technical/deployment.md` §3).
 
 ## Checks (same as CI, `.github/workflows/backend-ci.yml`)
 

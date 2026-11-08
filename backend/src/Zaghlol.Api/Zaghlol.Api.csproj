@@ -9,4 +9,9 @@
     <PackageReference Include="Serilog.AspNetCore" />
   </ItemGroup>
 
+  <ItemGroup>
+    <InternalsVisibleTo Include="Zaghlol.Api.Tests" />
+    <InternalsVisibleTo Include="Zaghlol.Contract.Tests" />
+  </ItemGroup>
+
 </Project>

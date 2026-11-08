@@ -135,7 +135,7 @@ plaintext = tar-like stream: db.snapshot, settings.json, manifest.json
 | Rate limiting & abuse | Token bucket per install and per /24; registration limited per IP; WAF managed rules |
 | Secrets | Cloud secrets manager; no secrets in config files or images; CI uses OIDC federation (no long-lived keys) |
 | Signing keys | ES256 keys in KMS/HSM (`sign` permission for the API identity only). Each `kid` has a 12-month active life. The app embeds current + next public keys, and rotation ships in an app release before activation. |
-| Data at rest | Managed PostgreSQL encryption; Apple refresh tokens additionally envelope-encrypted with KMS |
+| Data at rest | Managed PostgreSQL encryption; Apple refresh tokens and idempotency bodies additionally envelope-encrypted with KMS (`IEnvelopeCipher`, format v1 in `deployment.md` §3: AES-256-GCM, fresh data key per record, the row's context bound as associated data) |
 | DB access | Separate least-privilege roles; no public IP (private networking); operator access only through the admin API |
 | Dependencies | Dependabot/Renovate; `dotnet list package --vulnerable` and SCA in CI; container image scanning; SBOM per release |
 | Logging privacy | IP truncation at ingestion; no request bodies logged; install IDs hashed in logs |
