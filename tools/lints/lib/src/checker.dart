@@ -209,7 +209,8 @@ class _RuleVisitor extends RecursiveAstVisitor<void> {
 
   @override
   void visitClassDeclaration(ClassDeclaration node) {
-    if (scope.inParsingOrDbLayer) {
+    // SafeException itself implements Exception, so it is exempt.
+    if (scope.inParsingOrDbLayer && node.name.lexeme != 'SafeException') {
       final ancestors = <String>{};
       for (final direct in ClassGraph.directSupertypes(node)) {
         ancestors.addAll(graph.ancestors(direct));
