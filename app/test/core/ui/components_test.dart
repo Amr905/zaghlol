@@ -12,6 +12,7 @@ Widget _app(
 }) {
   return MaterialApp(
     locale: rtl ? const Locale('ar', 'EG') : const Locale('en'),
+    supportedLocales: [rtl ? const Locale('ar', 'EG') : const Locale('en')],
     theme: ZaghlolTheme.light,
     darkTheme: ZaghlolTheme.dark,
     themeMode: dark ? ThemeMode.dark : ThemeMode.light,
