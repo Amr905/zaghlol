@@ -113,18 +113,13 @@ void main() {
     test('map and flatMap pass failures through', () {
       expect(ok.map((v) => v * 3).valueOrNull, 6);
       expect(err.map((v) => v * 3).failureOrNull, isA<CurrencyFailure>());
-      expect(
-        ok.flatMap<int>((v) => Result.ok(v + 1)).valueOrNull,
-        3,
+      final chained = ok.flatMap<int>((v) => Result.ok(v + 1));
+      expect(chained.valueOrNull, 3);
+      const Result<int, Failure> boom = Result.err(
+        DbFailure(DbFailureKind.diskFull),
       );
-      expect(
-        ok
-            .flatMap<int>(
-              (_) => const Result.err(DbFailure(DbFailureKind.diskFull)),
-            )
-            .failureOrNull,
-        isA<DbFailure>(),
-      );
+      final failed = ok.flatMap<int>((_) => boom);
+      expect(failed.failureOrNull, isA<DbFailure>());
       expect(err.flatMap<int>((v) => Result.ok(v)).isErr, isTrue);
     });
 

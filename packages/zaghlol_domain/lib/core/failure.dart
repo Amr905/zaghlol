@@ -125,6 +125,7 @@ final class CurrencyFailure extends Failure {
 }
 
 /// Converts a lowerCamelCase enum name to UPPER_SNAKE_CASE.
-String _screaming(String camel) => camel
-    .replaceAllMapped(RegExp('[A-Z]'), (m) => '_${m[0]}')
-    .toUpperCase();
+String _screaming(String camel) {
+  final spaced = camel.replaceAllMapped(RegExp('[A-Z]'), (m) => '_${m[0]}');
+  return spaced.toUpperCase();
+}
