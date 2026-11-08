@@ -44,11 +44,25 @@ public sealed class SeededSeriesTests
 
         Assert.True(provider.GetRequiredService<MeterProvider>().ForceFlush(10_000));
 
-        var zeros = exported
-            .SelectMany(m => m.MetricPoints.Select(p => (m.Name, Tags: p.Tags.ToArray(), Sum: p.GetSumLong())))
-            .Where(x => x.Sum == 0)
-            .Select(x => (x.Name, Tag: string.Join(';', x.Tags.Select(t => $"{t.Key}={t.Value}"))))
-            .ToArray();
+        var zeros = new List<(string Name, string Tag)>();
+        foreach (var metric in exported)
+        {
+            foreach (var point in metric.MetricPoints)
+            {
+                if (point.GetSumLong() != 0)
+                {
+                    continue;
+                }
+
+                var tags = new List<string>();
+                foreach (var tag in point.Tags)
+                {
+                    tags.Add($"{tag.Key}={tag.Value}");
+                }
+
+                zeros.Add((metric.Name, string.Join(';', tags)));
+            }
+        }
 
         foreach (var rule in Enum.GetValues<AuditAlertRule>())
         {
