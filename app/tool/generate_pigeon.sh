@@ -10,4 +10,4 @@ for input in pigeons/*.dart; do
 done
 
 # Pigeon's Dart output is not always dart-format clean, and CI checks format.
-dart format lib/core/platform
+dart format pigeons lib/core/platform

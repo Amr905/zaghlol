@@ -8,8 +8,7 @@ import 'package:pigeon/pigeon.dart';
   PigeonOptions(
     dartOut: 'lib/core/platform/capture_api.g.dart',
     dartPackageName: 'zaghlol',
-    kotlinOut:
-        'android/app/src/main/kotlin/app/zaghlol/platform/capture/CaptureApi.g.kt',
+    kotlinOut: 'android/app/src/main/kotlin/app/zaghlol/platform/capture/CaptureApi.g.kt',
     kotlinOptions: KotlinOptions(
       package: 'app.zaghlol.platform.capture',
       errorClassName: 'CaptureApiError',
@@ -18,7 +17,6 @@ import 'package:pigeon/pigeon.dart';
     swiftOptions: SwiftOptions(errorClassName: 'CaptureApiError'),
   ),
 )
-
 @HostApi()
 abstract class AndroidCaptureHostApi {}
 

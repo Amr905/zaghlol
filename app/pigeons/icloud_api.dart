@@ -8,8 +8,7 @@ import 'package:pigeon/pigeon.dart';
   PigeonOptions(
     dartOut: 'lib/core/platform/icloud_api.g.dart',
     dartPackageName: 'zaghlol',
-    kotlinOut:
-        'android/app/src/main/kotlin/app/zaghlol/platform/icloud/IcloudApi.g.kt',
+    kotlinOut: 'android/app/src/main/kotlin/app/zaghlol/platform/icloud/IcloudApi.g.kt',
     kotlinOptions: KotlinOptions(
       package: 'app.zaghlol.platform.icloud',
       errorClassName: 'IcloudApiError',
@@ -18,6 +17,5 @@ import 'package:pigeon/pigeon.dart';
     swiftOptions: SwiftOptions(errorClassName: 'IcloudApiError'),
   ),
 )
-
 @HostApi()
 abstract class ICloudBackupHostApi {}

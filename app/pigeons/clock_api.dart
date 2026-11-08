@@ -18,7 +18,6 @@ import 'package:pigeon/pigeon.dart';
     swiftOptions: SwiftOptions(errorClassName: 'ClockApiError'),
   ),
 )
-
 @HostApi()
 abstract class TrustedClockHostApi {}
 

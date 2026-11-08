@@ -8,8 +8,7 @@ import 'package:pigeon/pigeon.dart';
   PigeonOptions(
     dartOut: 'lib/core/platform/device_api.g.dart',
     dartPackageName: 'zaghlol',
-    kotlinOut:
-        'android/app/src/main/kotlin/app/zaghlol/platform/device/DeviceApi.g.kt',
+    kotlinOut: 'android/app/src/main/kotlin/app/zaghlol/platform/device/DeviceApi.g.kt',
     kotlinOptions: KotlinOptions(
       package: 'app.zaghlol.platform.device',
       errorClassName: 'DeviceApiError',
@@ -18,7 +17,6 @@ import 'package:pigeon/pigeon.dart';
     swiftOptions: SwiftOptions(errorClassName: 'DeviceApiError'),
   ),
 )
-
 @HostApi()
 abstract class DeviceSecurityHostApi {}
 

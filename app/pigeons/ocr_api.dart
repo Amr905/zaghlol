@@ -18,6 +18,5 @@ import 'package:pigeon/pigeon.dart';
     swiftOptions: SwiftOptions(errorClassName: 'OcrApiError'),
   ),
 )
-
 @HostApi()
 abstract class OcrHostApi {}

@@ -8,8 +8,7 @@ import 'package:pigeon/pigeon.dart';
   PigeonOptions(
     dartOut: 'lib/core/platform/attestation_api.g.dart',
     dartPackageName: 'zaghlol',
-    kotlinOut:
-        'android/app/src/main/kotlin/app/zaghlol/platform/attestation/AttestationApi.g.kt',
+    kotlinOut: 'android/app/src/main/kotlin/app/zaghlol/platform/attestation/AttestationApi.g.kt',
     kotlinOptions: KotlinOptions(
       package: 'app.zaghlol.platform.attestation',
       errorClassName: 'AttestationApiError',
@@ -18,6 +17,5 @@ import 'package:pigeon/pigeon.dart';
     swiftOptions: SwiftOptions(errorClassName: 'AttestationApiError'),
   ),
 )
-
 @HostApi()
 abstract class AttestationHostApi {}
