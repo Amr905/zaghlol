@@ -1,6 +1,11 @@
 /// Public API of the `zaghlol_domain` package.
 library;
 
+export 'core/domain_event.dart';
+export 'core/domain_event_bus.dart';
+export 'core/failure.dart';
+export 'core/result.dart';
+export 'core/safe_exception.dart';
 export 'money/currency.dart';
 export 'money/money.dart';
 export 'money/money_errors.dart';

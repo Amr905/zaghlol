@@ -4,7 +4,7 @@
 
 | Job | What it checks |
 |-----|----------------|
-| `static` | `pub get --enforce-lockfile`, `dart format`, `flutter analyze`, custom_lint slot, app non-golden tests, `dart test` for both packages, a check that `FLUTTER_VERSION` is identical in `app-ci.yml` and `app-regen.yml`, and the negative-control self-test of the T-165 backup assertions (`.github/scripts/test-check-no-os-backup.sh`) |
+| `static` | `pub get --enforce-lockfile`, `dart format`, `flutter analyze`, zaghlol_lints, app non-golden tests, `dart test` for both packages, a check that `FLUTTER_VERSION` is identical in `app-ci.yml` and `app-regen.yml`, and the negative-control self-test of the T-165 backup assertions (`.github/scripts/test-check-no-os-backup.sh`) |
 | `golden` | `flutter test --tags golden`; on failure uploads artifact `golden-diffs` |
 | `kotlin-unit` | Gradle JVM unit tests (`app/android/app/src/test`); fails when no `<testcase>` result exists; then `:app:lintDevNoSmsDebug` with `AllowBackup`, `DataExtractionRules` and `FullBackupContent` fatal (`app/android/app/lint.xml`, T-165) |
 | `swift-unit` | `xcodebuild test` of `RunnerTests` on an iOS simulator (macOS runner); each T-165 `BackupExclusionTests` case must be reported as passed |
@@ -12,8 +12,6 @@
 | `ios` (x3) | all flavors built with `--no-codesign` |
 
 Flutter is pinned to the exact version in `FLUTTER_VERSION` (3.47.9), matching `pubspec.lock`. All actions are pinned to commit SHAs.
-
-To enable custom_lint (T-002), add it to the workspace and set `RUN_CUSTOM_LINT: 'true'` in `app-ci.yml`.
 
 Tag golden tests with `@Tags(['golden'])` and put their PNGs in a `goldens/` directory next to the test (for example `app/test/goldens/`). Never generate goldens locally: pixels differ per platform, so CI (ubuntu) is the only source of truth.
 
@@ -72,3 +70,7 @@ Safety properties:
 ## Pinned actions
 
 Update by looking up the tag's commit SHA (`git ls-remote --tags <repo-url>`; for annotated tags use the `^{}` line) and changing the SHA and the `# vX.Y.Z` comment together in both workflows.
+
+## zaghlol_lints (T-002)
+
+The `static` job runs `dart run bin/zaghlol_lints.dart ../../app ../../packages/zaghlol_parsing ../../packages/zaghlol_domain` in `tools/lints` (rules: no double money, no UI string literals in build, no print outside debug files, SafeException in parsing/db), then `dart test` there (fixtures with `// expect_lint:` comments). `flutter analyze` does not run them. See `tools/lints/README.md` for why this is a standalone checker and not a `custom_lint` plugin.
