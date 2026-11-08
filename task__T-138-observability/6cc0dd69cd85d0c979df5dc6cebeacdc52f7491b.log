@@ -1,1 +1,400 @@
-﻿auto task/T-138-observability 6cc0dd69cd85d0c979df5dc6cebeacdc52f7491b 2026-11-09T00:01:49.1706889+02:00
+﻿--- End of stack trace from previous location ---
+   at System.Threading.ExecutionContext.RunFromThreadPoolDispatchLoop(Thread threadPoolThread, ExecutionContext executionContext, ContextCallback callback, Object state)
+   at System.Threading.Tasks.Task.ExecuteWithThreadLocal(Task& currentTaskSlot, Thread threadPoolThread)
+--- End of stack trace from previous location ---
+   at Docker.DotNet.DockerClient.<>c__DisplayClass5_0.<<-ctor>b__0>d.MoveNext() in /_/src/Docker.DotNet/DockerClient.cs:line 69
+--- End of stack trace from previous location ---
+   at Microsoft.Net.Http.Client.ManagedHandler.ProcessRequestAsync(HttpRequestMessage request, CancellationToken cancellationToken) in /_/src/Docker.DotNet/Microsoft.Net.Http.Client/ManagedHandler.cs:line 160
+   at Microsoft.Net.Http.Client.ManagedHandler.SendAsync(HttpRequestMessage httpRequestMessage, CancellationToken cancellationToken) in /_/src/Docker.DotNet/Microsoft.Net.Http.Client/ManagedHandler.cs:line 77
+   at System.Net.Http.HttpClient.<SendAsync>g__Core|83_0(HttpRequestMessage request, HttpCompletionOption completionOption, CancellationTokenSource cts, Boolean disposeCts, CancellationTokenSource pendingRequestsCts, CancellationToken originalCancellationToken)
+   at Docker.DotNet.DockerClient.PrivateMakeRequestAsync(TimeSpan timeout, HttpCompletionOption completionOption, HttpMethod method, String path, IQueryString queryString, IDictionary`2 headers, IRequestContent data, CancellationToken cancellationToken) in /_/src/Docker.DotNet/DockerClient.cs:line 433
+   at Docker.DotNet.DockerClient.MakeRequestAsync[T](IEnumerable`1 errorHandlers, HttpMethod method, String path, IQueryString queryString, IRequestContent body, IDictionary`2 headers, TimeSpan timeout, CancellationToken token) in /_/src/Docker.DotNet/DockerClient.cs:line 243
+   at DotNet.Testcontainers.Builders.DockerEndpointAuthenticationProvider.<>c__DisplayClass5_0.<<IsAvailable>b__0>d.MoveNext() in /_/src/Testcontainers/Builders/DockerEndpointAuthenticationProvider.cs:line 48
+  Failed Zaghlol.Api.Tests.Observability.ProductionLevelSentinelTests.TheSentinelAppearsInNoSpan [1 ms]
+  Error Message:
+   DotNet.Testcontainers.Builders.DockerUnavailableException : Docker is either not running or misconfigured. Please ensure that Docker is running and that the endpoint is properly configured.
+You can customize your configuration using either the environment variables or the ~/.testcontainers.properties file.
+For more information, visit: https://dotnet.testcontainers.org/custom_configuration/.
+  Details: 
+    Failed to connect to Docker endpoint at 'npipe://./pipe/docker_engine'.
+---- System.AggregateException : One or more errors occurred. (Failed to connect to Docker endpoint at 'npipe://./pipe/docker_engine'.)
+-------- DotNet.Testcontainers.Builders.DockerUnavailableException : Failed to connect to Docker endpoint at 'npipe://./pipe/docker_engine'.
+------------ System.TimeoutException : The operation has timed out.
+  Stack Trace:
+     at DotNet.Testcontainers.Guard.ThrowIf[TType](ArgumentInfo`1& argument, Func`2 condition, Func`2 ifClause) in /_/src/Testcontainers/Guard.Null.cs:line 62
+   at DotNet.Testcontainers.Builders.AbstractBuilder`4.Validate() in /_/src/Testcontainers/Builders/AbstractBuilder`4.cs:line 146
+   at DotNet.Testcontainers.Builders.ContainerBuilder`3.Validate() in /_/src/Testcontainers/Builders/ContainerBuilder`3.cs:line 395
+   at Testcontainers.PostgreSql.PostgreSqlBuilder.Validate() in /_/src/Testcontainers.PostgreSql/PostgreSqlBuilder.cs:line 101
+   at Testcontainers.PostgreSql.PostgreSqlBuilder.Build() in /_/src/Testcontainers.PostgreSql/PostgreSqlBuilder.cs:line 75
+   at Zaghlol.Testing.ZaghlolTestDatabase.StartAsync(Nullable`1 hostPort, Boolean migrate) in C:\Users\amr90\zaghlol-ci\repo\backend\tests\Shared\ZaghlolTestDatabase.cs:line 52
+   at Zaghlol.Api.Tests.Observability.ObservabilityHostFixture.InitializeAsync() in C:\Users\amr90\zaghlol-ci\repo\backend\tests\Zaghlol.Api.Tests\Observability\ObservabilityHostFixture.cs:line 159
+----- Inner Stack Trace -----
+
+----- Inner Stack Trace -----
+
+----- Inner Stack Trace -----
+   at System.IO.Pipes.NamedPipeClientStream.ConnectInternal(Int32 timeout, CancellationToken cancellationToken, Int32 startTime)
+   at System.Threading.ExecutionContext.RunFromThreadPoolDispatchLoop(Thread threadPoolThread, ExecutionContext executionContext, ContextCallback callback, Object state)
+--- End of stack trace from previous location ---
+   at System.Threading.ExecutionContext.RunFromThreadPoolDispatchLoop(Thread threadPoolThread, ExecutionContext executionContext, ContextCallback callback, Object state)
+   at System.Threading.Tasks.Task.ExecuteWithThreadLocal(Task& currentTaskSlot, Thread threadPoolThread)
+--- End of stack trace from previous location ---
+   at Docker.DotNet.DockerClient.<>c__DisplayClass5_0.<<-ctor>b__0>d.MoveNext() in /_/src/Docker.DotNet/DockerClient.cs:line 69
+--- End of stack trace from previous location ---
+   at Microsoft.Net.Http.Client.ManagedHandler.ProcessRequestAsync(HttpRequestMessage request, CancellationToken cancellationToken) in /_/src/Docker.DotNet/Microsoft.Net.Http.Client/ManagedHandler.cs:line 160
+   at Microsoft.Net.Http.Client.ManagedHandler.SendAsync(HttpRequestMessage httpRequestMessage, CancellationToken cancellationToken) in /_/src/Docker.DotNet/Microsoft.Net.Http.Client/ManagedHandler.cs:line 77
+   at System.Net.Http.HttpClient.<SendAsync>g__Core|83_0(HttpRequestMessage request, HttpCompletionOption completionOption, CancellationTokenSource cts, Boolean disposeCts, CancellationTokenSource pendingRequestsCts, CancellationToken originalCancellationToken)
+   at Docker.DotNet.DockerClient.PrivateMakeRequestAsync(TimeSpan timeout, HttpCompletionOption completionOption, HttpMethod method, String path, IQueryString queryString, IDictionary`2 headers, IRequestContent data, CancellationToken cancellationToken) in /_/src/Docker.DotNet/DockerClient.cs:line 433
+   at Docker.DotNet.DockerClient.MakeRequestAsync[T](IEnumerable`1 errorHandlers, HttpMethod method, String path, IQueryString queryString, IRequestContent body, IDictionary`2 headers, TimeSpan timeout, CancellationToken token) in /_/src/Docker.DotNet/DockerClient.cs:line 243
+   at DotNet.Testcontainers.Builders.DockerEndpointAuthenticationProvider.<>c__DisplayClass5_0.<<IsAvailable>b__0>d.MoveNext() in /_/src/Testcontainers/Builders/DockerEndpointAuthenticationProvider.cs:line 48
+  Failed Zaghlol.Api.Tests.Observability.ProductionLevelSentinelTests.TheHeaderNamesInTheScenarioAreTheNeverLoggedOnes [1 ms]
+  Error Message:
+   DotNet.Testcontainers.Builders.DockerUnavailableException : Docker is either not running or misconfigured. Please ensure that Docker is running and that the endpoint is properly configured.
+You can customize your configuration using either the environment variables or the ~/.testcontainers.properties file.
+For more information, visit: https://dotnet.testcontainers.org/custom_configuration/.
+  Details: 
+    Failed to connect to Docker endpoint at 'npipe://./pipe/docker_engine'.
+---- System.AggregateException : One or more errors occurred. (Failed to connect to Docker endpoint at 'npipe://./pipe/docker_engine'.)
+-------- DotNet.Testcontainers.Builders.DockerUnavailableException : Failed to connect to Docker endpoint at 'npipe://./pipe/docker_engine'.
+------------ System.TimeoutException : The operation has timed out.
+  Stack Trace:
+     at DotNet.Testcontainers.Guard.ThrowIf[TType](ArgumentInfo`1& argument, Func`2 condition, Func`2 ifClause) in /_/src/Testcontainers/Guard.Null.cs:line 62
+   at DotNet.Testcontainers.Builders.AbstractBuilder`4.Validate() in /_/src/Testcontainers/Builders/AbstractBuilder`4.cs:line 146
+   at DotNet.Testcontainers.Builders.ContainerBuilder`3.Validate() in /_/src/Testcontainers/Builders/ContainerBuilder`3.cs:line 395
+   at Testcontainers.PostgreSql.PostgreSqlBuilder.Validate() in /_/src/Testcontainers.PostgreSql/PostgreSqlBuilder.cs:line 101
+   at Testcontainers.PostgreSql.PostgreSqlBuilder.Build() in /_/src/Testcontainers.PostgreSql/PostgreSqlBuilder.cs:line 75
+   at Zaghlol.Testing.ZaghlolTestDatabase.StartAsync(Nullable`1 hostPort, Boolean migrate) in C:\Users\amr90\zaghlol-ci\repo\backend\tests\Shared\ZaghlolTestDatabase.cs:line 52
+   at Zaghlol.Api.Tests.Observability.ObservabilityHostFixture.InitializeAsync() in C:\Users\amr90\zaghlol-ci\repo\backend\tests\Zaghlol.Api.Tests\Observability\ObservabilityHostFixture.cs:line 159
+----- Inner Stack Trace -----
+
+----- Inner Stack Trace -----
+
+----- Inner Stack Trace -----
+   at System.IO.Pipes.NamedPipeClientStream.ConnectInternal(Int32 timeout, CancellationToken cancellationToken, Int32 startTime)
+   at System.Threading.ExecutionContext.RunFromThreadPoolDispatchLoop(Thread threadPoolThread, ExecutionContext executionContext, ContextCallback callback, Object state)
+--- End of stack trace from previous location ---
+   at System.Threading.ExecutionContext.RunFromThreadPoolDispatchLoop(Thread threadPoolThread, ExecutionContext executionContext, ContextCallback callback, Object state)
+   at System.Threading.Tasks.Task.ExecuteWithThreadLocal(Task& currentTaskSlot, Thread threadPoolThread)
+--- End of stack trace from previous location ---
+   at Docker.DotNet.DockerClient.<>c__DisplayClass5_0.<<-ctor>b__0>d.MoveNext() in /_/src/Docker.DotNet/DockerClient.cs:line 69
+--- End of stack trace from previous location ---
+   at Microsoft.Net.Http.Client.ManagedHandler.ProcessRequestAsync(HttpRequestMessage request, CancellationToken cancellationToken) in /_/src/Docker.DotNet/Microsoft.Net.Http.Client/ManagedHandler.cs:line 160
+   at Microsoft.Net.Http.Client.ManagedHandler.SendAsync(HttpRequestMessage httpRequestMessage, CancellationToken cancellationToken) in /_/src/Docker.DotNet/Microsoft.Net.Http.Client/ManagedHandler.cs:line 77
+   at System.Net.Http.HttpClient.<SendAsync>g__Core|83_0(HttpRequestMessage request, HttpCompletionOption completionOption, CancellationTokenSource cts, Boolean disposeCts, CancellationTokenSource pendingRequestsCts, CancellationToken originalCancellationToken)
+   at Docker.DotNet.DockerClient.PrivateMakeRequestAsync(TimeSpan timeout, HttpCompletionOption completionOption, HttpMethod method, String path, IQueryString queryString, IDictionary`2 headers, IRequestContent data, CancellationToken cancellationToken) in /_/src/Docker.DotNet/DockerClient.cs:line 433
+   at Docker.DotNet.DockerClient.MakeRequestAsync[T](IEnumerable`1 errorHandlers, HttpMethod method, String path, IQueryString queryString, IRequestContent body, IDictionary`2 headers, TimeSpan timeout, CancellationToken token) in /_/src/Docker.DotNet/DockerClient.cs:line 243
+   at DotNet.Testcontainers.Builders.DockerEndpointAuthenticationProvider.<>c__DisplayClass5_0.<<IsAvailable>b__0>d.MoveNext() in /_/src/Testcontainers/Builders/DockerEndpointAuthenticationProvider.cs:line 48
+  Failed Zaghlol.Api.Tests.Observability.ProductionLevelSentinelTests.TheSentinelAppearsInNoMetricTag [1 ms]
+  Error Message:
+   DotNet.Testcontainers.Builders.DockerUnavailableException : Docker is either not running or misconfigured. Please ensure that Docker is running and that the endpoint is properly configured.
+You can customize your configuration using either the environment variables or the ~/.testcontainers.properties file.
+For more information, visit: https://dotnet.testcontainers.org/custom_configuration/.
+  Details: 
+    Failed to connect to Docker endpoint at 'npipe://./pipe/docker_engine'.
+---- System.AggregateException : One or more errors occurred. (Failed to connect to Docker endpoint at 'npipe://./pipe/docker_engine'.)
+-------- DotNet.Testcontainers.Builders.DockerUnavailableException : Failed to connect to Docker endpoint at 'npipe://./pipe/docker_engine'.
+------------ System.TimeoutException : The operation has timed out.
+  Stack Trace:
+     at DotNet.Testcontainers.Guard.ThrowIf[TType](ArgumentInfo`1& argument, Func`2 condition, Func`2 ifClause) in /_/src/Testcontainers/Guard.Null.cs:line 62
+   at DotNet.Testcontainers.Builders.AbstractBuilder`4.Validate() in /_/src/Testcontainers/Builders/AbstractBuilder`4.cs:line 146
+   at DotNet.Testcontainers.Builders.ContainerBuilder`3.Validate() in /_/src/Testcontainers/Builders/ContainerBuilder`3.cs:line 395
+   at Testcontainers.PostgreSql.PostgreSqlBuilder.Validate() in /_/src/Testcontainers.PostgreSql/PostgreSqlBuilder.cs:line 101
+   at Testcontainers.PostgreSql.PostgreSqlBuilder.Build() in /_/src/Testcontainers.PostgreSql/PostgreSqlBuilder.cs:line 75
+   at Zaghlol.Testing.ZaghlolTestDatabase.StartAsync(Nullable`1 hostPort, Boolean migrate) in C:\Users\amr90\zaghlol-ci\repo\backend\tests\Shared\ZaghlolTestDatabase.cs:line 52
+   at Zaghlol.Api.Tests.Observability.ObservabilityHostFixture.InitializeAsync() in C:\Users\amr90\zaghlol-ci\repo\backend\tests\Zaghlol.Api.Tests\Observability\ObservabilityHostFixture.cs:line 159
+----- Inner Stack Trace -----
+
+----- Inner Stack Trace -----
+
+----- Inner Stack Trace -----
+   at System.IO.Pipes.NamedPipeClientStream.ConnectInternal(Int32 timeout, CancellationToken cancellationToken, Int32 startTime)
+   at System.Threading.ExecutionContext.RunFromThreadPoolDispatchLoop(Thread threadPoolThread, ExecutionContext executionContext, ContextCallback callback, Object state)
+--- End of stack trace from previous location ---
+   at System.Threading.ExecutionContext.RunFromThreadPoolDispatchLoop(Thread threadPoolThread, ExecutionContext executionContext, ContextCallback callback, Object state)
+   at System.Threading.Tasks.Task.ExecuteWithThreadLocal(Task& currentTaskSlot, Thread threadPoolThread)
+--- End of stack trace from previous location ---
+   at Docker.DotNet.DockerClient.<>c__DisplayClass5_0.<<-ctor>b__0>d.MoveNext() in /_/src/Docker.DotNet/DockerClient.cs:line 69
+--- End of stack trace from previous location ---
+   at Microsoft.Net.Http.Client.ManagedHandler.ProcessRequestAsync(HttpRequestMessage request, CancellationToken cancellationToken) in /_/src/Docker.DotNet/Microsoft.Net.Http.Client/ManagedHandler.cs:line 160
+   at Microsoft.Net.Http.Client.ManagedHandler.SendAsync(HttpRequestMessage httpRequestMessage, CancellationToken cancellationToken) in /_/src/Docker.DotNet/Microsoft.Net.Http.Client/ManagedHandler.cs:line 77
+   at System.Net.Http.HttpClient.<SendAsync>g__Core|83_0(HttpRequestMessage request, HttpCompletionOption completionOption, CancellationTokenSource cts, Boolean disposeCts, CancellationTokenSource pendingRequestsCts, CancellationToken originalCancellationToken)
+   at Docker.DotNet.DockerClient.PrivateMakeRequestAsync(TimeSpan timeout, HttpCompletionOption completionOption, HttpMethod method, String path, IQueryString queryString, IDictionary`2 headers, IRequestContent data, CancellationToken cancellationToken) in /_/src/Docker.DotNet/DockerClient.cs:line 433
+   at Docker.DotNet.DockerClient.MakeRequestAsync[T](IEnumerable`1 errorHandlers, HttpMethod method, String path, IQueryString queryString, IRequestContent body, IDictionary`2 headers, TimeSpan timeout, CancellationToken token) in /_/src/Docker.DotNet/DockerClient.cs:line 243
+   at DotNet.Testcontainers.Builders.DockerEndpointAuthenticationProvider.<>c__DisplayClass5_0.<<IsAvailable>b__0>d.MoveNext() in /_/src/Testcontainers/Builders/DockerEndpointAuthenticationProvider.cs:line 48
+[xUnit.net 00:00:13.10]     
+Zaghlol.Api.Tests.ReadinessTests.HealthIs503WhileTheDatabaseIsDownAnd200WithinFiveSecondsAfterItIsBack [FAIL]
+  Failed Zaghlol.Api.Tests.ReadinessTests.HealthIs503WhileTheDatabaseIsDownAnd200WithinFiveSecondsAfterItIsBack [1 ms]
+  Error Message:
+   DotNet.Testcontainers.Builders.DockerUnavailableException : Docker is either not running or misconfigured. Please ensure that Docker is running and that the endpoint is properly configured.
+You can customize your configuration using either the environment variables or the ~/.testcontainers.properties file.
+For more information, visit: https://dotnet.testcontainers.org/custom_configuration/.
+  Details: 
+    Failed to connect to Docker endpoint at 'npipe://./pipe/docker_engine'.
+---- System.AggregateException : One or more errors occurred. (Failed to connect to Docker endpoint at 'npipe://./pipe/docker_engine'.)
+-------- DotNet.Testcontainers.Builders.DockerUnavailableException : Failed to connect to Docker endpoint at 'npipe://./pipe/docker_engine'.
+------------ System.TimeoutException : The operation has timed out.
+  Stack Trace:
+     at DotNet.Testcontainers.Guard.ThrowIf[TType](ArgumentInfo`1& argument, Func`2 condition, Func`2 ifClause) in /_/src/Testcontainers/Guard.Null.cs:line 62
+   at DotNet.Testcontainers.Builders.AbstractBuilder`4.Validate() in /_/src/Testcontainers/Builders/AbstractBuilder`4.cs:line 146
+   at DotNet.Testcontainers.Builders.ContainerBuilder`3.Validate() in /_/src/Testcontainers/Builders/ContainerBuilder`3.cs:line 395
+   at Testcontainers.PostgreSql.PostgreSqlBuilder.Validate() in /_/src/Testcontainers.PostgreSql/PostgreSqlBuilder.cs:line 101
+   at Testcontainers.PostgreSql.PostgreSqlBuilder.Build() in /_/src/Testcontainers.PostgreSql/PostgreSqlBuilder.cs:line 75
+   at Zaghlol.Testing.ZaghlolTestDatabase.StartAsync(Nullable`1 hostPort, Boolean migrate) in C:\Users\amr90\zaghlol-ci\repo\backend\tests\Shared\ZaghlolTestDatabase.cs:line 52
+   at Zaghlol.Api.Tests.ReadinessFixture.InitializeAsync() in C:\Users\amr90\zaghlol-ci\repo\backend\tests\Zaghlol.Api.Tests\ReadinessTests.cs:line 22
+----- Inner Stack Trace -----
+
+----- Inner Stack Trace -----
+
+----- Inner Stack Trace -----
+   at System.IO.Pipes.NamedPipeClientStream.ConnectInternal(Int32 timeout, CancellationToken cancellationToken, Int32 startTime)
+   at System.Threading.ExecutionContext.RunFromThreadPoolDispatchLoop(Thread threadPoolThread, ExecutionContext executionContext, ContextCallback callback, Object state)
+--- End of stack trace from previous location ---
+   at System.Threading.ExecutionContext.RunFromThreadPoolDispatchLoop(Thread threadPoolThread, ExecutionContext executionContext, ContextCallback callback, Object state)
+   at System.Threading.Tasks.Task.ExecuteWithThreadLocal(Task& currentTaskSlot, Thread threadPoolThread)
+--- End of stack trace from previous location ---
+   at Docker.DotNet.DockerClient.<>c__DisplayClass5_0.<<-ctor>b__0>d.MoveNext() in /_/src/Docker.DotNet/DockerClient.cs:line 69
+--- End of stack trace from previous location ---
+   at Microsoft.Net.Http.Client.ManagedHandler.ProcessRequestAsync(HttpRequestMessage request, CancellationToken cancellationToken) in /_/src/Docker.DotNet/Microsoft.Net.Http.Client/ManagedHandler.cs:line 160
+   at Microsoft.Net.Http.Client.ManagedHandler.SendAsync(HttpRequestMessage httpRequestMessage, CancellationToken cancellationToken) in /_/src/Docker.DotNet/Microsoft.Net.Http.Client/ManagedHandler.cs:line 77
+   at System.Net.Http.HttpClient.<SendAsync>g__Core|83_0(HttpRequestMessage request, HttpCompletionOption completionOption, CancellationTokenSource cts, Boolean disposeCts, CancellationTokenSource pendingRequestsCts, CancellationToken originalCancellationToken)
+   at Docker.DotNet.DockerClient.PrivateMakeRequestAsync(TimeSpan timeout, HttpCompletionOption completionOption, HttpMethod method, String path, IQueryString queryString, IDictionary`2 headers, IRequestContent data, CancellationToken cancellationToken) in /_/src/Docker.DotNet/DockerClient.cs:line 433
+   at Docker.DotNet.DockerClient.MakeRequestAsync[T](IEnumerable`1 errorHandlers, HttpMethod method, String path, IQueryString queryString, IRequestContent body, IDictionary`2 headers, TimeSpan timeout, CancellationToken token) in /_/src/Docker.DotNet/DockerClient.cs:line 243
+   at DotNet.Testcontainers.Builders.DockerEndpointAuthenticationProvider.<>c__DisplayClass5_0.<<IsAvailable>b__0>d.MoveNext() in /_/src/Testcontainers/Builders/DockerEndpointAuthenticationProvider.cs:line 48
+[xUnit.net 00:00:13.17]     Zaghlol.Api.Tests.ApiTests.RequestBodiesAreNeverLogged [FAIL]
+[xUnit.net 00:00:13.17]     Zaghlol.Api.Tests.ApiTests.HealthReturns200WithStatusOkAndServerTime [FAIL]
+[xUnit.net 00:00:13.18]     Zaghlol.Api.Tests.ApiTests.UnknownRouteReturnsProblemDetailsWithStableCode [FAIL]
+[xUnit.net 00:00:13.18]     Zaghlol.Api.Tests.ApiTests.PostgresContainerIsVersion17 [FAIL]
+[xUnit.net 00:00:13.18]     Zaghlol.Api.Tests.ApiTests.BadHttpRequestMapsTo400ValidationFailedWithoutEchoingMessage 
+[FAIL]
+[xUnit.net 00:00:13.18]     Zaghlol.Api.Tests.ApiTests.UnhandledExceptionReturns500InternalWithoutLeakingDetails [FAIL]
+  Failed Zaghlol.Api.Tests.ApiTests.RequestBodiesAreNeverLogged [1 ms]
+  Error Message:
+   DotNet.Testcontainers.Builders.DockerUnavailableException : Docker is either not running or misconfigured. Please ensure that Docker is running and that the endpoint is properly configured.
+You can customize your configuration using either the environment variables or the ~/.testcontainers.properties file.
+For more information, visit: https://dotnet.testcontainers.org/custom_configuration/.
+  Details: 
+    Failed to connect to Docker endpoint at 'npipe://./pipe/docker_engine'.
+---- System.AggregateException : One or more errors occurred. (Failed to connect to Docker endpoint at 'npipe://./pipe/docker_engine'.)
+-------- DotNet.Testcontainers.Builders.DockerUnavailableException : Failed to connect to Docker endpoint at 'npipe://./pipe/docker_engine'.
+------------ System.TimeoutException : The operation has timed out.
+  Stack Trace:
+     at DotNet.Testcontainers.Guard.ThrowIf[TType](ArgumentInfo`1& argument, Func`2 condition, Func`2 ifClause) in /_/src/Testcontainers/Guard.Null.cs:line 62
+   at DotNet.Testcontainers.Builders.AbstractBuilder`4.Validate() in /_/src/Testcontainers/Builders/AbstractBuilder`4.cs:line 146
+   at DotNet.Testcontainers.Builders.ContainerBuilder`3.Validate() in /_/src/Testcontainers/Builders/ContainerBuilder`3.cs:line 395
+   at Testcontainers.PostgreSql.PostgreSqlBuilder.Validate() in /_/src/Testcontainers.PostgreSql/PostgreSqlBuilder.cs:line 101
+   at Testcontainers.PostgreSql.PostgreSqlBuilder.Build() in /_/src/Testcontainers.PostgreSql/PostgreSqlBuilder.cs:line 75
+   at Zaghlol.Testing.ZaghlolTestDatabase.StartAsync(Nullable`1 hostPort, Boolean migrate) in C:\Users\amr90\zaghlol-ci\repo\backend\tests\Shared\ZaghlolTestDatabase.cs:line 52
+   at Zaghlol.Api.Tests.ApiFixture.InitializeAsync() in C:\Users\amr90\zaghlol-ci\repo\backend\tests\Zaghlol.Api.Tests\ApiFixture.cs:line 28
+----- Inner Stack Trace -----
+
+----- Inner Stack Trace -----
+
+----- Inner Stack Trace -----
+   at System.IO.Pipes.NamedPipeClientStream.ConnectInternal(Int32 timeout, CancellationToken cancellationToken, Int32 startTime)
+   at System.Threading.ExecutionContext.RunFromThreadPoolDispatchLoop(Thread threadPoolThread, ExecutionContext executionContext, ContextCallback callback, Object state)
+--- End of stack trace from previous location ---
+   at System.Threading.ExecutionContext.RunFromThreadPoolDispatchLoop(Thread threadPoolThread, ExecutionContext executionContext, ContextCallback callback, Object state)
+   at System.Threading.Tasks.Task.ExecuteWithThreadLocal(Task& currentTaskSlot, Thread threadPoolThread)
+--- End of stack trace from previous location ---
+   at Docker.DotNet.DockerClient.<>c__DisplayClass5_0.<<-ctor>b__0>d.MoveNext() in /_/src/Docker.DotNet/DockerClient.cs:line 69
+--- End of stack trace from previous location ---
+   at Microsoft.Net.Http.Client.ManagedHandler.ProcessRequestAsync(HttpRequestMessage request, CancellationToken cancellationToken) in /_/src/Docker.DotNet/Microsoft.Net.Http.Client/ManagedHandler.cs:line 160
+   at Microsoft.Net.Http.Client.ManagedHandler.SendAsync(HttpRequestMessage httpRequestMessage, CancellationToken cancellationToken) in /_/src/Docker.DotNet/Microsoft.Net.Http.Client/ManagedHandler.cs:line 77
+   at System.Net.Http.HttpClient.<SendAsync>g__Core|83_0(HttpRequestMessage request, HttpCompletionOption completionOption, CancellationTokenSource cts, Boolean disposeCts, CancellationTokenSource pendingRequestsCts, CancellationToken originalCancellationToken)
+   at Docker.DotNet.DockerClient.PrivateMakeRequestAsync(TimeSpan timeout, HttpCompletionOption completionOption, HttpMethod method, String path, IQueryString queryString, IDictionary`2 headers, IRequestContent data, CancellationToken cancellationToken) in /_/src/Docker.DotNet/DockerClient.cs:line 433
+   at Docker.DotNet.DockerClient.MakeRequestAsync[T](IEnumerable`1 errorHandlers, HttpMethod method, String path, IQueryString queryString, IRequestContent body, IDictionary`2 headers, TimeSpan timeout, CancellationToken token) in /_/src/Docker.DotNet/DockerClient.cs:line 243
+   at DotNet.Testcontainers.Builders.DockerEndpointAuthenticationProvider.<>c__DisplayClass5_0.<<IsAvailable>b__0>d.MoveNext() in /_/src/Testcontainers/Builders/DockerEndpointAuthenticationProvider.cs:line 48
+  Failed Zaghlol.Api.Tests.ApiTests.HealthReturns200WithStatusOkAndServerTime [1 ms]
+  Error Message:
+   DotNet.Testcontainers.Builders.DockerUnavailableException : Docker is either not running or misconfigured. Please ensure that Docker is running and that the endpoint is properly configured.
+You can customize your configuration using either the environment variables or the ~/.testcontainers.properties file.
+For more information, visit: https://dotnet.testcontainers.org/custom_configuration/.
+  Details: 
+    Failed to connect to Docker endpoint at 'npipe://./pipe/docker_engine'.
+---- System.AggregateException : One or more errors occurred. (Failed to connect to Docker endpoint at 'npipe://./pipe/docker_engine'.)
+-------- DotNet.Testcontainers.Builders.DockerUnavailableException : Failed to connect to Docker endpoint at 'npipe://./pipe/docker_engine'.
+------------ System.TimeoutException : The operation has timed out.
+  Stack Trace:
+     at DotNet.Testcontainers.Guard.ThrowIf[TType](ArgumentInfo`1& argument, Func`2 condition, Func`2 ifClause) in /_/src/Testcontainers/Guard.Null.cs:line 62
+   at DotNet.Testcontainers.Builders.AbstractBuilder`4.Validate() in /_/src/Testcontainers/Builders/AbstractBuilder`4.cs:line 146
+   at DotNet.Testcontainers.Builders.ContainerBuilder`3.Validate() in /_/src/Testcontainers/Builders/ContainerBuilder`3.cs:line 395
+   at Testcontainers.PostgreSql.PostgreSqlBuilder.Validate() in /_/src/Testcontainers.PostgreSql/PostgreSqlBuilder.cs:line 101
+   at Testcontainers.PostgreSql.PostgreSqlBuilder.Build() in /_/src/Testcontainers.PostgreSql/PostgreSqlBuilder.cs:line 75
+   at Zaghlol.Testing.ZaghlolTestDatabase.StartAsync(Nullable`1 hostPort, Boolean migrate) in C:\Users\amr90\zaghlol-ci\repo\backend\tests\Shared\ZaghlolTestDatabase.cs:line 52
+   at Zaghlol.Api.Tests.ApiFixture.InitializeAsync() in C:\Users\amr90\zaghlol-ci\repo\backend\tests\Zaghlol.Api.Tests\ApiFixture.cs:line 28
+----- Inner Stack Trace -----
+
+----- Inner Stack Trace -----
+
+----- Inner Stack Trace -----
+   at System.IO.Pipes.NamedPipeClientStream.ConnectInternal(Int32 timeout, CancellationToken cancellationToken, Int32 startTime)
+   at System.Threading.ExecutionContext.RunFromThreadPoolDispatchLoop(Thread threadPoolThread, ExecutionContext executionContext, ContextCallback callback, Object state)
+--- End of stack trace from previous location ---
+   at System.Threading.ExecutionContext.RunFromThreadPoolDispatchLoop(Thread threadPoolThread, ExecutionContext executionContext, ContextCallback callback, Object state)
+   at System.Threading.Tasks.Task.ExecuteWithThreadLocal(Task& currentTaskSlot, Thread threadPoolThread)
+--- End of stack trace from previous location ---
+   at Docker.DotNet.DockerClient.<>c__DisplayClass5_0.<<-ctor>b__0>d.MoveNext() in /_/src/Docker.DotNet/DockerClient.cs:line 69
+--- End of stack trace from previous location ---
+   at Microsoft.Net.Http.Client.ManagedHandler.ProcessRequestAsync(HttpRequestMessage request, CancellationToken cancellationToken) in /_/src/Docker.DotNet/Microsoft.Net.Http.Client/ManagedHandler.cs:line 160
+   at Microsoft.Net.Http.Client.ManagedHandler.SendAsync(HttpRequestMessage httpRequestMessage, CancellationToken cancellationToken) in /_/src/Docker.DotNet/Microsoft.Net.Http.Client/ManagedHandler.cs:line 77
+   at System.Net.Http.HttpClient.<SendAsync>g__Core|83_0(HttpRequestMessage request, HttpCompletionOption completionOption, CancellationTokenSource cts, Boolean disposeCts, CancellationTokenSource pendingRequestsCts, CancellationToken originalCancellationToken)
+   at Docker.DotNet.DockerClient.PrivateMakeRequestAsync(TimeSpan timeout, HttpCompletionOption completionOption, HttpMethod method, String path, IQueryString queryString, IDictionary`2 headers, IRequestContent data, CancellationToken cancellationToken) in /_/src/Docker.DotNet/DockerClient.cs:line 433
+   at Docker.DotNet.DockerClient.MakeRequestAsync[T](IEnumerable`1 errorHandlers, HttpMethod method, String path, IQueryString queryString, IRequestContent body, IDictionary`2 headers, TimeSpan timeout, CancellationToken token) in /_/src/Docker.DotNet/DockerClient.cs:line 243
+   at DotNet.Testcontainers.Builders.DockerEndpointAuthenticationProvider.<>c__DisplayClass5_0.<<IsAvailable>b__0>d.MoveNext() in /_/src/Testcontainers/Builders/DockerEndpointAuthenticationProvider.cs:line 48
+  Failed Zaghlol.Api.Tests.ApiTests.UnknownRouteReturnsProblemDetailsWithStableCode [1 ms]
+  Error Message:
+   DotNet.Testcontainers.Builders.DockerUnavailableException : Docker is either not running or misconfigured. Please ensure that Docker is running and that the endpoint is properly configured.
+You can customize your configuration using either the environment variables or the ~/.testcontainers.properties file.
+For more information, visit: https://dotnet.testcontainers.org/custom_configuration/.
+  Details: 
+    Failed to connect to Docker endpoint at 'npipe://./pipe/docker_engine'.
+---- System.AggregateException : One or more errors occurred. (Failed to connect to Docker endpoint at 'npipe://./pipe/docker_engine'.)
+-------- DotNet.Testcontainers.Builders.DockerUnavailableException : Failed to connect to Docker endpoint at 'npipe://./pipe/docker_engine'.
+------------ System.TimeoutException : The operation has timed out.
+  Stack Trace:
+     at DotNet.Testcontainers.Guard.ThrowIf[TType](ArgumentInfo`1& argument, Func`2 condition, Func`2 ifClause) in /_/src/Testcontainers/Guard.Null.cs:line 62
+   at DotNet.Testcontainers.Builders.AbstractBuilder`4.Validate() in /_/src/Testcontainers/Builders/AbstractBuilder`4.cs:line 146
+   at DotNet.Testcontainers.Builders.ContainerBuilder`3.Validate() in /_/src/Testcontainers/Builders/ContainerBuilder`3.cs:line 395
+   at Testcontainers.PostgreSql.PostgreSqlBuilder.Validate() in /_/src/Testcontainers.PostgreSql/PostgreSqlBuilder.cs:line 101
+   at Testcontainers.PostgreSql.PostgreSqlBuilder.Build() in /_/src/Testcontainers.PostgreSql/PostgreSqlBuilder.cs:line 75
+   at Zaghlol.Testing.ZaghlolTestDatabase.StartAsync(Nullable`1 hostPort, Boolean migrate) in C:\Users\amr90\zaghlol-ci\repo\backend\tests\Shared\ZaghlolTestDatabase.cs:line 52
+   at Zaghlol.Api.Tests.ApiFixture.InitializeAsync() in C:\Users\amr90\zaghlol-ci\repo\backend\tests\Zaghlol.Api.Tests\ApiFixture.cs:line 28
+----- Inner Stack Trace -----
+
+----- Inner Stack Trace -----
+
+----- Inner Stack Trace -----
+   at System.IO.Pipes.NamedPipeClientStream.ConnectInternal(Int32 timeout, CancellationToken cancellationToken, Int32 startTime)
+   at System.Threading.ExecutionContext.RunFromThreadPoolDispatchLoop(Thread threadPoolThread, ExecutionContext executionContext, ContextCallback callback, Object state)
+--- End of stack trace from previous location ---
+   at System.Threading.ExecutionContext.RunFromThreadPoolDispatchLoop(Thread threadPoolThread, ExecutionContext executionContext, ContextCallback callback, Object state)
+   at System.Threading.Tasks.Task.ExecuteWithThreadLocal(Task& currentTaskSlot, Thread threadPoolThread)
+--- End of stack trace from previous location ---
+   at Docker.DotNet.DockerClient.<>c__DisplayClass5_0.<<-ctor>b__0>d.MoveNext() in /_/src/Docker.DotNet/DockerClient.cs:line 69
+--- End of stack trace from previous location ---
+   at Microsoft.Net.Http.Client.ManagedHandler.ProcessRequestAsync(HttpRequestMessage request, CancellationToken cancellationToken) in /_/src/Docker.DotNet/Microsoft.Net.Http.Client/ManagedHandler.cs:line 160
+   at Microsoft.Net.Http.Client.ManagedHandler.SendAsync(HttpRequestMessage httpRequestMessage, CancellationToken cancellationToken) in /_/src/Docker.DotNet/Microsoft.Net.Http.Client/ManagedHandler.cs:line 77
+   at System.Net.Http.HttpClient.<SendAsync>g__Core|83_0(HttpRequestMessage request, HttpCompletionOption completionOption, CancellationTokenSource cts, Boolean disposeCts, CancellationTokenSource pendingRequestsCts, CancellationToken originalCancellationToken)
+   at Docker.DotNet.DockerClient.PrivateMakeRequestAsync(TimeSpan timeout, HttpCompletionOption completionOption, HttpMethod method, String path, IQueryString queryString, IDictionary`2 headers, IRequestContent data, CancellationToken cancellationToken) in /_/src/Docker.DotNet/DockerClient.cs:line 433
+   at Docker.DotNet.DockerClient.MakeRequestAsync[T](IEnumerable`1 errorHandlers, HttpMethod method, String path, IQueryString queryString, IRequestContent body, IDictionary`2 headers, TimeSpan timeout, CancellationToken token) in /_/src/Docker.DotNet/DockerClient.cs:line 243
+   at DotNet.Testcontainers.Builders.DockerEndpointAuthenticationProvider.<>c__DisplayClass5_0.<<IsAvailable>b__0>d.MoveNext() in /_/src/Testcontainers/Builders/DockerEndpointAuthenticationProvider.cs:line 48
+  Failed Zaghlol.Api.Tests.ApiTests.PostgresContainerIsVersion17 [1 ms]
+  Error Message:
+   DotNet.Testcontainers.Builders.DockerUnavailableException : Docker is either not running or misconfigured. Please ensure that Docker is running and that the endpoint is properly configured.
+You can customize your configuration using either the environment variables or the ~/.testcontainers.properties file.
+For more information, visit: https://dotnet.testcontainers.org/custom_configuration/.
+  Details: 
+    Failed to connect to Docker endpoint at 'npipe://./pipe/docker_engine'.
+---- System.AggregateException : One or more errors occurred. (Failed to connect to Docker endpoint at 'npipe://./pipe/docker_engine'.)
+-------- DotNet.Testcontainers.Builders.DockerUnavailableException : Failed to connect to Docker endpoint at 'npipe://./pipe/docker_engine'.
+------------ System.TimeoutException : The operation has timed out.
+  Stack Trace:
+     at DotNet.Testcontainers.Guard.ThrowIf[TType](ArgumentInfo`1& argument, Func`2 condition, Func`2 ifClause) in /_/src/Testcontainers/Guard.Null.cs:line 62
+   at DotNet.Testcontainers.Builders.AbstractBuilder`4.Validate() in /_/src/Testcontainers/Builders/AbstractBuilder`4.cs:line 146
+   at DotNet.Testcontainers.Builders.ContainerBuilder`3.Validate() in /_/src/Testcontainers/Builders/ContainerBuilder`3.cs:line 395
+   at Testcontainers.PostgreSql.PostgreSqlBuilder.Validate() in /_/src/Testcontainers.PostgreSql/PostgreSqlBuilder.cs:line 101
+   at Testcontainers.PostgreSql.PostgreSqlBuilder.Build() in /_/src/Testcontainers.PostgreSql/PostgreSqlBuilder.cs:line 75
+   at Zaghlol.Testing.ZaghlolTestDatabase.StartAsync(Nullable`1 hostPort, Boolean migrate) in C:\Users\amr90\zaghlol-ci\repo\backend\tests\Shared\ZaghlolTestDatabase.cs:line 52
+   at Zaghlol.Api.Tests.ApiFixture.InitializeAsync() in C:\Users\amr90\zaghlol-ci\repo\backend\tests\Zaghlol.Api.Tests\ApiFixture.cs:line 28
+----- Inner Stack Trace -----
+
+----- Inner Stack Trace -----
+
+----- Inner Stack Trace -----
+   at System.IO.Pipes.NamedPipeClientStream.ConnectInternal(Int32 timeout, CancellationToken cancellationToken, Int32 startTime)
+   at System.Threading.ExecutionContext.RunFromThreadPoolDispatchLoop(Thread threadPoolThread, ExecutionContext executionContext, ContextCallback callback, Object state)
+--- End of stack trace from previous location ---
+   at System.Threading.ExecutionContext.RunFromThreadPoolDispatchLoop(Thread threadPoolThread, ExecutionContext executionContext, ContextCallback callback, Object state)
+   at System.Threading.Tasks.Task.ExecuteWithThreadLocal(Task& currentTaskSlot, Thread threadPoolThread)
+--- End of stack trace from previous location ---
+   at Docker.DotNet.DockerClient.<>c__DisplayClass5_0.<<-ctor>b__0>d.MoveNext() in /_/src/Docker.DotNet/DockerClient.cs:line 69
+--- End of stack trace from previous location ---
+   at Microsoft.Net.Http.Client.ManagedHandler.ProcessRequestAsync(HttpRequestMessage request, CancellationToken cancellationToken) in /_/src/Docker.DotNet/Microsoft.Net.Http.Client/ManagedHandler.cs:line 160
+   at Microsoft.Net.Http.Client.ManagedHandler.SendAsync(HttpRequestMessage httpRequestMessage, CancellationToken cancellationToken) in /_/src/Docker.DotNet/Microsoft.Net.Http.Client/ManagedHandler.cs:line 77
+   at System.Net.Http.HttpClient.<SendAsync>g__Core|83_0(HttpRequestMessage request, HttpCompletionOption completionOption, CancellationTokenSource cts, Boolean disposeCts, CancellationTokenSource pendingRequestsCts, CancellationToken originalCancellationToken)
+   at Docker.DotNet.DockerClient.PrivateMakeRequestAsync(TimeSpan timeout, HttpCompletionOption completionOption, HttpMethod method, String path, IQueryString queryString, IDictionary`2 headers, IRequestContent data, CancellationToken cancellationToken) in /_/src/Docker.DotNet/DockerClient.cs:line 433
+   at Docker.DotNet.DockerClient.MakeRequestAsync[T](IEnumerable`1 errorHandlers, HttpMethod method, String path, IQueryString queryString, IRequestContent body, IDictionary`2 headers, TimeSpan timeout, CancellationToken token) in /_/src/Docker.DotNet/DockerClient.cs:line 243
+   at DotNet.Testcontainers.Builders.DockerEndpointAuthenticationProvider.<>c__DisplayClass5_0.<<IsAvailable>b__0>d.MoveNext() in /_/src/Testcontainers/Builders/DockerEndpointAuthenticationProvider.cs:line 48
+  Failed Zaghlol.Api.Tests.ApiTests.BadHttpRequestMapsTo400ValidationFailedWithoutEchoingMessage [1 ms]
+  Error Message:
+   DotNet.Testcontainers.Builders.DockerUnavailableException : Docker is either not running or misconfigured. Please ensure that Docker is running and that the endpoint is properly configured.
+You can customize your configuration using either the environment variables or the ~/.testcontainers.properties file.
+For more information, visit: https://dotnet.testcontainers.org/custom_configuration/.
+  Details: 
+    Failed to connect to Docker endpoint at 'npipe://./pipe/docker_engine'.
+---- System.AggregateException : One or more errors occurred. (Failed to connect to Docker endpoint at 'npipe://./pipe/docker_engine'.)
+-------- DotNet.Testcontainers.Builders.DockerUnavailableException : Failed to connect to Docker endpoint at 'npipe://./pipe/docker_engine'.
+------------ System.TimeoutException : The operation has timed out.
+  Stack Trace:
+     at DotNet.Testcontainers.Guard.ThrowIf[TType](ArgumentInfo`1& argument, Func`2 condition, Func`2 ifClause) in /_/src/Testcontainers/Guard.Null.cs:line 62
+   at DotNet.Testcontainers.Builders.AbstractBuilder`4.Validate() in /_/src/Testcontainers/Builders/AbstractBuilder`4.cs:line 146
+   at DotNet.Testcontainers.Builders.ContainerBuilder`3.Validate() in /_/src/Testcontainers/Builders/ContainerBuilder`3.cs:line 395
+   at Testcontainers.PostgreSql.PostgreSqlBuilder.Validate() in /_/src/Testcontainers.PostgreSql/PostgreSqlBuilder.cs:line 101
+   at Testcontainers.PostgreSql.PostgreSqlBuilder.Build() in /_/src/Testcontainers.PostgreSql/PostgreSqlBuilder.cs:line 75
+   at Zaghlol.Testing.ZaghlolTestDatabase.StartAsync(Nullable`1 hostPort, Boolean migrate) in C:\Users\amr90\zaghlol-ci\repo\backend\tests\Shared\ZaghlolTestDatabase.cs:line 52
+   at Zaghlol.Api.Tests.ApiFixture.InitializeAsync() in C:\Users\amr90\zaghlol-ci\repo\backend\tests\Zaghlol.Api.Tests\ApiFixture.cs:line 28
+----- Inner Stack Trace -----
+
+----- Inner Stack Trace -----
+
+----- Inner Stack Trace -----
+   at System.IO.Pipes.NamedPipeClientStream.ConnectInternal(Int32 timeout, CancellationToken cancellationToken, Int32 startTime)
+   at System.Threading.ExecutionContext.RunFromThreadPoolDispatchLoop(Thread threadPoolThread, ExecutionContext executionContext, ContextCallback callback, Object state)
+--- End of stack trace from previous location ---
+   at System.Threading.ExecutionContext.RunFromThreadPoolDispatchLoop(Thread threadPoolThread, ExecutionContext executionContext, ContextCallback callback, Object state)
+   at System.Threading.Tasks.Task.ExecuteWithThreadLocal(Task& currentTaskSlot, Thread threadPoolThread)
+--- End of stack trace from previous location ---
+   at Docker.DotNet.DockerClient.<>c__DisplayClass5_0.<<-ctor>b__0>d.MoveNext() in /_/src/Docker.DotNet/DockerClient.cs:line 69
+--- End of stack trace from previous location ---
+   at Microsoft.Net.Http.Client.ManagedHandler.ProcessRequestAsync(HttpRequestMessage request, CancellationToken cancellationToken) in /_/src/Docker.DotNet/Microsoft.Net.Http.Client/ManagedHandler.cs:line 160
+   at Microsoft.Net.Http.Client.ManagedHandler.SendAsync(HttpRequestMessage httpRequestMessage, CancellationToken cancellationToken) in /_/src/Docker.DotNet/Microsoft.Net.Http.Client/ManagedHandler.cs:line 77
+   at System.Net.Http.HttpClient.<SendAsync>g__Core|83_0(HttpRequestMessage request, HttpCompletionOption completionOption, CancellationTokenSource cts, Boolean disposeCts, CancellationTokenSource pendingRequestsCts, CancellationToken originalCancellationToken)
+   at Docker.DotNet.DockerClient.PrivateMakeRequestAsync(TimeSpan timeout, HttpCompletionOption completionOption, HttpMethod method, String path, IQueryString queryString, IDictionary`2 headers, IRequestContent data, CancellationToken cancellationToken) in /_/src/Docker.DotNet/DockerClient.cs:line 433
+   at Docker.DotNet.DockerClient.MakeRequestAsync[T](IEnumerable`1 errorHandlers, HttpMethod method, String path, IQueryString queryString, IRequestContent body, IDictionary`2 headers, TimeSpan timeout, CancellationToken token) in /_/src/Docker.DotNet/DockerClient.cs:line 243
+   at DotNet.Testcontainers.Builders.DockerEndpointAuthenticationProvider.<>c__DisplayClass5_0.<<IsAvailable>b__0>d.MoveNext() in /_/src/Testcontainers/Builders/DockerEndpointAuthenticationProvider.cs:line 48
+  Failed Zaghlol.Api.Tests.ApiTests.UnhandledExceptionReturns500InternalWithoutLeakingDetails [1 ms]
+  Error Message:
+   DotNet.Testcontainers.Builders.DockerUnavailableException : Docker is either not running or misconfigured. Please ensure that Docker is running and that the endpoint is properly configured.
+You can customize your configuration using either the environment variables or the ~/.testcontainers.properties file.
+For more information, visit: https://dotnet.testcontainers.org/custom_configuration/.
+  Details: 
+    Failed to connect to Docker endpoint at 'npipe://./pipe/docker_engine'.
+---- System.AggregateException : One or more errors occurred. (Failed to connect to Docker endpoint at 'npipe://./pipe/docker_engine'.)
+-------- DotNet.Testcontainers.Builders.DockerUnavailableException : Failed to connect to Docker endpoint at 'npipe://./pipe/docker_engine'.
+------------ System.TimeoutException : The operation has timed out.
+  Stack Trace:
+     at DotNet.Testcontainers.Guard.ThrowIf[TType](ArgumentInfo`1& argument, Func`2 condition, Func`2 ifClause) in /_/src/Testcontainers/Guard.Null.cs:line 62
+   at DotNet.Testcontainers.Builders.AbstractBuilder`4.Validate() in /_/src/Testcontainers/Builders/AbstractBuilder`4.cs:line 146
+   at DotNet.Testcontainers.Builders.ContainerBuilder`3.Validate() in /_/src/Testcontainers/Builders/ContainerBuilder`3.cs:line 395
+   at Testcontainers.PostgreSql.PostgreSqlBuilder.Validate() in /_/src/Testcontainers.PostgreSql/PostgreSqlBuilder.cs:line 101
+   at Testcontainers.PostgreSql.PostgreSqlBuilder.Build() in /_/src/Testcontainers.PostgreSql/PostgreSqlBuilder.cs:line 75
+   at Zaghlol.Testing.ZaghlolTestDatabase.StartAsync(Nullable`1 hostPort, Boolean migrate) in C:\Users\amr90\zaghlol-ci\repo\backend\tests\Shared\ZaghlolTestDatabase.cs:line 52
+   at Zaghlol.Api.Tests.ApiFixture.InitializeAsync() in C:\Users\amr90\zaghlol-ci\repo\backend\tests\Zaghlol.Api.Tests\ApiFixture.cs:line 28
+----- Inner Stack Trace -----
+
+----- Inner Stack Trace -----
+
+----- Inner Stack Trace -----
+   at System.IO.Pipes.NamedPipeClientStream.ConnectInternal(Int32 timeout, CancellationToken cancellationToken, Int32 startTime)
+   at System.Threading.ExecutionContext.RunFromThreadPoolDispatchLoop(Thread threadPoolThread, ExecutionContext executionContext, ContextCallback callback, Object state)
+--- End of stack trace from previous location ---
+   at System.Threading.ExecutionContext.RunFromThreadPoolDispatchLoop(Thread threadPoolThread, ExecutionContext executionContext, ContextCallback callback, Object state)
+   at System.Threading.Tasks.Task.ExecuteWithThreadLocal(Task& currentTaskSlot, Thread threadPoolThread)
+--- End of stack trace from previous location ---
+   at Docker.DotNet.DockerClient.<>c__DisplayClass5_0.<<-ctor>b__0>d.MoveNext() in /_/src/Docker.DotNet/DockerClient.cs:line 69
+--- End of stack trace from previous location ---
+   at Microsoft.Net.Http.Client.ManagedHandler.ProcessRequestAsync(HttpRequestMessage request, CancellationToken cancellationToken) in /_/src/Docker.DotNet/Microsoft.Net.Http.Client/ManagedHandler.cs:line 160
+   at Microsoft.Net.Http.Client.ManagedHandler.SendAsync(HttpRequestMessage httpRequestMessage, CancellationToken cancellationToken) in /_/src/Docker.DotNet/Microsoft.Net.Http.Client/ManagedHandler.cs:line 77
+   at System.Net.Http.HttpClient.<SendAsync>g__Core|83_0(HttpRequestMessage request, HttpCompletionOption completionOption, CancellationTokenSource cts, Boolean disposeCts, CancellationTokenSource pendingRequestsCts, CancellationToken originalCancellationToken)
+   at Docker.DotNet.DockerClient.PrivateMakeRequestAsync(TimeSpan timeout, HttpCompletionOption completionOption, HttpMethod method, String path, IQueryString queryString, IDictionary`2 headers, IRequestContent data, CancellationToken cancellationToken) in /_/src/Docker.DotNet/DockerClient.cs:line 433
+   at Docker.DotNet.DockerClient.MakeRequestAsync[T](IEnumerable`1 errorHandlers, HttpMethod method, String path, IQueryString queryString, IRequestContent body, IDictionary`2 headers, TimeSpan timeout, CancellationToken token) in /_/src/Docker.DotNet/DockerClient.cs:line 243
+   at DotNet.Testcontainers.Builders.DockerEndpointAuthenticationProvider.<>c__DisplayClass5_0.<<IsAvailable>b__0>d.MoveNext() in /_/src/Testcontainers/Builders/DockerEndpointAuthenticationProvider.cs:line 48
+
+Failed!  - Failed:    19, Passed:    51, Skipped:     0, Total:    70, Duration: 1 s - Zaghlol.Api.Tests.dll (net10.0)
+
+Passed!  - Failed:     0, Passed:    50, Skipped:     0, Total:    50, Duration: 11 s - Zaghlol.Contract.Tests.dll (net10.0)
+
+Failed!  - Failed:   330, Passed:   141, Skipped:     0, Total:   471, Duration: 9 s - Zaghlol.Infrastructure.Tests.dll (net10.0)
+
+[00:02:38] === RESULT dotnet-test exit=1
+[00:02:38] SUMMARY FAIL sha=6cc0dd69cd85d0c979df5dc6cebeacdc52f7491b pipeline=quick-backend dotnet-build=0 dotnet-format=2 dotnet-test=1
