@@ -45,7 +45,7 @@ public sealed class SeededSeriesTests
         Assert.True(provider.GetRequiredService<MeterProvider>().ForceFlush(10_000));
 
         var zeros = new List<(string Name, string Tag)>();
-        foreach (var metric in exported)
+        foreach (var metric in exported.Where(m => m.MetricType == MetricType.LongSum))
         {
             foreach (var point in metric.MetricPoints)
             {
