@@ -31,7 +31,7 @@ internal sealed record PlainBody(string Message, int Count);
 /// The real API pipeline (<see cref="ApiPipeline"/>) and KMS wiring over <see cref="FakeKms"/>, with test-only endpoints,
 /// verbose logs captured by <see cref="CapturingSink"/> and every span captured by an <see cref="ActivityListener"/>.
 /// </summary>
-public sealed class SigningHostFixture : IAsyncLifetime
+public sealed class SigningHostFixture : IAsyncLifetime, IDisposable
 {
     public const string HandlerFailure = "test handler failure";
 
@@ -92,6 +92,10 @@ public sealed class SigningHostFixture : IAsyncLifetime
             await app.DisposeAsync();
         }
 
+    }
+
+    public void Dispose()
+    {
         listener?.Dispose();
         Kms.Dispose();
     }

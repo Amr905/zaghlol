@@ -172,6 +172,6 @@ public class TimeNonceTests(SigningHostFixture fixture) : IClassFixture<SigningH
         Assert.Equal(3, parts.Length);
         var kid = parts[0]["kid=".Length..];
         var key = fixture.Signer.PublishedKeys(SigningPurpose.Sync).Single(k => k.Kid == kid);
-        Assert.True(SignatureCheck.Verifies(key.PublicJwk, body, Base64Url.DecodeFromChars(parts[2]["sig=".Length..])));
+        Assert.True(SignatureCheck.Verifies(key.PublicJwk, body, Base64Url.DecodeFromChars(parts[2].AsSpan("sig=".Length))));
     }
 }

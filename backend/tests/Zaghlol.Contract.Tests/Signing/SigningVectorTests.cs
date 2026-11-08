@@ -127,7 +127,7 @@ public class SigningVectorTests
         }
 
         var highS = valid.Single(v => Name(v) == "high-s")!["header"]!.GetValue<string>();
-        Assert.True(P256.IsHighS(Base64Url.DecodeFromChars(highS[(highS.IndexOf("sig=", StringComparison.Ordinal) + 4)..])));
+        Assert.True(P256.IsHighS(Base64Url.DecodeFromChars(highS.AsSpan(highS.IndexOf("sig=", StringComparison.Ordinal) + 4))));
         Assert.Contains(valid, v => Body(v!).Length == 2);
     }
 
