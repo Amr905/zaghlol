@@ -41,3 +41,23 @@ One major gap (M1): nothing proves the real span exporter is registered after th
 | m6 | minor | No test for `AddZaghlolLogPseudonymizer` source selection (KMS used when present; throws outside Development/Testing without KMS). | T-124 (wires installHash) |
 | m7 | minor | No test or analyzer ban for `EnableSensitiveDataLogging`; the "reflection test over DTO assembly requires `Sensitive<T>`" from the design note is also absent (passes trivially until T-124+, but it must exist before they add DTOs). | T-124 (add the reflection test with the first DTOs) |
 | m8 | nit | No canary showing the harness would catch a leak (for example asserting the sentinel is present in the raw Serilog event before formatting at Verbose). Mitigated by the Verbose fixture and `TheFrameworkReallyLoggedAtVerbose`. | T-138 optional |
+
+## Round 2 (delta 902498a..c0288f4, backend-ci 42527311523 green per coordinator)
+
+Scope: only M1. Read `git diff 902498a c0288f4`; not run locally (no .NET SDK).
+
+What the delta does:
+- `AddZaghlolTelemetry` gets a `configureExporters` hook, called after `AddProcessor(new RedactingActivityProcessor())` and after the `if (exportOtlp) AddOtlpExporter()` block (TelemetryServiceCollectionExtensions.cs lines 74-81).
+- `ExporterOrderTests.TheRealPipelineExportsRedactedSpansWithTheOtlpEndpointSet` calls the real `AddZaghlolTelemetry` with `OTEL_EXPORTER_OTLP_ENDPOINT` set, resolves the real `TracerProvider`, and registers a `SnapshotProcessor` through the hook. The probe copies tags and status in `OnEnd` (not live refs). The test asserts that `url.full`, `url.query`, the unlisted `enduser.id` and the status text (carrying the sentinel) are absent, and that `http.request.method` is kept. This is the real setup code, not a hand-built order.
+- `TheProbeCatchesAnExporterThatRunsBeforeTheRedactor` is a hand-built reversed order. It is only a negative control for the probe, and it does prove the probe sees the sentinel when it runs first. Valid as a control.
+
+Would it fail if the OTLP exporter moved before the redactor? **No.** The probe is not the OTLP exporter. It sits at the `configureExporters` call, which stays at the end of the lambda. Moving `tracing.AddOtlpExporter()` above `AddProcessor(new RedactingActivityProcessor())` leaves the redactor before the probe, so the test still passes while the real exporter would receive unredacted spans. The test does fail if the redactor is removed or moved after the hook, which is a genuine improvement. The comment "same place as the OTLP exporter" is held only by adjacency in the source.
+
+Residual gap M1b (major, T-138): the OTLP exporter's own position relative to the redactor is unproven.
+Smallest fix: route the OTLP registration through a seam the test can replace. For example, an internal parameter or overload `Action<TracerProviderBuilder> addOtlpExporter = static t => t.AddOtlpExporter()` called where `AddOtlpExporter()` is today. The test passes the probe in its place and with the endpoint set, so moving that call above the redactor makes the probe see the sentinel and the test fail. (Alternative: build the exporter list once, `[otlp, extras]`, and add all of it after the redactor, with the test substituting the list.) A mutation check, moving the line locally and seeing the test go red, should be part of the fix.
+
+Other delta items (not part of the round, noted only): `AnyOccurrenceSeriesExistAtZeroBeforeAnyEvent` covers the audit_alert rules and dead_letter stores; `KmsMetrics.Seed()` (five operations) has no direct test; the Play Integrity `and max(...) > 0` guard in `seats.yaml` is not pinned by a unit test (m4 already). Both minor.
+
+### Round 2 verdict: TESTS_INSUFFICIENT
+
+M1 is narrowed but not closed: one remaining major (M1b). Everything else stays as in round 1. After the seam fix and a passing mutation check, the verdict would be TESTS_SUFFICIENT without another full round.
