@@ -898,9 +898,11 @@ void registerSqlite3mcContract({required String env}) {
             db,
             "CREATE VIRTUAL TABLE like_control USING fts5(merchant, tokenize='trigram')",
           );
-          await statement(db, 'INSERT INTO like_control (merchant) VALUES (?)', [
-            'Café Riche',
-          ]);
+          await statement(
+            db,
+            'INSERT INTO like_control (merchant) VALUES (?)',
+            ['Café Riche'],
+          );
           final controlPlan = await _likePlan(db, 'like_control');
           findings['like_control_plan'] = controlPlan;
           expect(

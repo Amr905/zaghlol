@@ -15,6 +15,20 @@ Flutter is pinned to the exact version in `FLUTTER_VERSION` (3.47.9), matching `
 
 Tag golden tests with `@Tags(['golden'])` and put their PNGs in a `goldens/` directory next to the test (for example `app/test/goldens/`). Never generate goldens locally: pixels differ per platform, so CI (ubuntu) is the only source of truth.
 
+## db-platform.yml: encrypted SQLite on host, emulator and simulator (T-007)
+
+Not a merge gate. Runs on `workflow_dispatch` and on pushes to `task/**` / `main` that touch `pubspec.lock`, `pubspec.yaml`, `app/pubspec.yaml`, `app/integration_test/db_*`, `app/test/core/db/**` or the workflow and its `.github/scripts/db-platform-*.sh` scripts. Any sqlite3 bump therefore re-proves the binaries.
+
+| Job | What it checks |
+|-----|----------------|
+| `host` | `flutter test test/core/db/` (the contract in `sqlite3mc_contract.dart` plus the `benchmark`-tagged 50k-row FTS benchmark, **gated at p95 < 50 ms**); Ubuntu's `sqlite3` CLI refuses the encrypted file and the `sqlcipher` CLI (SQLCipher 4 defaults, raw key from `$RUNNER_TEMP`, masked) reads it; `gh attestation verify --repo simolus3/sqlite3.dart` on every downloaded sqlite3 binary under `.dart_tool/hooks_runner` |
+| `android-emulator` (API 35, API 26) | `integration_test/db_platform_test.dart --flavor devNoSms` (debug, x86_64): the same contract on the real APK; benchmark on API 35 only, recorded, not gating |
+| `ios-simulator` | the same test with `--flavor dev` on the first available iPhone simulator; contract and benchmark, recorded |
+
+The tests print only `ZAGHLOL_DB_BENCH {json}` and `ZAGHLOL_DB_FINDINGS {json}` lines (numbers, flags, result codes, versions), never keys, sentinels or row text. `.github/scripts/db-platform-results.sh` copies them into the step summary and the `db-results-*` artifacts. Record new numbers in ADR-002, "Spike results (T-007)". Real-device runs (profile mode) follow `docs/05-reviews/T-007-device.md`.
+
+app-ci also carries the T-007 guards: the `static` job excludes the `benchmark` tag and fails if `app/lib` mentions `integration_test` or test-only code; each `android` leg asserts the sqlite3 code asset for arm64-v8a, armeabi-v7a and x86_64, and release legs also run `zipalign -c -P 16 -v 4` (16 KB pages) and check that `libapp.so` does not contain `ZAGHLOL_DB_BENCH`.
+
 ## app-regen.yml: getting generated files back from CI
 
 Agents without a local Flutter use this to obtain (a) a regenerated `pubspec.lock` and (b) updated golden PNGs. The workflow commits them to the same `task/**` branch.
