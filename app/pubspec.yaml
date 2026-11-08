@@ -10,11 +10,19 @@ environment:
 dependencies:
   flutter:
     sdk: flutter
+  # T-007 / ADR-002: encrypted SQLite (SQLite3MultipleCiphers via the root
+  # pubspec's hook user_define). drift_dev and codegen land with T-015/T-016.
+  drift: ^2.35.3
+  sqlite3: ^3.9.0
 
 dev_dependencies:
   flutter_test:
     sdk: flutter
   flutter_lints: ^6.0.0
+  # T-007: on-device contract and benchmark (app/integration_test/). Never
+  # imported from lib/ (guarded in app-ci).
+  integration_test:
+    sdk: flutter
   pigeon: ^26.0.0
 
 flutter:
