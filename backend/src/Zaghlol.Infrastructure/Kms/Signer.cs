@@ -63,7 +63,9 @@ internal sealed class Signer(SigningKeyRing ring, ISigningKeyProvider provider, 
 
         if (!key.PublicJwk.VerifiesDigest(digest, signature))
         {
-            KmsMetrics.KmsUnavailable("sign");
+            // A signature that fails its own verification is a permanent fault (wrong key reference), not an outage:
+            // its own tag lets the alert tell the two apart (T-123 review nit 9).
+            KmsMetrics.KmsUnavailable(KmsMetrics.SignVerifyOperation);
             throw new KmsUnavailableException();
         }
 

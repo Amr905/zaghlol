@@ -94,8 +94,9 @@ public class ApiTests(ApiFixture fixture) : IClassFixture<ApiFixture>
 
         // The request-completion event is written after the response is sent: wait for this request's own entry.
         static bool ThisRequest(string e) =>
-            e.Contains("RequestMethod=\"POST\"", StringComparison.Ordinal)
-            && e.Contains("RequestPath=\"/v1/health\"", StringComparison.Ordinal);
+            e.StartsWith("request completed", StringComparison.Ordinal)
+            && e.Contains("Method=\"POST\"", StringComparison.Ordinal)
+            && e.Contains("Status=405", StringComparison.Ordinal);
         var deadline = DateTime.UtcNow.AddSeconds(5);
         while (!fixture.LogSink.Entries.Any(ThisRequest) && DateTime.UtcNow < deadline)
         {

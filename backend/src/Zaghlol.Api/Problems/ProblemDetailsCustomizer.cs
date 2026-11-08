@@ -1,4 +1,5 @@
 using System.Diagnostics;
+using Zaghlol.Api.Observability;
 
 namespace Zaghlol.Api.Problems;
 
@@ -16,9 +17,15 @@ internal static class ProblemDetailsCustomizer
         problem.Status = status;
         problem.Instance = null;
 
-        if (!problem.Extensions.ContainsKey("code"))
+        if (!problem.Extensions.TryGetValue("code", out var existing))
         {
-            problem.Extensions["code"] = ProblemCodes.ForStatus(status);
+            existing = ProblemCodes.ForStatus(status);
+            problem.Extensions["code"] = existing;
+        }
+
+        if (existing is string code)
+        {
+            context.HttpContext.Items[RequestLogItems.ProblemCode] = code;
         }
 
         problem.Extensions["correlationId"] = Activity.Current?.TraceId.ToString() ?? context.HttpContext.TraceIdentifier;

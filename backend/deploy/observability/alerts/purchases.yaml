@@ -1,0 +1,115 @@
+# Purchases, store notifications, prices, catalog, sync size and signing (error-handling-and-observability.md section 4).
+groups:
+  - name: zaghlol-purchases
+    rules:
+      - alert: ZaghlolPurchaseUnackedOver48h
+        expr: max(zaghlol_purchase_unacked_oldest_age_seconds) > 172800
+        for: 5m
+        labels:
+          severity: page
+        annotations:
+          summary: "A purchase has been unacknowledged for more than 48 hours"
+          description: "Google Play refunds unacknowledged purchases after 3 days. Run the acknowledge sweeper and check the Play API."
+
+      - alert: ZaghlolPurchaseVerifyFailureRateHigh
+        expr: |
+          sum(rate(zaghlol_purchase_verify_total{outcome="failure"}[15m]))
+          / sum(rate(zaghlol_purchase_verify_total[15m])) > 0.05
+        for: 15m
+        labels:
+          severity: warn
+        annotations:
+          summary: "More than 5% of purchase verifications fail"
+          description: "Break the failure rate down by the code label."
+
+  - name: zaghlol-notifications
+    rules:
+      - alert: ZaghlolNotificationLagHigh
+        expr: |
+          histogram_quantile(0.95,
+            sum by (le) (rate(zaghlol_notification_processing_lag_seconds_bucket[5m]))) > 900
+        for: 10m
+        labels:
+          severity: page
+        annotations:
+          summary: "Store notification processing lag is above 15 minutes"
+          description: "The notification worker is behind or stuck."
+
+      - alert: ZaghlolNotificationDeadLetter
+        expr: sum by (store) (increase(zaghlol_notification_dead_letter_total[10m])) > 0
+        labels:
+          severity: page
+        annotations:
+          summary: "A {{ $labels.store }} notification was dead-lettered"
+          description: "Inspect the dead-letter queue; the notification was not applied."
+
+  - name: zaghlol-prices
+    rules:
+      - alert: ZaghlolPriceAgeWarn
+        expr: max by (symbol) (zaghlol_price_age_seconds) > 21600
+        labels:
+          severity: warn
+        annotations:
+          summary: "The newest {{ $labels.symbol }} quote is older than 6 hours"
+          description: "Check the price provider and the price worker."
+
+      - alert: ZaghlolPriceAgePage
+        expr: max by (symbol) (zaghlol_price_age_seconds) > 86400
+        labels:
+          severity: page
+        annotations:
+          summary: "The newest {{ $labels.symbol }} quote is older than 24 hours"
+          description: "Apps are showing stale prices. Check the price provider and fall back if needed."
+
+  - name: zaghlol-catalog-and-sync
+    rules:
+      - alert: ZaghlolCatalogSnapshotMissing
+        # The synthetic check requests the latest full snapshot URL (synthetics.yaml).
+        expr: probe_http_status_code{job="zaghlol-synthetics", check="catalog-latest-snapshot"} == 404
+        for: 2m
+        labels:
+          severity: page
+        annotations:
+          summary: "The latest full catalog snapshot returns 404"
+          description: "Apps cannot download the catalog. Republish the snapshot or fix the CDN origin."
+
+      - alert: ZaghlolSyncResponseSizeHigh
+        expr: |
+          histogram_quantile(0.95,
+            sum by (le) (rate(zaghlol_sync_response_size_bytes_bucket{up_to_date="true"}[1h]))) > 2048
+        for: 30m
+        labels:
+          severity: warn
+        annotations:
+          summary: "p95 sync response for up-to-date clients is above 2 KB"
+          description: "An up-to-date client should get a tiny response. Check for a payload regression."
+
+  - name: zaghlol-signing
+    rules:
+      - alert: ZaghlolKmsUnavailable
+        # Transient KMS failures after the retry (the API answers 503 with Retry-After).
+        expr: sum by (operation) (increase(zaghlol_kms_unavailable_total{operation=~"sign|hmac|data_key|public_key"}[5m])) > 0
+        for: 5m
+        labels:
+          severity: page
+        annotations:
+          summary: "KMS {{ $labels.operation }} calls are failing"
+          description: "Responses are not being signed. Check the KMS and the service identity's key permissions."
+
+      - alert: ZaghlolSigningVerifyFailed
+        # A signature that fails verification against the published key (T-123 review nit 9): a wrong key reference or ring.
+        # Permanent until fixed; retrying does not help.
+        expr: sum(increase(zaghlol_kms_unavailable_total{operation="sign_verify"}[5m])) > 0
+        labels:
+          severity: page
+        annotations:
+          summary: "A signature failed verification against the published key"
+          description: "Configuration fault: the active key reference does not match the published key in the ring. Fix the configuration or roll back."
+
+      - alert: ZaghlolSigningResponseTooLarge
+        expr: sum(increase(zaghlol_signing_response_too_large_total[15m])) > 0
+        labels:
+          severity: warn
+        annotations:
+          summary: "A signed response exceeded the 1 MiB buffer cap"
+          description: "An endpoint is returning a body that cannot be signed in memory."

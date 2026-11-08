@@ -16,6 +16,11 @@
   </ItemGroup>
 
   <ItemGroup>
+    <!-- T-138: alert rules, synthetics and dashboards as code, linted by the Observability tests. -->
+    <Content Include="..\..\deploy\observability\**\*" Link="observability\%(RecursiveDir)%(Filename)%(Extension)" CopyToOutputDirectory="PreserveNewest" />
+  </ItemGroup>
+
+  <ItemGroup>
     <!-- The spec under test is copied next to the test assembly. -->
     <Content Include="..\..\openapi\zaghlol-v1.yaml" Link="openapi\zaghlol-v1.yaml" CopyToOutputDirectory="PreserveNewest" />
     <!-- Shared install-bound restore hash vectors (backend-api.md section 4.3), also used by the Dart tests. -->
