@@ -221,6 +221,6 @@ void main() {
   });
 }
 
-class _Custom extends SafeException {
+base class _Custom extends SafeException {
   _Custom() : super('CUSTOM_CODE');
 }
