@@ -68,3 +68,21 @@ Package pins verified in `backend/Directory.Packages.props`: OpenTelemetry.Exten
 - Only finding 1 triggers another round (delta re-review: `ZaghlolMetrics` and its test). Findings 2 to 8 become FUs with the owners in the table; finding 2 should be done before T-140.
 - The security reviewer should look at finding 2 and the `Sensitive<T>` and `SafeException` conventions.
 - Architecture conforms to `project-structure.md`: domain pure, the formatter and telemetry in Infrastructure, HTTP-specific code in Api, workers share the Infrastructure code.
+
+## Round 2 (delta `902498a..c0288f4`, backend-ci 42527311523 green)
+
+**Verdict: CHANGES_REQUESTED.** Major #1 is not shown to be fixed in production, only in the unit test. I could not run .NET here, so this is from reading the code and the registration order.
+
+| Item | Result |
+|------|--------|
+| #1 (major) series absent until first event | **Open (re-raised, same severity).** The seeding itself is right (`ZaghlolMetrics.SeedSeries`: six `audit_alert.fired` rules and `dead_letter` for play and apple; `KmsMetrics.Seed()` for five operations). The problem is when it runs. A `Counter.Add(0)` made before a `MeterListener` exists is dropped. `ZaghlolMetrics` is constructed when the hosted services are resolved, and `MetricsStarter.StartAsync` calls `KmsMetrics.Seed()`. `MetricsStarter` is registered (`TelemetryServiceCollectionExtensions.cs:48`) before `services.AddOpenTelemetry()` (`:56`), so it starts before OpenTelemetry's own hosted service builds the `MeterProvider`. Every zero is then recorded with no listener and lost, and the first real `Add(1)` creates the series, which is the original bug. After a restart the new `service.instance.id` series behaves the same way. `AnyOccurrenceSeriesExistAtZeroBeforeAnyEvent` attaches its `MeterListener` before `new ZaghlolMetrics()`, so it does not model production. The CI smoke step only checks `zaghlol_service_up` (an observable gauge) and so does not catch it either |
+| #4 quota guard | PASS (`... and max(zaghlol_play_integrity_daily_quota) > 0`; the promtool job is green) |
+| #7 comment | PASS (`purchases.yaml`) |
+| #8 client abort | PASS (`RequestAborted` plus status >= 500 logs 499, `ClientClosedRequest`). Nit: no test for it |
+| #2 Npgsql events | Stays a follow-up as agreed (T-138 follow-up, before T-140) |
+| `ExporterOrderTests` / `configureExporters` hook | Fine: the hook sits at the OTLP exporter's position, after the redactor, with a negative control |
+
+### Required change for #1
+1. Guarantee that the `MeterProvider` exists and is listening before anything is seeded. Simplest: `MetricsStarter(MeterProvider provider, ZaghlolMetrics metrics)` (resolving the provider first builds it with its `AddMeter` subscriptions), then seed in `StartAsync`. Remove the reliance on the constructor `Add(0)`, or keep it only as a second line.
+2. Add a test through `AddZaghlolTelemetry` (the real DI path, as in `ExporterOrderTests`): start the hosted services, force a metric collect with an in-memory metric exporter (`OpenTelemetry.Exporter.InMemory`, already referenced) and assert zero-valued data points for `zaghlol.audit_alert.fired{rule=...}` (six), `zaghlol.notification.dead_letter{store=play|apple}` and `zaghlol.kms.unavailable{operation=...}` (five) before any event. Alternatively assert the same with a CI step that curls `:8889/metrics` for `zaghlol_audit_alert_fired_total{rule="support_unfreeze"} 0`.
+3. Re-review: delta only.
