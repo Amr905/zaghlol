@@ -61,10 +61,10 @@ jobs:
             tail -n 5 analyze.log | while read -r line; do echo "::error::analyze: $line"; done
             exit 1
           fi
-      - name: zaghlol_lints (T-002: money, UI strings, print, SafeException)
+      - name: "zaghlol_lints (T-002 - money, UI strings, print, SafeException)"
         working-directory: tools/lints
         run: |
-          if ! dart run bin/zaghlol_lints.dart ../../app ../../packages/zaghlol_parsing > lints.log 2>&1; then
+          if ! dart run bin/zaghlol_lints.dart ../../app ../../packages/zaghlol_parsing ../../packages/zaghlol_domain > lints.log 2>&1; then
             cat lints.log
             grep -E "^\S+:[0-9]+:" lints.log | head -n 20 | while read -r line; do echo "::error::zaghlol_lints: $line"; done
             exit 1

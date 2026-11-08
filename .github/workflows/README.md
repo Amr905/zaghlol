@@ -44,4 +44,4 @@ Update by looking up the tag's commit SHA (`git ls-remote --tags <repo-url>`; fo
 
 ## zaghlol_lints (T-002)
 
-The `static` job runs `dart run bin/zaghlol_lints.dart ../../app ../../packages/zaghlol_parsing` in `tools/lints` (rules: no double money, no UI string literals in build, no print outside debug files, SafeException in parsing/db), then `dart test` there (fixtures with `// expect_lint:` comments). `flutter analyze` does not run them. See `tools/lints/README.md` for why this is a standalone checker and not a `custom_lint` plugin. `packages/zaghlol_domain` is not scanned yet: add its path to the command in `app-ci.yml` once T-012 has landed (money rules matter most there).
+The `static` job runs `dart run bin/zaghlol_lints.dart ../../app ../../packages/zaghlol_parsing ../../packages/zaghlol_domain` in `tools/lints` (rules: no double money, no UI string literals in build, no print outside debug files, SafeException in parsing/db), then `dart test` there (fixtures with `// expect_lint:` comments). `flutter analyze` does not run them. See `tools/lints/README.md` for why this is a standalone checker and not a `custom_lint` plugin.

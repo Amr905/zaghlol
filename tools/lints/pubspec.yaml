@@ -1,5 +1,5 @@
 name: zaghlol_lints
-description: custom_lint rules enforcing Zaghlol non-negotiables (T-002).
+description: Standalone AST checker enforcing Zaghlol non-negotiables (T-002).
 publish_to: none
 resolution: workspace
 

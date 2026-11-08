@@ -1,8 +1,8 @@
 # The app uses flutter_lints (T-002, review follow-up F11). A file can have only
 # one `include`, so the shared workspace rules from ../analysis_options.yaml are
 # repeated here; keep both in sync. The generated-file excludes are kept (F13).
-# riverpod_lint and the zaghlol_lints rules run through `dart run custom_lint`
-# (see .github/workflows/README.md), not through `flutter analyze`.
+# The zaghlol_lints rules run through tools/lints/bin/zaghlol_lints.dart (see
+# .github/workflows/README.md), not through `flutter analyze`.
 include: package:flutter_lints/flutter.yaml
 
 analyzer:
