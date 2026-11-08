@@ -2,7 +2,7 @@
 
 | | |
 |---|---|
-| Status | **DRAFT — Parts 1 (T-026) and 2 (T-027)**. Part 3 (T-028) appends below its marker. |
+| Status | **DRAFT — Parts 1 (T-026), 2 (T-027) and 3 (T-028)**. All three parts are drafted; native-speaker review is T-058. |
 | Voice | `06-voice-and-tone.md` (D-34): Egyptian colloquial everywhere; simple standard Arabic only for legal text and disclaimers (Part 3). |
 | Sources | SRS `docs/01-requirements/requirements.md`; screens `02-screen-inventory.md`, `screens/10…70-*.md`, `07-flows-onboarding-cards-import.md`; mascot `04-design-system.md` §4 and `08-mascot-motion-and-bank-logos.md` (D-35); mockup copy in `mockups/source/*.py` (reused where it already fit the voice). |
 | Consumers | T-029 (ARB part 1), T-058 (native Egyptian-speaker review), T-087 (ARB parts 2–3). Keys map 1:1 to ARB keys (ADR-017). |
@@ -164,6 +164,12 @@ Isolate = the presentation layer wraps the value in FSI U+2068 … PDI U+2069 (�
 | `state` | String | **Select**, branches listed in each key's note | — | wording variant |
 | `trend` | String | **Select** (`up` / `down` / `other`) | — | direction against a comparison; `other` = about the same |
 | `years` | String | **Select** (`two` / `other`) | — | Smart ROI projection length |
+| `supportCode` | String | Data: the install ID shown as the support code (D-57(f)) | yes | Latin, LTR, never mirrored. Part 3 |
+| `storePrice` | String | Data: the store's own formatted price (`ProductDetails.price` / StoreKit `displayPrice`) | yes | never reformatted by the app. Part 3 |
+| `plan` | String | **Select** (`monthly` / `yearly` / `lifetime` / `other`) | — | Gold plan. Part 3 |
+| `email` | String | Data: the masked address from the ID token, e.g. `amr…@gmail.com` | yes | LTR. Part 3 |
+| `build` | String | Data: the build number, Western digits always | yes | Part 3 |
+| `banks` | String | Data: institution names (registry, per locale) joined with the locale list format | yes | may contain Latin names. Part 3 |
 
 ARB type for every Select placeholder is String (gen-l10n requirement).
 
@@ -201,6 +207,11 @@ ARB type for every Select placeholder is String (gen-l10n requirement).
 | `chat_main_tooLong` | count = the fixed maximum (300) |
 | `chat_period_lastMonths`, `chat_period_nextDays` | a window of 1 or more |
 | `roi_tips_badgeA11y` | the badge shows only when count > 0 |
+| `settings_main_finishSetup` | the row shows only while at least one step is skipped |
+| `categories_list_subCount` | the line is hidden when a category has no subcategories |
+| `backup_settings_stale` | the reminder shows only when the backup is older than 30 days |
+| `exports_import_found`, `exports_import_duplicates`, `exports_import_untracked`, `exports_import_importButton`, `exports_import_done` | an empty file has its own state; the duplicate and untracked rows are hidden at 0; the button and the done line need at least one new row |
+| `settings_prefs_lockAfterMinutes` | menu choices are 1, 5 and 15 minutes; "immediately" is its own key |
 
 - Every plural row's note states `count:int, n` plus its other placeholders.
 - Egyptian noun forms used throughout:
@@ -2042,3 +2053,818 @@ Nothing here blocks T-029 or T-087. Drafts are used where a question is open.
   - **Not touched on purpose:** the three Part 1 length overruns (R2-1) and the other T-029 carry-overs from the T-026 review, which belong to that task.
 
 <!-- ===================== PART 3 (T-028) appends below ===================== -->
+---
+
+# PART 3 — T-028: settings, categories & rules, templates, backup, export & import, Gold, account, notifications, privacy, preferences, share, about, legal, error catalogue
+
+## 3.0 Approach (design note, C3)
+- **Scope**: every user-visible string on S-60, S-63…S-74 (S-61 and S-62 are Part 1), plus the sub-states those specs define: the passphrase sheet (C-32), import flow, delete-everything dialog, purchase states, sign-in states and the diagnostics view. Also the shared support strings, the **notification texts with their redacted lock-screen variants**, the **one-phone Gold strings** (plan v1.1) and the **error catalogue** (§3.14) that maps every `Failure` code to user copy.
+- **Not in scope**: the full Terms of Use and Privacy Policy documents. They are lawyer-owned, hosted pages that S-74 opens; the deck holds their in-app **Egyptian one-line summaries** and the in-app disclaimers (Q-37). Store listing text is not app copy.
+- **Reused, not repeated**: the Zakah and Smart ROI disclaimers stay in `zakah_main_disclaimer*` and `roi_tips_disclaimer*` (Part 2, screen-bound). The online-speech consent stays in `voice_logger_onlineTitle/Body` (Part 2). The §3.14 mapping table points to them.
+- **Legal and disclaimer register**: simple standard Arabic, each text with an Egyptian one-line summary above it (`06-voice-and-tone.md` §1). Every other string is Egyptian colloquial. Standard-Arabic strings are tagged "simple standard Arabic" in the Notes column.
+- **Tone**: tone gate 1 applies to the whole Part: no jokes and no emoji on errors, permissions, payments, the Gold purchase, destructive dialogs, backup passphrases, notifications about money, or any one-phone Gold string. The only emoji in this Part are `✓` (a symbol) on short success lines.
+- **Glossary use**: «التنبيهات» for Zaghlol's own notifications (S-70, Q-17 split); «الإشعارات» stays for other apps' notifications that Zaghlol captures (Part 1). «نسخة احتياطية», «خصوصيتك» and «إكسيل وكشوف البنوك» follow `06-voice-and-tone.md` §3.
+- **Numbers**: no digits in Arabic strings. The only fixed numbers are written as words («عشرة حروف», «أربعة تثبيتات»). Every other number is a registry placeholder (§0.3a).
+- **Gold strings** follow `error-handling-and-observability.md` §1 (Gold rows), FR-GOLD-03/07/08, FR-ACCT-01/03/05 and D-52…D-66. The wording never reveals account details to someone who has not signed in (EC-65), never uses "blocked" or "banned", and always gives the next step: a date, Restore, Sign in or Support.
+- **Redacted notification variants** (FR-NTF-03): a `…Hidden` key replaces the body when "Hide amounts on lock screen" is on. The variant has no amount, merchant, counterparty, card or item name (Q-33).
+- **New length class**: none. Policy paragraphs that would pass class E are split into two keys.
+- **Machine-friendly**: as Parts 1 and 2. One key per row; ICU written in full; new placeholders are in §3.0.1.
+
+### 3.0.1 New registry rows (added to §0.3a)
+`supportCode`, `storePrice`, `plan`, `email`, `build`, `banks`. Added to the §0.3a table in this part. New no-zero plurals are added to the §0.4 table.
+
+### 3.0.2 Spec edits made with this part
+None. Spec gaps found are in §3.Q.
+
+---
+
+## 3.1 Shared (Part 3) — `common_*`
+
+### Actions and support
+| Key | AR | EN | Notes |
+|---|---|---|---|
+| `common_action_copy` | انسخ | Copy | B |
+| `common_action_contactSupport` | كلّم الدعم | Contact support | B · opens the support link (mail, UX-A-06). Used with `common_support_codeLabel` wherever support is offered |
+| `common_action_signIn` | سجّل دخول | Sign in | B |
+| `common_action_signOut` | اخرج من الحساب | Sign out | B |
+| `common_action_manage` | إدارة | Manage | C |
+| `common_support_codeLabel` | كود الدعم | Support code | L · D-57(f), the install ID shown so support can find the phone |
+| `common_support_codeValue` | {supportCode} | {supportCode} | L · Latin, LTR, selectable; never mirrored |
+| `common_support_codeCopied` | اتنسخ ✓ | Copied ✓ | N |
+| `common_support_codeCopyA11y` | انسخ كود الدعم {supportCode} | Copy support code {supportCode} | A |
+| `common_support_hint` | ادّي كود الدعم ده للدعم عشان يلاقي موبايلك. | Give this code to support so they can find your phone. | S |
+
+---
+
+## 3.2 S-60 Settings — `settings_main_*`
+Static list. Subtitles show live status. States: all on · attention (capture off, backup stale) · Free · Gold · finish-setup row only while a step is skipped.
+
+| Key | AR | EN | Notes |
+|---|---|---|---|
+| `settings_main_title` | الإعدادات | Settings | T |
+| `settings_main_finishSetup` | `{count, plural, =1{فاضل خطوة واحدة في الإعداد} =2{فاضل خطوتين في الإعداد} few{فاضل {n} خطوات في الإعداد} many{فاضل {n} خطوة في الإعداد} other{فاضل {n} خطوة في الإعداد}}` | `{count, plural, =1{1 setup step left} other{{n} setup steps left}}` | L · count:int, n · FR-ONB-11, shown only while a step is skipped |
+| `settings_main_goldFree` | الباقة المجانية | Free plan | L · Gold row title for Free |
+| `settings_main_goldActive` | `{plan, select, monthly{جولد · شهري} yearly{جولد · سنوي} lifetime{جولد · مدى الحياة} other{جولد}}` | `{plan, select, monthly{Gold · Monthly} yearly{Gold · Yearly} lifetime{Gold · Lifetime} other{Gold}}` | L · plan = monthly / yearly / lifetime / other |
+| `settings_main_seeGold` | شوف جولد | See Gold | L · opens S-68 |
+| `settings_main_sectionGeneral` | عام | General | L |
+| `settings_main_sectionData` | بياناتك | Your data | L |
+| `settings_main_preferences` | التفضيلات | Preferences | L |
+| `settings_main_notifications` | التنبيهات | Notifications | L · Zaghlol's own alerts (Q-17) |
+| `settings_main_capture` | زغلول بيقرا منين | Capture | L · glossary |
+| `settings_main_captureSub` | `{state, select, ok{كله شغال} attention{محتاج انتباه} other{لسه متظبطش}}` | `{state, select, ok{All on} attention{Needs attention} other{Not set up yet}}` | C · state = ok / attention / other |
+| `settings_main_categories` | التصنيفات | Categories & rules | L · glossary |
+| `settings_main_backup` | نسخة احتياطية | Backup | L · glossary |
+| `settings_main_backupSub` | `{state, select, never{لسه مفيش نسخة} other{آخر نسخة {date}}}` | `{state, select, never{No backup yet} other{Last: {date}}}` | L · state = never / other |
+| `settings_main_exports` | إكسيل وكشوف البنوك | Export & import | L · glossary |
+| `settings_main_privacy` | خصوصيتك | Privacy & data | L · glossary |
+| `settings_main_about` | عن زغلول | About | L |
+
+---
+
+## 3.3 S-63 Categories & rules — `categories_list_*`; S-64 Edit category — `categories_edit_*`
+Category and subcategory **names** are catalog data (FR-CAT-01) and are not in the deck. States: categories · rules · empty rules · loading · error (`common_error_loadFailed`) · Gold-locked (new category, new subcategory).
+
+| Key | AR | EN | Notes |
+|---|---|---|---|
+| `categories_list_title` | التصنيفات | Categories & rules | T |
+| `categories_list_tabCategories` | التصنيفات | Categories | C |
+| `categories_list_tabRules` | القواعد | Rules | C |
+| `categories_list_subCount` | `{count, plural, =1{تصنيف فرعي واحد} =2{تصنيفين فرعيين} few{{n} تصنيفات فرعية} many{{n} تصنيف فرعي} other{{n} تصنيف فرعي}}` | `{count, plural, =1{1 subcategory} other{{n} subcategories}}` | L · count:int, n · row subtitle |
+| `categories_list_systemNote` | دي تصنيفات زغلول الأساسية. جولد بيخليك تضيف تصنيفات فرعية. | These are Zaghlol's built-in categories. Gold lets you add subcategories. | S · read-only for Free |
+| `categories_list_new` | تصنيف جديد | New category | L · + `common_gold_badge`; Free opens S-68 |
+| `categories_list_newSub` | تصنيف فرعي جديد | New subcategory | L · + `common_gold_badge` |
+| `categories_list_rulesCount` | `{count, plural, =0{مفيش قواعد} =1{قاعدة واحدة} =2{قاعدتين} few{{n} قواعد} many{{n} قاعدة} other{{n} قاعدة}}` | `{count, plural, =0{No rules} =1{1 rule} other{{n} rules}}` | L · count:int, n · section header |
+| `categories_list_rulesSearch` | دوّر في القواعد | Search rules | L · search field |
+| `categories_list_ruleA11y` | {merchant} بيتصنف {category} | {merchant} goes to {category} | A · each rule row |
+| `categories_list_ruleEditA11y` | غيّر تصنيف القاعدة | Change the rule's category | A |
+| `categories_list_ruleDeleteA11y` | امسح القاعدة | Delete the rule | A |
+| `categories_list_rulesEmpty` | لما تصلّح تصنيف، هسألك لو عايزني أفتكره. | When you fix a category, I'll ask if you want me to remember it. | S · empty rules state, Rive `tourGuide` allowed |
+| `categories_list_ruleDeleteTitle` | تمسح القاعدة دي؟ | Delete this rule? | T · C-18 dialog |
+| `categories_list_ruleDeleteBody` | زغلول مش هيطبّقها على الحركات الجاية. | Zaghlol won't apply it to future transactions. | S |
+| `categories_list_ruleDeleted` | القاعدة اتمسحت | Rule deleted | N · + `common_action_undo` |
+| `categories_list_noResults` | مفيش قاعدة بالاسم ده | No rule matches that | S |
+| `categories_edit_titleNew` | تصنيف جديد | New category | T |
+| `categories_edit_titleEdit` | تعديل التصنيف | Edit category | T |
+| `categories_edit_name` | اسم التصنيف | Category name | L · 1 to 30 characters, unique (`common_validation_nameRequired`, `…nameLength`, `…nameTaken`) |
+| `categories_edit_parent` | تحت تصنيف | Inside | L · parent picker |
+| `categories_edit_parentNone` | مفيش (تصنيف رئيسي) | None (top level) | L |
+| `categories_edit_bucket` | النوع | Type | L · bucket picker (BR-CAT-02) |
+| `categories_edit_bucketNeeds` | ضروريات | Needs | C |
+| `categories_edit_bucketWants` | رغبات | Wants | C |
+| `categories_edit_bucketObligations` | التزامات | Obligations | C |
+| `categories_edit_bucketSavings` | ادخار | Savings | C |
+| `categories_edit_bucketIncome` | دخل | Income | C |
+| `categories_edit_bucketGiving` | عطاء | Giving | C |
+| `categories_edit_bucketRequired` | اختار النوع | Choose a type | S |
+| `categories_edit_icon` | الأيقونة | Icon | L |
+| `categories_edit_color` | اللون | Colour | L · from the approved palette |
+| `categories_edit_delete` | امسح التصنيف | Delete category | B · destructive, edit mode only |
+| `categories_edit_deleteTitle` | تمسح "{category}"؟ | Delete "{category}"? | T |
+| `categories_edit_deleteBody` | اختار تصنيف تتنقل له حركاته قبل ما نمسحه. | Choose a category to move its transactions to before we delete it. | S |
+| `categories_edit_moveTo` | انقل الحركات لـ | Move transactions to | L |
+| `categories_edit_moveRequired` | اختار تصنيف تتنقل له الحركات | Choose a category to move them to | S |
+| `categories_edit_deleteConfirm` | امسح وانقل | Delete and move | B · destructive |
+| `categories_edit_deleted` | التصنيف اتمسح والحركات اتنقلت | Category deleted and transactions moved | N |
+| `categories_edit_lockedBody` | التصنيفات الخاصة بيك مع جولد | Your own categories come with Gold | S · locked state + `common_gold_unlock` |
+
+---
+
+## 3.4 S-65 Custom message template — `templates_builder_*` (Gold)
+Three steps shown as three titled blocks, not numbered in the copy. The message stays on the phone. States: empty (paste only) · tagging · testing · test failed · saved · Gold-locked.
+
+| Key | AR | EN | Notes |
+|---|---|---|---|
+| `templates_builder_title` | قالب رسالة جديد | New message template | T |
+| `templates_builder_pickTitle` | الصق رسالة أو اختار واحدة | Paste or pick a message | L · block 1 |
+| `templates_builder_fromReview` | من اللي مستني رأيك | From the review queue | L |
+| `templates_builder_paste` | الصق رسالة | Paste a message | L |
+| `templates_builder_empty` | الصق رسالة من البنك عشان نبدأ | Paste a bank message to begin | S · empty state |
+| `templates_builder_private` | الرسالة بتفضل على موبايلك ومش بتتبعت لحد. | The message stays on your phone and isn't sent anywhere. | S |
+| `templates_builder_tagTitle` | علّم الأجزاء | Tap the parts | L · block 2 |
+| `templates_builder_tapHint` | دوس على الجزء وبعدين اختار هو إيه. | Tap a part, then say what it is. | S |
+| `templates_builder_tagAmount` | المبلغ | Amount | C · required |
+| `templates_builder_tagCurrency` | العملة | Currency | C |
+| `templates_builder_tagMerchant` | التاجر | Merchant | C |
+| `templates_builder_tagLast4` | آخر أربع أرقام | Last four digits | C |
+| `templates_builder_tagBalance` | الرصيد | Balance | C |
+| `templates_builder_tagDate` | التاريخ | Date | C |
+| `templates_builder_direction` | الاتجاه | Direction | L · options `common_txnType_expense` / `common_txnType_income` |
+| `templates_builder_sender` | اسم المرسل | Sender name | L · required |
+| `templates_builder_senderHint` | زي ما بيظهر على الرسايل | As it shows on the messages | S |
+| `templates_builder_testTitle` | جرّب القالب | Test the template | L · block 3 |
+| `templates_builder_testResult` | الرسايل الشبه دي اللي القالب فهمها: {done} من {total} | Similar messages the template understood: {done} of {total} | S · done, total |
+| `templates_builder_testFailTitle` | في رسالة مافهمتهاش | One message didn't match | L |
+| `templates_builder_testFailReason` | `{state, select, amount{مش لاقي المبلغ فيها.} direction{مش عارف دي صرف ولا دخل.} other{شكلها مختلف عن القالب.}}` | `{state, select, amount{I can't find the amount in it.} direction{I can't tell if it's spending or income.} other{It looks different from the template.}}` | S · state = amount / direction / other |
+| `templates_builder_save` | احفظ القالب | Save template | B |
+| `templates_builder_saved` | القالب اتحفظ ✓ | Template saved ✓ | N |
+| `templates_builder_errorAmount` | علّم المبلغ الأول | Tag the amount first | S |
+| `templates_builder_errorSender` | اكتب اسم المرسل | Enter the sender name | S |
+| `templates_builder_errorSelfParse` | القالب لازم يقرا الرسالة اللي عملته عليها | The template has to read the message you built it from | S |
+| `templates_builder_lockedBody` | علّم زغلول يفهم رسايل بنك مش مدعوم، مع جولد | Teach Zaghlol an unsupported bank's messages, with Gold | S · locked state + `common_gold_unlock` |
+
+---
+
+## 3.5 S-66 Backup — `backup_settings_*`; passphrase sheet (C-32) — `backup_passphrase_*`
+Restore is Part 1 (`backup_restore_*`). States: never backed up (Free nudge) · idle · in progress (cancellable until upload completes) · done · reminder (Free, older than 30 days, A-67) · error (network, storage full, sign-in expired, iCloud off) · Gold-locked (schedule, versions). The last good backup always stays on any error. No jokes anywhere on this screen.
+
+| Key | AR | EN | Notes |
+|---|---|---|---|
+| `backup_settings_title` | نسخة احتياطية | Backup | T |
+| `backup_settings_where` | النسخة تتحفظ فين؟ | Where to back up | L |
+| `backup_settings_account` | الحساب | Account | L |
+| `backup_settings_accountChange` | غيّر | Change | L · text button |
+| `backup_settings_last` | آخر نسخة: {date} · {size} | Last backup: {date} · {size} | L · size = `common_fileSize_mb` |
+| `backup_settings_never` | لسه ما عملتش نسخة | No backup yet | L |
+| `backup_settings_freeNudge` | النسخة الأولى ببلاش، وبتحمي بياناتك لو الموبايل ضاع. | Your first backup is free, and it protects your data if the phone is lost. | S · Free, never backed up |
+| `backup_settings_now` | اعمل نسخة دلوقتي | Back up now | B |
+| `backup_settings_freeReplaces` | النسخة الجديدة بتحل محل القديمة. | The new backup replaces the current one. | S · Free (FR-BAK-08) |
+| `backup_settings_auto` | نسخة تلقائي | Automatic backup | L · + `common_gold_badge` |
+| `backup_settings_autoOff` | مقفول | Off | C |
+| `backup_settings_autoDaily` | كل يوم | Daily | C |
+| `backup_settings_autoWeekly` | كل أسبوع | Weekly | C |
+| `backup_settings_autoMonthly` | كل شهر | Monthly | C |
+| `backup_settings_autoLocked` | النسخ التلقائي مع جولد | Automatic backups come with Gold | S · + `common_gold_unlock` |
+| `backup_settings_versions` | النسخ المحفوظة | Saved versions | L · Gold, up to five |
+| `backup_settings_versionsLocked` | جولد بيحتفظ بخمس نسخ | Gold keeps five versions | S |
+| `backup_settings_goldKeeps` | لو بقيت جولد، نسختك الحالية بتبقى أول نسخة في السجل. | If you go Gold, your current backup becomes the first version in the history. | S · FR-BAK-09 |
+| `backup_settings_passphrase` | كلمة سر النسخة | Backup passphrase | L |
+| `backup_settings_passphraseChange` | غيّر | Change | L · text button |
+| `backup_settings_restore` | استرجاع نسخة | Restore a backup | L · opens S-04 |
+| `backup_settings_includes` | في النسخة: حركاتك وإعداداتك وتصنيفاتك وقواعدك والكروت اللي مش بتتابعها. | The backup holds your transactions, settings, categories, rules and ignored cards. | S · FR-BAK-06 |
+| `backup_settings_excludes` | مفيهاش مفاتيح الحماية ولا أذونات الموبايل. هتفعّلهم من جديد بعد الاسترجاع. | It doesn't hold your security keys or phone permissions. You'll set those up again after restoring. | S · FR-BAK-07 |
+| `backup_settings_stale` | `{count, plural, =1{آخر نسخة بقالها يوم} =2{آخر نسخة بقالها يومين} few{آخر نسخة بقالها {n} أيام} many{آخر نسخة بقالها {n} يوم} other{آخر نسخة بقالها {n} يوم}}` | `{count, plural, =1{Your last backup is 1 day old} other{Your last backup is {n} days old}}` | N · count:int, n · Free, older than 30 days (A-67); + `backup_settings_now` |
+| `backup_settings_running` | بعمل النسخة… | Backing up… | L · C-27 with `common_progress_percent`, Rive `counting` |
+| `backup_settings_cancelNote` | تقدر تلغي قبل ما الرفع يخلص. | You can cancel before the upload finishes. | S |
+| `backup_settings_done` | النسخة اتعملت ✓ | Backup done ✓ | N |
+| `backup_settings_errorNetwork` | النسخة ماتعملتش لأن النت مش ثابت. النسخة اللي فاتت لسه موجودة. | The backup didn't finish because the connection dropped. Your previous backup is still there. | S · maps `NetworkFailure` in backup |
+| `backup_settings_errorStorage` | المساحة على {provider} خلصت. فضّي مساحة وجرّب تاني. النسخة اللي فاتت لسه موجودة. | There's no space left on {provider}. Free some up and try again. Your previous backup is still there. | S |
+| `backup_settings_errorAuth` | الدخول على {provider} خلص. سجّل دخول تاني وجرّب تاني. | Your {provider} sign-in expired. Sign in again and retry. | S |
+| `backup_settings_errorIcloud` | iCloud مش شغال على الموبايل ده. سجّل دخول بحساب Apple من إعدادات الآيفون وشغّل iCloud Drive. | iCloud isn't available on this phone. Sign in with your Apple ID in Settings and turn on iCloud Drive. | S · `ICLOUD_UNAVAILABLE` |
+| `backup_settings_errorGeneric` | النسخة الاحتياطية ماتعملتش. جرّب تاني. | The backup didn't work. Try again. | S |
+| `backup_passphrase_title` | اختار كلمة سر للنسخة | Choose a backup passphrase | T · first backup |
+| `backup_passphrase_new` | كلمة السر | Passphrase | L |
+| `backup_passphrase_confirm` | اكتبها تاني | Enter it again | L |
+| `backup_passphrase_weak` | ضعيفة | Weak | C · strength meter |
+| `backup_passphrase_fair` | كويسة | Fair | C |
+| `backup_passphrase_strong` | قوية | Strong | C |
+| `backup_passphrase_warning` | لو نسيت كلمة السر، محدش يقدر يفتح نسختك، ولا حتى إحنا. | If you forget this passphrase, nobody can open your backup, not even us. | S · FR-BAK-01 |
+| `backup_passphrase_understand` | فاهم إنها مش بتترجّع | I know it can't be recovered | L · checkbox, required |
+| `backup_passphrase_tooShort` | استخدم عشرة حروف على الأقل | Use at least 10 characters | S · UX-A-01, fixed length |
+| `backup_passphrase_mismatch` | كلمتين السر مش زي بعض | The passphrases don't match | S |
+| `backup_passphrase_ackRequired` | علّم إنك فاهم الأول | Tick that you understand first | S |
+| `backup_passphrase_save` | احفظ وابدأ النسخة | Save and back up | B |
+| `backup_passphrase_changeTitle` | غيّر كلمة سر النسخة | Change backup passphrase | T |
+| `backup_passphrase_current` | كلمة السر الحالية | Current passphrase | L |
+| `backup_passphrase_currentWrong` | كلمة السر الحالية مش صح | The current passphrase is wrong | S |
+| `backup_passphrase_changed` | كلمة السر اتغيرت ✓ | Passphrase changed ✓ | N |
+
+---
+
+## 3.6 S-67 Export & import — `exports_main_*`, `exports_import_*`
+Export and import are Gold; Free sees the preview and a locked import. Exported files are not encrypted (FR-EXP-05), and nothing is converted between currencies (FR-EXP-07). States: export idle · preview empty · preparing · ready · import pick · parsing · password-protected PDF · summary · importing · done · empty file · unsupported file · Gold-locked.
+
+| Key | AR | EN | Notes |
+|---|---|---|---|
+| `exports_main_title` | إكسيل وكشوف البنوك | Export & import | T · glossary |
+| `exports_main_exportSection` | تصدير | Export | L |
+| `exports_main_format` | الصيغة | Format | L |
+| `exports_main_formatCsv` | CSV | CSV | C |
+| `exports_main_formatExcel` | Excel | Excel | C |
+| `exports_main_dates` | الفترة | Dates | L |
+| `exports_main_categories` | التصنيفات | Categories | L |
+| `exports_main_categoriesAll` | كل التصنيفات | All categories | C |
+| `exports_main_cards` | الكروت | Cards | L · options `common_cardFilter_all` and the card filter sheet |
+| `exports_main_preview` | معاينة أول عشرين صف | Preview of the first 20 rows | L · fixed count |
+| `exports_main_previewEmpty` | مفيش حركات في الفترة دي | No transactions in this range | S |
+| `exports_main_freePreview` | المعاينة ببلاش. التصدير مع جولد. | The preview is free. Exporting comes with Gold. | S · + `common_gold_unlock` |
+| `exports_main_export` | صدّر | Export | B · + `common_gold_badge` |
+| `exports_main_currencyNote` | كل صف فيه عملته، ومفيش أي تحويل بين العملات. | Every row keeps its own currency. Nothing is converted. | S · FR-EXP-07 |
+| `exports_main_unencrypted` | الملف اللي بتصدّره مش متشفّر. احفظه في مكان بتثق فيه. | The file you export isn't encrypted. Save it somewhere you trust. | S · FR-EXP-05, FR-SEC-06 |
+| `exports_main_preparing` | بجهّز الملف… | Preparing the file… | L · C-27 |
+| `exports_main_ready` | الملف جاهز ✓ | The file is ready ✓ | N |
+| `exports_main_save` | احفظ الملف | Save the file | B · system file picker |
+| `exports_main_failed` | معرفتش أجهّز الملف. جرّب تاني. | Couldn't prepare the file. Try again. | S |
+| `exports_import_section` | استيراد | Import | L · + `common_gold_badge` |
+| `exports_import_zaghlolCsv` | ملف زغلول CSV | Zaghlol CSV file | L |
+| `exports_import_pdfTitle` | كشف حساب PDF | Bank statement (PDF) | L |
+| `exports_import_pdfBanks` | {banks} | {banks} | L · banks = supported PDF banks (FR-EXP-04), joined with the locale list format |
+| `exports_import_onlineTitle` | كشف بنك أونلاين | Online bank statement | L |
+| `exports_import_onlineBanks` | {banks} | {banks} | L · banks = Wise, Revolut, Monzo, bunq, N26, Payoneer (FR-EXP-06), Latin |
+| `exports_import_pick` | اختار الملف | Choose the file | B |
+| `exports_import_parsing` | بقرا الملف… | Reading the file… | L · Rive `scanning`, C-27. The file is read on the phone |
+| `exports_import_passwordTitle` | الكشف محمي بكلمة سر | This statement has a password | T |
+| `exports_import_passwordBody` | اكتب كلمة السر. بتتستخدم على موبايلك بس ومش بتتحفظ. | Enter the password. It's used on this phone only and isn't saved. | S |
+| `exports_import_passwordLabel` | كلمة سر الكشف | Statement password | L |
+| `exports_import_passwordWrong` | كلمة السر دي غلط | That password is wrong | S |
+| `exports_import_found` | `{count, plural, =1{لقيت حركة واحدة} =2{لقيت حركتين} few{لقيت {n} حركات} many{لقيت {n} حركة} other{لقيت {n} حركة}}` | `{count, plural, =1{1 transaction found} other{{n} transactions found}}` | L · count:int, n · summary line; the empty file has its own state |
+| `exports_import_duplicates` | `{count, plural, =1{حركة واحدة موجودة عندك (هتتخطى)} =2{حركتين موجودين عندك (هيتخطوا)} few{{n} حركات موجودة عندك (هتتخطى)} many{{n} حركة موجودة عندك (هتتخطى)} other{{n} حركة موجودة عندك (هتتخطى)}}` | `{count, plural, =1{1 already in Zaghlol (skipped)} other{{n} already in Zaghlol (skipped)}}` | S · count:int, n · row hidden when 0 |
+| `exports_import_untracked` | `{count, plural, =1{كارت واحد مش متتبع (هيتخطى)} =2{كارتين مش متتبعين (هيتخطوا)} few{{n} كروت مش متتبعة (هتتخطى)} many{{n} كارت مش متتبعة (هتتخطى)} other{{n} كارت مش متتبعة (هتتخطى)}}` | `{count, plural, =1{1 card not tracked (skipped)} other{{n} cards not tracked (skipped)}}` | L · count:int, n · expandable; row hidden when 0 (FR-CAP-06) |
+| `exports_import_importButton` | `{count, plural, =1{استورد حركة} =2{استورد حركتين} few{استورد {n} حركات} many{استورد {n} حركة} other{استورد {n} حركة}}` | `{count, plural, =1{Import 1 transaction} other{Import {n} transactions}}` | B · count:int, n · shown only when at least one is new |
+| `exports_import_nothingNew` | كل الحركات دي موجودة عندك قبل كده | Everything in this file is already in Zaghlol | S · replaces the button |
+| `exports_import_importing` | بضيف الحركات… | Adding the transactions… | L · C-27 |
+| `exports_import_done` | `{count, plural, =1{اتضافت حركة ✓} =2{اتضافت حركتين ✓} few{اتضافت {n} حركات ✓} many{اتضافت {n} حركة ✓} other{اتضافت {n} حركة ✓}}` | `{count, plural, =1{1 transaction added ✓} other{{n} transactions added ✓}}` | N · count:int, n |
+| `exports_import_emptyTitle` | مفيش حركات في الملف ده | No transactions in this file | T · C-28 |
+| `exports_import_unsupportedTitle` | الملف ده مش كشف مدعوم | This isn't a supported statement | T |
+| `exports_import_unsupportedBody` | دي الجهات المدعومة: {banks} | Supported: {banks} | S · banks = both lists, joined |
+| `exports_import_wrongType` | نوع الملف مش اللي اخترته | The file type isn't the one you chose | S |
+| `exports_import_failed` | معرفتش أقرا الملف. جرّب ملف تاني. | Couldn't read the file. Try another one. | S |
+| `exports_import_lockedBody` | ضيف شهور فاتتة وكشوف البنوك مع جولد | Add past months and bank statements with Gold | S · locked state + `common_gold_unlock` |
+
+---
+
+## 3.7 S-68 Zaghlol Gold (paywall) — `gold_paywall_*`
+Calm and exact: this is a payment screen (tone gate 1). The mascot appears as a still `proud` pose with a crown; the only mascot line is the success one. Prices come from the store as ready-made strings (`storePrice`); the copy never adds numbers of its own. States: loading prices (skeleton) · prices failed · ready · purchasing · pending (BR-GOLD-05) · verifying (online / offline, BR-GOLD-06) · success · cancelled · invalid · already Gold · store error.
+
+| Key | AR | EN | Notes |
+|---|---|---|---|
+| `gold_paywall_title` | زغلول جولد | Zaghlol Gold | T |
+| `gold_paywall_closeA11y` | اقفل | Close | A |
+| `gold_paywall_headline` | كل أدواتك في مكان واحد | All your tools in one place | T |
+| `gold_paywall_benefitCharts` | كل الشارتات الاتناشر مع تحليل أعمق | All twelve charts with deeper insight | S |
+| `gold_paywall_benefitVoice` | تسجيل بالصوت من غير حدود | Unlimited voice logging | L |
+| `gold_paywall_benefitExport` | تصدير واستيراد وكشوف البنوك | Export, import and bank statements | S |
+| `gold_paywall_benefitBackup` | نسخ تلقائي بخمس نسخ محفوظة | Automatic backups, five versions | S |
+| `gold_paywall_benefitAssets` | دهب وشهادات وأصول | Gold, certificates and assets | L |
+| `gold_paywall_benefitCustom` | تصنيفات وقوالب رسايل خاصة بيك | Your own categories and templates | S |
+| `gold_paywall_planName` | `{plan, select, monthly{شهري} yearly{سنوي} lifetime{مدى الحياة} other{جولد}}` | `{plan, select, monthly{Monthly} yearly{Yearly} lifetime{Lifetime} other{Gold}}` | C · C-31 plan card title |
+| `gold_paywall_planPrice` | `{plan, select, monthly{{storePrice} في الشهر} yearly{{storePrice} في السنة} lifetime{{storePrice} مرة واحدة} other{{storePrice}}}` | `{plan, select, monthly{{storePrice} per month} yearly{{storePrice} per year} lifetime{{storePrice} one time} other{{storePrice}}}` | L · storePrice = the store's own formatted price |
+| `gold_paywall_bestValue` | الأوفر | Best value | C · yearly card |
+| `gold_paywall_continue` | يلا نشترك | Continue | B · Gold button, glossary. No emoji (payment) |
+| `gold_paywall_planRequired` | اختار خطة الأول | Choose a plan first | S |
+| `gold_paywall_restore` | استرجع مشترياتي | Restore purchases | L · text button |
+| `gold_paywall_terms` | الشروط | Terms | L |
+| `gold_paywall_privacy` | الخصوصية | Privacy | L |
+| `gold_paywall_renewal` | `{platform, select, ios{يتجدد الاشتراك تلقائياً ما لم يُلغَ قبل نهاية الفترة من إعدادات حساب Apple.} other{يتجدد الاشتراك تلقائياً ما لم يُلغَ قبل نهاية الفترة من Google Play.}}` | `{platform, select, ios{The subscription renews automatically unless cancelled before the period ends, in your Apple account settings.} other{The subscription renews automatically unless cancelled before the period ends, in Google Play.}}` | S · **simple standard Arabic** (store legal line), for monthly and yearly |
+| `gold_paywall_renewalSummary` | بيتجدد لوحده وتقدر تلغيه من المتجر في أي وقت. | It renews by itself, and you can cancel in the store any time. | S · Egyptian summary above `gold_paywall_renewal` |
+| `gold_paywall_lifetimeNote` | الدفع مرة واحدة ومن غير تجديد. | One payment, no renewal. | S · shown when Lifetime is selected |
+| `gold_paywall_pricesLoading` | بحمّل الأسعار… | Loading prices… | L · skeleton caption |
+| `gold_paywall_pricesFailed` | مش قادر أحمّل الأسعار. اتأكد من النت وجرّب تاني. | Can't load the prices. Check your connection and try again. | S · + `common_action_tryAgain` |
+| `gold_paywall_purchasing` | بفتح المتجر… | Opening the store… | L |
+| `gold_paywall_pending` | الدفع لسه معلّق. جولد هيشتغل أول ما يتم. | Your payment is still pending. Gold starts when it's complete. | S · BR-GOLD-05 |
+| `gold_paywall_verifying` | بتأكد من الدفع… | Verifying your purchase… | L · no Gold until verified |
+| `gold_paywall_verifyOffline` | هكمّل التأكد أول ما النت يرجع. | I'll finish checking when you're back online. | S · BR-GOLD-06, EC-44 |
+| `gold_paywall_success` | جولد اشتغل ✓ | Gold is on ✓ | N · returns to the origin screen (N-05) |
+| `gold_paywall_successMascot` | ألف مبروك. جولد اشتغل وكل حاجة اتفتحت. | Congratulations. Gold is on and everything is unlocked. | M · Rive `proud` · purchase verified. No joke, no emoji (tone gate 1) |
+| `gold_paywall_cancelled` | الشراء اتلغى. مفيش حاجة اتخصمت. | The purchase was cancelled. Nothing was charged. | N |
+| `gold_paywall_invalid` | مقدرناش نتأكد من الشراء. جرّب «استرجع مشترياتي»، ولو لسه كلّم الدعم. | We couldn't verify the purchase. Try "Restore purchases", and contact support if it still fails. | S · `PURCHASE_TOKEN_INVALID`, `PURCHASE_NOT_OWNED`, `PURCHASE_WRONG_APP`; no Gold |
+| `gold_paywall_storeError` | المتجر رجّع مشكلة. جرّب تاني كمان شوية. | The store reported a problem. Try again in a bit. | S |
+| `gold_paywall_alreadyGold` | `{plan, select, monthly{إنت جولد: شهري} yearly{إنت جولد: سنوي} lifetime{إنت جولد: مدى الحياة} other{إنت جولد}}` | `{plan, select, monthly{You have Gold: Monthly} yearly{You have Gold: Yearly} lifetime{You have Gold: Lifetime} other{You have Gold}}` | L · plan = monthly / yearly / lifetime / other; + `common_action_manage` |
+| `gold_paywall_protectNote` | بعد الشراء، سجّل دخول على الموبايل ده عشان تحمي الجولد. | After you buy, sign in on this phone to protect your Gold. | S · D-54, shown on the buying phone after success; opens `gold_seat_protectTitle` |
+
+---
+
+## 3.8 S-69 Gold & account — `gold_account_*`
+Sign-in is optional and only carries the Gold plan (FR-ACCT-01/02). States: Free · Gold (with and without an account) · paused · expired · signing in · restoring · signed in · replace-link question (EC-46) · delete account.
+
+| Key | AR | EN | Notes |
+|---|---|---|---|
+| `gold_account_title` | جولد وحسابك | Gold & account | T |
+| `gold_account_plan` | `{plan, select, monthly{جولد · شهري · بيتجدد {date}} yearly{جولد · سنوي · بيتجدد {date}} lifetime{جولد · مدى الحياة} other{الباقة المجانية}}` | `{plan, select, monthly{Gold · Monthly · renews {date}} yearly{Gold · Yearly · renews {date}} lifetime{Gold · Lifetime} other{Free plan}}` | L · plan = monthly / yearly / lifetime / other |
+| `gold_account_seeGold` | شوف جولد | See Gold | B · Free, opens S-68 |
+| `gold_account_manage` | إدارة الاشتراك | Manage subscription | L · opens the store |
+| `gold_account_restore` | استرجع مشترياتي | Restore purchases | L |
+| `gold_account_restoring` | بدوّر على مشترياتك… | Looking for your purchases… | L |
+| `gold_account_restoreDone` | الجولد رجع ✓ | Gold is back ✓ | N |
+| `gold_account_restoreNone` | مفيش مشتريات أقدر أرجّعها على الحساب ده | I found no purchases to restore on this account | S |
+| `gold_account_endedTitle` | الجولد خلص | Gold has ended | T · expired or refunded (FR-GOLD-06) |
+| `gold_account_endedBody` | بياناتك كلها لسه موجودة، وتقدر ترجع جولد في أي وقت. | All your data is still here, and you can come back to Gold any time. | S |
+| `gold_account_otherPhone` | استخدم جولد على موبايل تاني (اختياري) | Use Gold on another phone (optional) | S |
+| `gold_account_google` | كمّل بحساب Google | Continue with Google | B |
+| `gold_account_apple` | كمّل بحساب Apple | Continue with Apple | B |
+| `gold_account_privacy` | بنربط باقة جولد بس. بيانات فلوسك عمرها ما بتتبعت. | We only link your Gold plan. Your money data is never sent. | S · FR-ACCT-02 |
+| `gold_account_signingIn` | بدخل… | Signing in… | L · button loading |
+| `gold_account_signInCancelled` | الدخول اتلغى. | Sign-in was cancelled. | N |
+| `gold_account_signInFailed` | الدخول ما كملش. جرّب تاني. | Sign-in didn't finish. Try again. | S · `ID_TOKEN_INVALID` |
+| `gold_account_signInAgain` | سجّل دخول تاني عشان تكمّل | Sign in again to continue | S · `ACCOUNT_TOKEN_EXPIRED`, shown in Settings only |
+| `gold_account_signedInAs` | داخل بـ {email} | Signed in as {email} | L · email = masked address from the ID token |
+| `gold_account_nextMove` | تقدر تنقل الجولد تاني يوم {date} | You can move Gold again on {date} | L · stored `nextMoveAt` (EC-68) |
+| `gold_account_signOutTitle` | تخرج من الحساب؟ | Sign out? | T |
+| `gold_account_signOutBody` | `{state, select, linked{بياناتك كلها هتفضل على الموبايل. الجولد هيقف على الموبايل ده لحد ما تسجّل دخول تاني بنفس الحساب.} other{بياناتك كلها هتفضل على الموبايل، والجولد هيفضل شغال.}}` | `{state, select, linked{All your data stays on this phone. Gold pauses here until you sign in again with the same account.} other{All your data stays on this phone, and Gold keeps working.}}` | S · state = linked (Gold bought under the account) / other. FR-ACCT-03 |
+| `gold_account_replaceTitle` | الموبايل ده مربوط بحساب تاني | This phone is linked to another account | T · `INSTALL_LINKED_TO_OTHER_ACCOUNT` (EC-46) |
+| `gold_account_replaceBody` | تربطه بالحساب ده بدله؟ باقة الجولد بس هي اللي بتتربط. | Link it to this account instead? Only the Gold plan is linked. | S |
+| `gold_account_replaceConfirm` | اربطه بالحساب ده | Link to this account | B |
+| `gold_account_lostPhone` | موبايلك القديم ضاع أو اتباع؟ كلّم الدعم وهنساعدك. | Lost or sold your old phone? Contact support and we'll help. | S · FR-ACCT-05, no self-service relink |
+| `gold_account_deleteRow` | امسح الحساب | Delete account | L · destructive |
+| `gold_account_deleteTitle` | تمسح حسابك؟ | Delete your account? | T |
+| `gold_account_deleteBody` | هنمسح حسابك والربط بالجولد من عندنا. مشترياتك هتفضل على حساب المتجر بتاعك. | We'll delete your account and its link to Gold on our side. Your purchases stay with your store account. | S · FR-ACCT-04 |
+| `gold_account_deleteConfirm` | امسح الحساب | Delete account | B · destructive |
+| `gold_account_deleted` | الحساب اتمسح | Account deleted | N |
+
+---
+
+## 3.8a One-phone Gold — `gold_seat_*` (plan v1.1, D-52…D-66)
+Gold sits on one phone at a time and can move once a month. These strings explain that without blame. Every one gives the next step: a date, Restore, Sign in or Support. Sources: `error-handling-and-observability.md` §1 Gold rows, `backend-api.md` §4.3/§4.6. **Support** always means `common_action_contactSupport` plus the support code row (`common_support_codeLabel`, `common_support_codeValue`, `common_support_hint`) where the table says "with support".
+
+### Cooldown, attestation, account
+| Key | AR | EN | Notes |
+|---|---|---|---|
+| `gold_seat_cooldownTitle` | نقلت الجولد من قريب | You moved Gold recently | T · `MOVE_COOLDOWN` (409, restore) and sign-in `moveRefused` (200) |
+| `gold_seat_cooldownBody` | تقدر تنقله تاني يوم {date}، أو كلّم الدعم. | You can move it again on {date}, or contact support. | S · date = `nextMoveAt` for the locale; with support. Not a move (EC-66), no retry before the date |
+| `gold_seat_attestTitle` | مقدرناش نتأكد من الموبايل ده | We couldn't verify this phone | T · `DEVICE_ATTESTATION_FAILED` after the one retry (EC-66) |
+| `gold_seat_attestBody` | جرّب تاني بعد شوية. لو لسه، سجّل دخول بالحساب اللي اشتريت بيه، أو كلّم الدعم. | Try again in a bit. If it still fails, sign in with the account you bought with, or contact support. | S · actions `common_action_tryAgain`, `common_action_signIn`; with support. Existing Gold untouched |
+| `gold_seat_attestPlayServices` | حدّث خدمات Google Play من المتجر وجرّب تاني. | Update Google Play services from the store and try again. | S · `ATTEST_PLAY_SERVICES_OUTDATED` (Android) |
+| `gold_seat_attestUnavailable` | التأكد من الموبايل مش متاح دلوقتي. سجّل دخول بالحساب اللي اشتريت بيه، أو كلّم الدعم. | Phone verification isn't available right now. Sign in with the account you bought with, or contact support. | S · `ATTEST_UNAVAILABLE`, `ATTEST_TRANSIENT` after retries; with support |
+| `gold_seat_accountRequiredTitle` | سجّل دخول الأول | Sign in first | T · restore item `account_required` (EC-65) |
+| `gold_seat_accountRequiredBody` | اعمل تسجيل دخول بالحساب اللي اشتريت بيه. | Sign in with the account you bought with. | S · reveals nothing about the account; action `common_action_signIn` |
+
+### Moved, paused, time check
+| Key | AR | EN | Notes |
+|---|---|---|---|
+| `gold_seat_movedUserTitle` | الجولد اتنقل لموبايل تاني | Gold moved to another phone | T · entitlement `moved`, `movedBy: user` |
+| `gold_seat_movedUserBody` | لو عايزه على الموبايل ده، استرجع مشترياتك أو سجّل دخول. | To use it on this phone, restore your purchases or sign in. | S · actions `gold_seat_restoreAction`, `common_action_signIn` |
+| `gold_seat_movedSupportTitle` | الدعم نقل الجولد لموبايل تاني | Support moved Gold to another phone | T · `movedBy: support` (D-57(f)) |
+| `gold_seat_movedSupportBody` | لو ده مش اللي طلبته، كلّم الدعم وادّيهم كود الدعم. | If that isn't what you asked for, contact support and give them your support code. | S · with support |
+| `gold_seat_pausedTitle` | الجولد واقف مؤقتاً | Gold is paused | T · entitlement `paused` (D-61(c)) |
+| `gold_seat_pausedBody` | اعمل تسجيل دخول عشان تستخدم الجولد على الموبايل ده. مكانك محفوظ ومش هيتحسب نقلة. | Sign in to use Gold on this phone. Your place is kept and it won't count as a move. | S · action `common_action_signIn` |
+| `gold_seat_tamperedTitle` | اتصل بالنت عشان نتأكد من الجولد | Go online so we can check your Gold | T · `tampered` (D-60, EC-70) |
+| `gold_seat_tamperedBody` | ساعة الموبايل اتغيّرت. أول ما النت يشتغل هنتأكد، وبياناتك كلها لسه موجودة. | The phone's clock changed. We'll check as soon as you're online, and all your data is still here. | S · local data stays readable |
+
+### Payment while the seat is elsewhere, support notice
+| Key | AR | EN | Notes |
+|---|---|---|---|
+| `gold_seat_heldElsewhere` | الدفع تم. الجولد لسه على الموبايل التاني، وتقدر تنقله يوم {date}. | Payment went through. Gold is still on your other phone, and you can move it on {date}. | S · verify `seatHeldElsewhere` (D-61(a), EC-71) |
+| `gold_seat_heldElsewhereAccount` | الدفع تم. عشان الجولد ييجي هنا، اعمل تسجيل دخول بالحساب اللي عليه الجولد. | Payment went through. To bring Gold here, sign in with the account that holds it. | S · `seatHeldElsewhere` + `accountRequired` (R4-4); action `common_action_signIn` |
+| `gold_seat_supportNoticeTitle` | الدعم ربط الجولد بحساب | Support linked your Gold to an account | T · `supportNotice: gold_linked_by_support` |
+| `gold_seat_supportNoticeBody` | الدعم ربط الجولد بتاعك بحساب. لو ده مش إنت، كلّم الدعم. | Support linked your Gold to an account. If that wasn't you, contact support. | S · shown once, on the buying phone; with support (R4-7(2), R5-7) |
+
+### Sign-in refused, restore suggested (R5-3(b))
+| Key | AR | EN | Notes |
+|---|---|---|---|
+| `gold_seat_signInLinked` | الحساب اتربط، بس الجولد لسه مجاش على الموبايل ده. | Your account is linked, but Gold isn't on this phone yet. | S · sign-in `moveRefused`; followed by the cooldown copy or one of the two branches below |
+| `gold_seat_restoreSuggested` | جرّب «استرجع مشترياتي»، والجولد هيرجع على الموبايل ده. | Try "Restore purchases" and Gold will come back to this phone. | S · branch (a): `restoreSuggested: true`, an App Store purchase exists on this iPhone (D-65(a)); action `gold_seat_restoreAction` |
+| `gold_seat_restoreAction` | استرجع مشترياتي | Restore purchases | B |
+| `gold_seat_supportPath` | الجولد مش هينفع ينتقل للموبايل ده قبل يوم {date}. كلّم الدعم وهنساعدك. | Gold can't move to this phone before {date}. Contact support and we'll help. | S · branch (b): bought on Android or under another Apple ID, no Restore offered (D-66(c)); with support |
+
+### Protect your Gold, delete-everything warning
+| Key | AR | EN | Notes |
+|---|---|---|---|
+| `gold_seat_protectTitle` | سجّل دخول هنا عشان تحمي الجولد | Sign in on this phone to protect your Gold | T · D-54, FR-ACCT-01. After purchase and in `gold_account_*` |
+| `gold_seat_protectBody` | الربط بيتعمل من الموبايل اللي اشتريت عليه بس. بعدها تقدر تنقل الجولد لموبايل جديد بحسابك. | Linking can only be done from the phone you bought on. After that you can move Gold to a new phone with your account. | S |
+| `gold_seat_protectDone` | الجولد اتربط بحسابك ✓ | Gold is linked to your account ✓ | N |
+| `gold_seat_deleteWarning` | `{state, select, cooldown{لو مسحت كل حاجة، هيتحسب إن الجولد اتنقل، ومش هتقدر ترجّعه على الموبايل ده قبل يوم {date}.} other{لو مسحت كل حاجة ورجعت الجولد، ده هيتحسب نقلة الشهر ده.}}` | `{state, select, cooldown{If you delete everything, Gold counts as moved, and you can't bring it back to this phone before {date}.} other{If you delete everything and bring Gold back, it counts as this month's move.}}` | S · Android, in the "Delete everything" dialog (D-55, EC-69). state = cooldown (a cooldown is running, `date` shown) / other |
+
+---
+
+## 3.9 S-70 Notifications — `notifications_settings_*`; alert texts — `notifications_alert_*`
+Zaghlol's own local alerts (FR-NTF-01). Reimbursement suggestions are in-app only (FR-XFR-08), so they have no notification text. States: all on · OS notifications off (banner) · quiet hours on.
+
+### Settings screen
+| Key | AR | EN | Notes |
+|---|---|---|---|
+| `notifications_settings_title` | التنبيهات | Notifications | T · Q-17 |
+| `notifications_settings_budget` | تنبيهات الميزانية | Budget alerts | L |
+| `notifications_settings_spikes` | لما الصرف يزيد | Spending spikes | L |
+| `notifications_settings_dues` | الأقساط والفواتير | Bills & installments | L |
+| `notifications_settings_dueDays` | `{count, plural, =0{يوم الاستحقاق نفسه} =1{قبلها بيوم} =2{قبلها بيومين} few{قبلها بـ {n} أيام} many{قبلها بـ {n} يوم} other{قبلها بـ {n} يوم}}` | `{count, plural, =0{On the due day} =1{1 day before} other{{n} days before}}` | L · count:int, n · FR-SUB-04, 0 to 30 |
+| `notifications_settings_duplicates` | حركة اتسجلت مرتين | Duplicate charges | L |
+| `notifications_settings_renewals` | تجديد الاشتراكات | Subscription renewals | L |
+| `notifications_settings_backup` | مشاكل النسخة الاحتياطية | Backup problems | L |
+| `notifications_settings_weekly` | ملخص الأسبوع | Weekly summary | L |
+| `notifications_settings_weeklySub` | كل جمعة الصبح | Friday mornings | L · UX-A-07 |
+| `notifications_settings_quiet` | ساعات الهدوء | Quiet hours | L · A-27 |
+| `notifications_settings_quietRange` | من {start} لحد {end} | From {start} to {end} | L · start, end = times, default 23:00 to 08:00 |
+| `notifications_settings_hideAmounts` | اخفي المبالغ على شاشة القفل | Hide amounts on lock screen | L · FR-NTF-03 |
+| `notifications_settings_hideAmountsHint` | التنبيه بيوصل من غير مبلغ ولا اسم تاجر. | Alerts arrive without amounts or merchant names. | S |
+| `notifications_settings_daysRange` | اختار من يوم الاستحقاق لحد تلاتين يوم قبله | Choose from the due day up to thirty days before | S · validation, 0 to 30 |
+| `notifications_settings_quietSame` | بداية ونهاية ساعات الهدوء لازم يختلفوا | The start and end of quiet hours must differ | S · validation |
+| `notifications_settings_osOffTitle` | التنبيهات مقفولة لزغلول | Notifications are off for Zaghlol | T · banner |
+| `notifications_settings_osOffBody` | شغّلها من إعدادات الموبايل عشان توصلك. | Turn them on in your phone's settings so they reach you. | S · + `common_action_openSettings` |
+
+### Alert texts
+Each money alert has a full text and a `…Hidden` text used when "hide amounts" is on (FR-NTF-03). The hidden text has no amount, merchant, counterparty, card or item name. Titles are shared by both variants. All are plain and calm: no jokes, no emoji.
+
+| Key | AR | EN | Notes |
+|---|---|---|---|
+| `notifications_alert_budgetNearTitle` | قربت توصل لحد الميزانية | You're near your budget limit | T · BR-BUD-02, default 80% |
+| `notifications_alert_budgetNear` | صرفت {percent} من ميزانية {category}، وفاضلك {left}. | You've used {percent} of your {category} budget, with {left} left. | N · amount variant |
+| `notifications_alert_budgetNearHidden` | ميزانية {category} قربت تخلص. | Your {category} budget is nearly used up. | N · hidden variant; category name kept (Q-33) |
+| `notifications_alert_budgetReachedTitle` | وصلت لحد الميزانية | You've reached your budget limit | T · 100% |
+| `notifications_alert_budgetReached` | ميزانية {category} خلصت: صرفت {spent} من {budget}. | Your {category} budget is used up: {spent} of {budget}. | N |
+| `notifications_alert_budgetReachedHidden` | ميزانية {category} خلصت. | Your {category} budget is used up. | N |
+| `notifications_alert_spikeTitle` | صرفك النهارده أكتر من المعتاد | Spending is higher than usual today | T |
+| `notifications_alert_spike` | صرفت النهارده {spent}، أكتر من المعتاد بـ {delta}. | You've spent {spent} today, {delta} more than usual. | N |
+| `notifications_alert_spikeHidden` | صرفك النهارده أكتر من المعتاد. افتح زغلول وراجع. | Your spending today is higher than usual. Open Zaghlol to take a look. | N |
+| `notifications_alert_dueTitle` | قسط أو فاتورة قربت | A bill or installment is coming up | T |
+| `notifications_alert_due` | `{count, plural, =0{{item} بيستحق النهارده: {amount}} =1{{item} بيستحق بكره: {amount}} =2{{item} بيستحق بعد يومين: {amount}} few{{item} بيستحق بعد {n} أيام: {amount}} many{{item} بيستحق بعد {n} يوم: {amount}} other{{item} بيستحق بعد {n} يوم: {amount}}}` | `{count, plural, =0{{item} is due today: {amount}} =1{{item} is due tomorrow: {amount}} other{{item} is due in {n} days: {amount}}}` | N · count:int, n, item, amount · days until the due date |
+| `notifications_alert_dueHidden` | عندك قسط أو فاتورة بتستحق قريب. | You have a bill or installment due soon. | N |
+| `notifications_alert_duplicateTitle` | ممكن حركة تكون اتسجلت مرتين | A charge may have been logged twice | T |
+| `notifications_alert_duplicate` | {merchant}: {amount} ظهرت مرتين تقريباً في نفس الوقت. بُص عليها. | {merchant}: {amount} appears twice around the same time. Take a look. | N |
+| `notifications_alert_duplicateHidden` | في حركة ممكن تكون مكررة. افتح زغلول وراجعها. | A transaction may be a duplicate. Open Zaghlol to check. | N |
+| `notifications_alert_renewalTitle` | اشتراك هيتجدد | A subscription is about to renew | T |
+| `notifications_alert_renewal` | {merchant} هيتجدد يوم {date} بـ {amount}. | {merchant} renews on {date} for {amount}. | N |
+| `notifications_alert_renewalHidden` | في اشتراك هيتجدد قريب. | A subscription renews soon. | N |
+| `notifications_alert_backupTitle` | النسخة الاحتياطية ماتعملتش | Your backup didn't work | T · FR-NTF-01. No amounts, so no hidden variant |
+| `notifications_alert_backupBody` | جرّب تاني من الإعدادات. بياناتك لسه على الموبايل. | Try again from Settings. Your data is still on this phone. | N |
+| `notifications_alert_weeklyTitle` | ملخص أسبوعك جاهز | Your weekly summary is ready | T · Friday morning |
+| `notifications_alert_weekly` | صرفت {spent} الأسبوع ده، وأكتر حاجة كانت {category}. | You spent {spent} this week, mostly on {category}. | N |
+| `notifications_alert_weeklyHidden` | ملخص أسبوعك جاهز. افتح زغلول تشوفه. | Your weekly summary is ready. Open Zaghlol to see it. | N |
+
+### Android notification channels (not ARB; native strings, T-029 skips them)
+| Key | AR | EN | Notes |
+|---|---|---|---|
+| `native_android_channelBudget` | تنبيهات الميزانية | Budget alerts | L · `res/values{,-ar}/strings.xml` |
+| `native_android_channelSpikes` | ارتفاع الصرف | Spending spikes | L |
+| `native_android_channelDues` | الأقساط والفواتير | Bills & installments | L |
+| `native_android_channelDuplicates` | حركات مكررة | Duplicate charges | L |
+| `native_android_channelRenewals` | تجديد الاشتراكات | Subscription renewals | L |
+| `native_android_channelBackup` | النسخة الاحتياطية | Backup problems | L |
+| `native_android_channelWeekly` | ملخص الأسبوع | Weekly summary | L |
+
+---
+
+## 3.10 S-71 Privacy & data — `privacy_main_*`, `privacy_server_*`, `privacy_contribute_*`, `privacy_rooted_*`, `privacy_delete_*`
+"What Zaghlol's server knows" is generated from the same allow-list as the screen (`security-model.md` §2). The four §2a disclosures (T-137) are in simple standard Arabic, each with an Egyptian one-line summary above it. The claim is always "your financial data stays on the phone", never "no server" (tone gate 4). States: normal · rooted · contribution on / off · deleting · delete failed on the server.
+
+### Overview
+| Key | AR | EN | Notes |
+|---|---|---|---|
+| `privacy_main_title` | خصوصيتك | Privacy & data | T · glossary |
+| `privacy_main_staysTitle` | اللي بيفضل على موبايلك | What stays on your phone | L |
+| `privacy_main_staysBody` | رسايلك وحركاتك وأرصدتك وميزانياتك وأصولك وقواعدك. كله متشفّر. | Your messages, transactions, balances, budgets, assets and rules. All encrypted. | S |
+| `privacy_main_appLock` | قفل التطبيق | App lock | L · opens S-72 |
+| `privacy_main_serverRow` | اللي سيرفر زغلول يعرفه عنك | What Zaghlol's server knows | L · opens the list below |
+
+### What the server knows (BR-SYNC-03)
+| Key | AR | EN | Notes |
+|---|---|---|---|
+| `privacy_server_title` | اللي سيرفر زغلول يعرفه عنك | What Zaghlol's server knows about you | T |
+| `privacy_server_summary` | فلوسك وحركاتك عمرها ما بتسيب موبايلك. السيرفر بيعرف الحاجات دي بس: | Your money and transactions never leave your phone. The server knows only these things: | S · Egyptian summary of the whole screen |
+| `privacy_server_itemId` | رقم عشوائي للتطبيق، مش اسمك ولا رقم موبايلك | A random app ID, not your name or phone number | S |
+| `privacy_server_itemPurchase` | شراء الجولد بتاعك، عشان نتأكد منه | Your Gold purchase, so we can verify it | S |
+| `privacy_server_itemSignIn` | تسجيل دخولك، لو استخدمته بس | Your sign-in, only if you use it | S |
+| `privacy_server_itemMerchants` | أسماء التجار، لو سمحت بس | Merchant names, only if you allow it | S |
+| `privacy_server_itemVersion` | نوع الموبايل وإصدار التطبيق وإصدار قايمة التجار | Phone platform, app version and merchant-list version | S · BR-SYNC-03 |
+| `privacy_server_itemAttest` | إثبات إن الموبايل حقيقي (Play Integrity أو App Attest) وقت الاسترجاع، وأحياناً وقت الشراء | A proof the phone is genuine (Play Integrity or App Attest) on restore, sometimes on purchase | S · BR-SYNC-03, D-45 (carries no other device data); "sometimes on purchase" because purchase verify needs it only where ADR-012 requires |
+| `privacy_server_itemBankRequest` | طلب دعم بنك، لو طلبته بس: اسم البنك وبلده ونوع التنبيه | A bank-support request, only if you ask: the bank's name, country and alert type | S · FR-PAR-14; same fields as `ingestion_requestBank_privacy` |
+| `privacy_server_seatKeysSummary` | على الآيفون بس: زغلول بيعرف إن التثبيتات القديمة كانت على نفس الموبايل. | iPhone only: Zaghlol can tell that earlier installs were on the same phone. | S · Egyptian summary · disclosure 1 (D-62); shown on iOS |
+| `privacy_server_seatKeys` | على الآيفون، يرسل التطبيق عند الاسترجاع أو تسجيل الدخول إثباتاً من هذا التثبيت ومن حتى أربعة تثبيتات سابقة، ليعرف الخادم أنها على الجهاز نفسه. يحفظ الخادم صورة مشفّرة فقط، ولا يسجّل المفاتيح. | On iPhone, restoring or signing in sends a key proof from this install and up to four earlier ones, so the server can tell they were on the same phone. The server keeps only a scrambled form and never logs the keys. | E · **simple standard Arabic** · disclosure 1 |
+| `privacy_server_deleteKeepsSummary` | لو مسحت كل حاجة من الآيفون، الجولد يقدر يرجع عليه من غير نقلة. | If you delete everything on iPhone, Gold can come back to it without using a move. | S · Egyptian summary · disclosure 2 (R4-8); shown on iOS |
+| `privacy_server_deleteKeeps` | يُبقي «امسح كل حاجة» على الآيفون مفاتيح التعريف على الجهاز، ليعود الجولد إليه دون احتساب نقلة. ويحتفظ الخادم بتجزئة مفتاحية للمفتاح مع الشراء حتى يُحذف الشراء. مسح الآيفون بالكامل يزيلها. | "Delete everything" on iPhone keeps the identity keys on the phone, so Gold can return without counting as a move. The server keeps a keyed hash of the key with the purchase until the purchase is deleted. Erasing the iPhone removes them. | E · **simple standard Arabic** · disclosure 2 |
+| `privacy_server_timeNonceSummary` | رقم عشوائي بيتأكد بيه السيرفر من الوقت، ومفيهوش أي حاجة عنك. | A random number the server uses to check the time. It says nothing about you. | S · Egyptian summary · disclosure 3 (R4-2) |
+| `privacy_server_timeNonce` | تحمل بعض الطلبات رقماً عشوائياً يُستخدم مرة واحدة للتحقق من الوقت. لا يتضمن أي معلومة عن الجهاز أو المستخدم، ولا يُخزَّن. | Some requests carry a random one-time number used to check the time. It contains nothing about the phone or the user, and it isn't stored. | E · **simple standard Arabic** · disclosure 3 |
+| `privacy_server_supportNoticeSummary` | لو الدعم ربط الجولد بحساب، موبايلك اللي اشتريت عليه بيتبلّغ. | If support links your Gold to an account, the phone you bought it on is told. | S · Egyptian summary · disclosure 4 (R4-7(2), R5-7) |
+| `privacy_server_supportNotice` | إذا ربط الدعم الجولد بحساب، يُبلَّغ الهاتف الذي اشتُري عليه عند اتصاله التالي. يكرّر الخادم الإشعار حتى تؤكد مزامنة ذلك الهاتف استلامه، حتى لا يضيع إن فُقدت الاستجابة. | If support links Gold to an account, the phone that bought it is told when it next connects. The server repeats the notice until that phone's next sync confirms it, so a lost response doesn't lose it. | E · **simple standard Arabic** · disclosure 4 |
+| `privacy_server_supportRowsSummary` | لما تمسح حسابك، بنمسح كل حاجة، وأثر الدعم بيتمسح بعد سنة. | When you delete your account we delete everything, and support traces go after a year. | S · Egyptian summary · D-47, FR-ACCT-04 |
+| `privacy_server_supportRows` | عند حذف الحساب تُحذف بياناته من الخادم، عدا سجلات تدقيق الدعم التي تحمل بصمة مشفّرة للبريد ومعرّف الحساب، وتُحذف تلقائياً بعد سنة من إنشائها. | When an account is deleted its data is removed from the server, except support audit rows that hold an encrypted e-mail fingerprint and the account ID. They are deleted automatically one year after creation. | E · **simple standard Arabic** |
+
+### Merchant contribution opt-in (FR-CAT-09, BR-SYNC-04)
+| Key | AR | EN | Notes |
+|---|---|---|---|
+| `privacy_contribute_label` | ساعد في تحسين قايمة التجار | Help improve the merchant list | L · toggle, off by default |
+| `privacy_contribute_sentence` | لو شغّلتها، بنبعت اسم التاجر والتصنيف اللي اخترته بس. | If you turn it on, we send only the merchant name and the category you chose. | S · one-sentence explanation (FR-CAT-09) |
+| `privacy_contribute_infoTitle` | بالظبط إيه اللي بيتبعت؟ | What exactly is sent? | T · ⓘ sheet |
+| `privacy_contribute_sends` | بنبعت: اسم التاجر بعد تنضيفه، وكود البنك، والتصنيف اللي اخترته. | We send: the cleaned-up merchant name, the bank code and the category you chose. | E |
+| `privacy_contribute_neverSends` | مبنبعتش: مبالغ، ولا تواريخ، ولا أرقام كروت، ولا أرقام تليفونات، ولا حسابات إنستاباي، ولا أسماء ناس. | We never send: amounts, dates, card numbers, phone numbers, InstaPay addresses or people's names. | E |
+| `privacy_contribute_filters` | بنستبعد أي اسم شكله اسم شخص، والتصنيفات الخاصة بيك عمرها ما بتتبعت. | We skip anything that looks like a person's name, and your own custom categories are never sent. | E |
+| `privacy_contribute_offHint` | تقدر تقفلها في أي وقت. | You can turn it off any time. | S |
+| `privacy_contribute_turnedOn` | شكراً. هنبعت اسم التاجر والتصنيف بس. | Thanks. We'll send only the merchant name and category. | N |
+
+### Rooted or jailbroken phone (FR-SEC-07)
+| Key | AR | EN | Notes |
+|---|---|---|---|
+| `privacy_rooted_row` | `{platform, select, ios{الآيفون ده متعمله جيلبريك، فحماية بياناتك أضعف.} other{الموبايل ده متعمله روت، فحماية بياناتك أضعف.}}` | `{platform, select, ios{This iPhone is jailbroken, so your data is less protected.} other{This phone is rooted, so your data is less protected.}}` | S · platform = ios / other. Same wording as `home_banner_rooted` |
+| `privacy_rooted_title` | يعني إيه حماية أضعف؟ | What does weaker protection mean? | T · opened from `common_action_learnMore` |
+| `privacy_rooted_body` | على موبايل متعدّل، تطبيق تاني ممكن يوصل لملفات زغلول بسهولة أكتر. بياناتك لسه متشفّرة، بس الأمان مش كامل. | On a modified phone, another app may reach Zaghlol's files more easily. Your data is still encrypted, but protection isn't complete. | E · not blocking, a warning only |
+
+### Delete everything (FR-ONB-08, NFR-PRIV-06)
+Serious and exact. No jokes, no emoji. The dialog is a type-to-confirm (C-18).
+
+| Key | AR | EN | Notes |
+|---|---|---|---|
+| `privacy_delete_row` | امسح كل حاجة | Delete everything | L · destructive |
+| `privacy_delete_title` | تمسح كل حاجة من على الموبايل ده؟ | Delete everything from this phone? | T |
+| `privacy_delete_body` | هنمسح كل حركاتك وإعداداتك ومفاتيح الحماية من على الموبايل ده. مفيش رجوع. | We'll delete all your transactions, settings and security keys from this phone. There's no undo. | S |
+| `privacy_delete_lastBackup` | آخر نسخة احتياطية: {date} | Last backup: {date} | S |
+| `privacy_delete_noBackup` | مفيش نسخة احتياطية. اللي هتمسحه مش هيرجع. | You have no backup. What you delete can't come back. | S |
+| `privacy_delete_iosKeys` | على الآيفون، مفاتيح تعريف الموبايل بتفضل عليه عشان الجولد يرجع من غير نقلة، ومفيهاش أي بيانات مالية. مسح الآيفون كله بيشيلها. | On iPhone, the phone's identity keys stay so Gold can return without a move. They hold no financial data. Erasing the iPhone removes them. | E · FR-ONB-08 iOS exception (D-62); iOS only |
+| `privacy_delete_iosServer` | والسيرفر بيحتفظ بصورة مشفّرة من المفتاح مع الشراء لحد ما الشراء يتمسح. | The server keeps a scrambled form of the key with the purchase until the purchase is deleted. | S · iOS only, R4-8 |
+| `privacy_delete_typePrompt` | اكتب «احذف» أو DELETE عشان تأكد | Type "DELETE" (or «احذف») to confirm | S · both words are accepted in either language |
+| `privacy_delete_typeLabel` | كلمة التأكيد | Confirmation word | L |
+| `privacy_delete_typeMismatch` | الكلمة مش مطابقة | The word doesn't match | S |
+| `privacy_delete_confirm` | امسح كل حاجة | Delete everything | B · destructive, enabled on an exact match |
+| `privacy_delete_working` | بمسح… | Deleting… | L · progress |
+| `privacy_delete_serverCopy` | النسخة اللي على السيرفر هتنتهي لوحدها. | The copy on the server will expire on its own. | N · shown if the server delete failed; the local wipe is never blocked (NFR-PRIV-06) |
+
+---
+
+## 3.11 S-72 Preferences — `settings_prefs_*`
+The app lock row follows A-10 and the S-05 strings. States: normal · digits row hidden in English · primary currency changed · biometrics unavailable · payday changed mid-cycle (EC-21).
+
+| Key | AR | EN | Notes |
+|---|---|---|---|
+| `settings_prefs_title` | التفضيلات | Preferences | T |
+| `settings_prefs_language` | اللغة | Language | L |
+| `settings_prefs_languageAr` | العربية | العربية | C · always in its own script |
+| `settings_prefs_languageEn` | English | English | C · always in its own script |
+| `settings_prefs_digits` | الأرقام | Digits | L · shown only when the language is Arabic |
+| `settings_prefs_digitsArabic` | عربي | Arabic-Indic | C · the UI draws the sample glyphs |
+| `settings_prefs_digitsWestern` | إنجليزي | Western | C · the UI draws the sample glyphs |
+| `settings_prefs_theme` | الشكل | Theme | L |
+| `settings_prefs_themeSystem` | زي الموبايل | System | C |
+| `settings_prefs_themeLight` | فاتح | Light | C |
+| `settings_prefs_themeDark` | غامق | Dark | C |
+| `settings_prefs_currency` | العملة الأساسية | Primary currency | L |
+| `settings_prefs_approx` | اعرض مجموع تقريبي (≈) | Show an approximate total (≈) | L · FR-CUR-04, off by default |
+| `settings_prefs_approxHint` | بيتحسب بسعر تقريبي ومكتوب عليه كده. مفيش حاجة بتتحوّل فعلاً. | Calculated at an approximate rate and labelled as such. Nothing is actually converted. | S |
+| `settings_prefs_combineInto` | حوّل المجموع لـ | Combine into | L · FR-CUR-05, visible when the total is on |
+| `settings_prefs_payday` | يوم القبض | Payday | L |
+| `settings_prefs_paydayDay` | يوم {day} | Day {day} | C · stepper value, 1 to 28 |
+| `settings_prefs_paydayMonth` | أول الشهر | Month start | C · calendar month option |
+| `settings_prefs_paydayRange` | اختار يوم من أول الشهر لحد تمانية وعشرين | Choose a day from the 1st up to the 28th | S · validation |
+| `settings_prefs_paydayChangeTitle` | تغيّر يوم القبض في نص الدورة؟ | Change payday mid-cycle? | T · EC-21 |
+| `settings_prefs_paydayChangeBody` | الدورة الحالية هتخلص بدري، وهتبدأ دورة جديدة من يوم القبض الجديد. | Your current cycle will end early and a new one starts from the new payday. | S |
+| `settings_prefs_income` | هدف الدخل الشهري | Monthly income target | L |
+| `settings_prefs_incomeOptional` | اختياري | Optional | C |
+| `settings_prefs_incomeNegative` | المبلغ ميكونش بالسالب | The amount can't be negative | S |
+| `settings_prefs_appLock` | قفل التطبيق | App lock | L |
+| `settings_prefs_lockAfter` | اقفل بعد | Lock after | L |
+| `settings_prefs_lockImmediately` | على طول | Immediately | C |
+| `settings_prefs_lockAfterMinutes` | `{count, plural, =1{دقيقة} =2{دقيقتين} few{{n} دقايق} many{{n} دقيقة} other{{n} دقيقة}}` | `{count, plural, =1{1 minute} other{{n} minutes}}` | C · count:int, n · menu choices 1, 5, 15 minutes |
+| `settings_prefs_biometricsUnavailable` | `{platform, select, ios{البصمة مش متاحة. هنستخدم كود الآيفون بدلها.} other{البصمة مش متاحة. هنستخدم قفل الموبايل بدلها.}}` | `{platform, select, ios{Biometrics aren't available. We'll use your passcode instead.} other{Biometrics aren't available. We'll use your phone lock instead.}}` | S · platform = ios / other (A-08) |
+
+---
+
+## 3.12 S-73 Share studio — `share_studio_*`
+The image text is part of the share card (C-34, 1080 by 1350). Amounts are hidden by default (A-26, FR-SHR-02), so the default lines show percentages only. The card carries the mascot, a headline, one metric and the hashtag (FR-SHR-03). The card has no emoji: the trophy is artwork. States: templates with data · no achievement data · rendering · render error.
+
+| Key | AR | EN | Notes |
+|---|---|---|---|
+| `share_studio_title` | شارك إنجازك | Share your win | T |
+| `share_studio_closeA11y` | اقفل | Close | A |
+| `share_studio_templateSavings` | التحويش | Savings | C · shown only if the data exists |
+| `share_studio_templateDelivery` | تقليل الدليفري | Delivery cut | C |
+| `share_studio_templateBudget` | تحت الميزانية | Under budget | C |
+| `share_studio_showAmounts` | اظهر المبالغ | Show amounts | L · off by default |
+| `share_studio_showAmountsHint` | وإنت مقفلها بتظهر النسب بس. | While it's off, only percentages show. | S |
+| `share_studio_certificate` | شهادة تقدير من الكابتن زغلول | A certificate of thanks from Captain Zaghlol | T · card header |
+| `share_studio_cardSavings` | وفرت {percent} من مرتبي الشهر ده! | I saved {percent} of my salary this month! | T · card, percentage version |
+| `share_studio_cardSavingsAmount` | وفرت {amount} الشهر ده! | I saved {amount} this month! | T · card, amount version |
+| `share_studio_cardDelivery` | قللت الدليفري {percent} الشهر ده! | I cut my delivery spending by {percent} this month! | T · card, percentage version |
+| `share_studio_cardDeliveryAmount` | قللت الدليفري {amount} الشهر ده! | I cut {amount} from my delivery spending this month! | T · card, amount version |
+| `share_studio_cardBudget` | خلصت الدورة تحت الميزانية بـ {percent}! | I finished the cycle {percent} under budget! | T · card, percentage version |
+| `share_studio_cardBudgetAmount` | خلصت الدورة تحت الميزانية بـ {amount}! | I finished the cycle {amount} under budget! | T · card, amount version |
+| `share_studio_hashtag` | #زغلول_ضبط_الميزانية | #ZaghlolOnBudget | L · FR-SHR-03. One hashtag per card |
+| `share_studio_share` | شارك | Share | B · opens the system share sheet |
+| `share_studio_previewA11y` | معاينة الكارت: {text} | Card preview: {text} | A |
+| `share_studio_unencrypted` | الصورة مش متشفّرة، ولما تشاركها بتبقى بره زغلول. | The image isn't encrypted, and once shared it's outside Zaghlol. | S · FR-SEC-06 |
+| `share_studio_emptyTitle` | لسه مفيش إنجاز تشاركه | Nothing to share yet | T · C-28 |
+| `share_studio_emptyBody` | كمّل تسجيل وهتلاقي إنجازات هنا. | Keep logging and your wins will show up here. | S |
+| `share_studio_rendering` | بجهّز الكارت… | Preparing the card… | L |
+| `share_studio_renderFailed` | معرفتش أجهّز الصورة. جرّب تاني. | Couldn't prepare the image. Try again. | S |
+
+---
+
+## 3.13 S-74 About — `about_main_*`, `about_diag_*`; legal — `legal_*`
+Version and update status (FR-SYNC-06). The merchant-list status never shows an error (FR-SYNC-06): never synced reads "works offline". Legal links open hosted pages; each has an **Egyptian one-line summary** here (Q-37). The disclaimers are simple standard Arabic with their own Egyptian summary above (NFR-LEGAL-03).
+
+### About and diagnostics
+| Key | AR | EN | Notes |
+|---|---|---|---|
+| `about_main_title` | عن زغلول | About Zaghlol | T |
+| `about_main_version` | الإصدار {appVersion} (رقم {build}) | Version {appVersion} (build {build}) | L · Western digits always |
+| `about_main_catalog` | قايمة التجار اتحدّثت {date} | Merchant list updated {date} | L · FR-SYNC-06 |
+| `about_main_prices` | الأسعار اتحدّثت {date} | Prices updated {date} | L |
+| `about_main_neverSynced` | لسه ما اتحدّثتش (شغال من غير نت) | Not updated yet (works offline) | S |
+| `about_main_terms` | الشروط | Terms of use | L |
+| `about_main_privacy` | سياسة الخصوصية | Privacy policy | L |
+| `about_main_licenses` | تراخيص المصدر المفتوح | Open-source licences | L |
+| `about_main_disclaimers` | تنبيهات مهمة | Important notices | L · opens the disclaimers list |
+| `about_main_support` | كلّم الدعم | Contact support | L · opens mail (UX-A-06) |
+| `about_main_supportSubject` | مساعدة في زغلول | Help with Zaghlol | L · mail subject; the body holds only `common_support_codeValue` |
+| `about_diag_title` | بيانات تشخيص | Diagnostics | T · `error-handling-and-observability.md` §3.1 |
+| `about_diag_body` | ملف فيه أكواد أعطال بس، من غير رسايل ولا مبالغ ولا أسماء. تبعته للدعم لو احتجت. | A file with error codes only, with no messages, amounts or names. Send it to support if you need to. | S |
+| `about_diag_share` | ابعت الملف | Share the file | B · system share sheet, user-initiated (NFR-PRIV-02b) |
+| `about_diag_empty` | مفيش أعطال مسجلة. | No errors logged. | S |
+
+### Legal summaries and links
+| Key | AR | EN | Notes |
+|---|---|---|---|
+| `legal_terms_summary` | الشروط باختصار: بتستخدم زغلول لإدارة فلوسك بنفسك، وقرارك المالي مسؤوليتك. | Terms in short: you use Zaghlol to manage your own money, and your financial decisions are yours. | S · Egyptian summary above the hosted Terms of Use. Wording is a draft for legal (Q-37) |
+| `legal_terms_open` | اقرا الشروط كاملة | Read the full terms | B |
+| `legal_privacy_summary` | الخصوصية باختصار: بيانات فلوسك بتفضل على موبايلك، والسيرفر مبيعرفش غير اللي مكتوب في «خصوصيتك». | Privacy in short: your money data stays on your phone, and the server knows only what's listed in "Privacy & data". | S · Egyptian summary above the hosted Privacy Policy. Draft for legal (Q-37) |
+| `legal_privacy_open` | اقرا السياسة كاملة | Read the full policy | B |
+| `legal_licenses_summary` | زغلول بيستخدم برامج مفتوحة المصدر، وده ترخيص كل واحد منها. | Zaghlol uses open-source software, and these are each one's licence. | S |
+| `legal_licenses_title` | تراخيص المصدر المفتوح | Open-source licences | T |
+
+### Disclaimers (NFR-LEGAL-03)
+| Key | AR | EN | Notes |
+|---|---|---|---|
+| `legal_disclaimer_title` | تنبيهات مهمة | Important notices | T |
+| `legal_disclaimer_coachingSummary` | نصايح زغلول أفكار عامة، مش نصيحة مالية. | Zaghlol's tips are general ideas, not financial advice. | S · Egyptian summary |
+| `legal_disclaimer_coaching` | توجيهات الكابتن زغلول وتفسيرات الرسوم البيانية واقتراحاته أفكار عامة للتوعية، وليست نصيحة مالية أو استثمارية أو قانونية. القرار النهائي لك. | Captain Zaghlol's guidance, chart explanations and suggestions are general ideas for awareness, not financial, investment or legal advice. The final decision is yours. | E · **simple standard Arabic** · NFR-LEGAL-03 |
+| `legal_disclaimer_estimatesSummary` | الأرقام تقريبية، وكشف البنك هو المرجع. | The numbers are approximate. Your bank statement is the reference. | S · Egyptian summary |
+| `legal_disclaimer_estimates` | الأرقام المعروضة تقديرية، ومبنية على الرسائل التي يقرؤها التطبيق وعلى ما تدخله بنفسك، وقد تختلف عن كشوف حساباتك الرسمية. | The figures shown are estimates based on the messages the app reads and what you enter yourself. They may differ from your official statements. | E · **simple standard Arabic** |
+| `legal_disclaimer_pricesSummary` | أسعار الدهب والعملات إرشادية، وممكن تتأخر عن السوق. | Gold and currency prices are indicative and may lag the market. | S · Egyptian summary |
+| `legal_disclaimer_prices` | أسعار الذهب والعملات المعروضة إرشادية فقط، وقد تتأخر أو تختلف عن سعر السوق وقت التنفيذ. | Gold and currency prices shown are indicative only and may lag or differ from the market price at the time of a deal. | E · **simple standard Arabic** |
+| `legal_disclaimer_zakahRef` | حساب الزكاة تقدير مش فتوى. التفاصيل في شاشة الزكاة. | The Zakah figure is an estimate, not a ruling. Details are on the Zakah screen. | S · pointer only; the disclaimer itself is `zakah_main_disclaimer` (Part 2) |
+| `legal_disclaimer_roiRef` | نصايح الاستثمار أفكار عامة مش نصيحة مالية. التفاصيل في شاشة النصايح. | Investment tips are general ideas, not financial advice. Details are on the tips screen. | S · pointer only; the disclaimer itself is `roi_tips_disclaimer` (Part 2) |
+| `legal_disclaimer_footer` | زغلول بيدّي أفكار عامة، مش نصيحة مالية. | Zaghlol gives general ideas, not financial advice. | N · short footer for chat answers and chart tips, if the PO wants one (Q-20, Q-37) |
+
+---
+
+## 3.14 Error catalogue — `errors_*`
+Every `Failure` the docs name has copy here or points at a screen key that already holds it. The calm rule applies (tone gates 1 and 4): say what happened in a few plain words, say the data is safe where that is true, and give one next step. No jokes, no emoji, no blame. Mascot: `oops` only shows the copy of the screen it appears on (§0.9).
+
+### Generic and network
+| Key | AR | EN | Notes |
+|---|---|---|---|
+| `errors_generic_unexpectedTitle` | حصلت مشكلة صغيرة | A small problem came up | T · unexpected exception (`FlutterError.onError`), full-screen fallback, Rive `oops` |
+| `errors_generic_unexpectedBody` | مش بسببك، وبياناتك في أمان على موبايلك. ارجع للرئيسية وجرّب تاني. | It's not your fault, and your data is safe on this phone. Go home and try again. | S |
+| `errors_generic_goHome` | ارجع للرئيسية | Go home | B |
+| `errors_generic_actionFailed` | الحاجة دي ماتمتش. جرّب تاني كمان شوية. | That didn't go through. Try again in a bit. | S · bug-class backend codes when a user action was waiting |
+| `errors_network_offline` | مفيش نت دلوقتي. اللي بتشوفه محفوظ على موبايلك. | You're offline. What you see is saved on your phone. | S · `NetworkFailure.offline` |
+| `errors_network_timeout` | الاتصال أخد وقت طويل. جرّب تاني. | The connection took too long. Try again. | S · `NetworkFailure.timeout` |
+| `errors_network_server` | السيرفر مشغول دلوقتي. هنجرّب تاني لوحدنا. | The server is busy right now. We'll retry on our own. | S · `NetworkFailure.server(5xx)`, `STORE_UNAVAILABLE`, `UPSTREAM_UNAVAILABLE`, `INTERNAL` |
+| `errors_network_rateLimited` | الطلبات كتير شوية. استنى شوية وجرّب تاني. | That's a lot of requests. Wait a moment and try again. | S · `RATE_LIMITED` (respect `Retry-After`) |
+
+### Storage, security and migration
+| Key | AR | EN | Notes |
+|---|---|---|---|
+| `errors_storage_openTitle` | مقدرناش نفتح بياناتك | We couldn't open your data | T · `DbFailure` open, `KEY_INVALIDATED` on the DB key, `CryptoFailure`; full screen, Rive `oops` |
+| `errors_storage_openBody` | ممكن ترجّعها من نسخة احتياطية أو تبدأ من جديد. الملف القديم هيفضل لحد ما تختار. | You can restore from a backup or start fresh. The old file stays until you choose. | S |
+| `errors_storage_restore` | استرجع من نسخة | Restore a backup | B · opens S-04 |
+| `errors_storage_startFreshWarn` | هنمسح الملف القديم اللي مش بيتفتح. مفيش رجوع. | We'll delete the old file that won't open. There's no undo. | S · confirm for `backup_restore_startFresh` |
+| `errors_storage_full` | المساحة على الموبايل خلصت. فضّي مساحة وجرّب تاني. الرسايل اللي وصلت متحفظة. | Your phone is out of space. Free some up and try again. Messages that arrived are kept. | S · `DbFailure` write (EC-28); banner |
+| `errors_storage_migrationTitle` | التحديث ماكملش | The update didn't finish | T · migration failed; Rive `oops` |
+| `errors_storage_migrationBody` | رجّعنا بياناتك زي ما كانت. جرّب تاني. | We put your data back as it was. Try again. | S · + `common_action_tryAgain` |
+| `errors_storage_io` | حصلت مشكلة في قراءة أو حفظ ملف. جرّب تاني. | There was a problem reading or saving a file. Try again. | S · `IO_ERROR` |
+
+### Capture and on-device processing
+| Key | AR | EN | Notes |
+|---|---|---|---|
+| `errors_capture_permission` | الإذن ده مقفول. شغّله من إعدادات الموبايل. | That permission is off. Turn it on in your phone's settings. | S · `PERMISSION_DENIED`; + `common_action_openSettings` |
+| `errors_capture_unavailable` | الحاجة دي مش متاحة على الموبايل ده. | That isn't available on this phone. | S · `NOT_AVAILABLE` |
+| `errors_capture_spool` | في رسايل مقدرتش أقراها. دوّر في الرسايل القديمة تاني. | Some messages couldn't be read. Re-scan your old messages. | S · `SPOOL_DECRYPT_FAILED` after three tries; Settings, Capture; action `capture_settings_rescan` |
+| `errors_capture_keyChanged` | الحماية على الموبايل اتجدّدت بعد تغيير القفل، ورسايل مستنية ممكن تكون ضاعت. دوّر في الرسايل القديمة تاني. | Phone protection was renewed after a lock change, so waiting messages may be lost. Re-scan your old messages. | S · `KEY_INVALIDATED` for the spool key (Android) |
+| `errors_capture_config` | بظبّط إعدادات اللقط لوحدي. مفيش حاجة مطلوبة منك. | I'm fixing the capture settings myself. Nothing needed from you. | S · `CONFIG_INVALID`; normally silent, shown only on the Capture screen |
+| `errors_capture_ocr` | معرفتش أقرا الصورة. جرّب صورة أوضح أو اكتب الحركة بإيدك. | I couldn't read the image. Try a clearer one or type the transaction. | S · `OCR_FAILED`; same advice as `capture_scan_emptyBody` |
+| `errors_money_currency` | العملتين مختلفتين، مينفعش نجمعهم. | The currencies differ, so they can't be combined. | S · domain `CurrencyMismatch`; amounts are never converted |
+| `errors_money_offset` | المبلغ الراجع أكبر من الحركة نفسها. | The amount back is larger than the transaction. | S · domain `OffsetExceedsAmount` |
+
+### Sign-in and Gold failures that need no screen of their own
+| Key | AR | EN | Notes |
+|---|---|---|---|
+| `errors_account_tokenExpired` | سجّل دخول تاني عشان تكمّل. | Sign in again to continue. | S · same text as `gold_account_signInAgain`; Settings only |
+| `errors_account_failed` | العملية ماتمتش. جرّب تاني كمان شوية. | That didn't go through. Try again in a bit. | S · `INSTALL_EXISTS` and `INSTALL_TOKEN_INVALID` when a user action was waiting (the app re-registers silently first) |
+
+### Mapping: every Failure code to its copy
+Silent codes show nothing in the normal flow (the "Surface" column). The key is the copy to use if a user action was waiting or the status line must say something. Table rows have no backticked first cell on purpose, so the deck checker ignores them.
+
+| Source | Code | Surface | Copy key |
+|---|---|---|---|
+| Domain | ParseFailure.noTemplate (low confidence) | Review queue; Home pill | `home_banner_review`, `ingestion_review_*` (Part 1) |
+| Domain | CurrencyMismatch | Inline | `errors_money_currency` |
+| Domain | OffsetExceedsAmount | Inline | `errors_money_offset` |
+| Data | DbFailure open / CryptoFailure | Full screen | `errors_storage_openTitle`, `errors_storage_openBody` |
+| Data | DbFailure write (disk full) | Banner | `errors_storage_full` |
+| Data | Migration failed | Full screen | `errors_storage_migrationTitle`, `errors_storage_migrationBody` |
+| Data | NetworkFailure.offline | Inline / banner | `errors_network_offline` (fallback `common_error_network`) |
+| Data | NetworkFailure.timeout | Inline | `errors_network_timeout` |
+| Data | NetworkFailure.server(5xx) | Silent; retried | `errors_network_server` |
+| Data | Backup network / storage / auth | Backup screen | `backup_settings_errorNetwork`, `…errorStorage`, `…errorAuth` |
+| Data | Restore wrong passphrase / newer / corrupt | Restore screen | `backup_restore_passphraseWrong`, `…errorNewer`, `…errorCorrupted` |
+| Data | Speech unavailable (EC-32) | Sheet | `voice_logger_unavailable`, `voice_logger_onlineTitle` (Part 2) |
+| Presentation | Unexpected exception | Full screen | `errors_generic_unexpectedTitle`, `errors_generic_unexpectedBody` |
+| Native | PERMISSION_DENIED | Inline | `errors_capture_permission` |
+| Native | NOT_AVAILABLE | Inline | `errors_capture_unavailable` |
+| Native | SPOOL_DECRYPT_FAILED | Capture settings | `errors_capture_spool` |
+| Native | KEY_INVALIDATED | Capture settings / full screen | `errors_capture_keyChanged` (spool key), `errors_storage_openTitle` (DB key) |
+| Native | CONFIG_INVALID | Silent | `errors_capture_config` |
+| Native | ICLOUD_UNAVAILABLE | Backup screen | `backup_settings_errorIcloud` |
+| Native | OCR_FAILED | Scan screen | `errors_capture_ocr` |
+| Native | IO_ERROR | Inline | `errors_storage_io` |
+| Native | ATTEST_TRANSIENT | Silent; retried three times, then help | `gold_seat_attestUnavailable` |
+| Native | ATTEST_PLAY_SERVICES_OUTDATED | Inline | `gold_seat_attestPlayServices` |
+| Native | ATTEST_UNAVAILABLE | Help sheet | `gold_seat_attestUnavailable` |
+| Native | SEAT_KEY_UNAVAILABLE | Silent (send no seat keys) | `errors_account_failed` |
+| Backend 400 | VALIDATION_FAILED, UNKNOWN_FIELD | Silent; diag code | `errors_generic_actionFailed` |
+| Backend 400 | SEAT_KEY_MISMATCH | Silent; one retry without seat keys | `errors_account_failed` |
+| Backend 401 | INSTALL_TOKEN_INVALID | Silent; re-register | `errors_account_failed` |
+| Backend 401 | ACCOUNT_TOKEN_EXPIRED | Settings status line | `errors_account_tokenExpired` |
+| Backend 401 | UNAUTHORIZED | Not sent to the app | `errors_generic_actionFailed` |
+| Backend 403 | FORBIDDEN | Not retried | `errors_generic_actionFailed` |
+| Backend 404 | CATALOG_VERSION_UNKNOWN | Silent; full catalog requested | `errors_generic_actionFailed` |
+| Backend 404 / 405 / 413 / 415 | NOT_FOUND, METHOD_NOT_ALLOWED, PAYLOAD_TOO_LARGE, UNSUPPORTED_MEDIA_TYPE | Silent; app bug, diag code | `errors_generic_actionFailed` |
+| Backend 409 | INSTALL_EXISTS | Silent; new install ID | `errors_account_failed` |
+| Backend 409 | INSTALL_LINKED_TO_OTHER_ACCOUNT | Question dialog | `gold_account_replaceTitle`, `gold_account_replaceBody` |
+| Backend 409 | MOVE_COOLDOWN | Gold screen / sheet | `gold_seat_cooldownTitle`, `gold_seat_cooldownBody` |
+| Backend 409 | IDEMPOTENCY_KEY_REUSED | Silent; app bug | `errors_generic_actionFailed` |
+| Backend 409 | ADMIN_CONFLICT | Operator API only; never sent to the app | `errors_generic_actionFailed` |
+| Backend 422 | DEVICE_ATTESTATION_FAILED | Help sheet | `gold_seat_attestTitle`, `gold_seat_attestBody` |
+| Backend 422 | PURCHASE_TOKEN_INVALID, PURCHASE_NOT_OWNED, PURCHASE_WRONG_APP | Paywall | `gold_paywall_invalid` |
+| Backend 422 | ID_TOKEN_INVALID | Sign-in | `gold_account_signInFailed` |
+| Backend 422 | OWNERSHIP_CHECK_FAILED | Operator API only; never sent to the app | `errors_generic_actionFailed` |
+| Backend 429 | RATE_LIMITED | Inline | `errors_network_rateLimited` |
+| Backend 502 / 503 | STORE_UNAVAILABLE, UPSTREAM_UNAVAILABLE | Purchase kept pending | `gold_paywall_verifyOffline`, `errors_network_server` |
+| Backend 500 | INTERNAL | Retried with back-off | `errors_network_server` |
+| Entitlement | `account_required` (restore item, EC-65) | Help sheet | `gold_seat_accountRequiredTitle`, `gold_seat_accountRequiredBody` |
+| Entitlement | `status: moved` | Gold screen | `gold_seat_movedUserTitle` / `…Body`, `gold_seat_movedSupportTitle` / `…Body` |
+| Entitlement | `status: paused` | Gold screen | `gold_seat_pausedTitle`, `gold_seat_pausedBody` |
+| Entitlement | `tampered` (clock set back) | Gold screen | `gold_seat_tamperedTitle`, `gold_seat_tamperedBody` |
+| Verify | `seatHeldElsewhere` | After payment | `gold_seat_heldElsewhere` |
+| Verify | `seatHeldElsewhere` + `accountRequired` | After payment | `gold_seat_heldElsewhereAccount` |
+| Sign-in | `moveRefused` | Gold screen | `gold_seat_signInLinked` + `gold_seat_cooldownBody`; `restoreSuggested` branches `gold_seat_restoreSuggested` / `gold_seat_supportPath` |
+| Sync | `supportNotice: gold_linked_by_support` | One-time sheet | `gold_seat_supportNoticeTitle`, `gold_seat_supportNoticeBody` |
+| Sync | Signature invalid | Silent; response dropped | `errors_generic_actionFailed` |
+| Sync | Sync fails | Silent; Settings, About status only | `about_main_neverSynced` |
+| Purchase | Verify unreachable | Paywall | `gold_paywall_verifyOffline` |
+| Purchase | Pending | Paywall | `gold_paywall_pending` |
+| Android | Delete everything while holding a seat | Confirmation | `gold_seat_deleteWarning` |
+| Backup | Fails (notification) | Notification + status | `notifications_alert_backupTitle`, `notifications_alert_backupBody` |
+
+
+
+---
+
+## 3.K Key count (Part 3)
+| Section | Screens | Keys |
+|---|---|---|
+| 3.1 `common_*` additions | shared | 10 |
+| 3.2 Settings | S-60 | 17 |
+| 3.3 Categories & rules, edit category | S-63, S-64 | 40 |
+| 3.4 Custom message template | S-65 | 27 |
+| 3.5 Backup, passphrase sheet | S-66 | 48 |
+| 3.6 Export & import | S-67 | 44 |
+| 3.7 Gold paywall | S-68 | 33 |
+| 3.8 Gold & account | S-69 | 31 |
+| 3.8a One-phone Gold | S-68, S-69, S-04, S-71 | 28 |
+| 3.9 Notifications (settings 17, alert texts 24) | S-70 | 41 |
+| 3.10 Privacy & data | S-71 | 48 |
+| 3.11 Preferences | S-72 | 29 |
+| 3.12 Share studio | S-73 | 22 |
+| 3.13 About, diagnostics, legal, disclaimers | S-74 | 31 |
+| 3.14 Error catalogue | all | 26 |
+| **Part 3 ARB total** | | **475** |
+| **Deck total (Parts 1 + 2 + 3)** | | **1,651 ARB keys + 19 native** |
+
+Native (not ARB): 7 new Android notification-channel names in §3.9, on top of Part 1's 12. Plural messages in Part 3: 12 (3 with `=0`: `categories_list_rulesCount`, `notifications_settings_dueDays`, `notifications_alert_due`; 9 on the no-zero list in §0.4). Select messages in Part 3: 13. The deck as a whole now has 67 plural and 49 select messages. The T-029 counting note in §1.K still applies: count only rows with four cells. The §3.14 mapping table has four cells but no backticked first cell, so the deck checker and a key count both skip it.
+
+Failure-code coverage: the §3.14 mapping table has 59 rows covering every code and state named in `error-handling-and-observability.md` §1, `backend-api.md` §6 (every problem code in the table, the two operator-only ones included) and `platform-channels.md` §6 (all 12 native codes). Each row has a key of its own or a named existing key.
+
+## 3.Q Open questions and spec gaps (Part 3)
+Nothing here blocks T-058 or T-087. Drafts are used where a question is open.
+
+| ID | Where | Issue | Draft used | Needs |
+|---|---|---|---|---|
+| Q-30 | S-68 Continue button | The glossary (`06-voice-and-tone.md` §3) writes «يلا نشترك 👑», but tone gate 1 and FR-L10N-04 forbid emoji on purchases. | «يلا نشترك», and the crown stays an icon | UX lead: confirm, then fix the glossary |
+| Q-31 | S-71 online speech | The task lists the online-speech consent as Part 3 copy, but Part 2 already has it (`voice_logger_onlineBody`, Q-21). The S-71 spec has no row to see or withdraw that consent. | No new key; §3.14 points at the Part 2 keys | UX / security: whether S-71 needs a "withdraw online speech" row |
+| Q-32 | S-71 §2a disclosures | Disclosures 1 and 2 only apply to iPhone; 3 and 4 apply to both platforms. The Play data-safety form and the App Store label need the same words (T-137). | Keys 1 and 2 are shown on iOS only; 3 and 4 on both | T-137 owner: confirm the platform split and reuse of these strings in the store forms |
+| Q-33 | Notification redaction | FR-NTF-03 hides **amounts**. The hidden variants also drop merchant, counterparty, card and bill names, because a lock screen shouldn't reveal them either. They keep the category name on budget alerts. | As described | PO / security reviewer: confirm the scope, and whether category names should be hidden too |
+| Q-34 | §3.14 coverage | The docs name Failure families and codes (error-handling §1, `backend-api.md` §6, `platform-channels.md` §6) but not the full sealed `Failure` hierarchy. | The table maps what the docs name | Architect / T-029 owner: re-check the table against the `Failure` classes in code and add any new subtype here first |
+| Q-35 | Support code | D-57(f) shows the **install ID** as the support code. A UUID is long and awkward to read aloud or type. | `common_support_codeValue` shows it as is, with a Copy action | UX / architect: a short display form, if support wants one |
+| Q-36 | S-68 renewal line | Apple and Google require subscription terms near the buy button. The exact required wording isn't in the spec. | `gold_paywall_renewal` in simple standard Arabic, per platform | Legal: confirm the wording and the places it must appear |
+| Q-37 | S-74 legal | The Terms of Use and Privacy Policy are lawyer-owned hosted pages. The one-line summaries, the disclaimers (NFR-LEGAL-03) and the footer line are drafts. Q-20 (a disclaimer under chart tips) is still open: `legal_disclaimer_footer` exists if the PO wants it. | Drafts in §3.13 | PO / legal for wording; T-058 for naturalness. The legal text itself is not written here |
+| Q-38 | S-72 digits | The digit options in the spec show `١٢٣` and `123`. Arabic copy can't contain digits (§0.3), so the labels are words and the UI draws the sample glyphs. | `settings_prefs_digitsArabic` / `…Western` | UX: confirm in the golden tests |
+| Q-39 | S-71 type-to-confirm | The spec asks for "DELETE (or احذف)", while the button and the app's glossary say «امسح». | Accept both words and `DELETE`, as the spec says; the button reads «امسح كل حاجة» | UX lead: pick one word for the dialog |
+| Q-40 | Android Delete everything | `gold_seat_deleteWarning` says Gold counts as moved, and in a cooldown can't come back before the date. EC-69 says a restore after a reinstall spends the monthly move and is refused during a cooldown; the exact app wording was not given. | As written, with the optional date | Architect: confirm it matches EC-69 and D-55 |
+| Q-41 | Sign-in `moveRefused` | Which branch to show (Restore, or support with the date) depends on whether the iPhone can restore with an App Store purchase (D-66(d)). The spec doesn't say how the client knows. | Two keys, `gold_seat_restoreSuggested` and `gold_seat_supportPath` | Architect: the rule for choosing the branch (StoreKit current entitlement check) |
+| Q-42 | S-73 card language | The share card follows the app language. The EN hashtag differs from the AR one, so a user who shares in the other language would need a language choice. | Card text follows the app language | UX: confirm, or add a language switch to S-73 |
+| Q-43 | S-66 Gold keys | `backup_settings_goldKeeps` states FR-BAK-09 (the Free backup becomes the first Gold version). The downgrade case ("keeps only the newest") has no copy because no screen shows it. | No copy for downgrade | UX: whether a downgrade notice is wanted |
+
+## 3.C Changelog (Part 3)
+- 2026-11-08 — first draft (T-028), 475 ARB keys plus 7 native.
+  - **Conventions added:** 6 placeholder rows in §0.3a (`supportCode`, `storePrice`, `plan`, `email`, `build`, `banks`); 5 no-zero rows in §0.4 (9 keys); no new length class.
+  - **Screens covered:** S-60, S-63, S-64, S-65, S-66, S-67, S-68, S-69, S-70, S-71, S-72, S-73, S-74, the passphrase sheet (C-32), the one-phone Gold set, notification texts with redacted variants, legal summaries and disclaimers, and the Failure-code catalogue.
+  - **Part 1 and Part 2 rows touched:** none. The header status line only.
+  - **Spec edited:** none.
+  - **Review round 1 (MAJOR):** `privacy_server_*` now lists everything in BR-SYNC-03 that the app sends: added `privacy_server_itemAttest` (device attestation, D-45) and `privacy_server_itemBankRequest` (FR-PAR-14). The seat keys and time nonce are covered by the §2a disclosures. 473 became 475 keys. **T-137 (store forms) must use this updated list.** The "28 problem codes" wording in §3.K was corrected.
