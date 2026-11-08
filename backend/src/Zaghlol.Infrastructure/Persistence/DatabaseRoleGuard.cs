@@ -10,30 +10,47 @@ namespace Zaghlol.Infrastructure.Persistence;
 
 /// <summary>
 /// SEC F11: a runtime connection must log in as a member of exactly its own group role, and must not be a superuser,
-/// the schema owner or a member of <c>migrator</c>. Otherwise a wrong credential in <c>ConnectionStrings:App</c> (for
-/// example the migrator's) would silently bypass every grant and the two-login injection boundary.
+/// the schema or database owner or a member of <c>migrator</c>. Otherwise a wrong credential in <c>ConnectionStrings:App</c>
+/// (for example the migrator's) would silently bypass every grant and the two-login injection boundary.
+/// FU-019: every check runs on <c>session_user</c> (the login), and the session must not have switched role
+/// (<c>-c role=…</c> or <c>SET ROLE</c>), so a superuser login can't pass as <c>zaghlol_api</c>.
+/// FU-023: membership is the full transitive closure, so a grant of <c>pg_write_all_data</c> or a provider admin
+/// group (directly or through an intermediate role) is rejected too.
 /// </summary>
 public static class DatabaseRoleGuard
 {
     // Why a login was rejected. Stable values, safe to log (no names or secrets).
+    public const string RejectRoleSwitched = "role_switched";
     public const string RejectPrivileged = "privileged_login";
     public const string RejectOwner = "schema_owner";
     public const string RejectMigrator = "migrator_member";
     public const string RejectWrongGroups = "wrong_group_membership";
 
-    /// <summary>One row about <c>current_user</c>: privilege flags, owner, migrator, then each group membership.</summary>
+    /// <summary>
+    /// One row about <c>session_user</c> and every role it is transitively a member of: role switched, privilege flags,
+    /// owner of the schema or database, migrator membership, then the sorted names of all groups.
+    /// </summary>
     public const string Query = """
-        SELECT r.rolsuper OR r.rolbypassrls OR r.rolcreaterole OR r.rolcreatedb OR r.rolreplication,
-               coalesce((SELECT n.nspowner = r.oid FROM pg_catalog.pg_namespace n WHERE n.nspname = 'zaghlol'), false),
-               pg_catalog.pg_has_role(current_user, 'migrator', 'MEMBER'),
-               pg_catalog.pg_has_role(current_user, 'app_rw', 'MEMBER'),
-               pg_catalog.pg_has_role(current_user, 'ops_rw', 'MEMBER'),
-               pg_catalog.pg_has_role(current_user, 'worker_rw', 'MEMBER'),
-               pg_catalog.pg_has_role(current_user, 'ops_ro', 'MEMBER')
-        FROM pg_catalog.pg_roles r WHERE r.rolname = current_user
+        WITH RECURSIVE me AS (
+            SELECT r.oid FROM pg_catalog.pg_roles r WHERE r.rolname = session_user
+        ), groups(roleid) AS (
+            SELECT m.roleid FROM pg_catalog.pg_auth_members m JOIN me ON m.member = me.oid
+            UNION
+            SELECT m.roleid FROM pg_catalog.pg_auth_members m JOIN groups g ON m.member = g.roleid
+        ), everyone(oid) AS (
+            SELECT oid FROM me UNION SELECT roleid FROM groups
+        )
+        SELECT session_user <> current_user,
+               EXISTS (SELECT 1 FROM pg_catalog.pg_roles r JOIN everyone e ON e.oid = r.oid
+                       WHERE r.rolsuper OR r.rolbypassrls OR r.rolcreaterole OR r.rolcreatedb OR r.rolreplication),
+               EXISTS (SELECT 1 FROM pg_catalog.pg_namespace n JOIN everyone e ON e.oid = n.nspowner WHERE n.nspname = 'zaghlol')
+                 OR EXISTS (SELECT 1 FROM pg_catalog.pg_database d JOIN everyone e ON e.oid = d.datdba
+                            WHERE d.datname = pg_catalog.current_database()),
+               EXISTS (SELECT 1 FROM groups g JOIN pg_catalog.pg_roles r ON r.oid = g.roleid WHERE r.rolname = 'migrator'),
+               coalesce((SELECT array_agg(r.rolname::text ORDER BY r.rolname::text)
+                         FROM groups g JOIN pg_catalog.pg_roles r ON r.oid = g.roleid), '{}'::text[])
+        FROM me
         """;
-
-    private static readonly string[] Groups = [GrantMatrix.AppRw, GrantMatrix.OpsRw, GrantMatrix.WorkerRw, GrantMatrix.OpsRo];
 
     /// <summary>The only group a runtime role's login may belong to.</summary>
     public static string ExpectedGroup(DatabaseRole role) => role switch
@@ -59,29 +76,44 @@ public static class DatabaseRoleGuard
 
         if (reader.GetBoolean(0))
         {
-            return RejectPrivileged;
+            return RejectRoleSwitched;
         }
 
         if (reader.GetBoolean(1))
         {
-            return RejectOwner;
+            return RejectPrivileged;
         }
 
         if (reader.GetBoolean(2))
         {
+            return RejectOwner;
+        }
+
+        if (reader.GetBoolean(3))
+        {
             return RejectMigrator;
         }
 
-        for (var i = 0; i < Groups.Length; i++)
-        {
-            if (reader.GetBoolean(3 + i) != string.Equals(Groups[i], expected, StringComparison.Ordinal))
-            {
-                return RejectWrongGroups;
-            }
-        }
-
-        return null;
+        var groups = reader.GetFieldValue<string[]>(4);
+        return groups.Length == 1 && string.Equals(groups[0], expected, StringComparison.Ordinal) ? null : RejectWrongGroups;
     }
+}
+
+/// <summary>
+/// The process exit code (FU-023): <c>Program</c> returns <see cref="Value"/>, so a host stopped by a guard exits non-zero
+/// and the orchestrator sees a failed start instead of a clean exit.
+/// </summary>
+public sealed class HostExitCode
+{
+    /// <summary>EX_CONFIG (sysexits.h): a database login was rejected by <see cref="DatabaseRoleGuard"/>.</summary>
+    public const int DatabaseLoginRejected = 78;
+
+    private int value;
+
+    public int Value => Volatile.Read(ref value);
+
+    /// <summary>Records the first failure; later calls keep it.</summary>
+    public void Fail(int code) => Interlocked.CompareExchange(ref value, code, 0);
 }
 
 /// <summary>
@@ -93,6 +125,7 @@ internal sealed partial class DatabaseRoleGuardService(
     IServiceProvider services,
     IOptions<DatabaseConnectionOptions> options,
     IHostApplicationLifetime lifetime,
+    HostExitCode exitCode,
     TimeProvider clock,
     ILogger<DatabaseRoleGuardService> logger) : BackgroundService
 {
@@ -113,6 +146,7 @@ internal sealed partial class DatabaseRoleGuardService(
                     if (reason is not null)
                     {
                         LogRejected(logger, role, reason);
+                        exitCode.Fail(HostExitCode.DatabaseLoginRejected);
                         lifetime.StopApplication();
                         return;
                     }

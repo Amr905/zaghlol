@@ -57,6 +57,14 @@ tag vX:  build prodSms + prodNoSms AAB (signed via Play App Signing upload key f
 - Google Cloud project for the Play Developer API service account and the Pub/Sub topic + push subscription to `/v1/notifications/google`.
 - App Store Connect: production and sandbox notification URLs.
 
+**KMS and key-ring configuration (T-123).** The API reads its key ring from configuration that the IaC (T-140) writes next to the KMS keys; there is no `signing_keys` table, so a database write can never change the signer.
+- `Kms:Provider`: `Local` is allowed only in `Development`/`Testing` (throwaway keys from `backend/tools/dev-keys.sh`, read from `Kms:Local:KeyDirectory`); the cloud adapter arrives with T-140. Any other environment without an adapter refuses to start.
+- `Signing:Keys:<n>:{Kid, Purpose (Sync|Entitlement), Status (Next|Active|Retired), KeyRef, PublicJwk:{Kty, Crv, X, Y}}`: exactly one `Active` key per purpose; kids match `^[se][0-9]{4}[a-z]$` (`s` = Sync: response headers and catalog `.sig`; `e` = Entitlement: JWS tokens); each key has its own KMS key. At startup every JWK must equal the KMS public key and each active key must pass a sign-then-verify probe, or the process exits non-zero and readiness never goes green.
+- `Kms:HmacKeys:{Seat, Audit, InstallHashPepper}`: key references of the three HMAC keys (`IKeyedHasher`). On Azure only Managed HSM offers HMAC.
+- `Kms:Envelope:KeyRef` (new envelopes) and `Kms:Envelope:PreviousKeyRefs:<n>` (older key-encryption keys that may still decrypt). Envelope format v1: `0x01 ‖ u8 len(keyRef) ‖ keyRef ‖ u16be len(wrappedDek) ‖ wrappedDek ‖ nonce(12) ‖ ciphertext ‖ tag(16)`, AES-256-GCM with a fresh data key per record and associated data `"zaghlol-env-v1" ‖ 0x00 ‖ context`.
+- KMS calls time out after 2 s with one retry; a signing outage answers `503 UPSTREAM_UNAVAILABLE` with `Retry-After: 5`.
+- Managed PostgreSQL: set `log_error_verbosity = terse` so a CHECK failure's DETAIL (row values) never reaches server logs, and never set `Include Error Detail` on a connection string (the API and migrator refuse it; FU-025).
+
 **Infrastructure as code:**
 - OpenTofu modules per environment under `backend/deploy/`.
 - Secrets are referenced, never stored.
@@ -89,7 +97,7 @@ tag:  promote the same image digest to prod → migration job (expand/contract, 
 
 - [ ] Play SMS-permission declaration submitted; `prodNoSms` ready.
 - [ ] Signed `Zaghlol.shortcut` published; setup checker verified on iOS 17 and iOS 26.
-- [ ] ES256 production keys created in KMS; public keys embedded; key-rotation test passed.
+- [ ] ES256 production keys created in KMS; public keys embedded (JWKS from `EcPublicJwk.ToJwks`); key-rotation test passed; `log_error_verbosity = terse` on the managed PostgreSQL.
 - [ ] RTDN + ASSN V2 configured for prod and sandbox; reconciliation jobs green.
 - [ ] Price provider contract signed (OQ-02); stale alerts tested.
 - [ ] Hosting region approved and PDPL licensing done (CR-03).

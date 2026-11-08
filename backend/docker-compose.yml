@@ -1,4 +1,6 @@
-# Local development stack: `docker compose up --build` then `curl http://localhost:8080/v1/health`.
+# Local development stack: `tools/dev-keys.sh && docker compose up --build` then `curl http://localhost:8080/v1/health`.
+# The API runs as Development with the Local KMS over the throwaway keys in .dev-keys/ (T-123); it refuses to start
+# without them, and the Local provider is refused outside Development/Testing.
 # All passwords below are throwaway local-development values (deploy/db/dev-passwords.sql); real secrets come from the
 # secrets manager. Roles: deploy/db/bootstrap-roles.sql runs once when the volume is first initialised.
 name: zaghlol-backend
@@ -12,6 +14,8 @@ x-backend-image: &backend-image
 services:
   postgres:
     image: postgres:17
+    # FU-025: no DETAIL/HINT in server logs ("Failing row contains (...)" would log row values on a CHECK failure).
+    command: ["postgres", "-c", "log_error_verbosity=terse"]
     environment:
       POSTGRES_DB: zaghlol
       POSTGRES_USER: zaghlol
@@ -49,8 +53,14 @@ services:
       migrate:
         condition: service_completed_successfully
     environment:
+      ASPNETCORE_ENVIRONMENT: Development
       ConnectionStrings__App: Host=postgres;Port=5432;Database=zaghlol;Username=zaghlol_api;Password=api_dev_only
       ConnectionStrings__Admin: Host=postgres;Port=5432;Database=zaghlol;Username=zaghlol_admin;Password=admin_dev_only
+    # Kms:* and Signing:Keys for the Local provider, written by tools/dev-keys.sh.
+    env_file:
+      - ./.dev-keys/kms.env
+    volumes:
+      - ./.dev-keys:/run/zaghlol-dev-keys:ro
     ports:
       - "${API_PORT:-8080}:8080"
     read_only: true

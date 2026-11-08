@@ -229,6 +229,38 @@ public class GrantTests(SchemaFixture fixture)
         Assert.Equal("ops_ro", logins["zaghlol_ops_ro"][3]);
     }
 
+    [Fact]
+    public async Task NoRoleHoldsAnyPrivilegeOnASequence()
+    {
+        // FU-026: identity columns need no sequence grant (INSERT on the table is enough), so no login may read, bump
+        // or reset a sequence (which would leak row counts or burn ids).
+        var sequences = await Db.QueryAsync(
+            fixture.Database.Superuser,
+            """
+            SELECT c.relname, (SELECT count(*) FROM aclexplode(c.relacl) a WHERE a.grantee <> c.relowner)
+            FROM pg_class c JOIN pg_namespace n ON n.oid = c.relnamespace
+            WHERE n.nspname = 'zaghlol' AND c.relkind = 'S'
+            """);
+
+        Assert.NotEmpty(sequences);
+        Assert.All(sequences, s => Assert.Equal(0L, s[1]));
+
+        var auditSequence = (string)(await Db.ScalarAsync(fixture.Database.Superuser, "SELECT pg_get_serial_sequence('zaghlol.audit_log', 'id')"))!;
+        foreach (var login in new[] { fixture.Database.Api, fixture.Database.Admin, fixture.Database.Worker, fixture.Database.OpsRo })
+        {
+            foreach (var sql in SequenceProbes)
+            {
+                var error = await Assert.ThrowsAsync<PostgresException>(() => Db.ScalarAsync(login, string.Format(System.Globalization.CultureInfo.InvariantCulture, sql, auditSequence)));
+                Assert.Equal(PostgresErrorCodes.InsufficientPrivilege, error.SqlState);
+            }
+        }
+    }
+
+    private static readonly string[] SequenceProbes =
+    [
+        "SELECT nextval('{0}')", "SELECT setval('{0}', 1)", "SELECT last_value FROM {0}",
+    ];
+
     [Theory]
     [MemberData(nameof(Denied))]
     public async Task RoleIsDenied(string login, string sql)
