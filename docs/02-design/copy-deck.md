@@ -2534,6 +2534,8 @@ Each money alert has a full text and a `…Hidden` text used when "hide amounts"
 | `privacy_server_itemSignIn` | تسجيل دخولك، لو استخدمته بس | Your sign-in, only if you use it | S |
 | `privacy_server_itemMerchants` | أسماء التجار، لو سمحت بس | Merchant names, only if you allow it | S |
 | `privacy_server_itemVersion` | نوع الموبايل وإصدار التطبيق وإصدار قايمة التجار | Phone platform, app version and merchant-list version | S · BR-SYNC-03 |
+| `privacy_server_itemAttest` | إثبات إن الموبايل حقيقي (Play Integrity أو App Attest) وقت الاسترجاع، وأحياناً وقت الشراء | A proof the phone is genuine (Play Integrity or App Attest) on restore, sometimes on purchase | S · BR-SYNC-03, D-45 (carries no other device data); "sometimes on purchase" because purchase verify needs it only where ADR-012 requires |
+| `privacy_server_itemBankRequest` | طلب دعم بنك، لو طلبته بس: اسم البنك وبلده ونوع التنبيه | A bank-support request, only if you ask: the bank's name, country and alert type | S · FR-PAR-14; same fields as `ingestion_requestBank_privacy` |
 | `privacy_server_seatKeysSummary` | على الآيفون بس: زغلول بيعرف إن التثبيتات القديمة كانت على نفس الموبايل. | iPhone only: Zaghlol can tell that earlier installs were on the same phone. | S · Egyptian summary · disclosure 1 (D-62); shown on iOS |
 | `privacy_server_seatKeys` | على الآيفون، يرسل التطبيق عند الاسترجاع أو تسجيل الدخول إثباتاً من هذا التثبيت ومن حتى أربعة تثبيتات سابقة، ليعرف الخادم أنها على الجهاز نفسه. يحفظ الخادم صورة مشفّرة فقط، ولا يسجّل المفاتيح. | On iPhone, restoring or signing in sends a key proof from this install and up to four earlier ones, so the server can tell they were on the same phone. The server keeps only a scrambled form and never logs the keys. | E · **simple standard Arabic** · disclosure 1 |
 | `privacy_server_deleteKeepsSummary` | لو مسحت كل حاجة من الآيفون، الجولد يقدر يرجع عليه من غير نقلة. | If you delete everything on iPhone, Gold can come back to it without using a move. | S · Egyptian summary · disclosure 2 (R4-8); shown on iOS |
@@ -2827,17 +2829,17 @@ Silent codes show nothing in the normal flow (the "Surface" column). The key is 
 | 3.8 Gold & account | S-69 | 31 |
 | 3.8a One-phone Gold | S-68, S-69, S-04, S-71 | 28 |
 | 3.9 Notifications (settings 17, alert texts 24) | S-70 | 41 |
-| 3.10 Privacy & data | S-71 | 46 |
+| 3.10 Privacy & data | S-71 | 48 |
 | 3.11 Preferences | S-72 | 29 |
 | 3.12 Share studio | S-73 | 22 |
 | 3.13 About, diagnostics, legal, disclaimers | S-74 | 31 |
 | 3.14 Error catalogue | all | 26 |
-| **Part 3 ARB total** | | **473** |
-| **Deck total (Parts 1 + 2 + 3)** | | **1,649 ARB keys + 19 native** |
+| **Part 3 ARB total** | | **475** |
+| **Deck total (Parts 1 + 2 + 3)** | | **1,651 ARB keys + 19 native** |
 
 Native (not ARB): 7 new Android notification-channel names in §3.9, on top of Part 1's 12. Plural messages in Part 3: 12 (3 with `=0`: `categories_list_rulesCount`, `notifications_settings_dueDays`, `notifications_alert_due`; 9 on the no-zero list in §0.4). Select messages in Part 3: 13. The deck as a whole now has 67 plural and 49 select messages. The T-029 counting note in §1.K still applies: count only rows with four cells. The §3.14 mapping table has four cells but no backticked first cell, so the deck checker and a key count both skip it.
 
-Failure-code coverage: the §3.14 mapping table has 59 rows covering every code and state named in `error-handling-and-observability.md` §1, `backend-api.md` §6 (all 28 problem codes, the two operator-only ones included) and `platform-channels.md` §6 (all 12 native codes). Each row has a key of its own or a named existing key.
+Failure-code coverage: the §3.14 mapping table has 59 rows covering every code and state named in `error-handling-and-observability.md` §1, `backend-api.md` §6 (every problem code in the table, the two operator-only ones included) and `platform-channels.md` §6 (all 12 native codes). Each row has a key of its own or a named existing key.
 
 ## 3.Q Open questions and spec gaps (Part 3)
 Nothing here blocks T-058 or T-087. Drafts are used where a question is open.
@@ -2860,8 +2862,9 @@ Nothing here blocks T-058 or T-087. Drafts are used where a question is open.
 | Q-43 | S-66 Gold keys | `backup_settings_goldKeeps` states FR-BAK-09 (the Free backup becomes the first Gold version). The downgrade case ("keeps only the newest") has no copy because no screen shows it. | No copy for downgrade | UX: whether a downgrade notice is wanted |
 
 ## 3.C Changelog (Part 3)
-- 2026-11-08 — first draft (T-028), 473 ARB keys plus 7 native.
+- 2026-11-08 — first draft (T-028), 475 ARB keys plus 7 native.
   - **Conventions added:** 6 placeholder rows in §0.3a (`supportCode`, `storePrice`, `plan`, `email`, `build`, `banks`); 5 no-zero rows in §0.4 (9 keys); no new length class.
   - **Screens covered:** S-60, S-63, S-64, S-65, S-66, S-67, S-68, S-69, S-70, S-71, S-72, S-73, S-74, the passphrase sheet (C-32), the one-phone Gold set, notification texts with redacted variants, legal summaries and disclaimers, and the Failure-code catalogue.
   - **Part 1 and Part 2 rows touched:** none. The header status line only.
   - **Spec edited:** none.
+  - **Review round 1 (MAJOR):** `privacy_server_*` now lists everything in BR-SYNC-03 that the app sends: added `privacy_server_itemAttest` (device attestation, D-45) and `privacy_server_itemBankRequest` (FR-PAR-14). The seat keys and time nonce are covered by the §2a disclosures. 473 became 475 keys. **T-137 (store forms) must use this updated list.** The "28 problem codes" wording in §3.K was corrected.
