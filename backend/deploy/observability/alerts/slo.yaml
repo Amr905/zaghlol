@@ -1,0 +1,95 @@
+# Availability, SLO and latency alerts (error-handling-and-observability.md section 4, NFR-BE-02).
+# Prometheus rule format; T-140 adapts it to the hosting provider's managed Prometheus. Metric names follow the OTLP to
+# Prometheus mapping of the collector (dots become underscores, unit suffixes, _total on counters).
+# Alerts carry no install, account, token, transaction or order identifier (rule-file lint test).
+groups:
+  - name: zaghlol-availability
+    rules:
+      - alert: ZaghlolSyntheticCheckFailing
+        expr: min by (check) (probe_success{job="zaghlol-synthetics"}) == 0
+        for: 3m
+        labels:
+          severity: page
+        annotations:
+          summary: "Synthetic check {{ $labels.check }} failed 3 times in a row"
+          description: "GET /v1/health or POST /v1/sync (test install) fails from at least one region. Check the API and the database first."
+
+      - alert: ZaghlolSloBurnRateFast
+        # 2% of the 99.5% monthly budget in 1 hour: burn rate 14.4. Successful ratio excludes 4xx.
+        expr: |
+          (
+            sum(rate(http_server_request_duration_seconds_count{http_route=~"/v1/.*", http_response_status_code=~"5.."}[1h]))
+            /
+            sum(rate(http_server_request_duration_seconds_count{http_route=~"/v1/.*", http_response_status_code!~"4.."}[1h]))
+          ) > (14.4 * 0.005)
+        for: 2m
+        labels:
+          severity: page
+        annotations:
+          summary: "Error budget burning 14.4x (2% of the month in 1 hour)"
+          description: "5xx ratio of /v1/* is above 7.2% over 1 hour."
+
+      - alert: ZaghlolSloBurnRateSlow
+        # 5% of the monthly budget in 6 hours: burn rate 6.
+        expr: |
+          (
+            sum(rate(http_server_request_duration_seconds_count{http_route=~"/v1/.*", http_response_status_code=~"5.."}[6h]))
+            /
+            sum(rate(http_server_request_duration_seconds_count{http_route=~"/v1/.*", http_response_status_code!~"4.."}[6h]))
+          ) > (6 * 0.005)
+        for: 15m
+        labels:
+          severity: page
+        annotations:
+          summary: "Error budget burning 6x (5% of the month in 6 hours)"
+          description: "5xx ratio of /v1/* is above 3% over 6 hours."
+
+  - name: zaghlol-latency
+    rules:
+      - alert: ZaghlolSyncLatencyP95High
+        expr: |
+          histogram_quantile(0.95,
+            sum by (le) (rate(http_server_request_duration_seconds_bucket{http_route="/v1/sync"}[5m]))) > 0.3
+        for: 15m
+        labels:
+          severity: warn
+        annotations:
+          summary: "p95 of POST /v1/sync is above 300 ms for 15 minutes"
+          description: "Target is p95 under 300 ms (NFR-BE-02)."
+
+      - alert: ZaghlolPurchaseVerifyLatencyP95High
+        expr: |
+          histogram_quantile(0.95,
+            sum by (le) (rate(http_server_request_duration_seconds_bucket{http_route="/v1/purchases/verify"}[5m]))) > 2
+        for: 15m
+        labels:
+          severity: warn
+        annotations:
+          summary: "p95 of POST /v1/purchases/verify is above 2 s for 15 minutes"
+          description: "Target is p95 under 2 s. Check the store API latency and the outbound budget."
+
+  - name: zaghlol-security
+    rules:
+      - alert: ZaghlolAuthFailureSpike
+        # 401 and 403 above 5x the 1-day baseline (floor 30 per 15 minutes).
+        expr: |
+          sum(increase(http_server_request_duration_seconds_count{http_response_status_code=~"401|403"}[15m]))
+          > clamp_min(5 * sum(increase(http_server_request_duration_seconds_count{http_response_status_code=~"401|403"}[1d])) / 96, 30)
+        for: 10m
+        labels:
+          severity: warn
+        annotations:
+          summary: "401 and 403 responses are spiking"
+          description: "Possible credential stuffing or a client release that broke authentication."
+
+      - alert: ZaghlolRateLimitedSpike
+        # RATE_LIMITED is HTTP 429.
+        expr: |
+          sum(increase(http_server_request_duration_seconds_count{http_response_status_code="429"}[15m]))
+          > clamp_min(5 * sum(increase(http_server_request_duration_seconds_count{http_response_status_code="429"}[1d])) / 96, 30)
+        for: 10m
+        labels:
+          severity: warn
+        annotations:
+          summary: "RATE_LIMITED responses are spiking"
+          description: "Check whether one client version or one network is hammering the API."

@@ -2,10 +2,12 @@ using Serilog;
 using Serilog.Core;
 using Zaghlol.Api;
 using Zaghlol.Api.Endpoints;
+using Zaghlol.Api.Observability;
 using Zaghlol.Application;
 using Zaghlol.Infrastructure;
 using Zaghlol.Infrastructure.Kms;
 using Zaghlol.Infrastructure.Logging;
+using Zaghlol.Infrastructure.Observability;
 using Zaghlol.Infrastructure.Persistence;
 
 // `dotnet Zaghlol.Api.dll --healthcheck` is used by container health checks (the runtime image has no shell or curl).
@@ -37,6 +39,10 @@ builder.Services.AddZaghlolKms();
 builder.Services.AddZaghlolDatabase(DatabaseRole.App, DatabaseRole.Admin);
 builder.Services.AddDatabaseReadiness();
 builder.Services.AddZaghlolHttp();
+
+// OpenTelemetry (redacted spans, the Zaghlol meter) and the monthly log key for installHash (T-138).
+builder.Services.AddZaghlolApiTelemetry(builder.Configuration, builder.Environment);
+builder.Services.AddZaghlolLogPseudonymizer();
 
 var app = builder.Build();
 

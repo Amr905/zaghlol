@@ -65,12 +65,21 @@ public sealed class SigningHostFixture : IAsyncLifetime, IDisposable
         var builder = WebApplication.CreateBuilder(new WebApplicationOptions { EnvironmentName = "Testing" });
         builder.WebHost.UseTestServer();
         builder.Configuration.AddInMemoryCollection(Kms.Settings());
-        builder.Host.UseSerilog((_, _, logger) => logger
-            .ConfigureZaghlol("api")
-            .MinimumLevel.Verbose()
-            .MinimumLevel.Override("Microsoft", LogEventLevel.Verbose)
-            .MinimumLevel.Override("System", LogEventLevel.Verbose)
-            .WriteTo.Sink(LogSink));
+        builder.Host.UseSerilog((_, _, logger) =>
+        {
+            logger
+                .ConfigureZaghlol("api")
+                .MinimumLevel.Verbose()
+                .MinimumLevel.Override("Microsoft", LogEventLevel.Verbose)
+                .MinimumLevel.Override("System", LogEventLevel.Verbose)
+                .WriteTo.Sink(LogSink);
+
+            // The framework categories ConfigureZaghlol keeps quiet are verbose here, to prove the pipeline leaks nothing.
+            foreach (var category in LoggingConfigurationExtensions.QuietCategories)
+            {
+                logger.MinimumLevel.Override(category, LogEventLevel.Verbose);
+            }
+        });
         builder.Services.AddZaghlolKms();
         Kms.Use(builder.Services);
         builder.Services.AddSingleton(new KmsCallPolicy { Timeout = TimeSpan.FromMilliseconds(200) });

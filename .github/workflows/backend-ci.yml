@@ -88,6 +88,19 @@ jobs:
         run: |
           npx --yes @stoplight/spectral-cli@6.15.0 lint zaghlol-v1.yaml --ruleset .spectral.yaml --fail-severity=warn || { echo "::error title=Spectral::OpenAPI lint failed; see the step log."; exit 1; }
 
+  alert-rules:
+    name: alert rules (promtool)
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+
+      # T-138: the rule files are valid Prometheus rules (the rule-file lint test checks names and privacy in build-test).
+      - name: promtool check rules
+        run: |
+          docker run --rm --entrypoint /bin/sh -v "$PWD/backend/deploy/observability/alerts:/rules:ro" prom/prometheus:v3.5.0 \
+            -c 'promtool check rules /rules/*.yaml' || { echo "::error title=promtool::Alert rule files are invalid."; exit 1; }
+
   dependency-audit:
     name: vulnerable packages
     runs-on: ubuntu-latest
@@ -237,6 +250,23 @@ jobs:
           curl -fsS http://localhost:8080/v1/health | tee health.json
           echo
           grep -q '"status":"ok"' health.json || { echo "::error title=docker compose::/v1/health did not return status ok."; exit 1; }
+
+      # T-138: metrics reach the local collector. The api exports OTLP every 5 s; the collector serves Prometheus text on :8889.
+      - name: Metrics are visible in the local collector
+        run: |
+          for i in 1 2 3 4 5; do curl -fsS http://localhost:8080/v1/health >/dev/null; done
+          found=""
+          for i in $(seq 1 30); do
+            curl -fsS http://localhost:8889/metrics > metrics.txt || true
+            if grep -q '^zaghlol_service_up' metrics.txt && grep -q '^http_server_request_duration_seconds_count' metrics.txt; then found=yes; break; fi
+            sleep 2
+          done
+          grep -E '^(zaghlol_|http_server_request_duration_seconds_count)' metrics.txt | head -n 20 || true
+          if [ -z "$found" ]; then
+            docker compose logs --no-color otel-collector api | tail -n 80
+            echo "::error title=Metrics::zaghlol_* series did not reach the collector."
+            exit 1
+          fi
 
       - name: Dump logs
         if: always()

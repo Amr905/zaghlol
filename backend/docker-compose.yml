@@ -33,6 +33,16 @@ services:
       retries: 10
       start_period: 5s
 
+  # Local OpenTelemetry collector (T-138): receives OTLP from the api and the worker and exposes the metrics in Prometheus
+  # format on :8889 (curl http://localhost:8889/metrics | grep zaghlol_). Logs are JSON on stdout, not OTLP.
+  otel-collector:
+    image: otel/opentelemetry-collector-contrib:0.116.1
+    command: ["--config=/etc/otelcol/config.yaml"]
+    volumes:
+      - ./deploy/observability/otel-collector.yaml:/etc/otelcol/config.yaml:ro
+    ports:
+      - "127.0.0.1:${OTEL_METRICS_PORT:-8889}:8889"
+
   # One-shot migration job (same image as the worker), as the schema-owning `migrator` login.
   migrate:
     <<: *backend-image
@@ -52,7 +62,11 @@ services:
     depends_on:
       migrate:
         condition: service_completed_successfully
+      otel-collector:
+        condition: service_started
     environment:
+      OTEL_EXPORTER_OTLP_ENDPOINT: http://otel-collector:4317
+      OTEL_METRIC_EXPORT_INTERVAL: "5000"
       ASPNETCORE_ENVIRONMENT: Development
       ConnectionStrings__App: Host=postgres;Port=5432;Database=zaghlol;Username=zaghlol_api;Password=api_dev_only
       ConnectionStrings__Admin: Host=postgres;Port=5432;Database=zaghlol;Username=zaghlol_admin;Password=admin_dev_only
@@ -79,7 +93,11 @@ services:
     depends_on:
       migrate:
         condition: service_completed_successfully
+      otel-collector:
+        condition: service_started
     environment:
+      OTEL_EXPORTER_OTLP_ENDPOINT: http://otel-collector:4317
+      OTEL_METRIC_EXPORT_INTERVAL: "5000"
       ConnectionStrings__Worker: Host=postgres;Port=5432;Database=zaghlol;Username=zaghlol_worker;Password=worker_dev_only
       Worker__HeartbeatFile: /tmp/zaghlol-worker.heartbeat
     read_only: true

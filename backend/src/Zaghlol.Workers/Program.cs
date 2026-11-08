@@ -1,6 +1,7 @@
 using Serilog;
 using Zaghlol.Infrastructure;
 using Zaghlol.Infrastructure.Logging;
+using Zaghlol.Infrastructure.Observability;
 using Zaghlol.Infrastructure.Persistence;
 using Zaghlol.Workers;
 
@@ -24,6 +25,7 @@ builder.Logging.ClearProviders();
 builder.Logging.AddSerilog(Log.Logger, dispose: true);
 
 builder.Services.AddInfrastructure();
+builder.Services.AddZaghlolTelemetry(builder.Configuration, builder.Environment, "zaghlol-worker");
 builder.Services.AddZaghlolDatabase(DatabaseRole.Worker);
 builder.Services.AddHostedService<WorkerHeartbeatService>();
 
