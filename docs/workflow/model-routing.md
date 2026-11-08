@@ -16,10 +16,14 @@ Score each factor 0–2 and sum:
 
 | Score | Class | Implementer | Reviews required |
 |-------|-------|-------------|------------------|
-| 0–2 | **C1 Trivial** | `haiku` | Lead spot-check |
-| 3–5 | **C2 Standard** | `sonnet` | code-reviewer |
-| 6–7 | **C3 Complex** | `sonnet` after an Opus design note in the task file, or `opus` | code-reviewer + test-engineer |
-| 8–10 | **C4 Critical** | `opus` | code-reviewer + security-privacy-reviewer + test-engineer |
+| 0–2 | **C1 Trivial** | `haiku` | Lead spot-check (diff + green CI) |
+| 3–5 | **C2 Standard** | `sonnet` | code-reviewer (sonnet) |
+| 6–7 | **C3 Complex** | `sonnet`, after a short design note by the architect on `sonnet` | code-reviewer (sonnet) + test-engineer (sonnet) |
+| 8–10 | **C4 Critical** | `opus` | code-reviewer (opus) + security-privacy-reviewer (opus) + test-engineer (sonnet) |
+
+Docs-only tasks (copy deck, spec text) are implemented on `sonnet` and get one reviewer (code-reviewer on `sonnet`).
+
+**Review rounds (2026-11-08):** only blocker or major findings trigger another round, and only the reviewers who raised them re-review, delta only. Minors and nits become `FU-###` follow-ups with an owner task.
 
 **Automatic C4** regardless of score: anything touching encryption keys, SQLCipher setup, backup crypto, purchase verification & entitlement signing (app or backend), store webhooks, sign-in token verification, SMS/notification permissions & native receivers, schema migrations (app or backend), Zakah computation, money arithmetic primitives, the backend's accepted-fields boundary (BR-SYNC-03).
 
@@ -28,17 +32,17 @@ Score each factor 0–2 and sum:
 | Agent | Default model | Typical classes |
 |-------|---------------|-----------------|
 | requirements-analyst | opus | Phase 1 |
-| ux-designer | opus | Phase 2 |
-| solution-architect | opus | Phase 3 + C3 design notes |
+| ux-designer | opus | Phase 2; Phase 5 copy and design tasks on sonnet |
+| solution-architect | opus | Phase 3; design notes: sonnet for C3, opus for C4 |
 | task-planner | opus | Phase 4 |
 | boilerplate-engineer | haiku | C1 |
 | flutter-ui-engineer | sonnet | C2, C3 |
 | flutter-core-engineer | sonnet | C2, C3 (opus override for C4) |
 | parsing-engine-engineer | sonnet | C2, C3 (opus override for C4) |
-| native-platform-engineer | opus | C3, C4 |
+| native-platform-engineer | sonnet | C3 (opus override for C4) |
 | backend-engineer | sonnet | C2, C3 (opus override for C4) |
 | test-engineer | sonnet | Phase 6 |
-| code-reviewer | opus | Phase 6 |
+| code-reviewer | sonnet | Phase 6 (opus override for C4) |
 | security-privacy-reviewer | opus | Phase 6 (C4 + data-touching) |
 
 To run an agent on a different model than its default, pass `model` in the Agent call (e.g. `flutter-core-engineer` with `model: opus` for a C4 money-arithmetic task).

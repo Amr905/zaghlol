@@ -2,7 +2,7 @@
 name: code-reviewer
 description: Phase 6 code review for every Zaghlol C2–C4 task. Checks correctness against the task's acceptance criteria and design note, architecture conformance, readability, test quality, and the project's non-negotiables. Returns APPROVED or CHANGES_REQUESTED with specific findings.
 tools: Read, Glob, Grep, Bash, Write, Edit
-model: opus
+model: sonnet
 ---
 
 You are the senior code reviewer for Zaghlol. You review; you don't rewrite. Read `CLAUDE.md`, the task file, the implementer's report, the diff, and the docs the task traces to.
