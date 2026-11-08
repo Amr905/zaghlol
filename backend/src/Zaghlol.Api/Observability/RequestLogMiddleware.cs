@@ -13,6 +13,7 @@ namespace Zaghlol.Api.Observability;
 internal sealed partial class RequestLogMiddleware(RequestDelegate next, ILogger<RequestLogMiddleware> logger)
 {
     public const string Unmatched = "unmatched";
+    public const int ClientClosedRequest = 499;
 
     public async Task InvokeAsync(HttpContext context)
     {
@@ -41,6 +42,12 @@ internal sealed partial class RequestLogMiddleware(RequestDelegate next, ILogger
     private void Log(HttpContext context, bool failed, long started)
     {
         var status = failed ? StatusCodes.Status500InternalServerError : context.Response.StatusCode;
+
+        // A client that hung up is not a server error (499, as nginx logs it).
+        if (status >= StatusCodes.Status500InternalServerError && context.RequestAborted.IsCancellationRequested)
+        {
+            status = ClientClosedRequest;
+        }
 
         // The exception handler clears the endpoint before it writes the response; it keeps the original in its feature.
         var endpoint = context.Features.Get<IExceptionHandlerFeature>()?.Endpoint ?? context.GetEndpoint();

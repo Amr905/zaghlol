@@ -107,6 +107,47 @@ public sealed class ZaghlolMetricsTests : IDisposable
         Assert.Equal("true", m.Tags["up_to_date"]);
     }
 
+    // Code review round 1, major #1: a labelled series that doesn't exist until its first Add never lets increase() fire for
+    // the first event of each rare alert per process. Every such series is created at 0 by the constructor.
+    [Fact]
+    public void AnyOccurrenceSeriesExistAtZeroBeforeAnyEvent()
+    {
+        var zeros = new ConcurrentQueue<(string Instrument, string Tag)>();
+        using var early = new MeterListener();
+        early.InstrumentPublished = (instrument, l) =>
+        {
+            if (instrument.Meter.Name == ZaghlolMetrics.MeterName)
+            {
+                l.EnableMeasurementEvents(instrument);
+            }
+        };
+        early.SetMeasurementEventCallback<long>((instrument, value, tags, _) =>
+        {
+            if (value != 0)
+            {
+                return;
+            }
+
+            foreach (var tag in tags)
+            {
+                zeros.Enqueue((instrument.Name, $"{tag.Key}={tag.Value}"));
+            }
+        });
+        early.Start();
+
+        using var fresh = new ZaghlolMetrics();
+
+        foreach (var rule in Enum.GetValues<AuditAlertRule>())
+        {
+            Assert.Contains(("zaghlol.audit_alert.fired", "rule=" + AlertSignal.RuleName(rule)), zeros);
+        }
+
+        foreach (var store in ZaghlolMetrics.NotificationStores)
+        {
+            Assert.Contains(("zaghlol.notification.dead_letter", "store=" + store), zeros);
+        }
+    }
+
     private IEnumerable<(string Instrument, double Value, Dictionary<string, object?> Tags)> Named(string instrument) =>
         seen.Where(x => x.Instrument == instrument);
 

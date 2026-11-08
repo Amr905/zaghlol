@@ -35,6 +35,20 @@ public static class KmsMetrics
     public static void KmsUnavailable(string operation) =>
         Unavailable.Add(1, new TagList { { "operation", operation } });
 
+    /// <summary>
+    /// Starts the per-operation series at 0 (and creates the meter at startup), so <c>increase()</c> alerts see the first
+    /// failure of each operation.
+    /// </summary>
+    private static readonly string[] SeededOperations = ["sign", SignVerifyOperation, "hmac", "data_key", "public_key"];
+
+    public static void Seed()
+    {
+        foreach (var operation in SeededOperations)
+        {
+            Unavailable.Add(0, new TagList { { "operation", operation } });
+        }
+    }
+
     public static void ResponseTooLargeToSign() => TooLarge.Add(1);
 
     public static void TimeNonceEchoMismatch() => NonceMismatch.Add(1);

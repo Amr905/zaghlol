@@ -49,12 +49,17 @@ public sealed partial class ZaghlolMetrics : IDisposable
         playIntegrityCalls = meter.CreateCounter<long>("zaghlol.play_integrity.calls", description: "Play Integrity API calls.");
         alertFired = meter.CreateCounter<long>("zaghlol.audit_alert.fired", description: "Audit alert signals by rule.");
 
+        SeedSeries();
+
         meter.CreateObservableGauge("zaghlol.purchase.unacked", () => Interlocked.Read(ref unackedCount), description: "Purchases waiting for acknowledgement.");
         meter.CreateObservableGauge("zaghlol.purchase.unacked.oldest_age", () => Volatile.Read(ref unackedOldestAgeSeconds), "s", "Age of the oldest unacknowledged purchase.");
         meter.CreateObservableGauge<double>("zaghlol.price.age", ObservePriceAges, "s", "Age of the newest quote per symbol.");
         meter.CreateObservableGauge("zaghlol.play_integrity.daily_quota", () => Interlocked.Read(ref playIntegrityDailyQuota), description: "Configured Play Integrity daily quota.");
         meter.CreateObservableGauge("zaghlol.service.up", () => new Measurement<long>(1, new KeyValuePair<string, object?>("version", serviceVersion)), description: "1 while the process runs.");
     }
+
+    /// <summary>The stores whose notifications can be dead-lettered; their series start at 0.</summary>
+    public static IReadOnlyList<string> NotificationStores { get; } = ["play", "apple"];
 
     public void PurchaseVerified(string store, string outcome, string code) =>
         verify.Add(1, Tags(("store", store), ("outcome", outcome), ("code", code)));
@@ -98,6 +103,23 @@ public sealed partial class ZaghlolMetrics : IDisposable
     internal void AuditAlertFired(string rule) => alertFired.Add(1, Tags(("rule", rule)));
 
     public void Dispose() => meter.Dispose();
+
+    /// <summary>
+    /// A labelled counter series doesn't exist until its first Add, and Prometheus <c>increase()</c> needs an earlier sample,
+    /// so the first event of a rare "any occurrence" alert would never fire. Every such series starts at 0 here.
+    /// </summary>
+    private void SeedSeries()
+    {
+        foreach (var rule in Enum.GetValues<AuditAlertRule>())
+        {
+            alertFired.Add(0, Tags(("rule", AlertSignal.RuleName(rule))));
+        }
+
+        foreach (var store in NotificationStores)
+        {
+            deadLetter.Add(0, Tags(("store", store)));
+        }
+    }
 
     private IEnumerable<Measurement<double>> ObservePriceAges() =>
         priceAges.Select(p => new Measurement<double>(p.Value, new KeyValuePair<string, object?>("symbol", p.Key)));

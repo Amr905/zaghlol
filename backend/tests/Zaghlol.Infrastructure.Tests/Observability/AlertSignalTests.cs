@@ -31,8 +31,13 @@ public sealed class AlertSignalTests
                 l.EnableMeasurementEvents(instrument);
             }
         };
-        listener.SetMeasurementEventCallback<long>((_, _, tags, _) =>
+        listener.SetMeasurementEventCallback<long>((_, value, tags, _) =>
         {
+            if (value == 0)
+            {
+                return;
+            }
+
             foreach (var tag in tags)
             {
                 counted.Enqueue(string.Create(CultureInfo.InvariantCulture, $"{tag.Key}={tag.Value}"));

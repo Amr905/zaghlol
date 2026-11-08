@@ -36,7 +36,7 @@ public sealed class SignVerifyMetricTests
     [Fact]
     public void TheTagValueIsStable()
     {
-        // Alert rules match this literal (deploy/observability/alerts/platform.yaml).
+        // Alert rules match this literal (deploy/observability/alerts/purchases.yaml).
         Assert.Equal("sign_verify", KmsMetrics.SignVerifyOperation);
     }
 

@@ -30,7 +30,8 @@ groups:
 
       - alert: ZaghlolPlayIntegrityQuotaHigh
         expr: |
-          sum(increase(zaghlol_play_integrity_calls_total[1d])) / max(zaghlol_play_integrity_daily_quota) > 0.5
+          (sum(increase(zaghlol_play_integrity_calls_total[1d])) / max(zaghlol_play_integrity_daily_quota) > 0.5)
+          and max(zaghlol_play_integrity_daily_quota) > 0
         for: 10m
         labels:
           severity: warn

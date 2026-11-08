@@ -25,13 +25,16 @@ public static class TelemetryServiceCollectionExtensions
     /// </summary>
     /// <param name="configureTracing">Host-specific instrumentation (ASP.NET Core in the API).</param>
     /// <param name="configureMetrics">Host-specific meters (ASP.NET Core in the API).</param>
+    /// <param name="configureExporters">Extra span exporters or processors (tests). They are registered after the redactor,
+    /// at the same place as the OTLP exporter, so they only ever see redacted spans.</param>
     public static IServiceCollection AddZaghlolTelemetry(
         this IServiceCollection services,
         IConfiguration configuration,
         IHostEnvironment environment,
         string serviceName,
         Action<TracerProviderBuilder>? configureTracing = null,
-        Action<MeterProviderBuilder>? configureMetrics = null)
+        Action<MeterProviderBuilder>? configureMetrics = null,
+        Action<TracerProviderBuilder>? configureExporters = null)
     {
         ArgumentNullException.ThrowIfNull(services);
         ArgumentNullException.ThrowIfNull(configuration);
@@ -74,6 +77,8 @@ public static class TelemetryServiceCollectionExtensions
                 {
                     tracing.AddOtlpExporter();
                 }
+
+                configureExporters?.Invoke(tracing);
             })
             .WithMetrics(metrics =>
             {
@@ -121,6 +126,7 @@ internal sealed class MetricsStarter(ZaghlolMetrics metrics) : IHostedService
     public Task StartAsync(CancellationToken cancellationToken)
     {
         _ = metrics;
+        KmsMetrics.Seed();
         return Task.CompletedTask;
     }
 
