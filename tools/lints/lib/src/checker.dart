@@ -49,7 +49,7 @@ class _RuleVisitor extends RecursiveAstVisitor<void> {
   final ClassGraph graph;
   final List<Violation> violations = [];
 
-  int _buildDepth = 0;
+  int _uiDepth = 0;
 
   void _report(String rule, int offset, String message) {
     final line = file.lineInfo.getLocation(offset).lineNumber;
@@ -107,12 +107,30 @@ class _RuleVisitor extends RecursiveAstVisitor<void> {
 
   // Rule 2: no_ui_string_literals.
 
+  /// UI scope: methods named `build`, and any method, getter or function whose
+  /// return type is a widget (`Widget`, `PreferredSizeWidget`, `Widget?`,
+  /// `List<Widget>`), so helpers like `_buildHeader()` are covered too.
+  static final RegExp _widgetType = RegExp(
+    r'^(?:List<)?(?:\w+\.)?\w*Widget\??>?\??$',
+  );
+
+  static bool _returnsWidget(TypeAnnotation? type) =>
+      type != null && _widgetType.hasMatch(type.toSource());
+
   @override
   void visitMethodDeclaration(MethodDeclaration node) {
-    final isBuild = node.name.lexeme == 'build';
-    if (isBuild) _buildDepth++;
+    final isUi = node.name.lexeme == 'build' || _returnsWidget(node.returnType);
+    if (isUi) _uiDepth++;
     super.visitMethodDeclaration(node);
-    if (isBuild) _buildDepth--;
+    if (isUi) _uiDepth--;
+  }
+
+  @override
+  void visitFunctionDeclaration(FunctionDeclaration node) {
+    final isUi = _returnsWidget(node.returnType);
+    if (isUi) _uiDepth++;
+    super.visitFunctionDeclaration(node);
+    if (isUi) _uiDepth--;
   }
 
   @override
@@ -132,12 +150,12 @@ class _RuleVisitor extends RecursiveAstVisitor<void> {
   }
 
   void _checkString(StringLiteral node, String text) {
-    if (_buildDepth == 0 || scope.isL10n) return;
+    if (_uiDepth == 0 || scope.isL10n) return;
     if (isTechnicalString(text) || _isAllowedByContext(node)) return;
     _report(
       ruleNoUiStringLiterals,
       node.offset,
-      'Hard-coded string in a build method; use the localized strings.',
+      'Hard-coded string in a build method or widget helper; use the localized strings.',
     );
   }
 
