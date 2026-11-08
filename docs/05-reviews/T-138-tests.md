@@ -61,3 +61,18 @@ Other delta items (not part of the round, noted only): `AnyOccurrenceSeriesExist
 ### Round 2 verdict: TESTS_INSUFFICIENT
 
 M1 is narrowed but not closed: one remaining major (M1b). Everything else stays as in round 1. After the seam fix and a passing mutation check, the verdict would be TESTS_SUFFICIENT without another full round.
+
+## Round 3 (delta c0288f4..4020b9e, backend-ci 42528633775 green)
+
+Scope: only M1b. Read `git diff c0288f4 4020b9e -- backend/`; not run locally.
+
+- `AddZaghlolTelemetry` now calls `(addOtlpExporter ?? (static t => t.AddOtlpExporter()))(tracing)` inside `if (exportOtlp)`, directly after `AddProcessor(new RedactingActivityProcessor())`. The `configureExporters` hook is gone. Production passes `null`, so the real `AddOtlpExporter()` runs at that exact call site; the test replaces that one call.
+- `ExporterOrderTests.TheRealPipelineExportsRedactedSpansWithTheOtlpEndpointSet` passes its copying `SnapshotProcessor` through `addOtlpExporter`, with `OTEL_EXPORTER_OTLP_ENDPOINT` set, on the real `AddZaghlolTelemetry` and the real `TracerProvider`. The probe now occupies the OTLP exporter's own position, so any move of that call above the redactor puts the probe before it.
+- Mutation evidence: commit 6cc0dd6 moved the seam call above `AddProcessor(redactor)` (diff checked: the only source change is that reordering). Its run 42528095105 failed in the build, format, test job; the other jobs passed. The job-level result is confirmed from the API; the individual failing test name is per the coordinator (job logs need auth). It follows from the code: with the probe first, the sentinel in `url.query`/status reaches it, exactly the behaviour the negative control `TheProbeCatchesAnExporterThatRunsBeforeTheRedactor` shows. Commit 683b28b reverted it, and the final source for this file matches the restored order (`git diff 683b28b 4020b9e` touches only the seeding change).
+- Side finding: the seeding tests were rewritten to go through the real DI path (`SeededSeriesTests` with an in-memory metric exporter, started hosted services). A second mutation (seeding before the provider exists) was also run and reverted. Not in scope; looks sound. Minor: `KmsMetrics.Seed` is checked by existence only because the counter is process-wide.
+
+M1b is closed. M1 is closed.
+
+### Round 3 verdict: TESTS_SUFFICIENT
+
+Remaining items are the minor gaps m1-m8 from round 1 (none blocks).
