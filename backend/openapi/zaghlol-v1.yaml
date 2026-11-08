@@ -67,7 +67,11 @@ paths:
       tags: [Health]
       operationId: getHealth
       summary: Liveness and readiness
-      description: Unauthenticated. Never cached.
+      description: |
+        Unauthenticated. Never cached. Readiness: the server runs a trivial database query as the API's own
+        least-privilege role (1 s timeout; the answer is cached for 2 s, so calls never load the database). While the
+        database is unreachable the answer is `503 UPSTREAM_UNAVAILABLE`. Orchestrators use this for readiness only;
+        liveness is a process-level check.
       responses:
         '200':
           description: The service is up.
@@ -85,6 +89,8 @@ paths:
           $ref: '#/components/responses/RateLimited'
         '500':
           $ref: '#/components/responses/InternalError'
+        '503':
+          $ref: '#/components/responses/UpstreamUnavailable'
 
   /v1/installs:
     post:

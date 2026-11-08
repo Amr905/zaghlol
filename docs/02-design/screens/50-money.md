@@ -21,6 +21,7 @@
 │ 🌍 Wise            USD 1,200  ▸│ multi-currency: first balance + "+2"
 │ 💵 Cash             1,240 EGP ▸│
 │ 👁‍🗨 Company card •9910 Not tracked ▸│ ignored card (C-07 ignored)
+│ Hidden accounts      2 ▸     │ last row, only when ≥ 1 is hidden → hidden list
 ├──────────────────────────────┤
 │ Assets 👑                      │ Gold section
 │ 🪙 Gold 21K  24 g  ≈ 90,000 EGP▸│
@@ -30,6 +31,15 @@
 │ 🕌 Zakah ▸                     │ ONLY when flag on → S-46
 └──────────────────────────────┘
 ```
+**Net-worth unit lines (hero):** one line per currency and per gold karat, never summed (FR-WLT-01, D-29): `EGP 54,000` · `USD 1,200` · `GBP 300` · `Gold 21K: 24 g` · `Gold 24K: 5 g` · gold coins as a count. The ≈ line appears only in the ≈ view.
+**Asset rows (Gold):**
+- Gold: karat and grams, valued at the current price (`≈ value`); the stale badge shows when the price is older than 24 h.
+- Bank certificate: bank, rate, principal, and the next payout date and amount (FR-WLT-04).
+- Cash in a currency: shown in its own currency; with no rate yet it stays in that currency and says so (EC-35).
+- Stocks and funds, property, car: the user's own name and an "Estimated value" tag (entered by hand).
+- Empty (Gold): one line with Add asset.
+
+**Hidden accounts (D-69, R2-4):** the row sits at the end of the *Cards & accounts* list, shows the number of hidden accounts, and opens a plain list. Each row shows the card label and an **Unhide** action, and tapping the row opens S-43. Unhiding needs no confirmation and offers Undo. The intro line says hidden accounts still count in totals, budgets and charts. If the last account is unhidden while the list is open, the list shows an empty state, and the entry row disappears from S-40.
 **Interactions:** tap card → S-41. Add ▸ Account → S-43 (new) · Asset → S-44. Free tapping Assets section → S-68 (section shows locked preview).
 **Validation:** none.
 **States:** *Loading* — skeleton list. *Empty* — no accounts yet: "Accounts appear automatically from your bank messages" + Add account manually. *Stale prices* — C-21 stale badge on gold values. *Error* — standard.

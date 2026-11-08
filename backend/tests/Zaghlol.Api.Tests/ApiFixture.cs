@@ -2,16 +2,17 @@ using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Mvc.Testing;
 using Microsoft.Extensions.DependencyInjection;
 using Serilog.Core;
-using Testcontainers.PostgreSql;
+using Zaghlol.Testing;
 
 namespace Zaghlol.Api.Tests;
 
 /// <summary>
-/// Starts a real PostgreSQL 17 container and boots the API in-process against it.
+/// Starts a real, migrated PostgreSQL 17 (roles bootstrapped like production) and boots the API in-process against it
+/// with its two least-privilege logins.
 /// </summary>
 public sealed class ApiFixture : IAsyncLifetime
 {
-    private PostgreSqlContainer? postgres;
+    private ZaghlolTestDatabase? database;
     private WebApplicationFactory<Program>? factory;
 
     public CapturingSink LogSink { get; } = new();
@@ -22,13 +23,13 @@ public sealed class ApiFixture : IAsyncLifetime
 
     public async Task InitializeAsync()
     {
-        postgres = new PostgreSqlBuilder().WithImage("postgres:17").Build();
-        await postgres.StartAsync();
-        PostgresConnectionString = postgres.GetConnectionString();
+        database = await ZaghlolTestDatabase.StartAsync();
+        PostgresConnectionString = database.Superuser;
 
         factory = new WebApplicationFactory<Program>().WithWebHostBuilder(builder =>
         {
-            builder.UseSetting("ConnectionStrings:Postgres", PostgresConnectionString);
+            builder.UseSetting("ConnectionStrings:App", database.Api);
+            builder.UseSetting("ConnectionStrings:Admin", database.Admin);
             builder.ConfigureServices(services =>
             {
                 services.AddSingleton<ILogEventSink>(LogSink);
@@ -46,9 +47,9 @@ public sealed class ApiFixture : IAsyncLifetime
             await factory.DisposeAsync();
         }
 
-        if (postgres is not null)
+        if (database is not null)
         {
-            await postgres.DisposeAsync();
+            await database.DisposeAsync();
         }
     }
 }

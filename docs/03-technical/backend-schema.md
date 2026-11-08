@@ -14,8 +14,13 @@ Conventions:
 - **Naming:** snake_case.
 - **Migrations:** EF Core, applied by a deploy job.
 - **Schema:** all objects live in schema `zaghlol` (not `public`), owned by `migrator`.
-- **Database roles:** separate roles for API (`app_rw`), workers (`worker_rw`), operators (`ops_ro` + audited `ops_rw` via the admin API only) and migrations (`migrator`). The API uses `app_rw` for `/v1/*` and `ops_rw` for `/admin/v1/*` (two connection strings). Roles are created by `backend/deploy/db/bootstrap-roles.sql` (not by migrations); per-table grants are in the migrations (T-122 design note).
-- **Hardening CHECKs not repeated below:** every SHA-256 / HMAC `bytea` column has `CHECK (octet_length(col) = 32)`; `idempotency_key` has `char_length = 26`; `purchase_events.cause` has a regex CHECK for exactly the listed values (`rtdn:` / `assn:` + `[A-Za-z0-9_]{1,64}`); `audit_log.details` has `CHECK (NOT (details ?| array['email','order_id','orderId']))`.
+- **Database roles:** separate roles for API (`app_rw`), workers (`worker_rw`), operators (`ops_ro` + audited `ops_rw` via the admin API only) and migrations (`migrator`). The API uses `app_rw` for `/v1/*` and `ops_rw` for `/admin/v1/*` (two connection strings). Roles are created by `backend/deploy/db/bootstrap-roles.sql` (not by migrations); per-table grants are in the migrations (T-122 design note, `GrantMatrix.cs`). Each group has its own login (`zaghlol_api` → `app_rw`, `zaghlol_admin` → `ops_rw`, `zaghlol_worker` → `worker_rw`, `zaghlol_ops_ro` → `ops_ro`), so the two API connection strings really are two privilege sets.
+- **Hardening CHECKs not repeated below:**
+  - Every SHA-256 / HMAC `bytea` column has `CHECK (octet_length(col) = 32)`; `idempotency_key` has `char_length = 26`.
+  - `purchase_events.cause` has a regex CHECK for exactly the listed values (`rtdn:` / `assn:` + `[A-Za-z0-9_]{1,64}`).
+  - Formats (T-122 round 2, SEC F8): `installs.app_version` and `daily_active_counts.app_version` match `'^[0-9]{1,4}(\.[0-9]{1,4}){1,3}([+-][0-9A-Za-z.-]{1,32})?$'` (OpenAPI `appVersion`, which allows `-` in the suffix); `bank_requests.country ~ '^[A-Z]{2}$'`; `store_notifications.last_error ~ '^[A-Z0-9_]{1,64}$'`; `char_length(store_key) <= 512` on `purchases` and `store_notifications`.
+- **Invariant triggers (SEC F9):** BEFORE UPDATE triggers raise SQLSTATE 23514 when `installs.seat_key_hash` is replaced or cleared without a tombstone, when `installs.seat_key_trusted` goes true → false, or when `purchases.attach_reclaim_used_at` is cleared or changed. With the two BEFORE DELETE backstops (§2 comments) they are the only functions in the schema.
+- **`audit_log` row-level security (SEC F4):** readers (`ops_ro`, `ops_rw`, `worker_rw`) see every row; `ops_rw` may only insert rows stamped now (no backdating); `worker_rw` may delete only rows past their retention age (§4). There is no UPDATE policy, and no role has UPDATE.
 - **Crypto is computed in the application, never in the DB:** no `pgcrypto`; hashes, keyed hashes (`IKeyedHasher`) and envelope ciphertexts (`IEnvelopeCipher`) arrive as `bytea`.
 
 ## 1. ER overview
@@ -171,7 +176,7 @@ CREATE TABLE purchase_seats (
                                                       -- device_key_trusted, otherwise an ordinary move
   CHECK ((install_id IS NULL) = (proof IS NULL)),
   CHECK ((last_moved_at IS NULL) = (next_move_at IS NULL)),
-  CHECK (next_move_at IS NULL OR date_trunc('hour', next_move_at) = next_move_at),
+  CHECK (next_move_at IS NULL OR date_trunc('hour', next_move_at, 'UTC') = next_move_at),  -- whole UTC hour in any session time zone
   CHECK (cardinality(recent_rebinds) <= 2)
 );
 CREATE INDEX ix_purchase_seats_install ON purchase_seats(install_id);
@@ -281,8 +286,11 @@ CREATE TABLE merchant_contributions (
   install_hash bytea NOT NULL,                  -- HMAC(install_id, pepper) — counts distinct installs without joining
   received_at timestamptz NOT NULL DEFAULT now(),
   UNIQUE (merchant_norm, institution_code, install_hash),
-  CHECK (char_length(merchant_norm) <= 64 AND merchant_norm !~ '[0-9]{6,}'),
-  CHECK (char_length(institution_code) <= 64 AND char_length(category_code) <= 64)
+  -- No run of 6 digits in any script (ASCII, Arabic-Indic, Extended Arabic-Indic, fullwidth), optionally separated by one
+  -- space, dot or dash ('010 1234 5678' is a run); no '@' (e-mail, InstaPay address); at most 64 characters.
+  CHECK (char_length(merchant_norm) <= 64 AND merchant_norm !~ '([0-9٠-٩۰-۹０-９][[:space:].-]?){6,}' AND position('@' in merchant_norm) = 0),
+  CHECK (institution_code ~ '^[a-z0-9_]{1,64}$'),   -- OpenAPI InstitutionCode alphabet (lowercase slug)
+  CHECK (category_code ~ '^[a-z0-9_]{1,64}$')       -- OpenAPI CategoryCode alphabet (no dots)
 );
 CREATE TABLE contribution_aggregates (
   merchant_norm text NOT NULL, institution_code text NOT NULL,
@@ -294,7 +302,9 @@ CREATE TABLE contribution_aggregates (
 
 -- "Request my bank" (FR-BE-10)
 CREATE TABLE bank_requests (
-  institution_name_norm text NOT NULL CHECK (char_length(institution_name_norm) <= 64 AND institution_name_norm !~ '[0-9]{6,}'), country text NOT NULL, channel text NOT NULL CHECK (channel IN ('sms','notification')),
+  institution_name_norm text NOT NULL, country text NOT NULL, channel text NOT NULL CHECK (channel IN ('sms','notification')),
+  CHECK (char_length(institution_name_norm) <= 64 AND institution_name_norm !~ '([0-9٠-٩۰-۹０-９][[:space:].-]?){6,}'
+         AND position('@' in institution_name_norm) = 0),
   install_hash bytea NOT NULL, received_at timestamptz NOT NULL DEFAULT now(),
   PRIMARY KEY (institution_name_norm, country, channel, install_hash)
 );
@@ -306,8 +316,13 @@ CREATE TABLE daily_active_counts (day date NOT NULL, platform text NOT NULL, app
 -- Operators & audit (FR-BE-08)
 CREATE TABLE operators (id uuid PRIMARY KEY, oidc_subject text NOT NULL UNIQUE, display_name text NOT NULL,
   roles text[] NOT NULL, disabled_at timestamptz);
-CREATE TABLE audit_log (id bigint GENERATED ALWAYS AS IDENTITY PRIMARY KEY, operator_id uuid NOT NULL,
-  action text NOT NULL, target text NOT NULL, details jsonb NOT NULL, at timestamptz NOT NULL DEFAULT now());
+CREATE TABLE audit_log (id bigint GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
+  operator_id uuid NOT NULL REFERENCES operators(id),   -- operators are disabled, never deleted
+  action text NOT NULL, target text NOT NULL, details jsonb NOT NULL, at timestamptz NOT NULL DEFAULT now(),
+  -- No e-mail or order ID under any key at any depth, in any letter case, and no '@' anywhere (D-57, NFR-PRIV-07)
+  CHECK (NOT jsonb_path_exists(details, 'lax $.** ? (@.type() == "object").keyvalue() ? (@.key like_regex "^(e-?mail|order_?id)$" flag "i")')
+         AND details::text !~ '@'),
+  CHECK (position('@' in target) = 0));
 -- Support lookups: target = install id, or 'email:' || hex(HMAC-SHA256(K_audit, NFC(trim(lower(email))))); details.account_id
 -- = the matched account. Never the e-mail. Pseudonymous personal data (see §3, §4).
 -- Support seat moves and detaches (backend-api §5.3, D-57, FR-BE-11): action IN ('support_seat_move','support_detach'),
@@ -324,7 +339,9 @@ CREATE TABLE audit_log (id bigint GENERATED ALWAYS AS IDENTITY PRIMARY KEY, oper
 
 | Concern | Mechanism |
 |---|---|
-| Contributions can't contain people or amounts | API validation (BR-SYNC-04 filters, `security-model.md` §6), plus a DB `CHECK (merchant_norm !~ '[0-9]{6,}')` and a length cap of 64 (the same two CHECKs on `bank_requests.institution_name_norm`) |
+| Contributions can't contain people or amounts | API validation (BR-SYNC-04 filters, `security-model.md` §6; digits folded to ASCII and separators stripped first). The DB backstop rejects a run of 6 digits in any script (ASCII, Arabic-Indic `٠-٩`, Extended `۰-۹`, fullwidth `０-９`), optionally separated by one space, dot or dash, rejects any `@`, and caps the length at 64 (the same CHECK on `bank_requests.institution_name_norm`). `institution_code` and `category_code` must be lowercase slugs |
+| Direct read-only DB access | `ops_ro` (login `zaghlol_ops_ro`, break-glass only, T-140) can't read `accounts.email`, `accounts.provider_subject`, `purchases.store_key`, `purchases.linked_purchase_token`, `store_notifications.store_key`, token hashes, refresh tokens or stored responses. Support lookups go through the audited admin API (`ops_rw`) |
+| Wrong credentials | Each runtime process checks at startup that its login is a member of exactly its own group and is not a superuser, the schema owner or `migrator`, and stops otherwise; readiness reports 503 until the App login passes the same check |
 | Distinct counts without tracking | `install_hash` = HMAC-SHA256 with a pepper held in the KMS; it can't be joined back to `installs` without the pepper |
 | No device identifiers | No column exists for IMEI, ad ID or phone number; DTOs reject unknown fields |
 | Purchase link to a person | Store receives `obfuscatedAccountId`/`appAccountToken` = HMAC(install_id), never e-mail |
@@ -342,7 +359,8 @@ CREATE TABLE audit_log (id bigint GENERATED ALWAYS AS IDENTITY PRIMARY KEY, oper
 | Data | Retention | Job |
 |---|---|---|
 | `installs` inactive (no sync) | 12 months, then deleted (cascades links; purchases keep `install_id = NULL` for store reconciliation) | `RetentionPurger` daily |
-| Deleted installs/accounts | Tombstone 30 days, then hard delete | same |
+| Deleted installs | Tombstone (`deleted_at`) 30 days, then hard delete | same |
+| Deleted accounts | No tombstone: `DELETE /v1/accounts/me` hard-deletes the row at once (cascading `account_installs`; the trigger clears the purchase links). Audit rows naming the account keep their own retention (below) | API (T-135) |
 | `store_notifications` | 90 days | same |
 | `merchant_contributions` raw rows | Deleted when the aggregate is promoted/rejected, or after 180 days | same |
 | `bank_requests` | 24 months (aggregate counts kept) | same |
@@ -359,6 +377,10 @@ CREATE TABLE audit_log (id bigint GENERATED ALWAYS AS IDENTITY PRIMARY KEY, oper
 | DB backups (PITR) | 14 days | provider |
 
 **Retention indexes (T-122):** `installs(last_seen_at)`; `installs(deleted_at) WHERE deleted_at IS NOT NULL`; `installs(first_seen_at) WHERE registration_key_hash IS NOT NULL`; `store_notifications(received_at)`; `merchant_contributions(received_at)`; `bank_requests(received_at)`; `audit_log(at)` plus `audit_log(at) WHERE action IN ('support_lookup','support_seat_move','support_detach','support_unfreeze')`; `replay_guard(expires_at)`; `seat_claimants(claimed_at)`; `idempotency_records(expires_at)`.
+
+**Foreign-key indexes (EF convention, T-122):** `ix_account_installs_install_id`, `ix_seat_claimants_install_id`, `ix_purchase_events_purchase_id`, `ix_catalog_categories_parent_code`, `ix_catalog_merchants_category_code`, `ix_catalog_aliases_merchant_id`, `ix_audit_log_operator_id`. They serve the cascades and the purges. The unique contribution key is named `ux_merchant_contributions_identity` (the convention name would exceed PostgreSQL's 63-byte limit).
+
+**`audit_log` purges are enforced by the database too:** the `worker_rw` DELETE policy admits only rows past these ages (support actions 1 year, others 3 years), so a purger bug can't erase recent evidence.
 
 ## 5. Capacity check (NFR-BE-04)
 

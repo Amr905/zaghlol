@@ -1,8 +1,27 @@
-# Inherits the shared workspace rules (strict-casts/inference/raw-types, lints).
-include: ../analysis_options.yaml
+# The app uses flutter_lints (T-002, review follow-up F11). A file can have only
+# one `include`, so the shared workspace rules from ../analysis_options.yaml are
+# repeated here; keep both in sync. The generated-file excludes are kept (F13).
+# The zaghlol_lints rules run through tools/lints/bin/zaghlol_lints.dart (see
+# .github/workflows/README.md), not through `flutter analyze`.
+include: package:flutter_lints/flutter.yaml
 
 analyzer:
+  language:
+    strict-casts: true
+    strict-inference: true
+    strict-raw-types: true
   exclude:
+    - "**/*.g.dart"
+    - "**/*.freezed.dart"
+    - "**/generated/**"
     - build/**
     - android/**
     - ios/**
+
+linter:
+  rules:
+    - always_declare_return_types
+    - avoid_print
+    - prefer_final_locals
+    - prefer_single_quotes
+    - unawaited_futures

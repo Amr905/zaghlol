@@ -6,11 +6,13 @@ on:
     paths:
       - "backend/**"
       - "docs/03-technical/backend-api.md"
+      - "docs/03-technical/backend-schema.md"
       - ".github/workflows/backend-ci.yml"
   pull_request:
     paths:
       - "backend/**"
       - "docs/03-technical/backend-api.md"
+      - "docs/03-technical/backend-schema.md"
       - ".github/workflows/backend-ci.yml"
 
 permissions:
@@ -47,6 +49,13 @@ jobs:
       - name: Build (warnings are errors)
         run: |
           dotnet build Zaghlol.sln -c Release --no-restore -warnaserror || { echo "::error title=dotnet build::Build failed; warnings are treated as errors."; exit 1; }
+
+      - name: EF model matches the migrations (no pending model changes)
+        run: |
+          dotnet tool restore || { echo "::error title=dotnet tool restore::Could not restore dotnet-ef (.config/dotnet-tools.json)."; exit 1; }
+          dotnet tool run dotnet-ef migrations has-pending-model-changes \
+            --project src/Zaghlol.Infrastructure --startup-project src/Zaghlol.Infrastructure \
+            --configuration Release --no-build || { echo "::error title=EF migrations::The EF model and the migration snapshot differ. Generate a migration (backend-ef-migration workflow)."; exit 1; }
 
       - name: Verify formatting
         run: |
@@ -130,21 +139,27 @@ jobs:
               ;;
           esac
 
-      - name: Container process runs as non-root and serves /v1/health
+      # No database here, so readiness must fail closed: 503 UPSTREAM_UNAVAILABLE (FU-003). The 200 path with a real
+      # database is covered by compose-smoke and the Testcontainers tests.
+      - name: Container process runs as non-root and serves /v1/health (503 without a database)
         run: |
-          cid=$(docker run -d -p 8080:8080 "$IMAGE")
-          ok=""
+          cid=$(docker run -d -p 8080:8080 \
+            -e 'ConnectionStrings__App=Host=127.0.0.1;Port=1;Database=none;Username=none' \
+            -e 'ConnectionStrings__Admin=Host=127.0.0.1;Port=1;Database=none;Username=none' \
+            "$IMAGE")
+          status=""
           for i in $(seq 1 30); do
-            if curl -fsS http://localhost:8080/v1/health -o health.json; then ok=1; break; fi
+            status=$(curl -sS -o health.json -w '%{http_code}' http://localhost:8080/v1/health || true)
+            if [ "$status" = "503" ]; then break; fi
             sleep 1
           done
-          if [ -z "$ok" ]; then
+          if [ "$status" != "503" ]; then
             docker logs "$cid"
-            echo "::error title=Container health::/v1/health did not return 200 from the image."
+            echo "::error title=Container health::/v1/health did not return 503 without a database (got '$status')."
             exit 1
           fi
           cat health.json; echo
-          grep -q '"status":"ok"' health.json || { echo "::error title=Container health::Unexpected /v1/health body."; exit 1; }
+          grep -q '"code":"UPSTREAM_UNAVAILABLE"' health.json || { echo "::error title=Container health::Unexpected /v1/health body."; exit 1; }
           docker top "$cid" -eo pid,uid,args
           uid=$(docker top "$cid" -eo pid,uid,args | grep 'Zaghlol.Api.dll' | awk '{print $2}' | head -n1)
           echo "Process uid=$uid"

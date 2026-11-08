@@ -32,6 +32,26 @@ public class LiveApiContractTests(ContractApiFixture fixture) : IClassFixture<Co
     }
 
     [Fact]
+    public async Task HealthWithoutDatabaseIsTheDeclared503Problem()
+    {
+        var operation = Spec.Operations().Single(o => o.Id == "getHealth");
+        Assert.True(operation.Body["responses"]!.AsObject().ContainsKey("503"));
+
+        fixture.Readiness.Ready = false;
+        try
+        {
+            using var response = await fixture.Client.GetAsync(new Uri("/v1/health", UriKind.Relative));
+
+            await AssertProblem(response, HttpStatusCode.ServiceUnavailable, "UPSTREAM_UNAVAILABLE");
+            Assert.True(response.Headers.CacheControl?.NoStore);
+        }
+        finally
+        {
+            fixture.Readiness.Ready = true;
+        }
+    }
+
+    [Fact]
     public async Task UnknownRouteReturnsSpecProblem()
     {
         using var response = await fixture.Client.GetAsync(new Uri("/v1/does-not-exist", UriKind.Relative));
