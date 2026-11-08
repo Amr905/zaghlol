@@ -1,0 +1,29 @@
+name: scratch-gen
+on:
+  push:
+    branches: ['task/T-004-scratch']
+permissions:
+  contents: read
+jobs:
+  gen:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@fbc6f3992d24b796d5a048ff273f7fcc4a7b6c09 # v5.1.0
+        with:
+          persist-credentials: false
+      - uses: subosito/flutter-action@1a449444c387b1966244ae4d4f8c696479add0b2 # v2.23.0
+        with:
+          flutter-version: '3.47.9'
+          channel: stable
+      - run: flutter pub get 2>&1 | tail -5
+      - run: grep -A8 "^  pigeon:" pubspec.lock | while read l; do echo "::notice::lock: $l"; done
+      - run: bash app/tool/generate_pigeon.sh 2>&1 | tail -20 | while read l; do echo "::notice::gen: $l"; done
+      - name: emit
+        run: |
+          git add -A -N
+          git status --porcelain | while read l; do echo "::notice::st: $l"; done
+          tar czf - app/lib/core/platform app/android/app/src/main/kotlin/app/zaghlol/platform app/ios/Runner/Platform | base64 -w0 > out.b64
+          wc -c out.b64
+          split -b 60000 -d out.b64 chunk.
+          i=0
+          for c in chunk.*; do echo "::notice title=chunk$i::$(cat $c)"; i=$((i+1)); done
