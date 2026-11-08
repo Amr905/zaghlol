@@ -71,3 +71,21 @@ Architecture: KMS code sits in `Zaghlol.Infrastructure/Kms` and middleware/filte
 - Route #2 to T-124, #3 to T-132, #4–#7 to T-140, #9 to T-138 and #10 to T-128 as FUs.
 - Squash-merge the PR: WIP commit c76f75f contains the temporary vector-dump CI step (D8).
 - The branch is based on 635c791; origin/main has moved on to bb81775. Rebase before merging and re-run CI.
+
+## Round 2 (delta re-review)
+
+| Field | Value |
+|-------|-------|
+| Date | 2026-11-08 |
+| Commit / diff | `git diff 9035f64 1a8d165 -- backend/` (6 files). Merge commit 7bf7e9a ignored; it touches nothing under `backend/` |
+| CI | backend-ci 42502737300 green, 5/5, head SHA 1a8d165 confirmed |
+| Verdict | **APPROVED** |
+
+| Round-1 item | Result | Evidence |
+|--------------|--------|----------|
+| #1 major: bodiless non-200 responses lost the problem body | FIXED | `ResponseSigningMiddleware`: for a non-200 response with an empty buffer, the middleware now returns before it sets `Content-Length` or writes anything, so the outer `UseStatusCodePages` writes the RFC 9457 body. A non-200 response with a body is still copied out unsigned. A forged `Zaghlol-Signature` header is still removed first. `ABodilessErrorOfASignedEndpointStillGetsTheProblemBody` covers bare 404, bare 401 and the `NotFound` arm of `Results<Ok,NotFound>`: each gets `application/problem+json` with the right `code` and no signature |
+| 200s are always signed | CONFIRMED | The `StatusCode == 200` branch is checked first and doesn't depend on body size, so an empty 200 is still signed and gets `Content-Length` (`AnEmptyObjectBodyIsSigned`, the cap tests and the echo tests are unchanged and green) |
+| #8 nit: `Retry-After` constant | FIXED | Derived from `KmsRetryAfterSeconds` with the invariant culture |
+| #3 minor / security L-2: echo check skipped status-less results | FIXED | The pattern now matches `StatusCode: null or 200`. `TypedResults.Json` (null status, writes 200) is checked; a `Json(..., statusCode: 4xx)` is still exempt, which is correct. `AnAnchoredBodyThatDoesNotEchoTheNonceFailsClosed` now also runs `/t/anchored-json-wrong`, for both the absent and the valid nonce |
+
+No new findings. Follow-ups #2, #4–#7, #9 and #10 stand as routed in round 1; #3 and #8 are closed. Squash-merge still required (D8).
