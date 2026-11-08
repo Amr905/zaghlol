@@ -72,11 +72,11 @@ public static class TelemetryServiceCollectionExtensions
                 configureTracing?.Invoke(tracing);
 
                 // Registered before any exporter, so nothing is exported unredacted.
+                tracing.AddProcessor(new RedactingActivityProcessor());
                 if (exportOtlp)
                 {
                     (addOtlpExporter ?? (static t => t.AddOtlpExporter()))(tracing);
                 }
-                tracing.AddProcessor(new RedactingActivityProcessor());
             })
             .WithMetrics(metrics =>
             {

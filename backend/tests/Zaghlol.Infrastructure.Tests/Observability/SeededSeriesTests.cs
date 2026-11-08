@@ -45,22 +45,24 @@ public sealed class SeededSeriesTests
         Assert.True(provider.GetRequiredService<MeterProvider>().ForceFlush(10_000));
 
         var zeros = new List<(string Name, string Tag)>();
+
+        // The KMS counter is process-wide, so a parallel test may already have moved a series off 0: for it, existence counts.
+        var present = new List<(string Name, string Tag)>();
         foreach (var metric in exported.Where(m => m.MetricType == MetricType.LongSum))
         {
             foreach (var point in metric.MetricPoints)
             {
-                if (point.GetSumLong() != 0)
-                {
-                    continue;
-                }
-
                 var tags = new List<string>();
                 foreach (var tag in point.Tags)
                 {
                     tags.Add($"{tag.Key}={tag.Value}");
                 }
 
-                zeros.Add((metric.Name, string.Join(';', tags)));
+                present.Add((metric.Name, string.Join(';', tags)));
+                if (point.GetSumLong() == 0)
+                {
+                    zeros.Add((metric.Name, string.Join(';', tags)));
+                }
             }
         }
 
@@ -76,7 +78,7 @@ public sealed class SeededSeriesTests
 
         foreach (var operation in new[] { "sign", "sign_verify", "hmac", "data_key", "public_key" })
         {
-            Assert.Contains(("zaghlol.kms.unavailable", "operation=" + operation), zeros);
+            Assert.Contains(("zaghlol.kms.unavailable", "operation=" + operation), present);
         }
     }
 }
