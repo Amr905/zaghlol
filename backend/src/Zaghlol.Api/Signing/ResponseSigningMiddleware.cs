@@ -70,6 +70,13 @@ internal sealed class ResponseSigningMiddleware(RequestDelegate next, ISigner si
             context.Response.Headers[HeaderName] = signature.HeaderValue;
         }
 
+        else if (body.IsEmpty)
+        {
+            // A bodiless 4xx/5xx (NotFound(), Unauthorized()) stays untouched: no Content-Length, so the status-code
+            // pages middleware outside can still write the RFC 9457 problem body.
+            return;
+        }
+
         context.Response.ContentLength = body.Length;
         if (body.Length > 0)
         {

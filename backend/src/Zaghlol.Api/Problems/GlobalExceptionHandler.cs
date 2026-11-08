@@ -1,3 +1,4 @@
+using System.Globalization;
 using Microsoft.AspNetCore.Diagnostics;
 using Microsoft.AspNetCore.Mvc;
 using Zaghlol.Infrastructure.Kms;
@@ -34,7 +35,7 @@ internal sealed partial class GlobalExceptionHandler(
         var problem = new ProblemDetails { Status = status };
         if (exception is KmsUnavailableException)
         {
-            httpContext.Response.Headers.RetryAfter = "5";
+            httpContext.Response.Headers.RetryAfter = KmsRetryAfterSeconds.ToString(CultureInfo.InvariantCulture);
             problem.Extensions["retryAfterSeconds"] = KmsRetryAfterSeconds;
         }
         else if (status >= StatusCodes.Status500InternalServerError)

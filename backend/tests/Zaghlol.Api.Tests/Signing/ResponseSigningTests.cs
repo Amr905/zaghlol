@@ -65,6 +65,21 @@ public partial class ResponseSigningTests(SigningHostFixture fixture) : IClassFi
         Assert.NotEmpty(await response.Content.ReadAsByteArrayAsync());
     }
 
+    [Theory]
+    [InlineData("/t/signed-404-bodiless", HttpStatusCode.NotFound, "NOT_FOUND")]
+    [InlineData("/t/signed-401-bodiless", HttpStatusCode.Unauthorized, "UNAUTHORIZED")]
+    [InlineData("/t/signed-union-not-found", HttpStatusCode.NotFound, "NOT_FOUND")]
+    public async Task ABodilessErrorOfASignedEndpointStillGetsTheProblemBody(string path, HttpStatusCode status, string code)
+    {
+        using var response = await GetAsync(path);
+
+        Assert.Equal(status, response.StatusCode);
+        Assert.False(response.Headers.Contains(ResponseSigningMiddleware.HeaderName));
+        Assert.Equal("application/problem+json", response.Content.Headers.ContentType?.MediaType);
+        using var json = JsonDocument.Parse(await response.Content.ReadAsStringAsync());
+        Assert.Equal(code, json.RootElement.GetProperty("code").GetString());
+    }
+
     [Fact]
     public async Task AHandlerCannotSupplyItsOwnSignature()
     {

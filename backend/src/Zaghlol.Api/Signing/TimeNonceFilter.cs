@@ -31,7 +31,8 @@ internal sealed class TimeNonceFeature(string? value) : ITimeNonceFeature
 /// R4-2 (backend-api §1): validates <c>Zaghlol-Time-Nonce</c> for the six anchoring operations and exposes it to the
 /// handler only through <see cref="ITimeNonceFeature"/>. Never stored, logged, traced or put in problem bodies.
 /// Registered first among endpoint filters (<see cref="TimeNonceEndpointExtensions.WithTimeNonce"/>), ahead of
-/// idempotency, so a malformed nonce is always 400 and never a replay. After the handler, a typed 200 result whose
+/// idempotency, so a malformed nonce is always 400 and never a replay. After the handler, a typed 200 result (or one with
+/// no status code, such as <c>TypedResults.Json</c>, which writes 200) whose
 /// <see cref="IAnchoredResponse.TimeNonce"/> differs from the request fails closed (500). Raw replay results are exempt.
 /// </summary>
 internal sealed class TimeNonceFilter : IEndpointFilter
@@ -115,7 +116,7 @@ internal sealed class TimeNonceFilter : IEndpointFilter
 
         return result switch
         {
-            IValueHttpResult { Value: IAnchoredResponse value } and IStatusCodeHttpResult { StatusCode: StatusCodes.Status200OK } => value,
+            IValueHttpResult { Value: IAnchoredResponse value } and IStatusCodeHttpResult { StatusCode: null or StatusCodes.Status200OK } => value,
             IAnchoredResponse direct => direct,
             _ => null,
         };

@@ -106,6 +106,9 @@ public sealed class SigningHostFixture : IAsyncLifetime, IDisposable
         app.MapGet("/t/signed-empty", () => TypedResults.Ok(new Dictionary<string, string>())).RequireResponseSignature();
         app.MapGet("/t/unsigned", () => TypedResults.Ok(new PlainBody("plain", 1)));
         app.MapGet("/t/signed-404", () => TypedResults.NotFound(new PlainBody("missing", 0))).RequireResponseSignature();
+        app.MapGet("/t/signed-404-bodiless", () => TypedResults.NotFound()).RequireResponseSignature();
+        app.MapGet("/t/signed-401-bodiless", () => TypedResults.Unauthorized()).RequireResponseSignature();
+        app.MapGet("/t/signed-union-not-found", Results<Ok<PlainBody>, NotFound> () => TypedResults.NotFound()).RequireResponseSignature();
         app.MapGet("/t/signed-409", () => TypedResults.Conflict(new PlainBody("conflict", 0))).RequireResponseSignature();
 
         app.MapGet("/t/signed-body-stream", async (HttpContext context) =>
@@ -160,6 +163,10 @@ public sealed class SigningHostFixture : IAsyncLifetime, IDisposable
             .RequireResponseSignature();
 
         app.MapGet("/t/anchored-wrong", () => TypedResults.Ok(new AnchoredBody("AAAAAAAAAAAAAAAAAAAAAA", "wrong")))
+            .WithTimeNonce()
+            .RequireResponseSignature();
+
+        app.MapGet("/t/anchored-json-wrong", () => TypedResults.Json(new AnchoredBody("AAAAAAAAAAAAAAAAAAAAAA", "json")))
             .WithTimeNonce()
             .RequireResponseSignature();
 

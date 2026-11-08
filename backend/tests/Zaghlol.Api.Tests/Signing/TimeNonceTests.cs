@@ -99,11 +99,17 @@ public class TimeNonceTests(SigningHostFixture fixture) : IClassFixture<SigningH
     [InlineData(Valid)]
     public async Task AnAnchoredBodyThatDoesNotEchoTheNonceFailsClosed(string? nonce)
     {
-        using var response = await SendAsync("/t/anchored-wrong", nonce);
+        foreach (var path in MismatchPaths)
+        {
+            using var response = await SendAsync(path, nonce);
 
-        Assert.Equal(HttpStatusCode.InternalServerError, response.StatusCode);
-        Assert.False(response.Headers.Contains(ResponseSigningMiddleware.HeaderName));
+            Assert.Equal(HttpStatusCode.InternalServerError, response.StatusCode);
+            Assert.False(response.Headers.Contains(ResponseSigningMiddleware.HeaderName));
+        }
     }
+
+    // TypedResults.Json carries no status code (it writes 200), so the echo check must cover it too.
+    private static readonly string[] MismatchPaths = ["/t/anchored-wrong", "/t/anchored-json-wrong"];
 
     [Fact]
     public async Task TheNonceAppearsInNoLogSpanOrExceptionOutput()
