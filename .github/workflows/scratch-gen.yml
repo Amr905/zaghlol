@@ -20,12 +20,27 @@ jobs:
           grep -A8 "^  pigeon:" pubspec.lock | while read l; do echo "::notice::lock $l"; done
       - run: |
           bash app/tool/generate_pigeon.sh 2>&1 | tail -20 | while read l; do echo "::notice::gen $l"; done
-      - name: emit
+      - name: pack
         run: |
-          git add -A -N
-          git status --porcelain | while read l; do echo "::notice::st $l"; done
           tar czf - app/lib/core/platform app/android/app/src/main/kotlin/app/zaghlol/platform app/ios/Runner/Platform | base64 -w0 > out.b64
           wc -c out.b64
           split -b 60000 -d out.b64 chunk.
-          i=0
-          for c in chunk.*; do echo "::notice title=chunk$i::$(cat $c)"; i=$((i+1)); done
+          ls chunk.*
+      - name: c0
+        run: |
+          if [ -f chunk.00 ]; then echo "::notice title=chunk0::$(cat chunk.00)"; fi
+      - name: c1
+        run: |
+          if [ -f chunk.01 ]; then echo "::notice title=chunk1::$(cat chunk.01)"; fi
+      - name: c2
+        run: |
+          if [ -f chunk.02 ]; then echo "::notice title=chunk2::$(cat chunk.02)"; fi
+      - name: c3
+        run: |
+          if [ -f chunk.03 ]; then echo "::notice title=chunk3::$(cat chunk.03)"; fi
+      - name: c4
+        run: |
+          if [ -f chunk.04 ]; then echo "::notice title=chunk4::$(cat chunk.04)"; fi
+      - name: c5
+        run: |
+          if [ -f chunk.05 ]; then echo "::notice title=chunk5::$(cat chunk.05)"; fi
