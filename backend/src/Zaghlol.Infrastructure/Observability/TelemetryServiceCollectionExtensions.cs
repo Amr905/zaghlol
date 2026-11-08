@@ -119,13 +119,14 @@ public static class TelemetryServiceCollectionExtensions
 }
 
 /// <summary>Builds <see cref="ZaghlolMetrics"/> when the host starts, so the <c>Zaghlol</c> meter is live from the first export.</summary>
-internal sealed class MetricsStarter(ZaghlolMetrics metrics, MeterProvider provider) : IHostedService
+internal sealed class MetricsStarter(MeterProvider provider, ZaghlolMetrics metrics) : IHostedService
 {
     // The MeterProvider comes first in the constructor, so its AddMeter subscriptions exist before any seeded zero is added.
     public Task StartAsync(CancellationToken cancellationToken)
     {
         _ = provider;
-        _ = metrics;
+        metrics.SeedSeries();
+        KmsMetrics.Seed();
         return Task.CompletedTask;
     }
 
