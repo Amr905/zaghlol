@@ -1,0 +1,38 @@
+name: scratch-t007
+# THROWAWAY (T-007 iteration only; never merged): format diff, analyze and the
+# host DB tests against a freshly resolved lock.
+on:
+  push:
+    branches: ['scratch/T-007-*']
+permissions:
+  contents: read
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@fbc6f3992d24b796d5a048ff273f7fcc4a7b6c09 # v5.1.0
+        with:
+          persist-credentials: false
+      - uses: subosito/flutter-action@1a449444c387b1966244ae4d4f8c696479add0b2 # v2.23.0
+        with:
+          flutter-version: '3.47.9'
+          channel: stable
+          cache: true
+      - name: pub get (resolve)
+        run: flutter pub get
+      - name: lock diff
+        run: git diff -- pubspec.lock | grep -E '^[+-]  [a-z_]+:$|^[+-]    version:' || true
+      - name: format diff
+        run: |
+          dart format . > /dev/null || true
+          echo BEGIN_FORMAT_PATCH
+          git diff -- '*.dart'
+          echo END_FORMAT_PATCH
+      - name: analyze
+        run: flutter analyze || true
+      - name: host db tests
+        working-directory: app
+        run: |
+          mkdir -p "$RUNNER_TEMP/interop"
+          ZAGHLOL_DB_INTEROP_DIR="$RUNNER_TEMP/interop" flutter test test/core/db/ --reporter expanded 2>&1 | tail -n 150
