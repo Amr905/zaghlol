@@ -38,6 +38,16 @@ jobs:
           cache: true
       - name: Resolve workspace (lockfile must be up to date)
         run: flutter pub get --enforce-lockfile
+      - name: Pigeon generated files are up to date (T-004)
+        run: |
+          bash app/tool/generate_pigeon.sh > pigeon.log 2>&1 || { cat pigeon.log; exit 1; }
+          stale=$(git status --porcelain -- app/lib/core/platform app/android/app/src/main/kotlin/app/zaghlol/platform app/ios/Runner/Platform)
+          if [ -n "$stale" ]; then
+            echo "$stale" | while read -r line; do echo "::error::pigeon output is stale or untracked: $line"; done
+            echo "::error::run app/tool/generate_pigeon.sh and commit the generated files"
+            git diff --stat -- app | tail -n 20
+            exit 1
+          fi
       - name: Flutter version must match app-regen.yml
         run: |
           ci=$(grep -E "^  FLUTTER_VERSION:" .github/workflows/app-ci.yml | grep -oE "[0-9]+\.[0-9]+\.[0-9]+")

@@ -2,9 +2,9 @@ using Serilog;
 using Serilog.Core;
 using Zaghlol.Api;
 using Zaghlol.Api.Endpoints;
-using Zaghlol.Api.Problems;
 using Zaghlol.Application;
 using Zaghlol.Infrastructure;
+using Zaghlol.Infrastructure.Kms;
 using Zaghlol.Infrastructure.Logging;
 using Zaghlol.Infrastructure.Persistence;
 
@@ -30,21 +30,22 @@ builder.Host.UseSerilog((_, services, logger) =>
 builder.Services.AddApplication();
 builder.Services.AddInfrastructure();
 
+// Signing, keyed hashes and envelopes through the KMS (T-123); refuses to start on a misconfigured key ring.
+builder.Services.AddZaghlolKms();
+
 // Two logins: app_rw for /v1/*, ops_rw for /admin/v1/* (T-122), so an injection in /v1 can't write catalog or audit rows.
 builder.Services.AddZaghlolDatabase(DatabaseRole.App, DatabaseRole.Admin);
 builder.Services.AddDatabaseReadiness();
-builder.Services.AddProblemDetails(options => options.CustomizeProblemDetails = ProblemDetailsCustomizer.Customize);
-builder.Services.AddExceptionHandler<GlobalExceptionHandler>();
+builder.Services.AddZaghlolHttp();
 
 var app = builder.Build();
 
-app.UseExceptionHandler();
-app.UseStatusCodePages();
-app.UseSerilogRequestLogging();
-
+app.UseZaghlolPipeline();
 app.MapHealth();
 
 await app.RunAsync();
-return 0;
+
+// Non-zero when a guard stopped the host (FU-023), e.g. a rejected database login.
+return app.Services.GetRequiredService<HostExitCode>().Value;
 
 public partial class Program;

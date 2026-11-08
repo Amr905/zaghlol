@@ -55,6 +55,9 @@ public static class PersistenceServiceCollectionExtensions
                 }
             })
             .Validate(options => required.All(r => !string.IsNullOrWhiteSpace(options.For(r))), $"{names} must be set.")
+            .Validate(
+                options => required.All(r => !ZaghlolDbContextOptions.IncludesErrorDetail(options.For(r))),
+                $"{names} must not set Include Error Detail: server error details carry row values (FU-025).")
             .ValidateOnStart();
 
         foreach (var role in required)
@@ -69,6 +72,7 @@ public static class PersistenceServiceCollectionExtensions
 
         // SEC F11: stop the process if any of these logins is privileged, the owner, or in the wrong group.
         services.TryAddSingleton(TimeProvider.System);
+        services.TryAddSingleton<HostExitCode>();
         services.TryAddEnumerable(ServiceDescriptor.Singleton<IHostedService, DatabaseRoleGuardService>());
         return services;
     }

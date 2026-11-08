@@ -12,12 +12,20 @@
   </ItemGroup>
 
   <ItemGroup>
+    <Compile Include="..\Shared\FakeKms.cs" Link="Shared\FakeKms.cs" />
+  </ItemGroup>
+
+  <ItemGroup>
     <!-- The spec under test is copied next to the test assembly. -->
     <Content Include="..\..\openapi\zaghlol-v1.yaml" Link="openapi\zaghlol-v1.yaml" CopyToOutputDirectory="PreserveNewest" />
     <!-- Shared install-bound restore hash vectors (backend-api.md section 4.3), also used by the Dart tests. -->
     <None Update="vectors\restore-binding-v1.json" CopyToOutputDirectory="PreserveNewest" />
     <!-- Shared iOS seat-key proof vectors (D-55, backend-api.md section 4.3). -->
     <None Update="vectors\seat-proof-v1.json" CopyToOutputDirectory="PreserveNewest" />
+    <!-- T-123 shared signing vectors (public test keys only; also read by the Dart verifier) and RFC 4231 HMAC cases. -->
+    <None Update="vectors\response-signature-v1.json" CopyToOutputDirectory="PreserveNewest" />
+    <None Update="vectors\jws-es256-v1.json" CopyToOutputDirectory="PreserveNewest" />
+    <None Update="vectors\keyed-hash-v1.json" CopyToOutputDirectory="PreserveNewest" />
   </ItemGroup>
 
 </Project>

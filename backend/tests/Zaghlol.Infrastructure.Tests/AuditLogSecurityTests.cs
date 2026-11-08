@@ -66,6 +66,27 @@ public class AuditLogSecurityTests(SchemaFixture fixture)
         Assert.Equal(PostgresErrorCodes.InsufficientPrivilege, backdated.SqlState);
     }
 
+    [Theory]
+    [InlineData(-30, true)]
+    [InlineData(30, true)]
+    [InlineData(-90, false)]
+    [InlineData(90, false)]
+    [InlineData(3600, false)]
+    public async Task OperatorsMayStampRowsOnlyWithinAMinuteOfNow(int offsetSeconds, bool allowed)
+    {
+        // FU-026: the append policy's window is now() ± 1 minute; a future-dated row can't be planted either.
+        var insert = Rows.InsertAsync(fixture.Database, "audit_log", new Dictionary<string, object?> { ["at"] = Rows.Now().AddSeconds(offsetSeconds) });
+
+        if (allowed)
+        {
+            await insert;
+            return;
+        }
+
+        var error = await Assert.ThrowsAsync<PostgresException>(() => insert);
+        Assert.Equal(PostgresErrorCodes.InsufficientPrivilege, error.SqlState);
+    }
+
     [Fact]
     public async Task ARowMustNameARealOperator()
     {

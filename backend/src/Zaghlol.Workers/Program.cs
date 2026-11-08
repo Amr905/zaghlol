@@ -29,4 +29,6 @@ builder.Services.AddHostedService<WorkerHeartbeatService>();
 
 using var host = builder.Build();
 await host.RunAsync();
-return 0;
+
+// Non-zero when a guard stopped the host (FU-023), e.g. a rejected database login.
+return host.Services.GetRequiredService<HostExitCode>().Value;

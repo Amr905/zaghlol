@@ -1,3 +1,4 @@
+using System.Security.Cryptography;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
@@ -6,6 +7,7 @@ using Microsoft.Extensions.Options;
 using Npgsql;
 using Zaghlol.Application.Health;
 using Zaghlol.Infrastructure.Persistence;
+using Zaghlol.Testing;
 
 namespace Zaghlol.Infrastructure.Tests;
 
@@ -44,17 +46,80 @@ public class DatabaseRoleGuardTests(SchemaFixture fixture)
     }
 
     [Fact]
-    public async Task TheGuardStopsTheHostWhenTheAppLoginIsTheMigrator()
+    public async Task TheGuardStopsTheHostWithANonZeroExitCodeWhenTheAppLoginIsTheMigrator()
     {
         var lifetime = new RecordingLifetime();
         await using var provider = Services(fixture.Database.Migrator, lifetime);
         var guard = provider.GetServices<IHostedService>().Single();
+        Assert.Equal(0, provider.GetRequiredService<HostExitCode>().Value);
 
         await guard.StartAsync(CancellationToken.None);
         var stopped = await Task.WhenAny(lifetime.Stopped, Task.Delay(TimeSpan.FromSeconds(20)));
         await guard.StopAsync(CancellationToken.None);
 
         Assert.Same(lifetime.Stopped, stopped);
+        Assert.Equal(HostExitCode.DatabaseLoginRejected, provider.GetRequiredService<HostExitCode>().Value);
+    }
+
+    [Fact]
+    public async Task ASuperuserLoginThatSwitchedToTheApiRoleIsRejected()
+    {
+        // FU-019: `-c role=zaghlol_api` makes current_user the API role while session_user stays the superuser.
+        var switched = new NpgsqlConnectionStringBuilder(fixture.Database.Superuser) { Options = "-c role=zaghlol_api" }.ConnectionString;
+        await using var connection = await Db.OpenAsync(switched);
+        await using (var who = new NpgsqlCommand("SELECT current_user::text", connection))
+        {
+            Assert.Equal("zaghlol_api", (string?)await who.ExecuteScalarAsync());
+        }
+
+        Assert.Equal(DatabaseRoleGuard.RejectRoleSwitched, await DatabaseRoleGuard.CheckAsync(connection, DatabaseRole.App, CancellationToken.None));
+    }
+
+    [Fact]
+    public async Task AnyExtraTransitiveMembershipIsRejected()
+    {
+        // FU-023: a predefined role granted directly, and another group reached through an intermediate role.
+        var suffix = Guid.NewGuid().ToString("N")[..8];
+        string direct = "t123_direct_" + suffix, viaMid = "t123_via_" + suffix, mid = "t123_mid_" + suffix, clean = "t123_clean_" + suffix;
+        var password = Convert.ToHexString(RandomNumberGenerator.GetBytes(16));
+        await Db.ExecuteAsync(fixture.Database.Superuser, $"""
+            CREATE ROLE {direct} LOGIN PASSWORD '{password}' IN ROLE app_rw, pg_write_all_data;
+            CREATE ROLE {mid} NOLOGIN IN ROLE ops_rw;
+            CREATE ROLE {viaMid} LOGIN PASSWORD '{password}' IN ROLE app_rw, {mid};
+            CREATE ROLE {clean} LOGIN PASSWORD '{password}' IN ROLE app_rw;
+            GRANT CONNECT ON DATABASE {ZaghlolTestDatabase.DatabaseName} TO {direct}, {viaMid}, {clean};
+            """);
+        try
+        {
+            foreach (var (login, expected) in new[] { (direct, DatabaseRoleGuard.RejectWrongGroups), (viaMid, DatabaseRoleGuard.RejectWrongGroups), (clean, (string?)null) })
+            {
+                var connectionString = new NpgsqlConnectionStringBuilder(fixture.Database.Superuser) { Username = login, Password = password }.ConnectionString;
+                await using var connection = await Db.OpenAsync(connectionString);
+                Assert.Equal(expected, await DatabaseRoleGuard.CheckAsync(connection, DatabaseRole.App, CancellationToken.None));
+            }
+        }
+        finally
+        {
+            NpgsqlConnection.ClearAllPools();
+            await Db.ExecuteAsync(fixture.Database.Superuser, $"""
+                REVOKE CONNECT ON DATABASE {ZaghlolTestDatabase.DatabaseName} FROM {direct}, {viaMid}, {clean};
+                DROP ROLE {direct}; DROP ROLE {viaMid}; DROP ROLE {mid}; DROP ROLE {clean};
+                """);
+        }
+    }
+
+    [Theory]
+    [InlineData("Host=db.invalid;Database=zaghlol;Username=zaghlol_api;Include Error Detail=true")]
+    [InlineData("Host=db.invalid;Database=zaghlol;Username=zaghlol_api;IncludeErrorDetail=True")]
+    public void IncludeErrorDetailIsRefusedAtStartup(string connectionString)
+    {
+        // FU-025: the server's DETAIL for a CHECK failure carries row values; it must never reach exception messages.
+        Assert.True(ZaghlolDbContextOptions.IncludesErrorDetail(connectionString));
+        Assert.Throws<ArgumentException>(() => ZaghlolDbContextOptions.CreateDataSource(connectionString, DatabaseRole.App));
+        using var provider = Services(connectionString, new RecordingLifetime());
+        var error = Assert.Throws<OptionsValidationException>(() => provider.GetRequiredService<IOptions<DatabaseConnectionOptions>>().Value);
+        Assert.Contains("Include Error Detail", error.Message, StringComparison.Ordinal);
+        Assert.False(new NpgsqlConnectionStringBuilder(PostgresDatabaseReadiness.ProbeConnectionString(connectionString)).IncludeErrorDetail);
     }
 
     [Fact]
@@ -116,6 +181,24 @@ public class DatabaseRoleGuardTests(SchemaFixture fixture)
             fixture.Database.Superuser, "SELECT count(*) FROM pg_stat_activity WHERE application_name = $1", marker));
     }
 
+    [Fact]
+    public async Task AReadyAnswerIsCachedForTwoSeconds()
+    {
+        // FU-026: "ready" is cached like "not ready". The data source is disposed after the first probe, so any later
+        // probe fails: within the window the cached true is served; after it, the failed probe is reported.
+        var clock = new SteppingClock(DateTimeOffset.UtcNow);
+        var probeSource = PostgresDatabaseReadiness.CreateProbeSource(fixture.Database.Api);
+        using var readiness = new PostgresDatabaseReadiness(probeSource, clock, NullLogger<PostgresDatabaseReadiness>.Instance);
+
+        Assert.True(await readiness.IsReadyAsync(CancellationToken.None));
+        await probeSource.DisposeAsync();
+
+        clock.Advance(TimeSpan.FromSeconds(1.9));
+        Assert.True(await readiness.IsReadyAsync(CancellationToken.None));
+        clock.Advance(TimeSpan.FromSeconds(0.2));
+        Assert.False(await readiness.IsReadyAsync(CancellationToken.None));
+    }
+
     private static ServiceProvider Services(string appConnectionString, IHostApplicationLifetime lifetime)
     {
         var configuration = new ConfigurationBuilder()
@@ -128,6 +211,15 @@ public class DatabaseRoleGuardTests(SchemaFixture fixture)
         services.AddZaghlolDatabase(DatabaseRole.App);
         services.AddDatabaseReadiness();
         return services.BuildServiceProvider();
+    }
+
+    private sealed class SteppingClock(DateTimeOffset start) : TimeProvider
+    {
+        private long ticks = start.UtcTicks;
+
+        public override DateTimeOffset GetUtcNow() => new(Interlocked.Read(ref ticks), TimeSpan.Zero);
+
+        public void Advance(TimeSpan by) => Interlocked.Add(ref ticks, by.Ticks);
     }
 
     private sealed class RecordingLifetime : IHostApplicationLifetime
