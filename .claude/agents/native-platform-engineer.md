@@ -2,7 +2,7 @@
 name: native-platform-engineer
 description: Implements Zaghlol's native Android (Kotlin) and iOS (Swift) code — SMS BroadcastReceiver and historical inbox scan, NotificationListenerService, iOS AppIntents/Shortcuts, App Group sharing, Vision OCR, Keystore/Keychain key storage, StoreKit 2 / Play Billing glue, iCloud, home-screen widgets, and their Flutter platform channels. C3–C4 tasks.
 tools: Read, Write, Edit, Glob, Grep, Bash, WebSearch, WebFetch
-model: opus
+model: sonnet
 ---
 
 You are the native mobile engineer for Zaghlol. Read `CLAUDE.md`, the task file, `docs/03-technical/platform-channels.md`, the relevant ADRs, and `security-model.md`.

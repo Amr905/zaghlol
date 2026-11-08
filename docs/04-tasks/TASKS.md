@@ -49,7 +49,7 @@ Every task file has: ID, description, technical details, dependencies, affected 
 | [T-009](tasks/T-009.md) | SPK-03: can an iOS App Intent process immediately with a headless Flutter engine? | US-01-2 | High* | Opus | native-platform-engineer | T-001, T-004 | E | 3 | TODO |
 | [T-010](tasks/T-010.md) | SPK-02: OCR accuracy on synthetic InstaPay/wallet receipts | US-01-2 | High | Sonnet | native-platform-engineer | T-001 | D | 2 | MERGED (device run pending) |
 | [T-011](tasks/T-011.md) | SPK-04: on-device ar-EG speech availability across the device matrix | US-01-2 | Medium | Sonnet | native-platform-engineer | T-001 | D | 2 | TODO |
-| [T-012](tasks/T-012.md) | Money and Currency value types with ISO 4217 table | US-02-2 | High* | Opus | flutter-core-engineer | T-001 | A | 2 | TODO |
+| [T-012](tasks/T-012.md) | Money and Currency value types with ISO 4217 table | US-02-2 | High* | Opus | flutter-core-engineer | T-001 | A | 2 | DONE |
 | [T-013](tasks/T-013.md) | Text & amount normalization utilities (digits, separators, groupings) | US-05-1 | High | Sonnet | parsing-engine-engineer | T-012 | F | 3 | TODO |
 | [T-014](tasks/T-014.md) | Result/Failure types, SafeException and domain event bus | US-02-1 | Medium | Sonnet | flutter-core-engineer | T-001 | A | 2 | TODO |
 | [T-015](tasks/T-015.md) | Secure key bootstrap for the database key | US-02-1 | High* | Opus | flutter-core-engineer | T-007 | A | 3 | TODO |
@@ -63,7 +63,7 @@ Every task file has: ID, description, technical details, dependencies, affected 
 | [T-023](tasks/T-023.md) | Localization scaffold, digits mode and money/date formatting | US-02-2 | Medium | Sonnet | flutter-core-engineer | T-012, T-020 | A | 7 | TODO |
 | [T-024](tasks/T-024.md) | App shell: routing, platform tab bars, Add button, deep links | US-02-3 | Medium | Sonnet | flutter-ui-engineer | T-022, T-023 | G | 8 | TODO |
 | [T-025](tasks/T-025.md) | Feature flags service (default OFF) | US-13-1 | Medium | Sonnet | flutter-core-engineer | T-019 | A | 6 | TODO |
-| [T-026](tasks/T-026.md) | Copy deck part 1: onboarding, capture, Home, transactions, review, accounts | US-20-1 | High | Opus | ux-designer | — | C | 1 | TODO |
+| [T-026](tasks/T-026.md) | Copy deck part 1: onboarding, capture, Home, transactions, review, accounts | US-20-1 | High | Opus | ux-designer | — | C | 1 | DONE |
 | [T-027](tasks/T-027.md) | Copy deck part 2: insights, budget, bills, money, chat, voice, roast, explanations | US-20-1 | High | Opus | ux-designer | — | C | 1 | TODO |
 | [T-028](tasks/T-028.md) | Copy deck part 3: settings, Gold, backup, import/export, notifications, errors, legal | US-20-1 | High | Opus | ux-designer | — | C | 1 | TODO |
 

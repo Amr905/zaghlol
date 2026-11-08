@@ -64,17 +64,24 @@ Every task in `docs/04-tasks/tasks/` carries a **complexity class**. The class d
 
 | Class | Meaning | Implementer model | Review |
 |-------|---------|-------------------|--------|
-| **C1 Trivial** | Boilerplate, constants, seed data, string files, assets wiring | Haiku (`boilerplate-engineer`) | Lead spot-check |
-| **C2 Standard** | Screens, widgets, DAOs, providers, API endpoints, ordinary logic with clear spec | Sonnet (`flutter-ui-engineer`, `flutter-core-engineer`, `parsing-engine-engineer`, `backend-engineer`) | `code-reviewer` |
-| **C3 Complex** | Non-trivial algorithms, cross-module work, ambiguous edge cases | Sonnet with Opus design note first, or Opus | `code-reviewer` + `test-engineer` |
-| **C4 Critical** | Security, crypto, billing/entitlements, native ingestion, financial/Zakah math, data migrations | Opus (`native-platform-engineer` or named engineer with `model: opus` override) | `code-reviewer` + `security-privacy-reviewer` + `test-engineer` |
+| **C1 Trivial** | Boilerplate, constants, seed data, string files, assets wiring | Haiku (`boilerplate-engineer`) | Lead spot-check (diff + green CI) |
+| **C2 Standard** | Screens, widgets, DAOs, providers, API endpoints, ordinary logic with clear spec | Sonnet (`flutter-ui-engineer`, `flutter-core-engineer`, `parsing-engine-engineer`, `backend-engineer`) | `code-reviewer` on **Sonnet** (one reviewer) |
+| **C3 Complex** | Non-trivial algorithms, cross-module work, ambiguous edge cases | **Sonnet**, with a short design note written by the architect on **Sonnet** | `code-reviewer` + `test-engineer`, both on **Sonnet** |
+| **C4 Critical** | Security, crypto, billing/entitlements, native ingestion, financial/Zakah math, data migrations | Opus (design note on Opus too) | `code-reviewer` (Opus) + `security-privacy-reviewer` (Opus) + `test-engineer` (Sonnet) |
+| **Docs-only** | Copy deck, design or spec text | Sonnet | One reviewer (`code-reviewer` on Sonnet) |
 
 Delegation rules for the Lead:
-1. Delegate one task per sub-agent call. Pass the task file path, not a paraphrase.
+1. Delegate one task per sub-agent call. Pass the task file path, not a paraphrase. Keep briefs short: point to files instead of restating them.
 2. Choose the agent named in the task; use the model the class dictates (override with the Agent `model` parameter when the agent's default differs).
 3. Independent tasks may run in parallel; tasks touching the same files may not.
 4. A sub-agent's "done" is a claim, not a fact. The Lead reads the diff and the review report before marking a task complete.
 5. If a C1/C2 task fails review twice, re-classify one level up and re-delegate.
+
+**Review-round policy (adopted 2026-11-08):**
+- Only **blocker** or **major** findings trigger another implementation round. The implementer may fix a trivial minor or nit in the same pass. Every other minor or nit becomes a follow-up (`FU-###` in `docs/implementation-status.md`) with an owner task, and does not block the merge.
+- Only the reviewers who raised a blocker or major re-review. Re-reviews look at the delta only.
+- Security findings rated Low or Info are follow-ups unless the reviewer marks them "before merge".
+- Fast checks: agents push and verify on CI. The local runner on the PO's PC (`.zaghlol-local-ci/`, see `docs/workflow/local-ci.md`) gives faster analyze and test results when it's running. GitHub Actions stays the gate for merging.
 
 ## 7. Definition of Done (per task)
 
@@ -106,6 +113,7 @@ Decisions D-01…D-24, assumptions, open questions and risks live in `docs/01-re
 
 ## 10. How the Lead should start a session
 
-1. Read `docs/workflow/PHASE_LOG.md` to see the current phase.
-2. Read `docs/04-tasks/TASKS.md` if in Phase 5–6.
-3. Continue from the next unchecked step; never skip a gate.
+1. Read `docs/workflow/LEAD_HANDOFF.md` first: it holds what is in flight, open PO asks, and agent state.
+2. Read `docs/workflow/PHASE_LOG.md` to see the current phase.
+3. Read `docs/04-tasks/TASKS.md` and `docs/implementation-status.md` if in Phase 5–6.
+4. Continue from the next unchecked step; never skip a gate. Keep `LEAD_HANDOFF.md` current, so any session can pick up the work.
