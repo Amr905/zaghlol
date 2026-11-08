@@ -78,7 +78,9 @@ void main() {
       isEmpty,
     );
     expect(run(path, 'class A {} class B extends A {}'), isEmpty);
-    expect(run('/r/app/lib/core/a.dart', 'class E implements Exception {}'),
-        isEmpty);
+    expect(
+      run('/r/app/lib/core/a.dart', 'class E implements Exception {}'),
+      isEmpty,
+    );
   });
 }
