@@ -4,7 +4,7 @@
 
 | Job | What it checks |
 |-----|----------------|
-| `static` | `pub get --enforce-lockfile`, `dart format`, `flutter analyze`, zaghlol_lints, app non-golden tests, `dart test` for both packages, a check that `FLUTTER_VERSION` is identical in `app-ci.yml` and `app-regen.yml`, and the negative-control self-test of the T-165 backup assertions (`.github/scripts/test-check-no-os-backup.sh`) |
+| `static` | `pub get --enforce-lockfile`, the Pigeon stale-generation check (`app/tool/generate_pigeon.sh` must leave `app/lib/core/platform`, `app/android/.../platform` and `app/ios/Runner/Platform` unchanged), `dart format`, `flutter analyze`, zaghlol_lints, app non-golden tests, `dart test` for both packages, a check that `FLUTTER_VERSION` is identical in `app-ci.yml` and `app-regen.yml`, and the negative-control self-test of the T-165 backup assertions (`.github/scripts/test-check-no-os-backup.sh`) |
 | `golden` | `flutter test --tags golden`; on failure uploads artifact `golden-diffs` |
 | `kotlin-unit` | Gradle JVM unit tests (`app/android/app/src/test`); fails when no `<testcase>` result exists; then `:app:lintDevNoSmsDebug` with `AllowBackup`, `DataExtractionRules` and `FullBackupContent` fatal (`app/android/app/lint.xml`, T-165) |
 | `swift-unit` | `xcodebuild test` of `RunnerTests` on an iOS simulator (macOS runner); each T-165 `BackupExclusionTests` case must be reported as passed |
@@ -74,3 +74,7 @@ Update by looking up the tag's commit SHA (`git ls-remote --tags <repo-url>`; fo
 ## zaghlol_lints (T-002)
 
 The `static` job runs `dart run bin/zaghlol_lints.dart ../../app ../../packages/zaghlol_parsing ../../packages/zaghlol_domain` in `tools/lints` (rules: no double money, no UI string literals in build, no print outside debug files, SafeException in parsing/db), then `dart test` there (fixtures with `// expect_lint:` comments). `flutter analyze` does not run them. See `tools/lints/README.md` for why this is a standalone checker and not a `custom_lint` plugin.
+
+## Pigeon (T-004)
+
+Contracts live in `app/pigeons/*.dart`; each file names its own Dart, Kotlin (own package and error class, so files cannot clash) and Swift outputs. After editing one, run `app/tool/generate_pigeon.sh` (needs `flutter pub get`) and commit the generated files; the `static` job fails when they differ. Agents without a local Dart SDK cannot run it: ask for a scratch CI run. Swift outputs sit in `app/ios/Runner/Platform/` but are not yet in the Xcode project; the first native task that implements a host adds the files to the Runner target.
