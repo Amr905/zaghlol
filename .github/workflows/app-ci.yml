@@ -100,6 +100,12 @@ jobs:
       - name: flutter test (golden)
         working-directory: app
         run: flutter test --tags golden
+      - name: TEMP show golden failures
+        if: always()
+        working-directory: app
+        continue-on-error: true
+        run: |
+          flutter test --tags golden --update-goldens --reporter expanded 2>&1 | grep -B2 -A14 -E "EXCEPTION|FAILED|Expected|overflow" | head -c 24000 | base64 -w0 | fold -w 3000 | nl -ba -w2 -s: | while read -r l; do echo "::error::FD$l"; done
       # flutter_test writes <golden dir>/failures/*_{masterImage,testImage,isolatedDiff,maskedDiff}.png
       - name: Upload golden diffs
         if: failure()
