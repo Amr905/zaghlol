@@ -48,29 +48,23 @@ class ZButton extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final c = ZColors.of(context);
-    final (Color fg, Color? fill, Gradient? gradient, BorderSide? border) =
-        switch (variant) {
-          ZButtonVariant.primary => (c.onPrimary, c.primary, null, null),
-          ZButtonVariant.gold => (
-            c.onAccent,
-            null,
-            LinearGradient(colors: [c.accentLight, c.accentDark]),
-            null,
-          ),
-          ZButtonVariant.secondary => (
-            c.primary,
-            c.primaryContainer,
-            null,
-            null,
-          ),
-          ZButtonVariant.text => (c.primary, null, null, null),
-          ZButtonVariant.destructive => (
-            c.dangerBg,
-            c.dangerText,
-            null,
-            null,
-          ),
-        };
+    final (
+      Color fg,
+      Color? fill,
+      Gradient? gradient,
+      BorderSide? border,
+    ) = switch (variant) {
+      ZButtonVariant.primary => (c.onPrimary, c.primary, null, null),
+      ZButtonVariant.gold => (
+        c.onAccent,
+        null,
+        LinearGradient(colors: [c.accentLight, c.accentDark]),
+        null,
+      ),
+      ZButtonVariant.secondary => (c.primary, c.primaryContainer, null, null),
+      ZButtonVariant.text => (c.primary, null, null, null),
+      ZButtonVariant.destructive => (c.dangerBg, c.dangerText, null, null),
+    };
     final shape = BorderRadius.circular(ZRadius.pill);
     final textStyle = ZType.label.copyWith(
       color: fg,
@@ -119,9 +113,7 @@ class ZButton extends StatelessWidget {
             color: fill,
             gradient: gradient,
             borderRadius: shape,
-            border: border == null
-                ? null
-                : Border.fromBorderSide(border),
+            border: border == null ? null : Border.fromBorderSide(border),
           ),
           child: InkWell(
             borderRadius: shape,

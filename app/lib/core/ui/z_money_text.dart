@@ -47,10 +47,12 @@ class ZMoneyText extends StatelessWidget {
       ZMoneySize.caption => ZType.caption,
     };
     final shown = masked ? (maskedText ?? text) : text;
-    final isolated = '⁨$shown⁩';
+    final isolated = '\u2068$shown\u2069';
     final style = base.copyWith(
       color: color,
-      fontWeight: size == ZMoneySize.caption ? FontWeight.w500 : FontWeight.w600,
+      fontWeight: size == ZMoneySize.caption
+          ? FontWeight.w500
+          : FontWeight.w600,
     );
     return Semantics(
       label: semanticsLabel ?? shown,

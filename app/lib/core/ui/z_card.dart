@@ -29,7 +29,11 @@ class ZCard extends StatelessWidget {
         color: color ?? c.surface,
         borderRadius: radius,
         boxShadow: [
-          BoxShadow(color: c.shadow, blurRadius: 20, offset: const Offset(0, 6)),
+          BoxShadow(
+            color: c.shadow,
+            blurRadius: 20,
+            offset: const Offset(0, 6),
+          ),
         ],
       ),
       child: Material(

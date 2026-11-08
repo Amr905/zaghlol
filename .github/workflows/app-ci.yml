@@ -59,9 +59,7 @@ jobs:
         continue-on-error: true
         run: |
           dart format . > /dev/null 2>&1 || true
-          d=$(git diff -- app tools | head -c 60000)
-          d="${d//'%'/'%25'}"; d="${d//$'\n'/'%0A'}"; d="${d//$'\r'/'%0D'}"
-          echo "::error::FMTDIFF%0A$d"
+          git diff -- app tools | base64 -w0 | fold -w 3000 | nl -ba -w2 -s: | while read -r l; do echo "::error::FD$l"; done
       - name: flutter analyze
         run: |
           if ! flutter analyze > analyze.log 2>&1; then

@@ -39,11 +39,7 @@ class ZBanner extends StatelessWidget {
         c.warningBg,
         Icons.warning_amber_rounded,
       ),
-      ZBannerTone.error => (
-        c.dangerText,
-        c.dangerBg,
-        Icons.error_outline,
-      ),
+      ZBannerTone.error => (c.dangerText, c.dangerBg, Icons.error_outline),
       ZBannerTone.success => (
         c.incomeText,
         c.incomeBg,
