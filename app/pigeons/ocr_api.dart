@@ -19,4 +19,6 @@ import 'package:pigeon/pigeon.dart';
   ),
 )
 @HostApi()
-abstract class OcrHostApi {}
+abstract class OcrHostApi {
+  void probe();
+}
