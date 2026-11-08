@@ -17,6 +17,8 @@ public sealed class ApiFixture : IAsyncLifetime
 
     public CapturingSink LogSink { get; } = new();
 
+    public FakeKms Kms { get; } = FakeKms.CreateDefault();
+
     public string PostgresConnectionString { get; private set; } = string.Empty;
 
     public HttpClient Client { get; private set; } = null!;
@@ -30,8 +32,14 @@ public sealed class ApiFixture : IAsyncLifetime
         {
             builder.UseSetting("ConnectionStrings:App", database.Api);
             builder.UseSetting("ConnectionStrings:Admin", database.Admin);
+            foreach (var (key, value) in Kms.Settings())
+            {
+                builder.UseSetting(key, value);
+            }
+
             builder.ConfigureServices(services =>
             {
+                Kms.Use(services);
                 services.AddSingleton<ILogEventSink>(LogSink);
                 services.AddSingleton<IStartupFilter, FaultInjectionStartupFilter>();
             });
@@ -51,5 +59,7 @@ public sealed class ApiFixture : IAsyncLifetime
         {
             await database.DisposeAsync();
         }
+
+        Kms.Dispose();
     }
 }

@@ -5,6 +5,7 @@ using Microsoft.AspNetCore.Mvc.Testing;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.DependencyInjection.Extensions;
 using Zaghlol.Application.Health;
+using Zaghlol.Testing;
 
 namespace Zaghlol.Contract.Tests;
 
@@ -17,6 +18,7 @@ public sealed class ContractApiFixture : IDisposable
     private const string Unreachable = "Host=127.0.0.1;Port=1;Database=none;Username=none";
 
     private readonly WebApplicationFactory<Program> factory;
+    private readonly FakeKms kms = FakeKms.CreateDefault();
 
     public ContractApiFixture()
     {
@@ -24,8 +26,14 @@ public sealed class ContractApiFixture : IDisposable
         {
             builder.UseSetting("ConnectionStrings:App", Unreachable);
             builder.UseSetting("ConnectionStrings:Admin", Unreachable);
+            foreach (var (key, value) in kms.Settings())
+            {
+                builder.UseSetting(key, value);
+            }
+
             builder.ConfigureServices(services =>
             {
+                kms.Use(services);
                 services.AddSingleton<IStartupFilter, FaultEndpointsStartupFilter>();
                 services.RemoveAll<IDatabaseReadiness>();
                 services.AddSingleton<IDatabaseReadiness>(Readiness);
@@ -42,6 +50,7 @@ public sealed class ContractApiFixture : IDisposable
     {
         Client.Dispose();
         factory.Dispose();
+        kms.Dispose();
     }
 }
 

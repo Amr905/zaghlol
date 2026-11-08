@@ -1660,12 +1660,14 @@ components:
   headers:
     ZaghlolSignature:
       description: |
-        `kid=<kid>; alg=ES256; sig=<base64url>`. ECDSA P-256 signature over the exact response body bytes after
-        decompression, verified by the app against embedded public keys.
+        `kid=<kid>; alg=ES256; sig=<base64url>`, exactly that order with `; ` separators. ECDSA P-256 / SHA-256
+        signature over the exact response body bytes after decompression, in IEEE P1363 form (`r||s`, 64 bytes, 86
+        base64url chars without padding; high-S accepted), verified by the app against embedded public keys. Only
+        `s` kids sign headers (T-123); vectors in `backend/tests/Zaghlol.Contract.Tests/vectors/response-signature-v1.json`.
       required: true
       schema:
         type: string
-        pattern: '^kid=[A-Za-z0-9_-]+; alg=ES256; sig=[A-Za-z0-9_-]+$'
+        pattern: '^kid=[se][0-9]{4}[a-z]; alg=ES256; sig=[A-Za-z0-9_-]{86}$'
     CacheControlNoStore:
       description: Always `no-store`.
       schema:

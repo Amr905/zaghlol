@@ -10,6 +10,7 @@ namespace Zaghlol.Api.Tests;
 /// <summary>A database on a fixed host port, so the container can be stopped and started under the running API.</summary>
 public sealed class ReadinessFixture : IAsyncLifetime
 {
+    private readonly FakeKms kms = FakeKms.CreateDefault();
     private WebApplicationFactory<Program>? factory;
 
     public ZaghlolTestDatabase Database { get; private set; } = null!;
@@ -23,6 +24,12 @@ public sealed class ReadinessFixture : IAsyncLifetime
         {
             builder.UseSetting("ConnectionStrings:App", Database.Api);
             builder.UseSetting("ConnectionStrings:Admin", Database.Admin);
+            foreach (var (key, value) in kms.Settings())
+            {
+                builder.UseSetting(key, value);
+            }
+
+            builder.ConfigureServices(kms.Use);
         });
         Client = factory.CreateClient();
     }
@@ -39,6 +46,8 @@ public sealed class ReadinessFixture : IAsyncLifetime
         {
             await Database.DisposeAsync();
         }
+
+        kms.Dispose();
     }
 
     private static int FreeTcpPort()
