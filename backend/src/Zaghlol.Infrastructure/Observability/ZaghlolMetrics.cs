@@ -49,8 +49,6 @@ public sealed partial class ZaghlolMetrics : IDisposable
         playIntegrityCalls = meter.CreateCounter<long>("zaghlol.play_integrity.calls", description: "Play Integrity API calls.");
         alertFired = meter.CreateCounter<long>("zaghlol.audit_alert.fired", description: "Audit alert signals by rule.");
 
-        SeedSeries();
-
         meter.CreateObservableGauge("zaghlol.purchase.unacked", () => Interlocked.Read(ref unackedCount), description: "Purchases waiting for acknowledgement.");
         meter.CreateObservableGauge("zaghlol.purchase.unacked.oldest_age", () => Volatile.Read(ref unackedOldestAgeSeconds), "s", "Age of the oldest unacknowledged purchase.");
         meter.CreateObservableGauge<double>("zaghlol.price.age", ObservePriceAges, "s", "Age of the newest quote per symbol.");
@@ -106,9 +104,10 @@ public sealed partial class ZaghlolMetrics : IDisposable
 
     /// <summary>
     /// A labelled counter series doesn't exist until its first Add, and Prometheus <c>increase()</c> needs an earlier sample,
-    /// so the first event of a rare "any occurrence" alert would never fire. Every such series starts at 0 here.
+    /// so the first event of a rare "any occurrence" alert would never fire. Every such series starts at 0 here. Counter.Add is dropped
+    /// while no listener exists, so this runs from <c>MetricsStarter</c> after the MeterProvider is built, never from the constructor.
     /// </summary>
-    private void SeedSeries()
+    public void SeedSeries()
     {
         foreach (var rule in Enum.GetValues<AuditAlertRule>())
         {

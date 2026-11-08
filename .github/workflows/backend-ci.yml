@@ -258,7 +258,7 @@ jobs:
           found=""
           for i in $(seq 1 30); do
             curl -fsS http://localhost:8889/metrics > metrics.txt || true
-            if grep -q '^zaghlol_service_up' metrics.txt && grep -q '^http_server_request_duration_seconds_count' metrics.txt; then found=yes; break; fi
+            if grep -q '^zaghlol_service_up' metrics.txt && grep -q '^http_server_request_duration_seconds_count' metrics.txt && grep -Eq 'zaghlol_audit_alert_fired_total\{[^}]*rule="support_unfreeze"[^}]*\} 0' metrics.txt; then found=yes; break; fi
             sleep 2
           done
           grep -E '^(zaghlol_|http_server_request_duration_seconds_count)' metrics.txt | head -n 20 || true
