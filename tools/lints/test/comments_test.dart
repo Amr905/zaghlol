@@ -15,7 +15,10 @@ void main() {
   test('ignore comment on the previous line silences a rule', () {
     expect(run(money, 'class A {\n  double x = 1;\n}\n'), hasLength(1));
     expect(
-      run(money, 'class A {\n  // ignore: no_double_money\n  double x = 1;\n}\n'),
+      run(
+        money,
+        'class A {\n  // ignore: no_double_money\n  double x = 1;\n}\n',
+      ),
       isEmpty,
     );
   });
@@ -26,7 +29,10 @@ void main() {
       isEmpty,
     );
     expect(
-      run(money, '// ignore_for_file: no_double_money\nclass A {double x = 1;}'),
+      run(
+        money,
+        '// ignore_for_file: no_double_money\nclass A {double x = 1;}',
+      ),
       isEmpty,
     );
   });
