@@ -1,1 +1,1 @@
-﻿RUNNING sha=1a8d165a2a8a8a7e233bac462a4a2fe231cf8601
+﻿FAIL sha=1a8d165a2a8a8a7e233bac462a4a2fe231cf8601 pipeline=quick-backend dotnet-build=0 dotnet-format=2 dotnet-test=1
