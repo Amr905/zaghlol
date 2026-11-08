@@ -46,9 +46,16 @@ function Probe {
 
 function Checkout($log, $branch) {
   if (-not (Test-Path (Join-Path $Repo '.git'))) {
-    Log $log "cloning..."; git clone --quiet $Origin $Repo 2>&1 | Out-String | Add-Content $log
+    Log $log "cloning..."; git clone --quiet -c core.autocrlf=false -c core.eol=lf $Origin $Repo 2>&1 | Out-String | Add-Content $log
   }
   Push-Location $Repo
+  # Keep LF line endings like CI (dotnet format / dart format reject CRLF). One-time renormalize of an old clone.
+  git config core.autocrlf false
+  git config core.eol lf
+  if (-not (Test-Path (Join-Path $Repo '.git\zaghlol-lf-ok'))) {
+    git rm -rq --cached . 2>&1 | Out-Null; git reset --quiet --hard 2>&1 | Out-Null
+    New-Item -ItemType File -Force -Path (Join-Path $Repo '.git\zaghlol-lf-ok') | Out-Null
+  }
   git fetch --quiet --force origin "+refs/heads/main:refs/remotes/origin/main" "+refs/heads/${branch}:refs/remotes/origin/${branch}" 2>&1 | Out-String | Add-Content $log
   git checkout --quiet --force --detach "origin/$branch" 2>&1 | Out-String | Add-Content $log
   git clean -fdxq -e 'app/build' -e '.dart_tool' -e 'bin' -e 'obj' 2>&1 | Out-String | Add-Content $log

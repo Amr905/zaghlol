@@ -1,0 +1,8 @@
+# Keep LF everywhere (CI runs on Linux/macOS; dotnet format and dart format reject CRLF).
+* text=auto eol=lf
+*.png binary
+*.jpg binary
+*.ttf binary
+*.riv binary
+*.docx binary
+*.zip binary
