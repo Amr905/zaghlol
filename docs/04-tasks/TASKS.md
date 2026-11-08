@@ -64,7 +64,7 @@ Every task file has: ID, description, technical details, dependencies, affected 
 | [T-024](tasks/T-024.md) | App shell: routing, platform tab bars, Add button, deep links | US-02-3 | Medium | Sonnet | flutter-ui-engineer | T-022, T-023 | G | 8 | TODO |
 | [T-025](tasks/T-025.md) | Feature flags service (default OFF) | US-13-1 | Medium | Sonnet | flutter-core-engineer | T-019 | A | 6 | TODO |
 | [T-026](tasks/T-026.md) | Copy deck part 1: onboarding, capture, Home, transactions, review, accounts | US-20-1 | High | Opus | ux-designer | — | C | 1 | DONE |
-| [T-027](tasks/T-027.md) | Copy deck part 2: insights, budget, bills, money, chat, voice, roast, explanations | US-20-1 | High | Opus | ux-designer | — | C | 1 | TODO |
+| [T-027](tasks/T-027.md) | Copy deck part 2: insights, budget, bills, money, chat, voice, roast, explanations | US-20-1 | High | Opus | ux-designer | — | C | 1 | DONE |
 | [T-028](tasks/T-028.md) | Copy deck part 3: settings, Gold, backup, import/export, notifications, errors, legal | US-20-1 | High | Opus | ux-designer | — | C | 1 | TODO |
 
 ## M1 — Android capture → Home (vertical slice)
