@@ -5,7 +5,7 @@
 | Reviewer(s) | code-reviewer (Sonnet; C3) |
 | Date | 2026-11-08 |
 | Commit / diff | `origin/task/T-138-observability` @ 902498a vs `origin/main` (56 files). Design note 1c68de5. CI backend-ci run 42525861682: 6/6 green, including the promtool job. |
-| Verdict | **CHANGES_REQUESTED** (1 major) |
+| Verdict | **APPROVED** (after round 3; rounds 1 and 2 were CHANGES_REQUESTED) |
 
 ## Acceptance criteria
 | Criterion | Result | Evidence |
@@ -86,3 +86,14 @@ Package pins verified in `backend/Directory.Packages.props`: OpenTelemetry.Exten
 1. Guarantee that the `MeterProvider` exists and is listening before anything is seeded. Simplest: `MetricsStarter(MeterProvider provider, ZaghlolMetrics metrics)` (resolving the provider first builds it with its `AddMeter` subscriptions), then seed in `StartAsync`. Remove the reliance on the constructor `Add(0)`, or keep it only as a second line.
 2. Add a test through `AddZaghlolTelemetry` (the real DI path, as in `ExporterOrderTests`): start the hosted services, force a metric collect with an in-memory metric exporter (`OpenTelemetry.Exporter.InMemory`, already referenced) and assert zero-valued data points for `zaghlol.audit_alert.fired{rule=...}` (six), `zaghlol.notification.dead_letter{store=play|apple}` and `zaghlol.kms.unavailable{operation=...}` (five) before any event. Alternatively assert the same with a CI step that curls `:8889/metrics` for `zaghlol_audit_alert_fired_total{rule="support_unfreeze"} 0`.
 3. Re-review: delta only.
+
+## Round 3 (delta `c0288f4..4020b9e`, backend-ci 42528633775 green)
+
+**Verdict: APPROVED.** Major #1 is fixed.
+
+- `MetricsStarter(MeterProvider provider, ZaghlolMetrics metrics)` takes the provider first, so DI builds the `MeterProvider` and its `AddMeter` subscriptions before any seed. `StartAsync` then calls `metrics.SeedSeries()` and `KmsMetrics.Seed()`. The constructor seeding is gone. A new process (a restart) seeds its new series at 0 and exports them from the first collection, so the first real event is an increase from 0.
+- `SeededSeriesTests` goes through `AddZaghlolTelemetry` and the hosted services with an in-memory metric exporter. It asserts zero data points for the six audit rules and the play and apple dead-letter stores. For the process-wide KMS counter it asserts existence only, which is right because a parallel test may have moved a series. It replaces the old listener-first test that did not model production. `SeedCreatesEveryOperationSeriesAtZero` covers `KmsMetrics.Seed()`.
+- The compose smoke step now requires `zaghlol_audit_alert_fired_total{... rule="support_unfreeze" ...} 0` on the collector. The coordinator reports a mutation run (42528424746) in which seeding before the provider existed failed both the test and the smoke step; I did not re-run it.
+- The `addOtlpExporter` seam replaces `configureExporters`. It still sits after the redactor and only when the endpoint is set, and `ExporterOrderTests` still has its negative control.
+
+Remaining items are follow-ups only (no re-review): #2 Npgsql span events (before T-140), #3 DTO reflection test (T-124), #5, #6, and a test for the 499 path.
