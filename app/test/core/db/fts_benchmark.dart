@@ -142,9 +142,11 @@ const String _shortQuery =
 Future<Map<String, Object?>> _benchMode(Directory dir, DbKey key) async {
   final file = File('${dir.path}/bench_${key is NoKey ? 'plain' : 'enc'}.db');
   final data = benchData();
+  // The plaintext baseline cannot pass the encryption check.
+  final verify = key is! NoKey;
 
   // Create + insert 50k rows in one transaction through the sync triggers.
-  var db = openBackground(file, key);
+  var db = openBackground(file, key, verify: verify);
   for (final ddl in ftsSourceDdl) {
     await statement(db, ddl, const [], 'bench_ddl');
   }
@@ -167,7 +169,7 @@ Future<Map<String, Object?>> _benchMode(Directory dir, DbKey key) async {
 
   Future<int> reopen() async {
     final sw = Stopwatch()..start();
-    db = openBackground(file, key);
+    db = openBackground(file, key, verify: verify);
     final n = await scalar(db, 'SELECT count(*) FROM transactions_fts_src');
     sw.stop();
     if (n != benchRows) throw DbContractException('bench_row_count');
@@ -268,7 +270,9 @@ Future<Map<String, Object?>> runDbBenchmark({
       'rows': benchRows,
       'enc': enc,
       'plain': plain,
-      'ratio_list_p95': plainP95 == 0 ? null : (encP95 / plainP95 * 100).round() / 100,
+      'ratio_list_p95': plainP95 == 0
+          ? null
+          : (encP95 / plainP95 * 100).round() / 100,
       'pbkdf2_open_ms': pbkdf2,
     };
   } finally {

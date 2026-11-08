@@ -35,8 +35,7 @@ const int sqliteNotADb = 26;
 
 /// The `transactions_fts` DDL exactly as written in
 /// docs/03-technical/database-schema.md §2.2 (the host test checks that).
-const String transactionsFtsDdl =
-    '''CREATE VIRTUAL TABLE transactions_fts USING fts5(      -- FR-TXN-01 search < 200 ms @ 50k
+const String transactionsFtsDdl = '''CREATE VIRTUAL TABLE transactions_fts USING fts5(      -- FR-TXN-01 search < 200 ms @ 50k
   merchant, counterparty, note, amount_text,
   content='transactions_fts_src', tokenize='trigram remove_diacritics 1'
 );''';
@@ -171,7 +170,11 @@ void _rawExec(sql.Database raw, String statement, String stage) {
   try {
     raw.execute(statement);
   } on sql.SqliteException catch (e) {
-    throw DbContractException(stage, sqliteCode: e.resultCode, detail: e.message);
+    throw DbContractException(
+      stage,
+      sqliteCode: e.resultCode,
+      detail: e.message,
+    );
   }
 }
 
@@ -188,7 +191,11 @@ List<List<Object?>> _rawSelect(sql.Database raw, String query, String stage) {
   try {
     return raw.select(query).rows;
   } on sql.SqliteException catch (e) {
-    throw DbContractException(stage, sqliteCode: e.resultCode, detail: e.message);
+    throw DbContractException(
+      stage,
+      sqliteCode: e.resultCode,
+      detail: e.message,
+    );
   }
 }
 
@@ -334,10 +341,7 @@ Future<List<List<Object?>>> query(
   String stage = 'query',
 ]) => guarded(stage, () async {
   final rows = await db
-      .customSelect(
-        sqlText,
-        variables: [for (final a in args) _variable(a)],
-      )
+      .customSelect(sqlText, variables: [for (final a in args) _variable(a)])
       .get();
   return [for (final r in rows) r.data.values.toList()];
 });
@@ -485,7 +489,9 @@ final class LibraryInfo {
 
   bool atLeast(int major, int minor, int patch) {
     final parts = sqliteVersion.split('.').map(int.tryParse).toList();
-    final v = [for (var i = 0; i < 3; i++) i < parts.length ? parts[i] ?? 0 : 0];
+    final v = [
+      for (var i = 0; i < 3; i++) i < parts.length ? parts[i] ?? 0 : 0,
+    ];
     if (v[0] != major) return v[0] > major;
     if (v[1] != minor) return v[1] > minor;
     return v[2] >= patch;
@@ -501,15 +507,28 @@ Future<LibraryInfo> libraryInfo(ContractDb db) async {
     mc = null; // upstream SQLite: no such function (negative proof a)
   }
   final options = [
-    for (final r in await query(db, 'PRAGMA compile_options')) r.first as String,
+    for (final r in await query(db, 'PRAGMA compile_options'))
+      r.first as String,
   ];
   return LibraryInfo(version, mc, options);
 }
 
 /// FTS5 rows for the functional checks (synthetic). Row 3 carries tashkeel.
 const List<(int, String, String, String, String)> _ftsFixture = [
-  (101, 'Café Riche', 'Downtown Branch', 'synthetic lunch', '1,250.00 ١٬٢٥٠٫٠٠'),
-  (102, 'هايبر كارفور المعادي', 'فرع المعادي', 'مشتريات البيت', '٣٤٠٫٥٠ 340.50'),
+  (
+    101,
+    'Café Riche',
+    'Downtown Branch',
+    'synthetic lunch',
+    '1,250.00 ١٬٢٥٠٫٠٠',
+  ),
+  (
+    102,
+    'هايبر كارفور المعادي',
+    'فرع المعادي',
+    'مشتريات البيت',
+    '٣٤٠٫٥٠ 340.50',
+  ),
   (103, 'مُحَمَّد للعطور', 'محل العطور', 'هدية', '75.00 ٧٥٫٠٠'),
   (104, 'Kiosk Nile', 'Zamalek', 'كارت شحن', '20.00 ٢٠٫٠٠'),
 ];
@@ -533,6 +552,20 @@ Future<Set<int>> _likeIds(ContractDb db, String pattern) async {
   );
   return {for (final r in rows) r.first as int};
 }
+
+Future<String> _likePlan(ContractDb db, String table) async => [
+  for (final r in await query(
+    db,
+    'EXPLAIN QUERY PLAN SELECT rowid FROM $table WHERE merchant LIKE ?',
+    ['%riche%'],
+    'fts_plan',
+  ))
+    r.last.toString(),
+].join(' | ');
+
+/// An FTS5 plan uses its index when idxStr (after `INDEX n:`) is non-empty.
+bool _usesIndex(String plan) =>
+    RegExp(r'VIRTUAL TABLE INDEX \d+:\S+').hasMatch(plan);
 
 /// FTS5 string literal for a user term.
 String ftsQuote(String term) => '"${term.replaceAll('"', '""')}"';
@@ -579,45 +612,75 @@ void registerSqlite3mcContract({required String env}) {
   tearDownAll(() => emitFindings(env));
 
   group('sqlite3mc contract', () {
-    test('library is SQLite3MultipleCiphers with FTS5 on SQLite >= 3.45', () async {
-      final db = openForeground(File('${dir.path}/lib.db'), RawKey(randomHexKey()));
-      try {
-        final info = await libraryInfo(db);
-        findings['sqlite_version'] = info.sqliteVersion;
-        findings['sqlite3mc_version'] = info.mcVersion;
-        findings['tmp_parent'] = dir.parent.path;
-        expect(info.hasFts5, isTrue, reason: 'ENABLE_FTS5 in compile_options');
-        expect(
-          info.atLeast(3, 45, 0),
-          isTrue,
-          reason: 'trigram remove_diacritics needs SQLite 3.45.0',
+    test(
+      'library is SQLite3MultipleCiphers with FTS5 on SQLite >= 3.45',
+      () async {
+        final db = openForeground(
+          File('${dir.path}/lib.db'),
+          RawKey(randomHexKey()),
         );
-        expect(info.mcVersion, isNotNull, reason: 'sqlite3mc_version() exists');
-      } finally {
-        await db.close();
-      }
-    });
+        try {
+          final info = await libraryInfo(db);
+          findings['sqlite_version'] = info.sqliteVersion;
+          findings['sqlite3mc_version'] = info.mcVersion;
+          findings['tmp_parent'] = dir.parent.path;
+          expect(
+            info.hasFts5,
+            isTrue,
+            reason: 'ENABLE_FTS5 in compile_options',
+          );
+          expect(
+            info.atLeast(3, 45, 0),
+            isTrue,
+            reason: 'trigram remove_diacritics needs SQLite 3.45.0',
+          );
+          expect(
+            info.mcVersion,
+            isNotNull,
+            reason: 'sqlite3mc_version() exists',
+          );
+        } finally {
+          await db.close();
+        }
+      },
+    );
 
-    test('the open sequence verifies cipher and salt (background isolate)', () async {
-      final file = File('${dir.path}/verify.db');
-      final key = RawKey(randomHexKey());
-      final db = openBackground(file, key);
-      try {
-        expect(await scalar(db, 'SELECT count(*) FROM sqlite_master'), isA<int>());
-        expect(await scalar(db, 'PRAGMA cipher') == 'sqlcipher', isTrue,
-            reason: 'PRAGMA cipher returns sqlcipher');
-        expect(
-          await scalar(db, "SELECT sqlite3mc_codec_data('cipher_salt')"),
-          isNotNull,
-          reason: 'main database has a cipher salt',
-        );
-        expect(await scalar(db, 'PRAGMA journal_mode') == 'wal', isTrue,
-            reason: 'journal_mode WAL');
-        expect(await scalar(db, 'PRAGMA temp_store'), 2, reason: 'temp_store MEMORY');
-      } finally {
-        await db.close();
-      }
-    });
+    test(
+      'the open sequence verifies cipher and salt (background isolate)',
+      () async {
+        final file = File('${dir.path}/verify.db');
+        final key = RawKey(randomHexKey());
+        final db = openBackground(file, key);
+        try {
+          expect(
+            await scalar(db, 'SELECT count(*) FROM sqlite_master'),
+            isA<int>(),
+          );
+          expect(
+            await scalar(db, 'PRAGMA cipher') == 'sqlcipher',
+            isTrue,
+            reason: 'PRAGMA cipher returns sqlcipher',
+          );
+          expect(
+            await scalar(db, "SELECT sqlite3mc_codec_data('cipher_salt')"),
+            isNotNull,
+            reason: 'main database has a cipher salt',
+          );
+          expect(
+            await scalar(db, 'PRAGMA journal_mode') == 'wal',
+            isTrue,
+            reason: 'journal_mode WAL',
+          );
+          expect(
+            await scalar(db, 'PRAGMA temp_store'),
+            2,
+            reason: 'temp_store MEMORY',
+          );
+        } finally {
+          await db.close();
+        }
+      },
+    );
 
     test('no key and a wrong key are refused with SQLITE_NOTADB', () async {
       final file = File('${dir.path}/refuse.db');
@@ -643,9 +706,16 @@ void registerSqlite3mcContract({required String env}) {
 
       // Positive controls: the header check and the byte scan do detect a
       // plaintext file made by the same library.
-      expect(hasPlaintextHeader(file), isTrue, reason: 'control: plaintext header');
-      expect(anyFileContains(dbFiles(file), s.utf8Needles), isTrue,
-          reason: 'control: scanner finds plaintext sentinels');
+      expect(
+        hasPlaintextHeader(file),
+        isTrue,
+        reason: 'control: plaintext header',
+      );
+      expect(
+        anyFileContains(dbFiles(file), s.utf8Needles),
+        isTrue,
+        reason: 'control: scanner finds plaintext sentinels',
+      );
 
       final keyed = await openFailureCode(file, RawKey(randomHexKey()));
       findings['plaintext_with_key_code'] = keyed;
@@ -655,40 +725,70 @@ void registerSqlite3mcContract({required String env}) {
       final verified = openForeground(file, RawKey(randomHexKey()));
       Object? failure;
       try {
-        await guarded('verify_plain', () => verified.customSelect('SELECT 1').get());
+        await guarded(
+          'verify_plain',
+          () => verified.customSelect('SELECT 1').get(),
+        );
       } on DbContractException catch (e) {
         failure = e;
       } finally {
         await verified.close().catchError((Object _) {});
       }
-      expect(failure, isA<DbContractException>(), reason: 'open sequence refuses plaintext');
+      expect(
+        failure,
+        isA<DbContractException>(),
+        reason: 'open sequence refuses plaintext',
+      );
     });
 
-    test('header, -wal and -shm hold no plaintext (open and after close)', () async {
-      final file = File('${dir.path}/scan.db');
-      final s = Sentinels.random();
-      final db = openForeground(file, RawKey(randomHexKey()), verify: false);
-      try {
-        // Keep the writes in the WAL while the connection is open.
-        await statement(db, 'PRAGMA wal_autocheckpoint = 0');
-        await writeSentinels(db, s);
-        expect(await sentinelCount(db), 1);
-        final wal = File('${file.path}-wal');
-        expect(wal.existsSync() && wal.lengthSync() > 0, isTrue,
-            reason: 'un-checkpointed WAL exists while open');
-        expect(anyFileContains(dbFiles(file), s.utf8Needles), isFalse,
-            reason: 'no sentinel bytes in db/-wal/-shm while open');
-        expect(entryNames(dir).difference({'scan.db', 'scan.db-wal', 'scan.db-shm'}),
-            isEmpty, reason: 'only db, -wal, -shm in the directory while open');
-      } finally {
-        await db.close();
-      }
-      expect(hasPlaintextHeader(file), isFalse, reason: 'header is not SQLite format 3');
-      expect(anyFileContains(dbFiles(file), s.utf8Needles), isFalse,
-          reason: 'no sentinel bytes after close');
-      expect(entryNames(dir).difference({'scan.db', 'scan.db-wal', 'scan.db-shm'}),
-          isEmpty, reason: 'only db, -wal, -shm in the directory after close');
-    });
+    test(
+      'header, -wal and -shm hold no plaintext (open and after close)',
+      () async {
+        final file = File('${dir.path}/scan.db');
+        final s = Sentinels.random();
+        final db = openForeground(file, RawKey(randomHexKey()), verify: false);
+        try {
+          // Keep the writes in the WAL while the connection is open.
+          await statement(db, 'PRAGMA wal_autocheckpoint = 0');
+          await writeSentinels(db, s);
+          expect(await sentinelCount(db), 1);
+          final wal = File('${file.path}-wal');
+          expect(
+            wal.existsSync() && wal.lengthSync() > 0,
+            isTrue,
+            reason: 'un-checkpointed WAL exists while open',
+          );
+          expect(
+            anyFileContains(dbFiles(file), s.utf8Needles),
+            isFalse,
+            reason: 'no sentinel bytes in db/-wal/-shm while open',
+          );
+          expect(
+            entryNames(dir)
+                .difference({'scan.db', 'scan.db-wal', 'scan.db-shm'}),
+            isEmpty,
+            reason: 'only db, -wal, -shm in the directory while open',
+          );
+        } finally {
+          await db.close();
+        }
+        expect(
+          hasPlaintextHeader(file),
+          isFalse,
+          reason: 'header is not SQLite format 3',
+        );
+        expect(
+          anyFileContains(dbFiles(file), s.utf8Needles),
+          isFalse,
+          reason: 'no sentinel bytes after close',
+        );
+        expect(
+          entryNames(dir).difference({'scan.db', 'scan.db-wal', 'scan.db-shm'}),
+          isEmpty,
+          reason: 'only db, -wal, -shm in the directory after close',
+        );
+      },
+    );
 
     test('rekey round-trip: K2 opens, K1 is refused', () async {
       final file = File('${dir.path}/rekey.db');
@@ -700,12 +800,18 @@ void registerSqlite3mcContract({required String env}) {
       // Record whether rekey works in WAL mode before falling back to the
       // documented path (rekey in rollback-journal mode).
       try {
-        await guarded('rekey_wal', () => db.customStatement('PRAGMA rekey = "x\'${k2.hex}\'"'));
+        await guarded(
+          'rekey_wal',
+          () => db.customStatement('PRAGMA rekey = "x\'${k2.hex}\'"'),
+        );
         findings['rekey_in_wal'] = 'ok';
       } on DbContractException catch (e) {
         findings['rekey_in_wal'] = 'error ${e.sqliteCode}';
         await statement(db, 'PRAGMA journal_mode = DELETE');
-        await guarded('rekey_delete', () => db.customStatement('PRAGMA rekey = "x\'${k2.hex}\'"'));
+        await guarded(
+          'rekey_delete',
+          () => db.customStatement('PRAGMA rekey = "x\'${k2.hex}\'"'),
+        );
         await statement(db, 'PRAGMA journal_mode = WAL');
       }
       await db.close();
@@ -716,48 +822,96 @@ void registerSqlite3mcContract({required String env}) {
       } finally {
         await reopened.close();
       }
-      expect(await openFailureCode(file, k1), sqliteNotADb, reason: 'K1 refused after rekey');
-      expect(hasPlaintextHeader(file), isFalse, reason: 'still encrypted after rekey');
+      expect(
+        await openFailureCode(file, k1),
+        sqliteNotADb,
+        reason: 'K1 refused after rekey',
+      );
+      expect(
+        hasPlaintextHeader(file),
+        isFalse,
+        reason: 'still encrypted after rekey',
+      );
     });
 
-    test('FTS5 trigram: DDL as written, Latin, Arabic, digits, LIKE via index', () async {
-      final db = openForeground(File('${dir.path}/fts.db'), RawKey(randomHexKey()));
-      try {
-        for (final ddl in ftsSourceDdl) {
-          await statement(db, ddl, const [], 'fts_ddl');
-        }
-        await insertFtsFixture(db);
+    test(
+      'FTS5 trigram: DDL as written, Latin, Arabic, digits, LIKE via index',
+      () async {
+        final db = openForeground(
+          File('${dir.path}/fts.db'),
+          RawKey(randomHexKey()),
+        );
+        try {
+          for (final ddl in ftsSourceDdl) {
+            await statement(db, ddl, const [], 'fts_ddl');
+          }
+          await insertFtsFixture(db);
 
-        expect(await _matchIds(db, 'cafe'), contains(101), reason: 'Café ~ cafe');
-        expect(await _matchIds(db, 'CAFÉ'), contains(101), reason: 'case-insensitive');
-        expect(await _matchIds(db, 'كارفور'), {102}, reason: 'Arabic substring');
-        expect(await _matchIds(db, '1,250'), {101}, reason: 'Latin digits');
-        expect(await _matchIds(db, '١٬٢٥٠'), {101}, reason: 'Arabic-Indic digits');
-        expect(await _matchIds(db, '340.5'), {102}, reason: 'Latin digits, Arabic row');
+          expect(
+            await _matchIds(db, 'cafe'),
+            contains(101),
+            reason: 'Café ~ cafe',
+          );
+          expect(
+            await _matchIds(db, 'CAFÉ'),
+            contains(101),
+            reason: 'case-insensitive',
+          );
+          expect(await _matchIds(db, 'كارفور'), {
+            102,
+          }, reason: 'Arabic substring');
+          expect(await _matchIds(db, '1,250'), {101}, reason: 'Latin digits');
+          expect(await _matchIds(db, '١٬٢٥٠'), {
+            101,
+          }, reason: 'Arabic-Indic digits');
+          expect(await _matchIds(db, '340.5'), {
+            102,
+          }, reason: 'Latin digits, Arabic row');
 
-        expect(await _likeIds(db, '%RICHE%'), {101}, reason: 'LIKE substring');
-        final plan = [
-          for (final r in await query(
+          expect(await _likeIds(db, '%RICHE%'), {
+            101,
+          }, reason: 'LIKE substring');
+          // Recorded only (design note: normalize in Dart, fall back for
+          // short queries).
+          findings['tashkeel_folded'] = (await _matchIds(
             db,
-            'EXPLAIN QUERY PLAN SELECT rowid FROM transactions_fts WHERE merchant LIKE ?',
-            ['%riche%'],
-            'fts_plan',
-          ))
-            r.last.toString(),
-        ].join(' | ');
-        findings['like_plan'] = plan;
-        expect(RegExp(r'VIRTUAL TABLE INDEX \d+:\S*L').hasMatch(plan), isTrue,
-            reason: 'LIKE is served by the trigram index');
+            'محمد',
+          )).contains(103);
+          findings['match_1ch_rows'] = (await _matchIds(db, 'ك')).length;
+          findings['match_2ch_rows'] = (await _matchIds(db, 'كا')).length;
+          findings['like_2ch_rows'] = (await _likeIds(db, '%كا%')).length;
+          findings['latin_diacritics_folded'] = (await _matchIds(
+            db,
+            'cafe',
+          )).contains(101);
 
-        // Recorded only.
-        findings['tashkeel_folded'] = (await _matchIds(db, 'محمد')).contains(103);
-        findings['match_1ch_rows'] = (await _matchIds(db, 'ك')).length;
-        findings['match_2ch_rows'] = (await _matchIds(db, 'كا')).length;
-        findings['like_2ch_rows'] = (await _likeIds(db, '%كا%')).length;
-        findings['latin_diacritics_folded'] = (await _matchIds(db, 'cafe')).contains(101);
-      } finally {
-        await db.close();
-      }
-    });
+          // Whether LIKE is served by the trigram index. Recorded, not
+          // asserted: SQLite does not use the index for LIKE/GLOB when the
+          // tokenizer has remove_diacritics 1 (found in T-007, see ADR-002).
+          final plan = await _likePlan(db, 'transactions_fts');
+          findings['like_plan'] = plan;
+          findings['like_indexed'] = _usesIndex(plan);
+
+          // Control: with plain `trigram` the same LIKE uses the index, which
+          // proves the plan check itself.
+          await statement(
+            db,
+            "CREATE VIRTUAL TABLE like_control USING fts5(merchant, tokenize='trigram')",
+          );
+          await statement(db, 'INSERT INTO like_control (merchant) VALUES (?)', [
+            'Café Riche',
+          ]);
+          final controlPlan = await _likePlan(db, 'like_control');
+          findings['like_control_plan'] = controlPlan;
+          expect(
+            _usesIndex(controlPlan),
+            isTrue,
+            reason: 'control: LIKE uses a plain trigram index',
+          );
+        } finally {
+          await db.close();
+        }
+      },
+    );
   });
 }
