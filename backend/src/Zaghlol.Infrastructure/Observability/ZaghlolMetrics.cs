@@ -50,7 +50,7 @@ public sealed partial class ZaghlolMetrics : IDisposable
         alertFired = meter.CreateCounter<long>("zaghlol.audit_alert.fired", description: "Audit alert signals by rule.");
 
         SeedSeries();
-        KmsMetrics.Seed();
+        Zaghlol.Infrastructure.Kms.KmsMetrics.Seed();
 
         meter.CreateObservableGauge("zaghlol.purchase.unacked", () => Interlocked.Read(ref unackedCount), description: "Purchases waiting for acknowledgement.");
         meter.CreateObservableGauge("zaghlol.purchase.unacked.oldest_age", () => Volatile.Read(ref unackedOldestAgeSeconds), "s", "Age of the oldest unacknowledged purchase.");

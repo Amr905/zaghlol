@@ -125,6 +125,7 @@ internal sealed class MetricsStarter(ZaghlolMetrics metrics, MeterProvider provi
     public Task StartAsync(CancellationToken cancellationToken)
     {
         _ = provider;
+        _ = metrics;
         return Task.CompletedTask;
     }
 
