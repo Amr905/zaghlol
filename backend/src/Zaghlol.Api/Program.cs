@@ -6,6 +6,7 @@ using Zaghlol.Api.Problems;
 using Zaghlol.Application;
 using Zaghlol.Infrastructure;
 using Zaghlol.Infrastructure.Logging;
+using Zaghlol.Infrastructure.Persistence;
 
 // `dotnet Zaghlol.Api.dll --healthcheck` is used by container health checks (the runtime image has no shell or curl).
 if (args.Contains("--healthcheck", StringComparer.Ordinal))
@@ -28,6 +29,10 @@ builder.Host.UseSerilog((_, services, logger) =>
 
 builder.Services.AddApplication();
 builder.Services.AddInfrastructure();
+
+// Two logins: app_rw for /v1/*, ops_rw for /admin/v1/* (T-122), so an injection in /v1 can't write catalog or audit rows.
+builder.Services.AddZaghlolDatabase(DatabaseRole.App, DatabaseRole.Admin);
+builder.Services.AddDatabaseReadiness();
 builder.Services.AddProblemDetails(options => options.CustomizeProblemDetails = ProblemDetailsCustomizer.Customize);
 builder.Services.AddExceptionHandler<GlobalExceptionHandler>();
 

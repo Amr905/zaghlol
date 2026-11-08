@@ -5,6 +5,7 @@ using Npgsql;
 
 namespace Zaghlol.Api.Tests;
 
+[Collection(ApiHostGroup.Name)]
 public class ApiTests(ApiFixture fixture) : IClassFixture<ApiFixture>
 {
     private static readonly string[] StackTraceMarkers = ["   at ", "StackTrace", "InvalidOperationException"];
@@ -90,7 +91,18 @@ public class ApiTests(ApiFixture fixture) : IClassFixture<ApiFixture>
         using var response = await fixture.Client.PostAsync(new Uri("/v1/health", UriKind.Relative), content);
 
         Assert.Equal(HttpStatusCode.MethodNotAllowed, response.StatusCode);
-        Assert.NotEmpty(fixture.LogSink.Entries);
+
+        // The request-completion event is written after the response is sent: wait for this request's own entry.
+        static bool ThisRequest(string e) =>
+            e.Contains("RequestMethod=\"POST\"", StringComparison.Ordinal)
+            && e.Contains("RequestPath=\"/v1/health\"", StringComparison.Ordinal);
+        var deadline = DateTime.UtcNow.AddSeconds(5);
+        while (!fixture.LogSink.Entries.Any(ThisRequest) && DateTime.UtcNow < deadline)
+        {
+            await Task.Delay(50);
+        }
+
+        Assert.Contains(fixture.LogSink.Entries, ThisRequest);
         Assert.DoesNotContain(fixture.LogSink.Entries, e => e.Contains("super-secret-body-value", StringComparison.Ordinal));
     }
 }
