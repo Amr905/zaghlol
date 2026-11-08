@@ -117,8 +117,17 @@ jobs:
           echo "### sqlite3 binaries (attestation verified)" >> "$GITHUB_STEP_SUMMARY"
           for f in "${files[@]}"; do
             echo "== $f ($(sha256sum "$f" | cut -c1-64))"
-            gh attestation verify "$f" --repo simolus3/sqlite3.dart
-            echo "- \`$f\` $(sha256sum "$f" | cut -c1-16)…" >> "$GITHUB_STEP_SUMMARY"
+            # Non-zero exit (step fails) unless a valid attestation exists.
+            # Without a TTY gh prints nothing, so show what was verified.
+            gh attestation verify "$f" --repo simolus3/sqlite3.dart --format json > att.json
+            n=$(jq 'length' att.json)
+            signer=$(jq -r '[.[].verificationResult.signature.certificate.buildSignerURI] | unique | join(", ")' att.json)
+            ref=$(jq -r '[.[].verificationResult.signature.certificate.sourceRepositoryRef] | unique | join(", ")' att.json)
+            echo "verified attestations: $n; signer: $signer; source ref: $ref"
+            if [ "$n" -lt 1 ]; then
+              echo "::error::no verified attestation for $f"; exit 1
+            fi
+            echo "- \`$f\` $(sha256sum "$f" | cut -c1-16)…: $n attestation(s), signer $signer, ref $ref" >> "$GITHUB_STEP_SUMMARY"
           done
       - name: Resolved versions
         if: always()
