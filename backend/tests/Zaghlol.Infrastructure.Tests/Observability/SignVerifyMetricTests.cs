@@ -34,6 +34,38 @@ public sealed class SignVerifyMetricTests
     }
 
     [Fact]
+    public void SeedCreatesEveryOperationSeriesAtZero()
+    {
+        var zeros = new ConcurrentQueue<string>();
+        using var listener = new MeterListener();
+        listener.InstrumentPublished = (instrument, l) =>
+        {
+            if (instrument.Meter.Name == KmsMetrics.MeterName && instrument.Name == "zaghlol.kms.unavailable")
+            {
+                l.EnableMeasurementEvents(instrument);
+            }
+        };
+        listener.SetMeasurementEventCallback<long>((_, value, tags, _) =>
+        {
+            foreach (var tag in tags)
+            {
+                if (value == 0 && tag.Key == "operation" && tag.Value is string operation)
+                {
+                    zeros.Enqueue(operation);
+                }
+            }
+        });
+        listener.Start();
+
+        KmsMetrics.Seed();
+
+        foreach (var operation in new[] { "sign", "sign_verify", "hmac", "data_key", "public_key" })
+        {
+            Assert.Contains(operation, zeros);
+        }
+    }
+
+    [Fact]
     public void TheTagValueIsStable()
     {
         // Alert rules match this literal (deploy/observability/alerts/purchases.yaml).

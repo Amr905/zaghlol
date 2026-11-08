@@ -11,7 +11,7 @@ namespace Zaghlol.Infrastructure.Tests.Observability;
 /// <summary>
 /// Code review round 1 (tests M1): the span exporters run after <see cref="RedactingActivityProcessor"/>. The probe is a
 /// processor that copies what it sees in <c>OnEnd</c> (a live <c>Activity</c> reference would look redacted later), and it is
-/// registered through the same hook and at the same place as the OTLP exporter, with the OTLP endpoint set.
+/// registered through the OTLP exporter seam (it replaces the OTLP registration, which sits at one place in the pipeline), with the OTLP endpoint set.
 /// </summary>
 public sealed class ExporterOrderTests
 {
@@ -58,7 +58,7 @@ public sealed class ExporterOrderTests
             new TestEnvironment(),
             "zaghlol-test",
             configureTracing: tracing => tracing.AddSource(SourceName),
-            configureExporters: tracing => tracing.AddProcessor(new SnapshotProcessor(snapshot)));
+            addOtlpExporter: tracing => tracing.AddProcessor(new SnapshotProcessor(snapshot)));
         using var provider = services.BuildServiceProvider();
         using var tracerProvider = provider.GetRequiredService<TracerProvider>();
 

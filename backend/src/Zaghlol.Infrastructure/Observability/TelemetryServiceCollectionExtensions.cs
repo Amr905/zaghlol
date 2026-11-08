@@ -25,8 +25,8 @@ public static class TelemetryServiceCollectionExtensions
     /// </summary>
     /// <param name="configureTracing">Host-specific instrumentation (ASP.NET Core in the API).</param>
     /// <param name="configureMetrics">Host-specific meters (ASP.NET Core in the API).</param>
-    /// <param name="configureExporters">Extra span exporters or processors (tests). They are registered after the redactor,
-    /// at the same place as the OTLP exporter, so they only ever see redacted spans.</param>
+    /// <param name="addOtlpExporter">Test seam: replaces the OTLP span exporter registration, which stays at the same place,
+    /// after the redactor and only when the endpoint is set. Production passes <c>null</c>.</param>
     public static IServiceCollection AddZaghlolTelemetry(
         this IServiceCollection services,
         IConfiguration configuration,
@@ -34,7 +34,7 @@ public static class TelemetryServiceCollectionExtensions
         string serviceName,
         Action<TracerProviderBuilder>? configureTracing = null,
         Action<MeterProviderBuilder>? configureMetrics = null,
-        Action<TracerProviderBuilder>? configureExporters = null)
+        Action<TracerProviderBuilder>? addOtlpExporter = null)
     {
         ArgumentNullException.ThrowIfNull(services);
         ArgumentNullException.ThrowIfNull(configuration);
@@ -75,10 +75,8 @@ public static class TelemetryServiceCollectionExtensions
                 tracing.AddProcessor(new RedactingActivityProcessor());
                 if (exportOtlp)
                 {
-                    tracing.AddOtlpExporter();
+                    (addOtlpExporter ?? (static t => t.AddOtlpExporter()))(tracing);
                 }
-
-                configureExporters?.Invoke(tracing);
             })
             .WithMetrics(metrics =>
             {
