@@ -31,6 +31,7 @@ The Lead updates this file at every gate. Newest entry at the bottom.
 | 2026-11-03 | 5 — Implementation | BLK-01 resolved: product owner chose GitHub (Amr905/zaghlol) + GitHub Actions CI as the build/verification environment. T-001 and T-005 started. | Implementation running; per-task status in `docs/implementation-status.md`. |
 | 2026-11-06 | 5 — Implementation | Gold design approved (FU-api-decisions, SRS v1.8 D-45…D-66). Task plan v1.1 APPROVED by the product owner: 186 tasks, T-178…T-186 added. Repo made public; CI on GitHub Actions incl. iOS. | Implementation continues on plan v1.1. |
 | 2026-11-08 | 5 — Implementation | Process change approved by the PO: fewer reviewers on routine work, only blockers and majors trigger another round, Sonnet by default for C2 and C3, a fresh Lead session (see `LEAD_HANDOFF.md`), and local CI v2 on the PO's PC. | CLAUDE.md §6 and §10 updated. |
+| 2026-11-08 | 5 — Implementation | PO chose "Balanced" lighter rules: C3 one Sonnet reviewer (incl. tests); C4 Opus code (incl. tests) + Opus security, no separate test-engineer; re-reviews on Sonnet; C4 design notes on Sonnet except crypto/billing/ingestion; at most 2 tasks at once. Local runner fixed (LF line endings); agents read local-ci results first. | CLAUDE.md §6, model-routing.md, run-task.md, local-ci.md updated. |
 
 ## Current phase
 **Phase 5 — Implementation: RUNNING (CI on GitHub Actions)**

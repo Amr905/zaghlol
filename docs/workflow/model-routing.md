@@ -18,12 +18,12 @@ Score each factor 0–2 and sum:
 |-------|-------|-------------|------------------|
 | 0–2 | **C1 Trivial** | `haiku` | Lead spot-check (diff + green CI) |
 | 3–5 | **C2 Standard** | `sonnet` | code-reviewer (sonnet) |
-| 6–7 | **C3 Complex** | `sonnet`, after a short design note by the architect on `sonnet` | code-reviewer (sonnet) + test-engineer (sonnet) |
-| 8–10 | **C4 Critical** | `opus` | code-reviewer (opus) + security-privacy-reviewer (opus) + test-engineer (sonnet) |
+| 6–7 | **C3 Complex** | `sonnet`, after a short design note by the architect on `sonnet` | code-reviewer (sonnet), also checks tests |
+| 8–10 | **C4 Critical** | `opus` | code-reviewer (opus), also checks tests + security-privacy-reviewer (opus) |
 
 Docs-only tasks (copy deck, spec text) are implemented on `sonnet` and get one reviewer (code-reviewer on `sonnet`).
 
-**Review rounds (2026-11-08):** only blocker or major findings trigger another round, and only the reviewers who raised them re-review, delta only. Minors and nits become `FU-###` follow-ups with an owner task.
+**Review rounds (2026-11-08, Balanced):** only blocker or major findings trigger another round, and only the reviewers who raised them re-review, delta only, on `sonnet`. Minors and nits become `FU-###` follow-ups with an owner task. `test-engineer` runs only when the Lead asks for it (e.g. a reviewer flags weak tests). At most 2 tasks run at once.
 
 **Automatic C4** regardless of score: anything touching encryption keys, SQLCipher setup, backup crypto, purchase verification & entitlement signing (app or backend), store webhooks, sign-in token verification, SMS/notification permissions & native receivers, schema migrations (app or backend), Zakah computation, money arithmetic primitives, the backend's accepted-fields boundary (BR-SYNC-03).
 
@@ -33,7 +33,7 @@ Docs-only tasks (copy deck, spec text) are implemented on `sonnet` and get one r
 |-------|---------------|-----------------|
 | requirements-analyst | opus | Phase 1 |
 | ux-designer | opus | Phase 2; Phase 5 copy and design tasks on sonnet |
-| solution-architect | opus | Phase 3; design notes: sonnet for C3, opus for C4 |
+| solution-architect | opus | Phase 3; design notes: sonnet for C3 and most C4; opus for C4 crypto/keys, billing/entitlements, SMS/notification ingestion |
 | task-planner | opus | Phase 4 |
 | boilerplate-engineer | haiku | C1 |
 | flutter-ui-engineer | sonnet | C2, C3 |
@@ -41,7 +41,7 @@ Docs-only tasks (copy deck, spec text) are implemented on `sonnet` and get one r
 | parsing-engine-engineer | sonnet | C2, C3 (opus override for C4) |
 | native-platform-engineer | sonnet | C3 (opus override for C4) |
 | backend-engineer | sonnet | C2, C3 (opus override for C4) |
-| test-engineer | sonnet | Phase 6 |
+| test-engineer | sonnet | Phase 6, on request only |
 | code-reviewer | sonnet | Phase 6 (opus override for C4) |
 | security-privacy-reviewer | opus | Phase 6 (C4 + data-touching) |
 

@@ -66,8 +66,8 @@ Every task in `docs/04-tasks/tasks/` carries a **complexity class**. The class d
 |-------|---------|-------------------|--------|
 | **C1 Trivial** | Boilerplate, constants, seed data, string files, assets wiring | Haiku (`boilerplate-engineer`) | Lead spot-check (diff + green CI) |
 | **C2 Standard** | Screens, widgets, DAOs, providers, API endpoints, ordinary logic with clear spec | Sonnet (`flutter-ui-engineer`, `flutter-core-engineer`, `parsing-engine-engineer`, `backend-engineer`) | `code-reviewer` on **Sonnet** (one reviewer) |
-| **C3 Complex** | Non-trivial algorithms, cross-module work, ambiguous edge cases | **Sonnet**, with a short design note written by the architect on **Sonnet** | `code-reviewer` + `test-engineer`, both on **Sonnet** |
-| **C4 Critical** | Security, crypto, billing/entitlements, native ingestion, financial/Zakah math, data migrations | Opus (design note on Opus too) | `code-reviewer` (Opus) + `security-privacy-reviewer` (Opus) + `test-engineer` (Sonnet) |
+| **C3 Complex** | Non-trivial algorithms, cross-module work, ambiguous edge cases | **Sonnet**, with a short design note written by the architect on **Sonnet** | `code-reviewer` on **Sonnet** (one reviewer, also checks tests) |
+| **C4 Critical** | Security, crypto, billing/entitlements, native ingestion, financial/Zakah math, data migrations | Opus. Design note on Opus only for crypto/keys, billing/entitlements and SMS/notification ingestion; otherwise Sonnet | `code-reviewer` (Opus, also checks tests) + `security-privacy-reviewer` (Opus) |
 | **Docs-only** | Copy deck, design or spec text | Sonnet | One reviewer (`code-reviewer` on Sonnet) |
 
 Delegation rules for the Lead:
@@ -77,11 +77,12 @@ Delegation rules for the Lead:
 4. A sub-agent's "done" is a claim, not a fact. The Lead reads the diff and the review report before marking a task complete.
 5. If a C1/C2 task fails review twice, re-classify one level up and re-delegate.
 
-**Review-round policy (adopted 2026-11-08):**
+**Review-round policy (adopted 2026-11-08; lightened 2026-11-08 evening, "Balanced"):**
 - Only **blocker** or **major** findings trigger another implementation round. The implementer may fix a trivial minor or nit in the same pass. Every other minor or nit becomes a follow-up (`FU-###` in `docs/implementation-status.md`) with an owner task, and does not block the merge.
-- Only the reviewers who raised a blocker or major re-review. Re-reviews look at the delta only.
+- Only the reviewers who raised a blocker or major re-review. Re-reviews look at the delta only and run on **Sonnet**.
+- At most **2 tasks** run at the same time (implementers; their reviews count with them). Agent briefs point to the specific sections an agent needs, not whole documents.
 - Security findings rated Low or Info are follow-ups unless the reviewer marks them "before merge".
-- Fast checks: agents push and verify on CI. The local runner on the PO's PC (`.zaghlol-local-ci/`, see `docs/workflow/local-ci.md`) gives faster analyze and test results when it's running. GitHub Actions stays the gate for merging.
+- Fast checks: after each push, agents read the local runner result first (`git show origin/local-ci:<branch with / as __>/<sha>.status` and `.log`, usually within ~3 min; see `docs/workflow/local-ci.md`) to fix format/analyze/test errors, and only then wait for GitHub Actions, which stays the gate for merging.
 
 ## 7. Definition of Done (per task)
 
