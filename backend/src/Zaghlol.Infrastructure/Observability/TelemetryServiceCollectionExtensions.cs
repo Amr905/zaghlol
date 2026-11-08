@@ -41,6 +41,9 @@ public static class TelemetryServiceCollectionExtensions
         services.TryAddSingleton<ZaghlolMetrics>();
         services.TryAddSingleton<IAlertSignal, AlertSignal>();
 
+        // The meter exists only once ZaghlolMetrics is built; build it at startup so its instruments are always exported.
+        services.TryAddEnumerable(ServiceDescriptor.Singleton<IHostedService, MetricsStarter>());
+
         var exportOtlp = !string.IsNullOrWhiteSpace(configuration[OtlpEndpointKey]);
         var ratio = double.TryParse(configuration[SampleRatioKey], NumberStyles.Float, CultureInfo.InvariantCulture, out var parsed)
             ? Math.Clamp(parsed, 0d, 1d)
@@ -110,4 +113,16 @@ public static class TelemetryServiceCollectionExtensions
         services.TryAddSingleton<ILogPseudonymizer, LogPseudonymizer>();
         return services;
     }
+}
+
+/// <summary>Builds <see cref="ZaghlolMetrics"/> when the host starts, so the <c>Zaghlol</c> meter is live from the first export.</summary>
+internal sealed class MetricsStarter(ZaghlolMetrics metrics) : IHostedService
+{
+    public Task StartAsync(CancellationToken cancellationToken)
+    {
+        _ = metrics;
+        return Task.CompletedTask;
+    }
+
+    public Task StopAsync(CancellationToken cancellationToken) => Task.CompletedTask;
 }

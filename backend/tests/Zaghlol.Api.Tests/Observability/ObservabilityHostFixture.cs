@@ -69,7 +69,7 @@ internal sealed class SynchronizedWriter : TextWriter
 }
 
 /// <summary>Retries once on a 5xx, logging the URI through a placeholder (which must not reach the output).</summary>
-internal sealed class RetryOnceHandler(ILogger logger) : DelegatingHandler
+internal sealed class RetryOnceHandler(Microsoft.Extensions.Logging.ILogger logger) : DelegatingHandler
 {
     protected override async Task<HttpResponseMessage> SendAsync(HttpRequestMessage request, CancellationToken cancellationToken)
     {
