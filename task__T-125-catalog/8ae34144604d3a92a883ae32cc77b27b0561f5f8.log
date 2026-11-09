@@ -1,5 +1,77 @@
 ﻿== SUMMARY ==
-RUNNING sha=8ae34144604d3a92a883ae32cc77b27b0561f5f8
+FAIL sha=8ae34144604d3a92a883ae32cc77b27b0561f5f8 pipeline=quick-backend dotnet-build=1 dotnet-format=0 dotnet-test=0
+dotnet-build                 FAIL  exit=1  8s
+dotnet-format                PASS  exit=0  20s
+dotnet-test                  PASS  exit=0  38s
+
+== ERRORS: dotnet-build ==
+/work/backend/tests/Zaghlol.Application.Tests/Catalog/CatalogSeedCsvTests.cs(29,22): error CA1861: Prefer 'static readonly' fields over constant array arguments if the called method is called repeatedly and is not mutating the passed array (https://learn.microsoft.com/dotnet/fundamentals/code-analysis/quality-rules/ca1861) [/work/backend/tests/Zaghlol.Application.Tests/Zaghlol.Application.Tests.csproj]
+/work/backend/tests/Zaghlol.Application.Tests/Catalog/CatalogSeedCsvTests.cs(30,22): error CA1861: Prefer 'static readonly' fields over constant array arguments if the called method is called repeatedly and is not mutating the passed array (https://learn.microsoft.com/dotnet/fundamentals/code-analysis/quality-rules/ca1861) [/work/backend/tests/Zaghlol.Application.Tests/Zaghlol.Application.Tests.csproj]
+/work/backend/tests/Zaghlol.Application.Tests/Catalog/CatalogOpsTests.cs(27,13): error CA1861: Prefer 'static readonly' fields over constant array arguments if the called method is called repeatedly and is not mutating the passed array (https://learn.microsoft.com/dotnet/fundamentals/code-analysis/quality-rules/ca1861) [/work/backend/tests/Zaghlol.Application.Tests/Zaghlol.Application.Tests.csproj]
+/work/backend/src/Zaghlol.Infrastructure/Catalog/CatalogMapping.cs(11,9): error CA1806: FromDraft calls TryParse but does not explicitly check whether the conversion succeeded. Either use the return value in a conditional statement or verify that the call site expects that the out argument will be set to the default value when the conversion fails. (https://learn.microsoft.com/dotnet/fundamentals/code-analysis/quality-rules/ca1806) [/work/backend/src/Zaghlol.Infrastructure/Zaghlol.Infrastructure.csproj]
+/work/backend/src/Zaghlol.Infrastructure/Catalog/CatalogAdminStore.cs(231,25): error CA1859: Change return type of method 'LockAsync' from 'System.Threading.Tasks.Task' to 'System.Threading.Tasks.Task<int>' for improved performance (https://learn.microsoft.com/dotnet/fundamentals/code-analysis/quality-rules/ca1859) [/work/backend/src/Zaghlol.Infrastructure/Zaghlol.Infrastructure.csproj]
 
 == FULL LOG (last 1500 lines) ==
 auto task/T-125-catalog 8ae34144604d3a92a883ae32cc77b27b0561f5f8 2026-11-10T01:27:49.2738712+02:00
+
+
+
+[01:27:54] === STEP dotnet-build (docker mcr.microsoft.com/dotnet/sdk:10.0.402, /work/backend)
+  Determining projects to restore...
+  All projects are up-to-date for restore.
+  Zaghlol.Domain -> /work/backend/src/Zaghlol.Domain/bin/Release/net10.0/Zaghlol.Domain.dll
+  Zaghlol.Ops -> /work/backend/src/Zaghlol.Ops/bin/Release/net10.0/zaghlol-ops.dll
+  Zaghlol.Application -> /work/backend/src/Zaghlol.Application/bin/Release/net10.0/Zaghlol.Application.dll
+  Zaghlol.Ops.Tests -> /work/backend/tests/Zaghlol.Ops.Tests/bin/Release/net10.0/Zaghlol.Ops.Tests.dll
+/work/backend/tests/Zaghlol.Application.Tests/Catalog/CatalogSeedCsvTests.cs(29,22): error CA1861: Prefer 'static readonly' fields over constant array arguments if the called method is called repeatedly and is not mutating the passed array (https://learn.microsoft.com/dotnet/fundamentals/code-analysis/quality-rules/ca1861) [/work/backend/tests/Zaghlol.Application.Tests/Zaghlol.Application.Tests.csproj]
+/work/backend/tests/Zaghlol.Application.Tests/Catalog/CatalogSeedCsvTests.cs(30,22): error CA1861: Prefer 'static readonly' fields over constant array arguments if the called method is called repeatedly and is not mutating the passed array (https://learn.microsoft.com/dotnet/fundamentals/code-analysis/quality-rules/ca1861) [/work/backend/tests/Zaghlol.Application.Tests/Zaghlol.Application.Tests.csproj]
+/work/backend/tests/Zaghlol.Application.Tests/Catalog/CatalogOpsTests.cs(27,13): error CA1861: Prefer 'static readonly' fields over constant array arguments if the called method is called repeatedly and is not mutating the passed array (https://learn.microsoft.com/dotnet/fundamentals/code-analysis/quality-rules/ca1861) [/work/backend/tests/Zaghlol.Application.Tests/Zaghlol.Application.Tests.csproj]
+/work/backend/src/Zaghlol.Infrastructure/Catalog/CatalogMapping.cs(11,9): error CA1806: FromDraft calls TryParse but does not explicitly check whether the conversion succeeded. Either use the return value in a conditional statement or verify that the call site expects that the out argument will be set to the default value when the conversion fails. (https://learn.microsoft.com/dotnet/fundamentals/code-analysis/quality-rules/ca1806) [/work/backend/src/Zaghlol.Infrastructure/Zaghlol.Infrastructure.csproj]
+/work/backend/src/Zaghlol.Infrastructure/Catalog/CatalogAdminStore.cs(231,25): error CA1859: Change return type of method 'LockAsync' from 'System.Threading.Tasks.Task' to 'System.Threading.Tasks.Task<int>' for improved performance (https://learn.microsoft.com/dotnet/fundamentals/code-analysis/quality-rules/ca1859) [/work/backend/src/Zaghlol.Infrastructure/Zaghlol.Infrastructure.csproj]
+
+Build FAILED.
+
+/work/backend/tests/Zaghlol.Application.Tests/Catalog/CatalogSeedCsvTests.cs(29,22): error CA1861: Prefer 'static readonly' fields over constant array arguments if the called method is called repeatedly and is not mutating the passed array (https://learn.microsoft.com/dotnet/fundamentals/code-analysis/quality-rules/ca1861) [/work/backend/tests/Zaghlol.Application.Tests/Zaghlol.Application.Tests.csproj]
+/work/backend/tests/Zaghlol.Application.Tests/Catalog/CatalogSeedCsvTests.cs(30,22): error CA1861: Prefer 'static readonly' fields over constant array arguments if the called method is called repeatedly and is not mutating the passed array (https://learn.microsoft.com/dotnet/fundamentals/code-analysis/quality-rules/ca1861) [/work/backend/tests/Zaghlol.Application.Tests/Zaghlol.Application.Tests.csproj]
+/work/backend/tests/Zaghlol.Application.Tests/Catalog/CatalogOpsTests.cs(27,13): error CA1861: Prefer 'static readonly' fields over constant array arguments if the called method is called repeatedly and is not mutating the passed array (https://learn.microsoft.com/dotnet/fundamentals/code-analysis/quality-rules/ca1861) [/work/backend/tests/Zaghlol.Application.Tests/Zaghlol.Application.Tests.csproj]
+/work/backend/src/Zaghlol.Infrastructure/Catalog/CatalogMapping.cs(11,9): error CA1806: FromDraft calls TryParse but does not explicitly check whether the conversion succeeded. Either use the return value in a conditional statement or verify that the call site expects that the out argument will be set to the default value when the conversion fails. (https://learn.microsoft.com/dotnet/fundamentals/code-analysis/quality-rules/ca1806) [/work/backend/src/Zaghlol.Infrastructure/Zaghlol.Infrastructure.csproj]
+/work/backend/src/Zaghlol.Infrastructure/Catalog/CatalogAdminStore.cs(231,25): error CA1859: Change return type of method 'LockAsync' from 'System.Threading.Tasks.Task' to 'System.Threading.Tasks.Task<int>' for improved performance (https://learn.microsoft.com/dotnet/fundamentals/code-analysis/quality-rules/ca1859) [/work/backend/src/Zaghlol.Infrastructure/Zaghlol.Infrastructure.csproj]
+    0 Warning(s)
+    5 Error(s)
+
+Time Elapsed 00:00:06.75
+
+[01:28:02] === RESULT dotnet-build exit=1 (8s)
+[01:28:02] === STEP dotnet-format (docker mcr.microsoft.com/dotnet/sdk:10.0.402, /work/backend)
+Formatting code files in workspace '/work/backend/Zaghlol.sln'.
+Format complete in 18751ms.
+
+[01:28:21] === RESULT dotnet-format exit=0 (20s)
+[01:28:21] === STEP dotnet-test (docker mcr.microsoft.com/dotnet/sdk:10.0.402, /work/backend)
+Test run for /work/backend/tests/Zaghlol.Ops.Tests/bin/Release/net10.0/Zaghlol.Ops.Tests.dll (.NETCoreApp,Version=v10.0)
+Test run for /work/backend/tests/Zaghlol.Workers.Tests/bin/Release/net10.0/Zaghlol.Workers.Tests.dll (.NETCoreApp,Version=v10.0)
+Test run for /work/backend/tests/Zaghlol.Application.Tests/bin/Release/net10.0/Zaghlol.Application.Tests.dll (.NETCoreApp,Version=v10.0)
+Test run for /work/backend/tests/Zaghlol.Api.Tests/bin/Release/net10.0/Zaghlol.Api.Tests.dll (.NETCoreApp,Version=v10.0)
+Test run for /work/backend/tests/Zaghlol.Infrastructure.Tests/bin/Release/net10.0/Zaghlol.Infrastructure.Tests.dll (.NETCoreApp,Version=v10.0)
+Test run for /work/backend/tests/Zaghlol.Contract.Tests/bin/Release/net10.0/Zaghlol.Contract.Tests.dll (.NETCoreApp,Version=v10.0)
+A total of 1 test files matched the specified pattern.
+A total of 1 test files matched the specified pattern.
+A total of 1 test files matched the specified pattern.
+A total of 1 test files matched the specified pattern.
+A total of 1 test files matched the specified pattern.
+A total of 1 test files matched the specified pattern.
+
+Passed!  - Failed:     0, Passed:    37, Skipped:     0, Total:    37, Duration: 71 ms - Zaghlol.Application.Tests.dll (net10.0)
+
+Passed!  - Failed:     0, Passed:     2, Skipped:     0, Total:     2, Duration: 29 ms - Zaghlol.Ops.Tests.dll (net10.0)
+
+Passed!  - Failed:     0, Passed:     3, Skipped:     0, Total:     3, Duration: 102 ms - Zaghlol.Workers.Tests.dll (net10.0)
+
+Passed!  - Failed:     0, Passed:    63, Skipped:     0, Total:    63, Duration: 11 s - Zaghlol.Contract.Tests.dll (net10.0)
+
+Passed!  - Failed:     0, Passed:   501, Skipped:     0, Total:   501, Duration: 13 s - Zaghlol.Infrastructure.Tests.dll (net10.0)
+
+Passed!  - Failed:     0, Passed:   200, Skipped:     0, Total:   200, Duration: 26 s - Zaghlol.Api.Tests.dll (net10.0)
+
+[01:29:00] === RESULT dotnet-test exit=0 (38s)
+[01:29:00] SUMMARY FAIL sha=8ae34144604d3a92a883ae32cc77b27b0561f5f8 pipeline=quick-backend dotnet-build=1 dotnet-format=0 dotnet-test=0
