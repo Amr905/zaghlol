@@ -44,7 +44,9 @@ public sealed class KeyRingTests : IDisposable
         Assert.False(string.IsNullOrEmpty(error.Message), name);
     }
 
-    [Fact]
+    // Windows CNG throws PlatformNotSupportedException while the test builds the off-curve key; the check
+    // under test runs on Linux (CI, local-ci containers).
+    [FactSkipOnWindows]
     public async Task AnOffCurvePointIsRejected()
     {
         using var kms = FakeKms.CreateDefault();
@@ -247,5 +249,17 @@ public sealed class KeyRingTests : IDisposable
         public string ContentRootPath { get; set; } = AppContext.BaseDirectory;
 
         public IFileProvider ContentRootFileProvider { get; set; } = new NullFileProvider();
+    }
+}
+
+/// <summary>A [Fact] that is skipped on Windows (xunit 2 has no runtime skip).</summary>
+internal sealed class FactSkipOnWindowsAttribute : FactAttribute
+{
+    public FactSkipOnWindowsAttribute()
+    {
+        if (OperatingSystem.IsWindows())
+        {
+            Skip = "Windows CNG rejects off-curve EC points with PlatformNotSupportedException when the fixture builds them; covered on Linux.";
+        }
     }
 }

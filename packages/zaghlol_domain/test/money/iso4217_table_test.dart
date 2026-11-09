@@ -24,10 +24,13 @@ THB TJS TMT TND TOP TRY TTD TWD TZS UAH UGX USD USN UYI UYU UYW UZS VED VES
 VND VUV WST XAF XCD XCG XOF XPF YER ZAR ZMW ZWG
 ''';
 
+/// Checked-out files may have CRLF endings on Windows; the generator emits LF.
+String _lf(String s) => s.replaceAll('\r\n', '\n');
+
 void main() {
-  final xml = File(gen.xmlPath).readAsStringSync();
-  final json = File(gen.jsonPath).readAsStringSync();
-  final dart = File(gen.dartPath).readAsStringSync();
+  final xml = _lf(File(gen.xmlPath).readAsStringSync());
+  final json = _lf(File(gen.jsonPath).readAsStringSync());
+  final dart = _lf(File(gen.dartPath).readAsStringSync());
   final listOne = gen.parseListOne(xml);
   final table = gen.parseJson(json);
 
