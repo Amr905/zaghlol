@@ -1,6 +1,6 @@
 # Lead handoff — read this first
 
-_Last updated: 2026-11-08 (afternoon) by the Lead session. Update it whenever the state below changes._
+_Last updated: 2026-11-09 (evening) by the Lead session. Update it whenever the state below changes._
 
 **All state is in the repo.** Agents from earlier sessions can't be messaged; start new ones from their branches.
 
@@ -14,23 +14,29 @@ _Last updated: 2026-11-08 (afternoon) by the Lead session. Update it whenever th
 - **Merging:** the `main` ruleset (26756600) is **Active** (PR required). The **PO authorised the Lead (2026-11-08) to merge approved PRs**: when all reviews are APPROVED and CI on the PR head is green, squash-merge via `PUT /repos/Amr905/zaghlol/pulls/<n>/merge` (`gh` has no valid token here). If the PR branch is behind code that changes its checks (e.g. new lint rules), merge `main` into it and wait for green CI first.
 - **Copy deck checks:** `python3 docs/workflow/tools/copy_deck_check.py docs/02-design/copy-deck.md`.
 
-## Progress: 15 of 186 tasks done (8.1%)
+## Progress: 18 of 186 tasks done (9.7%)
 
-DONE: T-001…T-006, T-012, T-014, T-022, T-026, T-027, T-028, T-122, T-123, T-138. T-165 is merged but needs a device run.
+DONE: T-001…T-007, T-012, T-013, T-014, T-022, T-026, T-027, T-028, T-122, T-123, T-124, T-138. T-165 is merged but needs a device run.
+
+| Milestone | Done | Total |
+|---|---|---|
+| M0 | 14 | 28 |
+| M5 | 4 | 35 |
+| M1–M4, M6, M7 | 0 | 123 |
+
+The PO asked for this progress table in every update.
 
 ## In flight (limit: 2 tasks at once)
 
-| Task | State | Next step |
-|---|---|---|
-| T-007 SQLCipher spike (C4) | Opus implementer on `task/T-007-sqlcipher`, from the Opus design note on `task/T-007-design-note` (20e82d7). | C4 reviews (Balanced): Opus code reviewer (incl. tests) + Opus security reviewer. PO device decisions are still open. |
-| T-124 Install auth (C4) | Sonnet design note in progress on `task/T-124-design-note`. | Then Opus implementer (backend-engineer), then the Balanced C4 reviews. |
-| T-165 No OS backups | Merged, IN_REVIEW. | DONE after the device run. |
+Nothing in flight. T-165 is merged, IN_REVIEW, waiting for a device run.
+
+**Session notes (2026-11-09):** project agent types (`code-reviewer`, `backend-engineer`, …) only appear after the repo is registered in the session; before that, run them as `general-purpose` with the role file. For a fix round, start a fresh agent with a short brief instead of resuming the implementer (cheaper). `gh` works through `gh api` (REST only, no GraphQL).
 
 ## Ready next (dependencies DONE)
 
-- **App:** T-007 SQLCipher spike (C4, after T-004 for the lockfile), spikes T-010 (C3) and T-011 (C2), T-013 normalization (C3, needs T-012 ✓), T-015 after T-007.
-- **Lint hardening (FU-030):** must land before T-032/T-033 parsing work. Ask the task-planner to add a small task, or fold it into T-013.
-- **Backend:** T-138 (C3) after T-123; T-124 after T-123; T-125 and T-126 (need T-122 ✓, T-123).
+- **App:** T-015 secure DB key bootstrap (C4, Opus design note: crypto/keys), spikes T-010 (C3) and T-011 (C2), T-032/T-034 parsing (after FU-030 lint hardening).
+- **Lint hardening (FU-030):** must land before T-032/T-033 parsing work. T-013 is merged without it; ask the task-planner to add a small task.
+- **Backend:** T-125 and T-126; T-130 (needs the FU-052 S-2 idempotency design fix first).
 - **Docs:** T-029 (ARB from copy deck part 1) needs T-023 and the Q-15/Q-16 answers.
 - **External:** T-088 (Rive file), T-058 (native-speaker review, now unblocked: all three copy-deck parts are merged).
 

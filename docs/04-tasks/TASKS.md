@@ -44,13 +44,13 @@ Every task file has: ID, description, technical details, dependencies, affected 
 | [T-004](tasks/T-004.md) | Pigeon setup and stale-generation check | US-01-1 | Medium | Sonnet | flutter-core-engineer | T-001 | A | 2 | DONE |
 | [T-005](tasks/T-005.md) | Backend solution scaffold, Docker Compose and CI | US-01-1 | Medium | Sonnet | backend-engineer | — | B | 1 | DONE |
 | [T-006](tasks/T-006.md) | OpenAPI v1 spec and contract-test harness | US-13-1 | Medium | Sonnet | backend-engineer | T-005 | B | 2 | DONE |
-| [T-007](tasks/T-007.md) | SPK-05: encrypted SQLite (SQLite3MultipleCiphers) + FTS5 trigram on both platforms | US-01-2 | High* | Opus | flutter-core-engineer | T-001 | A | 2 | IN_PROGRESS |
+| [T-007](tasks/T-007.md) | SPK-05: encrypted SQLite (SQLite3MultipleCiphers) + FTS5 trigram on both platforms | US-01-2 | High* | Opus | flutter-core-engineer | T-001 | A | 2 | DONE |
 | [T-008](tasks/T-008.md) | SPK-01: Android receiver → spool → WorkManager → headless engine latency | US-01-2 | High* | Opus | native-platform-engineer | T-001, T-004 | D | 3 | TODO |
 | [T-009](tasks/T-009.md) | SPK-03: can an iOS App Intent process immediately with a headless Flutter engine? | US-01-2 | High* | Opus | native-platform-engineer | T-001, T-004 | E | 3 | TODO |
 | [T-010](tasks/T-010.md) | SPK-02: OCR accuracy on synthetic InstaPay/wallet receipts | US-01-2 | High | Sonnet | native-platform-engineer | T-001 | D | 2 | MERGED (device run pending) |
 | [T-011](tasks/T-011.md) | SPK-04: on-device ar-EG speech availability across the device matrix | US-01-2 | Medium | Sonnet | native-platform-engineer | T-001 | D | 2 | TODO |
 | [T-012](tasks/T-012.md) | Money and Currency value types with ISO 4217 table | US-02-2 | High* | Opus | flutter-core-engineer | T-001 | A | 2 | DONE |
-| [T-013](tasks/T-013.md) | Text & amount normalization utilities (digits, separators, groupings) | US-05-1 | High | Sonnet | parsing-engine-engineer | T-012 | F | 3 | TODO |
+| [T-013](tasks/T-013.md) | Text & amount normalization utilities (digits, separators, groupings) | US-05-1 | High | Sonnet | parsing-engine-engineer | T-012 | F | 3 | DONE |
 | [T-014](tasks/T-014.md) | Result/Failure types, SafeException and domain event bus | US-02-1 | Medium | Sonnet | flutter-core-engineer | T-001 | A | 2 | DONE |
 | [T-015](tasks/T-015.md) | Secure key bootstrap for the database key | US-02-1 | High* | Opus | flutter-core-engineer | T-007 | A | 3 | TODO |
 | [T-016](tasks/T-016.md) | AppDatabase v1 skeleton: encrypted open, isolate, migration harness | US-02-1 | High* | Opus | flutter-core-engineer | T-015 | A | 4 | TODO |
@@ -186,7 +186,7 @@ Every task file has: ID, description, technical details, dependencies, affected 
 |---|---|---|---|---|---|---|---|---|---|
 | [T-122](tasks/T-122.md) | EF Core model and initial migration for all backend tables + DB roles | US-13-1 | High* | Opus | backend-engineer | T-005 | B | 2 | DONE |
 | [T-123](tasks/T-123.md) | Signing service (ES256 via KMS abstraction) and response-signature middleware | US-13-1 | High* | Opus | backend-engineer | T-005 | B | 2 | DONE |
-| [T-124](tasks/T-124.md) | Install registration, install-token auth, rate limits, idempotency, strict DTOs | US-13-1 | High* | Opus | backend-engineer | T-122, T-123, T-006 | B | 3 | IN_PROGRESS |
+| [T-124](tasks/T-124.md) | Install registration, install-token auth, rate limits, idempotency, strict DTOs | US-13-1 | High* | Opus | backend-engineer | T-122, T-123, T-006 | B | 3 | DONE |
 | [T-125](tasks/T-125.md) | Catalog versions, deltas, signed full snapshots and admin draft/publish | US-13-1 | High | Opus | backend-engineer | T-122, T-123 | B | 3 | TODO |
 | [T-126](tasks/T-126.md) | Feature flags with targeting rules and admin endpoints | US-13-1 | Medium | Sonnet | backend-engineer | T-122 | B | 3 | TODO |
 | [T-127](tasks/T-127.md) | Price service: local Egyptian gold-market adapter, FX adapter, worker, override | US-12-1 | High | Sonnet | backend-engineer | T-122 | B | 3 | BLOCKED |

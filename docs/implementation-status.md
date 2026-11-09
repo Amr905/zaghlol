@@ -18,12 +18,12 @@
 ## Summary
 | Milestone | Total | DONE | IN_PROGRESS | BLOCKED |
 |---|---|---|---|---|
-| M0 | 28 | 12 | 1 | 0 |
+| M0 | 28 | 14 | 0 | 0 |
 | M1 | 29 | 0 | 0 | 1 |
 | M2 | 29 | 0 | 0 | 0 |
 | M3 | 18 | 0 | 0 | 0 |
 | M4 | 17 | 0 | 0 | 0 |
-| M5 | 35 | 3 | 1 | 2 |
+| M5 | 35 | 4 | 0 | 2 |
 | M6 | 19 | 0 | 1 | 2 |
 | M7 | 11 | 0 | 0 | 0 |
 
@@ -36,13 +36,13 @@
 | T-004 | Pigeon setup and stale-generation check | M0 | C2 | Sonnet | flutter-core-engineer | T-001 | DONE | app-ci 42488720352 (13/13); negative control 42488874829; PR #7 squash-merged; review [T-004](05-reviews/T-004.md) APPROVED | FU-042, FU-043 |
 | T-005 | Backend solution scaffold, Docker Compose and CI | M0 | C2 | Sonnet | backend-engineer | — | DONE | CI run 41720361381 (4/4 green) @ d98b37d; review [T-005](05-reviews/T-005.md) APPROVED | Squash-merged; follow-ups FU-001…005 |
 | T-006 | OpenAPI v1 spec and contract-test harness | M0 | C2 | Sonnet | backend-engineer | T-005 | DONE | CI run 42102066749 (5/5 green) @ 8d60381; review [T-006](05-reviews/T-006.md) APPROVED (round 2) | Squash-merged; osMajor dropped per BR-SYNC-03 |
-| T-007 | SPK-05: encrypted SQLite (SQLite3MultipleCiphers) + FTS5 trigram on both platforms | M0 | C4 | Opus | flutter-core-engineer | T-001 | IN_PROGRESS | — | Opus design note 20e82d7 (branch task/T-007-design-note); implementation on task/T-007-sqlcipher. PO device decisions pending (iPhone 12 row, reference Android phone) |
+| T-007 | SPK-05: encrypted SQLite (SQLite3MultipleCiphers) + FTS5 trigram on both platforms | M0 | C4 | Opus | flutter-core-engineer | T-001 | DONE | app-ci 42525620560, db-platform 42525620566 (4 legs); negative proofs 42525638895 (upstream SQLite) and 42525641481 (key removed) red as intended; reviews [T-007](05-reviews/T-007.md) + [security](05-reviews/T-007-security.md) APPROVED | PR #13 squash-merged. Device timing rows in ADR-002 pending PO decisions (iPhone 12 run, reference Android phone) |
 | T-008 | SPK-01: Android receiver → spool → WorkManager → headless engine latency | M0 | C4 | Opus | native-platform-engineer | T-001, T-004 | TODO | — |  |
 | T-009 | SPK-03: can an iOS App Intent process immediately with a headless Flutter engine? | M0 | C4 | Opus | native-platform-engineer | T-001, T-004 | TODO | — |  |
 | T-010 | SPK-02: OCR accuracy on synthetic InstaPay/wallet receipts | M0 | C3 | Sonnet | native-platform-engineer | T-001 | TODO | — |  |
 | T-011 | SPK-04: on-device ar-EG speech availability across the device matrix | M0 | C2 | Sonnet | native-platform-engineer | T-001 | TODO | — |  |
 | T-012 | Money and Currency value types with ISO 4217 table | M0 | C4 | Opus | flutter-core-engineer | T-001 | DONE | app-ci 42407200685 (13/13) @ cb1859c; merged to main | All three reviews APPROVED (round 3). Review: docs/05-reviews/T-012.md. Follow-ups: FU-014; optional F11 dart:math check, R3 nits |
-| T-013 | Text & amount normalization utilities (digits, separators, groupings) | M0 | C3 | Sonnet | parsing-engine-engineer | T-012 | TODO | — |  |
+| T-013 | Text & amount normalization utilities (digits, separators, groupings) | M0 | C3 | Sonnet | parsing-engine-engineer | T-012 | DONE | app-ci 42689001237 + PR head green; review [T-013](05-reviews/T-013.md) APPROVED | PR #14 squash-merged. Adds ParseFailureReason.excessPrecision |
 | T-014 | Result/Failure types, SafeException and domain event bus | M0 | C2 | Sonnet | flutter-core-engineer | T-001 | DONE | app-ci 42487468428 (green, on main-merged head 160f2f6); PR #3 squash-merged; review [T-014](05-reviews/T-014.md) APPROVED | FU-034…FU-038 |
 | T-015 | Secure key bootstrap for the database key | M0 | C4 | Opus | flutter-core-engineer | T-007 | TODO | — |  |
 | T-016 | AppDatabase v1 skeleton: encrypted open, isolate, migration harness | M0 | C4 | Opus | flutter-core-engineer | T-015 | TODO | — |  |
@@ -153,7 +153,7 @@
 | T-121 | Money tab assets, Add asset S-44 and Prices S-45 | M4 | C2 | Sonnet | flutter-ui-engineer | T-113, T-083, T-119 | TODO | — |  |
 | T-122 | EF Core model and initial migration for all backend tables + DB roles | M5 | C4 | Opus | backend-engineer | T-005 | DONE | backend-ci 42407789072 (5/5, 391 tests) @ d5943be; PR #2 squash-merged | All three C4 reviews APPROVED (round 2). Follow-ups FU-015 to FU-026; FU-020 before T-184 |
 | T-123 | Signing service (ES256 via KMS abstraction) and response-signature middleware | M5 | C4 | Opus | backend-engineer | T-005 | DONE | backend-ci 42502737300 (5/5) @ 1a8d165; PR #8 squash-merged; [T-123](05-reviews/T-123.md) APPROVED (code r2, security, tests) | Closes FU-019, 022, 023, 026, FU-025 code part. FU-048 |
-| T-124 | Install registration, install-token auth, rate limits, idempotency, strict DTOs | M5 | C4 | Opus | backend-engineer | T-122, T-123, T-006 | IN_PROGRESS | — | Sonnet design note in progress (Balanced rules) |
+| T-124 | Install registration, install-token auth, rate limits, idempotency, strict DTOs | M5 | C4 | Opus | backend-engineer | T-122, T-123, T-006 | DONE | backend-ci 42691437478 + PR head green (Android NDK download flake re-run); reviews [T-124](05-reviews/T-124.md) APPROVED, [security](05-reviews/T-124-security.md) APPROVED after S-1 fix (delta re-review) | PR #15 squash-merged. Non-dev deploys must set ForwardedHeaders proxies or NoProxy=true |
 | T-125 | Catalog versions, deltas, signed full snapshots and admin draft/publish | M5 | C3 | Opus | backend-engineer | T-122, T-123 | TODO | — |  |
 | T-126 | Feature flags with targeting rules and admin endpoints | M5 | C2 | Sonnet | backend-engineer | T-122 | TODO | — |  |
 | T-127 | Price service: local Egyptian gold-market adapter, FX adapter, worker, override | M5 | C3 | Sonnet | backend-engineer | T-122 | BLOCKED | — | Provider contract for local gold feed (D-41) needed before go-live; build continues with fakes |
@@ -270,6 +270,10 @@
 - **FU-047** (T-022 #4, UX): 1.3x goldens for chips, pills, segmented, money text and sheet (T-053). UX to confirm the dark tokens §0 leaves undefined (warning, danger, zaghlolBg, incomeBg) before T-053.
 - **FU-048** (T-123 code #2, #4–#7, #9–#10; security L-1, L-3, L-4, I-1…I-5; tests G1, G2, G4–G7): see `docs/05-reviews/T-123.md` and its three reports for each item and owner (T-124, T-125, T-128, T-132, T-138, T-140, T-141, backend tooling).
 - **FU-049** (T-138 code #2, #5–#6, the 499 test; tests m1–m8; security F1–F9): see `docs/05-reviews/T-138.md` and its three reports for each item and owner (T-124, T-125, T-135, T-136, T-140, T-138 follow-up). **Before T-140:** strip Npgsql exception span events. **Before T-125:** use fixed value sets for metric tags.
+- **FU-050** (T-007 code #1–#7; security L-1…L-3, I-1…I-5): attestation check only covers the Linux host binary and isn't pinned to the upstream release workflow/tag; APK regex also matches upstream `libsqlite3.so`; CI key file not removed on failure; ADR-002 cites bf2419e runs. See `docs/05-reviews/T-007*.md`. Owners: T-015 (key-handling rules, error codes), T-171 release checklist (mobile binary attestation), CI tooling.
+- **FU-051** (T-013 minors #1–#5, nits): `$` with a non-candidate fallback fails (policy decision for templates); trailing `.`/`,` after a number fails (template captures must exclude it); `0,123` accepted; U+2060/U+00AD not stripped; no-echo fuzz check is vacuous. See `docs/05-reviews/T-013.md`. Owner: T-032.
+- **FU-052** (T-124 code minors/nits; security S-2…S-7): **Before T-130/T-135 use `WithIdempotency`:** S-2, the idempotency session holds a DB connection/transaction while the handler opens another (pool exhaustion) — needs a design note in T-130. Also S-3 (no guard against storing `rotateInstallToken`), S-4 (DELETE race leaves a row ≤24 h), S-6 (key not in encryption context), replay drops handler headers, no rotated-kid re-sign test. See `docs/05-reviews/T-124*.md`. Owners: T-130, T-135, T-140.
+- **FU-053** (PC runner): fails for local reasons — Docker not running, `KeyRingTests.AnOffCurvePointIsRejected` throws PlatformNotSupportedException on Windows, CRLF vs LF in `iso4217_table_test`, and once Application Control blocked it. Owner: PO (Docker) + backend/app tooling.
 
 ## Log
 | Date | Event |
@@ -321,3 +325,4 @@
 | 2026-11-08 | New Lead session. T-027 DONE (docs-only review APPROVED, no blockers/majors); copy-deck check script added as docs/workflow/tools/copy_deck_check.py. T-002 resumed and T-014 started (both Sonnet). Main ruleset now Active: merges go through PRs. |
 | 2026-11-08 | Lead merged PRs #1 (T-027), #2 (T-122), #4 (T-002), #3 (T-014, after re-running CI on a main-merged head) and #5 (T-028, round 2 after one major). PO authorised the Lead to merge approved PRs. Started T-004, T-022 (Sonnet) and T-123 (Opus). FU-029…FU-041 logged. |
 | 2026-11-09 | Merged #7 (T-004), #8 (T-123), #9 (T-022), #10 (Balanced rules, 2 tasks at a time, runner LF fix), #11 (T-138). 15/186 done. T-007 (Opus) and T-124 (design note, Sonnet) in progress. |
+| 2026-11-09 | New Lead session (PO linked GitHub, upgraded Flutter). Merged #13 (T-007), #14 (T-013), #15 (T-124, one security fix round). 18/186 done. FU-050…FU-053 logged. |
