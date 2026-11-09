@@ -1,4 +1,5 @@
 using System.Text.Json.Serialization;
+using Zaghlol.Api.Endpoints.Admin;
 using Zaghlol.Api.Endpoints.V1;
 
 namespace Zaghlol.Api.Json;
@@ -16,5 +17,7 @@ namespace Zaghlol.Api.Json;
     Converters = new[] { typeof(UtcZDateTimeOffsetConverter) })]
 [JsonSerializable(typeof(InstallRequest))]
 [JsonSerializable(typeof(InstallResponse))]
+[JsonSerializable(typeof(FlagUpdateRequest))]
+[JsonSerializable(typeof(FlagStateDto))]
 [JsonSerializable(typeof(string))]
 internal sealed partial class ApiJsonContext : JsonSerializerContext;

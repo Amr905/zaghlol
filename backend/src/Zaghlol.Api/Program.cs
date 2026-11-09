@@ -2,10 +2,12 @@ using Serilog;
 using Serilog.Core;
 using Zaghlol.Api;
 using Zaghlol.Api.Endpoints;
+using Zaghlol.Api.Endpoints.Admin;
 using Zaghlol.Api.Endpoints.V1;
 using Zaghlol.Api.Observability;
 using Zaghlol.Application;
 using Zaghlol.Infrastructure;
+using Zaghlol.Infrastructure.Flags;
 using Zaghlol.Infrastructure.Kms;
 using Zaghlol.Infrastructure.Logging;
 using Zaghlol.Infrastructure.Observability;
@@ -48,11 +50,16 @@ builder.Services.AddZaghlolLogPseudonymizer();
 // Install registration, install-token auth and the idempotency store (T-124); after the pseudonymizer for its startup check.
 builder.Services.AddZaghlolInstalls();
 
+// Feature flags (T-126): the admin store on the Admin login, the reader on the App login, the ops-channel notifier.
+builder.Services.AddZaghlolFlagAdmin();
+builder.Services.AddZaghlolFlagReader();
+
 var app = builder.Build();
 
 app.UseZaghlolPipeline();
 app.MapHealth();
 app.MapInstalls();
+app.MapFlagAdmin();
 
 await app.RunAsync();
 

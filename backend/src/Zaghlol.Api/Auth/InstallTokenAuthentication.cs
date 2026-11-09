@@ -23,10 +23,14 @@ internal static class InstallTokenAuthentication
     /// <summary><c>HttpContext.Items</c> flag: the <c>Zaghlol-Install</c> header was malformed (400, not 401).</summary>
     internal const string MalformedInstallHeaderItem = "zaghlol.auth.malformedInstallHeader";
 
-    /// <summary>The scheme, its policy, and the claims it sets. No default scheme is set for other endpoints.</summary>
+    /// <summary>
+    /// The scheme, its policy, and the claims it sets. It is the default scheme (set explicitly, because the operator scheme
+    /// is a second one and a lone scheme would no longer be picked): its handler ignores every endpoint without
+    /// <see cref="InstallTokenRequiredMetadata"/>, so other endpoints are never authenticated by it.
+    /// </summary>
     public static IServiceCollection AddInstallTokenAuthentication(this IServiceCollection services)
     {
-        services.AddAuthentication().AddScheme<AuthenticationSchemeOptions, InstallTokenAuthenticationHandler>(Scheme, _ => { });
+        services.AddAuthentication(Scheme).AddScheme<AuthenticationSchemeOptions, InstallTokenAuthenticationHandler>(Scheme, _ => { });
         services.AddAuthorizationBuilder()
             .AddPolicy(Policy, policy => policy.AddAuthenticationSchemes(Scheme).RequireAuthenticatedUser());
         return services;

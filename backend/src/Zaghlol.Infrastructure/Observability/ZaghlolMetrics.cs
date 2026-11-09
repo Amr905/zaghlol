@@ -29,6 +29,7 @@ public sealed partial class ZaghlolMetrics : IDisposable
     private readonly Counter<long> alertFired;
     private readonly Counter<long> installHashUnavailable;
     private readonly Counter<long> rateLimited;
+    private readonly Counter<long> flagChanged;
     private readonly ConcurrentDictionary<string, double> priceAges = new(StringComparer.Ordinal);
     private readonly string serviceVersion;
     private long unackedCount;
@@ -54,6 +55,8 @@ public sealed partial class ZaghlolMetrics : IDisposable
             "zaghlol.diag.install_hash_unavailable",
             description: "Requests logged with installHash=unavailable because the log key could not be read (T-124 F7).");
         rateLimited = meter.CreateCounter<long>("zaghlol.rate_limit.rejected", description: "429 RATE_LIMITED answers by bucket name.");
+
+        flagChanged = meter.CreateCounter<long>("zaghlol.flag.changed", description: "Feature flag changes by flag key (a fixed set of known keys).");
 
         meter.CreateObservableGauge("zaghlol.purchase.unacked", () => Interlocked.Read(ref unackedCount), description: "Purchases waiting for acknowledgement.");
         meter.CreateObservableGauge("zaghlol.purchase.unacked.oldest_age", () => Volatile.Read(ref unackedOldestAgeSeconds), "s", "Age of the oldest unacknowledged purchase.");
@@ -107,6 +110,9 @@ public sealed partial class ZaghlolMetrics : IDisposable
 
     /// <summary><paramref name="bucket"/> is a bucket name constant (<c>network</c>, <c>token</c>, <c>idempotency</c>).</summary>
     public void RateLimited(string bucket) => rateLimited.Add(1, Tags(("bucket", bucket)));
+
+    /// <summary><paramref name="key"/> is one of the known flag keys (the admin endpoint 404s any other).</summary>
+    public void FlagChanged(string key) => flagChanged.Add(1, Tags(("key", key)));
 
     public void SetPlayIntegrityDailyQuota(long quota) => Interlocked.Exchange(ref playIntegrityDailyQuota, quota);
 

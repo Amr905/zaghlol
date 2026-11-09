@@ -45,7 +45,7 @@ public sealed class RateLimitSettings
     /// <summary><c>POST /v1/installs</c> per /24 in addition: 60 an hour (carrier NAT puts many users behind one /24).</summary>
     public TokenBucketSettings Register { get; set; } = new() { TokenLimit = 60, TokensPerPeriod = 60, PeriodSeconds = 3600 };
 
-    /// <summary>Per install token, after authentication: burst 30, 10 a minute.</summary>
+    /// <summary>Per install token (or per operator on `/admin/v1`), after authentication: burst 30, 10 a minute.</summary>
     public TokenBucketSettings PerToken { get; set; } = new() { TokenLimit = 30, TokensPerPeriod = 10, PeriodSeconds = 60 };
 }
 
@@ -90,7 +90,9 @@ internal sealed class ZaghlolRateLimiters : IDisposable
         token = PartitionedRateLimiter.Create<HttpContext, string>(context =>
             context.User.FindFirst(InstallTokenAuthentication.TokenHashClaim)?.Value is { } key
                 ? RateLimitPartition.GetTokenBucketLimiter(key, _ => limits.PerToken.ToOptions())
-                : RateLimitPartition.GetNoLimiter(string.Empty));
+                : context.User.FindFirst(OperatorAuthentication.OperatorIdClaim)?.Value is { } operatorId
+                    ? RateLimitPartition.GetTokenBucketLimiter("op:" + operatorId, _ => limits.PerToken.ToOptions())
+                    : RateLimitPartition.GetNoLimiter(string.Empty));
 
         PerNetwork = CreateOptions(network, NetworkBucket);
         PerToken = CreateOptions(token, TokenBucket);
