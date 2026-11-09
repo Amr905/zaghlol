@@ -1,1 +1,1 @@
-﻿RUNNING sha=31c58a896bd6e99e0fdf947283e30415f5e1ac1d
+﻿PASS sha=31c58a896bd6e99e0fdf947283e30415f5e1ac1d pipeline=quick-backend dotnet-build=0 dotnet-format=0 dotnet-test=0
