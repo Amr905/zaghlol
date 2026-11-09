@@ -9,10 +9,15 @@
     <PackageReference Include="Microsoft.AspNetCore.Mvc.Testing" />
     <PackageReference Include="JsonSchema.Net" />
     <PackageReference Include="YamlDotNet" />
+    <!-- T-124 FU-011: the install endpoints' live contract tests run against a real PostgreSQL. -->
+    <PackageReference Include="Npgsql" />
+    <PackageReference Include="Testcontainers.PostgreSql" />
   </ItemGroup>
 
   <ItemGroup>
     <Compile Include="..\Shared\FakeKms.cs" Link="Shared\FakeKms.cs" />
+    <Compile Include="..\Shared\ZaghlolTestDatabase.cs" Link="Shared\ZaghlolTestDatabase.cs" />
+    <None Include="..\..\deploy\db\bootstrap-roles.sql" Link="db\bootstrap-roles.sql" CopyToOutputDirectory="PreserveNewest" />
   </ItemGroup>
 
   <ItemGroup>

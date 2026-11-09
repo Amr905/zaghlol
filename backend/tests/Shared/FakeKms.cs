@@ -21,6 +21,9 @@ public enum FakeKmsFault
 
     /// <summary>Signatures come from a different key (a wrong key reference).</summary>
     WrongKey,
+
+    /// <summary>Every call throws a <c>CryptographicException</c> whose text names the key (as a cloud SDK's may).</summary>
+    Crypto,
 }
 
 /// <summary>
@@ -31,6 +34,9 @@ public sealed class FakeKms : ISigningKeyProvider, IHmacProvider, IDataKeyProvid
 {
     public const string SyncKid = "s0000t";
     public const string EntitlementKid = "e0000t";
+
+    /// <summary>The text of <see cref="FakeKmsFault.Crypto"/> exceptions; it must never reach a client or a log.</summary>
+    public const string CryptoFaultMessage = "fake KMS: key arn:aws:kms:eu-west-1:000000000000:key/fake-envelope-key";
 
     private static readonly byte[] WrapAad = "fake-kms-wrap"u8.ToArray();
 
@@ -220,6 +226,8 @@ public sealed class FakeKms : ISigningKeyProvider, IHmacProvider, IDataKeyProvid
         {
             case FakeKmsFault.Throw:
                 throw new HttpRequestException("fake KMS unreachable");
+            case FakeKmsFault.Crypto:
+                throw new CryptographicException(CryptoFaultMessage);
             case FakeKmsFault.Hang:
                 await Task.Delay(Timeout.InfiniteTimeSpan, cancellationToken);
                 break;
