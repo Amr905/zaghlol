@@ -74,6 +74,13 @@ public sealed class CatalogContractFixture : IAsyncLifetime
             builder.UseSetting("ConnectionStrings:Admin", db.Admin);
             builder.UseSetting("Catalog:Snapshots:Directory", SnapshotDirectory);
             builder.UseSetting("Catalog:Snapshots:BaseUrl", BaseUrl);
+            foreach (var bucket in new[] { "PerNetwork", "PerToken" })
+            {
+                builder.UseSetting($"RateLimits:{bucket}:TokenLimit", "100000");
+                builder.UseSetting($"RateLimits:{bucket}:TokensPerPeriod", "100000");
+                builder.UseSetting($"RateLimits:{bucket}:PeriodSeconds", "60");
+            }
+
             foreach (var (key, value) in kms.Settings())
             {
                 builder.UseSetting(key, value);
