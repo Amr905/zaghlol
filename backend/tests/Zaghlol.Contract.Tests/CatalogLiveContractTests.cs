@@ -45,6 +45,8 @@ public sealed class CatalogContractFixture : IAsyncLifetime
     public const string BaseUrl = "https://api.zaghlol.test";
     public const string EditorRole = "catalog_editor";
 
+    private static readonly string[] RateLimitBuckets = ["PerNetwork", "PerToken"];
+
     public static readonly Guid OperatorId = Guid.Parse("5f0c1c3a-0b7e-4f64-9c1d-7f2b1a2c3d4e");
 
     private readonly FakeKms kms = FakeKms.CreateDefault();
@@ -74,7 +76,7 @@ public sealed class CatalogContractFixture : IAsyncLifetime
             builder.UseSetting("ConnectionStrings:Admin", db.Admin);
             builder.UseSetting("Catalog:Snapshots:Directory", SnapshotDirectory);
             builder.UseSetting("Catalog:Snapshots:BaseUrl", BaseUrl);
-            foreach (var bucket in new[] { "PerNetwork", "PerToken" })
+            foreach (var bucket in RateLimitBuckets)
             {
                 builder.UseSetting($"RateLimits:{bucket}:TokenLimit", "100000");
                 builder.UseSetting($"RateLimits:{bucket}:TokensPerPeriod", "100000");
