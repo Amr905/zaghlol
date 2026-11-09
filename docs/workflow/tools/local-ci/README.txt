@@ -1,7 +1,7 @@
 Zaghlol local CI runner v2 (fast checks; GitHub Actions is still the merge gate)
 
 To start:
-1. Start Docker Desktop. The backend tests use a PostgreSQL container.
+1. Start Docker Desktop (Linux containers) and set it to start at login. All checks run in Docker containers; the first run downloads the images and takes a while.
 2. Double-click START-LOCAL-CI.cmd and leave the window open.
 
 What it does:
