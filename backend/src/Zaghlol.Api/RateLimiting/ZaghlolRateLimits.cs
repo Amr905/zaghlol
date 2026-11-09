@@ -166,7 +166,8 @@ internal static class RateLimitServiceCollectionExtensions
     /// <summary>
     /// The rate limiters and the forwarded-headers rule: the client address is taken from <c>X-Forwarded-For</c> only when the
     /// direct peer is in <c>ForwardedHeaders:KnownProxies</c> (IP addresses) or <c>ForwardedHeaders:KnownNetworks</c> (CIDR);
-    /// the defaults (loopback) are cleared, and the raw header is never read anywhere else.
+    /// the defaults (loopback) are cleared, and the raw header is never read anywhere else. Outside Development and Testing,
+    /// <see cref="ForwardedHeadersStartupCheck"/> stops the host when neither list nor <c>ForwardedHeaders:NoProxy=true</c> is set.
     /// </summary>
     public static IServiceCollection AddZaghlolRateLimits(this IServiceCollection services)
     {
@@ -191,6 +192,7 @@ internal static class RateLimitServiceCollectionExtensions
                 options.KnownIPNetworks.Add(System.Net.IPNetwork.Parse(network.Value ?? string.Empty));
             }
         });
+        services.AddHostedService<ForwardedHeadersStartupCheck>();
         return services;
     }
 }

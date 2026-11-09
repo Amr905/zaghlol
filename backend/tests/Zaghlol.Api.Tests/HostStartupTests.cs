@@ -24,6 +24,7 @@ public class HostStartupTests
             builder.UseSetting("ConnectionStrings:Admin", Unreachable);
             builder.UseSetting("Kms:Provider", "Local");
             builder.UseSetting("Kms:Local:KeyDirectory", Path.GetTempPath());
+            builder.UseSetting("ForwardedHeaders:NoProxy", "true");
             foreach (var (key, value) in kms.Settings())
             {
                 builder.UseSetting(key, value);

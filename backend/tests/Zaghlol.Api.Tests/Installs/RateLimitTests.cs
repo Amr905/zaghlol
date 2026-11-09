@@ -1,5 +1,6 @@
 using System.Net;
 using System.Text.Json;
+using Zaghlol.Api.Auth;
 using Zaghlol.Api.RateLimiting;
 
 namespace Zaghlol.Api.Tests.Installs;
@@ -102,6 +103,48 @@ public class RateLimitTests(RateLimitHostFixture fixture) : IClassFixture<RateLi
         Assert.Equal(HttpStatusCode.TooManyRequests, third.StatusCode);
     }
 
+    [Fact]
+    public async Task A429IsLoggedWithoutTheTokenTheInstallIdTheKeyOrTheClientAddress()
+    {
+        // T-124 security S-5: the 429 paths of the network and registration buckets (the token bucket is in InstallAuthTests).
+        const string NetworkPeer = "198.18.30.4";
+        const string RegisterPeer = "198.18.31.4";
+        var token = InstallTokens.Generate();
+        for (var i = 0; i < 5; i++)
+        {
+            using var allowed = await Ping(NetworkPeer);
+            Assert.Equal(HttpStatusCode.OK, allowed.StatusCode);
+        }
+
+        using (var request = new HttpRequestMessage(HttpMethod.Get, "/v1/t/whoami"))
+        {
+            request.Headers.Add(InstallsHostFixture.PeerHeader, NetworkPeer);
+            request.Headers.TryAddWithoutValidation("Authorization", "Bearer " + token);
+            using var limited = await fixture.Client.SendAsync(request);
+            await Problems.AssertAsync(limited, HttpStatusCode.TooManyRequests, "RATE_LIMITED");
+        }
+
+        for (var i = 0; i < 3; i++)
+        {
+            using var counted = await fixture.RegisterAsync("{}", InstallsHostFixture.NewKey(), RegisterPeer);
+            Assert.Equal(HttpStatusCode.BadRequest, counted.StatusCode);
+        }
+
+        var installId = InstallsHostFixture.NewInstallId();
+        var key = InstallsHostFixture.NewKey();
+        using (var limited = await fixture.RegisterAsync(InstallsHostFixture.InstallBody(installId), key, RegisterPeer))
+        {
+            await Problems.AssertAsync(limited, HttpStatusCode.TooManyRequests, "RATE_LIMITED");
+        }
+
+        await WaitForLogAsync(e => e.Contains("/v1/t/whoami", StringComparison.Ordinal) && e.Contains("Status=429", StringComparison.Ordinal));
+        await WaitForLogAsync(e => e.Contains("\"/v1/installs\"", StringComparison.Ordinal) && e.Contains("Status=429", StringComparison.Ordinal));
+        foreach (var secret in new[] { token, installId, key, "198.18.30.", "198.18.31.", "198.18.30.0/24", "198.18.31.0/24" })
+        {
+            Assert.DoesNotContain(fixture.LogSink.Entries, e => e.Contains(secret, StringComparison.Ordinal));
+        }
+    }
+
     [Theory]
     [InlineData("198.51.100.1", "198.51.100.0/24")]
     [InlineData("198.51.100.255", "198.51.100.0/24")]
@@ -132,5 +175,16 @@ public class RateLimitTests(RateLimitHostFixture fixture) : IClassFixture<RateLi
         }
 
         return await fixture.Client.SendAsync(request);
+    }
+
+    private async Task WaitForLogAsync(Func<string, bool> predicate)
+    {
+        var deadline = DateTime.UtcNow.AddSeconds(5);
+        while (!fixture.LogSink.Entries.Any(predicate) && DateTime.UtcNow < deadline)
+        {
+            await Task.Delay(50);
+        }
+
+        Assert.Contains(fixture.LogSink.Entries, e => predicate(e));
     }
 }
