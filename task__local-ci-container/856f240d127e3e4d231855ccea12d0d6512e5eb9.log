@@ -1,1 +1,400 @@
-﻿auto task/local-ci-container 856f240d127e3e4d231855ccea12d0d6512e5eb9 2026-11-09T23:28:45.3250719+02:00
+﻿end of line marker. Replace 2 characters with '\n'. 
+[C:\Users\amr90\zaghlol-ci\repo\backend\tests\Zaghlol.Infrastructure.Tests\Zaghlol.Infrastructure.Tests.csproj]
+C:\Users\amr90\zaghlol-ci\repo\backend\tests\Zaghlol.Infrastructure.Tests\SchemaFixture.cs(26,41): error ENDOFLINE: 
+Fix end of line marker. Replace 2 characters with '\n'. 
+[C:\Users\amr90\zaghlol-ci\repo\backend\tests\Zaghlol.Infrastructure.Tests\Zaghlol.Infrastructure.Tests.csproj]
+C:\Users\amr90\zaghlol-ci\repo\backend\tests\Zaghlol.Infrastructure.Tests\SchemaFixture.cs(27,2): error ENDOFLINE: Fix 
+end of line marker. Replace 2 characters with '\n'. 
+[C:\Users\amr90\zaghlol-ci\repo\backend\tests\Zaghlol.Infrastructure.Tests\Zaghlol.Infrastructure.Tests.csproj]
+C:\Users\amr90\zaghlol-ci\repo\backend\tests\Zaghlol.Infrastructure.Tests\SchemaFixture.cs(28,1): error ENDOFLINE: Fix 
+end of line marker. Replace 2 characters with '\n'. 
+[C:\Users\amr90\zaghlol-ci\repo\backend\tests\Zaghlol.Infrastructure.Tests\Zaghlol.Infrastructure.Tests.csproj]
+C:\Users\amr90\zaghlol-ci\repo\backend\tests\Zaghlol.Infrastructure.Tests\SchemaFixture.cs(29,55): error ENDOFLINE: 
+Fix end of line marker. Replace 2 characters with '\n'. 
+[C:\Users\amr90\zaghlol-ci\repo\backend\tests\Zaghlol.Infrastructure.Tests\Zaghlol.Infrastructure.Tests.csproj]
+C:\Users\amr90\zaghlol-ci\repo\backend\tests\Zaghlol.Infrastructure.Tests\SchemaFixture.cs(30,41): error ENDOFLINE: 
+Fix end of line marker. Replace 2 characters with '\n'. 
+[C:\Users\amr90\zaghlol-ci\repo\backend\tests\Zaghlol.Infrastructure.Tests\Zaghlol.Infrastructure.Tests.csproj]
+C:\Users\amr90\zaghlol-ci\repo\backend\tests\Zaghlol.Infrastructure.Tests\SchemaFixture.cs(31,1): error ENDOFLINE: Fix 
+end of line marker. Replace 2 characters with '\n'. 
+[C:\Users\amr90\zaghlol-ci\repo\backend\tests\Zaghlol.Infrastructure.Tests\Zaghlol.Infrastructure.Tests.csproj]
+C:\Users\amr90\zaghlol-ci\repo\backend\tests\Zaghlol.Infrastructure.Tests\SchemaFixture.cs(32,76): error ENDOFLINE: 
+Fix end of line marker. Replace 2 characters with '\n'. 
+[C:\Users\amr90\zaghlol-ci\repo\backend\tests\Zaghlol.Infrastructure.Tests\Zaghlol.Infrastructure.Tests.csproj]
+C:\Users\amr90\zaghlol-ci\repo\backend\tests\Zaghlol.Infrastructure.Tests\SchemaFixture.cs(33,23): error ENDOFLINE: 
+Fix end of line marker. Replace 2 characters with '\n'. 
+[C:\Users\amr90\zaghlol-ci\repo\backend\tests\Zaghlol.Infrastructure.Tests\Zaghlol.Infrastructure.Tests.csproj]
+C:\Users\amr90\zaghlol-ci\repo\backend\tests\Zaghlol.Infrastructure.Tests\SchemaFixture.cs(34,2): error ENDOFLINE: Fix 
+end of line marker. Replace 2 characters with '\n'. 
+[C:\Users\amr90\zaghlol-ci\repo\backend\tests\Zaghlol.Infrastructure.Tests\Zaghlol.Infrastructure.Tests.csproj]
+C:\Users\amr90\zaghlol-ci\repo\backend\tests\Zaghlol.Infrastructure.Tests\SchemaFixture.cs(35,82): error ENDOFLINE: 
+Fix end of line marker. Replace 2 characters with '\n'. 
+[C:\Users\amr90\zaghlol-ci\repo\backend\tests\Zaghlol.Infrastructure.Tests\Zaghlol.Infrastructure.Tests.csproj]
+C:\Users\amr90\zaghlol-ci\repo\backend\tests\Zaghlol.Infrastructure.Tests\SchemaFixture.cs(36,6): error ENDOFLINE: Fix 
+end of line marker. Replace 2 characters with '\n'. 
+[C:\Users\amr90\zaghlol-ci\repo\backend\tests\Zaghlol.Infrastructure.Tests\Zaghlol.Infrastructure.Tests.csproj]
+C:\Users\amr90\zaghlol-ci\repo\backend\tests\Zaghlol.Infrastructure.Tests\SchemaFixture.cs(37,65): error ENDOFLINE: 
+Fix end of line marker. Replace 2 characters with '\n'. 
+[C:\Users\amr90\zaghlol-ci\repo\backend\tests\Zaghlol.Infrastructure.Tests\Zaghlol.Infrastructure.Tests.csproj]
+C:\Users\amr90\zaghlol-ci\repo\backend\tests\Zaghlol.Infrastructure.Tests\SchemaFixture.cs(38,38): error ENDOFLINE: 
+Fix end of line marker. Replace 2 characters with '\n'. 
+[C:\Users\amr90\zaghlol-ci\repo\backend\tests\Zaghlol.Infrastructure.Tests\Zaghlol.Infrastructure.Tests.csproj]
+C:\Users\amr90\zaghlol-ci\repo\backend\tests\Zaghlol.Infrastructure.Tests\SchemaFixture.cs(39,27): error ENDOFLINE: 
+Fix end of line marker. Replace 2 characters with '\n'. 
+[C:\Users\amr90\zaghlol-ci\repo\backend\tests\Zaghlol.Infrastructure.Tests\Zaghlol.Infrastructure.Tests.csproj]
+C:\Users\amr90\zaghlol-ci\repo\backend\tests\Zaghlol.Infrastructure.Tests\SchemaFixture.cs(40,6): error ENDOFLINE: Fix 
+end of line marker. Replace 2 characters with '\n'. 
+[C:\Users\amr90\zaghlol-ci\repo\backend\tests\Zaghlol.Infrastructure.Tests\Zaghlol.Infrastructure.Tests.csproj]
+C:\Users\amr90\zaghlol-ci\repo\backend\tests\Zaghlol.Infrastructure.Tests\SchemaFixture.cs(41,1): error ENDOFLINE: Fix 
+end of line marker. Replace 2 characters with '\n'. 
+[C:\Users\amr90\zaghlol-ci\repo\backend\tests\Zaghlol.Infrastructure.Tests\Zaghlol.Infrastructure.Tests.csproj]
+C:\Users\amr90\zaghlol-ci\repo\backend\tests\Zaghlol.Infrastructure.Tests\SchemaFixture.cs(42,123): error ENDOFLINE: 
+Fix end of line marker. Replace 2 characters with '\n'. 
+[C:\Users\amr90\zaghlol-ci\repo\backend\tests\Zaghlol.Infrastructure.Tests\Zaghlol.Infrastructure.Tests.csproj]
+C:\Users\amr90\zaghlol-ci\repo\backend\tests\Zaghlol.Infrastructure.Tests\SchemaFixture.cs(43,6): error ENDOFLINE: Fix 
+end of line marker. Replace 2 characters with '\n'. 
+[C:\Users\amr90\zaghlol-ci\repo\backend\tests\Zaghlol.Infrastructure.Tests\Zaghlol.Infrastructure.Tests.csproj]
+C:\Users\amr90\zaghlol-ci\repo\backend\tests\Zaghlol.Infrastructure.Tests\SchemaFixture.cs(44,72): error ENDOFLINE: 
+Fix end of line marker. Replace 2 characters with '\n'. 
+[C:\Users\amr90\zaghlol-ci\repo\backend\tests\Zaghlol.Infrastructure.Tests\Zaghlol.Infrastructure.Tests.csproj]
+C:\Users\amr90\zaghlol-ci\repo\backend\tests\Zaghlol.Infrastructure.Tests\SchemaFixture.cs(45,72): error ENDOFLINE: 
+Fix end of line marker. Replace 2 characters with '\n'. 
+[C:\Users\amr90\zaghlol-ci\repo\backend\tests\Zaghlol.Infrastructure.Tests\Zaghlol.Infrastructure.Tests.csproj]
+C:\Users\amr90\zaghlol-ci\repo\backend\tests\Zaghlol.Infrastructure.Tests\SchemaFixture.cs(46,69): error ENDOFLINE: 
+Fix end of line marker. Replace 2 characters with '\n'. 
+[C:\Users\amr90\zaghlol-ci\repo\backend\tests\Zaghlol.Infrastructure.Tests\Zaghlol.Infrastructure.Tests.csproj]
+C:\Users\amr90\zaghlol-ci\repo\backend\tests\Zaghlol.Infrastructure.Tests\SchemaFixture.cs(47,42): error ENDOFLINE: 
+Fix end of line marker. Replace 2 characters with '\n'. 
+[C:\Users\amr90\zaghlol-ci\repo\backend\tests\Zaghlol.Infrastructure.Tests\Zaghlol.Infrastructure.Tests.csproj]
+C:\Users\amr90\zaghlol-ci\repo\backend\tests\Zaghlol.Infrastructure.Tests\SchemaFixture.cs(48,41): error ENDOFLINE: 
+Fix end of line marker. Replace 2 characters with '\n'. 
+[C:\Users\amr90\zaghlol-ci\repo\backend\tests\Zaghlol.Infrastructure.Tests\Zaghlol.Infrastructure.Tests.csproj]
+C:\Users\amr90\zaghlol-ci\repo\backend\tests\Zaghlol.Infrastructure.Tests\SchemaFixture.cs(49,10): error ENDOFLINE: 
+Fix end of line marker. Replace 2 characters with '\n'. 
+[C:\Users\amr90\zaghlol-ci\repo\backend\tests\Zaghlol.Infrastructure.Tests\Zaghlol.Infrastructure.Tests.csproj]
+C:\Users\amr90\zaghlol-ci\repo\backend\tests\Zaghlol.Infrastructure.Tests\SchemaFixture.cs(50,54): error ENDOFLINE: 
+Fix end of line marker. Replace 2 characters with '\n'. 
+[C:\Users\amr90\zaghlol-ci\repo\backend\tests\Zaghlol.Infrastructure.Tests\Zaghlol.Infrastructure.Tests.csproj]
+C:\Users\amr90\zaghlol-ci\repo\backend\tests\Zaghlol.Infrastructure.Tests\SchemaFixture.cs(51,49): error ENDOFLINE: 
+Fix end of line marker. Replace 2 characters with '\n'. 
+[C:\Users\amr90\zaghlol-ci\repo\backend\tests\Zaghlol.Infrastructure.Tests\Zaghlol.Infrastructure.Tests.csproj]
+C:\Users\amr90\zaghlol-ci\repo\backend\tests\Zaghlol.Infrastructure.Tests\SchemaFixture.cs(52,14): error ENDOFLINE: 
+Fix end of line marker. Replace 2 characters with '\n'. 
+[C:\Users\amr90\zaghlol-ci\repo\backend\tests\Zaghlol.Infrastructure.Tests\Zaghlol.Infrastructure.Tests.csproj]
+C:\Users\amr90\zaghlol-ci\repo\backend\tests\Zaghlol.Infrastructure.Tests\SchemaFixture.cs(53,73): error ENDOFLINE: 
+Fix end of line marker. Replace 2 characters with '\n'. 
+[C:\Users\amr90\zaghlol-ci\repo\backend\tests\Zaghlol.Infrastructure.Tests\Zaghlol.Infrastructure.Tests.csproj]
+C:\Users\amr90\zaghlol-ci\repo\backend\tests\Zaghlol.Infrastructure.Tests\SchemaFixture.cs(54,14): error ENDOFLINE: 
+Fix end of line marker. Replace 2 characters with '\n'. 
+[C:\Users\amr90\zaghlol-ci\repo\backend\tests\Zaghlol.Infrastructure.Tests\Zaghlol.Infrastructure.Tests.csproj]
+C:\Users\amr90\zaghlol-ci\repo\backend\tests\Zaghlol.Infrastructure.Tests\SchemaFixture.cs(55,1): error ENDOFLINE: Fix 
+end of line marker. Replace 2 characters with '\n'. 
+[C:\Users\amr90\zaghlol-ci\repo\backend\tests\Zaghlol.Infrastructure.Tests\Zaghlol.Infrastructure.Tests.csproj]
+C:\Users\amr90\zaghlol-ci\repo\backend\tests\Zaghlol.Infrastructure.Tests\SchemaFixture.cs(56,27): error ENDOFLINE: 
+Fix end of line marker. Replace 2 characters with '\n'. 
+[C:\Users\amr90\zaghlol-ci\repo\backend\tests\Zaghlol.Infrastructure.Tests\Zaghlol.Infrastructure.Tests.csproj]
+C:\Users\amr90\zaghlol-ci\repo\backend\tests\Zaghlol.Infrastructure.Tests\SchemaFixture.cs(57,10): error ENDOFLINE: 
+Fix end of line marker. Replace 2 characters with '\n'. 
+[C:\Users\amr90\zaghlol-ci\repo\backend\tests\Zaghlol.Infrastructure.Tests\Zaghlol.Infrastructure.Tests.csproj]
+C:\Users\amr90\zaghlol-ci\repo\backend\tests\Zaghlol.Infrastructure.Tests\SchemaFixture.cs(58,1): error ENDOFLINE: Fix 
+end of line marker. Replace 2 characters with '\n'. 
+[C:\Users\amr90\zaghlol-ci\repo\backend\tests\Zaghlol.Infrastructure.Tests\Zaghlol.Infrastructure.Tests.csproj]
+C:\Users\amr90\zaghlol-ci\repo\backend\tests\Zaghlol.Infrastructure.Tests\SchemaFixture.cs(59,21): error ENDOFLINE: 
+Fix end of line marker. Replace 2 characters with '\n'. 
+[C:\Users\amr90\zaghlol-ci\repo\backend\tests\Zaghlol.Infrastructure.Tests\Zaghlol.Infrastructure.Tests.csproj]
+C:\Users\amr90\zaghlol-ci\repo\backend\tests\Zaghlol.Infrastructure.Tests\SchemaFixture.cs(60,6): error ENDOFLINE: Fix 
+end of line marker. Replace 2 characters with '\n'. 
+[C:\Users\amr90\zaghlol-ci\repo\backend\tests\Zaghlol.Infrastructure.Tests\Zaghlol.Infrastructure.Tests.csproj]
+C:\Users\amr90\zaghlol-ci\repo\backend\tests\Zaghlol.Infrastructure.Tests\SchemaFixture.cs(61,1): error ENDOFLINE: Fix 
+end of line marker. Replace 2 characters with '\n'. 
+[C:\Users\amr90\zaghlol-ci\repo\backend\tests\Zaghlol.Infrastructure.Tests\Zaghlol.Infrastructure.Tests.csproj]
+C:\Users\amr90\zaghlol-ci\repo\backend\tests\Zaghlol.Infrastructure.Tests\SchemaFixture.cs(62,116): error ENDOFLINE: 
+Fix end of line marker. Replace 2 characters with '\n'. 
+[C:\Users\amr90\zaghlol-ci\repo\backend\tests\Zaghlol.Infrastructure.Tests\Zaghlol.Infrastructure.Tests.csproj]
+C:\Users\amr90\zaghlol-ci\repo\backend\tests\Zaghlol.Infrastructure.Tests\SchemaFixture.cs(63,6): error ENDOFLINE: Fix 
+end of line marker. Replace 2 characters with '\n'. 
+[C:\Users\amr90\zaghlol-ci\repo\backend\tests\Zaghlol.Infrastructure.Tests\Zaghlol.Infrastructure.Tests.csproj]
+C:\Users\amr90\zaghlol-ci\repo\backend\tests\Zaghlol.Infrastructure.Tests\SchemaFixture.cs(64,72): error ENDOFLINE: 
+Fix end of line marker. Replace 2 characters with '\n'. 
+[C:\Users\amr90\zaghlol-ci\repo\backend\tests\Zaghlol.Infrastructure.Tests\Zaghlol.Infrastructure.Tests.csproj]
+C:\Users\amr90\zaghlol-ci\repo\backend\tests\Zaghlol.Infrastructure.Tests\SchemaFixture.cs(65,72): error ENDOFLINE: 
+Fix end of line marker. Replace 2 characters with '\n'. 
+[C:\Users\amr90\zaghlol-ci\repo\backend\tests\Zaghlol.Infrastructure.Tests\Zaghlol.Infrastructure.Tests.csproj]
+C:\Users\amr90\zaghlol-ci\repo\backend\tests\Zaghlol.Infrastructure.Tests\SchemaFixture.cs(66,56): error ENDOFLINE: 
+Fix end of line marker. Replace 2 characters with '\n'. 
+[C:\Users\amr90\zaghlol-ci\repo\backend\tests\Zaghlol.Infrastructure.Tests\Zaghlol.Infrastructure.Tests.csproj]
+C:\Users\amr90\zaghlol-ci\repo\backend\tests\Zaghlol.Infrastructure.Tests\SchemaFixture.cs(67,47): error ENDOFLINE: 
+Fix end of line marker. Replace 2 characters with '\n'. 
+[C:\Users\amr90\zaghlol-ci\repo\backend\tests\Zaghlol.Infrastructure.Tests\Zaghlol.Infrastructure.Tests.csproj]
+C:\Users\amr90\zaghlol-ci\repo\backend\tests\Zaghlol.Infrastructure.Tests\SchemaFixture.cs(68,6): error ENDOFLINE: Fix 
+end of line marker. Replace 2 characters with '\n'. 
+[C:\Users\amr90\zaghlol-ci\repo\backend\tests\Zaghlol.Infrastructure.Tests\Zaghlol.Infrastructure.Tests.csproj]
+C:\Users\amr90\zaghlol-ci\repo\backend\tests\Zaghlol.Infrastructure.Tests\SchemaFixture.cs(69,1): error ENDOFLINE: Fix 
+end of line marker. Replace 2 characters with '\n'. 
+[C:\Users\amr90\zaghlol-ci\repo\backend\tests\Zaghlol.Infrastructure.Tests\Zaghlol.Infrastructure.Tests.csproj]
+C:\Users\amr90\zaghlol-ci\repo\backend\tests\Zaghlol.Infrastructure.Tests\SchemaFixture.cs(70,113): error ENDOFLINE: 
+Fix end of line marker. Replace 2 characters with '\n'. 
+[C:\Users\amr90\zaghlol-ci\repo\backend\tests\Zaghlol.Infrastructure.Tests\Zaghlol.Infrastructure.Tests.csproj]
+C:\Users\amr90\zaghlol-ci\repo\backend\tests\Zaghlol.Infrastructure.Tests\SchemaFixture.cs(71,6): error ENDOFLINE: Fix 
+end of line marker. Replace 2 characters with '\n'. 
+[C:\Users\amr90\zaghlol-ci\repo\backend\tests\Zaghlol.Infrastructure.Tests\Zaghlol.Infrastructure.Tests.csproj]
+C:\Users\amr90\zaghlol-ci\repo\backend\tests\Zaghlol.Infrastructure.Tests\SchemaFixture.cs(72,72): error ENDOFLINE: 
+Fix end of line marker. Replace 2 characters with '\n'. 
+[C:\Users\amr90\zaghlol-ci\repo\backend\tests\Zaghlol.Infrastructure.Tests\Zaghlol.Infrastructure.Tests.csproj]
+C:\Users\amr90\zaghlol-ci\repo\backend\tests\Zaghlol.Infrastructure.Tests\SchemaFixture.cs(73,72): error ENDOFLINE: 
+Fix end of line marker. Replace 2 characters with '\n'. 
+[C:\Users\amr90\zaghlol-ci\repo\backend\tests\Zaghlol.Infrastructure.Tests\Zaghlol.Infrastructure.Tests.csproj]
+C:\Users\amr90\zaghlol-ci\repo\backend\tests\Zaghlol.Infrastructure.Tests\SchemaFixture.cs(74,53): error ENDOFLINE: 
+Fix end of line marker. Replace 2 characters with '\n'. 
+[C:\Users\amr90\zaghlol-ci\repo\backend\tests\Zaghlol.Infrastructure.Tests\Zaghlol.Infrastructure.Tests.csproj]
+C:\Users\amr90\zaghlol-ci\repo\backend\tests\Zaghlol.Infrastructure.Tests\SchemaFixture.cs(75,6): error ENDOFLINE: Fix 
+end of line marker. Replace 2 characters with '\n'. 
+[C:\Users\amr90\zaghlol-ci\repo\backend\tests\Zaghlol.Infrastructure.Tests\Zaghlol.Infrastructure.Tests.csproj]
+C:\Users\amr90\zaghlol-ci\repo\backend\tests\Zaghlol.Infrastructure.Tests\SchemaFixture.cs(76,1): error ENDOFLINE: Fix 
+end of line marker. Replace 2 characters with '\n'. 
+[C:\Users\amr90\zaghlol-ci\repo\backend\tests\Zaghlol.Infrastructure.Tests\Zaghlol.Infrastructure.Tests.csproj]
+C:\Users\amr90\zaghlol-ci\repo\backend\tests\Zaghlol.Infrastructure.Tests\SchemaFixture.cs(77,105): error ENDOFLINE: 
+Fix end of line marker. Replace 2 characters with '\n'. 
+[C:\Users\amr90\zaghlol-ci\repo\backend\tests\Zaghlol.Infrastructure.Tests\Zaghlol.Infrastructure.Tests.csproj]
+C:\Users\amr90\zaghlol-ci\repo\backend\tests\Zaghlol.Infrastructure.Tests\SchemaFixture.cs(78,125): error ENDOFLINE: 
+Fix end of line marker. Replace 2 characters with '\n'. 
+[C:\Users\amr90\zaghlol-ci\repo\backend\tests\Zaghlol.Infrastructure.Tests\Zaghlol.Infrastructure.Tests.csproj]
+C:\Users\amr90\zaghlol-ci\repo\backend\tests\Zaghlol.Infrastructure.Tests\SchemaFixture.cs(79,6): error ENDOFLINE: Fix 
+end of line marker. Replace 2 characters with '\n'. 
+[C:\Users\amr90\zaghlol-ci\repo\backend\tests\Zaghlol.Infrastructure.Tests\Zaghlol.Infrastructure.Tests.csproj]
+C:\Users\amr90\zaghlol-ci\repo\backend\tests\Zaghlol.Infrastructure.Tests\SchemaFixture.cs(80,44): error ENDOFLINE: 
+Fix end of line marker. Replace 2 characters with '\n'. 
+[C:\Users\amr90\zaghlol-ci\repo\backend\tests\Zaghlol.Infrastructure.Tests\Zaghlol.Infrastructure.Tests.csproj]
+C:\Users\amr90\zaghlol-ci\repo\backend\tests\Zaghlol.Infrastructure.Tests\SchemaFixture.cs(81,66): error ENDOFLINE: 
+Fix end of line marker. Replace 2 characters with '\n'. 
+[C:\Users\amr90\zaghlol-ci\repo\backend\tests\Zaghlol.Infrastructure.Tests\Zaghlol.Infrastructure.Tests.csproj]
+C:\Users\amr90\zaghlol-ci\repo\backend\tests\Zaghlol.Infrastructure.Tests\SchemaFixture.cs(82,124): error ENDOFLINE: 
+Fix end of line marker. Replace 2 characters with '\n'. 
+[C:\Users\amr90\zaghlol-ci\repo\backend\tests\Zaghlol.Infrastructure.Tests\Zaghlol.Infrastructure.Tests.csproj]
+C:\Users\amr90\zaghlol-ci\repo\backend\tests\Zaghlol.Infrastructure.Tests\SchemaFixture.cs(83,88): error ENDOFLINE: 
+Fix end of line marker. Replace 2 characters with '\n'. 
+[C:\Users\amr90\zaghlol-ci\repo\backend\tests\Zaghlol.Infrastructure.Tests\Zaghlol.Infrastructure.Tests.csproj]
+C:\Users\amr90\zaghlol-ci\repo\backend\tests\Zaghlol.Infrastructure.Tests\SchemaFixture.cs(84,6): error ENDOFLINE: Fix 
+end of line marker. Replace 2 characters with '\n'. 
+[C:\Users\amr90\zaghlol-ci\repo\backend\tests\Zaghlol.Infrastructure.Tests\Zaghlol.Infrastructure.Tests.csproj]
+C:\Users\amr90\zaghlol-ci\repo\backend\tests\Zaghlol.Infrastructure.Tests\SchemaFixture.cs(85,1): error ENDOFLINE: Fix 
+end of line marker. Replace 2 characters with '\n'. 
+[C:\Users\amr90\zaghlol-ci\repo\backend\tests\Zaghlol.Infrastructure.Tests\Zaghlol.Infrastructure.Tests.csproj]
+C:\Users\amr90\zaghlol-ci\repo\backend\tests\Zaghlol.Infrastructure.Tests\SchemaFixture.cs(86,110): error ENDOFLINE: 
+Fix end of line marker. Replace 2 characters with '\n'. 
+[C:\Users\amr90\zaghlol-ci\repo\backend\tests\Zaghlol.Infrastructure.Tests\Zaghlol.Infrastructure.Tests.csproj]
+C:\Users\amr90\zaghlol-ci\repo\backend\tests\Zaghlol.Infrastructure.Tests\SchemaFixture.cs(87,6): error ENDOFLINE: Fix 
+end of line marker. Replace 2 characters with '\n'. 
+[C:\Users\amr90\zaghlol-ci\repo\backend\tests\Zaghlol.Infrastructure.Tests\Zaghlol.Infrastructure.Tests.csproj]
+C:\Users\amr90\zaghlol-ci\repo\backend\tests\Zaghlol.Infrastructure.Tests\SchemaFixture.cs(88,58): error ENDOFLINE: 
+Fix end of line marker. Replace 2 characters with '\n'. 
+[C:\Users\amr90\zaghlol-ci\repo\backend\tests\Zaghlol.Infrastructure.Tests\Zaghlol.Infrastructure.Tests.csproj]
+C:\Users\amr90\zaghlol-ci\repo\backend\tests\Zaghlol.Infrastructure.Tests\SchemaFixture.cs(89,42): error ENDOFLINE: 
+Fix end of line marker. Replace 2 characters with '\n'. 
+[C:\Users\amr90\zaghlol-ci\repo\backend\tests\Zaghlol.Infrastructure.Tests\Zaghlol.Infrastructure.Tests.csproj]
+C:\Users\amr90\zaghlol-ci\repo\backend\tests\Zaghlol.Infrastructure.Tests\SchemaFixture.cs(90,10): error ENDOFLINE: 
+Fix end of line marker. Replace 2 characters with '\n'. 
+[C:\Users\amr90\zaghlol-ci\repo\backend\tests\Zaghlol.Infrastructure.Tests\Zaghlol.Infrastructure.Tests.csproj]
+C:\Users\amr90\zaghlol-ci\repo\backend\tests\Zaghlol.Infrastructure.Tests\SchemaFixture.cs(91,48): error ENDOFLINE: 
+Fix end of line marker. Replace 2 characters with '\n'. 
+[C:\Users\amr90\zaghlol-ci\repo\backend\tests\Zaghlol.Infrastructure.Tests\Zaghlol.Infrastructure.Tests.csproj]
+C:\Users\amr90\zaghlol-ci\repo\backend\tests\Zaghlol.Infrastructure.Tests\SchemaFixture.cs(92,14): error ENDOFLINE: 
+Fix end of line marker. Replace 2 characters with '\n'. 
+[C:\Users\amr90\zaghlol-ci\repo\backend\tests\Zaghlol.Infrastructure.Tests\Zaghlol.Infrastructure.Tests.csproj]
+C:\Users\amr90\zaghlol-ci\repo\backend\tests\Zaghlol.Infrastructure.Tests\SchemaFixture.cs(93,70): error ENDOFLINE: 
+Fix end of line marker. Replace 2 characters with '\n'. 
+[C:\Users\amr90\zaghlol-ci\repo\backend\tests\Zaghlol.Infrastructure.Tests\Zaghlol.Infrastructure.Tests.csproj]
+C:\Users\amr90\zaghlol-ci\repo\backend\tests\Zaghlol.Infrastructure.Tests\SchemaFixture.cs(94,108): error ENDOFLINE: 
+Fix end of line marker. Replace 2 characters with '\n'. 
+[C:\Users\amr90\zaghlol-ci\repo\backend\tests\Zaghlol.Infrastructure.Tests\Zaghlol.Infrastructure.Tests.csproj]
+C:\Users\amr90\zaghlol-ci\repo\backend\tests\Zaghlol.Infrastructure.Tests\SchemaFixture.cs(95,60): error ENDOFLINE: 
+Fix end of line marker. Replace 2 characters with '\n'. 
+[C:\Users\amr90\zaghlol-ci\repo\backend\tests\Zaghlol.Infrastructure.Tests\Zaghlol.Infrastructure.Tests.csproj]
+C:\Users\amr90\zaghlol-ci\repo\backend\tests\Zaghlol.Infrastructure.Tests\SchemaFixture.cs(96,16): error ENDOFLINE: 
+Fix end of line marker. Replace 2 characters with '\n'. 
+[C:\Users\amr90\zaghlol-ci\repo\backend\tests\Zaghlol.Infrastructure.Tests\Zaghlol.Infrastructure.Tests.csproj]
+C:\Users\amr90\zaghlol-ci\repo\backend\tests\Zaghlol.Infrastructure.Tests\SchemaFixture.cs(97,10): error ENDOFLINE: 
+Fix end of line marker. Replace 2 characters with '\n'. 
+[C:\Users\amr90\zaghlol-ci\repo\backend\tests\Zaghlol.Infrastructure.Tests\Zaghlol.Infrastructure.Tests.csproj]
+C:\Users\amr90\zaghlol-ci\repo\backend\tests\Zaghlol.Infrastructure.Tests\SchemaFixture.cs(98,1): error ENDOFLINE: Fix 
+end of line marker. Replace 2 characters with '\n'. 
+[C:\Users\amr90\zaghlol-ci\repo\backend\tests\Zaghlol.Infrastructure.Tests\Zaghlol.Infrastructure.Tests.csproj]
+C:\Users\amr90\zaghlol-ci\repo\backend\tests\Zaghlol.Infrastructure.Tests\SchemaFixture.cs(99,24): error ENDOFLINE: 
+Fix end of line marker. Replace 2 characters with '\n'. 
+[C:\Users\amr90\zaghlol-ci\repo\backend\tests\Zaghlol.Infrastructure.Tests\Zaghlol.Infrastructure.Tests.csproj]
+C:\Users\amr90\zaghlol-ci\repo\backend\tests\Zaghlol.Infrastructure.Tests\SchemaFixture.cs(100,6): error ENDOFLINE: 
+Fix end of line marker. Replace 2 characters with '\n'. 
+[C:\Users\amr90\zaghlol-ci\repo\backend\tests\Zaghlol.Infrastructure.Tests\Zaghlol.Infrastructure.Tests.csproj]
+C:\Users\amr90\zaghlol-ci\repo\backend\tests\Zaghlol.Infrastructure.Tests\SchemaFixture.cs(101,2): error ENDOFLINE: 
+Fix end of line marker. Replace 2 characters with '\n'. 
+[C:\Users\amr90\zaghlol-ci\repo\backend\tests\Zaghlol.Infrastructure.Tests\Zaghlol.Infrastructure.Tests.csproj]
+
+[23:30:23] === RESULT dotnet-format exit=2
+[23:30:23] === STEP dotnet-test (in C:\Users\amr90\zaghlol-ci\repo\backend)
+Test run for C:\Users\amr90\zaghlol-ci\repo\backend\tests\Zaghlol.Api.Tests\bin\Release\net10.0\Zaghlol.Api.Tests.dll (.NETCoreApp,Version=v10.0)
+Test run for C:\Users\amr90\zaghlol-ci\repo\backend\tests\Zaghlol.Infrastructure.Tests\bin\Release\net10.0\Zaghlol.Infrastructure.Tests.dll (.NETCoreApp,Version=v10.0)
+Test run for C:\Users\amr90\zaghlol-ci\repo\backend\tests\Zaghlol.Workers.Tests\bin\Release\net10.0\Zaghlol.Workers.Tests.dll (.NETCoreApp,Version=v10.0)
+Test run for C:\Users\amr90\zaghlol-ci\repo\backend\tests\Zaghlol.Contract.Tests\bin\Release\net10.0\Zaghlol.Contract.Tests.dll (.NETCoreApp,Version=v10.0)
+Test run for C:\Users\amr90\zaghlol-ci\repo\backend\tests\Zaghlol.Application.Tests\bin\Release\net10.0\Zaghlol.Application.Tests.dll (.NETCoreApp,Version=v10.0)
+Test run for C:\Users\amr90\zaghlol-ci\repo\backend\tests\Zaghlol.Ops.Tests\bin\Release\net10.0\Zaghlol.Ops.Tests.dll (.NETCoreApp,Version=v10.0)
+A total of 1 test files matched the specified pattern.A total of 1 test files matched the specified pattern.
+
+A total of 1 test files matched the specified pattern.
+A total of 1 test files matched the specified pattern.
+A total of 1 test files matched the specified pattern.
+A total of 1 test files matched the specified pattern.
+dotnet : [xUnit.net 00:00:01.22] Zaghlol.Workers.Tests: Catastrophic failure: System.IO.FileLoadException: Could not 
+load file or assembly 
+'C:\Users\amr90\zaghlol-ci\repo\backend\tests\Zaghlol.Workers.Tests\bin\Release\net10.0\Zaghlol.Workers.Tests.dll'. An 
+Application Control policy has blocked this file. (0x800711C7)
+At C:\Projects\Zaghlol\.zaghlol-local-ci\runner.ps1:84 char:42
++ ... += Step $log 'dotnet-test'   $b { dotnet test -c Release --no-build }
++                                       ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    + CategoryInfo          : NotSpecified: ([xUnit.net 00:0...e. (0x800711C7):String) [], RemoteException
+    + FullyQualifiedErrorId : NativeCommandError
+ 
+File name: 
+'C:\Users\amr90\zaghlol-ci\repo\backend\tests\Zaghlol.Workers.Tests\bin\Release\net10.0\Zaghlol.Workers.Tests.dll'
+   at System.Reflection.RuntimeAssembly.InternalLoad(AssemblyName assemblyName, StackCrawlMark& stackMark, 
+AssemblyLoadContext assemblyLoadContext, RuntimeAssembly requestingAssembly, Boolean throwOnFileNotFound)
+   at System.Reflection.Assembly.Load(AssemblyName assemblyRef)
+   at Xunit.Sdk.ReflectionAssemblyInfo..ctor(String assemblyFileName) in 
+/_/src/xunit.execution/Sdk/Reflection/ReflectionAssemblyInfo.cs:line 31
+   at System.Reflection.MethodBaseInvoker.InterpretedInvoke_Constructor(Object obj, IntPtr* args)
+   at System.Reflection.MethodBaseInvoker.InvokeDirectByRefWithFewArgs(Object obj, Span`1 copyOfArgs, BindingFlags 
+invokeAttr)
+--- End of stack trace from previous location ---
+   at Xunit.AppDomainManager_NoAppDomain.CreateObject[TObject](AssemblyName assemblyName, String typeName, Object[] 
+args)
+   at Xunit.Runner.v2.Xunit2..ctor(IMessageSink diagnosticMessageSink, AppDomainSupport appDomainSupport, 
+ISourceInformationProvider sourceInformationProvider, IAssemblyInfo assemblyInfo, String assemblyFileName, String 
+xunitExecutionAssemblyPath, String configFileName, Boolean shadowCopy, String shadowCopyFolder, Boolean 
+verifyAssembliesOnDisk)
+   at Xunit.Runner.v2.Xunit2.ForDiscoveryAndExecution(XunitProjectAssembly projectAssembly, ISourceInformationProvider 
+sourceInformationProvider, IMessageSink diagnosticMessageSink, Boolean verifyAssembliesOnDisk)
+   at Xunit.XunitFrontController.Create(XunitProjectAssembly projectAssembly, ISourceInformationProvider 
+sourceInformationProvider, IMessageSink diagnosticMessageSink, ITestProcessLauncher testProcessLauncher)
+   at Xunit.Runner.VisualStudio.VsTestRunner.RunTestsInAssembly(IRunContext runContext, IFrameworkHandle 
+frameworkHandle, LoggerHelper logger, TestPlatformContext testPlatformContext, RunSettings runSettings, IMessageSink 
+reporterMessageHandler, AssemblyRunInfo runInfo)
+   at Xunit.Runner.VisualStudio.VsTestRunner.RunTestsInAssembly(IRunContext runContext, IFrameworkHandle 
+frameworkHandle, LoggerHelper logger, TestPlatformContext testPlatformContext, RunSettings runSettings, IMessageSink 
+reporterMessageHandler, AssemblyRunInfo runInfo)
+No test is available in C:\Users\amr90\zaghlol-ci\repo\backend\tests\Zaghlol.Workers.Tests\bin\Release\net10.0\Zaghlol.Workers.Tests.dll. Make sure that test discoverer & executors are registered and platform & framework version settings are appropriate and try again.
+
+Additionally, path to test adapters can be specified using /TestAdapterPath command. Example  /TestAdapterPath:<pathToCustomAdapters>.
+[xUnit.net 00:00:07.20] Zaghlol.Application.Tests: Catastrophic failure: System.IO.FileLoadException: Could not load 
+file or assembly 'C:\Users\amr90\zaghlol-ci\repo\backend\tests\Zaghlol.Application.Tests\bin\Release\net10.0\Zaghlol.Ap
+plication.Tests.dll'. An Application Control policy has blocked this file. (0x800711C7)
+File name: 'C:\Users\amr90\zaghlol-ci\repo\backend\tests\Zaghlol.Application.Tests\bin\Release\net10.0\Zaghlol.Applicat
+ion.Tests.dll'
+   at System.Reflection.RuntimeAssembly.InternalLoad(AssemblyName assemblyName, StackCrawlMark& stackMark, 
+AssemblyLoadContext assemblyLoadContext, RuntimeAssembly requestingAssembly, Boolean throwOnFileNotFound)
+   at System.Reflection.Assembly.Load(AssemblyName assemblyRef)
+   at Xunit.Sdk.ReflectionAssemblyInfo..ctor(String assemblyFileName) in 
+/_/src/xunit.execution/Sdk/Reflection/ReflectionAssemblyInfo.cs:line 31
+   at System.Reflection.MethodBaseInvoker.InterpretedInvoke_Constructor(Object obj, IntPtr* args)
+   at System.Reflection.MethodBaseInvoker.InvokeDirectByRefWithFewArgs(Object obj, Span`1 copyOfArgs, BindingFlags 
+invokeAttr)
+--- End of stack trace from previous location ---
+   at Xunit.AppDomainManager_NoAppDomain.CreateObject[TObject](AssemblyName assemblyName, String typeName, Object[] 
+args)
+   at Xunit.Runner.v2.Xunit2..ctor(IMessageSink diagnosticMessageSink, AppDomainSupport appDomainSupport, 
+ISourceInformationProvider sourceInformationProvider, IAssemblyInfo assemblyInfo, String assemblyFileName, String 
+xunitExecutionAssemblyPath, String configFileName, Boolean shadowCopy, String shadowCopyFolder, Boolean 
+verifyAssembliesOnDisk)
+   at Xunit.Runner.v2.Xunit2.ForDiscoveryAndExecution(XunitProjectAssembly projectAssembly, ISourceInformationProvider 
+sourceInformationProvider, IMessageSink diagnosticMessageSink, Boolean verifyAssembliesOnDisk)
+   at Xunit.XunitFrontController.Create(XunitProjectAssembly projectAssembly, ISourceInformationProvider 
+sourceInformationProvider, IMessageSink diagnosticMessageSink, ITestProcessLauncher testProcessLauncher)
+   at Xunit.Runner.VisualStudio.VsTestRunner.RunTestsInAssembly(IRunContext runContext, IFrameworkHandle 
+frameworkHandle, LoggerHelper logger, TestPlatformContext testPlatformContext, RunSettings runSettings, IMessageSink 
+reporterMessageHandler, AssemblyRunInfo runInfo)
+   at Xunit.Runner.VisualStudio.VsTestRunner.RunTestsInAssembly(IRunContext runContext, IFrameworkHandle 
+frameworkHandle, LoggerHelper logger, TestPlatformContext testPlatformContext, RunSettings runSettings, IMessageSink 
+reporterMessageHandler, AssemblyRunInfo runInfo)
+No test is available in C:\Users\amr90\zaghlol-ci\repo\backend\tests\Zaghlol.Application.Tests\bin\Release\net10.0\Zaghlol.Application.Tests.dll. Make sure that test discoverer & executors are registered and platform & framework version settings are appropriate and try again.
+
+Additionally, path to test adapters can be specified using /TestAdapterPath command. Example  /TestAdapterPath:<pathToCustomAdapters>.
+[xUnit.net 00:00:11.61]     
+Zaghlol.Infrastructure.Tests.InitialCreateGoldenTests.TheSqlOfInitialCreateIsUnchanged(block: "Comments") [FAIL]
+[xUnit.net 00:00:11.62]     
+Zaghlol.Infrastructure.Tests.InitialCreateGoldenTests.TheSqlOfInitialCreateIsUnchanged(block: 
+"CreateInvariantTriggers") [FAIL]
+[xUnit.net 00:00:11.62]     
+Zaghlol.Infrastructure.Tests.InitialCreateGoldenTests.TheSqlOfInitialCreateIsUnchanged(block: "CreateTriggers") [FAIL]
+[xUnit.net 00:00:11.62]     
+Zaghlol.Infrastructure.Tests.InitialCreateGoldenTests.TheSqlOfInitialCreateIsUnchanged(block: 
+"AuditLogRowLevelSecurity") [FAIL]
+  Failed Zaghlol.Infrastructure.Tests.InitialCreateGoldenTests.TheSqlOfInitialCreateIsUnchanged(block: "Comments") [1 ms]
+  Error Message:
+   InitialCreateSql.Comments changed (sha256 fedd8785e1795bc83854b1503e5717b0407f3c052cc18ac7360e7b5f362b2ac4). InitialCreate is frozen: put the change in a new migration.
+  Stack Trace:
+     at Zaghlol.Infrastructure.Tests.InitialCreateGoldenTests.TheSqlOfInitialCreateIsUnchanged(String block) in C:\Users\amr90\zaghlol-ci\repo\backend\tests\Zaghlol.Infrastructure.Tests\InitialCreateGoldenTests.cs:line 46
+   at InvokeStub_InitialCreateGoldenTests.TheSqlOfInitialCreateIsUnchanged(Object, Span`1)
+   at System.Reflection.MethodBaseInvoker.InvokeWithOneArg(Object obj, BindingFlags invokeAttr, Binder binder, Object[] parameters, CultureInfo culture)
+  Failed Zaghlol.Infrastructure.Tests.InitialCreateGoldenTests.TheSqlOfInitialCreateIsUnchanged(block: "CreateInvariantTriggers") [< 1 ms]
+  Error Message:
+   InitialCreateSql.CreateInvariantTriggers changed (sha256 bafb11d2c3741ac98682bd8deecec69865090c7be4c437df02babb5b5c1cc01a). InitialCreate is frozen: put the change in a new migration.
+  Stack Trace:
+     at Zaghlol.Infrastructure.Tests.InitialCreateGoldenTests.TheSqlOfInitialCreateIsUnchanged(String block) in C:\Users\amr90\zaghlol-ci\repo\backend\tests\Zaghlol.Infrastructure.Tests\InitialCreateGoldenTests.cs:line 46
+   at InvokeStub_InitialCreateGoldenTests.TheSqlOfInitialCreateIsUnchanged(Object, Span`1)
+   at System.Reflection.MethodBaseInvoker.InvokeWithOneArg(Object obj, BindingFlags invokeAttr, Binder binder, Object[] parameters, CultureInfo culture)
+  Failed Zaghlol.Infrastructure.Tests.InitialCreateGoldenTests.TheSqlOfInitialCreateIsUnchanged(block: "CreateTriggers") [< 1 ms]
+  Error Message:
+   InitialCreateSql.CreateTriggers changed (sha256 004d265ba5f685c9b15afad5e3e7e46260e32b795e2557dd2fda5af1f1cd8367). InitialCreate is frozen: put the change in a new migration.
+  Stack Trace:
+     at Zaghlol.Infrastructure.Tests.InitialCreateGoldenTests.TheSqlOfInitialCreateIsUnchanged(String block) in C:\Users\amr90\zaghlol-ci\repo\backend\tests\Zaghlol.Infrastructure.Tests\InitialCreateGoldenTests.cs:line 46
+   at InvokeStub_InitialCreateGoldenTests.TheSqlOfInitialCreateIsUnchanged(Object, Span`1)
+   at System.Reflection.MethodBaseInvoker.InvokeWithOneArg(Object obj, BindingFlags invokeAttr, Binder binder, Object[] parameters, CultureInfo culture)
+  Failed Zaghlol.Infrastructure.Tests.InitialCreateGoldenTests.TheSqlOfInitialCreateIsUnchanged(block: "AuditLogRowLevelSecurity") [< 1 ms]
+  Error Message:
+   InitialCreateSql.AuditLogRowLevelSecurity changed (sha256 76abaa8cb4a11bd14ab541ed2738f759d06fb3959700e431e5c5450e88f057a7). InitialCreate is frozen: put the change in a new migration.
+  Stack Trace:
+     at Zaghlol.Infrastructure.Tests.InitialCreateGoldenTests.TheSqlOfInitialCreateIsUnchanged(String block) in C:\Users\amr90\zaghlol-ci\repo\backend\tests\Zaghlol.Infrastructure.Tests\InitialCreateGoldenTests.cs:line 46
+   at InvokeStub_InitialCreateGoldenTests.TheSqlOfInitialCreateIsUnchanged(Object, Span`1)
+   at System.Reflection.MethodBaseInvoker.InvokeWithOneArg(Object obj, BindingFlags invokeAttr, Binder binder, Object[] parameters, CultureInfo culture)
+[xUnit.net 00:00:11.62]     
+Zaghlol.Infrastructure.Tests.InitialCreateGoldenTests.TheSqlOfInitialCreateIsUnchanged(block: "DropViewAndTriggers") 
+[FAIL]
+[xUnit.net 00:00:11.63]     
+Zaghlol.Infrastructure.Tests.InitialCreateGoldenTests.TheSqlOfInitialCreateIsUnchanged(block: "CreateEntitlementView") 
+[FAIL]
+  Failed Zaghlol.Infrastructure.Tests.InitialCreateGoldenTests.TheSqlOfInitialCreateIsUnchanged(block: "DropViewAndTriggers") [< 1 ms]
+  Error Message:
+   InitialCreateSql.DropViewAndTriggers changed (sha256 824bf8a6dbec0a0cce58ff62e03c2a2cad031ad29cffc61bad3e7e36b77eb875). InitialCreate is frozen: put the change in a new migration.
+  Stack Trace:
+     at Zaghlol.Infrastructure.Tests.InitialCreateGoldenTests.TheSqlOfInitialCreateIsUnchanged(String block) in C:\Users\amr90\zaghlol-ci\repo\backend\tests\Zaghlol.Infrastructure.Tests\InitialCreateGoldenTests.cs:line 46
+   at InvokeStub_InitialCreateGoldenTests.TheSqlOfInitialCreateIsUnchanged(Object, Span`1)
+   at System.Reflection.MethodBaseInvoker.InvokeWithOneArg(Object obj, BindingFlags invokeAttr, Binder binder, Object[] parameters, CultureInfo culture)
+  Failed Zaghlol.Infrastructure.Tests.InitialCreateGoldenTests.TheSqlOfInitialCreateIsUnchanged(block: "CreateEntitlementView") [< 1 ms]
+  Error Message:
+   InitialCreateSql.CreateEntitlementView changed (sha256 d77b90611580cc1e00bf2693435a5b2013ebc8059517c7f3dcfecdfc80ba6126). InitialCreate is frozen: put the change in a new migration.
+  Stack Trace:
+     at Zaghlol.Infrastructure.Tests.InitialCreateGoldenTests.TheSqlOfInitialCreateIsUnchanged(String block) in C:\Users\amr90\zaghlol-ci\repo\backend\tests\Zaghlol.Infrastructure.Tests\InitialCreateGoldenTests.cs:line 46
+   at InvokeStub_InitialCreateGoldenTests.TheSqlOfInitialCreateIsUnchanged(Object, Span`1)
+   at System.Reflection.MethodBaseInvoker.InvokeWithOneArg(Object obj, BindingFlags invokeAttr, Binder binder, Object[] parameters, CultureInfo culture)
+[xUnit.net 00:00:11.90]     
+Zaghlol.Infrastructure.Tests.Observability.SeededSeriesTests.EverySeriesIsExportedAtZeroBeforeAnyEvent [FAIL]
+  Failed Zaghlol.Infrastructure.Tests.Observability.SeededSeriesTests.EverySeriesIsExportedAtZeroBeforeAnyEvent [590 ms]
+  Error Message:
+   Assert.Contains() Failure: Item not found in collection
+Collection: [Tuple ("zaghlol.kms.unavailable", "operation=sign"), Tuple ("zaghlol.kms.unavailable", "operation=sign_verify"), Tuple ("zaghlol.kms.unavailable", "operation=hmac"), Tuple ("zaghlol.kms.unavailable", "operation=public_key"), Tuple ("zaghlol.notification.dead_letter", "store=play"), ┬╖┬╖┬╖]
+Not found:  Tuple ("zaghlol.audit_alert.fired", "rule=ownership_failures_per_operator_day")
+  Stack Trace:
+     at Zaghlol.Infrastructure.Tests.Observability.SeededSeriesTests.EverySeriesIsExportedAtZeroBeforeAnyEvent() in C:\Users\amr90\zaghlol-ci\repo\backend\tests\Zaghlol.Infrastructure.Tests\Observability\SeededSeriesTests.cs:line 71
+   at Zaghlol.Infrastructure.Tests.Observability.SeededSeriesTests.EverySeriesIsExportedAtZeroBeforeAnyEvent() in C:\Users\amr90\zaghlol-ci\repo\backend\tests\Zaghlol.Infrastructure.Tests\Observability\SeededSeriesTests.cs:line 79
+--- End of stack trace from previous location ---
+[xUnit.net 00:00:12.39]     Zaghlol.Infrastructure.Tests.Kms.KeyRingTests.AnOffCurvePointIsRejected [SKIP]
+  Skipped Zaghlol.Infrastructure.Tests.Kms.KeyRingTests.AnOffCurvePointIsRejected [1 ms]
+
+Passed!  - Failed:     0, Passed:    57, Skipped:     0, Total:    57, Duration: 9 s - Zaghlol.Contract.Tests.dll (net10.0)
+
+Passed!  - Failed:     0, Passed:     2, Skipped:     0, Total:     2, Duration: 10 s - Zaghlol.Ops.Tests.dll (net10.0)
+
+Failed!  - Failed:     7, Passed:   479, Skipped:     1, Total:   487, Duration: 9 s - Zaghlol.Infrastructure.Tests.dll (net10.0)
+
+Passed!  - Failed:     0, Passed:   167, Skipped:     0, Total:   167, Duration: 28 s - Zaghlol.Api.Tests.dll (net10.0)
+
+[23:31:13] === RESULT dotnet-test exit=1
+[23:31:13] SUMMARY FAIL sha=856f240d127e3e4d231855ccea12d0d6512e5eb9 pipeline=quick pub-get=0 format=0 analyze=0 app-test=1 dart-test-zaghlol_domain=0 dart-test-zaghlol_parsing=0 dotnet-build=0 dotnet-format=2 dotnet-test=1
