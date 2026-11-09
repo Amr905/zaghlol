@@ -1,5 +1,90 @@
 ﻿== SUMMARY ==
-RUNNING sha=a5df5af6f113fb1ec21715d8cf1203fdcf285e5b
+FAIL sha=a5df5af6f113fb1ec21715d8cf1203fdcf285e5b pipeline=quick-backend dotnet-build=1 dotnet-format=0 dotnet-test=1
+dotnet-build                 FAIL  exit=1  6s
+dotnet-format                PASS  exit=0  20s
+dotnet-test                  FAIL  exit=1  31s
+
+== ERRORS: dotnet-build ==
+/work/backend/src/Zaghlol.Application/Catalog/CatalogOps.cs(143,26): error CA1720: Identifier 'Single' contains type name (https://learn.microsoft.com/dotnet/fundamentals/code-analysis/quality-rules/ca1720) [/work/backend/src/Zaghlol.Application/Zaghlol.Application.csproj]
+
+== ERRORS: dotnet-test ==
+  Failed Zaghlol.Contract.Tests.FlagsLiveContractTests.TheServerSidePatternsAreTheSpecsPatterns [< 1 ms]
+  Error Message:
+   System.InvalidOperationException : A value of type 'System.Int64' cannot be converted to a 'System.Int32'.
+  Stack Trace:
+     at System.Text.Json.ThrowHelper.ThrowInvalidOperationException_NodeUnableToConvert(Type sourceType, Type destinationType)
+   at System.Text.Json.Nodes.JsonValue`1.GetValue[T]()
+   at Zaghlol.Contract.Tests.FlagsLiveContractTests.TheServerSidePatternsAreTheSpecsPatterns() in /_/backend/tests/Zaghlol.Contract.Tests/FlagsLiveContractTests.cs:line 204
+   at System.Reflection.MethodBaseInvoker.InterpretedInvoke_Method(Object obj, IntPtr* args)
+   at System.Reflection.RuntimeMethodInfo.Invoke(Object obj, BindingFlags invokeAttr, Binder binder, Object[] parameters, CultureInfo culture)
+
+Failed!  - Failed:     1, Passed:    62, Skipped:     0, Total:    63, Duration: 11 s - Zaghlol.Contract.Tests.dll (net10.0)
+
+Passed!  - Failed:     0, Passed:   501, Skipped:     0, Total:   501, Duration: 13 s - Zaghlol.Infrastructure.Tests.dll (net10.0)
+
 
 == FULL LOG (last 1500 lines) ==
 auto task/T-125-catalog a5df5af6f113fb1ec21715d8cf1203fdcf285e5b 2026-11-10T01:24:26.4782967+02:00
+
+
+
+[01:24:32] === STEP dotnet-build (docker mcr.microsoft.com/dotnet/sdk:10.0.402, /work/backend)
+  Determining projects to restore...
+  All projects are up-to-date for restore.
+  Zaghlol.Domain -> /work/backend/src/Zaghlol.Domain/bin/Release/net10.0/Zaghlol.Domain.dll
+  Zaghlol.Ops -> /work/backend/src/Zaghlol.Ops/bin/Release/net10.0/zaghlol-ops.dll
+/work/backend/src/Zaghlol.Application/Catalog/CatalogOps.cs(143,26): error CA1720: Identifier 'Single' contains type name (https://learn.microsoft.com/dotnet/fundamentals/code-analysis/quality-rules/ca1720) [/work/backend/src/Zaghlol.Application/Zaghlol.Application.csproj]
+  Zaghlol.Ops.Tests -> /work/backend/tests/Zaghlol.Ops.Tests/bin/Release/net10.0/Zaghlol.Ops.Tests.dll
+
+Build FAILED.
+
+/work/backend/src/Zaghlol.Application/Catalog/CatalogOps.cs(143,26): error CA1720: Identifier 'Single' contains type name (https://learn.microsoft.com/dotnet/fundamentals/code-analysis/quality-rules/ca1720) [/work/backend/src/Zaghlol.Application/Zaghlol.Application.csproj]
+    0 Warning(s)
+    1 Error(s)
+
+Time Elapsed 00:00:04.97
+
+[01:24:38] === RESULT dotnet-build exit=1 (6s)
+[01:24:38] === STEP dotnet-format (docker mcr.microsoft.com/dotnet/sdk:10.0.402, /work/backend)
+Formatting code files in workspace '/work/backend/Zaghlol.sln'.
+Format complete in 18973ms.
+
+[01:24:57] === RESULT dotnet-format exit=0 (20s)
+[01:24:57] === STEP dotnet-test (docker mcr.microsoft.com/dotnet/sdk:10.0.402, /work/backend)
+Test run for /work/backend/tests/Zaghlol.Workers.Tests/bin/Release/net10.0/Zaghlol.Workers.Tests.dll (.NETCoreApp,Version=v10.0)
+Test run for /work/backend/tests/Zaghlol.Ops.Tests/bin/Release/net10.0/Zaghlol.Ops.Tests.dll (.NETCoreApp,Version=v10.0)
+Test run for /work/backend/tests/Zaghlol.Application.Tests/bin/Release/net10.0/Zaghlol.Application.Tests.dll (.NETCoreApp,Version=v10.0)
+Test run for /work/backend/tests/Zaghlol.Api.Tests/bin/Release/net10.0/Zaghlol.Api.Tests.dll (.NETCoreApp,Version=v10.0)
+Test run for /work/backend/tests/Zaghlol.Infrastructure.Tests/bin/Release/net10.0/Zaghlol.Infrastructure.Tests.dll (.NETCoreApp,Version=v10.0)
+Test run for /work/backend/tests/Zaghlol.Contract.Tests/bin/Release/net10.0/Zaghlol.Contract.Tests.dll (.NETCoreApp,Version=v10.0)
+A total of 1 test files matched the specified pattern.
+A total of 1 test files matched the specified pattern.
+A total of 1 test files matched the specified pattern.
+A total of 1 test files matched the specified pattern.
+A total of 1 test files matched the specified pattern.
+A total of 1 test files matched the specified pattern.
+
+Passed!  - Failed:     0, Passed:     2, Skipped:     0, Total:     2, Duration: 27 ms - Zaghlol.Ops.Tests.dll (net10.0)
+
+Passed!  - Failed:     0, Passed:    37, Skipped:     0, Total:    37, Duration: 70 ms - Zaghlol.Application.Tests.dll (net10.0)
+
+Passed!  - Failed:     0, Passed:     3, Skipped:     0, Total:     3, Duration: 103 ms - Zaghlol.Workers.Tests.dll (net10.0)
+[xUnit.net 00:00:11.43]     Zaghlol.Contract.Tests.FlagsLiveContractTests.TheServerSidePatternsAreTheSpecsPatterns [FAIL]
+  Failed Zaghlol.Contract.Tests.FlagsLiveContractTests.TheServerSidePatternsAreTheSpecsPatterns [< 1 ms]
+  Error Message:
+   System.InvalidOperationException : A value of type 'System.Int64' cannot be converted to a 'System.Int32'.
+  Stack Trace:
+     at System.Text.Json.ThrowHelper.ThrowInvalidOperationException_NodeUnableToConvert(Type sourceType, Type destinationType)
+   at System.Text.Json.Nodes.JsonValue`1.GetValue[T]()
+   at Zaghlol.Contract.Tests.FlagsLiveContractTests.TheServerSidePatternsAreTheSpecsPatterns() in /_/backend/tests/Zaghlol.Contract.Tests/FlagsLiveContractTests.cs:line 204
+   at System.Reflection.MethodBaseInvoker.InterpretedInvoke_Method(Object obj, IntPtr* args)
+   at System.Reflection.RuntimeMethodInfo.Invoke(Object obj, BindingFlags invokeAttr, Binder binder, Object[] parameters, CultureInfo culture)
+
+Failed!  - Failed:     1, Passed:    62, Skipped:     0, Total:    63, Duration: 11 s - Zaghlol.Contract.Tests.dll (net10.0)
+
+Passed!  - Failed:     0, Passed:   501, Skipped:     0, Total:   501, Duration: 13 s - Zaghlol.Infrastructure.Tests.dll (net10.0)
+
+Passed!  - Failed:     0, Passed:   167, Skipped:     0, Total:   167, Duration: 19 s - Zaghlol.Api.Tests.dll (net10.0)
+
+[01:25:28] === RESULT dotnet-test exit=1 (31s)
+[01:25:28] SUMMARY FAIL sha=a5df5af6f113fb1ec21715d8cf1203fdcf285e5b pipeline=quick-backend dotnet-build=1 dotnet-format=0 dotnet-test=1
