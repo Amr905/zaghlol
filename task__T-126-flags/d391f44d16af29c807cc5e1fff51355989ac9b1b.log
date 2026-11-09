@@ -1,5 +1,134 @@
 ﻿== SUMMARY ==
-RUNNING sha=d391f44d16af29c807cc5e1fff51355989ac9b1b
+FAIL sha=d391f44d16af29c807cc5e1fff51355989ac9b1b pipeline=quick-backend dotnet-build=1 dotnet-format=0 dotnet-test=1
+dotnet-build                 FAIL  exit=1  12s
+dotnet-format                PASS  exit=0  20s
+dotnet-test                  FAIL  exit=1  27s
+
+== ERRORS: dotnet-build ==
+/work/backend/tests/Zaghlol.Api.Tests/Flags/FlagAdminEndpointTests.cs(300,15): error CS0234: The type or namespace name 'AssertAsync' does not exist in the namespace 'Zaghlol.Api.Problems' (are you missing an assembly reference?) [/work/backend/tests/Zaghlol.Api.Tests/Zaghlol.Api.Tests.csproj]
+/work/backend/tests/Zaghlol.Api.Tests/Flags/FlagAdminEndpointTests.cs(281,26): error CS0234: The type or namespace name 'AssertAsync' does not exist in the namespace 'Zaghlol.Api.Problems' (are you missing an assembly reference?) [/work/backend/tests/Zaghlol.Api.Tests/Zaghlol.Api.Tests.csproj]
+/work/backend/tests/Zaghlol.Api.Tests/Flags/FlagAdminEndpointTests.cs(121,26): error CS0234: The type or namespace name 'AssertAsync' does not exist in the namespace 'Zaghlol.Api.Problems' (are you missing an assembly reference?) [/work/backend/tests/Zaghlol.Api.Tests/Zaghlol.Api.Tests.csproj]
+/work/backend/tests/Zaghlol.Api.Tests/Flags/FlagAdminEndpointTests.cs(149,15): error CS0234: The type or namespace name 'AssertAsync' does not exist in the namespace 'Zaghlol.Api.Problems' (are you missing an assembly reference?) [/work/backend/tests/Zaghlol.Api.Tests/Zaghlol.Api.Tests.csproj]
+/work/backend/tests/Zaghlol.Api.Tests/Flags/FlagAdminEndpointTests.cs(162,19): error CS0234: The type or namespace name 'AssertAsync' does not exist in the namespace 'Zaghlol.Api.Problems' (are you missing an assembly reference?) [/work/backend/tests/Zaghlol.Api.Tests/Zaghlol.Api.Tests.csproj]
+/work/backend/tests/Zaghlol.Api.Tests/Flags/FlagAdminEndpointTests.cs(167,23): error CS0234: The type or namespace name 'AssertAsync' does not exist in the namespace 'Zaghlol.Api.Problems' (are you missing an assembly reference?) [/work/backend/tests/Zaghlol.Api.Tests/Zaghlol.Api.Tests.csproj]
+/work/backend/tests/Zaghlol.Api.Tests/Flags/FlagAdminEndpointTests.cs(180,15): error CS0234: The type or namespace name 'AssertAsync' does not exist in the namespace 'Zaghlol.Api.Problems' (are you missing an assembly reference?) [/work/backend/tests/Zaghlol.Api.Tests/Zaghlol.Api.Tests.csproj]
+/work/backend/tests/Zaghlol.Api.Tests/Flags/FlagAdminEndpointTests.cs(181,15): error CS0234: The type or namespace name 'AssertAsync' does not exist in the namespace 'Zaghlol.Api.Problems' (are you missing an assembly reference?) [/work/backend/tests/Zaghlol.Api.Tests/Zaghlol.Api.Tests.csproj]
+/work/backend/tests/Zaghlol.Api.Tests/Flags/FlagAdminEndpointTests.cs(197,30): error CS0234: The type or namespace name 'AssertAsync' does not exist in the namespace 'Zaghlol.Api.Problems' (are you missing an assembly reference?) [/work/backend/tests/Zaghlol.Api.Tests/Zaghlol.Api.Tests.csproj]
+/work/backend/tests/Zaghlol.Api.Tests/Flags/FlagAdminEndpointTests.cs(199,24): error CS0234: The type or namespace name 'WithoutCorrelationId' does not exist in the namespace 'Zaghlol.Api.Problems' (are you missing an assembly reference?) [/work/backend/tests/Zaghlol.Api.Tests/Zaghlol.Api.Tests.csproj]
+/work/backend/tests/Zaghlol.Api.Tests/Flags/FlagAdminEndpointTests.cs(213,15): error CS0234: The type or namespace name 'AssertAsync' does not exist in the namespace 'Zaghlol.Api.Problems' (are you missing an assembly reference?) [/work/backend/tests/Zaghlol.Api.Tests/Zaghlol.Api.Tests.csproj]
+/work/backend/tests/Zaghlol.Api.Tests/Flags/FlagAdminEndpointTests.cs(214,15): error CS0234: The type or namespace name 'AssertAsync' does not exist in the namespace 'Zaghlol.Api.Problems' (are you missing an assembly reference?) [/work/backend/tests/Zaghlol.Api.Tests/Zaghlol.Api.Tests.csproj]
+/work/backend/tests/Zaghlol.Api.Tests/Flags/FlagAdminEndpointTests.cs(232,15): error CS0234: The type or namespace name 'AssertAsync' does not exist in the namespace 'Zaghlol.Api.Problems' (are you missing an assembly reference?) [/work/backend/tests/Zaghlol.Api.Tests/Zaghlol.Api.Tests.csproj]
+
+== ERRORS: dotnet-test ==
+  Failed Zaghlol.Contract.Tests.FlagsLiveContractTests.TheServerSidePatternsAreTheSpecsPatterns [< 1 ms]
+  Error Message:
+   System.InvalidOperationException : A value of type 'System.Int64' cannot be converted to a 'System.Int32'.
+  Stack Trace:
+     at System.Text.Json.ThrowHelper.ThrowInvalidOperationException_NodeUnableToConvert(Type sourceType, Type destinationType)
+   at System.Text.Json.Nodes.JsonValue`1.GetValue[T]()
+   at Zaghlol.Contract.Tests.FlagsLiveContractTests.TheServerSidePatternsAreTheSpecsPatterns() in /_/backend/tests/Zaghlol.Contract.Tests/FlagsLiveContractTests.cs:line 204
+   at System.Reflection.MethodBaseInvoker.InterpretedInvoke_Method(Object obj, IntPtr* args)
+   at System.Reflection.RuntimeMethodInfo.Invoke(Object obj, BindingFlags invokeAttr, Binder binder, Object[] parameters, CultureInfo culture)
+
+Failed!  - Failed:     1, Passed:    62, Skipped:     0, Total:    63, Duration: 6 s - Zaghlol.Contract.Tests.dll (net10.0)
+
+Passed!  - Failed:     0, Passed:   501, Skipped:     0, Total:   501, Duration: 9 s - Zaghlol.Infrastructure.Tests.dll (net10.0)
+
 
 == FULL LOG (last 1500 lines) ==
 auto task/T-126-flags d391f44d16af29c807cc5e1fff51355989ac9b1b 2026-11-10T01:22:47.9397398+02:00
+
+
+
+[01:22:53] === STEP dotnet-build (docker mcr.microsoft.com/dotnet/sdk:10.0.402, /work/backend)
+  Determining projects to restore...
+  All projects are up-to-date for restore.
+  Zaghlol.Domain -> /work/backend/src/Zaghlol.Domain/bin/Release/net10.0/Zaghlol.Domain.dll
+  Zaghlol.Ops -> /work/backend/src/Zaghlol.Ops/bin/Release/net10.0/zaghlol-ops.dll
+  Zaghlol.Application -> /work/backend/src/Zaghlol.Application/bin/Release/net10.0/Zaghlol.Application.dll
+  Zaghlol.Ops.Tests -> /work/backend/tests/Zaghlol.Ops.Tests/bin/Release/net10.0/Zaghlol.Ops.Tests.dll
+  Zaghlol.Application.Tests -> /work/backend/tests/Zaghlol.Application.Tests/bin/Release/net10.0/Zaghlol.Application.Tests.dll
+  Zaghlol.Infrastructure -> /work/backend/src/Zaghlol.Infrastructure/bin/Release/net10.0/Zaghlol.Infrastructure.dll
+  Zaghlol.Workers -> /work/backend/src/Zaghlol.Workers/bin/Release/net10.0/Zaghlol.Workers.dll
+  Zaghlol.Infrastructure.Tests -> /work/backend/tests/Zaghlol.Infrastructure.Tests/bin/Release/net10.0/Zaghlol.Infrastructure.Tests.dll
+  Zaghlol.Workers.Tests -> /work/backend/tests/Zaghlol.Workers.Tests/bin/Release/net10.0/Zaghlol.Workers.Tests.dll
+  Zaghlol.Api -> /work/backend/src/Zaghlol.Api/bin/Release/net10.0/Zaghlol.Api.dll
+/work/backend/tests/Zaghlol.Api.Tests/Flags/FlagAdminEndpointTests.cs(300,15): error CS0234: The type or namespace name 'AssertAsync' does not exist in the namespace 'Zaghlol.Api.Problems' (are you missing an assembly reference?) [/work/backend/tests/Zaghlol.Api.Tests/Zaghlol.Api.Tests.csproj]
+/work/backend/tests/Zaghlol.Api.Tests/Flags/FlagAdminEndpointTests.cs(281,26): error CS0234: The type or namespace name 'AssertAsync' does not exist in the namespace 'Zaghlol.Api.Problems' (are you missing an assembly reference?) [/work/backend/tests/Zaghlol.Api.Tests/Zaghlol.Api.Tests.csproj]
+/work/backend/tests/Zaghlol.Api.Tests/Flags/FlagAdminEndpointTests.cs(121,26): error CS0234: The type or namespace name 'AssertAsync' does not exist in the namespace 'Zaghlol.Api.Problems' (are you missing an assembly reference?) [/work/backend/tests/Zaghlol.Api.Tests/Zaghlol.Api.Tests.csproj]
+/work/backend/tests/Zaghlol.Api.Tests/Flags/FlagAdminEndpointTests.cs(149,15): error CS0234: The type or namespace name 'AssertAsync' does not exist in the namespace 'Zaghlol.Api.Problems' (are you missing an assembly reference?) [/work/backend/tests/Zaghlol.Api.Tests/Zaghlol.Api.Tests.csproj]
+/work/backend/tests/Zaghlol.Api.Tests/Flags/FlagAdminEndpointTests.cs(162,19): error CS0234: The type or namespace name 'AssertAsync' does not exist in the namespace 'Zaghlol.Api.Problems' (are you missing an assembly reference?) [/work/backend/tests/Zaghlol.Api.Tests/Zaghlol.Api.Tests.csproj]
+/work/backend/tests/Zaghlol.Api.Tests/Flags/FlagAdminEndpointTests.cs(167,23): error CS0234: The type or namespace name 'AssertAsync' does not exist in the namespace 'Zaghlol.Api.Problems' (are you missing an assembly reference?) [/work/backend/tests/Zaghlol.Api.Tests/Zaghlol.Api.Tests.csproj]
+/work/backend/tests/Zaghlol.Api.Tests/Flags/FlagAdminEndpointTests.cs(180,15): error CS0234: The type or namespace name 'AssertAsync' does not exist in the namespace 'Zaghlol.Api.Problems' (are you missing an assembly reference?) [/work/backend/tests/Zaghlol.Api.Tests/Zaghlol.Api.Tests.csproj]
+/work/backend/tests/Zaghlol.Api.Tests/Flags/FlagAdminEndpointTests.cs(181,15): error CS0234: The type or namespace name 'AssertAsync' does not exist in the namespace 'Zaghlol.Api.Problems' (are you missing an assembly reference?) [/work/backend/tests/Zaghlol.Api.Tests/Zaghlol.Api.Tests.csproj]
+/work/backend/tests/Zaghlol.Api.Tests/Flags/FlagAdminEndpointTests.cs(197,30): error CS0234: The type or namespace name 'AssertAsync' does not exist in the namespace 'Zaghlol.Api.Problems' (are you missing an assembly reference?) [/work/backend/tests/Zaghlol.Api.Tests/Zaghlol.Api.Tests.csproj]
+/work/backend/tests/Zaghlol.Api.Tests/Flags/FlagAdminEndpointTests.cs(199,24): error CS0234: The type or namespace name 'WithoutCorrelationId' does not exist in the namespace 'Zaghlol.Api.Problems' (are you missing an assembly reference?) [/work/backend/tests/Zaghlol.Api.Tests/Zaghlol.Api.Tests.csproj]
+/work/backend/tests/Zaghlol.Api.Tests/Flags/FlagAdminEndpointTests.cs(213,15): error CS0234: The type or namespace name 'AssertAsync' does not exist in the namespace 'Zaghlol.Api.Problems' (are you missing an assembly reference?) [/work/backend/tests/Zaghlol.Api.Tests/Zaghlol.Api.Tests.csproj]
+/work/backend/tests/Zaghlol.Api.Tests/Flags/FlagAdminEndpointTests.cs(214,15): error CS0234: The type or namespace name 'AssertAsync' does not exist in the namespace 'Zaghlol.Api.Problems' (are you missing an assembly reference?) [/work/backend/tests/Zaghlol.Api.Tests/Zaghlol.Api.Tests.csproj]
+/work/backend/tests/Zaghlol.Api.Tests/Flags/FlagAdminEndpointTests.cs(232,15): error CS0234: The type or namespace name 'AssertAsync' does not exist in the namespace 'Zaghlol.Api.Problems' (are you missing an assembly reference?) [/work/backend/tests/Zaghlol.Api.Tests/Zaghlol.Api.Tests.csproj]
+  Zaghlol.Contract.Tests -> /work/backend/tests/Zaghlol.Contract.Tests/bin/Release/net10.0/Zaghlol.Contract.Tests.dll
+
+Build FAILED.
+
+/work/backend/tests/Zaghlol.Api.Tests/Flags/FlagAdminEndpointTests.cs(300,15): error CS0234: The type or namespace name 'AssertAsync' does not exist in the namespace 'Zaghlol.Api.Problems' (are you missing an assembly reference?) [/work/backend/tests/Zaghlol.Api.Tests/Zaghlol.Api.Tests.csproj]
+/work/backend/tests/Zaghlol.Api.Tests/Flags/FlagAdminEndpointTests.cs(281,26): error CS0234: The type or namespace name 'AssertAsync' does not exist in the namespace 'Zaghlol.Api.Problems' (are you missing an assembly reference?) [/work/backend/tests/Zaghlol.Api.Tests/Zaghlol.Api.Tests.csproj]
+/work/backend/tests/Zaghlol.Api.Tests/Flags/FlagAdminEndpointTests.cs(121,26): error CS0234: The type or namespace name 'AssertAsync' does not exist in the namespace 'Zaghlol.Api.Problems' (are you missing an assembly reference?) [/work/backend/tests/Zaghlol.Api.Tests/Zaghlol.Api.Tests.csproj]
+/work/backend/tests/Zaghlol.Api.Tests/Flags/FlagAdminEndpointTests.cs(149,15): error CS0234: The type or namespace name 'AssertAsync' does not exist in the namespace 'Zaghlol.Api.Problems' (are you missing an assembly reference?) [/work/backend/tests/Zaghlol.Api.Tests/Zaghlol.Api.Tests.csproj]
+/work/backend/tests/Zaghlol.Api.Tests/Flags/FlagAdminEndpointTests.cs(162,19): error CS0234: The type or namespace name 'AssertAsync' does not exist in the namespace 'Zaghlol.Api.Problems' (are you missing an assembly reference?) [/work/backend/tests/Zaghlol.Api.Tests/Zaghlol.Api.Tests.csproj]
+/work/backend/tests/Zaghlol.Api.Tests/Flags/FlagAdminEndpointTests.cs(167,23): error CS0234: The type or namespace name 'AssertAsync' does not exist in the namespace 'Zaghlol.Api.Problems' (are you missing an assembly reference?) [/work/backend/tests/Zaghlol.Api.Tests/Zaghlol.Api.Tests.csproj]
+/work/backend/tests/Zaghlol.Api.Tests/Flags/FlagAdminEndpointTests.cs(180,15): error CS0234: The type or namespace name 'AssertAsync' does not exist in the namespace 'Zaghlol.Api.Problems' (are you missing an assembly reference?) [/work/backend/tests/Zaghlol.Api.Tests/Zaghlol.Api.Tests.csproj]
+/work/backend/tests/Zaghlol.Api.Tests/Flags/FlagAdminEndpointTests.cs(181,15): error CS0234: The type or namespace name 'AssertAsync' does not exist in the namespace 'Zaghlol.Api.Problems' (are you missing an assembly reference?) [/work/backend/tests/Zaghlol.Api.Tests/Zaghlol.Api.Tests.csproj]
+/work/backend/tests/Zaghlol.Api.Tests/Flags/FlagAdminEndpointTests.cs(197,30): error CS0234: The type or namespace name 'AssertAsync' does not exist in the namespace 'Zaghlol.Api.Problems' (are you missing an assembly reference?) [/work/backend/tests/Zaghlol.Api.Tests/Zaghlol.Api.Tests.csproj]
+/work/backend/tests/Zaghlol.Api.Tests/Flags/FlagAdminEndpointTests.cs(199,24): error CS0234: The type or namespace name 'WithoutCorrelationId' does not exist in the namespace 'Zaghlol.Api.Problems' (are you missing an assembly reference?) [/work/backend/tests/Zaghlol.Api.Tests/Zaghlol.Api.Tests.csproj]
+/work/backend/tests/Zaghlol.Api.Tests/Flags/FlagAdminEndpointTests.cs(213,15): error CS0234: The type or namespace name 'AssertAsync' does not exist in the namespace 'Zaghlol.Api.Problems' (are you missing an assembly reference?) [/work/backend/tests/Zaghlol.Api.Tests/Zaghlol.Api.Tests.csproj]
+/work/backend/tests/Zaghlol.Api.Tests/Flags/FlagAdminEndpointTests.cs(214,15): error CS0234: The type or namespace name 'AssertAsync' does not exist in the namespace 'Zaghlol.Api.Problems' (are you missing an assembly reference?) [/work/backend/tests/Zaghlol.Api.Tests/Zaghlol.Api.Tests.csproj]
+/work/backend/tests/Zaghlol.Api.Tests/Flags/FlagAdminEndpointTests.cs(232,15): error CS0234: The type or namespace name 'AssertAsync' does not exist in the namespace 'Zaghlol.Api.Problems' (are you missing an assembly reference?) [/work/backend/tests/Zaghlol.Api.Tests/Zaghlol.Api.Tests.csproj]
+    0 Warning(s)
+    13 Error(s)
+
+Time Elapsed 00:00:11.65
+
+[01:23:05] === RESULT dotnet-build exit=1 (12s)
+[01:23:05] === STEP dotnet-format (docker mcr.microsoft.com/dotnet/sdk:10.0.402, /work/backend)
+Formatting code files in workspace '/work/backend/Zaghlol.sln'.
+Format complete in 18778ms.
+
+[01:23:25] === RESULT dotnet-format exit=0 (20s)
+[01:23:25] === STEP dotnet-test (docker mcr.microsoft.com/dotnet/sdk:10.0.402, /work/backend)
+Test run for /work/backend/tests/Zaghlol.Ops.Tests/bin/Release/net10.0/Zaghlol.Ops.Tests.dll (.NETCoreApp,Version=v10.0)
+Test run for /work/backend/tests/Zaghlol.Workers.Tests/bin/Release/net10.0/Zaghlol.Workers.Tests.dll (.NETCoreApp,Version=v10.0)
+Test run for /work/backend/tests/Zaghlol.Application.Tests/bin/Release/net10.0/Zaghlol.Application.Tests.dll (.NETCoreApp,Version=v10.0)
+Test run for /work/backend/tests/Zaghlol.Api.Tests/bin/Release/net10.0/Zaghlol.Api.Tests.dll (.NETCoreApp,Version=v10.0)
+Test run for /work/backend/tests/Zaghlol.Infrastructure.Tests/bin/Release/net10.0/Zaghlol.Infrastructure.Tests.dll (.NETCoreApp,Version=v10.0)
+Test run for /work/backend/tests/Zaghlol.Contract.Tests/bin/Release/net10.0/Zaghlol.Contract.Tests.dll (.NETCoreApp,Version=v10.0)
+A total of 1 test files matched the specified pattern.
+A total of 1 test files matched the specified pattern.
+A total of 1 test files matched the specified pattern.
+A total of 1 test files matched the specified pattern.
+A total of 1 test files matched the specified pattern.
+A total of 1 test files matched the specified pattern.
+
+Passed!  - Failed:     0, Passed:     2, Skipped:     0, Total:     2, Duration: 25 ms - Zaghlol.Ops.Tests.dll (net10.0)
+
+Passed!  - Failed:     0, Passed:    37, Skipped:     0, Total:    37, Duration: 69 ms - Zaghlol.Application.Tests.dll (net10.0)
+
+Passed!  - Failed:     0, Passed:     3, Skipped:     0, Total:     3, Duration: 98 ms - Zaghlol.Workers.Tests.dll (net10.0)
+[xUnit.net 00:00:07.04]     Zaghlol.Contract.Tests.FlagsLiveContractTests.TheServerSidePatternsAreTheSpecsPatterns [FAIL]
+  Failed Zaghlol.Contract.Tests.FlagsLiveContractTests.TheServerSidePatternsAreTheSpecsPatterns [< 1 ms]
+  Error Message:
+   System.InvalidOperationException : A value of type 'System.Int64' cannot be converted to a 'System.Int32'.
+  Stack Trace:
+     at System.Text.Json.ThrowHelper.ThrowInvalidOperationException_NodeUnableToConvert(Type sourceType, Type destinationType)
+   at System.Text.Json.Nodes.JsonValue`1.GetValue[T]()
+   at Zaghlol.Contract.Tests.FlagsLiveContractTests.TheServerSidePatternsAreTheSpecsPatterns() in /_/backend/tests/Zaghlol.Contract.Tests/FlagsLiveContractTests.cs:line 204
+   at System.Reflection.MethodBaseInvoker.InterpretedInvoke_Method(Object obj, IntPtr* args)
+   at System.Reflection.RuntimeMethodInfo.Invoke(Object obj, BindingFlags invokeAttr, Binder binder, Object[] parameters, CultureInfo culture)
+
+Failed!  - Failed:     1, Passed:    62, Skipped:     0, Total:    63, Duration: 6 s - Zaghlol.Contract.Tests.dll (net10.0)
+
+Passed!  - Failed:     0, Passed:   501, Skipped:     0, Total:   501, Duration: 9 s - Zaghlol.Infrastructure.Tests.dll (net10.0)
+
+Passed!  - Failed:     0, Passed:   167, Skipped:     0, Total:   167, Duration: 19 s - Zaghlol.Api.Tests.dll (net10.0)
+
+[01:23:52] === RESULT dotnet-test exit=1 (27s)
+[01:23:52] SUMMARY FAIL sha=d391f44d16af29c807cc5e1fff51355989ac9b1b pipeline=quick-backend dotnet-build=1 dotnet-format=0 dotnet-test=1
