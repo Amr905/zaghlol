@@ -25,7 +25,7 @@ $LogCap  = 1500   # max lines of raw log tail in the published .log (summary and
 # Pinned toolchain images. Keep the Flutter version equal to FLUTTER_VERSION in .github/workflows/app-ci.yml
 # and the .NET SDK on the 10.0 line used by backend-ci.yml / backend/global.json.
 # Override per PC with the environment variables if a tag does not exist.
-$FlutterImage = if ($env:ZAGHLOL_FLUTTER_IMAGE) { $env:ZAGHLOL_FLUTTER_IMAGE } else { 'ghcr.io/cirruslabs/flutter:3.47.9' }
+$FlutterImage = if ($env:ZAGHLOL_FLUTTER_IMAGE) { $env:ZAGHLOL_FLUTTER_IMAGE } else { 'zaghlol-flutter:3.47.9' }   # built locally from flutter.Dockerfile
 $DotnetImage  = if ($env:ZAGHLOL_DOTNET_IMAGE)  { $env:ZAGHLOL_DOTNET_IMAGE }  else { 'mcr.microsoft.com/dotnet/sdk:10.0.402' }
 # Named volumes: package caches survive between runs so only the first run downloads everything.
 $PubVolume    = 'zaghlol-ci-pub-cache'
@@ -44,6 +44,20 @@ function Docker-Up {
 function Ensure-Image($log, $image) {
   docker image inspect $image *> $null
   if ($LASTEXITCODE -eq 0) { return $true }
+  if ($image -like 'zaghlol-flutter:*') {
+    # No published image for every Flutter release: build ours once from flutter.Dockerfile (next to this script).
+    $ver = $image.Split(':')[1]
+    $df = Join-Path $PSScriptRoot 'flutter.Dockerfile'
+    if (-not (Test-Path $df)) { Log $log "missing $df"; return $false }
+    Log $log "building $image from flutter.Dockerfile (first run only; ~5-10 minutes)"
+    $ctx = Join-Path $env:TEMP 'zaghlol-flutter-ctx'   # empty build context (the script folder holds large logs)
+    New-Item -ItemType Directory -Force -Path $ctx | Out-Null
+    $o = & docker build -t $image --build-arg "FLUTTER_VERSION=$ver" -f $df $ctx 2>&1 | ForEach-Object { if ($_ -is [System.Management.Automation.ErrorRecord]) { $_.Exception.Message } else { $_ } } | Out-String
+    $ok = ($LASTEXITCODE -eq 0)
+    Add-Content -Path $log -Value $o -Encoding UTF8
+    if (-not $ok) { Log $log "docker build $image FAILED" }
+    return $ok
+  }
   Log $log "pulling $image (first run only; can take several minutes)"
   $o = & docker pull $image 2>&1 | ForEach-Object { if ($_ -is [System.Management.Automation.ErrorRecord]) { $_.Exception.Message } else { $_ } } | Out-String
   $ok = ($LASTEXITCODE -eq 0)
