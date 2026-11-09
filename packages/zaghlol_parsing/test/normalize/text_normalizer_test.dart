@@ -1,0 +1,134 @@
+import 'dart:math';
+
+import 'package:test/test.dart';
+import 'package:zaghlol_parsing/zaghlol_parsing.dart';
+
+typedef _Row = (String name, String input, String expected);
+
+void main() {
+  group('normalizeText', () {
+    final rows = <_Row>[
+      ('arabic-indic digits', '٠١٢٣٤٥٦٧٨٩', '0123456789'),
+      ('extended digits', '۰۱۲۳۴۵۶۷۸۹', '0123456789'),
+      ('decimal separator', '١٢٫٥٠', '12.50'),
+      ('thousands separator', '١٬٢٥٠', '1,250'),
+      ('nbsp', 'a b', 'a b'),
+      ('narrow nbsp', 'a b', 'a b'),
+      ('thin space', 'a b', 'a b'),
+      ('zero width', 'a​b‌c‍d', 'abcd'),
+      ('rtl and ltr marks', '‏١٢٣‎', '123'),
+      ('embedding controls', '‪1‫2‬3‭4‮', '1234'),
+      ('isolates', '⁦1⁧2⁨3⁩', '123'),
+      ('arabic letter mark', '؜12', '12'),
+      ('bom', '﻿12', '12'),
+      ('whitespace runs', '  a \t\n b  ', 'a b'),
+      ('arabic comma kept', 'أ،ب', 'أ،ب'),
+      ('tatweel kept at display level', 'محمـد', 'محمـد'),
+      ('letters kept at display level', 'أحمد', 'أحمد'),
+      ('empty', '', ''),
+    ];
+    for (final (name, input, expected) in rows) {
+      test(name, () => expect(normalizeText(input), expected));
+    }
+  });
+
+  group('foldForMatching', () {
+    final rows = <_Row>[
+      ('tatweel', 'محمـــد', 'محمد'),
+      ('harakat', 'مُحَمَّد', 'محمد'),
+      ('dagger alef', 'هٰذا', 'هذا'),
+      ('digits too', 'مبلغ ١٢٫٥', 'مبلغ 12.5'),
+      ('tatweel between spaces', 'a ـ b', 'a b'),
+      ('letters not folded', 'أحمد مدرسة', 'أحمد مدرسة'),
+    ];
+    for (final (name, input, expected) in rows) {
+      test(name, () => expect(foldForMatching(input), expected));
+    }
+  });
+
+  group('foldKey', () {
+    final rows = <_Row>[
+      ('alef hamza above', 'أحمد', 'احمد'),
+      ('alef hamza below', 'إيمان', 'ايمان'),
+      ('alef madda', 'آمن', 'امن'),
+      ('alef wasla', 'ٱسم', 'اسم'),
+      ('alef maksura', 'مصطفى', 'مصطفي'),
+      ('teh marbuta', 'مدرسة', 'مدرسه'),
+      ('ascii lowercase', 'CARREFOUR Maadi', 'carrefour maadi'),
+      ('all levels together', 'أَحْمَـد ١٢', 'احمد 12'),
+    ];
+    for (final (name, input, expected) in rows) {
+      test(name, () => expect(foldKey(input), expected));
+    }
+  });
+
+  group('fuzz', () {
+    final random = Random(13);
+    const pool = <int>[
+      0x20, 0x09, 0x0A, 0xA0, 0x202F, 0x2009, 0x200B, 0x200F, 0x202A, 0x2066,
+      0x061C, 0xFEFF, 0x0640, 0x064B, 0x0652, 0x0670, 0x0623, 0x0625, 0x0622,
+      0x0671, 0x0649, 0x0629, 0x0660, 0x0669, 0x06F0, 0x06F9, 0x066B, 0x066C,
+      0x41, 0x5A, 0x61, 0x31, 0x2E, 0x2C, 0xD800, 0xDC00, //
+    ];
+
+    String randomText() {
+      final length = random.nextInt(24);
+      final units = List<int>.generate(length, (_) {
+        return random.nextBool()
+            ? pool[random.nextInt(pool.length)]
+            : random.nextInt(0x10000);
+      });
+      return String.fromCharCodes(units);
+    }
+
+    bool hasForbidden(String text) {
+      for (final u in text.codeUnits) {
+        final removed =
+            (u >= 0x200B && u <= 0x200F) ||
+            (u >= 0x202A && u <= 0x202E) ||
+            (u >= 0x2066 && u <= 0x2069) ||
+            u == 0x061C ||
+            u == 0xFEFF ||
+            u == 0x0640 ||
+            (u >= 0x064B && u <= 0x0652) ||
+            u == 0x0670;
+        final folded =
+            u == 0x0623 ||
+            u == 0x0625 ||
+            u == 0x0622 ||
+            u == 0x0671 ||
+            u == 0x0649 ||
+            u == 0x0629 ||
+            (u >= 0x41 && u <= 0x5A);
+        if (removed || folded) {
+          return true;
+        }
+      }
+      return false;
+    }
+
+    test('never throws and is idempotent', () {
+      for (var i = 0; i < 3000; i++) {
+        final s = randomText();
+        for (final f in [normalizeText, foldForMatching, foldKey]) {
+          final once = f(s);
+          expect(f(once), once);
+        }
+      }
+    });
+
+    test('foldKey output has no removed or folded code points', () {
+      for (var i = 0; i < 3000; i++) {
+        expect(hasForbidden(foldKey(randomText())), isFalse);
+      }
+    });
+
+    test('output never has leading, trailing or doubled spaces', () {
+      for (var i = 0; i < 1000; i++) {
+        final out = foldKey(randomText());
+        expect(out, equals(out.trim()));
+        expect(out.contains('  '), isFalse);
+      }
+    });
+  });
+}

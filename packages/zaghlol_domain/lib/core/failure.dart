@@ -18,7 +18,16 @@ sealed class Failure {
 }
 
 /// Why a message could not be parsed into a transaction.
-enum ParseFailureReason { noTemplate, lowConfidence, malformedAmount, unknown }
+enum ParseFailureReason {
+  noTemplate,
+  lowConfidence,
+  malformedAmount,
+
+  /// The amount has more fraction digits than the currency allows (and the
+  /// extra digits are not all zero). Never rounded (T-013).
+  excessPrecision,
+  unknown,
+}
 
 /// A message could not be parsed. The raw message is kept for review
 /// elsewhere (EC-08); it is never stored on the failure.
