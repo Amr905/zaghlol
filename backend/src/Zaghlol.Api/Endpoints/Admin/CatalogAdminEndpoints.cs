@@ -144,7 +144,7 @@ internal static class CatalogAdminEndpoints
     {
         DraftStatus.NotFound => ApiProblems.Of(StatusCodes.Status404NotFound, ErrorCodes.NotFound),
         DraftStatus.Conflict => ApiProblems.Of(StatusCodes.Status409Conflict, ErrorCodes.AdminConflict),
-        _ => new JsonBytesResult(CatalogJson.Single(change.Op!), successStatus),
+        _ => new JsonBytesResult(CatalogJson.OfOp(change.Op!), successStatus),
     };
 
     private static IResult Invalid() => ApiProblems.Of(StatusCodes.Status400BadRequest, ErrorCodes.ValidationFailed);

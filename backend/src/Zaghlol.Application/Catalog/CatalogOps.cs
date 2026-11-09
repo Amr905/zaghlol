@@ -140,7 +140,7 @@ public static class CatalogJson
     }
 
     /// <summary>One op as a JSON document.</summary>
-    public static byte[] Single(CatalogOp op)
+    public static byte[] OfOp(CatalogOp op)
     {
         var buffer = new ArrayBufferWriter<byte>(256);
         using (var writer = new Utf8JsonWriter(buffer, WriterOptions))

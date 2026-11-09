@@ -87,19 +87,19 @@ public static class CatalogText
 
         switch (c)
         {
-            case >= '٠' and <= '٩':
-                return (char)('0' + (c - '٠'));
-            case >= '۰' and <= '۹':
-                return (char)('0' + (c - '۰'));
-            case 'آ' or 'أ' or 'إ' or 'ٱ':
-                return 'ا';
-            case 'ى':
-                return 'ي';
-            case 'ـ' or 'ٰ' or '⁠' or '﻿':
-            case >= 'ً' and <= 'ٟ':
-            case >= '̀' and <= 'ͯ':
-            case >= '​' and <= '‏':
-            case >= '‪' and <= '‮':
+            case >= '\u0660' and <= '\u0669':
+                return (char)('0' + (c - '\u0660'));
+            case >= '\u06F0' and <= '\u06F9':
+                return (char)('0' + (c - '\u06F0'));
+            case '\u0622' or '\u0623' or '\u0625' or '\u0671':
+                return '\u0627';
+            case '\u0649':
+                return '\u064A';
+            case '\u0640' or '\u0670' or '\u2060' or '\uFEFF':
+            case >= '\u064B' and <= '\u065F':
+            case >= '\u0300' and <= '\u036F':
+            case >= '\u200B' and <= '\u200F':
+            case >= '\u202A' and <= '\u202E':
                 return null;
             default:
                 return char.ToLower(c, CultureInfo.InvariantCulture);

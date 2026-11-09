@@ -1,0 +1,27 @@
+{
+  "version": 1,
+  "description": "Catalog snapshot vector (T-125, backend-api.md section 4.8). 'bodyB64u' is the exact UTF-8 JSON of GET /v1/catalog/{version}/full after gunzip (the stored .json.gz and the .sig file cover the same bytes). The signature is ECDSA P-256 / SHA-256 in IEEE P1363 form (r||s) over those bytes, in the Zaghlol-Signature header grammar. The backend test also checks that CatalogJson.Snapshot(7, ops) reproduces these bytes. Synthetic test key; only the public JWK is here.",
+  "jwks": {
+    "keys": [
+      {
+        "kty": "EC",
+        "crv": "P-256",
+        "x": "zlBfT_r3_sc6xlnwBFOfwP20I6LdM4qvnwRx6pHW4Vg",
+        "y": "DHHH4W_qb0zX0hhze0wNrRc8AuGxlmZCyYMbd7zqu2E",
+        "kid": "s0000t",
+        "use": "sig",
+        "alg": "ES256"
+      }
+    ]
+  },
+  "snapshot": {
+    "version": 7,
+    "bodyB64u": "eyJ2ZXJzaW9uIjo3LCJvcHMiOlt7InQiOiJjYXRlZ29yeSIsIm9wIjoidXBzZXJ0IiwiY29kZSI6ImRpbmluZyIsIm5hbWVBciI6Itij2YPZhCIsIm5hbWVFbiI6IkRpbmluZyIsImljb24iOiJyZXN0YXVyYW50IiwiY29sb3IiOiIjRkZCODZCIiwiYnVja2V0Ijoid2FudHMiLCJzb3J0IjozfSx7InQiOiJtZXJjaGFudCIsIm9wIjoidXBzZXJ0IiwiaWQiOjgxMiwiY2Fub25pY2FsIjoiS29zaGFyeSBFbCBUYWhyaXIiLCJuYW1lQXIiOiLZg9i02LHZiiDYp9mE2KrYrdix2YrYsSIsImNhdGVnb3J5IjoiZGluaW5nIn0seyJ0IjoiYWxpYXMiLCJvcCI6InVwc2VydCIsIm1lcmNoYW50SWQiOjgxMiwiYWxpYXMiOiJrb3NoYXJ5IGVsIHRhaHJpciIsIm1hdGNoIjoiZXhhY3QifSx7InQiOiJrZXl3b3JkIiwib3AiOiJ1cHNlcnQiLCJrZXl3b3JkIjoi2LXZitiv2YTZitipIiwibGFuZyI6ImFyIiwiY2F0ZWdvcnkiOiJkaW5pbmciLCJ3ZWlnaHQiOjgwfV19",
+    "header": "kid=s0000t; alg=ES256; sig=paQZu167g4YvlUNsPuIfYFczu7_sk-4kpHcy_9i40S5NdqComIf75exB5vsUZrRkuwPfp0tgEjrK8ZM1PSPmvA"
+  },
+  "tampered": {
+    "name": "weight-changed",
+    "bodyB64u": "eyJ2ZXJzaW9uIjo3LCJvcHMiOlt7InQiOiJjYXRlZ29yeSIsIm9wIjoidXBzZXJ0IiwiY29kZSI6ImRpbmluZyIsIm5hbWVBciI6Itij2YPZhCIsIm5hbWVFbiI6IkRpbmluZyIsImljb24iOiJyZXN0YXVyYW50IiwiY29sb3IiOiIjRkZCODZCIiwiYnVja2V0Ijoid2FudHMiLCJzb3J0IjozfSx7InQiOiJtZXJjaGFudCIsIm9wIjoidXBzZXJ0IiwiaWQiOjgxMiwiY2Fub25pY2FsIjoiS29zaGFyeSBFbCBUYWhyaXIiLCJuYW1lQXIiOiLZg9i02LHZiiDYp9mE2KrYrdix2YrYsSIsImNhdGVnb3J5IjoiZGluaW5nIn0seyJ0IjoiYWxpYXMiLCJvcCI6InVwc2VydCIsIm1lcmNoYW50SWQiOjgxMiwiYWxpYXMiOiJrb3NoYXJ5IGVsIHRhaHJpciIsIm1hdGNoIjoiZXhhY3QifSx7InQiOiJrZXl3b3JkIiwib3AiOiJ1cHNlcnQiLCJrZXl3b3JkIjoi2LXZitiv2YTZitipIiwibGFuZyI6ImFyIiwiY2F0ZWdvcnkiOiJkaW5pbmciLCJ3ZWlnaHQiOjgxfV19",
+    "header": "kid=s0000t; alg=ES256; sig=paQZu167g4YvlUNsPuIfYFczu7_sk-4kpHcy_9i40S5NdqComIf75exB5vsUZrRkuwPfp0tgEjrK8ZM1PSPmvA"
+  }
+}
