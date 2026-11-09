@@ -49,14 +49,8 @@ void main() {
     });
 
     test('too many decimals fails and does not round', () {
-      expect(
-        parseMoneyText('EGP 12.345').failureOrNull!.reason,
-        _excess,
-      );
-      expect(
-        parseMoneyText('KWD 12.3456').failureOrNull!.reason,
-        _excess,
-      );
+      expect(parseMoneyText('EGP 12.345').failureOrNull!.reason, _excess);
+      expect(parseMoneyText('KWD 12.3456').failureOrNull!.reason, _excess);
       expect(parseMoneyText('JPY 15.5').failureOrNull!.reason, _excess);
       expect(parseMoneyText('EGP 0.001').failureOrNull!.reason, _excess);
     });
@@ -121,11 +115,7 @@ void main() {
     ];
     for (final (name, input, code, locale, expected) in rows) {
       test(name, () {
-        final result = parseAmount(
-          input,
-          currency: _c(code!),
-          locale: locale,
-        );
+        final result = parseAmount(input, currency: _c(code!), locale: locale);
         _expectRow(result, expected);
       });
     }
@@ -184,19 +174,15 @@ void main() {
         final currency = currencies[random.nextInt(currencies.length)];
         final minor = _randomMinor(random);
         final money = Money(currency, minor);
-        final style = FormatStyle.values[random.nextInt(
-          FormatStyle.values.length,
-        )];
+        final style =
+            FormatStyle.values[random.nextInt(FormatStyle.values.length)];
         final formatted = formatMoney(
           money,
           style,
           markerAfter: random.nextBool(),
           useSymbol: random.nextBool(),
         );
-        final result = parseMoneyText(
-          formatted.text,
-          locale: formatted.locale,
-        );
+        final result = parseMoneyText(formatted.text, locale: formatted.locale);
         expect(
           result.valueOrNull,
           money,
