@@ -1,0 +1,47 @@
+# Capacity: CPU, memory, database connections and storage above 80% sustained (error-handling-and-observability.md section 4).
+# The expressions use the usual exporter names (container and Postgres exporters); T-140 adapts them to the provider's
+# managed metrics. The process-level CPU metric comes from the .NET runtime instrumentation.
+groups:
+  - name: zaghlol-capacity
+    rules:
+      - alert: ZaghlolCpuHigh
+        expr: |
+          sum by (service_name) (rate(dotnet_process_cpu_time_seconds_total[5m]))
+          / max by (service_name) (dotnet_process_cpu_count) > 0.8
+        for: 15m
+        labels:
+          severity: warn
+        annotations:
+          summary: "{{ $labels.service_name }} CPU is above 80% for 15 minutes"
+          description: "Scale out or look for a hot loop."
+
+      - alert: ZaghlolMemoryHigh
+        expr: |
+          max by (pod) (container_memory_working_set_bytes{container=~"zaghlol-.*"})
+          / max by (pod) (container_spec_memory_limit_bytes{container=~"zaghlol-.*"}) > 0.8
+        for: 15m
+        labels:
+          severity: warn
+        annotations:
+          summary: "Memory of {{ $labels.pod }} is above 80% of its limit for 15 minutes"
+          description: "Raise the limit or look for a leak."
+
+      - alert: ZaghlolDbConnectionsHigh
+        expr: sum(pg_stat_activity_count) / max(pg_settings_max_connections) > 0.8
+        for: 10m
+        labels:
+          severity: warn
+        annotations:
+          summary: "Database connections are above 80% of max_connections"
+          description: "Check pool sizes and for connection leaks."
+
+      - alert: ZaghlolDbStorageHigh
+        expr: |
+          max(kubelet_volume_stats_used_bytes{persistentvolumeclaim=~".*zaghlol.*"})
+          / max(kubelet_volume_stats_capacity_bytes{persistentvolumeclaim=~".*zaghlol.*"}) > 0.8
+        for: 30m
+        labels:
+          severity: warn
+        annotations:
+          summary: "Database storage is above 80% full"
+          description: "Grow the volume; check the retention purger."

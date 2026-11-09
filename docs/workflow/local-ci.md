@@ -8,6 +8,11 @@ GitHub Actions (`app-ci`, `backend-ci`) is still the **merge gate**. The local r
 - Toolchain: Flutter 3.47.7 / Dart 3.13.5, .NET SDK 10.0.402, Android SDK, 16 cores. Backend tests need Docker Desktop running.
 - The PO starts it with `START-LOCAL-CI.cmd`. It runs only while that window is open.
 
+## Requirements on the PC
+
+- **Flutter 3.47.9** (the version CI pins; the workspace needs Dart ≥ 3.13.7). Older Flutter makes every app job fail at `pub get`.
+- The runner forces LF line endings in its clone (`core.autocrlf=false`), because `dotnet format` and `dart format` reject CRLF. After updating `runner.ps1`, close the runner window and start `START-LOCAL-CI.cmd` again.
+
 ## What it does
 
 - Every 30 seconds it checks `task/*` branches for new commits.
@@ -17,6 +22,8 @@ GitHub Actions (`app-ci`, `backend-ci`) is still the **merge gate**. The local r
 - It publishes the result to the `local-ci` branch.
 
 ## Reading a result (agents)
+
+Read this **before** waiting on GitHub Actions: it is the fast loop for format, analyze and test errors.
 
 ```bash
 git fetch -q origin local-ci 2>/dev/null && git show origin/local-ci:<branch with / replaced by __>/<full sha>.status

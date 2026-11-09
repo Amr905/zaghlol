@@ -1,9 +1,11 @@
+using Zaghlol.Domain;
+
 namespace Zaghlol.Infrastructure.Kms;
 
 // Exception messages are constants: they never include a key reference, data or a nonce (T-123 design note).
 
 /// <summary>The KMS could not sign, hash or unwrap in time (after one retry). Mapped to <c>503 UPSTREAM_UNAVAILABLE</c>.</summary>
-public sealed class KmsUnavailableException : Exception
+public sealed class KmsUnavailableException : SafeException
 {
     public const string DefaultMessage = "The key management service is unavailable.";
 
@@ -24,7 +26,7 @@ public sealed class KmsUnavailableException : Exception
 }
 
 /// <summary>The KMS provider or key ring is misconfigured; the process refuses to start.</summary>
-public sealed class KmsConfigurationException : Exception
+public sealed class KmsConfigurationException : SafeException
 {
     public const string DefaultMessage = "The KMS configuration is invalid.";
 
@@ -45,7 +47,7 @@ public sealed class KmsConfigurationException : Exception
 }
 
 /// <summary>An envelope blob is malformed, tampered with, or bound to another context.</summary>
-public sealed class EnvelopeDecryptionException : Exception
+public sealed class EnvelopeDecryptionException : SafeException
 {
     public const string DefaultMessage = "The envelope could not be decrypted.";
 

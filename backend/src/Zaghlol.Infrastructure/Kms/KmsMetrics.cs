@@ -22,9 +22,32 @@ public static class KmsMetrics
     private static readonly Counter<long> NonceMismatch =
         Meter.CreateCounter<long>("zaghlol.time_nonce.echo_mismatch", description: "Anchored responses whose timeNonce differed from the request.");
 
-    /// <summary><paramref name="operation"/> is one of <c>sign</c>, <c>hmac</c>, <c>data_key</c>, <c>public_key</c>.</summary>
+    /// <summary>
+    /// The operation tag of a signature that failed verification against the published key before it was returned
+    /// (a wrong key reference or ring: a configuration fault that a retry can't fix).
+    /// </summary>
+    public const string SignVerifyOperation = "sign_verify";
+
+    /// <summary>
+    /// <paramref name="operation"/> is one of <c>sign</c>, <c>sign_verify</c> (<see cref="SignVerifyOperation"/>), <c>hmac</c>,
+    /// <c>data_key</c>, <c>public_key</c>.
+    /// </summary>
     public static void KmsUnavailable(string operation) =>
         Unavailable.Add(1, new TagList { { "operation", operation } });
+
+    /// <summary>
+    /// Starts the per-operation series at 0 (and creates the meter at startup), so <c>increase()</c> alerts see the first
+    /// failure of each operation.
+    /// </summary>
+    private static readonly string[] SeededOperations = ["sign", SignVerifyOperation, "hmac", "data_key", "public_key"];
+
+    public static void Seed()
+    {
+        foreach (var operation in SeededOperations)
+        {
+            Unavailable.Add(0, new TagList { { "operation", operation } });
+        }
+    }
 
     public static void ResponseTooLargeToSign() => TooLarge.Add(1);
 

@@ -1,0 +1,96 @@
+# Gold seats, support actions and attestation (error-handling-and-observability.md section 4; backend-api.md sections 4.3 and 5.3).
+# Per-purchase and per-operator thresholds are evaluated by the acting service, which raises an audit_alert signal
+# (IAlertSignal). That counts zaghlol_audit_alert_fired_total{rule} and logs one warn event with msg "audit_alert", the rule
+# and the purchase UUID (or the operator UUID for operator rules). The alert links to the log query in log_query.
+groups:
+  - name: zaghlol-seats
+    rules:
+      - alert: ZaghlolMoveCooldownSpike
+        # MOVE_COOLDOWN refusals above 3x the 7-day hourly baseline (floor 5 per hour).
+        expr: |
+          sum(increase(zaghlol_seat_move_cooldown_refused_total[1h]))
+          > clamp_min(3 * sum(increase(zaghlol_seat_move_cooldown_refused_total[7d])) / 168, 5)
+        for: 10m
+        labels:
+          severity: warn
+        annotations:
+          summary: "MOVE_COOLDOWN refusals are spiking"
+          description: "Look for one channel or one app version causing repeated move attempts."
+
+      - alert: ZaghlolAttestationFailureSpike
+        expr: |
+          sum by (platform, reason) (increase(zaghlol_attestation_failure_total[15m]))
+          > clamp_min(3 * sum by (platform, reason) (increase(zaghlol_attestation_failure_total[7d])) / 672, 10)
+        for: 10m
+        labels:
+          severity: warn
+        annotations:
+          summary: "{{ $labels.platform }} attestation failures with reason {{ $labels.reason }} are spiking"
+          description: "A reason code spike points to a release problem (hash_mismatch, app_unrecognized) or an attack (replayed, chain)."
+
+      - alert: ZaghlolPlayIntegrityQuotaHigh
+        expr: |
+          (sum(increase(zaghlol_play_integrity_calls_total[1d])) / max(zaghlol_play_integrity_daily_quota) > 0.5)
+          and max(zaghlol_play_integrity_daily_quota) > 0
+        for: 10m
+        labels:
+          severity: warn
+        annotations:
+          summary: "Play Integrity calls used more than 50% of the daily quota"
+          description: "Request a quota increase or reduce restore attempts."
+
+  - name: zaghlol-audit-alerts
+    rules:
+      - alert: ZaghlolAuditSupportMovesPerPurchase90d
+        expr: sum(increase(zaghlol_audit_alert_fired_total{rule="support_moves_per_purchase_90d"}[10m])) > 0
+        labels:
+          severity: warn
+        annotations:
+          summary: "More than 2 support moves for one purchase in 90 days"
+          description: "A support lead other than the agent reviews within 2 business days and corrects if needed."
+          log_query: 'msg="audit_alert" rule="support_moves_per_purchase_90d" (carries the purchase UUID)'
+
+      - alert: ZaghlolAuditSupportActionsPerOperatorDay
+        expr: sum(increase(zaghlol_audit_alert_fired_total{rule="support_actions_per_operator_day"}[10m])) > 0
+        labels:
+          severity: page
+        annotations:
+          summary: "More than 20 support actions by one operator in a day"
+          description: "Suspend the role pending review."
+          log_query: 'msg="audit_alert" rule="support_actions_per_operator_day" (carries the operator UUID)'
+
+      - alert: ZaghlolAuditOwnershipFailuresPerOperatorDay
+        expr: sum(increase(zaghlol_audit_alert_fired_total{rule="ownership_failures_per_operator_day"}[10m])) > 0
+        labels:
+          severity: page
+        annotations:
+          summary: "More than 5 failed ownership checks by one operator in a day"
+          description: "Review the operator's recent support actions."
+          log_query: 'msg="audit_alert" rule="ownership_failures_per_operator_day" (carries the operator UUID)'
+
+      - alert: ZaghlolAuditDisputeFrozenRefusal
+        expr: sum(increase(zaghlol_audit_alert_fired_total{rule="dispute_frozen_refusal"}[10m])) > 0
+        labels:
+          severity: warn
+        annotations:
+          summary: "A dispute_frozen refusal happened"
+          description: "A support lead takes the ticket (D-64)."
+          log_query: 'msg="audit_alert" rule="dispute_frozen_refusal" (carries the purchase UUID)'
+
+      - alert: ZaghlolAuditSupportUnfreeze
+        expr: sum(increase(zaghlol_audit_alert_fired_total{rule="support_unfreeze"}[10m])) > 0
+        labels:
+          severity: warn
+        annotations:
+          summary: "A support_unfreeze call was made"
+          description: "A second support lead checks the ticket within 2 business days (R5-5(b))."
+          log_query: 'msg="audit_alert" rule="support_unfreeze" (carries the purchase UUID)'
+
+      - alert: ZaghlolAuditSeatRebindOverCap
+        expr: sum(increase(zaghlol_audit_alert_fired_total{rule="seat_rebind_over_cap"}[10m])) > 0
+        labels:
+          severity: warn
+        annotations:
+          summary: "An over-cap same-iPhone rebind happened (seat_rebind)"
+          description: "Check for a relay pattern (D-63, D-65(a))."
+          log_query: 'msg="audit_alert" rule="seat_rebind_over_cap" (carries the purchase UUID)'

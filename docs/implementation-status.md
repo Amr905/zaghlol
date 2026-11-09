@@ -18,12 +18,12 @@
 ## Summary
 | Milestone | Total | DONE | IN_PROGRESS | BLOCKED |
 |---|---|---|---|---|
-| M0 | 28 | 10 | 2 | 0 |
+| M0 | 28 | 12 | 1 | 0 |
 | M1 | 29 | 0 | 0 | 1 |
 | M2 | 29 | 0 | 0 | 0 |
 | M3 | 18 | 0 | 0 | 0 |
 | M4 | 17 | 0 | 0 | 0 |
-| M5 | 35 | 1 | 1 | 2 |
+| M5 | 35 | 3 | 1 | 2 |
 | M6 | 19 | 0 | 1 | 2 |
 | M7 | 11 | 0 | 0 | 0 |
 
@@ -33,10 +33,10 @@
 | T-001 | Create mono-repo scaffold with pub workspace, app flavors and pure-Dart packages | M0 | C2 | Sonnet | flutter-core-engineer | — | DONE | CI run 42103098253 (10/10 green) @ ec6214e; review [T-001](05-reviews/T-001.md) APPROVED (round 2) | Squash-merged; deferred findings appended to T-002/003/022/023/141/165/176 |
 | T-002 | Add custom lint rules (no double in money, no UI string literals, no print) | M0 | C2 | Sonnet | flutter-core-engineer | T-001 | DONE | app-ci 42484193276 (13/13) @ 4c13193; PR #4 squash-merged; review [T-002](05-reviews/T-002.md) APPROVED | Standalone AST checker in tools/lints (custom_lint does not analyze on Dart 3.13). FU-029…FU-033 |
 | T-003 | App CI pipeline (format, analyze, unit, golden, native unit) | M0 | C2 | Sonnet | flutter-core-engineer | T-001 | DONE | app-ci run 42213382460 (13/13 green) @ b186d1d; red/no-test proofs 42211250792, 42212487800; symlink proofs 42209342928, 42209963798; regen runs 42213382374, 42207136110; review [T-003](05-reviews/T-003.md) APPROVED (round 2) | Squash-merged; nits deferred to T-007/T-008/T-022/T-023 |
-| T-004 | Pigeon setup and stale-generation check | M0 | C2 | Sonnet | flutter-core-engineer | T-001 | IN_PROGRESS | — | Started 2026-11-08 (Sonnet); owns pubspec.lock this wave |
+| T-004 | Pigeon setup and stale-generation check | M0 | C2 | Sonnet | flutter-core-engineer | T-001 | DONE | app-ci 42488720352 (13/13); negative control 42488874829; PR #7 squash-merged; review [T-004](05-reviews/T-004.md) APPROVED | FU-042, FU-043 |
 | T-005 | Backend solution scaffold, Docker Compose and CI | M0 | C2 | Sonnet | backend-engineer | — | DONE | CI run 41720361381 (4/4 green) @ d98b37d; review [T-005](05-reviews/T-005.md) APPROVED | Squash-merged; follow-ups FU-001…005 |
 | T-006 | OpenAPI v1 spec and contract-test harness | M0 | C2 | Sonnet | backend-engineer | T-005 | DONE | CI run 42102066749 (5/5 green) @ 8d60381; review [T-006](05-reviews/T-006.md) APPROVED (round 2) | Squash-merged; osMajor dropped per BR-SYNC-03 |
-| T-007 | SPK-05: encrypted SQLite (SQLite3MultipleCiphers) + FTS5 trigram on both platforms | M0 | C4 | Opus | flutter-core-engineer | T-001 | TODO | — |  |
+| T-007 | SPK-05: encrypted SQLite (SQLite3MultipleCiphers) + FTS5 trigram on both platforms | M0 | C4 | Opus | flutter-core-engineer | T-001 | IN_PROGRESS | — | Opus design note 20e82d7 (branch task/T-007-design-note); implementation on task/T-007-sqlcipher. PO device decisions pending (iPhone 12 row, reference Android phone) |
 | T-008 | SPK-01: Android receiver → spool → WorkManager → headless engine latency | M0 | C4 | Opus | native-platform-engineer | T-001, T-004 | TODO | — |  |
 | T-009 | SPK-03: can an iOS App Intent process immediately with a headless Flutter engine? | M0 | C4 | Opus | native-platform-engineer | T-001, T-004 | TODO | — |  |
 | T-010 | SPK-02: OCR accuracy on synthetic InstaPay/wallet receipts | M0 | C3 | Sonnet | native-platform-engineer | T-001 | TODO | — |  |
@@ -51,7 +51,7 @@
 | T-019 | Schema batch C: wealth, prices, Zakah, capture controls, review, settings, outbox, misc | M0 | C4 | Opus | flutter-core-engineer | T-016 | TODO | — |  |
 | T-020 | Settings repository with typed accessors and defaults | M0 | C2 | Sonnet | flutter-core-engineer | T-019 | TODO | — |  |
 | T-021 | Redacting local diagnostic log | M0 | C3 | Sonnet | flutter-core-engineer | T-019, T-014 | TODO | — |  |
-| T-022 | Design tokens, Mint Fresh/Jade Night themes and base components | M0 | C2 | Sonnet | flutter-ui-engineer | T-001 | IN_PROGRESS | — | Started 2026-11-08 (Sonnet); no lockfile changes |
+| T-022 | Design tokens, Mint Fresh/Jade Night themes and base components | M0 | C2 | Sonnet | flutter-ui-engineer | T-001 | DONE | app-ci 42506573523 (13/13); PR #9 squash-merged; review [T-022](05-reviews/T-022.md) APPROVED | Goldens use Ahem until IBM Plex Sans Arabic is bundled. FU-044…FU-047 |
 | T-023 | Localization scaffold, digits mode and money/date formatting | M0 | C2 | Sonnet | flutter-core-engineer | T-012, T-020 | TODO | — |  |
 | T-024 | App shell: routing, platform tab bars, Add button, deep links | M0 | C2 | Sonnet | flutter-ui-engineer | T-022, T-023 | TODO | — |  |
 | T-025 | Feature flags service (default OFF) | M0 | C2 | Sonnet | flutter-core-engineer | T-019 | TODO | — |  |
@@ -152,8 +152,8 @@
 | T-120 | Voice logger S-31 with on-device-first recognition and monthly limit | M4 | C3 | Sonnet | flutter-ui-engineer | T-109, T-119, T-011 | TODO | — |  |
 | T-121 | Money tab assets, Add asset S-44 and Prices S-45 | M4 | C2 | Sonnet | flutter-ui-engineer | T-113, T-083, T-119 | TODO | — |  |
 | T-122 | EF Core model and initial migration for all backend tables + DB roles | M5 | C4 | Opus | backend-engineer | T-005 | DONE | backend-ci 42407789072 (5/5, 391 tests) @ d5943be; PR #2 squash-merged | All three C4 reviews APPROVED (round 2). Follow-ups FU-015 to FU-026; FU-020 before T-184 |
-| T-123 | Signing service (ES256 via KMS abstraction) and response-signature middleware | M5 | C4 | Opus | backend-engineer | T-005 | IN_REVIEW | backend-ci 42489960257 (5/5) @ 9035f64 | Implemented 2026-11-08 (Opus); C4 reviews running. Also closes FU-019, FU-022, FU-023, FU-026 and the code part of FU-025 (pending review) |
-| T-124 | Install registration, install-token auth, rate limits, idempotency, strict DTOs | M5 | C4 | Opus | backend-engineer | T-122, T-123, T-006 | TODO | — |  |
+| T-123 | Signing service (ES256 via KMS abstraction) and response-signature middleware | M5 | C4 | Opus | backend-engineer | T-005 | DONE | backend-ci 42502737300 (5/5) @ 1a8d165; PR #8 squash-merged; [T-123](05-reviews/T-123.md) APPROVED (code r2, security, tests) | Closes FU-019, 022, 023, 026, FU-025 code part. FU-048 |
+| T-124 | Install registration, install-token auth, rate limits, idempotency, strict DTOs | M5 | C4 | Opus | backend-engineer | T-122, T-123, T-006 | IN_PROGRESS | — | Sonnet design note in progress (Balanced rules) |
 | T-125 | Catalog versions, deltas, signed full snapshots and admin draft/publish | M5 | C3 | Opus | backend-engineer | T-122, T-123 | TODO | — |  |
 | T-126 | Feature flags with targeting rules and admin endpoints | M5 | C2 | Sonnet | backend-engineer | T-122 | TODO | — |  |
 | T-127 | Price service: local Egyptian gold-market adapter, FX adapter, worker, override | M5 | C3 | Sonnet | backend-engineer | T-122 | BLOCKED | — | Provider contract for local gold feed (D-41) needed before go-live; build continues with fakes |
@@ -167,7 +167,7 @@
 | T-135 | Accounts: Google/Apple ID token sign-in, linking, sign-out, delete, Android Apple callback | M5 | C4 | Opus | backend-engineer | T-132, T-182, T-184 | TODO | — | Plan v1.1: R5-3(a) note |
 | T-136 | Operator auth (OIDC + MFA), roles, audit log and support lookup | M5 | C4 | Opus | backend-engineer | T-122 | TODO | — | Plan v1.1: support write endpoints → T-186 |
 | T-137 | zaghlol-ops CLI for catalog, flags, prices, contributions and support, plus support runbook | M5 | C3 | Sonnet | backend-engineer | T-136, T-186, T-125, T-126, T-127, T-129 | TODO | — | Plan v1.1: C2→C3 (order IDs, operator login) |
-| T-138 | Backend observability: OpenTelemetry, metrics, dashboards, alert rules | M5 | C3 | Sonnet | backend-engineer | T-005 | READY | — | Design note merged (1c68de5) |
+| T-138 | Backend observability: OpenTelemetry, metrics, dashboards, alert rules | M5 | C3 | Sonnet | backend-engineer | T-005 | DONE | backend-ci 42528633775 (6/6) @ 4020b9e; mutation runs 42528095105, 42528424746; PR #11 squash-merged; [T-138](05-reviews/T-138.md) APPROVED (r3) | Closes FU-002, FU-008. FU-049 |
 | T-139 | Retention purger and log privacy settings | M5 | C2 | Sonnet | backend-engineer | T-122, T-138 | TODO | — |  |
 | T-140 | Infrastructure as code and deployment pipeline (staging, prod) | M5 | C4 | Opus | backend-engineer | T-138 | BLOCKED | — | CR-03 / OQ-16: hosting provider & region + PDPL licence decision. Plan v1.1: C3→C4 (KMS keys) |
 | T-141 | App BackendClient: generated DTOs, ES256 verification, lazy install registration | M5 | C4 | Opus | flutter-core-engineer | T-006, T-019 | TODO | — |  |
@@ -262,6 +262,14 @@
 - **FU-039** (T-028 review #2, #6): `privacy_delete_body` says "security keys" are deleted but iPhone seat keys stay; reword. Owner: T-058.
 - **FU-040** (T-028 review #3): delete-everything dialog should say Drive/iCloud backups, the store purchase and the account are untouched (check FR-ONB-08). Owner: T-087.
 - **FU-041** (T-028 review #4, #5): PO/security decide whether redacted budget alerts keep the category name (Q-33); UX picks «احذف» vs «امسح» for the delete confirmation word (Q-39). Owner: PO / UX.
+- **FU-042** (T-004 #1): the Pigeon stale check watches three fixed output dirs; fail if an output path falls outside them. Owner: T-008.
+- **FU-043** (T-004 #2): add the generated `.g.swift` files to the Runner target and confirm it builds. Owner: first iOS native task (T-009/T-062).
+- **FU-044** (T-022 #1, deviation): bundle IBM Plex Sans Arabic (4 TTFs + `fonts:` block) and regenerate goldens; until then goldens use Ahem. Owner: PO supplies the files; T-024 wires them.
+- **FU-045** (T-022 #2): `ZMoneyText` with `masked: true` and no `maskedText` shows the real amount; make it required. Owner: T-117.
+- **FU-046** (T-022 #3, #5): require semantics labels when clear/dismiss callbacks are set; real `ZColors.lerp`/`copyWith`. Owner: T-024.
+- **FU-047** (T-022 #4, UX): 1.3x goldens for chips, pills, segmented, money text and sheet (T-053). UX to confirm the dark tokens §0 leaves undefined (warning, danger, zaghlolBg, incomeBg) before T-053.
+- **FU-048** (T-123 code #2, #4–#7, #9–#10; security L-1, L-3, L-4, I-1…I-5; tests G1, G2, G4–G7): see `docs/05-reviews/T-123.md` and its three reports for each item and owner (T-124, T-125, T-128, T-132, T-138, T-140, T-141, backend tooling).
+- **FU-049** (T-138 code #2, #5–#6, the 499 test; tests m1–m8; security F1–F9): see `docs/05-reviews/T-138.md` and its three reports for each item and owner (T-124, T-125, T-135, T-136, T-140, T-138 follow-up). **Before T-140:** strip Npgsql exception span events. **Before T-125:** use fixed value sets for metric tags.
 
 ## Log
 | Date | Event |
@@ -312,3 +320,4 @@
 | 2026-11-07 | T-012 DONE: merged after round 3 (all three reviews APPROVED). |
 | 2026-11-08 | New Lead session. T-027 DONE (docs-only review APPROVED, no blockers/majors); copy-deck check script added as docs/workflow/tools/copy_deck_check.py. T-002 resumed and T-014 started (both Sonnet). Main ruleset now Active: merges go through PRs. |
 | 2026-11-08 | Lead merged PRs #1 (T-027), #2 (T-122), #4 (T-002), #3 (T-014, after re-running CI on a main-merged head) and #5 (T-028, round 2 after one major). PO authorised the Lead to merge approved PRs. Started T-004, T-022 (Sonnet) and T-123 (Opus). FU-029…FU-041 logged. |
+| 2026-11-09 | Merged #7 (T-004), #8 (T-123), #9 (T-022), #10 (Balanced rules, 2 tasks at a time, runner LF fix), #11 (T-138). 15/186 done. T-007 (Opus) and T-124 (design note, Sonnet) in progress. |

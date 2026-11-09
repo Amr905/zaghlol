@@ -1,0 +1,43 @@
+# Local OpenTelemetry collector (docker compose). The API and the worker export OTLP here; metrics are exposed in Prometheus
+# format on :8889. In production the same pipeline runs with the provider's exporters (T-140), and the traces pipeline keeps
+# 10% of traces plus every error (tail sampling), because the apps export all spans.
+receivers:
+  otlp:
+    protocols:
+      grpc:
+        endpoint: 0.0.0.0:4317
+      http:
+        endpoint: 0.0.0.0:4318
+
+processors:
+  batch: {}
+  tail_sampling:
+    decision_wait: 10s
+    policies:
+      - name: errors
+        type: status_code
+        status_code:
+          status_codes: [ERROR]
+      - name: ten-percent
+        type: probabilistic
+        probabilistic:
+          sampling_percentage: 10
+
+exporters:
+  debug:
+    verbosity: basic
+  prometheus:
+    endpoint: 0.0.0.0:8889
+    resource_to_telemetry_conversion:
+      enabled: true
+
+service:
+  pipelines:
+    metrics:
+      receivers: [otlp]
+      processors: [batch]
+      exporters: [prometheus, debug]
+    traces:
+      receivers: [otlp]
+      processors: [tail_sampling, batch]
+      exporters: [debug]

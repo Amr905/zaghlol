@@ -42,7 +42,7 @@ env:
 jobs:
   regenerate:
     name: regenerate (${{ github.event_name }})
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     if: >-
       startsWith(github.ref, 'refs/heads/task/') &&
       (github.event_name == 'workflow_dispatch' ||

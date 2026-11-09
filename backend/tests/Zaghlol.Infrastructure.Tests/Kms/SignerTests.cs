@@ -9,7 +9,14 @@ using Zaghlol.Testing;
 
 namespace Zaghlol.Infrastructure.Tests.Kms;
 
+/// <summary>Signer failure tests and the sign_verify metric tests share the process-wide KMS meter, so they run one at a time.</summary>
+internal static class SignerMetricsCollection
+{
+    public const string Name = "kms-signer-metrics";
+}
+
 /// <summary>T-123: ES256 signatures, JWS, rotation and fail-closed behaviour of <see cref="ISigner"/>.</summary>
+[Collection(SignerMetricsCollection.Name)]
 public partial class SignerTests
 {
     private static readonly byte[] Body = "{\"serverTime\":\"2026-11-08T00:00:00Z\",\"timeNonce\":null}"u8.ToArray();

@@ -1,0 +1,32 @@
+# Synthetic check definitions (error-handling-and-observability.md section 4): every minute from two regions.
+# Provider-neutral; T-140 maps them to the hosting provider's synthetic monitoring (or a blackbox exporter, which produces
+# the probe_success and probe_http_status_code series the alert rules use, with job="zaghlol-synthetics" and a check label).
+# The install credentials are those of the dedicated synthetic test install and come from the secrets manager; they are
+# never written here.
+interval: 60s
+regions: [region-a, region-b]
+checks:
+  - name: health
+    method: GET
+    url: ${API_BASE_URL}/v1/health
+    expect_status: 200
+    expect_body_contains: '"status":"ok"'
+
+  - name: sync
+    method: POST
+    url: ${API_BASE_URL}/v1/sync
+    headers:
+      Zaghlol-App: "synthetic/1.0 (1)"
+      Zaghlol-Install: ${SYNTHETIC_INSTALL_ID}
+      Authorization: Bearer ${SYNTHETIC_INSTALL_CREDENTIAL}
+      Content-Type: application/json
+    # An empty sync: no outbox rows, catalog at the current version. Contains no user data.
+    body: '{}'
+    expect_status: 200
+    expect_header: Zaghlol-Signature
+
+  - name: catalog-latest-snapshot
+    method: GET
+    url: ${CDN_BASE_URL}/v1/catalog/latest/full
+    expect_status: 200
+    expect_header: Zaghlol-Signature
