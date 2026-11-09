@@ -1,5 +1,332 @@
 ﻿== SUMMARY ==
-RUNNING sha=b29da78f318ec6c790e6713c03cdb7ff8ec1c7a5
+FAIL sha=b29da78f318ec6c790e6713c03cdb7ff8ec1c7a5 pipeline=quick-backend dotnet-build=1 dotnet-format=0 dotnet-test=1
+dotnet-build                 FAIL  exit=1  13s
+dotnet-format                PASS  exit=0  20s
+dotnet-test                  FAIL  exit=1  34s
+
+== ERRORS: dotnet-build ==
+/work/backend/tests/Zaghlol.Contract.Tests/CatalogLiveContractTests.cs(77,36): error CA1861: Prefer 'static readonly' fields over constant array arguments if the called method is called repeatedly and is not mutating the passed array (https://learn.microsoft.com/dotnet/fundamentals/code-analysis/quality-rules/ca1861) [/work/backend/tests/Zaghlol.Contract.Tests/Zaghlol.Contract.Tests.csproj]
+
+== ERRORS: dotnet-test ==
+  Failed Zaghlol.Contract.Tests.CatalogLiveContractTests.ConflictsAndMissingKeysAreTheDeclaredProblems [70 ms]
+  Error Message:
+   expected 404, got 429: {"type":"about:blank","title":"Too Many Requests","status":429,"code":"RATE_LIMITED","retryAfterSeconds":60,"traceId":"00-2fe4942b444d37b1878d3f36a8e2dc82-2e517ac7e9ef825a-01","correlationId":"2fe4942b444d37b1878d3f36a8e2dc82"}
+  Stack Trace:
+     at Zaghlol.Contract.Tests.CatalogLiveContractTests.AssertDeclared(HttpResponseMessage response, SpecOperation operation, HttpStatusCode status, String mediaType) in /_/backend/tests/Zaghlol.Contract.Tests/CatalogLiveContractTests.cs:line 645
+   at Zaghlol.Contract.Tests.CatalogLiveContractTests.ConflictsAndMissingKeysAreTheDeclaredProblems() in /_/backend/tests/Zaghlol.Contract.Tests/CatalogLiveContractTests.cs:line 240
+--- End of stack trace from previous location ---
+[xUnit.net 00:00:09.04]     Zaghlol.Contract.Tests.CatalogLiveContractTests.EveryAdminWriteIsAuditedWithTheOperatorAndNoIdentifiers [FAIL]
+[xUnit.net 00:00:09.05]     Zaghlol.Contract.Tests.CatalogLiveContractTests.BodiesAreStrictAndKeysNeverBelongInThem [FAIL]
+[xUnit.net 00:00:09.14]     Zaghlol.Contract.Tests.CatalogLiveContractTests.ASeedFileLoadsIntoTheDraftInOneTransactionAndPublishes [FAIL]
+[xUnit.net 00:00:09.15]     Zaghlol.Contract.Tests.CatalogLiveContractTests.NonCanonicalAliasKeysAreRejectedAndAKeywordKeyRoundTrips [FAIL]
+[xUnit.net 00:00:09.16]     Zaghlol.Contract.Tests.CatalogLiveContractTests.DeletingAReferencedCategoryIs409AdminConflictUntilNothingUsesIt [FAIL]
+[xUnit.net 00:00:09.17]     Zaghlol.Contract.Tests.CatalogLiveContractTests.PutAndPostAnswerTheDeclaredOpsAndTheListShowsThem [FAIL]
+
+  Failed Zaghlol.Contract.Tests.CatalogLiveContractTests.EveryAdminWriteIsAuditedWithTheOperatorAndNoIdentifiers [5 ms]
+  Error Message:
+   Assert.Equal() Failure: Values differ
+Expected: OK
+Actual:   TooManyRequests
+  Stack Trace:
+     at Zaghlol.Contract.Tests.CatalogLiveContractTests.EveryAdminWriteIsAuditedWithTheOperatorAndNoIdentifiers() in /_/backend/tests/Zaghlol.Contract.Tests/CatalogLiveContractTests.cs:line 516
+--- End of stack trace from previous location ---
+  Failed Zaghlol.Contract.Tests.CatalogLiveContractTests.BodiesAreStrictAndKeysNeverBelongInThem [4 ms]
+  Error Message:
+   Assert.Equal() Failure: Values differ
+Expected: OK
+Actual:   TooManyRequests
+
+  Failed Zaghlol.Contract.Tests.CatalogLiveContractTests.BodiesAreStrictAndKeysNeverBelongInThem [4 ms]
+  Error Message:
+   Assert.Equal() Failure: Values differ
+Expected: OK
+Actual:   TooManyRequests
+  Stack Trace:
+     at Zaghlol.Contract.Tests.CatalogLiveContractTests.NewCategoryAsync() in /_/backend/tests/Zaghlol.Contract.Tests/CatalogLiveContractTests.cs:line 587
+   at Zaghlol.Contract.Tests.CatalogLiveContractTests.BodiesAreStrictAndKeysNeverBelongInThem() in /_/backend/tests/Zaghlol.Contract.Tests/CatalogLiveContractTests.cs:line 248
+--- End of stack trace from previous location ---
+  Failed Zaghlol.Contract.Tests.CatalogLiveContractTests.ASeedFileLoadsIntoTheDraftInOneTransactionAndPublishes [93 ms]
+  Error Message:
+   expected 200, got 429: {"type":"about:blank","title":"Too Many Requests","status":429,"code":"RATE_LIMITED","retryAfterSeconds":60,"traceId":"00-3a88d9f544a01b90741d01147edd5611-12c7290834e9770b-01","correlationId":"3a88d9f544a01b90741d01147edd5611"}
+  Stack Trace:
+
+  Failed Zaghlol.Contract.Tests.CatalogLiveContractTests.ASeedFileLoadsIntoTheDraftInOneTransactionAndPublishes [93 ms]
+  Error Message:
+   expected 200, got 429: {"type":"about:blank","title":"Too Many Requests","status":429,"code":"RATE_LIMITED","retryAfterSeconds":60,"traceId":"00-3a88d9f544a01b90741d01147edd5611-12c7290834e9770b-01","correlationId":"3a88d9f544a01b90741d01147edd5611"}
+  Stack Trace:
+     at Zaghlol.Contract.Tests.CatalogLiveContractTests.AssertDeclared(HttpResponseMessage response, SpecOperation operation, HttpStatusCode status, String mediaType) in /_/backend/tests/Zaghlol.Contract.Tests/CatalogLiveContractTests.cs:line 645
+   at Zaghlol.Contract.Tests.CatalogLiveContractTests.PublishAsync(String note) in /_/backend/tests/Zaghlol.Contract.Tests/CatalogLiveContractTests.cs:line 602
+   at Zaghlol.Contract.Tests.CatalogLiveContractTests.ASeedFileLoadsIntoTheDraftInOneTransactionAndPublishes() in /_/backend/tests/Zaghlol.Contract.Tests/CatalogLiveContractTests.cs:line 547
+--- End of stack trace from previous location ---
+  Failed Zaghlol.Contract.Tests.CatalogLiveContractTests.NonCanonicalAliasKeysAreRejectedAndAKeywordKeyRoundTrips [6 ms]
+  Error Message:
+   Assert.Equal() Failure: Values differ
+Expected: OK
+Actual:   TooManyRequests
+
+  Failed Zaghlol.Contract.Tests.CatalogLiveContractTests.NonCanonicalAliasKeysAreRejectedAndAKeywordKeyRoundTrips [6 ms]
+  Error Message:
+   Assert.Equal() Failure: Values differ
+Expected: OK
+Actual:   TooManyRequests
+  Stack Trace:
+     at Zaghlol.Contract.Tests.CatalogLiveContractTests.NewCategoryAsync() in /_/backend/tests/Zaghlol.Contract.Tests/CatalogLiveContractTests.cs:line 587
+   at Zaghlol.Contract.Tests.CatalogLiveContractTests.NonCanonicalAliasKeysAreRejectedAndAKeywordKeyRoundTrips() in /_/backend/tests/Zaghlol.Contract.Tests/CatalogLiveContractTests.cs:line 277
+--- End of stack trace from previous location ---
+  Failed Zaghlol.Contract.Tests.CatalogLiveContractTests.DeletingAReferencedCategoryIs409AdminConflictUntilNothingUsesIt [5 ms]
+  Error Message:
+   Assert.Equal() Failure: Values differ
+Expected: OK
+
+  Failed Zaghlol.Contract.Tests.CatalogLiveContractTests.DeletingAReferencedCategoryIs409AdminConflictUntilNothingUsesIt [5 ms]
+  Error Message:
+   Assert.Equal() Failure: Values differ
+Expected: OK
+Actual:   TooManyRequests
+  Stack Trace:
+     at Zaghlol.Contract.Tests.CatalogLiveContractTests.NewCategoryAsync() in /_/backend/tests/Zaghlol.Contract.Tests/CatalogLiveContractTests.cs:line 587
+   at Zaghlol.Contract.Tests.CatalogLiveContractTests.DeletingAReferencedCategoryIs409AdminConflictUntilNothingUsesIt() in /_/backend/tests/Zaghlol.Contract.Tests/CatalogLiveContractTests.cs:line 308
+--- End of stack trace from previous location ---
+  Failed Zaghlol.Contract.Tests.CatalogLiveContractTests.PutAndPostAnswerTheDeclaredOpsAndTheListShowsThem [10 ms]
+  Error Message:
+   expected 200, got 429: {"type":"about:blank","title":"Too Many Requests","status":429,"code":"RATE_LIMITED","retryAfterSeconds":60,"traceId":"00-a60cb7efc3095b3af6299a092bc0ee6a-54e1128ce4447d6b-01","correlationId":"a60cb7efc3095b3af6299a092bc0ee6a"}
+  Stack Trace:
+
+  Failed Zaghlol.Contract.Tests.CatalogLiveContractTests.PutAndPostAnswerTheDeclaredOpsAndTheListShowsThem [10 ms]
+  Error Message:
+   expected 200, got 429: {"type":"about:blank","title":"Too Many Requests","status":429,"code":"RATE_LIMITED","retryAfterSeconds":60,"traceId":"00-a60cb7efc3095b3af6299a092bc0ee6a-54e1128ce4447d6b-01","correlationId":"a60cb7efc3095b3af6299a092bc0ee6a"}
+  Stack Trace:
+     at Zaghlol.Contract.Tests.CatalogLiveContractTests.AssertDeclared(HttpResponseMessage response, SpecOperation operation, HttpStatusCode status, String mediaType) in /_/backend/tests/Zaghlol.Contract.Tests/CatalogLiveContractTests.cs:line 645
+   at Zaghlol.Contract.Tests.CatalogLiveContractTests.PutAndPostAnswerTheDeclaredOpsAndTheListShowsThem() in /_/backend/tests/Zaghlol.Contract.Tests/CatalogLiveContractTests.cs:line 158
+--- End of stack trace from previous location ---
+  Failed Zaghlol.Contract.Tests.CatalogLiveContractTests.DeletingAMerchantListsItsAliasDeletesBeforeTheMerchantDeleteInTheNextDelta [5 ms]
+  Error Message:
+   Assert.Equal() Failure: Values differ
+Expected: OK
+Actual:   TooManyRequests
+  Stack Trace:
+
+  Failed Zaghlol.Contract.Tests.CatalogLiveContractTests.DeletingAMerchantListsItsAliasDeletesBeforeTheMerchantDeleteInTheNextDelta [5 ms]
+  Error Message:
+   Assert.Equal() Failure: Values differ
+Expected: OK
+Actual:   TooManyRequests
+  Stack Trace:
+     at Zaghlol.Contract.Tests.CatalogLiveContractTests.NewCategoryAsync() in /_/backend/tests/Zaghlol.Contract.Tests/CatalogLiveContractTests.cs:line 587
+   at Zaghlol.Contract.Tests.CatalogLiveContractTests.DeletingAMerchantListsItsAliasDeletesBeforeTheMerchantDeleteInTheNextDelta() in /_/backend/tests/Zaghlol.Contract.Tests/CatalogLiveContractTests.cs:line 334
+--- End of stack trace from previous location ---
+  Failed Zaghlol.Contract.Tests.CatalogLiveContractTests.AnUpToDateClientGetsAnEmptyDelta [4 ms]
+  Error Message:
+   Assert.Equal() Failure: Values differ
+Expected: OK
+
+  Failed Zaghlol.Contract.Tests.CatalogLiveContractTests.AnUpToDateClientGetsAnEmptyDelta [4 ms]
+  Error Message:
+   Assert.Equal() Failure: Values differ
+Expected: OK
+Actual:   TooManyRequests
+  Stack Trace:
+     at Zaghlol.Contract.Tests.CatalogLiveContractTests.NewCategoryAsync() in /_/backend/tests/Zaghlol.Contract.Tests/CatalogLiveContractTests.cs:line 587
+   at Zaghlol.Contract.Tests.CatalogLiveContractTests.AnUpToDateClientGetsAnEmptyDelta() in /_/backend/tests/Zaghlol.Contract.Tests/CatalogLiveContractTests.cs:line 465
+--- End of stack trace from previous location ---
+[xUnit.net 00:00:09.20]     Zaghlol.Contract.Tests.CatalogLiveContractTests.APutThatChangesNothingDoesNotMakeTheNextPublishHappen [FAIL]
+[xUnit.net 00:00:09.21]     Zaghlol.Contract.Tests.CatalogLiveContractTests.TheDraftListPagesWithAnOpaqueCursor [FAIL]
+  Failed Zaghlol.Contract.Tests.CatalogLiveContractTests.APutThatChangesNothingDoesNotMakeTheNextPublishHappen [4 ms]
+  Error Message:
+
+  Failed Zaghlol.Contract.Tests.CatalogLiveContractTests.APutThatChangesNothingDoesNotMakeTheNextPublishHappen [4 ms]
+  Error Message:
+   Assert.Equal() Failure: Values differ
+Expected: OK
+Actual:   TooManyRequests
+  Stack Trace:
+     at Zaghlol.Contract.Tests.CatalogLiveContractTests.NewCategoryAsync() in /_/backend/tests/Zaghlol.Contract.Tests/CatalogLiveContractTests.cs:line 587
+   at Zaghlol.Contract.Tests.CatalogLiveContractTests.APutThatChangesNothingDoesNotMakeTheNextPublishHappen() in /_/backend/tests/Zaghlol.Contract.Tests/CatalogLiveContractTests.cs:line 498
+--- End of stack trace from previous location ---
+  Failed Zaghlol.Contract.Tests.CatalogLiveContractTests.TheDraftListPagesWithAnOpaqueCursor [3 ms]
+  Error Message:
+   Assert.Equal() Failure: Values differ
+Expected: OK
+
+  Failed Zaghlol.Contract.Tests.CatalogLiveContractTests.TheDraftListPagesWithAnOpaqueCursor [3 ms]
+  Error Message:
+   Assert.Equal() Failure: Values differ
+Expected: OK
+Actual:   TooManyRequests
+  Stack Trace:
+     at Zaghlol.Contract.Tests.CatalogLiveContractTests.NewCategoryAsync() in /_/backend/tests/Zaghlol.Contract.Tests/CatalogLiveContractTests.cs:line 587
+   at Zaghlol.Contract.Tests.CatalogLiveContractTests.TheDraftListPagesWithAnOpaqueCursor() in /_/backend/tests/Zaghlol.Contract.Tests/CatalogLiveContractTests.cs:line 189
+--- End of stack trace from previous location ---
+
+Failed!  - Failed:    11, Passed:    78, Skipped:     0, Total:    89, Duration: 8 s - Zaghlol.Contract.Tests.dll (net10.0)
+
+Passed!  - Failed:     0, Passed:   503, Skipped:     0, Total:   503, Duration: 9 s - Zaghlol.Infrastructure.Tests.dll (net10.0)
+
 
 == FULL LOG (last 1500 lines) ==
 auto task/T-125-catalog b29da78f318ec6c790e6713c03cdb7ff8ec1c7a5 2026-11-10T01:48:29.1234125+02:00
+
+
+
+[01:48:34] === STEP dotnet-build (docker mcr.microsoft.com/dotnet/sdk:10.0.402, /work/backend)
+  Determining projects to restore...
+  All projects are up-to-date for restore.
+  Zaghlol.Domain -> /work/backend/src/Zaghlol.Domain/bin/Release/net10.0/Zaghlol.Domain.dll
+  Zaghlol.Ops -> /work/backend/src/Zaghlol.Ops/bin/Release/net10.0/zaghlol-ops.dll
+  Zaghlol.Application -> /work/backend/src/Zaghlol.Application/bin/Release/net10.0/Zaghlol.Application.dll
+  Zaghlol.Ops.Tests -> /work/backend/tests/Zaghlol.Ops.Tests/bin/Release/net10.0/Zaghlol.Ops.Tests.dll
+  Zaghlol.Application.Tests -> /work/backend/tests/Zaghlol.Application.Tests/bin/Release/net10.0/Zaghlol.Application.Tests.dll
+  Zaghlol.Infrastructure -> /work/backend/src/Zaghlol.Infrastructure/bin/Release/net10.0/Zaghlol.Infrastructure.dll
+  Zaghlol.Workers -> /work/backend/src/Zaghlol.Workers/bin/Release/net10.0/Zaghlol.Workers.dll
+  Zaghlol.Infrastructure.Tests -> /work/backend/tests/Zaghlol.Infrastructure.Tests/bin/Release/net10.0/Zaghlol.Infrastructure.Tests.dll
+  Zaghlol.Workers.Tests -> /work/backend/tests/Zaghlol.Workers.Tests/bin/Release/net10.0/Zaghlol.Workers.Tests.dll
+  Zaghlol.Api -> /work/backend/src/Zaghlol.Api/bin/Release/net10.0/Zaghlol.Api.dll
+/work/backend/tests/Zaghlol.Contract.Tests/CatalogLiveContractTests.cs(77,36): error CA1861: Prefer 'static readonly' fields over constant array arguments if the called method is called repeatedly and is not mutating the passed array (https://learn.microsoft.com/dotnet/fundamentals/code-analysis/quality-rules/ca1861) [/work/backend/tests/Zaghlol.Contract.Tests/Zaghlol.Contract.Tests.csproj]
+  Zaghlol.Api.Tests -> /work/backend/tests/Zaghlol.Api.Tests/bin/Release/net10.0/Zaghlol.Api.Tests.dll
+
+Build FAILED.
+
+/work/backend/tests/Zaghlol.Contract.Tests/CatalogLiveContractTests.cs(77,36): error CA1861: Prefer 'static readonly' fields over constant array arguments if the called method is called repeatedly and is not mutating the passed array (https://learn.microsoft.com/dotnet/fundamentals/code-analysis/quality-rules/ca1861) [/work/backend/tests/Zaghlol.Contract.Tests/Zaghlol.Contract.Tests.csproj]
+    0 Warning(s)
+    1 Error(s)
+
+Time Elapsed 00:00:11.90
+
+[01:48:47] === RESULT dotnet-build exit=1 (13s)
+[01:48:47] === STEP dotnet-format (docker mcr.microsoft.com/dotnet/sdk:10.0.402, /work/backend)
+Formatting code files in workspace '/work/backend/Zaghlol.sln'.
+Format complete in 19037ms.
+
+[01:49:07] === RESULT dotnet-format exit=0 (20s)
+[01:49:07] === STEP dotnet-test (docker mcr.microsoft.com/dotnet/sdk:10.0.402, /work/backend)
+Test run for /work/backend/tests/Zaghlol.Ops.Tests/bin/Release/net10.0/Zaghlol.Ops.Tests.dll (.NETCoreApp,Version=v10.0)
+Test run for /work/backend/tests/Zaghlol.Application.Tests/bin/Release/net10.0/Zaghlol.Application.Tests.dll (.NETCoreApp,Version=v10.0)
+Test run for /work/backend/tests/Zaghlol.Workers.Tests/bin/Release/net10.0/Zaghlol.Workers.Tests.dll (.NETCoreApp,Version=v10.0)
+Test run for /work/backend/tests/Zaghlol.Api.Tests/bin/Release/net10.0/Zaghlol.Api.Tests.dll (.NETCoreApp,Version=v10.0)
+Test run for /work/backend/tests/Zaghlol.Infrastructure.Tests/bin/Release/net10.0/Zaghlol.Infrastructure.Tests.dll (.NETCoreApp,Version=v10.0)
+Test run for /work/backend/tests/Zaghlol.Contract.Tests/bin/Release/net10.0/Zaghlol.Contract.Tests.dll (.NETCoreApp,Version=v10.0)
+A total of 1 test files matched the specified pattern.
+A total of 1 test files matched the specified pattern.
+A total of 1 test files matched the specified pattern.
+A total of 1 test files matched the specified pattern.A total of 1 test files matched the specified pattern.
+
+A total of 1 test files matched the specified pattern.
+
+Passed!  - Failed:     0, Passed:     2, Skipped:     0, Total:     2, Duration: 26 ms - Zaghlol.Ops.Tests.dll (net10.0)
+
+Passed!  - Failed:     0, Passed:   116, Skipped:     0, Total:   116, Duration: 84 ms - Zaghlol.Application.Tests.dll (net10.0)
+
+Passed!  - Failed:     0, Passed:     3, Skipped:     0, Total:     3, Duration: 104 ms - Zaghlol.Workers.Tests.dll (net10.0)
+[xUnit.net 00:00:09.04]     Zaghlol.Contract.Tests.CatalogLiveContractTests.ConflictsAndMissingKeysAreTheDeclaredProblems [FAIL]
+  Failed Zaghlol.Contract.Tests.CatalogLiveContractTests.ConflictsAndMissingKeysAreTheDeclaredProblems [70 ms]
+  Error Message:
+   expected 404, got 429: {"type":"about:blank","title":"Too Many Requests","status":429,"code":"RATE_LIMITED","retryAfterSeconds":60,"traceId":"00-2fe4942b444d37b1878d3f36a8e2dc82-2e517ac7e9ef825a-01","correlationId":"2fe4942b444d37b1878d3f36a8e2dc82"}
+  Stack Trace:
+     at Zaghlol.Contract.Tests.CatalogLiveContractTests.AssertDeclared(HttpResponseMessage response, SpecOperation operation, HttpStatusCode status, String mediaType) in /_/backend/tests/Zaghlol.Contract.Tests/CatalogLiveContractTests.cs:line 645
+   at Zaghlol.Contract.Tests.CatalogLiveContractTests.ConflictsAndMissingKeysAreTheDeclaredProblems() in /_/backend/tests/Zaghlol.Contract.Tests/CatalogLiveContractTests.cs:line 240
+--- End of stack trace from previous location ---
+[xUnit.net 00:00:09.04]     Zaghlol.Contract.Tests.CatalogLiveContractTests.EveryAdminWriteIsAuditedWithTheOperatorAndNoIdentifiers [FAIL]
+[xUnit.net 00:00:09.05]     Zaghlol.Contract.Tests.CatalogLiveContractTests.BodiesAreStrictAndKeysNeverBelongInThem [FAIL]
+[xUnit.net 00:00:09.14]     Zaghlol.Contract.Tests.CatalogLiveContractTests.ASeedFileLoadsIntoTheDraftInOneTransactionAndPublishes [FAIL]
+[xUnit.net 00:00:09.15]     Zaghlol.Contract.Tests.CatalogLiveContractTests.NonCanonicalAliasKeysAreRejectedAndAKeywordKeyRoundTrips [FAIL]
+[xUnit.net 00:00:09.16]     Zaghlol.Contract.Tests.CatalogLiveContractTests.DeletingAReferencedCategoryIs409AdminConflictUntilNothingUsesIt [FAIL]
+[xUnit.net 00:00:09.17]     Zaghlol.Contract.Tests.CatalogLiveContractTests.PutAndPostAnswerTheDeclaredOpsAndTheListShowsThem [FAIL]
+[xUnit.net 00:00:09.18]     Zaghlol.Contract.Tests.CatalogLiveContractTests.DeletingAMerchantListsItsAliasDeletesBeforeTheMerchantDeleteInTheNextDelta [FAIL]
+[xUnit.net 00:00:09.20]     Zaghlol.Contract.Tests.CatalogLiveContractTests.AnUpToDateClientGetsAnEmptyDelta [FAIL]
+  Failed Zaghlol.Contract.Tests.CatalogLiveContractTests.EveryAdminWriteIsAuditedWithTheOperatorAndNoIdentifiers [5 ms]
+  Error Message:
+   Assert.Equal() Failure: Values differ
+Expected: OK
+Actual:   TooManyRequests
+  Stack Trace:
+     at Zaghlol.Contract.Tests.CatalogLiveContractTests.EveryAdminWriteIsAuditedWithTheOperatorAndNoIdentifiers() in /_/backend/tests/Zaghlol.Contract.Tests/CatalogLiveContractTests.cs:line 516
+--- End of stack trace from previous location ---
+  Failed Zaghlol.Contract.Tests.CatalogLiveContractTests.BodiesAreStrictAndKeysNeverBelongInThem [4 ms]
+  Error Message:
+   Assert.Equal() Failure: Values differ
+Expected: OK
+Actual:   TooManyRequests
+  Stack Trace:
+     at Zaghlol.Contract.Tests.CatalogLiveContractTests.NewCategoryAsync() in /_/backend/tests/Zaghlol.Contract.Tests/CatalogLiveContractTests.cs:line 587
+   at Zaghlol.Contract.Tests.CatalogLiveContractTests.BodiesAreStrictAndKeysNeverBelongInThem() in /_/backend/tests/Zaghlol.Contract.Tests/CatalogLiveContractTests.cs:line 248
+--- End of stack trace from previous location ---
+  Failed Zaghlol.Contract.Tests.CatalogLiveContractTests.ASeedFileLoadsIntoTheDraftInOneTransactionAndPublishes [93 ms]
+  Error Message:
+   expected 200, got 429: {"type":"about:blank","title":"Too Many Requests","status":429,"code":"RATE_LIMITED","retryAfterSeconds":60,"traceId":"00-3a88d9f544a01b90741d01147edd5611-12c7290834e9770b-01","correlationId":"3a88d9f544a01b90741d01147edd5611"}
+  Stack Trace:
+     at Zaghlol.Contract.Tests.CatalogLiveContractTests.AssertDeclared(HttpResponseMessage response, SpecOperation operation, HttpStatusCode status, String mediaType) in /_/backend/tests/Zaghlol.Contract.Tests/CatalogLiveContractTests.cs:line 645
+   at Zaghlol.Contract.Tests.CatalogLiveContractTests.PublishAsync(String note) in /_/backend/tests/Zaghlol.Contract.Tests/CatalogLiveContractTests.cs:line 602
+   at Zaghlol.Contract.Tests.CatalogLiveContractTests.ASeedFileLoadsIntoTheDraftInOneTransactionAndPublishes() in /_/backend/tests/Zaghlol.Contract.Tests/CatalogLiveContractTests.cs:line 547
+--- End of stack trace from previous location ---
+  Failed Zaghlol.Contract.Tests.CatalogLiveContractTests.NonCanonicalAliasKeysAreRejectedAndAKeywordKeyRoundTrips [6 ms]
+  Error Message:
+   Assert.Equal() Failure: Values differ
+Expected: OK
+Actual:   TooManyRequests
+  Stack Trace:
+     at Zaghlol.Contract.Tests.CatalogLiveContractTests.NewCategoryAsync() in /_/backend/tests/Zaghlol.Contract.Tests/CatalogLiveContractTests.cs:line 587
+   at Zaghlol.Contract.Tests.CatalogLiveContractTests.NonCanonicalAliasKeysAreRejectedAndAKeywordKeyRoundTrips() in /_/backend/tests/Zaghlol.Contract.Tests/CatalogLiveContractTests.cs:line 277
+--- End of stack trace from previous location ---
+  Failed Zaghlol.Contract.Tests.CatalogLiveContractTests.DeletingAReferencedCategoryIs409AdminConflictUntilNothingUsesIt [5 ms]
+  Error Message:
+   Assert.Equal() Failure: Values differ
+Expected: OK
+Actual:   TooManyRequests
+  Stack Trace:
+     at Zaghlol.Contract.Tests.CatalogLiveContractTests.NewCategoryAsync() in /_/backend/tests/Zaghlol.Contract.Tests/CatalogLiveContractTests.cs:line 587
+   at Zaghlol.Contract.Tests.CatalogLiveContractTests.DeletingAReferencedCategoryIs409AdminConflictUntilNothingUsesIt() in /_/backend/tests/Zaghlol.Contract.Tests/CatalogLiveContractTests.cs:line 308
+--- End of stack trace from previous location ---
+  Failed Zaghlol.Contract.Tests.CatalogLiveContractTests.PutAndPostAnswerTheDeclaredOpsAndTheListShowsThem [10 ms]
+  Error Message:
+   expected 200, got 429: {"type":"about:blank","title":"Too Many Requests","status":429,"code":"RATE_LIMITED","retryAfterSeconds":60,"traceId":"00-a60cb7efc3095b3af6299a092bc0ee6a-54e1128ce4447d6b-01","correlationId":"a60cb7efc3095b3af6299a092bc0ee6a"}
+  Stack Trace:
+     at Zaghlol.Contract.Tests.CatalogLiveContractTests.AssertDeclared(HttpResponseMessage response, SpecOperation operation, HttpStatusCode status, String mediaType) in /_/backend/tests/Zaghlol.Contract.Tests/CatalogLiveContractTests.cs:line 645
+   at Zaghlol.Contract.Tests.CatalogLiveContractTests.PutAndPostAnswerTheDeclaredOpsAndTheListShowsThem() in /_/backend/tests/Zaghlol.Contract.Tests/CatalogLiveContractTests.cs:line 158
+--- End of stack trace from previous location ---
+  Failed Zaghlol.Contract.Tests.CatalogLiveContractTests.DeletingAMerchantListsItsAliasDeletesBeforeTheMerchantDeleteInTheNextDelta [5 ms]
+  Error Message:
+   Assert.Equal() Failure: Values differ
+Expected: OK
+Actual:   TooManyRequests
+  Stack Trace:
+     at Zaghlol.Contract.Tests.CatalogLiveContractTests.NewCategoryAsync() in /_/backend/tests/Zaghlol.Contract.Tests/CatalogLiveContractTests.cs:line 587
+   at Zaghlol.Contract.Tests.CatalogLiveContractTests.DeletingAMerchantListsItsAliasDeletesBeforeTheMerchantDeleteInTheNextDelta() in /_/backend/tests/Zaghlol.Contract.Tests/CatalogLiveContractTests.cs:line 334
+--- End of stack trace from previous location ---
+  Failed Zaghlol.Contract.Tests.CatalogLiveContractTests.AnUpToDateClientGetsAnEmptyDelta [4 ms]
+  Error Message:
+   Assert.Equal() Failure: Values differ
+Expected: OK
+Actual:   TooManyRequests
+  Stack Trace:
+     at Zaghlol.Contract.Tests.CatalogLiveContractTests.NewCategoryAsync() in /_/backend/tests/Zaghlol.Contract.Tests/CatalogLiveContractTests.cs:line 587
+   at Zaghlol.Contract.Tests.CatalogLiveContractTests.AnUpToDateClientGetsAnEmptyDelta() in /_/backend/tests/Zaghlol.Contract.Tests/CatalogLiveContractTests.cs:line 465
+--- End of stack trace from previous location ---
+[xUnit.net 00:00:09.20]     Zaghlol.Contract.Tests.CatalogLiveContractTests.APutThatChangesNothingDoesNotMakeTheNextPublishHappen [FAIL]
+[xUnit.net 00:00:09.21]     Zaghlol.Contract.Tests.CatalogLiveContractTests.TheDraftListPagesWithAnOpaqueCursor [FAIL]
+  Failed Zaghlol.Contract.Tests.CatalogLiveContractTests.APutThatChangesNothingDoesNotMakeTheNextPublishHappen [4 ms]
+  Error Message:
+   Assert.Equal() Failure: Values differ
+Expected: OK
+Actual:   TooManyRequests
+  Stack Trace:
+     at Zaghlol.Contract.Tests.CatalogLiveContractTests.NewCategoryAsync() in /_/backend/tests/Zaghlol.Contract.Tests/CatalogLiveContractTests.cs:line 587
+   at Zaghlol.Contract.Tests.CatalogLiveContractTests.APutThatChangesNothingDoesNotMakeTheNextPublishHappen() in /_/backend/tests/Zaghlol.Contract.Tests/CatalogLiveContractTests.cs:line 498
+--- End of stack trace from previous location ---
+  Failed Zaghlol.Contract.Tests.CatalogLiveContractTests.TheDraftListPagesWithAnOpaqueCursor [3 ms]
+  Error Message:
+   Assert.Equal() Failure: Values differ
+Expected: OK
+Actual:   TooManyRequests
+  Stack Trace:
+     at Zaghlol.Contract.Tests.CatalogLiveContractTests.NewCategoryAsync() in /_/backend/tests/Zaghlol.Contract.Tests/CatalogLiveContractTests.cs:line 587
+   at Zaghlol.Contract.Tests.CatalogLiveContractTests.TheDraftListPagesWithAnOpaqueCursor() in /_/backend/tests/Zaghlol.Contract.Tests/CatalogLiveContractTests.cs:line 189
+--- End of stack trace from previous location ---
+
+Failed!  - Failed:    11, Passed:    78, Skipped:     0, Total:    89, Duration: 8 s - Zaghlol.Contract.Tests.dll (net10.0)
+
+Passed!  - Failed:     0, Passed:   503, Skipped:     0, Total:   503, Duration: 9 s - Zaghlol.Infrastructure.Tests.dll (net10.0)
+
+Passed!  - Failed:     0, Passed:   200, Skipped:     0, Total:   200, Duration: 24 s - Zaghlol.Api.Tests.dll (net10.0)
+
+[01:49:41] === RESULT dotnet-test exit=1 (34s)
+[01:49:41] SUMMARY FAIL sha=b29da78f318ec6c790e6713c03cdb7ff8ec1c7a5 pipeline=quick-backend dotnet-build=1 dotnet-format=0 dotnet-test=1
