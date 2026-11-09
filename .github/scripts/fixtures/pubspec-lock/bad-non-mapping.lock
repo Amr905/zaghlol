@@ -1,0 +1,4 @@
+# expect: top level is not a mapping
+# Synthetic fixture for test-lock-validator.sh.
+- packages
+- sdks

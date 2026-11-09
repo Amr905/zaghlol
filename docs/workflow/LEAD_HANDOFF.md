@@ -6,7 +6,7 @@ _Last updated: 2026-11-08 (afternoon) by the Lead session. Update it whenever th
 
 ## Process (see CLAUDE.md §6)
 
-- **Reviewers per class:** C1 Lead spot-check · C2 and docs-only one `code-reviewer` (Sonnet) · C3 `code-reviewer` + `test-engineer` (Sonnet) · C4 `code-reviewer` (Opus) + `security-privacy-reviewer` (Opus) + `test-engineer` (Sonnet).
+- **Reviewers per class (Balanced, 2026-11-08):** C1 Lead spot-check · C2, C3 and docs-only: one `code-reviewer` (Sonnet), which also checks tests · C4: `code-reviewer` (Opus, also checks tests) + `security-privacy-reviewer` (Opus). Re-reviews are delta-only, on Sonnet. At most 2 tasks at once.
 - **Rounds:** only blockers/majors trigger another round; minors/nits become `FU-###`. Re-reviews look at the delta only, by the reviewer who raised it.
 - **Agent roles:** `ux-designer` (and other roles without Bash) can't create worktrees or push. Run those tasks as `general-purpose` with "act as the role in `.claude/agents/<role>.md`".
 - **Parallel agents:** each agent works in its own `git worktree` under `/home/claude/wt-<task>`. The git proxy allows 2 concurrent git ops per repo.
@@ -14,18 +14,17 @@ _Last updated: 2026-11-08 (afternoon) by the Lead session. Update it whenever th
 - **Merging:** the `main` ruleset (26756600) is **Active** (PR required). The **PO authorised the Lead (2026-11-08) to merge approved PRs**: when all reviews are APPROVED and CI on the PR head is green, squash-merge via `PUT /repos/Amr905/zaghlol/pulls/<n>/merge` (`gh` has no valid token here). If the PR branch is behind code that changes its checks (e.g. new lint rules), merge `main` into it and wait for green CI first.
 - **Copy deck checks:** `python3 docs/workflow/tools/copy_deck_check.py docs/02-design/copy-deck.md`.
 
-## Progress: 11 of 186 tasks done
+## Progress: 15 of 186 tasks done (8.1%)
 
-DONE: T-001, T-002, T-003, T-005, T-006, T-012, T-014, T-026, T-027, T-028, T-122. T-165 is merged but needs a device run.
+DONE: T-001…T-006, T-012, T-014, T-022, T-026, T-027, T-028, T-122, T-123, T-138. T-165 is merged but needs a device run.
 
-## In flight
+## In flight (limit: 2 tasks at once)
 
 | Task | State | Next step |
 |---|---|---|
-| T-123 Signing service (C4) | Implemented on `task/T-123-signing` @ `9035f64`, backend-ci 42489960257 green. Three C4 reviews running; reports go to `docs/05-reviews/T-123-{code,security,tests}.md` on local `review/T-123-*` branches. | Consolidate into `docs/05-reviews/T-123.md`, fix round if needed, PR, merge. Then T-138 (C3). |
-| T-004 Pigeon (C2) | Implementer running on `task/T-004-pigeon`. Owns `pubspec.lock` this wave. | One Sonnet review, PR, merge. Then T-007 (C4, also changes the lockfile). |
-| T-022 Design tokens (C2) | Implementer running on `task/T-022-design-tokens`. Must not change the lockfile. May harden lint rule 2 (FU-031). | One Sonnet review, PR, merge. |
-| T-165 No OS backups | Merged (`189acf7`), IN_REVIEW. | DONE after `docs/05-reviews/T-165-device.md` passes on a release-candidate device run (PO, later). |
+| T-007 SQLCipher spike (C4) | Opus implementer on `task/T-007-sqlcipher`, from the Opus design note on `task/T-007-design-note` (20e82d7). | C4 reviews (Balanced): Opus code reviewer (incl. tests) + Opus security reviewer. PO device decisions are still open. |
+| T-124 Install auth (C4) | Sonnet design note in progress on `task/T-124-design-note`. | Then Opus implementer (backend-engineer), then the Balanced C4 reviews. |
+| T-165 No OS backups | Merged, IN_REVIEW. | DONE after the device run. |
 
 ## Ready next (dependencies DONE)
 

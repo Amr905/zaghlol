@@ -58,6 +58,10 @@ jobs:
           fi
       - name: T-165 backup assertion self-test (negative controls)
         run: bash .github/scripts/test-check-no-os-backup.sh
+      # R2-N1 (T-003 review, landed in T-007): the app-regen commit job's
+      # pubspec.lock validator, run against the current lock and bad fixtures.
+      - name: pubspec.lock validator self-test (app-regen)
+        run: bash .github/scripts/test-lock-validator.sh
       - name: dart format
         run: |
           if ! dart format --output=none --set-exit-if-changed . > format.log 2>&1; then
@@ -83,9 +87,19 @@ jobs:
       - name: dart test (zaghlol_lints)
         working-directory: tools/lints
         run: dart test
-      - name: flutter test (app, non-golden)
+      # T-007: test-only code (integration_test, the DB contract/benchmark
+      # under app/test/core/db) must never be reachable from lib/.
+      - name: lib/ does not import test-only code (T-007)
+        run: |
+          if grep -RnE "integration_test|flutter_test|/test/|test_driver" app/lib; then
+            echo "::error::app/lib references integration_test or test-only code"
+            exit 1
+          fi
+      # The DB contract (app/test/core/db, untagged) runs here on every push;
+      # the 50k-row benchmark (tag benchmark) runs in db-platform.yml.
+      - name: flutter test (app, non-golden, non-benchmark)
         working-directory: app
-        run: flutter test --exclude-tags golden
+        run: flutter test --exclude-tags golden,benchmark
       - name: dart test (zaghlol_domain)
         working-directory: packages/zaghlol_domain
         run: dart test
@@ -349,6 +363,40 @@ jobs:
           if ! grep -qE "targetSdkVersion:'36'" badging.txt; then
             echo "::error::targetSdkVersion is not 36"
             exit 1
+          fi
+      # T-007: the sqlite3mc code asset ships for every ABI; release APKs are
+      # 16 KB page-aligned (Play, targetSdk 35+) and contain no benchmark code.
+      - name: Assert sqlite3mc code asset, 16 KB alignment, no benchmark code
+        run: |
+          APK=$(find app/build/app/outputs -iname "*${FLAVOR}*${MODE}.apk" | head -n 1)
+          unzip -Z1 "$APK" | grep -E '^lib/' | sort > libs.txt
+          cat libs.txt
+          for abi in arm64-v8a armeabi-v7a x86_64; do
+            if ! grep -qE "^lib/$abi/lib[^/]*sqlite3[^/]*[.]so$" libs.txt; then
+              echo "::error::no sqlite3 code asset for $abi in $APK"
+              exit 1
+            fi
+          done
+          if [ "$MODE" = "release" ]; then
+            ZIPALIGN=$(ls -d "$ANDROID_HOME"/build-tools/*/zipalign | sort -V | tail -n 1)
+            if ! "$ZIPALIGN" -c -P 16 -v 4 "$APK" > zipalign.log 2>&1; then
+              grep -vE "\(OK" zipalign.log | tail -n 40
+              echo "::error::$APK is not 16 KB page-aligned (zipalign -c -P 16)"
+              exit 1
+            fi
+            grep -E "lib/.*[.]so" zipalign.log
+            tail -n 1 zipalign.log
+            for abi in arm64-v8a armeabi-v7a x86_64; do
+              so="lib/$abi/libapp.so"
+              if ! grep -qx "$so" libs.txt; then
+                echo "::error::$so missing from $APK"
+                exit 1
+              fi
+              if unzip -p "$APK" "$so" | grep -aqF ZAGHLOL_DB_BENCH; then
+                echo "::error::benchmark code (ZAGHLOL_DB_BENCH) found in $so"
+                exit 1
+              fi
+            done
           fi
       # T-165 (FR-SEC-05): on the final APK, backup is off and both rule files
       # exclude every domain for cloud backup and device-to-device transfer.
