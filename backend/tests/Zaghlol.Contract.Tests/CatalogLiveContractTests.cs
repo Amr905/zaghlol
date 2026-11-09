@@ -20,23 +20,22 @@ using Zaghlol.Testing;
 
 namespace Zaghlol.Contract.Tests;
 
-/// <summary>A test operator taken from two headers; production has no operator authenticator until T-136.</summary>
-internal sealed class HeaderOperatorAuthenticator : IOperatorAuthenticator
+/// <summary>A test operator validator: the bearer token is "roles:" and a comma-separated role list (the OIDC validator is T-136's).</summary>
+internal sealed class CatalogTestOperatorValidator : IOperatorTokenValidator
 {
-    public const string OperatorHeader = "X-Test-Operator";
-    public const string RolesHeader = "X-Test-Roles";
+    private const string Prefix = "roles:";
 
-    public ValueTask<OperatorIdentity?> AuthenticateAsync(HttpContext context)
+    public static string TokenFor(string roles) => Prefix + roles;
+
+    public ValueTask<OperatorIdentity?> ValidateAsync(string bearerToken, CancellationToken cancellationToken)
     {
-        ArgumentNullException.ThrowIfNull(context);
-
-        if (!Guid.TryParse(context.Request.Headers[OperatorHeader].ToString(), out var operatorId))
+        if (!bearerToken.StartsWith(Prefix, StringComparison.Ordinal))
         {
             return ValueTask.FromResult<OperatorIdentity?>(null);
         }
 
-        var roles = context.Request.Headers[RolesHeader].ToString().Split(',', StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries);
-        return ValueTask.FromResult<OperatorIdentity?>(new OperatorIdentity(operatorId, roles));
+        var roles = bearerToken[Prefix.Length..].Split(',', StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries);
+        return ValueTask.FromResult<OperatorIdentity?>(new OperatorIdentity(CatalogContractFixture.OperatorId, roles));
     }
 }
 
@@ -83,8 +82,8 @@ public sealed class CatalogContractFixture : IAsyncLifetime
             builder.ConfigureServices(services =>
             {
                 kms.Use(services);
-                services.RemoveAll<IOperatorAuthenticator>();
-                services.AddSingleton<IOperatorAuthenticator, HeaderOperatorAuthenticator>();
+                services.RemoveAll<IOperatorTokenValidator>();
+                services.AddSingleton<IOperatorTokenValidator, CatalogTestOperatorValidator>();
             });
         });
         Client = factory.CreateClient();
@@ -620,8 +619,7 @@ public class CatalogLiveContractTests(CatalogContractFixture fixture) : IClassFi
         using var request = new HttpRequestMessage(method, path);
         if (roles is not null)
         {
-            request.Headers.Add(HeaderOperatorAuthenticator.OperatorHeader, CatalogContractFixture.OperatorId.ToString("D"));
-            request.Headers.Add(HeaderOperatorAuthenticator.RolesHeader, roles);
+            request.Headers.Authorization = new AuthenticationHeaderValue("Bearer", CatalogTestOperatorValidator.TokenFor(roles));
         }
 
         if (body is not null)
@@ -702,8 +700,7 @@ public class CatalogLargeSnapshotTests(CatalogContractFixture fixture) : IClassF
     private async Task<HttpResponseMessage> SendAsync(HttpMethod method, string path, string body)
     {
         using var request = new HttpRequestMessage(method, path);
-        request.Headers.Add(HeaderOperatorAuthenticator.OperatorHeader, CatalogContractFixture.OperatorId.ToString("D"));
-        request.Headers.Add(HeaderOperatorAuthenticator.RolesHeader, CatalogContractFixture.EditorRole);
+        request.Headers.Authorization = new AuthenticationHeaderValue("Bearer", CatalogTestOperatorValidator.TokenFor(CatalogContractFixture.EditorRole));
         request.Content = new StringContent(body, Encoding.UTF8);
         request.Content.Headers.ContentType = new MediaTypeHeaderValue("application/json");
         return await fixture.Client.SendAsync(request);

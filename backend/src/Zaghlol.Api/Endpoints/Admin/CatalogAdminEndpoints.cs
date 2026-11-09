@@ -24,7 +24,7 @@ internal static class CatalogAdminEndpoints
     {
         ArgumentNullException.ThrowIfNull(endpoints);
 
-        var group = endpoints.MapGroup("/admin/v1/catalog").RequireAuthorization(OperatorAuthentication.CatalogEditor);
+        var group = endpoints.MapGroup("/admin/v1/catalog").RequireOperatorRole(OperatorRoles.CatalogEditor);
         group.MapGet("/draft/{entity}", ListAsync).WithName("adminListCatalogDraft");
         group.MapPost("/draft/{entity}", CreateMerchantAsync).WithName("adminCreateDraftMerchant");
         group.MapPut("/draft/{entity}/{id}", PutAsync).WithName("adminPutCatalogDraftEntry");

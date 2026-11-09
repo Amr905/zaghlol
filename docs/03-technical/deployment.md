@@ -71,6 +71,8 @@ tag vX:  build prodSms + prodNoSms AAB (signed via Play App Signing upload key f
 - Outside `Development`/`Testing` the API **refuses to start** unless at least one proxy entry is listed or `NoProxy=true` is set (`ForwardedHeadersConfigurationException`).
 - `ForwardLimit` is 1: the API takes the right-most `X-Forwarded-For` entry. The list must match the real hop count. With CDN → load balancer → API, list the load balancer and make it append the client address the CDN supplied (or raise the limit and list both hops); otherwise every client again shares the CDN's address.
 
+**Ops channel for flag changes (T-126).** `OpsChannel:WebhookUrl` is an incoming-webhook URL (Slack, Google Chat or Teams; body `{"text": "..."}`) that receives one message per feature-flag change. The URL is a credential: set it from the secrets manager (environment variable `OpsChannel__WebhookUrl`), never in a file in the repository. It must be an absolute `https` URL or the API refuses to start (the value is not echoed). Unset, nothing is posted. A failed post is logged by exception type only and never fails the change, which is already committed and audited.
+
 **Infrastructure as code:**
 - OpenTofu modules per environment under `backend/deploy/`.
 - Secrets are referenced, never stored.

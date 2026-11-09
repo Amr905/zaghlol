@@ -20,6 +20,7 @@ internal static class ApiPipeline
         services.AddProblemDetails(options => options.CustomizeProblemDetails = ProblemDetailsCustomizer.Customize);
         services.AddExceptionHandler<GlobalExceptionHandler>();
         services.AddInstallTokenAuthentication();
+        services.AddOperatorAuthentication();
         services.AddZaghlolRateLimits();
         services.ConfigureHttpJsonOptions(options => options.SerializerOptions.Converters.Add(new UtcZDateTimeOffsetConverter()));
         return services;
