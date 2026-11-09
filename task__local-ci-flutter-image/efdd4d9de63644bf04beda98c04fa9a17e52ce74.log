@@ -1,5 +1,8 @@
 ﻿== SUMMARY ==
-RUNNING sha=efdd4d9de63644bf04beda98c04fa9a17e52ce74
+SKIP sha=efdd4d9de63644bf04beda98c04fa9a17e52ce74 no app/packages/backend changes
 
 == FULL LOG (last 1500 lines) ==
 auto task/local-ci-flutter-image efdd4d9de63644bf04beda98c04fa9a17e52ce74 2026-11-10T00:57:29.7684890+02:00
+
+
+
