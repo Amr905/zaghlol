@@ -25,7 +25,7 @@ internal sealed partial class GlobalExceptionHandler(
             KmsUnavailableException => StatusCodes.Status503ServiceUnavailable,
 
             // The database is down or unreachable (T-124 design note): 503 UPSTREAM_UNAVAILABLE, never 500.
-            DbException { IsTransient: true } => StatusCodes.Status503ServiceUnavailable,
+            _ when IsTransientDatabaseFailure(exception) => StatusCodes.Status503ServiceUnavailable,
             _ => StatusCodes.Status500InternalServerError,
         };
 
@@ -52,6 +52,24 @@ internal sealed partial class GlobalExceptionHandler(
             HttpContext = httpContext,
             ProblemDetails = problem,
         });
+    }
+
+    /// <summary>
+    /// A transient <see cref="DbException"/>, directly or as an inner exception: EF Core queries run through Npgsql's default
+    /// execution strategy, which wraps a transient failure in an <see cref="InvalidOperationException"/>, while a directly
+    /// opened transaction throws the <c>NpgsqlException</c> itself.
+    /// </summary>
+    internal static bool IsTransientDatabaseFailure(Exception exception)
+    {
+        for (var current = exception; current is not null; current = current.InnerException)
+        {
+            if (current is DbException { IsTransient: true })
+            {
+                return true;
+            }
+        }
+
+        return false;
     }
 
     [LoggerMessage(Level = LogLevel.Error, Message = "Unhandled exception while processing request")]

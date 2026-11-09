@@ -172,7 +172,7 @@ public class InstallAuthTests(InstallsHostFixture fixture) : IClassFixture<Insta
     public async Task ThePerTokenBucketAnswers429WithRetryAfter()
     {
         // The fixture's per-token bucket: burst 20, one token an hour. Other tokens are unaffected.
-        var (_, token) = await fixture.NewInstallAsync();
+        var (installId, token) = await fixture.NewInstallAsync();
         for (var i = 0; i < 20; i++)
         {
             using var allowed = await fixture.SendAsync(HttpMethod.Get, "/v1/t/whoami", token);
@@ -193,6 +193,13 @@ public class InstallAuthTests(InstallsHostFixture fixture) : IClassFixture<Insta
         var (_, fresh) = await fixture.NewInstallAsync();
         using var other = await fixture.SendAsync(HttpMethod.Get, "/v1/t/whoami", fresh);
         Assert.Equal(HttpStatusCode.OK, other.StatusCode);
+
+        // T-124 security S-5: the token-bucket 429 is logged without the token or the install ID.
+        await WaitForLogAsync(e => e.Contains("/v1/t/whoami", StringComparison.Ordinal) && e.Contains("Status=429", StringComparison.Ordinal));
+        foreach (var secret in new[] { token, installId })
+        {
+            Assert.DoesNotContain(fixture.LogSink.Entries, e => e.Contains(secret, StringComparison.Ordinal));
+        }
     }
 
     private async Task<long> CountIdempotencyRows(string installId)

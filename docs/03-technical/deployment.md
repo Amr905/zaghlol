@@ -65,6 +65,12 @@ tag vX:  build prodSms + prodNoSms AAB (signed via Play App Signing upload key f
 - KMS calls time out after 2 s with one retry; a signing outage answers `503 UPSTREAM_UNAVAILABLE` with `Retry-After: 5`.
 - Managed PostgreSQL: set `log_error_verbosity = terse` so a CHECK failure's DETAIL (row values) never reaches server logs, and never set `Include Error Detail` on a connection string (the API and migrator refuse it; FU-025).
 
+**Forwarded headers and the client address (T-124).** The per-network rate limits (`RateLimits:*`) group clients by the /24 (IPv4) or /56 (IPv6) of the address that ASP.NET Core `ForwardedHeaders` resolves. `X-Forwarded-For` is trusted only from listed proxies; if none is listed behind a load balancer, every client looks like the load balancer and the whole service shares one bucket, so one client could block registration for everyone.
+- `ForwardedHeaders:KnownProxies:<n>` (IP addresses) and/or `ForwardedHeaders:KnownNetworks:<n>` (CIDR, e.g. `10.0.0.0/16`): the addresses of the hop directly in front of the API.
+- `ForwardedHeaders:NoProxy=true`: set this instead only when clients connect to the API directly (no load balancer, CDN or WAF in front).
+- Outside `Development`/`Testing` the API **refuses to start** unless at least one proxy entry is listed or `NoProxy=true` is set (`ForwardedHeadersConfigurationException`).
+- `ForwardLimit` is 1: the API takes the right-most `X-Forwarded-For` entry. The list must match the real hop count. With CDN → load balancer → API, list the load balancer and make it append the client address the CDN supplied (or raise the limit and list both hops); otherwise every client again shares the CDN's address.
+
 **Infrastructure as code:**
 - OpenTofu modules per environment under `backend/deploy/`.
 - Secrets are referenced, never stored.
@@ -98,6 +104,7 @@ tag:  promote the same image digest to prod → migration job (expand/contract, 
 - [ ] Play SMS-permission declaration submitted; `prodNoSms` ready.
 - [ ] Signed `Zaghlol.shortcut` published; setup checker verified on iOS 17 and iOS 26.
 - [ ] ES256 production keys created in KMS; public keys embedded (JWKS from `EcPublicJwk.ToJwks`); key-rotation test passed; `log_error_verbosity = terse` on the managed PostgreSQL.
+- [ ] `ForwardedHeaders:KnownProxies`/`KnownNetworks` set to the load balancer in front of the API (or `ForwardedHeaders:NoProxy=true` if there is none), matching the real hop count; the per-network limit checked from two client networks in staging.
 - [ ] RTDN + ASSN V2 configured for prod and sandbox; reconciliation jobs green.
 - [ ] Price provider contract signed (OQ-02); stale alerts tested.
 - [ ] Hosting region approved and PDPL licensing done (CR-03).
