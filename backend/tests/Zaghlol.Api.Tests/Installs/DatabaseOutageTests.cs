@@ -5,7 +5,7 @@ namespace Zaghlol.Api.Tests.Installs;
 
 /// <summary>
 /// T-124 deviation D3 (code review minor 3): with the database unreachable (connection refused, a transient
-/// <c>DbException</c>), registration and an authenticated call answer <c>503 UPSTREAM_UNAVAILABLE</c>, never 500, and the body
+/// <c>DbException</c>, raw on registration and wrapped by the EF execution strategy on the auth query), registration and an authenticated call answer <c>503 UPSTREAM_UNAVAILABLE</c>, never 500, and the body
 /// carries no driver text.
 /// </summary>
 [Collection(ApiHostGroup.Name)]
