@@ -85,3 +85,30 @@ None of these is financial data or a usable credential, because auth filters on 
 1. **S-1:** fail-closed startup check for the forwarded-headers configuration outside Development/Testing, plus a test.
 
 S-2 must be resolved in the T-130 design note before any production route uses `WithIdempotency`. S-3…S-5 are follow-ups for the Lead to file. S-6 and S-7 need no action.
+
+## Re-review (delta)
+
+Scope: `git diff 65bbbef 59dc8b1` on `task/T-124-install-auth` (commits 6836f93, 59dc8b1). backend-ci run 42691437478 is green (reported, not re-run here).
+
+### S-1 — RESOLVED
+
+- `ForwardedHeadersStartupCheck` (`backend/src/Zaghlol.Api/RateLimiting/ForwardedHeadersStartupCheck.cs`) is registered by `AddZaghlolRateLimits` as a hosted service. Outside `Development`/`Testing` it throws `ForwardedHeadersConfigurationException` from `StartAsync`, which aborts host start, unless `KnownProxies` or `KnownIPNetworks` is non-empty or `ForwardedHeaders:NoProxy` binds to true. It checks the bound options after the loopback defaults are cleared, so the default loopback entries can't satisfy it.
+- The opt-out is an explicit flag, as I asked. `GetValue<bool>` makes `false` or a typo fail closed, and the tests cover that. Tests cover Production and Staging refusing, the three accepted settings, and Development/Testing starting. The exception message is constant and carries no request data.
+- The existing Production-environment fixtures (`HostStartupTests`, `ObservabilityHostFixture`) now set `NoProxy=true`, which is correct for a test server with no proxy.
+- `deployment.md` now documents the keys, the refuse-to-start behavior, the `ForwardLimit = 1` hop-count caveat (CDN -> LB -> API) and a pre-release checklist item. This covers the documentation half of my required change.
+
+Residual, Low, no action required: `NoProxy=true` set by mistake behind a load balancer reverts to the old shared-bucket behavior. It is now a deliberate, documented operator choice, and the checklist item ("checked from two client networks in staging") is the control. Recommend the Lead keep that checklist item in the release gate.
+
+### Other delta items
+
+- `GlobalExceptionHandler.IsTransientDatabaseFailure` walks the `InnerException` chain for a transient `DbException` and maps it to 503. The loop is bounded by the chain, and the response is the constant `UPSTREAM_UNAVAILABLE` problem. The new `DatabaseOutageTests` assert that the body has no driver text (Npgsql, host, "refused", stack frames). The exception is still logged only via the existing `LogUnhandled` path, which was already reviewed. Nothing new leaks, and the change is security-neutral to slightly positive (no 500 with a different shape). Pass.
+- New 429-log test (S-5 follow-up) asserts that the token, install ID, key and client network are absent from logs on the network and registration 429 paths. That is a test-only improvement. Pass.
+- No new dependencies, endpoints, data egress or persistence in the delta.
+
+### Findings in the delta
+
+None at Medium or above.
+
+### Verdict: APPROVED
+
+S-1 is resolved. S-2 (design note in T-130 before any production route uses `WithIdempotency`) and S-3 to S-5 remain follow-ups for the Lead, unchanged from the original review, and are not blockers for T-124.
