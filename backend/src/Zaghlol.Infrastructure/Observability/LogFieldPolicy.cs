@@ -15,6 +15,9 @@ internal enum LogFieldShape
     /// <summary>16 lowercase hex characters (installHash, tokenHash8).</summary>
     Hex16,
 
+    /// <summary><see cref="Hex16"/>, or <see cref="LogFieldPolicy.InstallHashUnavailable"/> when the log key could not be read (T-124 F7).</summary>
+    InstallHash,
+
     /// <summary>A UUID.</summary>
     Uuid,
 
@@ -46,6 +49,9 @@ public static partial class LogFieldPolicy
     /// <summary>The message template of the one event that may carry <c>purchaseId</c>.</summary>
     public const string AuditAlertMessage = "audit_alert";
 
+    /// <summary>The <c>installHash</c> of a request whose pseudonym could not be computed (KMS down); the request still succeeds.</summary>
+    public const string InstallHashUnavailable = "unavailable";
+
     /// <summary>What a value of the wrong shape is replaced by.</summary>
     public const string InvalidValue = "<invalid>";
 
@@ -68,7 +74,7 @@ public static partial class LogFieldPolicy
         "Zaghlol-Time-Nonce", "timeNonce", "Idempotency-Key", "idempotencyKey", "seatKeys", "orderId", "ownershipCheck",
         "purchaseToken", "signedTransaction", "signedTransactions", "idToken", "nonce", "attestation", "assertion",
         "keyId", "refreshToken", "Authorization", "Location", "Cookie", "email", "ip", "requestBody", "responseBody",
-        "queryString", "path", "uri", "url", "Zaghlol-Install", "Zaghlol-Account", "installToken", "accountToken", "headers",
+        "queryString", "path", "uri", "url", "Zaghlol-Install", "Zaghlol-Account", "installToken", "rotateInstallToken", "accountToken", "headers",
         "requestHeaders",
     ];
 
@@ -80,7 +86,7 @@ public static partial class LogFieldPolicy
         ["route"] = LogFieldShape.Route,
         ["status"] = LogFieldShape.Number,
         ["durationMs"] = LogFieldShape.Number,
-        ["installHash"] = LogFieldShape.Hex16,
+        ["installHash"] = LogFieldShape.InstallHash,
         ["code"] = LogFieldShape.Code,
         ["reason"] = LogFieldShape.Word,
         ["operation"] = LogFieldShape.Word,
@@ -114,6 +120,7 @@ public static partial class LogFieldPolicy
         LogFieldShape.Code => CodeRegex().IsMatch(value),
         LogFieldShape.Word => WordRegex().IsMatch(value),
         LogFieldShape.Hex16 => HexRegex().IsMatch(value),
+        LogFieldShape.InstallHash => HexRegex().IsMatch(value) || string.Equals(value, InstallHashUnavailable, StringComparison.Ordinal),
         LogFieldShape.Uuid => Guid.TryParseExact(value, "D", out _),
         LogFieldShape.Route => RouteRegex().IsMatch(value),
         LogFieldShape.Method => MethodRegex().IsMatch(value),

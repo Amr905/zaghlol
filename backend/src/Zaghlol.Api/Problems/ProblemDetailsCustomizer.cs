@@ -1,4 +1,5 @@
 using System.Diagnostics;
+using Microsoft.AspNetCore.WebUtilities;
 using Zaghlol.Api.Observability;
 
 namespace Zaghlol.Api.Problems;
@@ -16,6 +17,11 @@ internal static class ProblemDetailsCustomizer
 
         problem.Status = status;
         problem.Instance = null;
+
+        // RFC 9457 §4.2.1: "about:blank" when no type is defined. The framework fills type and title only for some
+        // statuses (not 413 or 429), and the contract requires both (OpenAPI Problem).
+        problem.Type ??= "about:blank";
+        problem.Title ??= ReasonPhrases.GetReasonPhrase(status) is { Length: > 0 } phrase ? phrase : "Error";
 
         if (!problem.Extensions.TryGetValue("code", out var existing))
         {

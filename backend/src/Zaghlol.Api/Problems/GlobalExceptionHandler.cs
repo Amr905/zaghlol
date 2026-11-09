@@ -1,3 +1,4 @@
+using System.Data.Common;
 using System.Globalization;
 using Microsoft.AspNetCore.Diagnostics;
 using Microsoft.AspNetCore.Mvc;
@@ -22,6 +23,9 @@ internal sealed partial class GlobalExceptionHandler(
         {
             BadHttpRequestException badRequest => badRequest.StatusCode,
             KmsUnavailableException => StatusCodes.Status503ServiceUnavailable,
+
+            // The database is down or unreachable (T-124 design note): 503 UPSTREAM_UNAVAILABLE, never 500.
+            DbException { IsTransient: true } => StatusCodes.Status503ServiceUnavailable,
             _ => StatusCodes.Status500InternalServerError,
         };
 

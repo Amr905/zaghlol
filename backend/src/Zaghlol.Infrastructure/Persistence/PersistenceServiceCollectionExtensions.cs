@@ -10,11 +10,24 @@ using Zaghlol.Application.Health;
 
 namespace Zaghlol.Infrastructure.Persistence;
 
-/// <summary>Creates <see cref="ZaghlolDbContext"/> instances bound to one database login.</summary>
-public interface IZaghlolDbContextFactory
+/// <summary>
+/// Creates <see cref="ZaghlolDbContext"/> instances bound to one database login. Internal (FU-021): API code never chooses a
+/// role; it gets a factory whose role is fixed per endpoint group (<see cref="IAppDbContextFactory"/> for <c>/v1</c>).
+/// </summary>
+internal interface IZaghlolDbContextFactory
 {
     /// <summary>A new context on the given role's connection pool. The caller disposes it.</summary>
     ZaghlolDbContext CreateDbContext(DatabaseRole role);
+}
+
+/// <summary>
+/// The only database access of the public <c>/v1</c> endpoints and their stores: the <see cref="DatabaseRole.App"/> login
+/// (<c>app_rw</c>), fixed. A <c>/v1</c> handler can never get the admin context (T-122 code review #13, FU-021).
+/// </summary>
+public interface IAppDbContextFactory
+{
+    /// <summary>A new context on the App connection pool. The caller disposes it.</summary>
+    ZaghlolDbContext CreateDbContext();
 }
 
 /// <summary>Connection strings by role, read from <c>ConnectionStrings:App|Admin|Worker</c>.</summary>
@@ -69,6 +82,10 @@ public static class PersistenceServiceCollectionExtensions
         }
 
         services.TryAddSingleton<IZaghlolDbContextFactory, ZaghlolDbContextFactory>();
+        if (required.Contains(DatabaseRole.App))
+        {
+            services.TryAddSingleton<IAppDbContextFactory, AppDbContextFactory>();
+        }
 
         // SEC F11: stop the process if any of these logins is privileged, the owner, or in the wrong group.
         services.TryAddSingleton(TimeProvider.System);
@@ -93,6 +110,11 @@ public static class PersistenceServiceCollectionExtensions
                 ?? throw new InvalidOperationException("ConnectionStrings:App must be set for the readiness probe.")));
         services.TryAddSingleton<IDatabaseReadiness, PostgresDatabaseReadiness>();
         return services;
+    }
+
+    private sealed class AppDbContextFactory(IZaghlolDbContextFactory contexts) : IAppDbContextFactory
+    {
+        public ZaghlolDbContext CreateDbContext() => contexts.CreateDbContext(DatabaseRole.App);
     }
 
     private sealed class ZaghlolDbContextFactory(IServiceProvider services) : IZaghlolDbContextFactory

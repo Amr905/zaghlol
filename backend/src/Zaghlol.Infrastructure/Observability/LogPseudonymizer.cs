@@ -1,5 +1,6 @@
 using System.Security.Cryptography;
 using System.Text;
+using Zaghlol.Domain;
 using Zaghlol.Infrastructure.Kms;
 
 namespace Zaghlol.Infrastructure.Observability;
@@ -14,11 +15,12 @@ public interface ILogKeySource
 /// <c>installHash</c> for logs: the first 8 bytes (hex) of HMAC-SHA256 of the install ID under a log key that changes every
 /// month, so a log line can't be joined to <c>merchant_contributions.install_hash</c> or to another month's lines
 /// (error-handling-and-observability.md section 3.2). The install auth handler (T-124) calls it once per request and puts the
-/// result in <c>HttpContext.Items[RequestLogItems.InstallHash]</c>.
+/// result in <c>HttpContext.Items[RequestLogItems.InstallHash]</c>. It takes only an <see cref="InstallId"/> (a validated UUID
+/// v4), never free-form text (T-124 F6).
 /// </summary>
 public interface ILogPseudonymizer
 {
-    ValueTask<string> InstallHashAsync(string installId, CancellationToken cancellationToken);
+    ValueTask<string> InstallHashAsync(InstallId installId, CancellationToken cancellationToken);
 }
 
 /// <summary>
@@ -50,10 +52,8 @@ public sealed class LogPseudonymizer(ILogKeySource keys, TimeProvider clock) : I
 
     private MonthKey? current;
 
-    public async ValueTask<string> InstallHashAsync(string installId, CancellationToken cancellationToken)
+    public async ValueTask<string> InstallHashAsync(InstallId installId, CancellationToken cancellationToken)
     {
-        ArgumentException.ThrowIfNullOrWhiteSpace(installId);
-
         var month = clock.GetUtcNow().ToString("yyyy-MM", System.Globalization.CultureInfo.InvariantCulture);
         var held = Volatile.Read(ref current);
         if (held is null || !string.Equals(held.Month, month, StringComparison.Ordinal))
@@ -62,7 +62,7 @@ public sealed class LogPseudonymizer(ILogKeySource keys, TimeProvider clock) : I
             Volatile.Write(ref current, held);
         }
 
-        var mac = HMACSHA256.HashData(held.Key, Encoding.UTF8.GetBytes(installId));
+        var mac = HMACSHA256.HashData(held.Key, Encoding.UTF8.GetBytes(installId.ToString()));
         return Convert.ToHexStringLower(mac.AsSpan(0, 8));
     }
 }
