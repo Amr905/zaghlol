@@ -267,7 +267,16 @@ public static class CatalogKeys
         }
 
         var buffer = new byte[Base64Url.GetMaxDecodedLength(encoded.Length)];
-        if (!Base64Url.TryDecodeFromChars(encoded, buffer, out var written))
+        int written;
+        try
+        {
+            // Despite its name, TryDecodeFromChars throws on input that is not a whole number of base64 groups.
+            if (!Base64Url.TryDecodeFromChars(encoded, buffer, out written))
+            {
+                return false;
+            }
+        }
+        catch (FormatException)
         {
             return false;
         }

@@ -39,6 +39,9 @@ namespace Zaghlol.Infrastructure.Persistence.Migrations
                 table: "catalog_drafts",
                 column: "seq",
                 unique: true);
+
+            // Grants are explicit (no default privileges); rendered from the list frozen with this migration.
+            migrationBuilder.Sql(GrantMatrix.ToSql(GrantMatrix.CatalogDrafts));
         }
 
         /// <inheritdoc />

@@ -1,4 +1,5 @@
 using System.Globalization;
+using Microsoft.AspNetCore.Http.HttpResults;
 using Microsoft.AspNetCore.Mvc;
 using Zaghlol.Api.Auth;
 using Zaghlol.Api.Json;
@@ -147,7 +148,7 @@ internal static class CatalogAdminEndpoints
         _ => new JsonBytesResult(CatalogJson.OfOp(change.Op!), successStatus),
     };
 
-    private static IResult Invalid() => ApiProblems.Of(StatusCodes.Status400BadRequest, ErrorCodes.ValidationFailed);
+    private static ProblemHttpResult Invalid() => ApiProblems.Of(StatusCodes.Status400BadRequest, ErrorCodes.ValidationFailed);
 
     private static void NoStore(HttpContext context) => context.Response.Headers.CacheControl = "no-store";
 
