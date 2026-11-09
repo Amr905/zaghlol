@@ -45,3 +45,7 @@ Both Windows workarounds are now mostly redundant, since the runner no longer ex
 - Existence of the image tags `ghcr.io/cirruslabs/flutter:3.47.9` and `mcr.microsoft.com/dotnet/sdk:10.0.402` (env overrides exist).
 - `host.docker.internal` reachability from the SDK container to ports published by sibling Postgres containers on the PO's Docker Desktop.
 - Which PowerShell `START-LOCAL-CI.cmd` launches (script avoids the known quoting traps for both).
+
+## Lead fix (delta)
+
+Major resolved: `Checkout` now throws unless `$Repo\.git` exists and `git -C $Repo rev-parse --show-toplevel` equals `$Repo`; `Push-Location -ErrorAction Stop`; callers publish `FAIL ... checkout=1` instead of leaving RUNNING. Minors logged as follow-up FU-054.
