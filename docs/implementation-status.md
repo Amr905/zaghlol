@@ -274,6 +274,8 @@
 - **FU-051** (T-013 minors #1–#5, nits): `$` with a non-candidate fallback fails (policy decision for templates); trailing `.`/`,` after a number fails (template captures must exclude it); `0,123` accepted; U+2060/U+00AD not stripped; no-echo fuzz check is vacuous. See `docs/05-reviews/T-013.md`. Owner: T-032.
 - **FU-052** (T-124 code minors/nits; security S-2…S-7): **Before T-130/T-135 use `WithIdempotency`:** S-2, the idempotency session holds a DB connection/transaction while the handler opens another (pool exhaustion) — needs a design note in T-130. Also S-3 (no guard against storing `rotateInstallToken`), S-4 (DELETE race leaves a row ≤24 h), S-6 (key not in encryption context), replay drops handler headers, no rotated-kid re-sign test. See `docs/05-reviews/T-124*.md`. Owners: T-130, T-135, T-140.
 - **FU-053** (PC runner): fails for local reasons — Docker not running, `KeyRingTests.AnOffCurvePointIsRejected` throws PlatformNotSupportedException on Windows, CRLF vs LF in `iso4217_table_test`, and once Application Control blocked it. Owner: PO (Docker) + backend/app tooling.
+- **FU-054** (local-ci container review minors): no timeout/container name on `docker run` (a hung step blocks the loop); NTFS bind mount is slow; Windows-containers mode not detected; no Gradle cache volume for APK steps; bare `\r` progress lines in logs. See `docs/05-reviews/local-ci-container.md`. Owner: CI tooling.
+- **FU-055** (PC runner, first Linux-container run 2026-11-10): `SeededSeriesTests.EverySeriesIsExportedAtZeroBeforeAnyEvent` failed once (series `zaghlol.audit_alert.fired rule=support_moves_per_purchase_90d` missing) while it passes in GitHub CI — likely a timing/ordering race in the MeterListener collection. Owner: T-138 follow-up.
 
 ## Log
 | Date | Event |
@@ -326,3 +328,4 @@
 | 2026-11-08 | Lead merged PRs #1 (T-027), #2 (T-122), #4 (T-002), #3 (T-014, after re-running CI on a main-merged head) and #5 (T-028, round 2 after one major). PO authorised the Lead to merge approved PRs. Started T-004, T-022 (Sonnet) and T-123 (Opus). FU-029…FU-041 logged. |
 | 2026-11-09 | Merged #7 (T-004), #8 (T-123), #9 (T-022), #10 (Balanced rules, 2 tasks at a time, runner LF fix), #11 (T-138). 15/186 done. T-007 (Opus) and T-124 (design note, Sonnet) in progress. |
 | 2026-11-09 | New Lead session (PO linked GitHub, upgraded Flutter). Merged #13 (T-007), #14 (T-013), #15 (T-124, one security fix round). 18/186 done. FU-050…FU-053 logged. |
+| 2026-11-10 | PC runner moved to Linux Docker containers (#17) with a locally built Flutter 3.47.9 image; first runs: app checks all PASS, backend build/format PASS, Testcontainers work. FU-054, FU-055 logged. |
