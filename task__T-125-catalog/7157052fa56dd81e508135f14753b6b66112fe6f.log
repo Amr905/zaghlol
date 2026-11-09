@@ -1,5 +1,143 @@
 ﻿== SUMMARY ==
-RUNNING sha=7157052fa56dd81e508135f14753b6b66112fe6f
+FAIL sha=7157052fa56dd81e508135f14753b6b66112fe6f pipeline=quick-backend dotnet-build=1 dotnet-format=0 dotnet-test=1
+dotnet-build                 FAIL  exit=1  10s
+dotnet-format                PASS  exit=0  20s
+dotnet-test                  FAIL  exit=1  36s
+
+== ERRORS: dotnet-build ==
+/work/backend/src/Zaghlol.Api/Endpoints/Admin/CatalogAdminEndpoints.cs(150,28): error CA1859: Change return type of method 'Invalid' from 'Microsoft.AspNetCore.Http.IResult' to 'Microsoft.AspNetCore.Http.HttpResults.ProblemHttpResult' for improved performance (https://learn.microsoft.com/dotnet/fundamentals/code-analysis/quality-rules/ca1859) [/work/backend/src/Zaghlol.Api/Zaghlol.Api.csproj]
+
+== ERRORS: dotnet-test ==
+  Failed Zaghlol.Application.Tests.Catalog.CatalogKeysTests.AnAliasKeyWithNonZeroTrailingBitsIsRejected [< 1 ms]
+  Error Message:
+   System.FormatException : The input is not a valid Base-64 string as it contains a non-base 64 character, more than two padding characters, or an illegal character among the padding characters.
+  Stack Trace:
+     at System.Buffers.Text.Base64Url.TryDecodeFromChars(ReadOnlySpan`1 source, Span`1 destination, Int32& bytesWritten)
+   at Zaghlol.Application.Catalog.CatalogKeys.TryDecode(String encoded, String& text) in /_/backend/src/Zaghlol.Application/Catalog/CatalogKeys.cs:line 270
+   at Zaghlol.Application.Catalog.CatalogKeys.TryParseAlias(String id, CatalogEntryKey& key) in /_/backend/src/Zaghlol.Application/Catalog/CatalogKeys.cs:line 175
+   at Zaghlol.Application.Catalog.CatalogKeys.TryParse(CatalogEntity entity, String id, CatalogEntryKey& key) in /_/backend/src/Zaghlol.Application/Catalog/CatalogKeys.cs:line 109
+   at Zaghlol.Application.Tests.Catalog.CatalogKeysTests.AnAliasKeyWithNonZeroTrailingBitsIsRejected() in /_/backend/tests/Zaghlol.Application.Tests/Catalog/CatalogKeysTests.cs:line 41
+   at System.Reflection.MethodBaseInvoker.InterpretedInvoke_Method(Object obj, IntPtr* args)
+   at System.Reflection.MethodBaseInvoker.InvokeWithNoArgs(Object obj, BindingFlags invokeAttr)
+[xUnit.net 00:00:00.27]     Zaghlol.Application.Tests.Catalog.CatalogKeysTests.AnAliasKeyWithNonZeroTrailingBitsIsRejected [FAIL]
+
+
+  Failed Zaghlol.Infrastructure.Tests.GrantTests.TableAndColumnPrivilegesEqualTheGrantMatrix [15 ms]
+  Error Message:
+   Assert.Empty() Failure: Collection was not empty
+Collection: ["ops_ro|catalog_drafts|SELECT", "ops_rw|catalog_drafts|DELETE", "ops_rw|catalog_drafts|INSERT", "ops_rw|catalog_drafts|SELECT", "ops_rw|catalog_drafts|UPDATE"]
+  Stack Trace:
+     at Zaghlol.Infrastructure.Tests.GrantTests.TableAndColumnPrivilegesEqualTheGrantMatrix() in /_/backend/tests/Zaghlol.Infrastructure.Tests/GrantTests.cs:line 138
+--- End of stack trace from previous location ---
+
+Passed!  - Failed:     0, Passed:    63, Skipped:     0, Total:    63, Duration: 10 s - Zaghlol.Contract.Tests.dll (net10.0)
+[xUnit.net 00:00:13.11]     Zaghlol.Infrastructure.Tests.CheckConstraintTests.EveryCheckConstraintInTheSchemaHasANegativeCase [FAIL]
+  Failed Zaghlol.Infrastructure.Tests.CheckConstraintTests.EveryCheckConstraintInTheSchemaHasANegativeCase [5 ms]
+  Error Message:
+   Assert.Equal() Failure: Values differ
+
+  Failed Zaghlol.Infrastructure.Tests.CheckConstraintTests.EveryCheckConstraintInTheSchemaHasANegativeCase [5 ms]
+  Error Message:
+   Assert.Equal() Failure: Values differ
+Expected: 47
+Actual:   48
+  Stack Trace:
+     at Zaghlol.Infrastructure.Tests.CheckConstraintTests.EveryCheckConstraintInTheSchemaHasANegativeCase() in /_/backend/tests/Zaghlol.Infrastructure.Tests/CheckConstraintTests.cs:line 195
+--- End of stack trace from previous location ---
+
+Failed!  - Failed:     2, Passed:   485, Skipped:     0, Total:   487, Duration: 12 s - Zaghlol.Infrastructure.Tests.dll (net10.0)
+
+Passed!  - Failed:     0, Passed:   200, Skipped:     0, Total:   200, Duration: 25 s - Zaghlol.Api.Tests.dll (net10.0)
+
+
 
 == FULL LOG (last 1500 lines) ==
 auto task/T-125-catalog 7157052fa56dd81e508135f14753b6b66112fe6f 2026-11-10T01:33:06.0341876+02:00
+
+
+
+[01:33:11] === STEP dotnet-build (docker mcr.microsoft.com/dotnet/sdk:10.0.402, /work/backend)
+  Determining projects to restore...
+  All projects are up-to-date for restore.
+  Zaghlol.Domain -> /work/backend/src/Zaghlol.Domain/bin/Release/net10.0/Zaghlol.Domain.dll
+  Zaghlol.Ops -> /work/backend/src/Zaghlol.Ops/bin/Release/net10.0/zaghlol-ops.dll
+  Zaghlol.Application -> /work/backend/src/Zaghlol.Application/bin/Release/net10.0/Zaghlol.Application.dll
+  Zaghlol.Ops.Tests -> /work/backend/tests/Zaghlol.Ops.Tests/bin/Release/net10.0/Zaghlol.Ops.Tests.dll
+  Zaghlol.Application.Tests -> /work/backend/tests/Zaghlol.Application.Tests/bin/Release/net10.0/Zaghlol.Application.Tests.dll
+  Zaghlol.Infrastructure -> /work/backend/src/Zaghlol.Infrastructure/bin/Release/net10.0/Zaghlol.Infrastructure.dll
+  Zaghlol.Workers -> /work/backend/src/Zaghlol.Workers/bin/Release/net10.0/Zaghlol.Workers.dll
+/work/backend/src/Zaghlol.Api/Endpoints/Admin/CatalogAdminEndpoints.cs(150,28): error CA1859: Change return type of method 'Invalid' from 'Microsoft.AspNetCore.Http.IResult' to 'Microsoft.AspNetCore.Http.HttpResults.ProblemHttpResult' for improved performance (https://learn.microsoft.com/dotnet/fundamentals/code-analysis/quality-rules/ca1859) [/work/backend/src/Zaghlol.Api/Zaghlol.Api.csproj]
+  Zaghlol.Infrastructure.Tests -> /work/backend/tests/Zaghlol.Infrastructure.Tests/bin/Release/net10.0/Zaghlol.Infrastructure.Tests.dll
+  Zaghlol.Workers.Tests -> /work/backend/tests/Zaghlol.Workers.Tests/bin/Release/net10.0/Zaghlol.Workers.Tests.dll
+
+Build FAILED.
+
+/work/backend/src/Zaghlol.Api/Endpoints/Admin/CatalogAdminEndpoints.cs(150,28): error CA1859: Change return type of method 'Invalid' from 'Microsoft.AspNetCore.Http.IResult' to 'Microsoft.AspNetCore.Http.HttpResults.ProblemHttpResult' for improved performance (https://learn.microsoft.com/dotnet/fundamentals/code-analysis/quality-rules/ca1859) [/work/backend/src/Zaghlol.Api/Zaghlol.Api.csproj]
+    0 Warning(s)
+    1 Error(s)
+
+Time Elapsed 00:00:09.63
+
+[01:33:21] === RESULT dotnet-build exit=1 (10s)
+[01:33:21] === STEP dotnet-format (docker mcr.microsoft.com/dotnet/sdk:10.0.402, /work/backend)
+Formatting code files in workspace '/work/backend/Zaghlol.sln'.
+Format complete in 19408ms.
+
+[01:33:41] === RESULT dotnet-format exit=0 (20s)
+[01:33:41] === STEP dotnet-test (docker mcr.microsoft.com/dotnet/sdk:10.0.402, /work/backend)
+Test run for /work/backend/tests/Zaghlol.Application.Tests/bin/Release/net10.0/Zaghlol.Application.Tests.dll (.NETCoreApp,Version=v10.0)
+Test run for /work/backend/tests/Zaghlol.Ops.Tests/bin/Release/net10.0/Zaghlol.Ops.Tests.dll (.NETCoreApp,Version=v10.0)
+Test run for /work/backend/tests/Zaghlol.Workers.Tests/bin/Release/net10.0/Zaghlol.Workers.Tests.dll (.NETCoreApp,Version=v10.0)
+Test run for /work/backend/tests/Zaghlol.Api.Tests/bin/Release/net10.0/Zaghlol.Api.Tests.dll (.NETCoreApp,Version=v10.0)
+Test run for /work/backend/tests/Zaghlol.Infrastructure.Tests/bin/Release/net10.0/Zaghlol.Infrastructure.Tests.dll (.NETCoreApp,Version=v10.0)
+Test run for /work/backend/tests/Zaghlol.Contract.Tests/bin/Release/net10.0/Zaghlol.Contract.Tests.dll (.NETCoreApp,Version=v10.0)
+A total of 1 test files matched the specified pattern.
+A total of 1 test files matched the specified pattern.
+A total of 1 test files matched the specified pattern.
+A total of 1 test files matched the specified pattern.
+A total of 1 test files matched the specified pattern.
+A total of 1 test files matched the specified pattern.
+  Failed Zaghlol.Application.Tests.Catalog.CatalogKeysTests.AnAliasKeyWithNonZeroTrailingBitsIsRejected [< 1 ms]
+  Error Message:
+   System.FormatException : The input is not a valid Base-64 string as it contains a non-base 64 character, more than two padding characters, or an illegal character among the padding characters.
+  Stack Trace:
+     at System.Buffers.Text.Base64Url.TryDecodeFromChars(ReadOnlySpan`1 source, Span`1 destination, Int32& bytesWritten)
+   at Zaghlol.Application.Catalog.CatalogKeys.TryDecode(String encoded, String& text) in /_/backend/src/Zaghlol.Application/Catalog/CatalogKeys.cs:line 270
+   at Zaghlol.Application.Catalog.CatalogKeys.TryParseAlias(String id, CatalogEntryKey& key) in /_/backend/src/Zaghlol.Application/Catalog/CatalogKeys.cs:line 175
+   at Zaghlol.Application.Catalog.CatalogKeys.TryParse(CatalogEntity entity, String id, CatalogEntryKey& key) in /_/backend/src/Zaghlol.Application/Catalog/CatalogKeys.cs:line 109
+   at Zaghlol.Application.Tests.Catalog.CatalogKeysTests.AnAliasKeyWithNonZeroTrailingBitsIsRejected() in /_/backend/tests/Zaghlol.Application.Tests/Catalog/CatalogKeysTests.cs:line 41
+   at System.Reflection.MethodBaseInvoker.InterpretedInvoke_Method(Object obj, IntPtr* args)
+   at System.Reflection.MethodBaseInvoker.InvokeWithNoArgs(Object obj, BindingFlags invokeAttr)
+[xUnit.net 00:00:00.27]     Zaghlol.Application.Tests.Catalog.CatalogKeysTests.AnAliasKeyWithNonZeroTrailingBitsIsRejected [FAIL]
+
+Passed!  - Failed:     0, Passed:     2, Skipped:     0, Total:     2, Duration: 26 ms - Zaghlol.Ops.Tests.dll (net10.0)
+
+Failed!  - Failed:     1, Passed:    81, Skipped:     0, Total:    82, Duration: 77 ms - Zaghlol.Application.Tests.dll (net10.0)
+
+Passed!  - Failed:     0, Passed:     3, Skipped:     0, Total:     3, Duration: 97 ms - Zaghlol.Workers.Tests.dll (net10.0)
+[xUnit.net 00:00:10.41]     Zaghlol.Infrastructure.Tests.GrantTests.TableAndColumnPrivilegesEqualTheGrantMatrix [FAIL]
+  Failed Zaghlol.Infrastructure.Tests.GrantTests.TableAndColumnPrivilegesEqualTheGrantMatrix [15 ms]
+  Error Message:
+   Assert.Empty() Failure: Collection was not empty
+Collection: ["ops_ro|catalog_drafts|SELECT", "ops_rw|catalog_drafts|DELETE", "ops_rw|catalog_drafts|INSERT", "ops_rw|catalog_drafts|SELECT", "ops_rw|catalog_drafts|UPDATE"]
+  Stack Trace:
+     at Zaghlol.Infrastructure.Tests.GrantTests.TableAndColumnPrivilegesEqualTheGrantMatrix() in /_/backend/tests/Zaghlol.Infrastructure.Tests/GrantTests.cs:line 138
+--- End of stack trace from previous location ---
+
+Passed!  - Failed:     0, Passed:    63, Skipped:     0, Total:    63, Duration: 10 s - Zaghlol.Contract.Tests.dll (net10.0)
+[xUnit.net 00:00:13.11]     Zaghlol.Infrastructure.Tests.CheckConstraintTests.EveryCheckConstraintInTheSchemaHasANegativeCase [FAIL]
+  Failed Zaghlol.Infrastructure.Tests.CheckConstraintTests.EveryCheckConstraintInTheSchemaHasANegativeCase [5 ms]
+  Error Message:
+   Assert.Equal() Failure: Values differ
+Expected: 47
+Actual:   48
+  Stack Trace:
+     at Zaghlol.Infrastructure.Tests.CheckConstraintTests.EveryCheckConstraintInTheSchemaHasANegativeCase() in /_/backend/tests/Zaghlol.Infrastructure.Tests/CheckConstraintTests.cs:line 195
+--- End of stack trace from previous location ---
+
+Failed!  - Failed:     2, Passed:   485, Skipped:     0, Total:   487, Duration: 12 s - Zaghlol.Infrastructure.Tests.dll (net10.0)
+
+Passed!  - Failed:     0, Passed:   200, Skipped:     0, Total:   200, Duration: 25 s - Zaghlol.Api.Tests.dll (net10.0)
+
+[01:34:18] === RESULT dotnet-test exit=1 (36s)
+[01:34:18] SUMMARY FAIL sha=7157052fa56dd81e508135f14753b6b66112fe6f pipeline=quick-backend dotnet-build=1 dotnet-format=0 dotnet-test=1
