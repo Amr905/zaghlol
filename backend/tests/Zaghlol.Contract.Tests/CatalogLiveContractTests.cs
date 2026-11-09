@@ -260,7 +260,9 @@ public class CatalogLiveContractTests(CatalogContractFixture fixture) : IClassFi
 
         var unknown = await AssertDeclared(extra, Put, HttpStatusCode.BadRequest, Problem);
         Assert.Equal("UNKNOWN_FIELD", unknown!["code"]!.GetValue<string>());
-        foreach (var response in new[] { missing, badColor, wrongShape, badKey, badEntity })
+        var wrong = await AssertDeclared(wrongShape, Put, HttpStatusCode.BadRequest, Problem);
+        Assert.Equal("UNKNOWN_FIELD", wrong!["code"]!.GetValue<string>());
+        foreach (var response in new[] { missing, badColor, badKey, badEntity })
         {
             var body = await AssertDeclared(response, Put, HttpStatusCode.BadRequest, Problem);
             Assert.Equal("VALIDATION_FAILED", body!["code"]!.GetValue<string>());
@@ -440,6 +442,7 @@ public class CatalogLiveContractTests(CatalogContractFixture fixture) : IClassFi
     [Fact]
     public async Task TheFullEndpointIsPublicImmutableAndDeclaresItsStatuses()
     {
+        await NewCategoryAsync();
         var version = await PublishAsync();
 
         using var ok = await fixture.Client.GetAsync($"/v1/catalog/{version}/full");

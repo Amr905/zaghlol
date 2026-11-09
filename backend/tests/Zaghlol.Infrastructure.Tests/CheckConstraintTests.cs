@@ -66,6 +66,9 @@ public class CheckConstraintTests(SchemaFixture fixture)
             ["app_attest_keys: unknown environment"] = ("app_attest_keys", Set("environment", "sandbox"), "ck_app_attest_keys_environment"),
             ["app_attest_keys: key_id not 32 bytes"] = ("app_attest_keys", Set("key_id", Rows.Bytes(20)), "ck_app_attest_keys_key_id_length"),
 
+            // catalog_drafts (T-125)
+            ["catalog_drafts: unknown entity"] = ("catalog_drafts", Set("entity", "places"), "ck_catalog_drafts_entity"),
+
             // replay_guard
             ["replay_guard: unknown kind"] = ("replay_guard", Set("kind", "signin_facebook"), "ck_replay_guard_kind"),
             ["replay_guard: key_hash not 32 bytes"] = ("replay_guard", Set("key_hash", Rows.Bytes(64)), "ck_replay_guard_key_hash_length"),
@@ -191,8 +194,8 @@ public class CheckConstraintTests(SchemaFixture fixture)
             .ToHashSet(StringComparer.Ordinal);
         var tested = Cases.Values.Select(c => c.Constraint).ToHashSet(StringComparer.Ordinal);
 
-        // 23 documented + 24 hardening (octet/char lengths, cause regex, audit, codes, formats).
-        Assert.Equal(47, inSchema.Count);
+        // 23 documented + 24 hardening (octet/char lengths, cause regex, audit, codes, formats) + 1 catalog_drafts (T-125).
+        Assert.Equal(48, inSchema.Count);
         Assert.Empty(inSchema.Except(tested));
         Assert.Empty(tested.Except(inSchema));
     }
