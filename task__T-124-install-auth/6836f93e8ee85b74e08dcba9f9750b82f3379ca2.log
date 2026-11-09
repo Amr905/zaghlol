@@ -1,1 +1,400 @@
-﻿auto task/T-124-install-auth 6836f93e8ee85b74e08dcba9f9750b82f3379ca2 2026-11-09T22:12:36.7546177+02:00
+﻿  Stack Trace:
+     at Zaghlol.Api.Tests.Signing.SigningHostFixture.InitializeAsync()
+   at Zaghlol.Api.Tests.Signing.SigningHostFixture.InitializeAsync()
+   at System.Runtime.CompilerServices.AsyncMethodBuilderCore.Start[TStateMachine](TStateMachine& stateMachine)
+   at Zaghlol.Api.Tests.Signing.SigningHostFixture.InitializeAsync()
+  Failed Zaghlol.Api.Tests.Signing.TimeNonceTests.AValidNonceIsEchoedByteForByteInsideTheSignedBody(path: "/t/anchored-union") [1 ms]
+  Error Message:
+   System.IO.FileLoadException : Could not load file or assembly 'C:\Users\amr90\zaghlol-ci\repo\backend\tests\Zaghlol.Api.Tests\bin\Release\net10.0\Zaghlol.Api.dll'. An Application Control policy has blocked this file. (0x800711C7)
+  Stack Trace:
+     at Zaghlol.Api.Tests.Signing.SigningHostFixture.InitializeAsync()
+   at Zaghlol.Api.Tests.Signing.SigningHostFixture.InitializeAsync()
+   at System.Runtime.CompilerServices.AsyncMethodBuilderCore.Start[TStateMachine](TStateMachine& stateMachine)
+   at Zaghlol.Api.Tests.Signing.SigningHostFixture.InitializeAsync()
+  Failed Zaghlol.Api.Tests.Signing.TimeNonceTests.AValidNonceIsEchoedByteForByteInsideTheSignedBody(path: "/t/anchored") [1 ms]
+  Error Message:
+   System.IO.FileLoadException : Could not load file or assembly 'C:\Users\amr90\zaghlol-ci\repo\backend\tests\Zaghlol.Api.Tests\bin\Release\net10.0\Zaghlol.Api.dll'. An Application Control policy has blocked this file. (0x800711C7)
+  Stack Trace:
+     at Zaghlol.Api.Tests.Signing.SigningHostFixture.InitializeAsync()
+   at Zaghlol.Api.Tests.Signing.SigningHostFixture.InitializeAsync()
+   at System.Runtime.CompilerServices.AsyncMethodBuilderCore.Start[TStateMachine](TStateMachine& stateMachine)
+   at Zaghlol.Api.Tests.Signing.SigningHostFixture.InitializeAsync()
+  Failed Zaghlol.Api.Tests.Signing.TimeNonceTests.HeaderValuesAreAcceptedOnlyWhenAbsentOrExactlyOneCanonicalValue [1 ms]
+  Error Message:
+   System.IO.FileLoadException : Could not load file or assembly 'C:\Users\amr90\zaghlol-ci\repo\backend\tests\Zaghlol.Api.Tests\bin\Release\net10.0\Zaghlol.Api.dll'. An Application Control policy has blocked this file. (0x800711C7)
+  Stack Trace:
+     at Zaghlol.Api.Tests.Signing.SigningHostFixture.InitializeAsync()
+   at Zaghlol.Api.Tests.Signing.SigningHostFixture.InitializeAsync()
+   at System.Runtime.CompilerServices.AsyncMethodBuilderCore.Start[TStateMachine](TStateMachine& stateMachine)
+   at Zaghlol.Api.Tests.Signing.SigningHostFixture.InitializeAsync()
+  Failed Zaghlol.Api.Tests.Signing.TimeNonceTests.AnAnchoredBodyThatDoesNotEchoTheNonceFailsClosed(nonce: "kq3V9w0bQ2FwdGFpblphZw") [1 ms]
+  Error Message:
+   System.IO.FileLoadException : Could not load file or assembly 'C:\Users\amr90\zaghlol-ci\repo\backend\tests\Zaghlol.Api.Tests\bin\Release\net10.0\Zaghlol.Api.dll'. An Application Control policy has blocked this file. (0x800711C7)
+  Stack Trace:
+     at Zaghlol.Api.Tests.Signing.SigningHostFixture.InitializeAsync()
+   at Zaghlol.Api.Tests.Signing.SigningHostFixture.InitializeAsync()
+   at System.Runtime.CompilerServices.AsyncMethodBuilderCore.Start[TStateMachine](TStateMachine& stateMachine)
+   at Zaghlol.Api.Tests.Signing.SigningHostFixture.InitializeAsync()
+  Failed Zaghlol.Api.Tests.Signing.TimeNonceTests.AnAnchoredBodyThatDoesNotEchoTheNonceFailsClosed(nonce: null) [1 ms]
+  Error Message:
+   System.IO.FileLoadException : Could not load file or assembly 'C:\Users\amr90\zaghlol-ci\repo\backend\tests\Zaghlol.Api.Tests\bin\Release\net10.0\Zaghlol.Api.dll'. An Application Control policy has blocked this file. (0x800711C7)
+  Stack Trace:
+     at Zaghlol.Api.Tests.Signing.SigningHostFixture.InitializeAsync()
+   at Zaghlol.Api.Tests.Signing.SigningHostFixture.InitializeAsync()
+   at System.Runtime.CompilerServices.AsyncMethodBuilderCore.Start[TStateMachine](TStateMachine& stateMachine)
+   at Zaghlol.Api.Tests.Signing.SigningHostFixture.InitializeAsync()
+  Failed Zaghlol.Api.Tests.Signing.TimeNonceTests.CanonicalFormIsTheOpenApiPattern(value: "kq3V9w0bQ2FwdGFpblphZw", canonical: True) [1 ms]
+  Error Message:
+   System.IO.FileLoadException : Could not load file or assembly 'C:\Users\amr90\zaghlol-ci\repo\backend\tests\Zaghlol.Api.Tests\bin\Release\net10.0\Zaghlol.Api.dll'. An Application Control policy has blocked this file. (0x800711C7)
+  Stack Trace:
+     at Zaghlol.Api.Tests.Signing.SigningHostFixture.InitializeAsync()
+   at Zaghlol.Api.Tests.Signing.SigningHostFixture.InitializeAsync()
+   at System.Runtime.CompilerServices.AsyncMethodBuilderCore.Start[TStateMachine](TStateMachine& stateMachine)
+   at Zaghlol.Api.Tests.Signing.SigningHostFixture.InitializeAsync()
+[xUnit.net 00:00:16.44]     Zaghlol.Api.Tests.Signing.TimeNonceTests.CanonicalFormIsTheOpenApiPattern(value: 
+"kq3V9w0bQ2FwdGFpblphZB", canonical: False) [FAIL]
+[xUnit.net 00:00:16.44]     Zaghlol.Api.Tests.Signing.TimeNonceTests.CanonicalFormIsTheOpenApiPattern(value: 
+"kq3V9w0bQ2FwdGFpblphZw\n", canonical: False) [FAIL]
+[xUnit.net 00:00:16.44]     Zaghlol.Api.Tests.Signing.TimeNonceTests.CanonicalFormIsTheOpenApiPattern(value: 
+"AAAAAAAAAAAAAAAAAAAAAA", canonical: True) [FAIL]
+[xUnit.net 00:00:16.44]     Zaghlol.Api.Tests.Signing.TimeNonceTests.CanonicalFormIsTheOpenApiPattern(value: null, 
+canonical: False) [FAIL]
+[xUnit.net 00:00:16.44]     Zaghlol.Api.Tests.Signing.TimeNonceTests.CanonicalFormIsTheOpenApiPattern(value: 
+"____________________-Q", canonical: True) [FAIL]
+[xUnit.net 00:00:16.44]     Zaghlol.Api.Tests.Signing.TimeNonceTests.AnAbsentNonceGivesAnExplicitNull [FAIL]
+[xUnit.net 00:00:16.44]     Zaghlol.Api.Tests.Signing.TimeNonceTests.TheNonceAppearsInNoLogSpanOrExceptionOutput [FAIL]
+[xUnit.net 00:00:16.44]     Zaghlol.Api.Tests.Signing.TimeNonceTests.TwoNonceHeadersAre400 [FAIL]
+[xUnit.net 00:00:16.54]     
+Zaghlol.Api.Tests.Signing.ResponseSigningTests.ABodyOfExactlyTheCapIsSignedAndOneByteMoreIsA500 [FAIL]
+  Failed Zaghlol.Api.Tests.Signing.TimeNonceTests.CanonicalFormIsTheOpenApiPattern(value: "kq3V9w0bQ2FwdGFpblphZB", canonical: False) [1 ms]
+  Error Message:
+   System.IO.FileLoadException : Could not load file or assembly 'C:\Users\amr90\zaghlol-ci\repo\backend\tests\Zaghlol.Api.Tests\bin\Release\net10.0\Zaghlol.Api.dll'. An Application Control policy has blocked this file. (0x800711C7)
+  Stack Trace:
+     at Zaghlol.Api.Tests.Signing.SigningHostFixture.InitializeAsync()
+   at Zaghlol.Api.Tests.Signing.SigningHostFixture.InitializeAsync()
+   at System.Runtime.CompilerServices.AsyncMethodBuilderCore.Start[TStateMachine](TStateMachine& stateMachine)
+   at Zaghlol.Api.Tests.Signing.SigningHostFixture.InitializeAsync()
+  Failed Zaghlol.Api.Tests.Signing.TimeNonceTests.CanonicalFormIsTheOpenApiPattern(value: "kq3V9w0bQ2FwdGFpblphZw\n", canonical: False) [1 ms]
+  Error Message:
+   System.IO.FileLoadException : Could not load file or assembly 'C:\Users\amr90\zaghlol-ci\repo\backend\tests\Zaghlol.Api.Tests\bin\Release\net10.0\Zaghlol.Api.dll'. An Application Control policy has blocked this file. (0x800711C7)
+  Stack Trace:
+     at Zaghlol.Api.Tests.Signing.SigningHostFixture.InitializeAsync()
+   at Zaghlol.Api.Tests.Signing.SigningHostFixture.InitializeAsync()
+   at System.Runtime.CompilerServices.AsyncMethodBuilderCore.Start[TStateMachine](TStateMachine& stateMachine)
+   at Zaghlol.Api.Tests.Signing.SigningHostFixture.InitializeAsync()
+  Failed Zaghlol.Api.Tests.Signing.TimeNonceTests.CanonicalFormIsTheOpenApiPattern(value: "AAAAAAAAAAAAAAAAAAAAAA", canonical: True) [1 ms]
+  Error Message:
+   System.IO.FileLoadException : Could not load file or assembly 'C:\Users\amr90\zaghlol-ci\repo\backend\tests\Zaghlol.Api.Tests\bin\Release\net10.0\Zaghlol.Api.dll'. An Application Control policy has blocked this file. (0x800711C7)
+  Stack Trace:
+     at Zaghlol.Api.Tests.Signing.SigningHostFixture.InitializeAsync()
+   at Zaghlol.Api.Tests.Signing.SigningHostFixture.InitializeAsync()
+   at System.Runtime.CompilerServices.AsyncMethodBuilderCore.Start[TStateMachine](TStateMachine& stateMachine)
+   at Zaghlol.Api.Tests.Signing.SigningHostFixture.InitializeAsync()
+  Failed Zaghlol.Api.Tests.Signing.TimeNonceTests.CanonicalFormIsTheOpenApiPattern(value: null, canonical: False) [1 ms]
+  Error Message:
+   System.IO.FileLoadException : Could not load file or assembly 'C:\Users\amr90\zaghlol-ci\repo\backend\tests\Zaghlol.Api.Tests\bin\Release\net10.0\Zaghlol.Api.dll'. An Application Control policy has blocked this file. (0x800711C7)
+  Stack Trace:
+     at Zaghlol.Api.Tests.Signing.SigningHostFixture.InitializeAsync()
+   at Zaghlol.Api.Tests.Signing.SigningHostFixture.InitializeAsync()
+   at System.Runtime.CompilerServices.AsyncMethodBuilderCore.Start[TStateMachine](TStateMachine& stateMachine)
+   at Zaghlol.Api.Tests.Signing.SigningHostFixture.InitializeAsync()
+  Failed Zaghlol.Api.Tests.Signing.TimeNonceTests.CanonicalFormIsTheOpenApiPattern(value: "____________________-Q", canonical: True) [1 ms]
+  Error Message:
+   System.IO.FileLoadException : Could not load file or assembly 'C:\Users\amr90\zaghlol-ci\repo\backend\tests\Zaghlol.Api.Tests\bin\Release\net10.0\Zaghlol.Api.dll'. An Application Control policy has blocked this file. (0x800711C7)
+  Stack Trace:
+     at Zaghlol.Api.Tests.Signing.SigningHostFixture.InitializeAsync()
+   at Zaghlol.Api.Tests.Signing.SigningHostFixture.InitializeAsync()
+   at System.Runtime.CompilerServices.AsyncMethodBuilderCore.Start[TStateMachine](TStateMachine& stateMachine)
+   at Zaghlol.Api.Tests.Signing.SigningHostFixture.InitializeAsync()
+  Failed Zaghlol.Api.Tests.Signing.TimeNonceTests.AnAbsentNonceGivesAnExplicitNull [1 ms]
+  Error Message:
+   System.IO.FileLoadException : Could not load file or assembly 'C:\Users\amr90\zaghlol-ci\repo\backend\tests\Zaghlol.Api.Tests\bin\Release\net10.0\Zaghlol.Api.dll'. An Application Control policy has blocked this file. (0x800711C7)
+  Stack Trace:
+     at Zaghlol.Api.Tests.Signing.SigningHostFixture.InitializeAsync()
+   at Zaghlol.Api.Tests.Signing.SigningHostFixture.InitializeAsync()
+   at System.Runtime.CompilerServices.AsyncMethodBuilderCore.Start[TStateMachine](TStateMachine& stateMachine)
+   at Zaghlol.Api.Tests.Signing.SigningHostFixture.InitializeAsync()
+  Failed Zaghlol.Api.Tests.Signing.TimeNonceTests.TheNonceAppearsInNoLogSpanOrExceptionOutput [1 ms]
+  Error Message:
+   System.IO.FileLoadException : Could not load file or assembly 'C:\Users\amr90\zaghlol-ci\repo\backend\tests\Zaghlol.Api.Tests\bin\Release\net10.0\Zaghlol.Api.dll'. An Application Control policy has blocked this file. (0x800711C7)
+  Stack Trace:
+     at Zaghlol.Api.Tests.Signing.SigningHostFixture.InitializeAsync()
+   at Zaghlol.Api.Tests.Signing.SigningHostFixture.InitializeAsync()
+   at System.Runtime.CompilerServices.AsyncMethodBuilderCore.Start[TStateMachine](TStateMachine& stateMachine)
+   at Zaghlol.Api.Tests.Signing.SigningHostFixture.InitializeAsync()
+  Failed Zaghlol.Api.Tests.Signing.TimeNonceTests.TwoNonceHeadersAre400 [1 ms]
+  Error Message:
+   System.IO.FileLoadException : Could not load file or assembly 'C:\Users\amr90\zaghlol-ci\repo\backend\tests\Zaghlol.Api.Tests\bin\Release\net10.0\Zaghlol.Api.dll'. An Application Control policy has blocked this file. (0x800711C7)
+  Stack Trace:
+     at Zaghlol.Api.Tests.Signing.SigningHostFixture.InitializeAsync()
+   at Zaghlol.Api.Tests.Signing.SigningHostFixture.InitializeAsync()
+   at System.Runtime.CompilerServices.AsyncMethodBuilderCore.Start[TStateMachine](TStateMachine& stateMachine)
+   at Zaghlol.Api.Tests.Signing.SigningHostFixture.InitializeAsync()
+  Failed Zaghlol.Api.Tests.Signing.ResponseSigningTests.ABodyOfExactlyTheCapIsSignedAndOneByteMoreIsA500 [1 ms]
+  Error Message:
+   System.IO.FileLoadException : Could not load file or assembly 'C:\Users\amr90\zaghlol-ci\repo\backend\tests\Zaghlol.Api.Tests\bin\Release\net10.0\Zaghlol.Api.dll'. An Application Control policy has blocked this file. (0x800711C7)
+  Stack Trace:
+     at Zaghlol.Api.Tests.Signing.SigningHostFixture.InitializeAsync()
+   at Zaghlol.Api.Tests.Signing.SigningHostFixture.InitializeAsync()
+   at System.Runtime.CompilerServices.AsyncMethodBuilderCore.Start[TStateMachine](TStateMachine& stateMachine)
+   at Zaghlol.Api.Tests.Signing.SigningHostFixture.InitializeAsync()
+[xUnit.net 00:00:16.54]     
+Zaghlol.Api.Tests.Signing.ResponseSigningTests.AnExceptionDiscardsTheBufferAndGivesAnUnsignedProblem [FAIL]
+[xUnit.net 00:00:16.54]     
+Zaghlol.Api.Tests.Signing.ResponseSigningTests.ABodilessErrorOfASignedEndpointStillGetsTheProblemBody(path: 
+"/t/signed-union-not-found", status: NotFound, code: "NOT_FOUND") [FAIL]
+[xUnit.net 00:00:16.54]     
+Zaghlol.Api.Tests.Signing.ResponseSigningTests.ABodilessErrorOfASignedEndpointStillGetsTheProblemBody(path: 
+"/t/signed-401-bodiless", status: Unauthorized, code: "UNAUTHORIZED") [FAIL]
+[xUnit.net 00:00:16.54]     
+Zaghlol.Api.Tests.Signing.ResponseSigningTests.ABodilessErrorOfASignedEndpointStillGetsTheProblemBody(path: 
+"/t/signed-404-bodiless", status: NotFound, code: "NOT_FOUND") [FAIL]
+[xUnit.net 00:00:16.54]     Zaghlol.Api.Tests.Signing.ResponseSigningTests.AHandlerCannotSupplyItsOwnSignature [FAIL]
+[xUnit.net 00:00:16.54]     Zaghlol.Api.Tests.Signing.ResponseSigningTests.OnlyA200OfAMarkedEndpointIsSigned(path: 
+"/t/signed-409", status: Conflict) [FAIL]
+[xUnit.net 00:00:16.54]     Zaghlol.Api.Tests.Signing.ResponseSigningTests.OnlyA200OfAMarkedEndpointIsSigned(path: 
+"/t/signed-404", status: NotFound) [FAIL]
+[xUnit.net 00:00:16.54]     Zaghlol.Api.Tests.Signing.ResponseSigningTests.OnlyA200OfAMarkedEndpointIsSigned(path: 
+"/t/unsigned", status: OK) [FAIL]
+[xUnit.net 00:00:16.54]     
+Zaghlol.Api.Tests.Signing.ResponseSigningTests.BodyStreamAndBodyWriterWritesAreBothBufferedAndSigned(path: 
+"/t/signed-body-stream") [FAIL]
+  Failed Zaghlol.Api.Tests.Signing.ResponseSigningTests.AnExceptionDiscardsTheBufferAndGivesAnUnsignedProblem [1 ms]
+  Error Message:
+   System.IO.FileLoadException : Could not load file or assembly 'C:\Users\amr90\zaghlol-ci\repo\backend\tests\Zaghlol.Api.Tests\bin\Release\net10.0\Zaghlol.Api.dll'. An Application Control policy has blocked this file. (0x800711C7)
+  Stack Trace:
+     at Zaghlol.Api.Tests.Signing.SigningHostFixture.InitializeAsync()
+   at Zaghlol.Api.Tests.Signing.SigningHostFixture.InitializeAsync()
+   at System.Runtime.CompilerServices.AsyncMethodBuilderCore.Start[TStateMachine](TStateMachine& stateMachine)
+   at Zaghlol.Api.Tests.Signing.SigningHostFixture.InitializeAsync()
+  Failed Zaghlol.Api.Tests.Signing.ResponseSigningTests.ABodilessErrorOfASignedEndpointStillGetsTheProblemBody(path: "/t/signed-union-not-found", status: NotFound, code: "NOT_FOUND") [1 ms]
+  Error Message:
+   System.IO.FileLoadException : Could not load file or assembly 'C:\Users\amr90\zaghlol-ci\repo\backend\tests\Zaghlol.Api.Tests\bin\Release\net10.0\Zaghlol.Api.dll'. An Application Control policy has blocked this file. (0x800711C7)
+  Stack Trace:
+     at Zaghlol.Api.Tests.Signing.SigningHostFixture.InitializeAsync()
+   at Zaghlol.Api.Tests.Signing.SigningHostFixture.InitializeAsync()
+   at System.Runtime.CompilerServices.AsyncMethodBuilderCore.Start[TStateMachine](TStateMachine& stateMachine)
+   at Zaghlol.Api.Tests.Signing.SigningHostFixture.InitializeAsync()
+  Failed Zaghlol.Api.Tests.Signing.ResponseSigningTests.ABodilessErrorOfASignedEndpointStillGetsTheProblemBody(path: "/t/signed-401-bodiless", status: Unauthorized, code: "UNAUTHORIZED") [1 ms]
+  Error Message:
+   System.IO.FileLoadException : Could not load file or assembly 'C:\Users\amr90\zaghlol-ci\repo\backend\tests\Zaghlol.Api.Tests\bin\Release\net10.0\Zaghlol.Api.dll'. An Application Control policy has blocked this file. (0x800711C7)
+  Stack Trace:
+     at Zaghlol.Api.Tests.Signing.SigningHostFixture.InitializeAsync()
+   at Zaghlol.Api.Tests.Signing.SigningHostFixture.InitializeAsync()
+   at System.Runtime.CompilerServices.AsyncMethodBuilderCore.Start[TStateMachine](TStateMachine& stateMachine)
+   at Zaghlol.Api.Tests.Signing.SigningHostFixture.InitializeAsync()
+  Failed Zaghlol.Api.Tests.Signing.ResponseSigningTests.ABodilessErrorOfASignedEndpointStillGetsTheProblemBody(path: "/t/signed-404-bodiless", status: NotFound, code: "NOT_FOUND") [1 ms]
+  Error Message:
+   System.IO.FileLoadException : Could not load file or assembly 'C:\Users\amr90\zaghlol-ci\repo\backend\tests\Zaghlol.Api.Tests\bin\Release\net10.0\Zaghlol.Api.dll'. An Application Control policy has blocked this file. (0x800711C7)
+  Stack Trace:
+     at Zaghlol.Api.Tests.Signing.SigningHostFixture.InitializeAsync()
+   at Zaghlol.Api.Tests.Signing.SigningHostFixture.InitializeAsync()
+   at System.Runtime.CompilerServices.AsyncMethodBuilderCore.Start[TStateMachine](TStateMachine& stateMachine)
+   at Zaghlol.Api.Tests.Signing.SigningHostFixture.InitializeAsync()
+  Failed Zaghlol.Api.Tests.Signing.ResponseSigningTests.AHandlerCannotSupplyItsOwnSignature [1 ms]
+  Error Message:
+   System.IO.FileLoadException : Could not load file or assembly 'C:\Users\amr90\zaghlol-ci\repo\backend\tests\Zaghlol.Api.Tests\bin\Release\net10.0\Zaghlol.Api.dll'. An Application Control policy has blocked this file. (0x800711C7)
+  Stack Trace:
+     at Zaghlol.Api.Tests.Signing.SigningHostFixture.InitializeAsync()
+   at Zaghlol.Api.Tests.Signing.SigningHostFixture.InitializeAsync()
+   at System.Runtime.CompilerServices.AsyncMethodBuilderCore.Start[TStateMachine](TStateMachine& stateMachine)
+   at Zaghlol.Api.Tests.Signing.SigningHostFixture.InitializeAsync()
+  Failed Zaghlol.Api.Tests.Signing.ResponseSigningTests.OnlyA200OfAMarkedEndpointIsSigned(path: "/t/signed-409", status: Conflict) [1 ms]
+  Error Message:
+   System.IO.FileLoadException : Could not load file or assembly 'C:\Users\amr90\zaghlol-ci\repo\backend\tests\Zaghlol.Api.Tests\bin\Release\net10.0\Zaghlol.Api.dll'. An Application Control policy has blocked this file. (0x800711C7)
+  Stack Trace:
+     at Zaghlol.Api.Tests.Signing.SigningHostFixture.InitializeAsync()
+   at Zaghlol.Api.Tests.Signing.SigningHostFixture.InitializeAsync()
+   at System.Runtime.CompilerServices.AsyncMethodBuilderCore.Start[TStateMachine](TStateMachine& stateMachine)
+   at Zaghlol.Api.Tests.Signing.SigningHostFixture.InitializeAsync()
+  Failed Zaghlol.Api.Tests.Signing.ResponseSigningTests.OnlyA200OfAMarkedEndpointIsSigned(path: "/t/signed-404", status: NotFound) [1 ms]
+  Error Message:
+   System.IO.FileLoadException : Could not load file or assembly 'C:\Users\amr90\zaghlol-ci\repo\backend\tests\Zaghlol.Api.Tests\bin\Release\net10.0\Zaghlol.Api.dll'. An Application Control policy has blocked this file. (0x800711C7)
+  Stack Trace:
+     at Zaghlol.Api.Tests.Signing.SigningHostFixture.InitializeAsync()
+   at Zaghlol.Api.Tests.Signing.SigningHostFixture.InitializeAsync()
+   at System.Runtime.CompilerServices.AsyncMethodBuilderCore.Start[TStateMachine](TStateMachine& stateMachine)
+   at Zaghlol.Api.Tests.Signing.SigningHostFixture.InitializeAsync()
+  Failed Zaghlol.Api.Tests.Signing.ResponseSigningTests.OnlyA200OfAMarkedEndpointIsSigned(path: "/t/unsigned", status: OK) [1 ms]
+  Error Message:
+   System.IO.FileLoadException : Could not load file or assembly 'C:\Users\amr90\zaghlol-ci\repo\backend\tests\Zaghlol.Api.Tests\bin\Release\net10.0\Zaghlol.Api.dll'. An Application Control policy has blocked this file. (0x800711C7)
+  Stack Trace:
+     at Zaghlol.Api.Tests.Signing.SigningHostFixture.InitializeAsync()
+   at Zaghlol.Api.Tests.Signing.SigningHostFixture.InitializeAsync()
+   at System.Runtime.CompilerServices.AsyncMethodBuilderCore.Start[TStateMachine](TStateMachine& stateMachine)
+   at Zaghlol.Api.Tests.Signing.SigningHostFixture.InitializeAsync()
+  Failed Zaghlol.Api.Tests.Signing.ResponseSigningTests.BodyStreamAndBodyWriterWritesAreBothBufferedAndSigned(path: "/t/signed-body-stream") [1 ms]
+  Error Message:
+   System.IO.FileLoadException : Could not load file or assembly 'C:\Users\amr90\zaghlol-ci\repo\backend\tests\Zaghlol.Api.Tests\bin\Release\net10.0\Zaghlol.Api.dll'. An Application Control policy has blocked this file. (0x800711C7)
+  Stack Trace:
+     at Zaghlol.Api.Tests.Signing.SigningHostFixture.InitializeAsync()
+   at Zaghlol.Api.Tests.Signing.SigningHostFixture.InitializeAsync()
+   at System.Runtime.CompilerServices.AsyncMethodBuilderCore.Start[TStateMachine](TStateMachine& stateMachine)
+   at Zaghlol.Api.Tests.Signing.SigningHostFixture.InitializeAsync()
+[xUnit.net 00:00:16.54]     
+Zaghlol.Api.Tests.Signing.ResponseSigningTests.BodyStreamAndBodyWriterWritesAreBothBufferedAndSigned(path: 
+"/t/signed-body-writer") [FAIL]
+[xUnit.net 00:00:16.55]     
+Zaghlol.Api.Tests.Signing.ResponseSigningTests.AKmsOutageIs503WithRetryAfterAndNoBody(fault: Hang) [FAIL]
+[xUnit.net 00:00:16.55]     
+Zaghlol.Api.Tests.Signing.ResponseSigningTests.AKmsOutageIs503WithRetryAfterAndNoBody(fault: Throw) [FAIL]
+[xUnit.net 00:00:16.55]     
+Zaghlol.Api.Tests.Signing.ResponseSigningTests.A200IsSignedOverTheExactBodyAndVerifiesWithTheExportedKey [FAIL]
+[xUnit.net 00:00:16.55]     Zaghlol.Api.Tests.Signing.ResponseSigningTests.AnEmptyObjectBodyIsSigned [FAIL]
+[xUnit.net 00:00:16.64]     
+Zaghlol.Api.Tests.ReadinessTests.HealthIs503WhileTheDatabaseIsDownAnd200WithinFiveSecondsAfterItIsBack [FAIL]
+[xUnit.net 00:00:16.74]     [Test Class Cleanup Failure (Zaghlol.Api.Tests.ReadinessTests)] System.IO.FileLoadException
+[xUnit.net 00:00:17.25]     Zaghlol.Api.Tests.HostStartupTests.EveryTestClassThatCanBootAHostIsInTheApiHostGroup [FAIL]
+[xUnit.net 00:00:17.37]     
+Zaghlol.Api.Tests.HostStartupTests.TheApiRefusesToStartWithTheLocalKmsOutsideDevelopment(environment: "Production") 
+[FAIL]
+[xUnit.net 00:00:17.47]     
+Zaghlol.Api.Tests.HostStartupTests.TheApiRefusesToStartWithTheLocalKmsOutsideDevelopment(environment: "Staging") [FAIL]
+  Failed Zaghlol.Api.Tests.Signing.ResponseSigningTests.BodyStreamAndBodyWriterWritesAreBothBufferedAndSigned(path: "/t/signed-body-writer") [1 ms]
+  Error Message:
+   System.IO.FileLoadException : Could not load file or assembly 'C:\Users\amr90\zaghlol-ci\repo\backend\tests\Zaghlol.Api.Tests\bin\Release\net10.0\Zaghlol.Api.dll'. An Application Control policy has blocked this file. (0x800711C7)
+  Stack Trace:
+     at Zaghlol.Api.Tests.Signing.SigningHostFixture.InitializeAsync()
+   at Zaghlol.Api.Tests.Signing.SigningHostFixture.InitializeAsync()
+   at System.Runtime.CompilerServices.AsyncMethodBuilderCore.Start[TStateMachine](TStateMachine& stateMachine)
+   at Zaghlol.Api.Tests.Signing.SigningHostFixture.InitializeAsync()
+  Failed Zaghlol.Api.Tests.Signing.ResponseSigningTests.AKmsOutageIs503WithRetryAfterAndNoBody(fault: Hang) [1 ms]
+  Error Message:
+   System.IO.FileLoadException : Could not load file or assembly 'C:\Users\amr90\zaghlol-ci\repo\backend\tests\Zaghlol.Api.Tests\bin\Release\net10.0\Zaghlol.Api.dll'. An Application Control policy has blocked this file. (0x800711C7)
+  Stack Trace:
+     at Zaghlol.Api.Tests.Signing.SigningHostFixture.InitializeAsync()
+   at Zaghlol.Api.Tests.Signing.SigningHostFixture.InitializeAsync()
+   at System.Runtime.CompilerServices.AsyncMethodBuilderCore.Start[TStateMachine](TStateMachine& stateMachine)
+   at Zaghlol.Api.Tests.Signing.SigningHostFixture.InitializeAsync()
+  Failed Zaghlol.Api.Tests.Signing.ResponseSigningTests.AKmsOutageIs503WithRetryAfterAndNoBody(fault: Throw) [1 ms]
+  Error Message:
+   System.IO.FileLoadException : Could not load file or assembly 'C:\Users\amr90\zaghlol-ci\repo\backend\tests\Zaghlol.Api.Tests\bin\Release\net10.0\Zaghlol.Api.dll'. An Application Control policy has blocked this file. (0x800711C7)
+  Stack Trace:
+     at Zaghlol.Api.Tests.Signing.SigningHostFixture.InitializeAsync()
+   at Zaghlol.Api.Tests.Signing.SigningHostFixture.InitializeAsync()
+   at System.Runtime.CompilerServices.AsyncMethodBuilderCore.Start[TStateMachine](TStateMachine& stateMachine)
+   at Zaghlol.Api.Tests.Signing.SigningHostFixture.InitializeAsync()
+  Failed Zaghlol.Api.Tests.Signing.ResponseSigningTests.A200IsSignedOverTheExactBodyAndVerifiesWithTheExportedKey [1 ms]
+  Error Message:
+   System.IO.FileLoadException : Could not load file or assembly 'C:\Users\amr90\zaghlol-ci\repo\backend\tests\Zaghlol.Api.Tests\bin\Release\net10.0\Zaghlol.Api.dll'. An Application Control policy has blocked this file. (0x800711C7)
+  Stack Trace:
+     at Zaghlol.Api.Tests.Signing.SigningHostFixture.InitializeAsync()
+   at Zaghlol.Api.Tests.Signing.SigningHostFixture.InitializeAsync()
+   at System.Runtime.CompilerServices.AsyncMethodBuilderCore.Start[TStateMachine](TStateMachine& stateMachine)
+   at Zaghlol.Api.Tests.Signing.SigningHostFixture.InitializeAsync()
+  Failed Zaghlol.Api.Tests.Signing.ResponseSigningTests.AnEmptyObjectBodyIsSigned [1 ms]
+  Error Message:
+   System.IO.FileLoadException : Could not load file or assembly 'C:\Users\amr90\zaghlol-ci\repo\backend\tests\Zaghlol.Api.Tests\bin\Release\net10.0\Zaghlol.Api.dll'. An Application Control policy has blocked this file. (0x800711C7)
+  Stack Trace:
+     at Zaghlol.Api.Tests.Signing.SigningHostFixture.InitializeAsync()
+   at Zaghlol.Api.Tests.Signing.SigningHostFixture.InitializeAsync()
+   at System.Runtime.CompilerServices.AsyncMethodBuilderCore.Start[TStateMachine](TStateMachine& stateMachine)
+   at Zaghlol.Api.Tests.Signing.SigningHostFixture.InitializeAsync()
+  Failed Zaghlol.Api.Tests.ReadinessTests.HealthIs503WhileTheDatabaseIsDownAnd200WithinFiveSecondsAfterItIsBack [1 ms]
+  Error Message:
+   System.IO.FileLoadException : Could not load file or assembly 'C:\Users\amr90\zaghlol-ci\repo\backend\tests\Zaghlol.Api.Tests\bin\Release\net10.0\Zaghlol.Api.dll'. An Application Control policy has blocked this file. (0x800711C7)
+  Stack Trace:
+     at Zaghlol.Api.Tests.ReadinessFixture.InitializeAsync()
+   at Zaghlol.Api.Tests.ReadinessFixture.InitializeAsync()
+   at System.Runtime.CompilerServices.AsyncMethodBuilderCore.Start[TStateMachine](TStateMachine& stateMachine)
+   at Zaghlol.Api.Tests.ReadinessFixture.InitializeAsync()
+  Failed Zaghlol.Api.Tests.HostStartupTests.EveryTestClassThatCanBootAHostIsInTheApiHostGroup [513 ms]
+  Error Message:
+   System.Reflection.ReflectionTypeLoadException : Unable to load one or more of the requested types.
+Could not load file or assembly 'C:\Users\amr90\zaghlol-ci\repo\backend\tests\Zaghlol.Api.Tests\bin\Release\net10.0\Zaghlol.Api.dll'. An Application Control policy has blocked this file. (0x800711C7)
+Could not load file or assembly 'C:\Users\amr90\zaghlol-ci\repo\backend\tests\Zaghlol.Api.Tests\bin\Release\net10.0\Zaghlol.Api.dll'. An Application Control policy has blocked this file. (0x800711C7)
+Could not load file or assembly 'C:\Users\amr90\zaghlol-ci\repo\backend\tests\Zaghlol.Api.Tests\bin\Release\net10.0\Zaghlol.Api.dll'. An Application Control policy has blocked this file. (0x800711C7)
+Could not load file or assembly 'C:\Users\amr90\zaghlol-ci\repo\backend\tests\Zaghlol.Api.Tests\bin\Release\net10.0\Zaghlol.Api.dll'. An Application Control policy has blocked this file. (0x800711C7)
+Could not load file or assembly 'C:\Users\amr90\zaghlol-ci\repo\backend\tests\Zaghlol.Api.Tests\bin\Release\net10.0\Zaghlol.Api.dll'. An Application Control policy has blocked this file. (0x800711C7)
+  Stack Trace:
+     at System.Reflection.RuntimeModule.GetDefinedTypes()
+   at System.Reflection.RuntimeModule.GetTypes()
+   at Zaghlol.Api.Tests.HostStartupTests.EveryTestClassThatCanBootAHostIsInTheApiHostGroup() in C:\Users\amr90\zaghlol-ci\repo\backend\tests\Zaghlol.Api.Tests\HostStartupTests.cs:line 58
+   at System.Reflection.MethodBaseInvoker.InterpretedInvoke_Method(Object obj, IntPtr* args)
+   at System.Reflection.RuntimeMethodInfo.Invoke(Object obj, BindingFlags invokeAttr, Binder binder, Object[] parameters, CultureInfo culture)
+  Failed Zaghlol.Api.Tests.HostStartupTests.TheApiRefusesToStartWithTheLocalKmsOutsideDevelopment(environment: "Production") [121 ms]
+  Error Message:
+   System.IO.FileLoadException : Could not load file or assembly 'C:\Users\amr90\zaghlol-ci\repo\backend\tests\Zaghlol.Api.Tests\bin\Release\net10.0\Zaghlol.Api.dll'. An Application Control policy has blocked this file. (0x800711C7)
+  Stack Trace:
+     at Zaghlol.Api.Tests.HostStartupTests.TheApiRefusesToStartWithTheLocalKmsOutsideDevelopment(String environment)
+   at System.RuntimeMethodHandle.InvokeMethod(ObjectHandleOnStack target, Void** arguments, ObjectHandleOnStack sig, BOOL isConstructor, ObjectHandleOnStack result)
+   at System.Reflection.MethodBaseInvoker.InterpretedInvoke_Method(Object obj, IntPtr* args)
+   at System.Reflection.MethodBaseInvoker.InvokeDirectByRefWithFewArgs(Object obj, Span`1 copyOfArgs, BindingFlags invokeAttr)
+  Failed Zaghlol.Api.Tests.HostStartupTests.TheApiRefusesToStartWithTheLocalKmsOutsideDevelopment(environment: "Staging") [94 ms]
+  Error Message:
+   System.IO.FileLoadException : Could not load file or assembly 'C:\Users\amr90\zaghlol-ci\repo\backend\tests\Zaghlol.Api.Tests\bin\Release\net10.0\Zaghlol.Api.dll'. An Application Control policy has blocked this file. (0x800711C7)
+  Stack Trace:
+     at Zaghlol.Api.Tests.HostStartupTests.TheApiRefusesToStartWithTheLocalKmsOutsideDevelopment(String environment)
+   at Zaghlol.Api.Tests.HostStartupTests.TheApiRefusesToStartWithTheLocalKmsOutsideDevelopment(String environment)
+   at InvokeStub_HostStartupTests.TheApiRefusesToStartWithTheLocalKmsOutsideDevelopment(Object, Span`1)
+   at System.Reflection.MethodBaseInvoker.InvokeWithOneArg(Object obj, BindingFlags invokeAttr, Binder binder, Object[] parameters, CultureInfo culture)
+[xUnit.net 00:00:17.58]     Zaghlol.Api.Tests.HostStartupTests.TheApiRefusesToStartWithoutAKeyRing [FAIL]
+[xUnit.net 00:00:17.69]     Zaghlol.Api.Tests.ApiTests.RequestBodiesAreNeverLogged [FAIL]
+[xUnit.net 00:00:17.69]     Zaghlol.Api.Tests.ApiTests.HealthReturns200WithStatusOkAndServerTime [FAIL]
+[xUnit.net 00:00:17.69]     Zaghlol.Api.Tests.ApiTests.UnknownRouteReturnsProblemDetailsWithStableCode [FAIL]
+[xUnit.net 00:00:17.69]     Zaghlol.Api.Tests.ApiTests.PostgresContainerIsVersion17 [FAIL]
+[xUnit.net 00:00:17.70]     Zaghlol.Api.Tests.ApiTests.BadHttpRequestMapsTo400ValidationFailedWithoutEchoingMessage 
+[FAIL]
+[xUnit.net 00:00:17.70]     Zaghlol.Api.Tests.ApiTests.UnhandledExceptionReturns500InternalWithoutLeakingDetails [FAIL]
+[xUnit.net 00:00:17.81]     [Test Class Cleanup Failure (Zaghlol.Api.Tests.ApiTests)] System.IO.FileLoadException
+  Failed Zaghlol.Api.Tests.HostStartupTests.TheApiRefusesToStartWithoutAKeyRing [115 ms]
+  Error Message:
+   System.IO.FileLoadException : Could not load file or assembly 'C:\Users\amr90\zaghlol-ci\repo\backend\tests\Zaghlol.Api.Tests\bin\Release\net10.0\Zaghlol.Api.dll'. An Application Control policy has blocked this file. (0x800711C7)
+  Stack Trace:
+     at Zaghlol.Api.Tests.HostStartupTests.TheApiRefusesToStartWithoutAKeyRing()
+   at System.RuntimeMethodHandle.InvokeMethod(ObjectHandleOnStack target, Void** arguments, ObjectHandleOnStack sig, BOOL isConstructor, ObjectHandleOnStack result)
+   at System.Reflection.MethodBaseInvoker.InterpretedInvoke_Method(Object obj, IntPtr* args)
+   at System.Reflection.MethodBaseInvoker.InvokeWithNoArgs(Object obj, BindingFlags invokeAttr)
+  Failed Zaghlol.Api.Tests.ApiTests.RequestBodiesAreNeverLogged [1 ms]
+  Error Message:
+   System.IO.FileLoadException : Could not load file or assembly 'C:\Users\amr90\zaghlol-ci\repo\backend\tests\Zaghlol.Api.Tests\bin\Release\net10.0\Zaghlol.Api.dll'. An Application Control policy has blocked this file. (0x800711C7)
+  Stack Trace:
+     at Zaghlol.Api.Tests.ApiFixture.InitializeAsync()
+   at Zaghlol.Api.Tests.ApiFixture.InitializeAsync()
+   at System.Runtime.CompilerServices.AsyncMethodBuilderCore.Start[TStateMachine](TStateMachine& stateMachine)
+   at Zaghlol.Api.Tests.ApiFixture.InitializeAsync()
+  Failed Zaghlol.Api.Tests.ApiTests.HealthReturns200WithStatusOkAndServerTime [1 ms]
+  Error Message:
+   System.IO.FileLoadException : Could not load file or assembly 'C:\Users\amr90\zaghlol-ci\repo\backend\tests\Zaghlol.Api.Tests\bin\Release\net10.0\Zaghlol.Api.dll'. An Application Control policy has blocked this file. (0x800711C7)
+  Stack Trace:
+     at Zaghlol.Api.Tests.ApiFixture.InitializeAsync()
+   at Zaghlol.Api.Tests.ApiFixture.InitializeAsync()
+   at System.Runtime.CompilerServices.AsyncMethodBuilderCore.Start[TStateMachine](TStateMachine& stateMachine)
+   at Zaghlol.Api.Tests.ApiFixture.InitializeAsync()
+  Failed Zaghlol.Api.Tests.ApiTests.UnknownRouteReturnsProblemDetailsWithStableCode [1 ms]
+  Error Message:
+   System.IO.FileLoadException : Could not load file or assembly 'C:\Users\amr90\zaghlol-ci\repo\backend\tests\Zaghlol.Api.Tests\bin\Release\net10.0\Zaghlol.Api.dll'. An Application Control policy has blocked this file. (0x800711C7)
+  Stack Trace:
+     at Zaghlol.Api.Tests.ApiFixture.InitializeAsync()
+   at Zaghlol.Api.Tests.ApiFixture.InitializeAsync()
+   at System.Runtime.CompilerServices.AsyncMethodBuilderCore.Start[TStateMachine](TStateMachine& stateMachine)
+   at Zaghlol.Api.Tests.ApiFixture.InitializeAsync()
+  Failed Zaghlol.Api.Tests.ApiTests.PostgresContainerIsVersion17 [1 ms]
+  Error Message:
+   System.IO.FileLoadException : Could not load file or assembly 'C:\Users\amr90\zaghlol-ci\repo\backend\tests\Zaghlol.Api.Tests\bin\Release\net10.0\Zaghlol.Api.dll'. An Application Control policy has blocked this file. (0x800711C7)
+  Stack Trace:
+     at Zaghlol.Api.Tests.ApiFixture.InitializeAsync()
+   at Zaghlol.Api.Tests.ApiFixture.InitializeAsync()
+   at System.Runtime.CompilerServices.AsyncMethodBuilderCore.Start[TStateMachine](TStateMachine& stateMachine)
+   at Zaghlol.Api.Tests.ApiFixture.InitializeAsync()
+  Failed Zaghlol.Api.Tests.ApiTests.BadHttpRequestMapsTo400ValidationFailedWithoutEchoingMessage [1 ms]
+  Error Message:
+   System.IO.FileLoadException : Could not load file or assembly 'C:\Users\amr90\zaghlol-ci\repo\backend\tests\Zaghlol.Api.Tests\bin\Release\net10.0\Zaghlol.Api.dll'. An Application Control policy has blocked this file. (0x800711C7)
+  Stack Trace:
+     at Zaghlol.Api.Tests.ApiFixture.InitializeAsync()
+   at Zaghlol.Api.Tests.ApiFixture.InitializeAsync()
+   at System.Runtime.CompilerServices.AsyncMethodBuilderCore.Start[TStateMachine](TStateMachine& stateMachine)
+   at Zaghlol.Api.Tests.ApiFixture.InitializeAsync()
+  Failed Zaghlol.Api.Tests.ApiTests.UnhandledExceptionReturns500InternalWithoutLeakingDetails [1 ms]
+  Error Message:
+   System.IO.FileLoadException : Could not load file or assembly 'C:\Users\amr90\zaghlol-ci\repo\backend\tests\Zaghlol.Api.Tests\bin\Release\net10.0\Zaghlol.Api.dll'. An Application Control policy has blocked this file. (0x800711C7)
+  Stack Trace:
+     at Zaghlol.Api.Tests.ApiFixture.InitializeAsync()
+   at Zaghlol.Api.Tests.ApiFixture.InitializeAsync()
+   at System.Runtime.CompilerServices.AsyncMethodBuilderCore.Start[TStateMachine](TStateMachine& stateMachine)
+   at Zaghlol.Api.Tests.ApiFixture.InitializeAsync()
+
+Failed!  - Failed:   158, Passed:     9, Skipped:     0, Total:   167, Duration: 4 s - Zaghlol.Api.Tests.dll (net10.0)
+
+[22:13:36] === RESULT dotnet-test exit=1
+[22:13:36] SUMMARY FAIL sha=6836f93e8ee85b74e08dcba9f9750b82f3379ca2 pipeline=quick-backend dotnet-build=0 dotnet-format=2 dotnet-test=1
