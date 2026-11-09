@@ -1,5 +1,140 @@
 ﻿== SUMMARY ==
-RUNNING sha=c48a5d9f4c6e39b9559d843d4acff62272efeedf
+FAIL sha=c48a5d9f4c6e39b9559d843d4acff62272efeedf pipeline=quick-backend dotnet-build=0 dotnet-format=0 dotnet-test=1
+dotnet-build                 PASS  exit=0  13s
+dotnet-format                PASS  exit=0  19s
+dotnet-test                  FAIL  exit=1  31s
+
+== ERRORS: dotnet-test ==
+  Failed Zaghlol.Contract.Tests.CatalogLiveContractTests.TheFullEndpointIsPublicImmutableAndDeclaresItsStatuses [15 ms]
+  Error Message:
+   expected 200, got 409: {"type":"https://tools.ietf.org/html/rfc9110#section-15.5.10","title":"Conflict","status":409,"code":"ADMIN_CONFLICT","traceId":"00-2f4e2ae14f6fbf31f08de943ea992f83-7acc65afdf623d01-01","correlationId":"2f4e2ae14f6fbf31f08de943ea992f83"}
+  Stack Trace:
+     at Zaghlol.Contract.Tests.CatalogLiveContractTests.AssertDeclared(HttpResponseMessage response, SpecOperation operation, HttpStatusCode status, String mediaType) in /_/backend/tests/Zaghlol.Contract.Tests/CatalogLiveContractTests.cs:line 644
+   at Zaghlol.Contract.Tests.CatalogLiveContractTests.PublishAsync(String note) in /_/backend/tests/Zaghlol.Contract.Tests/CatalogLiveContractTests.cs:line 600
+   at Zaghlol.Contract.Tests.CatalogLiveContractTests.TheFullEndpointIsPublicImmutableAndDeclaresItsStatuses() in /_/backend/tests/Zaghlol.Contract.Tests/CatalogLiveContractTests.cs:line 443
+--- End of stack trace from previous location ---
+[xUnit.net 00:00:09.69]     Zaghlol.Contract.Tests.CatalogLiveContractTests.BodiesAreStrictAndKeysNeverBelongInThem [FAIL]
+  Failed Zaghlol.Contract.Tests.CatalogLiveContractTests.BodiesAreStrictAndKeysNeverBelongInThem [53 ms]
+  Error Message:
+   Assert.Equal() Failure: Strings differ
+           ↓ (pos 0)
+
+  Failed Zaghlol.Contract.Tests.CatalogLiveContractTests.BodiesAreStrictAndKeysNeverBelongInThem [53 ms]
+  Error Message:
+   Assert.Equal() Failure: Strings differ
+           ↓ (pos 0)
+Expected: "VALIDATION_FAILED"
+Actual:   "UNKNOWN_FIELD"
+           ↑ (pos 0)
+  Stack Trace:
+     at Zaghlol.Contract.Tests.CatalogLiveContractTests.BodiesAreStrictAndKeysNeverBelongInThem() in /_/backend/tests/Zaghlol.Contract.Tests/CatalogLiveContractTests.cs:line 266
+--- End of stack trace from previous location ---
+[xUnit.net 00:00:10.80]     Zaghlol.Infrastructure.Tests.CheckConstraintTests.EveryCheckConstraintInTheSchemaHasANegativeCase [FAIL]
+  Failed Zaghlol.Infrastructure.Tests.CheckConstraintTests.EveryCheckConstraintInTheSchemaHasANegativeCase [4 ms]
+  Error Message:
+
+  Failed Zaghlol.Infrastructure.Tests.CheckConstraintTests.EveryCheckConstraintInTheSchemaHasANegativeCase [4 ms]
+  Error Message:
+   Assert.Equal() Failure: Values differ
+Expected: 47
+Actual:   48
+  Stack Trace:
+     at Zaghlol.Infrastructure.Tests.CheckConstraintTests.EveryCheckConstraintInTheSchemaHasANegativeCase() in /_/backend/tests/Zaghlol.Infrastructure.Tests/CheckConstraintTests.cs:line 195
+--- End of stack trace from previous location ---
+
+Failed!  - Failed:     2, Passed:    81, Skipped:     0, Total:    83, Duration: 10 s - Zaghlol.Contract.Tests.dll (net10.0)
+
+Failed!  - Failed:     1, Passed:   486, Skipped:     0, Total:   487, Duration: 10 s - Zaghlol.Infrastructure.Tests.dll (net10.0)
+
+
 
 == FULL LOG (last 1500 lines) ==
 auto task/T-125-catalog c48a5d9f4c6e39b9559d843d4acff62272efeedf 2026-11-10T01:34:52.6641056+02:00
+
+
+
+[01:34:58] === STEP dotnet-build (docker mcr.microsoft.com/dotnet/sdk:10.0.402, /work/backend)
+  Determining projects to restore...
+  All projects are up-to-date for restore.
+  Zaghlol.Domain -> /work/backend/src/Zaghlol.Domain/bin/Release/net10.0/Zaghlol.Domain.dll
+  Zaghlol.Ops -> /work/backend/src/Zaghlol.Ops/bin/Release/net10.0/zaghlol-ops.dll
+  Zaghlol.Application -> /work/backend/src/Zaghlol.Application/bin/Release/net10.0/Zaghlol.Application.dll
+  Zaghlol.Ops.Tests -> /work/backend/tests/Zaghlol.Ops.Tests/bin/Release/net10.0/Zaghlol.Ops.Tests.dll
+  Zaghlol.Application.Tests -> /work/backend/tests/Zaghlol.Application.Tests/bin/Release/net10.0/Zaghlol.Application.Tests.dll
+  Zaghlol.Infrastructure -> /work/backend/src/Zaghlol.Infrastructure/bin/Release/net10.0/Zaghlol.Infrastructure.dll
+  Zaghlol.Workers -> /work/backend/src/Zaghlol.Workers/bin/Release/net10.0/Zaghlol.Workers.dll
+  Zaghlol.Infrastructure.Tests -> /work/backend/tests/Zaghlol.Infrastructure.Tests/bin/Release/net10.0/Zaghlol.Infrastructure.Tests.dll
+  Zaghlol.Api -> /work/backend/src/Zaghlol.Api/bin/Release/net10.0/Zaghlol.Api.dll
+  Zaghlol.Workers.Tests -> /work/backend/tests/Zaghlol.Workers.Tests/bin/Release/net10.0/Zaghlol.Workers.Tests.dll
+  Zaghlol.Api.Tests -> /work/backend/tests/Zaghlol.Api.Tests/bin/Release/net10.0/Zaghlol.Api.Tests.dll
+  Zaghlol.Contract.Tests -> /work/backend/tests/Zaghlol.Contract.Tests/bin/Release/net10.0/Zaghlol.Contract.Tests.dll
+
+Build succeeded.
+    0 Warning(s)
+    0 Error(s)
+
+Time Elapsed 00:00:12.09
+
+[01:35:11] === RESULT dotnet-build exit=0 (13s)
+[01:35:11] === STEP dotnet-format (docker mcr.microsoft.com/dotnet/sdk:10.0.402, /work/backend)
+Formatting code files in workspace '/work/backend/Zaghlol.sln'.
+Format complete in 18087ms.
+
+[01:35:30] === RESULT dotnet-format exit=0 (19s)
+[01:35:30] === STEP dotnet-test (docker mcr.microsoft.com/dotnet/sdk:10.0.402, /work/backend)
+Test run for /work/backend/tests/Zaghlol.Workers.Tests/bin/Release/net10.0/Zaghlol.Workers.Tests.dll (.NETCoreApp,Version=v10.0)
+Test run for /work/backend/tests/Zaghlol.Ops.Tests/bin/Release/net10.0/Zaghlol.Ops.Tests.dll (.NETCoreApp,Version=v10.0)
+Test run for /work/backend/tests/Zaghlol.Application.Tests/bin/Release/net10.0/Zaghlol.Application.Tests.dll (.NETCoreApp,Version=v10.0)
+Test run for /work/backend/tests/Zaghlol.Api.Tests/bin/Release/net10.0/Zaghlol.Api.Tests.dll (.NETCoreApp,Version=v10.0)
+Test run for /work/backend/tests/Zaghlol.Infrastructure.Tests/bin/Release/net10.0/Zaghlol.Infrastructure.Tests.dll (.NETCoreApp,Version=v10.0)
+Test run for /work/backend/tests/Zaghlol.Contract.Tests/bin/Release/net10.0/Zaghlol.Contract.Tests.dll (.NETCoreApp,Version=v10.0)
+A total of 1 test files matched the specified pattern.
+A total of 1 test files matched the specified pattern.
+A total of 1 test files matched the specified pattern.
+A total of 1 test files matched the specified pattern.
+A total of 1 test files matched the specified pattern.
+A total of 1 test files matched the specified pattern.
+
+Passed!  - Failed:     0, Passed:     2, Skipped:     0, Total:     2, Duration: 31 ms - Zaghlol.Ops.Tests.dll (net10.0)
+
+Passed!  - Failed:     0, Passed:     3, Skipped:     0, Total:     3, Duration: 119 ms - Zaghlol.Workers.Tests.dll (net10.0)
+
+Passed!  - Failed:     0, Passed:    82, Skipped:     0, Total:    82, Duration: 106 ms - Zaghlol.Application.Tests.dll (net10.0)
+[xUnit.net 00:00:09.02]     Zaghlol.Contract.Tests.CatalogLiveContractTests.TheFullEndpointIsPublicImmutableAndDeclaresItsStatuses [FAIL]
+  Failed Zaghlol.Contract.Tests.CatalogLiveContractTests.TheFullEndpointIsPublicImmutableAndDeclaresItsStatuses [15 ms]
+  Error Message:
+   expected 200, got 409: {"type":"https://tools.ietf.org/html/rfc9110#section-15.5.10","title":"Conflict","status":409,"code":"ADMIN_CONFLICT","traceId":"00-2f4e2ae14f6fbf31f08de943ea992f83-7acc65afdf623d01-01","correlationId":"2f4e2ae14f6fbf31f08de943ea992f83"}
+  Stack Trace:
+     at Zaghlol.Contract.Tests.CatalogLiveContractTests.AssertDeclared(HttpResponseMessage response, SpecOperation operation, HttpStatusCode status, String mediaType) in /_/backend/tests/Zaghlol.Contract.Tests/CatalogLiveContractTests.cs:line 644
+   at Zaghlol.Contract.Tests.CatalogLiveContractTests.PublishAsync(String note) in /_/backend/tests/Zaghlol.Contract.Tests/CatalogLiveContractTests.cs:line 600
+   at Zaghlol.Contract.Tests.CatalogLiveContractTests.TheFullEndpointIsPublicImmutableAndDeclaresItsStatuses() in /_/backend/tests/Zaghlol.Contract.Tests/CatalogLiveContractTests.cs:line 443
+--- End of stack trace from previous location ---
+[xUnit.net 00:00:09.69]     Zaghlol.Contract.Tests.CatalogLiveContractTests.BodiesAreStrictAndKeysNeverBelongInThem [FAIL]
+  Failed Zaghlol.Contract.Tests.CatalogLiveContractTests.BodiesAreStrictAndKeysNeverBelongInThem [53 ms]
+  Error Message:
+   Assert.Equal() Failure: Strings differ
+           ↓ (pos 0)
+Expected: "VALIDATION_FAILED"
+Actual:   "UNKNOWN_FIELD"
+           ↑ (pos 0)
+  Stack Trace:
+     at Zaghlol.Contract.Tests.CatalogLiveContractTests.BodiesAreStrictAndKeysNeverBelongInThem() in /_/backend/tests/Zaghlol.Contract.Tests/CatalogLiveContractTests.cs:line 266
+--- End of stack trace from previous location ---
+[xUnit.net 00:00:10.80]     Zaghlol.Infrastructure.Tests.CheckConstraintTests.EveryCheckConstraintInTheSchemaHasANegativeCase [FAIL]
+  Failed Zaghlol.Infrastructure.Tests.CheckConstraintTests.EveryCheckConstraintInTheSchemaHasANegativeCase [4 ms]
+  Error Message:
+   Assert.Equal() Failure: Values differ
+Expected: 47
+Actual:   48
+  Stack Trace:
+     at Zaghlol.Infrastructure.Tests.CheckConstraintTests.EveryCheckConstraintInTheSchemaHasANegativeCase() in /_/backend/tests/Zaghlol.Infrastructure.Tests/CheckConstraintTests.cs:line 195
+--- End of stack trace from previous location ---
+
+Failed!  - Failed:     2, Passed:    81, Skipped:     0, Total:    83, Duration: 10 s - Zaghlol.Contract.Tests.dll (net10.0)
+
+Failed!  - Failed:     1, Passed:   486, Skipped:     0, Total:   487, Duration: 10 s - Zaghlol.Infrastructure.Tests.dll (net10.0)
+
+Passed!  - Failed:     0, Passed:   167, Skipped:     0, Total:   167, Duration: 21 s - Zaghlol.Api.Tests.dll (net10.0)
+
+[01:36:01] === RESULT dotnet-test exit=1 (31s)
+[01:36:01] SUMMARY FAIL sha=c48a5d9f4c6e39b9559d843d4acff62272efeedf pipeline=quick-backend dotnet-build=0 dotnet-format=0 dotnet-test=1
