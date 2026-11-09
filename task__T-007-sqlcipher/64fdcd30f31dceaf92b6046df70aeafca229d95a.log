@@ -1,1 +1,400 @@
-﻿auto task/T-007-sqlcipher 64fdcd30f31dceaf92b6046df70aeafca229d95a 2026-11-09T21:33:49.1595333+02:00
+﻿              '  (\'PHP\', 608, 2, true, false),\r\n'
+              '  (\'PKR\', 586, 2, true, false),\r\n'
+              '  (\'PLN\', 985, 2, true, false),\r\n'
+              '  (\'PYG\', 600, 0, true, false),\r\n'
+              '  (\'QAR\', 634, 2, true, false),\r\n'
+              '  (\'RON\', 946, 2, true, false),\r\n'
+              '  (\'RSD\', 941, 2, true, false),\r\n'
+              '  (\'RUB\', 643, 2, true, false),\r\n'
+              '  (\'RWF\', 646, 0, true, false),\r\n'
+              '  (\'SAR\', 682, 2, true, false),\r\n'
+              '  (\'SBD\', 90, 2, true, false),\r\n'
+              '  (\'SCR\', 690, 2, true, false),\r\n'
+              '  (\'SDG\', 938, 2, true, false),\r\n'
+              '  (\'SEK\', 752, 2, true, false),\r\n'
+              '  (\'SGD\', 702, 2, true, false),\r\n'
+              '  (\'SHP\', 654, 2, true, false),\r\n'
+              '  (\'SLE\', 925, 2, true, false),\r\n'
+              '  (\'SOS\', 706, 2, true, false),\r\n'
+              '  (\'SRD\', 968, 2, true, false),\r\n'
+              '  (\'SSP\', 728, 2, true, false),\r\n'
+              '  (\'STN\', 930, 2, true, false),\r\n'
+              '  (\'SVC\', 222, 2, true, false),\r\n'
+              '  (\'SYP\', 760, 2, true, false),\r\n'
+              '  (\'SZL\', 748, 2, true, false),\r\n'
+              '  (\'THB\', 764, 2, true, false),\r\n'
+              '  (\'TJS\', 972, 2, true, false),\r\n'
+              '  (\'TMT\', 934, 2, true, false),\r\n'
+              '  (\'TND\', 788, 3, true, false),\r\n'
+              '  (\'TOP\', 776, 2, true, false),\r\n'
+              '  (\'TRY\', 949, 2, true, false),\r\n'
+              '  (\'TTD\', 780, 2, true, false),\r\n'
+              '  (\'TWD\', 901, 2, true, false),\r\n'
+              '  (\'TZS\', 834, 2, true, false),\r\n'
+              '  (\'UAH\', 980, 2, true, false),\r\n'
+              '  (\'UGX\', 800, 0, true, false),\r\n'
+              '  (\'USD\', 840, 2, true, false),\r\n'
+              '  (\'USN\', 997, 2, true, true),\r\n'
+              '  (\'UYI\', 940, 0, true, true),\r\n'
+              '  (\'UYU\', 858, 2, true, false),\r\n'
+              '  (\'UYW\', 927, 4, true, true),\r\n'
+              '  (\'UZS\', 860, 2, true, false),\r\n'
+              '  (\'VED\', 926, 2, true, false),\r\n'
+              '  (\'VES\', 928, 2, true, false),\r\n'
+              '  (\'VND\', 704, 0, true, false),\r\n'
+              '  (\'VUV\', 548, 0, true, false),\r\n'
+              '  (\'WST\', 882, 2, true, false),\r\n'
+              '  (\'XAF\', 950, 0, true, false),\r\n'
+              '  (\'XCD\', 951, 2, true, false),\r\n'
+              '  (\'XCG\', 532, 2, true, false),\r\n'
+              '  (\'XOF\', 952, 0, true, false),\r\n'
+              '  (\'XPF\', 953, 0, true, false),\r\n'
+              '  (\'YER\', 886, 2, true, false),\r\n'
+              '  (\'ZAR\', 710, 2, true, false),\r\n'
+              '  (\'ZMW\', 967, 2, true, false),\r\n'
+              '  (\'ZWG\', 924, 2, true, false),\r\n'
+              '];\r\n'
+              ''
+    Actual: '// GENERATED CODE - DO NOT MODIFY BY HAND.\n'
+              '// Source: lib/money/data/currencies.json\n'
+              '// (ISO 4217 List One, published 2026-09-17).\n'
+              '// Regenerate: dart run tool/gen_currencies.dart\n'
+              '\n'
+              '/// ISO 4217 rows (code, numeric, exponent, active, fund),\n'
+              '/// sorted by code.\n'
+              'const List<(String, int, int, bool, bool)> iso4217Table = [\n'
+              '  (\'AED\', 784, 2, true, false),\n'
+              '  (\'AFN\', 971, 2, true, false),\n'
+              '  (\'ALL\', 8, 2, true, false),\n'
+              '  (\'AMD\', 51, 2, true, false),\n'
+              '  (\'AOA\', 973, 2, true, false),\n'
+              '  (\'ARS\', 32, 2, true, false),\n'
+              '  (\'AUD\', 36, 2, true, false),\n'
+              '  (\'AWG\', 533, 2, true, false),\n'
+              '  (\'AZN\', 944, 2, true, false),\n'
+              '  (\'BAM\', 977, 2, true, false),\n'
+              '  (\'BBD\', 52, 2, true, false),\n'
+              '  (\'BDT\', 50, 2, true, false),\n'
+              '  (\'BHD\', 48, 3, true, false),\n'
+              '  (\'BIF\', 108, 0, true, false),\n'
+              '  (\'BMD\', 60, 2, true, false),\n'
+              '  (\'BND\', 96, 2, true, false),\n'
+              '  (\'BOB\', 68, 2, true, false),\n'
+              '  (\'BOV\', 984, 2, true, true),\n'
+              '  (\'BRL\', 986, 2, true, false),\n'
+              '  (\'BSD\', 44, 2, true, false),\n'
+              '  (\'BTN\', 64, 2, true, false),\n'
+              '  (\'BWP\', 72, 2, true, false),\n'
+              '  (\'BYN\', 933, 2, true, false),\n'
+              '  (\'BZD\', 84, 2, true, false),\n'
+              '  (\'CAD\', 124, 2, true, false),\n'
+              '  (\'CDF\', 976, 2, true, false),\n'
+              '  (\'CHE\', 947, 2, true, true),\n'
+              '  (\'CHF\', 756, 2, true, false),\n'
+              '  (\'CHW\', 948, 2, true, true),\n'
+              '  (\'CLF\', 990, 4, true, true),\n'
+              '  (\'CLP\', 152, 0, true, false),\n'
+              '  (\'CNY\', 156, 2, true, false),\n'
+              '  (\'COP\', 170, 2, true, false),\n'
+              '  (\'COU\', 970, 2, true, true),\n'
+              '  (\'CRC\', 188, 2, true, false),\n'
+              '  (\'CUP\', 192, 2, true, false),\n'
+              '  (\'CVE\', 132, 2, true, false),\n'
+              '  (\'CZK\', 203, 2, true, false),\n'
+              '  (\'DJF\', 262, 0, true, false),\n'
+              '  (\'DKK\', 208, 2, true, false),\n'
+              '  (\'DOP\', 214, 2, true, false),\n'
+              '  (\'DZD\', 12, 2, true, false),\n'
+              '  (\'EGP\', 818, 2, true, false),\n'
+              '  (\'ERN\', 232, 2, true, false),\n'
+              '  (\'ETB\', 230, 2, true, false),\n'
+              '  (\'EUR\', 978, 2, true, false),\n'
+              '  (\'FJD\', 242, 2, true, false),\n'
+              '  (\'FKP\', 238, 2, true, false),\n'
+              '  (\'GBP\', 826, 2, true, false),\n'
+              '  (\'GEL\', 981, 2, true, false),\n'
+              '  (\'GHS\', 936, 2, true, false),\n'
+              '  (\'GIP\', 292, 2, true, false),\n'
+              '  (\'GMD\', 270, 2, true, false),\n'
+              '  (\'GNF\', 324, 0, true, false),\n'
+              '  (\'GTQ\', 320, 2, true, false),\n'
+              '  (\'GYD\', 328, 2, true, false),\n'
+              '  (\'HKD\', 344, 2, true, false),\n'
+              '  (\'HNL\', 340, 2, true, false),\n'
+              '  (\'HTG\', 332, 2, true, false),\n'
+              '  (\'HUF\', 348, 2, true, false),\n'
+              '  (\'IDR\', 360, 2, true, false),\n'
+              '  (\'ILS\', 376, 2, true, false),\n'
+              '  (\'INR\', 356, 2, true, false),\n'
+              '  (\'IQD\', 368, 3, true, false),\n'
+              '  (\'IRR\', 364, 2, true, false),\n'
+              '  (\'ISK\', 352, 0, true, false),\n'
+              '  (\'JMD\', 388, 2, true, false),\n'
+              '  (\'JOD\', 400, 3, true, false),\n'
+              '  (\'JPY\', 392, 0, true, false),\n'
+              '  (\'KES\', 404, 2, true, false),\n'
+              '  (\'KGS\', 417, 2, true, false),\n'
+              '  (\'KHR\', 116, 2, true, false),\n'
+              '  (\'KMF\', 174, 0, true, false),\n'
+              '  (\'KPW\', 408, 2, true, false),\n'
+              '  (\'KRW\', 410, 0, true, false),\n'
+              '  (\'KWD\', 414, 3, true, false),\n'
+              '  (\'KYD\', 136, 2, true, false),\n'
+              '  (\'KZT\', 398, 2, true, false),\n'
+              '  (\'LAK\', 418, 2, true, false),\n'
+              '  (\'LBP\', 422, 2, true, false),\n'
+              '  (\'LKR\', 144, 2, true, false),\n'
+              '  (\'LRD\', 430, 2, true, false),\n'
+              '  (\'LSL\', 426, 2, true, false),\n'
+              '  (\'LYD\', 434, 3, true, false),\n'
+              '  (\'MAD\', 504, 2, true, false),\n'
+              '  (\'MDL\', 498, 2, true, false),\n'
+              '  (\'MGA\', 969, 2, true, false),\n'
+              '  (\'MKD\', 807, 2, true, false),\n'
+              '  (\'MMK\', 104, 2, true, false),\n'
+              '  (\'MNT\', 496, 2, true, false),\n'
+              '  (\'MOP\', 446, 2, true, false),\n'
+              '  (\'MRU\', 929, 2, true, false),\n'
+              '  (\'MUR\', 480, 2, true, false),\n'
+              '  (\'MVR\', 462, 2, true, false),\n'
+              '  (\'MWK\', 454, 2, true, false),\n'
+              '  (\'MXN\', 484, 2, true, false),\n'
+              '  (\'MXV\', 979, 2, true, true),\n'
+              '  (\'MYR\', 458, 2, true, false),\n'
+              '  (\'MZN\', 943, 2, true, false),\n'
+              '  (\'NAD\', 516, 2, true, false),\n'
+              '  (\'NGN\', 566, 2, true, false),\n'
+              '  (\'NIO\', 558, 2, true, false),\n'
+              '  (\'NOK\', 578, 2, true, false),\n'
+              '  (\'NPR\', 524, 2, true, false),\n'
+              '  (\'NZD\', 554, 2, true, false),\n'
+              '  (\'OMR\', 512, 3, true, false),\n'
+              '  (\'PAB\', 590, 2, true, false),\n'
+              '  (\'PEN\', 604, 2, true, false),\n'
+              '  (\'PGK\', 598, 2, true, false),\n'
+              '  (\'PHP\', 608, 2, true, false),\n'
+              '  (\'PKR\', 586, 2, true, false),\n'
+              '  (\'PLN\', 985, 2, true, false),\n'
+              '  (\'PYG\', 600, 0, true, false),\n'
+              '  (\'QAR\', 634, 2, true, false),\n'
+              '  (\'RON\', 946, 2, true, false),\n'
+              '  (\'RSD\', 941, 2, true, false),\n'
+              '  (\'RUB\', 643, 2, true, false),\n'
+              '  (\'RWF\', 646, 0, true, false),\n'
+              '  (\'SAR\', 682, 2, true, false),\n'
+              '  (\'SBD\', 90, 2, true, false),\n'
+              '  (\'SCR\', 690, 2, true, false),\n'
+              '  (\'SDG\', 938, 2, true, false),\n'
+              '  (\'SEK\', 752, 2, true, false),\n'
+              '  (\'SGD\', 702, 2, true, false),\n'
+              '  (\'SHP\', 654, 2, true, false),\n'
+              '  (\'SLE\', 925, 2, true, false),\n'
+              '  (\'SOS\', 706, 2, true, false),\n'
+              '  (\'SRD\', 968, 2, true, false),\n'
+              '  (\'SSP\', 728, 2, true, false),\n'
+              '  (\'STN\', 930, 2, true, false),\n'
+              '  (\'SVC\', 222, 2, true, false),\n'
+              '  (\'SYP\', 760, 2, true, false),\n'
+              '  (\'SZL\', 748, 2, true, false),\n'
+              '  (\'THB\', 764, 2, true, false),\n'
+              '  (\'TJS\', 972, 2, true, false),\n'
+              '  (\'TMT\', 934, 2, true, false),\n'
+              '  (\'TND\', 788, 3, true, false),\n'
+              '  (\'TOP\', 776, 2, true, false),\n'
+              '  (\'TRY\', 949, 2, true, false),\n'
+              '  (\'TTD\', 780, 2, true, false),\n'
+              '  (\'TWD\', 901, 2, true, false),\n'
+              '  (\'TZS\', 834, 2, true, false),\n'
+              '  (\'UAH\', 980, 2, true, false),\n'
+              '  (\'UGX\', 800, 0, true, false),\n'
+              '  (\'USD\', 840, 2, true, false),\n'
+              '  (\'USN\', 997, 2, true, true),\n'
+              '  (\'UYI\', 940, 0, true, true),\n'
+              '  (\'UYU\', 858, 2, true, false),\n'
+              '  (\'UYW\', 927, 4, true, true),\n'
+              '  (\'UZS\', 860, 2, true, false),\n'
+              '  (\'VED\', 926, 2, true, false),\n'
+              '  (\'VES\', 928, 2, true, false),\n'
+              '  (\'VND\', 704, 0, true, false),\n'
+              '  (\'VUV\', 548, 0, true, false),\n'
+              '  (\'WST\', 882, 2, true, false),\n'
+              '  (\'XAF\', 950, 0, true, false),\n'
+              '  (\'XCD\', 951, 2, true, false),\n'
+              '  (\'XCG\', 532, 2, true, false),\n'
+              '  (\'XOF\', 952, 0, true, false),\n'
+              '  (\'XPF\', 953, 0, true, false),\n'
+              '  (\'YER\', 886, 2, true, false),\n'
+              '  (\'ZAR\', 710, 2, true, false),\n'
+              '  (\'ZMW\', 967, 2, true, false),\n'
+              '  (\'ZWG\', 924, 2, true, false),\n'
+              '];\n'
+              ''
+     Which: is different.
+            Expected: ...  BY HAND.\r\n// Sour ...
+              Actual: ...  BY HAND.\n// Source ...
+                                    ^
+             Differ at offset 43
+  
+  package:matcher                          expect
+  test\money\iso4217_table_test.dart 41:7  main.<fn>.<fn>
+  
+00:00 +35 -2: test\money\money_property_test.dart: 1. addition laws + is commutative (testing 1000 inputs)
+00:00 +36 -2: test\money\money_property_test.dart: 1. addition laws + is commutative (testing 1000 inputs)
+00:00 +37 -2: test\money\money_property_test.dart: 1. addition laws + is commutative (testing 1000 inputs)
+00:00 +38 -2: test\money\money_property_test.dart: 1. addition laws + is commutative (testing 1000 inputs)
+00:00 +39 -2: test\money\money_property_test.dart: 1. addition laws + is commutative (testing 1000 inputs)
+00:00 +40 -2: test\money\money_property_test.dart: 1. addition laws + is commutative (testing 1000 inputs)
+00:00 +41 -2: test\money\money_property_test.dart: 1. addition laws + is commutative (testing 1000 inputs)
+00:00 +42 -2: test\money\money_property_test.dart: 1. addition laws + is commutative (testing 1000 inputs)
+00:00 +43 -2: test\money\money_property_test.dart: 1. addition laws + is commutative (testing 1000 inputs)
+00:00 +44 -2: test\money\money_property_test.dart: 1. addition laws + is commutative (testing 1000 inputs)
+00:00 +45 -2: test\money\money_property_test.dart: 1. addition laws + is commutative (testing 1000 inputs)
+00:00 +46 -2: test\money\money_property_test.dart: 1. addition laws + is commutative (testing 1000 inputs)
+00:00 +47 -2: test\money\money_property_test.dart: 1. addition laws + is commutative (testing 1000 inputs)
+00:00 +48 -2: test\money\money_property_test.dart: 1. addition laws + is commutative (testing 1000 inputs)
+00:00 +49 -2: test\money\money_property_test.dart: 1. addition laws + is commutative (testing 1000 inputs)
+00:00 +50 -2: test\money\money_property_test.dart: 1. addition laws + is commutative (testing 1000 inputs)
+00:00 +51 -2: test\money\money_property_test.dart: 1. addition laws + is commutative (testing 1000 inputs)
+00:00 +52 -2: test\money\money_property_test.dart: 1. addition laws + is commutative (testing 1000 inputs)
+00:00 +53 -2: test\money\money_property_test.dart: 1. addition laws + is commutative (testing 1000 inputs)
+00:00 +54 -2: test\money\money_property_test.dart: 1. addition laws + is commutative (testing 1000 inputs)
+00:00 +55 -2: test\money\money_test.dart: AC: exact round trips KWD 1.250 <-> 1250
+00:00 +56 -2: test\money\money_test.dart: AC: exact round trips KWD 1.250 <-> 1250
+00:00 +57 -2: test\money\money_test.dart: AC: exact round trips KWD 1.250 <-> 1250
+00:00 +58 -2: test\money\money_test.dart: AC: exact round trips KWD 1.250 <-> 1250
+00:00 +59 -2: test\money\money_test.dart: AC: exact round trips KWD 1.250 <-> 1250
+00:00 +60 -2: test\money\money_test.dart: AC: exact round trips KWD 1.250 <-> 1250
+00:00 +61 -2: test\money\money_test.dart: AC: exact round trips KWD 1.250 <-> 1250
+00:00 +62 -2: test\money\money_test.dart: AC: exact round trips KWD 1.250 <-> 1250
+00:00 +63 -2: test\money\money_test.dart: AC: exact round trips KWD 1.250 <-> 1250
+00:00 +64 -2: test\money\money_test.dart: AC: exact round trips KWD 1.250 <-> 1250
+00:00 +65 -2: test\money\money_test.dart: AC: exact round trips KWD 1.250 <-> 1250
+00:00 +66 -2: test\money\money_test.dart: AC: exact round trips KWD 1.250 <-> 1250
+00:00 +67 -2: test\money\money_property_test.dart: 1. addition laws + is associative (testing 1000 inputs)
+00:00 +68 -2: test\money\money_property_test.dart: 1. addition laws + is associative (testing 1000 inputs)
+00:00 +69 -2: test\money\no_floating_point_test.dart: lib/money contains no floating-point types or conversions
+00:00 +70 -2: test\money\no_floating_point_test.dart: lib/money contains no floating-point types or conversions
+00:00 +71 -2: test\money\no_floating_point_test.dart: lib/money contains no floating-point types or conversions
+00:00 +72 -2: test\money\no_floating_point_test.dart: lib/money contains no floating-point types or conversions
+00:00 +73 -2: test\money\no_floating_point_test.dart: lib/money contains no floating-point types or conversions
+00:00 +74 -2: test\money\no_floating_point_test.dart: lib/money contains no floating-point types or conversions
+00:00 +75 -2: test\money\no_floating_point_test.dart: lib/money contains no floating-point types or conversions
+00:00 +76 -2: test\money\no_floating_point_test.dart: lib/money contains no floating-point types or conversions
+00:00 +77 -2: test\money\no_floating_point_test.dart: lib/money contains no floating-point types or conversions
+00:00 +78 -2: test\money\no_floating_point_test.dart: lib/money contains no floating-point types or conversions
+00:00 +79 -2: test\money\no_floating_point_test.dart: lib/money contains no floating-point types or conversions
+00:00 +80 -2: test\money\no_floating_point_test.dart: lib/money contains no floating-point types or conversions
+00:00 +81 -2: test\money\no_floating_point_test.dart: lib/money contains no floating-point types or conversions
+00:00 +82 -2: test\money\no_floating_point_test.dart: lib/money contains no floating-point types or conversions
+00:00 +83 -2: test\money\no_floating_point_test.dart: lib/money contains no floating-point types or conversions
+00:00 +84 -2: test\money\no_floating_point_test.dart: lib/money contains no floating-point types or conversions
+00:00 +85 -2: test\money\no_floating_point_test.dart: lib/money contains no floating-point types or conversions
+00:00 +86 -2: test\money\no_floating_point_test.dart: lib/money contains no floating-point types or conversions
+00:00 +87 -2: test\money\no_floating_point_test.dart: lib/money contains no floating-point types or conversions
+00:00 +88 -2: test\money\no_floating_point_test.dart: lib/money contains no floating-point types or conversions
+00:00 +89 -2: test\money\no_floating_point_test.dart: lib/money contains no floating-point types or conversions
+00:00 +90 -2: test\money\no_floating_point_test.dart: lib/money contains no floating-point types or conversions
+00:00 +91 -2: test\money\no_floating_point_test.dart: lib/money contains no floating-point types or conversions
+00:00 +92 -2: test\money\no_floating_point_test.dart: lib/money contains no floating-point types or conversions
+00:00 +93 -2: test\money\no_floating_point_test.dart: lib/money contains no floating-point types or conversions
+00:00 +94 -2: test\money\no_floating_point_test.dart: lib/money contains no floating-point types or conversions
+00:00 +95 -2: test\money\no_floating_point_test.dart: lib/money contains no floating-point types or conversions
+00:00 +96 -2: test\money\no_floating_point_test.dart: lib/money contains no floating-point types or conversions
+00:00 +97 -2: test\money\no_floating_point_test.dart: lib/money contains no floating-point types or conversions
+00:00 +98 -2: test\money\no_floating_point_test.dart: lib/money contains no floating-point types or conversions
+00:00 +99 -2: test\money\no_floating_point_test.dart: lib/money contains no floating-point types or conversions
+00:00 +100 -2: test\money\no_floating_point_test.dart: lib/money contains no floating-point types or conversions
+00:00 +101 -2: test\money\no_floating_point_test.dart: lib/money contains no floating-point types or conversions
+00:00 +102 -2: test\money\no_floating_point_test.dart: lib/money contains no floating-point types or conversions
+00:00 +103 -2: test\money\no_floating_point_test.dart: lib/money contains no floating-point types or conversions
+00:00 +104 -2: test\money\no_floating_point_test.dart: lib/money contains no floating-point types or conversions
+00:00 +105 -2: test\money\no_floating_point_test.dart: lib/money contains no floating-point types or conversions
+00:00 +106 -2: test\money\no_floating_point_test.dart: lib/money contains no floating-point types or conversions
+00:00 +107 -2: test\money\no_floating_point_test.dart: lib/money contains no floating-point types or conversions
+00:00 +108 -2: test\money\no_floating_point_test.dart: lib/money contains no floating-point types or conversions
+00:00 +109 -2: test\money\no_floating_point_test.dart: lib/money contains no floating-point types or conversions
+00:00 +110 -2: test\money\no_floating_point_test.dart: lib/money contains no floating-point types or conversions
+00:00 +111 -2: test\money\no_floating_point_test.dart: lib/money contains no floating-point types or conversions
+00:00 +112 -2: test\money\no_floating_point_test.dart: lib/money contains no floating-point types or conversions
+00:00 +113 -2: test\money\no_floating_point_test.dart: lib/money contains no floating-point types or conversions
+00:00 +114 -2: test\money\no_floating_point_test.dart: lib/money contains no floating-point types or conversions
+00:00 +115 -2: test\money\no_floating_point_test.dart: lib/money contains no floating-point types or conversions
+00:00 +116 -2: test\money\no_floating_point_test.dart: lib/money contains no floating-point types or conversions
+00:00 +117 -2: test\money\money_property_test.dart: 2. overflow is exact + throws iff out of range (testing 1000 inputs)
+00:00 +118 -2: test\money\money_property_test.dart: 2. overflow is exact + throws iff out of range (testing 1000 inputs)
+00:00 +119 -2: test\money\money_property_test.dart: 2. overflow is exact + throws iff out of range (testing 1000 inputs)
+00:00 +120 -2: test\money\money_property_test.dart: 2. overflow is exact + throws iff out of range (testing 1000 inputs)
+00:00 +121 -2: test\money\money_property_test.dart: 2. overflow is exact + throws iff out of range (testing 1000 inputs)
+00:00 +122 -2: test\money\money_property_test.dart: 2. overflow is exact + throws iff out of range (testing 1000 inputs)
+00:00 +123 -2: test\money\money_property_test.dart: 2. overflow is exact + throws iff out of range (testing 1000 inputs)
+00:00 +124 -2: test\money\money_property_test.dart: 2. overflow is exact + throws iff out of range (testing 1000 inputs)
+00:00 +125 -2: test\money\money_test.dart: parse: canonical form only fewer fraction digits are padded
+00:00 +126 -2: test\money\money_property_test.dart: 2. overflow is exact - throws iff out of range (testing 1000 inputs)
+00:00 +127 -2: test\money\money_property_test.dart: 2. overflow is exact - throws iff out of range (testing 1000 inputs)
+00:00 +128 -2: test\money\money_property_test.dart: 2. overflow is exact - throws iff out of range (testing 1000 inputs)
+00:00 +129 -2: test\money\money_property_test.dart: 2. overflow is exact - throws iff out of range (testing 1000 inputs)
+00:00 +130 -2: test\money\money_property_test.dart: 2. overflow is exact - throws iff out of range (testing 1000 inputs)
+00:00 +131 -2: test\money\money_property_test.dart: 2. overflow is exact - throws iff out of range (testing 1000 inputs)
+00:00 +132 -2: test\money\money_test.dart: range and overflow add, subtract and times overflow throw instead of wrapping
+00:00 +133 -2: test\money\money_property_test.dart: 2. overflow is exact times throws iff overflow (testing 1000 inputs)
+00:00 +134 -2: test\money\money_property_test.dart: 2. overflow is exact times throws iff overflow (testing 1000 inputs)
+00:00 +135 -2: test\money\money_property_test.dart: 2. overflow is exact times throws iff overflow (testing 1000 inputs)
+00:00 +136 -2: test\money\money_property_test.dart: 2. overflow is exact times throws iff overflow (testing 1000 inputs)
+00:00 +137 -2: test\money\money_property_test.dart: 2. overflow is exact times throws iff overflow (testing 1000 inputs)
+00:00 +138 -2: test\money\money_test.dart: allocation negative amounts and zero weights
+00:00 +139 -2: test\money\money_property_test.dart: 2. overflow is exact mulDiv throws iff overflow (testing 1000 inputs)
+00:00 +140 -2: test\money\money_property_test.dart: 2. overflow is exact mulDiv throws iff overflow (testing 1000 inputs)
+00:00 +141 -2: test\money\money_property_test.dart: 2. overflow is exact mulDiv throws iff overflow (testing 1000 inputs)
+00:00 +142 -2: test\money\money_test.dart: allocation allocation accepts exactly the maximum number of parts
+00:00 +143 -2: test\money\money_property_test.dart: 3. different currencies mismatch throws, == is false (testing 1000 inputs)
+00:00 +144 -2: test\money\money_property_test.dart: 3. different currencies mismatch throws, == is false (testing 1000 inputs)
+00:00 +145 -2: test\money\money_property_test.dart: 3. different currencies mismatch throws, == is false (testing 1000 inputs)
+00:00 +146 -2: test\money\money_property_test.dart: 3. different currencies mismatch throws, == is false (testing 1000 inputs)
+00:00 +147 -2: test\money\money_property_test.dart: 3. different currencies mismatch throws, == is false (testing 1000 inputs)
+00:00 +148 -2: test\money\money_property_test.dart: 3. different currencies mismatch throws, == is false (testing 1000 inputs)
+00:00 +149 -2: test\money\money_property_test.dart: 3. different currencies mismatch throws, == is false (testing 1000 inputs)
+00:00 +150 -2: test\money\money_property_test.dart: 3. different currencies mismatch throws, == is false (testing 1000 inputs)
+00:00 +151 -2: test\money\money_property_test.dart: 3. different currencies mismatch throws, == is false (testing 1000 inputs)
+00:00 +152 -2: test\money\money_test.dart: no amounts in messages (NFR-SEC-03) invalid codes are not echoed
+00:00 +153 -2: test\money\money_property_test.dart: 4-7. allocation weights 0..10^6 and edges (testing 1000 inputs)
+00:00 +154 -2: test\money\money_property_test.dart: 4-7. allocation weights 0..10^6 and edges (testing 1000 inputs)
+00:00 +155 -2: test\money\money_property_test.dart: 4-7. allocation weights 0..10^6 and edges (testing 1000 inputs)
+00:00 +156 -2: test\money\money_property_test.dart: 4-7. allocation weights 0..10^6 and edges (testing 1000 inputs)
+00:00 +157 -2: test\money\money_property_test.dart: 4-7. allocation weights 0..10^6 and edges (testing 1000 inputs)
+00:00 +158 -2: test\money\money_property_test.dart: 4-7. allocation weights 0..10^6 and edges (testing 1000 inputs)
+00:00 +159 -2: test\money\money_property_test.dart: 4-7. allocation weights 0..10^6 and edges (testing 1000 inputs)
+00:00 +160 -2: test\money\money_property_test.dart: 4-7. allocation weights 0..10^6 and edges (testing 1000 inputs)
+00:00 +161 -2: test\money\money_property_test.dart: 4-7. allocation weights 0..10^6 and edges (testing 1000 inputs)
+00:00 +162 -2: test\money\money_property_test.dart: 4-7. allocation weights 0..10^6 and edges (testing 1000 inputs)
+00:00 +163 -2: test\money\money_property_test.dart: 4-7. allocation weights 0..10^6 and edges (testing 1000 inputs)
+00:00 +164 -2: test\money\money_property_test.dart: 4-7. allocation weights 0..10^6 and edges (testing 1000 inputs)
+00:00 +165 -2: test\money\money_property_test.dart: 4-7. allocation weights to maxMinor and edges (testing 1000 inputs)
+00:00 +166 -2: test\money\money_property_test.dart: 4-7. allocation equal weights (testing 1000 inputs)
+00:00 +167 -2: test\money\money_property_test.dart: 4-7. allocation 7. allocateEven spread <= 1 (testing 1000 inputs)
+00:00 +168 -2: test\money\money_property_test.dart: 8. round trips canonical string (testing 1000 inputs)
+00:00 +169 -2: test\money\money_property_test.dart: 8. round trips storage (testing 1000 inputs)
+00:00 +170 -2: test\money\money_property_test.dart: 8. round trips json (testing 1000 inputs)
+00:00 +171 -2: test\money\money_property_test.dart: equality and hashing equal copies hash equally (testing 1000 inputs)
+00:00 +172 -2: test\money\money_property_test.dart: equality and hashing a == b iff same minor (testing 1000 inputs)
+00:00 +173 -2: test\money\money_property_test.dart: 9. MultiCurrencyTotal independent of input order (testing 1000 inputs)
+00:00 +174 -2: test\money\money_property_test.dart: 9. MultiCurrencyTotal of(xs)[c] is the sum in c (testing 1000 inputs)
+00:00 +175 -2: test\money\money_property_test.dart: 9. MultiCurrencyTotal full range (testing 1000 inputs)
+00:00 +176 -2: test\money\money_property_test.dart: 9. MultiCurrencyTotal + is associative (testing 1000 inputs)
+00:00 +177 -2: test\money\money_property_test.dart: 10. roundDiv matches the oracle (testing 1000 inputs)
+00:00 +178 -2: Some tests failed.
+
+Failing tests:
+  test\money\iso4217_table_test.dart: generated files are in sync currencies.json == merge(List One snapshot, committed table)
+  test\money\iso4217_table_test.dart: generated files are in sync iso4217_table.g.dart is byte-identical to a fresh render
+
+Consider enabling the flag chain-stack-traces to receive more detailed exceptions.
+For example, 'dart test --chain-stack-traces'.
+
+[21:35:21] === RESULT dart-test-zaghlol_domain exit=1
+[21:35:21] === STEP dart-test-zaghlol_parsing (in C:\Users\amr90\zaghlol-ci\repo\packages\zaghlol_parsing)
+00:00 +0: loading test\zaghlol_parsing_test.dart
+00:00 +0: test\zaghlol_parsing_test.dart: package placeholder is wired up
+00:00 +1: All tests passed!
+
+[21:35:23] === RESULT dart-test-zaghlol_parsing exit=0
+[21:35:23] SUMMARY FAIL sha=64fdcd30f31dceaf92b6046df70aeafca229d95a pipeline=quick-app pub-get=0 format=0 analyze=0 app-test=1 dart-test-zaghlol_domain=1 dart-test-zaghlol_parsing=0

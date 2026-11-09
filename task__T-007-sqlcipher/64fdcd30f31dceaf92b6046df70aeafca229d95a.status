@@ -1,1 +1,1 @@
-﻿RUNNING sha=64fdcd30f31dceaf92b6046df70aeafca229d95a
+﻿FAIL sha=64fdcd30f31dceaf92b6046df70aeafca229d95a pipeline=quick-app pub-get=0 format=0 analyze=0 app-test=1 dart-test-zaghlol_domain=1 dart-test-zaghlol_parsing=0
