@@ -30,13 +30,16 @@ namespace Zaghlol.Api.Tests.Installs;
 /// <summary>A clock the tests move; timers stay real.</summary>
 public sealed class ManualClock : TimeProvider
 {
-    private long ticks = DateTimeOffset.UtcNow.UtcTicks - (DateTimeOffset.UtcNow.UtcTicks % TimeSpan.TicksPerSecond);
+    // Whole seconds, so values round-trip through PostgreSQL (microseconds) and the second-precision serverTime unchanged.
+    private long ticks = WholeSecond(DateTimeOffset.UtcNow.UtcTicks);
 
     public DateTimeOffset Now => new(Interlocked.Read(ref ticks), TimeSpan.Zero);
 
     public override DateTimeOffset GetUtcNow() => Now;
 
     public void Advance(TimeSpan by) => Interlocked.Add(ref ticks, by.Ticks);
+
+    private static long WholeSecond(long utcTicks) => utcTicks - (utcTicks % TimeSpan.TicksPerSecond);
 }
 
 /// <summary>The real pseudonymizer, or a failing one while <see cref="Fail"/> is set (F7).</summary>

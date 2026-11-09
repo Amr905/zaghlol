@@ -91,10 +91,15 @@ public class RateLimitTests(RateLimitHostFixture fixture) : IClassFixture<RateLi
         }
 
         using var limited = await fixture.RegisterAsync("{}", InstallsHostFixture.NewKey(), Peer);
-        using var ping = await Ping(Peer);
-
         await Problems.AssertAsync(limited, HttpStatusCode.TooManyRequests, "RATE_LIMITED");
-        Assert.Equal(HttpStatusCode.OK, ping.StatusCode);
+
+        // The refused registration didn't touch the general bucket: 2 of its 5 tokens are left.
+        using var first = await Ping(Peer);
+        using var second = await Ping(Peer);
+        using var third = await Ping(Peer);
+        Assert.Equal(HttpStatusCode.OK, first.StatusCode);
+        Assert.Equal(HttpStatusCode.OK, second.StatusCode);
+        Assert.Equal(HttpStatusCode.TooManyRequests, third.StatusCode);
     }
 
     [Theory]

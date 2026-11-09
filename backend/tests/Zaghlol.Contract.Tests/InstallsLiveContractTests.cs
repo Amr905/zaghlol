@@ -151,7 +151,7 @@ public class InstallsLiveContractTests(InstallsContractFixture fixture) : IClass
         var request = Spec.Schemas["InstallRequest"]!["properties"]!;
         var appVersion = request["appVersion"]!;
         Assert.Equal(InstallEndpoints.AppVersionPattern, appVersion["pattern"]!.GetValue<string>());
-        Assert.Equal(InstallEndpoints.AppVersionMaxLength, appVersion["maxLength"]!.GetValue<int>());
+        Assert.Equal(InstallEndpoints.AppVersionMaxLength, (int)appVersion["maxLength"]!.GetValue<long>());
         Assert.Equal(
             InstallEndpoints.Platforms,
             Spec.Schemas["Platform"]!["enum"]!.AsArray().Select(n => n!.GetValue<string>()).ToList());

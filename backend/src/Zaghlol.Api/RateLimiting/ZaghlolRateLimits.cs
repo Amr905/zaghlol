@@ -84,7 +84,9 @@ internal sealed class ZaghlolRateLimiters : IDisposable
             context.GetEndpoint()?.Metadata.GetMetadata<RegistrationRateLimitMetadata>() is null
                 ? RateLimitPartition.GetNoLimiter(string.Empty)
                 : RateLimitPartition.GetTokenBucketLimiter(ClientNetwork.Of(context.Connection.RemoteIpAddress), _ => limits.Register.ToOptions()));
-        network = PartitionedRateLimiter.CreateChained(perNetwork, register);
+        // Registration first: the middleware retries a refused lease once (AcquireAsync) and a chain charges every limiter
+        // before the one that refuses, so this order keeps a registration flood from also draining the /24's general bucket.
+        network = PartitionedRateLimiter.CreateChained(register, perNetwork);
         token = PartitionedRateLimiter.Create<HttpContext, string>(context =>
             context.User.FindFirst(InstallTokenAuthentication.TokenHashClaim)?.Value is { } key
                 ? RateLimitPartition.GetTokenBucketLimiter(key, _ => limits.PerToken.ToOptions())

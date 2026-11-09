@@ -34,7 +34,7 @@ public class InstallAuthTests(InstallsHostFixture fixture) : IClassFixture<Insta
             "Bearer " + valid[..42] + "+",
             "Bearer " + valid[..42] + "=",
             "Basic " + valid,
-            "Bearer  " + valid,
+            "Bearer",
             "Bearer " + InstallTokens.Generate(),
             "Bearer " + deletedToken,
         ];
