@@ -5,6 +5,7 @@ using Zaghlol.Api.Idempotency;
 using Zaghlol.Api.Tests.Installs;
 using Zaghlol.Application.Flags;
 using Zaghlol.Domain;
+using TestProblems = Zaghlol.Api.Tests.Installs.Problems;
 
 namespace Zaghlol.Api.Tests.Flags;
 
@@ -118,7 +119,7 @@ public class FlagAdminEndpointTests(AdminFlagFixture fixture) : IClassFixture<Ad
 
         using var response = await fixture.SendAsync(HttpMethod.Put, "/admin/v1/flags/zakah", token, body);
 
-        var text = await Problems.AssertAsync(response, HttpStatusCode.BadRequest, "UNKNOWN_FIELD");
+        var text = await TestProblems.AssertAsync(response, HttpStatusCode.BadRequest, "UNKNOWN_FIELD");
         Assert.DoesNotContain("audience", text, StringComparison.Ordinal);
         Assert.Equal(0, await fixture.AuditCountAsync(operatorId));
     }
@@ -146,7 +147,7 @@ public class FlagAdminEndpointTests(AdminFlagFixture fixture) : IClassFixture<Ad
 
         using var response = await fixture.SendAsync(HttpMethod.Put, "/admin/v1/flags/zakah", token, body);
 
-        await Problems.AssertAsync(response, HttpStatusCode.BadRequest, "VALIDATION_FAILED");
+        await TestProblems.AssertAsync(response, HttpStatusCode.BadRequest, "VALIDATION_FAILED");
         Assert.Equal(0, await fixture.AuditCountAsync(operatorId));
     }
 
@@ -159,12 +160,12 @@ public class FlagAdminEndpointTests(AdminFlagFixture fixture) : IClassFixture<Ad
         {
             var body = method == HttpMethod.Put ? Put("true") : null;
             using var unknown = await fixture.SendAsync(method, "/admin/v1/flags/not_a_flag", token, body);
-            await Problems.AssertAsync(unknown, HttpStatusCode.NotFound, "NOT_FOUND");
+            await TestProblems.AssertAsync(unknown, HttpStatusCode.NotFound, "NOT_FOUND");
 
             foreach (var key in new[] { "Zakah", "a", "2zakah", "zakah%0A", "za-kah", new string('a', 65) })
             {
                 using var malformed = await fixture.SendAsync(method, "/admin/v1/flags/" + key, token, body);
-                await Problems.AssertAsync(malformed, HttpStatusCode.BadRequest, "VALIDATION_FAILED");
+                await TestProblems.AssertAsync(malformed, HttpStatusCode.BadRequest, "VALIDATION_FAILED");
             }
         }
     }
@@ -177,8 +178,8 @@ public class FlagAdminEndpointTests(AdminFlagFixture fixture) : IClassFixture<Ad
         using var wrongType = await fixture.SendAsync(HttpMethod.Put, "/admin/v1/flags/zakah", token, Put("true"), "text/plain");
         using var tooLarge = await fixture.SendAsync(HttpMethod.Put, "/admin/v1/flags/zakah", token, "{\"value\":true,\"pad\":\"" + new string('a', 70_000) + "\"}");
 
-        await Problems.AssertAsync(wrongType, HttpStatusCode.UnsupportedMediaType, "UNSUPPORTED_MEDIA_TYPE");
-        await Problems.AssertAsync(tooLarge, HttpStatusCode.RequestEntityTooLarge, "PAYLOAD_TOO_LARGE");
+        await TestProblems.AssertAsync(wrongType, HttpStatusCode.UnsupportedMediaType, "UNSUPPORTED_MEDIA_TYPE");
+        await TestProblems.AssertAsync(tooLarge, HttpStatusCode.RequestEntityTooLarge, "PAYLOAD_TOO_LARGE");
     }
 
     [Fact]
@@ -194,9 +195,9 @@ public class FlagAdminEndpointTests(AdminFlagFixture fixture) : IClassFixture<Ad
             }
 
             using var response = await fixture.Client.SendAsync(request);
-            var text = await Problems.AssertAsync(response, HttpStatusCode.Unauthorized, "UNAUTHORIZED");
+            var text = await TestProblems.AssertAsync(response, HttpStatusCode.Unauthorized, "UNAUTHORIZED");
             Assert.Equal("Bearer", response.Headers.WwwAuthenticate.ToString());
-            bodies.Add(Problems.WithoutCorrelationId(text));
+            bodies.Add(TestProblems.WithoutCorrelationId(text));
         }
 
         Assert.Single(bodies.Distinct(StringComparer.Ordinal));
@@ -210,8 +211,8 @@ public class FlagAdminEndpointTests(AdminFlagFixture fixture) : IClassFixture<Ad
         using var get = await fixture.SendAsync(HttpMethod.Get, "/admin/v1/flags/zakah", token);
         using var put = await fixture.SendAsync(HttpMethod.Put, "/admin/v1/flags/zakah", token, Put("true"));
 
-        await Problems.AssertAsync(get, HttpStatusCode.Forbidden, "FORBIDDEN");
-        await Problems.AssertAsync(put, HttpStatusCode.Forbidden, "FORBIDDEN");
+        await TestProblems.AssertAsync(get, HttpStatusCode.Forbidden, "FORBIDDEN");
+        await TestProblems.AssertAsync(put, HttpStatusCode.Forbidden, "FORBIDDEN");
         Assert.Equal(0, await fixture.AuditCountAsync(operatorId));
     }
 
@@ -229,7 +230,7 @@ public class FlagAdminEndpointTests(AdminFlagFixture fixture) : IClassFixture<Ad
 
         using var response = await fixture.SendAsync(HttpMethod.Get, "/admin/v1/flags/zakah", installToken);
 
-        await Problems.AssertAsync(response, HttpStatusCode.Unauthorized, "UNAUTHORIZED");
+        await TestProblems.AssertAsync(response, HttpStatusCode.Unauthorized, "UNAUTHORIZED");
     }
 
     [Fact]
@@ -278,7 +279,7 @@ public class FlagAdminRateLimitTests(RateLimitedAdminFlagFixture fixture) : ICla
         using var limited = await fixture.SendAsync(HttpMethod.Get, "/admin/v1/flags/zakah", busy);
         using var unaffected = await fixture.SendAsync(HttpMethod.Get, "/admin/v1/flags/zakah", other);
 
-        var text = await Problems.AssertAsync(limited, HttpStatusCode.TooManyRequests, "RATE_LIMITED");
+        var text = await TestProblems.AssertAsync(limited, HttpStatusCode.TooManyRequests, "RATE_LIMITED");
         Assert.NotNull(limited.Headers.RetryAfter);
         Assert.DoesNotContain(busy, text, StringComparison.Ordinal);
         Assert.Equal(HttpStatusCode.OK, unaffected.StatusCode);
@@ -297,6 +298,6 @@ public class FlagAdminDefaultClosedTests(ApiFixture fixture) : IClassFixture<Api
 
         using var response = await fixture.Client.SendAsync(request);
 
-        await Problems.AssertAsync(response, HttpStatusCode.Unauthorized, "UNAUTHORIZED");
+        await TestProblems.AssertAsync(response, HttpStatusCode.Unauthorized, "UNAUTHORIZED");
     }
 }

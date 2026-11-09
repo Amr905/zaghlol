@@ -120,7 +120,7 @@ public class FlagsLiveContractTests(FlagsContractFixture fixture) : IClassFixtur
 
         var body = await AssertDeclared(response, Get, HttpStatusCode.OK, "application/json");
         Assert.False(body!["value"]!.GetValue<bool>());
-        Assert.Equal(0, body["version"]!.GetValue<int>());
+        Assert.Equal(0, body["version"]!.GetValue<long>());
     }
 
     [Fact]
@@ -136,7 +136,7 @@ public class FlagsLiveContractTests(FlagsContractFixture fixture) : IClassFixtur
         var putBody = await AssertDeclared(put, Put, HttpStatusCode.OK, "application/json");
         var getBody = await AssertDeclared(get, Get, HttpStatusCode.OK, "application/json");
         Assert.Equal(putBody!["rules"]!.ToJsonString(), getBody!["rules"]!.ToJsonString());
-        Assert.Equal(10, getBody["rules"]!["rolloutPercent"]!.GetValue<int>());
+        Assert.Equal(10, getBody["rules"]!["rolloutPercent"]!.GetValue<long>());
         Assert.Equal("1.4.0", getBody["rules"]!["minAppVersion"]!.GetValue<string>());
     }
 
@@ -201,8 +201,8 @@ public class FlagsLiveContractTests(FlagsContractFixture fixture) : IClassFixtur
             FlagRulesValidator.Platforms,
             Spec.Schemas["Platform"]!["enum"]!.AsArray().Select(n => n!.GetValue<string>()).ToList());
         var rollout = Spec.Schemas["FlagRules"]!["properties"]!["rolloutPercent"]!;
-        Assert.Equal(0, rollout["minimum"]!.GetValue<int>());
-        Assert.Equal(100, rollout["maximum"]!.GetValue<int>());
+        Assert.Equal(0, rollout["minimum"]!.GetValue<long>());
+        Assert.Equal(100, rollout["maximum"]!.GetValue<long>());
     }
 
     private static bool Declared(SpecOperation operation, string status) =>
