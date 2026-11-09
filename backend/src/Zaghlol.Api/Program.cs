@@ -2,6 +2,7 @@ using Serilog;
 using Serilog.Core;
 using Zaghlol.Api;
 using Zaghlol.Api.Endpoints;
+using Zaghlol.Api.Endpoints.V1;
 using Zaghlol.Api.Observability;
 using Zaghlol.Application;
 using Zaghlol.Infrastructure;
@@ -44,10 +45,14 @@ builder.Services.AddZaghlolHttp();
 builder.Services.AddZaghlolApiTelemetry(builder.Configuration, builder.Environment);
 builder.Services.AddZaghlolLogPseudonymizer();
 
+// Install registration, install-token auth and the idempotency store (T-124); after the pseudonymizer for its startup check.
+builder.Services.AddZaghlolInstalls();
+
 var app = builder.Build();
 
 app.UseZaghlolPipeline();
 app.MapHealth();
+app.MapInstalls();
 
 await app.RunAsync();
 

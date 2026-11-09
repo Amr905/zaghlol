@@ -21,7 +21,19 @@ internal sealed class EnvelopeCipher(KmsSettings settings, IDataKeyProvider prov
     {
         var aad = AssociatedData(context);
         var keyRef = settings.EnvelopeKeyRef;
-        using var dataKey = await DataKeyAsync(ct => provider.GenerateDataKeyAsync(keyRef, ct), cancellationToken);
+        DataKey generated;
+        try
+        {
+            generated = await DataKeyAsync(ct => provider.GenerateDataKeyAsync(keyRef, ct), cancellationToken);
+        }
+        catch (CryptographicException)
+        {
+            // A provider's crypto exception text can name the key (T-123 code review #2): constant message, no inner exception.
+            KmsMetrics.KmsUnavailable("data_key");
+            throw new KmsUnavailableException();
+        }
+
+        using var dataKey = generated;
 
         var keyRefBytes = Encoding.ASCII.GetBytes(keyRef);
         var wrapped = dataKey.Wrapped.Span;

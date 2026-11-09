@@ -9,9 +9,12 @@ public static class ErrorCodes
     public const string ValidationFailed = "VALIDATION_FAILED";
     public const string UnknownField = "UNKNOWN_FIELD";
     public const string Unauthorized = "UNAUTHORIZED";
+    public const string InstallTokenInvalid = "INSTALL_TOKEN_INVALID";
     public const string Forbidden = "FORBIDDEN";
     public const string NotFound = "NOT_FOUND";
     public const string MethodNotAllowed = "METHOD_NOT_ALLOWED";
+    public const string InstallExists = "INSTALL_EXISTS";
+    public const string IdempotencyKeyReused = "IDEMPOTENCY_KEY_REUSED";
     public const string PayloadTooLarge = "PAYLOAD_TOO_LARGE";
     public const string UnsupportedMediaType = "UNSUPPORTED_MEDIA_TYPE";
     public const string RateLimited = "RATE_LIMITED";

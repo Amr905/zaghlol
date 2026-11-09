@@ -151,6 +151,37 @@ public class EnvelopeAndHashTests
             await services.GetRequiredService<IKeyedHasher>().HmacSha256Async(KeyedHashKey.Seat, Plain, CancellationToken.None));
         Assert.Equal(2, kms.Calls);
     }
+
+    [Fact]
+    public async Task ACryptoErrorFromDataKeyGenerationBecomesAConstantKmsUnavailable()
+    {
+        // T-123 code review #2 (routed to T-124): a provider's crypto exception text can name the key.
+        using var kms = FakeKms.CreateDefault();
+        await using var services = kms.BuildServices();
+        kms.Fault = FakeKmsFault.Crypto;
+
+        var error = await Assert.ThrowsAsync<KmsUnavailableException>(async () =>
+            await services.GetRequiredService<IEnvelopeCipher>().EncryptAsync(Plain, Context, CancellationToken.None));
+
+        Assert.Equal(KmsUnavailableException.DefaultMessage, error.Message);
+        Assert.Null(error.InnerException);
+    }
+
+    [Fact]
+    public async Task ACryptoErrorFromDataKeyUnwrapIsAConstantDecryptionError()
+    {
+        using var kms = FakeKms.CreateDefault();
+        await using var services = kms.BuildServices();
+        var cipher = services.GetRequiredService<IEnvelopeCipher>();
+        var blob = await cipher.EncryptAsync(Plain, Context, CancellationToken.None);
+        kms.Fault = FakeKmsFault.Crypto;
+
+        var error = await Assert.ThrowsAsync<EnvelopeDecryptionException>(async () =>
+            await cipher.DecryptAsync(blob, Context, CancellationToken.None));
+
+        Assert.Equal(EnvelopeDecryptionException.DefaultMessage, error.Message);
+        Assert.Null(error.InnerException);
+    }
 }
 
 /// <summary>

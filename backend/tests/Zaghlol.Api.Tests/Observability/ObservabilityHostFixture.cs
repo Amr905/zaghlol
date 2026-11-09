@@ -174,6 +174,9 @@ public abstract class ObservabilityHostFixture : IAsyncLifetime, IDisposable
         var builder = WebApplication.CreateBuilder(new WebApplicationOptions { EnvironmentName = "Production" });
         builder.WebHost.UseTestServer();
         builder.Configuration.AddInMemoryCollection(Kms.Settings());
+
+        // Production needs a proxy list or the explicit flag (T-124 S-1); the test server has no proxy.
+        builder.Configuration.AddInMemoryCollection(new Dictionary<string, string?> { ["ForwardedHeaders:NoProxy"] = "true" });
         builder.Host.UseSerilog((_, _, logger) =>
         {
             logger.ConfigureZaghlol("api", log);

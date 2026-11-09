@@ -27,6 +27,8 @@ public sealed partial class ZaghlolMetrics : IDisposable
     private readonly Counter<long> attestationFailure;
     private readonly Counter<long> playIntegrityCalls;
     private readonly Counter<long> alertFired;
+    private readonly Counter<long> installHashUnavailable;
+    private readonly Counter<long> rateLimited;
     private readonly ConcurrentDictionary<string, double> priceAges = new(StringComparer.Ordinal);
     private readonly string serviceVersion;
     private long unackedCount;
@@ -48,6 +50,10 @@ public sealed partial class ZaghlolMetrics : IDisposable
         attestationFailure = meter.CreateCounter<long>("zaghlol.attestation.failure", description: "Device attestation failures by platform and reason code.");
         playIntegrityCalls = meter.CreateCounter<long>("zaghlol.play_integrity.calls", description: "Play Integrity API calls.");
         alertFired = meter.CreateCounter<long>("zaghlol.audit_alert.fired", description: "Audit alert signals by rule.");
+        installHashUnavailable = meter.CreateCounter<long>(
+            "zaghlol.diag.install_hash_unavailable",
+            description: "Requests logged with installHash=unavailable because the log key could not be read (T-124 F7).");
+        rateLimited = meter.CreateCounter<long>("zaghlol.rate_limit.rejected", description: "429 RATE_LIMITED answers by bucket name.");
 
         meter.CreateObservableGauge("zaghlol.purchase.unacked", () => Interlocked.Read(ref unackedCount), description: "Purchases waiting for acknowledgement.");
         meter.CreateObservableGauge("zaghlol.purchase.unacked.oldest_age", () => Volatile.Read(ref unackedOldestAgeSeconds), "s", "Age of the oldest unacknowledged purchase.");
@@ -95,6 +101,12 @@ public sealed partial class ZaghlolMetrics : IDisposable
         attestationFailure.Add(1, Tags(("platform", platform), ("reason", reason)));
 
     public void PlayIntegrityCalled() => playIntegrityCalls.Add(1);
+
+    /// <summary>The install auth handler or registration could not compute <c>installHash</c>; the request went on.</summary>
+    public void InstallHashUnavailable() => installHashUnavailable.Add(1);
+
+    /// <summary><paramref name="bucket"/> is a bucket name constant (<c>network</c>, <c>token</c>, <c>idempotency</c>).</summary>
+    public void RateLimited(string bucket) => rateLimited.Add(1, Tags(("bucket", bucket)));
 
     public void SetPlayIntegrityDailyQuota(long quota) => Interlocked.Exchange(ref playIntegrityDailyQuota, quota);
 
