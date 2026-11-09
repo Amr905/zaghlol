@@ -5,7 +5,7 @@ GitHub Actions (`app-ci`, `backend-ci`) is still the **merge gate**. The local r
 ## Runner
 
 - Location: `C:\Projects\Zaghlol\.zaghlol-local-ci\` on the PO's Windows PC. The source copy is in `docs/workflow/tools/local-ci/`.
-- Toolchain: **everything builds and tests inside pinned Linux Docker containers**, not on Windows (Windows Smart App Control blocks freshly built DLLs, and Windows-only test differences hid real results). Images: `ghcr.io/cirruslabs/flutter:3.47.9` (same Flutter as `app-ci.yml`) and `mcr.microsoft.com/dotnet/sdk:10.0.402` (.NET 10 like `backend-ci.yml`). Change the pins at the top of `runner.ps1`, or set the environment variables `ZAGHLOL_FLUTTER_IMAGE` / `ZAGHLOL_DOTNET_IMAGE`.
+- Toolchain: **everything builds and tests inside pinned Linux Docker containers**, not on Windows (Windows Smart App Control blocks freshly built DLLs, and Windows-only test differences hid real results). Images: `zaghlol-flutter:3.47.9`, built once on the PC from `flutter.Dockerfile` next to `runner.ps1` (no published image exists for every Flutter release; same version and commit as `app-ci.yml`/`app-regen.yml`; ~5–10 min the first time) and `mcr.microsoft.com/dotnet/sdk:10.0.402` (.NET 10 like `backend-ci.yml`). Change the pins at the top of `runner.ps1`, or set the environment variables `ZAGHLOL_FLUTTER_IMAGE` / `ZAGHLOL_DOTNET_IMAGE`.
 - Git polling and publishing still run on Windows. Only Git and Docker Desktop are needed on the PC (no local Flutter or .NET).
 - The PO starts it with `START-LOCAL-CI.cmd`. It runs only while that window is open.
 
