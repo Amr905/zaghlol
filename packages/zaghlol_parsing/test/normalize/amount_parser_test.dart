@@ -67,7 +67,7 @@ void main() {
       ('arabic-indic', '١٬٢٥٠٫٥٠', 'EGP', _std, 125050),
       ('extended digits', '۱۲۳٫۴۵', 'EGP', _std, 12345),
       ('mixed arabic and ascii digits', '١2', 'EGP', _std, 1200),
-      ('rtl-mark wrapped', '‏١٢٣‎', 'EGP', _std, 12300),
+      ('rtl-mark wrapped', '\u200F١٢٣\u200E', 'EGP', _std, 12300),
       ('exponent 0', '1500', 'JPY', _std, 1500),
       ('exponent 0 trailing zeros', '1500.00', 'JPY', _std, 1500),
       ('exponent 3', '12.345', 'KWD', _std, 12345),
@@ -215,7 +215,7 @@ void main() {
   group('fuzz', () {
     test('random text never throws and failures never echo the input', () {
       final random = Random(99);
-      const alphabet = '0123456789,.٫٬ ١٢٣۴€\$£﷼EGPKWDJ-+abc‏';
+      const alphabet = '0123456789,.٫٬ ١٢٣۴€\$£﷼EGPKWDJ-+abc\u200F';
       for (var i = 0; i < 5000; i++) {
         final length = random.nextInt(20);
         final text = String.fromCharCodes([
