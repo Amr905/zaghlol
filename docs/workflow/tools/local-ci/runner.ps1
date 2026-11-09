@@ -149,7 +149,12 @@ function Checkout($log, $branch) {
   if (-not (Test-Path (Join-Path $Repo '.git'))) {
     Log $log "cloning..."; git clone --quiet -c core.autocrlf=false -c core.eol=lf $Origin $Repo 2>&1 | Out-String | Add-Content $log
   }
-  Push-Location $Repo
+  # Guard (review major): never run reset/clean outside the CI clone.
+  if (-not (Test-Path (Join-Path $Repo '.git'))) { throw "checkout: clone of $Origin into $Repo failed" }
+  $top = (git -C $Repo rev-parse --show-toplevel 2>$null | Out-String).Trim()
+  $want = ((Resolve-Path $Repo).Path -replace '\\','/').TrimEnd('/')
+  if (-not $top -or (($top -replace '\\','/').TrimEnd('/') -ne $want)) { throw "checkout: $Repo is not the root of the CI clone (git top-level: '$top')" }
+  Push-Location $Repo -ErrorAction Stop
   # Keep LF line endings like CI (dotnet format / dart format reject CRLF). One-time renormalize of an old clone.
   git config core.autocrlf false
   git config core.eol lf
@@ -235,7 +240,7 @@ function Run-Job($jobFile) {
     Set-Content $status "FAIL invalid job (branch/pipeline)"; return
   }
   if ($pipeline -eq 'probe') { Probe; Set-Content $status "DONE probe"; return }
-  $co = Checkout $log $branch
+  try { $co = Checkout $log $branch } catch { Log $log "$_"; Set-Content -Path $status -Value "FAIL checkout=1" -Encoding UTF8; return }
   $r = Run-Pipeline $log $pipeline
   $summary = ($r | ForEach-Object { "{0}={1}" -f $_.Name, $_.Exit }) -join ' '
   $fail = @($r | Where-Object { $_.Exit -ne 0 }).Count
@@ -261,7 +266,7 @@ function Auto-Check {
     $log = Join-Path $Results ("auto-" + ($branch -replace '/','__') + "-" + $sha.Substring(0,7) + ".log")
     Set-Content -Path $log -Value "auto $branch $sha $(Get-Date -Format o)" -Encoding UTF8
     Publish $branch $sha "RUNNING sha=$sha" $log
-    $co = Checkout $log $branch
+    try { $co = Checkout $log $branch } catch { Log $log "$_"; Publish $branch $sha "FAIL sha=$sha pipeline=checkout checkout=1" $log; continue }
     $c = $co.Changed
     $pipeline = if (($c -match '(?m)^(app|packages)/') -and ($c -match '(?m)^backend/')) { 'quick' }
                 elseif ($c -match '(?m)^backend/') { 'quick-backend' }
