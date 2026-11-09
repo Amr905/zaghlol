@@ -1,1 +1,400 @@
-﻿auto task/local-ci-container 9b74996d2e9bda92ef84c25b3ba82f4574a330e2 2026-11-09T23:19:53.4322347+02:00
+﻿   at System.Runtime.CompilerServices.AsyncMethodBuilderCore.Start[TStateMachine](TStateMachine& stateMachine)
+   at Zaghlol.Infrastructure.Tests.ReadinessProbeTests.AnAbandonedProbeFreesThePoolOfOneWithinTheConnectTimeout()
+   at System.Reflection.MethodBaseInvoker.InterpretedInvoke_Method(Object obj, IntPtr* args)
+   at System.Reflection.MethodBaseInvoker.InvokeWithNoArgs(Object obj, BindingFlags invokeAttr)
+[xUnit.net 00:00:12.83]     Zaghlol.Infrastructure.Tests.Kms.KeyRingTests.AnOffCurvePointIsRejected [SKIP]
+  Skipped Zaghlol.Infrastructure.Tests.Kms.KeyRingTests.AnOffCurvePointIsRejected [1 ms]
+
+Passed!  - Failed:     0, Passed:     3, Skipped:     0, Total:     3, Duration: 10 s - Zaghlol.Workers.Tests.dll (net10.0)
+[xUnit.net 00:01:23.99]     
+Zaghlol.Infrastructure.Tests.DatabaseRoleGuardTests.ReadinessUsesItsOwnOneConnectionPoolAndRejectsTheWrongLogin [FAIL]
+  Failed Zaghlol.Infrastructure.Tests.DatabaseRoleGuardTests.ReadinessUsesItsOwnOneConnectionPoolAndRejectsTheWrongLogin [20 ms]
+  Error Message:
+   System.IO.FileLoadException : Could not load file or assembly 'C:\Users\amr90\zaghlol-ci\repo\backend\tests\Zaghlol.Infrastructure.Tests\bin\Release\net10.0\Zaghlol.Application.dll'. An Application Control policy has blocked this file. (0x800711C7)
+  Stack Trace:
+     at Zaghlol.Infrastructure.Tests.DatabaseRoleGuardTests.ReadinessUsesItsOwnOneConnectionPoolAndRejectsTheWrongLogin()
+   at Zaghlol.Infrastructure.Tests.DatabaseRoleGuardTests.ReadinessUsesItsOwnOneConnectionPoolAndRejectsTheWrongLogin()
+   at System.Runtime.CompilerServices.AsyncMethodBuilderCore.Start[TStateMachine](TStateMachine& stateMachine)
+   at Zaghlol.Infrastructure.Tests.DatabaseRoleGuardTests.ReadinessUsesItsOwnOneConnectionPoolAndRejectsTheWrongLogin()
+   at System.RuntimeMethodHandle.InvokeMethod(ObjectHandleOnStack target, Void** arguments, ObjectHandleOnStack sig, BOOL isConstructor, ObjectHandleOnStack result)
+   at System.Reflection.MethodBaseInvoker.InterpretedInvoke_Method(Object obj, IntPtr* args)
+   at System.Reflection.RuntimeMethodInfo.Invoke(Object obj, BindingFlags invokeAttr, Binder binder, Object[] parameters, CultureInfo culture)
+[xUnit.net 00:01:24.01]     Zaghlol.Infrastructure.Tests.DatabaseRoleGuardTests.TheGuardStopsTheHostWithANonZeroExitCod
+eWhenTheAppLoginIsTheMigrator [FAIL]
+  Failed Zaghlol.Infrastructure.Tests.DatabaseRoleGuardTests.TheGuardStopsTheHostWithANonZeroExitCodeWhenTheAppLoginIsTheMigrator [16 ms]
+  Error Message:
+   System.IO.FileLoadException : Could not load file or assembly 'C:\Users\amr90\zaghlol-ci\repo\backend\tests\Zaghlol.Infrastructure.Tests\bin\Release\net10.0\Zaghlol.Application.dll'. An Application Control policy has blocked this file. (0x800711C7)
+  Stack Trace:
+     at Zaghlol.Infrastructure.Persistence.PersistenceServiceCollectionExtensions.AddDatabaseReadiness(IServiceCollection services) in C:\Users\amr90\zaghlol-ci\repo\backend\src\Zaghlol.Infrastructure\Persistence\PersistenceServiceCollectionExtensions.cs:line 104
+   at Zaghlol.Infrastructure.Persistence.PersistenceServiceCollectionExtensions.AddDatabaseReadiness(IServiceCollection services) in C:\Users\amr90\zaghlol-ci\repo\backend\src\Zaghlol.Infrastructure\Persistence\PersistenceServiceCollectionExtensions.cs:line 104
+   at Zaghlol.Infrastructure.Tests.DatabaseRoleGuardTests.Services(String appConnectionString, IHostApplicationLifetime lifetime) in C:\Users\amr90\zaghlol-ci\repo\backend\tests\Zaghlol.Infrastructure.Tests\DatabaseRoleGuardTests.cs:line 212
+   at Zaghlol.Infrastructure.Tests.DatabaseRoleGuardTests.TheGuardStopsTheHostWithANonZeroExitCodeWhenTheAppLoginIsTheMigrator() in C:\Users\amr90\zaghlol-ci\repo\backend\tests\Zaghlol.Infrastructure.Tests\DatabaseRoleGuardTests.cs:line 52
+--- End of stack trace from previous location ---
+[xUnit.net 00:01:24.16]     Zaghlol.Infrastructure.Tests.DatabaseRoleGuardTests.AProbeTimeoutLeavesTheAppPoolAlone 
+[FAIL]
+[xUnit.net 00:01:24.17]     Zaghlol.Infrastructure.Tests.DatabaseRoleGuardTests.TheGuardLetsTheRightLoginRun [FAIL]
+[xUnit.net 00:01:24.19]     Zaghlol.Infrastructure.Tests.DatabaseRoleGuardTests.AReadyAnswerIsCachedForTwoSeconds 
+[FAIL]
+[xUnit.net 00:01:24.20]     
+Zaghlol.Infrastructure.Tests.DatabaseRoleGuardTests.IncludeErrorDetailIsRefusedAtStartup(connectionString: 
+"Host=db.invalid;Database=zaghlol;Username=zaghlol_"┬╖┬╖┬╖) [FAIL]
+[xUnit.net 00:01:24.21]     
+Zaghlol.Infrastructure.Tests.DatabaseRoleGuardTests.IncludeErrorDetailIsRefusedAtStartup(connectionString: 
+"Host=db.invalid;Database=zaghlol;Username=zaghlol_"┬╖┬╖┬╖) [FAIL]
+  Failed Zaghlol.Infrastructure.Tests.DatabaseRoleGuardTests.AProbeTimeoutLeavesTheAppPoolAlone [15 ms]
+  Error Message:
+   System.IO.FileLoadException : Could not load file or assembly 'C:\Users\amr90\zaghlol-ci\repo\backend\tests\Zaghlol.Infrastructure.Tests\bin\Release\net10.0\Zaghlol.Application.dll'. An Application Control policy has blocked this file. (0x800711C7)
+  Stack Trace:
+     at Zaghlol.Infrastructure.Tests.DatabaseRoleGuardTests.AProbeTimeoutLeavesTheAppPoolAlone()
+   at Zaghlol.Infrastructure.Tests.DatabaseRoleGuardTests.AProbeTimeoutLeavesTheAppPoolAlone()
+   at System.Runtime.CompilerServices.AsyncMethodBuilderCore.Start[TStateMachine](TStateMachine& stateMachine)
+   at Zaghlol.Infrastructure.Tests.DatabaseRoleGuardTests.AProbeTimeoutLeavesTheAppPoolAlone()
+   at System.RuntimeMethodHandle.InvokeMethod(ObjectHandleOnStack target, Void** arguments, ObjectHandleOnStack sig, BOOL isConstructor, ObjectHandleOnStack result)
+   at System.Reflection.MethodBaseInvoker.InterpretedInvoke_Method(Object obj, IntPtr* args)
+   at System.Reflection.RuntimeMethodInfo.Invoke(Object obj, BindingFlags invokeAttr, Binder binder, Object[] parameters, CultureInfo culture)
+  Failed Zaghlol.Infrastructure.Tests.DatabaseRoleGuardTests.TheGuardLetsTheRightLoginRun [12 ms]
+  Error Message:
+   System.IO.FileLoadException : Could not load file or assembly 'C:\Users\amr90\zaghlol-ci\repo\backend\tests\Zaghlol.Infrastructure.Tests\bin\Release\net10.0\Zaghlol.Application.dll'. An Application Control policy has blocked this file. (0x800711C7)
+  Stack Trace:
+     at Zaghlol.Infrastructure.Persistence.PersistenceServiceCollectionExtensions.AddDatabaseReadiness(IServiceCollection services) in C:\Users\amr90\zaghlol-ci\repo\backend\src\Zaghlol.Infrastructure\Persistence\PersistenceServiceCollectionExtensions.cs:line 104
+   at Zaghlol.Infrastructure.Persistence.PersistenceServiceCollectionExtensions.AddDatabaseReadiness(IServiceCollection services) in C:\Users\amr90\zaghlol-ci\repo\backend\src\Zaghlol.Infrastructure\Persistence\PersistenceServiceCollectionExtensions.cs:line 104
+   at Zaghlol.Infrastructure.Tests.DatabaseRoleGuardTests.Services(String appConnectionString, IHostApplicationLifetime lifetime) in C:\Users\amr90\zaghlol-ci\repo\backend\tests\Zaghlol.Infrastructure.Tests\DatabaseRoleGuardTests.cs:line 212
+   at Zaghlol.Infrastructure.Tests.DatabaseRoleGuardTests.TheGuardLetsTheRightLoginRun() in C:\Users\amr90\zaghlol-ci\repo\backend\tests\Zaghlol.Infrastructure.Tests\DatabaseRoleGuardTests.cs:line 129
+--- End of stack trace from previous location ---
+  Failed Zaghlol.Infrastructure.Tests.DatabaseRoleGuardTests.AReadyAnswerIsCachedForTwoSeconds [13 ms]
+  Error Message:
+   System.IO.FileLoadException : Could not load file or assembly 'C:\Users\amr90\zaghlol-ci\repo\backend\tests\Zaghlol.Infrastructure.Tests\bin\Release\net10.0\Zaghlol.Application.dll'. An Application Control policy has blocked this file. (0x800711C7)
+  Stack Trace:
+     at Zaghlol.Infrastructure.Tests.DatabaseRoleGuardTests.AReadyAnswerIsCachedForTwoSeconds()
+   at Zaghlol.Infrastructure.Tests.DatabaseRoleGuardTests.AReadyAnswerIsCachedForTwoSeconds()
+   at System.Runtime.CompilerServices.AsyncMethodBuilderCore.Start[TStateMachine](TStateMachine& stateMachine)
+   at Zaghlol.Infrastructure.Tests.DatabaseRoleGuardTests.AReadyAnswerIsCachedForTwoSeconds()
+   at System.RuntimeMethodHandle.InvokeMethod(ObjectHandleOnStack target, Void** arguments, ObjectHandleOnStack sig, BOOL isConstructor, ObjectHandleOnStack result)
+   at System.Reflection.MethodBaseInvoker.InterpretedInvoke_Method(Object obj, IntPtr* args)
+   at System.Reflection.RuntimeMethodInfo.Invoke(Object obj, BindingFlags invokeAttr, Binder binder, Object[] parameters, CultureInfo culture)
+  Failed Zaghlol.Infrastructure.Tests.DatabaseRoleGuardTests.IncludeErrorDetailIsRefusedAtStartup(connectionString: "Host=db.invalid;Database=zaghlol;Username=zaghlol_"┬╖┬╖┬╖) [9 ms]
+  Error Message:
+   System.IO.FileLoadException : Could not load file or assembly 'C:\Users\amr90\zaghlol-ci\repo\backend\tests\Zaghlol.Infrastructure.Tests\bin\Release\net10.0\Zaghlol.Application.dll'. An Application Control policy has blocked this file. (0x800711C7)
+  Stack Trace:
+     at Zaghlol.Infrastructure.Tests.DatabaseRoleGuardTests.IncludeErrorDetailIsRefusedAtStartup(String connectionString)
+   at System.RuntimeMethodHandle.InvokeMethod(ObjectHandleOnStack target, Void** arguments, ObjectHandleOnStack sig, BOOL isConstructor, ObjectHandleOnStack result)
+   at System.Reflection.MethodBaseInvoker.InterpretedInvoke_Method(Object obj, IntPtr* args)
+   at System.Reflection.MethodBaseInvoker.InvokeDirectByRefWithFewArgs(Object obj, Span`1 copyOfArgs, BindingFlags invokeAttr)
+  Failed Zaghlol.Infrastructure.Tests.DatabaseRoleGuardTests.IncludeErrorDetailIsRefusedAtStartup(connectionString: "Host=db.invalid;Database=zaghlol;Username=zaghlol_"┬╖┬╖┬╖) [9 ms]
+  Error Message:
+   System.IO.FileLoadException : Could not load file or assembly 'C:\Users\amr90\zaghlol-ci\repo\backend\tests\Zaghlol.Infrastructure.Tests\bin\Release\net10.0\Zaghlol.Application.dll'. An Application Control policy has blocked this file. (0x800711C7)
+  Stack Trace:
+     at Zaghlol.Infrastructure.Tests.DatabaseRoleGuardTests.IncludeErrorDetailIsRefusedAtStartup(String connectionString)
+   at Zaghlol.Infrastructure.Tests.DatabaseRoleGuardTests.IncludeErrorDetailIsRefusedAtStartup(String connectionString)
+   at InvokeStub_DatabaseRoleGuardTests.IncludeErrorDetailIsRefusedAtStartup(Object, Span`1)
+   at System.Reflection.RuntimeMethodInfo.Invoke(Object obj, BindingFlags invokeAttr, Binder binder, Object[] parameters, CultureInfo culture)
+
+Failed!  - Failed:    20, Passed:   466, Skipped:     1, Total:   487, Duration: 1 m 13 s - Zaghlol.Infrastructure.Tests.dll (net10.0)
+[xUnit.net 00:01:38.80]     
+Zaghlol.Api.Tests.Installs.ArchitectureTests.V1CodeNeverSeesADatabaseRoleOrTheGenericFactory [FAIL]
+  Failed Zaghlol.Api.Tests.Installs.ArchitectureTests.V1CodeNeverSeesADatabaseRoleOrTheGenericFactory [24 ms]
+  Error Message:
+   System.Reflection.ReflectionTypeLoadException : Unable to load one or more of the requested types.
+Could not load file or assembly 'C:\Users\amr90\zaghlol-ci\repo\backend\tests\Zaghlol.Api.Tests\bin\Release\net10.0\Zaghlol.Application.dll'. An Application Control policy has blocked this file. (0x800711C7)
+  Stack Trace:
+     at System.Reflection.RuntimeModule.GetDefinedTypes()
+   at System.Reflection.RuntimeModule.GetTypes()
+   at Zaghlol.Api.Tests.Installs.ArchitectureTests.get_ApiTypes() in C:\Users\amr90\zaghlol-ci\repo\backend\tests\Zaghlol.Api.Tests\Installs\ArchitectureTests.cs:line 27
+   at Zaghlol.Api.Tests.Installs.ArchitectureTests.V1CodeNeverSeesADatabaseRoleOrTheGenericFactory() in C:\Users\amr90\zaghlol-ci\repo\backend\tests\Zaghlol.Api.Tests\Installs\ArchitectureTests.cs:line 60
+   at System.RuntimeMethodHandle.InvokeMethod(ObjectHandleOnStack target, Void** arguments, ObjectHandleOnStack sig, BOOL isConstructor, ObjectHandleOnStack result)
+   at System.Reflection.MethodBaseInvoker.InterpretedInvoke_Method(Object obj, IntPtr* args)
+   at System.Reflection.RuntimeMethodInfo.Invoke(Object obj, BindingFlags invokeAttr, Binder binder, Object[] parameters, CultureInfo culture)
+[xUnit.net 00:01:38.82]     Zaghlol.Api.Tests.Installs.ArchitectureTests.EverySecretCarryingMemberIsSensitive [FAIL]
+  Failed Zaghlol.Api.Tests.Installs.ArchitectureTests.EverySecretCarryingMemberIsSensitive [20 ms]
+  Error Message:
+   System.Reflection.ReflectionTypeLoadException : Unable to load one or more of the requested types.
+Could not load file or assembly 'C:\Users\amr90\zaghlol-ci\repo\backend\tests\Zaghlol.Api.Tests\bin\Release\net10.0\Zaghlol.Application.dll'. An Application Control policy has blocked this file. (0x800711C7)
+  Stack Trace:
+     at System.Reflection.RuntimeModule.GetDefinedTypes()
+   at System.Reflection.RuntimeModule.GetTypes()
+   at Zaghlol.Api.Tests.Installs.ArchitectureTests.get_ApiTypes() in C:\Users\amr90\zaghlol-ci\repo\backend\tests\Zaghlol.Api.Tests\Installs\ArchitectureTests.cs:line 27
+   at Zaghlol.Api.Tests.Installs.ArchitectureTests.EverySecretCarryingMemberIsSensitive() in C:\Users\amr90\zaghlol-ci\repo\backend\tests\Zaghlol.Api.Tests\Installs\ArchitectureTests.cs:line 34
+   at System.RuntimeMethodHandle.InvokeMethod(ObjectHandleOnStack target, Void** arguments, ObjectHandleOnStack sig, BOOL isConstructor, ObjectHandleOnStack result)
+   at System.Reflection.MethodBaseInvoker.InterpretedInvoke_Method(Object obj, IntPtr* args)
+   at System.Reflection.RuntimeMethodInfo.Invoke(Object obj, BindingFlags invokeAttr, Binder binder, Object[] parameters, CultureInfo culture)
+[xUnit.net 00:01:45.49]     
+Zaghlol.Api.Tests.ReadinessTests.HealthIs503WhileTheDatabaseIsDownAnd200WithinFiveSecondsAfterItIsBack [FAIL]
+[xUnit.net 00:01:45.89]     
+Zaghlol.Api.Tests.HostStartupTests.TheApiRefusesToStartWithTheLocalKmsOutsideDevelopment(environment: "Production") 
+[FAIL]
+[xUnit.net 00:01:45.94]     
+Zaghlol.Api.Tests.HostStartupTests.TheApiRefusesToStartWithTheLocalKmsOutsideDevelopment(environment: "Staging") [FAIL]
+[xUnit.net 00:01:45.97]     Zaghlol.Api.Tests.HostStartupTests.TheApiRefusesToStartWithoutAKeyRing [FAIL]
+  Failed Zaghlol.Api.Tests.ReadinessTests.HealthIs503WhileTheDatabaseIsDownAnd200WithinFiveSecondsAfterItIsBack [1 ms]
+  Error Message:
+   System.IO.FileLoadException : Could not load file or assembly 'C:\Users\amr90\zaghlol-ci\repo\backend\tests\Zaghlol.Api.Tests\bin\Release\net10.0\Zaghlol.Application.dll'. An Application Control policy has blocked this file. (0x800711C7)
+  Stack Trace:
+     at Program.<Main>$(String[] args)
+   at Program.<Main>$(String[] args)
+   at System.Runtime.CompilerServices.AsyncMethodBuilderCore.Start[TStateMachine](TStateMachine& stateMachine)
+   at Program.<Main>$(String[] args)
+   at Program.<Main>(String[] args)
+   at System.RuntimeMethodHandle.InvokeMethod(ObjectHandleOnStack target, Void** arguments, ObjectHandleOnStack sig, BOOL isConstructor, ObjectHandleOnStack result)
+   at System.Reflection.MethodBaseInvoker.InterpretedInvoke_Method(Object obj, IntPtr* args)
+   at System.Reflection.MethodBaseInvoker.InvokeDirectByRefWithFewArgs(Object obj, Span`1 copyOfArgs, BindingFlags invokeAttr)
+--- End of stack trace from previous location ---
+   at Microsoft.Extensions.Hosting.HostFactoryResolver.HostingListener.CreateHost()
+   at Microsoft.Extensions.Hosting.HostFactoryResolver.<>c__DisplayClass10_0.<ResolveHostFactory>b__0(String[] args)
+   at Microsoft.AspNetCore.Mvc.Testing.DeferredHostBuilder.Build()
+   at Microsoft.AspNetCore.Mvc.Testing.WebApplicationFactory`1.CreateHost(IHostBuilder builder)
+   at Microsoft.AspNetCore.Mvc.Testing.WebApplicationFactory`1.DelegatedWebApplicationFactory.CreateHost(IHostBuilder builder)
+   at Microsoft.AspNetCore.Mvc.Testing.WebApplicationFactory`1.ConfigureHostBuilder(IHostBuilder hostBuilder)
+   at Microsoft.AspNetCore.Mvc.Testing.WebApplicationFactory`1.StartServer()
+   at Microsoft.AspNetCore.Mvc.Testing.WebApplicationFactory`1.CreateDefaultClient(DelegatingHandler[] handlers)
+   at Microsoft.AspNetCore.Mvc.Testing.WebApplicationFactory`1.CreateDefaultClient(Uri baseAddress, DelegatingHandler[] handlers)
+   at Microsoft.AspNetCore.Mvc.Testing.WebApplicationFactory`1.CreateClient(WebApplicationFactoryClientOptions options)
+   at Microsoft.AspNetCore.Mvc.Testing.WebApplicationFactory`1.CreateClient()
+   at Zaghlol.Api.Tests.ReadinessFixture.InitializeAsync() in C:\Users\amr90\zaghlol-ci\repo\backend\tests\Zaghlol.Api.Tests\ReadinessTests.cs:line 34
+  Failed Zaghlol.Api.Tests.HostStartupTests.TheApiRefusesToStartWithTheLocalKmsOutsideDevelopment(environment: "Production") [40 ms]
+  Error Message:
+   Assert.Contains() Failure: Filter not matched in collection
+Collection: [System.IO.FileLoadException: Could not load file or assembly 'C:\Users\amr90\zaghlol-ci\repo\backend\tests\Zaghlol.Api.Tests\bin\Release\net10.0\Zaghlol.Application.dll'. An Application Control policy has blocked this file. (0x800711C7)
+File name: 'C:\Users\amr90\zaghlol-ci\repo\backend\tests\Zaghlol.Api.Tests\bin\Release\net10.0\Zaghlol.Application.dll'
+   at Program.<Main>$(String[] args)
+   at Program.<Main>$(String[] args)
+   at System.Runtime.CompilerServices.AsyncMethodBuilderCore.Start[TStateMachine](TStateMachine& stateMachine)
+   at Program.<Main>$(String[] args)
+   at Program.<Main>(String[] args)
+   at InvokeStub_Program.<Main>(Object, Span`1)
+   at System.Reflection.MethodBaseInvoker.InvokeWithOneArg(Object obj, BindingFlags invokeAttr, Binder binder, Object[] parameters, CultureInfo culture)
+--- End of stack trace from previous location ---
+   at Microsoft.Extensions.Hosting.HostFactoryResolver.HostingListener.CreateHost()
+   at Microsoft.Extensions.Hosting.HostFactoryResolver.<>c__DisplayClass10_0.<ResolveHostFactory>b__0(String[] args)
+   at Microsoft.AspNetCore.Mvc.Testing.DeferredHostBuilder.Build()
+   at Microsoft.AspNetCore.Mvc.Testing.WebApplicationFactory`1.CreateHost(IHostBuilder builder)
+   at Microsoft.AspNetCore.Mvc.Testing.WebApplicationFactory`1.DelegatedWebApplicationFactory.CreateHost(IHostBuilder builder)
+   at Microsoft.AspNetCore.Mvc.Testing.WebApplicationFactory`1.ConfigureHostBuilder(IHostBuilder hostBuilder)
+   at Microsoft.AspNetCore.Mvc.Testing.WebApplicationFactory`1.StartServer()
+   at Microsoft.AspNetCore.Mvc.Testing.WebApplicationFactory`1.CreateDefaultClient(DelegatingHandler[] handlers)
+   at Microsoft.AspNetCore.Mvc.Testing.WebApplicationFactory`1.CreateDefaultClient(Uri baseAddress, DelegatingHandler[] handlers)
+   at Microsoft.AspNetCore.Mvc.Testing.WebApplicationFactory`1.CreateClient(WebApplicationFactoryClientOptions options)
+   at Microsoft.AspNetCore.Mvc.Testing.WebApplicationFactory`1.CreateClient()
+   at Zaghlol.Api.Tests.HostStartupTests.<>c__DisplayClass1_0.<TheApiRefusesToStartWithTheLocalKmsOutsideDevelopment>b__1() in C:\Users\amr90\zaghlol-ci\repo\backend\tests\Zaghlol.Api.Tests\HostStartupTests.cs:line 34
+   at Xunit.Assert.RecordException(Func`1 testCode, String asyncMethodName) in /_/src/xunit.assert/Asserts/Record.cs:line 78]
+  Stack Trace:
+     at Zaghlol.Api.Tests.HostStartupTests.TheApiRefusesToStartWithTheLocalKmsOutsideDevelopment(String environment) in C:\Users\amr90\zaghlol-ci\repo\backend\tests\Zaghlol.Api.Tests\HostStartupTests.cs:line 36
+   at System.RuntimeMethodHandle.InvokeMethod(ObjectHandleOnStack target, Void** arguments, ObjectHandleOnStack sig, BOOL isConstructor, ObjectHandleOnStack result)
+   at System.Reflection.MethodBaseInvoker.InterpretedInvoke_Method(Object obj, IntPtr* args)
+   at System.Reflection.MethodBaseInvoker.InvokeDirectByRefWithFewArgs(Object obj, Span`1 copyOfArgs, BindingFlags invokeAttr)
+  Failed Zaghlol.Api.Tests.HostStartupTests.TheApiRefusesToStartWithTheLocalKmsOutsideDevelopment(environment: "Staging") [54 ms]
+  Error Message:
+   Assert.Contains() Failure: Filter not matched in collection
+Collection: [System.IO.FileLoadException: Could not load file or assembly 'C:\Users\amr90\zaghlol-ci\repo\backend\tests\Zaghlol.Api.Tests\bin\Release\net10.0\Zaghlol.Application.dll'. An Application Control policy has blocked this file. (0x800711C7)
+File name: 'C:\Users\amr90\zaghlol-ci\repo\backend\tests\Zaghlol.Api.Tests\bin\Release\net10.0\Zaghlol.Application.dll'
+   at Program.<Main>$(String[] args)
+   at Program.<Main>$(String[] args)
+   at System.Runtime.CompilerServices.AsyncMethodBuilderCore.Start[TStateMachine](TStateMachine& stateMachine)
+   at Program.<Main>$(String[] args)
+   at Program.<Main>(String[] args)
+   at InvokeStub_Program.<Main>(Object, Span`1)
+   at System.Reflection.MethodBaseInvoker.InvokeWithOneArg(Object obj, BindingFlags invokeAttr, Binder binder, Object[] parameters, CultureInfo culture)
+--- End of stack trace from previous location ---
+   at Microsoft.Extensions.Hosting.HostFactoryResolver.HostingListener.CreateHost()
+   at Microsoft.Extensions.Hosting.HostFactoryResolver.<>c__DisplayClass10_0.<ResolveHostFactory>b__0(String[] args)
+   at Microsoft.AspNetCore.Mvc.Testing.DeferredHostBuilder.Build()
+   at Microsoft.AspNetCore.Mvc.Testing.WebApplicationFactory`1.CreateHost(IHostBuilder builder)
+   at Microsoft.AspNetCore.Mvc.Testing.WebApplicationFactory`1.DelegatedWebApplicationFactory.CreateHost(IHostBuilder builder)
+   at Microsoft.AspNetCore.Mvc.Testing.WebApplicationFactory`1.ConfigureHostBuilder(IHostBuilder hostBuilder)
+   at Microsoft.AspNetCore.Mvc.Testing.WebApplicationFactory`1.StartServer()
+   at Microsoft.AspNetCore.Mvc.Testing.WebApplicationFactory`1.CreateDefaultClient(DelegatingHandler[] handlers)
+   at Microsoft.AspNetCore.Mvc.Testing.WebApplicationFactory`1.CreateDefaultClient(Uri baseAddress, DelegatingHandler[] handlers)
+   at Microsoft.AspNetCore.Mvc.Testing.WebApplicationFactory`1.CreateClient(WebApplicationFactoryClientOptions options)
+   at Microsoft.AspNetCore.Mvc.Testing.WebApplicationFactory`1.CreateClient()
+   at Zaghlol.Api.Tests.HostStartupTests.<>c__DisplayClass1_0.<TheApiRefusesToStartWithTheLocalKmsOutsideDevelopment>b__1() in C:\Users\amr90\zaghlol-ci\repo\backend\tests\Zaghlol.Api.Tests\HostStartupTests.cs:line 34
+   at Xunit.Assert.RecordException(Func`1 testCode, String asyncMethodName) in /_/src/xunit.assert/Asserts/Record.cs:line 78]
+  Stack Trace:
+     at Zaghlol.Api.Tests.HostStartupTests.TheApiRefusesToStartWithTheLocalKmsOutsideDevelopment(String environment) in C:\Users\amr90\zaghlol-ci\repo\backend\tests\Zaghlol.Api.Tests\HostStartupTests.cs:line 36
+   at InvokeStub_HostStartupTests.TheApiRefusesToStartWithTheLocalKmsOutsideDevelopment(Object, Span`1)
+   at System.Reflection.MethodBaseInvoker.InvokeWithOneArg(Object obj, BindingFlags invokeAttr, Binder binder, Object[] parameters, CultureInfo culture)
+  Failed Zaghlol.Api.Tests.HostStartupTests.TheApiRefusesToStartWithoutAKeyRing [27 ms]
+  Error Message:
+   Assert.Contains() Failure: Filter not matched in collection
+Collection: [System.IO.FileLoadException: Could not load file or assembly 'C:\Users\amr90\zaghlol-ci\repo\backend\tests\Zaghlol.Api.Tests\bin\Release\net10.0\Zaghlol.Application.dll'. An Application Control policy has blocked this file. (0x800711C7)
+File name: 'C:\Users\amr90\zaghlol-ci\repo\backend\tests\Zaghlol.Api.Tests\bin\Release\net10.0\Zaghlol.Application.dll'
+   at Program.<Main>$(String[] args)
+   at Program.<Main>$(String[] args)
+   at System.Runtime.CompilerServices.AsyncMethodBuilderCore.Start[TStateMachine](TStateMachine& stateMachine)
+   at Program.<Main>$(String[] args)
+   at Program.<Main>(String[] args)
+   at InvokeStub_Program.<Main>(Object, Span`1)
+   at System.Reflection.MethodBaseInvoker.InvokeWithOneArg(Object obj, BindingFlags invokeAttr, Binder binder, Object[] parameters, CultureInfo culture)
+--- End of stack trace from previous location ---
+   at Microsoft.Extensions.Hosting.HostFactoryResolver.HostingListener.CreateHost()
+   at Microsoft.Extensions.Hosting.HostFactoryResolver.<>c__DisplayClass10_0.<ResolveHostFactory>b__0(String[] args)
+   at Microsoft.AspNetCore.Mvc.Testing.DeferredHostBuilder.Build()
+   at Microsoft.AspNetCore.Mvc.Testing.WebApplicationFactory`1.CreateHost(IHostBuilder builder)
+   at Microsoft.AspNetCore.Mvc.Testing.WebApplicationFactory`1.DelegatedWebApplicationFactory.CreateHost(IHostBuilder builder)
+   at Microsoft.AspNetCore.Mvc.Testing.WebApplicationFactory`1.ConfigureHostBuilder(IHostBuilder hostBuilder)
+   at Microsoft.AspNetCore.Mvc.Testing.WebApplicationFactory`1.StartServer()
+   at Microsoft.AspNetCore.Mvc.Testing.WebApplicationFactory`1.CreateDefaultClient(DelegatingHandler[] handlers)
+   at Microsoft.AspNetCore.Mvc.Testing.WebApplicationFactory`1.CreateDefaultClient(Uri baseAddress, DelegatingHandler[] handlers)
+   at Microsoft.AspNetCore.Mvc.Testing.WebApplicationFactory`1.CreateClient(WebApplicationFactoryClientOptions options)
+   at Microsoft.AspNetCore.Mvc.Testing.WebApplicationFactory`1.CreateClient()
+   at Zaghlol.Api.Tests.HostStartupTests.<>c__DisplayClass2_0.<TheApiRefusesToStartWithoutAKeyRing>b__1() in C:\Users\amr90\zaghlol-ci\repo\backend\tests\Zaghlol.Api.Tests\HostStartupTests.cs:line 48
+   at Xunit.Assert.RecordException(Func`1 testCode, String asyncMethodName) in /_/src/xunit.assert/Asserts/Record.cs:line 78]
+  Stack Trace:
+     at Zaghlol.Api.Tests.HostStartupTests.TheApiRefusesToStartWithoutAKeyRing() in C:\Users\amr90\zaghlol-ci\repo\backend\tests\Zaghlol.Api.Tests\HostStartupTests.cs:line 50
+   at System.RuntimeMethodHandle.InvokeMethod(ObjectHandleOnStack target, Void** arguments, ObjectHandleOnStack sig, BOOL isConstructor, ObjectHandleOnStack result)
+   at System.Reflection.MethodBaseInvoker.InterpretedInvoke_Method(Object obj, IntPtr* args)
+   at System.Reflection.RuntimeMethodInfo.Invoke(Object obj, BindingFlags invokeAttr, Binder binder, Object[] parameters, CultureInfo culture)
+[xUnit.net 00:01:47.85]     Zaghlol.Api.Tests.ApiTests.RequestBodiesAreNeverLogged [FAIL]
+[xUnit.net 00:01:47.85]     Zaghlol.Api.Tests.ApiTests.HealthReturns200WithStatusOkAndServerTime [FAIL]
+[xUnit.net 00:01:47.85]     Zaghlol.Api.Tests.ApiTests.UnknownRouteReturnsProblemDetailsWithStableCode [FAIL]
+[xUnit.net 00:01:47.86]     Zaghlol.Api.Tests.ApiTests.PostgresContainerIsVersion17 [FAIL]
+[xUnit.net 00:01:47.86]     Zaghlol.Api.Tests.ApiTests.BadHttpRequestMapsTo400ValidationFailedWithoutEchoingMessage 
+[FAIL]
+[xUnit.net 00:01:47.86]     Zaghlol.Api.Tests.ApiTests.UnhandledExceptionReturns500InternalWithoutLeakingDetails [FAIL]
+  Failed Zaghlol.Api.Tests.ApiTests.RequestBodiesAreNeverLogged [1 ms]
+  Error Message:
+   System.IO.FileLoadException : Could not load file or assembly 'C:\Users\amr90\zaghlol-ci\repo\backend\tests\Zaghlol.Api.Tests\bin\Release\net10.0\Zaghlol.Application.dll'. An Application Control policy has blocked this file. (0x800711C7)
+  Stack Trace:
+     at Program.<Main>$(String[] args)
+   at Program.<Main>$(String[] args)
+   at System.Runtime.CompilerServices.AsyncMethodBuilderCore.Start[TStateMachine](TStateMachine& stateMachine)
+   at Program.<Main>$(String[] args)
+   at Program.<Main>(String[] args)
+   at InvokeStub_Program.<Main>(Object, Span`1)
+   at System.Reflection.MethodBaseInvoker.InvokeWithOneArg(Object obj, BindingFlags invokeAttr, Binder binder, Object[] parameters, CultureInfo culture)
+--- End of stack trace from previous location ---
+   at Microsoft.Extensions.Hosting.HostFactoryResolver.HostingListener.CreateHost()
+   at Microsoft.Extensions.Hosting.HostFactoryResolver.<>c__DisplayClass10_0.<ResolveHostFactory>b__0(String[] args)
+   at Microsoft.AspNetCore.Mvc.Testing.DeferredHostBuilder.Build()
+   at Microsoft.AspNetCore.Mvc.Testing.WebApplicationFactory`1.CreateHost(IHostBuilder builder)
+   at Microsoft.AspNetCore.Mvc.Testing.WebApplicationFactory`1.DelegatedWebApplicationFactory.CreateHost(IHostBuilder builder)
+   at Microsoft.AspNetCore.Mvc.Testing.WebApplicationFactory`1.ConfigureHostBuilder(IHostBuilder hostBuilder)
+   at Microsoft.AspNetCore.Mvc.Testing.WebApplicationFactory`1.StartServer()
+   at Microsoft.AspNetCore.Mvc.Testing.WebApplicationFactory`1.CreateDefaultClient(DelegatingHandler[] handlers)
+   at Microsoft.AspNetCore.Mvc.Testing.WebApplicationFactory`1.CreateDefaultClient(Uri baseAddress, DelegatingHandler[] handlers)
+   at Microsoft.AspNetCore.Mvc.Testing.WebApplicationFactory`1.CreateClient(WebApplicationFactoryClientOptions options)
+   at Microsoft.AspNetCore.Mvc.Testing.WebApplicationFactory`1.CreateClient()
+   at Zaghlol.Api.Tests.ApiFixture.InitializeAsync() in C:\Users\amr90\zaghlol-ci\repo\backend\tests\Zaghlol.Api.Tests\ApiFixture.cs:line 47
+  Failed Zaghlol.Api.Tests.ApiTests.HealthReturns200WithStatusOkAndServerTime [1 ms]
+  Error Message:
+   System.IO.FileLoadException : Could not load file or assembly 'C:\Users\amr90\zaghlol-ci\repo\backend\tests\Zaghlol.Api.Tests\bin\Release\net10.0\Zaghlol.Application.dll'. An Application Control policy has blocked this file. (0x800711C7)
+  Stack Trace:
+     at Program.<Main>$(String[] args)
+   at Program.<Main>$(String[] args)
+   at System.Runtime.CompilerServices.AsyncMethodBuilderCore.Start[TStateMachine](TStateMachine& stateMachine)
+   at Program.<Main>$(String[] args)
+   at Program.<Main>(String[] args)
+   at InvokeStub_Program.<Main>(Object, Span`1)
+   at System.Reflection.MethodBaseInvoker.InvokeWithOneArg(Object obj, BindingFlags invokeAttr, Binder binder, Object[] parameters, CultureInfo culture)
+--- End of stack trace from previous location ---
+   at Microsoft.Extensions.Hosting.HostFactoryResolver.HostingListener.CreateHost()
+   at Microsoft.Extensions.Hosting.HostFactoryResolver.<>c__DisplayClass10_0.<ResolveHostFactory>b__0(String[] args)
+   at Microsoft.AspNetCore.Mvc.Testing.DeferredHostBuilder.Build()
+   at Microsoft.AspNetCore.Mvc.Testing.WebApplicationFactory`1.CreateHost(IHostBuilder builder)
+   at Microsoft.AspNetCore.Mvc.Testing.WebApplicationFactory`1.DelegatedWebApplicationFactory.CreateHost(IHostBuilder builder)
+   at Microsoft.AspNetCore.Mvc.Testing.WebApplicationFactory`1.ConfigureHostBuilder(IHostBuilder hostBuilder)
+   at Microsoft.AspNetCore.Mvc.Testing.WebApplicationFactory`1.StartServer()
+   at Microsoft.AspNetCore.Mvc.Testing.WebApplicationFactory`1.CreateDefaultClient(DelegatingHandler[] handlers)
+   at Microsoft.AspNetCore.Mvc.Testing.WebApplicationFactory`1.CreateDefaultClient(Uri baseAddress, DelegatingHandler[] handlers)
+   at Microsoft.AspNetCore.Mvc.Testing.WebApplicationFactory`1.CreateClient(WebApplicationFactoryClientOptions options)
+   at Microsoft.AspNetCore.Mvc.Testing.WebApplicationFactory`1.CreateClient()
+   at Zaghlol.Api.Tests.ApiFixture.InitializeAsync() in C:\Users\amr90\zaghlol-ci\repo\backend\tests\Zaghlol.Api.Tests\ApiFixture.cs:line 47
+  Failed Zaghlol.Api.Tests.ApiTests.UnknownRouteReturnsProblemDetailsWithStableCode [1 ms]
+  Error Message:
+   System.IO.FileLoadException : Could not load file or assembly 'C:\Users\amr90\zaghlol-ci\repo\backend\tests\Zaghlol.Api.Tests\bin\Release\net10.0\Zaghlol.Application.dll'. An Application Control policy has blocked this file. (0x800711C7)
+  Stack Trace:
+     at Program.<Main>$(String[] args)
+   at Program.<Main>$(String[] args)
+   at System.Runtime.CompilerServices.AsyncMethodBuilderCore.Start[TStateMachine](TStateMachine& stateMachine)
+   at Program.<Main>$(String[] args)
+   at Program.<Main>(String[] args)
+   at InvokeStub_Program.<Main>(Object, Span`1)
+   at System.Reflection.MethodBaseInvoker.InvokeWithOneArg(Object obj, BindingFlags invokeAttr, Binder binder, Object[] parameters, CultureInfo culture)
+--- End of stack trace from previous location ---
+   at Microsoft.Extensions.Hosting.HostFactoryResolver.HostingListener.CreateHost()
+   at Microsoft.Extensions.Hosting.HostFactoryResolver.<>c__DisplayClass10_0.<ResolveHostFactory>b__0(String[] args)
+   at Microsoft.AspNetCore.Mvc.Testing.DeferredHostBuilder.Build()
+   at Microsoft.AspNetCore.Mvc.Testing.WebApplicationFactory`1.CreateHost(IHostBuilder builder)
+   at Microsoft.AspNetCore.Mvc.Testing.WebApplicationFactory`1.DelegatedWebApplicationFactory.CreateHost(IHostBuilder builder)
+   at Microsoft.AspNetCore.Mvc.Testing.WebApplicationFactory`1.ConfigureHostBuilder(IHostBuilder hostBuilder)
+   at Microsoft.AspNetCore.Mvc.Testing.WebApplicationFactory`1.StartServer()
+   at Microsoft.AspNetCore.Mvc.Testing.WebApplicationFactory`1.CreateDefaultClient(DelegatingHandler[] handlers)
+   at Microsoft.AspNetCore.Mvc.Testing.WebApplicationFactory`1.CreateDefaultClient(Uri baseAddress, DelegatingHandler[] handlers)
+   at Microsoft.AspNetCore.Mvc.Testing.WebApplicationFactory`1.CreateClient(WebApplicationFactoryClientOptions options)
+   at Microsoft.AspNetCore.Mvc.Testing.WebApplicationFactory`1.CreateClient()
+   at Zaghlol.Api.Tests.ApiFixture.InitializeAsync() in C:\Users\amr90\zaghlol-ci\repo\backend\tests\Zaghlol.Api.Tests\ApiFixture.cs:line 47
+  Failed Zaghlol.Api.Tests.ApiTests.PostgresContainerIsVersion17 [1 ms]
+  Error Message:
+   System.IO.FileLoadException : Could not load file or assembly 'C:\Users\amr90\zaghlol-ci\repo\backend\tests\Zaghlol.Api.Tests\bin\Release\net10.0\Zaghlol.Application.dll'. An Application Control policy has blocked this file. (0x800711C7)
+  Stack Trace:
+     at Program.<Main>$(String[] args)
+   at Program.<Main>$(String[] args)
+   at System.Runtime.CompilerServices.AsyncMethodBuilderCore.Start[TStateMachine](TStateMachine& stateMachine)
+   at Program.<Main>$(String[] args)
+   at Program.<Main>(String[] args)
+   at InvokeStub_Program.<Main>(Object, Span`1)
+   at System.Reflection.MethodBaseInvoker.InvokeWithOneArg(Object obj, BindingFlags invokeAttr, Binder binder, Object[] parameters, CultureInfo culture)
+--- End of stack trace from previous location ---
+   at Microsoft.Extensions.Hosting.HostFactoryResolver.HostingListener.CreateHost()
+   at Microsoft.Extensions.Hosting.HostFactoryResolver.<>c__DisplayClass10_0.<ResolveHostFactory>b__0(String[] args)
+   at Microsoft.AspNetCore.Mvc.Testing.DeferredHostBuilder.Build()
+   at Microsoft.AspNetCore.Mvc.Testing.WebApplicationFactory`1.CreateHost(IHostBuilder builder)
+   at Microsoft.AspNetCore.Mvc.Testing.WebApplicationFactory`1.DelegatedWebApplicationFactory.CreateHost(IHostBuilder builder)
+   at Microsoft.AspNetCore.Mvc.Testing.WebApplicationFactory`1.ConfigureHostBuilder(IHostBuilder hostBuilder)
+   at Microsoft.AspNetCore.Mvc.Testing.WebApplicationFactory`1.StartServer()
+   at Microsoft.AspNetCore.Mvc.Testing.WebApplicationFactory`1.CreateDefaultClient(DelegatingHandler[] handlers)
+   at Microsoft.AspNetCore.Mvc.Testing.WebApplicationFactory`1.CreateDefaultClient(Uri baseAddress, DelegatingHandler[] handlers)
+   at Microsoft.AspNetCore.Mvc.Testing.WebApplicationFactory`1.CreateClient(WebApplicationFactoryClientOptions options)
+   at Microsoft.AspNetCore.Mvc.Testing.WebApplicationFactory`1.CreateClient()
+   at Zaghlol.Api.Tests.ApiFixture.InitializeAsync() in C:\Users\amr90\zaghlol-ci\repo\backend\tests\Zaghlol.Api.Tests\ApiFixture.cs:line 47
+  Failed Zaghlol.Api.Tests.ApiTests.BadHttpRequestMapsTo400ValidationFailedWithoutEchoingMessage [1 ms]
+  Error Message:
+   System.IO.FileLoadException : Could not load file or assembly 'C:\Users\amr90\zaghlol-ci\repo\backend\tests\Zaghlol.Api.Tests\bin\Release\net10.0\Zaghlol.Application.dll'. An Application Control policy has blocked this file. (0x800711C7)
+  Stack Trace:
+     at Program.<Main>$(String[] args)
+   at Program.<Main>$(String[] args)
+   at System.Runtime.CompilerServices.AsyncMethodBuilderCore.Start[TStateMachine](TStateMachine& stateMachine)
+   at Program.<Main>$(String[] args)
+   at Program.<Main>(String[] args)
+   at InvokeStub_Program.<Main>(Object, Span`1)
+   at System.Reflection.MethodBaseInvoker.InvokeWithOneArg(Object obj, BindingFlags invokeAttr, Binder binder, Object[] parameters, CultureInfo culture)
+--- End of stack trace from previous location ---
+   at Microsoft.Extensions.Hosting.HostFactoryResolver.HostingListener.CreateHost()
+   at Microsoft.Extensions.Hosting.HostFactoryResolver.<>c__DisplayClass10_0.<ResolveHostFactory>b__0(String[] args)
+   at Microsoft.AspNetCore.Mvc.Testing.DeferredHostBuilder.Build()
+   at Microsoft.AspNetCore.Mvc.Testing.WebApplicationFactory`1.CreateHost(IHostBuilder builder)
+   at Microsoft.AspNetCore.Mvc.Testing.WebApplicationFactory`1.DelegatedWebApplicationFactory.CreateHost(IHostBuilder builder)
+   at Microsoft.AspNetCore.Mvc.Testing.WebApplicationFactory`1.ConfigureHostBuilder(IHostBuilder hostBuilder)
+   at Microsoft.AspNetCore.Mvc.Testing.WebApplicationFactory`1.StartServer()
+   at Microsoft.AspNetCore.Mvc.Testing.WebApplicationFactory`1.CreateDefaultClient(DelegatingHandler[] handlers)
+   at Microsoft.AspNetCore.Mvc.Testing.WebApplicationFactory`1.CreateDefaultClient(Uri baseAddress, DelegatingHandler[] handlers)
+   at Microsoft.AspNetCore.Mvc.Testing.WebApplicationFactory`1.CreateClient(WebApplicationFactoryClientOptions options)
+   at Microsoft.AspNetCore.Mvc.Testing.WebApplicationFactory`1.CreateClient()
+   at Zaghlol.Api.Tests.ApiFixture.InitializeAsync() in C:\Users\amr90\zaghlol-ci\repo\backend\tests\Zaghlol.Api.Tests\ApiFixture.cs:line 47
+  Failed Zaghlol.Api.Tests.ApiTests.UnhandledExceptionReturns500InternalWithoutLeakingDetails [1 ms]
+  Error Message:
+   System.IO.FileLoadException : Could not load file or assembly 'C:\Users\amr90\zaghlol-ci\repo\backend\tests\Zaghlol.Api.Tests\bin\Release\net10.0\Zaghlol.Application.dll'. An Application Control policy has blocked this file. (0x800711C7)
+  Stack Trace:
+     at Program.<Main>$(String[] args)
+   at Program.<Main>$(String[] args)
+   at System.Runtime.CompilerServices.AsyncMethodBuilderCore.Start[TStateMachine](TStateMachine& stateMachine)
+   at Program.<Main>$(String[] args)
+   at Program.<Main>(String[] args)
+   at InvokeStub_Program.<Main>(Object, Span`1)
+   at System.Reflection.MethodBaseInvoker.InvokeWithOneArg(Object obj, BindingFlags invokeAttr, Binder binder, Object[] parameters, CultureInfo culture)
+--- End of stack trace from previous location ---
+   at Microsoft.Extensions.Hosting.HostFactoryResolver.HostingListener.CreateHost()
+   at Microsoft.Extensions.Hosting.HostFactoryResolver.<>c__DisplayClass10_0.<ResolveHostFactory>b__0(String[] args)
+   at Microsoft.AspNetCore.Mvc.Testing.DeferredHostBuilder.Build()
+   at Microsoft.AspNetCore.Mvc.Testing.WebApplicationFactory`1.CreateHost(IHostBuilder builder)
+   at Microsoft.AspNetCore.Mvc.Testing.WebApplicationFactory`1.DelegatedWebApplicationFactory.CreateHost(IHostBuilder builder)
+   at Microsoft.AspNetCore.Mvc.Testing.WebApplicationFactory`1.ConfigureHostBuilder(IHostBuilder hostBuilder)
+   at Microsoft.AspNetCore.Mvc.Testing.WebApplicationFactory`1.StartServer()
+   at Microsoft.AspNetCore.Mvc.Testing.WebApplicationFactory`1.CreateDefaultClient(DelegatingHandler[] handlers)
+   at Microsoft.AspNetCore.Mvc.Testing.WebApplicationFactory`1.CreateDefaultClient(Uri baseAddress, DelegatingHandler[] handlers)
+   at Microsoft.AspNetCore.Mvc.Testing.WebApplicationFactory`1.CreateClient(WebApplicationFactoryClientOptions options)
+   at Microsoft.AspNetCore.Mvc.Testing.WebApplicationFactory`1.CreateClient()
+   at Zaghlol.Api.Tests.ApiFixture.InitializeAsync() in C:\Users\amr90\zaghlol-ci\repo\backend\tests\Zaghlol.Api.Tests\ApiFixture.cs:line 47
+
+Failed!  - Failed:    12, Passed:   155, Skipped:     0, Total:   167, Duration: 22 s - Zaghlol.Api.Tests.dll (net10.0)
+
+[23:23:32] === RESULT dotnet-test exit=1
+[23:23:32] SUMMARY FAIL sha=9b74996d2e9bda92ef84c25b3ba82f4574a330e2 pipeline=quick pub-get=0 format=0 analyze=0 app-test=1 dart-test-zaghlol_domain=0 dart-test-zaghlol_parsing=0 dotnet-build=0 dotnet-format=2 dotnet-test=1
