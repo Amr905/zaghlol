@@ -26,8 +26,10 @@ public class CatalogSeedCsvTests
         var merchant = Assert.Single(seed.Merchants);
         Assert.Equal("Koshary, El Tahrir", merchant.Canonical);
         Assert.Equal("dining", merchant.Fields.Category);
-        Assert.Equal(new[] { "koshary el tahrir", "tahrir" }, merchant.Aliases.Select(a => a.Alias));
-        Assert.Equal(new[] { "exact", "prefix" }, merchant.Aliases.Select(a => a.Match));
+        string[] expectedAliases = ["koshary el tahrir", "tahrir"];
+        string[] expectedModes = ["exact", "prefix"];
+        Assert.Equal(expectedAliases, merchant.Aliases.Select(a => a.Alias));
+        Assert.Equal(expectedModes, merchant.Aliases.Select(a => a.Match));
         var keyword = Assert.Single(seed.Keywords);
         Assert.Equal(("ar", "\u0645\u0637\u0639\u0645", 70), (keyword.Lang, keyword.Keyword, keyword.Fields.Weight));
     }

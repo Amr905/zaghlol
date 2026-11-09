@@ -8,7 +8,11 @@ internal static class CatalogMapping
 {
     public static CatalogOp FromDraft(CatalogDraftEntry row)
     {
-        CatalogEntities.TryParse(row.Entity, out var entity);
+        if (!CatalogEntities.TryParse(row.Entity, out var entity))
+        {
+            throw new InvalidOperationException("A draft row names an unknown entity.");
+        }
+
         return new CatalogOp(CatalogKeys.FromStorage(entity, row.EntryKey), row.Deleted, CatalogFields.FromJson(row.Body));
     }
 

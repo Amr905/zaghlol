@@ -23,13 +23,12 @@ public class CatalogOpsTests
 
         var ordered = CatalogDeltaOrder.Order(ops).Select(o => (o.Delete ? "-" : "+") + CatalogEntities.Name(o.Key.Entity) + "/" + o.Key.StorageKey).ToList();
 
-        Assert.Equal(
-            new[]
-            {
-                "+categories/dining", "+merchants/9", "+aliases/9:abc", "+keywords/ar:x",
-                "-keywords/en:gone", "-aliases/812:another", "-aliases/812:koshary", "-merchants/812", "-categories/old",
-            },
-            ordered);
+        string[] expected =
+        [
+            "+categories/dining", "+merchants/9", "+aliases/9:abc", "+keywords/ar:x",
+            "-keywords/en:gone", "-aliases/812:another", "-aliases/812:koshary", "-merchants/812", "-categories/old",
+        ];
+        Assert.Equal(expected, ordered);
     }
 
     [Fact]

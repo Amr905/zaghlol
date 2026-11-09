@@ -228,7 +228,7 @@ internal sealed class CatalogAdminStore(
     private static CatalogSeedFormatException BadSeedRow() =>
         new("A seed row is invalid or conflicts with the draft catalog.");
 
-    private static Task LockAsync(ZaghlolDbContext db, CancellationToken cancellationToken) =>
+    private static Task<int> LockAsync(ZaghlolDbContext db, CancellationToken cancellationToken) =>
         db.Database.ExecuteSqlAsync($"SELECT pg_advisory_xact_lock({LockKey})", cancellationToken);
 
     private static Task<bool> IsLiveAsync(ZaghlolDbContext db, CatalogEntity entity, string storageKey, CancellationToken cancellationToken)
