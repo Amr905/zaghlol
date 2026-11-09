@@ -228,8 +228,15 @@ public static class GrantMatrix
         new(OpsRw, "audit_log", SI), // INSERT only; RLS has no UPDATE or DELETE policy for ops_rw
     ];
 
+    /// <summary>The grants of the AddCatalogDrafts migration (T-125). Frozen: never edit after it ships.</summary>
+    public static IReadOnlyList<TableGrant> CatalogDrafts { get; } =
+    [
+        new(OpsRw, "catalog_drafts", SIUD), // the operator draft workspace (backend-api section 5.2)
+        new(OpsRo, "catalog_drafts", S),
+    ];
+
     /// <summary>What the database must hold after all migrations.</summary>
-    public static IReadOnlyList<TableGrant> Current { get; } = [.. InitialCreate];
+    public static IReadOnlyList<TableGrant> Current { get; } = [.. InitialCreate, .. CatalogDrafts];
 
     /// <summary>Renders grants as SQL statements (schema-qualified, deterministic order).</summary>
     public static string ToSql(IEnumerable<TableGrant> grants)

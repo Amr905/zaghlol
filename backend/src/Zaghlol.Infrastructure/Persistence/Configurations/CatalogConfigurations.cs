@@ -67,3 +67,24 @@ internal sealed class CatalogKeywordConfiguration : IEntityTypeConfiguration<Cat
         builder.Property(x => x.Deleted).HasDefaultValue(false);
     }
 }
+
+internal sealed class CatalogDraftEntryConfiguration : IEntityTypeConfiguration<CatalogDraftEntry>
+{
+    public void Configure(EntityTypeBuilder<CatalogDraftEntry> builder)
+    {
+        builder.ToTable(
+            "catalog_drafts",
+            t => t.HasCheckConstraint("ck_catalog_drafts_entity", "entity IN ('categories','merchants','aliases','keywords')"));
+
+        builder.HasKey(x => new { x.Entity, x.EntryKey });
+
+        // The identity is the merchant id allocator (an identity needs no sequence grant, FU-026) and the paging order.
+        builder.Property(x => x.Seq).UseIdentityAlwaysColumn();
+        builder.HasIndex(x => x.Seq).IsUnique();
+
+        builder.Property(x => x.Body).HasColumnType("jsonb");
+        builder.Property(x => x.Deleted).HasDefaultValue(false);
+        builder.Property(x => x.Published).HasDefaultValue(false);
+        builder.Property(x => x.UpdatedAt).HasDefaultValueSql("now()");
+    }
+}

@@ -61,6 +61,8 @@ public sealed class ZaghlolDbContext(DbContextOptions<ZaghlolDbContext> options)
 
     public DbSet<CatalogKeyword> CatalogKeywords => Set<CatalogKeyword>();
 
+    public DbSet<CatalogDraftEntry> CatalogDrafts => Set<CatalogDraftEntry>();
+
     public DbSet<FeatureFlag> FeatureFlags => Set<FeatureFlag>();
 
     public DbSet<PriceQuote> PriceQuotes => Set<PriceQuote>();
@@ -103,6 +105,7 @@ public sealed class ZaghlolDbContext(DbContextOptions<ZaghlolDbContext> options)
         modelBuilder.ApplyConfiguration(new CatalogMerchantConfiguration());
         modelBuilder.ApplyConfiguration(new CatalogAliasConfiguration());
         modelBuilder.ApplyConfiguration(new CatalogKeywordConfiguration());
+        modelBuilder.ApplyConfiguration(new CatalogDraftEntryConfiguration());
         modelBuilder.ApplyConfiguration(new FeatureFlagConfiguration());
         modelBuilder.ApplyConfiguration(new PriceQuoteConfiguration());
         modelBuilder.ApplyConfiguration(new FxRateConfiguration());

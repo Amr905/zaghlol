@@ -4,13 +4,12 @@ using Zaghlol.Infrastructure.Kms;
 namespace Zaghlol.Api.Signing;
 
 /// <summary>Endpoint metadata: sign this endpoint's 200 responses (<see cref="ResponseSigningMiddleware"/>).</summary>
-internal sealed class RequireResponseSignatureMetadata
+internal sealed class RequireResponseSignatureMetadata(int maxBufferedBytes)
 {
-    public static readonly RequireResponseSignatureMetadata Instance = new();
+    public static readonly RequireResponseSignatureMetadata Instance = new(ResponseSigningMiddleware.MaxBufferedBytes);
 
-    private RequireResponseSignatureMetadata()
-    {
-    }
+    /// <summary>The most this endpoint may write; longer fails with 500 before anything is sent.</summary>
+    public int MaxBufferedBytes { get; } = maxBufferedBytes;
 }
 
 internal static class ResponseSigningEndpointExtensions
@@ -22,6 +21,11 @@ internal static class ResponseSigningEndpointExtensions
     public static TBuilder RequireResponseSignature<TBuilder>(this TBuilder builder)
         where TBuilder : IEndpointConventionBuilder =>
         builder.WithMetadata(RequireResponseSignatureMetadata.Instance);
+
+    /// <summary>As above, for an endpoint whose body may exceed the default 1 MiB buffer (the full catalog snapshot, T-125).</summary>
+    public static TBuilder RequireResponseSignature<TBuilder>(this TBuilder builder, int maxBufferedBytes)
+        where TBuilder : IEndpointConventionBuilder =>
+        builder.WithMetadata(new RequireResponseSignatureMetadata(maxBufferedBytes));
 }
 
 /// <summary>
@@ -39,14 +43,14 @@ internal sealed class ResponseSigningMiddleware(RequestDelegate next, ISigner si
 
     public async Task InvokeAsync(HttpContext context)
     {
-        if (context.GetEndpoint()?.Metadata.GetMetadata<RequireResponseSignatureMetadata>() is null)
+        if (context.GetEndpoint()?.Metadata.GetMetadata<RequireResponseSignatureMetadata>() is not { } metadata)
         {
             await next(context);
             return;
         }
 
         var original = context.Features.GetRequiredFeature<IHttpResponseBodyFeature>();
-        await using var buffer = new CappedBufferStream(MaxBufferedBytes);
+        await using var buffer = new CappedBufferStream(metadata.MaxBufferedBytes);
         var buffered = new StreamResponseBodyFeature(buffer);
         context.Features.Set<IHttpResponseBodyFeature>(buffered);
         try

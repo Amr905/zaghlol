@@ -1,11 +1,14 @@
 using Serilog;
 using Serilog.Core;
 using Zaghlol.Api;
+using Zaghlol.Api.Auth;
 using Zaghlol.Api.Endpoints;
+using Zaghlol.Api.Endpoints.Admin;
 using Zaghlol.Api.Endpoints.V1;
 using Zaghlol.Api.Observability;
 using Zaghlol.Application;
 using Zaghlol.Infrastructure;
+using Zaghlol.Infrastructure.Catalog;
 using Zaghlol.Infrastructure.Kms;
 using Zaghlol.Infrastructure.Logging;
 using Zaghlol.Infrastructure.Observability;
@@ -48,11 +51,17 @@ builder.Services.AddZaghlolLogPseudonymizer();
 // Install registration, install-token auth and the idempotency store (T-124); after the pseudonymizer for its startup check.
 builder.Services.AddZaghlolInstalls();
 
+// Catalog versions, deltas, signed snapshots and the operator draft/publish API (T-125); operators are denied until T-136.
+builder.Services.AddZaghlolCatalog();
+builder.Services.AddOperatorAuthentication();
+
 var app = builder.Build();
 
 app.UseZaghlolPipeline();
 app.MapHealth();
 app.MapInstalls();
+app.MapCatalog();
+app.MapCatalogAdmin();
 
 await app.RunAsync();
 

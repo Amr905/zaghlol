@@ -1,6 +1,6 @@
 namespace Zaghlol.Infrastructure.Persistence.Entities;
 
-// backend-schema.md section 2, "Catalog" (FR-BE-06, FR-SYNC-02). Published versions are immutable; catalog_drafts is T-125's.
+// backend-schema.md section 2, "Catalog" (FR-BE-06, FR-SYNC-02). Published versions are immutable; catalog_drafts (T-125) is the editable working copy.
 
 /// <summary><c>catalog_versions</c>.</summary>
 public sealed class CatalogVersion
@@ -88,4 +88,30 @@ public sealed class CatalogKeyword
     public int Version { get; set; }
 
     public bool Deleted { get; set; }
+}
+
+/// <summary>
+/// <c>catalog_drafts</c> (T-125): the editable working copy of the whole catalog, one row per entry. <see cref="EntryKey"/> is
+/// the decoded key (<c>812</c>, <c>812:koshary el tahrir</c>, <c>ar:text</c>); <see cref="Seq"/> is the identity that allocates
+/// merchant ids. <see cref="Published"/> is set once the entry has been written to the live tables, <see cref="Changed"/> while
+/// it differs from them.
+/// </summary>
+public sealed class CatalogDraftEntry
+{
+    public int Seq { get; set; }
+
+    public required string Entity { get; set; }
+
+    public required string EntryKey { get; set; }
+
+    /// <summary><c>jsonb</c>: the non-key fields (<c>CatalogFields</c>).</summary>
+    public required string Body { get; set; }
+
+    public bool Deleted { get; set; }
+
+    public bool Published { get; set; }
+
+    public bool Changed { get; set; }
+
+    public DateTimeOffset UpdatedAt { get; set; }
 }
