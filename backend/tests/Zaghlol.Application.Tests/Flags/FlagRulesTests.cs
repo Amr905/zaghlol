@@ -46,7 +46,7 @@ public class FlagRulesTests
 
         Assert.Equal("{\"platforms\":[\"android\",\"ios\"],\"min_app_version\":\"1.4.0\",\"rollout_percent\":10}", json);
         var back = FlagRulesJson.Parse(json);
-        Assert.Equal(new[] { "android", "ios" }, back.Platforms!.ToArray());
+        Assert.Equal("android,ios", string.Join(',', back.Platforms!));
         Assert.Equal("1.4.0", back.MinAppVersion);
         Assert.Equal(10, back.RolloutPercent);
     }
@@ -65,7 +65,7 @@ public class FlagRulesTests
     [Fact]
     public void FlagKeysAreAClosedSetWithAnAsciiShape()
     {
-        Assert.Equal(new[] { "zakah", "smart_roi", "roi_named_products" }, FlagKeys.Known.ToArray());
+        Assert.Equal("zakah,smart_roi,roi_named_products", string.Join(',', FlagKeys.Known));
         Assert.True(FlagKeys.IsKnown("zakah"));
         Assert.False(FlagKeys.IsKnown("Zakah"));
         Assert.False(FlagKeys.IsKnown("other"));

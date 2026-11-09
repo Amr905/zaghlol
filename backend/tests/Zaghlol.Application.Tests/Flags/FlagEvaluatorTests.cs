@@ -47,7 +47,7 @@ public class FlagEvaluatorTests
             previous = current;
         }
 
-        Assert.Empty(ids.Where(id => FlagEvaluator.IsEnabled(Flag("smart_roi", true, new FlagRules(null, null, 0)), "ios", "1.0.0", id)));
+        Assert.DoesNotContain(ids, id => FlagEvaluator.IsEnabled(Flag("smart_roi", true, new FlagRules(null, null, 0)), "ios", "1.0.0", id));
         Assert.Equal(ids.Count, previous.Count);
     }
 

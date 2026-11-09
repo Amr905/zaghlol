@@ -1,3 +1,4 @@
+using Microsoft.AspNetCore.Http.HttpResults;
 using Microsoft.AspNetCore.Mvc;
 using Zaghlol.Api.Auth;
 using Zaghlol.Api.Json;
@@ -87,7 +88,7 @@ internal static class FlagAdminEndpoints
         return StateResult(state);
     }
 
-    private static IResult StateResult(FlagState state) =>
+    private static JsonHttpResult<FlagStateDto> StateResult(FlagState state) =>
         TypedResults.Json(
             new FlagStateDto
             {

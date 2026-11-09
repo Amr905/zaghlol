@@ -76,7 +76,7 @@ public class FlagStoreTests(FlagStoreFixture fixture) : IClassFixture<FlagStoreF
     public async Task ANeverSetFlagHasNoRow()
     {
         Assert.Null(await Admin.GetAsync("never_set", CancellationToken.None));
-        Assert.Empty((await Reader.ListAsync(CancellationToken.None)).Where(f => f.Key == "never_set"));
+        Assert.DoesNotContain(await Reader.ListAsync(CancellationToken.None), f => f.Key == "never_set");
     }
 
     [Fact]
@@ -94,7 +94,7 @@ public class FlagStoreTests(FlagStoreFixture fixture) : IClassFixture<FlagStoreF
         Assert.False(second.Value);
         Assert.Equal(Now.AddMinutes(1), second.UpdatedAt);
 
-        var read = Assert.Single((await Reader.ListAsync(CancellationToken.None)).Where(f => f.Key == "version_probe"));
+        var read = Assert.Single(await Reader.ListAsync(CancellationToken.None), f => f.Key == "version_probe");
         Assert.Equal(2, read.Version);
         Assert.False(read.Value);
         var viaAdmin = await Admin.GetAsync("version_probe", CancellationToken.None);
@@ -112,7 +112,7 @@ public class FlagStoreTests(FlagStoreFixture fixture) : IClassFixture<FlagStoreF
         var replaced = await Admin.UpsertAsync("rules_probe", true, new FlagRules(null, null, 50), op, Now, CancellationToken.None);
         var cleared = await Admin.UpsertAsync("rules_probe", true, FlagRules.None, op, Now, CancellationToken.None);
 
-        Assert.Equal(new[] { "android" }, set.Rules.Platforms!.ToArray());
+        Assert.Equal("android", Assert.Single(set.Rules.Platforms!));
         Assert.Equal("1.4.0", set.Rules.MinAppVersion);
         Assert.Equal(10, set.Rules.RolloutPercent);
         Assert.Equal("1.4.0", kept.Rules.MinAppVersion);
@@ -120,7 +120,7 @@ public class FlagStoreTests(FlagStoreFixture fixture) : IClassFixture<FlagStoreF
         Assert.Null(replaced.Rules.MinAppVersion);
         Assert.Equal(50, replaced.Rules.RolloutPercent);
         Assert.True(cleared.Rules.IsEmpty);
-        Assert.Equal(new[] { 1, 2, 3, 4 }, new[] { set.Version, kept.Version, replaced.Version, cleared.Version });
+        Assert.Equal("1,2,3,4", string.Join(',', set.Version, kept.Version, replaced.Version, cleared.Version));
     }
 
     [Fact]
