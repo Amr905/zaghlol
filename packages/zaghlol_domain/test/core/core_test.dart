@@ -77,6 +77,13 @@ void main() {
       }
     });
 
+    test('excessPrecision has its own code', () {
+      expect(
+        const ParseFailure(ParseFailureReason.excessPrecision).code,
+        'PARSE_EXCESS_PRECISION',
+      );
+    });
+
     test('toString shows type and code only', () {
       expect(
         const DbFailure(DbFailureKind.writeFailed).toString(),

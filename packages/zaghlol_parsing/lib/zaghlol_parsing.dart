@@ -1,6 +1,9 @@
 /// Public API of the `zaghlol_parsing` package.
 library;
 
-/// Placeholder so the package has a stable, testable entry point.
-/// Real content arrives in later tasks.
+export 'normalize/amount_parser.dart';
+export 'normalize/currency_markers.dart';
+export 'normalize/text_normalizer.dart';
+
+/// Stable, testable package marker.
 const String packageName = 'zaghlol_parsing';
