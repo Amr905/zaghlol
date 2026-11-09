@@ -2,3 +2,6 @@ tags:
   # Golden (screenshot) tests. CI runs them in a separate job and uploads diffs;
   # regenerate with the app-regen workflow, never locally (platform-specific).
   golden:
+  # T-007 DB benchmark (50k-row FTS). Gated in db-platform.yml's host job;
+  # excluded from app-ci's static job.
+  benchmark:

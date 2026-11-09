@@ -2,7 +2,7 @@
 
 | | |
 |---|---|
-| Status | Proposed |
+| Status | Accepted — CI evidence; device confirmation pending (T-007, 2026-11-08) |
 | Date | 2026-11-03 |
 | Deciders | Product owner (approval), solution-architect |
 | References | database-schema.md; security-model §3; https://drift.simonbinder.eu/platforms/encryption |
@@ -20,3 +20,47 @@ All data on the phone must be encrypted from the first write with AES-256 (FR-SE
 
 ## Consequences
 One encrypted file holds *all* app state (settings, catalog, entitlement cache, outbox), which satisfies FR-SEC-03 without separate encrypted preferences. The build uses Dart build hooks, so CI needs a recent Flutter. If Keystore invalidates the key, the DB can't be recovered; restore from backup is the path (error-handling §1).
+
+## Spike results (T-007)
+
+Evidence: `.github/workflows/db-platform.yml` run **42506507228** (head `bf2419e`, all four legs green) and app-ci run **42506507253**. Harness: `app/test/core/db/sqlite3mc_contract.dart` and `fts_benchmark.dart`, used by the host tests and by `app/integration_test/db_platform_test.dart`.
+
+**Versions.** `package:sqlite3` **3.9.1** (lock sha256 `8765980411f9…886b`), `package:drift` **2.35.3**. `sqlite_version()` **3.54.0**, `sqlite3mc_version()` **SQLite3 Multiple Ciphers 2.6.1**, the same on all four legs. The Android code asset is **`lib/<abi>/libsqlite3mc.so`** (arm64-v8a, armeabi-v7a, x86_64). On the Linux host the hook downloads `.dart_tool/hooks_runner/shared/sqlite3/build/download-*/libsqlite3mc.so`, and `gh attestation verify --repo simolus3/sqlite3.dart` passes on it. SQLite3MultipleCiphers is MIT-licensed; note it for the OSS-notices task.
+
+**Contract (asserted on host, Android emulator API 35 and API 26, iOS simulator):**
+- The open sequence is `cipher='sqlcipher'`, `legacy=4`, raw `x'…'` key, `temp_store=2`, WAL/NORMAL. Its verification (`count(*) FROM sqlite_master`, `PRAGMA cipher` = `sqlcipher`, `sqlite3mc_codec_data('cipher_salt')` non-NULL) passes, including inside `NativeDatabase.createInBackground`.
+- No key → SQLITE_NOTADB (26). Wrong key → 26. A key applied to a plaintext file made by the same library → 26; it never opens as plaintext, and the full open sequence refuses it.
+- The header is not `SQLite format 3\0`. Neither sentinel (ASCII or Arabic) appears in `.db`, `-wal` or `-shm`, whether open with an un-checkpointed WAL or after close. Positive control: the scanner finds both in a plaintext file. Only the three DB files are in the directory.
+- `PRAGMA rekey` round-trip: K2 opens, K1 → 26. Rekey also worked in WAL mode on every leg.
+- **SQLCipher compatibility (host):** Ubuntu's `sqlite3` CLI reports "file is not a database (26)". The `sqlcipher` CLI with SQLCipher 4 defaults and the raw key reads the sentinel rows (2/2).
+- FTS5: `ENABLE_FTS5` is present. The database-schema.md `transactions_fts` DDL works as written, with external content and sync triggers. `Café` ↔ `cafe`/`CAFÉ`, Arabic substring `كارفور`, and Latin and Arabic-Indic digits in `amount_text` all match.
+- Temp files: on Android `Directory.systemTemp` is `/data/user/0/app.zaghlol.dev/code_cache`; on iOS it is the app container's `tmp/`.
+
+**Findings (recorded, not asserted; for T-015/T-016 and the search task):**
+1. **`LIKE` is not served by the index with `remove_diacritics 1`.** The plan is `SCAN transactions_fts VIRTUAL TABLE INDEX 0:` (empty idxStr) on every leg. Control: the same LIKE on a `tokenize='trigram'` table gives `INDEX 0:L0`. Search must use `MATCH`; `LIKE` is a full scan with this tokenizer. The design note expected an indexed LIKE: **deviation**, now recorded instead of asserted.
+2. `remove_diacritics` does **not** strip Arabic tashkeel (`محمد` does not match `مُحَمَّد`). It folds Latin only. Normalize Arabic (tashkeel, and probably alef/yaa/taa-marbuta forms) in Dart, on both the indexed text and the query.
+3. Queries of 1–2 characters return **0 rows** via `MATCH` (trigram needs 3 or more). The `LIKE` fallback finds them but scans (`like_short_ms` p95 below). The search task needs a fallback for short queries, ideally limited (recent rows / LIMIT) or debounced.
+4. The encrypted/plaintext ratio is about 1.5× for the rank query but **4.6–5.7×** for the list query (join + `ORDER BY occurred_at`), which touches many random pages to decrypt. The first lever is `cache_size` tuning: the 50k DB is about 18 MB against the default 2 MB cache.
+5. A passphrase key (PBKDF2, 256k) costs 140–240 ms per open, against 6–9 ms for the raw key. That confirms the raw `x'…'` key.
+
+**Timings** (50,000 rows; ms; p50 / p95 / max for queries). Every CI row is **emulator/simulator or CI host, debug mode, x86_64/arm64-sim on CI hardware**. They are not device numbers and do not prove FR-TXN-01. Only the host row is gated (testing-strategy §5: p95 < 50 ms).
+
+| Environment | Run | open cold / warm | insert 50k | FTS rank | FTS list | LIKE 2-char | enc/plain list p95 | PBKDF2 open | DB size |
+|---|---|---|---|---|---|---|---|---|---|
+| CI host (ubuntu x86_64, `flutter test`) | 42506507228 | 7.1 / 5.7 | 2658 | 6.9 / 9.1 / 10.1 | 15.7 / 18.3 / 18.8 | 4.8 / 463 / 468 | 5.72 | 175 | 17.98 MB |
+| Android emulator API 35 (x86_64, debug) | 42506507228 | 8.9 / 8.0 | 2428 | 6.4 / 9.9 / 12.5 | 13.1 / 16.7 / 18.5 | 3.8 / 349 / 351 | 4.64 | 140 | 17.98 MB |
+| Android emulator API 26 (x86_64, debug) | 42506507228 | contract only | | | | | | | |
+| iOS simulator (iPhone 17 Pro, iOS 26.2, arm64-sim, debug) | 42506507228 | 12.6 / 8.6 | 3711 | 8.9 / 15.8 / 27.5 | 23.6 / 45.2 / 76.5 | 8.1 / 718 / 761 | 5.32 | 237 | 17.98 MB |
+| Mid-range Android (profile) | — | **PENDING** | | | | | | | |
+| iPhone 12 (profile) | — | **PENDING** | | | | | | | |
+
+Plaintext baseline, same binary (FTS list p95): host 3.2, API 35 3.6, iOS simulator 8.5.
+
+**Recommendation:** **confirmed on CI evidence.** SQLite3MultipleCiphers with the SQLCipher-4 AES-256 scheme and a raw key works on every platform leg, and the indexed search shapes are well under 200 ms even in debug on emulators. Two items remain open:
+- **Device rows (PENDING):** run `docs/05-reviews/T-007-device.md` and fill these rows before the first release candidate. This item goes on the T-171 checklist.
+- **`like_short_ms` p95:** the 2-character fallback is 350–720 ms p95 on emulators, which is a full scan for rare terms. This is a search-design item, not a cipher one.
+
+If a device FTS p95 is 200 ms or more, try the fallbacks in this order:
+1. `cache_size` and page-size tuning;
+2. query shape;
+3. sqlite3mc's default ChaCha20-Poly1305. This conflicts with "AES-256" in FR-SEC-01, so it needs a PO decision first.

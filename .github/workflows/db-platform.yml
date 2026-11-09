@@ -1,0 +1,246 @@
+name: db-platform
+
+# T-007 (SPK-05, ADR-002): proves on the CI host, an Android emulator (API 35
+# and minSdk 26) and an iOS simulator that the sqlite3 build hook links
+# SQLite3MultipleCiphers, that the database is SQLCipher-4-compatible AES-256
+# and unreadable without the key, and that FTS5 trigram works; records the
+# 50k-row FTS timings. Not a merge gate (app-ci is). Any sqlite3 bump
+# (pubspec.lock) re-runs it, so new binaries are re-proven.
+#
+# Numbers from the emulator/simulator legs are "emulator/simulator, debug mode,
+# x86_64/arm64-sim on CI hardware": recorded, not gating. Only the host leg
+# gates the benchmark (testing-strategy §5: p95 < 50 ms).
+#
+# No key, sentinel or row text is ever printed: the tests print only
+# numbers/flags/codes, and the interop key stays in $RUNNER_TEMP (masked).
+#
+# The push `paths` filter sees only the pushed range. After an app-regen
+# `[regen-lock]` bot commit (which triggers nothing), the follow-up push must
+# touch one of these paths, or dispatch the workflow (once it is on main).
+on:
+  workflow_dispatch:
+  push:
+    branches:
+      - 'task/**'
+      - main
+    paths:
+      - pubspec.lock
+      - pubspec.yaml
+      - app/pubspec.yaml
+      - 'app/integration_test/db_*'
+      - 'app/test/core/db/**'
+      - .github/workflows/db-platform.yml
+      - '.github/scripts/db-platform-*.sh'
+
+permissions:
+  contents: read
+
+concurrency:
+  group: db-platform-${{ github.ref }}
+  cancel-in-progress: ${{ github.ref != 'refs/heads/main' }}
+
+env:
+  # Keep in sync with app-ci.yml / app-regen.yml.
+  FLUTTER_VERSION: '3.47.9'
+
+jobs:
+  host:
+    name: host (contract, benchmark, CLI interop, attestations)
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@fbc6f3992d24b796d5a048ff273f7fcc4a7b6c09 # v5.1.0
+        with:
+          persist-credentials: false
+      - uses: subosito/flutter-action@1a449444c387b1966244ae4d4f8c696479add0b2 # v2.23.0
+        with:
+          flutter-version: ${{ env.FLUTTER_VERSION }}
+          channel: stable
+          cache: true
+      - name: Resolve workspace (lockfile must be up to date)
+        run: flutter pub get --enforce-lockfile
+      - name: Install independent CLIs (sqlite3, sqlcipher)
+        run: |
+          sudo apt-get update -q
+          sudo apt-get install -y -q sqlite3 sqlcipher
+          sqlite3 --version
+          sqlcipher -version < /dev/null || true
+      - name: flutter test test/core/db (contract + benchmark, budget p95 < 50 ms)
+        working-directory: app
+        run: |
+          set -o pipefail
+          mkdir -m 700 -p "$RUNNER_TEMP/interop"
+          ZAGHLOL_DB_INTEROP_DIR="$RUNNER_TEMP/interop" \
+            flutter test test/core/db/ --reporter expanded 2>&1 | tee "$RUNNER_TEMP/host.log"
+      - name: Results to summary
+        if: always()
+        run: bash .github/scripts/db-platform-results.sh "$RUNNER_TEMP/host.log" host true
+      - name: Independent CLIs (Ubuntu sqlite3 refuses; sqlcipher reads)
+        run: |
+          dir="$RUNNER_TEMP/interop"
+          key=$(cat "$dir/interop.key")
+          echo "::add-mask::$key"
+          if ! [[ "$key" =~ ^[0-9a-f]{64}$ ]]; then
+            echo "::error::interop key has an unexpected format"; exit 1
+          fi
+          if out=$(sqlite3 "$dir/interop.db" 'SELECT count(*) FROM sqlite_master;' 2>&1); then
+            echo "::error::Ubuntu sqlite3 opened the encrypted file"; exit 1
+          fi
+          echo "sqlite3 CLI: $out"
+          if ! grep -q "file is not a database" <<<"$out"; then
+            echo "::error::Ubuntu sqlite3 did not report 'file is not a database'"; exit 1
+          fi
+          # SQLCipher 4 defaults (no cipher_compatibility pragma): proves the
+          # file is SQLCipher-compatible, not just self-consistent.
+          umask 077
+          printf 'PRAGMA key = "x'"'"'%s'"'"'";\nSELECT count(*) FROM sentinels;\n' "$key" > "$dir/cmd.sql"
+          got=$(sqlcipher -batch "$dir/interop.db" < "$dir/cmd.sql" 2>&1 | tail -n 1) || true
+          rm -f "$dir/cmd.sql" "$dir/interop.key"
+          expected=$(cat "$dir/interop.expected")
+          echo "sqlcipher CLI sentinel count: $got (expected $expected)"
+          if [ "$got" != "$expected" ]; then
+            echo "::error::sqlcipher CLI could not read the database with the raw key"; exit 1
+          fi
+          echo "### CLI interop" >> "$GITHUB_STEP_SUMMARY"
+          echo "Ubuntu sqlite3 $(sqlite3 --version | cut -d' ' -f1): refused (file is not a database). sqlcipher CLI: read $got sentinel rows." >> "$GITHUB_STEP_SUMMARY"
+      - name: SLSA attestations of the downloaded sqlite3mc binaries
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          mapfile -t files < <(find . -path '*/.dart_tool/hooks_runner/*' -type f \
+            \( -name '*.so' -o -name '*.dylib' -o -name '*.dll' \) | grep -i sqlite | sort)
+          if [ "${#files[@]}" -eq 0 ]; then
+            echo "::error::no downloaded sqlite3 binary found under .dart_tool/hooks_runner"
+            find . -path '*/.dart_tool/hooks_runner/*' -maxdepth 8 | head -n 60
+            exit 1
+          fi
+          echo "### sqlite3 binaries (attestation verified)" >> "$GITHUB_STEP_SUMMARY"
+          for f in "${files[@]}"; do
+            echo "== $f ($(sha256sum "$f" | cut -c1-64))"
+            # Non-zero exit (step fails) unless a valid attestation exists.
+            # Without a TTY gh prints nothing, so show what was verified.
+            gh attestation verify "$f" --repo simolus3/sqlite3.dart --format json > att.json
+            n=$(jq 'length' att.json)
+            signer=$(jq -r '[.[].verificationResult.signature.certificate.buildSignerURI] | unique | join(", ")' att.json)
+            ref=$(jq -r '[.[].verificationResult.signature.certificate.sourceRepositoryRef] | unique | join(", ")' att.json)
+            echo "verified attestations: $n; signer: $signer; source ref: $ref"
+            if [ "$n" -lt 1 ]; then
+              echo "::error::no verified attestation for $f"; exit 1
+            fi
+            echo "- \`$f\` $(sha256sum "$f" | cut -c1-16)…: $n attestation(s), signer $signer, ref $ref" >> "$GITHUB_STEP_SUMMARY"
+          done
+      - name: Resolved versions
+        if: always()
+        run: |
+          v=$(awk '/^  sqlite3:$/{f=1} f && /^    version:/{print $2; exit}' pubspec.lock)
+          d=$(awk '/^  drift:$/{f=1} f && /^    version:/{print $2; exit}' pubspec.lock)
+          echo "package:sqlite3 $v, package:drift $d"
+          echo "package:sqlite3 $v, package:drift $d" >> "$GITHUB_STEP_SUMMARY"
+      - uses: actions/upload-artifact@b7c566a772e6b6bfb58ed0dc250532a479d7789f # v6.0.0
+        if: always()
+        with:
+          name: db-results-host
+          path: ${{ runner.temp }}/db-results
+          if-no-files-found: warn
+          retention-days: 30
+
+  android-emulator:
+    name: android emulator API ${{ matrix.api }} (${{ matrix.bench && 'contract + benchmark' || 'contract' }})
+    runs-on: ubuntu-latest
+    timeout-minutes: 75
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - { api: 35, bench: true }
+          # ADR-019 minSdk: catches a prebuilt built against a higher API level.
+          - { api: 26, bench: false }
+    env:
+      FLAVOR: devNoSms
+      DEVICE: emulator-5554
+      DB_ENV: android-emu-api${{ matrix.api }}
+      BENCH: ${{ matrix.bench }}
+    steps:
+      - uses: actions/checkout@fbc6f3992d24b796d5a048ff273f7fcc4a7b6c09 # v5.1.0
+        with:
+          persist-credentials: false
+      - uses: actions/setup-java@b6effb05e454b25005698d916606bdc6ffcbf961 # v5.7.0
+        with:
+          distribution: temurin
+          java-version: '17'
+      - uses: subosito/flutter-action@1a449444c387b1966244ae4d4f8c696479add0b2 # v2.23.0
+        with:
+          flutter-version: ${{ env.FLUTTER_VERSION }}
+          channel: stable
+          cache: true
+      - name: Resolve workspace (lockfile must be up to date)
+        run: flutter pub get --enforce-lockfile
+      - name: Enable KVM
+        run: |
+          echo 'KERNEL=="kvm", GROUP="kvm", MODE="0666", OPTIONS+="static_node=kvm"' | sudo tee /etc/udev/rules.d/99-kvm4all.rules
+          sudo udevadm control --reload-rules
+          sudo udevadm trigger --name-match=kvm
+      - name: Run on the emulator
+        uses: reactivecircus/android-emulator-runner@a421e43855164a8197daf9d8d40fe71c6996bb0d # v2.38.0
+        with:
+          api-level: ${{ matrix.api }}
+          arch: x86_64
+          target: google_apis
+          disable-animations: true
+          emulator-options: -no-window -gpu swiftshader_indirect -noaudio -no-boot-anim -camera-back none
+          script: bash .github/scripts/db-platform-device.sh
+      - name: Results to summary
+        if: always()
+        run: bash .github/scripts/db-platform-results.sh "$RUNNER_TEMP/device.log" "$DB_ENV" "$BENCH"
+      - uses: actions/upload-artifact@b7c566a772e6b6bfb58ed0dc250532a479d7789f # v6.0.0
+        if: always()
+        with:
+          name: db-results-android-api${{ matrix.api }}
+          path: ${{ runner.temp }}/db-results
+          if-no-files-found: warn
+          retention-days: 30
+
+  ios-simulator:
+    name: ios simulator (contract + benchmark)
+    runs-on: macos-latest
+    timeout-minutes: 60
+    env:
+      FLAVOR: dev
+      DB_ENV: ios-sim
+      BENCH: 'true'
+    steps:
+      - uses: actions/checkout@fbc6f3992d24b796d5a048ff273f7fcc4a7b6c09 # v5.1.0
+        with:
+          persist-credentials: false
+      - uses: subosito/flutter-action@1a449444c387b1966244ae4d4f8c696479add0b2 # v2.23.0
+        with:
+          flutter-version: ${{ env.FLUTTER_VERSION }}
+          channel: stable
+          cache: true
+      - name: Resolve workspace (lockfile must be up to date)
+        run: flutter pub get --enforce-lockfile
+      - name: Boot the first available iPhone simulator
+        run: |
+          # Same picker as app-ci's swift-unit job.
+          UDID=$(xcrun simctl list devices available iPhone | grep -Eo '[0-9A-F]{8}(-[0-9A-F]{4}){3}-[0-9A-F]{12}' | head -n 1)
+          if [ -z "$UDID" ]; then
+            echo "::error::no iPhone simulator available"
+            xcrun simctl list devices available
+            exit 1
+          fi
+          xcrun simctl list devices available | grep "$UDID"
+          xcrun simctl boot "$UDID" || true
+          xcrun simctl bootstatus "$UDID" -b
+          echo "DEVICE=$UDID" >> "$GITHUB_ENV"
+      - name: Run on the simulator
+        run: bash .github/scripts/db-platform-device.sh
+      - name: Results to summary
+        if: always()
+        run: bash .github/scripts/db-platform-results.sh "$RUNNER_TEMP/device.log" "$DB_ENV" "$BENCH"
+      - uses: actions/upload-artifact@b7c566a772e6b6bfb58ed0dc250532a479d7789f # v6.0.0
+        if: always()
+        with:
+          name: db-results-ios-sim
+          path: ${{ runner.temp }}/db-results
+          if-no-files-found: warn
+          retention-days: 30

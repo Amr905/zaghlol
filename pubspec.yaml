@@ -5,7 +5,15 @@ publish_to: none
 environment:
   sdk: ^3.13.7
 
-# The sqlite3 build hook (sqlite3mc) is added in T-007.
+# T-007 / ADR-002: the sqlite3 package's build hook bundles the prebuilt
+# SQLite3MultipleCiphers binaries (encryption + FTS5) on every platform. Drift
+# reads this from the workspace root. No url_pattern, no per-OS map and no
+# `source: source`, so every platform gets the hash-checked prebuilt release.
+hooks:
+  user_defines:
+    sqlite3:
+      source: sqlite3mc
+
 workspace:
   - app
   - packages/zaghlol_domain
