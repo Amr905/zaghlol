@@ -100,11 +100,17 @@ public class InstallAuthTests(InstallsHostFixture fixture) : IClassFixture<Insta
         using var ok = await fixture.SendAsync(HttpMethod.Get, "/v1/t/whoami", token);
         using var unauthorized = await fixture.SendAsync(HttpMethod.Get, "/v1/t/whoami", InstallTokens.Generate());
 
+        // T-138 tests m2, re-run on the real filter: the Idempotency-Key of an idempotent call is never logged either.
+        var idemKey = InstallsHostFixture.NewKey();
+        using var idem = await fixture.SendAsync(HttpMethod.Post, "/v1/t/idem", token, "{\"mode\":\"ok\"}", idemKey);
+        Assert.Equal(HttpStatusCode.OK, idem.StatusCode);
+        await WaitForLogAsync(e => e.Contains("/v1/t/idem", StringComparison.Ordinal));
+
         await WaitForLogAsync(e => e.Contains("/v1/t/whoami", StringComparison.Ordinal) && e.Contains("Status=401", StringComparison.Ordinal));
         await WaitForLogAsync(e => e.Contains("/v1/t/whoami", StringComparison.Ordinal)
             && e.Contains("Status=200", StringComparison.Ordinal)
             && e.Contains("InstallHash=", StringComparison.Ordinal));
-        foreach (var secret in new[] { token, installId, key })
+        foreach (var secret in new[] { token, installId, key, idemKey })
         {
             Assert.DoesNotContain(fixture.LogSink.Entries, e => e.Contains(secret, StringComparison.Ordinal));
         }

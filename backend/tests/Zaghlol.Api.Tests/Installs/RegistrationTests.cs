@@ -262,11 +262,12 @@ internal static class Problems
         return text;
     }
 
-    /// <summary>The body without its per-request <c>correlationId</c>, for comparing two answers.</summary>
+    /// <summary>The body without its per-request ids (<c>correlationId</c>, the framework's <c>traceId</c>), for comparing answers.</summary>
     public static string WithoutCorrelationId(string text)
     {
         var node = System.Text.Json.Nodes.JsonNode.Parse(text)!.AsObject();
         node.Remove("correlationId");
+        node.Remove("traceId");
         return node.ToJsonString();
     }
 }
