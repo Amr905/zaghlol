@@ -14,14 +14,14 @@ _Last updated: 2026-11-10 by the Lead session. Update it whenever the state belo
 - **Merging:** the `main` ruleset (26756600) is **Active** (PR required). The **PO authorised the Lead (2026-11-08) to merge approved PRs**: when all reviews are APPROVED and CI on the PR head is green, squash-merge via `PUT /repos/Amr905/zaghlol/pulls/<n>/merge` (`gh` has no valid token here). If the PR branch is behind code that changes its checks (e.g. new lint rules), merge `main` into it and wait for green CI first.
 - **Copy deck checks:** `python3 docs/workflow/tools/copy_deck_check.py docs/02-design/copy-deck.md`.
 
-## Progress: 20 of 186 tasks done (10.8%)
+## Progress: 22 of 186 tasks done (11.8%)
 
-DONE: T-001…T-007, T-012, T-013, T-014, T-022, T-026, T-027, T-028, T-122, T-123, T-124, T-125, T-126, T-138. T-165 is merged but needs a device run.
+DONE: T-001…T-007, T-012, T-013, T-014, T-022, T-026, T-027, T-028, T-122, T-123, T-124, T-125, T-126, T-127, T-128, T-138. T-136 merged, IN_REVIEW (IdP evidence). T-165 is merged but needs a device run.
 
 | Milestone | Done | Total |
 |---|---|---|
 | M0 | 14 | 28 |
-| M5 | 6 | 35 |
+| M5 | 8 | 35 |
 | M1–M4, M6, M7 | 0 | 123 |
 
 The PO asked for this progress table in every update.
@@ -36,11 +36,13 @@ Nothing in flight. T-165 is merged, IN_REVIEW, waiting for a device run.
 
 - **App:** T-015 secure DB key bootstrap (C4, Opus design note: crypto/keys), spikes T-010 (C3) and T-011 (C2), T-032/T-034 parsing (after FU-030 lint hardening).
 - **Lint hardening (FU-030):** must land before T-032/T-033 parsing work. T-013 is merged without it; ask the task-planner to add a small task.
-- **Backend:** T-127 prices (BLOCKED only for go-live; can be built with fakes, Sonnet); T-128 sync after T-127, T-136 operator auth (unblocks all /admin routes, FU-058); T-130 needs the FU-052 S-2 idempotency design fix first.
+- **Backend:** T-129 (after T-128), T-130/T-131 purchases (T-130 needs the FU-052 S-2 idempotency design fix first), T-140.
 - **Docs:** T-029 (ARB from copy deck part 1) needs T-023 and the Q-15/Q-16 answers.
 - **External:** T-088 (Rive file), T-058 (native-speaker review, now unblocked: all three copy-deck parts are merged).
 
 ## Waiting on the PO
+
+0. **IdP for operators (T-136 Q1/Q2):** PO chose "decide later". Needed before T-136 can close and before T-186 goes live (FU-060 S-4). Google needs a design change; Entra needs a token-lifetime policy ≤60 min. Also D-41 (local gold feed provider) before T-127 go-live.
 
 1. Start Docker Desktop alongside `START-LOCAL-CI.cmd` (backend tests need it). The runner hasn't published to `local-ci` yet.
 2. Copy questions needing a PO/legal call: Q-20 (financial-advice line on tips), Q-23 (Zakah/Smart ROI disclaimer + scholar sign-off, before those flags go on), Q-24 (halal mention and example-rate owner), Q-25 (never-roasted categories), Q-33 (category name on redacted alerts), Q-36 (subscription renewal wording, legal).
