@@ -1,10 +1,8 @@
 package app.zaghlol.platform.spool
 
-import android.os.Build
 import android.security.keystore.KeyGenParameterSpec
 import android.security.keystore.KeyProperties
 import java.security.KeyStore
-import java.security.ProviderException
 import javax.crypto.KeyGenerator
 import javax.crypto.SecretKey
 
@@ -18,7 +16,11 @@ import javax.crypto.SecretKey
  * - Alias `zaghlol_spool_v1`: AES-256-GCM, encrypt + decrypt, no padding,
  *   randomized encryption (the Keystore picks a fresh 12-byte nonce per
  *   operation), 128-bit tag, non-exportable, no user authentication,
- *   StrongBox when available with a software-TEE fallback.
+ *   TEE-backed AndroidKeyStore, deliberately NOT StrongBox (bulk data up to
+ *   20 MiB inside the 20 s intake deadline is too slow on StrongBox; Lead
+ *   decision 2026-11-10, T-060 review C1). Never call setIsStrongBoxBacked for
+ *   this alias. T-039 must not add a StrongBox attempt or fallback; K_db (T-015)
+ *   is separate and keeps StrongBox-with-fallback.
  * - Get-or-create runs under one process-wide lock ([GetOrCreate]). All
  *   capture components run in the app's default process; a component moved to
  *   another process would need a cross-process scheme instead.
@@ -29,6 +31,9 @@ import javax.crypto.SecretKey
  */
 object SpoolKey {
     const val ALIAS = "zaghlol_spool_v1"
+
+    /** Spool key is TEE-only; see the class KDoc. Asserted by SpoolKeySpecTest. */
+    internal const val REQUEST_STRONGBOX = false
     private const val PROVIDER = "AndroidKeyStore"
 
     private val holder = GetOrCreate(load = ::load, create = ::create)
@@ -40,9 +45,9 @@ object SpoolKey {
         return ks.getKey(ALIAS, null) as? SecretKey
     }
 
-    private fun create(): SecretKey = generate(strongBox = Build.VERSION.SDK_INT >= Build.VERSION_CODES.P)
+    private fun create(): SecretKey = generate()
 
-    private fun generate(strongBox: Boolean): SecretKey {
+    private fun generate(): SecretKey {
         val spec = KeyGenParameterSpec.Builder(
             ALIAS,
             KeyProperties.PURPOSE_ENCRYPT or KeyProperties.PURPOSE_DECRYPT,
@@ -52,18 +57,10 @@ object SpoolKey {
             .setEncryptionPaddings(KeyProperties.ENCRYPTION_PADDING_NONE)
             .setRandomizedEncryptionRequired(true)
             .setUserAuthenticationRequired(false)
-            .apply {
-                if (strongBox && Build.VERSION.SDK_INT >= Build.VERSION_CODES.P) setIsStrongBoxBacked(true)
-            }
             .build()
-        return try {
-            KeyGenerator.getInstance(KeyProperties.KEY_ALGORITHM_AES, PROVIDER).run {
-                init(spec)
-                generateKey()
-            }
-        } catch (e: ProviderException) {
-            // StrongBoxUnavailableException (API 28+) extends ProviderException.
-            if (strongBox) generate(strongBox = false) else throw e
+        return KeyGenerator.getInstance(KeyProperties.KEY_ALGORITHM_AES, PROVIDER).run {
+            init(spec)
+            generateKey()
         }
     }
 }
