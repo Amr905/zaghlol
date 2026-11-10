@@ -1,5 +1,4 @@
 import 'dart:async';
-import 'dart:typed_data';
 
 import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -78,6 +77,9 @@ class _FakeNative {
   }
 }
 
+/// Lets the broadcast stream deliver queued events to the test's listener.
+Future<void> _pump() => Future<void>.delayed(Duration.zero);
+
 ShareContent _share(
   String id,
   ShareKind kind, {
@@ -124,7 +126,7 @@ void main() {
     native.pending.add(share);
 
     await native.push('onShareReceived', share.descriptor);
-    await Future<void>.delayed(Duration.zero);
+    await _pump();
 
     expect(seen, hasLength(1));
     final event = seen.single as ShareReceived;
@@ -139,6 +141,7 @@ void main() {
     native.pending.add(_share('b' * 28, ShareKind.image, bytes: bytes));
 
     await service.pollPending();
+    await _pump();
 
     expect((seen.single as ShareReceived).descriptor.kind, ShareKind.image);
     final content = await service.read('b' * 28);
@@ -151,7 +154,9 @@ void main() {
     native.pending.add(_share('c' * 28, ShareKind.text, text: 'x'));
 
     await service.pollPending();
+    await _pump();
     await service.pollPending();
+    await _pump();
 
     expect(seen, hasLength(2));
     expect((seen[0] as ShareRejected).reason, ShareRejectReason.tooLarge);
@@ -166,6 +171,7 @@ void main() {
 
       await native.push('onShareReceived', share.descriptor);
       await service.pollPending();
+      await _pump();
 
       expect(seen.whereType<ShareReceived>(), hasLength(1));
     },
@@ -173,7 +179,7 @@ void main() {
 
   test('warm-start refusal is forwarded', () async {
     await native.push('onShareRejected', ShareRejectReason.unsupportedType);
-    await Future<void>.delayed(Duration.zero);
+    await _pump();
 
     expect(
       (seen.single as ShareRejected).reason,
@@ -186,9 +192,11 @@ void main() {
     () async {
       native.pending.add(_share('e' * 28, ShareKind.text, text: 'x'));
       await service.pollPending();
+      await _pump();
 
       await service.discard('e' * 28);
       await service.pollPending();
+      await _pump();
 
       expect(native.discarded, <String>['e' * 28]);
       expect(seen.whereType<ShareReceived>(), hasLength(1));

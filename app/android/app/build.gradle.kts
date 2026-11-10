@@ -81,9 +81,15 @@ kotlin {
 dependencies {
     testImplementation("junit:junit:4.13.2")
     // T-060: instrumented tests (Keystore cipher, share store on a device).
-    androidTestImplementation("junit:junit:4.13.2")
-    androidTestImplementation("androidx.test:runner:1.6.2")
-    androidTestImplementation("androidx.test.ext:junit:1.2.1")
+    // Gradle's consistent resolution pins junit to 4.12 (from the main runtime
+    // classpath), so the androidx.test artifacts must not bring their own 4.13.
+    androidTestImplementation("junit:junit:4.12")
+    androidTestImplementation("androidx.test:runner:1.6.2") {
+        exclude(group = "junit", module = "junit")
+    }
+    androidTestImplementation("androidx.test.ext:junit:1.2.1") {
+        exclude(group = "junit", module = "junit")
+    }
 }
 
 flutter {
