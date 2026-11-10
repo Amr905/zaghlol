@@ -489,14 +489,8 @@ final class KeyBootstrap {
         }
         return KeyReady(key, attempts: read.attempts);
       case SecretStatus.notFound:
-        if (dbPresent) {
-          return KeyInvalidated(
-            KeyInvalidatedReason.missing,
-            lease,
-            attempts: read.attempts,
-          );
-        }
-        return _create(lease, KeyCreatedReason.firstRun, deleteFirst: false);
+        // NEGATIVE PROOF (a): writes a new key although a database exists.
+        return _createIgnoringDb(lease);
       case SecretStatus.unusable:
         if (dbPresent) {
           return KeyInvalidated(
@@ -555,5 +549,19 @@ final class KeyBootstrap {
     final key = DbKeyMaterial.copyOf(stored);
     wipeBytes(stored);
     return KeyCreated(key, reason, lease);
+  }
+
+  Future<KeyBootstrapOutcome> _createIgnoringDb(BootstrapLease lease) async {
+    final candidate = _generator.next()!;
+    final stored = await _store.createIfAbsent(
+      lease._lease,
+      SecretSlot.dbKey,
+      candidate,
+    );
+    return KeyCreated(
+      DbKeyMaterial.copyOf(stored),
+      KeyCreatedReason.firstRun,
+      lease,
+    );
   }
 }
