@@ -19,13 +19,15 @@ void main() {
       ['run', 'bin/zaghlol_lints.dart', ...roots],
     );
 
-    test('a root with no lib/ files exits non-zero with a clear message',
-        () async {
-      File('${tmp.path}/a.dart').writeAsStringSync('int x = 1;');
-      final r = await lint([tmp.path]);
-      expect(r.exitCode, isNot(0));
-      expect(r.stderr, contains('no lintable files'));
-    });
+    test(
+      'a root with no lib/ files exits non-zero with a clear message',
+      () async {
+        File('${tmp.path}/a.dart').writeAsStringSync('int x = 1;');
+        final r = await lint([tmp.path]);
+        expect(r.exitCode, isNot(0));
+        expect(r.stderr, contains('no lintable files'));
+      },
+    );
 
     test('an empty root among good roots still fails', () async {
       final r = await lint(['test/fixtures/lib/money', tmp.path]);

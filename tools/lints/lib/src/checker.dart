@@ -74,9 +74,7 @@ class _RuleVisitor extends RecursiveAstVisitor<void> {
   void _reportDouble(int offset, String message) {
     final line = file.lineInfo.getLocation(offset).lineNumber;
     // One report per line: `double x = 1.5;` is a single finding.
-    if (violations.any(
-      (v) => v.rule == ruleNoDoubleMoney && v.line == line,
-    )) {
+    if (violations.any((v) => v.rule == ruleNoDoubleMoney && v.line == line)) {
       return;
     }
     violations.add(Violation(ruleNoDoubleMoney, file.path, line, message));
