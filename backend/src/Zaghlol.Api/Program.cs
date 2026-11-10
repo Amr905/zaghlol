@@ -14,8 +14,8 @@ using Zaghlol.Infrastructure.Kms;
 using Zaghlol.Infrastructure.Logging;
 using Zaghlol.Infrastructure.Observability;
 using Zaghlol.Infrastructure.Persistence;
-using Zaghlol.Infrastructure.Support;
 using Zaghlol.Infrastructure.Prices;
+using Zaghlol.Infrastructure.Support;
 
 // `dotnet Zaghlol.Api.dll --healthcheck` is used by container health checks (the runtime image has no shell or curl).
 if (args.Contains("--healthcheck", StringComparer.Ordinal))
