@@ -1,5 +1,74 @@
 ﻿== SUMMARY ==
-RUNNING sha=588e6e62546ab3898a9fabee46369b2fec1e199c
+FAIL sha=588e6e62546ab3898a9fabee46369b2fec1e199c pipeline=quick-backend dotnet-build=1 dotnet-format=2 dotnet-test=0
+dotnet-build                 FAIL  exit=1  7s
+dotnet-format                FAIL  exit=2  26s
+dotnet-test                  PASS  exit=0  64s
+
+== ERRORS: dotnet-build ==
+/work/backend/src/Zaghlol.Application/Contributions/ContributionPorts.cs(142,10): error CA1716: Rename virtual/interface member IContributionMetrics.Event(string, int) so that it no longer conflicts with the reserved language keyword 'Event'. Using a reserved keyword as the name of a virtual/interface member makes it harder for consumers in other languages to override/implement the member. (https://learn.microsoft.com/dotnet/fundamentals/code-analysis/quality-rules/ca1716) [/work/backend/src/Zaghlol.Application/Zaghlol.Application.csproj]
+
+== ERRORS: dotnet-format ==
+/work/backend/src/Zaghlol.Api/Endpoints/Admin/ContributionAdminEndpoints.cs(129,20): error CS0246: The type or namespace name 'ProblemHttpResult' could not be found (are you missing a using directive or an assembly reference?) [/work/backend/src/Zaghlol.Api/Zaghlol.Api.csproj]
+/work/backend/tests/Zaghlol.Infrastructure.Tests/Contributions/ContributionStoreTests.cs(16,38): error CS0535: 'UnusedSigner' does not implement interface member 'ISigner.PublishedKeys(SigningPurpose)' [/work/backend/tests/Zaghlol.Infrastructure.Tests/Zaghlol.Infrastructure.Tests.csproj]
+Formatted code file '/work/backend/src/Zaghlol.Api/Endpoints/Admin/ContributionAdminEndpoints.cs'.
+Formatted code file '/work/backend/tests/Zaghlol.Infrastructure.Tests/Contributions/ContributionStoreTests.cs'.
 
 == FULL LOG (last 1500 lines) ==
 auto task/T-129-contributions 588e6e62546ab3898a9fabee46369b2fec1e199c 2026-11-10T20:59:03.2494213+02:00
+
+
+
+[20:59:09] === STEP dotnet-build (docker mcr.microsoft.com/dotnet/sdk:10.0.402, /work/backend)
+  Determining projects to restore...
+  All projects are up-to-date for restore.
+  Zaghlol.Domain -> /work/backend/src/Zaghlol.Domain/bin/Release/net10.0/Zaghlol.Domain.dll
+  Zaghlol.Ops -> /work/backend/src/Zaghlol.Ops/bin/Release/net10.0/zaghlol-ops.dll
+/work/backend/src/Zaghlol.Application/Contributions/ContributionPorts.cs(142,10): error CA1716: Rename virtual/interface member IContributionMetrics.Event(string, int) so that it no longer conflicts with the reserved language keyword 'Event'. Using a reserved keyword as the name of a virtual/interface member makes it harder for consumers in other languages to override/implement the member. (https://learn.microsoft.com/dotnet/fundamentals/code-analysis/quality-rules/ca1716) [/work/backend/src/Zaghlol.Application/Zaghlol.Application.csproj]
+  Zaghlol.Ops.Tests -> /work/backend/tests/Zaghlol.Ops.Tests/bin/Release/net10.0/Zaghlol.Ops.Tests.dll
+
+Build FAILED.
+
+/work/backend/src/Zaghlol.Application/Contributions/ContributionPorts.cs(142,10): error CA1716: Rename virtual/interface member IContributionMetrics.Event(string, int) so that it no longer conflicts with the reserved language keyword 'Event'. Using a reserved keyword as the name of a virtual/interface member makes it harder for consumers in other languages to override/implement the member. (https://learn.microsoft.com/dotnet/fundamentals/code-analysis/quality-rules/ca1716) [/work/backend/src/Zaghlol.Application/Zaghlol.Application.csproj]
+    0 Warning(s)
+    1 Error(s)
+
+Time Elapsed 00:00:06.07
+
+[20:59:16] === RESULT dotnet-build exit=1 (7s)
+[20:59:16] === STEP dotnet-format (docker mcr.microsoft.com/dotnet/sdk:10.0.402, /work/backend)
+Formatting code files in workspace '/work/backend/Zaghlol.sln'.
+/work/backend/src/Zaghlol.Api/Endpoints/Admin/ContributionAdminEndpoints.cs(129,20): error CS0246: The type or namespace name 'ProblemHttpResult' could not be found (are you missing a using directive or an assembly reference?) [/work/backend/src/Zaghlol.Api/Zaghlol.Api.csproj]
+/work/backend/tests/Zaghlol.Infrastructure.Tests/Contributions/ContributionStoreTests.cs(16,38): error CS0535: 'UnusedSigner' does not implement interface member 'ISigner.PublishedKeys(SigningPurpose)' [/work/backend/tests/Zaghlol.Infrastructure.Tests/Zaghlol.Infrastructure.Tests.csproj]
+Formatted code file '/work/backend/src/Zaghlol.Api/Endpoints/Admin/ContributionAdminEndpoints.cs'.
+Formatted code file '/work/backend/tests/Zaghlol.Infrastructure.Tests/Contributions/ContributionStoreTests.cs'.
+Format complete in 24970ms.
+
+[20:59:42] === RESULT dotnet-format exit=2 (26s)
+[20:59:42] === STEP dotnet-test (docker mcr.microsoft.com/dotnet/sdk:10.0.402, /work/backend)
+Test run for /work/backend/tests/Zaghlol.Ops.Tests/bin/Release/net10.0/Zaghlol.Ops.Tests.dll (.NETCoreApp,Version=v10.0)
+Test run for /work/backend/tests/Zaghlol.Workers.Tests/bin/Release/net10.0/Zaghlol.Workers.Tests.dll (.NETCoreApp,Version=v10.0)
+Test run for /work/backend/tests/Zaghlol.Application.Tests/bin/Release/net10.0/Zaghlol.Application.Tests.dll (.NETCoreApp,Version=v10.0)
+Test run for /work/backend/tests/Zaghlol.Contract.Tests/bin/Release/net10.0/Zaghlol.Contract.Tests.dll (.NETCoreApp,Version=v10.0)
+Test run for /work/backend/tests/Zaghlol.Api.Tests/bin/Release/net10.0/Zaghlol.Api.Tests.dll (.NETCoreApp,Version=v10.0)
+Test run for /work/backend/tests/Zaghlol.Infrastructure.Tests/bin/Release/net10.0/Zaghlol.Infrastructure.Tests.dll (.NETCoreApp,Version=v10.0)
+A total of 1 test files matched the specified pattern.
+A total of 1 test files matched the specified pattern.
+A total of 1 test files matched the specified pattern.
+A total of 1 test files matched the specified pattern.
+A total of 1 test files matched the specified pattern.
+A total of 1 test files matched the specified pattern.
+
+Passed!  - Failed:     0, Passed:     2, Skipped:     0, Total:     2, Duration: 45 ms - Zaghlol.Ops.Tests.dll (net10.0)
+
+Passed!  - Failed:     0, Passed:    11, Skipped:     0, Total:    11, Duration: 203 ms - Zaghlol.Workers.Tests.dll (net10.0)
+
+Passed!  - Failed:     0, Passed:   395, Skipped:     0, Total:   395, Duration: 206 ms - Zaghlol.Application.Tests.dll (net10.0)
+
+Passed!  - Failed:     0, Passed:   107, Skipped:     0, Total:   107, Duration: 16 s - Zaghlol.Contract.Tests.dll (net10.0)
+
+Passed!  - Failed:     0, Passed:   564, Skipped:     0, Total:   564, Duration: 16 s - Zaghlol.Infrastructure.Tests.dll (net10.0)
+
+Passed!  - Failed:     0, Passed:   364, Skipped:     0, Total:   364, Duration: 46 s - Zaghlol.Api.Tests.dll (net10.0)
+
+[21:00:46] === RESULT dotnet-test exit=0 (64s)
+[21:00:46] SUMMARY FAIL sha=588e6e62546ab3898a9fabee46369b2fec1e199c pipeline=quick-backend dotnet-build=1 dotnet-format=2 dotnet-test=0
