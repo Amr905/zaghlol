@@ -1,5 +1,171 @@
 ﻿== SUMMARY ==
-RUNNING sha=e8c57c3d2d88af8e77ab4468288f51e3271b939b
+FAIL sha=e8c57c3d2d88af8e77ab4468288f51e3271b939b pipeline=quick-backend dotnet-build=1 dotnet-format=0 dotnet-test=1
+dotnet-build                 FAIL  exit=1  19s
+dotnet-format                PASS  exit=0  27s
+dotnet-test                  FAIL  exit=1  64s
+
+== ERRORS: dotnet-build ==
+/work/backend/tests/Zaghlol.Infrastructure.Tests/Contributions/ContributionStoreTests.cs(500,33): error CA1861: Prefer 'static readonly' fields over constant array arguments if the called method is called repeatedly and is not mutating the passed array (https://learn.microsoft.com/dotnet/fundamentals/code-analysis/quality-rules/ca1861) [/work/backend/tests/Zaghlol.Infrastructure.Tests/Zaghlol.Infrastructure.Tests.csproj]
+/work/backend/tests/Zaghlol.Contract.Tests/ContributionsLiveContractTests.cs(194,22): error CA1861: Prefer 'static readonly' fields over constant array arguments if the called method is called repeatedly and is not mutating the passed array (https://learn.microsoft.com/dotnet/fundamentals/code-analysis/quality-rules/ca1861) [/work/backend/tests/Zaghlol.Contract.Tests/Zaghlol.Contract.Tests.csproj]
+
+== ERRORS: dotnet-test ==
+  Failed Zaghlol.Infrastructure.Tests.Observability.SeededSeriesTests.EverySeriesIsExportedAtZeroBeforeAnyEvent [477 ms]
+  Error Message:
+   Assert.Contains() Failure: Item not found in collection
+Collection: [Tuple ("dotnet.thread_pool.queue.length", ""), Tuple ("zaghlol.kms.unavailable", "operation=sign"), Tuple ("zaghlol.kms.unavailable", "operation=sign_verify"), Tuple ("zaghlol.kms.unavailable", "operation=hmac"), Tuple ("zaghlol.kms.unavailable", "operation=data_key"), ···]
+Not found:  Tuple ("zaghlol.audit_alert.fired", "rule=support_moves_per_purchase_90d")
+  Stack Trace:
+     at Zaghlol.Infrastructure.Tests.Observability.SeededSeriesTests.EverySeriesIsExportedAtZeroBeforeAnyEvent() in /_/backend/tests/Zaghlol.Infrastructure.Tests/Observability/SeededSeriesTests.cs:line 73
+   at Zaghlol.Infrastructure.Tests.Observability.SeededSeriesTests.EverySeriesIsExportedAtZeroBeforeAnyEvent() in /_/backend/tests/Zaghlol.Infrastructure.Tests/Observability/SeededSeriesTests.cs:line 110
+--- End of stack trace from previous location ---
+[xUnit.net 00:00:12.75]     Zaghlol.Api.Tests.Contributions.ContributionAdminEndpointTests.ACollectingKeyAndAnAbsentKeyGetByteIdenticalNotFoundAnswers(path: "/admin/v1/contributions:promote") [FAIL]
+[xUnit.net 00:00:12.82]     Zaghlol.Api.Tests.Contributions.ContributionAdminEndpointTests.ACollectingKeyAndAnAbsentKeyGetByteIdenticalNotFoundAnswers(path: "/admin/v1/contributions:reject") [FAIL]
+  Failed Zaghlol.Api.Tests.Contributions.ContributionAdminEndpointTests.ACollectingKeyAndAnAbsentKeyGetByteIdenticalNotFoundAnswers(path: "/admin/v1/contributions:promote") [1 s]
+  Error Message:
+
+  Failed Zaghlol.Api.Tests.Contributions.ContributionAdminEndpointTests.ACollectingKeyAndAnAbsentKeyGetByteIdenticalNotFoundAnswers(path: "/admin/v1/contributions:promote") [1 s]
+  Error Message:
+   Assert.Equal() Failure: Values differ
+Expected: Tuple (404, "application/problem+json", "{\"type\":\"https://tools.ietf.org/html/rfc9110#se"···)
+Actual:   Tuple (404, "application/problem+json", "{\"type\":\"https://tools.ietf.org/html/rfc9110#se"···)
+  Stack Trace:
+     at Zaghlol.Api.Tests.Contributions.ContributionAdminEndpointTests.ACollectingKeyAndAnAbsentKeyGetByteIdenticalNotFoundAnswers(String path) in /_/backend/tests/Zaghlol.Api.Tests/Contributions/ContributionAdminEndpointTests.cs:line 251
+--- End of stack trace from previous location ---
+  Failed Zaghlol.Api.Tests.Contributions.ContributionAdminEndpointTests.ACollectingKeyAndAnAbsentKeyGetByteIdenticalNotFoundAnswers(path: "/admin/v1/contributions:reject") [74 ms]
+  Error Message:
+   Assert.Equal() Failure: Values differ
+Expected: Tuple (404, "application/problem+json", "{\"type\":\"https://tools.ietf.org/html/rfc9110#se"···)
+Actual:   Tuple (404, "application/problem+json", "{\"type\":\"https://tools.ietf.org/html/rfc9110#se"···)
+
+  Failed Zaghlol.Api.Tests.Contributions.ContributionAdminEndpointTests.ACollectingKeyAndAnAbsentKeyGetByteIdenticalNotFoundAnswers(path: "/admin/v1/contributions:reject") [74 ms]
+  Error Message:
+   Assert.Equal() Failure: Values differ
+Expected: Tuple (404, "application/problem+json", "{\"type\":\"https://tools.ietf.org/html/rfc9110#se"···)
+Actual:   Tuple (404, "application/problem+json", "{\"type\":\"https://tools.ietf.org/html/rfc9110#se"···)
+  Stack Trace:
+     at Zaghlol.Api.Tests.Contributions.ContributionAdminEndpointTests.ACollectingKeyAndAnAbsentKeyGetByteIdenticalNotFoundAnswers(String path) in /_/backend/tests/Zaghlol.Api.Tests/Contributions/ContributionAdminEndpointTests.cs:line 251
+--- End of stack trace from previous location ---
+
+Passed!  - Failed:     0, Passed:   107, Skipped:     0, Total:   107, Duration: 16 s - Zaghlol.Contract.Tests.dll (net10.0)
+
+Failed!  - Failed:     1, Passed:   563, Skipped:     0, Total:   564, Duration: 16 s - Zaghlol.Infrastructure.Tests.dll (net10.0)
+[xUnit.net 00:00:38.18]     Zaghlol.Api.Tests.Operators.OperatorEndpointTests.EveryAdminWriteLeavesExactlyOneAuditRowNamingTheOperator [FAIL]
+
+  Failed Zaghlol.Api.Tests.Operators.OperatorEndpointTests.EveryAdminWriteLeavesExactlyOneAuditRowNamingTheOperator [4 ms]
+  Error Message:
+   Assert.Equal() Failure: Collections differ
+                                                                                           ↓ (pos 3)
+Expected: [···, "POST /admin/v1/catalog/draft/{entity}", "POST /admin/v1/catalog/publish", "POST /admin/v1/support/entitlement:lookup", "PUT /admin/v1/catalog/draft/{entity}/{id}", "PUT /admin/v1/flags/{key}", ···]
+Actual:   [···, "POST /admin/v1/catalog/draft/{entity}", "POST /admin/v1/catalog/publish", "POST /admin/v1/contributions:promote", "POST /admin/v1/contributions:reject", "POST /admin/v1/support/entitlement:lookup", ···]
+                                                                                           ↑ (pos 3)
+  Stack Trace:
+     at Zaghlol.Api.Tests.Operators.OperatorEndpointTests.EveryAdminWriteLeavesExactlyOneAuditRowNamingTheOperator() in /_/backend/tests/Zaghlol.Api.Tests/Operators/OperatorEndpointTests.cs:line 97
+--- End of stack trace from previous location ---
+
+Failed!  - Failed:     3, Passed:   374, Skipped:     0, Total:   377, Duration: 49 s - Zaghlol.Api.Tests.dll (net10.0)
+
+
 
 == FULL LOG (last 1500 lines) ==
 auto task/T-129-contributions e8c57c3d2d88af8e77ab4468288f51e3271b939b 2026-11-10T21:07:00.0426630+02:00
+
+
+
+[21:07:05] === STEP dotnet-build (docker mcr.microsoft.com/dotnet/sdk:10.0.402, /work/backend)
+  Determining projects to restore...
+  All projects are up-to-date for restore.
+  Zaghlol.Domain -> /work/backend/src/Zaghlol.Domain/bin/Release/net10.0/Zaghlol.Domain.dll
+  Zaghlol.Ops -> /work/backend/src/Zaghlol.Ops/bin/Release/net10.0/zaghlol-ops.dll
+  Zaghlol.Ops.Tests -> /work/backend/tests/Zaghlol.Ops.Tests/bin/Release/net10.0/Zaghlol.Ops.Tests.dll
+  Zaghlol.Application -> /work/backend/src/Zaghlol.Application/bin/Release/net10.0/Zaghlol.Application.dll
+  Zaghlol.Application.Tests -> /work/backend/tests/Zaghlol.Application.Tests/bin/Release/net10.0/Zaghlol.Application.Tests.dll
+  Zaghlol.Infrastructure -> /work/backend/src/Zaghlol.Infrastructure/bin/Release/net10.0/Zaghlol.Infrastructure.dll
+  Zaghlol.Workers -> /work/backend/src/Zaghlol.Workers/bin/Release/net10.0/Zaghlol.Workers.dll
+/work/backend/tests/Zaghlol.Infrastructure.Tests/Contributions/ContributionStoreTests.cs(500,33): error CA1861: Prefer 'static readonly' fields over constant array arguments if the called method is called repeatedly and is not mutating the passed array (https://learn.microsoft.com/dotnet/fundamentals/code-analysis/quality-rules/ca1861) [/work/backend/tests/Zaghlol.Infrastructure.Tests/Zaghlol.Infrastructure.Tests.csproj]
+  Zaghlol.Workers.Tests -> /work/backend/tests/Zaghlol.Workers.Tests/bin/Release/net10.0/Zaghlol.Workers.Tests.dll
+  Zaghlol.Api -> /work/backend/src/Zaghlol.Api/bin/Release/net10.0/Zaghlol.Api.dll
+/work/backend/tests/Zaghlol.Contract.Tests/ContributionsLiveContractTests.cs(194,22): error CA1861: Prefer 'static readonly' fields over constant array arguments if the called method is called repeatedly and is not mutating the passed array (https://learn.microsoft.com/dotnet/fundamentals/code-analysis/quality-rules/ca1861) [/work/backend/tests/Zaghlol.Contract.Tests/Zaghlol.Contract.Tests.csproj]
+  Zaghlol.Api.Tests -> /work/backend/tests/Zaghlol.Api.Tests/bin/Release/net10.0/Zaghlol.Api.Tests.dll
+
+Build FAILED.
+
+/work/backend/tests/Zaghlol.Infrastructure.Tests/Contributions/ContributionStoreTests.cs(500,33): error CA1861: Prefer 'static readonly' fields over constant array arguments if the called method is called repeatedly and is not mutating the passed array (https://learn.microsoft.com/dotnet/fundamentals/code-analysis/quality-rules/ca1861) [/work/backend/tests/Zaghlol.Infrastructure.Tests/Zaghlol.Infrastructure.Tests.csproj]
+/work/backend/tests/Zaghlol.Contract.Tests/ContributionsLiveContractTests.cs(194,22): error CA1861: Prefer 'static readonly' fields over constant array arguments if the called method is called repeatedly and is not mutating the passed array (https://learn.microsoft.com/dotnet/fundamentals/code-analysis/quality-rules/ca1861) [/work/backend/tests/Zaghlol.Contract.Tests/Zaghlol.Contract.Tests.csproj]
+    0 Warning(s)
+    2 Error(s)
+
+Time Elapsed 00:00:18.53
+
+[21:07:24] === RESULT dotnet-build exit=1 (19s)
+[21:07:24] === STEP dotnet-format (docker mcr.microsoft.com/dotnet/sdk:10.0.402, /work/backend)
+Formatting code files in workspace '/work/backend/Zaghlol.sln'.
+Format complete in 25859ms.
+
+[21:07:51] === RESULT dotnet-format exit=0 (27s)
+[21:07:51] === STEP dotnet-test (docker mcr.microsoft.com/dotnet/sdk:10.0.402, /work/backend)
+Test run for /work/backend/tests/Zaghlol.Ops.Tests/bin/Release/net10.0/Zaghlol.Ops.Tests.dll (.NETCoreApp,Version=v10.0)
+Test run for /work/backend/tests/Zaghlol.Workers.Tests/bin/Release/net10.0/Zaghlol.Workers.Tests.dll (.NETCoreApp,Version=v10.0)
+Test run for /work/backend/tests/Zaghlol.Application.Tests/bin/Release/net10.0/Zaghlol.Application.Tests.dll (.NETCoreApp,Version=v10.0)
+Test run for /work/backend/tests/Zaghlol.Contract.Tests/bin/Release/net10.0/Zaghlol.Contract.Tests.dll (.NETCoreApp,Version=v10.0)
+Test run for /work/backend/tests/Zaghlol.Api.Tests/bin/Release/net10.0/Zaghlol.Api.Tests.dll (.NETCoreApp,Version=v10.0)
+A total of 1 test files matched the specified pattern.
+Test run for /work/backend/tests/Zaghlol.Infrastructure.Tests/bin/Release/net10.0/Zaghlol.Infrastructure.Tests.dll (.NETCoreApp,Version=v10.0)
+A total of 1 test files matched the specified pattern.
+A total of 1 test files matched the specified pattern.
+A total of 1 test files matched the specified pattern.
+A total of 1 test files matched the specified pattern.
+A total of 1 test files matched the specified pattern.
+
+Passed!  - Failed:     0, Passed:     2, Skipped:     0, Total:     2, Duration: 46 ms - Zaghlol.Ops.Tests.dll (net10.0)
+
+Passed!  - Failed:     0, Passed:    11, Skipped:     0, Total:    11, Duration: 154 ms - Zaghlol.Workers.Tests.dll (net10.0)
+
+Passed!  - Failed:     0, Passed:   421, Skipped:     0, Total:   421, Duration: 232 ms - Zaghlol.Application.Tests.dll (net10.0)
+[xUnit.net 00:00:01.22]     Zaghlol.Infrastructure.Tests.Observability.SeededSeriesTests.EverySeriesIsExportedAtZeroBeforeAnyEvent [FAIL]
+  Failed Zaghlol.Infrastructure.Tests.Observability.SeededSeriesTests.EverySeriesIsExportedAtZeroBeforeAnyEvent [477 ms]
+  Error Message:
+   Assert.Contains() Failure: Item not found in collection
+Collection: [Tuple ("dotnet.thread_pool.queue.length", ""), Tuple ("zaghlol.kms.unavailable", "operation=sign"), Tuple ("zaghlol.kms.unavailable", "operation=sign_verify"), Tuple ("zaghlol.kms.unavailable", "operation=hmac"), Tuple ("zaghlol.kms.unavailable", "operation=data_key"), ···]
+Not found:  Tuple ("zaghlol.audit_alert.fired", "rule=support_moves_per_purchase_90d")
+  Stack Trace:
+     at Zaghlol.Infrastructure.Tests.Observability.SeededSeriesTests.EverySeriesIsExportedAtZeroBeforeAnyEvent() in /_/backend/tests/Zaghlol.Infrastructure.Tests/Observability/SeededSeriesTests.cs:line 73
+   at Zaghlol.Infrastructure.Tests.Observability.SeededSeriesTests.EverySeriesIsExportedAtZeroBeforeAnyEvent() in /_/backend/tests/Zaghlol.Infrastructure.Tests/Observability/SeededSeriesTests.cs:line 110
+--- End of stack trace from previous location ---
+[xUnit.net 00:00:12.75]     Zaghlol.Api.Tests.Contributions.ContributionAdminEndpointTests.ACollectingKeyAndAnAbsentKeyGetByteIdenticalNotFoundAnswers(path: "/admin/v1/contributions:promote") [FAIL]
+[xUnit.net 00:00:12.82]     Zaghlol.Api.Tests.Contributions.ContributionAdminEndpointTests.ACollectingKeyAndAnAbsentKeyGetByteIdenticalNotFoundAnswers(path: "/admin/v1/contributions:reject") [FAIL]
+  Failed Zaghlol.Api.Tests.Contributions.ContributionAdminEndpointTests.ACollectingKeyAndAnAbsentKeyGetByteIdenticalNotFoundAnswers(path: "/admin/v1/contributions:promote") [1 s]
+  Error Message:
+   Assert.Equal() Failure: Values differ
+Expected: Tuple (404, "application/problem+json", "{\"type\":\"https://tools.ietf.org/html/rfc9110#se"···)
+Actual:   Tuple (404, "application/problem+json", "{\"type\":\"https://tools.ietf.org/html/rfc9110#se"···)
+  Stack Trace:
+     at Zaghlol.Api.Tests.Contributions.ContributionAdminEndpointTests.ACollectingKeyAndAnAbsentKeyGetByteIdenticalNotFoundAnswers(String path) in /_/backend/tests/Zaghlol.Api.Tests/Contributions/ContributionAdminEndpointTests.cs:line 251
+--- End of stack trace from previous location ---
+  Failed Zaghlol.Api.Tests.Contributions.ContributionAdminEndpointTests.ACollectingKeyAndAnAbsentKeyGetByteIdenticalNotFoundAnswers(path: "/admin/v1/contributions:reject") [74 ms]
+  Error Message:
+   Assert.Equal() Failure: Values differ
+Expected: Tuple (404, "application/problem+json", "{\"type\":\"https://tools.ietf.org/html/rfc9110#se"···)
+Actual:   Tuple (404, "application/problem+json", "{\"type\":\"https://tools.ietf.org/html/rfc9110#se"···)
+  Stack Trace:
+     at Zaghlol.Api.Tests.Contributions.ContributionAdminEndpointTests.ACollectingKeyAndAnAbsentKeyGetByteIdenticalNotFoundAnswers(String path) in /_/backend/tests/Zaghlol.Api.Tests/Contributions/ContributionAdminEndpointTests.cs:line 251
+--- End of stack trace from previous location ---
+
+Passed!  - Failed:     0, Passed:   107, Skipped:     0, Total:   107, Duration: 16 s - Zaghlol.Contract.Tests.dll (net10.0)
+
+Failed!  - Failed:     1, Passed:   563, Skipped:     0, Total:   564, Duration: 16 s - Zaghlol.Infrastructure.Tests.dll (net10.0)
+[xUnit.net 00:00:38.18]     Zaghlol.Api.Tests.Operators.OperatorEndpointTests.EveryAdminWriteLeavesExactlyOneAuditRowNamingTheOperator [FAIL]
+  Failed Zaghlol.Api.Tests.Operators.OperatorEndpointTests.EveryAdminWriteLeavesExactlyOneAuditRowNamingTheOperator [4 ms]
+  Error Message:
+   Assert.Equal() Failure: Collections differ
+                                                                                           ↓ (pos 3)
+Expected: [···, "POST /admin/v1/catalog/draft/{entity}", "POST /admin/v1/catalog/publish", "POST /admin/v1/support/entitlement:lookup", "PUT /admin/v1/catalog/draft/{entity}/{id}", "PUT /admin/v1/flags/{key}", ···]
+Actual:   [···, "POST /admin/v1/catalog/draft/{entity}", "POST /admin/v1/catalog/publish", "POST /admin/v1/contributions:promote", "POST /admin/v1/contributions:reject", "POST /admin/v1/support/entitlement:lookup", ···]
+                                                                                           ↑ (pos 3)
+  Stack Trace:
+     at Zaghlol.Api.Tests.Operators.OperatorEndpointTests.EveryAdminWriteLeavesExactlyOneAuditRowNamingTheOperator() in /_/backend/tests/Zaghlol.Api.Tests/Operators/OperatorEndpointTests.cs:line 97
+--- End of stack trace from previous location ---
+
+Failed!  - Failed:     3, Passed:   374, Skipped:     0, Total:   377, Duration: 49 s - Zaghlol.Api.Tests.dll (net10.0)
+
+[21:08:56] === RESULT dotnet-test exit=1 (64s)
+[21:08:56] SUMMARY FAIL sha=e8c57c3d2d88af8e77ab4468288f51e3271b939b pipeline=quick-backend dotnet-build=1 dotnet-format=0 dotnet-test=1
