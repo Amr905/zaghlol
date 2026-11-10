@@ -33,12 +33,14 @@ public class OperatorEndpointTests(OperatorHostFixture fixture) : IClassFixture<
     private const string Publish = "POST /admin/v1/catalog/publish";
     private const string PutFlag = "PUT /admin/v1/flags/{key}";
     private const string PutPriceOverride = "PUT /admin/v1/prices/override";
+    private const string PromoteContribution = "POST /admin/v1/contributions:promote";
+    private const string RejectContribution = "POST /admin/v1/contributions:reject";
 
     private static readonly string[] AllOperatorRoles =
         [OperatorRoles.CatalogEditor, OperatorRoles.FlagsAdmin, OperatorRoles.PricesAdmin, OperatorRoles.SupportViewer];
 
     /// <summary>Every admin operation that changes state or is audited, with a valid call. A new one fails the test below.</summary>
-    private static readonly string[] AuditedOperations = [PutDraft, CreateDraft, DeleteDraft, Publish, PutFlag, PutPriceOverride, LookupKey];
+    private static readonly string[] AuditedOperations = [PutDraft, CreateDraft, DeleteDraft, Publish, PutFlag, PutPriceOverride, PromoteContribution, RejectContribution, LookupKey];
 
     [Fact]
     public async Task AValidMfaTokenWithTheRoleIsServed()
@@ -395,6 +397,20 @@ public class OperatorEndpointTests(OperatorHostFixture fixture) : IClassFixture<
             ("linked", account is null ? DBNull.Value : (object)"signin"),
             ("frozen", (object?)disputeFrozenUntil ?? DBNull.Value));
 
+    private static string ContributionKey(string norm) => $"{{\"merchantNorm\":\"{norm}\",\"institutionCode\":\"nbe\"}}";
+
+    /// <summary>A <c>ready_for_review</c> aggregate (letters-only text: a valid catalog alias) with the given top category.</summary>
+    private async Task<string> SeedAggregateAsync(string category)
+    {
+        var norm = "t129 " + string.Concat(Guid.NewGuid().ToByteArray().Take(8).Select(b => (char)('a' + (b % 26))));
+        await fixture.ExecuteAsync(
+            "INSERT INTO zaghlol.contribution_aggregates (merchant_norm, institution_code, distinct_installs, top_category_code, category_votes, status) "
+            + "VALUES (@norm, 'nbe', 5, @category, '{}'::jsonb, 'ready_for_review')",
+            ("norm", norm),
+            ("category", category));
+        return norm;
+    }
+
     private async Task<(long Before, HttpResponseMessage Response)> PerformAsync(string operation, Guid operatorId, string subject)
     {
         string Token() => fixture.Token(subject);
@@ -423,6 +439,20 @@ public class OperatorEndpointTests(OperatorHostFixture fixture) : IClassFixture<
                 return (await fixture.AuditCountAsync(operatorId), await fixture.SendAsync(HttpMethod.Put, "/admin/v1/flags/zakah", Token(), "{\"value\":true}"));
             case PutPriceOverride:
                 return (await fixture.AuditCountAsync(operatorId), await fixture.SendAsync(HttpMethod.Put, "/admin/v1/prices/override", Token(), "{\"symbol\":\"XAU21_G\",\"currency\":\"EGP\",\"price\":\"4217.50\",\"reason\":\"Audit coverage test\"}"));
+            case PromoteContribution:
+                {
+                    var code = NewCode();
+                    (await fixture.SendAsync(HttpMethod.Put, "/admin/v1/catalog/draft/categories/" + code, Token(), CategoryBody)).Dispose();
+                    var norm = await SeedAggregateAsync(code);
+                    return (await fixture.AuditCountAsync(operatorId), await fixture.SendAsync(HttpMethod.Post, "/admin/v1/contributions:promote", Token(), ContributionKey(norm)));
+                }
+
+            case RejectContribution:
+                {
+                    var norm = await SeedAggregateAsync("dining");
+                    return (await fixture.AuditCountAsync(operatorId), await fixture.SendAsync(HttpMethod.Post, "/admin/v1/contributions:reject", Token(), ContributionKey(norm)));
+                }
+
             case LookupKey:
                 return (await fixture.AuditCountAsync(operatorId), await fixture.SendAsync(HttpMethod.Post, Lookup, Token(), InstallBody(Guid.NewGuid())));
             default:

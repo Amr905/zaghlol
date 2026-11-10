@@ -16,6 +16,8 @@ public class ContributionsLiveContractTests(FlagsContractFixture fixture) : ICla
 {
     private static readonly OpenApiSpec Spec = OpenApiSpec.Load();
 
+    private static readonly string[] DeclaredStatuses = ["ready_for_review", "promoted", "rejected"];
+
     private const string Editor = "catalog_editor";
     private const string Base = "/admin/v1/contributions";
 
@@ -71,7 +73,7 @@ public class ContributionsLiveContractTests(FlagsContractFixture fixture) : ICla
     public async Task ListWithEachDeclaredStatusConforms()
     {
         var token = await fixture.OperatorTokenAsync(Editor);
-        foreach (var status in new[] { "ready_for_review", "promoted", "rejected" })
+        foreach (var status in DeclaredStatuses)
         {
             using var response = await Send(HttpMethod.Get, Base + "?status=" + status, token);
             await AssertDeclared(List, response, HttpStatusCode.OK, "application/json");
@@ -191,7 +193,7 @@ public class ContributionsLiveContractTests(FlagsContractFixture fixture) : ICla
         Assert.False(Spec.Schemas["ContributionKey"]!["additionalProperties"]!.GetValue<bool>());
         Assert.False(Spec.Schemas["ContributionPromoteRequest"]!["additionalProperties"]!.GetValue<bool>());
         var statuses = Spec.Schemas["ContributionStatus"]!["enum"]!.AsArray().Select(n => n!.GetValue<string>()).ToList();
-        Assert.Equal(new[] { "ready_for_review", "promoted", "rejected" }, statuses);
+        Assert.Equal(DeclaredStatuses, statuses);
     }
 
     private static async Task<JsonNode?> AssertDeclared(SpecOperation operation, HttpResponseMessage response, HttpStatusCode status, string mediaType)

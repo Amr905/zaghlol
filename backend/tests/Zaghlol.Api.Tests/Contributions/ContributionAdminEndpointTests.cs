@@ -64,12 +64,12 @@ public partial class ContributionAdminEndpointTests(AdminFlagFixture fixture) : 
         return json.RootElement.GetProperty("code").GetString()!;
     }
 
-    [GeneratedRegex("\"correlationId\":\"[^\"]*\"", RegexOptions.CultureInvariant)]
-    private static partial Regex CorrelationId();
+    [GeneratedRegex("\"(correlationId|traceId)\":\"[^\"]*\"", RegexOptions.CultureInvariant)]
+    private static partial Regex RequestIds();
 
-    /// <summary>The wire bytes of a problem, with the per-request correlation id (the only member that differs) blanked.</summary>
+    /// <summary>The wire bytes of a problem, with the per-request ids (`correlationId`, `traceId`: the only members that differ) blanked.</summary>
     private static async Task<(int Status, string Type, string Body)> ProblemBytesAsync(HttpResponseMessage response) =>
-        ((int)response.StatusCode, response.Content.Headers.ContentType!.ToString(), CorrelationId().Replace(await response.Content.ReadAsStringAsync(), "\"correlationId\":\"-\""));
+        ((int)response.StatusCode, response.Content.Headers.ContentType!.ToString(), RequestIds().Replace(await response.Content.ReadAsStringAsync(), "\"$1\":\"-\""));
 
     // ---- GET -----------------------------------------------------------------------------------------------------------
 

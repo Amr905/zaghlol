@@ -112,6 +112,8 @@ public sealed class ContributionStoreFixture : IAsyncLifetime
 /// <summary>T-129: aggregation, review queue, promote and reject against PostgreSQL.</summary>
 public class ContributionStoreTests(ContributionStoreFixture fixture) : IClassFixture<ContributionStoreFixture>
 {
+    private static readonly string[] DecidedStatuses = ["promoted", "rejected"];
+
     private IContributionAdminStore Admin => fixture.Services.GetRequiredService<IContributionAdminStore>();
 
     private IContributionAggregationStore Aggregation => fixture.Services.GetRequiredService<IContributionAggregationStore>();
@@ -497,7 +499,7 @@ public class ContributionStoreTests(ContributionStoreFixture fixture) : IClassFi
         Assert.Equal(1, results.Count(r => r.Outcome == ContributionOutcome.Ok));
         Assert.Equal(2, results.Count(r => r.Outcome == ContributionOutcome.Conflict));
         var status = (await AggregateAsync(key.MerchantNorm, "nbe")).Status;
-        Assert.Contains(status, new[] { "promoted", "rejected" });
+        Assert.Contains(status, DecidedStatuses);
     }
 
     [Fact]
