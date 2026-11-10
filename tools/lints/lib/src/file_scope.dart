@@ -31,6 +31,13 @@ class FileScope {
 
   bool get inMoneyLayer => dirs.contains('money');
 
+  /// Where any double/num use is reported by `no_double_money`: money/
+  /// directories and the pure-Dart packages that parse and model amounts.
+  bool get inStrictDoubleScope =>
+      inMoneyLayer ||
+      packageName == 'zaghlol_parsing' ||
+      packageName == 'zaghlol_domain';
+
   bool get inParsingOrDbLayer =>
       dirs.contains('parsing') ||
       dirs.contains('db') ||
