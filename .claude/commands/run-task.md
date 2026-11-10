@@ -12,7 +12,7 @@ Run task $ARGUMENTS through implementation and review.
    - C1: you spot-check the diff and CI;
    - C2 and docs-only: `code-reviewer` on sonnet;
    - C3: `code-reviewer` on sonnet (also checks tests);
-   - C4: `code-reviewer` (opus, also checks tests) + `security-privacy-reviewer` (opus).
+   - C4: one combined review on opus (`code-reviewer` also acting as `security-privacy-reviewer`, also checks tests); two separate opus reviewers only for crypto/keys, billing/entitlements and SMS/notification ingestion.
    Re-reviews are delta-only on sonnet. Run at most 2 tasks at once.
 5. Only blocker or major findings go back to the implementer, who may also fix trivial minors in the same pass. Log every other minor or nit as an `FU-###` follow-up and don't block on it. Only the reviewers who raised a blocker or major re-review, and only the delta. After two failed rounds, bump the class by one and re-delegate.
-6. When all verdicts are APPROVED and the Definition of Done in `CLAUDE.md` §7 holds, set DONE and give me a 2–3 line summary.
+6. When all verdicts are APPROVED and the PC runner is green, the task is ready for the next batch (CLAUDE.md §6 "Batch merge"). It becomes DONE when its batch PR is merged; give me a 2–3 line summary.

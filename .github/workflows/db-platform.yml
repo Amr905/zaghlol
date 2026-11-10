@@ -19,10 +19,11 @@ name: db-platform
 # touch one of these paths, or dispatch the workflow (once it is on main).
 on:
   workflow_dispatch:
+  # Batch CI (PO, 2026-11-10): see app-ci.yml and docs/workflow/local-ci.md.
   push:
     branches:
-      - 'task/**'
-      - main
+      - 'batch/**'
+      - 'ci/**'
     paths:
       - pubspec.lock
       - pubspec.yaml

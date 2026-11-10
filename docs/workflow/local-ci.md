@@ -1,3 +1,5 @@
+> **Batch CI (PO, 2026-11-10):** this runner is the only check on `task/**` pushes. GitHub Actions runs once per batch (`batch/**`) or on opt-in pushes to `ci/<task-id>` for iOS/device-only changes. Keep the PC on, Docker Desktop running and `START-LOCAL-CI.cmd` open while agents work.
+
 # Local CI on the PO's PC (fast feedback)
 
 GitHub Actions (`app-ci`, `backend-ci`) is still the **merge gate**. The local runner exists only to give agents faster feedback.

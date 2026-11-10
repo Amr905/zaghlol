@@ -3,12 +3,13 @@ name: app-ci
 # App CI (T-003): the checks the Definition of Done requires on every PR.
 # Supersedes app-smoke.yml; every smoke check (9 flavor builds, aapt2 SMS
 # assertions) is kept below.
+# Batch CI (PO, 2026-11-10): task branches are verified on the PO's PC runner (docs/workflow/local-ci.md).
+# GitHub runs once per batch of ~5 tasks (batch/**) or when an agent opts in by pushing to ci/<task>.
 on:
   push:
     branches:
-      - 'task/**'
-      - main
-  pull_request:
+      - 'batch/**'
+      - 'ci/**'
   workflow_dispatch:
 
 permissions:

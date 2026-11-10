@@ -26,6 +26,12 @@ DONE: T-001…T-007, T-012, T-013, T-014, T-022, T-026, T-027, T-028, T-122, T-1
 
 The PO asked for this progress table in every update.
 
+## Batch CI workflow (PO, 2026-11-10)
+
+Task branches: PC runner only. GitHub CI runs on `batch/**` and opt-in `ci/<task-id>` pushes (CLAUDE.md §6). C4 tasks get one combined Opus review except crypto/keys, billing/entitlements and SMS ingestion (two reviewers). Status docs are updated in each batch PR.
+
+**Next batch (`batch/2026-11-…-1`):** T-015 (after its fix round and delta re-reviews). Add tasks as they pass review; merge at ~5.
+
 ## In flight (limit: 2 tasks at once)
 
 Nothing in flight. T-165 is merged, IN_REVIEW, waiting for a device run.

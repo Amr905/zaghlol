@@ -1,19 +1,15 @@
 name: backend-ci
 
+# Batch CI (PO, 2026-11-10): see app-ci.yml and docs/workflow/local-ci.md.
 on:
   push:
-    branches: [main, "task/**"]
+    branches: ["batch/**", "ci/**"]
     paths:
       - "backend/**"
       - "docs/03-technical/backend-api.md"
       - "docs/03-technical/backend-schema.md"
       - ".github/workflows/backend-ci.yml"
-  pull_request:
-    paths:
-      - "backend/**"
-      - "docs/03-technical/backend-api.md"
-      - "docs/03-technical/backend-schema.md"
-      - ".github/workflows/backend-ci.yml"
+  workflow_dispatch:
 
 permissions:
   contents: read
