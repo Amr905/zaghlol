@@ -141,3 +141,23 @@ Design note §9 says the negative-proof runs are recorded in `docs/implementatio
 | Permissions / manifest | No new permissions or exported components (`MainActivity` unchanged apart from the registration). Pass |
 | Store policy | Not affected |
 | Supply chain | 9 packages, all reputable publishers, no telemetry. Pass |
+
+## Re-review (delta) — `git diff 92fa7f7 d4559c3` (Sonnet)
+
+Evidence: PC runner PASS at d4559c3; GitHub app-ci 42841743318 success (incl. Swift unit tests). db-platform for this SHA was cancelled by an infra stop; it runs in the batch CI.
+
+**S-1: resolved on both platforms.** Android `DbKeyStore.read` and iOS `readLocked` retry every non-found result on the 100/300/900 ms schedule. One `found` wins at once. UNUSABLE/unusable (and iOS notFound) are returned only when every attempt agrees. Any disagreement returns UNAVAILABLE, which never wipes. Tests exist on both sides: one failure then success returns the key, consistent failure is unusable/notFound, and mixed outcomes are unavailable. Two accepted asymmetries:
+- Android NOT_FOUND returns on the first attempt. It rests on `Files.notExists` (a NoSuchFile result from the file system), not on the Keystore, so the transient Keystore failure that S-1 was about cannot produce it. A locked or unreadable directory gives UNKNOWN, not ABSENT.
+- iOS `createIfAbsent` reads with `confirmNotFound: false`. A false notFound there cannot overwrite, because `SecItemAdd` returns `errSecDuplicateItem` and the winner is read back. `read()`, the path that can lead to a wipe, uses the confirmed read.
+
+**M-1 (security view):** resolved. `createFresh` (which deletes the Keystore alias) is reached only after two ABSENT probes; UNKNOWN throws `KeyStoreFailure`.
+
+**S-3: resolved.** Every query, add and delete on iOS names `kSecAttrAccessGroup` = `<AppIdentifierPrefix><bundle id>`, resolved by `resolveAccessGroup`. A prefix that is empty or still contains `$(` (unsigned build) gives nil, so the attribute is omitted and the item stays in the only group the app has. Tests assert the group on every call. A future `keychain-access-groups` entitlement (T-008) can no longer move K_db into a shared group. The default group is the same as the old implicit one, so items written by earlier builds still match. If a simulator build ever returns `errSecMissingEntitlement` for the pinned group, the result is unavailable (no wipe), a test-environment issue and not a security one.
+
+**Info.plist change:** it adds only `AppIdentifierPrefix = $(AppIdentifierPrefix)`. That expands to the Team ID, which is not a secret (it is in the code signature and the provisioning profile). It requests no entitlement, permission or URL scheme and does not weaken anything.
+
+**S-6: resolved.** `SecretStoreHost.dispatch` takes a `wipe` hook that runs in a `finally` after the Pigeon callback returns (the reply encodes the value synchronously inside the callback). It zeroes `SecretReadMsg.value` and the `createIfAbsent` result, and the input `candidate` is already zeroed in `finally`. The internal `plain` and read-back arrays in `DbKeyStore` were already zeroed. Residual: Pigeon's own encoded reply buffer and the Dart-side copy are outside this task (the Dart side zeroizes after first open, per the security model).
+
+**New findings at Medium or above:** none. Low/Info follow-ups only: the iOS fresh-install read costs about 1.3 s (n-5 above); nothing else.
+
+### Final verdict (security): APPROVED
