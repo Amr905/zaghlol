@@ -2,6 +2,8 @@ using System.Collections.Concurrent;
 using System.Diagnostics;
 using System.Diagnostics.Metrics;
 using System.Text.RegularExpressions;
+using Zaghlol.Application.Flags;
+using Zaghlol.Application.Sync;
 
 namespace Zaghlol.Infrastructure.Observability;
 
@@ -32,6 +34,11 @@ public sealed partial class ZaghlolMetrics : IDisposable
     private readonly Counter<long> flagChanged;
     private readonly Counter<long> priceFetch;
     private readonly Counter<long> priceOverridden;
+    private readonly Counter<long> syncRequests;
+    private readonly Counter<long> syncCatalog;
+    private readonly Counter<long> syncIntake;
+    private readonly Counter<long> syncBlockFailure;
+    private readonly Counter<long> syncFlagRulesInvalid;
     private readonly ConcurrentDictionary<string, double> priceAges = new(StringComparer.Ordinal);
     private readonly string serviceVersion;
     private long unackedCount;
@@ -62,6 +69,16 @@ public sealed partial class ZaghlolMetrics : IDisposable
 
         priceFetch = meter.CreateCounter<long>("zaghlol.price.fetch", description: "Price provider fetches by provider (fixed names) and outcome (ok|failed|empty).");
         priceOverridden = meter.CreateCounter<long>("zaghlol.price.override", description: "Operator price overrides.");
+
+        syncRequests = meter.CreateCounter<long>("zaghlol.sync.requests", description: "Sync calls by outcome (ok|throttled|rejected).");
+        syncCatalog = meter.CreateCounter<long>("zaghlol.sync.catalog", description: "Full sync answers by catalog mode (none|delta|full).");
+        syncIntake = meter.CreateCounter<long>(
+            "zaghlol.sync.intake",
+            description: "Contributions and bank requests by kind and result (accepted|filtered|invalid_code|duplicate|dropped_hasher).");
+        syncBlockFailure = meter.CreateCounter<long>("zaghlol.sync.block_failure", description: "Sync source failures by block (catalog|flags|prices|entitlement).");
+        syncFlagRulesInvalid = meter.CreateCounter<long>(
+            "zaghlol.sync.flag_rules_invalid",
+            description: "Syncs that evaluated a flag OFF because its stored rules failed the strict parse, by flag key (FU-056).");
 
         meter.CreateObservableGauge("zaghlol.purchase.unacked", () => Interlocked.Read(ref unackedCount), description: "Purchases waiting for acknowledgement.");
         meter.CreateObservableGauge("zaghlol.purchase.unacked.oldest_age", () => Volatile.Read(ref unackedOldestAgeSeconds), "s", "Age of the oldest unacknowledged purchase.");
@@ -125,6 +142,28 @@ public sealed partial class ZaghlolMetrics : IDisposable
     /// <summary><paramref name="key"/> is one of the known flag keys (the admin endpoint 404s any other).</summary>
     public void FlagChanged(string key) => flagChanged.Add(1, Tags(("key", key)));
 
+    /// <param name="outcome"><c>ok</c>, <c>throttled</c> or <c>rejected</c>.</param>
+    public void SyncRequest(string outcome) => syncRequests.Add(1, Tags(("outcome", outcome)));
+
+    /// <param name="mode"><c>none</c>, <c>delta</c> or <c>full</c>.</param>
+    public void SyncCatalog(string mode) => syncCatalog.Add(1, Tags(("mode", mode)));
+
+    /// <param name="kind"><c>contribution</c> or <c>bank_request</c>.</param>
+    /// <param name="result">One of <c>SyncTags.IntakeResults</c>.</param>
+    public void SyncIntake(string kind, string result, int count)
+    {
+        if (count > 0)
+        {
+            syncIntake.Add(count, Tags(("kind", kind), ("result", result)));
+        }
+    }
+
+    /// <param name="block"><c>catalog</c>, <c>flags</c>, <c>prices</c> or <c>entitlement</c>.</param>
+    public void SyncBlockFailed(string block) => syncBlockFailure.Add(1, Tags(("block", block)));
+
+    /// <param name="flag">A known flag key (the closed set).</param>
+    public void SyncFlagRulesInvalid(string flag) => syncFlagRulesInvalid.Add(1, Tags(("flag", flag)));
+
     public void SetPlayIntegrityDailyQuota(long quota) => Interlocked.Exchange(ref playIntegrityDailyQuota, quota);
 
     internal void AuditAlertFired(string rule) => alertFired.Add(1, Tags(("rule", rule)));
@@ -146,6 +185,34 @@ public sealed partial class ZaghlolMetrics : IDisposable
         foreach (var store in NotificationStores)
         {
             deadLetter.Add(0, Tags(("store", store)));
+        }
+
+        foreach (var outcome in SyncTags.Outcomes)
+        {
+            syncRequests.Add(0, Tags(("outcome", outcome)));
+        }
+
+        foreach (var mode in SyncTags.CatalogModeValues)
+        {
+            syncCatalog.Add(0, Tags(("mode", mode)));
+        }
+
+        foreach (var kind in SyncTags.IntakeKinds)
+        {
+            foreach (var result in SyncTags.IntakeResults)
+            {
+                syncIntake.Add(0, Tags(("kind", kind), ("result", result)));
+            }
+        }
+
+        foreach (var block in SyncTags.Blocks)
+        {
+            syncBlockFailure.Add(0, Tags(("block", block)));
+        }
+
+        foreach (var flag in FlagKeys.Known)
+        {
+            syncFlagRulesInvalid.Add(0, Tags(("flag", flag)));
         }
     }
 

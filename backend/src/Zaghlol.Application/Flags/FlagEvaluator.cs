@@ -8,7 +8,11 @@ namespace Zaghlol.Application.Flags;
 /// <summary>The flags an install gets in a sync response (<c>flags</c>, backend-api §4.4).</summary>
 /// <param name="Version">The sum of the flags' versions: it rises with every change to any flag.</param>
 /// <param name="Values">One entry per known flag, in <see cref="FlagKeys.Known"/> order.</param>
-public sealed record FlagSnapshot(int Version, IReadOnlyDictionary<string, bool> Values);
+public sealed record FlagSnapshot(int Version, IReadOnlyDictionary<string, bool> Values)
+{
+    /// <summary>Known flags whose stored rules failed the strict parse; each is OFF in <see cref="Values"/> (FU-056).</summary>
+    public IReadOnlyList<string> InvalidRules { get; init; } = [];
+}
 
 /// <summary>
 /// Pure targeting logic (FR-BE-05). A flag is ON for an install only if its value is ON and every present rule holds.
@@ -33,7 +37,7 @@ public static class FlagEvaluator
     {
         ArgumentNullException.ThrowIfNull(flag);
 
-        if (!flag.Value)
+        if (!flag.Value || flag.RulesInvalid)
         {
             return false;
         }
@@ -56,21 +60,30 @@ public static class FlagEvaluator
         return rules.RolloutPercent is not { } percent || Bucket(flag.Key, installId) < percent;
     }
 
-    /// <summary>Every known flag for this install; a flag with no stored row is OFF.</summary>
+    /// <summary>
+    /// Every known flag for this install; a flag with no stored row is OFF. A flag whose stored rules are corrupt
+    /// (<see cref="FlagState.RulesInvalid"/>) is OFF for everyone and listed in <see cref="FlagSnapshot.InvalidRules"/>, so the
+    /// caller can count it (fail closed, FU-056).
+    /// </summary>
     public static FlagSnapshot Snapshot(IEnumerable<FlagState> stored, string platform, string appVersion, InstallId installId)
     {
         ArgumentNullException.ThrowIfNull(stored);
 
         var byKey = stored.Where(f => FlagKeys.IsKnown(f.Key)).ToDictionary(f => f.Key, StringComparer.Ordinal);
         var values = new Dictionary<string, bool>(StringComparer.Ordinal);
+        var invalid = new List<string>();
         var version = 0;
         foreach (var key in FlagKeys.Known)
         {
             var flag = byKey.GetValueOrDefault(key) ?? FlagState.Default(key);
             values[key] = IsEnabled(flag, platform, appVersion, installId);
             version += flag.Version;
+            if (flag.RulesInvalid)
+            {
+                invalid.Add(key);
+            }
         }
 
-        return new FlagSnapshot(version, values);
+        return new FlagSnapshot(version, values) { InvalidRules = invalid };
     }
 }

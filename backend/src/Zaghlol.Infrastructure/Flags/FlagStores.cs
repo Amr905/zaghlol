@@ -110,14 +110,18 @@ internal sealed class FlagAdminStore(IZaghlolDbContextFactory contexts) : IFlagA
     }
 }
 
-/// <summary><c>feature_flags</c> on the App login (<c>app_rw</c>, SELECT only): what the sync response is built from.</summary>
+/// <summary>
+/// <c>feature_flags</c> on the App login (<c>app_rw</c>, SELECT only): what the sync response is built from. Rules are read
+/// strictly (FU-056): a row whose stored rules don't parse is returned with <see cref="FlagState.RulesInvalid"/> set, never
+/// with a partial rule set, so the evaluator turns it OFF.
+/// </summary>
 internal sealed class FlagReader(IAppDbContextFactory contexts) : IFlagReader
 {
     public async Task<IReadOnlyList<FlagState>> ListAsync(CancellationToken cancellationToken)
     {
         await using var db = contexts.CreateDbContext();
         var rows = await db.FeatureFlags.AsNoTracking().ToListAsync(cancellationToken);
-        return rows.Select(FlagRows.ToState).ToList();
+        return rows.Select(FlagRows.ToStrictState).ToList();
     }
 }
 
@@ -125,4 +129,9 @@ internal static class FlagRows
 {
     public static FlagState ToState(FeatureFlag row) =>
         new(row.Key, row.Enabled, FlagRulesJson.Parse(row.Rules), row.Version, row.UpdatedAt);
+
+    public static FlagState ToStrictState(FeatureFlag row) =>
+        FlagRulesJson.TryParseStrict(row.Rules, out var rules)
+            ? new FlagState(row.Key, row.Enabled, rules, row.Version, row.UpdatedAt)
+            : new FlagState(row.Key, row.Enabled, FlagRules.None, row.Version, row.UpdatedAt, RulesInvalid: true);
 }

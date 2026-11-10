@@ -23,6 +23,12 @@ public sealed class Install
 
     public DateTimeOffset? DeletedAt { get; set; }
 
+    /// <summary>
+    /// The last effective (claimed) <c>POST /v1/sync</c>; <c>NULL</c> = never synced. Drives the server-side 24 h throttle (T-128);
+    /// deliberately separate from <see cref="LastSeenAt"/>, which drives retention.
+    /// </summary>
+    public DateTimeOffset? LastSyncAt { get; set; }
+
     /// <summary>SHA-256(Idempotency-Key) of the registration (R3-6).</summary>
     public byte[]? RegistrationKeyHash { get; set; }
 

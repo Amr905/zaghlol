@@ -60,12 +60,15 @@ builder.Services.AddZaghlolFlagAdmin();
 builder.Services.AddZaghlolFlagReader();
 // Price cache reader (App login) and operator override (Admin login) (T-127).
 builder.Services.AddZaghlolPrices();
+// Daily sync (T-128): throttle, composition, intake; after the catalog, flag and price readers it composes from.
+builder.Services.AddZaghlolSync();
 
 var app = builder.Build();
 
 app.UseZaghlolPipeline();
 app.MapHealth();
 app.MapInstalls();
+app.MapSync();
 app.MapCatalog();
 app.MapCatalogAdmin();
 app.MapFlagAdmin();

@@ -45,4 +45,14 @@ internal sealed class CatalogReader(IAppDbContextFactory contexts) : ICatalogRea
             .ToListAsync(cancellationToken)).Select(CatalogMapping.FromKeyword));
         return CatalogDeltaOrder.Order(ops);
     }
+
+    public async Task<IReadOnlySet<string>> CategoryCodesAsync(CancellationToken cancellationToken)
+    {
+        await using var db = contexts.CreateDbContext();
+        var codes = await db.CatalogCategories.AsNoTracking()
+            .Where(c => !c.Deleted)
+            .Select(c => c.Code)
+            .ToListAsync(cancellationToken);
+        return codes.ToHashSet(StringComparer.Ordinal);
+    }
 }

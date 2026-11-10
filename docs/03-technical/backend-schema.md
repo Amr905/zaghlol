@@ -52,6 +52,8 @@ CREATE TABLE installs (
   first_seen_at timestamptz NOT NULL DEFAULT now(),
   last_seen_at timestamptz NOT NULL DEFAULT now(),
   deleted_at timestamptz,                      -- FR-ONB-08 tombstone (row purged after 30 days)
+  last_sync_at timestamptz,                    -- T-128: last effective (claimed) POST /v1/sync; NULL = never synced. Drives the
+                                               -- server-side 24 h throttle (backend-api §4.2); last_seen_at drives retention
   -- Registration retry (backend-api §4.1, R3-6): no response with a token is ever stored. Both columns are cleared at the
   -- install's first authenticated call or after 24 h; while set, a same-key same-body replay gets a fresh token.
   registration_key_hash bytea,                 -- SHA-256(Idempotency-Key)
@@ -332,6 +334,9 @@ CREATE TABLE bank_requests (
 -- Anonymous aggregate counters (OQ-01, ADR-021)
 CREATE TABLE daily_active_counts (day date NOT NULL, platform text NOT NULL, app_version text NOT NULL,
   installs integer NOT NULL, PRIMARY KEY (day, platform, app_version));
+-- T-128: each claimed sync adds its install to (UTC day, platform, app version) in the same transaction as the claim, through
+-- zaghlol.count_daily_active(date, text, text): SECURITY DEFINER (owner migrator), search_path fixed, EXECUTE for app_rw only.
+-- It can only add 1; app_rw keeps no table privilege here (cannot read the counters or write a count, T-122 SEC F10).
 
 -- Operators & audit (FR-BE-08)
 CREATE TABLE operators (id uuid PRIMARY KEY, oidc_subject text NOT NULL UNIQUE, display_name text NOT NULL,
