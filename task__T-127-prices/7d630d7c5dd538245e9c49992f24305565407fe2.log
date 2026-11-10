@@ -1,5 +1,129 @@
 ﻿== SUMMARY ==
-RUNNING sha=7d630d7c5dd538245e9c49992f24305565407fe2
+FAIL sha=7d630d7c5dd538245e9c49992f24305565407fe2 pipeline=quick-backend dotnet-build=1 dotnet-format=0 dotnet-test=1
+dotnet-build                 FAIL  exit=1  8s
+dotnet-format                PASS  exit=0  29s
+dotnet-test                  FAIL  exit=1  40s
+
+== ERRORS: dotnet-build ==
+/work/backend/src/Zaghlol.Application/Prices/PriceFetchJob.cs(13,52): error CA1859: Change type of field 'configured' from 'System.Collections.Generic.IReadOnlyList<Zaghlol.Application.Prices.IPriceProvider>' to 'System.Collections.Generic.List<Zaghlol.Application.Prices.IPriceProvider>' for improved performance (https://learn.microsoft.com/dotnet/fundamentals/code-analysis/quality-rules/ca1859) [/work/backend/src/Zaghlol.Application/Zaghlol.Application.csproj]
+
+== ERRORS: dotnet-test ==
+  Failed Zaghlol.Infrastructure.Tests.Observability.SeededSeriesTests.EverySeriesIsExportedAtZeroBeforeAnyEvent [330 ms]
+  Error Message:
+   Assert.Contains() Failure: Item not found in collection
+Collection: [Tuple ("dotnet.thread_pool.queue.length", ""), Tuple ("zaghlol.kms.unavailable", "operation=sign"), Tuple ("zaghlol.kms.unavailable", "operation=sign_verify"), Tuple ("zaghlol.kms.unavailable", "operation=hmac"), Tuple ("zaghlol.kms.unavailable", "operation=data_key"), ···]
+Not found:  Tuple ("zaghlol.audit_alert.fired", "rule=support_moves_per_purchase_90d")
+  Stack Trace:
+     at Zaghlol.Infrastructure.Tests.Observability.SeededSeriesTests.EverySeriesIsExportedAtZeroBeforeAnyEvent() in /_/backend/tests/Zaghlol.Infrastructure.Tests/Observability/SeededSeriesTests.cs:line 71
+   at Zaghlol.Infrastructure.Tests.Observability.SeededSeriesTests.EverySeriesIsExportedAtZeroBeforeAnyEvent() in /_/backend/tests/Zaghlol.Infrastructure.Tests/Observability/SeededSeriesTests.cs:line 79
+--- End of stack trace from previous location ---
+
+Passed!  - Failed:     0, Passed:    89, Skipped:     0, Total:    89, Duration: 10 s - Zaghlol.Contract.Tests.dll (net10.0)
+
+Failed!  - Failed:     1, Passed:   502, Skipped:     0, Total:   503, Duration: 11 s - Zaghlol.Infrastructure.Tests.dll (net10.0)
+
+  Failed Zaghlol.Api.Tests.HostStartupTests.TheApiRefusesToStartWithTheLocalKmsOutsideDevelopment(environment: "Staging") [15 ms]
+  Error Message:
+   Assert.Contains() Failure: Filter not matched in collection
+Collection: [System.ObjectDisposedException: Cannot access a disposed object.
+Object name: 'IServiceProvider'.
+   at Microsoft.Extensions.DependencyInjection.ServiceLookup.ThrowHelper.ThrowObjectDisposedException()
+   at Microsoft.Extensions.DependencyInjection.ServiceProvider.GetService(Type serviceType)
+   at Microsoft.Extensions.DependencyInjection.ServiceProviderServiceExtensions.GetRequiredService[T](IServiceProvider provider)
+   at Microsoft.AspNetCore.Mvc.Testing.DeferredHostBuilder.DeferredHost.StartAsync(CancellationToken cancellationToken)
+   at Microsoft.Extensions.Hosting.HostingAbstractionsHostExtensions.Start(IHost host)
+   at Microsoft.AspNetCore.Mvc.Testing.WebApplicationFactory`1.CreateHost(IHostBuilder builder)
+   at Microsoft.AspNetCore.Mvc.Testing.WebApplicationFactory`1.DelegatedWebApplicationFactory.CreateHost(IHostBuilder builder)
+   at Microsoft.AspNetCore.Mvc.Testing.WebApplicationFactory`1.ConfigureHostBuilder(IHostBuilder hostBuilder)
+
 
 == FULL LOG (last 1500 lines) ==
 auto task/T-127-prices 7d630d7c5dd538245e9c49992f24305565407fe2 2026-11-10T11:10:35.4038348+02:00
+
+
+
+[11:10:43] === STEP dotnet-build (docker mcr.microsoft.com/dotnet/sdk:10.0.402, /work/backend)
+  Determining projects to restore...
+  All projects are up-to-date for restore.
+  Zaghlol.Domain -> /work/backend/src/Zaghlol.Domain/bin/Release/net10.0/Zaghlol.Domain.dll
+  Zaghlol.Ops -> /work/backend/src/Zaghlol.Ops/bin/Release/net10.0/zaghlol-ops.dll
+/work/backend/src/Zaghlol.Application/Prices/PriceFetchJob.cs(13,52): error CA1859: Change type of field 'configured' from 'System.Collections.Generic.IReadOnlyList<Zaghlol.Application.Prices.IPriceProvider>' to 'System.Collections.Generic.List<Zaghlol.Application.Prices.IPriceProvider>' for improved performance (https://learn.microsoft.com/dotnet/fundamentals/code-analysis/quality-rules/ca1859) [/work/backend/src/Zaghlol.Application/Zaghlol.Application.csproj]
+  Zaghlol.Ops.Tests -> /work/backend/tests/Zaghlol.Ops.Tests/bin/Release/net10.0/Zaghlol.Ops.Tests.dll
+
+Build FAILED.
+
+/work/backend/src/Zaghlol.Application/Prices/PriceFetchJob.cs(13,52): error CA1859: Change type of field 'configured' from 'System.Collections.Generic.IReadOnlyList<Zaghlol.Application.Prices.IPriceProvider>' to 'System.Collections.Generic.List<Zaghlol.Application.Prices.IPriceProvider>' for improved performance (https://learn.microsoft.com/dotnet/fundamentals/code-analysis/quality-rules/ca1859) [/work/backend/src/Zaghlol.Application/Zaghlol.Application.csproj]
+    0 Warning(s)
+    1 Error(s)
+
+Time Elapsed 00:00:06.69
+
+[11:10:51] === RESULT dotnet-build exit=1 (8s)
+[11:10:51] === STEP dotnet-format (docker mcr.microsoft.com/dotnet/sdk:10.0.402, /work/backend)
+Formatting code files in workspace '/work/backend/Zaghlol.sln'.
+Format complete in 28016ms.
+
+[11:11:20] === RESULT dotnet-format exit=0 (29s)
+[11:11:20] === STEP dotnet-test (docker mcr.microsoft.com/dotnet/sdk:10.0.402, /work/backend)
+Test run for /work/backend/tests/Zaghlol.Workers.Tests/bin/Release/net10.0/Zaghlol.Workers.Tests.dll (.NETCoreApp,Version=v10.0)
+Test run for /work/backend/tests/Zaghlol.Ops.Tests/bin/Release/net10.0/Zaghlol.Ops.Tests.dll (.NETCoreApp,Version=v10.0)
+Test run for /work/backend/tests/Zaghlol.Api.Tests/bin/Release/net10.0/Zaghlol.Api.Tests.dll (.NETCoreApp,Version=v10.0)
+Test run for /work/backend/tests/Zaghlol.Application.Tests/bin/Release/net10.0/Zaghlol.Application.Tests.dll (.NETCoreApp,Version=v10.0)
+Test run for /work/backend/tests/Zaghlol.Contract.Tests/bin/Release/net10.0/Zaghlol.Contract.Tests.dll (.NETCoreApp,Version=v10.0)
+Test run for /work/backend/tests/Zaghlol.Infrastructure.Tests/bin/Release/net10.0/Zaghlol.Infrastructure.Tests.dll (.NETCoreApp,Version=v10.0)
+A total of 1 test files matched the specified pattern.
+A total of 1 test files matched the specified pattern.
+A total of 1 test files matched the specified pattern.
+A total of 1 test files matched the specified pattern.
+A total of 1 test files matched the specified pattern.
+A total of 1 test files matched the specified pattern.
+
+Passed!  - Failed:     0, Passed:     2, Skipped:     0, Total:     2, Duration: 29 ms - Zaghlol.Ops.Tests.dll (net10.0)
+
+Passed!  - Failed:     0, Passed:     3, Skipped:     0, Total:     3, Duration: 124 ms - Zaghlol.Workers.Tests.dll (net10.0)
+
+Passed!  - Failed:     0, Passed:   116, Skipped:     0, Total:   116, Duration: 109 ms - Zaghlol.Application.Tests.dll (net10.0)
+[xUnit.net 00:00:00.79]     Zaghlol.Infrastructure.Tests.Observability.SeededSeriesTests.EverySeriesIsExportedAtZeroBeforeAnyEvent [FAIL]
+  Failed Zaghlol.Infrastructure.Tests.Observability.SeededSeriesTests.EverySeriesIsExportedAtZeroBeforeAnyEvent [330 ms]
+  Error Message:
+   Assert.Contains() Failure: Item not found in collection
+Collection: [Tuple ("dotnet.thread_pool.queue.length", ""), Tuple ("zaghlol.kms.unavailable", "operation=sign"), Tuple ("zaghlol.kms.unavailable", "operation=sign_verify"), Tuple ("zaghlol.kms.unavailable", "operation=hmac"), Tuple ("zaghlol.kms.unavailable", "operation=data_key"), ···]
+Not found:  Tuple ("zaghlol.audit_alert.fired", "rule=support_moves_per_purchase_90d")
+  Stack Trace:
+     at Zaghlol.Infrastructure.Tests.Observability.SeededSeriesTests.EverySeriesIsExportedAtZeroBeforeAnyEvent() in /_/backend/tests/Zaghlol.Infrastructure.Tests/Observability/SeededSeriesTests.cs:line 71
+   at Zaghlol.Infrastructure.Tests.Observability.SeededSeriesTests.EverySeriesIsExportedAtZeroBeforeAnyEvent() in /_/backend/tests/Zaghlol.Infrastructure.Tests/Observability/SeededSeriesTests.cs:line 79
+--- End of stack trace from previous location ---
+
+Passed!  - Failed:     0, Passed:    89, Skipped:     0, Total:    89, Duration: 10 s - Zaghlol.Contract.Tests.dll (net10.0)
+
+Failed!  - Failed:     1, Passed:   502, Skipped:     0, Total:   503, Duration: 11 s - Zaghlol.Infrastructure.Tests.dll (net10.0)
+[xUnit.net 00:00:35.10]     Zaghlol.Api.Tests.HostStartupTests.TheApiRefusesToStartWithTheLocalKmsOutsideDevelopment(environment: "Staging") [FAIL]
+  Failed Zaghlol.Api.Tests.HostStartupTests.TheApiRefusesToStartWithTheLocalKmsOutsideDevelopment(environment: "Staging") [15 ms]
+  Error Message:
+   Assert.Contains() Failure: Filter not matched in collection
+Collection: [System.ObjectDisposedException: Cannot access a disposed object.
+Object name: 'IServiceProvider'.
+   at Microsoft.Extensions.DependencyInjection.ServiceLookup.ThrowHelper.ThrowObjectDisposedException()
+   at Microsoft.Extensions.DependencyInjection.ServiceProvider.GetService(Type serviceType)
+   at Microsoft.Extensions.DependencyInjection.ServiceProviderServiceExtensions.GetRequiredService[T](IServiceProvider provider)
+   at Microsoft.AspNetCore.Mvc.Testing.DeferredHostBuilder.DeferredHost.StartAsync(CancellationToken cancellationToken)
+   at Microsoft.Extensions.Hosting.HostingAbstractionsHostExtensions.Start(IHost host)
+   at Microsoft.AspNetCore.Mvc.Testing.WebApplicationFactory`1.CreateHost(IHostBuilder builder)
+   at Microsoft.AspNetCore.Mvc.Testing.WebApplicationFactory`1.DelegatedWebApplicationFactory.CreateHost(IHostBuilder builder)
+   at Microsoft.AspNetCore.Mvc.Testing.WebApplicationFactory`1.ConfigureHostBuilder(IHostBuilder hostBuilder)
+   at Microsoft.AspNetCore.Mvc.Testing.WebApplicationFactory`1.StartServer()
+   at Microsoft.AspNetCore.Mvc.Testing.WebApplicationFactory`1.CreateDefaultClient(DelegatingHandler[] handlers)
+   at Microsoft.AspNetCore.Mvc.Testing.WebApplicationFactory`1.CreateDefaultClient(Uri baseAddress, DelegatingHandler[] handlers)
+   at Microsoft.AspNetCore.Mvc.Testing.WebApplicationFactory`1.CreateClient(WebApplicationFactoryClientOptions options)
+   at Microsoft.AspNetCore.Mvc.Testing.WebApplicationFactory`1.CreateClient()
+   at Zaghlol.Api.Tests.HostStartupTests.<>c__DisplayClass1_0.<TheApiRefusesToStartWithTheLocalKmsOutsideDevelopment>b__1() in /_/backend/tests/Zaghlol.Api.Tests/HostStartupTests.cs:line 34
+   at Xunit.Assert.RecordException(Func`1 testCode, String asyncMethodName) in /_/src/xunit.assert/Asserts/Record.cs:line 78]
+  Stack Trace:
+     at Zaghlol.Api.Tests.HostStartupTests.TheApiRefusesToStartWithTheLocalKmsOutsideDevelopment(String environment) in /_/backend/tests/Zaghlol.Api.Tests/HostStartupTests.cs:line 36
+   at InvokeStub_HostStartupTests.TheApiRefusesToStartWithTheLocalKmsOutsideDevelopment(Object, Span`1)
+   at System.Reflection.MethodBaseInvoker.InvokeWithOneArg(Object obj, BindingFlags invokeAttr, Binder binder, Object[] parameters, CultureInfo culture)
+
+Failed!  - Failed:     1, Passed:   199, Skipped:     0, Total:   200, Duration: 28 s - Zaghlol.Api.Tests.dll (net10.0)
+
+[11:12:00] === RESULT dotnet-test exit=1 (40s)
+[11:12:00] SUMMARY FAIL sha=7d630d7c5dd538245e9c49992f24305565407fe2 pipeline=quick-backend dotnet-build=1 dotnet-format=0 dotnet-test=1
