@@ -48,6 +48,15 @@ interface ArabicOcrEngine : OcrEngine {
 /** Reads the plaintext of a pending share in memory. Throws [OcrFailure] with the contract's error code. */
 fun interface OcrImageSource {
     fun read(id: String): ByteArray
+
+    /** Deletes the encrypted image once it has been read (FR-SEC-03: receipt images are never kept). Never throws. */
+    fun discard(id: String) {}
+}
+
+/** `OcrHostApi.sealImage`: encrypts a plain image the user picked and returns the handle for `recognize`. */
+fun interface OcrImageSealer {
+    /** Throws [OcrFailure] (`IO_ERROR` for a refused or unreadable file). The plain file is deleted whatever happens. */
+    fun seal(plainImagePath: String): String
 }
 
 /** Error with a platform-channels.md error code. Never carries recognised text, ids or sizes. */
@@ -69,6 +78,9 @@ object OcrLimits {
 
     /** Whole recognition deadline, all engines together. */
     const val TIMEOUT_MS = 40_000L
+
+    /** Largest plain image `sealImage` accepts (platform-channels section 4, pigeon contract). */
+    const val SEAL_MAX_BYTES = 25L * 1024 * 1024
 
     const val LANG_AR = "ar"
     const val LANG_EN = "en"

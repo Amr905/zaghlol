@@ -7,8 +7,9 @@ import java.util.concurrent.RejectedExecutionException
  * Pigeon host for `OcrHostApi` (platform-channels.md section 4).
  *
  * The image is read from the share store into memory, decoded with a
- * sample-size cap and recognised; nothing is written to disk and the share is
- * not discarded here (Dart owns that, FU-067). Recognitions run one at a time
+ * sample-size cap and recognised; nothing is written to disk. Once the bytes
+ * were read, the encrypted share is deleted in a `finally` (pigeon contract;
+ * Dart's later `discardShare` is then a no-op). Recognitions run one at a time
  * on [executor]. Nothing here logs; errors carry codes only.
  *
  * [post] delivers the reply on the platform thread. [clock] is monotonic ms.
@@ -21,6 +22,7 @@ class OcrHost(
     private val executor: ExecutorService,
     private val post: (Runnable) -> Unit,
     private val clock: () -> Long = { System.nanoTime() / 1_000_000 },
+    private val sealer: OcrImageSealer? = null,
 ) : OcrHostApi {
 
     override fun recognize(encryptedImagePath: String, languages: List<String>, callback: (Result<OcrResult>) -> Unit) {
@@ -42,6 +44,15 @@ class OcrHost(
             callback(Result.failure(OcrApiError(OcrFailure.OCR_FAILED, "recognition unavailable")))
         }
     }
+
+    override fun sealImage(plainImagePath: String): String =
+        try {
+            (sealer ?: throw OcrFailure(OcrFailure.NOT_AVAILABLE, "no image store")).seal(plainImagePath)
+        } catch (e: OcrFailure) {
+            throw OcrApiError(e.code, e.message)
+        } catch (_: Exception) {
+            throw OcrApiError(OcrFailure.IO_ERROR, "image could not be sealed")
+        }
 
     override fun supportedLanguages(): List<String> =
         if (arabic.likelyAvailable()) listOf(OcrLimits.LANG_AR, OcrLimits.LANG_EN) else listOf(OcrLimits.LANG_EN)
@@ -82,6 +93,8 @@ class OcrHost(
         } finally {
             bytes.fill(0)
             image?.recycle()
+            // The image was read: whatever happened next, it is not kept (FR-SEC-03).
+            images.discard(id)
         }
     }
 

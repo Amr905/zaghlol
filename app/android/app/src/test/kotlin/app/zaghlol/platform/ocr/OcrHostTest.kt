@@ -61,8 +61,8 @@ class OcrHostTest {
     private val arabic = FakeArabic(lines = listOf(RawLine("مرحبا", 0.7, 0, 0, 500, 100)))
     private val executor = Executors.newSingleThreadExecutor()
 
-    private fun host(clock: () -> Long = { 0L }) =
-        OcrHost({ source.read(it) }, decoder, latin, arabic, executor, { it.run() }, clock)
+    private fun host(clock: () -> Long = { 0L }, sealer: OcrImageSealer? = null) =
+        OcrHost({ source.read(it) }, decoder, latin, arabic, executor, { it.run() }, clock, sealer)
 
     private fun failureCode(block: () -> Unit): OcrFailure = try {
         block()
@@ -224,5 +224,71 @@ class OcrHostTest {
         var got: Result<OcrResult>? = null
         host().recognize("id", listOf("en")) { got = it }
         assertEquals("OCR_FAILED", (got!!.exceptionOrNull() as OcrApiError).code)
+    }
+
+    private class RecordingSource(private val bytes: ByteArray, private val error: OcrFailure? = null) : OcrImageSource {
+        val discarded = mutableListOf<String>()
+        override fun read(id: String): ByteArray = error?.let { throw it } ?: bytes
+        override fun discard(id: String) {
+            discarded += id
+        }
+    }
+
+    private fun hostWith(src: OcrImageSource) = OcrHost(src, decoder, latin, arabic, executor, { it.run() })
+
+    @Test
+    fun theEncryptedImageIsDiscardedAfterSuccessAndAfterEveryFailureOnceRead() {
+        val ok = RecordingSource(ByteArray(8))
+        hostWith(ok).recognizeBlocking("a", listOf("en"))
+        assertEquals(listOf("a"), ok.discarded)
+
+        latin.error = OcrFailure("OCR_FAILED", "engine")
+        val failed = RecordingSource(ByteArray(8))
+        failureCode { hostWith(failed).recognizeBlocking("b", listOf("en")) }
+        assertEquals(listOf("b"), failed.discarded)
+        latin.error = null
+
+        decoder.size = null
+        val bad = RecordingSource(ByteArray(8))
+        failureCode { hostWith(bad).recognizeBlocking("c", listOf("en")) }
+        assertEquals(listOf("c"), bad.discarded)
+    }
+
+    @Test
+    fun anImageThatCouldNotBeReadOrAModelThatIsMissingKeepsTheFile() {
+        val unreadable = RecordingSource(ByteArray(8), OcrFailure("IO_ERROR", "later"))
+        failureCode { hostWith(unreadable).recognizeBlocking("d", listOf("en")) }
+        assertTrue(unreadable.discarded.isEmpty())
+
+        arabic.available = false
+        val untouched = RecordingSource(ByteArray(8))
+        failureCode { hostWith(untouched).recognizeBlocking("e", listOf("ar")) }
+        assertTrue(untouched.discarded.isEmpty())
+    }
+
+    @Test
+    fun sealImageReturnsTheHandleAndMapsFailuresToCodes() {
+        assertEquals("handle", host(sealer = { "handle" }).sealImage("/p"))
+        for (code in listOf("IO_ERROR", "NOT_AVAILABLE")) {
+            try {
+                host(sealer = { throw OcrFailure(code, "x") }).sealImage("/p")
+                fail("expected error")
+            } catch (e: OcrApiError) {
+                assertEquals(code, e.code)
+            }
+        }
+        try {
+            host(sealer = { throw IllegalStateException("/secret/path") }).sealImage("/secret/path")
+            fail("expected error")
+        } catch (e: OcrApiError) {
+            assertEquals("IO_ERROR", e.code)
+            assertFalse(e.message!!.contains("secret"))
+        }
+        try {
+            host().sealImage("/p")
+            fail("expected error")
+        } catch (e: OcrApiError) {
+            assertEquals("NOT_AVAILABLE", e.code)
+        }
     }
 }

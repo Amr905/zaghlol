@@ -28,6 +28,7 @@ object OcrHosts {
             arabic = TesseractArabicEngine(context.assets, installer),
             executor = executor,
             post = { main.post(it) },
+            sealer = ShareStoreImageSealer(store, listOf(context.cacheDir)),
         )
         return host to executor
     }
