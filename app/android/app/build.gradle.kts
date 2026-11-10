@@ -79,6 +79,13 @@ kotlin {
 }
 
 dependencies {
+    // T-159 (ADR-009, CR-02): on-device OCR, versions pinned on purpose.
+    // ML Kit Text Recognition v2, Latin, BUNDLED model (no model download).
+    // Google ML Kit terms; adds roughly 4 MB per ABI (compressed .so).
+    implementation("com.google.mlkit:text-recognition:16.0.1")
+    // Tesseract 5.5 JNI wrapper, standard (single-thread) variant. Apache-2.0.
+    // The bundled model is tessdata_fast ara (Apache-2.0), see TessdataSpec.
+    implementation("cz.adaptech.tesseract4android:tesseract4android:4.9.0")
     testImplementation("junit:junit:4.13.2")
     // T-060: instrumented tests (Keystore cipher, share store on a device).
     // Versions match what the integration_test plugin already puts on the debug

@@ -4,6 +4,8 @@ import android.content.Intent
 import android.os.Handler
 import android.os.Looper
 import app.zaghlol.platform.keys.SecretStoreRegistration
+import app.zaghlol.platform.ocr.OcrHostApi
+import app.zaghlol.platform.ocr.OcrHosts
 import app.zaghlol.platform.share.ShareDescriptor
 import app.zaghlol.platform.share.ShareHandOff
 import app.zaghlol.platform.share.ShareIntakeEventsApi
@@ -14,11 +16,13 @@ import app.zaghlol.platform.share.ShareStore
 import app.zaghlol.platform.share.ShareStores
 import io.flutter.embedding.android.FlutterActivity
 import io.flutter.embedding.engine.FlutterEngine
+import java.util.concurrent.ExecutorService
 import java.util.concurrent.Executors
 
 class MainActivity : FlutterActivity() {
     private var shareEvents: ShareIntakeEventsApi? = null
     private var shareStore: ShareStore? = null
+    private var ocrExecutor: ExecutorService? = null
 
     override fun configureFlutterEngine(flutterEngine: FlutterEngine) {
         super.configureFlutterEngine(flutterEngine)
@@ -30,10 +34,17 @@ class MainActivity : FlutterActivity() {
         shareStore = store
         ShareIntakeHostApi.setUp(messenger, ShareIntakeHost(store))
         shareEvents = ShareIntakeEventsApi(messenger)
+        // T-159: OCR reads pending shares from the same encrypted store.
+        val (ocr, executor) = OcrHosts.create(applicationContext, store)
+        ocrExecutor = executor
+        OcrHostApi.setUp(messenger, ocr)
     }
 
     override fun cleanUpFlutterEngine(flutterEngine: FlutterEngine) {
         ShareIntakeHostApi.setUp(flutterEngine.dartExecutor.binaryMessenger, null)
+        OcrHostApi.setUp(flutterEngine.dartExecutor.binaryMessenger, null)
+        ocrExecutor?.shutdown()
+        ocrExecutor = null
         shareEvents = null
         shareStore = null
         super.cleanUpFlutterEngine(flutterEngine)
