@@ -127,6 +127,6 @@ public class ContributionReviewTests
     {
         public List<(string, int)> Events { get; } = [];
 
-        public void Event(string name, int count) => Events.Add((name, count));
+        public void Count(string name, int count) => Events.Add((name, count));
     }
 }

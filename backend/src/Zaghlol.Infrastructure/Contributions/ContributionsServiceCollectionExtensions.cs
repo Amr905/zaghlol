@@ -41,5 +41,5 @@ public static class ContributionsServiceCollectionExtensions
 
 internal sealed class ZaghlolContributionMetrics(ZaghlolMetrics metrics) : IContributionMetrics
 {
-    public void Event(string name, int count) => metrics.ContributionEvent(name, count);
+    public void Count(string name, int count) => metrics.ContributionEvent(name, count);
 }

@@ -20,6 +20,8 @@ internal sealed class UnusedSigner : ISigner
 
     public ValueTask<string> CreateJwsAsync<T>(SigningPurpose purpose, T payload, CancellationToken cancellationToken) =>
         throw new InvalidOperationException("Nothing here signs.");
+
+    public IReadOnlyList<SigningKey> PublishedKeys(SigningPurpose purpose) => [];
 }
 
 internal sealed class UnusedSnapshotStore : ICatalogSnapshotStore

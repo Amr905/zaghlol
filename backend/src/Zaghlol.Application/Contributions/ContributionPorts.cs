@@ -139,7 +139,7 @@ public static class ContributionEvents
 public interface IContributionMetrics
 {
     /// <param name="name">A value of <see cref="ContributionEvents.All"/>.</param>
-    void Event(string name, int count);
+    void Count(string name, int count);
 }
 
 /// <summary>One aggregation run (the worker calls it on a timer).</summary>
@@ -149,9 +149,9 @@ public sealed class ContributionAggregationJob(IContributionAggregationStore sto
     {
         var cutoff = clock.GetUtcNow().AddDays(-ContributionRules.RawRetentionDays);
         var run = await store.RunAsync(ContributionRules.MinDistinctInstalls, cutoff, cancellationToken);
-        metrics.Event(ContributionEvents.Ready, run.BecameReady);
-        metrics.Event(ContributionEvents.PurgedDecided, run.PurgedDecided);
-        metrics.Event(ContributionEvents.PurgedExpired, run.PurgedExpired);
+        metrics.Count(ContributionEvents.Ready, run.BecameReady);
+        metrics.Count(ContributionEvents.PurgedDecided, run.PurgedDecided);
+        metrics.Count(ContributionEvents.PurgedExpired, run.PurgedExpired);
         return run;
     }
 }

@@ -1,3 +1,4 @@
+using Microsoft.AspNetCore.Http.HttpResults;
 using Microsoft.AspNetCore.Mvc;
 using Zaghlol.Api.Auth;
 using Zaghlol.Api.Json;
@@ -82,7 +83,7 @@ internal static class ContributionAdminEndpoints
             OperatorAuthentication.OperatorIdOf(context.User), key, request.MerchantId, request.CategoryCode, cancellationToken);
         if (decision.Outcome == ContributionOutcome.Ok)
         {
-            metrics.Event(ContributionEvents.Promoted, 1);
+            metrics.Count(ContributionEvents.Promoted, 1);
         }
 
         return Respond(key, decision);
@@ -111,7 +112,7 @@ internal static class ContributionAdminEndpoints
         var decision = await store.RejectAsync(OperatorAuthentication.OperatorIdOf(context.User), key, cancellationToken);
         if (decision.Outcome == ContributionOutcome.Ok)
         {
-            metrics.Event(ContributionEvents.Rejected, 1);
+            metrics.Count(ContributionEvents.Rejected, 1);
         }
 
         return Respond(key, decision);
