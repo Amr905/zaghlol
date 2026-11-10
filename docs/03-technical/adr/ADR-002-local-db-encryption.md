@@ -16,10 +16,22 @@ All data on the phone must be encrypted from the first write with AES-256 (FR-SE
 3. **Isar / ObjectBox / Realm** — Fast object stores, but weaker or no SQL aggregation, FTS and migration tooling; Isar maintenance risk.
 
 ## Decision
-**Drift ≥ 2.32 with SQLite3MultipleCiphers**, using the SQLCipher-compatible AES-256 cipher (`PRAGMA cipher='sqlcipher'; legacy=4`) to meet FR-SEC-01 literally. The 256-bit random key `K_db` comes from `flutter_secure_storage` (Keystore/Keychain, device-only). The app verifies on open that encryption is active.
+**Drift ≥ 2.32 with SQLite3MultipleCiphers**, using the SQLCipher-compatible AES-256 cipher (`PRAGMA cipher='sqlcipher'; legacy=4`) to meet FR-SEC-01 literally. The 256-bit random key `K_db` is kept in the Android Keystore / iOS Keychain (device-only) through the app's own Pigeon channel `SecretStoreHostApi`, not `flutter_secure_storage` *(Amendment 2026-11-10)*. The app verifies on open that encryption is active.
 
 ## Consequences
 One encrypted file holds *all* app state (settings, catalog, entitlement cache, outbox), which satisfies FR-SEC-03 without separate encrypted preferences. The build uses Dart build hooks, so CI needs a recent Flutter. If Keystore invalidates the key, the DB can't be recovered; restore from backup is the path (error-handling §1).
+
+## Amendment (2026-11-10): K_db storage through a native channel (T-015, PO approved)
+
+**Decision.** `K_db` is stored by a project Pigeon channel, `SecretStoreHostApi` (`app/pigeons/secret_store_api.dart`), instead of `flutter_secure_storage`. The PO approved this on 2026-11-10 (T-015 design note, Q1).
+- **Android:** a Keystore AES-256-GCM key `zaghlol_db_kek_v1` (non-exportable, no user authentication, no unlocked-device requirement, StrongBox when available) wraps `K_db`. The blob is `noBackupFilesDir/keys/db_key_v1.bin` = `0x01 ‖ iv(12) ‖ ct(32) ‖ tag(16)`, AAD `zaghlol/k_db/v1`, written as tmp, fsync, rename, and read back before a create returns. Every create makes a fresh wrapping key.
+- **iOS:** a Keychain generic password (service `app.zaghlol.keys`, account `db_key_v1`), `kSecAttrAccessibleAfterFirstUnlockThisDeviceOnly`, `kSecAttrSynchronizable = false`, default access group. Queries always name service and account and never touch the D-62 seat keys.
+- **Read classes:** `found`, `notFound` (positive evidence of absence), `unusable` (positive evidence the key can't be read again: alias missing, tag failure, malformed blob, invalidated key), `unavailable` (everything else, after 3 retries at 100/300/900 ms). Only `notFound`/`unusable` with a database present lead to `KeyInvalidated` and the D-50 orphan wipe; `unavailable` never wipes.
+- A process-wide **bootstrap lease** (30 s expiry) serialises the bootstrap and database creation/wipe across Flutter engines.
+
+**Why not the plugin.** Since 10.0 `flutter_secure_storage` defaults `resetOnError` to true (it deletes stored values on read errors), and 11.0 makes data saved with removed algorithms unusable: both are wrong for the one key whose loss erases all user data. It flattens Keystore errors into strings, so the exact classification FR-SEC-05 needs (T-165 review F6) is impossible. Its Android store is SharedPreferences, against the T-165 policy. The native code is small (we need Keystore/Keychain code for `K_spool` anyway) and adds no pub or native dependency.
+
+**Consequences.** Every engine that opens the database must register the channel (the UI engine does; T-008's headless engine must). `K_spool` (T-008) and `K_bk` (T-148) reuse the channel by adding slots. Contract: platform-channels §5/§6; key table: security-model §3; implementation and tests: T-015.
 
 ## Spike results (T-007)
 

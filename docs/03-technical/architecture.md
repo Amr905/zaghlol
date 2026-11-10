@@ -251,7 +251,7 @@ App dependencies are pinned in `pubspec.lock`. Versions are the latest stable at
 |---|---|---|
 | `flutter_riverpod`, `riverpod_annotation`, `riverpod_generator` (3.x) | State + DI (ADR-001) | Bloc, Provider + GetIt |
 | `drift`, `drift_dev` (≥ 2.32) + `sqlite3` (3.x) with the `sqlite3mc` build hook | Typed SQL, migrations, FTS5, encryption via SQLite3MultipleCiphers (ADR-002) | `sqflite_sqlcipher` (extra setup), Isar/ObjectBox (no SQL/FTS) |
-| `flutter_secure_storage` | DB / backup / spool key storage in Keystore/Keychain, device-only | Custom channel (more native code) |
+| *(none: own Pigeon channel `SecretStoreHostApi`)* | DB / backup / spool key storage in Keystore/Keychain, device-only (ADR-002 Amendment 2026-11-10, T-015) | `flutter_secure_storage`: deletes values on read errors by default (`resetOnError`), flattens Keystore errors, stores in SharedPreferences on Android |
 | `cryptography` + `cryptography_flutter` | AES-256-GCM (hardware-accelerated), Argon2id, ES256 verification | `pointycastle` (slow pure Dart), libsodium bindings (2nd crypto stack) |
 | `pigeon` (dev) | Type-safe platform channels | Hand-written MethodChannels |
 | `go_router` | Declarative routing, deep links | Navigator 2 by hand |
