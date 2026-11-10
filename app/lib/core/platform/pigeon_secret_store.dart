@@ -48,9 +48,11 @@ final class PigeonSecretStore implements SecretStore {
         if (value == null) {
           return SecretRead(SecretStatus.unavailable, attempts: msg.attempts);
         }
+        // The codec may hand out an unmodifiable view; copy it so the caller
+        // can zero its buffer.
         return SecretRead(
           SecretStatus.found,
-          value: value,
+          value: Uint8List.fromList(value),
           attempts: msg.attempts,
         );
       case SecretStatusMsg.notFound:
@@ -67,7 +69,12 @@ final class PigeonSecretStore implements SecretStore {
     SecretStoreLease lease,
     SecretSlot slot,
     Uint8List candidate,
-  ) => _guard(() => _api.createIfAbsent(lease.id, _slot(slot), candidate));
+  ) async {
+    final stored = await _guard(
+      () => _api.createIfAbsent(lease.id, _slot(slot), candidate),
+    );
+    return Uint8List.fromList(stored);
+  }
 
   @override
   Future<void> delete(SecretStoreLease lease, SecretSlot slot) =>

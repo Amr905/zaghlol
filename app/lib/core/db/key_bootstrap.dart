@@ -119,6 +119,17 @@ final class SecureKeyGenerator implements KeyGenerator {
   }
 }
 
+/// Overwrites [bytes] with zeros where possible. Buffers decoded by the
+/// platform channel codec can be unmodifiable views; those are skipped (the
+/// codec buffer is freed but not wiped, an accepted limit, design note §5).
+void wipeBytes(Uint8List bytes) {
+  try {
+    bytes.fillRange(0, bytes.length, 0);
+  } on UnsupportedError {
+    // Unmodifiable view: nothing to do.
+  }
+}
+
 /// True for a key no healthy CSPRNG would produce in practice: wrong length or
 /// all bytes equal.
 bool isDegenerateKey(Uint8List bytes) {
@@ -451,7 +462,7 @@ final class KeyBootstrap {
       case SecretStatus.found:
         final value = read.value!;
         if (!dbPresent) {
-          value.fillRange(0, value.length, 0);
+          wipeBytes(value);
           return _create(
             lease,
             KeyCreatedReason.rotatedNoDb,
@@ -459,7 +470,7 @@ final class KeyBootstrap {
           );
         }
         if (value.length != dbKeyLength) {
-          value.fillRange(0, value.length, 0);
+          wipeBytes(value);
           return KeyInvalidated(
             KeyInvalidatedReason.unusable,
             lease,
@@ -467,7 +478,7 @@ final class KeyBootstrap {
           );
         }
         final key = DbKeyMaterial.copyOf(value);
-        value.fillRange(0, value.length, 0);
+        wipeBytes(value);
         if (rejected != null && key.sameKeyAs(rejected)) {
           key.zeroize();
           return KeyInvalidated(
@@ -510,20 +521,20 @@ final class KeyBootstrap {
   }) async {
     final candidate = _generator.next();
     if (candidate == null || isDegenerateKey(candidate)) {
-      candidate?.fillRange(0, candidate.length, 0);
+      if (candidate != null) wipeBytes(candidate);
       return const KeyStoreFailed(KeyStoreFailedReason.generate);
     }
     // Never delete or store a key while a database file exists (checked again
     // right before the first write; the lease keeps other engines out).
     if (await _files.anyExists()) {
-      candidate.fillRange(0, candidate.length, 0);
+      wipeBytes(candidate);
       return const KeyUnavailable(KeyUnavailableReason.transient);
     }
     if (deleteFirst) {
       try {
         await _store.delete(lease._lease, SecretSlot.dbKey);
       } on Object {
-        candidate.fillRange(0, candidate.length, 0);
+        wipeBytes(candidate);
         rethrow;
       }
     }
@@ -535,14 +546,14 @@ final class KeyBootstrap {
         candidate,
       );
     } finally {
-      candidate.fillRange(0, candidate.length, 0);
+      wipeBytes(candidate);
     }
     if (stored.length != dbKeyLength || isDegenerateKey(stored)) {
-      stored.fillRange(0, stored.length, 0);
+      wipeBytes(stored);
       return const KeyStoreFailed(KeyStoreFailedReason.write);
     }
     final key = DbKeyMaterial.copyOf(stored);
-    stored.fillRange(0, stored.length, 0);
+    wipeBytes(stored);
     return KeyCreated(key, reason, lease);
   }
 }

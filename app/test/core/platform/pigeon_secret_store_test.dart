@@ -38,7 +38,11 @@ class _FakeApi extends SecretStoreHostApi {
     int lease,
     SecretSlotMsg slot,
     Uint8List candidate,
-  ) => _answer('create:$lease:${slot.name}', Uint8List.fromList(candidate));
+  ) => _answer(
+    'create:$lease:${slot.name}',
+    // Like the codec: an unmodifiable view.
+    Uint8List.fromList(candidate).asUnmodifiableView(),
+  );
 
   @override
   Future<void> delete(int lease, SecretSlotMsg slot) =>
@@ -91,6 +95,25 @@ void main() {
     final found = await store.read(SecretSlot.dbKey);
     expect(found.status, SecretStatus.found);
     expect(found.value!.length, 32);
+  });
+
+  test('codec values are copied so the caller can zero them', () async {
+    api.readResult = SecretReadMsg(
+      status: SecretStatusMsg.found,
+      value: syntheticKeyBytes().asUnmodifiableView(),
+      attempts: 1,
+    );
+    final read = (await store.read(SecretSlot.dbKey)).value!;
+    read.fillRange(0, read.length, 0);
+    expect(read.every((b) => b == 0), isTrue);
+
+    final created = await store.createIfAbsent(
+      SecretStoreLease(1),
+      SecretSlot.dbKey,
+      syntheticKeyBytes(),
+    );
+    created.fillRange(0, created.length, 0);
+    expect(created.every((b) => b == 0), isTrue);
   });
 
   test('found without a value is unavailable, never found', () async {

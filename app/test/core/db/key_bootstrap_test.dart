@@ -464,6 +464,15 @@ void main() {
       expect(store.handedOut.every(_allZero), isTrue);
     });
 
+    test('wipeBytes zeroes a buffer and tolerates an unmodifiable view', () {
+      final buf = syntheticKeyBytes();
+      wipeBytes(buf);
+      expect(_allZero(buf), isTrue);
+      final view = syntheticKeyBytes().asUnmodifiableView();
+      wipeBytes(view); // no throw
+      expect(view.length, dbKeyLength);
+    });
+
     test('zeroize wipes the bytes and blocks further use', () {
       final key = DbKeyMaterial.copyOf(syntheticKeyBytes());
       final twin = DbKeyMaterial.copyOf(syntheticKeyBytes());
