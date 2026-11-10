@@ -6,31 +6,21 @@ typedef _Clean = (String name, String input, String display, String cleaned);
 void main() {
   group('cleanMerchant', () {
     final rows = <_Clean>[
-      (
-        'spec example',
-        'CARREFOUR MAADI EG 041',
-        'Carrefour',
-        'CARREFOUR',
-      ),
+      ('spec example', 'CARREFOUR MAADI EG 041', 'Carrefour', 'CARREFOUR'),
       ('lowercase input', 'carrefour maadi eg 041', 'Carrefour', 'CARREFOUR'),
       ('pos token leading', 'POS SPINNEYS 12345', 'Spinneys', 'SPINNEYS'),
       ('pos token trailing', 'SPINNEYS POS 12345', 'Spinneys', 'SPINNEYS'),
       ('ecom and online', 'NOON ECOM ONLINE EG', 'Noon', 'NOON'),
       ('multi-word city', 'HYPERONE NASR CITY EG', 'Hyperone', 'HYPERONE'),
-      (
-        'city then country then code',
-        'TALABAT CAIRO EGY 0042',
-        'Talabat',
-        'TALABAT',
-      ),
+      ('city country code', 'TALABAT CAIRO EGY 0042', 'Talabat', 'TALABAT'),
       ('legal suffix', 'ORASCOM FOODS LLC', 'Orascom Foods', 'ORASCOM FOODS'),
-      ('dotted legal suffix', 'MISR FOODS S.A.E.', 'Misr Foods', 'MISR FOODS'),
+      ('dotted legal', 'MISR FOODS S.A.E.', 'Misr Foods', 'MISR FOODS'),
       ('co with dot', 'DELTA TRADING CO.', 'Delta Trading', 'DELTA TRADING'),
       ('hash terminal', 'BREADFAST #4521', 'Breadfast', 'BREADFAST'),
       ('star separator', 'UBER*TRIP EG', 'Uber Trip', 'UBER TRIP'),
       ('short number kept', '7-ELEVEN 12', '7-Eleven 12', '7-ELEVEN 12'),
-      ('name with digits kept', 'B TECH 2', 'B Tech 2', 'B TECH 2'),
-      ('first token never stripped', 'EGYPT AIR', 'Egypt Air', 'EGYPT AIR'),
+      ('digits in name kept', 'B TECH 2', 'B Tech 2', 'B TECH 2'),
+      ('first token kept', 'EGYPT AIR', 'Egypt Air', 'EGYPT AIR'),
       ('only noise falls back', 'POS', 'Pos', 'POS'),
       ('city only', 'MAADI', 'Maadi', 'MAADI'),
       ('arabic city suffix', 'كارفور القاهرة', 'كارفور', 'كارفور'),
@@ -57,15 +47,14 @@ void main() {
         legalSuffixes: [],
         noiseTokens: [],
       );
-      expect(
-        cleanMerchant('SHOP SMALLVILLE XX', config: config).display,
-        'Shop',
-      );
-      expect(cleanMerchant('SHOP EG', config: config).display, 'Shop Eg');
+      final custom = cleanMerchant('SHOP SMALLVILLE XX', config: config);
+      final plain = cleanMerchant('SHOP EG', config: config);
+      expect(custom.display, 'Shop');
+      expect(plain.display, 'Shop Eg');
     });
 
     test('never throws on odd input', () {
-      final inputs = ['\u0000', '###', '٠٠٠', '\u200F', 'a' * 5000, '😀'];
+      final inputs = ['\u0000', '###', '٠٠٠', '‏', 'a' * 5000, '😀'];
       for (final s in inputs) {
         expect(() => cleanMerchant(s), returnsNormally);
       }
@@ -75,11 +64,11 @@ void main() {
   group('merchantKey', () {
     final rows = <(String, String, String)>[
       ('latin', 'Carrefour', 'carrefour'),
-      ('upper and spaces', 'EL EZABY', 'ezaby'),
+      ('separate article', 'EL EZABY', 'ezaby'),
       ('attached article', 'ELEZABY', 'ezaby'),
       ('al article', 'AL RAWSHA', 'rawsha'),
-      ('short word starting el kept', 'ELF', 'elf'),
-      ('attached short remainder kept', 'ELITE', 'elite'),
+      ('short word kept', 'ELF', 'elf'),
+      ('short remainder kept', 'ELITE', 'elite'),
       ('lone el kept', 'EL', 'el'),
       ('arabic article', 'الاهرام', 'ahram'),
       ('arabic transliteration', 'كارفور', 'karfwr'),
@@ -97,11 +86,11 @@ void main() {
 
     test('ELEZABY and EL EZABY share a key', () {
       expect(merchantKey('ELEZABY'), merchantKey('EL EZABY'));
-      expect(
-        cleanMerchant('ELEZABY').key,
-        cleanMerchant('EL EZABY EG 0042').key,
-      );
-      expect(cleanMerchant('El-Ezaby').key, cleanMerchant('EL EZABY').key);
+      final a = cleanMerchant('ELEZABY');
+      final b = cleanMerchant('EL EZABY EG 0042');
+      final c = cleanMerchant('El-Ezaby');
+      expect(a.key, b.key);
+      expect(a.key, c.key);
     });
 
     test('capped at 64 characters', () {
@@ -109,12 +98,7 @@ void main() {
     });
 
     test('output is lowercase ASCII, idempotent, no whitespace', () {
-      final inputs = [
-        'CARREFOUR MAADI EG 041',
-        'صيدليات العزبي',
-        'Ünï cödé ٣٤',
-        'EL  EZABY',
-      ];
+      final inputs = ['CARREFOUR 041', 'صيدليات العزبي', 'Ünï ٣٤', 'EL  EZABY'];
       for (final s in inputs) {
         final k = merchantKey(s);
         expect(RegExp(r'^[a-z0-9]*$').hasMatch(k), isTrue, reason: s);

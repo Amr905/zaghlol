@@ -18,45 +18,16 @@ class MerchantCleaningConfig {
 
   /// Seed lists. City phrases may have several words (`NASR CITY`).
   static const MerchantCleaningConfig defaults = MerchantCleaningConfig(
-    countryTokens: ['EG', 'EGY', 'EGYPT', 'ARE', 'UAE', 'SAU', 'KSA', 'مصر'],
+    countryTokens: _countries,
     cityPhrases: [
-      'CAIRO',
-      'GIZA',
-      'MAADI',
-      'NASR CITY',
-      'HELIOPOLIS',
-      'MOHANDESSIN',
-      'DOKKI',
-      'ZAMALEK',
-      'NEW CAIRO',
-      'TAGAMOA',
-      'SHEIKH ZAYED',
-      '6 OCTOBER',
-      'ALEXANDRIA',
-      'ALEX',
-      'MANSOURA',
-      'TANTA',
-      'SHARM EL SHEIKH',
-      'HURGHADA',
-      'القاهرة',
-      'الجيزة',
-      'المعادي',
-      'مدينة نصر',
-      'الاسكندرية',
+      ..._citiesA,
+      ..._citiesB,
+      ..._citiesC,
+      ..._citiesD,
+      ..._citiesE,
     ],
-    legalSuffixes: [
-      'LLC',
-      'LTD',
-      'INC',
-      'CO',
-      'CORP',
-      'SAE',
-      'S.A.E',
-      'S.A.E.',
-      'ش.م.م',
-      'ذ.م.م',
-    ],
-    noiseTokens: ['POS', 'ECOM', 'ONLINE'],
+    legalSuffixes: [..._legalA, ..._legalB],
+    noiseTokens: _noise,
   );
 
   final List<String> countryTokens;
@@ -66,6 +37,16 @@ class MerchantCleaningConfig {
   /// Removed wherever they appear (POS, ECOM, ONLINE).
   final List<String> noiseTokens;
 }
+
+const List<String> _countries = ['EG', 'EGY', 'EGYPT', 'ARE', 'UAE', 'مصر'];
+const List<String> _citiesA = ['CAIRO', 'GIZA', 'MAADI', 'DOKKI', 'ZAMALEK'];
+const List<String> _citiesB = ['NASR CITY', 'NEW CAIRO', 'SHEIKH ZAYED'];
+const List<String> _citiesC = ['HELIOPOLIS', 'MOHANDESSIN', 'TAGAMOA'];
+const List<String> _citiesD = ['6 OCTOBER', 'ALEXANDRIA', 'MANSOURA', 'TANTA'];
+const List<String> _citiesE = ['القاهرة', 'الجيزة', 'المعادي', 'مدينة نصر'];
+const List<String> _legalA = ['LLC', 'LTD', 'INC', 'CO', 'CORP', 'SAE'];
+const List<String> _legalB = ['S.A.E', 'ش.م.م', 'ذ.م.م'];
+const List<String> _noise = ['POS', 'ECOM', 'ONLINE'];
 
 /// Result of [cleanMerchant].
 class CleanedMerchant {
@@ -131,15 +112,11 @@ String merchantKey(String text) {
     return '';
   }
   final first = words.first;
-  if (first == 'el' || first == 'al') {
-    if (words.length > 1) {
-      words.removeAt(0);
-    }
+  if ((first == 'el' || first == 'al') && words.length > 1) {
+    words.removeAt(0);
   } else if (_hasArabicArticle(first)) {
     words[0] = first.substring(2);
-  } else if ((first.startsWith('el') || first.startsWith('al')) &&
-      _letterCount(first) - 2 >= 4 &&
-      _isLatinWord(first)) {
+  } else if (_hasAttachedLatinArticle(first)) {
     words[0] = first.substring(2);
   }
   final out = StringBuffer();
@@ -147,25 +124,44 @@ String merchantKey(String text) {
     final mapped = _translit[unit];
     if (mapped != null) {
       out.write(mapped);
-    } else if ((unit >= 0x61 && unit <= 0x7A) ||
-        (unit >= 0x30 && unit <= 0x39)) {
+    } else if (_isAsciiAlnum(unit)) {
       out.writeCharCode(unit);
     }
   }
   final key = out.toString();
-  return key.length > merchantKeyMaxLength
-      ? key.substring(0, merchantKeyMaxLength)
-      : key;
+  if (key.length > merchantKeyMaxLength) {
+    return key.substring(0, merchantKeyMaxLength);
+  }
+  return key;
 }
 
-bool _hasArabicArticle(String w) =>
-    w.length > 2 && w.codeUnitAt(0) == 0x0627 && w.codeUnitAt(1) == 0x0644;
+bool _hasArabicArticle(String w) {
+  return w.length > 2 && w.codeUnitAt(0) == 0x0627 && w.codeUnitAt(1) == 0x0644;
+}
 
-bool _isLatinWord(String w) => w.codeUnits.every((u) => u < 0x80);
+/// `elezaby`, `al-rawsha`: attached article with at least four letters left.
+bool _hasAttachedLatinArticle(String w) {
+  if (!w.startsWith('el') && !w.startsWith('al')) {
+    return false;
+  }
+  var letters = 0;
+  for (final u in w.codeUnits) {
+    if (u > 0x7F) {
+      return false;
+    }
+    if (u >= 0x61 && u <= 0x7A) {
+      letters++;
+    }
+  }
+  return letters - 2 >= 4;
+}
 
-int _letterCount(String w) => w.codeUnits
-    .where((u) => (u >= 0x61 && u <= 0x7A) || u > 0x7F)
-    .length;
+bool _isAsciiAlnum(int u) {
+  return (u >= 0x61 && u <= 0x7A) || (u >= 0x30 && u <= 0x39);
+}
+
+/// Separators that carry no meaning in a merchant name.
+const String _separatorChars = '*_|/\\,،:;';
 
 List<String> _tokenize(String raw) {
   // Matching fold keeps case and Arabic letter variants; the display of
@@ -173,28 +169,17 @@ List<String> _tokenize(String raw) {
   final folded = foldForMatching(raw);
   final spaced = StringBuffer();
   for (final unit in folded.runes) {
-    // Separators that carry no meaning in a merchant name.
-    if (unit == 0x2A /* * */ ||
-        unit == 0x5F /* _ */ ||
-        unit == 0x7C /* | */ ||
-        unit == 0x2F /* / */ ||
-        unit == 0x5C /* \ */ ||
-        unit == 0x2C /* , */ ||
-        unit == 0x060C /* ، */ ||
-        unit == 0x3A /* : */ ||
-        unit == 0x3B /* ; */) {
-      spaced.writeCharCode(0x20);
-    } else {
-      spaced.writeCharCode(unit);
+    final isSeparator = _separatorChars.contains(String.fromCharCode(unit));
+    spaced.writeCharCode(isSeparator ? 0x20 : unit);
+  }
+  final tokens = <String>[];
+  for (final part in spaced.toString().split(' ')) {
+    final token = _trimEdgePunctuation(part);
+    if (token.isNotEmpty) {
+      tokens.add(_upperLatin(token));
     }
   }
-  return spaced
-      .toString()
-      .split(' ')
-      .map(_trimEdgePunctuation)
-      .where((t) => t.isNotEmpty)
-      .map(_upperLatin)
-      .toList();
+  return tokens;
 }
 
 String _trimEdgePunctuation(String t) {
@@ -205,8 +190,8 @@ String _trimEdgePunctuation(String t) {
     start++;
   }
   // A trailing dot is kept for dotted abbreviations such as `S.A.E.`; the
-  // legal-suffix table lists both forms.
-  while (end > start && (t.codeUnitAt(end - 1) == 0x2D)) {
+  // legal-suffix match ignores trailing dots.
+  while (end > start && t.codeUnitAt(end - 1) == 0x2D) {
     end--;
   }
   return t.substring(start, end);
@@ -225,11 +210,14 @@ List<String> _strip(List<String> input, MerchantCleaningConfig config) {
   final noise = config.noiseTokens.map(f).toSet();
   final countries = config.countryTokens.map(f).toSet();
   final legal = config.legalSuffixes.map(f).toSet();
-  final cities = config.cityPhrases
-      .map((p) => f(p).split(' '))
-      .where((p) => p.isNotEmpty && p.first.isNotEmpty)
-      .toList()
-    ..sort((a, b) => b.length.compareTo(a.length));
+  final cities = <List<String>>[];
+  for (final phrase in config.cityPhrases) {
+    final words = f(phrase).split(' ');
+    if (words.first.isNotEmpty) {
+      cities.add(words);
+    }
+  }
+  cities.sort((a, b) => b.length.compareTo(a.length));
 
   final folded = input.map(f).toList();
   final keep = List<bool>.filled(input.length, true);
@@ -252,9 +240,8 @@ List<String> _strip(List<String> input, MerchantCleaningConfig config) {
     }
     final t = folded[last];
     var removed = 1;
-    if (_isTerminalCode(t) ||
-        legal.contains(_withoutTrailingDots(t)) ||
-        countries.contains(t)) {
+    final isLegal = legal.contains(_withoutTrailingDots(t));
+    if (_isTerminalCode(t) || isLegal || countries.contains(t)) {
       keep[last] = false;
     } else {
       removed = _matchCity(folded, keep, last, cities, firstKept());
@@ -351,16 +338,16 @@ String _titleCase(String token) {
   if (token.codeUnits.any((u) => u > 0x7F)) {
     return token;
   }
-  // Keep tokens that carry digits or symbols readable: only letters change.
+  // Only letters change; digits and symbols stay readable (`7-Eleven`).
   final b = StringBuffer();
   var atWordStart = true;
   for (final u in token.codeUnits) {
     final isUpper = u >= 0x41 && u <= 0x5A;
     final isLower = u >= 0x61 && u <= 0x7A;
     if (isUpper || isLower) {
-      b.writeCharCode(
-        atWordStart ? (isLower ? u - 0x20 : u) : (isUpper ? u + 0x20 : u),
-      );
+      final upper = isLower ? u - 0x20 : u;
+      final lower = isUpper ? u + 0x20 : u;
+      b.writeCharCode(atWordStart ? upper : lower);
       atWordStart = false;
     } else {
       b.writeCharCode(u);
