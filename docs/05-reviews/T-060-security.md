@@ -1,0 +1,97 @@
+# Review — T-060 Android share/paste intake (C4: code review + security/privacy review)
+
+| Field | Value |
+|-------|-------|
+| Reviewer(s) | code-reviewer (Opus, also checks tests) + security-privacy-reviewer (Opus), combined pass |
+| Date | 2026-11-10 |
+| Commit / diff | origin/main...origin/task/T-060-share-intake @fe94cc2 (generated `*.g.*` skipped) |
+| Earlier review | `docs/05-reviews/T-060.md` on `origin/review/T-060-code` (Sonnet, F1-F12) |
+| CI | PC runner: all steps pass except the known T-007 `fts_benchmark_test` flake (FU-069). Instrumented test and manual device steps 1-11 **not run** (no device). |
+| Verdict | **CHANGES_REQUESTED**: 1 code major (C1). No security finding at Critical/High/Medium. |
+
+## 1. Code
+
+### 1.1 Earlier findings F1-F12
+
+| # | Status | Evidence |
+|---|--------|----------|
+| F1 | Resolved (Lead decision) | ACs re-scoped in `T-060.md`. Wiring owners listed in FU-067: T-047 startup/resume poll, T-024 routes, T-080 confirm-before-save, T-161 OCR, T-158 PDF/CSV import, T-103 lock gate. Manual steps 1-11 must pass before M2 closes. |
+| F2 | Resolved | `ShareStore.capacity()` (`ShareStore.kt:159-168`) counts `.meta` plus in-flight `.bin.tmp` against 10 shares, and every file's bytes against 100 MiB. `Writer.write` enforces the remaining budget (`:70-74`). `ShareIntake.acceptStream` fails fast before opening the stream (`ShareIntake.kt:73`). Tests: `tooManyPendingShares…`, `theCountCapIncludesWritesInProgress`, `theByteCapStopsAWriteMidway…`, `staleSharesDoNotCountAgainstTheCaps`. |
+| F3 | Resolved, with a residual (S1) | The deadline is counted from arrival (`ShareActivity.kt:58`). `checkDeadline` runs after every read and before commit. The watchdog closes the stream at 20 s, and `giveUp` rejects at 23 s. Recreation re-attaches by job id (`:35-45`, `ShareJob.kt`). The tests cover drip-feed, a share queued past its deadline, a cancelled read and job delivery across recreation. One gap remains: a provider that never returns from `openInputStream` is not cancellable. See S1. |
+| F4 | Resolved | `ShareUriPolicy.isAllowed` (`ShareSource.kt:44-59`) refuses non-`content` schemes, any userinfo (`IntentShareSource.kt:38`, checked on both `userInfo` and a raw `@` in `encodedAuthority`), a host equal to the package or under `<pkg>.` (lowercase, port-free), and any authority whose `resolveContentProvider` package is ours. JVM tests and an instrumented test with real `Uri` parsing cover these cases. |
+| F5 | Resolved | `SpoolKey` (`spool/SpoolKey.kt`) is the only owner of the alias. `GetOrCreate` does the load-or-create under one lock (`GetOrCreate.kt:13`). There is a JVM test with 16 concurrent callers and an instrumented test of the real Keystore under concurrency. The contract for T-039 is in FU-068 and in `T-039.md`. Note C1 on the key's StrongBox setting. |
+| F6 | Resolved | `ShareStore.authentic` (`ShareStore.kt:179-192`) deletes only on `AEADBadTagException` or `Corrupt`, and a size mismatch counts as `Corrupt`. Other `GeneralSecurityException`, `RuntimeException` and `IOException` errors become `Transient`, which maps to `IO_ERROR` and keeps the share. Android Keystore maps `KM_ERROR_VERIFICATION_FAILED` to `AEADBadTagException`, so a real tamper is proven, and the instrumented test checks this. `OutOfMemoryError` maps to `IO_ERROR` in the host. |
+| F7 | Resolved | A 128-bit `SecureRandom` hand-off token is compared in constant time and checked together with the action (`ShareHandOff.kt`). Only a token-bearing intent can take the refusal slot in `onNewIntent`. `onResume` only lists the store. The received-share slot has been removed. |
+| F8 | Resolved | `noBackupFilesDir/share/` (`ShareStores.kt`), separate from `spool/`. |
+| F9 | Resolved | `BitmapBoundsProbe` (`inJustDecodeBounds`) runs on the first 4 MiB. A share over 64 MP is refused as `tooLarge`, and a share whose bounds cannot be read is refused as `unsupportedType`. Both checks run before anything is stored. |
+| F10 | Resolved | Approval is recorded in `platform-channels.md` §2.1. |
+| F11 | Resolved | AAD `zaghlol.share.v1\|meta\|<id>` and `…\|body\|<id>\|<kind>`. Tests cover swapping a body or a meta file between shares and AAD differences by role, id and kind. |
+| F12 | Resolved | Imports in `ShareIntakeInstrumentedTest.kt` are ordered. |
+
+### 1.2 New code findings
+
+| # | Severity | File:line | Issue | Required change |
+|---|----------|-----------|-------|-----------------|
+| C1 | **major** | `platform/spool/SpoolKey.kt:43,56` (`create()` asks for StrongBox on API 28+); `KeystoreShareCipher.kt:15-22`; `ShareLimits.kt:33` (20 s deadline) | The share path pushes up to 20 MiB through the Keystore cipher inside the 20 s intake deadline, and `readShare` decrypts the same amount again. On devices that have StrongBox (most Pixels and Samsung flagships), `SpoolKey` creates the key in StrongBox. Android's Keystore guide warns that StrongBox ["is slower, more resource-constrained, and supports fewer concurrent operations"](https://developer.android.com/privacy-and-security/keystore?hl=en). Every `CipherOutputStream.write` is a Keystore `update` that goes to the secure element. This is unmeasured, but it makes it likely that large images and PDFs hit the deadline and are refused as `unreadable` on exactly those devices, which would defeat AC2. A long streaming operation also holds one of StrongBox's few operation slots while T-039 receivers need the same key. The contract (`platform-channels.md` §1.3, `security-model.md` K_spool "StrongBox if present") was written for small spool entries, but K_spool also covers images, PDFs and export staging. The cheapest time to settle this is now, before T-039 builds on the alias. | Before merge, do one of the following. **(a)** Create `zaghlol_spool_v1` without StrongBox. A TEE key is still hardware-backed and non-exportable. Amend §1.3 and K_spool with the Lead/architect, record the reason, and update FU-068. This is a one-line code change. **(b)** Keep StrongBox for the spool and use a separate TEE alias for bulk data (shares, export staging), with the same `SpoolKey`-style single owner. **(c)** Keep the code as it is, but attach a measurement from a StrongBox device: a 20 MiB PDF ingested within the deadline and read back by `readShare` in a reasonable time. Without a device, (a) is the practical option. |
+| C2 | minor (FU) | `ShareIntake.kt:69-71` | When the provider reports a type that we do not accept (for example `application/zip`), the code falls back to the intent's type instead of refusing. The design note says the declared MIME must be allowed. Magic-byte sniffing still blocks wrong content, so the impact is low. | Refuse when `resolverType()` is non-null and maps to no kind. Fall back to the intent's type only when the provider reports none. Add a test. |
+| C3 | minor (FU) | `ShareActivity.kt:63-80` | Race between `giveUp` and a late commit. A commit that starts just before 20 s (fsync plus a meta encryption on a slow Keystore) can finish after the 3 s grace. The share is then stored **and** an `unreadable` refusal is announced. This is UX only. | In the worker, skip `commit()` when the job already has an outcome: check `newJob` under its lock, or pass a "still wanted" flag into `accept`. |
+| C4 | minor (FU) | `ShareClassifier.kt:224-227`, `BitmapBoundsProbe.kt`; minSdk 26 | `BitmapFactory` decodes HEIF only from API 28. On Android 8.x, a HEIC photo passes the sniff, fails the bounds probe, and is refused as `unsupportedType`. | Document this in manual step 2 and in the copy for the refusal, or skip the HEIF brands below API 28. |
+| C5 | nit (FU) | `ShareActivity.kt:118-131` | If the user leaves the share activity mid-copy, `openApp()` runs from a stopped activity. Android 10+ background-activity-launch rules may block it, and the share then shows up on the next open. That behaviour is fine, but it is not written down. | Add it to manual step 5 or 9 and to §2.1. |
+
+### 1.3 Tests
+There are 73 JVM tests in `share/` and `spool/`. They test behaviour and boundaries: limits at and one byte over, the URI policy including userinfo, case, port and resolve-to-us, mid-copy failure leaving nothing behind, files on disk holding no plaintext, tamper and truncation tests, wrong key, AAD swaps, transient errors keeping the share, caps including in-flight writes, deadline, cancel, pixel cap, purge, path-traversal ids, job delivery across recreation, the token and single key creation. The software test cipher uses a random 12-byte nonce, the same as production. The Dart fake-native test covers events, polling, dedupe across resume re-announcements, retry after `IO_ERROR`, and discard.
+
+Missing (follow-up, not blocking): a test where `open()` never returns (S1), a test for C2, and any device run. The instrumented test and manual steps 1-11 must run before M2 closes (FU-067). After C1 is settled, add to the instrumented suite a timing check of a 15 MiB stream through the real `KeystoreShareCipher`.
+
+## 2. Security
+
+### 2.1 Findings
+
+| # | Severity | File:line | Leak / exploit path | Required change |
+|---|----------|-----------|---------------------|-----------------|
+| S1 | Low (FU) | `IntentShareSource.kt:57-66`, `ShareActivity.kt:117` (single-thread `EXECUTOR`) | A hostile app shares a URI to its own provider whose `openFile` never returns. `cancel()` can only close a stream that has already been opened, so the binder call blocks the only worker for the life of the process. Every later share times out in `giveUp` as `unreadable`. The share feature is denied until the process dies. No data is exposed. `resolverType()` (provider `getType`) has the same exposure. | Open with `resolver.openAssetFileDescriptor(uri, "r", cancellationSignal)` and call `cancellationSignal.cancel()` from `cancel()`. Also run each job on its own thread from a small bounded pool (for example 2), so one stuck provider cannot block the next share. Add a JVM test with an opener that never returns. |
+| S2 | Low (FU) | `ShareSource.kt:44-59` (`ShareUriPolicy`) | Confused deputy through the app's own permissions. The own-provider refusal stops another app from making us read **our** provider. It does not stop us from reading **system** providers that only we can read. In the SMS flavor we hold `READ_SMS`, so an app without that permission can share `content://mms/part/<id>` as `image/jpeg`, and we import the user's MMS attachment. The data does not go back to the attacker: it stays encrypted locally and the user must confirm it. So this is an integrity and consent issue, not a leak. | Refuse the authorities that our permissions unlock: `sms`, `mms`, `mms-sms`, `call_log`, `com.android.contacts`, `contacts`. Do not block `media` (Gallery shares use it). Add a test. |
+| S3 | Info | `AndroidManifest.xml` `ShareActivity` | Any foreground app can start the exported activity with forged text, such as a fake "card charged" message. It can fill the 10-share cap for 24 h or put a fake transaction in front of the user. Background-activity-launch rules limit this to foreground apps, and the cap and deadline limit the cost. | No change here. T-080 and T-161 (FU-067) must keep confirm-before-save mandatory, never auto-save, and label the item as "shared". |
+| S4 | Info | `ShareIntake.kt` (`text`, `ByteArrayOutputStream`), `ShareStore.read` | Plaintext sits on the heap as `String` and `byte[]` and is never zeroed. `EXTRA_TEXT` stays in the activity record until the share activity finishes (≤23 s). This is no worse than the Dart side, which has to hold the content to show it. | Accept. |
+| S5 | Info | `BitmapBoundsProbe.kt` | Untrusted image headers are parsed by the platform codec in the app process, which also holds the DB key. Bounds-only parsing is a small surface, and the full decode comes later in T-161 anyway. | Accept. Keep the sample-size decode in T-161, and treat the PDF parser in T-158 the same way. |
+
+### 2.2 Judgements on the requested surface
+- **Exported `ShareActivity` / `MainActivity`, spoofing.** `ShareActivity` accepts only `ACTION_SEND`, everything else calls `finish()`, and it re-validates everything itself. A spoofed `SHARE_READY` sent to `MainActivity` cannot take the refusal: the token is per-process, comes from `SecureRandom`, is compared in constant time, and exists only inside our own explicit intent. Re-announcing on resume sends metadata only. No grant flags, URI or content are forwarded to `MainActivity`, so there is no re-grant or confused deputy on the way out. Sound.
+- **Task affinity / StrandHogg.** Both activities have `taskAffinity=""`, and `MainActivity` is `singleTop`. No other app can share an empty affinity, and the hand-off with `NEW_TASK|CLEAR_TOP|SINGLE_TOP` finds the existing Zaghlol task by component. `ShareActivity` is `excludeFromRecents`. Sound. Manual step 9 still has to confirm it on a device.
+- **Recreation.** The job id is saved in the instance state. Ids from an earlier process have a different random prefix, so a restored id can never attach to a new job, and a dead process falls back to `openApp()` and polling. Shares are never ingested twice. Sound.
+- **Removal of `noHistory`.** Correct. `noHistory` would finish the activity when the user leaves, which ends the read grant tied to that activity in the middle of a copy. The activity still finishes itself within about 23 s. Leaving the share activity alive in the sender's task is acceptable because it has no UI and is excluded from Recents.
+- **URI handling.** Only `content://`. Userinfo is refused. The host check is lowercase and port-free. Providers that resolve to us are refused. `ClipData` grants are migrated by the platform, and we read `EXTRA_STREAM` only. Provider redirects (a provider returning any fd it likes) are the provider's own data and cannot reach our private files. See S2 for system providers.
+- **Resource exhaustion.** Caps on count, bytes (including in-flight writes) and per kind are enforced on bytes actually read. The deadline is counted from arrival. A 4 MiB probe buffer, one worker. The 64 MP cap is enforced natively before storage. Residual: S1.
+- **Key lifecycle (`SpoolKey`).** There is one owner and one process-wide lock. The single-process assumption is written down, and FU-068 covers what to do if a component moves to another process. The StrongBox-to-TEE fallback catches `ProviderException`, which is the superclass of `StrongBoxUnavailableException`. There is no user-authentication requirement, so there is no biometric invalidation. A lost key is recreated silently, and old data then fails authentication and is deleted, which is the documented behaviour. T-039 owns `KEY_INVALIDATED`. Nonces are generated by the Keystore (`setRandomizedEncryptionRequired(true)`), random 96-bit per operation, and the cipher instance is not shared, so concurrent use is safe and the volume is far below the random-nonce bound. See C1 on StrongBox.
+- **AEAD binding / deletion.** The AAD binds id, role and kind. A size check catches length games inside authenticated data. Files are deleted only on proof (bad tag, truncation, malformed metadata). Sound.
+- **Plaintext exposure.** `.tmp` files are written through the cipher, so nothing on disk is plaintext (tested). There is no cache dir, no `Log` in `share/` or `spool/`, and error messages are fixed strings with no cause attached. Pigeon's generic `wrapError` is not reached on the documented paths. The descriptor holds only our canonical MIME, never the sender's strings. Dart does not log. Heap: see S4.
+- **Location (T-165).** `noBackupFilesDir/share/`, with `allowBackup=false` and data-extraction rules that exclude every domain for cloud backup and device transfer. Sound.
+- **Data egress.** No network code and no new dependencies, apart from test-only `androidTest` artifacts. Nothing leaves the phone.
+- **Follow-up ownership.** FU-067 (owners T-047, T-024, T-080, T-161, T-158, T-103, plus the device steps), FU-068 (T-039 key and directory contract) and FU-069 (T-016 benchmark flake) are adequate. Please file **FU-070** (T-060 hardening, owner: a T-060 follow-up or T-039) for C2-C5 and S1-S2. Update FU-068 with the outcome of C1.
+
+## 3. Verdict
+
+**CHANGES_REQUESTED.** One blocking item:
+
+- **C1 (code major):** the spool key is StrongBox-backed while it encrypts up to 20 MiB inside a 20 s deadline. Either decide on a TEE-only key (or a separate TEE alias for bulk data), recorded in §1.3 and K_spool, or provide a device measurement.
+
+All other findings are follow-ups (FU-070). After the C1 decision and its one-line change land, a delta re-review on Sonnet is enough.
+
+## Re-review (delta) @2d3f96a (diff fe94cc2..2d3f96a)
+
+Scope: SpoolKey.kt, SpoolKeySpecTest.kt, platform-channels.md 1.3, security-model.md K_spool row, implementation-status FU-068/FU-070. PC runner PASS reported at 2d3f96a.
+
+**C1 closed.**
+- `SpoolKey.generate()` no longer calls `setIsStrongBoxBacked`, and the `strongBox` parameter, the `Build` import and the `ProviderException` retry are removed. No StrongBox request or fallback remains in K_spool generation.
+- Other KeyGenParameterSpec parameters are unchanged: AES, GCM, no padding, randomized encryption required, user auth not required, 128-bit tag, non-exportable by default. Alias `zaghlol_spool_v1` is unchanged.
+- The `GetOrCreate(load, create)` process-wide lock holder is untouched, so the F5/F8 lock is intact.
+- K_db (T-015) is not in the diff. The docs state it keeps StrongBox-with-fallback.
+- Docs are consistent: the KDoc, platform-channels 1.3, the security-model K_spool row and FU-068 all say TEE-backed and never StrongBox, and cite the Lead decision.
+- Dropping the retry is safe: with no StrongBox request, a `ProviderException` is a real failure and surfaces instead of being masked. Devices without a TEE transparently get the software-backed AndroidKeyStore, which is the same trust level as before the fallback.
+
+**New findings:** none at Medium or above.
+- Info D1: `REQUEST_STRONGBOX` is an `internal const` that is not wired into the code. `SpoolKeySpecTest` asserts it is false and also source-greps for `setIsStrongBoxBacked` and `StrongBoxUnavailable` outside comments, so the guard is the grep and the constant is documentation only. Accept.
+- Info D2: the test locates the source by relative path with a fixed candidate list, and `first` throws if none exists. A CI working-directory change would fail loudly, which is fail-safe. Accept.
+- FU-070 contains the earlier C2-C5/S1-S5 follow-ups as agreed. None is "before merge".
+
+**Verdict: APPROVED** (security section; C1 resolved, no new blocker/major).

@@ -60,7 +60,7 @@ A malformed config makes the Guard **fail closed for unknown senders** but still
 
 | | Android | iOS |
 |---|---|---|
-| Key | Keystore AES-256-GCM key `zaghlol_spool_v1`, non-exportable, `setUserAuthenticationRequired(false)`, StrongBox if available | Keychain item `spool_key_v1` (32 random bytes) with `kSecAttrAccessibleAfterFirstUnlockThisDeviceOnly`, shared access group with the Share Extension |
+| Key | Keystore AES-256-GCM key `zaghlol_spool_v1`, non-exportable, `setUserAuthenticationRequired(false)`, TEE-backed AndroidKeyStore, not StrongBox (bulk data; Lead decision 2026-11-10, T-060 review C1) | Keychain item `spool_key_v1` (32 random bytes) with `kSecAttrAccessibleAfterFirstUnlockThisDeviceOnly`, shared access group with the Share Extension |
 | Location | `noBackupFilesDir/spool/` | App Group container `spool/`, `isExcludedFromBackup = true` |
 | Entry file | `<ulid>.bin` = nonce(12) ‖ AES-GCM(CBOR{channel, source, body, receivedAt, simSlot, guardInst, guardLast4}) ‖ tag | same |
 | Write | atomic: write `.tmp`, fsync, rename | `Data.write(options: .atomic)` |
@@ -116,6 +116,39 @@ abstract class CaptureEventsApi { void onSpoolChanged(int pendingCount); void on
   - `dataExtractionRules` exclude everything (FR-SEC-05);
   - `FLAG_SECURE` plus `setRecentsScreenshotEnabled(false)` when app lock is on (FR-SEC-02);
   - share intent filters for `text/plain`, `image/*`, `application/pdf`, `text/csv`.
+
+### 2.1 Share intake (T-060; contract addition, `app/pigeons/share_intake_api.dart`)
+
+**Approved by Lead 2026-11-10 (T-060 review).** The capture API above has no way to hand a shared file to Dart, so T-060 adds a separate Pigeon file. `AndroidCaptureHostApi` is unchanged.
+
+```dart
+enum ShareKind { text, image, pdf, csv }
+enum ShareRejectReason { tooLarge, unsupportedType, unreadable, empty }
+class ShareDescriptor { String id; ShareKind kind; String mimeType; int sizeBytes; int receivedAtMs; }   // metadata only
+class ShareContent { ShareDescriptor descriptor; String? text; Uint8List? bytes; }                         // decrypted, in memory only
+
+@HostApi()
+abstract class ShareIntakeHostApi {
+  List<ShareDescriptor> listPendingShares();   // oldest first; purges shares older than 24 h
+  ShareContent readShare(String id);           // IO_ERROR (unknown id, or transient: share kept) | SPOOL_DECRYPT_FAILED (not authentic: entry deleted)
+  void discardShare(String id);                // idempotent
+  ShareRejectReason? takePendingRejection();   // once
+}
+@FlutterApi()
+abstract class ShareIntakeEventsApi { void onShareReceived(ShareDescriptor d); void onShareRejected(ShareRejectReason r); }
+```
+
+- **`ShareActivity`** (exported; `ACTION_SEND`, MIME `text/plain`, `image/*`, `application/pdf`, `text/csv`; no UI, no permission, `excludeFromRecents`, empty `taskAffinity`): validates and encrypts on one worker thread, then opens `MainActivity` with an explicit intent that carries no content, only a per-process random hand-off token.
+  - **Time bound:** the whole intake must finish within 20 s of the share arriving. Past it the sender's stream is closed, nothing is committed (the partial file is deleted) and the share is refused as `unreadable`; 3 s later the activity gives up on the worker regardless.
+  - **Recreation:** the job id is kept in the saved instance state; a recreated activity re-attaches to the running job and never ingests the same share twice.
+- **`MainActivity`** (exported launcher): a `SHARE_READY` intent is honoured only with the matching token, and only that may consume the refusal slot. On **every resume** it announces every pending share with `onShareReceived` (it reads the store only, so a spoofed intent cannot consume anything). Dart deduplicates by id and also calls `takePendingRejection()` and `listPendingShares()` at startup and on every resume.
+- **Storage:** `noBackupFilesDir/share/<id>.bin` + `<id>.meta`, a directory of its own (never under `spool/`: the share store purges by age, the T-039 spool deletes only on ack). Both files are `nonce(12) || AES-256-GCM` with the spool key `zaghlol_spool_v1` (section 1.3), with AAD `zaghlol.share.v1|meta|<id>` and `zaghlol.share.v1|body|<id>|<kind>`, so files cannot be swapped between shares, roles or kinds. The key is obtained only through `SpoolKey` (`app.zaghlol.platform.spool`), which serialises get-or-create process-wide; T-039 must reuse it. Every share, text included, is stored this way until `discardShare`. Dart discards after the user confirms or cancels.
+- **Read errors:** a share is deleted only on proof that it is bad (GCM authentication failure, truncation, malformed metadata): `SPOOL_DECRYPT_FAILED`. I/O or Keystore failures return `IO_ERROR` and keep the share for a retry.
+- **Limits (native, on bytes read):** text 100,000 chars; image 15 MiB and at most 64,000,000 decoded pixels (bounds read with `BitmapFactory` `inJustDecodeBounds` from the first 4 MiB; an image whose bounds cannot be read is refused as `unsupportedType`); PDF 20 MiB; CSV 5 MiB. At most 10 pending shares and 100 MiB on disk; beyond either the new share is refused as `tooLarge` (before the sender's stream is opened when the count is reached). Images are accepted only as PNG, JPEG, WEBP or HEIC/HEIF by magic bytes; PDFs by `%PDF-`; text files must be valid UTF-8; CSV may be any text encoding but not binary.
+- **URIs:** only `content://` is read. A URI with user info (`content://x@host/...`) is refused, and so is any host equal to this app's package or starting with `<package>.` (compared on `Uri.getHost()`, lowercase) and any authority that resolves to a provider of this app.
+- **Paste** is a Dart-side clipboard read on a user tap. Native code never reads the clipboard.
+- Shared text does **not** go through the Capture Guard: it is user-initiated and always shown for confirmation (FR-ING-A-04). The confirmation stays mandatory (no auto-save).
+- **Dart side owners** (wiring, routing, app-lock gate): FU-067 in `docs/implementation-status.md`.
 
 ## 3. iOS (`IosCaptureHostApi`, App Intents, extensions)
 

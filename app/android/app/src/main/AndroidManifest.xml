@@ -38,6 +38,29 @@
                 <category android:name="android.intent.category.LAUNCHER"/>
             </intent-filter>
         </activity>
+        <!-- T-060 / FR-ING-A-04: share-to-Zaghlol target. Exported because other
+             apps must be able to start it; it accepts only ACTION_SEND with
+             the four declared MIME types, has no UI, requests no permission
+             (the sender grants read access to the shared content:// URI) and
+             re-validates type, size and URI scheme itself. See
+             platform/share/ShareActivity.kt. No noHistory: leaving the
+             activity mid-copy must not finish it (the read grant is tied to
+             it); it finishes itself within the intake deadline (T-060 F3). -->
+        <activity
+            android:name=".platform.share.ShareActivity"
+            android:exported="true"
+            android:excludeFromRecents="true"
+            android:taskAffinity=""
+            android:theme="@android:style/Theme.Translucent.NoTitleBar">
+            <intent-filter>
+                <action android:name="android.intent.action.SEND"/>
+                <category android:name="android.intent.category.DEFAULT"/>
+                <data android:mimeType="text/plain"/>
+                <data android:mimeType="image/*"/>
+                <data android:mimeType="application/pdf"/>
+                <data android:mimeType="text/csv"/>
+            </intent-filter>
+        </activity>
         <!-- Don't delete the meta-data below.
              This is used by the Flutter tool to generate GeneratedPluginRegistrant.java -->
         <meta-data
