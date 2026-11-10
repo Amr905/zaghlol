@@ -189,8 +189,8 @@ Every task file has: ID, description, technical details, dependencies, affected 
 | [T-124](tasks/T-124.md) | Install registration, install-token auth, rate limits, idempotency, strict DTOs | US-13-1 | High* | Opus | backend-engineer | T-122, T-123, T-006 | B | 3 | DONE |
 | [T-125](tasks/T-125.md) | Catalog versions, deltas, signed full snapshots and admin draft/publish | US-13-1 | High | Opus | backend-engineer | T-122, T-123 | B | 3 | DONE |
 | [T-126](tasks/T-126.md) | Feature flags with targeting rules and admin endpoints | US-13-1 | Medium | Sonnet | backend-engineer | T-122 | B | 3 | DONE |
-| [T-127](tasks/T-127.md) | Price service: local Egyptian gold-market adapter, FX adapter, worker, override | US-12-1 | High | Sonnet | backend-engineer | T-122 | B | 3 | BLOCKED |
-| [T-128](tasks/T-128.md) | Daily POST /v1/sync with throttle, contributions and bank-request intake | US-13-1 | High* | Opus | backend-engineer | T-124, T-125, T-126, T-127, T-123 | B | 4 | TODO |
+| [T-127](tasks/T-127.md) | Price service: local Egyptian gold-market adapter, FX adapter, worker, override | US-12-1 | High | Sonnet | backend-engineer | T-122 | B | 3 | DONE |
+| [T-128](tasks/T-128.md) | Daily POST /v1/sync with throttle, contributions and bank-request intake | US-13-1 | High* | Opus | backend-engineer | T-124, T-125, T-126, T-127, T-123 | B | 4 | DONE |
 | [T-129](tasks/T-129.md) | Contribution aggregation, review list and promote/reject | US-13-2 | Medium | Sonnet | backend-engineer | T-128, T-125 | B | 5 | TODO |
 | [T-130](tasks/T-130.md) | Google Play purchase verification, acknowledgement and sweeper | US-14-1 | High* | Opus | backend-engineer | T-124, T-123 | B | 4 | TODO |
 | [T-131](tasks/T-131.md) | App Store verification (JWS chain, Server API status, appAccountToken) | US-14-1 | High* | Opus | backend-engineer | T-124, T-123 | B | 4 | TODO |
@@ -198,7 +198,7 @@ Every task file has: ID, description, technical details, dependencies, affected 
 | [T-133](tasks/T-133.md) | Google RTDN push endpoint, processing worker and voided reconciliation | US-14-1 | High* | Opus | backend-engineer | T-130 | B | 5 | TODO |
 | [T-134](tasks/T-134.md) | App Store Server Notifications V2 endpoint and reconciliation | US-14-1 | High* | Opus | backend-engineer | T-131 | B | 5 | TODO |
 | [T-135](tasks/T-135.md) | Accounts: Google/Apple ID token sign-in, linking, sign-out, delete, Android Apple callback | US-15-1 | High* | Opus | backend-engineer | T-132, T-182, T-184 | B | 6 | TODO |
-| [T-136](tasks/T-136.md) | Operator auth (OIDC + MFA), roles, audit log and support lookup | US-13-2 | High* | Opus | backend-engineer | T-122 | B | 3 | TODO |
+| [T-136](tasks/T-136.md) | Operator auth (OIDC + MFA), roles, audit log and support lookup | US-13-2 | High* | Opus | backend-engineer | T-122 | B | 3 | IN_REVIEW |
 | [T-137](tasks/T-137.md) | zaghlol-ops CLI for catalog, flags, prices, contributions and support, plus support runbook | US-13-2 | High | Sonnet | backend-engineer | T-136, T-186, T-125, T-126, T-127, T-129 | B | 7 | TODO |
 | [T-138](tasks/T-138.md) | Backend observability: OpenTelemetry, metrics, dashboards, alert rules | US-21-1 | High | Sonnet | backend-engineer | T-005 | B | 2 | DONE |
 | [T-139](tasks/T-139.md) | Retention purger and log privacy settings | US-13-1 | Medium | Sonnet | backend-engineer | T-122, T-138 | B | 3 | TODO |

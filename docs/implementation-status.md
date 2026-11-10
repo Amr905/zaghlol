@@ -23,7 +23,7 @@
 | M2 | 29 | 0 | 0 | 0 |
 | M3 | 18 | 0 | 0 | 0 |
 | M4 | 17 | 0 | 0 | 0 |
-| M5 | 35 | 6 | 0 | 2 |
+| M5 | 35 | 8 | 1 | 1 |
 | M6 | 19 | 0 | 1 | 2 |
 | M7 | 11 | 0 | 0 | 0 |
 
@@ -156,8 +156,8 @@
 | T-124 | Install registration, install-token auth, rate limits, idempotency, strict DTOs | M5 | C4 | Opus | backend-engineer | T-122, T-123, T-006 | DONE | backend-ci 42691437478 + PR head green (Android NDK download flake re-run); reviews [T-124](05-reviews/T-124.md) APPROVED, [security](05-reviews/T-124-security.md) APPROVED after S-1 fix (delta re-review) | PR #15 squash-merged. Non-dev deploys must set ForwardedHeaders proxies or NoProxy=true |
 | T-125 | Catalog versions, deltas, signed full snapshots and admin draft/publish | M5 | C3 | Opus | backend-engineer | T-122, T-123 | DONE | backend-ci 42723599241 + PR head green; review [T-125](05-reviews/T-125.md) APPROVED | PR #20 squash-merged. Adds catalog_drafts; config Catalog:Snapshots:Directory/BaseUrl |
 | T-126 | Feature flags with targeting rules and admin endpoints | M5 | C2 | Sonnet | backend-engineer | T-122 | DONE | backend-ci 42720155392 + PR head green; review [T-126](05-reviews/T-126.md) APPROVED | PR #19 squash-merged. Operator auth = fail-closed seam until T-136 |
-| T-127 | Price service: local Egyptian gold-market adapter, FX adapter, worker, override | M5 | C3 | Sonnet | backend-engineer | T-122 | BLOCKED | — | Provider contract for local gold feed (D-41) needed before go-live; build continues with fakes |
-| T-128 | Daily POST /v1/sync with throttle, contributions and bank-request intake | M5 | C4 | Opus | backend-engineer | T-124, T-125, T-126, T-127, T-123 | TODO | — |  |
+| T-127 | Price service: local Egyptian gold-market adapter, FX adapter, worker, override | M5 | C3 | Sonnet | backend-engineer | T-122 | DONE | backend-ci 42789670558 + PR head green; review [T-127](05-reviews/T-127.md) APPROVED | PR #22 squash-merged. Fake provider only; real local gold / FX / spot adapters blocked on D-41 (BLK-03) before go-live |
+| T-128 | Daily POST /v1/sync with throttle, contributions and bank-request intake | M5 | C4 | Opus | backend-engineer | T-124, T-125, T-126, T-127, T-123 | DONE | backend-ci 42801208178 + PR head green; reviews [T-128](05-reviews/T-128.md) APPROVED, [security](05-reviews/T-128-security.md) APPROVED after S1/S2/S3 fixes (delta) | PR #24 squash-merged. PO accepted: lost reply waits a day; no server-side name detection |
 | T-129 | Contribution aggregation, review list and promote/reject | M5 | C2 | Sonnet | backend-engineer | T-128, T-125 | TODO | — |  |
 | T-130 | Google Play purchase verification, acknowledgement and sweeper | M5 | C4 | Opus | backend-engineer | T-124, T-123 | TODO | — |  |
 | T-131 | App Store verification (JWS chain, Server API status, appAccountToken) | M5 | C4 | Opus | backend-engineer | T-124, T-123 | TODO | — |  |
@@ -165,7 +165,7 @@
 | T-133 | Google RTDN push endpoint, processing worker and voided reconciliation | M5 | C4 | Opus | backend-engineer | T-130 | TODO | — |  |
 | T-134 | App Store Server Notifications V2 endpoint and reconciliation | M5 | C4 | Opus | backend-engineer | T-131 | TODO | — |  |
 | T-135 | Accounts: Google/Apple ID token sign-in, linking, sign-out, delete, Android Apple callback | M5 | C4 | Opus | backend-engineer | T-132, T-182, T-184 | TODO | — | Plan v1.1: R5-3(a) note |
-| T-136 | Operator auth (OIDC + MFA), roles, audit log and support lookup | M5 | C4 | Opus | backend-engineer | T-122 | TODO | — | Plan v1.1: support write endpoints → T-186 |
+| T-136 | Operator auth (OIDC + MFA), roles, audit log and support lookup | M5 | C4 | Opus | backend-engineer | T-122 | IN_REVIEW | backend-ci 42794656371 + PR head green; reviews [T-136](05-reviews/T-136.md) APPROVED, [security](05-reviews/T-136-security.md) APPROVED after S-1 fix (delta) | PR #23 squash-merged. AC3 (R4-6) and AC4 (R3-9) IdP evidence pending: PO chose "decide later" on the IdP. Advisory acrs default; Profile=Google refused at startup |
 | T-137 | zaghlol-ops CLI for catalog, flags, prices, contributions and support, plus support runbook | M5 | C3 | Sonnet | backend-engineer | T-136, T-186, T-125, T-126, T-127, T-129 | TODO | — | Plan v1.1: C2→C3 (order IDs, operator login) |
 | T-138 | Backend observability: OpenTelemetry, metrics, dashboards, alert rules | M5 | C3 | Sonnet | backend-engineer | T-005 | DONE | backend-ci 42528633775 (6/6) @ 4020b9e; mutation runs 42528095105, 42528424746; PR #11 squash-merged; [T-138](05-reviews/T-138.md) APPROVED (r3) | Closes FU-002, FU-008. FU-049 |
 | T-139 | Retention purger and log privacy settings | M5 | C2 | Sonnet | backend-engineer | T-122, T-138 | TODO | — |  |
@@ -279,6 +279,9 @@
 - **FU-056** (T-126 minors): `FlagRulesJson.Parse` drops malformed stored rule members (fails open, unreachable today); backend-api §4.8 should pin the exact `installId` text form in the rollout hash with a known-answer vector. See `docs/05-reviews/T-126.md`. Owner: T-128.
 - **FU-057** (T-125 minors/nits): no test for the stored-hash integrity check (tampered/missing `full.json.gz` → 500); full endpoint re-signs up to 8 MiB via KMS per origin request though a `.sig` is stored at publish (T-140); category `parent_code` and merchant `name_en` always NULL (draft has no field); raw `FromSql` on jsonb; fixed `.tmp` name assumes one writer. See `docs/05-reviews/T-125.md`. Owners: T-140, T-137.
 - **FU-058** (T-125/T-126): `/admin/v1/*` returns 401 for everyone until T-136 supplies a real `IOperatorTokenValidator` (OIDC + MFA, enabled `operators` row, 1 h lifetime). Owner: T-136.
+- **FU-059** (T-127 minors/nits): staleness judged across kinds hid a gold-only outage (resolved in T-128 by per-kind staleness); derived USD for a derived karat rounded twice (<0.01); `char.IsWhiteSpace` stricter than PostgreSQL `[:space:]`; "fifteen digits" wording; `ClearAsync` has no HTTP route (T-137 decides); price override writes its own audit SQL → move to the shared `IAuditWriter` (T-136 code minor 2). Owners: T-137, T-140.
+- **FU-060** (T-136 minors; security S-3…S-8): Google profile needs its own MFA rule before use (Q1); Entra token lifetime policy ≤60 min and `amr` in the presented token; **S-4: Enforced acrs mode or recorded conditional access is a go-live gate for T-186**; `seed-operator.sql` changes are unaudited; ID tokens accepted as API bearer; lookup counter role tag constant; no check that K_audit ≠ install-hash pepper; e-mail lookup scans `accounts`; OpenAPI still lists 404 for lookup. Owners: T-186, T-137, T-140, architect with Q1/Q2.
+- **FU-061** (T-128 code minors; security Info): intake drop counters emitted before the claim; 503 causes not logged/metered; `count_daily_active` app_version is free text; digits spelled as words / >3 separators pass (documented). Owners: T-129, T-140.
 
 ## Log
 | Date | Event |
@@ -333,3 +336,4 @@
 | 2026-11-09 | New Lead session (PO linked GitHub, upgraded Flutter). Merged #13 (T-007), #14 (T-013), #15 (T-124, one security fix round). 18/186 done. FU-050…FU-053 logged. |
 | 2026-11-10 | PC runner moved to Linux Docker containers (#17) with a locally built Flutter 3.47.9 image; first runs: app checks all PASS, backend build/format PASS, Testcontainers work. FU-054, FU-055 logged. |
 | 2026-11-10 | Merged #19 (T-126 flags) and #20 (T-125 catalog; operator-auth seam reconciled to T-126). 20/186 done. FU-056…FU-058 logged. |
+| 2026-11-10 | Merged #22 (T-127 prices, fakes), #23 (T-136 operator auth; IN_REVIEW pending IdP evidence), #24 (T-128 sync). PO: IdP "decide later"; accepted T-128 defaults. 22/186 done. FU-059…FU-061 logged. |
