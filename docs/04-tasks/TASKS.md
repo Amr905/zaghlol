@@ -187,8 +187,8 @@ Every task file has: ID, description, technical details, dependencies, affected 
 | [T-122](tasks/T-122.md) | EF Core model and initial migration for all backend tables + DB roles | US-13-1 | High* | Opus | backend-engineer | T-005 | B | 2 | DONE |
 | [T-123](tasks/T-123.md) | Signing service (ES256 via KMS abstraction) and response-signature middleware | US-13-1 | High* | Opus | backend-engineer | T-005 | B | 2 | DONE |
 | [T-124](tasks/T-124.md) | Install registration, install-token auth, rate limits, idempotency, strict DTOs | US-13-1 | High* | Opus | backend-engineer | T-122, T-123, T-006 | B | 3 | DONE |
-| [T-125](tasks/T-125.md) | Catalog versions, deltas, signed full snapshots and admin draft/publish | US-13-1 | High | Opus | backend-engineer | T-122, T-123 | B | 3 | TODO |
-| [T-126](tasks/T-126.md) | Feature flags with targeting rules and admin endpoints | US-13-1 | Medium | Sonnet | backend-engineer | T-122 | B | 3 | TODO |
+| [T-125](tasks/T-125.md) | Catalog versions, deltas, signed full snapshots and admin draft/publish | US-13-1 | High | Opus | backend-engineer | T-122, T-123 | B | 3 | DONE |
+| [T-126](tasks/T-126.md) | Feature flags with targeting rules and admin endpoints | US-13-1 | Medium | Sonnet | backend-engineer | T-122 | B | 3 | DONE |
 | [T-127](tasks/T-127.md) | Price service: local Egyptian gold-market adapter, FX adapter, worker, override | US-12-1 | High | Sonnet | backend-engineer | T-122 | B | 3 | BLOCKED |
 | [T-128](tasks/T-128.md) | Daily POST /v1/sync with throttle, contributions and bank-request intake | US-13-1 | High* | Opus | backend-engineer | T-124, T-125, T-126, T-127, T-123 | B | 4 | TODO |
 | [T-129](tasks/T-129.md) | Contribution aggregation, review list and promote/reject | US-13-2 | Medium | Sonnet | backend-engineer | T-128, T-125 | B | 5 | TODO |
