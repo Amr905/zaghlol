@@ -76,3 +76,22 @@ Missing (follow-up, not blocking): a test where `open()` never returns (S1), a t
 - **C1 (code major):** the spool key is StrongBox-backed while it encrypts up to 20 MiB inside a 20 s deadline. Either decide on a TEE-only key (or a separate TEE alias for bulk data), recorded in §1.3 and K_spool, or provide a device measurement.
 
 All other findings are follow-ups (FU-070). After the C1 decision and its one-line change land, a delta re-review on Sonnet is enough.
+
+## Re-review (delta) @2d3f96a (diff fe94cc2..2d3f96a)
+
+Scope: SpoolKey.kt, SpoolKeySpecTest.kt, platform-channels.md 1.3, security-model.md K_spool row, implementation-status FU-068/FU-070. PC runner PASS reported at 2d3f96a.
+
+**C1 closed.**
+- `SpoolKey.generate()` no longer calls `setIsStrongBoxBacked`, and the `strongBox` parameter, the `Build` import and the `ProviderException` retry are removed. No StrongBox request or fallback remains in K_spool generation.
+- Other KeyGenParameterSpec parameters are unchanged: AES, GCM, no padding, randomized encryption required, user auth not required, 128-bit tag, non-exportable by default. Alias `zaghlol_spool_v1` is unchanged.
+- The `GetOrCreate(load, create)` process-wide lock holder is untouched, so the F5/F8 lock is intact.
+- K_db (T-015) is not in the diff. The docs state it keeps StrongBox-with-fallback.
+- Docs are consistent: the KDoc, platform-channels 1.3, the security-model K_spool row and FU-068 all say TEE-backed and never StrongBox, and cite the Lead decision.
+- Dropping the retry is safe: with no StrongBox request, a `ProviderException` is a real failure and surfaces instead of being masked. Devices without a TEE transparently get the software-backed AndroidKeyStore, which is the same trust level as before the fallback.
+
+**New findings:** none at Medium or above.
+- Info D1: `REQUEST_STRONGBOX` is an `internal const` that is not wired into the code. `SpoolKeySpecTest` asserts it is false and also source-greps for `setIsStrongBoxBacked` and `StrongBoxUnavailable` outside comments, so the guard is the grep and the constant is documentation only. Accept.
+- Info D2: the test locates the source by relative path with a fixed candidate list, and `first` throws if none exists. A CI working-directory change would fail loudly, which is fail-safe. Accept.
+- FU-070 contains the earlier C2-C5/S1-S5 follow-ups as agreed. None is "before merge".
+
+**Verdict: APPROVED** (security section; C1 resolved, no new blocker/major).
