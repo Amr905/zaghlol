@@ -1,19 +1,17 @@
-using System.Text.Json;
 using Microsoft.EntityFrameworkCore;
 using Npgsql;
 using NpgsqlTypes;
+using Zaghlol.Application.Audit;
 using Zaghlol.Application.Flags;
+using Zaghlol.Infrastructure.Audit;
 using Zaghlol.Infrastructure.Persistence;
 using Zaghlol.Infrastructure.Persistence.Entities;
 
 namespace Zaghlol.Infrastructure.Flags;
 
 /// <summary><c>feature_flags</c> on the Admin login (<c>ops_rw</c>): the only writer of flags, and of their audit rows.</summary>
-internal sealed class FlagAdminStore(IZaghlolDbContextFactory contexts) : IFlagAdminStore
+internal sealed class FlagAdminStore(IZaghlolDbContextFactory contexts, IAuditWriter audit) : IFlagAdminStore
 {
-    /// <summary>The audit action for a flag change (<c>audit_log.action</c>).</summary>
-    public const string AuditAction = "flag_update";
-
     // One statement: the version increments atomically, so two concurrent changes never share a version.
     private const string UpsertSql = """
         INSERT INTO zaghlol.feature_flags AS f (key, enabled, rules, version, updated_at, updated_by)
@@ -25,12 +23,6 @@ internal sealed class FlagAdminStore(IZaghlolDbContextFactory contexts) : IFlagA
           updated_at = EXCLUDED.updated_at,
           updated_by = EXCLUDED.updated_by
         RETURNING f.enabled, f.rules::text, f.version, f.updated_at
-        """;
-
-    // `at` is left to the database clock: the audit_log RLS policy only accepts rows stamped now.
-    private const string AuditSql = """
-        INSERT INTO zaghlol.audit_log (operator_id, action, target, details)
-        VALUES (@operator, @action, @target, @details)
         """;
 
     public async Task<FlagState?> GetAsync(string key, CancellationToken cancellationToken)
@@ -79,34 +71,16 @@ internal sealed class FlagAdminStore(IZaghlolDbContextFactory contexts) : IFlagA
                 reader.GetFieldValue<DateTimeOffset>(3));
         }
 
-        await using (var audit = new NpgsqlCommand(AuditSql, connection, transaction))
-        {
-            audit.Parameters.AddWithValue("operator", operatorId);
-            audit.Parameters.AddWithValue("action", AuditAction);
-            audit.Parameters.AddWithValue("target", "flag:" + key);
-            audit.Parameters.Add(new NpgsqlParameter("details", NpgsqlDbType.Jsonb) { Value = AuditDetails(state) });
-            await audit.ExecuteNonQueryAsync(cancellationToken);
-        }
+        // Same transaction: exactly one audit row per change, and a failed insert rolls the change back.
+        await audit.WriteAsync(
+            connection,
+            transaction,
+            operatorId,
+            new FlagUpdateAudit(state.Key, state.Value, state.Version, FlagRulesJson.Serialize(state.Rules)),
+            cancellationToken);
 
         await transaction.CommitAsync(cancellationToken);
         return state;
-    }
-
-    /// <summary>The audit payload: the flag's new value, version and rules. Never an e-mail, an order ID or free text.</summary>
-    internal static string AuditDetails(FlagState state)
-    {
-        using var stream = new MemoryStream();
-        using (var writer = new Utf8JsonWriter(stream))
-        {
-            writer.WriteStartObject();
-            writer.WriteBoolean("value", state.Value);
-            writer.WriteNumber("version", state.Version);
-            writer.WritePropertyName("rules");
-            writer.WriteRawValue(FlagRulesJson.Serialize(state.Rules));
-            writer.WriteEndObject();
-        }
-
-        return System.Text.Encoding.UTF8.GetString(stream.ToArray());
     }
 }
 

@@ -1,6 +1,7 @@
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.DependencyInjection.Extensions;
 using Zaghlol.Application.Catalog;
+using Zaghlol.Infrastructure.Audit;
 
 namespace Zaghlol.Infrastructure.Catalog;
 
@@ -17,6 +18,7 @@ public static class CatalogServiceCollectionExtensions
         services.TryAddSingleton(TimeProvider.System);
         services.TryAddSingleton<ICatalogReader, CatalogReader>();
         services.TryAddSingleton<ICatalogSnapshotStore, DirectorySnapshotStore>();
+        services.AddZaghlolAudit();
         services.TryAddSingleton<ICatalogAdminStore, CatalogAdminStore>();
         return services;
     }

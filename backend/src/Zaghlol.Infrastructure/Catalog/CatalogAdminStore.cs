@@ -2,7 +2,9 @@ using System.Globalization;
 using System.IO.Compression;
 using System.Security.Cryptography;
 using Microsoft.EntityFrameworkCore;
+using Zaghlol.Application.Audit;
 using Zaghlol.Application.Catalog;
+using Zaghlol.Infrastructure.Audit;
 using Zaghlol.Infrastructure.Kms;
 using Zaghlol.Infrastructure.Persistence;
 using Zaghlol.Infrastructure.Persistence.Entities;
@@ -18,6 +20,7 @@ internal sealed class CatalogAdminStore(
     IZaghlolDbContextFactory contexts,
     ISigner signer,
     ICatalogSnapshotStore snapshots,
+    IAuditWriter audit,
     TimeProvider clock) : ICatalogAdminStore
 {
     private const long LockKey = 7_125_001;
@@ -52,8 +55,8 @@ internal sealed class CatalogAdminStore(
 
         var id = await AllocateMerchantAsync(db, fields, clock.GetUtcNow(), cancellationToken);
         var key = CatalogKeys.FromStorage(CatalogEntity.Merchants, id.ToString(CultureInfo.InvariantCulture));
-        Audit(db, operatorId, "catalog_draft_create", key);
         await db.SaveChangesAsync(cancellationToken);
+        await AuditAsync(db, operatorId, CatalogDraftAction.Create, key, cancellationToken);
         await transaction.CommitAsync(cancellationToken);
         return new DraftChange(DraftStatus.Ok, new CatalogOp(key, false, fields));
     }
@@ -73,8 +76,8 @@ internal sealed class CatalogAdminStore(
             return change;
         }
 
-        Audit(db, operatorId, "catalog_draft_put", key);
         await db.SaveChangesAsync(cancellationToken);
+        await AuditAsync(db, operatorId, CatalogDraftAction.Put, key, cancellationToken);
         await transaction.CommitAsync(cancellationToken);
         return change;
     }
@@ -117,8 +120,8 @@ internal sealed class CatalogAdminStore(
         }
 
         Tombstone(db, existing, now);
-        Audit(db, operatorId, "catalog_draft_delete", key);
         await db.SaveChangesAsync(cancellationToken);
+        await AuditAsync(db, operatorId, CatalogDraftAction.Delete, key, cancellationToken);
         await transaction.CommitAsync(cancellationToken);
         return new DraftChange(DraftStatus.Ok);
     }
@@ -159,14 +162,8 @@ internal sealed class CatalogAdminStore(
             FullSnapshotUrl = url,
             FullSnapshotSha256 = SHA256.HashData(json),
         });
-        db.AuditLog.Add(new AuditLogEntry
-        {
-            OperatorId = operatorId,
-            Action = "catalog_publish",
-            Target = string.Create(CultureInfo.InvariantCulture, $"catalog/{version}"),
-            Details = string.Create(CultureInfo.InvariantCulture, $"{{\"version\":{version},\"ops\":{ops.Count}}}"),
-        });
         await db.SaveChangesAsync(cancellationToken);
+        await audit.WriteAsync(db, operatorId, new CatalogPublishAudit(version, ops.Count), cancellationToken);
         await transaction.CommitAsync(cancellationToken);
         return new PublishResult(false, version, now, url);
     }
@@ -211,16 +208,12 @@ internal sealed class CatalogAdminStore(
         }
 
         var result = new SeedImportResult(seed.Categories.Count, seed.Merchants.Count, aliasCount, seed.Keywords.Count);
-        db.AuditLog.Add(new AuditLogEntry
-        {
-            OperatorId = operatorId,
-            Action = "catalog_seed_import",
-            Target = "catalog",
-            Details = string.Create(
-                CultureInfo.InvariantCulture,
-                $"{{\"categories\":{result.Categories},\"merchants\":{result.Merchants},\"aliases\":{result.Aliases},\"keywords\":{result.Keywords}}}"),
-        });
         await db.SaveChangesAsync(cancellationToken);
+        await audit.WriteAsync(
+            db,
+            operatorId,
+            new CatalogSeedImportAudit(result.Categories, result.Merchants, result.Aliases, result.Keywords),
+            cancellationToken);
         await transaction.CommitAsync(cancellationToken);
         return result;
     }
@@ -342,17 +335,9 @@ internal sealed class CatalogAdminStore(
         }
     }
 
-    private static void Audit(ZaghlolDbContext db, Guid operatorId, string action, CatalogEntryKey key)
-    {
-        var name = CatalogEntities.Name(key.Entity);
-        db.AuditLog.Add(new AuditLogEntry
-        {
-            OperatorId = operatorId,
-            Action = action,
-            Target = name + "/" + key.PathId,
-            Details = "{\"entity\":\"" + name + "\"}",
-        });
-    }
+    /// <summary>The draft edit's audit row, in the edit's transaction (the shared writer, T-136).</summary>
+    private Task<long> AuditAsync(ZaghlolDbContext db, Guid operatorId, CatalogDraftAction kind, CatalogEntryKey key, CancellationToken cancellationToken) =>
+        audit.WriteAsync(db, operatorId, new CatalogDraftAudit(kind, CatalogEntities.Name(key.Entity), key.PathId), cancellationToken);
 
     private async Task SeedPutAsync(ZaghlolDbContext db, CatalogEntity entity, string pathId, CatalogFields fields, CancellationToken cancellationToken)
     {

@@ -15,6 +15,7 @@ using Zaghlol.Infrastructure.Logging;
 using Zaghlol.Infrastructure.Observability;
 using Zaghlol.Infrastructure.Persistence;
 using Zaghlol.Infrastructure.Prices;
+using Zaghlol.Infrastructure.Support;
 
 // `dotnet Zaghlol.Api.dll --healthcheck` is used by container health checks (the runtime image has no shell or curl).
 if (args.Contains("--healthcheck", StringComparer.Ordinal))
@@ -53,7 +54,7 @@ builder.Services.AddZaghlolLogPseudonymizer();
 // Install registration, install-token auth and the idempotency store (T-124); after the pseudonymizer for its startup check.
 builder.Services.AddZaghlolInstalls();
 
-// Catalog versions, deltas, signed snapshots and the operator draft/publish API (T-125); operator auth comes from AddOperatorAuthentication (T-126, real validator T-136).
+// Catalog versions, deltas, signed snapshots and the operator draft/publish API (T-125); operator auth comes from AddOperatorAuthentication and AddZaghlolOperatorAuth (T-136).
 builder.Services.AddZaghlolCatalog();
 // Feature flags (T-126): the admin store on the Admin login, the reader on the App login, the ops-channel notifier.
 builder.Services.AddZaghlolFlagAdmin();
@@ -62,6 +63,10 @@ builder.Services.AddZaghlolFlagReader();
 builder.Services.AddZaghlolPrices();
 // Daily sync (T-128): throttle, composition, intake; after the catalog, flag and price readers it composes from.
 builder.Services.AddZaghlolSync();
+
+// Operator OIDC + MFA, the operator directory and the startup check (T-136); the audited support lookup on the Admin login.
+builder.Services.AddZaghlolOperatorAuth();
+builder.Services.AddZaghlolSupport();
 
 var app = builder.Build();
 
@@ -72,6 +77,7 @@ app.MapSync();
 app.MapCatalog();
 app.MapCatalogAdmin();
 app.MapFlagAdmin();
+app.MapSupportAdmin();
 app.MapPriceAdmin();
 
 await app.RunAsync();

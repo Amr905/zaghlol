@@ -8,12 +8,20 @@ using Zaghlol.Domain;
 
 namespace Zaghlol.Api.Auth;
 
-/// <summary>The operator roles (<c>x-required-roles</c> in the OpenAPI file, backend-api §5.1).</summary>
+/// <summary>
+/// The operator roles (<c>x-required-roles</c> in the OpenAPI file, backend-api §3 and §5.1). The values live in
+/// <see cref="Application.Operators.OperatorRoles"/>; a role implies no other role.
+/// </summary>
 internal static class OperatorRoles
 {
-    public const string FlagsAdmin = "flags_admin";
-    public const string CatalogEditor = "catalog_editor";
-    public const string PricesAdmin = "prices_admin";
+    public const string FlagsAdmin = Application.Operators.OperatorRoles.FlagsAdmin;
+    public const string CatalogEditor = Application.Operators.OperatorRoles.CatalogEditor;
+    public const string PricesAdmin = Application.Operators.OperatorRoles.PricesAdmin;
+    public const string SupportViewer = Application.Operators.OperatorRoles.SupportViewer;
+    public const string SupportAgent = Application.Operators.OperatorRoles.SupportAgent;
+    public const string SupportLead = Application.Operators.OperatorRoles.SupportLead;
+
+    public static IReadOnlyList<string> All => Application.Operators.OperatorRoles.All;
 }
 
 /// <summary>A validated operator token: who, and with which roles.</summary>
@@ -21,8 +29,8 @@ internal sealed record OperatorIdentity(Guid OperatorId, IReadOnlyCollection<str
 
 /// <summary>
 /// Turns an operator bearer token into an identity: OIDC signature, issuer, audience, lifetime (at most 1 hour), the MFA
-/// signal, the operator row and its roles (backend-api §3). The real validator is T-136's. Until it replaces the default
-/// below, every operator call is refused.
+/// signal, the operator row and its roles (backend-api §3). <see cref="OidcOperatorTokenValidator"/> replaces the reject-all
+/// default when <c>OperatorAuth:Enabled</c> is set and the settings are valid (T-136).
 /// </summary>
 internal interface IOperatorTokenValidator
 {
@@ -30,7 +38,7 @@ internal interface IOperatorTokenValidator
     ValueTask<OperatorIdentity?> ValidateAsync(string bearerToken, CancellationToken cancellationToken);
 }
 
-/// <summary>The default validator: accepts nothing, so <c>/admin/v1/*</c> is closed (401) until operator auth is configured.</summary>
+/// <summary>The default validator: accepts nothing, so <c>/admin/v1/*</c> is closed (401) unless operator auth is enabled.</summary>
 internal sealed class RejectAllOperatorTokenValidator : IOperatorTokenValidator
 {
     public ValueTask<OperatorIdentity?> ValidateAsync(string bearerToken, CancellationToken cancellationToken) =>
@@ -45,7 +53,9 @@ internal static class OperatorAuthentication
 
     private const int MaxTokenLength = 8192;
 
-    public static string PolicyFor(string role) => "operator:" + role;
+    public const string PolicyPrefix = "operator:";
+
+    public static string PolicyFor(string role) => PolicyPrefix + role;
 
     /// <summary>
     /// The operator scheme and one policy per role. It never becomes the default scheme: only endpoints that name it (through
@@ -56,7 +66,7 @@ internal static class OperatorAuthentication
         services.TryAddSingleton<IOperatorTokenValidator, RejectAllOperatorTokenValidator>();
         services.AddAuthentication().AddScheme<AuthenticationSchemeOptions, OperatorAuthenticationHandler>(Scheme, _ => { });
         var authorization = services.AddAuthorizationBuilder();
-        foreach (var role in new[] { OperatorRoles.FlagsAdmin, OperatorRoles.CatalogEditor, OperatorRoles.PricesAdmin })
+        foreach (var role in OperatorRoles.All)
         {
             authorization.AddPolicy(
                 PolicyFor(role),

@@ -3,6 +3,7 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.DependencyInjection.Extensions;
 using Microsoft.Extensions.Logging;
 using Zaghlol.Application.Flags;
+using Zaghlol.Infrastructure.Audit;
 
 namespace Zaghlol.Infrastructure.Flags;
 
@@ -16,6 +17,7 @@ public static class FlagsServiceCollectionExtensions
     {
         ArgumentNullException.ThrowIfNull(services);
 
+        services.AddZaghlolAudit();
         services.TryAddSingleton<IFlagAdminStore, FlagAdminStore>();
         services.TryAddSingleton<IOpsNotifier>(provider => new WebhookOpsNotifier(
             provider.GetRequiredService<IConfiguration>(),
