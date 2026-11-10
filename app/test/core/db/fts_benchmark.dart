@@ -133,6 +133,54 @@ const String _listQuery =
     'SELECT s.id, s.occurred_at, s.merchant, s.amount_text '
     'FROM transactions_fts f JOIN transactions_fts_src s ON s.id = f.rowid '
     'WHERE transactions_fts MATCH ? ORDER BY s.occurred_at DESC LIMIT 50';
+
+/// T-016 §8(b): the short-query variant for T-017. A second, small FTS5 table
+/// over merchant and counterparty only, with unicode61 word tokens and
+/// 1- and 2-character prefix indexes, so 1–2 character queries become a
+/// word-prefix MATCH ('ab*') instead of a LIKE scan.
+const String shortPrefixDdl =
+    'CREATE VIRTUAL TABLE transactions_fts_short USING fts5('
+    'merchant, counterparty, '
+    "tokenize='unicode61 remove_diacritics 2', prefix='1 2')";
+
+const String _shortPrefixFill =
+    'INSERT INTO transactions_fts_short (rowid, merchant, counterparty) '
+    'SELECT id, merchant, counterparty FROM transactions_fts_src';
+
+const String _shortPrefixQuery =
+    'SELECT s.id FROM transactions_fts_short f '
+    'JOIN transactions_fts_src s ON s.id = f.rowid '
+    'WHERE transactions_fts_short MATCH ? '
+    'ORDER BY s.occurred_at DESC LIMIT 50';
+
+/// `"ab"*`: a quoted word-prefix query.
+String ftsPrefix(String term) => '${ftsQuote(term)}*';
+
+/// Measured passes per query set; each pass is preceded by one discarded
+/// warm-up pass. Reported percentiles are the median over the passes.
+const int benchPasses = 3;
+
+/// The median of each percentile (p50, p95, max) over [passes].
+List<double> medianOfPasses(List<List<double>> passes) {
+  double median(List<double> xs) {
+    final s = [...xs]..sort();
+    return s[s.length ~/ 2];
+  }
+
+  return [
+    for (var i = 0; i < 3; i++) median([for (final p in passes) p[i]]),
+  ];
+}
+
+/// One warm-up pass, then [benchPasses] measured passes of [pass] (each
+/// returns per-query micros); percentiles per pass, median across passes.
+Future<List<double>> _measured(Future<List<int>> Function() pass) async {
+  await pass(); // warm-up, discarded
+  return medianOfPasses([
+    for (var i = 0; i < benchPasses; i++) percentiles(await pass()),
+  ]);
+}
+
 const String _shortQuery =
     'SELECT id FROM transactions_fts_src '
     'WHERE merchant LIKE ? OR counterparty LIKE ? OR note LIKE ? '
@@ -186,23 +234,53 @@ Future<Map<String, Object?>> _benchMode(Directory dir, DbKey key) async {
   }
   warm.sort();
 
-  final rank = <int>[];
-  final list = <int>[];
-  for (var rep = 0; rep < 5; rep++) {
-    for (final term in benchTerms) {
-      final q = ftsQuote(term);
-      rank.add(await _timed(() => query(db, _rankQuery, [q], 'bench_rank')));
-      list.add(await _timed(() => query(db, _listQuery, [q], 'bench_list')));
+  Future<List<int>> termPass(
+    String sql,
+    String stage,
+    List<String> terms,
+    List<Object?> Function(String term) args,
+  ) async {
+    final out = <int>[];
+    for (var rep = 0; rep < 5; rep++) {
+      for (final term in terms) {
+        out.add(await _timed(() => query(db, sql, args(term), stage)));
+      }
     }
+    return out;
   }
-  final short = <int>[];
-  for (var rep = 0; rep < 5; rep++) {
-    for (final term in benchShortTerms) {
-      final p = '%$term%';
-      short.add(
-        await _timed(() => query(db, _shortQuery, [p, p, p], 'bench_short')),
-      );
-    }
+
+  final rank = await _measured(
+    () => termPass(_rankQuery, 'bench_rank', benchTerms, (t) => [ftsQuote(t)]),
+  );
+  final list = await _measured(
+    () => termPass(_listQuery, 'bench_list', benchTerms, (t) => [ftsQuote(t)]),
+  );
+  final short = await _measured(
+    () => termPass(_shortQuery, 'bench_short', benchShortTerms, (t) {
+      final p = '%$t%';
+      return [p, p, p];
+    }),
+  );
+
+  // §8(b): the short-prefix table, built from the source rows.
+  await statement(db, shortPrefixDdl, const [], 'bench_short_ddl');
+  final shortBuildUs = await _timed(
+    () => statement(db, _shortPrefixFill, const [], 'bench_short_fill'),
+  );
+  final shortPrefix = await _measured(
+    () => termPass(
+      _shortPrefixQuery,
+      'bench_short_prefix',
+      benchShortTerms,
+      (t) => [ftsPrefix(t)],
+    ),
+  );
+  var shortPrefixHits = 0;
+  for (final term in benchShortTerms) {
+    final rows = await query(db, _shortPrefixQuery, [
+      ftsPrefix(term),
+    ], 'bench_short_hits');
+    shortPrefixHits += rows.length;
   }
   await db.close();
 
@@ -210,9 +288,13 @@ Future<Map<String, Object?>> _benchMode(Directory dir, DbKey key) async {
     'open_cold_ms': _ms(coldUs),
     'open_warm_ms': _ms(warm[warm.length ~/ 2]),
     'insert_50k_ms': _ms(insertUs),
-    'fts_rank_ms': percentiles(rank),
-    'fts_list_ms': percentiles(list),
-    'like_short_ms': percentiles(short),
+    'fts_rank_ms': rank,
+    'fts_list_ms': list,
+    'like_short_ms': short,
+    'short_prefix_ms': shortPrefix,
+    'short_prefix_build_ms': _ms(shortBuildUs),
+    'short_prefix_hits': shortPrefixHits,
+    'passes': benchPasses,
     'db_bytes': file.lengthSync(),
   };
 }
@@ -260,7 +342,7 @@ Future<Map<String, Object?>> runDbBenchmark({
     final encP95 = (enc['fts_list_ms']! as List<double>)[1];
     final plainP95 = (plain['fts_list_ms']! as List<double>)[1];
     return {
-      'v': 1,
+      'v': 2,
       'run': runId,
       'env': env,
       'build': _buildMode(),

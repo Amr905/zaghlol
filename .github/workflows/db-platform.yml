@@ -9,11 +9,16 @@ name: db-platform
 #
 # Numbers from the emulator/simulator legs are "emulator/simulator, debug mode,
 # x86_64/arm64-sim on CI hardware": recorded, not gating. Only the host leg
-# gates the benchmark (testing-strategy §5: p95 < 50 ms).
+# gates the benchmark: T-016 (FU-069) gates on the real NFR, FR-TXN-01 search
+# p95 < 200 ms; the testing-strategy §5 figure (50 ms) is a printed warning
+# (ZAGHLOL_DB_WARN). Figures are the median of 3 passes after a warm-up, and
+# include the short-prefix FTS variant handed to T-017 (short_prefix_ms).
 #
 # T-015: each device leg also runs the key bootstrap tests (registered by
 # db_platform_test.dart: real Keystore/Keychain, sandbox scan) and greps the
 # test and system logs for the synthetic test key (db-key-log-scan.sh).
+# T-016: and the AppDatabase tests (app_database_tests.dart: wrong key, orphan
+# wipe, migration restore, header), in the same launch.
 #
 # No key, sentinel or row text is ever printed: the tests print only
 # numbers/flags/codes, and the interop key stays in $RUNNER_TEMP (masked).
@@ -38,6 +43,7 @@ on:
       - 'app/lib/core/db/**'
       - 'app/lib/core/crypto/**'
       - 'app/lib/core/platform/*secret_store*'
+      - 'app/pigeons/secret_store_api.dart'
       - 'app/test/support/**'
       - 'app/android/app/src/main/kotlin/app/zaghlol/platform/keys/**'
       - 'app/android/app/src/main/kotlin/app/zaghlol/MainActivity.kt'
@@ -80,7 +86,7 @@ jobs:
           sudo apt-get install -y -q sqlite3 sqlcipher
           sqlite3 --version
           sqlcipher -version < /dev/null || true
-      - name: flutter test test/core/db (contract + benchmark, budget p95 < 50 ms)
+      - name: flutter test test/core/db (contract + benchmark, gate p95 < 200 ms)
         working-directory: app
         run: |
           set -o pipefail

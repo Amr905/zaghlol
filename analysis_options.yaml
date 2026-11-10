@@ -13,6 +13,8 @@ analyzer:
     - "**/generated/**"
     - "backend/**"
     - "docs/**"
+    # T-016: scratch copies made by app/tool/generate_drift.sh.
+    - "tools/drift_codegen/**"
 
 linter:
   rules:

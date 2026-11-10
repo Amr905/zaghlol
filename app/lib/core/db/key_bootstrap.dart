@@ -17,6 +17,7 @@ import 'dart:math';
 import 'dart:typed_data';
 
 import '../crypto/secret_store.dart';
+import 'db_errors.dart';
 import 'db_file_set.dart';
 
 /// Length of K_db in bytes (256-bit raw SQLCipher key).
@@ -152,6 +153,22 @@ final class BootstrapLease {
   bool _released = false;
 
   bool get isReleased => _released;
+
+  /// T-016 (S-2, FU-065): proves the lease is still current right before a
+  /// destructive or creating step, and extends it by 30 s. Throws
+  /// `DbOpenException('DB_LEASE_LAPSED')` (code only) when it was released,
+  /// expired, taken over, or can't be confirmed; the caller then stops
+  /// without touching anything else.
+  Future<void> ensureValid() async {
+    if (_released) throw DbOpenException(DbOpenException.leaseLapsed);
+    bool valid;
+    try {
+      valid = await _store.renewBootstrapLease(_lease);
+    } on Object {
+      valid = false;
+    }
+    if (!valid) throw DbOpenException(DbOpenException.leaseLapsed);
+  }
 
   Future<void> release() async {
     if (_released) return;

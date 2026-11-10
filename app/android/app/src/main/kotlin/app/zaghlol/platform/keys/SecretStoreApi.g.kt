@@ -318,6 +318,13 @@ interface SecretStoreHostApi {
   fun acquireBootstrapLease(timeoutMs: Long, callback: (Result<Long>) -> Unit)
   /** Releases [lease]. A stale or unknown lease is ignored. */
   fun releaseBootstrapLease(lease: Long, callback: (Result<Unit>) -> Unit)
+  /**
+   * T-016: if [lease] is the current, unexpired lease, sets its expiry to
+   * now + 30 s and returns true; otherwise returns false. Never takes a
+   * lease. Same-lease renewals are unbounded, but a dead engine stops
+   * renewing, so its lease still lapses after 30 s.
+   */
+  fun renewBootstrapLease(lease: Long, callback: (Result<Boolean>) -> Unit)
   /** Reads [slot]. Never throws for storage errors: they are classified. */
   fun read(slot: SecretSlotMsg, callback: (Result<SecretReadMsg>) -> Unit)
   /**
@@ -375,6 +382,26 @@ interface SecretStoreHostApi {
                 reply.reply(SecretStoreApiPigeonUtils.wrapError(error))
               } else {
                 reply.reply(SecretStoreApiPigeonUtils.wrapResult(null))
+              }
+            }
+          }
+        } else {
+          channel.setMessageHandler(null)
+        }
+      }
+      run {
+        val channel = BasicMessageChannel<Any?>(binaryMessenger, "dev.flutter.pigeon.zaghlol.SecretStoreHostApi.renewBootstrapLease$separatedMessageChannelSuffix", codec)
+        if (api != null) {
+          channel.setMessageHandler { message, reply ->
+            val args = message as List<Any?>
+            val leaseArg = args[0] as Long
+            api.renewBootstrapLease(leaseArg) { result: Result<Boolean> ->
+              val error = result.exceptionOrNull()
+              if (error != null) {
+                reply.reply(SecretStoreApiPigeonUtils.wrapError(error))
+              } else {
+                val data = result.getOrNull()
+                reply.reply(SecretStoreApiPigeonUtils.wrapResult(data))
               }
             }
           }

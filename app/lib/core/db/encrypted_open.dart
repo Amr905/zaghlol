@@ -15,9 +15,12 @@ import 'package:drift/drift.dart' show DriftWrappedException, QueryExecutor;
 import 'package:drift/native.dart';
 import 'package:drift/isolate.dart' show DriftRemoteException;
 import 'package:sqlite3/sqlite3.dart' as sql;
-import 'package:zaghlol_domain/zaghlol_domain.dart' show SafeException;
 
+import 'db_errors.dart';
 import 'key_bootstrap.dart';
+import 'migration_guard.dart';
+
+export 'db_errors.dart';
 
 /// drift statement logging. Must stay false in every flavor: logged
 /// statements could include `PRAGMA key` or user data.
@@ -25,34 +28,6 @@ const bool driftLogStatements = false;
 
 /// SQLITE_NOTADB: "file is not a database" (wrong key, or a corrupt page 1).
 const int sqliteNotADb = 26;
-
-/// A failed open. Carries a constant code and the SQLite result code only.
-///
-/// Codes: `DB_KEY_PRAGMA_FAILED` (the key statement failed),
-/// `DB_KEY_REJECTED` (SQLITE_NOTADB on the first page read: report it with
-/// `KeyBootstrap.reportRejected`), `DB_NOT_ENCRYPTED` (the file opened but is
-/// not SQLCipher-encrypted), `DB_OPEN_FAILED` (any other SQLite error during
-/// the open sequence; transient, never a reason to wipe).
-final class DbOpenException extends SafeException {
-  DbOpenException(super.code, {this.sqliteCode});
-
-  static const String keyPragmaFailed = 'DB_KEY_PRAGMA_FAILED';
-  static const String keyRejected = 'DB_KEY_REJECTED';
-  static const String notEncrypted = 'DB_NOT_ENCRYPTED';
-  static const String openFailed = 'DB_OPEN_FAILED';
-
-  static const Set<String> codes = {
-    keyPragmaFailed,
-    keyRejected,
-    notEncrypted,
-    openFailed,
-  };
-
-  final int? sqliteCode;
-
-  /// True only for SQLITE_NOTADB on the first page read.
-  bool get isKeyRejected => code == keyRejected;
-}
 
 /// Finds a [DbOpenException] in [error] or in drift's wrappers (foreground
 /// `DriftWrappedException.cause`, background `DriftRemoteException`).
@@ -82,13 +57,17 @@ DbOpenException? dbOpenExceptionOf(Object error) {
 /// closure, and with it a copy of the key bytes, is sent there (accepted,
 /// design note §5).
 ///
+/// T-016: [guard] (the app's open) runs the pre-migration check and copy in
+/// `setup`, after the open sequence and [applyAppPragmas] (design note §6).
+///
 /// The caller zeroizes [key] right after the first successful statement.
 QueryExecutor openEncryptedExecutor(
   File file,
   DbKeyMaterial key, {
   bool inBackground = true,
+  MigrationGuard? guard,
 }) {
-  final setup = _setupFor(key);
+  final setup = _setupFor(key, file.path, guard);
   if (inBackground) {
     return NativeDatabase.createInBackground(
       file,
@@ -99,9 +78,48 @@ QueryExecutor openEncryptedExecutor(
   return NativeDatabase(file, logStatements: driftLogStatements, setup: setup);
 }
 
-// Built in its own function so the closure captures only the key.
-void Function(sql.Database) _setupFor(DbKeyMaterial key) =>
-    (raw) => applyEncryptedOpenSequence(raw, key);
+// Built in its own function so the closure captures only the key, the path
+// string and the (sendable) guard.
+void Function(sql.Database) _setupFor(
+  DbKeyMaterial key,
+  String path,
+  MigrationGuard? guard,
+) => (raw) {
+  applyEncryptedOpenSequence(raw, key);
+  applyAppPragmas(raw);
+  if (guard != null) {
+    guard.check(
+      () => _userVersion(raw),
+      () => _checkpointTruncate(raw),
+      File(path),
+    );
+  }
+};
+
+/// T-016 §5: the connection PRAGMAs after the keyed sequence. `busy_timeout`
+/// because two engines (UI and headless) share the file; `secure_delete =
+/// FAST` zeroes freed content where it costs no extra I/O (defence in depth
+/// for purged raw SMS; the file is encrypted anyway); `cache_size` 8 MiB
+/// (ADR-002 finding 4). `foreign_keys` is set in drift's `beforeOpen` (a
+/// no-op inside a transaction, so never here).
+void applyAppPragmas(sql.Database raw) {
+  _exec(raw, 'PRAGMA busy_timeout = 5000');
+  _exec(raw, 'PRAGMA secure_delete = FAST');
+  _exec(raw, 'PRAGMA cache_size = -8192');
+}
+
+int _userVersion(sql.Database raw) {
+  final rows = _select(raw, 'PRAGMA user_version');
+  final v = rows.isEmpty ? null : rows.first.first;
+  if (v is! int) throw DbOpenException(DbOpenException.openFailed);
+  return v;
+}
+
+/// True when the WAL was fully checkpointed and truncated (busy == 0).
+bool _checkpointTruncate(sql.Database raw) {
+  final rows = _select(raw, 'PRAGMA wal_checkpoint(TRUNCATE)');
+  return rows.isNotEmpty && rows.first.first == 0;
+}
 
 /// The open sequence (T-007): cipher and legacy PRAGMAs, the raw key, then
 /// temp_store, WAL and synchronous, then verification. Everything before the

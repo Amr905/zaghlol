@@ -1,0 +1,25 @@
+# T-016: standalone (NOT a pub workspace member) code generator for the app's
+# drift schema. drift_dev 2.35 needs analyzer >= 13, which the workspace can't
+# take while Pigeon 26 (analyzer < 13) and tools/lints (analyzer < 9) are in
+# it. app/tool/generate_drift.sh copies app/lib/core/db/schema/ and
+# app/build.yaml here, runs build_runner, and copies the *.g.dart files back;
+# the drift_dev CLI (schema dump / make-migrations) runs from this package's
+# resolution against the app directory. Nothing here ships in the app.
+#
+# Keep `drift` at the exact version in the root pubspec.lock (the generated
+# code must match the runtime). Remove this package once the workspace can
+# resolve drift_dev directly (Pigeon >= 27.3.1 and an analyzer >= 13 lints
+# tool), and move drift_dev / build_runner into app/pubspec.yaml.
+name: zaghlol_drift_codegen
+description: Code generation for the app's drift schema (T-016). Not shipped.
+publish_to: none
+
+environment:
+  sdk: ^3.13.7
+
+dependencies:
+  drift: 2.35.3
+
+dev_dependencies:
+  build_runner: 2.17.1
+  drift_dev: 2.35.3

@@ -27,6 +27,14 @@ final class FakeSecretStore implements SecretStore {
   /// Called right before createIfAbsent decides (to simulate a racing writer).
   void Function()? beforeCreate;
 
+  /// T-016: how many more renewals succeed before the held lease lapses
+  /// (null: never lapses). At 0 the next renewal expires the lease (it is no
+  /// longer held) and returns false, like the native 30 s expiry.
+  int? renewalsBeforeLapse;
+
+  /// When true, renewals throw (a broken channel).
+  bool failRenew = false;
+
   final List<String> calls = [];
 
   /// Every buffer handed out by [read] (to check the caller zeroes them).
@@ -37,6 +45,7 @@ final class FakeSecretStore implements SecretStore {
   final List<Completer<void>> _waiters = [];
 
   int get createCalls => calls.where((c) => c == 'create').length;
+  int get renewCalls => calls.where((c) => c == 'renew').length;
   int get deleteCalls => calls.where((c) => c == 'delete').length;
   int get writeCalls => createCalls + deleteCalls;
   bool get leaseHeld => _held != null;
@@ -78,6 +87,25 @@ final class FakeSecretStore implements SecretStore {
     if (_held != lease.id) return;
     _held = null;
     if (_waiters.isNotEmpty) _waiters.removeAt(0).complete();
+  }
+
+  @override
+  Future<bool> renewBootstrapLease(SecretStoreLease lease) async {
+    calls.add('renew');
+    if (failRenew) {
+      throw const SecretStoreException(SecretStoreErrorCode.unavailable);
+    }
+    if (_held != lease.id) return false;
+    final left = renewalsBeforeLapse;
+    if (left != null) {
+      if (left <= 0) {
+        _held = null;
+        if (_waiters.isNotEmpty) _waiters.removeAt(0).complete();
+        return false;
+      }
+      renewalsBeforeLapse = left - 1;
+    }
+    return true;
   }
 
   @override

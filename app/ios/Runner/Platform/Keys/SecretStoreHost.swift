@@ -50,6 +50,10 @@ final class SecretStoreHost: SecretStoreHostApi {
     dispatch(completion) { self.leases.release(lease) }
   }
 
+  func renewBootstrapLease(lease: Int64, completion: @escaping (Result<Bool, Error>) -> Void) {
+    dispatch(completion) { self.leases.renew(lease) }
+  }
+
   func read(slot: SecretSlotMsg, completion: @escaping (Result<SecretReadMsg, Error>) -> Void) {
     dispatch(completion) {
       let r = self.slots(slot).read()

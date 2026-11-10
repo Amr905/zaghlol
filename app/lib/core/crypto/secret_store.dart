@@ -86,6 +86,11 @@ abstract interface class SecretStore {
   /// Releases [lease]. Never throws.
   Future<void> releaseBootstrapLease(SecretStoreLease lease);
 
+  /// T-016 (S-2, FU-065): if [lease] is still the current, unexpired lease,
+  /// extends its expiry to now + 30 s and returns true; otherwise returns
+  /// false (it never takes a lease). Never throws: a failed call is false.
+  Future<bool> renewBootstrapLease(SecretStoreLease lease);
+
   /// Reads [slot]. Never throws: every failure is a [SecretStatus].
   Future<SecretRead> read(SecretSlot slot);
 

@@ -35,6 +35,16 @@ final class PigeonSecretStore implements SecretStore {
   }
 
   @override
+  Future<bool> renewBootstrapLease(SecretStoreLease lease) async {
+    try {
+      return await _api.renewBootstrapLease(lease.id);
+    } on Object {
+      // Can't confirm the lease: treat it as lapsed (the caller stops).
+      return false;
+    }
+  }
+
+  @override
   Future<SecretRead> read(SecretSlot slot) async {
     final SecretReadMsg msg;
     try {

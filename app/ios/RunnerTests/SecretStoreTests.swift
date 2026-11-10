@@ -313,6 +313,56 @@ final class SecretStoreTests: XCTestCase {
     XCTAssertNil(leases.acquire(timeoutMs: 50))
   }
 
+  // T-016 (S-2, FU-065): renew extends a current lease and never takes one.
+
+  func testRenewExtendsAValidLease() {
+    var now: UInt64 = 1_000
+    let leases = BootstrapLeaseManager(ttlNanos: 30_000_000_000, clock: { now })
+    let lease = leases.acquire(timeoutMs: 10)!
+    now += 29_000_000_000
+    XCTAssertTrue(leases.renew(lease))
+    // Without the renewal the lease would have expired at 30 s.
+    now += 29_000_000_000
+    XCTAssertTrue(leases.isValid(lease))
+    now += 1_000_000_000
+    XCTAssertFalse(leases.isValid(lease))
+  }
+
+  func testRenewOfAnExpiredLeaseIsFalseAndDoesNotRevive() {
+    var now: UInt64 = 1_000
+    let leases = BootstrapLeaseManager(ttlNanos: 30_000_000_000, clock: { now })
+    let lease = leases.acquire(timeoutMs: 10)!
+    now += 30_000_000_000
+    XCTAssertFalse(leases.renew(lease))
+    XCTAssertFalse(leases.isValid(lease))
+    let next = leases.acquire(timeoutMs: 10)
+    XCTAssertNotNil(next)
+    XCTAssertNotEqual(next, lease)
+  }
+
+  func testRenewOfAStaleIdIsFalseAndLeavesTheCurrentLeaseAlone() {
+    var now: UInt64 = 1_000
+    let leases = BootstrapLeaseManager(ttlNanos: 30_000_000_000, clock: { now })
+    let first = leases.acquire(timeoutMs: 10)!
+    now += 31_000_000_000
+    let second = leases.acquire(timeoutMs: 10)!
+    now += 20_000_000_000
+    XCTAssertFalse(leases.renew(first))
+    XCTAssertFalse(leases.renew(0))
+    XCTAssertFalse(leases.renew(-1))
+    now += 10_000_000_000
+    XCTAssertFalse(leases.isValid(second), "a stale renewal must not extend the current lease")
+  }
+
+  func testRenewAfterReleaseIsFalseAndNeverTakesTheLease() {
+    let leases = BootstrapLeaseManager()
+    let lease = leases.acquire(timeoutMs: 10)!
+    leases.release(lease)
+    XCTAssertFalse(leases.renew(lease))
+    XCTAssertFalse(leases.isValid(lease))
+    XCTAssertNotNil(leases.acquire(timeoutMs: 0))
+  }
+
   // MARK: Host errors
 
   private final class FakeSlot: SecretSlotStore {
@@ -365,6 +415,23 @@ final class SecretStoreTests: XCTestCase {
     assertCodeOnly(timedOut, "LEASE_TIMEOUT")
   }
 
+  // T-016: renew through the host answers true only for the current lease.
+  func testHostRenewIsTrueForTheCurrentLeaseOnly() {
+    let leases = BootstrapLeaseManager()
+    let host = syncHost(FakeSlot(), leases)
+    var lease: Int64 = 0
+    host.acquireBootstrapLease(timeoutMs: 10) { if case .success(let l) = $0 { lease = l } }
+    XCTAssertGreaterThan(lease, 0)
+    var renewed: Bool?
+    host.renewBootstrapLease(lease: lease) { if case .success(let v) = $0 { renewed = v } }
+    XCTAssertEqual(renewed, true)
+    host.renewBootstrapLease(lease: lease + 1) { if case .success(let v) = $0 { renewed = v } }
+    XCTAssertEqual(renewed, false)
+    host.releaseBootstrapLease(lease: lease) { _ in }
+    host.renewBootstrapLease(lease: lease) { if case .success(let v) = $0 { renewed = v } }
+    XCTAssertEqual(renewed, false)
+  }
+
   // MARK: Real Keychain (skipped when the unsigned host has no access)
 
   func testRealKeychainRoundTripAndAttributes() throws {
@@ -392,5 +459,32 @@ final class SecretStoreTests: XCTestCase {
     if let group = store.accessGroup {
       XCTAssertEqual(attrs?[kSecAttrAccessGroup as String] as? String, group)
     }
+  }
+
+  // T-016 (D-50, T-165 F6): deleting the database key (the only secret the
+  // orphan wipe deletes) leaves a D-62 seat-key item alone. A dummy item is
+  // planted under the seat-key service (platform-channels §4b).
+  func testDeletingTheDbKeyLeavesSeatKeyItemsAlone() throws {
+    let store = DbKeyKeychain(sleeper: { _ in })
+    if store.read().status == .unavailable {
+      throw XCTSkip("no Keychain access in this test host")
+    }
+    var seat: [String: Any] = [
+      kSecClass as String: kSecClassGenericPassword,
+      kSecAttrService as String: "app.zaghlol.seatkey",
+      kSecAttrAccount as String: "t016-dummy",
+    ]
+    if let group = store.accessGroup { seat[kSecAttrAccessGroup as String] = group }
+    SecItemDelete(seat as CFDictionary)
+    var add = seat
+    add[kSecValueData as String] = Data([1, 2, 3])
+    add[kSecAttrAccessible as String] = kSecAttrAccessibleAfterFirstUnlockThisDeviceOnly
+    XCTAssertEqual(SecItemAdd(add as CFDictionary, nil), errSecSuccess)
+    defer { SecItemDelete(seat as CFDictionary) }
+
+    _ = try store.createIfAbsent(syntheticKey())
+    try store.delete()
+    XCTAssertEqual(store.read().status, .notFound)
+    XCTAssertEqual(SecItemCopyMatching(seat as CFDictionary, nil), errSecSuccess)
   }
 }
