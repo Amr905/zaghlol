@@ -39,6 +39,25 @@ groups:
           summary: "Play Integrity calls used more than 50% of the daily quota"
           description: "Request a quota increase or reduce restore attempts."
 
+      - alert: ZaghlolSupportLookupVolume
+        # Enumeration guard (T-136): each lookup answers one support ticket, so a burst across the team is unusual.
+        expr: sum(increase(zaghlol_support_lookup_total[1h])) > 60
+        for: 5m
+        labels:
+          severity: warn
+        annotations:
+          summary: "More than 60 support lookups in the last hour"
+          description: "Check the audit log (action support_lookup) for who ran them and confirm each one matches a ticket."
+
+      - alert: ZaghlolOperatorPhishingResistantMfaUnproven
+        # Advisory mode (R4-6): support_agent or support_lead requests whose token carried no proving acrs claim.
+        expr: sum by (role) (increase(zaghlol_diag_operator_phishing_resistant_unproven_total[1d])) > 0
+        labels:
+          severity: warn
+        annotations:
+          summary: "{{ $labels.role }} requests without a proving acrs claim"
+          description: "The IdP policy is the control in Advisory mode. Confirm the conditional-access policy still covers the support group, or switch to Enforced once the IdP emits acrs."
+
   - name: zaghlol-audit-alerts
     rules:
       - alert: ZaghlolAuditSupportMovesPerPurchase90d
