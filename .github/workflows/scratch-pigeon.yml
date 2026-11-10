@@ -1,0 +1,29 @@
+name: scratch-pigeon
+# Throwaway (T-015): prints the Pigeon output for the new contract. Never merged.
+on:
+  push:
+    branches: ['scratch/**']
+permissions:
+  contents: read
+jobs:
+  gen:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@fbc6f3992d24b796d5a048ff273f7fcc4a7b6c09 # v5.1.0
+        with:
+          persist-credentials: false
+      - uses: subosito/flutter-action@1a449444c387b1966244ae4d4f8c696479add0b2 # v2.23.0
+        with:
+          flutter-version: '3.47.9'
+          channel: stable
+          cache: true
+      - run: flutter pub get --enforce-lockfile
+      - run: bash app/tool/generate_pigeon.sh
+      - name: dump
+        run: |
+          git status --porcelain
+          tar czf /tmp/gen.tgz $(git status --porcelain --untracked-files=all | awk '{print $2}')
+          echo "BEGIN_B64"
+          base64 -w 0 /tmp/gen.tgz
+          echo
+          echo "END_B64"
