@@ -1,5 +1,155 @@
 ﻿== SUMMARY ==
-RUNNING sha=e91c7c4e24b7b7d0444c450c186fcbc1211b4761
+FAIL sha=e91c7c4e24b7b7d0444c450c186fcbc1211b4761 pipeline=quick-backend dotnet-build=1 dotnet-format=0 dotnet-test=1
+dotnet-build                 FAIL  exit=1  15s
+dotnet-format                PASS  exit=0  22s
+dotnet-test                  FAIL  exit=1  51s
+
+== ERRORS: dotnet-build ==
+/work/backend/tests/Zaghlol.Api.Tests/Sync/SyncHostFixture.cs(92,18): error CS1061: 'IServiceCollection' does not contain a definition for 'AddZaghlolLogPseudonymizer' and no accessible extension method 'AddZaghlolLogPseudonymizer' accepting a first argument of type 'IServiceCollection' could be found (are you missing a using directive or an assembly reference?) [/work/backend/tests/Zaghlol.Api.Tests/Zaghlol.Api.Tests.csproj]
+
+== ERRORS: dotnet-test ==
+  Failed Zaghlol.Application.Tests.Sync.SyncServiceTests.AFirstSyncIsFullAtWholeSecondsAndClaimsTheWindow [2 ms]
+  Error Message:
+[xUnit.net 00:00:00.43]     Zaghlol.Application.Tests.Sync.SyncServiceTests.AHasherOutageDropsTheIntakeButTheSyncSucceeds [FAIL]
+   Assert.Null() Failure: Value of type 'Nullable<ReadOnlyMemory<byte>>' has a value
+Expected: null
+Actual:   System.ReadOnlyMemory<Byte>[0]
+  Stack Trace:
+     at Zaghlol.Application.Tests.Sync.SyncServiceTests.AFirstSyncIsFullAtWholeSecondsAndClaimsTheWindow() in /_/backend/tests/Zaghlol.Application.Tests/Sync/SyncServiceTests.cs:line 56
+--- End of stack trace from previous location ---
+  Failed Zaghlol.Application.Tests.Sync.SyncServiceTests.AHasherOutageDropsTheIntakeButTheSyncSucceeds [< 1 ms]
+  Error Message:
+   Assert.Null() Failure: Value of type 'Nullable<ReadOnlyMemory<byte>>' has a value
+Expected: null
+
+  Failed Zaghlol.Application.Tests.Sync.SyncServiceTests.AHasherOutageDropsTheIntakeButTheSyncSucceeds [< 1 ms]
+  Error Message:
+   Assert.Null() Failure: Value of type 'Nullable<ReadOnlyMemory<byte>>' has a value
+Expected: null
+Actual:   System.ReadOnlyMemory<Byte>[0]
+  Stack Trace:
+     at Zaghlol.Application.Tests.Sync.SyncServiceTests.AHasherOutageDropsTheIntakeButTheSyncSucceeds() in /_/backend/tests/Zaghlol.Application.Tests/Sync/SyncServiceTests.cs:line 285
+--- End of stack trace from previous location ---
+
+Failed!  - Failed:     2, Passed:   342, Skipped:     0, Total:   344, Duration: 117 ms - Zaghlol.Application.Tests.dll (net10.0)
+[xUnit.net 00:00:00.76]     Zaghlol.Infrastructure.Tests.Observability.SeededSeriesTests.EverySeriesIsExportedAtZeroBeforeAnyEvent [FAIL]
+  Failed Zaghlol.Infrastructure.Tests.Observability.SeededSeriesTests.EverySeriesIsExportedAtZeroBeforeAnyEvent [146 ms]
+  Error Message:
+
+  Failed Zaghlol.Infrastructure.Tests.Observability.SeededSeriesTests.EverySeriesIsExportedAtZeroBeforeAnyEvent [146 ms]
+  Error Message:
+   Assert.Contains() Failure: Item not found in collection
+Collection: [Tuple ("dotnet.thread_pool.queue.length", ""), Tuple ("zaghlol.kms.unavailable", "operation=sign"), Tuple ("zaghlol.kms.unavailable", "operation=sign_verify"), Tuple ("zaghlol.kms.unavailable", "operation=hmac"), Tuple ("zaghlol.kms.unavailable", "operation=data_key"), ···]
+Not found:  Tuple ("zaghlol.audit_alert.fired", "rule=support_moves_per_purchase_90d")
+  Stack Trace:
+     at Zaghlol.Infrastructure.Tests.Observability.SeededSeriesTests.EverySeriesIsExportedAtZeroBeforeAnyEvent() in /_/backend/tests/Zaghlol.Infrastructure.Tests/Observability/SeededSeriesTests.cs:line 73
+   at Zaghlol.Infrastructure.Tests.Observability.SeededSeriesTests.EverySeriesIsExportedAtZeroBeforeAnyEvent() in /_/backend/tests/Zaghlol.Infrastructure.Tests/Observability/SeededSeriesTests.cs:line 110
+--- End of stack trace from previous location ---
+
+Passed!  - Failed:     0, Passed:   107, Skipped:     0, Total:   107, Duration: 11 s - Zaghlol.Contract.Tests.dll (net10.0)
+
+Failed!  - Failed:     1, Passed:   553, Skipped:     0, Total:   554, Duration: 12 s - Zaghlol.Infrastructure.Tests.dll (net10.0)
+
 
 == FULL LOG (last 1500 lines) ==
 auto task/T-128-sync e91c7c4e24b7b7d0444c450c186fcbc1211b4761 2026-11-10T12:14:50.9104203+02:00
+
+
+
+[12:14:56] === STEP dotnet-build (docker mcr.microsoft.com/dotnet/sdk:10.0.402, /work/backend)
+  Determining projects to restore...
+  Restored /work/backend/src/Zaghlol.Domain/Zaghlol.Domain.csproj (in 122 ms).
+  Restored /work/backend/src/Zaghlol.Ops/Zaghlol.Ops.csproj (in 122 ms).
+  Restored /work/backend/src/Zaghlol.Application/Zaghlol.Application.csproj (in 642 ms).
+  Restored /work/backend/tests/Zaghlol.Ops.Tests/Zaghlol.Ops.Tests.csproj (in 653 ms).
+  Restored /work/backend/tests/Zaghlol.Application.Tests/Zaghlol.Application.Tests.csproj (in 653 ms).
+  Restored /work/backend/src/Zaghlol.Workers/Zaghlol.Workers.csproj (in 655 ms).
+  Restored /work/backend/tests/Zaghlol.Infrastructure.Tests/Zaghlol.Infrastructure.Tests.csproj (in 653 ms).
+  Restored /work/backend/tests/Zaghlol.Contract.Tests/Zaghlol.Contract.Tests.csproj (in 654 ms).
+  Restored /work/backend/tests/Zaghlol.Workers.Tests/Zaghlol.Workers.Tests.csproj (in 655 ms).
+  Restored /work/backend/tests/Zaghlol.Api.Tests/Zaghlol.Api.Tests.csproj (in 654 ms).
+  Restored /work/backend/src/Zaghlol.Api/Zaghlol.Api.csproj (in 654 ms).
+  Restored /work/backend/src/Zaghlol.Infrastructure/Zaghlol.Infrastructure.csproj (in 672 ms).
+  Zaghlol.Domain -> /work/backend/src/Zaghlol.Domain/bin/Release/net10.0/Zaghlol.Domain.dll
+  Zaghlol.Ops -> /work/backend/src/Zaghlol.Ops/bin/Release/net10.0/zaghlol-ops.dll
+  Zaghlol.Ops.Tests -> /work/backend/tests/Zaghlol.Ops.Tests/bin/Release/net10.0/Zaghlol.Ops.Tests.dll
+  Zaghlol.Application -> /work/backend/src/Zaghlol.Application/bin/Release/net10.0/Zaghlol.Application.dll
+  Zaghlol.Application.Tests -> /work/backend/tests/Zaghlol.Application.Tests/bin/Release/net10.0/Zaghlol.Application.Tests.dll
+  Zaghlol.Infrastructure -> /work/backend/src/Zaghlol.Infrastructure/bin/Release/net10.0/Zaghlol.Infrastructure.dll
+  Zaghlol.Workers -> /work/backend/src/Zaghlol.Workers/bin/Release/net10.0/Zaghlol.Workers.dll
+  Zaghlol.Infrastructure.Tests -> /work/backend/tests/Zaghlol.Infrastructure.Tests/bin/Release/net10.0/Zaghlol.Infrastructure.Tests.dll
+  Zaghlol.Workers.Tests -> /work/backend/tests/Zaghlol.Workers.Tests/bin/Release/net10.0/Zaghlol.Workers.Tests.dll
+  Zaghlol.Api -> /work/backend/src/Zaghlol.Api/bin/Release/net10.0/Zaghlol.Api.dll
+/work/backend/tests/Zaghlol.Api.Tests/Sync/SyncHostFixture.cs(92,18): error CS1061: 'IServiceCollection' does not contain a definition for 'AddZaghlolLogPseudonymizer' and no accessible extension method 'AddZaghlolLogPseudonymizer' accepting a first argument of type 'IServiceCollection' could be found (are you missing a using directive or an assembly reference?) [/work/backend/tests/Zaghlol.Api.Tests/Zaghlol.Api.Tests.csproj]
+  Zaghlol.Contract.Tests -> /work/backend/tests/Zaghlol.Contract.Tests/bin/Release/net10.0/Zaghlol.Contract.Tests.dll
+
+Build FAILED.
+
+/work/backend/tests/Zaghlol.Api.Tests/Sync/SyncHostFixture.cs(92,18): error CS1061: 'IServiceCollection' does not contain a definition for 'AddZaghlolLogPseudonymizer' and no accessible extension method 'AddZaghlolLogPseudonymizer' accepting a first argument of type 'IServiceCollection' could be found (are you missing a using directive or an assembly reference?) [/work/backend/tests/Zaghlol.Api.Tests/Zaghlol.Api.Tests.csproj]
+    0 Warning(s)
+    1 Error(s)
+
+Time Elapsed 00:00:14.21
+
+[12:15:11] === RESULT dotnet-build exit=1 (15s)
+[12:15:11] === STEP dotnet-format (docker mcr.microsoft.com/dotnet/sdk:10.0.402, /work/backend)
+Formatting code files in workspace '/work/backend/Zaghlol.sln'.
+Format complete in 21525ms.
+
+[12:15:33] === RESULT dotnet-format exit=0 (22s)
+[12:15:33] === STEP dotnet-test (docker mcr.microsoft.com/dotnet/sdk:10.0.402, /work/backend)
+Test run for /work/backend/tests/Zaghlol.Ops.Tests/bin/Release/net10.0/Zaghlol.Ops.Tests.dll (.NETCoreApp,Version=v10.0)
+Test run for /work/backend/tests/Zaghlol.Workers.Tests/bin/Release/net10.0/Zaghlol.Workers.Tests.dll (.NETCoreApp,Version=v10.0)
+Test run for /work/backend/tests/Zaghlol.Application.Tests/bin/Release/net10.0/Zaghlol.Application.Tests.dll (.NETCoreApp,Version=v10.0)
+Test run for /work/backend/tests/Zaghlol.Api.Tests/bin/Release/net10.0/Zaghlol.Api.Tests.dll (.NETCoreApp,Version=v10.0)
+Test run for /work/backend/tests/Zaghlol.Contract.Tests/bin/Release/net10.0/Zaghlol.Contract.Tests.dll (.NETCoreApp,Version=v10.0)
+Test run for /work/backend/tests/Zaghlol.Infrastructure.Tests/bin/Release/net10.0/Zaghlol.Infrastructure.Tests.dll (.NETCoreApp,Version=v10.0)
+A total of 1 test files matched the specified pattern.A total of 1 test files matched the specified pattern.
+
+A total of 1 test files matched the specified pattern.
+A total of 1 test files matched the specified pattern.
+A total of 1 test files matched the specified pattern.
+A total of 1 test files matched the specified pattern.
+
+Passed!  - Failed:     0, Passed:    11, Skipped:     0, Total:    11, Duration: 111 ms - Zaghlol.Workers.Tests.dll (net10.0)
+
+Passed!  - Failed:     0, Passed:     2, Skipped:     0, Total:     2, Duration: 31 ms - Zaghlol.Ops.Tests.dll (net10.0)
+[xUnit.net 00:00:00.43]     Zaghlol.Application.Tests.Sync.SyncServiceTests.AFirstSyncIsFullAtWholeSecondsAndClaimsTheWindow [FAIL]
+  Failed Zaghlol.Application.Tests.Sync.SyncServiceTests.AFirstSyncIsFullAtWholeSecondsAndClaimsTheWindow [2 ms]
+  Error Message:
+[xUnit.net 00:00:00.43]     Zaghlol.Application.Tests.Sync.SyncServiceTests.AHasherOutageDropsTheIntakeButTheSyncSucceeds [FAIL]
+   Assert.Null() Failure: Value of type 'Nullable<ReadOnlyMemory<byte>>' has a value
+Expected: null
+Actual:   System.ReadOnlyMemory<Byte>[0]
+  Stack Trace:
+     at Zaghlol.Application.Tests.Sync.SyncServiceTests.AFirstSyncIsFullAtWholeSecondsAndClaimsTheWindow() in /_/backend/tests/Zaghlol.Application.Tests/Sync/SyncServiceTests.cs:line 56
+--- End of stack trace from previous location ---
+  Failed Zaghlol.Application.Tests.Sync.SyncServiceTests.AHasherOutageDropsTheIntakeButTheSyncSucceeds [< 1 ms]
+  Error Message:
+   Assert.Null() Failure: Value of type 'Nullable<ReadOnlyMemory<byte>>' has a value
+Expected: null
+Actual:   System.ReadOnlyMemory<Byte>[0]
+  Stack Trace:
+     at Zaghlol.Application.Tests.Sync.SyncServiceTests.AHasherOutageDropsTheIntakeButTheSyncSucceeds() in /_/backend/tests/Zaghlol.Application.Tests/Sync/SyncServiceTests.cs:line 285
+--- End of stack trace from previous location ---
+
+Failed!  - Failed:     2, Passed:   342, Skipped:     0, Total:   344, Duration: 117 ms - Zaghlol.Application.Tests.dll (net10.0)
+[xUnit.net 00:00:00.76]     Zaghlol.Infrastructure.Tests.Observability.SeededSeriesTests.EverySeriesIsExportedAtZeroBeforeAnyEvent [FAIL]
+  Failed Zaghlol.Infrastructure.Tests.Observability.SeededSeriesTests.EverySeriesIsExportedAtZeroBeforeAnyEvent [146 ms]
+  Error Message:
+   Assert.Contains() Failure: Item not found in collection
+Collection: [Tuple ("dotnet.thread_pool.queue.length", ""), Tuple ("zaghlol.kms.unavailable", "operation=sign"), Tuple ("zaghlol.kms.unavailable", "operation=sign_verify"), Tuple ("zaghlol.kms.unavailable", "operation=hmac"), Tuple ("zaghlol.kms.unavailable", "operation=data_key"), ···]
+Not found:  Tuple ("zaghlol.audit_alert.fired", "rule=support_moves_per_purchase_90d")
+  Stack Trace:
+     at Zaghlol.Infrastructure.Tests.Observability.SeededSeriesTests.EverySeriesIsExportedAtZeroBeforeAnyEvent() in /_/backend/tests/Zaghlol.Infrastructure.Tests/Observability/SeededSeriesTests.cs:line 73
+   at Zaghlol.Infrastructure.Tests.Observability.SeededSeriesTests.EverySeriesIsExportedAtZeroBeforeAnyEvent() in /_/backend/tests/Zaghlol.Infrastructure.Tests/Observability/SeededSeriesTests.cs:line 110
+--- End of stack trace from previous location ---
+
+Passed!  - Failed:     0, Passed:   107, Skipped:     0, Total:   107, Duration: 11 s - Zaghlol.Contract.Tests.dll (net10.0)
+
+Failed!  - Failed:     1, Passed:   553, Skipped:     0, Total:   554, Duration: 12 s - Zaghlol.Infrastructure.Tests.dll (net10.0)
+
+Passed!  - Failed:     0, Passed:   318, Skipped:     0, Total:   318, Duration: 40 s - Zaghlol.Api.Tests.dll (net10.0)
+
+[12:16:24] === RESULT dotnet-test exit=1 (51s)
+[12:16:24] SUMMARY FAIL sha=e91c7c4e24b7b7d0444c450c186fcbc1211b4761 pipeline=quick-backend dotnet-build=1 dotnet-format=0 dotnet-test=1
