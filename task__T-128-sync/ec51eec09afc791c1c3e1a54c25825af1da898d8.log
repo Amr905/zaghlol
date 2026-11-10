@@ -1,5 +1,789 @@
 ﻿== SUMMARY ==
-RUNNING sha=ec51eec09afc791c1c3e1a54c25825af1da898d8
+FAIL sha=ec51eec09afc791c1c3e1a54c25825af1da898d8 pipeline=quick-backend dotnet-build=0 dotnet-format=0 dotnet-test=1
+dotnet-build                 PASS  exit=0  15s
+dotnet-format                PASS  exit=0  22s
+dotnet-test                  FAIL  exit=1  53s
+
+== ERRORS: dotnet-test ==
+  Failed Zaghlol.Infrastructure.Tests.Sync.PrivacyFilterCheckTests.EveryTextTheFilterAcceptsPassesTheDatabaseCheck [76 ms]
+  Error Message:
+   Npgsql.PostgresException : 22P02: malformed array literal: "a·54|)−"
+
+DETAIL: Detail redacted as it may contain sensitive data. Specify 'Include Error Detail' in the connection string to include this information.
+  Stack Trace:
+     at Npgsql.Internal.NpgsqlConnector.ReadMessageLong(Boolean async, DataRowLoadingMode dataRowLoadingMode, Boolean readingNotifications, Boolean isReadingPrependedMessage)
+   at System.Runtime.CompilerServices.PoolingAsyncValueTaskMethodBuilder`1.StateMachineBox`1.System.Threading.Tasks.Sources.IValueTaskSource<TResult>.GetResult(Int16 token)
+   at Npgsql.NpgsqlDataReader.NextResult(Boolean async, Boolean isConsuming, CancellationToken cancellationToken)
+   at Npgsql.NpgsqlDataReader.NextResult(Boolean async, Boolean isConsuming, CancellationToken cancellationToken)
+   at Npgsql.NpgsqlCommand.ExecuteReader(Boolean async, CommandBehavior behavior, CancellationToken cancellationToken)
+   at Npgsql.NpgsqlCommand.ExecuteReader(Boolean async, CommandBehavior behavior, CancellationToken cancellationToken)
+   at Zaghlol.Infrastructure.Tests.Db.QueryAsync(String connectionString, String sql, Object[] parameters) in /_/backend/tests/Zaghlol.Infrastructure.Tests/SchemaFixture.cs:line 46
+
+  Failed Zaghlol.Infrastructure.Tests.Sync.DailyActiveFunctionTests.TheDayIsTheDatabasesUtcDateWhateverTheSessionTimeZone [47 ms]
+  Error Message:
+   Npgsql.PostgresException : 42883: function zaghlol.count_daily_active(unknown, text) does not exist
+
+POSITION: 8
+  Stack Trace:
+[xUnit.net 00:00:08.10]     Zaghlol.Infrastructure.Tests.Sync.DailyActiveFunctionTests.AnUnknownPlatformIsRejectedAndWritesNothing(platform: "x") [FAIL]
+[xUnit.net 00:00:08.10]     Zaghlol.Infrastructure.Tests.Sync.DailyActiveFunctionTests.AnUnknownPlatformIsRejectedAndWritesNothing(platform: "") [FAIL]
+     at Npgsql.Internal.NpgsqlConnector.ReadMessageLong(Boolean async, DataRowLoadingMode dataRowLoadingMode, Boolean readingNotifications, Boolean isReadingPrependedMessage)
+   at System.Runtime.CompilerServices.PoolingAsyncValueTaskMethodBuilder`1.StateMachineBox`1.System.Threading.Tasks.Sources.IValueTaskSource<TResult>.GetResult(Int16 token)
+   at Npgsql.NpgsqlDataReader.NextResult(Boolean async, Boolean isConsuming, CancellationToken cancellationToken)
+   at Npgsql.NpgsqlDataReader.NextResult(Boolean async, Boolean isConsuming, CancellationToken cancellationToken)
+   at Npgsql.NpgsqlCommand.ExecuteReader(Boolean async, CommandBehavior behavior, CancellationToken cancellationToken)
+
+  Failed Zaghlol.Infrastructure.Tests.Sync.DailyActiveFunctionTests.AnUnknownPlatformIsRejectedAndWritesNothing(platform: "Android") [10 ms]
+  Error Message:
+   Assert.Equal() Failure: Strings differ
+           ↓ (pos 0)
+Expected: "22023"
+Actual:   "42883"
+           ↑ (pos 0)
+  Stack Trace:
+     at Zaghlol.Infrastructure.Tests.Sync.DailyActiveFunctionTests.AnUnknownPlatformIsRejectedAndWritesNothing(String platform) in /_/backend/tests/Zaghlol.Infrastructure.Tests/Sync/DailyActiveFunctionTests.cs:line 74
+--- End of stack trace from previous location ---
+  Failed Zaghlol.Infrastructure.Tests.Sync.DailyActiveFunctionTests.AnUnknownPlatformIsRejectedAndWritesNothing(platform: "windows") [8 ms]
+  Error Message:
+   Assert.Equal() Failure: Strings differ
+
+  Failed Zaghlol.Infrastructure.Tests.Sync.DailyActiveFunctionTests.AnUnknownPlatformIsRejectedAndWritesNothing(platform: "windows") [8 ms]
+  Error Message:
+   Assert.Equal() Failure: Strings differ
+           ↓ (pos 0)
+Expected: "22023"
+Actual:   "42883"
+           ↑ (pos 0)
+  Stack Trace:
+     at Zaghlol.Infrastructure.Tests.Sync.DailyActiveFunctionTests.AnUnknownPlatformIsRejectedAndWritesNothing(String platform) in /_/backend/tests/Zaghlol.Infrastructure.Tests/Sync/DailyActiveFunctionTests.cs:line 74
+--- End of stack trace from previous location ---
+[xUnit.net 00:00:08.11]     Zaghlol.Infrastructure.Tests.Sync.DailyActiveFunctionTests.TheCallerCanNoLongerChooseTheDay [FAIL]
+[xUnit.net 00:00:08.12]     Zaghlol.Infrastructure.Tests.Sync.DailyActiveFunctionTests.TwoCallsAddTwoToOneRow [FAIL]
+[xUnit.net 00:00:08.13]     Zaghlol.Infrastructure.Tests.Sync.DailyActiveFunctionTests.ANullPlatformIsRejected [FAIL]
+
+  Failed Zaghlol.Infrastructure.Tests.Sync.DailyActiveFunctionTests.AnUnknownPlatformIsRejectedAndWritesNothing(platform: "x") [4 ms]
+  Error Message:
+   Assert.Equal() Failure: Strings differ
+           ↓ (pos 0)
+Expected: "22023"
+Actual:   "42883"
+           ↑ (pos 0)
+  Stack Trace:
+     at Zaghlol.Infrastructure.Tests.Sync.DailyActiveFunctionTests.AnUnknownPlatformIsRejectedAndWritesNothing(String platform) in /_/backend/tests/Zaghlol.Infrastructure.Tests/Sync/DailyActiveFunctionTests.cs:line 74
+--- End of stack trace from previous location ---
+  Failed Zaghlol.Infrastructure.Tests.Sync.DailyActiveFunctionTests.AnUnknownPlatformIsRejectedAndWritesNothing(platform: "") [4 ms]
+  Error Message:
+   Assert.Equal() Failure: Strings differ
+
+  Failed Zaghlol.Infrastructure.Tests.Sync.DailyActiveFunctionTests.AnUnknownPlatformIsRejectedAndWritesNothing(platform: "") [4 ms]
+  Error Message:
+   Assert.Equal() Failure: Strings differ
+           ↓ (pos 0)
+Expected: "22023"
+Actual:   "42883"
+           ↑ (pos 0)
+  Stack Trace:
+     at Zaghlol.Infrastructure.Tests.Sync.DailyActiveFunctionTests.AnUnknownPlatformIsRejectedAndWritesNothing(String platform) in /_/backend/tests/Zaghlol.Infrastructure.Tests/Sync/DailyActiveFunctionTests.cs:line 74
+--- End of stack trace from previous location ---
+  Failed Zaghlol.Infrastructure.Tests.Sync.DailyActiveFunctionTests.TheCallerCanNoLongerChooseTheDay [9 ms]
+  Error Message:
+   Assert.Throws() Failure: No exception was thrown
+
+  Failed Zaghlol.Infrastructure.Tests.Sync.DailyActiveFunctionTests.TheCallerCanNoLongerChooseTheDay [9 ms]
+  Error Message:
+   Assert.Throws() Failure: No exception was thrown
+Expected: typeof(Npgsql.PostgresException)
+  Stack Trace:
+     at Zaghlol.Infrastructure.Tests.Sync.DailyActiveFunctionTests.TheCallerCanNoLongerChooseTheDay() in /_/backend/tests/Zaghlol.Infrastructure.Tests/Sync/DailyActiveFunctionTests.cs:line 93
+--- End of stack trace from previous location ---
+  Failed Zaghlol.Infrastructure.Tests.Sync.DailyActiveFunctionTests.TwoCallsAddTwoToOneRow [6 ms]
+  Error Message:
+   Npgsql.PostgresException : 42883: function zaghlol.count_daily_active(unknown, text) does not exist
+
+POSITION: 8
+  Stack Trace:
+
+  Failed Zaghlol.Infrastructure.Tests.Sync.DailyActiveFunctionTests.TwoCallsAddTwoToOneRow [6 ms]
+  Error Message:
+   Npgsql.PostgresException : 42883: function zaghlol.count_daily_active(unknown, text) does not exist
+
+POSITION: 8
+  Stack Trace:
+     at Npgsql.Internal.NpgsqlConnector.ReadMessageLong(Boolean async, DataRowLoadingMode dataRowLoadingMode, Boolean readingNotifications, Boolean isReadingPrependedMessage)
+   at System.Runtime.CompilerServices.PoolingAsyncValueTaskMethodBuilder`1.StateMachineBox`1.System.Threading.Tasks.Sources.IValueTaskSource<TResult>.GetResult(Int16 token)
+   at Npgsql.NpgsqlDataReader.NextResult(Boolean async, Boolean isConsuming, CancellationToken cancellationToken)
+   at Npgsql.NpgsqlDataReader.NextResult(Boolean async, Boolean isConsuming, CancellationToken cancellationToken)
+   at Npgsql.NpgsqlCommand.ExecuteReader(Boolean async, CommandBehavior behavior, CancellationToken cancellationToken)
+   at Npgsql.NpgsqlCommand.ExecuteReader(Boolean async, CommandBehavior behavior, CancellationToken cancellationToken)
+   at Npgsql.NpgsqlCommand.ExecuteNonQuery(Boolean async, CancellationToken cancellationToken)
+
+  Failed Zaghlol.Infrastructure.Tests.Sync.DailyActiveFunctionTests.ANullPlatformIsRejected [6 ms]
+  Error Message:
+   Assert.Equal() Failure: Strings differ
+           ↓ (pos 0)
+Expected: "22023"
+Actual:   "42883"
+           ↑ (pos 0)
+  Stack Trace:
+     at Zaghlol.Infrastructure.Tests.Sync.DailyActiveFunctionTests.ANullPlatformIsRejected() in /_/backend/tests/Zaghlol.Infrastructure.Tests/Sync/DailyActiveFunctionTests.cs:line 87
+--- End of stack trace from previous location ---
+[xUnit.net 00:00:08.14]     Zaghlol.Infrastructure.Tests.Sync.DailyActiveFunctionTests.OnlyTheTwoArgumentFunctionExists [FAIL]
+  Failed Zaghlol.Infrastructure.Tests.Sync.DailyActiveFunctionTests.OnlyTheTwoArgumentFunctionExists [8 ms]
+  Error Message:
+
+  Failed Zaghlol.Infrastructure.Tests.Sync.DailyActiveFunctionTests.OnlyTheTwoArgumentFunctionExists [8 ms]
+  Error Message:
+   Assert.Equal() Failure: Values differ
+Expected: p_platform text, p_app_version text
+Actual:   p_day date, p_platform text, p_app_version text
+  Stack Trace:
+     at Zaghlol.Infrastructure.Tests.Sync.DailyActiveFunctionTests.OnlyTheTwoArgumentFunctionExists() in /_/backend/tests/Zaghlol.Infrastructure.Tests/Sync/DailyActiveFunctionTests.cs:line 113
+--- End of stack trace from previous location ---
+[xUnit.net 00:00:08.38]     Zaghlol.Infrastructure.Tests.Sync.SyncStoreTests.IntakeIsInsertedOnceByUniqueKeyAndCountsOnlyNewRows [FAIL]
+  Failed Zaghlol.Infrastructure.Tests.Sync.SyncStoreTests.IntakeIsInsertedOnceByUniqueKeyAndCountsOnlyNewRows [105 ms]
+  Error Message:
+   Npgsql.PostgresException : 42883: function zaghlol.count_daily_active(text, text) does not exist
+
+
+  Failed Zaghlol.Infrastructure.Tests.Sync.SyncStoreTests.IntakeIsInsertedOnceByUniqueKeyAndCountsOnlyNewRows [105 ms]
+  Error Message:
+   Npgsql.PostgresException : 42883: function zaghlol.count_daily_active(text, text) does not exist
+
+POSITION: 8
+  Stack Trace:
+     at Npgsql.Internal.NpgsqlConnector.ReadMessageLong(Boolean async, DataRowLoadingMode dataRowLoadingMode, Boolean readingNotifications, Boolean isReadingPrependedMessage)
+   at System.Runtime.CompilerServices.PoolingAsyncValueTaskMethodBuilder`1.StateMachineBox`1.System.Threading.Tasks.Sources.IValueTaskSource<TResult>.GetResult(Int16 token)
+   at Npgsql.NpgsqlDataReader.NextResult(Boolean async, Boolean isConsuming, CancellationToken cancellationToken)
+   at Npgsql.NpgsqlDataReader.NextResult(Boolean async, Boolean isConsuming, CancellationToken cancellationToken)
+   at Npgsql.NpgsqlCommand.ExecuteReader(Boolean async, CommandBehavior behavior, CancellationToken cancellationToken)
+   at Npgsql.NpgsqlCommand.ExecuteReader(Boolean async, CommandBehavior behavior, CancellationToken cancellationToken)
+   at Npgsql.NpgsqlCommand.ExecuteNonQuery(Boolean async, CancellationToken cancellationToken)
+
+  Failed Zaghlol.Infrastructure.Tests.Sync.SyncStoreTests.TheFirstClaimWinsUpdatesTheInstallAndCountsADailyActive [29 ms]
+  Error Message:
+   Npgsql.PostgresException : 42883: function zaghlol.count_daily_active(text, text) does not exist
+
+POSITION: 8
+  Stack Trace:
+     at Npgsql.Internal.NpgsqlConnector.ReadMessageLong(Boolean async, DataRowLoadingMode dataRowLoadingMode, Boolean readingNotifications, Boolean isReadingPrependedMessage)
+   at System.Runtime.CompilerServices.PoolingAsyncValueTaskMethodBuilder`1.StateMachineBox`1.System.Threading.Tasks.Sources.IValueTaskSource<TResult>.GetResult(Int16 token)
+   at Npgsql.NpgsqlDataReader.NextResult(Boolean async, Boolean isConsuming, CancellationToken cancellationToken)
+   at Npgsql.NpgsqlDataReader.NextResult(Boolean async, Boolean isConsuming, CancellationToken cancellationToken)
+   at Npgsql.NpgsqlCommand.ExecuteReader(Boolean async, CommandBehavior behavior, CancellationToken cancellationToken)
+   at Npgsql.NpgsqlCommand.ExecuteReader(Boolean async, CommandBehavior behavior, CancellationToken cancellationToken)
+   at Npgsql.NpgsqlCommand.ExecuteNonQuery(Boolean async, CancellationToken cancellationToken)
+
+  Failed Zaghlol.Infrastructure.Tests.Sync.SyncStoreTests.ASecondClaimInsideTheWindowWritesNothingAndOneAtTheEndWins [21 ms]
+  Error Message:
+   Npgsql.PostgresException : 42883: function zaghlol.count_daily_active(text, text) does not exist
+
+POSITION: 8
+  Stack Trace:
+     at Npgsql.Internal.NpgsqlConnector.ReadMessageLong(Boolean async, DataRowLoadingMode dataRowLoadingMode, Boolean readingNotifications, Boolean isReadingPrependedMessage)
+   at System.Runtime.CompilerServices.PoolingAsyncValueTaskMethodBuilder`1.StateMachineBox`1.System.Threading.Tasks.Sources.IValueTaskSource<TResult>.GetResult(Int16 token)
+   at Npgsql.NpgsqlDataReader.NextResult(Boolean async, Boolean isConsuming, CancellationToken cancellationToken)
+   at Npgsql.NpgsqlDataReader.NextResult(Boolean async, Boolean isConsuming, CancellationToken cancellationToken)
+   at Npgsql.NpgsqlCommand.ExecuteReader(Boolean async, CommandBehavior behavior, CancellationToken cancellationToken)
+   at Npgsql.NpgsqlCommand.ExecuteReader(Boolean async, CommandBehavior behavior, CancellationToken cancellationToken)
+   at Npgsql.NpgsqlCommand.ExecuteNonQuery(Boolean async, CancellationToken cancellationToken)
+
+  Failed Zaghlol.Infrastructure.Tests.Sync.SyncStoreTests.ConcurrentClaimsHaveExactlyOneWinnerAndOneDailyActive [96 ms]
+  Error Message:
+   Npgsql.PostgresException : 42883: function zaghlol.count_daily_active(text, text) does not exist
+
+POSITION: 8
+  Stack Trace:
+     at Npgsql.Internal.NpgsqlConnector.ReadMessageLong(Boolean async, DataRowLoadingMode dataRowLoadingMode, Boolean readingNotifications, Boolean isReadingPrependedMessage)
+   at System.Runtime.CompilerServices.PoolingAsyncValueTaskMethodBuilder`1.StateMachineBox`1.System.Threading.Tasks.Sources.IValueTaskSource<TResult>.GetResult(Int16 token)
+   at Npgsql.NpgsqlDataReader.NextResult(Boolean async, Boolean isConsuming, CancellationToken cancellationToken)
+   at Npgsql.NpgsqlDataReader.NextResult(Boolean async, Boolean isConsuming, CancellationToken cancellationToken)
+   at Npgsql.NpgsqlCommand.ExecuteReader(Boolean async, CommandBehavior behavior, CancellationToken cancellationToken)
+   at Npgsql.NpgsqlCommand.ExecuteReader(Boolean async, CommandBehavior behavior, CancellationToken cancellationToken)
+   at Npgsql.NpgsqlCommand.ExecuteNonQuery(Boolean async, CancellationToken cancellationToken)
+
+  Failed Zaghlol.Infrastructure.Tests.GrantTests.RoleIsDenied(login: "zaghlol_worker", sql: "SELECT zaghlol.count_daily_active('ios', '1.0.0')") [3 ms]
+  Error Message:
+   Assert.Equal() Failure: Strings differ
+             ↓ (pos 2)
 
 == FULL LOG (last 1500 lines) ==
 auto task/T-128-sync ec51eec09afc791c1c3e1a54c25825af1da898d8 2026-11-10T12:37:19.4548003+02:00
+
+
+
+[12:37:25] === STEP dotnet-build (docker mcr.microsoft.com/dotnet/sdk:10.0.402, /work/backend)
+  Determining projects to restore...
+  All projects are up-to-date for restore.
+  Zaghlol.Domain -> /work/backend/src/Zaghlol.Domain/bin/Release/net10.0/Zaghlol.Domain.dll
+  Zaghlol.Ops -> /work/backend/src/Zaghlol.Ops/bin/Release/net10.0/zaghlol-ops.dll
+  Zaghlol.Ops.Tests -> /work/backend/tests/Zaghlol.Ops.Tests/bin/Release/net10.0/Zaghlol.Ops.Tests.dll
+  Zaghlol.Application -> /work/backend/src/Zaghlol.Application/bin/Release/net10.0/Zaghlol.Application.dll
+  Zaghlol.Application.Tests -> /work/backend/tests/Zaghlol.Application.Tests/bin/Release/net10.0/Zaghlol.Application.Tests.dll
+  Zaghlol.Infrastructure -> /work/backend/src/Zaghlol.Infrastructure/bin/Release/net10.0/Zaghlol.Infrastructure.dll
+  Zaghlol.Workers -> /work/backend/src/Zaghlol.Workers/bin/Release/net10.0/Zaghlol.Workers.dll
+  Zaghlol.Infrastructure.Tests -> /work/backend/tests/Zaghlol.Infrastructure.Tests/bin/Release/net10.0/Zaghlol.Infrastructure.Tests.dll
+  Zaghlol.Workers.Tests -> /work/backend/tests/Zaghlol.Workers.Tests/bin/Release/net10.0/Zaghlol.Workers.Tests.dll
+  Zaghlol.Api -> /work/backend/src/Zaghlol.Api/bin/Release/net10.0/Zaghlol.Api.dll
+  Zaghlol.Contract.Tests -> /work/backend/tests/Zaghlol.Contract.Tests/bin/Release/net10.0/Zaghlol.Contract.Tests.dll
+  Zaghlol.Api.Tests -> /work/backend/tests/Zaghlol.Api.Tests/bin/Release/net10.0/Zaghlol.Api.Tests.dll
+
+Build succeeded.
+    0 Warning(s)
+    0 Error(s)
+
+Time Elapsed 00:00:13.93
+
+[12:37:40] === RESULT dotnet-build exit=0 (15s)
+[12:37:40] === STEP dotnet-format (docker mcr.microsoft.com/dotnet/sdk:10.0.402, /work/backend)
+Formatting code files in workspace '/work/backend/Zaghlol.sln'.
+Format complete in 21390ms.
+
+[12:38:02] === RESULT dotnet-format exit=0 (22s)
+[12:38:02] === STEP dotnet-test (docker mcr.microsoft.com/dotnet/sdk:10.0.402, /work/backend)
+Test run for /work/backend/tests/Zaghlol.Workers.Tests/bin/Release/net10.0/Zaghlol.Workers.Tests.dll (.NETCoreApp,Version=v10.0)
+Test run for /work/backend/tests/Zaghlol.Ops.Tests/bin/Release/net10.0/Zaghlol.Ops.Tests.dll (.NETCoreApp,Version=v10.0)
+Test run for /work/backend/tests/Zaghlol.Application.Tests/bin/Release/net10.0/Zaghlol.Application.Tests.dll (.NETCoreApp,Version=v10.0)
+Test run for /work/backend/tests/Zaghlol.Infrastructure.Tests/bin/Release/net10.0/Zaghlol.Infrastructure.Tests.dll (.NETCoreApp,Version=v10.0)
+Test run for /work/backend/tests/Zaghlol.Api.Tests/bin/Release/net10.0/Zaghlol.Api.Tests.dll (.NETCoreApp,Version=v10.0)
+Test run for /work/backend/tests/Zaghlol.Contract.Tests/bin/Release/net10.0/Zaghlol.Contract.Tests.dll (.NETCoreApp,Version=v10.0)
+A total of 1 test files matched the specified pattern.A total of 1 test files matched the specified pattern.
+
+A total of 1 test files matched the specified pattern.
+A total of 1 test files matched the specified pattern.
+A total of 1 test files matched the specified pattern.
+A total of 1 test files matched the specified pattern.
+
+Passed!  - Failed:     0, Passed:     2, Skipped:     0, Total:     2, Duration: 25 ms - Zaghlol.Ops.Tests.dll (net10.0)
+
+Passed!  - Failed:     0, Passed:    11, Skipped:     0, Total:    11, Duration: 113 ms - Zaghlol.Workers.Tests.dll (net10.0)
+
+Passed!  - Failed:     0, Passed:   395, Skipped:     0, Total:   395, Duration: 112 ms - Zaghlol.Application.Tests.dll (net10.0)
+[xUnit.net 00:00:08.02]     Zaghlol.Infrastructure.Tests.Sync.PrivacyFilterCheckTests.EveryTextTheFilterAcceptsPassesTheDatabaseCheck [FAIL]
+[xUnit.net 00:00:08.07]     Zaghlol.Infrastructure.Tests.Sync.DailyActiveFunctionTests.TheDayIsTheDatabasesUtcDateWhateverTheSessionTimeZone [FAIL]
+[xUnit.net 00:00:08.09]     Zaghlol.Infrastructure.Tests.Sync.DailyActiveFunctionTests.AnUnknownPlatformIsRejectedAndWritesNothing(platform: "Android") [FAIL]
+[xUnit.net 00:00:08.09]     Zaghlol.Infrastructure.Tests.Sync.DailyActiveFunctionTests.AnUnknownPlatformIsRejectedAndWritesNothing(platform: "windows") [FAIL]
+  Failed Zaghlol.Infrastructure.Tests.Sync.PrivacyFilterCheckTests.EveryTextTheFilterAcceptsPassesTheDatabaseCheck [76 ms]
+  Error Message:
+   Npgsql.PostgresException : 22P02: malformed array literal: "a·54|)−"
+
+DETAIL: Detail redacted as it may contain sensitive data. Specify 'Include Error Detail' in the connection string to include this information.
+  Stack Trace:
+     at Npgsql.Internal.NpgsqlConnector.ReadMessageLong(Boolean async, DataRowLoadingMode dataRowLoadingMode, Boolean readingNotifications, Boolean isReadingPrependedMessage)
+   at System.Runtime.CompilerServices.PoolingAsyncValueTaskMethodBuilder`1.StateMachineBox`1.System.Threading.Tasks.Sources.IValueTaskSource<TResult>.GetResult(Int16 token)
+   at Npgsql.NpgsqlDataReader.NextResult(Boolean async, Boolean isConsuming, CancellationToken cancellationToken)
+   at Npgsql.NpgsqlDataReader.NextResult(Boolean async, Boolean isConsuming, CancellationToken cancellationToken)
+   at Npgsql.NpgsqlCommand.ExecuteReader(Boolean async, CommandBehavior behavior, CancellationToken cancellationToken)
+   at Npgsql.NpgsqlCommand.ExecuteReader(Boolean async, CommandBehavior behavior, CancellationToken cancellationToken)
+   at Zaghlol.Infrastructure.Tests.Db.QueryAsync(String connectionString, String sql, Object[] parameters) in /_/backend/tests/Zaghlol.Infrastructure.Tests/SchemaFixture.cs:line 46
+   at Zaghlol.Infrastructure.Tests.Db.QueryAsync(String connectionString, String sql, Object[] parameters) in /_/backend/tests/Zaghlol.Infrastructure.Tests/SchemaFixture.cs:line 59
+   at Zaghlol.Infrastructure.Tests.Db.QueryAsync(String connectionString, String sql, Object[] parameters) in /_/backend/tests/Zaghlol.Infrastructure.Tests/SchemaFixture.cs:line 59
+   at Zaghlol.Infrastructure.Tests.Sync.PrivacyFilterCheckTests.EveryTextTheFilterAcceptsPassesTheDatabaseCheck() in /_/backend/tests/Zaghlol.Infrastructure.Tests/Sync/PrivacyFilterCheckTests.cs:line 42
+--- End of stack trace from previous location ---
+  Failed Zaghlol.Infrastructure.Tests.Sync.DailyActiveFunctionTests.TheDayIsTheDatabasesUtcDateWhateverTheSessionTimeZone [47 ms]
+  Error Message:
+   Npgsql.PostgresException : 42883: function zaghlol.count_daily_active(unknown, text) does not exist
+
+POSITION: 8
+  Stack Trace:
+[xUnit.net 00:00:08.10]     Zaghlol.Infrastructure.Tests.Sync.DailyActiveFunctionTests.AnUnknownPlatformIsRejectedAndWritesNothing(platform: "x") [FAIL]
+[xUnit.net 00:00:08.10]     Zaghlol.Infrastructure.Tests.Sync.DailyActiveFunctionTests.AnUnknownPlatformIsRejectedAndWritesNothing(platform: "") [FAIL]
+     at Npgsql.Internal.NpgsqlConnector.ReadMessageLong(Boolean async, DataRowLoadingMode dataRowLoadingMode, Boolean readingNotifications, Boolean isReadingPrependedMessage)
+   at System.Runtime.CompilerServices.PoolingAsyncValueTaskMethodBuilder`1.StateMachineBox`1.System.Threading.Tasks.Sources.IValueTaskSource<TResult>.GetResult(Int16 token)
+   at Npgsql.NpgsqlDataReader.NextResult(Boolean async, Boolean isConsuming, CancellationToken cancellationToken)
+   at Npgsql.NpgsqlDataReader.NextResult(Boolean async, Boolean isConsuming, CancellationToken cancellationToken)
+   at Npgsql.NpgsqlCommand.ExecuteReader(Boolean async, CommandBehavior behavior, CancellationToken cancellationToken)
+   at Npgsql.NpgsqlCommand.ExecuteReader(Boolean async, CommandBehavior behavior, CancellationToken cancellationToken)
+   at Npgsql.NpgsqlCommand.ExecuteNonQuery(Boolean async, CancellationToken cancellationToken)
+   at Zaghlol.Infrastructure.Tests.Sync.DailyActiveFunctionTests.TheDayIsTheDatabasesUtcDateWhateverTheSessionTimeZone() in /_/backend/tests/Zaghlol.Infrastructure.Tests/Sync/DailyActiveFunctionTests.cs:line 30
+   at Zaghlol.Infrastructure.Tests.Sync.DailyActiveFunctionTests.TheDayIsTheDatabasesUtcDateWhateverTheSessionTimeZone() in /_/backend/tests/Zaghlol.Infrastructure.Tests/Sync/DailyActiveFunctionTests.cs:line 30
+   at Zaghlol.Infrastructure.Tests.Sync.DailyActiveFunctionTests.TheDayIsTheDatabasesUtcDateWhateverTheSessionTimeZone() in /_/backend/tests/Zaghlol.Infrastructure.Tests/Sync/DailyActiveFunctionTests.cs:line 31
+--- End of stack trace from previous location ---
+  Failed Zaghlol.Infrastructure.Tests.Sync.DailyActiveFunctionTests.AnUnknownPlatformIsRejectedAndWritesNothing(platform: "Android") [10 ms]
+  Error Message:
+   Assert.Equal() Failure: Strings differ
+           ↓ (pos 0)
+Expected: "22023"
+Actual:   "42883"
+           ↑ (pos 0)
+  Stack Trace:
+     at Zaghlol.Infrastructure.Tests.Sync.DailyActiveFunctionTests.AnUnknownPlatformIsRejectedAndWritesNothing(String platform) in /_/backend/tests/Zaghlol.Infrastructure.Tests/Sync/DailyActiveFunctionTests.cs:line 74
+--- End of stack trace from previous location ---
+  Failed Zaghlol.Infrastructure.Tests.Sync.DailyActiveFunctionTests.AnUnknownPlatformIsRejectedAndWritesNothing(platform: "windows") [8 ms]
+  Error Message:
+   Assert.Equal() Failure: Strings differ
+           ↓ (pos 0)
+Expected: "22023"
+Actual:   "42883"
+           ↑ (pos 0)
+  Stack Trace:
+     at Zaghlol.Infrastructure.Tests.Sync.DailyActiveFunctionTests.AnUnknownPlatformIsRejectedAndWritesNothing(String platform) in /_/backend/tests/Zaghlol.Infrastructure.Tests/Sync/DailyActiveFunctionTests.cs:line 74
+--- End of stack trace from previous location ---
+[xUnit.net 00:00:08.11]     Zaghlol.Infrastructure.Tests.Sync.DailyActiveFunctionTests.TheCallerCanNoLongerChooseTheDay [FAIL]
+[xUnit.net 00:00:08.12]     Zaghlol.Infrastructure.Tests.Sync.DailyActiveFunctionTests.TwoCallsAddTwoToOneRow [FAIL]
+[xUnit.net 00:00:08.13]     Zaghlol.Infrastructure.Tests.Sync.DailyActiveFunctionTests.ANullPlatformIsRejected [FAIL]
+  Failed Zaghlol.Infrastructure.Tests.Sync.DailyActiveFunctionTests.AnUnknownPlatformIsRejectedAndWritesNothing(platform: "x") [4 ms]
+  Error Message:
+   Assert.Equal() Failure: Strings differ
+           ↓ (pos 0)
+Expected: "22023"
+Actual:   "42883"
+           ↑ (pos 0)
+  Stack Trace:
+     at Zaghlol.Infrastructure.Tests.Sync.DailyActiveFunctionTests.AnUnknownPlatformIsRejectedAndWritesNothing(String platform) in /_/backend/tests/Zaghlol.Infrastructure.Tests/Sync/DailyActiveFunctionTests.cs:line 74
+--- End of stack trace from previous location ---
+  Failed Zaghlol.Infrastructure.Tests.Sync.DailyActiveFunctionTests.AnUnknownPlatformIsRejectedAndWritesNothing(platform: "") [4 ms]
+  Error Message:
+   Assert.Equal() Failure: Strings differ
+           ↓ (pos 0)
+Expected: "22023"
+Actual:   "42883"
+           ↑ (pos 0)
+  Stack Trace:
+     at Zaghlol.Infrastructure.Tests.Sync.DailyActiveFunctionTests.AnUnknownPlatformIsRejectedAndWritesNothing(String platform) in /_/backend/tests/Zaghlol.Infrastructure.Tests/Sync/DailyActiveFunctionTests.cs:line 74
+--- End of stack trace from previous location ---
+  Failed Zaghlol.Infrastructure.Tests.Sync.DailyActiveFunctionTests.TheCallerCanNoLongerChooseTheDay [9 ms]
+  Error Message:
+   Assert.Throws() Failure: No exception was thrown
+Expected: typeof(Npgsql.PostgresException)
+  Stack Trace:
+     at Zaghlol.Infrastructure.Tests.Sync.DailyActiveFunctionTests.TheCallerCanNoLongerChooseTheDay() in /_/backend/tests/Zaghlol.Infrastructure.Tests/Sync/DailyActiveFunctionTests.cs:line 93
+--- End of stack trace from previous location ---
+  Failed Zaghlol.Infrastructure.Tests.Sync.DailyActiveFunctionTests.TwoCallsAddTwoToOneRow [6 ms]
+  Error Message:
+   Npgsql.PostgresException : 42883: function zaghlol.count_daily_active(unknown, text) does not exist
+
+POSITION: 8
+  Stack Trace:
+     at Npgsql.Internal.NpgsqlConnector.ReadMessageLong(Boolean async, DataRowLoadingMode dataRowLoadingMode, Boolean readingNotifications, Boolean isReadingPrependedMessage)
+   at System.Runtime.CompilerServices.PoolingAsyncValueTaskMethodBuilder`1.StateMachineBox`1.System.Threading.Tasks.Sources.IValueTaskSource<TResult>.GetResult(Int16 token)
+   at Npgsql.NpgsqlDataReader.NextResult(Boolean async, Boolean isConsuming, CancellationToken cancellationToken)
+   at Npgsql.NpgsqlDataReader.NextResult(Boolean async, Boolean isConsuming, CancellationToken cancellationToken)
+   at Npgsql.NpgsqlCommand.ExecuteReader(Boolean async, CommandBehavior behavior, CancellationToken cancellationToken)
+   at Npgsql.NpgsqlCommand.ExecuteReader(Boolean async, CommandBehavior behavior, CancellationToken cancellationToken)
+   at Npgsql.NpgsqlCommand.ExecuteNonQuery(Boolean async, CancellationToken cancellationToken)
+   at Zaghlol.Infrastructure.Tests.Db.ExecuteAsync(String connectionString, String sql, Object[] parameters) in /_/backend/tests/Zaghlol.Infrastructure.Tests/SchemaFixture.cs:line 74
+   at Zaghlol.Infrastructure.Tests.Db.ExecuteAsync(String connectionString, String sql, Object[] parameters) in /_/backend/tests/Zaghlol.Infrastructure.Tests/SchemaFixture.cs:line 74
+   at Zaghlol.Infrastructure.Tests.Db.ExecuteAsync(String connectionString, String sql, Object[] parameters) in /_/backend/tests/Zaghlol.Infrastructure.Tests/SchemaFixture.cs:line 74
+   at Zaghlol.Infrastructure.Tests.Sync.DailyActiveFunctionTests.TwoCallsAddTwoToOneRow() in /_/backend/tests/Zaghlol.Infrastructure.Tests/Sync/DailyActiveFunctionTests.cs:line 51
+--- End of stack trace from previous location ---
+  Failed Zaghlol.Infrastructure.Tests.Sync.DailyActiveFunctionTests.ANullPlatformIsRejected [6 ms]
+  Error Message:
+   Assert.Equal() Failure: Strings differ
+           ↓ (pos 0)
+Expected: "22023"
+Actual:   "42883"
+           ↑ (pos 0)
+  Stack Trace:
+     at Zaghlol.Infrastructure.Tests.Sync.DailyActiveFunctionTests.ANullPlatformIsRejected() in /_/backend/tests/Zaghlol.Infrastructure.Tests/Sync/DailyActiveFunctionTests.cs:line 87
+--- End of stack trace from previous location ---
+[xUnit.net 00:00:08.14]     Zaghlol.Infrastructure.Tests.Sync.DailyActiveFunctionTests.OnlyTheTwoArgumentFunctionExists [FAIL]
+  Failed Zaghlol.Infrastructure.Tests.Sync.DailyActiveFunctionTests.OnlyTheTwoArgumentFunctionExists [8 ms]
+  Error Message:
+   Assert.Equal() Failure: Values differ
+Expected: p_platform text, p_app_version text
+Actual:   p_day date, p_platform text, p_app_version text
+  Stack Trace:
+     at Zaghlol.Infrastructure.Tests.Sync.DailyActiveFunctionTests.OnlyTheTwoArgumentFunctionExists() in /_/backend/tests/Zaghlol.Infrastructure.Tests/Sync/DailyActiveFunctionTests.cs:line 113
+--- End of stack trace from previous location ---
+[xUnit.net 00:00:08.38]     Zaghlol.Infrastructure.Tests.Sync.SyncStoreTests.IntakeIsInsertedOnceByUniqueKeyAndCountsOnlyNewRows [FAIL]
+  Failed Zaghlol.Infrastructure.Tests.Sync.SyncStoreTests.IntakeIsInsertedOnceByUniqueKeyAndCountsOnlyNewRows [105 ms]
+  Error Message:
+   Npgsql.PostgresException : 42883: function zaghlol.count_daily_active(text, text) does not exist
+
+POSITION: 8
+  Stack Trace:
+     at Npgsql.Internal.NpgsqlConnector.ReadMessageLong(Boolean async, DataRowLoadingMode dataRowLoadingMode, Boolean readingNotifications, Boolean isReadingPrependedMessage)
+   at System.Runtime.CompilerServices.PoolingAsyncValueTaskMethodBuilder`1.StateMachineBox`1.System.Threading.Tasks.Sources.IValueTaskSource<TResult>.GetResult(Int16 token)
+   at Npgsql.NpgsqlDataReader.NextResult(Boolean async, Boolean isConsuming, CancellationToken cancellationToken)
+   at Npgsql.NpgsqlDataReader.NextResult(Boolean async, Boolean isConsuming, CancellationToken cancellationToken)
+   at Npgsql.NpgsqlCommand.ExecuteReader(Boolean async, CommandBehavior behavior, CancellationToken cancellationToken)
+   at Npgsql.NpgsqlCommand.ExecuteReader(Boolean async, CommandBehavior behavior, CancellationToken cancellationToken)
+   at Npgsql.NpgsqlCommand.ExecuteNonQuery(Boolean async, CancellationToken cancellationToken)
+   at Zaghlol.Infrastructure.Sync.SyncStore.ClaimAsync(SyncClaim claim, CancellationToken cancellationToken) in /_/backend/src/Zaghlol.Infrastructure/Sync/SyncStore.cs:line 112
+   at Zaghlol.Infrastructure.Sync.SyncStore.ClaimAsync(SyncClaim claim, CancellationToken cancellationToken) in /_/backend/src/Zaghlol.Infrastructure/Sync/SyncStore.cs:line 112
+   at Zaghlol.Infrastructure.Sync.SyncStore.ClaimAsync(SyncClaim claim, CancellationToken cancellationToken) in /_/backend/src/Zaghlol.Infrastructure/Sync/SyncStore.cs:line 116
+   at Zaghlol.Infrastructure.Sync.SyncStore.ClaimAsync(SyncClaim claim, CancellationToken cancellationToken) in /_/backend/src/Zaghlol.Infrastructure/Sync/SyncStore.cs:line 116
+   at Zaghlol.Infrastructure.Tests.Sync.SyncStoreTests.IntakeIsInsertedOnceByUniqueKeyAndCountsOnlyNewRows() in /_/backend/tests/Zaghlol.Infrastructure.Tests/Sync/SyncStoreTests.cs:line 147
+--- End of stack trace from previous location ---
+[xUnit.net 00:00:08.41]     Zaghlol.Infrastructure.Tests.Sync.SyncStoreTests.TheFirstClaimWinsUpdatesTheInstallAndCountsADailyActive [FAIL]
+[xUnit.net 00:00:08.44]     Zaghlol.Infrastructure.Tests.Sync.SyncStoreTests.ASecondClaimInsideTheWindowWritesNothingAndOneAtTheEndWins [FAIL]
+  Failed Zaghlol.Infrastructure.Tests.Sync.SyncStoreTests.TheFirstClaimWinsUpdatesTheInstallAndCountsADailyActive [29 ms]
+  Error Message:
+   Npgsql.PostgresException : 42883: function zaghlol.count_daily_active(text, text) does not exist
+
+POSITION: 8
+  Stack Trace:
+     at Npgsql.Internal.NpgsqlConnector.ReadMessageLong(Boolean async, DataRowLoadingMode dataRowLoadingMode, Boolean readingNotifications, Boolean isReadingPrependedMessage)
+   at System.Runtime.CompilerServices.PoolingAsyncValueTaskMethodBuilder`1.StateMachineBox`1.System.Threading.Tasks.Sources.IValueTaskSource<TResult>.GetResult(Int16 token)
+   at Npgsql.NpgsqlDataReader.NextResult(Boolean async, Boolean isConsuming, CancellationToken cancellationToken)
+   at Npgsql.NpgsqlDataReader.NextResult(Boolean async, Boolean isConsuming, CancellationToken cancellationToken)
+   at Npgsql.NpgsqlCommand.ExecuteReader(Boolean async, CommandBehavior behavior, CancellationToken cancellationToken)
+   at Npgsql.NpgsqlCommand.ExecuteReader(Boolean async, CommandBehavior behavior, CancellationToken cancellationToken)
+   at Npgsql.NpgsqlCommand.ExecuteNonQuery(Boolean async, CancellationToken cancellationToken)
+   at Zaghlol.Infrastructure.Sync.SyncStore.ClaimAsync(SyncClaim claim, CancellationToken cancellationToken) in /_/backend/src/Zaghlol.Infrastructure/Sync/SyncStore.cs:line 112
+   at Zaghlol.Infrastructure.Sync.SyncStore.ClaimAsync(SyncClaim claim, CancellationToken cancellationToken) in /_/backend/src/Zaghlol.Infrastructure/Sync/SyncStore.cs:line 112
+   at Zaghlol.Infrastructure.Sync.SyncStore.ClaimAsync(SyncClaim claim, CancellationToken cancellationToken) in /_/backend/src/Zaghlol.Infrastructure/Sync/SyncStore.cs:line 116
+   at Zaghlol.Infrastructure.Sync.SyncStore.ClaimAsync(SyncClaim claim, CancellationToken cancellationToken) in /_/backend/src/Zaghlol.Infrastructure/Sync/SyncStore.cs:line 116
+   at Zaghlol.Infrastructure.Tests.Sync.SyncStoreTests.TheFirstClaimWinsUpdatesTheInstallAndCountsADailyActive() in /_/backend/tests/Zaghlol.Infrastructure.Tests/Sync/SyncStoreTests.cs:line 99
+--- End of stack trace from previous location ---
+  Failed Zaghlol.Infrastructure.Tests.Sync.SyncStoreTests.ASecondClaimInsideTheWindowWritesNothingAndOneAtTheEndWins [21 ms]
+  Error Message:
+   Npgsql.PostgresException : 42883: function zaghlol.count_daily_active(text, text) does not exist
+
+POSITION: 8
+  Stack Trace:
+     at Npgsql.Internal.NpgsqlConnector.ReadMessageLong(Boolean async, DataRowLoadingMode dataRowLoadingMode, Boolean readingNotifications, Boolean isReadingPrependedMessage)
+   at System.Runtime.CompilerServices.PoolingAsyncValueTaskMethodBuilder`1.StateMachineBox`1.System.Threading.Tasks.Sources.IValueTaskSource<TResult>.GetResult(Int16 token)
+   at Npgsql.NpgsqlDataReader.NextResult(Boolean async, Boolean isConsuming, CancellationToken cancellationToken)
+   at Npgsql.NpgsqlDataReader.NextResult(Boolean async, Boolean isConsuming, CancellationToken cancellationToken)
+   at Npgsql.NpgsqlCommand.ExecuteReader(Boolean async, CommandBehavior behavior, CancellationToken cancellationToken)
+   at Npgsql.NpgsqlCommand.ExecuteReader(Boolean async, CommandBehavior behavior, CancellationToken cancellationToken)
+   at Npgsql.NpgsqlCommand.ExecuteNonQuery(Boolean async, CancellationToken cancellationToken)
+   at Zaghlol.Infrastructure.Sync.SyncStore.ClaimAsync(SyncClaim claim, CancellationToken cancellationToken) in /_/backend/src/Zaghlol.Infrastructure/Sync/SyncStore.cs:line 112
+   at Zaghlol.Infrastructure.Sync.SyncStore.ClaimAsync(SyncClaim claim, CancellationToken cancellationToken) in /_/backend/src/Zaghlol.Infrastructure/Sync/SyncStore.cs:line 112
+   at Zaghlol.Infrastructure.Sync.SyncStore.ClaimAsync(SyncClaim claim, CancellationToken cancellationToken) in /_/backend/src/Zaghlol.Infrastructure/Sync/SyncStore.cs:line 116
+   at Zaghlol.Infrastructure.Sync.SyncStore.ClaimAsync(SyncClaim claim, CancellationToken cancellationToken) in /_/backend/src/Zaghlol.Infrastructure/Sync/SyncStore.cs:line 116
+   at Zaghlol.Infrastructure.Tests.Sync.SyncStoreTests.ASecondClaimInsideTheWindowWritesNothingAndOneAtTheEndWins() in /_/backend/tests/Zaghlol.Infrastructure.Tests/Sync/SyncStoreTests.cs:line 114
+--- End of stack trace from previous location ---
+[xUnit.net 00:00:08.53]     Zaghlol.Infrastructure.Tests.Sync.SyncStoreTests.ConcurrentClaimsHaveExactlyOneWinnerAndOneDailyActive [FAIL]
+  Failed Zaghlol.Infrastructure.Tests.Sync.SyncStoreTests.ConcurrentClaimsHaveExactlyOneWinnerAndOneDailyActive [96 ms]
+  Error Message:
+   Npgsql.PostgresException : 42883: function zaghlol.count_daily_active(text, text) does not exist
+
+POSITION: 8
+  Stack Trace:
+     at Npgsql.Internal.NpgsqlConnector.ReadMessageLong(Boolean async, DataRowLoadingMode dataRowLoadingMode, Boolean readingNotifications, Boolean isReadingPrependedMessage)
+   at System.Runtime.CompilerServices.PoolingAsyncValueTaskMethodBuilder`1.StateMachineBox`1.System.Threading.Tasks.Sources.IValueTaskSource<TResult>.GetResult(Int16 token)
+   at Npgsql.NpgsqlDataReader.NextResult(Boolean async, Boolean isConsuming, CancellationToken cancellationToken)
+   at Npgsql.NpgsqlDataReader.NextResult(Boolean async, Boolean isConsuming, CancellationToken cancellationToken)
+   at Npgsql.NpgsqlCommand.ExecuteReader(Boolean async, CommandBehavior behavior, CancellationToken cancellationToken)
+   at Npgsql.NpgsqlCommand.ExecuteReader(Boolean async, CommandBehavior behavior, CancellationToken cancellationToken)
+   at Npgsql.NpgsqlCommand.ExecuteNonQuery(Boolean async, CancellationToken cancellationToken)
+   at Zaghlol.Infrastructure.Sync.SyncStore.ClaimAsync(SyncClaim claim, CancellationToken cancellationToken) in /_/backend/src/Zaghlol.Infrastructure/Sync/SyncStore.cs:line 112
+   at Zaghlol.Infrastructure.Sync.SyncStore.ClaimAsync(SyncClaim claim, CancellationToken cancellationToken) in /_/backend/src/Zaghlol.Infrastructure/Sync/SyncStore.cs:line 112
+   at Zaghlol.Infrastructure.Sync.SyncStore.ClaimAsync(SyncClaim claim, CancellationToken cancellationToken) in /_/backend/src/Zaghlol.Infrastructure/Sync/SyncStore.cs:line 116
+   at Zaghlol.Infrastructure.Sync.SyncStore.ClaimAsync(SyncClaim claim, CancellationToken cancellationToken) in /_/backend/src/Zaghlol.Infrastructure/Sync/SyncStore.cs:line 116
+   at Zaghlol.Infrastructure.Tests.Sync.SyncStoreTests.ConcurrentClaimsHaveExactlyOneWinnerAndOneDailyActive() in /_/backend/tests/Zaghlol.Infrastructure.Tests/Sync/SyncStoreTests.cs:line 134
+--- End of stack trace from previous location ---
+[xUnit.net 00:00:08.84]     Zaghlol.Infrastructure.Tests.GrantTests.RoleIsDenied(login: "zaghlol_worker", sql: "SELECT zaghlol.count_daily_active('ios', '1.0.0')") [FAIL]
+  Failed Zaghlol.Infrastructure.Tests.GrantTests.RoleIsDenied(login: "zaghlol_worker", sql: "SELECT zaghlol.count_daily_active('ios', '1.0.0')") [3 ms]
+  Error Message:
+   Assert.Equal() Failure: Strings differ
+             ↓ (pos 2)
+Expected: "42501"
+Actual:   "42883"
+             ↑ (pos 2)
+  Stack Trace:
+     at Zaghlol.Infrastructure.Tests.GrantTests.RoleIsDenied(String login, String sql) in /_/backend/tests/Zaghlol.Infrastructure.Tests/GrantTests.cs:line 290
+--- End of stack trace from previous location ---
+[xUnit.net 00:00:09.06]     Zaghlol.Infrastructure.Tests.GrantTests.RoleIsDenied(login: "zaghlol_admin", sql: "SELECT zaghlol.count_daily_active('ios', '1.0.0')") [FAIL]
+[xUnit.net 00:00:09.09]     Zaghlol.Infrastructure.Tests.GrantTests.RoleIsDenied(login: "zaghlol_ops_ro", sql: "SELECT zaghlol.count_daily_active('ios', '1.0.0')") [FAIL]
+  Failed Zaghlol.Infrastructure.Tests.GrantTests.RoleIsDenied(login: "zaghlol_admin", sql: "SELECT zaghlol.count_daily_active('ios', '1.0.0')") [6 ms]
+  Error Message:
+   Assert.Equal() Failure: Strings differ
+             ↓ (pos 2)
+Expected: "42501"
+Actual:   "42883"
+             ↑ (pos 2)
+  Stack Trace:
+     at Zaghlol.Infrastructure.Tests.GrantTests.RoleIsDenied(String login, String sql) in /_/backend/tests/Zaghlol.Infrastructure.Tests/GrantTests.cs:line 290
+--- End of stack trace from previous location ---
+  Failed Zaghlol.Infrastructure.Tests.GrantTests.RoleIsDenied(login: "zaghlol_ops_ro", sql: "SELECT zaghlol.count_daily_active('ios', '1.0.0')") [4 ms]
+  Error Message:
+   Assert.Equal() Failure: Strings differ
+             ↓ (pos 2)
+Expected: "42501"
+Actual:   "42883"
+             ↑ (pos 2)
+  Stack Trace:
+     at Zaghlol.Infrastructure.Tests.GrantTests.RoleIsDenied(String login, String sql) in /_/backend/tests/Zaghlol.Infrastructure.Tests/GrantTests.cs:line 290
+--- End of stack trace from previous location ---
+[xUnit.net 00:00:09.13]     Zaghlol.Infrastructure.Tests.GrantTests.RoleIsAllowed(login: "zaghlol_api", sql: "SELECT zaghlol.count_daily_active('ios', '1.0.0')") [FAIL]
+  Failed Zaghlol.Infrastructure.Tests.GrantTests.RoleIsAllowed(login: "zaghlol_api", sql: "SELECT zaghlol.count_daily_active('ios', '1.0.0')") [4 ms]
+  Error Message:
+   Npgsql.PostgresException : 42883: function zaghlol.count_daily_active(unknown, unknown) does not exist
+
+POSITION: 8
+  Stack Trace:
+     at Npgsql.Internal.NpgsqlConnector.ReadMessageLong(Boolean async, DataRowLoadingMode dataRowLoadingMode, Boolean readingNotifications, Boolean isReadingPrependedMessage)
+   at System.Runtime.CompilerServices.PoolingAsyncValueTaskMethodBuilder`1.StateMachineBox`1.System.Threading.Tasks.Sources.IValueTaskSource<TResult>.GetResult(Int16 token)
+   at Npgsql.NpgsqlDataReader.NextResult(Boolean async, Boolean isConsuming, CancellationToken cancellationToken)
+   at Npgsql.NpgsqlDataReader.NextResult(Boolean async, Boolean isConsuming, CancellationToken cancellationToken)
+   at Npgsql.NpgsqlCommand.ExecuteReader(Boolean async, CommandBehavior behavior, CancellationToken cancellationToken)
+   at Npgsql.NpgsqlCommand.ExecuteReader(Boolean async, CommandBehavior behavior, CancellationToken cancellationToken)
+   at Npgsql.NpgsqlCommand.ExecuteNonQuery(Boolean async, CancellationToken cancellationToken)
+   at Zaghlol.Infrastructure.Tests.Db.ExecuteAsync(String connectionString, String sql, Object[] parameters) in /_/backend/tests/Zaghlol.Infrastructure.Tests/SchemaFixture.cs:line 74
+   at Zaghlol.Infrastructure.Tests.Db.ExecuteAsync(String connectionString, String sql, Object[] parameters) in /_/backend/tests/Zaghlol.Infrastructure.Tests/SchemaFixture.cs:line 74
+   at Zaghlol.Infrastructure.Tests.Db.ExecuteAsync(String connectionString, String sql, Object[] parameters) in /_/backend/tests/Zaghlol.Infrastructure.Tests/SchemaFixture.cs:line 74
+   at Zaghlol.Infrastructure.Tests.GrantTests.RoleIsAllowed(String login, String sql) in /_/backend/tests/Zaghlol.Infrastructure.Tests/GrantTests.cs:line 297
+--- End of stack trace from previous location ---
+[xUnit.net 00:00:09.67]     Zaghlol.Contract.Tests.SyncLiveContractTests.ADeltaWithOpsAndAcceptedCountsConforms [FAIL]
+  Failed Zaghlol.Contract.Tests.SyncLiveContractTests.ADeltaWithOpsAndAcceptedCountsConforms [508 ms]
+  Error Message:
+   expected 200, got 500: {"type":"https://tools.ietf.org/html/rfc9110#section-15.6.1","title":"An unexpected error occurred.","status":500,"traceId":"00-a6307a9f836523e7bd4044276577f1f6-7956dcc07c281a78-01","code":"INTERNAL","correlationId":"a6307a9f836523e7bd4044276577f1f6"}
+  Stack Trace:
+     at Zaghlol.Contract.Tests.SyncLiveContractTests.AssertDeclared(HttpResponseMessage response, HttpStatusCode status, String mediaType) in /_/backend/tests/Zaghlol.Contract.Tests/SyncLiveContractTests.cs:line 239
+   at Zaghlol.Contract.Tests.SyncLiveContractTests.ADeltaWithOpsAndAcceptedCountsConforms() in /_/backend/tests/Zaghlol.Contract.Tests/SyncLiveContractTests.cs:line 78
+--- End of stack trace from previous location ---
+[xUnit.net 00:00:09.96]     Zaghlol.Contract.Tests.SyncLiveContractTests.FullModeThenThrottleConformAndTheThrottleHasExactlyThreeMembers [FAIL]
+  Failed Zaghlol.Contract.Tests.SyncLiveContractTests.FullModeThenThrottleConformAndTheThrottleHasExactlyThreeMembers [202 ms]
+  Error Message:
+   expected 200, got 500: {"type":"https://tools.ietf.org/html/rfc9110#section-15.6.1","title":"An unexpected error occurred.","status":500,"traceId":"00-cdceda889dc1c3986b22c0dcd7eb0287-b4b397fafa39d925-01","code":"INTERNAL","correlationId":"cdceda889dc1c3986b22c0dcd7eb0287"}
+  Stack Trace:
+     at Zaghlol.Contract.Tests.SyncLiveContractTests.AssertDeclared(HttpResponseMessage response, HttpStatusCode status, String mediaType) in /_/backend/tests/Zaghlol.Contract.Tests/SyncLiveContractTests.cs:line 239
+   at Zaghlol.Contract.Tests.SyncLiveContractTests.FullModeThenThrottleConformAndTheThrottleHasExactlyThreeMembers() in /_/backend/tests/Zaghlol.Contract.Tests/SyncLiveContractTests.cs:line 51
+--- End of stack trace from previous location ---
+
+Failed!  - Failed:     2, Passed:   105, Skipped:     0, Total:   107, Duration: 11 s - Zaghlol.Contract.Tests.dll (net10.0)
+
+Failed!  - Failed:    18, Passed:   546, Skipped:     0, Total:   564, Duration: 12 s - Zaghlol.Infrastructure.Tests.dll (net10.0)
+[xUnit.net 00:00:40.89]     Zaghlol.Api.Tests.Sync.SyncEndpointTests.ThereIsNoIdempotencyReplayTheThrottleIsTheMechanism [FAIL]
+[xUnit.net 00:00:40.92]     Zaghlol.Api.Tests.Sync.SyncEndpointTests.CustomCategoriesAndBadBankRequestsAreDroppedSilently [FAIL]
+[xUnit.net 00:00:40.95]     Zaghlol.Api.Tests.Sync.SyncEndpointTests.ContributionsWithPhoneNumbersOrAddressesAreDroppedAndACleanOneIsAccepted [FAIL]
+[xUnit.net 00:00:40.97]     Zaghlol.Api.Tests.Sync.SyncEndpointTests.TheHeaderPlatformIsIgnoredAndTheRowsIsUsed [FAIL]
+[xUnit.net 00:00:40.99]     Zaghlol.Api.Tests.Sync.SyncEndpointTests.AnAppUpdateSendsFlagsAndIsStored [FAIL]
+[xUnit.net 00:00:41.01]     Zaghlol.Api.Tests.Sync.SyncEndpointTests.MalformedBodiesAre400EvenWhenTheCallWouldBeThrottled(body: "{\"catalogVersion\":0,\"flagsVersion\":0,\"bankReq"···, code: "UNKNOWN_FIELD") [FAIL]
+[xUnit.net 00:00:41.03]     Zaghlol.Api.Tests.Sync.SyncEndpointTests.MalformedBodiesAre400EvenWhenTheCallWouldBeThrottled(body: "{\"catalogVersion\":0,\"flagsVersion\":0,\"message"···, code: "UNKNOWN_FIELD") [FAIL]
+[xUnit.net 00:00:41.04]     Zaghlol.Api.Tests.Sync.SyncEndpointTests.MalformedBodiesAre400EvenWhenTheCallWouldBeThrottled(body: "{\"catalogVersion\":-1,\"flagsVersion\":0}", code: "VALIDATION_FAILED") [FAIL]
+[xUnit.net 00:00:41.06]     Zaghlol.Api.Tests.Sync.SyncEndpointTests.MalformedBodiesAre400EvenWhenTheCallWouldBeThrottled(body: "{\"catalogVersion\":0,\"flagsVersion\":0,\"contrib"···, code: "UNKNOWN_FIELD") [FAIL]
+  Failed Zaghlol.Api.Tests.Sync.SyncEndpointTests.ThereIsNoIdempotencyReplayTheThrottleIsTheMechanism [92 ms]
+  Error Message:
+   500: {"type":"https://tools.ietf.org/html/rfc9110#section-15.6.1","title":"An unexpected error occurred.","status":500,"traceId":"00-6a0d7436ee8f8a2cb1a4ce1febe27c52-28c6c285c8c59fef-00","code":"INTERNAL","correlationId":"6a0d7436ee8f8a2cb1a4ce1febe27c52"}
+  Stack Trace:
+     at Zaghlol.Api.Tests.Sync.SyncEndpointTests.ReadAsync(HttpResponseMessage response) in /_/backend/tests/Zaghlol.Api.Tests/Sync/SyncEndpointTests.cs:line 597
+   at Zaghlol.Api.Tests.Sync.SyncEndpointTests.ThereIsNoIdempotencyReplayTheThrottleIsTheMechanism() in /_/backend/tests/Zaghlol.Api.Tests/Sync/SyncEndpointTests.cs:line 589
+--- End of stack trace from previous location ---
+  Failed Zaghlol.Api.Tests.Sync.SyncEndpointTests.CustomCategoriesAndBadBankRequestsAreDroppedSilently [31 ms]
+  Error Message:
+   500: {"type":"https://tools.ietf.org/html/rfc9110#section-15.6.1","title":"An unexpected error occurred.","status":500,"traceId":"00-5e045c58a89c5ee3c0f6712265668a78-be567a5f199aee30-00","code":"INTERNAL","correlationId":"5e045c58a89c5ee3c0f6712265668a78"}
+  Stack Trace:
+     at Zaghlol.Api.Tests.Sync.SyncEndpointTests.ReadAsync(HttpResponseMessage response) in /_/backend/tests/Zaghlol.Api.Tests/Sync/SyncEndpointTests.cs:line 597
+   at Zaghlol.Api.Tests.Sync.SyncEndpointTests.CustomCategoriesAndBadBankRequestsAreDroppedSilently() in /_/backend/tests/Zaghlol.Api.Tests/Sync/SyncEndpointTests.cs:line 146
+--- End of stack trace from previous location ---
+  Failed Zaghlol.Api.Tests.Sync.SyncEndpointTests.ContributionsWithPhoneNumbersOrAddressesAreDroppedAndACleanOneIsAccepted [35 ms]
+  Error Message:
+   500: {"type":"https://tools.ietf.org/html/rfc9110#section-15.6.1","title":"An unexpected error occurred.","status":500,"traceId":"00-48edd3b73b416058fc98483fa2b81dbe-aeb89ca4a8dcffb6-00","code":"INTERNAL","correlationId":"48edd3b73b416058fc98483fa2b81dbe"}
+  Stack Trace:
+     at Zaghlol.Api.Tests.Sync.SyncEndpointTests.ReadAsync(HttpResponseMessage response) in /_/backend/tests/Zaghlol.Api.Tests/Sync/SyncEndpointTests.cs:line 597
+   at Zaghlol.Api.Tests.Sync.SyncEndpointTests.ContributionsWithPhoneNumbersOrAddressesAreDroppedAndACleanOneIsAccepted() in /_/backend/tests/Zaghlol.Api.Tests/Sync/SyncEndpointTests.cs:line 123
+--- End of stack trace from previous location ---
+  Failed Zaghlol.Api.Tests.Sync.SyncEndpointTests.TheHeaderPlatformIsIgnoredAndTheRowsIsUsed [18 ms]
+  Error Message:
+   Assert.Equal() Failure: Values differ
+Expected: OK
+Actual:   InternalServerError
+  Stack Trace:
+     at Zaghlol.Api.Tests.Sync.SyncEndpointTests.TheHeaderPlatformIsIgnoredAndTheRowsIsUsed() in /_/backend/tests/Zaghlol.Api.Tests/Sync/SyncEndpointTests.cs:line 360
+--- End of stack trace from previous location ---
+  Failed Zaghlol.Api.Tests.Sync.SyncEndpointTests.AnAppUpdateSendsFlagsAndIsStored [17 ms]
+  Error Message:
+   500: {"type":"https://tools.ietf.org/html/rfc9110#section-15.6.1","title":"An unexpected error occurred.","status":500,"traceId":"00-a49c2088b6e2c9fdceb62c6670b272ca-2de9b5ac60c336c2-00","code":"INTERNAL","correlationId":"a49c2088b6e2c9fdceb62c6670b272ca"}
+  Stack Trace:
+     at Zaghlol.Api.Tests.Sync.SyncEndpointTests.ReadAsync(HttpResponseMessage response) in /_/backend/tests/Zaghlol.Api.Tests/Sync/SyncEndpointTests.cs:line 597
+   at Zaghlol.Api.Tests.Sync.SyncEndpointTests.AnAppUpdateSendsFlagsAndIsStored() in /_/backend/tests/Zaghlol.Api.Tests/Sync/SyncEndpointTests.cs:line 513
+--- End of stack trace from previous location ---
+  Failed Zaghlol.Api.Tests.Sync.SyncEndpointTests.MalformedBodiesAre400EvenWhenTheCallWouldBeThrottled(body: "{\"catalogVersion\":0,\"flagsVersion\":0,\"bankReq"···, code: "UNKNOWN_FIELD") [17 ms]
+  Error Message:
+   Assert.Equal() Failure: Values differ
+Expected: OK
+Actual:   InternalServerError
+  Stack Trace:
+     at Zaghlol.Api.Tests.Sync.SyncEndpointTests.MalformedBodiesAre400EvenWhenTheCallWouldBeThrottled(String body, String code) in /_/backend/tests/Zaghlol.Api.Tests/Sync/SyncEndpointTests.cs:line 295
+--- End of stack trace from previous location ---
+  Failed Zaghlol.Api.Tests.Sync.SyncEndpointTests.MalformedBodiesAre400EvenWhenTheCallWouldBeThrottled(body: "{\"catalogVersion\":0,\"flagsVersion\":0,\"message"···, code: "UNKNOWN_FIELD") [17 ms]
+  Error Message:
+   Assert.Equal() Failure: Values differ
+Expected: OK
+Actual:   InternalServerError
+  Stack Trace:
+     at Zaghlol.Api.Tests.Sync.SyncEndpointTests.MalformedBodiesAre400EvenWhenTheCallWouldBeThrottled(String body, String code) in /_/backend/tests/Zaghlol.Api.Tests/Sync/SyncEndpointTests.cs:line 295
+--- End of stack trace from previous location ---
+  Failed Zaghlol.Api.Tests.Sync.SyncEndpointTests.MalformedBodiesAre400EvenWhenTheCallWouldBeThrottled(body: "{\"catalogVersion\":-1,\"flagsVersion\":0}", code: "VALIDATION_FAILED") [16 ms]
+  Error Message:
+   Assert.Equal() Failure: Values differ
+Expected: OK
+Actual:   InternalServerError
+  Stack Trace:
+     at Zaghlol.Api.Tests.Sync.SyncEndpointTests.MalformedBodiesAre400EvenWhenTheCallWouldBeThrottled(String body, String code) in /_/backend/tests/Zaghlol.Api.Tests/Sync/SyncEndpointTests.cs:line 295
+--- End of stack trace from previous location ---
+  Failed Zaghlol.Api.Tests.Sync.SyncEndpointTests.MalformedBodiesAre400EvenWhenTheCallWouldBeThrottled(body: "{\"catalogVersion\":0,\"flagsVersion\":0,\"contrib"···, code: "UNKNOWN_FIELD") [16 ms]
+  Error Message:
+   Assert.Equal() Failure: Values differ
+Expected: OK
+Actual:   InternalServerError
+  Stack Trace:
+     at Zaghlol.Api.Tests.Sync.SyncEndpointTests.MalformedBodiesAre400EvenWhenTheCallWouldBeThrottled(String body, String code) in /_/backend/tests/Zaghlol.Api.Tests/Sync/SyncEndpointTests.cs:line 295
+--- End of stack trace from previous location ---
+[xUnit.net 00:00:41.08]     Zaghlol.Api.Tests.Sync.SyncEndpointTests.MalformedBodiesAre400EvenWhenTheCallWouldBeThrottled(body: "{\"catalogVersion\":\"1\",\"flagsVersion\":0}", code: "VALIDATION_FAILED") [FAIL]
+[xUnit.net 00:00:41.10]     Zaghlol.Api.Tests.Sync.SyncEndpointTests.MalformedBodiesAre400EvenWhenTheCallWouldBeThrottled(body: "{\"catalogVersion\":0}", code: "VALIDATION_FAILED") [FAIL]
+[xUnit.net 00:00:41.12]     Zaghlol.Api.Tests.Sync.SyncEndpointTests.MalformedBodiesAre400EvenWhenTheCallWouldBeThrottled(body: "{\"catalogVersion\":0,\"flagsVersion\":0,\"pricesA"···, code: "VALIDATION_FAILED") [FAIL]
+[xUnit.net 00:00:41.14]     Zaghlol.Api.Tests.Sync.SyncEndpointTests.TheEntitlementBlockReceivesEntitlementIssuedAtAndItsBlocksAreSent [FAIL]
+[xUnit.net 00:00:41.16]     Zaghlol.Api.Tests.Sync.SyncEndpointTests.ASecondCallWithin24HoursIsASignedThrottleWithOnlyThreeMembersAndWritesNothing [FAIL]
+[xUnit.net 00:00:41.18]     Zaghlol.Api.Tests.Sync.SyncEndpointTests.OverTheCapsIsTheWholeCall400 [FAIL]
+[xUnit.net 00:00:41.22]     Zaghlol.Api.Tests.Sync.SyncEndpointTests.TheSameContributionTwiceInOneCallAndAcrossDaysIsOneRow [FAIL]
+[xUnit.net 00:00:41.24]     Zaghlol.Api.Tests.Sync.SyncEndpointTests.AFirstSyncGetsTheFullModeUrl [FAIL]
+  Failed Zaghlol.Api.Tests.Sync.SyncEndpointTests.MalformedBodiesAre400EvenWhenTheCallWouldBeThrottled(body: "{\"catalogVersion\":\"1\",\"flagsVersion\":0}", code: "VALIDATION_FAILED") [18 ms]
+  Error Message:
+   Assert.Equal() Failure: Values differ
+Expected: OK
+Actual:   InternalServerError
+  Stack Trace:
+     at Zaghlol.Api.Tests.Sync.SyncEndpointTests.MalformedBodiesAre400EvenWhenTheCallWouldBeThrottled(String body, String code) in /_/backend/tests/Zaghlol.Api.Tests/Sync/SyncEndpointTests.cs:line 295
+--- End of stack trace from previous location ---
+  Failed Zaghlol.Api.Tests.Sync.SyncEndpointTests.MalformedBodiesAre400EvenWhenTheCallWouldBeThrottled(body: "{\"catalogVersion\":0}", code: "VALIDATION_FAILED") [18 ms]
+  Error Message:
+   Assert.Equal() Failure: Values differ
+Expected: OK
+Actual:   InternalServerError
+  Stack Trace:
+     at Zaghlol.Api.Tests.Sync.SyncEndpointTests.MalformedBodiesAre400EvenWhenTheCallWouldBeThrottled(String body, String code) in /_/backend/tests/Zaghlol.Api.Tests/Sync/SyncEndpointTests.cs:line 295
+--- End of stack trace from previous location ---
+  Failed Zaghlol.Api.Tests.Sync.SyncEndpointTests.MalformedBodiesAre400EvenWhenTheCallWouldBeThrottled(body: "{\"catalogVersion\":0,\"flagsVersion\":0,\"pricesA"···, code: "VALIDATION_FAILED") [18 ms]
+  Error Message:
+   Assert.Equal() Failure: Values differ
+Expected: OK
+Actual:   InternalServerError
+  Stack Trace:
+     at Zaghlol.Api.Tests.Sync.SyncEndpointTests.MalformedBodiesAre400EvenWhenTheCallWouldBeThrottled(String body, String code) in /_/backend/tests/Zaghlol.Api.Tests/Sync/SyncEndpointTests.cs:line 295
+--- End of stack trace from previous location ---
+  Failed Zaghlol.Api.Tests.Sync.SyncEndpointTests.TheEntitlementBlockReceivesEntitlementIssuedAtAndItsBlocksAreSent [18 ms]
+  Error Message:
+   500: {"type":"https://tools.ietf.org/html/rfc9110#section-15.6.1","title":"An unexpected error occurred.","status":500,"traceId":"00-bc156080e1fc80b15c7af69db7f5a007-0d3356c285328ecb-00","code":"INTERNAL","correlationId":"bc156080e1fc80b15c7af69db7f5a007"}
+  Stack Trace:
+     at Zaghlol.Api.Tests.Sync.SyncEndpointTests.ReadAsync(HttpResponseMessage response) in /_/backend/tests/Zaghlol.Api.Tests/Sync/SyncEndpointTests.cs:line 597
+   at Zaghlol.Api.Tests.Sync.SyncEndpointTests.TheEntitlementBlockReceivesEntitlementIssuedAtAndItsBlocksAreSent() in /_/backend/tests/Zaghlol.Api.Tests/Sync/SyncEndpointTests.cs:line 461
+--- End of stack trace from previous location ---
+  Failed Zaghlol.Api.Tests.Sync.SyncEndpointTests.ASecondCallWithin24HoursIsASignedThrottleWithOnlyThreeMembersAndWritesNothing [18 ms]
+  Error Message:
+   500: {"type":"https://tools.ietf.org/html/rfc9110#section-15.6.1","title":"An unexpected error occurred.","status":500,"traceId":"00-8e28e22e8774642996d110f4785d40bd-df9ba22e006b596e-00","code":"INTERNAL","correlationId":"8e28e22e8774642996d110f4785d40bd"}
+  Stack Trace:
+     at Zaghlol.Api.Tests.Sync.SyncEndpointTests.ReadAsync(HttpResponseMessage response) in /_/backend/tests/Zaghlol.Api.Tests/Sync/SyncEndpointTests.cs:line 597
+   at Zaghlol.Api.Tests.Sync.SyncEndpointTests.ASecondCallWithin24HoursIsASignedThrottleWithOnlyThreeMembersAndWritesNothing() in /_/backend/tests/Zaghlol.Api.Tests/Sync/SyncEndpointTests.cs:line 162
+--- End of stack trace from previous location ---
+  Failed Zaghlol.Api.Tests.Sync.SyncEndpointTests.OverTheCapsIsTheWholeCall400 [22 ms]
+  Error Message:
+   Assert.Equal() Failure: Values differ
+Expected: OK
+Actual:   InternalServerError
+  Stack Trace:
+     at Zaghlol.Api.Tests.Sync.SyncEndpointTests.OverTheCapsIsTheWholeCall400() in /_/backend/tests/Zaghlol.Api.Tests/Sync/SyncEndpointTests.cs:line 316
+--- End of stack trace from previous location ---
+  Failed Zaghlol.Api.Tests.Sync.SyncEndpointTests.TheSameContributionTwiceInOneCallAndAcrossDaysIsOneRow [38 ms]
+  Error Message:
+   500: {"type":"https://tools.ietf.org/html/rfc9110#section-15.6.1","title":"An unexpected error occurred.","status":500,"traceId":"00-657931bcbfa3eb789cedaaf5bc8545e7-a0a81c6218fa2cb7-00","code":"INTERNAL","correlationId":"657931bcbfa3eb789cedaaf5bc8545e7"}
+  Stack Trace:
+     at Zaghlol.Api.Tests.Sync.SyncEndpointTests.ReadAsync(HttpResponseMessage response) in /_/backend/tests/Zaghlol.Api.Tests/Sync/SyncEndpointTests.cs:line 597
+   at Zaghlol.Api.Tests.Sync.SyncEndpointTests.TheSameContributionTwiceInOneCallAndAcrossDaysIsOneRow() in /_/backend/tests/Zaghlol.Api.Tests/Sync/SyncEndpointTests.cs:line 487
+--- End of stack trace from previous location ---
+  Failed Zaghlol.Api.Tests.Sync.SyncEndpointTests.AFirstSyncGetsTheFullModeUrl [18 ms]
+  Error Message:
+   500: {"type":"https://tools.ietf.org/html/rfc9110#section-15.6.1","title":"An unexpected error occurred.","status":500,"traceId":"00-1e5d4efb8a00fe3609c5fce830d5d0cd-4bfeda7a8d2b1488-00","code":"INTERNAL","correlationId":"1e5d4efb8a00fe3609c5fce830d5d0cd"}
+  Stack Trace:
+     at Zaghlol.Api.Tests.Sync.SyncEndpointTests.ReadAsync(HttpResponseMessage response) in /_/backend/tests/Zaghlol.Api.Tests/Sync/SyncEndpointTests.cs:line 597
+   at Zaghlol.Api.Tests.Sync.SyncEndpointTests.AFirstSyncGetsTheFullModeUrl() in /_/backend/tests/Zaghlol.Api.Tests/Sync/SyncEndpointTests.cs:line 104
+--- End of stack trace from previous location ---
+[xUnit.net 00:00:41.26]     Zaghlol.Api.Tests.Sync.SyncEndpointTests.AHasherOutageDropsTheIntakeButTheSyncSucceeds [FAIL]
+  Failed Zaghlol.Api.Tests.Sync.SyncEndpointTests.AHasherOutageDropsTheIntakeButTheSyncSucceeds [20 ms]
+  Error Message:
+   500: {"type":"https://tools.ietf.org/html/rfc9110#section-15.6.1","title":"An unexpected error occurred.","status":500,"traceId":"00-b86d4e0faf334f86f44b202838b800d9-2b5e8045dc3283de-00","code":"INTERNAL","correlationId":"b86d4e0faf334f86f44b202838b800d9"}
+  Stack Trace:
+     at Zaghlol.Api.Tests.Sync.SyncEndpointTests.ReadAsync(HttpResponseMessage response) in /_/backend/tests/Zaghlol.Api.Tests/Sync/SyncEndpointTests.cs:line 597
+   at Zaghlol.Api.Tests.Sync.SyncEndpointTests.AHasherOutageDropsTheIntakeButTheSyncSucceeds() in /_/backend/tests/Zaghlol.Api.Tests/Sync/SyncEndpointTests.cs:line 438
+--- End of stack trace from previous location ---
+[xUnit.net 00:00:41.29]     Zaghlol.Api.Tests.Sync.SyncEndpointTests.ACatalogFailureIs503WithoutConsumingTheWindow [FAIL]
+[xUnit.net 00:00:41.35]     Zaghlol.Api.Tests.Sync.SyncEndpointTests.TheNonceIsEchoedExactlyAndAnAbsentOneIsAnExplicitNull [FAIL]
+[xUnit.net 00:00:41.37]     Zaghlol.Api.Tests.Sync.SyncEndpointTests.APriceFailureDegradesToNullPrices [FAIL]
+  Failed Zaghlol.Api.Tests.Sync.SyncEndpointTests.ACatalogFailureIs503WithoutConsumingTheWindow [30 ms]
+  Error Message:
+   500: {"type":"https://tools.ietf.org/html/rfc9110#section-15.6.1","title":"An unexpected error occurred.","status":500,"traceId":"00-ec48b1e8ff7185717082643008433321-69fb527d85019c96-00","code":"INTERNAL","correlationId":"ec48b1e8ff7185717082643008433321"}
+  Stack Trace:
+     at Zaghlol.Api.Tests.Sync.SyncEndpointTests.ReadAsync(HttpResponseMessage response) in /_/backend/tests/Zaghlol.Api.Tests/Sync/SyncEndpointTests.cs:line 597
+   at Zaghlol.Api.Tests.Sync.SyncEndpointTests.ACatalogFailureIs503WithoutConsumingTheWindow() in /_/backend/tests/Zaghlol.Api.Tests/Sync/SyncEndpointTests.cs:line 389
+--- End of stack trace from previous location ---
+  Failed Zaghlol.Api.Tests.Sync.SyncEndpointTests.TheNonceIsEchoedExactlyAndAnAbsentOneIsAnExplicitNull [31 ms]
+  Error Message:
+   500: {"type":"https://tools.ietf.org/html/rfc9110#section-15.6.1","title":"An unexpected error occurred.","status":500,"traceId":"00-2239064d176359f854924b6e84f7a5de-77bdf0cc964c1d87-00","code":"INTERNAL","correlationId":"2239064d176359f854924b6e84f7a5de"}
+  Stack Trace:
+     at Zaghlol.Api.Tests.Sync.SyncEndpointTests.ReadAsync(HttpResponseMessage response) in /_/backend/tests/Zaghlol.Api.Tests/Sync/SyncEndpointTests.cs:line 597
+   at Zaghlol.Api.Tests.Sync.SyncEndpointTests.TheNonceIsEchoedExactlyAndAnAbsentOneIsAnExplicitNull() in /_/backend/tests/Zaghlol.Api.Tests/Sync/SyncEndpointTests.cs:line 252
+--- End of stack trace from previous location ---
+  Failed Zaghlol.Api.Tests.Sync.SyncEndpointTests.APriceFailureDegradesToNullPrices [16 ms]
+  Error Message:
+   500: {"type":"https://tools.ietf.org/html/rfc9110#section-15.6.1","title":"An unexpected error occurred.","status":500,"traceId":"00-eb3a339fd1c37d9c55ec07cbf6cc8f1f-6e940e25c87e2d29-00","code":"INTERNAL","correlationId":"eb3a339fd1c37d9c55ec07cbf6cc8f1f"}
+  Stack Trace:
+     at Zaghlol.Api.Tests.Sync.SyncEndpointTests.ReadAsync(HttpResponseMessage response) in /_/backend/tests/Zaghlol.Api.Tests/Sync/SyncEndpointTests.cs:line 597
+   at Zaghlol.Api.Tests.Sync.SyncEndpointTests.APriceFailureDegradesToNullPrices() in /_/backend/tests/Zaghlol.Api.Tests/Sync/SyncEndpointTests.cs:line 400
+--- End of stack trace from previous location ---
+[xUnit.net 00:00:41.41]     Zaghlol.Api.Tests.Sync.SyncEndpointTests.AFullAnswerIsSignedToo [FAIL]
+[xUnit.net 00:00:41.43]     Zaghlol.Api.Tests.Sync.SyncEndpointTests.AnUpToDateResponseIsUnder2KbWithEveryBlockNull [FAIL]
+[xUnit.net 00:00:41.48]     Zaghlol.Api.Tests.Sync.SyncEndpointTests.AMalformedNonceIs400AndAnotherInstallsNonceIsNeverEchoed [FAIL]
+[xUnit.net 00:00:41.51]     Zaghlol.Api.Tests.Sync.SyncEndpointTests.TwoSimultaneousSyncsGiveOneFullAnswerAndOneDailyActive [FAIL]
+[xUnit.net 00:00:41.53]     Zaghlol.Api.Tests.Sync.SyncEndpointTests.LogsNeverContainContributionTextTheNonceOrEntitlementIssuedAt [FAIL]
+[xUnit.net 00:00:41.57]     Zaghlol.Api.Tests.Sync.SyncEndpointTests.AFullAnswerCarriesPricesAsDecimalStringsAndAStaleFlag [FAIL]
+[xUnit.net 00:00:41.63]     Zaghlol.Api.Tests.Sync.SyncEndpointTests.DailyActiveCountsAddOnePerInstallPerDayAndVersion [FAIL]
+  Failed Zaghlol.Api.Tests.Sync.SyncEndpointTests.AFullAnswerIsSignedToo [20 ms]
+  Error Message:
+   System.InvalidOperationException : The given header was not found.
+  Stack Trace:
+     at System.Net.Http.Headers.HttpHeaders.GetValues(HeaderDescriptor descriptor)
+   at Zaghlol.Api.Tests.Sync.SyncEndpointTests.AssertSigned(HttpResponseMessage response, Byte[] body) in /_/backend/tests/Zaghlol.Api.Tests/Sync/SyncEndpointTests.cs:line 611
+   at Zaghlol.Api.Tests.Sync.SyncEndpointTests.AFullAnswerIsSignedToo() in /_/backend/tests/Zaghlol.Api.Tests/Sync/SyncEndpointTests.cs:line 199
+--- End of stack trace from previous location ---
+  Failed Zaghlol.Api.Tests.Sync.SyncEndpointTests.AnUpToDateResponseIsUnder2KbWithEveryBlockNull [20 ms]
+  Error Message:
+   500: {"type":"https://tools.ietf.org/html/rfc9110#section-15.6.1","title":"An unexpected error occurred.","status":500,"traceId":"00-674abadf7d9ebd2b05117cb788bfd346-26e8b349f39a99af-00","code":"INTERNAL","correlationId":"674abadf7d9ebd2b05117cb788bfd346"}
+  Stack Trace:
+     at Zaghlol.Api.Tests.Sync.SyncEndpointTests.ReadAsync(HttpResponseMessage response) in /_/backend/tests/Zaghlol.Api.Tests/Sync/SyncEndpointTests.cs:line 597
+   at Zaghlol.Api.Tests.Sync.SyncEndpointTests.AnUpToDateResponseIsUnder2KbWithEveryBlockNull() in /_/backend/tests/Zaghlol.Api.Tests/Sync/SyncEndpointTests.cs:line 43
+--- End of stack trace from previous location ---
+  Failed Zaghlol.Api.Tests.Sync.SyncEndpointTests.AMalformedNonceIs400AndAnotherInstallsNonceIsNeverEchoed [50 ms]
+  Error Message:
+   Assert.Contains() Failure: Sub-string not found
+String:    "{"type":"https://tools.ietf.org/html/rfc9"···
+Not found: "qBPtdwDLRWX1ZRuPCU2keA"
+  Stack Trace:
+     at Zaghlol.Api.Tests.Sync.SyncEndpointTests.AMalformedNonceIs400AndAnotherInstallsNonceIsNeverEchoed() in /_/backend/tests/Zaghlol.Api.Tests/Sync/SyncEndpointTests.cs:line 274
+--- End of stack trace from previous location ---
+  Failed Zaghlol.Api.Tests.Sync.SyncEndpointTests.TwoSimultaneousSyncsGiveOneFullAnswerAndOneDailyActive [27 ms]
+  Error Message:
+   500: {"type":"https://tools.ietf.org/html/rfc9110#section-15.6.1","title":"An unexpected error occurred.","status":500,"traceId":"00-f95c77380e3835c4fdd818fec505d2e5-7dc770f240af33af-00","code":"INTERNAL","correlationId":"f95c77380e3835c4fdd818fec505d2e5"}
+  Stack Trace:
+     at Zaghlol.Api.Tests.Sync.SyncEndpointTests.ReadAsync(HttpResponseMessage response) in /_/backend/tests/Zaghlol.Api.Tests/Sync/SyncEndpointTests.cs:line 597
+   at Zaghlol.Api.Tests.Sync.SyncEndpointTests.TwoSimultaneousSyncsGiveOneFullAnswerAndOneDailyActive() in /_/backend/tests/Zaghlol.Api.Tests/Sync/SyncEndpointTests.cs:line 215
+--- End of stack trace from previous location ---
+  Failed Zaghlol.Api.Tests.Sync.SyncEndpointTests.LogsNeverContainContributionTextTheNonceOrEntitlementIssuedAt [21 ms]
+  Error Message:
+   Assert.Equal() Failure: Values differ
+Expected: OK
+Actual:   InternalServerError
+  Stack Trace:
+     at Zaghlol.Api.Tests.Sync.SyncEndpointTests.LogsNeverContainContributionTextTheNonceOrEntitlementIssuedAt() in /_/backend/tests/Zaghlol.Api.Tests/Sync/SyncEndpointTests.cs:line 540
+--- End of stack trace from previous location ---
+  Failed Zaghlol.Api.Tests.Sync.SyncEndpointTests.AFullAnswerCarriesPricesAsDecimalStringsAndAStaleFlag [18 ms]
+  Error Message:
+   500: {"type":"https://tools.ietf.org/html/rfc9110#section-15.6.1","title":"An unexpected error occurred.","status":500,"traceId":"00-5eb001cefaf8b77ee431c606986c62be-015eaa67c26c8b7e-00","code":"INTERNAL","correlationId":"5eb001cefaf8b77ee431c606986c62be"}
+  Stack Trace:
+     at Zaghlol.Api.Tests.Sync.SyncEndpointTests.ReadAsync(HttpResponseMessage response) in /_/backend/tests/Zaghlol.Api.Tests/Sync/SyncEndpointTests.cs:line 597
+   at Zaghlol.Api.Tests.Sync.SyncEndpointTests.AFullAnswerCarriesPricesAsDecimalStringsAndAStaleFlag() in /_/backend/tests/Zaghlol.Api.Tests/Sync/SyncEndpointTests.cs:line 72
+--- End of stack trace from previous location ---
+  Failed Zaghlol.Api.Tests.Sync.SyncEndpointTests.DailyActiveCountsAddOnePerInstallPerDayAndVersion [47 ms]
+  Error Message:
+   Assert.Equal() Failure: Values differ
+Expected: 2
+Actual:   0
+  Stack Trace:
+     at Zaghlol.Api.Tests.Sync.SyncEndpointTests.DailyActiveCountsAddOnePerInstallPerDayAndVersion() in /_/backend/tests/Zaghlol.Api.Tests/Sync/SyncEndpointTests.cs:line 504
+--- End of stack trace from previous location ---
+[xUnit.net 00:00:41.67]     Zaghlol.Api.Tests.Sync.SyncEndpointTests.ACatalogDeltaCarriesTheOpsOfTheNewerVersions [FAIL]
+  Failed Zaghlol.Api.Tests.Sync.SyncEndpointTests.ACatalogDeltaCarriesTheOpsOfTheNewerVersions [32 ms]
+  Error Message:
+   500: {"type":"https://tools.ietf.org/html/rfc9110#section-15.6.1","title":"An unexpected error occurred.","status":500,"traceId":"00-44f4e0fd17779544416b969d611b6504-84ac34f385c4a92d-00","code":"INTERNAL","correlationId":"44f4e0fd17779544416b969d611b6504"}
+  Stack Trace:
+     at Zaghlol.Api.Tests.Sync.SyncEndpointTests.ReadAsync(HttpResponseMessage response) in /_/backend/tests/Zaghlol.Api.Tests/Sync/SyncEndpointTests.cs:line 597
+   at Zaghlol.Api.Tests.Sync.SyncEndpointTests.ACatalogDeltaCarriesTheOpsOfTheNewerVersions() in /_/backend/tests/Zaghlol.Api.Tests/Sync/SyncEndpointTests.cs:line 87
+--- End of stack trace from previous location ---
+
+Failed!  - Failed:    29, Passed:   335, Skipped:     0, Total:   364, Duration: 40 s - Zaghlol.Api.Tests.dll (net10.0)
+
+[12:38:55] === RESULT dotnet-test exit=1 (53s)
+[12:38:55] SUMMARY FAIL sha=ec51eec09afc791c1c3e1a54c25825af1da898d8 pipeline=quick-backend dotnet-build=0 dotnet-format=0 dotnet-test=1
