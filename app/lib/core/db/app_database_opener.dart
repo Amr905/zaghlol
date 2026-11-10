@@ -13,7 +13,8 @@
 //    - KeyInvalidated: wipe under the lease (ensureValid before each step),
 //      recreateAfterWipe, create.
 //    - KeyUnavailable → DB_UNAVAILABLE; KeyStoreFailed → DB_STORE_FAILED.
-// 3. A failed migration restores the pre-migration copy.
+// 3. A failed migration restores the pre-migration copy, but only a copy this
+//    open made (review M-1): another engine's copy is never touched.
 
 import 'dart:io';
 
@@ -286,6 +287,15 @@ final class _Opener<D extends GeneratedDatabase> {
 
   int? _fromVersion;
 
+  /// True when the last [_openAndConfirm] made the pre-migration copy itself
+  /// (review M-1). Step 1 leaves no `.migrate.tmp` behind, so a copy present
+  /// later is this open's only if its guard was allowed to migrate and drift
+  /// then ran an upgrade on this connection (the guard copies exactly when
+  /// `0 < user_version < target`, which is when drift upgrades). Any other
+  /// `.migrate.tmp` belongs to another engine that may be migrating right
+  /// now: never restore, confirm or delete it.
+  bool _ownsCopy = false;
+
   DbOpenFailed<D> failed(
     DbOpenFailureCode code, {
     bool leaseLapsed = false,
@@ -310,10 +320,13 @@ final class _Opener<D extends GeneratedDatabase> {
     final outcome = await bootstrap.obtain();
     if (outcome is KeyReady && !await _mainExists()) {
       // Leftovers without a main file (e.g. a WAL): no database to protect.
-      // Delete them and ask again, which now takes the rotate path.
+      // Delete them and ask again, which now takes the rotate path. Never the
+      // main file (review m-1): this runs without a lease, and another engine
+      // may have just created it after the check above.
       outcome.key.zeroize();
       try {
         for (final f in files.wipeOrder) {
+          if (f.path == files.mainFile.path) continue;
           await DeleteFileStep('leftover', f).run();
         }
       } on FileSystemException {
@@ -514,6 +527,7 @@ final class _Opener<D extends GeneratedDatabase> {
     DbKeyMaterial key, {
     required bool restoreNoticeDue,
   }) async {
+    _ownsCopy = false;
     final db = database(
       executor(files.mainFile, key, guard),
       restoreNoticeDue: restoreNoticeDue,
@@ -522,6 +536,7 @@ final class _Opener<D extends GeneratedDatabase> {
       await db.doWhenOpened((_) {});
     } on Object {
       _fromVersion = _upgradeFromOf(db);
+      _ownsCopy = guard.allowMigration && _fromVersion != null;
       try {
         await db.close();
       } on Object {
@@ -531,8 +546,11 @@ final class _Opener<D extends GeneratedDatabase> {
     }
     final from = _upgradeFromOf(db);
     _fromVersion = from;
+    _ownsCopy = guard.allowMigration && from != null;
     try {
-      if (await files.migrateTmp.exists()) await files.migrateTmp.delete();
+      if (_ownsCopy && await files.migrateTmp.exists()) {
+        await files.migrateTmp.delete();
+      }
     } on FileSystemException {
       // Accepted (design note §6): the next open rolls back and re-migrates.
     }
@@ -542,15 +560,17 @@ final class _Opener<D extends GeneratedDatabase> {
   static int? _upgradeFromOf(GeneratedDatabase db) =>
       db is AppDatabase ? db.attemptedUpgradeFrom : null;
 
-  /// Maps an open failure. A copy made by this attempt is restored first
-  /// (nothing was confirmed).
+  /// Maps an open failure. A copy made by this attempt ([_ownsCopy]) is
+  /// restored first (nothing was confirmed); any other copy is left alone.
   Future<DbOpenResult<D>> _afterFailure(Object error) async {
     final open = dbOpenExceptionOf(error);
     bool? restored;
-    try {
-      if (await files.migrateTmp.exists()) restored = await _restoreCopy();
-    } on FileSystemException {
-      restored = false;
+    if (_ownsCopy) {
+      try {
+        if (await files.migrateTmp.exists()) restored = await _restoreCopy();
+      } on FileSystemException {
+        restored = false;
+      }
     }
     if (open == null) {
       // Failed after the open sequence: a migration step, the FK check, the

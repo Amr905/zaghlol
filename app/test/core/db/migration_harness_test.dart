@@ -230,6 +230,102 @@ void main() {
     expect(sameSnapshot(before, snapshotFiles(world.dbDir)), isTrue);
   });
 
+  group('review M-1: only a copy made by this open is ever restored', () {
+    for (final background in [true, false]) {
+      final mode = background ? 'background' : 'foreground';
+      final engine = background ? defaultDbExecutor : foregroundExecutor;
+
+      test('two engines: the UI engine is migrating (copy present, live '
+          '-wal/-shm); the headless engine\'s open fails → '
+          'DB_MIGRATION_PENDING; main file, -wal, -shm and the copy are '
+          'untouched and the UI engine loses nothing ($mode)', () async {
+        await makeV1(world);
+        // The UI engine: a live connection with uncheckpointed writes.
+        final ui = rawAppDatabase(world.mainFile);
+        await writeMeta(ui, 'ui', 'one');
+        final wal = File('${world.mainFile.path}-wal');
+        final shm = File('${world.mainFile.path}-shm');
+        expect(wal.existsSync(), isTrue);
+        expect(shm.existsSync(), isTrue);
+        final copyBytes = world.mainFile.readAsBytesSync();
+
+        // The UI engine's copy appears after the headless engine's step 1
+        // (step 1 alone already defers when it sees a copy).
+        Map<String, Uint8List>? before;
+        final opened = <FakeV2Database>[];
+        final result = await world.openWith(
+          fakeV2Factory(opened: opened),
+          FakeV2Database.version,
+          allowMigration: false,
+          executor: (file, key, guard) {
+            world.files.migrateTmp.writeAsBytesSync(copyBytes, flush: true);
+            before = snapshotFiles(world.dbDir);
+            return engine(file, key, guard);
+          },
+        );
+        final failed = result as DbOpenFailed;
+        expect(failed.code, DbOpenFailureCode.migrationPending);
+        expect(failed.restored, isNull);
+        expect(opened.single.steps, 0);
+
+        final after = snapshotFiles(world.dbDir);
+        for (final name in [
+          dbFileName,
+          '$dbFileName-wal',
+          migrateTmpFileName,
+        ]) {
+          expect(after.containsKey(name), isTrue, reason: name);
+          expect(sameBytes(before![name]!, after[name]!), isTrue, reason: name);
+        }
+        expect(shm.existsSync(), isTrue);
+        expect(world.wipeLog, isEmpty);
+
+        // The UI engine keeps writing into the live file, not an unlinked one.
+        await writeMeta(ui, 'ui', 'two');
+        await ui.close();
+        world.files.migrateTmp.deleteSync(); // the UI engine confirms
+        final check = rawAppDatabase(world.mainFile);
+        addTearDown(check.close);
+        expect(await metaValue(check, 'ui'), 'two');
+        expect(await metaValue(check, 'marker'), 'v1');
+      });
+    }
+
+    test('an engine that may migrate but did not upgrade (DB_SCHEMA_TOO_NEW) '
+        'leaves a copy that appeared after step 1 alone', () async {
+      await makeV1(world);
+      final db = rawAppDatabase(world.mainFile);
+      await db.customStatement('PRAGMA user_version = 3');
+      await db.close();
+      final copyBytes = world.mainFile.readAsBytesSync();
+      Map<String, Uint8List>? before;
+      final result = await world.open(
+        executor: (file, key, guard) {
+          world.files.migrateTmp.writeAsBytesSync(copyBytes, flush: true);
+          before = snapshotFiles(world.dbDir);
+          return foregroundExecutor(file, key, guard);
+        },
+      );
+      expect((result as DbOpenFailed).code, DbOpenFailureCode.schemaTooNew);
+      expect(sameSnapshot(before!, snapshotFiles(world.dbDir)), isTrue);
+    });
+
+    test('an engine that opened without upgrading never confirms (deletes) '
+        'another engine\'s copy', () async {
+      await makeV1(world);
+      final copyBytes = world.mainFile.readAsBytesSync();
+      final result = await world.open(
+        executor: (file, key, guard) {
+          world.files.migrateTmp.writeAsBytesSync(copyBytes, flush: true);
+          return foregroundExecutor(file, key, guard);
+        },
+      );
+      final db = openedDb(result);
+      addTearDown(db.close);
+      expect(world.files.migrateTmp.existsSync(), isTrue);
+    });
+  });
+
   test('the copy is the encrypted file: header is not "SQLite format 3" and '
       'it opens with the same key', () async {
     await makeV1(world);

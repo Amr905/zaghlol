@@ -459,6 +459,29 @@ void main() {
     });
   });
 
+  test('review m-1: the leftover path never deletes the main file (another '
+      'engine may have created it right after the check)', () async {
+    await firstRun(world);
+
+    // The main file "appears" between the opener's check and the leftover
+    // deletion: its first exists() reports false although it is there.
+    final overrides = _StaleMainCheck(world.mainFile.path);
+    final result = await IOOverrides.runWithIOOverrides(
+      () => world.open(
+        // The real file object for drift, outside the override.
+        executor: (file, key, guard) =>
+            foregroundExecutor(overrides.real, key, guard),
+      ),
+      overrides,
+    );
+    expect(overrides.lied, isTrue);
+    expect(overrides.mainDeleted, isFalse);
+    final opened = openedDb(result);
+    addTearDown(opened.close);
+    expect((result as DbOpened).created, isFalse);
+    expect(await metaValue(opened, 'marker'), 'old');
+  });
+
   group('gate and diag', () {
     test('every failure code maps to a gate state', () {
       expect(DbOpenFailureCode.values, hasLength(7));
@@ -629,4 +652,52 @@ final class ContractPlain {
     await db.customStatement("INSERT INTO db_meta VALUES ('plain', '1')");
     await db.close();
   }
+}
+
+/// Makes the main file's first `exists()` report false (a check that went
+/// stale: another engine created the file just after it), forwards the rest.
+final class _StaleMainCheck extends IOOverrides {
+  _StaleMainCheck(this.path) : real = File(path);
+
+  final String path;
+
+  /// Created outside the override: a plain dart:io file.
+  final File real;
+  bool lied = false;
+  bool mainDeleted = false;
+
+  @override
+  File createFile(String p) =>
+      p == path ? _StaleFile(this) : super.createFile(p);
+}
+
+final class _StaleFile implements File {
+  _StaleFile(this._o);
+
+  final _StaleMainCheck _o;
+
+  @override
+  String get path => _o.path;
+
+  @override
+  Future<bool> exists() async {
+    if (!_o.lied) {
+      _o.lied = true;
+      return false;
+    }
+    return _o.real.exists();
+  }
+
+  @override
+  bool existsSync() => _o.real.existsSync();
+
+  @override
+  Future<FileSystemEntity> delete({bool recursive = false}) {
+    _o.mainDeleted = true;
+    return _o.real.delete(recursive: recursive);
+  }
+
+  @override
+  dynamic noSuchMethod(Invocation invocation) =>
+      throw UnsupportedError('not used by the leftover path');
 }
