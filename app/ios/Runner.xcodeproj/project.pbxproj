@@ -18,6 +18,11 @@
 		97C147011CF9000F007C117D /* LaunchScreen.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 97C146FF1CF9000F007C117D /* LaunchScreen.storyboard */; };
 		5A1650000000000000000A01 /* BackupExclusion.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5A1650000000000000000A02 /* BackupExclusion.swift */; };
 		5A1650000000000000000A04 /* BackupExclusionTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5A1650000000000000000A05 /* BackupExclusionTests.swift */; };
+		5A0150000000000000000B01 /* SecretStoreApi.g.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5A0150000000000000000B02 /* SecretStoreApi.g.swift */; };
+		5A0150000000000000000B03 /* BootstrapLeaseManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5A0150000000000000000B04 /* BootstrapLeaseManager.swift */; };
+		5A0150000000000000000B05 /* DbKeyKeychain.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5A0150000000000000000B06 /* DbKeyKeychain.swift */; };
+		5A0150000000000000000B07 /* SecretStoreHost.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5A0150000000000000000B08 /* SecretStoreHost.swift */; };
+		5A0150000000000000000B09 /* SecretStoreTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5A0150000000000000000B0A /* SecretStoreTests.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -63,6 +68,11 @@
 		97C147021CF9000F007C117D /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		5A1650000000000000000A02 /* BackupExclusion.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BackupExclusion.swift; sourceTree = "<group>"; };
 		5A1650000000000000000A05 /* BackupExclusionTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BackupExclusionTests.swift; sourceTree = "<group>"; };
+		5A0150000000000000000B02 /* SecretStoreApi.g.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SecretStoreApi.g.swift; sourceTree = "<group>"; };
+		5A0150000000000000000B04 /* BootstrapLeaseManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BootstrapLeaseManager.swift; sourceTree = "<group>"; };
+		5A0150000000000000000B06 /* DbKeyKeychain.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DbKeyKeychain.swift; sourceTree = "<group>"; };
+		5A0150000000000000000B08 /* SecretStoreHost.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SecretStoreHost.swift; sourceTree = "<group>"; };
+		5A0150000000000000000B0A /* SecretStoreTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SecretStoreTests.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -82,6 +92,7 @@
 			children = (
 				331C807B294A618700263BE5 /* RunnerTests.swift */,
 				5A1650000000000000000A05 /* BackupExclusionTests.swift */,
+				5A0150000000000000000B0A /* SecretStoreTests.swift */,
 			);
 			path = RunnerTests;
 			sourceTree = "<group>";
@@ -138,8 +149,28 @@
 				74858FAE1ED2DC5600515810 /* AppDelegate.swift */,
 				7884E8672EC3CC0400C636F2 /* SceneDelegate.swift */,
 				74858FAD1ED2DC5600515810 /* Runner-Bridging-Header.h */,
+				5A0150000000000000000B0B /* Platform */,
 			);
 			path = Runner;
+			sourceTree = "<group>";
+		};
+		5A0150000000000000000B0B /* Platform */ = {
+			isa = PBXGroup;
+			children = (
+				5A0150000000000000000B02 /* SecretStoreApi.g.swift */,
+				5A0150000000000000000B0C /* Keys */,
+			);
+			path = Platform;
+			sourceTree = "<group>";
+		};
+		5A0150000000000000000B0C /* Keys */ = {
+			isa = PBXGroup;
+			children = (
+				5A0150000000000000000B04 /* BootstrapLeaseManager.swift */,
+				5A0150000000000000000B06 /* DbKeyKeychain.swift */,
+				5A0150000000000000000B08 /* SecretStoreHost.swift */,
+			);
+			path = Keys;
 			sourceTree = "<group>";
 		};
 /* End PBXGroup section */
@@ -289,6 +320,7 @@
 			files = (
 				331C808B294A63AB00263BE5 /* RunnerTests.swift in Sources */,
 				5A1650000000000000000A04 /* BackupExclusionTests.swift in Sources */,
+				5A0150000000000000000B09 /* SecretStoreTests.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -300,6 +332,10 @@
 				1498D2341E8E89220040F4C2 /* GeneratedPluginRegistrant.m in Sources */,
 				7884E8682EC3CC0700C636F2 /* SceneDelegate.swift in Sources */,
 				5A1650000000000000000A01 /* BackupExclusion.swift in Sources */,
+				5A0150000000000000000B01 /* SecretStoreApi.g.swift in Sources */,
+				5A0150000000000000000B03 /* BootstrapLeaseManager.swift in Sources */,
+				5A0150000000000000000B05 /* DbKeyKeychain.swift in Sources */,
+				5A0150000000000000000B07 /* SecretStoreHost.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
