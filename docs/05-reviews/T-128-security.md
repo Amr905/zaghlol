@@ -68,3 +68,32 @@
 2. S2: reword `backend-schema.md:367`.
 
 S3, I1, I2 are follow-ups (FU entries in `docs/implementation-status.md`). Re-review: delta only, on Sonnet.
+
+## Re-review (delta) — `git diff 65bc6d6 8a4f02c`
+
+Reviewer: security-privacy-reviewer (delta only). CI: backend-ci run 42801208178 green, PC runner PASS (all suites).
+
+### S1 — resolved
+
+- **Stored text is what was checked.** `SyncIntake.cs:52-53` and `78-79` call `NormalizeText` and then `ContributionPrivacy.IsAcceptable` on that same string, and the string is stored. `NormalizeText` now walks runes (no surrogate splitting), removes `Cc`, `Cf`, `Mn`, `Me`, folds fullwidth ASCII, U+3000, `﹫` (U+FE6B) to ASCII and every digit `DigitValue` accepts to its ASCII digit. The DB CHECK therefore sees the filtered text, and for ASCII-folded digits it is a true backstop.
+- **Each earlier bypass is dropped.** `ContributionPrivacyTests` now carries a rejected vector for en dash, U+2212, tatweel between Arabic-Indic digits, bullet, pipe, colon, middle dot with brackets, Devanagari, mathematical digits (non-BMP), superscripts, circled digits, combining acute between digits, zero-width space, `﹫` and `＠`. By reading the code each takes the intended path: digits count via `Nd`/`No` with integer value 0-9; marks and `Cf` are transparent; any other non-letter is a separator with a budget of 3; `@` lookalikes are caught either by folding or by `AtSigns`.
+- **No new letters-as-separators route.** `Lu Ll Lt Lo` reset both counters, so a letter cannot bridge a run (`12 abc 34 def 56` passes by design). Only `Lm` (tatweel) is a separator, and it shares the budget of 3. A fourth separator resets, so `acct 12 ---- 34 56` passes; that is the documented limit and is tested as an accept.
+- **No over-blocking of ordinary merchant names.** `7-Eleven`, `branch 12`, `shop 12 34 5`, `7 eleven 2024`, `carrefour – maadi`, `كشري ١٢٣` and `pay ⑩ 1234` (ten is not a digit) are accepted. A name such as `studio 54 - 2020 - 15` is dropped; that is acceptable (silent drop, privacy-first).
+- **Residuals, Info only, no change required:** (a) digits written as letters (CJK numerals, spelled-out words) are `Lo` and are not detected, which is the same class as person names and is covered by the app filter, A-48 and operator review; (b) a number grouped with more than 3 separators between groups of fewer than 6 digits ("010 ---- 1234 ---- 5678") is not a run by the stated rule; (c) `Mc` is skipped by the filter but not stripped from stored text, which is harmless because the filter ran on the stored form and the DB CHECK is narrower by documentation.
+
+### S2 — resolved
+
+`backend-api.md`, `backend-schema.md` (§3 table and the CHECK comment), `security-model.md` and `deployment.md` now say: the API filter runs on the stored normalized text, the DB CHECK is a narrower backstop listing its four scripts, and names, short amounts and dates are not detected and rely on the app filter, the A-48 threshold and operator review. The "any script" claim is attached only to the API filter, where it is true. `CheckSql.cs` comments match. The overclaim is gone.
+
+### S3 — migration and function are safe
+
+- **UTC day:** `(now() AT TIME ZONE 'UTC')::date`; the caller can no longer pass a day (`SyncStore` drops the parameter; test `TheCallerCanNoLongerChooseTheDay`, plus a session time-zone test).
+- **Platform allow-list:** `IS NULL OR NOT IN ('android','ios')` raises SQLSTATE 22023; the message is the fixed text `count_daily_active: unknown platform` and does not echo the argument. Nothing is written on rejection (tested for unknown and NULL).
+- **Hardening unchanged:** `SECURITY DEFINER`, `SET search_path = zaghlol, pg_temp` (pg_temp last), a single static upsert that only adds 1, `REVOKE ALL ... FROM PUBLIC`, `GRANT EXECUTE ... TO app_rw` on the new signature. The old three-argument function is dropped, so no stale overload with a caller-chosen day survives (`OnlyTheTwoArgumentFunctionExists`). `GrantTests` still denies admin, worker and ops_ro and still allows api, with the new signature.
+- **Rollback:** `Down` drops the two-argument function and re-runs the frozen `SyncSql.CreateCountDailyActive`, which re-creates the old function with the same REVOKE, GRANT and COMMENT. `SyncSql` itself is untouched.
+- **Migration form:** hand-written with a designer copy of the unchanged model; no snapshot change, which is correct since only SQL changes.
+- **Info (no change):** `p_app_version` is still caller-supplied text, so a compromised `app_rw` could add rows with arbitrary version strings. This is bounded to adding 1 per call to an aggregate and is the same trust level as before; a version-format CHECK could be a later hardening.
+
+### Verdict (delta): APPROVED
+
+S1 and S2 are resolved, S3 is implemented safely. No new findings above Info. Security gate for T-128: **APPROVED**.
