@@ -1,5 +1,1311 @@
 ﻿== SUMMARY ==
-RUNNING sha=f81d7135ec65b308c7296e4b48cd41bd717b6357
+PASS sha=f81d7135ec65b308c7296e4b48cd41bd717b6357 pipeline=quick-app pub-get=0 format=0 analyze=0 app-test=0 dart-test-zaghlol_domain=0 dart-test-zaghlol_parsing=0 apk-devNoSms=0 apk-perms=0 android-unit=0 android-lint=0
+pub-get                      PASS  exit=0  2s
+format                       PASS  exit=0  6s
+analyze                      PASS  exit=0  97s
+app-test                     PASS  exit=0  24s
+dart-test-zaghlol_domain     PASS  exit=0  3s
+dart-test-zaghlol_parsing    PASS  exit=0  2s
+apk-devNoSms                 PASS  exit=0  188s
+apk-perms                    PASS  exit=0  1s
+android-unit                 PASS  exit=0  83s
+android-lint                 PASS  exit=0  94s
 
 == FULL LOG (last 1500 lines) ==
 auto task/T-016-app-database f81d7135ec65b308c7296e4b48cd41bd717b6357 2026-11-11T00:26:05.4225744+02:00
+
+
+
+[00:26:11] === STEP pub-get (docker zaghlol-flutter:3.47.9, /work/)
+Resolving dependencies...
+Downloading packages...
+  _fe_analyzer_shared 91.0.0 (111.0.0 available)
+  analyzer 8.4.0 (14.7.0 available)
+  built_collection 5.1.2 (6.0.0 available)
+  coverage 1.15.1 (1.16.0 available)
+  dart_style 3.1.3 (3.1.14 available)
+  drift 2.35.3 (2.35.4 available)
+  material_color_utilities 0.13.0 (0.13.1 available)
+  package_config 2.2.0 (3.0.0 available)
+  pigeon 26.3.2 (29.1.1 available)
+  test 1.31.1 (1.33.0 available)
+  test_api 0.7.12 (0.7.15 available)
+  test_core 0.6.18 (0.6.21 available)
+Got dependencies!
+12 packages have newer versions incompatible with dependency constraints.
+Try `flutter pub outdated` for more information.
+
+[00:26:13] === RESULT pub-get exit=0 (2s)
+[00:26:13] === STEP format (docker zaghlol-flutter:3.47.9, /work/)
+Formatted 133 files (0 changed) in 5.37 seconds.
+
+[00:26:19] === RESULT format exit=0 (6s)
+[00:26:19] === STEP analyze (docker zaghlol-flutter:3.47.9, /work/)
+Resolving dependencies...
+Downloading packages...
+  _fe_analyzer_shared 91.0.0 (111.0.0 available)
+  analyzer 8.4.0 (14.7.0 available)
+  built_collection 5.1.2 (6.0.0 available)
+  coverage 1.15.1 (1.16.0 available)
+  dart_style 3.1.3 (3.1.14 available)
+  drift 2.35.3 (2.35.4 available)
+  material_color_utilities 0.13.0 (0.13.1 available)
+  package_config 2.2.0 (3.0.0 available)
+  pigeon 26.3.2 (29.1.1 available)
+  test 1.31.1 (1.33.0 available)
+  test_api 0.7.12 (0.7.15 available)
+  test_core 0.6.18 (0.6.21 available)
+Got dependencies!
+12 packages have newer versions incompatible with dependency constraints.
+Try `flutter pub outdated` for more information.
+Analyzing work...                                               
+No issues found! (ran in 95.4s)
+
+[00:27:55] === RESULT analyze exit=0 (97s)
+[00:27:55] === STEP app-test (docker zaghlol-flutter:3.47.9, /work/app)
+Resolving dependencies in `/work`...
+Downloading packages...
+  _fe_analyzer_shared 91.0.0 (111.0.0 available)
+  analyzer 8.4.0 (14.7.0 available)
+  built_collection 5.1.2 (6.0.0 available)
+  coverage 1.15.1 (1.16.0 available)
+  dart_style 3.1.3 (3.1.14 available)
+  drift 2.35.3 (2.35.4 available)
+  material_color_utilities 0.13.0 (0.13.1 available)
+  package_config 2.2.0 (3.0.0 available)
+  pigeon 26.3.2 (29.1.1 available)
+  test 1.31.1 (1.33.0 available)
+  test_api 0.7.12 (0.7.15 available)
+  test_core 0.6.18 (0.6.21 available)
+Got dependencies in `/work`!
+12 packages have newer versions incompatible with dependency constraints.
+Try `flutter pub outdated` for more information.
+00:00 +0: loading /work/app/test/core/db/app_database_opener_test.dart
+00:00 +0: /work/app/test/core/db/app_database_opener_test.dart: first run and reopen no key, no file: creates the key and the database under the lease, then releases it
+00:00 +1: /work/app/test/core/db/app_database_opener_test.dart: first run and reopen second launch: KeyReady opens the same database
+00:00 +2: /work/app/test/core/db/app_database_opener_test.dart: first run and reopen the key is zeroized after every open
+00:00 +3: /work/app/test/core/db/app_database_opener_test.dart: AC1: wrong key fails cleanly K1 file reopened with K2 → DB_KEY_REJECTED, file bytes unchanged
+00:00 +4: /work/app/test/core/db/app_database_opener_test.dart: AC1: wrong key fails cleanly the opener reports the rejection: KeyInvalidated(rejectedBySqlite) → wipe, new key, new database with the restore notice
+00:00 +5: /work/app/test/core/db/app_database_opener_test.dart: AC1: wrong key fails cleanly rejected, but another engine rotated the key meanwhile → one retry with the new key (no wipe)
+00:00 +6: /work/app/test/core/db/app_database_opener_test.dart: AC1: wrong key fails cleanly a BUSY-style open failure is DB_UNAVAILABLE and never a wipe
+00:00 +7: /work/app/test/core/db/app_database_opener_test.dart: AC1: wrong key fails cleanly a IOERR-style open failure is DB_UNAVAILABLE and never a wipe
+00:00 +8: /work/app/test/core/db/app_database_opener_test.dart: AC1: wrong key fails cleanly a plaintext file at the path is never opened: the key does not decrypt it, so it is an orphan (D-50) and replaced
+00:00 +9: /work/app/test/core/db/app_database_opener_test.dart: D-50 orphan wipe KeyInvalidated(missing): all 13 names gone, main file last, temp cleared, new key, new database, notice due
+00:00 +10: /work/app/test/core/db/app_database_opener_test.dart: D-50 orphan wipe KeyInvalidated(unusable): all 13 names gone, main file last, temp cleared, new key, new database, notice due
+00:00 +11: /work/app/test/core/db/app_database_opener_test.dart: D-50 orphan wipe a lease that lapses before step N stops at N-1: the rest stays, no key written, DB_UNAVAILABLE(leaseLapsed)
+00:00 +12: /work/app/test/core/db/app_database_opener_test.dart: D-50 orphan wipe a lease that lapses before the first create: no file exists, DB_UNAVAILABLE(leaseLapsed); the next launch re-bootstraps
+00:00 +13: /work/app/test/core/db/app_database_opener_test.dart: D-50 orphan wipe a lease that lapses after the wipe: no key is written and no database created; the next launch starts fresh
+00:00 +14: /work/app/test/core/db/app_database_opener_test.dart: D-50 orphan wipe a step that fails is DB_WIPE_INCOMPLETE and nothing is recreated
+00:00 +15: /work/app/test/core/db/app_database_opener_test.dart: D-50 orphan wipe steps that leave a database file behind → DB_WIPE_INCOMPLETE, no recreate over leftovers
+00:00 +16: /work/app/test/core/db/app_database_opener_test.dart: D-50 orphan wipe two openers racing: one wipe, both end with the same new database
+00:00 +17: /work/app/test/core/db/app_database_opener_test.dart: D-50 orphan wipe the only secret ever deleted is the database key
+00:00 +18: /work/app/test/core/db/app_database_opener_test.dart: dbFileWipeSteps deletes all 13 names, main file last, and is idempotent
+00:00 +19: /work/app/test/core/db/app_database_opener_test.dart: other bootstrap outcomes KeyUnavailable → DB_UNAVAILABLE, nothing touched
+00:00 +20: /work/app/test/core/db/app_database_opener_test.dart: other bootstrap outcomes lease timeout → DB_UNAVAILABLE
+00:00 +21: /work/app/test/core/db/app_database_test.dart: schemaVersion (read by drift_dev as a literal) equals appSchemaVersion
+00:00 +22: /work/app/test/core/db/app_database_test.dart: schemaVersion (read by drift_dev as a literal) equals appSchemaVersion
+00:00 +23: /work/app/test/core/db/app_database_opener_test.dart: other bootstrap outcomes leftovers without a main file (key present): deleted, then the rotate path creates a fresh database without a notice
+00:00 +24: /work/app/test/core/db/app_database_test.dart: AC2: header is not "SQLite format 3" after create + inserts; WAL/SHM hold no sentinel (foreground)
+00:00 +25: /work/app/test/core/db/app_database_test.dart: AC2: header is not "SQLite format 3" after create + inserts; WAL/SHM hold no sentinel (foreground)
+00:00 +26: /work/app/test/core/db/app_database_test.dart: AC2: header is not "SQLite format 3" after create + inserts; WAL/SHM hold no sentinel (foreground)
+00:01 +27: /work/app/test/core/db/app_database_test.dart: AC2: header is not "SQLite format 3" after create + inserts; WAL/SHM hold no sentinel (foreground)
+00:01 +28: /work/app/test/core/db/app_database_test.dart: AC2: header is not "SQLite format 3" after create + inserts; WAL/SHM hold no sentinel (foreground)
+00:01 +29: /work/app/test/core/db/app_database_opener_test.dart: Riverpod appDatabaseProvider opens the database; dispose closes it
+00:01 +30: /work/app/test/core/db/app_database_opener_test.dart: Riverpod appDatabaseProvider opens the database; dispose closes it
+00:01 +31: /work/app/test/core/db/app_database_opener_test.dart: Riverpod appDatabaseProvider opens the database; dispose closes it
+00:01 +32: /work/app/test/core/db/app_database_opener_test.dart: Riverpod appDatabaseProvider opens the database; dispose closes it
+00:01 +33: /work/app/test/core/db/app_database_opener_test.dart: Riverpod appDatabaseProvider opens the database; dispose closes it
+00:01 +34: /work/app/test/core/db/app_database_test.dart: AC2: header is not "SQLite format 3" after create + inserts; WAL/SHM hold no sentinel (background)
+00:01 +35: /work/app/test/core/db/app_database_test.dart: AC2: header is not "SQLite format 3" after create + inserts; WAL/SHM hold no sentinel (background)
+00:01 +36: /work/app/test/core/db/app_database_test.dart: AC2: header is not "SQLite format 3" after create + inserts; WAL/SHM hold no sentinel (background)
+00:01 +37: /work/app/test/core/db/app_database_test.dart: AC2: header is not "SQLite format 3" after create + inserts; WAL/SHM hold no sentinel (background)
+00:01 +38: /work/app/test/core/db/app_database_test.dart: AC2: header is not "SQLite format 3" after create + inserts; WAL/SHM hold no sentinel (background)
+00:01 +39: /work/app/test/core/db/app_database_test.dart: AC2: header is not "SQLite format 3" after create + inserts; WAL/SHM hold no sentinel (background)
+00:01 +40: /work/app/test/core/db/app_database_test.dart: AC2: header is not "SQLite format 3" after create + inserts; WAL/SHM hold no sentinel (background)
+00:01 +41: /work/app/test/core/db/app_database_test.dart: AC2: header is not "SQLite format 3" after create + inserts; WAL/SHM hold no sentinel (background)
+00:01 +42: /work/app/test/core/db/app_database_opener_test.dart: copyFileForMigration copies bytes exactly
+00:01 +43: /work/app/test/core/db/app_database_test.dart: every PRAGMA reads back from a live encrypted database (background)
+00:01 +44: /work/app/test/core/db/db_file_set_test.dart: the set covers the database, its companions and temp copies
+00:01 +45: /work/app/test/core/db/app_database_test.dart: restore notice: written in the create transaction when due, read and cleared
+00:01 +46: /work/app/test/core/db/app_database_test.dart: restore notice: written in the create transaction when due, read and cleared
+00:01 +47: /work/app/test/core/db/app_database_test.dart: restore notice: written in the create transaction when due, read and cleared
+00:01 +48: /work/app/test/core/db/app_database_test.dart: restore notice: written in the create transaction when due, read and cleared
+00:01 +49: /work/app/test/core/db/app_database_test.dart: restore notice: written in the create transaction when due, read and cleared
+00:01 +50: /work/app/test/core/db/app_database_test.dart: restore notice: written in the create transaction when due, read and cleared
+00:01 +51: /work/app/test/core/db/app_database_test.dart: restore notice: written in the create transaction when due, read and cleared
+00:01 +52: /work/app/test/core/db/app_database_test.dart: restore notice: written in the create transaction when due, read and cleared
+00:01 +53: /work/app/test/core/db/app_database_test.dart: restore notice: written in the create transaction when due, read and cleared
+00:01 +54: /work/app/test/core/db/db_file_set_test.dart: "zaghlol.db.restore.tmp-shm" alone means a database exists
+00:01 +55: /work/app/test/core/db/app_database_test.dart: no restore notice on a plain first run
+00:01 +56: /work/app/test/core/db/app_database_test.dart: no restore notice on a plain first run
+00:01 +57: /work/app/test/core/db/app_database_test.dart: no restore notice on a plain first run
+00:01 +58: /work/app/test/core/db/app_database_test.dart: no restore notice on a plain first run
+00:01 +59: /work/app/test/core/db/app_database_test.dart: no restore notice on a plain first run
+00:01 +60: /work/app/test/core/db/app_database_test.dart: no restore notice on a plain first run
+00:01 +61: /work/app/test/core/db/app_database_test.dart: no restore notice on a plain first run
+00:01 +62: /work/app/test/core/db/db_file_set_test.dart: a path that is not a directory throws (never "absent")
+00:01 +63: /work/app/test/core/db/app_database_test.dart: the created schema equals the committed dump of the current version (SchemaVerifier startAt(1).validate equivalent)
+00:01 +64: /work/app/test/core/db/app_database_test.dart: dumps exist for exactly versions 1..appSchemaVersion
+00:01 +65: /work/app/test/core/db/app_database_test.dart: debug schema check: an extra table makes the open fail with DB_SCHEMA_MISMATCH
+00:01 +66: /work/app/test/core/db/db_key_providers_test.dart: defaults: Pigeon store and the secure generator
+00:01 +67: /work/app/test/core/db/app_database_test.dart: the schema check passes on an unchanged database
+00:01 +68: /work/app/test/core/db/db_key_providers_test.dart: the database directory must be configured by T-016
+00:01 +69: /work/app/test/core/db/app_database_test.dart: drift statement logging is off and never switched on in lib/
+00:01 +70: /work/app/test/core/db/app_database_test.dart: drift statement logging is off and never switched on in lib/
+00:01 +71: /work/app/test/core/db/app_database_test.dart: drift statement logging is off and never switched on in lib/
+00:01 +72: /work/app/test/core/db/app_database_test.dart: drift statement logging is off and never switched on in lib/
+00:01 +73: /work/app/test/core/db/app_database_test.dart: drift statement logging is off and never switched on in lib/
+00:01 +74: /work/app/test/core/db/fts_benchmark_test.dart: 50k-row FTS benchmark (gate p95 < 200 ms, FR-TXN-01; soft 50 ms)
+00:01 +75: /work/app/test/core/db/fts_benchmark_test.dart: 50k-row FTS benchmark (gate p95 < 200 ms, FR-TXN-01; soft 50 ms)
+00:01 +76: /work/app/test/core/db/fts_benchmark_test.dart: 50k-row FTS benchmark (gate p95 < 200 ms, FR-TXN-01; soft 50 ms)
+00:01 +77: /work/app/test/core/db/fts_benchmark_test.dart: 50k-row FTS benchmark (gate p95 < 200 ms, FR-TXN-01; soft 50 ms)
+00:01 +78: /work/app/test/core/db/fts_benchmark_test.dart: 50k-row FTS benchmark (gate p95 < 200 ms, FR-TXN-01; soft 50 ms)
+00:01 +79: /work/app/test/core/db/fts_benchmark_test.dart: 50k-row FTS benchmark (gate p95 < 200 ms, FR-TXN-01; soft 50 ms)
+00:01 +80: /work/app/test/core/db/fts_benchmark_test.dart: 50k-row FTS benchmark (gate p95 < 200 ms, FR-TXN-01; soft 50 ms)
+00:01 +81: /work/app/test/core/db/fts_benchmark_test.dart: 50k-row FTS benchmark (gate p95 < 200 ms, FR-TXN-01; soft 50 ms)
+00:01 +82: /work/app/test/core/db/fts_benchmark_test.dart: 50k-row FTS benchmark (gate p95 < 200 ms, FR-TXN-01; soft 50 ms)
+00:01 +83: /work/app/test/core/db/fts_benchmark_test.dart: 50k-row FTS benchmark (gate p95 < 200 ms, FR-TXN-01; soft 50 ms)
+00:01 +84: /work/app/test/core/db/fts_benchmark_test.dart: 50k-row FTS benchmark (gate p95 < 200 ms, FR-TXN-01; soft 50 ms)
+00:01 +85: /work/app/test/core/db/fts_benchmark_test.dart: 50k-row FTS benchmark (gate p95 < 200 ms, FR-TXN-01; soft 50 ms)
+00:01 +86: /work/app/test/core/db/fts_benchmark_test.dart: 50k-row FTS benchmark (gate p95 < 200 ms, FR-TXN-01; soft 50 ms)
+00:01 +87: /work/app/test/core/db/fts_benchmark_test.dart: 50k-row FTS benchmark (gate p95 < 200 ms, FR-TXN-01; soft 50 ms)
+00:01 +88: /work/app/test/core/db/fts_benchmark_test.dart: 50k-row FTS benchmark (gate p95 < 200 ms, FR-TXN-01; soft 50 ms)
+00:01 +89: /work/app/test/core/db/fts_benchmark_test.dart: 50k-row FTS benchmark (gate p95 < 200 ms, FR-TXN-01; soft 50 ms)
+00:01 +90: /work/app/test/core/db/fts_benchmark_test.dart: 50k-row FTS benchmark (gate p95 < 200 ms, FR-TXN-01; soft 50 ms)
+00:01 +91: /work/app/test/core/db/fts_benchmark_test.dart: 50k-row FTS benchmark (gate p95 < 200 ms, FR-TXN-01; soft 50 ms)
+00:01 +92: /work/app/test/core/db/fts_benchmark_test.dart: 50k-row FTS benchmark (gate p95 < 200 ms, FR-TXN-01; soft 50 ms)
+00:01 +93: /work/app/test/core/db/fts_benchmark_test.dart: 50k-row FTS benchmark (gate p95 < 200 ms, FR-TXN-01; soft 50 ms)
+00:01 +94: /work/app/test/core/db/fts_benchmark_test.dart: 50k-row FTS benchmark (gate p95 < 200 ms, FR-TXN-01; soft 50 ms)
+00:01 +95: /work/app/test/core/db/fts_benchmark_test.dart: 50k-row FTS benchmark (gate p95 < 200 ms, FR-TXN-01; soft 50 ms)
+00:01 +96: /work/app/test/core/db/fts_benchmark_test.dart: 50k-row FTS benchmark (gate p95 < 200 ms, FR-TXN-01; soft 50 ms)
+00:01 +97: /work/app/test/core/db/fts_benchmark_test.dart: 50k-row FTS benchmark (gate p95 < 200 ms, FR-TXN-01; soft 50 ms)
+00:01 +98: /work/app/test/core/db/fts_benchmark_test.dart: 50k-row FTS benchmark (gate p95 < 200 ms, FR-TXN-01; soft 50 ms)
+00:01 +99: /work/app/test/core/db/fts_benchmark_test.dart: 50k-row FTS benchmark (gate p95 < 200 ms, FR-TXN-01; soft 50 ms)
+00:01 +100: /work/app/test/core/db/fts_benchmark_test.dart: 50k-row FTS benchmark (gate p95 < 200 ms, FR-TXN-01; soft 50 ms)
+00:01 +101: /work/app/test/core/db/fts_benchmark_test.dart: 50k-row FTS benchmark (gate p95 < 200 ms, FR-TXN-01; soft 50 ms)
+00:01 +102: /work/app/test/core/db/fts_benchmark_test.dart: 50k-row FTS benchmark (gate p95 < 200 ms, FR-TXN-01; soft 50 ms)
+00:02 +103: /work/app/test/core/db/fts_benchmark_test.dart: 50k-row FTS benchmark (gate p95 < 200 ms, FR-TXN-01; soft 50 ms)
+00:02 +104: /work/app/test/core/db/fts_benchmark_test.dart: 50k-row FTS benchmark (gate p95 < 200 ms, FR-TXN-01; soft 50 ms)
+00:02 +105: /work/app/test/core/db/fts_benchmark_test.dart: 50k-row FTS benchmark (gate p95 < 200 ms, FR-TXN-01; soft 50 ms)
+00:02 +106: /work/app/test/core/db/fts_benchmark_test.dart: 50k-row FTS benchmark (gate p95 < 200 ms, FR-TXN-01; soft 50 ms)
+00:02 +107: /work/app/test/core/db/fts_benchmark_test.dart: 50k-row FTS benchmark (gate p95 < 200 ms, FR-TXN-01; soft 50 ms)
+00:02 +108: /work/app/test/core/db/fts_benchmark_test.dart: 50k-row FTS benchmark (gate p95 < 200 ms, FR-TXN-01; soft 50 ms)
+00:02 +109: /work/app/test/core/db/fts_benchmark_test.dart: 50k-row FTS benchmark (gate p95 < 200 ms, FR-TXN-01; soft 50 ms)
+00:02 +110: /work/app/test/core/db/fts_benchmark_test.dart: 50k-row FTS benchmark (gate p95 < 200 ms, FR-TXN-01; soft 50 ms)
+00:02 +111: /work/app/test/core/db/fts_benchmark_test.dart: 50k-row FTS benchmark (gate p95 < 200 ms, FR-TXN-01; soft 50 ms)
+00:02 +112: /work/app/test/core/db/fts_benchmark_test.dart: 50k-row FTS benchmark (gate p95 < 200 ms, FR-TXN-01; soft 50 ms)
+00:02 +113: /work/app/test/core/db/fts_benchmark_test.dart: 50k-row FTS benchmark (gate p95 < 200 ms, FR-TXN-01; soft 50 ms)
+00:02 +114: /work/app/test/core/db/fts_benchmark_test.dart: 50k-row FTS benchmark (gate p95 < 200 ms, FR-TXN-01; soft 50 ms)
+00:02 +115: /work/app/test/core/db/fts_benchmark_test.dart: 50k-row FTS benchmark (gate p95 < 200 ms, FR-TXN-01; soft 50 ms)
+00:02 +116: /work/app/test/core/db/fts_benchmark_test.dart: 50k-row FTS benchmark (gate p95 < 200 ms, FR-TXN-01; soft 50 ms)
+00:02 +117: /work/app/test/core/db/fts_benchmark_test.dart: 50k-row FTS benchmark (gate p95 < 200 ms, FR-TXN-01; soft 50 ms)
+00:02 +118: /work/app/test/core/db/fts_benchmark_test.dart: 50k-row FTS benchmark (gate p95 < 200 ms, FR-TXN-01; soft 50 ms)
+00:02 +119: /work/app/test/core/db/fts_benchmark_test.dart: 50k-row FTS benchmark (gate p95 < 200 ms, FR-TXN-01; soft 50 ms)
+00:02 +120: /work/app/test/core/db/fts_benchmark_test.dart: 50k-row FTS benchmark (gate p95 < 200 ms, FR-TXN-01; soft 50 ms)
+00:02 +121: /work/app/test/core/db/fts_benchmark_test.dart: 50k-row FTS benchmark (gate p95 < 200 ms, FR-TXN-01; soft 50 ms)
+00:02 +122: /work/app/test/core/db/fts_benchmark_test.dart: 50k-row FTS benchmark (gate p95 < 200 ms, FR-TXN-01; soft 50 ms)
+00:02 +123: /work/app/test/core/db/fts_benchmark_test.dart: 50k-row FTS benchmark (gate p95 < 200 ms, FR-TXN-01; soft 50 ms)
+00:02 +124: /work/app/test/core/db/fts_benchmark_test.dart: 50k-row FTS benchmark (gate p95 < 200 ms, FR-TXN-01; soft 50 ms)
+00:02 +125: /work/app/test/core/db/fts_benchmark_test.dart: 50k-row FTS benchmark (gate p95 < 200 ms, FR-TXN-01; soft 50 ms)
+00:02 +126: /work/app/test/core/db/fts_benchmark_test.dart: 50k-row FTS benchmark (gate p95 < 200 ms, FR-TXN-01; soft 50 ms)
+00:02 +127: /work/app/test/core/db/fts_benchmark_test.dart: 50k-row FTS benchmark (gate p95 < 200 ms, FR-TXN-01; soft 50 ms)
+00:02 +128: /work/app/test/core/db/fts_benchmark_test.dart: 50k-row FTS benchmark (gate p95 < 200 ms, FR-TXN-01; soft 50 ms)
+00:02 +129: /work/app/test/core/db/fts_benchmark_test.dart: 50k-row FTS benchmark (gate p95 < 200 ms, FR-TXN-01; soft 50 ms)
+00:02 +130: /work/app/test/core/db/fts_benchmark_test.dart: 50k-row FTS benchmark (gate p95 < 200 ms, FR-TXN-01; soft 50 ms)
+00:02 +131: /work/app/test/core/db/fts_benchmark_test.dart: 50k-row FTS benchmark (gate p95 < 200 ms, FR-TXN-01; soft 50 ms)
+00:02 +132: /work/app/test/core/db/fts_benchmark_test.dart: 50k-row FTS benchmark (gate p95 < 200 ms, FR-TXN-01; soft 50 ms)
+00:02 +133: /work/app/test/core/db/fts_benchmark_test.dart: 50k-row FTS benchmark (gate p95 < 200 ms, FR-TXN-01; soft 50 ms)
+00:02 +134: /work/app/test/core/db/fts_benchmark_test.dart: 50k-row FTS benchmark (gate p95 < 200 ms, FR-TXN-01; soft 50 ms)
+00:02 +135: /work/app/test/core/db/fts_benchmark_test.dart: 50k-row FTS benchmark (gate p95 < 200 ms, FR-TXN-01; soft 50 ms)
+00:02 +136: /work/app/test/core/db/fts_benchmark_test.dart: 50k-row FTS benchmark (gate p95 < 200 ms, FR-TXN-01; soft 50 ms)
+00:02 +137: /work/app/test/core/db/fts_benchmark_test.dart: 50k-row FTS benchmark (gate p95 < 200 ms, FR-TXN-01; soft 50 ms)
+00:02 +138: /work/app/test/core/db/fts_benchmark_test.dart: 50k-row FTS benchmark (gate p95 < 200 ms, FR-TXN-01; soft 50 ms)
+00:02 +139: /work/app/test/core/db/fts_benchmark_test.dart: 50k-row FTS benchmark (gate p95 < 200 ms, FR-TXN-01; soft 50 ms)
+00:02 +140: /work/app/test/core/db/fts_benchmark_test.dart: 50k-row FTS benchmark (gate p95 < 200 ms, FR-TXN-01; soft 50 ms)
+00:02 +141: /work/app/test/core/db/fts_benchmark_test.dart: 50k-row FTS benchmark (gate p95 < 200 ms, FR-TXN-01; soft 50 ms)
+00:02 +142: /work/app/test/core/db/fts_benchmark_test.dart: 50k-row FTS benchmark (gate p95 < 200 ms, FR-TXN-01; soft 50 ms)
+00:02 +143: /work/app/test/core/db/fts_benchmark_test.dart: 50k-row FTS benchmark (gate p95 < 200 ms, FR-TXN-01; soft 50 ms)
+00:02 +144: /work/app/test/core/db/fts_benchmark_test.dart: 50k-row FTS benchmark (gate p95 < 200 ms, FR-TXN-01; soft 50 ms)
+00:02 +145: /work/app/test/core/db/fts_benchmark_test.dart: 50k-row FTS benchmark (gate p95 < 200 ms, FR-TXN-01; soft 50 ms)
+00:02 +146: /work/app/test/core/db/fts_benchmark_test.dart: 50k-row FTS benchmark (gate p95 < 200 ms, FR-TXN-01; soft 50 ms)
+00:02 +147: /work/app/test/core/db/fts_benchmark_test.dart: 50k-row FTS benchmark (gate p95 < 200 ms, FR-TXN-01; soft 50 ms)
+00:02 +148: /work/app/test/core/db/fts_benchmark_test.dart: 50k-row FTS benchmark (gate p95 < 200 ms, FR-TXN-01; soft 50 ms)
+00:02 +149: /work/app/test/core/db/fts_benchmark_test.dart: 50k-row FTS benchmark (gate p95 < 200 ms, FR-TXN-01; soft 50 ms)
+00:02 +150: /work/app/test/core/db/fts_benchmark_test.dart: 50k-row FTS benchmark (gate p95 < 200 ms, FR-TXN-01; soft 50 ms)
+00:02 +151: /work/app/test/core/db/fts_benchmark_test.dart: 50k-row FTS benchmark (gate p95 < 200 ms, FR-TXN-01; soft 50 ms)
+00:02 +152: /work/app/test/core/db/fts_benchmark_test.dart: 50k-row FTS benchmark (gate p95 < 200 ms, FR-TXN-01; soft 50 ms)
+00:02 +153: /work/app/test/core/db/fts_benchmark_test.dart: 50k-row FTS benchmark (gate p95 < 200 ms, FR-TXN-01; soft 50 ms)
+00:02 +154: /work/app/test/core/db/fts_benchmark_test.dart: 50k-row FTS benchmark (gate p95 < 200 ms, FR-TXN-01; soft 50 ms)
+00:02 +155: /work/app/test/core/db/fts_benchmark_test.dart: 50k-row FTS benchmark (gate p95 < 200 ms, FR-TXN-01; soft 50 ms)
+00:02 +156: /work/app/test/core/db/fts_benchmark_test.dart: 50k-row FTS benchmark (gate p95 < 200 ms, FR-TXN-01; soft 50 ms)
+00:02 +157: /work/app/test/core/db/fts_benchmark_test.dart: 50k-row FTS benchmark (gate p95 < 200 ms, FR-TXN-01; soft 50 ms)
+00:02 +158: /work/app/test/core/db/fts_benchmark_test.dart: 50k-row FTS benchmark (gate p95 < 200 ms, FR-TXN-01; soft 50 ms)
+00:02 +159: /work/app/test/core/db/fts_benchmark_test.dart: 50k-row FTS benchmark (gate p95 < 200 ms, FR-TXN-01; soft 50 ms)
+00:02 +160: /work/app/test/core/db/fts_benchmark_test.dart: 50k-row FTS benchmark (gate p95 < 200 ms, FR-TXN-01; soft 50 ms)
+00:02 +161: /work/app/test/core/db/fts_benchmark_test.dart: 50k-row FTS benchmark (gate p95 < 200 ms, FR-TXN-01; soft 50 ms)
+00:02 +161: /work/app/test/core/db/sqlite3mc_contract_test.dart: interop: write an encrypted database for the sqlcipher CLI
+  Skip: ZAGHLOL_DB_INTEROP_DIR not set (db-platform host job only)
+00:02 +161 ~1: /work/app/test/core/db/fts_benchmark_test.dart: 50k-row FTS benchmark (gate p95 < 200 ms, FR-TXN-01; soft 50 ms)
+00:03 +162 ~1: /work/app/test/core/db/fts_benchmark_test.dart: 50k-row FTS benchmark (gate p95 < 200 ms, FR-TXN-01; soft 50 ms)
+00:03 +163 ~1: /work/app/test/core/db/fts_benchmark_test.dart: 50k-row FTS benchmark (gate p95 < 200 ms, FR-TXN-01; soft 50 ms)
+00:03 +163 ~1: /work/app/test/core/db/sqlite3mc_contract_test.dart: (tearDownAll)
+ZAGHLOL_DB_FINDINGS {"env":"host-linux","sqlite_version":"3.54.0","sqlite3mc_version":"SQLite3 Multiple Ciphers 2.6.1","tmp_parent":"/tmp","no_key_code":26,"wrong_key_code":26,"plaintext_with_key_code":26,"rekey_in_wal":"ok","tashkeel_folded":false,"match_1ch_rows":0,"match_2ch_rows":0,"like_2ch_rows":1,"latin_diacritics_folded":true,"like_plan":"SCAN transactions_fts VIRTUAL TABLE INDEX 0:","like_indexed":false,"like_control_plan":"SCAN like_control VIRTUAL TABLE INDEX 0:L0"}
+00:03 +163 ~1: /work/app/test/core/db/fts_benchmark_test.dart: 50k-row FTS benchmark (gate p95 < 200 ms, FR-TXN-01; soft 50 ms)
+00:03 +164 ~1: /work/app/test/core/db/fts_benchmark_test.dart: 50k-row FTS benchmark (gate p95 < 200 ms, FR-TXN-01; soft 50 ms)
+00:03 +165 ~1: /work/app/test/core/db/fts_benchmark_test.dart: 50k-row FTS benchmark (gate p95 < 200 ms, FR-TXN-01; soft 50 ms)
+00:03 +166 ~1: /work/app/test/core/db/fts_benchmark_test.dart: 50k-row FTS benchmark (gate p95 < 200 ms, FR-TXN-01; soft 50 ms)
+00:03 +167 ~1: /work/app/test/core/db/fts_benchmark_test.dart: 50k-row FTS benchmark (gate p95 < 200 ms, FR-TXN-01; soft 50 ms)
+00:03 +168 ~1: /work/app/test/core/db/fts_benchmark_test.dart: 50k-row FTS benchmark (gate p95 < 200 ms, FR-TXN-01; soft 50 ms)
+00:03 +169 ~1: /work/app/test/core/db/fts_benchmark_test.dart: 50k-row FTS benchmark (gate p95 < 200 ms, FR-TXN-01; soft 50 ms)
+00:03 +170 ~1: /work/app/test/core/db/fts_benchmark_test.dart: 50k-row FTS benchmark (gate p95 < 200 ms, FR-TXN-01; soft 50 ms)
+00:03 +171 ~1: /work/app/test/core/db/fts_benchmark_test.dart: 50k-row FTS benchmark (gate p95 < 200 ms, FR-TXN-01; soft 50 ms)
+00:03 +172 ~1: /work/app/test/core/db/fts_benchmark_test.dart: 50k-row FTS benchmark (gate p95 < 200 ms, FR-TXN-01; soft 50 ms)
+00:03 +173 ~1: /work/app/test/core/db/fts_benchmark_test.dart: 50k-row FTS benchmark (gate p95 < 200 ms, FR-TXN-01; soft 50 ms)
+00:03 +174 ~1: /work/app/test/core/db/fts_benchmark_test.dart: 50k-row FTS benchmark (gate p95 < 200 ms, FR-TXN-01; soft 50 ms)
+00:03 +175 ~1: /work/app/test/core/db/fts_benchmark_test.dart: 50k-row FTS benchmark (gate p95 < 200 ms, FR-TXN-01; soft 50 ms)
+00:03 +176 ~1: /work/app/test/core/db/fts_benchmark_test.dart: 50k-row FTS benchmark (gate p95 < 200 ms, FR-TXN-01; soft 50 ms)
+00:03 +177 ~1: /work/app/test/core/db/fts_benchmark_test.dart: 50k-row FTS benchmark (gate p95 < 200 ms, FR-TXN-01; soft 50 ms)
+00:03 +178 ~1: /work/app/test/core/db/fts_benchmark_test.dart: 50k-row FTS benchmark (gate p95 < 200 ms, FR-TXN-01; soft 50 ms)
+00:03 +179 ~1: /work/app/test/core/db/fts_benchmark_test.dart: 50k-row FTS benchmark (gate p95 < 200 ms, FR-TXN-01; soft 50 ms)
+00:03 +180 ~1: /work/app/test/core/db/fts_benchmark_test.dart: 50k-row FTS benchmark (gate p95 < 200 ms, FR-TXN-01; soft 50 ms)
+00:03 +181 ~1: /work/app/test/core/db/fts_benchmark_test.dart: 50k-row FTS benchmark (gate p95 < 200 ms, FR-TXN-01; soft 50 ms)
+00:03 +182 ~1: /work/app/test/core/db/fts_benchmark_test.dart: 50k-row FTS benchmark (gate p95 < 200 ms, FR-TXN-01; soft 50 ms)
+00:03 +183 ~1: /work/app/test/core/db/fts_benchmark_test.dart: 50k-row FTS benchmark (gate p95 < 200 ms, FR-TXN-01; soft 50 ms)
+00:03 +184 ~1: /work/app/test/core/db/fts_benchmark_test.dart: 50k-row FTS benchmark (gate p95 < 200 ms, FR-TXN-01; soft 50 ms)
+00:03 +185 ~1: /work/app/test/core/db/fts_benchmark_test.dart: 50k-row FTS benchmark (gate p95 < 200 ms, FR-TXN-01; soft 50 ms)
+00:03 +186 ~1: /work/app/test/core/db/fts_benchmark_test.dart: 50k-row FTS benchmark (gate p95 < 200 ms, FR-TXN-01; soft 50 ms)
+00:03 +187 ~1: /work/app/test/core/db/fts_benchmark_test.dart: 50k-row FTS benchmark (gate p95 < 200 ms, FR-TXN-01; soft 50 ms)
+00:03 +188 ~1: /work/app/test/core/db/fts_benchmark_test.dart: 50k-row FTS benchmark (gate p95 < 200 ms, FR-TXN-01; soft 50 ms)
+00:03 +189 ~1: /work/app/test/core/db/fts_benchmark_test.dart: 50k-row FTS benchmark (gate p95 < 200 ms, FR-TXN-01; soft 50 ms)
+00:03 +190 ~1: /work/app/test/core/db/fts_benchmark_test.dart: 50k-row FTS benchmark (gate p95 < 200 ms, FR-TXN-01; soft 50 ms)
+00:03 +191 ~1: /work/app/test/core/db/fts_benchmark_test.dart: 50k-row FTS benchmark (gate p95 < 200 ms, FR-TXN-01; soft 50 ms)
+00:03 +192 ~1: /work/app/test/core/db/fts_benchmark_test.dart: 50k-row FTS benchmark (gate p95 < 200 ms, FR-TXN-01; soft 50 ms)
+00:03 +193 ~1: /work/app/test/core/db/fts_benchmark_test.dart: 50k-row FTS benchmark (gate p95 < 200 ms, FR-TXN-01; soft 50 ms)
+00:03 +194 ~1: /work/app/test/core/db/fts_benchmark_test.dart: 50k-row FTS benchmark (gate p95 < 200 ms, FR-TXN-01; soft 50 ms)
+00:03 +195 ~1: /work/app/test/core/db/fts_benchmark_test.dart: 50k-row FTS benchmark (gate p95 < 200 ms, FR-TXN-01; soft 50 ms)
+00:03 +196 ~1: /work/app/test/core/db/fts_benchmark_test.dart: 50k-row FTS benchmark (gate p95 < 200 ms, FR-TXN-01; soft 50 ms)
+00:03 +197 ~1: /work/app/test/core/db/fts_benchmark_test.dart: 50k-row FTS benchmark (gate p95 < 200 ms, FR-TXN-01; soft 50 ms)
+00:03 +198 ~1: /work/app/test/core/db/fts_benchmark_test.dart: 50k-row FTS benchmark (gate p95 < 200 ms, FR-TXN-01; soft 50 ms)
+00:03 +199 ~1: /work/app/test/core/db/fts_benchmark_test.dart: 50k-row FTS benchmark (gate p95 < 200 ms, FR-TXN-01; soft 50 ms)
+00:03 +200 ~1: /work/app/test/core/db/fts_benchmark_test.dart: 50k-row FTS benchmark (gate p95 < 200 ms, FR-TXN-01; soft 50 ms)
+00:03 +201 ~1: /work/app/test/core/db/fts_benchmark_test.dart: 50k-row FTS benchmark (gate p95 < 200 ms, FR-TXN-01; soft 50 ms)
+00:03 +202 ~1: /work/app/test/core/db/fts_benchmark_test.dart: 50k-row FTS benchmark (gate p95 < 200 ms, FR-TXN-01; soft 50 ms)
+00:03 +203 ~1: /work/app/test/core/db/fts_benchmark_test.dart: 50k-row FTS benchmark (gate p95 < 200 ms, FR-TXN-01; soft 50 ms)
+00:03 +204 ~1: /work/app/test/core/db/fts_benchmark_test.dart: 50k-row FTS benchmark (gate p95 < 200 ms, FR-TXN-01; soft 50 ms)
+00:03 +205 ~1: /work/app/test/core/db/fts_benchmark_test.dart: 50k-row FTS benchmark (gate p95 < 200 ms, FR-TXN-01; soft 50 ms)
+00:03 +206 ~1: /work/app/test/core/db/fts_benchmark_test.dart: 50k-row FTS benchmark (gate p95 < 200 ms, FR-TXN-01; soft 50 ms)
+00:03 +207 ~1: /work/app/test/core/db/fts_benchmark_test.dart: 50k-row FTS benchmark (gate p95 < 200 ms, FR-TXN-01; soft 50 ms)
+00:03 +208 ~1: /work/app/test/core/db/fts_benchmark_test.dart: 50k-row FTS benchmark (gate p95 < 200 ms, FR-TXN-01; soft 50 ms)
+00:03 +209 ~1: /work/app/test/core/db/fts_benchmark_test.dart: 50k-row FTS benchmark (gate p95 < 200 ms, FR-TXN-01; soft 50 ms)
+00:03 +210 ~1: /work/app/test/core/db/fts_benchmark_test.dart: 50k-row FTS benchmark (gate p95 < 200 ms, FR-TXN-01; soft 50 ms)
+00:03 +211 ~1: /work/app/test/core/db/fts_benchmark_test.dart: 50k-row FTS benchmark (gate p95 < 200 ms, FR-TXN-01; soft 50 ms)
+00:03 +212 ~1: /work/app/test/core/db/fts_benchmark_test.dart: 50k-row FTS benchmark (gate p95 < 200 ms, FR-TXN-01; soft 50 ms)
+00:03 +213 ~1: /work/app/test/core/db/fts_benchmark_test.dart: 50k-row FTS benchmark (gate p95 < 200 ms, FR-TXN-01; soft 50 ms)
+00:03 +214 ~1: /work/app/test/core/db/fts_benchmark_test.dart: 50k-row FTS benchmark (gate p95 < 200 ms, FR-TXN-01; soft 50 ms)
+00:03 +215 ~1: /work/app/test/core/db/fts_benchmark_test.dart: 50k-row FTS benchmark (gate p95 < 200 ms, FR-TXN-01; soft 50 ms)
+00:03 +216 ~1: /work/app/test/core/db/fts_benchmark_test.dart: 50k-row FTS benchmark (gate p95 < 200 ms, FR-TXN-01; soft 50 ms)
+00:03 +217 ~1: /work/app/test/core/db/fts_benchmark_test.dart: 50k-row FTS benchmark (gate p95 < 200 ms, FR-TXN-01; soft 50 ms)
+00:03 +218 ~1: /work/app/test/core/db/fts_benchmark_test.dart: 50k-row FTS benchmark (gate p95 < 200 ms, FR-TXN-01; soft 50 ms)
+00:03 +219 ~1: /work/app/test/core/db/fts_benchmark_test.dart: 50k-row FTS benchmark (gate p95 < 200 ms, FR-TXN-01; soft 50 ms)
+00:03 +220 ~1: /work/app/test/core/db/fts_benchmark_test.dart: 50k-row FTS benchmark (gate p95 < 200 ms, FR-TXN-01; soft 50 ms)
+00:03 +221 ~1: /work/app/test/core/db/fts_benchmark_test.dart: 50k-row FTS benchmark (gate p95 < 200 ms, FR-TXN-01; soft 50 ms)
+00:03 +222 ~1: /work/app/test/core/db/fts_benchmark_test.dart: 50k-row FTS benchmark (gate p95 < 200 ms, FR-TXN-01; soft 50 ms)
+00:03 +223 ~1: /work/app/test/core/db/fts_benchmark_test.dart: 50k-row FTS benchmark (gate p95 < 200 ms, FR-TXN-01; soft 50 ms)
+00:03 +224 ~1: /work/app/test/core/db/fts_benchmark_test.dart: 50k-row FTS benchmark (gate p95 < 200 ms, FR-TXN-01; soft 50 ms)
+00:03 +225 ~1: /work/app/test/core/db/fts_benchmark_test.dart: 50k-row FTS benchmark (gate p95 < 200 ms, FR-TXN-01; soft 50 ms)
+00:03 +226 ~1: /work/app/test/core/db/fts_benchmark_test.dart: 50k-row FTS benchmark (gate p95 < 200 ms, FR-TXN-01; soft 50 ms)
+00:03 +227 ~1: /work/app/test/core/db/fts_benchmark_test.dart: 50k-row FTS benchmark (gate p95 < 200 ms, FR-TXN-01; soft 50 ms)
+00:03 +228 ~1: /work/app/test/core/db/fts_benchmark_test.dart: 50k-row FTS benchmark (gate p95 < 200 ms, FR-TXN-01; soft 50 ms)
+00:03 +229 ~1: /work/app/test/core/db/fts_benchmark_test.dart: 50k-row FTS benchmark (gate p95 < 200 ms, FR-TXN-01; soft 50 ms)
+00:03 +230 ~1: /work/app/test/core/db/fts_benchmark_test.dart: 50k-row FTS benchmark (gate p95 < 200 ms, FR-TXN-01; soft 50 ms)
+00:03 +231 ~1: /work/app/test/core/db/fts_benchmark_test.dart: 50k-row FTS benchmark (gate p95 < 200 ms, FR-TXN-01; soft 50 ms)
+00:03 +232 ~1: /work/app/test/core/db/fts_benchmark_test.dart: 50k-row FTS benchmark (gate p95 < 200 ms, FR-TXN-01; soft 50 ms)
+00:03 +233 ~1: /work/app/test/core/db/fts_benchmark_test.dart: 50k-row FTS benchmark (gate p95 < 200 ms, FR-TXN-01; soft 50 ms)
+00:03 +234 ~1: /work/app/test/core/db/fts_benchmark_test.dart: 50k-row FTS benchmark (gate p95 < 200 ms, FR-TXN-01; soft 50 ms)
+00:03 +235 ~1: /work/app/test/core/db/fts_benchmark_test.dart: 50k-row FTS benchmark (gate p95 < 200 ms, FR-TXN-01; soft 50 ms)
+00:03 +236 ~1: /work/app/test/core/db/fts_benchmark_test.dart: 50k-row FTS benchmark (gate p95 < 200 ms, FR-TXN-01; soft 50 ms)
+00:03 +237 ~1: /work/app/test/core/db/fts_benchmark_test.dart: 50k-row FTS benchmark (gate p95 < 200 ms, FR-TXN-01; soft 50 ms)
+00:04 +238 ~1: /work/app/test/core/db/fts_benchmark_test.dart: 50k-row FTS benchmark (gate p95 < 200 ms, FR-TXN-01; soft 50 ms)
+00:04 +239 ~1: /work/app/test/core/db/fts_benchmark_test.dart: 50k-row FTS benchmark (gate p95 < 200 ms, FR-TXN-01; soft 50 ms)
+00:04 +240 ~1: /work/app/test/core/db/fts_benchmark_test.dart: 50k-row FTS benchmark (gate p95 < 200 ms, FR-TXN-01; soft 50 ms)
+00:04 +241 ~1: /work/app/test/core/db/fts_benchmark_test.dart: 50k-row FTS benchmark (gate p95 < 200 ms, FR-TXN-01; soft 50 ms)
+00:04 +242 ~1: /work/app/test/core/db/fts_benchmark_test.dart: 50k-row FTS benchmark (gate p95 < 200 ms, FR-TXN-01; soft 50 ms)
+00:04 +243 ~1: /work/app/test/core/db/fts_benchmark_test.dart: 50k-row FTS benchmark (gate p95 < 200 ms, FR-TXN-01; soft 50 ms)
+00:04 +244 ~1: /work/app/test/core/db/fts_benchmark_test.dart: 50k-row FTS benchmark (gate p95 < 200 ms, FR-TXN-01; soft 50 ms)
+00:04 +245 ~1: /work/app/test/core/db/fts_benchmark_test.dart: 50k-row FTS benchmark (gate p95 < 200 ms, FR-TXN-01; soft 50 ms)
+00:04 +246 ~1: /work/app/test/core/db/fts_benchmark_test.dart: 50k-row FTS benchmark (gate p95 < 200 ms, FR-TXN-01; soft 50 ms)
+00:04 +247 ~1: /work/app/test/core/db/fts_benchmark_test.dart: 50k-row FTS benchmark (gate p95 < 200 ms, FR-TXN-01; soft 50 ms)
+00:04 +248 ~1: /work/app/test/core/db/fts_benchmark_test.dart: 50k-row FTS benchmark (gate p95 < 200 ms, FR-TXN-01; soft 50 ms)
+00:04 +249 ~1: /work/app/test/core/db/fts_benchmark_test.dart: 50k-row FTS benchmark (gate p95 < 200 ms, FR-TXN-01; soft 50 ms)
+00:04 +250 ~1: /work/app/test/core/db/fts_benchmark_test.dart: 50k-row FTS benchmark (gate p95 < 200 ms, FR-TXN-01; soft 50 ms)
+00:04 +251 ~1: /work/app/test/core/db/fts_benchmark_test.dart: 50k-row FTS benchmark (gate p95 < 200 ms, FR-TXN-01; soft 50 ms)
+00:04 +252 ~1: /work/app/test/core/db/fts_benchmark_test.dart: 50k-row FTS benchmark (gate p95 < 200 ms, FR-TXN-01; soft 50 ms)
+00:04 +253 ~1: /work/app/test/core/db/fts_benchmark_test.dart: 50k-row FTS benchmark (gate p95 < 200 ms, FR-TXN-01; soft 50 ms)
+00:04 +254 ~1: /work/app/test/core/db/fts_benchmark_test.dart: 50k-row FTS benchmark (gate p95 < 200 ms, FR-TXN-01; soft 50 ms)
+00:04 +255 ~1: /work/app/test/core/db/fts_benchmark_test.dart: 50k-row FTS benchmark (gate p95 < 200 ms, FR-TXN-01; soft 50 ms)
+00:04 +256 ~1: /work/app/test/core/db/fts_benchmark_test.dart: 50k-row FTS benchmark (gate p95 < 200 ms, FR-TXN-01; soft 50 ms)
+00:04 +257 ~1: /work/app/test/core/db/fts_benchmark_test.dart: 50k-row FTS benchmark (gate p95 < 200 ms, FR-TXN-01; soft 50 ms)
+00:04 +258 ~1: /work/app/test/core/db/fts_benchmark_test.dart: 50k-row FTS benchmark (gate p95 < 200 ms, FR-TXN-01; soft 50 ms)
+00:04 +259 ~1: /work/app/test/core/db/fts_benchmark_test.dart: 50k-row FTS benchmark (gate p95 < 200 ms, FR-TXN-01; soft 50 ms)
+00:04 +260 ~1: /work/app/test/core/db/fts_benchmark_test.dart: 50k-row FTS benchmark (gate p95 < 200 ms, FR-TXN-01; soft 50 ms)
+00:04 +261 ~1: /work/app/test/core/db/fts_benchmark_test.dart: 50k-row FTS benchmark (gate p95 < 200 ms, FR-TXN-01; soft 50 ms)
+00:04 +262 ~1: /work/app/test/core/db/fts_benchmark_test.dart: 50k-row FTS benchmark (gate p95 < 200 ms, FR-TXN-01; soft 50 ms)
+00:04 +263 ~1: /work/app/test/core/db/fts_benchmark_test.dart: 50k-row FTS benchmark (gate p95 < 200 ms, FR-TXN-01; soft 50 ms)
+00:04 +264 ~1: /work/app/test/core/db/fts_benchmark_test.dart: 50k-row FTS benchmark (gate p95 < 200 ms, FR-TXN-01; soft 50 ms)
+00:04 +265 ~1: /work/app/test/core/db/fts_benchmark_test.dart: 50k-row FTS benchmark (gate p95 < 200 ms, FR-TXN-01; soft 50 ms)
+00:04 +266 ~1: /work/app/test/core/db/fts_benchmark_test.dart: 50k-row FTS benchmark (gate p95 < 200 ms, FR-TXN-01; soft 50 ms)
+00:04 +267 ~1: /work/app/test/core/db/fts_benchmark_test.dart: 50k-row FTS benchmark (gate p95 < 200 ms, FR-TXN-01; soft 50 ms)
+00:04 +268 ~1: /work/app/test/core/db/fts_benchmark_test.dart: 50k-row FTS benchmark (gate p95 < 200 ms, FR-TXN-01; soft 50 ms)
+00:04 +269 ~1: /work/app/test/core/db/fts_benchmark_test.dart: 50k-row FTS benchmark (gate p95 < 200 ms, FR-TXN-01; soft 50 ms)
+00:04 +270 ~1: /work/app/test/core/db/fts_benchmark_test.dart: 50k-row FTS benchmark (gate p95 < 200 ms, FR-TXN-01; soft 50 ms)
+00:04 +271 ~1: /work/app/test/core/db/fts_benchmark_test.dart: 50k-row FTS benchmark (gate p95 < 200 ms, FR-TXN-01; soft 50 ms)
+00:04 +272 ~1: /work/app/test/core/db/fts_benchmark_test.dart: 50k-row FTS benchmark (gate p95 < 200 ms, FR-TXN-01; soft 50 ms)
+00:04 +273 ~1: /work/app/test/core/db/fts_benchmark_test.dart: 50k-row FTS benchmark (gate p95 < 200 ms, FR-TXN-01; soft 50 ms)
+00:04 +274 ~1: /work/app/test/core/db/fts_benchmark_test.dart: 50k-row FTS benchmark (gate p95 < 200 ms, FR-TXN-01; soft 50 ms)
+00:04 +275 ~1: /work/app/test/core/db/fts_benchmark_test.dart: 50k-row FTS benchmark (gate p95 < 200 ms, FR-TXN-01; soft 50 ms)
+00:04 +276 ~1: /work/app/test/core/db/fts_benchmark_test.dart: 50k-row FTS benchmark (gate p95 < 200 ms, FR-TXN-01; soft 50 ms)
+00:04 +277 ~1: /work/app/test/core/db/fts_benchmark_test.dart: 50k-row FTS benchmark (gate p95 < 200 ms, FR-TXN-01; soft 50 ms)
+00:04 +278 ~1: /work/app/test/core/db/fts_benchmark_test.dart: 50k-row FTS benchmark (gate p95 < 200 ms, FR-TXN-01; soft 50 ms)
+00:04 +279 ~1: /work/app/test/core/db/fts_benchmark_test.dart: 50k-row FTS benchmark (gate p95 < 200 ms, FR-TXN-01; soft 50 ms)
+00:04 +280 ~1: /work/app/test/core/db/fts_benchmark_test.dart: 50k-row FTS benchmark (gate p95 < 200 ms, FR-TXN-01; soft 50 ms)
+00:04 +281 ~1: /work/app/test/core/db/fts_benchmark_test.dart: 50k-row FTS benchmark (gate p95 < 200 ms, FR-TXN-01; soft 50 ms)
+00:05 +282 ~1: /work/app/test/core/db/fts_benchmark_test.dart: 50k-row FTS benchmark (gate p95 < 200 ms, FR-TXN-01; soft 50 ms)
+00:05 +283 ~1: /work/app/test/core/db/fts_benchmark_test.dart: 50k-row FTS benchmark (gate p95 < 200 ms, FR-TXN-01; soft 50 ms)
+00:05 +284 ~1: /work/app/test/core/db/fts_benchmark_test.dart: 50k-row FTS benchmark (gate p95 < 200 ms, FR-TXN-01; soft 50 ms)
+00:05 +285 ~1: /work/app/test/core/db/fts_benchmark_test.dart: 50k-row FTS benchmark (gate p95 < 200 ms, FR-TXN-01; soft 50 ms)
+00:05 +286 ~1: /work/app/test/core/db/fts_benchmark_test.dart: 50k-row FTS benchmark (gate p95 < 200 ms, FR-TXN-01; soft 50 ms)
+00:05 +287 ~1: /work/app/test/core/db/fts_benchmark_test.dart: 50k-row FTS benchmark (gate p95 < 200 ms, FR-TXN-01; soft 50 ms)
+00:05 +288 ~1: /work/app/test/core/db/fts_benchmark_test.dart: 50k-row FTS benchmark (gate p95 < 200 ms, FR-TXN-01; soft 50 ms)
+00:05 +289 ~1: /work/app/test/core/db/fts_benchmark_test.dart: 50k-row FTS benchmark (gate p95 < 200 ms, FR-TXN-01; soft 50 ms)
+00:05 +290 ~1: /work/app/test/core/db/fts_benchmark_test.dart: 50k-row FTS benchmark (gate p95 < 200 ms, FR-TXN-01; soft 50 ms)
+00:05 +291 ~1: /work/app/test/core/db/fts_benchmark_test.dart: 50k-row FTS benchmark (gate p95 < 200 ms, FR-TXN-01; soft 50 ms)
+ZAGHLOL_DB_BENCH {"v":2,"run":"","env":"host-linux","build":"debug","os":"linux","sqlite":"3.54.0","mc":"SQLite3 Multiple Ciphers 2.6.1","rows":50000,"enc":{"open_cold_ms":5.7,"open_warm_ms":5.2,"insert_50k_ms":1807.9,"fts_rank_ms":[2.5,3.6,4.3],"fts_list_ms":[10.4,12.8,14.1],"like_short_ms":[3.1,266.7,266.7],"short_prefix_ms":[10.2,12.6,13.0],"short_prefix_build_ms":69.4,"short_prefix_hits":200,"passes":3,"db_bytes":20029440},"plain":{"open_cold_ms":2.1,"open_warm_ms":1.5,"insert_50k_ms":1318.8,"fts_rank_ms":[1.9,3.0,4.0],"fts_list_ms":[1.4,2.1,3.1],"like_short_ms":[0.7,26.7,26.8],"short_prefix_ms":[1.4,1.8,2.1],"short_prefix_build_ms":49.9,"short_prefix_hits":200,"passes":3,"db_bytes":18620416},"ratio_list_p95":6.1,"pbkdf2_open_ms":104.7}
+00:18 +292 ~1: All tests passed!
+
+[00:28:20] === RESULT app-test exit=0 (24s)
+[00:28:20] === STEP dart-test-zaghlol_domain (docker zaghlol-flutter:3.47.9, /work/packages/zaghlol_domain)
+00:00 +0: loading test/core/core_test.dart
+00:00 +0: test/core/core_test.dart: Failure every area is switchable and has a code
+00:00 +1: test/core/core_test.dart: Failure network variants
+00:00 +2: test/core/core_test.dart: Failure every enum value yields an UPPER_SNAKE code
+00:00 +3: test/core/core_test.dart: Failure excessPrecision has its own code
+00:00 +4: test/core/core_test.dart: Failure toString shows type and code only
+00:00 +5: test/core/core_test.dart: Result switch is exhaustive over Ok and Err
+00:00 +6: test/core/core_test.dart: Result accessors
+00:00 +7: test/money/iso4217_generator_rows_test.dart: generator row validation (SEC F2, F9) exponent 0..4 and numeric 1..999 are enforced
+00:00 +8: test/money/iso4217_generator_rows_test.dart: generator row validation (SEC F2, F9) exponent 0..4 and numeric 1..999 are enforced
+00:00 +9: test/money/iso4217_generator_rows_test.dart: generator row validation (SEC F2, F9) exponent 0..4 and numeric 1..999 are enforced
+00:00 +10: test/money/iso4217_generator_rows_test.dart: generator row validation (SEC F2, F9) exponent 0..4 and numeric 1..999 are enforced
+00:00 +11: test/money/iso4217_generator_rows_test.dart: generator row validation (SEC F2, F9) exponent 0..4 and numeric 1..999 are enforced
+00:00 +12: test/money/iso4217_generator_rows_test.dart: generator row validation (SEC F2, F9) exponent 0..4 and numeric 1..999 are enforced
+00:00 +13: test/money/iso4217_generator_rows_test.dart: generator row validation (SEC F2, F9) exponent 0..4 and numeric 1..999 are enforced
+00:00 +14: test/money/iso4217_generator_rows_test.dart: generator row validation (SEC F2, F9) exponent 0..4 and numeric 1..999 are enforced
+00:00 +15: test/core/core_test.dart: DomainEventBus delivers typed events in order to many listeners
+00:00 +16: test/money/iso4217_generator_rows_test.dart: generator row validation (SEC F2, F9) comments, CDATA and DOCTYPE are ignored
+00:00 +17: test/money/iso4217_generator_rows_test.dart: generator row validation (SEC F2, F9) comments, CDATA and DOCTYPE are ignored
+00:00 +18: test/core/core_test.dart: DomainEventBus publish with no listeners is fine; late listeners miss it
+00:00 +19: test/money/iso4217_generator_rows_test.dart: generator row validation (SEC F2, F9) parseJson accepts a valid row
+00:00 +20: test/money/iso4217_generator_rows_test.dart: generator row validation (SEC F2, F9) parseJson accepts a valid row
+00:00 +21: test/money/iso4217_generator_rows_test.dart: generator row validation (SEC F2, F9) parseJson accepts a valid row
+00:00 +22: test/money/iso4217_generator_test.dart: generator input validation (SEC F2, F9) a Pblshd with a newline or */ is rejected
+00:00 +23: test/money/iso4217_generator_test.dart: generator input validation (SEC F2, F9) a Pblshd with a newline or */ is rejected
+00:00 +24: test/money/iso4217_generator_test.dart: generator input validation (SEC F2, F9) YYYY-MM and YYYY-MM-DD are accepted
+00:00 +25: test/money/iso4217_generator_test.dart: generator input validation (SEC F2, F9) render refuses an unvalidated table
+00:00 +26: test/money/iso4217_merge_test.dart: --fresh guard (R2-2) refused on a genuine committed table without --i-know
+00:00 +27: test/money/iso4217_snapshot_gate_test.dart: snapshot gate (CR2) published is a real SIX date on or after 2025-09-01
+00:00 +28: test/money/iso4217_snapshot_gate_test.dart: snapshot gate (CR2) published is a real SIX date on or after 2025-09-01
+00:00 +29: test/money/iso4217_merge_test.dart: excluded codes (D-67) XAD is skipped even though List One flags it IsFund
+00:00 +30: test/money/iso4217_merge_test.dart: excluded codes (D-67) the genuine snapshot lists XAD; the table does not
+00:00 +31: test/money/iso4217_merge_test.dart: excluded codes (D-67) a committed XAD row is dropped, not kept as historic
+00:00 +32: test/money/iso4217_merge_test.dart: excluded codes (D-67) render refuses a table containing XAD
+00:00 +33: test/money/iso4217_merge_test.dart: merge guards (CR2, CR3) without a previous table (--fresh) the result is the snapshot
+00:00 +34: test/money/iso4217_merge_test.dart: merge guards (CR2, CR3) a changed exponent or numeric throws unless allowed
+00:00 +35: test/money/money_property_test.dart: 1. addition laws + is commutative (testing 1000 inputs)
+00:00 +36: test/money/money_property_test.dart: 1. addition laws + is commutative (testing 1000 inputs)
+00:00 +37: test/money/money_property_test.dart: 1. addition laws + is commutative (testing 1000 inputs)
+00:00 +38: test/money/money_property_test.dart: 1. addition laws + is commutative (testing 1000 inputs)
+00:00 +39: test/money/money_property_test.dart: 1. addition laws + is commutative (testing 1000 inputs)
+00:00 +40: test/money/money_test.dart: AC: exact round trips KWD 1.250 <-> 1250
+00:00 +41: test/money/money_test.dart: AC: exact round trips KWD 1.250 <-> 1250
+00:00 +42: test/money/money_test.dart: AC: exact round trips KWD 1.250 <-> 1250
+00:00 +43: test/money/money_test.dart: AC: exact round trips KWD 1.250 <-> 1250
+00:00 +44: test/money/money_test.dart: AC: exact round trips KWD 1.250 <-> 1250
+00:00 +45: test/money/no_floating_point_test.dart: lib/money contains no floating-point types or conversions
+00:00 +46: test/money/no_floating_point_test.dart: lib/money contains no floating-point types or conversions
+00:00 +47: test/money/no_floating_point_test.dart: lib/money contains no floating-point types or conversions
+00:00 +48: test/money/no_floating_point_test.dart: lib/money contains no floating-point types or conversions
+00:00 +49: test/money/no_floating_point_test.dart: lib/money contains no floating-point types or conversions
+00:00 +50: test/money/no_floating_point_test.dart: lib/money contains no floating-point types or conversions
+00:00 +51: test/money/no_floating_point_test.dart: lib/money contains no floating-point types or conversions
+00:00 +52: test/money/no_floating_point_test.dart: lib/money contains no floating-point types or conversions
+00:00 +53: test/money/no_floating_point_test.dart: lib/money contains no floating-point types or conversions
+00:00 +54: test/money/no_floating_point_test.dart: lib/money contains no floating-point types or conversions
+00:00 +55: test/money/no_floating_point_test.dart: lib/money contains no floating-point types or conversions
+00:00 +56: test/money/no_floating_point_test.dart: lib/money contains no floating-point types or conversions
+00:00 +57: test/money/no_floating_point_test.dart: lib/money contains no floating-point types or conversions
+00:00 +58: test/money/no_floating_point_test.dart: lib/money contains no floating-point types or conversions
+00:00 +59: test/money/no_floating_point_test.dart: lib/money contains no floating-point types or conversions
+00:00 +60: test/money/no_floating_point_test.dart: lib/money contains no floating-point types or conversions
+00:00 +61: test/money/no_floating_point_test.dart: lib/money contains no floating-point types or conversions
+00:00 +62: test/money/no_floating_point_test.dart: lib/money contains no floating-point types or conversions
+00:00 +63: test/money/no_floating_point_test.dart: lib/money contains no floating-point types or conversions
+00:00 +64: test/money/no_floating_point_test.dart: lib/money contains no floating-point types or conversions
+00:00 +65: test/money/no_floating_point_test.dart: lib/money contains no floating-point types or conversions
+00:00 +66: test/money/no_floating_point_test.dart: lib/money contains no floating-point types or conversions
+00:00 +67: test/money/no_floating_point_test.dart: lib/money contains no floating-point types or conversions
+00:00 +68: test/money/no_floating_point_test.dart: lib/money contains no floating-point types or conversions
+00:00 +69: test/money/no_floating_point_test.dart: lib/money contains no floating-point types or conversions
+00:00 +70: test/money/no_floating_point_test.dart: lib/money contains no floating-point types or conversions
+00:00 +71: test/money/no_floating_point_test.dart: lib/money contains no floating-point types or conversions
+00:00 +72: test/money/no_floating_point_test.dart: lib/money contains no floating-point types or conversions
+00:00 +73: test/money/no_floating_point_test.dart: lib/money contains no floating-point types or conversions
+00:00 +74: test/money/no_floating_point_test.dart: lib/money contains no floating-point types or conversions
+00:00 +75: test/money/no_floating_point_test.dart: lib/money contains no floating-point types or conversions
+00:00 +76: test/money/no_floating_point_test.dart: lib/money contains no floating-point types or conversions
+00:00 +77: test/money/no_floating_point_test.dart: lib/money contains no floating-point types or conversions
+00:00 +78: test/money/no_floating_point_test.dart: lib/money contains no floating-point types or conversions
+00:00 +79: test/money/no_floating_point_test.dart: lib/money contains no floating-point types or conversions
+00:00 +80: test/money/no_floating_point_test.dart: lib/money contains no floating-point types or conversions
+00:00 +81: test/money/no_floating_point_test.dart: lib/money contains no floating-point types or conversions
+00:00 +82: test/money/no_floating_point_test.dart: lib/money contains no floating-point types or conversions
+00:00 +83: test/money/no_floating_point_test.dart: lib/money contains no floating-point types or conversions
+00:00 +84: test/money/no_floating_point_test.dart: lib/money contains no floating-point types or conversions
+00:00 +85: test/money/no_floating_point_test.dart: lib/money contains no floating-point types or conversions
+00:00 +86: test/money/no_floating_point_test.dart: lib/money contains no floating-point types or conversions
+00:00 +87: test/money/no_floating_point_test.dart: lib/money contains no floating-point types or conversions
+00:00 +88: test/money/no_floating_point_test.dart: lib/money contains no floating-point types or conversions
+00:00 +89: test/money/no_floating_point_test.dart: lib/money contains no floating-point types or conversions
+00:00 +90: test/money/no_floating_point_test.dart: lib/money contains no floating-point types or conversions
+00:00 +91: test/money/no_floating_point_test.dart: lib/money contains no floating-point types or conversions
+00:00 +92: test/money/no_floating_point_test.dart: lib/money contains no floating-point types or conversions
+00:00 +93: test/money/no_floating_point_test.dart: lib/money contains no floating-point types or conversions
+00:00 +94: test/money/no_floating_point_test.dart: lib/money contains no floating-point types or conversions
+00:00 +95: test/money/no_floating_point_test.dart: lib/money contains no floating-point types or conversions
+00:00 +96: test/money/no_floating_point_test.dart: lib/money contains no floating-point types or conversions
+00:00 +97: test/money/no_floating_point_test.dart: lib/money contains no floating-point types or conversions
+00:00 +98: test/money/no_floating_point_test.dart: lib/money contains no floating-point types or conversions
+00:00 +99: test/money/no_floating_point_test.dart: lib/money contains no floating-point types or conversions
+00:00 +100: test/money/no_floating_point_test.dart: lib/money contains no floating-point types or conversions
+00:00 +101: test/money/no_floating_point_test.dart: lib/money contains no floating-point types or conversions
+00:00 +102: test/money/no_floating_point_test.dart: lib/money contains no floating-point types or conversions
+00:00 +103: test/money/no_floating_point_test.dart: lib/money contains no floating-point types or conversions
+00:00 +104: test/money/no_floating_point_test.dart: lib/money contains no floating-point types or conversions
+00:00 +105: test/money/no_floating_point_test.dart: lib/money contains no floating-point types or conversions
+00:00 +106: test/money/no_floating_point_test.dart: lib/money contains no floating-point types or conversions
+00:00 +107: test/money/no_floating_point_test.dart: lib/money contains no floating-point types or conversions
+00:00 +108: test/money/no_floating_point_test.dart: lib/money contains no floating-point types or conversions
+00:00 +109: test/money/no_floating_point_test.dart: lib/money contains no floating-point types or conversions
+00:00 +110: test/money/no_floating_point_test.dart: lib/money contains no floating-point types or conversions
+00:00 +111: test/money/no_floating_point_test.dart: lib/money contains no floating-point types or conversions
+00:00 +112: test/money/no_floating_point_test.dart: lib/money contains no floating-point types or conversions
+00:00 +113: test/money/no_floating_point_test.dart: lib/money contains no floating-point types or conversions
+00:00 +114: test/money/no_floating_point_test.dart: lib/money contains no floating-point types or conversions
+00:00 +115: test/money/no_floating_point_test.dart: lib/money contains no floating-point types or conversions
+00:00 +116: test/money/no_floating_point_test.dart: lib/money contains no floating-point types or conversions
+00:00 +117: test/money/no_floating_point_test.dart: lib/money contains no floating-point types or conversions
+00:00 +118: test/money/no_floating_point_test.dart: lib/money contains no floating-point types or conversions
+00:00 +119: test/money/no_floating_point_test.dart: lib/money contains no floating-point types or conversions
+00:00 +120: test/money/no_floating_point_test.dart: lib/money contains no floating-point types or conversions
+00:00 +121: test/money/no_floating_point_test.dart: lib/money contains no floating-point types or conversions
+00:00 +122: test/money/no_floating_point_test.dart: lib/money contains no floating-point types or conversions
+00:00 +123: test/money/no_floating_point_test.dart: lib/money contains no floating-point types or conversions
+00:00 +124: test/money/no_floating_point_test.dart: lib/money contains no floating-point types or conversions
+00:00 +125: test/money/no_floating_point_test.dart: lib/money contains no floating-point types or conversions
+00:00 +126: test/money/no_floating_point_test.dart: lib/money contains no floating-point types or conversions
+00:00 +127: test/money/no_floating_point_test.dart: lib/money contains no floating-point types or conversions
+00:00 +128: test/money/no_floating_point_test.dart: lib/money contains no floating-point types or conversions
+00:00 +129: test/money/no_floating_point_test.dart: lib/money contains no floating-point types or conversions
+00:00 +130: test/money/no_floating_point_test.dart: lib/money contains no floating-point types or conversions
+00:00 +131: test/money/no_floating_point_test.dart: lib/money contains no floating-point types or conversions
+00:00 +132: test/money/no_floating_point_test.dart: lib/money contains no floating-point types or conversions
+00:00 +133: test/money/no_floating_point_test.dart: lib/money contains no floating-point types or conversions
+00:00 +134: test/money/no_floating_point_test.dart: lib/money contains no floating-point types or conversions
+00:00 +135: test/money/no_floating_point_test.dart: lib/money contains no floating-point types or conversions
+00:00 +136: test/money/no_floating_point_test.dart: lib/money contains no floating-point types or conversions
+00:00 +137: test/money/no_floating_point_test.dart: lib/money contains no floating-point types or conversions
+00:00 +138: test/money/no_floating_point_test.dart: lib/money contains no floating-point types or conversions
+00:00 +139: test/money/no_floating_point_test.dart: lib/money contains no floating-point types or conversions
+00:00 +140: test/money/no_floating_point_test.dart: lib/money contains no floating-point types or conversions
+00:00 +141: test/money/no_floating_point_test.dart: lib/money contains no floating-point types or conversions
+00:00 +142: test/money/money_property_test.dart: 2. overflow is exact mulDiv throws iff overflow (testing 1000 inputs)
+00:00 +143: test/money/money_property_test.dart: 2. overflow is exact mulDiv throws iff overflow (testing 1000 inputs)
+00:00 +144: test/money/money_property_test.dart: 2. overflow is exact mulDiv throws iff overflow (testing 1000 inputs)
+00:00 +145: test/money/money_test.dart: allocation allocation accepts exactly the maximum number of parts
+00:00 +146: test/money/money_property_test.dart: 3. different currencies mismatch throws, == is false (testing 1000 inputs)
+00:00 +147: test/money/money_property_test.dart: 3. different currencies mismatch throws, == is false (testing 1000 inputs)
+00:00 +148: test/money/money_property_test.dart: 3. different currencies mismatch throws, == is false (testing 1000 inputs)
+00:00 +149: test/money/money_property_test.dart: 3. different currencies mismatch throws, == is false (testing 1000 inputs)
+00:00 +150: test/money/money_property_test.dart: 3. different currencies mismatch throws, == is false (testing 1000 inputs)
+00:00 +151: test/money/money_test.dart: storage and json errors fromJson reports a typed reason
+00:00 +152: test/money/money_property_test.dart: 4-7. allocation weights 0..10^6 and edges (testing 1000 inputs)
+00:00 +153: test/money/money_property_test.dart: 4-7. allocation weights 0..10^6 and edges (testing 1000 inputs)
+00:00 +154: test/money/money_property_test.dart: 4-7. allocation weights 0..10^6 and edges (testing 1000 inputs)
+00:00 +155: test/money/money_property_test.dart: 4-7. allocation weights 0..10^6 and edges (testing 1000 inputs)
+00:00 +156: test/money/money_property_test.dart: 4-7. allocation weights 0..10^6 and edges (testing 1000 inputs)
+00:00 +157: test/money/money_property_test.dart: 4-7. allocation weights 0..10^6 and edges (testing 1000 inputs)
+00:00 +158: test/money/money_property_test.dart: 4-7. allocation weights 0..10^6 and edges (testing 1000 inputs)
+00:00 +159: test/money/money_property_test.dart: 4-7. allocation weights 0..10^6 and edges (testing 1000 inputs)
+00:00 +160: test/money/money_property_test.dart: 4-7. allocation weights 0..10^6 and edges (testing 1000 inputs)
+00:00 +161: test/money/money_property_test.dart: 4-7. allocation weights 0..10^6 and edges (testing 1000 inputs)
+00:00 +162: test/money/money_property_test.dart: 4-7. allocation weights 0..10^6 and edges (testing 1000 inputs)
+00:00 +163: test/money/money_property_test.dart: 4-7. allocation weights 0..10^6 and edges (testing 1000 inputs)
+00:00 +164: test/money/money_property_test.dart: 4-7. allocation weights 0..10^6 and edges (testing 1000 inputs)
+00:00 +165: test/money/money_property_test.dart: 4-7. allocation weights 0..10^6 and edges (testing 1000 inputs)
+00:00 +166: test/money/money_property_test.dart: 4-7. allocation weights 0..10^6 and edges (testing 1000 inputs)
+00:00 +167: test/money/money_property_test.dart: 4-7. allocation weights 0..10^6 and edges (testing 1000 inputs)
+00:00 +168: test/money/money_property_test.dart: 4-7. allocation weights to maxMinor and edges (testing 1000 inputs)
+00:00 +169: test/money/money_property_test.dart: 4-7. allocation equal weights (testing 1000 inputs)
+00:00 +170: test/money/money_property_test.dart: 4-7. allocation 7. allocateEven spread <= 1 (testing 1000 inputs)
+00:00 +171: test/money/money_property_test.dart: 8. round trips canonical string (testing 1000 inputs)
+00:00 +172: test/money/money_property_test.dart: 8. round trips storage (testing 1000 inputs)
+00:00 +173: test/money/money_property_test.dart: 8. round trips json (testing 1000 inputs)
+00:00 +174: test/money/money_property_test.dart: equality and hashing equal copies hash equally (testing 1000 inputs)
+00:00 +175: test/money/money_property_test.dart: equality and hashing a == b iff same minor (testing 1000 inputs)
+00:00 +176: test/money/money_property_test.dart: 9. MultiCurrencyTotal independent of input order (testing 1000 inputs)
+00:00 +177: test/money/money_property_test.dart: 9. MultiCurrencyTotal of(xs)[c] is the sum in c (testing 1000 inputs)
+00:00 +178: test/money/money_property_test.dart: 9. MultiCurrencyTotal full range (testing 1000 inputs)
+00:00 +179: test/money/money_property_test.dart: 9. MultiCurrencyTotal + is associative (testing 1000 inputs)
+00:00 +180: test/money/money_property_test.dart: 10. roundDiv matches the oracle (testing 1000 inputs)
+00:00 +181: All tests passed!
+
+[00:28:22] === RESULT dart-test-zaghlol_domain exit=0 (3s)
+[00:28:22] === STEP dart-test-zaghlol_parsing (docker zaghlol-flutter:3.47.9, /work/packages/zaghlol_parsing)
+00:00 +0: loading test/merchant/merchant_cleaner_test.dart
+00:00 +0: test/merchant/merchant_cleaner_test.dart: cleanMerchant spec example
+00:00 +1: test/normalize/amount_parser_test.dart: acceptance criteria Arabic-Indic 1,250.00 is 1250.00 EGP
+00:00 +2: test/normalize/amount_parser_test.dart: acceptance criteria Arabic-Indic 1,250.00 is 1250.00 EGP
+00:00 +3: test/normalize/amount_parser_test.dart: acceptance criteria Arabic-Indic 1,250.00 is 1250.00 EGP
+00:00 +4: test/merchant/merchant_cleaner_test.dart: cleanMerchant pos token trailing
+00:00 +5: test/normalize/amount_parser_test.dart: acceptance criteria KWD 12.345 is 12345 minor
+00:00 +6: test/merchant/merchant_cleaner_test.dart: cleanMerchant ecom and online
+00:00 +7: test/normalize/amount_parser_test.dart: acceptance criteria too many decimals fails and does not round
+00:00 +8: test/merchant/merchant_cleaner_test.dart: cleanMerchant multi-word city
+00:00 +9: test/normalize/amount_parser_test.dart: parseAmount table plain integer
+00:00 +10: test/normalize/text_normalizer_test.dart: normalizeText arabic-indic digits
+00:00 +11: test/normalize/text_normalizer_test.dart: normalizeText arabic-indic digits
+00:00 +12: test/normalize/text_normalizer_test.dart: normalizeText arabic-indic digits
+00:00 +13: test/normalize/text_normalizer_test.dart: normalizeText arabic-indic digits
+00:00 +14: test/normalize/text_normalizer_test.dart: normalizeText arabic-indic digits
+00:00 +15: test/normalize/text_normalizer_test.dart: normalizeText arabic-indic digits
+00:00 +16: test/normalize/text_normalizer_test.dart: normalizeText arabic-indic digits
+00:00 +17: test/normalize/text_normalizer_test.dart: normalizeText arabic-indic digits
+00:00 +18: test/normalize/text_normalizer_test.dart: normalizeText arabic-indic digits
+00:00 +19: test/normalize/text_normalizer_test.dart: normalizeText arabic-indic digits
+00:00 +20: test/normalize/text_normalizer_test.dart: normalizeText arabic-indic digits
+00:00 +21: test/normalize/text_normalizer_test.dart: normalizeText arabic-indic digits
+00:00 +22: test/normalize/text_normalizer_test.dart: normalizeText arabic-indic digits
+00:00 +23: test/normalize/text_normalizer_test.dart: normalizeText arabic-indic digits
+00:00 +24: test/normalize/text_normalizer_test.dart: normalizeText arabic-indic digits
+00:00 +25: test/normalize/text_normalizer_test.dart: normalizeText arabic-indic digits
+00:00 +26: test/normalize/text_normalizer_test.dart: normalizeText arabic-indic digits
+00:00 +27: test/normalize/text_normalizer_test.dart: normalizeText arabic-indic digits
+00:00 +28: test/normalize/text_normalizer_test.dart: normalizeText arabic-indic digits
+00:00 +29: test/zaghlol_parsing_test.dart: package marker is wired up
+00:00 +30: test/zaghlol_parsing_test.dart: package marker is wired up
+00:00 +31: test/normalize/amount_parser_test.dart: parseAmount table exponent 3
+00:00 +32: test/merchant/merchant_cleaner_test.dart: cleanMerchant bank misr keeps country word
+00:00 +33: test/normalize/text_normalizer_test.dart: normalizeText extended digits
+00:00 +34: test/normalize/amount_parser_test.dart: parseAmount table exponent 3 short fraction pads
+00:00 +35: test/merchant/merchant_cleaner_test.dart: cleanMerchant national bank of egypt
+00:00 +36: test/merchant/merchant_cleaner_test.dart: cleanMerchant national bank of egypt
+00:00 +37: test/normalize/amount_parser_test.dart: parseAmount table exponent 2 trailing zero dropped
+00:00 +38: test/normalize/text_normalizer_test.dart: normalizeText thousands separator
+00:00 +39: test/merchant/merchant_cleaner_test.dart: cleanMerchant full country name kept
+00:00 +40: test/normalize/amount_parser_test.dart: parseAmount table short fraction pads
+00:00 +41: test/merchant/merchant_cleaner_test.dart: cleanMerchant documents mid-name city kept
+00:00 +42: test/merchant/merchant_cleaner_test.dart: cleanMerchant documents mid-name city kept
+00:00 +43: test/normalize/amount_parser_test.dart: parseAmount table zero
+00:00 +44: test/normalize/text_normalizer_test.dart: normalizeText narrow nbsp
+00:00 +45: test/merchant/merchant_cleaner_test.dart: cleanMerchant documents alnum id kept
+00:00 +46: test/merchant/merchant_cleaner_test.dart: cleanMerchant documents alnum id kept
+00:00 +47: test/normalize/text_normalizer_test.dart: normalizeText thin space
+00:00 +48: test/normalize/amount_parser_test.dart: parseAmount table leading zeros
+00:00 +49: test/normalize/amount_parser_test.dart: parseAmount table leading zeros
+00:00 +50: test/normalize/text_normalizer_test.dart: normalizeText zero width
+00:00 +51: test/merchant/merchant_cleaner_test.dart: cleanMerchant only noise falls back
+00:00 +52: test/merchant/merchant_cleaner_test.dart: cleanMerchant only noise falls back
+00:00 +53: test/normalize/text_normalizer_test.dart: normalizeText rtl and ltr marks
+00:00 +54: test/normalize/text_normalizer_test.dart: normalizeText rtl and ltr marks
+00:00 +55: test/normalize/amount_parser_test.dart: parseAmount table std 1,234 EGP is a thousand
+00:00 +56: test/merchant/merchant_cleaner_test.dart: cleanMerchant arabic city suffix
+00:00 +57: test/merchant/merchant_cleaner_test.dart: cleanMerchant arabic city suffix
+00:00 +58: test/normalize/amount_parser_test.dart: parseAmount table std 1,234 KWD is a thousand
+00:00 +59: test/normalize/text_normalizer_test.dart: normalizeText isolates
+00:00 +60: test/merchant/merchant_cleaner_test.dart: cleanMerchant arabic digits code
+00:00 +61: test/normalize/amount_parser_test.dart: parseAmount table std 1,234 JPY is a thousand
+00:00 +62: test/normalize/text_normalizer_test.dart: normalizeText arabic letter mark
+00:00 +63: test/merchant/merchant_cleaner_test.dart: cleanMerchant arabic legal
+00:00 +64: test/normalize/amount_parser_test.dart: parseAmount table std 1.234 KWD is a decimal
+00:00 +65: test/normalize/text_normalizer_test.dart: normalizeText bom
+00:00 +66: test/merchant/merchant_cleaner_test.dart: cleanMerchant tatweel removed
+00:00 +67: test/merchant/merchant_cleaner_test.dart: cleanMerchant tatweel removed
+00:00 +68: test/normalize/text_normalizer_test.dart: normalizeText whitespace runs
+00:00 +69: test/normalize/text_normalizer_test.dart: normalizeText whitespace runs
+00:00 +70: test/normalize/text_normalizer_test.dart: normalizeText whitespace runs
+00:00 +71: test/normalize/amount_parser_test.dart: parseAmount table eu 1.234 EGP is a thousand
+00:00 +72: test/merchant/merchant_cleaner_test.dart: cleanMerchant empty
+00:00 +73: test/normalize/text_normalizer_test.dart: normalizeText arabic comma kept
+00:00 +74: test/normalize/text_normalizer_test.dart: normalizeText arabic comma kept
+00:00 +75: test/normalize/text_normalizer_test.dart: normalizeText arabic comma kept
+00:00 +76: test/normalize/amount_parser_test.dart: parseAmount table eu 1.234 JPY is a thousand
+00:00 +77: test/merchant/merchant_cleaner_test.dart: cleanMerchant punctuation only
+00:00 +78: test/normalize/text_normalizer_test.dart: normalizeText tatweel kept at display level
+00:00 +79: test/normalize/amount_parser_test.dart: parseAmount table eu 1,234 KWD is a decimal
+00:00 +80: test/merchant/merchant_cleaner_test.dart: cleanMerchant custom config lists are honoured
+00:00 +81: test/normalize/text_normalizer_test.dart: normalizeText letters kept at display level
+00:00 +82: test/normalize/amount_parser_test.dart: parseAmount table eu 1,234 EGP fails
+00:00 +83: test/merchant/merchant_cleaner_test.dart: cleanMerchant never throws on odd input
+00:00 +84: test/merchant/merchant_cleaner_test.dart: cleanMerchant never throws on odd input
+00:00 +85: test/merchant/merchant_cleaner_test.dart: cleanMerchant never throws on odd input
+00:00 +86: test/merchant/merchant_cleaner_test.dart: cleanMerchant never throws on odd input
+00:00 +87: test/merchant/merchant_cleaner_test.dart: cleanMerchant never throws on odd input
+00:00 +88: test/merchant/merchant_cleaner_test.dart: cleanMerchant never throws on odd input
+00:00 +89: test/merchant/merchant_cleaner_test.dart: cleanMerchant never throws on odd input
+00:00 +90: test/merchant/merchant_cleaner_test.dart: cleanMerchant never throws on odd input
+00:00 +91: test/merchant/merchant_cleaner_test.dart: cleanMerchant never throws on odd input
+00:00 +92: test/merchant/merchant_cleaner_test.dart: cleanMerchant never throws on odd input
+00:00 +93: test/merchant/merchant_cleaner_test.dart: cleanMerchant never throws on odd input
+00:00 +94: test/merchant/merchant_cleaner_test.dart: cleanMerchant never throws on odd input
+00:00 +95: test/merchant/merchant_cleaner_test.dart: cleanMerchant never throws on odd input
+00:00 +96: test/merchant/merchant_cleaner_test.dart: cleanMerchant never throws on odd input
+00:00 +97: test/normalize/text_normalizer_test.dart: foldForMatching letters not folded
+00:00 +98: test/normalize/amount_parser_test.dart: parseAmount table group too short
+00:00 +99: test/merchant/merchant_cleaner_test.dart: merchantKey golden vectors are present
+00:00 +100: test/merchant/merchant_cleaner_test.dart: merchantKey golden vectors are present
+00:00 +101: test/merchant/merchant_cleaner_test.dart: merchantKey golden vectors are present
+00:00 +102: test/normalize/text_normalizer_test.dart: foldKey alef hamza below
+00:00 +103: test/normalize/amount_parser_test.dart: parseAmount table group after decimal
+00:00 +104: test/merchant/merchant_cleaner_test.dart: merchantKey vector: Carrefour
+00:00 +105: test/normalize/text_normalizer_test.dart: foldKey alef madda
+00:00 +106: test/normalize/amount_parser_test.dart: parseAmount table empty group
+00:00 +107: test/merchant/merchant_cleaner_test.dart: merchantKey vector: EL EZABY
+00:00 +108: test/merchant/merchant_cleaner_test.dart: merchantKey vector: EL EZABY
+00:00 +109: test/normalize/amount_parser_test.dart: parseAmount table empty
+00:00 +110: test/normalize/text_normalizer_test.dart: foldKey alef maksura
+00:00 +111: test/normalize/text_normalizer_test.dart: foldKey alef maksura
+00:00 +112: test/normalize/text_normalizer_test.dart: foldKey alef maksura
+00:00 +113: test/merchant/merchant_cleaner_test.dart: merchantKey vector: El-Ezaby
+00:00 +114: test/normalize/amount_parser_test.dart: parseAmount table no leading digit
+00:00 +115: test/normalize/text_normalizer_test.dart: foldKey teh marbuta
+00:00 +116: test/merchant/merchant_cleaner_test.dart: merchantKey vector: EL  EZABY
+00:00 +117: test/normalize/amount_parser_test.dart: parseAmount table leading separator
+00:00 +118: test/normalize/text_normalizer_test.dart: foldKey ascii lowercase
+00:00 +119: test/normalize/text_normalizer_test.dart: foldKey ascii lowercase
+00:00 +120: test/normalize/amount_parser_test.dart: parseAmount table trailing separator
+00:00 +121: test/merchant/merchant_cleaner_test.dart: merchantKey vector: ALRAWSHA
+00:00 +122: test/normalize/text_normalizer_test.dart: foldKey all levels together
+00:00 +123: test/normalize/amount_parser_test.dart: parseAmount table minus sign
+00:00 +124: test/merchant/merchant_cleaner_test.dart: merchantKey vector: ELF
+00:00 +125: test/normalize/text_normalizer_test.dart: fuzz never throws and is idempotent
+00:00 +126: test/normalize/text_normalizer_test.dart: fuzz never throws and is idempotent
+00:00 +127: test/normalize/text_normalizer_test.dart: fuzz never throws and is idempotent
+00:00 +128: test/normalize/text_normalizer_test.dart: fuzz never throws and is idempotent
+00:00 +129: test/normalize/text_normalizer_test.dart: fuzz never throws and is idempotent
+00:00 +130: test/normalize/text_normalizer_test.dart: fuzz never throws and is idempotent
+00:00 +131: test/normalize/text_normalizer_test.dart: fuzz never throws and is idempotent
+00:00 +132: test/normalize/text_normalizer_test.dart: fuzz never throws and is idempotent
+00:00 +133: test/normalize/text_normalizer_test.dart: fuzz never throws and is idempotent
+00:00 +134: test/normalize/text_normalizer_test.dart: fuzz never throws and is idempotent
+00:00 +135: test/normalize/text_normalizer_test.dart: fuzz never throws and is idempotent
+00:00 +136: test/normalize/text_normalizer_test.dart: fuzz never throws and is idempotent
+00:00 +137: test/normalize/text_normalizer_test.dart: fuzz never throws and is idempotent
+00:00 +138: test/normalize/text_normalizer_test.dart: fuzz never throws and is idempotent
+00:00 +139: test/normalize/text_normalizer_test.dart: fuzz never throws and is idempotent
+00:00 +140: test/normalize/text_normalizer_test.dart: fuzz never throws and is idempotent
+00:00 +141: test/normalize/text_normalizer_test.dart: fuzz never throws and is idempotent
+00:00 +142: test/normalize/text_normalizer_test.dart: fuzz never throws and is idempotent
+00:00 +143: test/normalize/text_normalizer_test.dart: fuzz never throws and is idempotent
+00:00 +144: test/normalize/text_normalizer_test.dart: fuzz never throws and is idempotent
+00:00 +145: test/normalize/text_normalizer_test.dart: fuzz never throws and is idempotent
+00:00 +146: test/normalize/text_normalizer_test.dart: fuzz never throws and is idempotent
+00:00 +147: test/normalize/text_normalizer_test.dart: fuzz never throws and is idempotent
+00:00 +148: test/normalize/text_normalizer_test.dart: fuzz never throws and is idempotent
+00:00 +149: test/normalize/text_normalizer_test.dart: fuzz never throws and is idempotent
+00:00 +150: test/normalize/text_normalizer_test.dart: fuzz never throws and is idempotent
+00:00 +151: test/normalize/text_normalizer_test.dart: fuzz never throws and is idempotent
+00:00 +152: test/normalize/text_normalizer_test.dart: fuzz never throws and is idempotent
+00:00 +153: test/normalize/text_normalizer_test.dart: fuzz never throws and is idempotent
+00:00 +154: test/normalize/text_normalizer_test.dart: fuzz never throws and is idempotent
+00:00 +155: test/normalize/text_normalizer_test.dart: fuzz never throws and is idempotent
+00:00 +156: test/normalize/text_normalizer_test.dart: fuzz never throws and is idempotent
+00:00 +157: test/normalize/text_normalizer_test.dart: fuzz never throws and is idempotent
+00:00 +158: test/normalize/text_normalizer_test.dart: fuzz never throws and is idempotent
+00:00 +159: test/normalize/text_normalizer_test.dart: fuzz never throws and is idempotent
+00:00 +160: test/normalize/text_normalizer_test.dart: fuzz never throws and is idempotent
+00:00 +161: test/normalize/text_normalizer_test.dart: fuzz never throws and is idempotent
+00:00 +162: test/normalize/text_normalizer_test.dart: fuzz never throws and is idempotent
+00:00 +163: test/normalize/text_normalizer_test.dart: fuzz never throws and is idempotent
+00:00 +164: test/normalize/text_normalizer_test.dart: fuzz never throws and is idempotent
+00:00 +165: test/normalize/text_normalizer_test.dart: fuzz never throws and is idempotent
+00:00 +166: test/normalize/text_normalizer_test.dart: fuzz never throws and is idempotent
+00:00 +167: test/normalize/text_normalizer_test.dart: fuzz never throws and is idempotent
+00:00 +168: test/normalize/text_normalizer_test.dart: fuzz never throws and is idempotent
+00:00 +169: test/normalize/text_normalizer_test.dart: fuzz never throws and is idempotent
+00:00 +170: test/normalize/text_normalizer_test.dart: fuzz never throws and is idempotent
+00:00 +171: test/normalize/text_normalizer_test.dart: fuzz never throws and is idempotent
+00:00 +172: test/normalize/text_normalizer_test.dart: fuzz never throws and is idempotent
+00:00 +173: test/normalize/text_normalizer_test.dart: fuzz never throws and is idempotent
+00:00 +174: test/normalize/text_normalizer_test.dart: fuzz never throws and is idempotent
+00:00 +175: test/normalize/text_normalizer_test.dart: fuzz never throws and is idempotent
+00:00 +176: test/normalize/text_normalizer_test.dart: fuzz never throws and is idempotent
+00:00 +177: test/normalize/text_normalizer_test.dart: fuzz never throws and is idempotent
+00:00 +178: test/normalize/text_normalizer_test.dart: fuzz never throws and is idempotent
+00:00 +179: test/normalize/text_normalizer_test.dart: fuzz never throws and is idempotent
+00:00 +180: test/normalize/text_normalizer_test.dart: fuzz never throws and is idempotent
+00:00 +181: test/normalize/text_normalizer_test.dart: fuzz never throws and is idempotent
+00:00 +182: test/normalize/text_normalizer_test.dart: fuzz never throws and is idempotent
+00:00 +183: test/normalize/text_normalizer_test.dart: fuzz never throws and is idempotent
+00:00 +184: test/normalize/text_normalizer_test.dart: fuzz never throws and is idempotent
+00:00 +185: test/normalize/text_normalizer_test.dart: fuzz never throws and is idempotent
+00:00 +186: test/normalize/text_normalizer_test.dart: fuzz never throws and is idempotent
+00:00 +187: test/normalize/text_normalizer_test.dart: fuzz never throws and is idempotent
+00:00 +188: test/normalize/text_normalizer_test.dart: fuzz never throws and is idempotent
+00:00 +189: test/normalize/text_normalizer_test.dart: fuzz never throws and is idempotent
+00:00 +190: test/normalize/text_normalizer_test.dart: fuzz never throws and is idempotent
+00:00 +191: test/normalize/text_normalizer_test.dart: fuzz never throws and is idempotent
+00:00 +192: test/normalize/text_normalizer_test.dart: fuzz never throws and is idempotent
+00:00 +193: test/normalize/text_normalizer_test.dart: fuzz never throws and is idempotent
+00:00 +194: test/normalize/text_normalizer_test.dart: fuzz never throws and is idempotent
+00:00 +195: test/normalize/text_normalizer_test.dart: fuzz never throws and is idempotent
+00:00 +196: test/normalize/text_normalizer_test.dart: fuzz never throws and is idempotent
+00:00 +197: test/normalize/amount_parser_test.dart: round trip property parseMoneyText(format(m)) == m
+00:00 +198: test/normalize/amount_parser_test.dart: round trip property parseMoneyText(format(m)) == m
+00:00 +199: test/normalize/amount_parser_test.dart: round trip property parseMoneyText(format(m)) == m
+00:00 +200: test/normalize/amount_parser_test.dart: round trip property exponent+1 digits with non-zero last digit never parse
+00:00 +201: test/normalize/amount_parser_test.dart: fuzz random text never throws and failures never echo the input
+00:00 +202: All tests passed!
+
+[00:28:25] === RESULT dart-test-zaghlol_parsing exit=0 (2s)
+[00:28:25] === STEP apk-devNoSms (docker zaghlol-flutter-android:3.47.9, /work/app)
+Resolving dependencies in `/work`...
+Downloading packages...
+  _fe_analyzer_shared 91.0.0 (111.0.0 available)
+  analyzer 8.4.0 (14.7.0 available)
+  built_collection 5.1.2 (6.0.0 available)
+  coverage 1.15.1 (1.16.0 available)
+  dart_style 3.1.3 (3.1.14 available)
+  drift 2.35.3 (2.35.4 available)
+  material_color_utilities 0.13.0 (0.13.1 available)
+  package_config 2.2.0 (3.0.0 available)
+  pigeon 26.3.2 (29.1.1 available)
+  test 1.31.1 (1.33.0 available)
+  test_api 0.7.12 (0.7.15 available)
+  test_core 0.6.18 (0.6.21 available)
+Got dependencies in `/work`!
+12 packages have newer versions incompatible with dependency constraints.
+Try `flutter pub outdated` for more information.
+Running Gradle task 'assembleDevNoSmsDebug'...                  
+Warning: SDK processing. This version only understands SDK XML versions up to 3 but an SDK XML file of version 4 was encountered. This can happen if you use versions of Android Studio and the command-line tools that were released at different times.
+Checking the license for package Android SDK Platform 35 in /opt/android-sdk/licenses
+License for package Android SDK Platform 35 accepted.
+Preparing "Install Android SDK Platform 35 (revision 2)".
+"Install Android SDK Platform 35 (revision 2)" ready.
+Installing Android SDK Platform 35 in /opt/android-sdk/platforms/android-35
+"Install Android SDK Platform 35 (revision 2)" complete.
+"Install Android SDK Platform 35 (revision 2)" finished.
+[=========                              ] 25%                                   
+Checking the license for package CMake 3.22.1 in /opt/android-sdk/licenses
+License for package CMake 3.22.1 accepted.
+Preparing "Install CMake 3.22.1 v.3.22.1".
+"Install CMake 3.22.1 v.3.22.1" ready.
+Installing CMake 3.22.1 in /opt/android-sdk/cmake/3.22.1
+"Install CMake 3.22.1 v.3.22.1" complete.
+"Install CMake 3.22.1 v.3.22.1" finished.
+Running Gradle task 'assembleDevNoSmsDebug'...                    184.1s
+✓ Built build/app/outputs/flutter-apk/app-devnosms-debug.apk
+
+[00:31:33] === RESULT apk-devNoSms exit=0 (188s)
+[00:31:33] === STEP apk-perms (docker zaghlol-flutter-android:3.47.9, /work/app)
+package: app.zaghlol.dev
+uses-permission: name='android.permission.INTERNET'
+permission: app.zaghlol.dev.DYNAMIC_RECEIVER_NOT_EXPORTED_PERMISSION
+uses-permission: name='app.zaghlol.dev.DYNAMIC_RECEIVER_NOT_EXPORTED_PERMISSION'
+
+[00:31:33] === RESULT apk-perms exit=0 (1s)
+[00:31:33] === STEP android-unit (docker zaghlol-flutter-android:3.47.9, /work/app)
+To honour the JVM settings for this build a single-use Daemon process will be forked. For more on this, please refer to https://docs.gradle.org/9.3.1/userguide/gradle_daemon.html#sec:disabling_the_daemon in the Gradle documentation.
+Daemon will be stopped at the end of the build 
+> Task :gradle:checkKotlinGradlePluginConfigurationErrors SKIPPED
+> Task :gradle:pluginDescriptors
+> Task :gradle:processResources
+
+> Task :gradle:compileKotlin
+w: file:///opt/flutter/packages/flutter_tools/gradle/src/main/kotlin/Deeplink.kt:13:5 This annotation is currently applied to the value parameter only, but in the future it will also be applied to property.
+- To opt in to applying to both value parameter and property, add '-Xannotation-default-target=param-property' to your compiler arguments.
+- To keep applying to the value parameter only, use the '@param:' annotation target.
+
+See https://youtrack.jetbrains.com/issue/KT-73255 for more details.
+w: file:///opt/flutter/packages/flutter_tools/gradle/src/main/kotlin/Deeplink.kt:15:5 This annotation is currently applied to the value parameter only, but in the future it will also be applied to property.
+- To opt in to applying to both value parameter and property, add '-Xannotation-default-target=param-property' to your compiler arguments.
+- To keep applying to the value parameter only, use the '@param:' annotation target.
+
+See https://youtrack.jetbrains.com/issue/KT-73255 for more details.
+w: file:///opt/flutter/packages/flutter_tools/gradle/src/main/kotlin/Deeplink.kt:17:5 This annotation is currently applied to the value parameter only, but in the future it will also be applied to property.
+- To opt in to applying to both value parameter and property, add '-Xannotation-default-target=param-property' to your compiler arguments.
+- To keep applying to the value parameter only, use the '@param:' annotation target.
+
+See https://youtrack.jetbrains.com/issue/KT-73255 for more details.
+w: file:///opt/flutter/packages/flutter_tools/gradle/src/main/kotlin/Deeplink.kt:19:5 This annotation is currently applied to the value parameter only, but in the future it will also be applied to property.
+- To opt in to applying to both value parameter and property, add '-Xannotation-default-target=param-property' to your compiler arguments.
+- To keep applying to the value parameter only, use the '@param:' annotation target.
+
+See https://youtrack.jetbrains.com/issue/KT-73255 for more details.
+w: file:///opt/flutter/packages/flutter_tools/gradle/src/main/kotlin/FlutterPlugin.kt:12:8 'interface ApkVariant : Any, BaseVariant, InstallableVariant, AndroidArtifactVariant, InternalBaseVariant' is deprecated. Deprecated in Java.
+w: file:///opt/flutter/packages/flutter_tools/gradle/src/main/kotlin/FlutterPlugin.kt:664:69 'interface ApkVariant : Any, BaseVariant, InstallableVariant, AndroidArtifactVariant, InternalBaseVariant' is deprecated. Deprecated in Java.
+w: file:///opt/flutter/packages/flutter_tools/gradle/src/main/kotlin/FlutterPluginUtils.kt:766:29 Condition is always 'true'.
+w: file:///opt/flutter/packages/flutter_tools/gradle/src/main/kotlin/plugins/PluginHandler.kt:168:70 Unchecked cast of 'NamedDomainObjectContainer<out BuildType>' to 'NamedDomainObjectContainer<BuildType>'.
+w: file:///opt/flutter/packages/flutter_tools/gradle/src/main/kotlin/plugins/PluginHandler.kt:169:75 Unchecked cast of 'NamedDomainObjectContainer<out BuildType>' to 'NamedDomainObjectContainer<BuildType>'.
+
+> Task :gradle:compileJava NO-SOURCE
+> Task :gradle:compileGroovy NO-SOURCE
+> Task :gradle:classes
+> Task :gradle:jar
+
+> Configure project :app
+WARNING: The option setting 'android.builtInKotlin=false' is deprecated.
+The current default is 'true'.
+It will be removed in version 10.0 of the Android Gradle plugin.
+WARNING: The option setting 'android.newDsl=false' is deprecated.
+The current default is 'true'.
+It will be removed in version 10.0 of the Android Gradle plugin.
+w: ?? Deprecated 'org.jetbrains.kotlin.android' plugin usage
+The 'org.jetbrains.kotlin.android' plugin in project ':app' is no longer required for Kotlin support since AGP 9.0.
+Solution: Remove both `android.builtInKotlin=true` and `android.newDsl=false` from `gradle.properties`, then migrate to built-in Kotlin.
+See https://kotl.in/gradle/agp-built-in-kotlin for more details.
+
+
+> Configure project :integration_test
+w: ?? Deprecated 'org.jetbrains.kotlin.android' plugin usage
+The 'org.jetbrains.kotlin.android' plugin in project ':integration_test' is no longer required for Kotlin support since AGP 9.0.
+Solution: Remove both `android.builtInKotlin=true` and `android.newDsl=false` from `gradle.properties`, then migrate to built-in Kotlin.
+See https://kotl.in/gradle/agp-built-in-kotlin for more details.
+
+
+> Configure project :jni
+w: ?? Deprecated 'org.jetbrains.kotlin.android' plugin usage
+The 'org.jetbrains.kotlin.android' plugin in project ':jni' is no longer required for Kotlin support since AGP 9.0.
+Solution: Remove both `android.builtInKotlin=true` and `android.newDsl=false` from `gradle.properties`, then migrate to built-in Kotlin.
+See https://kotl.in/gradle/agp-built-in-kotlin for more details.
+
+
+> Configure project :jni_flutter
+w: ?? Deprecated 'org.jetbrains.kotlin.android' plugin usage
+The 'org.jetbrains.kotlin.android' plugin in project ':jni_flutter' is no longer required for Kotlin support since AGP 9.0.
+Solution: Remove both `android.builtInKotlin=true` and `android.newDsl=false` from `gradle.properties`, then migrate to built-in Kotlin.
+See https://kotl.in/gradle/agp-built-in-kotlin for more details.
+
+Warning: SDK processing. This version only understands SDK XML versions up to 3 but an SDK XML file of version 4 was encountered. This can happen if you use versions of Android Studio and the command-line tools that were released at different times.
+Checking the license for package Android SDK Platform 35 in /opt/android-sdk/licenses
+License for package Android SDK Platform 35 accepted.
+Preparing "Install Android SDK Platform 35 (revision 2)".
+"Install Android SDK Platform 35 (revision 2)" ready.
+Installing Android SDK Platform 35 in /opt/android-sdk/platforms/android-35
+"Install Android SDK Platform 35 (revision 2)" complete.
+"Install Android SDK Platform 35 (revision 2)" finished.
+[=========                              ] 25%                                   
+> Task :app:checkKotlinGradlePluginConfigurationErrors SKIPPED
+> Task :app:cleanMergeDevNoSmsDebugAssets
+> Task :app:compileFlutterBuildDevNoSmsDebug
+> Task :app:generateDevNoSmsDebugAssets UP-TO-DATE
+> Task :app:validateCompileSdkVersion
+> Task :app:preBuild
+> Task :app:preDevNoSmsDebugBuild
+> Task :integration_test:generateDebugAssets UP-TO-DATE
+> Task :integration_test:preBuild UP-TO-DATE
+> Task :integration_test:preDebugBuild UP-TO-DATE
+> Task :integration_test:mergeDebugAssets UP-TO-DATE
+> Task :jni:generateDebugAssets UP-TO-DATE
+> Task :jni:preBuild UP-TO-DATE
+> Task :jni:preDebugBuild UP-TO-DATE
+> Task :jni:mergeDebugAssets UP-TO-DATE
+> Task :jni_flutter:generateDebugAssets UP-TO-DATE
+> Task :jni_flutter:preBuild UP-TO-DATE
+> Task :jni_flutter:preDebugBuild UP-TO-DATE
+> Task :jni_flutter:mergeDebugAssets UP-TO-DATE
+> Task :app:mergeDevNoSmsDebugAssets
+> Task :app:copyFlutterAssetsDevNoSmsDebug
+> Task :app:generateDevNoSmsDebugResValues UP-TO-DATE
+> Task :app:generateDevNoSmsDebugResources UP-TO-DATE
+> Task :app:packageDevNoSmsDebugResources UP-TO-DATE
+> Task :integration_test:processDebugNavigationResources UP-TO-DATE
+> Task :jni:processDebugNavigationResources UP-TO-DATE
+> Task :jni_flutter:processDebugNavigationResources UP-TO-DATE
+> Task :app:processDevNoSmsDebugNavigationResources UP-TO-DATE
+> Task :app:parseDevNoSmsDebugLocalResources UP-TO-DATE
+> Task :app:generateDevNoSmsDebugRFile UP-TO-DATE
+> Task :integration_test:checkKotlinGradlePluginConfigurationErrors SKIPPED
+> Task :integration_test:generateDebugResources UP-TO-DATE
+> Task :integration_test:packageDebugResources UP-TO-DATE
+> Task :integration_test:parseDebugLocalResources UP-TO-DATE
+> Task :integration_test:generateDebugRFile UP-TO-DATE
+> Task :integration_test:compileDebugKotlin NO-SOURCE
+> Task :integration_test:javaPreCompileDebug UP-TO-DATE
+> Task :integration_test:compileDebugJavaWithJavac UP-TO-DATE
+> Task :integration_test:bundleLibCompileToJarDebug UP-TO-DATE
+> Task :jni:checkKotlinGradlePluginConfigurationErrors SKIPPED
+> Task :jni:generateDebugResources UP-TO-DATE
+> Task :jni:packageDebugResources UP-TO-DATE
+> Task :jni:parseDebugLocalResources UP-TO-DATE
+> Task :jni:generateDebugRFile UP-TO-DATE
+> Task :jni:compileDebugKotlin NO-SOURCE
+> Task :jni:javaPreCompileDebug UP-TO-DATE
+> Task :jni:compileDebugJavaWithJavac UP-TO-DATE
+> Task :jni:bundleLibCompileToJarDebug UP-TO-DATE
+> Task :jni_flutter:checkKotlinGradlePluginConfigurationErrors SKIPPED
+> Task :jni_flutter:generateDebugResources UP-TO-DATE
+> Task :jni_flutter:packageDebugResources UP-TO-DATE
+> Task :jni_flutter:parseDebugLocalResources UP-TO-DATE
+> Task :jni_flutter:generateDebugRFile UP-TO-DATE
+> Task :jni_flutter:compileDebugKotlin NO-SOURCE
+> Task :jni_flutter:javaPreCompileDebug UP-TO-DATE
+> Task :jni_flutter:compileDebugJavaWithJavac UP-TO-DATE
+> Task :jni_flutter:bundleLibCompileToJarDebug UP-TO-DATE
+> Task :app:compileDevNoSmsDebugKotlin UP-TO-DATE
+> Task :app:javaPreCompileDevNoSmsDebug UP-TO-DATE
+> Task :app:compileDevNoSmsDebugJavaWithJavac UP-TO-DATE
+> Task :integration_test:writeDebugAarMetadata UP-TO-DATE
+> Task :jni:writeDebugAarMetadata UP-TO-DATE
+> Task :jni_flutter:writeDebugAarMetadata UP-TO-DATE
+> Task :app:checkDevNoSmsDebugAarMetadata UP-TO-DATE
+> Task :app:mapDevNoSmsDebugSourceSetPaths UP-TO-DATE
+> Task :app:compileDevNoSmsDebugNavigationResources UP-TO-DATE
+> Task :app:mergeDevNoSmsDebugResources UP-TO-DATE
+> Task :app:createDevNoSmsDebugCompatibleScreenManifests UP-TO-DATE
+> Task :app:extractDeepLinksDevNoSmsDebug UP-TO-DATE
+> Task :integration_test:extractDeepLinksDebug UP-TO-DATE
+> Task :integration_test:processDebugManifest UP-TO-DATE
+> Task :jni:extractDeepLinksDebug UP-TO-DATE
+> Task :jni:processDebugManifest UP-TO-DATE
+> Task :jni_flutter:extractDeepLinksDebug UP-TO-DATE
+> Task :jni_flutter:processDebugManifest UP-TO-DATE
+> Task :app:processDevNoSmsDebugMainManifest UP-TO-DATE
+> Task :app:outputDevNoSmsDebugAppLinkSettings UP-TO-DATE
+> Task :app:processDevNoSmsDebugManifest UP-TO-DATE
+> Task :app:processDevNoSmsDebugManifestForPackage UP-TO-DATE
+> Task :integration_test:mapDebugSourceSetPaths UP-TO-DATE
+> Task :integration_test:compileDebugLibraryResources UP-TO-DATE
+> Task :jni:mapDebugSourceSetPaths UP-TO-DATE
+> Task :jni:compileDebugLibraryResources UP-TO-DATE
+> Task :jni_flutter:mapDebugSourceSetPaths UP-TO-DATE
+> Task :jni_flutter:compileDebugLibraryResources UP-TO-DATE
+> Task :app:processDevNoSmsDebugResources UP-TO-DATE
+> Task :app:preDevNoSmsDebugUnitTestBuild
+> Task :app:javaPreCompileDevNoSmsDebugUnitTest
+> Task :app:processDevNoSmsDebugJavaRes UP-TO-DATE
+> Task :integration_test:bundleLibRuntimeToJarDebug UP-TO-DATE
+> Task :integration_test:processDebugJavaRes NO-SOURCE
+> Task :jni:bundleLibRuntimeToJarDebug UP-TO-DATE
+> Task :jni:processDebugJavaRes NO-SOURCE
+> Task :jni_flutter:bundleLibRuntimeToJarDebug UP-TO-DATE
+> Task :jni_flutter:processDebugJavaRes NO-SOURCE
+> Task :app:bundleDevNoSmsDebugClassesToRuntimeJar
+> Task :app:bundleDevNoSmsDebugClassesToCompileJar
+> Task :app:compileDevNoSmsDebugUnitTestKotlin
+> Task :app:compileDevNoSmsDebugUnitTestJavaWithJavac NO-SOURCE
+> Task :app:processDevNoSmsDebugUnitTestJavaRes
+> Task :app:testDevNoSmsDebugUnitTest
+
+[Incubating] Problems report is available at: file:///work/app/build/reports/problems/problems-report.html
+
+Deprecated Gradle features were used in this build, making it incompatible with Gradle 10.
+
+You can use '--warning-mode all' to show the individual deprecation warnings and determine if they come from your own scripts or plugins.
+
+For more on this, please refer to https://docs.gradle.org/9.3.1/userguide/command_line_interface.html#sec:command_line_warnings in the Gradle documentation.
+
+BUILD SUCCESSFUL in 1m 21s
+81 actionable tasks: 15 executed, 66 up-to-date
+kotlin testcases: 55
+
+[00:32:56] === RESULT android-unit exit=0 (83s)
+[00:32:56] === STEP android-lint (docker zaghlol-flutter-android:3.47.9, /work/app)
+To honour the JVM settings for this build a single-use Daemon process will be forked. For more on this, please refer to https://docs.gradle.org/9.3.1/userguide/gradle_daemon.html#sec:disabling_the_daemon in the Gradle documentation.
+Daemon will be stopped at the end of the build 
+> Task :gradle:checkKotlinGradlePluginConfigurationErrors SKIPPED
+> Task :gradle:pluginDescriptors
+> Task :gradle:processResources
+
+> Task :gradle:compileKotlin
+w: file:///opt/flutter/packages/flutter_tools/gradle/src/main/kotlin/Deeplink.kt:13:5 This annotation is currently applied to the value parameter only, but in the future it will also be applied to property.
+- To opt in to applying to both value parameter and property, add '-Xannotation-default-target=param-property' to your compiler arguments.
+- To keep applying to the value parameter only, use the '@param:' annotation target.
+
+See https://youtrack.jetbrains.com/issue/KT-73255 for more details.
+w: file:///opt/flutter/packages/flutter_tools/gradle/src/main/kotlin/Deeplink.kt:15:5 This annotation is currently applied to the value parameter only, but in the future it will also be applied to property.
+- To opt in to applying to both value parameter and property, add '-Xannotation-default-target=param-property' to your compiler arguments.
+- To keep applying to the value parameter only, use the '@param:' annotation target.
+
+See https://youtrack.jetbrains.com/issue/KT-73255 for more details.
+w: file:///opt/flutter/packages/flutter_tools/gradle/src/main/kotlin/Deeplink.kt:17:5 This annotation is currently applied to the value parameter only, but in the future it will also be applied to property.
+- To opt in to applying to both value parameter and property, add '-Xannotation-default-target=param-property' to your compiler arguments.
+- To keep applying to the value parameter only, use the '@param:' annotation target.
+
+See https://youtrack.jetbrains.com/issue/KT-73255 for more details.
+w: file:///opt/flutter/packages/flutter_tools/gradle/src/main/kotlin/Deeplink.kt:19:5 This annotation is currently applied to the value parameter only, but in the future it will also be applied to property.
+- To opt in to applying to both value parameter and property, add '-Xannotation-default-target=param-property' to your compiler arguments.
+- To keep applying to the value parameter only, use the '@param:' annotation target.
+
+See https://youtrack.jetbrains.com/issue/KT-73255 for more details.
+w: file:///opt/flutter/packages/flutter_tools/gradle/src/main/kotlin/FlutterPlugin.kt:12:8 'interface ApkVariant : Any, BaseVariant, InstallableVariant, AndroidArtifactVariant, InternalBaseVariant' is deprecated. Deprecated in Java.
+w: file:///opt/flutter/packages/flutter_tools/gradle/src/main/kotlin/FlutterPlugin.kt:664:69 'interface ApkVariant : Any, BaseVariant, InstallableVariant, AndroidArtifactVariant, InternalBaseVariant' is deprecated. Deprecated in Java.
+w: file:///opt/flutter/packages/flutter_tools/gradle/src/main/kotlin/FlutterPluginUtils.kt:766:29 Condition is always 'true'.
+w: file:///opt/flutter/packages/flutter_tools/gradle/src/main/kotlin/plugins/PluginHandler.kt:168:70 Unchecked cast of 'NamedDomainObjectContainer<out BuildType>' to 'NamedDomainObjectContainer<BuildType>'.
+w: file:///opt/flutter/packages/flutter_tools/gradle/src/main/kotlin/plugins/PluginHandler.kt:169:75 Unchecked cast of 'NamedDomainObjectContainer<out BuildType>' to 'NamedDomainObjectContainer<BuildType>'.
+
+> Task :gradle:compileJava NO-SOURCE
+> Task :gradle:compileGroovy NO-SOURCE
+> Task :gradle:classes
+> Task :gradle:jar
+
+> Configure project :app
+WARNING: The option setting 'android.builtInKotlin=false' is deprecated.
+The current default is 'true'.
+It will be removed in version 10.0 of the Android Gradle plugin.
+WARNING: The option setting 'android.newDsl=false' is deprecated.
+The current default is 'true'.
+It will be removed in version 10.0 of the Android Gradle plugin.
+w: ?? Deprecated 'org.jetbrains.kotlin.android' plugin usage
+The 'org.jetbrains.kotlin.android' plugin in project ':app' is no longer required for Kotlin support since AGP 9.0.
+Solution: Remove both `android.builtInKotlin=true` and `android.newDsl=false` from `gradle.properties`, then migrate to built-in Kotlin.
+See https://kotl.in/gradle/agp-built-in-kotlin for more details.
+
+
+> Configure project :integration_test
+w: ?? Deprecated 'org.jetbrains.kotlin.android' plugin usage
+The 'org.jetbrains.kotlin.android' plugin in project ':integration_test' is no longer required for Kotlin support since AGP 9.0.
+Solution: Remove both `android.builtInKotlin=true` and `android.newDsl=false` from `gradle.properties`, then migrate to built-in Kotlin.
+See https://kotl.in/gradle/agp-built-in-kotlin for more details.
+
+
+> Configure project :jni
+w: ?? Deprecated 'org.jetbrains.kotlin.android' plugin usage
+The 'org.jetbrains.kotlin.android' plugin in project ':jni' is no longer required for Kotlin support since AGP 9.0.
+Solution: Remove both `android.builtInKotlin=true` and `android.newDsl=false` from `gradle.properties`, then migrate to built-in Kotlin.
+See https://kotl.in/gradle/agp-built-in-kotlin for more details.
+
+
+> Configure project :jni_flutter
+w: ?? Deprecated 'org.jetbrains.kotlin.android' plugin usage
+The 'org.jetbrains.kotlin.android' plugin in project ':jni_flutter' is no longer required for Kotlin support since AGP 9.0.
+Solution: Remove both `android.builtInKotlin=true` and `android.newDsl=false` from `gradle.properties`, then migrate to built-in Kotlin.
+See https://kotl.in/gradle/agp-built-in-kotlin for more details.
+
+Warning: SDK processing. This version only understands SDK XML versions up to 3 but an SDK XML file of version 4 was encountered. This can happen if you use versions of Android Studio and the command-line tools that were released at different times.
+Checking the license for package Android SDK Platform 35 in /opt/android-sdk/licenses
+License for package Android SDK Platform 35 accepted.
+Preparing "Install Android SDK Platform 35 (revision 2)".
+"Install Android SDK Platform 35 (revision 2)" ready.
+Installing Android SDK Platform 35 in /opt/android-sdk/platforms/android-35
+"Install Android SDK Platform 35 (revision 2)" complete.
+"Install Android SDK Platform 35 (revision 2)" finished.
+[=========                              ] 25%                                   
+> Task :integration_test:preBuild UP-TO-DATE
+> Task :integration_test:preDebugBuild UP-TO-DATE
+> Task :integration_test:checkDebugAarMetadata
+> Task :integration_test:mergeDebugJniLibFolders UP-TO-DATE
+> Task :integration_test:mergeDebugNativeLibs NO-SOURCE
+> Task :integration_test:stripDebugDebugSymbols NO-SOURCE
+> Task :integration_test:checkKotlinGradlePluginConfigurationErrors SKIPPED
+> Task :integration_test:copyDebugJniLibsProjectAndLocalJars
+> Task :integration_test:generateDebugResources UP-TO-DATE
+> Task :integration_test:packageDebugResources UP-TO-DATE
+> Task :integration_test:processDebugNavigationResources UP-TO-DATE
+> Task :integration_test:parseDebugLocalResources UP-TO-DATE
+> Task :integration_test:generateDebugRFile UP-TO-DATE
+> Task :integration_test:compileDebugKotlin NO-SOURCE
+> Task :integration_test:extractDebugAnnotations
+> Task :integration_test:extractDeepLinksForAarDebug
+> Task :integration_test:generateDebugAssets UP-TO-DATE
+> Task :integration_test:mergeDebugAssets UP-TO-DATE
+> Task :integration_test:javaPreCompileDebug UP-TO-DATE
+> Task :integration_test:compileDebugJavaWithJavac UP-TO-DATE
+> Task :integration_test:mergeDebugGeneratedProguardFiles
+> Task :integration_test:mergeDebugConsumerProguardFiles
+> Task :integration_test:prepareDebugArtProfile
+> Task :integration_test:prepareLintJarForPublish
+> Task :integration_test:processDebugManifest UP-TO-DATE
+> Task :integration_test:processDebugJavaRes NO-SOURCE
+> Task :integration_test:writeDebugAarMetadata UP-TO-DATE
+> Task :jni:preBuild UP-TO-DATE
+> Task :jni:preDebugBuild UP-TO-DATE
+> Task :jni:preProfileBuild UP-TO-DATE
+> Task :jni:checkDebugAarMetadata
+> Task :integration_test:mergeDebugJavaResource
+
+> Task :jni:configureCMakeDebug[arm64-v8a]
+Checking the license for package CMake 3.22.1 in /opt/android-sdk/licenses
+License for package CMake 3.22.1 accepted.
+Preparing "Install CMake 3.22.1 v.3.22.1".
+"Install CMake 3.22.1 v.3.22.1" ready.
+Installing CMake 3.22.1 in /opt/android-sdk/cmake/3.22.1
+"Install CMake 3.22.1 v.3.22.1" complete.
+"Install CMake 3.22.1 v.3.22.1" finished.
+
+> Task :integration_test:syncDebugLibJars
+> Task :integration_test:bundleDebugLocalLintAar
+> Task :jni:buildCMakeDebug[arm64-v8a]
+> Task :jni:configureCMakeDebug[armeabi-v7a]
+> Task :jni:buildCMakeDebug[armeabi-v7a]
+> Task :jni:configureCMakeDebug[x86]
+> Task :jni:buildCMakeDebug[x86]
+> Task :jni:configureCMakeDebug[x86_64]
+> Task :jni:buildCMakeDebug[x86_64]
+> Task :jni:mergeDebugJniLibFolders UP-TO-DATE
+> Task :jni:mergeDebugNativeLibs UP-TO-DATE
+> Task :jni:checkKotlinGradlePluginConfigurationErrors SKIPPED
+> Task :jni:generateDebugResources UP-TO-DATE
+> Task :jni:stripDebugDebugSymbols
+> Task :jni:packageDebugResources UP-TO-DATE
+> Task :jni:processDebugNavigationResources UP-TO-DATE
+> Task :jni:parseDebugLocalResources UP-TO-DATE
+> Task :jni:generateDebugRFile UP-TO-DATE
+> Task :jni:compileDebugKotlin NO-SOURCE
+> Task :jni:extractDebugAnnotations
+> Task :jni:extractDeepLinksForAarDebug
+> Task :jni:generateDebugAssets UP-TO-DATE
+> Task :jni:mergeDebugAssets UP-TO-DATE
+> Task :jni:javaPreCompileDebug UP-TO-DATE
+> Task :jni:copyDebugJniLibsProjectAndLocalJars
+> Task :jni:compileDebugJavaWithJavac UP-TO-DATE
+> Task :jni:mergeDebugGeneratedProguardFiles
+> Task :jni:mergeDebugConsumerProguardFiles
+> Task :jni:prepareDebugArtProfile
+> Task :jni:prepareLintJarForPublish
+> Task :jni:processDebugManifest UP-TO-DATE
+> Task :jni:processDebugJavaRes NO-SOURCE
+> Task :jni:writeDebugAarMetadata UP-TO-DATE
+> Task :jni_flutter:preBuild UP-TO-DATE
+> Task :jni_flutter:preDebugBuild UP-TO-DATE
+> Task :jni:mergeDebugJavaResource
+> Task :jni_flutter:checkDebugAarMetadata
+> Task :jni:syncDebugLibJars
+> Task :jni:bundleDebugLocalLintAar
+> Task :jni_flutter:mergeDebugJniLibFolders UP-TO-DATE
+> Task :jni_flutter:mergeDebugNativeLibs NO-SOURCE
+> Task :jni_flutter:stripDebugDebugSymbols NO-SOURCE
+> Task :jni:bundleLibCompileToJarDebug UP-TO-DATE
+> Task :jni_flutter:checkKotlinGradlePluginConfigurationErrors SKIPPED
+> Task :jni_flutter:copyDebugJniLibsProjectAndLocalJars
+> Task :jni_flutter:generateDebugResources UP-TO-DATE
+> Task :jni_flutter:packageDebugResources UP-TO-DATE
+> Task :jni_flutter:processDebugNavigationResources UP-TO-DATE
+> Task :jni_flutter:parseDebugLocalResources UP-TO-DATE
+> Task :jni_flutter:generateDebugRFile UP-TO-DATE
+> Task :jni_flutter:compileDebugKotlin NO-SOURCE
+> Task :jni_flutter:extractDebugAnnotations
+> Task :jni_flutter:extractDeepLinksForAarDebug
+> Task :jni_flutter:generateDebugAssets UP-TO-DATE
+> Task :jni_flutter:mergeDebugAssets UP-TO-DATE
+> Task :jni_flutter:javaPreCompileDebug UP-TO-DATE
+> Task :jni_flutter:compileDebugJavaWithJavac UP-TO-DATE
+> Task :jni_flutter:mergeDebugGeneratedProguardFiles
+> Task :jni_flutter:mergeDebugConsumerProguardFiles
+> Task :jni_flutter:prepareDebugArtProfile
+> Task :jni_flutter:prepareLintJarForPublish
+> Task :jni_flutter:processDebugManifest UP-TO-DATE
+> Task :jni_flutter:processDebugJavaRes NO-SOURCE
+> Task :jni_flutter:writeDebugAarMetadata UP-TO-DATE
+> Task :app:checkKotlinGradlePluginConfigurationErrors SKIPPED
+> Task :jni_flutter:mergeDebugJavaResource
+> Task :app:cleanMergeDevNoSmsDebugAssets
+> Task :jni_flutter:syncDebugLibJars
+> Task :jni_flutter:bundleDebugLocalLintAar
+> Task :app:compileFlutterBuildDevNoSmsDebug UP-TO-DATE
+> Task :app:generateDevNoSmsDebugAssets UP-TO-DATE
+> Task :app:validateCompileSdkVersion
+> Task :app:preBuild
+> Task :app:preDevNoSmsDebugBuild
+> Task :app:mergeDevNoSmsDebugAssets
+> Task :app:copyFlutterAssetsDevNoSmsDebug
+> Task :app:generateDevNoSmsDebugResValues UP-TO-DATE
+> Task :app:generateDevNoSmsDebugResources UP-TO-DATE
+> Task :app:packageDevNoSmsDebugResources UP-TO-DATE
+> Task :app:processDevNoSmsDebugNavigationResources UP-TO-DATE
+> Task :app:parseDevNoSmsDebugLocalResources UP-TO-DATE
+> Task :app:generateDevNoSmsDebugRFile UP-TO-DATE
+> Task :integration_test:bundleLibCompileToJarDebug UP-TO-DATE
+> Task :jni_flutter:bundleLibCompileToJarDebug UP-TO-DATE
+> Task :app:compileDevNoSmsDebugKotlin UP-TO-DATE
+> Task :app:javaPreCompileDevNoSmsDebug UP-TO-DATE
+> Task :app:compileDevNoSmsDebugJavaWithJavac UP-TO-DATE
+> Task :app:checkDevNoSmsDebugAarMetadata UP-TO-DATE
+> Task :app:mapDevNoSmsDebugSourceSetPaths UP-TO-DATE
+> Task :app:compileDevNoSmsDebugNavigationResources UP-TO-DATE
+> Task :app:mergeDevNoSmsDebugResources UP-TO-DATE
+> Task :app:createDevNoSmsDebugCompatibleScreenManifests UP-TO-DATE
+> Task :app:extractDeepLinksDevNoSmsDebug UP-TO-DATE
+> Task :integration_test:extractDeepLinksDebug UP-TO-DATE
+> Task :jni:extractDeepLinksDebug UP-TO-DATE
+> Task :jni_flutter:extractDeepLinksDebug UP-TO-DATE
+> Task :app:processDevNoSmsDebugMainManifest UP-TO-DATE
+> Task :app:outputDevNoSmsDebugAppLinkSettings UP-TO-DATE
+> Task :app:processDevNoSmsDebugManifest UP-TO-DATE
+> Task :app:processDevNoSmsDebugManifestForPackage UP-TO-DATE
+> Task :integration_test:mapDebugSourceSetPaths UP-TO-DATE
+> Task :integration_test:compileDebugLibraryResources UP-TO-DATE
+> Task :jni:mapDebugSourceSetPaths UP-TO-DATE
+> Task :jni:compileDebugLibraryResources UP-TO-DATE
+> Task :jni_flutter:mapDebugSourceSetPaths UP-TO-DATE
+> Task :jni_flutter:compileDebugLibraryResources UP-TO-DATE
+> Task :app:processDevNoSmsDebugResources UP-TO-DATE
+> Task :app:bundleDevNoSmsDebugClassesToCompileJar UP-TO-DATE
+> Task :app:preDevNoSmsDebugAndroidTestBuild SKIPPED
+> Task :app:generateDevNoSmsDebugAndroidTestResValues
+> Task :integration_test:bundleLibRuntimeToJarDebug UP-TO-DATE
+> Task :integration_test:createFullJarDebug
+> Task :integration_test:writeDebugLintModelMetadata
+> Task :jni:bundleLibRuntimeToJarDebug UP-TO-DATE
+> Task :jni:createFullJarDebug
+> Task :jni:writeDebugLintModelMetadata
+> Task :jni_flutter:bundleLibRuntimeToJarDebug UP-TO-DATE
+> Task :jni_flutter:createFullJarDebug
+> Task :jni_flutter:writeDebugLintModelMetadata
+> Task :app:generateDevNoSmsDebugAndroidTestLintModel
+> Task :app:extractProguardFiles
+> Task :integration_test:extractProguardFiles
+> Task :integration_test:generateDebugLintModel
+> Task :jni:extractProguardFiles
+> Task :jni:generateDebugLintModel
+> Task :jni_flutter:extractProguardFiles
+> Task :jni_flutter:generateDebugLintModel
+> Task :app:generateDevNoSmsDebugLintReportModel
+> Task :app:preDevNoSmsDebugUnitTestBuild
+> Task :app:generateDevNoSmsDebugUnitTestLintModel
+> Task :integration_test:preDebugAndroidTestBuild UP-TO-DATE
+> Task :integration_test:generateDebugAndroidTestLintModel
+> Task :integration_test:preDebugUnitTestBuild UP-TO-DATE
+> Task :integration_test:generateDebugUnitTestLintModel
+> Task :jni:preDebugAndroidTestBuild UP-TO-DATE
+> Task :jni:generateDebugAndroidTestLintModel
+> Task :jni:preDebugUnitTestBuild UP-TO-DATE
+> Task :jni:generateDebugUnitTestLintModel
+> Task :jni_flutter:preDebugAndroidTestBuild UP-TO-DATE
+> Task :jni:lintAnalyzeDebugAndroidTest
+> Task :jni_flutter:generateDebugAndroidTestLintModel
+> Task :jni_flutter:preDebugUnitTestBuild UP-TO-DATE
+> Task :jni_flutter:generateDebugUnitTestLintModel
+> Task :integration_test:lintAnalyzeDebugAndroidTest
+> Task :jni_flutter:lintAnalyzeDebugAndroidTest
+> Task :jni:lintAnalyzeDebugUnitTest
+> Task :app:lintAnalyzeDevNoSmsDebugAndroidTest
+> Task :jni_flutter:lintAnalyzeDebugUnitTest
+> Task :integration_test:lintAnalyzeDebugUnitTest
+> Task :jni:lintAnalyzeDebug
+> Task :integration_test:lintAnalyzeDebug
+> Task :jni_flutter:lintAnalyzeDebug
+> Task :app:lintAnalyzeDevNoSmsDebugUnitTest
+> Task :app:lintAnalyzeDevNoSmsDebug
+
+> Task :app:lintReportDevNoSmsDebug
+Wrote HTML report to file:///work/app/build/app/reports/lint-results-devNoSmsDebug.html
+
+> Task :app:lintDevNoSmsDebug
+
+[Incubating] Problems report is available at: file:///work/app/build/reports/problems/problems-report.html
+
+BUILD SUCCESSFUL in 1m 33s
+158 actionable tasks: 87 executed, 71 up-to-date
+Consider enabling configuration cache to speed up this build: https://docs.gradle.org/9.3.1/userguide/configuration_cache_enabling.html
+
+[00:34:31] === RESULT android-lint exit=0 (94s)
+[00:34:31] SUMMARY PASS sha=f81d7135ec65b308c7296e4b48cd41bd717b6357 pipeline=quick-app pub-get=0 format=0 analyze=0 app-test=0 dart-test-zaghlol_domain=0 dart-test-zaghlol_parsing=0 apk-devNoSms=0 apk-perms=0 android-unit=0 android-lint=0
