@@ -10,7 +10,7 @@ public sealed class PriceFetchJob(
     IPriceMetrics metrics,
     TimeProvider clock)
 {
-    private readonly IReadOnlyList<IPriceProvider> configured = providers.ToList();
+    private readonly List<IPriceProvider> configured = [.. providers];
 
     /// <summary>Returns the number of gold and FX quotes written.</summary>
     public async Task<int> RunOnceAsync(CancellationToken cancellationToken)
