@@ -3,6 +3,7 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using OpenTelemetry;
 using OpenTelemetry.Metrics;
+using Zaghlol.Application.Contributions;
 using Zaghlol.Application.Flags;
 using Zaghlol.Application.Sync;
 using Zaghlol.Infrastructure.Observability;
@@ -110,6 +111,12 @@ public sealed class SeededSeriesTests
         foreach (var flag in FlagKeys.Known)
         {
             Assert.Contains(("zaghlol.sync.flag_rules_invalid", "flag=" + flag), present);
+        }
+
+        // T-129: the contribution review events exist before the first one.
+        foreach (var name in ContributionEvents.All)
+        {
+            Assert.Contains(("zaghlol.contribution.events", "event=" + name), present);
         }
     }
 }

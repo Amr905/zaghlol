@@ -45,6 +45,9 @@ public sealed class FlagsContractFixture : IAsyncLifetime
 
     public HttpClient Client { get; private set; } = null!;
 
+    /// <summary>The owner login, to seed rows no endpoint creates (T-129 aggregates).</summary>
+    internal string Migrator => database!.Migrator;
+
     public async Task InitializeAsync()
     {
         database = await ZaghlolTestDatabase.StartAsync();

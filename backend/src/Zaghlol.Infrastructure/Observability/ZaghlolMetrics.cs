@@ -2,6 +2,7 @@ using System.Collections.Concurrent;
 using System.Diagnostics;
 using System.Diagnostics.Metrics;
 using System.Text.RegularExpressions;
+using Zaghlol.Application.Contributions;
 using Zaghlol.Application.Flags;
 using Zaghlol.Application.Sync;
 
@@ -42,6 +43,7 @@ public sealed partial class ZaghlolMetrics : IDisposable
     private readonly Counter<long> syncIntake;
     private readonly Counter<long> syncBlockFailure;
     private readonly Counter<long> syncFlagRulesInvalid;
+    private readonly Counter<long> contributionEvents;
     private readonly ConcurrentDictionary<string, double> priceAges = new(StringComparer.Ordinal);
     private readonly string serviceVersion;
     private long unackedCount;
@@ -82,12 +84,15 @@ public sealed partial class ZaghlolMetrics : IDisposable
         priceFetch = meter.CreateCounter<long>("zaghlol.price.fetch", description: "Price provider fetches by provider (fixed names) and outcome (ok|failed|empty).");
         priceOverridden = meter.CreateCounter<long>("zaghlol.price.override", description: "Operator price overrides.");
 
-        syncRequests = meter.CreateCounter<long>("zaghlol.sync.requests", description: "Sync calls by outcome (ok|throttled|rejected).");
+        syncRequests = meter.CreateCounter<long>("zaghlol.sync.requests", description: "Sync calls by outcome (ok|throttled|rejected|unavailable).");
         syncCatalog = meter.CreateCounter<long>("zaghlol.sync.catalog", description: "Full sync answers by catalog mode (none|delta|full).");
         syncIntake = meter.CreateCounter<long>(
             "zaghlol.sync.intake",
             description: "Contributions and bank requests by kind and result (accepted|filtered|invalid_code|duplicate|dropped_hasher).");
         syncBlockFailure = meter.CreateCounter<long>("zaghlol.sync.block_failure", description: "Sync source failures by block (catalog|flags|prices|entitlement).");
+        contributionEvents = meter.CreateCounter<long>(
+            "zaghlol.contribution.events",
+            description: "Contribution review events: aggregates ready, promoted, rejected, and raw rows purged (decided|expired). Counts only.");
         syncFlagRulesInvalid = meter.CreateCounter<long>(
             "zaghlol.sync.flag_rules_invalid",
             description: "Syncs that evaluated a flag OFF because its stored rules failed the strict parse, by flag key (FU-056).");
@@ -154,7 +159,7 @@ public sealed partial class ZaghlolMetrics : IDisposable
     /// <summary><paramref name="key"/> is one of the known flag keys (the admin endpoint 404s any other).</summary>
     public void FlagChanged(string key) => flagChanged.Add(1, Tags(("key", key)));
 
-    /// <param name="outcome"><c>ok</c>, <c>throttled</c> or <c>rejected</c>.</param>
+    /// <param name="outcome"><c>ok</c>, <c>throttled</c>, <c>rejected</c> or <c>unavailable</c>.</param>
     public void SyncRequest(string outcome) => syncRequests.Add(1, Tags(("outcome", outcome)));
 
     /// <param name="mode"><c>none</c>, <c>delta</c> or <c>full</c>.</param>
@@ -175,6 +180,15 @@ public sealed partial class ZaghlolMetrics : IDisposable
 
     /// <param name="flag">A known flag key (the closed set).</param>
     public void SyncFlagRulesInvalid(string flag) => syncFlagRulesInvalid.Add(1, Tags(("flag", flag)));
+
+    /// <param name="name">One of <c>ContributionEvents.All</c>.</param>
+    public void ContributionEvent(string name, int count)
+    {
+        if (count > 0)
+        {
+            contributionEvents.Add(count, Tags(("event", name)));
+        }
+    }
 
     /// <param name="role">A known operator role constant.</param>
     public void SupportLookup(string role) => supportLookup.Add(1, Tags(("role", role)));
@@ -228,6 +242,11 @@ public sealed partial class ZaghlolMetrics : IDisposable
         foreach (var block in SyncTags.Blocks)
         {
             syncBlockFailure.Add(0, Tags(("block", block)));
+        }
+
+        foreach (var name in ContributionEvents.All)
+        {
+            contributionEvents.Add(0, Tags(("event", name)));
         }
 
         foreach (var flag in FlagKeys.Known)

@@ -23,10 +23,16 @@ internal sealed partial class SyncTelemetry(ZaghlolMetrics metrics, ILogger<Sync
 
     public void Intake(string kind, string result, int count) => metrics.SyncIntake(kind, result, count);
 
-    public void BlockFailed(string block)
+    public void BlockFailed(string block, string cause)
     {
         metrics.SyncBlockFailed(block);
-        LogBlockFailed(logger, block);
+        LogBlockFailed(logger, block, cause);
+    }
+
+    public void Unavailable(string cause)
+    {
+        metrics.SyncRequest(SyncTags.Unavailable);
+        LogUnavailable(logger, cause);
     }
 
     public void FlagRulesInvalid(string flag)
@@ -40,8 +46,11 @@ internal sealed partial class SyncTelemetry(ZaghlolMetrics metrics, ILogger<Sync
     [LoggerMessage(Level = LogLevel.Debug, Message = "SYNC_THROTTLED")]
     private static partial void LogThrottled(ILogger logger);
 
-    [LoggerMessage(Level = LogLevel.Warning, Message = "SYNC_BLOCK_FAILED {Reason}")]
-    private static partial void LogBlockFailed(ILogger logger, string reason);
+    [LoggerMessage(Level = LogLevel.Warning, Message = "SYNC_BLOCK_FAILED {Reason} {Cause}")]
+    private static partial void LogBlockFailed(ILogger logger, string reason, string cause);
+
+    [LoggerMessage(Level = LogLevel.Warning, Message = "SYNC_UNAVAILABLE {Reason}")]
+    private static partial void LogUnavailable(ILogger logger, string reason);
 
     [LoggerMessage(Level = LogLevel.Warning, Message = "SYNC_FLAG_RULES_INVALID {Reason}")]
     private static partial void LogFlagRulesInvalid(ILogger logger, string reason);
