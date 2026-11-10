@@ -50,8 +50,8 @@ internal sealed class MerchantContributionConfiguration : IEntityTypeConfigurati
     {
         builder.ToTable("merchant_contributions", t =>
         {
-            // Privacy CHECKs (backend-schema.md section 3): no digit runs (phone/card/account numbers, any script), no "@",
-            // a length cap, and the code columns restricted to their slug alphabets.
+            // Privacy CHECKs (backend-schema.md section 3): no digit runs (phone/card/account numbers; a narrower backstop of
+            // ContributionPrivacy), no "@", a length cap, and the code columns restricted to their slug alphabets.
             t.HasCheckConstraint("ck_merchant_contributions_merchant_norm", CheckSql.PrivacySafeNorm("merchant_norm"));
             t.HasCheckConstraint(
                 "ck_merchant_contributions_institution_code",

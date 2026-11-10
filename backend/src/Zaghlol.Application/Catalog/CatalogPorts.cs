@@ -24,6 +24,12 @@ public interface ICatalogReader
     /// (an up-to-date client).
     /// </summary>
     Task<IReadOnlyList<CatalogOp>> DeltaAsync(int fromVersion, int toVersion, CancellationToken cancellationToken);
+
+    /// <summary>
+    /// The codes of the live (published, not tombstoned) system categories. A merchant contribution whose category is not in
+    /// this set (a user's custom category, BR-SYNC-04) is dropped by the sync.
+    /// </summary>
+    Task<IReadOnlySet<string>> CategoryCodesAsync(CancellationToken cancellationToken);
 }
 
 /// <summary>

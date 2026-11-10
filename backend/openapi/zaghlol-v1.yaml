@@ -170,11 +170,13 @@ paths:
       operationId: sync
       summary: Daily sync (catalog delta, flags, prices, entitlement, outbox upload)
       description: |
-        At most one effective sync per 24 hours; a call inside the window returns 200 with only `serverTime`
-        and `nextSyncNotBefore`. Unchanged blocks are `null` so an up-to-date response stays under 2 KB.
-        `mode: full` is returned when `catalogVersion` is 0 or more than 20 versions behind. The response is
-        signed. `contributions` are sent only if the user opted in (D-16) and the server silently drops any
-        that fail BR-SYNC-04, reporting counts in `accepted`.
+        At most one effective sync per install per 24 hours, by the server clock; a call inside the window returns
+        200 with only `serverTime`, `nextSyncNotBefore` and `timeNonce`, and writes nothing. Unchanged blocks are
+        `null` so an up-to-date response stays under 2 KB. `mode: full` is returned when `catalogVersion` is 0,
+        ahead of the server, more than 20 versions behind, or the delta is too large. Every 200 is signed.
+        `contributions` are sent only if the user opted in (D-16) and the server silently drops any that fail
+        BR-SYNC-04; `accepted` counts the rows actually stored. A catalog, flags or entitlement read failure is
+        503 with nothing written (the window is not consumed). No `Idempotency-Key`: the throttle makes a repeat safe.
       security:
         - installToken: []
         - installToken: []

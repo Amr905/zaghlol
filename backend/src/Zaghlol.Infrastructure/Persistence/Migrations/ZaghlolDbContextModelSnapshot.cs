@@ -784,6 +784,10 @@ namespace Zaghlol.Infrastructure.Persistence.Migrations
                         .HasColumnName("last_seen_at")
                         .HasDefaultValueSql("now()");
 
+                    b.Property<DateTimeOffset?>("LastSyncAt")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("last_sync_at");
+
                     b.Property<string>("Platform")
                         .IsRequired()
                         .HasColumnType("text")

@@ -7,8 +7,13 @@ namespace Zaghlol.Infrastructure.Tests;
 [Collection(SchemaGroup.Name)]
 public class GrantTests(SchemaFixture fixture)
 {
-    private static readonly string[] TriggerFunctions =
-        ["accounts_before_delete", "installs_before_delete", "installs_before_update", "purchases_before_update"];
+    private static readonly string[] SchemaFunctions =
+    [
+        "accounts_before_delete", "count_daily_active", "installs_before_delete", "installs_before_update", "purchases_before_update",
+    ];
+
+    /// <summary>T-128: the one function a login may execute (the sync's daily-active increment), and who may.</summary>
+    private const string CountDailyActive = "count_daily_active";
 
     public static TheoryData<string, string> Denied => new()
     {
@@ -58,6 +63,13 @@ public class GrantTests(SchemaFixture fixture)
         { "zaghlol_admin", "SELECT * FROM zaghlol.replay_guard" },
         { "zaghlol_admin", "DELETE FROM zaghlol.installs" },
         { "zaghlol_admin", "SELECT apple_refresh_token_enc FROM zaghlol.accounts" },
+
+        // T-128: only app_rw may add to the daily-active counter, and only through the function.
+        { "zaghlol_api", "UPDATE zaghlol.daily_active_counts SET installs = 1000" },
+        { "zaghlol_api", "DELETE FROM zaghlol.daily_active_counts" },
+        { "zaghlol_admin", "SELECT zaghlol.count_daily_active('ios', '1.0.0')" },
+        { "zaghlol_worker", "SELECT zaghlol.count_daily_active('ios', '1.0.0')" },
+        { "zaghlol_ops_ro", "SELECT zaghlol.count_daily_active('ios', '1.0.0')" },
     };
 
     public static TheoryData<string, string> Allowed => new()
@@ -81,6 +93,8 @@ public class GrantTests(SchemaFixture fixture)
         { "zaghlol_worker", "DELETE FROM zaghlol.audit_log WHERE false" },
         { "zaghlol_worker", "UPDATE zaghlol.installs SET deleted_at = now(), registration_key_hash = NULL WHERE false" },
         { "zaghlol_worker", "UPDATE zaghlol.purchases SET state = 'expired', acknowledged = true WHERE false" },
+        { "zaghlol_api", "SELECT zaghlol.count_daily_active('ios', '1.0.0')" },
+        { "zaghlol_api", "UPDATE zaghlol.installs SET last_sync_at = now() WHERE false" },
     };
 
     [Fact]
@@ -177,25 +191,31 @@ public class GrantTests(SchemaFixture fixture)
     }
 
     [Fact]
-    public async Task TriggerFunctionsHaveAFixedSearchPathAndOnlyTheDeleteBackstopsAreSecurityDefiner()
+    public async Task FunctionsHaveAFixedSearchPathAndOnlyTheDeleteBackstopsAndTheCounterAreSecurityDefiner()
     {
         var functions = await Db.QueryAsync(
             fixture.Database.Superuser,
             """
             SELECT p.proname, p.prosecdef, array_to_string(p.proconfig, ','),
-                   (SELECT count(*) FROM aclexplode(coalesce(p.proacl, acldefault('f', p.proowner))) a WHERE a.grantee <> p.proowner)
+                   (SELECT coalesce(string_agg(coalesce(r.rolname, 'PUBLIC') || ':' || a.privilege_type, ','), '')
+                    FROM aclexplode(coalesce(p.proacl, acldefault('f', p.proowner))) a
+                    LEFT JOIN pg_roles r ON r.oid = a.grantee
+                    WHERE a.grantee <> p.proowner)
             FROM pg_proc p JOIN pg_namespace n ON n.oid = p.pronamespace
             WHERE n.nspname = 'zaghlol' ORDER BY p.proname
             """);
 
-        Assert.Equal(TriggerFunctions, functions.Select(f => (string)f[0]!));
+        Assert.Equal(SchemaFunctions, functions.Select(f => (string)f[0]!));
         Assert.All(functions, f =>
         {
-            // The delete backstops update another table, so they run as the owner; the update invariants only read
-            // OLD and NEW and run as the caller.
-            Assert.Equal(((string)f[0]!).EndsWith("_before_delete", StringComparison.Ordinal), (bool)f[1]!);
+            var name = (string)f[0]!;
+            var counter = name == CountDailyActive;
+
+            // The delete backstops update another table and the counter writes a table app_rw has no grant on, so they run
+            // as the owner; the update invariants only read OLD and NEW and run as the caller.
+            Assert.Equal(name.EndsWith("_before_delete", StringComparison.Ordinal) || counter, (bool)f[1]!);
             Assert.Equal("search_path=zaghlol, pg_temp", f[2]);
-            Assert.Equal(0L, f[3]);
+            Assert.Equal(counter ? "app_rw:EXECUTE" : string.Empty, f[3]);
         });
     }
 

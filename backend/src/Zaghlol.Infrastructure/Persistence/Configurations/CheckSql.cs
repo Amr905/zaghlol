@@ -7,8 +7,8 @@ namespace Zaghlol.Infrastructure.Persistence.Configurations;
 internal static class CheckSql
 {
     /// <summary>
-    /// Digits of every script a phone, card or account number may arrive in: ASCII, Arabic-Indic (U+0660-0669),
-    /// Extended Arabic-Indic (U+06F0-06F9) and fullwidth (U+FF10-FF19).
+    /// The digits the CHECK backstop knows: ASCII, Arabic-Indic (U+0660-0669), Extended Arabic-Indic (U+06F0-06F9) and fullwidth
+    /// (U+FF10-FF19). The API filter (<c>ContributionPrivacy</c>) counts every Unicode digit and stores them folded to ASCII.
     /// </summary>
     public const string AnyDigit = "0-9٠-٩۰-۹０-９";
 
@@ -16,8 +16,8 @@ internal static class CheckSql
     public const string DigitSeparators = "[:space:].,/_،-";
 
     /// <summary>
-    /// A free-text norm of at most 64 characters with no run of 6 digits (any script, separated by up to three whitespace, dot,
-    /// comma, slash, underscore, Arabic comma or dash characters: "010 1234 5678" and "01 / 23 / 45" are runs; FU-018) and no "@"
+    /// A free-text norm of at most 64 characters with no run of 6 digits (the scripts of <see cref="AnyDigit"/>, separated by up
+    /// to three whitespace, dot, comma, slash, underscore, Arabic comma or dash characters: "010 1234 5678" and "01 / 23 / 45" are runs; FU-018) and no "@"
     /// (no e-mail or InstaPay address). The API filter (<c>ContributionPrivacy</c>) is stricter and runs first.
     /// </summary>
     public static string PrivacySafeNorm(string column) =>

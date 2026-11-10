@@ -3,6 +3,8 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using OpenTelemetry;
 using OpenTelemetry.Metrics;
+using Zaghlol.Application.Flags;
+using Zaghlol.Application.Sync;
 using Zaghlol.Infrastructure.Observability;
 
 namespace Zaghlol.Infrastructure.Tests.Observability;
@@ -79,6 +81,35 @@ public sealed class SeededSeriesTests
         foreach (var operation in new[] { "sign", "sign_verify", "hmac", "data_key", "public_key" })
         {
             Assert.Contains(("zaghlol.kms.unavailable", "operation=" + operation), present);
+        }
+
+        // T-128: every sync series exists (existence, not 0: the meter is process-wide and sync tests may run in parallel).
+        foreach (var outcome in SyncTags.Outcomes)
+        {
+            Assert.Contains(("zaghlol.sync.requests", "outcome=" + outcome), present);
+        }
+
+        foreach (var mode in SyncTags.CatalogModeValues)
+        {
+            Assert.Contains(("zaghlol.sync.catalog", "mode=" + mode), present);
+        }
+
+        foreach (var kind in SyncTags.IntakeKinds)
+        {
+            foreach (var result in SyncTags.IntakeResults)
+            {
+                Assert.Contains(("zaghlol.sync.intake", "kind=" + kind + ";result=" + result), present);
+            }
+        }
+
+        foreach (var block in SyncTags.Blocks)
+        {
+            Assert.Contains(("zaghlol.sync.block_failure", "block=" + block), present);
+        }
+
+        foreach (var flag in FlagKeys.Known)
+        {
+            Assert.Contains(("zaghlol.sync.flag_rules_invalid", "flag=" + flag), present);
         }
     }
 }

@@ -73,6 +73,8 @@ tag vX:  build prodSms + prodNoSms AAB (signed via Play App Signing upload key f
 
 **Price worker (T-127).** `Prices:Providers` is a comma-separated list of provider names in priority order (`fake`, later `local_gold`, `fx`, `spot_gold`). It is empty by default, so the worker fetches nothing and the sync `prices.stale` turns true after 24 h. `fake` is for development and staging only; the worker refuses to start with it in Production. `local_gold`, `fx` and `spot_gold` have no adapter yet (BLK-03, D-41): naming one stops startup. When the adapters exist, their credentials come from the secrets manager (environment variables `Prices__<Provider>__*`), never from a file. `Prices:IntervalMinutes` (default 60, minimum 1) sets the fetch period. The worker needs the `Worker` connection string; the API needs `App` and `Admin` (already required).
 
+**Daily sync (T-128).** `Sync:ThrottleWindow` (a `TimeSpan`, default `24:00:00`) is the server-side window between two effective syncs of one install; `Sync:MaxDeltaOps` (default 2000) is the largest catalog delta sent inline, above which the answer is `mode: full`. Both must be positive or the API refuses to start. Neither is a secret. The contribution `install_hash` uses the existing `Kms:HmacKeys:InstallHashPepper` key (HMAC of `"zaghlol-install-hash-v1" ‖ 0x00 ‖ installId`); a KMS outage drops that call's intake (the app resends) without failing the sync. The migration `AddInstallLastSyncAt` adds `installs.last_sync_at` (nullable, no backfill: `NULL` = never synced, so every install's next sync is allowed) and the `zaghlol.count_daily_active` function (EXECUTE for `app_rw` only); the migration `CountDailyActiveServerDay` replaces it with a two-argument form that uses the database's UTC date and accepts only `android` or `ios` (no data change).
+
 **Ops channel for flag changes (T-126).** `OpsChannel:WebhookUrl` is an incoming-webhook URL (Slack, Google Chat or Teams; body `{"text": "..."}`) that receives one message per feature-flag change. The URL is a credential: set it from the secrets manager (environment variable `OpsChannel__WebhookUrl`), never in a file in the repository. It must be an absolute `https` URL or the API refuses to start (the value is not echoed). Unset, nothing is posted. A failed post is logged by exception type only and never fails the change, which is already committed and audited.
 
 **Infrastructure as code:**
@@ -89,7 +91,7 @@ tag:  promote the same image digest to prod → migration job (expand/contract, 
       → synthetic checks → automatic rollback on failed health
 ```
 
-**Migrations:** expand → deploy → contract across two releases. Migrations must be compatible with the N-1 API version, because a rolling deploy runs mixed versions.
+**Migrations:** expand → deploy → contract across two releases. Migrations must be compatible with the N-1 API version, because a rolling deploy runs mixed versions. A CHECK added to a table that already holds rows is validated against them: the FU-018 CHECKs on `merchant_contributions` and `bank_requests` (AddPriceFeedColumns) were added while both tables were empty. Since T-128 the sync writes them, so a later migration that tightens one of their CHECKs must first delete or migrate the rows that would fail it (or add the constraint `NOT VALID` and validate after the cleanup).
 
 ## 4. Operations
 

@@ -1,10 +1,15 @@
+using Microsoft.Extensions.DependencyInjection.Extensions;
 using Zaghlol.Api.Auth;
+using Zaghlol.Api.Endpoints.V1;
 using Zaghlol.Api.Json;
 using Zaghlol.Api.Observability;
 using Zaghlol.Api.Problems;
 using Zaghlol.Api.RateLimiting;
 using Zaghlol.Api.Signing;
+using Zaghlol.Application.Sync;
 using Zaghlol.Infrastructure.Installs;
+using Zaghlol.Infrastructure.Observability;
+using Zaghlol.Infrastructure.Sync;
 
 namespace Zaghlol.Api;
 
@@ -35,6 +40,19 @@ internal static class ApiPipeline
         services.AddZaghlolInstallStores();
         services.AddSingleton<IInstallTokenRotator, InstallTokenRotator>();
         services.AddHostedService<InstallHashStartupCheck>();
+        return services;
+    }
+
+    /// <summary>
+    /// The sync's services (T-128): the service and its ports (<c>AddZaghlolSyncServices</c>) and the telemetry adapter. Call after
+    /// <c>AddZaghlolDatabase</c> with the App role, <c>AddZaghlolKms</c>, <c>AddZaghlolCatalog</c>, <c>AddZaghlolFlagReader</c> and
+    /// <c>AddZaghlolPrices</c>.
+    /// </summary>
+    public static IServiceCollection AddZaghlolSync(this IServiceCollection services)
+    {
+        services.AddZaghlolSyncServices();
+        services.TryAddSingleton<ZaghlolMetrics>();
+        services.TryAddSingleton<ISyncTelemetry, SyncTelemetry>();
         return services;
     }
 

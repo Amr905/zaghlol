@@ -1,3 +1,4 @@
+using System.Diagnostics.CodeAnalysis;
 using System.Globalization;
 using System.Text;
 using System.Text.Json;
@@ -89,6 +90,105 @@ public static class FlagRulesJson
         return Encoding.UTF8.GetString(stream.ToArray());
     }
 
+    /// <summary>
+    /// The strict reading used by the sync (FU-056): the stored text must be a JSON object whose members are only
+    /// <c>platforms</c> (array of strings), <c>min_app_version</c> (string) and <c>rollout_percent</c> (32-bit integer), each at
+    /// most once, and the result must pass <see cref="FlagRulesValidator.IsValid"/> (non-empty unique platforms, a
+    /// <c>major.minor.patch</c> version, a percentage from 0 to 100). Anything else is a failure, never a partial rule set:
+    /// the caller then treats the flag as OFF.
+    /// </summary>
+    public static bool TryParseStrict(string? json, [NotNullWhen(true)] out FlagRules? rules)
+    {
+        rules = null;
+        if (json is null)
+        {
+            return false;
+        }
+
+        JsonDocument document;
+        try
+        {
+            document = JsonDocument.Parse(json);
+        }
+        catch (JsonException)
+        {
+            return false;
+        }
+
+        using (document)
+        {
+            var root = document.RootElement;
+            if (root.ValueKind != JsonValueKind.Object)
+            {
+                return false;
+            }
+
+            IReadOnlyList<string>? platforms = null;
+            string? min = null;
+            int? percent = null;
+            var seen = new HashSet<string>(StringComparer.Ordinal);
+            foreach (var member in root.EnumerateObject())
+            {
+                if (!seen.Add(member.Name))
+                {
+                    return false;
+                }
+
+                var value = member.Value;
+                switch (member.Name)
+                {
+                    case "platforms":
+                        if (value.ValueKind != JsonValueKind.Array)
+                        {
+                            return false;
+                        }
+
+                        var list = new List<string>();
+                        foreach (var item in value.EnumerateArray())
+                        {
+                            if (item.ValueKind != JsonValueKind.String)
+                            {
+                                return false;
+                            }
+
+                            list.Add(item.GetString()!);
+                        }
+
+                        platforms = list;
+                        break;
+                    case "min_app_version":
+                        if (value.ValueKind != JsonValueKind.String)
+                        {
+                            return false;
+                        }
+
+                        min = value.GetString();
+                        break;
+                    case "rollout_percent":
+                        if (value.ValueKind != JsonValueKind.Number || !value.TryGetInt32(out var number))
+                        {
+                            return false;
+                        }
+
+                        percent = number;
+                        break;
+                    default:
+                        return false;
+                }
+            }
+
+            var parsed = new FlagRules(platforms, min, percent);
+            if (!FlagRulesValidator.IsValid(parsed))
+            {
+                return false;
+            }
+
+            rules = parsed;
+            return true;
+        }
+    }
+
+    /// <summary>The lenient reading for admin read paths; the sync uses <see cref="TryParseStrict"/>.</summary>
     public static FlagRules Parse(string json)
     {
         ArgumentNullException.ThrowIfNull(json);
