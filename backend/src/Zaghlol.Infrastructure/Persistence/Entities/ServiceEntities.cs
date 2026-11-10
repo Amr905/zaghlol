@@ -37,6 +37,11 @@ public sealed class PriceQuote
     public bool IsOverride { get; set; }
 
     public DateTimeOffset? OverrideExpiresAt { get; set; }
+
+    /// <summary>The last feed value, kept while an override is in force so the feed applies again at expiry (T-127).</summary>
+    public decimal? FeedPrice { get; set; }
+
+    public DateTimeOffset? FeedAsOf { get; set; }
 }
 
 /// <summary><c>fx_rates</c>.</summary>

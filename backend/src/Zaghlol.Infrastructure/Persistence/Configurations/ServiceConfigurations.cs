@@ -20,10 +20,15 @@ internal sealed class PriceQuoteConfiguration : IEntityTypeConfiguration<PriceQu
 {
     public void Configure(EntityTypeBuilder<PriceQuote> builder)
     {
-        builder.ToTable("price_quotes");
+        builder.ToTable("price_quotes", t =>
+        {
+            t.HasCheckConstraint("ck_price_quotes_price_positive", "price > 0 AND (feed_price IS NULL OR feed_price > 0)");
+            t.HasCheckConstraint("ck_price_quotes_override_expiry", "is_override = (override_expires_at IS NOT NULL)");
+        });
 
         builder.HasKey(x => new { x.Symbol, x.Currency });
         builder.Property(x => x.Price).HasPrecision(20, 6);
+        builder.Property(x => x.FeedPrice).HasPrecision(20, 6);
         builder.Property(x => x.IsOverride).HasDefaultValue(false);
     }
 }

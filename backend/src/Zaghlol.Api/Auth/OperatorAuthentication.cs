@@ -13,6 +13,7 @@ internal static class OperatorRoles
 {
     public const string FlagsAdmin = "flags_admin";
     public const string CatalogEditor = "catalog_editor";
+    public const string PricesAdmin = "prices_admin";
 }
 
 /// <summary>A validated operator token: who, and with which roles.</summary>
@@ -55,7 +56,7 @@ internal static class OperatorAuthentication
         services.TryAddSingleton<IOperatorTokenValidator, RejectAllOperatorTokenValidator>();
         services.AddAuthentication().AddScheme<AuthenticationSchemeOptions, OperatorAuthenticationHandler>(Scheme, _ => { });
         var authorization = services.AddAuthorizationBuilder();
-        foreach (var role in new[] { OperatorRoles.FlagsAdmin, OperatorRoles.CatalogEditor })
+        foreach (var role in new[] { OperatorRoles.FlagsAdmin, OperatorRoles.CatalogEditor, OperatorRoles.PricesAdmin })
         {
             authorization.AddPolicy(
                 PolicyFor(role),

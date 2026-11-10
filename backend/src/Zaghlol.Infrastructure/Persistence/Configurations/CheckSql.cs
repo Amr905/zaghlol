@@ -12,12 +12,16 @@ internal static class CheckSql
     /// </summary>
     public const string AnyDigit = "0-9٠-٩۰-۹０-９";
 
+    /// <summary>The characters allowed between the digits of one run, inside a bracket expression.</summary>
+    public const string DigitSeparators = "[:space:].,/_،-";
+
     /// <summary>
-    /// A free-text norm of at most 64 characters with no run of 6 digits (any script, optionally separated by one
-    /// space, dot or dash: "010 1234 5678" is a run) and no "@" (no e-mail or InstaPay address).
+    /// A free-text norm of at most 64 characters with no run of 6 digits (any script, separated by up to three whitespace, dot,
+    /// comma, slash, underscore, Arabic comma or dash characters: "010 1234 5678" and "01 / 23 / 45" are runs; FU-018) and no "@"
+    /// (no e-mail or InstaPay address). The API filter (<c>ContributionPrivacy</c>) is stricter and runs first.
     /// </summary>
     public static string PrivacySafeNorm(string column) =>
-        $"char_length({column}) <= 64 AND {column} !~ '([{AnyDigit}][[:space:].-]?){{6,}}' AND position('@' in {column}) = 0";
+        $"char_length({column}) <= 64 AND {column} !~ '([{AnyDigit}][{DigitSeparators}]{{0,3}}){{6,}}' AND position('@' in {column}) = 0";
 
     /// <summary>Same as <c>appVersion</c> in the OpenAPI file, loosened to 2-4 numeric parts.</summary>
     public static string AppVersion(string column) =>

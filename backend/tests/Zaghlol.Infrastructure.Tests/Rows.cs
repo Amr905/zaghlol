@@ -170,6 +170,16 @@ public static class Rows
             ["published"] = false,
             ["changed"] = true,
         },
+        "price_quotes" => new(StringComparer.Ordinal)
+        {
+            ["symbol"] = "XAU21_G",
+            ["currency"] = "EGP",
+            ["price"] = 4217.5m,
+            ["per_unit"] = "gram",
+            ["as_of"] = Now(),
+            ["source"] = "fake",
+            ["is_override"] = false,
+        },
         "operators" => new(StringComparer.Ordinal)
         {
             ["id"] = Guid.CreateVersion7(),
@@ -191,7 +201,7 @@ public static class Rows
     public static string Writer(ZaghlolTestDatabase database, string table) => table switch
     {
         "catalog_versions" or "catalog_categories" or "catalog_merchants" or "catalog_drafts" or "audit_log" => database.Admin,
-        "contribution_aggregates" or "daily_active_counts" => database.Worker,
+        "contribution_aggregates" or "daily_active_counts" or "price_quotes" => database.Worker,
         "operators" => database.Migrator, // no runtime role writes operators yet (T-136)
         _ => database.Api,
     };
