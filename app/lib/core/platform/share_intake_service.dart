@@ -31,9 +31,12 @@ final class ShareRejected extends ShareIntakeEvent {
 /// Dart side of the Android share intake channel
 /// (docs/03-technical/platform-channels.md, "Share intake").
 ///
-/// Usage: listen to [events], call [attach], then [pollPending] once (cold
-/// start). For each [ShareReceived], call [read], run the confirmation / OCR
-/// flow, and finally [discard]. Never log what [read] returns.
+/// Usage: listen to [events], call [attach], then [pollPending] at startup
+/// and on every app resume (the native side also re-announces every pending
+/// share on resume; ids are deduplicated here). For each [ShareReceived],
+/// call [read] only after the app lock is open (T-103), run the
+/// confirmation / OCR flow, and finally [discard]. Never log what [read]
+/// returns. Wiring owners: see FU-067 in docs/implementation-status.md.
 class ShareIntakeService implements ShareIntakeEventsApi {
   ShareIntakeService({ShareIntakeHostApi? host, BinaryMessenger? messenger})
     : _host = host ?? ShareIntakeHostApi(binaryMessenger: messenger),
@@ -54,8 +57,8 @@ class ShareIntakeService implements ShareIntakeEventsApi {
   void detach() =>
       ShareIntakeEventsApi.setUp(null, binaryMessenger: _messenger);
 
-  /// Cold start (and after resume): emits a refusal that happened while Dart
-  /// was not listening and every stored share not yet announced.
+  /// Startup and every resume: emits a refusal that happened while Dart was
+  /// not listening and every stored share not yet announced.
   Future<void> pollPending() async {
     final ShareRejectReason? rejection = await _host.takePendingRejection();
     if (rejection != null) {
@@ -68,8 +71,10 @@ class ShareIntakeService implements ShareIntakeEventsApi {
     }
   }
 
-  /// Decrypted content, in memory only. Throws a `PlatformException` with code
-  /// `IO_ERROR` or `SPOOL_DECRYPT_FAILED` (the share is then already deleted).
+  /// Decrypted content, in memory only. Throws a `PlatformException` with
+  /// code `IO_ERROR` (unknown id, or a transient failure: the share is kept
+  /// and a later call may succeed) or `SPOOL_DECRYPT_FAILED` (tampered or
+  /// unreadable with the current key: the share is already deleted).
   Future<ShareContent> read(String id) => _host.readShare(id);
 
   /// Call after the user confirmed or cancelled; deletes the encrypted files.

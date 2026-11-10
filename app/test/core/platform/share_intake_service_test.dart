@@ -15,6 +15,10 @@ class _FakeNative {
   _FakeNative(this.messenger) {
     _on('listPendingShares', (_) => pending.map((e) => e.descriptor).toList());
     _on('readShare', (List<Object?> args) {
+      if (readFailures > 0) {
+        readFailures--;
+        throw PlatformException(code: 'IO_ERROR', message: 'not now');
+      }
       final id = args[0]! as String;
       final match = pending.where((e) => e.descriptor.id == id);
       if (match.isEmpty) {
@@ -38,6 +42,9 @@ class _FakeNative {
   final List<ShareContent> pending = <ShareContent>[];
   final List<String> discarded = <String>[];
   ShareRejectReason? rejection;
+
+  /// Transient failures (Keystore busy, I/O) before reads succeed again.
+  int readFailures = 0;
 
   void _on(String method, Object? Function(List<Object?> args) handler) {
     messenger.setMockMessageHandler('$_host.$method', (
@@ -214,4 +221,34 @@ void main() {
       );
     },
   );
+
+  test('resume re-announces every pending share once', () async {
+    final a = _share('g' * 28, ShareKind.text, text: 'x');
+    final b = _share('h' * 28, ShareKind.image, bytes: Uint8List(1));
+    native.pending.addAll(<ShareContent>[a, b]);
+
+    // MainActivity announces the whole store on every resume.
+    for (var i = 0; i < 2; i++) {
+      await native.push('onShareReceived', a.descriptor);
+      await native.push('onShareReceived', b.descriptor);
+    }
+    await _pump();
+
+    final ids = seen.whereType<ShareReceived>().map((e) => e.descriptor.id);
+    expect(ids, <String>['g' * 28, 'h' * 28]);
+  });
+
+  test('a transient read error keeps the share for a retry', () async {
+    native.pending.add(_share('i' * 28, ShareKind.text, text: 'x'));
+    native.readFailures = 1;
+
+    await expectLater(
+      service.read('i' * 28),
+      throwsA(
+        isA<PlatformException>().having((e) => e.code, 'code', 'IO_ERROR'),
+      ),
+    );
+    expect((await service.read('i' * 28)).text, 'x');
+    expect(native.discarded, isEmpty);
+  });
 }

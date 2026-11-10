@@ -43,12 +43,13 @@
              the four declared MIME types, has no UI, requests no permission
              (the sender grants read access to the shared content:// URI) and
              re-validates type, size and URI scheme itself. See
-             platform/share/ShareActivity.kt. -->
+             platform/share/ShareActivity.kt. No noHistory: leaving the
+             activity mid-copy must not finish it (the read grant is tied to
+             it); it finishes itself within the intake deadline (T-060 F3). -->
         <activity
             android:name=".platform.share.ShareActivity"
             android:exported="true"
             android:excludeFromRecents="true"
-            android:noHistory="true"
             android:taskAffinity=""
             android:theme="@android:style/Theme.Translucent.NoTitleBar">
             <intent-filter>

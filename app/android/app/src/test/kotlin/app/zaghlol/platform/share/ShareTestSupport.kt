@@ -5,28 +5,53 @@ import java.io.File
 import java.io.IOException
 import java.io.InputStream
 import java.io.OutputStream
+import java.net.URI
+import javax.crypto.AEADBadTagException
 import javax.crypto.Cipher
 import javax.crypto.CipherOutputStream
 import javax.crypto.spec.GCMParameterSpec
 import javax.crypto.spec.SecretKeySpec
 
-/** Software AES-256-GCM with the same file format as [KeystoreShareCipher]. Test key only. */
-class SoftwareShareCipher(keyBytes: ByteArray = ByteArray(32) { it.toByte() }) : ShareCipher {
+/** Software AES-256-GCM with the same file format and AAD use as [KeystoreShareCipher]. Test key only. */
+open class SoftwareShareCipher(keyBytes: ByteArray = ByteArray(32) { it.toByte() }) : ShareCipher {
     private val key = SecretKeySpec(keyBytes, "AES")
     private val random = java.security.SecureRandom()
 
-    override fun wrapEncrypt(out: OutputStream): OutputStream {
-        val iv = ByteArray(12).also { random.nextBytes(it) }
+    override fun wrapEncrypt(out: OutputStream, aad: ByteArray): OutputStream {
+        val iv = ByteArray(ShareCipher.NONCE_BYTES).also { random.nextBytes(it) }
         val cipher = Cipher.getInstance("AES/GCM/NoPadding")
         cipher.init(Cipher.ENCRYPT_MODE, key, GCMParameterSpec(128, iv))
+        cipher.updateAAD(aad)
         out.write(iv)
         return CipherOutputStream(out, cipher)
     }
 
-    override fun decrypt(data: ByteArray): ByteArray {
+    override fun decrypt(data: ByteArray, aad: ByteArray): ByteArray {
+        if (data.size < ShareCipher.NONCE_BYTES + ShareCipher.TAG_BYTES) throw AEADBadTagException("truncated")
         val cipher = Cipher.getInstance("AES/GCM/NoPadding")
-        cipher.init(Cipher.DECRYPT_MODE, key, GCMParameterSpec(128, data, 0, 12))
-        return cipher.doFinal(data, 12, data.size - 12)
+        cipher.init(Cipher.DECRYPT_MODE, key, GCMParameterSpec(128, data, 0, ShareCipher.NONCE_BYTES))
+        cipher.updateAAD(aad)
+        return cipher.doFinal(data, ShareCipher.NONCE_BYTES, data.size - ShareCipher.NONCE_BYTES)
+    }
+}
+
+/** Fails the next [failures] decrypts with [error] (a Keystore-style transient failure), then works. */
+class FlakyShareCipher(var failures: Int, private val error: () -> Exception) : SoftwareShareCipher() {
+    override fun decrypt(data: ByteArray, aad: ByteArray): ByteArray {
+        if (failures > 0) {
+            failures--
+            throw error()
+        }
+        return super.decrypt(data, aad)
+    }
+}
+
+/** Fixed bounds for every image, so intake tests control the pixel cap without real image data. */
+class FakeBoundsProbe(var bounds: ImageBounds? = ImageBounds(1080, 2400)) : ImageBoundsProbe {
+    var lastLength = -1
+    override fun bounds(data: ByteArray, length: Int): ImageBounds? {
+        lastLength = length
+        return bounds
     }
 }
 
@@ -34,31 +59,59 @@ class FakeShareSource(
     override val intentType: String? = null,
     override val text: CharSequence? = null,
     override val streamScheme: String? = null,
-    override val streamAuthority: String? = null,
+    override val streamHost: String? = null,
+    override val streamHasUserInfo: Boolean = false,
+    override val streamProviderPackage: String? = null,
     private val resolverMime: String? = null,
     private val opener: () -> InputStream? = { null },
 ) : ShareSource {
+    var opened = 0
+    var cancelled = false
+
     override fun resolverType(): String? = resolverMime
-    override fun open(): InputStream? = opener()
+    override fun open(): InputStream? {
+        opened++
+        return opener()
+    }
+
+    override fun cancel() {
+        cancelled = true
+    }
 
     companion object {
         fun stream(
             mime: String,
             bytes: ByteArray,
-            authority: String = "com.example.provider",
+            host: String = "com.example.provider",
             scheme: String = "content",
         ) = FakeShareSource(
             intentType = mime,
             streamScheme = scheme,
-            streamAuthority = authority,
+            streamHost = host,
             opener = { ByteArrayInputStream(bytes) },
         )
+
+        /**
+         * Parses [uri] like a ContentResolver caller would see it (scheme, host
+         * without user info or port, user info present or not).
+         */
+        fun fromUri(uri: String, mime: String, bytes: ByteArray, providerPackage: String? = null): FakeShareSource {
+            val u = URI(uri)
+            return FakeShareSource(
+                intentType = mime,
+                streamScheme = u.scheme?.lowercase(),
+                streamHost = u.host?.lowercase(),
+                streamHasUserInfo = u.rawUserInfo != null,
+                streamProviderPackage = providerPackage,
+                opener = { ByteArrayInputStream(bytes) },
+            )
+        }
 
         /** A stream of [length] bytes that starts with [head], generated lazily (no big allocation). */
         fun bigStream(mime: String, head: ByteArray, length: Long) = FakeShareSource(
             intentType = mime,
             streamScheme = "content",
-            streamAuthority = "com.example.provider",
+            streamHost = "com.example.provider",
             opener = {
                 object : InputStream() {
                     var pos = 0L
@@ -72,6 +125,28 @@ class FakeShareSource(
                         val n = minOf(len.toLong(), length - pos).toInt()
                         for (i in 0 until n) b[off + i] = read().toByte()
                         return n
+                    }
+                }
+            },
+        )
+
+        /** A never-ending stream that returns one byte per read and calls [onRead] first (drip-feed). */
+        fun dripStream(mime: String, head: ByteArray, onRead: () -> Unit) = FakeShareSource(
+            intentType = mime,
+            streamScheme = "content",
+            streamHost = "com.example.provider",
+            opener = {
+                object : InputStream() {
+                    var pos = 0
+                    override fun read(): Int = throw UnsupportedOperationException()
+                    override fun read(b: ByteArray, off: Int, len: Int): Int {
+                        onRead()
+                        if (pos < head.size) {
+                            b[off] = head[pos++]
+                            return 1
+                        }
+                        b[off] = 0x41
+                        return 1
                     }
                 }
             },

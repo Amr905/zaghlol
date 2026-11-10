@@ -107,7 +107,7 @@ Every task file has: ID, description, technical details, dependencies, affected 
 |---|---|---|---|---|---|---|---|---|---|
 | [T-058](tasks/T-058.md) | Native Egyptian-speaker review of the copy deck | US-20-1 | Medium | — (human) | external | T-026, T-027, T-028 | C | 2 | TODO |
 | [T-059](tasks/T-059.md) | Compile the 600+ Egyptian merchant seed list (OQ-05) | US-20-1 | Medium | — (human) | external | T-030 | C | 7 | TODO |
-| [T-060](tasks/T-060.md) | Android share/paste intake (text, image, PDF, CSV) | US-03-4 | High | Sonnet | native-platform-engineer | T-004 | D | 3 | TODO |
+| [T-060](tasks/T-060.md) | Android share/paste intake (text, image, PDF, CSV) | US-03-4 | High* | Opus | native-platform-engineer | T-004 | D | 3 | TODO |
 | [T-061](tasks/T-061.md) | iOS Capture Guard (Swift) with config reader | US-04-1 | High* | Opus | native-platform-engineer | T-035, T-009 | E | 6 | TODO |
 | [T-062](tasks/T-062.md) | iOS encrypted spool, host API and background refresh | US-04-1 | High* | Opus | native-platform-engineer | T-004, T-009 | E | 4 | TODO |
 | [T-063](tasks/T-063.md) | App Intents for Message and Wallet automations | US-04-1 | High* | Opus | native-platform-engineer | T-061, T-062 | E | 7 | TODO |

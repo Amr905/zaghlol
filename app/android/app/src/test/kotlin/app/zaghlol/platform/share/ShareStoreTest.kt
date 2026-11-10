@@ -25,18 +25,24 @@ class ShareStoreTest {
         dir.deleteRecursively()
     }
 
-    private fun newStore(cipher: ShareCipher = SoftwareShareCipher()) = ShareStore(
+    private fun newStore(
+        cipher: ShareCipher = SoftwareShareCipher(),
+        maxPending: Int = ShareLimits.MAX_PENDING_SHARES,
+        maxBytes: Long = ShareLimits.MAX_PENDING_BYTES,
+    ) = ShareStore(
         dir,
         cipher,
         clock = { now },
         newId = { "%012x".format(now) + "%016x".format(++counter) },
+        maxPending = maxPending,
+        maxBytes = maxBytes,
     )
 
-    private fun put(store: ShareStore, text: String): ShareDescriptor {
-        val w = store.newWriter()
+    private fun put(store: ShareStore, text: String, kind: ShareKind = ShareKind.TEXT): ShareDescriptor {
+        val w = store.newWriter(kind, if (kind == ShareKind.TEXT) "text/plain" else "text/csv")
         val bytes = text.toByteArray()
         w.write(bytes, 0, bytes.size)
-        return w.commit(ShareKind.TEXT, "text/plain")
+        return w.commit()
     }
 
     @Test
@@ -115,7 +121,7 @@ class ShareStoreTest {
     @Test
     fun abortedWritesLeaveNothing() {
         val store = newStore()
-        val w = store.newWriter()
+        val w = store.newWriter(ShareKind.IMAGE, "image/png")
         w.write(ByteArray(10), 0, 10)
         w.abort()
         assertNoLeftovers(dir)
@@ -137,5 +143,118 @@ class ShareStoreTest {
         ShareIntakeState.setRejected(ShareRejectReason.TOO_LARGE)
         assertEquals(ShareRejectReason.TOO_LARGE, host.takePendingRejection())
         assertEquals(null, host.takePendingRejection())
+    }
+
+    // ---- F6: delete only on proof ----
+
+    @Test
+    fun aTransientDecryptFailureKeepsTheShare() {
+        val flaky = FlakyShareCipher(failures = 0) { java.security.ProviderException("keystore busy") }
+        val store = newStore(flaky)
+        val a = put(store, "payload")
+        flaky.failures = 1
+        assertThrows(ShareStore.Transient::class.java) { store.read(a.id) }
+        assertTrue(File(dir, "${a.id}.bin").exists())
+        assertTrue(File(dir, "${a.id}.meta").exists())
+        assertEquals("payload", store.read(a.id).text)
+    }
+
+    @Test
+    fun aKeystoreGeneralSecurityExceptionIsTransientToo() {
+        val flaky = FlakyShareCipher(failures = 0) { java.security.InvalidKeyException("not now") }
+        val store = newStore(flaky)
+        val a = put(store, "payload")
+        flaky.failures = 2 // meta and body attempts in two reads
+        assertThrows(ShareStore.Transient::class.java) { store.read(a.id) }
+        assertThrows(ShareStore.Transient::class.java) { store.read(a.id) }
+        assertEquals("payload", store.read(a.id).text)
+    }
+
+    @Test
+    fun hostMapsATransientFailureToIoErrorAndKeepsTheShare() {
+        val flaky = FlakyShareCipher(failures = 0) { java.security.ProviderException("keystore busy") }
+        val store = newStore(flaky)
+        val host = ShareIntakeHost(store)
+        val a = put(store, "payload")
+        flaky.failures = 1
+        assertEquals("IO_ERROR", assertThrows(ShareIntakeApiError::class.java) { host.readShare(a.id) }.code)
+        assertEquals(listOf(a.id), host.listPendingShares().map { it.id })
+    }
+
+    @Test
+    fun aTruncatedFileIsProvenBadAndDeleted() {
+        val store = newStore()
+        val a = put(store, "payload")
+        File(dir, "${a.id}.bin").writeBytes(ByteArray(5))
+        assertThrows(ShareStore.DecryptFailed::class.java) { store.read(a.id) }
+        assertNoLeftovers(dir)
+    }
+
+    // ---- F11: AAD binds files to id and kind ----
+
+    @Test
+    fun aBodyMovedToAnotherShareFailsAuthentication() {
+        val store = newStore()
+        val a = put(store, "first")
+        now += 1
+        val b = put(store, "second")
+        File(dir, "${a.id}.bin").copyTo(File(dir, "${b.id}.bin"), overwrite = true)
+        assertThrows(ShareStore.DecryptFailed::class.java) { store.read(b.id) }
+        assertEquals("first", store.read(a.id).text)
+    }
+
+    @Test
+    fun aMetaMovedToAnotherShareFailsAuthentication() {
+        val store = newStore()
+        val a = put(store, "first")
+        now += 1
+        val b = put(store, "second", kind = ShareKind.CSV)
+        File(dir, "${a.id}.meta").copyTo(File(dir, "${b.id}.meta"), overwrite = true)
+        assertThrows(ShareStore.DecryptFailed::class.java) { store.read(b.id) }
+    }
+
+    @Test
+    fun aadDiffersByRoleIdAndKind() {
+        val id = "0".repeat(28)
+        val other = "1".repeat(28)
+        val all = listOf(
+            ShareStore.metaAad(id),
+            ShareStore.metaAad(other),
+            ShareStore.bodyAad(id, ShareKind.TEXT),
+            ShareStore.bodyAad(id, ShareKind.IMAGE),
+            ShareStore.bodyAad(other, ShareKind.TEXT),
+        ).map { String(it) }
+        assertEquals(all.size, all.toSet().size)
+    }
+
+    // ---- F2: caps ----
+
+    @Test
+    fun theCountCapIncludesWritesInProgress() {
+        val store = newStore(maxPending = 2)
+        put(store, "a")
+        val inProgress = store.newWriter(ShareKind.TEXT, "text/plain")
+        assertThrows(ShareStore.Full::class.java) { store.newWriter(ShareKind.TEXT, "text/plain") }
+        inProgress.abort()
+        put(store, "b")
+        assertThrows(ShareStore.Full::class.java) { store.ensureCapacity() }
+    }
+
+    @Test
+    fun theByteCapStopsAWriteMidwayAndAbortCleansUp() {
+        val store = newStore(maxBytes = 1_000)
+        val w = store.newWriter(ShareKind.PDF, "application/pdf")
+        w.write(ByteArray(900), 0, 900)
+        assertThrows(ShareStore.Full::class.java) { w.write(ByteArray(200), 0, 200) }
+        w.abort()
+        assertNoLeftovers(dir)
+    }
+
+    @Test
+    fun staleSharesDoNotCountAgainstTheCaps() {
+        val store = newStore(maxPending = 1)
+        put(store, "old")
+        dir.listFiles()!!.forEach { it.setLastModified(now - ShareLimits.STALE_AFTER_MS - 1000) }
+        store.ensureCapacity()
     }
 }

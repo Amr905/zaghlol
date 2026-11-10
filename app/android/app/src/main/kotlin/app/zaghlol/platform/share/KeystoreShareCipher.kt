@@ -1,75 +1,40 @@
 package app.zaghlol.platform.share
 
-import android.os.Build
-import android.security.keystore.KeyGenParameterSpec
-import android.security.keystore.KeyProperties
+import app.zaghlol.platform.spool.SpoolKey
 import java.io.OutputStream
-import java.security.KeyStore
-import java.security.ProviderException
+import javax.crypto.AEADBadTagException
 import javax.crypto.Cipher
 import javax.crypto.CipherOutputStream
-import javax.crypto.KeyGenerator
-import javax.crypto.SecretKey
 import javax.crypto.spec.GCMParameterSpec
 
 /**
- * Android Keystore AES-256-GCM key `zaghlol_spool_v1`: non-exportable, no user
- * authentication, StrongBox when available (platform-channels.md 1.3). The
- * alias is shared with the T-039 spool; whichever task runs first creates it.
+ * [ShareCipher] over the Keystore spool key. The key itself (alias, parameters,
+ * get-or-create lock) is owned by [SpoolKey], shared with T-039.
  */
 class KeystoreShareCipher : ShareCipher {
-    override fun wrapEncrypt(out: OutputStream): OutputStream {
+    override fun wrapEncrypt(out: OutputStream, aad: ByteArray): OutputStream {
         val cipher = Cipher.getInstance(TRANSFORMATION)
-        cipher.init(Cipher.ENCRYPT_MODE, key())
+        cipher.init(Cipher.ENCRYPT_MODE, SpoolKey.get())
+        cipher.updateAAD(aad)
         val iv = cipher.iv
-        check(iv.size == NONCE_BYTES) { "unexpected GCM nonce length" }
+        check(iv.size == ShareCipher.NONCE_BYTES) { "unexpected GCM nonce length" }
         out.write(iv)
         return CipherOutputStream(out, cipher)
     }
 
-    override fun decrypt(data: ByteArray): ByteArray {
-        require(data.size > NONCE_BYTES + TAG_BYTES) { "ciphertext too short" }
+    override fun decrypt(data: ByteArray, aad: ByteArray): ByteArray {
+        if (data.size < ShareCipher.NONCE_BYTES + ShareCipher.TAG_BYTES) throw AEADBadTagException("truncated")
         val cipher = Cipher.getInstance(TRANSFORMATION)
-        cipher.init(Cipher.DECRYPT_MODE, key(), GCMParameterSpec(TAG_BYTES * 8, data, 0, NONCE_BYTES))
-        return cipher.doFinal(data, NONCE_BYTES, data.size - NONCE_BYTES)
-    }
-
-    private fun key(): SecretKey {
-        val ks = KeyStore.getInstance(PROVIDER).apply { load(null) }
-        (ks.getKey(ALIAS, null) as? SecretKey)?.let { return it }
-        return generate(strongBox = Build.VERSION.SDK_INT >= Build.VERSION_CODES.P)
-    }
-
-    private fun generate(strongBox: Boolean): SecretKey {
-        val spec = KeyGenParameterSpec.Builder(
-            ALIAS,
-            KeyProperties.PURPOSE_ENCRYPT or KeyProperties.PURPOSE_DECRYPT,
+        cipher.init(
+            Cipher.DECRYPT_MODE,
+            SpoolKey.get(),
+            GCMParameterSpec(ShareCipher.TAG_BYTES * 8, data, 0, ShareCipher.NONCE_BYTES),
         )
-            .setKeySize(256)
-            .setBlockModes(KeyProperties.BLOCK_MODE_GCM)
-            .setEncryptionPaddings(KeyProperties.ENCRYPTION_PADDING_NONE)
-            .setRandomizedEncryptionRequired(true)
-            .setUserAuthenticationRequired(false)
-            .apply {
-                if (strongBox && Build.VERSION.SDK_INT >= Build.VERSION_CODES.P) setIsStrongBoxBacked(true)
-            }
-            .build()
-        return try {
-            KeyGenerator.getInstance(KeyProperties.KEY_ALGORITHM_AES, PROVIDER).run {
-                init(spec)
-                generateKey()
-            }
-        } catch (e: ProviderException) {
-            // StrongBoxUnavailableException (API 28+) extends ProviderException.
-            if (strongBox) generate(strongBox = false) else throw e
-        }
+        cipher.updateAAD(aad)
+        return cipher.doFinal(data, ShareCipher.NONCE_BYTES, data.size - ShareCipher.NONCE_BYTES)
     }
 
-    companion object {
-        const val ALIAS = "zaghlol_spool_v1"
-        private const val PROVIDER = "AndroidKeyStore"
-        private const val TRANSFORMATION = "AES/GCM/NoPadding"
-        const val NONCE_BYTES = 12
-        const val TAG_BYTES = 16
+    private companion object {
+        const val TRANSFORMATION = "AES/GCM/NoPadding"
     }
 }

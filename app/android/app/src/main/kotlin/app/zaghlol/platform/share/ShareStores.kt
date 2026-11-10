@@ -4,7 +4,12 @@ import android.content.Context
 import java.io.File
 
 object ShareStores {
-    /** `noBackupFilesDir/spool/files`: excluded from every backup path (T-165, platform-channels.md 1.3). */
-    fun create(context: Context): ShareStore =
-        ShareStore(File(context.noBackupFilesDir, "spool/files"), KeystoreShareCipher())
+    /**
+     * `noBackupFilesDir/share/`: excluded from every backup path (T-165). It is
+     * deliberately not under `spool/` (F8): the share store purges by age,
+     * while T-039 spool entries are deleted only on ack.
+     */
+    fun dir(context: Context): File = File(context.noBackupFilesDir, "share")
+
+    fun create(context: Context): ShareStore = ShareStore(dir(context), KeystoreShareCipher())
 }
