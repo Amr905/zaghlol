@@ -36,8 +36,9 @@ internal sealed class SyncStore(IAppDbContextFactory contexts) : ISyncStore
         ON CONFLICT DO NOTHING
         """;
 
-    // app_rw has no privilege on daily_active_counts; this SECURITY DEFINER function can only add 1 (SyncSql).
-    private const string DailyActiveSql = "SELECT zaghlol.count_daily_active(@day, @platform, @app_version)";
+    // app_rw has no privilege on daily_active_counts; this SECURITY DEFINER function can only add 1 to today's (database UTC
+    // date) row of android or ios (DailyActiveServerDaySql).
+    private const string DailyActiveSql = "SELECT zaghlol.count_daily_active(@platform, @app_version)";
 
     public async Task<SyncInstall?> FindInstallAsync(InstallId installId, CancellationToken cancellationToken)
     {
@@ -103,10 +104,9 @@ internal sealed class SyncStore(IAppDbContextFactory contexts) : ISyncStore
             }
         }
 
-        // At most one increment per install per UTC day follows from the 24 h window.
+        // At most one increment per install per UTC day follows from the 24 h window. The day is the database's own.
         await using (var active = new NpgsqlCommand(DailyActiveSql, connection, transaction))
         {
-            active.Parameters.AddWithValue("day", DateOnly.FromDateTime(now.UtcDateTime));
             active.Parameters.AddWithValue("platform", claim.Platform);
             active.Parameters.AddWithValue("app_version", claim.AppVersion);
             await active.ExecuteNonQueryAsync(cancellationToken);

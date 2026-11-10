@@ -308,7 +308,8 @@ CREATE TABLE merchant_contributions (
   install_hash bytea NOT NULL,                  -- HMAC(install_id, pepper) — counts distinct installs without joining
   received_at timestamptz NOT NULL DEFAULT now(),
   UNIQUE (merchant_norm, institution_code, install_hash),
-  -- No run of 6 digits in any script (ASCII, Arabic-Indic, Extended Arabic-Indic, fullwidth), separated by up to three
+  -- Backstop only, narrower than the API filter (ContributionPrivacy, security-model.md §6), which runs first on the same stored text.
+  -- No run of 6 digits in the scripts listed here (ASCII, Arabic-Indic, Extended Arabic-Indic, fullwidth), separated by up to three
   -- whitespace, dot, comma, slash, underscore, Arabic comma or dash characters (FU-018; '010 1234 5678' and '01 / 23 / 45' are runs); no '@' (e-mail, InstaPay address); at most 64 characters.
   CHECK (char_length(merchant_norm) <= 64 AND merchant_norm !~ '([0-9٠-٩۰-۹０-９][[:space:].,/_،-]{0,3}){6,}' AND position('@' in merchant_norm) = 0),
   CHECK (institution_code ~ '^[a-z0-9_]{1,64}$'),   -- OpenAPI InstitutionCode alphabet (lowercase slug)
@@ -335,8 +336,11 @@ CREATE TABLE bank_requests (
 CREATE TABLE daily_active_counts (day date NOT NULL, platform text NOT NULL, app_version text NOT NULL,
   installs integer NOT NULL, PRIMARY KEY (day, platform, app_version));
 -- T-128: each claimed sync adds its install to (UTC day, platform, app version) in the same transaction as the claim, through
--- zaghlol.count_daily_active(date, text, text): SECURITY DEFINER (owner migrator), search_path fixed, EXECUTE for app_rw only.
--- It can only add 1; app_rw keeps no table privilege here (cannot read the counters or write a count, T-122 SEC F10).
+-- zaghlol.count_daily_active(p_platform text, p_app_version text): SECURITY DEFINER (owner migrator), search_path fixed, EXECUTE
+-- for app_rw only. It can only add 1, to the row of the database's own UTC date ((now() AT TIME ZONE 'UTC')::date; the caller
+-- can't choose a day), and only for platform 'android' or 'ios' (SQLSTATE 22023 otherwise). Migration CountDailyActiveServerDay
+-- (T-128 SEC S3) replaced the first form, which took the day as an argument. app_rw keeps no table privilege here (cannot read
+-- the counters or write a count, T-122 SEC F10).
 
 -- Operators & audit (FR-BE-08)
 CREATE TABLE operators (id uuid PRIMARY KEY, oidc_subject text NOT NULL UNIQUE, display_name text NOT NULL,
@@ -364,7 +368,7 @@ CREATE TABLE audit_log (id bigint GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
 
 | Concern | Mechanism |
 |---|---|
-| Contributions can't contain people or amounts | API validation (BR-SYNC-04 filters, `security-model.md` §6; digits folded to ASCII and separators stripped first). The DB backstop rejects a run of 6 digits in any script (ASCII, Arabic-Indic `٠-٩`, Extended `۰-۹`, fullwidth `０-９`), separated by up to three whitespace, dot, comma, slash, underscore, Arabic-comma or dash characters (FU-018), rejects any `@`, and caps the length at 64 (the same CHECK on `bank_requests.institution_name_norm`). `institution_code` and `category_code` must be lowercase slugs |
+| Contributions carry no phone, card or account number and no e-mail or InstaPay address; person names, short amounts and dates are not detected by the server | API validation (BR-SYNC-04, `security-model.md` §6): the server drops text with a commercial at, a run of 6 digits of any Unicode digit script (up to 3 non-letter separators between digits) or over 64 characters, on the normalized text it stores. It does **not** detect person names, and short amounts and dates (`250.00`, `12/05`, `99 egp`) pass the 6-digit rule: that residual is PO-accepted and covered by the app's own filter, the A-48 threshold (at least 5 distinct installs before review) and mandatory operator review before promotion (T-129). The DB backstop, narrower than the API filter, rejects a run of 6 digits in ASCII, Arabic-Indic `٠-٩`, Extended `۰-۹` or fullwidth `０-９`, separated by up to three whitespace, dot, comma, slash, underscore, Arabic-comma or dash characters (FU-018), rejects any `@`, and caps the length at 64 (the same CHECK on `bank_requests.institution_name_norm`). `institution_code` and `category_code` must be lowercase slugs |
 | Direct read-only DB access | `ops_ro` (login `zaghlol_ops_ro`, break-glass only, T-140) can't read `accounts.email`, `accounts.provider_subject`, `purchases.store_key`, `purchases.linked_purchase_token`, `store_notifications.store_key`, token hashes, refresh tokens or stored responses. Support lookups go through the audited admin API (`ops_rw`) |
 | Wrong credentials | Each runtime process checks at startup that its login is a member of exactly its own group and is not a superuser, the schema owner or `migrator`, and stops otherwise; readiness reports 503 until the App login passes the same check |
 | Distinct counts without tracking | `install_hash` = HMAC-SHA256 with a pepper held in the KMS; it can't be joined back to `installs` without the pepper |

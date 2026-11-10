@@ -48,6 +48,62 @@ public class SyncIntakeTests
         Assert.Equal(new IntakeCounts(1, 0, 0), intake.ContributionDrops);
     }
 
+    /// <summary>T-128 security review S1: phone and account numbers in shapes the first filter missed, all synthetic.</summary>
+    public static TheoryData<string, string> S1Bypasses => new()
+    {
+        { "en dash", "010\u20131234\u20135678" },
+        { "minus sign", "010\u22121234\u22125678" },
+        { "figure dash", "010\u20121234\u20125678" },
+        { "tatweel", "\u0660\u0661\u0660\u0640\u0661\u0662\u0663\u0664\u0640\u0665\u0666\u0667\u0668" },
+        { "bullet", "010\u20221234\u20225678" },
+        { "pipe", "010|1234|5678" },
+        { "colon", "010:1234:5678" },
+        { "brackets and middle dot", "(010) 1234\u00B75678" },
+        { "Devanagari digits", "pay \u0966\u0967\u0966\u0967\u0968\u0969\u096A\u096B" },
+        { "Bengali digits", "pay \u09E6\u09E7\u09E8\u09E9\u09EA\u09EB" },
+        { "mathematical digits", "pay \U0001D7CE\U0001D7CF\U0001D7D0\U0001D7D1\U0001D7D2\U0001D7D3" },
+        { "mathematical double-struck digits", "\U0001D7D8\U0001D7D9 \U0001D7DA\U0001D7DB \U0001D7DC\U0001D7DD" },
+        { "superscript digits", "pay \u2070\u00B9\u00B2\u00B3\u2074\u2075" },
+        { "subscript digits", "pay \u2080\u2081\u2082\u2083\u2084\u2085" },
+        { "circled digits", "pay \u2460\u2461\u2462\u2463\u2464\u2465" },
+        { "combining acute after each digit", "0\u03011\u03010\u03011\u03012\u03013\u03014\u0301" },
+        { "combining grapheme joiner", "0\u034F1\u034F0\u034F1\u034F2\u034F3" },
+        { "variation selector", "0\uFE0F1\uFE0F0\uFE0F1\uFE0F2\uFE0F3" },
+        { "enclosing keycap", "0\u20E31\u20E30\u20E31\u20E32\u20E33" },
+        { "small commercial at", "name\uFE6Binstapay" },
+        { "fullwidth commercial at", "name\uFF20instapay" },
+    };
+
+    [Theory]
+    [MemberData(nameof(S1Bypasses))]
+    public void S1BypassShapesAreFiltered(string shape, string merchant)
+    {
+        var intake = SyncIntake.Prepare(
+            [new SyncContribution(merchant, "nbe", "dining")],
+            [new SyncBankRequest(merchant, "EG", "sms")],
+            Categories);
+
+        Assert.True(intake.IsEmpty, shape);
+        Assert.Equal(new IntakeCounts(1, 0, 0), intake.ContributionDrops);
+        Assert.Equal(new IntakeCounts(1, 0, 0), intake.BankRequestDrops);
+    }
+
+    [Theory]
+    [InlineData("name\uFE6Bx", "name@x")] // small commercial at
+    [InlineData("name\uFF20x", "name@x")] // fullwidth commercial at
+    [InlineData("shop \u0661\u0662", "shop 12")] // Arabic-Indic digits stored as ASCII
+    [InlineData("shop \u0967\u0968", "shop 12")] // Devanagari
+    [InlineData("shop \U0001D7CF\U0001D7D0", "shop 12")] // mathematical digits (surrogate pairs)
+    [InlineData("shop \u00B9\u2082", "shop 12")] // superscript and subscript
+    [InlineData("shop \u2460\u2461", "shop 12")] // circled
+    [InlineData("1\u03012\u20E3", "12")] // combining and enclosing marks removed
+    [InlineData("\u0643\u064E\u0634\u0652\u0631\u0650\u064A", "\u0643\u0634\u0631\u064A")] // Arabic harakat removed
+    [InlineData("shop \u2469", "shop \u2469")] // circled ten is not one digit: kept
+    public void NormalizeFoldsAtSignsDigitsAndMarks(string input, string expected)
+    {
+        Assert.Equal(expected, SyncIntake.NormalizeText(input));
+    }
+
     [Fact]
     public void ACleanContributionIsKeptNextToFilteredOnes()
     {

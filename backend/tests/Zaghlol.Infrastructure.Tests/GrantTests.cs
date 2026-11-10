@@ -67,9 +67,9 @@ public class GrantTests(SchemaFixture fixture)
         // T-128: only app_rw may add to the daily-active counter, and only through the function.
         { "zaghlol_api", "UPDATE zaghlol.daily_active_counts SET installs = 1000" },
         { "zaghlol_api", "DELETE FROM zaghlol.daily_active_counts" },
-        { "zaghlol_admin", "SELECT zaghlol.count_daily_active(current_date, 'ios', '1.0.0')" },
-        { "zaghlol_worker", "SELECT zaghlol.count_daily_active(current_date, 'ios', '1.0.0')" },
-        { "zaghlol_ops_ro", "SELECT zaghlol.count_daily_active(current_date, 'ios', '1.0.0')" },
+        { "zaghlol_admin", "SELECT zaghlol.count_daily_active('ios', '1.0.0')" },
+        { "zaghlol_worker", "SELECT zaghlol.count_daily_active('ios', '1.0.0')" },
+        { "zaghlol_ops_ro", "SELECT zaghlol.count_daily_active('ios', '1.0.0')" },
     };
 
     public static TheoryData<string, string> Allowed => new()
@@ -93,7 +93,7 @@ public class GrantTests(SchemaFixture fixture)
         { "zaghlol_worker", "DELETE FROM zaghlol.audit_log WHERE false" },
         { "zaghlol_worker", "UPDATE zaghlol.installs SET deleted_at = now(), registration_key_hash = NULL WHERE false" },
         { "zaghlol_worker", "UPDATE zaghlol.purchases SET state = 'expired', acknowledged = true WHERE false" },
-        { "zaghlol_api", "SELECT zaghlol.count_daily_active(DATE '2000-01-01', 'ios', '1.0.0')" },
+        { "zaghlol_api", "SELECT zaghlol.count_daily_active('ios', '1.0.0')" },
         { "zaghlol_api", "UPDATE zaghlol.installs SET last_sync_at = now() WHERE false" },
     };
 
