@@ -18,6 +18,8 @@ import app.zaghlol.platform.notifications.NotificationRoutes
 import app.zaghlol.platform.notifications.NotificationsEventsApi
 import app.zaghlol.platform.notifications.NotificationsHost
 import app.zaghlol.platform.notifications.NotificationsRegistration
+import app.zaghlol.platform.ocr.OcrHostApi
+import app.zaghlol.platform.ocr.OcrHosts
 import app.zaghlol.platform.share.ShareDescriptor
 import app.zaghlol.platform.share.ShareHandOff
 import app.zaghlol.platform.share.ShareIntakeEventsApi
@@ -33,6 +35,7 @@ import app.zaghlol.platform.text.TextNormalizationRegistration
 import app.zaghlol.platform.widget.WidgetBridgeRegistration
 import io.flutter.embedding.android.FlutterFragmentActivity
 import io.flutter.embedding.engine.FlutterEngine
+import java.util.concurrent.ExecutorService
 import java.util.concurrent.Executors
 
 // T-103: BiometricPrompt (DeviceSecurityHost.authenticate) needs a FragmentActivity.
@@ -48,6 +51,7 @@ class MainActivity : FlutterFragmentActivity() {
         if (SecureWindowState.requested) AndroidDeviceEnv.applyTo(this, true)
         super.onCreate(savedInstanceState)
     }
+    private var ocrExecutor: ExecutorService? = null
 
     override fun configureFlutterEngine(flutterEngine: FlutterEngine) {
         super.configureFlutterEngine(flutterEngine)
@@ -105,6 +109,10 @@ class MainActivity : FlutterFragmentActivity() {
         rt.attachUi(flutterEngine, perms)
         // SMS-device: debug-only counters screen (dev flavours; no-op elsewhere).
         SmsDiagChannel.register(messenger, applicationContext)
+        // T-159: OCR reads pending shares from the same encrypted store.
+        val (ocr, executor) = OcrHosts.create(applicationContext, store)
+        ocrExecutor = executor
+        OcrHostApi.setUp(messenger, ocr)
     }
 
     override fun onRequestPermissionsResult(requestCode: Int, permissions: Array<out String>, grantResults: IntArray) {
@@ -131,6 +139,9 @@ class MainActivity : FlutterFragmentActivity() {
         NotificationsRegistration.unregister(flutterEngine.dartExecutor.binaryMessenger)
         notificationsHost = null
         notificationEvents = null
+        OcrHostApi.setUp(flutterEngine.dartExecutor.binaryMessenger, null)
+        ocrExecutor?.shutdown()
+        ocrExecutor = null
         shareEvents = null
         shareStore = null
         capturePermissions = null
