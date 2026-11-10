@@ -85,7 +85,7 @@ public sealed class SyncService(
                 request.CatalogVersion,
                 install.Platform,
                 appVersion,
-                installHash is null ? null : new ReadOnlyMemory<byte>(installHash),
+                installHash is null ? (ReadOnlyMemory<byte>?)null : new ReadOnlyMemory<byte>(installHash),
                 intake.Contributions,
                 intake.BankRequests),
             cancellationToken);

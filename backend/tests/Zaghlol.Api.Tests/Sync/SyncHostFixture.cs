@@ -24,6 +24,7 @@ using Zaghlol.Infrastructure.Catalog;
 using Zaghlol.Infrastructure.Flags;
 using Zaghlol.Infrastructure.Kms;
 using Zaghlol.Infrastructure.Logging;
+using Zaghlol.Infrastructure.Observability;
 using Zaghlol.Infrastructure.Persistence;
 using Zaghlol.Infrastructure.Prices;
 using Zaghlol.Testing;

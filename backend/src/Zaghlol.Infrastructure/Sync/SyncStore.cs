@@ -77,7 +77,7 @@ internal sealed class SyncStore(IAppDbContextFactory contexts) : ISyncStore
 
         var contributions = 0;
         var bankRequests = 0;
-        if (claim.InstallHash is { } hash)
+        if (claim.InstallHash is { IsEmpty: false } hash)
         {
             if (claim.Contributions.Count > 0)
             {

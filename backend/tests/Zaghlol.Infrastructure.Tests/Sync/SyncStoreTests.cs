@@ -79,7 +79,7 @@ public class SyncStoreTests(SyncStoreFixture fixture) : IClassFixture<SyncStoreF
         byte[]? hash = null,
         IReadOnlyList<PreparedContribution>? contributions = null,
         IReadOnlyList<PreparedBankRequest>? banks = null) =>
-        new(id, now, Window, 7, "android", appVersion, hash is null ? null : new ReadOnlyMemory<byte>(hash), contributions ?? [], banks ?? []);
+        new(id, now, Window, 7, "android", appVersion, hash is null ? (ReadOnlyMemory<byte>?)null : new ReadOnlyMemory<byte>(hash), contributions ?? [], banks ?? []);
 
     private async Task<long> DailyActiveAsync(string appVersion, DateTimeOffset day) =>
         (long?)(int?)await Db.ScalarAsync(
