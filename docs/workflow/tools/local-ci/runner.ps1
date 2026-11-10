@@ -27,9 +27,12 @@ $LogCap  = 1500   # max lines of raw log tail in the published .log (summary and
 # Override per PC with the environment variables if a tag does not exist.
 $FlutterImage = if ($env:ZAGHLOL_FLUTTER_IMAGE) { $env:ZAGHLOL_FLUTTER_IMAGE } else { 'zaghlol-flutter:3.47.9' }   # built locally from flutter.Dockerfile
 $DotnetImage  = if ($env:ZAGHLOL_DOTNET_IMAGE)  { $env:ZAGHLOL_DOTNET_IMAGE }  else { 'mcr.microsoft.com/dotnet/sdk:10.0.402' }
+# Android image for the apk/Gradle steps: built on first use from flutter-android.Dockerfile on top of $FlutterImage.
+$AndroidImage = if ($env:ZAGHLOL_ANDROID_IMAGE) { $env:ZAGHLOL_ANDROID_IMAGE } else { 'zaghlol-flutter-android:3.47.9' }   # keep the version equal to $FlutterImage
 # Named volumes: package caches survive between runs so only the first run downloads everything.
 $PubVolume    = 'zaghlol-ci-pub-cache'
 $NugetVolume  = 'zaghlol-ci-nuget-cache'
+$GradleVolume = 'zaghlol-ci-gradle-cache'   # /root/.gradle: Gradle wrapper distribution + dependency cache for android steps
 
 function Log($f,$m){ $line = "[{0}] {1}" -f (Get-Date -Format 'HH:mm:ss'), $m; Add-Content -Path $f -Value $line -Encoding UTF8; Write-Host $line }
 
@@ -58,6 +61,20 @@ function Ensure-Image($log, $image) {
     if (-not $ok) { Log $log "docker build $image FAILED" }
     return $ok
   }
+  if ($image -like 'zaghlol-flutter-android:*') {
+    # Android SDK/NDK/JDK on top of the quick Flutter image, which is built first if missing.
+    $df = Join-Path $PSScriptRoot 'flutter-android.Dockerfile'
+    if (-not (Test-Path $df)) { Log $log "missing $df"; return $false }
+    if (-not (Ensure-Image $log $script:FlutterImage)) { return $false }
+    Log $log "building $image from flutter-android.Dockerfile (first run only; ~10-20 minutes, ~6 GB)"
+    $ctx = Join-Path $env:TEMP 'zaghlol-flutter-ctx'
+    New-Item -ItemType Directory -Force -Path $ctx | Out-Null
+    $o = & docker build -t $image --build-arg "BASE_IMAGE=$($script:FlutterImage)" -f $df $ctx 2>&1 | ForEach-Object { if ($_ -is [System.Management.Automation.ErrorRecord]) { $_.Exception.Message } else { $_ } } | Out-String
+    $ok = ($LASTEXITCODE -eq 0)
+    Add-Content -Path $log -Value $o -Encoding UTF8
+    if (-not $ok) { Log $log "docker build $image FAILED" }
+    return $ok
+  }
   Log $log "pulling $image (first run only; can take several minutes)"
   $o = & docker pull $image 2>&1 | ForEach-Object { if ($_ -is [System.Management.Automation.ErrorRecord]) { $_.Exception.Message } else { $_ } } | Out-String
   $ok = ($LASTEXITCODE -eq 0)
@@ -77,8 +94,9 @@ function Docker-Step($log, $name, $image, $kind, $subdir, $cmd) {
       '-v', "${Repo}:/work", '-w', "/work/$subdir",
       '-e', 'GIT_CONFIG_COUNT=1', '-e', 'GIT_CONFIG_KEY_0=safe.directory', '-e', 'GIT_CONFIG_VALUE_0=*',
       '-e', 'CI=true')
-    if ($kind -eq 'flutter') {
+    if ($kind -eq 'flutter' -or $kind -eq 'android') {
       $a += @('-v', "${PubVolume}:/pubcache", '-e', 'PUB_CACHE=/pubcache', '-e', 'FLUTTER_SUPPRESS_ANALYTICS=true')
+      if ($kind -eq 'android') { $a += @('-v', "${GradleVolume}:/root/.gradle") }
     } else {
       $a += @('-v', "${NugetVolume}:/nuget", '-e', 'NUGET_PACKAGES=/nuget',
               '-e', 'DOTNET_NOLOGO=1', '-e', 'DOTNET_CLI_TELEMETRY_OPTOUT=1', '-e', 'DOTNET_CLI_HOME=/tmp',
@@ -114,6 +132,11 @@ function Get-ErrorLines($name, $out) {
     }
   }
   switch -Regex ($name) {
+    '^(apk-|android-)' {
+      # Gradle failure blocks, Kotlin/Java compiler errors, lint findings, our own assertion messages.
+      Ctx 'What went wrong' 14
+      foreach ($l in $lines) { if ($l -match '^e: |: error: |^\s*Error: |Lint found |^ERROR:|^FAIL: |::error::|FAILED$') { $hits.Add($l) } }
+      break }
     '^format$'        { foreach ($l in $lines) { if ($l -match '^Changed |^Could not format|^Formatted ') { $hits.Add($l) } } ; break }
     '^analyze$'       { foreach ($l in $lines) { if ($l -match '^\s*(info|warning|error)\s' -or $l -match '^\d+ issues? found') { $hits.Add($l) } } ; break }
     '^dotnet-format$' { foreach ($l in $lines) { if ($l -match ': (error|warning) [A-Za-z0-9_]+:|Unhandled exception|Formatted code file') { $hits.Add($l) } } ; break }
@@ -152,7 +175,7 @@ function Probe {
   }
   Add-Content $p ("docker running: " + (Docker-Up))
   Add-Content $p ("docker server: " + (docker version --format '{{.Server.Version}} {{.Server.Os}}' 2>&1 | Out-String))
-  foreach ($img in $FlutterImage,$DotnetImage) {
+  foreach ($img in $FlutterImage,$AndroidImage,$DotnetImage) {
     docker image inspect $img *> $null
     Add-Content $p ("image {0}: {1}" -f $img, $(if ($LASTEXITCODE -eq 0) { 'present' } else { 'not pulled yet (pulled on first use)' }))
   }
@@ -189,7 +212,19 @@ function Checkout($log, $branch) {
   return [pscustomobject]@{ Sha=$sha; Changed=$changed }
 }
 
-function Run-Pipeline($log, $pipeline) {
+# aapt2 permission check on a built APK (mirrors the app-ci matrix job): *NoSms flavors must not declare any
+# restricted SMS permission, *Sms flavors must declare READ_SMS and RECEIVE_SMS. No double quotes (PowerShell 5.1).
+function Apk-Perms-Cmd($fl, $mode, $expectSms) {
+  $c = "AAPT2=`$(ls -d `$ANDROID_HOME/build-tools/*/aapt2 | sort -V | tail -n 1); APK=`$(find build/app/outputs -iname '*$fl*$mode.apk' | head -n 1); : `${APK:?FAIL: APK for $fl not found}; `$AAPT2 dump permissions `$APK > /tmp/perms.txt; cat /tmp/perms.txt; "
+  if ($expectSms) {
+    $c += "for p in READ_SMS RECEIVE_SMS; do grep -q android.permission.`$p /tmp/perms.txt || { echo FAIL: $fl is missing `$p; exit 1; }; done"
+  } else {
+    $c += "if grep -E 'android\.permission\.(READ_SMS|RECEIVE_SMS|SEND_SMS|RECEIVE_MMS|RECEIVE_WAP_PUSH|READ_CELL_BROADCASTS)' /tmp/perms.txt; then echo FAIL: $fl contains restricted SMS permissions; exit 1; fi"
+  }
+  return $c
+}
+
+function Run-Pipeline($log, $pipeline, $changed = $null) {
   $r = @()
   $quick = $pipeline -like 'quick*'
   $doApp = $pipeline -in 'app','all','quick','quick-app'
@@ -207,9 +242,26 @@ function Run-Pipeline($log, $pipeline) {
     foreach ($pkg in Get-ChildItem (Join-Path $Repo 'packages') -Directory -ErrorAction SilentlyContinue) {
       $r += Docker-Step $log "dart-test-$($pkg.Name)" $FlutterImage 'flutter' "packages/$($pkg.Name)" 'dart test'
     }
-    if (-not $quick) {
-      foreach ($fl in 'prodNoSms','prodSms') {
-        $r += Docker-Step $log "apk-$fl" $FlutterImage 'flutter' 'app' "flutter build apk --release --flavor $fl"
+    # Android (Gradle) steps in the android image: devNoSms always (when app/packages changed); all six flavors
+    # (the app-ci matrix) only for the full app/all pipelines.
+    $androidNeeded = (-not $quick) -or ($null -eq $changed) -or ($changed -match '(?m)^(app|packages)/|^pubspec\.')
+    if ($androidNeeded) {
+      $apk = Docker-Step $log 'apk-devNoSms' $AndroidImage 'android' 'app' 'flutter build apk --debug --flavor devNoSms'
+      $r += $apk
+      if ($apk.Exit -eq 0) {
+        $r += Docker-Step $log 'apk-perms' $AndroidImage 'android' 'app' (Apk-Perms-Cmd 'devNoSms' 'debug' $false)
+        # Gradle needs the project files the Flutter build just generated (local.properties, plugin registrations).
+        $r += Docker-Step $log 'android-unit' $AndroidImage 'android' 'app' 'cd android && ./gradlew --no-daemon --console=plain testDevNoSmsDebugUnitTest || exit 1; n=$(cat ../build/app/test-results/testDevNoSmsDebugUnitTest/*.xml 2>/dev/null | grep -c ''<testcase ''); echo kotlin testcases: $n; [ $n -ge 1 ] || { echo FAIL: no Kotlin testcase ran; exit 1; }'
+        $r += Docker-Step $log 'android-lint' $AndroidImage 'android' 'app' 'cd android && { ./gradlew --no-daemon --console=plain :app:lintDevNoSmsDebug || { f=$(find ../build/app -name lint-results-devNoSmsDebug.txt | head -n 1); cat ${f:-/dev/null}; exit 1; }; }'
+      } else {
+        Log $log 'skipping apk-perms, android-unit and android-lint: apk-devNoSms failed (fix the build first)'
+      }
+      if (-not $quick) {
+        foreach ($f in @(@('devSms','debug',$true), @('stagingSms','debug',$true), @('stagingNoSms','debug',$false), @('prodSms','release',$true), @('prodNoSms','release',$false))) {
+          $b = Docker-Step $log "apk-$($f[0])" $AndroidImage 'android' 'app' "flutter build apk --$($f[1]) --flavor $($f[0])"
+          $r += $b
+          if ($b.Exit -eq 0) { $r += Docker-Step $log "apk-perms-$($f[0])" $AndroidImage 'android' 'app' (Apk-Perms-Cmd $f[0] $f[1] $f[2]) }
+        }
       }
     }
   }
@@ -255,7 +307,7 @@ function Run-Job($jobFile) {
   }
   if ($pipeline -eq 'probe') { Probe; Set-Content $status "DONE probe"; return }
   try { $co = Checkout $log $branch } catch { Log $log "$_"; Set-Content -Path $status -Value "FAIL checkout=1" -Encoding UTF8; return }
-  $r = Run-Pipeline $log $pipeline
+  $r = Run-Pipeline $log $pipeline   # manual job: no diff filter, android steps always run
   $summary = ($r | ForEach-Object { "{0}={1}" -f $_.Name, $_.Exit }) -join ' '
   $fail = @($r | Where-Object { $_.Exit -ne 0 }).Count
   $line = "{0} sha={1} pipeline={2} {3}" -f $(if ($fail -eq 0) {'PASS'} else {'FAIL'}), $co.Sha, $pipeline, $summary
@@ -287,7 +339,7 @@ function Auto-Check {
                 elseif ($c -match '(?m)^(app|packages)/') { 'quick-app' }
                 else { '' }
     if (-not $pipeline) { Publish $branch $sha "SKIP sha=$sha no app/packages/backend changes" $log; continue }
-    $r = Run-Pipeline $log $pipeline
+    $r = Run-Pipeline $log $pipeline $c
     $summary = ($r | ForEach-Object { "{0}={1}" -f $_.Name, $_.Exit }) -join ' '
     $fail = @($r | Where-Object { $_.Exit -ne 0 }).Count
     $status = "{0} sha={1} pipeline={2} {3}" -f $(if ($fail -eq 0) {'PASS'} else {'FAIL'}), $sha, $pipeline, $summary
