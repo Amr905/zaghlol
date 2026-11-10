@@ -21,7 +21,7 @@ public sealed class OperatorAuthStartupCheckTests : IDisposable
     public static TheoryData<string> BadConfigurations => new()
     {
         "disabled", "http_issuer", "issuer_with_query", "no_audience", "hs256_algorithm", "enforced_without_acrs",
-        "enforced_on_google", "lifetime_over_an_hour", "idp_unreachable", "idp_issuer_mismatch", "test_issuer",
+        "enforced_on_google", "google_profile", "lifetime_over_an_hour", "idp_unreachable", "idp_issuer_mismatch", "test_issuer",
     };
 
     [Theory]
@@ -53,6 +53,9 @@ public sealed class OperatorAuthStartupCheckTests : IDisposable
                 settings["OperatorAuth:PhishingResistantMode"] = "Enforced";
                 settings["OperatorAuth:Profile"] = "Google";
                 settings["OperatorAuth:RequiredAcrs"] = "c1";
+                break;
+            case "google_profile":
+                settings["OperatorAuth:Profile"] = "Google";
                 break;
             case "lifetime_over_an_hour":
                 settings["OperatorAuth:MaxLifetimeSeconds"] = "7200";
@@ -111,6 +114,29 @@ public sealed class OperatorAuthStartupCheckTests : IDisposable
         await app.StopAsync();
 
         Assert.IsType<RejectAllOperatorTokenValidator>(app.Services.GetRequiredService<IOperatorTokenValidator>());
+    }
+
+    [Fact]
+    public void TheGoogleProfileIsRefusedWithAClearReason()
+    {
+        var settings = new OperatorAuthOptions
+        {
+            Enabled = true,
+            Profile = OperatorAuthProfile.Google,
+            Issuer = "https://accounts.google.com",
+        };
+        settings.Audiences.Add(FakeOidcIssuer.CliAudience);
+
+        var problem = settings.Problem();
+
+        Assert.NotNull(problem);
+        Assert.Contains("Profile=Google", problem, StringComparison.Ordinal);
+        Assert.Contains("amr", problem, StringComparison.Ordinal);
+        Assert.Contains("nbf", problem, StringComparison.Ordinal);
+        Assert.Contains("IdP decision", problem, StringComparison.Ordinal);
+
+        settings.Profile = OperatorAuthProfile.Entra;
+        Assert.Null(settings.Problem());
     }
 
     private static Dictionary<string, string?> Valid() => new(StringComparer.Ordinal)

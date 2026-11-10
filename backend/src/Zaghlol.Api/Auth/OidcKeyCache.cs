@@ -17,29 +17,45 @@ internal sealed partial class OidcKeyCache(
     IHttpClientFactory clients,
     IOptions<OperatorAuthOptions> options,
     TimeProvider clock,
-    ILogger<OidcKeyCache> logger) : IDisposable
+    ILogger<OidcKeyCache> logger,
+    IHostApplicationLifetime? lifetime = null) : IDisposable
 {
     public const string HttpClientName = "zaghlol-operator-oidc";
 
     /// <summary>The longest the last good keys are used while the IdP can't be reached.</summary>
     public static readonly TimeSpan LastGoodLifetime = TimeSpan.FromDays(7);
 
-    /// <summary>The minimum time between two refresh attempts (forced or after a failure).</summary>
+    /// <summary>The minimum time between two completed refresh attempts (forced or after a failure).</summary>
     public static readonly TimeSpan RefreshThrottle = TimeSpan.FromMinutes(5);
 
     /// <summary>More keys than this in a JWKS is treated as a malformed document.</summary>
     public const int MaxKeys = 50;
 
-    private readonly SemaphoreSlim gate = new(1, 1);
+    private readonly Lock sync = new();
+    private readonly CancellationTokenSource disposed = new();
     private volatile KeySnapshot? current;
     private DateTimeOffset? lastAttempt;
+    private Task? inflight;
 
     /// <summary>When the keys in use were fetched; <c>null</c> before the first success.</summary>
     public DateTimeOffset? FetchedAt => current?.FetchedAt;
 
+    /// <summary>The refresh in flight, or a completed task. Callers never cancel it; tests await it.</summary>
+    internal Task PendingRefresh
+    {
+        get
+        {
+            lock (sync)
+            {
+                return inflight ?? Task.CompletedTask;
+            }
+        }
+    }
+
     /// <summary>
     /// The signing key with this <c>kid</c>, or <c>null</c>. Refreshes on schedule, and once per throttle window for an
     /// unknown <c>kid</c>; returns <c>null</c> once the last good keys are older than <see cref="LastGoodLifetime"/>.
+    /// <paramref name="cancellationToken"/> only stops this caller waiting: a refresh it started runs on to completion.
     /// </summary>
     public async ValueTask<JsonWebKey?> FindAsync(string kid, CancellationToken cancellationToken)
     {
@@ -73,54 +89,107 @@ internal sealed partial class OidcKeyCache(
     /// <summary>Fetches now, regardless of the throttle (the startup check). Throws when discovery or the JWKS fails.</summary>
     public async Task LoadAsync(CancellationToken cancellationToken)
     {
-        await gate.WaitAsync(cancellationToken);
+        var started = clock.GetUtcNow();
+        using var fetch = FetchCancellation();
+        using var link = CancellationTokenSource.CreateLinkedTokenSource(fetch.Token, cancellationToken);
         try
         {
-            lastAttempt = clock.GetUtcNow();
-            current = await FetchAsync(cancellationToken);
+            current = await FetchAsync(link.Token);
         }
-        finally
+        catch (Exception) when (!cancellationToken.IsCancellationRequested)
         {
-            gate.Release();
+            MarkAttempt(started);
+            throw;
+        }
+
+        MarkAttempt(started);
+    }
+
+    public void Dispose()
+    {
+        disposed.Cancel();
+        disposed.Dispose();
+    }
+
+    /// <summary>
+    /// Joins the refresh in flight, or starts one unless a completed attempt lies inside the throttle window. The fetch
+    /// never runs on the caller's token (S-1): a caller that aborts only stops waiting, so it can't burn the window.
+    /// </summary>
+    private Task RefreshAsync(CancellationToken cancellationToken)
+    {
+        Task task;
+        lock (sync)
+        {
+            if (inflight is null || inflight.IsCompleted)
+            {
+                var now = clock.GetUtcNow();
+                if (lastAttempt is { } last && now - last < RefreshThrottle)
+                {
+                    return Task.CompletedTask;
+                }
+
+                inflight = Task.Run(() => RunRefreshAsync(now), CancellationToken.None);
+            }
+
+            task = inflight;
+        }
+
+        return task.WaitAsync(cancellationToken);
+    }
+
+    /// <summary>One refresh on a shutdown + 10 s token. Never throws; a failure keeps the last good keys (up to 7 days).</summary>
+    private async Task RunRefreshAsync(DateTimeOffset started)
+    {
+        try
+        {
+            using var fetch = FetchCancellation();
+            current = await FetchAsync(fetch.Token);
+            MarkAttempt(started);
+            LogRefreshed(logger, current.Keys.Count);
+        }
+        catch (OperationCanceledException) when (IsShuttingDown())
+        {
+            // Shutdown is not an attempt; nothing to record.
+        }
+#pragma warning disable CA1031 // A failed refresh keeps the last good keys (up to 7 days); the error type is logged, never the body.
+        catch (Exception ex)
+#pragma warning restore CA1031
+        {
+            // A real fetch failure, including the 10 s IdP timeout, counts toward the throttle window.
+            MarkAttempt(started);
+            LogRefreshFailed(logger, ex.GetType().Name);
         }
     }
 
-    public void Dispose() => gate.Dispose();
-
-    private async Task RefreshAsync(CancellationToken cancellationToken)
+    private void MarkAttempt(DateTimeOffset started)
     {
-        var before = current;
-        await gate.WaitAsync(cancellationToken);
-        try
+        lock (sync)
         {
-            // Another caller refreshed while this one waited.
-            if (!ReferenceEquals(before, current))
+            if (lastAttempt is null || started > lastAttempt)
             {
-                return;
-            }
-
-            var now = clock.GetUtcNow();
-            if (lastAttempt is { } last && now - last < RefreshThrottle)
-            {
-                return;
-            }
-
-            lastAttempt = now;
-            try
-            {
-                current = await FetchAsync(cancellationToken);
-                LogRefreshed(logger, current.Keys.Count);
-            }
-#pragma warning disable CA1031 // A failed refresh keeps the last good keys (up to 7 days); the error type is logged, never the body.
-            catch (Exception ex) when (ex is not OperationCanceledException || !cancellationToken.IsCancellationRequested)
-#pragma warning restore CA1031
-            {
-                LogRefreshFailed(logger, ex.GetType().Name);
+                lastAttempt = started;
             }
         }
-        finally
+    }
+
+    /// <summary>Cancelled by host shutdown, disposal, or after the IdP timeout; never by an HTTP request.</summary>
+    private CancellationTokenSource FetchCancellation()
+    {
+        var stopping = lifetime?.ApplicationStopping ?? CancellationToken.None;
+        var source = CancellationTokenSource.CreateLinkedTokenSource(stopping, disposed.Token);
+        source.CancelAfter(OperatorAuthServiceCollectionExtensions.IdpTimeout);
+        return source;
+    }
+
+    private bool IsShuttingDown()
+    {
+        try
         {
-            gate.Release();
+            return disposed.IsCancellationRequested || lifetime?.ApplicationStopping.IsCancellationRequested == true;
+        }
+        catch (ObjectDisposedException)
+        {
+            return true;
         }
     }
 
