@@ -1,0 +1,91 @@
+{
+  "code": "nbe",
+  "names": {
+    "ar": "البنك الأهلي المصري",
+    "en": "National Bank of Egypt (synthetic test copy)"
+  },
+  "country": "EG",
+  "defaultCurrency": "EGP",
+  "senders": [
+    {
+      "match": "exact",
+      "value": "NBE"
+    },
+    {
+      "match": "exact",
+      "value": "AlAhly"
+    }
+  ],
+  "packages": [
+    "com.example.nbe"
+  ],
+  "walletCardNames": [
+    "NBE",
+    "الأهلي"
+  ],
+  "last4": [
+    "\\*\\*(\\d{4})",
+    "رقم (\\d{4})"
+  ],
+  "drop": [
+    "(?i)\\boffer\\b",
+    "عرض خاص"
+  ],
+  "templates": [
+    {
+      "id": "nbe.card_purchase.ar",
+      "version": 2,
+      "lang": "ar",
+      "channel": [
+        "sms"
+      ],
+      "event": "card_purchase",
+      "direction": "expense",
+      "baseConfidence": 0.98,
+      "pattern": "تم خصم (?<amount>[\\d,.]+) (?<cur>جم|egp|usd) .*?بطاقة .*?\\*\\*(?<last4>\\d{4}) لدى (?<merchant>.+?) (?:يوم|في) (?<date>\\d{1,2}/\\d{1,2})(?:.*?الرصيد المتاح (?<balance>[\\d,.]+))?",
+      "currencyMap": {
+        "جم": "EGP"
+      },
+      "date": {
+        "format": "d/M",
+        "yearPolicy": "nearest_past"
+      },
+      "flags": {
+        "isAvailableLimit": false
+      }
+    },
+    {
+      "id": "nbe.card_foreign.en",
+      "version": 1,
+      "lang": "en",
+      "event": "card_purchase_fx",
+      "direction": "expense",
+      "baseConfidence": 0.97,
+      "pattern": "^nbe: (?<ocur>[a-z]{3}) (?<oamount>[\\d,.]+) at (?<merchant>.+?) charged (?<cur>egp) (?<amount>[\\d,.]+) on card \\*(?<last4>\\d{4})(?:\\. bal egp (?<balance>[\\d,.]+))?"
+    },
+    {
+      "id": "nbe.salary.ar",
+      "version": 3,
+      "lang": "ar",
+      "event": "salary",
+      "direction": "income",
+      "baseConfidence": 0.96,
+      "pattern": "تم ايداع راتب (?<amount>[\\d,.]+) جم في حسابكم رقم \\*\\*(?<last4>\\d{4}) بتاريخ (?<date>\\d{1,2}/\\d{1,2}/\\d{4})",
+      "currencyMap": {
+        "جم": "EGP"
+      },
+      "date": {
+        "format": "d/M/yyyy"
+      }
+    },
+    {
+      "id": "nbe.declined.en",
+      "version": 1,
+      "lang": "en",
+      "event": "declined",
+      "direction": "neutral",
+      "baseConfidence": 0.95,
+      "pattern": "^nbe: card \\*(?<last4>\\d{4}) purchase of egp (?<amount>[\\d,.]+) at (?<merchant>.+?) declined"
+    }
+  ]
+}

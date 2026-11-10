@@ -24,6 +24,7 @@ const Result<Money, ParseFailure> _excess = Err(
 
 final RegExp _digitsOnly = RegExp(r'^[0-9]+$');
 final RegExp _tokenShape = RegExp(r'^[0-9](?:[0-9.,]*[0-9])?$');
+final RegExp _trailingPunctuation = RegExp(r'[0-9][.,]$');
 final RegExp _numberRun = RegExp(r'[0-9][0-9.,]*');
 
 /// Parses one numeric token (no currency marker, no sign) into [Money].
@@ -88,6 +89,9 @@ bool _validGrouping(List<String> groups) {
     }
   }
   final first = groups.first.length;
+  if (groups.first.startsWith('0')) {
+    return false;
+  }
   final rest = groups.sublist(1);
   // Western: 1,234,567
   if (first <= 3 && rest.every((g) => g.length == 3)) {
@@ -120,6 +124,12 @@ Result<Money, ParseFailure> parseMoneyText(
     return _malformed;
   }
   final match = matches.single;
+  // One sentence-ending `.` or `,` after the number is punctuation, not
+  // part of it (`EGP 150.`). Anything else stays in the number run.
+  final run = match.group(0)!;
+  final numberText = _trailingPunctuation.hasMatch(run)
+      ? run.substring(0, run.length - 1)
+      : run;
   final before = normalized.substring(0, match.start).trim();
   final after = normalized.substring(match.end).trim();
   if (before.isNotEmpty && after.isNotEmpty) {
@@ -135,5 +145,5 @@ Result<Money, ParseFailure> parseMoneyText(
   if (currency == null) {
     return _malformed;
   }
-  return parseAmount(match.group(0)!, currency: currency, locale: locale);
+  return parseAmount(numberText, currency: currency, locale: locale);
 }

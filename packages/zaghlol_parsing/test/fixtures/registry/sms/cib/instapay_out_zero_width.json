@@ -1,0 +1,10 @@
+{
+  "sender": "CIB-ALERT",
+  "body": "CIB: You sent EGP 10.00‏ to 01512345678 via InstaPay. Ref 55443322. Balance EGP 90.00",
+  "receivedAt": "2026-10-23T11:14:00+03:00",
+  "expect": {
+    "template": "cib.instapay_out.en",
+    "amount": "10.00",
+    "balance": "90.00"
+  }
+}

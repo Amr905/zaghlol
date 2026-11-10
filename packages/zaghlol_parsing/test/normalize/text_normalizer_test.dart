@@ -16,6 +16,7 @@ void main() {
       ('narrow nbsp', 'a b', 'a b'),
       ('thin space', 'a b', 'a b'),
       ('zero width', 'a\u200Bb\u200Cc\u200Dd', 'abcd'),
+      ('word joiner and soft hyphen', 'a\u2060b\u00ADc', 'abc'),
       ('rtl and ltr marks', '\u200F١٢٣\u200E', '123'),
       ('embedding controls', '\u202A1\u202B2\u202C3\u202D4\u202E', '1234'),
       ('isolates', '\u20661\u20672\u20683\u2069', '123'),
@@ -62,6 +63,14 @@ void main() {
     }
   });
 
+  group('foldArabicVariants', () {
+    test('folds letter variants and marks, keeps case and escapes', () {
+      expect(foldArabicVariants('أإآٱ ى ة'), 'اااا ي ه');
+      expect(foldArabicVariants('جـنيه \\S\\D ABC'), 'جنيه \\S\\D ABC');
+      expect(foldArabicVariants('أَحْمَد'), 'احمد');
+    });
+  });
+
   group('fuzz', () {
     final random = Random(13);
     const pool = <int>[
@@ -88,6 +97,8 @@ void main() {
             (u >= 0x202A && u <= 0x202E) ||
             (u >= 0x2066 && u <= 0x2069) ||
             u == 0x061C ||
+            u == 0x2060 ||
+            u == 0x00AD ||
             u == 0xFEFF ||
             u == 0x0640 ||
             (u >= 0x064B && u <= 0x0652) ||

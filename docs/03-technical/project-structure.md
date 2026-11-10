@@ -27,7 +27,7 @@ The repository is a mono-repo with a **Dart pub workspace** for the app and its 
 │  ├─ test/                         mirrors lib/ (widget + golden tests: goldens/ar, goldens/en)
 │  ├─ integration_test/             device flows (onboarding, capture→home, backup→restore, purchase sandbox)
 │  ├─ assets/
-│  │  ├─ registry/                  institutions/*.json (templates), senders.json, registry_manifest.json
+│  │  ├─ registry/                  institutions/*.json (templates), shared.json, registry_manifest.json
 │  │  ├─ catalog/                   catalog_seed.json.gz (+ signature)
 │  │  ├─ rive/                      zaghlol.riv
 │  │  ├─ mascot/                    static pose PNG/SVG fallbacks

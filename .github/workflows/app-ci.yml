@@ -138,6 +138,11 @@ jobs:
       - name: dart test (zaghlol_parsing)
         working-directory: packages/zaghlol_parsing
         run: dart test
+      # T-032: the registry lint CLI and its self-tests. Once the real
+      # registry exists (T-036), add `dart run registry_lint` over it here.
+      - name: dart test (registry_lint)
+        working-directory: tools/registry_lint
+        run: dart test
 
   golden:
     name: widget golden tests

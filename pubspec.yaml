@@ -19,3 +19,4 @@ workspace:
   - packages/zaghlol_domain
   - packages/zaghlol_parsing
   - tools/lints
+  - tools/registry_lint

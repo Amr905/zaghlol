@@ -1,0 +1,54 @@
+{
+  "code": "cib",
+  "names": {
+    "ar": "البنك التجاري الدولي",
+    "en": "CIB (synthetic test copy)"
+  },
+  "country": "EG",
+  "defaultCurrency": "EGP",
+  "senders": [
+    {
+      "match": "exact",
+      "value": "CIB"
+    },
+    {
+      "match": "regex",
+      "value": "^CIB-(EGY|ALERT)$"
+    }
+  ],
+  "packages": [],
+  "walletCardNames": [
+    "CIB"
+  ],
+  "last4": [],
+  "drop": [],
+  "templates": [
+    {
+      "id": "cib.instapay_out.en",
+      "version": 1,
+      "lang": "en",
+      "event": "instapay_out",
+      "direction": "expense",
+      "baseConfidence": 0.96,
+      "pattern": "^cib: you sent egp (?<amount>[\\d,.]+) to (?<phone>01\\d{9}) via instapay\\. ref (?<ref>\\d{6,12})(?:\\. balance egp (?<balance>[\\d,.]+))?"
+    },
+    {
+      "id": "cib.card_symbol.en",
+      "version": 1,
+      "lang": "en",
+      "event": "card_purchase_fx",
+      "direction": "expense",
+      "baseConfidence": 0.9,
+      "pattern": "^cib: purchase (?<cur>\\$|€) (?<amount>[\\d,.]+) at (?<merchant>.+?) card \\*(?<last4>\\d{4})"
+    },
+    {
+      "id": "cib.kwd_credit.en",
+      "version": 1,
+      "lang": "en",
+      "event": "transfer_in",
+      "direction": "income",
+      "baseConfidence": 0.9,
+      "pattern": "^cib: credited (?<cur>kwd|bhd|jpy) (?<amount>[\\d,.]+) to account \\*(?<last4>\\d{4})"
+    }
+  ]
+}
