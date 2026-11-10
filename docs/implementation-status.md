@@ -18,9 +18,9 @@
 ## Summary
 | Milestone | Total | DONE | IN_PROGRESS | BLOCKED |
 |---|---|---|---|---|
-| M0 | 28 | 15 | 0 | 0 |
+| M0 | 28 | 16 | 0 | 0 |
 | M1 | 29 | 1 | 0 | 1 |
-| M2 | 29 | 0 | 0 | 0 |
+| M2 | 29 | 1 | 0 | 0 |
 | M3 | 18 | 0 | 0 | 0 |
 | M4 | 17 | 0 | 0 | 0 |
 | M5 | 35 | 10 | 1 | 1 |
@@ -45,7 +45,7 @@
 | T-013 | Text & amount normalization utilities (digits, separators, groupings) | M0 | C3 | Sonnet | parsing-engine-engineer | T-012 | DONE | app-ci 42689001237 + PR head green; review [T-013](05-reviews/T-013.md) APPROVED | PR #14 squash-merged. Adds ParseFailureReason.excessPrecision |
 | T-014 | Result/Failure types, SafeException and domain event bus | M0 | C2 | Sonnet | flutter-core-engineer | T-001 | DONE | app-ci 42487468428 (green, on main-merged head 160f2f6); PR #3 squash-merged; review [T-014](05-reviews/T-014.md) APPROVED | FU-034…FU-038 |
 | T-015 | Secure key bootstrap for the database key | M0 | C4 | Opus | flutter-core-engineer | T-007 | DONE | PC runner PASS; app-ci 42837898795 + db-platform 42837899161 (pre-fix), batch/2026-11-10-1 CI; negative proofs (a) 42822023257/42825275660, (b) 42825291865, (c) 42822048850; reviews [T-015](05-reviews/T-015.md) + [security](05-reviews/T-015-security.md) APPROVED after M-1/S-1 fixes (delta) | Batch 1. D-70 native key channel; Q-44 restore-notice copy |
-| T-016 | AppDatabase v1 skeleton: encrypted open, isolate, migration harness | M0 | C4 | Opus | flutter-core-engineer | T-015 | TODO | — |  |
+| T-016 | AppDatabase v1 skeleton: encrypted open, isolate, migration harness | M0 | C4 | Opus | flutter-core-engineer | T-015 | DONE | local checks + PC runner PASS @8c92e85; app-ci 42908787823 + db-platform 42909058771 (ci/T-016, pre-fix); batch/2026-11-11-1 CI; negative proofs run locally (lease before create/wipe, wipe order, no wipe on DB_OPEN_FAILED, pre-migration copy, statement logging, schema version); review [T-016](05-reviews/T-016.md) APPROVED after M-1/m-1/n-1 fixes (delta) | Batch 2. Closes FU-065 S-2/S-7; FTS short-query measurement handed to T-017 |
 | T-017 | Schema batch A: accounts, balances, raw messages, transactions (+FTS), transfers, offsets, splits | M0 | C4 | Opus | flutter-core-engineer | T-016 | TODO | — |  |
 | T-018 | Schema batch B: categories, catalog, rules, budgets, alerts, summaries, recurring | M0 | C4 | Opus | flutter-core-engineer | T-016 | TODO | — |  |
 | T-019 | Schema batch C: wealth, prices, Zakah, capture controls, review, settings, outbox, misc | M0 | C4 | Opus | flutter-core-engineer | T-016 | TODO | — |  |
@@ -89,7 +89,7 @@
 | T-057 | Scan results screen S-06 «دي كروتك؟» | M1 | C2 | Sonnet | flutter-ui-engineer | T-056, T-045 | TODO | — |  |
 | T-058 | Native Egyptian-speaker review of the copy deck | M2 | C2 | human | external | T-026, T-027, T-028 | TODO | — |  |
 | T-059 | Compile the 600+ Egyptian merchant seed list (OQ-05) | M2 | C2 | human | external | T-030 | TODO | — |  |
-| T-060 | Android share/paste intake (text, image, PDF, CSV) | M2 | C3 | Sonnet | native-platform-engineer | T-004 | TODO | — |  |
+| T-060 | Android share/paste intake (text, image, PDF, CSV) | M2 | C3 | Sonnet | native-platform-engineer | T-004 | DONE | PC runner PASS @2d3f96a; batch/2026-11-11-1 CI; reviews [T-060](05-reviews/T-060.md) (Sonnet, re-classified C4) and [combined Opus](05-reviews/T-060-security.md) APPROVED after F1–F12 and C1 fixes (delta) | Batch 2. K_spool TEE-only (Lead decision); app wiring owned per FU-067; device steps pending |
 | T-061 | iOS Capture Guard (Swift) with config reader | M2 | C4 | Opus | native-platform-engineer | T-035, T-009 | TODO | — |  |
 | T-062 | iOS encrypted spool, host API and background refresh | M2 | C4 | Opus | native-platform-engineer | T-004, T-009 | TODO | — |  |
 | T-063 | App Intents for Message and Wallet automations | M2 | C4 | Opus | native-platform-engineer | T-061, T-062 | TODO | — |  |
@@ -291,6 +291,8 @@
 - **FU-068** (T-060 review F5/F8, for **T-039**; before T-039 starts): get the spool key only through `app.zaghlol.platform.spool.SpoolKey` (alias `zaghlol_spool_v1`, AES-256-GCM, no user auth, TEE-backed AndroidKeyStore and never StrongBox (Lead decision 2026-11-10, T-060 review C1), process-wide get-or-create lock; never call `KeyGenerator` for the alias elsewhere). T-039 owns the `KEY_INVALIDATED` mapping (today an `UnrecoverableKeyException`/`KeyPermanentlyInvalidatedException` in share intake is a transient `IO_ERROR`, and a missing key is silently recreated). Share files live in `noBackupFilesDir/share/` and are purged after 24 h; T-039 entries stay in `noBackupFilesDir/spool/` and are deleted only on ack. If any capture component moves to another process, the lock is no longer enough.
 - **FU-069** (T-007 flake seen on the PC runner during T-060): `fts_benchmark_test` p95 51.1 ms against a 50 ms budget on a slower host. Make the budget robust (warm-up runs, median of several runs, or a host-scaled budget) without weakening the device target. Owner: T-016.
 - **FU-070** (T-060 review C2-C5, S1-S5; from `docs/05-reviews/T-060-security.md`): C2 (owner T-060 follow-up): refuse when the provider reports a MIME that maps to no kind; fall back to the intent type only when the provider reports none; add a test. C3 (T-060 follow-up): skip `commit()` when the job already has an outcome, so a late commit cannot also announce `unreadable`. C4 (T-060 follow-up): HEIC passes the sniff but fails the bounds probe below API 28 and is refused as `unsupportedType`; document in manual step 2 and the refusal copy, or skip HEIF brands below API 28. C5 (T-060 follow-up): `openApp()` from a stopped activity may be blocked by Android 10+ background-launch rules; document in manual step 5 or 9 and in section 2.1. S1 (T-060 follow-up): a provider whose `openFile`/`getType` never returns blocks the single worker; use `openAssetFileDescriptor` with a `CancellationSignal`, a small bounded pool (about 2), and a JVM test with a never-returning opener. S2 (T-060 follow-up): refuse system authorities our permissions unlock (`sms`, `mms`, `mms-sms`, `call_log`, `com.android.contacts`, `contacts`), not `media`; add a test. S3 (info; T-080 and T-161, via FU-067): keep confirm-before-save mandatory, never auto-save, label the item as "shared". S4 (info; accept): plaintext on the heap is never zeroed. S5 (info; T-161 and T-158): keep the sample-size image decode in T-161 and treat the PDF parser in T-158 as untrusted-input parsing. Also T-047: add the timing check of a 15 MiB stream through the real `KeystoreShareCipher` to the instrumented suite when device runs happen.
+- **FU-071** (T-016 follow-ups): m-2 restore notice also lost if a crash happens after the header write but before the create commits; m-3 hand-written schema comparison ignores `CHECK` constraints (matters for T-017's money CHECKs); m-4 nothing checks `tools/drift_codegen`'s drift version matches the app lock; nit: guard `renameSync` onto `.migrate.tmp` could overwrite another engine's copy in a narrow window; replace `tools/drift_codegen` once Pigeon ≥27.3.1 and tools/lints analyzer ≥13 allow drift_dev in the workspace. Owners: T-017, T-047, tooling.
+- **FU-072** (batch 2 workflow): done — app-ci iOS test-name checks tolerate interleaved xcodebuild lines; PC runner runs `zaghlol_lints` + its tests and checks `tools/**` changes; `docs/workflow/tools/cloud-sdk.sh` installs Flutter/.NET in the cloud workspace for local checks. PO: restart the PC runner after deploying the new `runner.ps1`; delete leftover `ci/*` branches (agents can't).
 
 ## Log
 | Date | Event |
@@ -347,3 +349,4 @@
 | 2026-11-10 | Merged #19 (T-126 flags) and #20 (T-125 catalog; operator-auth seam reconciled to T-126). 20/186 done. FU-056…FU-058 logged. |
 | 2026-11-10 | Merged #22 (T-127 prices, fakes), #23 (T-136 operator auth; IN_REVIEW pending IdP evidence), #24 (T-128 sync). PO: IdP "decide later"; accepted T-128 defaults. 22/186 done. FU-059…FU-061 logged. |
 | 2026-11-10 | Batch workflow adopted (#27). Batch 1 (`batch/2026-11-10-1`): T-015, T-034, T-129, T-139. T-060 re-classified C4 (fix round + Opus security review; batch 2). 26/186 done. FU-063…FU-066 logged. |
+| 2026-11-11 | Package installs allowed; Flutter 3.47.9 and .NET 10 installed in the cloud workspace, local checks before push. Batch 2 (`batch/2026-11-11-1`): T-016, T-060, FU-030 lint hardening, workflow fixes. 28/186 done. FU-071, FU-072 logged. |

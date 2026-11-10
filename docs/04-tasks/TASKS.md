@@ -53,7 +53,7 @@ Every task file has: ID, description, technical details, dependencies, affected 
 | [T-013](tasks/T-013.md) | Text & amount normalization utilities (digits, separators, groupings) | US-05-1 | High | Sonnet | parsing-engine-engineer | T-012 | F | 3 | DONE |
 | [T-014](tasks/T-014.md) | Result/Failure types, SafeException and domain event bus | US-02-1 | Medium | Sonnet | flutter-core-engineer | T-001 | A | 2 | DONE |
 | [T-015](tasks/T-015.md) | Secure key bootstrap for the database key | US-02-1 | High* | Opus | flutter-core-engineer | T-007 | A | 3 | DONE |
-| [T-016](tasks/T-016.md) | AppDatabase v1 skeleton: encrypted open, isolate, migration harness | US-02-1 | High* | Opus | flutter-core-engineer | T-015 | A | 4 | TODO |
+| [T-016](tasks/T-016.md) | AppDatabase v1 skeleton: encrypted open, isolate, migration harness | US-02-1 | High* | Opus | flutter-core-engineer | T-015 | A | 4 | DONE |
 | [T-017](tasks/T-017.md) | Schema batch A: accounts, balances, raw messages, transactions (+FTS), transfers, offsets, splits | US-06-1 | High* | Opus | flutter-core-engineer | T-016 | A | 5 | TODO |
 | [T-018](tasks/T-018.md) | Schema batch B: categories, catalog, rules, budgets, alerts, summaries, recurring | US-07-1 | High* | Opus | flutter-core-engineer | T-016 | A | 5 | TODO |
 | [T-019](tasks/T-019.md) | Schema batch C: wealth, prices, Zakah, capture controls, review, settings, outbox, misc | US-02-1 | High* | Opus | flutter-core-engineer | T-016 | A | 5 | TODO |
@@ -107,7 +107,7 @@ Every task file has: ID, description, technical details, dependencies, affected 
 |---|---|---|---|---|---|---|---|---|---|
 | [T-058](tasks/T-058.md) | Native Egyptian-speaker review of the copy deck | US-20-1 | Medium | — (human) | external | T-026, T-027, T-028 | C | 2 | TODO |
 | [T-059](tasks/T-059.md) | Compile the 600+ Egyptian merchant seed list (OQ-05) | US-20-1 | Medium | — (human) | external | T-030 | C | 7 | TODO |
-| [T-060](tasks/T-060.md) | Android share/paste intake (text, image, PDF, CSV) | US-03-4 | High* | Opus | native-platform-engineer | T-004 | D | 3 | TODO |
+| [T-060](tasks/T-060.md) | Android share/paste intake (text, image, PDF, CSV) | US-03-4 | High* | Opus | native-platform-engineer | T-004 | D | 3 | DONE |
 | [T-061](tasks/T-061.md) | iOS Capture Guard (Swift) with config reader | US-04-1 | High* | Opus | native-platform-engineer | T-035, T-009 | E | 6 | TODO |
 | [T-062](tasks/T-062.md) | iOS encrypted spool, host API and background refresh | US-04-1 | High* | Opus | native-platform-engineer | T-004, T-009 | E | 4 | TODO |
 | [T-063](tasks/T-063.md) | App Intents for Message and Wallet automations | US-04-1 | High* | Opus | native-platform-engineer | T-061, T-062 | E | 7 | TODO |
