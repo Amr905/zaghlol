@@ -23,7 +23,7 @@
 | M2 | 29 | 0 | 0 | 0 |
 | M3 | 18 | 0 | 0 | 0 |
 | M4 | 17 | 0 | 0 | 0 |
-| M5 | 35 | 4 | 0 | 2 |
+| M5 | 35 | 6 | 0 | 2 |
 | M6 | 19 | 0 | 1 | 2 |
 | M7 | 11 | 0 | 0 | 0 |
 
@@ -154,8 +154,8 @@
 | T-122 | EF Core model and initial migration for all backend tables + DB roles | M5 | C4 | Opus | backend-engineer | T-005 | DONE | backend-ci 42407789072 (5/5, 391 tests) @ d5943be; PR #2 squash-merged | All three C4 reviews APPROVED (round 2). Follow-ups FU-015 to FU-026; FU-020 before T-184 |
 | T-123 | Signing service (ES256 via KMS abstraction) and response-signature middleware | M5 | C4 | Opus | backend-engineer | T-005 | DONE | backend-ci 42502737300 (5/5) @ 1a8d165; PR #8 squash-merged; [T-123](05-reviews/T-123.md) APPROVED (code r2, security, tests) | Closes FU-019, 022, 023, 026, FU-025 code part. FU-048 |
 | T-124 | Install registration, install-token auth, rate limits, idempotency, strict DTOs | M5 | C4 | Opus | backend-engineer | T-122, T-123, T-006 | DONE | backend-ci 42691437478 + PR head green (Android NDK download flake re-run); reviews [T-124](05-reviews/T-124.md) APPROVED, [security](05-reviews/T-124-security.md) APPROVED after S-1 fix (delta re-review) | PR #15 squash-merged. Non-dev deploys must set ForwardedHeaders proxies or NoProxy=true |
-| T-125 | Catalog versions, deltas, signed full snapshots and admin draft/publish | M5 | C3 | Opus | backend-engineer | T-122, T-123 | TODO | — |  |
-| T-126 | Feature flags with targeting rules and admin endpoints | M5 | C2 | Sonnet | backend-engineer | T-122 | TODO | — |  |
+| T-125 | Catalog versions, deltas, signed full snapshots and admin draft/publish | M5 | C3 | Opus | backend-engineer | T-122, T-123 | DONE | backend-ci 42723599241 + PR head green; review [T-125](05-reviews/T-125.md) APPROVED | PR #20 squash-merged. Adds catalog_drafts; config Catalog:Snapshots:Directory/BaseUrl |
+| T-126 | Feature flags with targeting rules and admin endpoints | M5 | C2 | Sonnet | backend-engineer | T-122 | DONE | backend-ci 42720155392 + PR head green; review [T-126](05-reviews/T-126.md) APPROVED | PR #19 squash-merged. Operator auth = fail-closed seam until T-136 |
 | T-127 | Price service: local Egyptian gold-market adapter, FX adapter, worker, override | M5 | C3 | Sonnet | backend-engineer | T-122 | BLOCKED | — | Provider contract for local gold feed (D-41) needed before go-live; build continues with fakes |
 | T-128 | Daily POST /v1/sync with throttle, contributions and bank-request intake | M5 | C4 | Opus | backend-engineer | T-124, T-125, T-126, T-127, T-123 | TODO | — |  |
 | T-129 | Contribution aggregation, review list and promote/reject | M5 | C2 | Sonnet | backend-engineer | T-128, T-125 | TODO | — |  |
@@ -276,6 +276,9 @@
 - **FU-053** (PC runner): fails for local reasons — Docker not running, `KeyRingTests.AnOffCurvePointIsRejected` throws PlatformNotSupportedException on Windows, CRLF vs LF in `iso4217_table_test`, and once Application Control blocked it. Owner: PO (Docker) + backend/app tooling.
 - **FU-054** (local-ci container review minors): no timeout/container name on `docker run` (a hung step blocks the loop); NTFS bind mount is slow; Windows-containers mode not detected; no Gradle cache volume for APK steps; bare `\r` progress lines in logs. See `docs/05-reviews/local-ci-container.md`. Owner: CI tooling.
 - **FU-055** (PC runner, first Linux-container run 2026-11-10): `SeededSeriesTests.EverySeriesIsExportedAtZeroBeforeAnyEvent` failed once (series `zaghlol.audit_alert.fired rule=support_moves_per_purchase_90d` missing) while it passes in GitHub CI — likely a timing/ordering race in the MeterListener collection. Owner: T-138 follow-up.
+- **FU-056** (T-126 minors): `FlagRulesJson.Parse` drops malformed stored rule members (fails open, unreachable today); backend-api §4.8 should pin the exact `installId` text form in the rollout hash with a known-answer vector. See `docs/05-reviews/T-126.md`. Owner: T-128.
+- **FU-057** (T-125 minors/nits): no test for the stored-hash integrity check (tampered/missing `full.json.gz` → 500); full endpoint re-signs up to 8 MiB via KMS per origin request though a `.sig` is stored at publish (T-140); category `parent_code` and merchant `name_en` always NULL (draft has no field); raw `FromSql` on jsonb; fixed `.tmp` name assumes one writer. See `docs/05-reviews/T-125.md`. Owners: T-140, T-137.
+- **FU-058** (T-125/T-126): `/admin/v1/*` returns 401 for everyone until T-136 supplies a real `IOperatorTokenValidator` (OIDC + MFA, enabled `operators` row, 1 h lifetime). Owner: T-136.
 
 ## Log
 | Date | Event |
@@ -329,3 +332,4 @@
 | 2026-11-09 | Merged #7 (T-004), #8 (T-123), #9 (T-022), #10 (Balanced rules, 2 tasks at a time, runner LF fix), #11 (T-138). 15/186 done. T-007 (Opus) and T-124 (design note, Sonnet) in progress. |
 | 2026-11-09 | New Lead session (PO linked GitHub, upgraded Flutter). Merged #13 (T-007), #14 (T-013), #15 (T-124, one security fix round). 18/186 done. FU-050…FU-053 logged. |
 | 2026-11-10 | PC runner moved to Linux Docker containers (#17) with a locally built Flutter 3.47.9 image; first runs: app checks all PASS, backend build/format PASS, Testcontainers work. FU-054, FU-055 logged. |
+| 2026-11-10 | Merged #19 (T-126 flags) and #20 (T-125 catalog; operator-auth seam reconciled to T-126). 20/186 done. FU-056…FU-058 logged. |
