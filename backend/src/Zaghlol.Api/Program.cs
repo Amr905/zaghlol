@@ -9,6 +9,7 @@ using Zaghlol.Api.Observability;
 using Zaghlol.Application;
 using Zaghlol.Infrastructure;
 using Zaghlol.Infrastructure.Catalog;
+using Zaghlol.Infrastructure.Contributions;
 using Zaghlol.Infrastructure.Flags;
 using Zaghlol.Infrastructure.Kms;
 using Zaghlol.Infrastructure.Logging;
@@ -56,6 +57,8 @@ builder.Services.AddZaghlolInstalls();
 
 // Catalog versions, deltas, signed snapshots and the operator draft/publish API (T-125); operator auth comes from AddOperatorAuthentication and AddZaghlolOperatorAuth (T-136).
 builder.Services.AddZaghlolCatalog();
+// Contribution review queue (T-129): promote edits the draft under the catalog lock, so it follows the catalog registration.
+builder.Services.AddZaghlolContributionAdmin();
 // Feature flags (T-126): the admin store on the Admin login, the reader on the App login, the ops-channel notifier.
 builder.Services.AddZaghlolFlagAdmin();
 builder.Services.AddZaghlolFlagReader();
@@ -76,6 +79,7 @@ app.MapInstalls();
 app.MapSync();
 app.MapCatalog();
 app.MapCatalogAdmin();
+app.MapContributionAdmin();
 app.MapFlagAdmin();
 app.MapSupportAdmin();
 app.MapPriceAdmin();

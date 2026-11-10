@@ -290,6 +290,46 @@ public class SyncServiceTests
     }
 
     [Fact]
+    public async Task ALostClaimRaceCountsNoIntakeAtAll()
+    {
+        // FU-061: drop counters used to be emitted before the claim, so a call that became the throttle answer counted twice.
+        catalog.Categories = new HashSet<string>(["dining"], StringComparer.Ordinal);
+        store.LoseClaim = T0.AddSeconds(-2);
+
+        Assert.IsType<SyncThrottled>(await SyncAsync(Request(contributions:
+        [
+            new SyncContribution("Koshary", "nbe", "dining"),
+            new SyncContribution("010 1234 5678", "nbe", "dining"),
+            new SyncContribution("mine", "nbe", "my_category"),
+        ])));
+
+        Assert.Empty(telemetry.Intakes);
+    }
+
+    [Fact]
+    public async Task AHasherOutageCountsItsDropOnlyOnceTheClaimWins()
+    {
+        catalog.Categories = new HashSet<string>(["dining"], StringComparer.Ordinal);
+        hasher.Throws = true;
+        store.LoseClaim = T0.AddSeconds(-2);
+
+        Assert.IsType<SyncThrottled>(await SyncAsync(Request(contributions: [new SyncContribution("koshary", "nbe", "dining")])));
+
+        Assert.Empty(telemetry.Intakes);
+    }
+
+    [Fact]
+    public async Task ARequiredSourceFailureIsCountedWithItsExceptionTypeOnly()
+    {
+        catalog.Throws = true;
+
+        await Assert.ThrowsAsync<SyncSourceUnavailableException>(() => SyncAsync(Request()));
+
+        Assert.Equal([SyncTags.CatalogBlock], telemetry.Failures);
+        Assert.Equal([nameof(InvalidOperationException)], telemetry.FailureCauses);
+    }
+
+    [Fact]
     public async Task NoIntakeMeansNoHashAndNoCategoryRead()
     {
         catalog.CategoriesThrow = true;
@@ -437,7 +477,15 @@ public class SyncServiceTests
             }
         }
 
-        public void BlockFailed(string block) => Failures.Add(block);
+        public List<string> FailureCauses { get; } = [];
+
+        public void BlockFailed(string block, string cause)
+        {
+            Failures.Add(block);
+            FailureCauses.Add(cause);
+        }
+
+        public void Unavailable(string cause) => Requests.Add((SyncTags.Unavailable + ":" + cause, 1));
 
         public void FlagRulesInvalid(string flag) => InvalidFlags.Add(flag);
 

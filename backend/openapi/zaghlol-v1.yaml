@@ -1063,7 +1063,8 @@ paths:
       description: |
         Role `catalog_editor`. Returns counts per normalized merchant, never per install. Aggregates still
         collecting (fewer than 5 distinct installs, A-48) are never returned, so a string sent by only a few
-        phones is never shown to an operator.
+        phones is never shown to an operator. One page of at most 500 aggregates, most installs first; `status`
+        is the only query parameter.
       x-required-roles: [catalog_editor]
       security:
         - operatorOidc: []
@@ -1101,11 +1102,13 @@ paths:
         Role `catalog_editor`. Audited. The aggregate key travels in the body, not the path, because
         `merchantNorm` is free text. With `merchantId` the string becomes an `exact` alias of that live draft
         merchant; without it a new draft merchant is created (`canonical` = `merchantNorm`) with the string as
-        its `exact` alias. `categoryCode` defaults to the top-voted category. Answers `404 NOT_FOUND` if no
+        its `exact` alias. `categoryCode` defaults to the top-voted category and is ignored when `merchantId`
+        is given (the merchant keeps its category). Answers `404 NOT_FOUND` if no
         aggregate has the key **or the aggregate is still `collecting`**. The two cases are indistinguishable:
         same status, same body, and one lookup that filters out `collecting`, so timing does not differ either.
         `409 ADMIN_CONFLICT` only if the aggregate is already `promoted` or `rejected`, or the merchant or
-        category is not live in the draft.
+        category is not live in the draft, the merchant text is not a valid catalog alias, or the canonical name
+        already exists in the draft. Nothing is published: the change is live only after a catalog publish.
       x-required-roles: [catalog_editor]
       security:
         - operatorOidc: []

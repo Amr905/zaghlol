@@ -88,6 +88,20 @@ jobs:
       - name: dart test (zaghlol_lints)
         working-directory: tools/lints
         run: dart test
+      # T-015 / FU-050: no logging in the key code (Dart, Kotlin, Swift).
+      # Generated Pigeon files are excluded (their generic error path is never
+      # used: every error is a code-only SecretStoreApiError).
+      - name: no logging in key code (T-015)
+        run: |
+          set -o pipefail
+          files=$(ls app/lib/core/db/*.dart app/lib/core/crypto/*.dart app/lib/core/platform/pigeon_secret_store.dart \
+            app/android/app/src/main/kotlin/app/zaghlol/platform/keys/*.kt \
+            app/ios/Runner/Platform/Keys/*.swift | grep -v '\.g\.')
+          [ -n "$files" ] || { echo "::error::no key files found"; exit 1; }
+          if grep -nE '\b(print|debugPrint|log|developer\.log)\(|\bLog\.[a-z]+\(|println\(|Timber|NSLog|os_log|Logger\(|logStatements: *true' $files; then
+            echo "::error::logging call in key code"
+            exit 1
+          fi
       # T-007: test-only code (integration_test, the DB contract/benchmark
       # under app/test/core/db) must never be reachable from lib/.
       - name: lib/ does not import test-only code (T-007)
@@ -281,6 +295,22 @@ jobs:
             fi
           done
           grep -iE "BackupExclusionTests.*(passed|skipped)" xcodebuild.log
+          # T-015: Keychain attributes, OSStatus mapping, store, lease, host errors.
+          for t in testItemIsAfterFirstUnlockThisDeviceOnlyAndNotSynchronizable \
+            testEveryQueryNamesServiceAndAccount testStatusMapping \
+            testCreateThenReadReturnsTheSameKey testExistingKeyWinsOverANewCandidate \
+            testDuplicateOnAddReturnsTheWinner testUnavailableIsRetriedThenReported \
+            testCreateRefusesWhileTheStateIsUnknownOrUnusable testDegenerateCandidatesAreRefused \
+            testFailedAddIsKeyStoreFailure testDeleteIsScopedAndIdempotent \
+            testLeaseIsExclusiveUntilReleasedOrExpired testLeaseTimesOutWhileHeld \
+            testHostErrorsCarryACodeOnly; do
+            if ! grep -qiE "test case.*SecretStoreTests.*$t.*passed" xcodebuild.log; then
+              echo "::error::SecretStoreTests.$t did not pass"
+              grep -iE "SecretStoreTests" xcodebuild.log | head -n 30
+              exit 1
+            fi
+          done
+          grep -iE "SecretStoreTests.*(passed|skipped)" xcodebuild.log
 
   android:
     name: android ${{ matrix.flavor }} (${{ matrix.mode }})

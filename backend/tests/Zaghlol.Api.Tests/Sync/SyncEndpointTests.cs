@@ -379,6 +379,11 @@ public class SyncEndpointTests(SyncHostFixture fixture) : IClassFixture<SyncHost
             Assert.Equal("30", failed.Headers.RetryAfter?.ToString());
             Assert.Equal("UPSTREAM_UNAVAILABLE", await CodeAsync(failed));
             Assert.Null(await fixture.ScalarAsync("SELECT last_sync_at FROM zaghlol.installs WHERE id = $1", Guid.Parse(installId)));
+
+            // FU-061: the 503 is logged with a fixed cause and the failed block with the exception type only.
+            var logs = string.Join('\n', fixture.LogSink.Entries);
+            Assert.Contains("SYNC_UNAVAILABLE", logs, StringComparison.Ordinal);
+            Assert.Contains("SYNC_BLOCK_FAILED", logs, StringComparison.Ordinal);
         }
         finally
         {

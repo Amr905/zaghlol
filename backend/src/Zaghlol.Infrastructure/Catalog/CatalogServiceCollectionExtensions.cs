@@ -19,7 +19,8 @@ public static class CatalogServiceCollectionExtensions
         services.TryAddSingleton<ICatalogReader, CatalogReader>();
         services.TryAddSingleton<ICatalogSnapshotStore, DirectorySnapshotStore>();
         services.AddZaghlolAudit();
-        services.TryAddSingleton<ICatalogAdminStore, CatalogAdminStore>();
+        services.TryAddSingleton<CatalogAdminStore>();
+        services.TryAddSingleton<ICatalogAdminStore>(provider => provider.GetRequiredService<CatalogAdminStore>());
         return services;
     }
 }
