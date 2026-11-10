@@ -189,4 +189,22 @@ public class FlagStoreTests(FlagStoreFixture fixture) : IClassFixture<FlagStoreF
                 op));
         Assert.Equal("42501", audit.SqlState);
     }
+
+    [Fact]
+    public async Task TheSyncReaderMarksCorruptStoredRulesInvalidWhileTheAdminReadStaysLenient()
+    {
+        // FU-056: a row whose rules a migration or a manual fix left malformed (a string percentage, an unknown member).
+        await Db.ExecuteAsync(
+            fixture.Database.Migrator,
+            "INSERT INTO zaghlol.feature_flags (key, enabled, rules, version, updated_at, updated_by) "
+            + "VALUES ('t128_corrupt', true, '{\"rollout_percent\":\"10\",\"audience\":\"beta\"}'::jsonb, 3, now(), gen_random_uuid())");
+
+        var read = Assert.Single(await Reader.ListAsync(CancellationToken.None), f => f.Key == "t128_corrupt");
+        var admin = await Admin.GetAsync("t128_corrupt", CancellationToken.None);
+
+        Assert.True(read.RulesInvalid);
+        Assert.True(read.Rules.IsEmpty);
+        Assert.False(admin!.RulesInvalid);
+        Assert.DoesNotContain(await Reader.ListAsync(CancellationToken.None), f => f.Key != "t128_corrupt" && f.RulesInvalid);
+    }
 }
