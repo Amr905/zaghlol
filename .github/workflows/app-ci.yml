@@ -107,10 +107,12 @@ jobs:
       # Generated Pigeon files are excluded (their generic error path is never
       # used: every error is a code-only SecretStoreApiError).
       # T-016 (S-5): also stdout/stderr/dump, and core/db/schema.
-      - name: no logging in key and database code (T-015, T-016)
+      # T-017: also the DAOs, the frozen migration steps and the .drift DDL.
+      - name: no logging in key and database code (T-015, T-016, T-017)
         run: |
           set -o pipefail
-          files=$(ls app/lib/core/db/*.dart app/lib/core/db/schema/*.dart app/lib/core/crypto/*.dart \
+          files=$(ls app/lib/core/db/*.dart app/lib/core/db/schema/*.dart app/lib/core/db/schema/*.drift \
+            app/lib/core/db/daos/*.dart app/lib/core/db/migrations/*.dart app/lib/core/crypto/*.dart \
             app/lib/core/platform/pigeon_secret_store.dart \
             app/android/app/src/main/kotlin/app/zaghlol/platform/keys/*.kt \
             app/ios/Runner/Platform/Keys/*.swift | grep -v '\.g\.')

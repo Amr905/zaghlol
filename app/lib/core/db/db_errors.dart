@@ -61,3 +61,44 @@ final class DbMigrationException extends SafeException {
   static const String fkViolation = 'DB_MIGRATION_FK_VIOLATION';
   static const String schemaMismatch = 'DB_SCHEMA_MISMATCH';
 }
+
+/// A write the database refused (T-017). Carries a constant code and the
+/// SQLite extended result code only: never the statement, its parameters or
+/// any row data (a raw `SqliteException` holds all three).
+///
+/// Constraint codes: `DB_CONSTRAINT_CHECK`, `DB_CONSTRAINT_UNIQUE`,
+/// `DB_CONSTRAINT_PRIMARY_KEY`, `DB_CONSTRAINT_FOREIGN_KEY`,
+/// `DB_CONSTRAINT_NOT_NULL`, `DB_CONSTRAINT_TRIGGER` (a trigger aborted with
+/// an unknown message), `DB_CONSTRAINT` (other). The offset triggers
+/// (financial.drift) abort with their own codes: `OFFSET_EXCEEDS_EXPENSE`,
+/// `OFFSET_EXCEEDS_SOURCE`, `OFFSET_CURRENCY_MISMATCH`,
+/// `OFFSET_PARTICIPANT_MISMATCH`. Any other SQLite failure is
+/// `DB_WRITE_FAILED`.
+final class DbWriteException extends SafeException {
+  DbWriteException(super.code, {this.sqliteCode});
+
+  static const String constraintCheck = 'DB_CONSTRAINT_CHECK';
+  static const String constraintUnique = 'DB_CONSTRAINT_UNIQUE';
+  static const String constraintPrimaryKey = 'DB_CONSTRAINT_PRIMARY_KEY';
+  static const String constraintForeignKey = 'DB_CONSTRAINT_FOREIGN_KEY';
+  static const String constraintNotNull = 'DB_CONSTRAINT_NOT_NULL';
+  static const String constraintTrigger = 'DB_CONSTRAINT_TRIGGER';
+  static const String constraint = 'DB_CONSTRAINT';
+  static const String writeFailed = 'DB_WRITE_FAILED';
+
+  static const String offsetExceedsExpense = 'OFFSET_EXCEEDS_EXPENSE';
+  static const String offsetExceedsSource = 'OFFSET_EXCEEDS_SOURCE';
+  static const String offsetCurrencyMismatch = 'OFFSET_CURRENCY_MISMATCH';
+  static const String offsetParticipantMismatch = 'OFFSET_PARTICIPANT_MISMATCH';
+
+  /// The `RAISE(ABORT, …)` messages of the schema's triggers.
+  static const Set<String> triggerCodes = {
+    offsetExceedsExpense,
+    offsetExceedsSource,
+    offsetCurrencyMismatch,
+    offsetParticipantMismatch,
+  };
+
+  /// SQLite extended result code, when known.
+  final int? sqliteCode;
+}

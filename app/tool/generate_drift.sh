@@ -6,11 +6,13 @@
 # drift_dev can't resolve inside the pub workspace (see
 # tools/drift_codegen/pubspec.yaml), so:
 #   1. tools/drift_codegen gets app/build.yaml and a copy of the schema folder
+#      (*.dart and *.drift; T-017: any drift_dev warning fails the run)
 #      at the same relative path, runs build_runner and hands back *.g.dart;
 #   2. the drift_dev CLI, run with the codegen package's resolution, reads the
 #      app directory (app/build.yaml) and writes app/drift_schemas/. With more
 #      than one schema version it also writes the stepByStep helper
-#      (schema_versions.dart) and the test schemas (test/core/db/migrations/).
+#      (lib/core/db/schema/app_schema.steps.dart) and the test schemas
+#      (test/core/db/migrations/).
 #      `--no-test`: the generated test template needs drift_dev at runtime;
 #      the app's own migration tests use test/core/db/migration_harness.dart.
 #   3. dart format.
@@ -32,11 +34,18 @@ trap cleanup EXIT
 rm -rf "$gen/lib"
 mkdir -p "$gen/$schema_rel"
 cp "$app/build.yaml" "$gen/build.yaml"
-find "$app/$schema_rel" -maxdepth 1 -name '*.dart' ! -name '*.g.dart' -exec cp {} "$gen/$schema_rel/" \;
+find "$app/$schema_rel" -maxdepth 1 \( -name '*.dart' -o -name '*.drift' \) ! -name '*.g.dart' -exec cp {} "$gen/$schema_rel/" \;
 (cd "$gen" && dart run build_runner build --delete-conflicting-outputs > "$gen/.dart_tool/build_runner.log" 2>&1) || {
   cat "$gen/.dart_tool/build_runner.log"
   exit 1
 }
+# T-017: a drift analysis warning (unknown table, unparsable SQL) still
+# "builds" but silently drops the entity: treat it as an error.
+if grep -q '^W drift_dev' "$gen/.dart_tool/build_runner.log"; then
+  grep -A8 '^W drift_dev' "$gen/.dart_tool/build_runner.log" >&2
+  echo "drift_dev reported warnings" >&2
+  exit 1
+fi
 find "$app/$schema_rel" -maxdepth 1 -name '*.g.dart' -delete
 find "$gen/$schema_rel" -maxdepth 1 -name '*.g.dart' -exec cp {} "$app/$schema_rel/" \;
 
