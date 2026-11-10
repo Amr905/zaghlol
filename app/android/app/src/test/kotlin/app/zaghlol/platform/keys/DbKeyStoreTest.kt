@@ -9,6 +9,7 @@ import org.junit.Assert.assertFalse
 import org.junit.Assert.assertNull
 import org.junit.Assert.assertTrue
 import org.junit.Assert.fail
+import org.junit.Assume.assumeFalse
 import org.junit.Before
 import org.junit.Rule
 import org.junit.Test
@@ -99,7 +100,8 @@ class DbKeyStoreTest {
     kek.key = null
     val r = s.read()
     assertEquals(SecretStatusMsg.UNUSABLE, r.status)
-    assertEquals(1, r.attempts)
+    // S-1: confirmed by every attempt of the schedule.
+    assertEquals(4, r.attempts)
   }
 
   @Test
@@ -245,5 +247,151 @@ class DbKeyStoreTest {
   @Test
   fun aeadTagFailureFromTheCipherIsClassifiedUnusable() {
     assertEquals(ReadFailure.UNUSABLE, KeyErrorClassifier { null }.classify(AEADBadTagException()))
+  }
+
+  // M-1: absence must be proven, never inferred from a failed stat.
+
+  private fun probed(probe: (File) -> Presence) =
+    DbKeyStore(dir, kek, KeyErrorClassifier { null }, sleeper = { sleeps.add(it) }, probe = probe)
+
+  private fun createAndExpectFailure(s: DbKeyStore, candidate: ByteArray) {
+    try {
+      s.createIfAbsent(candidate)
+      fail("expected KeyStoreFailure")
+    } catch (e: KeyStoreFailure) {
+      // expected
+    }
+  }
+
+  @Test
+  fun undeterminableBlobPresenceIsUnavailableAndNeverWrites() {
+    var presence = Presence.UNKNOWN
+    val s = probed { presence }
+    val r = s.read()
+    assertEquals(SecretStatusMsg.UNAVAILABLE, r.status)
+    assertNull(r.value)
+    assertEquals(4, r.attempts)
+    createAndExpectFailure(s, syntheticKey())
+    assertEquals(0, kek.creates)
+    assertEquals(0, kek.deletes)
+    assertFalse(dir.exists())
+    try {
+      s.delete()
+      fail("delete must not report success while absence is unproven")
+    } catch (e: KeyStoreFailure) {
+      // expected
+    }
+    presence = Presence.ABSENT
+    assertEquals(SecretStatusMsg.NOT_FOUND, s.read().status)
+  }
+
+  @Test
+  fun undeterminablePresenceOverAnExistingBlobKeepsBlobAndAlias() {
+    val real = store()
+    real.createIfAbsent(syntheticKey(1))
+    val before = real.blobFile.readBytes()
+    val aliasBefore = kek.key
+    val s = probed { Presence.UNKNOWN }
+    assertEquals(SecretStatusMsg.UNAVAILABLE, s.read().status)
+    createAndExpectFailure(s, syntheticKey(2))
+    assertEquals(1, kek.creates)
+    assertEquals(aliasBefore, kek.key)
+    assertArrayEquals(before, real.blobFile.readBytes())
+    assertArrayEquals(syntheticKey(1), real.read().value)
+  }
+
+  @Test
+  fun absenceThatFlipsBeforeTheWriteNeverReachesCreateFresh() {
+    // The read proves absence; the probe then can't tell. No KEK is created.
+    var calls = 0
+    val s = probed { if (calls++ == 0) Presence.ABSENT else Presence.UNKNOWN }
+    createAndExpectFailure(s, syntheticKey())
+    assertEquals(0, kek.creates)
+    assertEquals(0, kek.deletes)
+  }
+
+  @Test
+  fun nioPresenceDistinguishesAbsentFromPresent() {
+    val f = File(tmp.root, "probe.bin")
+    assertEquals(Presence.ABSENT, nioPresence(f))
+    f.writeBytes(byteArrayOf(1))
+    assertEquals(Presence.PRESENT, nioPresence(f))
+  }
+
+  @Test
+  fun aNonSearchableDirectoryIsUnknownNotAbsent() {
+    val locked = File(tmp.root, "locked").apply { mkdirs() }
+    val inner = File(locked, "db_key_v1.bin").apply { writeBytes(byteArrayOf(1)) }
+    assertTrue(locked.setExecutable(false, false))
+    try {
+      // root (and some CI sandboxes) ignore permission bits: nothing to prove.
+      assumeFalse("permissions not enforced for this user", inner.exists())
+      assertEquals(Presence.UNKNOWN, nioPresence(inner))
+      val s = DbKeyStore(locked, kek, KeyErrorClassifier { null }, sleeper = { sleeps.add(it) })
+      assertEquals(SecretStatusMsg.UNAVAILABLE, s.read().status)
+      createAndExpectFailure(s, syntheticKey())
+      assertEquals(0, kek.creates)
+    } finally {
+      locked.setExecutable(true, false)
+    }
+  }
+
+  // S-1: one bad observation is not proof; every attempt must agree.
+
+  @Test
+  fun oneTagFailureThenSuccessReturnsTheKey() {
+    val s = store()
+    s.createIfAbsent(syntheticKey())
+    var failures = 1
+    val flaky =
+      object : Kek by kek {
+        override fun get() = if (failures-- > 0) throw AEADBadTagException() else kek.get()
+      }
+    val r = DbKeyStore(dir, flaky, KeyErrorClassifier { null }, sleeper = { sleeps.add(it) }).read()
+    assertEquals(SecretStatusMsg.FOUND, r.status)
+    assertArrayEquals(syntheticKey(), r.value)
+    assertEquals(2, r.attempts)
+  }
+
+  @Test
+  fun oneMissingAliasThenSuccessReturnsTheKey() {
+    val s = store()
+    s.createIfAbsent(syntheticKey())
+    var misses = 3
+    val flaky =
+      object : Kek by kek {
+        override fun get() = if (misses-- > 0) null else kek.get()
+      }
+    val r = DbKeyStore(dir, flaky, KeyErrorClassifier { null }, sleeper = { sleeps.add(it) }).read()
+    assertEquals(SecretStatusMsg.FOUND, r.status)
+    assertEquals(4, r.attempts)
+  }
+
+  @Test
+  fun consistentTagFailureIsUnusableAfterEveryAttempt() {
+    val s = store()
+    s.createIfAbsent(syntheticKey())
+    sleeps.clear()
+    kek.getError = AEADBadTagException()
+    val r = s.read()
+    assertEquals(SecretStatusMsg.UNUSABLE, r.status)
+    assertNull(r.value)
+    assertEquals(4, r.attempts)
+    assertEquals(listOf(100L, 300L, 900L), sleeps)
+  }
+
+  @Test
+  fun mixedUnusableAndUnavailableIsUnavailable() {
+    val s = store()
+    s.createIfAbsent(syntheticKey())
+    var n = 0
+    val mixed =
+      object : Kek by kek {
+        override fun get(): javax.crypto.SecretKey? =
+          if (n++ % 2 == 0) throw AEADBadTagException() else throw IOException("synthetic")
+      }
+    val r = DbKeyStore(dir, mixed, KeyErrorClassifier { null }, sleeper = { sleeps.add(it) }).read()
+    assertEquals(SecretStatusMsg.UNAVAILABLE, r.status)
+    assertEquals(4, r.attempts)
   }
 }

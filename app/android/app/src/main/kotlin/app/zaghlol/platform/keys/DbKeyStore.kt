@@ -2,6 +2,7 @@ package app.zaghlol.platform.keys
 
 import java.io.File
 import java.io.FileOutputStream
+import java.nio.file.Files
 import java.security.MessageDigest
 import javax.crypto.Cipher
 import javax.crypto.SecretKey
@@ -9,6 +10,33 @@ import javax.crypto.spec.GCMParameterSpec
 
 /** Result of a slot read. [value] is set only for [SecretStatusMsg.FOUND]. */
 class SlotRead(val status: SecretStatusMsg, val value: ByteArray?, val attempts: Int)
+
+/** What a file-system probe can prove about a path (M-1). */
+enum class Presence {
+  PRESENT,
+  ABSENT,
+
+  /** Neither presence nor absence could be proven (EACCES, EIO, storage not ready). */
+  UNKNOWN,
+}
+
+/**
+ * `java.nio.file.Files` (API 26+): `exists` and `notExists` are both false when
+ * the check itself fails, unlike `java.io.File.exists()`, which turns any stat
+ * error into "absent".
+ */
+fun nioPresence(file: File): Presence {
+  return try {
+    val path = file.toPath()
+    when {
+      Files.exists(path) -> Presence.PRESENT
+      Files.notExists(path) -> Presence.ABSENT
+      else -> Presence.UNKNOWN
+    }
+  } catch (e: Exception) {
+    Presence.UNKNOWN
+  }
+}
 
 /** Thrown by writes; the host maps it to `KEY_STORE_FAILED` with no message. */
 class KeyStoreFailure : Exception()
@@ -45,9 +73,15 @@ interface Kek {
  * Blob `<dir>/db_key_v1.bin` = `0x01 ‖ iv(12) ‖ ct(32) ‖ tag(16)`, AAD
  * `zaghlol/k_db/v1`. Written as tmp, fsync, rename; read back and compared
  * before a create returns. `dir` is under `noBackupFilesDir` (never in an OS
- * backup). Reads classify: blob absent → NOT_FOUND; malformed blob, alias
- * missing, tag failure or an invalidated key → UNUSABLE; anything else →
- * UNAVAILABLE after retries ([retryDelaysMs]).
+ * backup). Reads classify: blob proven absent ([probe]) → NOT_FOUND; malformed
+ * blob, alias missing, tag failure or an invalidated key → UNUSABLE; blob
+ * presence undeterminable and anything else → UNAVAILABLE.
+ *
+ * Every non-FOUND read is retried on the [retryDelaysMs] schedule (S-1): one
+ * FOUND wins; UNUSABLE is returned only when every attempt agrees, and any
+ * disagreement is UNAVAILABLE. NOT_FOUND needs no confirmation: it rests on
+ * the file system proving absence (ENOENT), not on the Keystore, so it is
+ * returned at once when it is the only observation so far.
  *
  * Every method is synchronized: one instance per process serves all engines.
  * Nothing here logs (FU-050).
@@ -58,21 +92,31 @@ class DbKeyStore(
   private val classifier: KeyErrorClassifier = KeyErrorClassifier(),
   private val retryDelaysMs: LongArray = longArrayOf(100, 300, 900),
   private val sleeper: (Long) -> Unit = { Thread.sleep(it) },
+  private val probe: (File) -> Presence = ::nioPresence,
 ) : SecretSlotStore {
   val blobFile: File get() = File(dir, BLOB_NAME)
   private val tmpFile: File get() = File(dir, "$BLOB_NAME.tmp")
 
   @Synchronized
   override fun read(): SlotRead {
+    var first: SecretStatusMsg? = null
+    var agree = true
     var attempts = 0
     while (true) {
       attempts++
       val result = readOnce()
-      if (result.status != SecretStatusMsg.UNAVAILABLE || attempts > retryDelaysMs.size) {
-        return SlotRead(result.status, result.value, attempts)
+      if (result.status == SecretStatusMsg.FOUND) {
+        return SlotRead(SecretStatusMsg.FOUND, result.value, attempts)
       }
+      if (first == null) first = result.status else if (result.status != first) agree = false
+      if (agree && first == SecretStatusMsg.NOT_FOUND) {
+        return SlotRead(SecretStatusMsg.NOT_FOUND, null, attempts)
+      }
+      if (attempts > retryDelaysMs.size) break
       sleeper(retryDelaysMs[attempts - 1])
     }
+    val status = if (agree) first!! else SecretStatusMsg.UNAVAILABLE
+    return SlotRead(status, null, attempts)
   }
 
   @Synchronized
@@ -81,11 +125,16 @@ class DbKeyStore(
     val existing = read()
     when (existing.status) {
       SecretStatusMsg.FOUND -> return existing.value ?: throw KeyStoreFailure()
+      // Proven absence only (probe == ABSENT); UNKNOWN reads are UNAVAILABLE.
       SecretStatusMsg.NOT_FOUND -> {}
       // An unusable blob must be deleted first (the caller decides, under the
       // lease, that no database depends on it). Unknown state: never overwrite.
       SecretStatusMsg.UNUSABLE, SecretStatusMsg.UNAVAILABLE -> throw KeyStoreFailure()
     }
+    // write() calls kek.createFresh(), which deletes the alias: reach it only
+    // on proven absence (M-1). Checked again outside the try, so a failed
+    // check never runs deleteQuietly() over a blob that may exist.
+    if (probe(blobFile) != Presence.ABSENT) throw KeyStoreFailure()
     try {
       write(candidate)
     } catch (e: Exception) {
@@ -114,12 +163,16 @@ class DbKeyStore(
     } catch (e: Exception) {
       throw KeyStoreFailure()
     }
-    if (blobFile.exists()) throw KeyStoreFailure()
+    if (probe(blobFile) != Presence.ABSENT) throw KeyStoreFailure()
   }
 
   private fun readOnce(): SlotRead {
     return try {
-      if (!blobFile.exists()) return SlotRead(SecretStatusMsg.NOT_FOUND, null, 1)
+      when (probe(blobFile)) {
+        Presence.ABSENT -> return SlotRead(SecretStatusMsg.NOT_FOUND, null, 1)
+        Presence.UNKNOWN -> return SlotRead(SecretStatusMsg.UNAVAILABLE, null, 1)
+        Presence.PRESENT -> {}
+      }
       val blob = blobFile.readBytes()
       if (blob.size != BLOB_LENGTH || blob[0] != VERSION) {
         return SlotRead(SecretStatusMsg.UNUSABLE, null, 1)

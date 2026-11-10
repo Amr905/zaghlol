@@ -50,8 +50,12 @@ final class SecretStoreTests: XCTestCase {
 
   private var sleeps: [UInt32] = []
 
-  private func makeStore(_ keychain: FakeKeychain) -> DbKeyKeychain {
-    DbKeyKeychain(client: keychain, sleeper: { self.sleeps.append($0) })
+  private static let ownGroup = "ABCDE12345.app.zaghlol.dev"
+
+  private func makeStore(_ keychain: KeychainClient) -> DbKeyKeychain {
+    DbKeyKeychain(
+      client: keychain, accessGroup: SecretStoreTests.ownGroup,
+      sleeper: { self.sleeps.append($0) })
   }
 
   override func setUp() {
@@ -61,7 +65,7 @@ final class SecretStoreTests: XCTestCase {
   // MARK: Attributes
 
   func testItemIsAfterFirstUnlockThisDeviceOnlyAndNotSynchronizable() {
-    let attrs = DbKeyKeychain.addAttributes(value: syntheticKey())
+    let attrs = DbKeyKeychain.addAttributes(value: syntheticKey(), accessGroup: nil)
     XCTAssertEqual(
       attrs[kSecAttrAccessible as String] as? String,
       kSecAttrAccessibleAfterFirstUnlockThisDeviceOnly as String)
@@ -69,11 +73,50 @@ final class SecretStoreTests: XCTestCase {
     XCTAssertEqual(attrs[kSecClass as String] as? String, kSecClassGenericPassword as String)
     XCTAssertEqual(attrs[kSecAttrService as String] as? String, "app.zaghlol.keys")
     XCTAssertEqual(attrs[kSecAttrAccount as String] as? String, "db_key_v1")
-    XCTAssertNil(attrs[kSecAttrAccessGroup as String], "default access group (Runner only)")
+    XCTAssertNil(attrs[kSecAttrAccessGroup as String], "unsigned build: no group to name")
+  }
+
+  // S-3: K_db is pinned to Runner's own application-identifier group.
+
+  func testAccessGroupIsResolvedFromThePrefixAndBundleId() {
+    XCTAssertEqual(
+      DbKeyKeychain.resolveAccessGroup(prefix: "ABCDE12345.", bundleId: "app.zaghlol"),
+      "ABCDE12345.app.zaghlol")
+    XCTAssertEqual(
+      DbKeyKeychain.resolveAccessGroup(prefix: "ABCDE12345", bundleId: "app.zaghlol.dev"),
+      "ABCDE12345.app.zaghlol.dev")
+    for prefix: String? in [nil, "", "$(AppIdentifierPrefix)"] {
+      XCTAssertNil(DbKeyKeychain.resolveAccessGroup(prefix: prefix, bundleId: "app.zaghlol"))
+    }
+    XCTAssertNil(DbKeyKeychain.resolveAccessGroup(prefix: "ABCDE12345.", bundleId: nil))
+    XCTAssertNil(DbKeyKeychain.resolveAccessGroup(prefix: "ABCDE12345.", bundleId: ""))
+  }
+
+  func testTheDefaultStoreUsesTheAppsOwnGroup() {
+    XCTAssertEqual(DbKeyKeychain().accessGroup, DbKeyKeychain.appAccessGroup)
+    if let group = DbKeyKeychain.appAccessGroup {
+      XCTAssertTrue(group.hasSuffix("." + (Bundle.main.bundleIdentifier ?? "-")))
+    }
+  }
+
+  func testEveryCallNamesTheOwnAccessGroup() throws {
+    let kc = FakeKeychain()
+    let store = makeStore(kc)
+    _ = store.read()
+    _ = try store.createIfAbsent(syntheticKey())
+    _ = store.read()
+    try store.delete()
+    XCTAssertFalse(kc.queries.isEmpty)
+    XCTAssertEqual(kc.adds.count, 1)
+    XCTAssertEqual(kc.deletes.count, 1)
+    for q in kc.queries + kc.adds + kc.deletes {
+      XCTAssertEqual(q[kSecAttrAccessGroup as String] as? String, SecretStoreTests.ownGroup)
+    }
   }
 
   func testEveryQueryNamesServiceAndAccount() {
-    for q in [DbKeyKeychain.itemQuery(), DbKeyKeychain.readQuery()] {
+    let g = SecretStoreTests.ownGroup
+    for q in [DbKeyKeychain.itemQuery(accessGroup: g), DbKeyKeychain.readQuery(accessGroup: g)] {
       XCTAssertEqual(q[kSecAttrService as String] as? String, "app.zaghlol.keys")
       XCTAssertEqual(q[kSecAttrAccount as String] as? String, "db_key_v1")
       XCTAssertEqual(q[kSecAttrSynchronizable as String] as? Bool, false)
@@ -118,7 +161,8 @@ final class SecretStoreTests: XCTestCase {
 
   func testDuplicateOnAddReturnsTheWinner() throws {
     // The first read sees nothing; the add then races with another writer.
-    let raced = DbKeyKeychain(client: RaceKeychain(winner: syntheticKey(3)), sleeper: { _ in })
+    let raced = DbKeyKeychain(
+      client: RaceKeychain(winner: syntheticKey(3)), accessGroup: nil, sleeper: { _ in })
     XCTAssertEqual(try raced.createIfAbsent(syntheticKey(4)), syntheticKey(3))
   }
 
@@ -144,6 +188,64 @@ final class SecretStoreTests: XCTestCase {
     XCTAssertNil(r.value)
     XCTAssertEqual(r.attempts, 4)
     XCTAssertEqual(sleeps, [100, 300, 900])
+  }
+
+  // S-1: one bad observation is not proof; every attempt must agree.
+
+  /// Returns the scripted statuses in order, then repeats the last one.
+  private final class ScriptedKeychain: KeychainClient {
+    var script: [(OSStatus, Data?)]
+    var reads = 0
+    init(_ script: [(OSStatus, Data?)]) { self.script = script }
+    func copyMatching(_ query: [String: Any]) -> (OSStatus, Data?) {
+      defer { reads += 1 }
+      return script[min(reads, script.count - 1)]
+    }
+    func add(_ attributes: [String: Any]) -> OSStatus { errSecIO }
+    func delete(_ query: [String: Any]) -> OSStatus { errSecSuccess }
+  }
+
+  func testOneNotFoundThenSuccessReturnsTheKey() {
+    let kc = ScriptedKeychain([(errSecItemNotFound, nil), (errSecSuccess, syntheticKey())])
+    let r = makeStore(kc).read()
+    XCTAssertEqual(r.status, .found)
+    XCTAssertEqual(r.value, syntheticKey())
+    XCTAssertEqual(r.attempts, 2)
+    XCTAssertEqual(sleeps, [100])
+  }
+
+  func testNotFoundOnEveryAttemptIsNotFound() {
+    let kc = FakeKeychain()
+    let r = makeStore(kc).read()
+    XCTAssertEqual(r.status, .notFound)
+    XCTAssertEqual(r.attempts, 4)
+    XCTAssertEqual(sleeps, [100, 300, 900])
+  }
+
+  func testOneWrongLengthThenSuccessReturnsTheKey() {
+    let kc = ScriptedKeychain([
+      (errSecSuccess, Data(count: 16)), (errSecSuccess, Data(count: 16)),
+      (errSecSuccess, Data(count: 16)), (errSecSuccess, syntheticKey()),
+    ])
+    let r = makeStore(kc).read()
+    XCTAssertEqual(r.status, .found)
+    XCTAssertEqual(r.attempts, 4)
+  }
+
+  func testWrongLengthOnEveryAttemptIsUnusable() {
+    let r = makeStore(ScriptedKeychain([(errSecSuccess, Data(count: 16))])).read()
+    XCTAssertEqual(r.status, .unusable)
+    XCTAssertEqual(r.attempts, 4)
+  }
+
+  func testDisagreeingAttemptsAreUnavailable() {
+    let kc = ScriptedKeychain([
+      (errSecItemNotFound, nil), (errSecInteractionNotAllowed, nil), (errSecItemNotFound, nil),
+    ])
+    let r = makeStore(kc).read()
+    XCTAssertEqual(r.status, .unavailable)
+    XCTAssertNil(r.value)
+    XCTAssertEqual(r.attempts, 4)
   }
 
   func testCreateRefusesWhileTheStateIsUnknownOrUnusable() {
@@ -277,7 +379,7 @@ final class SecretStoreTests: XCTestCase {
     XCTAssertEqual(try store.createIfAbsent(syntheticKey()), syntheticKey())
     XCTAssertEqual(store.read().value, syntheticKey())
 
-    var q = DbKeyKeychain.itemQuery()
+    var q = DbKeyKeychain.itemQuery(accessGroup: store.accessGroup)
     q[kSecReturnAttributes as String] = kCFBooleanTrue
     q[kSecMatchLimit as String] = kSecMatchLimitOne
     var out: CFTypeRef?
@@ -287,5 +389,8 @@ final class SecretStoreTests: XCTestCase {
       attrs?[kSecAttrAccessible as String] as? String,
       kSecAttrAccessibleAfterFirstUnlockThisDeviceOnly as String)
     XCTAssertEqual((attrs?[kSecAttrSynchronizable as String] as? NSNumber)?.boolValue ?? false, false)
+    if let group = store.accessGroup {
+      XCTAssertEqual(attrs?[kSecAttrAccessGroup as String] as? String, group)
+    }
   }
 }
