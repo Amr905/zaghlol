@@ -1,0 +1,18 @@
+{
+  "sender": "AlAhly",
+  "body": "nbe: purchase of egp 75.00 from nbe visa **4567 at spinneys maadi on 23/10. avl bal egp 100.00",
+  "receivedAt": "2026-10-23T11:14:00+03:00",
+  "expect": {
+    "template": "nbe.card_purchase.en",
+    "amount": "75.00",
+    "last4": "4567",
+    "merchantClean": "Spinneys",
+    "balance": "100.00",
+    "date": "2026-10-23",
+    "confidence": "970",
+    "needsReview": "false",
+    "occurredAt": "2026-10-23T11:14:00",
+    "language": "en",
+    "reasons": []
+  }
+}

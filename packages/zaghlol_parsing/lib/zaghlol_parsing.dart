@@ -2,6 +2,8 @@
 library;
 
 export 'normalize/amount_parser.dart';
+export 'pipeline/parse_result.dart';
+export 'pipeline/parsing_pipeline.dart';
 export 'registry/fixture_runner.dart';
 export 'registry/guard_export.dart';
 export 'registry/regex_safety.dart';

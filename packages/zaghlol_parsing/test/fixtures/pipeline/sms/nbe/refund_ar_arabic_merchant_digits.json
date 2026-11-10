@@ -1,0 +1,16 @@
+{
+  "sender": "NBE",
+  "body": "تم استرداد ٨٥٫٥٠ جم من مكتبة الشروق إلى بطاقة **٤٥٦٧",
+  "receivedAt": "2026-10-23T11:14:00+03:00",
+  "expect": {
+    "template": "nbe.refund.ar",
+    "amount": "85.50",
+    "last4": "4567",
+    "merchantClean": "مكتبة الشروق",
+    "confidence": "970",
+    "needsReview": "false",
+    "occurredAt": "2026-10-23T11:14:00",
+    "language": "ar",
+    "reasons": []
+  }
+}

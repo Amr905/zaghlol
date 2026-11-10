@@ -1,0 +1,15 @@
+{
+  "sender": "NBE",
+  "body": "NBE: Card *4567 purchase of EGP 99.99 at SPINNEYS CAIRO declined. Insufficient funds",
+  "receivedAt": "2026-10-23T11:14:00+03:00",
+  "expect": {
+    "template": "nbe.declined.en",
+    "amount": "99.99",
+    "merchantClean": "Spinneys",
+    "confidence": "950",
+    "needsReview": "false",
+    "occurredAt": "2026-10-23T11:14:00",
+    "language": "en",
+    "reasons": []
+  }
+}

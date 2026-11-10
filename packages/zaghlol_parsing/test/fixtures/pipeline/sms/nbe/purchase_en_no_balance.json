@@ -1,0 +1,19 @@
+{
+  "sender": "NBE",
+  "body": "NBE: Purchase of EGP 1,250.00 from NBE Mastercard **8901 at KOSHARY EL TAHRIR on 21/10.",
+  "receivedAt": "2026-10-23T11:14:00+03:00",
+  "expect": {
+    "template": "nbe.card_purchase.en",
+    "amount": "1250.00",
+    "last4": "8901",
+    "merchantClean": "Koshary El Tahrir",
+    "merchantKey": "koshary el tahrir",
+    "balance": null,
+    "date": "2026-10-21",
+    "confidence": "970",
+    "needsReview": "false",
+    "occurredAt": "2026-10-21T11:14:00",
+    "language": "en",
+    "reasons": []
+  }
+}

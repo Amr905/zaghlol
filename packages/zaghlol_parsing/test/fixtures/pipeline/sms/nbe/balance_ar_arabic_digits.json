@@ -1,0 +1,16 @@
+{
+  "sender": "NBE",
+  "body": "رصيد حسابكم رقم **٤٥٦٧ هو ٣٬٢٥٠٫٧٥ جم",
+  "receivedAt": "2026-10-23T11:14:00+03:00",
+  "expect": {
+    "template": "nbe.balance.ar",
+    "amount": null,
+    "last4": "4567",
+    "balance": "3250.75",
+    "confidence": "900",
+    "needsReview": "false",
+    "occurredAt": "2026-10-23T11:14:00",
+    "language": "ar",
+    "reasons": []
+  }
+}

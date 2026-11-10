@@ -1,0 +1,19 @@
+{
+  "sender": "NBE",
+  "body": "تم خصم 99.50 جم ببطاقة ميزة **4567 لدى UBER EG 041 يوم 22/10",
+  "receivedAt": "2026-10-23T11:14:00+03:00",
+  "expect": {
+    "template": "nbe.card_purchase.ar",
+    "amount": "99.50",
+    "currency": "EGP",
+    "last4": "4567",
+    "merchantClean": "Uber",
+    "balance": null,
+    "date": "2026-10-22",
+    "confidence": "980",
+    "needsReview": "false",
+    "occurredAt": "2026-10-22T11:14:00",
+    "language": "ar",
+    "reasons": []
+  }
+}

@@ -7,6 +7,10 @@ const int maxPatternLength = 600;
 /// Most unbounded wildcards (`.*`, `.+`, `.*?`) one pattern may use.
 const int maxUnboundedWildcards = 6;
 
+/// Largest repeat count of a group that holds an unbounded quantifier before
+/// the pattern is flagged (`(\d+,){1,3}` is fine, `(a+){1,50}` is not).
+const int maxBoundedRepeat = 3;
+
 /// Compiles a registry pattern, or returns null when it is not valid.
 ///
 /// Dart's `RegExp` has no inline flags, so a single leading `(?i)` is
@@ -39,14 +43,20 @@ CompiledPattern? compilePattern(String source) {
 /// per-message budget tests. It flags:
 /// - `nested_quantifier`: an unbounded quantifier on a group that itself
 ///   contains an unbounded quantifier (`(a+)+`, `(.*x)*`);
-/// - `ambiguous_alternation`: a quantified group with an empty or duplicate
-///   alternative (`(a|a)*`, `(a|)+`);
+/// - `nested_bounded_quantifier`: the same with a bounded repeat above
+///   [maxBoundedRepeat] (`(a+){1,50}`);
+/// - `ambiguous_alternation`: a repeating group with an empty or duplicate
+///   alternative, an alternative that is also written optional, or one
+///   alternative that is a prefix of another (`(a|a)*`, `(a|)+`, `(a|a?)+`,
+///   `(a|aa)+`);
 /// - `lookaround` and `backreference`: not needed by templates and hard to
 ///   bound;
 /// - `too_many_wildcards`: more than [maxUnboundedWildcards] unbounded `.`;
 /// - `too_long`.
 ///
-/// Overlapping but distinct alternatives (`(a|ab)*`) are not detected.
+/// Overlap that is not a literal prefix (`(\w|\d)+`) is not detected, and
+/// the runtime guard of the fixture runner only measures, it can not stop a
+/// running match.
 List<String> backtrackingProblems(String source) {
   final problems = <String>{};
   if (source.length > maxPatternLength) {
@@ -62,8 +72,7 @@ List<String> backtrackingProblems(String source) {
     final start = i;
     var atomIsWildcard = false;
     var isAtom = true;
-    var closedGroup = false;
-    var closed = _Group(isRoot: true);
+    _Group? closed;
     if (c == r'\') {
       if (i + 1 < n) {
         final next = source[i + 1];
@@ -99,9 +108,8 @@ List<String> backtrackingProblems(String source) {
     } else if (c == ')') {
       if (stack.length > 1) {
         closed = stack.removeLast();
-        closedGroup = true;
       }
-      isAtom = closedGroup;
+      isAtom = closed != null;
       i += 1;
     } else if (c == '|') {
       stack.last.endAlternative();
@@ -115,10 +123,14 @@ List<String> backtrackingProblems(String source) {
     final q = _readQuantifier(source, i);
     if (q != null) {
       i = q.end;
-      if (closedGroup) {
+      if (closed != null) {
         closed.finish();
         if (q.unbounded && closed.hasUnbounded) {
           problems.add('nested_quantifier');
+        } else if (q.repeats &&
+            (q.max ?? 0) > maxBoundedRepeat &&
+            closed.hasUnbounded) {
+          problems.add('nested_bounded_quantifier');
         }
         if (q.repeats && closed.ambiguousAlternatives) {
           problems.add('ambiguous_alternation');
@@ -131,7 +143,7 @@ List<String> backtrackingProblems(String source) {
           wildcards += 1;
         }
       }
-    } else if (closedGroup) {
+    } else if (closed != null) {
       closed.finish();
       stack.last.hasUnbounded = stack.last.hasUnbounded || closed.hasUnbounded;
     }
@@ -139,7 +151,7 @@ List<String> backtrackingProblems(String source) {
       // The atom's own source text (a closed group's whole text), so
       // alternatives compare by what they are written as.
       stack.last.addAtom(
-        source.substring(closedGroup ? closed.openAt : start, i > n ? n : i),
+        source.substring(closed?.openAt ?? start, i > n ? n : i),
       );
     }
   }
@@ -165,9 +177,17 @@ int _skipClass(String s, int start) {
 }
 
 final class _Quantifier {
-  const _Quantifier(this.end, {required this.unbounded, required this.repeats});
+  const _Quantifier(
+    this.end, {
+    required this.unbounded,
+    required this.repeats,
+    required this.max,
+  });
 
   final int end;
+
+  /// Largest repeat count, null when unbounded.
+  final int? max;
   final bool unbounded;
 
   /// More than one repetition is possible.
@@ -182,10 +202,12 @@ _Quantifier? _readQuantifier(String s, int at) {
   var end = at + 1;
   var unbounded = false;
   var repeats = true;
+  int? max;
   if (c == '*' || c == '+') {
     unbounded = true;
   } else if (c == '?') {
     repeats = false;
+    max = 1;
   } else if (c == '{') {
     final m = RegExp(r'^\{(\d+)(,(\d*))?\}').firstMatch(s.substring(at));
     if (m == null) {
@@ -195,7 +217,9 @@ _Quantifier? _readQuantifier(String s, int at) {
     final hasComma = m.group(2) != null;
     final upper = m.group(3) ?? '';
     unbounded = hasComma && upper.isEmpty;
-    final max = hasComma ? int.tryParse(upper) : int.tryParse(m.group(1)!);
+    max = unbounded
+        ? null
+        : (hasComma ? int.tryParse(upper) : int.tryParse(m.group(1)!));
     repeats = unbounded || (max ?? 2) > 1;
   } else {
     return null;
@@ -203,7 +227,7 @@ _Quantifier? _readQuantifier(String s, int at) {
   if (end < s.length && (s[end] == '?' || s[end] == '+')) {
     end += 1; // lazy or possessive suffix
   }
-  return _Quantifier(end, unbounded: unbounded, repeats: repeats);
+  return _Quantifier(end, unbounded: unbounded, repeats: repeats, max: max);
 }
 
 /// Bookkeeping for one open group.
@@ -224,11 +248,26 @@ final class _Group {
     if (_alternatives.length < 2) {
       return;
     }
+    final texts = [for (final a in _alternatives) a.toString()];
     final seen = <String>{};
-    for (final a in _alternatives) {
-      final text = a.toString();
+    for (final text in texts) {
       if (text.isEmpty || !seen.add(text)) {
         ambiguousAlternatives = true;
+      }
+    }
+    for (final a in texts) {
+      // `x` next to `x?`.
+      if (a.length > 1 &&
+          a.endsWith('?') &&
+          !a.endsWith(r'\?') &&
+          seen.contains(a.substring(0, a.length - 1))) {
+        ambiguousAlternatives = true;
+      }
+      // One alternative is the start of another (`a|aa`).
+      for (final b in texts) {
+        if (a.isNotEmpty && b.length > a.length && b.startsWith(a)) {
+          ambiguousAlternatives = true;
+        }
       }
     }
   }
