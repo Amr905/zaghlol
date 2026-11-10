@@ -1,5 +1,8 @@
 ﻿== SUMMARY ==
-RUNNING sha=763d1074c56f8d82f5243548af264a50dc7e7b5c
+SKIP sha=763d1074c56f8d82f5243548af264a50dc7e7b5c no app/packages/backend changes
 
 == FULL LOG (last 1500 lines) ==
 auto task/T-017-schema-a 763d1074c56f8d82f5243548af264a50dc7e7b5c 2026-11-11T01:12:13.5556136+02:00
+
+
+
