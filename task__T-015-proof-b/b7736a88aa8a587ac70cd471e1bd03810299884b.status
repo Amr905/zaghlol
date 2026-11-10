@@ -1,1 +1,1 @@
-﻿RUNNING sha=b7736a88aa8a587ac70cd471e1bd03810299884b
+﻿PASS sha=b7736a88aa8a587ac70cd471e1bd03810299884b pipeline=quick-app pub-get=0 format=0 analyze=0 app-test=0 dart-test-zaghlol_domain=0 dart-test-zaghlol_parsing=0 apk-devNoSms=0 apk-perms=0 android-unit=0 android-lint=0
