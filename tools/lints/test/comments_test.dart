@@ -10,6 +10,7 @@ List<Violation> run(String path, String source) {
 }
 
 void main() {
+  hardeningTests();
   const money = '/r/app/lib/money/m.dart';
 
   test('ignore comment on the previous line silences a rule', () {
@@ -88,5 +89,106 @@ void main() {
       run('/r/app/lib/core/a.dart', 'class E implements Exception {}'),
       isEmpty,
     );
+  });
+}
+
+void hardeningTests() {
+  const parsing = '/r/packages/zaghlol_parsing/lib/p.dart';
+  const domain = '/r/packages/zaghlol_domain/lib/d.dart';
+  const other = '/r/packages/zaghlol_other/lib/o.dart';
+  const money = '/r/app/lib/money/m.dart';
+
+  group('no_double_money hardening', () {
+    test('parse calls and toDouble are flagged in the strict scope', () {
+      for (final path in [parsing, domain, money]) {
+        const snippets = [
+          "int f() { return double.parse('1').toInt(); }",
+          "Object? f() => double.tryParse('1');",
+          "Object f() => num.parse('1');",
+          "Object? f() => num.tryParse('1');",
+          'int f(int a) { return a.toDouble().round(); }',
+        ];
+        for (final code in snippets) {
+          expect(run(path, code), hasLength(1), reason: '$path: $code');
+        }
+      }
+    });
+
+    test('double literals, / and /= are flagged; ~/ and int ops are not', () {
+      expect(run(parsing, 'final a = 1.5;'), hasLength(1));
+      expect(run(parsing, 'final a = 3 / 2;'), hasLength(1));
+      expect(run(parsing, 'void f() { var a = 8; a /= 2; }'), hasLength(1));
+      expect(run(parsing, 'final a = 3 ~/ 2;'), isEmpty);
+      expect(run(parsing, 'void f() { var a = 8; a ~/= 2; }'), isEmpty);
+      expect(run(parsing, 'int a(int x) => x * 2 + 1;'), isEmpty);
+    });
+
+    test('double and num types: flagged in the packages, not elsewhere', () {
+      expect(run(parsing, 'double total = 0;'), hasLength(1));
+      expect(run(domain, 'num? price;'), hasLength(1));
+      expect(run(other, 'double total = 0;'), isEmpty);
+      expect(run(other, 'final a = 1.5; double w = 2 / 3;'), isEmpty);
+    });
+
+    test('int.parse, BigInt.parse and int.tryParse are fine', () {
+      const code =
+          'int a(String s) => int.parse(s);\n'
+          'BigInt b(String s) => BigInt.parse(s);\n'
+          'int? c(String s) => int.tryParse(s);\n';
+      expect(run(parsing, code), isEmpty);
+    });
+
+    test('one report per line', () {
+      expect(run(parsing, 'double x = 1.5;'), hasLength(1));
+    });
+
+    test('outside the strict scope: amount-named inferred doubles', () {
+      expect(run(other, 'final amount = 12.5;'), hasLength(1));
+      expect(run(other, 'final minorX = 1 / 2;'), hasLength(1));
+      expect(run(other, "final amountY = double.parse('1');"), hasLength(1));
+      expect(run(other, 'final amountZ = 5;'), isEmpty);
+      expect(run(other, 'final opacity = 0.5;'), isEmpty);
+      expect(
+        run(other, 'Object amountOf(int x) { return x * 1.5; }'),
+        hasLength(1),
+      );
+      expect(run(other, 'Object minorOf(int x) => x / 2;'), hasLength(1));
+      expect(run(other, 'int minorOf(int x) => (x / 2) ~/ 1;'), isEmpty);
+      expect(run(other, 'int minorOf(int x) => x ~/ 2;'), isEmpty);
+      expect(run(other, 'double scale(int x) => x / 3;'), isEmpty);
+    });
+
+    test('allow-list: ignore with a reason silences one line only', () {
+      const timing = 's.elapsedMicroseconds / 1000';
+      expect(
+        run(
+          parsing,
+          'void f(Stopwatch s) {\n'
+          '  // ignore: no_double_money - benchmark timing\n'
+          '  final ms = $timing;\n'
+          '}\n',
+        ),
+        isEmpty,
+      );
+      expect(
+        run(
+          parsing,
+          'void f(Stopwatch s) {\n'
+          '  final ms = $timing; // ignore: no_double_money\n'
+          '}\n',
+        ),
+        isEmpty,
+      );
+      expect(
+        run(
+          parsing,
+          'void f(Stopwatch s) {\n'
+          '  final ms = $timing;\n'
+          '  final q = 1.5;\n'
+          '}\n',
+        ),
+        hasLength(2),
+      );
+    });
   });
 }

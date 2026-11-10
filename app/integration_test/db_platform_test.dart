@@ -1,7 +1,8 @@
 // T-007 (SPK-05): the encrypted-SQLite contract and FTS benchmark on the
 // binaries the app ships (Android APK / iOS app, real flavors and minSdk).
 //
-// T-015 adds the key bootstrap tests (db_key_tests.dart) to this launch.
+// T-015 adds the key bootstrap tests (db_key_tests.dart) to this launch;
+// T-016 the AppDatabase tests (app_database_tests.dart).
 //
 // CI (db-platform.yml):
 //   flutter test integration_test/db_platform_test.dart --flavor devNoSms
@@ -22,6 +23,7 @@ import 'package:integration_test/integration_test.dart';
 
 import '../test/core/db/fts_benchmark.dart';
 import '../test/core/db/sqlite3mc_contract.dart';
+import 'app_database_tests.dart';
 import 'db_key_tests.dart';
 
 const String _benchFlag = String.fromEnvironment('ZAGHLOL_DB_BENCH');
@@ -35,10 +37,12 @@ void main() {
   registerSqlite3mcContract(env: env);
   // T-015: key bootstrap on the real Keystore / Keychain, in the same launch.
   group('T-015 key bootstrap', registerDbKeyTests);
+  // T-016: the encrypted AppDatabase (open, wipe, migration safety net).
+  group('T-016 app database', registerAppDatabaseTests);
 
   final bench = _benchFlag == '1' || _benchFlag == 'true';
   test(
-    '50k-row FTS benchmark (recorded; device budget p95 < 200 ms)',
+    '50k-row FTS benchmark (recorded; FR-TXN-01 p95 < 200 ms)',
     () async {
       final result = await runDbBenchmark(env: env, runId: _runId);
       emitBenchmark(result);

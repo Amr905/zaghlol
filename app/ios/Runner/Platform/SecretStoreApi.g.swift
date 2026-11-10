@@ -298,6 +298,11 @@ protocol SecretStoreHostApi {
   func acquireBootstrapLease(timeoutMs: Int64, completion: @escaping (Result<Int64, Error>) -> Void)
   /// Releases [lease]. A stale or unknown lease is ignored.
   func releaseBootstrapLease(lease: Int64, completion: @escaping (Result<Void, Error>) -> Void)
+  /// T-016: if [lease] is the current, unexpired lease, sets its expiry to
+  /// now + 30 s and returns true; otherwise returns false. Never takes a
+  /// lease. Same-lease renewals are unbounded, but a dead engine stops
+  /// renewing, so its lease still lapses after 30 s.
+  func renewBootstrapLease(lease: Int64, completion: @escaping (Result<Bool, Error>) -> Void)
   /// Reads [slot]. Never throws for storage errors: they are classified.
   func read(slot: SecretSlotMsg, completion: @escaping (Result<SecretReadMsg, Error>) -> Void)
   /// Stores [candidate] in [slot] unless a usable secret is already there, and
@@ -354,6 +359,27 @@ class SecretStoreHostApiSetup {
       }
     } else {
       releaseBootstrapLeaseChannel.setMessageHandler(nil)
+    }
+    /// T-016: if [lease] is the current, unexpired lease, sets its expiry to
+    /// now + 30 s and returns true; otherwise returns false. Never takes a
+    /// lease. Same-lease renewals are unbounded, but a dead engine stops
+    /// renewing, so its lease still lapses after 30 s.
+    let renewBootstrapLeaseChannel = FlutterBasicMessageChannel(name: "dev.flutter.pigeon.zaghlol.SecretStoreHostApi.renewBootstrapLease\(channelSuffix)", binaryMessenger: binaryMessenger, codec: codec)
+    if let api = api {
+      renewBootstrapLeaseChannel.setMessageHandler { message, reply in
+        let args = message as! [Any?]
+        let leaseArg = args[0] as! Int64
+        api.renewBootstrapLease(lease: leaseArg) { result in
+          switch result {
+          case .success(let res):
+            reply(wrapResult(res))
+          case .failure(let error):
+            reply(wrapError(error))
+          }
+        }
+      }
+    } else {
+      renewBootstrapLeaseChannel.setMessageHandler(nil)
     }
     /// Reads [slot]. Never throws for storage errors: they are classified.
     let readChannel = FlutterBasicMessageChannel(name: "dev.flutter.pigeon.zaghlol.SecretStoreHostApi.read\(channelSuffix)", binaryMessenger: binaryMessenger, codec: codec)

@@ -1,0 +1,13 @@
+# T-016: drift_dev options for app/lib/core/db/schema/. drift_dev does not
+# resolve inside the pub workspace (it needs analyzer >= 13; Pigeon 26 and
+# tools/lints cap it lower), so code generation runs in the standalone package
+# tools/drift_codegen with these options: run app/tool/generate_drift.sh.
+targets:
+  $default:
+    builders:
+      drift_dev:
+        options:
+          databases:
+            app_database: lib/core/db/schema/app_schema.dart
+          schema_dir: drift_schemas/
+          test_dir: test/core/db/migrations/

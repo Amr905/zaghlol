@@ -1,6 +1,6 @@
 # Lead handoff — read this first
 
-_Last updated: 2026-11-10 by the Lead session. Update it whenever the state below changes._
+_Last updated: 2026-11-11 by the Lead session. Update it whenever the state below changes._
 
 **All state is in the repo.** Agents from earlier sessions can't be messaged; start new ones from their branches.
 
@@ -14,16 +14,17 @@ _Last updated: 2026-11-10 by the Lead session. Update it whenever the state belo
 - **Merging:** the `main` ruleset (26756600) is **Active** (PR required). The **PO authorised the Lead (2026-11-08) to merge approved PRs**: when all reviews are APPROVED and CI on the PR head is green, squash-merge via `PUT /repos/Amr905/zaghlol/pulls/<n>/merge` (`gh` has no valid token here). If the PR branch is behind code that changes its checks (e.g. new lint rules), merge `main` into it and wait for green CI first.
 - **Copy deck checks:** `python3 docs/workflow/tools/copy_deck_check.py docs/02-design/copy-deck.md`.
 
-## Progress: 26 of 186 tasks done (14.0%)
+## Progress: 28 of 186 tasks done (15.1%)
 
-DONE: T-001…T-007, T-012, T-013, T-014, T-022, T-026, T-027, T-028, T-122, T-123, T-124, T-125, T-126, T-127, T-128, T-129, T-138, T-139, T-015, T-034. T-136 merged, IN_REVIEW (IdP evidence). T-165 is merged but needs a device run.
+DONE: T-001…T-007, T-012, T-013, T-014, T-022, T-026, T-027, T-028, T-122, T-123, T-124, T-125, T-126, T-127, T-128, T-129, T-138, T-139, T-015, T-034, T-016, T-060. T-136 merged, IN_REVIEW (IdP evidence). T-165 is merged but needs a device run.
 
 | Milestone | Done | Total |
 |---|---|---|
-| M0 | 15 | 28 |
+| M0 | 16 | 28 |
 | M5 | 10 | 35 |
 | M1 | 1 | 29 |
-| M2–M4, M6, M7 | 0 | 94 |
+| M2 | 1 | 29 |
+| M3, M4, M6, M7 | 0 | 65 |
 
 The PO asked for this progress table in every update.
 
@@ -31,7 +32,7 @@ The PO asked for this progress table in every update.
 
 Task branches: PC runner only. GitHub CI runs on `batch/**` and opt-in `ci/<task-id>` pushes (CLAUDE.md §6). C4 tasks get one combined Opus review except crypto/keys, billing/entitlements and SMS ingestion (two reviewers). Status docs are updated in each batch PR.
 
-**Batch 1** (`batch/2026-11-10-1`): T-015, T-034, T-129, T-139. **Batch 2 (next):** T-060 (re-classified C4: Opus fix round, then Opus security review), plus new tasks.
+**Batch 1** (#28): T-015, T-034, T-129, T-139. **Batch 2** (`batch/2026-11-11-1`): T-016, T-060, FU-030, workflow fixes. **Batch 3:** next tasks. **Start of session:** run `bash docs/workflow/tools/cloud-sdk.sh` (CLAUDE.md §6) and check local checks pass before pushing.
 
 ## In flight (limit: 2 tasks at once)
 

@@ -52,6 +52,19 @@ final class BootstrapLeaseManager {
     }
   }
 
+  /// T-016 (S-2, FU-065): if `lease` is the current, unexpired lease, sets its
+  /// expiry to now + `ttlNanos` and returns true; otherwise false. Never takes
+  /// a lease. Same-lease renewals are unbounded, but an engine that stops
+  /// renewing still loses the lease `ttlNanos` after its last renewal.
+  func renew(_ lease: Int64) -> Bool {
+    condition.lock()
+    defer { condition.unlock() }
+    let now = clock()
+    guard lease != 0 && lease == current && now < expiresAt else { return false }
+    expiresAt = now &+ ttlNanos
+    return true
+  }
+
   /// True while `lease` is the current, unexpired lease.
   func isValid(_ lease: Int64) -> Bool {
     condition.lock()

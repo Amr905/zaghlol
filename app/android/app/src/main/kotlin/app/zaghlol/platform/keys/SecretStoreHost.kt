@@ -38,6 +38,9 @@ class SecretStoreHost(
   override fun releaseBootstrapLease(lease: Long, callback: (Result<Unit>) -> Unit) =
     dispatch(callback) { leases.release(lease) }
 
+  override fun renewBootstrapLease(lease: Long, callback: (Result<Boolean>) -> Unit) =
+    dispatch(callback) { leases.renew(lease) }
+
   override fun read(slot: SecretSlotMsg, callback: (Result<SecretReadMsg>) -> Unit) =
     dispatch(callback, wipe = { it.value?.fill(0) }) {
       val r =

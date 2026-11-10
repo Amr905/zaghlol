@@ -49,6 +49,21 @@ jobs:
             git diff --stat -- app | tail -n 20
             exit 1
           fi
+      # T-016: drift code and schema dumps come from the standalone
+      # tools/drift_codegen (drift_dev can't resolve in the workspace). A
+      # table change without a schemaVersion bump makes make-migrations fail
+      # (the committed v<N> dump differs); a stale .g.dart or dump shows as a
+      # diff.
+      - name: drift generated files and schema dump are up to date (T-016)
+        run: |
+          bash app/tool/generate_drift.sh > drift.log 2>&1 || { cat drift.log; echo "::error::app/tool/generate_drift.sh failed (schema changed without a version bump?)"; exit 1; }
+          stale=$(git status --porcelain -- app/lib/core/db/schema app/drift_schemas app/test/core/db/migrations tools/drift_codegen)
+          if [ -n "$stale" ]; then
+            echo "$stale" | while read -r line; do echo "::error::drift output is stale or untracked: $line"; done
+            echo "::error::run app/tool/generate_drift.sh and commit the generated files"
+            git diff --stat -- app tools | tail -n 20
+            exit 1
+          fi
       - name: Flutter version must match app-regen.yml
         run: |
           ci=$(grep -E "^  FLUTTER_VERSION:" .github/workflows/app-ci.yml | grep -oE "[0-9]+\.[0-9]+\.[0-9]+")
@@ -91,14 +106,16 @@ jobs:
       # T-015 / FU-050: no logging in the key code (Dart, Kotlin, Swift).
       # Generated Pigeon files are excluded (their generic error path is never
       # used: every error is a code-only SecretStoreApiError).
-      - name: no logging in key code (T-015)
+      # T-016 (S-5): also stdout/stderr/dump, and core/db/schema.
+      - name: no logging in key and database code (T-015, T-016)
         run: |
           set -o pipefail
-          files=$(ls app/lib/core/db/*.dart app/lib/core/crypto/*.dart app/lib/core/platform/pigeon_secret_store.dart \
+          files=$(ls app/lib/core/db/*.dart app/lib/core/db/schema/*.dart app/lib/core/crypto/*.dart \
+            app/lib/core/platform/pigeon_secret_store.dart \
             app/android/app/src/main/kotlin/app/zaghlol/platform/keys/*.kt \
             app/ios/Runner/Platform/Keys/*.swift | grep -v '\.g\.')
           [ -n "$files" ] || { echo "::error::no key files found"; exit 1; }
-          if grep -nE '\b(print|debugPrint|log|developer\.log)\(|\bLog\.[a-z]+\(|println\(|Timber|NSLog|os_log|Logger\(|logStatements: *true' $files; then
+          if grep -nE '\b(print|debugPrint|log|developer\.log|dump)\(|\b(stdout|stderr)\b|\bLog\.[a-z]+\(|println\(|Timber|NSLog|os_log|Logger\(|logStatements: *true' $files; then
             echo "::error::logging call in key code"
             exit 1
           fi
@@ -288,7 +305,9 @@ jobs:
             testExcludeMarksEveryDirectory testExcludeReportsFailureWithoutStoppingOrCrashing \
             testFilesCreatedLaterStayUnderAnExcludedDirectory \
             testAppGroupDirectoriesAreSkippedWithoutAContainer; do
-            if ! grep -qiE "test case.*BackupExclusionTests.*$t.*passed" xcodebuild.log; then
+            # xcodebuild can interleave lines, cutting a "passed" line; xcodebuild already exited 0, so require
+            # that the test ran (its name appears) and that no line reports it failed.
+            if ! grep -qiE "BackupExclusionTests.*$t" xcodebuild.log || grep -qiE "test case.*BackupExclusionTests.*$t.*failed" xcodebuild.log; then
               echo "::error::BackupExclusionTests.$t did not pass"
               grep -iE "BackupExclusionTests" xcodebuild.log | head -n 30
               exit 1
@@ -303,8 +322,13 @@ jobs:
             testCreateRefusesWhileTheStateIsUnknownOrUnusable testDegenerateCandidatesAreRefused \
             testFailedAddIsKeyStoreFailure testDeleteIsScopedAndIdempotent \
             testLeaseIsExclusiveUntilReleasedOrExpired testLeaseTimesOutWhileHeld \
-            testHostErrorsCarryACodeOnly; do
-            if ! grep -qiE "test case.*SecretStoreTests.*$t.*passed" xcodebuild.log; then
+            testHostErrorsCarryACodeOnly \
+            testRenewExtendsAValidLease testRenewOfAnExpiredLeaseIsFalseAndDoesNotRevive \
+            testRenewOfAStaleIdIsFalseAndLeavesTheCurrentLeaseAlone \
+            testRenewAfterReleaseIsFalseAndNeverTakesTheLease testHostRenewIsTrueForTheCurrentLeaseOnly; do
+            # xcodebuild can interleave lines, cutting a "passed" line; xcodebuild already exited 0, so require
+            # that the test ran (its name appears) and that no line reports it failed.
+            if ! grep -qiE "SecretStoreTests.*$t" xcodebuild.log || grep -qiE "test case.*SecretStoreTests.*$t.*failed" xcodebuild.log; then
               echo "::error::SecretStoreTests.$t did not pass"
               grep -iE "SecretStoreTests" xcodebuild.log | head -n 30
               exit 1

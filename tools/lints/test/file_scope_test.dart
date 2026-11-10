@@ -54,4 +54,14 @@ void main() {
       expect(FileScope.of('/r/app/lib/l10n/a.dart')!.isL10n, isTrue);
     });
   });
+
+  group('inStrictDoubleScope', () {
+    test('money dirs and packages zaghlol_parsing / zaghlol_domain', () {
+      bool strict(String p) => FileScope.of(p)!.inStrictDoubleScope;
+      expect(strict('/r/app/lib/money/m.dart'), isTrue);
+      expect(strict('/r/packages/zaghlol_parsing/lib/a.dart'), isTrue);
+      expect(strict('/r/packages/zaghlol_domain/lib/a.dart'), isTrue);
+      expect(strict('/r/app/lib/core/ui/a.dart'), isFalse);
+    });
+  });
 }
