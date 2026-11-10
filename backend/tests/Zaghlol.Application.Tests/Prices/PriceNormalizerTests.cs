@@ -67,7 +67,7 @@ public class PriceNormalizerTests
     {
         var result = Run(("p", Snapshot([new GoldQuote("XAU24_G", "EGP", 4821.37m)])));
 
-        Assert.Equal(4218.69m, Price(result, "XAU21_G", "EGP")); // 4821.37 * 21 / 24 = 4218.68875
+        Assert.Equal(4218.70m, Price(result, "XAU21_G", "EGP")); // 4821.37 * 21 / 24 = 4218.69875
         Assert.Equal(3616.03m, Price(result, "XAU18_G", "EGP")); // 3616.0275
     }
 

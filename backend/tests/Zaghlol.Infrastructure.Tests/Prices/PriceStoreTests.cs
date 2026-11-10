@@ -98,8 +98,8 @@ public class PriceStoreTests(PriceStoreFixture fixture) : IClassFixture<PriceSto
         var gold = await Reader.ListGoldAsync(CancellationToken.None);
         Assert.Equal(6, gold.Count);
         var k21 = await RowAsync("XAU21_G", "EGP");
-        Assert.Equal(4218.69m, k21.Price);
-        Assert.Equal(4218.69m, k21.FeedPrice);
+        Assert.Equal(4218.70m, k21.Price);
+        Assert.Equal(4218.70m, k21.FeedPrice);
         Assert.Equal(T0, k21.AsOf);
         Assert.Equal(T0, k21.FeedAsOf);
         Assert.False(k21.IsOverride);
