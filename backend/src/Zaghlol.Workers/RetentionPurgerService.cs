@@ -79,10 +79,10 @@ public sealed partial class RetentionPurgerService(
         }
     }
 
-    [LoggerMessage(Level = LogLevel.Information, Message = "Retention purge finished")]
+    [LoggerMessage(Level = LogLevel.Information, Message = "Retention purge finished {Operation} {Count}")]
     private static partial void LogPurged(ILogger logger, string operation, int count);
 
-    [LoggerMessage(Level = LogLevel.Warning, Message = "Retention rule failed")]
+    [LoggerMessage(Level = LogLevel.Warning, Message = "Retention rule failed {Operation}")]
     private static partial void LogRuleFailed(ILogger logger, string operation);
 
     [LoggerMessage(Level = LogLevel.Warning, Message = "Retention run failed: {ExceptionType}")]
