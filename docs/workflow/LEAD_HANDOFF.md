@@ -36,7 +36,7 @@ Nothing in flight. T-165 is merged, IN_REVIEW, waiting for a device run.
 
 - **App:** T-015 secure DB key bootstrap (C4, Opus design note: crypto/keys), spikes T-010 (C3) and T-011 (C2), T-032/T-034 parsing (after FU-030 lint hardening).
 - **Lint hardening (FU-030):** must land before T-032/T-033 parsing work. T-013 is merged without it; ask the task-planner to add a small task.
-- **Backend:** T-127 prices is BLOCKED (see its task file); T-128 sync waits on T-127, T-136 operator auth (unblocks all /admin routes, FU-058); T-130 needs the FU-052 S-2 idempotency design fix first.
+- **Backend:** T-127 prices (BLOCKED only for go-live; can be built with fakes, Sonnet); T-128 sync after T-127, T-136 operator auth (unblocks all /admin routes, FU-058); T-130 needs the FU-052 S-2 idempotency design fix first.
 - **Docs:** T-029 (ARB from copy deck part 1) needs T-023 and the Q-15/Q-16 answers.
 - **External:** T-088 (Rive file), T-058 (native-speaker review, now unblocked: all three copy-deck parts are merged).
 
