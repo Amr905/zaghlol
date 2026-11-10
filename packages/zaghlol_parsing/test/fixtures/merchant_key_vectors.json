@@ -1,0 +1,161 @@
+{
+ "description": "merchant_norm golden vectors: input -> key. Shared by zaghlol_parsing tests and tools/catalog_build tests (alias_norm must be generated with the same algorithm). Synthetic data only.",
+ "vectors": [
+  {
+   "input": "Carrefour",
+   "key": "carrefour"
+  },
+  {
+   "input": "EL EZABY",
+   "key": "ezaby"
+  },
+  {
+   "input": "ELEZABY",
+   "key": "ezaby"
+  },
+  {
+   "input": "El-Ezaby",
+   "key": "ezaby"
+  },
+  {
+   "input": "EL  EZABY",
+   "key": "ezaby"
+  },
+  {
+   "input": "AL RAWSHA",
+   "key": "rawsha"
+  },
+  {
+   "input": "ALRAWSHA",
+   "key": "rawsha"
+  },
+  {
+   "input": "ELF",
+   "key": "elf"
+  },
+  {
+   "input": "ELITE",
+   "key": "elite"
+  },
+  {
+   "input": "EL",
+   "key": "el"
+  },
+  {
+   "input": "ال",
+   "key": "al"
+  },
+  {
+   "input": "KOSHARY EL TAHRIR",
+   "key": "koshary el tahrir"
+  },
+  {
+   "input": "CARREFOUR 041",
+   "key": "carrefour 041"
+  },
+  {
+   "input": "CARREFOUR MAADI CITY CENTER",
+   "key": "carrefour maadi city center"
+  },
+  {
+   "input": "UBER*TRIP",
+   "key": "uber trip"
+  },
+  {
+   "input": "McDonald's",
+   "key": "mcdonald s"
+  },
+  {
+   "input": "7-ELEVEN",
+   "key": "7 eleven"
+  },
+  {
+   "input": "B TECH",
+   "key": "b tech"
+  },
+  {
+   "input": "B T E C H",
+   "key": "btech"
+  },
+  {
+   "input": "b-tech",
+   "key": "b tech"
+  },
+  {
+   "input": "AB CD",
+   "key": "ab cd"
+  },
+  {
+   "input": "ELECTRONICS",
+   "key": "electronics"
+  },
+  {
+   "input": "ELEVEN",
+   "key": "eleven"
+  },
+  {
+   "input": "ALBANYA",
+   "key": "albanya"
+  },
+  {
+   "input": "ALBERT",
+   "key": "albert"
+  },
+  {
+   "input": "ELELEZABY",
+   "key": "elezaby"
+  },
+  {
+   "input": "NATIONAL BANK OF EGYPT",
+   "key": "national bank of egypt"
+  },
+  {
+   "input": "بنك مصر",
+   "key": "bnk msr"
+  },
+  {
+   "input": "الاهرام",
+   "key": "ahram"
+  },
+  {
+   "input": "العزبي",
+   "key": "azby"
+  },
+  {
+   "input": "صيدليات العزبي",
+   "key": "sydlyat alazby"
+  },
+  {
+   "input": "كارفور",
+   "key": "karfwr"
+  },
+  {
+   "input": "فرع ٢٣",
+   "key": "fra 23"
+  },
+  {
+   "input": "مَحَمّـد",
+   "key": "mhmd"
+  },
+  {
+   "input": "أحمد إبراهيم",
+   "key": "ahmd abrahym"
+  },
+  {
+   "input": "ابو  عوف",
+   "key": "abw awf"
+  },
+  {
+   "input": "😀",
+   "key": ""
+  },
+  {
+   "input": "",
+   "key": ""
+  },
+  {
+   "input": "   ",
+   "key": ""
+  }
+ ]
+}

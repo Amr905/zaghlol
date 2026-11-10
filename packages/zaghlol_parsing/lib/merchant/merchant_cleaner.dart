@@ -38,7 +38,9 @@ class MerchantCleaningConfig {
   final List<String> noiseTokens;
 }
 
-const List<String> _countries = ['EG', 'EGY', 'EGYPT', 'ARE', 'UAE', 'مصر'];
+// Short POS country codes only. Full names (EGYPT, مصر) can be part of a
+// merchant name (`بنك مصر`, `NATIONAL BANK OF EGYPT`) and are never stripped.
+const List<String> _countries = ['EG', 'EGY', 'ARE', 'UAE'];
 const List<String> _citiesA = ['CAIRO', 'GIZA', 'MAADI', 'DOKKI', 'ZAMALEK'];
 const List<String> _citiesB = ['NASR CITY', 'NEW CAIRO', 'SHEIKH ZAYED'];
 const List<String> _citiesC = ['HELIOPOLIS', 'MOHANDESSIN', 'TAGAMOA'];
@@ -73,8 +75,10 @@ class CleanedMerchant {
 /// (`CatalogText.MaxKeyLength`).
 const int merchantKeyMaxLength = 64;
 
-/// Cleans a raw merchant string and derives its key. Empty or all-noise
-/// input yields empty strings (the caller treats that as "no merchant").
+/// Cleans a raw merchant string and derives its key. Empty or blank input
+/// yields empty strings (the caller treats that as "no merchant"). Input
+/// made only of noise tokens (`POS`) falls back to its own tokens rather
+/// than becoming empty.
 CleanedMerchant cleanMerchant(
   String raw, {
   MerchantCleaningConfig config = MerchantCleaningConfig.defaults,
@@ -92,68 +96,115 @@ CleanedMerchant cleanMerchant(
   );
 }
 
-/// The `merchant_norm` key. Rules:
+/// The `merchant_norm` key (parsing-engine §5). Canonical rule:
 /// 1. [foldKey] (digits, tatweel, harakat, alef/ya/ta-marbuta, lowercase).
-/// 2. Leading article removed: Arabic `ال`, or Latin `el`/`al` either as a
-///    separate word or attached when at least four letters follow.
-/// 3. Arabic letters transliterated with the Egyptian table below.
-/// 4. Everything that is not `a-z` or `0-9` dropped, so spaces are gone.
+/// 2. A leading Arabic article `ال` is removed (before transliteration).
+/// 3. Arabic letters are transliterated with the Egyptian table below;
+///    every character outside `a-z` / `0-9` becomes a space; runs of spaces
+///    collapse and the ends are trimmed.
+/// 4. At most one leading article is removed: a first token `el` or `al`
+///    when another token follows, or an attached `el`/`al` (`elezaby`)
+///    when at least four characters follow and the word does not start with
+///    a common English stem such as `elect`, `eleven`, `album` (see
+///    [_attachedArticleExceptions]). Skipped if step 2 already stripped one.
+/// 5. Adjacent single-character tokens are joined (`b t e c h` -> `btech`);
+///    all other tokens stay separated by one space.
+/// 6. Capped at [merchantKeyMaxLength], then a trailing space is trimmed.
 ///
-/// Output is printable ASCII, lowercase, at most [merchantKeyMaxLength]
-/// characters, and a fixed point of the backend `CatalogText.Normalize`.
+/// Output is `[a-z0-9]` words separated by single spaces, which is a valid
+/// backend alias (`CatalogText.Normalize`). An empty result (emoji only,
+/// unmapped scripts) means "no merchant key"; callers must not match on it.
 ///
-/// Known difference from the backend: it keeps spaces and articles in
-/// stored aliases (`koshary el tahrir`). Catalog aliases must be generated
-/// with this function (tools/catalog_build) or exact lookup will miss.
+/// The key is applied exactly once per side: to the raw merchant text at
+/// parse time and to each catalog alias when the catalog is built. Stored
+/// aliases are never re-keyed, so the rule need not be idempotent
+/// (`ELELEZABY` -> `elezaby`, which would key to `zaby` if keyed again).
+/// tools/catalog_build must call this same algorithm and is tested against
+/// `test/fixtures/merchant_key_vectors.json`.
 String merchantKey(String text) {
-  final folded = foldKey(text);
-  final words = folded.split(' ').where((w) => w.isNotEmpty).toList();
-  if (words.isEmpty) {
-    return '';
+  var folded = foldKey(text);
+  var articleStripped = false;
+  if (_hasArabicArticle(folded)) {
+    folded = folded.substring(2);
+    articleStripped = true;
   }
-  final first = words.first;
-  if ((first == 'el' || first == 'al') && words.length > 1) {
-    words.removeAt(0);
-  } else if (_hasArabicArticle(first)) {
-    words[0] = first.substring(2);
-  } else if (_hasAttachedLatinArticle(first)) {
-    words[0] = first.substring(2);
-  }
-  final out = StringBuffer();
-  for (final unit in words.join('').runes) {
+  final spaced = StringBuffer();
+  for (final unit in folded.codeUnits) {
     final mapped = _translit[unit];
     if (mapped != null) {
-      out.write(mapped);
+      spaced.write(mapped);
     } else if (_isAsciiAlnum(unit)) {
-      out.writeCharCode(unit);
+      spaced.writeCharCode(unit);
+    } else {
+      spaced.writeCharCode(0x20);
     }
   }
-  final key = out.toString();
+  final tokens = [
+    for (final w in spaced.toString().split(' '))
+      if (w.isNotEmpty) w,
+  ];
+  if (tokens.isEmpty) {
+    return '';
+  }
+  if (!articleStripped) {
+    final first = tokens.first;
+    if ((first == 'el' || first == 'al') && tokens.length > 1) {
+      tokens.removeAt(0);
+    } else if (_hasAttachedLatinArticle(first)) {
+      tokens[0] = first.substring(2);
+    }
+  }
+  final joined = <String>[];
+  var previousSingle = false;
+  for (final t in tokens) {
+    final single = t.length == 1;
+    if (single && previousSingle) {
+      joined[joined.length - 1] = '${joined.last}$t';
+    } else {
+      joined.add(t);
+    }
+    previousSingle = single;
+  }
+  var key = joined.join(' ');
   if (key.length > merchantKeyMaxLength) {
-    return key.substring(0, merchantKeyMaxLength);
+    key = key.substring(0, merchantKeyMaxLength).trimRight();
   }
   return key;
 }
 
 bool _hasArabicArticle(String w) {
-  return w.length > 2 && w.codeUnitAt(0) == 0x0627 && w.codeUnitAt(1) == 0x0644;
-}
-
-/// `elezaby`, `al-rawsha`: attached article with at least four letters left.
-bool _hasAttachedLatinArticle(String w) {
-  if (!w.startsWith('el') && !w.startsWith('al')) {
+  if (w.length <= 2) {
     return false;
   }
-  var letters = 0;
-  for (final u in w.codeUnits) {
-    if (u > 0x7F) {
+  // Only a prefix of the first word: `الاهرام`, not the word `ال`.
+  return w.codeUnitAt(0) == 0x0627 &&
+      w.codeUnitAt(1) == 0x0644 &&
+      w.codeUnitAt(2) != 0x20;
+}
+
+/// Common English words that begin with `el` / `al`; an attached article is
+/// never stripped from a word starting with one of these stems.
+const List<String> _attachedArticleExceptions = [
+  ..._stemsEl,
+  ..._stemsAlA,
+  ..._stemsAlB,
+];
+const List<String> _stemsEl = ['elec', 'eleg', 'elev', 'elem', 'elit', 'elli'];
+const List<String> _stemsAlA = ['albe', 'albu', 'alban', 'alco', 'aler'];
+const List<String> _stemsAlB = ['alle', 'allo', 'alph', 'alpi', 'alma', 'almo'];
+
+/// `elezaby`, `alrawsha`: attached article with at least four characters
+/// left, unless the word starts with a common English stem.
+bool _hasAttachedLatinArticle(String w) {
+  if (w.length < 6 || !(w.startsWith('el') || w.startsWith('al'))) {
+    return false;
+  }
+  for (final stem in _attachedArticleExceptions) {
+    if (w.startsWith(stem)) {
       return false;
     }
-    if (u >= 0x61 && u <= 0x7A) {
-      letters++;
-    }
   }
-  return letters - 2 >= 4;
+  return true;
 }
 
 bool _isAsciiAlnum(int u) {

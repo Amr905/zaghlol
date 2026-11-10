@@ -256,10 +256,12 @@ CREATE TABLE catalog_categories (code text PRIMARY KEY, parent_code text REFEREN
 CREATE TABLE catalog_merchants (id integer PRIMARY KEY GENERATED ALWAYS AS IDENTITY, canonical text NOT NULL UNIQUE,
   name_ar text, name_en text, category_code text NOT NULL REFERENCES catalog_categories(code),
   version integer NOT NULL, deleted boolean NOT NULL DEFAULT false);
+-- alias_norm is exactly the app `merchant_norm` key (parsing-engine §5): [a-z0-9] words separated by single spaces, produced by the same algorithm (tools/catalog_build, shared golden vectors), never re-keyed once stored.
 CREATE TABLE catalog_aliases (merchant_id integer NOT NULL REFERENCES catalog_merchants(id), alias_norm text NOT NULL,
   match text NOT NULL, version integer NOT NULL, deleted boolean NOT NULL DEFAULT false, PRIMARY KEY (alias_norm, merchant_id));
 CREATE TABLE catalog_keywords (keyword_norm text NOT NULL, lang text NOT NULL, category_code text NOT NULL,
   weight integer NOT NULL, version integer NOT NULL, deleted boolean NOT NULL DEFAULT false, PRIMARY KEY (keyword_norm, lang));
+-- keyword_norm uses the same normalization as alias_norm: [a-z0-9] words with single spaces for Latin keywords, folded Arabic (alef/ya/ta-marbuta, no tatweel or harakat) for `ar`.
 -- Keyword identity is (keyword, lang), the same key the sync `keyword` op uses (FU-009): one category per keyword per language.
 -- A delta from version a→b = all rows with version in (a, b], including tombstones (deleted = true).
 -- Published versions are immutable; edits happen in the draft workspace (catalog_drafts, below) and publish atomically.
@@ -271,7 +273,7 @@ CREATE TABLE catalog_drafts (seq integer NOT NULL GENERATED ALWAYS AS IDENTITY, 
   published boolean NOT NULL DEFAULT false, changed boolean NOT NULL, updated_at timestamptz NOT NULL DEFAULT now(),
   PRIMARY KEY (entity, entry_key));
 -- T-125. The whole editable catalog, one row per entry (a working copy that also holds tombstones, so a PUT can revive one).
--- entry_key is the DECODED key: categories `dining`; merchants `812`; aliases `812:koshary el tahrir`; keywords `ar:text`.
+-- entry_key is the DECODED key: categories `dining`; merchants `812`; aliases `812:koshary el tahrir` (alias part = the exact `merchant_norm` form, `^[a-z0-9]+( [a-z0-9]+)*$`); keywords `ar:text`.
 -- body holds the non-key fields (camelCase JSON, backend-api §5.2). `published` = the entry has been written to the live tables;
 -- `changed` = it differs from them (new, edited or tombstoned since the last publish). A DELETE of a never-published entry
 -- removes the row. seq is the merchant id allocator: an identity needs no sequence grant (FU-026), the id is the row's seq, and
