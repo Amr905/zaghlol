@@ -263,6 +263,31 @@ class SecretStoreHostApi {
     );
   }
 
+  /// T-016: if [lease] is the current, unexpired lease, sets its expiry to
+  /// now + 30 s and returns true; otherwise returns false. Never takes a
+  /// lease. Same-lease renewals are unbounded, but a dead engine stops
+  /// renewing, so its lease still lapses after 30 s.
+  Future<bool> renewBootstrapLease(int lease) async {
+    final pigeonVar_channelName =
+        'dev.flutter.pigeon.zaghlol.SecretStoreHostApi.renewBootstrapLease$pigeonVar_messageChannelSuffix';
+    final pigeonVar_channel = BasicMessageChannel<Object?>(
+      pigeonVar_channelName,
+      pigeonChannelCodec,
+      binaryMessenger: pigeonVar_binaryMessenger,
+    );
+    final Future<Object?> pigeonVar_sendFuture = pigeonVar_channel.send(
+      <Object?>[lease],
+    );
+    final pigeonVar_replyList = await pigeonVar_sendFuture as List<Object?>?;
+
+    final Object? pigeonVar_replyValue = _extractReplyValueOrThrow(
+      pigeonVar_replyList,
+      pigeonVar_channelName,
+      isNullValid: false,
+    );
+    return pigeonVar_replyValue! as bool;
+  }
+
   /// Reads [slot]. Never throws for storage errors: they are classified.
   Future<SecretReadMsg> read(SecretSlotMsg slot) async {
     final pigeonVar_channelName =

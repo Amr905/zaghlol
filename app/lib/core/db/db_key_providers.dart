@@ -20,8 +20,9 @@ final secretStoreProvider = Provider<SecretStore>(
   name: 'secretStoreProvider',
 );
 
-/// The directory that holds `zaghlol.db`. T-016 owns the path (the app's
-/// private support directory) and overrides this provider at startup.
+/// The directory that holds `zaghlol.db`. T-016 owns the path
+/// (db_directory.dart: `<applicationSupport>/db`); startup overrides this
+/// provider with `await resolveDbDirectory()`.
 final dbDirectoryProvider = Provider<Directory>(
   (ref) => throw UnimplementedError('DB_DIRECTORY_NOT_CONFIGURED'),
   name: 'dbDirectoryProvider',

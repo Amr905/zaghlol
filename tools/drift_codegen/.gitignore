@@ -1,0 +1,4 @@
+# Copied from app/ by app/tool/generate_drift.sh; never edit here.
+/lib/
+/build.yaml
+/.dart_tool/

@@ -79,6 +79,17 @@ class SecretStoreHostTest {
     assertEquals(0, slot.writes)
   }
 
+  // T-016: renew through the host answers true only for the current lease.
+  @Test
+  fun renewIsTrueForTheCurrentLeaseOnly() {
+    val lease = call<Long> { host.acquireBootstrapLease(10, it) }.getOrThrow()
+    assertEquals(true, call<Boolean> { host.renewBootstrapLease(lease, it) }.getOrThrow())
+    assertEquals(false, call<Boolean> { host.renewBootstrapLease(lease + 1, it) }.getOrThrow())
+    call<Unit> { host.releaseBootstrapLease(lease, it) }.getOrThrow()
+    assertEquals(false, call<Boolean> { host.renewBootstrapLease(lease, it) }.getOrThrow())
+    assertEquals(0, slot.writes)
+  }
+
   @Test
   fun storeFailuresAreKeyStoreFailedWithoutMessage() {
     val lease = call<Long> { host.acquireBootstrapLease(10, it) }.getOrThrow()

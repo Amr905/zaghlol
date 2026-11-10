@@ -70,6 +70,13 @@ abstract class SecretStoreHostApi {
   @async
   void releaseBootstrapLease(int lease);
 
+  /// T-016: if [lease] is the current, unexpired lease, sets its expiry to
+  /// now + 30 s and returns true; otherwise returns false. Never takes a
+  /// lease. Same-lease renewals are unbounded, but a dead engine stops
+  /// renewing, so its lease still lapses after 30 s.
+  @async
+  bool renewBootstrapLease(int lease);
+
   /// Reads [slot]. Never throws for storage errors: they are classified.
   @async
   SecretReadMsg read(SecretSlotMsg slot);

@@ -316,7 +316,7 @@ CREATE TABLE diag_log (id INTEGER PRIMARY KEY, at INTEGER NOT NULL, level TEXT N
 
 1. Drift `schemaVersion` starts at 1. Every change bumps it and adds a `stepByStep` migration.
 2. `drift_dev schema dump` snapshots live in `app/drift_schemas/`, and generated migration tests verify every `vN → vN+1` path *and* `v1 → latest` on populated fixture databases (NFR-REL-02).
-3. Before running migrations, the app makes an encrypted copy of the DB (`VACUUM INTO 'pre-migrate.db'`, same key). It is deleted after success; on failure the app restores it and shows the "update failed" screen.
+3. Before running migrations, the app makes an encrypted copy of the DB: `PRAGMA wal_checkpoint(TRUNCATE)`, then a byte copy `zaghlol.db` → `zaghlol.db.migrate.part` → renamed `zaghlol.db.migrate.tmp` (same key and salt by construction; T-016 — `VACUUM INTO` can't run inside drift's migration transaction and its key semantics under sqlite3mc are unproven). It is deleted after success; on failure, or at the next start if the migration was never confirmed, the app restores it and shows the "update failed" screen.
 4. Migrations are additive in a release. Column drops or renames happen in two releases: shadow column first, then drop.
 5. The registry and catalog are **data**, not schema. Their versions are stored in `catalog_meta` and `raw_messages.registry_version`, and re-parse jobs are driven by version bumps.
 6. A backup records `schemaVersion`. Restore refuses files from a newer schema (EC-26) and migrates older ones.

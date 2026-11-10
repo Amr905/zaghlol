@@ -29,6 +29,12 @@ class _FakeApi extends SecretStoreHostApi {
   Future<void> releaseBootstrapLease(int lease) =>
       _answer('release:$lease', null);
 
+  bool renewResult = true;
+
+  @override
+  Future<bool> renewBootstrapLease(int lease) =>
+      _answer('renew:$lease', renewResult);
+
   @override
   Future<SecretReadMsg> read(SecretSlotMsg slot) =>
       _answer('read:${slot.name}', readResult!);
@@ -185,5 +191,20 @@ void main() {
   test('release never throws', () async {
     api.error = PlatformException(code: 'channel-error');
     await store.releaseBootstrapLease(SecretStoreLease(1));
+  });
+
+  // T-016 (S-2): renew passes the lease id through; any failure is "lapsed".
+  test('renewBootstrapLease answers the native result', () async {
+    expect(await store.renewBootstrapLease(SecretStoreLease(7)), isTrue);
+    api.renewResult = false;
+    expect(await store.renewBootstrapLease(SecretStoreLease(7)), isFalse);
+    expect(api.calls, ['renew:7', 'renew:7']);
+  });
+
+  test('renewBootstrapLease never throws: a failure is false', () async {
+    api.error = PlatformException(code: 'LEASE_TIMEOUT', message: 'detail');
+    expect(await store.renewBootstrapLease(SecretStoreLease(7)), isFalse);
+    api.error = StateError('channel not registered');
+    expect(await store.renewBootstrapLease(SecretStoreLease(7)), isFalse);
   });
 }
