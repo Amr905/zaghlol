@@ -11,9 +11,9 @@ name: db-platform
 # x86_64/arm64-sim on CI hardware": recorded, not gating. Only the host leg
 # gates the benchmark (testing-strategy §5: p95 < 50 ms).
 #
-# T-015: each device leg then runs integration_test/db_key_test.dart (key
-# bootstrap on the real Keystore/Keychain, sandbox scan) and greps the test
-# and system logs for the synthetic test key (db-key-log-scan.sh).
+# T-015: each device leg also runs the key bootstrap tests (registered by
+# db_platform_test.dart: real Keystore/Keychain, sandbox scan) and greps the
+# test and system logs for the synthetic test key (db-key-log-scan.sh).
 #
 # No key, sentinel or row text is ever printed: the tests print only
 # numbers/flags/codes, and the interop key stays in $RUNNER_TEMP (masked).
