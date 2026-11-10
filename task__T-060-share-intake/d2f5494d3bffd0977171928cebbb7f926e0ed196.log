@@ -1,5 +1,933 @@
 ﻿== SUMMARY ==
-RUNNING sha=d2f5494d3bffd0977171928cebbb7f926e0ed196
+FAIL sha=d2f5494d3bffd0977171928cebbb7f926e0ed196 pipeline=quick-app pub-get=0 format=0 analyze=0 app-test=0 dart-test-zaghlol_domain=0 dart-test-zaghlol_parsing=0 apk-devNoSms=0 apk-perms=0 android-unit=0 android-lint=1
+pub-get                      PASS  exit=0  2s
+format                       PASS  exit=0  5s
+analyze                      PASS  exit=0  78s
+app-test                     PASS  exit=0  26s
+dart-test-zaghlol_domain     PASS  exit=0  4s
+dart-test-zaghlol_parsing    PASS  exit=0  5s
+apk-devNoSms                 PASS  exit=0  222s
+apk-perms                    PASS  exit=0  1s
+android-unit                 PASS  exit=0  103s
+android-lint                 FAIL  exit=1  59s
+
+== ERRORS: android-lint ==
+* What went wrong:
+Execution failed for task ':app:generateDevNoSmsDebugAndroidTestLintModel'.
+> Could not resolve all files for configuration ':app:devNoSmsDebugAndroidTestRuntimeClasspath'.
+   > Could not resolve androidx.test:runner:1.6.2.
+     Required by:
+         project ':app'
+      > Cannot find a version of 'androidx.test:runner' that satisfies the version constraints:
+           Dependency path: 'project :app' (devNoSmsDebugAndroidTestRuntimeClasspath) --> 'androidx.test:runner:1.6.2'
+           Constraint path: 'project :app' (devNoSmsDebugAndroidTestRuntimeClasspath) --> 'androidx.test:runner:{strictly 1.3.0}' because of the following reason: version resolved in configuration ':app:devNoSmsDebugRuntimeClasspath' by consistent resolution
+
+> There is 1 more failure with an identical cause.
+
+* Try:
+> Run with --stacktrace option to get the stack trace.
+> Run with --info or --debug option to get more log output.
+
+> Task :app:generateDevNoSmsDebugAndroidTestLintModel FAILED
 
 == FULL LOG (last 1500 lines) ==
 auto task/T-060-share-intake d2f5494d3bffd0977171928cebbb7f926e0ed196 2026-11-10T21:54:19.6871858+02:00
+
+
+
+[21:54:25] === STEP pub-get (docker zaghlol-flutter:3.47.9, /work/)
+Resolving dependencies...
+Downloading packages...
+  _fe_analyzer_shared 91.0.0 (111.0.0 available)
+  analyzer 8.4.0 (14.7.0 available)
+  built_collection 5.1.2 (6.0.0 available)
+  coverage 1.15.1 (1.16.0 available)
+  dart_style 3.1.3 (3.1.14 available)
+  drift 2.35.3 (2.35.4 available)
+  material_color_utilities 0.13.0 (0.13.1 available)
+  package_config 2.2.0 (3.0.0 available)
+  pigeon 26.3.2 (29.1.1 available)
+  test 1.31.1 (1.33.0 available)
+  test_api 0.7.12 (0.7.15 available)
+  test_core 0.6.18 (0.6.21 available)
+Got dependencies!
+12 packages have newer versions incompatible with dependency constraints.
+Try `flutter pub outdated` for more information.
+
+[21:54:26] === RESULT pub-get exit=0 (2s)
+[21:54:26] === STEP format (docker zaghlol-flutter:3.47.9, /work/)
+Formatted 99 files (0 changed) in 4.29 seconds.
+
+[21:54:31] === RESULT format exit=0 (5s)
+[21:54:31] === STEP analyze (docker zaghlol-flutter:3.47.9, /work/)
+Resolving dependencies...
+Downloading packages...
+  _fe_analyzer_shared 91.0.0 (111.0.0 available)
+  analyzer 8.4.0 (14.7.0 available)
+  built_collection 5.1.2 (6.0.0 available)
+  coverage 1.15.1 (1.16.0 available)
+  dart_style 3.1.3 (3.1.14 available)
+  drift 2.35.3 (2.35.4 available)
+  material_color_utilities 0.13.0 (0.13.1 available)
+  package_config 2.2.0 (3.0.0 available)
+  pigeon 26.3.2 (29.1.1 available)
+  test 1.31.1 (1.33.0 available)
+  test_api 0.7.12 (0.7.15 available)
+  test_core 0.6.18 (0.6.21 available)
+Got dependencies!
+12 packages have newer versions incompatible with dependency constraints.
+Try `flutter pub outdated` for more information.
+Analyzing work...                                               
+No issues found! (ran in 76.7s)
+
+[21:55:49] === RESULT analyze exit=0 (78s)
+[21:55:49] === STEP app-test (docker zaghlol-flutter:3.47.9, /work/app)
+Resolving dependencies in `/work`...
+Downloading packages...
+  _fe_analyzer_shared 91.0.0 (111.0.0 available)
+  analyzer 8.4.0 (14.7.0 available)
+  built_collection 5.1.2 (6.0.0 available)
+  coverage 1.15.1 (1.16.0 available)
+  dart_style 3.1.3 (3.1.14 available)
+  drift 2.35.3 (2.35.4 available)
+  material_color_utilities 0.13.0 (0.13.1 available)
+  package_config 2.2.0 (3.0.0 available)
+  pigeon 26.3.2 (29.1.1 available)
+  test 1.31.1 (1.33.0 available)
+  test_api 0.7.12 (0.7.15 available)
+  test_core 0.6.18 (0.6.21 available)
+Got dependencies in `/work`!
+12 packages have newer versions incompatible with dependency constraints.
+Try `flutter pub outdated` for more information.
+00:00 +0: loading /work/app/test/core/db/fts_benchmark_test.dart
+00:00 +0: /work/app/test/core/db/fts_benchmark_test.dart: 50k-row FTS benchmark (host budget p95 < 50 ms)
+00:00 +1: /work/app/test/core/db/fts_benchmark_test.dart: 50k-row FTS benchmark (host budget p95 < 50 ms)
+00:01 +2: /work/app/test/core/db/fts_benchmark_test.dart: 50k-row FTS benchmark (host budget p95 < 50 ms)
+00:01 +3: /work/app/test/core/db/fts_benchmark_test.dart: 50k-row FTS benchmark (host budget p95 < 50 ms)
+00:01 +4: /work/app/test/core/db/fts_benchmark_test.dart: 50k-row FTS benchmark (host budget p95 < 50 ms)
+00:01 +5: /work/app/test/core/db/fts_benchmark_test.dart: 50k-row FTS benchmark (host budget p95 < 50 ms)
+00:01 +6: /work/app/test/core/db/fts_benchmark_test.dart: 50k-row FTS benchmark (host budget p95 < 50 ms)
+00:01 +7: /work/app/test/core/db/fts_benchmark_test.dart: 50k-row FTS benchmark (host budget p95 < 50 ms)
+00:01 +8: /work/app/test/core/db/fts_benchmark_test.dart: 50k-row FTS benchmark (host budget p95 < 50 ms)
+00:01 +9: /work/app/test/core/db/fts_benchmark_test.dart: 50k-row FTS benchmark (host budget p95 < 50 ms)
+00:01 +10: /work/app/test/core/db/fts_benchmark_test.dart: 50k-row FTS benchmark (host budget p95 < 50 ms)
+00:01 +11: /work/app/test/core/db/fts_benchmark_test.dart: 50k-row FTS benchmark (host budget p95 < 50 ms)
+00:01 +12: /work/app/test/core/db/fts_benchmark_test.dart: 50k-row FTS benchmark (host budget p95 < 50 ms)
+00:01 +13: /work/app/test/core/db/fts_benchmark_test.dart: 50k-row FTS benchmark (host budget p95 < 50 ms)
+00:01 +14: /work/app/test/core/db/fts_benchmark_test.dart: 50k-row FTS benchmark (host budget p95 < 50 ms)
+00:01 +15: /work/app/test/core/db/fts_benchmark_test.dart: 50k-row FTS benchmark (host budget p95 < 50 ms)
+00:01 +15: /work/app/test/core/db/sqlite3mc_contract_test.dart: interop: write an encrypted database for the sqlcipher CLI
+  Skip: ZAGHLOL_DB_INTEROP_DIR not set (db-platform host job only)
+00:01 +15 ~1: /work/app/test/core/db/fts_benchmark_test.dart: 50k-row FTS benchmark (host budget p95 < 50 ms)
+00:01 +15 ~1: /work/app/test/core/db/sqlite3mc_contract_test.dart: (tearDownAll)
+ZAGHLOL_DB_FINDINGS {"env":"host-linux","sqlite_version":"3.54.0","sqlite3mc_version":"SQLite3 Multiple Ciphers 2.6.1","tmp_parent":"/tmp","no_key_code":26,"wrong_key_code":26,"plaintext_with_key_code":26,"rekey_in_wal":"ok","tashkeel_folded":false,"match_1ch_rows":0,"match_2ch_rows":0,"like_2ch_rows":1,"latin_diacritics_folded":true,"like_plan":"SCAN transactions_fts VIRTUAL TABLE INDEX 0:","like_indexed":false,"like_control_plan":"SCAN like_control VIRTUAL TABLE INDEX 0:L0"}
+00:01 +15 ~1: /work/app/test/core/db/fts_benchmark_test.dart: 50k-row FTS benchmark (host budget p95 < 50 ms)
+00:01 +16 ~1: /work/app/test/core/db/fts_benchmark_test.dart: 50k-row FTS benchmark (host budget p95 < 50 ms)
+00:01 +17 ~1: /work/app/test/core/db/fts_benchmark_test.dart: 50k-row FTS benchmark (host budget p95 < 50 ms)
+00:01 +18 ~1: /work/app/test/core/db/fts_benchmark_test.dart: 50k-row FTS benchmark (host budget p95 < 50 ms)
+00:01 +19 ~1: /work/app/test/core/db/fts_benchmark_test.dart: 50k-row FTS benchmark (host budget p95 < 50 ms)
+00:01 +20 ~1: /work/app/test/core/db/fts_benchmark_test.dart: 50k-row FTS benchmark (host budget p95 < 50 ms)
+00:01 +21 ~1: /work/app/test/core/db/fts_benchmark_test.dart: 50k-row FTS benchmark (host budget p95 < 50 ms)
+00:01 +22 ~1: /work/app/test/core/db/fts_benchmark_test.dart: 50k-row FTS benchmark (host budget p95 < 50 ms)
+00:01 +23 ~1: /work/app/test/core/db/fts_benchmark_test.dart: 50k-row FTS benchmark (host budget p95 < 50 ms)
+00:01 +24 ~1: /work/app/test/core/db/fts_benchmark_test.dart: 50k-row FTS benchmark (host budget p95 < 50 ms)
+00:01 +25 ~1: /work/app/test/core/db/fts_benchmark_test.dart: 50k-row FTS benchmark (host budget p95 < 50 ms)
+00:01 +26 ~1: /work/app/test/core/db/fts_benchmark_test.dart: 50k-row FTS benchmark (host budget p95 < 50 ms)
+00:01 +27 ~1: /work/app/test/core/db/fts_benchmark_test.dart: 50k-row FTS benchmark (host budget p95 < 50 ms)
+00:01 +28 ~1: /work/app/test/core/db/fts_benchmark_test.dart: 50k-row FTS benchmark (host budget p95 < 50 ms)
+00:01 +29 ~1: /work/app/test/core/db/fts_benchmark_test.dart: 50k-row FTS benchmark (host budget p95 < 50 ms)
+00:01 +30 ~1: /work/app/test/core/db/fts_benchmark_test.dart: 50k-row FTS benchmark (host budget p95 < 50 ms)
+00:02 +31 ~1: /work/app/test/core/db/fts_benchmark_test.dart: 50k-row FTS benchmark (host budget p95 < 50 ms)
+00:02 +32 ~1: /work/app/test/core/db/fts_benchmark_test.dart: 50k-row FTS benchmark (host budget p95 < 50 ms)
+00:02 +33 ~1: /work/app/test/core/db/fts_benchmark_test.dart: 50k-row FTS benchmark (host budget p95 < 50 ms)
+00:02 +34 ~1: /work/app/test/core/db/fts_benchmark_test.dart: 50k-row FTS benchmark (host budget p95 < 50 ms)
+00:02 +35 ~1: /work/app/test/core/db/fts_benchmark_test.dart: 50k-row FTS benchmark (host budget p95 < 50 ms)
+00:02 +36 ~1: /work/app/test/core/db/fts_benchmark_test.dart: 50k-row FTS benchmark (host budget p95 < 50 ms)
+00:02 +37 ~1: /work/app/test/core/db/fts_benchmark_test.dart: 50k-row FTS benchmark (host budget p95 < 50 ms)
+00:02 +38 ~1: /work/app/test/core/db/fts_benchmark_test.dart: 50k-row FTS benchmark (host budget p95 < 50 ms)
+00:02 +39 ~1: /work/app/test/core/db/fts_benchmark_test.dart: 50k-row FTS benchmark (host budget p95 < 50 ms)
+00:02 +40 ~1: /work/app/test/core/db/fts_benchmark_test.dart: 50k-row FTS benchmark (host budget p95 < 50 ms)
+00:02 +41 ~1: /work/app/test/core/db/fts_benchmark_test.dart: 50k-row FTS benchmark (host budget p95 < 50 ms)
+00:02 +42 ~1: /work/app/test/core/db/fts_benchmark_test.dart: 50k-row FTS benchmark (host budget p95 < 50 ms)
+00:02 +43 ~1: /work/app/test/core/db/fts_benchmark_test.dart: 50k-row FTS benchmark (host budget p95 < 50 ms)
+00:02 +44 ~1: /work/app/test/core/db/fts_benchmark_test.dart: 50k-row FTS benchmark (host budget p95 < 50 ms)
+00:02 +45 ~1: /work/app/test/core/db/fts_benchmark_test.dart: 50k-row FTS benchmark (host budget p95 < 50 ms)
+00:02 +46 ~1: /work/app/test/core/db/fts_benchmark_test.dart: 50k-row FTS benchmark (host budget p95 < 50 ms)
+00:02 +47 ~1: /work/app/test/core/db/fts_benchmark_test.dart: 50k-row FTS benchmark (host budget p95 < 50 ms)
+00:02 +48 ~1: /work/app/test/core/db/fts_benchmark_test.dart: 50k-row FTS benchmark (host budget p95 < 50 ms)
+00:02 +49 ~1: /work/app/test/core/db/fts_benchmark_test.dart: 50k-row FTS benchmark (host budget p95 < 50 ms)
+00:02 +50 ~1: /work/app/test/core/db/fts_benchmark_test.dart: 50k-row FTS benchmark (host budget p95 < 50 ms)
+00:02 +51 ~1: /work/app/test/core/db/fts_benchmark_test.dart: 50k-row FTS benchmark (host budget p95 < 50 ms)
+00:02 +52 ~1: /work/app/test/core/db/fts_benchmark_test.dart: 50k-row FTS benchmark (host budget p95 < 50 ms)
+00:02 +53 ~1: /work/app/test/core/db/fts_benchmark_test.dart: 50k-row FTS benchmark (host budget p95 < 50 ms)
+00:02 +54 ~1: /work/app/test/core/db/fts_benchmark_test.dart: 50k-row FTS benchmark (host budget p95 < 50 ms)
+00:02 +55 ~1: /work/app/test/core/db/fts_benchmark_test.dart: 50k-row FTS benchmark (host budget p95 < 50 ms)
+00:02 +56 ~1: /work/app/test/core/db/fts_benchmark_test.dart: 50k-row FTS benchmark (host budget p95 < 50 ms)
+00:02 +57 ~1: /work/app/test/core/db/fts_benchmark_test.dart: 50k-row FTS benchmark (host budget p95 < 50 ms)
+00:02 +58 ~1: /work/app/test/core/db/fts_benchmark_test.dart: 50k-row FTS benchmark (host budget p95 < 50 ms)
+00:02 +59 ~1: /work/app/test/core/db/fts_benchmark_test.dart: 50k-row FTS benchmark (host budget p95 < 50 ms)
+00:02 +60 ~1: /work/app/test/core/db/fts_benchmark_test.dart: 50k-row FTS benchmark (host budget p95 < 50 ms)
+00:02 +61 ~1: /work/app/test/core/db/fts_benchmark_test.dart: 50k-row FTS benchmark (host budget p95 < 50 ms)
+00:02 +62 ~1: /work/app/test/core/db/fts_benchmark_test.dart: 50k-row FTS benchmark (host budget p95 < 50 ms)
+00:02 +63 ~1: /work/app/test/core/db/fts_benchmark_test.dart: 50k-row FTS benchmark (host budget p95 < 50 ms)
+00:02 +64 ~1: /work/app/test/core/db/fts_benchmark_test.dart: 50k-row FTS benchmark (host budget p95 < 50 ms)
+00:02 +65 ~1: /work/app/test/core/db/fts_benchmark_test.dart: 50k-row FTS benchmark (host budget p95 < 50 ms)
+00:02 +66 ~1: /work/app/test/core/db/fts_benchmark_test.dart: 50k-row FTS benchmark (host budget p95 < 50 ms)
+00:04 +67 ~1: /work/app/test/core/db/fts_benchmark_test.dart: 50k-row FTS benchmark (host budget p95 < 50 ms)
+00:04 +68 ~1: /work/app/test/core/db/fts_benchmark_test.dart: 50k-row FTS benchmark (host budget p95 < 50 ms)
+00:04 +69 ~1: /work/app/test/core/db/fts_benchmark_test.dart: 50k-row FTS benchmark (host budget p95 < 50 ms)
+00:05 +70 ~1: /work/app/test/core/db/fts_benchmark_test.dart: 50k-row FTS benchmark (host budget p95 < 50 ms)
+00:05 +71 ~1: /work/app/test/core/db/fts_benchmark_test.dart: 50k-row FTS benchmark (host budget p95 < 50 ms)
+00:05 +72 ~1: /work/app/test/core/db/fts_benchmark_test.dart: 50k-row FTS benchmark (host budget p95 < 50 ms)
+00:05 +73 ~1: /work/app/test/core/db/fts_benchmark_test.dart: 50k-row FTS benchmark (host budget p95 < 50 ms)
+00:05 +74 ~1: /work/app/test/core/db/fts_benchmark_test.dart: 50k-row FTS benchmark (host budget p95 < 50 ms)
+00:05 +75 ~1: /work/app/test/core/db/fts_benchmark_test.dart: 50k-row FTS benchmark (host budget p95 < 50 ms)
+00:05 +76 ~1: /work/app/test/core/db/fts_benchmark_test.dart: 50k-row FTS benchmark (host budget p95 < 50 ms)
+00:05 +77 ~1: /work/app/test/core/db/fts_benchmark_test.dart: 50k-row FTS benchmark (host budget p95 < 50 ms)
+00:05 +78 ~1: /work/app/test/core/db/fts_benchmark_test.dart: 50k-row FTS benchmark (host budget p95 < 50 ms)
+00:05 +79 ~1: /work/app/test/core/db/fts_benchmark_test.dart: 50k-row FTS benchmark (host budget p95 < 50 ms)
+00:05 +80 ~1: /work/app/test/core/db/fts_benchmark_test.dart: 50k-row FTS benchmark (host budget p95 < 50 ms)
+00:05 +81 ~1: /work/app/test/core/db/fts_benchmark_test.dart: 50k-row FTS benchmark (host budget p95 < 50 ms)
+00:05 +82 ~1: /work/app/test/core/db/fts_benchmark_test.dart: 50k-row FTS benchmark (host budget p95 < 50 ms)
+00:05 +83 ~1: /work/app/test/core/db/fts_benchmark_test.dart: 50k-row FTS benchmark (host budget p95 < 50 ms)
+00:05 +84 ~1: /work/app/test/core/db/fts_benchmark_test.dart: 50k-row FTS benchmark (host budget p95 < 50 ms)
+00:05 +85 ~1: /work/app/test/core/db/fts_benchmark_test.dart: 50k-row FTS benchmark (host budget p95 < 50 ms)
+00:05 +86 ~1: /work/app/test/core/db/fts_benchmark_test.dart: 50k-row FTS benchmark (host budget p95 < 50 ms)
+00:05 +87 ~1: /work/app/test/core/db/fts_benchmark_test.dart: 50k-row FTS benchmark (host budget p95 < 50 ms)
+00:06 +88 ~1: /work/app/test/core/db/fts_benchmark_test.dart: 50k-row FTS benchmark (host budget p95 < 50 ms)
+00:06 +89 ~1: /work/app/test/core/db/fts_benchmark_test.dart: 50k-row FTS benchmark (host budget p95 < 50 ms)
+00:06 +90 ~1: /work/app/test/core/db/fts_benchmark_test.dart: 50k-row FTS benchmark (host budget p95 < 50 ms)
+00:06 +91 ~1: /work/app/test/core/db/fts_benchmark_test.dart: 50k-row FTS benchmark (host budget p95 < 50 ms)
+00:06 +92 ~1: /work/app/test/core/db/fts_benchmark_test.dart: 50k-row FTS benchmark (host budget p95 < 50 ms)
+00:06 +93 ~1: /work/app/test/core/db/fts_benchmark_test.dart: 50k-row FTS benchmark (host budget p95 < 50 ms)
+00:06 +94 ~1: /work/app/test/core/db/fts_benchmark_test.dart: 50k-row FTS benchmark (host budget p95 < 50 ms)
+00:06 +95 ~1: /work/app/test/core/db/fts_benchmark_test.dart: 50k-row FTS benchmark (host budget p95 < 50 ms)
+00:06 +96 ~1: /work/app/test/core/db/fts_benchmark_test.dart: 50k-row FTS benchmark (host budget p95 < 50 ms)
+00:06 +97 ~1: /work/app/test/core/db/fts_benchmark_test.dart: 50k-row FTS benchmark (host budget p95 < 50 ms)
+00:06 +98 ~1: /work/app/test/core/db/fts_benchmark_test.dart: 50k-row FTS benchmark (host budget p95 < 50 ms)
+00:06 +99 ~1: /work/app/test/core/db/fts_benchmark_test.dart: 50k-row FTS benchmark (host budget p95 < 50 ms)
+00:06 +100 ~1: /work/app/test/core/db/fts_benchmark_test.dart: 50k-row FTS benchmark (host budget p95 < 50 ms)
+00:06 +101 ~1: /work/app/test/core/db/fts_benchmark_test.dart: 50k-row FTS benchmark (host budget p95 < 50 ms)
+00:06 +102 ~1: /work/app/test/core/db/fts_benchmark_test.dart: 50k-row FTS benchmark (host budget p95 < 50 ms)
+00:06 +103 ~1: /work/app/test/core/db/fts_benchmark_test.dart: 50k-row FTS benchmark (host budget p95 < 50 ms)
+00:06 +104 ~1: /work/app/test/core/db/fts_benchmark_test.dart: 50k-row FTS benchmark (host budget p95 < 50 ms)
+00:06 +105 ~1: /work/app/test/core/db/fts_benchmark_test.dart: 50k-row FTS benchmark (host budget p95 < 50 ms)
+00:06 +106 ~1: /work/app/test/core/db/fts_benchmark_test.dart: 50k-row FTS benchmark (host budget p95 < 50 ms)
+00:06 +107 ~1: /work/app/test/core/db/fts_benchmark_test.dart: 50k-row FTS benchmark (host budget p95 < 50 ms)
+00:06 +108 ~1: /work/app/test/core/db/fts_benchmark_test.dart: 50k-row FTS benchmark (host budget p95 < 50 ms)
+00:06 +109 ~1: /work/app/test/core/db/fts_benchmark_test.dart: 50k-row FTS benchmark (host budget p95 < 50 ms)
+00:06 +110 ~1: /work/app/test/core/db/fts_benchmark_test.dart: 50k-row FTS benchmark (host budget p95 < 50 ms)
+00:06 +111 ~1: /work/app/test/core/db/fts_benchmark_test.dart: 50k-row FTS benchmark (host budget p95 < 50 ms)
+00:06 +112 ~1: /work/app/test/core/db/fts_benchmark_test.dart: 50k-row FTS benchmark (host budget p95 < 50 ms)
+00:06 +113 ~1: /work/app/test/core/db/fts_benchmark_test.dart: 50k-row FTS benchmark (host budget p95 < 50 ms)
+00:06 +114 ~1: /work/app/test/core/db/fts_benchmark_test.dart: 50k-row FTS benchmark (host budget p95 < 50 ms)
+00:06 +115 ~1: /work/app/test/core/db/fts_benchmark_test.dart: 50k-row FTS benchmark (host budget p95 < 50 ms)
+00:06 +116 ~1: /work/app/test/core/db/fts_benchmark_test.dart: 50k-row FTS benchmark (host budget p95 < 50 ms)
+00:07 +117 ~1: /work/app/test/core/db/fts_benchmark_test.dart: 50k-row FTS benchmark (host budget p95 < 50 ms)
+00:07 +118 ~1: /work/app/test/core/db/fts_benchmark_test.dart: 50k-row FTS benchmark (host budget p95 < 50 ms)
+00:07 +119 ~1: /work/app/test/core/db/fts_benchmark_test.dart: 50k-row FTS benchmark (host budget p95 < 50 ms)
+00:07 +120 ~1: /work/app/test/core/db/fts_benchmark_test.dart: 50k-row FTS benchmark (host budget p95 < 50 ms)
+00:07 +121 ~1: /work/app/test/core/db/fts_benchmark_test.dart: 50k-row FTS benchmark (host budget p95 < 50 ms)
+00:07 +122 ~1: /work/app/test/core/db/fts_benchmark_test.dart: 50k-row FTS benchmark (host budget p95 < 50 ms)
+00:07 +123 ~1: /work/app/test/core/db/fts_benchmark_test.dart: 50k-row FTS benchmark (host budget p95 < 50 ms)
+00:07 +124 ~1: /work/app/test/core/db/fts_benchmark_test.dart: 50k-row FTS benchmark (host budget p95 < 50 ms)
+00:07 +125 ~1: /work/app/test/core/db/fts_benchmark_test.dart: 50k-row FTS benchmark (host budget p95 < 50 ms)
+00:07 +126 ~1: /work/app/test/core/db/fts_benchmark_test.dart: 50k-row FTS benchmark (host budget p95 < 50 ms)
+00:07 +127 ~1: /work/app/test/core/db/fts_benchmark_test.dart: 50k-row FTS benchmark (host budget p95 < 50 ms)
+00:07 +128 ~1: /work/app/test/core/db/fts_benchmark_test.dart: 50k-row FTS benchmark (host budget p95 < 50 ms)
+00:07 +129 ~1: /work/app/test/core/db/fts_benchmark_test.dart: 50k-row FTS benchmark (host budget p95 < 50 ms)
+00:07 +130 ~1: /work/app/test/core/db/fts_benchmark_test.dart: 50k-row FTS benchmark (host budget p95 < 50 ms)
+00:07 +131 ~1: /work/app/test/core/db/fts_benchmark_test.dart: 50k-row FTS benchmark (host budget p95 < 50 ms)
+00:07 +132 ~1: /work/app/test/core/db/fts_benchmark_test.dart: 50k-row FTS benchmark (host budget p95 < 50 ms)
+00:07 +133 ~1: /work/app/test/core/db/fts_benchmark_test.dart: 50k-row FTS benchmark (host budget p95 < 50 ms)
+00:07 +134 ~1: /work/app/test/core/db/fts_benchmark_test.dart: 50k-row FTS benchmark (host budget p95 < 50 ms)
+00:07 +135 ~1: /work/app/test/core/db/fts_benchmark_test.dart: 50k-row FTS benchmark (host budget p95 < 50 ms)
+00:07 +136 ~1: /work/app/test/core/db/fts_benchmark_test.dart: 50k-row FTS benchmark (host budget p95 < 50 ms)
+00:08 +137 ~1: /work/app/test/core/db/fts_benchmark_test.dart: 50k-row FTS benchmark (host budget p95 < 50 ms)
+00:08 +138 ~1: /work/app/test/core/db/fts_benchmark_test.dart: 50k-row FTS benchmark (host budget p95 < 50 ms)
+00:08 +139 ~1: /work/app/test/core/db/fts_benchmark_test.dart: 50k-row FTS benchmark (host budget p95 < 50 ms)
+ZAGHLOL_DB_BENCH {"v":1,"run":"","env":"host-linux","build":"debug","os":"linux","sqlite":"3.54.0","mc":"SQLite3 Multiple Ciphers 2.6.1","rows":50000,"enc":{"open_cold_ms":8.9,"open_warm_ms":6.0,"insert_50k_ms":6510.3,"fts_rank_ms":[11.1,20.4,22.1],"fts_list_ms":[27.1,49.4,57.4],"like_short_ms":[4.6,689.2,695.7],"db_bytes":17977344},"plain":{"open_cold_ms":5.1,"open_warm_ms":3.8,"insert_50k_ms":2547.3,"fts_rank_ms":[3.0,6.2,8.9],"fts_list_ms":[2.0,4.7,5.2],"like_short_ms":[0.8,30.2,30.9],"db_bytes":16560128},"ratio_list_p95":10.51,"pbkdf2_open_ms":130.6}
+00:17 +140 ~1: All tests passed!
+
+[21:56:15] === RESULT app-test exit=0 (26s)
+[21:56:15] === STEP dart-test-zaghlol_domain (docker zaghlol-flutter:3.47.9, /work/packages/zaghlol_domain)
+00:00 +0: loading test/core/core_test.dart
+00:00 +0: test/core/core_test.dart: Failure every area is switchable and has a code
+00:00 +1: test/money/iso4217_generator_rows_test.dart: generator row validation (SEC F2, F9) exponent 0..4 and numeric 1..999 are enforced
+00:00 +2: test/money/iso4217_generator_rows_test.dart: generator row validation (SEC F2, F9) exponent 0..4 and numeric 1..999 are enforced
+00:00 +3: test/money/iso4217_generator_rows_test.dart: generator row validation (SEC F2, F9) exponent 0..4 and numeric 1..999 are enforced
+00:00 +4: test/money/iso4217_generator_rows_test.dart: generator row validation (SEC F2, F9) exponent 0..4 and numeric 1..999 are enforced
+00:00 +5: test/money/iso4217_generator_rows_test.dart: generator row validation (SEC F2, F9) exponent 0..4 and numeric 1..999 are enforced
+00:00 +6: test/money/iso4217_generator_rows_test.dart: generator row validation (SEC F2, F9) exponent 0..4 and numeric 1..999 are enforced
+00:00 +7: test/money/iso4217_generator_rows_test.dart: generator row validation (SEC F2, F9) exponent 0..4 and numeric 1..999 are enforced
+00:00 +8: test/money/iso4217_generator_rows_test.dart: generator row validation (SEC F2, F9) exponent 0..4 and numeric 1..999 are enforced
+00:00 +9: test/money/iso4217_generator_rows_test.dart: generator row validation (SEC F2, F9) exponent 0..4 and numeric 1..999 are enforced
+00:00 +10: test/money/iso4217_generator_rows_test.dart: generator row validation (SEC F2, F9) exponent 0..4 and numeric 1..999 are enforced
+00:00 +11: test/money/iso4217_generator_rows_test.dart: generator row validation (SEC F2, F9) exponent 0..4 and numeric 1..999 are enforced
+00:00 +12: test/money/iso4217_generator_rows_test.dart: generator row validation (SEC F2, F9) exponent 0..4 and numeric 1..999 are enforced
+00:00 +13: test/money/iso4217_generator_test.dart: generator input validation (SEC F2, F9) a Pblshd with a newline or */ is rejected
+00:00 +14: test/money/iso4217_generator_test.dart: generator input validation (SEC F2, F9) a Pblshd with a newline or */ is rejected
+00:00 +15: test/money/iso4217_generator_test.dart: generator input validation (SEC F2, F9) a Pblshd with a newline or */ is rejected
+00:00 +16: test/money/iso4217_generator_test.dart: generator input validation (SEC F2, F9) a Pblshd with a newline or */ is rejected
+00:00 +17: test/money/iso4217_generator_test.dart: generator input validation (SEC F2, F9) a Pblshd with a newline or */ is rejected
+00:00 +18: test/money/iso4217_generator_test.dart: generator input validation (SEC F2, F9) a Pblshd with a newline or */ is rejected
+00:00 +19: test/money/iso4217_generator_test.dart: generator input validation (SEC F2, F9) a Pblshd with a newline or */ is rejected
+00:00 +20: test/money/iso4217_generator_test.dart: generator input validation (SEC F2, F9) a Pblshd with a newline or */ is rejected
+00:00 +21: test/money/iso4217_generator_test.dart: generator input validation (SEC F2, F9) a Pblshd with a newline or */ is rejected
+00:00 +22: test/money/iso4217_generator_test.dart: generator input validation (SEC F2, F9) a Pblshd with a newline or */ is rejected
+00:00 +23: test/money/iso4217_generator_test.dart: generator input validation (SEC F2, F9) a Pblshd with a newline or */ is rejected
+00:00 +24: test/money/iso4217_generator_test.dart: generator input validation (SEC F2, F9) YYYY-MM and YYYY-MM-DD are accepted
+00:00 +25: test/money/iso4217_generator_test.dart: generator input validation (SEC F2, F9) render refuses an unvalidated table
+00:00 +26: test/money/iso4217_merge_test.dart: --fresh guard (R2-2) refused on a genuine committed table without --i-know
+00:00 +27: test/money/iso4217_merge_test.dart: --fresh guard (R2-2) allowed for the placeholder table or when there is none
+00:00 +28: test/money/iso4217_merge_test.dart: excluded codes (D-67) XAD is skipped even though List One flags it IsFund
+00:00 +29: test/money/iso4217_merge_test.dart: excluded codes (D-67) the genuine snapshot lists XAD; the table does not
+00:00 +30: test/money/iso4217_snapshot_gate_test.dart: snapshot gate (CR2) published is a real SIX date on or after 2025-09-01
+00:00 +31: test/money/iso4217_snapshot_gate_test.dart: snapshot gate (CR2) published is a real SIX date on or after 2025-09-01
+00:00 +32: test/money/iso4217_snapshot_gate_test.dart: snapshot gate (CR2) published is a real SIX date on or after 2025-09-01
+00:00 +33: test/money/iso4217_merge_test.dart: merge guards (CR2, CR3) without a previous table (--fresh) the result is the snapshot
+00:00 +34: test/money/iso4217_merge_test.dart: merge guards (CR2, CR3) a changed exponent or numeric throws unless allowed
+00:00 +35: test/money/money_property_test.dart: 1. addition laws + is commutative (testing 1000 inputs)
+00:00 +36: test/money/iso4217_table_test.dart: generated files are in sync currencies.json == merge(List One snapshot, committed table)
+00:00 +37: test/money/money_test.dart: AC: exact round trips KWD 1.250 <-> 1250
+00:00 +38: test/money/money_test.dart: AC: exact round trips KWD 1.250 <-> 1250
+00:00 +39: test/money/money_test.dart: AC: exact round trips KWD 1.250 <-> 1250
+00:00 +40: test/money/money_test.dart: AC: exact round trips KWD 1.250 <-> 1250
+00:00 +41: test/money/money_property_test.dart: 1. addition laws + is associative (testing 1000 inputs)
+00:00 +42: test/money/money_property_test.dart: 1. addition laws + is associative (testing 1000 inputs)
+00:00 +43: test/money/money_property_test.dart: 1. addition laws + is associative (testing 1000 inputs)
+00:00 +44: test/money/no_floating_point_test.dart: lib/money contains no floating-point types or conversions
+00:00 +45: test/money/no_floating_point_test.dart: lib/money contains no floating-point types or conversions
+00:00 +46: test/money/no_floating_point_test.dart: lib/money contains no floating-point types or conversions
+00:00 +47: test/money/no_floating_point_test.dart: lib/money contains no floating-point types or conversions
+00:00 +48: test/money/no_floating_point_test.dart: lib/money contains no floating-point types or conversions
+00:00 +49: test/money/no_floating_point_test.dart: lib/money contains no floating-point types or conversions
+00:00 +50: test/money/no_floating_point_test.dart: lib/money contains no floating-point types or conversions
+00:00 +51: test/money/no_floating_point_test.dart: lib/money contains no floating-point types or conversions
+00:00 +52: test/money/no_floating_point_test.dart: lib/money contains no floating-point types or conversions
+00:00 +53: test/money/no_floating_point_test.dart: lib/money contains no floating-point types or conversions
+00:00 +54: test/money/no_floating_point_test.dart: lib/money contains no floating-point types or conversions
+00:00 +55: test/money/no_floating_point_test.dart: lib/money contains no floating-point types or conversions
+00:00 +56: test/money/no_floating_point_test.dart: lib/money contains no floating-point types or conversions
+00:00 +57: test/money/no_floating_point_test.dart: lib/money contains no floating-point types or conversions
+00:00 +58: test/money/no_floating_point_test.dart: lib/money contains no floating-point types or conversions
+00:00 +59: test/money/no_floating_point_test.dart: lib/money contains no floating-point types or conversions
+00:00 +60: test/money/no_floating_point_test.dart: lib/money contains no floating-point types or conversions
+00:00 +61: test/money/no_floating_point_test.dart: lib/money contains no floating-point types or conversions
+00:00 +62: test/money/no_floating_point_test.dart: lib/money contains no floating-point types or conversions
+00:00 +63: test/money/no_floating_point_test.dart: lib/money contains no floating-point types or conversions
+00:00 +64: test/money/no_floating_point_test.dart: lib/money contains no floating-point types or conversions
+00:00 +65: test/money/no_floating_point_test.dart: lib/money contains no floating-point types or conversions
+00:00 +66: test/money/no_floating_point_test.dart: lib/money contains no floating-point types or conversions
+00:00 +67: test/money/no_floating_point_test.dart: lib/money contains no floating-point types or conversions
+00:00 +68: test/money/no_floating_point_test.dart: lib/money contains no floating-point types or conversions
+00:00 +69: test/money/no_floating_point_test.dart: lib/money contains no floating-point types or conversions
+00:00 +70: test/money/no_floating_point_test.dart: lib/money contains no floating-point types or conversions
+00:00 +71: test/money/no_floating_point_test.dart: lib/money contains no floating-point types or conversions
+00:00 +72: test/money/no_floating_point_test.dart: lib/money contains no floating-point types or conversions
+00:00 +73: test/money/no_floating_point_test.dart: lib/money contains no floating-point types or conversions
+00:00 +74: test/money/no_floating_point_test.dart: lib/money contains no floating-point types or conversions
+00:00 +75: test/money/no_floating_point_test.dart: lib/money contains no floating-point types or conversions
+00:00 +76: test/money/no_floating_point_test.dart: lib/money contains no floating-point types or conversions
+00:00 +77: test/money/no_floating_point_test.dart: lib/money contains no floating-point types or conversions
+00:00 +78: test/money/no_floating_point_test.dart: lib/money contains no floating-point types or conversions
+00:00 +79: test/money/no_floating_point_test.dart: lib/money contains no floating-point types or conversions
+00:00 +80: test/money/no_floating_point_test.dart: lib/money contains no floating-point types or conversions
+00:00 +81: test/money/no_floating_point_test.dart: lib/money contains no floating-point types or conversions
+00:00 +82: test/money/no_floating_point_test.dart: lib/money contains no floating-point types or conversions
+00:00 +83: test/money/no_floating_point_test.dart: lib/money contains no floating-point types or conversions
+00:00 +84: test/money/no_floating_point_test.dart: lib/money contains no floating-point types or conversions
+00:00 +85: test/money/no_floating_point_test.dart: lib/money contains no floating-point types or conversions
+00:00 +86: test/money/no_floating_point_test.dart: lib/money contains no floating-point types or conversions
+00:00 +87: test/money/no_floating_point_test.dart: lib/money contains no floating-point types or conversions
+00:00 +88: test/money/no_floating_point_test.dart: lib/money contains no floating-point types or conversions
+00:00 +89: test/money/no_floating_point_test.dart: lib/money contains no floating-point types or conversions
+00:00 +90: test/money/no_floating_point_test.dart: lib/money contains no floating-point types or conversions
+00:00 +91: test/money/no_floating_point_test.dart: lib/money contains no floating-point types or conversions
+00:00 +92: test/money/no_floating_point_test.dart: lib/money contains no floating-point types or conversions
+00:00 +93: test/money/no_floating_point_test.dart: lib/money contains no floating-point types or conversions
+00:00 +94: test/money/no_floating_point_test.dart: lib/money contains no floating-point types or conversions
+00:00 +95: test/money/no_floating_point_test.dart: lib/money contains no floating-point types or conversions
+00:00 +96: test/money/no_floating_point_test.dart: lib/money contains no floating-point types or conversions
+00:00 +97: test/money/no_floating_point_test.dart: lib/money contains no floating-point types or conversions
+00:00 +98: test/money/no_floating_point_test.dart: lib/money contains no floating-point types or conversions
+00:00 +99: test/money/no_floating_point_test.dart: lib/money contains no floating-point types or conversions
+00:00 +100: test/money/no_floating_point_test.dart: lib/money contains no floating-point types or conversions
+00:00 +101: test/money/no_floating_point_test.dart: lib/money contains no floating-point types or conversions
+00:00 +102: test/money/no_floating_point_test.dart: lib/money contains no floating-point types or conversions
+00:00 +103: test/money/no_floating_point_test.dart: lib/money contains no floating-point types or conversions
+00:00 +104: test/money/no_floating_point_test.dart: lib/money contains no floating-point types or conversions
+00:00 +105: test/money/no_floating_point_test.dart: lib/money contains no floating-point types or conversions
+00:00 +106: test/money/no_floating_point_test.dart: lib/money contains no floating-point types or conversions
+00:00 +107: test/money/no_floating_point_test.dart: lib/money contains no floating-point types or conversions
+00:00 +108: test/money/no_floating_point_test.dart: lib/money contains no floating-point types or conversions
+00:00 +109: test/money/no_floating_point_test.dart: lib/money contains no floating-point types or conversions
+00:00 +110: test/money/no_floating_point_test.dart: lib/money contains no floating-point types or conversions
+00:00 +111: test/money/no_floating_point_test.dart: lib/money contains no floating-point types or conversions
+00:00 +112: test/money/no_floating_point_test.dart: lib/money contains no floating-point types or conversions
+00:00 +113: test/money/no_floating_point_test.dart: lib/money contains no floating-point types or conversions
+00:00 +114: test/money/no_floating_point_test.dart: lib/money contains no floating-point types or conversions
+00:00 +115: test/money/no_floating_point_test.dart: lib/money contains no floating-point types or conversions
+00:00 +116: test/money/no_floating_point_test.dart: lib/money contains no floating-point types or conversions
+00:00 +117: test/money/no_floating_point_test.dart: lib/money contains no floating-point types or conversions
+00:00 +118: test/money/no_floating_point_test.dart: lib/money contains no floating-point types or conversions
+00:00 +119: test/money/no_floating_point_test.dart: lib/money contains no floating-point types or conversions
+00:00 +120: test/money/no_floating_point_test.dart: lib/money contains no floating-point types or conversions
+00:00 +121: test/money/no_floating_point_test.dart: lib/money contains no floating-point types or conversions
+00:00 +122: test/money/no_floating_point_test.dart: lib/money contains no floating-point types or conversions
+00:00 +123: test/money/no_floating_point_test.dart: lib/money contains no floating-point types or conversions
+00:00 +124: test/money/no_floating_point_test.dart: lib/money contains no floating-point types or conversions
+00:00 +125: test/money/no_floating_point_test.dart: lib/money contains no floating-point types or conversions
+00:00 +126: test/money/no_floating_point_test.dart: lib/money contains no floating-point types or conversions
+00:00 +127: test/money/no_floating_point_test.dart: lib/money contains no floating-point types or conversions
+00:00 +128: test/money/no_floating_point_test.dart: lib/money contains no floating-point types or conversions
+00:00 +129: test/money/no_floating_point_test.dart: lib/money contains no floating-point types or conversions
+00:00 +130: test/money/no_floating_point_test.dart: lib/money contains no floating-point types or conversions
+00:00 +131: test/money/no_floating_point_test.dart: lib/money contains no floating-point types or conversions
+00:00 +132: test/money/no_floating_point_test.dart: lib/money contains no floating-point types or conversions
+00:00 +133: test/money/no_floating_point_test.dart: lib/money contains no floating-point types or conversions
+00:00 +134: test/money/no_floating_point_test.dart: lib/money contains no floating-point types or conversions
+00:00 +135: test/money/no_floating_point_test.dart: lib/money contains no floating-point types or conversions
+00:00 +136: test/money/no_floating_point_test.dart: lib/money contains no floating-point types or conversions
+00:00 +137: test/money/no_floating_point_test.dart: lib/money contains no floating-point types or conversions
+00:00 +138: test/money/no_floating_point_test.dart: lib/money contains no floating-point types or conversions
+00:00 +139: test/money/no_floating_point_test.dart: lib/money contains no floating-point types or conversions
+00:00 +140: test/money/no_floating_point_test.dart: lib/money contains no floating-point types or conversions
+00:00 +141: test/money/no_floating_point_test.dart: lib/money contains no floating-point types or conversions
+00:00 +142: test/money/money_property_test.dart: 2. overflow is exact mulDiv throws iff overflow (testing 1000 inputs)
+00:00 +143: test/money/money_property_test.dart: 2. overflow is exact mulDiv throws iff overflow (testing 1000 inputs)
+00:00 +144: test/money/money_property_test.dart: 2. overflow is exact mulDiv throws iff overflow (testing 1000 inputs)
+00:00 +145: test/money/money_test.dart: allocation allocation accepts exactly the maximum number of parts
+00:00 +146: test/money/money_property_test.dart: 3. different currencies mismatch throws, == is false (testing 1000 inputs)
+00:00 +147: test/money/money_property_test.dart: 3. different currencies mismatch throws, == is false (testing 1000 inputs)
+00:00 +148: test/money/money_property_test.dart: 3. different currencies mismatch throws, == is false (testing 1000 inputs)
+00:00 +149: test/money/money_property_test.dart: 3. different currencies mismatch throws, == is false (testing 1000 inputs)
+00:00 +150: test/money/money_property_test.dart: 3. different currencies mismatch throws, == is false (testing 1000 inputs)
+00:00 +151: test/money/money_property_test.dart: 3. different currencies mismatch throws, == is false (testing 1000 inputs)
+00:00 +152: test/money/money_property_test.dart: 3. different currencies mismatch throws, == is false (testing 1000 inputs)
+00:00 +153: test/money/money_property_test.dart: 3. different currencies mismatch throws, == is false (testing 1000 inputs)
+00:00 +154: test/money/money_property_test.dart: 3. different currencies mismatch throws, == is false (testing 1000 inputs)
+00:00 +155: test/money/money_property_test.dart: 3. different currencies mismatch throws, == is false (testing 1000 inputs)
+00:00 +156: test/money/money_property_test.dart: 3. different currencies mismatch throws, == is false (testing 1000 inputs)
+00:00 +157: test/money/money_property_test.dart: 3. different currencies mismatch throws, == is false (testing 1000 inputs)
+00:00 +158: test/money/money_test.dart: MultiCurrencyTotal empty, single currency and add
+00:00 +159: test/money/money_property_test.dart: 4-7. allocation weights 0..10^6 and edges (testing 1000 inputs)
+00:00 +160: test/money/money_property_test.dart: 4-7. allocation weights 0..10^6 and edges (testing 1000 inputs)
+00:00 +161: test/money/money_property_test.dart: 4-7. allocation weights 0..10^6 and edges (testing 1000 inputs)
+00:00 +162: test/money/money_property_test.dart: 4-7. allocation weights 0..10^6 and edges (testing 1000 inputs)
+00:00 +163: test/money/money_property_test.dart: 4-7. allocation weights 0..10^6 and edges (testing 1000 inputs)
+00:00 +164: test/money/money_property_test.dart: 4-7. allocation weights 0..10^6 and edges (testing 1000 inputs)
+00:00 +165: test/money/money_property_test.dart: 4-7. allocation weights 0..10^6 and edges (testing 1000 inputs)
+00:00 +166: test/money/money_property_test.dart: 4-7. allocation weights 0..10^6 and edges (testing 1000 inputs)
+00:00 +167: test/money/money_property_test.dart: 4-7. allocation weights 0..10^6 and edges (testing 1000 inputs)
+00:00 +168: test/money/money_property_test.dart: 4-7. allocation weights to maxMinor and edges (testing 1000 inputs)
+00:00 +169: test/money/money_property_test.dart: 4-7. allocation equal weights (testing 1000 inputs)
+00:00 +170: test/money/money_property_test.dart: 4-7. allocation 7. allocateEven spread <= 1 (testing 1000 inputs)
+00:00 +171: test/money/money_property_test.dart: 8. round trips canonical string (testing 1000 inputs)
+00:00 +172: test/money/money_property_test.dart: 8. round trips storage (testing 1000 inputs)
+00:00 +173: test/money/money_property_test.dart: 8. round trips json (testing 1000 inputs)
+00:00 +174: test/money/money_property_test.dart: equality and hashing equal copies hash equally (testing 1000 inputs)
+00:00 +175: test/money/money_property_test.dart: equality and hashing a == b iff same minor (testing 1000 inputs)
+00:00 +176: test/money/money_property_test.dart: 9. MultiCurrencyTotal independent of input order (testing 1000 inputs)
+00:01 +177: test/money/money_property_test.dart: 9. MultiCurrencyTotal of(xs)[c] is the sum in c (testing 1000 inputs)
+00:01 +178: test/money/money_property_test.dart: 9. MultiCurrencyTotal full range (testing 1000 inputs)
+00:01 +179: test/money/money_property_test.dart: 9. MultiCurrencyTotal + is associative (testing 1000 inputs)
+00:01 +180: test/money/money_property_test.dart: 10. roundDiv matches the oracle (testing 1000 inputs)
+00:01 +181: All tests passed!
+
+[21:56:19] === RESULT dart-test-zaghlol_domain exit=0 (4s)
+[21:56:19] === STEP dart-test-zaghlol_parsing (docker zaghlol-flutter:3.47.9, /work/packages/zaghlol_parsing)
+00:00 +0: loading test/normalize/amount_parser_test.dart
+00:00 +0: test/normalize/amount_parser_test.dart: acceptance criteria Arabic-Indic 1,250.00 is 1250.00 EGP
+00:00 +1: test/normalize/amount_parser_test.dart: acceptance criteria Arabic-Indic 1,250.00 is 1250.00 EGP
+00:00 +2: test/normalize/amount_parser_test.dart: acceptance criteria Arabic-Indic 1,250.00 is 1250.00 EGP
+00:00 +3: test/normalize/amount_parser_test.dart: acceptance criteria Arabic-Indic 1,250.00 is 1250.00 EGP
+00:00 +4: test/normalize/amount_parser_test.dart: acceptance criteria Arabic-Indic 1,250.00 is 1250.00 EGP
+00:00 +5: test/normalize/amount_parser_test.dart: acceptance criteria Arabic-Indic 1,250.00 is 1250.00 EGP
+00:00 +6: test/normalize/amount_parser_test.dart: acceptance criteria Arabic-Indic 1,250.00 is 1250.00 EGP
+00:00 +7: test/normalize/amount_parser_test.dart: acceptance criteria Arabic-Indic 1,250.00 is 1250.00 EGP
+00:00 +8: test/normalize/amount_parser_test.dart: acceptance criteria Arabic-Indic 1,250.00 is 1250.00 EGP
+00:00 +9: test/normalize/text_normalizer_test.dart: normalizeText rtl and ltr marks
+00:00 +10: test/zaghlol_parsing_test.dart: package marker is wired up
+00:00 +11: test/zaghlol_parsing_test.dart: package marker is wired up
+00:00 +12: test/zaghlol_parsing_test.dart: package marker is wired up
+00:00 +13: test/zaghlol_parsing_test.dart: package marker is wired up
+00:00 +14: test/zaghlol_parsing_test.dart: package marker is wired up
+00:00 +15: test/zaghlol_parsing_test.dart: package marker is wired up
+00:00 +16: test/zaghlol_parsing_test.dart: package marker is wired up
+00:00 +17: test/zaghlol_parsing_test.dart: package marker is wired up
+00:00 +18: test/zaghlol_parsing_test.dart: package marker is wired up
+00:00 +19: test/zaghlol_parsing_test.dart: package marker is wired up
+00:00 +20: test/zaghlol_parsing_test.dart: package marker is wired up
+00:00 +21: test/zaghlol_parsing_test.dart: package marker is wired up
+00:00 +22: test/zaghlol_parsing_test.dart: package marker is wired up
+00:00 +23: test/zaghlol_parsing_test.dart: package marker is wired up
+00:00 +24: test/zaghlol_parsing_test.dart: package marker is wired up
+00:00 +25: test/zaghlol_parsing_test.dart: package marker is wired up
+00:00 +26: test/zaghlol_parsing_test.dart: package marker is wired up
+00:00 +27: test/zaghlol_parsing_test.dart: package marker is wired up
+00:00 +28: test/zaghlol_parsing_test.dart: package marker is wired up
+00:00 +29: test/zaghlol_parsing_test.dart: package marker is wired up
+00:00 +30: test/zaghlol_parsing_test.dart: package marker is wired up
+00:00 +31: test/zaghlol_parsing_test.dart: package marker is wired up
+00:00 +32: test/zaghlol_parsing_test.dart: package marker is wired up
+00:00 +33: test/zaghlol_parsing_test.dart: package marker is wired up
+00:00 +34: test/zaghlol_parsing_test.dart: package marker is wired up
+00:00 +35: test/zaghlol_parsing_test.dart: package marker is wired up
+00:00 +36: test/zaghlol_parsing_test.dart: package marker is wired up
+00:00 +37: test/normalize/text_normalizer_test.dart: foldKey alef hamza above
+00:00 +38: test/normalize/text_normalizer_test.dart: foldKey alef hamza above
+00:00 +39: test/normalize/amount_parser_test.dart: parseAmount table exponent 0
+00:00 +40: test/normalize/text_normalizer_test.dart: foldKey alef hamza below
+00:00 +41: test/normalize/amount_parser_test.dart: parseAmount table exponent 0 trailing zeros
+00:00 +42: test/normalize/text_normalizer_test.dart: foldKey alef madda
+00:00 +43: test/normalize/amount_parser_test.dart: parseAmount table exponent 3
+00:00 +44: test/normalize/amount_parser_test.dart: parseAmount table exponent 3
+00:00 +45: test/normalize/text_normalizer_test.dart: foldKey alef maksura
+00:00 +46: test/normalize/amount_parser_test.dart: parseAmount table exponent 3 short fraction pads
+00:00 +47: test/normalize/amount_parser_test.dart: parseAmount table exponent 2 trailing zero dropped
+00:00 +48: test/normalize/text_normalizer_test.dart: foldKey teh marbuta
+00:00 +49: test/normalize/amount_parser_test.dart: parseAmount table short fraction pads
+00:00 +50: test/normalize/amount_parser_test.dart: parseAmount table short fraction pads
+00:00 +51: test/normalize/text_normalizer_test.dart: foldKey all levels together
+00:00 +52: test/normalize/amount_parser_test.dart: parseAmount table zero
+00:00 +53: test/normalize/text_normalizer_test.dart: fuzz never throws and is idempotent
+00:00 +54: test/normalize/text_normalizer_test.dart: fuzz never throws and is idempotent
+00:00 +55: test/normalize/text_normalizer_test.dart: fuzz never throws and is idempotent
+00:00 +56: test/normalize/text_normalizer_test.dart: fuzz never throws and is idempotent
+00:00 +57: test/normalize/text_normalizer_test.dart: fuzz never throws and is idempotent
+00:00 +58: test/normalize/text_normalizer_test.dart: fuzz never throws and is idempotent
+00:00 +59: test/normalize/text_normalizer_test.dart: fuzz never throws and is idempotent
+00:00 +60: test/normalize/text_normalizer_test.dart: fuzz never throws and is idempotent
+00:00 +61: test/normalize/text_normalizer_test.dart: fuzz never throws and is idempotent
+00:00 +62: test/normalize/text_normalizer_test.dart: fuzz never throws and is idempotent
+00:00 +63: test/normalize/text_normalizer_test.dart: fuzz never throws and is idempotent
+00:00 +64: test/normalize/text_normalizer_test.dart: fuzz never throws and is idempotent
+00:00 +65: test/normalize/text_normalizer_test.dart: fuzz never throws and is idempotent
+00:00 +66: test/normalize/text_normalizer_test.dart: fuzz never throws and is idempotent
+00:00 +67: test/normalize/text_normalizer_test.dart: fuzz never throws and is idempotent
+00:00 +68: test/normalize/text_normalizer_test.dart: fuzz never throws and is idempotent
+00:00 +69: test/normalize/text_normalizer_test.dart: fuzz never throws and is idempotent
+00:00 +70: test/normalize/text_normalizer_test.dart: fuzz never throws and is idempotent
+00:00 +71: test/normalize/text_normalizer_test.dart: fuzz never throws and is idempotent
+00:00 +72: test/normalize/text_normalizer_test.dart: fuzz never throws and is idempotent
+00:00 +73: test/normalize/text_normalizer_test.dart: fuzz never throws and is idempotent
+00:00 +74: test/normalize/text_normalizer_test.dart: fuzz never throws and is idempotent
+00:00 +75: test/normalize/text_normalizer_test.dart: fuzz never throws and is idempotent
+00:00 +76: test/normalize/text_normalizer_test.dart: fuzz never throws and is idempotent
+00:00 +77: test/normalize/text_normalizer_test.dart: fuzz never throws and is idempotent
+00:00 +78: test/normalize/text_normalizer_test.dart: fuzz never throws and is idempotent
+00:00 +79: test/normalize/text_normalizer_test.dart: fuzz never throws and is idempotent
+00:00 +80: test/normalize/text_normalizer_test.dart: fuzz never throws and is idempotent
+00:00 +81: test/normalize/text_normalizer_test.dart: fuzz never throws and is idempotent
+00:00 +82: test/normalize/text_normalizer_test.dart: fuzz never throws and is idempotent
+00:00 +83: test/normalize/text_normalizer_test.dart: fuzz never throws and is idempotent
+00:00 +84: test/normalize/text_normalizer_test.dart: fuzz never throws and is idempotent
+00:00 +85: test/normalize/text_normalizer_test.dart: fuzz never throws and is idempotent
+00:00 +86: test/normalize/text_normalizer_test.dart: fuzz never throws and is idempotent
+00:00 +87: test/normalize/text_normalizer_test.dart: fuzz never throws and is idempotent
+00:00 +88: test/normalize/text_normalizer_test.dart: fuzz never throws and is idempotent
+00:00 +89: test/normalize/text_normalizer_test.dart: fuzz never throws and is idempotent
+00:00 +90: test/normalize/text_normalizer_test.dart: fuzz never throws and is idempotent
+00:00 +91: test/normalize/text_normalizer_test.dart: fuzz never throws and is idempotent
+00:00 +92: test/normalize/text_normalizer_test.dart: fuzz never throws and is idempotent
+00:00 +93: test/normalize/text_normalizer_test.dart: fuzz never throws and is idempotent
+00:00 +94: test/normalize/text_normalizer_test.dart: fuzz never throws and is idempotent
+00:00 +95: test/normalize/text_normalizer_test.dart: fuzz never throws and is idempotent
+00:00 +96: test/normalize/text_normalizer_test.dart: fuzz never throws and is idempotent
+00:00 +97: test/normalize/text_normalizer_test.dart: fuzz never throws and is idempotent
+00:00 +98: test/normalize/text_normalizer_test.dart: fuzz never throws and is idempotent
+00:00 +99: test/normalize/text_normalizer_test.dart: fuzz never throws and is idempotent
+00:00 +100: test/normalize/text_normalizer_test.dart: fuzz never throws and is idempotent
+00:00 +101: test/normalize/text_normalizer_test.dart: fuzz never throws and is idempotent
+00:00 +102: test/normalize/text_normalizer_test.dart: fuzz never throws and is idempotent
+00:00 +103: test/normalize/text_normalizer_test.dart: fuzz never throws and is idempotent
+00:00 +104: test/normalize/text_normalizer_test.dart: fuzz never throws and is idempotent
+00:00 +105: test/normalize/text_normalizer_test.dart: fuzz never throws and is idempotent
+00:00 +106: test/normalize/text_normalizer_test.dart: fuzz never throws and is idempotent
+00:00 +107: test/normalize/text_normalizer_test.dart: fuzz never throws and is idempotent
+00:00 +108: test/normalize/amount_parser_test.dart: parseMoneyText table dollar with agreeing fallback
+00:00 +109: test/normalize/text_normalizer_test.dart: fuzz foldKey output has no removed or folded code points
+00:00 +110: test/normalize/text_normalizer_test.dart: fuzz foldKey output has no removed or folded code points
+00:00 +111: test/normalize/text_normalizer_test.dart: fuzz foldKey output has no removed or folded code points
+00:00 +112: test/normalize/text_normalizer_test.dart: fuzz foldKey output has no removed or folded code points
+00:00 +113: test/normalize/text_normalizer_test.dart: fuzz foldKey output has no removed or folded code points
+00:00 +114: test/normalize/text_normalizer_test.dart: fuzz foldKey output has no removed or folded code points
+00:00 +115: test/normalize/text_normalizer_test.dart: fuzz foldKey output has no removed or folded code points
+00:00 +116: test/normalize/text_normalizer_test.dart: fuzz foldKey output has no removed or folded code points
+00:00 +117: test/normalize/text_normalizer_test.dart: fuzz foldKey output has no removed or folded code points
+00:00 +118: test/normalize/text_normalizer_test.dart: fuzz foldKey output has no removed or folded code points
+00:00 +119: test/normalize/text_normalizer_test.dart: fuzz foldKey output has no removed or folded code points
+00:00 +120: test/normalize/amount_parser_test.dart: round trip property parseMoneyText(format(m)) == m
+00:00 +121: test/normalize/amount_parser_test.dart: round trip property parseMoneyText(format(m)) == m
+00:00 +122: test/normalize/amount_parser_test.dart: round trip property exponent+1 digits with non-zero last digit never parse
+00:00 +123: test/normalize/amount_parser_test.dart: fuzz random text never throws and failures never echo the input
+00:00 +124: All tests passed!
+
+[21:56:25] === RESULT dart-test-zaghlol_parsing exit=0 (5s)
+[21:56:25] === STEP apk-devNoSms (docker zaghlol-flutter-android:3.47.9, /work/app)
+Resolving dependencies in `/work`...
+Downloading packages...
+  _fe_analyzer_shared 91.0.0 (111.0.0 available)
+  analyzer 8.4.0 (14.7.0 available)
+  built_collection 5.1.2 (6.0.0 available)
+  coverage 1.15.1 (1.16.0 available)
+  dart_style 3.1.3 (3.1.14 available)
+  drift 2.35.3 (2.35.4 available)
+  material_color_utilities 0.13.0 (0.13.1 available)
+  package_config 2.2.0 (3.0.0 available)
+  pigeon 26.3.2 (29.1.1 available)
+  test 1.31.1 (1.33.0 available)
+  test_api 0.7.12 (0.7.15 available)
+  test_core 0.6.18 (0.6.21 available)
+Got dependencies in `/work`!
+12 packages have newer versions incompatible with dependency constraints.
+Try `flutter pub outdated` for more information.
+Running Gradle task 'assembleDevNoSmsDebug'...                  
+Warning: SDK processing. This version only understands SDK XML versions up to 3 but an SDK XML file of version 4 was encountered. This can happen if you use versions of Android Studio and the command-line tools that were released at different times.
+Running Gradle task 'assembleDevNoSmsDebug'...                    215.1s
+✓ Built build/app/outputs/flutter-apk/app-devnosms-debug.apk
+
+[22:00:06] === RESULT apk-devNoSms exit=0 (222s)
+[22:00:06] === STEP apk-perms (docker zaghlol-flutter-android:3.47.9, /work/app)
+package: app.zaghlol.dev
+uses-permission: name='android.permission.INTERNET'
+permission: app.zaghlol.dev.DYNAMIC_RECEIVER_NOT_EXPORTED_PERMISSION
+uses-permission: name='app.zaghlol.dev.DYNAMIC_RECEIVER_NOT_EXPORTED_PERMISSION'
+
+[22:00:07] === RESULT apk-perms exit=0 (1s)
+[22:00:07] === STEP android-unit (docker zaghlol-flutter-android:3.47.9, /work/app)
+To honour the JVM settings for this build a single-use Daemon process will be forked. For more on this, please refer to https://docs.gradle.org/9.3.1/userguide/gradle_daemon.html#sec:disabling_the_daemon in the Gradle documentation.
+Daemon will be stopped at the end of the build 
+> Task :gradle:checkKotlinGradlePluginConfigurationErrors SKIPPED
+> Task :gradle:pluginDescriptors
+> Task :gradle:processResources
+
+> Task :gradle:compileKotlin
+w: file:///opt/flutter/packages/flutter_tools/gradle/src/main/kotlin/Deeplink.kt:13:5 This annotation is currently applied to the value parameter only, but in the future it will also be applied to property.
+- To opt in to applying to both value parameter and property, add '-Xannotation-default-target=param-property' to your compiler arguments.
+- To keep applying to the value parameter only, use the '@param:' annotation target.
+
+See https://youtrack.jetbrains.com/issue/KT-73255 for more details.
+w: file:///opt/flutter/packages/flutter_tools/gradle/src/main/kotlin/Deeplink.kt:15:5 This annotation is currently applied to the value parameter only, but in the future it will also be applied to property.
+- To opt in to applying to both value parameter and property, add '-Xannotation-default-target=param-property' to your compiler arguments.
+- To keep applying to the value parameter only, use the '@param:' annotation target.
+
+See https://youtrack.jetbrains.com/issue/KT-73255 for more details.
+w: file:///opt/flutter/packages/flutter_tools/gradle/src/main/kotlin/Deeplink.kt:17:5 This annotation is currently applied to the value parameter only, but in the future it will also be applied to property.
+- To opt in to applying to both value parameter and property, add '-Xannotation-default-target=param-property' to your compiler arguments.
+- To keep applying to the value parameter only, use the '@param:' annotation target.
+
+See https://youtrack.jetbrains.com/issue/KT-73255 for more details.
+w: file:///opt/flutter/packages/flutter_tools/gradle/src/main/kotlin/Deeplink.kt:19:5 This annotation is currently applied to the value parameter only, but in the future it will also be applied to property.
+- To opt in to applying to both value parameter and property, add '-Xannotation-default-target=param-property' to your compiler arguments.
+- To keep applying to the value parameter only, use the '@param:' annotation target.
+
+See https://youtrack.jetbrains.com/issue/KT-73255 for more details.
+w: file:///opt/flutter/packages/flutter_tools/gradle/src/main/kotlin/FlutterPlugin.kt:12:8 'interface ApkVariant : Any, BaseVariant, InstallableVariant, AndroidArtifactVariant, InternalBaseVariant' is deprecated. Deprecated in Java.
+w: file:///opt/flutter/packages/flutter_tools/gradle/src/main/kotlin/FlutterPlugin.kt:664:69 'interface ApkVariant : Any, BaseVariant, InstallableVariant, AndroidArtifactVariant, InternalBaseVariant' is deprecated. Deprecated in Java.
+w: file:///opt/flutter/packages/flutter_tools/gradle/src/main/kotlin/FlutterPluginUtils.kt:766:29 Condition is always 'true'.
+w: file:///opt/flutter/packages/flutter_tools/gradle/src/main/kotlin/plugins/PluginHandler.kt:168:70 Unchecked cast of 'NamedDomainObjectContainer<out BuildType>' to 'NamedDomainObjectContainer<BuildType>'.
+w: file:///opt/flutter/packages/flutter_tools/gradle/src/main/kotlin/plugins/PluginHandler.kt:169:75 Unchecked cast of 'NamedDomainObjectContainer<out BuildType>' to 'NamedDomainObjectContainer<BuildType>'.
+
+> Task :gradle:compileJava NO-SOURCE
+> Task :gradle:compileGroovy NO-SOURCE
+> Task :gradle:classes
+> Task :gradle:jar
+
+> Configure project :app
+WARNING: The option setting 'android.builtInKotlin=false' is deprecated.
+The current default is 'true'.
+It will be removed in version 10.0 of the Android Gradle plugin.
+WARNING: The option setting 'android.newDsl=false' is deprecated.
+The current default is 'true'.
+It will be removed in version 10.0 of the Android Gradle plugin.
+w: ?? Deprecated 'org.jetbrains.kotlin.android' plugin usage
+The 'org.jetbrains.kotlin.android' plugin in project ':app' is no longer required for Kotlin support since AGP 9.0.
+Solution: Remove both `android.builtInKotlin=true` and `android.newDsl=false` from `gradle.properties`, then migrate to built-in Kotlin.
+See https://kotl.in/gradle/agp-built-in-kotlin for more details.
+
+
+> Configure project :integration_test
+w: ?? Deprecated 'org.jetbrains.kotlin.android' plugin usage
+The 'org.jetbrains.kotlin.android' plugin in project ':integration_test' is no longer required for Kotlin support since AGP 9.0.
+Solution: Remove both `android.builtInKotlin=true` and `android.newDsl=false` from `gradle.properties`, then migrate to built-in Kotlin.
+See https://kotl.in/gradle/agp-built-in-kotlin for more details.
+
+Warning: SDK processing. This version only understands SDK XML versions up to 3 but an SDK XML file of version 4 was encountered. This can happen if you use versions of Android Studio and the command-line tools that were released at different times.
+
+> Task :app:checkKotlinGradlePluginConfigurationErrors SKIPPED
+> Task :app:cleanMergeDevNoSmsDebugAssets
+> Task :app:compileFlutterBuildDevNoSmsDebug
+> Task :app:generateDevNoSmsDebugAssets UP-TO-DATE
+> Task :app:validateCompileSdkVersion
+> Task :app:preBuild
+> Task :app:preDevNoSmsDebugBuild
+> Task :integration_test:generateDebugAssets UP-TO-DATE
+> Task :integration_test:preBuild UP-TO-DATE
+> Task :integration_test:preDebugBuild UP-TO-DATE
+> Task :integration_test:mergeDebugAssets UP-TO-DATE
+> Task :app:mergeDevNoSmsDebugAssets
+> Task :app:copyFlutterAssetsDevNoSmsDebug
+> Task :app:generateDevNoSmsDebugResValues UP-TO-DATE
+> Task :app:generateDevNoSmsDebugResources UP-TO-DATE
+> Task :app:packageDevNoSmsDebugResources UP-TO-DATE
+> Task :integration_test:processDebugNavigationResources UP-TO-DATE
+> Task :app:processDevNoSmsDebugNavigationResources UP-TO-DATE
+> Task :app:parseDevNoSmsDebugLocalResources UP-TO-DATE
+> Task :app:generateDevNoSmsDebugRFile UP-TO-DATE
+> Task :integration_test:checkKotlinGradlePluginConfigurationErrors SKIPPED
+> Task :integration_test:generateDebugResources UP-TO-DATE
+> Task :integration_test:packageDebugResources UP-TO-DATE
+> Task :integration_test:parseDebugLocalResources UP-TO-DATE
+> Task :integration_test:generateDebugRFile UP-TO-DATE
+> Task :integration_test:compileDebugKotlin NO-SOURCE
+> Task :integration_test:javaPreCompileDebug UP-TO-DATE
+> Task :integration_test:compileDebugJavaWithJavac UP-TO-DATE
+> Task :integration_test:bundleLibCompileToJarDebug UP-TO-DATE
+> Task :app:compileDevNoSmsDebugKotlin UP-TO-DATE
+> Task :app:javaPreCompileDevNoSmsDebug UP-TO-DATE
+> Task :app:compileDevNoSmsDebugJavaWithJavac UP-TO-DATE
+> Task :integration_test:writeDebugAarMetadata UP-TO-DATE
+> Task :app:checkDevNoSmsDebugAarMetadata UP-TO-DATE
+> Task :app:mapDevNoSmsDebugSourceSetPaths UP-TO-DATE
+> Task :app:compileDevNoSmsDebugNavigationResources UP-TO-DATE
+> Task :app:mergeDevNoSmsDebugResources UP-TO-DATE
+> Task :app:createDevNoSmsDebugCompatibleScreenManifests UP-TO-DATE
+> Task :app:extractDeepLinksDevNoSmsDebug UP-TO-DATE
+> Task :integration_test:extractDeepLinksDebug UP-TO-DATE
+> Task :integration_test:processDebugManifest UP-TO-DATE
+> Task :app:processDevNoSmsDebugMainManifest UP-TO-DATE
+> Task :app:outputDevNoSmsDebugAppLinkSettings UP-TO-DATE
+> Task :app:processDevNoSmsDebugManifest UP-TO-DATE
+> Task :app:processDevNoSmsDebugManifestForPackage UP-TO-DATE
+> Task :integration_test:mapDebugSourceSetPaths UP-TO-DATE
+> Task :integration_test:compileDebugLibraryResources UP-TO-DATE
+> Task :app:processDevNoSmsDebugResources UP-TO-DATE
+> Task :app:preDevNoSmsDebugUnitTestBuild
+> Task :app:javaPreCompileDevNoSmsDebugUnitTest
+> Task :app:processDevNoSmsDebugJavaRes UP-TO-DATE
+> Task :integration_test:bundleLibRuntimeToJarDebug UP-TO-DATE
+> Task :integration_test:processDebugJavaRes NO-SOURCE
+> Task :app:bundleDevNoSmsDebugClassesToCompileJar
+> Task :app:bundleDevNoSmsDebugClassesToRuntimeJar
+> Task :app:compileDevNoSmsDebugUnitTestKotlin
+> Task :app:compileDevNoSmsDebugUnitTestJavaWithJavac NO-SOURCE
+> Task :app:processDevNoSmsDebugUnitTestJavaRes
+> Task :app:testDevNoSmsDebugUnitTest
+
+[Incubating] Problems report is available at: file:///work/app/build/reports/problems/problems-report.html
+
+Deprecated Gradle features were used in this build, making it incompatible with Gradle 10.
+
+You can use '--warning-mode all' to show the individual deprecation warnings and determine if they come from your own scripts or plugins.
+
+For more on this, please refer to https://docs.gradle.org/9.3.1/userguide/command_line_interface.html#sec:command_line_warnings in the Gradle documentation.
+
+BUILD SUCCESSFUL in 1m 40s
+51 actionable tasks: 15 executed, 36 up-to-date
+kotlin testcases: 39
+
+[22:01:50] === RESULT android-unit exit=0 (103s)
+[22:01:50] === STEP android-lint (docker zaghlol-flutter-android:3.47.9, /work/app)
+To honour the JVM settings for this build a single-use Daemon process will be forked. For more on this, please refer to https://docs.gradle.org/9.3.1/userguide/gradle_daemon.html#sec:disabling_the_daemon in the Gradle documentation.
+Daemon will be stopped at the end of the build 
+> Task :gradle:checkKotlinGradlePluginConfigurationErrors SKIPPED
+> Task :gradle:pluginDescriptors
+> Task :gradle:processResources
+
+> Task :gradle:compileKotlin
+w: file:///opt/flutter/packages/flutter_tools/gradle/src/main/kotlin/Deeplink.kt:13:5 This annotation is currently applied to the value parameter only, but in the future it will also be applied to property.
+- To opt in to applying to both value parameter and property, add '-Xannotation-default-target=param-property' to your compiler arguments.
+- To keep applying to the value parameter only, use the '@param:' annotation target.
+
+See https://youtrack.jetbrains.com/issue/KT-73255 for more details.
+w: file:///opt/flutter/packages/flutter_tools/gradle/src/main/kotlin/Deeplink.kt:15:5 This annotation is currently applied to the value parameter only, but in the future it will also be applied to property.
+- To opt in to applying to both value parameter and property, add '-Xannotation-default-target=param-property' to your compiler arguments.
+- To keep applying to the value parameter only, use the '@param:' annotation target.
+
+See https://youtrack.jetbrains.com/issue/KT-73255 for more details.
+w: file:///opt/flutter/packages/flutter_tools/gradle/src/main/kotlin/Deeplink.kt:17:5 This annotation is currently applied to the value parameter only, but in the future it will also be applied to property.
+- To opt in to applying to both value parameter and property, add '-Xannotation-default-target=param-property' to your compiler arguments.
+- To keep applying to the value parameter only, use the '@param:' annotation target.
+
+See https://youtrack.jetbrains.com/issue/KT-73255 for more details.
+w: file:///opt/flutter/packages/flutter_tools/gradle/src/main/kotlin/Deeplink.kt:19:5 This annotation is currently applied to the value parameter only, but in the future it will also be applied to property.
+- To opt in to applying to both value parameter and property, add '-Xannotation-default-target=param-property' to your compiler arguments.
+- To keep applying to the value parameter only, use the '@param:' annotation target.
+
+See https://youtrack.jetbrains.com/issue/KT-73255 for more details.
+w: file:///opt/flutter/packages/flutter_tools/gradle/src/main/kotlin/FlutterPlugin.kt:12:8 'interface ApkVariant : Any, BaseVariant, InstallableVariant, AndroidArtifactVariant, InternalBaseVariant' is deprecated. Deprecated in Java.
+w: file:///opt/flutter/packages/flutter_tools/gradle/src/main/kotlin/FlutterPlugin.kt:664:69 'interface ApkVariant : Any, BaseVariant, InstallableVariant, AndroidArtifactVariant, InternalBaseVariant' is deprecated. Deprecated in Java.
+w: file:///opt/flutter/packages/flutter_tools/gradle/src/main/kotlin/FlutterPluginUtils.kt:766:29 Condition is always 'true'.
+w: file:///opt/flutter/packages/flutter_tools/gradle/src/main/kotlin/plugins/PluginHandler.kt:168:70 Unchecked cast of 'NamedDomainObjectContainer<out BuildType>' to 'NamedDomainObjectContainer<BuildType>'.
+w: file:///opt/flutter/packages/flutter_tools/gradle/src/main/kotlin/plugins/PluginHandler.kt:169:75 Unchecked cast of 'NamedDomainObjectContainer<out BuildType>' to 'NamedDomainObjectContainer<BuildType>'.
+
+> Task :gradle:compileJava NO-SOURCE
+> Task :gradle:compileGroovy NO-SOURCE
+> Task :gradle:classes
+> Task :gradle:jar
+
+> Configure project :app
+WARNING: The option setting 'android.builtInKotlin=false' is deprecated.
+The current default is 'true'.
+It will be removed in version 10.0 of the Android Gradle plugin.
+WARNING: The option setting 'android.newDsl=false' is deprecated.
+The current default is 'true'.
+It will be removed in version 10.0 of the Android Gradle plugin.
+w: ?? Deprecated 'org.jetbrains.kotlin.android' plugin usage
+The 'org.jetbrains.kotlin.android' plugin in project ':app' is no longer required for Kotlin support since AGP 9.0.
+Solution: Remove both `android.builtInKotlin=true` and `android.newDsl=false` from `gradle.properties`, then migrate to built-in Kotlin.
+See https://kotl.in/gradle/agp-built-in-kotlin for more details.
+
+
+> Configure project :integration_test
+w: ?? Deprecated 'org.jetbrains.kotlin.android' plugin usage
+The 'org.jetbrains.kotlin.android' plugin in project ':integration_test' is no longer required for Kotlin support since AGP 9.0.
+Solution: Remove both `android.builtInKotlin=true` and `android.newDsl=false` from `gradle.properties`, then migrate to built-in Kotlin.
+See https://kotl.in/gradle/agp-built-in-kotlin for more details.
+
+Warning: SDK processing. This version only understands SDK XML versions up to 3 but an SDK XML file of version 4 was encountered. This can happen if you use versions of Android Studio and the command-line tools that were released at different times.
+
+> Task :integration_test:preBuild UP-TO-DATE
+> Task :integration_test:preDebugBuild UP-TO-DATE
+> Task :integration_test:checkDebugAarMetadata
+> Task :integration_test:mergeDebugJniLibFolders UP-TO-DATE
+> Task :integration_test:mergeDebugNativeLibs NO-SOURCE
+> Task :integration_test:stripDebugDebugSymbols NO-SOURCE
+> Task :integration_test:checkKotlinGradlePluginConfigurationErrors SKIPPED
+> Task :integration_test:generateDebugResources UP-TO-DATE
+> Task :integration_test:copyDebugJniLibsProjectAndLocalJars
+> Task :integration_test:packageDebugResources UP-TO-DATE
+> Task :integration_test:processDebugNavigationResources UP-TO-DATE
+> Task :integration_test:parseDebugLocalResources UP-TO-DATE
+> Task :integration_test:generateDebugRFile UP-TO-DATE
+> Task :integration_test:compileDebugKotlin NO-SOURCE
+> Task :integration_test:extractDebugAnnotations
+> Task :integration_test:extractDeepLinksForAarDebug
+> Task :integration_test:generateDebugAssets UP-TO-DATE
+> Task :integration_test:mergeDebugAssets UP-TO-DATE
+> Task :integration_test:javaPreCompileDebug UP-TO-DATE
+> Task :integration_test:compileDebugJavaWithJavac UP-TO-DATE
+> Task :integration_test:mergeDebugGeneratedProguardFiles
+> Task :integration_test:mergeDebugConsumerProguardFiles
+> Task :integration_test:prepareDebugArtProfile
+> Task :integration_test:prepareLintJarForPublish
+> Task :integration_test:processDebugManifest UP-TO-DATE
+> Task :integration_test:processDebugJavaRes NO-SOURCE
+> Task :integration_test:writeDebugAarMetadata UP-TO-DATE
+> Task :app:checkKotlinGradlePluginConfigurationErrors SKIPPED
+> Task :integration_test:mergeDebugJavaResource
+> Task :app:cleanMergeDevNoSmsDebugAssets
+> Task :integration_test:syncDebugLibJars
+> Task :integration_test:bundleDebugLocalLintAar
+> Task :app:compileFlutterBuildDevNoSmsDebug UP-TO-DATE
+> Task :app:generateDevNoSmsDebugAssets UP-TO-DATE
+> Task :app:validateCompileSdkVersion
+> Task :app:preBuild
+> Task :app:preDevNoSmsDebugBuild
+> Task :app:mergeDevNoSmsDebugAssets
+> Task :app:copyFlutterAssetsDevNoSmsDebug
+> Task :app:generateDevNoSmsDebugResValues UP-TO-DATE
+> Task :app:generateDevNoSmsDebugResources UP-TO-DATE
+> Task :app:packageDevNoSmsDebugResources UP-TO-DATE
+> Task :app:processDevNoSmsDebugNavigationResources UP-TO-DATE
+> Task :app:parseDevNoSmsDebugLocalResources UP-TO-DATE
+> Task :app:generateDevNoSmsDebugRFile UP-TO-DATE
+> Task :integration_test:bundleLibCompileToJarDebug UP-TO-DATE
+> Task :app:compileDevNoSmsDebugKotlin UP-TO-DATE
+> Task :app:javaPreCompileDevNoSmsDebug UP-TO-DATE
+> Task :app:compileDevNoSmsDebugJavaWithJavac UP-TO-DATE
+> Task :app:checkDevNoSmsDebugAarMetadata UP-TO-DATE
+> Task :app:mapDevNoSmsDebugSourceSetPaths UP-TO-DATE
+> Task :app:compileDevNoSmsDebugNavigationResources UP-TO-DATE
+> Task :app:mergeDevNoSmsDebugResources UP-TO-DATE
+> Task :app:createDevNoSmsDebugCompatibleScreenManifests UP-TO-DATE
+> Task :app:extractDeepLinksDevNoSmsDebug UP-TO-DATE
+> Task :integration_test:extractDeepLinksDebug UP-TO-DATE
+> Task :app:processDevNoSmsDebugMainManifest UP-TO-DATE
+> Task :app:outputDevNoSmsDebugAppLinkSettings UP-TO-DATE
+> Task :app:processDevNoSmsDebugManifest UP-TO-DATE
+> Task :app:processDevNoSmsDebugManifestForPackage UP-TO-DATE
+> Task :integration_test:mapDebugSourceSetPaths UP-TO-DATE
+> Task :integration_test:compileDebugLibraryResources UP-TO-DATE
+> Task :app:processDevNoSmsDebugResources UP-TO-DATE
+> Task :app:bundleDevNoSmsDebugClassesToCompileJar UP-TO-DATE
+> Task :app:preDevNoSmsDebugAndroidTestBuild SKIPPED
+> Task :app:generateDevNoSmsDebugAndroidTestResValues
+> Task :integration_test:bundleLibRuntimeToJarDebug UP-TO-DATE
+> Task :integration_test:createFullJarDebug
+> Task :integration_test:writeDebugLintModelMetadata
+> Task :app:generateDevNoSmsDebugAndroidTestLintModel FAILED
+
+[Incubating] Problems report is available at: file:///work/app/build/reports/problems/problems-report.html
+61 actionable tasks: 23 executed, 38 up-to-date
+
+FAILURE: Build failed with an exception.
+
+* What went wrong:
+Execution failed for task ':app:generateDevNoSmsDebugAndroidTestLintModel'.
+> Could not resolve all files for configuration ':app:devNoSmsDebugAndroidTestRuntimeClasspath'.
+   > Could not resolve androidx.test:runner:1.6.2.
+     Required by:
+         project ':app'
+      > Cannot find a version of 'androidx.test:runner' that satisfies the version constraints:
+           Dependency path: 'project :app' (devNoSmsDebugAndroidTestRuntimeClasspath) --> 'androidx.test:runner:1.6.2'
+           Constraint path: 'project :app' (devNoSmsDebugAndroidTestRuntimeClasspath) --> 'androidx.test:runner:{strictly 1.3.0}' because of the following reason: version resolved in configuration ':app:devNoSmsDebugRuntimeClasspath' by consistent resolution
+
+> There is 1 more failure with an identical cause.
+
+* Try:
+> Run with --stacktrace option to get the stack trace.
+> Run with --info or --debug option to get more log output.
+> Run with --scan to get full insights from a Build Scan (powered by Develocity).
+> Get more help at https://help.gradle.org.
+
+BUILD FAILED in 56s
+/work/app/android/app/src/main/AndroidManifest.xml:18: Warning: Attribute hasFragileUserData is only used in API level 29 and higher (current min is 26) [UnusedAttribute]
+        android:hasFragileUserData="false">
+        ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+   Explanation for issues of type "UnusedAttribute":
+   This check finds attributes set in XML files that were introduced in a
+   version newer than the oldest version targeted by your application (with
+   the minSdkVersion attribute).
+
+   This is not an error; the application will simply ignore the attribute.
+   However, if the attribute is important to the appearance or functionality
+   of your application, you should consider finding an alternative way to
+   achieve the same result with only available attributes, and then you can
+   optionally create a copy of the layout in a layout-vNN folder which will be
+   used on API NN or higher where you can take advantage of the newer
+   attribute.
+
+   Note: This check does not only apply to attributes. For example, some tags
+   can be unused too, such as the new <tag> element in layouts introduced in
+   API 21.
+
+/work/app/android/gradle/wrapper/gradle-wrapper.properties:5: Warning: A newer version of Gradle than 9.3.1 is available: 9.9.0 [AndroidGradlePluginVersion]
+distributionUrl=https\://services.gradle.org/distributions/gradle-9.3.1-all.zip
+                ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+   Explanation for issues of type "AndroidGradlePluginVersion":
+   This detector looks for usage of the Android Gradle Plugin where the
+   version you are using is not the current stable release. Using older
+   versions is fine, and there are cases where you deliberately want to stick
+   with an older version. However, you may simply not be aware that a more
+   recent version is available, and that is what this lint check helps find.
+
+/work/app/android/app/src/main/res/drawable-v21: Warning: This folder configuration (v21) is unnecessary; minSdkVersion is 26. Merge all the resources in this folder into drawable. [ObsoleteSdkInt]
+
+   Explanation for issues of type "ObsoleteSdkInt":
+   This check flags version checks that are not necessary, because the
+   minSdkVersion (or surrounding known API level) is already at least as high
+   as the version checked for.
+
+   Similarly, it also looks for resources in -vNN folders, such as values-v14
+   where the version qualifier is less than or equal to the minSdkVersion,
+   where the contents should be merged into the best folder.
+
+0 errors, 3 warnings
+
+[22:02:49] === RESULT android-lint exit=1 (59s)
+[22:02:49] SUMMARY FAIL sha=d2f5494d3bffd0977171928cebbb7f926e0ed196 pipeline=quick-app pub-get=0 format=0 analyze=0 app-test=0 dart-test-zaghlol_domain=0 dart-test-zaghlol_parsing=0 apk-devNoSms=0 apk-perms=0 android-unit=0 android-lint=1
