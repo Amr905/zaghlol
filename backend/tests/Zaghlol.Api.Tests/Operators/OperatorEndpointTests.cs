@@ -402,18 +402,18 @@ public class OperatorEndpointTests(OperatorHostFixture fixture) : IClassFixture<
             case PutDraft:
                 return (await fixture.AuditCountAsync(operatorId), await fixture.SendAsync(HttpMethod.Put, "/admin/v1/catalog/draft/categories/" + NewCode(), Token(), CategoryBody));
             case CreateDraft:
-            {
-                var code = NewCode();
-                (await fixture.SendAsync(HttpMethod.Put, "/admin/v1/catalog/draft/categories/" + code, Token(), CategoryBody)).Dispose();
-                return (await fixture.AuditCountAsync(operatorId), await fixture.SendAsync(HttpMethod.Post, "/admin/v1/catalog/draft/merchants", Token(), MerchantBody(code)));
-            }
+                {
+                    var code = NewCode();
+                    (await fixture.SendAsync(HttpMethod.Put, "/admin/v1/catalog/draft/categories/" + code, Token(), CategoryBody)).Dispose();
+                    return (await fixture.AuditCountAsync(operatorId), await fixture.SendAsync(HttpMethod.Post, "/admin/v1/catalog/draft/merchants", Token(), MerchantBody(code)));
+                }
 
             case DeleteDraft:
-            {
-                var code = NewCode();
-                (await fixture.SendAsync(HttpMethod.Put, "/admin/v1/catalog/draft/categories/" + code, Token(), CategoryBody)).Dispose();
-                return (await fixture.AuditCountAsync(operatorId), await fixture.SendAsync(HttpMethod.Delete, "/admin/v1/catalog/draft/categories/" + code, Token()));
-            }
+                {
+                    var code = NewCode();
+                    (await fixture.SendAsync(HttpMethod.Put, "/admin/v1/catalog/draft/categories/" + code, Token(), CategoryBody)).Dispose();
+                    return (await fixture.AuditCountAsync(operatorId), await fixture.SendAsync(HttpMethod.Delete, "/admin/v1/catalog/draft/categories/" + code, Token()));
+                }
 
             case Publish:
                 (await fixture.SendAsync(HttpMethod.Put, "/admin/v1/catalog/draft/categories/" + NewCode(), Token(), CategoryBody)).Dispose();

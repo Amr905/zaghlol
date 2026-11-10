@@ -9,6 +9,9 @@ namespace Zaghlol.Application.Tests.Support;
 public class SupportLookupTests
 {
     private static readonly DateTimeOffset Now = new(2026, 11, 10, 12, 0, 0, TimeSpan.Zero);
+    private static readonly string[] InstallSeats = ["holder", "claimant", "none"];
+    private static readonly string[] EmailSeats = ["held", "vacant"];
+    private static readonly bool?[] BuyingFlags = [true, false, false];
 
     private static SupportPurchaseRow Row(
         string state = "active",
@@ -86,9 +89,9 @@ public class SupportLookupTests
             Now);
         var email = SupportEntitlementBuilder.Build(SupportLookupKind.Email, [Row(held: true), Row(held: false)], Now);
 
-        Assert.Equal(new[] { "holder", "claimant", "none" }, install.Purchases.Select(p => p.Seat));
-        Assert.Equal(new bool?[] { true, false, false }, install.Purchases.Select(p => p.IsBuyingInstall));
-        Assert.Equal(new[] { "held", "vacant" }, email.Purchases.Select(p => p.Seat));
+        Assert.Equal(InstallSeats, install.Purchases.Select(p => p.Seat));
+        Assert.Equal(BuyingFlags, install.Purchases.Select(p => p.IsBuyingInstall));
+        Assert.Equal(EmailSeats, email.Purchases.Select(p => p.Seat));
         Assert.All(email.Purchases, p => Assert.Null(p.IsBuyingInstall));
         Assert.Equal("active", email.Status);
     }

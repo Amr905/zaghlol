@@ -1,8 +1,8 @@
 using System.Security.Cryptography;
 using System.Text.Json.Nodes;
 using Zaghlol.Api.Auth;
-using OperatorRoles = Zaghlol.Application.Operators.OperatorRoles;
 using Zaghlol.Testing;
+using OperatorRoles = Zaghlol.Application.Operators.OperatorRoles;
 
 namespace Zaghlol.Api.Tests.Operators;
 
