@@ -10,14 +10,12 @@
 #  - build-tools 36.0.0: default of AGP 9.1.0 (settings.gradle.kts); also provides aapt2 and zipalign for the
 #    apk-perms check. If AGP wants another version, Gradle downloads it into the SDK on first use (licenses
 #    are accepted below), so a mismatch costs time, not a failure.
-#  - cmdline-tools 13114758 (Google "latest" at pin time), SHA-256 checked. The hash comes from the nixpkgs
-#    package for this exact zip. If the build stops with "FAILED" from sha256sum, Google changed the file or the
-#    hash is wrong: take the hash from https://developer.android.com/studio#command-line-tools-only
-#    (the page lists SHA-256) and pass --build-arg CMDLINE_TOOLS_SHA256=...
+#  - cmdline-tools 15859902; SHA-256 from the official table on developer.android.com/studio
+#    ("Command line tools only", Linux), checked 2026-11-10. Override both build args together.
 ARG BASE_IMAGE=zaghlol-flutter:3.47.9
 FROM ${BASE_IMAGE}
-ARG CMDLINE_TOOLS_BUILD=13114758
-ARG CMDLINE_TOOLS_SHA256=76df27c232fcc3245f05939e7423d85e1ef3c9e314787d2038fa53729c427a05
+ARG CMDLINE_TOOLS_BUILD=15859902
+ARG CMDLINE_TOOLS_SHA256=4e4c464f145a7512b57d088ac6c278c03c9eea610886b35a5e0804e74eedf583
 ARG ANDROID_PLATFORM=android-36
 ARG ANDROID_BUILD_TOOLS=36.0.0
 ARG ANDROID_NDK=28.2.13676358
