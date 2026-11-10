@@ -16,5 +16,7 @@ import UIKit
 
   func didInitializeImplicitFlutterEngine(_ engineBridge: FlutterImplicitEngineBridge) {
     GeneratedPluginRegistrant.register(with: engineBridge.pluginRegistry)
+    // T-015: the database key store (every engine that opens the database).
+    SecretStoreRegistration.register(with: engineBridge.pluginRegistry)
   }
 }

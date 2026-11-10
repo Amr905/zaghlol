@@ -18,8 +18,7 @@ import 'package:pigeon/pigeon.dart';
   PigeonOptions(
     dartOut: 'lib/core/platform/secret_store_api.g.dart',
     dartPackageName: 'zaghlol',
-    kotlinOut:
-        'android/app/src/main/kotlin/app/zaghlol/platform/keys/SecretStoreApi.g.kt',
+    kotlinOut: 'android/app/src/main/kotlin/app/zaghlol/platform/keys/SecretStoreApi.g.kt',
     kotlinOptions: KotlinOptions(
       package: 'app.zaghlol.platform.keys',
       errorClassName: 'SecretStoreApiError',

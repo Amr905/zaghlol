@@ -1,12 +1,12 @@
 name: scratch-pigeon
-# Throwaway (T-015): prints the Pigeon output for the new contract. Never merged.
+# Throwaway (T-015): format/analyze/test feedback without a local SDK. Never merged.
 on:
   push:
     branches: ['scratch/**']
 permissions:
   contents: read
 jobs:
-  gen:
+  static:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@fbc6f3992d24b796d5a048ff273f7fcc4a7b6c09 # v5.1.0
@@ -17,8 +17,9 @@ jobs:
           flutter-version: '3.47.9'
           channel: stable
           cache: true
-      - run: flutter pub get --enforce-lockfile
+      - run: flutter pub get
       - run: bash app/tool/generate_pigeon.sh
+      - run: dart format . > /dev/null
       - name: dump
         run: |
           git status --porcelain
@@ -27,3 +28,58 @@ jobs:
           base64 -w 0 /tmp/gen.tgz
           echo
           echo "END_B64"
+      - name: analyze
+        if: always()
+        run: flutter analyze || true
+      - name: lints
+        if: always()
+        working-directory: tools/lints
+        run: dart run bin/zaghlol_lints.dart ../../app ../../packages/zaghlol_parsing ../../packages/zaghlol_domain || true
+      - name: test
+        if: always()
+        working-directory: app
+        run: flutter test --exclude-tags golden,benchmark --reporter expanded 2>&1 | grep -vE "^\s*$" | tail -n 300 || true
+  kotlin:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@fbc6f3992d24b796d5a048ff273f7fcc4a7b6c09 # v5.1.0
+        with:
+          persist-credentials: false
+      - uses: actions/setup-java@b6effb05e454b25005698d916606bdc6ffcbf961 # v5.7.0
+        with:
+          distribution: temurin
+          java-version: '17'
+      - uses: subosito/flutter-action@1a449444c387b1966244ae4d4f8c696479add0b2 # v2.23.0
+        with:
+          flutter-version: '3.47.9'
+          channel: stable
+          cache: true
+      - run: flutter pub get
+      - working-directory: app
+        run: flutter build apk --debug --flavor devNoSms > b.log 2>&1 || { grep -E "^e:|error:|What went wrong" -A5 b.log | head -60; exit 1; }
+      - working-directory: app/android
+        run: ./gradlew --no-daemon testDevNoSmsDebugUnitTest :app:lintDevNoSmsDebug 2>&1 | grep -E "^e:|^w:|FAILED|tests completed|BUILD|rror" | head -80
+      - if: always()
+        run: |
+          for f in app/build/app/test-results/testDevNoSmsDebugUnitTest/*.xml; do grep -E "<testsuite |<failure" "$f" | head -5; done
+          r=$(find app/build/app -name 'lint-results-devNoSmsDebug.txt' | head -n 1); [ -n "$r" ] && head -60 "$r" || true
+  swift:
+    runs-on: macos-15
+    steps:
+      - uses: actions/checkout@fbc6f3992d24b796d5a048ff273f7fcc4a7b6c09 # v5.1.0
+        with:
+          persist-credentials: false
+      - run: sudo xcode-select -s /Applications/Xcode_16.4.app
+      - uses: subosito/flutter-action@1a449444c387b1966244ae4d4f8c696479add0b2 # v2.23.0
+        with:
+          flutter-version: '3.47.9'
+          channel: stable
+          cache: true
+      - run: flutter pub get
+      - working-directory: app
+        run: flutter build ios --config-only --no-codesign --flavor dev > config.log 2>&1 || { tail -n 40 config.log; exit 1; }
+      - working-directory: app/ios
+        run: |
+          UDID=$(xcrun simctl list devices available iPhone | grep -Eo '[0-9A-F]{8}(-[0-9A-F]{4}){3}-[0-9A-F]{12}' | head -n 1)
+          xcodebuild test -workspace Runner.xcworkspace -scheme dev -configuration Debug-dev -destination "id=$UDID" CODE_SIGNING_ALLOWED=NO > x.log 2>&1 || true
+          grep -E "error:|Test Case.*(failed|passed|skipped)|\*\* TEST" x.log | grep -v "^ld:" | head -80
