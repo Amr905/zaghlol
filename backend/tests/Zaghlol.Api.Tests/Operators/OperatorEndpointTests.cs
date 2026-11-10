@@ -32,12 +32,13 @@ public class OperatorEndpointTests(OperatorHostFixture fixture) : IClassFixture<
     private const string DeleteDraft = "DELETE /admin/v1/catalog/draft/{entity}/{id}";
     private const string Publish = "POST /admin/v1/catalog/publish";
     private const string PutFlag = "PUT /admin/v1/flags/{key}";
+    private const string PutPriceOverride = "PUT /admin/v1/prices/override";
 
     private static readonly string[] AllOperatorRoles =
         [OperatorRoles.CatalogEditor, OperatorRoles.FlagsAdmin, OperatorRoles.PricesAdmin, OperatorRoles.SupportViewer];
 
     /// <summary>Every admin operation that changes state or is audited, with a valid call. A new one fails the test below.</summary>
-    private static readonly string[] AuditedOperations = [PutDraft, CreateDraft, DeleteDraft, Publish, PutFlag, LookupKey];
+    private static readonly string[] AuditedOperations = [PutDraft, CreateDraft, DeleteDraft, Publish, PutFlag, PutPriceOverride, LookupKey];
 
     [Fact]
     public async Task AValidMfaTokenWithTheRoleIsServed()
@@ -420,6 +421,8 @@ public class OperatorEndpointTests(OperatorHostFixture fixture) : IClassFixture<
                 return (await fixture.AuditCountAsync(operatorId), await fixture.SendAsync(HttpMethod.Post, "/admin/v1/catalog/publish", Token(), "{}"));
             case PutFlag:
                 return (await fixture.AuditCountAsync(operatorId), await fixture.SendAsync(HttpMethod.Put, "/admin/v1/flags/zakah", Token(), "{\"value\":true}"));
+            case PutPriceOverride:
+                return (await fixture.AuditCountAsync(operatorId), await fixture.SendAsync(HttpMethod.Put, "/admin/v1/prices/override", Token(), "{\"symbol\":\"XAU21_G\",\"currency\":\"EGP\",\"price\":\"4217.50\",\"reason\":\"Audit coverage test\"}"));
             case LookupKey:
                 return (await fixture.AuditCountAsync(operatorId), await fixture.SendAsync(HttpMethod.Post, Lookup, Token(), InstallBody(Guid.NewGuid())));
             default:

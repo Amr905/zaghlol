@@ -3,6 +3,7 @@ using Zaghlol.Infrastructure;
 using Zaghlol.Infrastructure.Logging;
 using Zaghlol.Infrastructure.Observability;
 using Zaghlol.Infrastructure.Persistence;
+using Zaghlol.Infrastructure.Prices;
 using Zaghlol.Workers;
 
 // `dotnet Zaghlol.Workers.dll --healthcheck` is used by container health checks (no shell in the runtime image).
@@ -28,6 +29,10 @@ builder.Services.AddInfrastructure();
 builder.Services.AddZaghlolTelemetry(builder.Configuration, builder.Environment, "zaghlol-worker");
 builder.Services.AddZaghlolDatabase(DatabaseRole.Worker);
 builder.Services.AddHostedService<WorkerHeartbeatService>();
+
+// Price fetcher (T-127): providers from Prices:Providers, hourly.
+builder.Services.AddZaghlolPriceWorker();
+builder.Services.AddHostedService<PriceFetcherService>();
 
 using var host = builder.Build();
 await host.RunAsync();

@@ -69,6 +69,13 @@ public class CheckConstraintTests(SchemaFixture fixture)
             // catalog_drafts (T-125)
             ["catalog_drafts: unknown entity"] = ("catalog_drafts", Set("entity", "places"), "ck_catalog_drafts_entity"),
 
+            // price_quotes (T-127)
+            ["price_quotes: price zero"] = ("price_quotes", Set("price", 0m), "ck_price_quotes_price_positive"),
+            ["price_quotes: price negative"] = ("price_quotes", Set("price", -1m), "ck_price_quotes_price_positive"),
+            ["price_quotes: feed_price zero"] = ("price_quotes", Set("feed_price", 0m), "ck_price_quotes_price_positive"),
+            ["price_quotes: override without an expiry"] = ("price_quotes", Set("is_override", true), "ck_price_quotes_override_expiry"),
+            ["price_quotes: expiry without an override"] = ("price_quotes", Set("override_expires_at", Rows.Now().AddHours(1)), "ck_price_quotes_override_expiry"),
+
             // replay_guard
             ["replay_guard: unknown kind"] = ("replay_guard", Set("kind", "signin_facebook"), "ck_replay_guard_kind"),
             ["replay_guard: key_hash not 32 bytes"] = ("replay_guard", Set("key_hash", Rows.Bytes(64)), "ck_replay_guard_key_hash_length"),
@@ -93,6 +100,12 @@ public class CheckConstraintTests(SchemaFixture fixture)
             ["merchant_contributions: digits separated by spaces"] = ("merchant_contributions", Set("merchant_norm", "pay 010 1234 5678"), "ck_merchant_contributions_merchant_norm"),
             ["merchant_contributions: digits separated by dashes"] = ("merchant_contributions", Set("merchant_norm", "card 41-11-11-11"), "ck_merchant_contributions_merchant_norm"),
             ["merchant_contributions: digits separated by dots"] = ("merchant_contributions", Set("merchant_norm", "acct 12.34.56"), "ck_merchant_contributions_merchant_norm"),
+            ["merchant_contributions: digits separated by double spaces (FU-018)"] = ("merchant_contributions", Set("merchant_norm", "acct 12  34  56"), "ck_merchant_contributions_merchant_norm"),
+            ["merchant_contributions: digits separated by slashes (FU-018)"] = ("merchant_contributions", Set("merchant_norm", "acct 12 / 34 / 56"), "ck_merchant_contributions_merchant_norm"),
+            ["merchant_contributions: digits separated by underscores (FU-018)"] = ("merchant_contributions", Set("merchant_norm", "acct 12_34_56"), "ck_merchant_contributions_merchant_norm"),
+            ["merchant_contributions: digits separated by Arabic commas (FU-018)"] = ("merchant_contributions", Set("merchant_norm", "acct 12،34،56"), "ck_merchant_contributions_merchant_norm"),
+            ["merchant_contributions: digits separated by commas (FU-018)"] = ("merchant_contributions", Set("merchant_norm", "acct 12, 34, 56"), "ck_merchant_contributions_merchant_norm"),
+            ["bank_requests: name with slash-separated digits (FU-018)"] = ("bank_requests", Set("institution_name_norm", "bank 98 / 76 / 54"), "ck_bank_requests_institution_name_norm"),
             ["merchant_contributions: an InstaPay address"] = ("merchant_contributions", Set("merchant_norm", "ahmed@instapay"), "ck_merchant_contributions_merchant_norm"),
             ["merchant_contributions: an e-mail"] = ("merchant_contributions", Set("merchant_norm", "someone@example.com"), "ck_merchant_contributions_merchant_norm"),
             ["merchant_contributions: institution_code over 64 characters"] = ("merchant_contributions", Set("institution_code", LongText), "ck_merchant_contributions_institution_code"),
@@ -194,8 +207,8 @@ public class CheckConstraintTests(SchemaFixture fixture)
             .ToHashSet(StringComparer.Ordinal);
         var tested = Cases.Values.Select(c => c.Constraint).ToHashSet(StringComparer.Ordinal);
 
-        // 23 documented + 24 hardening (octet/char lengths, cause regex, audit, codes, formats) + 1 catalog_drafts (T-125).
-        Assert.Equal(48, inSchema.Count);
+        // 23 documented + 24 hardening (octet/char lengths, cause regex, audit, codes, formats) + 1 catalog_drafts (T-125) + 2 price_quotes (T-127).
+        Assert.Equal(50, inSchema.Count);
         Assert.Empty(inSchema.Except(tested));
         Assert.Empty(tested.Except(inSchema));
     }
@@ -215,6 +228,8 @@ public class CheckConstraintTests(SchemaFixture fixture)
         { "merchant_contributions", "merchant_norm", "كارفور المعادي" },
         { "merchant_contributions", "merchant_norm", "shop 12 34 5" },
         { "merchant_contributions", "merchant_norm", "7 eleven 2024" },
+        { "merchant_contributions", "merchant_norm", "acct 12    34 56" },
+        { "merchant_contributions", "merchant_norm", "12 abc 34 def 56" },
         { "merchant_contributions", "institution_code", "vodafone_cash" },
         { "merchant_contributions", "institution_code", new string('a', 64) },
         { "merchant_contributions", "category_code", "dining_out" },

@@ -33,6 +33,8 @@ public sealed partial class ZaghlolMetrics : IDisposable
     private readonly Counter<long> supportLookup;
     private readonly Counter<long> phishingResistantUnproven;
     private readonly Counter<long> operatorUnknownRole;
+    private readonly Counter<long> priceFetch;
+    private readonly Counter<long> priceOverridden;
     private readonly ConcurrentDictionary<string, double> priceAges = new(StringComparer.Ordinal);
     private readonly string serviceVersion;
     private long unackedCount;
@@ -70,6 +72,9 @@ public sealed partial class ZaghlolMetrics : IDisposable
             "zaghlol.diag.operator_unknown_role",
             description: "Role strings in operators rows that the API doesn't know; they are dropped.");
 
+        priceFetch = meter.CreateCounter<long>("zaghlol.price.fetch", description: "Price provider fetches by provider (fixed names) and outcome (ok|failed|empty).");
+        priceOverridden = meter.CreateCounter<long>("zaghlol.price.override", description: "Operator price overrides.");
+
         meter.CreateObservableGauge("zaghlol.purchase.unacked", () => Interlocked.Read(ref unackedCount), description: "Purchases waiting for acknowledgement.");
         meter.CreateObservableGauge("zaghlol.purchase.unacked.oldest_age", () => Volatile.Read(ref unackedOldestAgeSeconds), "s", "Age of the oldest unacknowledged purchase.");
         meter.CreateObservableGauge<double>("zaghlol.price.age", ObservePriceAges, "s", "Age of the newest quote per symbol.");
@@ -84,6 +89,12 @@ public sealed partial class ZaghlolMetrics : IDisposable
         verify.Add(1, Tags(("store", store), ("outcome", outcome), ("code", code)));
 
     public void PurchaseAcknowledged(TimeSpan sincePurchase) => timeToAck.Record(sincePurchase.TotalSeconds);
+
+    /// <param name="provider">A name from <c>PriceProviderNames</c> (or <c>none</c>).</param>
+    /// <param name="outcome">One of <c>ok</c>, <c>failed</c>, <c>empty</c>.</param>
+    public void PriceFetched(string provider, string outcome) => priceFetch.Add(1, Tags(("provider", provider), ("outcome", outcome)));
+
+    public void PriceOverridden() => priceOverridden.Add(1);
 
     /// <summary>Called by the worker that counts unacknowledged purchases; the oldest age is 0 when none.</summary>
     public void SetUnacked(long count, TimeSpan oldestAge)

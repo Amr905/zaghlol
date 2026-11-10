@@ -233,7 +233,7 @@ namespace Zaghlol.Infrastructure.Persistence.Migrations
 
                             t.HasCheckConstraint("ck_bank_requests_install_hash_length", "octet_length(install_hash) = 32");
 
-                            t.HasCheckConstraint("ck_bank_requests_institution_name_norm", "char_length(institution_name_norm) <= 64 AND institution_name_norm !~ '([0-9٠-٩۰-۹０-９][[:space:].-]?){6,}' AND position('@' in institution_name_norm) = 0");
+                            t.HasCheckConstraint("ck_bank_requests_institution_name_norm", "char_length(institution_name_norm) <= 64 AND institution_name_norm !~ '([0-9٠-٩۰-۹０-９][[:space:].,/_،-]{0,3}){6,}' AND position('@' in institution_name_norm) = 0");
                         });
                 });
 
@@ -897,7 +897,7 @@ namespace Zaghlol.Infrastructure.Persistence.Migrations
 
                             t.HasCheckConstraint("ck_merchant_contributions_institution_code", "institution_code ~ '^[a-z0-9_]{1,64}$'");
 
-                            t.HasCheckConstraint("ck_merchant_contributions_merchant_norm", "char_length(merchant_norm) <= 64 AND merchant_norm !~ '([0-9٠-٩۰-۹０-９][[:space:].-]?){6,}' AND position('@' in merchant_norm) = 0");
+                            t.HasCheckConstraint("ck_merchant_contributions_merchant_norm", "char_length(merchant_norm) <= 64 AND merchant_norm !~ '([0-9٠-٩۰-۹０-９][[:space:].,/_،-]{0,3}){6,}' AND position('@' in merchant_norm) = 0");
                         });
                 });
 
@@ -950,6 +950,15 @@ namespace Zaghlol.Infrastructure.Persistence.Migrations
                         .HasColumnType("timestamp with time zone")
                         .HasColumnName("as_of");
 
+                    b.Property<DateTimeOffset?>("FeedAsOf")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("feed_as_of");
+
+                    b.Property<decimal?>("FeedPrice")
+                        .HasPrecision(20, 6)
+                        .HasColumnType("numeric(20,6)")
+                        .HasColumnName("feed_price");
+
                     b.Property<bool>("IsOverride")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("boolean")
@@ -978,7 +987,12 @@ namespace Zaghlol.Infrastructure.Persistence.Migrations
                     b.HasKey("Symbol", "Currency")
                         .HasName("pk_price_quotes");
 
-                    b.ToTable("price_quotes", "zaghlol");
+                    b.ToTable("price_quotes", "zaghlol", t =>
+                        {
+                            t.HasCheckConstraint("ck_price_quotes_override_expiry", "is_override = (override_expires_at IS NOT NULL)");
+
+                            t.HasCheckConstraint("ck_price_quotes_price_positive", "price > 0 AND (feed_price IS NULL OR feed_price > 0)");
+                        });
                 });
 
             modelBuilder.Entity("Zaghlol.Infrastructure.Persistence.Entities.Purchase", b =>
