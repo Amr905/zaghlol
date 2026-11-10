@@ -1,5 +1,237 @@
 ﻿== SUMMARY ==
-RUNNING sha=6e05d34f8f488c3b7aef03533c074f17fac662fa
+FAIL sha=6e05d34f8f488c3b7aef03533c074f17fac662fa pipeline=quick-backend dotnet-build=1 dotnet-format=2 dotnet-test=1
+dotnet-build                 FAIL  exit=1  16s
+dotnet-format                FAIL  exit=2  25s
+dotnet-test                  FAIL  exit=1  59s
+
+== ERRORS: dotnet-build ==
+/work/backend/tests/Zaghlol.Application.Tests/Support/SupportLookupTests.cs(89,22): error CA1861: Prefer 'static readonly' fields over constant array arguments if the called method is called repeatedly and is not mutating the passed array (https://learn.microsoft.com/dotnet/fundamentals/code-analysis/quality-rules/ca1861) [/work/backend/tests/Zaghlol.Application.Tests/Zaghlol.Application.Tests.csproj]
+/work/backend/tests/Zaghlol.Application.Tests/Support/SupportLookupTests.cs(91,22): error CA1861: Prefer 'static readonly' fields over constant array arguments if the called method is called repeatedly and is not mutating the passed array (https://learn.microsoft.com/dotnet/fundamentals/code-analysis/quality-rules/ca1861) [/work/backend/tests/Zaghlol.Application.Tests/Zaghlol.Application.Tests.csproj]
+
+== ERRORS: dotnet-format ==
+/work/backend/tests/Zaghlol.Api.Tests/Operators/OperatorEndpointTests.cs(405,13): error WHITESPACE: Fix whitespace formatting. Insert '\s\s\s\s'. [/work/backend/tests/Zaghlol.Api.Tests/Zaghlol.Api.Tests.csproj]
+/work/backend/tests/Zaghlol.Api.Tests/Operators/OperatorEndpointTests.cs(406,17): error WHITESPACE: Fix whitespace formatting. Insert '\s\s\s\s'. [/work/backend/tests/Zaghlol.Api.Tests/Zaghlol.Api.Tests.csproj]
+/work/backend/tests/Zaghlol.Api.Tests/Operators/OperatorEndpointTests.cs(407,17): error WHITESPACE: Fix whitespace formatting. Insert '\s\s\s\s'. [/work/backend/tests/Zaghlol.Api.Tests/Zaghlol.Api.Tests.csproj]
+/work/backend/tests/Zaghlol.Api.Tests/Operators/OperatorEndpointTests.cs(408,17): error WHITESPACE: Fix whitespace formatting. Insert '\s\s\s\s'. [/work/backend/tests/Zaghlol.Api.Tests/Zaghlol.Api.Tests.csproj]
+/work/backend/tests/Zaghlol.Api.Tests/Operators/OperatorEndpointTests.cs(409,13): error WHITESPACE: Fix whitespace formatting. Insert '\s\s\s\s'. [/work/backend/tests/Zaghlol.Api.Tests/Zaghlol.Api.Tests.csproj]
+/work/backend/tests/Zaghlol.Api.Tests/Operators/OperatorEndpointTests.cs(412,13): error WHITESPACE: Fix whitespace formatting. Insert '\s\s\s\s'. [/work/backend/tests/Zaghlol.Api.Tests/Zaghlol.Api.Tests.csproj]
+/work/backend/tests/Zaghlol.Api.Tests/Operators/OperatorEndpointTests.cs(413,17): error WHITESPACE: Fix whitespace formatting. Insert '\s\s\s\s'. [/work/backend/tests/Zaghlol.Api.Tests/Zaghlol.Api.Tests.csproj]
+/work/backend/tests/Zaghlol.Api.Tests/Operators/OperatorEndpointTests.cs(414,17): error WHITESPACE: Fix whitespace formatting. Insert '\s\s\s\s'. [/work/backend/tests/Zaghlol.Api.Tests/Zaghlol.Api.Tests.csproj]
+/work/backend/tests/Zaghlol.Api.Tests/Operators/OperatorEndpointTests.cs(415,17): error WHITESPACE: Fix whitespace formatting. Insert '\s\s\s\s'. [/work/backend/tests/Zaghlol.Api.Tests/Zaghlol.Api.Tests.csproj]
+/work/backend/tests/Zaghlol.Api.Tests/Operators/OperatorEndpointTests.cs(416,13): error WHITESPACE: Fix whitespace formatting. Insert '\s\s\s\s'. [/work/backend/tests/Zaghlol.Api.Tests/Zaghlol.Api.Tests.csproj]
+/work/backend/tests/Zaghlol.Api.Tests/Operators/OidcOperatorTokenValidatorTests.cs(1,1): error IMPORTS: Fix imports ordering. [/work/backend/tests/Zaghlol.Api.Tests/Zaghlol.Api.Tests.csproj]
+/work/backend/tests/Zaghlol.Api.Tests/Operators/OperatorHostFixture.cs(1,1): error IMPORTS: Fix imports ordering. [/work/backend/tests/Zaghlol.Api.Tests/Zaghlol.Api.Tests.csproj]
+Formatted code file '/work/backend/tests/Zaghlol.Api.Tests/Operators/OperatorEndpointTests.cs'.
+Formatted code file '/work/backend/tests/Zaghlol.Api.Tests/Operators/OidcOperatorTokenValidatorTests.cs'.
+Formatted code file '/work/backend/tests/Zaghlol.Api.Tests/Operators/OperatorHostFixture.cs'.
+
+== ERRORS: dotnet-test ==
+  Failed Zaghlol.Infrastructure.Tests.Observability.SeededSeriesTests.EverySeriesIsExportedAtZeroBeforeAnyEvent [661 ms]
+  Error Message:
+   Assert.Contains() Failure: Item not found in collection
+Collection: [Tuple ("dotnet.thread_pool.queue.length", ""), Tuple ("zaghlol.kms.unavailable", "operation=sign"), Tuple ("zaghlol.kms.unavailable", "operation=sign_verify"), Tuple ("zaghlol.kms.unavailable", "operation=hmac"), Tuple ("zaghlol.kms.unavailable", "operation=data_key"), ···]
+Not found:  Tuple ("zaghlol.audit_alert.fired", "rule=dispute_frozen_refusal")
+  Stack Trace:
+     at Zaghlol.Infrastructure.Tests.Observability.SeededSeriesTests.EverySeriesIsExportedAtZeroBeforeAnyEvent() in /_/backend/tests/Zaghlol.Infrastructure.Tests/Observability/SeededSeriesTests.cs:line 71
+   at Zaghlol.Infrastructure.Tests.Observability.SeededSeriesTests.EverySeriesIsExportedAtZeroBeforeAnyEvent() in /_/backend/tests/Zaghlol.Infrastructure.Tests/Observability/SeededSeriesTests.cs:line 79
+--- End of stack trace from previous location ---
+
+Passed!  - Failed:     0, Passed:    93, Skipped:     0, Total:    93, Duration: 19 s - Zaghlol.Contract.Tests.dll (net10.0)
+
+Failed!  - Failed:     1, Passed:   502, Skipped:     0, Total:   503, Duration: 19 s - Zaghlol.Infrastructure.Tests.dll (net10.0)
+
+  Failed Zaghlol.Api.Tests.Operators.OperatorAuthStartupCheckTests.DevelopmentAndTestingStartWithoutOperatorAuthAndRejectEveryone(environment: "Development") [5 ms]
+  Error Message:
+   System.AggregateException : Some services are not able to be constructed (Error while validating the service descriptor 'ServiceType: Zaghlol.Application.Operators.IOperatorDirectory Lifetime: Singleton ImplementationType: Zaghlol.Infrastructure.Operators.OperatorDirectory': Unable to resolve service for type 'Zaghlol.Infrastructure.Persistence.IZaghlolDbContextFactory' while attempting to activate 'Zaghlol.Infrastructure.Operators.OperatorDirectory'.)
+---- System.InvalidOperationException : Error while validating the service descriptor 'ServiceType: Zaghlol.Application.Operators.IOperatorDirectory Lifetime: Singleton ImplementationType: Zaghlol.Infrastructure.Operators.OperatorDirectory': Unable to resolve service for type 'Zaghlol.Infrastructure.Persistence.IZaghlolDbContextFactory' while attempting to activate 'Zaghlol.Infrastructure.Operators.OperatorDirectory'.
+-------- System.InvalidOperationException : Unable to resolve service for type 'Zaghlol.Infrastructure.Persistence.IZaghlolDbContextFactory' while attempting to activate 'Zaghlol.Infrastructure.Operators.OperatorDirectory'.
+  Stack Trace:
+     at Microsoft.Extensions.DependencyInjection.ServiceProvider..ctor(ICollection`1 serviceDescriptors, ServiceProviderOptions options)
+   at Microsoft.Extensions.DependencyInjection.ServiceCollectionContainerBuilderExtensions.BuildServiceProvider(IServiceCollection services, ServiceProviderOptions options)
+   at Microsoft.Extensions.Hosting.HostApplicationBuilder.Build()
+   at Microsoft.AspNetCore.Builder.WebApplicationBuilder.Build()
+   at Zaghlol.Api.Tests.Operators.OperatorAuthStartupCheckTests.Build(String environment, Dictionary`2 settings) in /_/backend/tests/Zaghlol.Api.Tests/Operators/OperatorAuthStartupCheckTests.cs:line 134
+   at Zaghlol.Api.Tests.Operators.OperatorAuthStartupCheckTests.DevelopmentAndTestingStartWithoutOperatorAuthAndRejectEveryone(String environment) in /_/backend/tests/Zaghlol.Api.Tests/Operators/OperatorAuthStartupCheckTests.cs:line 95
+--- End of stack trace from previous location ---
+
+  Failed Zaghlol.Api.Tests.Operators.OperatorAuthStartupCheckTests.AnEnabledButInvalidConfigurationInDevelopmentStaysRejectAll [5 ms]
+  Error Message:
+   System.AggregateException : Some services are not able to be constructed (Error while validating the service descriptor 'ServiceType: Zaghlol.Application.Operators.IOperatorDirectory Lifetime: Singleton ImplementationType: Zaghlol.Infrastructure.Operators.OperatorDirectory': Unable to resolve service for type 'Zaghlol.Infrastructure.Persistence.IZaghlolDbContextFactory' while attempting to activate 'Zaghlol.Infrastructure.Operators.OperatorDirectory'.)
+---- System.InvalidOperationException : Error while validating the service descriptor 'ServiceType: Zaghlol.Application.Operators.IOperatorDirectory Lifetime: Singleton ImplementationType: Zaghlol.Infrastructure.Operators.OperatorDirectory': Unable to resolve service for type 'Zaghlol.Infrastructure.Persistence.IZaghlolDbContextFactory' while attempting to activate 'Zaghlol.Infrastructure.Operators.OperatorDirectory'.
+-------- System.InvalidOperationException : Unable to resolve service for type 'Zaghlol.Infrastructure.Persistence.IZaghlolDbContextFactory' while attempting to activate 'Zaghlol.Infrastructure.Operators.OperatorDirectory'.
+  Stack Trace:
+     at Microsoft.Extensions.DependencyInjection.ServiceProvider..ctor(ICollection`1 serviceDescriptors, ServiceProviderOptions options)
+   at Microsoft.Extensions.DependencyInjection.ServiceCollectionContainerBuilderExtensions.BuildServiceProvider(IServiceCollection services, ServiceProviderOptions options)
+   at Microsoft.Extensions.Hosting.HostApplicationBuilder.Build()
+   at Microsoft.AspNetCore.Builder.WebApplicationBuilder.Build()
+   at Zaghlol.Api.Tests.Operators.OperatorAuthStartupCheckTests.Build(String environment, Dictionary`2 settings) in /_/backend/tests/Zaghlol.Api.Tests/Operators/OperatorAuthStartupCheckTests.cs:line 134
+   at Zaghlol.Api.Tests.Operators.OperatorAuthStartupCheckTests.AnEnabledButInvalidConfigurationInDevelopmentStaysRejectAll() in /_/backend/tests/Zaghlol.Api.Tests/Operators/OperatorAuthStartupCheckTests.cs:line 108
+--- End of stack trace from previous location ---
+
+  Failed Zaghlol.Api.Tests.Operators.OidcOperatorTokenValidatorTests.EveryDefectIsRefused(defect: "string_exp") [143 ms]
+  Error Message:
+   Assert.Null() Failure: Value is not null
+Expected: null
+Actual:   OperatorIdentity { OperatorId = 479827ae-5479-4b14-9442-a49323859622, Roles = System.Collections.Generic.List`1[System.String] }
+  Stack Trace:
+     at Zaghlol.Api.Tests.Operators.OidcOperatorTokenValidatorTests.EveryDefectIsRefused(String defect) in /_/backend/tests/Zaghlol.Api.Tests/Operators/OidcOperatorTokenValidatorTests.cs:line 94
+--- End of stack trace from previous location ---
+
+Failed!  - Failed:     3, Passed:   287, Skipped:     0, Total:   290, Duration: 41 s - Zaghlol.Api.Tests.dll (net10.0)
+
+
 
 == FULL LOG (last 1500 lines) ==
 auto task/T-136-operator-auth 6e05d34f8f488c3b7aef03533c074f17fac662fa 2026-11-10T11:27:58.8051759+02:00
+
+
+
+[11:28:04] === STEP dotnet-build (docker mcr.microsoft.com/dotnet/sdk:10.0.402, /work/backend)
+  Determining projects to restore...
+  Restored /work/backend/src/Zaghlol.Ops/Zaghlol.Ops.csproj (in 143 ms).
+  Restored /work/backend/src/Zaghlol.Domain/Zaghlol.Domain.csproj (in 144 ms).
+  Restored /work/backend/src/Zaghlol.Application/Zaghlol.Application.csproj (in 665 ms).
+  Restored /work/backend/tests/Zaghlol.Ops.Tests/Zaghlol.Ops.Tests.csproj (in 665 ms).
+  Restored /work/backend/tests/Zaghlol.Application.Tests/Zaghlol.Application.Tests.csproj (in 665 ms).
+  Restored /work/backend/src/Zaghlol.Workers/Zaghlol.Workers.csproj (in 669 ms).
+  Restored /work/backend/tests/Zaghlol.Infrastructure.Tests/Zaghlol.Infrastructure.Tests.csproj (in 669 ms).
+  Restored /work/backend/tests/Zaghlol.Contract.Tests/Zaghlol.Contract.Tests.csproj (in 669 ms).
+  Restored /work/backend/tests/Zaghlol.Workers.Tests/Zaghlol.Workers.Tests.csproj (in 673 ms).
+  Restored /work/backend/tests/Zaghlol.Api.Tests/Zaghlol.Api.Tests.csproj (in 673 ms).
+  Restored /work/backend/src/Zaghlol.Api/Zaghlol.Api.csproj (in 667 ms).
+  Restored /work/backend/src/Zaghlol.Infrastructure/Zaghlol.Infrastructure.csproj (in 700 ms).
+  Zaghlol.Domain -> /work/backend/src/Zaghlol.Domain/bin/Release/net10.0/Zaghlol.Domain.dll
+  Zaghlol.Ops -> /work/backend/src/Zaghlol.Ops/bin/Release/net10.0/zaghlol-ops.dll
+  Zaghlol.Ops.Tests -> /work/backend/tests/Zaghlol.Ops.Tests/bin/Release/net10.0/Zaghlol.Ops.Tests.dll
+  Zaghlol.Application -> /work/backend/src/Zaghlol.Application/bin/Release/net10.0/Zaghlol.Application.dll
+/work/backend/tests/Zaghlol.Application.Tests/Support/SupportLookupTests.cs(89,22): error CA1861: Prefer 'static readonly' fields over constant array arguments if the called method is called repeatedly and is not mutating the passed array (https://learn.microsoft.com/dotnet/fundamentals/code-analysis/quality-rules/ca1861) [/work/backend/tests/Zaghlol.Application.Tests/Zaghlol.Application.Tests.csproj]
+/work/backend/tests/Zaghlol.Application.Tests/Support/SupportLookupTests.cs(91,22): error CA1861: Prefer 'static readonly' fields over constant array arguments if the called method is called repeatedly and is not mutating the passed array (https://learn.microsoft.com/dotnet/fundamentals/code-analysis/quality-rules/ca1861) [/work/backend/tests/Zaghlol.Application.Tests/Zaghlol.Application.Tests.csproj]
+  Zaghlol.Infrastructure -> /work/backend/src/Zaghlol.Infrastructure/bin/Release/net10.0/Zaghlol.Infrastructure.dll
+  Zaghlol.Workers -> /work/backend/src/Zaghlol.Workers/bin/Release/net10.0/Zaghlol.Workers.dll
+  Zaghlol.Infrastructure.Tests -> /work/backend/tests/Zaghlol.Infrastructure.Tests/bin/Release/net10.0/Zaghlol.Infrastructure.Tests.dll
+  Zaghlol.Workers.Tests -> /work/backend/tests/Zaghlol.Workers.Tests/bin/Release/net10.0/Zaghlol.Workers.Tests.dll
+  Zaghlol.Api -> /work/backend/src/Zaghlol.Api/bin/Release/net10.0/Zaghlol.Api.dll
+  Zaghlol.Api.Tests -> /work/backend/tests/Zaghlol.Api.Tests/bin/Release/net10.0/Zaghlol.Api.Tests.dll
+  Zaghlol.Contract.Tests -> /work/backend/tests/Zaghlol.Contract.Tests/bin/Release/net10.0/Zaghlol.Contract.Tests.dll
+
+Build FAILED.
+
+/work/backend/tests/Zaghlol.Application.Tests/Support/SupportLookupTests.cs(89,22): error CA1861: Prefer 'static readonly' fields over constant array arguments if the called method is called repeatedly and is not mutating the passed array (https://learn.microsoft.com/dotnet/fundamentals/code-analysis/quality-rules/ca1861) [/work/backend/tests/Zaghlol.Application.Tests/Zaghlol.Application.Tests.csproj]
+/work/backend/tests/Zaghlol.Application.Tests/Support/SupportLookupTests.cs(91,22): error CA1861: Prefer 'static readonly' fields over constant array arguments if the called method is called repeatedly and is not mutating the passed array (https://learn.microsoft.com/dotnet/fundamentals/code-analysis/quality-rules/ca1861) [/work/backend/tests/Zaghlol.Application.Tests/Zaghlol.Application.Tests.csproj]
+    0 Warning(s)
+    2 Error(s)
+
+Time Elapsed 00:00:15.53
+
+[11:28:21] === RESULT dotnet-build exit=1 (16s)
+[11:28:21] === STEP dotnet-format (docker mcr.microsoft.com/dotnet/sdk:10.0.402, /work/backend)
+Formatting code files in workspace '/work/backend/Zaghlol.sln'.
+/work/backend/tests/Zaghlol.Api.Tests/Operators/OperatorEndpointTests.cs(405,13): error WHITESPACE: Fix whitespace formatting. Insert '\s\s\s\s'. [/work/backend/tests/Zaghlol.Api.Tests/Zaghlol.Api.Tests.csproj]
+/work/backend/tests/Zaghlol.Api.Tests/Operators/OperatorEndpointTests.cs(406,17): error WHITESPACE: Fix whitespace formatting. Insert '\s\s\s\s'. [/work/backend/tests/Zaghlol.Api.Tests/Zaghlol.Api.Tests.csproj]
+/work/backend/tests/Zaghlol.Api.Tests/Operators/OperatorEndpointTests.cs(407,17): error WHITESPACE: Fix whitespace formatting. Insert '\s\s\s\s'. [/work/backend/tests/Zaghlol.Api.Tests/Zaghlol.Api.Tests.csproj]
+/work/backend/tests/Zaghlol.Api.Tests/Operators/OperatorEndpointTests.cs(408,17): error WHITESPACE: Fix whitespace formatting. Insert '\s\s\s\s'. [/work/backend/tests/Zaghlol.Api.Tests/Zaghlol.Api.Tests.csproj]
+/work/backend/tests/Zaghlol.Api.Tests/Operators/OperatorEndpointTests.cs(409,13): error WHITESPACE: Fix whitespace formatting. Insert '\s\s\s\s'. [/work/backend/tests/Zaghlol.Api.Tests/Zaghlol.Api.Tests.csproj]
+/work/backend/tests/Zaghlol.Api.Tests/Operators/OperatorEndpointTests.cs(412,13): error WHITESPACE: Fix whitespace formatting. Insert '\s\s\s\s'. [/work/backend/tests/Zaghlol.Api.Tests/Zaghlol.Api.Tests.csproj]
+/work/backend/tests/Zaghlol.Api.Tests/Operators/OperatorEndpointTests.cs(413,17): error WHITESPACE: Fix whitespace formatting. Insert '\s\s\s\s'. [/work/backend/tests/Zaghlol.Api.Tests/Zaghlol.Api.Tests.csproj]
+/work/backend/tests/Zaghlol.Api.Tests/Operators/OperatorEndpointTests.cs(414,17): error WHITESPACE: Fix whitespace formatting. Insert '\s\s\s\s'. [/work/backend/tests/Zaghlol.Api.Tests/Zaghlol.Api.Tests.csproj]
+/work/backend/tests/Zaghlol.Api.Tests/Operators/OperatorEndpointTests.cs(415,17): error WHITESPACE: Fix whitespace formatting. Insert '\s\s\s\s'. [/work/backend/tests/Zaghlol.Api.Tests/Zaghlol.Api.Tests.csproj]
+/work/backend/tests/Zaghlol.Api.Tests/Operators/OperatorEndpointTests.cs(416,13): error WHITESPACE: Fix whitespace formatting. Insert '\s\s\s\s'. [/work/backend/tests/Zaghlol.Api.Tests/Zaghlol.Api.Tests.csproj]
+/work/backend/tests/Zaghlol.Api.Tests/Operators/OidcOperatorTokenValidatorTests.cs(1,1): error IMPORTS: Fix imports ordering. [/work/backend/tests/Zaghlol.Api.Tests/Zaghlol.Api.Tests.csproj]
+/work/backend/tests/Zaghlol.Api.Tests/Operators/OperatorHostFixture.cs(1,1): error IMPORTS: Fix imports ordering. [/work/backend/tests/Zaghlol.Api.Tests/Zaghlol.Api.Tests.csproj]
+Formatted code file '/work/backend/tests/Zaghlol.Api.Tests/Operators/OperatorEndpointTests.cs'.
+Formatted code file '/work/backend/tests/Zaghlol.Api.Tests/Operators/OidcOperatorTokenValidatorTests.cs'.
+Formatted code file '/work/backend/tests/Zaghlol.Api.Tests/Operators/OperatorHostFixture.cs'.
+Format complete in 23239ms.
+
+[11:28:45] === RESULT dotnet-format exit=2 (25s)
+[11:28:45] === STEP dotnet-test (docker mcr.microsoft.com/dotnet/sdk:10.0.402, /work/backend)
+Test run for /work/backend/tests/Zaghlol.Ops.Tests/bin/Release/net10.0/Zaghlol.Ops.Tests.dll (.NETCoreApp,Version=v10.0)
+Test run for /work/backend/tests/Zaghlol.Workers.Tests/bin/Release/net10.0/Zaghlol.Workers.Tests.dll (.NETCoreApp,Version=v10.0)
+Test run for /work/backend/tests/Zaghlol.Application.Tests/bin/Release/net10.0/Zaghlol.Application.Tests.dll (.NETCoreApp,Version=v10.0)
+Test run for /work/backend/tests/Zaghlol.Api.Tests/bin/Release/net10.0/Zaghlol.Api.Tests.dll (.NETCoreApp,Version=v10.0)
+Test run for /work/backend/tests/Zaghlol.Infrastructure.Tests/bin/Release/net10.0/Zaghlol.Infrastructure.Tests.dll (.NETCoreApp,Version=v10.0)
+Test run for /work/backend/tests/Zaghlol.Contract.Tests/bin/Release/net10.0/Zaghlol.Contract.Tests.dll (.NETCoreApp,Version=v10.0)
+A total of 1 test files matched the specified pattern.
+A total of 1 test files matched the specified pattern.
+A total of 1 test files matched the specified pattern.
+A total of 1 test files matched the specified pattern.
+A total of 1 test files matched the specified pattern.
+A total of 1 test files matched the specified pattern.
+
+Passed!  - Failed:     0, Passed:     2, Skipped:     0, Total:     2, Duration: 58 ms - Zaghlol.Ops.Tests.dll (net10.0)
+
+Passed!  - Failed:     0, Passed:     3, Skipped:     0, Total:     3, Duration: 148 ms - Zaghlol.Workers.Tests.dll (net10.0)
+
+Passed!  - Failed:     0, Passed:   215, Skipped:     0, Total:   215, Duration: 162 ms - Zaghlol.Application.Tests.dll (net10.0)
+[xUnit.net 00:00:01.53]     Zaghlol.Infrastructure.Tests.Observability.SeededSeriesTests.EverySeriesIsExportedAtZeroBeforeAnyEvent [FAIL]
+  Failed Zaghlol.Infrastructure.Tests.Observability.SeededSeriesTests.EverySeriesIsExportedAtZeroBeforeAnyEvent [661 ms]
+  Error Message:
+   Assert.Contains() Failure: Item not found in collection
+Collection: [Tuple ("dotnet.thread_pool.queue.length", ""), Tuple ("zaghlol.kms.unavailable", "operation=sign"), Tuple ("zaghlol.kms.unavailable", "operation=sign_verify"), Tuple ("zaghlol.kms.unavailable", "operation=hmac"), Tuple ("zaghlol.kms.unavailable", "operation=data_key"), ···]
+Not found:  Tuple ("zaghlol.audit_alert.fired", "rule=dispute_frozen_refusal")
+  Stack Trace:
+     at Zaghlol.Infrastructure.Tests.Observability.SeededSeriesTests.EverySeriesIsExportedAtZeroBeforeAnyEvent() in /_/backend/tests/Zaghlol.Infrastructure.Tests/Observability/SeededSeriesTests.cs:line 71
+   at Zaghlol.Infrastructure.Tests.Observability.SeededSeriesTests.EverySeriesIsExportedAtZeroBeforeAnyEvent() in /_/backend/tests/Zaghlol.Infrastructure.Tests/Observability/SeededSeriesTests.cs:line 79
+--- End of stack trace from previous location ---
+
+Passed!  - Failed:     0, Passed:    93, Skipped:     0, Total:    93, Duration: 19 s - Zaghlol.Contract.Tests.dll (net10.0)
+
+Failed!  - Failed:     1, Passed:   502, Skipped:     0, Total:   503, Duration: 19 s - Zaghlol.Infrastructure.Tests.dll (net10.0)
+[xUnit.net 00:00:41.04]     Zaghlol.Api.Tests.Operators.OperatorAuthStartupCheckTests.DevelopmentAndTestingStartWithoutOperatorAuthAndRejectEveryone(environment: "Development") [FAIL]
+[xUnit.net 00:00:41.05]     Zaghlol.Api.Tests.Operators.OperatorAuthStartupCheckTests.AnEnabledButInvalidConfigurationInDevelopmentStaysRejectAll [FAIL]
+  Failed Zaghlol.Api.Tests.Operators.OperatorAuthStartupCheckTests.DevelopmentAndTestingStartWithoutOperatorAuthAndRejectEveryone(environment: "Development") [5 ms]
+  Error Message:
+   System.AggregateException : Some services are not able to be constructed (Error while validating the service descriptor 'ServiceType: Zaghlol.Application.Operators.IOperatorDirectory Lifetime: Singleton ImplementationType: Zaghlol.Infrastructure.Operators.OperatorDirectory': Unable to resolve service for type 'Zaghlol.Infrastructure.Persistence.IZaghlolDbContextFactory' while attempting to activate 'Zaghlol.Infrastructure.Operators.OperatorDirectory'.)
+---- System.InvalidOperationException : Error while validating the service descriptor 'ServiceType: Zaghlol.Application.Operators.IOperatorDirectory Lifetime: Singleton ImplementationType: Zaghlol.Infrastructure.Operators.OperatorDirectory': Unable to resolve service for type 'Zaghlol.Infrastructure.Persistence.IZaghlolDbContextFactory' while attempting to activate 'Zaghlol.Infrastructure.Operators.OperatorDirectory'.
+-------- System.InvalidOperationException : Unable to resolve service for type 'Zaghlol.Infrastructure.Persistence.IZaghlolDbContextFactory' while attempting to activate 'Zaghlol.Infrastructure.Operators.OperatorDirectory'.
+  Stack Trace:
+     at Microsoft.Extensions.DependencyInjection.ServiceProvider..ctor(ICollection`1 serviceDescriptors, ServiceProviderOptions options)
+   at Microsoft.Extensions.DependencyInjection.ServiceCollectionContainerBuilderExtensions.BuildServiceProvider(IServiceCollection services, ServiceProviderOptions options)
+   at Microsoft.Extensions.Hosting.HostApplicationBuilder.Build()
+   at Microsoft.AspNetCore.Builder.WebApplicationBuilder.Build()
+   at Zaghlol.Api.Tests.Operators.OperatorAuthStartupCheckTests.Build(String environment, Dictionary`2 settings) in /_/backend/tests/Zaghlol.Api.Tests/Operators/OperatorAuthStartupCheckTests.cs:line 134
+   at Zaghlol.Api.Tests.Operators.OperatorAuthStartupCheckTests.DevelopmentAndTestingStartWithoutOperatorAuthAndRejectEveryone(String environment) in /_/backend/tests/Zaghlol.Api.Tests/Operators/OperatorAuthStartupCheckTests.cs:line 95
+--- End of stack trace from previous location ---
+----- Inner Stack Trace -----
+   at Microsoft.Extensions.DependencyInjection.ServiceProvider.ValidateService(ServiceDescriptor descriptor)
+   at Microsoft.Extensions.DependencyInjection.ServiceProvider..ctor(ICollection`1 serviceDescriptors, ServiceProviderOptions options)
+----- Inner Stack Trace -----
+   at Microsoft.Extensions.DependencyInjection.ServiceLookup.CallSiteFactory.CreateArgumentCallSites(ServiceIdentifier serviceIdentifier, Type implementationType, CallSiteChain callSiteChain, ParameterInfo[] parameters, Boolean throwIfCallSiteNotFound)
+   at Microsoft.Extensions.DependencyInjection.ServiceLookup.CallSiteFactory.CreateConstructorCallSite(ResultCache lifetime, ServiceIdentifier serviceIdentifier, Type implementationType, CallSiteChain callSiteChain)
+   at Microsoft.Extensions.DependencyInjection.ServiceLookup.CallSiteFactory.CreateExact(ServiceDescriptor descriptor, ServiceIdentifier serviceIdentifier, CallSiteChain callSiteChain, Int32 slot)
+   at Microsoft.Extensions.DependencyInjection.ServiceProvider.ValidateService(ServiceDescriptor descriptor)
+  Failed Zaghlol.Api.Tests.Operators.OperatorAuthStartupCheckTests.AnEnabledButInvalidConfigurationInDevelopmentStaysRejectAll [5 ms]
+  Error Message:
+   System.AggregateException : Some services are not able to be constructed (Error while validating the service descriptor 'ServiceType: Zaghlol.Application.Operators.IOperatorDirectory Lifetime: Singleton ImplementationType: Zaghlol.Infrastructure.Operators.OperatorDirectory': Unable to resolve service for type 'Zaghlol.Infrastructure.Persistence.IZaghlolDbContextFactory' while attempting to activate 'Zaghlol.Infrastructure.Operators.OperatorDirectory'.)
+---- System.InvalidOperationException : Error while validating the service descriptor 'ServiceType: Zaghlol.Application.Operators.IOperatorDirectory Lifetime: Singleton ImplementationType: Zaghlol.Infrastructure.Operators.OperatorDirectory': Unable to resolve service for type 'Zaghlol.Infrastructure.Persistence.IZaghlolDbContextFactory' while attempting to activate 'Zaghlol.Infrastructure.Operators.OperatorDirectory'.
+-------- System.InvalidOperationException : Unable to resolve service for type 'Zaghlol.Infrastructure.Persistence.IZaghlolDbContextFactory' while attempting to activate 'Zaghlol.Infrastructure.Operators.OperatorDirectory'.
+  Stack Trace:
+     at Microsoft.Extensions.DependencyInjection.ServiceProvider..ctor(ICollection`1 serviceDescriptors, ServiceProviderOptions options)
+   at Microsoft.Extensions.DependencyInjection.ServiceCollectionContainerBuilderExtensions.BuildServiceProvider(IServiceCollection services, ServiceProviderOptions options)
+   at Microsoft.Extensions.Hosting.HostApplicationBuilder.Build()
+   at Microsoft.AspNetCore.Builder.WebApplicationBuilder.Build()
+   at Zaghlol.Api.Tests.Operators.OperatorAuthStartupCheckTests.Build(String environment, Dictionary`2 settings) in /_/backend/tests/Zaghlol.Api.Tests/Operators/OperatorAuthStartupCheckTests.cs:line 134
+   at Zaghlol.Api.Tests.Operators.OperatorAuthStartupCheckTests.AnEnabledButInvalidConfigurationInDevelopmentStaysRejectAll() in /_/backend/tests/Zaghlol.Api.Tests/Operators/OperatorAuthStartupCheckTests.cs:line 108
+--- End of stack trace from previous location ---
+----- Inner Stack Trace -----
+   at Microsoft.Extensions.DependencyInjection.ServiceProvider.ValidateService(ServiceDescriptor descriptor)
+   at Microsoft.Extensions.DependencyInjection.ServiceProvider..ctor(ICollection`1 serviceDescriptors, ServiceProviderOptions options)
+----- Inner Stack Trace -----
+   at Microsoft.Extensions.DependencyInjection.ServiceLookup.CallSiteFactory.CreateArgumentCallSites(ServiceIdentifier serviceIdentifier, Type implementationType, CallSiteChain callSiteChain, ParameterInfo[] parameters, Boolean throwIfCallSiteNotFound)
+   at Microsoft.Extensions.DependencyInjection.ServiceLookup.CallSiteFactory.CreateConstructorCallSite(ResultCache lifetime, ServiceIdentifier serviceIdentifier, Type implementationType, CallSiteChain callSiteChain)
+   at Microsoft.Extensions.DependencyInjection.ServiceLookup.CallSiteFactory.CreateExact(ServiceDescriptor descriptor, ServiceIdentifier serviceIdentifier, CallSiteChain callSiteChain, Int32 slot)
+   at Microsoft.Extensions.DependencyInjection.ServiceProvider.ValidateService(ServiceDescriptor descriptor)
+[xUnit.net 00:00:43.02]     Zaghlol.Api.Tests.Operators.OidcOperatorTokenValidatorTests.EveryDefectIsRefused(defect: "string_exp") [FAIL]
+  Failed Zaghlol.Api.Tests.Operators.OidcOperatorTokenValidatorTests.EveryDefectIsRefused(defect: "string_exp") [143 ms]
+  Error Message:
+   Assert.Null() Failure: Value is not null
+Expected: null
+Actual:   OperatorIdentity { OperatorId = 479827ae-5479-4b14-9442-a49323859622, Roles = System.Collections.Generic.List`1[System.String] }
+  Stack Trace:
+     at Zaghlol.Api.Tests.Operators.OidcOperatorTokenValidatorTests.EveryDefectIsRefused(String defect) in /_/backend/tests/Zaghlol.Api.Tests/Operators/OidcOperatorTokenValidatorTests.cs:line 94
+--- End of stack trace from previous location ---
+
+Failed!  - Failed:     3, Passed:   287, Skipped:     0, Total:   290, Duration: 41 s - Zaghlol.Api.Tests.dll (net10.0)
+
+[11:29:45] === RESULT dotnet-test exit=1 (59s)
+[11:29:45] SUMMARY FAIL sha=6e05d34f8f488c3b7aef03533c074f17fac662fa pipeline=quick-backend dotnet-build=1 dotnet-format=2 dotnet-test=1
