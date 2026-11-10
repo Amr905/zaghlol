@@ -117,6 +117,33 @@ abstract class CaptureEventsApi { void onSpoolChanged(int pendingCount); void on
   - `FLAG_SECURE` plus `setRecentsScreenshotEnabled(false)` when app lock is on (FR-SEC-02);
   - share intent filters for `text/plain`, `image/*`, `application/pdf`, `text/csv`.
 
+### 2.1 Share intake (T-060; contract addition, `app/pigeons/share_intake_api.dart`)
+
+The capture API above has no way to hand a shared file to Dart, so T-060 adds a separate Pigeon file. `AndroidCaptureHostApi` is unchanged.
+
+```dart
+enum ShareKind { text, image, pdf, csv }
+enum ShareRejectReason { tooLarge, unsupportedType, unreadable, empty }
+class ShareDescriptor { String id; ShareKind kind; String mimeType; int sizeBytes; int receivedAtMs; }   // metadata only
+class ShareContent { ShareDescriptor descriptor; String? text; Uint8List? bytes; }                         // decrypted, in memory only
+
+@HostApi()
+abstract class ShareIntakeHostApi {
+  List<ShareDescriptor> listPendingShares();   // oldest first; purges shares older than 24 h
+  ShareContent readShare(String id);           // IO_ERROR (unknown id) | SPOOL_DECRYPT_FAILED (entry deleted)
+  void discardShare(String id);                // idempotent
+  ShareRejectReason? takePendingRejection();   // once
+}
+@FlutterApi()
+abstract class ShareIntakeEventsApi { void onShareReceived(ShareDescriptor d); void onShareRejected(ShareRejectReason r); }
+```
+
+- **`ShareActivity`** (exported; `ACTION_SEND`, MIME `text/plain`, `image/*`, `application/pdf`, `text/csv`; no UI, no permission): validates and encrypts on a worker thread, then opens `MainActivity` with an intent that carries no content. Warm start: `onShareReceived` / `onShareRejected`. Cold start: Dart calls `takePendingRejection()` and `listPendingShares()` once at startup.
+- **Storage:** `noBackupFilesDir/spool/files/<id>.bin` + `<id>.meta`, both `nonce(12) || AES-256-GCM` with the spool key `zaghlol_spool_v1` (section 1.3). Every share, text included, is stored this way until `discardShare`. Dart discards after the user confirms or cancels.
+- **Limits (native, on bytes read):** text 100,000 chars; image 15 MiB; PDF 20 MiB; CSV 5 MiB. Images are accepted only as PNG, JPEG, WEBP or HEIC/HEIF by magic bytes; PDFs by `%PDF-`; text files must be valid UTF-8; CSV may be any text encoding but not binary. Only `content://` URIs are read, and never this app's own providers.
+- **Paste** is a Dart-side clipboard read on a user tap. Native code never reads the clipboard.
+- Shared text does **not** go through the Capture Guard: it is user-initiated and always shown for confirmation (FR-ING-A-04).
+
 ## 3. iOS (`IosCaptureHostApi`, App Intents, extensions)
 
 ```dart
