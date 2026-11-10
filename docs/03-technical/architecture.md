@@ -283,7 +283,7 @@ Backend dependencies:
 - App Attest attestation/assertion validation: in-house, with `System.Formats.Cbor` + `System.Security.Cryptography` (X.509 chain to the Apple App Attestation Root CA, ES256). Apple ships no .NET library, and this is about 250 lines, reviewed under T-181;
 - `Google.Apis.Auth`, for Pub/Sub OIDC and Google ID token verification;
 - Apple JWS verification: `Enjna.AppStoreServerLibrary` (MIT, community, last updated 2026-09) **or** an in-house verifier of about 200 lines. ADR-012 decides; the Phase 5 task compares both;
-- `Microsoft.IdentityModel.JsonWebTokens` (Apple ID token, our own JWTs);
+- `Microsoft.IdentityModel.JsonWebTokens` 8.x (Apple ID token, our own JWTs, and since T-136 operator OIDC access tokens: RS256/ES256 signature checks against the IdP's JWKS; no `JwtBearer` handler, so the operator scheme keeps its single-body 401 and per-request operator lookup);
 - `Serilog` + OpenTelemetry exporters;
 - `Polly` (retries);
 - `FluentValidation`;

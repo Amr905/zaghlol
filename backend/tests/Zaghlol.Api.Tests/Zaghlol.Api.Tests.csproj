@@ -14,6 +14,7 @@
   <ItemGroup>
     <Compile Include="..\Shared\ZaghlolTestDatabase.cs" Link="Shared\ZaghlolTestDatabase.cs" />
     <Compile Include="..\Shared\FakeKms.cs" Link="Shared\FakeKms.cs" />
+    <Compile Include="..\Shared\FakeOidcIssuer.cs" Link="Shared\FakeOidcIssuer.cs" />
     <None Include="..\..\deploy\db\bootstrap-roles.sql" Link="db\bootstrap-roles.sql" CopyToOutputDirectory="PreserveNewest" />
   </ItemGroup>
 

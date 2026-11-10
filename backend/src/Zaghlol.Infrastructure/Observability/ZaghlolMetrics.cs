@@ -30,6 +30,9 @@ public sealed partial class ZaghlolMetrics : IDisposable
     private readonly Counter<long> installHashUnavailable;
     private readonly Counter<long> rateLimited;
     private readonly Counter<long> flagChanged;
+    private readonly Counter<long> supportLookup;
+    private readonly Counter<long> phishingResistantUnproven;
+    private readonly Counter<long> operatorUnknownRole;
     private readonly Counter<long> priceFetch;
     private readonly Counter<long> priceOverridden;
     private readonly ConcurrentDictionary<string, double> priceAges = new(StringComparer.Ordinal);
@@ -59,6 +62,15 @@ public sealed partial class ZaghlolMetrics : IDisposable
         rateLimited = meter.CreateCounter<long>("zaghlol.rate_limit.rejected", description: "429 RATE_LIMITED answers by bucket name.");
 
         flagChanged = meter.CreateCounter<long>("zaghlol.flag.changed", description: "Feature flag changes by flag key (a fixed set of known keys).");
+        supportLookup = meter.CreateCounter<long>(
+            "zaghlol.support.lookup",
+            description: "Support entitlement lookups by the caller's support role (enumeration alert, T-136).");
+        phishingResistantUnproven = meter.CreateCounter<long>(
+            "zaghlol.diag.operator_phishing_resistant_unproven",
+            description: "Operator requests carrying support_agent or support_lead without a proving acrs claim, in Advisory mode (R4-6).");
+        operatorUnknownRole = meter.CreateCounter<long>(
+            "zaghlol.diag.operator_unknown_role",
+            description: "Role strings in operators rows that the API doesn't know; they are dropped.");
 
         priceFetch = meter.CreateCounter<long>("zaghlol.price.fetch", description: "Price provider fetches by provider (fixed names) and outcome (ok|failed|empty).");
         priceOverridden = meter.CreateCounter<long>("zaghlol.price.override", description: "Operator price overrides.");
@@ -124,6 +136,14 @@ public sealed partial class ZaghlolMetrics : IDisposable
 
     /// <summary><paramref name="key"/> is one of the known flag keys (the admin endpoint 404s any other).</summary>
     public void FlagChanged(string key) => flagChanged.Add(1, Tags(("key", key)));
+
+    /// <param name="role">A known operator role constant.</param>
+    public void SupportLookup(string role) => supportLookup.Add(1, Tags(("role", role)));
+
+    /// <param name="role"><c>support_agent</c> or <c>support_lead</c>.</param>
+    public void OperatorPhishingResistantUnproven(string role) => phishingResistantUnproven.Add(1, Tags(("role", role)));
+
+    public void OperatorUnknownRole() => operatorUnknownRole.Add(1);
 
     public void SetPlayIntegrityDailyQuota(long quota) => Interlocked.Exchange(ref playIntegrityDailyQuota, quota);
 

@@ -44,6 +44,8 @@ public sealed class ContractApiFixture : IDisposable
 
     public HttpClient Client { get; }
 
+    public IServiceProvider Services => factory.Services;
+
     public SwitchableReadiness Readiness { get; } = new();
 
     public void Dispose()

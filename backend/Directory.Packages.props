@@ -30,6 +30,9 @@
     <PackageVersion Include="Serilog.Extensions.Logging" Version="9.0.0" />
     <PackageVersion Include="Serilog.Formatting.Compact" Version="3.0.0" />
     <PackageVersion Include="Serilog.Sinks.Console" Version="6.0.0" />
+    <!-- Operator OIDC (T-136): JWS parsing and RS256/ES256 signature validation against the IdP's JWKS; maintained Microsoft
+         identity library (8.x line, .NET 9/10 support). Microsoft.IdentityModel.Tokens/Logging/Abstractions come with it. -->
+    <PackageVersion Include="Microsoft.IdentityModel.JsonWebTokens" Version="8.23.0" />
     <!-- Tests -->
     <PackageVersion Include="JsonSchema.Net" Version="7.3.4" />
     <PackageVersion Include="Microsoft.AspNetCore.Mvc.Testing" Version="10.0.0" />
