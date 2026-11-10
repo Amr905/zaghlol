@@ -36,6 +36,8 @@
     <None Update="vectors\response-signature-v1.json" CopyToOutputDirectory="PreserveNewest" />
     <None Update="vectors\jws-es256-v1.json" CopyToOutputDirectory="PreserveNewest" />
     <None Update="vectors\keyed-hash-v1.json" CopyToOutputDirectory="PreserveNewest" />
+    <!-- T-125 catalog snapshot vector (public test key only; also read by the Dart verifier). -->
+    <None Update="vectors\catalog-snapshot-v1.json" CopyToOutputDirectory="PreserveNewest" />
   </ItemGroup>
 
 </Project>

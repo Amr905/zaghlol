@@ -12,6 +12,7 @@ namespace Zaghlol.Api.Auth;
 internal static class OperatorRoles
 {
     public const string FlagsAdmin = "flags_admin";
+    public const string CatalogEditor = "catalog_editor";
 }
 
 /// <summary>A validated operator token: who, and with which roles.</summary>
@@ -53,9 +54,14 @@ internal static class OperatorAuthentication
     {
         services.TryAddSingleton<IOperatorTokenValidator, RejectAllOperatorTokenValidator>();
         services.AddAuthentication().AddScheme<AuthenticationSchemeOptions, OperatorAuthenticationHandler>(Scheme, _ => { });
-        services.AddAuthorizationBuilder().AddPolicy(
-            PolicyFor(OperatorRoles.FlagsAdmin),
-            policy => policy.AddAuthenticationSchemes(Scheme).RequireAuthenticatedUser().RequireClaim(ClaimTypes.Role, OperatorRoles.FlagsAdmin));
+        var authorization = services.AddAuthorizationBuilder();
+        foreach (var role in new[] { OperatorRoles.FlagsAdmin, OperatorRoles.CatalogEditor })
+        {
+            authorization.AddPolicy(
+                PolicyFor(role),
+                policy => policy.AddAuthenticationSchemes(Scheme).RequireAuthenticatedUser().RequireClaim(ClaimTypes.Role, role));
+        }
+
         return services;
     }
 

@@ -329,6 +329,63 @@ namespace Zaghlol.Infrastructure.Persistence.Migrations
                     b.ToTable("catalog_categories", "zaghlol");
                 });
 
+            modelBuilder.Entity("Zaghlol.Infrastructure.Persistence.Entities.CatalogDraftEntry", b =>
+                {
+                    b.Property<string>("Entity")
+                        .HasColumnType("text")
+                        .HasColumnName("entity");
+
+                    b.Property<string>("EntryKey")
+                        .HasColumnType("text")
+                        .HasColumnName("entry_key");
+
+                    b.Property<string>("Body")
+                        .IsRequired()
+                        .HasColumnType("jsonb")
+                        .HasColumnName("body");
+
+                    b.Property<bool>("Changed")
+                        .HasColumnType("boolean")
+                        .HasColumnName("changed");
+
+                    b.Property<bool>("Deleted")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("boolean")
+                        .HasDefaultValue(false)
+                        .HasColumnName("deleted");
+
+                    b.Property<bool>("Published")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("boolean")
+                        .HasDefaultValue(false)
+                        .HasColumnName("published");
+
+                    b.Property<int>("Seq")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("integer")
+                        .HasColumnName("seq");
+
+                    NpgsqlPropertyBuilderExtensions.UseIdentityAlwaysColumn(b.Property<int>("Seq"));
+
+                    b.Property<DateTimeOffset>("UpdatedAt")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("updated_at")
+                        .HasDefaultValueSql("now()");
+
+                    b.HasKey("Entity", "EntryKey")
+                        .HasName("pk_catalog_drafts");
+
+                    b.HasIndex("Seq")
+                        .IsUnique()
+                        .HasDatabaseName("ux_catalog_drafts_seq");
+
+                    b.ToTable("catalog_drafts", "zaghlol", t =>
+                        {
+                            t.HasCheckConstraint("ck_catalog_drafts_entity", "entity IN ('categories','merchants','aliases','keywords')");
+                        });
+                });
+
             modelBuilder.Entity("Zaghlol.Infrastructure.Persistence.Entities.CatalogKeyword", b =>
                 {
                     b.Property<string>("KeywordNorm")

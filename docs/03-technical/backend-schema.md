@@ -260,9 +260,21 @@ CREATE TABLE catalog_keywords (keyword_norm text NOT NULL, lang text NOT NULL, c
   weight integer NOT NULL, version integer NOT NULL, deleted boolean NOT NULL DEFAULT false, PRIMARY KEY (keyword_norm, lang));
 -- Keyword identity is (keyword, lang), the same key the sync `keyword` op uses (FU-009): one category per keyword per language.
 -- A delta from version a→b = all rows with version in (a, b], including tombstones (deleted = true).
--- Published versions are immutable; edits happen in a draft workspace (catalog_drafts, not shown) and publish atomically.
--- Draft keys and tombstones: backend-api.md §5.2. A draft DELETE becomes deleted = true at publish; merchant ids come from
--- the identity sequence (allocated by POST /admin/v1/catalog/draft/merchants) and are never reused.
+-- Published versions are immutable; edits happen in the draft workspace (catalog_drafts, below) and publish atomically.
+-- Draft keys and tombstones: backend-api.md §5.2. A draft DELETE becomes deleted = true at publish; merchant ids are the
+-- identity values of catalog_drafts.seq (allocated by POST /admin/v1/catalog/draft/merchants) and are never reused.
+CREATE TABLE catalog_drafts (seq integer NOT NULL GENERATED ALWAYS AS IDENTITY, entity text NOT NULL
+    CHECK (entity IN ('categories','merchants','aliases','keywords')),
+  entry_key text NOT NULL, body jsonb NOT NULL, deleted boolean NOT NULL DEFAULT false,
+  published boolean NOT NULL DEFAULT false, changed boolean NOT NULL, updated_at timestamptz NOT NULL DEFAULT now(),
+  PRIMARY KEY (entity, entry_key));
+-- T-125. The whole editable catalog, one row per entry (a working copy that also holds tombstones, so a PUT can revive one).
+-- entry_key is the DECODED key: categories `dining`; merchants `812`; aliases `812:koshary el tahrir`; keywords `ar:text`.
+-- body holds the non-key fields (camelCase JSON, backend-api §5.2). `published` = the entry has been written to the live tables;
+-- `changed` = it differs from them (new, edited or tombstoned since the last publish). A DELETE of a never-published entry
+-- removes the row. seq is the merchant id allocator: an identity needs no sequence grant (FU-026), the id is the row's seq, and
+-- it is never reused. The live catalog_merchants identity stays unused: publish writes ids with OVERRIDING SYSTEM VALUE.
+-- Grants: ops_rw SELECT/INSERT/UPDATE/DELETE, ops_ro SELECT. Unique index on seq (paging order).
 
 -- Feature flags (FR-BE-05)
 CREATE TABLE feature_flags (

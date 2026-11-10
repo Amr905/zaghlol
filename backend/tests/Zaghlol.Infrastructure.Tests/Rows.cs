@@ -161,6 +161,15 @@ public static class Rows
             ["category_code"] = new Ref("catalog_categories", "code"),
             ["version"] = 1,
         },
+        "catalog_drafts" => new(StringComparer.Ordinal)
+        {
+            ["entity"] = "categories",
+            ["entry_key"] = "c_" + Guid.NewGuid().ToString("N")[..12],
+            ["body"] = new Jsonb("{}"),
+            ["deleted"] = false,
+            ["published"] = false,
+            ["changed"] = true,
+        },
         "operators" => new(StringComparer.Ordinal)
         {
             ["id"] = Guid.CreateVersion7(),
@@ -181,7 +190,7 @@ public static class Rows
     /// <summary>The login that writes the table in production (see GrantMatrix).</summary>
     public static string Writer(ZaghlolTestDatabase database, string table) => table switch
     {
-        "catalog_versions" or "catalog_categories" or "catalog_merchants" or "audit_log" => database.Admin,
+        "catalog_versions" or "catalog_categories" or "catalog_merchants" or "catalog_drafts" or "audit_log" => database.Admin,
         "contribution_aggregates" or "daily_active_counts" => database.Worker,
         "operators" => database.Migrator, // no runtime role writes operators yet (T-136)
         _ => database.Api,
