@@ -4,6 +4,7 @@ using System.Diagnostics.Metrics;
 using System.Text.RegularExpressions;
 using Zaghlol.Application.Contributions;
 using Zaghlol.Application.Flags;
+using Zaghlol.Application.Retention;
 using Zaghlol.Application.Sync;
 
 namespace Zaghlol.Infrastructure.Observability;
@@ -37,6 +38,8 @@ public sealed partial class ZaghlolMetrics : IDisposable
     private readonly Counter<long> phishingResistantUnproven;
     private readonly Counter<long> operatorUnknownRole;
     private readonly Counter<long> priceFetch;
+    private readonly Counter<long> retentionPurged;
+    private readonly Counter<long> retentionFailed;
     private readonly Counter<long> priceOverridden;
     private readonly Counter<long> syncRequests;
     private readonly Counter<long> syncCatalog;
@@ -81,6 +84,8 @@ public sealed partial class ZaghlolMetrics : IDisposable
             "zaghlol.diag.operator_unknown_role",
             description: "Role strings in operators rows that the API doesn't know; they are dropped.");
 
+        retentionPurged = meter.CreateCounter<long>("zaghlol.retention.purged", description: "Rows deleted or cleared by the RetentionPurger, by rule (fixed names).");
+        retentionFailed = meter.CreateCounter<long>("zaghlol.retention.failed", description: "RetentionPurger rule runs that failed, by rule (fixed names).");
         priceFetch = meter.CreateCounter<long>("zaghlol.price.fetch", description: "Price provider fetches by provider (fixed names) and outcome (ok|failed|empty).");
         priceOverridden = meter.CreateCounter<long>("zaghlol.price.override", description: "Operator price overrides.");
 
@@ -115,6 +120,11 @@ public sealed partial class ZaghlolMetrics : IDisposable
     /// <param name="provider">A name from <c>PriceProviderNames</c> (or <c>none</c>).</param>
     /// <param name="outcome">One of <c>ok</c>, <c>failed</c>, <c>empty</c>.</param>
     public void PriceFetched(string provider, string outcome) => priceFetch.Add(1, Tags(("provider", provider), ("outcome", outcome)));
+
+    /// <param name="rule">A name from <c>RetentionRules</c>.</param>
+    public void RetentionPurged(string rule, long count) => retentionPurged.Add(count, Tags(("rule", rule)));
+
+    public void RetentionFailed(string rule) => retentionFailed.Add(1, Tags(("rule", rule)));
 
     public void PriceOverridden() => priceOverridden.Add(1);
 
@@ -214,6 +224,12 @@ public sealed partial class ZaghlolMetrics : IDisposable
         foreach (var rule in Enum.GetValues<AuditAlertRule>())
         {
             alertFired.Add(0, Tags(("rule", AlertSignal.RuleName(rule))));
+        }
+
+        foreach (var rule in RetentionRules.All)
+        {
+            retentionPurged.Add(0, Tags(("rule", rule)));
+            retentionFailed.Add(0, Tags(("rule", rule)));
         }
 
         foreach (var store in NotificationStores)

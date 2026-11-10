@@ -5,6 +5,7 @@ using Zaghlol.Infrastructure.Logging;
 using Zaghlol.Infrastructure.Observability;
 using Zaghlol.Infrastructure.Persistence;
 using Zaghlol.Infrastructure.Prices;
+using Zaghlol.Infrastructure.Retention;
 using Zaghlol.Workers;
 
 // `dotnet Zaghlol.Workers.dll --healthcheck` is used by container health checks (no shell in the runtime image).
@@ -38,6 +39,9 @@ builder.Services.AddHostedService<PriceFetcherService>();
 // Contribution aggregator (T-129): roll raw rows into aggregates, A-48 threshold, retention purge.
 builder.Services.AddZaghlolContributionWorker();
 builder.Services.AddHostedService<ContributionAggregatorService>();
+// RetentionPurger (T-139): daily, Retention:IntervalHours / Retention:BatchSize.
+builder.Services.AddZaghlolRetention();
+builder.Services.AddHostedService<RetentionPurgerService>();
 
 using var host = builder.Build();
 await host.RunAsync();
