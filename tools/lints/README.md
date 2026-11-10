@@ -19,7 +19,7 @@ matched by name (see the rule notes below).
 
 | Rule | Fires on | Scope |
 |------|----------|-------|
-| `no_double_money` | `double` / `num` types and `double` literals | every file under a `money/` directory; elsewhere only declarations (field, variable, parameter, method or getter return) whose name contains `amount` or `minor` |
+| `no_double_money` | `double` / `num` types, double literals, `/` and `/=` (always a double), `double.parse` / `double.tryParse` / `num.parse` / `num.tryParse`, `.toDouble()` | strict scope: every file under a `money/` directory and packages `zaghlol_parsing` and `zaghlol_domain`. Elsewhere only declarations (field, variable, parameter, method or getter return) whose name contains `amount` or `minor`, plus amount-named variables, returns and arrow bodies whose value is a double expression (`final amount = 12.5;`, `=> x / 2`) |
 | `no_ui_string_literals` | string literals containing letters | inside methods named `build`, and any method, getter or function returning a widget (`Widget`, `PreferredSizeWidget`, `Widget?`, `List<Widget>`), including closures within them |
 | `no_print_outside_debug` | `print(...)` and `debugPrint(...)` | all `lib/` files except debug-only files |
 | `safe_exception_required` | classes that are an `Exception` or `Error` but not a `SafeException` | files in a `parsing/` or `db/` directory, or in package `zaghlol_parsing` |
@@ -41,6 +41,32 @@ Only files under `lib/` are linted (tests, tools and generated code are skipped:
   `==` / `!=` comparisons or index expressions. l10n directories are skipped.
 - `no_print_outside_debug` allows files in a `debug/` directory, or named
   `*_debug.dart` / `debug_*.dart`.
+
+## no_double_money: inferred doubles and allow-list
+
+Types are not resolved, so "inferred double" means the expression itself
+produces one: a double literal, `/`, a parse call or `.toDouble()`, including
+inside parentheses, `?:` and `as double`. `~/` stays an int. One report per line.
+
+Allowed non-money uses in the strict scope (benchmark timings, UI geometry)
+need an explicit, justified suppression on the same or previous line, with the
+reason after a dash so it is not read as a rule name:
+
+```dart
+// ignore: no_double_money - benchmark timing, not money
+final ms = sw.elapsedMicroseconds / 1000;
+```
+
+Never annotate money code. Outside the strict scope no annotation is needed for
+non-money doubles (`opacity`, sizes).
+
+## Empty scans fail
+
+Each root passed on the command line must contain at least one lintable file
+(`.dart` under `lib/`, not generated). Otherwise the checker prints
+`no lintable files ... in "<root>"` to stderr and exits 2, so a broken glob or
+mis-pointed root cannot pass silently. On success the summary line shows the
+number of files scanned.
 
 ## Rule 4 convention
 

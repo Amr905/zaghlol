@@ -3,6 +3,7 @@ import 'dart:io';
 import 'checker.dart';
 import 'class_graph.dart';
 import 'comments.dart';
+import 'file_scope.dart';
 import 'violation.dart';
 
 /// Parses every `.dart` file below [roots] that sits under a `lib/` directory.
@@ -19,6 +20,10 @@ List<ParsedFile> parseTree(List<String> roots) {
   }
   return files;
 }
+
+/// Number of [files] that are actually linted (under `lib/`, not generated).
+int countLinted(List<ParsedFile> files) =>
+    files.where((f) => FileScope.of(f.path) != null).length;
 
 /// Violations over all [files] (only files under `lib/` are checked).
 List<Violation> checkAll(List<ParsedFile> files) {

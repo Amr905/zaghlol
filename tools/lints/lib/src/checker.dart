@@ -57,30 +57,161 @@ class _RuleVisitor extends RecursiveAstVisitor<void> {
   }
 
   // Rule 1: no_double_money.
+  //
+  // Strict scope (money/ directories, packages zaghlol_parsing and
+  // zaghlol_domain): every double/num type, double literal, `/` operator
+  // (always a double in Dart), `double.parse`/`tryParse`, `num.parse`/
+  // `tryParse` and `.toDouble()` is reported. Elsewhere only declarations
+  // named like an amount are checked, including their initializers/returns.
+  // Types are inferred syntactically (no type resolution): a `final x = 1.5;`
+  // or `final r = a / b;` is caught through the expression that produces the
+  // double. Escape hatch for non-money uses (benchmark timings, UI geometry):
+  // `// ignore: no_double_money` with a reason; never on money code.
+
+  static const String _doubleMessage =
+      'double/num must not be used for money; use Money (minor units).';
+
+  void _reportDouble(int offset, String message) {
+    final line = file.lineInfo.getLocation(offset).lineNumber;
+    // One report per line: `double x = 1.5;` is a single finding.
+    if (violations.any(
+      (v) => v.rule == ruleNoDoubleMoney && v.line == line,
+    )) {
+      return;
+    }
+    violations.add(Violation(ruleNoDoubleMoney, file.path, line, message));
+  }
 
   @override
   void visitNamedType(NamedType node) {
     if (_doubleOrNum.hasMatch(node.toSource()) &&
-        (scope.inMoneyLayer || _declaresMoneyName(node))) {
-      _report(
-        ruleNoDoubleMoney,
-        node.offset,
-        'double/num must not be used for money; use Money (minor units).',
-      );
+        (scope.inStrictDoubleScope || _declaresMoneyName(node))) {
+      _reportDouble(node.offset, _doubleMessage);
     }
     super.visitNamedType(node);
   }
 
   @override
   void visitDoubleLiteral(DoubleLiteral node) {
-    if (scope.inMoneyLayer) {
-      _report(
-        ruleNoDoubleMoney,
+    if (scope.inStrictDoubleScope) {
+      _reportDouble(
         node.offset,
-        'double literal in a money file; use integer minor units.',
+        'double literal; use integer minor units (no doubles for money).',
       );
     }
     super.visitDoubleLiteral(node);
+  }
+
+  @override
+  void visitBinaryExpression(BinaryExpression node) {
+    if (scope.inStrictDoubleScope && node.operator.lexeme == '/') {
+      _reportDouble(
+        node.operator.offset,
+        '`/` yields a double; use `~/` or integer minor-unit arithmetic.',
+      );
+    }
+    super.visitBinaryExpression(node);
+  }
+
+  @override
+  void visitAssignmentExpression(AssignmentExpression node) {
+    if (scope.inStrictDoubleScope && node.operator.lexeme == '/=') {
+      _reportDouble(
+        node.operator.offset,
+        '`/=` yields a double; use `~/=` or integer minor-unit arithmetic.',
+      );
+    }
+    super.visitAssignmentExpression(node);
+  }
+
+  /// `double.parse(..)`, `double.tryParse(..)`, `num.parse(..)`,
+  /// `num.tryParse(..)` and `x.toDouble()`.
+  static bool _isDoubleCall(MethodInvocation node) {
+    final name = node.methodName.name;
+    if (name == 'toDouble' && node.target != null) return true;
+    final target = node.target;
+    return (name == 'parse' || name == 'tryParse') &&
+        target is SimpleIdentifier &&
+        (target.name == 'double' || target.name == 'num');
+  }
+
+  /// True when [e] syntactically produces a double.
+  static bool _isDoubleExpression(Expression? e) {
+    if (e == null) return false;
+    if (e is DoubleLiteral) return true;
+    if (e is ParenthesizedExpression) return _isDoubleExpression(e.expression);
+    if (e is PrefixExpression) return _isDoubleExpression(e.operand);
+    if (e is BinaryExpression) {
+      // `~/` and `%` on ints stay int; only `/` is always a double.
+      if (e.operator.lexeme == '~/') return false;
+      return e.operator.lexeme == '/' ||
+          _isDoubleExpression(e.leftOperand) ||
+          _isDoubleExpression(e.rightOperand);
+    }
+    if (e is ConditionalExpression) {
+      return _isDoubleExpression(e.thenExpression) ||
+          _isDoubleExpression(e.elseExpression);
+    }
+    if (e is MethodInvocation) return _isDoubleCall(e);
+    if (e is AsExpression) return _doubleOrNum.hasMatch(e.type.toSource());
+    return false;
+  }
+
+  @override
+  void visitMethodInvocation(MethodInvocation node) {
+    if (scope.inStrictDoubleScope && _isDoubleCall(node)) {
+      _reportDouble(
+        node.methodName.offset,
+        '${node.methodName.name} produces a double; parse amounts into '
+        'integer minor units instead.',
+      );
+    }
+    _checkPrint(node);
+    super.visitMethodInvocation(node);
+  }
+
+  // Outside the strict scope: amount-named variables and functions whose
+  // value is a double expression (the declared-type form is NamedType above).
+
+  @override
+  void visitVariableDeclaration(VariableDeclaration node) {
+    if (!scope.inStrictDoubleScope &&
+        _moneyName.hasMatch(node.name.lexeme) &&
+        _isDoubleExpression(node.initializer)) {
+      _reportDouble(node.name.offset, _doubleMessage);
+    }
+    super.visitVariableDeclaration(node);
+  }
+
+  @override
+  void visitReturnStatement(ReturnStatement node) {
+    if (!scope.inStrictDoubleScope &&
+        _isDoubleExpression(node.expression) &&
+        _enclosingFunctionHasMoneyName(node)) {
+      _reportDouble(node.offset, _doubleMessage);
+    }
+    super.visitReturnStatement(node);
+  }
+
+  @override
+  void visitExpressionFunctionBody(ExpressionFunctionBody node) {
+    if (!scope.inStrictDoubleScope &&
+        _isDoubleExpression(node.expression) &&
+        _enclosingFunctionHasMoneyName(node)) {
+      _reportDouble(node.expression.offset, _doubleMessage);
+    }
+    super.visitExpressionFunctionBody(node);
+  }
+
+  static bool _enclosingFunctionHasMoneyName(AstNode node) {
+    for (AstNode? p = node.parent; p != null; p = p.parent) {
+      if (p is MethodDeclaration) return _moneyName.hasMatch(p.name.lexeme);
+      if (p is FunctionDeclaration) return _moneyName.hasMatch(p.name.lexeme);
+      if (p is FunctionExpression && p.parent is! FunctionDeclaration) {
+        return false;
+      }
+    }
+    return false;
   }
 
   /// True when [type] is the type of a declaration named like an amount.
@@ -208,8 +339,7 @@ class _RuleVisitor extends RecursiveAstVisitor<void> {
 
   // Rule 3: no_print_outside_debug.
 
-  @override
-  void visitMethodInvocation(MethodInvocation node) {
+  void _checkPrint(MethodInvocation node) {
     final name = node.methodName.name;
     if (!scope.isDebugOnly &&
         node.target == null &&
@@ -220,7 +350,6 @@ class _RuleVisitor extends RecursiveAstVisitor<void> {
         '$name is only allowed in debug-only files.',
       );
     }
-    super.visitMethodInvocation(node);
   }
 
   // Rule 4: safe_exception_required.
