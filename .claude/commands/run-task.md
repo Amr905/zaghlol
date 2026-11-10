@@ -6,8 +6,8 @@ argument-hint: <T-###>
 Run task $ARGUMENTS through implementation and review.
 
 1. Read `docs/04-tasks/tasks/$ARGUMENTS.md` and `docs/workflow/model-routing.md`. Check that all dependencies are DONE in `docs/04-tasks/TASKS.md`; if not, stop.
-2. Verify the complexity class. If it's C3/C4 and the task has no Design note, delegate to `solution-architect` first to write a short one (sonnet, except opus for C4 crypto/keys, billing/entitlements and SMS/notification ingestion).
-3. Set status IN_PROGRESS. Delegate to the task's agent, passing the task file path, with the model the class dictates (override the agent's default with the `model` parameter if needed).
+2. Verify the complexity class. If it's C3/C4 and the task has no Design note: for C4 crypto/keys, billing/entitlements and SMS/notification ingestion delegate to `solution-architect` (opus) first; otherwise the implementer writes a short note in the task file before coding.
+3. Set status IN_PROGRESS. Delegate to the task's agent, passing the task file path and `docs/workflow/self-check.md`, with the model the class dictates (C4: opus for crypto/keys, billing, SMS ingestion, migrations and data-deleting code; otherwise sonnet) (override the agent's default with the `model` parameter if needed).
 4. Read the diff yourself. Then set IN_REVIEW and run only the reviews the class requires (CLAUDE.md §6):
    - C1: you spot-check the diff and CI;
    - C2 and docs-only: `code-reviewer` on sonnet;
