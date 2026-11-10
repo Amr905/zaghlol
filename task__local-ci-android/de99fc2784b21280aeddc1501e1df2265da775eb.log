@@ -1,5 +1,8 @@
 ﻿== SUMMARY ==
-RUNNING sha=de99fc2784b21280aeddc1501e1df2265da775eb
+SKIP sha=de99fc2784b21280aeddc1501e1df2265da775eb no app/packages/backend changes
 
 == FULL LOG (last 1500 lines) ==
 auto task/local-ci-android de99fc2784b21280aeddc1501e1df2265da775eb 2026-11-10T14:26:50.5346415+02:00
+
+
+
