@@ -288,7 +288,14 @@ CREATE TABLE feature_flags (
 CREATE TABLE price_quotes (symbol text NOT NULL, currency text NOT NULL, price numeric(20,6) NOT NULL,
   per_unit text NOT NULL, as_of timestamptz NOT NULL, source text NOT NULL, is_override boolean NOT NULL DEFAULT false,
   override_expires_at timestamptz,              -- set when is_override; default now() + 24 h, at most 7 days; then the feed applies again
-  PRIMARY KEY (symbol, currency));
+  feed_price numeric(20,6),                     -- T-127: the last feed value, kept while an override is in force (served again at expiry)
+  feed_as_of timestamptz,                       -- T-127: when the feed value was fetched; staleness (> 24 h) is judged on this
+  PRIMARY KEY (symbol, currency),
+  CHECK (price > 0 AND (feed_price IS NULL OR feed_price > 0)),
+  CHECK (is_override = (override_expires_at IS NOT NULL)));
+-- T-127. Effective value at time t: an override with override_expires_at > t, else feed_price (a row from before feed_price existed and
+-- not an override counts as its own feed value). The worker always writes feed_*, and price/as_of/source only where no unexpired override
+-- is in force. Gold symbols XAU24_G, XAU21_G, XAU18_G in EGP and USD (per gram); fx_rates.base is always USD.
 CREATE TABLE fx_rates (base text NOT NULL, quote text NOT NULL, rate numeric(24,12) NOT NULL,
   as_of timestamptz NOT NULL, source text NOT NULL, PRIMARY KEY (base, quote));
 
@@ -299,9 +306,9 @@ CREATE TABLE merchant_contributions (
   install_hash bytea NOT NULL,                  -- HMAC(install_id, pepper) — counts distinct installs without joining
   received_at timestamptz NOT NULL DEFAULT now(),
   UNIQUE (merchant_norm, institution_code, install_hash),
-  -- No run of 6 digits in any script (ASCII, Arabic-Indic, Extended Arabic-Indic, fullwidth), optionally separated by one
-  -- space, dot or dash ('010 1234 5678' is a run); no '@' (e-mail, InstaPay address); at most 64 characters.
-  CHECK (char_length(merchant_norm) <= 64 AND merchant_norm !~ '([0-9٠-٩۰-۹０-９][[:space:].-]?){6,}' AND position('@' in merchant_norm) = 0),
+  -- No run of 6 digits in any script (ASCII, Arabic-Indic, Extended Arabic-Indic, fullwidth), separated by up to three
+  -- whitespace, dot, comma, slash, underscore, Arabic comma or dash characters (FU-018; '010 1234 5678' and '01 / 23 / 45' are runs); no '@' (e-mail, InstaPay address); at most 64 characters.
+  CHECK (char_length(merchant_norm) <= 64 AND merchant_norm !~ '([0-9٠-٩۰-۹０-９][[:space:].,/_،-]{0,3}){6,}' AND position('@' in merchant_norm) = 0),
   CHECK (institution_code ~ '^[a-z0-9_]{1,64}$'),   -- OpenAPI InstitutionCode alphabet (lowercase slug)
   CHECK (category_code ~ '^[a-z0-9_]{1,64}$')       -- OpenAPI CategoryCode alphabet (no dots)
 );
@@ -316,7 +323,7 @@ CREATE TABLE contribution_aggregates (
 -- "Request my bank" (FR-BE-10)
 CREATE TABLE bank_requests (
   institution_name_norm text NOT NULL, country text NOT NULL, channel text NOT NULL CHECK (channel IN ('sms','notification')),
-  CHECK (char_length(institution_name_norm) <= 64 AND institution_name_norm !~ '([0-9٠-٩۰-۹０-９][[:space:].-]?){6,}'
+  CHECK (char_length(institution_name_norm) <= 64 AND institution_name_norm !~ '([0-9٠-٩۰-۹０-９][[:space:].,/_،-]{0,3}){6,}'
          AND position('@' in institution_name_norm) = 0),
   install_hash bytea NOT NULL, received_at timestamptz NOT NULL DEFAULT now(),
   PRIMARY KEY (institution_name_norm, country, channel, install_hash)
@@ -352,7 +359,7 @@ CREATE TABLE audit_log (id bigint GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
 
 | Concern | Mechanism |
 |---|---|
-| Contributions can't contain people or amounts | API validation (BR-SYNC-04 filters, `security-model.md` §6; digits folded to ASCII and separators stripped first). The DB backstop rejects a run of 6 digits in any script (ASCII, Arabic-Indic `٠-٩`, Extended `۰-۹`, fullwidth `０-９`), optionally separated by one space, dot or dash, rejects any `@`, and caps the length at 64 (the same CHECK on `bank_requests.institution_name_norm`). `institution_code` and `category_code` must be lowercase slugs |
+| Contributions can't contain people or amounts | API validation (BR-SYNC-04 filters, `security-model.md` §6; digits folded to ASCII and separators stripped first). The DB backstop rejects a run of 6 digits in any script (ASCII, Arabic-Indic `٠-٩`, Extended `۰-۹`, fullwidth `０-９`), separated by up to three whitespace, dot, comma, slash, underscore, Arabic-comma or dash characters (FU-018), rejects any `@`, and caps the length at 64 (the same CHECK on `bank_requests.institution_name_norm`). `institution_code` and `category_code` must be lowercase slugs |
 | Direct read-only DB access | `ops_ro` (login `zaghlol_ops_ro`, break-glass only, T-140) can't read `accounts.email`, `accounts.provider_subject`, `purchases.store_key`, `purchases.linked_purchase_token`, `store_notifications.store_key`, token hashes, refresh tokens or stored responses. Support lookups go through the audited admin API (`ops_rw`) |
 | Wrong credentials | Each runtime process checks at startup that its login is a member of exactly its own group and is not a superuser, the schema owner or `migrator`, and stops otherwise; readiness reports 503 until the App login passes the same check |
 | Distinct counts without tracking | `install_hash` = HMAC-SHA256 with a pepper held in the KMS; it can't be joined back to `installs` without the pepper |
