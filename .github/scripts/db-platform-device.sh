@@ -26,6 +26,10 @@ if [ "$BENCH" = "true" ]; then
   args+=("--dart-define=ZAGHLOL_DB_BENCH=1")
 fi
 flutter devices
+if [ "$FLAVOR" = "devNoSms" ]; then
+  # T-015: keep the whole run in logcat for the key log scan.
+  adb -s "$DEVICE" logcat -G 16M || true
+fi
 flutter "${args[@]}" 2>&1 | tee "$RUNNER_TEMP/device.log"
 
 # T-015: key bootstrap on the real Keystore / Keychain, then the log scan.
