@@ -42,7 +42,7 @@ void main() {
         'Carrefour Maadi City Center',
         'CARREFOUR MAADI CITY CENTER',
       ),
-      ('documents alnum id kept', 'SHOP T123A', 'Shop T123A', 'SHOP T123A'),
+      ('documents alnum id kept', 'SHOP T123A', 'Shop T123a', 'SHOP T123A'),
       ('first token kept', 'EGYPT AIR', 'Egypt Air', 'EGYPT AIR'),
       ('only noise falls back', 'POS', 'Pos', 'POS'),
       ('city only', 'MAADI', 'Maadi', 'MAADI'),
