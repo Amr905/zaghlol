@@ -1,5 +1,77 @@
 ﻿== SUMMARY ==
-RUNNING sha=503dc1fbd230645ad6600b204abff33b3da2da13
+FAIL sha=503dc1fbd230645ad6600b204abff33b3da2da13 pipeline=quick-backend dotnet-build=1 dotnet-format=0 dotnet-test=0
+dotnet-build                 FAIL  exit=1  23s
+dotnet-format                PASS  exit=0  35s
+dotnet-test                  PASS  exit=0  76s
+
+== ERRORS: dotnet-build ==
+/work/backend/src/Zaghlol.Workers/RetentionPurgerService.cs(83,66): error SYSLIB1015: Argument 'operation' is not referenced from the logging message (https://learn.microsoft.com/dotnet/fundamentals/syslib-diagnostics/syslib1015) [/work/backend/src/Zaghlol.Workers/Zaghlol.Workers.csproj]
+/work/backend/src/Zaghlol.Workers/RetentionPurgerService.cs(83,81): error SYSLIB1015: Argument 'count' is not referenced from the logging message (https://learn.microsoft.com/dotnet/fundamentals/syslib-diagnostics/syslib1015) [/work/backend/src/Zaghlol.Workers/Zaghlol.Workers.csproj]
+/work/backend/src/Zaghlol.Workers/RetentionPurgerService.cs(86,70): error SYSLIB1015: Argument 'operation' is not referenced from the logging message (https://learn.microsoft.com/dotnet/fundamentals/syslib-diagnostics/syslib1015) [/work/backend/src/Zaghlol.Workers/Zaghlol.Workers.csproj]
 
 == FULL LOG (last 1500 lines) ==
 auto task/T-139-retention 503dc1fbd230645ad6600b204abff33b3da2da13 2026-11-10T21:27:43.0278839+02:00
+
+
+
+[21:27:48] === STEP dotnet-build (docker mcr.microsoft.com/dotnet/sdk:10.0.402, /work/backend)
+  Determining projects to restore...
+  All projects are up-to-date for restore.
+  Zaghlol.Domain -> /work/backend/src/Zaghlol.Domain/bin/Release/net10.0/Zaghlol.Domain.dll
+  Zaghlol.Ops -> /work/backend/src/Zaghlol.Ops/bin/Release/net10.0/zaghlol-ops.dll
+  Zaghlol.Ops.Tests -> /work/backend/tests/Zaghlol.Ops.Tests/bin/Release/net10.0/Zaghlol.Ops.Tests.dll
+  Zaghlol.Application -> /work/backend/src/Zaghlol.Application/bin/Release/net10.0/Zaghlol.Application.dll
+  Zaghlol.Application.Tests -> /work/backend/tests/Zaghlol.Application.Tests/bin/Release/net10.0/Zaghlol.Application.Tests.dll
+  Zaghlol.Infrastructure -> /work/backend/src/Zaghlol.Infrastructure/bin/Release/net10.0/Zaghlol.Infrastructure.dll
+/work/backend/src/Zaghlol.Workers/RetentionPurgerService.cs(83,66): error SYSLIB1015: Argument 'operation' is not referenced from the logging message (https://learn.microsoft.com/dotnet/fundamentals/syslib-diagnostics/syslib1015) [/work/backend/src/Zaghlol.Workers/Zaghlol.Workers.csproj]
+/work/backend/src/Zaghlol.Workers/RetentionPurgerService.cs(83,81): error SYSLIB1015: Argument 'count' is not referenced from the logging message (https://learn.microsoft.com/dotnet/fundamentals/syslib-diagnostics/syslib1015) [/work/backend/src/Zaghlol.Workers/Zaghlol.Workers.csproj]
+/work/backend/src/Zaghlol.Workers/RetentionPurgerService.cs(86,70): error SYSLIB1015: Argument 'operation' is not referenced from the logging message (https://learn.microsoft.com/dotnet/fundamentals/syslib-diagnostics/syslib1015) [/work/backend/src/Zaghlol.Workers/Zaghlol.Workers.csproj]
+  Zaghlol.Infrastructure.Tests -> /work/backend/tests/Zaghlol.Infrastructure.Tests/bin/Release/net10.0/Zaghlol.Infrastructure.Tests.dll
+  Zaghlol.Api -> /work/backend/src/Zaghlol.Api/bin/Release/net10.0/Zaghlol.Api.dll
+  Zaghlol.Contract.Tests -> /work/backend/tests/Zaghlol.Contract.Tests/bin/Release/net10.0/Zaghlol.Contract.Tests.dll
+  Zaghlol.Api.Tests -> /work/backend/tests/Zaghlol.Api.Tests/bin/Release/net10.0/Zaghlol.Api.Tests.dll
+
+Build FAILED.
+
+/work/backend/src/Zaghlol.Workers/RetentionPurgerService.cs(83,66): error SYSLIB1015: Argument 'operation' is not referenced from the logging message (https://learn.microsoft.com/dotnet/fundamentals/syslib-diagnostics/syslib1015) [/work/backend/src/Zaghlol.Workers/Zaghlol.Workers.csproj]
+/work/backend/src/Zaghlol.Workers/RetentionPurgerService.cs(83,81): error SYSLIB1015: Argument 'count' is not referenced from the logging message (https://learn.microsoft.com/dotnet/fundamentals/syslib-diagnostics/syslib1015) [/work/backend/src/Zaghlol.Workers/Zaghlol.Workers.csproj]
+/work/backend/src/Zaghlol.Workers/RetentionPurgerService.cs(86,70): error SYSLIB1015: Argument 'operation' is not referenced from the logging message (https://learn.microsoft.com/dotnet/fundamentals/syslib-diagnostics/syslib1015) [/work/backend/src/Zaghlol.Workers/Zaghlol.Workers.csproj]
+    0 Warning(s)
+    3 Error(s)
+
+Time Elapsed 00:00:21.71
+
+[21:28:11] === RESULT dotnet-build exit=1 (23s)
+[21:28:11] === STEP dotnet-format (docker mcr.microsoft.com/dotnet/sdk:10.0.402, /work/backend)
+Formatting code files in workspace '/work/backend/Zaghlol.sln'.
+Format complete in 34052ms.
+
+[21:28:46] === RESULT dotnet-format exit=0 (35s)
+[21:28:46] === STEP dotnet-test (docker mcr.microsoft.com/dotnet/sdk:10.0.402, /work/backend)
+Test run for /work/backend/tests/Zaghlol.Ops.Tests/bin/Release/net10.0/Zaghlol.Ops.Tests.dll (.NETCoreApp,Version=v10.0)
+Test run for /work/backend/tests/Zaghlol.Workers.Tests/bin/Release/net10.0/Zaghlol.Workers.Tests.dll (.NETCoreApp,Version=v10.0)
+Test run for /work/backend/tests/Zaghlol.Application.Tests/bin/Release/net10.0/Zaghlol.Application.Tests.dll (.NETCoreApp,Version=v10.0)
+Test run for /work/backend/tests/Zaghlol.Api.Tests/bin/Release/net10.0/Zaghlol.Api.Tests.dll (.NETCoreApp,Version=v10.0)
+Test run for /work/backend/tests/Zaghlol.Contract.Tests/bin/Release/net10.0/Zaghlol.Contract.Tests.dll (.NETCoreApp,Version=v10.0)
+A total of 1 test files matched the specified pattern.
+A total of 1 test files matched the specified pattern.
+Test run for /work/backend/tests/Zaghlol.Infrastructure.Tests/bin/Release/net10.0/Zaghlol.Infrastructure.Tests.dll (.NETCoreApp,Version=v10.0)
+A total of 1 test files matched the specified pattern.
+A total of 1 test files matched the specified pattern.
+A total of 1 test files matched the specified pattern.
+A total of 1 test files matched the specified pattern.
+
+Passed!  - Failed:     0, Passed:     2, Skipped:     0, Total:     2, Duration: 47 ms - Zaghlol.Ops.Tests.dll (net10.0)
+
+Passed!  - Failed:     0, Passed:    11, Skipped:     0, Total:    11, Duration: 217 ms - Zaghlol.Workers.Tests.dll (net10.0)
+
+Passed!  - Failed:     0, Passed:   401, Skipped:     0, Total:   401, Duration: 248 ms - Zaghlol.Application.Tests.dll (net10.0)
+
+Passed!  - Failed:     0, Passed:   107, Skipped:     0, Total:   107, Duration: 19 s - Zaghlol.Contract.Tests.dll (net10.0)
+
+Passed!  - Failed:     0, Passed:   576, Skipped:     0, Total:   576, Duration: 20 s - Zaghlol.Infrastructure.Tests.dll (net10.0)
+
+Passed!  - Failed:     0, Passed:   364, Skipped:     0, Total:   364, Duration: 58 s - Zaghlol.Api.Tests.dll (net10.0)
+
+[21:30:01] === RESULT dotnet-test exit=0 (76s)
+[21:30:01] SUMMARY FAIL sha=503dc1fbd230645ad6600b204abff33b3da2da13 pipeline=quick-backend dotnet-build=1 dotnet-format=0 dotnet-test=0
