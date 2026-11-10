@@ -67,7 +67,7 @@ Every task in `docs/04-tasks/tasks/` carries a **complexity class**. The class d
 | **C1 Trivial** | Boilerplate, constants, seed data, string files, assets wiring | Haiku (`boilerplate-engineer`) | Lead spot-check (diff + green CI) |
 | **C2 Standard** | Screens, widgets, DAOs, providers, API endpoints, ordinary logic with clear spec | Sonnet (`flutter-ui-engineer`, `flutter-core-engineer`, `parsing-engine-engineer`, `backend-engineer`) | `code-reviewer` on **Sonnet** (one reviewer) |
 | **C3 Complex** | Non-trivial algorithms, cross-module work, ambiguous edge cases | **Sonnet**, with a short design note written by the architect on **Sonnet** | `code-reviewer` on **Sonnet** (one reviewer, also checks tests) |
-| **C4 Critical** | Security, crypto, billing/entitlements, native ingestion, financial/Zakah math, data migrations | Opus. Design note on Opus only for crypto/keys, billing/entitlements and SMS/notification ingestion; otherwise Sonnet | `code-reviewer` (Opus, also checks tests) + `security-privacy-reviewer` (Opus) |
+| **C4 Critical** | Security, crypto, billing/entitlements, native ingestion, financial/Zakah math, data migrations | Opus. Design note on Opus only for crypto/keys, billing/entitlements and SMS/notification ingestion; otherwise Sonnet | **One combined Opus review** (`code-reviewer` acting also as `security-privacy-reviewer`, also checks tests; one report `docs/05-reviews/T-###.md` with code and security sections). **Two separate Opus reviewers** stay mandatory for crypto/keys, billing/entitlements and SMS/notification ingestion. |
 | **Docs-only** | Copy deck, design or spec text | Sonnet | One reviewer (`code-reviewer` on Sonnet) |
 
 Delegation rules for the Lead:
@@ -82,7 +82,9 @@ Delegation rules for the Lead:
 - Only the reviewers who raised a blocker or major re-review. Re-reviews look at the delta only and run on **Sonnet**.
 - At most **2 tasks** run at the same time (implementers; their reviews count with them). Agent briefs point to the specific sections an agent needs, not whole documents.
 - Security findings rated Low or Info are follow-ups unless the reviewer marks them "before merge".
-- Fast checks: after each push, agents read the local runner result first (`git show origin/local-ci:<branch with / as __>/<sha>.status` and `.log`, usually within ~3 min; see `docs/workflow/local-ci.md`) to fix format/analyze/test errors, and only then wait for GitHub Actions, which stays the gate for merging.
+- **Verification and batch CI (PO, 2026-11-10):** task branches are verified on the PO's PC runner only (`git show origin/local-ci:<branch with / as __>/<sha>.status` and `.log`, errors at the top; ~5 min for app/backend checks incl. the Android APK, Android unit tests and lint; see `docs/workflow/local-ci.md`). Pushes to `task/**` do **not** run GitHub CI (the `app-regen` and `backend-ef-migration` bots still do). A task whose change can only be checked on GitHub (iOS/Swift, Xcode project, device/emulator `integration_test`, db-platform) opts in by also pushing the same commit to `ci/<task-id>`; delete that branch after use.
+- **Batch merge:** the Lead collects about **5 reviewed tasks**, merges them in order onto `batch/<date>-<n>` (created from current `main` and pushed once before the tasks are merged in, so path filters see the whole change), pushes, and waits for one full GitHub run (app-ci, backend-ci, db-platform). Failures are fixed on the batch branch (a fresh agent for anything non-trivial). Then one PR `batch/... → main` is merged with a **merge commit** (keeps per-task history). Status docs (`TASKS.md`, `implementation-status.md`, `LEAD_HANDOFF.md`) are updated in the same batch PR.
+- If the PC runner is offline (no result within 15 min), agents say so and stop waiting; the Lead either asks the PO to start it or opts the task into `ci/<task-id>`.
 
 ## 7. Definition of Done (per task)
 
