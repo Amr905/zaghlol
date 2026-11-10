@@ -25,5 +25,6 @@ namespace Zaghlol.Api.Json;
 [JsonSerializable(typeof(CatalogPublishResponse))]
 [JsonSerializable(typeof(FlagUpdateRequest))]
 [JsonSerializable(typeof(FlagStateDto))]
+[JsonSerializable(typeof(SupportEntitlementDto))]
 [JsonSerializable(typeof(string))]
 internal sealed partial class ApiJsonContext : JsonSerializerContext;

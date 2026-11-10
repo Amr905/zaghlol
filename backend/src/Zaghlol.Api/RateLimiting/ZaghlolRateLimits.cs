@@ -47,6 +47,9 @@ public sealed class RateLimitSettings
 
     /// <summary>Per install token (or per operator on `/admin/v1`), after authentication: burst 30, 10 a minute.</summary>
     public TokenBucketSettings PerToken { get; set; } = new() { TokenLimit = 30, TokensPerPeriod = 10, PeriodSeconds = 60 };
+
+    /// <summary>The support lookup per operator in addition (T-136, enumeration guard): 20 a minute.</summary>
+    public TokenBucketSettings SupportLookup { get; set; } = new() { TokenLimit = 20, TokensPerPeriod = 20, PeriodSeconds = 60 };
 }
 
 /// <summary>Endpoint metadata: this endpoint also draws on the registration bucket.</summary>
@@ -55,6 +58,16 @@ internal sealed class RegistrationRateLimitMetadata
     public static readonly RegistrationRateLimitMetadata Instance = new();
 
     private RegistrationRateLimitMetadata()
+    {
+    }
+}
+
+/// <summary>Endpoint metadata: this operator endpoint also draws on the per-operator support-lookup bucket.</summary>
+internal sealed class SupportLookupRateLimitMetadata
+{
+    public static readonly SupportLookupRateLimitMetadata Instance = new();
+
+    private SupportLookupRateLimitMetadata()
     {
     }
 }
@@ -87,12 +100,20 @@ internal sealed class ZaghlolRateLimiters : IDisposable
         // Registration first: the middleware retries a refused lease once (AcquireAsync) and a chain charges every limiter
         // before the one that refuses, so this order keeps a registration flood from also draining the /24's general bucket.
         network = PartitionedRateLimiter.CreateChained(register, perNetwork);
-        token = PartitionedRateLimiter.Create<HttpContext, string>(context =>
+        var perToken = PartitionedRateLimiter.Create<HttpContext, string>(context =>
             context.User.FindFirst(InstallTokenAuthentication.TokenHashClaim)?.Value is { } key
                 ? RateLimitPartition.GetTokenBucketLimiter(key, _ => limits.PerToken.ToOptions())
                 : context.User.FindFirst(OperatorAuthentication.OperatorIdClaim)?.Value is { } operatorId
                     ? RateLimitPartition.GetTokenBucketLimiter("op:" + operatorId, _ => limits.PerToken.ToOptions())
                     : RateLimitPartition.GetNoLimiter(string.Empty));
+        var supportLookup = PartitionedRateLimiter.Create<HttpContext, string>(context =>
+            context.GetEndpoint()?.Metadata.GetMetadata<SupportLookupRateLimitMetadata>() is not null
+            && context.User.FindFirst(OperatorAuthentication.OperatorIdClaim)?.Value is { } lookupOperator
+                ? RateLimitPartition.GetTokenBucketLimiter("lookup:" + lookupOperator, _ => limits.SupportLookup.ToOptions())
+                : RateLimitPartition.GetNoLimiter(string.Empty));
+
+        // The stricter lookup bucket first, so a refused lookup doesn't also drain the operator's general bucket.
+        token = PartitionedRateLimiter.CreateChained(supportLookup, perToken);
 
         PerNetwork = CreateOptions(network, NetworkBucket);
         PerToken = CreateOptions(token, TokenBucket);

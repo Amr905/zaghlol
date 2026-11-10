@@ -1,8 +1,8 @@
 namespace Zaghlol.Ops;
 
 /// <summary>
-/// Stub for the operator CLI (`zaghlol-ops`). Commands (catalog, flags, support lookup) and OIDC device-flow
-/// sign-in are added in later tasks.
+/// Stub for the operator CLI (`zaghlol-ops`). Commands (catalog, flags, support lookup) and OIDC sign-in (authorization code
+/// + PKCE with a loopback redirect; the device-code grant is disabled, R3-9) are added in later tasks.
 /// </summary>
 internal static class OpsCli
 {
