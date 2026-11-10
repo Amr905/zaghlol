@@ -1,3 +1,6 @@
+import 'dart:convert';
+import 'dart:io';
+
 import 'package:test/test.dart';
 import 'package:zaghlol_parsing/zaghlol_parsing.dart';
 
@@ -20,6 +23,26 @@ void main() {
       ('star separator', 'UBER*TRIP EG', 'Uber Trip', 'UBER TRIP'),
       ('short number kept', '7-ELEVEN 12', '7-Eleven 12', '7-ELEVEN 12'),
       ('digits in name kept', 'B TECH 2', 'B Tech 2', 'B TECH 2'),
+      ('bank misr keeps country word', 'بنك مصر', 'بنك مصر', 'بنك مصر'),
+      (
+        'national bank of egypt',
+        'NATIONAL BANK OF EGYPT',
+        'National Bank Of Egypt',
+        'NATIONAL BANK OF EGYPT',
+      ),
+      (
+        'full country name kept',
+        'TALABAT EGYPT',
+        'Talabat Egypt',
+        'TALABAT EGYPT',
+      ),
+      (
+        'documents mid-name city kept',
+        'CARREFOUR MAADI CITY CENTER EG',
+        'Carrefour Maadi City Center',
+        'CARREFOUR MAADI CITY CENTER',
+      ),
+      ('documents alnum id kept', 'SHOP T123A', 'Shop T123A', 'SHOP T123A'),
       ('first token kept', 'EGYPT AIR', 'Egypt Air', 'EGYPT AIR'),
       ('only noise falls back', 'POS', 'Pos', 'POS'),
       ('city only', 'MAADI', 'Maadi', 'MAADI'),
@@ -62,46 +85,58 @@ void main() {
   });
 
   group('merchantKey', () {
-    final rows = <(String, String, String)>[
-      ('latin', 'Carrefour', 'carrefour'),
-      ('separate article', 'EL EZABY', 'ezaby'),
-      ('attached article', 'ELEZABY', 'ezaby'),
-      ('al article', 'AL RAWSHA', 'rawsha'),
-      ('short word kept', 'ELF', 'elf'),
-      ('short remainder kept', 'ELITE', 'elite'),
-      ('lone el kept', 'EL', 'el'),
-      ('arabic article', 'الاهرام', 'ahram'),
-      ('arabic transliteration', 'كارفور', 'karfwr'),
-      ('arabic digits', 'فرع ٢٣', 'fra23'),
-      ('inner spaces removed', 'KOSHARY EL TAHRIR', 'kosharyeltahrir'),
-      ('punctuation dropped', "McDonald's", 'mcdonalds'),
-      ('digits kept', '7-ELEVEN', '7eleven'),
-      ('tatweel and harakat', 'مَحَمّـد', 'mhmd'),
-      ('alef variants', 'أحمد إبراهيم', 'ahmdabrahym'),
-      ('empty', '', ''),
-    ];
-    for (final (name, input, expected) in rows) {
-      test(name, () => expect(merchantKey(input), expected));
+    final file = [
+      File('test/fixtures/merchant_key_vectors.json'),
+      File('packages/zaghlol_parsing/test/fixtures/merchant_key_vectors.json'),
+    ].firstWhere((f) => f.existsSync());
+    final doc = jsonDecode(file.readAsStringSync()) as Map<String, dynamic>;
+    final list = doc['vectors'] as List<dynamic>;
+    final vectors = list.cast<Map<String, dynamic>>();
+    test('golden vectors are present', () {
+      expect(vectors.length, greaterThanOrEqualTo(30));
+    });
+    for (final v in vectors) {
+      final input = v['input'] as String;
+      final key = v['key'] as String;
+      test('vector: $input', () => expect(merchantKey(input), key));
     }
 
-    test('ELEZABY and EL EZABY share a key', () {
+    test('ELEZABY, EL EZABY and El-Ezaby share a key', () {
       expect(merchantKey('ELEZABY'), merchantKey('EL EZABY'));
       final a = cleanMerchant('ELEZABY');
       final b = cleanMerchant('EL EZABY EG 0042');
       final c = cleanMerchant('El-Ezaby');
+      expect(a.key, 'ezaby');
       expect(a.key, b.key);
       expect(a.key, c.key);
     });
 
-    test('capped at 64 characters', () {
-      expect(merchantKey('a' * 200).length, merchantKeyMaxLength);
+    test('token boundaries survive for prefix matching', () {
+      expect(merchantKey('UBER BREAK'), 'uber break');
+      expect(merchantKey('UBERBREAK'), 'uberbreak');
     });
 
-    test('output is lowercase ASCII, idempotent, no whitespace', () {
-      final inputs = ['CARREFOUR 041', 'صيدليات العزبي', 'Ünï ٣٤', 'EL  EZABY'];
+    test('capped at 64 characters without a trailing space', () {
+      expect(merchantKey('a' * 200).length, merchantKeyMaxLength);
+      final key = merchantKey('${'a' * 63} bb');
+      expect(key, 'a' * 63);
+    });
+
+    test('unmappable input gives an empty key', () {
+      expect(merchantKey('😀'), '');
+      expect(cleanMerchant('😀').key, '');
+    });
+
+    test('article strip is applied once and is not a fixed point', () {
+      expect(merchantKey('ELELEZABY'), 'elezaby');
+      expect(merchantKey('elezaby'), 'ezaby');
+    });
+
+    test('output is words of a-z0-9 with single spaces, stable', () {
+      final inputs = ['CARREFOUR 041', 'صيدليات العزبي', 'Ünï ٣٤', 'EL EZABY'];
       for (final s in inputs) {
         final k = merchantKey(s);
-        expect(RegExp(r'^[a-z0-9]*$').hasMatch(k), isTrue, reason: s);
+        expect(RegExp(r'^[a-z0-9]+( [a-z0-9]+)*$|^$').hasMatch(k), isTrue);
         expect(merchantKey(k), k, reason: s);
       }
     });
