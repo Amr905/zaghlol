@@ -129,18 +129,11 @@ internal sealed class PriceAdminStore(IZaghlolDbContextFactory contexts) : IPric
         RETURNING {Columns}
         """;
 
-    // The feed value serves again; with no feed value the quote is removed (there is nothing to serve).
+    // Ends the override now: the expiry becomes `now`, so the feed value (if any) is served at once and the next worker run resets the
+    // row. ops_rw has no DELETE on price_quotes, and a row stays useful as the record of the last override.
     private const string ClearSql = """
-        WITH cleared AS (
-          UPDATE zaghlol.price_quotes SET
-            price = feed_price, as_of = feed_as_of, source = 'feed', is_override = false, override_expires_at = NULL
-          WHERE symbol = @symbol AND currency = @currency AND is_override AND override_expires_at > @now AND feed_price IS NOT NULL
-          RETURNING 1),
-        removed AS (
-          DELETE FROM zaghlol.price_quotes
-          WHERE symbol = @symbol AND currency = @currency AND is_override AND override_expires_at > @now AND feed_price IS NULL
-          RETURNING 1)
-        SELECT (SELECT count(*) FROM cleared) + (SELECT count(*) FROM removed)
+        UPDATE zaghlol.price_quotes SET override_expires_at = @now
+        WHERE symbol = @symbol AND currency = @currency AND is_override AND override_expires_at > @now
         """;
 
     private const string AuditSql = """
@@ -204,13 +197,13 @@ internal sealed class PriceAdminStore(IZaghlolDbContextFactory contexts) : IPric
         var connection = (NpgsqlConnection)db.Database.GetDbConnection();
         await using var transaction = await connection.BeginTransactionAsync(cancellationToken);
 
-        long changed;
+        int changed;
         await using (var clear = new NpgsqlCommand(ClearSql, connection, transaction))
         {
             clear.Parameters.AddWithValue("symbol", symbol);
             clear.Parameters.AddWithValue("currency", currency);
             clear.Parameters.AddWithValue("now", now.ToUniversalTime());
-            changed = Convert.ToInt64(await clear.ExecuteScalarAsync(cancellationToken), CultureInfo.InvariantCulture);
+            changed = await clear.ExecuteNonQueryAsync(cancellationToken);
         }
 
         if (changed > 0)

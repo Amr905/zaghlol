@@ -99,8 +99,8 @@ public class PricesLiveContractTests(FlagsContractFixture fixture) : IClassFixtu
     public void TheServerSideLimitsAreTheSpecsLimits()
     {
         var request = Spec.Schemas["PriceOverrideRequest"]!["properties"]!;
-        Assert.Equal(PriceOverrideService.ReasonMin, request["reason"]!["minLength"]!.GetValue<int>());
-        Assert.Equal(PriceOverrideService.ReasonMax, request["reason"]!["maxLength"]!.GetValue<int>());
+        Assert.Equal((long)PriceOverrideService.ReasonMin, request["reason"]!["minLength"]!.GetValue<long>());
+        Assert.Equal((long)PriceOverrideService.ReasonMax, request["reason"]!["maxLength"]!.GetValue<long>());
         Assert.False(Spec.Schemas["PriceOverrideRequest"]!["additionalProperties"]!.GetValue<bool>());
 
         // Every symbol and currency the service accepts is also valid by the spec's patterns.

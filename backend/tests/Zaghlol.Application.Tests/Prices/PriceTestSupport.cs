@@ -88,7 +88,7 @@ internal sealed class MemoryPriceStore : IPriceFeedStore, IPriceAdminStore, IPri
     {
         if (Rows.TryGetValue((symbol, currency), out var row) && row.OverrideActive(now))
         {
-            Rows[(symbol, currency)] = row with { IsOverride = false, OverrideExpiresAt = null };
+            Rows[(symbol, currency)] = row with { OverrideExpiresAt = now };
             Audit.Add(("price_override_clear", operatorId));
             return Task.FromResult(true);
         }

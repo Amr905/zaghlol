@@ -215,14 +215,14 @@ public class PriceStoreTests(PriceStoreFixture fixture) : IClassFixture<PriceSto
         Assert.True(cleared);
         Assert.False(again);
         var row = await RowAsync("XAU24_G", "EGP");
-        Assert.False(row.IsOverride);
-        Assert.Equal(4800m, row.Price);
+        Assert.False(row.OverrideActive(T0.AddHours(1)));
+        Assert.Equal(4800m, row.Effective(T0.AddHours(1))!.Price);
         var actions = await Db.QueryAsync(fixture.Database.Superuser, "SELECT action FROM zaghlol.audit_log WHERE operator_id = $1 ORDER BY id", op);
         Assert.Equal(["price_override", "price_override_clear"], actions.Select(a => (string)a[0]!));
     }
 
     [Fact]
-    public async Task ClearingAnOverrideWithNoFeedValueRemovesTheQuote()
+    public async Task ClearingAnOverrideWithNoFeedValueLeavesNothingToServe()
     {
         await ResetAsync();
         var op = await fixture.NewOperatorAsync();
@@ -230,7 +230,7 @@ public class PriceStoreTests(PriceStoreFixture fixture) : IClassFixture<PriceSto
 
         Assert.True(await Admin.ClearOverrideAsync("XAU18_G", "USD", T0.AddHours(1), op, CancellationToken.None));
 
-        Assert.Empty(await Reader.ListGoldAsync(CancellationToken.None));
+        Assert.Null((await RowAsync("XAU18_G", "USD")).Effective(T0.AddHours(1)));
     }
 
     [Fact]
