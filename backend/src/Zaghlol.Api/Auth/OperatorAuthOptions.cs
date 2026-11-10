@@ -9,7 +9,10 @@ internal enum OperatorAuthProfile
     /// <summary>Microsoft Entra ID: an authentication context in <c>acrs</c> can prove phishing-resistant MFA.</summary>
     Entra,
 
-    /// <summary>Google Workspace: tokens carry no proving claim, so the check is always advisory.</summary>
+    /// <summary>
+    /// Google Workspace: tokens carry no proving claim, nor <c>amr</c> or <c>nbf</c>. Refused by
+    /// <see cref="OperatorAuthOptions.Problem"/> until the Google MFA-signal rule is decided (Q1).
+    /// </summary>
     Google,
 }
 
@@ -81,6 +84,11 @@ internal sealed class OperatorAuthOptions
     /// </summary>
     public string? Problem()
     {
+        if (Profile == OperatorAuthProfile.Google)
+        {
+            return "OperatorAuth:Profile=Google is not supported yet: Google ID tokens carry no amr (MFA) or nbf claim, so every operator would be refused; the Google MFA-signal rule awaits the PO's IdP decision (Q1).";
+        }
+
         if (!Uri.TryCreate(Issuer, UriKind.Absolute, out var issuer) || issuer.Scheme != Uri.UriSchemeHttps
             || !string.IsNullOrEmpty(issuer.Query) || !string.IsNullOrEmpty(issuer.Fragment))
         {

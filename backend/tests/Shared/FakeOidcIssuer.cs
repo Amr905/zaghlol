@@ -66,6 +66,8 @@ public sealed class FakeOidcIssuer : IDisposable
     private int discoveryRequests;
     private int jwksRequests;
     private int generation = 1;
+    private TaskCompletionSource? release;
+    private TaskCompletionSource? arrived;
 
     public string Issuer { get; } = DefaultIssuer;
 
@@ -81,9 +83,47 @@ public sealed class FakeOidcIssuer : IDisposable
 
     public int DiscoveryRequests => Volatile.Read(ref discoveryRequests);
 
+    /// <summary>Completes when a request reaches the issuer while <see cref="HoldRequests"/> is in effect.</summary>
+    public Task RequestArrived
+    {
+        get
+        {
+            lock (gate)
+            {
+                return arrived?.Task ?? Task.CompletedTask;
+            }
+        }
+    }
+
     public int JwksRequests => Volatile.Read(ref jwksRequests);
 
     public HttpMessageHandler CreateHandler() => new Handler(this);
+
+    /// <summary>
+    /// Requests wait (honouring the client's cancellation token) until <see cref="ReleaseRequests"/>, so a test can act
+    /// while a fetch is in flight.
+    /// </summary>
+    public void HoldRequests()
+    {
+        lock (gate)
+        {
+            release = new TaskCompletionSource(TaskCreationOptions.RunContinuationsAsynchronously);
+            arrived = new TaskCompletionSource(TaskCreationOptions.RunContinuationsAsynchronously);
+        }
+    }
+
+    /// <summary>Lets held and future requests through.</summary>
+    public void ReleaseRequests()
+    {
+        TaskCompletionSource? held;
+        lock (gate)
+        {
+            held = release;
+            release = null;
+        }
+
+        held?.TrySetResult();
+    }
 
     /// <summary>Replaces both keys with new ones under new key IDs; tokens signed before the rotation stop verifying.</summary>
     public void Rotate()
@@ -252,7 +292,24 @@ public sealed class FakeOidcIssuer : IDisposable
 
     private sealed class Handler(FakeOidcIssuer issuer) : HttpMessageHandler
     {
-        protected override Task<HttpResponseMessage> SendAsync(HttpRequestMessage request, CancellationToken cancellationToken) =>
-            Task.FromResult(issuer.Respond(request));
+        protected override async Task<HttpResponseMessage> SendAsync(HttpRequestMessage request, CancellationToken cancellationToken)
+        {
+            TaskCompletionSource? held;
+            lock (issuer.gate)
+            {
+                held = issuer.release;
+                if (held is not null)
+                {
+                    issuer.arrived?.TrySetResult();
+                }
+            }
+
+            if (held is not null)
+            {
+                await held.Task.WaitAsync(cancellationToken);
+            }
+
+            return issuer.Respond(request);
+        }
     }
 }

@@ -255,6 +255,94 @@ public sealed class OidcOperatorTokenValidatorTests : IDisposable
     }
 
     [Fact]
+    public async Task ACallerThatAbortsMidRefreshDoesNotCancelItOrBurnTheThrottleWindow()
+    {
+        Assert.NotNull(await kit.ValidateAsync(kit.Mint(new OperatorTokenSpec { Subject = Subject })));
+        Assert.Equal(1, kit.Issuer.DiscoveryRequests);
+
+        kit.Issuer.Rotate();
+        kit.Clock.Advance(OidcKeyCache.RefreshThrottle);
+
+        // An anonymous client sends a made-up kid and disconnects while the forced refresh is in flight (S-1).
+        kit.Issuer.HoldRequests();
+        using var aborted = new CancellationTokenSource();
+        var attack = kit.Validator.ValidateAsync(
+            kit.Mint(new OperatorTokenSpec { Subject = Subject, Kid = "made-up" }), aborted.Token).AsTask();
+        await kit.Issuer.RequestArrived.WaitAsync(TimeSpan.FromSeconds(10));
+        await aborted.CancelAsync();
+        await Assert.ThrowsAnyAsync<OperationCanceledException>(() => attack);
+
+        kit.Issuer.ReleaseRequests();
+        await kit.Keys.PendingRefresh.WaitAsync(TimeSpan.FromSeconds(10));
+
+        // The refresh completed anyway: the rotated key is known without another fetch.
+        Assert.Equal(2, kit.Issuer.DiscoveryRequests);
+        Assert.Equal(2, kit.Issuer.JwksRequests);
+        Assert.Equal<DateTimeOffset?>(kit.Clock.Now, kit.Keys.FetchedAt);
+        kit.Clock.Advance(TimeSpan.FromMinutes(1));
+        Assert.NotNull(await kit.ValidateAsync(kit.Mint(new OperatorTokenSpec { Subject = Subject })));
+
+        // And it counted: another unknown kid inside the 5-minute window starts no fetch.
+        Assert.Null(await kit.ValidateAsync(kit.Mint(new OperatorTokenSpec { Subject = Subject, Kid = "made-up-2" })));
+        kit.Clock.Advance(TimeSpan.FromMinutes(3));
+        Assert.Null(await kit.ValidateAsync(kit.Mint(new OperatorTokenSpec { Subject = Subject, Kid = "made-up-3" })));
+        Assert.Equal(2, kit.Issuer.DiscoveryRequests);
+        Assert.Equal(2, kit.Issuer.JwksRequests);
+    }
+
+    [Fact]
+    public async Task RepeatedAbortedRequestsCannotStarveTheDailyRefresh()
+    {
+        Assert.NotNull(await kit.ValidateAsync(kit.Mint(new OperatorTokenSpec { Subject = Subject })));
+
+        // Ten days, past the 7-day last-good limit: each day the IdP rotates and an attacker is first in, aborting every
+        // second while the refresh is held. The legitimate operator must still get in with the current key.
+        for (var day = 1; day <= 10; day++)
+        {
+            kit.Clock.Advance(TimeSpan.FromHours(24));
+            kit.Issuer.Rotate();
+            kit.Issuer.HoldRequests();
+
+            for (var attempt = 0; attempt < 3; attempt++)
+            {
+                using var aborted = new CancellationTokenSource();
+                var attack = kit.Validator.ValidateAsync(
+                    kit.Mint(new OperatorTokenSpec { Subject = Subject, Kid = "made-up-" + attempt }), aborted.Token).AsTask();
+                await kit.Issuer.RequestArrived.WaitAsync(TimeSpan.FromSeconds(10));
+                await aborted.CancelAsync();
+                await Assert.ThrowsAnyAsync<OperationCanceledException>(() => attack);
+            }
+
+            kit.Issuer.ReleaseRequests();
+            await kit.Keys.PendingRefresh.WaitAsync(TimeSpan.FromSeconds(10));
+
+            Assert.Equal<DateTimeOffset?>(kit.Clock.Now, kit.Keys.FetchedAt);
+            Assert.Equal(day + 1, kit.Issuer.DiscoveryRequests);
+            Assert.NotNull(await kit.ValidateAsync(kit.Mint(new OperatorTokenSpec { Subject = Subject })));
+        }
+    }
+
+    [Fact]
+    public async Task ConcurrentUnknownKidsShareOneInFlightRefresh()
+    {
+        Assert.NotNull(await kit.ValidateAsync(kit.Mint(new OperatorTokenSpec { Subject = Subject })));
+        kit.Issuer.Rotate();
+        kit.Clock.Advance(OidcKeyCache.RefreshThrottle);
+
+        kit.Issuer.HoldRequests();
+        var callers = Enumerable.Range(0, 8)
+            .Select(_ => kit.ValidateAsync(kit.Mint(new OperatorTokenSpec { Subject = Subject })))
+            .ToArray();
+        await kit.Issuer.RequestArrived.WaitAsync(TimeSpan.FromSeconds(10));
+        kit.Issuer.ReleaseRequests();
+
+        var identities = await Task.WhenAll(callers).WaitAsync(TimeSpan.FromSeconds(10));
+        Assert.All(identities, identity => Assert.NotNull(identity));
+        Assert.Equal(2, kit.Issuer.DiscoveryRequests);
+        Assert.Equal(2, kit.Issuer.JwksRequests);
+    }
+
+    [Fact]
     public async Task ADisabledOperatorLosesAccessWithinThirtySeconds()
     {
         kit.Directory.Add("leaver", OperatorRoles.FlagsAdmin);
