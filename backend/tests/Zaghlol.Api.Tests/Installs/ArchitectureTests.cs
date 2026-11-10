@@ -3,6 +3,10 @@ using System.Runtime.CompilerServices;
 using System.Text;
 using System.Text.Json;
 using System.Text.Json.Serialization.Metadata;
+using Microsoft.AspNetCore.Hosting;
+using Microsoft.AspNetCore.Mvc.Testing;
+using Microsoft.AspNetCore.Routing;
+using Microsoft.Extensions.DependencyInjection;
 using Zaghlol.Api.Json;
 using Zaghlol.Domain;
 
@@ -69,6 +73,38 @@ public class ArchitectureTests
         Assert.NotEmpty(types);
         Assert.Empty(referenced.Intersect(forbidden, StringComparer.Ordinal));
         Assert.Null(typeof(ApiPipeline).Assembly.GetReferencedAssemblies().FirstOrDefault(a => a.Name == "Zaghlol.Ops"));
+    }
+
+    [Fact]
+    public void IdempotentHandlersNeverTakeTheInstallTokenRotator()
+    {
+        // T-130 S-3: a stored, replayable body must never carry a rotated install token.
+        using var kms = Zaghlol.Testing.FakeKms.CreateDefault();
+        using var factory = new WebApplicationFactory<Program>().WithWebHostBuilder(builder =>
+        {
+            const string Unreachable = "Host=127.0.0.1;Port=1;Database=none;Username=none";
+            builder.UseSetting("ConnectionStrings:App", Unreachable);
+            builder.UseSetting("ConnectionStrings:Admin", Unreachable);
+            foreach (var (key, value) in kms.Settings())
+            {
+                builder.UseSetting(key, value);
+            }
+
+            builder.ConfigureServices(services => kms.Use(services));
+        });
+        using var client = factory.CreateClient();
+
+        var idempotent = factory.Services.GetRequiredService<EndpointDataSource>().Endpoints
+            .Where(e => e.Metadata.GetMetadata<Idempotency.IdempotentEndpointMetadata>() is not null)
+            .ToList();
+
+        Assert.Contains(idempotent, e => e.Metadata.GetMetadata<IEndpointNameMetadata>()?.EndpointName == "verifyPurchase");
+        Assert.All(idempotent, endpoint =>
+        {
+            var handler = endpoint.Metadata.GetMetadata<MethodInfo>();
+            Assert.NotNull(handler);
+            Assert.DoesNotContain(handler.GetParameters(), p => p.ParameterType == typeof(Auth.IInstallTokenRotator));
+        });
     }
 
     [Fact]

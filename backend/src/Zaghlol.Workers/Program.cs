@@ -5,6 +5,7 @@ using Zaghlol.Infrastructure.Logging;
 using Zaghlol.Infrastructure.Observability;
 using Zaghlol.Infrastructure.Persistence;
 using Zaghlol.Infrastructure.Prices;
+using Zaghlol.Infrastructure.Purchases;
 using Zaghlol.Infrastructure.Retention;
 using Zaghlol.Workers;
 
@@ -42,6 +43,9 @@ builder.Services.AddHostedService<ContributionAggregatorService>();
 // RetentionPurger (T-139): daily, Retention:IntervalHours / Retention:BatchSize.
 builder.Services.AddZaghlolRetention();
 builder.Services.AddHostedService<RetentionPurgerService>();
+// Google acknowledge sweeper (T-130): every 15 min, one instance across replicas (advisory lock), Purchases:Google:* config.
+builder.Services.AddZaghlolPlayAckSweeper();
+builder.Services.AddHostedService<PlayAckSweeperService>();
 
 using var host = builder.Build();
 await host.RunAsync();

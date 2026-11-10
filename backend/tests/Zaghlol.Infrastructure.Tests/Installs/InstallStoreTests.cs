@@ -119,53 +119,133 @@ public class InstallStoreTests(InstallStoreFixture fixture) : IClassFixture<Inst
     }
 
     [Fact]
-    public async Task AnExpiredRecordIsNeverServedAndIsReplacedOnSave()
+    public async Task AClaimIsCompletedIntoAFinalRowThatIsServedOnlyUntilItExpires()
     {
-        var id = NewInstallId();
+        var id = await RegisteredInstallAsync();
         const string Key = "01JZAGHLLTSTKEY0000000000A";
-        await using (var session = await Idempotency.TryBeginAsync(id, IdempotentOperation.VerifyPurchase, Key, CancellationToken.None))
-        {
-            Assert.NotNull(session);
-            await session.SaveAsync(Hash("body"), 200, new byte[] { 1, 2, 3 }, Now, Now.AddHours(24), CancellationToken.None);
-        }
 
-        await using (var session = await Idempotency.TryBeginAsync(id, IdempotentOperation.VerifyPurchase, Key, CancellationToken.None))
-        {
-            Assert.NotNull(session);
-            var live = await session.FindLiveAsync(Now.AddHours(23), CancellationToken.None);
-            Assert.Equal(200, live?.Status);
+        var claim = await Idempotency.TryClaimAsync(id, IdempotentOperation.VerifyPurchase, Key, Hash("body"), Now, CancellationToken.None);
+        Assert.Equal(IdempotencyClaimKind.Claimed, claim.Kind);
+        Assert.False(claim.TakenOver);
+        Assert.True(await Idempotency.CompleteAsync(id, IdempotentOperation.VerifyPurchase, Key, claim.ClaimId, Hash("body"), 200, new byte[] { 1, 2, 3 }, Now.AddHours(24), CancellationToken.None));
 
-            // Past expires_at, before any purge: never served (R3-6(b)).
-            Assert.Null(await session.FindLiveAsync(Now.AddHours(24), CancellationToken.None));
-            await session.SaveAsync(Hash("other"), 409, new byte[] { 9 }, Now.AddHours(25), Now.AddHours(49), CancellationToken.None);
-        }
+        var live = await Idempotency.TryClaimAsync(id, IdempotentOperation.VerifyPurchase, Key, Hash("body"), Now.AddHours(23), CancellationToken.None);
+        Assert.Equal(IdempotencyClaimKind.Stored, live.Kind);
+        Assert.Equal(200, live.Stored!.Status);
+        Assert.Equal(Hash("body"), live.Stored.BodySha256.ToArray());
 
-        await using (var session = await Idempotency.TryBeginAsync(id, IdempotentOperation.VerifyPurchase, Key, CancellationToken.None))
+        // Past expires_at, before any purge: never served (R3-6(b)); the key is claimed afresh instead.
+        var later = await Idempotency.TryClaimAsync(id, IdempotentOperation.VerifyPurchase, Key, Hash("other"), Now.AddHours(24), CancellationToken.None);
+        Assert.Equal(IdempotencyClaimKind.Claimed, later.Kind);
+        Assert.False(later.TakenOver);
+    }
+
+    [Fact]
+    public async Task ASecondClaimOnTheSameKeyIsInProgressWhileTheFirstHoldsIt()
+    {
+        var id = await RegisteredInstallAsync();
+        var other = await RegisteredInstallAsync();
+        const string Key = "01JZAGHLLTSTKEY0000000000B";
+
+        var first = await Idempotency.TryClaimAsync(id, IdempotentOperation.SignIn, Key, Hash("b"), Now, CancellationToken.None);
+        var second = await Idempotency.TryClaimAsync(id, IdempotentOperation.SignIn, Key, Hash("b"), Now.AddSeconds(30), CancellationToken.None);
+
+        Assert.Equal(IdempotencyClaimKind.Claimed, first.Kind);
+        Assert.Equal(IdempotencyClaimKind.InProgress, second.Kind);
+
+        // Another install's same key, and another operation, are different keys.
+        Assert.Equal(IdempotencyClaimKind.Claimed, (await Idempotency.TryClaimAsync(other, IdempotentOperation.SignIn, Key, Hash("b"), Now, CancellationToken.None)).Kind);
+        Assert.Equal(IdempotencyClaimKind.Claimed, (await Idempotency.TryClaimAsync(id, IdempotentOperation.VerifyPurchase, Key, Hash("b"), Now, CancellationToken.None)).Kind);
+    }
+
+    [Fact]
+    public async Task ConcurrentClaimsOfOneKeyHaveExactlyOneWinner()
+    {
+        var id = await RegisteredInstallAsync();
+        for (var round = 0; round < 10; round++)
         {
-            var replaced = await session!.FindLiveAsync(Now.AddHours(26), CancellationToken.None);
-            Assert.Equal(409, replaced?.Status);
-            Assert.Equal(Hash("other"), replaced!.BodySha256.ToArray());
+            var key = "01JZAGHLLTSTKEYRACE00000" + round.ToString("00", System.Globalization.CultureInfo.InvariantCulture);
+            var claims = await Task.WhenAll(Enumerable.Range(0, 8).Select(_ =>
+                Idempotency.TryClaimAsync(id, IdempotentOperation.VerifyPurchase, key, Hash("race"), Now, CancellationToken.None)));
+
+            Assert.Single(claims, c => c.Kind == IdempotencyClaimKind.Claimed);
+            Assert.All(claims.Where(c => c.Kind != IdempotencyClaimKind.Claimed), c => Assert.Equal(IdempotencyClaimKind.InProgress, c.Kind));
         }
     }
 
     [Fact]
-    public async Task ASecondSessionOnTheSameKeyIsRefusedWhileTheFirstHoldsIt()
+    public async Task AnExpiredClaimFromACrashedRequestIsTakenOverAndItsLateCompletionIsLost()
+    {
+        var id = await RegisteredInstallAsync();
+        const string Key = "01JZAGHLLTSTKEY0000000000C";
+        var crashed = await Idempotency.TryClaimAsync(id, IdempotentOperation.VerifyPurchase, Key, Hash("b"), Now, CancellationToken.None);
+
+        var takeover = await Idempotency.TryClaimAsync(id, IdempotentOperation.VerifyPurchase, Key, Hash("b"), Now + IdempotencyStore.Lease, CancellationToken.None);
+
+        Assert.Equal(IdempotencyClaimKind.Claimed, takeover.Kind);
+        Assert.True(takeover.TakenOver);
+        Assert.False(await Idempotency.CompleteAsync(id, IdempotentOperation.VerifyPurchase, Key, crashed.ClaimId, Hash("b"), 200, new byte[] { 7 }, Now.AddHours(24), CancellationToken.None));
+        Assert.True(await Idempotency.CompleteAsync(id, IdempotentOperation.VerifyPurchase, Key, takeover.ClaimId, Hash("b"), 422, new byte[] { 8 }, Now.AddHours(24), CancellationToken.None));
+        Assert.Equal(422, (await Idempotency.TryClaimAsync(id, IdempotentOperation.VerifyPurchase, Key, Hash("b"), Now.AddMinutes(5), CancellationToken.None)).Stored!.Status);
+    }
+
+    [Fact]
+    public async Task AReleasedClaimLetsTheNextRequestRunAtOnceAndAnotherRequestCantReleaseIt()
+    {
+        var id = await RegisteredInstallAsync();
+        const string Key = "01JZAGHLLTSTKEY0000000000D";
+        var first = await Idempotency.TryClaimAsync(id, IdempotentOperation.VerifyPurchase, Key, Hash("b"), Now, CancellationToken.None);
+
+        await Idempotency.ReleaseAsync(id, IdempotentOperation.VerifyPurchase, Key, Guid.NewGuid(), CancellationToken.None);
+        Assert.Equal(IdempotencyClaimKind.InProgress, (await Idempotency.TryClaimAsync(id, IdempotentOperation.VerifyPurchase, Key, Hash("b"), Now, CancellationToken.None)).Kind);
+
+        await Idempotency.ReleaseAsync(id, IdempotentOperation.VerifyPurchase, Key, first.ClaimId, CancellationToken.None);
+        Assert.Equal(IdempotencyClaimKind.Claimed, (await Idempotency.TryClaimAsync(id, IdempotentOperation.VerifyPurchase, Key, Hash("b"), Now, CancellationToken.None)).Kind);
+    }
+
+    [Fact]
+    public async Task ADeletedInstallCantClaimAndADeleteRacingAClaimLeavesNoRow()
+    {
+        // S-4: the claim and the completion insert only while the install exists and isn't deleted.
+        var id = await RegisteredInstallAsync();
+        const string Key = "01JZAGHLLTSTKEY0000000000E";
+        var claim = await Idempotency.TryClaimAsync(id, IdempotentOperation.VerifyPurchase, Key, Hash("b"), Now, CancellationToken.None);
+        Assert.Equal(IdempotencyClaimKind.Claimed, claim.Kind);
+
+        await Installs.DeleteAsync(id, Now, CancellationToken.None);
+
+        Assert.False(await Idempotency.CompleteAsync(id, IdempotentOperation.VerifyPurchase, Key, claim.ClaimId, Hash("b"), 200, new byte[] { 1 }, Now.AddHours(24), CancellationToken.None));
+        Assert.Equal(IdempotencyClaimKind.NoInstall, (await Idempotency.TryClaimAsync(id, IdempotentOperation.VerifyPurchase, Key, Hash("b"), Now, CancellationToken.None)).Kind);
+        Assert.Equal(0L, await RowsOf(id));
+
+        // Many deletes racing many claims: never a row left for a deleted install.
+        for (var round = 0; round < 10; round++)
+        {
+            var racer = await RegisteredInstallAsync();
+            var claims = Enumerable.Range(0, 4).Select(i => Idempotency.TryClaimAsync(
+                racer, IdempotentOperation.VerifyPurchase, "01JZAGHLLTSTKEYDEL000000" + i.ToString("00", System.Globalization.CultureInfo.InvariantCulture), Hash("b"), Now, CancellationToken.None));
+            var delete = Installs.DeleteAsync(racer, Now, CancellationToken.None);
+            await Task.WhenAll([.. claims, delete]);
+            Assert.Equal(0L, await RowsOf(racer));
+        }
+    }
+
+    private async Task<InstallId> RegisteredInstallAsync()
     {
         var id = NewInstallId();
-        const string Key = "01JZAGHLLTSTKEY0000000000B";
-        await using var first = await Idempotency.TryBeginAsync(id, IdempotentOperation.SignIn, Key, CancellationToken.None);
-        Assert.NotNull(first);
+        Assert.Equal(
+            RegistrationOutcome.Created,
+            await Installs.RegisterAsync(id, Platform.Android, "1.0.0", Hash("token-" + id), Hash("k" + id), Hash("b" + id), Now, CancellationToken.None));
+        return id;
+    }
 
-        await using (var second = await Idempotency.TryBeginAsync(id, IdempotentOperation.SignIn, Key, CancellationToken.None))
-        {
-            Assert.Null(second);
-        }
-
-        // Another install's same key, and another operation, are different keys.
-        await using var otherInstall = await Idempotency.TryBeginAsync(NewInstallId(), IdempotentOperation.SignIn, Key, CancellationToken.None);
-        await using var otherOperation = await Idempotency.TryBeginAsync(id, IdempotentOperation.VerifyPurchase, Key, CancellationToken.None);
-        Assert.NotNull(otherInstall);
-        Assert.NotNull(otherOperation);
+    private async Task<long> RowsOf(InstallId id)
+    {
+        await using var connection = new NpgsqlConnection(fixture.Database.Superuser);
+        await connection.OpenAsync();
+        await using var command = new NpgsqlCommand("SELECT count(*) FROM zaghlol.idempotency_records WHERE install_id = @i", connection);
+        command.Parameters.AddWithValue("i", id.Value);
+        return (long)(await command.ExecuteScalarAsync())!;
     }
 
     [Fact]

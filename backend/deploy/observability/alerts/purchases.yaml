@@ -3,13 +3,32 @@ groups:
   - name: zaghlol-purchases
     rules:
       - alert: ZaghlolPurchaseUnackedOver48h
-        expr: max(zaghlol_purchase_unacked_oldest_age_seconds) > 172800
+        # Recomputed by the acknowledge sweeper every 15 minutes over ackable rows (T-130).
+        expr: max(zaghlol_purchase_unacked{age="ge_48h"}) > 0
         for: 5m
         labels:
           severity: page
         annotations:
           summary: "A purchase has been unacknowledged for more than 48 hours"
-          description: "Google Play refunds unacknowledged purchases after 3 days. Run the acknowledge sweeper and check the Play API."
+          description: "Google Play refunds unacknowledged purchases after 3 days. Check the sweeper run log and the Play API outcome counters."
+
+      - alert: ZaghlolAuditPurchaseUnacked48h
+        expr: sum(increase(zaghlol_audit_alert_fired_total{rule="purchase_unacked_48h"}[30m])) > 0
+        labels:
+          severity: page
+        annotations:
+          summary: "The acknowledge sweeper found a purchase unacknowledged for 48 hours or more"
+          description: "Look up the purchase by its UUID; acknowledge it before Google refunds it at 72 hours (BR-GOLD-06)."
+          log_query: 'msg="audit_alert" rule="purchase_unacked_48h" (carries the purchase UUID)'
+
+      - alert: ZaghlolStoreAuthError
+        # 401/403 from the Play Developer API: our credential or its Play Console permissions are wrong, never the user's fault.
+        expr: sum by (api) (increase(zaghlol_store_call_total{outcome="auth_error"}[10m])) > 0
+        labels:
+          severity: page
+        annotations:
+          summary: "Store API calls are refused with 401/403 ({{ $labels.api }})"
+          description: "Verify answers 502 and Gold purchases stay pending. Check the Google service identity (workload identity or the key in the secrets manager) and its Play Console permissions."
 
       - alert: ZaghlolPurchaseVerifyFailureRateHigh
         expr: |

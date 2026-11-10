@@ -718,6 +718,10 @@ namespace Zaghlol.Infrastructure.Persistence.Migrations
                         .HasColumnType("bytea")
                         .HasColumnName("body_sha256");
 
+                    b.Property<Guid?>("ClaimId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("claim_id");
+
                     b.Property<DateTimeOffset>("ExpiresAt")
                         .HasColumnType("timestamp with time zone")
                         .HasColumnName("expires_at");
@@ -745,9 +749,13 @@ namespace Zaghlol.Infrastructure.Persistence.Migrations
                         {
                             t.HasCheckConstraint("ck_idempotency_records_body_sha256_length", "octet_length(body_sha256) = 32");
 
+                            t.HasCheckConstraint("ck_idempotency_records_claim", "(status = 0) = (claim_id IS NOT NULL)");
+
                             t.HasCheckConstraint("ck_idempotency_records_idempotency_key_length", "char_length(idempotency_key) = 26");
 
                             t.HasCheckConstraint("ck_idempotency_records_operation_id", "operation_id IN ('verifyPurchase','signIn')");
+
+                            t.HasCheckConstraint("ck_idempotency_records_status", "status = 0 OR status BETWEEN 200 AND 299 OR status IN (409, 422)");
                         });
                 });
 
