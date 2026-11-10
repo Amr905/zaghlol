@@ -60,7 +60,7 @@ public class SyncServiceTests
     [Fact]
     public async Task InsideTheWindowTheAnswerIsTheThrottleAndNothingIsReadOrWritten()
     {
-        store.Install = store.Install with { LastSyncAt = T0.AddHours(-23).AddMinutes(-59) };
+        store.Install = store.Install! with { LastSyncAt = T0.AddHours(-23).AddMinutes(-59) };
         catalog.Throws = true; // proves no source is read
 
         var result = Assert.IsType<SyncThrottled>(await SyncAsync(Request(contributions: [new SyncContribution("koshary", "nbe", "dining")])));
@@ -76,7 +76,7 @@ public class SyncServiceTests
     [Fact]
     public async Task AtTheEndOfTheWindowTheSyncIsFullAgain()
     {
-        store.Install = store.Install with { LastSyncAt = T0.AddHours(-24) };
+        store.Install = store.Install! with { LastSyncAt = T0.AddHours(-24) };
 
         Assert.IsType<SyncCompleted>(await SyncAsync(Request()));
     }
@@ -165,7 +165,7 @@ public class SyncServiceTests
         var result = Assert.IsType<SyncCompleted>(await SyncAsync(Request()));
 
         Assert.False(result.Flags!.Values["smart_roi"]);
-        Assert.Equal(new[] { "smart_roi" }, telemetry.InvalidFlags);
+        Assert.Equal("smart_roi", Assert.Single(telemetry.InvalidFlags));
     }
 
     [Fact]
@@ -175,7 +175,7 @@ public class SyncServiceTests
 
         await Assert.ThrowsAsync<SyncSourceUnavailableException>(() => SyncAsync(Request()));
         Assert.Empty(store.Claims);
-        Assert.Equal(new[] { SyncTags.CatalogBlock }, telemetry.Failures);
+        Assert.Equal(SyncTags.CatalogBlock, Assert.Single(telemetry.Failures));
 
         catalog.Throws = false;
         Assert.IsType<SyncCompleted>(await SyncAsync(Request()));
@@ -198,7 +198,7 @@ public class SyncServiceTests
 
         await Assert.ThrowsAsync<SyncSourceUnavailableException>(() => SyncAsync(Request()));
         Assert.Empty(store.Claims);
-        Assert.Equal(new[] { SyncTags.FlagsBlock }, telemetry.Failures);
+        Assert.Equal(SyncTags.FlagsBlock, Assert.Single(telemetry.Failures));
     }
 
     [Fact]
@@ -210,7 +210,7 @@ public class SyncServiceTests
 
         Assert.Null(result.Prices);
         Assert.Single(store.Claims);
-        Assert.Equal(new[] { SyncTags.PricesBlock }, telemetry.Failures);
+        Assert.Equal(SyncTags.PricesBlock, Assert.Single(telemetry.Failures));
     }
 
     [Fact]
@@ -220,7 +220,7 @@ public class SyncServiceTests
 
         await Assert.ThrowsAsync<SyncSourceUnavailableException>(() => SyncAsync(Request()));
         Assert.Empty(store.Claims);
-        Assert.Equal(new[] { SyncTags.EntitlementBlock }, telemetry.Failures);
+        Assert.Equal(SyncTags.EntitlementBlock, Assert.Single(telemetry.Failures));
     }
 
     [Fact]

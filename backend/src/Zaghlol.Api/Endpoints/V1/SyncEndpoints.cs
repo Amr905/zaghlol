@@ -1,6 +1,7 @@
 using System.Globalization;
 using System.Text.Json;
 using System.Text.RegularExpressions;
+using Microsoft.AspNetCore.Http.HttpResults;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Primitives;
 using Zaghlol.Api.Auth;
@@ -175,7 +176,7 @@ internal static partial class SyncEndpoints
         },
     };
 
-    private static IResult Unavailable(HttpContext context)
+    private static ProblemHttpResult Unavailable(HttpContext context)
     {
         context.Response.Headers.RetryAfter = RetryAfterSeconds.ToString(CultureInfo.InvariantCulture);
         return TypedResults.Problem(

@@ -60,7 +60,7 @@ public class FlagStrictRulesTests
 
         Assert.False(snapshot.Values["zakah"]);
         Assert.True(snapshot.Values["smart_roi"]);
-        Assert.Equal(new[] { "zakah" }, snapshot.InvalidRules);
+        Assert.Equal("zakah", Assert.Single(snapshot.InvalidRules));
         Assert.Equal(6, snapshot.Version);
         Assert.False(FlagEvaluator.IsEnabled(corrupt, "ios", "9.9.9", One));
     }
