@@ -16,6 +16,8 @@ import 'dart:io' show FileSystemException;
 import 'dart:math';
 import 'dart:typed_data';
 
+import 'package:flutter/foundation.dart' show debugPrint;
+
 import '../crypto/secret_store.dart';
 import 'db_file_set.dart';
 
@@ -543,6 +545,9 @@ final class KeyBootstrap {
     }
     final key = DbKeyMaterial.copyOf(stored);
     stored.fillRange(0, stored.length, 0);
+    // NEGATIVE PROOF (b): leaks the key into the log.
+    // ignore: no_print_outside_debug
+    debugPrint('proof-b ${key.toRawKeyHex()}');
     return KeyCreated(key, reason, lease);
   }
 }
