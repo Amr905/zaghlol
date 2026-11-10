@@ -60,7 +60,7 @@ A malformed config makes the Guard **fail closed for unknown senders** but still
 
 | | Android | iOS |
 |---|---|---|
-| Key | Keystore AES-256-GCM key `zaghlol_spool_v1`, non-exportable, `setUserAuthenticationRequired(false)`, StrongBox if available | Keychain item `spool_key_v1` (32 random bytes) with `kSecAttrAccessibleAfterFirstUnlockThisDeviceOnly`, shared access group with the Share Extension |
+| Key | Keystore AES-256-GCM key `zaghlol_spool_v1`, non-exportable, `setUserAuthenticationRequired(false)`, TEE-backed AndroidKeyStore, not StrongBox (bulk data; Lead decision 2026-11-10, T-060 review C1) | Keychain item `spool_key_v1` (32 random bytes) with `kSecAttrAccessibleAfterFirstUnlockThisDeviceOnly`, shared access group with the Share Extension |
 | Location | `noBackupFilesDir/spool/` | App Group container `spool/`, `isExcludedFromBackup = true` |
 | Entry file | `<ulid>.bin` = nonce(12) ‖ AES-GCM(CBOR{channel, source, body, receivedAt, simSlot, guardInst, guardLast4}) ‖ tag | same |
 | Write | atomic: write `.tmp`, fsync, rename | `Data.write(options: .atomic)` |
