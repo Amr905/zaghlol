@@ -62,17 +62,19 @@ public sealed class SyncService(
             () => entitlement.ComposeAsync(new SyncEntitlementContext(installId, request.EntitlementIssuedAt, now), cancellationToken));
 
         // Intake preparation: CPU only, then one keyed hash when there is anything to store.
+        // Nothing is counted until the claim wins (FU-061): a call that turns into the throttle answer, or a retry after a 503,
+        // would otherwise count the same items again.
         var intake = SyncIntake.Prepare(request.Contributions, request.BankRequests, categoryCodes);
-        ReportDrops(SyncTags.Contribution, intake.ContributionDrops);
-        ReportDrops(SyncTags.BankRequest, intake.BankRequestDrops);
+        var hasherDroppedContributions = 0;
+        var hasherDroppedBankRequests = 0;
         byte[]? installHash = null;
         if (!intake.IsEmpty)
         {
             installHash = await HashAsync(installId, cancellationToken);
             if (installHash is null)
             {
-                telemetry.Intake(SyncTags.Contribution, SyncTags.DroppedHasher, intake.Contributions.Count);
-                telemetry.Intake(SyncTags.BankRequest, SyncTags.DroppedHasher, intake.BankRequests.Count);
+                hasherDroppedContributions = intake.Contributions.Count;
+                hasherDroppedBankRequests = intake.BankRequests.Count;
                 intake = intake with { Contributions = [], BankRequests = [] };
             }
         }
@@ -96,6 +98,10 @@ public sealed class SyncService(
             return current is null ? SyncInstallGone.Instance : Throttle(now, current.LastSyncAt, window);
         }
 
+        ReportDrops(SyncTags.Contribution, intake.ContributionDrops);
+        ReportDrops(SyncTags.BankRequest, intake.BankRequestDrops);
+        telemetry.Intake(SyncTags.Contribution, SyncTags.DroppedHasher, hasherDroppedContributions);
+        telemetry.Intake(SyncTags.BankRequest, SyncTags.DroppedHasher, hasherDroppedBankRequests);
         telemetry.Intake(SyncTags.Contribution, SyncTags.Accepted, claim.ContributionsInserted);
         telemetry.Intake(SyncTags.Contribution, SyncTags.Duplicate, intake.Contributions.Count - claim.ContributionsInserted);
         telemetry.Intake(SyncTags.BankRequest, SyncTags.Accepted, claim.BankRequestsInserted);
@@ -152,7 +158,7 @@ public sealed class SyncService(
         catch (Exception ex) when (ex is not OperationCanceledException)
 #pragma warning restore CA1031
         {
-            telemetry.BlockFailed(SyncTags.PricesBlock);
+            telemetry.BlockFailed(SyncTags.PricesBlock, ex.GetType().Name);
             return null;
         }
     }
@@ -180,7 +186,7 @@ public sealed class SyncService(
         }
         catch (Exception ex) when (ex is not OperationCanceledException)
         {
-            telemetry.BlockFailed(block);
+            telemetry.BlockFailed(block, ex.GetType().Name);
             throw new SyncSourceUnavailableException(SyncSourceUnavailableException.DefaultMessage, ex);
         }
     }

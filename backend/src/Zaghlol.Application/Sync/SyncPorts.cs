@@ -64,6 +64,13 @@ public static class SyncTags
     public const string Throttled = "throttled";
     public const string Rejected = "rejected";
 
+    /// <summary>A 503: a required source or the database failed before anything was written (FU-061).</summary>
+    public const string Unavailable = "unavailable";
+
+    /// <summary>Why a sync was <see cref="Unavailable"/>: a required block (catalog, flags, entitlement) or the database.</summary>
+    public const string CauseSource = "source";
+    public const string CauseDatabase = "database";
+
     public const string Contribution = "contribution";
     public const string BankRequest = "bank_request";
 
@@ -78,7 +85,7 @@ public static class SyncTags
     public const string PricesBlock = "prices";
     public const string EntitlementBlock = "entitlement";
 
-    public static IReadOnlyList<string> Outcomes { get; } = [Ok, Throttled, Rejected];
+    public static IReadOnlyList<string> Outcomes { get; } = [Ok, Throttled, Rejected, Unavailable];
 
     public static IReadOnlyList<string> CatalogModeValues { get; } = [CatalogModes.None, CatalogModes.Delta, CatalogModes.Full];
 
@@ -101,7 +108,12 @@ public interface ISyncTelemetry
 
     void Intake(string kind, string result, int count);
 
-    void BlockFailed(string block);
+    /// <param name="block">A value of <see cref="SyncTags.Blocks"/>.</param>
+    /// <param name="cause">The exception type name only (never its message), for the log.</param>
+    void BlockFailed(string block, string cause);
+
+    /// <summary>A 503: counted as outcome <see cref="SyncTags.Unavailable"/> and logged with a fixed <see cref="SyncTags.CauseSource"/> or <see cref="SyncTags.CauseDatabase"/>.</summary>
+    void Unavailable(string cause);
 
     void FlagRulesInvalid(string flag);
 

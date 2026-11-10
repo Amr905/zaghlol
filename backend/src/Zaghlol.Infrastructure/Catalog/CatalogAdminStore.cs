@@ -47,6 +47,23 @@ internal sealed class CatalogAdminStore(
         await using var transaction = await db.Database.BeginTransactionAsync(cancellationToken);
         await LockAsync(db, cancellationToken);
 
+        var change = await CreateMerchantInAsync(db, fields, cancellationToken);
+        if (change.Status != DraftStatus.Ok)
+        {
+            return change;
+        }
+
+        await AuditAsync(db, operatorId, CatalogDraftAction.Create, change.Op!.Key, cancellationToken);
+        await transaction.CommitAsync(cancellationToken);
+        return change;
+    }
+
+    /// <summary>
+    /// The create inside the caller's transaction, which already holds <see cref="LockAsync"/> (T-129 promotes a contribution in
+    /// its own audited transaction). Saves the rows; the caller audits and commits.
+    /// </summary>
+    internal async Task<DraftChange> CreateMerchantInAsync(ZaghlolDbContext db, CatalogFields fields, CancellationToken cancellationToken)
+    {
         if (!await IsLiveAsync(db, CatalogEntity.Categories, fields.Category!, cancellationToken)
             || await CanonicalTakenAsync(db, fields.Canonical!, string.Empty, cancellationToken))
         {
@@ -56,8 +73,6 @@ internal sealed class CatalogAdminStore(
         var id = await AllocateMerchantAsync(db, fields, clock.GetUtcNow(), cancellationToken);
         var key = CatalogKeys.FromStorage(CatalogEntity.Merchants, id.ToString(CultureInfo.InvariantCulture));
         await db.SaveChangesAsync(cancellationToken);
-        await AuditAsync(db, operatorId, CatalogDraftAction.Create, key, cancellationToken);
-        await transaction.CommitAsync(cancellationToken);
         return new DraftChange(DraftStatus.Ok, new CatalogOp(key, false, fields));
     }
 
@@ -221,10 +236,10 @@ internal sealed class CatalogAdminStore(
     private static CatalogSeedFormatException BadSeedRow() =>
         new("A seed row is invalid or conflicts with the draft catalog.");
 
-    private static Task<int> LockAsync(ZaghlolDbContext db, CancellationToken cancellationToken) =>
+    internal static Task<int> LockAsync(ZaghlolDbContext db, CancellationToken cancellationToken) =>
         db.Database.ExecuteSqlAsync($"SELECT pg_advisory_xact_lock({LockKey})", cancellationToken);
 
-    private static Task<bool> IsLiveAsync(ZaghlolDbContext db, CatalogEntity entity, string storageKey, CancellationToken cancellationToken)
+    internal static Task<bool> IsLiveAsync(ZaghlolDbContext db, CatalogEntity entity, string storageKey, CancellationToken cancellationToken)
     {
         var name = CatalogEntities.Name(entity);
         return db.CatalogDrafts.AsNoTracking().AnyAsync(e => e.Entity == name && e.EntryKey == storageKey && !e.Deleted, cancellationToken);
@@ -266,7 +281,7 @@ internal sealed class CatalogAdminStore(
         return seq;
     }
 
-    private async Task<DraftChange> ApplyPutAsync(ZaghlolDbContext db, CatalogEntryKey key, CatalogFields fields, CancellationToken cancellationToken)
+    internal async Task<DraftChange> ApplyPutAsync(ZaghlolDbContext db, CatalogEntryKey key, CatalogFields fields, CancellationToken cancellationToken)
     {
         var name = CatalogEntities.Name(key.Entity);
         var storageKey = key.StorageKey;

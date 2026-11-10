@@ -72,6 +72,7 @@ internal static partial class SyncEndpoints
         }
         catch (Exception ex) when (ex is SyncSourceUnavailableException || GlobalExceptionHandler.IsTransientDatabaseFailure(ex))
         {
+            telemetry.Unavailable(ex is SyncSourceUnavailableException ? SyncTags.CauseSource : SyncTags.CauseDatabase);
             return Unavailable(context);
         }
 

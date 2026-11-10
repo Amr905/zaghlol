@@ -192,3 +192,40 @@ public sealed record EmailPseudonym
 
     public override string ToString() => Hex;
 }
+
+/// <summary>The two operator decisions on a contribution aggregate (T-129).</summary>
+public enum ContributionDecisionKind
+{
+    Promote,
+    Reject,
+}
+
+/// <summary>
+/// <c>contribution_promote|reject</c>: the institution code and the merchant text as <c>b64u</c> (the text is a public-by-threshold
+/// string, but like an alias path id it is kept in its encoded form), plus the draft merchant and category a promote used.
+/// </summary>
+public sealed record ContributionDecisionAudit(
+    ContributionDecisionKind Kind,
+    string InstitutionCode,
+    string MerchantNormB64,
+    int? MerchantId,
+    string? CategoryCode) : AuditEntry
+{
+    public override string Action => Kind == ContributionDecisionKind.Promote ? "contribution_promote" : "contribution_reject";
+
+    public override string Target => "contribution/" + InstitutionCode + ":" + MerchantNormB64;
+
+    private protected override void WriteDetails(Utf8JsonWriter writer)
+    {
+        writer.WriteString("institution", InstitutionCode);
+        if (MerchantId is { } id)
+        {
+            writer.WriteNumber("merchant_id", id);
+        }
+
+        if (CategoryCode is not null)
+        {
+            writer.WriteString("category", CategoryCode);
+        }
+    }
+}
