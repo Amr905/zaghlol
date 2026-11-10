@@ -42,7 +42,7 @@ public class PrivacyFilterCheckTests(SchemaFixture fixture)
         var violations = await Db.QueryAsync(
             fixture.Database.Superuser,
             $"SELECT x FROM unnest($1::text[]) AS u(x) WHERE NOT ({check})",
-            stored.ToArray());
+            (object)stored.ToArray());
 
         Assert.Empty(violations.Select(r => (string)r[0]!));
 
@@ -50,7 +50,7 @@ public class PrivacyFilterCheckTests(SchemaFixture fixture)
         var rejectedRaw = (long)(await Db.ScalarAsync(
             fixture.Database.Superuser,
             $"SELECT count(*) FROM unnest($1::text[]) AS u(x) WHERE NOT ({check})",
-            raw.ToArray()))!;
+            (object)raw.ToArray()))!;
         Assert.True(rejectedRaw > 100, $"{rejectedRaw} raw texts rejected by the CHECK");
         Assert.True(stored.Count > 100, $"{stored.Count} texts accepted by the filter");
     }
