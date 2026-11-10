@@ -221,11 +221,9 @@ public sealed class SyncHostFixture : IAsyncLifetime, IDisposable
         return value is DBNull ? null : value;
     }
 
+    /// <summary>The daily-active count of one app version over all days (the day is the database's UTC date, not the test clock's).</summary>
     public async Task<long> DailyActiveAsync(string appVersion) =>
-        (long?)(int?)await ScalarAsync(
-            "SELECT installs FROM zaghlol.daily_active_counts WHERE day = $1 AND app_version = $2",
-            DateOnly.FromDateTime(Clock.Now.UtcDateTime),
-            appVersion) ?? 0;
+        (long?)await ScalarAsync("SELECT sum(installs)::bigint FROM zaghlol.daily_active_counts WHERE app_version = $1", appVersion) ?? 0;
 
     private static void Decorate<T>(IServiceCollection services, Func<T, T> wrap)
         where T : class

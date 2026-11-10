@@ -81,11 +81,11 @@ public class SyncStoreTests(SyncStoreFixture fixture) : IClassFixture<SyncStoreF
         IReadOnlyList<PreparedBankRequest>? banks = null) =>
         new(id, now, Window, 7, "android", appVersion, hash is null ? (ReadOnlyMemory<byte>?)null : new ReadOnlyMemory<byte>(hash), contributions ?? [], banks ?? []);
 
-    private async Task<long> DailyActiveAsync(string appVersion, DateTimeOffset day) =>
-        (long?)(int?)await Db.ScalarAsync(
+    // The day is the database's own UTC date (T-128 SEC S3), not the test clock's; every install has its own app version.
+    private async Task<long> DailyActiveAsync(string appVersion) =>
+        (long?)await Db.ScalarAsync(
             fixture.Database.Superuser,
-            "SELECT installs FROM zaghlol.daily_active_counts WHERE day = $1 AND platform = 'android' AND app_version = $2",
-            DateOnly.FromDateTime(day.UtcDateTime),
+            "SELECT sum(installs)::bigint FROM zaghlol.daily_active_counts WHERE platform = 'android' AND app_version = $1",
             appVersion) ?? 0;
 
     private async Task<long> CountAsync(string sql, params object?[] parameters) =>
@@ -103,7 +103,7 @@ public class SyncStoreTests(SyncStoreFixture fixture) : IClassFixture<SyncStoreF
         Assert.Equal(Now, install!.LastSyncAt);
         Assert.Equal("android", install.Platform);
         Assert.Equal(7L, await CountAsync("SELECT catalog_version::bigint FROM zaghlol.installs WHERE id = $1", id.Value));
-        Assert.Equal(1L, await DailyActiveAsync(appVersion, Now));
+        Assert.Equal(1L, await DailyActiveAsync(appVersion));
     }
 
     [Fact]
@@ -118,12 +118,12 @@ public class SyncStoreTests(SyncStoreFixture fixture) : IClassFixture<SyncStoreF
             CancellationToken.None);
         Assert.Equal(SyncClaimResult.Lost, inside);
         Assert.Equal(0L, await CountAsync("SELECT count(*) FROM zaghlol.merchant_contributions WHERE merchant_norm = 't128 inside'"));
-        Assert.Equal(1L, await DailyActiveAsync(appVersion, Now));
+        Assert.Equal(1L, await DailyActiveAsync(appVersion));
         Assert.Equal(Now, (await Store.FindInstallAsync(id, CancellationToken.None))!.LastSyncAt);
 
         var atEnd = await Store.ClaimAsync(Claim(id, appVersion, Now.Add(Window)), CancellationToken.None);
         Assert.True(atEnd.Claimed);
-        Assert.Equal(1L, await DailyActiveAsync(appVersion, Now.Add(Window)));
+        Assert.Equal(2L, await DailyActiveAsync(appVersion));
     }
 
     [Fact]
@@ -134,7 +134,7 @@ public class SyncStoreTests(SyncStoreFixture fixture) : IClassFixture<SyncStoreF
         var results = await Task.WhenAll(Enumerable.Range(0, 8).Select(_ => Store.ClaimAsync(Claim(id, appVersion, Now), CancellationToken.None)));
 
         Assert.Single(results, r => r.Claimed);
-        Assert.Equal(1L, await DailyActiveAsync(appVersion, Now));
+        Assert.Equal(1L, await DailyActiveAsync(appVersion));
     }
 
     [Fact]
@@ -181,7 +181,7 @@ public class SyncStoreTests(SyncStoreFixture fixture) : IClassFixture<SyncStoreF
 
         Assert.Null(await Store.FindInstallAsync(id, CancellationToken.None));
         Assert.Equal(SyncClaimResult.Lost, await Store.ClaimAsync(Claim(id, appVersion, Now), CancellationToken.None));
-        Assert.Equal(0L, await DailyActiveAsync(appVersion, Now));
+        Assert.Equal(0L, await DailyActiveAsync(appVersion));
     }
 
     [Fact]
