@@ -1,5 +1,159 @@
 ﻿== SUMMARY ==
-RUNNING sha=7fd69eecf341d5673bd51648b6b2f05aeeb1f600
+FAIL sha=7fd69eecf341d5673bd51648b6b2f05aeeb1f600 pipeline=quick-backend dotnet-build=0 dotnet-format=0 dotnet-test=1
+dotnet-build                 PASS  exit=0  17s
+dotnet-format                PASS  exit=0  23s
+dotnet-test                  FAIL  exit=1  54s
+
+== ERRORS: dotnet-test ==
+  Failed Zaghlol.Infrastructure.Tests.Prices.PriceStoreTests.ClearingEndsAnActiveOverrideAtOnceAndWritesAnAuditRow [93 ms]
+  Error Message:
+   Npgsql.PostgresException : 42501: permission denied for table price_quotes
+  Stack Trace:
+     at Npgsql.Internal.NpgsqlConnector.ReadMessageLong(Boolean async, DataRowLoadingMode dataRowLoadingMode, Boolean readingNotifications, Boolean isReadingPrependedMessage)
+   at System.Runtime.CompilerServices.PoolingAsyncValueTaskMethodBuilder`1.StateMachineBox`1.System.Threading.Tasks.Sources.IValueTaskSource<TResult>.GetResult(Int16 token)
+   at Npgsql.NpgsqlDataReader.<ReadMessage>g__ReadMessageSequential|49_0(NpgsqlConnector connector, Boolean async)
+   at Npgsql.NpgsqlDataReader.NextResult(Boolean async, Boolean isConsuming, CancellationToken cancellationToken)
+   at Npgsql.NpgsqlDataReader.NextResult(Boolean async, Boolean isConsuming, CancellationToken cancellationToken)
+   at Npgsql.NpgsqlCommand.ExecuteReader(Boolean async, CommandBehavior behavior, CancellationToken cancellationToken)
+   at Npgsql.NpgsqlCommand.ExecuteReader(Boolean async, CommandBehavior behavior, CancellationToken cancellationToken)
+   at Npgsql.NpgsqlCommand.ExecuteScalar(Boolean async, CancellationToken cancellationToken)
+   at Zaghlol.Infrastructure.Prices.PriceAdminStore.ClearOverrideAsync(String symbol, String currency, DateTimeOffset now, Guid operatorId, CancellationToken cancellationToken) in /_/backend/src/Zaghlol.Infrastructure/Prices/PriceStores.cs:line 213
+
+  Failed Zaghlol.Infrastructure.Tests.Prices.PriceStoreTests.ClearingAnOverrideWithNoFeedValueRemovesTheQuote [29 ms]
+  Error Message:
+   Npgsql.PostgresException : 42501: permission denied for table price_quotes
+  Stack Trace:
+     at Npgsql.Internal.NpgsqlConnector.ReadMessageLong(Boolean async, DataRowLoadingMode dataRowLoadingMode, Boolean readingNotifications, Boolean isReadingPrependedMessage)
+   at System.Runtime.CompilerServices.PoolingAsyncValueTaskMethodBuilder`1.StateMachineBox`1.System.Threading.Tasks.Sources.IValueTaskSource<TResult>.GetResult(Int16 token)
+   at Npgsql.NpgsqlDataReader.<ReadMessage>g__ReadMessageSequential|49_0(NpgsqlConnector connector, Boolean async)
+   at Npgsql.NpgsqlDataReader.NextResult(Boolean async, Boolean isConsuming, CancellationToken cancellationToken)
+   at Npgsql.NpgsqlDataReader.NextResult(Boolean async, Boolean isConsuming, CancellationToken cancellationToken)
+   at Npgsql.NpgsqlCommand.ExecuteReader(Boolean async, CommandBehavior behavior, CancellationToken cancellationToken)
+   at Npgsql.NpgsqlCommand.ExecuteReader(Boolean async, CommandBehavior behavior, CancellationToken cancellationToken)
+   at Npgsql.NpgsqlCommand.ExecuteScalar(Boolean async, CancellationToken cancellationToken)
+   at Zaghlol.Infrastructure.Prices.PriceAdminStore.ClearOverrideAsync(String symbol, String currency, DateTimeOffset now, Guid operatorId, CancellationToken cancellationToken) in /_/backend/src/Zaghlol.Infrastructure/Prices/PriceStores.cs:line 213
+
+  Failed Zaghlol.Contract.Tests.PricesLiveContractTests.TheServerSideLimitsAreTheSpecsLimits [3 ms]
+  Error Message:
+   System.InvalidOperationException : A value of type 'System.Int64' cannot be converted to a 'System.Int32'.
+  Stack Trace:
+     at System.Text.Json.ThrowHelper.ThrowInvalidOperationException_NodeUnableToConvert(Type sourceType, Type destinationType)
+   at System.Text.Json.Nodes.JsonValue`1.GetValue[T]()
+   at Zaghlol.Contract.Tests.PricesLiveContractTests.TheServerSideLimitsAreTheSpecsLimits() in /_/backend/tests/Zaghlol.Contract.Tests/PricesLiveContractTests.cs:line 102
+   at System.Reflection.MethodBaseInvoker.InterpretedInvoke_Method(Object obj, IntPtr* args)
+   at System.Reflection.RuntimeMethodInfo.Invoke(Object obj, BindingFlags invokeAttr, Binder binder, Object[] parameters, CultureInfo culture)
+
+Failed!  - Failed:     2, Passed:   536, Skipped:     0, Total:   538, Duration: 18 s - Zaghlol.Infrastructure.Tests.dll (net10.0)
+
+Failed!  - Failed:     1, Passed:    94, Skipped:     0, Total:    95, Duration: 19 s - Zaghlol.Contract.Tests.dll (net10.0)
+
 
 == FULL LOG (last 1500 lines) ==
 auto task/T-127-prices 7fd69eecf341d5673bd51648b6b2f05aeeb1f600 2026-11-10T11:14:33.6862027+02:00
+
+
+
+[11:14:41] === STEP dotnet-build (docker mcr.microsoft.com/dotnet/sdk:10.0.402, /work/backend)
+  Determining projects to restore...
+  All projects are up-to-date for restore.
+  Zaghlol.Domain -> /work/backend/src/Zaghlol.Domain/bin/Release/net10.0/Zaghlol.Domain.dll
+  Zaghlol.Ops -> /work/backend/src/Zaghlol.Ops/bin/Release/net10.0/zaghlol-ops.dll
+  Zaghlol.Ops.Tests -> /work/backend/tests/Zaghlol.Ops.Tests/bin/Release/net10.0/Zaghlol.Ops.Tests.dll
+  Zaghlol.Application -> /work/backend/src/Zaghlol.Application/bin/Release/net10.0/Zaghlol.Application.dll
+  Zaghlol.Application.Tests -> /work/backend/tests/Zaghlol.Application.Tests/bin/Release/net10.0/Zaghlol.Application.Tests.dll
+  Zaghlol.Infrastructure -> /work/backend/src/Zaghlol.Infrastructure/bin/Release/net10.0/Zaghlol.Infrastructure.dll
+  Zaghlol.Workers -> /work/backend/src/Zaghlol.Workers/bin/Release/net10.0/Zaghlol.Workers.dll
+  Zaghlol.Infrastructure.Tests -> /work/backend/tests/Zaghlol.Infrastructure.Tests/bin/Release/net10.0/Zaghlol.Infrastructure.Tests.dll
+  Zaghlol.Workers.Tests -> /work/backend/tests/Zaghlol.Workers.Tests/bin/Release/net10.0/Zaghlol.Workers.Tests.dll
+  Zaghlol.Api -> /work/backend/src/Zaghlol.Api/bin/Release/net10.0/Zaghlol.Api.dll
+  Zaghlol.Api.Tests -> /work/backend/tests/Zaghlol.Api.Tests/bin/Release/net10.0/Zaghlol.Api.Tests.dll
+  Zaghlol.Contract.Tests -> /work/backend/tests/Zaghlol.Contract.Tests/bin/Release/net10.0/Zaghlol.Contract.Tests.dll
+
+Build succeeded.
+    0 Warning(s)
+    0 Error(s)
+
+Time Elapsed 00:00:15.81
+
+[11:14:57] === RESULT dotnet-build exit=0 (17s)
+[11:14:57] === STEP dotnet-format (docker mcr.microsoft.com/dotnet/sdk:10.0.402, /work/backend)
+Formatting code files in workspace '/work/backend/Zaghlol.sln'.
+Format complete in 21565ms.
+
+[11:15:20] === RESULT dotnet-format exit=0 (23s)
+[11:15:20] === STEP dotnet-test (docker mcr.microsoft.com/dotnet/sdk:10.0.402, /work/backend)
+Test run for /work/backend/tests/Zaghlol.Workers.Tests/bin/Release/net10.0/Zaghlol.Workers.Tests.dll (.NETCoreApp,Version=v10.0)
+Test run for /work/backend/tests/Zaghlol.Ops.Tests/bin/Release/net10.0/Zaghlol.Ops.Tests.dll (.NETCoreApp,Version=v10.0)
+Test run for /work/backend/tests/Zaghlol.Application.Tests/bin/Release/net10.0/Zaghlol.Application.Tests.dll (.NETCoreApp,Version=v10.0)
+Test run for /work/backend/tests/Zaghlol.Infrastructure.Tests/bin/Release/net10.0/Zaghlol.Infrastructure.Tests.dll (.NETCoreApp,Version=v10.0)
+Test run for /work/backend/tests/Zaghlol.Api.Tests/bin/Release/net10.0/Zaghlol.Api.Tests.dll (.NETCoreApp,Version=v10.0)
+Test run for /work/backend/tests/Zaghlol.Contract.Tests/bin/Release/net10.0/Zaghlol.Contract.Tests.dll (.NETCoreApp,Version=v10.0)
+A total of 1 test files matched the specified pattern.
+A total of 1 test files matched the specified pattern.
+A total of 1 test files matched the specified pattern.
+A total of 1 test files matched the specified pattern.
+A total of 1 test files matched the specified pattern.
+A total of 1 test files matched the specified pattern.
+
+Passed!  - Failed:     0, Passed:     2, Skipped:     0, Total:     2, Duration: 44 ms - Zaghlol.Ops.Tests.dll (net10.0)
+
+Passed!  - Failed:     0, Passed:    11, Skipped:     0, Total:    11, Duration: 171 ms - Zaghlol.Workers.Tests.dll (net10.0)
+
+Passed!  - Failed:     0, Passed:   215, Skipped:     0, Total:   215, Duration: 129 ms - Zaghlol.Application.Tests.dll (net10.0)
+[xUnit.net 00:00:12.56]     Zaghlol.Infrastructure.Tests.Prices.PriceStoreTests.ClearingEndsAnActiveOverrideAtOnceAndWritesAnAuditRow [FAIL]
+  Failed Zaghlol.Infrastructure.Tests.Prices.PriceStoreTests.ClearingEndsAnActiveOverrideAtOnceAndWritesAnAuditRow [93 ms]
+  Error Message:
+   Npgsql.PostgresException : 42501: permission denied for table price_quotes
+  Stack Trace:
+     at Npgsql.Internal.NpgsqlConnector.ReadMessageLong(Boolean async, DataRowLoadingMode dataRowLoadingMode, Boolean readingNotifications, Boolean isReadingPrependedMessage)
+   at System.Runtime.CompilerServices.PoolingAsyncValueTaskMethodBuilder`1.StateMachineBox`1.System.Threading.Tasks.Sources.IValueTaskSource<TResult>.GetResult(Int16 token)
+   at Npgsql.NpgsqlDataReader.<ReadMessage>g__ReadMessageSequential|49_0(NpgsqlConnector connector, Boolean async)
+   at Npgsql.NpgsqlDataReader.NextResult(Boolean async, Boolean isConsuming, CancellationToken cancellationToken)
+   at Npgsql.NpgsqlDataReader.NextResult(Boolean async, Boolean isConsuming, CancellationToken cancellationToken)
+   at Npgsql.NpgsqlCommand.ExecuteReader(Boolean async, CommandBehavior behavior, CancellationToken cancellationToken)
+   at Npgsql.NpgsqlCommand.ExecuteReader(Boolean async, CommandBehavior behavior, CancellationToken cancellationToken)
+   at Npgsql.NpgsqlCommand.ExecuteScalar(Boolean async, CancellationToken cancellationToken)
+   at Zaghlol.Infrastructure.Prices.PriceAdminStore.ClearOverrideAsync(String symbol, String currency, DateTimeOffset now, Guid operatorId, CancellationToken cancellationToken) in /_/backend/src/Zaghlol.Infrastructure/Prices/PriceStores.cs:line 213
+   at Zaghlol.Infrastructure.Prices.PriceAdminStore.ClearOverrideAsync(String symbol, String currency, DateTimeOffset now, Guid operatorId, CancellationToken cancellationToken) in /_/backend/src/Zaghlol.Infrastructure/Prices/PriceStores.cs:line 213
+   at Zaghlol.Infrastructure.Prices.PriceAdminStore.ClearOverrideAsync(String symbol, String currency, DateTimeOffset now, Guid operatorId, CancellationToken cancellationToken) in /_/backend/src/Zaghlol.Infrastructure/Prices/PriceStores.cs:line 222
+   at Zaghlol.Infrastructure.Prices.PriceAdminStore.ClearOverrideAsync(String symbol, String currency, DateTimeOffset now, Guid operatorId, CancellationToken cancellationToken) in /_/backend/src/Zaghlol.Infrastructure/Prices/PriceStores.cs:line 222
+   at Zaghlol.Infrastructure.Tests.Prices.PriceStoreTests.ClearingEndsAnActiveOverrideAtOnceAndWritesAnAuditRow() in /_/backend/tests/Zaghlol.Infrastructure.Tests/Prices/PriceStoreTests.cs:line 212
+--- End of stack trace from previous location ---
+[xUnit.net 00:00:12.80]     Zaghlol.Infrastructure.Tests.Prices.PriceStoreTests.ClearingAnOverrideWithNoFeedValueRemovesTheQuote [FAIL]
+  Failed Zaghlol.Infrastructure.Tests.Prices.PriceStoreTests.ClearingAnOverrideWithNoFeedValueRemovesTheQuote [29 ms]
+  Error Message:
+   Npgsql.PostgresException : 42501: permission denied for table price_quotes
+  Stack Trace:
+     at Npgsql.Internal.NpgsqlConnector.ReadMessageLong(Boolean async, DataRowLoadingMode dataRowLoadingMode, Boolean readingNotifications, Boolean isReadingPrependedMessage)
+   at System.Runtime.CompilerServices.PoolingAsyncValueTaskMethodBuilder`1.StateMachineBox`1.System.Threading.Tasks.Sources.IValueTaskSource<TResult>.GetResult(Int16 token)
+   at Npgsql.NpgsqlDataReader.<ReadMessage>g__ReadMessageSequential|49_0(NpgsqlConnector connector, Boolean async)
+   at Npgsql.NpgsqlDataReader.NextResult(Boolean async, Boolean isConsuming, CancellationToken cancellationToken)
+   at Npgsql.NpgsqlDataReader.NextResult(Boolean async, Boolean isConsuming, CancellationToken cancellationToken)
+   at Npgsql.NpgsqlCommand.ExecuteReader(Boolean async, CommandBehavior behavior, CancellationToken cancellationToken)
+   at Npgsql.NpgsqlCommand.ExecuteReader(Boolean async, CommandBehavior behavior, CancellationToken cancellationToken)
+   at Npgsql.NpgsqlCommand.ExecuteScalar(Boolean async, CancellationToken cancellationToken)
+   at Zaghlol.Infrastructure.Prices.PriceAdminStore.ClearOverrideAsync(String symbol, String currency, DateTimeOffset now, Guid operatorId, CancellationToken cancellationToken) in /_/backend/src/Zaghlol.Infrastructure/Prices/PriceStores.cs:line 213
+   at Zaghlol.Infrastructure.Prices.PriceAdminStore.ClearOverrideAsync(String symbol, String currency, DateTimeOffset now, Guid operatorId, CancellationToken cancellationToken) in /_/backend/src/Zaghlol.Infrastructure/Prices/PriceStores.cs:line 213
+   at Zaghlol.Infrastructure.Prices.PriceAdminStore.ClearOverrideAsync(String symbol, String currency, DateTimeOffset now, Guid operatorId, CancellationToken cancellationToken) in /_/backend/src/Zaghlol.Infrastructure/Prices/PriceStores.cs:line 222
+   at Zaghlol.Infrastructure.Prices.PriceAdminStore.ClearOverrideAsync(String symbol, String currency, DateTimeOffset now, Guid operatorId, CancellationToken cancellationToken) in /_/backend/src/Zaghlol.Infrastructure/Prices/PriceStores.cs:line 222
+   at Zaghlol.Infrastructure.Tests.Prices.PriceStoreTests.ClearingAnOverrideWithNoFeedValueRemovesTheQuote() in /_/backend/tests/Zaghlol.Infrastructure.Tests/Prices/PriceStoreTests.cs:line 231
+--- End of stack trace from previous location ---
+[xUnit.net 00:00:15.26]     Zaghlol.Contract.Tests.PricesLiveContractTests.TheServerSideLimitsAreTheSpecsLimits [FAIL]
+  Failed Zaghlol.Contract.Tests.PricesLiveContractTests.TheServerSideLimitsAreTheSpecsLimits [3 ms]
+  Error Message:
+   System.InvalidOperationException : A value of type 'System.Int64' cannot be converted to a 'System.Int32'.
+  Stack Trace:
+     at System.Text.Json.ThrowHelper.ThrowInvalidOperationException_NodeUnableToConvert(Type sourceType, Type destinationType)
+   at System.Text.Json.Nodes.JsonValue`1.GetValue[T]()
+   at Zaghlol.Contract.Tests.PricesLiveContractTests.TheServerSideLimitsAreTheSpecsLimits() in /_/backend/tests/Zaghlol.Contract.Tests/PricesLiveContractTests.cs:line 102
+   at System.Reflection.MethodBaseInvoker.InterpretedInvoke_Method(Object obj, IntPtr* args)
+   at System.Reflection.RuntimeMethodInfo.Invoke(Object obj, BindingFlags invokeAttr, Binder binder, Object[] parameters, CultureInfo culture)
+
+Failed!  - Failed:     2, Passed:   536, Skipped:     0, Total:   538, Duration: 18 s - Zaghlol.Infrastructure.Tests.dll (net10.0)
+
+Failed!  - Failed:     1, Passed:    94, Skipped:     0, Total:    95, Duration: 19 s - Zaghlol.Contract.Tests.dll (net10.0)
+
+Passed!  - Failed:     0, Passed:   223, Skipped:     0, Total:   223, Duration: 36 s - Zaghlol.Api.Tests.dll (net10.0)
+
+[11:16:14] === RESULT dotnet-test exit=1 (54s)
+[11:16:14] SUMMARY FAIL sha=7fd69eecf341d5673bd51648b6b2f05aeeb1f600 pipeline=quick-backend dotnet-build=0 dotnet-format=0 dotnet-test=1
