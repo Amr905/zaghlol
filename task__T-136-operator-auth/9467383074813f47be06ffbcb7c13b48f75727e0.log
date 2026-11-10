@@ -1,5 +1,67 @@
 ﻿== SUMMARY ==
-RUNNING sha=9467383074813f47be06ffbcb7c13b48f75727e0
+PASS sha=9467383074813f47be06ffbcb7c13b48f75727e0 pipeline=quick-backend dotnet-build=0 dotnet-format=0 dotnet-test=0
+dotnet-build                 PASS  exit=0  14s
+dotnet-format                PASS  exit=0  21s
+dotnet-test                  PASS  exit=0  50s
 
 == FULL LOG (last 1500 lines) ==
 auto task/T-136-operator-auth 9467383074813f47be06ffbcb7c13b48f75727e0 2026-11-10T11:54:46.0645316+02:00
+
+
+
+[11:54:51] === STEP dotnet-build (docker mcr.microsoft.com/dotnet/sdk:10.0.402, /work/backend)
+  Determining projects to restore...
+  All projects are up-to-date for restore.
+  Zaghlol.Domain -> /work/backend/src/Zaghlol.Domain/bin/Release/net10.0/Zaghlol.Domain.dll
+  Zaghlol.Ops -> /work/backend/src/Zaghlol.Ops/bin/Release/net10.0/zaghlol-ops.dll
+  Zaghlol.Ops.Tests -> /work/backend/tests/Zaghlol.Ops.Tests/bin/Release/net10.0/Zaghlol.Ops.Tests.dll
+  Zaghlol.Application -> /work/backend/src/Zaghlol.Application/bin/Release/net10.0/Zaghlol.Application.dll
+  Zaghlol.Application.Tests -> /work/backend/tests/Zaghlol.Application.Tests/bin/Release/net10.0/Zaghlol.Application.Tests.dll
+  Zaghlol.Infrastructure -> /work/backend/src/Zaghlol.Infrastructure/bin/Release/net10.0/Zaghlol.Infrastructure.dll
+  Zaghlol.Workers -> /work/backend/src/Zaghlol.Workers/bin/Release/net10.0/Zaghlol.Workers.dll
+  Zaghlol.Infrastructure.Tests -> /work/backend/tests/Zaghlol.Infrastructure.Tests/bin/Release/net10.0/Zaghlol.Infrastructure.Tests.dll
+  Zaghlol.Workers.Tests -> /work/backend/tests/Zaghlol.Workers.Tests/bin/Release/net10.0/Zaghlol.Workers.Tests.dll
+  Zaghlol.Api -> /work/backend/src/Zaghlol.Api/bin/Release/net10.0/Zaghlol.Api.dll
+  Zaghlol.Api.Tests -> /work/backend/tests/Zaghlol.Api.Tests/bin/Release/net10.0/Zaghlol.Api.Tests.dll
+  Zaghlol.Contract.Tests -> /work/backend/tests/Zaghlol.Contract.Tests/bin/Release/net10.0/Zaghlol.Contract.Tests.dll
+
+Build succeeded.
+    0 Warning(s)
+    0 Error(s)
+
+Time Elapsed 00:00:12.75
+
+[11:55:05] === RESULT dotnet-build exit=0 (14s)
+[11:55:05] === STEP dotnet-format (docker mcr.microsoft.com/dotnet/sdk:10.0.402, /work/backend)
+Formatting code files in workspace '/work/backend/Zaghlol.sln'.
+Format complete in 20535ms.
+
+[11:55:26] === RESULT dotnet-format exit=0 (21s)
+[11:55:26] === STEP dotnet-test (docker mcr.microsoft.com/dotnet/sdk:10.0.402, /work/backend)
+Test run for /work/backend/tests/Zaghlol.Ops.Tests/bin/Release/net10.0/Zaghlol.Ops.Tests.dll (.NETCoreApp,Version=v10.0)
+Test run for /work/backend/tests/Zaghlol.Workers.Tests/bin/Release/net10.0/Zaghlol.Workers.Tests.dll (.NETCoreApp,Version=v10.0)
+Test run for /work/backend/tests/Zaghlol.Application.Tests/bin/Release/net10.0/Zaghlol.Application.Tests.dll (.NETCoreApp,Version=v10.0)
+Test run for /work/backend/tests/Zaghlol.Api.Tests/bin/Release/net10.0/Zaghlol.Api.Tests.dll (.NETCoreApp,Version=v10.0)
+Test run for /work/backend/tests/Zaghlol.Infrastructure.Tests/bin/Release/net10.0/Zaghlol.Infrastructure.Tests.dll (.NETCoreApp,Version=v10.0)
+Test run for /work/backend/tests/Zaghlol.Contract.Tests/bin/Release/net10.0/Zaghlol.Contract.Tests.dll (.NETCoreApp,Version=v10.0)
+A total of 1 test files matched the specified pattern.
+A total of 1 test files matched the specified pattern.
+A total of 1 test files matched the specified pattern.
+A total of 1 test files matched the specified pattern.
+A total of 1 test files matched the specified pattern.A total of 1 test files matched the specified pattern.
+
+
+Passed!  - Failed:     0, Passed:     2, Skipped:     0, Total:     2, Duration: 24 ms - Zaghlol.Ops.Tests.dll (net10.0)
+
+Passed!  - Failed:     0, Passed:    11, Skipped:     0, Total:    11, Duration: 111 ms - Zaghlol.Workers.Tests.dll (net10.0)
+
+Passed!  - Failed:     0, Passed:   244, Skipped:     0, Total:   244, Duration: 74 ms - Zaghlol.Application.Tests.dll (net10.0)
+
+Passed!  - Failed:     0, Passed:    99, Skipped:     0, Total:    99, Duration: 10 s - Zaghlol.Contract.Tests.dll (net10.0)
+
+Passed!  - Failed:     0, Passed:   538, Skipped:     0, Total:   538, Duration: 11 s - Zaghlol.Infrastructure.Tests.dll (net10.0)
+
+Passed!  - Failed:     0, Passed:   318, Skipped:     0, Total:   318, Duration: 39 s - Zaghlol.Api.Tests.dll (net10.0)
+
+[11:56:16] === RESULT dotnet-test exit=0 (50s)
+[11:56:16] SUMMARY PASS sha=9467383074813f47be06ffbcb7c13b48f75727e0 pipeline=quick-backend dotnet-build=0 dotnet-format=0 dotnet-test=0
