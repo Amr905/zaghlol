@@ -370,7 +370,11 @@ void main() {
         results.whereType<DbOpened<AppDatabase>>().where((r) => r.wipedOrphan),
         hasLength(1),
       );
-      expect(sameBytes(store.stored!, syntheticKeyBytes(62)), isTrue);
+      // Either opener may win the lease; the key is the winner's.
+      final winner = (results[0] as DbOpened<AppDatabase>).wipedOrphan
+          ? 62
+          : 63;
+      expect(sameBytes(store.stored!, syntheticKeyBytes(winner)), isTrue);
       await writeMeta(dbs[0], 'shared', 'yes');
       expect(await metaValue(dbs[1], 'shared'), 'yes');
     });

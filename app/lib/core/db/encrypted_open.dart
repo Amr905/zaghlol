@@ -85,6 +85,10 @@ void Function(sql.Database) _setupFor(
   String path,
   MigrationGuard? guard,
 ) => (raw) {
+  // First: two engines share the file, and the sequence below reads it
+  // (journal_mode, verify). Without a timeout a concurrent close or
+  // checkpoint fails the open at once with SQLITE_BUSY.
+  applyBusyTimeout(raw);
   applyEncryptedOpenSequence(raw, key);
   applyAppPragmas(raw);
   if (guard != null) {
@@ -96,14 +100,18 @@ void Function(sql.Database) _setupFor(
   }
 };
 
-/// T-016 §5: the connection PRAGMAs after the keyed sequence. `busy_timeout`
-/// because two engines (UI and headless) share the file; `secure_delete =
-/// FAST` zeroes freed content where it costs no extra I/O (defence in depth
-/// for purged raw SMS; the file is encrypted anyway); `cache_size` 8 MiB
-/// (ADR-002 finding 4). `foreign_keys` is set in drift's `beforeOpen` (a
-/// no-op inside a transaction, so never here).
-void applyAppPragmas(sql.Database raw) {
+/// T-016 §5: `busy_timeout = 5000`, before anything reads the file (a
+/// connection setting; it reads nothing, so it may precede the key).
+void applyBusyTimeout(sql.Database raw) {
   _exec(raw, 'PRAGMA busy_timeout = 5000');
+}
+
+/// T-016 §5: the connection PRAGMAs after the keyed sequence.
+/// `secure_delete = FAST` zeroes freed content where it costs no extra I/O
+/// (defence in depth for purged raw SMS; the file is encrypted anyway);
+/// `cache_size` 8 MiB (ADR-002 finding 4). `foreign_keys` is set in drift's
+/// `beforeOpen` (a no-op inside a transaction, so never here).
+void applyAppPragmas(sql.Database raw) {
   _exec(raw, 'PRAGMA secure_delete = FAST');
   _exec(raw, 'PRAGMA cache_size = -8192');
 }
