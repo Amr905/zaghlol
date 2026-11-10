@@ -1,6 +1,6 @@
 using System.Collections.Concurrent;
-using System.Globalization;
-using System.Security.Claims;
+using System.Buffers.Text;
+using System.Text.Json;
 using Microsoft.Extensions.Options;
 using Microsoft.IdentityModel.JsonWebTokens;
 using Microsoft.IdentityModel.Tokens;
@@ -174,9 +174,7 @@ internal sealed partial class OidcOperatorTokenValidator(
             return Refuse("audience");
         }
 
-        if (!TryGetTime(jwt, JwtRegisteredClaimNames.Exp, out var exp)
-            || !TryGetTime(jwt, JwtRegisteredClaimNames.Iat, out var iat)
-            || !TryGetTime(jwt, JwtRegisteredClaimNames.Nbf, out var nbf))
+        if (!TryReadNumericDates(token, out var exp, out var iat, out var nbf))
         {
             return Refuse("lifetime_claims");
         }
@@ -212,17 +210,36 @@ internal sealed partial class OidcOperatorTokenValidator(
     };
 
     /// <summary>
-    /// A NumericDate claim: exactly one, an integer number of seconds. Read from the claim text so the library's internal
-    /// number representation doesn't matter; anything else (a string, a fraction, an array) is a refusal.
+    /// <c>exp</c>, <c>iat</c> and <c>nbf</c> straight from the signed payload: each must be present once as a JSON integer
+    /// (a string, fraction or array is a refusal, whatever the library would coerce).
     /// </summary>
-    private static bool TryGetTime(JsonWebToken jwt, string claim, out long seconds)
+    private static bool TryReadNumericDates(string token, out long exp, out long iat, out long nbf)
     {
-        seconds = 0;
-        var claims = jwt.Claims.Where(c => string.Equals(c.Type, claim, StringComparison.Ordinal)).ToList();
-        return claims.Count == 1
-            && !string.Equals(claims[0].ValueType, ClaimValueTypes.String, StringComparison.Ordinal)
-            && long.TryParse(claims[0].Value, NumberStyles.AllowLeadingSign, CultureInfo.InvariantCulture, out seconds)
-            && seconds > 0;
+        exp = iat = nbf = 0;
+        var first = token.IndexOf('.', StringComparison.Ordinal);
+        var second = token.IndexOf('.', first + 1);
+        try
+        {
+            using var payload = JsonDocument.Parse(Base64Url.DecodeFromChars(token.AsSpan(first + 1, second - first - 1)));
+            var root = payload.RootElement;
+            return root.ValueKind == JsonValueKind.Object
+                && TryInteger(root, JwtRegisteredClaimNames.Exp, out exp)
+                && TryInteger(root, JwtRegisteredClaimNames.Iat, out iat)
+                && TryInteger(root, JwtRegisteredClaimNames.Nbf, out nbf);
+        }
+        catch (Exception ex) when (ex is JsonException or FormatException)
+        {
+            return false;
+        }
+    }
+
+    private static bool TryInteger(JsonElement root, string name, out long value)
+    {
+        value = 0;
+        return root.TryGetProperty(name, out var element)
+            && element.ValueKind == JsonValueKind.Number
+            && element.TryGetInt64(out value)
+            && value > 0;
     }
 
     /// <summary>The values of a string or string-array claim (each array element is one claim).</summary>

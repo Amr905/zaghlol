@@ -127,9 +127,10 @@ public sealed class OperatorAuthStartupCheckTests : IDisposable
         builder.WebHost.UseTestServer();
         builder.Configuration.AddInMemoryCollection(settings);
         builder.Services.AddSingleton(new Infrastructure.Observability.ZaghlolMetrics());
+        // Before AddZaghlolOperatorAuth, whose TryAdd then keeps the fake (Development validates the whole graph).
+        builder.Services.AddSingleton<Application.Operators.IOperatorDirectory>(new FakeOperatorDirectory());
         builder.Services.AddOperatorAuthentication();
         builder.Services.AddZaghlolOperatorAuth();
-        builder.Services.AddSingleton<Application.Operators.IOperatorDirectory>(new FakeOperatorDirectory());
         builder.Services.AddHttpClient(OidcKeyCache.HttpClientName).ConfigurePrimaryHttpMessageHandler(() => issuer.CreateHandler());
         return builder.Build();
     }

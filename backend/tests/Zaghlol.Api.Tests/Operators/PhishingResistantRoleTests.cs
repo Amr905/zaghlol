@@ -126,9 +126,10 @@ public sealed class PhishingResistantRoleTests : IDisposable
         });
         builder.Services.AddSingleton<ZaghlolMetrics>();
         builder.Services.AddProblemDetails();
+        // Before AddZaghlolOperatorAuth, whose TryAdd then keeps the fake (Development validates the whole graph).
+        builder.Services.AddSingleton<Application.Operators.IOperatorDirectory>(directory);
         builder.Services.AddOperatorAuthentication();
         builder.Services.AddZaghlolOperatorAuth();
-        builder.Services.AddSingleton<Application.Operators.IOperatorDirectory>(directory);
         builder.Services.AddSingleton<TimeProvider>(new ManualClock());
         builder.Services.AddHttpClient(OidcKeyCache.HttpClientName).ConfigurePrimaryHttpMessageHandler(() => issuer.CreateHandler());
 
