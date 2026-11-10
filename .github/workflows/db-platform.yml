@@ -29,8 +29,18 @@ on:
       - app/pubspec.yaml
       - 'app/integration_test/db_*'
       - 'app/test/core/db/**'
+      # T-015: the key bootstrap (Dart, Pigeon, Kotlin, Swift) re-runs here.
+      - 'app/lib/core/db/**'
+      - 'app/lib/core/crypto/**'
+      - 'app/lib/core/platform/*secret_store*'
+      - 'app/test/support/**'
+      - 'app/android/app/src/main/kotlin/app/zaghlol/platform/keys/**'
+      - 'app/android/app/src/main/kotlin/app/zaghlol/MainActivity.kt'
+      - 'app/ios/Runner/Platform/**'
+      - 'app/ios/Runner/AppDelegate.swift'
       - .github/workflows/db-platform.yml
       - '.github/scripts/db-platform-*.sh'
+      - '.github/scripts/db-key-*'
 
 permissions:
   contents: read
@@ -78,6 +88,8 @@ jobs:
       - name: Independent CLIs (Ubuntu sqlite3 refuses; sqlcipher reads)
         run: |
           dir="$RUNNER_TEMP/interop"
+          # T-007 security L-3: remove the key files on every exit path.
+          trap 'rm -f "$dir/cmd.sql" "$dir/interop.key"' EXIT
           key=$(cat "$dir/interop.key")
           echo "::add-mask::$key"
           if ! [[ "$key" =~ ^[0-9a-f]{64}$ ]]; then
