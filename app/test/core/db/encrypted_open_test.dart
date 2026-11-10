@@ -13,6 +13,8 @@ import 'package:drift/native.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:zaghlol/core/db/encrypted_open.dart';
 import 'package:zaghlol/core/db/key_bootstrap.dart';
+import 'package:zaghlol/core/db/migration_guard.dart';
+import 'package:sqlite3/sqlite3.dart' as sql;
 
 import '../../support/synthetic_key.dart';
 import 'sqlite3mc_contract.dart' show ContractDb, dbFiles, hasPlaintextHeader;
@@ -23,6 +25,15 @@ DbKeyMaterial _key([int seed = 61]) =>
 Future<Object?> _failureOf(Future<void> Function() body) async {
   try {
     await body();
+    return null;
+  } on Object catch (e) {
+    return e;
+  }
+}
+
+Object? _failureSync(void Function() body) {
+  try {
+    body();
     return null;
   } on Object catch (e) {
     return e;
@@ -169,6 +180,29 @@ void main() {
         expect(printed, isNotEmpty);
       },
     );
+  });
+
+  test('review n-1: SQLITE_NOTADB after verification is DB_OPEN_FAILED, '
+      'never DB_KEY_REJECTED (the wipe trigger)', () {
+    // Not a database: any read of page 1 is SQLITE_NOTADB.
+    file.writeAsBytesSync(List<int>.filled(4096, 0xAB), flush: true);
+    final raw = sql.sqlite3.open(file.path);
+    addTearDown(raw.close);
+    // Control: in the verify step it is a rejected key.
+    final inVerify = _failureSync(() => verifyEncrypted(raw));
+    expect((inVerify as DbOpenException).code, DbOpenException.keyRejected);
+    expect(inVerify.sqliteCode, sqliteNotADb);
+    // After verification (the guard reads user_version): a plain failure.
+    final after = _failureSync(
+      () => applyAfterVerify(
+        raw,
+        const MigrationGuard(targetVersion: 1, allowMigration: true),
+        file,
+      ),
+    );
+    expect((after as DbOpenException).code, DbOpenException.openFailed);
+    expect(after.sqliteCode, sqliteNotADb);
+    expect(after.isKeyRejected, isFalse);
   });
 
   test('dbOpenExceptionOf unwraps only known shapes', () {

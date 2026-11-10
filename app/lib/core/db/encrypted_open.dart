@@ -90,15 +90,28 @@ void Function(sql.Database) _setupFor(
   // checkpoint fails the open at once with SQLITE_BUSY.
   applyBusyTimeout(raw);
   applyEncryptedOpenSequence(raw, key);
-  applyAppPragmas(raw);
-  if (guard != null) {
-    guard.check(
-      () => _userVersion(raw),
-      () => _checkpointTruncate(raw),
-      File(path),
-    );
-  }
+  applyAfterVerify(raw, guard, File(path));
 };
+
+/// T-016: the setup steps after [verifyEncrypted] (the app PRAGMAs and the
+/// [guard]'s check and copy). Page 1 has decrypted by now, so SQLITE_NOTADB
+/// here is not "key rejected" (that is the wipe trigger): it is mapped to
+/// [DbOpenException.openFailed] (review n-1).
+void applyAfterVerify(sql.Database raw, MigrationGuard? guard, File file) {
+  try {
+    applyAppPragmas(raw);
+    if (guard != null) {
+      guard.check(
+        () => _userVersion(raw),
+        () => _checkpointTruncate(raw),
+        file,
+      );
+    }
+  } on DbOpenException catch (e) {
+    if (!e.isKeyRejected) rethrow;
+    throw DbOpenException(DbOpenException.openFailed, sqliteCode: e.sqliteCode);
+  }
+}
 
 /// T-016 §5: `busy_timeout = 5000`, before anything reads the file (a
 /// connection setting; it reads nothing, so it may precede the key).
@@ -186,9 +199,10 @@ List<List<Object?>> _select(sql.Database raw, String query) {
   }
 }
 
-/// SQLITE_NOTADB can only come from reading page 1 (the statements before
-/// the key never read the file), so it means "key rejected". Every other code
-/// is a plain open failure.
+/// SQLITE_NOTADB during the open sequence can only come from reading page 1
+/// (the statements before the key never read the file), so it means "key
+/// rejected". After verification [applyAfterVerify] maps it back to a plain
+/// open failure. Every other code is a plain open failure.
 DbOpenException _failure(sql.SqliteException e) => e.resultCode == sqliteNotADb
     ? DbOpenException(DbOpenException.keyRejected, sqliteCode: sqliteNotADb)
     : DbOpenException(DbOpenException.openFailed, sqliteCode: e.resultCode);
