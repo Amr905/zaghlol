@@ -97,7 +97,7 @@ final class DbKeyKeychain: SecretSlotStore {
   static func addAttributes(value: Data) -> [String: Any] {
     var q = itemQuery()
     q[kSecValueData as String] = value
-    q[kSecAttrAccessible as String] = kSecAttrAccessibleAfterFirstUnlockThisDeviceOnly
+    q[kSecAttrAccessible as String] = kSecAttrAccessibleAfterFirstUnlock // NEGATIVE PROOF (c)
     return q
   }
 
