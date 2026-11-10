@@ -109,3 +109,27 @@ New dependency: `Microsoft.IdentityModel.JsonWebTokens` 8.23.0 is the current li
 ## Verdict
 
 **CHANGES_REQUESTED**: fix S-1 before merge (the re-review on Sonnet covers the `OidcKeyCache` delta and the new test only). S-2 to S-8 become follow-ups; S-4 is a go-live gate for T-186.
+
+## Re-review (delta): `git diff 7f8067c 9467383`
+
+Scope: `OidcKeyCache.cs`, `OperatorAuthOptions.cs`, `FakeOidcIssuer.cs` and the two test files. Reviewed on Sonnet. CI (backend-ci 42794656371) and the PC runner are reported green.
+
+### S-1: resolved
+
+- **Caller cancellation cannot cancel the fetch.** `RefreshAsync` starts the fetch with `Task.Run(..., CancellationToken.None)`. `RunRefreshAsync` uses `FetchCancellation()`, which links `ApplicationStopping`, the cache's own `disposed` token and a 10 s `IdpTimeout`. No request token reaches it. The caller only does `task.WaitAsync(cancellationToken)`, so an aborting client stops waiting and nothing else.
+- **An aborted request cannot burn the window.** `lastAttempt` is now stamped by `MarkAttempt` only after a fetch finishes (success, or a real failure including the 10 s timeout). Shutdown is not recorded. The attacker's forced refresh now runs to completion and loads the real keys, so the repeated-abort attack in S-1 no longer starves the 24 h refresh or a key rotation.
+- **Single-flight.** The in-flight check, the throttle check and the assignment of `inflight` all happen under `lock (sync)`. `MarkAttempt` runs inside the task before it completes, so there is no gap where a completed refresh has not yet stamped the window and a second one could start. Concurrent unknown-`kid` callers join the same task.
+- **No new DoS found.**
+  - Refresh storm: at most one fetch per 5-minute window, and only one at a time.
+  - Unbounded wait: a joiner waits at most the 10 s fetch timeout, and its own token still ends the wait early. `RunRefreshAsync` never throws, so there are no unobserved task faults. If `disposed` is already disposed, the resulting exception is caught and logged.
+  - Residual (Info, no action): while a slow IdP is being fetched, unknown-`kid` requests that arrive in that window wait up to 10 s. This happens at most once per 5 minutes, and the pre-auth rate buckets still apply.
+  - `LoadAsync` (startup only) is not part of the single-flight, which is acceptable.
+- **Tests.** The three new tests cover the cases requested in S-1: abort mid-refresh then rotation after the window, repeated aborts not starving the daily refresh, and concurrent unknown `kid`s sharing one refresh. I read them and the `FakeOidcIssuer` support code; I did not re-run them.
+
+### S-2: done
+
+`OperatorAuthOptions.Problem()` now returns a reason for `Profile=Google` before any other check, so the existing startup check fails the boot outside Dev/Testing. Fail-closed behaviour is unchanged and `AcceptedAmr` is not weakened. A startup test and an options unit test cover it.
+
+### Verdict
+
+**APPROVED** (security). S-3 to S-8 stay as follow-ups as before; S-4 remains a go-live gate for T-186.
