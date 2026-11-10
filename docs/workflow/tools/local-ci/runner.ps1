@@ -238,6 +238,7 @@ function Run-Pipeline($log, $pipeline, $changed = $null) {
     $r += Docker-Step $log 'pub-get' $FlutterImage 'flutter' '' 'flutter pub get --enforce-lockfile'
     $r += Docker-Step $log 'format'  $FlutterImage 'flutter' '' 'dart format --output=none --set-exit-if-changed .'
     $r += Docker-Step $log 'analyze' $FlutterImage 'flutter' '' 'flutter analyze'
+    $r += Docker-Step $log 'lints' $FlutterImage 'flutter' 'tools/lints' 'dart run bin/zaghlol_lints.dart ../../app ../../packages/zaghlol_parsing ../../packages/zaghlol_domain && dart test'
     $r += Docker-Step $log 'app-test' $FlutterImage 'flutter' 'app' 'flutter test'
     foreach ($pkg in Get-ChildItem (Join-Path $Repo 'packages') -Directory -ErrorAction SilentlyContinue) {
       $r += Docker-Step $log "dart-test-$($pkg.Name)" $FlutterImage 'flutter' "packages/$($pkg.Name)" 'dart test'
@@ -334,9 +335,9 @@ function Auto-Check {
     Publish $branch $sha "RUNNING sha=$sha" $log
     try { $co = Checkout $log $branch } catch { Log $log "$_"; Publish $branch $sha "FAIL sha=$sha pipeline=checkout checkout=1" $log; continue }
     $c = $co.Changed
-    $pipeline = if (($c -match '(?m)^(app|packages)/') -and ($c -match '(?m)^backend/')) { 'quick' }
+    $pipeline = if (($c -match '(?m)^(app|packages|tools)/') -and ($c -match '(?m)^backend/')) { 'quick' }
                 elseif ($c -match '(?m)^backend/') { 'quick-backend' }
-                elseif ($c -match '(?m)^(app|packages)/') { 'quick-app' }
+                elseif ($c -match '(?m)^(app|packages|tools)/') { 'quick-app' }
                 else { '' }
     if (-not $pipeline) { Publish $branch $sha "SKIP sha=$sha no app/packages/backend changes" $log; continue }
     $r = Run-Pipeline $log $pipeline $c

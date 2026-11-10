@@ -305,7 +305,9 @@ jobs:
             testExcludeMarksEveryDirectory testExcludeReportsFailureWithoutStoppingOrCrashing \
             testFilesCreatedLaterStayUnderAnExcludedDirectory \
             testAppGroupDirectoriesAreSkippedWithoutAContainer; do
-            if ! grep -qiE "test case.*BackupExclusionTests.*$t.*passed" xcodebuild.log; then
+            # xcodebuild can interleave lines, cutting a "passed" line; xcodebuild already exited 0, so require
+            # that the test ran (its name appears) and that no line reports it failed.
+            if ! grep -qiE "BackupExclusionTests.*$t" xcodebuild.log || grep -qiE "test case.*BackupExclusionTests.*$t.*failed" xcodebuild.log; then
               echo "::error::BackupExclusionTests.$t did not pass"
               grep -iE "BackupExclusionTests" xcodebuild.log | head -n 30
               exit 1
@@ -324,7 +326,9 @@ jobs:
             testRenewExtendsAValidLease testRenewOfAnExpiredLeaseIsFalseAndDoesNotRevive \
             testRenewOfAStaleIdIsFalseAndLeavesTheCurrentLeaseAlone \
             testRenewAfterReleaseIsFalseAndNeverTakesTheLease testHostRenewIsTrueForTheCurrentLeaseOnly; do
-            if ! grep -qiE "test case.*SecretStoreTests.*$t.*passed" xcodebuild.log; then
+            # xcodebuild can interleave lines, cutting a "passed" line; xcodebuild already exited 0, so require
+            # that the test ran (its name appears) and that no line reports it failed.
+            if ! grep -qiE "SecretStoreTests.*$t" xcodebuild.log || grep -qiE "test case.*SecretStoreTests.*$t.*failed" xcodebuild.log; then
               echo "::error::SecretStoreTests.$t did not pass"
               grep -iE "SecretStoreTests" xcodebuild.log | head -n 30
               exit 1
