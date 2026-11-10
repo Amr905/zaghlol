@@ -97,11 +97,20 @@ class SecretStoreHostTest {
     val lease = call<Long> { host.acquireBootstrapLease(10, it) }.getOrThrow()
     slot.value = syntheticKey(5)
     val candidate = syntheticKey(6)
+    var seen: ByteArray? = null
     val stored =
-      call<ByteArray> { host.createIfAbsent(lease, SecretSlotMsg.DB_KEY, candidate, it) }
+      call<ByteArray> { cb ->
+          host.createIfAbsent(lease, SecretSlotMsg.DB_KEY, candidate) { r ->
+            // The codec encodes inside the callback; copy as it would.
+            seen = r.getOrNull()?.copyOf()
+            cb(r)
+          }
+        }
         .getOrThrow()
-    assertArrayEquals(syntheticKey(5), stored)
+    assertArrayEquals(syntheticKey(5), seen)
     assertTrue(candidate.all { it == 0.toByte() })
+    // S-6: the returned plaintext is zeroed once the callback has returned.
+    assertTrue(stored.all { it == 0.toByte() })
   }
 
   @Test
@@ -118,10 +127,20 @@ class SecretStoreHostTest {
     assertEquals(SecretStatusMsg.NOT_FOUND, notFound.status)
     assertNull(notFound.value)
     slot.value = syntheticKey()
-    val found = call<SecretReadMsg> { host.read(SecretSlotMsg.DB_KEY, it) }.getOrThrow()
+    var seen: ByteArray? = null
+    val found =
+      call<SecretReadMsg> { cb ->
+          host.read(SecretSlotMsg.DB_KEY) { r ->
+            seen = r.getOrNull()?.value?.copyOf()
+            cb(r)
+          }
+        }
+        .getOrThrow()
     assertEquals(SecretStatusMsg.FOUND, found.status)
-    assertArrayEquals(syntheticKey(), found.value)
+    assertArrayEquals(syntheticKey(), seen)
     assertEquals(1L, found.attempts)
+    // S-6: the plaintext handed to the codec is zeroed after the reply.
+    assertTrue(found.value!!.all { it == 0.toByte() })
   }
 
   @Test

@@ -39,7 +39,7 @@ class SecretStoreHost(
     dispatch(callback) { leases.release(lease) }
 
   override fun read(slot: SecretSlotMsg, callback: (Result<SecretReadMsg>) -> Unit) =
-    dispatch(callback) {
+    dispatch(callback, wipe = { it.value?.fill(0) }) {
       val r =
         try {
           slots(slot).read()
@@ -55,7 +55,7 @@ class SecretStoreHost(
     candidate: ByteArray,
     callback: (Result<ByteArray>) -> Unit,
   ) =
-    dispatch(callback) {
+    dispatch(callback, wipe = { it.fill(0) }) {
       try {
         requireLease(lease)
         slots(slot).createIfAbsent(candidate)
@@ -74,8 +74,17 @@ class SecretStoreHost(
     if (!leases.isValid(lease)) throw SecretStoreErrors.error(SecretStoreErrors.LEASE_TIMEOUT)
   }
 
-  /** Runs [body] on the worker and replies on the main thread. */
-  private fun <T> dispatch(callback: (Result<T>) -> Unit, body: () -> T) {
+  /**
+   * Runs [body] on the worker and replies on the main thread. [wipe] runs on
+   * a successful value after [callback] returns (S-6): the Pigeon reply
+   * encodes the value into its own buffer synchronously inside the callback,
+   * so the plaintext key bytes we hold are no longer needed.
+   */
+  private fun <T> dispatch(
+    callback: (Result<T>) -> Unit,
+    wipe: (T) -> Unit = {},
+    body: () -> T,
+  ) {
     worker.execute {
       val result: Result<T> =
         try {
@@ -85,7 +94,15 @@ class SecretStoreHost(
         } catch (e: Throwable) {
           Result.failure(SecretStoreErrors.error(SecretStoreErrors.KEY_STORE_FAILED))
         }
-      main(Runnable { callback(result) })
+      main(
+        Runnable {
+          try {
+            callback(result)
+          } finally {
+            result.getOrNull()?.let { value -> runCatching { wipe(value) } }
+          }
+        }
+      )
     }
   }
 
