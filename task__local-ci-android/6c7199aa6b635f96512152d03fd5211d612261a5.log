@@ -1,5 +1,8 @@
 ﻿== SUMMARY ==
-RUNNING sha=6c7199aa6b635f96512152d03fd5211d612261a5
+SKIP sha=6c7199aa6b635f96512152d03fd5211d612261a5 no app/packages/backend changes
 
 == FULL LOG (last 1500 lines) ==
 auto task/local-ci-android 6c7199aa6b635f96512152d03fd5211d612261a5 2026-11-10T14:10:39.2835434+02:00
+
+
+
