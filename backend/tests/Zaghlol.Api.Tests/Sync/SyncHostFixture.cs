@@ -132,6 +132,13 @@ public sealed class SyncHostFixture : IAsyncLifetime, IDisposable
     /// <summary>A unique app version, so daily-active rows of one test are its own.</summary>
     public static string UniqueAppVersion() => "1.0.0-t" + Convert.ToHexStringLower(RandomNumberGenerator.GetBytes(4));
 
+    /// <summary>
+    /// A unique merchant or bank name of letters only: random hex could form a 6-digit run and be filtered (or rejected by the
+    /// database CHECK), which is not what the test means to exercise.
+    /// </summary>
+    public static string UniqueName(string label) =>
+        "sync " + label + " " + string.Concat(RandomNumberGenerator.GetBytes(10).Select(b => (char)('a' + (b % 26))));
+
     /// <summary>16 random bytes as a canonical time nonce.</summary>
     public static string NewNonce() => System.Buffers.Text.Base64Url.EncodeToString(RandomNumberGenerator.GetBytes(16));
 

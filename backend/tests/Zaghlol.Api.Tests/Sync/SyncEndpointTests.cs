@@ -116,7 +116,7 @@ public class SyncEndpointTests(SyncHostFixture fixture) : IClassFixture<SyncHost
     {
         var (_, token) = await fixture.NewInstallAsync();
         string[] dirty = ["010 1234 5678", "٠١٠١٢٣٤٥٦٧٨", "+20 100 123 4567", "user@bank", "pay me 01012345678"];
-        var clean = "t128 clean " + Guid.NewGuid().ToString("N")[..8];
+        var clean = SyncHostFixture.UniqueName("clean");
         var items = dirty.Select(d => (d, "nbe", "dining")).Append((clean, "nbe", "dining")).ToArray();
 
         using var response = await fixture.SyncAsync(token, SyncHostFixture.Body(extra: SyncHostFixture.Contributions(items)));
@@ -136,7 +136,7 @@ public class SyncEndpointTests(SyncHostFixture fixture) : IClassFixture<SyncHost
     public async Task CustomCategoriesAndBadBankRequestsAreDroppedSilently()
     {
         var (_, token) = await fixture.NewInstallAsync();
-        var bank = "t128 bank " + Guid.NewGuid().ToString("N")[..8];
+        var bank = SyncHostFixture.UniqueName("bank");
 
         using var response = await fixture.SyncAsync(
             token,
@@ -161,7 +161,7 @@ public class SyncEndpointTests(SyncHostFixture fixture) : IClassFixture<SyncHost
         using var first = await fixture.SyncAsync(token, SyncHostFixture.Body(), app: app);
         var firstTime = DateTimeOffset.Parse((await ReadAsync(first)).GetProperty("serverTime").GetString()!, CultureInfo.InvariantCulture);
         var lastSeen = await fixture.ScalarAsync("SELECT last_seen_at FROM zaghlol.installs WHERE id = $1", Guid.Parse(installId));
-        var merchant = "t128 throttled " + Guid.NewGuid().ToString("N")[..8];
+        var merchant = SyncHostFixture.UniqueName("throttled");
 
         fixture.Clock.Advance(Window - TimeSpan.FromMinutes(1));
         var nonce = SyncHostFixture.NewNonce();
@@ -430,7 +430,7 @@ public class SyncEndpointTests(SyncHostFixture fixture) : IClassFixture<SyncHost
     public async Task AHasherOutageDropsTheIntakeButTheSyncSucceeds()
     {
         var (_, token) = await fixture.NewInstallAsync();
-        var merchant = "t128 nohash " + Guid.NewGuid().ToString("N")[..8];
+        var merchant = SyncHostFixture.UniqueName("nohash");
         fixture.Faults.Hasher = true;
         try
         {
@@ -477,7 +477,7 @@ public class SyncEndpointTests(SyncHostFixture fixture) : IClassFixture<SyncHost
     public async Task TheSameContributionTwiceInOneCallAndAcrossDaysIsOneRow()
     {
         var (_, token) = await fixture.NewInstallAsync();
-        var merchant = "t128 dedupe " + Guid.NewGuid().ToString("N")[..8];
+        var merchant = SyncHostFixture.UniqueName("dedupe");
         var items = SyncHostFixture.Contributions((merchant, "nbe", "dining"), (merchant.ToUpperInvariant(), "nbe", "groceries"));
 
         using var first = await fixture.SyncAsync(token, SyncHostFixture.Body(extra: items));
@@ -525,7 +525,7 @@ public class SyncEndpointTests(SyncHostFixture fixture) : IClassFixture<SyncHost
     public async Task LogsNeverContainContributionTextTheNonceOrEntitlementIssuedAt()
     {
         var (_, token) = await fixture.NewInstallAsync();
-        var merchant = "t128 logcheck " + Guid.NewGuid().ToString("N")[..8];
+        var merchant = SyncHostFixture.UniqueName("logcheck");
         var nonce = SyncHostFixture.NewNonce();
         fixture.Faults.Prices = true; // also exercises the SYNC_BLOCK_FAILED log line
         try
@@ -556,7 +556,7 @@ public class SyncEndpointTests(SyncHostFixture fixture) : IClassFixture<SyncHost
     public async Task TheResponseNeverEchoesRequestData()
     {
         var (_, token) = await fixture.NewInstallAsync();
-        var merchant = "t128 echo " + Guid.NewGuid().ToString("N")[..8];
+        var merchant = SyncHostFixture.UniqueName("echo");
 
         using var response = await fixture.SyncAsync(
             token,

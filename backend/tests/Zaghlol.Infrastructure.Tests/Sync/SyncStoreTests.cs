@@ -142,7 +142,7 @@ public class SyncStoreTests(SyncStoreFixture fixture) : IClassFixture<SyncStoreF
     {
         var (id, appVersion) = await NewInstallAsync();
         var hash = Rows.Bytes();
-        var merchant = "t128 koshary " + Convert.ToHexStringLower(RandomNumberGenerator.GetBytes(3));
+        var merchant = "sync koshary " + string.Concat(RandomNumberGenerator.GetBytes(10).Select(b => (char)('a' + (b % 26))));
 
         var first = await Store.ClaimAsync(
             Claim(
