@@ -1,5 +1,371 @@
 ﻿== SUMMARY ==
-RUNNING sha=facc6994f19564afeebf16876a2782fc1db509d3
+FAIL sha=facc6994f19564afeebf16876a2782fc1db509d3 pipeline=quick-backend dotnet-build=0 dotnet-format=0 dotnet-test=1
+dotnet-build                 PASS  exit=0  22s
+dotnet-format                PASS  exit=0  29s
+dotnet-test                  FAIL  exit=1  78s
+
+== ERRORS: dotnet-test ==
+  Failed Zaghlol.Infrastructure.Tests.Purchases.PurchaseStoreTests.OnlyOneSweeperHoldsTheLockAcrossInstances [126 ms]
+  Error Message:
+   Assert.Null() Failure: Value is not null
+Expected: null
+Actual:   SessionLock { }
+  Stack Trace:
+     at Zaghlol.Infrastructure.Tests.Purchases.PurchaseStoreTests.OnlyOneSweeperHoldsTheLockAcrossInstances() in /_/backend/tests/Zaghlol.Infrastructure.Tests/Purchases/PurchaseStoreTests.cs:line 155
+   at Zaghlol.Infrastructure.Tests.Purchases.PurchaseStoreTests.OnlyOneSweeperHoldsTheLockAcrossInstances() in /_/backend/tests/Zaghlol.Infrastructure.Tests/Purchases/PurchaseStoreTests.cs:line 159
+--- End of stack trace from previous location ---
+[xUnit.net 00:00:14.29]     Zaghlol.Infrastructure.Tests.Purchases.PurchaseStoreTests.ANewerReadUpdatesAnOlderOneDoesNotAndTheBuyingInstallNeverChanges [FAIL]
+  Failed Zaghlol.Infrastructure.Tests.Purchases.PurchaseStoreTests.ANewerReadUpdatesAnOlderOneDoesNotAndTheBuyingInstallNeverChanges [102 ms]
+  Error Message:
+   Assert.False() Failure
+
+  Failed Zaghlol.Infrastructure.Tests.Purchases.PurchaseStoreTests.ANewerReadUpdatesAnOlderOneDoesNotAndTheBuyingInstallNeverChanges [102 ms]
+  Error Message:
+   Assert.False() Failure
+Expected: False
+Actual:   True
+  Stack Trace:
+     at Zaghlol.Infrastructure.Tests.Purchases.PurchaseStoreTests.ANewerReadUpdatesAnOlderOneDoesNotAndTheBuyingInstallNeverChanges() in /_/backend/tests/Zaghlol.Infrastructure.Tests/Purchases/PurchaseStoreTests.cs:line 92
+--- End of stack trace from previous location ---
+[xUnit.net 00:00:14.95]     Zaghlol.Infrastructure.Tests.Installs.InstallStoreTests.ADeletedInstallCantClaimAndADeleteRacingAClaimLeavesNoRow [FAIL]
+  Failed Zaghlol.Infrastructure.Tests.Installs.InstallStoreTests.ADeletedInstallCantClaimAndADeleteRacingAClaimLeavesNoRow [99 ms]
+  Error Message:
+   Assert.Equal() Failure: Values differ
+Expected: NoInstall
+
+  Failed Zaghlol.Infrastructure.Tests.Installs.InstallStoreTests.ADeletedInstallCantClaimAndADeleteRacingAClaimLeavesNoRow [99 ms]
+  Error Message:
+   Assert.Equal() Failure: Values differ
+Expected: NoInstall
+Actual:   Claimed
+  Stack Trace:
+     at Zaghlol.Infrastructure.Tests.Installs.InstallStoreTests.ADeletedInstallCantClaimAndADeleteRacingAClaimLeavesNoRow() in /_/backend/tests/Zaghlol.Infrastructure.Tests/Installs/InstallStoreTests.cs:line 218
+--- End of stack trace from previous location ---
+[xUnit.net 00:00:17.32]     Zaghlol.Contract.Tests.VerifyLiveContractTests.The422sThe409AndThe502AreDeclaredProblems [FAIL]
+  Failed Zaghlol.Contract.Tests.VerifyLiveContractTests.The422sThe409AndThe502AreDeclaredProblems [3 s]
+  Error Message:
+   expected 502, got 500: {"type":"https://tools.ietf.org/html/rfc9110#section-15.6.1","title":"An unexpected error occurred.","status":500,"traceId":"00-e21f19ab03f3d12fddb25fc734f4e3f2-2253898ddbbfc2eb-01","code":"INTERNAL","correlationId":"e21f19ab03f3d12fddb25fc734f4e3f2"}
+  Stack Trace:
+
+  Failed Zaghlol.Contract.Tests.VerifyLiveContractTests.The422sThe409AndThe502AreDeclaredProblems [3 s]
+  Error Message:
+   expected 502, got 500: {"type":"https://tools.ietf.org/html/rfc9110#section-15.6.1","title":"An unexpected error occurred.","status":500,"traceId":"00-e21f19ab03f3d12fddb25fc734f4e3f2-2253898ddbbfc2eb-01","code":"INTERNAL","correlationId":"e21f19ab03f3d12fddb25fc734f4e3f2"}
+  Stack Trace:
+     at Zaghlol.Contract.Tests.VerifyLiveContractTests.AssertDeclared(HttpResponseMessage response, HttpStatusCode status, String mediaType) in /_/backend/tests/Zaghlol.Contract.Tests/VerifyLiveContractTests.cs:line 179
+   at Zaghlol.Contract.Tests.VerifyLiveContractTests.The422sThe409AndThe502AreDeclaredProblems() in /_/backend/tests/Zaghlol.Contract.Tests/VerifyLiveContractTests.cs:line 127
+--- End of stack trace from previous location ---
+
+Failed!  - Failed:     1, Passed:   120, Skipped:     0, Total:   121, Duration: 18 s - Zaghlol.Contract.Tests.dll (net10.0)
+
+Failed!  - Failed:     3, Passed:   661, Skipped:     0, Total:   664, Duration: 34 s - Zaghlol.Infrastructure.Tests.dll (net10.0)
+[xUnit.net 00:00:51.22]     Zaghlol.Api.Tests.Purchases.PurchaseVerifyEndpointTests.APlayFailureIs502StoreUnavailableAndARetryRunsAgain(status: 503) [FAIL]
+  Failed Zaghlol.Api.Tests.Purchases.PurchaseVerifyEndpointTests.APlayFailureIs502StoreUnavailableAndARetryRunsAgain(status: 503) [256 ms]
+
+  Failed Zaghlol.Api.Tests.Purchases.PurchaseVerifyEndpointTests.APlayFailureIs502StoreUnavailableAndARetryRunsAgain(status: 503) [256 ms]
+  Error Message:
+   expected 502, got 500: {"type":"https://tools.ietf.org/html/rfc9110#section-15.6.1","title":"An unexpected error occurred.","status":500,"traceId":"00-487809407b4f264951f1b0cb0bfa4bb0-b53c35a0b598dc06-00","code":"INTERNAL","correlationId":"487809407b4f264951f1b0cb0bfa4bb0"}
+  Stack Trace:
+     at Zaghlol.Api.Tests.Installs.Problems.AssertAsync(HttpResponseMessage response, HttpStatusCode status, String code) in /_/backend/tests/Zaghlol.Api.Tests/Installs/RegistrationTests.cs:line 255
+   at Zaghlol.Api.Tests.Purchases.PurchaseVerifyEndpointTests.APlayFailureIs502StoreUnavailableAndARetryRunsAgain(Int32 status) in /_/backend/tests/Zaghlol.Api.Tests/Purchases/PurchaseVerifyEndpointTests.cs:line 223
+--- End of stack trace from previous location ---
+[xUnit.net 00:00:51.27]     Zaghlol.Api.Tests.Purchases.PurchaseVerifyEndpointTests.APlayFailureIs502StoreUnavailableAndARetryRunsAgain(status: 403) [FAIL]
+[xUnit.net 00:00:51.31]     Zaghlol.Api.Tests.Purchases.PurchaseVerifyEndpointTests.APlayFailureIs502StoreUnavailableAndARetryRunsAgain(status: 401) [FAIL]
+  Failed Zaghlol.Api.Tests.Purchases.PurchaseVerifyEndpointTests.APlayFailureIs502StoreUnavailableAndARetryRunsAgain(status: 403) [50 ms]
+  Error Message:
+   expected 502, got 500: {"type":"https://tools.ietf.org/html/rfc9110#section-15.6.1","title":"An unexpected error occurred.","status":500,"traceId":"00-e38e7b606a35debee84279c917795482-49619c7729a125fa-00","code":"INTERNAL","correlationId":"e38e7b606a35debee84279c917795482"}
+  Stack Trace:
+
+  Failed Zaghlol.Api.Tests.Purchases.PurchaseVerifyEndpointTests.APlayFailureIs502StoreUnavailableAndARetryRunsAgain(status: 403) [50 ms]
+  Error Message:
+   expected 502, got 500: {"type":"https://tools.ietf.org/html/rfc9110#section-15.6.1","title":"An unexpected error occurred.","status":500,"traceId":"00-e38e7b606a35debee84279c917795482-49619c7729a125fa-00","code":"INTERNAL","correlationId":"e38e7b606a35debee84279c917795482"}
+  Stack Trace:
+     at Zaghlol.Api.Tests.Installs.Problems.AssertAsync(HttpResponseMessage response, HttpStatusCode status, String code) in /_/backend/tests/Zaghlol.Api.Tests/Installs/RegistrationTests.cs:line 255
+   at Zaghlol.Api.Tests.Purchases.PurchaseVerifyEndpointTests.APlayFailureIs502StoreUnavailableAndARetryRunsAgain(Int32 status) in /_/backend/tests/Zaghlol.Api.Tests/Purchases/PurchaseVerifyEndpointTests.cs:line 223
+--- End of stack trace from previous location ---
+  Failed Zaghlol.Api.Tests.Purchases.PurchaseVerifyEndpointTests.APlayFailureIs502StoreUnavailableAndARetryRunsAgain(status: 401) [44 ms]
+  Error Message:
+   expected 502, got 500: {"type":"https://tools.ietf.org/html/rfc9110#section-15.6.1","title":"An unexpected error occurred.","status":500,"traceId":"00-c30aed2807346f65e7af11e3df12e5fa-82b0a1ada1aab4f1-00","code":"INTERNAL","correlationId":"c30aed2807346f65e7af11e3df12e5fa"}
+  Stack Trace:
+     at Zaghlol.Api.Tests.Installs.Problems.AssertAsync(HttpResponseMessage response, HttpStatusCode status, String code) in /_/backend/tests/Zaghlol.Api.Tests/Installs/RegistrationTests.cs:line 255
+   at Zaghlol.Api.Tests.Purchases.PurchaseVerifyEndpointTests.APlayFailureIs502StoreUnavailableAndARetryRunsAgain(Int32 status) in /_/backend/tests/Zaghlol.Api.Tests/Purchases/PurchaseVerifyEndpointTests.cs:line 223
+
+  Failed Zaghlol.Api.Tests.Purchases.PurchaseVerifyEndpointTests.APlayFailureIs502StoreUnavailableAndARetryRunsAgain(status: 401) [44 ms]
+  Error Message:
+   expected 502, got 500: {"type":"https://tools.ietf.org/html/rfc9110#section-15.6.1","title":"An unexpected error occurred.","status":500,"traceId":"00-c30aed2807346f65e7af11e3df12e5fa-82b0a1ada1aab4f1-00","code":"INTERNAL","correlationId":"c30aed2807346f65e7af11e3df12e5fa"}
+  Stack Trace:
+     at Zaghlol.Api.Tests.Installs.Problems.AssertAsync(HttpResponseMessage response, HttpStatusCode status, String code) in /_/backend/tests/Zaghlol.Api.Tests/Installs/RegistrationTests.cs:line 255
+   at Zaghlol.Api.Tests.Purchases.PurchaseVerifyEndpointTests.APlayFailureIs502StoreUnavailableAndARetryRunsAgain(Int32 status) in /_/backend/tests/Zaghlol.Api.Tests/Purchases/PurchaseVerifyEndpointTests.cs:line 223
+--- End of stack trace from previous location ---
+[xUnit.net 00:00:51.67]     Zaghlol.Api.Tests.Purchases.PurchaseVerifyEndpointTests.ATokenBoundToAnotherInstallOrToNoneIsNotOwnedAndNothingIsWritten [FAIL]
+  Failed Zaghlol.Api.Tests.Purchases.PurchaseVerifyEndpointTests.ATokenBoundToAnotherInstallOrToNoneIsNotOwnedAndNothingIsWritten [49 ms]
+  Error Message:
+   Assert.Equal() Failure: Values differ
+Expected: 0
+Actual:   1
+
+  Failed Zaghlol.Api.Tests.Purchases.PurchaseVerifyEndpointTests.ATokenBoundToAnotherInstallOrToNoneIsNotOwnedAndNothingIsWritten [49 ms]
+  Error Message:
+   Assert.Equal() Failure: Values differ
+Expected: 0
+Actual:   1
+  Stack Trace:
+     at Zaghlol.Api.Tests.Purchases.PurchaseVerifyEndpointTests.ATokenBoundToAnotherInstallOrToNoneIsNotOwnedAndNothingIsWritten() in /_/backend/tests/Zaghlol.Api.Tests/Purchases/PurchaseVerifyEndpointTests.cs:line 75
+--- End of stack trace from previous location ---
+[xUnit.net 00:01:02.34]     Zaghlol.Api.Tests.Purchases.IdempotencyPoolTests.TenSlowVerifiesShareAThreeConnectionPoolWithoutHoldingAConnectionDuringTheHandler [FAIL]
+  Failed Zaghlol.Api.Tests.Purchases.IdempotencyPoolTests.TenSlowVerifiesShareAThreeConnectionPoolWithoutHoldingAConnectionDuringTheHandler [7 s]
+  Error Message:
+   Assert.All() Failure: 10 out of 10 items in the collection did not pass.
+[0]: Item:  StatusCode: 503, ReasonPhrase: 'Service Unavailable', Version: 1.1, Content: System.Net.Http.StreamContent, Headers:
+
+  Failed Zaghlol.Api.Tests.Purchases.IdempotencyPoolTests.TenSlowVerifiesShareAThreeConnectionPoolWithoutHoldingAConnectionDuringTheHandler [7 s]
+  Error Message:
+   Assert.All() Failure: 10 out of 10 items in the collection did not pass.
+[0]: Item:  StatusCode: 503, ReasonPhrase: 'Service Unavailable', Version: 1.1, Content: System.Net.Http.StreamContent, Headers:
+            {
+              Cache-Control: no-cache,no-store
+              Pragma: no-cache
+              Content-Type: application/problem+json
+              Expires: -1
+            }
+     Error: Assert.Equal() Failure: Values differ
+            Expected: OK
+            Actual:   ServiceUnavailable
+
 
 == FULL LOG (last 1500 lines) ==
 auto task/T-130-negproof facc6994f19564afeebf16876a2782fc1db509d3 2026-11-11T03:42:49.8284190+02:00
+
+
+
+[03:42:55] === STEP dotnet-build (docker mcr.microsoft.com/dotnet/sdk:10.0.402, /work/backend)
+  Determining projects to restore...
+  All projects are up-to-date for restore.
+  Zaghlol.Domain -> /work/backend/src/Zaghlol.Domain/bin/Release/net10.0/Zaghlol.Domain.dll
+  Zaghlol.Ops -> /work/backend/src/Zaghlol.Ops/bin/Release/net10.0/zaghlol-ops.dll
+  Zaghlol.Ops.Tests -> /work/backend/tests/Zaghlol.Ops.Tests/bin/Release/net10.0/Zaghlol.Ops.Tests.dll
+  Zaghlol.Application -> /work/backend/src/Zaghlol.Application/bin/Release/net10.0/Zaghlol.Application.dll
+  Zaghlol.Application.Tests -> /work/backend/tests/Zaghlol.Application.Tests/bin/Release/net10.0/Zaghlol.Application.Tests.dll
+  Zaghlol.Infrastructure -> /work/backend/src/Zaghlol.Infrastructure/bin/Release/net10.0/Zaghlol.Infrastructure.dll
+  Zaghlol.Workers -> /work/backend/src/Zaghlol.Workers/bin/Release/net10.0/Zaghlol.Workers.dll
+  Zaghlol.Infrastructure.Tests -> /work/backend/tests/Zaghlol.Infrastructure.Tests/bin/Release/net10.0/Zaghlol.Infrastructure.Tests.dll
+  Zaghlol.Workers.Tests -> /work/backend/tests/Zaghlol.Workers.Tests/bin/Release/net10.0/Zaghlol.Workers.Tests.dll
+  Zaghlol.Api -> /work/backend/src/Zaghlol.Api/bin/Release/net10.0/Zaghlol.Api.dll
+  Zaghlol.Contract.Tests -> /work/backend/tests/Zaghlol.Contract.Tests/bin/Release/net10.0/Zaghlol.Contract.Tests.dll
+  Zaghlol.Api.Tests -> /work/backend/tests/Zaghlol.Api.Tests/bin/Release/net10.0/Zaghlol.Api.Tests.dll
+
+Build succeeded.
+    0 Warning(s)
+    0 Error(s)
+
+Time Elapsed 00:00:20.75
+
+[03:43:16] === RESULT dotnet-build exit=0 (22s)
+[03:43:16] === STEP dotnet-format (docker mcr.microsoft.com/dotnet/sdk:10.0.402, /work/backend)
+Formatting code files in workspace '/work/backend/Zaghlol.sln'.
+Format complete in 28034ms.
+
+[03:43:45] === RESULT dotnet-format exit=0 (29s)
+[03:43:45] === STEP dotnet-test (docker mcr.microsoft.com/dotnet/sdk:10.0.402, /work/backend)
+Test run for /work/backend/tests/Zaghlol.Ops.Tests/bin/Release/net10.0/Zaghlol.Ops.Tests.dll (.NETCoreApp,Version=v10.0)
+Test run for /work/backend/tests/Zaghlol.Workers.Tests/bin/Release/net10.0/Zaghlol.Workers.Tests.dll (.NETCoreApp,Version=v10.0)
+Test run for /work/backend/tests/Zaghlol.Application.Tests/bin/Release/net10.0/Zaghlol.Application.Tests.dll (.NETCoreApp,Version=v10.0)
+Test run for /work/backend/tests/Zaghlol.Api.Tests/bin/Release/net10.0/Zaghlol.Api.Tests.dll (.NETCoreApp,Version=v10.0)
+Test run for /work/backend/tests/Zaghlol.Contract.Tests/bin/Release/net10.0/Zaghlol.Contract.Tests.dll (.NETCoreApp,Version=v10.0)
+A total of 1 test files matched the specified pattern.
+A total of 1 test files matched the specified pattern.
+Test run for /work/backend/tests/Zaghlol.Infrastructure.Tests/bin/Release/net10.0/Zaghlol.Infrastructure.Tests.dll (.NETCoreApp,Version=v10.0)
+A total of 1 test files matched the specified pattern.
+A total of 1 test files matched the specified pattern.
+A total of 1 test files matched the specified pattern.
+A total of 1 test files matched the specified pattern.
+
+Passed!  - Failed:     0, Passed:     2, Skipped:     0, Total:     2, Duration: 41 ms - Zaghlol.Ops.Tests.dll (net10.0)
+
+Passed!  - Failed:     0, Passed:    22, Skipped:     0, Total:    22, Duration: 275 ms - Zaghlol.Workers.Tests.dll (net10.0)
+
+Passed!  - Failed:     0, Passed:   512, Skipped:     0, Total:   512, Duration: 278 ms - Zaghlol.Application.Tests.dll (net10.0)
+[xUnit.net 00:00:13.65]     Zaghlol.Infrastructure.Tests.Purchases.PurchaseStoreTests.OnlyOneSweeperHoldsTheLockAcrossInstances [FAIL]
+  Failed Zaghlol.Infrastructure.Tests.Purchases.PurchaseStoreTests.OnlyOneSweeperHoldsTheLockAcrossInstances [126 ms]
+  Error Message:
+   Assert.Null() Failure: Value is not null
+Expected: null
+Actual:   SessionLock { }
+  Stack Trace:
+     at Zaghlol.Infrastructure.Tests.Purchases.PurchaseStoreTests.OnlyOneSweeperHoldsTheLockAcrossInstances() in /_/backend/tests/Zaghlol.Infrastructure.Tests/Purchases/PurchaseStoreTests.cs:line 155
+   at Zaghlol.Infrastructure.Tests.Purchases.PurchaseStoreTests.OnlyOneSweeperHoldsTheLockAcrossInstances() in /_/backend/tests/Zaghlol.Infrastructure.Tests/Purchases/PurchaseStoreTests.cs:line 159
+--- End of stack trace from previous location ---
+[xUnit.net 00:00:14.29]     Zaghlol.Infrastructure.Tests.Purchases.PurchaseStoreTests.ANewerReadUpdatesAnOlderOneDoesNotAndTheBuyingInstallNeverChanges [FAIL]
+  Failed Zaghlol.Infrastructure.Tests.Purchases.PurchaseStoreTests.ANewerReadUpdatesAnOlderOneDoesNotAndTheBuyingInstallNeverChanges [102 ms]
+  Error Message:
+   Assert.False() Failure
+Expected: False
+Actual:   True
+  Stack Trace:
+     at Zaghlol.Infrastructure.Tests.Purchases.PurchaseStoreTests.ANewerReadUpdatesAnOlderOneDoesNotAndTheBuyingInstallNeverChanges() in /_/backend/tests/Zaghlol.Infrastructure.Tests/Purchases/PurchaseStoreTests.cs:line 92
+--- End of stack trace from previous location ---
+[xUnit.net 00:00:14.95]     Zaghlol.Infrastructure.Tests.Installs.InstallStoreTests.ADeletedInstallCantClaimAndADeleteRacingAClaimLeavesNoRow [FAIL]
+  Failed Zaghlol.Infrastructure.Tests.Installs.InstallStoreTests.ADeletedInstallCantClaimAndADeleteRacingAClaimLeavesNoRow [99 ms]
+  Error Message:
+   Assert.Equal() Failure: Values differ
+Expected: NoInstall
+Actual:   Claimed
+  Stack Trace:
+     at Zaghlol.Infrastructure.Tests.Installs.InstallStoreTests.ADeletedInstallCantClaimAndADeleteRacingAClaimLeavesNoRow() in /_/backend/tests/Zaghlol.Infrastructure.Tests/Installs/InstallStoreTests.cs:line 218
+--- End of stack trace from previous location ---
+[xUnit.net 00:00:17.32]     Zaghlol.Contract.Tests.VerifyLiveContractTests.The422sThe409AndThe502AreDeclaredProblems [FAIL]
+  Failed Zaghlol.Contract.Tests.VerifyLiveContractTests.The422sThe409AndThe502AreDeclaredProblems [3 s]
+  Error Message:
+   expected 502, got 500: {"type":"https://tools.ietf.org/html/rfc9110#section-15.6.1","title":"An unexpected error occurred.","status":500,"traceId":"00-e21f19ab03f3d12fddb25fc734f4e3f2-2253898ddbbfc2eb-01","code":"INTERNAL","correlationId":"e21f19ab03f3d12fddb25fc734f4e3f2"}
+  Stack Trace:
+     at Zaghlol.Contract.Tests.VerifyLiveContractTests.AssertDeclared(HttpResponseMessage response, HttpStatusCode status, String mediaType) in /_/backend/tests/Zaghlol.Contract.Tests/VerifyLiveContractTests.cs:line 179
+   at Zaghlol.Contract.Tests.VerifyLiveContractTests.The422sThe409AndThe502AreDeclaredProblems() in /_/backend/tests/Zaghlol.Contract.Tests/VerifyLiveContractTests.cs:line 127
+--- End of stack trace from previous location ---
+
+Failed!  - Failed:     1, Passed:   120, Skipped:     0, Total:   121, Duration: 18 s - Zaghlol.Contract.Tests.dll (net10.0)
+
+Failed!  - Failed:     3, Passed:   661, Skipped:     0, Total:   664, Duration: 34 s - Zaghlol.Infrastructure.Tests.dll (net10.0)
+[xUnit.net 00:00:51.22]     Zaghlol.Api.Tests.Purchases.PurchaseVerifyEndpointTests.APlayFailureIs502StoreUnavailableAndARetryRunsAgain(status: 503) [FAIL]
+  Failed Zaghlol.Api.Tests.Purchases.PurchaseVerifyEndpointTests.APlayFailureIs502StoreUnavailableAndARetryRunsAgain(status: 503) [256 ms]
+  Error Message:
+   expected 502, got 500: {"type":"https://tools.ietf.org/html/rfc9110#section-15.6.1","title":"An unexpected error occurred.","status":500,"traceId":"00-487809407b4f264951f1b0cb0bfa4bb0-b53c35a0b598dc06-00","code":"INTERNAL","correlationId":"487809407b4f264951f1b0cb0bfa4bb0"}
+  Stack Trace:
+     at Zaghlol.Api.Tests.Installs.Problems.AssertAsync(HttpResponseMessage response, HttpStatusCode status, String code) in /_/backend/tests/Zaghlol.Api.Tests/Installs/RegistrationTests.cs:line 255
+   at Zaghlol.Api.Tests.Purchases.PurchaseVerifyEndpointTests.APlayFailureIs502StoreUnavailableAndARetryRunsAgain(Int32 status) in /_/backend/tests/Zaghlol.Api.Tests/Purchases/PurchaseVerifyEndpointTests.cs:line 223
+--- End of stack trace from previous location ---
+[xUnit.net 00:00:51.27]     Zaghlol.Api.Tests.Purchases.PurchaseVerifyEndpointTests.APlayFailureIs502StoreUnavailableAndARetryRunsAgain(status: 403) [FAIL]
+[xUnit.net 00:00:51.31]     Zaghlol.Api.Tests.Purchases.PurchaseVerifyEndpointTests.APlayFailureIs502StoreUnavailableAndARetryRunsAgain(status: 401) [FAIL]
+  Failed Zaghlol.Api.Tests.Purchases.PurchaseVerifyEndpointTests.APlayFailureIs502StoreUnavailableAndARetryRunsAgain(status: 403) [50 ms]
+  Error Message:
+   expected 502, got 500: {"type":"https://tools.ietf.org/html/rfc9110#section-15.6.1","title":"An unexpected error occurred.","status":500,"traceId":"00-e38e7b606a35debee84279c917795482-49619c7729a125fa-00","code":"INTERNAL","correlationId":"e38e7b606a35debee84279c917795482"}
+  Stack Trace:
+     at Zaghlol.Api.Tests.Installs.Problems.AssertAsync(HttpResponseMessage response, HttpStatusCode status, String code) in /_/backend/tests/Zaghlol.Api.Tests/Installs/RegistrationTests.cs:line 255
+   at Zaghlol.Api.Tests.Purchases.PurchaseVerifyEndpointTests.APlayFailureIs502StoreUnavailableAndARetryRunsAgain(Int32 status) in /_/backend/tests/Zaghlol.Api.Tests/Purchases/PurchaseVerifyEndpointTests.cs:line 223
+--- End of stack trace from previous location ---
+  Failed Zaghlol.Api.Tests.Purchases.PurchaseVerifyEndpointTests.APlayFailureIs502StoreUnavailableAndARetryRunsAgain(status: 401) [44 ms]
+  Error Message:
+   expected 502, got 500: {"type":"https://tools.ietf.org/html/rfc9110#section-15.6.1","title":"An unexpected error occurred.","status":500,"traceId":"00-c30aed2807346f65e7af11e3df12e5fa-82b0a1ada1aab4f1-00","code":"INTERNAL","correlationId":"c30aed2807346f65e7af11e3df12e5fa"}
+  Stack Trace:
+     at Zaghlol.Api.Tests.Installs.Problems.AssertAsync(HttpResponseMessage response, HttpStatusCode status, String code) in /_/backend/tests/Zaghlol.Api.Tests/Installs/RegistrationTests.cs:line 255
+   at Zaghlol.Api.Tests.Purchases.PurchaseVerifyEndpointTests.APlayFailureIs502StoreUnavailableAndARetryRunsAgain(Int32 status) in /_/backend/tests/Zaghlol.Api.Tests/Purchases/PurchaseVerifyEndpointTests.cs:line 223
+--- End of stack trace from previous location ---
+[xUnit.net 00:00:51.67]     Zaghlol.Api.Tests.Purchases.PurchaseVerifyEndpointTests.ATokenBoundToAnotherInstallOrToNoneIsNotOwnedAndNothingIsWritten [FAIL]
+  Failed Zaghlol.Api.Tests.Purchases.PurchaseVerifyEndpointTests.ATokenBoundToAnotherInstallOrToNoneIsNotOwnedAndNothingIsWritten [49 ms]
+  Error Message:
+   Assert.Equal() Failure: Values differ
+Expected: 0
+Actual:   1
+  Stack Trace:
+     at Zaghlol.Api.Tests.Purchases.PurchaseVerifyEndpointTests.ATokenBoundToAnotherInstallOrToNoneIsNotOwnedAndNothingIsWritten() in /_/backend/tests/Zaghlol.Api.Tests/Purchases/PurchaseVerifyEndpointTests.cs:line 75
+--- End of stack trace from previous location ---
+[xUnit.net 00:01:02.34]     Zaghlol.Api.Tests.Purchases.IdempotencyPoolTests.TenSlowVerifiesShareAThreeConnectionPoolWithoutHoldingAConnectionDuringTheHandler [FAIL]
+  Failed Zaghlol.Api.Tests.Purchases.IdempotencyPoolTests.TenSlowVerifiesShareAThreeConnectionPoolWithoutHoldingAConnectionDuringTheHandler [7 s]
+  Error Message:
+   Assert.All() Failure: 10 out of 10 items in the collection did not pass.
+[0]: Item:  StatusCode: 503, ReasonPhrase: 'Service Unavailable', Version: 1.1, Content: System.Net.Http.StreamContent, Headers:
+            {
+              Cache-Control: no-cache,no-store
+              Pragma: no-cache
+              Content-Type: application/problem+json
+              Expires: -1
+            }
+     Error: Assert.Equal() Failure: Values differ
+            Expected: OK
+            Actual:   ServiceUnavailable
+[1]: Item:  StatusCode: 503, ReasonPhrase: 'Service Unavailable', Version: 1.1, Content: System.Net.Http.StreamContent, Headers:
+            {
+              Cache-Control: no-cache,no-store
+              Pragma: no-cache
+              Content-Type: application/problem+json
+              Expires: -1
+            }
+     Error: Assert.Equal() Failure: Values differ
+            Expected: OK
+            Actual:   ServiceUnavailable
+[2]: Item:  StatusCode: 503, ReasonPhrase: 'Service Unavailable', Version: 1.1, Content: System.Net.Http.StreamContent, Headers:
+            {
+              Cache-Control: no-cache,no-store
+              Pragma: no-cache
+              Content-Type: application/problem+json
+              Expires: -1
+            }
+     Error: Assert.Equal() Failure: Values differ
+            Expected: OK
+            Actual:   ServiceUnavailable
+[3]: Item:  StatusCode: 503, ReasonPhrase: 'Service Unavailable', Version: 1.1, Content: System.Net.Http.StreamContent, Headers:
+            {
+              Cache-Control: no-cache,no-store
+              Pragma: no-cache
+              Content-Type: application/problem+json
+              Expires: -1
+            }
+     Error: Assert.Equal() Failure: Values differ
+            Expected: OK
+            Actual:   ServiceUnavailable
+[4]: Item:  StatusCode: 503, ReasonPhrase: 'Service Unavailable', Version: 1.1, Content: System.Net.Http.StreamContent, Headers:
+            {
+              Cache-Control: no-cache,no-store
+              Pragma: no-cache
+              Content-Type: application/problem+json
+              Expires: -1
+            }
+     Error: Assert.Equal() Failure: Values differ
+            Expected: OK
+            Actual:   ServiceUnavailable
+[5]: Item:  StatusCode: 503, ReasonPhrase: 'Service Unavailable', Version: 1.1, Content: System.Net.Http.StreamContent, Headers:
+            {
+              Cache-Control: no-cache,no-store
+              Pragma: no-cache
+              Content-Type: application/problem+json
+              Expires: -1
+            }
+     Error: Assert.Equal() Failure: Values differ
+            Expected: OK
+            Actual:   ServiceUnavailable
+[6]: Item:  StatusCode: 503, ReasonPhrase: 'Service Unavailable', Version: 1.1, Content: System.Net.Http.StreamContent, Headers:
+            {
+              Cache-Control: no-cache,no-store
+              Pragma: no-cache
+              Content-Type: application/problem+json
+              Expires: -1
+            }
+     Error: Assert.Equal() Failure: Values differ
+            Expected: OK
+            Actual:   ServiceUnavailable
+[7]: Item:  StatusCode: 503, ReasonPhrase: 'Service Unavailable', Version: 1.1, Content: System.Net.Http.StreamContent, Headers:
+            {
+              Cache-Control: no-cache,no-store
+              Pragma: no-cache
+              Content-Type: application/problem+json
+              Expires: -1
+            }
+     Error: Assert.Equal() Failure: Values differ
+            Expected: OK
+            Actual:   ServiceUnavailable
+[8]: Item:  StatusCode: 503, ReasonPhrase: 'Service Unavailable', Version: 1.1, Content: System.Net.Http.StreamContent, Headers:
+            {
+              Cache-Control: no-cache,no-store
+              Pragma: no-cache
+              Content-Type: application/problem+json
+              Expires: -1
+            }
+     Error: Assert.Equal() Failure: Values differ
+            Expected: OK
+            Actual:   ServiceUnavailable
+[9]: Item:  StatusCode: 503, ReasonPhrase: 'Service Unavailable', Version: 1.1, Content: System.Net.Http.StreamContent, Headers:
+            {
+              Cache-Control: no-cache,no-store
+              Pragma: no-cache
+              Content-Type: application/problem+json
+              Expires: -1
+            }
+     Error: Assert.Equal() Failure: Values differ
+            Expected: OK
+            Actual:   ServiceUnavailable
+  Stack Trace:
+     at Zaghlol.Api.Tests.Purchases.IdempotencyPoolTests.TenSlowVerifiesShareAThreeConnectionPoolWithoutHoldingAConnectionDuringTheHandler() in /_/backend/tests/Zaghlol.Api.Tests/Purchases/IdempotencyPoolTests.cs:line 42
+--- End of stack trace from previous location ---
+
+Failed!  - Failed:     5, Passed:   400, Skipped:     0, Total:   405, Duration: 1 m 3 s - Zaghlol.Api.Tests.dll (net10.0)
+
+[03:45:03] === RESULT dotnet-test exit=1 (78s)
+[03:45:03] SUMMARY FAIL sha=facc6994f19564afeebf16876a2782fc1db509d3 pipeline=quick-backend dotnet-build=0 dotnet-format=0 dotnet-test=1
