@@ -483,6 +483,81 @@ void main() {
       expect(r.needsReview, isTrue);
     });
 
+    group('signed balance (FU-078)', () {
+      // The shipped test template captures no sign; a copy whose balance
+      // group allows leading `-` or `−` stands in for a bank that writes
+      // overdrawn balances (up to two, so the parser's one-sign rule is
+      // what rejects `--`).
+      final signed = files.copy()
+        ..editInstitution('nbe.json', (json) {
+          for (final t in json['templates']! as List<Object?>) {
+            final m = t! as Map<String, Object?>;
+            if (m['id'] == 'nbe.card_purchase.en') {
+              m['pattern'] = (m['pattern']! as String).replaceFirst(
+                '(?<balance>[\\d,.]+)',
+                '(?<balance>[-\u2212]{0,2}[\\d,.]+)',
+              );
+              m['version'] = 3;
+            }
+          }
+        });
+      final p = _pipelineOf(signed);
+      ParseParsed purchase(String balance) => _parsed(
+        p.parse(
+          _req(
+            'NBE: Purchase of EGP 200.00 from NBE Visa **4567 at ZARA on 23/10. Avl Bal EGP $balance',
+          ),
+        ),
+      );
+
+      for (final sign in ['-', '\u2212']) {
+        test('a leading ${sign == '-' ? 'hyphen' : 'minus sign'} gives a '
+            'negative balance, informational reason, no penalty', () {
+          final r = purchase('${sign}500.25');
+          expect(r.fields.balance!.minor, -50025);
+          expect(r.fields.balance!.currency.code, 'EGP');
+          expect(r.fields.amount!.minor, 20000);
+          expect(r.reasons, [ParseReason.balanceNegative]);
+          expect(r.confidencePermille, 970);
+          expect(r.needsReview, isFalse);
+        });
+      }
+
+      test('a negative zero is zero, no reason', () {
+        final r = purchase('-0.00');
+        expect(r.fields.balance!.minor, 0);
+        expect(r.reasons, isEmpty);
+      });
+
+      test('two signs are still invalid', () {
+        final r = purchase('--5.00');
+        expect(r.fields.balance, isNull);
+        expect(r.reasons, [ParseReason.balanceInvalid]);
+      });
+
+      test('a sign on the amount is never accepted', () {
+        final amountSigned = files.copy()
+          ..editInstitution('nbe.json', (json) {
+            for (final t in json['templates']! as List<Object?>) {
+              final m = t! as Map<String, Object?>;
+              if (m['id'] == 'nbe.card_purchase.en') {
+                m['pattern'] = (m['pattern']! as String).replaceFirst(
+                  '(?<amount>[\\d,.]+)',
+                  '(?<amount>-?[\\d,.]+)',
+                );
+                m['version'] = 3;
+              }
+            }
+          });
+        final r = _pipelineOf(amountSigned).parse(
+          _req(
+            'NBE: Purchase of EGP -200.00 from NBE Visa **4567 at ZARA on 23/10.',
+          ),
+        );
+        expect(r, isNot(isA<ParseParsed>()));
+      });
+    });
+
     test('an unknown original currency is dropped with a penalty', () {
       final r = _parsed(
         pipeline.parse(
@@ -506,8 +581,13 @@ void main() {
       expect(r.confidencePermille, 760);
     });
 
-    test('each reason has a factor in 600..900 and the threshold is 850', () {
+    test('each penalty has a factor in 600..900 (informational reasons '
+        '1000) and the threshold is 850', () {
       for (final reason in ParseReason.values) {
+        if (reason == ParseReason.balanceNegative) {
+          expect(reason.factorPermille, 1000);
+          continue;
+        }
         expect(reason.factorPermille, inInclusiveRange(600, 900));
       }
       expect(kAutoAcceptThresholdPermille, 850);

@@ -35,7 +35,7 @@ void main() {
       marks: RecordingMarks(log),
       headless: true,
       spool: FakeSpool([], log),
-      store: (_) => store,
+      store: (_, _) => store,
       dbDirectory: () async => Directory.systemTemp,
     );
     final first = ingestion.drain();
@@ -65,7 +65,7 @@ void main() {
         marks: const NoMarks(),
         headless: true,
         spool: spool,
-        store: (_) {
+        store: (_, _) {
           builds++;
           return store = GatedStore(log)..gate = nextGate;
         },
