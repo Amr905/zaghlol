@@ -11,7 +11,9 @@ import 'package:drift/native.dart' show NativeDatabase;
 import 'package:flutter/foundation.dart' show kDebugMode, protected;
 
 import 'db_errors.dart';
+import 'fts_options.dart';
 import 'migrations/v2_financial_a.dart';
+import 'migrations/v3_financial_b.dart';
 import 'schema/app_schema.dart';
 import 'schema/app_schema.steps.dart';
 import 'schema_shape.dart';
@@ -48,9 +50,10 @@ class AppDatabase extends AppSchema {
   /// Diag fields only (FU-050).
   int? get attemptedUpgradeFrom => _upgradeFrom;
 
-  /// The version steps, `from` → `to` (T-017: v1 → v2). Any other pair is
-  /// refused before anything runs. Runs inside the upgrade transaction set
-  /// up by [migration]; tests override this (FakeNextDatabase).
+  /// The version steps, `from` → `to` (T-017: v1 → v2; T-018: v2 → v3).
+  /// Any other pair is refused before anything runs. Runs inside the upgrade
+  /// transaction set up by [migration]; tests override this
+  /// (FakeNextDatabase).
   @protected
   Future<void> upgradeSteps(Migrator m, int from, int to) async {
     if (from < 1 || from >= to || to != appSchemaVersion) {
@@ -59,7 +62,10 @@ class AppDatabase extends AppSchema {
     await m.runMigrationSteps(
       from: from,
       to: to,
-      steps: migrationSteps(from1To2: (m, _) => _from1To2()),
+      steps: migrationSteps(
+        from1To2: (m, _) => _from1To2(),
+        from2To3: (m, _) => _from2To3(),
+      ),
     );
   }
 
@@ -68,6 +74,21 @@ class AppDatabase extends AppSchema {
   /// misses three of the objects.
   Future<void> _from1To2() async {
     for (final (_, sql) in v2AddedObjects) {
+      await customStatement(sql);
+    }
+  }
+
+  /// v2 → v3 (T-018): the frozen statements of
+  /// migrations/v3_financial_b.dart (drop the changed triggers, create the
+  /// new and changed objects, set the FTS5 options).
+  Future<void> _from2To3() async {
+    for (final name in v3DroppedTriggers) {
+      await customStatement('DROP TRIGGER $name');
+    }
+    for (final (_, sql) in v3AddedObjects) {
+      await customStatement(sql);
+    }
+    for (final sql in v3FtsOptions) {
       await customStatement(sql);
     }
   }
@@ -82,6 +103,10 @@ class AppDatabase extends AppSchema {
   MigrationStrategy get migration => MigrationStrategy(
     onCreate: (m) => transaction(() async {
       await m.createAll();
+      // Data in the FTS config tables, which createAll doesn't set (T-018).
+      for (final sql in ftsOptionStatements) {
+        await customStatement(sql);
+      }
       if (_markRestoreNotice) {
         await into(dbMeta).insert(
           DbMetaCompanion.insert(key: restoreNoticeDueKey, value: '1'),

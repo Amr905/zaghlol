@@ -533,7 +533,9 @@ void main() {
           "AND p.name LIKE '%\\_minor' ESCAPE '\\'",
         )
         .get();
-    expect(rows.length, 8);
+    // 8 in v2 (T-017) + budgets.limit_minor, cycle_summaries.income_minor /
+    // spend_minor, recurring_items.amount_minor (T-018).
+    expect(rows.length, 12);
     for (final r in rows) {
       expect(r.read<String>('ty'), 'INTEGER', reason: r.read<String>('c'));
     }

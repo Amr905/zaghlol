@@ -190,11 +190,15 @@ CREATE INDEX ix_split_expense ON split_participants (expense_txn_id);
 -- Offset invariants (BR-XFR-06, FR-XFR-07; database-schema §3): the sum of
 -- links per expense ≤ the expense amount, per source ≤ the source amount,
 -- same currency, and a participant of the same expense. Fixed codes only.
+-- v3 (T-018, T-017 review m-1): the currency check runs only when both
+-- transactions exist, so a missing one fails the foreign key instead.
 CREATE TRIGGER trg_offset_links_bi BEFORE INSERT ON offset_links
 BEGIN
   SELECT RAISE(ABORT, 'OFFSET_CURRENCY_MISMATCH')
     WHERE (SELECT currency FROM transactions WHERE id = new.expense_txn_id)
-      IS NOT (SELECT currency FROM transactions WHERE id = new.source_txn_id);
+      IS NOT (SELECT currency FROM transactions WHERE id = new.source_txn_id)
+      AND EXISTS (SELECT 1 FROM transactions WHERE id = new.expense_txn_id)
+      AND EXISTS (SELECT 1 FROM transactions WHERE id = new.source_txn_id);
   SELECT RAISE(ABORT, 'OFFSET_PARTICIPANT_MISMATCH')
     WHERE new.participant_id IS NOT NULL AND NOT EXISTS (
       SELECT 1 FROM split_participants
@@ -213,7 +217,9 @@ CREATE TRIGGER trg_offset_links_bu BEFORE UPDATE ON offset_links
 BEGIN
   SELECT RAISE(ABORT, 'OFFSET_CURRENCY_MISMATCH')
     WHERE (SELECT currency FROM transactions WHERE id = new.expense_txn_id)
-      IS NOT (SELECT currency FROM transactions WHERE id = new.source_txn_id);
+      IS NOT (SELECT currency FROM transactions WHERE id = new.source_txn_id)
+      AND EXISTS (SELECT 1 FROM transactions WHERE id = new.expense_txn_id)
+      AND EXISTS (SELECT 1 FROM transactions WHERE id = new.source_txn_id);
   SELECT RAISE(ABORT, 'OFFSET_PARTICIPANT_MISMATCH')
     WHERE new.participant_id IS NOT NULL AND NOT EXISTS (
       SELECT 1 FROM split_participants
