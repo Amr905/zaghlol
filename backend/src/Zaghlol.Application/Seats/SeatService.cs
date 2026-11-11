@@ -221,7 +221,8 @@ public sealed class SeatService(SeatKeyHasher hasher, ISeatTelemetry telemetry, 
 
         await store.WriteEventAsync(request.PurchaseId, snapshot.PurchaseState, SeatCauses.MoveSupport, now, cancellationToken).ConfigureAwait(false);
         telemetry.Changed("support", "move");
-        return Result(decision, snapshot, callerHolds: true, previousHolder: snapshot.Holder, movedBy: SeatMovedBy.Support, next, now);
+        return Result(
+            decision, snapshot, callerHolds: true, snapshot.Holder, snapshot.Holder is null ? null : SeatMovedBy.Support, next, now);
     }
 
     private async Task<SeatResult> ApplyAsync(

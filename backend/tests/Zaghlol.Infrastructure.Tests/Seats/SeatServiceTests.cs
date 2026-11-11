@@ -731,6 +731,22 @@ public sealed class SeatServiceTests(SeatServiceFixture fixture) : IClassFixture
     }
 
     [Fact]
+    public async Task D56ASupportMoveOfAVacantSeatNamesNoLoser()
+    {
+        var (p, holder, _) = await TrustedHolderInCooldownAsync();
+        var claimant = await Db.InstallAsync();
+        await SignInRefusedAsync(claimant, p);
+        await Db.DeleteInstallAsync(holder);
+
+        var result = await SupportMoveAsync(p, claimant);
+
+        Assert.Equal(SeatOutcome.Moved, result.Outcome);
+        Assert.Null(result.PreviousHolder);
+        Assert.Null(result.MovedBy);
+        Assert.Equal(["seat_move:support"], await Db.EventsAsync(p));
+    }
+
+    [Fact]
     public async Task R54AMoveBackClearsTheSeatKeyEvenToATrustedInstall()
     {
         var (p, holder, holderKey) = await TrustedHolderInCooldownAsync();
