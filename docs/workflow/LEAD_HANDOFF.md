@@ -1,6 +1,6 @@
 # Lead handoff — read this first
 
-_Last updated: 2026-11-11 01:00 (Cairo) by the Lead session. Update it whenever the state below changes._
+_Last updated: 2026-11-11 22:00 (Cairo) by the Lead session. Update it whenever the state below changes._
 
 **All state is in the repo.** Agents from earlier sessions can't be messaged; start new ones from their branches. Where this file and the repo disagree, the repo wins.
 
@@ -18,7 +18,9 @@ _Last updated: 2026-11-11 01:00 (Cairo) by the Lead session. Update it whenever 
 - **Verification ladder:** (1) local in the cloud workspace — format, analyze, lints, `flutter test`/`dart test`, `dotnet build -warnaserror`, `dotnet format`, backend unit tests; (2) PC runner on push to `task/**` — Android APK + permission check + Android unit tests + lint, backend Testcontainers tests; (3) GitHub only per batch (`batch/**`) or opt-in `ci/<task-id>` for Swift/iOS and emulator/simulator tests. `db-platform` may need `workflow_dispatch` on a new `ci/` branch.
 - **Batches:** ~5 reviewed tasks merged in order onto `batch/<date>-<n>` (push the branch at `main` first, then merge tasks), run local checks on the merged tree, add the status-doc updates, push, one full GitHub run, then one PR merged with a **merge commit**. PO authorised the Lead to merge green, approved PRs.
 - **Speed-ups (PO, 2026-11-11):** up to 4 tasks at once on separate lanes; builders follow `docs/workflow/self-check.md`; non-crypto C4 builders write their own design note; Sonnet builds C4 tasks except crypto/keys, billing, SMS ingestion, migrations and data-deleting code; the Lead verifies small fix deltas itself.
-- **Limits and quirks:** The git proxy allows 2 concurrent ops per repo; on 429 wait 5 s and retry once. `gh` works only as `gh api` (REST). Agents can't delete remote branches (proxy); the PO deletes leftover `ci/*` and proof branches. Known flakes: GitHub Android NDK download / Maven 429 (rerun failed jobs), `SeededSeriesTests` on the PC (FU-055), interleaved xcodebuild lines (tolerated since batch 2).
+- **Limits and quirks:** The git proxy allows 2 concurrent ops per repo; on 429 wait 5 s and retry once. `gh` works only as `gh api` (REST). Agents can't delete remote branches (proxy); the PO deletes leftover `ci/*` and proof branches. Known flakes: GitHub Android NDK download / Maven 429 (rerun failed jobs), `SeededSeriesTests` on the PC (FU-055), interleaved xcodebuild lines (tolerated since batch 2), iOS `SecretStoreTests.testExistingKeyWinsOverANewCandidate` missing from the xcodebuild log (3× on 2026-11-11; rerun; root cause open), Android API 35 emulator hang / `adb: device offline` in db-platform and sms-spike (cancel at the 75-min timeout, rerun failed jobs), Ubuntu apt DNS outage on GitHub runners (`Temporary failure resolving *.ubuntu.com`, db-platform host job; still failing at 22:00 on 2026-11-11), PC-runner timing tests failing under load (catalog seed load, categorizer perf, guard perf, ingest benchmark — pass in the cloud).
+- **Restarts:** server and cloud-workspace restarts kill running agents several times a day. Brief every agent to commit early and push often. On restart: check each worktree for live processes (`ps aux`, `readlink /proc/<pid>/cwd`) and for pushed/unpushed commits before relaunching; relaunch as a "resume" agent pointed at the same worktree.
+- **Batch scripts:** never chain `git commit` after `git merge` without first checking `git diff --name-only --diff-filter=U` (a conflicted merge got committed with markers once; fixed before push). Local CI step logs (`*.log`) are git-ignored; don't `git add -A` in a worktree where the step script ran without checking `git status`.
 - **Copy deck checks:** `python3 docs/workflow/tools/copy_deck_check.py docs/02-design/copy-deck.md`.
 
 ## Progress: 54 of 186 tasks done (29.0%)
@@ -41,16 +43,22 @@ The PO asked for this progress table in every update.
 
 **Lessons:** never chain `git commit` after `git merge` in one script without checking for conflicts. Server/cloud restarts happen often: brief agents to commit early and push often; on restart, check worktrees for live processes (`ps`, `/proc/<pid>/cwd`) before relaunching.
 
-## In flight
+## In flight (2026-11-11 22:00 Cairo)
 
-- T-182 seat-key proof verifier: built (`task/T-182-seat-proof` @ f066e9b, backend-ci green); code + security reviews (Opus) running.
-- T-159 Android OCR: waiting for the PO's `tesseract4android-4.9.0.aar` (`/home/claude/wt-T159-fix`, unpushed).
+1. **Batch 8 — PR #37** (`batch/2026-11-11-7`, head after this commit): T-041 IngestionWorker (+ T-042 inbox reader wired, headless host NOT_AVAILABLE tested), T-042, T-051 payday engine. Status docs in the branch (FU-108…FU-110). app-ci green (after an iOS flake rerun); db-platform Android API 26/35 + iOS green. The **host** job (run 43047807477, 5 attempts) fails at `apt-get install sqlite3 sqlcipher` with Ubuntu DNS errors — infrastructure, not our code. **Next:** rerun failed jobs (or a new run on the new head); merge with a merge commit when fully green. Consider a follow-up: apt retries (`-o Acquire::Retries=5`, loop with backoff) in db-platform.yml.
+2. **Approved, waiting for batch 9:**
+   - T-182 seat-key proof verifier + keyed hashes — `task/T-182-seat-proof` @ e48a3a2 (code + security reviews merged in; backend-ci green on `ci/T-182`). Security M-1: the K_seat emergency-rotation runbook needs an ordered procedure before PO Q1 closes / T-140 scripts it; L-1 for T-184 (hash element 0 only).
+   - T-047 app-side capture module — `task/T-047-capture` @ 7a61dcc (review merged; APPROVED). **Merges together with T-040.**
+3. **T-040 SMS receiver (Opus build, C4 SMS ingestion):** the builder was killed by a restart after ~1 h. Work is pushed: `task/T-040-receiver` @ 76680a0 (worktree `/home/claude/wt-T-040`, clean; based on T-047's branch). **Next:** start a resume builder (check `ci/T-040` runs and the task file's notes first), then code + security reviews (Opus), then batch 9 = T-040 + T-047 + T-182 (+ whatever else is approved).
+4. **T-159 Android OCR:** waiting for the PO's `tesseract4android-4.9.0.aar` (`/home/claude/wt-T159-fix`, unpushed).
+
+Next free follow-up number: **FU-111**.
 
 ## Ready next (dependencies done)
 
-- **Ingestion chain (Android):** T-047 app-side capture module (Sonnet; design note on `task/ingest-notes-combined`) — must land before or with T-040 for non-devSms builds; T-040 SMS receiver (Opus; FU-101 L-1, FU-104 T-040 items, FU-108 L-1/L-2), then T-043 notification listener; T-048 catch-up scan after PO decides FU-109 M-1.
+- **Ingestion chain (Android):** T-043 notification listener after T-040 merges (design note on `task/ingest-notes-combined`; T-043 owns the listener, its intake thread and its manifest entries); T-048 catch-up scan after the PO decides FU-109 M-1 (must restart the scan on `INVALID_ARGUMENT`, implement `CatchUpScheduler`).
 - **App core:** T-021 diagnostic log (C3), T-052 home read model (needs T-049?), T-077 bulk edit/undo (C3), T-113 net worth, T-141 BackendClient (C4), T-142 contribution outbox (C4), T-183 request-binding library (C4), T-149/T-150 backup.
-- **Backend:** T-181 attestation verifiers (C4), T-184 seat service (after T-182), T-132 after T-184, T-140 (hosting), FU-107 M-1 before go-live.
+- **Backend:** T-184 seat service (T-182 approved; take security L-1), then T-132; T-181 attestation verifiers (C4); T-140 (hosting); FU-107 M-1 (dead-lettered notification rows never retried → Gold kept) before go-live.
 - **Native/iOS:** T-009 iOS App Intent spike, T-010/T-011 spikes, T-178 / T-180.
 - **Parsing:** bank templates T-036, T-037, T-068–T-072 wait for real SMS samples (OQ-04).
 - **UI:** T-053 ZaghlolAvatar (needs UX dark tokens, FU-047).
@@ -79,6 +87,8 @@ The PO asked for this progress table in every update.
 - Canonical merchant key keeps single spaces between tokens (parsing-engine §5, T-034).
 - T-128: a lost sync reply waits for the next day; no server-side person-name detection (PO accepted).
 - Batch CI workflow, combined C4 review, status docs per batch (PO, #27).
+- 2026-11-11 (Lead): shared text skips the Capture Guard on both platforms; Pigeon `encryptedConfig` → plaintext, native encrypts; possible duplicates use `low_confidence` + reason (no schema change); `capture_senders` stays keyed by sender, DAO refuses channel conflicts; T-041 owns `CaptureRuntime.kt` and the Pigeon changes, build order T-041 + T-042 → T-040 → T-043, T-047 lands with T-040; devSms spike receiver stays until T-040; FU-094 busy handler (Dart VM profiler SIGPROF cut SQLite busy sleeps); FU-101 portable-regex lint rejects classes starting with `:` (Android ICU).
+- Lead recommendation to the PO on FU-109 M-1 (user-added phone-number senders): live capture only with a financial-looking filter, consent text, separate opt-in "scan past 3 months", never put their unparsed messages in review.
 
 ## Progress page
 
