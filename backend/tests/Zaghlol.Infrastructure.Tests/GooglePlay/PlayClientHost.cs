@@ -35,7 +35,7 @@ internal sealed class PlayClientHost : IAsyncDisposable
     private readonly MeterListener meters = new();
     private readonly LockedWriter log = new();
 
-    private PlayClientHost(PlayWireMock play, IReadOnlyDictionary<string, string?> extra, IPlayAccessTokenSource? tokens)
+    private PlayClientHost(PlayWireMock play, IReadOnlyDictionary<string, string?> extra, IPlayAccessTokenSource? tokens, AppleBudgetPartition partition)
     {
         Play = play;
         var settings = new Dictionary<string, string?>(play.Settings()) { [TelemetryServiceCollectionExtensions.OtlpEndpointKey] = "http://127.0.0.1:1" };
@@ -59,7 +59,7 @@ internal sealed class PlayClientHost : IAsyncDisposable
         services.AddZaghlolGooglePlay();
 
         // T-131: the App Store clients too (Testing: an empty Purchases:Apple section is valid; Apple tests pass their settings).
-        services.AddZaghlolAppStore();
+        services.AddZaghlolAppStore(partition);
         if (tokens is not null)
         {
             services.AddSingleton(tokens);
@@ -94,8 +94,13 @@ internal sealed class PlayClientHost : IAsyncDisposable
 
     public string LogOutput => log.ToString();
 
-    public static PlayClientHost Start(PlayWireMock play, IReadOnlyDictionary<string, string?>? extra = null, IPlayAccessTokenSource? tokens = null) =>
-        new(play, extra ?? new Dictionary<string, string?>(), tokens);
+    /// <param name="partition">T-134: the Apple budget partition (the worker's serves only <c>StoreLane.Notification</c>).</param>
+    public static PlayClientHost Start(
+        PlayWireMock play,
+        IReadOnlyDictionary<string, string?>? extra = null,
+        IPlayAccessTokenSource? tokens = null,
+        AppleBudgetPartition partition = AppleBudgetPartition.Api) =>
+        new(play, extra ?? new Dictionary<string, string?>(), tokens, partition);
 
     public IReadOnlyList<Dictionary<string, string?>> StoreCalls() =>
         [.. Measurements.Where(m => m.Instrument == "zaghlol.store.call" && m.Value > 0).Select(m => m.Tags)];

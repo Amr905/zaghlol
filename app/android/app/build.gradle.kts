@@ -4,6 +4,10 @@ plugins {
     id("dev.flutter.flutter-gradle-plugin")
 }
 
+// T-038: the shared Capture Guard golden cases and configs (T-035), read in
+// place by the Kotlin tests, never copied.
+val guardFixtures: File = rootProject.file("../../packages/zaghlol_parsing/test/fixtures/guard")
+
 android {
     namespace = "app.zaghlol"
     compileSdk = 36
@@ -63,6 +67,16 @@ android {
         abortOnError = true
     }
 
+    // T-038: the Guard golden runner lives once in src/sharedTest and runs on
+    // the JVM (unit tests, JVM regex) and on devices (androidTest, ICU regex).
+    // The shared golden directory is packaged into the test APK only (never
+    // into the app APK; GuardGoldenInstrumentedTest asserts it).
+    sourceSets {
+        getByName("test").java.srcDir("src/sharedTest/kotlin")
+        getByName("androidTest").java.srcDir("src/sharedTest/kotlin")
+        getByName("androidTest").assets.srcDir(guardFixtures)
+    }
+
     buildTypes {
         release {
             // TODO: Add your own signing config for the release build.
@@ -76,6 +90,15 @@ kotlin {
     compilerOptions {
         jvmTarget = org.jetbrains.kotlin.gradle.dsl.JvmTarget.JVM_17
     }
+}
+
+// T-038: JVM unit tests read the golden file in place; the source scan reads
+// the Guard sources. The fixture dir is a task input, so a golden change
+// re-runs the tests.
+tasks.withType<Test>().configureEach {
+    systemProperty("zaghlol.guardFixtures", guardFixtures.absolutePath)
+    systemProperty("zaghlol.guardSources", file("src/main/kotlin/app/zaghlol/platform/guard").absolutePath)
+    inputs.dir(guardFixtures).withPathSensitivity(PathSensitivity.RELATIVE).withPropertyName("guardFixtures")
 }
 
 // T-008 (SPK-01): the SMS ingestion spike lives in src/devSms only (Lead

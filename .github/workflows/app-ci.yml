@@ -108,12 +108,14 @@ jobs:
       # used: every error is a code-only SecretStoreApiError).
       # T-016 (S-5): also stdout/stderr/dump, and core/db/schema.
       # T-017: also the DAOs, the frozen migration steps and the .drift DDL.
-      - name: no logging in key and database code (T-015, T-016, T-017)
+      - name: no logging in key, database and backup crypto code (T-015, T-016, T-017, T-148)
         run: |
           set -o pipefail
           files=$(ls app/lib/core/db/*.dart app/lib/core/db/schema/*.dart app/lib/core/db/schema/*.drift \
             app/lib/core/db/daos/*.dart app/lib/core/db/migrations/*.dart app/lib/core/crypto/*.dart \
-            app/lib/core/platform/pigeon_secret_store.dart \
+            app/lib/core/platform/pigeon_secret_store.dart app/lib/core/platform/pigeon_text_normalizer.dart \
+            app/lib/features/backup/crypto/*.dart \
+            app/android/app/src/main/kotlin/app/zaghlol/platform/text/*.kt app/ios/Runner/Platform/Text/*.swift \
             app/android/app/src/main/kotlin/app/zaghlol/platform/keys/*.kt \
             app/ios/Runner/Platform/Keys/*.swift | grep -v '\.g\.')
           # T-008: the SMS spike (Kotlin, except its code-only SpikeLog) and the
@@ -368,6 +370,15 @@ jobs:
             fi
           done
           grep -iE "SecretStoreTests.*(passed|skipped)" xcodebuild.log
+          # T-148: NFC rows shared with Kotlin and the Dart vectors; the backup key item.
+          for t in testEverySharedRowNormalizesToItsNfcForm testDigitsSpacesAndCaseAreLeftAlone \
+            testAWholeArabicPassphraseComposes testBackupKeyItemIsSeparateFromTheDatabaseKey; do
+            if ! grep -qiE "TextNormalizationTests.*$t" xcodebuild.log || grep -qiE "test case.*TextNormalizationTests.*$t.*failed" xcodebuild.log; then
+              echo "::error::TextNormalizationTests.$t did not pass"
+              grep -iE "TextNormalizationTests" xcodebuild.log | head -n 30
+              exit 1
+            fi
+          done
 
   android:
     name: android ${{ matrix.flavor }} (${{ matrix.mode }})

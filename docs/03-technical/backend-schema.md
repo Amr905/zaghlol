@@ -152,9 +152,20 @@ CREATE TABLE store_notifications (             -- FR-BE-03, idempotent ingest
   processed_at timestamptz, attempts integer NOT NULL DEFAULT 0,
   last_error text,                                  -- error code only; never payload text
   payload_digest bytea NOT NULL,                    -- SHA-256 of the received body, for dedupe/forensics
-  UNIQUE (store, external_id)
-);   -- Only these extracted columns are written, after authentication (backend-api §4.5). The raw envelope is NEVER stored;
-     -- fields not listed above (including unknown third-party fields) are not persisted anywhere.
+                                                    -- (Apple: of the signedPayload string, T-134)
+  next_attempt_at timestamptz,                      -- T-134: processing back-off; NULL = never failed. Only worker_rw writes it
+  UNIQUE (store, external_id),
+  CHECK (type ~ '^[A-Z0-9_]{1,64}$'),
+  CHECK (subtype IS NULL OR subtype ~ '^[A-Z0-9_]{1,64}$')
+);
+CREATE INDEX ix_store_notifications_due ON store_notifications (store, next_attempt_at NULLS FIRST, received_at)
+  WHERE processed_at IS NULL;                       -- T-134 (T-133 reuses it)
+-- Grants (T-134, migration AppleNotifications): worker_rw gains INSERT on store_notifications (Get Notification History
+-- reconciliation) and UPDATE (product_id, plan) on purchases (an upgrade notification re-plans the row). worker_rw never
+-- updates environment, obfuscated_install_ref, install_id or last_payment_at, and has only SELECT on purchase_seats, so a
+-- notification can't move a seat. The worker never inserts purchases.
+-- Only these extracted columns are written, after authentication (backend-api §4.5). The raw envelope is NEVER stored;
+-- fields not listed above (including unknown third-party fields) are not persisted anywhere.
 
 -- Effective entitlement is computed, not stored: view over purchases for an install or account
 -- Seat (D-52, FR-GOLD-08, BR-GOLD-07): the ONE install that may hold Gold from a purchase, across platforms (FR-GOLD-07).

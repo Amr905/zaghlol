@@ -394,4 +394,50 @@ class DbKeyStoreTest {
     assertEquals(SecretStatusMsg.UNAVAILABLE, r.status)
     assertEquals(4, r.attempts)
   }
+
+  // T-148: the backup data key slot.
+
+  private fun backupStore(k: Kek) =
+    DbKeyStore.forBackupKey(dir, k, KeyErrorClassifier { null }, sleeper = { sleeps.add(it) })
+
+  @Test
+  fun backupSlotHasItsOwnBlobAndBothSlotsCoexist() {
+    val backupKek = SoftwareKek()
+    val db = store()
+    val bk = backupStore(backupKek)
+    db.createIfAbsent(syntheticKey(61))
+    bk.createIfAbsent(syntheticKey(83))
+    assertEquals("db_key_v1.bin", db.blobFile.name)
+    assertEquals("backup_key_v1.bin", bk.blobFile.name)
+    assertArrayEquals(syntheticKey(61), db.read().value)
+    assertArrayEquals(syntheticKey(83), bk.read().value)
+    assertEquals(1, kek.creates)
+    assertEquals(1, backupKek.creates)
+  }
+
+  @Test
+  fun deletingTheBackupSlotLeavesTheDatabaseKeyAlone() {
+    val backupKek = SoftwareKek()
+    val db = store()
+    val bk = backupStore(backupKek)
+    db.createIfAbsent(syntheticKey(61))
+    bk.createIfAbsent(syntheticKey(83))
+    bk.delete()
+    assertEquals(SecretStatusMsg.NOT_FOUND, bk.read().status)
+    assertFalse(bk.blobFile.exists())
+    assertEquals(1, backupKek.deletes)
+    assertEquals(0, kek.deletes)
+    assertArrayEquals(syntheticKey(61), db.read().value)
+  }
+
+  @Test
+  fun aBlobMovedBetweenSlotsIsUnusableBecauseTheAadDiffers() {
+    // Same KEK on purpose: only the AAD tells the slots apart here.
+    val bk = backupStore(kek)
+    bk.createIfAbsent(syntheticKey(83))
+    bk.blobFile.copyTo(File(dir, DbKeyStore.BLOB_NAME))
+    val r = store().read()
+    assertEquals(SecretStatusMsg.UNUSABLE, r.status)
+    assertNull(r.value)
+  }
 }

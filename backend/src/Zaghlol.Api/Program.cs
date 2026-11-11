@@ -72,6 +72,8 @@ builder.Services.AddZaghlolSync();
 // placeholder (T-132) is registered.
 builder.Services.AddZaghlolGooglePlay();
 builder.Services.AddZaghlolPurchaseVerification();
+// App Store Server Notifications V2 ingest (T-134): verify and store only, on the App login; the worker processes.
+builder.Services.AddZaghlolAppleNotificationIngest();
 
 // Operator OIDC + MFA, the operator directory and the startup check (T-136); the audited support lookup on the Admin login.
 builder.Services.AddZaghlolOperatorAuth();
@@ -84,6 +86,7 @@ app.MapHealth();
 app.MapInstalls();
 app.MapSync();
 app.MapPurchases();
+app.MapAppleNotifications();
 app.MapCatalog();
 app.MapCatalogAdmin();
 app.MapContributionAdmin();

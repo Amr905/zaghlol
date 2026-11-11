@@ -207,4 +207,25 @@ void main() {
     api.error = StateError('channel not registered');
     expect(await store.renewBootstrapLease(SecretStoreLease(7)), isFalse);
   });
+
+  test('T-148: the backup slot maps to backupKey', () async {
+    final lease = await store.acquireBootstrapLease(const Duration(seconds: 1));
+    api.readResult = SecretReadMsg(
+      status: SecretStatusMsg.notFound,
+      attempts: 1,
+    );
+    await store.read(SecretSlot.backupKey);
+    await store.createIfAbsent(
+      lease,
+      SecretSlot.backupKey,
+      syntheticKeyBytes(),
+    );
+    await store.delete(lease, SecretSlot.backupKey);
+    expect(api.calls.where((c) => c.contains('backupKey')), [
+      'read:backupKey',
+      'create:7:backupKey',
+      'delete:7:backupKey',
+    ]);
+    expect(api.calls.where((c) => c.contains('dbKey')), isEmpty);
+  });
 }

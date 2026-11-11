@@ -17,6 +17,7 @@ import 'package:zaghlol/features/categorization/domain/merchant_rule.dart';
 
 import '../../../core/db/db_open_harness.dart' show keyOf;
 import '../../../core/db/financial_fixtures.dart';
+import '../../../support/db_interleave.dart';
 
 const String foodId = 'sys:food';
 const String billsId = 'sys:bills';
@@ -493,6 +494,61 @@ void main() {
             }
           }
         });
+
+        // FU-095: a real interleaving (support/db_interleave.dart). Both
+        // connections must be in drift's background isolate.
+        if (background) {
+          test('interleaved: a user edit committed after the preview and '
+              'before the write is never overwritten (ids from the stale '
+              'preview)', () async {
+            for (var i = 0; i < 6; i++) {
+              await put('t$i', norm: 'carrefour');
+            }
+            final r = await repo.save(
+              kind: RuleMatchKind.merchantNorm,
+              value: 'carrefour',
+              categoryId: foodId,
+            );
+            final preview = (await repo.pastMatchIds(r.id)).toSet();
+            expect(preview.length, 6);
+            final changed = await interleaved<int>(
+              blocker: other,
+              blockerWrites: () => TransactionsDao(other).updateById(
+                't2',
+                const TransactionsCompanion(
+                  categoryId: Value(billsId),
+                  categorySource: Value('user'),
+                  isUserVerified: Value(1),
+                ),
+              ),
+              action: () => repo.applyToPast(r.id, transactionIds: preview),
+            );
+            expect(changed, 5);
+            expect(await state('t2'), (billsId, 'user'));
+            for (final id in ['t0', 't1', 't3', 't4', 't5']) {
+              expect(await state(id), (foodId, 'user_rule'), reason: id);
+            }
+          });
+
+          test('interleaved: the rule deleted by the other connection '
+              'leaves nothing to apply', () async {
+            await put('t0', norm: 'carrefour');
+            final r = await repo.save(
+              kind: RuleMatchKind.merchantNorm,
+              value: 'carrefour',
+              categoryId: foodId,
+            );
+            final changed = await interleaved<int>(
+              blocker: other,
+              blockerWrites: () async {
+                await repoB.delete(r.id);
+              },
+              action: () => repo.applyToPast(r.id),
+            );
+            expect(changed, 0);
+            expect(await state('t0'), (null, 'none'));
+          });
+        }
 
         test('concurrent applies from both connections change each row '
             'once', () async {

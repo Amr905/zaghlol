@@ -1,0 +1,848 @@
+[
+ {
+  "merchant_raw": "CARREFOUR MAADI EG 041",
+  "expected": "groceries",
+  "level": "easy"
+ },
+ {
+  "merchant_raw": "CARREFOUR",
+  "expected": "groceries",
+  "level": "easy"
+ },
+ {
+  "merchant_raw": "SPINNEYS NEW CAIRO",
+  "expected": "groceries",
+  "level": "easy"
+ },
+ {
+  "merchant_raw": "SEOUDI MARKET CAIRO",
+  "expected": "groceries",
+  "level": "easy"
+ },
+ {
+  "merchant_raw": "KAZYON",
+  "expected": "groceries",
+  "level": "easy"
+ },
+ {
+  "merchant_raw": "HYPER ONE 6 OCTOBER",
+  "expected": "groceries",
+  "level": "easy"
+ },
+ {
+  "merchant_raw": "TALABAT MART",
+  "expected": "groceries",
+  "level": "easy"
+ },
+ {
+  "merchant_raw": "BREADFAST",
+  "expected": "groceries",
+  "level": "easy"
+ },
+ {
+  "merchant_raw": "AWLAD RAGAB",
+  "expected": "groceries",
+  "level": "easy"
+ },
+ {
+  "merchant_raw": "FATHALLA MARKET",
+  "expected": "groceries",
+  "level": "easy"
+ },
+ {
+  "merchant_raw": "INSTASHOP",
+  "expected": "groceries",
+  "level": "easy"
+ },
+ {
+  "merchant_raw": "TALABAT",
+  "expected": "dining",
+  "level": "easy"
+ },
+ {
+  "merchant_raw": "TALABAT FOOD EG",
+  "expected": "dining",
+  "level": "easy"
+ },
+ {
+  "merchant_raw": "ELMENUS",
+  "expected": "dining",
+  "level": "easy"
+ },
+ {
+  "merchant_raw": "MCDONALDS NASR CITY",
+  "expected": "dining",
+  "level": "easy"
+ },
+ {
+  "merchant_raw": "KFC HELIOPOLIS",
+  "expected": "dining",
+  "level": "easy"
+ },
+ {
+  "merchant_raw": "STARBUCKS CAIRO FESTIVAL",
+  "expected": "dining",
+  "level": "easy"
+ },
+ {
+  "merchant_raw": "COSTA COFFEE ZAMALEK",
+  "expected": "dining",
+  "level": "easy"
+ },
+ {
+  "merchant_raw": "CILANTRO DOKKI",
+  "expected": "dining",
+  "level": "easy"
+ },
+ {
+  "merchant_raw": "BUFFALO BURGER",
+  "expected": "dining",
+  "level": "easy"
+ },
+ {
+  "merchant_raw": "ABOU TAREK",
+  "expected": "dining",
+  "level": "easy"
+ },
+ {
+  "merchant_raw": "UBER TRIP CAIRO",
+  "expected": "transport",
+  "level": "easy"
+ },
+ {
+  "merchant_raw": "UBER *TRIP",
+  "expected": "transport",
+  "level": "easy"
+ },
+ {
+  "merchant_raw": "CAREEM RIDE",
+  "expected": "transport",
+  "level": "easy"
+ },
+ {
+  "merchant_raw": "DIDI",
+  "expected": "transport",
+  "level": "easy"
+ },
+ {
+  "merchant_raw": "INDRIVE",
+  "expected": "transport",
+  "level": "easy"
+ },
+ {
+  "merchant_raw": "WATANIYA 123",
+  "expected": "transport",
+  "level": "easy"
+ },
+ {
+  "merchant_raw": "TOTAL PARCO",
+  "expected": "transport",
+  "level": "easy"
+ },
+ {
+  "merchant_raw": "SHELL MAADI",
+  "expected": "transport",
+  "level": "easy"
+ },
+ {
+  "merchant_raw": "EMARAT MISR",
+  "expected": "transport",
+  "level": "easy"
+ },
+ {
+  "merchant_raw": "SWVL",
+  "expected": "transport",
+  "level": "easy"
+ },
+ {
+  "merchant_raw": "GOBUS",
+  "expected": "transport",
+  "level": "easy"
+ },
+ {
+  "merchant_raw": "VODAFONE EGYPT",
+  "expected": "bills",
+  "level": "easy"
+ },
+ {
+  "merchant_raw": "ORANGE EG",
+  "expected": "bills",
+  "level": "easy"
+ },
+ {
+  "merchant_raw": "ETISALAT",
+  "expected": "bills",
+  "level": "easy"
+ },
+ {
+  "merchant_raw": "FAWRY",
+  "expected": "bills",
+  "level": "easy"
+ },
+ {
+  "merchant_raw": "TE DATA",
+  "expected": "bills",
+  "level": "easy"
+ },
+ {
+  "merchant_raw": "WE EGYPT",
+  "expected": "bills",
+  "level": "easy"
+ },
+ {
+  "merchant_raw": "NATGAS",
+  "expected": "bills",
+  "level": "easy"
+ },
+ {
+  "merchant_raw": "TAQA ARABIA",
+  "expected": "bills",
+  "level": "easy"
+ },
+ {
+  "merchant_raw": "KHALES",
+  "expected": "bills",
+  "level": "easy"
+ },
+ {
+  "merchant_raw": "IKEA EGYPT",
+  "expected": "housing",
+  "level": "easy"
+ },
+ {
+  "merchant_raw": "HOMEWORKS",
+  "expected": "housing",
+  "level": "easy"
+ },
+ {
+  "merchant_raw": "HOMZMART",
+  "expected": "housing",
+  "level": "easy"
+ },
+ {
+  "merchant_raw": "EMAAR MISR",
+  "expected": "housing",
+  "level": "easy"
+ },
+ {
+  "merchant_raw": "SODIC",
+  "expected": "housing",
+  "level": "easy"
+ },
+ {
+  "merchant_raw": "PALM HILLS",
+  "expected": "housing",
+  "level": "easy"
+ },
+ {
+  "merchant_raw": "AMAZON EG",
+  "expected": "shopping",
+  "level": "easy"
+ },
+ {
+  "merchant_raw": "AMAZON.EG",
+  "expected": "shopping",
+  "level": "easy"
+ },
+ {
+  "merchant_raw": "NOON",
+  "expected": "shopping",
+  "level": "easy"
+ },
+ {
+  "merchant_raw": "JUMIA",
+  "expected": "shopping",
+  "level": "easy"
+ },
+ {
+  "merchant_raw": "ZARA CITYSTARS",
+  "expected": "shopping",
+  "level": "easy"
+ },
+ {
+  "merchant_raw": "H&M",
+  "expected": "shopping",
+  "level": "easy"
+ },
+ {
+  "merchant_raw": "LC WAIKIKI",
+  "expected": "shopping",
+  "level": "easy"
+ },
+ {
+  "merchant_raw": "DEFACTO",
+  "expected": "shopping",
+  "level": "easy"
+ },
+ {
+  "merchant_raw": "B.TECH",
+  "expected": "shopping",
+  "level": "easy"
+ },
+ {
+  "merchant_raw": "TRADELINE",
+  "expected": "shopping",
+  "level": "easy"
+ },
+ {
+  "merchant_raw": "2B",
+  "expected": "shopping",
+  "level": "easy"
+ },
+ {
+  "merchant_raw": "VALU",
+  "expected": "debt",
+  "level": "easy"
+ },
+ {
+  "merchant_raw": "SHAHRY",
+  "expected": "debt",
+  "level": "easy"
+ },
+ {
+  "merchant_raw": "SYMPL",
+  "expected": "debt",
+  "level": "easy"
+ },
+ {
+  "merchant_raw": "SOUHOOLA",
+  "expected": "debt",
+  "level": "easy"
+ },
+ {
+  "merchant_raw": "CONTACT",
+  "expected": "debt",
+  "level": "easy"
+ },
+ {
+  "merchant_raw": "NETFLIX.COM",
+  "expected": "subscriptions",
+  "level": "easy"
+ },
+ {
+  "merchant_raw": "SPOTIFY",
+  "expected": "subscriptions",
+  "level": "easy"
+ },
+ {
+  "merchant_raw": "ANGHAMI",
+  "expected": "subscriptions",
+  "level": "easy"
+ },
+ {
+  "merchant_raw": "YOUTUBE",
+  "expected": "subscriptions",
+  "level": "easy"
+ },
+ {
+  "merchant_raw": "GOOGLE*ONE",
+  "expected": "subscriptions",
+  "level": "easy"
+ },
+ {
+  "merchant_raw": "OPENAI",
+  "expected": "subscriptions",
+  "level": "easy"
+ },
+ {
+  "merchant_raw": "PLAYSTATION",
+  "expected": "subscriptions",
+  "level": "easy"
+ },
+ {
+  "merchant_raw": "STEAM",
+  "expected": "subscriptions",
+  "level": "easy"
+ },
+ {
+  "merchant_raw": "EL EZABY",
+  "expected": "health",
+  "level": "easy"
+ },
+ {
+  "merchant_raw": "ELEZABY",
+  "expected": "health",
+  "level": "easy"
+ },
+ {
+  "merchant_raw": "EL-EZABY PHARMACY",
+  "expected": "health",
+  "level": "easy"
+ },
+ {
+  "merchant_raw": "SEIF PHARMACY",
+  "expected": "health",
+  "level": "easy"
+ },
+ {
+  "merchant_raw": "VEZEETA",
+  "expected": "health",
+  "level": "easy"
+ },
+ {
+  "merchant_raw": "AL BORG LABS",
+  "expected": "health",
+  "level": "easy"
+ },
+ {
+  "merchant_raw": "GOLDS GYM",
+  "expected": "health",
+  "level": "easy"
+ },
+ {
+  "merchant_raw": "UDEMY",
+  "expected": "education",
+  "level": "easy"
+ },
+ {
+  "merchant_raw": "COURSERA",
+  "expected": "education",
+  "level": "easy"
+ },
+ {
+  "merchant_raw": "BRITISH COUNCIL",
+  "expected": "education",
+  "level": "easy"
+ },
+ {
+  "merchant_raw": "AUC",
+  "expected": "education",
+  "level": "easy"
+ },
+ {
+  "merchant_raw": "DIWAN",
+  "expected": "education",
+  "level": "easy"
+ },
+ {
+  "merchant_raw": "VOX CINEMAS",
+  "expected": "entertainment",
+  "level": "easy"
+ },
+ {
+  "merchant_raw": "TAZKARTI",
+  "expected": "entertainment",
+  "level": "easy"
+ },
+ {
+  "merchant_raw": "BOOKING.COM",
+  "expected": "entertainment",
+  "level": "easy"
+ },
+ {
+  "merchant_raw": "AIRBNB",
+  "expected": "entertainment",
+  "level": "easy"
+ },
+ {
+  "merchant_raw": "EGYPT AIR",
+  "expected": "entertainment",
+  "level": "easy"
+ },
+ {
+  "merchant_raw": "AIR CAIRO",
+  "expected": "entertainment",
+  "level": "hard"
+ },
+ {
+  "merchant_raw": "RESALA",
+  "expected": "family_giving",
+  "level": "easy"
+ },
+ {
+  "merchant_raw": "BAHEYA",
+  "expected": "family_giving",
+  "level": "easy"
+ },
+ {
+  "merchant_raw": "57357",
+  "expected": "family_giving",
+  "level": "easy"
+ },
+ {
+  "merchant_raw": "MISR EL KHEIR",
+  "expected": "family_giving",
+  "level": "easy"
+ },
+ {
+  "merchant_raw": "FOOD BANK",
+  "expected": "family_giving",
+  "level": "easy"
+ },
+ {
+  "merchant_raw": "صيدليات العزبي",
+  "expected": "health",
+  "level": "medium"
+ },
+ {
+  "merchant_raw": "العزبي",
+  "expected": "health",
+  "level": "medium"
+ },
+ {
+  "merchant_raw": "19011",
+  "expected": "health",
+  "level": "medium"
+ },
+ {
+  "merchant_raw": "POS CARREFOUR MAADI",
+  "expected": "groceries",
+  "level": "medium"
+ },
+ {
+  "merchant_raw": "CARREFOUR  EG",
+  "expected": "groceries",
+  "level": "medium"
+ },
+ {
+  "merchant_raw": "carrefour",
+  "expected": "groceries",
+  "level": "medium"
+ },
+ {
+  "merchant_raw": "MC DONALDS",
+  "expected": "dining",
+  "level": "medium"
+ },
+ {
+  "merchant_raw": "mcdonalds",
+  "expected": "dining",
+  "level": "medium"
+ },
+ {
+  "merchant_raw": "UBER   *   TRIP   HELP.UBER.COM",
+  "expected": "transport",
+  "level": "medium"
+ },
+ {
+  "merchant_raw": "shell station 55",
+  "expected": "transport",
+  "level": "medium"
+ },
+ {
+  "merchant_raw": "فودافون",
+  "expected": "bills",
+  "level": "hard"
+ },
+ {
+  "merchant_raw": "VODAFONE CASH TOPUP",
+  "expected": "bills",
+  "level": "medium"
+ },
+ {
+  "merchant_raw": "APPLE.COM/BILL",
+  "expected": "subscriptions",
+  "level": "medium"
+ },
+ {
+  "merchant_raw": "NETFLIX 12345",
+  "expected": "subscriptions",
+  "level": "medium"
+ },
+ {
+  "merchant_raw": "AMAZON 123 EG",
+  "expected": "shopping",
+  "level": "medium"
+ },
+ {
+  "merchant_raw": "ZZ PHARMACY NASR CITY",
+  "expected": "health",
+  "level": "keyword"
+ },
+ {
+  "merchant_raw": "DR SAMIR CLINIC",
+  "expected": "health",
+  "level": "keyword"
+ },
+ {
+  "merchant_raw": "NEW DENTAL CENTER",
+  "expected": "health",
+  "level": "keyword"
+ },
+ {
+  "merchant_raw": "صيدلية النور",
+  "expected": "health",
+  "level": "keyword"
+ },
+ {
+  "merchant_raw": "عيادة الدكتور",
+  "expected": "health",
+  "level": "keyword"
+ },
+ {
+  "merchant_raw": "AL NOUR SUPERMARKET",
+  "expected": "groceries",
+  "level": "keyword"
+ },
+ {
+  "merchant_raw": "BAKERY QWERTY",
+  "expected": "groceries",
+  "level": "keyword"
+ },
+ {
+  "merchant_raw": "سوبرماركت الأمل",
+  "expected": "groceries",
+  "level": "keyword"
+ },
+ {
+  "merchant_raw": "LA BELLA RESTAURANT",
+  "expected": "dining",
+  "level": "keyword"
+ },
+ {
+  "merchant_raw": "QWERTY CAFE",
+  "expected": "dining",
+  "level": "keyword"
+ },
+ {
+  "merchant_raw": "FOOL AND TAAMEYA RESTAURANT",
+  "expected": "dining",
+  "level": "keyword"
+ },
+ {
+  "merchant_raw": "مطعم الشرق",
+  "expected": "dining",
+  "level": "keyword"
+ },
+ {
+  "merchant_raw": "CAIRO LANGUAGE SCHOOL",
+  "expected": "education",
+  "level": "keyword"
+ },
+ {
+  "merchant_raw": "NILE UNIVERSITY",
+  "expected": "education",
+  "level": "keyword"
+ },
+ {
+  "merchant_raw": "مدرسة النور",
+  "expected": "education",
+  "level": "keyword"
+ },
+ {
+  "merchant_raw": "SEA VIEW HOTEL",
+  "expected": "entertainment",
+  "level": "keyword"
+ },
+ {
+  "merchant_raw": "GRAND CINEMA",
+  "expected": "entertainment",
+  "level": "keyword"
+ },
+ {
+  "merchant_raw": "CARREFOURR MAADI",
+  "expected": "groceries",
+  "level": "hard"
+ },
+ {
+  "merchant_raw": "CARREFOR",
+  "expected": "groceries",
+  "level": "hard"
+ },
+ {
+  "merchant_raw": "SPINNEYS S",
+  "expected": "groceries",
+  "level": "hard"
+ },
+ {
+  "merchant_raw": "STARBUCK",
+  "expected": "dining",
+  "level": "hard"
+ },
+ {
+  "merchant_raw": "STARBUCKSS 12",
+  "expected": "dining",
+  "level": "hard"
+ },
+ {
+  "merchant_raw": "EL EZABI",
+  "expected": "health",
+  "level": "hard"
+ },
+ {
+  "merchant_raw": "ELEZABI PHARMACY",
+  "expected": "health",
+  "level": "hard"
+ },
+ {
+  "merchant_raw": "VODAFON",
+  "expected": "bills",
+  "level": "hard"
+ },
+ {
+  "merchant_raw": "VODAPHONE",
+  "expected": "bills",
+  "level": "hard"
+ },
+ {
+  "merchant_raw": "LC WAIKIKY",
+  "expected": "shopping",
+  "level": "hard"
+ },
+ {
+  "merchant_raw": "AMAZONN",
+  "expected": "shopping",
+  "level": "hard"
+ },
+ {
+  "merchant_raw": "AHMED KHALED",
+  "expected": null,
+  "level": "hard"
+ },
+ {
+  "merchant_raw": "XJQ 77 TRADING",
+  "expected": null,
+  "level": "hard"
+ },
+ {
+  "merchant_raw": "FOO BAR 123",
+  "expected": null,
+  "level": "hard"
+ },
+ {
+  "merchant_raw": "???",
+  "expected": null,
+  "level": "hard"
+ },
+ {
+  "merchant_raw": "METRA",
+  "expected": null,
+  "level": "hard"
+ },
+ {
+  "merchant_raw": "MITRO",
+  "expected": null,
+  "level": "hard"
+ },
+ {
+  "merchant_raw": "",
+  "expected": null,
+  "level": "hard"
+ },
+ {
+  "merchant_raw": "😀",
+  "expected": null,
+  "level": "hard"
+ },
+ {
+  "merchant_raw": "AHMED SAMY",
+  "expected": null,
+  "level": "p2p",
+  "counterparty_kind": "person",
+  "counterparty_value": "Ahmed Samy"
+ },
+ {
+  "merchant_raw": "CARREFOUR",
+  "expected": null,
+  "level": "p2p",
+  "counterparty_kind": "ipa",
+  "counterparty_value": "x@instapay"
+ },
+ {
+  "merchant_raw": "",
+  "expected": null,
+  "level": "p2p",
+  "counterparty_kind": "phone",
+  "counterparty_value": "01000000000"
+ },
+ {
+  "merchant_raw": "KOSHARY EL TAHRIR",
+  "expected": "dining",
+  "level": "hard"
+ },
+ {
+  "merchant_raw": "ABO ZEID FOOL",
+  "expected": "dining",
+  "level": "hard"
+ },
+ {
+  "merchant_raw": "HAGGAG SEAFOOD",
+  "expected": "dining",
+  "level": "hard"
+ },
+ {
+  "merchant_raw": "LOCAL BURGER JOINT 2",
+  "expected": "dining",
+  "level": "hard"
+ },
+ {
+  "merchant_raw": "كشري التحرير",
+  "expected": "dining",
+  "level": "hard"
+ },
+ {
+  "merchant_raw": "HYPERMARKET 24",
+  "expected": "groceries",
+  "level": "hard"
+ },
+ {
+  "merchant_raw": "OTHAIM MARKETS",
+  "expected": "groceries",
+  "level": "hard"
+ },
+ {
+  "merchant_raw": "AL AHRAM BUTCHER",
+  "expected": "groceries",
+  "level": "hard"
+ },
+ {
+  "merchant_raw": "محل خضار وفاكهة",
+  "expected": "groceries",
+  "level": "hard"
+ },
+ {
+  "merchant_raw": "MISR PETROL STN",
+  "expected": "transport",
+  "level": "hard"
+ },
+ {
+  "merchant_raw": "NILE TAXI 77",
+  "expected": "transport",
+  "level": "hard"
+ },
+ {
+  "merchant_raw": "موقف سيارات المعادي",
+  "expected": "transport",
+  "level": "hard"
+ },
+ {
+  "merchant_raw": "ELECTRIC BILL PAY",
+  "expected": "bills",
+  "level": "hard"
+ },
+ {
+  "merchant_raw": "MOBILE RECHARGE 50",
+  "expected": "bills",
+  "level": "hard"
+ },
+ {
+  "merchant_raw": "فاتورة كهرباء",
+  "expected": "bills",
+  "level": "hard"
+ },
+ {
+  "merchant_raw": "MOBILE ACCESSORIES SHOP",
+  "expected": "shopping",
+  "level": "hard"
+ },
+ {
+  "merchant_raw": "FASHION OUTLET",
+  "expected": "shopping",
+  "level": "hard"
+ },
+ {
+  "merchant_raw": "DR AHMED CLINIC GIZA",
+  "expected": "health",
+  "level": "hard"
+ },
+ {
+  "merchant_raw": "LAB TEST CENTER",
+  "expected": "health",
+  "level": "hard"
+ },
+ {
+  "merchant_raw": "معمل تحاليل",
+  "expected": "health",
+  "level": "hard"
+ }
+]

@@ -796,15 +796,25 @@ paths:
       summary: App Store Server Notifications V2 ingest
       description: |
         Authenticated by the JWS signature inside `signedPayload` (x5c chain verified to Apple Root CA G3,
-        bundle ID and environment checked). Used for both the production and sandbox URLs. Deduplicated on
-        `notificationUUID`. Answers 200 after storing; Apple retries otherwise. The body is open: fields Apple
-        adds later are ignored, never stored and never logged. Request size limit is 256 KB.
+        bundle ID and environment checked). Used for both the production and sandbox URLs; the environment
+        comes only from the signed payload. Deduplicated on `notificationUUID`. Answers 200 after storing;
+        Apple retries otherwise. The body is open: fields Apple adds later are ignored, never stored and never
+        logged. Request size limit is 256 KB. Rate limited per /24 by its own `notifications-apple` bucket
+        (1 200/min). The request path never calls Apple: a worker re-reads the purchase from the App Store
+        Server API and writes Apple's current state (T-134).
 
-        **Order of checks.** Only `signedPayload` is read (DTO with that one field, no catch-all). The server
-        verifies the x5c chain to Apple Root CA G3 and the ES256 signature, then `bundleId` and `environment`,
-        then the nested `signedTransactionInfo` / `signedRenewalInfo` JWS the same way. Nothing is written
-        before all of these pass; a failure answers `401`. Then the extracted columns are written to
-        `store_notifications`. The raw body is never stored.
+        **Order of checks.** Only `signedPayload` is read (DTO with that one field, no catch-all). A body that
+        is not a JSON object with one non-empty string `signedPayload` (duplicate keys included) answers `400`.
+        The server then verifies the x5c chain to Apple Root CA G3 and the ES256 signature (outer payload at
+        most 65 536 characters, validated at its own `signedDate`, which may be at most 5 minutes ahead), then
+        `version` = "2.0", a UUID `notificationUUID`, `signedDate` no older than 10 days, `bundleId` and
+        `environment`, then the nested `signedTransactionInfo` / `signedRenewalInfo` JWS the same way, which
+        must agree with `data` on bundle, environment and `originalTransactionId`. Nothing is written before
+        all of these pass; any failure answers a generic `401` that never says which check failed. Then the
+        extracted columns are written to `store_notifications`. The raw body is never stored.
+
+        **200 without storing:** a payload without `data` (no Gold event), a sandbox notification while
+        sandbox purchases are not accepted, and a product outside the server's product table (alerted).
       x-third-party-body: true
       requestBody:
         required: true

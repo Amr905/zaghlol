@@ -50,6 +50,22 @@ public sealed class RateLimitSettings
 
     /// <summary>The support lookup per operator in addition (T-136, enumeration guard): 20 a minute.</summary>
     public TokenBucketSettings SupportLookup { get; set; } = new() { TokenLimit = 20, TokensPerPeriod = 20, PeriodSeconds = 60 };
+
+    /// <summary>
+    /// <c>POST /v1/notifications/apple</c> per /24 (T-134, policy <c>notifications-apple</c>): 1 200 a minute, <b>instead of</b> the
+    /// general per-network bucket, so Apple's delivery and app traffic never drain each other. A 429 is retried by Apple.
+    /// </summary>
+    public TokenBucketSettings AppleNotifications { get; set; } = new() { TokenLimit = 1200, TokensPerPeriod = 1200, PeriodSeconds = 60 };
+}
+
+/// <summary>Endpoint metadata: this endpoint uses the <c>notifications-apple</c> per-network bucket instead of the general one.</summary>
+internal sealed class AppleNotificationRateLimitMetadata
+{
+    public static readonly AppleNotificationRateLimitMetadata Instance = new();
+
+    private AppleNotificationRateLimitMetadata()
+    {
+    }
 }
 
 /// <summary>Endpoint metadata: this endpoint also draws on the registration bucket.</summary>
@@ -83,6 +99,9 @@ internal sealed class ZaghlolRateLimiters : IDisposable
     public const string NetworkBucket = "network";
     public const string TokenBucket = "token";
 
+    /// <summary>The partition prefix of the <c>notifications-apple</c> bucket (memory only, never logged).</summary>
+    private const string AppleNotificationsPrefix = "assn:";
+
     private readonly PartitionedRateLimiter<HttpContext> network;
     private readonly PartitionedRateLimiter<HttpContext> token;
 
@@ -92,7 +111,9 @@ internal sealed class ZaghlolRateLimiters : IDisposable
 
         var limits = settings.Value;
         var perNetwork = PartitionedRateLimiter.Create<HttpContext, string>(context =>
-            RateLimitPartition.GetTokenBucketLimiter(ClientNetwork.Of(context.Connection.RemoteIpAddress), _ => limits.PerNetwork.ToOptions()));
+            context.GetEndpoint()?.Metadata.GetMetadata<AppleNotificationRateLimitMetadata>() is not null
+                ? RateLimitPartition.GetTokenBucketLimiter(AppleNotificationsPrefix + ClientNetwork.Of(context.Connection.RemoteIpAddress), _ => limits.AppleNotifications.ToOptions())
+                : RateLimitPartition.GetTokenBucketLimiter(ClientNetwork.Of(context.Connection.RemoteIpAddress), _ => limits.PerNetwork.ToOptions()));
         var register = PartitionedRateLimiter.Create<HttpContext, string>(context =>
             context.GetEndpoint()?.Metadata.GetMetadata<RegistrationRateLimitMetadata>() is null
                 ? RateLimitPartition.GetNoLimiter(string.Empty)
