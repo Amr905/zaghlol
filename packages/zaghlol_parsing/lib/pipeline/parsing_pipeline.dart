@@ -1,3 +1,5 @@
+import '../generic/generic_parser.dart';
+import '../generic/generic_policy.dart';
 import '../normalize/text_normalizer.dart';
 import '../registry/registry_loader.dart';
 import '../registry/registry_models.dart';
@@ -57,7 +59,24 @@ final class ParsingPipeline {
       return ParseDropped(DropReason.globalPattern, institution?.code);
     }
     if (institution == null) {
-      return const ParseUnrecognized(UnrecognizedReason.unknownSource);
+      // Stage 8: the generic fallback (FR-PAR-13) for sources that look
+      // financial; everything else is an unknown source.
+      if (!isGenericCandidate(
+        shared: registry.shared,
+        source: request.source,
+        channel: request.channel,
+        foldedBody: folded.text,
+      )) {
+        return const ParseUnrecognized(UnrecognizedReason.unknownSource);
+      }
+      return parseGeneric(
+        body: body,
+        folded: folded,
+        receivedAt: receivedAt,
+        language: detectLanguage(folded.text).name,
+        globalLast4: registry.shared.globalLast4,
+        cleaning: registry.shared.merchantCleaning,
+      );
     }
 
     // Stage 3: first matching template, message language first.

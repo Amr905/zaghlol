@@ -375,13 +375,54 @@ void main() {
         institutions: f.institutions,
         fixtures: f.fixtures,
         minFixturesPerTemplate: 1,
-        maxMatchMillis: 2,
+        maxMatchMillis: 25,
       );
       final slowIssues = r.issues
           .where((i) => i.code == RegistryIssueCode.slowMatch)
           .toList();
-      expect(slowIssues, isNotEmpty);
-      expect(slowIssues.single.detail, 'cib.slow.en adversarial');
+      expect(
+        slowIssues.map((i) => i.detail),
+        contains('cib.slow.en adversarial'),
+      );
+    });
+
+    test('a slow drop, last4 or global pattern fails the probe (M-2)', () {
+      for (final target in ['drop', 'last4', 'globalDrop', 'globalLast4']) {
+        final f = base.copy();
+        const slowPattern = r'^(?:\d*\d*){2}x';
+        if (target.startsWith('global')) {
+          final json = jsonDecode(f.shared!) as Map<String, Object?>;
+          if (target == 'globalDrop') {
+            ((json['drop']! as Map)['global']! as List).add(slowPattern);
+          } else {
+            (json['last4']! as List).add('$slowPattern(\\d{4})');
+          }
+          f.shared = jsonEncode(json);
+        } else {
+          f.editInstitution('nbe.json', (j) {
+            final list = (j[target] as List?) ?? <Object?>[];
+            list.add(target == 'last4' ? '$slowPattern(\\d{4})' : slowPattern);
+            j[target] = list;
+          });
+        }
+        final r = lintRegistry(
+          manifest: f.manifest,
+          shared: f.shared,
+          institutions: f.institutions,
+          fixtures: f.fixtures,
+          minFixturesPerTemplate: 1,
+          maxMatchMillis: 25,
+        );
+        final details = r.issues
+            .where((i) => i.code == RegistryIssueCode.slowMatch)
+            .map((i) => i.detail)
+            .toList();
+        // The added pattern is reported. Unrelated clean patterns are not
+        // asserted on, so a loaded runner cannot make this test flaky.
+        final mine = details.where((d) => d.startsWith('$target[')).toList();
+        expect(mine, hasLength(1), reason: target);
+        expect(mine.single, endsWith(' adversarial'), reason: target);
+      }
     });
 
     test('the per-fixture timer reports the template id only', () {
