@@ -120,6 +120,58 @@ public class PurchaseVerifyEndpointTests(PurchasesHostFixture fixture) : IClassF
         Assert.Equal(0, Play.Count("POST", PlayWireMock.ProductAckPath(PlayWireMock.Lifetime, lifetime)));
     }
 
+    [Fact]
+    public async Task OnlyAnActivePurchaseReachesTheGrantStepEvenWhenTheGrantWouldAlwaysIssueOne()
+    {
+        // T-130 review finding 1: the grant here always answers with a token, so only the endpoint's gate keeps pending, expired
+        // and refunded purchases at entitlement: null.
+        var (installId, install) = await fixture.NewInstallAsync();
+        fixture.Grant.AlwaysGrantFor(installId);
+        var pendingSub = PurchasesHostFixture.NewPlayToken();
+        var pendingLifetime = PurchasesHostFixture.NewPlayToken();
+        var expired = PurchasesHostFixture.NewPlayToken();
+        var refunded = PurchasesHostFixture.NewPlayToken();
+        var active = PurchasesHostFixture.NewPlayToken();
+        var canceledActive = PurchasesHostFixture.NewPlayToken();
+        Play.Get(PlayWireMock.SubscriptionPath(pendingSub), 200, PlayWireMock.SubscriptionBody(Ref(installId), "SUBSCRIPTION_STATE_PENDING"));
+        Play.Get(PlayWireMock.ProductPath(pendingLifetime), 200, PlayWireMock.ProductBody(Ref(installId), "PENDING"));
+        Play.Get(PlayWireMock.SubscriptionPath(expired), 200, PlayWireMock.SubscriptionBody(Ref(installId), "SUBSCRIPTION_STATE_EXPIRED", expiry: DateTimeOffset.UtcNow.AddDays(-2), acknowledged: true));
+        Play.Get(PlayWireMock.ProductPath(refunded), 200, PlayWireMock.ProductBody(Ref(installId), "CANCELLED", acknowledged: true));
+        Play.Get(PlayWireMock.SubscriptionPath(active), 200, PlayWireMock.SubscriptionBody(Ref(installId), acknowledged: true));
+        Play.Get(PlayWireMock.SubscriptionPath(canceledActive), 200, PlayWireMock.SubscriptionBody(Ref(installId), "SUBSCRIPTION_STATE_CANCELED", expiry: DateTimeOffset.UtcNow.AddDays(5), acknowledged: true));
+
+        foreach (var (product, token, status) in new[]
+        {
+            (PlayWireMock.Yearly, pendingSub, "pending"),
+            (PlayWireMock.Lifetime, pendingLifetime, "pending"),
+            (PlayWireMock.Yearly, expired, "expired"),
+            (PlayWireMock.Lifetime, refunded, "refunded"),
+        })
+        {
+            using var response = await fixture.VerifyAsync(install, PurchasesHostFixture.AndroidBody(product, token));
+            Assert.Equal(HttpStatusCode.OK, response.StatusCode);
+            using var json = JsonDocument.Parse(await response.Content.ReadAsStringAsync());
+            Assert.Equal(status, json.RootElement.GetProperty("status").GetString());
+            Assert.Equal(JsonValueKind.Null, json.RootElement.GetProperty("entitlement").ValueKind);
+            Assert.NotNull(await fixture.RowAsync(token));
+        }
+
+        // The grant was never asked for any of them.
+        Assert.DoesNotContain(fixture.Grant.Calls, c => c.Install == Guid.Parse(installId));
+
+        // Positive control: the same fake does grant an active and a cancelled-but-paid purchase.
+        foreach (var token in new[] { active, canceledActive })
+        {
+            using var response = await fixture.VerifyAsync(install, PurchasesHostFixture.AndroidBody(PlayWireMock.Yearly, token));
+            Assert.Equal(HttpStatusCode.OK, response.StatusCode);
+            using var json = JsonDocument.Parse(await response.Content.ReadAsStringAsync());
+            Assert.Equal("active", json.RootElement.GetProperty("status").GetString());
+            Assert.Equal(GrantingVerifyGrant.Token, json.RootElement.GetProperty("entitlement").GetProperty("token").GetString());
+        }
+
+        Assert.Equal(2, fixture.Grant.Calls.Count(c => c.Install == Guid.Parse(installId) && c.Status == VerifyStatus.Active));
+    }
+
     // AC 3: the inline acknowledge fails, the sweeper acknowledges.
 
     [Fact]

@@ -57,7 +57,7 @@ public sealed record SweepUpdate(
     Sensitive<string>? LinkedPurchaseToken,
     DateTimeOffset ReadAt);
 
-/// <summary>The unacknowledged-purchase gauge input: ackable rows only (pending ones excluded).</summary>
+/// <summary>The unacknowledged-purchase gauge input: ackable rows younger than 72 h only (pending ones excluded).</summary>
 public sealed record UnackedSummary(long LessThan48h, long AtLeast48h, TimeSpan OldestAge, IReadOnlyList<Guid> Overdue);
 
 /// <summary>The acknowledge sweeper's rows, on the Worker login.</summary>
@@ -69,12 +69,25 @@ public interface IPlayAckSweepStore
     /// </summary>
     Task<IAsyncDisposable?> TryLockAsync(CancellationToken cancellationToken);
 
-    /// <summary>Up to <paramref name="limit"/> unacknowledged Google rows in a pending or ackable state, oldest first; no transaction held.</summary>
-    Task<IReadOnlyList<UnackedPurchase>> ListAsync(int limit, CancellationToken cancellationToken);
+    /// <summary>
+    /// Up to <paramref name="limit"/> unacknowledged Google rows in a pending or ackable state whose <c>ack_next_attempt_at</c> is
+    /// NULL or due at <paramref name="now"/>, in <see cref="PlayAckSweepSchedule.SortKey"/> order (ackable before pending, never
+    /// tried before deferred, earliest due, oldest); no transaction held.
+    /// </summary>
+    Task<IReadOnlyList<UnackedPurchase>> ListAsync(DateTimeOffset now, int limit, CancellationToken cancellationToken);
+
+    /// <summary>
+    /// Sets <c>ack_next_attempt_at</c> of a row the run could not finish (still waiting, skipped or failed), so it moves behind
+    /// the rows that are due (T-130 security M-1). A scheduling stamp only: no state change, no monotonic guard.
+    /// </summary>
+    Task DeferAsync(Guid id, DateTimeOffset nextAttemptAt, CancellationToken cancellationToken);
 
     /// <summary>One short update with the monotonic <c>last_verified_at</c> guard, and a <c>sweep</c> event on a state change.</summary>
     Task<bool> ApplyAsync(SweepUpdate update, CancellationToken cancellationToken);
 
-    /// <summary>Counts ackable unacknowledged rows by age (48 h) and returns up to <paramref name="maxOverdue"/> overdue IDs.</summary>
+    /// <summary>
+    /// Counts ackable unacknowledged rows younger than <see cref="PlayAckSweepSchedule.RefundAge"/> by age (48 h) and returns up to
+    /// <paramref name="maxOverdue"/> overdue IDs. Rows past 72 h are out: Play has already refunded them, so they can't page forever.
+    /// </summary>
     Task<UnackedSummary> SummarizeAsync(DateTimeOffset now, int maxOverdue, CancellationToken cancellationToken);
 }

@@ -253,6 +253,38 @@ public class PlayVerificationTests
         Assert.Equal(0, writer.Upserts);
     }
 
+    [Theory]
+    [InlineData(PlaySubscriptionState.Active)]
+    [InlineData(PlaySubscriptionState.InGracePeriod)]
+    [InlineData(PlaySubscriptionState.Canceled)]
+    public async Task AnEntitlingSubscriptionWithoutAnExpiryIsAStoreFailureNeverActiveAndWritesNothing(PlaySubscriptionState state)
+    {
+        // T-130 security L-1: never "active with expires_at NULL" (it would read like a lifetime purchase).
+        var install = Play.NewInstall();
+        var token = Play.NewToken();
+        play.Subscriptions[token] = Play.Subscription(install, state) with { LineItems = [new PlayLineItem(Play.Yearly, null, null)] };
+
+        var failure = await Assert.ThrowsAsync<StoreUnavailableException>(() => VerifyAsync(Play.Yearly, token, install));
+
+        Assert.Equal(StoreFailureKind.Store, failure.Kind);
+        Assert.Equal(0, writer.Upserts);
+        Assert.False(writer.Rows.ContainsKey(token));
+        Assert.Equal(0, play.CallsTo(PlayApi.SubscriptionAcknowledge));
+    }
+
+    [Theory]
+    [InlineData(PlaySubscriptionState.Active)]
+    [InlineData(PlaySubscriptionState.InGracePeriod)]
+    [InlineData(PlaySubscriptionState.Canceled)]
+    public void TheMappingNeverAnswersActiveWithoutAnExpiry(PlaySubscriptionState state)
+    {
+        var mapped = PlayStateMapping.Map(state, null, Play.Now);
+
+        Assert.Equal(PlayReadOutcome.Unknown, mapped.Outcome);
+        Assert.Null(mapped.State);
+        Assert.NotEqual(VerifyStatus.Active, mapped.Status);
+    }
+
     // Outages (design note §1 step 3, §2).
 
     [Theory]

@@ -200,6 +200,33 @@ public partial class ModelTests
         Assert.False(worker["purchases"].Privileges.HasFlag(TablePrivileges.Update));
         Assert.DoesNotContain("account_id", worker["purchases"].UpdateColumns!);
         Assert.DoesNotContain("account_linked_by", worker["purchases"].UpdateColumns!);
+
+        // T-130 M-1: the sweeper's deferral stamp is the worker's alone.
+        Assert.Contains("ack_next_attempt_at", worker["purchases"].UpdateColumns!);
+        Assert.Contains("acknowledged", worker["purchases"].UpdateColumns!);
+        var app = GrantMatrix.Current.Single(g => g.Role == GrantMatrix.AppRw && g.Table == "purchases");
+        Assert.DoesNotContain("ack_next_attempt_at", app.UpdateColumns!);
+    }
+
+    [Fact]
+    public void GrantsOfLaterMigrationsMergeIntoOneRowPerRoleAndTable()
+    {
+        var merged = GrantMatrix.Merge(
+        [
+            new TableGrant("worker_rw", "purchases", TablePrivileges.Select, UpdateColumns: ["state", "acknowledged"]),
+            new TableGrant("ops_ro", "purchases", TablePrivileges.None, SelectColumns: ["id"]),
+            new TableGrant("worker_rw", "purchases", TablePrivileges.None, UpdateColumns: ["ack_next_attempt_at", "state"]),
+        ]);
+
+        Assert.Equal(2, merged.Count);
+        var worker = merged[0];
+        Assert.Equal(TablePrivileges.Select, worker.Privileges);
+        Assert.Null(worker.SelectColumns);
+        Assert.Equal(["state", "acknowledged", "ack_next_attempt_at"], worker.UpdateColumns);
+        Assert.Equal(
+            GrantMatrix.Flatten(GrantMatrix.InitialCreate.Concat(GrantMatrix.CatalogDrafts).Concat(GrantMatrix.PurchaseAckNextAttempt)),
+            GrantMatrix.Flatten(GrantMatrix.Current));
+        Assert.Equal(GrantMatrix.Current.Count, GrantMatrix.Current.Select(g => (g.Role, g.Table)).Distinct().Count());
     }
 
     private static readonly string[] ReceivedAtOnly = ["received_at"];

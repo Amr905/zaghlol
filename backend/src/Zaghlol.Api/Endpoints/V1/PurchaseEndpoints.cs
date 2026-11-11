@@ -133,9 +133,11 @@ internal static partial class PurchaseEndpoints
         var account = context.Request.Headers[AccountHeader] is { Count: 1 } header && header[0] is { Length: > 0 } value
             ? new Sensitive<string>(value)
             : (Sensitive<string>?)null;
-        var granted = result.PurchaseId is null
-            ? VerifyGrantResult.None
-            : await grant.ComposeAsync(result, new VerifyContext(installId, account, now), cancellationToken);
+        // Never grant on doubt: only an active purchase that was written may reach the grant step (pending, expired and
+        // refunded answer entitlement: null whatever the grant would say).
+        var granted = result is { Status: VerifyStatus.Active, PurchaseId: not null }
+            ? await grant.ComposeAsync(result, new VerifyContext(installId, account, now), cancellationToken)
+            : VerifyGrantResult.None;
         telemetry.Verified(storeName, PurchaseTags.Success, PurchaseTags.NoCode);
 
         var response = new PurchaseVerifyResponse

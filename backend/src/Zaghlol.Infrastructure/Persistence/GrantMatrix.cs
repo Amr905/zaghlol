@@ -43,10 +43,11 @@ public sealed record TableGrant(
 /// <item><c>ops_ro</c>: SELECT, except <c>installs.token_hash</c>, <c>accounts.email</c>, <c>accounts.provider_subject</c>,
 /// <c>accounts.apple_refresh_token_enc</c>, <c>purchases.store_key</c>, <c>purchases.linked_purchase_token</c>,
 /// <c>store_notifications.store_key</c> and <c>idempotency_records.response_body_enc</c>. The T-130 column
-/// <c>idempotency_records.claim_id</c> (a 60 s request lease) was added without an <c>ops_ro</c> grant.</item>
+/// <c>idempotency_records.claim_id</c> (a 60 s request lease) and <c>purchases.ack_next_attempt_at</c> (the sweeper's deferral
+/// stamp) were added without an <c>ops_ro</c> grant.</item>
 /// </list>
 /// A later migration that adds a table or a grant adds a frozen list here (like <see cref="InitialCreate"/>), renders it
-/// with <see cref="ToSql"/> in that migration, and appends it to <see cref="Current"/>. A migration never renders
+/// with <see cref="ToSql"/> in that migration, and appends it to <see cref="Current"/> (merged per role and table). A migration never renders
 /// <see cref="Current"/>, so old migrations don't change.
 /// </remarks>
 public static class GrantMatrix
@@ -236,8 +237,47 @@ public static class GrantMatrix
         new(OpsRo, "catalog_drafts", S),
     ];
 
-    /// <summary>What the database must hold after all migrations.</summary>
-    public static IReadOnlyList<TableGrant> Current { get; } = [.. InitialCreate, .. CatalogDrafts];
+    /// <summary>
+    /// The grants of the PurchaseAckNextAttempt migration (T-130 security M-1). Frozen: never edit after it ships. Only the sweeper
+    /// writes the deferral stamp (like <c>idempotency_records.claim_id</c>, the new column has no <c>ops_ro</c> grant).
+    /// </summary>
+    public static IReadOnlyList<TableGrant> PurchaseAckNextAttempt { get; } =
+    [
+        new(WorkerRw, "purchases", TablePrivileges.None, UpdateColumns: ["ack_next_attempt_at"]),
+    ];
+
+    /// <summary>What the database must hold after all migrations: one merged row per role and table.</summary>
+    public static IReadOnlyList<TableGrant> Current { get; } = Merge([.. InitialCreate, .. CatalogDrafts, .. PurchaseAckNextAttempt]);
+
+    /// <summary>
+    /// Folds the grants of several migrations into one row per role and table (privileges and column lists united, in order),
+    /// so a later migration may add a column grant to a table an earlier one already granted.
+    /// </summary>
+    public static IReadOnlyList<TableGrant> Merge(IEnumerable<TableGrant> grants)
+    {
+        ArgumentNullException.ThrowIfNull(grants);
+
+        var merged = new List<TableGrant>();
+        foreach (var grant in grants)
+        {
+            var at = merged.FindIndex(g => g.Role == grant.Role && g.Table == grant.Table);
+            if (at < 0)
+            {
+                merged.Add(grant);
+                continue;
+            }
+
+            var existing = merged[at];
+            merged[at] = existing with
+            {
+                Privileges = existing.Privileges | grant.Privileges,
+                SelectColumns = Union(existing.SelectColumns, grant.SelectColumns),
+                UpdateColumns = Union(existing.UpdateColumns, grant.UpdateColumns),
+            };
+        }
+
+        return merged;
+    }
 
     /// <summary>Renders grants as SQL statements (schema-qualified, deterministic order).</summary>
     public static string ToSql(IEnumerable<TableGrant> grants)
@@ -298,6 +338,9 @@ public static class GrantMatrix
         return result;
     }
 
+
+    private static IReadOnlyList<string>? Union(IReadOnlyList<string>? first, IReadOnlyList<string>? second) =>
+        first is null ? second : second is null ? first : [.. first.Concat(second).Distinct(StringComparer.Ordinal)];
 
     private static List<string> PrivilegeNames(TablePrivileges privileges)
     {

@@ -12,7 +12,7 @@ namespace Zaghlol.Infrastructure.Purchases;
 
 /// <summary>
 /// The acknowledge sweeper's rows on the Worker login (<c>worker_rw</c>: UPDATE on state, expires_at, acknowledged,
-/// last_verified_at and linked_purchase_token only; INSERT on purchase_events). No transaction is held across a Play call: the
+/// last_verified_at, linked_purchase_token and ack_next_attempt_at only; INSERT on purchase_events). No transaction is held across a Play call: the
 /// list is a plain read and each update is its own short transaction with the monotonic guard.
 /// </summary>
 internal sealed class PlayAckSweepStore(IZaghlolDbContextFactory contexts) : IPlayAckSweepStore
@@ -21,13 +21,17 @@ internal sealed class PlayAckSweepStore(IZaghlolDbContextFactory contexts) : IPl
     public static readonly long LockKey = BinaryPrimitives.ReadInt64BigEndian(SHA256.HashData(Encoding.ASCII.GetBytes("play-ack-sweeper")));
 
     // Pending rows are read too (they may have become purchased); expired, refunded, on-hold and paused ones are never acked.
+    // Only due rows, in PlayAckSweepSchedule.SortKey order: ackable before pending, never deferred first, earliest due, oldest.
     private const string ListSql = """
         SELECT id, product_id, store_key, state, created_at
         FROM zaghlol.purchases
         WHERE store = 'google_play' AND acknowledged = false AND state IN ('pending', 'active', 'in_grace', 'canceled_active')
-        ORDER BY created_at
+          AND (ack_next_attempt_at IS NULL OR ack_next_attempt_at <= @now)
+        ORDER BY (state = 'pending'), ack_next_attempt_at NULLS FIRST, created_at
         LIMIT @limit
         """;
+
+    private const string DeferSql = "UPDATE zaghlol.purchases SET ack_next_attempt_at = @next WHERE id = @id";
 
     private const string LockRowSql = "SELECT state, last_verified_at FROM zaghlol.purchases WHERE id = @id FOR UPDATE";
 
@@ -38,16 +42,18 @@ internal sealed class PlayAckSweepStore(IZaghlolDbContextFactory contexts) : IPl
         WHERE id = @id
         """;
 
+    // Rows past the refund age are out of the alert: Play has already refunded them, nothing is left to save.
     private const string SummarySql = """
         SELECT count(*) FILTER (WHERE created_at > @cutoff), count(*) FILTER (WHERE created_at <= @cutoff), min(created_at)
         FROM zaghlol.purchases
         WHERE store = 'google_play' AND acknowledged = false AND state IN ('active', 'in_grace', 'canceled_active')
+          AND created_at > @refunded
         """;
 
     private const string OverdueSql = """
         SELECT id FROM zaghlol.purchases
         WHERE store = 'google_play' AND acknowledged = false AND state IN ('active', 'in_grace', 'canceled_active')
-          AND created_at <= @cutoff
+          AND created_at <= @cutoff AND created_at > @refunded
         ORDER BY created_at
         LIMIT @limit
         """;
@@ -76,11 +82,12 @@ internal sealed class PlayAckSweepStore(IZaghlolDbContextFactory contexts) : IPl
         }
     }
 
-    public async Task<IReadOnlyList<UnackedPurchase>> ListAsync(int limit, CancellationToken cancellationToken)
+    public async Task<IReadOnlyList<UnackedPurchase>> ListAsync(DateTimeOffset now, int limit, CancellationToken cancellationToken)
     {
         await using var db = contexts.CreateDbContext(DatabaseRole.Worker);
         await db.Database.OpenConnectionAsync(cancellationToken);
         await using var command = new NpgsqlCommand(ListSql, (NpgsqlConnection)db.Database.GetDbConnection());
+        command.Parameters.AddWithValue("now", now.ToUniversalTime());
         command.Parameters.AddWithValue("limit", limit);
         await using var reader = await command.ExecuteReaderAsync(cancellationToken);
         var rows = new List<UnackedPurchase>();
@@ -95,6 +102,16 @@ internal sealed class PlayAckSweepStore(IZaghlolDbContextFactory contexts) : IPl
         }
 
         return rows;
+    }
+
+    public async Task DeferAsync(Guid id, DateTimeOffset nextAttemptAt, CancellationToken cancellationToken)
+    {
+        await using var db = contexts.CreateDbContext(DatabaseRole.Worker);
+        await db.Database.OpenConnectionAsync(cancellationToken);
+        await using var command = new NpgsqlCommand(DeferSql, (NpgsqlConnection)db.Database.GetDbConnection());
+        command.Parameters.AddWithValue("id", id);
+        command.Parameters.AddWithValue("next", nextAttemptAt.ToUniversalTime());
+        await command.ExecuteNonQueryAsync(cancellationToken);
     }
 
     public async Task<bool> ApplyAsync(SweepUpdate update, CancellationToken cancellationToken)
@@ -145,6 +162,7 @@ internal sealed class PlayAckSweepStore(IZaghlolDbContextFactory contexts) : IPl
     public async Task<UnackedSummary> SummarizeAsync(DateTimeOffset now, int maxOverdue, CancellationToken cancellationToken)
     {
         var cutoff = now.ToUniversalTime() - PlayAckSweepJob.AlertAge;
+        var refunded = now.ToUniversalTime() - PlayAckSweepSchedule.RefundAge;
         await using var db = contexts.CreateDbContext(DatabaseRole.Worker);
         await db.Database.OpenConnectionAsync(cancellationToken);
         var connection = (NpgsqlConnection)db.Database.GetDbConnection();
@@ -154,6 +172,7 @@ internal sealed class PlayAckSweepStore(IZaghlolDbContextFactory contexts) : IPl
         await using (var summary = new NpgsqlCommand(SummarySql, connection))
         {
             summary.Parameters.AddWithValue("cutoff", cutoff);
+            summary.Parameters.AddWithValue("refunded", refunded);
             await using var reader = await summary.ExecuteReaderAsync(cancellationToken);
             await reader.ReadAsync(cancellationToken);
             fresh = reader.GetInt64(0);
@@ -166,6 +185,7 @@ internal sealed class PlayAckSweepStore(IZaghlolDbContextFactory contexts) : IPl
         {
             await using var list = new NpgsqlCommand(OverdueSql, connection);
             list.Parameters.AddWithValue("cutoff", cutoff);
+            list.Parameters.AddWithValue("refunded", refunded);
             list.Parameters.AddWithValue("limit", maxOverdue);
             await using var reader = await list.ExecuteReaderAsync(cancellationToken);
             while (await reader.ReadAsync(cancellationToken))
