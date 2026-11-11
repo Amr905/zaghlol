@@ -100,6 +100,12 @@ class IngestionWorker(context: Context, params: WorkerParameters) : CoroutineWor
         const val NOTIFICATION_ID = 0x5A47
         const val CHANNEL_ID = "zaghlol_capture"
 
+        /**
+         * Security review L-1: hidden on the lock screen, so nobody near a
+         * locked phone learns that (and when) a money movement arrived.
+         */
+        const val NOTIFICATION_VISIBILITY = Notification.VISIBILITY_SECRET
+
         fun captureNotification(context: Context): Notification {
             val nm = context.getSystemService(NotificationManager::class.java)
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O && nm != null) {
@@ -115,7 +121,7 @@ class IngestionWorker(context: Context, params: WorkerParameters) : CoroutineWor
                 .setContentTitle(context.getString(R.string.native_android_captureNotifTitle))
                 .setSmallIcon(R.mipmap.ic_launcher)
                 .setOngoing(true)
-                .setVisibility(Notification.VISIBILITY_PUBLIC)
+                .setVisibility(NOTIFICATION_VISIBILITY)
                 .build()
         }
     }

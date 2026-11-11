@@ -10,10 +10,16 @@ class SpikeMetricsTest {
     fun rowHasStageDeltasFromReceive() {
         var now = 0L
         val f = File(tempDir(), "m.csv")
-        val m = SpikeMetrics(f, { 7 }, { SpikeMetrics.Conditions(34, true, false, 40, 20_000) }, { now })
-        val id = "01ARZ3NDEKTSV4RRFFQ69G5FAV"
         val rx = 1_000_000_000L
-        m.spooled(id, rx, rx + 5_000_000)
+        val m = SpikeMetrics(
+            f,
+            { 7 },
+            { SpikeMetrics.Conditions(34, true, false, 40, 20_000) },
+            { now },
+            processStartNs = { rx - 750_000_000 },
+        )
+        val id = "01ARZ3NDEKTSV4RRFFQ69G5FAV"
+        m.spooled(id, rx, rx + 5_000_000, rxWallMs = 1_762_000_000_123)
         m.enqueued(id, rx + 6_000_000)
         val cycle = SpikeMetrics.Cycle(SpikeMetrics.Path.COLD_PROCESS).apply {
             workerNs = rx + 100_000_000
@@ -30,7 +36,7 @@ class SpikeMetricsTest {
         m.mark("acked", listOf(id))
         val lines = f.readLines()
         assertEquals(SpikeMetrics.HEADER, lines[0])
-        assertEquals("$id,cold_process,34,1,0,40,20000,5,6,100,900,1000,1100,1200,1300,1350", lines[1])
+        assertEquals("$id,cold_process,34,1,0,40,20000,1762000000123,-750,5,6,100,900,1000,1100,1200,1300,1350", lines[1])
     }
 
     @Test
@@ -42,5 +48,15 @@ class SpikeMetricsTest {
         m.drained(id, 0, 6, null)
         m.mark("acked", listOf(id))
         assertFalse(f.exists())
+    }
+
+    @Test
+    fun rowWithoutReceiveSideStampsLeavesWallAndProcessStartEmpty() {
+        val f = File(tempDir(), "m.csv")
+        val m = SpikeMetrics(f, { 7 }, { SpikeMetrics.Conditions(34, false, false, 10, 0) }, { 0 }, { 5 })
+        val id = "01ARZ3NDEKTSV4RRFFQ69G5FAV"
+        m.drained(id, 0, 7, null) // spooled in an earlier process: no wall / process stamps
+        m.mark("acked", listOf(id))
+        assertEquals("$id,unknown,34,0,0,10,0,,,,,,,,0,,,0", f.readLines()[1])
     }
 }

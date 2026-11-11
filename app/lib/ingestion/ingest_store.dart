@@ -99,9 +99,22 @@ final class ProviderIngestStore implements IngestStore {
     });
   }
 
+  /// Closes the database connection (awaited, so its isolate has released
+  /// the SQLCipher handle and the WAL lock when this returns), then disposes
+  /// the container. The container's own `onDispose(db.close)` runs after
+  /// that against an already closed database. A close failure is swallowed
+  /// (code-free: nothing to report); the container is disposed either way.
+  /// The store can't be opened again; a new cycle builds a new store.
   @override
   Future<void> close() async {
+    final db = _db;
     _db = null;
-    _container.dispose();
+    try {
+      await db?.close();
+    } on Object {
+      // Nothing to keep: the engine is about to be destroyed.
+    } finally {
+      _container.dispose();
+    }
   }
 }

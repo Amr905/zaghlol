@@ -31,6 +31,7 @@ class SpikeRuntime private constructor(context: Context) {
         bootCount = ::bootCount,
         conditions = { device.conditions(lingerMs()) },
         nanoClock = clockNs,
+        processStartNs = { android.os.Process.getStartElapsedRealtime() * 1_000_000 },
     )
     val intake = SmsIntake(guard, store, scheduler, metrics, clockNs)
     val dispatch = BoundedDispatch(

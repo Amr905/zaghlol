@@ -30,6 +30,10 @@ import kotlinx.coroutines.withTimeoutOrNull
  * - the spool host (drain/ack; other capture methods NOT_AVAILABLE);
  * - the spike-only `zaghlol/spike_metrics` channel (not a contract).
  * Never started while the UI engine is attached.
+ *
+ * Shutdown (review F1) goes through [ShutdownSequence]: a pending drain is
+ * waited for, Dart closes the database (`close` command), then the engine is
+ * destroyed. A cycle requested meanwhile waits until the old engine is gone.
  */
 class HeadlessEngine(private val rt: SpikeRuntime) {
     private var group: FlutterEngineGroup? = null
@@ -39,7 +43,18 @@ class HeadlessEngine(private val rt: SpikeRuntime) {
     private var ready: CompletableDeferred<Boolean>? = null
     private var current: SpikeMetrics.Cycle? = null
     private var pendingReply: CompletableDeferred<Any?>? = null
-    private val destroyTask = Runnable { destroy() }
+    private var sequence: ShutdownSequence? = null
+
+    /** Non-null from a shutdown request until the engine is destroyed. */
+    private var gone: CompletableDeferred<Unit>? = null
+    private val lingerTask = Runnable { shutdown() }
+    private val timers = object : MainTimers {
+        override fun postDelayed(task: Runnable, delayMs: Long) {
+            rt.main.postDelayed(task, delayMs)
+        }
+
+        override fun cancel(task: Runnable) = rt.main.removeCallbacks(task)
+    }
     private var trimRegistered = false
 
     @Volatile private var alive = false
@@ -51,19 +66,34 @@ class HeadlessEngine(private val rt: SpikeRuntime) {
     suspend fun runCycle(timeoutMs: Long, cycle: SpikeMetrics.Cycle): CycleOutcome {
         val reply = CompletableDeferred<Any?>()
         val outcome = withTimeoutOrNull(timeoutMs) {
-            val readyNow = withContext(Dispatchers.Main) {
-                rt.main.removeCallbacks(destroyTask)
-                current = cycle
-                ensureEngine()
-            } ?: return@withTimeoutOrNull CycleOutcome.TIMEOUT
-            if (!readyNow.await()) return@withTimeoutOrNull CycleOutcome.TIMEOUT
+            var readyNow: CompletableDeferred<Boolean>? = null
+            while (readyNow == null) {
+                // An engine that is shutting down is never reused: wait until
+                // it is destroyed, then start a fresh one.
+                val waitFor = withContext(Dispatchers.Main) {
+                    gone ?: run {
+                        rt.main.removeCallbacks(lingerTask)
+                        current = cycle
+                        readyNow = ensureEngine()
+                        null
+                    }
+                }
+                waitFor?.await()
+            }
+            if (readyNow?.await() != true) return@withTimeoutOrNull CycleOutcome.TIMEOUT
             withContext(Dispatchers.Main) {
                 val ch = channel
-                if (ch == null) {
-                    reply.complete(null)
+                val seq = sequence
+                if (ch == null || seq == null || !seq.acceptsDrain()) {
+                    reply.complete(null) // shutting down: RETRY, nothing acked
                 } else {
                     pendingReply = reply
-                    ch.send(mapOf("cmd" to "drain")) { reply.complete(it) }
+                    seq.drainSent()
+                    ch.send(mapOf("cmd" to "drain")) {
+                        if (pendingReply === reply) pendingReply = null
+                        reply.complete(it)
+                        seq.drainAnswered()
+                    }
                 }
             }
             val r = reply.await() as? Map<*, *>
@@ -73,17 +103,41 @@ class HeadlessEngine(private val rt: SpikeRuntime) {
         return outcome ?: CycleOutcome.TIMEOUT
     }
 
-    /** Main thread. Destroys the engine after [lingerMs] (0 = now). */
+    /** Main thread. Shuts the engine down after [lingerMs] (0 = now). */
     fun scheduleDestroy(lingerMs: Long) {
-        rt.main.removeCallbacks(destroyTask)
-        if (engine == null) return
-        if (lingerMs <= 0) destroy() else rt.main.postDelayed(destroyTask, lingerMs)
+        rt.main.removeCallbacks(lingerTask)
+        if (sequence == null) return
+        if (lingerMs <= 0) shutdown() else rt.main.postDelayed(lingerTask, lingerMs)
     }
 
-    /** Main thread. Also called when the UI engine attaches (never two writers). */
-    fun destroy() {
-        rt.main.removeCallbacks(destroyTask)
-        val e = engine ?: return
+    /**
+     * Main thread. Starts the [ShutdownSequence] (idempotent): also called
+     * when the UI engine attaches. Returns at once; the engine is destroyed
+     * after a pending drain was answered and Dart closed the database (or
+     * the bounds passed).
+     */
+    fun shutdown() {
+        rt.main.removeCallbacks(lingerTask)
+        val seq = sequence ?: return
+        if (gone == null) gone = CompletableDeferred()
+        seq.request()
+    }
+
+    /** Main thread. Sends `close`; [onReply] runs when Dart answered (any answer). */
+    private fun sendClose(onReply: () -> Unit) {
+        val ch = channel
+        if (ch == null) {
+            onReply() // Dart never started: nothing is open
+        } else {
+            ch.send(mapOf("cmd" to "close")) { onReply() }
+        }
+    }
+
+    /** Main thread. Only [ShutdownSequence] calls this. */
+    private fun teardown() {
+        rt.main.removeCallbacks(lingerTask)
+        sequence = null
+        val e = engine
         host?.detach()
         engine = null
         host = null
@@ -93,6 +147,9 @@ class HeadlessEngine(private val rt: SpikeRuntime) {
         pendingReply?.complete(null) // the cycle is abandoned: RETRY, nothing acked
         pendingReply = null
         alive = false
+        gone?.complete(Unit)
+        gone = null
+        if (e == null) return
         try {
             e.destroy()
         } catch (_: Exception) {
@@ -102,10 +159,12 @@ class HeadlessEngine(private val rt: SpikeRuntime) {
     }
 
     /** Main thread. Returns the readiness of the (new or existing) engine. */
-    private fun ensureEngine(): CompletableDeferred<Boolean>? {
+    private fun ensureEngine(): CompletableDeferred<Boolean> {
         ready?.let { return it }
         val signal = CompletableDeferred<Boolean>()
         ready = signal
+        val seq = ShutdownSequence(timers, ::sendClose, ::teardown)
+        sequence = seq
         alive = true
         registerTrim()
         SpikeLog.e(SpikeLog.Code.ENGINE_START)
@@ -119,14 +178,13 @@ class HeadlessEngine(private val rt: SpikeRuntime) {
                     start(loader.findAppBundlePath(), signal, startNs)
                 } catch (_: Exception) {
                     SpikeLog.e(SpikeLog.Code.ENGINE_FAILED)
-                    destroy()
+                    seq.abort()
                     signal.complete(false)
                 }
             }
         } catch (_: Exception) {
             SpikeLog.e(SpikeLog.Code.ENGINE_FAILED)
-            ready = null
-            alive = false
+            seq.abort()
             signal.complete(false)
         }
         return signal
@@ -160,14 +218,14 @@ class HeadlessEngine(private val rt: SpikeRuntime) {
         trimRegistered = true
         rt.app.registerComponentCallbacks(object : ComponentCallbacks2 {
             override fun onTrimMemory(level: Int) {
-                rt.main.post { if (engine != null && rt.claim.ownerOrNull() == null) destroy() }
+                rt.main.post { if (engine != null && rt.claim.ownerOrNull() == null) shutdown() }
             }
 
             override fun onConfigurationChanged(newConfig: Configuration) = Unit
 
             @Deprecated("Deprecated in Java")
             override fun onLowMemory() {
-                rt.main.post { if (engine != null && rt.claim.ownerOrNull() == null) destroy() }
+                rt.main.post { if (engine != null && rt.claim.ownerOrNull() == null) shutdown() }
             }
         })
     }

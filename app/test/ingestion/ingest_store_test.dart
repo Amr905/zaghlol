@@ -101,6 +101,49 @@ void main() {
     expect(spool.pending, isEmpty);
   });
 
+  // F1/F7: close() returns only after the connection is closed. Observed as
+  // the process's open file descriptors on zaghlol.db (Linux /proc).
+  int dbFds() =>
+      Directory('/proc/self/fd')
+          .listSync(followLinks: false)
+          .map((l) {
+            try {
+              return (l as Link).targetSync();
+            } on FileSystemException {
+              return '';
+            }
+          })
+          .where((t) => t.startsWith('${dbDir.path}/zaghlol.db'))
+          .length;
+
+  test('close after a drain closes the database before it returns; a drain '
+      'after close reopens (F1/F7)', () async {
+    final ui = uiStore();
+    await ui.open();
+    await ui.close();
+    expect(dbFds(), 0, reason: 'the UI store closed its connection');
+
+    final spool = FakeSpool([entry(sid(1))], <String>[]);
+    final headless = SpikeIngestion(
+      marks: const NoMarks(),
+      headless: true,
+      spool: spool,
+      store: (_) => headlessStore(),
+      dbDirectory: () async => dbDir,
+    );
+    expect((await headless.drain()).inserted, 1);
+    expect(dbFds(), greaterThan(0), reason: 'open while the engine lives');
+    await headless.close();
+    expect(dbFds(), 0, reason: 'no connection left when close returns');
+
+    spool.pending.add(entry(sid(2), body: 'other'));
+    final again = await headless.drain();
+    expect(again.outcome, CycleOutcome.ok);
+    expect(again.inserted, 1, reason: 'a new store reopened the database');
+    await headless.close();
+    expect(dbFds(), 0);
+  }, skip: Directory('/proc/self/fd').existsSync() ? false : 'needs /proc');
+
   test('the UI engine path (SpikeIngestion, headless false) creates the '
       'database on its first drain; the headless path then uses it', () async {
     final log = <String>[];

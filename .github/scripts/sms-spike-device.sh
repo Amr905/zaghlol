@@ -10,7 +10,12 @@
 # leave spool/ empty; the canary never appears in the app's logcat lines.
 #
 # Env: DEVICE (emulator-5554), API (26..36), RUNNER_TEMP, N (SMS per cell).
-# Results: $RUNNER_TEMP/sms-spike/{metrics.csv,report.md}; the report rows go
+# Broadcast times (review F2): after each SMS the system broadcast history
+# (`dumpsys activity broadcasts history`) is saved to a temp dir; at the end
+# only the SMS_RECEIVED enqueue/dispatch timestamps are extracted into
+# broadcasts.txt and the raw dumps are deleted. The report matches them to
+# the rows by the receive wall clock (enqueue → commit = FR-ING-A-01).
+# Results: $RUNNER_TEMP/sms-spike/{metrics.csv,broadcasts.txt,report.md}; the report rows go
 # into ADR-005 (emulator rows only; device rows come from T-008.md steps).
 # Called as one line (android-emulator-runner runs `script` line by line).
 set -euo pipefail
@@ -20,7 +25,8 @@ PKG=app.zaghlol.dev
 SENDER=5550100
 CANARY=ZG_CANARY_7731
 OUT="$RUNNER_TEMP/sms-spike"
-mkdir -p "$OUT"
+BH="$OUT/bh"  # raw broadcast history dumps; deleted after extraction
+mkdir -p "$OUT" "$BH"
 A() { adb -s "$DEVICE" "$@"; }
 sh_() { A shell "$@" < /dev/null; }
 runas() { sh_ run-as "$PKG" "$@"; }
@@ -78,6 +84,7 @@ send_and_wait() {
       [ "$after" -gt "$before" ] && break
       sleep 1
     done
+    sh_ dumpsys activity broadcasts history > "$BH/$(printf %04d "$seq_no").txt" 2>/dev/null || true
     echo "$label #$i: rows $before -> $after"
   done
 }
@@ -149,7 +156,21 @@ grep -E "ZG-SPK" "$OUT/logcat-all.txt" | grep -F "$CANARY" && fail "spike log ca
 runas cat no_backup/spike/metrics.csv > "$OUT/metrics.csv"
 grep -qF "$CANARY" "$OUT/metrics.csv" && fail "metrics carried content" || true
 grep -qF "$SENDER" "$OUT/metrics.csv" && fail "metrics carried the sender" || true
-dart run tool/spike/latency_report.dart "$OUT/metrics.csv" "emu-api$API" | tee "$OUT/report.md"
+# Last dump after every send (incl. the negative proofs and the last canary
+# SMS): matching needs the broadcast of every SMS, also of dropped ones.
+sh_ dumpsys activity broadcasts history > "$BH/9999.txt" 2>/dev/null || true
+TZ_OFF=$(sh_ date +%z | tr -d '\r')
+dart run tool/spike/latency_report.dart --extract-broadcasts "$BH" "$TZ_OFF" > "$OUT/broadcasts.txt"
+nb=$(grep -c '^enqueue_ms=' "$OUT/broadcasts.txt" || true)
+if [ "$nb" = 0 ]; then  # format diagnosis (emulator, synthetic SMS only): timestamps/record lines near the action
+  last=$(ls "$BH" | tail -n 1)
+  [ -n "$last" ] && grep -n -B4 -A8 'SMS_RECEIVED' "$BH/$last" | grep -iE 'BroadcastRecord|Historical|#[0-9]+:|enqueue|dispatch|act=' | head -n 40 || true
+fi
+rm -rf "$BH"
+echo "broadcast history: $nb SMS_RECEIVED records (device tz $TZ_OFF)"
+[ "$nb" -gt 0 ] || fail "no SMS_RECEIVED record in the broadcast history; enqueue → commit can't be reported"
+grep -qF "$PKG" "$OUT/broadcasts.txt" && fail "broadcasts.txt carried more than timestamps" || true
+dart run tool/spike/latency_report.dart "$OUT/metrics.csv" "emu-api$API" "$OUT/broadcasts.txt" | tee "$OUT/report.md"
 n=$(tail -n +2 "$OUT/metrics.csv" | grep -c . || true)
 [ "$n" -ge "$N" ] || fail "only $n messages were committed"
 rm -f "$OUT/logcat-all.txt" "$OUT/logcat-uid.txt" "$OUT/pkg.txt"

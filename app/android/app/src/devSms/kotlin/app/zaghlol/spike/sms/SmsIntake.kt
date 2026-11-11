@@ -79,7 +79,7 @@ class SmsIntake(
                     when (result) {
                         is SpoolStore.WriteResult.Written -> {
                             written += result.id
-                            metrics?.spooled(result.id, stamp.elapsedNs, nanoClock())
+                            metrics?.spooled(result.id, stamp.elapsedNs, nanoClock(), stamp.wallMs)
                             SpikeLog.e(SpikeLog.Code.SPOOL_WRITTEN, (nanoClock() - stamp.elapsedNs) / 1_000_000)
                         }
                         SpoolStore.WriteResult.Full -> SpikeLog.e(SpikeLog.Code.SPOOL_FULL)
