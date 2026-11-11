@@ -120,12 +120,13 @@ class InboxReaderTest {
             InboxRow(3, "Friend", now - day, "$CANARY egp 5"),
             InboxRow(4, "NBE", now - 400 * day * 3, paid(4)), // older than the 25-month floor
             InboxRow(5, "NBE", since - 1, paid(5)), // before since
-            InboxRow(6, "CIB", now - day, paid(6)), // allowlisted but not requested
+            InboxRow(6, "CIB-EGY", now - day, paid(6)), // allowlisted but not requested
+            InboxRow(7, "MyBank", now - day, paid(7)), // the Guard would keep it (sender + body hints)
         )
         val src = FakeInboxSource(rows).apply { ignoreSelection = true }
         val p = reader(src).query(q(listOf("NBE")))
         assertEquals(listOf("2"), p.items.map { it.providerId })
-        assertEquals(6L, p.scannedTotal)
+        assertEquals(7L, p.scannedTotal)
         assertNull(p.nextCursor)
     }
 
