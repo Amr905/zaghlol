@@ -1,0 +1,369 @@
+entity,code,nameAr,nameEn,icon,color,bucket,sort,canonical,category,alias,match,keyword,lang,weight
+category,groceries,خزين البيت والسوبرماركت,Groceries & Supermarkets,shopping_cart,#174C4F,needs,1,,,,,,,
+category,dining,أكل بره وكافيهات ودليفري,"Dining, Cafes & Delivery",restaurant,#F43F5E,wants,2,,,,,,,
+category,transport,مواصلات وبنزين وعربية,"Transport, Fuel & Rides",directions_car,#3B82F6,needs,3,,,,,,,
+category,bills,فواتير وشحن ومرافق,"Bills, Telecom & Utilities",receipt_long,#0EA5E9,needs,4,,,,,,,
+category,housing,إيجار ومصاريف البيت,"Housing, Rent & Home",home,#8B5CF6,needs,5,,,,,,,
+category,shopping,لبس وشوبينج وإلكترونيات,"Shopping, Fashion & Tech",shopping_bag,#EC4899,wants,6,,,,,,,
+category,debt,أقساط وجمعيات وكريدت,"BNPL, Installments & Debt",credit_card,#F59E0B,obligations,7,,,,,,,
+category,subscriptions,اشتراكات وتطبيقات,Subscriptions & Digital,subscriptions,#6366F1,wants,8,,,,,,,
+category,health,صحة وأدوية وجيم,"Healthcare, Meds & Gym",health_and_safety,#10B981,needs,9,,,,,,,
+category,education,تعليم ومدارس وكورسات,"Education, Kids & Courses",school,#14B8A6,needs,10,,,,,,,
+category,entertainment,فسح وسفر وخروجات,Entertainment & Travel,local_activity,#F97316,wants,11,,,,,,,
+category,family_giving,عيلة وهدايا وصدقات,"Family, Charity & Gifts",volunteer_activism,#A855F7,giving,12,,,,,,,
+category,savings,تحويش ودهب واستثمار,"Savings, Gold & Investing",savings,#60B669,savings,13,,,,,,,
+category,income,مرتب ودخل وكاش باك,"Income, Salary & Refunds",payments,#22C55E,income,14,,,,,,,
+merchant,,كارفور,,,,,,Carrefour,groceries,,prefix,,,
+merchant,,سبينيس,,,,,,Spinneys,groceries,,prefix,,,
+merchant,,سعودي ماركت,,,,,,Seoudi Market,groceries,,prefix,,,
+merchant,,جورميه,,,,,,Gourmet Egypt,groceries,,prefix,,,
+merchant,,كازيون,,,,,,Kazyon,groceries,,prefix,,,
+merchant,,بيم,,,,,,BIM,groceries,,exact,,,
+merchant,,فتح الله,,,,,,Fathalla Market,groceries,,prefix,,,
+merchant,,أولاد رجب,,,,,,Awlad Ragab,groceries,,prefix,,,
+merchant,,هايبر وان,,,,,,Hyper One,groceries,,prefix,,,
+merchant,,طلبات مارت,,,,,,Talabat Mart,groceries,,prefix,,,
+merchant,,بريدفاست,,,,,,Breadfast,groceries,,prefix,,,
+merchant,,رابيت,,,,,,Rabbit,groceries,,exact,,,
+merchant,,إنستاشوب,,,,,,Instashop,groceries,,prefix,,,
+merchant,,طلبات,,,,,,Talabat,dining,,exact,,,
+merchant,,المنيوس,,,,,,Elmenus,dining,,exact,,,
+merchant,,ماكدونالدز,,,,,,McDonald's,dining,,prefix,,,
+merchant,,كنتاكي,,,,,,KFC,dining,,prefix,,,
+merchant,,ستاربكس,,,,,,Starbucks,dining,,prefix,,,
+merchant,,كوستا,,,,,,Costa Coffee,dining,,prefix,,,
+merchant,,تي بي إس,,,,,,TBS,dining,,exact,,,
+merchant,,سيلانترو,,,,,,Cilantro,dining,,prefix,,,
+merchant,,بوفالو برجر,,,,,,Buffalo Burger,dining,,prefix,,,
+merchant,,هارت أتاك,,,,,,Heart Attack,dining,,prefix,,,
+merchant,,وافل,,,,,,Waffle,dining,,exact,,,
+merchant,,أبو طارق,,,,,,Abou Tarek,dining,,prefix,,,
+merchant,,جاد,,,,,,Gad,dining,,exact,,,
+merchant,,بلبن,,,,,,B.Laban,dining,,prefix,,,
+merchant,,أوبر,,,,,,Uber,transport,,prefix,,,
+merchant,,كريم,,,,,,Careem,transport,,prefix,,,
+merchant,,إن درايف,,,,,,InDrive,transport,,prefix,,,
+merchant,,ديدي,,,,,,DiDi,transport,,prefix,,,
+merchant,,تشيل أوت,,,,,,ChillOut,transport,,prefix,,,
+merchant,,وطنية,,,,,,Wataniya,transport,,prefix,,,
+merchant,,توتال باركو,,,,,,Total Parco,transport,,prefix,,,
+merchant,,موبيل,,,,,,Mobil,transport,,prefix,,,
+merchant,,شل,,,,,,Shell,transport,,prefix,,,
+merchant,,إمارات مصر,,,,,,Emarat Misr,transport,,prefix,,,
+merchant,,العليان,,,,,,Olayan,transport,,prefix,,,
+merchant,,سويفل,,,,,,Swvl,transport,,prefix,,,
+merchant,,جو باص,,,,,,GoBus,transport,,prefix,,,
+merchant,,مترو القاهرة,,,,,,Cairo Metro,transport,,exact,,,
+merchant,,وي مصر,,,,,,WE Egypt,bills,,prefix,,,
+merchant,,تي إي داتا,,,,,,TE Data,bills,,prefix,,,
+merchant,,فودافون,,,,,,Vodafone,bills,,prefix,,,
+merchant,,أورنج,,,,,,Orange,bills,,prefix,,,
+merchant,,اتصالات,,,,,,Etisalat,bills,,prefix,,,
+merchant,,فوري,,,,,,Fawry,bills,,prefix,,,
+merchant,,ماي فوري,,,,,,MyFawry,bills,,prefix,,,
+merchant,,بتروتريد,,,,,,Petrotrade,bills,,prefix,,,
+merchant,,ناتجاس,,,,,,Natgas,bills,,prefix,,,
+merchant,,طاقة عربية,,,,,,Taqa Arabia,bills,,prefix,,,
+merchant,,سهل,,,,,,Sahl,bills,,exact,,,
+merchant,,خالص,,,,,,Khales,bills,,exact,,,
+merchant,,إيكيا مصر,,,,,,IKEA Egypt,housing,,prefix,,,
+merchant,,هوم ووركس,,,,,,Homeworks,housing,,prefix,,,
+merchant,,هومز مارت,,,,,,Homzmart,housing,,prefix,,,
+merchant,,بي تك هوم,,,,,,B.TECH Home,housing,,prefix,,,
+merchant,,إعمار مصر,,,,,,Emaar Misr,housing,,prefix,,,
+merchant,,سوديك,,,,,,SODIC,housing,,prefix,,,
+merchant,,مجموعة طلعت مصطفى,,,,,,TMG,housing,,exact,,,
+merchant,,بالم هيلز,,,,,,Palm Hills,housing,,prefix,,,
+merchant,,مدينتي,,,,,,Madinaty,housing,,prefix,,,
+merchant,,أمازون مصر,,,,,,Amazon Egypt,shopping,,prefix,,,
+merchant,,نون,,,,,,Noon,shopping,,exact,,,
+merchant,,جوميا,,,,,,Jumia,shopping,,prefix,,,
+merchant,,زارا,,,,,,Zara,shopping,,prefix,,,
+merchant,,إتش آند إم,,,,,,H&M,shopping,,prefix,,,
+merchant,,إل سي وايكيكي,,,,,,LC Waikiki,shopping,,prefix,,,
+merchant,,ديفاكتو,,,,,,DeFacto,shopping,,prefix,,,
+merchant,,ماكس فاشون,,,,,,Max Fashion,shopping,,prefix,,,
+merchant,,أكتيف,,,,,,Activ,shopping,,exact,,,
+merchant,,بي تك,,,,,,B.TECH,shopping,,exact,,,
+merchant,,تريد لاين,,,,,,Tradeline,shopping,,prefix,,,
+merchant,,راية شوب,,,,,,Raya Shop,shopping,,prefix,,,
+merchant,,تو بي,,,,,,2B,shopping,,exact,,,
+merchant,,دبي فون,,,,,,Dubai Phone,shopping,,prefix,,,
+merchant,,فيسز,,,,,,Faces,shopping,,prefix,,,
+merchant,,فاليو,,,,,,Valu,debt,,prefix,,,
+merchant,,شهري,,,,,,Shahry,debt,,prefix,,,
+merchant,,سيمبل,,,,,,Sympl,debt,,prefix,,,
+merchant,,سهولة,,,,,,Souhoola,debt,,prefix,,,
+merchant,,أمان,,,,,,Aman,debt,,exact,,,
+merchant,,فرصة,,,,,,Forsa,debt,,prefix,,,
+merchant,,كونتاكت,,,,,,Contact,debt,,exact,,,
+merchant,,نتفليكس,,,,,,Netflix,subscriptions,,prefix,,,
+merchant,,شاهد في آي بي,,,,,,Shahid VIP,subscriptions,,prefix,,,
+merchant,,واتش إت,,,,,,Watch It,subscriptions,,prefix,,,
+merchant,,أو إس إن,,,,,,OSN+,subscriptions,,prefix,,,
+merchant,,سبوتيفاي,,,,,,Spotify,subscriptions,,prefix,,,
+merchant,,أنغامي,,,,,,Anghami,subscriptions,,prefix,,,
+merchant,,يوتيوب,,,,,,YouTube,subscriptions,,prefix,,,
+merchant,,خدمات آبل,,,,,,Apple Services,subscriptions,,prefix,,,
+merchant,,جوجل ون,,,,,,Google One,subscriptions,,prefix,,,
+merchant,,أوبن إيه آي,,,,,,OpenAI,subscriptions,,prefix,,,
+merchant,,بلايستيشن,,,,,,PlayStation,subscriptions,,prefix,,,
+merchant,,ستيم,,,,,,Steam,subscriptions,,prefix,,,
+merchant,,صيدليات العزبي,,,,,,El Ezaby Pharmacy,health,,prefix,,,
+merchant,,صيدليات سيف,,,,,,Seif Pharmacy,health,,prefix,,,
+merchant,,يودوي,,,,,,Yodawy,health,,prefix,,,
+merchant,,فيزيتا,,,,,,Vezeeta,health,,prefix,,,
+merchant,,معامل البرج,,,,,,Al Borg Labs,health,,prefix,,,
+merchant,,ألفا سكان,,,,,,Alfa Scan,health,,prefix,,,
+merchant,,المختبر,,,,,,Mokhtabar,health,,prefix,,,
+merchant,,جولدز جيم,,,,,,Gold's Gym,health,,prefix,,,
+merchant,,هيرز جيم,,,,,,Hers Gym,health,,prefix,,,
+merchant,,يوديمي,,,,,,Udemy,education,,prefix,,,
+merchant,,كورسيرا,,,,,,Coursera,education,,prefix,,,
+merchant,,المجلس الثقافي البريطاني,,,,,,British Council,education,,prefix,,,
+merchant,,الجامعة الأمريكية بالقاهرة,,,,,,AUC,education,,exact,,,
+merchant,,الجامعة الألمانية بالقاهرة,,,,,,GUC,education,,exact,,,
+merchant,,الجامعة البريطانية في مصر,,,,,,BUE,education,,exact,,,
+merchant,,سمير وعلي,,,,,,Samir & Aly,education,,prefix,,,
+merchant,,مكتبة ديوان,,,,,,Diwan Bookstore,education,,prefix,,,
+merchant,,فوكس سينما,,,,,,VOX Cinemas,entertainment,,prefix,,,
+merchant,,ريناسانس,,,,,,Renaissance,entertainment,,prefix,,,
+merchant,,تذكرتي,,,,,,Tazkarti,entertainment,,prefix,,,
+merchant,,بوكينج دوت كوم,,,,,,Booking.com,entertainment,,prefix,,,
+merchant,,إير بي إن بي,,,,,,Airbnb,entertainment,,prefix,,,
+merchant,,مصر للطيران,,,,,,EgyptAir,entertainment,,prefix,,,
+merchant,,إير كايرو,,,,,,Air Cairo,entertainment,,prefix,,,
+merchant,,وادي دجلة,,,,,,Wadi Degla,entertainment,,prefix,,,
+merchant,,نادي الجزيرة,,,,,,Gezira Club,entertainment,,prefix,,,
+merchant,,مرسال,,,,,,Mersal,family_giving,,prefix,,,
+merchant,,رسالة,,,,,,Resala,family_giving,,prefix,,,
+merchant,,بهية,,,,,,Baheya,family_giving,,prefix,,,
+merchant,,مستشفى 57357,,,,,,57357 Hospital,family_giving,,prefix,,,
+merchant,,مؤسسة مجدي يعقوب,,,,,,Magdi Yacoub Foundation,family_giving,,prefix,,,
+merchant,,مصر الخير,,,,,,Misr El Kheir,family_giving,,prefix,,,
+merchant,,بنك الطعام المصري,,,,,,Egyptian Food Bank,family_giving,,prefix,,,
+merchant,,تسيباس,,,,,,Tseppas,family_giving,,prefix,,,
+merchant,,العبد,,,,,,El Abd Bakery,family_giving,,prefix,,,
+merchant,,سال سوكريه,,,,,,Sale Sucre,family_giving,,prefix,,,
+merchant,,ثندر,,,,,,THNDR,savings,,prefix,,,
+merchant,,أزيموت,,,,,,Azimut,savings,,prefix,,,
+merchant,,بي تي سي جولد,,,,,,BTC Gold,savings,,prefix,,,
+merchant,,سام جولد,,,,,,SAM Gold,savings,,prefix,,,
+merchant,,سليمة جولد,,,,,,Selema Gold,savings,,prefix,,,
+alias,,,,,,,,Seoudi Market,,SEOUDI,prefix,,,
+alias,,,,,,,,Gourmet Egypt,,GOURMET,prefix,,,
+alias,,,,,,,,Fathalla Market,,FATHALLA,prefix,,,
+alias,,,,,,,,McDonald's,,MCDONALDS,prefix,,,
+alias,,,,,,,,McDonald's,,MC DONALDS,prefix,,,
+alias,,,,,,,,Costa Coffee,,COSTA,prefix,,,
+alias,,,,,,,,Cairo Metro,,METRO,exact,,,
+alias,,,,,,,,Taqa Arabia,,TAQA,prefix,,,
+alias,,,,,,,,IKEA Egypt,,IKEA,prefix,,,
+alias,,,,,,,,Emaar Misr,,EMAAR,prefix,,,
+alias,,,,,,,,Amazon Egypt,,AMAZON EG,prefix,,,
+alias,,,,,,,,Amazon Egypt,,AMAZON,prefix,,,
+alias,,,,,,,,Raya Shop,,RAYA,prefix,,,
+alias,,,,,,,,Shahid VIP,,SHAHID,prefix,,,
+alias,,,,,,,,OSN+,,OSN,prefix,,,
+alias,,,,,,,,Apple Services,,APPLE.COM/BILL,prefix,,,
+alias,,,,,,,,Google One,,GOOGLE*ONE,prefix,,,
+alias,,,,,,,,El Ezaby Pharmacy,,EL EZABY,prefix,,,
+alias,,,,,,,,El Ezaby Pharmacy,,ELEZABY,prefix,,,
+alias,,,,,,,,El Ezaby Pharmacy,,19011,prefix,,,
+alias,,,,,,,,Al Borg Labs,,AL BORG,prefix,,,
+alias,,,,,,,,Gold's Gym,,GOLDS GYM,prefix,,,
+alias,,,,,,,,Diwan Bookstore,,DIWAN,prefix,,,
+alias,,,,,,,,VOX Cinemas,,VOX,prefix,,,
+alias,,,,,,,,EgyptAir,,EGYPT AIR,prefix,,,
+alias,,,,,,,,57357 Hospital,,57357,prefix,,,
+alias,,,,,,,,Magdi Yacoub Foundation,,MAGDI YACOUB,prefix,,,
+alias,,,,,,,,Egyptian Food Bank,,FOOD BANK,prefix,,,
+alias,,,,,,,,El Abd Bakery,,EL ABD,prefix,,,
+keyword,,,,,,,,,groceries,,,supermarket,en,60
+keyword,,,,,,,,,groceries,,,grocery,en,60
+keyword,,,,,,,,,groceries,,,groceries,en,60
+keyword,,,,,,,,,groceries,,,vegetables,en,60
+keyword,,,,,,,,,groceries,,,fruit,en,60
+keyword,,,,,,,,,groceries,,,butcher,en,60
+keyword,,,,,,,,,groceries,,,bakery,en,60
+keyword,,,,,,,,,groceries,,,dairy,en,60
+keyword,,,,,,,,,groceries,,,سوبرماركت,ar,60
+keyword,,,,,,,,,groceries,,,بقالة,ar,60
+keyword,,,,,,,,,groceries,,,خضار,ar,60
+keyword,,,,,,,,,groceries,,,فاكهة,ar,60
+keyword,,,,,,,,,groceries,,,جزار,ar,60
+keyword,,,,,,,,,groceries,,,لحوم,ar,60
+keyword,,,,,,,,,groceries,,,فراخ,ar,60
+keyword,,,,,,,,,groceries,,,مخبوزات,ar,60
+keyword,,,,,,,,,groceries,,,ألبان,ar,60
+keyword,,,,,,,,,dining,,,restaurant,en,60
+keyword,,,,,,,,,dining,,,cafe,en,60
+keyword,,,,,,,,,dining,,,coffee,en,60
+keyword,,,,,,,,,dining,,,delivery,en,60
+keyword,,,,,,,,,dining,,,fast food,en,60
+keyword,,,,,,,,,dining,,,pizza,en,60
+keyword,,,,,,,,,dining,,,burger,en,60
+keyword,,,,,,,,,dining,,,مطعم,ar,60
+keyword,,,,,,,,,dining,,,كافيه,ar,60
+keyword,,,,,,,,,dining,,,قهوة,ar,60
+keyword,,,,,,,,,dining,,,دليفري,ar,60
+keyword,,,,,,,,,dining,,,فاست فود,ar,60
+keyword,,,,,,,,,dining,,,فول,ar,60
+keyword,,,,,,,,,dining,,,كشري,ar,60
+keyword,,,,,,,,,dining,,,بيتزا,ar,60
+keyword,,,,,,,,,transport,,,fuel,en,60
+keyword,,,,,,,,,transport,,,gas station,en,60
+keyword,,,,,,,,,transport,,,petrol,en,60
+keyword,,,,,,,,,transport,,,parking,en,60
+keyword,,,,,,,,,transport,,,toll,en,60
+keyword,,,,,,,,,transport,,,taxi,en,60
+keyword,,,,,,,,,transport,,,ride,en,60
+keyword,,,,,,,,,transport,,,spare parts,en,60
+keyword,,,,,,,,,transport,,,بنزين,ar,60
+keyword,,,,,,,,,transport,,,موقف,ar,60
+keyword,,,,,,,,,transport,,,أوبر,ar,60
+keyword,,,,,,,,,transport,,,تاكسي,ar,60
+keyword,,,,,,,,,transport,,,قطع غيار,ar,60
+keyword,,,,,,,,,transport,,,عربية,ar,60
+keyword,,,,,,,,,bills,,,electricity,en,60
+keyword,,,,,,,,,bills,,,water bill,en,60
+keyword,,,,,,,,,bills,,,internet,en,60
+keyword,,,,,,,,,bills,,,recharge,en,60
+keyword,,,,,,,,,bills,,,mobile bill,en,60
+keyword,,,,,,,,,bills,,,gas bill,en,60
+keyword,,,,,,,,,bills,,,كهرباء,ar,60
+keyword,,,,,,,,,bills,,,مياه,ar,60
+keyword,,,,,,,,,bills,,,إنترنت,ar,60
+keyword,,,,,,,,,bills,,,شحن,ar,60
+keyword,,,,,,,,,bills,,,فاتورة,ar,60
+keyword,,,,,,,,,bills,,,غاز,ar,60
+keyword,,,,,,,,,housing,,,rent,en,60
+keyword,,,,,,,,,housing,,,furniture,en,60
+keyword,,,,,,,,,housing,,,appliances,en,60
+keyword,,,,,,,,,housing,,,maintenance,en,60
+keyword,,,,,,,,,housing,,,cleaning,en,60
+keyword,,,,,,,,,housing,,,repairs,en,60
+keyword,,,,,,,,,housing,,,إيجار,ar,60
+keyword,,,,,,,,,housing,,,أثاث,ar,60
+keyword,,,,,,,,,housing,,,أجهزة,ar,60
+keyword,,,,,,,,,housing,,,صيانة,ar,60
+keyword,,,,,,,,,housing,,,تنضيف,ar,60
+keyword,,,,,,,,,shopping,,,clothes,en,60
+keyword,,,,,,,,,shopping,,,shoes,en,60
+keyword,,,,,,,,,shopping,,,mobile phone,en,60
+keyword,,,,,,,,,shopping,,,electronics,en,60
+keyword,,,,,,,,,shopping,,,cosmetics,en,60
+keyword,,,,,,,,,shopping,,,online shopping,en,60
+keyword,,,,,,,,,shopping,,,لبس,ar,60
+keyword,,,,,,,,,shopping,,,جزم,ar,60
+keyword,,,,,,,,,shopping,,,موبايل,ar,60
+keyword,,,,,,,,,shopping,,,إلكترونيات,ar,60
+keyword,,,,,,,,,shopping,,,مكياج,ar,60
+keyword,,,,,,,,,shopping,,,شوبينج,ar,60
+keyword,,,,,,,,,debt,,,installment,en,60
+keyword,,,,,,,,,debt,,,loan,en,60
+keyword,,,,,,,,,debt,,,credit card payment,en,60
+keyword,,,,,,,,,debt,,,gameya,en,60
+keyword,,,,,,,,,debt,,,bnpl,en,60
+keyword,,,,,,,,,debt,,,loan installment,en,60
+keyword,,,,,,,,,debt,,,قسط,ar,60
+keyword,,,,,,,,,debt,,,أقساط,ar,60
+keyword,,,,,,,,,debt,,,جمعية,ar,60
+keyword,,,,,,,,,debt,,,قرض,ar,60
+keyword,,,,,,,,,debt,,,كريدت,ar,60
+keyword,,,,,,,,,subscriptions,,,subscription,en,60
+keyword,,,,,,,,,subscriptions,,,streaming,en,60
+keyword,,,,,,,,,subscriptions,,,cloud storage,en,60
+keyword,,,,,,,,,subscriptions,,,gaming,en,60
+keyword,,,,,,,,,subscriptions,,,اشتراك,ar,60
+keyword,,,,,,,,,subscriptions,,,ستريمنج,ar,60
+keyword,,,,,,,,,subscriptions,,,جيمنج,ar,60
+keyword,,,,,,,,,health,,,pharmacy,en,60
+keyword,,,,,,,,,health,,,doctor,en,60
+keyword,,,,,,,,,health,,,clinic,en,60
+keyword,,,,,,,,,health,,,lab test,en,60
+keyword,,,,,,,,,health,,,scan,en,60
+keyword,,,,,,,,,health,,,gym,en,60
+keyword,,,,,,,,,health,,,dental,en,60
+keyword,,,,,,,,,health,,,medicine,en,60
+keyword,,,,,,,,,health,,,صيدلية,ar,60
+keyword,,,,,,,,,health,,,دكتور,ar,60
+keyword,,,,,,,,,health,,,كشف,ar,60
+keyword,,,,,,,,,health,,,عيادة,ar,60
+keyword,,,,,,,,,health,,,تحاليل,ar,60
+keyword,,,,,,,,,health,,,أشعة,ar,60
+keyword,,,,,,,,,health,,,جيم,ar,60
+keyword,,,,,,,,,health,,,أسنان,ar,60
+keyword,,,,,,,,,health,,,دوا,ar,60
+keyword,,,,,,,,,education,,,tuition,en,60
+keyword,,,,,,,,,education,,,school,en,60
+keyword,,,,,,,,,education,,,university,en,60
+keyword,,,,,,,,,education,,,course,en,60
+keyword,,,,,,,,,education,,,books,en,60
+keyword,,,,,,,,,education,,,stationery,en,60
+keyword,,,,,,,,,education,,,nursery,en,60
+keyword,,,,,,,,,education,,,مصاريف مدرسة,ar,60
+keyword,,,,,,,,,education,,,مدرسة,ar,60
+keyword,,,,,,,,,education,,,جامعة,ar,60
+keyword,,,,,,,,,education,,,كورس,ar,60
+keyword,,,,,,,,,education,,,دروس,ar,60
+keyword,,,,,,,,,education,,,سنتر,ar,60
+keyword,,,,,,,,,education,,,كتب,ar,60
+keyword,,,,,,,,,education,,,حضانة,ar,60
+keyword,,,,,,,,,entertainment,,,cinema,en,60
+keyword,,,,,,,,,entertainment,,,concert,en,60
+keyword,,,,,,,,,entertainment,,,hotel,en,60
+keyword,,,,,,,,,entertainment,,,flight,en,60
+keyword,,,,,,,,,entertainment,,,travel,en,60
+keyword,,,,,,,,,entertainment,,,club,en,60
+keyword,,,,,,,,,entertainment,,,vacation,en,60
+keyword,,,,,,,,,entertainment,,,سينما,ar,60
+keyword,,,,,,,,,entertainment,,,حفلة,ar,60
+keyword,,,,,,,,,entertainment,,,فندق,ar,60
+keyword,,,,,,,,,entertainment,,,طيران,ar,60
+keyword,,,,,,,,,entertainment,,,سفر,ar,60
+keyword,,,,,,,,,entertainment,,,مصيف,ar,60
+keyword,,,,,,,,,entertainment,,,نادي,ar,60
+keyword,,,,,,,,,entertainment,,,خروجة,ar,60
+keyword,,,,,,,,,family_giving,,,charity,en,60
+keyword,,,,,,,,,family_giving,,,zakat,en,60
+keyword,,,,,,,,,family_giving,,,donation,en,60
+keyword,,,,,,,,,family_giving,,,gift,en,60
+keyword,,,,,,,,,family_giving,,,wedding,en,60
+keyword,,,,,,,,,family_giving,,,tips,en,60
+keyword,,,,,,,,,family_giving,,,family allowance,en,60
+keyword,,,,,,,,,family_giving,,,صدقة,ar,60
+keyword,,,,,,,,,family_giving,,,زكاة,ar,60
+keyword,,,,,,,,,family_giving,,,تبرع,ar,60
+keyword,,,,,,,,,family_giving,,,هدية,ar,60
+keyword,,,,,,,,,family_giving,,,نقطة,ar,60
+keyword,,,,,,,,,family_giving,,,بقشيش,ar,60
+keyword,,,,,,,,,family_giving,,,إكرامية,ar,60
+keyword,,,,,,,,,family_giving,,,مصروف البيت,ar,60
+keyword,,,,,,,,,savings,,,gold,en,60
+keyword,,,,,,,,,savings,,,certificate,en,60
+keyword,,,,,,,,,savings,,,stocks,en,60
+keyword,,,,,,,,,savings,,,mutual fund,en,60
+keyword,,,,,,,,,savings,,,investment,en,60
+keyword,,,,,,,,,savings,,,emergency fund,en,60
+keyword,,,,,,,,,savings,,,savings,en,60
+keyword,,,,,,,,,savings,,,دهب,ar,60
+keyword,,,,,,,,,savings,,,شهادة,ar,60
+keyword,,,,,,,,,savings,,,أسهم,ar,60
+keyword,,,,,,,,,savings,,,صندوق استثمار,ar,60
+keyword,,,,,,,,,savings,,,استثمار,ar,60
+keyword,,,,,,,,,savings,,,تحويش,ar,60
+keyword,,,,,,,,,savings,,,طوارئ,ar,60
+keyword,,,,,,,,,income,,,salary,en,60
+keyword,,,,,,,,,income,,,payroll,en,60
+keyword,,,,,,,,,income,,,dividend,en,60
+keyword,,,,,,,,,income,,,interest credit,en,60
+keyword,,,,,,,,,income,,,refund,en,60
+keyword,,,,,,,,,income,,,cashback,en,60
+keyword,,,,,,,,,income,,,freelance,en,60
+keyword,,,,,,,,,income,,,مرتب,ar,60
+keyword,,,,,,,,,income,,,راتب,ar,60
+keyword,,,,,,,,,income,,,عائد,ar,60
+keyword,,,,,,,,,income,,,استرداد,ar,60
+keyword,,,,,,,,,income,,,كاش باك,ar,60
+keyword,,,,,,,,,income,,,فري لانس,ar,60

@@ -94,7 +94,7 @@ jobs:
       - name: "zaghlol_lints (T-002 - money, UI strings, print, SafeException)"
         working-directory: tools/lints
         run: |
-          if ! dart run bin/zaghlol_lints.dart ../../app ../../packages/zaghlol_parsing ../../packages/zaghlol_domain > lints.log 2>&1; then
+          if ! dart run bin/zaghlol_lints.dart ../../app ../../packages/zaghlol_parsing ../../packages/zaghlol_domain ../../packages/zaghlol_catalog ../../tools/catalog_build > lints.log 2>&1; then
             cat lints.log
             grep -E "^\S+:[0-9]+:" lints.log | head -n 20 | while read -r line; do echo "::error::zaghlol_lints: $line"; done
             exit 1
@@ -144,6 +144,16 @@ jobs:
       # registry exists (T-036), add `dart run registry_lint` over it here.
       - name: dart test (registry_lint)
         working-directory: tools/registry_lint
+        run: dart test
+      # T-030: seed codec and ES256 signature (incl. the backend vectors),
+      # then the catalog builder, whose test also fails when the committed
+      # app/assets/catalog files or tools/catalog_build/data/catalog_seed.csv
+      # are out of date (run the CLI, see its header).
+      - name: dart test (zaghlol_catalog)
+        working-directory: packages/zaghlol_catalog
+        run: dart test
+      - name: dart test (catalog_build)
+        working-directory: tools/catalog_build
         run: dart test
 
   golden:

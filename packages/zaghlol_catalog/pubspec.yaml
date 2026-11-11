@@ -1,0 +1,19 @@
+name: zaghlol_catalog
+description: Catalog seed format (strict JSON codec) and ES256 seed signatures (T-030). Pure Dart.
+publish_to: none
+resolution: workspace
+
+environment:
+  sdk: ^3.13.7
+
+dependencies:
+  # ES256 (ECDSA P-256 / SHA-256) in pure Dart: package:cryptography throws
+  # UnimplementedError for ECDSA without cryptography_flutter (checked 2.9.0).
+  # RFC 6979 deterministic signing makes the built seed reproducible.
+  pointycastle: ^4.0.0
+  zaghlol_domain:
+    path: ../zaghlol_domain
+
+dev_dependencies:
+  lints: ">=5.0.0 <7.0.0"
+  test: ^1.25.0
