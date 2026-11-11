@@ -14,6 +14,7 @@ import 'db_errors.dart';
 import 'fts_options.dart';
 import 'migrations/v2_financial_a.dart';
 import 'migrations/v3_financial_b.dart';
+import 'migrations/v4_financial_c.dart';
 import 'schema/app_schema.dart';
 import 'schema/app_schema.steps.dart';
 import 'schema_shape.dart';
@@ -50,7 +51,8 @@ class AppDatabase extends AppSchema {
   /// Diag fields only (FU-050).
   int? get attemptedUpgradeFrom => _upgradeFrom;
 
-  /// The version steps, `from` → `to` (T-017: v1 → v2; T-018: v2 → v3).
+  /// The version steps, `from` → `to` (T-017: v1 → v2; T-018: v2 → v3;
+  /// T-019: v3 → v4).
   /// Any other pair is refused before anything runs. Runs inside the upgrade
   /// transaction set up by [migration]; tests override this
   /// (FakeNextDatabase).
@@ -65,6 +67,7 @@ class AppDatabase extends AppSchema {
       steps: migrationSteps(
         from1To2: (m, _) => _from1To2(),
         from2To3: (m, _) => _from2To3(),
+        from3To4: (m, _) => _from3To4(),
       ),
     );
   }
@@ -89,6 +92,37 @@ class AppDatabase extends AppSchema {
       await customStatement(sql);
     }
     for (final sql in v3FtsOptions) {
+      await customStatement(sql);
+    }
+  }
+
+  /// v3 → v4 (T-019): the frozen statements of
+  /// migrations/v4_financial_c.dart. Each rebuilt table is copied by column
+  /// name into its v4 form; the copy must hold exactly the old row count
+  /// before the old table is dropped (else the step fails and the opener
+  /// restores the pre-migration copy). Foreign keys are off here (set by
+  /// [migration]); the opener's `foreign_key_check` runs before commit.
+  Future<void> _from3To4() async {
+    for (final r in v4Rebuilds) {
+      final cols = r.columns.map((c) => '"$c"').join(', ');
+      await customStatement(r.createTemp);
+      await customStatement(
+        'INSERT INTO "${r.temp}" ($cols) SELECT $cols FROM "${r.table}"',
+      );
+      final counts = await customSelect(
+        'SELECT (SELECT count(*) FROM "${r.table}") AS a, '
+        '(SELECT count(*) FROM "${r.temp}") AS b',
+      ).getSingle();
+      if (counts.read<int>('a') != counts.read<int>('b')) {
+        throw DbMigrationException(DbMigrationException.rowCountMismatch);
+      }
+      await customStatement('DROP TABLE "${r.table}"');
+      await customStatement('ALTER TABLE "${r.temp}" RENAME TO "${r.table}"');
+      for (final sql in r.indexes) {
+        await customStatement(sql);
+      }
+    }
+    for (final (_, sql) in v4AddedObjects) {
       await customStatement(sql);
     }
   }

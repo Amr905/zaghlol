@@ -13,20 +13,28 @@
 -- * category code = OpenAPI `CategoryCode`, `^[a-z][a-z0-9_]{1,31}$`;
 -- * ISO dates (`cycle_start`, `due_date`, …) must be real dates:
 --   `date(x) = x` (date() normalises 2026-02-30 to 2026-03-02).
+--
+-- T-019 (v4): catalog_merchants, catalog_keywords, merchant_rules and
+-- recurring_items were rebuilt (T-018 review n-3, n-4): every INTEGER column
+-- is CHECKed `typeof(x) = 'integer'`, and every TEXT column other than ids,
+-- FKs, enums and dates refuses NUL, tested on the bytes
+-- (`instr(CAST(x AS BLOB), x'00') = 0`), because length() and GLOB stop at
+-- the first NUL. The other tables here are unchanged since v3.
 
 import 'financial.drift';
 
 -- §2.4 Catalog (server data, FR-SYNC-02; ops in backend-api §4.2).
 CREATE TABLE catalog_merchants (
   id INTEGER NOT NULL PRIMARY KEY CHECK (id >= 1),
-  canonical TEXT NOT NULL CHECK (length(canonical) BETWEEN 1 AND 200),
-  name_ar TEXT,
-  name_en TEXT,
+  canonical TEXT NOT NULL
+    CHECK (length(canonical) BETWEEN 1 AND 200 AND instr(CAST(canonical AS BLOB), x'00') = 0),
+  name_ar TEXT CHECK (name_ar IS NULL OR instr(CAST(name_ar AS BLOB), x'00') = 0),
+  name_en TEXT CHECK (name_en IS NULL OR instr(CAST(name_en AS BLOB), x'00') = 0),
   category_code TEXT NOT NULL
     CHECK (length(category_code) BETWEEN 2 AND 32 AND category_code GLOB '[a-z]*'
-      AND category_code NOT GLOB '*[^a-z0-9_]*'),
-  logo_key TEXT,
-  version INTEGER NOT NULL CHECK (version >= 0)
+      AND category_code NOT GLOB '*[^a-z0-9_]*' AND instr(CAST(category_code AS BLOB), x'00') = 0),
+  logo_key TEXT CHECK (logo_key IS NULL OR instr(CAST(logo_key AS BLOB), x'00') = 0),
+  version INTEGER NOT NULL CHECK (typeof(version) = 'integer' AND version >= 0)
 ) AS CatalogMerchantRow;
 
 -- Identity is (alias_norm, merchant_id). The INTEGER PRIMARY KEY gives the
@@ -74,11 +82,12 @@ CREATE TABLE catalog_keywords (
   keyword_norm TEXT NOT NULL
     CHECK (length(keyword_norm) BETWEEN 1 AND 64
       AND keyword_norm NOT GLOB ('*[' || char(1) || '-' || char(31) || char(127) || '-' || char(159) || ']*')
-      AND keyword_norm NOT GLOB ' *' AND keyword_norm NOT GLOB '* ' AND keyword_norm NOT GLOB '*  *'),
-  lang TEXT NOT NULL CHECK (lang GLOB '[a-z][a-z]'),
+      AND keyword_norm NOT GLOB ' *' AND keyword_norm NOT GLOB '* ' AND keyword_norm NOT GLOB '*  *'
+      AND instr(CAST(keyword_norm AS BLOB), x'00') = 0),
+  lang TEXT NOT NULL CHECK (lang GLOB '[a-z][a-z]' AND instr(CAST(lang AS BLOB), x'00') = 0),
   category_code TEXT NOT NULL
     CHECK (length(category_code) BETWEEN 2 AND 32 AND category_code GLOB '[a-z]*'
-      AND category_code NOT GLOB '*[^a-z0-9_]*'),
+      AND category_code NOT GLOB '*[^a-z0-9_]*' AND instr(CAST(category_code AS BLOB), x'00') = 0),
   weight INTEGER NOT NULL CHECK (typeof(weight) = 'integer' AND weight BETWEEN 0 AND 100),
   PRIMARY KEY (keyword_norm, lang)
 ) AS CatalogKeywordRow;
@@ -97,9 +106,10 @@ CREATE TABLE merchant_rules (
     CHECK (match_kind IN ('catalog_merchant', 'merchant_norm', 'counterparty')),
   match_value TEXT NOT NULL,
   category_id TEXT NOT NULL REFERENCES categories(id),
-  created_at INTEGER NOT NULL,
-  last_applied_at INTEGER,
+  created_at INTEGER NOT NULL CHECK (typeof(created_at) = 'integer'),
+  last_applied_at INTEGER CHECK (last_applied_at IS NULL OR typeof(last_applied_at) = 'integer'),
   UNIQUE (match_kind, match_value),
+  CHECK (instr(CAST(match_value AS BLOB), x'00') = 0),
   CHECK (match_kind <> 'merchant_norm' OR (length(match_value) BETWEEN 1 AND 64
     AND match_value NOT GLOB '*[^a-z0-9 ]*' AND match_value NOT GLOB ' *'
     AND match_value NOT GLOB '* ' AND match_value NOT GLOB '*  *')),
@@ -163,24 +173,30 @@ CREATE TABLE recurring_items (
   id TEXT NOT NULL PRIMARY KEY,
   kind TEXT NOT NULL CHECK (kind IN ('subscription', 'installment', 'card_due', 'gameya', 'bill')),
   status TEXT NOT NULL CHECK (status IN ('suggested', 'active', 'dismissed', 'completed')),
-  name TEXT NOT NULL CHECK (length(name) BETWEEN 1 AND 60),
+  name TEXT NOT NULL CHECK (length(name) BETWEEN 1 AND 60 AND instr(CAST(name AS BLOB), x'00') = 0),
   merchant_norm TEXT
     CHECK (merchant_norm IS NULL OR (length(merchant_norm) BETWEEN 1 AND 64
       AND merchant_norm NOT GLOB '*[^a-z0-9 ]*' AND merchant_norm NOT GLOB ' *'
-      AND merchant_norm NOT GLOB '* ' AND merchant_norm NOT GLOB '*  *')),
+      AND merchant_norm NOT GLOB '* ' AND merchant_norm NOT GLOB '*  *'
+      AND instr(CAST(merchant_norm AS BLOB), x'00') = 0)),
   account_id TEXT REFERENCES accounts(id),
   amount_minor INTEGER NOT NULL
     CHECK (typeof(amount_minor) = 'integer' AND amount_minor BETWEEN 0 AND 9007199254740991),
-  currency TEXT NOT NULL CHECK (currency GLOB '[A-Z][A-Z][A-Z]'),
+  currency TEXT NOT NULL
+    CHECK (currency GLOB '[A-Z][A-Z][A-Z]' AND instr(CAST(currency AS BLOB), x'00') = 0),
   cadence TEXT NOT NULL CHECK (cadence IN ('monthly', 'yearly', 'weekly', 'custom_days')),
-  cadence_days INTEGER CHECK (cadence_days IS NULL OR cadence_days BETWEEN 1 AND 3660),
-  due_day INTEGER CHECK (due_day IS NULL OR due_day BETWEEN 1 AND 31),
+  cadence_days INTEGER
+    CHECK (cadence_days IS NULL OR (typeof(cadence_days) = 'integer' AND cadence_days BETWEEN 1 AND 3660)),
+  due_day INTEGER CHECK (due_day IS NULL OR (typeof(due_day) = 'integer' AND due_day BETWEEN 1 AND 31)),
   next_due_date TEXT CHECK (next_due_date IS NULL OR date(next_due_date) IS next_due_date),
-  total_count INTEGER CHECK (total_count IS NULL OR total_count >= 1),
+  total_count INTEGER
+    CHECK (total_count IS NULL OR (typeof(total_count) = 'integer' AND total_count >= 1)),
   paid_count INTEGER NOT NULL DEFAULT 0
-    CHECK (paid_count >= 0 AND (total_count IS NULL OR paid_count <= total_count)),
-  reminder_days INTEGER NOT NULL DEFAULT 3 CHECK (reminder_days BETWEEN 0 AND 60),
-  created_at INTEGER NOT NULL,
+    CHECK (typeof(paid_count) = 'integer' AND paid_count >= 0
+      AND (total_count IS NULL OR paid_count <= total_count)),
+  reminder_days INTEGER NOT NULL DEFAULT 3
+    CHECK (typeof(reminder_days) = 'integer' AND reminder_days BETWEEN 0 AND 60),
+  created_at INTEGER NOT NULL CHECK (typeof(created_at) = 'integer'),
   CHECK ((cadence = 'custom_days') = (cadence_days IS NOT NULL))
 ) AS RecurringItemRow;
 
