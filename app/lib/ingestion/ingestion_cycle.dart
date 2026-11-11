@@ -1,21 +1,25 @@
-// T-008 (SPK-01): one drain cycle, shared by the headless engine
-// (ingestion_main.dart) and the devSms UI engine (spike_foreground.dart).
+// T-008 (SPK-01) / T-041: one drain cycle, shared by the headless engine
+// (ingestion_main.dart) and the UI engine (foreground_ingestion.dart).
 //
 // Order per batch: drain → IngestRawMessages (parse, then one DB write
 // transaction) → ack. The ack is sent only after the use case returned (its
 // transaction committed); a failed batch or a crash before the ack
 // re-delivers the entries and `body_hash` absorbs the duplicate
 // (BR-ING-02). T-046: stuck entries (design note §10, platform-channels §2)
-// and the 5 s minimum budget per batch. Nothing here logs, prints or puts
-// message text in an error.
+// and the 5 s minimum budget per batch. T-041: entries the use case could
+// not store even alone are held after the ack (FU-105), and a stop request
+// (native `close`) ends the cycle before its next batch. Nothing here logs,
+// prints or puts message text in an error.
 
 import '../core/platform/capture_api.g.dart';
+import '../core/platform/ingestion_api.g.dart' as pigeon;
 import '../features/ingestion/domain/ingest_types.dart';
 import 'ingest_store.dart';
 import 'ingestion_config.dart';
 import 'spool_port.dart';
 
-/// Mirrors the native `CycleOutcome` (DrainLoop.kt); sent by name.
+/// Mirrors the native `CycleOutcome` (DrainLoop.kt); sent as the Pigeon
+/// `IngestOutcome`.
 enum CycleOutcome {
   /// Everything drained was committed and acked (or nothing was pending, or
   /// only stuck entries are left).
@@ -37,6 +41,13 @@ enum CycleOutcome {
     deferred => 'DEFERRED',
     retry => 'RETRY',
   };
+
+  pigeon.IngestOutcome get report => switch (this) {
+    ok => pigeon.IngestOutcome.ok,
+    noDatabase => pigeon.IngestOutcome.noDatabase,
+    deferred => pigeon.IngestOutcome.deferred,
+    retry => pigeon.IngestOutcome.retry,
+  };
 }
 
 final class CycleResult {
@@ -45,6 +56,7 @@ final class CycleResult {
     this.drained = 0,
     this.inserted = 0,
     this.stuck = 0,
+    this.held = 0,
     this.code,
   });
 
@@ -59,17 +71,23 @@ final class CycleResult {
   /// (left in the spool; the native worker does not re-enqueue for them).
   final int stuck;
 
+  /// Entries handed to `holdSpool` in this cycle (FU-105): could not be
+  /// stored even alone; native moved them out of the pending spool.
+  final int held;
+
   /// A code (DB_* / PLATFORM_* / CONFIG_INVALID / INGEST_*) for a non-ok
   /// outcome or a failed batch; never message text.
   final String? code;
 
-  Map<String, Object?> toWire() => {
-    'result': outcome.wire,
-    'drained': drained,
-    'inserted': inserted,
-    'stuck': stuck,
-    'code': code,
-  };
+  /// The headless control channel's answer (counts and a code only).
+  pigeon.IngestCycleReport toReport() => pigeon.IngestCycleReport(
+    outcome: outcome.report,
+    drained: drained,
+    inserted: inserted,
+    stuck: stuck,
+    held: held,
+    code: code,
+  );
 }
 
 /// Stage marks for the spike metrics (ids only).
@@ -99,7 +117,9 @@ final class IngestionCycle {
     int Function()? nowMs,
     this.batchSize = kDrainBatchSize,
     this.budget = kCycleBudget,
-  }) : _nowMs = nowMs ?? (() => DateTime.now().millisecondsSinceEpoch);
+    bool Function()? stopRequested,
+  }) : _stopRequested = stopRequested ?? _never,
+       _nowMs = nowMs ?? (() => DateTime.now().millisecondsSinceEpoch);
 
   final SpoolPort spool;
   final IngestStore store;
@@ -112,6 +132,12 @@ final class IngestionCycle {
   final int batchSize;
   final Duration budget;
   final int Function() _nowMs;
+
+  /// T-041: checked before each drainSpool; true once native sent `close`
+  /// (the cycle stops after its current batch).
+  final bool Function() _stopRequested;
+
+  static bool _never() => false;
 
   /// Codes that mean "the UI engine must do it" (not a transient failure).
   static const Set<String> deferCodes = {
@@ -141,18 +167,22 @@ final class IngestionCycle {
     var drained = 0;
     var inserted = 0;
     var stuck = 0;
+    var held = 0;
     String? failedCode;
+    CycleResult partial(CycleOutcome outcome, String? code) => CycleResult(
+      outcome,
+      drained: drained,
+      inserted: inserted,
+      held: held,
+      code: code,
+    );
     while (_nowMs() - start < lastStart) {
+      if (_stopRequested()) break;
       final List<SpoolEntry> entries;
       try {
         entries = await spool.drain(batchSize);
       } on SpoolPortException catch (e) {
-        return CycleResult(
-          CycleOutcome.retry,
-          drained: drained,
-          inserted: inserted,
-          code: e.code,
-        );
+        return partial(CycleOutcome.retry, e.code);
       }
       if (entries.isEmpty) break;
       final ids = [for (final e in entries) e.id];
@@ -182,12 +212,7 @@ final class IngestionCycle {
       } on IngestBatchFailed catch (e) {
         if (e.isTransient) {
           // Busy / I/O: nothing committed, nothing acked; the worker retries.
-          return CycleResult(
-            CycleOutcome.retry,
-            drained: drained,
-            inserted: inserted,
-            code: e.code,
-          );
+          return partial(CycleOutcome.retry, e.code);
         }
         // Not transient and not isolatable (CONFIG_INVALID, an oversized
         // batch): keep the entries, go on; the next drain returns them again
@@ -197,23 +222,14 @@ final class IngestionCycle {
         failedCode = e.code;
         continue;
       } on IngestStoreUnavailable catch (e) {
-        return CycleResult(
-          CycleOutcome.retry,
-          drained: drained,
-          inserted: inserted,
-          code: e.code,
-        );
+        return partial(CycleOutcome.retry, e.code);
       } on Object {
-        return CycleResult(
-          CycleOutcome.retry,
-          drained: drained,
-          inserted: inserted,
-          code: 'DB_WRITE_FAILED',
-        );
+        return partial(CycleOutcome.retry, 'DB_WRITE_FAILED');
       }
       if (result.kept.isNotEmpty) {
-        // Could not be stored even alone: left in the spool (not acked);
-        // a later drain that returns only these ends the cycle as stuck.
+        // Could not be stored even alone: not acked. Held below (FU-105);
+        // if the hold fails they stay pending, and a later drain that
+        // returns only these ends the cycle as stuck.
         failedCode = IngestBatchFailed.unstorable;
       }
       marks.mark('commit', ids);
@@ -225,12 +241,15 @@ final class IngestionCycle {
         await spool.ack(result.ackable);
       } on SpoolPortException catch (e) {
         // Committed but not acked: re-delivered later, deduped by body_hash.
-        return CycleResult(
-          CycleOutcome.retry,
-          drained: drained,
-          inserted: inserted,
-          code: e.code,
-        );
+        return partial(CycleOutcome.retry, e.code);
+      }
+      if (result.kept.isNotEmpty) {
+        try {
+          await spool.hold(result.kept);
+          held += result.kept.length;
+        } on Object {
+          // Ignored: the entries stay pending (today's stuck path).
+        }
       }
     }
     return CycleResult(
@@ -238,6 +257,7 @@ final class IngestionCycle {
       drained: drained,
       inserted: inserted,
       stuck: stuck,
+      held: held,
       code: failedCode,
     );
   }

@@ -40,7 +40,8 @@ class SpikeSourceTest {
     @Test
     fun spikeSourcesNeverAbortLogContentOrMakeKeys() {
         val files = sources()
-        assertTrue(files.size >= 10)
+        // T-041 keeps only the receiver, intake, Guard, metrics, log and initializer here.
+        assertTrue(files.size >= 6)
         for (f in files) {
             val text = f.readText()
             assertFalse("${f.name}: abortBroadcast", text.contains("abortBroadcast"))
@@ -53,11 +54,12 @@ class SpikeSourceTest {
     }
 
     @Test
-    fun notificationStringsExistInEnglishAndArabic() {
+    fun captureStringsLiveInMainAndTesterSenderIsEmpty() {
+        // T-041: the worker runs in every flavour, so its notification strings
+        // are in src/main (WorkRequestTest checks them); none are left here.
         for (dir in listOf("values", "values-ar")) {
-            val text = File(src, "devSms/res/$dir/spike_strings.xml").readText()
-            assertTrue(dir, text.contains("name=\"native_android_captureChannelName\""))
-            assertTrue(dir, text.contains("name=\"native_android_captureNotifTitle\""))
+            val f = File(src, "devSms/res/$dir/spike_strings.xml")
+            if (f.exists()) assertFalse(dir, f.readText().contains("native_android_capture"))
         }
         val tester = Regex("name=\"spike_tester_sender\"[^>]*>([^<]*)<").find(File(src, "devSms/res/values/spike_strings.xml").readText())
         assertEquals("", tester!!.groupValues[1]) // never commit a real number

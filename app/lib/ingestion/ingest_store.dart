@@ -85,9 +85,21 @@ final class ProviderIngestStore implements IngestStore {
     try {
       _db = await _container.read(appDatabaseProvider.future);
     } on DbOpenFailure catch (e) {
+      _forgetFailedOpen();
       throw IngestStoreUnavailable(e.failure.code);
     } on Object {
+      _forgetFailedOpen();
       throw const IngestStoreUnavailable('DB_UNAVAILABLE');
+    }
+  }
+
+  /// FU-081 F4: a failed open is cached by the provider; without this the
+  /// engine's next cycle would get the same error until it is destroyed.
+  void _forgetFailedOpen() {
+    try {
+      _container.invalidate(appDatabaseProvider);
+    } on Object {
+      // Disposed container: the next cycle builds a new store anyway.
     }
   }
 

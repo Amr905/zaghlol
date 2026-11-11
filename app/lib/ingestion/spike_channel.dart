@@ -1,15 +1,16 @@
-// T-008 (SPK-01): the spike-only metrics/control channel
-// `zaghlol/spike_metrics` (not a platform contract; removed with the spike).
-// Dart → native: {ev: ready | db_open | mark, stage, ids}. Native → Dart:
-// {cmd: drain}, answered with CycleResult.toWire(); {cmd: close} (before the
-// headless engine is destroyed), answered with {result: CLOSED} once the
-// database is closed. Only stage names, codes, counts and ULIDs cross it;
-// never a body, sender or amount.
+// T-008 (SPK-01) / T-041: the devSms-only stage marks channel
+// `zaghlol/spike_metrics` (not a platform contract; removed with the spike
+// recorder). Dart → native only: {ev: db_open | mark, stage, ids}; the native
+// side (SpikeTrace in src/devSms) writes them to the latency CSV. The command
+// protocol it used to carry is the Pigeon HeadlessIngestionApi now
+// (pigeons/ingestion_api.dart). Only stage names and ULIDs cross it; never a
+// body, sender or amount. Selected by `kIsSpikeBuild` only.
 
 import 'dart:async';
 
 import 'package:flutter/services.dart';
 
+import 'ingestion_config.dart';
 import 'ingestion_cycle.dart';
 
 const String spikeChannelName = 'zaghlol/spike_metrics';
@@ -25,9 +26,6 @@ final class SpikeChannel implements CycleMarks {
 
   final BasicMessageChannel<Object?> _channel;
 
-  /// Dart entry reached and the command handler is installed (t4).
-  void ready() => _send(const {'ev': 'ready'});
-
   @override
   void dbOpen() => _send(const {'ev': 'db_open'});
 
@@ -35,18 +33,13 @@ final class SpikeChannel implements CycleMarks {
   void mark(String stage, List<String> ids) =>
       _send({'ev': 'mark', 'stage': stage, 'ids': ids});
 
-  /// Installs the native → Dart command handler.
-  void onCommand(Future<Object?> Function(String command) handler) {
-    _channel.setMessageHandler((message) async {
-      final cmd = message is Map ? message['cmd'] : null;
-      if (cmd is! String) return null;
-      return handler(cmd);
-    });
-  }
-
   void _send(Object message) {
     unawaited(
       _channel.send(message).then<void>((_) {}, onError: (Object _) {}),
     );
   }
 }
+
+/// The marks of this build: the spike channel in devSms, none elsewhere.
+CycleMarks defaultCycleMarks() =>
+    kIsSpikeBuild ? SpikeChannel() : const NoMarks();

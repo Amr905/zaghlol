@@ -1,18 +1,22 @@
 import 'package:flutter/material.dart';
 
 import 'core/theme/app_theme.dart';
+import 'ingestion/foreground_ingestion.dart';
+import 'ingestion/ingestion_config.dart';
 import 'ingestion/ingestion_main.dart';
-import 'ingestion/spike_foreground.dart';
 
 void main() {
   WidgetsFlutterBinding.ensureInitialized();
-  // T-008: devSms builds only (the SMS spike); a no-op in every other build.
-  startSpikeForeground();
+  // T-041: foreground ingestion in devSms only (the build with a capture
+  // source until T-040); T-047 wires it for every build behind its startup
+  // gate. A compile-time constant, so other builds drop it.
+  if (kIsSpikeBuild) startForegroundIngestion();
   runApp(const ZaghlolApp());
 }
 
-/// T-008: the headless ingestion engine's entrypoint. Native code starts it
-/// by name in this (root) library; `vm:entry-point` keeps it in AOT builds.
+/// T-041: the headless ingestion engine's entrypoint (every build). The
+/// IngestionWorker starts it by name in this (root) library; `vm:entry-point`
+/// keeps it in AOT builds.
 @pragma('vm:entry-point')
 void ingestionMain() => runIngestionMain();
 
