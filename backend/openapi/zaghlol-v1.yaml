@@ -754,10 +754,17 @@ paths:
         **Order of checks.** The authentication handler verifies the OIDC JWT **before the body is read**:
         signature (Google JWKS), `iss` (`https://accounts.google.com` or `accounts.google.com`), `aud` equal
         to the pinned push audience, `email` equal to the push service account, `email_verified = true`, and
-        `exp`. On failure it answers `401` without buffering the body. Only then is the body bound to a DTO
-        with exactly the listed fields (no `[JsonExtensionData]` or `JsonElement` catch-all), `message.data`
-        is decoded, and the extracted columns are written to `store_notifications`. The raw envelope is never
-        stored.
+        `exp`. On failure it answers `401` without buffering the body (`503` when Google's keys are
+        unavailable). Only then is the body bound to a DTO with exactly the listed fields (no
+        `[JsonExtensionData]` or `JsonElement` catch-all), `message.data` is decoded, and the extracted
+        columns are written to `store_notifications`. The raw envelope is never stored.
+
+        **After authentication every outcome except a database failure is `204`** (T-133): a negative
+        acknowledgement would back off the whole Pub/Sub subscription, so an authenticated message that
+        can't be used (malformed envelope or payload, stale `publishTime`, another `packageName`, an
+        oversized or non-JSON body) is acknowledged, not stored, and alerted. The `400`, `413` and `415`
+        responses are therefore only declared for the contract rule. A database failure answers `503`
+        and Pub/Sub redelivers. Rate limit: own per-/24 bucket `notifications-google` (1 200/min).
       x-third-party-body: true
       security:
         - googlePubSubOidc: []
@@ -775,7 +782,7 @@ paths:
               subscription: projects/zaghlol/subscriptions/rtdn-push
       responses:
         '204':
-          description: Stored. Pub/Sub treats any 2xx as an ack.
+          description: Stored, a duplicate, or an authenticated message that is ignored. Pub/Sub treats 102/200/201/202/204 as an ack.
         '400':
           $ref: '#/components/responses/BadRequest'
         '401':
@@ -788,6 +795,8 @@ paths:
           $ref: '#/components/responses/RateLimited'
         '500':
           $ref: '#/components/responses/InternalError'
+        '503':
+          $ref: '#/components/responses/UpstreamUnavailable'
 
   /v1/notifications/apple:
     post:
