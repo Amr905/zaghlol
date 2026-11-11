@@ -328,7 +328,7 @@ void main() {
       );
       await repo.totals(closed());
       await db.customStatement(
-        "INSERT INTO offset_links (id, kind, expense_txn_id, source_txn_id, "
+        'INSERT INTO offset_links (id, kind, expense_txn_id, source_txn_id, '
         "amount_minor, created_at) VALUES ('l','reimbursement','x','s',400,9)",
       );
       expect(await inv.sweepSince(5, schedule), 1);
