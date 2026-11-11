@@ -52,7 +52,11 @@ enum ParseReason {
 
   /// Amounts in two currencies and no keyword says which is the charge (a
   /// bracketed foreign amount); the pick is a guess and never converted.
-  currencyAmbiguous(700);
+  currencyAmbiguous(700),
+
+  /// Informational (FU-078): the balance or available amount is negative
+  /// (an overdrawn account). Stored as a negative amount; no penalty.
+  balanceNegative(1000);
 
   const ParseReason(this.factorPermille);
 

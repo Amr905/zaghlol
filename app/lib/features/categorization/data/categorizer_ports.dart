@@ -10,6 +10,8 @@ import '../../../core/db/daos/catalog_dao.dart';
 import '../../../core/db/daos/categories_dao.dart';
 import '../domain/merchant_rule.dart' show RulesRepository;
 
+export '../domain/categorize_input.dart' show categorizeInputFor;
+
 /// [CatalogPort] over [CatalogDao].
 final class DriftCatalogPort implements CatalogPort {
   DriftCatalogPort(this._dao);
@@ -124,21 +126,3 @@ CategorizerPorts driftCategorizerPorts(AppDatabase db, RulesRepository rules) =>
       keywords: DriftKeywordPort(CatalogDao(db)),
       categories: DriftCategoryPort(CategoriesDao(db)),
     );
-
-/// The categorizer input of one transaction's stored fields. The merchant
-/// key is the stored `merchant_norm`; the keyword text is derived from
-/// `merchant_raw` (Arabic is lost in the key).
-CategorizeInput categorizeInputFor({
-  String? merchantRaw,
-  String? merchantNorm,
-  String? counterpartyKind,
-  String? counterpartyValue,
-}) {
-  final cleaned = cleanMerchant(merchantRaw ?? '').cleaned;
-  return CategorizeInput(
-    merchantNorm: merchantNorm ?? '',
-    merchantText: foldKey(cleaned),
-    counterpartyKind: PartyKind.tryParse(counterpartyKind),
-    counterpartyValue: counterpartyValue,
-  );
-}

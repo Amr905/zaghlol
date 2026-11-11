@@ -1,7 +1,7 @@
 // T-008: the real database path of a drain cycle on the host's sqlite3mc:
 // the UI engine (create allowed) creates zaghlol.db; the headless store
 // (allowMigration/allowCreateOrWipe false) finds, opens and writes it through
-// the T-017 RawMessagesDao; body_hash dedupes a re-delivered entry.
+// IngestRawMessages (T-046); body_hash dedupes a re-delivered entry.
 
 import 'dart:io';
 
@@ -9,13 +9,17 @@ import 'package:drift/drift.dart' show driftRuntimeOptions;
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_riverpod/misc.dart' show Override;
 import 'package:flutter_test/flutter_test.dart';
+import 'package:zaghlol/core/db/app_database.dart';
 import 'package:zaghlol/core/db/app_database_providers.dart';
 import 'package:zaghlol/core/db/db_directory.dart';
 import 'package:zaghlol/core/db/db_key_providers.dart';
+import 'package:zaghlol/features/ingestion/application/ingest_raw_messages.dart';
+import 'package:zaghlol/features/ingestion/data/ingest_factory.dart';
 import 'package:zaghlol/ingestion/ingest_store.dart';
 import 'package:zaghlol/ingestion/ingestion_cycle.dart';
 import 'package:zaghlol/ingestion/spike_ingestion.dart';
 import 'package:zaghlol/ingestion/spike_registry.dart';
+import 'package:zaghlol/ingestion/ulid.dart';
 import 'package:zaghlol_parsing/zaghlol_parsing.dart';
 
 import '../support/fake_secret_store.dart';
@@ -42,24 +46,28 @@ void main() {
     appTempDirectoryProvider.overrideWithValue(() async => root),
   ];
 
+  final registry = loadSpikeRegistry();
+  IngestRawMessages build(AppDatabase db) => buildIngestRawMessages(
+    db,
+    pipeline: ParsingPipeline(registry),
+    guardBase: RegistryGuardBase(registry),
+    newId: UlidGenerator().next,
+  );
+
   ProviderIngestStore headlessStore() => ProviderIngestStore(
     ProviderIngestStore.headlessContainer(dbDir, testOverrides: keys()),
+    build: build,
   );
 
   ProviderIngestStore uiStore() => ProviderIngestStore(
     ProviderContainer(
       overrides: [...keys(), dbDirectoryProvider.overrideWithValue(dbDir)],
     ),
+    build: build,
   );
 
   IngestionCycle cycleOver(IngestStore store, FakeSpool spool) =>
-      IngestionCycle(
-        spool: spool,
-        store: store,
-        parse: pipelineParser(ParsingPipeline(loadSpikeRegistry())),
-        registryVersion: 1,
-        mayCreateDatabase: false,
-      );
+      IngestionCycle(spool: spool, store: store, mayCreateDatabase: false);
 
   test(
     'headless before the UI ever ran: NO_DATABASE, nothing created',
@@ -76,8 +84,8 @@ void main() {
     },
   );
 
-  test('UI creates the database; headless commits through the DAO and '
-      'dedupes a re-delivery by body_hash', () async {
+  test('UI creates the database; headless commits through the use case '
+      'and dedupes a re-delivery by body_hash', () async {
     final ui = uiStore();
     await ui.open();
     await ui.close();
@@ -128,7 +136,7 @@ void main() {
       marks: const NoMarks(),
       headless: true,
       spool: spool,
-      store: (_) => headlessStore(),
+      store: (_, _) => headlessStore(),
       dbDirectory: () async => dbDir,
     );
     expect((await headless.drain()).inserted, 1);
@@ -151,7 +159,7 @@ void main() {
       marks: const NoMarks(),
       headless: false,
       spool: FakeSpool([], log),
-      store: (_) => uiStore(),
+      store: (_, _) => uiStore(),
       dbDirectory: () async => dbDir,
     );
     final first = await ui.drain();
@@ -163,7 +171,7 @@ void main() {
       marks: const NoMarks(),
       headless: true,
       spool: spool,
-      store: (_) => headlessStore(),
+      store: (_, _) => headlessStore(),
       dbDirectory: () async => dbDir,
     );
     final r = await headless.drain();
@@ -178,7 +186,7 @@ void main() {
       marks: const NoMarks(),
       headless: true,
       spool: spool,
-      store: (_) => headlessStore(),
+      store: (_, _) => headlessStore(),
       dbDirectory: () async => dbDir,
     );
     expect((await headless.drain()).outcome, CycleOutcome.noDatabase);

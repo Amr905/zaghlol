@@ -127,6 +127,8 @@ jobs:
           ls app/android/app/src/main/kotlin/app/zaghlol/platform/spool/*.kt app/android/app/src/main/kotlin/app/zaghlol/platform/capture/AndroidCaptureHost.kt > /dev/null \
             || { echo "::error::spool / capture host sources not found"; exit 1; }
           files="$files $(find app/android/app/src/main/kotlin/app/zaghlol/platform/spool app/android/app/src/main/kotlin/app/zaghlol/platform/capture app/android/app/src/main/kotlin/app/zaghlol/platform/guard -name '*.kt' ! -name '*.g.kt' 2>/dev/null || true)"
+          # T-046: the IngestRawMessages use case (domain, application, data).
+          files="$files $(ls app/lib/features/ingestion/*/*.dart)"
           [ -n "$files" ] || { echo "::error::no key files found"; exit 1; }
           if grep -nE '\b(print|debugPrint|log|developer\.log|dump)\(|\b(stdout|stderr)\b|\bLog\.[a-z]+\(|println\(|Timber|NSLog|os_log|Logger\(|logStatements: *true' $files; then
             echo "::error::logging call in key code"

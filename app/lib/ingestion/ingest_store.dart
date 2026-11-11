@@ -1,7 +1,8 @@
 // T-008: the database side of a drain cycle. The headless engine opens with
 // allowMigration and allowCreateOrWipe false (Q6): it never creates, wipes or
 // migrates; those cases come back as DB_DEFERRED / DB_MIGRATION_PENDING and
-// the spool is kept for the UI engine.
+// the spool is kept for the UI engine. T-046: a batch goes through
+// IngestRawMessages (the spike's raw-row-only commit is gone).
 
 import 'dart:io';
 
@@ -11,9 +12,9 @@ import 'package:flutter_riverpod/misc.dart' show Override;
 import '../core/db/app_database.dart';
 import '../core/db/app_database_opener.dart';
 import '../core/db/app_database_providers.dart';
-import '../core/db/daos/raw_messages_dao.dart';
 import '../core/db/db_key_providers.dart';
-import 'raw_message_mapper.dart';
+import '../features/ingestion/application/ingest_raw_messages.dart';
+import '../features/ingestion/domain/ingest_types.dart';
 
 /// Why the store could not be used. [code] is a DbOpenFailureCode code.
 final class IngestStoreUnavailable implements Exception {
@@ -33,16 +34,21 @@ abstract interface class IngestStore {
   /// Opens (once) and returns. Throws [IngestStoreUnavailable].
   Future<void> open();
 
-  /// Inserts [rows] in one transaction; returns how many were new. Throws on
-  /// any failure (nothing committed).
-  Future<int> commit(List<StoreRow> rows);
+  /// Ingests [batch] in one write transaction (T-046). Throws
+  /// [IngestBatchFailed] when nothing was committed, and
+  /// [IngestStoreUnavailable] when the store is not open.
+  Future<IngestBatchResult> ingest(List<IncomingMessage> batch);
 
   Future<void> close();
 }
 
 /// [IngestStore] over the app's Riverpod database providers.
 final class ProviderIngestStore implements IngestStore {
-  ProviderIngestStore(this._container);
+  /// [build] makes the use case over the opened database (once per open).
+  ProviderIngestStore(this._container, {required this.build});
+
+  final IngestRawMessages Function(AppDatabase db) build;
+  IngestRawMessages? _ingest;
 
   /// The headless engine's container: same providers as the UI engine,
   /// migration, create and wipe disabled, database directory from the same
@@ -86,17 +92,10 @@ final class ProviderIngestStore implements IngestStore {
   }
 
   @override
-  Future<int> commit(List<StoreRow> rows) async {
+  Future<IngestBatchResult> ingest(List<IncomingMessage> batch) {
     final db = _db;
     if (db == null) throw const IngestStoreUnavailable('DB_UNAVAILABLE');
-    final dao = RawMessagesDao(db);
-    return db.transaction(() async {
-      var inserted = 0;
-      for (final r in rows) {
-        if (await dao.insertIfNew(r.row)) inserted++;
-      }
-      return inserted;
-    });
+    return (_ingest ??= build(db)).call(batch);
   }
 
   /// Closes the database connection (awaited, so its isolate has released
@@ -109,6 +108,7 @@ final class ProviderIngestStore implements IngestStore {
   Future<void> close() async {
     final db = _db;
     _db = null;
+    _ingest = null;
     try {
       await db?.close();
     } on Object {

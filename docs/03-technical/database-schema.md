@@ -83,7 +83,7 @@ CREATE TABLE raw_messages (
   sender TEXT,                               -- SMS address / notification package / Shortcut 'card'
   institution_code TEXT,                     -- resolved by Guard (NULL = generic)
   body TEXT NOT NULL,                        -- encrypted at rest by the DB cipher; never logged
-  body_hash TEXT NOT NULL,                   -- SHA-256(sender ‖ normalized body) hex
+  body_hash TEXT NOT NULL,                   -- SHA-256("zg.raw.v1" ‖ 0x00 ‖ senderKey ‖ 0x00 ‖ hashNorm(body)) hex (T-046 note §3)
   received_at INTEGER NOT NULL,
   sim_slot INTEGER,
   parse_status TEXT NOT NULL CHECK (parse_status IN ('parsed','review','dismissed','reparse_pending')),
@@ -92,6 +92,10 @@ CREATE TABLE raw_messages (
   created_at INTEGER NOT NULL
 );
 CREATE UNIQUE INDEX ux_raw_body_hash ON raw_messages(body_hash);   -- BR-ING-02 rule 1
+-- body_hash (T-046): senderKey = guardSourceKey(channel, source) (folded SMS id, trimmed package); hashNorm is FROZEN
+-- (digits to ASCII, ٫/٬, platform-channels §1.2 invisible marks removed, whitespace runs to one space, trim; no case or
+-- letter folding; golden vectors), independent of the parser normalizers, so inbox re-scans keep colliding with old rows.
+-- The receive time is not hashed. Changing hashNorm requires a migration that re-hashes raw_messages.
 
 CREATE TABLE transactions (
   id TEXT PRIMARY KEY,
@@ -119,7 +123,7 @@ CREATE TABLE transactions (
   reference_no TEXT,
   balance_after_minor INTEGER,
   template_id TEXT, parse_confidence REAL,
-  dedupe_key TEXT,                           -- inst|last4|dir|amount|currency|minute-bucket (BR-ING-02 rule 2)
+  dedupe_key TEXT,                           -- d1|inst|dir|currency|amount_minor (BR-ING-02 rule 2; last-4 and the ±2 min window are checked in code, T-046 note §3-4)
   note TEXT,
   deleted_at INTEGER,                        -- soft delete for Undo (FR-TXN-06); purged after 30 days
   created_at INTEGER NOT NULL, updated_at INTEGER NOT NULL
@@ -364,6 +368,7 @@ CREATE TABLE diag_log (id INTEGER PRIMARY KEY, at INTEGER NOT NULL, level TEXT N
 | Rule | Where |
 |---|---|
 | Ignored-card and non-financial messages never reach `raw_messages` | Capture Guard before the spool, plus the Dart pipeline re-checks before insert (defense in depth) |
+| A message is stored once; one payment from two channels is one transaction | `ux_raw_body_hash` + `IngestRawMessages`: every dedupe and merge read runs inside the batch's `BEGIN IMMEDIATE` transaction, so the UI and headless connections serialize (T-046 note §4, §10) |
 | One default cash account | `AccountsRepository.ensureDefaultCash()` + partial unique index `ux_accounts_default_cash` |
 | Overall budget: one per currency and period | partial unique index `ux_budgets_overall` |
 | An alert fires once | `fired_alerts` primary key; `FiredAlertsDao.markFired` returns true for exactly one caller |
