@@ -23,6 +23,14 @@
 # skips allowed only by name), share (T-060, a warning until its owner makes it green),
 # then the two-phase kill test (AC1: a write phase halted between fsync and
 # rename of a 21st entry, a read phase in a new process).
+# T-041: the receiver feeds the production worker, drain loop and headless
+# engine (src/main); the metrics come from the devSms IngestTrace. AC1: after
+# the default cell (app killed before each SMS) the spool is empty. AC2: a
+# foreground cell (app open, UI engine drains on onSpoolChanged): p95 of
+# receive → commit for `foreground` rows <= 2000 ms. A burst of 40 SMS with
+# the app killed, the app launched during the headless drain: every entry
+# committed once (40 new rows, spool empty). Instrumented: the headless
+# plugin allowlist (fatal) and the #6 Cipher.init probe (recorded).
 # Called as one line (android-emulator-runner runs `script` line by line).
 set -euo pipefail
 : "${DEVICE:?}" "${API:?}" "${RUNNER_TEMP:?}"
@@ -97,6 +105,10 @@ send_and_wait() {
 
 # Cell 1: default settings (battery optimisation on), cold process.
 send_and_wait default "$N"
+# T-041 AC1: the killed app's spool was drained by the worker.
+for _ in $(seq 1 15); do [ "$(spool_count)" = 0 ] && break; sleep 1; done
+[ "$(spool_count)" = 0 ] || fail "AC1: spool not empty after the default cell ($(spool_count) entries)"
+echo "AC1: spool empty after $N SMS with the app killed"
 # Cell 2: battery optimisation exemption (whitelist), cold process.
 sh_ dumpsys deviceidle whitelist +"$PKG" > /dev/null
 send_and_wait exempt "$N"
@@ -117,6 +129,49 @@ sh_ dumpsys deviceidle force-idle > /dev/null || true
 send_and_wait doze 2
 sh_ dumpsys deviceidle unforce > /dev/null || true
 sh_ dumpsys battery reset > /dev/null
+
+# T-041 AC2: foreground. The app is open (UI engine attached); no kill.
+sh_ am start -W -n "$PKG/app.zaghlol.MainActivity" > /dev/null
+sleep 3
+for i in $(seq 1 "$N"); do
+  seq_no=$((seq_no + 1))
+  before=$(rows)
+  A emu sms send "$SENDER" "spike: you paid EGP $seq_no.00 at SYNTH SHOP $seq_no card *4321" > /dev/null
+  for _ in $(seq 1 30); do
+    after=$(rows)
+    [ "$after" -gt "$before" ] && break
+    sleep 1
+  done
+  sh_ dumpsys activity broadcasts history > "$BH/$(printf %04d "$seq_no").txt" 2>/dev/null || true
+  echo "foreground #$i: rows $before -> $after"
+done
+runas cat no_backup/spike/metrics.csv > "$OUT/metrics-fg.csv"
+# p95 (nearest rank) of t8_commit (else t9_acked) over the foreground rows.
+FG_P95=$(awk -F, 'NR==1{for(i=1;i<=NF;i++)h[$i]=i; next} $h["path"]=="foreground"{v=$h["t8_commit"]; if(v=="")v=$h["t9_acked"]; if(v!="")print v}' "$OUT/metrics-fg.csv" \
+  | sort -n | awk '{a[NR]=$1} END{if(NR==0){print "none"; exit} r=int((95*NR+99)/100); print a[r]}')
+rm -f "$OUT/metrics-fg.csv"
+echo "AC2: foreground receive -> commit p95 = ${FG_P95} ms"
+[ "$FG_P95" != none ] || fail "AC2: no foreground row was recorded"
+[ "$FG_P95" -le 2000 ] || fail "AC2: foreground p95 ${FG_P95} ms > 2000 ms"
+
+# T-041: UI attach mid-drain. A burst with the app killed; the app is launched
+# while the headless engine drains; nothing lost or doubled.
+kill_app
+before=$(rows)
+for i in $(seq 1 40); do
+  seq_no=$((seq_no + 1))
+  A emu sms send "$SENDER" "spike: you paid EGP $seq_no.00 at SYNTH SHOP $seq_no card *4321" > /dev/null
+done
+for _ in $(seq 1 60); do [ "$(rows)" -gt "$before" ] && break; sleep 0.5; done
+sh_ am start -W -n "$PKG/app.zaghlol.MainActivity" > /dev/null
+for _ in $(seq 1 120); do
+  [ "$(rows)" -ge $((before + 40)) ] && [ "$(spool_count)" = 0 ] && break
+  sleep 1
+done
+burst=$(( $(rows) - before ))
+echo "burst with UI attach mid-drain: $burst of 40 committed, spool $(spool_count)"
+[ "$burst" = 40 ] || fail "burst: $burst rows for 40 SMS (lost or doubled)"
+[ "$(spool_count)" = 0 ] || fail "burst: spool not empty after the UI took over"
 
 # Negative proofs.
 kill_app
@@ -215,6 +270,12 @@ instr spool -e package app.zaghlol.platform.spool -e notClass "$KILL" || fail "s
 tr -d '\r' < "$OUT/it-spool.txt" | grep -qE "^OK \(0 tests\)" && fail "no spool instrumented test ran"
 echo "spool instrumented: $(skipped spool) skipped"
 [ "$(skipped spool)" = 0 ] || fail "a spool instrumented test was skipped by an assumption (it-spool.txt)"
+INIT_PROBE=$(tr -d '\r' < "$OUT/it-spool.txt" | sed -n 's/^INSTRUMENTATION_STATUS: spool\.initProbe=//p' | head -n 1)
+echo "spool init probe (#6): ${INIT_PROBE:-none}"
+# T-041: the headless engine's plugin allowlist (fatal).
+instr ingest -e package app.zaghlol.platform.ingest || fail "ingest instrumented tests failed (it-ingest.txt)"
+tr -d '\r' < "$OUT/it-ingest.txt" | grep -qE "No tests found|^OK \(0 tests\)" && fail "no ingest instrumented test ran"
+[ "$(skipped ingest)" = 0 ] || fail "an ingest instrumented test was skipped"
 # Guard (T-038, security M-1): fatal; at least one test must run and every skip must be allowed by name.
 instr guard -e package app.zaghlol.platform.guard && guard_ok=1 || guard_ok=0
 GUARD_TIMING=$(tr -d '\r' < "$OUT/it-guard.txt" | sed -n 's/^INSTRUMENTATION_STATUS: guard\.timing=//p' | head -n 1)
@@ -240,10 +301,13 @@ instr kill-read -e class "$KILL#phaseRead" -e spoolPhase read || fail "the read 
 {
   echo
   echo "### Instrumented (T-039), API $API"
-  for n in spool guard share kill-read; do
+  for n in spool guard share kill-read ingest; do
     echo "- $n: $(tr -d '\r' < "$OUT/it-$n.txt" | grep -E "^(OK|FAILURES|Tests run)" | tr '\n' ' ')"
   done
   echo "- kill-write: halted with $bins entries + $tmps tmp on disk"
   echo "- guard skipped: $(skipped guard) ${guard_skips:+($guard_skips; allowed until T-036)}"
   echo "- guard timing: $GUARD_TIMING"
+  echo "- spool init probe (#6): ${INIT_PROBE:-none}"
+  echo "- foreground receive -> commit p95 (AC2): ${FG_P95} ms"
+  echo "- burst with UI attach mid-drain: $burst of 40"
 } >> "$OUT/report.md"

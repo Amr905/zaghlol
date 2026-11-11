@@ -11,6 +11,7 @@ import io.flutter.FlutterInjector
 import io.flutter.embedding.engine.FlutterEngine
 import io.flutter.embedding.engine.FlutterEngineGroup
 import io.flutter.embedding.engine.dart.DartExecutor
+import io.flutter.embedding.engine.plugins.FlutterPlugin
 import io.flutter.plugin.common.BinaryMessenger
 
 /**
@@ -106,6 +107,12 @@ class FlutterHeadlessStarter(
             a.close { onReply() }
         }
 
+        /** Which of [candidates] are registered on this engine (instrumented allowlist test). */
+        fun registeredAmong(candidates: List<Class<out FlutterPlugin>>): List<Class<out FlutterPlugin>> {
+            val e = engine ?: return emptyList()
+            return candidates.filter { e.plugins.has(it) }
+        }
+
         override fun destroy() {
             if (destroyed) return
             destroyed = true
@@ -120,8 +127,12 @@ class FlutterHeadlessStarter(
         }
     }
 
+    /** Instrumented test only: the plugins of [candidates] registered on [handle]'s engine. Main thread. */
+    internal fun registeredAmong(handle: HeadlessHandle, candidates: List<Class<out FlutterPlugin>>): List<Class<out FlutterPlugin>> =
+        (handle as? Handle)?.registeredAmong(candidates) ?: emptyList()
+
     companion object {
         /** The only plugin classes a headless engine registers (besides the Pigeon hosts above). */
-        val ALLOWED_PLUGINS: List<Class<*>> = listOf(JniPlugin::class.java, JniFlutterPlugin::class.java)
+        val ALLOWED_PLUGINS: List<Class<out FlutterPlugin>> = listOf(JniPlugin::class.java, JniFlutterPlugin::class.java)
     }
 }
