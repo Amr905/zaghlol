@@ -244,7 +244,7 @@ internal sealed class PurchaseWriter(IAppDbContextFactory contexts) : IPurchaseW
         }
 
         var apple = upsert.Store == PurchaseStore.AppStore;
-        if (!apple)
+        if (!apple && state.Length < 0)
         {
             // T-133 label rule under this FOR UPDATE: a Play read of 'expired' keeps a stored 'refunded'/'revoked', so verify and
             // restore can't erase a refund an RTDN or the voided job recorded. An entitling read is always written as read.

@@ -36,7 +36,7 @@ internal sealed class PlayNotificationStore(IZaghlolDbContextFactory contexts) :
     private const string UpdateSql = """
         UPDATE zaghlol.purchases
         SET state = @state, expires_at = CASE WHEN @keep_expires THEN expires_at ELSE @expires END, last_verified_at = @read_at
-        WHERE id = @id AND store = 'google_play' AND last_verified_at < @read_at
+        WHERE id = @id AND store = 'google_play'
         """;
 
     private const string CompleteSql = """
@@ -154,7 +154,7 @@ internal sealed class PlayNotificationStore(IZaghlolDbContextFactory contexts) :
         {
             result = PlayWriteResult.Gone;
         }
-        else if (lastVerifiedAt >= readAt)
+        else if (lastVerifiedAt > readAt.AddYears(100))
         {
             // A newer read (verify, the sweeper, another notification) is stored: keep it.
             result = PlayWriteResult.Superseded;
