@@ -60,6 +60,9 @@ jwk() {
   echo "Kms__HmacKeys__Seat=local:seat"
   echo "Kms__HmacKeys__Audit=local:audit"
   echo "Kms__HmacKeys__InstallHashPepper=local:install-pepper"
+  # T-182: the K_seat startup check value, HMAC-SHA256(K_seat, "zaghlol-kseat-check-v1") as 64 lower-case hex.
+  seat_hex=$(base64 -d < "$dir/seat.key" | od -An -v -tx1 | tr -d ' \n')
+  echo "Kms__HmacKeys__SeatCheck=$(printf '%s' zaghlol-kseat-check-v1 | openssl dgst -sha256 -mac HMAC -macopt "hexkey:$seat_hex" | sed 's/^.*= //')"
   echo "Kms__Envelope__KeyRef=local:envelope"
   jwk s0000d 0 Sync
   jwk e0000d 1 Entitlement

@@ -73,6 +73,21 @@ public sealed class FakeKms : ISigningKeyProvider, IHmacProvider, IDataKeyProvid
 
     public static string HmacKeyRef(KeyedHashKey key) => "fake:hmac-" + key.ToString().ToLowerInvariant();
 
+    /// <summary>The fixed <c>K_seat</c> of the shared vectors (<c>seat-key-hash-v1.json</c>): bytes 00 01 … 1f.</summary>
+    public static byte[] FixedSeatKey => [.. Enumerable.Range(0, 32).Select(i => (byte)i)];
+
+    /// <summary>Replaces the random <c>K_seat</c> with <see cref="FixedSeatKey"/> (T-182 vectors). Call before <see cref="Settings"/>.</summary>
+    public FakeKms UseFixedSeatKey()
+    {
+        AddSecret(HmacKeyRef(KeyedHashKey.Seat), FixedSeatKey);
+        return this;
+    }
+
+    /// <summary>The <c>Kms:HmacKeys:SeatCheck</c> value the IaC would write for this fake's <c>K_seat</c> (T-182 §6), or null without one.</summary>
+    public string? SeatCheckHex() => secrets.TryGetValue(HmacKeyRef(KeyedHashKey.Seat), out var seat)
+        ? Convert.ToHexStringLower(HMACSHA256.HashData(seat, "zaghlol-kseat-check-v1"u8))
+        : null;
+
     public static string KeyRefFor(string kid) => "fake:" + kid;
 
     public SigningKey AddSigningKey(string kid, SigningPurpose purpose, SigningKeyStatus status)
@@ -120,6 +135,12 @@ public sealed class FakeKms : ISigningKeyProvider, IHmacProvider, IDataKeyProvid
         foreach (var key in Enum.GetValues<KeyedHashKey>())
         {
             settings["Kms:HmacKeys:" + key] = HmacKeyRef(key);
+        }
+
+        // T-182: the K_seat startup check value, so hosts in any environment pass the check (tests that need it absent remove it).
+        if (SeatCheckHex() is { } seatCheck)
+        {
+            settings["Kms:HmacKeys:SeatCheck"] = seatCheck;
         }
 
         settings["Kms:Envelope:KeyRef"] = EnvelopeKeyRef;

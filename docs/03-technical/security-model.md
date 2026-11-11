@@ -145,6 +145,7 @@ plaintext = tar-like stream: db.snapshot, settings.json, manifest.json (T-149)
 | Input validation | FluentValidation on every DTO; unknown fields rejected (except the three third-party bodies, which ignore them); size limits; regex timeouts; no personal data or credentials in query strings, and query strings never logged |
 | Rate limiting & abuse | Token bucket per install and per /24; registration limited per IP; WAF managed rules |
 | Secrets | Cloud secrets manager; no secrets in config files or images; CI uses OIDC federation (no long-lived keys) |
+| Keyed-hash keys | `K_seat`, `K_audit` and the `install_hash` pepper: HMAC-SHA256 keys in the KMS (MAC permission only, never exported), each referenced by a pinned key version with auto-rotation off and deletion protection. `K_seat` has a startup check value and no scheduled rotation, with an emergency procedure (`deployment.md` §3, T-182) |
 | Signing keys | ES256 keys in KMS/HSM (`sign` permission for the API identity only). Each `kid` has a 12-month active life. The app embeds current + next public keys, and rotation ships in an app release before activation. |
 | Data at rest | Managed PostgreSQL encryption; Apple refresh tokens and idempotency bodies additionally envelope-encrypted with KMS (`IEnvelopeCipher`, format v1 in `deployment.md` §3: AES-256-GCM, fresh data key per record, the row's context bound as associated data) |
 | DB access | Separate least-privilege roles; no public IP (private networking); operator access only through the admin API |
