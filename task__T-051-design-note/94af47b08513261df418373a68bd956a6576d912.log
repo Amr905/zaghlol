@@ -1,5 +1,8 @@
 ﻿== SUMMARY ==
-RUNNING sha=94af47b08513261df418373a68bd956a6576d912
+SKIP sha=94af47b08513261df418373a68bd956a6576d912 no app/packages/backend changes
 
 == FULL LOG (last 1500 lines) ==
 auto task/T-051-design-note 94af47b08513261df418373a68bd956a6576d912 2026-11-11T17:25:47.6109787+02:00
+
+
+
