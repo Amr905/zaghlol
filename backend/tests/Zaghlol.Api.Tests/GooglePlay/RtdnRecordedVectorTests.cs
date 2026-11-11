@@ -29,6 +29,7 @@ public sealed class RecordedRtdnFactAttribute : FactAttribute
 /// API). No value is printed.
 /// </summary>
 [Trait("live", "googleplay")]
+[Collection(ApiHostGroup.Name)]
 public sealed class RtdnRecordedVectorTests
 {
     public static string VectorPath => Path.Combine(AppContext.BaseDirectory, "GooglePlay", "fixtures", "recorded-rtdn-test-notification.json");

@@ -317,8 +317,8 @@ public class GoogleNotificationAuthTests(GoogleAuthHostFixture fixture) : IClass
     [InlineData("issuer_other", "bad_issuer")]
     [InlineData("audience_array", "bad_audience")]
     [InlineData("audience_other", "bad_audience")]
-    [InlineData("email_case", "bad_email")]
-    [InlineData("email_verified_string", "unverified_email")]
+    [InlineData("email_case", "bad_sender")]
+    [InlineData("email_verified_string", "unverified_sender")]
     [InlineData("expired", "expired")]
     [InlineData("issued_in_future", "expired")]
     public async Task EachForgeryIsCountedUnderItsOwnOutcome(string forgery, string outcome)
@@ -524,5 +524,42 @@ public class GoogleKeysUnavailableTests(GoogleKeysDownHostFixture fixture) : ICl
         // A token malformed before any key lookup stays a plain 401.
         using var forged = await RtdnPushKit.PostAsync(fixture.Client, body, "Bearer a.b.c");
         Assert.Equal(HttpStatusCode.Unauthorized, forged.StatusCode);
+    }
+}
+
+/// <summary>AC 5 as code: the Pub/Sub envelope DTOs list exactly the fields read and have no catch-all member of any kind.</summary>
+[Collection(ApiHostGroup.Name)]
+public class GoogleEnvelopeTests
+{
+    [Theory]
+    [InlineData(typeof(PubSubEnvelopeRequest), new[] { "Message", "Subscription" })]
+    [InlineData(typeof(PubSubMessageRequest), new[] { "Data", "MessageId", "PublishTime" })]
+    public void PubSubEnvelopeDtosHaveNoCatchAll(Type type, string[] expected)
+    {
+        var properties = type.GetProperties(System.Reflection.BindingFlags.Instance | System.Reflection.BindingFlags.Public | System.Reflection.BindingFlags.NonPublic);
+
+        Assert.Equal(expected, properties.Select(p => p.Name).Order(StringComparer.Ordinal));
+        Assert.All(properties, p =>
+        {
+            Assert.Null(System.Reflection.CustomAttributeExtensions.GetCustomAttribute<System.Text.Json.Serialization.JsonExtensionDataAttribute>(p));
+            Assert.True(p.PropertyType == typeof(string) || p.PropertyType == typeof(PubSubMessageRequest), p.Name);
+        });
+        Assert.DoesNotContain(
+            type.GetFields(System.Reflection.BindingFlags.Instance | System.Reflection.BindingFlags.Public | System.Reflection.BindingFlags.NonPublic),
+            f => !f.Name.Contains("k__BackingField", StringComparison.Ordinal));
+    }
+
+    [Fact]
+    public void TheEnvelopeContextSkipsUnknownMembersRefusesDuplicatesAndIsCaseSensitive()
+    {
+        var parsed = System.Text.Json.JsonSerializer.Deserialize(
+            "{\"x\":{\"y\":[1]},\"message\":{\"data\":\"ZA==\",\"messageId\":\"1\",\"message_id\":\"2\",\"attributes\":{\"k\":\"v\"},\"orderingKey\":\"o\"},\"deliveryAttempt\":3}",
+            PubSubEnvelopeJsonContext.Default.PubSubEnvelopeRequest);
+
+        Assert.Equal("1", parsed!.Message!.MessageId);
+        Assert.Equal("ZA==", parsed.Message.Data);
+        Assert.Throws<System.Text.Json.JsonException>(() => System.Text.Json.JsonSerializer.Deserialize("{\"subscription\":\"a\",\"subscription\":\"b\"}", PubSubEnvelopeJsonContext.Default.PubSubEnvelopeRequest));
+        Assert.Null(System.Text.Json.JsonSerializer.Deserialize("{\"Message\":{\"data\":\"a\"}}", PubSubEnvelopeJsonContext.Default.PubSubEnvelopeRequest)!.Message);
+        Assert.Equal(nameof(PubSubEnvelopeRequest), parsed.ToString());
     }
 }

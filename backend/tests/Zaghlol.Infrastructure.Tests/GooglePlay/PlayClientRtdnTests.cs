@@ -158,3 +158,26 @@ public sealed class PlayClientRtdnTests : IDisposable
         public override DateTimeOffset GetUtcNow() => now;
     }
 }
+
+/// <summary>AC 5 for the voided-list DTOs: exactly the fields read, no catch-all member.</summary>
+public sealed class VoidedListDtoTests
+{
+    [Theory]
+    [InlineData(typeof(VoidedPurchasesListDto), new[] { "TokenPagination", "VoidedPurchases" })]
+    [InlineData(typeof(VoidedPurchaseDto), new[] { "OrderId", "PurchaseToken", "VoidedTimeMillis" })]
+    [InlineData(typeof(TokenPaginationDto), new[] { "NextPageToken" })]
+    public void TheVoidedListDtosHaveNoCatchAll(Type type, string[] expected)
+    {
+        var properties = type.GetProperties(System.Reflection.BindingFlags.Instance | System.Reflection.BindingFlags.Public | System.Reflection.BindingFlags.NonPublic);
+
+        Assert.Equal(expected, properties.Select(p => p.Name).Order(StringComparer.Ordinal));
+        Assert.All(properties, p =>
+        {
+            Assert.Null(System.Reflection.CustomAttributeExtensions.GetCustomAttribute<System.Text.Json.Serialization.JsonExtensionDataAttribute>(p));
+            Assert.NotEqual(typeof(object), p.PropertyType);
+            Assert.NotEqual(typeof(System.Text.Json.JsonElement), p.PropertyType);
+            Assert.False(typeof(System.Text.Json.Nodes.JsonNode).IsAssignableFrom(p.PropertyType));
+            Assert.False(typeof(System.Collections.IDictionary).IsAssignableFrom(p.PropertyType));
+        });
+    }
+}

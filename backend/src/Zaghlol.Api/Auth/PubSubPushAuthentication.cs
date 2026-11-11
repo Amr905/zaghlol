@@ -188,12 +188,12 @@ internal sealed class PubSubPushTokenValidator(GoogleKeyCache keys, PlayRtdnSett
 
             if (!IsString(root, "email", out var email) || !string.Equals(email, settings.PushServiceAccount, StringComparison.Ordinal))
             {
-                return RtdnTags.Auth.BadEmail;
+                return RtdnTags.Auth.BadSender;
             }
 
             if (!root.TryGetProperty("email_verified", out var verified) || verified.ValueKind != JsonValueKind.True)
             {
-                return RtdnTags.Auth.UnverifiedEmail;
+                return RtdnTags.Auth.UnverifiedSender;
             }
 
             if (!IsInteger(root, "exp", out var exp) || exp <= now - (long)PubSubPushAuthentication.ExpirySkew.TotalSeconds)

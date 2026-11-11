@@ -478,7 +478,7 @@ public sealed partial class ZaghlolMetrics : IDisposable
         assnRefundNotReflected.Add(0);
 
         // T-133: every alerted RTDN series starts at 0.
-        foreach (var outcome in new[] { RtdnTags.Auth.BadAudience, RtdnTags.Auth.BadEmail, RtdnTags.Auth.KeysUnavailable })
+        foreach (var outcome in new[] { RtdnTags.Auth.BadAudience, RtdnTags.Auth.BadSender, RtdnTags.Auth.KeysUnavailable })
         {
             rtdnAuth.Add(0, Tags(("outcome", outcome)));
         }

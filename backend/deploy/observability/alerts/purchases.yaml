@@ -158,14 +158,14 @@ groups:
           description: "No worker replica ran the processor (or found its advisory lock held). Check that the worker runs and can reach PostgreSQL."
 
       - alert: ZaghlolRtdnAuthConfig
-        # Sustained audience, e-mail or key failures mean Google's genuine pushes are refused: RTDN silently stops.
-        expr: sum by (outcome) (increase(zaghlol_rtdn_auth_total{outcome=~"bad_audience|bad_email|keys_unavailable"}[15m])) > 5
+        # Sustained audience, sender or key failures mean Google's genuine pushes are refused: RTDN silently stops.
+        expr: sum by (outcome) (increase(zaghlol_rtdn_auth_total{outcome=~"bad_audience|bad_sender|keys_unavailable"}[15m])) > 5
         for: 15m
         labels:
           severity: page
         annotations:
           summary: "Pub/Sub pushes fail authentication with {{ $labels.outcome }}"
-          description: "bad_audience/bad_email: Purchases:Google:Rtdn:Audience or PushServiceAccount differs from the push subscription. keys_unavailable: Google's discovery or JWKS can't be fetched."
+          description: "bad_audience/bad_sender: the Purchases:Google:Rtdn audience or push identity setting differs from the push subscription. keys_unavailable: Google's discovery or JWKS can't be fetched."
 
       - alert: ZaghlolRtdnIgnoredPackage
         expr: sum(increase(zaghlol_rtdn_ingest_total{outcome="ignored_package"}[30m])) > 0
@@ -184,12 +184,12 @@ groups:
           description: "Acknowledged (204) without a row. ignored_subscription: Purchases:Google:Rtdn:Subscription differs from the push subscription. Others: an unexpected envelope or payload."
 
       - alert: ZaghlolRtdnProcessedWarn
-        expr: sum by (type, outcome) (increase(zaghlol_rtdn_processed_total{outcome=~"env_mismatch|refused|token_gone"}[30m])) > 0
+        expr: sum by (type, outcome) (increase(zaghlol_rtdn_processed_total{outcome=~"env_mismatch|refused|gone"}[30m])) > 0
         labels:
           severity: warn
         annotations:
           summary: "An RTDN row ended {{ $labels.outcome }} ({{ $labels.type }})"
-          description: "env_mismatch: a test purchase for a production row (or the reverse); nothing written. refused: a row the ingest never produces (worker-login injection?); no Play call. token_gone: Play answered 410 for a purchase that still grants Gold."
+          description: "env_mismatch: a test purchase for a production row (or the reverse); nothing written. refused: a row the ingest never produces (worker-login injection?); no Play call. gone: Play answered 410 for a purchase that still grants Gold."
 
       - alert: ZaghlolRtdnRefundNotReflected
         expr: sum(increase(zaghlol_rtdn_refund_not_reflected_total[1h])) > 0

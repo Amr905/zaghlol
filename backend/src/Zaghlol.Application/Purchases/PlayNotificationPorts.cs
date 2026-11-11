@@ -122,7 +122,7 @@ public static class RtdnTags
     public const string NoPurchase = "no_purchase";
     public const string EnvMismatch = "env_mismatch";
     public const string Refused = "refused";
-    public const string TokenGone = "token_gone";
+    public const string TokenGone = "gone";
     public const string Retry = "retry";
     public const string Deferred = "deferred";
     public const string DeadLetter = "dead_letter";
@@ -146,8 +146,8 @@ public static class RtdnTags
         public const string BadSignature = "bad_signature";
         public const string BadIssuer = "bad_issuer";
         public const string BadAudience = "bad_audience";
-        public const string BadEmail = "bad_email";
-        public const string UnverifiedEmail = "unverified_email";
+        public const string BadSender = "bad_sender";
+        public const string UnverifiedSender = "unverified_sender";
         public const string Expired = "expired";
         public const string KeysUnavailable = "keys_unavailable";
 
@@ -156,7 +156,7 @@ public static class RtdnTags
 
         public static IReadOnlyList<string> All { get; } =
         [
-            Ok, Missing, Malformed, BadAlg, UnknownKid, BadSignature, BadIssuer, BadAudience, BadEmail, UnverifiedEmail, Expired,
+            Ok, Missing, Malformed, BadAlg, UnknownKid, BadSignature, BadIssuer, BadAudience, BadSender, UnverifiedSender, Expired,
             KeysUnavailable, NotConfigured,
         ];
     }
@@ -177,7 +177,7 @@ public interface IPlayNotificationTelemetry
     /// <summary><c>zaghlol.rtdn.ingest{kind, outcome}</c>; <c>ignored_package</c> pages, other <c>ignored_*</c> warn.</summary>
     void Ingested(string kind, string outcome);
 
-    /// <summary><c>zaghlol.rtdn.processed{type, outcome}</c>; <c>env_mismatch</c>, <c>refused</c>, <c>token_gone</c> warn.</summary>
+    /// <summary><c>zaghlol.rtdn.processed{type, outcome}</c>; <c>env_mismatch</c>, <c>refused</c>, <c>gone</c> (Play 410 on an entitling row) warn.</summary>
     void Processed(string type, string outcome);
 
     /// <summary><c>zaghlol.rtdn.lag</c> (received to processed) and the generic notification lag.</summary>
