@@ -13,6 +13,11 @@
 // AC3: a failing migration restores byte-identical files; the old version
 //      reopens. D-50: a deleted key wipes every file (main last) and the new
 //      database carries the restore notice.
+// T-017: the real v1 → v2 step on the device's sqlite3mc (FTS5 trigram and
+//      unicode61 tables, offset triggers, CHECKs) through the app's opener.
+// T-018: v1 files now migrate to v3; the real v2 → v3 step on a populated
+//      file (catalog trigram candidates, FTS5 secure-delete set and
+//      effective on this sqlite3mc, the T-017 review trigger fixes).
 //
 // Hygiene: keys are synthetic and never printed; assertions compare
 // booleans, counts and codes. Nothing is printed.
@@ -20,18 +25,28 @@
 import 'dart:convert';
 import 'dart:io';
 
-import 'package:drift/drift.dart' show driftRuntimeOptions;
+import 'package:drift/drift.dart' show Value, driftRuntimeOptions;
 import 'package:drift/native.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:zaghlol/core/crypto/secret_store.dart';
 import 'package:zaghlol/core/db/app_database.dart';
 import 'package:zaghlol/core/db/app_database_opener.dart';
+import 'package:zaghlol/core/db/daos/accounts_dao.dart';
+import 'package:zaghlol/core/db/daos/catalog_dao.dart';
+import 'package:zaghlol/core/db/daos/offset_links_dao.dart';
+import 'package:zaghlol/core/db/daos/transactions_dao.dart';
 import 'package:zaghlol/core/db/db_file_set.dart';
 import 'package:zaghlol/core/db/encrypted_open.dart';
+import 'package:zaghlol/core/db/schema_shape.dart';
 import 'package:zaghlol/core/platform/pigeon_secret_store.dart';
 
 import '../test/core/db/db_open_harness.dart';
-import '../test/core/db/fake_v2_database.dart';
+import '../test/core/db/fake_next_database.dart';
+import '../test/core/db/financial_fixtures.dart'
+    show account, failureOf, link, txn;
+import '../test/core/db/fts_probe.dart';
+import '../test/core/db/schema_v1_database.dart';
+import '../test/core/db/schema_v2_database.dart';
 import '../test/core/db/sqlite3mc_contract.dart'
     show anyFileContains, hasPlaintextHeader;
 import '../test/support/file_snapshot.dart';
@@ -178,14 +193,14 @@ void registerAppDatabaseTests() {
     expect(anyFileContains([control], needles), isTrue);
   });
 
-  test('AC3: a failing v1 → v2 step restores byte-identical files; the copy '
-      'was encrypted; v1 reopens', () async {
+  test('AC3: a failing current → next step restores byte-identical files; '
+      'the copy was encrypted; the current version reopens', () async {
     await firstRun();
     final before = snapshotFiles(world.dbDir);
     var copyHeaderPlain = true;
     final result = await world.openWith(
-      fakeV2Factory(
-        mode: FakeV2Mode.throwInStep,
+      fakeNextFactory(
+        mode: FakeNextMode.throwInStep,
         onStep: () {
           copyHeaderPlain = hasPlaintextHeader(world.files.migrateTmp);
           world.mainFile.writeAsBytesSync(
@@ -195,7 +210,7 @@ void registerAppDatabaseTests() {
           );
         },
       ),
-      FakeV2Database.version,
+      FakeNextDatabase.version,
     );
     final failed = result as DbOpenFailed;
     expect(failed.code, DbOpenFailureCode.migrationFailed);
@@ -208,24 +223,183 @@ void registerAppDatabaseTests() {
     }
     expect(sameSnapshot(before, snapshotFiles(world.dbDir)), isTrue);
 
-    final v1 = openedDb(await world.open());
-    expect(await userVersionOf(v1), 1);
-    expect(await metaValue(v1, 'marker'), 'old');
-    await v1.close();
+    final current = openedDb(await world.open());
+    expect(await userVersionOf(current), appSchemaVersion);
+    expect(await metaValue(current, 'marker'), 'old');
+    await current.close();
   });
 
-  test('AC3: a successful v1 → v2 migration deletes the copy', () async {
+  test('AC3: a successful current → next migration deletes the copy', () async {
     await firstRun();
     final result = await world.openWith(
-      fakeV2Factory(),
-      FakeV2Database.version,
+      fakeNextFactory(),
+      FakeNextDatabase.version,
     );
-    final opened = result as DbOpened<FakeV2Database>;
-    expect(opened.migratedFrom, 1);
-    expect(await userVersionOf(opened.db), 2);
+    final opened = result as DbOpened<FakeNextDatabase>;
+    expect(opened.migratedFrom, appSchemaVersion);
+    expect(await userVersionOf(opened.db), FakeNextDatabase.version);
     expect(world.files.migrateTmp.existsSync(), isFalse);
     await opened.db.close();
   });
+
+  test(
+    'T-017: v1 → latest on this device: copy deleted, schema = fresh, '
+    'Arabic/English search in both FTS tables, offset trigger, CHECKs',
+    () async {
+      await storeKey(61);
+      await makeV1File(world.mainFile);
+      final result = await world.open();
+      final opened = result as DbOpened<AppDatabase>;
+      final db = opened.db;
+      try {
+        expect(opened.migratedFrom, 1);
+        expect(await userVersionOf(db), appSchemaVersion);
+        expect(world.files.migrateTmp.existsSync(), isFalse);
+        expect(await metaValue(db, 'marker'), 'v1');
+        final fresh = AppDatabase(
+          NativeDatabase.memory(),
+          validateSchema: false,
+        );
+        final freshShape = await schemaShapeOf(fresh);
+        await fresh.close();
+        expect(sameSchemaShape(await schemaShapeOf(db), freshShape), isTrue);
+
+        await AccountsDao(db).insert(account('acc1'));
+        final txns = TransactionsDao(db);
+        await txns.insert(
+          txn('e1', merchant: 'كارفور المعادي', amountMinor: 125050),
+        );
+        await txns.insert(
+          txn('e2', merchant: 'Café Zamalek', amountMinor: 900),
+        );
+        await txns.insert(txn('i1', direction: 'income', amountMinor: 1000));
+        Future<List<String>> ids(String q) async => [
+          for (final r in await txns.search(q)) r.id,
+        ];
+        expect(await ids('كارف'), ['e1']);
+        expect(await ids('معادي'), ['e1']);
+        expect(await ids('١٢٥٠٫٥٠'), ['e1']);
+        expect(await ids('cafe'), ['e2']);
+        expect(await ids('كا'), ['e1']);
+        expect(await ids('Ca'), ['e2']);
+        for (final t in ['transactions_fts', 'transactions_fts_short']) {
+          await db.customStatement(
+            "INSERT INTO $t ($t) VALUES ('integrity-check')",
+          );
+        }
+        await expectLater(
+          OffsetLinksDao(
+            db,
+          ).insert(link('l1', expense: 'e2', source: 'i1', amountMinor: 901)),
+          throwsA(
+            isA<DbWriteException>().having(
+              (e) => e.code,
+              'code',
+              DbWriteException.offsetExceedsExpense,
+            ),
+          ),
+        );
+        expect(
+          await failureOf(
+            db,
+            "UPDATE transactions SET amount_minor = 1.5 WHERE id = 'e1'",
+          ),
+          DbWriteException.constraintCheck,
+        );
+      } finally {
+        await db.close();
+      }
+    },
+  );
+
+  test(
+    'T-018: v2 → v3 on this device: copy deleted, rows kept, schema = '
+    'fresh v3, trigram candidates, secure-delete set and effective, m-1/m-2',
+    () async {
+      await storeKey(61);
+      await makeV2File(world.mainFile);
+      final result = await world.open();
+      final opened = result as DbOpened<AppDatabase>;
+      final db = opened.db;
+      try {
+        expect(opened.migratedFrom, 2);
+        expect(await userVersionOf(db), appSchemaVersion);
+        expect(world.files.migrateTmp.existsSync(), isFalse);
+        final fresh = AppDatabase(
+          NativeDatabase.memory(),
+          validateSchema: false,
+        );
+        final freshShape = await schemaShapeOf(fresh);
+        await fresh.close();
+        expect(sameSchemaShape(await schemaShapeOf(db), freshShape), isTrue);
+        expect(
+          await db.customSelect('PRAGMA foreign_key_check').get(),
+          isEmpty,
+        );
+
+        final txns = TransactionsDao(db);
+        expect([for (final r in await txns.search('العزب')) r.id], ['e1']);
+
+        // S-2 on this sqlite3mc: set, and a hard delete leaves no tokens.
+        for (final t in ['transactions_fts', 'transactions_fts_short']) {
+          expect(await secureDeleteOf(db, t), 1);
+        }
+        await txns.insert(txn('gone', merchant: 'qzxvjwk'));
+        expect(
+          await dataHolds(db, 'transactions_fts_short', 'qzxvjwk'),
+          isTrue,
+        );
+        await db.customStatement("DELETE FROM transactions WHERE id = 'gone'");
+        expect(
+          await dataHolds(db, 'transactions_fts_short', 'qzxvjwk'),
+          isFalse,
+        );
+        expect(await dataHolds(db, 'transactions_fts', 'zxv'), isFalse);
+
+        final catalog = CatalogDao(db);
+        await catalog.upsertMerchant(
+          CatalogMerchantsCompanion.insert(
+            id: const Value(1),
+            canonical: 'El Ezaby',
+            categoryCode: 'health',
+            version: 1,
+          ),
+        );
+        await catalog.upsertAlias(
+          merchantId: 1,
+          aliasNorm: 'ezaby',
+          match: 'exact',
+        );
+        expect(
+          [for (final a in await catalog.aliasCandidates('ezabi')) a.aliasNorm],
+          ['ezaby'],
+        );
+
+        await expectLater(
+          OffsetLinksDao(
+            db,
+          ).insert(link('l9', expense: 'nope', source: 'i1', amountMinor: 1)),
+          throwsA(
+            isA<DbWriteException>().having(
+              (e) => e.code,
+              'code',
+              DbWriteException.constraintForeignKey,
+            ),
+          ),
+        );
+        expect(
+          await failureOf(
+            db,
+            "UPDATE split_participants SET expense_txn_id = 'e2' "
+            "WHERE id = 'p1'",
+          ),
+          DbWriteException.offsetParticipantMismatch,
+        );
+      } finally {
+        await db.close();
+      }
+    },
+  );
 
   test('D-50: key deleted → every file wiped (main last), new database with '
       'the restore notice', () async {

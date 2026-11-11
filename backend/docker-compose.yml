@@ -98,6 +98,7 @@ services:
     environment:
       OTEL_EXPORTER_OTLP_ENDPOINT: http://otel-collector:4317
       OTEL_METRIC_EXPORT_INTERVAL: "5000"
+      DOTNET_ENVIRONMENT: Development
       ConnectionStrings__Worker: Host=postgres;Port=5432;Database=zaghlol;Username=zaghlol_worker;Password=worker_dev_only
       Worker__HeartbeatFile: /tmp/zaghlol-worker.heartbeat
     read_only: true

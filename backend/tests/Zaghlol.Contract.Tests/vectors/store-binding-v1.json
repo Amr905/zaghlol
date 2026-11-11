@@ -1,0 +1,59 @@
+{
+  "name": "store-binding-v1",
+  "description": "StoreBindingRef(installId) (backend-api section 4.3, T-130 design note section 5): the first 16 bytes of HMAC-SHA256(key = ASCII 'zaghlol-store-binding-v1', msg = ASCII lower-case 36-character installId), with byte[6] = (byte[6] & 0x0F) | 0x80 (version 8) and byte[8] = (byte[8] & 0x3F) | 0x80 (variant), as a lower-case hyphenated UUID in network byte order. The app sets it as Play obfuscatedAccountId and Apple appAccountToken; verify compares it with the install the install token authenticates. The key is a public domain separator, not a secret. T-130 (.NET), T-131 (.NET, appAccountToken) and T-145 (Dart) must reproduce every vector.",
+  "key": "zaghlol-store-binding-v1",
+  "vectors": [
+    {
+      "installId": "0193f2c4-7a10-4c52-9d3e-5b1f8a2c6e77",
+      "hmacSha256Hex": "b8ed21d0365d79621cacd9accd69b5b0c15ae593ff760b461f2f4edaf976a76d",
+      "storeBindingRef": "b8ed21d0-365d-8962-9cac-d9accd69b5b0"
+    },
+    {
+      "installId": "00000000-0000-4000-8000-000000000000",
+      "hmacSha256Hex": "c479ae47e84a39c1b620fe332b9b0724e6c9e80b893d475b12e9e44b173baf86",
+      "storeBindingRef": "c479ae47-e84a-89c1-b620-fe332b9b0724"
+    },
+    {
+      "installId": "ffffffff-ffff-4fff-bfff-ffffffffffff",
+      "hmacSha256Hex": "9c689f62a38140c1f2242174ff0a5282ad7abe45de9deb18de6378e2c58800e8",
+      "storeBindingRef": "9c689f62-a381-80c1-b224-2174ff0a5282"
+    },
+    {
+      "installId": "6f1c2b9e-3d4a-4e8b-a1f0-7c2d9e4b5a63",
+      "hmacSha256Hex": "0f2fe86cc708f035646420e449925692906bdbcd21d11ab1bc4265412822499d",
+      "storeBindingRef": "0f2fe86c-c708-8035-a464-20e449925692"
+    },
+    {
+      "installId": "b3e7d0a2-91c4-4f56-8a2e-0d7f3c9b1e48",
+      "hmacSha256Hex": "978b1f98ede8982430ee217b24490adac3d4997460a06072755522f8c34c78ce",
+      "storeBindingRef": "978b1f98-ede8-8824-b0ee-217b24490ada"
+    }
+  ],
+  "mismatches": [
+    {
+      "installId": "0193f2c4-7a10-4c52-9d3e-5b1f8a2c6e77",
+      "storeValue": "c479ae47-e84a-89c1-b620-fe332b9b0724",
+      "why": "another install's value"
+    },
+    {
+      "installId": "0193f2c4-7a10-4c52-9d3e-5b1f8a2c6e77",
+      "storeValue": "B8ED21D0-365D-8962-9CAC-D9ACCD69B5B0",
+      "why": "upper-case hex is a different value"
+    },
+    {
+      "installId": "0193f2c4-7a10-4c52-9d3e-5b1f8a2c6e77",
+      "storeValue": "b8ed21d0365d89629cacd9accd69b5b0",
+      "why": "unhyphenated"
+    },
+    {
+      "installId": "0193f2c4-7a10-4c52-9d3e-5b1f8a2c6e77",
+      "storeValue": "",
+      "why": "empty"
+    },
+    {
+      "installId": "0193f2c4-7a10-4c52-9d3e-5b1f8a2c6e77",
+      "storeValue": "b8ed21d0-365d-8962-9cac-d9accd69b5b0 ",
+      "why": "trailing space"
+    }
+  ]
+}

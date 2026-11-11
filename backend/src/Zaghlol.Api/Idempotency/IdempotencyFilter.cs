@@ -1,4 +1,8 @@
+using System.Buffers.Text;
+using System.Globalization;
 using System.Security.Cryptography;
+using System.Text;
+using System.Text.Json;
 using Microsoft.AspNetCore.Http.Features;
 using Zaghlol.Api.Auth;
 using Zaghlol.Api.Json;
@@ -19,18 +23,35 @@ namespace Zaghlol.Api.Idempotency;
 /// from <see cref="TimeProvider"/>). A different body is <c>409 IDEMPOTENCY_KEY_REUSED</c>, never the stored body; another
 /// install's same key is a new request. Only final results are stored (2xx, 409, 422), never 429 or 5xx, and only after the
 /// handler; the stored bytes are the unsigned body, envelope-encrypted with the context
-/// <c>idem/v1/&lt;installId&gt;/&lt;operation&gt;</c>, and the signing middleware signs a replay with the current key.
-/// Two concurrent requests with one key: the loser gets <c>429</c> with <c>Retry-After: 1</c> and nothing is stored.
+/// <c>idem/v2/&lt;installId&gt;/&lt;operation&gt;/&lt;b64u(SHA-256(key))&gt;</c> (S-6), and the signing middleware signs a replay with
+/// the current key.
+/// <para>
+/// T-130 (FU-052 S-2): the key is claimed by a short transaction (a <c>status = 0</c> row with a 60 s lease), the handler runs
+/// with no connection held and a hard 30 s timeout (shorter than the lease, so a live handler keeps it), and a second short
+/// transaction replaces the claim with the final row. A concurrent request with the same key gets <c>429</c> with
+/// <c>Retry-After: 1</c>; a 429, 5xx or exception releases the claim so a retry runs at once; a claim whose lease expired
+/// (a crashed request) is taken over. A 2xx body carrying a non-null <c>rotateInstallToken</c> is never stored (S-3).
+/// </para>
 /// </summary>
-internal sealed class IdempotencyFilter(IdempotentOperation operation) : IEndpointFilter
+internal sealed partial class IdempotencyFilter(IdempotentOperation operation) : IEndpointFilter
 {
     public static readonly TimeSpan Ttl = TimeSpan.FromHours(24);
 
+    /// <summary>The hard handler timeout; must stay below the claim lease (<c>IdempotencyStore.Lease</c>, 60 s).</summary>
+    public static readonly TimeSpan HandlerTimeout = TimeSpan.FromSeconds(30);
+
+    /// <summary><c>Retry-After</c> of the 503 answered when the handler hit <see cref="HandlerTimeout"/>.</summary>
+    public const int TimeoutRetryAfterSeconds = 5;
+
     public IdempotentOperation Operation { get; } = operation;
 
-    /// <summary>The envelope context that binds a stored body to its install and operation.</summary>
-    public static string EnvelopeContext(InstallId installId, IdempotentOperation operation) =>
-        "idem/v1/" + installId + "/" + DbEnumMaps.IdempotentOperations.ToDb(operation);
+    /// <summary>The envelope context that binds a stored body to its install, operation and key (S-6).</summary>
+    public static string EnvelopeContext(InstallId installId, IdempotentOperation operation, string idempotencyKey)
+    {
+        ArgumentNullException.ThrowIfNull(idempotencyKey);
+        return "idem/v2/" + installId + "/" + DbEnumMaps.IdempotentOperations.ToDb(operation) + "/"
+            + Base64Url.EncodeToString(SHA256.HashData(Encoding.ASCII.GetBytes(idempotencyKey)));
+    }
 
     /// <summary>Statuses whose result is final and stored (backend-api §1).</summary>
     public static bool IsStored(int status) =>
@@ -57,45 +78,202 @@ internal sealed class IdempotencyFilter(IdempotentOperation operation) : IEndpoi
         var store = services.GetRequiredService<IIdempotencyStore>();
         var cipher = services.GetRequiredService<IEnvelopeCipher>();
         var clock = services.GetRequiredService<TimeProvider>();
+        var metrics = services.GetService<ZaghlolMetrics>();
         var installId = InstallTokenAuthentication.InstallIdOf(http.User);
         var bodyHash = SHA256.HashData(body.Bytes.Span);
-        var envelopeContext = EnvelopeContext(installId, Operation);
-        var cancellationToken = http.RequestAborted;
+        var envelopeContext = EnvelopeContext(installId, Operation, key);
+        var requestAborted = http.RequestAborted;
 
-        await using var session = await store.TryBeginAsync(installId, Operation, key, cancellationToken);
-        if (session is null)
+        var claim = await store.TryClaimAsync(installId, Operation, key, bodyHash, clock.GetUtcNow(), requestAborted);
+        switch (claim.Kind)
         {
-            services.GetService<ZaghlolMetrics>()?.RateLimited("idempotency");
-            return ApiProblems.RateLimited(http, 1);
+            case IdempotencyClaimKind.Stored:
+                var stored = claim.Stored!;
+                if (!CryptographicOperations.FixedTimeEquals(stored.BodySha256.Span, bodyHash))
+                {
+                    metrics?.IdempotencyClaim(IdempotencyClaimOutcomes.Reused);
+                    return ApiProblems.Of(StatusCodes.Status409Conflict, ErrorCodes.IdempotencyKeyReused);
+                }
+
+                metrics?.IdempotencyClaim(IdempotencyClaimOutcomes.Replayed);
+                var replay = await cipher.DecryptAsync(stored.ResponseBodyEnc, envelopeContext, requestAborted);
+                return new ReplayedResult(stored.Status, replay);
+
+            case IdempotencyClaimKind.InProgress:
+                metrics?.IdempotencyClaim(IdempotencyClaimOutcomes.InProgress);
+                metrics?.RateLimited("idempotency");
+                return ApiProblems.RateLimited(http, 1);
+
+            case IdempotencyClaimKind.NoInstall:
+                // Deleted after authentication: the same answer as an unknown token.
+                http.Response.Headers.WWWAuthenticate = "Bearer";
+                return ApiProblems.Of(StatusCodes.Status401Unauthorized, ErrorCodes.InstallTokenInvalid);
         }
 
-        var now = clock.GetUtcNow();
-        if (await session.FindLiveAsync(now, cancellationToken) is { } stored)
+        metrics?.IdempotencyClaim(claim.TakenOver ? IdempotencyClaimOutcomes.TakenOver : IdempotencyClaimOutcomes.Claimed);
+
+        CapturedResult captured;
+        try
         {
-            if (!CryptographicOperations.FixedTimeEquals(stored.BodySha256.Span, bodyHash))
+            using var timeout = CancellationTokenSource.CreateLinkedTokenSource(requestAborted);
+            timeout.CancelAfter(HandlerTimeout);
+            var result = await RunHandlerAsync(context, next, timeout.Token);
+            if (result is not IResult handlerResult)
             {
-                return ApiProblems.Of(StatusCodes.Status409Conflict, ErrorCodes.IdempotencyKeyReused);
+                throw new InvalidOperationException("Idempotent endpoints must return an IResult.");
             }
 
-            var replay = await cipher.DecryptAsync(stored.ResponseBodyEnc, envelopeContext, cancellationToken);
-            return new ReplayedResult(stored.Status, replay);
+            captured = await CapturedResult.CaptureAsync(http, handlerResult);
+        }
+        catch (OperationCanceledException) when (!requestAborted.IsCancellationRequested)
+        {
+            await ReleaseAsync(store, installId, key, claim.ClaimId);
+            http.Response.Headers.RetryAfter = TimeoutRetryAfterSeconds.ToString(CultureInfo.InvariantCulture);
+            return TypedResults.Problem(
+                statusCode: StatusCodes.Status503ServiceUnavailable,
+                extensions: new Dictionary<string, object?> { ["code"] = ErrorCodes.UpstreamUnavailable, ["retryAfterSeconds"] = TimeoutRetryAfterSeconds });
+        }
+        catch
+        {
+            await ReleaseAsync(store, installId, key, claim.ClaimId);
+            throw;
         }
 
-        var result = await next(context);
-        if (result is not IResult handlerResult)
+        var rotation = captured.StatusCode is >= 200 and < 300 && CarriesRotationToken(captured.Body.Span);
+        if (!IsStored(captured.StatusCode) || rotation)
         {
-            throw new InvalidOperationException("Idempotent endpoints must return an IResult.");
+            await ReleaseAsync(store, installId, key, claim.ClaimId);
+            if (rotation)
+            {
+                // S-3: a rotated install token must never sit in a replayable store. Idempotent handlers don't rotate (an
+                // architecture test); this is the backstop: loud in Development and Testing, logged by type in Production.
+                var environment = services.GetRequiredService<IHostEnvironment>();
+                if (environment.IsDevelopment() || environment.IsEnvironment("Testing"))
+                {
+                    throw new InvalidOperationException("An idempotent handler returned rotateInstallToken; it is never stored.");
+                }
+
+                LogRotationNotStored(services.GetRequiredService<ILogger<IdempotencyFilter>>());
+            }
+
+            return captured;
         }
 
-        var captured = await CapturedResult.CaptureAsync(http, handlerResult);
-        if (IsStored(captured.StatusCode))
+        bool completed;
+        try
         {
-            var encrypted = await cipher.EncryptAsync(captured.Body, envelopeContext, cancellationToken);
-            await session.SaveAsync(bodyHash, captured.StatusCode, encrypted, now, now + Ttl, cancellationToken);
+            var encrypted = await cipher.EncryptAsync(captured.Body, envelopeContext, CancellationToken.None);
+            completed = await store.CompleteAsync(
+                installId, Operation, key, claim.ClaimId, bodyHash, captured.StatusCode, encrypted, clock.GetUtcNow() + Ttl, CancellationToken.None);
+        }
+        catch
+        {
+            // KMS or database down after the handler: free the key so the app's retry runs again instead of waiting out the lease.
+            await ReleaseAsync(store, installId, key, claim.ClaimId);
+            throw;
+        }
+
+        if (!completed)
+        {
+            // The lease expired and another request took the key over, or the install was deleted: answer, don't store.
+            metrics?.IdempotencyClaim(IdempotencyClaimOutcomes.LeaseLost);
         }
 
         return captured;
     }
+
+    /// <summary>True when the top-level JSON object has a non-null <c>rotateInstallToken</c> member.</summary>
+    internal static bool CarriesRotationToken(ReadOnlySpan<byte> json)
+    {
+        try
+        {
+            var reader = new Utf8JsonReader(json);
+            if (!reader.Read() || reader.TokenType != JsonTokenType.StartObject)
+            {
+                return false;
+            }
+
+            while (reader.Read() && reader.TokenType == JsonTokenType.PropertyName)
+            {
+                var isRotation = reader.ValueTextEquals("rotateInstallToken"u8);
+                reader.Read();
+                if (isRotation && reader.TokenType != JsonTokenType.Null)
+                {
+                    return true;
+                }
+
+                reader.Skip();
+            }
+        }
+        catch (JsonException)
+        {
+            return false;
+        }
+
+        return false;
+    }
+
+    /// <summary>
+    /// Runs the handler with <paramref name="token"/> as its cancellation token: <c>HttpContext.RequestAborted</c> and any bound
+    /// <see cref="CancellationToken"/> argument are swapped for the call and restored after.
+    /// </summary>
+    private static async ValueTask<object?> RunHandlerAsync(EndpointFilterInvocationContext context, EndpointFilterDelegate next, CancellationToken token)
+    {
+        var http = context.HttpContext;
+        var original = http.RequestAborted;
+        var swapped = new List<int>();
+        for (var i = 0; i < context.Arguments.Count; i++)
+        {
+            if (context.Arguments[i] is CancellationToken)
+            {
+                context.Arguments[i] = token;
+                swapped.Add(i);
+            }
+        }
+
+        http.RequestAborted = token;
+        try
+        {
+            return await next(context);
+        }
+        finally
+        {
+            http.RequestAborted = original;
+            foreach (var i in swapped)
+            {
+                context.Arguments[i] = original;
+            }
+        }
+    }
+
+    private async Task ReleaseAsync(IIdempotencyStore store, InstallId installId, string key, Guid claimId)
+    {
+        try
+        {
+            await store.ReleaseAsync(installId, Operation, key, claimId, CancellationToken.None);
+        }
+#pragma warning disable CA1031 // Best effort: the 60 s lease releases the key anyway; the original outcome must reach the client.
+        catch (Exception)
+#pragma warning restore CA1031
+        {
+        }
+    }
+
+    [LoggerMessage(Level = LogLevel.Error, Message = "An idempotent handler returned rotateInstallToken; the result was not stored")]
+    private static partial void LogRotationNotStored(ILogger logger);
+}
+
+/// <summary>Tag values of <c>zaghlol.idempotency.claim</c> (a fixed set).</summary>
+internal static class IdempotencyClaimOutcomes
+{
+    public const string Claimed = "claimed";
+    public const string Replayed = "replayed";
+    public const string Reused = "reused";
+    public const string InProgress = "in_progress";
+    public const string TakenOver = "taken_over";
+    public const string LeaseLost = "lease_lost";
+
+    public static IReadOnlyList<string> All { get; } = [Claimed, Replayed, Reused, InProgress, TakenOver, LeaseLost];
 }
 
 /// <summary>
@@ -179,9 +357,12 @@ internal sealed class ReplayedResult(int statusCode, byte[] body) : IResult, ISt
     }
 }
 
+/// <summary>Marks an endpoint as idempotency-keyed (an architecture test checks its handler never rotates the install token, S-3).</summary>
+internal sealed record IdempotentEndpointMetadata(IdempotentOperation Operation);
+
 internal static class IdempotencyEndpointExtensions
 {
     /// <summary>Adds <see cref="IdempotencyFilter"/>. Call it after <c>WithTimeNonce</c> on an install-scoped endpoint.</summary>
     public static RouteHandlerBuilder WithIdempotency(this RouteHandlerBuilder builder, IdempotentOperation operation) =>
-        builder.AddEndpointFilter(new IdempotencyFilter(operation));
+        builder.WithMetadata(new IdempotentEndpointMetadata(operation)).AddEndpointFilter(new IdempotencyFilter(operation));
 }

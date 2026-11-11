@@ -1,0 +1,3479 @@
+{
+  "_meta": {
+    "description": "This file contains a serialized version of schema entities for drift.",
+    "version": "1.3.0"
+  },
+  "options": {
+    "store_date_time_values_as_text": false
+  },
+  "entities": [
+    {
+      "id": 0,
+      "references": [],
+      "type": "table",
+      "data": {
+        "name": "catalog_merchants",
+        "was_declared_in_moor": true,
+        "columns": [
+          {
+            "name": "id",
+            "getter_name": "id",
+            "moor_type": "int",
+            "nullable": false,
+            "customConstraints": "NOT NULL PRIMARY KEY CHECK (id >= 1)",
+            "default_dart": null,
+            "default_client_dart": null,
+            "dsl_features": [
+              "primary-key"
+            ]
+          },
+          {
+            "name": "canonical",
+            "getter_name": "canonical",
+            "moor_type": "string",
+            "nullable": false,
+            "customConstraints": "NOT NULL CHECK (length(canonical) BETWEEN 1 AND 200)",
+            "default_dart": null,
+            "default_client_dart": null,
+            "dsl_features": []
+          },
+          {
+            "name": "name_ar",
+            "getter_name": "nameAr",
+            "moor_type": "string",
+            "nullable": true,
+            "customConstraints": "",
+            "default_dart": null,
+            "default_client_dart": null,
+            "dsl_features": []
+          },
+          {
+            "name": "name_en",
+            "getter_name": "nameEn",
+            "moor_type": "string",
+            "nullable": true,
+            "customConstraints": "",
+            "default_dart": null,
+            "default_client_dart": null,
+            "dsl_features": []
+          },
+          {
+            "name": "category_code",
+            "getter_name": "categoryCode",
+            "moor_type": "string",
+            "nullable": false,
+            "customConstraints": "NOT NULL CHECK (length(category_code) BETWEEN 2 AND 32 AND category_code GLOB '[a-z]*' AND category_code NOT GLOB '*[^a-z0-9_]*')",
+            "default_dart": null,
+            "default_client_dart": null,
+            "dsl_features": []
+          },
+          {
+            "name": "logo_key",
+            "getter_name": "logoKey",
+            "moor_type": "string",
+            "nullable": true,
+            "customConstraints": "",
+            "default_dart": null,
+            "default_client_dart": null,
+            "dsl_features": []
+          },
+          {
+            "name": "version",
+            "getter_name": "version",
+            "moor_type": "int",
+            "nullable": false,
+            "customConstraints": "NOT NULL CHECK (version >= 0)",
+            "default_dart": null,
+            "default_client_dart": null,
+            "dsl_features": []
+          }
+        ],
+        "is_virtual": false,
+        "without_rowid": false,
+        "constraints": []
+      }
+    },
+    {
+      "id": 1,
+      "references": [
+        0
+      ],
+      "type": "table",
+      "data": {
+        "name": "catalog_aliases",
+        "was_declared_in_moor": true,
+        "columns": [
+          {
+            "name": "id",
+            "getter_name": "id",
+            "moor_type": "int",
+            "nullable": false,
+            "customConstraints": "NOT NULL PRIMARY KEY",
+            "default_dart": null,
+            "default_client_dart": null,
+            "dsl_features": [
+              "primary-key"
+            ]
+          },
+          {
+            "name": "merchant_id",
+            "getter_name": "merchantId",
+            "moor_type": "int",
+            "nullable": false,
+            "customConstraints": "NOT NULL REFERENCES catalog_merchants(id)ON DELETE CASCADE",
+            "default_dart": null,
+            "default_client_dart": null,
+            "dsl_features": [
+              {
+                "foreign_key": {
+                  "to": {
+                    "table": "catalog_merchants",
+                    "column": "id"
+                  },
+                  "initially_deferred": false,
+                  "on_update": null,
+                  "on_delete": "cascade"
+                }
+              }
+            ]
+          },
+          {
+            "name": "alias_norm",
+            "getter_name": "aliasNorm",
+            "moor_type": "string",
+            "nullable": false,
+            "customConstraints": "NOT NULL CHECK (length(alias_norm) BETWEEN 1 AND 64 AND alias_norm NOT GLOB '*[^a-z0-9 ]*' AND alias_norm NOT GLOB ' *' AND alias_norm NOT GLOB '* ' AND alias_norm NOT GLOB '*  *')",
+            "default_dart": null,
+            "default_client_dart": null,
+            "dsl_features": []
+          },
+          {
+            "name": "match",
+            "getter_name": "match",
+            "moor_type": "string",
+            "nullable": false,
+            "customConstraints": "NOT NULL CHECK (\"match\" IN ('exact', 'prefix', 'token'))",
+            "default_dart": null,
+            "default_client_dart": null,
+            "dsl_features": []
+          }
+        ],
+        "is_virtual": false,
+        "without_rowid": false,
+        "constraints": [
+          "UNIQUE(alias_norm, merchant_id)"
+        ],
+        "unique_keys": [
+          [
+            "alias_norm",
+            "merchant_id"
+          ]
+        ]
+      }
+    },
+    {
+      "id": 2,
+      "references": [
+        1
+      ],
+      "type": "index",
+      "data": {
+        "on": 1,
+        "name": "ix_alias_merchant",
+        "sql": "CREATE INDEX ix_alias_merchant ON catalog_aliases (merchant_id);",
+        "unique": false,
+        "columns": []
+      }
+    },
+    {
+      "id": 3,
+      "references": [
+        1
+      ],
+      "type": "table",
+      "data": {
+        "name": "catalog_alias_fts",
+        "was_declared_in_moor": true,
+        "columns": [
+          {
+            "name": "alias_norm",
+            "getter_name": "aliasNorm",
+            "moor_type": "string",
+            "nullable": false,
+            "customConstraints": "",
+            "default_dart": null,
+            "default_client_dart": null,
+            "dsl_features": []
+          }
+        ],
+        "is_virtual": true,
+        "create_virtual_stmt": "CREATE VIRTUAL TABLE \"catalog_alias_fts\" USING fts5(alias_norm, content='catalog_aliases', content_rowid='id', tokenize='trigram')",
+        "without_rowid": false,
+        "constraints": []
+      }
+    },
+    {
+      "id": 4,
+      "references": [
+        1,
+        3
+      ],
+      "type": "trigger",
+      "data": {
+        "on": 1,
+        "references_in_body": [
+          1,
+          3
+        ],
+        "name": "trg_alias_fts_ai",
+        "sql": "CREATE TRIGGER trg_alias_fts_ai AFTER INSERT ON catalog_aliases\nBEGIN\n  INSERT INTO catalog_alias_fts (\"rowid\", alias_norm) VALUES (new.id, new.alias_norm);\nEND;"
+      }
+    },
+    {
+      "id": 5,
+      "references": [
+        1,
+        3
+      ],
+      "type": "trigger",
+      "data": {
+        "on": 1,
+        "references_in_body": [
+          1,
+          3
+        ],
+        "name": "trg_alias_fts_ad",
+        "sql": "CREATE TRIGGER trg_alias_fts_ad AFTER DELETE ON catalog_aliases\nBEGIN\n  INSERT INTO catalog_alias_fts (catalog_alias_fts, \"rowid\", alias_norm)\n    VALUES ('delete', old.id, old.alias_norm);\nEND;"
+      }
+    },
+    {
+      "id": 6,
+      "references": [
+        1,
+        3
+      ],
+      "type": "trigger",
+      "data": {
+        "on": 1,
+        "references_in_body": [
+          1,
+          3
+        ],
+        "name": "trg_alias_fts_au",
+        "sql": "CREATE TRIGGER trg_alias_fts_au AFTER UPDATE OF id, alias_norm ON catalog_aliases\nBEGIN\n  INSERT INTO catalog_alias_fts (catalog_alias_fts, \"rowid\", alias_norm)\n    VALUES ('delete', old.id, old.alias_norm);\n  INSERT INTO catalog_alias_fts (\"rowid\", alias_norm) VALUES (new.id, new.alias_norm);\nEND;"
+      }
+    },
+    {
+      "id": 7,
+      "references": [],
+      "type": "table",
+      "data": {
+        "name": "catalog_keywords",
+        "was_declared_in_moor": true,
+        "columns": [
+          {
+            "name": "keyword_norm",
+            "getter_name": "keywordNorm",
+            "moor_type": "string",
+            "nullable": false,
+            "customConstraints": "NOT NULL CHECK (length(keyword_norm) BETWEEN 1 AND 64 AND keyword_norm NOT GLOB('*[' || char(1) || '-' || char(31) || char(127) || '-' || char(159) || ']*')AND keyword_norm NOT GLOB ' *' AND keyword_norm NOT GLOB '* ' AND keyword_norm NOT GLOB '*  *')",
+            "default_dart": null,
+            "default_client_dart": null,
+            "dsl_features": []
+          },
+          {
+            "name": "lang",
+            "getter_name": "lang",
+            "moor_type": "string",
+            "nullable": false,
+            "customConstraints": "NOT NULL CHECK (lang GLOB '[a-z][a-z]')",
+            "default_dart": null,
+            "default_client_dart": null,
+            "dsl_features": []
+          },
+          {
+            "name": "category_code",
+            "getter_name": "categoryCode",
+            "moor_type": "string",
+            "nullable": false,
+            "customConstraints": "NOT NULL CHECK (length(category_code) BETWEEN 2 AND 32 AND category_code GLOB '[a-z]*' AND category_code NOT GLOB '*[^a-z0-9_]*')",
+            "default_dart": null,
+            "default_client_dart": null,
+            "dsl_features": []
+          },
+          {
+            "name": "weight",
+            "getter_name": "weight",
+            "moor_type": "int",
+            "nullable": false,
+            "customConstraints": "NOT NULL CHECK (typeof(weight) = 'integer' AND weight BETWEEN 0 AND 100)",
+            "default_dart": null,
+            "default_client_dart": null,
+            "dsl_features": []
+          }
+        ],
+        "is_virtual": false,
+        "without_rowid": false,
+        "constraints": [
+          "PRIMARY KEY(keyword_norm, lang)"
+        ],
+        "explicit_pk": [
+          "keyword_norm",
+          "lang"
+        ]
+      }
+    },
+    {
+      "id": 8,
+      "references": [],
+      "type": "table",
+      "data": {
+        "name": "catalog_meta",
+        "was_declared_in_moor": true,
+        "columns": [
+          {
+            "name": "id",
+            "getter_name": "id",
+            "moor_type": "int",
+            "nullable": false,
+            "customConstraints": "NOT NULL PRIMARY KEY CHECK (id = 1)",
+            "default_dart": null,
+            "default_client_dart": null,
+            "dsl_features": [
+              "primary-key"
+            ]
+          },
+          {
+            "name": "version",
+            "getter_name": "version",
+            "moor_type": "int",
+            "nullable": false,
+            "customConstraints": "NOT NULL CHECK (version >= 0)",
+            "default_dart": null,
+            "default_client_dart": null,
+            "dsl_features": []
+          },
+          {
+            "name": "applied_at",
+            "getter_name": "appliedAt",
+            "moor_type": "int",
+            "nullable": false,
+            "customConstraints": "NOT NULL",
+            "default_dart": null,
+            "default_client_dart": null,
+            "dsl_features": []
+          },
+          {
+            "name": "signature_kid",
+            "getter_name": "signatureKid",
+            "moor_type": "string",
+            "nullable": false,
+            "customConstraints": "NOT NULL CHECK (length(signature_kid) BETWEEN 1 AND 128)",
+            "default_dart": null,
+            "default_client_dart": null,
+            "dsl_features": []
+          }
+        ],
+        "is_virtual": false,
+        "without_rowid": false,
+        "constraints": []
+      }
+    },
+    {
+      "id": 9,
+      "references": [],
+      "type": "table",
+      "data": {
+        "name": "categories",
+        "was_declared_in_moor": true,
+        "columns": [
+          {
+            "name": "id",
+            "getter_name": "id",
+            "moor_type": "string",
+            "nullable": false,
+            "customConstraints": "NOT NULL PRIMARY KEY",
+            "default_dart": null,
+            "default_client_dart": null,
+            "dsl_features": [
+              "primary-key"
+            ]
+          },
+          {
+            "name": "system_code",
+            "getter_name": "systemCode",
+            "moor_type": "string",
+            "nullable": true,
+            "customConstraints": "UNIQUE",
+            "default_dart": null,
+            "default_client_dart": null,
+            "dsl_features": [
+              "unique"
+            ]
+          },
+          {
+            "name": "parent_id",
+            "getter_name": "parentId",
+            "moor_type": "string",
+            "nullable": true,
+            "customConstraints": "REFERENCES categories(id)",
+            "default_dart": null,
+            "default_client_dart": null,
+            "dsl_features": [
+              {
+                "foreign_key": {
+                  "to": {
+                    "table": "categories",
+                    "column": "id"
+                  },
+                  "initially_deferred": false,
+                  "on_update": null,
+                  "on_delete": null
+                }
+              }
+            ]
+          },
+          {
+            "name": "name_ar",
+            "getter_name": "nameAr",
+            "moor_type": "string",
+            "nullable": false,
+            "customConstraints": "NOT NULL",
+            "default_dart": null,
+            "default_client_dart": null,
+            "dsl_features": []
+          },
+          {
+            "name": "name_en",
+            "getter_name": "nameEn",
+            "moor_type": "string",
+            "nullable": false,
+            "customConstraints": "NOT NULL",
+            "default_dart": null,
+            "default_client_dart": null,
+            "dsl_features": []
+          },
+          {
+            "name": "icon",
+            "getter_name": "icon",
+            "moor_type": "string",
+            "nullable": false,
+            "customConstraints": "NOT NULL",
+            "default_dart": null,
+            "default_client_dart": null,
+            "dsl_features": []
+          },
+          {
+            "name": "color",
+            "getter_name": "color",
+            "moor_type": "string",
+            "nullable": false,
+            "customConstraints": "NOT NULL",
+            "default_dart": null,
+            "default_client_dart": null,
+            "dsl_features": []
+          },
+          {
+            "name": "bucket",
+            "getter_name": "bucket",
+            "moor_type": "string",
+            "nullable": false,
+            "customConstraints": "NOT NULL CHECK (bucket IN ('needs', 'wants', 'obligations', 'savings', 'income', 'giving'))",
+            "default_dart": null,
+            "default_client_dart": null,
+            "dsl_features": []
+          },
+          {
+            "name": "is_custom",
+            "getter_name": "isCustom",
+            "moor_type": "int",
+            "nullable": false,
+            "customConstraints": "NOT NULL DEFAULT 0 CHECK (is_custom IN (0, 1))",
+            "default_dart": "const CustomExpression('0')",
+            "default_client_dart": null,
+            "dsl_features": []
+          },
+          {
+            "name": "is_archived",
+            "getter_name": "isArchived",
+            "moor_type": "int",
+            "nullable": false,
+            "customConstraints": "NOT NULL DEFAULT 0 CHECK (is_archived IN (0, 1))",
+            "default_dart": "const CustomExpression('0')",
+            "default_client_dart": null,
+            "dsl_features": []
+          },
+          {
+            "name": "sort",
+            "getter_name": "sort",
+            "moor_type": "int",
+            "nullable": false,
+            "customConstraints": "NOT NULL",
+            "default_dart": null,
+            "default_client_dart": null,
+            "dsl_features": []
+          }
+        ],
+        "is_virtual": false,
+        "without_rowid": false,
+        "constraints": []
+      }
+    },
+    {
+      "id": 10,
+      "references": [
+        9
+      ],
+      "type": "table",
+      "data": {
+        "name": "merchant_rules",
+        "was_declared_in_moor": true,
+        "columns": [
+          {
+            "name": "id",
+            "getter_name": "id",
+            "moor_type": "string",
+            "nullable": false,
+            "customConstraints": "NOT NULL PRIMARY KEY",
+            "default_dart": null,
+            "default_client_dart": null,
+            "dsl_features": [
+              "primary-key"
+            ]
+          },
+          {
+            "name": "match_kind",
+            "getter_name": "matchKind",
+            "moor_type": "string",
+            "nullable": false,
+            "customConstraints": "NOT NULL CHECK (match_kind IN ('catalog_merchant', 'merchant_norm', 'counterparty'))",
+            "default_dart": null,
+            "default_client_dart": null,
+            "dsl_features": []
+          },
+          {
+            "name": "match_value",
+            "getter_name": "matchValue",
+            "moor_type": "string",
+            "nullable": false,
+            "customConstraints": "NOT NULL",
+            "default_dart": null,
+            "default_client_dart": null,
+            "dsl_features": []
+          },
+          {
+            "name": "category_id",
+            "getter_name": "categoryId",
+            "moor_type": "string",
+            "nullable": false,
+            "customConstraints": "NOT NULL REFERENCES categories(id)",
+            "default_dart": null,
+            "default_client_dart": null,
+            "dsl_features": [
+              {
+                "foreign_key": {
+                  "to": {
+                    "table": "categories",
+                    "column": "id"
+                  },
+                  "initially_deferred": false,
+                  "on_update": null,
+                  "on_delete": null
+                }
+              }
+            ]
+          },
+          {
+            "name": "created_at",
+            "getter_name": "createdAt",
+            "moor_type": "int",
+            "nullable": false,
+            "customConstraints": "NOT NULL",
+            "default_dart": null,
+            "default_client_dart": null,
+            "dsl_features": []
+          },
+          {
+            "name": "last_applied_at",
+            "getter_name": "lastAppliedAt",
+            "moor_type": "int",
+            "nullable": true,
+            "customConstraints": "",
+            "default_dart": null,
+            "default_client_dart": null,
+            "dsl_features": []
+          }
+        ],
+        "is_virtual": false,
+        "without_rowid": false,
+        "constraints": [
+          "UNIQUE(match_kind, match_value)",
+          "CHECK(match_kind <> 'merchant_norm' OR(length(match_value) BETWEEN 1 AND 64 AND match_value NOT GLOB '*[^a-z0-9 ]*' AND match_value NOT GLOB ' *' AND match_value NOT GLOB '* ' AND match_value NOT GLOB '*  *'))",
+          "CHECK(match_kind <> 'catalog_merchant' OR(length(match_value) BETWEEN 1 AND 10 AND match_value GLOB '[1-9]*' AND match_value NOT GLOB '*[^0-9]*'))",
+          "CHECK(match_kind <> 'counterparty' OR(length(match_value) BETWEEN 1 AND 128 AND match_value NOT GLOB('*[' || char(1) || '-' || char(31) || char(127) || '-' || char(159) || ']*')))"
+        ],
+        "unique_keys": [
+          [
+            "match_kind",
+            "match_value"
+          ]
+        ]
+      }
+    },
+    {
+      "id": 11,
+      "references": [
+        10
+      ],
+      "type": "index",
+      "data": {
+        "on": 10,
+        "name": "ix_rules_category",
+        "sql": "CREATE INDEX ix_rules_category ON merchant_rules (category_id);",
+        "unique": false,
+        "columns": []
+      }
+    },
+    {
+      "id": 12,
+      "references": [
+        9
+      ],
+      "type": "table",
+      "data": {
+        "name": "budgets",
+        "was_declared_in_moor": true,
+        "columns": [
+          {
+            "name": "id",
+            "getter_name": "id",
+            "moor_type": "string",
+            "nullable": false,
+            "customConstraints": "NOT NULL PRIMARY KEY",
+            "default_dart": null,
+            "default_client_dart": null,
+            "dsl_features": [
+              "primary-key"
+            ]
+          },
+          {
+            "name": "category_id",
+            "getter_name": "categoryId",
+            "moor_type": "string",
+            "nullable": true,
+            "customConstraints": "REFERENCES categories(id)",
+            "default_dart": null,
+            "default_client_dart": null,
+            "dsl_features": [
+              {
+                "foreign_key": {
+                  "to": {
+                    "table": "categories",
+                    "column": "id"
+                  },
+                  "initially_deferred": false,
+                  "on_update": null,
+                  "on_delete": null
+                }
+              }
+            ]
+          },
+          {
+            "name": "currency",
+            "getter_name": "currency",
+            "moor_type": "string",
+            "nullable": false,
+            "customConstraints": "NOT NULL CHECK (currency GLOB '[A-Z][A-Z][A-Z]')",
+            "default_dart": null,
+            "default_client_dart": null,
+            "dsl_features": []
+          },
+          {
+            "name": "limit_minor",
+            "getter_name": "limitMinor",
+            "moor_type": "int",
+            "nullable": false,
+            "customConstraints": "NOT NULL CHECK (typeof(limit_minor) = 'integer' AND limit_minor BETWEEN 0 AND 9007199254740991)",
+            "default_dart": null,
+            "default_client_dart": null,
+            "dsl_features": []
+          },
+          {
+            "name": "period",
+            "getter_name": "period",
+            "moor_type": "string",
+            "nullable": false,
+            "customConstraints": "NOT NULL CHECK (period IN ('cycle', 'annual'))",
+            "default_dart": null,
+            "default_client_dart": null,
+            "dsl_features": []
+          },
+          {
+            "name": "rollover",
+            "getter_name": "rollover",
+            "moor_type": "int",
+            "nullable": false,
+            "customConstraints": "NOT NULL DEFAULT 0 CHECK (rollover IN (0, 1))",
+            "default_dart": "const CustomExpression('0')",
+            "default_client_dart": null,
+            "dsl_features": []
+          },
+          {
+            "name": "thresholds",
+            "getter_name": "thresholds",
+            "moor_type": "string",
+            "nullable": false,
+            "customConstraints": "NOT NULL DEFAULT '[80,100]' CHECK (CASE WHEN json_valid(thresholds) THEN json_type(thresholds) = 'array' ELSE 0 END)",
+            "default_dart": "const CustomExpression('\\'[80,100]\\'')",
+            "default_client_dart": null,
+            "dsl_features": []
+          },
+          {
+            "name": "created_at",
+            "getter_name": "createdAt",
+            "moor_type": "int",
+            "nullable": false,
+            "customConstraints": "NOT NULL",
+            "default_dart": null,
+            "default_client_dart": null,
+            "dsl_features": []
+          }
+        ],
+        "is_virtual": false,
+        "without_rowid": false,
+        "constraints": [
+          "UNIQUE(category_id, currency, period)"
+        ],
+        "unique_keys": [
+          [
+            "category_id",
+            "currency",
+            "period"
+          ]
+        ]
+      }
+    },
+    {
+      "id": 13,
+      "references": [
+        12
+      ],
+      "type": "index",
+      "data": {
+        "on": 12,
+        "name": "ux_budgets_overall",
+        "sql": "CREATE UNIQUE INDEX ux_budgets_overall ON budgets (currency, period)\n  WHERE category_id IS NULL;",
+        "unique": true,
+        "columns": []
+      }
+    },
+    {
+      "id": 14,
+      "references": [],
+      "type": "table",
+      "data": {
+        "name": "fired_alerts",
+        "was_declared_in_moor": true,
+        "columns": [
+          {
+            "name": "kind",
+            "getter_name": "kind",
+            "moor_type": "string",
+            "nullable": false,
+            "customConstraints": "NOT NULL CHECK (length(kind) BETWEEN 1 AND 64 AND kind NOT GLOB '*[^a-z0-9_]*')",
+            "default_dart": null,
+            "default_client_dart": null,
+            "dsl_features": []
+          },
+          {
+            "name": "subject_id",
+            "getter_name": "subjectId",
+            "moor_type": "string",
+            "nullable": false,
+            "customConstraints": "NOT NULL CHECK (length(subject_id) BETWEEN 1 AND 128)",
+            "default_dart": null,
+            "default_client_dart": null,
+            "dsl_features": []
+          },
+          {
+            "name": "period_key",
+            "getter_name": "periodKey",
+            "moor_type": "string",
+            "nullable": false,
+            "customConstraints": "NOT NULL CHECK (length(period_key) BETWEEN 1 AND 64)",
+            "default_dart": null,
+            "default_client_dart": null,
+            "dsl_features": []
+          },
+          {
+            "name": "threshold",
+            "getter_name": "threshold",
+            "moor_type": "int",
+            "nullable": false,
+            "customConstraints": "NOT NULL DEFAULT 0 CHECK (typeof(threshold) = 'integer' AND threshold >= 0)",
+            "default_dart": "const CustomExpression('0')",
+            "default_client_dart": null,
+            "dsl_features": []
+          },
+          {
+            "name": "fired_at",
+            "getter_name": "firedAt",
+            "moor_type": "int",
+            "nullable": false,
+            "customConstraints": "NOT NULL",
+            "default_dart": null,
+            "default_client_dart": null,
+            "dsl_features": []
+          }
+        ],
+        "is_virtual": false,
+        "without_rowid": false,
+        "constraints": [
+          "PRIMARY KEY(kind, subject_id, period_key, threshold)"
+        ],
+        "explicit_pk": [
+          "kind",
+          "subject_id",
+          "period_key",
+          "threshold"
+        ]
+      }
+    },
+    {
+      "id": 15,
+      "references": [],
+      "type": "table",
+      "data": {
+        "name": "cycle_summaries",
+        "was_declared_in_moor": true,
+        "columns": [
+          {
+            "name": "cycle_start",
+            "getter_name": "cycleStart",
+            "moor_type": "string",
+            "nullable": false,
+            "customConstraints": "NOT NULL CHECK (date(cycle_start) IS cycle_start)",
+            "default_dart": null,
+            "default_client_dart": null,
+            "dsl_features": []
+          },
+          {
+            "name": "currency",
+            "getter_name": "currency",
+            "moor_type": "string",
+            "nullable": false,
+            "customConstraints": "NOT NULL CHECK (currency GLOB '[A-Z][A-Z][A-Z]')",
+            "default_dart": null,
+            "default_client_dart": null,
+            "dsl_features": []
+          },
+          {
+            "name": "account_filter",
+            "getter_name": "accountFilter",
+            "moor_type": "string",
+            "nullable": false,
+            "customConstraints": "NOT NULL DEFAULT '*' CHECK (length(account_filter) BETWEEN 1 AND 1024)",
+            "default_dart": "const CustomExpression('\\'*\\'')",
+            "default_client_dart": null,
+            "dsl_features": []
+          },
+          {
+            "name": "income_minor",
+            "getter_name": "incomeMinor",
+            "moor_type": "int",
+            "nullable": false,
+            "customConstraints": "NOT NULL CHECK (typeof(income_minor) = 'integer' AND income_minor BETWEEN -9007199254740991 AND 9007199254740991)",
+            "default_dart": null,
+            "default_client_dart": null,
+            "dsl_features": []
+          },
+          {
+            "name": "spend_minor",
+            "getter_name": "spendMinor",
+            "moor_type": "int",
+            "nullable": false,
+            "customConstraints": "NOT NULL CHECK (typeof(spend_minor) = 'integer' AND spend_minor BETWEEN -9007199254740991 AND 9007199254740991)",
+            "default_dart": null,
+            "default_client_dart": null,
+            "dsl_features": []
+          },
+          {
+            "name": "by_category",
+            "getter_name": "byCategory",
+            "moor_type": "string",
+            "nullable": false,
+            "customConstraints": "NOT NULL CHECK (CASE WHEN json_valid(by_category) THEN json_type(by_category) = 'object' ELSE 0 END)",
+            "default_dart": null,
+            "default_client_dart": null,
+            "dsl_features": []
+          },
+          {
+            "name": "computed_at",
+            "getter_name": "computedAt",
+            "moor_type": "int",
+            "nullable": false,
+            "customConstraints": "NOT NULL",
+            "default_dart": null,
+            "default_client_dart": null,
+            "dsl_features": []
+          }
+        ],
+        "is_virtual": false,
+        "without_rowid": false,
+        "constraints": [
+          "PRIMARY KEY(cycle_start, currency, account_filter)"
+        ],
+        "explicit_pk": [
+          "cycle_start",
+          "currency",
+          "account_filter"
+        ]
+      }
+    },
+    {
+      "id": 16,
+      "references": [],
+      "type": "table",
+      "data": {
+        "name": "accounts",
+        "was_declared_in_moor": true,
+        "columns": [
+          {
+            "name": "id",
+            "getter_name": "id",
+            "moor_type": "string",
+            "nullable": false,
+            "customConstraints": "NOT NULL PRIMARY KEY",
+            "default_dart": null,
+            "default_client_dart": null,
+            "dsl_features": [
+              "primary-key"
+            ]
+          },
+          {
+            "name": "institution_code",
+            "getter_name": "institutionCode",
+            "moor_type": "string",
+            "nullable": true,
+            "customConstraints": "",
+            "default_dart": null,
+            "default_client_dart": null,
+            "dsl_features": []
+          },
+          {
+            "name": "kind",
+            "getter_name": "kind",
+            "moor_type": "string",
+            "nullable": false,
+            "customConstraints": "NOT NULL CHECK (kind IN ('debit', 'credit', 'account', 'wallet', 'bnpl', 'cash', 'multi_currency'))",
+            "default_dart": null,
+            "default_client_dart": null,
+            "dsl_features": []
+          },
+          {
+            "name": "label",
+            "getter_name": "label",
+            "moor_type": "string",
+            "nullable": false,
+            "customConstraints": "NOT NULL CHECK (length(label) BETWEEN 1 AND 30)",
+            "default_dart": null,
+            "default_client_dart": null,
+            "dsl_features": []
+          },
+          {
+            "name": "last4",
+            "getter_name": "last4",
+            "moor_type": "string",
+            "nullable": true,
+            "customConstraints": "CHECK (last4 IS NULL OR(length(last4) BETWEEN 2 AND 4 AND last4 NOT GLOB '*[^0-9]*'))",
+            "default_dart": null,
+            "default_client_dart": null,
+            "dsl_features": []
+          },
+          {
+            "name": "default_currency",
+            "getter_name": "defaultCurrency",
+            "moor_type": "string",
+            "nullable": false,
+            "customConstraints": "NOT NULL CHECK (default_currency GLOB '[A-Z][A-Z][A-Z]')",
+            "default_dart": null,
+            "default_client_dart": null,
+            "dsl_features": []
+          },
+          {
+            "name": "credit_limit_minor",
+            "getter_name": "creditLimitMinor",
+            "moor_type": "int",
+            "nullable": true,
+            "customConstraints": "CHECK (credit_limit_minor IS NULL OR(typeof(credit_limit_minor) = 'integer' AND credit_limit_minor BETWEEN 0 AND 9007199254740991))",
+            "default_dart": null,
+            "default_client_dart": null,
+            "dsl_features": []
+          },
+          {
+            "name": "statement_due_day",
+            "getter_name": "statementDueDay",
+            "moor_type": "int",
+            "nullable": true,
+            "customConstraints": "CHECK (statement_due_day BETWEEN 1 AND 31)",
+            "default_dart": null,
+            "default_client_dart": null,
+            "dsl_features": []
+          },
+          {
+            "name": "is_hidden",
+            "getter_name": "isHidden",
+            "moor_type": "int",
+            "nullable": false,
+            "customConstraints": "NOT NULL DEFAULT 0 CHECK (is_hidden IN (0, 1))",
+            "default_dart": "const CustomExpression('0')",
+            "default_client_dart": null,
+            "dsl_features": []
+          },
+          {
+            "name": "merged_into_id",
+            "getter_name": "mergedIntoId",
+            "moor_type": "string",
+            "nullable": true,
+            "customConstraints": "REFERENCES accounts(id) CHECK (merged_into_id IS NULL OR merged_into_id <> id)",
+            "default_dart": null,
+            "default_client_dart": null,
+            "dsl_features": [
+              {
+                "foreign_key": {
+                  "to": {
+                    "table": "accounts",
+                    "column": "id"
+                  },
+                  "initially_deferred": false,
+                  "on_update": null,
+                  "on_delete": null
+                }
+              }
+            ]
+          },
+          {
+            "name": "is_default_cash",
+            "getter_name": "isDefaultCash",
+            "moor_type": "int",
+            "nullable": false,
+            "customConstraints": "NOT NULL DEFAULT 0 CHECK (is_default_cash IN (0, 1) AND(is_default_cash = 0 OR kind = 'cash'))",
+            "default_dart": "const CustomExpression('0')",
+            "default_client_dart": null,
+            "dsl_features": []
+          },
+          {
+            "name": "created_at",
+            "getter_name": "createdAt",
+            "moor_type": "int",
+            "nullable": false,
+            "customConstraints": "NOT NULL",
+            "default_dart": null,
+            "default_client_dart": null,
+            "dsl_features": []
+          },
+          {
+            "name": "updated_at",
+            "getter_name": "updatedAt",
+            "moor_type": "int",
+            "nullable": false,
+            "customConstraints": "NOT NULL",
+            "default_dart": null,
+            "default_client_dart": null,
+            "dsl_features": []
+          }
+        ],
+        "is_virtual": false,
+        "without_rowid": false,
+        "constraints": []
+      }
+    },
+    {
+      "id": 17,
+      "references": [
+        16
+      ],
+      "type": "table",
+      "data": {
+        "name": "recurring_items",
+        "was_declared_in_moor": true,
+        "columns": [
+          {
+            "name": "id",
+            "getter_name": "id",
+            "moor_type": "string",
+            "nullable": false,
+            "customConstraints": "NOT NULL PRIMARY KEY",
+            "default_dart": null,
+            "default_client_dart": null,
+            "dsl_features": [
+              "primary-key"
+            ]
+          },
+          {
+            "name": "kind",
+            "getter_name": "kind",
+            "moor_type": "string",
+            "nullable": false,
+            "customConstraints": "NOT NULL CHECK (kind IN ('subscription', 'installment', 'card_due', 'gameya', 'bill'))",
+            "default_dart": null,
+            "default_client_dart": null,
+            "dsl_features": []
+          },
+          {
+            "name": "status",
+            "getter_name": "status",
+            "moor_type": "string",
+            "nullable": false,
+            "customConstraints": "NOT NULL CHECK (status IN ('suggested', 'active', 'dismissed', 'completed'))",
+            "default_dart": null,
+            "default_client_dart": null,
+            "dsl_features": []
+          },
+          {
+            "name": "name",
+            "getter_name": "name",
+            "moor_type": "string",
+            "nullable": false,
+            "customConstraints": "NOT NULL CHECK (length(name) BETWEEN 1 AND 60)",
+            "default_dart": null,
+            "default_client_dart": null,
+            "dsl_features": []
+          },
+          {
+            "name": "merchant_norm",
+            "getter_name": "merchantNorm",
+            "moor_type": "string",
+            "nullable": true,
+            "customConstraints": "CHECK (merchant_norm IS NULL OR(length(merchant_norm) BETWEEN 1 AND 64 AND merchant_norm NOT GLOB '*[^a-z0-9 ]*' AND merchant_norm NOT GLOB ' *' AND merchant_norm NOT GLOB '* ' AND merchant_norm NOT GLOB '*  *'))",
+            "default_dart": null,
+            "default_client_dart": null,
+            "dsl_features": []
+          },
+          {
+            "name": "account_id",
+            "getter_name": "accountId",
+            "moor_type": "string",
+            "nullable": true,
+            "customConstraints": "REFERENCES accounts(id)",
+            "default_dart": null,
+            "default_client_dart": null,
+            "dsl_features": [
+              {
+                "foreign_key": {
+                  "to": {
+                    "table": "accounts",
+                    "column": "id"
+                  },
+                  "initially_deferred": false,
+                  "on_update": null,
+                  "on_delete": null
+                }
+              }
+            ]
+          },
+          {
+            "name": "amount_minor",
+            "getter_name": "amountMinor",
+            "moor_type": "int",
+            "nullable": false,
+            "customConstraints": "NOT NULL CHECK (typeof(amount_minor) = 'integer' AND amount_minor BETWEEN 0 AND 9007199254740991)",
+            "default_dart": null,
+            "default_client_dart": null,
+            "dsl_features": []
+          },
+          {
+            "name": "currency",
+            "getter_name": "currency",
+            "moor_type": "string",
+            "nullable": false,
+            "customConstraints": "NOT NULL CHECK (currency GLOB '[A-Z][A-Z][A-Z]')",
+            "default_dart": null,
+            "default_client_dart": null,
+            "dsl_features": []
+          },
+          {
+            "name": "cadence",
+            "getter_name": "cadence",
+            "moor_type": "string",
+            "nullable": false,
+            "customConstraints": "NOT NULL CHECK (cadence IN ('monthly', 'yearly', 'weekly', 'custom_days'))",
+            "default_dart": null,
+            "default_client_dart": null,
+            "dsl_features": []
+          },
+          {
+            "name": "cadence_days",
+            "getter_name": "cadenceDays",
+            "moor_type": "int",
+            "nullable": true,
+            "customConstraints": "CHECK (cadence_days IS NULL OR cadence_days BETWEEN 1 AND 3660)",
+            "default_dart": null,
+            "default_client_dart": null,
+            "dsl_features": []
+          },
+          {
+            "name": "due_day",
+            "getter_name": "dueDay",
+            "moor_type": "int",
+            "nullable": true,
+            "customConstraints": "CHECK (due_day IS NULL OR due_day BETWEEN 1 AND 31)",
+            "default_dart": null,
+            "default_client_dart": null,
+            "dsl_features": []
+          },
+          {
+            "name": "next_due_date",
+            "getter_name": "nextDueDate",
+            "moor_type": "string",
+            "nullable": true,
+            "customConstraints": "CHECK (next_due_date IS NULL OR date(next_due_date) IS next_due_date)",
+            "default_dart": null,
+            "default_client_dart": null,
+            "dsl_features": []
+          },
+          {
+            "name": "total_count",
+            "getter_name": "totalCount",
+            "moor_type": "int",
+            "nullable": true,
+            "customConstraints": "CHECK (total_count IS NULL OR total_count >= 1)",
+            "default_dart": null,
+            "default_client_dart": null,
+            "dsl_features": []
+          },
+          {
+            "name": "paid_count",
+            "getter_name": "paidCount",
+            "moor_type": "int",
+            "nullable": false,
+            "customConstraints": "NOT NULL DEFAULT 0 CHECK (paid_count >= 0 AND(total_count IS NULL OR paid_count <= total_count))",
+            "default_dart": "const CustomExpression('0')",
+            "default_client_dart": null,
+            "dsl_features": []
+          },
+          {
+            "name": "reminder_days",
+            "getter_name": "reminderDays",
+            "moor_type": "int",
+            "nullable": false,
+            "customConstraints": "NOT NULL DEFAULT 3 CHECK (reminder_days BETWEEN 0 AND 60)",
+            "default_dart": "const CustomExpression('3')",
+            "default_client_dart": null,
+            "dsl_features": []
+          },
+          {
+            "name": "created_at",
+            "getter_name": "createdAt",
+            "moor_type": "int",
+            "nullable": false,
+            "customConstraints": "NOT NULL",
+            "default_dart": null,
+            "default_client_dart": null,
+            "dsl_features": []
+          }
+        ],
+        "is_virtual": false,
+        "without_rowid": false,
+        "constraints": [
+          "CHECK((cadence = 'custom_days')=(cadence_days IS NOT NULL))"
+        ]
+      }
+    },
+    {
+      "id": 18,
+      "references": [
+        17
+      ],
+      "type": "index",
+      "data": {
+        "on": 17,
+        "name": "ix_recurring_due",
+        "sql": "CREATE INDEX ix_recurring_due ON recurring_items (next_due_date) WHERE status = 'active';",
+        "unique": false,
+        "columns": []
+      }
+    },
+    {
+      "id": 19,
+      "references": [
+        17
+      ],
+      "type": "index",
+      "data": {
+        "on": 17,
+        "name": "ix_recurring_account",
+        "sql": "CREATE INDEX ix_recurring_account ON recurring_items (account_id) WHERE account_id IS NOT NULL;",
+        "unique": false,
+        "columns": []
+      }
+    },
+    {
+      "id": 20,
+      "references": [],
+      "type": "table",
+      "data": {
+        "name": "raw_messages",
+        "was_declared_in_moor": true,
+        "columns": [
+          {
+            "name": "id",
+            "getter_name": "id",
+            "moor_type": "string",
+            "nullable": false,
+            "customConstraints": "NOT NULL PRIMARY KEY",
+            "default_dart": null,
+            "default_client_dart": null,
+            "dsl_features": [
+              "primary-key"
+            ]
+          },
+          {
+            "name": "channel",
+            "getter_name": "channel",
+            "moor_type": "string",
+            "nullable": false,
+            "customConstraints": "NOT NULL CHECK (channel IN ('sms', 'notification', 'shortcut_message', 'apple_pay', 'share', 'paste', 'ocr', 'pdf', 'csv'))",
+            "default_dart": null,
+            "default_client_dart": null,
+            "dsl_features": []
+          },
+          {
+            "name": "sender",
+            "getter_name": "sender",
+            "moor_type": "string",
+            "nullable": true,
+            "customConstraints": "",
+            "default_dart": null,
+            "default_client_dart": null,
+            "dsl_features": []
+          },
+          {
+            "name": "institution_code",
+            "getter_name": "institutionCode",
+            "moor_type": "string",
+            "nullable": true,
+            "customConstraints": "",
+            "default_dart": null,
+            "default_client_dart": null,
+            "dsl_features": []
+          },
+          {
+            "name": "body",
+            "getter_name": "body",
+            "moor_type": "string",
+            "nullable": false,
+            "customConstraints": "NOT NULL",
+            "default_dart": null,
+            "default_client_dart": null,
+            "dsl_features": []
+          },
+          {
+            "name": "body_hash",
+            "getter_name": "bodyHash",
+            "moor_type": "string",
+            "nullable": false,
+            "customConstraints": "NOT NULL CHECK (length(body_hash) = 64 AND body_hash NOT GLOB '*[^0-9a-f]*')",
+            "default_dart": null,
+            "default_client_dart": null,
+            "dsl_features": []
+          },
+          {
+            "name": "received_at",
+            "getter_name": "receivedAt",
+            "moor_type": "int",
+            "nullable": false,
+            "customConstraints": "NOT NULL",
+            "default_dart": null,
+            "default_client_dart": null,
+            "dsl_features": []
+          },
+          {
+            "name": "sim_slot",
+            "getter_name": "simSlot",
+            "moor_type": "int",
+            "nullable": true,
+            "customConstraints": "",
+            "default_dart": null,
+            "default_client_dart": null,
+            "dsl_features": []
+          },
+          {
+            "name": "parse_status",
+            "getter_name": "parseStatus",
+            "moor_type": "string",
+            "nullable": false,
+            "customConstraints": "NOT NULL CHECK (parse_status IN ('parsed', 'review', 'dismissed', 'reparse_pending'))",
+            "default_dart": null,
+            "default_client_dart": null,
+            "dsl_features": []
+          },
+          {
+            "name": "template_id",
+            "getter_name": "templateId",
+            "moor_type": "string",
+            "nullable": true,
+            "customConstraints": "",
+            "default_dart": null,
+            "default_client_dart": null,
+            "dsl_features": []
+          },
+          {
+            "name": "template_version",
+            "getter_name": "templateVersion",
+            "moor_type": "int",
+            "nullable": true,
+            "customConstraints": "",
+            "default_dart": null,
+            "default_client_dart": null,
+            "dsl_features": []
+          },
+          {
+            "name": "registry_version",
+            "getter_name": "registryVersion",
+            "moor_type": "int",
+            "nullable": false,
+            "customConstraints": "NOT NULL",
+            "default_dart": null,
+            "default_client_dart": null,
+            "dsl_features": []
+          },
+          {
+            "name": "created_at",
+            "getter_name": "createdAt",
+            "moor_type": "int",
+            "nullable": false,
+            "customConstraints": "NOT NULL",
+            "default_dart": null,
+            "default_client_dart": null,
+            "dsl_features": []
+          }
+        ],
+        "is_virtual": false,
+        "without_rowid": false,
+        "constraints": []
+      }
+    },
+    {
+      "id": 21,
+      "references": [
+        22
+      ],
+      "type": "table",
+      "data": {
+        "name": "transfer_pairs",
+        "was_declared_in_moor": true,
+        "columns": [
+          {
+            "name": "id",
+            "getter_name": "id",
+            "moor_type": "string",
+            "nullable": false,
+            "customConstraints": "NOT NULL PRIMARY KEY",
+            "default_dart": null,
+            "default_client_dart": null,
+            "dsl_features": [
+              "primary-key"
+            ]
+          },
+          {
+            "name": "out_txn_id",
+            "getter_name": "outTxnId",
+            "moor_type": "string",
+            "nullable": false,
+            "customConstraints": "NOT NULL UNIQUE REFERENCES transactions(id)ON DELETE CASCADE",
+            "default_dart": null,
+            "default_client_dart": null,
+            "dsl_features": [
+              "unique",
+              {
+                "foreign_key": {
+                  "to": {
+                    "table": "transactions",
+                    "column": "id"
+                  },
+                  "initially_deferred": false,
+                  "on_update": null,
+                  "on_delete": "cascade"
+                }
+              }
+            ]
+          },
+          {
+            "name": "in_txn_id",
+            "getter_name": "inTxnId",
+            "moor_type": "string",
+            "nullable": true,
+            "customConstraints": "UNIQUE REFERENCES transactions(id)ON DELETE CASCADE",
+            "default_dart": null,
+            "default_client_dart": null,
+            "dsl_features": [
+              "unique",
+              {
+                "foreign_key": {
+                  "to": {
+                    "table": "transactions",
+                    "column": "id"
+                  },
+                  "initially_deferred": false,
+                  "on_update": null,
+                  "on_delete": "cascade"
+                }
+              }
+            ]
+          },
+          {
+            "name": "kind",
+            "getter_name": "kind",
+            "moor_type": "string",
+            "nullable": false,
+            "customConstraints": "NOT NULL CHECK (kind IN ('auto', 'manual', 'fx_conversion', 'card_settlement', 'cross_currency'))",
+            "default_dart": null,
+            "default_client_dart": null,
+            "dsl_features": []
+          },
+          {
+            "name": "created_at",
+            "getter_name": "createdAt",
+            "moor_type": "int",
+            "nullable": false,
+            "customConstraints": "NOT NULL",
+            "default_dart": null,
+            "default_client_dart": null,
+            "dsl_features": []
+          }
+        ],
+        "is_virtual": false,
+        "without_rowid": false,
+        "constraints": [
+          "CHECK(in_txn_id IS NULL OR in_txn_id <> out_txn_id)"
+        ]
+      }
+    },
+    {
+      "id": 22,
+      "references": [
+        16,
+        20,
+        9,
+        21
+      ],
+      "type": "table",
+      "data": {
+        "name": "transactions",
+        "was_declared_in_moor": true,
+        "columns": [
+          {
+            "name": "id",
+            "getter_name": "id",
+            "moor_type": "string",
+            "nullable": false,
+            "customConstraints": "NOT NULL PRIMARY KEY",
+            "default_dart": null,
+            "default_client_dart": null,
+            "dsl_features": [
+              "primary-key"
+            ]
+          },
+          {
+            "name": "account_id",
+            "getter_name": "accountId",
+            "moor_type": "string",
+            "nullable": false,
+            "customConstraints": "NOT NULL REFERENCES accounts(id)",
+            "default_dart": null,
+            "default_client_dart": null,
+            "dsl_features": [
+              {
+                "foreign_key": {
+                  "to": {
+                    "table": "accounts",
+                    "column": "id"
+                  },
+                  "initially_deferred": false,
+                  "on_update": null,
+                  "on_delete": null
+                }
+              }
+            ]
+          },
+          {
+            "name": "raw_message_id",
+            "getter_name": "rawMessageId",
+            "moor_type": "string",
+            "nullable": true,
+            "customConstraints": "REFERENCES raw_messages(id)ON DELETE SET NULL",
+            "default_dart": null,
+            "default_client_dart": null,
+            "dsl_features": [
+              {
+                "foreign_key": {
+                  "to": {
+                    "table": "raw_messages",
+                    "column": "id"
+                  },
+                  "initially_deferred": false,
+                  "on_update": null,
+                  "on_delete": "setNull"
+                }
+              }
+            ]
+          },
+          {
+            "name": "source",
+            "getter_name": "source",
+            "moor_type": "string",
+            "nullable": false,
+            "customConstraints": "NOT NULL CHECK (source IN ('sms', 'notification', 'shortcut', 'apple_pay', 'ocr', 'pdf', 'csv', 'voice', 'manual', 'share'))",
+            "default_dart": null,
+            "default_client_dart": null,
+            "dsl_features": []
+          },
+          {
+            "name": "direction",
+            "getter_name": "direction",
+            "moor_type": "string",
+            "nullable": false,
+            "customConstraints": "NOT NULL CHECK (direction IN ('expense', 'income', 'transfer_out', 'transfer_in', 'refund', 'fee'))",
+            "default_dart": null,
+            "default_client_dart": null,
+            "dsl_features": []
+          },
+          {
+            "name": "status",
+            "getter_name": "status",
+            "moor_type": "string",
+            "nullable": false,
+            "customConstraints": "NOT NULL DEFAULT 'posted' CHECK (status IN ('posted', 'pending', 'declined', 'reversed'))",
+            "default_dart": "const CustomExpression('\\'posted\\'')",
+            "default_client_dart": null,
+            "dsl_features": []
+          },
+          {
+            "name": "amount_minor",
+            "getter_name": "amountMinor",
+            "moor_type": "int",
+            "nullable": false,
+            "customConstraints": "NOT NULL CHECK (typeof(amount_minor) = 'integer' AND amount_minor BETWEEN 0 AND 9007199254740991)",
+            "default_dart": null,
+            "default_client_dart": null,
+            "dsl_features": []
+          },
+          {
+            "name": "currency",
+            "getter_name": "currency",
+            "moor_type": "string",
+            "nullable": false,
+            "customConstraints": "NOT NULL CHECK (currency GLOB '[A-Z][A-Z][A-Z]')",
+            "default_dart": null,
+            "default_client_dart": null,
+            "dsl_features": []
+          },
+          {
+            "name": "original_amount_minor",
+            "getter_name": "originalAmountMinor",
+            "moor_type": "int",
+            "nullable": true,
+            "customConstraints": "CHECK (original_amount_minor IS NULL OR(typeof(original_amount_minor) = 'integer' AND original_amount_minor BETWEEN 0 AND 9007199254740991))",
+            "default_dart": null,
+            "default_client_dart": null,
+            "dsl_features": []
+          },
+          {
+            "name": "original_currency",
+            "getter_name": "originalCurrency",
+            "moor_type": "string",
+            "nullable": true,
+            "customConstraints": "CHECK (original_currency IS NULL OR original_currency GLOB '[A-Z][A-Z][A-Z]')",
+            "default_dart": null,
+            "default_client_dart": null,
+            "dsl_features": []
+          },
+          {
+            "name": "occurred_at",
+            "getter_name": "occurredAt",
+            "moor_type": "int",
+            "nullable": false,
+            "customConstraints": "NOT NULL",
+            "default_dart": null,
+            "default_client_dart": null,
+            "dsl_features": []
+          },
+          {
+            "name": "occurred_tz_offset_min",
+            "getter_name": "occurredTzOffsetMin",
+            "moor_type": "int",
+            "nullable": false,
+            "customConstraints": "NOT NULL CHECK (occurred_tz_offset_min BETWEEN -1080 AND 1080)",
+            "default_dart": null,
+            "default_client_dart": null,
+            "dsl_features": []
+          },
+          {
+            "name": "merchant_raw",
+            "getter_name": "merchantRaw",
+            "moor_type": "string",
+            "nullable": true,
+            "customConstraints": "",
+            "default_dart": null,
+            "default_client_dart": null,
+            "dsl_features": []
+          },
+          {
+            "name": "merchant_norm",
+            "getter_name": "merchantNorm",
+            "moor_type": "string",
+            "nullable": true,
+            "customConstraints": "",
+            "default_dart": null,
+            "default_client_dart": null,
+            "dsl_features": []
+          },
+          {
+            "name": "catalog_merchant_id",
+            "getter_name": "catalogMerchantId",
+            "moor_type": "int",
+            "nullable": true,
+            "customConstraints": "",
+            "default_dart": null,
+            "default_client_dart": null,
+            "dsl_features": []
+          },
+          {
+            "name": "counterparty_kind",
+            "getter_name": "counterpartyKind",
+            "moor_type": "string",
+            "nullable": true,
+            "customConstraints": "CHECK (counterparty_kind IN ('merchant', 'ipa', 'phone', 'person', 'bank', 'own_account'))",
+            "default_dart": null,
+            "default_client_dart": null,
+            "dsl_features": []
+          },
+          {
+            "name": "counterparty_value",
+            "getter_name": "counterpartyValue",
+            "moor_type": "string",
+            "nullable": true,
+            "customConstraints": "",
+            "default_dart": null,
+            "default_client_dart": null,
+            "dsl_features": []
+          },
+          {
+            "name": "category_id",
+            "getter_name": "categoryId",
+            "moor_type": "string",
+            "nullable": true,
+            "customConstraints": "REFERENCES categories(id)",
+            "default_dart": null,
+            "default_client_dart": null,
+            "dsl_features": [
+              {
+                "foreign_key": {
+                  "to": {
+                    "table": "categories",
+                    "column": "id"
+                  },
+                  "initially_deferred": false,
+                  "on_update": null,
+                  "on_delete": null
+                }
+              }
+            ]
+          },
+          {
+            "name": "category_source",
+            "getter_name": "categorySource",
+            "moor_type": "string",
+            "nullable": false,
+            "customConstraints": "NOT NULL CHECK (category_source IN ('user', 'user_rule', 'catalog', 'heuristic', 'none'))",
+            "default_dart": null,
+            "default_client_dart": null,
+            "dsl_features": []
+          },
+          {
+            "name": "is_user_verified",
+            "getter_name": "isUserVerified",
+            "moor_type": "int",
+            "nullable": false,
+            "customConstraints": "NOT NULL DEFAULT 0 CHECK (is_user_verified IN (0, 1))",
+            "default_dart": "const CustomExpression('0')",
+            "default_client_dart": null,
+            "dsl_features": []
+          },
+          {
+            "name": "transfer_pair_id",
+            "getter_name": "transferPairId",
+            "moor_type": "string",
+            "nullable": true,
+            "customConstraints": "REFERENCES transfer_pairs(id)ON DELETE SET NULL",
+            "default_dart": null,
+            "default_client_dart": null,
+            "dsl_features": [
+              {
+                "foreign_key": {
+                  "to": {
+                    "table": "transfer_pairs",
+                    "column": "id"
+                  },
+                  "initially_deferred": false,
+                  "on_update": null,
+                  "on_delete": "setNull"
+                }
+              }
+            ]
+          },
+          {
+            "name": "is_internal",
+            "getter_name": "isInternal",
+            "moor_type": "int",
+            "nullable": false,
+            "customConstraints": "NOT NULL DEFAULT 0 CHECK (is_internal IN (0, 1))",
+            "default_dart": "const CustomExpression('0')",
+            "default_client_dart": null,
+            "dsl_features": []
+          },
+          {
+            "name": "reference_no",
+            "getter_name": "referenceNo",
+            "moor_type": "string",
+            "nullable": true,
+            "customConstraints": "",
+            "default_dart": null,
+            "default_client_dart": null,
+            "dsl_features": []
+          },
+          {
+            "name": "balance_after_minor",
+            "getter_name": "balanceAfterMinor",
+            "moor_type": "int",
+            "nullable": true,
+            "customConstraints": "CHECK (balance_after_minor IS NULL OR(typeof(balance_after_minor) = 'integer' AND balance_after_minor BETWEEN -9007199254740991 AND 9007199254740991))",
+            "default_dart": null,
+            "default_client_dart": null,
+            "dsl_features": []
+          },
+          {
+            "name": "template_id",
+            "getter_name": "templateId",
+            "moor_type": "string",
+            "nullable": true,
+            "customConstraints": "",
+            "default_dart": null,
+            "default_client_dart": null,
+            "dsl_features": []
+          },
+          {
+            "name": "parse_confidence",
+            "getter_name": "parseConfidence",
+            "moor_type": "double",
+            "nullable": true,
+            "customConstraints": "CHECK (parse_confidence IS NULL OR parse_confidence BETWEEN 0 AND 1)",
+            "default_dart": null,
+            "default_client_dart": null,
+            "dsl_features": []
+          },
+          {
+            "name": "dedupe_key",
+            "getter_name": "dedupeKey",
+            "moor_type": "string",
+            "nullable": true,
+            "customConstraints": "",
+            "default_dart": null,
+            "default_client_dart": null,
+            "dsl_features": []
+          },
+          {
+            "name": "note",
+            "getter_name": "note",
+            "moor_type": "string",
+            "nullable": true,
+            "customConstraints": "",
+            "default_dart": null,
+            "default_client_dart": null,
+            "dsl_features": []
+          },
+          {
+            "name": "deleted_at",
+            "getter_name": "deletedAt",
+            "moor_type": "int",
+            "nullable": true,
+            "customConstraints": "",
+            "default_dart": null,
+            "default_client_dart": null,
+            "dsl_features": []
+          },
+          {
+            "name": "created_at",
+            "getter_name": "createdAt",
+            "moor_type": "int",
+            "nullable": false,
+            "customConstraints": "NOT NULL",
+            "default_dart": null,
+            "default_client_dart": null,
+            "dsl_features": []
+          },
+          {
+            "name": "updated_at",
+            "getter_name": "updatedAt",
+            "moor_type": "int",
+            "nullable": false,
+            "customConstraints": "NOT NULL",
+            "default_dart": null,
+            "default_client_dart": null,
+            "dsl_features": []
+          }
+        ],
+        "is_virtual": false,
+        "without_rowid": false,
+        "constraints": [
+          "CHECK((original_amount_minor IS NULL)=(original_currency IS NULL))"
+        ]
+      }
+    },
+    {
+      "id": 23,
+      "references": [
+        17,
+        22
+      ],
+      "type": "table",
+      "data": {
+        "name": "recurring_occurrences",
+        "was_declared_in_moor": true,
+        "columns": [
+          {
+            "name": "item_id",
+            "getter_name": "itemId",
+            "moor_type": "string",
+            "nullable": false,
+            "customConstraints": "NOT NULL REFERENCES recurring_items(id)ON DELETE CASCADE",
+            "default_dart": null,
+            "default_client_dart": null,
+            "dsl_features": [
+              {
+                "foreign_key": {
+                  "to": {
+                    "table": "recurring_items",
+                    "column": "id"
+                  },
+                  "initially_deferred": false,
+                  "on_update": null,
+                  "on_delete": "cascade"
+                }
+              }
+            ]
+          },
+          {
+            "name": "due_date",
+            "getter_name": "dueDate",
+            "moor_type": "string",
+            "nullable": false,
+            "customConstraints": "NOT NULL CHECK (date(due_date) IS due_date)",
+            "default_dart": null,
+            "default_client_dart": null,
+            "dsl_features": []
+          },
+          {
+            "name": "txn_id",
+            "getter_name": "txnId",
+            "moor_type": "string",
+            "nullable": true,
+            "customConstraints": "REFERENCES transactions(id)ON DELETE SET NULL",
+            "default_dart": null,
+            "default_client_dart": null,
+            "dsl_features": [
+              {
+                "foreign_key": {
+                  "to": {
+                    "table": "transactions",
+                    "column": "id"
+                  },
+                  "initially_deferred": false,
+                  "on_update": null,
+                  "on_delete": "setNull"
+                }
+              }
+            ]
+          },
+          {
+            "name": "paid_at",
+            "getter_name": "paidAt",
+            "moor_type": "int",
+            "nullable": true,
+            "customConstraints": "",
+            "default_dart": null,
+            "default_client_dart": null,
+            "dsl_features": []
+          }
+        ],
+        "is_virtual": false,
+        "without_rowid": false,
+        "constraints": [
+          "PRIMARY KEY(item_id, due_date)"
+        ],
+        "explicit_pk": [
+          "item_id",
+          "due_date"
+        ]
+      }
+    },
+    {
+      "id": 24,
+      "references": [
+        23
+      ],
+      "type": "index",
+      "data": {
+        "on": 23,
+        "name": "ix_recurring_occ_txn",
+        "sql": "CREATE INDEX ix_recurring_occ_txn ON recurring_occurrences (txn_id) WHERE txn_id IS NOT NULL;",
+        "unique": false,
+        "columns": []
+      }
+    },
+    {
+      "id": 25,
+      "references": [
+        22
+      ],
+      "type": "table",
+      "data": {
+        "name": "split_participants",
+        "was_declared_in_moor": true,
+        "columns": [
+          {
+            "name": "id",
+            "getter_name": "id",
+            "moor_type": "string",
+            "nullable": false,
+            "customConstraints": "NOT NULL PRIMARY KEY",
+            "default_dart": null,
+            "default_client_dart": null,
+            "dsl_features": [
+              "primary-key"
+            ]
+          },
+          {
+            "name": "expense_txn_id",
+            "getter_name": "expenseTxnId",
+            "moor_type": "string",
+            "nullable": false,
+            "customConstraints": "NOT NULL REFERENCES transactions(id)ON DELETE CASCADE",
+            "default_dart": null,
+            "default_client_dart": null,
+            "dsl_features": [
+              {
+                "foreign_key": {
+                  "to": {
+                    "table": "transactions",
+                    "column": "id"
+                  },
+                  "initially_deferred": false,
+                  "on_update": null,
+                  "on_delete": "cascade"
+                }
+              }
+            ]
+          },
+          {
+            "name": "name",
+            "getter_name": "name",
+            "moor_type": "string",
+            "nullable": false,
+            "customConstraints": "NOT NULL",
+            "default_dart": null,
+            "default_client_dart": null,
+            "dsl_features": []
+          },
+          {
+            "name": "share_minor",
+            "getter_name": "shareMinor",
+            "moor_type": "int",
+            "nullable": false,
+            "customConstraints": "NOT NULL CHECK (typeof(share_minor) = 'integer' AND share_minor BETWEEN 0 AND 9007199254740991)",
+            "default_dart": null,
+            "default_client_dart": null,
+            "dsl_features": []
+          },
+          {
+            "name": "created_at",
+            "getter_name": "createdAt",
+            "moor_type": "int",
+            "nullable": false,
+            "customConstraints": "NOT NULL",
+            "default_dart": null,
+            "default_client_dart": null,
+            "dsl_features": []
+          }
+        ],
+        "is_virtual": false,
+        "without_rowid": false,
+        "constraints": []
+      }
+    },
+    {
+      "id": 26,
+      "references": [
+        22,
+        25
+      ],
+      "type": "table",
+      "data": {
+        "name": "offset_links",
+        "was_declared_in_moor": true,
+        "columns": [
+          {
+            "name": "id",
+            "getter_name": "id",
+            "moor_type": "string",
+            "nullable": false,
+            "customConstraints": "NOT NULL PRIMARY KEY",
+            "default_dart": null,
+            "default_client_dart": null,
+            "dsl_features": [
+              "primary-key"
+            ]
+          },
+          {
+            "name": "kind",
+            "getter_name": "kind",
+            "moor_type": "string",
+            "nullable": false,
+            "customConstraints": "NOT NULL CHECK (kind IN ('refund', 'reimbursement'))",
+            "default_dart": null,
+            "default_client_dart": null,
+            "dsl_features": []
+          },
+          {
+            "name": "expense_txn_id",
+            "getter_name": "expenseTxnId",
+            "moor_type": "string",
+            "nullable": false,
+            "customConstraints": "NOT NULL REFERENCES transactions(id)ON DELETE CASCADE",
+            "default_dart": null,
+            "default_client_dart": null,
+            "dsl_features": [
+              {
+                "foreign_key": {
+                  "to": {
+                    "table": "transactions",
+                    "column": "id"
+                  },
+                  "initially_deferred": false,
+                  "on_update": null,
+                  "on_delete": "cascade"
+                }
+              }
+            ]
+          },
+          {
+            "name": "source_txn_id",
+            "getter_name": "sourceTxnId",
+            "moor_type": "string",
+            "nullable": false,
+            "customConstraints": "NOT NULL REFERENCES transactions(id)ON DELETE CASCADE",
+            "default_dart": null,
+            "default_client_dart": null,
+            "dsl_features": [
+              {
+                "foreign_key": {
+                  "to": {
+                    "table": "transactions",
+                    "column": "id"
+                  },
+                  "initially_deferred": false,
+                  "on_update": null,
+                  "on_delete": "cascade"
+                }
+              }
+            ]
+          },
+          {
+            "name": "amount_minor",
+            "getter_name": "amountMinor",
+            "moor_type": "int",
+            "nullable": false,
+            "customConstraints": "NOT NULL CHECK (typeof(amount_minor) = 'integer' AND amount_minor BETWEEN 1 AND 9007199254740991)",
+            "default_dart": null,
+            "default_client_dart": null,
+            "dsl_features": []
+          },
+          {
+            "name": "participant_id",
+            "getter_name": "participantId",
+            "moor_type": "string",
+            "nullable": true,
+            "customConstraints": "REFERENCES split_participants(id)ON DELETE SET NULL",
+            "default_dart": null,
+            "default_client_dart": null,
+            "dsl_features": [
+              {
+                "foreign_key": {
+                  "to": {
+                    "table": "split_participants",
+                    "column": "id"
+                  },
+                  "initially_deferred": false,
+                  "on_update": null,
+                  "on_delete": "setNull"
+                }
+              }
+            ]
+          },
+          {
+            "name": "created_at",
+            "getter_name": "createdAt",
+            "moor_type": "int",
+            "nullable": false,
+            "customConstraints": "NOT NULL",
+            "default_dart": null,
+            "default_client_dart": null,
+            "dsl_features": []
+          }
+        ],
+        "is_virtual": false,
+        "without_rowid": false,
+        "constraints": [
+          "UNIQUE(expense_txn_id, source_txn_id)",
+          "CHECK(expense_txn_id <> source_txn_id)"
+        ],
+        "unique_keys": [
+          [
+            "expense_txn_id",
+            "source_txn_id"
+          ]
+        ]
+      }
+    },
+    {
+      "id": 27,
+      "references": [
+        26
+      ],
+      "type": "index",
+      "data": {
+        "on": 26,
+        "name": "ix_offset_participant",
+        "sql": "CREATE INDEX ix_offset_participant ON offset_links (participant_id)\n  WHERE participant_id IS NOT NULL;",
+        "unique": false,
+        "columns": []
+      }
+    },
+    {
+      "id": 28,
+      "references": [
+        25,
+        26
+      ],
+      "type": "trigger",
+      "data": {
+        "on": 25,
+        "references_in_body": [
+          25,
+          26
+        ],
+        "name": "trg_split_participant_move",
+        "sql": "CREATE TRIGGER trg_split_participant_move BEFORE UPDATE OF expense_txn_id ON split_participants\n  WHEN new.expense_txn_id IS NOT old.expense_txn_id\nBEGIN\n  SELECT RAISE(ABORT, 'OFFSET_PARTICIPANT_MISMATCH')\n    WHERE EXISTS (SELECT 1 FROM offset_links WHERE participant_id = old.id);\nEND;"
+      }
+    },
+    {
+      "id": 29,
+      "references": [
+        16
+      ],
+      "type": "index",
+      "data": {
+        "on": 16,
+        "name": "ux_accounts_inst_last4",
+        "sql": "CREATE UNIQUE INDEX ux_accounts_inst_last4 ON accounts (institution_code, last4)\n  WHERE last4 IS NOT NULL AND merged_into_id IS NULL;",
+        "unique": true,
+        "columns": []
+      }
+    },
+    {
+      "id": 30,
+      "references": [
+        16
+      ],
+      "type": "index",
+      "data": {
+        "on": 16,
+        "name": "ux_accounts_default_cash",
+        "sql": "CREATE UNIQUE INDEX ux_accounts_default_cash ON accounts (is_default_cash)\n  WHERE is_default_cash = 1;",
+        "unique": true,
+        "columns": []
+      }
+    },
+    {
+      "id": 31,
+      "references": [
+        16,
+        22
+      ],
+      "type": "table",
+      "data": {
+        "name": "account_balances",
+        "was_declared_in_moor": true,
+        "columns": [
+          {
+            "name": "account_id",
+            "getter_name": "accountId",
+            "moor_type": "string",
+            "nullable": false,
+            "customConstraints": "NOT NULL REFERENCES accounts(id)ON DELETE CASCADE",
+            "default_dart": null,
+            "default_client_dart": null,
+            "dsl_features": [
+              {
+                "foreign_key": {
+                  "to": {
+                    "table": "accounts",
+                    "column": "id"
+                  },
+                  "initially_deferred": false,
+                  "on_update": null,
+                  "on_delete": "cascade"
+                }
+              }
+            ]
+          },
+          {
+            "name": "currency",
+            "getter_name": "currency",
+            "moor_type": "string",
+            "nullable": false,
+            "customConstraints": "NOT NULL CHECK (currency GLOB '[A-Z][A-Z][A-Z]')",
+            "default_dart": null,
+            "default_client_dart": null,
+            "dsl_features": []
+          },
+          {
+            "name": "balance_minor",
+            "getter_name": "balanceMinor",
+            "moor_type": "int",
+            "nullable": true,
+            "customConstraints": "CHECK (balance_minor IS NULL OR(typeof(balance_minor) = 'integer' AND balance_minor BETWEEN -9007199254740991 AND 9007199254740991))",
+            "default_dart": null,
+            "default_client_dart": null,
+            "dsl_features": []
+          },
+          {
+            "name": "available_minor",
+            "getter_name": "availableMinor",
+            "moor_type": "int",
+            "nullable": true,
+            "customConstraints": "CHECK (available_minor IS NULL OR(typeof(available_minor) = 'integer' AND available_minor BETWEEN -9007199254740991 AND 9007199254740991))",
+            "default_dart": null,
+            "default_client_dart": null,
+            "dsl_features": []
+          },
+          {
+            "name": "as_of",
+            "getter_name": "asOf",
+            "moor_type": "int",
+            "nullable": false,
+            "customConstraints": "NOT NULL",
+            "default_dart": null,
+            "default_client_dart": null,
+            "dsl_features": []
+          },
+          {
+            "name": "source_txn_id",
+            "getter_name": "sourceTxnId",
+            "moor_type": "string",
+            "nullable": true,
+            "customConstraints": "REFERENCES transactions(id)ON DELETE SET NULL",
+            "default_dart": null,
+            "default_client_dart": null,
+            "dsl_features": [
+              {
+                "foreign_key": {
+                  "to": {
+                    "table": "transactions",
+                    "column": "id"
+                  },
+                  "initially_deferred": false,
+                  "on_update": null,
+                  "on_delete": "setNull"
+                }
+              }
+            ]
+          }
+        ],
+        "is_virtual": false,
+        "without_rowid": false,
+        "constraints": [
+          "PRIMARY KEY(account_id, currency)"
+        ],
+        "explicit_pk": [
+          "account_id",
+          "currency"
+        ]
+      }
+    },
+    {
+      "id": 32,
+      "references": [
+        20
+      ],
+      "type": "index",
+      "data": {
+        "on": 20,
+        "name": "ux_raw_body_hash",
+        "sql": "CREATE UNIQUE INDEX ux_raw_body_hash ON raw_messages (body_hash);",
+        "unique": true,
+        "columns": []
+      }
+    },
+    {
+      "id": 33,
+      "references": [
+        22
+      ],
+      "type": "index",
+      "data": {
+        "on": 22,
+        "name": "ix_txn_account_time",
+        "sql": "CREATE INDEX ix_txn_account_time ON transactions (account_id, occurred_at)\n  WHERE deleted_at IS NULL;",
+        "unique": false,
+        "columns": []
+      }
+    },
+    {
+      "id": 34,
+      "references": [
+        22
+      ],
+      "type": "index",
+      "data": {
+        "on": 22,
+        "name": "ix_txn_category_time",
+        "sql": "CREATE INDEX ix_txn_category_time ON transactions (category_id, occurred_at)\n  WHERE deleted_at IS NULL;",
+        "unique": false,
+        "columns": []
+      }
+    },
+    {
+      "id": 35,
+      "references": [
+        22
+      ],
+      "type": "index",
+      "data": {
+        "on": 22,
+        "name": "ix_txn_currency_time",
+        "sql": "CREATE INDEX ix_txn_currency_time ON transactions (currency, occurred_at, direction)\n  WHERE deleted_at IS NULL;",
+        "unique": false,
+        "columns": []
+      }
+    },
+    {
+      "id": 36,
+      "references": [
+        22
+      ],
+      "type": "index",
+      "data": {
+        "on": 22,
+        "name": "ix_txn_merchant",
+        "sql": "CREATE INDEX ix_txn_merchant ON transactions (merchant_norm, occurred_at);",
+        "unique": false,
+        "columns": []
+      }
+    },
+    {
+      "id": 37,
+      "references": [
+        22
+      ],
+      "type": "index",
+      "data": {
+        "on": 22,
+        "name": "ix_txn_dedupe",
+        "sql": "CREATE INDEX ix_txn_dedupe ON transactions (dedupe_key, occurred_at);",
+        "unique": false,
+        "columns": []
+      }
+    },
+    {
+      "id": 38,
+      "references": [
+        22
+      ],
+      "type": "index",
+      "data": {
+        "on": 22,
+        "name": "ix_txn_category_source",
+        "sql": "CREATE INDEX ix_txn_category_source ON transactions (category_source)\n  WHERE is_user_verified = 0;",
+        "unique": false,
+        "columns": []
+      }
+    },
+    {
+      "id": 39,
+      "references": [
+        26
+      ],
+      "type": "index",
+      "data": {
+        "on": 26,
+        "name": "ix_offset_source",
+        "sql": "CREATE INDEX ix_offset_source ON offset_links (source_txn_id);",
+        "unique": false,
+        "columns": []
+      }
+    },
+    {
+      "id": 40,
+      "references": [
+        25
+      ],
+      "type": "index",
+      "data": {
+        "on": 25,
+        "name": "ix_split_expense",
+        "sql": "CREATE INDEX ix_split_expense ON split_participants (expense_txn_id);",
+        "unique": false,
+        "columns": []
+      }
+    },
+    {
+      "id": 41,
+      "references": [
+        26,
+        22,
+        25
+      ],
+      "type": "trigger",
+      "data": {
+        "on": 26,
+        "references_in_body": [
+          26,
+          22,
+          25
+        ],
+        "name": "trg_offset_links_bi",
+        "sql": "CREATE TRIGGER trg_offset_links_bi BEFORE INSERT ON offset_links\nBEGIN\n  SELECT RAISE(ABORT, 'OFFSET_CURRENCY_MISMATCH')\n    WHERE (SELECT currency FROM transactions WHERE id = new.expense_txn_id)\n      IS NOT (SELECT currency FROM transactions WHERE id = new.source_txn_id)\n      AND EXISTS (SELECT 1 FROM transactions WHERE id = new.expense_txn_id)\n      AND EXISTS (SELECT 1 FROM transactions WHERE id = new.source_txn_id);\n  SELECT RAISE(ABORT, 'OFFSET_PARTICIPANT_MISMATCH')\n    WHERE new.participant_id IS NOT NULL AND NOT EXISTS (\n      SELECT 1 FROM split_participants\n      WHERE id = new.participant_id AND expense_txn_id = new.expense_txn_id);\n  SELECT RAISE(ABORT, 'OFFSET_EXCEEDS_EXPENSE')\n    WHERE new.amount_minor + (SELECT coalesce(sum(amount_minor), 0) FROM offset_links\n        WHERE expense_txn_id = new.expense_txn_id)\n      > (SELECT amount_minor FROM transactions WHERE id = new.expense_txn_id);\n  SELECT RAISE(ABORT, 'OFFSET_EXCEEDS_SOURCE')\n    WHERE new.amount_minor + (SELECT coalesce(sum(amount_minor), 0) FROM offset_links\n        WHERE source_txn_id = new.source_txn_id)\n      > (SELECT amount_minor FROM transactions WHERE id = new.source_txn_id);\nEND;"
+      }
+    },
+    {
+      "id": 42,
+      "references": [
+        26,
+        22,
+        25
+      ],
+      "type": "trigger",
+      "data": {
+        "on": 26,
+        "references_in_body": [
+          26,
+          22,
+          25
+        ],
+        "name": "trg_offset_links_bu",
+        "sql": "CREATE TRIGGER trg_offset_links_bu BEFORE UPDATE ON offset_links\nBEGIN\n  SELECT RAISE(ABORT, 'OFFSET_CURRENCY_MISMATCH')\n    WHERE (SELECT currency FROM transactions WHERE id = new.expense_txn_id)\n      IS NOT (SELECT currency FROM transactions WHERE id = new.source_txn_id)\n      AND EXISTS (SELECT 1 FROM transactions WHERE id = new.expense_txn_id)\n      AND EXISTS (SELECT 1 FROM transactions WHERE id = new.source_txn_id);\n  SELECT RAISE(ABORT, 'OFFSET_PARTICIPANT_MISMATCH')\n    WHERE new.participant_id IS NOT NULL AND NOT EXISTS (\n      SELECT 1 FROM split_participants\n      WHERE id = new.participant_id AND expense_txn_id = new.expense_txn_id);\n  SELECT RAISE(ABORT, 'OFFSET_EXCEEDS_EXPENSE')\n    WHERE new.amount_minor + (SELECT coalesce(sum(amount_minor), 0) FROM offset_links\n        WHERE expense_txn_id = new.expense_txn_id AND id <> old.id)\n      > (SELECT amount_minor FROM transactions WHERE id = new.expense_txn_id);\n  SELECT RAISE(ABORT, 'OFFSET_EXCEEDS_SOURCE')\n    WHERE new.amount_minor + (SELECT coalesce(sum(amount_minor), 0) FROM offset_links\n        WHERE source_txn_id = new.source_txn_id AND id <> old.id)\n      > (SELECT amount_minor FROM transactions WHERE id = new.source_txn_id);\nEND;"
+      }
+    },
+    {
+      "id": 43,
+      "references": [
+        22,
+        26
+      ],
+      "type": "trigger",
+      "data": {
+        "on": 22,
+        "references_in_body": [
+          22,
+          26
+        ],
+        "name": "trg_txn_offset_bu",
+        "sql": "CREATE TRIGGER trg_txn_offset_bu BEFORE UPDATE OF amount_minor, currency ON transactions\nBEGIN\n  SELECT RAISE(ABORT, 'OFFSET_CURRENCY_MISMATCH')\n    WHERE new.currency IS NOT old.currency AND EXISTS (\n      SELECT 1 FROM offset_links\n      WHERE expense_txn_id = old.id OR source_txn_id = old.id);\n  SELECT RAISE(ABORT, 'OFFSET_EXCEEDS_EXPENSE')\n    WHERE (SELECT coalesce(sum(amount_minor), 0) FROM offset_links\n        WHERE expense_txn_id = old.id) > new.amount_minor;\n  SELECT RAISE(ABORT, 'OFFSET_EXCEEDS_SOURCE')\n    WHERE (SELECT coalesce(sum(amount_minor), 0) FROM offset_links\n        WHERE source_txn_id = old.id) > new.amount_minor;\nEND;"
+      }
+    },
+    {
+      "id": 44,
+      "references": [],
+      "type": "table",
+      "data": {
+        "name": "transactions_fts_src",
+        "was_declared_in_moor": true,
+        "columns": [
+          {
+            "name": "id",
+            "getter_name": "id",
+            "moor_type": "int",
+            "nullable": false,
+            "customConstraints": "NOT NULL PRIMARY KEY",
+            "default_dart": null,
+            "default_client_dart": null,
+            "dsl_features": [
+              "primary-key"
+            ]
+          },
+          {
+            "name": "txn_id",
+            "getter_name": "txnId",
+            "moor_type": "string",
+            "nullable": false,
+            "customConstraints": "NOT NULL UNIQUE",
+            "default_dart": null,
+            "default_client_dart": null,
+            "dsl_features": [
+              "unique"
+            ]
+          },
+          {
+            "name": "merchant",
+            "getter_name": "merchant",
+            "moor_type": "string",
+            "nullable": true,
+            "customConstraints": "",
+            "default_dart": null,
+            "default_client_dart": null,
+            "dsl_features": []
+          },
+          {
+            "name": "counterparty",
+            "getter_name": "counterparty",
+            "moor_type": "string",
+            "nullable": true,
+            "customConstraints": "",
+            "default_dart": null,
+            "default_client_dart": null,
+            "dsl_features": []
+          },
+          {
+            "name": "note",
+            "getter_name": "note",
+            "moor_type": "string",
+            "nullable": true,
+            "customConstraints": "",
+            "default_dart": null,
+            "default_client_dart": null,
+            "dsl_features": []
+          },
+          {
+            "name": "amount_text",
+            "getter_name": "amountText",
+            "moor_type": "string",
+            "nullable": false,
+            "customConstraints": "NOT NULL",
+            "default_dart": null,
+            "default_client_dart": null,
+            "dsl_features": []
+          }
+        ],
+        "is_virtual": false,
+        "without_rowid": false,
+        "constraints": []
+      }
+    },
+    {
+      "id": 45,
+      "references": [
+        44
+      ],
+      "type": "table",
+      "data": {
+        "name": "transactions_fts",
+        "was_declared_in_moor": true,
+        "columns": [
+          {
+            "name": "merchant",
+            "getter_name": "merchant",
+            "moor_type": "string",
+            "nullable": false,
+            "customConstraints": "",
+            "default_dart": null,
+            "default_client_dart": null,
+            "dsl_features": []
+          },
+          {
+            "name": "counterparty",
+            "getter_name": "counterparty",
+            "moor_type": "string",
+            "nullable": false,
+            "customConstraints": "",
+            "default_dart": null,
+            "default_client_dart": null,
+            "dsl_features": []
+          },
+          {
+            "name": "note",
+            "getter_name": "note",
+            "moor_type": "string",
+            "nullable": false,
+            "customConstraints": "",
+            "default_dart": null,
+            "default_client_dart": null,
+            "dsl_features": []
+          },
+          {
+            "name": "amount_text",
+            "getter_name": "amountText",
+            "moor_type": "string",
+            "nullable": false,
+            "customConstraints": "",
+            "default_dart": null,
+            "default_client_dart": null,
+            "dsl_features": []
+          }
+        ],
+        "is_virtual": true,
+        "create_virtual_stmt": "CREATE VIRTUAL TABLE \"transactions_fts\" USING fts5(merchant, counterparty, note, amount_text, content='transactions_fts_src', content_rowid='id', tokenize='trigram remove_diacritics 1')",
+        "without_rowid": false,
+        "constraints": []
+      }
+    },
+    {
+      "id": 46,
+      "references": [
+        44
+      ],
+      "type": "table",
+      "data": {
+        "name": "transactions_fts_short",
+        "was_declared_in_moor": true,
+        "columns": [
+          {
+            "name": "merchant",
+            "getter_name": "merchant",
+            "moor_type": "string",
+            "nullable": false,
+            "customConstraints": "",
+            "default_dart": null,
+            "default_client_dart": null,
+            "dsl_features": []
+          },
+          {
+            "name": "counterparty",
+            "getter_name": "counterparty",
+            "moor_type": "string",
+            "nullable": false,
+            "customConstraints": "",
+            "default_dart": null,
+            "default_client_dart": null,
+            "dsl_features": []
+          }
+        ],
+        "is_virtual": true,
+        "create_virtual_stmt": "CREATE VIRTUAL TABLE \"transactions_fts_short\" USING fts5(merchant, counterparty, content='transactions_fts_src', content_rowid='id', tokenize='unicode61 remove_diacritics 2', prefix='1 2')",
+        "without_rowid": false,
+        "constraints": []
+      }
+    },
+    {
+      "id": 47,
+      "references": [
+        22
+      ],
+      "type": "view",
+      "data": {
+        "name": "transactions_fts_row",
+        "sql": "CREATE VIEW transactions_fts_row AS SELECT id AS txn_id, CASE WHEN merchant_norm IS NULL OR merchant_norm = merchant_raw THEN merchant_raw WHEN merchant_raw IS NULL THEN merchant_norm ELSE merchant_raw || ' ' || merchant_norm END AS merchant, counterparty_value AS counterparty, note, latin || ' ' || \"replace\"(\"replace\"(\"replace\"(\"replace\"(\"replace\"(\"replace\"(\"replace\"(\"replace\"(\"replace\"(\"replace\"(\"replace\"(latin, '0', '٠'), '1', '١'), '2', '٢'), '3', '٣'), '4', '٤'), '5', '٥'), '6', '٦'), '7', '٧'), '8', '٨'), '9', '٩'), '.', '٫') AS amount_text FROM (SELECT id, merchant_raw, merchant_norm, counterparty_value, note, CASE WHEN currency IN ('BIF', 'CLP', 'DJF', 'GNF', 'ISK', 'JPY', 'KMF', 'KRW', 'PYG', 'RWF', 'UGX', 'UYI', 'VND', 'VUV', 'XAF', 'XOF', 'XPF') THEN format('%d', amount_minor) WHEN currency IN ('BHD', 'IQD', 'JOD', 'KWD', 'LYD', 'OMR', 'TND') THEN format('%d.%03d', amount_minor / 1000, amount_minor % 1000) WHEN currency IN ('CLF', 'UYW') THEN format('%d.%04d', amount_minor / 10000, amount_minor % 10000) ELSE format('%d.%02d', amount_minor / 100, amount_minor % 100) END AS latin FROM transactions)",
+        "dart_info_name": "TransactionsFtsRow",
+        "columns": [
+          {
+            "name": "txn_id",
+            "getter_name": "txnId",
+            "moor_type": "string",
+            "nullable": false,
+            "customConstraints": null,
+            "default_dart": null,
+            "default_client_dart": null,
+            "dsl_features": []
+          },
+          {
+            "name": "merchant",
+            "getter_name": "merchant",
+            "moor_type": "string",
+            "nullable": true,
+            "customConstraints": null,
+            "default_dart": null,
+            "default_client_dart": null,
+            "dsl_features": []
+          },
+          {
+            "name": "counterparty",
+            "getter_name": "counterparty",
+            "moor_type": "string",
+            "nullable": true,
+            "customConstraints": null,
+            "default_dart": null,
+            "default_client_dart": null,
+            "dsl_features": []
+          },
+          {
+            "name": "note",
+            "getter_name": "note",
+            "moor_type": "string",
+            "nullable": true,
+            "customConstraints": null,
+            "default_dart": null,
+            "default_client_dart": null,
+            "dsl_features": []
+          },
+          {
+            "name": "amount_text",
+            "getter_name": "amountText",
+            "moor_type": "string",
+            "nullable": false,
+            "customConstraints": null,
+            "default_dart": null,
+            "default_client_dart": null,
+            "dsl_features": []
+          }
+        ]
+      }
+    },
+    {
+      "id": 48,
+      "references": [
+        22,
+        44,
+        47
+      ],
+      "type": "trigger",
+      "data": {
+        "on": 22,
+        "references_in_body": [
+          22,
+          44,
+          47
+        ],
+        "name": "trg_txn_fts_ai",
+        "sql": "CREATE TRIGGER trg_txn_fts_ai AFTER INSERT ON transactions\nBEGIN\n  INSERT INTO transactions_fts_src (txn_id, merchant, counterparty, note, amount_text)\n    SELECT txn_id, merchant, counterparty, note, amount_text\n    FROM transactions_fts_row WHERE txn_id = new.id;\nEND;"
+      }
+    },
+    {
+      "id": 49,
+      "references": [
+        22,
+        44,
+        47
+      ],
+      "type": "trigger",
+      "data": {
+        "on": 22,
+        "references_in_body": [
+          22,
+          44,
+          47
+        ],
+        "name": "trg_txn_fts_au",
+        "sql": "CREATE TRIGGER trg_txn_fts_au\n  AFTER UPDATE OF id, merchant_raw, merchant_norm, counterparty_value, note, amount_minor, currency\n  ON transactions\nBEGIN\n  DELETE FROM transactions_fts_src WHERE txn_id = old.id;\n  INSERT INTO transactions_fts_src (txn_id, merchant, counterparty, note, amount_text)\n    SELECT txn_id, merchant, counterparty, note, amount_text\n    FROM transactions_fts_row WHERE txn_id = new.id;\nEND;"
+      }
+    },
+    {
+      "id": 50,
+      "references": [
+        22,
+        44
+      ],
+      "type": "trigger",
+      "data": {
+        "on": 22,
+        "references_in_body": [
+          22,
+          44
+        ],
+        "name": "trg_txn_fts_ad",
+        "sql": "CREATE TRIGGER trg_txn_fts_ad AFTER DELETE ON transactions\nBEGIN\n  DELETE FROM transactions_fts_src WHERE txn_id = old.id;\nEND;"
+      }
+    },
+    {
+      "id": 51,
+      "references": [
+        44,
+        45,
+        46
+      ],
+      "type": "trigger",
+      "data": {
+        "on": 44,
+        "references_in_body": [
+          44,
+          45,
+          46
+        ],
+        "name": "trg_fts_src_ai",
+        "sql": "CREATE TRIGGER trg_fts_src_ai AFTER INSERT ON transactions_fts_src\nBEGIN\n  INSERT INTO transactions_fts (rowid, merchant, counterparty, note, amount_text)\n    VALUES (new.id, new.merchant, new.counterparty, new.note, new.amount_text);\n  INSERT INTO transactions_fts_short (rowid, merchant, counterparty)\n    VALUES (new.id, new.merchant, new.counterparty);\nEND;"
+      }
+    },
+    {
+      "id": 52,
+      "references": [
+        44,
+        45,
+        46
+      ],
+      "type": "trigger",
+      "data": {
+        "on": 44,
+        "references_in_body": [
+          44,
+          45,
+          46
+        ],
+        "name": "trg_fts_src_ad",
+        "sql": "CREATE TRIGGER trg_fts_src_ad AFTER DELETE ON transactions_fts_src\nBEGIN\n  INSERT INTO transactions_fts (transactions_fts, rowid, merchant, counterparty, note, amount_text)\n    VALUES ('delete', old.id, old.merchant, old.counterparty, old.note, old.amount_text);\n  INSERT INTO transactions_fts_short (transactions_fts_short, rowid, merchant, counterparty)\n    VALUES ('delete', old.id, old.merchant, old.counterparty);\nEND;"
+      }
+    },
+    {
+      "id": 53,
+      "references": [
+        44,
+        45,
+        46
+      ],
+      "type": "trigger",
+      "data": {
+        "on": 44,
+        "references_in_body": [
+          44,
+          45,
+          46
+        ],
+        "name": "trg_fts_src_au",
+        "sql": "CREATE TRIGGER trg_fts_src_au AFTER UPDATE ON transactions_fts_src\nBEGIN\n  INSERT INTO transactions_fts (transactions_fts, rowid, merchant, counterparty, note, amount_text)\n    VALUES ('delete', old.id, old.merchant, old.counterparty, old.note, old.amount_text);\n  INSERT INTO transactions_fts_short (transactions_fts_short, rowid, merchant, counterparty)\n    VALUES ('delete', old.id, old.merchant, old.counterparty);\n  INSERT INTO transactions_fts (rowid, merchant, counterparty, note, amount_text)\n    VALUES (new.id, new.merchant, new.counterparty, new.note, new.amount_text);\n  INSERT INTO transactions_fts_short (rowid, merchant, counterparty)\n    VALUES (new.id, new.merchant, new.counterparty);\nEND;"
+      }
+    },
+    {
+      "id": 54,
+      "references": [],
+      "type": "table",
+      "data": {
+        "name": "db_meta",
+        "was_declared_in_moor": false,
+        "columns": [
+          {
+            "name": "key",
+            "getter_name": "key",
+            "moor_type": "string",
+            "nullable": false,
+            "customConstraints": null,
+            "default_dart": null,
+            "default_client_dart": null,
+            "dsl_features": []
+          },
+          {
+            "name": "value",
+            "getter_name": "value",
+            "moor_type": "string",
+            "nullable": false,
+            "customConstraints": null,
+            "default_dart": null,
+            "default_client_dart": null,
+            "dsl_features": []
+          }
+        ],
+        "is_virtual": false,
+        "without_rowid": false,
+        "constraints": [],
+        "explicit_pk": [
+          "key"
+        ]
+      }
+    }
+  ],
+  "fixed_sql": [
+    {
+      "name": "catalog_merchants",
+      "sql": [
+        {
+          "dialect": "sqlite",
+          "sql": "CREATE TABLE IF NOT EXISTS \"catalog_merchants\" (\"id\" INTEGER NOT NULL PRIMARY KEY CHECK (id >= 1), \"canonical\" TEXT NOT NULL CHECK (length(canonical) BETWEEN 1 AND 200), \"name_ar\" TEXT, \"name_en\" TEXT, \"category_code\" TEXT NOT NULL CHECK (length(category_code) BETWEEN 2 AND 32 AND category_code GLOB '[a-z]*' AND category_code NOT GLOB '*[^a-z0-9_]*'), \"logo_key\" TEXT, \"version\" INTEGER NOT NULL CHECK (version >= 0));"
+        }
+      ]
+    },
+    {
+      "name": "catalog_aliases",
+      "sql": [
+        {
+          "dialect": "sqlite",
+          "sql": "CREATE TABLE IF NOT EXISTS \"catalog_aliases\" (\"id\" INTEGER NOT NULL PRIMARY KEY, \"merchant_id\" INTEGER NOT NULL REFERENCES catalog_merchants(id)ON DELETE CASCADE, \"alias_norm\" TEXT NOT NULL CHECK (length(alias_norm) BETWEEN 1 AND 64 AND alias_norm NOT GLOB '*[^a-z0-9 ]*' AND alias_norm NOT GLOB ' *' AND alias_norm NOT GLOB '* ' AND alias_norm NOT GLOB '*  *'), \"match\" TEXT NOT NULL CHECK (\"match\" IN ('exact', 'prefix', 'token')), UNIQUE(alias_norm, merchant_id));"
+        }
+      ]
+    },
+    {
+      "name": "ix_alias_merchant",
+      "sql": [
+        {
+          "dialect": "sqlite",
+          "sql": "CREATE INDEX ix_alias_merchant ON catalog_aliases (merchant_id)"
+        }
+      ]
+    },
+    {
+      "name": "catalog_alias_fts",
+      "sql": [
+        {
+          "dialect": "sqlite",
+          "sql": "CREATE VIRTUAL TABLE IF NOT EXISTS \"catalog_alias_fts\" USING fts5(alias_norm, content='catalog_aliases', content_rowid='id', tokenize='trigram');"
+        }
+      ]
+    },
+    {
+      "name": "trg_alias_fts_ai",
+      "sql": [
+        {
+          "dialect": "sqlite",
+          "sql": "CREATE TRIGGER trg_alias_fts_ai AFTER INSERT ON catalog_aliases BEGIN INSERT INTO catalog_alias_fts (\"rowid\", alias_norm) VALUES (new.id, new.alias_norm);END"
+        }
+      ]
+    },
+    {
+      "name": "trg_alias_fts_ad",
+      "sql": [
+        {
+          "dialect": "sqlite",
+          "sql": "CREATE TRIGGER trg_alias_fts_ad AFTER DELETE ON catalog_aliases BEGIN INSERT INTO catalog_alias_fts (catalog_alias_fts, \"rowid\", alias_norm) VALUES ('delete', old.id, old.alias_norm);END"
+        }
+      ]
+    },
+    {
+      "name": "trg_alias_fts_au",
+      "sql": [
+        {
+          "dialect": "sqlite",
+          "sql": "CREATE TRIGGER trg_alias_fts_au AFTER UPDATE OF id, alias_norm ON catalog_aliases BEGIN INSERT INTO catalog_alias_fts (catalog_alias_fts, \"rowid\", alias_norm) VALUES ('delete', old.id, old.alias_norm);INSERT INTO catalog_alias_fts (\"rowid\", alias_norm) VALUES (new.id, new.alias_norm);END"
+        }
+      ]
+    },
+    {
+      "name": "catalog_keywords",
+      "sql": [
+        {
+          "dialect": "sqlite",
+          "sql": "CREATE TABLE IF NOT EXISTS \"catalog_keywords\" (\"keyword_norm\" TEXT NOT NULL CHECK (length(keyword_norm) BETWEEN 1 AND 64 AND keyword_norm NOT GLOB('*[' || char(1) || '-' || char(31) || char(127) || '-' || char(159) || ']*')AND keyword_norm NOT GLOB ' *' AND keyword_norm NOT GLOB '* ' AND keyword_norm NOT GLOB '*  *'), \"lang\" TEXT NOT NULL CHECK (lang GLOB '[a-z][a-z]'), \"category_code\" TEXT NOT NULL CHECK (length(category_code) BETWEEN 2 AND 32 AND category_code GLOB '[a-z]*' AND category_code NOT GLOB '*[^a-z0-9_]*'), \"weight\" INTEGER NOT NULL CHECK (typeof(weight) = 'integer' AND weight BETWEEN 0 AND 100), PRIMARY KEY(keyword_norm, lang));"
+        }
+      ]
+    },
+    {
+      "name": "catalog_meta",
+      "sql": [
+        {
+          "dialect": "sqlite",
+          "sql": "CREATE TABLE IF NOT EXISTS \"catalog_meta\" (\"id\" INTEGER NOT NULL PRIMARY KEY CHECK (id = 1), \"version\" INTEGER NOT NULL CHECK (version >= 0), \"applied_at\" INTEGER NOT NULL, \"signature_kid\" TEXT NOT NULL CHECK (length(signature_kid) BETWEEN 1 AND 128));"
+        }
+      ]
+    },
+    {
+      "name": "categories",
+      "sql": [
+        {
+          "dialect": "sqlite",
+          "sql": "CREATE TABLE IF NOT EXISTS \"categories\" (\"id\" TEXT NOT NULL PRIMARY KEY, \"system_code\" TEXT UNIQUE, \"parent_id\" TEXT REFERENCES categories(id), \"name_ar\" TEXT NOT NULL, \"name_en\" TEXT NOT NULL, \"icon\" TEXT NOT NULL, \"color\" TEXT NOT NULL, \"bucket\" TEXT NOT NULL CHECK (bucket IN ('needs', 'wants', 'obligations', 'savings', 'income', 'giving')), \"is_custom\" INTEGER NOT NULL DEFAULT 0 CHECK (is_custom IN (0, 1)), \"is_archived\" INTEGER NOT NULL DEFAULT 0 CHECK (is_archived IN (0, 1)), \"sort\" INTEGER NOT NULL);"
+        }
+      ]
+    },
+    {
+      "name": "merchant_rules",
+      "sql": [
+        {
+          "dialect": "sqlite",
+          "sql": "CREATE TABLE IF NOT EXISTS \"merchant_rules\" (\"id\" TEXT NOT NULL PRIMARY KEY, \"match_kind\" TEXT NOT NULL CHECK (match_kind IN ('catalog_merchant', 'merchant_norm', 'counterparty')), \"match_value\" TEXT NOT NULL, \"category_id\" TEXT NOT NULL REFERENCES categories(id), \"created_at\" INTEGER NOT NULL, \"last_applied_at\" INTEGER, UNIQUE(match_kind, match_value), CHECK(match_kind <> 'merchant_norm' OR(length(match_value) BETWEEN 1 AND 64 AND match_value NOT GLOB '*[^a-z0-9 ]*' AND match_value NOT GLOB ' *' AND match_value NOT GLOB '* ' AND match_value NOT GLOB '*  *')), CHECK(match_kind <> 'catalog_merchant' OR(length(match_value) BETWEEN 1 AND 10 AND match_value GLOB '[1-9]*' AND match_value NOT GLOB '*[^0-9]*')), CHECK(match_kind <> 'counterparty' OR(length(match_value) BETWEEN 1 AND 128 AND match_value NOT GLOB('*[' || char(1) || '-' || char(31) || char(127) || '-' || char(159) || ']*'))));"
+        }
+      ]
+    },
+    {
+      "name": "ix_rules_category",
+      "sql": [
+        {
+          "dialect": "sqlite",
+          "sql": "CREATE INDEX ix_rules_category ON merchant_rules (category_id)"
+        }
+      ]
+    },
+    {
+      "name": "budgets",
+      "sql": [
+        {
+          "dialect": "sqlite",
+          "sql": "CREATE TABLE IF NOT EXISTS \"budgets\" (\"id\" TEXT NOT NULL PRIMARY KEY, \"category_id\" TEXT REFERENCES categories(id), \"currency\" TEXT NOT NULL CHECK (currency GLOB '[A-Z][A-Z][A-Z]'), \"limit_minor\" INTEGER NOT NULL CHECK (typeof(limit_minor) = 'integer' AND limit_minor BETWEEN 0 AND 9007199254740991), \"period\" TEXT NOT NULL CHECK (period IN ('cycle', 'annual')), \"rollover\" INTEGER NOT NULL DEFAULT 0 CHECK (rollover IN (0, 1)), \"thresholds\" TEXT NOT NULL DEFAULT '[80,100]' CHECK (CASE WHEN json_valid(thresholds) THEN json_type(thresholds) = 'array' ELSE 0 END), \"created_at\" INTEGER NOT NULL, UNIQUE(category_id, currency, period));"
+        }
+      ]
+    },
+    {
+      "name": "ux_budgets_overall",
+      "sql": [
+        {
+          "dialect": "sqlite",
+          "sql": "CREATE UNIQUE INDEX ux_budgets_overall ON budgets (currency, period) WHERE category_id IS NULL"
+        }
+      ]
+    },
+    {
+      "name": "fired_alerts",
+      "sql": [
+        {
+          "dialect": "sqlite",
+          "sql": "CREATE TABLE IF NOT EXISTS \"fired_alerts\" (\"kind\" TEXT NOT NULL CHECK (length(kind) BETWEEN 1 AND 64 AND kind NOT GLOB '*[^a-z0-9_]*'), \"subject_id\" TEXT NOT NULL CHECK (length(subject_id) BETWEEN 1 AND 128), \"period_key\" TEXT NOT NULL CHECK (length(period_key) BETWEEN 1 AND 64), \"threshold\" INTEGER NOT NULL DEFAULT 0 CHECK (typeof(threshold) = 'integer' AND threshold >= 0), \"fired_at\" INTEGER NOT NULL, PRIMARY KEY(kind, subject_id, period_key, threshold));"
+        }
+      ]
+    },
+    {
+      "name": "cycle_summaries",
+      "sql": [
+        {
+          "dialect": "sqlite",
+          "sql": "CREATE TABLE IF NOT EXISTS \"cycle_summaries\" (\"cycle_start\" TEXT NOT NULL CHECK (date(cycle_start) IS cycle_start), \"currency\" TEXT NOT NULL CHECK (currency GLOB '[A-Z][A-Z][A-Z]'), \"account_filter\" TEXT NOT NULL DEFAULT '*' CHECK (length(account_filter) BETWEEN 1 AND 1024), \"income_minor\" INTEGER NOT NULL CHECK (typeof(income_minor) = 'integer' AND income_minor BETWEEN -9007199254740991 AND 9007199254740991), \"spend_minor\" INTEGER NOT NULL CHECK (typeof(spend_minor) = 'integer' AND spend_minor BETWEEN -9007199254740991 AND 9007199254740991), \"by_category\" TEXT NOT NULL CHECK (CASE WHEN json_valid(by_category) THEN json_type(by_category) = 'object' ELSE 0 END), \"computed_at\" INTEGER NOT NULL, PRIMARY KEY(cycle_start, currency, account_filter));"
+        }
+      ]
+    },
+    {
+      "name": "accounts",
+      "sql": [
+        {
+          "dialect": "sqlite",
+          "sql": "CREATE TABLE IF NOT EXISTS \"accounts\" (\"id\" TEXT NOT NULL PRIMARY KEY, \"institution_code\" TEXT, \"kind\" TEXT NOT NULL CHECK (kind IN ('debit', 'credit', 'account', 'wallet', 'bnpl', 'cash', 'multi_currency')), \"label\" TEXT NOT NULL CHECK (length(label) BETWEEN 1 AND 30), \"last4\" TEXT CHECK (last4 IS NULL OR(length(last4) BETWEEN 2 AND 4 AND last4 NOT GLOB '*[^0-9]*')), \"default_currency\" TEXT NOT NULL CHECK (default_currency GLOB '[A-Z][A-Z][A-Z]'), \"credit_limit_minor\" INTEGER CHECK (credit_limit_minor IS NULL OR(typeof(credit_limit_minor) = 'integer' AND credit_limit_minor BETWEEN 0 AND 9007199254740991)), \"statement_due_day\" INTEGER CHECK (statement_due_day BETWEEN 1 AND 31), \"is_hidden\" INTEGER NOT NULL DEFAULT 0 CHECK (is_hidden IN (0, 1)), \"merged_into_id\" TEXT REFERENCES accounts(id) CHECK (merged_into_id IS NULL OR merged_into_id <> id), \"is_default_cash\" INTEGER NOT NULL DEFAULT 0 CHECK (is_default_cash IN (0, 1) AND(is_default_cash = 0 OR kind = 'cash')), \"created_at\" INTEGER NOT NULL, \"updated_at\" INTEGER NOT NULL);"
+        }
+      ]
+    },
+    {
+      "name": "recurring_items",
+      "sql": [
+        {
+          "dialect": "sqlite",
+          "sql": "CREATE TABLE IF NOT EXISTS \"recurring_items\" (\"id\" TEXT NOT NULL PRIMARY KEY, \"kind\" TEXT NOT NULL CHECK (kind IN ('subscription', 'installment', 'card_due', 'gameya', 'bill')), \"status\" TEXT NOT NULL CHECK (status IN ('suggested', 'active', 'dismissed', 'completed')), \"name\" TEXT NOT NULL CHECK (length(name) BETWEEN 1 AND 60), \"merchant_norm\" TEXT CHECK (merchant_norm IS NULL OR(length(merchant_norm) BETWEEN 1 AND 64 AND merchant_norm NOT GLOB '*[^a-z0-9 ]*' AND merchant_norm NOT GLOB ' *' AND merchant_norm NOT GLOB '* ' AND merchant_norm NOT GLOB '*  *')), \"account_id\" TEXT REFERENCES accounts(id), \"amount_minor\" INTEGER NOT NULL CHECK (typeof(amount_minor) = 'integer' AND amount_minor BETWEEN 0 AND 9007199254740991), \"currency\" TEXT NOT NULL CHECK (currency GLOB '[A-Z][A-Z][A-Z]'), \"cadence\" TEXT NOT NULL CHECK (cadence IN ('monthly', 'yearly', 'weekly', 'custom_days')), \"cadence_days\" INTEGER CHECK (cadence_days IS NULL OR cadence_days BETWEEN 1 AND 3660), \"due_day\" INTEGER CHECK (due_day IS NULL OR due_day BETWEEN 1 AND 31), \"next_due_date\" TEXT CHECK (next_due_date IS NULL OR date(next_due_date) IS next_due_date), \"total_count\" INTEGER CHECK (total_count IS NULL OR total_count >= 1), \"paid_count\" INTEGER NOT NULL DEFAULT 0 CHECK (paid_count >= 0 AND(total_count IS NULL OR paid_count <= total_count)), \"reminder_days\" INTEGER NOT NULL DEFAULT 3 CHECK (reminder_days BETWEEN 0 AND 60), \"created_at\" INTEGER NOT NULL, CHECK((cadence = 'custom_days')=(cadence_days IS NOT NULL)));"
+        }
+      ]
+    },
+    {
+      "name": "ix_recurring_due",
+      "sql": [
+        {
+          "dialect": "sqlite",
+          "sql": "CREATE INDEX ix_recurring_due ON recurring_items (next_due_date) WHERE status = 'active'"
+        }
+      ]
+    },
+    {
+      "name": "ix_recurring_account",
+      "sql": [
+        {
+          "dialect": "sqlite",
+          "sql": "CREATE INDEX ix_recurring_account ON recurring_items (account_id) WHERE account_id IS NOT NULL"
+        }
+      ]
+    },
+    {
+      "name": "raw_messages",
+      "sql": [
+        {
+          "dialect": "sqlite",
+          "sql": "CREATE TABLE IF NOT EXISTS \"raw_messages\" (\"id\" TEXT NOT NULL PRIMARY KEY, \"channel\" TEXT NOT NULL CHECK (channel IN ('sms', 'notification', 'shortcut_message', 'apple_pay', 'share', 'paste', 'ocr', 'pdf', 'csv')), \"sender\" TEXT, \"institution_code\" TEXT, \"body\" TEXT NOT NULL, \"body_hash\" TEXT NOT NULL CHECK (length(body_hash) = 64 AND body_hash NOT GLOB '*[^0-9a-f]*'), \"received_at\" INTEGER NOT NULL, \"sim_slot\" INTEGER, \"parse_status\" TEXT NOT NULL CHECK (parse_status IN ('parsed', 'review', 'dismissed', 'reparse_pending')), \"template_id\" TEXT, \"template_version\" INTEGER, \"registry_version\" INTEGER NOT NULL, \"created_at\" INTEGER NOT NULL);"
+        }
+      ]
+    },
+    {
+      "name": "transfer_pairs",
+      "sql": [
+        {
+          "dialect": "sqlite",
+          "sql": "CREATE TABLE IF NOT EXISTS \"transfer_pairs\" (\"id\" TEXT NOT NULL PRIMARY KEY, \"out_txn_id\" TEXT NOT NULL UNIQUE REFERENCES transactions(id)ON DELETE CASCADE, \"in_txn_id\" TEXT UNIQUE REFERENCES transactions(id)ON DELETE CASCADE, \"kind\" TEXT NOT NULL CHECK (kind IN ('auto', 'manual', 'fx_conversion', 'card_settlement', 'cross_currency')), \"created_at\" INTEGER NOT NULL, CHECK(in_txn_id IS NULL OR in_txn_id <> out_txn_id));"
+        }
+      ]
+    },
+    {
+      "name": "transactions",
+      "sql": [
+        {
+          "dialect": "sqlite",
+          "sql": "CREATE TABLE IF NOT EXISTS \"transactions\" (\"id\" TEXT NOT NULL PRIMARY KEY, \"account_id\" TEXT NOT NULL REFERENCES accounts(id), \"raw_message_id\" TEXT REFERENCES raw_messages(id)ON DELETE SET NULL, \"source\" TEXT NOT NULL CHECK (source IN ('sms', 'notification', 'shortcut', 'apple_pay', 'ocr', 'pdf', 'csv', 'voice', 'manual', 'share')), \"direction\" TEXT NOT NULL CHECK (direction IN ('expense', 'income', 'transfer_out', 'transfer_in', 'refund', 'fee')), \"status\" TEXT NOT NULL DEFAULT 'posted' CHECK (status IN ('posted', 'pending', 'declined', 'reversed')), \"amount_minor\" INTEGER NOT NULL CHECK (typeof(amount_minor) = 'integer' AND amount_minor BETWEEN 0 AND 9007199254740991), \"currency\" TEXT NOT NULL CHECK (currency GLOB '[A-Z][A-Z][A-Z]'), \"original_amount_minor\" INTEGER CHECK (original_amount_minor IS NULL OR(typeof(original_amount_minor) = 'integer' AND original_amount_minor BETWEEN 0 AND 9007199254740991)), \"original_currency\" TEXT CHECK (original_currency IS NULL OR original_currency GLOB '[A-Z][A-Z][A-Z]'), \"occurred_at\" INTEGER NOT NULL, \"occurred_tz_offset_min\" INTEGER NOT NULL CHECK (occurred_tz_offset_min BETWEEN -1080 AND 1080), \"merchant_raw\" TEXT, \"merchant_norm\" TEXT, \"catalog_merchant_id\" INTEGER, \"counterparty_kind\" TEXT CHECK (counterparty_kind IN ('merchant', 'ipa', 'phone', 'person', 'bank', 'own_account')), \"counterparty_value\" TEXT, \"category_id\" TEXT REFERENCES categories(id), \"category_source\" TEXT NOT NULL CHECK (category_source IN ('user', 'user_rule', 'catalog', 'heuristic', 'none')), \"is_user_verified\" INTEGER NOT NULL DEFAULT 0 CHECK (is_user_verified IN (0, 1)), \"transfer_pair_id\" TEXT REFERENCES transfer_pairs(id)ON DELETE SET NULL, \"is_internal\" INTEGER NOT NULL DEFAULT 0 CHECK (is_internal IN (0, 1)), \"reference_no\" TEXT, \"balance_after_minor\" INTEGER CHECK (balance_after_minor IS NULL OR(typeof(balance_after_minor) = 'integer' AND balance_after_minor BETWEEN -9007199254740991 AND 9007199254740991)), \"template_id\" TEXT, \"parse_confidence\" REAL CHECK (parse_confidence IS NULL OR parse_confidence BETWEEN 0 AND 1), \"dedupe_key\" TEXT, \"note\" TEXT, \"deleted_at\" INTEGER, \"created_at\" INTEGER NOT NULL, \"updated_at\" INTEGER NOT NULL, CHECK((original_amount_minor IS NULL)=(original_currency IS NULL)));"
+        }
+      ]
+    },
+    {
+      "name": "recurring_occurrences",
+      "sql": [
+        {
+          "dialect": "sqlite",
+          "sql": "CREATE TABLE IF NOT EXISTS \"recurring_occurrences\" (\"item_id\" TEXT NOT NULL REFERENCES recurring_items(id)ON DELETE CASCADE, \"due_date\" TEXT NOT NULL CHECK (date(due_date) IS due_date), \"txn_id\" TEXT REFERENCES transactions(id)ON DELETE SET NULL, \"paid_at\" INTEGER, PRIMARY KEY(item_id, due_date));"
+        }
+      ]
+    },
+    {
+      "name": "ix_recurring_occ_txn",
+      "sql": [
+        {
+          "dialect": "sqlite",
+          "sql": "CREATE INDEX ix_recurring_occ_txn ON recurring_occurrences (txn_id) WHERE txn_id IS NOT NULL"
+        }
+      ]
+    },
+    {
+      "name": "split_participants",
+      "sql": [
+        {
+          "dialect": "sqlite",
+          "sql": "CREATE TABLE IF NOT EXISTS \"split_participants\" (\"id\" TEXT NOT NULL PRIMARY KEY, \"expense_txn_id\" TEXT NOT NULL REFERENCES transactions(id)ON DELETE CASCADE, \"name\" TEXT NOT NULL, \"share_minor\" INTEGER NOT NULL CHECK (typeof(share_minor) = 'integer' AND share_minor BETWEEN 0 AND 9007199254740991), \"created_at\" INTEGER NOT NULL);"
+        }
+      ]
+    },
+    {
+      "name": "offset_links",
+      "sql": [
+        {
+          "dialect": "sqlite",
+          "sql": "CREATE TABLE IF NOT EXISTS \"offset_links\" (\"id\" TEXT NOT NULL PRIMARY KEY, \"kind\" TEXT NOT NULL CHECK (kind IN ('refund', 'reimbursement')), \"expense_txn_id\" TEXT NOT NULL REFERENCES transactions(id)ON DELETE CASCADE, \"source_txn_id\" TEXT NOT NULL REFERENCES transactions(id)ON DELETE CASCADE, \"amount_minor\" INTEGER NOT NULL CHECK (typeof(amount_minor) = 'integer' AND amount_minor BETWEEN 1 AND 9007199254740991), \"participant_id\" TEXT REFERENCES split_participants(id)ON DELETE SET NULL, \"created_at\" INTEGER NOT NULL, UNIQUE(expense_txn_id, source_txn_id), CHECK(expense_txn_id <> source_txn_id));"
+        }
+      ]
+    },
+    {
+      "name": "ix_offset_participant",
+      "sql": [
+        {
+          "dialect": "sqlite",
+          "sql": "CREATE INDEX ix_offset_participant ON offset_links (participant_id) WHERE participant_id IS NOT NULL"
+        }
+      ]
+    },
+    {
+      "name": "trg_split_participant_move",
+      "sql": [
+        {
+          "dialect": "sqlite",
+          "sql": "CREATE TRIGGER trg_split_participant_move BEFORE UPDATE OF expense_txn_id ON split_participants WHEN new.expense_txn_id IS NOT old.expense_txn_id BEGIN SELECT RAISE (ABORT, 'OFFSET_PARTICIPANT_MISMATCH') WHERE EXISTS (SELECT 1 FROM offset_links WHERE participant_id = old.id);END"
+        }
+      ]
+    },
+    {
+      "name": "ux_accounts_inst_last4",
+      "sql": [
+        {
+          "dialect": "sqlite",
+          "sql": "CREATE UNIQUE INDEX ux_accounts_inst_last4 ON accounts (institution_code, last4) WHERE last4 IS NOT NULL AND merged_into_id IS NULL"
+        }
+      ]
+    },
+    {
+      "name": "ux_accounts_default_cash",
+      "sql": [
+        {
+          "dialect": "sqlite",
+          "sql": "CREATE UNIQUE INDEX ux_accounts_default_cash ON accounts (is_default_cash) WHERE is_default_cash = 1"
+        }
+      ]
+    },
+    {
+      "name": "account_balances",
+      "sql": [
+        {
+          "dialect": "sqlite",
+          "sql": "CREATE TABLE IF NOT EXISTS \"account_balances\" (\"account_id\" TEXT NOT NULL REFERENCES accounts(id)ON DELETE CASCADE, \"currency\" TEXT NOT NULL CHECK (currency GLOB '[A-Z][A-Z][A-Z]'), \"balance_minor\" INTEGER CHECK (balance_minor IS NULL OR(typeof(balance_minor) = 'integer' AND balance_minor BETWEEN -9007199254740991 AND 9007199254740991)), \"available_minor\" INTEGER CHECK (available_minor IS NULL OR(typeof(available_minor) = 'integer' AND available_minor BETWEEN -9007199254740991 AND 9007199254740991)), \"as_of\" INTEGER NOT NULL, \"source_txn_id\" TEXT REFERENCES transactions(id)ON DELETE SET NULL, PRIMARY KEY(account_id, currency));"
+        }
+      ]
+    },
+    {
+      "name": "ux_raw_body_hash",
+      "sql": [
+        {
+          "dialect": "sqlite",
+          "sql": "CREATE UNIQUE INDEX ux_raw_body_hash ON raw_messages (body_hash)"
+        }
+      ]
+    },
+    {
+      "name": "ix_txn_account_time",
+      "sql": [
+        {
+          "dialect": "sqlite",
+          "sql": "CREATE INDEX ix_txn_account_time ON transactions (account_id, occurred_at) WHERE deleted_at IS NULL"
+        }
+      ]
+    },
+    {
+      "name": "ix_txn_category_time",
+      "sql": [
+        {
+          "dialect": "sqlite",
+          "sql": "CREATE INDEX ix_txn_category_time ON transactions (category_id, occurred_at) WHERE deleted_at IS NULL"
+        }
+      ]
+    },
+    {
+      "name": "ix_txn_currency_time",
+      "sql": [
+        {
+          "dialect": "sqlite",
+          "sql": "CREATE INDEX ix_txn_currency_time ON transactions (currency, occurred_at, direction) WHERE deleted_at IS NULL"
+        }
+      ]
+    },
+    {
+      "name": "ix_txn_merchant",
+      "sql": [
+        {
+          "dialect": "sqlite",
+          "sql": "CREATE INDEX ix_txn_merchant ON transactions (merchant_norm, occurred_at)"
+        }
+      ]
+    },
+    {
+      "name": "ix_txn_dedupe",
+      "sql": [
+        {
+          "dialect": "sqlite",
+          "sql": "CREATE INDEX ix_txn_dedupe ON transactions (dedupe_key, occurred_at)"
+        }
+      ]
+    },
+    {
+      "name": "ix_txn_category_source",
+      "sql": [
+        {
+          "dialect": "sqlite",
+          "sql": "CREATE INDEX ix_txn_category_source ON transactions (category_source) WHERE is_user_verified = 0"
+        }
+      ]
+    },
+    {
+      "name": "ix_offset_source",
+      "sql": [
+        {
+          "dialect": "sqlite",
+          "sql": "CREATE INDEX ix_offset_source ON offset_links (source_txn_id)"
+        }
+      ]
+    },
+    {
+      "name": "ix_split_expense",
+      "sql": [
+        {
+          "dialect": "sqlite",
+          "sql": "CREATE INDEX ix_split_expense ON split_participants (expense_txn_id)"
+        }
+      ]
+    },
+    {
+      "name": "trg_offset_links_bi",
+      "sql": [
+        {
+          "dialect": "sqlite",
+          "sql": "CREATE TRIGGER trg_offset_links_bi BEFORE INSERT ON offset_links BEGIN SELECT RAISE (ABORT, 'OFFSET_CURRENCY_MISMATCH') WHERE (SELECT currency FROM transactions WHERE id = new.expense_txn_id) IS NOT (SELECT currency FROM transactions WHERE id = new.source_txn_id) AND EXISTS (SELECT 1 FROM transactions WHERE id = new.expense_txn_id) AND EXISTS (SELECT 1 FROM transactions WHERE id = new.source_txn_id);SELECT RAISE (ABORT, 'OFFSET_PARTICIPANT_MISMATCH') WHERE new.participant_id IS NOT NULL AND NOT EXISTS (SELECT 1 FROM split_participants WHERE id = new.participant_id AND expense_txn_id = new.expense_txn_id);SELECT RAISE (ABORT, 'OFFSET_EXCEEDS_EXPENSE') WHERE new.amount_minor + (SELECT coalesce(sum(amount_minor), 0) FROM offset_links WHERE expense_txn_id = new.expense_txn_id) > (SELECT amount_minor FROM transactions WHERE id = new.expense_txn_id);SELECT RAISE (ABORT, 'OFFSET_EXCEEDS_SOURCE') WHERE new.amount_minor + (SELECT coalesce(sum(amount_minor), 0) FROM offset_links WHERE source_txn_id = new.source_txn_id) > (SELECT amount_minor FROM transactions WHERE id = new.source_txn_id);END"
+        }
+      ]
+    },
+    {
+      "name": "trg_offset_links_bu",
+      "sql": [
+        {
+          "dialect": "sqlite",
+          "sql": "CREATE TRIGGER trg_offset_links_bu BEFORE UPDATE ON offset_links BEGIN SELECT RAISE (ABORT, 'OFFSET_CURRENCY_MISMATCH') WHERE (SELECT currency FROM transactions WHERE id = new.expense_txn_id) IS NOT (SELECT currency FROM transactions WHERE id = new.source_txn_id) AND EXISTS (SELECT 1 FROM transactions WHERE id = new.expense_txn_id) AND EXISTS (SELECT 1 FROM transactions WHERE id = new.source_txn_id);SELECT RAISE (ABORT, 'OFFSET_PARTICIPANT_MISMATCH') WHERE new.participant_id IS NOT NULL AND NOT EXISTS (SELECT 1 FROM split_participants WHERE id = new.participant_id AND expense_txn_id = new.expense_txn_id);SELECT RAISE (ABORT, 'OFFSET_EXCEEDS_EXPENSE') WHERE new.amount_minor + (SELECT coalesce(sum(amount_minor), 0) FROM offset_links WHERE expense_txn_id = new.expense_txn_id AND id <> old.id) > (SELECT amount_minor FROM transactions WHERE id = new.expense_txn_id);SELECT RAISE (ABORT, 'OFFSET_EXCEEDS_SOURCE') WHERE new.amount_minor + (SELECT coalesce(sum(amount_minor), 0) FROM offset_links WHERE source_txn_id = new.source_txn_id AND id <> old.id) > (SELECT amount_minor FROM transactions WHERE id = new.source_txn_id);END"
+        }
+      ]
+    },
+    {
+      "name": "trg_txn_offset_bu",
+      "sql": [
+        {
+          "dialect": "sqlite",
+          "sql": "CREATE TRIGGER trg_txn_offset_bu BEFORE UPDATE OF amount_minor, currency ON transactions BEGIN SELECT RAISE (ABORT, 'OFFSET_CURRENCY_MISMATCH') WHERE new.currency IS NOT old.currency AND EXISTS (SELECT 1 FROM offset_links WHERE expense_txn_id = old.id OR source_txn_id = old.id);SELECT RAISE (ABORT, 'OFFSET_EXCEEDS_EXPENSE') WHERE (SELECT coalesce(sum(amount_minor), 0) FROM offset_links WHERE expense_txn_id = old.id) > new.amount_minor;SELECT RAISE (ABORT, 'OFFSET_EXCEEDS_SOURCE') WHERE (SELECT coalesce(sum(amount_minor), 0) FROM offset_links WHERE source_txn_id = old.id) > new.amount_minor;END"
+        }
+      ]
+    },
+    {
+      "name": "transactions_fts_src",
+      "sql": [
+        {
+          "dialect": "sqlite",
+          "sql": "CREATE TABLE IF NOT EXISTS \"transactions_fts_src\" (\"id\" INTEGER NOT NULL PRIMARY KEY, \"txn_id\" TEXT NOT NULL UNIQUE, \"merchant\" TEXT, \"counterparty\" TEXT, \"note\" TEXT, \"amount_text\" TEXT NOT NULL);"
+        }
+      ]
+    },
+    {
+      "name": "transactions_fts",
+      "sql": [
+        {
+          "dialect": "sqlite",
+          "sql": "CREATE VIRTUAL TABLE IF NOT EXISTS \"transactions_fts\" USING fts5(merchant, counterparty, note, amount_text, content='transactions_fts_src', content_rowid='id', tokenize='trigram remove_diacritics 1');"
+        }
+      ]
+    },
+    {
+      "name": "transactions_fts_short",
+      "sql": [
+        {
+          "dialect": "sqlite",
+          "sql": "CREATE VIRTUAL TABLE IF NOT EXISTS \"transactions_fts_short\" USING fts5(merchant, counterparty, content='transactions_fts_src', content_rowid='id', tokenize='unicode61 remove_diacritics 2', prefix='1 2');"
+        }
+      ]
+    },
+    {
+      "name": "transactions_fts_row",
+      "sql": [
+        {
+          "dialect": "sqlite",
+          "sql": "CREATE VIEW transactions_fts_row AS SELECT id AS txn_id, CASE WHEN merchant_norm IS NULL OR merchant_norm = merchant_raw THEN merchant_raw WHEN merchant_raw IS NULL THEN merchant_norm ELSE merchant_raw || ' ' || merchant_norm END AS merchant, counterparty_value AS counterparty, note, latin || ' ' || \"replace\"(\"replace\"(\"replace\"(\"replace\"(\"replace\"(\"replace\"(\"replace\"(\"replace\"(\"replace\"(\"replace\"(\"replace\"(latin, '0', '٠'), '1', '١'), '2', '٢'), '3', '٣'), '4', '٤'), '5', '٥'), '6', '٦'), '7', '٧'), '8', '٨'), '9', '٩'), '.', '٫') AS amount_text FROM (SELECT id, merchant_raw, merchant_norm, counterparty_value, note, CASE WHEN currency IN ('BIF', 'CLP', 'DJF', 'GNF', 'ISK', 'JPY', 'KMF', 'KRW', 'PYG', 'RWF', 'UGX', 'UYI', 'VND', 'VUV', 'XAF', 'XOF', 'XPF') THEN format('%d', amount_minor) WHEN currency IN ('BHD', 'IQD', 'JOD', 'KWD', 'LYD', 'OMR', 'TND') THEN format('%d.%03d', amount_minor / 1000, amount_minor % 1000) WHEN currency IN ('CLF', 'UYW') THEN format('%d.%04d', amount_minor / 10000, amount_minor % 10000) ELSE format('%d.%02d', amount_minor / 100, amount_minor % 100) END AS latin FROM transactions)"
+        }
+      ]
+    },
+    {
+      "name": "trg_txn_fts_ai",
+      "sql": [
+        {
+          "dialect": "sqlite",
+          "sql": "CREATE TRIGGER trg_txn_fts_ai AFTER INSERT ON transactions BEGIN INSERT INTO transactions_fts_src (txn_id, merchant, counterparty, note, amount_text) SELECT txn_id, merchant, counterparty, note, amount_text FROM transactions_fts_row WHERE txn_id = new.id;END"
+        }
+      ]
+    },
+    {
+      "name": "trg_txn_fts_au",
+      "sql": [
+        {
+          "dialect": "sqlite",
+          "sql": "CREATE TRIGGER trg_txn_fts_au AFTER UPDATE OF id, merchant_raw, merchant_norm, counterparty_value, note, amount_minor, currency ON transactions BEGIN DELETE FROM transactions_fts_src WHERE txn_id = old.id;INSERT INTO transactions_fts_src (txn_id, merchant, counterparty, note, amount_text) SELECT txn_id, merchant, counterparty, note, amount_text FROM transactions_fts_row WHERE txn_id = new.id;END"
+        }
+      ]
+    },
+    {
+      "name": "trg_txn_fts_ad",
+      "sql": [
+        {
+          "dialect": "sqlite",
+          "sql": "CREATE TRIGGER trg_txn_fts_ad AFTER DELETE ON transactions BEGIN DELETE FROM transactions_fts_src WHERE txn_id = old.id;END"
+        }
+      ]
+    },
+    {
+      "name": "trg_fts_src_ai",
+      "sql": [
+        {
+          "dialect": "sqlite",
+          "sql": "CREATE TRIGGER trg_fts_src_ai AFTER INSERT ON transactions_fts_src BEGIN INSERT INTO transactions_fts (\"rowid\", merchant, counterparty, note, amount_text) VALUES (new.id, new.merchant, new.counterparty, new.note, new.amount_text);INSERT INTO transactions_fts_short (\"rowid\", merchant, counterparty) VALUES (new.id, new.merchant, new.counterparty);END"
+        }
+      ]
+    },
+    {
+      "name": "trg_fts_src_ad",
+      "sql": [
+        {
+          "dialect": "sqlite",
+          "sql": "CREATE TRIGGER trg_fts_src_ad AFTER DELETE ON transactions_fts_src BEGIN INSERT INTO transactions_fts (transactions_fts, \"rowid\", merchant, counterparty, note, amount_text) VALUES ('delete', old.id, old.merchant, old.counterparty, old.note, old.amount_text);INSERT INTO transactions_fts_short (transactions_fts_short, \"rowid\", merchant, counterparty) VALUES ('delete', old.id, old.merchant, old.counterparty);END"
+        }
+      ]
+    },
+    {
+      "name": "trg_fts_src_au",
+      "sql": [
+        {
+          "dialect": "sqlite",
+          "sql": "CREATE TRIGGER trg_fts_src_au AFTER UPDATE ON transactions_fts_src BEGIN INSERT INTO transactions_fts (transactions_fts, \"rowid\", merchant, counterparty, note, amount_text) VALUES ('delete', old.id, old.merchant, old.counterparty, old.note, old.amount_text);INSERT INTO transactions_fts_short (transactions_fts_short, \"rowid\", merchant, counterparty) VALUES ('delete', old.id, old.merchant, old.counterparty);INSERT INTO transactions_fts (\"rowid\", merchant, counterparty, note, amount_text) VALUES (new.id, new.merchant, new.counterparty, new.note, new.amount_text);INSERT INTO transactions_fts_short (\"rowid\", merchant, counterparty) VALUES (new.id, new.merchant, new.counterparty);END"
+        }
+      ]
+    },
+    {
+      "name": "db_meta",
+      "sql": [
+        {
+          "dialect": "sqlite",
+          "sql": "CREATE TABLE IF NOT EXISTS \"db_meta\" (\"key\" TEXT NOT NULL, \"value\" TEXT NOT NULL, PRIMARY KEY (\"key\"));"
+        }
+      ]
+    }
+  ]
+}

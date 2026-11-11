@@ -12,10 +12,12 @@
     <!-- T-124 FU-011: the install endpoints' live contract tests run against a real PostgreSQL. -->
     <PackageReference Include="Npgsql" />
     <PackageReference Include="Testcontainers.PostgreSql" />
+    <PackageReference Include="WireMock.Net.Minimal" />
   </ItemGroup>
 
   <ItemGroup>
     <Compile Include="..\Shared\FakeKms.cs" Link="Shared\FakeKms.cs" />
+    <Compile Include="..\Shared\PlayWireMock.cs" Link="Shared\PlayWireMock.cs" />
     <Compile Include="..\Shared\ZaghlolTestDatabase.cs" Link="Shared\ZaghlolTestDatabase.cs" />
     <None Include="..\..\deploy\db\bootstrap-roles.sql" Link="db\bootstrap-roles.sql" CopyToOutputDirectory="PreserveNewest" />
   </ItemGroup>
@@ -32,6 +34,8 @@
     <None Update="vectors\restore-binding-v1.json" CopyToOutputDirectory="PreserveNewest" />
     <!-- Shared iOS seat-key proof vectors (D-55, backend-api.md section 4.3). -->
     <None Update="vectors\seat-proof-v1.json" CopyToOutputDirectory="PreserveNewest" />
+    <!-- T-130 store binding (Play obfuscatedAccountId / Apple appAccountToken); also read by the Dart tests (T-145) and T-131. -->
+    <None Update="vectors\store-binding-v1.json" CopyToOutputDirectory="PreserveNewest" />
     <!-- T-123 shared signing vectors (public test keys only; also read by the Dart verifier) and RFC 4231 HMAC cases. -->
     <None Update="vectors\response-signature-v1.json" CopyToOutputDirectory="PreserveNewest" />
     <None Update="vectors\jws-es256-v1.json" CopyToOutputDirectory="PreserveNewest" />

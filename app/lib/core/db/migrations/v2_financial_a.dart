@@ -1,0 +1,146 @@
+// T-017: the v1 → v2 step (design note §1, §9), frozen. These are the
+// exact CREATE statements of drift_schemas/app_database/drift_schema_v2.json
+// (minus `db_meta`, which v1 has), in the dump's dependency order, without
+// `IF NOT EXISTS`: a stray object of the same name fails the step (and the
+// opener restores the pre-migration copy) instead of being silently reused.
+//
+// Never edit: a later schema change is a new version with its own step. A
+// test checks this list against the committed v2 dump.
+//
+// Not generated from drift_dev's `Schema2` (app_schema.steps.dart): drift_dev
+// 2.35.3 leaves `transactions_fts_src`, `transactions_fts_short` and the view
+// `transactions_fts_row` out of its versioned entities.
+
+// ignore_for_file: lines_longer_than_80_chars, prefer_single_quotes
+
+/// The names and statements of the objects v2 adds, in creation order.
+const List<(String, String)> v2AddedObjects = [
+  (
+    'categories',
+    r"""CREATE TABLE "categories" ("id" TEXT NOT NULL PRIMARY KEY, "system_code" TEXT UNIQUE, "parent_id" TEXT REFERENCES categories(id), "name_ar" TEXT NOT NULL, "name_en" TEXT NOT NULL, "icon" TEXT NOT NULL, "color" TEXT NOT NULL, "bucket" TEXT NOT NULL CHECK (bucket IN ('needs', 'wants', 'obligations', 'savings', 'income', 'giving')), "is_custom" INTEGER NOT NULL DEFAULT 0 CHECK (is_custom IN (0, 1)), "is_archived" INTEGER NOT NULL DEFAULT 0 CHECK (is_archived IN (0, 1)), "sort" INTEGER NOT NULL);""",
+  ),
+  (
+    'accounts',
+    r"""CREATE TABLE "accounts" ("id" TEXT NOT NULL PRIMARY KEY, "institution_code" TEXT, "kind" TEXT NOT NULL CHECK (kind IN ('debit', 'credit', 'account', 'wallet', 'bnpl', 'cash', 'multi_currency')), "label" TEXT NOT NULL CHECK (length(label) BETWEEN 1 AND 30), "last4" TEXT CHECK (last4 IS NULL OR(length(last4) BETWEEN 2 AND 4 AND last4 NOT GLOB '*[^0-9]*')), "default_currency" TEXT NOT NULL CHECK (default_currency GLOB '[A-Z][A-Z][A-Z]'), "credit_limit_minor" INTEGER CHECK (credit_limit_minor IS NULL OR(typeof(credit_limit_minor) = 'integer' AND credit_limit_minor BETWEEN 0 AND 9007199254740991)), "statement_due_day" INTEGER CHECK (statement_due_day BETWEEN 1 AND 31), "is_hidden" INTEGER NOT NULL DEFAULT 0 CHECK (is_hidden IN (0, 1)), "merged_into_id" TEXT REFERENCES accounts(id) CHECK (merged_into_id IS NULL OR merged_into_id <> id), "is_default_cash" INTEGER NOT NULL DEFAULT 0 CHECK (is_default_cash IN (0, 1) AND(is_default_cash = 0 OR kind = 'cash')), "created_at" INTEGER NOT NULL, "updated_at" INTEGER NOT NULL);""",
+  ),
+  (
+    'ux_accounts_inst_last4',
+    r"""CREATE UNIQUE INDEX ux_accounts_inst_last4 ON accounts (institution_code, last4) WHERE last4 IS NOT NULL AND merged_into_id IS NULL""",
+  ),
+  (
+    'ux_accounts_default_cash',
+    r"""CREATE UNIQUE INDEX ux_accounts_default_cash ON accounts (is_default_cash) WHERE is_default_cash = 1""",
+  ),
+  (
+    'raw_messages',
+    r"""CREATE TABLE "raw_messages" ("id" TEXT NOT NULL PRIMARY KEY, "channel" TEXT NOT NULL CHECK (channel IN ('sms', 'notification', 'shortcut_message', 'apple_pay', 'share', 'paste', 'ocr', 'pdf', 'csv')), "sender" TEXT, "institution_code" TEXT, "body" TEXT NOT NULL, "body_hash" TEXT NOT NULL CHECK (length(body_hash) = 64 AND body_hash NOT GLOB '*[^0-9a-f]*'), "received_at" INTEGER NOT NULL, "sim_slot" INTEGER, "parse_status" TEXT NOT NULL CHECK (parse_status IN ('parsed', 'review', 'dismissed', 'reparse_pending')), "template_id" TEXT, "template_version" INTEGER, "registry_version" INTEGER NOT NULL, "created_at" INTEGER NOT NULL);""",
+  ),
+  (
+    'transfer_pairs',
+    r"""CREATE TABLE "transfer_pairs" ("id" TEXT NOT NULL PRIMARY KEY, "out_txn_id" TEXT NOT NULL UNIQUE REFERENCES transactions(id)ON DELETE CASCADE, "in_txn_id" TEXT UNIQUE REFERENCES transactions(id)ON DELETE CASCADE, "kind" TEXT NOT NULL CHECK (kind IN ('auto', 'manual', 'fx_conversion', 'card_settlement', 'cross_currency')), "created_at" INTEGER NOT NULL, CHECK(in_txn_id IS NULL OR in_txn_id <> out_txn_id));""",
+  ),
+  (
+    'transactions',
+    r"""CREATE TABLE "transactions" ("id" TEXT NOT NULL PRIMARY KEY, "account_id" TEXT NOT NULL REFERENCES accounts(id), "raw_message_id" TEXT REFERENCES raw_messages(id)ON DELETE SET NULL, "source" TEXT NOT NULL CHECK (source IN ('sms', 'notification', 'shortcut', 'apple_pay', 'ocr', 'pdf', 'csv', 'voice', 'manual', 'share')), "direction" TEXT NOT NULL CHECK (direction IN ('expense', 'income', 'transfer_out', 'transfer_in', 'refund', 'fee')), "status" TEXT NOT NULL DEFAULT 'posted' CHECK (status IN ('posted', 'pending', 'declined', 'reversed')), "amount_minor" INTEGER NOT NULL CHECK (typeof(amount_minor) = 'integer' AND amount_minor BETWEEN 0 AND 9007199254740991), "currency" TEXT NOT NULL CHECK (currency GLOB '[A-Z][A-Z][A-Z]'), "original_amount_minor" INTEGER CHECK (original_amount_minor IS NULL OR(typeof(original_amount_minor) = 'integer' AND original_amount_minor BETWEEN 0 AND 9007199254740991)), "original_currency" TEXT CHECK (original_currency IS NULL OR original_currency GLOB '[A-Z][A-Z][A-Z]'), "occurred_at" INTEGER NOT NULL, "occurred_tz_offset_min" INTEGER NOT NULL CHECK (occurred_tz_offset_min BETWEEN -1080 AND 1080), "merchant_raw" TEXT, "merchant_norm" TEXT, "catalog_merchant_id" INTEGER, "counterparty_kind" TEXT CHECK (counterparty_kind IN ('merchant', 'ipa', 'phone', 'person', 'bank', 'own_account')), "counterparty_value" TEXT, "category_id" TEXT REFERENCES categories(id), "category_source" TEXT NOT NULL CHECK (category_source IN ('user', 'user_rule', 'catalog', 'heuristic', 'none')), "is_user_verified" INTEGER NOT NULL DEFAULT 0 CHECK (is_user_verified IN (0, 1)), "transfer_pair_id" TEXT REFERENCES transfer_pairs(id)ON DELETE SET NULL, "is_internal" INTEGER NOT NULL DEFAULT 0 CHECK (is_internal IN (0, 1)), "reference_no" TEXT, "balance_after_minor" INTEGER CHECK (balance_after_minor IS NULL OR(typeof(balance_after_minor) = 'integer' AND balance_after_minor BETWEEN -9007199254740991 AND 9007199254740991)), "template_id" TEXT, "parse_confidence" REAL CHECK (parse_confidence IS NULL OR parse_confidence BETWEEN 0 AND 1), "dedupe_key" TEXT, "note" TEXT, "deleted_at" INTEGER, "created_at" INTEGER NOT NULL, "updated_at" INTEGER NOT NULL, CHECK((original_amount_minor IS NULL)=(original_currency IS NULL)));""",
+  ),
+  (
+    'account_balances',
+    r"""CREATE TABLE "account_balances" ("account_id" TEXT NOT NULL REFERENCES accounts(id)ON DELETE CASCADE, "currency" TEXT NOT NULL CHECK (currency GLOB '[A-Z][A-Z][A-Z]'), "balance_minor" INTEGER CHECK (balance_minor IS NULL OR(typeof(balance_minor) = 'integer' AND balance_minor BETWEEN -9007199254740991 AND 9007199254740991)), "available_minor" INTEGER CHECK (available_minor IS NULL OR(typeof(available_minor) = 'integer' AND available_minor BETWEEN -9007199254740991 AND 9007199254740991)), "as_of" INTEGER NOT NULL, "source_txn_id" TEXT REFERENCES transactions(id)ON DELETE SET NULL, PRIMARY KEY(account_id, currency));""",
+  ),
+  (
+    'ux_raw_body_hash',
+    r"""CREATE UNIQUE INDEX ux_raw_body_hash ON raw_messages (body_hash)""",
+  ),
+  (
+    'ix_txn_account_time',
+    r"""CREATE INDEX ix_txn_account_time ON transactions (account_id, occurred_at) WHERE deleted_at IS NULL""",
+  ),
+  (
+    'ix_txn_category_time',
+    r"""CREATE INDEX ix_txn_category_time ON transactions (category_id, occurred_at) WHERE deleted_at IS NULL""",
+  ),
+  (
+    'ix_txn_currency_time',
+    r"""CREATE INDEX ix_txn_currency_time ON transactions (currency, occurred_at, direction) WHERE deleted_at IS NULL""",
+  ),
+  (
+    'ix_txn_merchant',
+    r"""CREATE INDEX ix_txn_merchant ON transactions (merchant_norm, occurred_at)""",
+  ),
+  (
+    'ix_txn_dedupe',
+    r"""CREATE INDEX ix_txn_dedupe ON transactions (dedupe_key, occurred_at)""",
+  ),
+  (
+    'ix_txn_category_source',
+    r"""CREATE INDEX ix_txn_category_source ON transactions (category_source) WHERE is_user_verified = 0""",
+  ),
+  (
+    'split_participants',
+    r"""CREATE TABLE "split_participants" ("id" TEXT NOT NULL PRIMARY KEY, "expense_txn_id" TEXT NOT NULL REFERENCES transactions(id)ON DELETE CASCADE, "name" TEXT NOT NULL, "share_minor" INTEGER NOT NULL CHECK (typeof(share_minor) = 'integer' AND share_minor BETWEEN 0 AND 9007199254740991), "created_at" INTEGER NOT NULL);""",
+  ),
+  (
+    'offset_links',
+    r"""CREATE TABLE "offset_links" ("id" TEXT NOT NULL PRIMARY KEY, "kind" TEXT NOT NULL CHECK (kind IN ('refund', 'reimbursement')), "expense_txn_id" TEXT NOT NULL REFERENCES transactions(id)ON DELETE CASCADE, "source_txn_id" TEXT NOT NULL REFERENCES transactions(id)ON DELETE CASCADE, "amount_minor" INTEGER NOT NULL CHECK (typeof(amount_minor) = 'integer' AND amount_minor BETWEEN 1 AND 9007199254740991), "participant_id" TEXT REFERENCES split_participants(id)ON DELETE SET NULL, "created_at" INTEGER NOT NULL, UNIQUE(expense_txn_id, source_txn_id), CHECK(expense_txn_id <> source_txn_id));""",
+  ),
+  (
+    'ix_offset_source',
+    r"""CREATE INDEX ix_offset_source ON offset_links (source_txn_id)""",
+  ),
+  (
+    'ix_split_expense',
+    r"""CREATE INDEX ix_split_expense ON split_participants (expense_txn_id)""",
+  ),
+  (
+    'trg_offset_links_bi',
+    r"""CREATE TRIGGER trg_offset_links_bi BEFORE INSERT ON offset_links BEGIN SELECT RAISE (ABORT, 'OFFSET_CURRENCY_MISMATCH') WHERE (SELECT currency FROM transactions WHERE id = new.expense_txn_id) IS NOT (SELECT currency FROM transactions WHERE id = new.source_txn_id);SELECT RAISE (ABORT, 'OFFSET_PARTICIPANT_MISMATCH') WHERE new.participant_id IS NOT NULL AND NOT EXISTS (SELECT 1 FROM split_participants WHERE id = new.participant_id AND expense_txn_id = new.expense_txn_id);SELECT RAISE (ABORT, 'OFFSET_EXCEEDS_EXPENSE') WHERE new.amount_minor + (SELECT coalesce(sum(amount_minor), 0) FROM offset_links WHERE expense_txn_id = new.expense_txn_id) > (SELECT amount_minor FROM transactions WHERE id = new.expense_txn_id);SELECT RAISE (ABORT, 'OFFSET_EXCEEDS_SOURCE') WHERE new.amount_minor + (SELECT coalesce(sum(amount_minor), 0) FROM offset_links WHERE source_txn_id = new.source_txn_id) > (SELECT amount_minor FROM transactions WHERE id = new.source_txn_id);END""",
+  ),
+  (
+    'trg_offset_links_bu',
+    r"""CREATE TRIGGER trg_offset_links_bu BEFORE UPDATE ON offset_links BEGIN SELECT RAISE (ABORT, 'OFFSET_CURRENCY_MISMATCH') WHERE (SELECT currency FROM transactions WHERE id = new.expense_txn_id) IS NOT (SELECT currency FROM transactions WHERE id = new.source_txn_id);SELECT RAISE (ABORT, 'OFFSET_PARTICIPANT_MISMATCH') WHERE new.participant_id IS NOT NULL AND NOT EXISTS (SELECT 1 FROM split_participants WHERE id = new.participant_id AND expense_txn_id = new.expense_txn_id);SELECT RAISE (ABORT, 'OFFSET_EXCEEDS_EXPENSE') WHERE new.amount_minor + (SELECT coalesce(sum(amount_minor), 0) FROM offset_links WHERE expense_txn_id = new.expense_txn_id AND id <> old.id) > (SELECT amount_minor FROM transactions WHERE id = new.expense_txn_id);SELECT RAISE (ABORT, 'OFFSET_EXCEEDS_SOURCE') WHERE new.amount_minor + (SELECT coalesce(sum(amount_minor), 0) FROM offset_links WHERE source_txn_id = new.source_txn_id AND id <> old.id) > (SELECT amount_minor FROM transactions WHERE id = new.source_txn_id);END""",
+  ),
+  (
+    'trg_txn_offset_bu',
+    r"""CREATE TRIGGER trg_txn_offset_bu BEFORE UPDATE OF amount_minor, currency ON transactions BEGIN SELECT RAISE (ABORT, 'OFFSET_CURRENCY_MISMATCH') WHERE new.currency IS NOT old.currency AND EXISTS (SELECT 1 FROM offset_links WHERE expense_txn_id = old.id OR source_txn_id = old.id);SELECT RAISE (ABORT, 'OFFSET_EXCEEDS_EXPENSE') WHERE (SELECT coalesce(sum(amount_minor), 0) FROM offset_links WHERE expense_txn_id = old.id) > new.amount_minor;SELECT RAISE (ABORT, 'OFFSET_EXCEEDS_SOURCE') WHERE (SELECT coalesce(sum(amount_minor), 0) FROM offset_links WHERE source_txn_id = old.id) > new.amount_minor;END""",
+  ),
+  (
+    'transactions_fts_src',
+    r"""CREATE TABLE "transactions_fts_src" ("id" INTEGER NOT NULL PRIMARY KEY, "txn_id" TEXT NOT NULL UNIQUE, "merchant" TEXT, "counterparty" TEXT, "note" TEXT, "amount_text" TEXT NOT NULL);""",
+  ),
+  (
+    'transactions_fts',
+    r"""CREATE VIRTUAL TABLE "transactions_fts" USING fts5(merchant, counterparty, note, amount_text, content='transactions_fts_src', content_rowid='id', tokenize='trigram remove_diacritics 1');""",
+  ),
+  (
+    'transactions_fts_short',
+    r"""CREATE VIRTUAL TABLE "transactions_fts_short" USING fts5(merchant, counterparty, content='transactions_fts_src', content_rowid='id', tokenize='unicode61 remove_diacritics 2', prefix='1 2');""",
+  ),
+  (
+    'transactions_fts_row',
+    r"""CREATE VIEW transactions_fts_row AS SELECT id AS txn_id, CASE WHEN merchant_norm IS NULL OR merchant_norm = merchant_raw THEN merchant_raw WHEN merchant_raw IS NULL THEN merchant_norm ELSE merchant_raw || ' ' || merchant_norm END AS merchant, counterparty_value AS counterparty, note, latin || ' ' || "replace"("replace"("replace"("replace"("replace"("replace"("replace"("replace"("replace"("replace"("replace"(latin, '0', '٠'), '1', '١'), '2', '٢'), '3', '٣'), '4', '٤'), '5', '٥'), '6', '٦'), '7', '٧'), '8', '٨'), '9', '٩'), '.', '٫') AS amount_text FROM (SELECT id, merchant_raw, merchant_norm, counterparty_value, note, CASE WHEN currency IN ('BIF', 'CLP', 'DJF', 'GNF', 'ISK', 'JPY', 'KMF', 'KRW', 'PYG', 'RWF', 'UGX', 'UYI', 'VND', 'VUV', 'XAF', 'XOF', 'XPF') THEN format('%d', amount_minor) WHEN currency IN ('BHD', 'IQD', 'JOD', 'KWD', 'LYD', 'OMR', 'TND') THEN format('%d.%03d', amount_minor / 1000, amount_minor % 1000) WHEN currency IN ('CLF', 'UYW') THEN format('%d.%04d', amount_minor / 10000, amount_minor % 10000) ELSE format('%d.%02d', amount_minor / 100, amount_minor % 100) END AS latin FROM transactions)""",
+  ),
+  (
+    'trg_txn_fts_ai',
+    r"""CREATE TRIGGER trg_txn_fts_ai AFTER INSERT ON transactions BEGIN INSERT INTO transactions_fts_src (txn_id, merchant, counterparty, note, amount_text) SELECT txn_id, merchant, counterparty, note, amount_text FROM transactions_fts_row WHERE txn_id = new.id;END""",
+  ),
+  (
+    'trg_txn_fts_au',
+    r"""CREATE TRIGGER trg_txn_fts_au AFTER UPDATE OF id, merchant_raw, merchant_norm, counterparty_value, note, amount_minor, currency ON transactions BEGIN DELETE FROM transactions_fts_src WHERE txn_id = old.id;INSERT INTO transactions_fts_src (txn_id, merchant, counterparty, note, amount_text) SELECT txn_id, merchant, counterparty, note, amount_text FROM transactions_fts_row WHERE txn_id = new.id;END""",
+  ),
+  (
+    'trg_txn_fts_ad',
+    r"""CREATE TRIGGER trg_txn_fts_ad AFTER DELETE ON transactions BEGIN DELETE FROM transactions_fts_src WHERE txn_id = old.id;END""",
+  ),
+  (
+    'trg_fts_src_ai',
+    r"""CREATE TRIGGER trg_fts_src_ai AFTER INSERT ON transactions_fts_src BEGIN INSERT INTO transactions_fts ("rowid", merchant, counterparty, note, amount_text) VALUES (new.id, new.merchant, new.counterparty, new.note, new.amount_text);INSERT INTO transactions_fts_short ("rowid", merchant, counterparty) VALUES (new.id, new.merchant, new.counterparty);END""",
+  ),
+  (
+    'trg_fts_src_ad',
+    r"""CREATE TRIGGER trg_fts_src_ad AFTER DELETE ON transactions_fts_src BEGIN INSERT INTO transactions_fts (transactions_fts, "rowid", merchant, counterparty, note, amount_text) VALUES ('delete', old.id, old.merchant, old.counterparty, old.note, old.amount_text);INSERT INTO transactions_fts_short (transactions_fts_short, "rowid", merchant, counterparty) VALUES ('delete', old.id, old.merchant, old.counterparty);END""",
+  ),
+  (
+    'trg_fts_src_au',
+    r"""CREATE TRIGGER trg_fts_src_au AFTER UPDATE ON transactions_fts_src BEGIN INSERT INTO transactions_fts (transactions_fts, "rowid", merchant, counterparty, note, amount_text) VALUES ('delete', old.id, old.merchant, old.counterparty, old.note, old.amount_text);INSERT INTO transactions_fts_short (transactions_fts_short, "rowid", merchant, counterparty) VALUES ('delete', old.id, old.merchant, old.counterparty);INSERT INTO transactions_fts ("rowid", merchant, counterparty, note, amount_text) VALUES (new.id, new.merchant, new.counterparty, new.note, new.amount_text);INSERT INTO transactions_fts_short ("rowid", merchant, counterparty) VALUES (new.id, new.merchant, new.counterparty);END""",
+  ),
+];

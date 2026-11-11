@@ -44,6 +44,9 @@ public sealed class Purchase
 
     public bool Acknowledged { get; set; }
 
+    /// <summary>T-130 security M-1: when the acknowledge sweeper may next try a row it could not finish; NULL = never deferred.</summary>
+    public DateTimeOffset? AckNextAttemptAt { get; set; }
+
     public StoreEnvironment Environment { get; set; }
 
     public string? ObfuscatedInstallRef { get; set; }

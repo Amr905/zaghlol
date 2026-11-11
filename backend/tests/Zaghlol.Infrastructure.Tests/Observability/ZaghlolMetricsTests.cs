@@ -67,7 +67,7 @@ public sealed class ZaghlolMetricsTests : IDisposable
         metrics.SupportAction("move", "ok", "passed");
         metrics.AttestationFailed("ios", "hash_mismatch");
         metrics.PlayIntegrityCalled();
-        metrics.SetUnacked(2, TimeSpan.FromHours(1));
+        metrics.SetUnacked(2, 0, TimeSpan.FromHours(1));
         metrics.SetPriceAge("XAU", TimeSpan.FromMinutes(5));
         metrics.SetPlayIntegrityDailyQuota(10000);
         listener.RecordObservableInstruments();
@@ -87,12 +87,13 @@ public sealed class ZaghlolMetricsTests : IDisposable
     [Fact]
     public void GaugesReportTheLastValueSet()
     {
-        metrics.SetUnacked(7, TimeSpan.FromHours(50));
+        metrics.SetUnacked(7, 3, TimeSpan.FromHours(50));
         metrics.SetPriceAge("T138SYM", TimeSpan.FromHours(7));
 
         listener.RecordObservableInstruments();
 
-        Assert.Contains(Named("zaghlol.purchase.unacked"), x => x.Value == 7);
+        Assert.Contains(Named("zaghlol.purchase.unacked"), x => Equals(x.Tags["age"], "lt_48h") && x.Value == 7);
+        Assert.Contains(Named("zaghlol.purchase.unacked"), x => Equals(x.Tags["age"], "ge_48h") && x.Value == 3);
         Assert.Contains(Named("zaghlol.purchase.unacked.oldest_age"), x => x.Value == 50 * 3600);
         Assert.Contains(Named("zaghlol.price.age"), x => Equals(x.Tags["symbol"], "T138SYM") && x.Value == 7 * 3600);
     }

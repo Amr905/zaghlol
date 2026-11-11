@@ -81,6 +81,16 @@ tag vX:  build prodSms + prodNoSms AAB (signed via Play App Signing upload key f
 
 **Ops channel for flag changes (T-126).** `OpsChannel:WebhookUrl` is an incoming-webhook URL (Slack, Google Chat or Teams; body `{"text": "..."}`) that receives one message per feature-flag change. The URL is a credential: set it from the secrets manager (environment variable `OpsChannel__WebhookUrl`), never in a file in the repository. It must be an absolute `https` URL or the API refuses to start (the value is not echoed). Unset, nothing is posted. A failed post is logged by exception type only and never fails the change, which is already committed and audited.
 
+**Google Play verify and acknowledge sweeper (T-130).** The API (verify, support order lookup) and the worker (`PlayAckSweeperService`, every 15 min, one instance across replicas through a PostgreSQL advisory lock) read `Purchases:Google:*`:
+- `PackageName`: the app's Play package (never taken from a request). Production refuses a debug, dev, staging, test or sandbox segment.
+- `Products:<productId>:Kind` (`subscription` | `onetime`) and `Products:<productId>:Plan` (`monthly` | `yearly` | `lifetime`): exactly three products, one per plan, monthly and yearly subscriptions and a one-time lifetime product (`zaghlol_gold_monthly`, `zaghlol_gold_yearly`, `zaghlol_gold_lifetime`; PO question 2 confirms they are separate subscription products, not base plans). Production refuses `android.test.*` IDs.
+- `CredentialSource`: `ApplicationDefault` (preferred: workload identity federation or the platform identity, no key in the deployment) or `ServiceAccountJson`, with the key JSON in `Purchases:Google:Credential` set from the secrets manager (environment variable `Purchases__Google__Credential`), never a file in the repository. The service account needs only the Play Console permissions for reading orders and managing orders and subscriptions on this app (PO question 1). A 401/403 from Play raises `ZaghlolStoreAuthError`.
+- `BaseUrl`: defaults to `https://androidpublisher.googleapis.com`; Production refuses any other value.
+- `OrderLookup`: `fallback` (default) or `orders`; set `orders` only after the `orders.get` availability check recorded in T-130 (AC 5).
+- `Budget:TokenLimit` / `Budget:TokensPerPeriod` / `Budget:PeriodSeconds` (defaults 600 / 130 / 60): the outbound store budget **per process**; size the sum over all API and worker replicas under the Play Developer API daily quota (200 K/day by default, PO question 4).
+- Missing or invalid values stop the API and the worker outside Development and Testing; no value is echoed. `Resilience:*` overrides apply only in Development and Testing.
+- **Production refuses to start the API** while verify has no entitlement composer (`NullVerifyGrant`, until T-132) or no App Store verifier (until T-131).
+
 **Infrastructure as code:**
 - OpenTofu modules per environment under `backend/deploy/`.
 - Secrets are referenced, never stored.

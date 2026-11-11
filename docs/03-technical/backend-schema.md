@@ -110,6 +110,8 @@ CREATE TABLE purchases (
   state text NOT NULL CHECK (state IN ('pending','active','in_grace','on_hold','paused','canceled_active','expired','refunded','revoked')),
   expires_at timestamptz,                      -- NULL for lifetime
   acknowledged boolean NOT NULL DEFAULT false, -- Google; must be true within 3 days (BR-GOLD-06)
+  ack_next_attempt_at timestamptz,             -- T-130 M-1: the ack sweeper defers a row it can't finish (pending, unknown
+                                               -- product/state, Play error) until then; NULL = never deferred. Only worker_rw writes it
   environment text NOT NULL CHECK (environment IN ('production','sandbox')),
   obfuscated_install_ref text,                 -- Play obfuscatedAccountId / Apple appAccountToken = hash(install_id)
   last_verified_at timestamptz NOT NULL,
@@ -233,10 +235,15 @@ CREATE TABLE idempotency_records (
   operation_id text NOT NULL CHECK (operation_id IN ('verifyPurchase','signIn')),
   idempotency_key text NOT NULL,                -- ULID from the Idempotency-Key header (CSPRNG random part)
   body_sha256 bytea NOT NULL,                   -- SHA-256 of the request body bytes; a mismatch gives 409 IDEMPOTENCY_KEY_REUSED
-  status integer NOT NULL, response_body_enc bytea NOT NULL,  -- final result only (2xx/409/422), KMS-envelope-encrypted (holds tokens)
+  status integer NOT NULL CHECK (status = 0 OR status BETWEEN 200 AND 299 OR status IN (409, 422)),
+                                                -- 0 = claimed by a running request (T-130, FU-052 S-2); otherwise the final result
+  response_body_enc bytea NOT NULL,             -- final result only (2xx/409/422), KMS-envelope-encrypted with context
+                                                -- idem/v2/<installId>/<operationId>/<b64u(SHA-256(key))> (holds tokens); empty while claimed
+  claim_id uuid,                                -- the running request's lease; CHECK ((status = 0) = (claim_id IS NOT NULL))
   account_id uuid,                              -- signIn: the account whose token the stored body holds; DELETE /v1/accounts/me
                                                 -- deletes these rows
-  expires_at timestamptz NOT NULL,              -- created + 24 h; every lookup requires expires_at > now()
+  expires_at timestamptz NOT NULL,              -- final: created + 24 h; claim: now + 60 s (the lease). Every lookup requires
+                                                -- expires_at > now(); an expired claim is taken over by the next request
   PRIMARY KEY (install_id, operation_id, idempotency_key)
 );
 CREATE INDEX ix_idempotency_account ON idempotency_records(account_id) WHERE account_id IS NOT NULL;

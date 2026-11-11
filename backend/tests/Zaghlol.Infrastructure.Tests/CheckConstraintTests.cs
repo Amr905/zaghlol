@@ -85,6 +85,10 @@ public class CheckConstraintTests(SchemaFixture fixture)
             ["idempotency_records: key of 25 characters"] = ("idempotency_records", Set("idempotency_key", new string('0', 25)), "ck_idempotency_records_idempotency_key_length"),
             ["idempotency_records: key of 27 characters"] = ("idempotency_records", Set("idempotency_key", new string('0', 27)), "ck_idempotency_records_idempotency_key_length"),
             ["idempotency_records: body_sha256 not 32 bytes"] = ("idempotency_records", Set("body_sha256", Rows.Bytes(31)), "ck_idempotency_records_body_sha256_length"),
+            ["idempotency_records: a 500 is never stored"] = ("idempotency_records", Set("status", 500), "ck_idempotency_records_status"),
+            ["idempotency_records: a 429 is never stored"] = ("idempotency_records", Set("status", 429), "ck_idempotency_records_status"),
+            ["idempotency_records: a claim without its lease"] = ("idempotency_records", Set("status", 0), "ck_idempotency_records_claim"),
+            ["idempotency_records: a final row with a lease"] = ("idempotency_records", Set("claim_id", Guid.NewGuid()), "ck_idempotency_records_claim"),
 
             // catalog_versions
             ["catalog_versions: full_snapshot_sha256 not 32 bytes"] = ("catalog_versions", Set("full_snapshot_sha256", Rows.Bytes(31)), "ck_catalog_versions_full_snapshot_sha256_length"),
@@ -207,8 +211,9 @@ public class CheckConstraintTests(SchemaFixture fixture)
             .ToHashSet(StringComparer.Ordinal);
         var tested = Cases.Values.Select(c => c.Constraint).ToHashSet(StringComparer.Ordinal);
 
-        // 23 documented + 24 hardening (octet/char lengths, cause regex, audit, codes, formats) + 1 catalog_drafts (T-125) + 2 price_quotes (T-127).
-        Assert.Equal(50, inSchema.Count);
+        // 23 documented + 24 hardening (octet/char lengths, cause regex, audit, codes, formats) + 1 catalog_drafts (T-125) + 2 price_quotes (T-127)
+        // + 2 idempotency_records claim checks (T-130).
+        Assert.Equal(52, inSchema.Count);
         Assert.Empty(inSchema.Except(tested));
         Assert.Empty(tested.Except(inSchema));
     }

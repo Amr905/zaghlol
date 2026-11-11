@@ -107,6 +107,19 @@ public class InstallsHostFixture : IAsyncLifetime, IDisposable
         ["RateLimits:PerToken:PeriodSeconds"] = "3600",
     };
 
+    /// <summary>Extra services of a derived host (registered after the install services).</summary>
+    protected virtual void ConfigureServices(IServiceCollection services)
+    {
+    }
+
+    /// <summary>Extra endpoints of a derived host (mapped after the install endpoints).</summary>
+    protected virtual void MapEndpoints(WebApplication application)
+    {
+    }
+
+    /// <summary>The App connection string (a derived host may shrink the pool).</summary>
+    protected virtual string AppConnectionString(string api) => api;
+
     /// <summary>Lets one <c>slow</c> idempotent request leave its handler.</summary>
     public void Release() => gate.Release();
 
@@ -122,7 +135,7 @@ public class InstallsHostFixture : IAsyncLifetime, IDisposable
         builder.WebHost.UseTestServer();
         var settings = new Dictionary<string, string?>(Kms.Settings())
         {
-            ["ConnectionStrings:App"] = WithDatabase ? Database.Api : Unreachable,
+            ["ConnectionStrings:App"] = WithDatabase ? AppConnectionString(Database.Api) : Unreachable,
             ["ForwardedHeaders:KnownProxies:0"] = TrustedProxy,
         };
         foreach (var (key, value) in Settings)
@@ -144,6 +157,7 @@ public class InstallsHostFixture : IAsyncLifetime, IDisposable
         builder.Services.RemoveAll<ILogPseudonymizer>();
         builder.Services.AddSingleton<ILogPseudonymizer, SwitchablePseudonymizer>();
         builder.Services.AddZaghlolInstalls();
+        ConfigureServices(builder.Services);
 
         app = builder.Build();
         app.Use(async (context, next) =>
@@ -157,6 +171,7 @@ public class InstallsHostFixture : IAsyncLifetime, IDisposable
         });
         app.UseZaghlolPipeline();
         app.MapInstalls();
+        MapEndpoints(app);
         MapTestEndpoints(app);
         await app.StartAsync();
         Client = app.GetTestClient();
@@ -179,10 +194,18 @@ public class InstallsHostFixture : IAsyncLifetime, IDisposable
 
     public void Dispose()
     {
-        Kms.Dispose();
-        gate.Dispose();
-        Entered.Dispose();
+        Dispose(true);
         GC.SuppressFinalize(this);
+    }
+
+    protected virtual void Dispose(bool disposing)
+    {
+        if (disposing)
+        {
+            Kms.Dispose();
+            gate.Dispose();
+            Entered.Dispose();
+        }
     }
 
     /// <summary>A fresh lowercase UUID v4.</summary>
@@ -302,6 +325,7 @@ public class InstallsHostFixture : IAsyncLifetime, IDisposable
                     "tooMany" => Results.Json(payload, statusCode: StatusCodes.Status429TooManyRequests),
                     "unavailable" => Results.Json(payload, statusCode: StatusCodes.Status503ServiceUnavailable),
                     "throw" => throw new InvalidOperationException("test handler failure"),
+                    "rotate" => Results.Json(new Dictionary<string, object?> { ["run"] = run, ["rotateInstallToken"] = "rotated-test-token" }),
                     _ => Results.Json(payload),
                 };
             })
