@@ -11,15 +11,17 @@ import io.flutter.embedding.engine.FlutterEngine
 /**
  * UI-engine side of the spike: the same spool host as the headless engine
  * (drain/ack under the process-wide claim), the event API for
- * `onSpoolChanged`, and the metrics channel. Attaching destroys a lingering
- * headless engine, so only one engine drains and writes at a time.
+ * `onSpoolChanged`, and the metrics channel. Attaching shuts a lingering
+ * headless engine down (review F1): never mid-drain; its pending drain is
+ * answered first (bounded), Dart closes the database, then it is destroyed.
+ * Until then the claim keeps the UI engine from draining the same entries.
  */
 object SpikeEngineHook : EngineHook {
     private var host: SpoolHost? = null
 
     override fun attach(engine: FlutterEngine, context: Context) {
         val rt = SpikeRuntime.get(context)
-        rt.headless.destroy()
+        rt.headless.shutdown()
         val messenger = engine.dartExecutor.binaryMessenger
         val h = SpoolHost(rt.engineIds.getAndIncrement(), rt.store, rt.claim, rt.scheduler, rt.device, rt.metrics) {
             rt.uiCycle ?: SpikeMetrics.Cycle(SpikeMetrics.Path.FOREGROUND)

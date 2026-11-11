@@ -85,6 +85,7 @@ jobs:
           name: sms-spike-api${{ matrix.api }}
           path: |
             ${{ runner.temp }}/sms-spike/metrics.csv
+            ${{ runner.temp }}/sms-spike/broadcasts.txt
             ${{ runner.temp }}/sms-spike/report.md
             ${{ runner.temp }}/sms-spike/spoof.txt
             ${{ runner.temp }}/sms-spike/canary-lines.txt

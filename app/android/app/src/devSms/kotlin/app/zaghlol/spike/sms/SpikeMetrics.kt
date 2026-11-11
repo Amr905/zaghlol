@@ -10,15 +10,20 @@ import java.util.concurrent.ConcurrentHashMap
  * are stamped when they reach this class). One CSV row per message, written
  * when the message is acked (t9), to `noBackupFilesDir/spike/metrics.csv`.
  *
- * A row holds a ULID, the path, device conditions and stage deltas in ms from
- * t0 (receive). Never a sender, body, amount or anything derived from them.
- * Rows whose boot count changed between receive and ack are discarded.
+ * A row holds a ULID, the path, device conditions, the receive wall clock
+ * (`rx_wall_ms`, to match the system's broadcast history; review F2) and
+ * stage deltas in ms from t0 (receive), including `t_proc`, the start of the
+ * process that received the message (negative: before t0). Never a sender,
+ * body, amount or anything derived from them. Rows whose boot count changed
+ * between receive and ack are discarded.
  */
 class SpikeMetrics(
     private val file: File,
     private val bootCount: () -> Int,
     private val conditions: () -> Conditions,
     private val nanoClock: () -> Long = System::nanoTime,
+    /** `Process.getStartElapsedRealtime()` in ns (same clock as the stamps); -1 unknown. */
+    private val processStartNs: () -> Long = { -1L },
 ) {
     enum class Path(val label: String) {
         COLD_PROCESS("cold_process"),
@@ -43,6 +48,8 @@ class SpikeMetrics(
     }
 
     private class Row(val rxNs: Long, val bootCount: Int) {
+        var rxWallMs = -1L
+        var procStartNs = -1L
         var spooledNs = -1L
         var enqueuedNs = -1L
         var cycle: Cycle? = null
@@ -52,8 +59,15 @@ class SpikeMetrics(
     private val rows = ConcurrentHashMap<String, Row>()
     private val writeLock = Any()
 
-    fun spooled(id: String, rxNs: Long, nowNs: Long) {
-        rows.getOrPut(id) { Row(rxNs, bootCount()) }.spooledNs = nowNs
+    fun spooled(id: String, rxNs: Long, nowNs: Long, rxWallMs: Long = -1L) {
+        val row = rows.getOrPut(id) { Row(rxNs, bootCount()) }
+        row.spooledNs = nowNs
+        row.rxWallMs = rxWallMs
+        row.procStartNs = try {
+            processStartNs()
+        } catch (_: Exception) {
+            -1L
+        }
     }
 
     fun enqueued(id: String, nowNs: Long) {
@@ -99,6 +113,8 @@ class SpikeMetrics(
                 if (c.deviceIdle) "1" else "0",
                 c.standbyBucket.toString(),
                 c.lingerMs.toString(),
+                if (row.rxWallMs < 0) "" else row.rxWallMs.toString(),
+                delta(row, row.procStartNs),
                 delta(row, row.spooledNs),
                 delta(row, row.enqueuedNs),
                 delta(row, cycle?.workerNs ?: -1),
@@ -126,7 +142,7 @@ class SpikeMetrics(
     private fun delta(row: Row, ns: Long): String = if (ns < 0) "" else ((ns - row.rxNs) / 1_000_000).toString()
 
     companion object {
-        const val HEADER = "ulid,path,sdk,batt_exempt,doze,bucket,linger_ms," +
+        const val HEADER = "ulid,path,sdk,batt_exempt,doze,bucket,linger_ms,rx_wall_ms,t_proc," +
             "t1_spooled,t2_enqueued,t3_worker,t4_dart,t5_db_open,t6_drained,t7_parsed,t8_commit,t9_acked"
         const val MAX_FILE_BYTES = 1L * 1024 * 1024
     }

@@ -1,8 +1,10 @@
 // T-008 (SPK-01): the spike-only metrics/control channel
 // `zaghlol/spike_metrics` (not a platform contract; removed with the spike).
 // Dart → native: {ev: ready | db_open | mark, stage, ids}. Native → Dart:
-// {cmd: drain}, answered with CycleResult.toWire(). Only stage names, codes,
-// counts and ULIDs cross it; never a body, sender or amount.
+// {cmd: drain}, answered with CycleResult.toWire(); {cmd: close} (before the
+// headless engine is destroyed), answered with {result: CLOSED} once the
+// database is closed. Only stage names, codes, counts and ULIDs cross it;
+// never a body, sender or amount.
 
 import 'dart:async';
 

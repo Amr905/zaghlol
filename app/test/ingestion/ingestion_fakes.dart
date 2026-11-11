@@ -86,8 +86,13 @@ base class FakeStore implements IngestStore {
     return rows.length;
   }
 
+  int closes = 0;
+
   @override
-  Future<void> close() async {}
+  Future<void> close() async {
+    log.add('close');
+    closes++;
+  }
 }
 
 final class RecordingMarks implements CycleMarks {
