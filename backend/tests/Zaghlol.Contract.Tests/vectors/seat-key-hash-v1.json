@@ -1,0 +1,14 @@
+{
+  "description": "Shared vectors for the K_seat keyed hashes (T-182 design note section 4; backend-api.md section 4.3, backend-schema.md section 3). HMAC-SHA256 under K_seat, computed inside the KMS. UUIDs are their 36-character lower-case hyphenated ASCII text; publicKey is the raw 65-byte X9.63 point. installKeyHash = HMAC(K_seat, 'install' || 0x00 || installId || publicKey) (109-byte input); seatKeyHash = HMAC(K_seat, purchaseId || publicKey) (101-byte input); seatCheck = HMAC(K_seat, 'zaghlol-kseat-check-v1') (22-byte input; deployment.md section 3 Kms:HmacKeys:SeatCheck). The key is the synthetic test key 00 01 .. 1f; expected values were computed independently with Python hmac. No real key or install.",
+  "keyHex": "000102030405060708090a0b0c0d0e0f101112131415161718191a1b1c1d1e1f",
+  "installId": "0193f2c4-7a10-4c52-9d3e-5b1f8a2c6e77",
+  "purchaseId": "5f0c8a7e-2b1d-4e3f-9a6b-7c8d9e0f1a2b",
+  "publicKey": "BKw-hZOelhI7Qqz1u2fvEeenXV7sdJXBqF8DBH1C87-1EVRGa-CMMTOjVMX8Hlomdv0syufgIhH1vIY-jnxNauk",
+  "publicKeyIs": "seat-proof-v1 'restore' publicKey",
+  "installKeyInputHex": "696e7374616c6c0030313933663263342d376131302d346335322d396433652d35623166386132633665373704ac3e85939e96123b42acf5bb67ef11e7a75d5eec7495c1a85f03047d42f3bfb51154466be08c3133a354c5fc1e5a2676fd2ccae7e02211f5bc863e8e7c4d6ae9",
+  "installKeyHashHex": "76afad8dc0cedf6f80f26f3d76fc6fc858d39c5acbe92d30e384be81d343ece5",
+  "seatKeyInputHex": "35663063386137652d326231642d346533662d396136622d37633864396530663161326204ac3e85939e96123b42acf5bb67ef11e7a75d5eec7495c1a85f03047d42f3bfb51154466be08c3133a354c5fc1e5a2676fd2ccae7e02211f5bc863e8e7c4d6ae9",
+  "seatKeyHashHex": "80b9750e4df0d6aae1ca7a162b14a4af0c742cc45a3ec456aedc8c9ccf6593ec",
+  "seatCheckInputHex": "7a6167686c6f6c2d6b736561742d636865636b2d7631",
+  "seatCheckHex": "fe38d23ca263a6f7334148b2ae03e1d4b71a9fa54a062f3efe0470055de93e5b"
+}

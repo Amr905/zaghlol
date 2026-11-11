@@ -1,0 +1,9 @@
+Project Wycheproof test vectors (C2SP/wycheproof), Apache License 2.0 (see LICENSE in this folder).
+
+Source:  https://github.com/C2SP/wycheproof
+Commit:  dab4ea2ed021eb633874959ca601004f3457d911 (2026-11-10)
+File:    testvectors_v1/ecdsa_secp256r1_sha256_p1363_test.json (unmodified)
+SHA-256: c60de693930e386c3a5472d08081623ef8504decc54b38ac01ec6b2a2575c986
+
+Used by Zaghlol.Contract.Tests.WycheproofP256Tests (T-182): every case runs through the production primitive
+Zaghlol.Application.Seats.SeatKeys.P256.VerifyP1363. The file is vendored unmodified; the test pins its SHA-256.

@@ -6,6 +6,7 @@ using Zaghlol.Application.Contributions;
 using Zaghlol.Application.Flags;
 using Zaghlol.Application.Purchases;
 using Zaghlol.Application.Retention;
+using Zaghlol.Application.Seats.SeatKeys;
 using Zaghlol.Application.Sync;
 
 namespace Zaghlol.Infrastructure.Observability;
@@ -15,7 +16,7 @@ namespace Zaghlol.Infrastructure.Observability;
 /// words only, never IDs, tokens or hashes: every tag value is checked and replaced by <c>invalid</c> when it isn't a short
 /// lower- or upper-case word. T-138 ships the instruments; the owning tasks call them.
 /// </summary>
-public sealed partial class ZaghlolMetrics : IDisposable
+public sealed partial class ZaghlolMetrics : ISeatKeyMetrics, IDisposable
 {
     public const string MeterName = "Zaghlol";
 
@@ -28,6 +29,8 @@ public sealed partial class ZaghlolMetrics : IDisposable
     private readonly Histogram<long> syncBytes;
     private readonly Counter<long> seatChange;
     private readonly Counter<long> moveCooldownRefused;
+    private readonly Counter<long> seatProof;
+    private readonly Counter<long> seatElementZero;
     private readonly Counter<long> supportAction;
     private readonly Counter<long> attestationFailure;
     private readonly Counter<long> playIntegrityCalls;
@@ -91,6 +94,12 @@ public sealed partial class ZaghlolMetrics : IDisposable
         syncBytes = meter.CreateHistogram<long>("zaghlol.sync.response.size", "By", "Sync response size.");
         seatChange = meter.CreateCounter<long>("zaghlol.seat.change", description: "Seat binds, moves and rebinds by channel and kind.");
         moveCooldownRefused = meter.CreateCounter<long>("zaghlol.seat.move_cooldown_refused", description: "MOVE_COOLDOWN refusals by channel.");
+        seatProof = meter.CreateCounter<long>(
+            "zaghlol.seat.proof",
+            description: "seatKeys sets decided, by op (verify|restore|signin) and result (valid or a rejection reason) (T-182).");
+        seatElementZero = meter.CreateCounter<long>(
+            "zaghlol.seat.element_zero",
+            description: "Element-0 checks against the install's registered key, by op and status (none_registered|matches|mismatch) (T-182).");
         supportAction = meter.CreateCounter<long>("zaghlol.support.action", description: "Support actions by action, outcome and ownership-check outcome.");
         attestationFailure = meter.CreateCounter<long>("zaghlol.attestation.failure", description: "Device attestation failures by platform and reason code.");
         playIntegrityCalls = meter.CreateCounter<long>("zaghlol.play_integrity.calls", description: "Play Integrity API calls.");
@@ -312,6 +321,14 @@ public sealed partial class ZaghlolMetrics : IDisposable
     public void SeatChanged(string channel, string kind) => seatChange.Add(1, Tags(("channel", channel), ("kind", kind)));
 
     public void MoveCooldownRefused(string channel) => moveCooldownRefused.Add(1, Tags(("channel", channel)));
+
+    /// <summary><c>zaghlol.seat.proof{op, result}</c> (T-182): fixed words only.</summary>
+    void ISeatKeyMetrics.Proof(SeatOp op, SeatKeyRejection? rejection) =>
+        seatProof.Add(1, Tags(("op", SeatOps.Wire(op)), ("result", SeatKeyTags.Result(rejection))));
+
+    /// <summary><c>zaghlol.seat.element_zero{op, status}</c> (T-182): fixed words only.</summary>
+    void ISeatKeyMetrics.ElementZero(SeatOp op, ElementZeroStatus status) =>
+        seatElementZero.Add(1, Tags(("op", SeatOps.Wire(op)), ("status", SeatKeyTags.Status(status))));
 
     public void SupportAction(string action, string outcome, string ownershipOutcome) =>
         supportAction.Add(1, Tags(("action", action), ("outcome", outcome), ("ownership_outcome", ownershipOutcome)));

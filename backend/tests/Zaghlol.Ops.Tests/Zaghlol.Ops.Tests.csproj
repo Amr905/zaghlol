@@ -4,4 +4,9 @@
     <ProjectReference Include="..\..\src\Zaghlol.Ops\Zaghlol.Ops.csproj" />
   </ItemGroup>
 
+  <ItemGroup>
+    <!-- T-182 design note section 8: no test support in production assemblies. -->
+    <Compile Include="..\Shared\TestSupportExclusion.cs" Link="Shared\TestSupportExclusion.cs" />
+  </ItemGroup>
+
 </Project>
