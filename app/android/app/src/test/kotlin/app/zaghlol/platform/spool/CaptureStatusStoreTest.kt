@@ -180,6 +180,56 @@ class CaptureStatusStoreTest {
         assertEquals(1L, statusIn(dir).read().refusedFull)
     }
 
+    /**
+     * FileNotFoundException is also EACCES / EMFILE / EISDIR: not proof of
+     * absence, so the status is unavailable and nothing is overwritten
+     * (a directory in place of the file stands in for "exists, can't open",
+     * which works even when the tests run as root).
+     */
+    @Test
+    fun anUnopenableStatusFileIsUnavailableNotAbsent() {
+        val dir = tempDir()
+        val blocker = file(dir).apply { mkdirs() }
+        File(blocker, "keep").writeText("x")
+        val s = statusIn(dir)
+        s.recordRefused(RefusalReason.FULL, "sms", 1) // kept in memory, nothing written
+        try {
+            s.read()
+            fail("read")
+        } catch (_: CaptureStatusUnavailableException) {
+        }
+        try {
+            s.clear(0)
+            fail("clear")
+        } catch (_: CaptureStatusUnavailableException) {
+        }
+        assertTrue(blocker.isDirectory)
+        assertEquals(listOf("keep"), blocker.list()!!.toList())
+        // Once the file can be opened (here: absent), the in-memory alert is merged.
+        blocker.deleteRecursively()
+        assertEquals(1L, s.read().refusedFull)
+    }
+
+    /** A delta whose write failed is part of what the caller cleared; it is not re-added later. */
+    @Test
+    fun clearDropsAPendingDeltaTheCallerAlreadySaw() {
+        val dir = tempDir()
+        var failingMoves = 3
+        val ops = object : SpoolFileOps by DefaultSpoolFileOps {
+            override fun move(from: File, to: File) {
+                if (failingMoves-- > 0) throw IOException("rename")
+                DefaultSpoolFileOps.move(from, to)
+            }
+        }
+        val s = statusIn(dir, files = ops)
+        s.recordRefused(RefusalReason.FULL, "sms", 1) // move 1 fails: delta pending
+        val seen = s.read() // move 2 fails: the caller sees the delta under this seq
+        assertEquals(1L, seen.refusedFull)
+        assertTrue(s.clear(seen.seq)) // move 3 (merge) fails, the clear write succeeds
+        assertEquals(0L, s.read().refusedFull)
+        assertEquals(0L, statusIn(dir).read().refusedFull)
+    }
+
     @Test
     fun aClearWriteFailureThrows() {
         val dir = tempDir()

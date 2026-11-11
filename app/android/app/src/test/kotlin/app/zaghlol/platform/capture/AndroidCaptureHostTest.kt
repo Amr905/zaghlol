@@ -100,6 +100,25 @@ class AndroidCaptureHostTest {
         assertEquals(emptyList<String>(), store.pendingIds())
     }
 
+    /** After a claim expiry another engine may ack an entry; the first host forgets it at its next drain. */
+    @Test
+    fun ackRightsForEntriesThatLeftTheSpoolAreForgotten() {
+        var now = 0L
+        val expiring = SpoolClaim(clock = { now }, ttlMs = 10)
+        val a = store.put("a")
+        val ui = AndroidCaptureHost(1, store, expiring, status, sched, null, null, device)
+        val headless = AndroidCaptureHost(2, store, expiring, status, sched, null, null, device)
+        assertEquals(listOf(a), ui.drainSpool(10).map { it.id })
+        now = 11 // the UI engine never acked; its claim expires
+        assertEquals(listOf(a), headless.drainSpool(10).map { it.id })
+        headless.ackSpool(listOf(a))
+        assertEquals(1, ui.ackableCount())
+        val b = store.put("b")
+        now = 30
+        assertEquals(listOf(b), ui.drainSpool(10).map { it.id })
+        assertEquals(1, ui.ackableCount()) // b only; a is gone
+    }
+
     @Test
     fun moreThan100IdsIsIoErrorAndDeletesNothing() {
         val a = store.put("a")

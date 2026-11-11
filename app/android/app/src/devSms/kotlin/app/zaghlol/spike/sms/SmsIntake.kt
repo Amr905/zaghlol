@@ -53,6 +53,7 @@ class SmsIntake(
     /** Returns the ids written. Throws only for unexpected errors (the caller still finishes). */
     fun process(messages: List<AssembledSms>, stamp: ReceiveStamp): List<String> {
         val written = ArrayList<String>()
+        var refused = false
         for (m in messages) {
             when (val d = guard.decide(SpikeGuard.CHANNEL_SMS, m.source, m.body)) {
                 is SpikeGuard.Decision.Drop -> SpikeLog.e(SpikeLog.Code.RX_DROP)
@@ -81,13 +82,17 @@ class SmsIntake(
                             metrics?.spooled(result.id, stamp.elapsedNs, nanoClock(), stamp.wallMs)
                             SpikeLog.e(SpikeLog.Code.SPOOL_WRITTEN, (nanoClock() - stamp.elapsedNs) / 1_000_000)
                         }
-                        is SpoolStore.WriteResult.Refused -> SpikeLog.e(SpikeLog.Code.SPOOL_FULL)
+                        is SpoolStore.WriteResult.Refused -> {
+                            // Recorded in the capture status by the store; the drain still runs (T-039 note section 4).
+                            refused = true
+                            SpikeLog.e(SpikeLog.Code.SPOOL_FULL)
+                        }
                         null -> Unit
                     }
                 }
             }
         }
-        if (written.isNotEmpty()) {
+        if (written.isNotEmpty() || refused) {
             try {
                 scheduler.enqueue()
                 val now = nanoClock()

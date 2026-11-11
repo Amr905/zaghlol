@@ -148,6 +148,23 @@ class SpoolStoreTest {
         assertTrue(store.read(id) is SpoolStore.ReadResult.Ok)
     }
 
+    /** FileNotFoundException that is not "absent" (EACCES, EMFILE, EISDIR) proves nothing: kept, not Missing. */
+    @Test
+    fun anEntryThatCannotBeOpenedIsUnavailableNotMissingOrDeleted() {
+        val dir = tempDir()
+        val sleep = RecordingSleep()
+        val store = storeIn(dir, sleep = sleep)
+        val id = UlidGenerator().next()
+        val blocker = File(dir, "$id.bin").apply { mkdirs() }
+        File(blocker, "keep").writeText("x")
+        assertEquals(listOf(id), store.pendingIds())
+        assertEquals(SpoolStore.ReadResult.Unavailable, store.read(id))
+        assertEquals(listOf(100L, 300L, 900L), sleep.calls)
+        assertTrue(File(blocker, "keep").exists())
+        blocker.deleteRecursively()
+        assertEquals(SpoolStore.ReadResult.Missing, store.read(id))
+    }
+
     @Test
     fun oneTransientAttemptAmongProofsKeepsTheEntry() {
         val dir = tempDir()

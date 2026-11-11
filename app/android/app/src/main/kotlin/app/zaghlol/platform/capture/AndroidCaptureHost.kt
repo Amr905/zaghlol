@@ -85,8 +85,12 @@ class AndroidCaptureHost(
         val limit = max.coerceIn(1, MAX_DRAIN.toLong()).toInt()
         val out = ArrayList<SpoolEntry>(limit)
         var deleted = 0
+        val pending = store.pendingIds()
+        // Ids that left the spool (acked by another engine after a claim
+        // expiry, or deleted on proof) can't be acked here any more: forget them.
+        synchronized(drained) { drained.retainAll(pending.toSet()) }
         try {
-            for (id in store.pendingIds()) {
+            for (id in pending) {
                 if (out.size >= limit) break
                 when (val r = store.read(id)) {
                     is SpoolStore.ReadResult.Ok -> {
@@ -145,6 +149,9 @@ class AndroidCaptureHost(
         claim.release(engineId)
         synchronized(drained) { drained.clear() }
     }
+
+    /** Ids this host may still ack (tests only). */
+    internal fun ackableCount(): Int = synchronized(drained) { drained.size }
 
     private fun <T : Any> need(dep: T?): T = dep ?: throw notAvailable()
 

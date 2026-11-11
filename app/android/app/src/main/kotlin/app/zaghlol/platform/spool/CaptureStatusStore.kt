@@ -107,6 +107,9 @@ class CaptureStatusStore(
         val current = mergedLocked()
         if (current.seq != seq) return false
         writeLocked(CaptureStatus(seq = (current.seq + 1) and U32_MAX))
+        // A delta whose own write failed is part of `current` (the caller saw
+        // it under this seq), so it is cleared with the counters, not re-added.
+        pending = Delta()
         true
     }
 
@@ -154,10 +157,11 @@ class CaptureStatusStore(
             if (attempt > 0) sleep(delayMs)
             val bytes = try {
                 readBounded()
-            } catch (_: FileNotFoundException) {
-                return Loaded.Absent
             } catch (_: NoSuchFileException) {
                 return Loaded.Absent
+            } catch (_: FileNotFoundException) {
+                // Also EACCES / EMFILE: "absent" (and so a fresh file) only when proven.
+                return if (SpoolStore.isProvenAbsent(file)) Loaded.Absent else Loaded.Unavailable
             } catch (_: TooLarge) {
                 continue // proof
             } catch (_: IOException) {

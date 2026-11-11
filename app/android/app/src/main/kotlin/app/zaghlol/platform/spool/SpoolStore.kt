@@ -268,10 +268,13 @@ class SpoolStore(
             if (attempt > 0) sleep(delayMs)
             val bytes = try {
                 readBounded(entry(id))
-            } catch (_: FileNotFoundException) {
-                return ReadResult.Missing
             } catch (_: NoSuchFileException) {
                 return ReadResult.Missing
+            } catch (_: FileNotFoundException) {
+                // Also raised for EACCES / EMFILE: absent only when proven.
+                if (isProvenAbsent(entry(id))) return ReadResult.Missing
+                transient = true
+                continue
             } catch (_: TooLarge) {
                 null // proof: not a record we wrote
             } catch (_: IOException) {
@@ -380,6 +383,20 @@ class SpoolStore(
 
         /** First attempt, then 3 retries (T-008 design note section 4). */
         val RETRY_DELAYS_MS = longArrayOf(0, 100, 300, 900)
+
+        /**
+         * True only when the file positively does not exist (`NoSuchFileException`).
+         * `FileNotFoundException` and `File.exists()` also mean "permission
+         * denied" or "too many open files", which prove nothing (self-check 1).
+         */
+        fun isProvenAbsent(f: File): Boolean = try {
+            Files.readAttributes(f.toPath(), "basic:size")
+            false
+        } catch (_: NoSuchFileException) {
+            true
+        } catch (_: Exception) {
+            false
+        }
 
         fun aad(id: String): ByteArray = "zaghlol.spool.v1|entry|$id".toByteArray(Charsets.UTF_8)
 
