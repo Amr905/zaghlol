@@ -83,8 +83,8 @@ Every task file has: ID, description, technical details, dependencies, affected 
 | [T-038](tasks/T-038.md) | Android Capture Guard (Kotlin) with config reader | US-03-1 | High* | Opus | native-platform-engineer | T-035, T-008 | D | 6 | DONE |
 | [T-039](tasks/T-039.md) | Android encrypted spool + spool host API | US-03-1 | High* | Opus | native-platform-engineer | T-004, T-008 | D | 4 | DONE |
 | [T-040](tasks/T-040.md) | SMS receiver (multipart, Guard, spool, enqueue) in prodSms flavor | US-03-1 | High* | Opus | native-platform-engineer | T-038, T-039 | D | 7 | TODO |
-| [T-041](tasks/T-041.md) | IngestionWorker with headless Flutter engine and foreground events | US-03-1 | High* | Opus | native-platform-engineer | T-039, T-008 | D | 5 | TODO |
-| [T-042](tasks/T-042.md) | Inbox reader for historical scan (sender-filtered, paged) | US-03-2 | High* | Opus | native-platform-engineer | T-004, T-038 | D | 7 | TODO |
+| [T-041](tasks/T-041.md) | IngestionWorker with headless Flutter engine and foreground events | US-03-1 | High* | Opus | native-platform-engineer | T-039, T-008 | D | 5 | DONE |
+| [T-042](tasks/T-042.md) | Inbox reader for historical scan (sender-filtered, paged) | US-03-2 | High* | Opus | native-platform-engineer | T-004, T-038 | D | 7 | DONE |
 | [T-043](tasks/T-043.md) | Bank notification listener service | US-03-3 | High* | Opus | native-platform-engineer | T-038, T-039 | D | 7 | TODO |
 | [T-044](tasks/T-044.md) | Android capabilities and permission flows host API | US-03-4 | High* | Opus | native-platform-engineer | T-040, T-043 | D | 8 | TODO |
 | [T-045](tasks/T-045.md) | Accounts repository: auto-create, default cash, per-currency balances | US-06-1 | High | Sonnet | flutter-core-engineer | T-017 | A | 6 | DONE |
@@ -93,7 +93,7 @@ Every task file has: ID, description, technical details, dependencies, affected 
 | [T-048](tasks/T-048.md) | Historical inbox scan with progress (Android) | US-03-2 | High | Sonnet | flutter-core-engineer | T-047, T-042 | A | 9 | TODO |
 | [T-049](tasks/T-049.md) | Review queue domain and repository | US-06-2 | Medium | Sonnet | flutter-core-engineer | T-019, T-046 | A | 8 | TODO |
 | [T-050](tasks/T-050.md) | Transactions repository: query, search, CRUD, soft delete | US-06-3 | Medium | Sonnet | flutter-core-engineer | T-017 | A | 6 | DONE |
-| [T-051](tasks/T-051.md) | Payday cycle engine, safe-to-spend, burn line and cycle summaries | US-09-1 | High | Sonnet | flutter-core-engineer | T-012, T-018, T-050 | A | 7 | TODO |
+| [T-051](tasks/T-051.md) | Payday cycle engine, safe-to-spend, burn line and cycle summaries | US-09-1 | High | Sonnet | flutter-core-engineer | T-012, T-018, T-050 | A | 7 | DONE |
 | [T-052](tasks/T-052.md) | Home read model and persistent card filter | US-10-2 | Medium | Sonnet | flutter-core-engineer | T-051, T-050, T-045, T-049 | A | 9 | TODO |
 | [T-053](tasks/T-053.md) | ZaghlolAvatar widget with static fallback and reduce-motion | US-10-3 | Medium | Sonnet | flutter-ui-engineer | T-022 | G | 3 | TODO |
 | [T-054](tasks/T-054.md) | Home screen S-10 (iOS and Android variants) | US-10-2 | Medium | Sonnet | flutter-ui-engineer | T-052, T-024, T-029, T-053 | G | 10 | TODO |

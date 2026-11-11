@@ -21,14 +21,14 @@ _Last updated: 2026-11-11 01:00 (Cairo) by the Lead session. Update it whenever 
 - **Limits and quirks:** The git proxy allows 2 concurrent ops per repo; on 429 wait 5 s and retry once. `gh` works only as `gh api` (REST). Agents can't delete remote branches (proxy); the PO deletes leftover `ci/*` and proof branches. Known flakes: GitHub Android NDK download / Maven 429 (rerun failed jobs), `SeededSeriesTests` on the PC (FU-055), interleaved xcodebuild lines (tolerated since batch 2).
 - **Copy deck checks:** `python3 docs/workflow/tools/copy_deck_check.py docs/02-design/copy-deck.md`.
 
-## Progress: 51 of 186 tasks done (27.4%)
+## Progress: 54 of 186 tasks done (29.0%)
 
-DONE: T-001…T-007, T-012…T-020, T-022, T-025…T-028, T-030, T-032…T-035, T-038, T-039, T-045, T-046, T-050, T-060, T-073…T-075, T-112, T-122…T-131, T-133, T-134, T-138, T-139, T-148. **Merged but open:** T-008 (device rows AC1/AC2), T-136 (IdP evidence), T-165 (device run).
+DONE: T-001…T-007, T-012…T-020, T-022, T-025…T-028, T-030, T-032…T-035, T-038, T-039, T-041, T-042, T-045, T-046, T-050, T-051, T-060, T-073…T-075, T-112, T-122…T-131, T-133, T-134, T-138, T-139, T-148. **Merged but open:** T-008 (device rows AC1/AC2), T-136 (IdP evidence), T-165 (device run).
 
 | Milestone | Done | Total |
 |---|---|---|
 | M0 | 21 | 28 |
-| M1 | 10 | 29 |
+| M1 | 12 | 29 |
 | M2 | 4 | 29 |
 | M4 | 1 | 17 |
 | M5 | 14 | 35 |
@@ -37,31 +37,31 @@ DONE: T-001…T-007, T-012…T-020, T-022, T-025…T-028, T-030, T-032…T-035, 
 
 The PO asked for this progress table in every update.
 
-**Merged batches:** #28, #29, #32, #33, #34, #35 (batch 6), batch 7 (`batch/2026-11-11-6`: T-039 + FU-101, T-046, T-112, T-133; T-038 closed). Next free follow-up number: **FU-108**.
+**Merged batches:** #28, #29, #32–#36 (batch 7), batch 8 (`batch/2026-11-11-7`: T-041 + T-042, T-051). Next free follow-up number: **FU-111**.
 
-**Lesson (batch 7):** never chain `git commit` after a `git merge` in one script without checking for conflicts first — a conflicted merge got committed with markers locally (caught and amended before push). And local CI step logs are now git-ignored.
+**Lessons:** never chain `git commit` after `git merge` in one script without checking for conflicts. Server/cloud restarts happen often: brief agents to commit early and push often; on restart, check worktrees for live processes (`ps`, `/proc/<pid>/cwd`) before relaunching.
 
 ## In flight
 
-- Nothing running at the time of writing.
-- T-159 Android OCR: Tesseract-only rework committed locally in `/home/claude/wt-T159-fix`, not pushed — waiting for the PO's `tesseract4android-4.9.0.aar`.
+- T-182 seat-key proof verifier: built (`task/T-182-seat-proof` @ f066e9b, backend-ci green); code + security reviews (Opus) running.
+- T-159 Android OCR: waiting for the PO's `tesseract4android-4.9.0.aar` (`/home/claude/wt-T159-fix`, unpushed).
 
 ## Ready next (dependencies done)
 
-- **Ingestion chain (Android):** T-040 receiver wiring (needs FU-101 L-1 + FU-104 T-040 items), T-041 IngestionWorker production (FU-104 T-041 items, FU-105 quarantine), T-042 inbox reader, T-043 notification listener, T-047 user guard config writer (T-046 + T-039 done), T-048 catch-up scan.
-- **App core:** T-021 diagnostic log (C3), T-051 payday cycle (C3), T-077 bulk edit/undo (C3), T-113 net worth (after T-112), T-141 BackendClient (C4), T-142 contribution outbox (C4), T-183 request-binding library (C4), T-149/T-150 backup (after T-148).
+- **Ingestion chain (Android):** T-047 app-side capture module (Sonnet; design note on `task/ingest-notes-combined`) — must land before or with T-040 for non-devSms builds; T-040 SMS receiver (Opus; FU-101 L-1, FU-104 T-040 items, FU-108 L-1/L-2), then T-043 notification listener; T-048 catch-up scan after PO decides FU-109 M-1.
+- **App core:** T-021 diagnostic log (C3), T-052 home read model (needs T-049?), T-077 bulk edit/undo (C3), T-113 net worth, T-141 BackendClient (C4), T-142 contribution outbox (C4), T-183 request-binding library (C4), T-149/T-150 backup.
+- **Backend:** T-181 attestation verifiers (C4), T-184 seat service (after T-182), T-132 after T-184, T-140 (hosting), FU-107 M-1 before go-live.
 - **Native/iOS:** T-009 iOS App Intent spike, T-010/T-011 spikes, T-178 / T-180.
-- **Parsing:** bank templates T-036, T-037, T-068–T-072 wait for real SMS samples (OQ-04); T-109 voice-phrase parser.
-- **Backend:** T-181 / T-182 verifiers (C4), T-184 seat service, T-132 after T-184, T-140 (hosting), FU-107 M-1 before go-live.
+- **Parsing:** bank templates T-036, T-037, T-068–T-072 wait for real SMS samples (OQ-04).
 - **UI:** T-053 ZaghlolAvatar (needs UX dark tokens, FU-047).
-- **Human:** T-058 copy review, T-059 merchant seed list (+ Arabic aliases from T-075), T-088 Rive file.
+- **Human:** T-058, T-059, T-088.
 
 ## Waiting on the PO (Amr)
 
 1. **Operator sign-in provider** (T-136 Q1/Q2, "decide later"): needed to close T-136 and before T-186 goes live (FU-060 S-4). Google needs a design change; Entra needs a token-lifetime policy ≤ 60 min.
 2. **D-41** local gold-price provider, before T-127 go-live.
 3. **Copy decisions:** Q-20, Q-23, Q-24, Q-25, Q-33, Q-36; Q-44 (restore-notice wording, UX); later Q-17, OQ-09 brand clearance.
-4. **Inputs:** `tesseract4android-4.9.0.aar` in `C:\\Projects\\Zaghlol\\` (T-159); Play Console service account, product IDs, quota and a tester order (T-130 §13); App Store Connect IAP key, bundle/team ID, products, sandbox-in-production, Family Sharing, sandbox testers (T-131 §12 questions 1–7); T-035 Guard Q1–Q6 (provisional defaults in code); T-019 data questions 1–4; T-134 questions 1–4 and T-148 questions 1–3 (in their design notes); T-046 Q1–Q3; T-039 Q1–Q2; T-075 PO-1…PO-4; T-020 key defaults; T-025 14-day maxAge; T-112 manual FX override (OQ); T-133 Q1–Q6 (Pub/Sub setup, push account, refund policy, chargeback reviews, test vector, quota); test phones + second SIM for SPK-01 (T-008 Q1); IBM Plex Sans Arabic TTFs (FU-044); synthetic-able SMS samples (OQ-04/OQ-18, T-031); Rive file (T-088).
+4. **Inputs:** `tesseract4android-4.9.0.aar` in `C:\\Projects\\Zaghlol\\` (T-159); Play Console service account, product IDs, quota and a tester order (T-130 §13); App Store Connect IAP key, bundle/team ID, products, sandbox-in-production, Family Sharing, sandbox testers (T-131 §12 questions 1–7); T-035 Guard Q1–Q6 (provisional defaults in code); T-019 data questions 1–4; T-134 questions 1–4 and T-148 questions 1–3 (in their design notes); T-046 Q1–Q3; T-039 Q1–Q2; T-075 PO-1…PO-4; T-020 key defaults; T-025 14-day maxAge; T-112 manual FX override (OQ); T-133 Q1–Q6 (Pub/Sub setup, push account, refund policy, chargeback reviews, test vector, quota); **FU-109 M-1: user-added phone-number senders and inbox history (before T-048)**; T-040/T-043/T-041/T-047 questions (spool share, user notification senders, missed notifications, held messages, NoSms Home banner, missed-notification copy, banner priority, rule-save copy); T-051 Q1–Q5; T-182 Q1 (K_seat emergency rotation); test phones + second SIM for SPK-01 (T-008 Q1); IBM Plex Sans Arabic TTFs (FU-044); synthetic-able SMS samples (OQ-04/OQ-18, T-031); Rive file (T-088).
 5. **Device runs:** T-165; T-015 device checklist (StrongBox phone; iPhone reboot + background read before unlock); T-060 manual steps (FU-067); reference Android phone and iPhone 12 timings (T-007).
 6. **Housekeeping:** delete leftover branches `ci/FU-030`, `ci/T-016`, `ci/T-017`, `ci/T-018`, `ci/T-008`, `ci/T-131`, `ci/T-134`, `ci/T-148`, `ci/T-038`, `ci/T-039`, `ci/T-133`, `ci/T-133-neg`, `task/T-130-negproof`, `task/T-003-throwaway-red`, `task/T-165-proof`, `task/T-004-scratch`, `task/T-004-negctl`, `task/T-007-proof*`, `task/T-015-proof-*`, `scratch/*`.
 7. **PC:** keep Docker Desktop (Linux containers, 10 GB in `.wslconfig`) and `START-LOCAL-CI.cmd` running while agents work; restart the runner after a new `runner.ps1` is deployed.
