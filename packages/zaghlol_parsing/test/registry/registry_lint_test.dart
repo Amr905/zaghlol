@@ -384,6 +384,44 @@ void main() {
       expect(slowIssues.single.detail, 'cib.slow.en adversarial');
     });
 
+    test('a slow drop, last4 or global pattern fails the probe (M-2)', () {
+      for (final target in ['drop', 'last4', 'globalDrop', 'globalLast4']) {
+        final f = base.copy();
+        const slowPattern = r'^(?:\d*\d*){2}x';
+        if (target.startsWith('global')) {
+          final json = jsonDecode(f.shared!) as Map<String, Object?>;
+          if (target == 'globalDrop') {
+            ((json['drop']! as Map)['global']! as List).add(slowPattern);
+          } else {
+            (json['last4']! as List).add('$slowPattern(\\d{4})');
+          }
+          f.shared = jsonEncode(json);
+        } else {
+          f.editInstitution('nbe.json', (j) {
+            final list = (j[target] as List?) ?? <Object?>[];
+            list.add(target == 'last4' ? '$slowPattern(\\d{4})' : slowPattern);
+            j[target] = list;
+          });
+        }
+        final r = lintRegistry(
+          manifest: f.manifest,
+          shared: f.shared,
+          institutions: f.institutions,
+          fixtures: f.fixtures,
+          minFixturesPerTemplate: 1,
+          maxMatchMillis: 2,
+        );
+        final details = r.issues
+            .where((i) => i.code == RegistryIssueCode.slowMatch)
+            .map((i) => i.detail)
+            .toList();
+        // Exactly the one added pattern (the existing ones stay clean).
+        expect(details, hasLength(1), reason: target);
+        expect(details.single, startsWith('$target['), reason: target);
+        expect(details.single, endsWith(' adversarial'), reason: target);
+      }
+    });
+
     test('the per-fixture timer reports the template id only', () {
       final reg = RegistryLoader.load(
         manifest: base.manifest,

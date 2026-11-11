@@ -506,7 +506,7 @@ void main() {
       expect(r.confidencePermille, 760);
     });
 
-    test('penalties multiply in integers and never go below zero', () {
+    test('each reason has a factor in 600..900 and the threshold is 850', () {
       for (final reason in ParseReason.values) {
         expect(reason.factorPermille, inInclusiveRange(600, 900));
       }
@@ -670,13 +670,15 @@ void main() {
           _req(
             b.toString(),
             source: sources[rnd.nextInt(sources.length)],
-            channel: RegistryChannel.values[rnd.nextInt(5)],
+            channel: RegistryChannel
+                .values[rnd.nextInt(RegistryChannel.values.length)],
           ),
         );
         expect(
           r,
           anyOf(
             isA<ParseParsed>(),
+            isA<ParseGeneric>(),
             isA<ParseDropped>(),
             isA<ParseUnrecognized>(),
           ),
@@ -751,6 +753,8 @@ void main() {
     clock.stop();
     final meanMicros = clock.elapsedMicroseconds / runs;
     expect(parsed, greaterThan(runs ~/ 2));
+    // ignore: avoid_print
+    print('pipeline parse mean: ${meanMicros.round()} us over $runs runs');
     expect(meanMicros, lessThan(2000), reason: 'mean ${meanMicros.round()} us');
   });
 }
@@ -768,6 +772,8 @@ List<String> _allStrings(ParseResult r) {
       return [?r.institutionCode];
     case ParseUnrecognized():
       return [?r.institutionCode, ?r.templateId];
+    case ParseGeneric():
+      return [r.language, ?r.last4, ?r.merchant?.display, ?r.merchant?.key];
     case ParseParsed():
       final f = r.fields;
       return [

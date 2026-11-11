@@ -203,8 +203,9 @@ enum UnrecognizedReason {
   emptyBody,
   bodyTooLong,
 
-  /// No institution for the sender or package (the generic parser, T-073,
-  /// picks these up).
+  /// No institution for the sender or package, and the message does not
+  /// qualify for the generic parser (not from an always-capture source, no
+  /// sender-and-body hint match, not a shortcut, Apple Pay or share input).
   unknownSource,
 
   /// The institution is known but no template matched.
@@ -219,6 +220,14 @@ enum UnrecognizedReason {
 
   /// Unexpected internal failure; the message goes to review.
   internalError,
+
+  /// Generic parser: the message qualified but no amount with an adjacent
+  /// currency could be read.
+  genericNoAmount,
+
+  /// Generic parser: the message says the attempt failed or was declined,
+  /// which is not a transaction.
+  genericDeclined,
 }
 
 /// Nothing could be parsed. The caller keeps the raw message as an
@@ -229,4 +238,67 @@ final class ParseUnrecognized extends ParseResult {
   final UnrecognizedReason reason;
   final String? institutionCode;
   final String? templateId;
+}
+
+/// Why a generic suggestion lost confidence. Codes only.
+enum GenericReason {
+  /// Two or more different amounts and no keyword singled one out.
+  amountAmbiguous(700),
+
+  /// Expense and income keywords sit within 20 characters of each other, so
+  /// the direction is left unset.
+  directionConflict(800),
+
+  /// No direction keyword: the direction is left unset, never defaulted.
+  directionUnknown(800),
+
+  /// Neither a last-4 nor a merchant was found.
+  sparseFields(900);
+
+  const GenericReason(this.factorPermille);
+
+  /// Multiplier in thousandths applied to the confidence.
+  final int factorPermille;
+}
+
+/// Highest confidence a generic suggestion can have, in thousandths. It is
+/// below [kAutoAcceptThresholdPermille] by construction.
+const int kGenericMaxConfidencePermille = 700;
+
+/// A best-effort suggestion for a message from a source with no template
+/// (FR-PAR-13). It always needs review: the amount is a suggestion the user
+/// confirms or edits. A field the message does not carry is null (never
+/// guessed), including [direction].
+final class ParseGeneric extends ParseResult {
+  const ParseGeneric({
+    required this.language,
+    required this.amount,
+    required this.direction,
+    required this.last4,
+    required this.merchant,
+    required this.occurredAt,
+    required this.confidencePermille,
+    required this.reasons,
+  });
+
+  /// Detected language of the message, `ar` or `en`.
+  final String language;
+
+  /// Positive amount in the currency the message names next to it.
+  final Money amount;
+
+  /// `expense` or `income`; null when the message gives no clear keyword.
+  final TemplateDirection? direction;
+  final String? last4;
+  final CleanedMerchant? merchant;
+
+  /// The receipt time: the generic parser reads no dates.
+  final DateTime occurredAt;
+
+  /// 0..[kGenericMaxConfidencePermille].
+  final int confidencePermille;
+  final List<GenericReason> reasons;
+
+  /// Always true: a generic result is never accepted without the user.
+  bool get needsReview => true;
 }

@@ -104,7 +104,11 @@ LintReport lintRegistry({
   }
   for (final inst in registry.institutions) {
     for (final t in inst.templates) {
-      if (_isSlowOnAdversarial(t, samples[t.id], maxMatchMillis)) {
+      if (_isSlowOnAdversarial(
+        t.pattern.regex,
+        samples[t.id],
+        maxMatchMillis,
+      )) {
         issues.add(
           RegistryIssue(
             'institutions/${inst.code}.json',
@@ -115,6 +119,29 @@ LintReport lintRegistry({
       }
     }
   }
+  // These lists run on every message too (pipeline stage 0, last-4 borrowing,
+  // the generic parser), so they get the same runtime probe (T-033 M-2).
+  void probe(String file, String list, List<CompiledPattern> patterns) {
+    for (var i = 0; i < patterns.length; i++) {
+      if (_isSlowOnAdversarial(patterns[i].regex, null, maxMatchMillis)) {
+        issues.add(
+          RegistryIssue(
+            file,
+            RegistryIssueCode.slowMatch,
+            '$list[$i] adversarial',
+          ),
+        );
+      }
+    }
+  }
+
+  for (final inst in registry.institutions) {
+    probe('institutions/${inst.code}.json', 'drop', inst.drop);
+    probe('institutions/${inst.code}.json', 'last4', inst.last4);
+  }
+  probe('shared.json', 'globalDrop', registry.shared.globalDrop);
+  probe('shared.json', 'globalLast4', registry.shared.globalLast4);
+  probe('shared.json', 'bodyHints', registry.shared.bodyHints);
   final guard = exportGuardConfig(registry);
   issues.addAll(guard.issues);
   return LintReport(
@@ -130,7 +157,10 @@ LintReport lintRegistry({
 /// SMS is under 1600 characters; the lint stops at the first length that is
 /// over the limit, so a high-degree polynomial pattern is caught at a small
 /// size instead of hanging the lint at the largest.
-const List<int> adversarialBodyLengths = [64, 128, 256, 512];
+///
+/// The ladder ends at the pipeline's body cap (4000), so quadratic headroom
+/// on a maximum-size message is measured, not assumed.
+const List<int> adversarialBodyLengths = [64, 128, 256, 512, 1600, 4000];
 
 String? _fixtureBody(String text) {
   try {
@@ -159,7 +189,7 @@ List<String> adversarialBodies(String? sample, int length) {
   return out;
 }
 
-bool _isSlowOnAdversarial(Template t, String? sample, int limitMillis) {
+bool _isSlowOnAdversarial(RegExp regex, String? sample, int limitMillis) {
   final clock = Stopwatch();
   for (final length in adversarialBodyLengths) {
     for (final body in adversarialBodies(sample, length)) {
@@ -167,7 +197,7 @@ bool _isSlowOnAdversarial(Template t, String? sample, int limitMillis) {
       clock
         ..reset()
         ..start();
-      t.pattern.regex.firstMatch(folded);
+      regex.firstMatch(folded);
       clock.stop();
       if (clock.elapsedMilliseconds > limitMillis) {
         return true;
