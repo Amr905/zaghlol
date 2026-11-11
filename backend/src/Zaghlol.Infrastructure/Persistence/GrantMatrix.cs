@@ -42,7 +42,8 @@ public sealed record TableGrant(
 /// deletes; UPDATE on <c>installs</c> and <c>purchases</c> is column-level.</item>
 /// <item><c>ops_ro</c>: SELECT, except <c>installs.token_hash</c>, <c>accounts.email</c>, <c>accounts.provider_subject</c>,
 /// <c>accounts.apple_refresh_token_enc</c>, <c>purchases.store_key</c>, <c>purchases.linked_purchase_token</c>,
-/// <c>store_notifications.store_key</c> and <c>idempotency_records.response_body_enc</c>.</item>
+/// <c>store_notifications.store_key</c> and <c>idempotency_records.response_body_enc</c>. The T-130 column
+/// <c>idempotency_records.claim_id</c> (a 60 s request lease) was added without an <c>ops_ro</c> grant.</item>
 /// </list>
 /// A later migration that adds a table or a grant adds a frozen list here (like <see cref="InitialCreate"/>), renders it
 /// with <see cref="ToSql"/> in that migration, and appends it to <see cref="Current"/>. A migration never renders

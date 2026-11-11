@@ -76,6 +76,13 @@ public class ArchitectureTests
     }
 
     [Fact]
+    public void TheHandlerTimeoutIsShorterThanTheClaimLease()
+    {
+        // S-2: a live handler must never lose its claim to a takeover.
+        Assert.True(Idempotency.IdempotencyFilter.HandlerTimeout < Zaghlol.Infrastructure.Installs.IdempotencyLease.Duration);
+    }
+
+    [Fact]
     public void IdempotentHandlersNeverTakeTheInstallTokenRotator()
     {
         // T-130 S-3: a stored, replayable body must never carry a rotated install token.

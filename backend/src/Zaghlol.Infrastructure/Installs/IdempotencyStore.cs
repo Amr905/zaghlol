@@ -68,10 +68,16 @@ public interface IIdempotencyStore
     Task ReleaseAsync(InstallId installId, IdempotentOperation operation, string idempotencyKey, Guid claimId, CancellationToken cancellationToken);
 }
 
-internal sealed class IdempotencyStore(IAppDbContextFactory contexts) : IIdempotencyStore
+/// <summary>The idempotency claim lease (T-130, FU-052 S-2).</summary>
+public static class IdempotencyLease
 {
     /// <summary>How long a claim lasts without being completed. Longer than the handler timeout, so a live handler keeps it.</summary>
-    public static readonly TimeSpan Lease = TimeSpan.FromSeconds(60);
+    public static readonly TimeSpan Duration = TimeSpan.FromSeconds(60);
+}
+
+internal sealed class IdempotencyStore(IAppDbContextFactory contexts) : IIdempotencyStore
+{
+    public static readonly TimeSpan Lease = IdempotencyLease.Duration;
 
     private const string DeleteExpiredSql = """
         DELETE FROM zaghlol.idempotency_records
