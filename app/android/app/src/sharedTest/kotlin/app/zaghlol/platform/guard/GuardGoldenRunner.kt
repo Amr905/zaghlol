@@ -38,7 +38,8 @@ class GuardGoldenRunner(private val load: (String) -> ByteArray) {
         val configs = golden["configs"] as Map<String, Map<String, Any?>>
         configs.mapValues { (id, c) ->
             val load = GuardConfig.parse(load(c["base"] as String), (c["user"] as String?)?.let(load))
-            checkNotNull(load.config) { "golden config $id does not load: $load" }
+            // The error paths are fixed key names and indexes, never a value.
+            checkNotNull(load.config) { "golden config $id does not load: $load at ${load.baseError?.path} / ${load.userError?.path}" }
             CaptureGuard(load.config)
         }
     }
