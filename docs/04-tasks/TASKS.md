@@ -45,7 +45,7 @@ Every task file has: ID, description, technical details, dependencies, affected 
 | [T-005](tasks/T-005.md) | Backend solution scaffold, Docker Compose and CI | US-01-1 | Medium | Sonnet | backend-engineer | — | B | 1 | DONE |
 | [T-006](tasks/T-006.md) | OpenAPI v1 spec and contract-test harness | US-13-1 | Medium | Sonnet | backend-engineer | T-005 | B | 2 | DONE |
 | [T-007](tasks/T-007.md) | SPK-05: encrypted SQLite (SQLite3MultipleCiphers) + FTS5 trigram on both platforms | US-01-2 | High* | Opus | flutter-core-engineer | T-001 | A | 2 | DONE |
-| [T-008](tasks/T-008.md) | SPK-01: Android receiver → spool → WorkManager → headless engine latency | US-01-2 | High* | Opus | native-platform-engineer | T-001, T-004 | D | 3 | TODO |
+| [T-008](tasks/T-008.md) | SPK-01: Android receiver → spool → WorkManager → headless engine latency | US-01-2 | High* | Opus | native-platform-engineer | T-001, T-004 | D | 3 | IN_REVIEW |
 | [T-009](tasks/T-009.md) | SPK-03: can an iOS App Intent process immediately with a headless Flutter engine? | US-01-2 | High* | Opus | native-platform-engineer | T-001, T-004 | E | 3 | TODO |
 | [T-010](tasks/T-010.md) | SPK-02: OCR accuracy on synthetic InstaPay/wallet receipts | US-01-2 | High | Sonnet | native-platform-engineer | T-001 | D | 2 | MERGED (device run pending) |
 | [T-011](tasks/T-011.md) | SPK-04: on-device ar-EG speech availability across the device matrix | US-01-2 | Medium | Sonnet | native-platform-engineer | T-001 | D | 2 | TODO |
@@ -72,7 +72,7 @@ Every task file has: ID, description, technical details, dependencies, affected 
 | ID | Title | Story | Cx | Model | Agent | Depends on | Lane | Wave | Status |
 |---|---|---|---|---|---|---|---|---|---|
 | [T-029](tasks/T-029.md) | Generate ARB files from copy deck (part 1) | US-02-2 | Low | Haiku | boilerplate-engineer | T-023, T-026 | C | 8 | TODO |
-| [T-030](tasks/T-030.md) | Catalog seed pipeline and 14 system categories | US-07-1 | Medium | Sonnet | flutter-core-engineer | T-018 | A | 6 | TODO |
+| [T-030](tasks/T-030.md) | Catalog seed pipeline and 14 system categories | US-07-1 | Medium | Sonnet | flutter-core-engineer | T-018 | A | 6 | DONE |
 | [T-031](tasks/T-031.md) | Convert real SMS/notification/statement samples into synthetic fixtures (OQ-04/18) | US-05-1 | Medium | Sonnet | parsing-engine-engineer | T-013 | F | 4 | BLOCKED |
 | [T-032](tasks/T-032.md) | Template registry format, loader and registry_lint CLI | US-05-1 | High | Sonnet | parsing-engine-engineer | T-013 | F | 4 | DONE |
 | [T-033](tasks/T-033.md) | Parsing pipeline stages 1–7 and ParseResult | US-05-1 | High | Sonnet | parsing-engine-engineer | T-032, T-012 | F | 5 | DONE |
@@ -87,7 +87,7 @@ Every task file has: ID, description, technical details, dependencies, affected 
 | [T-042](tasks/T-042.md) | Inbox reader for historical scan (sender-filtered, paged) | US-03-2 | High* | Opus | native-platform-engineer | T-004, T-038 | D | 7 | TODO |
 | [T-043](tasks/T-043.md) | Bank notification listener service | US-03-3 | High* | Opus | native-platform-engineer | T-038, T-039 | D | 7 | TODO |
 | [T-044](tasks/T-044.md) | Android capabilities and permission flows host API | US-03-4 | High* | Opus | native-platform-engineer | T-040, T-043 | D | 8 | TODO |
-| [T-045](tasks/T-045.md) | Accounts repository: auto-create, default cash, per-currency balances | US-06-1 | High | Sonnet | flutter-core-engineer | T-017 | A | 6 | TODO |
+| [T-045](tasks/T-045.md) | Accounts repository: auto-create, default cash, per-currency balances | US-06-1 | High | Sonnet | flutter-core-engineer | T-017 | A | 6 | DONE |
 | [T-046](tasks/T-046.md) | IngestRawMessages use case (dedupe, merge, persist, ack, events) | US-06-1 | High* | Opus | flutter-core-engineer | T-033, T-045, T-014, T-035 | A | 7 | TODO |
 | [T-047](tasks/T-047.md) | Capture module (app side): guard config writer, spool orchestrator, degraded mode | US-03-1 | High | Sonnet | flutter-core-engineer | T-046, T-039, T-035 | A | 8 | TODO |
 | [T-048](tasks/T-048.md) | Historical inbox scan with progress (Android) | US-03-2 | High | Sonnet | flutter-core-engineer | T-047, T-042 | A | 9 | TODO |
@@ -120,7 +120,7 @@ Every task file has: ID, description, technical details, dependencies, affected 
 | [T-070](tasks/T-070.md) | Templates + fixtures: BNPL (valU, Sympl, Souhoola, Shahry, Aman, Forsa, Contact) | US-05-1 | Medium | Sonnet | parsing-engine-engineer | T-033 | F | 6 | TODO |
 | [T-071](tasks/T-071.md) | Templates + fixtures: Wise, Revolut, Monzo, bunq, N26, Payoneer | US-05-1 | High | Sonnet | parsing-engine-engineer | T-033 | F | 6 | TODO |
 | [T-072](tasks/T-072.md) | Templates + fixtures: HDFC, Paytm, Al Rajhi, Emirates NBD/Liv, GCC (S rows) | US-05-1 | Medium | Sonnet | parsing-engine-engineer | T-033 | F | 6 | TODO |
-| [T-073](tasks/T-073.md) | Generic parser for unknown financial senders | US-05-2 | High | Sonnet | parsing-engine-engineer | T-033, T-034 | F | 6 | TODO |
+| [T-073](tasks/T-073.md) | Generic parser for unknown financial senders | US-05-2 | High | Sonnet | parsing-engine-engineer | T-033, T-034 | F | 6 | DONE |
 | [T-074](tasks/T-074.md) | Merchant rules repository and apply-to-past | US-07-1 | Medium | Sonnet | flutter-core-engineer | T-018, T-050 | A | 7 | TODO |
 | [T-075](tasks/T-075.md) | Categorizer with fuzzy merchant matching | US-07-1 | High | Sonnet | parsing-engine-engineer | T-034, T-018, T-074, T-030 | F | 8 | TODO |
 | [T-076](tasks/T-076.md) | Re-parse job after registry version bump | US-06-2 | High | Sonnet | flutter-core-engineer | T-046, T-032 | A | 8 | TODO |
@@ -193,7 +193,7 @@ Every task file has: ID, description, technical details, dependencies, affected 
 | [T-128](tasks/T-128.md) | Daily POST /v1/sync with throttle, contributions and bank-request intake | US-13-1 | High* | Opus | backend-engineer | T-124, T-125, T-126, T-127, T-123 | B | 4 | DONE |
 | [T-129](tasks/T-129.md) | Contribution aggregation, review list and promote/reject | US-13-2 | Medium | Sonnet | backend-engineer | T-128, T-125 | B | 5 | DONE |
 | [T-130](tasks/T-130.md) | Google Play purchase verification, acknowledgement and sweeper | US-14-1 | High* | Opus | backend-engineer | T-124, T-123 | B | 4 | DONE |
-| [T-131](tasks/T-131.md) | App Store verification (JWS chain, Server API status, appAccountToken) | US-14-1 | High* | Opus | backend-engineer | T-124, T-123 | B | 4 | TODO |
+| [T-131](tasks/T-131.md) | App Store verification (JWS chain, Server API status, appAccountToken) | US-14-1 | High* | Opus | backend-engineer | T-124, T-123 | B | 4 | DONE |
 | [T-132](tasks/T-132.md) | Entitlement tokens, GET /v1/entitlement, seat at verify and sync entitlement block | US-14-1 | High* | Opus | backend-engineer | T-128, T-130, T-131, T-184 | B | 5 | TODO |
 | [T-133](tasks/T-133.md) | Google RTDN push endpoint, processing worker and voided reconciliation | US-14-1 | High* | Opus | backend-engineer | T-130 | B | 5 | TODO |
 | [T-134](tasks/T-134.md) | App Store Server Notifications V2 endpoint and reconciliation | US-14-1 | High* | Opus | backend-engineer | T-131 | B | 5 | TODO |
