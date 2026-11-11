@@ -134,3 +134,8 @@ Re-review scope after the fix: the delta to `shared.json` (all three test regist
 - **Newline residual and the security trade-off.** I support making a line break a boundary (code-review finding 1), as long as `OTP:` newline `482913` and `Verification code` newline `482913` still drop. That keeps the security posture and removes the data-loss case. Do not respond by widening the code shapes.
 - **Performance:** worst adversarial body about 1.6-2.0 ms on a noisy machine, similar to the old worst; linear. No regression that matters.
 - ADR-005 *Threats* names the residuals accurately.
+
+---
+
+### Code-review delta 2 note
+Re-review (delta 2, `7721f27..1eb4f92`) found nothing security-relevant: only the line-break fold for the four global drop patterns changed; tight-form OTP drops and every single-line OTP shape still drop, so M-1 and M-2 stay closed. The one new residual (a line break before `is`/`as`) is a Low keep of the same kind as the existing ones.
