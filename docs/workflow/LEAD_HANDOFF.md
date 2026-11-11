@@ -21,33 +21,35 @@ _Last updated: 2026-11-11 01:00 (Cairo) by the Lead session. Update it whenever 
 - **Limits and quirks:** The git proxy allows 2 concurrent ops per repo; on 429 wait 5 s and retry once. `gh` works only as `gh api` (REST). Agents can't delete remote branches (proxy); the PO deletes leftover `ci/*` and proof branches. Known flakes: GitHub Android NDK download / Maven 429 (rerun failed jobs), `SeededSeriesTests` on the PC (FU-055), interleaved xcodebuild lines (tolerated since batch 2).
 - **Copy deck checks:** `python3 docs/workflow/tools/copy_deck_check.py docs/02-design/copy-deck.md`.
 
-## Progress: 28 of 186 tasks done (15.1%)
+## Progress: 34 of 186 tasks done (18.3%)
 
-DONE: T-001…T-007, T-012, T-013, T-014, T-015, T-016, T-022, T-026, T-027, T-028, T-034, T-060, T-122…T-129, T-138, T-139. **Merged but open:** T-136 (IdP evidence), T-165 (device run).
+DONE: T-001…T-007, T-012, T-013, T-014, T-015, T-016, T-022, T-026, T-027, T-028, T-017, T-018, T-032, T-033, T-034, T-050, T-060, T-122…T-130, T-138, T-139. **Merged but open:** T-136 (IdP evidence), T-165 (device run).
 
 | Milestone | Done | Total |
 |---|---|---|
-| M0 | 16 | 28 |
-| M1 | 1 | 29 |
+| M0 | 18 | 28 |
+| M1 | 4 | 29 |
 | M2 | 1 | 29 |
-| M5 | 10 | 35 |
+| M5 | 11 | 35 |
 | M3, M4, M6, M7 | 0 | 65 |
 
 The PO asked for this progress table in every update.
 
-**Merged batches:** batch 1 (#28: T-015, T-034, T-129, T-139); batch 2 (#29: T-016, T-060, FU-030 lint hardening, workflow fixes).
+**Merged batches:** batch 1 (#28: T-015, T-034, T-129, T-139); batch 2 (#29: T-016, T-060, FU-030, workflow fixes); batch 3 (`batch/2026-11-11-2`: T-032, T-033, T-017, T-018, T-050, T-130).
 
 ## In flight
 
-Nothing. Batch 3 has not started.
+- T-008 SMS ingestion spike (Opus; restarted after an infra stop; needs PO devices/second SIM for SPK-01 timings).
+- T-073 generic parser: fix round (flaky lint probe, ambiguous "sent").
+- T-159 Android OCR: Tesseract-only rework committed locally in `/home/claude/wt-T159-fix`, not pushed — waiting for the PO to place `tesseract4android-4.9.0.aar` in `C:\Projects\Zaghlol\`.
 
 ## Ready next (dependencies done)
 
-- **App core (unblocked by T-016):** T-017, T-018, T-019 schema batches A–C (C4, Opus; T-017 also gets the FTS short-query table proposal from T-016 and must handle FU-071 m-3 CHECK constraints). T-148 backup file format (C4 crypto, two reviewers).
-- **Parsing (unblocked by FU-030):** T-032 template registry + registry_lint (C3, Sonnet). Then T-033.
-- **Native:** T-008 Android SMS receiver → spool → headless engine spike (C4, SMS ingestion: Opus note + two reviewers; must use `SpoolKey`, FU-068, and register `SecretStoreRegistration` in the headless engine). T-009 iOS App Intent spike. T-159 / T-160 OCR hosts (C3).
-- **Backend:** T-130 / T-131 purchase verification (C4 billing; T-130 first needs a design fix for FU-052 S-2, the idempotency session holding a DB connection). T-181 / T-182 attestation and seat-key verifiers. T-140.
-- **UI:** T-053 ZaghlolAvatar (needs UX to confirm the dark tokens, FU-047).
+- **App core:** T-019 schema batch C (C4 Opus; take FU-075 items in scope), T-030 catalog seed + 14 system categories (C2), T-045 accounts repository (C3), T-148 backup file format (C4 crypto, two reviewers).
+- **Parsing:** T-035 Capture Guard rules (C4, Opus). Bank template tasks T-036, T-037, T-068–T-072 should wait for real SMS samples from the PO (OQ-04) so templates match real formats.
+- **Native:** T-009 iOS App Intent spike (C4), T-160 iOS OCR host (C3; Tesseract or Vision per D-71 scope — check), T-178 / T-180 attestation and trusted-clock host APIs (C4).
+- **Backend:** T-131 App Store verification (C4 billing; adopt StoreBindingRef from T-130), T-132 entitlement + seat (C4 billing), T-181 / T-182 verifiers, T-140.
+- **UI:** T-053 ZaghlolAvatar (needs UX dark tokens, FU-047).
 - **Human:** T-058 native-speaker copy review, T-088 Rive file.
 
 ## Waiting on the PO (Amr)
@@ -55,9 +57,9 @@ Nothing. Batch 3 has not started.
 1. **Operator sign-in provider** (T-136 Q1/Q2, "decide later"): needed to close T-136 and before T-186 goes live (FU-060 S-4). Google needs a design change; Entra needs a token-lifetime policy ≤ 60 min.
 2. **D-41** local gold-price provider, before T-127 go-live.
 3. **Copy decisions:** Q-20, Q-23, Q-24, Q-25, Q-33, Q-36; Q-44 (restore-notice wording, UX); later Q-17, OQ-09 brand clearance.
-4. **Inputs:** IBM Plex Sans Arabic TTFs (FU-044); synthetic-able SMS samples (OQ-04/OQ-18, T-031); Rive file (T-088).
+4. **Inputs:** `tesseract4android-4.9.0.aar` in `C:\\Projects\\Zaghlol\\` (T-159); Play Console service account, product IDs, quota and a tester order (T-130 §13); test phones + second SIM for SPK-01 (T-008 Q1); IBM Plex Sans Arabic TTFs (FU-044); synthetic-able SMS samples (OQ-04/OQ-18, T-031); Rive file (T-088).
 5. **Device runs:** T-165; T-015 device checklist (StrongBox phone; iPhone reboot + background read before unlock); T-060 manual steps (FU-067); reference Android phone and iPhone 12 timings (T-007).
-6. **Housekeeping:** delete leftover branches `ci/FU-030`, `ci/T-016`, `task/T-003-throwaway-red`, `task/T-165-proof`, `task/T-004-scratch`, `task/T-004-negctl`, `task/T-007-proof*`, `task/T-015-proof-*`, `scratch/*`.
+6. **Housekeeping:** delete leftover branches `ci/FU-030`, `ci/T-016`, `ci/T-017`, `ci/T-018`, `ci/T-008`, `task/T-130-negproof`, `task/T-003-throwaway-red`, `task/T-165-proof`, `task/T-004-scratch`, `task/T-004-negctl`, `task/T-007-proof*`, `task/T-015-proof-*`, `scratch/*`.
 7. **PC:** keep Docker Desktop (Linux containers, 10 GB in `.wslconfig`) and `START-LOCAL-CI.cmd` running while agents work; restart the runner after a new `runner.ps1` is deployed.
 
 ## Waiting on the architect or UX
