@@ -166,7 +166,7 @@ plaintext = tar-like stream: db.snapshot, settings.json, manifest.json (T-149)
   - **Orphaned data:** a DB without its key (an OEM transfer or a leaked restore) is deleted at startup, and the app starts in first-launch state offering restore. It is never partially opened.
 - **IPC:**
   - The share intent and extension accept only declared MIME types.
-  - Exported Android components are limited to the SMS receiver (permission-protected `BROADCAST_SMS`), the notification listener (`BIND_NOTIFICATION_LISTENER_SERVICE`) and the share activity.
+  - Exported Android components are limited to the SMS receiver (permission-protected `BROADCAST_SMS`), the notification listener (`BIND_NOTIFICATION_LISTENER_SERVICE`), the share activity and WorkManager's `SystemJobService` (`BIND_JOB_SERVICE`, system only). WorkManager's exported `DiagnosticsReceiver` (`DUMP`) is removed with `tools:node="remove"`; CI checks the merged manifest (T-041).
   - Deep links can't trigger destructive actions.
 - **Exports/share cards** (FR-SEC-06): written only to a user-chosen location after an unencrypted-file warning. Staging files are encrypted with `K_spool` and deleted after sharing.
 - **Clipboard:** paste is user-initiated only; the app never reads the clipboard silently.

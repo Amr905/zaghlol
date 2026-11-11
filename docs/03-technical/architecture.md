@@ -272,7 +272,7 @@ App dependencies are pinned in `pubspec.lock`. Versions are the latest stable at
 | `workmanager` *(not used)* | — | Native WorkManager is configured in Kotlin directly (headless engine control) |
 
 Native-only dependencies:
-- **Android:** WorkManager, Glance (widget), ML Kit text recognition (Latin), Tesseract4Android with `ara.traineddata` (about 1.4 MB "fast" model), `com.google.android.play:integrity`. The last is needed for restore attestation (D-45/D-46). It is Google's only first-party attestation and ships through Play services, which Play Billing already requires.
+- **Android:** WorkManager (`androidx.work:work-runtime` 2.12.0, stable 2026-09-23, minSdk 24 ≤ 26; all flavours since T-041: the only supported way to run expedited background work that survives process death; its exported `DiagnosticsReceiver` is removed in the manifest), Glance (widget), ML Kit text recognition (Latin), Tesseract4Android with `ara.traineddata` (about 1.4 MB "fast" model), `com.google.android.play:integrity`. The last is needed for restore attestation (D-45/D-46). It is Google's only first-party attestation and ships through Play services, which Play Billing already requires.
 - **iOS:** AppIntents, Vision, WidgetKit, DeviceCheck (`DCAppAttestService`), a system framework used for restore attestation, so it adds no dependency.
 
 **Not used, by policy:** Firebase/Crashlytics/Analytics, any ads SDK, any HTTP interceptor that logs bodies (NFR-PRIV-01).
