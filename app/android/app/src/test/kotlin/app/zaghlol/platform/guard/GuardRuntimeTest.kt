@@ -33,7 +33,7 @@ class GuardRuntimeTest {
     // NBE card 4567 is ignored on SMS by t1_user; BM is ignored as an institution.
     private val ignoredCard = Triple("sms", "NBE", "Purchase EGP 10.00 card **4567")
 
-    private fun GuardRuntime.decideIgnored() = decision(decide(ignoredCard.first, ignoredCard.second, ignoredCard.third))
+    private fun GuardRuntime.decideIgnored() = decision(decide(AndroidGuardChannel.SMS, ignoredCard.second, ignoredCard.third))
 
     @Test
     fun freshInstallIsBaseOnlyAndCached() {
@@ -176,10 +176,10 @@ class GuardRuntimeTest {
     @Test
     fun rateLimitIsAppliedPerProcess() {
         val rt = runtime()
-        repeat(20) { assertEquals("keep", decision(rt.decide("sms", "NBE", "Purchase EGP 10.00"))["decision"]) }
-        assertEquals("rate_limited", decision(rt.decide("sms", "NBE", "Purchase EGP 10.00"))["reason"])
+        repeat(20) { assertEquals("keep", decision(rt.decide(AndroidGuardChannel.SMS, "NBE", "Purchase EGP 10.00"))["decision"]) }
+        assertEquals("rate_limited", decision(rt.decide(AndroidGuardChannel.SMS, "NBE", "Purchase EGP 10.00"))["reason"])
         now = 60_000
-        assertEquals("keep", decision(rt.decide("sms", "NBE", "Purchase EGP 10.00"))["decision"])
+        assertEquals("keep", decision(rt.decide(AndroidGuardChannel.SMS, "NBE", "Purchase EGP 10.00"))["decision"])
     }
 
     /** Two actors: readers during writes always see a whole snapshot (old or new rules), never a mix or an error. */
@@ -223,5 +223,49 @@ class GuardRuntimeTest {
     @Test
     fun snapshotToStringHasModeAndStateOnly() {
         assertEquals("GuardSnapshot(baseOnly, ABSENT)", runtime().current().toString())
+    }
+
+    // T-040 design note section 5.
+
+    /** FU-101 L-1: the Android entry point is typed; only these two wires exist. */
+    @Test
+    fun androidGuardChannelWiresAreExactlySmsAndNotification() {
+        assertEquals(listOf("sms", "notification"), AndroidGuardChannel.entries.map { it.wire })
+        for (c in AndroidGuardChannel.entries) assertEquals(c.wire, GuardChannel.fromWire(c.wire)!!.wire)
+        // The fail-open generic channels have no Android value.
+        for (w in listOf("share", "apple_pay", "shortcut_message")) {
+            assertTrue(w, AndroidGuardChannel.entries.none { it.wire == w })
+        }
+        // decide has no String overload: the only public decide takes the typed channel.
+        val decides = GuardRuntime::class.java.methods.filter { it.name == "decide" }
+        assertEquals(1, decides.size)
+        assertEquals(AndroidGuardChannel::class.java, decides[0].parameterTypes[0])
+    }
+
+    /** T-038 security L-2: a transient user read reuses the compiled base-only rules. */
+    @Test
+    fun transientReadParsesTheBaseOnceOverAHundredDecides() {
+        store.write(GuardFixtures.t1User)
+        var parses = 0
+        val rt = GuardRuntime(
+            loadBase = { GuardFixtures.t1Base },
+            store = store,
+            clockMs = { now },
+            parse = { base, user, unreadable ->
+                parses++
+                GuardConfig.parse(base, user, userUnreadable = unreadable)
+            },
+        )
+        cipher.failDecrypt = true
+        repeat(100) { i ->
+            now = i * 4_000L // 15 a minute: under the rate limit
+            val d = rt.decide(AndroidGuardChannel.SMS, "NBE", "Purchase EGP 10.00 card **4567")
+            assertEquals("keep", decision(d)["decision"]) // base-only: the ignore rule is not known
+        }
+        assertEquals(GuardUserState.RETRY, rt.current().userState)
+        assertEquals(1, parses)
+        cipher.failDecrypt = false
+        assertEquals(GuardConfigMode.FULL, rt.current().mode)
+        assertEquals(2, parses)
     }
 }

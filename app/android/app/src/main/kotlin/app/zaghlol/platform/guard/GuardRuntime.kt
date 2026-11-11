@@ -47,12 +47,24 @@ class GuardRuntime(
     private val loadBase: () -> ByteArray,
     private val store: GuardUserConfigStore,
     private val clockMs: () -> Long,
+    /** [GuardConfig.parse]; a seam so a test can count parses (T-038 security L-2). */
+    private val parse: (base: ByteArray, user: ByteArray?, userUnreadable: Boolean) -> GuardConfigLoad =
+        { base, user, unreadable -> GuardConfig.parse(base, user, userUnreadable = unreadable) },
 ) {
     private val lock = Any()
     private val snapshot = AtomicReference<GuardSnapshot?>(null)
 
     /** Bytes of the last base that parsed (public registry data). Guarded by [lock]. */
     private var validBase: ByteArray? = null
+
+    /**
+     * The compiled base-only rules of [validBase] (T-038 security L-2, T-040
+     * design note section 5): a transient user-file error is not cached as a
+     * snapshot (the next message retries the file), but it reuses these
+     * instead of parsing and compiling the base again per message. Guarded
+     * by [lock].
+     */
+    private var baseOnly: GuardConfigLoad? = null
 
     @Volatile
     private var limiter: SenderRateLimiter? = null
@@ -74,12 +86,16 @@ class GuardRuntime(
     /** Mode and user state now (loads on first use). */
     fun state(): GuardSnapshot = current()
 
-    /** Guard decision plus the per-process rate limit (applied to keeps only). Never throws. */
-    fun decide(channel: String, source: String, body: String): GuardDecision {
+    /**
+     * Guard decision plus the per-process rate limit (applied to keeps only).
+     * Never throws. Typed (FU-101 L-1): only the Android capture channels
+     * reach the native Guard.
+     */
+    fun decide(channel: AndroidGuardChannel, source: String, body: String): GuardDecision {
         val snap = current()
-        val decision = snap.guard.decide(channel, source, body)
+        val decision = snap.guard.decide(channel.wire, source, body)
         val cfg = snap.guard.config ?: return decision
-        return limiterFor(cfg.perSenderPerMin).apply(decision, channel, source, clockMs())
+        return limiterFor(cfg.perSenderPerMin).apply(decision, channel.wire, source, clockMs())
     }
 
     /**
@@ -107,7 +123,7 @@ class GuardRuntime(
                     // Base not loaded yet (or invalid): the next message loads both parts.
                     snapshot.set(null)
                 } else {
-                    snapshot.set(snapshotOf(GuardConfig.parse(base, json), GuardUserState.OK))
+                    snapshot.set(snapshotOf(parse(base, json, false), GuardUserState.OK))
                 }
             }
         } finally {
@@ -127,23 +143,25 @@ class GuardRuntime(
         val userState: GuardUserState
         when (read) {
             is GuardUserConfigStore.Read.Absent -> {
-                load = GuardConfig.parse(base, null)
+                load = baseOnlyOf(base)
                 userState = GuardUserState.ABSENT
             }
             is GuardUserConfigStore.Read.Plain -> {
                 try {
-                    load = GuardConfig.parse(base, read.bytes)
+                    load = parse(base, read.bytes, false)
                 } finally {
                     read.bytes.fill(0)
                 }
                 userState = if (load.userFailed) GuardUserState.UNREADABLE else GuardUserState.OK
             }
             is GuardUserConfigStore.Read.Unreadable -> {
-                load = GuardConfig.parse(base, null, userUnreadable = true)
+                load = parse(base, null, true)
                 userState = GuardUserState.UNREADABLE
             }
             is GuardUserConfigStore.Read.Transient -> {
-                load = GuardConfig.parse(base, null)
+                // Not cached as a snapshot (the next message retries the file),
+                // but the compiled base-only rules are reused (security L-2).
+                load = baseOnlyOf(base)
                 userState = GuardUserState.RETRY
             }
         }
@@ -153,6 +171,14 @@ class GuardRuntime(
             if (read !is GuardUserConfigStore.Read.Transient) snapshot.set(snap)
         }
         return snap
+    }
+
+    /** The base-only rules of [base], parsed once per valid base (under [lock]). */
+    private fun baseOnlyOf(base: ByteArray): GuardConfigLoad {
+        baseOnly?.takeIf { validBase === base }?.let { return it }
+        val load = parse(base, null, false)
+        if (load.baseError == null) baseOnly = load
+        return load
     }
 
     private fun limiterFor(perMin: Int): SenderRateLimiter {
@@ -179,7 +205,7 @@ class GuardRuntime(
             instance ?: synchronized(this) { instance ?: create(context.applicationContext).also { instance = it } }
 
         private fun create(context: Context): GuardRuntime = GuardRuntime(
-            loadBase = { BaseConfigSource.read(context.assets) },
+            loadBase = { BaseConfigSource.readForBuild(context.assets) },
             store = GuardUserConfigStore(
                 GuardUserConfigStore.dirUnder(context.noBackupFilesDir),
                 KeystoreGuardUserCipher(),

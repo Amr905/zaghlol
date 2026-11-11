@@ -53,6 +53,16 @@ class CaptureStatusUnavailableException : Exception("CAPTURE_STATUS_UNAVAILABLE"
  * only if the caller's `seq` still matches, so alerts that arrived after the
  * caller's read survive.
  *
+ * Coalescing (T-039 security L-2, T-040 design note section 8): an alert is
+ * persisted **at once** when it adds a fact the file does not hold yet (the
+ * first refusal, the first missed SMS time, the first missed notification,
+ * a key loss, ...) or when no write succeeded in the last
+ * [COALESCE_WINDOW_MS] (monotonic, [monoClockMs]); otherwise it stays in the
+ * shared in-memory delta and is merged by the next [read] / [clear], or by
+ * the next alert after the window. A process kill loses at most the counts
+ * of one window, never a fact. A refusal burst (a spoofed-SMS flood) is
+ * therefore one file write, not one per message.
+ *
  * Invariant (T-039 review #1): the lock and the pending in-memory delta
  * belong to the **file**, not to the instance. Every `CaptureStatusStore` in
  * the process over the same canonical file path shares them, so two instances
@@ -66,6 +76,8 @@ class CaptureStatusStore(
     private val wallClock: () -> Long = System::currentTimeMillis,
     private val files: SpoolFileOps = DefaultSpoolFileOps,
     private val randomSeq: () -> Long = { SecureRandom().nextInt().toLong() and U32_MAX },
+    /** Monotonic ms for the coalescing window (`SystemClock.elapsedRealtime` in production). */
+    private val monoClockMs: () -> Long = { System.nanoTime() / 1_000_000 },
 ) {
     /** Per-file state shared by every instance over the same path. */
     private class Shared {
@@ -73,6 +85,12 @@ class CaptureStatusStore(
 
         /** Under [lock]. */
         var pending = Delta()
+
+        /** What the file held after the last successful read or write (under [lock]); null = unknown. */
+        var onDisk: CaptureStatus? = null
+
+        /** Monotonic time of the last successful write (under [lock]); null = none in this process. */
+        var lastWriteMono: Long? = null
     }
 
     private val shared: Shared = SHARED.computeIfAbsent(SpoolStore.canonicalKey(file)) { Shared() }
@@ -86,7 +104,7 @@ class CaptureStatusStore(
     /** A spool write was refused (store lock held by the caller; lock order store → status). */
     fun recordRefused(reason: RefusalReason, channel: String, wallMs: Long) = record {
         when (reason) {
-            RefusalReason.FULL -> refusedFull++
+            RefusalReason.FULL, RefusalReason.SMS_RESERVE -> refusedFull++
             RefusalReason.GENERIC_BUDGET, RefusalReason.GENERIC_RATE -> refusedGeneric++
         }
         lastRefusedAtMs = maxOf(lastRefusedAtMs, wallMs)
@@ -147,11 +165,21 @@ class CaptureStatusStore(
         true
     }
 
-    /** Never throws: an alert that can't be persisted now stays in memory. */
+    /**
+     * Never throws: an alert that can't be persisted now stays in memory.
+     * Coalesced (see the class comment): deferred while it adds no new fact
+     * and a write succeeded less than [COALESCE_WINDOW_MS] ago.
+     */
     private fun record(change: Delta.() -> Unit) {
         synchronized(lock) {
             pending.change()
             pending.changes++
+            val disk = shared.onDisk
+            val last = shared.lastWriteMono
+            if (disk != null && last != null && !pending.addsFactTo(disk)) {
+                val age = monoClockMs() - last
+                if (age in 0 until COALESCE_WINDOW_MS) return
+            }
             try {
                 mergedLocked()
             } catch (_: Exception) {
@@ -168,13 +196,17 @@ class CaptureStatusStore(
             Loaded.Unreadable -> CaptureStatus(seq = randomSeq(), keyInvalidatedAtMs = wallClock()) to true
             Loaded.Unavailable -> throw CaptureStatusUnavailableException()
         }
-        if (pending.changes == 0 && !mustWrite) return base
+        if (pending.changes == 0 && !mustWrite) {
+            shared.onDisk = base
+            return base
+        }
         val next = if (pending.changes == 0) base else pending.applyTo(base)
         try {
             writeLocked(next)
             pending = Delta()
         } catch (_: Exception) {
             // The file is unchanged; the delta stays pending (no double count).
+            shared.onDisk = if (mustWrite) null else base
         }
         return next
     }
@@ -236,6 +268,8 @@ class CaptureStatusStore(
         } catch (_: Throwable) {
             // best effort
         }
+        shared.onDisk = s
+        shared.lastWriteMono = monoClockMs()
     }
 
     private class TooLarge : IOException("STATUS_TOO_LARGE")
@@ -268,6 +302,20 @@ class CaptureStatusStore(
         var decryptDeleted = 0L
         var keyInvalidated = -1L
 
+        /**
+         * True when this delta sets something [disk] does not hold yet: a
+         * counter going from zero, or a time from none. Such an alert is
+         * written at once (never lose a fact to coalescing).
+         */
+        fun addsFactTo(disk: CaptureStatus): Boolean =
+            (refusedFull > 0 && disk.refusedFull == 0L) ||
+                (refusedGeneric > 0 && disk.refusedGeneric == 0L) ||
+                (rateLimited > 0 && disk.rateLimited == 0L) ||
+                (missedNotifications > 0 && disk.missedNotifications == 0L) ||
+                (firstMissedSms >= 0 && (disk.firstMissedSmsAtMs < 0 || firstMissedSms < disk.firstMissedSmsAtMs)) ||
+                (decryptDeleted > 0 && disk.decryptDeleted == 0L) ||
+                (keyInvalidated >= 0 && (disk.keyInvalidatedAtMs < 0 || keyInvalidated < disk.keyInvalidatedAtMs))
+
         fun missed(channel: String, wallMs: Long) {
             when (channel) {
                 CHANNEL_SMS -> firstMissedSms = earliest(firstMissedSms, wallMs)
@@ -293,6 +341,9 @@ class CaptureStatusStore(
         private val SHARED = ConcurrentHashMap<String, Shared>()
 
         const val VERSION = 1
+
+        /** Status writes of an alert burst: at most one per window (T-040, security L-2). */
+        const val COALESCE_WINDOW_MS = 10_000L
         const val U32_MAX = 0xFFFF_FFFFL
         const val CHANNEL_SMS = "sms"
         const val CHANNEL_NOTIFICATION = "notification"

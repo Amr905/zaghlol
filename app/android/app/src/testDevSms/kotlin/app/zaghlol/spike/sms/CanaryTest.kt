@@ -2,8 +2,15 @@ package app.zaghlol.spike.sms
 
 import app.zaghlol.platform.capture.AndroidCaptureHost
 import app.zaghlol.platform.capture.CaptureApiError
+import app.zaghlol.platform.capture.CaptureIntake
 import app.zaghlol.platform.capture.FakeDevice
 import app.zaghlol.platform.capture.FakeScheduler
+import app.zaghlol.platform.capture.SmsIntake
+import app.zaghlol.platform.capture.SmsPart
+import app.zaghlol.platform.guard.AndroidGuardChannel
+import app.zaghlol.platform.guard.GuardRuntime
+import app.zaghlol.platform.guard.GuardUserConfigStore
+import app.zaghlol.platform.guard.SoftwareGuardUserCipher
 import app.zaghlol.platform.spool.AdmissionClass
 import app.zaghlol.platform.spool.FlakySpoolCipher
 import app.zaghlol.platform.spool.SpoolClaim
@@ -22,9 +29,11 @@ import java.io.File
 import java.io.PrintStream
 
 /**
- * Design note section 9 canary: a synthetic body travels receiver core →
- * spool → production host drain/ack/hold (T-041) with logging enabled; neither the log sink, stdout,
- * stderr, thrown errors nor the spool bytes ever contain it.
+ * Design note section 9 canary (T-008, T-040): a synthetic body travels the
+ * **production** SMS intake (devSms spike Guard base) → spool → production
+ * host drain/ack/hold, with the spike latency recorder and its log enabled;
+ * neither the log sink, stdout, stderr, thrown errors, the metrics CSV nor
+ * the spool bytes ever contain it or the sender.
  */
 class CanaryTest {
     private val canary = "ZG_CANARY_7731"
@@ -56,24 +65,37 @@ class CanaryTest {
         val dir = tempDir()
         val metricsFile = File(tempDir(), "metrics.csv")
         val metrics = SpikeMetrics(metricsFile, { 7 }, { SpikeMetrics.Conditions(34, false, false, 10, 0) })
+        val trace = SpikeTrace(metrics, System::nanoTime, uiAttached = { false }, headlessIdle = { true })
         val store = storeIn(dir)
+        val status = statusIn(tempDir())
         val sched = FakeScheduler()
-        val intake = SmsIntake(SpikeGuard(), store, sched, metrics)
-        val stamp = ReceiveStamp(1L, System.nanoTime(), 7, null)
-        val parts = listOf(SmsPart("5550100", "$canary paid EGP 1.00 ", 1), SmsPart("5550100", "card **9999", 1))
-        val ids = intake.process(SmsAssembler.assemble(parts), stamp)
+        val guard = GuardRuntime(
+            { File("src/devSms/assets/guard/spike_guard_base.json").readBytes() },
+            GuardUserConfigStore(tempDir(), SoftwareGuardUserCipher()),
+            { 0L },
+        )
+        val intake = SmsIntake(
+            CaptureIntake(AndroidGuardChannel.SMS, guard::decide, store, status, { sched.enqueue() }, { trace }),
+            bootCount = { 7 },
+            trace = { trace },
+        )
+        val rx = System.nanoTime()
+        val parts = listOf(SmsPart("5550100", "spike: you paid EGP 1.00 at $canary ", 1), SmsPart("5550100", "card *9999", 1))
+        val kept = intake.process(parts, 1L, rx, null)
         // OTP and non-allowlisted canaries are dropped without a trace too.
-        intake.process(listOf(AssembledSms("5550100", "$canary OTP 1", 1), AssembledSms("Friend", canary, 1)), stamp)
+        intake.process(listOf(SmsPart("5550100", "$canary your OTP is 123456", 1)), 1L, rx, null)
+        intake.process(listOf(SmsPart("5550199", "$canary hello", 1)), 1L, rx, null)
+        val ids = kept.written
         assertEquals(1, ids.size)
+        assertEquals(1, sched.enqueued)
 
         val raw = String(File(dir, "${ids[0]}.bin").readBytes(), Charsets.ISO_8859_1)
         assertFalse(raw.contains(canary))
 
-        val trace = SpikeTrace(metrics, System::nanoTime, uiAttached = { false }, headlessIdle = { true })
         trace.runStarted(foreground = false, warmEngine = false)
-        val host = AndroidCaptureHost(1, store, SpoolClaim(), statusIn(tempDir()), sched, null, null, FakeDevice(), { trace })
+        val host = AndroidCaptureHost(1, store, SpoolClaim(), status, sched, null, null, FakeDevice(), { trace })
         val entries = host.drainSpool(10)
-        assertTrue(entries[0].body.startsWith(canary))
+        assertTrue(entries[0].body.contains(canary))
         metrics.mark("parsed", ids)
         metrics.mark("commit", ids)
         host.ackSpool(ids)
@@ -111,7 +133,7 @@ class CanaryTest {
             assertFalse((t.message ?: "").contains(canary))
         }
 
-        assertTrue(logged.isNotEmpty())
+        assertTrue(logged.any { it.startsWith("code=RX_RECEIVED") })
         assertTrue(logged.none { it.contains(canary) || it.contains("5550100") })
         assertFalse(out.toString().contains(canary))
         assertFalse(err.toString().contains(canary))
@@ -120,5 +142,7 @@ class CanaryTest {
         assertFalse(csv.contains("5550100"))
         assertTrue(csv.startsWith(SpikeMetrics.HEADER))
         assertTrue(csv.contains(ids[0]))
+        assertFalse(intake.toString().contains(canary))
+        assertFalse(kept.toString().contains(canary))
     }
 }

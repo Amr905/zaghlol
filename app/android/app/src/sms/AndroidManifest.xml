@@ -6,4 +6,22 @@
          this Play would hide the app from devices without telephony (tablets),
          which can still capture notifications and shares. -->
     <uses-feature android:name="android.hardware.telephony" android:required="false" />
+    <application>
+        <!-- T-040: live SMS capture (every *Sms variant; no *NoSms build has it,
+             src/noSms removes it too). An observer only: no priority, never
+             aborted. BROADCAST_SMS is held only by the telephony stack, so no
+             other app (and no `adb shell am broadcast`) can deliver a fake
+             SMS_RECEIVED here. Not direct-boot aware: before the first unlock
+             the credential-encrypted storage (spool key, DB) is locked anyway;
+             those messages come back through the inbox catch-up. -->
+        <receiver
+            android:name="app.zaghlol.platform.capture.SmsReceiver"
+            android:exported="true"
+            android:directBootAware="false"
+            android:permission="android.permission.BROADCAST_SMS">
+            <intent-filter>
+                <action android:name="android.provider.Telephony.SMS_RECEIVED" />
+            </intent-filter>
+        </receiver>
+    </application>
 </manifest>

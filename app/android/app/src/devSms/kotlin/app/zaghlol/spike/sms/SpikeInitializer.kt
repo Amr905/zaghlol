@@ -8,9 +8,7 @@ import android.os.PowerManager
 import android.os.SystemClock
 import android.provider.Settings
 import androidx.startup.Initializer
-import app.zaghlol.R
 import app.zaghlol.platform.capture.CaptureRuntime
-import app.zaghlol.platform.capture.IngestScheduler
 import app.zaghlol.platform.ingest.HeadlessEngine
 import app.zaghlol.platform.ingest.IngestTrace
 import app.zaghlol.platform.spool.UlidGenerator
@@ -18,15 +16,15 @@ import io.flutter.plugin.common.BasicMessageChannel
 import io.flutter.plugin.common.BinaryMessenger
 import io.flutter.plugin.common.StandardMessageCodec
 import java.io.File
-import java.util.concurrent.Executors
 import java.util.concurrent.atomic.AtomicBoolean
 
 /**
- * The devSms-only part of the T-008 spike that T-041 keeps (design note
- * section 1): the spike receiver's intake (until T-040 replaces it) and the
- * latency recorder, now measuring the **production** worker and engines
- * through [IngestTrace]. Everything else (spool, worker, engines, hosts)
- * is the production code in `src/main`.
+ * The devSms-only part of the T-008 spike that is left after T-040: the
+ * latency recorder, measuring the **production** receiver (`src/sms`
+ * `SmsReceiver`), Guard, spool, worker and engines through [IngestTrace].
+ * T-040 replaced the spike receiver and `SpikeGuard`; in devSms the
+ * production Guard decides with the base exported from the spike registry
+ * (`src/devSms/assets/guard/spike_guard_base.json`, sender 5550100).
  */
 class Spike private constructor(context: Context) {
     val app: Context = context.applicationContext
@@ -39,12 +37,12 @@ class Spike private constructor(context: Context) {
         nanoClock = clockNs,
         processStartNs = { android.os.Process.getStartElapsedRealtime() * 1_000_000 },
     )
-    val trace = SpikeTrace(metrics, clockNs, uiAttached = runtime::uiAttached, headlessIdle = runtime.headless::isIdle)
-    val guard = SpikeGuard(listOfNotNull(app.getString(R.string.spike_tester_sender).takeIf { it.isNotBlank() }))
-    val intake = SmsIntake(guard, runtime.store, IngestScheduler { runtime.afterSpoolWrite() }, metrics, clockNs)
-    val dispatch = BoundedDispatch(
-        executor = Executors.newSingleThreadExecutor { r -> Thread(r, "zaghlol-sms-intake").apply { isDaemon = true } },
-        timer = Executors.newSingleThreadScheduledExecutor { r -> Thread(r, "zaghlol-sms-timer").apply { isDaemon = true } },
+    val trace = SpikeTrace(
+        metrics,
+        clockNs,
+        uiAttached = runtime::uiAttached,
+        headlessIdle = runtime.headless::isIdle,
+        processStartMs = { android.os.Process.getStartElapsedRealtime() },
     )
 
     fun bootCount(): Int = try {
@@ -99,6 +97,8 @@ class SpikeTrace(
     private val clockNs: () -> Long,
     private val uiAttached: () -> Boolean,
     private val headlessIdle: () -> Boolean,
+    /** `Process.getStartElapsedRealtime()` (ms, same clock as the receive stamp); -1 unknown. */
+    private val processStartMs: () -> Long = { -1L },
 ) : IngestTrace {
     /** Set by the first receive of a process started for it: a cold-process run. */
     @Volatile var processWokenBySms = false
@@ -107,14 +107,32 @@ class SpikeTrace(
     @Volatile private var cycle: SpikeMetrics.Cycle? = null
 
     /**
-     * Called by the receiver: the run is "cold process" when this is the
-     * process's first receive, it started less than [COLD_START_WINDOW_MS]
-     * before it, and no engine exists.
+     * The run is "cold process" when this is the process's first receive, it
+     * started less than [COLD_START_WINDOW_MS] before it, and no engine exists.
      */
     fun noteReceive(rxElapsedMs: Long, processStartMs: Long) {
         if (!firstReceive.compareAndSet(true, false)) return
+        if (processStartMs < 0) return
         val age = rxElapsedMs - processStartMs
         if (age in 0 until COLD_START_WINDOW_MS && headlessIdle() && !uiAttached()) processWokenBySms = true
+    }
+
+    /** T-040: the production receiver's intake (ULIDs and stamps only). */
+    override fun received(rxElapsedNs: Long) {
+        noteReceive(rxElapsedNs / 1_000_000, processStartMs())
+        SpikeLog.e(SpikeLog.Code.RX_RECEIVED)
+    }
+
+    override fun spooled(id: String, rxElapsedNs: Long, rxWallMs: Long) {
+        val now = clockNs()
+        metrics.spooled(id, rxElapsedNs, now, rxWallMs)
+        SpikeLog.e(SpikeLog.Code.SPOOL_WRITTEN, (now - rxElapsedNs) / 1_000_000)
+    }
+
+    override fun enqueued(ids: List<String>) {
+        val now = clockNs()
+        ids.forEach { metrics.enqueued(it, now) }
+        SpikeLog.e(SpikeLog.Code.ENQUEUED)
     }
 
     override fun runStarted(foreground: Boolean, warmEngine: Boolean) {

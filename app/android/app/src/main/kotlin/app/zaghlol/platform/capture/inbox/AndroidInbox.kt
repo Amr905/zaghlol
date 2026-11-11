@@ -8,7 +8,7 @@ import android.content.pm.PackageManager
 import android.database.Cursor
 import android.os.Build
 import android.provider.Telephony
-import android.telephony.SubscriptionManager
+import app.zaghlol.platform.capture.SimSlot
 import app.zaghlol.platform.guard.GuardRuntime
 
 /** `Telephony.Sms.Inbox` (inbox rows only; never `content://sms`, which holds sent messages and drafts). */
@@ -32,20 +32,6 @@ class ContextInboxAccess(private val context: Context) : InboxAccess {
 
     override fun granted(): Boolean =
         context.checkSelfPermission(Manifest.permission.READ_SMS) == PackageManager.PERMISSION_GRANTED
-}
-
-/**
- * `sub_id` to the SIM slot index: `SubscriptionManager.getSlotIndex` on API
- * 29+ (no permission needed); below it null (the older lookups need
- * `READ_PHONE_STATE`, which the app does not request). One mapping for live
- * capture and the inbox; T-040 should reuse it.
- */
-object SimSlot {
-    fun of(subId: Int): Long? {
-        if (subId < 0 || Build.VERSION.SDK_INT < 29) return null
-        val slot = SubscriptionManager.getSlotIndex(subId)
-        return if (slot >= 0) slot.toLong() else null
-    }
 }
 
 /** Composition of the production reader. */

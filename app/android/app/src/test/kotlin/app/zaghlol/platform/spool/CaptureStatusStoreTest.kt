@@ -253,4 +253,111 @@ class CaptureStatusStoreTest {
         assertEquals(12 + CaptureStatusStore.RECORD_BYTES + 16, bytes.size)
         assertFalse(String(bytes, Charsets.ISO_8859_1).contains("\u0001\u0002\u0003\u0004\u0005"))
     }
+
+    // Coalescing (T-040 design note section 8, T-039 security L-2).
+
+    /** Counts status file writes (each write opens the fixed `.tmp`). */
+    private class CountingOps : SpoolFileOps by DefaultSpoolFileOps {
+        var opens = 0
+
+        override fun open(file: File) = DefaultSpoolFileOps.open(file).also { opens++ }
+    }
+
+    private fun onDisk(dir: File): CaptureStatus =
+        CaptureStatusStore.decode(SoftwareSpoolCipher().decrypt(file(dir).readBytes(), CaptureStatusStore.AAD))
+
+    @Test
+    fun aRefusalBurstIsOneFileWriteWithExactCountsAfterRead() {
+        val dir = tempDir()
+        val ops = CountingOps()
+        val clock = FakeClock()
+        val s = statusIn(dir, files = ops, mono = clock.fn)
+        repeat(100) { i ->
+            s.recordRefused(RefusalReason.FULL, "sms", 1_000L + i)
+            clock.now += 10 // 100 refusals in 1 s
+        }
+        assertTrue("writes ${ops.opens}", ops.opens <= 2)
+        val read = s.read()
+        assertEquals(100L, read.refusedFull)
+        assertEquals(1_000L, read.firstMissedSmsAtMs)
+        assertEquals(1_099L, read.lastRefusedAtMs)
+        assertEquals(100L, onDisk(dir).refusedFull)
+    }
+
+    @Test
+    fun theFirstRefusalIsOnDiskAtOnce() {
+        val dir = tempDir()
+        val clock = FakeClock()
+        statusIn(dir, mono = clock.fn).recordRefused(RefusalReason.SMS_RESERVE, "sms", 42)
+        val disk = onDisk(dir)
+        assertEquals(1L, disk.refusedFull)
+        assertEquals(42L, disk.firstMissedSmsAtMs)
+    }
+
+    @Test
+    fun aNewFactIsWrittenAtOnceInsideTheWindow() {
+        val dir = tempDir()
+        val ops = CountingOps()
+        val clock = FakeClock()
+        val s = statusIn(dir, files = ops, mono = clock.fn)
+        s.recordRefused(RefusalReason.FULL, "notification", 1)
+        s.recordRefused(RefusalReason.FULL, "notification", 2) // same facts: deferred
+        assertEquals(1, ops.opens)
+        clock.now += 100
+        s.recordRateLimited("sms", 3) // first rate limit and first missed SMS: written
+        assertEquals(2, ops.opens)
+        val disk = onDisk(dir)
+        assertEquals(3L, disk.firstMissedSmsAtMs)
+        assertEquals(1L, disk.rateLimited)
+        assertEquals(2L, disk.refusedFull) // the deferred count went with it
+        s.recordKeyInvalidated(4)
+        assertEquals(3, ops.opens)
+        assertEquals(4L, onDisk(dir).keyInvalidatedAtMs)
+    }
+
+    @Test
+    fun afterTheWindowTheNextAlertPersists() {
+        val dir = tempDir()
+        val ops = CountingOps()
+        val clock = FakeClock()
+        val s = statusIn(dir, files = ops, mono = clock.fn)
+        s.recordRefused(RefusalReason.FULL, "sms", 1)
+        clock.now += 1_000
+        s.recordRefused(RefusalReason.FULL, "sms", 2)
+        assertEquals(1, ops.opens)
+        assertEquals(1L, onDisk(dir).refusedFull)
+        clock.now += CaptureStatusStore.COALESCE_WINDOW_MS
+        s.recordRefused(RefusalReason.FULL, "sms", 3)
+        assertEquals(2, ops.opens)
+        assertEquals(3L, onDisk(dir).refusedFull)
+    }
+
+    @Test
+    fun aDeferredDeltaIsSharedByEveryInstanceAndClearedOnce() {
+        val dir = tempDir()
+        val clock = FakeClock()
+        val a = statusIn(dir, mono = clock.fn)
+        a.recordRefused(RefusalReason.FULL, "sms", 1)
+        a.recordRefused(RefusalReason.FULL, "sms", 2) // deferred
+        val b = statusIn(dir, mono = clock.fn)
+        val seen = b.read()
+        assertEquals(2L, seen.refusedFull)
+        assertTrue(b.clear(seen.seq))
+        assertEquals(0L, a.read().refusedFull)
+        // After a clear the next refusal is a new fact: on disk at once.
+        a.recordRefused(RefusalReason.FULL, "sms", 5)
+        assertEquals(1L, onDisk(dir).refusedFull)
+    }
+
+    @Test
+    fun aClockGoingBackwardsDoesNotDeferForever() {
+        val dir = tempDir()
+        val ops = CountingOps()
+        val clock = FakeClock(now = 50_000)
+        val s = statusIn(dir, files = ops, mono = clock.fn)
+        s.recordRefused(RefusalReason.FULL, "sms", 1)
+        clock.now = 10 // another boot's clock, or a test seam
+        s.recordRefused(RefusalReason.FULL, "sms", 2)
+        assertEquals(2, ops.opens)
+    }
 }

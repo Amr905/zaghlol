@@ -1,26 +1,13 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools">
     <!-- T-008 (SPK-01) SMS ingestion spike, reduced by T-041 to the receiver
-         and the latency recorder. This source set is the dev x sms flavour
-         combination only: no staging*/prod* build contains the spike receiver
-         (Lead decision Q5; T-040 replaces it). The worker, the engines and
-         WorkManager are production code in src/main (T-041). CI checks the
-         merged manifests and dex of every flavour. -->
+         and the latency recorder, and by T-040 to the latency recorder only:
+         the SMS receiver is the production one (src/sms, every *Sms build).
+         This source set is the dev x sms flavour combination only: no
+         staging*/prod* build contains spike code or the spike Guard base
+         (assets/guard/spike_guard_base.json). CI checks the merged manifests
+         and dex of every flavour. -->
     <application>
-        <!-- Observer only (the broadcast is never aborted). BROADCAST_SMS is held only by
-             the telephony stack, so no other app (and no `adb shell am
-             broadcast`) can deliver a fake SMS_RECEIVED here. Not direct-boot
-             aware: before the first unlock the credential-encrypted storage
-             (spool key, DB) is locked anyway. -->
-        <receiver
-            android:name="app.zaghlol.spike.sms.SpikeSmsReceiver"
-            android:exported="true"
-            android:directBootAware="false"
-            android:permission="android.permission.BROADCAST_SMS">
-            <intent-filter>
-                <action android:name="android.provider.Telephony.SMS_RECEIVED" />
-            </intent-filter>
-        </receiver>
         <!-- Installs the spike latency recorder as the production IngestTrace
              (T-041). Merged into the androidx.startup provider WorkManager
              declares; not exported. -->

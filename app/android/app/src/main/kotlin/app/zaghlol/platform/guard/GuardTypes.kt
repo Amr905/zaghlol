@@ -22,6 +22,19 @@ enum class GuardChannel(val wire: String) {
     }
 }
 
+/**
+ * The only channels Android capture passes to the native Guard (FU-101 L-1,
+ * T-040 design note section 5): the SMS receiver and the notification
+ * listener. `share`, `apple_pay` and `shortcut_message` keep as `generic`
+ * without a sender match (fail-open by design for user-initiated or iOS
+ * input), so they must never reach [GuardRuntime.decide]; with a typed entry
+ * point they cannot. The wires are the [GuardChannel] wires.
+ */
+enum class AndroidGuardChannel(val wire: String) {
+    SMS("sms"),
+    NOTIFICATION("notification"),
+}
+
 /** Channels an ignore rule can name (database `ignore_rules.channel`). */
 enum class GuardIgnoreChannel(val wire: String) {
     SMS("sms"),

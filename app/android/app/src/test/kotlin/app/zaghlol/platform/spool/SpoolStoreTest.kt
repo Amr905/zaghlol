@@ -232,11 +232,69 @@ class SpoolStoreTest {
         val dir = tempDir()
         val status = statusIn(tempDir())
         val store = storeIn(dir, status = status)
-        val ids = (1..500).map { store.put("m$it") }
+        // T-040: SMS fill their 80 % share, notifications the rest.
+        val ids = (1..400).map { store.put("m$it") } + (401..500).map { store.put("n$it", channel = "notification") }
         assertEquals(RefusalReason.FULL, refused(store.write(record(body = "new"), AdmissionClass.PRIORITY)))
+        assertEquals(RefusalReason.FULL, refused(store.write(record(body = "new", channel = "notification"), AdmissionClass.PRIORITY)))
         assertEquals(ids, store.pendingIds())
-        assertEquals(1L, status.read().refusedFull)
+        assertEquals(2L, status.read().refusedFull)
         assertTrue(status.read().firstMissedSmsAtMs > 0)
+        assertEquals(1L, status.read().missedNotifications)
+    }
+
+    // Notification reserve (T-040 design note section 7, T-039 security L-1; PO Q1 provisional).
+    @Test
+    fun smsShareIsEightyPercentOfBothCaps() {
+        assertEquals(80, SpoolPolicy.SMS_SHARE_PERCENT)
+        assertEquals(400, SpoolPolicy.SMS_MAX_ENTRIES)
+        assertEquals(3_355_443L, SpoolPolicy.SMS_MAX_BYTES)
+    }
+
+    @Test
+    fun the400thSmsIsWrittenThe401stHitsTheReserveWhileNotificationsGoOnTo500() {
+        val dir = tempDir()
+        val status = statusIn(tempDir())
+        val store = storeIn(dir, status = status, wall = { 1_700_000_000_000L })
+        repeat(400) { store.put("s$it") }
+        assertEquals(RefusalReason.SMS_RESERVE, refused(store.write(record(body = "s401"), AdmissionClass.PRIORITY)))
+        assertEquals(RefusalReason.SMS_RESERVE, refused(store.write(record(body = "g"), AdmissionClass.GENERIC)))
+        repeat(100) { store.put("n$it", channel = "notification") }
+        assertEquals(500, store.pendingCount())
+        assertEquals(RefusalReason.FULL, refused(store.write(record(body = "n501", channel = "notification"), AdmissionClass.PRIORITY)))
+        val s = status.read()
+        assertEquals("SMS_RESERVE counts as refusedFull", 3L, s.refusedFull)
+        assertEquals(0L, s.refusedGeneric)
+        assertEquals(1_700_000_000_000L, s.firstMissedSmsAtMs)
+        assertEquals(1L, s.missedNotifications)
+    }
+
+    @Test
+    fun smsByteReserveRefusesBeforeTheFullByteCap() {
+        val dir = tempDir()
+        val store = storeIn(dir, limits = SpoolLimits(maxBytes = 2_000, smsMaxBytes = 600))
+        store.put("x".repeat(150))
+        store.put("x".repeat(150))
+        assertEquals(RefusalReason.SMS_RESERVE, refused(store.write(record(body = "y".repeat(150)), AdmissionClass.PRIORITY)))
+        store.put("y".repeat(150), channel = "notification")
+        assertEquals(3, store.pendingCount())
+    }
+
+    @Test
+    fun notificationsNeverHitTheReserve() {
+        val dir = tempDir()
+        val store = storeIn(dir, limits = SpoolLimits(maxEntries = 10, smsMaxEntries = 2))
+        repeat(10) { store.put("n$it", channel = "notification") }
+        assertEquals(RefusalReason.FULL, refused(store.write(record(body = "n", channel = "notification"), AdmissionClass.PRIORITY)))
+        assertEquals(RefusalReason.FULL, refused(store.write(record(body = "s"), AdmissionClass.PRIORITY)))
+    }
+
+    @Test
+    fun smsReserveIsCheckedBeforeTheGenericBudget() {
+        val store = storeIn(tempDir(), limits = SpoolLimits(maxEntries = 10, smsMaxEntries = 2, genericMaxEntries = 1))
+        store.put("a")
+        store.put("b")
+        assertEquals(RefusalReason.SMS_RESERVE, refused(store.write(record(body = "g"), AdmissionClass.GENERIC)))
+        assertEquals(RefusalReason.GENERIC_BUDGET, refused(store.write(record(body = "g", channel = "notification"), AdmissionClass.GENERIC)))
     }
 
     @Test

@@ -16,4 +16,9 @@
     <uses-permission-sdk-23 android:name="android.permission.RECEIVE_MMS" tools:node="remove" />
     <uses-permission-sdk-23 android:name="android.permission.RECEIVE_WAP_PUSH" tools:node="remove" />
     <uses-permission-sdk-23 android:name="android.permission.READ_CELL_BROADCASTS" tools:node="remove" />
+    <!-- T-040: defense in depth, like the permissions: the SMS receiver lives in
+         src/sms only; should a merge ever bring it in, it is removed here. -->
+    <application>
+        <receiver android:name="app.zaghlol.platform.capture.SmsReceiver" tools:node="remove" />
+    </application>
 </manifest>

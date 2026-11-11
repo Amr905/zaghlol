@@ -6,6 +6,7 @@ import androidx.test.platform.app.InstrumentationRegistry
 import app.zaghlol.platform.capture.CaptureApiError
 import app.zaghlol.platform.capture.InboxQuery
 import app.zaghlol.platform.capture.RawInboxMessage
+import app.zaghlol.platform.capture.SimSlot
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertNull
 import org.junit.Assert.assertTrue

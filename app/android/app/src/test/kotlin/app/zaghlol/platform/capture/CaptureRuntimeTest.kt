@@ -10,6 +10,10 @@ import app.zaghlol.platform.ingest.FakeMain
 import app.zaghlol.platform.ingest.FakeStarter
 import app.zaghlol.platform.ingest.IngestTrace
 import app.zaghlol.platform.ingest.IngestWorkQueue
+import app.zaghlol.platform.guard.GuardFixtures
+import app.zaghlol.platform.guard.GuardRuntime
+import app.zaghlol.platform.guard.GuardUserConfigStore
+import app.zaghlol.platform.guard.SoftwareGuardUserCipher
 import app.zaghlol.platform.spool.SoftwareSpoolCipher
 import app.zaghlol.platform.spool.SpoolStore
 import app.zaghlol.platform.spool.put
@@ -300,5 +304,93 @@ class CaptureRuntimeTest {
         main.onMain { rt.attachUi(key, m) }
         main.onMain { rt.detachUi(key, m) }
         assertEquals(listOf("attach", "detach"), seen)
+    }
+
+    // T-040: the SMS intake and the Guard adapters in the composition.
+
+    private fun guardSeams(guardCalls: IntArray = IntArray(1)) = CaptureSeams(
+        noBackupDir = dir, appVersion = { 1 }, main = main, queue = queue, device = FakeDevice(),
+        guard = {
+            guardCalls[0]++
+            GuardRuntime({ GuardFixtures.t1Base }, GuardUserConfigStore(File(dir, "guard"), SoftwareGuardUserCipher()), { 0L })
+        },
+        headlessStarter = { starter },
+        cipher = SoftwareSpoolCipher(),
+        keyCreatedAtMs = { null },
+        monoClockMs = { System.nanoTime() / 1_000_000 },
+        bootCount = { 9 },
+    )
+
+    @Test
+    fun theUiHostWritesTheGuardConfigAndTheHeadlessHostCannot() {
+        val calls = IntArray(1)
+        val rt = CaptureRuntime.create(guardSeams(calls))
+        val ui = rt.newHost(headless = false)
+        val headless = rt.newHost(headless = true)
+        assertEquals("building hosts does not load the Guard", 0, calls[0])
+        assertEquals(GuardConfigState.BASE_ONLY, ui.getSpoolStatus().guardState)
+        ui.writeGuardConfig(GuardFixtures.t1User)
+        assertEquals(GuardConfigState.FULL, ui.getSpoolStatus().guardState)
+        assertEquals(GuardConfigState.UNKNOWN, headless.getSpoolStatus().guardState)
+        try {
+            headless.writeGuardConfig(GuardFixtures.t1User)
+            fail("the headless host wrote the Guard config")
+        } catch (e: CaptureApiError) {
+            assertEquals("NOT_AVAILABLE", e.code)
+        }
+        assertEquals(1, calls[0])
+    }
+
+    @Test
+    fun theSmsIntakeWritesEnqueuesOnceAndNotifiesTheUi() {
+        val rt = CaptureRuntime.create(guardSeams())
+        val m = RecordingMessenger()
+        main.onMain { rt.attachUi(Any(), m) }
+        val r = rt.sms.process(
+            listOf(SmsPart("NBE", "Purchase EGP 1.00 ", 1), SmsPart("NBE", "card **1234", 1), SmsPart("Mom", "hi", 1)),
+            wallMs = 5L,
+            rxElapsedNs = 6L,
+            simSlot = 1,
+        )
+        assertEquals(1, r.written.size)
+        assertEquals(1, r.dropped)
+        assertEquals(1, queue.live)
+        main.flush()
+        assertEquals(listOf(1L), m.spoolChanged())
+        val rec = (rt.store.read(r.written[0]) as SpoolStore.ReadResult.Ok).record
+        assertEquals(9, rec.bootCount)
+        assertEquals(1, rec.simSlot)
+        assertEquals("Purchase EGP 1.00 card **1234", rec.body)
+        assertSame(rt.sms, rt.sms)
+    }
+
+    @Test
+    fun aPersonalSmsThroughTheRuntimeTouchesNothing() {
+        val rt = CaptureRuntime.create(guardSeams())
+        val before = dir.walkTopDown().map { it.relativeTo(dir).path }.toSet()
+        rt.sms.process(listOf(SmsPart("Mom", "see you", 1)), 1L, 2L, null)
+        assertEquals(before, dir.walkTopDown().map { it.relativeTo(dir).path }.toSet())
+        assertEquals(0, queue.live)
+    }
+
+    @Test
+    fun theStatusStoreUsesTheRuntimeMonotonicClock() {
+        var mono = 1_000L
+        val rt = CaptureRuntime.create(
+            CaptureSeams(
+                noBackupDir = dir, appVersion = { 1 }, main = main, queue = queue, device = null,
+                guard = { throw IllegalStateException("unused") }, headlessStarter = { starter },
+                cipher = SoftwareSpoolCipher(), keyCreatedAtMs = { null }, monoClockMs = { mono },
+            ),
+        )
+        rt.status.recordRefused(app.zaghlol.platform.spool.RefusalReason.FULL, "sms", 1)
+        val file = File(dir, "capture/status.bin")
+        val first = file.lastModified() to file.length()
+        rt.status.recordRefused(app.zaghlol.platform.spool.RefusalReason.FULL, "sms", 2)
+        assertEquals(1L, app.zaghlol.platform.spool.CaptureStatusStore.decode(SoftwareSpoolCipher().decrypt(file.readBytes(), app.zaghlol.platform.spool.CaptureStatusStore.AAD)).refusedFull)
+        mono += app.zaghlol.platform.spool.CaptureStatusStore.COALESCE_WINDOW_MS
+        rt.status.recordRefused(app.zaghlol.platform.spool.RefusalReason.FULL, "sms", 3)
+        assertEquals(3L, app.zaghlol.platform.spool.CaptureStatusStore.decode(SoftwareSpoolCipher().decrypt(file.readBytes(), app.zaghlol.platform.spool.CaptureStatusStore.AAD)).refusedFull)
+        assertTrue(first.second > 0)
     }
 }
