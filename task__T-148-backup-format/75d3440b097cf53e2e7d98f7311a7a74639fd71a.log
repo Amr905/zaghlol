@@ -1,5 +1,8 @@
 ﻿== SUMMARY ==
-RUNNING sha=75d3440b097cf53e2e7d98f7311a7a74639fd71a
+SKIP sha=75d3440b097cf53e2e7d98f7311a7a74639fd71a no app/packages/backend changes
 
 == FULL LOG (last 1500 lines) ==
 auto task/T-148-backup-format 75d3440b097cf53e2e7d98f7311a7a74639fd71a 2026-11-11T12:54:42.8228010+02:00
+
+
+
