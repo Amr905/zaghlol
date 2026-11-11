@@ -164,7 +164,11 @@ class CaptureRuntime internal constructor(seams: CaptureSeams) {
         main.post {
             notifyPosted.set(false)
             val events = uiEvents ?: return@post
-            events.onSpoolChanged(store.pendingCount().toLong()) { }
+            try {
+                events.onSpoolChanged(store.pendingCount().toLong()) { }
+            } catch (_: Exception) {
+                // A notification only: the worker polls and drains anyway.
+            }
         }
     }
 
