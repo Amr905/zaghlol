@@ -105,12 +105,12 @@ input: channel, source, body           output: KEEP(kind registry|user|generic, 
 | Location | `noBackupFilesDir/spool/` | App Group container `spool/`, `isExcludedFromBackup = true` |
 | Entry file | `<ulid>.bin` = nonce(12) ‖ AES-GCM(record) ‖ tag, **AAD `zaghlol.spool.v1\|entry\|<ulid>`** (an entry can't be renamed or swapped). File names are ULIDs and so reveal receive times (FU-086 I-2): accepted, the directory is no-backup and entries are deleted on ack and by "Delete everything". The record is a versioned binary record (T-008, Lead Q8; replaces CBOR: same fields, no dependency): `u8 v=1 \| str8 channel \| str16 source \| u32 len + UTF-8 body \| i64 receivedAtMs \| i32 simSlot (-1 none) \| opt8 guardInst \| opt8 guardLast4 \| i64 rxElapsedNs \| i32 bootCount` (big-endian; `strN` = N-bit length + UTF-8; `opt8` = present flag + str8; the last two are diagnostic timing fields, kept in production by T-039, inside the ciphertext). Strict decode: unknown version, over-long field (body ≤ 4,000 chars), invalid UTF-8 or trailing bytes = malformed | same record and AAD (T-044) |
 | Write | atomic: write `<ulid>.bin.tmp`, fsync, atomic rename, best-effort directory fsync. A `.tmp` is invisible to drain. Every `.tmp` is swept **under the store lock** at drain (no write is in flight then, single process), with no age rule, so a clock change can't keep or lose one (T-039; the T-008 spike used a 60 s age) | `Data.write(options: .atomic)` |
-| Caps | 500 entries or 4 MiB on disk; beyond either the **new** message is refused (`refusedFull` in the capture status), never an old one evicted. **Generic budget** (T-035 security L-3, T-039): a Guard `generic` keep is refused (`refusedGeneric`) when the spool already holds 250 entries or 2 MiB, or after 10 generic writes in the last 60 s process-wide (in memory); `registry`/`user` keeps use the full caps. Numbers provisional (T-039 PO Q1). On any refusal the caller still schedules a drain and notifies an attached engine; Dart then runs the inbox catch-up from `firstMissedSmsAtMs` (Sms build) and shows the degraded state (T-047/T-048) | same |
+| Caps | 500 entries or 4 MiB on disk; beyond either the **new** message is refused (`refusedFull` in the capture status), never an old one evicted. **Generic budget** (T-035 security L-3, T-039): a Guard `generic` keep is refused (`refusedGeneric`) when the spool already holds 250 entries or 2 MiB, or after 10 generic writes in the last 60 s process-wide (in memory); `registry`/`user` keeps use the full caps. **Notification reserve** (T-039 security L-1, T-040): an `sms` keep is refused when the spool already holds 400 entries or 3.2 MiB (counted as `refusedFull`, sets `firstMissedSmsAtMs`), so the last 100 entries / ~0.8 MiB stay for notifications, which no catch-up can recover. Numbers provisional (T-039 PO Q1, T-040 PO Q1). On any refusal the caller still schedules a drain and notifies an attached engine; Dart then runs the inbox catch-up from `firstMissedSmsAtMs` (Sms build) and shows the degraded state (T-047/T-048) | same |
 | Dedupe | none in the spool (at-least-once; a hash in a file name would be a body fingerprint). The DB's unique `raw_messages.body_hash` (BR-ING-02) is the only dedupe | same |
 | Delete | only on `ackSpool(ids)` after the DB commit (or after Dart's drain-time Guard re-check dropped it), and only ids that the same engine's host returned from `drainSpool` (a stray ack can't delete an entry that engine never received); no age purge (unlike `share/`) | same |
 | Read errors | delete only on proof: GCM tag failure, truncation or a malformed record is retried at 100/300/900 ms in that drain and the entry deleted (counted as `decryptDeleted`) only when every attempt proves it; any I/O or Keystore error in any attempt keeps it. **Lost key** (FU-086 I-3): an entry whose first attempt fails the tag and whose ULID time is before the key's Keystore creation date was written under an earlier key; it is deleted without the ladder and `keyInvalidatedAtMs` is set. The clock only chooses ladder or not; a deletion always needs a tag failure | same |
 | Drain claim | process-wide: `drainSpool` hands entries to one engine at a time (the claim is released when that engine has acked all it drained, when it detaches, or 60 s after its last drain), so the UI and headless engines never process the same entry concurrently. While another engine holds the claim, `drainSpool` returns an empty list | n/a (one engine) |
-| Capture status | `noBackupFilesDir/capture/status.bin`, AES-GCM with the spool key, AAD `zaghlol.capture.v1\|status`: alert counters only (`seq`, `refusedFull`, `refusedGeneric`, `rateLimited`, `missedNotifications`, `firstMissedSmsAtMs`, `lastRefusedAtMs`, `decryptDeleted`, `keyInvalidatedAtMs`). Written only on an alert, never for a normal keep or a non-financial drop. Read by `getSpoolStatus`, cleared by `clearSpoolAlerts(seq)` (compare-and-clear) (T-039) | T-044/T-061 decide |
+| Capture status | `noBackupFilesDir/capture/status.bin`, AES-GCM with the spool key, AAD `zaghlol.capture.v1\|status`: alert counters only (`seq`, `refusedFull`, `refusedGeneric`, `rateLimited`, `missedNotifications`, `firstMissedSmsAtMs`, `lastRefusedAtMs`, `decryptDeleted`, `keyInvalidatedAtMs`). Written only on an alert, never for a normal keep or a non-financial drop; a burst of alerts is coalesced (the first is written at once, later ones at most once per 10 s, the rest merged at the next read; T-040, T-039 security L-2). Read by `getSpoolStatus`, cleared by `clearSpoolAlerts(seq)` (compare-and-clear) (T-039) | T-044/T-061 decide |
 
 ## 2. Android (`CaptureHostApi`, `CaptureEventsApi`)
 
@@ -146,17 +146,18 @@ abstract class CaptureEventsApi { void onSpoolChanged(int pendingCount); void on
 ```
 
 **Native components:**
-- **`SmsReceiver`** (`SMS_RECEIVED`, priority default):
-  1. Assembles multipart PDUs by sender and timestamp (EC-09).
-  2. Runs the Guard and spools the message.
-  3. Calls `goAsync()`, which is bounded to 5 s.
-  4. Enqueues `IngestionWorker` (expedited, `OutOfQuotaPolicy.RUN_AS_NON_EXPEDITED_WORK_REQUEST`).
+- **`SmsReceiver`** (`SMS_RECEIVED`, priority default; every `*Sms` variant, `src/sms`, never `*NoSms`; T-040 design note):
+  1. On the main thread: stamps the receive time, reads the PDUs and the SIM slot, calls `goAsync()` and hands off to the SMS intake thread with a 5 s budget (`finish()` exactly once).
+  2. Assembles the PDUs of the broadcast (EC-09): grouped by address, bodies joined **in PDU array order** (one broadcast normally carries one reassembled message), with the accessors that reproduce the inbox row, so live and catch-up `body_hash` match.
+  3. Runs the Guard through the typed Android entry point (`AndroidGuardChannel`: `sms` or `notification` only, FU-101 L-1) and spools a keep (`registry`/`user` → priority, `generic` → generic class); a rate-limited keep is recorded in the capture status; any other drop writes nothing.
+  4. If anything was written or refused, enqueues the ingestion work once per broadcast through the injected `IngestScheduler` (returns after WorkManager persisted the request; unique `zaghlol.ingest`, expedited, `OutOfQuotaPolicy.RUN_AS_NON_EXPEDITED_WORK_REQUEST`; T-041 provides it outside devSms).
   5. Calls `CaptureEventsApi.onSpoolChanged` if an engine is attached.
-- **`BankNotificationListener`:**
-  - Gets the `onNotificationPosted` callback and filters `packageName` against `packages`.
-  - Reads `EXTRA_TITLE`, `EXTRA_TEXT` and `EXTRA_BIG_TEXT`.
-  - Ignores ongoing and group-summary notifications.
-  - Then runs Guard → spool as above.
+- **`BankNotificationListener`** (main source set, every flavour; T-043 design note):
+  - `onNotificationPosted` (main thread) skips its own package, group summaries, ongoing and foreground-service notifications without reading extras, and hands the rest to its own intake thread (not the SMS thread).
+  - Admits only a `packageName` in the base `packages` or a user `notification` sender (never the generic hint path) **before** any extras are read.
+  - Reads `EXTRA_TITLE` and `EXTRA_BIG_TEXT`, else `EXTRA_TEXT`, else `EXTRA_TEXT_LINES`; body = title + `\n` + content (either alone if the other is blank). Notification templates and fixtures use this shape.
+  - Skips an identical `(package, body)` seen in the last 15 min (in memory only); an update with new text is a new message.
+  - Then runs Guard → spool → enqueue as above; refused, rate-limited or overflowed notifications count as `missedNotifications` (not recoverable).
 - **`IngestionWorker`:**
   1. Starts a `FlutterEngine` with entrypoint `ingestionMain`, or reuses the cached engine if the app is alive.
   2. Waits for Dart to finish draining (`MethodChannel` completion), 60 s maximum.
@@ -169,7 +170,8 @@ abstract class CaptureEventsApi { void onSpoolChanged(int pendingCount); void on
   - `android:allowBackup="false"`;
   - `dataExtractionRules` exclude everything (FR-SEC-05);
   - `FLAG_SECURE` plus `setRecentsScreenshotEnabled(false)` when app lock is on (FR-SEC-02);
-  - share intent filters for `text/plain`, `image/*`, `application/pdf`, `text/csv`.
+  - share intent filters for `text/plain`, `image/*`, `application/pdf`, `text/csv`;
+  - `SmsReceiver` exported with `android:permission="android.permission.BROADCAST_SMS"` (Sms variants only); `BankNotificationListener` exported with `android:permission="android.permission.BIND_NOTIFICATION_LISTENER_SERVICE"`, ongoing notifications filtered out on API 31+ by `default_filter_types` / `disabled_filter_types` meta-data.
 
 ### 2.1 Share intake (T-060; contract addition, `app/pigeons/share_intake_api.dart`)
 
