@@ -149,6 +149,8 @@ public class CheckConstraintTests(SchemaFixture fixture)
             ["store_notifications: last_error with free text"] = ("store_notifications", Set("last_error", "Timeout talking to api.example"), "ck_store_notifications_last_error"),
             ["store_notifications: last_error lower case"] = ("store_notifications", Set("last_error", "store_unavailable"), "ck_store_notifications_last_error"),
             ["store_notifications: store_key over 512 characters"] = ("store_notifications", Set("store_key", new string('k', 513)), "ck_store_notifications_store_key_length"),
+            ["store_notifications: type lower case"] = ("store_notifications", Set("type", "did_renew"), "ck_store_notifications_type"),
+            ["store_notifications: subtype with a dash"] = ("store_notifications", Set("subtype", "AUTO-RENEW_DISABLED"), "ck_store_notifications_subtype"),
             ["purchases: store_key over 512 characters"] = ("purchases", Set("store_key", new string('k', 513)), "ck_purchases_store_key_length"),
 
             // audit_log (SEC F3): any depth, any letter case, values with "@", and the target
@@ -213,7 +215,7 @@ public class CheckConstraintTests(SchemaFixture fixture)
 
         // 23 documented + 24 hardening (octet/char lengths, cause regex, audit, codes, formats) + 1 catalog_drafts (T-125) + 2 price_quotes (T-127)
         // + 2 idempotency_records claim checks (T-130).
-        Assert.Equal(52, inSchema.Count);
+        Assert.Equal(54, inSchema.Count);
         Assert.Empty(inSchema.Except(tested));
         Assert.Empty(tested.Except(inSchema));
     }
