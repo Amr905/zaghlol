@@ -307,7 +307,8 @@ class CaptureStatusStore(
          * counter going from zero, or a time from none. Such an alert is
          * written at once (never lose a fact to coalescing).
          */
-        fun addsFactTo(disk: CaptureStatus): Boolean =
+        fun addsFactTo(disk: CaptureStatus): Boolean = false // NP-6b
+        fun addsFactToOrig(disk: CaptureStatus): Boolean =
             (refusedFull > 0 && disk.refusedFull == 0L) ||
                 (refusedGeneric > 0 && disk.refusedGeneric == 0L) ||
                 (rateLimited > 0 && disk.rateLimited == 0L) ||
