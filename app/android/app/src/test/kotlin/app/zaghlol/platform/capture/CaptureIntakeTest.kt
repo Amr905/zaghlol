@@ -103,6 +103,9 @@ class CaptureIntakeTest {
         val store = storeIn(spoolDir, status = status, limits = SpoolLimits(genericMaxEntries = 0))
         val r = intake(store).process(listOf(msg("NBE", "Purchase EGP 10.00 card **1234")), stamp)
         assertEquals(1, r.written.size)
+        // AC2 on disk, not only the returned ids: exactly one entry file, the one reported.
+        assertEquals(r.written, store.pendingIds())
+        assertEquals(listOf("${r.written[0]}.bin"), spoolDir.list().orEmpty().filter { it.endsWith(".bin") })
         assertEquals(1, afterWrites)
         val rec = (store.read(r.written[0]) as SpoolStore.ReadResult.Ok).record
         assertEquals("sms", rec.channel)
