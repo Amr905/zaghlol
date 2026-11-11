@@ -20,6 +20,13 @@ enum RegistryIssueCode {
   crossMatch,
   slowMatch,
   guardConfigTooLarge,
+
+  /// A Guard-bound pattern outside the portable regex subset (T-035 §3).
+  nonPortableRegex,
+
+  /// The Guard's last-4 on a fixture body differs from the template's
+  /// (T-035 §10): a card-level ignore rule could miss natively.
+  guardLast4Mismatch,
 }
 
 /// One finding. [path] is a location in the registry or fixture tree

@@ -65,6 +65,10 @@ final class DbMigrationException extends SafeException {
   static const String noMigrationPath = 'DB_NO_MIGRATION_PATH';
   static const String fkViolation = 'DB_MIGRATION_FK_VIOLATION';
   static const String schemaMismatch = 'DB_SCHEMA_MISMATCH';
+
+  /// A table rebuild copied a different number of rows than the old table
+  /// held (T-019); the step stops before anything is dropped.
+  static const String rowCountMismatch = 'DB_MIGRATION_ROW_COUNT';
 }
 
 /// A write the database refused (T-017). Carries a constant code and the

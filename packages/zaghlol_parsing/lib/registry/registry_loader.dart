@@ -43,7 +43,8 @@ final class Registry {
       for (final s in i.senders) {
         final hit = switch (s.kind) {
           SenderMatchKind.exact => foldKey(s.value) == key,
-          SenderMatchKind.regex => s.regex!.regex.hasMatch(source.trim()),
+          // Same input as the Guard: the folded key (T-035 §4).
+          SenderMatchKind.regex => s.regex!.regex.hasMatch(key),
         };
         if (hit) {
           return i;

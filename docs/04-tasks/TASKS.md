@@ -56,7 +56,7 @@ Every task file has: ID, description, technical details, dependencies, affected 
 | [T-016](tasks/T-016.md) | AppDatabase v1 skeleton: encrypted open, isolate, migration harness | US-02-1 | High* | Opus | flutter-core-engineer | T-015 | A | 4 | DONE |
 | [T-017](tasks/T-017.md) | Schema batch A: accounts, balances, raw messages, transactions (+FTS), transfers, offsets, splits | US-06-1 | High* | Opus | flutter-core-engineer | T-016 | A | 5 | DONE |
 | [T-018](tasks/T-018.md) | Schema batch B: categories, catalog, rules, budgets, alerts, summaries, recurring | US-07-1 | High* | Opus | flutter-core-engineer | T-016 | A | 5 | DONE |
-| [T-019](tasks/T-019.md) | Schema batch C: wealth, prices, Zakah, capture controls, review, settings, outbox, misc | US-02-1 | High* | Opus | flutter-core-engineer | T-016 | A | 5 | TODO |
+| [T-019](tasks/T-019.md) | Schema batch C: wealth, prices, Zakah, capture controls, review, settings, outbox, misc | US-02-1 | High* | Opus | flutter-core-engineer | T-016 | A | 5 | DONE |
 | [T-020](tasks/T-020.md) | Settings repository with typed accessors and defaults | US-18-1 | Medium | Sonnet | flutter-core-engineer | T-019 | A | 6 | TODO |
 | [T-021](tasks/T-021.md) | Redacting local diagnostic log | US-21-1 | High | Sonnet | flutter-core-engineer | T-019, T-014 | A | 6 | TODO |
 | [T-022](tasks/T-022.md) | Design tokens, Mint Fresh/Jade Night themes and base components | US-02-3 | Medium | Sonnet | flutter-ui-engineer | T-001 | G | 2 | DONE |
@@ -77,7 +77,7 @@ Every task file has: ID, description, technical details, dependencies, affected 
 | [T-032](tasks/T-032.md) | Template registry format, loader and registry_lint CLI | US-05-1 | High | Sonnet | parsing-engine-engineer | T-013 | F | 4 | DONE |
 | [T-033](tasks/T-033.md) | Parsing pipeline stages 1–7 and ParseResult | US-05-1 | High | Sonnet | parsing-engine-engineer | T-032, T-012 | F | 5 | DONE |
 | [T-034](tasks/T-034.md) | Merchant cleaning and normalized merchant key | US-07-1 | Medium | Sonnet | parsing-engine-engineer | T-013 | F | 4 | DONE |
-| [T-035](tasks/T-035.md) | Capture Guard rules in Dart, shared golden cases and config generator | US-03-1 | High* | Opus | parsing-engine-engineer | T-032 | F | 5 | TODO |
+| [T-035](tasks/T-035.md) | Capture Guard rules in Dart, shared golden cases and config generator | US-03-1 | High* | Opus | parsing-engine-engineer | T-032 | F | 5 | DONE |
 | [T-036](tasks/T-036.md) | Templates + fixtures: NBE, CIB, Banque Misr, QNB | US-05-1 | Medium | Sonnet | parsing-engine-engineer | T-033 | F | 6 | TODO |
 | [T-037](tasks/T-037.md) | Templates + fixtures: InstaPay scenarios and mobile wallets | US-05-1 | Medium | Sonnet | parsing-engine-engineer | T-033 | F | 6 | TODO |
 | [T-038](tasks/T-038.md) | Android Capture Guard (Kotlin) with config reader | US-03-1 | High* | Opus | native-platform-engineer | T-035, T-008 | D | 6 | TODO |
@@ -121,7 +121,7 @@ Every task file has: ID, description, technical details, dependencies, affected 
 | [T-071](tasks/T-071.md) | Templates + fixtures: Wise, Revolut, Monzo, bunq, N26, Payoneer | US-05-1 | High | Sonnet | parsing-engine-engineer | T-033 | F | 6 | TODO |
 | [T-072](tasks/T-072.md) | Templates + fixtures: HDFC, Paytm, Al Rajhi, Emirates NBD/Liv, GCC (S rows) | US-05-1 | Medium | Sonnet | parsing-engine-engineer | T-033 | F | 6 | TODO |
 | [T-073](tasks/T-073.md) | Generic parser for unknown financial senders | US-05-2 | High | Sonnet | parsing-engine-engineer | T-033, T-034 | F | 6 | DONE |
-| [T-074](tasks/T-074.md) | Merchant rules repository and apply-to-past | US-07-1 | Medium | Sonnet | flutter-core-engineer | T-018, T-050 | A | 7 | TODO |
+| [T-074](tasks/T-074.md) | Merchant rules repository and apply-to-past | US-07-1 | Medium | Sonnet | flutter-core-engineer | T-018, T-050 | A | 7 | DONE |
 | [T-075](tasks/T-075.md) | Categorizer with fuzzy merchant matching | US-07-1 | High | Sonnet | parsing-engine-engineer | T-034, T-018, T-074, T-030 | F | 8 | TODO |
 | [T-076](tasks/T-076.md) | Re-parse job after registry version bump | US-06-2 | High | Sonnet | flutter-core-engineer | T-046, T-032 | A | 8 | TODO |
 | [T-077](tasks/T-077.md) | Bulk edit and undo use case | US-06-3 | High | Sonnet | flutter-core-engineer | T-050, T-074 | A | 8 | TODO |

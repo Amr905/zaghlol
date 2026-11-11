@@ -134,6 +134,33 @@ void main() {
       }
     });
 
+    test('foldKeyLines is foldKey with each line break run as one \\n', () {
+      const breaks = [0x0A, 0x0B, 0x0C, 0x0D, 0x85, 0x2028, 0x2029];
+      for (var i = 0; i < 3000; i++) {
+        final base = randomText();
+        // Splice line breaks in, so most inputs carry some.
+        final units = [...base.codeUnits];
+        for (var k = random.nextInt(4); k > 0; k--) {
+          units.insert(
+            random.nextInt(units.length + 1),
+            breaks[random.nextInt(breaks.length)],
+          );
+        }
+        final s = String.fromCharCodes(units);
+        final lines = foldKeyLines(s);
+        expect(lines.replaceAll('\n', ' '), foldKey(s));
+        expect(foldKeyLines(lines), lines);
+        expect(lines, equals(lines.trim()));
+        for (final bad in [' \n', '\n ', '\n\n', '  ']) {
+          expect(lines.contains(bad), isFalse);
+        }
+        for (final u in lines.codeUnits) {
+          // Only LF survives; every other line break folds to it.
+          expect(u != 0x0A && breaks.contains(u), isFalse);
+        }
+      }
+    });
+
     test('output never has leading, trailing or doubled spaces', () {
       for (var i = 0; i < 1000; i++) {
         final out = foldKey(randomText());

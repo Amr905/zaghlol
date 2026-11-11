@@ -534,8 +534,10 @@ void main() {
         )
         .get();
     // 8 in v2 (T-017) + budgets.limit_minor, cycle_summaries.income_minor /
-    // spend_minor, recurring_items.amount_minor (T-018).
-    expect(rows.length, 12);
+    // spend_minor, recurring_items.amount_minor (T-018) + 8 in v4 (T-019:
+    // assets ×3, price_quotes, networth_snapshots ×2, zakah_ledger ×2).
+    // schema_audit_test.dart checks each one's CHECKs and currency partner.
+    expect(rows.length, 20);
     for (final r in rows) {
       expect(r.read<String>('ty'), 'INTEGER', reason: r.read<String>('c'));
     }

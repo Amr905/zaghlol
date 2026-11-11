@@ -55,7 +55,7 @@ void main() {
     final db = AppDatabase(NativeDatabase.memory(), validateSchema: false);
     addTearDown(db.close);
     expect(db.schemaVersion, appSchemaVersion);
-    expect(appSchemaVersion, 3);
+    expect(appSchemaVersion, 4);
   });
 
   for (final background in [false, true]) {
@@ -113,7 +113,9 @@ void main() {
         expect(await pragma('temp_store'), 2);
         expect(await pragma('journal_mode'), 'wal');
         expect(await pragma('synchronous'), 1); // NORMAL
-        expect(await pragma('busy_timeout'), 5000);
+        // FU-094: the wait is a Dart busy handler (applyBusyTimeout), so the
+        // PRAGMA reads 0; busy_wait_test.dart proves the 5 s wait.
+        expect(await pragma('busy_timeout'), 0);
         expect(await pragma('secure_delete'), 2); // FAST
         expect(await pragma('cache_size'), -8192);
         expect(await pragma('foreign_keys'), 1);

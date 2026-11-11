@@ -1,0 +1,45 @@
+{
+ "v": 1,
+ "baseRegistryVersion": 3,
+ "ignore": [
+  {
+   "inst": "bm",
+   "last4": null,
+   "ch": "sms"
+  },
+  {
+   "inst": "cib",
+   "last4": null,
+   "ch": "notification"
+  },
+  {
+   "inst": "cib",
+   "last4": "9910",
+   "ch": "sms"
+  },
+  {
+   "inst": "nbe",
+   "last4": null,
+   "ch": "apple_pay"
+  },
+  {
+   "inst": "nbe",
+   "last4": "4567",
+   "ch": "sms"
+  }
+ ],
+ "userSenders": [
+  {
+   "value": "com.example.wallet",
+   "ch": "notification"
+  },
+  {
+   "value": "club-7",
+   "ch": "sms"
+  },
+  {
+   "value": "mycoop",
+   "ch": "sms"
+  }
+ ]
+}

@@ -1,0 +1,2833 @@
+{
+ "format": 1,
+ "synthetic": true,
+ "note": "Synthetic data only (CLAUDE.md 2.6). Shared by the Dart, Kotlin (T-038) and Swift (T-061) Guards: never copy. count = fold + cases + rate + modes. fold: out = foldKey(in); lines (when present, else out) = foldKeyLines(in), the Guard's fold for the global drop patterns.",
+ "count": 207,
+ "configs": {
+  "t1": {
+   "base": "configs/t1_base.json",
+   "user": "configs/t1_user.json"
+  },
+  "t1base": {
+   "base": "configs/t1_base.json",
+   "user": null
+  }
+ },
+ "fold": [
+  {
+   "id": "fold.digits.arabic_indic",
+   "in": "١٢٣٤٥٦",
+   "out": "123456"
+  },
+  {
+   "id": "fold.digits.extended",
+   "in": "۱۲۳۴",
+   "out": "1234"
+  },
+  {
+   "id": "fold.digits.arabic_decimal",
+   "in": "٢٠٫٥٠",
+   "out": "20.50"
+  },
+  {
+   "id": "fold.digits.arabic_thousands",
+   "in": "١٬٢٥٠",
+   "out": "1,250"
+  },
+  {
+   "id": "fold.invisible.zwj_in_keyword",
+   "in": "رمز‍التحـقق ١٢٣٤",
+   "out": "رمزالتحقق 1234"
+  },
+  {
+   "id": "fold.invisible.zwnj",
+   "in": "OTP‌123",
+   "out": "otp123"
+  },
+  {
+   "id": "fold.invisible.rlm",
+   "in": "‏NBE‏",
+   "out": "nbe"
+  },
+  {
+   "id": "fold.invisible.bom",
+   "in": "﻿BOM",
+   "out": "bom"
+  },
+  {
+   "id": "fold.tatweel",
+   "in": "خـــصم",
+   "out": "خصم"
+  },
+  {
+   "id": "fold.harakat",
+   "in": "خَصْم",
+   "out": "خصم"
+  },
+  {
+   "id": "fold.alef_variants",
+   "in": "أإآٱ",
+   "out": "اااا"
+  },
+  {
+   "id": "fold.alef_maksura",
+   "in": "مصرى",
+   "out": "مصري"
+  },
+  {
+   "id": "fold.ta_marbuta",
+   "in": "بطاقة",
+   "out": "بطاقه"
+  },
+  {
+   "id": "fold.newlines",
+   "in": "line1\nline2\r\n line3",
+   "out": "line1 line2 line3",
+   "lines": "line1\nline2\nline3"
+  },
+  {
+   "id": "fold.nbsp",
+   "in": "EGP 450",
+   "out": "egp 450"
+  },
+  {
+   "id": "fold.nel",
+   "in": "ab",
+   "out": "a b",
+   "lines": "a\nb"
+  },
+  {
+   "id": "fold.trim_collapse",
+   "in": "  CIB   ALERT  ",
+   "out": "cib alert"
+  },
+  {
+   "id": "fold.turkish_dotted_i_stays",
+   "in": "İSTANBUL",
+   "out": "İstanbul"
+  },
+  {
+   "id": "fold.kelvin_sign_stays",
+   "in": "K",
+   "out": "K"
+  },
+  {
+   "id": "fold.greek_epsilon_not_confused",
+   "in": "NBΕ",
+   "out": "nbΕ"
+  },
+  {
+   "id": "fold.emoji",
+   "in": "Pay 😀 now",
+   "out": "pay 😀 now"
+  },
+  {
+   "id": "fold.lines.tab_is_space",
+   "in": "a\tb",
+   "out": "a b"
+  },
+  {
+   "id": "fold.lines.ls_ps",
+   "in": "a b c",
+   "out": "a b c",
+   "lines": "a\nb\nc"
+  },
+  {
+   "id": "fold.lines.vt_ff",
+   "in": "a\u000bb\fc",
+   "out": "a b c",
+   "lines": "a\nb\nc"
+  },
+  {
+   "id": "fold.lines.spaces_around_break",
+   "in": "a   \n \t b",
+   "out": "a b",
+   "lines": "a\nb"
+  },
+  {
+   "id": "fold.lines.invisible_in_break_run",
+   "in": "a ‏\n‎ b",
+   "out": "a b",
+   "lines": "a\nb"
+  },
+  {
+   "id": "fold.lines.edges_trimmed",
+   "in": "\r\n OTP 1234\r\n",
+   "out": "otp 1234"
+  }
+ ],
+ "cases": [
+  {
+   "id": "nf.personal_number",
+   "tags": [
+    "non_financial"
+   ],
+   "config": "t1",
+   "channel": "sms",
+   "source": "+201000000001",
+   "body": "تعالى بكرة الساعة ٥",
+   "expect": {
+    "decision": "drop",
+    "reason": "not_financial"
+   }
+  },
+  {
+   "id": "nf.unknown_alpha_id",
+   "tags": [
+    "non_financial"
+   ],
+   "config": "t1",
+   "channel": "sms",
+   "source": "PROMOX",
+   "body": "Big sale today 50% off",
+   "expect": {
+    "decision": "drop",
+    "reason": "not_financial"
+   }
+  },
+  {
+   "id": "nf.confusable_sender_greek_epsilon",
+   "tags": [
+    "non_financial"
+   ],
+   "config": "t1",
+   "channel": "sms",
+   "source": "NBΕ",
+   "body": "Purchase EGP 450.00 card **2468",
+   "expect": {
+    "decision": "drop",
+    "reason": "not_financial"
+   }
+  },
+  {
+   "id": "nf.sender_hint_only",
+   "tags": [
+    "non_financial"
+   ],
+   "config": "t1",
+   "channel": "sms",
+   "source": "MyBank",
+   "body": "Happy Eid from all of us",
+   "expect": {
+    "decision": "drop",
+    "reason": "not_financial"
+   }
+  },
+  {
+   "id": "nf.body_hint_only",
+   "tags": [
+    "non_financial"
+   ],
+   "config": "t1",
+   "channel": "sms",
+   "source": "FRIEND",
+   "body": "send me EGP 500 tomorrow",
+   "expect": {
+    "decision": "drop",
+    "reason": "not_financial"
+   }
+  },
+  {
+   "id": "nf.unknown_package",
+   "tags": [
+    "non_financial"
+   ],
+   "config": "t1",
+   "channel": "notification",
+   "source": "com.example.game",
+   "body": "You won 500 coins",
+   "expect": {
+    "decision": "drop",
+    "reason": "not_financial"
+   }
+  },
+  {
+   "id": "nf.package_case_sensitive",
+   "tags": [
+    "non_financial"
+   ],
+   "config": "t1",
+   "channel": "notification",
+   "source": "COM.EXAMPLE.NBE",
+   "body": "Purchase EGP 10.00",
+   "expect": {
+    "decision": "drop",
+    "reason": "not_financial"
+   }
+  },
+  {
+   "id": "nf.sender_on_notification_channel",
+   "tags": [
+    "non_financial"
+   ],
+   "config": "t1",
+   "channel": "notification",
+   "source": "NBE",
+   "body": "Purchase EGP 10.00",
+   "expect": {
+    "decision": "drop",
+    "reason": "not_financial"
+   }
+  },
+  {
+   "id": "nf.empty_source",
+   "tags": [
+    "non_financial"
+   ],
+   "config": "t1",
+   "channel": "sms",
+   "source": "",
+   "body": "Purchase EGP 10.00",
+   "expect": {
+    "decision": "drop",
+    "reason": "not_financial"
+   }
+  },
+  {
+   "id": "nf.sender_suffix",
+   "tags": [
+    "non_financial"
+   ],
+   "config": "t1",
+   "channel": "sms",
+   "source": "NBE2",
+   "body": "Purchase EGP 10.00",
+   "expect": {
+    "decision": "drop",
+    "reason": "not_financial"
+   }
+  },
+  {
+   "id": "nf.empty_body",
+   "tags": [
+    "non_financial"
+   ],
+   "config": "t1",
+   "channel": "sms",
+   "source": "NBE",
+   "body": "  ‏ ‍",
+   "expect": {
+    "decision": "drop",
+    "reason": "empty_body"
+   }
+  },
+  {
+   "id": "nf.body_4001",
+   "tags": [
+    "non_financial"
+   ],
+   "config": "t1",
+   "channel": "sms",
+   "source": "NBE",
+   "body": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+   "expect": {
+    "decision": "drop",
+    "reason": "too_long"
+   }
+  },
+  {
+   "id": "nf.body_4000_kept",
+   "tags": [
+    "non_financial",
+    "registry_keep"
+   ],
+   "config": "t1",
+   "channel": "sms",
+   "source": "NBE",
+   "body": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+   "expect": {
+    "decision": "keep",
+    "kind": "registry",
+    "inst": "nbe",
+    "last4": null
+   }
+  },
+  {
+   "id": "nf.body_4001_utf16_units",
+   "tags": [
+    "non_financial"
+   ],
+   "config": "t1",
+   "channel": "sms",
+   "source": "NBE",
+   "body": "😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀a",
+   "expect": {
+    "decision": "drop",
+    "reason": "too_long"
+   }
+  },
+  {
+   "id": "nf.source_257",
+   "tags": [
+    "non_financial"
+   ],
+   "config": "t1",
+   "channel": "sms",
+   "source": "NNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNN",
+   "body": "Purchase EGP 10.00",
+   "expect": {
+    "decision": "drop",
+    "reason": "too_long"
+   }
+  },
+  {
+   "id": "nf.unknown_channel",
+   "tags": [
+    "non_financial"
+   ],
+   "config": "t1",
+   "channel": "mms",
+   "source": "NBE",
+   "body": "Purchase EGP 10.00",
+   "expect": {
+    "decision": "drop",
+    "reason": "unknown_channel"
+   }
+  },
+  {
+   "id": "nf.channel_uppercase",
+   "tags": [
+    "non_financial"
+   ],
+   "config": "t1",
+   "channel": "SMS",
+   "source": "NBE",
+   "body": "Purchase EGP 10.00",
+   "expect": {
+    "decision": "drop",
+    "reason": "unknown_channel"
+   }
+  },
+  {
+   "id": "nf.user_sender_other_channel",
+   "tags": [
+    "non_financial"
+   ],
+   "config": "t1",
+   "channel": "notification",
+   "source": "MyCoop",
+   "body": "Paid 10.00",
+   "expect": {
+    "decision": "drop",
+    "reason": "not_financial"
+   }
+  },
+  {
+   "id": "nf.user_sender_without_user_config",
+   "tags": [
+    "non_financial"
+   ],
+   "config": "t1base",
+   "channel": "sms",
+   "source": "MyCoop",
+   "body": "Paid 10.00",
+   "expect": {
+    "decision": "drop",
+    "reason": "not_financial"
+   }
+  },
+  {
+   "id": "otp.en.keyword_first",
+   "tags": [
+    "otp_drop"
+   ],
+   "config": "t1",
+   "channel": "sms",
+   "source": "NBE",
+   "body": "Your OTP is 482913. Do not share it.",
+   "expect": {
+    "decision": "drop",
+    "reason": "otp_or_promo_global"
+   }
+  },
+  {
+   "id": "otp.en.code_first",
+   "tags": [
+    "otp_drop"
+   ],
+   "config": "t1",
+   "channel": "sms",
+   "source": "NBE",
+   "body": "482913 is your one-time password for NBE online",
+   "expect": {
+    "decision": "drop",
+    "reason": "otp_or_promo_global"
+   }
+  },
+  {
+   "id": "otp.en.glued",
+   "tags": [
+    "otp_drop"
+   ],
+   "config": "t1",
+   "channel": "sms",
+   "source": "CIB",
+   "body": "OTP482913 valid for 5 minutes",
+   "expect": {
+    "decision": "drop",
+    "reason": "otp_or_promo_global"
+   }
+  },
+  {
+   "id": "otp.en.uppercase",
+   "tags": [
+    "otp_drop"
+   ],
+   "config": "t1",
+   "channel": "sms",
+   "source": "NBE",
+   "body": "YOUR VERIFICATION CODE: 7731",
+   "expect": {
+    "decision": "drop",
+    "reason": "otp_or_promo_global"
+   }
+  },
+  {
+   "id": "otp.en.login_code",
+   "tags": [
+    "otp_drop"
+   ],
+   "config": "t1",
+   "channel": "sms",
+   "source": "CIB",
+   "body": "Login code 55102 for CIB mobile",
+   "expect": {
+    "decision": "drop",
+    "reason": "otp_or_promo_global"
+   }
+  },
+  {
+   "id": "otp.en.passcode",
+   "tags": [
+    "otp_drop"
+   ],
+   "config": "t1",
+   "channel": "sms",
+   "source": "NBE",
+   "body": "Passcode 90817 for your transfer",
+   "expect": {
+    "decision": "drop",
+    "reason": "otp_or_promo_global"
+   }
+  },
+  {
+   "id": "otp.en.with_transaction",
+   "tags": [
+    "otp_drop"
+   ],
+   "config": "t1",
+   "channel": "sms",
+   "source": "NBE",
+   "body": "OTP 739201 to confirm EGP 500.00 at SHOP X",
+   "expect": {
+    "decision": "drop",
+    "reason": "otp_or_promo_global"
+   }
+  },
+  {
+   "id": "otp.en.generic_sender",
+   "tags": [
+    "otp_drop"
+   ],
+   "config": "t1",
+   "channel": "sms",
+   "source": "MyBank",
+   "body": "Security code 123456 to confirm EGP 500",
+   "expect": {
+    "decision": "drop",
+    "reason": "otp_or_promo_global"
+   }
+  },
+  {
+   "id": "otp.en.notification",
+   "tags": [
+    "otp_drop"
+   ],
+   "config": "t1",
+   "channel": "notification",
+   "source": "com.example.cib",
+   "body": "Your OTP is 120934",
+   "expect": {
+    "decision": "drop",
+    "reason": "otp_or_promo_global"
+   }
+  },
+  {
+   "id": "otp.ar.keyword_first",
+   "tags": [
+    "otp_drop"
+   ],
+   "config": "t1",
+   "channel": "sms",
+   "source": "NBE",
+   "body": "رمز التحقق الخاص بك هو 482913",
+   "expect": {
+    "decision": "drop",
+    "reason": "otp_or_promo_global"
+   }
+  },
+  {
+   "id": "otp.ar.indic_digits",
+   "tags": [
+    "otp_drop"
+   ],
+   "config": "t1",
+   "channel": "sms",
+   "source": "NBE",
+   "body": "رمز التحقق ٤٨٢٩١٣ لا تشاركه مع أحد",
+   "expect": {
+    "decision": "drop",
+    "reason": "otp_or_promo_global"
+   }
+  },
+  {
+   "id": "otp.ar.zwj_tatweel_in_keyword",
+   "tags": [
+    "otp_drop"
+   ],
+   "config": "t1",
+   "channel": "sms",
+   "source": "NBE",
+   "body": "رمز‍التحـقق 1234",
+   "expect": {
+    "decision": "drop",
+    "reason": "otp_or_promo_global"
+   }
+  },
+  {
+   "id": "otp.ar.code_first",
+   "tags": [
+    "otp_drop"
+   ],
+   "config": "t1",
+   "channel": "sms",
+   "source": "CIB",
+   "body": "482913 هو كود التفعيل",
+   "expect": {
+    "decision": "drop",
+    "reason": "otp_or_promo_global"
+   }
+  },
+  {
+   "id": "otp.ar.hamza_variant",
+   "tags": [
+    "otp_drop"
+   ],
+   "config": "t1",
+   "channel": "sms",
+   "source": "NBE",
+   "body": "رمز الأمان: ٥٥٦٧٧٨",
+   "expect": {
+    "decision": "drop",
+    "reason": "otp_or_promo_global"
+   }
+  },
+  {
+   "id": "otp.ar.one_time_password",
+   "tags": [
+    "otp_drop"
+   ],
+   "config": "t1",
+   "channel": "sms",
+   "source": "NBE",
+   "body": "كلمة السر لمرة واحدة 9921 صالحة لمدة 5 دقائق",
+   "expect": {
+    "decision": "drop",
+    "reason": "otp_or_promo_global"
+   }
+  },
+  {
+   "id": "otp.ar.temporary_password",
+   "tags": [
+    "otp_drop"
+   ],
+   "config": "t1",
+   "channel": "sms",
+   "source": "CIB",
+   "body": "كلمة المرور المؤقتة هي 773311",
+   "expect": {
+    "decision": "drop",
+    "reason": "otp_or_promo_global"
+   }
+  },
+  {
+   "id": "otp.ar.shortcut_message",
+   "tags": [
+    "otp_drop"
+   ],
+   "config": "t1",
+   "channel": "shortcut_message",
+   "source": "",
+   "body": "الرقم السري المؤقت ٧٧٨٨",
+   "expect": {
+    "decision": "drop",
+    "reason": "otp_or_promo_global"
+   }
+  },
+  {
+   "id": "promo.inst.en",
+   "tags": [
+    "otp_drop"
+   ],
+   "config": "t1",
+   "channel": "sms",
+   "source": "NBE",
+   "body": "Special offer: 0% installments this week",
+   "expect": {
+    "decision": "drop",
+    "reason": "otp_or_promo_inst"
+   }
+  },
+  {
+   "id": "promo.inst.ar",
+   "tags": [
+    "otp_drop"
+   ],
+   "config": "t1",
+   "channel": "sms",
+   "source": "NBE",
+   "body": "عرض خاص لعملاء الأهلي",
+   "expect": {
+    "decision": "drop",
+    "reason": "otp_or_promo_inst"
+   }
+  },
+  {
+   "id": "promo.inst.bm",
+   "tags": [
+    "otp_drop"
+   ],
+   "config": "t1",
+   "channel": "notification",
+   "source": "com.example.bm",
+   "body": "تقسيط بدون فوائد على مشترياتك",
+   "expect": {
+    "decision": "drop",
+    "reason": "otp_or_promo_inst"
+   }
+  },
+  {
+   "id": "neg.otp_footer_on_purchase",
+   "tags": [
+    "negative"
+   ],
+   "config": "t1",
+   "channel": "sms",
+   "source": "NBE",
+   "body": "Purchase of EGP 450.00 at SHOP A with card **2468. Never share your OTP.",
+   "expect": {
+    "decision": "keep",
+    "kind": "registry",
+    "inst": "nbe",
+    "last4": "2468"
+   }
+  },
+  {
+   "id": "neg.hotpot_merchant",
+   "tags": [
+    "negative"
+   ],
+   "config": "t1",
+   "channel": "sms",
+   "source": "CIB",
+   "body": "Purchase EGP 320.00 at HOTPOT 1234 CAIRO",
+   "expect": {
+    "decision": "keep",
+    "kind": "registry",
+    "inst": "cib",
+    "last4": null
+   }
+  },
+  {
+   "id": "neg.khasm_debit",
+   "tags": [
+    "negative"
+   ],
+   "config": "t1",
+   "channel": "sms",
+   "source": "NBE",
+   "body": "تم خصم 450.00 جم من بطاقة رقم **2468",
+   "expect": {
+    "decision": "keep",
+    "kind": "registry",
+    "inst": "nbe",
+    "last4": "2468"
+   }
+  },
+  {
+   "id": "neg.amount_after_otp_word",
+   "tags": [
+    "negative"
+   ],
+   "config": "t1",
+   "channel": "sms",
+   "source": "CIB",
+   "body": "OTP-protected purchase EGP 1500.00 at SHOP B",
+   "expect": {
+    "decision": "keep",
+    "kind": "registry",
+    "inst": "cib",
+    "last4": null
+   }
+  },
+  {
+   "id": "neg.amount_before_otp_word",
+   "tags": [
+    "negative"
+   ],
+   "config": "t1",
+   "channel": "sms",
+   "source": "NBE",
+   "body": "Charged EGP 1500.00 otp verified",
+   "expect": {
+    "decision": "keep",
+    "kind": "registry",
+    "inst": "nbe",
+    "last4": null
+   }
+  },
+  {
+   "id": "neg.card_ending_then_footer",
+   "tags": [
+    "negative"
+   ],
+   "config": "t1",
+   "channel": "sms",
+   "source": "NBE",
+   "body": "Payment EGP 99.00 card ending 2468. Never share your OTP",
+   "expect": {
+    "decision": "keep",
+    "kind": "registry",
+    "inst": "nbe",
+    "last4": "2468"
+   }
+  },
+  {
+   "id": "neg.nine_digit_reference",
+   "tags": [
+    "negative"
+   ],
+   "config": "t1",
+   "channel": "sms",
+   "source": "CIB",
+   "body": "Ref 123456789 OTP not required",
+   "expect": {
+    "decision": "keep",
+    "kind": "registry",
+    "inst": "cib",
+    "last4": null
+   }
+  },
+  {
+   "id": "neg.khasm_khas_promo_words",
+   "tags": [
+    "negative"
+   ],
+   "config": "t1",
+   "channel": "sms",
+   "source": "CIB",
+   "body": "خصم خاص 20% على مشترياتك",
+   "expect": {
+    "decision": "keep",
+    "kind": "registry",
+    "inst": "cib",
+    "last4": null
+   }
+  },
+  {
+   "id": "promo.no_inst_pattern_kept",
+   "tags": [
+    "negative"
+   ],
+   "config": "t1",
+   "channel": "sms",
+   "source": "CIB",
+   "body": "Exclusive offer: 20% cashback this weekend",
+   "expect": {
+    "decision": "keep",
+    "kind": "registry",
+    "inst": "cib",
+    "last4": null
+   }
+  },
+  {
+   "id": "neg.footer_then_card_mask",
+   "tags": [
+    "negative"
+   ],
+   "config": "t1",
+   "channel": "sms",
+   "source": "NBE",
+   "body": "Never share your OTP. Card **1234 charged EGP 50.00 at SHOP A",
+   "expect": {
+    "decision": "keep",
+    "kind": "registry",
+    "inst": "nbe",
+    "last4": "1234"
+   }
+  },
+  {
+   "id": "neg.footer_then_card_ending",
+   "tags": [
+    "negative"
+   ],
+   "config": "t1",
+   "channel": "sms",
+   "source": "NBE",
+   "body": "Do not share OTP with anyone. Your card ending 4821 was debited EGP 250.00",
+   "expect": {
+    "decision": "keep",
+    "kind": "registry",
+    "inst": "nbe",
+    "last4": "4821"
+   }
+  },
+  {
+   "id": "neg.login_code_word_then_card_xx",
+   "tags": [
+    "negative"
+   ],
+   "config": "t1",
+   "channel": "sms",
+   "source": "NBE",
+   "body": "Login code reminder: your card xx4821 was charged EGP 99.00",
+   "expect": {
+    "decision": "keep",
+    "kind": "registry",
+    "inst": "nbe",
+    "last4": "4821"
+   }
+  },
+  {
+   "id": "neg.ar.footer_then_card_raqm",
+   "tags": [
+    "negative"
+   ],
+   "config": "t1",
+   "channel": "sms",
+   "source": "NBE",
+   "body": "لا تشارك رمز التحقق. تم خصم 1500 ج.م من بطاقة رقم 4821",
+   "expect": {
+    "decision": "keep",
+    "kind": "registry",
+    "inst": "nbe",
+    "last4": "4821"
+   }
+  },
+  {
+   "id": "neg.otp_word_then_integer_amount",
+   "tags": [
+    "negative"
+   ],
+   "config": "t1",
+   "channel": "sms",
+   "source": "CIB",
+   "body": "OTP-protected purchase EGP 1500 at SHOP B",
+   "expect": {
+    "decision": "keep",
+    "kind": "registry",
+    "inst": "cib",
+    "last4": null
+   }
+  },
+  {
+   "id": "neg.footer_then_hotline",
+   "tags": [
+    "negative"
+   ],
+   "config": "t1",
+   "channel": "sms",
+   "source": "NBE",
+   "body": "Purchase EGP 450.00 card **2468. Never share your OTP with anyone. Call 19623",
+   "expect": {
+    "decision": "keep",
+    "kind": "registry",
+    "inst": "nbe",
+    "last4": "2468"
+   }
+  },
+  {
+   "id": "neg.ar.footer_then_hotline",
+   "tags": [
+    "negative"
+   ],
+   "config": "t1",
+   "channel": "sms",
+   "source": "NBE",
+   "body": "تم خصم 450.00 جم من بطاقة **2468. لا تشارك رمز التحقق مع أحد. للاستفسار 19623",
+   "expect": {
+    "decision": "keep",
+    "kind": "registry",
+    "inst": "nbe",
+    "last4": "2468"
+   }
+  },
+  {
+   "id": "neg.footer_comma_hotline",
+   "tags": [
+    "negative"
+   ],
+   "config": "t1",
+   "channel": "sms",
+   "source": "NBE",
+   "body": "Purchase EGP 75.00 card **2468. Never share your OTP, hotline: 19623",
+   "expect": {
+    "decision": "keep",
+    "kind": "registry",
+    "inst": "nbe",
+    "last4": "2468"
+   }
+  },
+  {
+   "id": "neg.footer_comma_call_hotline",
+   "tags": [
+    "negative"
+   ],
+   "config": "t1",
+   "channel": "sms",
+   "source": "CIB",
+   "body": "Never share your PIN or OTP, call 19623 for help",
+   "expect": {
+    "decision": "keep",
+    "kind": "registry",
+    "inst": "cib",
+    "last4": null
+   }
+  },
+  {
+   "id": "neg.pin_word_then_amount",
+   "tags": [
+    "negative"
+   ],
+   "config": "t1",
+   "channel": "sms",
+   "source": "CIB",
+   "body": "PIN-protected purchase EGP 1500 at SHOP C",
+   "expect": {
+    "decision": "keep",
+    "kind": "registry",
+    "inst": "cib",
+    "last4": null
+   }
+  },
+  {
+   "id": "neg.password_word_then_card",
+   "tags": [
+    "negative"
+   ],
+   "config": "t1",
+   "channel": "sms",
+   "source": "NBE",
+   "body": "Password changed for card ending 4821",
+   "expect": {
+    "decision": "keep",
+    "kind": "registry",
+    "inst": "nbe",
+    "last4": "4821"
+   }
+  },
+  {
+   "id": "neg.integer_amount_then_otp_word",
+   "tags": [
+    "negative"
+   ],
+   "config": "t1",
+   "channel": "sms",
+   "source": "NBE",
+   "body": "Charged EGP 1500 OTP verified",
+   "expect": {
+    "decision": "keep",
+    "kind": "registry",
+    "inst": "nbe",
+    "last4": null
+   }
+  },
+  {
+   "id": "neg.colon_amount_currency_then_otp_word",
+   "tags": [
+    "negative"
+   ],
+   "config": "t1",
+   "channel": "sms",
+   "source": "CIB",
+   "body": "Amount: 1500 EGP, OTP verified",
+   "expect": {
+    "decision": "keep",
+    "kind": "registry",
+    "inst": "cib",
+    "last4": null
+   }
+  },
+  {
+   "id": "neg.otp_word_then_colon_amount_currency",
+   "tags": [
+    "negative"
+   ],
+   "config": "t1",
+   "channel": "sms",
+   "source": "CIB",
+   "body": "OTP verified, amount: 1500 EGP at SHOP E",
+   "expect": {
+    "decision": "keep",
+    "kind": "registry",
+    "inst": "cib",
+    "last4": null
+   }
+  },
+  {
+   "id": "neg.ar.amount_then_otp_word",
+   "tags": [
+    "negative"
+   ],
+   "config": "t1",
+   "channel": "sms",
+   "source": "NBE",
+   "body": "تم خصم 1500 جنيه بعد إدخال رمز التحقق",
+   "expect": {
+    "decision": "keep",
+    "kind": "registry",
+    "inst": "nbe",
+    "last4": null
+   }
+  },
+  {
+   "id": "neg.ref_code_without_verb",
+   "tags": [
+    "negative"
+   ],
+   "config": "t1",
+   "channel": "sms",
+   "source": "CIB",
+   "body": "Ref code 48291344 for your transfer of EGP 500.00",
+   "expect": {
+    "decision": "keep",
+    "kind": "registry",
+    "inst": "cib",
+    "last4": null
+   }
+  },
+  {
+   "id": "neg.pin_word_then_decimal_balance",
+   "tags": [
+    "negative"
+   ],
+   "config": "t1",
+   "channel": "sms",
+   "source": "NBE",
+   "body": "Card **4821 PIN verified purchase EGP 150.00 at SHOP F, balance is 2345.50",
+   "expect": {
+    "decision": "keep",
+    "kind": "registry",
+    "inst": "nbe",
+    "last4": "4821"
+   }
+  },
+  {
+   "id": "neg.ar.pin_footer_card_raqm",
+   "tags": [
+    "negative"
+   ],
+   "config": "t1",
+   "channel": "sms",
+   "source": "CIB",
+   "body": "لا تشارك الرقم السري لبطاقتك رقم 4821 مع أحد",
+   "expect": {
+    "decision": "keep",
+    "kind": "registry",
+    "inst": "cib",
+    "last4": null
+   }
+  },
+  {
+   "id": "otp.en.amount_between",
+   "tags": [
+    "otp_drop"
+   ],
+   "config": "t1",
+   "channel": "sms",
+   "source": "NBE",
+   "body": "Your OTP for EGP 1,500.00 purchase at SHOP X is 482913",
+   "expect": {
+    "decision": "drop",
+    "reason": "otp_or_promo_global"
+   }
+  },
+  {
+   "id": "otp.ar.amount_between",
+   "tags": [
+    "otp_drop"
+   ],
+   "config": "t1",
+   "channel": "sms",
+   "source": "NBE",
+   "body": "رمز التحقق لعملية بقيمة 500 جم هو 482913",
+   "expect": {
+    "decision": "drop",
+    "reason": "otp_or_promo_global"
+   }
+  },
+  {
+   "id": "otp.en.code_after_amount",
+   "tags": [
+    "otp_drop"
+   ],
+   "config": "t1",
+   "channel": "sms",
+   "source": "NBE",
+   "body": "OTP for EGP 500 is 123456",
+   "expect": {
+    "decision": "drop",
+    "reason": "otp_or_promo_global"
+   }
+  },
+  {
+   "id": "otp.en.colon_after_merchant",
+   "tags": [
+    "otp_drop"
+   ],
+   "config": "t1",
+   "channel": "sms",
+   "source": "NBE",
+   "body": "Your OTP for purchase at SHOP X: 482913",
+   "expect": {
+    "decision": "drop",
+    "reason": "otp_or_promo_global"
+   }
+  },
+  {
+   "id": "otp.ar.bare_kod_with_confirm_verb",
+   "tags": [
+    "otp_drop"
+   ],
+   "config": "t1",
+   "channel": "sms",
+   "source": "CIB",
+   "body": "كود 482913 لتأكيد عملية الشراء",
+   "expect": {
+    "decision": "drop",
+    "reason": "otp_or_promo_global"
+   }
+  },
+  {
+   "id": "otp.en.bare_code_with_confirm_verb",
+   "tags": [
+    "otp_drop"
+   ],
+   "config": "t1",
+   "channel": "sms",
+   "source": "CIB",
+   "body": "Code 482913 to confirm your transfer",
+   "expect": {
+    "decision": "drop",
+    "reason": "otp_or_promo_global"
+   }
+  },
+  {
+   "id": "otp.en.bare_code_message_start",
+   "tags": [
+    "otp_drop"
+   ],
+   "config": "t1",
+   "channel": "sms",
+   "source": "NBE",
+   "body": "Code: 482913",
+   "expect": {
+    "decision": "drop",
+    "reason": "otp_or_promo_global"
+   }
+  },
+  {
+   "id": "otp.en.instapay_code",
+   "tags": [
+    "otp_drop"
+   ],
+   "config": "t1",
+   "channel": "sms",
+   "source": "CIB",
+   "body": "InstaPay code 482913",
+   "expect": {
+    "decision": "drop",
+    "reason": "otp_or_promo_global"
+   }
+  },
+  {
+   "id": "otp.en.your_code",
+   "tags": [
+    "otp_drop"
+   ],
+   "config": "t1",
+   "channel": "sms",
+   "source": "NBE",
+   "body": "Your code is 482913",
+   "expect": {
+    "decision": "drop",
+    "reason": "otp_or_promo_global"
+   }
+  },
+  {
+   "id": "otp.en.pin",
+   "tags": [
+    "otp_drop"
+   ],
+   "config": "t1",
+   "channel": "sms",
+   "source": "NBE",
+   "body": "Your PIN is 4829",
+   "expect": {
+    "decision": "drop",
+    "reason": "otp_or_promo_global"
+   }
+  },
+  {
+   "id": "otp.en.password",
+   "tags": [
+    "otp_drop"
+   ],
+   "config": "t1",
+   "channel": "sms",
+   "source": "NBE",
+   "body": "Your password is 482913",
+   "expect": {
+    "decision": "drop",
+    "reason": "otp_or_promo_global"
+   }
+  },
+  {
+   "id": "otp.en.one_time_pin",
+   "tags": [
+    "otp_drop"
+   ],
+   "config": "t1",
+   "channel": "sms",
+   "source": "CIB",
+   "body": "one time pin 482913",
+   "expect": {
+    "decision": "drop",
+    "reason": "otp_or_promo_global"
+   }
+  },
+  {
+   "id": "otp.en.3d_secure_code",
+   "tags": [
+    "otp_drop"
+   ],
+   "config": "t1",
+   "channel": "sms",
+   "source": "NBE",
+   "body": "Your 3D Secure code is 482913",
+   "expect": {
+    "decision": "drop",
+    "reason": "otp_or_promo_global"
+   }
+  },
+  {
+   "id": "otp.en.split_space",
+   "tags": [
+    "otp_drop"
+   ],
+   "config": "t1",
+   "channel": "sms",
+   "source": "NBE",
+   "body": "OTP: 48 29 13",
+   "expect": {
+    "decision": "drop",
+    "reason": "otp_or_promo_global"
+   }
+  },
+  {
+   "id": "otp.en.split_dash_after_sentence",
+   "tags": [
+    "otp_drop"
+   ],
+   "config": "t1",
+   "channel": "sms",
+   "source": "CIB",
+   "body": "Do not share. OTP: 482-913",
+   "expect": {
+    "decision": "drop",
+    "reason": "otp_or_promo_global"
+   }
+  },
+  {
+   "id": "otp.en.zero_for_o",
+   "tags": [
+    "otp_drop"
+   ],
+   "config": "t1",
+   "channel": "sms",
+   "source": "NBE",
+   "body": "0TP 482913",
+   "expect": {
+    "decision": "drop",
+    "reason": "otp_or_promo_global"
+   }
+  },
+  {
+   "id": "otp.en.code_first_dear_customer",
+   "tags": [
+    "otp_drop"
+   ],
+   "config": "t1",
+   "channel": "sms",
+   "source": "NBE",
+   "body": "Dear customer, 482913 is your verification code",
+   "expect": {
+    "decision": "drop",
+    "reason": "otp_or_promo_global"
+   }
+  },
+  {
+   "id": "otp.en.code_first_use_as",
+   "tags": [
+    "otp_drop"
+   ],
+   "config": "t1",
+   "channel": "sms",
+   "source": "CIB",
+   "body": "Use 482913 as your one-time password",
+   "expect": {
+    "decision": "drop",
+    "reason": "otp_or_promo_global"
+   }
+  },
+  {
+   "id": "otp.ar.password_hiya",
+   "tags": [
+    "otp_drop"
+   ],
+   "config": "t1",
+   "channel": "sms",
+   "source": "NBE",
+   "body": "كلمة المرور الخاصة بك هي 482913",
+   "expect": {
+    "decision": "drop",
+    "reason": "otp_or_promo_global"
+   }
+  },
+  {
+   "id": "otp.en.code_then_sentence_end",
+   "tags": [
+    "otp_drop"
+   ],
+   "config": "t1",
+   "channel": "sms",
+   "source": "NBE",
+   "body": "OTP 482913. Do not share",
+   "expect": {
+    "decision": "drop",
+    "reason": "otp_or_promo_global"
+   }
+  },
+  {
+   "id": "residual.hotline_shaped_code_kept",
+   "tags": [
+    "residual"
+   ],
+   "config": "t1",
+   "channel": "sms",
+   "source": "NBE",
+   "body": "OTP 19234 for login",
+   "expect": {
+    "decision": "keep",
+    "kind": "registry",
+    "inst": "nbe",
+    "last4": null
+   }
+  },
+  {
+   "id": "residual.long_gap_kept",
+   "tags": [
+    "residual"
+   ],
+   "config": "t1",
+   "channel": "sms",
+   "source": "NBE",
+   "body": "رمز التحقق لعملية الشراء بمبلغ 1,500.00 ج.م من SHOP X هو 482913",
+   "expect": {
+    "decision": "keep",
+    "kind": "registry",
+    "inst": "nbe",
+    "last4": null
+   }
+  },
+  {
+   "id": "residual.newline_code_after_gap_kept",
+   "tags": [
+    "residual"
+   ],
+   "config": "t1",
+   "channel": "sms",
+   "source": "NBE",
+   "body": "Your OTP for login\n482913",
+   "expect": {
+    "decision": "keep",
+    "kind": "registry",
+    "inst": "nbe",
+    "last4": null
+   }
+  },
+  {
+   "id": "residual.newline_after_lead_in_kept",
+   "tags": [
+    "residual"
+   ],
+   "config": "t1",
+   "channel": "sms",
+   "source": "NBE",
+   "body": "Your OTP for login is\n482913",
+   "expect": {
+    "decision": "keep",
+    "kind": "registry",
+    "inst": "nbe",
+    "last4": null
+   }
+  },
+  {
+   "id": "residual.keyword_split_by_newline_kept",
+   "tags": [
+    "residual"
+   ],
+   "config": "t1",
+   "channel": "sms",
+   "source": "CIB",
+   "body": "Your verification\ncode 482913",
+   "expect": {
+    "decision": "keep",
+    "kind": "registry",
+    "inst": "cib",
+    "last4": null
+   }
+  },
+  {
+   "id": "neg.newline.ref_then_pin_footer",
+   "tags": [
+    "negative"
+   ],
+   "config": "t1",
+   "channel": "sms",
+   "source": "NBE",
+   "body": "Debit EGP 100.00 at SHOP.\nRef: 482913\nPIN is never requested by the bank",
+   "expect": {
+    "decision": "keep",
+    "kind": "registry",
+    "inst": "nbe",
+    "last4": null
+   }
+  },
+  {
+   "id": "neg.newline.ref_then_password_footer",
+   "tags": [
+    "negative"
+   ],
+   "config": "t1",
+   "channel": "sms",
+   "source": "NBE",
+   "body": "Purchase EGP 100.00 at SHOP\nRef: 482913\nPassword is never requested",
+   "expect": {
+    "decision": "keep",
+    "kind": "registry",
+    "inst": "nbe",
+    "last4": null
+   }
+  },
+  {
+   "id": "neg.newline.pin_footer_then_txn",
+   "tags": [
+    "negative"
+   ],
+   "config": "t1",
+   "channel": "sms",
+   "source": "NBE",
+   "body": "Never share your PIN\nTxn: 123456\nPurchase EGP 100.00",
+   "expect": {
+    "decision": "keep",
+    "kind": "registry",
+    "inst": "nbe",
+    "last4": null
+   }
+  },
+  {
+   "id": "neg.newline.ref_then_otp_footer",
+   "tags": [
+    "negative"
+   ],
+   "config": "t1",
+   "channel": "sms",
+   "source": "NBE",
+   "body": "Transfer received EGP 500.00. Ref: 482913\nOTP never required",
+   "expect": {
+    "decision": "keep",
+    "kind": "registry",
+    "inst": "nbe",
+    "last4": null
+   }
+  },
+  {
+   "id": "neg.ar.newline.password_footer_then_ref",
+   "tags": [
+    "negative"
+   ],
+   "config": "t1",
+   "channel": "sms",
+   "source": "NBE",
+   "body": "لا تشارك كلمة المرور\nرقم المرجع: 482913\nتم خصم 300.00 جنيه",
+   "expect": {
+    "decision": "keep",
+    "kind": "registry",
+    "inst": "nbe",
+    "last4": null
+   }
+  },
+  {
+   "id": "neg.newline.otp_footer_then_balance",
+   "tags": [
+    "negative"
+   ],
+   "config": "t1",
+   "channel": "sms",
+   "source": "NBE",
+   "body": "Do not share your OTP\nAvailable balance: 23456",
+   "expect": {
+    "decision": "keep",
+    "kind": "registry",
+    "inst": "nbe",
+    "last4": null
+   }
+  },
+  {
+   "id": "neg.newline.crlf_pin_footer_then_txn",
+   "tags": [
+    "negative"
+   ],
+   "config": "t1",
+   "channel": "sms",
+   "source": "CIB",
+   "body": "Never share your PIN\r\nTxn: 123456\r\nPurchase EGP 100.00",
+   "expect": {
+    "decision": "keep",
+    "kind": "registry",
+    "inst": "cib",
+    "last4": null
+   }
+  },
+  {
+   "id": "neg.newline.line_separator",
+   "tags": [
+    "negative"
+   ],
+   "config": "t1",
+   "channel": "sms",
+   "source": "NBE",
+   "body": "Never share your OTP Ref: 482913 Debit EGP 100.00",
+   "expect": {
+    "decision": "keep",
+    "kind": "registry",
+    "inst": "nbe",
+    "last4": null
+   }
+  },
+  {
+   "id": "neg.ar.newline.otp_footer_then_ref",
+   "tags": [
+    "negative"
+   ],
+   "config": "t1",
+   "channel": "sms",
+   "source": "NBE",
+   "body": "تم خصم 250.00 جم\nلا تشارك رمز التحقق مع أي حد\nرقم العملية: 48291356",
+   "expect": {
+    "decision": "keep",
+    "kind": "registry",
+    "inst": "nbe",
+    "last4": null
+   }
+  },
+  {
+   "id": "neg.ar.newline.ref_then_pin_footer",
+   "tags": [
+    "negative"
+   ],
+   "config": "t1",
+   "channel": "sms",
+   "source": "CIB",
+   "body": "تم تحويل 500.00 جنيه. رقم العملية: 482913\nالرقم السري لا يطلب أبدا",
+   "expect": {
+    "decision": "keep",
+    "kind": "registry",
+    "inst": "cib",
+    "last4": null
+   }
+  },
+  {
+   "id": "otp.en.tight_newline_colon",
+   "tags": [
+    "otp_drop"
+   ],
+   "config": "t1",
+   "channel": "sms",
+   "source": "NBE",
+   "body": "OTP:\n482913",
+   "expect": {
+    "decision": "drop",
+    "reason": "otp_or_promo_global"
+   }
+  },
+  {
+   "id": "otp.en.tight_newline_verification_code",
+   "tags": [
+    "otp_drop"
+   ],
+   "config": "t1",
+   "channel": "sms",
+   "source": "NBE",
+   "body": "Verification code\n482913",
+   "expect": {
+    "decision": "drop",
+    "reason": "otp_or_promo_global"
+   }
+  },
+  {
+   "id": "otp.en.tight_newline_is_crlf",
+   "tags": [
+    "otp_drop"
+   ],
+   "config": "t1",
+   "channel": "sms",
+   "source": "CIB",
+   "body": "Your OTP is\r\n482913\r\nDo not share it",
+   "expect": {
+    "decision": "drop",
+    "reason": "otp_or_promo_global"
+   }
+  },
+  {
+   "id": "otp.ar.tight_newline_colon",
+   "tags": [
+    "otp_drop"
+   ],
+   "config": "t1",
+   "channel": "sms",
+   "source": "NBE",
+   "body": "رمز التحقق:\n482913",
+   "expect": {
+    "decision": "drop",
+    "reason": "otp_or_promo_global"
+   }
+  },
+  {
+   "id": "otp.ar.tight_newline_temp_password",
+   "tags": [
+    "otp_drop"
+   ],
+   "config": "t1",
+   "channel": "sms",
+   "source": "CIB",
+   "body": "كلمة المرور المؤقتة\n48291356",
+   "expect": {
+    "decision": "drop",
+    "reason": "otp_or_promo_global"
+   }
+  },
+  {
+   "id": "otp.en.code_first_after_newline",
+   "tags": [
+    "otp_drop"
+   ],
+   "config": "t1",
+   "channel": "sms",
+   "source": "NBE",
+   "body": "Login attempt\n482913 is your OTP",
+   "expect": {
+    "decision": "drop",
+    "reason": "otp_or_promo_global"
+   }
+  },
+  {
+   "id": "otp.ar.code_first_after_newline",
+   "tags": [
+    "otp_drop"
+   ],
+   "config": "t1",
+   "channel": "sms",
+   "source": "NBE",
+   "body": "محاولة دخول\n482913 هو رمز التحقق",
+   "expect": {
+    "decision": "drop",
+    "reason": "otp_or_promo_global"
+   }
+  },
+  {
+   "id": "otp.en.bare_code_newline_message_start",
+   "tags": [
+    "otp_drop"
+   ],
+   "config": "t1",
+   "channel": "sms",
+   "source": "NBE",
+   "body": "Code:\n482913",
+   "expect": {
+    "decision": "drop",
+    "reason": "otp_or_promo_global"
+   }
+  },
+  {
+   "id": "otp.en.bare_code_newline_confirm_verb",
+   "tags": [
+    "otp_drop"
+   ],
+   "config": "t1",
+   "channel": "sms",
+   "source": "CIB",
+   "body": "Use code\n482913 to confirm your payment",
+   "expect": {
+    "decision": "drop",
+    "reason": "otp_or_promo_global"
+   }
+  },
+  {
+   "id": "inst.sms_rule",
+   "tags": [
+    "inst_ignore"
+   ],
+   "config": "t1",
+   "channel": "sms",
+   "source": "BanqueMisr",
+   "body": "شراء 200.00 جم ببطاقة رقم 3344 من SHOP C",
+   "expect": {
+    "decision": "drop",
+    "reason": "ignored_institution"
+   }
+  },
+  {
+   "id": "inst.shortcut_hits_sms_rule",
+   "tags": [
+    "inst_ignore"
+   ],
+   "config": "t1",
+   "channel": "shortcut_message",
+   "source": "BanqueMisr",
+   "body": "شراء 200.00 جم ببطاقة رقم 3344 من SHOP C",
+   "expect": {
+    "decision": "drop",
+    "reason": "ignored_institution"
+   }
+  },
+  {
+   "id": "inst.channel_mismatch_keeps",
+   "tags": [
+    "inst_ignore"
+   ],
+   "config": "t1",
+   "channel": "notification",
+   "source": "com.example.bm",
+   "body": "شراء 200.00 جم ببطاقة رقم 3344 من SHOP C",
+   "expect": {
+    "decision": "keep",
+    "kind": "registry",
+    "inst": "bm",
+    "last4": "3344"
+   }
+  },
+  {
+   "id": "inst.notification_by_package",
+   "tags": [
+    "inst_ignore"
+   ],
+   "config": "t1",
+   "channel": "notification",
+   "source": "com.example.cib",
+   "body": "Purchase EGP 50.00 card *1212",
+   "expect": {
+    "decision": "drop",
+    "reason": "ignored_institution"
+   }
+  },
+  {
+   "id": "inst.notification_rule_not_sms",
+   "tags": [
+    "inst_ignore"
+   ],
+   "config": "t1",
+   "channel": "sms",
+   "source": "CIB",
+   "body": "Purchase EGP 50.00 card *1212",
+   "expect": {
+    "decision": "keep",
+    "kind": "registry",
+    "inst": "cib",
+    "last4": "1212"
+   }
+  },
+  {
+   "id": "inst.apple_pay_rule",
+   "tags": [
+    "inst_ignore"
+   ],
+   "config": "t1",
+   "channel": "apple_pay",
+   "source": "NBE Visa",
+   "body": "EGP 120.00 SHOP D",
+   "expect": {
+    "decision": "drop",
+    "reason": "ignored_institution"
+   }
+  },
+  {
+   "id": "inst.apple_pay_other_inst",
+   "tags": [
+    "inst_ignore"
+   ],
+   "config": "t1",
+   "channel": "apple_pay",
+   "source": "CIB",
+   "body": "EGP 120.00 SHOP D",
+   "expect": {
+    "decision": "keep",
+    "kind": "registry",
+    "inst": "cib",
+    "last4": null
+   }
+  },
+  {
+   "id": "inst.base_only_has_no_rules",
+   "tags": [
+    "inst_ignore"
+   ],
+   "config": "t1base",
+   "channel": "sms",
+   "source": "BanqueMisr",
+   "body": "شراء 200.00 جم ببطاقة رقم 3344 من SHOP C",
+   "expect": {
+    "decision": "keep",
+    "kind": "registry",
+    "inst": "bm",
+    "last4": "3344"
+   }
+  },
+  {
+   "id": "inst.share_never_ignored",
+   "tags": [
+    "inst_ignore"
+   ],
+   "config": "t1",
+   "channel": "share",
+   "source": "BanqueMisr",
+   "body": "شراء 200.00 جم ببطاقة رقم 3344 من SHOP C",
+   "expect": {
+    "decision": "keep",
+    "kind": "generic",
+    "inst": null,
+    "last4": null
+   }
+  },
+  {
+   "id": "card.ar_rule",
+   "tags": [
+    "card_ignore"
+   ],
+   "config": "t1",
+   "channel": "sms",
+   "source": "NBE",
+   "body": "تم خصم 450.00 جم من بطاقة رقم **4567",
+   "expect": {
+    "decision": "drop",
+    "reason": "ignored_card"
+   }
+  },
+  {
+   "id": "card.indic_last4",
+   "tags": [
+    "card_ignore"
+   ],
+   "config": "t1",
+   "channel": "sms",
+   "source": "NBE",
+   "body": "تم خصم ٤٥٠٫٠٠ جم من بطاقة **٤٥٦٧",
+   "expect": {
+    "decision": "drop",
+    "reason": "ignored_card"
+   }
+  },
+  {
+   "id": "card.xx_mask",
+   "tags": [
+    "card_ignore"
+   ],
+   "config": "t1",
+   "channel": "sms",
+   "source": "NBE",
+   "body": "Purchase EGP 10.00 card xx4567",
+   "expect": {
+    "decision": "drop",
+    "reason": "ignored_card"
+   }
+  },
+  {
+   "id": "card.ending_word",
+   "tags": [
+    "card_ignore"
+   ],
+   "config": "t1",
+   "channel": "sms",
+   "source": "NBE",
+   "body": "Purchase EGP 10.00 card ending 4567",
+   "expect": {
+    "decision": "drop",
+    "reason": "ignored_card"
+   }
+  },
+  {
+   "id": "card.ec59.other_inst",
+   "tags": [
+    "card_ignore",
+    "negative"
+   ],
+   "config": "t1",
+   "channel": "sms",
+   "source": "CIB",
+   "body": "Purchase EGP 10.00 card **4567",
+   "expect": {
+    "decision": "keep",
+    "kind": "registry",
+    "inst": "cib",
+    "last4": "4567"
+   }
+  },
+  {
+   "id": "card.ec59.other_inst_bm",
+   "tags": [
+    "card_ignore",
+    "negative"
+   ],
+   "config": "t1",
+   "channel": "notification",
+   "source": "com.example.bm",
+   "body": "شراء 10.00 جم ببطاقة رقم 4567 من SHOP E",
+   "expect": {
+    "decision": "keep",
+    "kind": "registry",
+    "inst": "bm",
+    "last4": "4567"
+   }
+  },
+  {
+   "id": "card.ec59.generic_sender",
+   "tags": [
+    "card_ignore",
+    "negative"
+   ],
+   "config": "t1",
+   "channel": "sms",
+   "source": "MyBank",
+   "body": "Debit EGP 10.00 card **4567",
+   "expect": {
+    "decision": "keep",
+    "kind": "generic",
+    "inst": null,
+    "last4": null
+   }
+  },
+  {
+   "id": "card.other_last4",
+   "tags": [
+    "card_ignore"
+   ],
+   "config": "t1",
+   "channel": "sms",
+   "source": "NBE",
+   "body": "Purchase EGP 10.00 card **2468",
+   "expect": {
+    "decision": "keep",
+    "kind": "registry",
+    "inst": "nbe",
+    "last4": "2468"
+   }
+  },
+  {
+   "id": "card.no_last4",
+   "tags": [
+    "card_ignore"
+   ],
+   "config": "t1",
+   "channel": "sms",
+   "source": "NBE",
+   "body": "تم إيداع 5000.00 جم في حسابك",
+   "expect": {
+    "decision": "keep",
+    "kind": "registry",
+    "inst": "nbe",
+    "last4": null
+   }
+  },
+  {
+   "id": "card.two_cards_first_kept",
+   "tags": [
+    "card_ignore"
+   ],
+   "config": "t1",
+   "channel": "sms",
+   "source": "NBE",
+   "body": "Transfer from card **2468 to card **4567 EGP 100.00",
+   "expect": {
+    "decision": "keep",
+    "kind": "registry",
+    "inst": "nbe",
+    "last4": "2468"
+   }
+  },
+  {
+   "id": "card.two_cards_first_ignored",
+   "tags": [
+    "card_ignore"
+   ],
+   "config": "t1",
+   "channel": "sms",
+   "source": "NBE",
+   "body": "Transfer from card **4567 to card **2468 EGP 100.00",
+   "expect": {
+    "decision": "drop",
+    "reason": "ignored_card"
+   }
+  },
+  {
+   "id": "card.cib_single_star",
+   "tags": [
+    "card_ignore"
+   ],
+   "config": "t1",
+   "channel": "sms",
+   "source": "CIB",
+   "body": "Purchase EGP 50.00 card *9910",
+   "expect": {
+    "decision": "drop",
+    "reason": "ignored_card"
+   }
+  },
+  {
+   "id": "card.regex_sender",
+   "tags": [
+    "card_ignore"
+   ],
+   "config": "t1",
+   "channel": "sms",
+   "source": "CIB-ALERT",
+   "body": "Purchase EGP 50.00 card *9910",
+   "expect": {
+    "decision": "drop",
+    "reason": "ignored_card"
+   }
+  },
+  {
+   "id": "card.shortcut_hits_sms_rule",
+   "tags": [
+    "card_ignore"
+   ],
+   "config": "t1",
+   "channel": "shortcut_message",
+   "source": "NBE",
+   "body": "Purchase EGP 10.00 card **4567",
+   "expect": {
+    "decision": "drop",
+    "reason": "ignored_card"
+   }
+  },
+  {
+   "id": "card.notification_not_sms_rule",
+   "tags": [
+    "card_ignore"
+   ],
+   "config": "t1",
+   "channel": "notification",
+   "source": "com.example.nbe",
+   "body": "Purchase EGP 10.00 card **4567",
+   "expect": {
+    "decision": "keep",
+    "kind": "registry",
+    "inst": "nbe",
+    "last4": "4567"
+   }
+  },
+  {
+   "id": "card.five_digits_not_card",
+   "tags": [
+    "card_ignore"
+   ],
+   "config": "t1",
+   "channel": "sms",
+   "source": "NBE",
+   "body": "Ref 45678 EGP 10.00",
+   "expect": {
+    "decision": "keep",
+    "kind": "registry",
+    "inst": "nbe",
+    "last4": null
+   }
+  },
+  {
+   "id": "gen.always_capture",
+   "tags": [
+    "generic_keep"
+   ],
+   "config": "t1",
+   "channel": "sms",
+   "source": "BDC-ALERT",
+   "body": "Account credited 300.00",
+   "expect": {
+    "decision": "keep",
+    "kind": "generic",
+    "inst": null,
+    "last4": null
+   }
+  },
+  {
+   "id": "gen.always_capture_folded",
+   "tags": [
+    "generic_keep"
+   ],
+   "config": "t1",
+   "channel": "sms",
+   "source": "FAWRY  PAY",
+   "body": "Paid 10.00",
+   "expect": {
+    "decision": "keep",
+    "kind": "generic",
+    "inst": null,
+    "last4": null
+   }
+  },
+  {
+   "id": "gen.user_sender",
+   "tags": [
+    "generic_keep"
+   ],
+   "config": "t1",
+   "channel": "sms",
+   "source": "MyCoop",
+   "body": "Paid 10.00",
+   "expect": {
+    "decision": "keep",
+    "kind": "user",
+    "inst": null,
+    "last4": null
+   }
+  },
+  {
+   "id": "gen.user_sender_custom_template",
+   "tags": [
+    "generic_keep"
+   ],
+   "config": "t1",
+   "channel": "sms",
+   "source": "CLUB-7",
+   "body": "Paid 10.00",
+   "expect": {
+    "decision": "keep",
+    "kind": "user",
+    "inst": null,
+    "last4": null
+   }
+  },
+  {
+   "id": "gen.user_sender_notification",
+   "tags": [
+    "generic_keep"
+   ],
+   "config": "t1",
+   "channel": "notification",
+   "source": "com.example.wallet",
+   "body": "Paid 10.00",
+   "expect": {
+    "decision": "keep",
+    "kind": "user",
+    "inst": null,
+    "last4": null
+   }
+  },
+  {
+   "id": "gen.hints_en",
+   "tags": [
+    "generic_keep"
+   ],
+   "config": "t1",
+   "channel": "sms",
+   "source": "MyBank",
+   "body": "Debit EGP 250.00 at SHOP E",
+   "expect": {
+    "decision": "keep",
+    "kind": "generic",
+    "inst": null,
+    "last4": null
+   }
+  },
+  {
+   "id": "gen.hints_ar",
+   "tags": [
+    "generic_keep"
+   ],
+   "config": "t1",
+   "channel": "sms",
+   "source": "بنك التعمير",
+   "body": "مبلغ ج.م 250 تم خصمه",
+   "expect": {
+    "decision": "keep",
+    "kind": "generic",
+    "inst": null,
+    "last4": null
+   }
+  },
+  {
+   "id": "gen.apple_pay_unknown_card",
+   "tags": [
+    "generic_keep"
+   ],
+   "config": "t1",
+   "channel": "apple_pay",
+   "source": "Some Card",
+   "body": "EGP 75.00 SHOP F",
+   "expect": {
+    "decision": "keep",
+    "kind": "generic",
+    "inst": null,
+    "last4": null
+   }
+  },
+  {
+   "id": "gen.apple_pay_tie",
+   "tags": [
+    "generic_keep"
+   ],
+   "config": "t1",
+   "channel": "apple_pay",
+   "source": "NBE CIB",
+   "body": "EGP 75.00 SHOP F",
+   "expect": {
+    "decision": "keep",
+    "kind": "generic",
+    "inst": null,
+    "last4": null
+   }
+  },
+  {
+   "id": "gen.share",
+   "tags": [
+    "generic_keep"
+   ],
+   "config": "t1",
+   "channel": "share",
+   "source": "NBE",
+   "body": "Purchase EGP 10.00 card **4567",
+   "expect": {
+    "decision": "keep",
+    "kind": "generic",
+    "inst": null,
+    "last4": null
+   }
+  },
+  {
+   "id": "gen.shortcut_unknown_sender",
+   "tags": [
+    "generic_keep"
+   ],
+   "config": "t1",
+   "channel": "shortcut_message",
+   "source": "",
+   "body": "Purchase EGP 10.00",
+   "expect": {
+    "decision": "keep",
+    "kind": "generic",
+    "inst": null,
+    "last4": null
+   }
+  },
+  {
+   "id": "reg.exact",
+   "tags": [
+    "registry_keep"
+   ],
+   "config": "t1",
+   "channel": "sms",
+   "source": "NBE",
+   "body": "Purchase EGP 10.00 card **1357",
+   "expect": {
+    "decision": "keep",
+    "kind": "registry",
+    "inst": "nbe",
+    "last4": "1357"
+   }
+  },
+  {
+   "id": "reg.exact_lowercase",
+   "tags": [
+    "registry_keep"
+   ],
+   "config": "t1",
+   "channel": "sms",
+   "source": "nbe",
+   "body": "Purchase EGP 10.00",
+   "expect": {
+    "decision": "keep",
+    "kind": "registry",
+    "inst": "nbe",
+    "last4": null
+   }
+  },
+  {
+   "id": "reg.second_sender",
+   "tags": [
+    "registry_keep"
+   ],
+   "config": "t1",
+   "channel": "sms",
+   "source": "AlAhly",
+   "body": "Purchase EGP 10.00",
+   "expect": {
+    "decision": "keep",
+    "kind": "registry",
+    "inst": "nbe",
+    "last4": null
+   }
+  },
+  {
+   "id": "reg.trimmed",
+   "tags": [
+    "registry_keep"
+   ],
+   "config": "t1",
+   "channel": "sms",
+   "source": " NBE ",
+   "body": "Purchase EGP 10.00",
+   "expect": {
+    "decision": "keep",
+    "kind": "registry",
+    "inst": "nbe",
+    "last4": null
+   }
+  },
+  {
+   "id": "reg.rlm_in_sender",
+   "tags": [
+    "registry_keep"
+   ],
+   "config": "t1",
+   "channel": "sms",
+   "source": "‏NBE",
+   "body": "Purchase EGP 10.00",
+   "expect": {
+    "decision": "keep",
+    "kind": "registry",
+    "inst": "nbe",
+    "last4": null
+   }
+  },
+  {
+   "id": "reg.regex_sender",
+   "tags": [
+    "registry_keep"
+   ],
+   "config": "t1",
+   "channel": "sms",
+   "source": "CIB-EGY",
+   "body": "Purchase EGP 10.00",
+   "expect": {
+    "decision": "keep",
+    "kind": "registry",
+    "inst": "cib",
+    "last4": null
+   }
+  },
+  {
+   "id": "reg.regex_sender_lowercase",
+   "tags": [
+    "registry_keep"
+   ],
+   "config": "t1",
+   "channel": "sms",
+   "source": "cib-egy",
+   "body": "Purchase EGP 10.00",
+   "expect": {
+    "decision": "keep",
+    "kind": "registry",
+    "inst": "cib",
+    "last4": null
+   }
+  },
+  {
+   "id": "reg.regex_sender_anchored",
+   "tags": [
+    "non_financial"
+   ],
+   "config": "t1",
+   "channel": "sms",
+   "source": "CIB-EGYPT",
+   "body": "Purchase EGP 10.00",
+   "expect": {
+    "decision": "drop",
+    "reason": "not_financial"
+   }
+  },
+  {
+   "id": "reg.package",
+   "tags": [
+    "registry_keep"
+   ],
+   "config": "t1",
+   "channel": "notification",
+   "source": "com.example.nbe",
+   "body": "Purchase EGP 10.00",
+   "expect": {
+    "decision": "keep",
+    "kind": "registry",
+    "inst": "nbe",
+    "last4": null
+   }
+  },
+  {
+   "id": "reg.package_trimmed",
+   "tags": [
+    "registry_keep"
+   ],
+   "config": "t1",
+   "channel": "notification",
+   "source": " com.example.nbe ",
+   "body": "Purchase EGP 10.00",
+   "expect": {
+    "decision": "keep",
+    "kind": "registry",
+    "inst": "nbe",
+    "last4": null
+   }
+  },
+  {
+   "id": "reg.shortcut_sender",
+   "tags": [
+    "registry_keep"
+   ],
+   "config": "t1",
+   "channel": "shortcut_message",
+   "source": "NBE",
+   "body": "Purchase EGP 10.00",
+   "expect": {
+    "decision": "keep",
+    "kind": "registry",
+    "inst": "nbe",
+    "last4": null
+   }
+  },
+  {
+   "id": "reg.apple_pay_longest",
+   "tags": [
+    "registry_keep"
+   ],
+   "config": "t1",
+   "channel": "apple_pay",
+   "source": "CIB Banque Misr",
+   "body": "EGP 75.00",
+   "expect": {
+    "decision": "keep",
+    "kind": "registry",
+    "inst": "bm",
+    "last4": null
+   }
+  },
+  {
+   "id": "reg.apple_pay_arabic_name",
+   "tags": [
+    "inst_ignore"
+   ],
+   "config": "t1",
+   "channel": "apple_pay",
+   "source": "بطاقة الأهلي",
+   "body": "EGP 75.00",
+   "expect": {
+    "decision": "drop",
+    "reason": "ignored_institution"
+   }
+  },
+  {
+   "id": "reg.apple_pay_arabic_name_base",
+   "tags": [
+    "registry_keep"
+   ],
+   "config": "t1base",
+   "channel": "apple_pay",
+   "source": "بطاقة الأهلي",
+   "body": "EGP 75.00",
+   "expect": {
+    "decision": "keep",
+    "kind": "registry",
+    "inst": "nbe",
+    "last4": null
+   }
+  },
+  {
+   "id": "reg.base_only_card_not_ignored",
+   "tags": [
+    "registry_keep"
+   ],
+   "config": "t1base",
+   "channel": "sms",
+   "source": "NBE",
+   "body": "Purchase EGP 10.00 card **4567",
+   "expect": {
+    "decision": "keep",
+    "kind": "registry",
+    "inst": "nbe",
+    "last4": "4567"
+   }
+  },
+  {
+   "id": "reg.bm_template_last4",
+   "tags": [
+    "registry_keep"
+   ],
+   "config": "t1",
+   "channel": "notification",
+   "source": "com.example.bm",
+   "body": "شراء 75.00 جم ببطاقة رقم 8642 من SHOP G",
+   "expect": {
+    "decision": "keep",
+    "kind": "registry",
+    "inst": "bm",
+    "last4": "8642"
+   }
+  }
+ ],
+ "rate": [
+  {
+   "id": "rate.burst",
+   "config": "t1base",
+   "events": [
+    {
+     "tMs": 0,
+     "channel": "sms",
+     "source": "NBE",
+     "body": "Purchase EGP 10.00",
+     "n": 21
+    }
+   ],
+   "expect": {
+    "kept": 20,
+    "rateLimited": 1,
+    "dropped": 0
+   }
+  },
+  {
+   "id": "rate.sliding_window",
+   "config": "t1base",
+   "events": [
+    {
+     "tMs": 0,
+     "channel": "sms",
+     "source": "NBE",
+     "body": "Purchase EGP 10.00",
+     "n": 20
+    },
+    {
+     "tMs": 59999,
+     "channel": "sms",
+     "source": "NBE",
+     "body": "Purchase EGP 10.00",
+     "n": 1
+    },
+    {
+     "tMs": 60000,
+     "channel": "sms",
+     "source": "NBE",
+     "body": "Purchase EGP 10.00",
+     "n": 1
+    }
+   ],
+   "expect": {
+    "kept": 21,
+    "rateLimited": 1,
+    "dropped": 0
+   }
+  },
+  {
+   "id": "rate.per_sender",
+   "config": "t1base",
+   "events": [
+    {
+     "tMs": 0,
+     "channel": "sms",
+     "source": "NBE",
+     "body": "Purchase EGP 10.00",
+     "n": 20
+    },
+    {
+     "tMs": 0,
+     "channel": "sms",
+     "source": "CIB",
+     "body": "Purchase EGP 10.00",
+     "n": 20
+    }
+   ],
+   "expect": {
+    "kept": 40,
+    "rateLimited": 0,
+    "dropped": 0
+   }
+  },
+  {
+   "id": "rate.folded_source_is_one_sender",
+   "config": "t1base",
+   "events": [
+    {
+     "tMs": 0,
+     "channel": "sms",
+     "source": "NBE",
+     "body": "Purchase EGP 10.00",
+     "n": 10
+    },
+    {
+     "tMs": 0,
+     "channel": "sms",
+     "source": "nbe",
+     "body": "Purchase EGP 10.00",
+     "n": 11
+    }
+   ],
+   "expect": {
+    "kept": 20,
+    "rateLimited": 1,
+    "dropped": 0
+   }
+  },
+  {
+   "id": "rate.per_channel",
+   "config": "t1base",
+   "events": [
+    {
+     "tMs": 0,
+     "channel": "sms",
+     "source": "NBE",
+     "body": "Purchase EGP 10.00",
+     "n": 20
+    },
+    {
+     "tMs": 0,
+     "channel": "shortcut_message",
+     "source": "NBE",
+     "body": "Purchase EGP 10.00",
+     "n": 20
+    }
+   ],
+   "expect": {
+    "kept": 40,
+    "rateLimited": 0,
+    "dropped": 0
+   }
+  },
+  {
+   "id": "rate.drops_not_counted",
+   "config": "t1base",
+   "events": [
+    {
+     "tMs": 0,
+     "channel": "sms",
+     "source": "NBE",
+     "body": "Your OTP is 482913",
+     "n": 25
+    },
+    {
+     "tMs": 1,
+     "channel": "sms",
+     "source": "NBE",
+     "body": "Purchase EGP 10.00",
+     "n": 20
+    }
+   ],
+   "expect": {
+    "kept": 20,
+    "rateLimited": 0,
+    "dropped": 25
+   }
+  }
+ ],
+ "modes": [
+  {
+   "id": "base.alone",
+   "base": "configs/t1_base.json",
+   "user": null,
+   "expect": "baseOnly",
+   "userError": false
+  },
+  {
+   "id": "user.valid",
+   "base": "configs/t1_base.json",
+   "user": "configs/t1_user.json",
+   "expect": "full",
+   "userError": false
+  },
+  {
+   "id": "user.malformed",
+   "base": "configs/t1_base.json",
+   "user": "configs/bad_user.json",
+   "expect": "baseOnly",
+   "userError": true
+  },
+  {
+   "id": "user.unknown_version",
+   "base": "configs/t1_base.json",
+   "user": "configs/user_v2.json",
+   "expect": "baseOnly",
+   "userError": true
+  },
+  {
+   "id": "user.last4_without_inst",
+   "base": "configs/t1_base.json",
+   "user": "configs/user_last4_only.json",
+   "expect": "baseOnly",
+   "userError": true
+  },
+  {
+   "id": "user.indic_last4",
+   "base": "configs/t1_base.json",
+   "user": "configs/user_indic_last4.json",
+   "expect": "baseOnly",
+   "userError": true
+  },
+  {
+   "id": "user.unknown_key",
+   "base": "configs/t1_base.json",
+   "user": "configs/user_unknown_key.json",
+   "expect": "baseOnly",
+   "userError": true
+  },
+  {
+   "id": "user.older_registry_version",
+   "base": "configs/t1_base.json",
+   "user": "configs/user_old_registry.json",
+   "expect": "full",
+   "userError": false
+  },
+  {
+   "id": "base.old_version",
+   "base": "configs/base_v3.json",
+   "user": "configs/t1_user.json",
+   "expect": "invalid",
+   "userError": false
+  },
+  {
+   "id": "base.bad_regex",
+   "base": "configs/base_bad_regex.json",
+   "user": "configs/t1_user.json",
+   "expect": "invalid",
+   "userError": false
+  },
+  {
+   "id": "base.missing_key",
+   "base": "configs/base_missing_rate.json",
+   "user": null,
+   "expect": "invalid",
+   "userError": false
+  },
+  {
+   "id": "base.not_utf8",
+   "base": "configs/base_not_utf8.json",
+   "user": null,
+   "expect": "invalid",
+   "userError": false
+  }
+ ]
+}
