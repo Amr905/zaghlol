@@ -1,5 +1,417 @@
 ﻿== SUMMARY ==
-RUNNING sha=d71dc11b8a3e638dfed64b9a57dd63e3298de7d9
+FAIL sha=d71dc11b8a3e638dfed64b9a57dd63e3298de7d9 pipeline=quick-backend dotnet-build=0 dotnet-format=0 dotnet-test=1
+dotnet-build                 PASS  exit=0  68s
+dotnet-format                PASS  exit=0  50s
+dotnet-test                  FAIL  exit=1  122s
+
+== ERRORS: dotnet-test ==
+  Failed Zaghlol.Infrastructure.Tests.Purchases.PurchaseStoreTests.OnlyOneSweeperHoldsTheLockAcrossInstances [175 ms]
+  Error Message:
+   System.InvalidOperationException : Connection is not open
+  Stack Trace:
+     at Npgsql.ThrowHelper.ThrowInvalidOperationException(String message)
+   at Npgsql.NpgsqlCommand.CheckAndGetConnection()
+   at Npgsql.NpgsqlCommand.ExecuteReader(Boolean async, CommandBehavior behavior, CancellationToken cancellationToken)
+   at Npgsql.NpgsqlCommand.ExecuteScalar(Boolean async, CancellationToken cancellationToken)
+   at Zaghlol.Infrastructure.Purchases.PlayAckSweepStore.SessionLock.DisposeAsync() in /_/backend/src/Zaghlol.Infrastructure/Purchases/PlayAckSweepStore.cs:line 190
+   at Zaghlol.Infrastructure.Purchases.PlayAckSweepStore.SessionLock.DisposeAsync() in /_/backend/src/Zaghlol.Infrastructure/Purchases/PlayAckSweepStore.cs:line 190
+   at Zaghlol.Infrastructure.Purchases.PlayAckSweepStore.SessionLock.DisposeAsync() in /_/backend/src/Zaghlol.Infrastructure/Purchases/PlayAckSweepStore.cs:line 194
+   at Zaghlol.Infrastructure.Tests.Purchases.PurchaseStoreTests.OnlyOneSweeperHoldsTheLockAcrossInstances() in /_/backend/tests/Zaghlol.Infrastructure.Tests/Purchases/PurchaseStoreTests.cs:line 159
+--- End of stack trace from previous location ---
+
+  Failed Zaghlol.Contract.Tests.VerifyLiveContractTests.TheSpecTokenLimitMatchesTheServerAndTheStoreKeyColumn [5 ms]
+  Error Message:
+   System.InvalidOperationException : A value of type 'System.Int64' cannot be converted to a 'System.Int32'.
+  Stack Trace:
+     at System.Text.Json.ThrowHelper.ThrowInvalidOperationException_NodeUnableToConvert(Type sourceType, Type destinationType)
+   at System.Text.Json.Nodes.JsonValue`1.GetValue[T]()
+   at Zaghlol.Contract.Tests.VerifyLiveContractTests.TheSpecTokenLimitMatchesTheServerAndTheStoreKeyColumn() in /_/backend/tests/Zaghlol.Contract.Tests/VerifyLiveContractTests.cs:line 157
+   at System.RuntimeMethodHandle.InvokeMethod(ObjectHandleOnStack target, Void** arguments, ObjectHandleOnStack sig, BOOL isConstructor, ObjectHandleOnStack result)
+   at System.RuntimeMethodHandle.InvokeMethod(ObjectHandleOnStack target, Void** arguments, ObjectHandleOnStack sig, BOOL isConstructor, ObjectHandleOnStack result)
+   at System.Reflection.MethodBaseInvoker.InterpretedInvoke_Method(Object obj, IntPtr* args)
+   at System.Reflection.RuntimeMethodInfo.Invoke(Object obj, BindingFlags invokeAttr, Binder binder, Object[] parameters, CultureInfo culture)
+[xUnit.net 00:00:46.67]     Zaghlol.Infrastructure.Tests.CheckConstraintTests.EveryCheckConstraintInTheSchemaHasANegativeCase [FAIL]
+  Failed Zaghlol.Infrastructure.Tests.CheckConstraintTests.EveryCheckConstraintInTheSchemaHasANegativeCase [9 ms]
+
+  Failed Zaghlol.Infrastructure.Tests.CheckConstraintTests.EveryCheckConstraintInTheSchemaHasANegativeCase [9 ms]
+  Error Message:
+   Assert.Equal() Failure: Values differ
+Expected: 50
+Actual:   52
+  Stack Trace:
+     at Zaghlol.Infrastructure.Tests.CheckConstraintTests.EveryCheckConstraintInTheSchemaHasANegativeCase() in /_/backend/tests/Zaghlol.Infrastructure.Tests/CheckConstraintTests.cs:line 215
+--- End of stack trace from previous location ---
+
+Failed!  - Failed:     1, Passed:   120, Skipped:     0, Total:   121, Duration: 45 s - Zaghlol.Contract.Tests.dll (net10.0)
+
+Failed!  - Failed:     2, Passed:   662, Skipped:     0, Total:   664, Duration: 59 s - Zaghlol.Infrastructure.Tests.dll (net10.0)
+[xUnit.net 00:01:37.52]     Zaghlol.Api.Tests.Purchases.PurchaseVerifyEndpointTests.APlayFailureIs502StoreUnavailableAndARetryRunsAgain(status: 403) [FAIL]
+
+  Failed Zaghlol.Api.Tests.Purchases.PurchaseVerifyEndpointTests.APlayFailureIs502StoreUnavailableAndARetryRunsAgain(status: 403) [21 ms]
+  Error Message:
+   Assert.True() Failure
+Expected: True
+Actual:   False
+  Stack Trace:
+     at Zaghlol.Api.Tests.Purchases.PurchaseVerifyEndpointTests.APlayFailureIs502StoreUnavailableAndARetryRunsAgain(Int32 status) in /_/backend/tests/Zaghlol.Api.Tests/Purchases/PurchaseVerifyEndpointTests.cs:line 226
+--- End of stack trace from previous location ---
+  Failed Zaghlol.Api.Tests.Purchases.PurchaseVerifyEndpointTests.APlayFailureIs502StoreUnavailableAndARetryRunsAgain(status: 401) [18 ms]
+  Error Message:
+   Assert.True() Failure
+Expected: True
+Actual:   False
+
+  Failed Zaghlol.Api.Tests.Purchases.PurchaseVerifyEndpointTests.APlayFailureIs502StoreUnavailableAndARetryRunsAgain(status: 401) [18 ms]
+  Error Message:
+   Assert.True() Failure
+Expected: True
+Actual:   False
+  Stack Trace:
+     at Zaghlol.Api.Tests.Purchases.PurchaseVerifyEndpointTests.APlayFailureIs502StoreUnavailableAndARetryRunsAgain(Int32 status) in /_/backend/tests/Zaghlol.Api.Tests/Purchases/PurchaseVerifyEndpointTests.cs:line 226
+--- End of stack trace from previous location ---
+  Failed Zaghlol.Api.Tests.Purchases.PurchaseVerifyEndpointTests.AnUpgradeRecordsItsPredecessorAndNeverTouchesIt [15 ms]
+  Error Message:
+   System.InvalidOperationException : Nullable object must have a value.
+  Stack Trace:
+     at System.Nullable`1.get_Value()
+
+  Failed Zaghlol.Api.Tests.Purchases.PurchaseVerifyEndpointTests.AnUpgradeRecordsItsPredecessorAndNeverTouchesIt [15 ms]
+  Error Message:
+   System.InvalidOperationException : Nullable object must have a value.
+  Stack Trace:
+     at System.Nullable`1.get_Value()
+   at Zaghlol.Api.Tests.Purchases.PurchaseVerifyEndpointTests.AnUpgradeRecordsItsPredecessorAndNeverTouchesIt() in /_/backend/tests/Zaghlol.Api.Tests/Purchases/PurchaseVerifyEndpointTests.cs:line 315
+--- End of stack trace from previous location ---
+  Failed Zaghlol.Api.Tests.Purchases.PurchaseVerifyEndpointTests.ATokenPlayRejectsIsAFinal422TokenInvalidThatIsReplayed(status: 400) [19 ms]
+  Error Message:
+   expected 422, got 502: {"type":"https://tools.ietf.org/html/rfc9110#section-15.6.3","title":"Bad Gateway","status":502,"code":"STORE_UNAVAILABLE","retryAfterSeconds":30,"traceId":"00-c9be9b37399c8b78f0549749c209d432-6d380efe03ba03c8-00","correlationId":"c9be9b37399c8b78f0549749c209d432"}
+  Stack Trace:
+     at Zaghlol.Api.Tests.Installs.Problems.AssertAsync(HttpResponseMessage response, HttpStatusCode status, String code) in /_/backend/tests/Zaghlol.Api.Tests/Installs/RegistrationTests.cs:line 255
+   at Zaghlol.Api.Tests.Purchases.PurchaseVerifyEndpointTests.ATokenPlayRejectsIsAFinal422TokenInvalidThatIsReplayed(Int32 status) in /_/backend/tests/Zaghlol.Api.Tests/Purchases/PurchaseVerifyEndpointTests.cs:line 39
+
+  Failed Zaghlol.Api.Tests.Purchases.PurchaseVerifyEndpointTests.ATokenPlayRejectsIsAFinal422TokenInvalidThatIsReplayed(status: 400) [19 ms]
+  Error Message:
+   expected 422, got 502: {"type":"https://tools.ietf.org/html/rfc9110#section-15.6.3","title":"Bad Gateway","status":502,"code":"STORE_UNAVAILABLE","retryAfterSeconds":30,"traceId":"00-c9be9b37399c8b78f0549749c209d432-6d380efe03ba03c8-00","correlationId":"c9be9b37399c8b78f0549749c209d432"}
+  Stack Trace:
+     at Zaghlol.Api.Tests.Installs.Problems.AssertAsync(HttpResponseMessage response, HttpStatusCode status, String code) in /_/backend/tests/Zaghlol.Api.Tests/Installs/RegistrationTests.cs:line 255
+   at Zaghlol.Api.Tests.Purchases.PurchaseVerifyEndpointTests.ATokenPlayRejectsIsAFinal422TokenInvalidThatIsReplayed(Int32 status) in /_/backend/tests/Zaghlol.Api.Tests/Purchases/PurchaseVerifyEndpointTests.cs:line 39
+--- End of stack trace from previous location ---
+  Failed Zaghlol.Api.Tests.Purchases.PurchaseVerifyEndpointTests.ATokenPlayRejectsIsAFinal422TokenInvalidThatIsReplayed(status: 404) [17 ms]
+  Error Message:
+   expected 422, got 502: {"type":"https://tools.ietf.org/html/rfc9110#section-15.6.3","title":"Bad Gateway","status":502,"code":"STORE_UNAVAILABLE","retryAfterSeconds":30,"traceId":"00-3a6a2d5242c4f51b219ff2b2be25c1d8-f6f3987224598527-00","correlationId":"3a6a2d5242c4f51b219ff2b2be25c1d8"}
+  Stack Trace:
+     at Zaghlol.Api.Tests.Installs.Problems.AssertAsync(HttpResponseMessage response, HttpStatusCode status, String code) in /_/backend/tests/Zaghlol.Api.Tests/Installs/RegistrationTests.cs:line 255
+   at Zaghlol.Api.Tests.Purchases.PurchaseVerifyEndpointTests.ATokenPlayRejectsIsAFinal422TokenInvalidThatIsReplayed(Int32 status) in /_/backend/tests/Zaghlol.Api.Tests/Purchases/PurchaseVerifyEndpointTests.cs:line 39
+
+  Failed Zaghlol.Api.Tests.Purchases.PurchaseVerifyEndpointTests.ATokenPlayRejectsIsAFinal422TokenInvalidThatIsReplayed(status: 404) [17 ms]
+  Error Message:
+   expected 422, got 502: {"type":"https://tools.ietf.org/html/rfc9110#section-15.6.3","title":"Bad Gateway","status":502,"code":"STORE_UNAVAILABLE","retryAfterSeconds":30,"traceId":"00-3a6a2d5242c4f51b219ff2b2be25c1d8-f6f3987224598527-00","correlationId":"3a6a2d5242c4f51b219ff2b2be25c1d8"}
+  Stack Trace:
+     at Zaghlol.Api.Tests.Installs.Problems.AssertAsync(HttpResponseMessage response, HttpStatusCode status, String code) in /_/backend/tests/Zaghlol.Api.Tests/Installs/RegistrationTests.cs:line 255
+   at Zaghlol.Api.Tests.Purchases.PurchaseVerifyEndpointTests.ATokenPlayRejectsIsAFinal422TokenInvalidThatIsReplayed(Int32 status) in /_/backend/tests/Zaghlol.Api.Tests/Purchases/PurchaseVerifyEndpointTests.cs:line 39
+--- End of stack trace from previous location ---
+  Failed Zaghlol.Api.Tests.Purchases.PurchaseVerifyEndpointTests.ATokenPlayRejectsIsAFinal422TokenInvalidThatIsReplayed(status: 410) [17 ms]
+  Error Message:
+   expected 422, got 502: {"type":"https://tools.ietf.org/html/rfc9110#section-15.6.3","title":"Bad Gateway","status":502,"code":"STORE_UNAVAILABLE","retryAfterSeconds":30,"traceId":"00-ccf2a22df8ed4b7f8439fb1f61aa488c-c19002e9df92240f-00","correlationId":"ccf2a22df8ed4b7f8439fb1f61aa488c"}
+  Stack Trace:
+     at Zaghlol.Api.Tests.Installs.Problems.AssertAsync(HttpResponseMessage response, HttpStatusCode status, String code) in /_/backend/tests/Zaghlol.Api.Tests/Installs/RegistrationTests.cs:line 255
+   at Zaghlol.Api.Tests.Purchases.PurchaseVerifyEndpointTests.ATokenPlayRejectsIsAFinal422TokenInvalidThatIsReplayed(Int32 status) in /_/backend/tests/Zaghlol.Api.Tests/Purchases/PurchaseVerifyEndpointTests.cs:line 39
+
+  Failed Zaghlol.Api.Tests.Purchases.PurchaseVerifyEndpointTests.ATokenPlayRejectsIsAFinal422TokenInvalidThatIsReplayed(status: 410) [17 ms]
+  Error Message:
+   expected 422, got 502: {"type":"https://tools.ietf.org/html/rfc9110#section-15.6.3","title":"Bad Gateway","status":502,"code":"STORE_UNAVAILABLE","retryAfterSeconds":30,"traceId":"00-ccf2a22df8ed4b7f8439fb1f61aa488c-c19002e9df92240f-00","correlationId":"ccf2a22df8ed4b7f8439fb1f61aa488c"}
+  Stack Trace:
+     at Zaghlol.Api.Tests.Installs.Problems.AssertAsync(HttpResponseMessage response, HttpStatusCode status, String code) in /_/backend/tests/Zaghlol.Api.Tests/Installs/RegistrationTests.cs:line 255
+   at Zaghlol.Api.Tests.Purchases.PurchaseVerifyEndpointTests.ATokenPlayRejectsIsAFinal422TokenInvalidThatIsReplayed(Int32 status) in /_/backend/tests/Zaghlol.Api.Tests/Purchases/PurchaseVerifyEndpointTests.cs:line 39
+--- End of stack trace from previous location ---
+[xUnit.net 00:01:37.69]     Zaghlol.Api.Tests.Purchases.PurchaseVerifyEndpointTests.ATokenBoundToAnotherInstallOrToNoneIsNotOwnedAndNothingIsWritten [FAIL]
+[xUnit.net 00:01:37.72]     Zaghlol.Api.Tests.Purchases.PurchaseVerifyEndpointTests.AnActiveAnswerIsSignedEchoesTheNonceAndIsReplayedWithoutAnotherPlayCall [FAIL]
+[xUnit.net 00:01:37.74]     Zaghlol.Api.Tests.Purchases.PurchaseVerifyEndpointTests.AnotherProductsTokenIsTokenInvalid [FAIL]
+  Failed Zaghlol.Api.Tests.Purchases.PurchaseVerifyEndpointTests.ATokenBoundToAnotherInstallOrToNoneIsNotOwnedAndNothingIsWritten [21 ms]
+  Error Message:
+   expected 422, got 502: {"type":"https://tools.ietf.org/html/rfc9110#section-15.6.3","title":"Bad Gateway","status":502,"code":"STORE_UNAVAILABLE","retryAfterSeconds":30,"traceId":"00-1159963af13d80f5be61dd6b3e65ff62-6a2777296a7043c6-00","correlationId":"1159963af13d80f5be61dd6b3e65ff62"}
+
+  Failed Zaghlol.Api.Tests.Purchases.PurchaseVerifyEndpointTests.ATokenBoundToAnotherInstallOrToNoneIsNotOwnedAndNothingIsWritten [21 ms]
+  Error Message:
+   expected 422, got 502: {"type":"https://tools.ietf.org/html/rfc9110#section-15.6.3","title":"Bad Gateway","status":502,"code":"STORE_UNAVAILABLE","retryAfterSeconds":30,"traceId":"00-1159963af13d80f5be61dd6b3e65ff62-6a2777296a7043c6-00","correlationId":"1159963af13d80f5be61dd6b3e65ff62"}
+  Stack Trace:
+     at Zaghlol.Api.Tests.Installs.Problems.AssertAsync(HttpResponseMessage response, HttpStatusCode status, String code) in /_/backend/tests/Zaghlol.Api.Tests/Installs/RegistrationTests.cs:line 255
+   at Zaghlol.Api.Tests.Purchases.PurchaseVerifyEndpointTests.ATokenBoundToAnotherInstallOrToNoneIsNotOwnedAndNothingIsWritten() in /_/backend/tests/Zaghlol.Api.Tests/Purchases/PurchaseVerifyEndpointTests.cs:line 71
+--- End of stack trace from previous location ---
+  Failed Zaghlol.Api.Tests.Purchases.PurchaseVerifyEndpointTests.AnActiveAnswerIsSignedEchoesTheNonceAndIsReplayedWithoutAnotherPlayCall [20 ms]
+  Error Message:
+   Assert.Equal() Failure: Values differ
+Expected: OK
+Actual:   BadGateway
+  Stack Trace:
+
+  Failed Zaghlol.Api.Tests.Purchases.PurchaseVerifyEndpointTests.AnActiveAnswerIsSignedEchoesTheNonceAndIsReplayedWithoutAnotherPlayCall [20 ms]
+  Error Message:
+   Assert.Equal() Failure: Values differ
+Expected: OK
+Actual:   BadGateway
+  Stack Trace:
+     at Zaghlol.Api.Tests.Purchases.PurchaseVerifyEndpointTests.AnActiveAnswerIsSignedEchoesTheNonceAndIsReplayedWithoutAnotherPlayCall() in /_/backend/tests/Zaghlol.Api.Tests/Purchases/PurchaseVerifyEndpointTests.cs:line 268
+--- End of stack trace from previous location ---
+  Failed Zaghlol.Api.Tests.Purchases.PurchaseVerifyEndpointTests.AnotherProductsTokenIsTokenInvalid [13 ms]
+  Error Message:
+   expected 422, got 502: {"type":"https://tools.ietf.org/html/rfc9110#section-15.6.3","title":"Bad Gateway","status":502,"code":"STORE_UNAVAILABLE","retryAfterSeconds":30,"traceId":"00-55ea4cbf35cfd726271a47600b8df0a5-adf53a5b375f00d3-00","correlationId":"55ea4cbf35cfd726271a47600b8df0a5"}
+  Stack Trace:
+     at Zaghlol.Api.Tests.Installs.Problems.AssertAsync(HttpResponseMessage response, HttpStatusCode status, String code) in /_/backend/tests/Zaghlol.Api.Tests/Installs/RegistrationTests.cs:line 255
+
+  Failed Zaghlol.Api.Tests.Purchases.PurchaseVerifyEndpointTests.AnotherProductsTokenIsTokenInvalid [13 ms]
+  Error Message:
+   expected 422, got 502: {"type":"https://tools.ietf.org/html/rfc9110#section-15.6.3","title":"Bad Gateway","status":502,"code":"STORE_UNAVAILABLE","retryAfterSeconds":30,"traceId":"00-55ea4cbf35cfd726271a47600b8df0a5-adf53a5b375f00d3-00","correlationId":"55ea4cbf35cfd726271a47600b8df0a5"}
+  Stack Trace:
+     at Zaghlol.Api.Tests.Installs.Problems.AssertAsync(HttpResponseMessage response, HttpStatusCode status, String code) in /_/backend/tests/Zaghlol.Api.Tests/Installs/RegistrationTests.cs:line 255
+   at Zaghlol.Api.Tests.Purchases.PurchaseVerifyEndpointTests.AnotherProductsTokenIsTokenInvalid() in /_/backend/tests/Zaghlol.Api.Tests/Purchases/PurchaseVerifyEndpointTests.cs:line 54
+--- End of stack trace from previous location ---
+[xUnit.net 00:01:37.94]     Zaghlol.Api.Tests.Purchases.PurchaseVerifyEndpointTests.AFailedInlineAcknowledgeStillAnswersActiveAndTheSweeperAcknowledgesOnce [FAIL]
+[xUnit.net 00:01:37.97]     Zaghlol.Api.Tests.Purchases.PurchaseVerifyEndpointTests.APendingPurchaseGrantsNothingAndIsNeverAcknowledged [FAIL]
+[xUnit.net 00:01:38.28]     Zaghlol.Api.Tests.Purchases.PurchaseVerifyEndpointTests.TheSameKeyRunningTwiceGivesOne200AndOne429 [FAIL]
+  Failed Zaghlol.Api.Tests.Purchases.PurchaseVerifyEndpointTests.AFailedInlineAcknowledgeStillAnswersActiveAndTheSweeperAcknowledgesOnce [16 ms]
+  Error Message:
+   Assert.Equal() Failure: Values differ
+
+  Failed Zaghlol.Api.Tests.Purchases.PurchaseVerifyEndpointTests.AFailedInlineAcknowledgeStillAnswersActiveAndTheSweeperAcknowledgesOnce [16 ms]
+  Error Message:
+   Assert.Equal() Failure: Values differ
+Expected: OK
+Actual:   BadGateway
+  Stack Trace:
+     at Zaghlol.Api.Tests.Purchases.PurchaseVerifyEndpointTests.AFailedInlineAcknowledgeStillAnswersActiveAndTheSweeperAcknowledgesOnce() in /_/backend/tests/Zaghlol.Api.Tests/Purchases/PurchaseVerifyEndpointTests.cs:line 135
+--- End of stack trace from previous location ---
+  Failed Zaghlol.Api.Tests.Purchases.PurchaseVerifyEndpointTests.APendingPurchaseGrantsNothingAndIsNeverAcknowledged [21 ms]
+  Error Message:
+   Assert.Equal() Failure: Values differ
+Expected: OK
+Actual:   BadGateway
+
+  Failed Zaghlol.Api.Tests.Purchases.PurchaseVerifyEndpointTests.APendingPurchaseGrantsNothingAndIsNeverAcknowledged [21 ms]
+  Error Message:
+   Assert.Equal() Failure: Values differ
+Expected: OK
+Actual:   BadGateway
+  Stack Trace:
+     at Zaghlol.Api.Tests.Purchases.PurchaseVerifyEndpointTests.APendingPurchaseGrantsNothingAndIsNeverAcknowledged() in /_/backend/tests/Zaghlol.Api.Tests/Purchases/PurchaseVerifyEndpointTests.cs:line 110
+--- End of stack trace from previous location ---
+  Failed Zaghlol.Api.Tests.Purchases.PurchaseVerifyEndpointTests.TheSameKeyRunningTwiceGivesOne200AndOne429 [315 ms]
+  Error Message:
+   Assert.Equal() Failure: Values differ
+Expected: OK
+Actual:   BadGateway
+
+  Failed Zaghlol.Api.Tests.Purchases.PurchaseVerifyEndpointTests.TheSameKeyRunningTwiceGivesOne200AndOne429 [315 ms]
+  Error Message:
+   Assert.Equal() Failure: Values differ
+Expected: OK
 
 == FULL LOG (last 1500 lines) ==
 auto task/T-130-play-verify d71dc11b8a3e638dfed64b9a57dd63e3298de7d9 2026-11-11T02:35:20.2356018+02:00
+
+
+
+[02:35:27] === STEP dotnet-build (docker mcr.microsoft.com/dotnet/sdk:10.0.402, /work/backend)
+  Determining projects to restore...
+  Restored /work/backend/src/Zaghlol.Domain/Zaghlol.Domain.csproj (in 804 ms).
+  Restored /work/backend/src/Zaghlol.Ops/Zaghlol.Ops.csproj (in 804 ms).
+  Restored /work/backend/src/Zaghlol.Application/Zaghlol.Application.csproj (in 2.58 sec).
+  Restored /work/backend/tests/Zaghlol.Ops.Tests/Zaghlol.Ops.Tests.csproj (in 2.69 sec).
+  Restored /work/backend/tests/Zaghlol.Application.Tests/Zaghlol.Application.Tests.csproj (in 2.69 sec).
+  Restored /work/backend/src/Zaghlol.Workers/Zaghlol.Workers.csproj (in 12.25 sec).
+  Restored /work/backend/src/Zaghlol.Infrastructure/Zaghlol.Infrastructure.csproj (in 12.27 sec).
+  Restored /work/backend/tests/Zaghlol.Workers.Tests/Zaghlol.Workers.Tests.csproj (in 12.26 sec).
+  Restored /work/backend/src/Zaghlol.Api/Zaghlol.Api.csproj (in 12.32 sec).
+  Restored /work/backend/tests/Zaghlol.Infrastructure.Tests/Zaghlol.Infrastructure.Tests.csproj (in 13.26 sec).
+  Restored /work/backend/tests/Zaghlol.Api.Tests/Zaghlol.Api.Tests.csproj (in 13.35 sec).
+  Restored /work/backend/tests/Zaghlol.Contract.Tests/Zaghlol.Contract.Tests.csproj (in 13.35 sec).
+  Zaghlol.Domain -> /work/backend/src/Zaghlol.Domain/bin/Release/net10.0/Zaghlol.Domain.dll
+  Zaghlol.Ops -> /work/backend/src/Zaghlol.Ops/bin/Release/net10.0/zaghlol-ops.dll
+  Zaghlol.Ops.Tests -> /work/backend/tests/Zaghlol.Ops.Tests/bin/Release/net10.0/Zaghlol.Ops.Tests.dll
+  Zaghlol.Application -> /work/backend/src/Zaghlol.Application/bin/Release/net10.0/Zaghlol.Application.dll
+  Zaghlol.Application.Tests -> /work/backend/tests/Zaghlol.Application.Tests/bin/Release/net10.0/Zaghlol.Application.Tests.dll
+  Zaghlol.Infrastructure -> /work/backend/src/Zaghlol.Infrastructure/bin/Release/net10.0/Zaghlol.Infrastructure.dll
+  Zaghlol.Workers -> /work/backend/src/Zaghlol.Workers/bin/Release/net10.0/Zaghlol.Workers.dll
+  Zaghlol.Infrastructure.Tests -> /work/backend/tests/Zaghlol.Infrastructure.Tests/bin/Release/net10.0/Zaghlol.Infrastructure.Tests.dll
+  Zaghlol.Workers.Tests -> /work/backend/tests/Zaghlol.Workers.Tests/bin/Release/net10.0/Zaghlol.Workers.Tests.dll
+  Zaghlol.Api -> /work/backend/src/Zaghlol.Api/bin/Release/net10.0/Zaghlol.Api.dll
+  Zaghlol.Contract.Tests -> /work/backend/tests/Zaghlol.Contract.Tests/bin/Release/net10.0/Zaghlol.Contract.Tests.dll
+  Zaghlol.Api.Tests -> /work/backend/tests/Zaghlol.Api.Tests/bin/Release/net10.0/Zaghlol.Api.Tests.dll
+
+Build succeeded.
+    0 Warning(s)
+    0 Error(s)
+
+Time Elapsed 00:01:06.26
+
+[02:36:35] === RESULT dotnet-build exit=0 (68s)
+[02:36:35] === STEP dotnet-format (docker mcr.microsoft.com/dotnet/sdk:10.0.402, /work/backend)
+Formatting code files in workspace '/work/backend/Zaghlol.sln'.
+Format complete in 48507ms.
+
+[02:37:24] === RESULT dotnet-format exit=0 (50s)
+[02:37:24] === STEP dotnet-test (docker mcr.microsoft.com/dotnet/sdk:10.0.402, /work/backend)
+Test run for /work/backend/tests/Zaghlol.Workers.Tests/bin/Release/net10.0/Zaghlol.Workers.Tests.dll (.NETCoreApp,Version=v10.0)
+Test run for /work/backend/tests/Zaghlol.Ops.Tests/bin/Release/net10.0/Zaghlol.Ops.Tests.dll (.NETCoreApp,Version=v10.0)
+Test run for /work/backend/tests/Zaghlol.Application.Tests/bin/Release/net10.0/Zaghlol.Application.Tests.dll (.NETCoreApp,Version=v10.0)
+Test run for /work/backend/tests/Zaghlol.Api.Tests/bin/Release/net10.0/Zaghlol.Api.Tests.dll (.NETCoreApp,Version=v10.0)
+Test run for /work/backend/tests/Zaghlol.Contract.Tests/bin/Release/net10.0/Zaghlol.Contract.Tests.dll (.NETCoreApp,Version=v10.0)
+Test run for /work/backend/tests/Zaghlol.Infrastructure.Tests/bin/Release/net10.0/Zaghlol.Infrastructure.Tests.dll (.NETCoreApp,Version=v10.0)
+A total of 1 test files matched the specified pattern.
+A total of 1 test files matched the specified pattern.
+A total of 1 test files matched the specified pattern.
+A total of 1 test files matched the specified pattern.
+A total of 1 test files matched the specified pattern.
+A total of 1 test files matched the specified pattern.
+
+Passed!  - Failed:     0, Passed:     2, Skipped:     0, Total:     2, Duration: 309 ms - Zaghlol.Ops.Tests.dll (net10.0)
+
+Passed!  - Failed:     0, Passed:    22, Skipped:     0, Total:    22, Duration: 585 ms - Zaghlol.Workers.Tests.dll (net10.0)
+
+Passed!  - Failed:     0, Passed:   512, Skipped:     0, Total:   512, Duration: 2 s - Zaghlol.Application.Tests.dll (net10.0)
+[xUnit.net 00:00:35.40]     Zaghlol.Infrastructure.Tests.Purchases.PurchaseStoreTests.OnlyOneSweeperHoldsTheLockAcrossInstances [FAIL]
+  Failed Zaghlol.Infrastructure.Tests.Purchases.PurchaseStoreTests.OnlyOneSweeperHoldsTheLockAcrossInstances [175 ms]
+  Error Message:
+   System.InvalidOperationException : Connection is not open
+  Stack Trace:
+     at Npgsql.ThrowHelper.ThrowInvalidOperationException(String message)
+   at Npgsql.NpgsqlCommand.CheckAndGetConnection()
+   at Npgsql.NpgsqlCommand.ExecuteReader(Boolean async, CommandBehavior behavior, CancellationToken cancellationToken)
+   at Npgsql.NpgsqlCommand.ExecuteScalar(Boolean async, CancellationToken cancellationToken)
+   at Zaghlol.Infrastructure.Purchases.PlayAckSweepStore.SessionLock.DisposeAsync() in /_/backend/src/Zaghlol.Infrastructure/Purchases/PlayAckSweepStore.cs:line 190
+   at Zaghlol.Infrastructure.Purchases.PlayAckSweepStore.SessionLock.DisposeAsync() in /_/backend/src/Zaghlol.Infrastructure/Purchases/PlayAckSweepStore.cs:line 190
+   at Zaghlol.Infrastructure.Purchases.PlayAckSweepStore.SessionLock.DisposeAsync() in /_/backend/src/Zaghlol.Infrastructure/Purchases/PlayAckSweepStore.cs:line 194
+   at Zaghlol.Infrastructure.Tests.Purchases.PurchaseStoreTests.OnlyOneSweeperHoldsTheLockAcrossInstances() in /_/backend/tests/Zaghlol.Infrastructure.Tests/Purchases/PurchaseStoreTests.cs:line 159
+--- End of stack trace from previous location ---
+[xUnit.net 00:00:42.92]     Zaghlol.Contract.Tests.VerifyLiveContractTests.TheSpecTokenLimitMatchesTheServerAndTheStoreKeyColumn [FAIL]
+  Failed Zaghlol.Contract.Tests.VerifyLiveContractTests.TheSpecTokenLimitMatchesTheServerAndTheStoreKeyColumn [5 ms]
+  Error Message:
+   System.InvalidOperationException : A value of type 'System.Int64' cannot be converted to a 'System.Int32'.
+  Stack Trace:
+     at System.Text.Json.ThrowHelper.ThrowInvalidOperationException_NodeUnableToConvert(Type sourceType, Type destinationType)
+   at System.Text.Json.Nodes.JsonValue`1.GetValue[T]()
+   at Zaghlol.Contract.Tests.VerifyLiveContractTests.TheSpecTokenLimitMatchesTheServerAndTheStoreKeyColumn() in /_/backend/tests/Zaghlol.Contract.Tests/VerifyLiveContractTests.cs:line 157
+   at System.RuntimeMethodHandle.InvokeMethod(ObjectHandleOnStack target, Void** arguments, ObjectHandleOnStack sig, BOOL isConstructor, ObjectHandleOnStack result)
+   at System.RuntimeMethodHandle.InvokeMethod(ObjectHandleOnStack target, Void** arguments, ObjectHandleOnStack sig, BOOL isConstructor, ObjectHandleOnStack result)
+   at System.Reflection.MethodBaseInvoker.InterpretedInvoke_Method(Object obj, IntPtr* args)
+   at System.Reflection.RuntimeMethodInfo.Invoke(Object obj, BindingFlags invokeAttr, Binder binder, Object[] parameters, CultureInfo culture)
+[xUnit.net 00:00:46.67]     Zaghlol.Infrastructure.Tests.CheckConstraintTests.EveryCheckConstraintInTheSchemaHasANegativeCase [FAIL]
+  Failed Zaghlol.Infrastructure.Tests.CheckConstraintTests.EveryCheckConstraintInTheSchemaHasANegativeCase [9 ms]
+  Error Message:
+   Assert.Equal() Failure: Values differ
+Expected: 50
+Actual:   52
+  Stack Trace:
+     at Zaghlol.Infrastructure.Tests.CheckConstraintTests.EveryCheckConstraintInTheSchemaHasANegativeCase() in /_/backend/tests/Zaghlol.Infrastructure.Tests/CheckConstraintTests.cs:line 215
+--- End of stack trace from previous location ---
+
+Failed!  - Failed:     1, Passed:   120, Skipped:     0, Total:   121, Duration: 45 s - Zaghlol.Contract.Tests.dll (net10.0)
+
+Failed!  - Failed:     2, Passed:   662, Skipped:     0, Total:   664, Duration: 59 s - Zaghlol.Infrastructure.Tests.dll (net10.0)
+[xUnit.net 00:01:37.52]     Zaghlol.Api.Tests.Purchases.PurchaseVerifyEndpointTests.APlayFailureIs502StoreUnavailableAndARetryRunsAgain(status: 403) [FAIL]
+[xUnit.net 00:01:37.54]     Zaghlol.Api.Tests.Purchases.PurchaseVerifyEndpointTests.APlayFailureIs502StoreUnavailableAndARetryRunsAgain(status: 401) [FAIL]
+[xUnit.net 00:01:37.56]     Zaghlol.Api.Tests.Purchases.PurchaseVerifyEndpointTests.AnUpgradeRecordsItsPredecessorAndNeverTouchesIt [FAIL]
+[xUnit.net 00:01:37.58]     Zaghlol.Api.Tests.Purchases.PurchaseVerifyEndpointTests.ATokenPlayRejectsIsAFinal422TokenInvalidThatIsReplayed(status: 400) [FAIL]
+[xUnit.net 00:01:37.59]     Zaghlol.Api.Tests.Purchases.PurchaseVerifyEndpointTests.ATokenPlayRejectsIsAFinal422TokenInvalidThatIsReplayed(status: 404) [FAIL]
+[xUnit.net 00:01:37.61]     Zaghlol.Api.Tests.Purchases.PurchaseVerifyEndpointTests.ATokenPlayRejectsIsAFinal422TokenInvalidThatIsReplayed(status: 410) [FAIL]
+  Failed Zaghlol.Api.Tests.Purchases.PurchaseVerifyEndpointTests.APlayFailureIs502StoreUnavailableAndARetryRunsAgain(status: 403) [21 ms]
+  Error Message:
+   Assert.True() Failure
+Expected: True
+Actual:   False
+  Stack Trace:
+     at Zaghlol.Api.Tests.Purchases.PurchaseVerifyEndpointTests.APlayFailureIs502StoreUnavailableAndARetryRunsAgain(Int32 status) in /_/backend/tests/Zaghlol.Api.Tests/Purchases/PurchaseVerifyEndpointTests.cs:line 226
+--- End of stack trace from previous location ---
+  Failed Zaghlol.Api.Tests.Purchases.PurchaseVerifyEndpointTests.APlayFailureIs502StoreUnavailableAndARetryRunsAgain(status: 401) [18 ms]
+  Error Message:
+   Assert.True() Failure
+Expected: True
+Actual:   False
+  Stack Trace:
+     at Zaghlol.Api.Tests.Purchases.PurchaseVerifyEndpointTests.APlayFailureIs502StoreUnavailableAndARetryRunsAgain(Int32 status) in /_/backend/tests/Zaghlol.Api.Tests/Purchases/PurchaseVerifyEndpointTests.cs:line 226
+--- End of stack trace from previous location ---
+  Failed Zaghlol.Api.Tests.Purchases.PurchaseVerifyEndpointTests.AnUpgradeRecordsItsPredecessorAndNeverTouchesIt [15 ms]
+  Error Message:
+   System.InvalidOperationException : Nullable object must have a value.
+  Stack Trace:
+     at System.Nullable`1.get_Value()
+   at Zaghlol.Api.Tests.Purchases.PurchaseVerifyEndpointTests.AnUpgradeRecordsItsPredecessorAndNeverTouchesIt() in /_/backend/tests/Zaghlol.Api.Tests/Purchases/PurchaseVerifyEndpointTests.cs:line 315
+--- End of stack trace from previous location ---
+  Failed Zaghlol.Api.Tests.Purchases.PurchaseVerifyEndpointTests.ATokenPlayRejectsIsAFinal422TokenInvalidThatIsReplayed(status: 400) [19 ms]
+  Error Message:
+   expected 422, got 502: {"type":"https://tools.ietf.org/html/rfc9110#section-15.6.3","title":"Bad Gateway","status":502,"code":"STORE_UNAVAILABLE","retryAfterSeconds":30,"traceId":"00-c9be9b37399c8b78f0549749c209d432-6d380efe03ba03c8-00","correlationId":"c9be9b37399c8b78f0549749c209d432"}
+  Stack Trace:
+     at Zaghlol.Api.Tests.Installs.Problems.AssertAsync(HttpResponseMessage response, HttpStatusCode status, String code) in /_/backend/tests/Zaghlol.Api.Tests/Installs/RegistrationTests.cs:line 255
+   at Zaghlol.Api.Tests.Purchases.PurchaseVerifyEndpointTests.ATokenPlayRejectsIsAFinal422TokenInvalidThatIsReplayed(Int32 status) in /_/backend/tests/Zaghlol.Api.Tests/Purchases/PurchaseVerifyEndpointTests.cs:line 39
+--- End of stack trace from previous location ---
+  Failed Zaghlol.Api.Tests.Purchases.PurchaseVerifyEndpointTests.ATokenPlayRejectsIsAFinal422TokenInvalidThatIsReplayed(status: 404) [17 ms]
+  Error Message:
+   expected 422, got 502: {"type":"https://tools.ietf.org/html/rfc9110#section-15.6.3","title":"Bad Gateway","status":502,"code":"STORE_UNAVAILABLE","retryAfterSeconds":30,"traceId":"00-3a6a2d5242c4f51b219ff2b2be25c1d8-f6f3987224598527-00","correlationId":"3a6a2d5242c4f51b219ff2b2be25c1d8"}
+  Stack Trace:
+     at Zaghlol.Api.Tests.Installs.Problems.AssertAsync(HttpResponseMessage response, HttpStatusCode status, String code) in /_/backend/tests/Zaghlol.Api.Tests/Installs/RegistrationTests.cs:line 255
+   at Zaghlol.Api.Tests.Purchases.PurchaseVerifyEndpointTests.ATokenPlayRejectsIsAFinal422TokenInvalidThatIsReplayed(Int32 status) in /_/backend/tests/Zaghlol.Api.Tests/Purchases/PurchaseVerifyEndpointTests.cs:line 39
+--- End of stack trace from previous location ---
+  Failed Zaghlol.Api.Tests.Purchases.PurchaseVerifyEndpointTests.ATokenPlayRejectsIsAFinal422TokenInvalidThatIsReplayed(status: 410) [17 ms]
+  Error Message:
+   expected 422, got 502: {"type":"https://tools.ietf.org/html/rfc9110#section-15.6.3","title":"Bad Gateway","status":502,"code":"STORE_UNAVAILABLE","retryAfterSeconds":30,"traceId":"00-ccf2a22df8ed4b7f8439fb1f61aa488c-c19002e9df92240f-00","correlationId":"ccf2a22df8ed4b7f8439fb1f61aa488c"}
+  Stack Trace:
+     at Zaghlol.Api.Tests.Installs.Problems.AssertAsync(HttpResponseMessage response, HttpStatusCode status, String code) in /_/backend/tests/Zaghlol.Api.Tests/Installs/RegistrationTests.cs:line 255
+   at Zaghlol.Api.Tests.Purchases.PurchaseVerifyEndpointTests.ATokenPlayRejectsIsAFinal422TokenInvalidThatIsReplayed(Int32 status) in /_/backend/tests/Zaghlol.Api.Tests/Purchases/PurchaseVerifyEndpointTests.cs:line 39
+--- End of stack trace from previous location ---
+[xUnit.net 00:01:37.69]     Zaghlol.Api.Tests.Purchases.PurchaseVerifyEndpointTests.ATokenBoundToAnotherInstallOrToNoneIsNotOwnedAndNothingIsWritten [FAIL]
+[xUnit.net 00:01:37.72]     Zaghlol.Api.Tests.Purchases.PurchaseVerifyEndpointTests.AnActiveAnswerIsSignedEchoesTheNonceAndIsReplayedWithoutAnotherPlayCall [FAIL]
+[xUnit.net 00:01:37.74]     Zaghlol.Api.Tests.Purchases.PurchaseVerifyEndpointTests.AnotherProductsTokenIsTokenInvalid [FAIL]
+  Failed Zaghlol.Api.Tests.Purchases.PurchaseVerifyEndpointTests.ATokenBoundToAnotherInstallOrToNoneIsNotOwnedAndNothingIsWritten [21 ms]
+  Error Message:
+   expected 422, got 502: {"type":"https://tools.ietf.org/html/rfc9110#section-15.6.3","title":"Bad Gateway","status":502,"code":"STORE_UNAVAILABLE","retryAfterSeconds":30,"traceId":"00-1159963af13d80f5be61dd6b3e65ff62-6a2777296a7043c6-00","correlationId":"1159963af13d80f5be61dd6b3e65ff62"}
+  Stack Trace:
+     at Zaghlol.Api.Tests.Installs.Problems.AssertAsync(HttpResponseMessage response, HttpStatusCode status, String code) in /_/backend/tests/Zaghlol.Api.Tests/Installs/RegistrationTests.cs:line 255
+   at Zaghlol.Api.Tests.Purchases.PurchaseVerifyEndpointTests.ATokenBoundToAnotherInstallOrToNoneIsNotOwnedAndNothingIsWritten() in /_/backend/tests/Zaghlol.Api.Tests/Purchases/PurchaseVerifyEndpointTests.cs:line 71
+--- End of stack trace from previous location ---
+  Failed Zaghlol.Api.Tests.Purchases.PurchaseVerifyEndpointTests.AnActiveAnswerIsSignedEchoesTheNonceAndIsReplayedWithoutAnotherPlayCall [20 ms]
+  Error Message:
+   Assert.Equal() Failure: Values differ
+Expected: OK
+Actual:   BadGateway
+  Stack Trace:
+     at Zaghlol.Api.Tests.Purchases.PurchaseVerifyEndpointTests.AnActiveAnswerIsSignedEchoesTheNonceAndIsReplayedWithoutAnotherPlayCall() in /_/backend/tests/Zaghlol.Api.Tests/Purchases/PurchaseVerifyEndpointTests.cs:line 268
+--- End of stack trace from previous location ---
+  Failed Zaghlol.Api.Tests.Purchases.PurchaseVerifyEndpointTests.AnotherProductsTokenIsTokenInvalid [13 ms]
+  Error Message:
+   expected 422, got 502: {"type":"https://tools.ietf.org/html/rfc9110#section-15.6.3","title":"Bad Gateway","status":502,"code":"STORE_UNAVAILABLE","retryAfterSeconds":30,"traceId":"00-55ea4cbf35cfd726271a47600b8df0a5-adf53a5b375f00d3-00","correlationId":"55ea4cbf35cfd726271a47600b8df0a5"}
+  Stack Trace:
+     at Zaghlol.Api.Tests.Installs.Problems.AssertAsync(HttpResponseMessage response, HttpStatusCode status, String code) in /_/backend/tests/Zaghlol.Api.Tests/Installs/RegistrationTests.cs:line 255
+   at Zaghlol.Api.Tests.Purchases.PurchaseVerifyEndpointTests.AnotherProductsTokenIsTokenInvalid() in /_/backend/tests/Zaghlol.Api.Tests/Purchases/PurchaseVerifyEndpointTests.cs:line 54
+--- End of stack trace from previous location ---
+[xUnit.net 00:01:37.94]     Zaghlol.Api.Tests.Purchases.PurchaseVerifyEndpointTests.AFailedInlineAcknowledgeStillAnswersActiveAndTheSweeperAcknowledgesOnce [FAIL]
+[xUnit.net 00:01:37.97]     Zaghlol.Api.Tests.Purchases.PurchaseVerifyEndpointTests.APendingPurchaseGrantsNothingAndIsNeverAcknowledged [FAIL]
+[xUnit.net 00:01:38.28]     Zaghlol.Api.Tests.Purchases.PurchaseVerifyEndpointTests.TheSameKeyRunningTwiceGivesOne200AndOne429 [FAIL]
+  Failed Zaghlol.Api.Tests.Purchases.PurchaseVerifyEndpointTests.AFailedInlineAcknowledgeStillAnswersActiveAndTheSweeperAcknowledgesOnce [16 ms]
+  Error Message:
+   Assert.Equal() Failure: Values differ
+Expected: OK
+Actual:   BadGateway
+  Stack Trace:
+     at Zaghlol.Api.Tests.Purchases.PurchaseVerifyEndpointTests.AFailedInlineAcknowledgeStillAnswersActiveAndTheSweeperAcknowledgesOnce() in /_/backend/tests/Zaghlol.Api.Tests/Purchases/PurchaseVerifyEndpointTests.cs:line 135
+--- End of stack trace from previous location ---
+  Failed Zaghlol.Api.Tests.Purchases.PurchaseVerifyEndpointTests.APendingPurchaseGrantsNothingAndIsNeverAcknowledged [21 ms]
+  Error Message:
+   Assert.Equal() Failure: Values differ
+Expected: OK
+Actual:   BadGateway
+  Stack Trace:
+     at Zaghlol.Api.Tests.Purchases.PurchaseVerifyEndpointTests.APendingPurchaseGrantsNothingAndIsNeverAcknowledged() in /_/backend/tests/Zaghlol.Api.Tests/Purchases/PurchaseVerifyEndpointTests.cs:line 110
+--- End of stack trace from previous location ---
+  Failed Zaghlol.Api.Tests.Purchases.PurchaseVerifyEndpointTests.TheSameKeyRunningTwiceGivesOne200AndOne429 [315 ms]
+  Error Message:
+   Assert.Equal() Failure: Values differ
+Expected: OK
+Actual:   BadGateway
+  Stack Trace:
+     at Zaghlol.Api.Tests.Purchases.PurchaseVerifyEndpointTests.TheSameKeyRunningTwiceGivesOne200AndOne429() in /_/backend/tests/Zaghlol.Api.Tests/Purchases/PurchaseVerifyEndpointTests.cs:line 297
+--- End of stack trace from previous location ---
+
+Failed!  - Failed:    12, Passed:   393, Skipped:     0, Total:   405, Duration: 1 m 20 s - Zaghlol.Api.Tests.dll (net10.0)
+
+[02:39:26] === RESULT dotnet-test exit=1 (122s)
+[02:39:26] SUMMARY FAIL sha=d71dc11b8a3e638dfed64b9a57dd63e3298de7d9 pipeline=quick-backend dotnet-build=0 dotnet-format=0 dotnet-test=1
