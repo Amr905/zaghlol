@@ -8,6 +8,7 @@
 import 'dart:typed_data';
 
 import 'package:cryptography/cryptography.dart';
+import 'package:cryptography/dart.dart';
 
 import 'backup_crypto_exception.dart';
 import 'backup_format.dart';
@@ -21,6 +22,9 @@ final class AeadAuthenticationFailure implements Exception {
   @override
   String toString() => 'AeadAuthenticationFailure';
 }
+
+/// SHA-256 output length (HKDF HashLen).
+const int _hashLength = 32;
 
 final class BackupPrimitives {
   BackupPrimitives({AesGcm? aesGcm}) : _aes = aesGcm;
@@ -102,8 +106,12 @@ final class BackupPrimitives {
     }
   }
 
-  /// HKDF-SHA256 (RFC 5869). An empty [salt] means "no salt" (HashLen zero
-  /// bytes, RFC 5869 §2.2).
+  /// HKDF-SHA256 (RFC 5869), always the pure-Dart implementation: it runs a
+  /// few HMACs on 32-byte inputs, so platform acceleration buys nothing, and
+  /// the platform HMAC on Android (javax.crypto) rejects the empty key an
+  /// empty salt would give (found by the db-platform Android leg). An empty
+  /// [salt] is passed as HashLen zero bytes, which RFC 5869 §2.2 defines as
+  /// the same thing (HMAC pads both to the same block).
   Future<SecretBytes> hkdf({
     required SecretBytes ikm,
     required List<int> salt,
@@ -115,10 +123,15 @@ final class BackupPrimitives {
       overwriteWhenDestroyed: true,
     );
     try {
-      final derived = await Hkdf(
-        hmac: Hmac.sha256(),
-        outputLength: length,
-      ).deriveKey(secretKey: secretKey, nonce: salt, info: info);
+      final derived =
+          await DartHkdf(
+            hmac: const DartHmac(DartSha256()),
+            outputLength: length,
+          ).deriveKey(
+            secretKey: secretKey,
+            nonce: salt.isEmpty ? Uint8List(_hashLength) : salt,
+            info: info,
+          );
       final data = await derived.extractBytes();
       final out = SecretBytes.copyOf(data);
       derived.destroy();
