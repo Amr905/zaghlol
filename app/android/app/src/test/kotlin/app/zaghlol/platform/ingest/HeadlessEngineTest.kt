@@ -137,7 +137,8 @@ class HeadlessEngineTest {
     fun theUiCheckRunsOnTheMainThread() = runBlocking {
         var thread: String? = null
         engine.runCycle(10_000) { thread = Thread.currentThread().name; true }
-        assertEquals("fake-main", thread)
+        // With -ea (Gradle) kotlinx.coroutines debug mode appends " @coroutine#n".
+        assertEquals("fake-main", thread?.substringBefore(" @coroutine#"))
     }
 
     /** UI attach mid-drain: close at once, the drain reply first, destroy after close, exactly once. */
