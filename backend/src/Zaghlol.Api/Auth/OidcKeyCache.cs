@@ -6,22 +6,42 @@ using Zaghlol.Domain;
 namespace Zaghlol.Api.Auth;
 
 /// <summary>
-/// The operator IdP's signing keys (T-136 design note §2), fetched from <c>{Issuer}/.well-known/openid-configuration</c> and
-/// its <c>jwks_uri</c>, HTTPS only. The discovered <c>issuer</c> must equal the configured one (mix-up defence). Keys are
-/// refreshed every <c>JwksRefreshHours</c> (24 h); an unknown <c>kid</c> forces at most one refresh per 5 minutes, so a
-/// flood of made-up key IDs can't hammer the IdP; and a failed refresh keeps the last good keys for up to 7 days, then fails
-/// closed. Header-supplied keys (<c>jku</c>, <c>x5u</c>, <c>jwk</c>) are never fetched or used. Written instead of
-/// <c>ConfigurationManager</c> so the timing rules are exact and testable with a <see cref="TimeProvider"/>.
+/// The operator IdP's signing keys (T-136 design note §2): <see cref="OidcJwksCache"/> for <c>OperatorAuth:Issuer</c>, refreshed every
+/// <c>JwksRefreshHours</c> (24 h).
 /// </summary>
-internal sealed partial class OidcKeyCache(
+internal sealed class OidcKeyCache(
     IHttpClientFactory clients,
     IOptions<OperatorAuthOptions> options,
     TimeProvider clock,
     ILogger<OidcKeyCache> logger,
-    IHostApplicationLifetime? lifetime = null) : IDisposable
+    IHostApplicationLifetime? lifetime = null) : OidcJwksCache(clients, HttpClientName, clock, logger, lifetime)
 {
     public const string HttpClientName = "zaghlol-operator-oidc";
 
+    protected override string Issuer => options.Value.Issuer ?? string.Empty;
+
+    protected override Uri DiscoveryUri => options.Value.DiscoveryUri();
+
+    protected override TimeSpan RefreshEvery => TimeSpan.FromHours(options.Value.JwksRefreshHours);
+
+    protected override string Source => "operator";
+}
+
+/// <summary>
+/// An OpenID provider's signing keys, fetched from its discovery document and <c>jwks_uri</c>, HTTPS only (T-136 design note §2;
+/// generalised by issuer for the Pub/Sub push tokens of T-133). The discovered <c>issuer</c> must equal the configured one (mix-up
+/// defence). Keys are refreshed every <see cref="RefreshEvery"/>; an unknown <c>kid</c> forces at most one refresh per 5 minutes, so a
+/// flood of made-up key IDs can't hammer the provider; and a failed refresh keeps the last good keys for up to 7 days, then fails
+/// closed. Header-supplied keys (<c>jku</c>, <c>x5u</c>, <c>jwk</c>) are never fetched or used. Written instead of
+/// <c>ConfigurationManager</c> so the timing rules are exact and testable with a <see cref="TimeProvider"/>.
+/// </summary>
+internal abstract partial class OidcJwksCache(
+    IHttpClientFactory clients,
+    string clientName,
+    TimeProvider clock,
+    ILogger logger,
+    IHostApplicationLifetime? lifetime) : IDisposable
+{
     /// <summary>The longest the last good keys are used while the IdP can't be reached.</summary>
     public static readonly TimeSpan LastGoodLifetime = TimeSpan.FromDays(7);
 
@@ -39,6 +59,23 @@ internal sealed partial class OidcKeyCache(
 
     /// <summary>When the keys in use were fetched; <c>null</c> before the first success.</summary>
     public DateTimeOffset? FetchedAt => current?.FetchedAt;
+
+    /// <summary>
+    /// True while a key set no older than <see cref="LastGoodLifetime"/> is held. False before the first success and once the last good
+    /// keys expired: a caller can tell "unknown kid" (a forged token) from "no keys at all" (fail closed, but retryable).
+    /// </summary>
+    public bool HasUsableKeys => current is { } snapshot && clock.GetUtcNow() - snapshot.FetchedAt <= LastGoodLifetime;
+
+    /// <summary>The exact <c>issuer</c> the discovery document must announce.</summary>
+    protected abstract string Issuer { get; }
+
+    /// <summary><c>{issuer}/.well-known/openid-configuration</c>.</summary>
+    protected abstract Uri DiscoveryUri { get; }
+
+    protected abstract TimeSpan RefreshEvery { get; }
+
+    /// <summary>A fixed word naming the provider in logs (<c>operator</c>, <c>google</c>).</summary>
+    protected abstract string Source { get; }
 
     /// <summary>The refresh in flight, or a completed task. Callers never cancel it; tests await it.</summary>
     internal Task PendingRefresh
@@ -59,7 +96,7 @@ internal sealed partial class OidcKeyCache(
     /// </summary>
     public async ValueTask<JsonWebKey?> FindAsync(string kid, CancellationToken cancellationToken)
     {
-        var refreshEvery = TimeSpan.FromHours(options.Value.JwksRefreshHours);
+        var refreshEvery = RefreshEvery;
         var snapshot = current;
         if (snapshot is null || clock.GetUtcNow() - snapshot.FetchedAt >= refreshEvery)
         {
@@ -145,7 +182,7 @@ internal sealed partial class OidcKeyCache(
             using var fetch = FetchCancellation();
             current = await FetchAsync(fetch.Token);
             MarkAttempt(started);
-            LogRefreshed(logger, current.Keys.Count);
+            LogRefreshed(logger, Source, current.Keys.Count);
         }
         catch (OperationCanceledException) when (IsShuttingDown())
         {
@@ -157,7 +194,7 @@ internal sealed partial class OidcKeyCache(
         {
             // A real fetch failure, including the 10 s IdP timeout, counts toward the throttle window.
             MarkAttempt(started);
-            LogRefreshFailed(logger, ex.GetType().Name);
+            LogRefreshFailed(logger, Source, ex.GetType().Name);
         }
     }
 
@@ -195,16 +232,15 @@ internal sealed partial class OidcKeyCache(
 
     private async Task<KeySnapshot> FetchAsync(CancellationToken cancellationToken)
     {
-        var settings = options.Value;
-        var client = clients.CreateClient(HttpClientName);
+        var client = clients.CreateClient(clientName);
 
-        using var discovery = JsonDocument.Parse(await GetAsync(client, settings.DiscoveryUri(), cancellationToken));
+        using var discovery = JsonDocument.Parse(await GetAsync(client, DiscoveryUri, cancellationToken));
         var root = discovery.RootElement;
         if (root.ValueKind != JsonValueKind.Object
             || !root.TryGetProperty("issuer", out var issuer) || issuer.ValueKind != JsonValueKind.String
-            || !string.Equals(issuer.GetString(), settings.Issuer, StringComparison.Ordinal))
+            || !string.Equals(issuer.GetString(), Issuer, StringComparison.Ordinal))
         {
-            throw new OidcDiscoveryException("The discovered issuer does not equal OperatorAuth:Issuer.");
+            throw new OidcDiscoveryException("The discovered issuer does not equal the configured issuer.");
         }
 
         if (!root.TryGetProperty("jwks_uri", out var jwksUri) || jwksUri.ValueKind != JsonValueKind.String
@@ -222,7 +258,7 @@ internal sealed partial class OidcKeyCache(
         var keys = new Dictionary<string, JsonWebKey>(StringComparer.Ordinal);
         foreach (var key in set.Keys)
         {
-            if (IsUsableSigningKey(key))
+            if (Accepts(key))
             {
                 keys.TryAdd(key.Kid, key);
             }
@@ -235,6 +271,9 @@ internal sealed partial class OidcKeyCache(
 
         return new KeySnapshot(keys, clock.GetUtcNow());
     }
+
+    /// <summary>Which keys of the JWKS are kept (default <see cref="IsUsableSigningKey"/>).</summary>
+    protected virtual bool Accepts(JsonWebKey key) => IsUsableSigningKey(key);
 
     /// <summary>A public RSA or P-256 key with a <c>kid</c>, meant for signatures. Private keys and other kinds are skipped.</summary>
     internal static bool IsUsableSigningKey(JsonWebKey key) =>
@@ -249,23 +288,23 @@ internal sealed partial class OidcKeyCache(
     {
         if (uri.Scheme != Uri.UriSchemeHttps)
         {
-            throw new OidcDiscoveryException("Operator OIDC documents are fetched over https only.");
+            throw new OidcDiscoveryException("OIDC documents are fetched over https only.");
         }
 
         using var response = await client.GetAsync(uri, cancellationToken);
         if (!response.IsSuccessStatusCode)
         {
-            throw new OidcDiscoveryException("An operator OIDC document could not be fetched.");
+            throw new OidcDiscoveryException("An OIDC document could not be fetched.");
         }
 
         return await response.Content.ReadAsStringAsync(cancellationToken);
     }
 
-    [LoggerMessage(Level = LogLevel.Information, Message = "Operator OIDC signing keys refreshed ({KeyCount} keys)")]
-    private static partial void LogRefreshed(ILogger logger, int keyCount);
+    [LoggerMessage(Level = LogLevel.Information, Message = "OIDC signing keys refreshed for {KeySource} ({KeyCount} keys)")]
+    private static partial void LogRefreshed(ILogger logger, string keySource, int keyCount);
 
-    [LoggerMessage(Level = LogLevel.Warning, Message = "Operator OIDC signing key refresh failed ({ExceptionType}); keeping the last good keys")]
-    private static partial void LogRefreshFailed(ILogger logger, string exceptionType);
+    [LoggerMessage(Level = LogLevel.Warning, Message = "OIDC signing key refresh failed for {KeySource} ({ExceptionType}); keeping the last good keys")]
+    private static partial void LogRefreshFailed(ILogger logger, string keySource, string exceptionType);
 
     private sealed record KeySnapshot(IReadOnlyDictionary<string, JsonWebKey> Keys, DateTimeOffset FetchedAt);
 }

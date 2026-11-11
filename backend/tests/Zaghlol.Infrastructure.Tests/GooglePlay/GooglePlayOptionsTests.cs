@@ -183,34 +183,133 @@ public sealed class GooglePlayOptionsTests
         public Task AcknowledgeProductAsync(string productId, Sensitive<string> token, StoreLane lane, CancellationToken cancellationToken) => throw new NotSupportedException();
 
         public Task<PlayOrder> GetOrderAsync(Sensitive<string> orderId, StoreLane lane, CancellationToken cancellationToken) => throw new NotSupportedException();
+
+        public Task<PlayVoidedPage> ListVoidedPurchasesAsync(DateTimeOffset from, DateTimeOffset until, Sensitive<string>? pageToken, StoreLane lane, CancellationToken cancellationToken) =>
+            throw new NotSupportedException();
     }
 }
 
-/// <summary>T-130 design note §2: the shared budget and its restore lane.</summary>
-public sealed class StoreCallBudgetTests
+/// <summary>
+/// T-130 design note §2, T-133 §6 (FU-077 M-2, FU-098 code 4): the partitioned Play budget. Options (10, 1/h): the API partition gets
+/// 8 permits (80 %), the worker 2 (20 %).
+/// </summary>
+public sealed class PlayCallBudgetTests
 {
+    [Fact]
+    public void TheTotalIsSplitBetweenTheWorkerShareAndTheApiReplicas()
+    {
+        var options = new PlayBudgetOptions(1000, 100, TimeSpan.FromMinutes(1), Replicas: 4, WorkerShare: 0.2m, WorkerReplicas: 2);
+
+        using var api = new PlayCallBudget(options, PlayBudgetPartition.Api);
+        using var worker = new PlayCallBudget(options, PlayBudgetPartition.Worker);
+
+        Assert.Equal(200, api.Limit);
+        Assert.Equal(100, worker.Limit);
+        Assert.Equal(20, options.PerReplicaPerPeriod);
+        Assert.Equal(10, options.WorkerPerPeriod);
+    }
+
     [Fact]
     public void RestoreIsDeniedFirstAndNeverSpendsTheReserve()
     {
-        using var budget = new StoreCallBudget(new PlayBudgetOptions(10, 1, TimeSpan.FromHours(1)));
+        using var budget = new PlayCallBudget(new PlayBudgetOptions(10, 1, TimeSpan.FromHours(1)));
+        Assert.Equal(8, budget.Limit);
 
-        // Restore may take at most 30 % (3 of 10), and only while more than the 30 % reserve is left.
-        Assert.Equal(3, Enumerable.Range(0, 10).Count(_ => budget.TryAcquire(StoreLane.Restore)));
+        // Restore may take at most 30 % (2 of 8), and only while more than the 30 % reserve (2) is left.
+        Assert.Equal(2, Enumerable.Range(0, 10).Count(_ => budget.TryAcquire(StoreLane.Restore)));
 
         // Verify and ack spend the rest, down to zero.
-        Assert.Equal(7, Enumerable.Range(0, 10).Count(_ => budget.TryAcquire(StoreLane.Verify)));
+        Assert.Equal(6, Enumerable.Range(0, 10).Count(_ => budget.TryAcquire(StoreLane.Verify)));
         Assert.False(budget.TryAcquire(StoreLane.Ack));
     }
 
     [Fact]
     public void RestoreIsRefusedWhileOnlyTheReserveIsLeft()
     {
-        using var budget = new StoreCallBudget(new PlayBudgetOptions(10, 1, TimeSpan.FromHours(1)));
-        Assert.Equal(7, Enumerable.Range(0, 7).Count(_ => budget.TryAcquire(StoreLane.Verify)));
+        using var budget = new PlayCallBudget(new PlayBudgetOptions(10, 1, TimeSpan.FromHours(1)));
+        Assert.Equal(6, Enumerable.Range(0, 6).Count(_ => budget.TryAcquire(StoreLane.Verify)));
 
         Assert.False(budget.TryAcquire(StoreLane.Restore));
         Assert.True(budget.TryAcquire(StoreLane.Ack));
         Assert.True(budget.TryAcquire(StoreLane.Support));
-        Assert.True(budget.TryAcquire(StoreLane.Notification));
+    }
+
+    [Fact]
+    public void EachPartitionRefusesTheLanesItDoesNotServe()
+    {
+        var options = new PlayBudgetOptions(1000, 100, TimeSpan.FromHours(1));
+        using var api = new PlayCallBudget(options, PlayBudgetPartition.Api);
+        using var worker = new PlayCallBudget(options, PlayBudgetPartition.Worker);
+
+        Assert.False(api.TryAcquire(StoreLane.Notification));
+        Assert.True(api.TryAcquire(StoreLane.Verify));
+        Assert.True(api.TryAcquire(StoreLane.Ack));
+        Assert.True(api.TryAcquire(StoreLane.Support));
+        Assert.True(api.TryAcquire(StoreLane.Restore));
+
+        Assert.True(worker.TryAcquire(StoreLane.Notification));
+        Assert.True(worker.TryAcquire(StoreLane.Ack));
+        Assert.False(worker.TryAcquire(StoreLane.Verify));
+        Assert.False(worker.TryAcquire(StoreLane.Support));
+        Assert.False(worker.TryAcquire(StoreLane.Restore));
+    }
+
+    /// <summary>T-133 §6: in the worker partition, Notification stops at 25 % left; the acknowledge sweeper may still spend it.</summary>
+    [Fact]
+    public void TheAckReserveKeepsAQuarterOfTheWorkerBucketForAcknowledge()
+    {
+        // Worker: 20 % of 400 = 80 permits; reserve 20.
+        using var worker = new PlayCallBudget(new PlayBudgetOptions(400, 1, TimeSpan.FromHours(1)), PlayBudgetPartition.Worker);
+        Assert.Equal(80, worker.Limit);
+
+        Assert.Equal(60, Enumerable.Range(0, 100).Count(_ => worker.TryAcquire(StoreLane.Notification)));
+        Assert.Equal(20, worker.Available());
+        Assert.False(worker.TryAcquire(StoreLane.Notification));
+
+        Assert.Equal(20, Enumerable.Range(0, 100).Count(_ => worker.TryAcquire(StoreLane.Ack)));
+        Assert.False(worker.TryAcquire(StoreLane.Ack));
+    }
+
+    /// <summary>One lock around every check and acquisition: 64 concurrent callers never take more than the bucket or the sub-buckets.</summary>
+    [Fact]
+    public async Task SixtyFourConcurrentCallersNeverOverspendAnyBucket()
+    {
+        using var api = new PlayCallBudget(new PlayBudgetOptions(1000, 1, TimeSpan.FromHours(1)), PlayBudgetPartition.Api);
+        using var worker = new PlayCallBudget(new PlayBudgetOptions(1000, 1, TimeSpan.FromHours(1)), PlayBudgetPartition.Worker);
+        using var start = new ManualResetEventSlim();
+        var restore = 0;
+        var total = 0;
+        var notifications = 0;
+        var acks = 0;
+
+        var tasks = Enumerable.Range(0, 64).Select(i => Task.Run(() =>
+        {
+            start.Wait();
+            for (var n = 0; n < 50; n++)
+            {
+                var lane = (i + n) % 2 == 0 ? StoreLane.Restore : StoreLane.Verify;
+                if (api.TryAcquire(lane))
+                {
+                    Interlocked.Increment(ref total);
+                    if (lane == StoreLane.Restore)
+                    {
+                        Interlocked.Increment(ref restore);
+                    }
+                }
+
+                var workerLane = (i + n) % 2 == 0 ? StoreLane.Notification : StoreLane.Ack;
+                if (worker.TryAcquire(workerLane))
+                {
+                    Interlocked.Increment(ref workerLane == StoreLane.Notification ? ref notifications : ref acks);
+                }
+            }
+        })).ToArray();
+        start.Set();
+        await Task.WhenAll(tasks);
+
+        Assert.Equal(800, total);
+        Assert.InRange(restore, 1, 240);
+        Assert.Equal(200, notifications + acks);
+        Assert.InRange(notifications, 1, 150);
     }
 }

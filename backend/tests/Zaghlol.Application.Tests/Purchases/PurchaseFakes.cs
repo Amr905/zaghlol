@@ -90,6 +90,24 @@ internal sealed class FakePlayDeveloperApi : IPlayDeveloperApi
             : throw new PlayApiException(PlayApi.OrderGet, PlayCallOutcome.ClientError, 404);
     }
 
+    /// <summary>Pages of <c>voidedpurchases.list</c>, served in order (an empty listing when none is left).</summary>
+    public Queue<PlayVoidedPage> VoidedPages { get; } = new();
+
+    /// <summary>Every voided-list request: the window and the page token.</summary>
+    public List<(DateTimeOffset From, DateTimeOffset Until, string? PageToken, StoreLane Lane)> VoidedRequests { get; } = [];
+
+    public Task<PlayVoidedPage> ListVoidedPurchasesAsync(
+        DateTimeOffset from,
+        DateTimeOffset until,
+        Sensitive<string>? pageToken,
+        StoreLane lane,
+        CancellationToken cancellationToken)
+    {
+        VoidedRequests.Add((from, until, pageToken?.Reveal(), lane));
+        Record(PlayApi.VoidedList, "voided", null, lane);
+        return Task.FromResult(VoidedPages.TryDequeue(out var page) ? page : new PlayVoidedPage([], null));
+    }
+
     private void Record(PlayApi api, string subject, string? productId, StoreLane lane)
     {
         Calls.Enqueue((api, subject, productId, lane));
