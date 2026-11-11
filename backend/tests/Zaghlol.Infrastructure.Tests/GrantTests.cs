@@ -70,6 +70,16 @@ public class GrantTests(SchemaFixture fixture)
         { "zaghlol_admin", "SELECT zaghlol.count_daily_active('ios', '1.0.0')" },
         { "zaghlol_worker", "SELECT zaghlol.count_daily_active('ios', '1.0.0')" },
         { "zaghlol_ops_ro", "SELECT zaghlol.count_daily_active('ios', '1.0.0')" },
+
+        // T-134: the worker never writes verify's binding/payment columns or seats, never inserts purchases; only the worker
+        // schedules notification retries, and ops_ro can't read the back-off stamp.
+        { "zaghlol_worker", "UPDATE zaghlol.purchases SET last_payment_at = now() WHERE false" },
+        { "zaghlol_worker", "UPDATE zaghlol.purchases SET obfuscated_install_ref = NULL WHERE false" },
+        { "zaghlol_worker", "UPDATE zaghlol.purchases SET environment = 'sandbox' WHERE false" },
+        { "zaghlol_worker", "UPDATE zaghlol.purchase_seats SET install_id = NULL WHERE false" },
+        { "zaghlol_worker", "INSERT INTO zaghlol.purchases (id) SELECT gen_random_uuid() WHERE false" },
+        { "zaghlol_api", "UPDATE zaghlol.store_notifications SET next_attempt_at = now() WHERE false" },
+        { "zaghlol_ops_ro", "SELECT next_attempt_at FROM zaghlol.store_notifications" },
     };
 
     public static TheoryData<string, string> Allowed => new()
@@ -95,6 +105,16 @@ public class GrantTests(SchemaFixture fixture)
         { "zaghlol_worker", "UPDATE zaghlol.purchases SET state = 'expired', acknowledged = true WHERE false" },
         { "zaghlol_api", "SELECT zaghlol.count_daily_active('ios', '1.0.0')" },
         { "zaghlol_api", "UPDATE zaghlol.installs SET last_sync_at = now() WHERE false" },
+
+        // T-134: the worker statement and the history job's insert.
+        { "zaghlol_worker", "UPDATE zaghlol.purchases SET state = 'refunded', expires_at = expires_at, product_id = product_id, plan = plan, last_verified_at = now() WHERE false" },
+        {
+            "zaghlol_worker",
+            "INSERT INTO zaghlol.store_notifications (id, store, external_id, type, payload_digest) "
+            + "SELECT gen_random_uuid(), 'app_store', 'grant-probe', 'TEST', sha256('x'::bytea) WHERE false ON CONFLICT (store, external_id) DO NOTHING"
+        },
+        { "zaghlol_worker", "UPDATE zaghlol.store_notifications SET attempts = 1, next_attempt_at = now(), last_error = 'STORE_ERROR' WHERE false" },
+        { "zaghlol_api", "INSERT INTO zaghlol.store_notifications (id, store, external_id, type, payload_digest) SELECT gen_random_uuid(), 'app_store', 'grant-probe', 'TEST', sha256('x'::bytea) WHERE false ON CONFLICT (store, external_id) DO NOTHING" },
     };
 
     [Fact]

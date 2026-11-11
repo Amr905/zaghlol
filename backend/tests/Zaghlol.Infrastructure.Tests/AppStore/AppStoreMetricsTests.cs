@@ -57,7 +57,7 @@ public sealed class AppStoreMetricsTests
         }
 
         var jws = seen.Where(s => s.Instrument == "zaghlol.purchase.jws").ToList();
-        Assert.Equal(2 * (1 + Enum.GetValues<AppleJwsFailure>().Length), jws.Count);
+        Assert.Equal(Enum.GetValues<JwsSource>().Length * (1 + Enum.GetValues<AppleJwsFailure>().Length), jws.Count);
         Assert.All(jws, s => Assert.Contains(s.Tags["source"], PurchaseTags.JwsSources));
         Assert.All(jws, s => Assert.Contains(s.Tags["outcome"], PurchaseTags.JwsOutcomes));
         Assert.Equal(PurchaseTags.JwsOutcomes.Count, jws.Select(s => s.Tags["outcome"]).Distinct().Count());

@@ -25,14 +25,20 @@ namespace Zaghlol.Infrastructure.AppStore;
 /// <item>the ES256 signature with the leaf key, 64-byte IEEE P1363 only (<see cref="AppleJwsFailure.Signature"/>);</item>
 /// <item>the payload's read fields (<see cref="AppleJwsFailure.Payload"/>).</item>
 /// </list>
-/// Validation time: <see cref="JwsSource.Api"/> at now; <see cref="JwsSource.App"/> at the payload's <c>signedDate</c> (read before
-/// trust, at most now + 5 min), because StoreKit hands out JWSs signed under intermediates that have since expired. That is safe
-/// because a grant never rests on the app's JWS alone: verify re-reads the transaction from Apple.
+/// Validation time: <see cref="JwsSource.Api"/> at now; <see cref="JwsSource.App"/> and <see cref="JwsSource.Notification"/> at the
+/// payload's <c>signedDate</c> (read before trust, at most now + 5 min), because StoreKit hands out JWSs signed under intermediates
+/// that have since expired, and Apple's notification retries and history entries keep their original signature. That is safe
+/// because neither is ever the source of state: verify and the notification worker re-read the purchase from Apple's API.
+/// The ASSN V2 outer payload (<see cref="VerifyNotification"/>) may be up to <see cref="MaxNotificationLength"/> characters (it
+/// embeds two JWSs with their own chains); every other JWS stays capped at <see cref="MaxLength"/>.
 /// </summary>
 public sealed class AppleJwsVerifier : IAppleJwsVerifier
 {
     /// <summary>The OpenAPI <c>Jws</c> <c>maxLength</c>.</summary>
     public const int MaxLength = 16384;
+
+    /// <summary>The ASSN V2 <c>signedPayload</c> cap (T-134 design note §1 step 3; about 20 KB in practice).</summary>
+    public const int MaxNotificationLength = 65536;
 
     public const int MaxCertificateBytes = 4096;
 
@@ -62,7 +68,7 @@ public sealed class AppleJwsVerifier : IAppleJwsVerifier
 
     public AppleTransaction VerifyTransaction(Sensitive<string> jws, JwsSource source, DateTimeOffset now)
     {
-        var payload = Verify(jws.Reveal(), source, now, AppleJsonContext.Default.TransactionPayloadDto, static p => p.SignedDate);
+        var payload = Verify(jws.Reveal(), MaxLength, source, now, AppleJsonContext.Default.TransactionPayloadDto, static p => p.SignedDate);
         if (payload.SignedDate is not { } signed)
         {
             throw Fail(AppleJwsFailure.Payload);
@@ -100,14 +106,31 @@ public sealed class AppleJwsVerifier : IAppleJwsVerifier
             Time(signed)!.Value);
     }
 
-    public AppleRenewalInfo VerifyRenewalInfo(Sensitive<string> jws, DateTimeOffset now)
+    public AppleRenewalInfo VerifyRenewalInfo(Sensitive<string> jws, JwsSource source, DateTimeOffset now)
     {
-        var payload = Verify(jws.Reveal(), JwsSource.Api, now, AppleJsonContext.Default.RenewalPayloadDto, static p => p.SignedDate);
+        // Renewal info comes only from Apple (its API, or nested in a notification), never from the app.
+        if (source == JwsSource.App)
+        {
+            throw new ArgumentOutOfRangeException(nameof(source), "Renewal info never comes from the app.");
+        }
+
+        var payload = Verify(jws.Reveal(), MaxLength, source, now, AppleJsonContext.Default.RenewalPayloadDto, static p => p.SignedDate);
         return new AppleRenewalInfo(
             Wrap(payload.OriginalTransactionId),
             Environment(payload.Environment),
             payload.AutoRenewStatus,
             Time(payload.GracePeriodExpiresDate));
+    }
+
+    public AppleNotification VerifyNotification(Sensitive<string> signedPayload, DateTimeOffset now)
+    {
+        var payload = Verify(signedPayload.Reveal(), MaxNotificationLength, JwsSource.Notification, now, AppleJsonContext.Default.NotificationPayloadDto, static p => p.SignedDate);
+
+        // Verify already required a readable signedDate for the validation time.
+        var data = payload.Data is { } d
+            ? new AppleNotificationData(d.BundleId, d.Environment, d.Status, Wrap(d.SignedTransactionInfo), Wrap(d.SignedRenewalInfo))
+            : null;
+        return new AppleNotification(payload.NotificationType, payload.Subtype, payload.NotificationUuid, payload.Version, Time(payload.SignedDate)!.Value, data);
     }
 
     private static AppleEnvironment Environment(string? value) => value switch
@@ -132,11 +155,11 @@ public sealed class AppleJwsVerifier : IAppleJwsVerifier
 
     private static AppleJwsException Fail(AppleJwsFailure reason) => new(reason);
 
-    private T Verify<T>(string? text, JwsSource source, DateTimeOffset now, JsonTypeInfo<T> type, Func<T, long?> signedDate)
+    private T Verify<T>(string? text, int maxLength, JwsSource source, DateTimeOffset now, JsonTypeInfo<T> type, Func<T, long?> signedDate)
         where T : class
     {
         // 1. Shape, before any decode.
-        if (text is null || text.Length is 0 or > MaxLength)
+        if (text is null || text.Length == 0 || text.Length > maxLength)
         {
             throw Fail(AppleJwsFailure.Malformed);
         }
@@ -180,7 +203,7 @@ public sealed class AppleJwsVerifier : IAppleJwsVerifier
             der[i] = x5c[i].ValueKind == JsonValueKind.String ? Base64Strict(x5c[i].GetString()!) : throw Fail(AppleJwsFailure.Chain);
         }
 
-        // 6 (time first, the chain needs it). Api: now. App: the payload's signedDate, read before trust and bounded.
+        // 6 (time first, the chain needs it). Api: now. App and Notification: the payload's signedDate, read before trust and bounded.
         T payload;
         try
         {

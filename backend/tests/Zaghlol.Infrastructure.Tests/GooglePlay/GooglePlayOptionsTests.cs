@@ -211,6 +211,6 @@ public sealed class StoreCallBudgetTests
         Assert.False(budget.TryAcquire(StoreLane.Restore));
         Assert.True(budget.TryAcquire(StoreLane.Ack));
         Assert.True(budget.TryAcquire(StoreLane.Support));
-        Assert.True(budget.TryAcquire(StoreLane.Rtdn));
+        Assert.True(budget.TryAcquire(StoreLane.Notification));
     }
 }

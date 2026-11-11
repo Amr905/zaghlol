@@ -83,7 +83,59 @@ groups:
           severity: page
         annotations:
           summary: "A {{ $labels.store }} notification was dead-lettered"
-          description: "Inspect the dead-letter queue; the notification was not applied."
+          description: "Inspect the dead-letter queue; the notification was not applied. apple: store_notifications rows with processed_at set and last_error in the failure codes (error-handling section 2); the hourly expiry sweep still repairs subscriptions, a dead-lettered lifetime REFUND needs a human."
+
+      # T-134: App Store Server Notifications V2.
+      - alert: ZaghlolAssnBacklogOld
+        expr: max(zaghlol_assn_backlog{age="ge_1h"}) > 0
+        for: 10m
+        labels:
+          severity: page
+        annotations:
+          summary: "App Store notifications have waited more than an hour"
+          description: "The ASSN processor is stuck or deferring (Apple 429, our worker budget, an open circuit). Check the worker log and zaghlol_store_call_total{store=\"app_store\"}."
+
+      - alert: ZaghlolAssnIgnoredProduct
+        # Authentic notifications for a product outside Purchases:Apple:Products: our configuration is behind App Store Connect.
+        expr: sum by (env) (increase(zaghlol_assn_ingest_total{outcome="ignored_product"}[30m])) > 0
+        labels:
+          severity: page
+        annotations:
+          summary: "An App Store notification named a product we don't know ({{ $labels.env }})"
+          description: "Gold events for that product are answered 200 and dropped. Add the product to Purchases:Apple:Products or remove it from App Store Connect."
+
+      - alert: ZaghlolAssnEnvMismatch
+        expr: sum by (type) (increase(zaghlol_assn_processed_total{outcome="env_mismatch"}[30m])) > 0
+        labels:
+          severity: warn
+        annotations:
+          summary: "An App Store notification's environment differs from the stored purchase ({{ $labels.type }})"
+          description: "Nothing was written. A production notification for a sandbox row (or the reverse) points at a wrong Sandbox Server URL or AllowSandbox setting."
+
+      - alert: ZaghlolAssnRefundNotReflected
+        expr: sum(increase(zaghlol_assn_refund_not_reflected_total[1h])) > 0
+        labels:
+          severity: warn
+        annotations:
+          summary: "A REFUND/REVOKE notification was applied while Apple still reported the purchase as paid"
+          description: "After four retries Apple's current answer was written (an older period may have been refunded). Look the purchase up by its UUID in purchase_events (cause assn:REFUND) and confirm in App Store Connect."
+
+      - alert: ZaghlolAssnRecovered
+        # The daily Get Notification History job inserted rows Apple had failed to deliver.
+        expr: sum(increase(zaghlol_assn_recovered_total[1d])) > 0
+        labels:
+          severity: warn
+        annotations:
+          summary: "The ASSN history job recovered notifications Apple could not deliver"
+          description: "Apple's deliveries to /v1/notifications/apple are failing. Check the App Store Connect server URL, TLS, the notifications-apple rate limit and 5xx answers."
+
+      - alert: ZaghlolAssnHistoryProblem
+        expr: sum by (outcome) (increase(zaghlol_assn_reconcile_total{step="history", outcome=~"invalid_entry|truncated|failed"}[1d])) > 0
+        labels:
+          severity: warn
+        annotations:
+          summary: "The ASSN history reconciliation reported {{ $labels.outcome }}"
+          description: "invalid_entry: an entry from Apple's API failed verification (check the pinned root and Apple news). truncated: more than 20 pages in 7 days. failed: the history call failed; the next daily run retries."
 
   - name: zaghlol-prices
     rules:

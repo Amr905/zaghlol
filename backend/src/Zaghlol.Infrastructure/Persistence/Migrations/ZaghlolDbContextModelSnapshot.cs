@@ -1349,6 +1349,10 @@ namespace Zaghlol.Infrastructure.Persistence.Migrations
                         .HasColumnType("text")
                         .HasColumnName("last_error");
 
+                    b.Property<DateTimeOffset?>("NextAttemptAt")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("next_attempt_at");
+
                     b.Property<string>("NotificationType")
                         .IsRequired()
                         .HasColumnType("text")
@@ -1396,6 +1400,12 @@ namespace Zaghlol.Infrastructure.Persistence.Migrations
                         .IsUnique()
                         .HasDatabaseName("ux_store_notifications_store_external_id");
 
+                    b.HasIndex("Store", "NextAttemptAt", "ReceivedAt")
+                        .HasDatabaseName("ix_store_notifications_due")
+                        .HasFilter("processed_at IS NULL");
+
+                    NpgsqlIndexBuilderExtensions.HasNullSortOrder(b.HasIndex("Store", "NextAttemptAt", "ReceivedAt"), new[] { NullSortOrder.NullsFirst, NullSortOrder.NullsLast, NullSortOrder.NullsLast });
+
                     b.ToTable("store_notifications", "zaghlol", t =>
                         {
                             t.HasCheckConstraint("ck_store_notifications_environment", "environment IN ('production','sandbox')");
@@ -1405,6 +1415,10 @@ namespace Zaghlol.Infrastructure.Persistence.Migrations
                             t.HasCheckConstraint("ck_store_notifications_payload_digest_length", "octet_length(payload_digest) = 32");
 
                             t.HasCheckConstraint("ck_store_notifications_store_key_length", "char_length(store_key) <= 512");
+
+                            t.HasCheckConstraint("ck_store_notifications_subtype", "subtype IS NULL OR subtype ~ '^[A-Z0-9_]{1,64}$'");
+
+                            t.HasCheckConstraint("ck_store_notifications_type", "type ~ '^[A-Z0-9_]{1,64}$'");
                         });
                 });
 

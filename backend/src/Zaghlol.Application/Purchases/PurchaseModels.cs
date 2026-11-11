@@ -216,6 +216,9 @@ public static class PurchaseTags
     public const string JwsSourceApp = "app";
     public const string JwsSourceApi = "api";
 
+    /// <summary>An ASSN V2 payload or one of its nested JWSs (T-134): attacker-reachable input, so failures are not alerted.</summary>
+    public const string JwsSourceNotification = "notification";
+
     public static IReadOnlyList<string> Stores { get; } = [GooglePlay, AppStore];
 
     public static IReadOnlyList<string> VerifyOutcomes { get; } = [Success, Failure];
@@ -228,7 +231,14 @@ public static class PurchaseTags
 
     public static IReadOnlyList<string> Environments { get; } = [EnvProduction, EnvSandbox];
 
-    public static IReadOnlyList<string> JwsSources { get; } = [JwsSourceApp, JwsSourceApi];
+    public static IReadOnlyList<string> JwsSources { get; } = [JwsSourceApp, JwsSourceApi, JwsSourceNotification];
+
+    public static string JwsSourceName(JwsSource source) => source switch
+    {
+        JwsSource.Api => JwsSourceApi,
+        JwsSource.Notification => JwsSourceNotification,
+        _ => JwsSourceApp,
+    };
 
     /// <summary><c>zaghlol.purchase.jws{outcome}</c>: <c>ok</c> or an <see cref="AppleJwsFailure"/> name.</summary>
     public static IReadOnlyList<string> JwsOutcomes { get; } = ["ok", "malformed", "alg", "chain", "oid", "signature", "payload"];
@@ -275,8 +285,9 @@ public interface IPurchaseTelemetry
     void EnvironmentSeen(string store, PurchaseEnvironment environment);
 
     /// <summary>
-    /// <c>zaghlol.purchase.jws{source, outcome}</c> (T-131 §8): one per Apple JWS checked. Any <c>api</c> failure is alerted: Apple's
-    /// own answer failing verification, or contradicting the app's copy (<see cref="AppleJwsFailure.Payload"/>), is doubt, not user fault.
+    /// <c>zaghlol.purchase.jws{source, outcome}</c> (T-131 §8, T-134 §7): one per Apple JWS checked. Any <c>api</c> failure is alerted:
+    /// Apple's own answer failing verification, or contradicting the app's copy (<see cref="AppleJwsFailure.Payload"/>), is doubt, not
+    /// user fault. <c>app</c> and <c>notification</c> failures are attacker-reachable input and are not alerted.
     /// </summary>
     void AppleJwsChecked(JwsSource source, AppleJwsFailure? failure);
 }

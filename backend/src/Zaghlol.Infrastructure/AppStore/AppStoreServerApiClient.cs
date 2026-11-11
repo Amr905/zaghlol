@@ -12,13 +12,14 @@ namespace Zaghlol.Infrastructure.AppStore;
 /// <summary>Metric tag values of App Store calls on <c>zaghlol.store.call</c> (fixed sets).</summary>
 public static class AppStoreCallTags
 {
-    public static IReadOnlyList<string> Apis { get; } = ["tx_get", "sub_status", "order_lookup"];
+    public static IReadOnlyList<string> Apis { get; } = ["tx_get", "sub_status", "order_lookup", "notification_history"];
 
     public static string Api(AppStoreApi api) => api switch
     {
         AppStoreApi.TransactionInfo => "tx_get",
         AppStoreApi.SubscriptionStatuses => "sub_status",
         AppStoreApi.OrderLookup => "order_lookup",
+        AppStoreApi.NotificationHistory => "notification_history",
         _ => "invalid",
     };
 
@@ -51,6 +52,7 @@ internal sealed class AppStoreServerApiClient(IHttpClientFactory clients, Zaghlo
     public const string TransactionTemplate = "/inApps/v1/transactions/{transactionId}";
     public const string SubscriptionsTemplate = "/inApps/v1/subscriptions/{transactionId}";
     public const string LookupTemplate = "/inApps/v1/lookup/{orderId}";
+    public const string HistoryTemplate = "/inApps/v1/notifications/history";
 
     /// <summary>The largest response read (a status or lookup answer with its JWSs is tens of KB).</summary>
     public const int MaxResponseBytes = 1024 * 1024;
@@ -61,7 +63,9 @@ internal sealed class AppStoreServerApiClient(IHttpClientFactory clients, Zaghlo
             AppStoreApi.TransactionInfo,
             environment,
             lane,
+            HttpMethod.Get,
             "inApps/v1/transactions/" + Escape(transactionId),
+            null,
             TransactionTemplate,
             AppleJsonContext.Default.TransactionInfoResponseDto,
             cancellationToken);
@@ -80,7 +84,9 @@ internal sealed class AppStoreServerApiClient(IHttpClientFactory clients, Zaghlo
             AppStoreApi.SubscriptionStatuses,
             environment,
             lane,
+            HttpMethod.Get,
             "inApps/v1/subscriptions/" + Escape(transactionId),
+            null,
             SubscriptionsTemplate,
             AppleJsonContext.Default.StatusResponseDto,
             cancellationToken);
@@ -100,11 +106,47 @@ internal sealed class AppStoreServerApiClient(IHttpClientFactory clients, Zaghlo
             AppStoreApi.OrderLookup,
             PurchaseEnvironment.Production,
             lane,
+            HttpMethod.Get,
             "inApps/v1/lookup/" + Escape(orderId),
+            null,
             LookupTemplate,
             AppleJsonContext.Default.OrderLookupResponseDto,
             cancellationToken);
         return new AppleOrderLookupResult(dto.Status, [.. (dto.SignedTransactions ?? []).Select(s => new Sensitive<string>(s))]);
+    }
+
+    public async Task<AppleNotificationHistoryPage> GetNotificationHistoryAsync(
+        PurchaseEnvironment environment,
+        DateTimeOffset startDate,
+        DateTimeOffset endDate,
+        Sensitive<string>? paginationToken,
+        StoreLane lane,
+        CancellationToken cancellationToken)
+    {
+        // The continuation goes in the query (Apple's contract); the span carries only the template, and request logging is off.
+        var path = "inApps/v1/notifications/history"
+            + (paginationToken?.Reveal() is { Length: > 0 } token ? "?paginationToken=" + Uri.EscapeDataString(token) : string.Empty);
+        var body = new NotificationHistoryRequestDto
+        {
+            StartDate = startDate.ToUnixTimeMilliseconds(),
+            EndDate = endDate.ToUnixTimeMilliseconds(),
+            OnlyFailures = true,
+        };
+        var dto = await ReadAsync(
+            AppStoreApi.NotificationHistory,
+            environment,
+            lane,
+            HttpMethod.Post,
+            path,
+            JsonContent.Create(body, AppleJsonContext.Default.NotificationHistoryRequestDto),
+            HistoryTemplate,
+            AppleJsonContext.Default.NotificationHistoryResponseDto,
+            cancellationToken);
+        Sensitive<string>? next = dto.HasMore == true && dto.PaginationToken is { Length: > 0 } more ? new Sensitive<string>(more) : null;
+        return new AppleNotificationHistoryPage(
+            [.. (dto.NotificationHistory ?? []).Select(i => i.SignedPayload).OfType<string>().Select(p => new Sensitive<string>(p))],
+            next is not null,
+            next);
     }
 
     private static string Escape(Sensitive<string> value) => Uri.EscapeDataString(value.Reveal() ?? string.Empty);
@@ -117,14 +159,16 @@ internal sealed class AppStoreServerApiClient(IHttpClientFactory clients, Zaghlo
         AppStoreApi api,
         PurchaseEnvironment environment,
         StoreLane lane,
+        HttpMethod method,
         string path,
+        HttpContent? content,
         string template,
         JsonTypeInfo<T> type,
         CancellationToken cancellationToken)
         where T : class
     {
         var http = clients.CreateClient(environment == PurchaseEnvironment.Sandbox ? SandboxClient : ProductionClient);
-        using var request = new HttpRequestMessage(HttpMethod.Get, path).SetUrlTemplate(template);
+        using var request = new HttpRequestMessage(method, path) { Content = content }.SetUrlTemplate(template);
         request.Options.Set(AppleRequestLane.Key, lane);
 
         HttpResponseMessage response;

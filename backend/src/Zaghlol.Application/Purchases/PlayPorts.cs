@@ -8,8 +8,11 @@ public enum StoreLane
     Verify,
     Ack,
 
-    /// <summary>Store notification processing: Google RTDN (T-133) or Apple ASSN V2 (T-134).</summary>
-    Rtdn,
+    /// <summary>
+    /// Store notification processing and reconciliation: Google RTDN (T-133) or Apple ASSN V2 (T-134). On the App Store budget it
+    /// is the only lane the worker's partition serves, and the API partition refuses it (FU-092 item 8: renamed from <c>Rtdn</c>).
+    /// </summary>
+    Notification,
     Support,
     Restore,
 }

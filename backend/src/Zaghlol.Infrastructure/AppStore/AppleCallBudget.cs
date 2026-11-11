@@ -4,74 +4,92 @@ using Zaghlol.Domain;
 
 namespace Zaghlol.Infrastructure.AppStore;
 
+/// <summary>Which share of the Apple budget a process serves (T-134 design note §6).</summary>
+public enum AppleBudgetPartition
+{
+    /// <summary>An API process: verify, support and restore; refuses <see cref="StoreLane.Notification"/>.</summary>
+    Api,
+
+    /// <summary>The worker: notification processing and reconciliation only (<see cref="StoreLane.Notification"/>).</summary>
+    Worker,
+}
+
 /// <summary>
-/// The Apple outbound budget (T-131 design note §6, FU-077 M-2 applied from the start), separate from Play's. One token bucket per
-/// process, sized <c>1 / Replicas</c> of the configured total, charged once per HTTP <b>attempt</b> (retries included, by
-/// <see cref="AppleBudgetHandler"/> inside the retry). Lanes:
-/// <list type="bullet">
-/// <item>store notifications (<see cref="StoreLane.Rtdn"/>, T-134) may spend the whole bucket;</item>
-/// <item>verify, support and anything else stop while only the 20 % notification reserve is left;</item>
-/// <item>restore is denied first: it stops while only the notification reserve plus a 30 % reserve is left, and it may take at
-/// most 30 % of the bucket through its own sub-bucket.</item>
-/// </list>
-/// A denied attempt is never sent.
+/// The Apple outbound budget (T-131 design note §6, T-134 §6), separate from Play's, charged once per HTTP <b>attempt</b> (retries
+/// included, by <see cref="AppleBudgetHandler"/> inside the retry). The configured total is <b>partitioned</b> across processes instead
+/// of reserved inside one: the worker gets <c>WorkerShare</c> of it for <see cref="StoreLane.Notification"/> (the only lane it serves),
+/// and each API process <c>(1 − WorkerShare) / Replicas</c> for every other lane (it refuses <see cref="StoreLane.Notification"/>).
+/// Inside an API bucket restore is denied first: it stops while only a 30 % reserve is left, and it may take at most 30 % of the bucket
+/// through its own sub-bucket. The checks and both acquisitions run under one lock (FU-092 item 2): only <see cref="TryAcquire"/>
+/// consumes permits and replenishment only adds them, so a check under the lock can't be invalidated before the acquisition, and a
+/// failed shared acquisition never spends a restore permit. A denied attempt is never sent.
 /// </summary>
 public sealed class AppleCallBudget : IStoreCallBudget, IDisposable
 {
-    public const double NotificationReserveShare = 0.2;
     public const double RestoreShare = 0.3;
 
+    private readonly Lock gate = new();
     private readonly TokenBucketRateLimiter shared;
     private readonly TokenBucketRateLimiter restore;
-    private readonly int notificationReserve;
     private readonly int restoreReserve;
 
-    public AppleCallBudget(AppleBudgetOptions options)
+    public AppleCallBudget(AppleBudgetOptions options, AppleBudgetPartition partition = AppleBudgetPartition.Api)
     {
         ArgumentNullException.ThrowIfNull(options);
 
-        var limit = options.PerReplicaLimit;
-        var perPeriod = options.PerReplicaPerPeriod;
+        Partition = partition;
+        var (limit, perPeriod) = partition == AppleBudgetPartition.Worker
+            ? (options.WorkerLimit, options.WorkerPerPeriod)
+            : (options.PerReplicaLimit, options.PerReplicaPerPeriod);
+        Limit = limit;
         shared = Bucket(limit, perPeriod, options.Period);
         restore = Bucket(Math.Max(1, (int)(limit * RestoreShare)), Math.Max(1, (int)(perPeriod * RestoreShare)), options.Period);
-        notificationReserve = (int)(limit * NotificationReserveShare);
-        restoreReserve = notificationReserve + (int)(limit * RestoreShare);
+        restoreReserve = (int)(limit * RestoreShare);
     }
+
+    public AppleBudgetPartition Partition { get; }
+
+    /// <summary>This process's bucket size.</summary>
+    public int Limit { get; }
 
     public bool TryAcquire(StoreLane lane)
     {
-        var available = shared.GetStatistics()?.CurrentAvailablePermits ?? 0;
-        switch (lane)
+        // A lane the partition doesn't serve is a programming error: refused, never sent.
+        if ((lane == StoreLane.Notification) != (Partition == AppleBudgetPartition.Worker))
         {
-            case StoreLane.Rtdn:
-                break;
-            case StoreLane.Restore:
-                if (available <= restoreReserve)
-                {
-                    return false;
-                }
-
-                using (var restoreLease = restore.AttemptAcquire())
-                {
-                    if (!restoreLease.IsAcquired)
-                    {
-                        return false;
-                    }
-                }
-
-                break;
-            default:
-                if (available <= notificationReserve)
-                {
-                    return false;
-                }
-
-                break;
+            return false;
         }
 
-        using var lease = shared.AttemptAcquire();
-        return lease.IsAcquired;
+        lock (gate)
+        {
+            if (lane == StoreLane.Restore
+                && ((shared.GetStatistics()?.CurrentAvailablePermits ?? 0) <= restoreReserve
+                    || (restore.GetStatistics()?.CurrentAvailablePermits ?? 0) < 1))
+            {
+                return false;
+            }
+
+            using (var lease = shared.AttemptAcquire())
+            {
+                if (!lease.IsAcquired)
+                {
+                    return false;
+                }
+            }
+
+            if (lane == StoreLane.Restore)
+            {
+                // Checked above under the same lock, and nothing else consumes it: this succeeds.
+                using var restoreLease = restore.AttemptAcquire();
+            }
+
+            return true;
+        }
     }
+
+    /// <summary>The permits each bucket holds now (tests).</summary>
+    internal (long Shared, long Restore) Available() =>
+        (shared.GetStatistics()?.CurrentAvailablePermits ?? 0, restore.GetStatistics()?.CurrentAvailablePermits ?? 0);
 
     public void Dispose()
     {

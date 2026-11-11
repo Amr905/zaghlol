@@ -212,6 +212,21 @@ public partial class ModelTests
         Assert.DoesNotContain("last_payment_at", worker["purchases"].UpdateColumns!);
         var opsRo = GrantMatrix.Current.Single(g => g.Role == GrantMatrix.OpsRo && g.Table == "purchases");
         Assert.DoesNotContain("last_payment_at", opsRo.SelectColumns!);
+
+        // T-134 §5 (FU-092 item 1): the worker may re-plan an App Store row and insert notifications, never verify's binding,
+        // payment or environment columns, and only read seats.
+        Assert.Contains("product_id", worker["purchases"].UpdateColumns!);
+        Assert.Contains("plan", worker["purchases"].UpdateColumns!);
+        foreach (var column in new[] { "environment", "obfuscated_install_ref", "install_id", "last_payment_at", "account_id" })
+        {
+            Assert.DoesNotContain(column, worker["purchases"].UpdateColumns!);
+        }
+
+        Assert.True(worker["store_notifications"].Privileges.HasFlag(TablePrivileges.Insert));
+        Assert.Equal(TablePrivileges.Select, worker["purchase_seats"].Privileges);
+        Assert.Null(worker["purchase_seats"].UpdateColumns);
+        var opsRoNotifications = GrantMatrix.Current.Single(g => g.Role == GrantMatrix.OpsRo && g.Table == "store_notifications");
+        Assert.DoesNotContain("next_attempt_at", opsRoNotifications.SelectColumns!);
     }
 
     [Fact]
@@ -230,7 +245,7 @@ public partial class ModelTests
         Assert.Null(worker.SelectColumns);
         Assert.Equal(["state", "acknowledged", "ack_next_attempt_at"], worker.UpdateColumns);
         Assert.Equal(
-            GrantMatrix.Flatten(GrantMatrix.InitialCreate.Concat(GrantMatrix.CatalogDrafts).Concat(GrantMatrix.PurchaseAckNextAttempt).Concat(GrantMatrix.PurchaseLastPaymentAt)),
+            GrantMatrix.Flatten(GrantMatrix.InitialCreate.Concat(GrantMatrix.CatalogDrafts).Concat(GrantMatrix.PurchaseAckNextAttempt).Concat(GrantMatrix.PurchaseLastPaymentAt).Concat(GrantMatrix.AppleNotifications)),
             GrantMatrix.Flatten(GrantMatrix.Current));
         Assert.Equal(GrantMatrix.Current.Count, GrantMatrix.Current.Select(g => (g.Role, g.Table)).Distinct().Count());
     }

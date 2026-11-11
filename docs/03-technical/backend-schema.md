@@ -163,8 +163,9 @@ CREATE INDEX ix_store_notifications_due ON store_notifications (store, next_atte
 -- Grants (T-134, migration AppleNotifications): worker_rw gains INSERT on store_notifications (Get Notification History
 -- reconciliation) and UPDATE (product_id, plan) on purchases (an upgrade notification re-plans the row). worker_rw never
 -- updates environment, obfuscated_install_ref, install_id or last_payment_at, and has only SELECT on purchase_seats, so a
--- notification can't move a seat. The worker never inserts purchases.   -- Only these extracted columns are written, after authentication (backend-api §4.5). The raw envelope is NEVER stored;
-     -- fields not listed above (including unknown third-party fields) are not persisted anywhere.
+-- notification can't move a seat. The worker never inserts purchases.
+-- Only these extracted columns are written, after authentication (backend-api §4.5). The raw envelope is NEVER stored;
+-- fields not listed above (including unknown third-party fields) are not persisted anywhere.
 
 -- Effective entitlement is computed, not stored: view over purchases for an install or account
 -- Seat (D-52, FR-GOLD-08, BR-GOLD-07): the ONE install that may hold Gold from a purchase, across platforms (FR-GOLD-07).
