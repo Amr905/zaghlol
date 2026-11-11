@@ -237,10 +237,64 @@ echo "after halt: $bins entries, $tmps tmp"
 [ "$bins" = 20 ] && [ "$tmps" = 1 ] || fail "after the halt expected 20 entries and 1 tmp, found $bins and $tmps"
 instr kill-read -e class "$KILL#phaseRead" -e spoolPhase read || fail "the read phase after the halt failed (it-kill-read.txt)"
 [ "$(skipped kill-read)" = 0 ] || fail "the read phase was skipped (spoolPhase argument not received)"
+# ---- Inbox reader (T-042) ----------------------------------------------------
+# Real provider: 30 messages from $SENDER (#10 a 3-part one, #20 an OTP, #7
+# with the canary) and 10 from 5550199, `inboxMid` taken between #15 and #16;
+# the test reads with page size 7 (only $SENDER's non-OTP rows), then AC2
+# (10k × 4,000 chars) and, after `pm revoke`, PERMISSION_DENIED. The app's
+# logcat lines must not carry the canary.
+INBOX=app.zaghlol.platform.capture.inbox.InboxReaderInstrumentedTest
+LONG_TAIL="this synthetic statement line is repeated to make one message span three parts"
+inbox_body() {
+  case "$1" in
+    7) echo "inbox-it 7 paid EGP 7.00 at $CANARY SHOP card *4321" ;;
+    10) echo "inbox-it 10 paid EGP 10.00 at SYNTH SHOP card *4321 $LONG_TAIL $LONG_TAIL $LONG_TAIL $LONG_TAIL $LONG_TAIL END-OF-LONG" ;;
+    20) echo "inbox-it 20 your OTP is 123456" ;;
+    *) echo "inbox-it $1 paid EGP $1.00 at SYNTH SHOP card *4321" ;;
+  esac
+}
+sh_ pm grant "$PKG" android.permission.READ_SMS
+A logcat -c || true
+sleep 2
+INBOX_SINCE=$(( $(sh_ date +%s | tr -d '\r') * 1000 ))
+sleep 2
+for i in $(seq 1 30); do
+  A emu sms send "$SENDER" "$(inbox_body "$i")" > /dev/null
+  if [ $((i % 3)) = 0 ]; then A emu sms send 5550199 "inbox-it friend $i $CANARY EGP 5.00" > /dev/null; fi
+  if [ "$i" = 15 ]; then
+    sleep 8
+    INBOX_MID=$(( $(sh_ date +%s | tr -d '\r') * 1000 ))
+    sleep 2
+  fi
+  sleep 1
+done
+instr inbox -e class "$INBOX" -e inboxPhase seeded -e inboxSince "$INBOX_SINCE" -e inboxMid "$INBOX_MID" \
+  || fail "inbox instrumented tests failed (it-inbox.txt)"
+[ "$(skipped inbox)" = 1 ] || fail "expected exactly the denied-phase test skipped in the seeded run (it-inbox.txt)"
+sh_ pm revoke "$PKG" android.permission.READ_SMS
+instr inbox-denied -e class "$INBOX#revokedPermissionIsPermissionDenied" -e inboxPhase denied \
+  || fail "inbox permission-denied test failed (it-inbox-denied.txt)"
+[ "$(skipped inbox-denied)" = 0 ] || fail "the inbox denied phase was skipped"
+sh_ pm grant "$PKG" android.permission.READ_SMS
+sh_ pm list packages -U > "$OUT/pkg.txt"
+UID_N=$(grep -E "^package:$PKG uid:" "$OUT/pkg.txt" | grep -oE 'uid:[0-9]+' | cut -d: -f2 || true)
+if [ -z "$UID_N" ]; then
+  sh_ dumpsys package "$PKG" > "$OUT/pkg.txt"
+  UID_N=$(grep -oE '(userId|appId)=[0-9]+' "$OUT/pkg.txt" | cut -d= -f2 | sort -u | tail -n 1 || true)
+fi
+[ -n "$UID_N" ] || fail "could not read the app uid (inbox step)"
+APP_NAME="u0_a$((UID_N - 10000))"
+A logcat -d -v uid > "$OUT/logcat-uid.txt" || true
+inbox_own=$(grep -E "(^|[[:space:]])($UID_N|$APP_NAME)[[:space:]]" "$OUT/logcat-uid.txt" | grep -c . || true)
+inbox_hits=$(grep -F "$CANARY" "$OUT/logcat-uid.txt" | grep -E "(^|[[:space:]])($UID_N|$APP_NAME)[[:space:]]" | grep -c . || true)
+echo "inbox canary: app log lines $inbox_hits of $inbox_own app lines"
+[ "$inbox_own" -gt 0 ] || fail "the logcat uid filter matched no app line after the inbox tests; canary scan would be vacuous"
+[ "$inbox_hits" = 0 ] || fail "the canary appeared in the app's logcat during the inbox tests"
+rm -f "$OUT/logcat-uid.txt" "$OUT/pkg.txt"
 {
   echo
   echo "### Instrumented (T-039), API $API"
-  for n in spool guard share kill-read; do
+  for n in spool guard share kill-read inbox inbox-denied; do
     echo "- $n: $(tr -d '\r' < "$OUT/it-$n.txt" | grep -E "^(OK|FAILURES|Tests run)" | tr '\n' ' ')"
   done
   echo "- kill-write: halted with $bins entries + $tmps tmp on disk"
