@@ -56,7 +56,12 @@ final class CaptureGuard {
         source.length > kGuardMaxSourceLength) {
       return const GuardDrop(GuardDropReason.tooLong);
     }
-    final folded = foldKey(body);
+    // One fold with line breaks kept (`foldKeyLines`) for the global drop
+    // patterns, where a line break is a sentence end; every other pattern
+    // runs on plain `foldKey` text, which is the same string with each
+    // line break as a space (platform-channels §1.2).
+    final lines = foldKeyLines(body);
+    final folded = lines.contains('\n') ? lines.replaceAll('\n', ' ') : lines;
     if (folded.isEmpty) {
       return const GuardDrop(GuardDropReason.emptyBody);
     }
@@ -89,7 +94,7 @@ final class CaptureGuard {
         (cfg.dropByInst[inst]?.any((p) => p.hasMatch(folded)) ?? false)) {
       return const GuardDrop(GuardDropReason.otpOrPromoInst);
     }
-    if (cfg.globalDrop.any((p) => p.hasMatch(folded))) {
+    if (cfg.globalDrop.any((p) => p.hasMatch(lines))) {
       return const GuardDrop(GuardDropReason.otpOrPromoGlobal);
     }
     if (inst == null) {

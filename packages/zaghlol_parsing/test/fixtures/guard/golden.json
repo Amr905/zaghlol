@@ -1,8 +1,8 @@
 {
  "format": 1,
  "synthetic": true,
- "note": "Synthetic data only (CLAUDE.md 2.6). Shared by the Dart, Kotlin (T-038) and Swift (T-061) Guards: never copy. count = fold + cases + rate + modes.",
- "count": 180,
+ "note": "Synthetic data only (CLAUDE.md 2.6). Shared by the Dart, Kotlin (T-038) and Swift (T-061) Guards: never copy. count = fold + cases + rate + modes. fold: out = foldKey(in); lines (when present, else out) = foldKeyLines(in), the Guard's fold for the global drop patterns.",
+ "count": 207,
  "configs": {
   "t1": {
    "base": "configs/t1_base.json",
@@ -82,7 +82,8 @@
   {
    "id": "fold.newlines",
    "in": "line1\nline2\r\n line3",
-   "out": "line1 line2 line3"
+   "out": "line1 line2 line3",
+   "lines": "line1\nline2\nline3"
   },
   {
    "id": "fold.nbsp",
@@ -92,7 +93,8 @@
   {
    "id": "fold.nel",
    "in": "ab",
-   "out": "a b"
+   "out": "a b",
+   "lines": "a\nb"
   },
   {
    "id": "fold.trim_collapse",
@@ -118,6 +120,40 @@
    "id": "fold.emoji",
    "in": "Pay 😀 now",
    "out": "pay 😀 now"
+  },
+  {
+   "id": "fold.lines.tab_is_space",
+   "in": "a\tb",
+   "out": "a b"
+  },
+  {
+   "id": "fold.lines.ls_ps",
+   "in": "a b c",
+   "out": "a b c",
+   "lines": "a\nb\nc"
+  },
+  {
+   "id": "fold.lines.vt_ff",
+   "in": "a\u000bb\fc",
+   "out": "a b c",
+   "lines": "a\nb\nc"
+  },
+  {
+   "id": "fold.lines.spaces_around_break",
+   "in": "a   \n \t b",
+   "out": "a b",
+   "lines": "a\nb"
+  },
+  {
+   "id": "fold.lines.invisible_in_break_run",
+   "in": "a ‏\n‎ b",
+   "out": "a b",
+   "lines": "a\nb"
+  },
+  {
+   "id": "fold.lines.edges_trimmed",
+   "in": "\r\n OTP 1234\r\n",
+   "out": "otp 1234"
   }
  ],
  "cases": [
@@ -1415,14 +1451,334 @@
    }
   },
   {
-   "id": "residual.newline_not_a_sentence_end",
+   "id": "residual.newline_code_after_gap_kept",
    "tags": [
     "residual"
    ],
    "config": "t1",
    "channel": "sms",
    "source": "NBE",
+   "body": "Your OTP for login\n482913",
+   "expect": {
+    "decision": "keep",
+    "kind": "registry",
+    "inst": "nbe",
+    "last4": null
+   }
+  },
+  {
+   "id": "residual.newline_after_lead_in_kept",
+   "tags": [
+    "residual"
+   ],
+   "config": "t1",
+   "channel": "sms",
+   "source": "NBE",
+   "body": "Your OTP for login is\n482913",
+   "expect": {
+    "decision": "keep",
+    "kind": "registry",
+    "inst": "nbe",
+    "last4": null
+   }
+  },
+  {
+   "id": "residual.keyword_split_by_newline_kept",
+   "tags": [
+    "residual"
+   ],
+   "config": "t1",
+   "channel": "sms",
+   "source": "CIB",
+   "body": "Your verification\ncode 482913",
+   "expect": {
+    "decision": "keep",
+    "kind": "registry",
+    "inst": "cib",
+    "last4": null
+   }
+  },
+  {
+   "id": "neg.newline.ref_then_pin_footer",
+   "tags": [
+    "negative"
+   ],
+   "config": "t1",
+   "channel": "sms",
+   "source": "NBE",
+   "body": "Debit EGP 100.00 at SHOP.\nRef: 482913\nPIN is never requested by the bank",
+   "expect": {
+    "decision": "keep",
+    "kind": "registry",
+    "inst": "nbe",
+    "last4": null
+   }
+  },
+  {
+   "id": "neg.newline.ref_then_password_footer",
+   "tags": [
+    "negative"
+   ],
+   "config": "t1",
+   "channel": "sms",
+   "source": "NBE",
+   "body": "Purchase EGP 100.00 at SHOP\nRef: 482913\nPassword is never requested",
+   "expect": {
+    "decision": "keep",
+    "kind": "registry",
+    "inst": "nbe",
+    "last4": null
+   }
+  },
+  {
+   "id": "neg.newline.pin_footer_then_txn",
+   "tags": [
+    "negative"
+   ],
+   "config": "t1",
+   "channel": "sms",
+   "source": "NBE",
+   "body": "Never share your PIN\nTxn: 123456\nPurchase EGP 100.00",
+   "expect": {
+    "decision": "keep",
+    "kind": "registry",
+    "inst": "nbe",
+    "last4": null
+   }
+  },
+  {
+   "id": "neg.newline.ref_then_otp_footer",
+   "tags": [
+    "negative"
+   ],
+   "config": "t1",
+   "channel": "sms",
+   "source": "NBE",
+   "body": "Transfer received EGP 500.00. Ref: 482913\nOTP never required",
+   "expect": {
+    "decision": "keep",
+    "kind": "registry",
+    "inst": "nbe",
+    "last4": null
+   }
+  },
+  {
+   "id": "neg.ar.newline.password_footer_then_ref",
+   "tags": [
+    "negative"
+   ],
+   "config": "t1",
+   "channel": "sms",
+   "source": "NBE",
+   "body": "لا تشارك كلمة المرور\nرقم المرجع: 482913\nتم خصم 300.00 جنيه",
+   "expect": {
+    "decision": "keep",
+    "kind": "registry",
+    "inst": "nbe",
+    "last4": null
+   }
+  },
+  {
+   "id": "neg.newline.otp_footer_then_balance",
+   "tags": [
+    "negative"
+   ],
+   "config": "t1",
+   "channel": "sms",
+   "source": "NBE",
    "body": "Do not share your OTP\nAvailable balance: 23456",
+   "expect": {
+    "decision": "keep",
+    "kind": "registry",
+    "inst": "nbe",
+    "last4": null
+   }
+  },
+  {
+   "id": "neg.newline.crlf_pin_footer_then_txn",
+   "tags": [
+    "negative"
+   ],
+   "config": "t1",
+   "channel": "sms",
+   "source": "CIB",
+   "body": "Never share your PIN\r\nTxn: 123456\r\nPurchase EGP 100.00",
+   "expect": {
+    "decision": "keep",
+    "kind": "registry",
+    "inst": "cib",
+    "last4": null
+   }
+  },
+  {
+   "id": "neg.newline.line_separator",
+   "tags": [
+    "negative"
+   ],
+   "config": "t1",
+   "channel": "sms",
+   "source": "NBE",
+   "body": "Never share your OTP Ref: 482913 Debit EGP 100.00",
+   "expect": {
+    "decision": "keep",
+    "kind": "registry",
+    "inst": "nbe",
+    "last4": null
+   }
+  },
+  {
+   "id": "neg.ar.newline.otp_footer_then_ref",
+   "tags": [
+    "negative"
+   ],
+   "config": "t1",
+   "channel": "sms",
+   "source": "NBE",
+   "body": "تم خصم 250.00 جم\nلا تشارك رمز التحقق مع أي حد\nرقم العملية: 48291356",
+   "expect": {
+    "decision": "keep",
+    "kind": "registry",
+    "inst": "nbe",
+    "last4": null
+   }
+  },
+  {
+   "id": "neg.ar.newline.ref_then_pin_footer",
+   "tags": [
+    "negative"
+   ],
+   "config": "t1",
+   "channel": "sms",
+   "source": "CIB",
+   "body": "تم تحويل 500.00 جنيه. رقم العملية: 482913\nالرقم السري لا يطلب أبدا",
+   "expect": {
+    "decision": "keep",
+    "kind": "registry",
+    "inst": "cib",
+    "last4": null
+   }
+  },
+  {
+   "id": "otp.en.tight_newline_colon",
+   "tags": [
+    "otp_drop"
+   ],
+   "config": "t1",
+   "channel": "sms",
+   "source": "NBE",
+   "body": "OTP:\n482913",
+   "expect": {
+    "decision": "drop",
+    "reason": "otp_or_promo_global"
+   }
+  },
+  {
+   "id": "otp.en.tight_newline_verification_code",
+   "tags": [
+    "otp_drop"
+   ],
+   "config": "t1",
+   "channel": "sms",
+   "source": "NBE",
+   "body": "Verification code\n482913",
+   "expect": {
+    "decision": "drop",
+    "reason": "otp_or_promo_global"
+   }
+  },
+  {
+   "id": "otp.en.tight_newline_is_crlf",
+   "tags": [
+    "otp_drop"
+   ],
+   "config": "t1",
+   "channel": "sms",
+   "source": "CIB",
+   "body": "Your OTP is\r\n482913\r\nDo not share it",
+   "expect": {
+    "decision": "drop",
+    "reason": "otp_or_promo_global"
+   }
+  },
+  {
+   "id": "otp.ar.tight_newline_colon",
+   "tags": [
+    "otp_drop"
+   ],
+   "config": "t1",
+   "channel": "sms",
+   "source": "NBE",
+   "body": "رمز التحقق:\n482913",
+   "expect": {
+    "decision": "drop",
+    "reason": "otp_or_promo_global"
+   }
+  },
+  {
+   "id": "otp.ar.tight_newline_temp_password",
+   "tags": [
+    "otp_drop"
+   ],
+   "config": "t1",
+   "channel": "sms",
+   "source": "CIB",
+   "body": "كلمة المرور المؤقتة\n48291356",
+   "expect": {
+    "decision": "drop",
+    "reason": "otp_or_promo_global"
+   }
+  },
+  {
+   "id": "otp.en.code_first_after_newline",
+   "tags": [
+    "otp_drop"
+   ],
+   "config": "t1",
+   "channel": "sms",
+   "source": "NBE",
+   "body": "Login attempt\n482913 is your OTP",
+   "expect": {
+    "decision": "drop",
+    "reason": "otp_or_promo_global"
+   }
+  },
+  {
+   "id": "otp.ar.code_first_after_newline",
+   "tags": [
+    "otp_drop"
+   ],
+   "config": "t1",
+   "channel": "sms",
+   "source": "NBE",
+   "body": "محاولة دخول\n482913 هو رمز التحقق",
+   "expect": {
+    "decision": "drop",
+    "reason": "otp_or_promo_global"
+   }
+  },
+  {
+   "id": "otp.en.bare_code_newline_message_start",
+   "tags": [
+    "otp_drop"
+   ],
+   "config": "t1",
+   "channel": "sms",
+   "source": "NBE",
+   "body": "Code:\n482913",
+   "expect": {
+    "decision": "drop",
+    "reason": "otp_or_promo_global"
+   }
+  },
+  {
+   "id": "otp.en.bare_code_newline_confirm_verb",
+   "tags": [
+    "otp_drop"
+   ],
+   "config": "t1",
+   "channel": "sms",
+   "source": "CIB",
+   "body": "Use code\n482913 to confirm your payment",
    "expect": {
     "decision": "drop",
     "reason": "otp_or_promo_global"

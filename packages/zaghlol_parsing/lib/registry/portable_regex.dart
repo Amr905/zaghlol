@@ -32,6 +32,11 @@ RegExp compileGuardPattern(String exported) => RegExp(exported, unicode: true);
 /// plus `/`): their escape means the literal character in every engine.
 const String _metaEscapes = r'^$\.*+?()[]{}|/';
 
+/// The one letter escape allowed: `\n`, a line feed in every engine. It is
+/// meaningful only in the global drop patterns, which run on `foldKeyLines`
+/// text (platform-channels §1.2); elsewhere it never matches.
+const String _lineFeedEscape = 'n';
+
 /// Shorthand classes and escapes whose meaning differs between the engines
 /// (`\b \w \d \s` are Unicode-aware in ICU, ASCII in ECMAScript; `\p`, `\u`,
 /// `\x` have different syntax).
@@ -40,6 +45,7 @@ const String _shorthand = 'bBwWdDsSpPux';
 /// Problems that make [exported] (the output of [guardPatternText]) not
 /// portable; empty means portable. Codes, sorted and unique:
 /// `uppercase`, `shorthand_escape`, `backreference`, `escape`,
+/// `control_char` (a raw control character; write a line feed as `\n`),
 /// `inline_flag`, `lookaround`, `named_group`, `atomic_group`, `possessive`,
 /// `posix_class`, `nested_class`, `class_set_operation`, `capture_groups`
 /// (only when [maxCaptureGroups] is given and exceeded), `no_capture_group`
@@ -60,6 +66,9 @@ List<String> portableRegexProblems(
     if (c >= 0x41 && c <= 0x5A) {
       problems.add('uppercase');
     }
+    if (c < 0x20 || c == 0x7F) {
+      problems.add('control_char');
+    }
     if (c == 0x5C) {
       // Backslash.
       if (i + 1 >= n) {
@@ -72,7 +81,9 @@ List<String> portableRegexProblems(
       } else if ((next.codeUnitAt(0) >= 0x30 && next.codeUnitAt(0) <= 0x39) ||
           next == 'k') {
         problems.add('backreference');
-      } else if (!(_metaEscapes.contains(next) || (inClass && next == '-'))) {
+      } else if (!(_metaEscapes.contains(next) ||
+          next == _lineFeedEscape ||
+          (inClass && next == '-'))) {
         problems.add('escape');
       }
       if (next.codeUnitAt(0) >= 0x41 && next.codeUnitAt(0) <= 0x5A) {

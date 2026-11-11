@@ -32,7 +32,8 @@ void main() {
       r'\x41': 'shorthand_escape',
       r'(a)\1': 'backreference',
       r'(?<n>a)\k<n>': 'backreference',
-      r'\n': 'escape',
+      'a\nb': 'control_char',
+      'a\tb': 'control_char',
       r'\t': 'escape',
       r'\-': 'escape',
       'a(?i)b': 'inline_flag',
@@ -78,6 +79,8 @@ void main() {
       r'[\-a-z]',
       r'[^0-9.,*x]',
       r'a\/b',
+      r'a\nb',
+      r'[^a-z\n]',
       'رقم ([0-9]{4})',
       r'\(\)\[\]\{\}\|\^\$\?\+\*\.\\',
     ]) {

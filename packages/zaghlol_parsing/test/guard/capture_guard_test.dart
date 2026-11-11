@@ -412,6 +412,11 @@ void main() {
         ('pin 1 2 ' * 500),
         ('كود ' * 1000),
         (', 1234 ' * 572).substring(0, 4000),
+        // Line breaks survive the global-drop fold (`foldKeyLines`).
+        ('otp\n' * 1000),
+        ('ref: 482913\n' * 334).substring(0, 4000),
+        ('otp is\n' * 572).substring(0, 4000),
+        ('رمز التحقق\n' * 364).substring(0, 4000),
       ];
       final sw = Stopwatch()..start();
       for (var i = 0; i < 1000; i++) {

@@ -129,9 +129,19 @@ LintReport lintRegistry({
   }
   // These lists run on every message too (pipeline stage 0, last-4 borrowing,
   // the generic parser), so they get the same runtime probe (T-033 M-2).
-  void probe(String file, String list, List<CompiledPattern> patterns) {
+  void probe(
+    String file,
+    String list,
+    List<CompiledPattern> patterns, {
+    bool lines = false,
+  }) {
     for (var i = 0; i < patterns.length; i++) {
-      if (_isSlowOnAdversarial(patterns[i].regex, null, maxMatchMillis)) {
+      if (_isSlowOnAdversarial(
+        patterns[i].regex,
+        null,
+        maxMatchMillis,
+        lines: lines,
+      )) {
         issues.add(
           RegistryIssue(
             file,
@@ -147,7 +157,7 @@ LintReport lintRegistry({
     probe('institutions/${inst.code}.json', 'drop', inst.drop);
     probe('institutions/${inst.code}.json', 'last4', inst.last4);
   }
-  probe('shared.json', 'globalDrop', registry.shared.globalDrop);
+  probe('shared.json', 'globalDrop', registry.shared.globalDrop, lines: true);
   probe('shared.json', 'globalLast4', registry.shared.globalLast4);
   probe('shared.json', 'bodyHints', registry.shared.bodyHints);
   probe('shared.json', 'senderHints', registry.shared.senderHints);
@@ -230,6 +240,8 @@ List<String> adversarialBodies(String? sample, int length) {
     '\u0627 ' * (length ~/ 2),
     '*' * length,
     'x' * length,
+    // Line breaks survive `foldKeyLines` (global drop patterns).
+    '1\n' * (length ~/ 2),
   ];
   if (sample != null && sample.isNotEmpty) {
     final b = StringBuffer();
@@ -243,7 +255,12 @@ List<String> adversarialBodies(String? sample, int length) {
   return out;
 }
 
-bool _isSlowOnAdversarial(RegExp regex, String? sample, int limitMillis) {
+bool _isSlowOnAdversarial(
+  RegExp regex,
+  String? sample,
+  int limitMillis, {
+  bool lines = false,
+}) {
   final clock = Stopwatch();
   int timeOnce(String folded) {
     clock
@@ -257,7 +274,7 @@ bool _isSlowOnAdversarial(RegExp regex, String? sample, int limitMillis) {
   final limitMicros = limitMillis * 1000;
   for (final length in adversarialBodyLengths) {
     for (final body in adversarialBodies(sample, length)) {
-      final folded = foldKey(body);
+      final folded = lines ? foldKeyLines(body) : foldKey(body);
       var best = timeOnce(folded);
       // A scheduler stall on a loaded runner inflates one sample, so a
       // candidate is confirmed by taking the best of three runs. Only the

@@ -82,7 +82,10 @@ void main() {
   group('fold', () {
     for (final f in fold) {
       test(f['id'], () {
-        expect(foldKey(f['in']! as String), f['out']);
+        final input = f['in']! as String;
+        expect(foldKey(input), f['out']);
+        // The Guard's global-drop fold: `lines`, or `out` when absent.
+        expect(foldKeyLines(input), f['lines'] ?? f['out']);
       });
     }
   });
