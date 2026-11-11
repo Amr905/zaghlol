@@ -1,5 +1,8 @@
 ﻿== SUMMARY ==
-RUNNING sha=c4aa9f04b0ced902629ba9bc94dbeec971602c21
+SKIP sha=c4aa9f04b0ced902629ba9bc94dbeec971602c21 no app/packages/backend changes
 
 == FULL LOG (last 1500 lines) ==
 auto task/T-131-appstore-verify c4aa9f04b0ced902629ba9bc94dbeec971602c21 2026-11-11T11:33:05.2130443+02:00
+
+
+
