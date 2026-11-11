@@ -1,5 +1,6 @@
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
+using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 using Zaghlol.Infrastructure.Persistence.Entities;
 
 namespace Zaghlol.Infrastructure.Persistence.Configurations;
@@ -166,6 +167,10 @@ internal sealed class StoreNotificationConfiguration : IEntityTypeConfiguration<
             t.HasCheckConstraint(
                 "ck_store_notifications_store_key_length",
                 $"char_length(store_key) <= {CheckSql.StoreKeyMaxLength}");
+
+            // T-134: store-defined type names only (T-133 reuses both).
+            t.HasCheckConstraint("ck_store_notifications_type", "type ~ '^[A-Z0-9_]{1,64}$'");
+            t.HasCheckConstraint("ck_store_notifications_subtype", "subtype IS NULL OR subtype ~ '^[A-Z0-9_]{1,64}$'");
         });
 
         builder.HasKey(x => x.Id);
@@ -176,5 +181,11 @@ internal sealed class StoreNotificationConfiguration : IEntityTypeConfiguration<
         builder.Property(x => x.Attempts).HasDefaultValue(0);
         builder.HasIndex(x => new { x.Store, x.ExternalId }).IsUnique();
         builder.HasIndex(x => x.ReceivedAt).HasDatabaseName("ix_store_notifications_received_at");
+
+        // T-134: the processor's pick (never-failed first, then due, then oldest) over unprocessed rows only.
+        builder.HasIndex(x => new { x.Store, x.NextAttemptAt, x.ReceivedAt })
+            .HasDatabaseName("ix_store_notifications_due")
+            .HasNullSortOrder(NullSortOrder.NullsFirst, NullSortOrder.NullsLast, NullSortOrder.NullsLast)
+            .HasFilter("processed_at IS NULL");
     }
 }

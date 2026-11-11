@@ -192,9 +192,14 @@ class SecretStoreApiError (
   val details: Any? = null
 ) : Throwable()
 
-/** The secrets the store knows. Each slot maps to one fixed native location. */
+/**
+ * The secrets the store knows. Each slot maps to one fixed native location.
+ * `backupKey` (T-148): Android blob `backup_key_v1.bin` under Keystore key
+ * `zaghlol_bk_kek_v1`; iOS account `backup_key_v1`. Same rules as `dbKey`.
+ */
 enum class SecretSlotMsg(val raw: Int) {
-  DB_KEY(0);
+  DB_KEY(0),
+  BACKUP_KEY(1);
 
   companion object {
     fun ofRaw(raw: Int): SecretSlotMsg? {

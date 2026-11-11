@@ -30,16 +30,31 @@ internal sealed class FakeAppleJwsVerifier : IAppleJwsVerifier
         return Transactions.TryGetValue(key, out var transaction) ? transaction : throw new AppleJwsException(AppleJwsFailure.Malformed);
     }
 
-    public AppleRenewalInfo VerifyRenewalInfo(Sensitive<string> jws, DateTimeOffset now)
+    /// <summary>Notification payloads by key (the "signedPayload" text).</summary>
+    public Dictionary<string, AppleNotification> Notifications { get; } = new(StringComparer.Ordinal);
+
+    public AppleRenewalInfo VerifyRenewalInfo(Sensitive<string> jws, JwsSource source, DateTimeOffset now)
     {
         var key = jws.Reveal();
-        Calls.Enqueue((key, JwsSource.Api));
+        Calls.Enqueue((key, source));
         if (Failures.TryGetValue(key, out var failure))
         {
             throw new AppleJwsException(failure);
         }
 
         return Renewals.TryGetValue(key, out var renewal) ? renewal : throw new AppleJwsException(AppleJwsFailure.Malformed);
+    }
+
+    public AppleNotification VerifyNotification(Sensitive<string> signedPayload, DateTimeOffset now)
+    {
+        var key = signedPayload.Reveal();
+        Calls.Enqueue((key, JwsSource.Notification));
+        if (Failures.TryGetValue(key, out var failure))
+        {
+            throw new AppleJwsException(failure);
+        }
+
+        return Notifications.TryGetValue(key, out var notification) ? notification : throw new AppleJwsException(AppleJwsFailure.Malformed);
     }
 }
 
@@ -53,6 +68,11 @@ internal sealed class FakeAppStoreServerApi : IAppStoreServerApi
     public Dictionary<string, AppleOrderLookupResult> Lookups { get; } = new(StringComparer.Ordinal);
 
     public Dictionary<AppStoreApi, AppStoreApiException> Errors { get; } = [];
+
+    /// <summary>History pages by environment, served in order (the page token is the page index).</summary>
+    public Dictionary<PurchaseEnvironment, List<AppleNotificationHistoryPage>> History { get; } = [];
+
+    public ConcurrentQueue<(PurchaseEnvironment Environment, DateTimeOffset Start, DateTimeOffset End, string? Token)> HistoryRequests { get; } = new();
 
     public ConcurrentQueue<(AppStoreApi Api, PurchaseEnvironment Environment, string Subject, StoreLane Lane)> Calls { get; } = new();
 
@@ -80,6 +100,16 @@ internal sealed class FakeAppStoreServerApi : IAppStoreServerApi
         return Lookups.TryGetValue(orderId.Reveal(), out var lookup)
             ? Task.FromResult(lookup)
             : Task.FromResult(new AppleOrderLookupResult(1, []));
+    }
+
+    public Task<AppleNotificationHistoryPage> GetNotificationHistoryAsync(PurchaseEnvironment environment, DateTimeOffset startDate, DateTimeOffset endDate, Sensitive<string>? paginationToken, StoreLane lane, CancellationToken cancellationToken)
+    {
+        var token = paginationToken?.Reveal();
+        HistoryRequests.Enqueue((environment, startDate, endDate, token));
+        Record(AppStoreApi.NotificationHistory, environment, token ?? string.Empty, lane);
+        var pages = History.TryGetValue(environment, out var list) ? list : [];
+        var index = token is null ? 0 : int.Parse(token, System.Globalization.CultureInfo.InvariantCulture);
+        return Task.FromResult(index < pages.Count ? pages[index] : new AppleNotificationHistoryPage([], false, null));
     }
 
     private void Record(AppStoreApi api, PurchaseEnvironment environment, string subject, StoreLane lane)

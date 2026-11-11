@@ -4,6 +4,7 @@ using System.Diagnostics.Metrics;
 using System.Text.RegularExpressions;
 using Zaghlol.Application.Contributions;
 using Zaghlol.Application.Flags;
+using Zaghlol.Application.Purchases;
 using Zaghlol.Application.Retention;
 using Zaghlol.Application.Sync;
 
@@ -53,6 +54,14 @@ public sealed partial class ZaghlolMetrics : IDisposable
     private readonly Counter<long> idempotencyClaim;
     private readonly Counter<long> appleJws;
     private readonly Counter<long> purchaseEnvironment;
+    private readonly Counter<long> assnIngest;
+    private readonly Counter<long> assnProcessed;
+    private readonly Histogram<double> assnLag;
+    private readonly Counter<long> assnReconcile;
+    private readonly Counter<long> assnRecovered;
+    private readonly Counter<long> assnRefundNotReflected;
+    private long assnBacklogLessThan1h;
+    private long assnBacklogAtLeast1h;
     private readonly ConcurrentDictionary<string, double> priceAges = new(StringComparer.Ordinal);
     private readonly string serviceVersion;
     private long unackedLessThan48h;
@@ -128,6 +137,16 @@ public sealed partial class ZaghlolMetrics : IDisposable
             "zaghlol.idempotency.claim",
             description: "Idempotency claims by outcome (claimed|replayed|reused|in_progress|taken_over|lease_lost).");
 
+        // T-134: App Store Server Notifications V2 (design note §7).
+        assnIngest = meter.CreateCounter<long>("zaghlol.assn.ingest", description: "ASSN V2 payloads by env (production|sandbox|none) and outcome.");
+        assnProcessed = meter.CreateCounter<long>("zaghlol.assn.processed", description: "ASSN V2 rows processed by type (reconcile-set name|test|other) and outcome.");
+        assnLag = meter.CreateHistogram<double>("zaghlol.assn.lag", "s", "ASSN V2 notification receipt to processed.");
+        assnReconcile = meter.CreateCounter<long>("zaghlol.assn.reconcile", description: "ASSN V2 reconciliation results by step (history|expiry) and outcome.");
+        assnRecovered = meter.CreateCounter<long>("zaghlol.assn.recovered", description: "Notifications the history job inserted (Apple delivery failed).");
+        assnRefundNotReflected = meter.CreateCounter<long>(
+            "zaghlol.assn.refund_not_reflected",
+            description: "REFUND/REVOKE notifications applied after the floor while Apple's API still answered otherwise.");
+        meter.CreateObservableGauge("zaghlol.assn.backlog", ObserveAssnBacklog, description: "Unprocessed ASSN V2 rows by age (lt_1h|ge_1h).");
         meter.CreateObservableGauge("zaghlol.purchase.unacked", ObserveUnacked, description: "Ackable Google purchases waiting for acknowledgement, by age (lt_48h|ge_48h).");
         meter.CreateObservableGauge("zaghlol.purchase.unacked.oldest_age", () => Volatile.Read(ref unackedOldestAgeSeconds), "s", "Age of the oldest unacknowledged purchase.");
         meter.CreateObservableGauge<double>("zaghlol.price.age", ObservePriceAges, "s", "Age of the newest quote per symbol.");
@@ -190,6 +209,27 @@ public sealed partial class ZaghlolMetrics : IDisposable
 
     /// <param name="outcome">One of <c>IdempotencyClaimOutcomes</c>.</param>
     public void IdempotencyClaim(string outcome) => idempotencyClaim.Add(1, Tags(("outcome", outcome)));
+
+    /// <summary><c>zaghlol.assn.ingest{env, outcome}</c> (T-134).</summary>
+    public void AssnIngested(string env, string outcome) => assnIngest.Add(1, Tags(("env", env), ("outcome", outcome)));
+
+    /// <summary><c>zaghlol.assn.processed{type, outcome}</c> (T-134).</summary>
+    public void AssnProcessed(string type, string outcome) => assnProcessed.Add(1, Tags(("type", type), ("outcome", outcome)));
+
+    public void AssnLag(TimeSpan lag) => assnLag.Record(Math.Max(0, lag.TotalSeconds));
+
+    /// <summary><c>zaghlol.assn.reconcile{step, outcome}</c> (T-134).</summary>
+    public void AssnReconciled(string step, string outcome) => assnReconcile.Add(1, Tags(("step", step), ("outcome", outcome)));
+
+    public void AssnRecovered(long count) => assnRecovered.Add(count);
+
+    public void AssnRefundNotReflected() => assnRefundNotReflected.Add(1);
+
+    public void SetAssnBacklog(long lessThan1h, long atLeast1h)
+    {
+        Interlocked.Exchange(ref assnBacklogLessThan1h, lessThan1h);
+        Interlocked.Exchange(ref assnBacklogAtLeast1h, atLeast1h);
+    }
 
     public void NotificationProcessed(TimeSpan lag) => notificationLag.Record(lag.TotalSeconds);
 
@@ -351,10 +391,30 @@ public sealed partial class ZaghlolMetrics : IDisposable
         {
             appleJws.Add(0, Tags(("source", "api"), ("outcome", outcome)));
         }
+
+        // T-134: every alerted ASSN series starts at 0.
+        foreach (var env in new[] { AssnTags.EnvProduction, AssnTags.EnvSandbox })
+        {
+            assnIngest.Add(0, Tags(("env", env), ("outcome", AssnTags.IgnoredProduct)));
+        }
+
+        foreach (var type in AssnTags.Types)
+        {
+            assnProcessed.Add(0, Tags(("type", type), ("outcome", AssnTags.EnvMismatch)));
+            assnProcessed.Add(0, Tags(("type", type), ("outcome", AssnTags.DeadLetter)));
+        }
+
+        foreach (var outcome in new[] { AssnTags.ReconcileInvalidEntry, AssnTags.ReconcileTruncated, AssnTags.ReconcileFailed })
+        {
+            assnReconcile.Add(0, Tags(("step", AssnTags.StepHistory), ("outcome", outcome)));
+        }
+
+        assnRecovered.Add(0);
+        assnRefundNotReflected.Add(0);
     }
 
     /// <summary>The <c>api</c> tag values of App Store calls (<c>AppStoreCallTags.Apis</c>).</summary>
-    internal static IReadOnlyList<string> AppleCallApis { get; } = ["tx_get", "sub_status", "order_lookup"];
+    internal static IReadOnlyList<string> AppleCallApis { get; } = ["tx_get", "sub_status", "order_lookup", "notification_history"];
 
     /// <summary>The <c>api</c> tag values of <c>zaghlol.store.call</c> (StoreCallTags.Apis).</summary>
     internal static IReadOnlyList<string> StoreCallApis { get; } = ["sub_get", "prod_get", "sub_ack", "prod_ack", "orders_get"];
@@ -363,6 +423,12 @@ public sealed partial class ZaghlolMetrics : IDisposable
     [
         new(Interlocked.Read(ref unackedLessThan48h), new KeyValuePair<string, object?>("age", "lt_48h")),
         new(Interlocked.Read(ref unackedAtLeast48h), new KeyValuePair<string, object?>("age", "ge_48h")),
+    ];
+
+    private IEnumerable<Measurement<long>> ObserveAssnBacklog() =>
+    [
+        new(Interlocked.Read(ref assnBacklogLessThan1h), new KeyValuePair<string, object?>("age", "lt_1h")),
+        new(Interlocked.Read(ref assnBacklogAtLeast1h), new KeyValuePair<string, object?>("age", "ge_1h")),
     ];
 
     private IEnumerable<Measurement<double>> ObservePriceAges() =>

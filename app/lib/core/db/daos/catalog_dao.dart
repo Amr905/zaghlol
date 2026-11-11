@@ -23,6 +23,9 @@ const int merchantKeyMaxLength = 64;
 bool isCanonicalMerchantKey(String key) =>
     key.length <= merchantKeyMaxLength && _merchantKey.hasMatch(key);
 
+/// Most keys [CatalogDao.aliasesByKeys] takes in one call.
+const int maxAliasLookupKeys = 512;
+
 /// Default and largest number of fuzzy candidates.
 const int defaultAliasCandidates = 10;
 const int maxAliasCandidates = 50;
@@ -203,6 +206,56 @@ class CatalogDao {
               .get(),
     );
   }
+
+  /// Aliases whose `alias_norm` is one of [keys] and whose `match` is one of
+  /// [kinds] (lookup step 3, T-075): one `IN (...)` on the unique
+  /// `(alias_norm, merchant_id)` index, never `LIKE`. Keys that are not
+  /// canonical are dropped (they can't be stored). At most
+  /// [maxAliasLookupKeys] keys; more is an [ArgumentError] (a canonical key
+  /// of 64 characters has far fewer token runs). Ordered by id.
+  Future<List<CatalogAliasRow>> aliasesByKeys(
+    Set<String> keys,
+    Set<String> kinds,
+  ) {
+    final ok = [
+      for (final k in keys)
+        if (isCanonicalMerchantKey(k)) k,
+    ];
+    if (ok.length > maxAliasLookupKeys) {
+      throw ArgumentError('too many keys', 'keys');
+    }
+    if (ok.isEmpty || kinds.isEmpty) return Future.value(const []);
+    return guardRead(
+      () =>
+          (_db.select(_db.catalogAliases)
+                ..where((a) => a.aliasNorm.isIn(ok) & a.match.isIn(kinds))
+                ..orderBy([(a) => OrderingTerm.asc(a.id)]))
+              .get(),
+    );
+  }
+
+  /// The merchants with [ids] (T-075), by id.
+  Future<List<CatalogMerchantRow>> merchantsByIds(Set<int> ids) {
+    if (ids.isEmpty) return Future.value(const []);
+    return guardRead(
+      () =>
+          (_db.select(_db.catalogMerchants)
+                ..where((m) => m.id.isIn(ids))
+                ..orderBy([(m) => OrderingTerm.asc(m.id)]))
+              .get(),
+    );
+  }
+
+  /// Every keyword of every language (T-075: the heuristic step loads them
+  /// once per run).
+  Future<List<CatalogKeywordRow>> allKeywords() => guardRead(
+    () =>
+        (_db.select(_db.catalogKeywords)..orderBy([
+              (k) => OrderingTerm.asc(k.lang),
+              (k) => OrderingTerm.asc(k.keywordNorm),
+            ]))
+            .get(),
+  );
 
   /// Fuzzy candidates for [key] (lookup step 4): aliases sharing trigrams
   /// with it in `catalog_alias_fts`, best `bm25` rank first, at most [limit]

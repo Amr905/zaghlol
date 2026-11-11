@@ -122,6 +122,18 @@ class SecretStoreHost(
  */
 object SecretStoreRegistration {
   @Volatile private var dbKeyStore: DbKeyStore? = null
+  @Volatile private var backupKeyStore: DbKeyStore? = null
+
+  private fun backupKeyStore(context: Context): DbKeyStore =
+    backupKeyStore
+      ?: synchronized(this) {
+        backupKeyStore
+          ?: DbKeyStore.forBackupKey(
+              dir = File(context.applicationContext.noBackupFilesDir, "keys"),
+              kek = AndroidKeystoreKek(AndroidKeystoreKek.BACKUP_KEK_ALIAS),
+            )
+            .also { backupKeyStore = it }
+      }
 
   private fun dbKeyStore(context: Context): DbKeyStore =
     dbKeyStore
@@ -136,15 +148,14 @@ object SecretStoreRegistration {
 
   fun register(messenger: BinaryMessenger, context: Context) {
     val store = dbKeyStore(context)
-    SecretStoreHostApi.setUp(
-      messenger,
-      SecretStoreHost(
-        slots = { slot ->
-          when (slot) {
-            SecretSlotMsg.DB_KEY -> store
-          }
-        }
-      ),
-    )
+    val backup = backupKeyStore(context)
+    SecretStoreHostApi.setUp(messenger, SecretStoreHost(slots = { slot -> slotStore(slot, store, backup) }))
   }
+
+  /** Slot → store. Each slot has its own blob, AAD and Keystore key (T-148). */
+  fun slotStore(slot: SecretSlotMsg, dbKey: SecretSlotStore, backupKey: SecretSlotStore): SecretSlotStore =
+    when (slot) {
+      SecretSlotMsg.DB_KEY -> dbKey
+      SecretSlotMsg.BACKUP_KEY -> backupKey
+    }
 }

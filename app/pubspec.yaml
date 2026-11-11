@@ -32,6 +32,13 @@ dependencies:
     path: ../packages/zaghlol_parsing
   # T-008: raw_messages.body_hash (SHA-256; dart-lang, already in the lock).
   crypto: ^3.0.6
+  # T-148 (ADR-011 amendment, architecture §7): backup AES-256-GCM and HKDF.
+  # cryptography_flutter swaps in the OS AES-GCM (javax.crypto / CryptoKit) on
+  # Android and iOS; host tests use the pure-Dart fallback. Exact pins (C4).
+  cryptography: 2.9.0
+  cryptography_flutter: 2.3.4
+  # T-148: Argon2id for the backup passphrase (pure Dart, no FFI, no network).
+  hashlib: 2.4.2
 
 dev_dependencies:
   flutter_test:

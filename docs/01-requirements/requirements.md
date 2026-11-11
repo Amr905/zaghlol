@@ -1000,6 +1000,7 @@ Canonical screen set: the spec's §13 16-screen set, with §5 content mapped ont
 | A-65 | Free backup is first suggested after 7 days of data. |
 | A-66 | "Always capture this sender" for generically parsed messages still sends each message to the review queue until the user has confirmed 3 parses from that sender. |
 | A-67 | "One free backup" = one backup **slot** (the user can refresh it anytime), not a single lifetime backup. Reminder when older than 30 days. |
+| A-68 | Among user rules the order is counterparty, then `merchant_norm`, then catalog merchant (most specific first); any rule beats the catalog (BR-CAT-01). Proposed by T-074, kept by T-075; PO may overrule. |
 
 ## 15. Open questions (non-blocking for approval unless marked)
 

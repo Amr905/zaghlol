@@ -10,6 +10,13 @@ public enum JwsSource
 
     /// <summary>Freshly signed by Apple for one of our App Store Server API calls: validated at now.</summary>
     Api,
+
+    /// <summary>
+    /// An App Store Server Notification V2 (the outer payload and its nested JWSs, T-134 design note §1 step 3): validated at its own
+    /// <c>signedDate</c> (bounded by now + 5 min), like <see cref="App"/>, because Apple's retries and history entries keep their
+    /// original signature. Safe because a notification is only a trigger: the worker re-reads the state from Apple's API.
+    /// </summary>
+    Notification,
 }
 
 /// <summary>Why an Apple JWS was refused (<c>zaghlol.purchase.jws{outcome}</c>).</summary>
@@ -123,15 +130,50 @@ public sealed record AppleRenewalInfo(
     DateTimeOffset? GracePeriodExpiresDate);
 
 /// <summary>
-/// The in-house Apple JWS verifier (T-131 design note §2): pure, synchronous, no I/O. The key comes only from <c>x5c[0]</c>, whose
-/// chain must build offline to the pinned Apple Root CA G3. Every failure is an <see cref="AppleJwsException"/>.
+/// The <c>data</c> object of a verified <c>responseBodyV2DecodedPayload</c>: the read fields only (T-134 design note §1 step 4).
+/// The two nested JWSs are still unverified here.
+/// </summary>
+/// <param name="Environment">The raw signed value; the ingest maps it (anything but <c>Production</c>/<c>Sandbox</c> is refused).</param>
+public sealed record AppleNotificationData(
+    string? BundleId,
+    string? Environment,
+    int? Status,
+    Sensitive<string>? SignedTransactionInfo,
+    Sensitive<string>? SignedRenewalInfo);
+
+/// <summary>
+/// The read fields of a verified <c>responseBodyV2DecodedPayload</c> (T-134 design note §1 step 4). Nothing else of the payload is
+/// read: not <c>appData</c>, <c>summary</c>, <c>externalPurchaseToken</c> or <c>unclaimInfo</c>. The values are still to be
+/// validated by the ingest (version, UUID, type pattern, freshness, bundle, environment).
+/// </summary>
+/// <param name="Data"><c>null</c> when the payload has no <c>data</c> object (no Gold event).</param>
+public sealed record AppleNotification(
+    string? NotificationType,
+    string? Subtype,
+    string? NotificationUuid,
+    string? Version,
+    DateTimeOffset SignedDate,
+    AppleNotificationData? Data);
+
+/// <summary>
+/// The in-house Apple JWS verifier (T-131 design note §2, T-134 §1): pure, synchronous, no I/O. The key comes only from
+/// <c>x5c[0]</c>, whose chain must build offline to the pinned Apple Root CA G3. Every failure is an <see cref="AppleJwsException"/>.
 /// </summary>
 public interface IAppleJwsVerifier
 {
     AppleTransaction VerifyTransaction(Sensitive<string> jws, JwsSource source, DateTimeOffset now);
 
-    /// <summary>Renewal info only ever comes from Apple's API, so it is always validated at <paramref name="now"/>.</summary>
-    AppleRenewalInfo VerifyRenewalInfo(Sensitive<string> jws, DateTimeOffset now);
+    /// <summary>
+    /// Renewal info from Apple's API (<see cref="JwsSource.Api"/>, validated at <paramref name="now"/>) or nested in a notification
+    /// (<see cref="JwsSource.Notification"/>, validated at its own <c>signedDate</c>). <see cref="JwsSource.App"/> is refused.
+    /// </summary>
+    AppleRenewalInfo VerifyRenewalInfo(Sensitive<string> jws, JwsSource source, DateTimeOffset now);
+
+    /// <summary>
+    /// The outer <c>signedPayload</c> of an App Store Server Notification V2: at most 65 536 characters, validated at its own
+    /// <c>signedDate</c> (at most now + 5 min). The nested JWSs are not verified here.
+    /// </summary>
+    AppleNotification VerifyNotification(Sensitive<string> signedPayload, DateTimeOffset now);
 }
 
 /// <summary>The App Store Server API calls the server makes.</summary>
@@ -140,6 +182,9 @@ public enum AppStoreApi
     TransactionInfo,
     SubscriptionStatuses,
     OrderLookup,
+
+    /// <summary><c>Get Notification History</c> (T-134 reconciliation).</summary>
+    NotificationHistory,
 }
 
 /// <summary>How an App Store Server API call ended (<c>zaghlol.store.call{outcome}</c>, the T-130 set).</summary>
@@ -223,6 +268,10 @@ public sealed record AppleLastTransaction(
 /// <summary><c>Look Up Order ID</c>: <c>status</c> and the signed transactions (still unverified).</summary>
 public sealed record AppleOrderLookupResult(int? Status, IReadOnlyList<Sensitive<string>> SignedTransactions);
 
+/// <summary>One page of <c>Get Notification History</c>: the <c>signedPayload</c>s (still unverified), and where to continue.</summary>
+/// <param name="PaginationToken">Apple's opaque continuation token; never logged.</param>
+public sealed record AppleNotificationHistoryPage(IReadOnlyList<Sensitive<string>> SignedPayloads, bool HasMore, Sensitive<string>? PaginationToken);
+
 /// <summary>
 /// The App Store Server API (T-131 design note §6). The environment picks the base URL (production or sandbox; never a fallback
 /// from one to the other). Each HTTP attempt, retries included, draws on the Apple call budget for <paramref name="lane"/>.
@@ -238,6 +287,18 @@ public interface IAppStoreServerApi
 
     /// <summary><c>GET /inApps/v1/lookup/{orderId}</c> on production (the endpoint doesn't exist in sandbox).</summary>
     Task<AppleOrderLookupResult> LookUpOrderIdAsync(Sensitive<string> orderId, StoreLane lane, CancellationToken cancellationToken);
+
+    /// <summary>
+    /// <c>POST /inApps/v1/notifications/history</c> with <c>{startDate, endDate, onlyFailures: true}</c>, continued with
+    /// <paramref name="paginationToken"/> when given (T-134 design note §4).
+    /// </summary>
+    Task<AppleNotificationHistoryPage> GetNotificationHistoryAsync(
+        PurchaseEnvironment environment,
+        DateTimeOffset startDate,
+        DateTimeOffset endDate,
+        Sensitive<string>? paginationToken,
+        StoreLane lane,
+        CancellationToken cancellationToken);
 }
 
 /// <summary>A per-install limit on verify calls that reach Apple (T-131 §6, FU-077 M-2: 10 an hour by default).</summary>

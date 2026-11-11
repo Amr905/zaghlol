@@ -160,4 +160,25 @@ class SecretStoreHostTest {
     call<Unit> { host.releaseBootstrapLease(lease, it) }.getOrThrow()
     assertCodeOnly(call<Unit> { host.delete(lease, SecretSlotMsg.DB_KEY, it) }, "LEASE_TIMEOUT")
   }
+
+  @Test
+  fun eachSlotRoutesToItsOwnStore() {
+    val db = FakeSlot()
+    val backup = FakeSlot()
+    assertTrue(SecretStoreRegistration.slotStore(SecretSlotMsg.DB_KEY, db, backup) === db)
+    assertTrue(SecretStoreRegistration.slotStore(SecretSlotMsg.BACKUP_KEY, db, backup) === backup)
+    val routed =
+      SecretStoreHost(
+        slots = { SecretStoreRegistration.slotStore(it, db, backup) },
+        leases = leases,
+        worker = { it.run() },
+        main = { it.run() },
+      )
+    val lease = call<Long> { routed.acquireBootstrapLease(10, it) }.getOrThrow()
+    call<ByteArray> { routed.createIfAbsent(lease, SecretSlotMsg.BACKUP_KEY, syntheticKey(83), it) }
+      .getOrThrow()
+    assertEquals(0, db.writes)
+    assertEquals(1, backup.writes)
+    assertArrayEquals(syntheticKey(83), backup.value)
+  }
 }

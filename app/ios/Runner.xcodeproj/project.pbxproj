@@ -23,6 +23,9 @@
 		5A0150000000000000000B05 /* DbKeyKeychain.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5A0150000000000000000B06 /* DbKeyKeychain.swift */; };
 		5A0150000000000000000B07 /* SecretStoreHost.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5A0150000000000000000B08 /* SecretStoreHost.swift */; };
 		5A0150000000000000000B09 /* SecretStoreTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5A0150000000000000000B0A /* SecretStoreTests.swift */; };
+		5A1480000000000000000C01 /* TextNormalizationApi.g.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5A1480000000000000000C02 /* TextNormalizationApi.g.swift */; };
+		5A1480000000000000000C03 /* TextNormalizationHost.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5A1480000000000000000C04 /* TextNormalizationHost.swift */; };
+		5A1480000000000000000C05 /* TextNormalizationTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5A1480000000000000000C06 /* TextNormalizationTests.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -73,6 +76,9 @@
 		5A0150000000000000000B06 /* DbKeyKeychain.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DbKeyKeychain.swift; sourceTree = "<group>"; };
 		5A0150000000000000000B08 /* SecretStoreHost.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SecretStoreHost.swift; sourceTree = "<group>"; };
 		5A0150000000000000000B0A /* SecretStoreTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SecretStoreTests.swift; sourceTree = "<group>"; };
+		5A1480000000000000000C02 /* TextNormalizationApi.g.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TextNormalizationApi.g.swift; sourceTree = "<group>"; };
+		5A1480000000000000000C04 /* TextNormalizationHost.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TextNormalizationHost.swift; sourceTree = "<group>"; };
+		5A1480000000000000000C06 /* TextNormalizationTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TextNormalizationTests.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -93,6 +99,7 @@
 				331C807B294A618700263BE5 /* RunnerTests.swift */,
 				5A1650000000000000000A05 /* BackupExclusionTests.swift */,
 				5A0150000000000000000B0A /* SecretStoreTests.swift */,
+				5A1480000000000000000C06 /* TextNormalizationTests.swift */,
 			);
 			path = RunnerTests;
 			sourceTree = "<group>";
@@ -159,6 +166,8 @@
 			children = (
 				5A0150000000000000000B02 /* SecretStoreApi.g.swift */,
 				5A0150000000000000000B0C /* Keys */,
+				5A1480000000000000000C02 /* TextNormalizationApi.g.swift */,
+				5A1480000000000000000C07 /* Text */,
 			);
 			path = Platform;
 			sourceTree = "<group>";
@@ -171,6 +180,14 @@
 				5A0150000000000000000B08 /* SecretStoreHost.swift */,
 			);
 			path = Keys;
+			sourceTree = "<group>";
+		};
+		5A1480000000000000000C07 /* Text */ = {
+			isa = PBXGroup;
+			children = (
+				5A1480000000000000000C04 /* TextNormalizationHost.swift */,
+			);
+			path = Text;
 			sourceTree = "<group>";
 		};
 /* End PBXGroup section */
@@ -321,6 +338,7 @@
 				331C808B294A63AB00263BE5 /* RunnerTests.swift in Sources */,
 				5A1650000000000000000A04 /* BackupExclusionTests.swift in Sources */,
 				5A0150000000000000000B09 /* SecretStoreTests.swift in Sources */,
+				5A1480000000000000000C05 /* TextNormalizationTests.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -336,6 +354,8 @@
 				5A0150000000000000000B03 /* BootstrapLeaseManager.swift in Sources */,
 				5A0150000000000000000B05 /* DbKeyKeychain.swift in Sources */,
 				5A0150000000000000000B07 /* SecretStoreHost.swift in Sources */,
+				5A1480000000000000000C01 /* TextNormalizationApi.g.swift in Sources */,
+				5A1480000000000000000C03 /* TextNormalizationHost.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

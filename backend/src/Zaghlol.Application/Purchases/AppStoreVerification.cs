@@ -19,6 +19,8 @@ public sealed partial class AppStoreVerification(
     IPurchaseTelemetry telemetry,
     TimeProvider clock) : IStoreVerification
 {
+    private readonly AppleSubscriptionReader reader = new(jws, apple, catalog, telemetry);
+
     /// <summary><c>Retry-After</c> for an Apple failure that carries none.</summary>
     public const int DefaultRetryAfterSeconds = 30;
 
@@ -219,6 +221,11 @@ public sealed partial class AppStoreVerification(
         && api.Type == app.Type
         && api.Environment == app.Environment;
 
+    /// <summary>
+    /// The subscription read, shared with the notification worker (<see cref="AppleSubscriptionReader"/>, T-134 §2 step 3). An API
+    /// failure is an outage (502, or 503 for our budget); anything else Apple answered is doubt (502; the reader already counted a
+    /// JWS failure or contradiction as an alerted <c>api</c> failure).
+    /// </summary>
     private async Task<(string ProductId, GoldPlan Plan, MappedAppleState Mapped)> ReadSubscriptionAsync(
         PurchaseEnvironment environment,
         Sensitive<string> transactionId,
@@ -227,53 +234,20 @@ public sealed partial class AppStoreVerification(
         DateTimeOffset now,
         CancellationToken cancellationToken)
     {
-        IReadOnlyList<AppleLastTransaction> items;
         try
         {
-            items = await apple.GetAllSubscriptionStatusesAsync(environment, transactionId, lane, cancellationToken);
+            var read = await reader.ReadSubscriptionAsync(environment, transactionId, originalTransactionId, lane, now, cancellationToken);
+            return (read.ProductId, read.Plan, read.Mapped);
         }
-        catch (AppStoreApiException error)
+        catch (AppleReadException error) when (error.ApiError is { } api)
         {
             // Get Transaction Info already found this transaction: nothing here is a final answer about it.
-            throw Unavailable(error);
+            throw Unavailable(api);
         }
-
-        var ours = items.Where(i => string.Equals(i.OriginalTransactionId?.Reveal(), originalTransactionId, StringComparison.Ordinal)).ToList();
-        if (ours.Count != 1 || ours[0].SignedTransactionInfo is not { } signedLatest || ours[0].SignedRenewalInfo is not { } signedRenewal)
-        {
-            throw Contradiction();
-        }
-
-        var latest = VerifyApiCopy(signedLatest, now);
-        AppleRenewalInfo renewal;
-        try
-        {
-            renewal = jws.VerifyRenewalInfo(signedRenewal, now);
-            telemetry.AppleJwsChecked(JwsSource.Api, null);
-        }
-        catch (AppleJwsException error)
-        {
-            telemetry.AppleJwsChecked(JwsSource.Api, error.Reason);
-            throw Doubt();
-        }
-
-        var expectedEnvironment = environment == PurchaseEnvironment.Sandbox ? AppleEnvironment.Sandbox : AppleEnvironment.Production;
-        if (!string.Equals(latest.OriginalTransactionId?.Reveal(), originalTransactionId, StringComparison.Ordinal)
-            || !string.Equals(latest.BundleId, catalog.BundleId, StringComparison.Ordinal)
-            || latest.Environment != expectedEnvironment
-            || (renewal.OriginalTransactionId is { } renewalOriginal && !string.Equals(renewalOriginal.Reveal(), originalTransactionId, StringComparison.Ordinal))
-            || (renewal.Environment != AppleEnvironment.Unknown && renewal.Environment != expectedEnvironment))
-        {
-            throw Contradiction();
-        }
-
-        // The latest transaction's product must be one of ours (our configuration is behind Apple otherwise).
-        if (!catalog.TryGet(latest.ProductId, out var latestProduct) || latestProduct.Type != AppleProductType.AutoRenewable)
+        catch (AppleReadException)
         {
             throw Doubt();
         }
-
-        return (latest.ProductId!, latestProduct.Plan, AppStoreStateMapping.MapSubscription(ours[0].Status, latest, renewal));
     }
 
     /// <summary>An Apple API JWS, validated at now. A failure is Apple contradicting itself: 502 and the <c>api</c> alert.</summary>

@@ -385,8 +385,10 @@ void main() {
       store.calls.clear();
       final db = openedDb(await world.open(seed: 62));
       addTearDown(db.close);
-      // SecretSlot has dbKey only; the wipe steps never call the store.
-      expect(SecretSlot.values, [SecretSlot.dbKey]);
+      // The wipe steps never call the store, and the DB key bootstrap never
+      // touches another slot (T-148 added backupKey).
+      expect(store.slotsTouched, isNotEmpty);
+      expect(store.slotsTouched.toSet(), {SecretSlot.dbKey});
       expect(store.deleteCalls, 1);
     });
   });
