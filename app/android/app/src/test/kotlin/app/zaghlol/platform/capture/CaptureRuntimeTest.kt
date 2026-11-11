@@ -13,6 +13,8 @@ import io.flutter.plugin.common.BinaryMessenger
 import io.flutter.plugin.common.StandardMessageCodec
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.async
+import kotlinx.coroutines.cancelAndJoin
+import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking
 import org.junit.After
 import org.junit.Assert.assertEquals
@@ -193,6 +195,42 @@ class CaptureRuntimeTest {
         cycle.await()
         h.answerClose()
         assertEquals(listOf("drain", "close", "destroy"), h.log)
+    }
+
+    /**
+     * Design note section 3 (time limits): a worker run stopped by WorkManager
+     * (quota, 10 min, cancel) shuts the headless engine down at once (close
+     * first) and never destroys it before the drain and close replies; a run
+     * that ends normally lets it linger.
+     */
+    @Test
+    fun aStoppedWorkerRunShutsTheEngineDownAtOnceAndNeverDestroysIt() = runBlocking {
+        val rt = CaptureRuntime.create(seams())
+        rt.store.put("a")
+        val run = launch(Dispatchers.Default) { rt.ingest.run(0) }
+        repeat(400) { if (main.onMain { starter.handles.size == 1 && starter.handles[0].drains.size == 1 }) return@repeat; Thread.sleep(5) }
+        val h = starter.handles[0]
+        run.cancelAndJoin()
+        main.flush()
+        assertEquals("close at once, no destroy yet", listOf("drain", "close"), h.log)
+        h.answerDrain()
+        h.answerClose()
+        main.flush()
+        assertEquals(listOf("drain", "close", "destroy"), h.log)
+    }
+
+    @Test
+    fun aNormalRunLetsTheEngineLinger() = runBlocking {
+        val rt = CaptureRuntime.create(seams())
+        rt.store.put("a")
+        val run = async(Dispatchers.Default) { rt.ingest.run(0) }
+        repeat(400) { if (main.onMain { starter.handles.size == 1 && starter.handles[0].drains.size == 1 }) return@repeat; Thread.sleep(5) }
+        val h = starter.handles[0]
+        rt.store.ack(rt.store.pendingIds().toSet())
+        h.answerDrain()
+        run.await()
+        main.flush()
+        assertEquals("lingering: no close before the linger ends", listOf("drain"), h.log)
     }
 
     @Test
