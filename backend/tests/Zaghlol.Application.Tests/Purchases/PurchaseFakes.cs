@@ -108,9 +108,17 @@ internal sealed class FakePlayDeveloperApi : IPlayDeveloperApi
         return Task.FromResult(VoidedPages.TryDequeue(out var page) ? page : new PlayVoidedPage([], null));
     }
 
+    /// <summary>Exact exceptions to throw, consumed one per call before <see cref="Failures"/> (a 410, a 429 with Retry-After).</summary>
+    public Queue<PlayApiException> Throws { get; } = new();
+
     private void Record(PlayApi api, string subject, string? productId, StoreLane lane)
     {
         Calls.Enqueue((api, subject, productId, lane));
+        if (Throws.TryDequeue(out var error))
+        {
+            throw error;
+        }
+
         if (Failures.TryGetValue(api, out var queue) && queue.TryDequeue(out var outcome))
         {
             throw new PlayApiException(api, outcome, outcome == PlayCallOutcome.ClientError ? 400 : 503);
