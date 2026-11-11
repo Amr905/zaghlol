@@ -113,6 +113,20 @@ class CaptureStatusStore(
     fun recordKeyInvalidated(wallMs: Long) = record { keyInvalidated = earliest(keyInvalidated, wallMs) }
 
     /**
+     * The alerts of one drain (FU-104 #8), recorded with one status write
+     * (none when the drain found nothing). Never throws.
+     */
+    fun recordDrain(scope: SpoolStore.DrainScope) {
+        val deleted = scope.decryptDeleted
+        val keyAt = scope.keyInvalidatedAtMs
+        if (deleted <= 0 && keyAt < 0) return
+        record {
+            if (deleted > 0) decryptDeleted += deleted
+            if (keyAt >= 0) keyInvalidated = earliest(keyInvalidated, keyAt)
+        }
+    }
+
+    /**
      * The current status with any pending in-memory alerts merged (and
      * persisted when possible). Throws [CaptureStatusUnavailableException]
      * when the file can't be read now.

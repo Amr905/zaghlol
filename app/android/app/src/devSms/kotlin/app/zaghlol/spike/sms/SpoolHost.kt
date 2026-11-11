@@ -71,7 +71,7 @@ class SpoolHost(
                     metrics?.drained(id, rec.rxElapsedNs, rec.bootCount, currentCycle)
                 }
                 SpoolStore.ReadResult.Deleted -> SpikeLog.e(SpikeLog.Code.SPOOL_DECRYPT_FAILED)
-                SpoolStore.ReadResult.Unavailable -> SpikeLog.e(SpikeLog.Code.SPOOL_READ_DEFERRED)
+                is SpoolStore.ReadResult.Unavailable -> SpikeLog.e(SpikeLog.Code.SPOOL_READ_DEFERRED)
                 SpoolStore.ReadResult.Missing -> Unit
             }
         }
@@ -93,6 +93,8 @@ class SpoolHost(
     override fun getSpoolStatus(): SpoolStatus = notAvailable()
 
     override fun clearSpoolAlerts(seq: Long): Unit = notAvailable()
+
+    override fun holdSpool(ids: List<String>): Unit = notAvailable()
 
     /** The engine is going away: drop its claim. */
     fun detach() {

@@ -52,6 +52,12 @@ object SpoolPolicy {
     const val GENERIC_PER_WINDOW = 10
 
     const val GENERIC_WINDOW_MS = 60_000L
+
+    /**
+     * Held entries (T-041, FU-105): at most this many; beyond it an entry the
+     * use case could not store stays pending (the stuck path).
+     */
+    const val MAX_HELD = 50
 }
 
 /** The spool's limits; tests shrink them, production uses [SpoolPolicy]. */
@@ -62,6 +68,7 @@ data class SpoolLimits(
     val genericMaxBytes: Long = SpoolPolicy.GENERIC_MAX_BYTES,
     val genericPerWindow: Int = SpoolPolicy.GENERIC_PER_WINDOW,
     val genericWindowMs: Long = SpoolPolicy.GENERIC_WINDOW_MS,
+    val maxHeld: Int = SpoolPolicy.MAX_HELD,
 )
 
 /**
@@ -171,8 +178,31 @@ class SpoolStore(
         /** Already gone (acked or deleted meanwhile). */
         object Missing : ReadResult()
 
-        /** Could not be read now (I/O, Keystore); the entry is kept. */
-        object Unavailable : ReadResult()
+        /**
+         * Could not be read now; the entry is kept. [keyRelated]: the cipher or
+         * Keystore failed (not the file), so the next entries would most likely
+         * fail the same way (FU-104 #2: the drain stops scanning).
+         */
+        class Unavailable(val keyRelated: Boolean) : ReadResult() {
+            override fun toString(): String = "Unavailable($keyRelated)"
+        }
+    }
+
+    /**
+     * Alerts found by the reads of one drain (FU-104 #8): written to the
+     * capture status once, by the host, when the drain ends.
+     */
+    class DrainScope {
+        var decryptDeleted = 0
+            internal set
+        var keyInvalidatedAtMs = -1L
+            internal set
+
+        internal fun keyInvalidated(wallMs: Long) {
+            if (keyInvalidatedAtMs < 0 || wallMs < keyInvalidatedAtMs) keyInvalidatedAtMs = wallMs
+        }
+
+        override fun toString(): String = "DrainScope($decryptDeleted, $keyInvalidatedAtMs)"
     }
 
     /** Per-directory state shared by every instance over the same path. */
@@ -207,6 +237,17 @@ class SpoolStore(
                     if (isEntryName(f.name) || isTmpName(f.name)) {
                         n++
                         bytes += f.length()
+                    }
+                }
+                // Held entries (FU-105) count towards the caps; an unlistable
+                // held directory refuses nothing it can't count.
+                if (heldDir.isDirectory) {
+                    val held = heldDir.listFiles() ?: throw IOException("SPOOL_LIST")
+                    for (f in held) {
+                        if (isEntryName(f.name)) {
+                            n++
+                            bytes += f.length()
+                        }
                     }
                 }
                 val after = bytes + plain.size + SpoolCipher.NONCE_BYTES + SpoolCipher.TAG_BYTES
@@ -256,13 +297,104 @@ class SpoolStore(
         return genericWrites.size
     }
 
-    /** Pending entry ids, oldest first. Foreign file names are ignored. */
+    /**
+     * Pending entry ids, oldest first. Foreign file names and held entries
+     * (`held/`) are ignored. An unlistable directory reads as empty; callers
+     * that must tell "empty" from "unknown" use [pendingCountOrNull].
+     */
     fun pendingIds(): List<String> {
         val names = dir.list() ?: return emptyList()
         return names.filter(::isEntryName).map { it.removeSuffix(".bin") }.sorted()
     }
 
     fun pendingCount(): Int = pendingIds().size
+
+    /**
+     * Pending entries, or null when the directory exists (or may exist) but
+     * can't be listed now (I/O): "unknown" is never "empty" (self-check 1).
+     */
+    fun pendingCountOrNull(): Int? {
+        val names = dir.list()
+        if (names == null) return if (isProvenAbsent(dir)) 0 else null
+        return names.count(::isEntryName)
+    }
+
+    /** Held entries (FU-105); 0 when there are none or the directory can't be listed. */
+    fun heldCount(): Int = heldDir.list()?.count(::isEntryName) ?: 0
+
+    /**
+     * FU-105: moves a drained entry the use case could not store even alone
+     * from `spool/<ulid>.bin` to `spool/held/<ulid>.bin` (atomic rename, same
+     * bytes, so the AAD still matches). Held entries are not pending, are
+     * never drained and still count towards the caps. Returns false (and
+     * changes nothing) for an invalid id, an entry that is gone, or when
+     * [SpoolLimits.maxHeld] entries are held already: the entry then stays
+     * pending (stuck). Throws IOException when the rename fails; the entry is
+     * then still pending. The caller passes only ids its engine drained.
+     */
+    fun hold(id: String): Boolean {
+        if (!UlidGenerator.isValid(id)) return false
+        synchronized(lock) {
+            val from = entry(id)
+            if (isProvenAbsent(from)) return false
+            if (!heldDir.isDirectory && !heldDir.mkdirs() && !heldDir.isDirectory) throw IOException("SPOOL_HELD_DIR")
+            val held = heldDir.list() ?: throw IOException("SPOOL_LIST")
+            if (held.count(::isEntryName) >= limits.maxHeld) return false
+            files.move(from, File(heldDir, "$id.bin"))
+            try {
+                files.syncDir(dir)
+                files.syncDir(heldDir)
+            } catch (_: Throwable) {
+                // Best effort, as for writes: the rename itself is atomic.
+            }
+            return true
+        }
+    }
+
+    /**
+     * FU-105 release, called once at process start ([app.zaghlol.platform.capture.CaptureRuntime]):
+     * when [appVersion] differs from `held/.app_version` (or the file is
+     * absent or unreadable as a number), every held entry is renamed back
+     * to the spool (an app update may fix the cause) and the version is
+     * rewritten. Never deletes anything. Returns the number released; an I/O
+     * failure leaves the remaining entries held for the next start.
+     */
+    fun releaseHeldIfVersionChanged(appVersion: Long): Int = synchronized(lock) {
+        if (!heldDir.isDirectory) return 0
+        val versionFile = File(heldDir, HELD_VERSION_FILE)
+        val stored = try {
+            if (isProvenAbsent(versionFile)) null else versionFile.readText().trim().toLongOrNull()
+        } catch (_: IOException) {
+            return 0 // can't tell: keep them held
+        }
+        if (stored == appVersion) return 0
+        val names = heldDir.list() ?: return 0
+        var released = 0
+        for (name in names.filter(::isEntryName)) {
+            try {
+                files.move(File(heldDir, name), File(dir, name))
+                released++
+            } catch (_: Exception) {
+                return released // version not rewritten: the rest are retried next start
+            }
+        }
+        try {
+            files.syncDir(dir)
+        } catch (_: Throwable) {
+            // Best effort.
+        }
+        try {
+            val tmp = File(heldDir, HELD_VERSION_FILE + TMP_SUFFIX)
+            files.open(tmp).use { out ->
+                files.write(out, appVersion.toString().toByteArray(Charsets.US_ASCII))
+                files.sync(out)
+            }
+            files.move(tmp, versionFile)
+        } catch (_: Exception) {
+            // Next start compares again; releasing twice is harmless.
+        }
+        released
+    }
 
     /**
      * Reads and decrypts one entry. Not authentic (tag failure, truncation,
@@ -277,9 +409,10 @@ class SpoolStore(
      * first. The clock only chooses ladder or not; a deletion always needs a
      * tag failure.
      */
-    fun read(id: String): ReadResult {
+    fun read(id: String, scope: DrainScope? = null): ReadResult {
         if (!UlidGenerator.isValid(id)) return ReadResult.Missing
         var transient = false
+        var keyRelated = false
         for ((attempt, delayMs) in RETRY_DELAYS_MS.withIndex()) {
             if (attempt > 0) sleep(delayMs)
             val bytes = try {
@@ -307,8 +440,8 @@ class SpoolStore(
                 }
             } catch (_: AEADBadTagException) {
                 if (attempt == 0 && !transient && writtenBeforeCurrentKey(id)) {
-                    status?.recordKeyInvalidated(wallClock())
-                    return deleteOnProof(id)
+                    if (scope != null) scope.keyInvalidated(wallClock()) else status?.recordKeyInvalidated(wallClock())
+                    return deleteOnProof(id, scope)
                 }
                 // proof; retry per schedule
             } catch (_: SpoolFormatException) {
@@ -316,10 +449,11 @@ class SpoolStore(
             } catch (_: Exception) {
                 // Keystore / provider failure: proves nothing.
                 transient = true
+                keyRelated = true
             }
         }
-        if (transient) return ReadResult.Unavailable
-        return deleteOnProof(id)
+        if (transient) return ReadResult.Unavailable(keyRelated)
+        return deleteOnProof(id, scope)
     }
 
     private fun writtenBeforeCurrentKey(id: String): Boolean {
@@ -331,16 +465,19 @@ class SpoolStore(
         return UlidGenerator.timeMs(id) < created
     }
 
-    private fun deleteOnProof(id: String): ReadResult {
+    private fun deleteOnProof(id: String, scope: DrainScope?): ReadResult {
         val f = entry(id)
-        if (f.delete()) return ReadResult.Deleted
+        if (f.delete()) {
+            if (scope != null) scope.decryptDeleted++
+            return ReadResult.Deleted
+        }
         return try {
             Files.readAttributes(f.toPath(), "basic:size")
-            ReadResult.Unavailable // still there: keep, retried at the next drain
+            ReadResult.Unavailable(false) // still there: keep, retried at the next drain
         } catch (_: NoSuchFileException) {
             ReadResult.Missing // acked meanwhile
         } catch (_: Exception) {
-            ReadResult.Unavailable
+            ReadResult.Unavailable(false)
         }
     }
 
@@ -394,8 +531,17 @@ class SpoolStore(
 
     private fun entry(id: String) = File(dir, "$id.bin")
 
+    private val heldDir get() = File(dir, HELD_DIR)
+
+    /** Test seams (FU-104 I-1: the production graph is checked by identity). */
+    internal val keyCreatedAtMsFn: () -> Long? get() = keyCreatedAtMs
+    internal val monoClockMsFn: () -> Long get() = monoClockMs
+    internal val statusStore: CaptureStatusStore? get() = status
+
     companion object {
         const val TMP_SUFFIX = ".tmp"
+        const val HELD_DIR = "held"
+        const val HELD_VERSION_FILE = ".app_version"
 
         /** One [Shared] per canonical directory path, for the whole process. */
         private val SHARED = ConcurrentHashMap<String, Shared>()

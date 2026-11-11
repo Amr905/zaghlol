@@ -354,6 +354,7 @@ class SpoolStatus {
     required this.decryptDeleted,
     this.keyInvalidatedAtMs,
     required this.guardState,
+    required this.held,
   });
 
   /// Entries waiting in the spool.
@@ -381,6 +382,10 @@ class SpoolStatus {
 
   GuardConfigState guardState;
 
+  /// Held entries (T-041, FU-105): stored in the spool but not storable even
+  /// alone; not pending, retried after the next app update. Diagnostics only.
+  int held;
+
   List<Object?> _toList() {
     return <Object?>[
       pending,
@@ -393,6 +398,7 @@ class SpoolStatus {
       decryptDeleted,
       keyInvalidatedAtMs,
       guardState,
+      held,
     ];
   }
 
@@ -413,6 +419,7 @@ class SpoolStatus {
       decryptDeleted: result[7]! as int,
       keyInvalidatedAtMs: result[8] as int?,
       guardState: result[9]! as GuardConfigState,
+      held: result[10]! as int,
     );
   }
 
@@ -434,7 +441,8 @@ class SpoolStatus {
         _deepEquals(firstMissedSmsAtMs, other.firstMissedSmsAtMs) &&
         _deepEquals(decryptDeleted, other.decryptDeleted) &&
         _deepEquals(keyInvalidatedAtMs, other.keyInvalidatedAtMs) &&
-        _deepEquals(guardState, other.guardState);
+        _deepEquals(guardState, other.guardState) &&
+        _deepEquals(held, other.held);
   }
 
   @override
@@ -811,6 +819,29 @@ class AndroidCaptureHostApi {
     );
     final Future<Object?> pigeonVar_sendFuture = pigeonVar_channel.send(
       <Object?>[seq],
+    );
+    final pigeonVar_replyList = await pigeonVar_sendFuture as List<Object?>?;
+
+    _extractReplyValueOrThrow(
+      pigeonVar_replyList,
+      pigeonVar_channelName,
+      isNullValid: true,
+    );
+  }
+
+  /// T-041 (FU-105): entries IngestRawMessages could not store even alone
+  /// (IngestBatchResult.kept), called after the ack of the rest. Only ids this
+  /// engine drained; moved to spool/held/ (platform-channels.md 1.3). IO_ERROR.
+  Future<void> holdSpool(List<String> ids) async {
+    final pigeonVar_channelName =
+        'dev.flutter.pigeon.zaghlol.AndroidCaptureHostApi.holdSpool$pigeonVar_messageChannelSuffix';
+    final pigeonVar_channel = BasicMessageChannel<Object?>(
+      pigeonVar_channelName,
+      pigeonChannelCodec,
+      binaryMessenger: pigeonVar_binaryMessenger,
+    );
+    final Future<Object?> pigeonVar_sendFuture = pigeonVar_channel.send(
+      <Object?>[ids],
     );
     final pigeonVar_replyList = await pigeonVar_sendFuture as List<Object?>?;
 
