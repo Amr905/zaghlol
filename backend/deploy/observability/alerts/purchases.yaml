@@ -83,7 +83,7 @@ groups:
           severity: page
         annotations:
           summary: "A {{ $labels.store }} notification was dead-lettered"
-          description: "Inspect the dead-letter queue; the notification was not applied. apple: store_notifications rows with processed_at set and last_error in the failure codes (error-handling section 2); the hourly expiry sweep still repairs subscriptions, a dead-lettered lifetime REFUND needs a human."
+          description: "Inspect the dead-letter queue; the notification was not applied. apple: store_notifications rows with processed_at set and last_error in the failure codes (error-handling section 2); the hourly expiry sweep still repairs subscriptions, a dead-lettered lifetime REFUND needs a human. play (T-133): the same columns with store google_play; the hourly sweep re-enqueues a subscription only after a renewal, a dead-lettered VOIDED_PURCHASE needs a human."
 
       # T-134: App Store Server Notifications V2.
       - alert: ZaghlolAssnBacklogOld
@@ -136,6 +136,84 @@ groups:
         annotations:
           summary: "The ASSN history reconciliation reported {{ $labels.outcome }}"
           description: "invalid_entry: an entry from Apple's API failed verification (check the pinned root and Apple news). truncated: more than 20 pages in 7 days. failed: the history call failed; the next daily run retries."
+
+      # T-133: Google RTDN (Pub/Sub push).
+      - alert: ZaghlolRtdnBacklogOld
+        expr: max(zaghlol_rtdn_backlog{age="ge_1h"}) > 0
+        for: 10m
+        labels:
+          severity: page
+        annotations:
+          summary: "Google RTDN rows have waited more than an hour"
+          description: "The RTDN processor is stuck or deferring (Play 429, our worker budget or its acknowledge reserve, an open circuit). Check the worker log and zaghlol_store_call_total{store=\"google_play\"}."
+
+      - alert: ZaghlolNotificationProcessorHeartbeat
+        # Per store, the freshest worker replica: a processor that never completes a run (or never starts) is caught too.
+        expr: min by (store) (zaghlol_notification_processor_heartbeat_age_seconds) > 600
+        for: 5m
+        labels:
+          severity: page
+        annotations:
+          summary: "The {{ $labels.store }} notification processor has not completed a run for 10 minutes"
+          description: "No worker replica ran the processor (or found its advisory lock held). Check that the worker runs and can reach PostgreSQL."
+
+      - alert: ZaghlolRtdnAuthConfig
+        # Sustained audience, e-mail or key failures mean Google's genuine pushes are refused: RTDN silently stops.
+        expr: sum by (outcome) (increase(zaghlol_rtdn_auth_total{outcome=~"bad_audience|bad_email|keys_unavailable"}[15m])) > 5
+        for: 15m
+        labels:
+          severity: page
+        annotations:
+          summary: "Pub/Sub pushes fail authentication with {{ $labels.outcome }}"
+          description: "bad_audience/bad_email: Purchases:Google:Rtdn:Audience or PushServiceAccount differs from the push subscription. keys_unavailable: Google's discovery or JWKS can't be fetched."
+
+      - alert: ZaghlolRtdnIgnoredPackage
+        expr: sum(increase(zaghlol_rtdn_ingest_total{outcome="ignored_package"}[30m])) > 0
+        labels:
+          severity: page
+        annotations:
+          summary: "An authenticated RTDN named another package"
+          description: "The Play Console topic points at this endpoint for another app (or Purchases:Google:PackageName is wrong). The message was acknowledged and dropped."
+
+      - alert: ZaghlolRtdnIgnored
+        expr: sum by (outcome) (increase(zaghlol_rtdn_ingest_total{outcome=~"ignored_malformed|ignored_stale|ignored_subscription"}[1h])) > 0
+        labels:
+          severity: warn
+        annotations:
+          summary: "Authenticated RTDN pushes were ignored ({{ $labels.outcome }})"
+          description: "Acknowledged (204) without a row. ignored_subscription: Purchases:Google:Rtdn:Subscription differs from the push subscription. Others: an unexpected envelope or payload."
+
+      - alert: ZaghlolRtdnProcessedWarn
+        expr: sum by (type, outcome) (increase(zaghlol_rtdn_processed_total{outcome=~"env_mismatch|refused|token_gone"}[30m])) > 0
+        labels:
+          severity: warn
+        annotations:
+          summary: "An RTDN row ended {{ $labels.outcome }} ({{ $labels.type }})"
+          description: "env_mismatch: a test purchase for a production row (or the reverse); nothing written. refused: a row the ingest never produces (worker-login injection?); no Play call. token_gone: Play answered 410 for a purchase that still grants Gold."
+
+      - alert: ZaghlolRtdnRefundNotReflected
+        expr: sum(increase(zaghlol_rtdn_refund_not_reflected_total[1h])) > 0
+        labels:
+          severity: warn
+        annotations:
+          summary: "A void or revoke was applied while Play still reported the purchase as entitling"
+          description: "After 40 minutes Play's answer was written (a refund without revoke keeps Gold until Play ends it; T-133 PO question 3, provisional). Look the purchase up in purchase_events (cause rtdn:VOIDED_PURCHASE or rtdn:SUBSCRIPTION_REVOKED)."
+
+      - alert: ZaghlolRtdnRecovered
+        expr: sum(increase(zaghlol_rtdn_recovered_total[1d])) > 0
+        labels:
+          severity: warn
+        annotations:
+          summary: "The voided-purchases job found voids no RTDN delivered"
+          description: "Google's pushes to /v1/notifications/google are failing. Check the Pub/Sub subscription, its authentication settings and the notifications-google rate limit."
+
+      - alert: ZaghlolRtdnVoidedProblem
+        expr: sum by (outcome) (increase(zaghlol_rtdn_reconcile_total{step="voided", outcome=~"failed|truncated"}[1d])) > 0
+        labels:
+          severity: warn
+        annotations:
+          summary: "The voided-purchases reconciliation reported {{ $labels.outcome }}"
+          description: "failed: the Play call failed; the next daily run repeats the 30 days. truncated: more than 10 pages of voids."
 
   - name: zaghlol-prices
     rules:

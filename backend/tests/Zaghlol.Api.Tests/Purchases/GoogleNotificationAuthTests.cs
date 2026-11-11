@@ -296,6 +296,43 @@ public class GoogleNotificationAuthTests(GoogleAuthHostFixture fixture) : IClass
         Assert.Equal(0, fixture.BodyReads[spy]);
     }
 
+    /// <summary>
+    /// §7: each check answers its own fixed outcome word (<c>zaghlol.rtdn.auth{outcome}</c>), so every check is individually
+    /// observable (and individually provable: the RS256-only signature parameters and the RSA-only key cache would still refuse an
+    /// <c>alg</c> forgery if the header check were missing, but not with <c>bad_alg</c>).
+    /// </summary>
+    [Theory]
+    [InlineData("no_header", "missing")]
+    [InlineData("basic", "malformed")]
+    [InlineData("two_segments", "malformed")]
+    [InlineData("too_long", "malformed")]
+    [InlineData("alg_none", "bad_alg")]
+    [InlineData("alg_hs256", "bad_alg")]
+    [InlineData("alg_rs512", "bad_alg")]
+    [InlineData("alg_es256", "bad_alg")]
+    [InlineData("unknown_kid", "unknown_kid")]
+    [InlineData("signature_byte", "bad_signature")]
+    [InlineData("foreign_key", "bad_signature")]
+    [InlineData("jwk_header", "bad_signature")]
+    [InlineData("issuer_other", "bad_issuer")]
+    [InlineData("audience_array", "bad_audience")]
+    [InlineData("audience_other", "bad_audience")]
+    [InlineData("email_case", "bad_email")]
+    [InlineData("email_verified_string", "unverified_email")]
+    [InlineData("expired", "expired")]
+    [InlineData("issued_in_future", "expired")]
+    public async Task EachForgeryIsCountedUnderItsOwnOutcome(string forgery, string outcome)
+    {
+        var validator = fixture.Services.GetRequiredService<PubSubPushTokenValidator>();
+        var (single, many) = Forge(forgery);
+        var header = many is not null
+            ? new Microsoft.Extensions.Primitives.StringValues([.. many])
+            : single is null ? Microsoft.Extensions.Primitives.StringValues.Empty : new Microsoft.Extensions.Primitives.StringValues(single);
+
+        Assert.Equal(outcome, await validator.ValidateAsync(header, CancellationToken.None));
+        Assert.Equal("ok", await validator.ValidateAsync(new Microsoft.Extensions.Primitives.StringValues("Bearer " + RtdnPushKit.Token(Google, Now)), CancellationToken.None));
+    }
+
     /// <summary>Positive control for the spy: an authenticated push is read (and, with no database, answered 503 so Pub/Sub retries).</summary>
     [Fact]
     public async Task AValidPushIsReadAndADatabaseFailureIs503()
