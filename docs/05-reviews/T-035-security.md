@@ -121,3 +121,16 @@ An attacker can rotate alphanumeric IDs that match `senderHints` plus `bodyHints
 | I-1…I-6 | Info | no | as noted |
 
 Re-review scope after the fix: the delta to `shared.json` (all three test registries), `golden.json`, and a rerun of the probe bodies above. M-1 and M-2 touch only data and golden cases, so this is likely a Lead delta check under the review-round policy if the change stays small and the new golden cases fail without it.
+
+---
+
+## Re-review (delta) — `58fbe5e..eaa2e10` (Opus, 2026-11-11)
+
+**Verdict: APPROVED from the security side.** M-1 and M-2 are closed; no Medium or higher remains. (The code-review re-review has one new major about dropped transactions, which is a correctness issue, not a security one.)
+
+- **M-2 (footer keeps a transaction): closed.** Every probe body from this report keeps; the new `neg.*` goldens fail on the old config (checked against `58fbe5e` `t1_base.json`).
+- **M-1 (OTP shapes kept): closed.** The listed wordings (PIN, password, amount between keyword and code, code first, `3D secure`, Arabic password/PIN) drop. Own run: 13 of 16 varied OTP bodies drop, including `Your PIN for InstaPay is 8421`, `Your temporary password: 48291356`, and an Arabic purchase OTP with an amount before the code.
+- **Residual kept OTPs: Low, acceptable.** Kept in my run: `استخدم الرمز 482913 لتأكيد العملية` (bare `الرمز`), `Enter 482913 to confirm your payment`, `Your Fawry code is 482913`, and a long-gap `one time password for transfer of EGP 5,000.00 to Ahmed is 739204`. Downstream a kept OTP carries no amount, so it cannot auto-save as a transaction; it is stored encrypted (spool, DB, FTS, backup) and shows in review as unrecognised. A code that is still valid when stored is a bounded exposure on a locked, encrypted device; it is not a reason to block. L-4 (new, Low, T-036): add Arabic `الرمز` with lead-in/confirm verb, and add real-institution OTP fixtures.
+- **Newline residual and the security trade-off.** I support making a line break a boundary (code-review finding 1), as long as `OTP:` newline `482913` and `Verification code` newline `482913` still drop. That keeps the security posture and removes the data-loss case. Do not respond by widening the code shapes.
+- **Performance:** worst adversarial body about 1.6-2.0 ms on a noisy machine, similar to the old worst; linear. No regression that matters.
+- ADR-005 *Threats* names the residuals accurately.
