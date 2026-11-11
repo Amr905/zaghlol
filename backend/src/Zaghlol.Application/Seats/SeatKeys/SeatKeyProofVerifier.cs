@@ -143,7 +143,9 @@ internal static class SeatKeyParser
 
     /// <summary>
     /// Exactly <paramref name="chars"/> characters from <c>[A-Za-z0-9_-]</c> that decode to <paramref name="bytes"/> bytes and
-    /// re-encode to the same text: rejects padding, whitespace and non-canonical trailing bits, which the decoder would accept.
+    /// re-encode to the same text. The length and alphabet checks reject padding and whitespace, which the .NET decoder accepts;
+    /// the .NET 10 decoder already refuses non-zero trailing bits, so the re-encode comparison is defence in depth that keeps the
+    /// rule independent of the runtime's decoder.
     /// </summary>
     private static bool TryDecodeCanonical(string? text, int chars, int bytes, out byte[] value)
     {

@@ -126,6 +126,7 @@ public sealed class SeatKeyInfrastructureTests
         var challenge = SeatChallenge.ForRestore(new byte[32]);
         var keys = verifier.ParseAndVerify([a.Prove(challenge, Install), b.Prove(challenge, Install)], challenge, Install).Keys!;
         var stored = await hasher.SeatKeyHashAsync(Purchase, keys.Others[0], CancellationToken.None);
+        var registered = (await hasher.CheckElementZeroAsync(Install, null, keys, CancellationToken.None)).Computed;
 
         foreach (var fault in new[] { FakeKmsFault.Throw, FakeKmsFault.Crypto })
         {
@@ -133,6 +134,8 @@ public sealed class SeatKeyInfrastructureTests
             var errors = new[]
             {
                 await Assert.ThrowsAsync<KmsUnavailableException>(() => hasher.CheckElementZeroAsync(Install, null, keys, CancellationToken.None)),
+                await Assert.ThrowsAsync<KmsUnavailableException>(() => hasher.CheckElementZeroAsync(Install, registered, keys, CancellationToken.None)),
+                await Assert.ThrowsAsync<KmsUnavailableException>(() => hasher.SeatCheckAsync(CancellationToken.None)),
                 await Assert.ThrowsAsync<KmsUnavailableException>(() => hasher.MatchSeatAsync(Purchase, stored, keys, CancellationToken.None)),
                 await Assert.ThrowsAsync<KmsUnavailableException>(() => hasher.SeatKeyHashAsync(Purchase, keys.ElementZero, CancellationToken.None)),
             };

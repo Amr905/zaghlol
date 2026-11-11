@@ -67,6 +67,7 @@ public static class P256
             return SeatKeyRejection.BadSignature;
         }
 
+        // 1 ≤ r, s ≤ n − 1 explicitly (§3 step 6); the platform verifier refuses these too, so this doesn't depend on it.
         var r = Unsigned(signature[..FieldLength]);
         var s = Unsigned(signature[FieldLength..]);
         if (r.IsZero || s.IsZero || r >= Order || s >= Order)
