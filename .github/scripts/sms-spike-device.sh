@@ -199,7 +199,10 @@ instr() {
   local name=$1; shift
   sh_ am instrument -w -r "$@" "$RUNNER" > "$OUT/it-$name.txt" 2>&1 || true
   tr -d '\r' < "$OUT/it-$name.txt" | grep -E "^(OK|FAILURES|Tests run|INSTRUMENTATION_RESULT: shortMsg|[0-9]+\))" | head -n 20 || true
-  tr -d '\r' < "$OUT/it-$name.txt" | grep -qE "^OK \([0-9]+ tests?\)"
+  tr -d '\r' < "$OUT/it-$name.txt" | grep -qE "^OK \([0-9]+ tests?\)" && return 0
+  # Failure causes into the log (the artifact is not always reachable); test data is synthetic.
+  tr -d '\r' < "$OUT/it-$name.txt" | awk '/^INSTRUMENTATION_STATUS: stack=/{n=6} n>0{print "  " substr($0,1,300); n--}' | head -n 60 || true
+  return 1
 }
 KILL=app.zaghlol.platform.spool.SpoolKillRecoveryTest
 # skipped <name>: assumption failures (am instrument counts them inside "OK (n tests)").
@@ -213,16 +216,17 @@ tr -d '\r' < "$OUT/it-spool.txt" | grep -qE "^OK \(0 tests\)" && fail "no spool 
 echo "spool instrumented: $(skipped spool) skipped"
 [ "$(skipped spool)" = 0 ] || fail "a spool instrumented test was skipped by an assumption (it-spool.txt)"
 # Guard (T-038, security M-1): fatal; at least one test must run and every skip must be allowed by name.
-instr guard -e package app.zaghlol.platform.guard || fail "guard instrumented tests failed (it-guard.txt)"
+instr guard -e package app.zaghlol.platform.guard && guard_ok=1 || guard_ok=0
+GUARD_TIMING=$(tr -d '\r' < "$OUT/it-guard.txt" | sed -n 's/^INSTRUMENTATION_STATUS: guard\.timing=//p' | head -n 1)
+echo "guard timing: ${GUARD_TIMING:-none}"
+[ "$guard_ok" = 1 ] || fail "guard instrumented tests failed (it-guard.txt)"
 tr -d '\r' < "$OUT/it-guard.txt" | grep -qE "No tests found|^OK \(0 tests\)" && fail "no guard instrumented test ran"
 guard_skips=$(skipped_names guard | tr '\n' ' ')
 echo "guard instrumented: $(skipped guard) skipped ${guard_skips:+($guard_skips)}"
 for t in $guard_skips; do
   case " $GUARD_ALLOWED_SKIPS " in *" $t "*) ;; *) fail "guard instrumented test $t was skipped by an assumption (it-guard.txt)" ;; esac
 done
-GUARD_TIMING=$(tr -d '\r' < "$OUT/it-guard.txt" | sed -n 's/^INSTRUMENTATION_STATUS: guard\.timing=//p' | head -n 1)
 [ -n "$GUARD_TIMING" ] || fail "the guard timing test reported no guard.timing value"
-echo "guard timing: $GUARD_TIMING"
 instr share -e class app.zaghlol.platform.share.ShareIntakeInstrumentedTest || echo "::warning::T-060 ShareIntakeInstrumentedTest failed on API $API (it-share.txt); reported to the Lead, not a T-039 gate"
 # AC1 for real: phase write halts the process between fsync and rename of entry 21.
 instr kill-write -e class "$KILL#phaseWrite" -e spoolPhase write && fail "the write phase finished instead of halting"
