@@ -55,7 +55,7 @@ void main() {
     final db = AppDatabase(NativeDatabase.memory(), validateSchema: false);
     addTearDown(db.close);
     expect(db.schemaVersion, appSchemaVersion);
-    expect(appSchemaVersion, 2);
+    expect(appSchemaVersion, 3);
   });
 
   for (final background in [false, true]) {

@@ -4,6 +4,9 @@
 // the committed v2 dump (CHECKs included), the new tables work, and a failing
 // step is rolled back byte for byte. Also: the frozen step SQL equals the
 // dump, and version pairs without a path are refused. Keys synthetic.
+// T-018: the app is at v3 now, so a v1 file runs v1 → v2 → v3 through the
+// opener; v1 + the frozen v2 statements must still equal the v2 dump. The
+// v2 → v3 step itself is tested in migration_v3_test.dart.
 
 import 'package:drift/drift.dart' show Migrator, driftRuntimeOptions;
 import 'package:drift/native.dart';
@@ -103,18 +106,31 @@ void main() {
     );
   });
 
-  test('a fresh v2 equals the committed v2 dump, CHECKs included', () async {
-    final fresh = await freshShape();
-    expect(fresh.where((l) => l.startsWith('check ')), isNotEmpty);
-    expect(sameSchemaShape(fresh, await dumpShape(2)), isTrue);
+  test('v1 + the frozen v2 statements equal the committed v2 dump, CHECKs '
+      'included', () async {
+    final db = ContractDb(NativeDatabase.memory());
+    addTearDown(db.close);
+    for (final sql in [...v1Sql, for (final (_, s) in v2AddedObjects) s]) {
+      await db.customStatement(sql);
+    }
+    final shape = await schemaShapeOf(db);
+    expect(shape.where((l) => l.startsWith('check ')), isNotEmpty);
+    expect(sameSchemaShape(shape, await dumpShape(2)), isTrue);
+  });
+
+  test('a fresh database equals the latest committed dump', () async {
+    expect(
+      sameSchemaShape(await freshShape(), await dumpShape(appSchemaVersion)),
+      isTrue,
+    );
   });
 
   for (final background in [true, false]) {
     final mode = background ? 'background' : 'foreground';
 
     test(
-      'v1 → v2 through the opener: copy made then deleted, db_meta kept, '
-      'schema = fresh v2 = dump, FK check clean, new tables work ($mode)',
+      'v1 → latest through the opener: copy made then deleted, db_meta '
+      'kept, schema = fresh = dump, FK check clean, v2 tables work ($mode)',
       () async {
         await prepareV1(world);
         final result = await world.open(
@@ -126,7 +142,7 @@ void main() {
         expect(opened.migratedFrom, 1);
         expect(opened.diagCode, 'DB_MIGRATED');
         expect(db.attemptedUpgradeFrom, 1);
-        expect(await userVersionOf(db), 2);
+        expect(await userVersionOf(db), appSchemaVersion);
         expect(world.files.migrateTmp.existsSync(), isFalse);
         expect(world.files.migratePart.existsSync(), isFalse);
         expect(await metaValue(db, 'marker'), 'v1');
@@ -134,7 +150,10 @@ void main() {
 
         final live = await schemaShapeOf(db);
         expect(sameSchemaShape(live, await freshShape()), isTrue);
-        expect(sameSchemaShape(live, await dumpShape(2)), isTrue);
+        expect(
+          sameSchemaShape(live, await dumpShape(appSchemaVersion)),
+          isTrue,
+        );
         expect(
           await db.customSelect('PRAGMA foreign_key_check').get(),
           isEmpty,
@@ -206,7 +225,7 @@ void main() {
       expect(failed.code, DbOpenFailureCode.migrationFailed);
       expect(failed.restored, isTrue);
       expect(failed.fromVersion, 1);
-      expect(failed.toVersion, 2);
+      expect(failed.toVersion, appSchemaVersion);
       await settle(world);
       expect(sameSnapshot(before, snapshotFiles(world.dbDir)), isTrue);
       expect(world.wipeLog, isEmpty);
@@ -231,7 +250,7 @@ void main() {
   );
 
   test(
-    'v1 → next (FakeNextDatabase) runs the real v1 → v2 step first',
+    'v1 → next (FakeNextDatabase) runs the real v1 → v2 → v3 steps first',
     () async {
       await prepareV1(world);
       final result = await world.openWith(
@@ -255,7 +274,16 @@ void main() {
     () async {
       final probe = _Probe();
       addTearDown(probe.close);
-      for (final (from, to) in [(0, 2), (2, 2), (1, 3), (2, 1), (1, 1)]) {
+      const v = appSchemaVersion;
+      for (final (from, to) in [
+        (0, v),
+        (v, v),
+        (1, v + 1),
+        (v, 1),
+        (1, 1),
+        (1, 2),
+        (2, 2),
+      ]) {
         await expectLater(
           probe.run(from, to),
           throwsA(

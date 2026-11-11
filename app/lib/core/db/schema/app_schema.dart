@@ -13,10 +13,11 @@ import 'package:drift/drift.dart';
 part 'app_schema.g.dart';
 
 /// The current schema version. v1: `db_meta` only (T-016). v2: batch A of
-/// the financial tables in financial.drift (T-017). Must equal
+/// the financial tables in financial.drift (T-017). v3: batch B in
+/// financial_b.drift (T-018) and the T-017 review trigger fixes. Must equal
 /// [AppSchema.schemaVersion], which drift_dev reads as a literal (a test
 /// checks both).
-const int appSchemaVersion = 2;
+const int appSchemaVersion = 3;
 
 /// Key/value facts about the database itself (T-016), e.g.
 /// `restore_notice_due`. Not user settings (T-019 owns `settings`).
@@ -33,11 +34,14 @@ class DbMeta extends Table {
 }
 
 /// The generated schema. [AppDatabase] (app_database.dart) adds behaviour.
-@DriftDatabase(tables: [DbMeta], include: {'financial.drift'})
+@DriftDatabase(
+  tables: [DbMeta],
+  include: {'financial.drift', 'financial_b.drift'},
+)
 abstract class AppSchema extends _$AppSchema {
   AppSchema(super.e);
 
   // A literal: drift_dev reads it from the source (make-migrations).
   @override
-  int get schemaVersion => 2;
+  int get schemaVersion => 3;
 }

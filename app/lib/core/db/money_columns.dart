@@ -1,6 +1,6 @@
 // T-017: rows ↔ Money (design note §4; T-012 "Serialization"). The domain's
 // toStorage/fromStorage are the only conversion; this file adds the column
-// pairs of the batch-A tables. Amounts are integer minor units end to end:
+// pairs of the batch-A tables (T-018: and batch B). Amounts are integer minor units end to end:
 // no double anywhere. A corrupt stored pair (unknown code, out of range,
 // half-NULL) throws [CorruptMoney], whose message never echoes free text.
 
@@ -66,5 +66,29 @@ extension TransactionsCompanionMoney on TransactionsCompanion {
       originalAmountMinor: Value(s?.minor),
       originalCurrency: Value(s?.currency),
     );
+  }
+}
+
+// T-018: batch-B money columns.
+
+extension BudgetRowMoney on BudgetRow {
+  /// The budget limit, in the budget's one currency (FR-BUD-02).
+  Money get limit => moneyOf(limitMinor, currency);
+}
+
+extension CycleSummaryRowMoney on CycleSummaryRow {
+  Money get income => moneyOf(incomeMinor, currency);
+  Money get spend => moneyOf(spendMinor, currency);
+}
+
+extension RecurringItemRowMoney on RecurringItemRow {
+  Money get amount => moneyOf(amountMinor, currency);
+}
+
+extension RecurringItemsCompanionMoney on RecurringItemsCompanion {
+  /// Sets `amount_minor` and `currency` from [amount].
+  RecurringItemsCompanion withAmount(Money amount) {
+    final s = amount.toStorage();
+    return copyWith(amountMinor: Value(s.minor), currency: Value(s.currency));
   }
 }

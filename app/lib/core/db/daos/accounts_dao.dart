@@ -36,13 +36,15 @@ class AccountsDao {
     Money? balance,
     Money? available,
     String? sourceTxnId,
-  }) {
+  }) async {
+    // async (T-017 review n-1): a mismatch is a failed Future, not a
+    // synchronous throw.
     for (final m in [balance, available]) {
       if (m != null && m.currency != currency) {
         throw CurrencyMismatch(m.currency, currency);
       }
     }
-    return guardWrite(
+    await guardWrite(
       () => _db
           .into(_db.accountBalances)
           .insertOnConflictUpdate(
