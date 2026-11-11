@@ -40,8 +40,21 @@ class SpikeRuntime private constructor(context: Context) {
     val engineIds = AtomicLong(1)
     val headless = HeadlessEngine(this)
 
-    /** First receive in this process with no engine yet: a cold-process run. */
+    /** Set by the first receive of a process started for it: a cold-process run. */
     @Volatile var processWokenBySms = false
+
+    private val firstReceive = java.util.concurrent.atomic.AtomicBoolean(true)
+
+    /**
+     * Called by the receiver: the run is "cold process" when this is the
+     * process's first receive, it started less than [COLD_START_WINDOW_MS]
+     * before it, and no engine exists.
+     */
+    fun noteReceive(rxElapsedMs: Long) {
+        if (!firstReceive.compareAndSet(true, false)) return
+        val age = rxElapsedMs - android.os.Process.getStartElapsedRealtime()
+        if (age in 0 until COLD_START_WINDOW_MS && headless.isIdle() && uiEvents == null) processWokenBySms = true
+    }
 
     /** The UI engine's event API while MainActivity's engine is attached (main thread only). */
     @Volatile var uiEvents: CaptureEventsApi? = null
@@ -77,6 +90,8 @@ class SpikeRuntime private constructor(context: Context) {
     }
 
     companion object {
+        const val COLD_START_WINDOW_MS = 5_000L
+
         @Volatile private var instance: SpikeRuntime? = null
 
         fun get(context: Context): SpikeRuntime =

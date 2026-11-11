@@ -20,7 +20,7 @@ class SpikeSmsReceiver : BroadcastReceiver() {
         val elapsedNs = SystemClock.elapsedRealtimeNanos()
         if (intent.action != Telephony.Sms.Intents.SMS_RECEIVED_ACTION) return
         val rt = SpikeRuntime.get(context)
-        if (rt.headless.isIdle() && rt.uiEvents == null) rt.processWokenBySms = true
+        rt.noteReceive(elapsedNs / 1_000_000)
         val parts = try {
             Telephony.Sms.Intents.getMessagesFromIntent(intent)
                 ?.filterNotNull()
