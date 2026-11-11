@@ -53,8 +53,8 @@ The copy is UX-owned (Egyptian colloquial with standard Arabic for the legal tex
 |---|---|---|---|---|---|
 | `K_db` | 256-bit random | First launch (`Random.secure()`; all-equal output rejected) | Own channel `SecretStoreHostApi` (ADR-002 Amendment 2026-11-10, T-015). Android: wrapped by a Keystore AES-256-GCM key `zaghlol_db_kek_v1` (non-exportable, StrongBox if present, no auth/unlock requirement), blob in `noBackupFilesDir/keys/`. iOS: Keychain generic password `kSecAttrAccessibleAfterFirstUnlockThisDeviceOnly`, not synchronizable, access group pinned to Runner's own application-identifier group. Never cached in a provider; zeroized after the first open. | SQLite3MultipleCiphers `PRAGMA key` | Never leaves the device; not in backups (FR-BAK-07). If lost (Keystore invalidated) the DB is unreadable, and the app offers restore from backup. Rekey supported (`PRAGMA rekey`) for future rotation. |
 | `K_spool` | AES-256-GCM | First launch | Android Keystore (non-exportable; TEE-backed AndroidKeyStore, not StrongBox (bulk data; Lead decision 2026-11-10, T-060 review C1)); iOS Keychain (shared access group with the Share Extension) | Spool entries, Guard config, encrypted temp files (images, PDFs, export staging) | Rotated if invalidated; pending spool is lost (rare, logged) |
-| `K_bk` (backup data key) | 256-bit random | First backup setup | Secure storage (for automatic backups) **and** wrapped inside each backup file header | AES-256-GCM chunks of the backup | Re-wrapped when the passphrase changes. A new `K_bk` only if the user resets backup (old backups then need the old passphrase). |
-| `KEK_pass` | Argon2id(passphrase, salt 16 B, m = 64 MiB, t = 3, p = 1) → 256-bit | At passphrase set / restore | Never stored | Wraps `K_bk` (AES-256-GCM key wrap) | Parameters stored in the header for future upgrades |
+| `K_bk` (backup data key) | 256-bit random (`Random.secure()`, all-equal output rejected) | First backup setup | `SecretStoreHostApi` slot `backupKey` (same native rules as `dbKey`; Android Keystore key `zaghlol_bk_kek_v1`, blob `noBackupFilesDir/keys/backup_key_v1.bin`; iOS item `backup_key_v1`, `AfterFirstUnlockThisDeviceOnly`), so automatic backups need no passphrase; **and** wrapped inside each backup file header. The non-secret key slot `{kdf, wrap, kbkId}` is kept in `secure_state` (`backup.key_slot.v1`) and excluded from the snapshot (T-148) | Per-file chunk key and `K_snap` via HKDF (§5) | **Rotated when the passphrase changes** (T-148): anyone holding an old file and the old passphrase can recover the old `K_bk`, so a re-wrap alone would not protect future backups. Old backups then need the old passphrase. If the secret is lost while the slot exists, the passphrase unwraps the local slot and restores it (no rotation). |
+| `KEK_pass` | Argon2id(P, salt 16 B, m = 64 MiB, t = 3, p = 1, v0x13) → 256-bit; P = UTF-8 of the passphrase after Arabic-Indic/Extended digits → ASCII, space separators → U+0020, NFC (T-148 §4) | At passphrase set / restore | Never stored | Wraps `K_bk` (AES-256-GCM key wrap) | Parameters stored in the header for future upgrades |
 | Install token, account token, entitlement token | — | Backend | `secure_state` table in the encrypted DB | API auth / Gold | Cleared on Delete everything; the account token and the cached entitlement are dropped at sign-out (D-61(c)) |
 | Trusted-time state (`hw`, `lb`, monotonic and boot reference, `lastServerTime`, `tampered`; the outstanding time nonce in memory only) | — | App | `secure_state` in the encrypted DB | Gold expiry against trusted time (NFR-SEC-08) | Re-anchored only by the echo of the outstanding time nonce (R4-2); cleared on Delete everything |
 | Seat keys (iOS, D-55) | P-256, Secure Enclave | Per install, at first need | Keychain generic-password item holding the SE-wrapped key, `kSecAttrAccessibleAfterFirstUnlockThisDeviceOnly`, not synchronizable; up to 5 (this install + 4 earlier) | Same-iPhone recognition proofs (`seatKeys`); the own key is registered to the install by the server (keyed hash) | Never leave the Secure Enclave, but usable as a signing oracle on a jailbroken phone (bounded server-side, §1). **Kept by "Delete everything"** (D-55: same-iPhone Delete everything is not a move) and by app deletion; lost on device erase. Hold no financial or account data |
@@ -107,25 +107,34 @@ The copy is UX-owned (Egyptian colloquial with standard Arabic for the legal tex
 - **While locked:** a blank lock screen sits over the router. On Android, `FLAG_SECURE` + `setRecentsScreenshotEnabled(false)` hide the app-switcher snapshot; on iOS, a privacy overlay is drawn on `sceneWillResignActive`.
 - **Notifications:** amounts are hidden on the lock screen when the user chooses (FR-NTF-03). This is the default when app lock is on.
 
-## 5. Backup cryptography (ADR-011, FR-BAK-*)
+## 5. Backup cryptography (ADR-011, FR-BAK-*; format v1 fixed by the T-148 design note)
 
 ```
-file  = header ‖ chunk_1 ‖ … ‖ chunk_n
-header (CBOR, authenticated as AAD of every chunk):
-  magic "ZGLB", format 1, appVersion, schemaVersion, createdAt, platform, contents manifest digest,
-  kdf {alg: argon2id, salt, m, t, p}, wrapped_bk = AES-256-GCM(KEK_pass, K_bk) with nonce,
-  chunkSize 1 MiB
-chunk_i = nonce_i(12: 8-byte random prefix ‖ 4-byte counter i) ‖ AES-256-GCM(K_bk, plaintext_i, AAD = header ‖ i ‖ isLast) ‖ tag
-plaintext = tar-like stream: db.snapshot, settings.json, manifest.json
-  db.snapshot = online copy via the SQLite backup API into a temp DB keyed with K_snap = HKDF(K_bk, "db-snapshot"),
+file   = prefix ‖ header ‖ chunk_0 ‖ … ‖ chunk_{n-1}                 (integers big-endian)
+prefix = "ZGLB" ‖ formatVersion u8 = 1 ‖ headerLen u16 (1..4096)
+header = deterministic CBOR (RFC 8949 §4.2.1), integer keys 1..12, no others:
+  1 kdf {alg argon2id, salt 16 B, mKiB, t, p}   2 wrap {alg AES-256-GCM, nonce 12 B, ct 48 B}
+  3 kbkId 16 B   4 fileId 16 B   5 noncePrefix 8 B   6 chunkSize (1 MiB)   7 createdAt (ms)
+  8 seq   9 schemaVersion   10 contentsVersion   11 platform   12 appVersion
+headerBlock = prefix ‖ header (exact bytes)
+wrap.ct = AES-256-GCM(KEK_pass, wrap.nonce, K_bk, AAD = "ZGLB v1 wrap" ‖ CBOR(kdf) ‖ kbkId)
+kbkId   = HKDF-SHA256(K_bk, "", "ZGLB v1 key-id", 16)
+K_chunk = HKDF-SHA256(K_bk, salt = fileId, "ZGLB v1 chunk", 32)     -- per file
+K_snap  = HKDF-SHA256(K_bk, salt = fileId, "ZGLB v1 db-snapshot", 32)
+chunk_i = AES-256-GCM(K_chunk, nonce = noncePrefix ‖ u32(i), plaintext_i, AAD = headerBlock ‖ u32(i) ‖ u8(isLast)) = ct ‖ tag
+          (nonce derived, not stored; every chunk but the last is exactly chunkSize; at most 65 536 chunks)
+plaintext = tar-like stream: db.snapshot, settings.json, manifest.json (T-149)
+  db.snapshot = online copy via the SQLite backup API into a temp DB keyed with K_snap,
                 so the DB pages are never written unencrypted, even in temp storage
 ```
-- **Integrity:** truncation, reordering or swapping chunks fails authentication, thanks to the counter and `isLast` in the AAD.
-- **Passphrase:** a wrong one fails at the key unwrap, giving the clear error «الباسورد ده مش بيفتح النسخة دي».
+- **Integrity:** truncation, reordering, duplication or swapping of chunks (also across files under the same `K_bk`) fails authentication, thanks to the per-file key, the index and `isLast` in the AAD, and the header in every AAD.
+- **Passphrase:** a wrong one fails at the key unwrap, before any chunk is read, giving the clear error «الباسورد ده مش بيفتح النسخة دي».
 - **Strength:** minimum 8 characters, strength-meter guidance. The user is warned that it can't be recovered (EC-27).
+- **KDF bounds on restore:** `mKiB` 19 456..262 144, `t` 1..10, `p` 1..4, else refused before the KDF runs. The KDF runs only in the foreground (setup, passphrase change, restore), in a background isolate; budget p50 ≤ 4 s, p95 ≤ 8 s on the reference low-end Android.
 - **Contents:** everything in FR-BAK-06, nothing in FR-BAK-07.
-- **Storage:** Drive `appDataFolder` (D-11) or iCloud ubiquity container. Free = 1 slot, overwritten (FR-BAK-08). Gold keeps the last 5 (A-25).
-- **Restore:** verify the header → unwrap → stream-decrypt to a temp encrypted DB → open it with `K_snap` → copy (SQLite backup API) into a new DB under this device's fresh `K_db` → swap atomically.
+- **Storage:** Drive `appDataFolder` (D-11) or iCloud ubiquity container. Free = 1 slot, overwritten (FR-BAK-08). Gold keeps the last 5 (A-25). Every written file is decrypted once (verify-after-write) before upload.
+- **Restore order:** prefix and version → strict header decode and bounds → cheap refusals (newer schema, EC-26) → KDF and unwrap (wrong passphrase) → `kbkId` check → stream-decrypt to a temp encrypted DB; plaintext is untrusted until the stream ends with an authenticated last chunk → open it with `K_snap` → copy (SQLite backup API) into a new DB under this device's fresh `K_db` → swap atomically.
+- **Rollback:** an older genuine backup put in place of a newer one can't be detected without outside state; the restore list shows the authenticated `createdAt` and `seq`, and the writing device warns about a lower `seq`.
 
 ## 6. Backend security controls
 
