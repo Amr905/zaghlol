@@ -18,10 +18,10 @@ D-13 and FR-BE-02: our own backend verifies purchases (no RevenueCat, OOS-16). G
 ## Decision
 **Option 2.**
 - **Google:** `purchases.subscriptionsv2` / `products`, acknowledge server-side, purchase token as unique key, `obfuscatedExternalAccountId` = HMAC(installId).
-- **Apple:** verify StoreKit 2 JWS (x5c → Apple Root CA G3), then App Store Server API for status, `appAccountToken` = HMAC(installId).
+- **Apple:** verify StoreKit 2 JWS (x5c → Apple Root CA G3), then App Store Server API for status, `appAccountToken` = `StoreBindingRef(installId)` (backend-api §4.3; T-131).
 - **Lifecycle:** RTDN and ASSN V2.
 - **Token:** ES256 JWS `{sub, acct, plan, status, exp, graceUntil, nextMoveAt, movedBy}`. Every token, lifetime included, lives at most 3 days plus 4 days of grace, evaluated against trusted time (Part B (b), D-60; supersedes A-38's 7-day grace and the 30-day lifetime roll).
-- **Apple library:** decided in the Phase 5 task between `Enjna.AppStoreServerLibrary` (after a code review) and an in-house verifier using `System.Security.Cryptography` (x5c chain + ES256), preferring in-house if the review finds gaps.
+- **Apple library:** **in-house** (decided in T-131, 2026-11-11): the verifier uses `System.Security.Cryptography` only (an `x5c` chain of exactly three certificates built offline to the pinned Apple Root CA - G3, Apple's marker OIDs, ES256 with the key from `x5c[0]` only), and the App Store Server API client is a typed `HttpClient`. `Enjna.AppStoreServerLibrary` 2.3.0 was reviewed and rejected (it reads every response field, its redaction can't be controlled, its revocation checks need the network, single maintainer).
 
 ## Consequences
 The backend becomes critical for **new** purchases only. A background retry protects Google's 3-day acknowledge window (BR-GOLD-06). Signing keys live in the KMS with rotation via embedded next keys.

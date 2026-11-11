@@ -29,4 +29,9 @@
     <InternalsVisibleTo Include="Zaghlol.Infrastructure.Tests" />
   </ItemGroup>
 
+  <ItemGroup>
+    <!-- T-131: Apple Root CA - G3 (DER), the only trust anchor of the Apple JWS verifier. Its SHA-256 is asserted at startup. -->
+    <EmbeddedResource Include="AppStore\AppleRootCA-G3.cer" LogicalName="Zaghlol.AppStore.AppleRootCA-G3.cer" />
+  </ItemGroup>
+
 </Project>

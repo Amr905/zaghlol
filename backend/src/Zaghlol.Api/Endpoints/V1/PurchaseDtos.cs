@@ -23,7 +23,7 @@ public sealed class PurchaseVerifyRequest
     public Sensitive<IReadOnlyList<VerifySeatKeyInput>>? SeatKeys { get; init; }
 }
 
-/// <summary>OpenAPI <c>SeatKeyProof</c> (iOS, T-131/T-182 verify it).</summary>
+/// <summary>OpenAPI <c>SeatKeyProof</c> (iOS). T-131 passes it through untouched; T-182 verifies it.</summary>
 public sealed class VerifySeatKeyInput
 {
     public required string PublicKey { get; init; }

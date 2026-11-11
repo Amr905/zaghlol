@@ -67,8 +67,9 @@ builder.Services.AddZaghlolFlagReader();
 builder.Services.AddZaghlolPrices();
 // Daily sync (T-128): throttle, composition, intake; after the catalog, flag and price readers it composes from.
 builder.Services.AddZaghlolSync();
-// Purchase verify (T-130): the Google Play client, verifier and support order lookup on the App login. Production refuses to
-// start while the NullVerifyGrant placeholder (T-132) or no App Store verifier (T-131) is registered.
+// Purchase verify (T-130, T-131): the Google Play and App Store clients, verifiers and support order lookups on the App login
+// (AddZaghlolPurchaseVerification adds the App Store services). Production refuses to start while the NullVerifyGrant
+// placeholder (T-132) is registered.
 builder.Services.AddZaghlolGooglePlay();
 builder.Services.AddZaghlolPurchaseVerification();
 

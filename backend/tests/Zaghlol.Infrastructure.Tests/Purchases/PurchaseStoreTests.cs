@@ -403,6 +403,14 @@ public class PurchaseStoreTests(PurchaseStoreFixture fixture) : IClassFixture<Pu
         public void OwnershipChecked(string path, OwnershipOutcome outcome)
         {
         }
+
+        public void EnvironmentSeen(string store, PurchaseEnvironment environment)
+        {
+        }
+
+        public void AppleJwsChecked(JwsSource source, AppleJwsFailure? failure)
+        {
+        }
     }
 
     /// <summary>Play as a dictionary: a token it doesn't hold is a 404 (a final client error).</summary>

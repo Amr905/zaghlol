@@ -1058,6 +1058,10 @@ namespace Zaghlol.Infrastructure.Persistence.Migrations
                         .HasColumnType("uuid")
                         .HasColumnName("install_id");
 
+                    b.Property<DateTimeOffset?>("LastPaymentAt")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("last_payment_at");
+
                     b.Property<DateTimeOffset>("LastVerifiedAt")
                         .HasColumnType("timestamp with time zone")
                         .HasColumnName("last_verified_at");

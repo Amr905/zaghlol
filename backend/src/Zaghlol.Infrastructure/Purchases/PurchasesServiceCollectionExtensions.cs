@@ -7,6 +7,7 @@ using Microsoft.Extensions.Logging;
 using Polly;
 using Zaghlol.Application.Purchases;
 using Zaghlol.Domain;
+using Zaghlol.Infrastructure.AppStore;
 using Zaghlol.Infrastructure.GooglePlay;
 using Zaghlol.Infrastructure.Observability;
 
@@ -31,6 +32,12 @@ internal sealed class PurchaseTelemetry(ZaghlolMetrics metrics, IAlertSignal ale
         OwnershipOutcome.Fail => "fail",
         _ => "unavailable",
     });
+
+    public void EnvironmentSeen(string store, PurchaseEnvironment environment) =>
+        metrics.PurchaseEnvironment(store, PurchaseTags.EnvironmentName(environment));
+
+    public void AppleJwsChecked(JwsSource source, AppleJwsFailure? failure) =>
+        metrics.AppleJws(source == JwsSource.Api ? PurchaseTags.JwsSourceApi : PurchaseTags.JwsSourceApp, PurchaseTags.JwsOutcome(failure));
 }
 
 public static class PurchasesServiceCollectionExtensions
@@ -99,17 +106,21 @@ public static class PurchasesServiceCollectionExtensions
     }
 
     /// <summary>
-    /// The verify side on the App login (T-130): the purchase writer, the Google <see cref="IStoreVerification"/>, the support
-    /// order lookup, the <see cref="NullVerifyGrant"/> placeholder (T-132 replaces it) and the Production startup check. Call
-    /// after <c>AddZaghlolDatabase</c> with the App role and <see cref="AddZaghlolGooglePlay"/>.
+    /// The verify side on the App login (T-130, T-131): the purchase writer, the Google and App Store <see cref="IStoreVerification"/>s,
+    /// both support order lookups, the <see cref="NullVerifyGrant"/> placeholder (T-132 replaces it) and the Production startup
+    /// check. Call after <c>AddZaghlolDatabase</c> with the App role and <see cref="AddZaghlolGooglePlay"/>; it adds
+    /// <see cref="AppStoreServiceCollectionExtensions.AddZaghlolAppStore"/> itself.
     /// </summary>
     public static IServiceCollection AddZaghlolPurchaseVerification(this IServiceCollection services)
     {
         ArgumentNullException.ThrowIfNull(services);
 
+        services.AddZaghlolAppStore();
         services.TryAddSingleton<IPurchaseWriter, PurchaseWriter>();
-        // Transient: they hold the typed Play HttpClient, whose handler the factory rotates (a singleton would pin one forever).
+        // Transient: they hold the typed store HttpClients, whose handlers the factory rotates (a singleton would pin one forever).
         services.TryAddEnumerable(ServiceDescriptor.Transient<IStoreVerification, PlayVerification>());
+        services.TryAddEnumerable(ServiceDescriptor.Transient<IStoreVerification, AppStoreVerification>());
+        services.TryAddTransient<IAppStoreOrderLookup, AppStoreOrderLookup>();
         services.TryAddSingleton<IVerifyGrant, NullVerifyGrant>();
         services.TryAddTransient<IPlayOrderLookup>(provider => new PlayOrderLookup(
             provider.GetRequiredService<IPlayDeveloperApi>(),

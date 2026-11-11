@@ -61,8 +61,17 @@ public enum BindingCheck
     Skip,
 }
 
-/// <summary>An Android purchase as the app sent it. The token is a bearer-like secret: never logged or put in a message.</summary>
-public sealed record StorePurchaseRef(string ProductId, Sensitive<string> PurchaseToken);
+/// <summary>
+/// A purchase as the app sent it (T-131 design note §0): <see cref="PlayPurchaseRef"/> or <see cref="AppStorePurchaseRef"/>. Each
+/// verifier accepts only its own case and rejects the other with <see cref="ArgumentException"/> (a programming error).
+/// </summary>
+public abstract record StorePurchaseRef;
+
+/// <summary>An Android purchase. The token is a bearer-like secret: never logged or put in a message.</summary>
+public sealed record PlayPurchaseRef(string ProductId, Sensitive<string> PurchaseToken) : StorePurchaseRef;
+
+/// <summary>An iOS purchase: the StoreKit 2 signed transaction (JWS) exactly as the app sent it. Never logged.</summary>
+public sealed record AppStorePurchaseRef(Sensitive<string> SignedTransaction) : StorePurchaseRef;
 
 /// <summary>
 /// The outcome of a store verification (T-130 design note §0). Store failures are never a value: they throw
@@ -72,6 +81,12 @@ public sealed record StorePurchaseRef(string ProductId, Sensitive<string> Purcha
 /// <param name="ProblemCode"><c>PURCHASE_TOKEN_INVALID</c>, <c>PURCHASE_NOT_OWNED</c>, <c>PURCHASE_WRONG_APP</c> or <c>null</c>.</param>
 /// <param name="PurchaseId">The upserted <c>purchases</c> row; <c>null</c> when nothing was written.</param>
 /// <param name="PredecessorPurchaseId">The known purchase that Play's <c>linkedPurchaseToken</c> names (T-184's "new payment" rule).</param>
+/// <param name="IsNewPayment">
+/// D-59/D-61(a), one flag for both stores (T-184 reads it): Google, the row was inserted and names a known predecessor (a
+/// <c>linkedPurchaseToken</c> successor); Apple, this binding-checked verify advanced <c>purchases.last_payment_at</c> with a
+/// <c>PURCHASE</c>-reason transaction (a first purchase, upgrade, downgrade, crossgrade or re-subscription), true at most once per
+/// transaction even under concurrent verifies. Never true for restore.
+/// </param>
 public sealed record StoreVerificationResult(
     VerifyStatus Status,
     string? ProblemCode,
@@ -80,13 +95,17 @@ public sealed record StoreVerificationResult(
     DateTimeOffset? ExpiresAt,
     PurchaseEnvironment Environment,
     Guid? PredecessorPurchaseId,
-    bool Acknowledged)
+    bool Acknowledged,
+    bool IsNewPayment = false)
 {
     public static StoreVerificationResult Rejected(string problemCode, GoldPlan plan = GoldPlan.Monthly) =>
         new(VerifyStatus.Invalid, problemCode, null, plan, null, PurchaseEnvironment.Production, null, false);
 }
 
-/// <summary>Verifies a purchase with one store. T-130 registers Google Play; T-131 adds the App Store.</summary>
+/// <summary>
+/// Verifies a purchase with one store. T-130 registers Google Play (<see cref="PlayPurchaseRef"/>); T-131 the App Store
+/// (<see cref="AppStorePurchaseRef"/>).
+/// </summary>
 public interface IStoreVerification
 {
     PurchaseStore Store { get; }
@@ -188,6 +207,15 @@ public static class PurchaseTags
     public const string PathOrders = "orders";
     public const string PathFallback = "fallback";
 
+    /// <summary>The App Store Look Up Order ID check (T-131).</summary>
+    public const string PathApple = "apple";
+
+    public const string EnvProduction = "production";
+    public const string EnvSandbox = "sandbox";
+
+    public const string JwsSourceApp = "app";
+    public const string JwsSourceApi = "api";
+
     public static IReadOnlyList<string> Stores { get; } = [GooglePlay, AppStore];
 
     public static IReadOnlyList<string> VerifyOutcomes { get; } = [Success, Failure];
@@ -196,9 +224,30 @@ public static class PurchaseTags
 
     public static IReadOnlyList<string> AckOutcomes { get; } = [AckAcked, AckAlready, AckFailed, AckNotAckable];
 
-    public static IReadOnlyList<string> OwnershipPaths { get; } = [PathOrders, PathFallback];
+    public static IReadOnlyList<string> OwnershipPaths { get; } = [PathOrders, PathFallback, PathApple];
+
+    public static IReadOnlyList<string> Environments { get; } = [EnvProduction, EnvSandbox];
+
+    public static IReadOnlyList<string> JwsSources { get; } = [JwsSourceApp, JwsSourceApi];
+
+    /// <summary><c>zaghlol.purchase.jws{outcome}</c>: <c>ok</c> or an <see cref="AppleJwsFailure"/> name.</summary>
+    public static IReadOnlyList<string> JwsOutcomes { get; } = ["ok", "malformed", "alg", "chain", "oid", "signature", "payload"];
 
     public static string StoreName(PurchaseStore store) => store == PurchaseStore.GooglePlay ? GooglePlay : AppStore;
+
+    public static string EnvironmentName(PurchaseEnvironment environment) =>
+        environment == PurchaseEnvironment.Sandbox ? EnvSandbox : EnvProduction;
+
+    public static string JwsOutcome(AppleJwsFailure? failure) => failure switch
+    {
+        null => "ok",
+        AppleJwsFailure.Malformed => "malformed",
+        AppleJwsFailure.Alg => "alg",
+        AppleJwsFailure.Chain => "chain",
+        AppleJwsFailure.Oid => "oid",
+        AppleJwsFailure.Signature => "signature",
+        _ => "payload",
+    };
 }
 
 /// <summary>Purchase metrics and the 48 h alert, as the Application sees them (implemented over <c>ZaghlolMetrics</c>).</summary>
@@ -219,8 +268,17 @@ public interface IPurchaseTelemetry
     /// <summary>One <c>audit_alert</c> for a purchase unacknowledged for 48 h or more (purchase UUID only).</summary>
     void UnackedOver48h(Guid purchaseId);
 
-    /// <param name="path"><see cref="PurchaseTags.PathOrders"/> or <see cref="PurchaseTags.PathFallback"/>.</param>
+    /// <param name="path">One of <see cref="PurchaseTags.OwnershipPaths"/>.</param>
     void OwnershipChecked(string path, OwnershipOutcome outcome);
+
+    /// <summary><c>zaghlol.purchase.environment{store, env}</c>: one per verified purchase written (watches sandbox use in production).</summary>
+    void EnvironmentSeen(string store, PurchaseEnvironment environment);
+
+    /// <summary>
+    /// <c>zaghlol.purchase.jws{source, outcome}</c> (T-131 §8): one per Apple JWS checked. Any <c>api</c> failure is alerted: Apple's
+    /// own answer failing verification, or contradicting the app's copy (<see cref="AppleJwsFailure.Payload"/>), is doubt, not user fault.
+    /// </summary>
+    void AppleJwsChecked(JwsSource source, AppleJwsFailure? failure);
 }
 
 /// <summary>The support ownership check result (backend-api §5.3 <c>ownership_outcome</c>).</summary>
