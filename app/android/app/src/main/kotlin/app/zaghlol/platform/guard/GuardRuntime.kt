@@ -175,7 +175,7 @@ class GuardRuntime(
 
     /** The base-only rules of [base], parsed once per valid base (under [lock]). */
     private fun baseOnlyOf(base: ByteArray): GuardConfigLoad {
-        baseOnly?.takeIf { validBase === base }?.let { return it }
+        
         val load = parse(base, null, false)
         if (load.baseError == null) baseOnly = load
         return load

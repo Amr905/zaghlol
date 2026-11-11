@@ -31,7 +31,7 @@ class AssembledSms(val source: String, val body: String) {
 object SmsAssembler {
     fun assemble(parts: List<SmsPart>): List<AssembledSms> {
         val bySender = LinkedHashMap<String, StringBuilder>()
-        for (p in parts) {
+        for (p in parts.sortedBy { it.timestampMs }) {
             val address = p.address?.takeIf { it.isNotEmpty() } ?: continue
             bySender.getOrPut(address) { StringBuilder() }.append(p.body.orEmpty())
         }

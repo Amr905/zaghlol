@@ -39,7 +39,7 @@ class LiveEnqueueGate(
             } catch (_: Exception) {
                 null
             }
-            if (waiting == true) return false
+            
             enqueueLive()
             return true
         }

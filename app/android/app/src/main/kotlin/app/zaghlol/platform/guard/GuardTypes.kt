@@ -33,6 +33,7 @@ enum class GuardChannel(val wire: String) {
 enum class AndroidGuardChannel(val wire: String) {
     SMS("sms"),
     NOTIFICATION("notification"),
+    SHARE("share"),
 }
 
 /** Channels an ignore rule can name (database `ignore_rules.channel`). */

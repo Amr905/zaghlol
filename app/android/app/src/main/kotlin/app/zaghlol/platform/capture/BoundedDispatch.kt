@@ -38,13 +38,16 @@ class BoundedDispatch(
         }
         try {
             executor.execute {
+                var ok = false
                 try {
                     work()
+                    ok = true
                 } catch (_: Throwable) {
-                    // Code-free by design: the work swallows its own errors; this is the last net.
                 } finally {
-                    timeout?.cancel(false)
-                    finishOnce()
+                    if (ok) {
+                        timeout?.cancel(false)
+                        finishOnce()
+                    }
                 }
             }
         } catch (_: Throwable) {

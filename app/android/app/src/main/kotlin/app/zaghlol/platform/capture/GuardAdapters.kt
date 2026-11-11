@@ -30,8 +30,8 @@ object GuardAdapters {
             writeUser(json)
         } catch (e: GuardConfigWriteException) {
             throw CaptureApiError(codeOf(e.error), null, null)
-        } catch (_: Exception) {
-            throw CaptureApiError(AndroidCaptureHost.IO_ERROR, null, null)
+        } catch (e: Exception) {
+            throw CaptureApiError(AndroidCaptureHost.IO_ERROR, e.message, null)
         } finally {
             json.fill(0)
         }
@@ -60,7 +60,8 @@ object GuardAdapters {
         GuardConfigMode.BASE_ONLY -> when (snapshot.userState) {
             GuardUserState.ABSENT -> GuardConfigState.BASE_ONLY
             GuardUserState.UNREADABLE -> GuardConfigState.USER_UNREADABLE
-            GuardUserState.RETRY, GuardUserState.OK -> GuardConfigState.UNKNOWN
+            GuardUserState.RETRY -> GuardConfigState.BASE_ONLY
+            GuardUserState.OK -> GuardConfigState.UNKNOWN
         }
     }
 }

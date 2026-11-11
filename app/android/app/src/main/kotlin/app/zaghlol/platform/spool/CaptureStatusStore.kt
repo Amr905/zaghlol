@@ -178,7 +178,7 @@ class CaptureStatusStore(
             val last = shared.lastWriteMono
             if (disk != null && last != null && !pending.addsFactTo(disk)) {
                 val age = monoClockMs() - last
-                if (age in 0 until COALESCE_WINDOW_MS) return
+                if (age in 0 until COALESCE_WINDOW_MS) Unit
             }
             try {
                 mergedLocked()

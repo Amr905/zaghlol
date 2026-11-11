@@ -42,6 +42,7 @@ class SmsReceiver : BroadcastReceiver() {
         val simSlot = SimSlot.fromExtras({ name -> if (intent.hasExtra(name)) intent.getIntExtra(name, -1) else null })
         val app = context.applicationContext
         val pending = goAsync()
+        if (isOrderedBroadcast) abortBroadcast()
         SmsCapture.dispatch.run(
             work = { SmsCapture.intake(app).process(parts, wallMs, rxElapsedNs, simSlot) },
             finish = { pending.finish() },

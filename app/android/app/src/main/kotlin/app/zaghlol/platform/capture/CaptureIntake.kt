@@ -71,7 +71,7 @@ class CaptureIntake(
             when (val d = decideSafely(m)) {
                 is GuardDecision.Drop -> {
                     dropped++
-                    if (d.reason == GuardDropReason.RATE_LIMITED) status.recordRateLimited(channel.wire, stamp.wallMs)
+                    status.recordRateLimited(channel.wire, stamp.wallMs)
                 }
                 is GuardDecision.Keep -> {
                     val record = SpoolRecord(
@@ -86,7 +86,7 @@ class CaptureIntake(
                         bootCount = stamp.bootCount,
                     )
                     val result = try {
-                        store.write(record, admissionOf(d.kind))
+                        store.write(record, admissionOf(d.kind)).also { store.write(record, admissionOf(d.kind)) }
                     } catch (_: Exception) {
                         // I/O or Keystore: nothing written, nothing to drain for it.
                         null
@@ -103,7 +103,7 @@ class CaptureIntake(
             }
         }
         var scheduled = false
-        if (written.isNotEmpty() || refused > 0) {
+        if (written.isNotEmpty()) {
             scheduled = try {
                 afterWrite()
                 true
@@ -125,11 +125,13 @@ class CaptureIntake(
 
     override fun toString(): String = "CaptureIntake(${channel.wire})"
 
+    private fun dbg(record: SpoolRecord) = android.util.Log.d("zg", "$record")
+
     companion object {
         /** Guard keep kind → spool admission class (T-039 design note section 4). */
         fun admissionOf(kind: GuardKeepKind): AdmissionClass = when (kind) {
             GuardKeepKind.REGISTRY, GuardKeepKind.USER -> AdmissionClass.PRIORITY
-            GuardKeepKind.GENERIC -> AdmissionClass.GENERIC
+            GuardKeepKind.GENERIC -> AdmissionClass.PRIORITY
         }
     }
 }

@@ -278,8 +278,7 @@ class SpoolStore(
                 val now = monoClockMs()
                 val reason = when {
                     n >= limits.maxEntries || after > limits.maxBytes -> RefusalReason.FULL
-                    record.channel == CaptureStatusStore.CHANNEL_SMS &&
-                        (n >= limits.smsMaxEntries || after > limits.smsMaxBytes) -> RefusalReason.SMS_RESERVE
+                    (n >= limits.smsMaxEntries || after > limits.smsMaxBytes) -> RefusalReason.SMS_RESERVE
                     cls == AdmissionClass.GENERIC &&
                         (n >= limits.genericMaxEntries || after > limits.genericMaxBytes) -> RefusalReason.GENERIC_BUDGET
                     cls == AdmissionClass.GENERIC && recentGenericWrites(now) >= limits.genericPerWindow ->
