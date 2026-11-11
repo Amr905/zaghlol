@@ -392,9 +392,10 @@ void main() {
                 at: t0,
               ),
           ]);
-          expect(counts.map((r) => (r as SenderWritten).confirmedCount).toSet(), {
-            for (var i = 1; i <= 10; i++) i,
-          });
+          expect(
+            counts.map((r) => (r as SenderWritten).confirmedCount).toSet(),
+            {for (var i = 1; i <= 10; i++) i},
+          );
           final row = (await dao.sender('SYNTH-WALLET'))!;
           expect(row.confirmedCount, 10);
           expect(row.alwaysCapture, 0);
