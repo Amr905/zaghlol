@@ -194,5 +194,9 @@ public sealed class StoreNotification
     /// <summary>An error code only; never payload text.</summary>
     public string? LastError { get; set; }
 
+    /// <summary>SHA-256 of the received body (Apple: of the <c>signedPayload</c> string, T-134).</summary>
     public required byte[] PayloadDigest { get; set; }
+
+    /// <summary>T-134: the processor's back-off; NULL = never failed. Only <c>worker_rw</c> writes it.</summary>
+    public DateTimeOffset? NextAttemptAt { get; set; }
 }

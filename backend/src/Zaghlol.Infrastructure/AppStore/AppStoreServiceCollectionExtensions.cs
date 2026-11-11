@@ -12,22 +12,32 @@ namespace Zaghlol.Infrastructure.AppStore;
 public static class AppStoreServiceCollectionExtensions
 {
     /// <summary>
-    /// The App Store services for the API (verify, support order lookup) and, later, the ASSN V2 worker (T-134): <see cref="AppStoreOptions"/>
-    /// read and validated from <c>Purchases:Apple</c> when the host starts, the pinned-root <see cref="IAppleJwsVerifier"/>, the API
-    /// token source, the separate Apple budget and per-install verify limiter, and the two environment clients with the T-130
-    /// resilience pipeline, the per-attempt budget handler and the bearer token. Idempotent. Call after <c>AddZaghlolTelemetry</c>
-    /// (or <c>AddZaghlolApiTelemetry</c>).
+    /// <c>Retry-After</c> values up to this are honoured inside the 20 s total; a longer one ends the call at once as
+    /// <see cref="AppStoreCallOutcome.RateLimited"/> (or a 503 as <see cref="AppStoreCallOutcome.ServerError"/>) carrying Apple's
+    /// value, so the caller defers instead of timing out (FU-092 item 3).
     /// </summary>
-    public static IServiceCollection AddZaghlolAppStore(this IServiceCollection services)
+    public static readonly TimeSpan MaxInlineRetryAfter = TimeSpan.FromSeconds(5);
+
+    /// <summary>
+    /// The App Store services for the API (verify, support order lookup; <see cref="AppleBudgetPartition.Api"/>) and the ASSN V2 worker
+    /// (<see cref="AppleBudgetPartition.Worker"/>, T-134): <see cref="AppStoreOptions"/> read and validated from <c>Purchases:Apple</c>
+    /// when the host starts, the pinned-root <see cref="IAppleJwsVerifier"/>, the API token source, this process's partition of the
+    /// Apple budget and the per-install verify limiter, and the two environment clients with the T-130 resilience pipeline, the
+    /// per-attempt budget handler and the bearer token. Idempotent for one partition; asking for the other one throws. Call after
+    /// <c>AddZaghlolTelemetry</c> (or <c>AddZaghlolApiTelemetry</c>).
+    /// </summary>
+    public static IServiceCollection AddZaghlolAppStore(this IServiceCollection services, AppleBudgetPartition partition = AppleBudgetPartition.Api)
     {
         ArgumentNullException.ThrowIfNull(services);
 
-        if (services.Any(d => d.ServiceType == typeof(AppStoreRegistered)))
+        if (services.FirstOrDefault(d => d.ServiceType == typeof(AppStoreRegistered))?.ImplementationInstance is AppStoreRegistered registered)
         {
-            return services;
+            return registered.Partition == partition
+                ? services
+                : throw new InvalidOperationException("The App Store services are already registered for the other budget partition.");
         }
 
-        services.AddSingleton<AppStoreRegistered>();
+        services.AddSingleton(new AppStoreRegistered(partition));
         services.TryAddSingleton(TimeProvider.System);
         services.TryAddSingleton<ZaghlolMetrics>();
         services.TryAddSingleton<IAlertSignal, AlertSignal>();
@@ -37,7 +47,7 @@ public static class AppStoreServiceCollectionExtensions
         services.TryAddSingleton(provider => provider.GetRequiredService<AppStoreOptions>().Catalog);
         services.TryAddSingleton<IAppleJwsVerifier>(provider => new AppleJwsVerifier(provider.GetRequiredService<AppStoreOptions>().TrustAnchor()));
         services.TryAddSingleton<IAppStoreApiTokenSource, AppStoreApiTokenProvider>();
-        services.TryAddSingleton(provider => new AppleCallBudget(provider.GetRequiredService<AppStoreOptions>().Budget));
+        services.TryAddSingleton(provider => new AppleCallBudget(provider.GetRequiredService<AppStoreOptions>().Budget, partition));
         services.TryAddSingleton<IAppleVerifyLimiter>(provider => new AppleVerifyLimiter(provider.GetRequiredService<AppStoreOptions>().Budget));
         services.TryAddTransient<AppleBudgetHandler>();
         services.TryAddTransient<AppStoreAuthenticationHandler>();
@@ -70,8 +80,9 @@ public static class AppStoreServiceCollectionExtensions
                     .AddTimeout(options.TotalTimeout)
                     .AddRetry(new HttpRetryStrategyOptions
                     {
-                        // Defaults handle 408, 429, 5xx, HttpRequestException and an attempt timeout; never another 4xx, and never
-                        // our own budget refusal.
+                        // The default transient set (408, 429, 5xx, HttpRequestException, an attempt timeout; never another 4xx, and
+                        // never our own budget refusal), minus a 429 or 503 asking for more than MaxInlineRetryAfter (FU-092 item 3).
+                        ShouldHandle = static args => ValueTask.FromResult(ShouldRetry(args.Outcome)),
                         MaxRetryAttempts = options.MaxRetries,
                         BackoffType = DelayBackoffType.Exponential,
                         UseJitter = true,
@@ -91,8 +102,19 @@ public static class AppStoreServiceCollectionExtensions
         http.AddHttpMessageHandler<AppStoreAuthenticationHandler>();
     }
 
-    /// <summary>Marks <see cref="AddZaghlolAppStore"/> as done, so a second call doesn't stack a second pipeline on the clients.</summary>
-    private sealed class AppStoreRegistered;
+    /// <summary>The retry predicate of the App Store pipeline.</summary>
+    internal static bool ShouldRetry(Outcome<HttpResponseMessage> outcome) =>
+        HttpClientResiliencePredicates.IsTransient(outcome)
+        && !(outcome.Result is { } response
+             && (int)response.StatusCode is 429 or 503
+             && RetryAfter(response) > MaxInlineRetryAfter);
+
+    private static TimeSpan? RetryAfter(HttpResponseMessage response) =>
+        response.Headers.RetryAfter?.Delta
+        ?? (response.Headers.RetryAfter?.Date is { } date ? date - DateTimeOffset.UtcNow : null);
+
+    /// <summary>Marks <see cref="AddZaghlolAppStore"/> as done (and for which partition), so a second call doesn't stack a second pipeline.</summary>
+    private sealed record AppStoreRegistered(AppleBudgetPartition Partition);
 }
 
 /// <summary>

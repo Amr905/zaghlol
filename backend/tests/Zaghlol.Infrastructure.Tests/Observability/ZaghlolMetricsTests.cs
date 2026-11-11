@@ -85,6 +85,25 @@ public sealed class ZaghlolMetricsTests : IDisposable
     }
 
     [Fact]
+    public void TheAssnInstrumentsArePublishedWithFixedTags()
+    {
+        metrics.AssnIngested("production", "stored");
+        metrics.AssnProcessed("refund", "applied");
+        metrics.AssnLag(TimeSpan.FromSeconds(3));
+        metrics.AssnReconciled("history", "ok");
+        metrics.AssnRecovered(2);
+        metrics.AssnRefundNotReflected();
+        metrics.SetAssnBacklog(4, 1);
+        listener.RecordObservableInstruments();
+
+        var published = seen.Select(x => x.Instrument).ToHashSet(StringComparer.Ordinal);
+        Assert.All(
+            ["zaghlol.assn.ingest", "zaghlol.assn.processed", "zaghlol.assn.lag", "zaghlol.assn.reconcile", "zaghlol.assn.recovered",
+             "zaghlol.assn.refund_not_reflected", "zaghlol.assn.backlog"],
+            name => Assert.Contains(name, published));
+    }
+
+    [Fact]
     public void GaugesReportTheLastValueSet()
     {
         metrics.SetUnacked(7, 3, TimeSpan.FromHours(50));

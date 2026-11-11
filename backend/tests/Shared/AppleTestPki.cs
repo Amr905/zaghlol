@@ -182,6 +182,69 @@ public sealed class AppleTestPki : IDisposable
         return payload;
     }
 
+    /// <summary>
+    /// An ASSN V2 <c>responseBodyV2DecodedPayload</c> (T-134; synthetic values), with Apple's extra fields (<c>appAppleId</c>,
+    /// <c>bundleVersion</c>) that the server never reads. <paramref name="withData"/> false leaves out <c>data</c> (summary-style types).
+    /// </summary>
+    public static JsonObject Notification(
+        string notificationType,
+        string? subtype,
+        string bundleId,
+        string environment = "Production",
+        string? signedTransactionInfo = null,
+        string? signedRenewalInfo = null,
+        DateTimeOffset? signedDate = null,
+        string? notificationUuid = null,
+        string version = "2.0",
+        bool withData = true,
+        int? status = 1)
+    {
+        var payload = new JsonObject
+        {
+            ["notificationType"] = notificationType,
+            ["notificationUUID"] = notificationUuid ?? Guid.NewGuid().ToString("D"),
+            ["version"] = version,
+            ["signedDate"] = Ms(signedDate ?? DateTimeOffset.UtcNow),
+        };
+        if (subtype is not null)
+        {
+            payload["subtype"] = subtype;
+        }
+
+        if (withData)
+        {
+            var data = new JsonObject
+            {
+                ["appAppleId"] = 1234567890,
+                ["bundleId"] = bundleId,
+                ["bundleVersion"] = "42",
+                ["environment"] = environment,
+            };
+            if (status is { } s)
+            {
+                data["status"] = s;
+            }
+
+            if (signedTransactionInfo is not null)
+            {
+                data["signedTransactionInfo"] = signedTransactionInfo;
+            }
+
+            if (signedRenewalInfo is not null)
+            {
+                data["signedRenewalInfo"] = signedRenewalInfo;
+            }
+
+            payload["data"] = data;
+        }
+        else
+        {
+            payload["summary"] = new JsonObject { ["requestIdentifier"] = Guid.NewGuid().ToString("D"), ["succeededCount"] = 1 };
+        }
+
+        return payload;
+    }
+
     public static long Ms(DateTimeOffset value) => value.ToUnixTimeMilliseconds();
 
     public static string B64Url(byte[] bytes) => Base64Url.EncodeToString(bytes);

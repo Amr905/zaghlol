@@ -35,12 +35,18 @@ internal static class StrictJson
 {
     public const int MaxBodyBytes = 64 * 1024;
 
+    /// <summary>The <c>/v1/notifications/*</c> cap (backend-api §1).</summary>
+    public const int MaxNotificationBodyBytes = 256 * 1024;
+
     private const int MaxDepth = 32;
 
     public static JsonSerializerOptions Options { get; } = CreateOptions();
 
-    /// <summary>Reads the body once (cached in <see cref="RequestBodyFeature"/>).</summary>
-    public static async ValueTask<BodyRead> ReadBodyAsync(HttpContext context)
+    /// <summary>Reads the body once (cached in <see cref="RequestBodyFeature"/>), at most <see cref="MaxBodyBytes"/>.</summary>
+    public static ValueTask<BodyRead> ReadBodyAsync(HttpContext context) => ReadBodyAsync(context, MaxBodyBytes);
+
+    /// <summary>Reads the body once (cached in <see cref="RequestBodyFeature"/>), at most <paramref name="maxBytes"/> (<c>413</c> beyond).</summary>
+    public static async ValueTask<BodyRead> ReadBodyAsync(HttpContext context, int maxBytes)
     {
         ArgumentNullException.ThrowIfNull(context);
 
@@ -55,7 +61,7 @@ internal static class StrictJson
             return new BodyRead(default, ApiProblems.Of(StatusCodes.Status415UnsupportedMediaType, ErrorCodes.UnsupportedMediaType));
         }
 
-        if (request.ContentLength > MaxBodyBytes)
+        if (request.ContentLength > maxBytes)
         {
             return new BodyRead(default, ApiProblems.Of(StatusCodes.Status413PayloadTooLarge, ErrorCodes.PayloadTooLarge));
         }
@@ -65,7 +71,7 @@ internal static class StrictJson
         int read;
         while ((read = await request.Body.ReadAsync(chunk, context.RequestAborted)) > 0)
         {
-            if (buffer.Length + read > MaxBodyBytes)
+            if (buffer.Length + read > maxBytes)
             {
                 return new BodyRead(default, ApiProblems.Of(StatusCodes.Status413PayloadTooLarge, ErrorCodes.PayloadTooLarge));
             }

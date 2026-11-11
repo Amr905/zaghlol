@@ -37,7 +37,7 @@ internal sealed class PurchaseTelemetry(ZaghlolMetrics metrics, IAlertSignal ale
         metrics.PurchaseEnvironment(store, PurchaseTags.EnvironmentName(environment));
 
     public void AppleJwsChecked(JwsSource source, AppleJwsFailure? failure) =>
-        metrics.AppleJws(source == JwsSource.Api ? PurchaseTags.JwsSourceApi : PurchaseTags.JwsSourceApp, PurchaseTags.JwsOutcome(failure));
+        metrics.AppleJws(PurchaseTags.JwsSourceName(source), PurchaseTags.JwsOutcome(failure));
 }
 
 public static class PurchasesServiceCollectionExtensions

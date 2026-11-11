@@ -46,6 +46,12 @@ builder.Services.AddHostedService<RetentionPurgerService>();
 // Google acknowledge sweeper (T-130): every 15 min, one instance across replicas (advisory lock), Purchases:Google:* config.
 builder.Services.AddZaghlolPlayAckSweeper();
 builder.Services.AddHostedService<PlayAckSweeperService>();
+// App Store Server Notifications V2 (T-134): processor (5 s idle poll), daily history reconciliation, hourly expiry sweep; one
+// instance of each across replicas (advisory locks), Purchases:Apple:* config, the worker's share of the Apple budget.
+builder.Services.AddZaghlolAppleNotificationWorker();
+builder.Services.AddHostedService<AppleNotificationProcessorService>();
+builder.Services.AddHostedService<AppleNotificationHistoryService>();
+builder.Services.AddHostedService<AppleExpirySweepService>();
 
 using var host = builder.Build();
 await host.RunAsync();
