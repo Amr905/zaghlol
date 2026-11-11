@@ -54,8 +54,10 @@ internal static class PurchaseDbText
 /// <c>purchases</c> upserts of verify on the App login (T-130 design note §1 step 5). One short READ COMMITTED transaction:
 /// the row is locked (<c>FOR UPDATE</c>), inserted or updated only when <c>last_verified_at &lt; readAt</c> (the monotonic
 /// guard: a slower read never overwrites a newer RTDN or sweeper read), and a <c>purchase_events</c> row is added when the
-/// state changes. <c>install_id</c> and <c>product_id</c> are written on insert only; <c>acknowledged</c> never goes back to
-/// false. The predecessor named by <c>linked_purchase_token</c> is looked up, never edited.
+/// state changes. <c>install_id</c> is written on insert only, and so are <c>product_id</c> and <c>plan</c> of Google rows (an
+/// App Store update re-plans the row from the latest transaction, T-131); <c>acknowledged</c> never goes back to false. The
+/// predecessor named by <c>linked_purchase_token</c> is looked up, never edited. With <c>NewPaymentAt</c> the same transaction
+/// runs the T-131 new-payment rule on <c>last_payment_at</c>.
 /// </summary>
 internal sealed class PurchaseWriter(IAppDbContextFactory contexts) : IPurchaseWriter
 {
@@ -77,10 +79,29 @@ internal sealed class PurchaseWriter(IAppDbContextFactory contexts) : IPurchaseW
         UPDATE zaghlol.purchases
         SET linked_purchase_token = COALESCE(@linked, linked_purchase_token),
             obfuscated_install_ref = COALESCE(@ref, obfuscated_install_ref),
-            state = @state, expires_at = @expires, environment = @environment,
+            state = @state, expires_at = CASE WHEN @keep_expires THEN expires_at ELSE @expires END, environment = @environment,
             acknowledged = acknowledged OR @ack, last_verified_at = @read_at
         WHERE id = @id AND last_verified_at < @read_at
-        RETURNING acknowledged
+        RETURNING acknowledged, expires_at
+        """;
+
+    // App Store rows only (T-131 §3 step 5): the latest transaction's product re-plans the row. Kept out of the Google statement,
+    // so that one never needs UPDATE on product_id or plan.
+    private const string UpdateAppleSql = """
+        UPDATE zaghlol.purchases
+        SET linked_purchase_token = COALESCE(@linked, linked_purchase_token),
+            obfuscated_install_ref = COALESCE(@ref, obfuscated_install_ref),
+            state = @state, expires_at = CASE WHEN @keep_expires THEN expires_at ELSE @expires END, environment = @environment,
+            acknowledged = acknowledged OR @ack, last_verified_at = @read_at, product_id = @product, plan = @plan
+        WHERE id = @id AND last_verified_at < @read_at
+        RETURNING acknowledged, expires_at
+        """;
+
+    // T-131 §4: the new-payment rule. Independent of the last_verified_at guard; the row is locked, so of two concurrent verifies
+    // of the same transaction exactly one advances it.
+    private const string PaymentSql = """
+        UPDATE zaghlol.purchases SET last_payment_at = @pd
+        WHERE id = @id AND (last_payment_at IS NULL OR last_payment_at < @pd)
         """;
 
     private const string EventSql = """
@@ -108,6 +129,7 @@ internal sealed class PurchaseWriter(IAppDbContextFactory contexts) : IPurchaseW
         var existing = await LockAsync(connection, transaction, store, key, cancellationToken);
         Guid id;
         bool applied;
+        var inserted = false;
         string storedState;
         DateTimeOffset? storedExpires;
         bool storedAck;
@@ -132,6 +154,7 @@ internal sealed class PurchaseWriter(IAppDbContextFactory contexts) : IPurchaseW
             {
                 await EventAsync(connection, transaction, id, null, state, cause, readAt, cancellationToken);
                 applied = true;
+                inserted = true;
                 (storedState, storedExpires, storedAck) = (state, upsert.ExpiresAt, upsert.Acknowledged);
             }
             else
@@ -147,6 +170,15 @@ internal sealed class PurchaseWriter(IAppDbContextFactory contexts) : IPurchaseW
             (id, applied, storedState, storedExpires, storedAck) = await UpdateAsync(connection, transaction, existing, upsert, state, cause, readAt, cancellationToken);
         }
 
+        var newPayment = false;
+        if (upsert.NewPaymentAt is { } paidAt)
+        {
+            await using var payment = new NpgsqlCommand(PaymentSql, connection, transaction);
+            payment.Parameters.AddWithValue("id", id);
+            payment.Parameters.AddWithValue("pd", paidAt.ToUniversalTime());
+            newPayment = await payment.ExecuteNonQueryAsync(cancellationToken) == 1;
+        }
+
         Guid? predecessor = null;
         if (upsert.LinkedPurchaseToken?.Reveal() is { } linked)
         {
@@ -158,7 +190,7 @@ internal sealed class PurchaseWriter(IAppDbContextFactory contexts) : IPurchaseW
         }
 
         await transaction.CommitAsync(cancellationToken);
-        return new PurchaseUpsertResult(id, applied, PurchaseDbText.ParseState(storedState), storedExpires, storedAck, predecessor);
+        return new PurchaseUpsertResult(id, applied, PurchaseDbText.ParseState(storedState), storedExpires, storedAck, predecessor, inserted, newPayment);
     }
 
     public async Task<bool> MarkAcknowledgedAsync(Guid purchaseId, CancellationToken cancellationToken)
@@ -210,8 +242,16 @@ internal sealed class PurchaseWriter(IAppDbContextFactory contexts) : IPurchaseW
             return (existing.Id, false, existing.State, existing.ExpiresAt, existing.Acknowledged);
         }
 
-        await using var update = new NpgsqlCommand(UpdateSql, connection, transaction);
+        var apple = upsert.Store == PurchaseStore.AppStore;
+        await using var update = new NpgsqlCommand(apple ? UpdateAppleSql : UpdateSql, connection, transaction);
         update.Parameters.AddWithValue("id", existing.Id);
+        update.Parameters.AddWithValue("keep_expires", upsert.KeepStoredExpiry);
+        if (apple)
+        {
+            update.Parameters.AddWithValue("product", upsert.ProductId);
+            update.Parameters.AddWithValue("plan", PurchaseDbText.Plan(upsert.Plan));
+        }
+
         update.Parameters.AddWithValue("linked", (object?)upsert.LinkedPurchaseToken?.Reveal() ?? DBNull.Value);
         update.Parameters.AddWithValue("ref", (object?)upsert.ObfuscatedInstallRef ?? DBNull.Value);
         update.Parameters.AddWithValue("state", state);
@@ -219,13 +259,26 @@ internal sealed class PurchaseWriter(IAppDbContextFactory contexts) : IPurchaseW
         update.Parameters.AddWithValue("environment", PurchaseDbText.Environment(upsert.Environment));
         update.Parameters.AddWithValue("ack", upsert.Acknowledged);
         update.Parameters.AddWithValue("read_at", readAt);
-        var acknowledged = await update.ExecuteScalarAsync(cancellationToken) is true;
+        bool acknowledged;
+        DateTimeOffset? expires;
+        await using (var reader = await update.ExecuteReaderAsync(cancellationToken))
+        {
+            // The row is locked and the guard was checked above, so the update always matches.
+            if (!await reader.ReadAsync(cancellationToken))
+            {
+                throw new InvalidOperationException("The locked purchase row was not updated.");
+            }
+
+            acknowledged = reader.GetBoolean(0);
+            expires = reader.IsDBNull(1) ? null : reader.GetFieldValue<DateTimeOffset>(1);
+        }
+
         if (!string.Equals(existing.State, state, StringComparison.Ordinal))
         {
             await EventAsync(connection, transaction, existing.Id, existing.State, state, cause, readAt, cancellationToken);
         }
 
-        return (existing.Id, true, state, upsert.ExpiresAt, acknowledged);
+        return (existing.Id, true, state, expires, acknowledged);
     }
 
     internal static async Task EventAsync(

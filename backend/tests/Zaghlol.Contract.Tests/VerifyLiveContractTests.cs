@@ -12,7 +12,7 @@ using Zaghlol.Testing;
 
 namespace Zaghlol.Contract.Tests;
 
-/// <summary>The real API (<c>Program</c>, Development) over PostgreSQL 17 and a WireMock Play Developer API.</summary>
+/// <summary>The real API (<c>Program</c>, Development) over PostgreSQL 17 and WireMock Play Developer and App Store Server APIs.</summary>
 public sealed class VerifyContractFixture : IAsyncLifetime
 {
     private readonly FakeKms kms = FakeKms.CreateDefault();
@@ -20,6 +20,12 @@ public sealed class VerifyContractFixture : IAsyncLifetime
     private WebApplicationFactory<Program>? factory;
 
     public PlayWireMock Play { get; } = new();
+
+    /// <summary>T-131: the App Store Server API (both environments) with a test PKI as the Apple root (Development only).</summary>
+    public AppleWireMock Apple { get; } = new();
+
+    /// <summary>The verify per-install limit here, so the 503 budget answer can be reached.</summary>
+    public const int VerifyPerInstallPerHour = 3;
 
     public HttpClient Client { get; private set; } = null!;
 
@@ -30,10 +36,12 @@ public sealed class VerifyContractFixture : IAsyncLifetime
         {
             builder.UseSetting("ConnectionStrings:App", database.Api);
             builder.UseSetting("ConnectionStrings:Admin", database.Admin);
-            foreach (var (key, value) in kms.Settings().Concat(Play.Settings()))
+            foreach (var (key, value) in kms.Settings().Concat(Play.Settings()).Concat(Apple.Settings()))
             {
                 builder.UseSetting(key, value);
             }
+
+            builder.UseSetting("Purchases:Apple:Budget:VerifyPerInstallPerHour", VerifyPerInstallPerHour.ToString(CultureInfo.InvariantCulture));
 
             builder.ConfigureServices(kms.Use);
         });
@@ -54,14 +62,15 @@ public sealed class VerifyContractFixture : IAsyncLifetime
         }
 
         Play.Dispose();
+        Apple.Dispose();
         kms.Dispose();
     }
 }
 
 /// <summary>
-/// FU-011 for <c>verifyPurchase</c> (Android, T-130 AC 9): every status the live endpoint answers is declared by the operation and
-/// every body validates against its schema: 200 active and pending, 409, the three 422s, 502, 503 (iOS until T-131), 400
-/// <c>UNKNOWN_FIELD</c>, 400 for a missing key, and 401.
+/// FU-011 for <c>verifyPurchase</c> (Android, T-130 AC 9; iOS, T-131 AC 7): every status the live endpoint answers is declared by the
+/// operation and every body validates against its schema: 200 active, pending and expired, 409, the three 422s per platform, 502,
+/// 503 (our budget), 400 <c>UNKNOWN_FIELD</c>, 400 for a missing key, and 401.
 /// </summary>
 public class VerifyLiveContractTests(VerifyContractFixture fixture) : IClassFixture<VerifyContractFixture>
 {
@@ -144,8 +153,77 @@ public class VerifyLiveContractTests(VerifyContractFixture fixture) : IClassFixt
 
         Assert.Equal("UNKNOWN_FIELD", (await AssertDeclared(unknown, HttpStatusCode.BadRequest, Problem))!["code"]!.GetValue<string>());
         Assert.Equal("VALIDATION_FAILED", (await AssertDeclared(noKey, HttpStatusCode.BadRequest, Problem))!["code"]!.GetValue<string>());
-        Assert.Equal("UPSTREAM_UNAVAILABLE", (await AssertDeclared(ios, HttpStatusCode.ServiceUnavailable, Problem))!["code"]!.GetValue<string>());
+        Assert.Equal("PURCHASE_TOKEN_INVALID", (await AssertDeclared(ios, HttpStatusCode.UnprocessableEntity, Problem))!["code"]!.GetValue<string>());
         Assert.Equal("INSTALL_TOKEN_INVALID", (await AssertDeclared(anonymous, HttpStatusCode.Unauthorized, Problem))!["code"]!.GetValue<string>());
+    }
+
+    [Fact]
+    public async Task IosActiveAndExpired200sConformToPurchaseVerifyResponse()
+    {
+        var (installId, token) = await NewInstallAsync("ios");
+        var active = ApplePurchase(Ref(installId));
+        var expired = ApplePurchase(Ref(installId), status: 2, autoRenew: 0, expires: DateTimeOffset.UtcNow.AddDays(-1));
+        Assert.Null(Spec.Validate(OpenApiSpec.RequestSchema(Verify)!, JsonNode.Parse(IosBody(active.Jws))));
+
+        using var a = await SendAsync(token, IosBody(active.Jws), NewKey(), Base64Url(RandomNumberGenerator.GetBytes(16)), "ios");
+        using var e = await SendAsync(token, IosBody(expired.Jws), NewKey(), platform: "ios");
+
+        Assert.Equal("active", (await AssertDeclared(a, HttpStatusCode.OK, Json))!["status"]!.GetValue<string>());
+        Assert.True(a.Headers.Contains("Zaghlol-Signature"));
+        var body = await AssertDeclared(e, HttpStatusCode.OK, Json);
+        Assert.Equal("expired", body!["status"]!.GetValue<string>());
+        Assert.Null(body["entitlement"]);
+    }
+
+    [Fact]
+    public async Task IosThe422sThe502AndThe503AreDeclaredProblems()
+    {
+        var (installId, token) = await NewInstallAsync("ios");
+        var (_, otherToken) = await NewInstallAsync("ios");
+        var genuine = ApplePurchase(Ref(installId));
+        var parts = genuine.Jws.Split('.');
+        var tampered = parts[0] + "." + parts[1] + "." + (parts[2][0] == 'A' ? 'B' : 'A') + parts[2][1..];
+        var otherApp = Apple.Pki.Sign(AppleTestPki.Transaction("com.example.other", AppleWireMock.Yearly, AppleWireMock.NewTransactionId(), AppleWireMock.NewTransactionId(), Ref(installId)));
+
+        using var tokenInvalid = await SendAsync(token, IosBody(tampered), NewKey(), platform: "ios");
+        using var notOwned = await SendAsync(otherToken, IosBody(genuine.Jws), NewKey(), platform: "ios");
+        using var wrongApp = await SendAsync(token, IosBody(otherApp), NewKey(), platform: "ios");
+
+        Assert.Equal("PURCHASE_TOKEN_INVALID", (await AssertDeclared(tokenInvalid, HttpStatusCode.UnprocessableEntity, Problem))!["code"]!.GetValue<string>());
+        Assert.Equal("PURCHASE_NOT_OWNED", (await AssertDeclared(notOwned, HttpStatusCode.UnprocessableEntity, Problem))!["code"]!.GetValue<string>());
+        Assert.Equal("PURCHASE_WRONG_APP", (await AssertDeclared(wrongApp, HttpStatusCode.UnprocessableEntity, Problem))!["code"]!.GetValue<string>());
+
+        // A transaction Apple doesn't answer for with a final code is an outage (502), until our per-install budget runs out (503).
+        var (busyId, busyToken) = await NewInstallAsync("ios");
+        var unknown = Apple.Pki.Sign(AppleTestPki.Transaction(AppleWireMock.BundleId, AppleWireMock.Yearly, AppleWireMock.NewTransactionId(), AppleWireMock.NewTransactionId(), Ref(busyId)));
+        for (var i = 0; i < VerifyContractFixture.VerifyPerInstallPerHour; i++)
+        {
+            using var down = await SendAsync(busyToken, IosBody(unknown), NewKey(), platform: "ios");
+            Assert.Equal("STORE_UNAVAILABLE", (await AssertDeclared(down, HttpStatusCode.BadGateway, Problem))!["code"]!.GetValue<string>());
+            Assert.NotNull(down.Headers.RetryAfter);
+        }
+
+        using var budget = await SendAsync(busyToken, IosBody(unknown), NewKey(), platform: "ios");
+        Assert.Equal("UPSTREAM_UNAVAILABLE", (await AssertDeclared(budget, HttpStatusCode.ServiceUnavailable, Problem))!["code"]!.GetValue<string>());
+        Assert.NotNull(budget.Headers.RetryAfter);
+    }
+
+    [Fact]
+    public async Task IosWithAnAndroidFieldIs400UnknownField()
+    {
+        var (installId, token) = await NewInstallAsync("ios");
+        var body = "{\"platform\":\"ios\",\"signedTransaction\":\"" + ApplePurchase(Ref(installId)).Jws + "\",\"productId\":\"zaghlol_gold_yearly\"}";
+        Assert.NotNull(Spec.Validate(OpenApiSpec.RequestSchema(Verify)!, JsonNode.Parse(body)));
+
+        using var response = await SendAsync(token, body, NewKey(), platform: "ios");
+
+        Assert.Equal("UNKNOWN_FIELD", (await AssertDeclared(response, HttpStatusCode.BadRequest, Problem))!["code"]!.GetValue<string>());
+    }
+
+    [Fact]
+    public void TheSpecJwsLimitMatchesTheVerifier()
+    {
+        Assert.Equal(Zaghlol.Infrastructure.AppStore.AppleJwsVerifier.MaxLength, Spec.Schemas["Jws"]!["maxLength"]!.GetValue<long>());
     }
 
     [Fact]
@@ -159,6 +237,21 @@ public class VerifyLiveContractTests(VerifyContractFixture fixture) : IClassFixt
     }
 
     private static string Ref(string installId) => StoreBindingRef.Compute(InstallId.Parse(installId));
+
+    private static string IosBody(string jws) => "{\"platform\":\"ios\",\"signedTransaction\":\"" + jws + "\"}";
+
+    private (string Jws, string OriginalTransactionId) ApplePurchase(string boundTo, int status = 1, int autoRenew = 1, DateTimeOffset? expires = null)
+    {
+        var transactionId = AppleWireMock.NewTransactionId();
+        var original = AppleWireMock.NewTransactionId();
+        var jws = Apple.Pki.Sign(AppleTestPki.Transaction(AppleWireMock.BundleId, AppleWireMock.Yearly, transactionId, original, boundTo, expiresDate: expires));
+        var renewal = Apple.Pki.Sign(AppleTestPki.Renewal(original, AppleWireMock.Yearly, autoRenew));
+        Apple.Get(false, AppleWireMock.TransactionPath(transactionId), 200, AppleWireMock.TransactionInfoBody(jws));
+        Apple.Get(false, AppleWireMock.SubscriptionsPath(transactionId), 200, AppleWireMock.StatusBody("Production", (status, original, jws, renewal)));
+        return (jws, original);
+    }
+
+    private AppleWireMock Apple => fixture.Apple;
 
     private static string Body(string productId, string token) =>
         "{\"platform\":\"android\",\"productId\":\"" + productId + "\",\"purchaseToken\":\"" + token + "\"}";
@@ -187,18 +280,18 @@ public class VerifyLiveContractTests(VerifyContractFixture fixture) : IClassFixt
         return body;
     }
 
-    private async Task<(string InstallId, string Token)> NewInstallAsync()
+    private async Task<(string InstallId, string Token)> NewInstallAsync(string platform = "android")
     {
         var installId = Guid.NewGuid().ToString("D");
         using var request = new HttpRequestMessage(HttpMethod.Post, "/v1/installs");
         request.Headers.Add(IdempotencyKeys.HeaderName, NewKey());
-        request.Content = new StringContent("{\"installId\":\"" + installId + "\",\"platform\":\"android\",\"appVersion\":\"1.0.0\"}", Encoding.UTF8, Json);
+        request.Content = new StringContent("{\"installId\":\"" + installId + "\",\"platform\":\"" + platform + "\",\"appVersion\":\"1.0.0\"}", Encoding.UTF8, Json);
         using var response = await fixture.Client.SendAsync(request);
         Assert.Equal(HttpStatusCode.Created, response.StatusCode);
         return (installId, JsonNode.Parse(await response.Content.ReadAsStringAsync())!["installToken"]!.GetValue<string>());
     }
 
-    private async Task<HttpResponseMessage> SendAsync(string? token, string body, string? key, string? nonce = null)
+    private async Task<HttpResponseMessage> SendAsync(string? token, string body, string? key, string? nonce = null, string platform = "android")
     {
         using var request = new HttpRequestMessage(HttpMethod.Post, "/v1/purchases/verify");
         if (token is not null)
@@ -216,7 +309,7 @@ public class VerifyLiveContractTests(VerifyContractFixture fixture) : IClassFixt
             request.Headers.Add("Zaghlol-Time-Nonce", nonce);
         }
 
-        request.Headers.Add("Zaghlol-App", "android/1.0.0 (1)");
+        request.Headers.Add("Zaghlol-App", platform + "/1.0.0 (1)");
         request.Content = new StringContent(body, Encoding.UTF8, Json);
         return await fixture.Client.SendAsync(request);
     }

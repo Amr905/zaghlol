@@ -49,6 +49,13 @@ public sealed class Purchase
 
     public StoreEnvironment Environment { get; set; }
 
+    /// <summary>
+    /// T-131 (Apple only): the <c>purchaseDate</c> of the newest <c>PURCHASE</c>-reason transaction a binding-checked verify has
+    /// seen; advancing it is what makes a verify a new payment (D-59/D-61(a)). NULL until the first such verify.
+    /// </summary>
+    public DateTimeOffset? LastPaymentAt { get; set; }
+
+    /// <summary>Play obfuscatedAccountId / Apple appAccountToken: <c>StoreBindingRef</c> of the buying install.</summary>
     public string? ObfuscatedInstallRef { get; set; }
 
     public DateTimeOffset LastVerifiedAt { get; set; }

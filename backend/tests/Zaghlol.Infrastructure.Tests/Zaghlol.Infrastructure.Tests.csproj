@@ -17,8 +17,12 @@
     <Compile Include="..\Shared\ZaghlolTestDatabase.cs" Link="Shared\ZaghlolTestDatabase.cs" />
     <Compile Include="..\Shared\FakeKms.cs" Link="Shared\FakeKms.cs" />
     <Compile Include="..\Shared\PlayWireMock.cs" Link="Shared\PlayWireMock.cs" />
+    <Compile Include="..\Shared\AppleTestPki.cs" Link="Shared\AppleTestPki.cs" />
+    <Compile Include="..\Shared\AppleWireMock.cs" Link="Shared\AppleWireMock.cs" />
     <!-- The same role bootstrap the provider admin and docker compose run. -->
     <None Include="..\..\deploy\db\bootstrap-roles.sql" Link="db\bootstrap-roles.sql" CopyToOutputDirectory="PreserveNewest" />
+    <!-- T-131: the PO's recorded sandbox JWS, once it exists (the test reports skipped until then). -->
+    <None Include="AppStore\fixtures\**" CopyToOutputDirectory="PreserveNewest" />
     <!-- The authoritative table list the schema is diffed against. -->
     <None Include="..\..\..\docs\03-technical\backend-schema.md" Link="docs\backend-schema.md" CopyToOutputDirectory="PreserveNewest" />
   </ItemGroup>

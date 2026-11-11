@@ -12,6 +12,7 @@ using OpenTelemetry.Trace;
 using Serilog;
 using Serilog.Events;
 using Zaghlol.Application.Purchases;
+using Zaghlol.Infrastructure.AppStore;
 using Zaghlol.Infrastructure.GooglePlay;
 using Zaghlol.Infrastructure.Logging;
 using Zaghlol.Infrastructure.Observability;
@@ -23,7 +24,7 @@ using MelLevel = Microsoft.Extensions.Logging.LogLevel;
 namespace Zaghlol.Infrastructure.Tests.GooglePlay;
 
 /// <summary>
-/// The real Play client registration (<c>AddZaghlolGooglePlay</c>) in a <c>Testing</c> host against WireMock, with the production
+/// The real Play and App Store client registrations (<c>AddZaghlolGooglePlay</c>, <c>AddZaghlolAppStore</c>) in a <c>Testing</c> host against WireMock, with the production
 /// logger configuration (every category at Verbose: the worst case), the real telemetry pipeline (spans copied after the
 /// redactor) and a meter listener on the Zaghlol meter.
 /// </summary>
@@ -56,6 +57,9 @@ internal sealed class PlayClientHost : IAsyncDisposable
         services.AddLogging(b => b.AddSerilog(logger.CreateLogger(), dispose: true).SetMinimumLevel(MelLevel.Trace));
         services.AddZaghlolTelemetry(configuration, new TestEnvironment(), "zaghlol-test", addOtlpExporter: t => t.AddProcessor(new SpanCopy(Spans)));
         services.AddZaghlolGooglePlay();
+
+        // T-131: the App Store clients too (Testing: an empty Purchases:Apple section is valid; Apple tests pass their settings).
+        services.AddZaghlolAppStore();
         if (tokens is not null)
         {
             services.AddSingleton(tokens);
@@ -81,6 +85,8 @@ internal sealed class PlayClientHost : IAsyncDisposable
     public IServiceProvider Services => provider;
 
     public IPlayDeveloperApi Api => provider.GetRequiredService<IPlayDeveloperApi>();
+
+    public IAppStoreServerApi AppStore => provider.GetRequiredService<IAppStoreServerApi>();
 
     public ConcurrentQueue<string> Spans { get; } = new();
 

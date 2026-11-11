@@ -331,7 +331,10 @@ paths:
         purchased and active state (a cancelled subscription keeps Gold until its expiry). A pending purchase
         returns `status: pending` and grants nothing. A `purchaseToken` that isn't 1-512 characters of
         `[A-Za-z0-9._-]` (with at least one letter or digit) is answered `422 PURCHASE_TOKEN_INVALID` without a
-        Play call. A store failure is `502 STORE_UNAVAILABLE` and an exhausted server-side store budget
+        Play call. On iOS a `signedTransaction` that fails the JWS checks (shape, `alg`, the x5c chain to the pinned
+        Apple Root CA - G3, Apple's marker OIDs, the signature) is `422 PURCHASE_TOKEN_INVALID` without an Apple call;
+        Apple's API is called on the signed `environment` only, and the state comes from Apple's answers, never the
+        app's JWS (backend-api §4.3). A store failure is `502 STORE_UNAVAILABLE` and an exhausted server-side store budget
         `503 UPSTREAM_UNAVAILABLE`, both with `Retry-After` and neither stored. Idempotent for 24 hours per
         `Idempotency-Key`.
         No device attestation here: the store-side binding to StoreBindingRef(installId) already ties a new purchase to

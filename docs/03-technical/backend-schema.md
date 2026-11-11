@@ -109,11 +109,16 @@ CREATE TABLE purchases (
   support_link_notice_iat timestamptz,         -- R5-7: iat of the newest entitlement token sent together with supportNotice
   state text NOT NULL CHECK (state IN ('pending','active','in_grace','on_hold','paused','canceled_active','expired','refunded','revoked')),
   expires_at timestamptz,                      -- NULL for lifetime
-  acknowledged boolean NOT NULL DEFAULT false, -- Google; must be true within 3 days (BR-GOLD-06)
+  acknowledged boolean NOT NULL DEFAULT false, -- Google; must be true within 3 days (BR-GOLD-06). Always true for app_store
+                                               -- (Apple has no server acknowledgement; the app finishes the transaction, T-131)
   ack_next_attempt_at timestamptz,             -- T-130 M-1: the ack sweeper defers a row it can't finish (pending, unknown
                                                -- product/state, Play error) until then; NULL = never deferred. Only worker_rw writes it
   environment text NOT NULL CHECK (environment IN ('production','sandbox')),
-  obfuscated_install_ref text,                 -- Play obfuscatedAccountId / Apple appAccountToken = hash(install_id)
+  last_payment_at timestamptz,                 -- T-131 (Apple only): purchaseDate of the newest PURCHASE-reason transaction a
+                                               -- binding-checked verify has seen; advancing it = a new payment (D-59/D-61(a)).
+                                               -- Only app_rw updates it (never restore or T-134 notifications); no transaction ID stored
+  obfuscated_install_ref text,                 -- = StoreBindingRef(install_id): Play obfuscatedAccountId / Apple appAccountToken
+                                               -- (canonical lower-case UUID for Apple)
   last_verified_at timestamptz NOT NULL,
   created_at timestamptz NOT NULL DEFAULT now(),
   UNIQUE (store, store_key),

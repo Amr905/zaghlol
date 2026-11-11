@@ -52,4 +52,35 @@ public static class StoreBindingRef
         var actual = Encoding.UTF8.GetBytes(storeValue);
         return actual.Length == expected.Length && CryptographicOperations.FixedTimeEquals(actual, expected);
     }
+
+    /// <summary>
+    /// Apple <c>appAccountToken</c> (T-131 §3 step 4): parsed as a hyphenated UUID (any hex case), its 16 bytes compared in constant
+    /// time with <see cref="Compute"/> of <paramref name="installId"/>. Absent or unparsable is false.
+    /// </summary>
+    public static bool MatchesAppAccountToken(string? appAccountToken, InstallId installId)
+    {
+        if (!TryCanonicalUuid(appAccountToken, out var actual))
+        {
+            return false;
+        }
+
+        Span<byte> actualBytes = stackalloc byte[16];
+        Span<byte> expectedBytes = stackalloc byte[16];
+        Guid.ParseExact(actual, "D").TryWriteBytes(actualBytes, bigEndian: true, out _);
+        Guid.ParseExact(Compute(installId), "D").TryWriteBytes(expectedBytes, bigEndian: true, out _);
+        return CryptographicOperations.FixedTimeEquals(actualBytes, expectedBytes);
+    }
+
+    /// <summary>The lower-case hyphenated form of a hyphenated UUID string (what <c>obfuscated_install_ref</c> stores for Apple).</summary>
+    public static bool TryCanonicalUuid(string? value, out string canonical)
+    {
+        if (value is { Length: Length } && Guid.TryParseExact(value, "D", out var uuid))
+        {
+            canonical = uuid.ToString("D");
+            return true;
+        }
+
+        canonical = string.Empty;
+        return false;
+    }
 }
