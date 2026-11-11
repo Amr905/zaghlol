@@ -169,3 +169,21 @@ Both are on the app-core lane, so one fix agent can take both. Both are probably
 - [x] No `double` money; T-077 never writes amounts
 - [ ] No sensitive data in logs: T-040 and T-184 yes; T-021 has the 21-1 escape hatch
 - [x] Stays within each task's scope (T-040's spike removal follows Lead decision 3)
+
+## Re-review 77-1 (delta)
+
+Scope: commit 2d576f8, `bulk_edit.dart` and `bulk_edit_test.dart` only. Ran `bulk_edit_test.dart` on 2d576f8: 29 passed.
+
+**Verdict: APPROVED**
+
+Checked and holding:
+- Event content: apply and undo name old and new account ids on an account move, the cycle key of every affected row, and both ends of every offset link on delete (apply and undo). Tests cover each case.
+- Publish happens after `inTransaction` returns, so a rollback emits nothing. Undo with nothing restorable emits no event.
+- Undo still checks `updated_at == batch time` before restoring, then stamps `now`. A later edit still blocks it (tested), and the resume sweep now finds undone rows (tested with a seeded cycle summary).
+- All-or-nothing and "never destroy on doubt" are untouched: the event code only reads, and the restore guards are unchanged.
+
+Blockers: none. Majors: none.
+
+Minors:
+- 77-1a: `loadSchedule` defaults to payday on the 1st and `events` to none, and no production code constructs `BulkEditUseCase` yet. When the provider is wired (T-051/T-077 UI task), pass the real schedule and the bus, or make `loadSchedule` required. A default 1st would silently name the wrong cycles for users with another payday. Follow-up for the wiring task.
+- 77-1b: In the review worktree `/home/claude/wt-batch9` the index holds staged changes that revert 2d576f8 (6 files). Running tests there does not exercise the fix. Do not commit from that index; run `git restore --staged --worktree .` first.
