@@ -1,0 +1,17 @@
+name: catalog_build
+description: CLI that turns the curated catalog CSV into the signed catalog_seed.json.gz (T-030).
+publish_to: none
+resolution: workspace
+
+environment:
+  sdk: ^3.13.7
+
+dependencies:
+  zaghlol_catalog:
+    path: ../../packages/zaghlol_catalog
+  zaghlol_parsing:
+    path: ../../packages/zaghlol_parsing
+
+dev_dependencies:
+  lints: ">=5.0.0 <7.0.0"
+  test: ^1.25.0

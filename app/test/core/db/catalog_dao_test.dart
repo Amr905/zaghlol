@@ -58,6 +58,44 @@ void main() {
           a.aliasNorm,
       ];
 
+      test(
+        'T-030 bulk upserts update in place and keep the FTS in sync',
+        () async {
+          await dao.upsertMerchants([
+            merchant(1, 'Carrefour Renamed'),
+            merchant(9, 'Newcomer'),
+          ]);
+          await dao.upsertAliases([
+            (merchantId: 1, aliasNorm: 'carrefour', match: 'exact'),
+            (merchantId: 9, aliasNorm: 'newcomer', match: 'prefix'),
+          ]);
+          await dao.upsertKeywords([
+            CatalogKeywordsCompanion.insert(
+              keywordNorm: 'فاكهه',
+              lang: 'ar',
+              categoryCode: 'groceries',
+              weight: 60,
+            ),
+          ]);
+          await dao.upsertKeywords([
+            CatalogKeywordsCompanion.insert(
+              keywordNorm: 'فاكهه',
+              lang: 'ar',
+              categoryCode: 'groceries',
+              weight: 70,
+            ),
+          ]);
+          expect((await dao.merchantById(1))!.canonical, 'Carrefour Renamed');
+          // The original aliases of merchant 1 stayed (update, not replace).
+          expect(await dao.aliasesEqualTo('carrefour maadi'), hasLength(1));
+          final same = await dao.aliasesEqualTo('carrefour');
+          expect(same.single.match, 'exact');
+          expect(await candidates('newcomr'), ['newcomer']);
+          expect((await dao.keywordsOf('ar')).single.weight, 70);
+          await expectIndexIntact(edb.db);
+        },
+      );
+
       test('a misspelt key finds its alias (shared trigrams)', () async {
         expect(await candidates('ezabi'), ['ezaby', 'ezaby pharmacy']);
         expect((await candidates('carrefur')).toSet(), {

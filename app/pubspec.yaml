@@ -24,6 +24,9 @@ dependencies:
   # T-015: SafeException for code-only DB errors (error-handling §3).
   zaghlol_domain:
     path: ../packages/zaghlol_domain
+  # T-030: the seed format and its ES256 check (pure Dart).
+  zaghlol_catalog:
+    path: ../packages/zaghlol_catalog
 
 dev_dependencies:
   flutter_test:
@@ -37,3 +40,6 @@ dev_dependencies:
 
 flutter:
   uses-material-design: true
+  assets:
+    # T-030: the signed first-launch catalog (tools/catalog_build).
+    - assets/catalog/

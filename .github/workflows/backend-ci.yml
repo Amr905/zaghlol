@@ -6,6 +6,7 @@ on:
     branches: ["batch/**", "ci/**"]
     paths:
       - "backend/**"
+      - "tools/catalog_build/data/catalog_seed.csv"
       - "docs/03-technical/backend-api.md"
       - "docs/03-technical/backend-schema.md"
       - ".github/workflows/backend-ci.yml"
