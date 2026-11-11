@@ -110,6 +110,31 @@ import 'package:zaghlol/core/logging/diag_field.dart';
     );
   });
 
+  group('registry-only codes (T-021 fix 21-1)', () {
+    test('no public re-reader builds a code from a String', () async {
+      expect(
+        await _compiles(
+          "$imports\nvoid main() => DiagEvent(level: DiagLevel.info, code: DiagCode.tryFromStored('CARD_4111111111111111')!);",
+        ),
+        isFalse,
+      );
+      expect(
+        await _compiles(
+          "$imports\nvoid main() => DiagEvent(level: DiagLevel.info, code: DiagCode.fromRegistry('SYNC_OK')!);",
+        ),
+        isTrue,
+        reason: 'control: the registry lookup is typed and compiles',
+      );
+    });
+
+    test('fromRegistry only returns registered codes', () {
+      expect(DiagCode.fromRegistry('CARD_4111111111111111'), isNull);
+      expect(DiagCode.fromRegistry('EGP_1234_50'), isNull);
+      expect(DiagCode.fromRegistry(null), isNull);
+      expect(DiagCode.fromRegistry('SYNC_OK'), same(DiagCodes.syncOk));
+    });
+  });
+
   group('runtime shape checks (strings that remain)', () {
     test('free text, SMS and key-like strings are rejected without echo', () {
       for (final bad in [_smsSentinel, _keySentinel, '1.2 beta', '', 'a b']) {
@@ -229,7 +254,7 @@ import 'package:zaghlol/core/logging/diag_field.dart';
       await dao.append(
         at: clock.millisecondsSinceEpoch,
         level: DiagLevel.error,
-        code: 'GOOD_CODE',
+        code: 'SYNC_FAILED',
         fields: {
           'body': _smsSentinel,
           'app_version': _smsSentinel,
@@ -243,8 +268,14 @@ import 'package:zaghlol/core/logging/diag_field.dart';
         level: DiagLevel.error,
         code: 'lower.case:code',
       );
+      await dao.append(
+        at: clock.millisecondsSinceEpoch,
+        level: DiagLevel.error,
+        code: 'CARD_4111111111111111',
+      );
       final text = await DiagExporter(dao).exportText(now: clock);
-      expect(text, contains('GOOD_CODE institution=CIB'));
+      expect(text, isNot(contains('4111')));
+      expect(text, contains('SYNC_FAILED institution=CIB'));
       expect(text, isNot(contains('ACME')));
       expect(text, isNot(contains('123450')));
       expect(text, isNot(contains('lower')));
@@ -330,7 +361,8 @@ import 'package:zaghlol/core/logging/diag_field.dart';
         DiagCodes.dbMigrated,
         DiagCodes.backupExclusionFailed,
       ]) {
-        expect(DiagCode.tryFromStored(c.value), c);
+        expect(DiagCode.fromRegistry(c.value), c);
+        expect(DiagCodes.all, contains(c));
       }
       expect(DiagCodes.backupExclusionFailed.value, 'BACKUP_EXCLUSION_FAILED');
     });

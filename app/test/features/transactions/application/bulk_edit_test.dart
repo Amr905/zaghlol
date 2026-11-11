@@ -7,9 +7,12 @@ import 'package:zaghlol/core/db/app_database.dart';
 import 'package:zaghlol/core/db/daos/accounts_dao.dart';
 import 'package:zaghlol/core/db/daos/categories_dao.dart';
 import 'package:zaghlol/core/db/daos/merchant_rules_dao.dart';
+import 'package:zaghlol/core/db/daos/offset_links_dao.dart';
 import 'package:zaghlol/core/db/daos/misc_daos.dart';
 import 'package:zaghlol/core/db/daos/transactions_dao.dart';
+import 'package:zaghlol/features/budget/data/cycle_cache_invalidator.dart';
 import 'package:zaghlol/features/transactions/application/bulk_edit.dart';
+import 'package:zaghlol_domain/zaghlol_domain.dart';
 
 import '../../../core/db/financial_fixtures.dart';
 
@@ -33,7 +36,8 @@ void main() {
   var nextId = 0;
 
   Future<Map<String, Map<String, Object?>>> snapshot() async => {
-    for (final r in await db.select(db.transactions).get()) r.id: r.toJson(),
+    for (final r in await db.select(db.transactions).get())
+      r.id: (r.toJson()..remove('updated_at')),
   };
 
   Future<Map<String, int>> totals() async {
@@ -366,6 +370,122 @@ void main() {
       expect(res.rulesCreated, 0);
       expect(await MerchantRulesDao(db).all(), isEmpty);
     });
+  });
+
+  group('77-1 TransactionsChanged and undo stamp', () {
+    final schedule = PaydaySchedule.single(1);
+    String keyAt(int ms) => schedule.cycleOnMs(ms, 120).key;
+    // Two cycles apart so the keys differ.
+    final lastMonth = t0 - 40 * 86400000;
+
+    test('category apply and undo emit the accounts and cycles of the rows, '
+        'and publish them on the bus', () async {
+      final bus = DomainEventBus();
+      final seen = <TransactionsChanged>[];
+      bus.on<TransactionsChanged>().listen(seen.add);
+      uc = BulkEditUseCase(
+        db,
+        clock: () => DateTime.fromMillisecondsSinceEpoch(clockMs, isUtc: true),
+        newId: () => 'id${nextId++}',
+        events: bus,
+      );
+      final dao = TransactionsDao(db);
+      await dao.insert(txn('a', occurredAt: t0));
+      await dao.insert(txn('b', occurredAt: lastMonth));
+      final res = await uc.apply({'a', 'b'}, const SetCategory(foodId));
+      expect(res.event.accountIds, {'acc1'});
+      expect(res.event.cycleKeys, {keyAt(t0), keyAt(lastMonth)});
+      expect(res.event.cycleKeys.length, 2);
+      final u = await uc.undo(res.batchId);
+      expect(u.event!.accountIds, {'acc1'});
+      expect(u.event!.cycleKeys, res.event.cycleKeys);
+      await Future<void>.delayed(Duration.zero);
+      expect(seen.length, 2);
+      expect(seen.first.cycleKeys, res.event.cycleKeys);
+    });
+
+    test('account move: old and new account ids, also on undo', () async {
+      await TransactionsDao(db).insert(txn('a', occurredAt: lastMonth));
+      final res = await uc.apply({'a'}, const SetAccount('acc2'));
+      expect(res.event.accountIds, {'acc1', 'acc2'});
+      expect(res.event.cycleKeys, {keyAt(lastMonth)});
+      final u = await uc.undo(res.batchId);
+      expect(u.event!.accountIds, {'acc1', 'acc2'});
+      expect(u.event!.cycleKeys, {keyAt(lastMonth)});
+    });
+
+    test('delete: also the cycle and account of the expense an offset link '
+        'points to; same on undo', () async {
+      final dao = TransactionsDao(db);
+      await dao.insert(txn('exp', occurredAt: lastMonth, amountMinor: 5000));
+      await dao.insert(
+        txn(
+          'refund',
+          accountId: 'acc2',
+          direction: 'income',
+          occurredAt: t0,
+          amountMinor: 2000,
+        ),
+      );
+      await OffsetLinksDao(
+        db,
+      ).insert(link('l1', expense: 'exp', source: 'refund', amountMinor: 2000));
+      final res = await uc.apply({'refund'}, const DeleteTransactions());
+      expect(res.event.cycleKeys, {keyAt(t0), keyAt(lastMonth)});
+      expect(res.event.accountIds, {'acc1', 'acc2'});
+      final u = await uc.undo(res.batchId);
+      expect(u.event!.cycleKeys, {keyAt(t0), keyAt(lastMonth)});
+      expect(u.event!.accountIds, {'acc1', 'acc2'});
+    });
+
+    test('undo with nothing restorable emits no event', () async {
+      await seed(1);
+      final res = await uc.apply({'t0'}, const SetCategory(foodId));
+      clockMs += 1000;
+      await TransactionsDao(db).updateById(
+        't0',
+        TransactionsCompanion(
+          categoryId: const Value(billsId),
+          updatedAt: Value(clockMs),
+        ),
+      );
+      expect((await uc.undo(res.batchId)).event, isNull);
+    });
+
+    test(
+      'undo stamps updated_at with the undo time, so the resume sweep '
+      'finds the undone rows; conflict check still sees later edits',
+      () async {
+        await seed(2);
+        final dao = TransactionsDao(db);
+        final res = await uc.apply({'t0', 't1'}, const SetCategory(foodId));
+        final batchAt = clockMs;
+        // Seed a cached closed-cycle summary for the rows' cycle.
+        await db.customStatement(
+          'INSERT INTO cycle_summaries (cycle_start, currency, account_filter, '
+          "income_minor, spend_minor, by_category, computed_at) VALUES ('"
+          "${keyAt(t0)}', 'KWD', '*', 0, 0, '{}', $batchAt)",
+        );
+        clockMs += 5000;
+        final undoAt = clockMs;
+        await uc.undo(res.batchId);
+        final rows = await db.select(db.transactions).get();
+        expect(rows.map((r) => r.updatedAt), everyElement(undoAt));
+        final inv = CycleCacheInvalidator(db);
+        expect(await inv.sweepSince(batchAt + 1, schedule), 1);
+        // A later edit still blocks undo (stamp check on the batch time).
+        clockMs += 1000;
+        final res2 = await uc.apply({'t0'}, const SetCategory(billsId));
+        await dao.updateById(
+          't0',
+          TransactionsCompanion(
+            categoryId: const Value(foodId),
+            updatedAt: Value(clockMs + 1),
+          ),
+        );
+        expect((await uc.undo(res2.batchId)).skipped, 1);
+      },
+    );
   });
 
   group('undo safety', () {

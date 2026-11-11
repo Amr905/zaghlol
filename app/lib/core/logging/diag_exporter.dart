@@ -26,7 +26,7 @@ class DiagExporter {
     final out = StringBuffer('zaghlol diagnostics\n');
     for (final row in rows.reversed) {
       if (row.at < cutoff) continue;
-      final code = DiagCode.tryFromStored(row.code);
+      final code = DiagCode.fromRegistry(row.code);
       if (code == null) continue;
       final line = StringBuffer(
         '${DateTime.fromMillisecondsSinceEpoch(row.at, isUtc: true).toIso8601String()} '

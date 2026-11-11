@@ -14,9 +14,21 @@ final class DiagCode {
   factory DiagCode.fromSafeException(SafeException e) =>
       _shape.hasMatch(e.code) ? DiagCode._(e.code) : DiagCodes.unknownError;
 
-  /// Re-reads a stored code (export). `null` when the shape is wrong.
-  static DiagCode? tryFromStored(Object? raw) =>
-      raw is String && _shape.hasMatch(raw) ? DiagCode._(raw) : null;
+  /// Re-reads a stored code (export): the [DiagCodes] entry with that value,
+  /// or `null`. It never builds a new instance, so text read back from a row
+  /// cannot become a code.
+  static DiagCode? fromRegistry(Object? raw) {
+    if (raw is! String) return null;
+    for (final c in DiagCodes.all) {
+      if (c.value == raw) return c;
+    }
+    return null;
+  }
+
+  /// Whether [raw] has the shape of an error code (a [SafeException] code
+  /// stored as an `error_code` field value). A shape check only.
+  static bool hasCodeShape(Object? raw) =>
+      raw is String && _shape.hasMatch(raw);
 
   static final RegExp _shape = RegExp(r'^[A-Z][A-Z0-9_]{0,63}$');
 
@@ -35,6 +47,23 @@ final class DiagCode {
 /// The registry of codes the app may log. Adding one is a reviewed code
 /// change; there is deliberately no way to log a code built at run time.
 abstract final class DiagCodes {
+  /// Every registered code. Keep in step with the constants below; the export
+  /// drops a stored row code that is not in this list.
+  static const List<DiagCode> all = [
+    flutterError,
+    uncaughtError,
+    unknownError,
+    appStarted,
+    ingestCycle,
+    ingestUncaught,
+    ingestFlutterError,
+    syncOk,
+    syncFailed,
+    catalogUpdated,
+    dbMigrated,
+    backupExclusionFailed,
+  ];
+
   static const DiagCode flutterError = DiagCode._('FLUTTER_ERROR');
   static const DiagCode uncaughtError = DiagCode._('UNCAUGHT_ERROR');
   static const DiagCode unknownError = DiagCode._('UNKNOWN_ERROR');

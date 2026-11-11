@@ -127,7 +127,7 @@ final class DiagField {
       DiagKind.version => raw is String && _versionShape.hasMatch(raw),
       DiagKind.institution => raw is String && _institutionShape.hasMatch(raw),
       DiagKind.templateId => raw is String && _isTemplate(raw),
-      DiagKind.errorCode => DiagCode.tryFromStored(raw) != null,
+      DiagKind.errorCode => DiagCode.hasCodeShape(raw),
     };
     return ok ? DiagField._(key, raw!) : null;
   }

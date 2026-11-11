@@ -10,7 +10,7 @@
 
 import 'dart:convert';
 
-import 'package:drift/drift.dart' show Expression, Value;
+import 'package:drift/drift.dart' show Expression, Value, Variable;
 import 'package:zaghlol_domain/zaghlol_domain.dart';
 
 import '../../../core/db/app_database.dart';
@@ -81,6 +81,7 @@ final class BulkEditResult {
     required this.batchId,
     required this.changed,
     required this.rulesCreated,
+    required this.event,
   });
 
   /// The id to pass to [BulkEditUseCase.undo].
@@ -89,10 +90,19 @@ final class BulkEditResult {
 
   /// Rules newly created or re-pointed by this batch.
   final int rulesCreated;
+
+  /// The `TransactionsChanged` this edit caused (old and new account ids,
+  /// the cycle of every affected row and of the rows their offset links
+  /// reach). Already published when an event bus was given.
+  final TransactionsChanged event;
 }
 
 final class UndoResult {
-  const UndoResult({required this.restored, required this.skipped});
+  const UndoResult({
+    required this.restored,
+    required this.skipped,
+    required this.event,
+  });
 
   /// Rows put back exactly as they were.
   final int restored;
@@ -100,17 +110,29 @@ final class UndoResult {
   /// Rows (or rules) edited again after the bulk edit. They are left as the
   /// user last set them: Undo never overwrites a later edit.
   final int skipped;
+
+  /// The `TransactionsChanged` for the rows put back; `null` when no row was
+  /// restored. Already published when an event bus was given.
+  final TransactionsChanged? event;
 }
 
 class BulkEditUseCase {
-  BulkEditUseCase(this._db, {Clock? clock, IdGenerator? newId})
-    : _now = clock ?? DateTime.now,
-      _newId = newId ?? newUuidV4,
-      _txns = TransactionsDao(_db),
-      _rules = MerchantRulesDao(_db),
-      _undo = UndoBatchesDao(_db),
-      _categories = CategoriesDao(_db),
-      _accounts = AccountsDao(_db);
+  /// [loadSchedule] gives the payday schedule in force (used to name the
+  /// cycles of the emitted event; default: payday on the 1st). [events]
+  /// receives the `TransactionsChanged` after each commit (T-051 note §6).
+  BulkEditUseCase(
+    this._db, {
+    Clock? clock,
+    IdGenerator? newId,
+    this._loadSchedule,
+    this._events,
+  }) : _now = clock ?? DateTime.now,
+       _newId = newId ?? newUuidV4,
+       _txns = TransactionsDao(_db),
+       _rules = MerchantRulesDao(_db),
+       _undo = UndoBatchesDao(_db),
+       _categories = CategoriesDao(_db),
+       _accounts = AccountsDao(_db);
 
   final AppDatabase _db;
   final Clock _now;
@@ -120,6 +142,51 @@ class BulkEditUseCase {
   final UndoBatchesDao _undo;
   final CategoriesDao _categories;
   final AccountsDao _accounts;
+  final Future<PaydaySchedule> Function()? _loadSchedule;
+  final DomainEventBus? _events;
+
+  Future<PaydaySchedule> _schedule() async =>
+      await _loadSchedule?.call() ?? PaydaySchedule.single(1);
+
+  /// The event for [rows] (their state's account and occurrence). With
+  /// [withLinks], also the accounts and cycles of every transaction linked
+  /// to them by an offset link, on either side (BR-XFR-07).
+  Future<TransactionsChanged> _eventFor(
+    PaydaySchedule schedule,
+    Iterable<TransactionRow> rows, {
+    Set<String> accountIds = const {},
+    bool withLinks = false,
+  }) async {
+    final accounts = <String>{...accountIds};
+    final keys = <String>{};
+    void add(String account, int at, int off) {
+      accounts.add(account);
+      keys.add(schedule.cycleOnMs(at, off).key);
+    }
+
+    for (final r in rows) {
+      add(r.accountId, r.occurredAt, r.occurredTzOffsetMin);
+      if (!withLinks) continue;
+      final links = await _db
+          .customSelect(
+            'SELECT e.account_id AS ea, e.occurred_at AS eat, '
+            'e.occurred_tz_offset_min AS eoff, s.account_id AS sa, '
+            's.occurred_at AS sat, s.occurred_tz_offset_min AS soff '
+            'FROM offset_links l '
+            'JOIN transactions e ON e.id = l.expense_txn_id '
+            'JOIN transactions s ON s.id = l.source_txn_id '
+            'WHERE l.expense_txn_id = ?1 OR l.source_txn_id = ?1',
+            variables: [Variable.withString(r.id)],
+            readsFrom: {_db.offsetLinks, _db.transactions},
+          )
+          .get();
+      for (final l in links) {
+        add(l.read<String>('ea'), l.read<int>('eat'), l.read<int>('eoff'));
+        add(l.read<String>('sa'), l.read<int>('sat'), l.read<int>('soff'));
+      }
+    }
+    return TransactionsChanged(accountIds: accounts, cycleKeys: keys);
+  }
 
   int _nowMs() => _now().toUtc().millisecondsSinceEpoch;
 
@@ -131,7 +198,8 @@ class BulkEditUseCase {
     if (unique.isEmpty || unique.length > maxIdsPerCall) _invalid();
     final now = _nowMs();
     final batchId = _newId();
-    return _txns.inTransaction(() async {
+    final schedule = await _schedule();
+    final result = await _txns.inTransaction(() async {
       await _undo.purgeOlderThan(now - undoWindow.inMilliseconds + 1);
       final rows = <TransactionRow>[];
       for (final id in unique) {
@@ -222,8 +290,16 @@ class BulkEditUseCase {
         batchId: batchId,
         changed: rows.length,
         rulesCreated: rulesTouched,
+        event: await _eventFor(
+          schedule,
+          rows,
+          accountIds: {if (change is SetAccount) change.accountId},
+          withLinks: change is DeleteTransactions,
+        ),
       );
     });
+    _events?.publish(result.event);
+    return result;
   }
 
   /// Undoes batch [batchId] in one database transaction: restores each row
@@ -234,7 +310,8 @@ class BulkEditUseCase {
   Future<UndoResult> undo(String batchId) async {
     if (batchId.isEmpty) _invalid();
     final now = _nowMs();
-    return _txns.inTransaction(() async {
+    final schedule = await _schedule();
+    final result = await _txns.inTransaction(() async {
       final batch = await _undo.byId(batchId);
       if (batch == null) {
         throw BulkEditException(BulkEditException.undoNotFound);
@@ -245,14 +322,23 @@ class BulkEditUseCase {
       final image = _parse(batch.beforeJson);
       var restored = 0;
       var skipped = 0;
+      final restoredIds = <String>[];
       for (final r in image.rows) {
         final ok = switch (image.kind) {
-          'category' => await _undoCategory(r, image),
-          'account' => await _undoAccount(r, image),
-          _ => await _undoDelete(r, image),
+          'category' => await _undoCategory(r, image, now),
+          'account' => await _undoAccount(r, image, now),
+          _ => await _undoDelete(r, image, now),
         };
-        ok ? restored++ : skipped++;
+        if (ok) {
+          restored++;
+          restoredIds.add(r.id);
+        } else {
+          skipped++;
+        }
       }
+      final restoredRows = <TransactionRow>[
+        for (final id in restoredIds) ?await _txns.byId(id),
+      ];
       for (final id in image.rulesCreated) {
         final rule = await _rules.byId(id);
         if (rule == null) continue;
@@ -276,8 +362,22 @@ class BulkEditUseCase {
       if (await _undo.deleteById(batchId) != 1) {
         throw BulkEditException(BulkEditException.undoNotFound);
       }
-      return UndoResult(restored: restored, skipped: skipped);
+      return UndoResult(
+        restored: restored,
+        skipped: skipped,
+        event: restoredRows.isEmpty
+            ? null
+            : await _eventFor(
+                schedule,
+                restoredRows,
+                accountIds: {if (image.kind == 'account') ?image.to},
+                withLinks: image.kind == 'delete',
+              ),
+      );
     });
+    final event = result.event;
+    if (event != null) _events?.publish(event);
+    return result;
   }
 
   /// Deletes expired batches. Returns how many were removed.
@@ -319,7 +419,7 @@ class BulkEditUseCase {
             .write(patch),
   );
 
-  Future<bool> _undoCategory(_ImageRow r, _Image image) async {
+  Future<bool> _undoCategory(_ImageRow r, _Image image, int now) async {
     final n = await _restoreIf(
       r.id,
       expectUpdatedAt: image.at,
@@ -328,33 +428,33 @@ class BulkEditUseCase {
         categoryId: Value(r.cat),
         categorySource: Value(r.src!),
         isUserVerified: Value(r.ver!),
-        updatedAt: Value(r.upd),
+        updatedAt: Value(now),
       ),
     );
     return n == 1;
   }
 
-  Future<bool> _undoAccount(_ImageRow r, _Image image) async {
+  Future<bool> _undoAccount(_ImageRow r, _Image image, int now) async {
     final n = await _restoreIf(
       r.id,
       expectUpdatedAt: image.at,
       expectAccountId: image.to,
       patch: TransactionsCompanion(
         accountId: Value(r.acc!),
-        updatedAt: Value(r.upd),
+        updatedAt: Value(now),
       ),
     );
     return n == 1;
   }
 
-  Future<bool> _undoDelete(_ImageRow r, _Image image) async {
+  Future<bool> _undoDelete(_ImageRow r, _Image image, int now) async {
     final n = await _restoreIf(
       r.id,
       expectUpdatedAt: image.at,
       expectDeletedAt: image.at,
       patch: TransactionsCompanion(
         deletedAt: const Value(null),
-        updatedAt: Value(r.upd),
+        updatedAt: Value(now),
       ),
     );
     return n == 1;
