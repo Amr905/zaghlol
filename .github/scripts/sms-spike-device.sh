@@ -19,8 +19,8 @@
 # into ADR-005 (emulator rows only; device rows come from T-008.md steps).
 # Instrumented suites (T-039 design note section 11): after the spike, the
 # devSms debug app + test APK replace the profile build and run the native
-# instrumented tests on the same emulator: spool (fatal), guard (T-038, fatal
-# once it exists), share (T-060, a warning until its owner makes it green),
+# instrumented tests on the same emulator: spool (fatal), guard (T-038, fatal;
+# skips allowed only by name), share (T-060, a warning until its owner makes it green),
 # then the two-phase kill test (AC1: a write phase halted between fsync and
 # rename of a 21st entry, a read phase in a new process).
 # Called as one line (android-emulator-runner runs `script` line by line).
@@ -192,23 +192,37 @@ A uninstall "$PKG" > /dev/null 2>&1 || true  # the profile build's signature may
 A install -r -t -g "$APP_APK" > /dev/null
 A install -r -t "$TEST_APK" > /dev/null
 # instr <name> <am instrument args...>: output to $OUT/it-<name>.txt; returns 0 only on "OK (n tests)".
+# Raw mode (-r): only it prints the per-test status codes (-4 = assumption
+# failure, counted inside "OK (n tests)") and the tests' own status values
+# (guard.timing); the final stream with "OK (n tests)" is printed as well.
 instr() {
   local name=$1; shift
-  sh_ am instrument -w "$@" "$RUNNER" > "$OUT/it-$name.txt" 2>&1 || true
+  sh_ am instrument -w -r "$@" "$RUNNER" > "$OUT/it-$name.txt" 2>&1 || true
   tr -d '\r' < "$OUT/it-$name.txt" | grep -E "^(OK|FAILURES|Tests run|INSTRUMENTATION_RESULT: shortMsg|[0-9]+\))" | head -n 20 || true
   tr -d '\r' < "$OUT/it-$name.txt" | grep -qE "^OK \([0-9]+ tests?\)"
 }
 KILL=app.zaghlol.platform.spool.SpoolKillRecoveryTest
 # skipped <name>: assumption failures (am instrument counts them inside "OK (n tests)").
 skipped() { tr -d '\r' < "$OUT/it-$1.txt" | grep -c "^INSTRUMENTATION_STATUS_CODE: -4" || true; }
+# skipped_names <name>: the method names of those skips, one per line (a status block ends at its code line).
+skipped_names() { tr -d '\r' < "$OUT/it-$1.txt" | awk '/^INSTRUMENTATION_STATUS: test=/{t=substr($0,30)} /^INSTRUMENTATION_STATUS_CODE: -4$/{print t}' | sort -u; }
+# Guard skips allowed by name: bundledBaseLoads until T-036 bundles guard_base.json.
+GUARD_ALLOWED_SKIPS="bundledBaseLoads"
 instr spool -e package app.zaghlol.platform.spool -e notClass "$KILL" || fail "spool instrumented tests failed (it-spool.txt)"
 tr -d '\r' < "$OUT/it-spool.txt" | grep -qE "^OK \(0 tests\)" && fail "no spool instrumented test ran"
 echo "spool instrumented: $(skipped spool) skipped"
 [ "$(skipped spool)" = 0 ] || fail "a spool instrumented test was skipped by an assumption (it-spool.txt)"
-instr guard -e package app.zaghlol.platform.guard && guard_ok=1 || guard_ok=0
-if tr -d '\r' < "$OUT/it-guard.txt" | grep -qE "No tests found|^OK \(0 tests\)"; then echo "guard instrumented: none yet (T-038)"
-elif [ "$guard_ok" = 1 ]; then echo "guard instrumented: ok, $(skipped guard) skipped"
-else fail "guard instrumented tests failed (it-guard.txt)"; fi
+# Guard (T-038, security M-1): fatal; at least one test must run and every skip must be allowed by name.
+instr guard -e package app.zaghlol.platform.guard || fail "guard instrumented tests failed (it-guard.txt)"
+tr -d '\r' < "$OUT/it-guard.txt" | grep -qE "No tests found|^OK \(0 tests\)" && fail "no guard instrumented test ran"
+guard_skips=$(skipped_names guard | tr '\n' ' ')
+echo "guard instrumented: $(skipped guard) skipped ${guard_skips:+($guard_skips)}"
+for t in $guard_skips; do
+  case " $GUARD_ALLOWED_SKIPS " in *" $t "*) ;; *) fail "guard instrumented test $t was skipped by an assumption (it-guard.txt)" ;; esac
+done
+GUARD_TIMING=$(tr -d '\r' < "$OUT/it-guard.txt" | sed -n 's/^INSTRUMENTATION_STATUS: guard\.timing=//p' | head -n 1)
+[ -n "$GUARD_TIMING" ] || fail "the guard timing test reported no guard.timing value"
+echo "guard timing: $GUARD_TIMING"
 instr share -e class app.zaghlol.platform.share.ShareIntakeInstrumentedTest || echo "::warning::T-060 ShareIntakeInstrumentedTest failed on API $API (it-share.txt); reported to the Lead, not a T-039 gate"
 # AC1 for real: phase write halts the process between fsync and rename of entry 21.
 instr kill-write -e class "$KILL#phaseWrite" -e spoolPhase write && fail "the write phase finished instead of halting"
@@ -226,4 +240,6 @@ instr kill-read -e class "$KILL#phaseRead" -e spoolPhase read || fail "the read 
     echo "- $n: $(tr -d '\r' < "$OUT/it-$n.txt" | grep -E "^(OK|FAILURES|Tests run)" | tr '\n' ' ')"
   done
   echo "- kill-write: halted with $bins entries + $tmps tmp on disk"
+  echo "- guard skipped: $(skipped guard) ${guard_skips:+($guard_skips; allowed until T-036)}"
+  echo "- guard timing: $GUARD_TIMING"
 } >> "$OUT/report.md"

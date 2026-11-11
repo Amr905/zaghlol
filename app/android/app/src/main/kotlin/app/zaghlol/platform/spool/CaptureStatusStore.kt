@@ -9,6 +9,7 @@ import java.io.FileNotFoundException
 import java.io.IOException
 import java.nio.file.NoSuchFileException
 import java.security.SecureRandom
+import java.util.concurrent.ConcurrentHashMap
 import javax.crypto.AEADBadTagException
 
 /**
@@ -51,6 +52,12 @@ class CaptureStatusUnavailableException : Exception("CAPTURE_STATUS_UNAVAILABLE"
  * Every alert and every [clear] advances `seq`; [clear] zeroes the counters
  * only if the caller's `seq` still matches, so alerts that arrived after the
  * caller's read survive.
+ *
+ * Invariant (T-039 review #1): the lock and the pending in-memory delta
+ * belong to the **file**, not to the instance. Every `CaptureStatusStore` in
+ * the process over the same canonical file path shares them, so two instances
+ * never write the fixed `status.bin.tmp` at the same time and a delta is
+ * merged exactly once, as if there were one instance.
  */
 class CaptureStatusStore(
     private val file: File,
@@ -60,8 +67,21 @@ class CaptureStatusStore(
     private val files: SpoolFileOps = DefaultSpoolFileOps,
     private val randomSeq: () -> Long = { SecureRandom().nextInt().toLong() and U32_MAX },
 ) {
-    private val lock = Any()
-    private var pending = Delta()
+    /** Per-file state shared by every instance over the same path. */
+    private class Shared {
+        val lock = Any()
+
+        /** Under [lock]. */
+        var pending = Delta()
+    }
+
+    private val shared: Shared = SHARED.computeIfAbsent(SpoolStore.canonicalKey(file)) { Shared() }
+    private val lock get() = shared.lock
+    private var pending: Delta
+        get() = shared.pending
+        set(value) {
+            shared.pending = value
+        }
 
     /** A spool write was refused (store lock held by the caller; lock order store → status). */
     fun recordRefused(reason: RefusalReason, channel: String, wallMs: Long) = record {
@@ -255,6 +275,9 @@ class CaptureStatusStore(
     }
 
     companion object {
+        /** One [Shared] per canonical status file path, for the whole process. */
+        private val SHARED = ConcurrentHashMap<String, Shared>()
+
         const val VERSION = 1
         const val U32_MAX = 0xFFFF_FFFFL
         const val CHANNEL_SMS = "sms"

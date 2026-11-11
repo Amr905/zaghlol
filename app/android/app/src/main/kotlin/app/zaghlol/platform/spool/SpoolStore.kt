@@ -10,6 +10,7 @@ import java.nio.file.AtomicMoveNotSupportedException
 import java.nio.file.Files
 import java.nio.file.NoSuchFileException
 import java.nio.file.StandardCopyOption
+import java.util.concurrent.ConcurrentHashMap
 import javax.crypto.AEADBadTagException
 
 /**
@@ -126,6 +127,14 @@ object DefaultSpoolFileOps : SpoolFileOps {
  *
  * Locks: writes and [sweepTmp] hold the store lock; inside it the status
  * lock and then the SpoolKey lock may be taken, never the reverse.
+ *
+ * Invariant (T-039 review #1): the store lock and the generic rate window
+ * belong to the **directory**, not to the instance. Every `SpoolStore` in the
+ * process over the same canonical directory path (receiver, listener, one host
+ * per engine, ...) shares one lock and one window ([shared]). So no `.tmp` is
+ * ever in flight while [sweepTmp] runs on any instance, and the generic rate
+ * bound is per process, not per instance. Other processes never open the
+ * spool (single-process app, ADR-005).
  */
 class SpoolStore(
     private val dir: File,
@@ -166,10 +175,17 @@ class SpoolStore(
         object Unavailable : ReadResult()
     }
 
-    private val lock = Any()
+    /** Per-directory state shared by every instance over the same path. */
+    private class Shared {
+        val lock = Any()
 
-    /** Monotonic times of the generic writes in the current window (under [lock]). */
-    private val genericWrites = ArrayDeque<Long>()
+        /** Monotonic times of the generic writes in the current window (under [lock]). */
+        val genericWrites = ArrayDeque<Long>()
+    }
+
+    private val shared: Shared = SHARED.computeIfAbsent(canonicalKey(dir)) { Shared() }
+    private val lock get() = shared.lock
+    private val genericWrites get() = shared.genericWrites
 
     /**
      * Admits, encrypts and writes [record] atomically: `.tmp`, fsync, atomic
@@ -344,7 +360,8 @@ class SpoolStore(
 
     /**
      * Deletes every spool `.tmp`. Runs under the store lock, where no write is
-     * in flight (single process; writes hold the lock from tmp to rename), so
+     * in flight (single process; writes hold the lock from tmp to rename, and
+     * the lock is shared by every instance over this directory), so
      * any `.tmp` seen here is a leftover of a killed write. No age rule, so a
      * clock change can neither keep nor lose one. Foreign files are untouched.
      */
@@ -379,6 +396,16 @@ class SpoolStore(
 
     companion object {
         const val TMP_SUFFIX = ".tmp"
+
+        /** One [Shared] per canonical directory path, for the whole process. */
+        private val SHARED = ConcurrentHashMap<String, Shared>()
+
+        /** The key of a path in the process-wide lock maps (canonical when it can be resolved). */
+        internal fun canonicalKey(f: File): String = try {
+            f.canonicalPath
+        } catch (_: IOException) {
+            f.absoluteFile.normalize().path
+        }
         val MAX_FILE_BYTES = SpoolRecordCodec.MAX_RECORD_BYTES + SpoolCipher.NONCE_BYTES + SpoolCipher.TAG_BYTES
 
         /** First attempt, then 3 retries (T-008 design note section 4). */
