@@ -1,5 +1,1544 @@
 ﻿== SUMMARY ==
-RUNNING sha=3a10cdc60e4ea8638334b9875fe8d324b8998b44
+FAIL sha=3a10cdc60e4ea8638334b9875fe8d324b8998b44 pipeline=quick-app pub-get=0 format=0 analyze=0 lints=0 app-test=1 dart-test-zaghlol_catalog=0 dart-test-zaghlol_domain=0 dart-test-zaghlol_parsing=1 apk-devNoSms=0 apk-perms=0 android-unit=0 android-lint=0
+pub-get                      PASS  exit=0  2s
+format                       PASS  exit=0  10s
+analyze                      PASS  exit=0  104s
+lints                        PASS  exit=0  39s
+app-test                     FAIL  exit=1  88s
+dart-test-zaghlol_catalog    PASS  exit=0  3s
+dart-test-zaghlol_domain     PASS  exit=0  4s
+dart-test-zaghlol_parsing    FAIL  exit=1  9s
+apk-devNoSms                 PASS  exit=0  270s
+apk-perms                    PASS  exit=0  1s
+android-unit                 PASS  exit=0  141s
+android-lint                 PASS  exit=0  156s
+
+== ERRORS: app-test ==
+00:59 +1044 ~1 -1: /work/app/test/features/categorization/data/categorizer_seed_test.dart: performance and determinism 3000-alias synthetic catalog: fuzzy stays within budget [E]
+  Expected: a value less than <25>
+    Actual: <25.751>
+     Which: is not a value less than <25>
+  
+  package:matcher                                                     expect
+  package:flutter_test/src/widget_tester.dart 473:18                  expect
+  test/features/categorization/data/categorizer_seed_test.dart 251:7  main.<fn>.<fn>
+  
+00:59 +1045 ~1 -1: /work/app/test/core/db/fts_benchmark_test.dart: 50k-row FTS benchmark (gate p95 < 200 ms, FR-TXN-01; soft 50 ms)
+00:59 +1046 ~1 -1: /work/app/test/core/db/fts_benchmark_test.dart: 50k-row FTS benchmark (gate p95 < 200 ms, FR-TXN-01; soft 50 ms)
+
+
+== ERRORS: dart-test-zaghlol_parsing ==
+00:04 +1075 -1: test/guard/capture_guard_test.dart: performance (loose CI bounds; natives measure on device) 1,000 adversarial 4,000-char decisions take under 2 s [E]
+  Expected: a value less than <2000>
+    Actual: <2248>
+     Which: is not a value less than <2000>
+  
+  package:matcher                           expect
+  test/guard/capture_guard_test.dart 430:7  main.<fn>.<fn>
+  
+00:04 +1076 -1: test/registry/registry_lint_test.dart: runtime guard (slow templates) a slow drop, last4 or global pattern fails the probe (M-2)
+00:04 +1077 -1: test/registry/registry_lint_test.dart: runtime guard (slow templates) a slow drop, last4 or global pattern fails the probe (M-2)
+00:04 +1078 -1: test/registry/registry_lint_test.dart: runtime guard (slow templates) the per-fixture timer reports the template id only
+
 
 == FULL LOG (last 1500 lines) ==
-auto task/T-075-categorizer 3a10cdc60e4ea8638334b9875fe8d324b8998b44 2026-11-11T12:40:27.7670906+02:00
+00:00 +145: test/guard/guard_generator_test.dart: base config (exportGuardConfig) is deterministic byte for byte
+00:00 +146: test/guard/guard_generator_test.dart: base config (exportGuardConfig) is deterministic byte for byte
+00:00 +147: test/guard/guard_generator_test.dart: base config (exportGuardConfig) is deterministic byte for byte
+00:00 +148: test/guard/guard_generator_test.dart: base config (exportGuardConfig) is deterministic byte for byte
+00:00 +149: test/guard/guard_generator_test.dart: base config (exportGuardConfig) is deterministic byte for byte
+00:00 +150: test/guard/guard_generator_test.dart: base config (exportGuardConfig) is deterministic byte for byte
+00:00 +151: test/guard/guard_generator_test.dart: base config (exportGuardConfig) is deterministic byte for byte
+00:00 +152: test/guard/guard_generator_test.dart: base config (exportGuardConfig) is deterministic byte for byte
+00:00 +153: test/guard/guard_generator_test.dart: base config (exportGuardConfig) is deterministic byte for byte
+00:00 +154: test/guard/guard_generator_test.dart: base config (exportGuardConfig) is deterministic byte for byte
+00:00 +155: test/guard/guard_generator_test.dart: base config (exportGuardConfig) is deterministic byte for byte
+00:00 +156: test/guard/guard_generator_test.dart: base config (exportGuardConfig) is deterministic byte for byte
+00:00 +157: test/guard/guard_generator_test.dart: base config (exportGuardConfig) is deterministic byte for byte
+00:00 +158: test/guard/guard_generator_test.dart: base config (exportGuardConfig) is deterministic byte for byte
+00:00 +159: test/guard/capture_guard_test.dart: parity with ParsingPipeline stage 0 nf.body_4000_kept
+00:00 +160: test/guard/capture_guard_test.dart: parity with ParsingPipeline stage 0 nf.body_4000_kept
+00:00 +161: test/guard/capture_guard_test.dart: parity with ParsingPipeline stage 0 nf.body_4000_kept
+00:00 +162: test/guard/capture_guard_test.dart: parity with ParsingPipeline stage 0 nf.body_4000_kept
+00:00 +163: test/normalize/amount_parser_test.dart: parseAmount table zero
+00:00 +164: test/normalize/amount_parser_test.dart: parseAmount table zero
+00:00 +165: test/normalize/amount_parser_test.dart: parseAmount table zero
+00:00 +166: test/guard/guard_generator_test.dart: base config (exportGuardConfig) parses back as a full base config
+00:00 +167: test/guard/guard_generator_test.dart: base config (exportGuardConfig) parses back as a full base config
+00:00 +168: test/guard/guard_generator_test.dart: base config (exportGuardConfig) parses back as a full base config
+00:00 +169: test/guard/guard_generator_test.dart: base config (exportGuardConfig) parses back as a full base config
+00:00 +170: test/guard/guard_generator_test.dart: base config (exportGuardConfig) parses back as a full base config
+00:00 +171: test/guard/guard_generator_test.dart: base config (exportGuardConfig) parses back as a full base config
+00:00 +172: test/guard/guard_generator_test.dart: base config (exportGuardConfig) parses back as a full base config
+00:00 +173: test/guard/guard_generator_test.dart: base config (exportGuardConfig) parses back as a full base config
+00:00 +174: test/guard/guard_generator_test.dart: base config (exportGuardConfig) parses back as a full base config
+00:00 +175: test/guard/guard_generator_test.dart: base config (exportGuardConfig) parses back as a full base config
+00:00 +176: test/guard/guard_generator_test.dart: base config (exportGuardConfig) parses back as a full base config
+00:00 +177: test/guard/guard_generator_test.dart: base config (exportGuardConfig) parses back as a full base config
+00:00 +178: test/guard/capture_guard_test.dart: parity with ParsingPipeline stage 0 nf.user_sender_other_channel
+00:00 +179: test/merchant/merchant_cleaner_test.dart: cleanMerchant custom config lists are honoured
+00:00 +180: test/normalize/amount_parser_test.dart: parseAmount table max minor
+00:00 +181: test/guard/guard_golden_test.dart: fold fold.lines.spaces_around_break
+00:00 +182: test/normalize/text_normalizer_test.dart: normalizeText empty
+00:00 +183: test/guard/guard_generator_test.dart: base config (exportGuardConfig) a non-portable pattern is an issue and no config is written
+00:00 +184: test/guard/guard_generator_test.dart: base config (exportGuardConfig) a non-portable pattern is an issue and no config is written
+00:00 +185: test/guard/guard_generator_test.dart: base config (exportGuardConfig) a non-portable pattern is an issue and no config is written
+00:00 +186: test/guard/guard_generator_test.dart: base config (exportGuardConfig) a non-portable pattern is an issue and no config is written
+00:00 +187: test/guard/guard_generator_test.dart: base config (exportGuardConfig) a non-portable pattern is an issue and no config is written
+00:00 +188: test/guard/guard_generator_test.dart: base config (exportGuardConfig) a non-portable pattern is an issue and no config is written
+00:00 +189: test/guard/guard_generator_test.dart: base config (exportGuardConfig) a non-portable pattern is an issue and no config is written
+00:00 +190: test/guard/guard_generator_test.dart: base config (exportGuardConfig) a non-portable pattern is an issue and no config is written
+00:00 +191: test/guard/guard_generator_test.dart: base config (exportGuardConfig) a non-portable pattern is an issue and no config is written
+00:00 +192: test/guard/guard_generator_test.dart: base config (exportGuardConfig) a non-portable pattern is an issue and no config is written
+00:00 +193: test/guard/guard_generator_test.dart: base config (exportGuardConfig) a non-portable pattern is an issue and no config is written
+00:00 +194: test/guard/guard_generator_test.dart: base config (exportGuardConfig) a non-portable pattern is an issue and no config is written
+00:00 +195: test/guard/guard_generator_test.dart: base config (exportGuardConfig) a non-portable pattern is an issue and no config is written
+00:00 +196: test/guard/guard_generator_test.dart: base config (exportGuardConfig) a non-portable pattern is an issue and no config is written
+00:00 +197: test/guard/guard_generator_test.dart: base config (exportGuardConfig) a non-portable pattern is an issue and no config is written
+00:00 +198: test/guard/guard_generator_test.dart: base config (exportGuardConfig) a non-portable pattern is an issue and no config is written
+00:00 +199: test/guard/guard_generator_test.dart: base config (exportGuardConfig) a non-portable pattern is an issue and no config is written
+00:00 +200: test/guard/guard_generator_test.dart: base config (exportGuardConfig) a non-portable pattern is an issue and no config is written
+00:00 +201: test/guard/guard_generator_test.dart: base config (exportGuardConfig) a non-portable pattern is an issue and no config is written
+00:00 +202: test/guard/guard_generator_test.dart: base config (exportGuardConfig) a non-portable pattern is an issue and no config is written
+00:00 +203: test/guard/guard_generator_test.dart: base config (exportGuardConfig) a non-portable pattern is an issue and no config is written
+00:00 +204: test/guard/guard_generator_test.dart: base config (exportGuardConfig) a non-portable pattern is an issue and no config is written
+00:00 +205: test/guard/guard_generator_test.dart: base config (exportGuardConfig) a non-portable pattern is an issue and no config is written
+00:00 +206: test/guard/guard_generator_test.dart: base config (exportGuardConfig) a non-portable pattern is an issue and no config is written
+00:00 +207: test/guard/guard_generator_test.dart: base config (exportGuardConfig) a non-portable pattern is an issue and no config is written
+00:00 +208: test/guard/guard_generator_test.dart: base config (exportGuardConfig) a non-portable pattern is an issue and no config is written
+00:00 +209: test/guard/guard_generator_test.dart: base config (exportGuardConfig) a non-portable pattern is an issue and no config is written
+00:00 +210: test/guard/guard_generator_test.dart: base config (exportGuardConfig) a non-portable pattern is an issue and no config is written
+00:00 +211: test/guard/guard_generator_test.dart: base config (exportGuardConfig) a non-portable pattern is an issue and no config is written
+00:00 +212: test/guard/guard_generator_test.dart: base config (exportGuardConfig) a non-portable pattern is an issue and no config is written
+00:00 +213: test/guard/guard_generator_test.dart: base config (exportGuardConfig) a non-portable pattern is an issue and no config is written
+00:00 +214: test/guard/guard_generator_test.dart: base config (exportGuardConfig) a non-portable pattern is an issue and no config is written
+00:00 +215: test/guard/guard_generator_test.dart: base config (exportGuardConfig) a non-portable pattern is an issue and no config is written
+00:00 +216: test/guard/guard_generator_test.dart: base config (exportGuardConfig) a non-portable pattern is an issue and no config is written
+00:00 +217: test/guard/guard_generator_test.dart: base config (exportGuardConfig) a non-portable pattern is an issue and no config is written
+00:00 +218: test/guard/guard_generator_test.dart: base config (exportGuardConfig) a non-portable pattern is an issue and no config is written
+00:00 +219: test/guard/guard_generator_test.dart: base config (exportGuardConfig) a non-portable pattern is an issue and no config is written
+00:00 +220: test/guard/guard_generator_test.dart: base config (exportGuardConfig) a non-portable pattern is an issue and no config is written
+00:00 +221: test/guard/guard_generator_test.dart: base config (exportGuardConfig) a non-portable pattern is an issue and no config is written
+00:00 +222: test/guard/guard_generator_test.dart: base config (exportGuardConfig) a non-portable pattern is an issue and no config is written
+00:00 +223: test/guard/guard_generator_test.dart: base config (exportGuardConfig) a non-portable pattern is an issue and no config is written
+00:00 +224: test/guard/guard_generator_test.dart: base config (exportGuardConfig) a non-portable pattern is an issue and no config is written
+00:00 +225: test/guard/guard_generator_test.dart: base config (exportGuardConfig) a non-portable pattern is an issue and no config is written
+00:00 +226: test/guard/guard_generator_test.dart: base config (exportGuardConfig) a non-portable pattern is an issue and no config is written
+00:00 +227: test/guard/guard_generator_test.dart: base config (exportGuardConfig) a non-portable pattern is an issue and no config is written
+00:00 +228: test/guard/guard_generator_test.dart: base config (exportGuardConfig) a non-portable pattern is an issue and no config is written
+00:00 +229: test/guard/guard_generator_test.dart: base config (exportGuardConfig) a non-portable pattern is an issue and no config is written
+00:00 +230: test/guard/guard_generator_test.dart: base config (exportGuardConfig) a non-portable pattern is an issue and no config is written
+00:00 +231: test/guard/guard_generator_test.dart: base config (exportGuardConfig) a non-portable pattern is an issue and no config is written
+00:00 +232: test/guard/guard_generator_test.dart: base config (exportGuardConfig) a non-portable pattern is an issue and no config is written
+00:00 +233: test/guard/guard_generator_test.dart: base config (exportGuardConfig) a non-portable pattern is an issue and no config is written
+00:00 +234: test/guard/guard_generator_test.dart: base config (exportGuardConfig) a non-portable pattern is an issue and no config is written
+00:00 +235: test/guard/guard_generator_test.dart: base config (exportGuardConfig) a non-portable pattern is an issue and no config is written
+00:00 +236: test/guard/guard_generator_test.dart: base config (exportGuardConfig) a non-portable pattern is an issue and no config is written
+00:00 +237: test/guard/guard_generator_test.dart: base config (exportGuardConfig) a non-portable pattern is an issue and no config is written
+00:00 +238: test/guard/guard_generator_test.dart: base config (exportGuardConfig) a non-portable pattern is an issue and no config is written
+00:00 +239: test/guard/guard_generator_test.dart: base config (exportGuardConfig) a non-portable pattern is an issue and no config is written
+00:00 +240: test/guard/guard_generator_test.dart: base config (exportGuardConfig) a non-portable pattern is an issue and no config is written
+00:00 +241: test/guard/guard_generator_test.dart: base config (exportGuardConfig) a non-portable pattern is an issue and no config is written
+00:00 +242: test/guard/guard_generator_test.dart: base config (exportGuardConfig) a non-portable pattern is an issue and no config is written
+00:00 +243: test/guard/guard_generator_test.dart: base config (exportGuardConfig) a non-portable pattern is an issue and no config is written
+00:00 +244: test/guard/guard_generator_test.dart: base config (exportGuardConfig) a non-portable pattern is an issue and no config is written
+00:00 +245: test/guard/guard_generator_test.dart: base config (exportGuardConfig) a non-portable pattern is an issue and no config is written
+00:00 +246: test/guard/guard_generator_test.dart: base config (exportGuardConfig) a non-portable pattern is an issue and no config is written
+00:00 +247: test/guard/guard_generator_test.dart: base config (exportGuardConfig) a non-portable pattern is an issue and no config is written
+00:00 +248: test/guard/guard_generator_test.dart: base config (exportGuardConfig) a non-portable pattern is an issue and no config is written
+00:00 +249: test/guard/guard_generator_test.dart: base config (exportGuardConfig) a non-portable pattern is an issue and no config is written
+00:00 +250: test/guard/guard_generator_test.dart: base config (exportGuardConfig) a non-portable pattern is an issue and no config is written
+00:00 +251: test/guard/guard_generator_test.dart: base config (exportGuardConfig) a non-portable pattern is an issue and no config is written
+00:00 +252: test/guard/guard_generator_test.dart: base config (exportGuardConfig) a non-portable pattern is an issue and no config is written
+00:00 +253: test/guard/guard_generator_test.dart: base config (exportGuardConfig) a non-portable pattern is an issue and no config is written
+00:00 +254: test/guard/guard_generator_test.dart: base config (exportGuardConfig) a non-portable pattern is an issue and no config is written
+00:00 +255: test/guard/guard_generator_test.dart: base config (exportGuardConfig) a non-portable pattern is an issue and no config is written
+00:00 +256: test/guard/guard_generator_test.dart: base config (exportGuardConfig) a non-portable pattern is an issue and no config is written
+00:00 +257: test/guard/guard_generator_test.dart: base config (exportGuardConfig) a non-portable pattern is an issue and no config is written
+00:00 +258: test/guard/guard_generator_test.dart: base config (exportGuardConfig) a non-portable pattern is an issue and no config is written
+00:00 +259: test/guard/guard_generator_test.dart: base config (exportGuardConfig) a non-portable pattern is an issue and no config is written
+00:00 +260: test/guard/guard_generator_test.dart: base config (exportGuardConfig) a non-portable pattern is an issue and no config is written
+00:00 +261: test/guard/guard_generator_test.dart: base config (exportGuardConfig) a non-portable pattern is an issue and no config is written
+00:00 +262: test/guard/guard_generator_test.dart: base config (exportGuardConfig) a non-portable pattern is an issue and no config is written
+00:00 +263: test/guard/guard_generator_test.dart: base config (exportGuardConfig) a non-portable pattern is an issue and no config is written
+00:00 +264: test/guard/guard_generator_test.dart: base config (exportGuardConfig) a non-portable pattern is an issue and no config is written
+00:00 +265: test/guard/guard_generator_test.dart: base config (exportGuardConfig) a non-portable pattern is an issue and no config is written
+00:00 +266: test/guard/guard_generator_test.dart: base config (exportGuardConfig) a non-portable pattern is an issue and no config is written
+00:00 +267: test/guard/guard_generator_test.dart: base config (exportGuardConfig) a non-portable pattern is an issue and no config is written
+00:00 +268: test/guard/guard_generator_test.dart: base config (exportGuardConfig) a non-portable pattern is an issue and no config is written
+00:00 +269: test/guard/guard_generator_test.dart: base config (exportGuardConfig) a non-portable pattern is an issue and no config is written
+00:00 +270: test/guard/guard_generator_test.dart: base config (exportGuardConfig) a non-portable pattern is an issue and no config is written
+00:00 +271: test/guard/guard_generator_test.dart: base config (exportGuardConfig) a non-portable pattern is an issue and no config is written
+00:00 +272: test/guard/guard_generator_test.dart: base config (exportGuardConfig) a non-portable pattern is an issue and no config is written
+00:00 +273: test/guard/guard_generator_test.dart: base config (exportGuardConfig) a non-portable pattern is an issue and no config is written
+00:00 +274: test/guard/guard_generator_test.dart: base config (exportGuardConfig) a non-portable pattern is an issue and no config is written
+00:00 +275: test/guard/guard_generator_test.dart: base config (exportGuardConfig) a non-portable pattern is an issue and no config is written
+00:00 +276: test/guard/guard_generator_test.dart: base config (exportGuardConfig) a non-portable pattern is an issue and no config is written
+00:00 +277: test/guard/guard_generator_test.dart: base config (exportGuardConfig) a non-portable pattern is an issue and no config is written
+00:00 +278: test/guard/guard_generator_test.dart: base config (exportGuardConfig) a non-portable pattern is an issue and no config is written
+00:00 +279: test/normalize/text_normalizer_test.dart: fuzz never throws and is idempotent
+00:00 +280: test/normalize/text_normalizer_test.dart: fuzz never throws and is idempotent
+00:00 +281: test/normalize/text_normalizer_test.dart: fuzz never throws and is idempotent
+00:00 +282: test/normalize/text_normalizer_test.dart: fuzz never throws and is idempotent
+00:00 +283: test/normalize/text_normalizer_test.dart: fuzz never throws and is idempotent
+00:00 +284: test/normalize/text_normalizer_test.dart: fuzz never throws and is idempotent
+00:00 +285: test/normalize/text_normalizer_test.dart: fuzz never throws and is idempotent
+00:00 +286: test/normalize/text_normalizer_test.dart: fuzz never throws and is idempotent
+00:00 +287: test/normalize/text_normalizer_test.dart: fuzz never throws and is idempotent
+00:00 +288: test/normalize/text_normalizer_test.dart: fuzz never throws and is idempotent
+00:00 +289: test/normalize/text_normalizer_test.dart: fuzz never throws and is idempotent
+00:00 +290: test/normalize/text_normalizer_test.dart: fuzz never throws and is idempotent
+00:00 +291: test/normalize/text_normalizer_test.dart: fuzz never throws and is idempotent
+00:00 +292: test/normalize/text_normalizer_test.dart: fuzz never throws and is idempotent
+00:00 +293: test/normalize/text_normalizer_test.dart: fuzz never throws and is idempotent
+00:00 +294: test/normalize/text_normalizer_test.dart: fuzz never throws and is idempotent
+00:00 +295: test/normalize/text_normalizer_test.dart: fuzz never throws and is idempotent
+00:00 +296: test/normalize/text_normalizer_test.dart: fuzz never throws and is idempotent
+00:00 +297: test/normalize/text_normalizer_test.dart: fuzz never throws and is idempotent
+00:00 +298: test/normalize/text_normalizer_test.dart: fuzz never throws and is idempotent
+00:00 +299: test/normalize/text_normalizer_test.dart: fuzz never throws and is idempotent
+00:00 +300: test/normalize/text_normalizer_test.dart: fuzz never throws and is idempotent
+00:00 +301: test/normalize/text_normalizer_test.dart: fuzz never throws and is idempotent
+00:00 +302: test/normalize/text_normalizer_test.dart: fuzz never throws and is idempotent
+00:00 +303: test/normalize/text_normalizer_test.dart: fuzz never throws and is idempotent
+00:00 +304: test/normalize/text_normalizer_test.dart: fuzz never throws and is idempotent
+00:00 +305: test/normalize/text_normalizer_test.dart: fuzz never throws and is idempotent
+00:00 +306: test/normalize/text_normalizer_test.dart: fuzz never throws and is idempotent
+00:00 +307: test/normalize/text_normalizer_test.dart: fuzz never throws and is idempotent
+00:00 +308: test/normalize/text_normalizer_test.dart: fuzz never throws and is idempotent
+00:00 +309: test/normalize/text_normalizer_test.dart: fuzz never throws and is idempotent
+00:00 +310: test/normalize/text_normalizer_test.dart: fuzz never throws and is idempotent
+00:00 +311: test/normalize/text_normalizer_test.dart: fuzz never throws and is idempotent
+00:00 +312: test/normalize/text_normalizer_test.dart: fuzz never throws and is idempotent
+00:00 +313: test/normalize/text_normalizer_test.dart: fuzz never throws and is idempotent
+00:00 +314: test/normalize/text_normalizer_test.dart: fuzz never throws and is idempotent
+00:00 +315: test/normalize/text_normalizer_test.dart: fuzz never throws and is idempotent
+00:00 +316: test/normalize/text_normalizer_test.dart: fuzz never throws and is idempotent
+00:00 +317: test/normalize/text_normalizer_test.dart: fuzz never throws and is idempotent
+00:00 +318: test/normalize/text_normalizer_test.dart: fuzz never throws and is idempotent
+00:00 +319: test/normalize/text_normalizer_test.dart: fuzz never throws and is idempotent
+00:00 +320: test/normalize/text_normalizer_test.dart: fuzz never throws and is idempotent
+00:00 +321: test/normalize/text_normalizer_test.dart: fuzz never throws and is idempotent
+00:00 +322: test/normalize/text_normalizer_test.dart: fuzz never throws and is idempotent
+00:00 +323: test/normalize/text_normalizer_test.dart: fuzz never throws and is idempotent
+00:00 +324: test/normalize/text_normalizer_test.dart: fuzz never throws and is idempotent
+00:00 +325: test/normalize/text_normalizer_test.dart: fuzz never throws and is idempotent
+00:00 +326: test/normalize/text_normalizer_test.dart: fuzz never throws and is idempotent
+00:00 +327: test/normalize/text_normalizer_test.dart: fuzz never throws and is idempotent
+00:00 +328: test/normalize/text_normalizer_test.dart: fuzz never throws and is idempotent
+00:00 +329: test/normalize/text_normalizer_test.dart: fuzz never throws and is idempotent
+00:00 +330: test/normalize/text_normalizer_test.dart: fuzz never throws and is idempotent
+00:00 +331: test/normalize/text_normalizer_test.dart: fuzz never throws and is idempotent
+00:00 +332: test/normalize/text_normalizer_test.dart: fuzz never throws and is idempotent
+00:00 +333: test/normalize/text_normalizer_test.dart: fuzz never throws and is idempotent
+00:00 +334: test/normalize/text_normalizer_test.dart: fuzz never throws and is idempotent
+00:00 +335: test/normalize/text_normalizer_test.dart: fuzz never throws and is idempotent
+00:00 +336: test/normalize/text_normalizer_test.dart: fuzz never throws and is idempotent
+00:00 +337: test/normalize/text_normalizer_test.dart: fuzz never throws and is idempotent
+00:00 +338: test/normalize/text_normalizer_test.dart: fuzz never throws and is idempotent
+00:00 +339: test/normalize/text_normalizer_test.dart: fuzz never throws and is idempotent
+00:00 +340: test/normalize/text_normalizer_test.dart: fuzz never throws and is idempotent
+00:00 +341: test/normalize/text_normalizer_test.dart: fuzz never throws and is idempotent
+00:00 +342: test/normalize/text_normalizer_test.dart: fuzz never throws and is idempotent
+00:00 +343: test/normalize/text_normalizer_test.dart: fuzz never throws and is idempotent
+00:00 +344: test/normalize/text_normalizer_test.dart: fuzz never throws and is idempotent
+00:00 +345: test/normalize/text_normalizer_test.dart: fuzz never throws and is idempotent
+00:00 +346: test/normalize/text_normalizer_test.dart: fuzz never throws and is idempotent
+00:00 +347: test/normalize/text_normalizer_test.dart: fuzz never throws and is idempotent
+00:00 +348: test/normalize/text_normalizer_test.dart: fuzz never throws and is idempotent
+00:00 +349: test/normalize/text_normalizer_test.dart: fuzz never throws and is idempotent
+00:00 +350: test/normalize/text_normalizer_test.dart: fuzz never throws and is idempotent
+00:00 +351: test/normalize/text_normalizer_test.dart: fuzz never throws and is idempotent
+00:00 +352: test/normalize/text_normalizer_test.dart: fuzz never throws and is idempotent
+00:00 +353: test/normalize/text_normalizer_test.dart: fuzz never throws and is idempotent
+00:00 +354: test/normalize/text_normalizer_test.dart: fuzz never throws and is idempotent
+00:00 +355: test/normalize/text_normalizer_test.dart: fuzz never throws and is idempotent
+00:00 +356: test/normalize/text_normalizer_test.dart: fuzz never throws and is idempotent
+00:00 +357: test/normalize/text_normalizer_test.dart: fuzz never throws and is idempotent
+00:00 +358: test/normalize/text_normalizer_test.dart: fuzz never throws and is idempotent
+00:00 +359: test/normalize/text_normalizer_test.dart: fuzz never throws and is idempotent
+00:00 +360: test/normalize/text_normalizer_test.dart: fuzz never throws and is idempotent
+00:00 +361: test/normalize/text_normalizer_test.dart: fuzz never throws and is idempotent
+00:00 +362: test/normalize/text_normalizer_test.dart: fuzz never throws and is idempotent
+00:00 +363: test/normalize/text_normalizer_test.dart: fuzz never throws and is idempotent
+00:00 +364: test/normalize/text_normalizer_test.dart: fuzz never throws and is idempotent
+00:00 +365: test/normalize/text_normalizer_test.dart: fuzz never throws and is idempotent
+00:00 +366: test/normalize/text_normalizer_test.dart: fuzz never throws and is idempotent
+00:00 +367: test/normalize/text_normalizer_test.dart: fuzz never throws and is idempotent
+00:00 +368: test/normalize/text_normalizer_test.dart: fuzz never throws and is idempotent
+00:00 +369: test/normalize/text_normalizer_test.dart: fuzz never throws and is idempotent
+00:00 +370: test/normalize/text_normalizer_test.dart: fuzz never throws and is idempotent
+00:00 +371: test/normalize/text_normalizer_test.dart: fuzz never throws and is idempotent
+00:00 +372: test/normalize/text_normalizer_test.dart: fuzz never throws and is idempotent
+00:00 +373: test/normalize/text_normalizer_test.dart: fuzz never throws and is idempotent
+00:00 +374: test/normalize/text_normalizer_test.dart: fuzz never throws and is idempotent
+00:00 +375: test/normalize/text_normalizer_test.dart: fuzz never throws and is idempotent
+00:00 +376: test/normalize/text_normalizer_test.dart: fuzz never throws and is idempotent
+00:00 +377: test/normalize/text_normalizer_test.dart: fuzz never throws and is idempotent
+00:00 +378: test/normalize/text_normalizer_test.dart: fuzz never throws and is idempotent
+00:00 +379: test/normalize/text_normalizer_test.dart: fuzz never throws and is idempotent
+00:00 +380: test/normalize/text_normalizer_test.dart: fuzz never throws and is idempotent
+00:00 +381: test/normalize/text_normalizer_test.dart: fuzz never throws and is idempotent
+00:00 +382: test/normalize/text_normalizer_test.dart: fuzz never throws and is idempotent
+00:00 +383: test/normalize/text_normalizer_test.dart: fuzz never throws and is idempotent
+00:00 +384: test/normalize/text_normalizer_test.dart: fuzz never throws and is idempotent
+00:00 +385: test/normalize/text_normalizer_test.dart: fuzz never throws and is idempotent
+00:00 +386: test/normalize/text_normalizer_test.dart: fuzz never throws and is idempotent
+00:00 +387: test/normalize/text_normalizer_test.dart: fuzz never throws and is idempotent
+00:00 +388: test/normalize/text_normalizer_test.dart: fuzz never throws and is idempotent
+00:00 +389: test/normalize/text_normalizer_test.dart: fuzz never throws and is idempotent
+00:00 +390: test/normalize/text_normalizer_test.dart: fuzz never throws and is idempotent
+00:00 +391: test/normalize/text_normalizer_test.dart: fuzz never throws and is idempotent
+00:00 +392: test/normalize/text_normalizer_test.dart: fuzz never throws and is idempotent
+00:00 +393: test/normalize/text_normalizer_test.dart: fuzz never throws and is idempotent
+00:00 +394: test/normalize/text_normalizer_test.dart: fuzz never throws and is idempotent
+00:00 +395: test/normalize/text_normalizer_test.dart: fuzz never throws and is idempotent
+00:00 +396: test/normalize/text_normalizer_test.dart: fuzz never throws and is idempotent
+00:00 +397: test/normalize/text_normalizer_test.dart: fuzz never throws and is idempotent
+00:00 +398: test/normalize/text_normalizer_test.dart: fuzz never throws and is idempotent
+00:00 +399: test/normalize/text_normalizer_test.dart: fuzz never throws and is idempotent
+00:00 +400: test/normalize/text_normalizer_test.dart: fuzz never throws and is idempotent
+00:00 +401: test/normalize/text_normalizer_test.dart: fuzz never throws and is idempotent
+00:00 +402: test/normalize/text_normalizer_test.dart: fuzz never throws and is idempotent
+00:00 +403: test/normalize/text_normalizer_test.dart: fuzz never throws and is idempotent
+00:00 +404: test/normalize/text_normalizer_test.dart: fuzz never throws and is idempotent
+00:00 +405: test/normalize/text_normalizer_test.dart: fuzz never throws and is idempotent
+00:00 +406: test/normalize/text_normalizer_test.dart: fuzz never throws and is idempotent
+00:00 +407: test/normalize/text_normalizer_test.dart: fuzz never throws and is idempotent
+00:00 +408: test/normalize/text_normalizer_test.dart: fuzz never throws and is idempotent
+00:00 +409: test/normalize/text_normalizer_test.dart: fuzz never throws and is idempotent
+00:00 +410: test/normalize/text_normalizer_test.dart: fuzz never throws and is idempotent
+00:00 +411: test/normalize/text_normalizer_test.dart: fuzz never throws and is idempotent
+00:00 +412: test/normalize/text_normalizer_test.dart: fuzz never throws and is idempotent
+00:00 +413: test/normalize/text_normalizer_test.dart: fuzz never throws and is idempotent
+00:00 +414: test/normalize/text_normalizer_test.dart: fuzz never throws and is idempotent
+00:00 +415: test/normalize/text_normalizer_test.dart: fuzz never throws and is idempotent
+00:00 +416: test/normalize/text_normalizer_test.dart: fuzz never throws and is idempotent
+00:00 +417: test/normalize/text_normalizer_test.dart: fuzz never throws and is idempotent
+00:00 +418: test/normalize/text_normalizer_test.dart: fuzz never throws and is idempotent
+00:00 +419: test/normalize/text_normalizer_test.dart: fuzz never throws and is idempotent
+00:00 +420: test/normalize/text_normalizer_test.dart: fuzz never throws and is idempotent
+00:00 +421: test/normalize/text_normalizer_test.dart: fuzz never throws and is idempotent
+00:00 +422: test/normalize/text_normalizer_test.dart: fuzz never throws and is idempotent
+00:00 +423: test/normalize/text_normalizer_test.dart: fuzz never throws and is idempotent
+00:00 +424: test/normalize/text_normalizer_test.dart: fuzz never throws and is idempotent
+00:00 +425: test/normalize/text_normalizer_test.dart: fuzz never throws and is idempotent
+00:00 +426: test/normalize/text_normalizer_test.dart: fuzz never throws and is idempotent
+00:00 +427: test/normalize/text_normalizer_test.dart: fuzz never throws and is idempotent
+00:00 +428: test/normalize/text_normalizer_test.dart: fuzz never throws and is idempotent
+00:00 +429: test/normalize/text_normalizer_test.dart: fuzz never throws and is idempotent
+00:00 +430: test/guard/guard_generator_test.dart: user config (buildGuardUserConfig) checked-in t1_user.json equals regeneration
+00:00 +431: test/guard/guard_generator_test.dart: user config (buildGuardUserConfig) checked-in t1_user.json equals regeneration
+00:00 +432: test/guard/guard_generator_test.dart: user config (buildGuardUserConfig) checked-in t1_user.json equals regeneration
+00:00 +433: test/guard/guard_generator_test.dart: user config (buildGuardUserConfig) checked-in t1_user.json equals regeneration
+00:00 +434: test/guard/guard_generator_test.dart: user config (buildGuardUserConfig) checked-in t1_user.json equals regeneration
+00:00 +435: test/guard/guard_generator_test.dart: user config (buildGuardUserConfig) checked-in t1_user.json equals regeneration
+00:00 +436: test/guard/guard_generator_test.dart: user config (buildGuardUserConfig) checked-in t1_user.json equals regeneration
+00:00 +437: test/guard/guard_generator_test.dart: user config (buildGuardUserConfig) checked-in t1_user.json equals regeneration
+00:00 +438: test/guard/guard_generator_test.dart: user config (buildGuardUserConfig) checked-in t1_user.json equals regeneration
+00:00 +439: test/guard/guard_generator_test.dart: user config (buildGuardUserConfig) checked-in t1_user.json equals regeneration
+00:00 +440: test/guard/guard_generator_test.dart: user config (buildGuardUserConfig) checked-in t1_user.json equals regeneration
+00:00 +441: test/guard/guard_generator_test.dart: user config (buildGuardUserConfig) checked-in t1_user.json equals regeneration
+00:00 +442: test/normalize/text_normalizer_test.dart: fuzz foldKey output has no removed or folded code points
+00:00 +443: test/normalize/text_normalizer_test.dart: fuzz foldKey output has no removed or folded code points
+00:00 +444: test/normalize/text_normalizer_test.dart: fuzz foldKey output has no removed or folded code points
+00:00 +445: test/normalize/text_normalizer_test.dart: fuzz foldKey output has no removed or folded code points
+00:00 +446: test/normalize/text_normalizer_test.dart: fuzz foldKey output has no removed or folded code points
+00:00 +447: test/normalize/text_normalizer_test.dart: fuzz foldKey output has no removed or folded code points
+00:00 +448: test/normalize/text_normalizer_test.dart: fuzz foldKey output has no removed or folded code points
+00:00 +449: test/guard/guard_generator_test.dart: user config (buildGuardUserConfig) sorted and deduplicated, whatever the input order
+00:00 +450: test/guard/guard_generator_test.dart: user config (buildGuardUserConfig) sorted and deduplicated, whatever the input order
+00:00 +451: test/guard/capture_guard_test.dart: parity with ParsingPipeline stage 0 otp.en.code_first_use_as
+00:00 +452: test/normalize/amount_parser_test.dart: parseMoneyText table empty
+00:00 +453: test/normalize/text_normalizer_test.dart: fuzz foldKeyLines is foldKey with each line break run as one \n
+00:00 +454: test/normalize/text_normalizer_test.dart: fuzz foldKeyLines is foldKey with each line break run as one \n
+00:00 +455: test/normalize/text_normalizer_test.dart: fuzz foldKeyLines is foldKey with each line break run as one \n
+00:00 +456: test/normalize/text_normalizer_test.dart: fuzz foldKeyLines is foldKey with each line break run as one \n
+00:00 +457: test/normalize/text_normalizer_test.dart: fuzz foldKeyLines is foldKey with each line break run as one \n
+00:00 +458: test/normalize/text_normalizer_test.dart: fuzz foldKeyLines is foldKey with each line break run as one \n
+00:00 +459: test/normalize/text_normalizer_test.dart: fuzz foldKeyLines is foldKey with each line break run as one \n
+00:00 +460: test/normalize/text_normalizer_test.dart: fuzz foldKeyLines is foldKey with each line break run as one \n
+00:00 +461: test/normalize/text_normalizer_test.dart: fuzz foldKeyLines is foldKey with each line break run as one \n
+00:00 +462: test/normalize/text_normalizer_test.dart: fuzz foldKeyLines is foldKey with each line break run as one \n
+00:00 +463: test/normalize/text_normalizer_test.dart: fuzz foldKeyLines is foldKey with each line break run as one \n
+00:00 +464: test/normalize/text_normalizer_test.dart: fuzz foldKeyLines is foldKey with each line break run as one \n
+00:00 +465: test/normalize/text_normalizer_test.dart: fuzz foldKeyLines is foldKey with each line break run as one \n
+00:00 +466: test/normalize/text_normalizer_test.dart: fuzz foldKeyLines is foldKey with each line break run as one \n
+00:00 +467: test/normalize/text_normalizer_test.dart: fuzz foldKeyLines is foldKey with each line break run as one \n
+00:00 +468: test/normalize/text_normalizer_test.dart: fuzz foldKeyLines is foldKey with each line break run as one \n
+00:00 +469: test/normalize/text_normalizer_test.dart: fuzz foldKeyLines is foldKey with each line break run as one \n
+00:00 +470: test/normalize/text_normalizer_test.dart: fuzz foldKeyLines is foldKey with each line break run as one \n
+00:00 +471: test/normalize/text_normalizer_test.dart: fuzz foldKeyLines is foldKey with each line break run as one \n
+00:00 +472: test/normalize/text_normalizer_test.dart: fuzz foldKeyLines is foldKey with each line break run as one \n
+00:00 +473: test/normalize/text_normalizer_test.dart: fuzz foldKeyLines is foldKey with each line break run as one \n
+00:00 +474: test/normalize/text_normalizer_test.dart: fuzz foldKeyLines is foldKey with each line break run as one \n
+00:00 +475: test/normalize/text_normalizer_test.dart: fuzz foldKeyLines is foldKey with each line break run as one \n
+00:00 +476: test/normalize/text_normalizer_test.dart: fuzz foldKeyLines is foldKey with each line break run as one \n
+00:00 +477: test/normalize/text_normalizer_test.dart: fuzz foldKeyLines is foldKey with each line break run as one \n
+00:00 +478: test/normalize/text_normalizer_test.dart: fuzz foldKeyLines is foldKey with each line break run as one \n
+00:00 +479: test/normalize/text_normalizer_test.dart: fuzz foldKeyLines is foldKey with each line break run as one \n
+00:00 +480: test/normalize/text_normalizer_test.dart: fuzz foldKeyLines is foldKey with each line break run as one \n
+00:00 +481: test/normalize/text_normalizer_test.dart: fuzz foldKeyLines is foldKey with each line break run as one \n
+00:00 +482: test/normalize/text_normalizer_test.dart: fuzz foldKeyLines is foldKey with each line break run as one \n
+00:00 +483: test/normalize/text_normalizer_test.dart: fuzz foldKeyLines is foldKey with each line break run as one \n
+00:00 +484: test/normalize/text_normalizer_test.dart: fuzz foldKeyLines is foldKey with each line break run as one \n
+00:00 +485: test/normalize/text_normalizer_test.dart: fuzz foldKeyLines is foldKey with each line break run as one \n
+00:00 +486: test/normalize/text_normalizer_test.dart: fuzz foldKeyLines is foldKey with each line break run as one \n
+00:00 +487: test/normalize/text_normalizer_test.dart: fuzz foldKeyLines is foldKey with each line break run as one \n
+00:00 +488: test/normalize/text_normalizer_test.dart: fuzz foldKeyLines is foldKey with each line break run as one \n
+00:00 +489: test/normalize/text_normalizer_test.dart: fuzz foldKeyLines is foldKey with each line break run as one \n
+00:00 +490: test/normalize/text_normalizer_test.dart: fuzz foldKeyLines is foldKey with each line break run as one \n
+00:00 +491: test/normalize/text_normalizer_test.dart: fuzz foldKeyLines is foldKey with each line break run as one \n
+00:00 +492: test/normalize/text_normalizer_test.dart: fuzz foldKeyLines is foldKey with each line break run as one \n
+00:00 +493: test/normalize/text_normalizer_test.dart: fuzz foldKeyLines is foldKey with each line break run as one \n
+00:00 +494: test/normalize/text_normalizer_test.dart: fuzz foldKeyLines is foldKey with each line break run as one \n
+00:00 +495: test/normalize/text_normalizer_test.dart: fuzz foldKeyLines is foldKey with each line break run as one \n
+00:00 +496: test/normalize/text_normalizer_test.dart: fuzz foldKeyLines is foldKey with each line break run as one \n
+00:00 +497: test/normalize/text_normalizer_test.dart: fuzz foldKeyLines is foldKey with each line break run as one \n
+00:00 +498: test/normalize/text_normalizer_test.dart: fuzz foldKeyLines is foldKey with each line break run as one \n
+00:00 +499: test/normalize/text_normalizer_test.dart: fuzz foldKeyLines is foldKey with each line break run as one \n
+00:00 +500: test/normalize/text_normalizer_test.dart: fuzz foldKeyLines is foldKey with each line break run as one \n
+00:00 +501: test/normalize/text_normalizer_test.dart: fuzz foldKeyLines is foldKey with each line break run as one \n
+00:00 +502: test/normalize/text_normalizer_test.dart: fuzz foldKeyLines is foldKey with each line break run as one \n
+00:00 +503: test/normalize/text_normalizer_test.dart: fuzz foldKeyLines is foldKey with each line break run as one \n
+00:00 +504: test/normalize/text_normalizer_test.dart: fuzz foldKeyLines is foldKey with each line break run as one \n
+00:00 +505: test/normalize/text_normalizer_test.dart: fuzz foldKeyLines is foldKey with each line break run as one \n
+00:00 +506: test/normalize/text_normalizer_test.dart: fuzz foldKeyLines is foldKey with each line break run as one \n
+00:00 +507: test/normalize/text_normalizer_test.dart: fuzz foldKeyLines is foldKey with each line break run as one \n
+00:00 +508: test/normalize/text_normalizer_test.dart: fuzz foldKeyLines is foldKey with each line break run as one \n
+00:00 +509: test/normalize/text_normalizer_test.dart: fuzz foldKeyLines is foldKey with each line break run as one \n
+00:00 +510: test/normalize/text_normalizer_test.dart: fuzz foldKeyLines is foldKey with each line break run as one \n
+00:00 +511: test/normalize/text_normalizer_test.dart: fuzz foldKeyLines is foldKey with each line break run as one \n
+00:00 +512: test/normalize/text_normalizer_test.dart: fuzz foldKeyLines is foldKey with each line break run as one \n
+00:00 +513: test/normalize/text_normalizer_test.dart: fuzz foldKeyLines is foldKey with each line break run as one \n
+00:00 +514: test/normalize/text_normalizer_test.dart: fuzz foldKeyLines is foldKey with each line break run as one \n
+00:00 +515: test/normalize/text_normalizer_test.dart: fuzz foldKeyLines is foldKey with each line break run as one \n
+00:00 +516: test/normalize/text_normalizer_test.dart: fuzz foldKeyLines is foldKey with each line break run as one \n
+00:00 +517: test/normalize/text_normalizer_test.dart: fuzz foldKeyLines is foldKey with each line break run as one \n
+00:00 +518: test/normalize/text_normalizer_test.dart: fuzz foldKeyLines is foldKey with each line break run as one \n
+00:00 +519: test/normalize/text_normalizer_test.dart: fuzz foldKeyLines is foldKey with each line break run as one \n
+00:00 +520: test/normalize/text_normalizer_test.dart: fuzz foldKeyLines is foldKey with each line break run as one \n
+00:00 +521: test/normalize/text_normalizer_test.dart: fuzz foldKeyLines is foldKey with each line break run as one \n
+00:00 +522: test/normalize/text_normalizer_test.dart: fuzz foldKeyLines is foldKey with each line break run as one \n
+00:00 +523: test/normalize/text_normalizer_test.dart: fuzz foldKeyLines is foldKey with each line break run as one \n
+00:00 +524: test/normalize/text_normalizer_test.dart: fuzz foldKeyLines is foldKey with each line break run as one \n
+00:00 +525: test/normalize/text_normalizer_test.dart: fuzz foldKeyLines is foldKey with each line break run as one \n
+00:00 +526: test/normalize/text_normalizer_test.dart: fuzz foldKeyLines is foldKey with each line break run as one \n
+00:00 +527: test/normalize/text_normalizer_test.dart: fuzz foldKeyLines is foldKey with each line break run as one \n
+00:00 +528: test/normalize/text_normalizer_test.dart: fuzz foldKeyLines is foldKey with each line break run as one \n
+00:00 +529: test/normalize/text_normalizer_test.dart: fuzz foldKeyLines is foldKey with each line break run as one \n
+00:00 +530: test/normalize/text_normalizer_test.dart: fuzz foldKeyLines is foldKey with each line break run as one \n
+00:00 +531: test/normalize/text_normalizer_test.dart: fuzz foldKeyLines is foldKey with each line break run as one \n
+00:00 +532: test/normalize/text_normalizer_test.dart: fuzz foldKeyLines is foldKey with each line break run as one \n
+00:00 +533: test/normalize/text_normalizer_test.dart: fuzz foldKeyLines is foldKey with each line break run as one \n
+00:00 +534: test/normalize/text_normalizer_test.dart: fuzz foldKeyLines is foldKey with each line break run as one \n
+00:00 +535: test/normalize/text_normalizer_test.dart: fuzz foldKeyLines is foldKey with each line break run as one \n
+00:00 +536: test/normalize/text_normalizer_test.dart: fuzz foldKeyLines is foldKey with each line break run as one \n
+00:00 +537: test/normalize/text_normalizer_test.dart: fuzz foldKeyLines is foldKey with each line break run as one \n
+00:00 +538: test/normalize/text_normalizer_test.dart: fuzz foldKeyLines is foldKey with each line break run as one \n
+00:00 +539: test/normalize/text_normalizer_test.dart: fuzz foldKeyLines is foldKey with each line break run as one \n
+00:00 +540: test/normalize/text_normalizer_test.dart: fuzz foldKeyLines is foldKey with each line break run as one \n
+00:00 +541: test/normalize/text_normalizer_test.dart: fuzz foldKeyLines is foldKey with each line break run as one \n
+00:00 +542: test/normalize/text_normalizer_test.dart: fuzz foldKeyLines is foldKey with each line break run as one \n
+00:00 +543: test/normalize/text_normalizer_test.dart: fuzz foldKeyLines is foldKey with each line break run as one \n
+00:00 +544: test/normalize/text_normalizer_test.dart: fuzz foldKeyLines is foldKey with each line break run as one \n
+00:00 +545: test/normalize/text_normalizer_test.dart: fuzz foldKeyLines is foldKey with each line break run as one \n
+00:00 +546: test/normalize/amount_parser_test.dart: round trip property parseMoneyText(format(m)) == m
+00:01 +547: test/normalize/amount_parser_test.dart: round trip property parseMoneyText(format(m)) == m
+00:01 +548: test/normalize/amount_parser_test.dart: round trip property parseMoneyText(format(m)) == m
+00:01 +549: test/normalize/amount_parser_test.dart: round trip property parseMoneyText(format(m)) == m
+00:01 +550: test/normalize/amount_parser_test.dart: round trip property parseMoneyText(format(m)) == m
+00:01 +551: test/normalize/amount_parser_test.dart: round trip property parseMoneyText(format(m)) == m
+00:01 +552: test/normalize/amount_parser_test.dart: round trip property parseMoneyText(format(m)) == m
+00:01 +553: test/normalize/amount_parser_test.dart: round trip property parseMoneyText(format(m)) == m
+00:01 +554: test/normalize/amount_parser_test.dart: round trip property parseMoneyText(format(m)) == m
+00:01 +555: test/normalize/amount_parser_test.dart: round trip property parseMoneyText(format(m)) == m
+00:01 +556: test/normalize/amount_parser_test.dart: round trip property parseMoneyText(format(m)) == m
+00:01 +557: test/normalize/amount_parser_test.dart: round trip property parseMoneyText(format(m)) == m
+00:01 +558: test/normalize/amount_parser_test.dart: round trip property parseMoneyText(format(m)) == m
+00:01 +559: test/normalize/amount_parser_test.dart: round trip property parseMoneyText(format(m)) == m
+00:01 +560: test/normalize/amount_parser_test.dart: round trip property parseMoneyText(format(m)) == m
+00:01 +561: test/normalize/amount_parser_test.dart: round trip property parseMoneyText(format(m)) == m
+00:01 +562: test/normalize/amount_parser_test.dart: round trip property parseMoneyText(format(m)) == m
+00:01 +563: test/normalize/amount_parser_test.dart: round trip property parseMoneyText(format(m)) == m
+00:01 +564: test/normalize/amount_parser_test.dart: round trip property parseMoneyText(format(m)) == m
+00:01 +565: test/normalize/amount_parser_test.dart: round trip property parseMoneyText(format(m)) == m
+00:01 +566: test/normalize/amount_parser_test.dart: round trip property parseMoneyText(format(m)) == m
+00:01 +567: test/normalize/amount_parser_test.dart: round trip property parseMoneyText(format(m)) == m
+00:01 +568: test/normalize/amount_parser_test.dart: round trip property parseMoneyText(format(m)) == m
+00:01 +569: test/normalize/amount_parser_test.dart: round trip property parseMoneyText(format(m)) == m
+00:01 +570: test/normalize/amount_parser_test.dart: round trip property parseMoneyText(format(m)) == m
+00:01 +571: test/normalize/amount_parser_test.dart: round trip property parseMoneyText(format(m)) == m
+00:01 +572: test/normalize/amount_parser_test.dart: round trip property parseMoneyText(format(m)) == m
+00:01 +573: test/normalize/amount_parser_test.dart: round trip property parseMoneyText(format(m)) == m
+00:01 +574: test/normalize/amount_parser_test.dart: round trip property parseMoneyText(format(m)) == m
+00:01 +575: test/normalize/amount_parser_test.dart: round trip property parseMoneyText(format(m)) == m
+00:01 +576: test/normalize/amount_parser_test.dart: round trip property parseMoneyText(format(m)) == m
+00:01 +577: test/normalize/amount_parser_test.dart: round trip property parseMoneyText(format(m)) == m
+00:01 +578: test/normalize/amount_parser_test.dart: round trip property parseMoneyText(format(m)) == m
+00:01 +579: test/normalize/amount_parser_test.dart: round trip property parseMoneyText(format(m)) == m
+00:01 +580: test/normalize/amount_parser_test.dart: round trip property parseMoneyText(format(m)) == m
+00:01 +581: test/normalize/amount_parser_test.dart: round trip property parseMoneyText(format(m)) == m
+00:01 +582: test/normalize/amount_parser_test.dart: round trip property parseMoneyText(format(m)) == m
+00:01 +583: test/normalize/amount_parser_test.dart: round trip property parseMoneyText(format(m)) == m
+00:01 +584: test/normalize/amount_parser_test.dart: round trip property parseMoneyText(format(m)) == m
+00:01 +585: test/normalize/amount_parser_test.dart: round trip property parseMoneyText(format(m)) == m
+00:01 +586: test/normalize/amount_parser_test.dart: round trip property parseMoneyText(format(m)) == m
+00:01 +587: test/normalize/amount_parser_test.dart: round trip property parseMoneyText(format(m)) == m
+00:01 +588: test/normalize/amount_parser_test.dart: round trip property parseMoneyText(format(m)) == m
+00:01 +589: test/normalize/amount_parser_test.dart: round trip property parseMoneyText(format(m)) == m
+00:01 +590: test/normalize/amount_parser_test.dart: round trip property parseMoneyText(format(m)) == m
+00:01 +591: test/normalize/amount_parser_test.dart: round trip property parseMoneyText(format(m)) == m
+00:01 +592: test/normalize/text_normalizer_test.dart: foldKeyIndexed text equals foldKey on rows and random input
+00:01 +593: test/normalize/text_normalizer_test.dart: foldKeyIndexed text equals foldKey on rows and random input
+00:01 +594: test/normalize/text_normalizer_test.dart: foldKeyIndexed text equals foldKey on rows and random input
+00:01 +595: test/generic/generic_parser_test.dart: unseen set (AC 1: at least 80% correct amount and currency) accuracy report
+00:01 +596: test/generic/generic_parser_test.dart: unseen set (AC 1: at least 80% correct amount and currency) accuracy report
+00:01 +597: test/generic/generic_parser_test.dart: unseen set (AC 1: at least 80% correct amount and currency) accuracy report
+00:01 +598: test/generic/generic_parser_test.dart: unseen set (AC 1: at least 80% correct amount and currency) accuracy report
+00:01 +599: test/generic/generic_parser_test.dart: unseen set (AC 1: at least 80% correct amount and currency) accuracy report
+00:01 +600: test/generic/generic_parser_test.dart: unseen set (AC 1: at least 80% correct amount and currency) accuracy report
+00:01 +601: test/generic/generic_parser_test.dart: unseen set (AC 1: at least 80% correct amount and currency) accuracy report
+00:01 +602: test/generic/generic_parser_test.dart: unseen set (AC 1: at least 80% correct amount and currency) accuracy report
+00:01 +603: test/generic/generic_parser_test.dart: unseen set (AC 1: at least 80% correct amount and currency) accuracy report
+00:01 +604: test/generic/generic_parser_test.dart: unseen set (AC 1: at least 80% correct amount and currency) accuracy report
+00:01 +605: test/generic/generic_parser_test.dart: unseen set (AC 1: at least 80% correct amount and currency) accuracy report
+00:01 +606: test/generic/generic_parser_test.dart: unseen set (AC 1: at least 80% correct amount and currency) accuracy report
+00:01 +607: test/generic/generic_parser_test.dart: unseen set (AC 1: at least 80% correct amount and currency) accuracy report
+00:01 +608: test/generic/generic_parser_test.dart: unseen set (AC 1: at least 80% correct amount and currency) accuracy report
+00:01 +609: test/generic/generic_parser_test.dart: unseen set (AC 1: at least 80% correct amount and currency) accuracy report
+00:01 +610: test/generic/generic_parser_test.dart: unseen set (AC 1: at least 80% correct amount and currency) accuracy report
+00:01 +611: test/generic/generic_parser_test.dart: unseen set (AC 1: at least 80% correct amount and currency) accuracy report
+00:01 +612: test/generic/generic_parser_test.dart: unseen set (AC 1: at least 80% correct amount and currency) accuracy report
+00:01 +613: test/generic/generic_parser_test.dart: unseen set (AC 1: at least 80% correct amount and currency) accuracy report
+00:01 +614: test/generic/generic_parser_test.dart: unseen set (AC 1: at least 80% correct amount and currency) accuracy report
+00:01 +615: test/generic/generic_parser_test.dart: unseen set (AC 1: at least 80% correct amount and currency) accuracy report
+00:01 +616: test/generic/generic_parser_test.dart: unseen set (AC 1: at least 80% correct amount and currency) accuracy report
+00:01 +617: test/generic/generic_parser_test.dart: unseen set (AC 1: at least 80% correct amount and currency) accuracy report
+00:01 +618: test/generic/generic_parser_test.dart: unseen set (AC 1: at least 80% correct amount and currency) accuracy report
+00:01 +619: test/generic/generic_parser_test.dart: unseen set (AC 1: at least 80% correct amount and currency) accuracy report
+00:01 +620: test/generic/generic_parser_test.dart: unseen set (AC 1: at least 80% correct amount and currency) accuracy report
+00:01 +621: test/generic/generic_parser_test.dart: unseen set (AC 1: at least 80% correct amount and currency) accuracy report
+00:01 +622: test/generic/generic_parser_test.dart: unseen set (AC 1: at least 80% correct amount and currency) accuracy report
+00:01 +623: test/generic/generic_parser_test.dart: unseen set (AC 1: at least 80% correct amount and currency) accuracy report
+00:01 +624: test/generic/generic_parser_test.dart: unseen set (AC 1: at least 80% correct amount and currency) accuracy report
+00:01 +625: test/generic/generic_parser_test.dart: unseen set (AC 1: at least 80% correct amount and currency) accuracy report
+00:01 +626: test/generic/generic_parser_test.dart: unseen set (AC 1: at least 80% correct amount and currency) accuracy report
+00:01 +627: test/generic/generic_parser_test.dart: unseen set (AC 1: at least 80% correct amount and currency) accuracy report
+00:01 +628: test/generic/generic_parser_test.dart: unseen set (AC 1: at least 80% correct amount and currency) accuracy report
+00:01 +629: test/generic/generic_parser_test.dart: unseen set (AC 1: at least 80% correct amount and currency) accuracy report
+00:01 +630: test/generic/generic_parser_test.dart: unseen set (AC 1: at least 80% correct amount and currency) accuracy report
+00:01 +631: test/generic/generic_parser_test.dart: unseen set (AC 1: at least 80% correct amount and currency) accuracy report
+00:01 +632: test/generic/generic_parser_test.dart: unseen set (AC 1: at least 80% correct amount and currency) accuracy report
+00:01 +633: test/generic/generic_parser_test.dart: unseen set (AC 1: at least 80% correct amount and currency) accuracy report
+00:01 +634: test/generic/generic_parser_test.dart: unseen set (AC 1: at least 80% correct amount and currency) accuracy report
+00:01 +635: test/generic/generic_parser_test.dart: unseen set (AC 1: at least 80% correct amount and currency) accuracy report
+00:01 +636: test/generic/generic_parser_test.dart: unseen set (AC 1: at least 80% correct amount and currency) accuracy report
+00:01 +637: test/generic/generic_parser_test.dart: unseen set (AC 1: at least 80% correct amount and currency) accuracy report
+00:01 +638: test/generic/generic_parser_test.dart: unseen set (AC 1: at least 80% correct amount and currency) accuracy report
+00:01 +639: test/generic/generic_parser_test.dart: unseen set (AC 1: at least 80% correct amount and currency) accuracy report
+00:01 +640: test/generic/generic_parser_test.dart: unseen set (AC 1: at least 80% correct amount and currency) accuracy report
+00:01 +641: test/generic/generic_parser_test.dart: unseen set (AC 1: at least 80% correct amount and currency) accuracy report
+00:01 +642: test/generic/generic_parser_test.dart: unseen set (AC 1: at least 80% correct amount and currency) accuracy report
+00:01 +643: test/generic/generic_parser_test.dart: unseen set (AC 1: at least 80% correct amount and currency) accuracy report
+00:01 +644: test/generic/generic_parser_test.dart: unseen set (AC 1: at least 80% correct amount and currency) accuracy report
+generic unseen set: 42/43 amount+currency correct (97.6% precision on suggested); coverage 43/53 (81.1%); correct over all cases 42/53 (79.2%); misses: en_fx_two_currencies
+00:01 +645: test/normalize/amount_parser_test.dart: fuzz random text never throws; failures carry only a reason and a code
+00:01 +646: test/normalize/amount_parser_test.dart: fuzz random text never throws; failures carry only a reason and a code
+00:01 +647: test/normalize/amount_parser_test.dart: fuzz random text never throws; failures carry only a reason and a code
+00:01 +648: test/normalize/amount_parser_test.dart: fuzz random text never throws; failures carry only a reason and a code
+00:01 +649: test/normalize/amount_parser_test.dart: fuzz random text never throws; failures carry only a reason and a code
+00:01 +650: test/normalize/amount_parser_test.dart: fuzz random text never throws; failures carry only a reason and a code
+00:01 +651: test/normalize/amount_parser_test.dart: fuzz random text never throws; failures carry only a reason and a code
+00:01 +652: test/normalize/amount_parser_test.dart: fuzz random text never throws; failures carry only a reason and a code
+00:01 +653: test/normalize/amount_parser_test.dart: fuzz random text never throws; failures carry only a reason and a code
+00:01 +654: test/normalize/amount_parser_test.dart: fuzz random text never throws; failures carry only a reason and a code
+00:01 +655: test/normalize/amount_parser_test.dart: fuzz random text never throws; failures carry only a reason and a code
+00:01 +656: test/normalize/amount_parser_test.dart: fuzz random text never throws; failures carry only a reason and a code
+00:01 +657: test/normalize/amount_parser_test.dart: fuzz random text never throws; failures carry only a reason and a code
+00:01 +658: test/normalize/amount_parser_test.dart: fuzz random text never throws; failures carry only a reason and a code
+00:01 +659: test/normalize/amount_parser_test.dart: fuzz random text never throws; failures carry only a reason and a code
+00:01 +660: test/normalize/amount_parser_test.dart: fuzz random text never throws; failures carry only a reason and a code
+00:01 +661: test/normalize/amount_parser_test.dart: fuzz random text never throws; failures carry only a reason and a code
+00:01 +662: test/normalize/amount_parser_test.dart: fuzz random text never throws; failures carry only a reason and a code
+00:01 +663: test/normalize/amount_parser_test.dart: fuzz random text never throws; failures carry only a reason and a code
+00:01 +664: test/normalize/amount_parser_test.dart: fuzz random text never throws; failures carry only a reason and a code
+00:01 +665: test/normalize/amount_parser_test.dart: fuzz random text never throws; failures carry only a reason and a code
+00:01 +666: test/normalize/amount_parser_test.dart: fuzz random text never throws; failures carry only a reason and a code
+00:01 +667: test/normalize/amount_parser_test.dart: fuzz random text never throws; failures carry only a reason and a code
+00:01 +668: test/normalize/amount_parser_test.dart: fuzz random text never throws; failures carry only a reason and a code
+00:01 +669: test/normalize/amount_parser_test.dart: fuzz random text never throws; failures carry only a reason and a code
+00:01 +670: test/normalize/amount_parser_test.dart: fuzz random text never throws; failures carry only a reason and a code
+00:01 +671: test/normalize/amount_parser_test.dart: fuzz random text never throws; failures carry only a reason and a code
+00:01 +672: test/normalize/amount_parser_test.dart: fuzz random text never throws; failures carry only a reason and a code
+00:01 +673: test/normalize/amount_parser_test.dart: fuzz random text never throws; failures carry only a reason and a code
+00:01 +674: test/normalize/amount_parser_test.dart: fuzz random text never throws; failures carry only a reason and a code
+00:01 +675: test/normalize/amount_parser_test.dart: fuzz random text never throws; failures carry only a reason and a code
+00:01 +676: test/normalize/amount_parser_test.dart: fuzz random text never throws; failures carry only a reason and a code
+00:01 +677: test/normalize/amount_parser_test.dart: fuzz random text never throws; failures carry only a reason and a code
+00:01 +678: test/normalize/amount_parser_test.dart: fuzz random text never throws; failures carry only a reason and a code
+00:01 +679: test/normalize/amount_parser_test.dart: fuzz random text never throws; failures carry only a reason and a code
+00:01 +680: test/normalize/amount_parser_test.dart: fuzz random text never throws; failures carry only a reason and a code
+00:01 +681: test/normalize/amount_parser_test.dart: fuzz random text never throws; failures carry only a reason and a code
+00:01 +682: test/normalize/amount_parser_test.dart: fuzz random text never throws; failures carry only a reason and a code
+00:01 +683: test/guard/capture_guard_test.dart: EC-59: ignore matches institution + last4, never last4 alone property: a random rule set never drops another institution
+00:01 +684: test/guard/capture_guard_test.dart: EC-59: ignore matches institution + last4, never last4 alone property: a random rule set never drops another institution
+00:01 +685: test/guard/capture_guard_test.dart: EC-59: ignore matches institution + last4, never last4 alone property: a random rule set never drops another institution
+00:01 +686: test/guard/capture_guard_test.dart: EC-59: ignore matches institution + last4, never last4 alone property: a random rule set never drops another institution
+00:01 +687: test/guard/capture_guard_test.dart: EC-59: ignore matches institution + last4, never last4 alone property: a random rule set never drops another institution
+00:01 +688: test/guard/capture_guard_test.dart: EC-59: ignore matches institution + last4, never last4 alone property: a random rule set never drops another institution
+00:01 +689: test/guard/capture_guard_test.dart: EC-59: ignore matches institution + last4, never last4 alone property: a random rule set never drops another institution
+00:01 +690: test/guard/capture_guard_test.dart: EC-59: ignore matches institution + last4, never last4 alone property: a random rule set never drops another institution
+00:01 +691: test/guard/capture_guard_test.dart: EC-59: ignore matches institution + last4, never last4 alone property: a random rule set never drops another institution
+00:01 +692: test/guard/capture_guard_test.dart: EC-59: ignore matches institution + last4, never last4 alone property: a random rule set never drops another institution
+00:01 +693: test/guard/capture_guard_test.dart: EC-59: ignore matches institution + last4, never last4 alone property: a random rule set never drops another institution
+00:01 +694: test/guard/capture_guard_test.dart: EC-59: ignore matches institution + last4, never last4 alone property: a random rule set never drops another institution
+00:01 +695: test/guard/capture_guard_test.dart: EC-59: ignore matches institution + last4, never last4 alone property: a random rule set never drops another institution
+00:01 +696: test/guard/capture_guard_test.dart: EC-59: ignore matches institution + last4, never last4 alone property: a random rule set never drops another institution
+00:01 +697: test/guard/capture_guard_test.dart: EC-59: ignore matches institution + last4, never last4 alone property: a random rule set never drops another institution
+00:01 +698: test/guard/capture_guard_test.dart: EC-59: ignore matches institution + last4, never last4 alone property: a random rule set never drops another institution
+00:01 +699: test/guard/capture_guard_test.dart: EC-59: ignore matches institution + last4, never last4 alone property: a random rule set never drops another institution
+00:01 +700: test/guard/capture_guard_test.dart: EC-59: ignore matches institution + last4, never last4 alone property: a random rule set never drops another institution
+00:01 +701: test/guard/capture_guard_test.dart: EC-59: ignore matches institution + last4, never last4 alone property: a random rule set never drops another institution
+00:01 +702: test/guard/capture_guard_test.dart: EC-59: ignore matches institution + last4, never last4 alone property: a random rule set never drops another institution
+00:01 +703: test/guard/capture_guard_test.dart: EC-59: ignore matches institution + last4, never last4 alone property: a random rule set never drops another institution
+00:01 +704: test/guard/capture_guard_test.dart: EC-59: ignore matches institution + last4, never last4 alone property: a random rule set never drops another institution
+00:01 +705: test/guard/capture_guard_test.dart: EC-59: ignore matches institution + last4, never last4 alone property: a random rule set never drops another institution
+00:01 +706: test/guard/capture_guard_test.dart: EC-59: ignore matches institution + last4, never last4 alone property: a random rule set never drops another institution
+00:01 +707: test/guard/capture_guard_test.dart: EC-59: ignore matches institution + last4, never last4 alone property: a random rule set never drops another institution
+00:01 +708: test/guard/capture_guard_test.dart: EC-59: ignore matches institution + last4, never last4 alone property: a random rule set never drops another institution
+00:01 +709: test/guard/capture_guard_test.dart: EC-59: ignore matches institution + last4, never last4 alone property: a random rule set never drops another institution
+00:01 +710: test/guard/capture_guard_test.dart: EC-59: ignore matches institution + last4, never last4 alone property: a random rule set never drops another institution
+00:01 +711: test/guard/capture_guard_test.dart: EC-59: ignore matches institution + last4, never last4 alone property: a random rule set never drops another institution
+00:01 +712: test/guard/capture_guard_test.dart: EC-59: ignore matches institution + last4, never last4 alone property: a random rule set never drops another institution
+00:01 +713: test/guard/capture_guard_test.dart: EC-59: ignore matches institution + last4, never last4 alone property: a random rule set never drops another institution
+00:01 +714: test/guard/capture_guard_test.dart: EC-59: ignore matches institution + last4, never last4 alone property: a random rule set never drops another institution
+00:01 +715: test/guard/capture_guard_test.dart: EC-59: ignore matches institution + last4, never last4 alone property: a random rule set never drops another institution
+00:01 +716: test/guard/capture_guard_test.dart: EC-59: ignore matches institution + last4, never last4 alone property: a random rule set never drops another institution
+00:01 +717: test/guard/capture_guard_test.dart: EC-59: ignore matches institution + last4, never last4 alone property: a random rule set never drops another institution
+00:01 +718: test/guard/capture_guard_test.dart: EC-59: ignore matches institution + last4, never last4 alone property: a random rule set never drops another institution
+00:01 +719: test/guard/capture_guard_test.dart: EC-59: ignore matches institution + last4, never last4 alone property: a random rule set never drops another institution
+00:01 +720: test/guard/capture_guard_test.dart: EC-59: ignore matches institution + last4, never last4 alone property: a random rule set never drops another institution
+00:01 +721: test/guard/capture_guard_test.dart: EC-59: ignore matches institution + last4, never last4 alone property: a random rule set never drops another institution
+00:01 +722: test/guard/capture_guard_test.dart: EC-59: ignore matches institution + last4, never last4 alone property: a random rule set never drops another institution
+00:01 +723: test/guard/capture_guard_test.dart: EC-59: ignore matches institution + last4, never last4 alone property: a random rule set never drops another institution
+00:01 +724: test/guard/capture_guard_test.dart: EC-59: ignore matches institution + last4, never last4 alone property: a random rule set never drops another institution
+00:01 +725: test/guard/capture_guard_test.dart: EC-59: ignore matches institution + last4, never last4 alone property: a random rule set never drops another institution
+00:01 +726: test/registry/regex_safety_test.dart: backtrackingProblems plain literal
+00:01 +727: test/registry/regex_safety_test.dart: backtrackingProblems plain literal
+00:01 +728: test/registry/regex_safety_test.dart: backtrackingProblems plain literal
+00:01 +729: test/registry/regex_safety_test.dart: backtrackingProblems plain literal
+00:01 +730: test/registry/regex_safety_test.dart: backtrackingProblems plain literal
+00:01 +731: test/registry/regex_safety_test.dart: backtrackingProblems plain literal
+00:01 +732: test/registry/regex_safety_test.dart: backtrackingProblems plain literal
+00:01 +733: test/registry/regex_safety_test.dart: backtrackingProblems plain literal
+00:01 +734: test/registry/regex_safety_test.dart: backtrackingProblems plain literal
+00:01 +735: test/guard/guard_golden_test.dart: modes user.indic_last4
+00:01 +736: test/guard/guard_golden_test.dart: modes user.indic_last4
+00:01 +737: test/guard/guard_golden_test.dart: modes user.indic_last4
+00:01 +738: test/guard/guard_golden_test.dart: modes user.indic_last4
+00:01 +739: test/guard/guard_golden_test.dart: modes user.indic_last4
+00:01 +740: test/guard/guard_golden_test.dart: modes user.indic_last4
+00:01 +741: test/guard/guard_golden_test.dart: modes user.indic_last4
+00:01 +742: test/guard/guard_golden_test.dart: modes user.indic_last4
+00:01 +743: test/guard/guard_golden_test.dart: modes user.indic_last4
+00:01 +744: test/registry/portable_regex_test.dart: portableRegexProblems rejects more than one capture group in last4
+00:01 +745: test/registry/portable_regex_test.dart: portableRegexProblems rejects more than one capture group in last4
+00:01 +746: test/registry/portable_regex_test.dart: portableRegexProblems rejects more than one capture group in last4
+00:01 +747: test/registry/portable_regex_test.dart: portableRegexProblems rejects more than one capture group in last4
+00:01 +748: test/registry/portable_regex_test.dart: portableRegexProblems rejects more than one capture group in last4
+00:01 +749: test/guard/guard_golden_test.dart: modes user.unknown_key
+00:01 +750: test/guard/guard_golden_test.dart: modes user.unknown_key
+00:01 +751: test/guard/guard_golden_test.dart: modes user.unknown_key
+00:01 +752: test/guard/guard_golden_test.dart: modes user.unknown_key
+00:01 +753: test/guard/guard_golden_test.dart: modes user.unknown_key
+00:01 +754: test/guard/guard_golden_test.dart: modes user.unknown_key
+00:01 +755: test/guard/guard_golden_test.dart: modes user.unknown_key
+00:01 +756: test/guard/guard_golden_test.dart: modes user.unknown_key
+00:01 +757: test/guard/guard_golden_test.dart: modes user.unknown_key
+00:01 +758: test/guard/guard_golden_test.dart: modes user.unknown_key
+00:01 +759: test/guard/guard_golden_test.dart: modes user.unknown_key
+00:01 +760: test/guard/guard_golden_test.dart: modes user.unknown_key
+00:01 +761: test/guard/guard_golden_test.dart: modes user.unknown_key
+00:01 +762: test/guard/guard_golden_test.dart: modes user.unknown_key
+00:01 +763: test/guard/guard_golden_test.dart: modes user.unknown_key
+00:01 +764: test/guard/guard_golden_test.dart: modes user.unknown_key
+00:01 +765: test/guard/guard_golden_test.dart: modes user.unknown_key
+00:01 +766: test/guard/guard_golden_test.dart: modes user.unknown_key
+00:01 +767: test/guard/guard_golden_test.dart: modes user.unknown_key
+00:01 +768: test/guard/capture_guard_test.dart: config reader a malformed user part never yields invalid (mutation fuzz)
+00:01 +769: test/guard/capture_guard_test.dart: config reader a malformed user part never yields invalid (mutation fuzz)
+00:01 +770: test/guard/capture_guard_test.dart: config reader a malformed user part never yields invalid (mutation fuzz)
+00:01 +771: test/guard/capture_guard_test.dart: config reader a malformed user part never yields invalid (mutation fuzz)
+00:01 +772: test/guard/capture_guard_test.dart: config reader a malformed user part never yields invalid (mutation fuzz)
+00:01 +773: test/guard/capture_guard_test.dart: config reader a malformed user part never yields invalid (mutation fuzz)
+00:01 +774: test/guard/capture_guard_test.dart: config reader a malformed user part never yields invalid (mutation fuzz)
+00:01 +775: test/guard/capture_guard_test.dart: config reader a malformed user part never yields invalid (mutation fuzz)
+00:01 +776: test/guard/capture_guard_test.dart: config reader a malformed user part never yields invalid (mutation fuzz)
+00:01 +777: test/guard/capture_guard_test.dart: config reader a malformed user part never yields invalid (mutation fuzz)
+00:01 +778: test/guard/capture_guard_test.dart: config reader a malformed user part never yields invalid (mutation fuzz)
+00:01 +779: test/guard/capture_guard_test.dart: config reader a malformed user part never yields invalid (mutation fuzz)
+00:01 +780: test/guard/capture_guard_test.dart: config reader a malformed user part never yields invalid (mutation fuzz)
+00:01 +781: test/guard/capture_guard_test.dart: config reader a malformed user part never yields invalid (mutation fuzz)
+00:01 +782: test/guard/capture_guard_test.dart: config reader a malformed user part never yields invalid (mutation fuzz)
+00:01 +783: test/guard/capture_guard_test.dart: config reader a malformed user part never yields invalid (mutation fuzz)
+00:01 +784: test/guard/capture_guard_test.dart: config reader a malformed user part never yields invalid (mutation fuzz)
+00:01 +785: test/guard/capture_guard_test.dart: config reader a malformed user part never yields invalid (mutation fuzz)
+00:01 +786: test/guard/capture_guard_test.dart: config reader a malformed user part never yields invalid (mutation fuzz)
+00:01 +787: test/guard/capture_guard_test.dart: config reader a malformed user part never yields invalid (mutation fuzz)
+00:01 +788: test/guard/capture_guard_test.dart: config reader a malformed user part never yields invalid (mutation fuzz)
+00:01 +789: test/guard/capture_guard_test.dart: config reader a malformed user part never yields invalid (mutation fuzz)
+00:01 +790: test/guard/capture_guard_test.dart: config reader a malformed user part never yields invalid (mutation fuzz)
+00:01 +791: test/guard/capture_guard_test.dart: config reader a malformed user part never yields invalid (mutation fuzz)
+00:01 +792: test/guard/capture_guard_test.dart: config reader a malformed user part never yields invalid (mutation fuzz)
+00:01 +793: test/guard/capture_guard_test.dart: config reader a malformed user part never yields invalid (mutation fuzz)
+00:01 +794: test/guard/capture_guard_test.dart: config reader a malformed user part never yields invalid (mutation fuzz)
+00:01 +795: test/guard/capture_guard_test.dart: config reader a malformed user part never yields invalid (mutation fuzz)
+00:01 +796: test/guard/capture_guard_test.dart: config reader a malformed user part never yields invalid (mutation fuzz)
+00:01 +797: test/guard/capture_guard_test.dart: config reader a malformed user part never yields invalid (mutation fuzz)
+00:01 +798: test/guard/capture_guard_test.dart: config reader a malformed user part never yields invalid (mutation fuzz)
+00:01 +799: test/guard/capture_guard_test.dart: config reader a malformed user part never yields invalid (mutation fuzz)
+00:01 +800: test/guard/capture_guard_test.dart: config reader a malformed user part never yields invalid (mutation fuzz)
+00:01 +801: test/guard/capture_guard_test.dart: config reader a malformed user part never yields invalid (mutation fuzz)
+00:01 +802: test/guard/capture_guard_test.dart: config reader a malformed user part never yields invalid (mutation fuzz)
+00:01 +803: test/guard/capture_guard_test.dart: config reader a malformed user part never yields invalid (mutation fuzz)
+00:01 +804: test/guard/capture_guard_test.dart: config reader a malformed user part never yields invalid (mutation fuzz)
+00:01 +805: test/guard/capture_guard_test.dart: config reader a malformed user part never yields invalid (mutation fuzz)
+00:01 +806: test/guard/capture_guard_test.dart: config reader a malformed user part never yields invalid (mutation fuzz)
+00:01 +807: test/guard/capture_guard_test.dart: config reader a malformed user part never yields invalid (mutation fuzz)
+00:01 +808: test/guard/capture_guard_test.dart: config reader a malformed user part never yields invalid (mutation fuzz)
+00:01 +809: test/guard/capture_guard_test.dart: config reader a malformed user part never yields invalid (mutation fuzz)
+00:01 +810: test/guard/capture_guard_test.dart: config reader a malformed user part never yields invalid (mutation fuzz)
+00:01 +811: test/guard/capture_guard_test.dart: config reader a malformed user part never yields invalid (mutation fuzz)
+00:01 +812: test/guard/capture_guard_test.dart: config reader a malformed user part never yields invalid (mutation fuzz)
+00:01 +813: test/guard/capture_guard_test.dart: config reader a malformed user part never yields invalid (mutation fuzz)
+00:01 +814: test/guard/capture_guard_test.dart: config reader a malformed user part never yields invalid (mutation fuzz)
+00:01 +815: test/guard/capture_guard_test.dart: config reader a malformed user part never yields invalid (mutation fuzz)
+00:01 +816: test/guard/capture_guard_test.dart: config reader a malformed user part never yields invalid (mutation fuzz)
+00:01 +817: test/guard/capture_guard_test.dart: config reader a malformed user part never yields invalid (mutation fuzz)
+00:01 +818: test/guard/capture_guard_test.dart: config reader a malformed user part never yields invalid (mutation fuzz)
+00:01 +819: test/guard/capture_guard_test.dart: config reader a malformed user part never yields invalid (mutation fuzz)
+00:01 +820: test/guard/capture_guard_test.dart: config reader a malformed user part never yields invalid (mutation fuzz)
+00:01 +821: test/guard/capture_guard_test.dart: config reader a malformed user part never yields invalid (mutation fuzz)
+00:01 +822: test/guard/capture_guard_test.dart: config reader a malformed user part never yields invalid (mutation fuzz)
+00:01 +823: test/guard/capture_guard_test.dart: config reader a malformed user part never yields invalid (mutation fuzz)
+00:01 +824: test/guard/capture_guard_test.dart: config reader a malformed user part never yields invalid (mutation fuzz)
+00:01 +825: test/guard/capture_guard_test.dart: config reader a malformed user part never yields invalid (mutation fuzz)
+00:01 +826: test/guard/capture_guard_test.dart: config reader a malformed user part never yields invalid (mutation fuzz)
+00:01 +827: test/guard/capture_guard_test.dart: config reader a malformed user part never yields invalid (mutation fuzz)
+00:01 +828: test/guard/capture_guard_test.dart: config reader a malformed user part never yields invalid (mutation fuzz)
+00:01 +829: test/guard/capture_guard_test.dart: config reader a malformed user part never yields invalid (mutation fuzz)
+00:01 +830: test/guard/capture_guard_test.dart: config reader a malformed user part never yields invalid (mutation fuzz)
+00:01 +831: test/guard/capture_guard_test.dart: config reader a malformed user part never yields invalid (mutation fuzz)
+00:01 +832: test/guard/capture_guard_test.dart: config reader a malformed user part never yields invalid (mutation fuzz)
+00:01 +833: test/guard/capture_guard_test.dart: config reader a malformed user part never yields invalid (mutation fuzz)
+00:01 +834: test/guard/capture_guard_test.dart: config reader a malformed user part never yields invalid (mutation fuzz)
+00:01 +835: test/guard/capture_guard_test.dart: config reader a malformed user part never yields invalid (mutation fuzz)
+00:01 +836: test/guard/capture_guard_test.dart: config reader a malformed user part never yields invalid (mutation fuzz)
+00:01 +837: test/guard/capture_guard_test.dart: config reader a malformed user part never yields invalid (mutation fuzz)
+00:01 +838: test/guard/capture_guard_test.dart: config reader a malformed user part never yields invalid (mutation fuzz)
+00:01 +839: test/guard/capture_guard_test.dart: config reader a malformed user part never yields invalid (mutation fuzz)
+00:01 +840: test/guard/capture_guard_test.dart: config reader a malformed user part never yields invalid (mutation fuzz)
+00:01 +841: test/guard/capture_guard_test.dart: config reader a malformed user part never yields invalid (mutation fuzz)
+00:01 +842: test/guard/capture_guard_test.dart: config reader a malformed user part never yields invalid (mutation fuzz)
+00:01 +843: test/guard/capture_guard_test.dart: config reader a malformed user part never yields invalid (mutation fuzz)
+00:01 +844: test/guard/capture_guard_test.dart: config reader a malformed user part never yields invalid (mutation fuzz)
+00:01 +845: test/guard/capture_guard_test.dart: config reader a malformed user part never yields invalid (mutation fuzz)
+00:01 +846: test/guard/capture_guard_test.dart: config reader a malformed user part never yields invalid (mutation fuzz)
+00:01 +847: test/guard/capture_guard_test.dart: config reader a malformed user part never yields invalid (mutation fuzz)
+00:01 +848: test/generic/generic_parser_test.dart: safety benchmark: mean generic parse time (printed)
+00:01 +849: test/generic/generic_parser_test.dart: safety benchmark: mean generic parse time (printed)
+00:01 +850: test/generic/generic_parser_test.dart: safety benchmark: mean generic parse time (printed)
+00:01 +851: test/generic/generic_parser_test.dart: safety benchmark: mean generic parse time (printed)
+00:02 +852: test/generic/generic_parser_test.dart: safety benchmark: mean generic parse time (printed)
+00:02 +853: test/generic/generic_parser_test.dart: safety benchmark: mean generic parse time (printed)
+00:02 +854: test/generic/generic_parser_test.dart: safety benchmark: mean generic parse time (printed)
+00:02 +855: test/generic/generic_parser_test.dart: safety benchmark: mean generic parse time (printed)
+00:02 +856: test/generic/generic_parser_test.dart: safety benchmark: mean generic parse time (printed)
+00:02 +857: test/generic/generic_parser_test.dart: safety benchmark: mean generic parse time (printed)
+00:02 +858: test/generic/generic_parser_test.dart: safety benchmark: mean generic parse time (printed)
+00:02 +859: test/generic/generic_parser_test.dart: safety benchmark: mean generic parse time (printed)
+00:02 +860: test/generic/generic_parser_test.dart: safety benchmark: mean generic parse time (printed)
+00:02 +861: test/generic/generic_parser_test.dart: safety benchmark: mean generic parse time (printed)
+00:02 +862: test/generic/generic_parser_test.dart: safety benchmark: mean generic parse time (printed)
+00:02 +863: test/generic/generic_parser_test.dart: safety benchmark: mean generic parse time (printed)
+00:02 +864: test/generic/generic_parser_test.dart: safety benchmark: mean generic parse time (printed)
+00:02 +865: test/generic/generic_parser_test.dart: safety benchmark: mean generic parse time (printed)
+00:02 +866: test/generic/generic_parser_test.dart: safety benchmark: mean generic parse time (printed)
+00:02 +867: test/generic/generic_parser_test.dart: safety benchmark: mean generic parse time (printed)
+00:02 +868: test/generic/generic_parser_test.dart: safety benchmark: mean generic parse time (printed)
+00:02 +869: test/generic/generic_parser_test.dart: safety benchmark: mean generic parse time (printed)
+00:02 +870: test/generic/generic_parser_test.dart: safety benchmark: mean generic parse time (printed)
+00:02 +871: test/generic/generic_parser_test.dart: safety benchmark: mean generic parse time (printed)
+00:02 +872: test/generic/generic_parser_test.dart: safety benchmark: mean generic parse time (printed)
+00:02 +873: test/generic/generic_parser_test.dart: safety benchmark: mean generic parse time (printed)
+00:02 +874: test/generic/generic_parser_test.dart: safety benchmark: mean generic parse time (printed)
+00:02 +875: test/generic/generic_parser_test.dart: safety benchmark: mean generic parse time (printed)
+00:02 +876: test/generic/generic_parser_test.dart: safety benchmark: mean generic parse time (printed)
+00:02 +877: test/generic/generic_parser_test.dart: safety benchmark: mean generic parse time (printed)
+00:02 +878: test/generic/generic_parser_test.dart: safety benchmark: mean generic parse time (printed)
+00:02 +879: test/generic/generic_parser_test.dart: safety benchmark: mean generic parse time (printed)
+00:02 +880: test/generic/generic_parser_test.dart: safety benchmark: mean generic parse time (printed)
+00:02 +881: test/generic/generic_parser_test.dart: safety benchmark: mean generic parse time (printed)
+00:02 +882: test/generic/generic_parser_test.dart: safety benchmark: mean generic parse time (printed)
+00:02 +883: test/generic/generic_parser_test.dart: safety benchmark: mean generic parse time (printed)
+00:02 +884: test/generic/generic_parser_test.dart: safety benchmark: mean generic parse time (printed)
+00:02 +885: test/generic/generic_parser_test.dart: safety benchmark: mean generic parse time (printed)
+00:02 +886: test/generic/generic_parser_test.dart: safety benchmark: mean generic parse time (printed)
+00:02 +887: test/generic/generic_parser_test.dart: safety benchmark: mean generic parse time (printed)
+00:02 +888: test/generic/generic_parser_test.dart: safety benchmark: mean generic parse time (printed)
+00:02 +889: test/generic/generic_parser_test.dart: safety benchmark: mean generic parse time (printed)
+00:02 +890: test/generic/generic_parser_test.dart: safety benchmark: mean generic parse time (printed)
+00:02 +891: test/generic/generic_parser_test.dart: safety benchmark: mean generic parse time (printed)
+00:02 +892: test/generic/generic_parser_test.dart: safety benchmark: mean generic parse time (printed)
+00:02 +893: test/generic/generic_parser_test.dart: safety benchmark: mean generic parse time (printed)
+00:02 +894: test/generic/generic_parser_test.dart: safety benchmark: mean generic parse time (printed)
+00:02 +895: test/generic/generic_parser_test.dart: safety benchmark: mean generic parse time (printed)
+00:02 +896: test/generic/generic_parser_test.dart: safety benchmark: mean generic parse time (printed)
+00:02 +897: test/generic/generic_parser_test.dart: safety benchmark: mean generic parse time (printed)
+00:02 +898: test/generic/generic_parser_test.dart: safety benchmark: mean generic parse time (printed)
+00:02 +899: test/generic/generic_parser_test.dart: safety benchmark: mean generic parse time (printed)
+00:02 +900: test/generic/generic_parser_test.dart: safety benchmark: mean generic parse time (printed)
+00:02 +901: test/generic/generic_parser_test.dart: safety benchmark: mean generic parse time (printed)
+00:02 +902: test/generic/generic_parser_test.dart: safety benchmark: mean generic parse time (printed)
+00:02 +903: test/generic/generic_parser_test.dart: safety benchmark: mean generic parse time (printed)
+00:02 +904: test/generic/generic_parser_test.dart: safety benchmark: mean generic parse time (printed)
+00:02 +905: test/generic/generic_parser_test.dart: safety benchmark: mean generic parse time (printed)
+00:02 +906: test/generic/generic_parser_test.dart: safety benchmark: mean generic parse time (printed)
+00:02 +907: test/generic/generic_parser_test.dart: safety benchmark: mean generic parse time (printed)
+00:02 +908: test/generic/generic_parser_test.dart: safety benchmark: mean generic parse time (printed)
+00:02 +909: test/generic/generic_parser_test.dart: safety benchmark: mean generic parse time (printed)
+00:02 +910: test/generic/generic_parser_test.dart: safety benchmark: mean generic parse time (printed)
+00:02 +911: test/generic/generic_parser_test.dart: safety benchmark: mean generic parse time (printed)
+00:02 +912: test/generic/generic_parser_test.dart: safety benchmark: mean generic parse time (printed)
+00:02 +913: test/generic/generic_parser_test.dart: safety benchmark: mean generic parse time (printed)
+00:02 +914: test/generic/generic_parser_test.dart: safety benchmark: mean generic parse time (printed)
+00:02 +915: test/generic/generic_parser_test.dart: safety benchmark: mean generic parse time (printed)
+00:02 +916: test/generic/generic_parser_test.dart: safety benchmark: mean generic parse time (printed)
+00:02 +917: test/generic/generic_parser_test.dart: safety benchmark: mean generic parse time (printed)
+00:02 +918: test/generic/generic_parser_test.dart: safety benchmark: mean generic parse time (printed)
+00:02 +919: test/generic/generic_parser_test.dart: safety benchmark: mean generic parse time (printed)
+00:02 +920: test/generic/generic_parser_test.dart: safety benchmark: mean generic parse time (printed)
+00:02 +921: test/generic/generic_parser_test.dart: safety benchmark: mean generic parse time (printed)
+00:02 +922: test/generic/generic_parser_test.dart: safety benchmark: mean generic parse time (printed)
+00:02 +923: test/generic/generic_parser_test.dart: safety benchmark: mean generic parse time (printed)
+00:02 +924: test/generic/generic_parser_test.dart: safety benchmark: mean generic parse time (printed)
+00:02 +925: test/generic/generic_parser_test.dart: safety benchmark: mean generic parse time (printed)
+00:02 +926: test/generic/generic_parser_test.dart: safety benchmark: mean generic parse time (printed)
+00:02 +927: test/generic/generic_parser_test.dart: safety benchmark: mean generic parse time (printed)
+00:02 +928: test/generic/generic_parser_test.dart: safety benchmark: mean generic parse time (printed)
+00:02 +929: test/generic/generic_parser_test.dart: safety benchmark: mean generic parse time (printed)
+00:02 +930: test/generic/generic_parser_test.dart: safety benchmark: mean generic parse time (printed)
+00:02 +931: test/generic/generic_parser_test.dart: safety benchmark: mean generic parse time (printed)
+00:02 +932: test/generic/generic_parser_test.dart: safety benchmark: mean generic parse time (printed)
+00:02 +933: test/generic/generic_parser_test.dart: safety benchmark: mean generic parse time (printed)
+00:02 +934: test/generic/generic_parser_test.dart: safety benchmark: mean generic parse time (printed)
+00:02 +935: test/generic/generic_parser_test.dart: safety benchmark: mean generic parse time (printed)
+00:02 +936: test/generic/generic_parser_test.dart: safety benchmark: mean generic parse time (printed)
+00:02 +937: test/generic/generic_parser_test.dart: safety benchmark: mean generic parse time (printed)
+00:02 +938: test/generic/generic_parser_test.dart: safety benchmark: mean generic parse time (printed)
+00:02 +939: test/generic/generic_parser_test.dart: safety benchmark: mean generic parse time (printed)
+00:02 +940: test/generic/generic_parser_test.dart: safety benchmark: mean generic parse time (printed)
+00:02 +941: test/generic/generic_parser_test.dart: safety benchmark: mean generic parse time (printed)
+00:02 +942: test/generic/generic_parser_test.dart: safety benchmark: mean generic parse time (printed)
+00:02 +943: test/generic/generic_parser_test.dart: safety benchmark: mean generic parse time (printed)
+00:02 +944: test/generic/generic_parser_test.dart: safety benchmark: mean generic parse time (printed)
+00:02 +945: test/generic/generic_parser_test.dart: safety benchmark: mean generic parse time (printed)
+00:02 +946: test/generic/generic_parser_test.dart: safety benchmark: mean generic parse time (printed)
+00:02 +947: test/generic/generic_parser_test.dart: safety benchmark: mean generic parse time (printed)
+00:02 +948: test/generic/generic_parser_test.dart: safety benchmark: mean generic parse time (printed)
+00:02 +949: test/generic/generic_parser_test.dart: safety benchmark: mean generic parse time (printed)
+00:02 +950: test/generic/generic_parser_test.dart: safety benchmark: mean generic parse time (printed)
+00:02 +951: test/generic/generic_parser_test.dart: safety benchmark: mean generic parse time (printed)
+00:02 +952: test/generic/generic_parser_test.dart: safety benchmark: mean generic parse time (printed)
+00:02 +953: test/generic/generic_parser_test.dart: safety benchmark: mean generic parse time (printed)
+00:02 +954: test/generic/generic_parser_test.dart: safety benchmark: mean generic parse time (printed)
+00:02 +955: test/generic/generic_parser_test.dart: safety benchmark: mean generic parse time (printed)
+00:02 +956: test/generic/generic_parser_test.dart: safety benchmark: mean generic parse time (printed)
+00:02 +957: test/generic/generic_parser_test.dart: safety benchmark: mean generic parse time (printed)
+00:02 +958: test/generic/generic_parser_test.dart: safety benchmark: mean generic parse time (printed)
+00:02 +959: test/generic/generic_parser_test.dart: safety benchmark: mean generic parse time (printed)
+00:02 +960: test/generic/generic_parser_test.dart: safety benchmark: mean generic parse time (printed)
+00:02 +961: test/generic/generic_parser_test.dart: safety benchmark: mean generic parse time (printed)
+00:02 +962: test/generic/generic_parser_test.dart: safety benchmark: mean generic parse time (printed)
+00:02 +963: test/generic/generic_parser_test.dart: safety benchmark: mean generic parse time (printed)
+00:02 +964: test/generic/generic_parser_test.dart: safety benchmark: mean generic parse time (printed)
+00:02 +965: test/generic/generic_parser_test.dart: safety benchmark: mean generic parse time (printed)
+00:02 +966: test/generic/generic_parser_test.dart: safety benchmark: mean generic parse time (printed)
+00:02 +967: test/generic/generic_parser_test.dart: safety benchmark: mean generic parse time (printed)
+generic parse mean: 184 us over 4000 runs
+00:02 +968: test/guard/capture_guard_test.dart: performance (loose CI bounds; natives measure on device) 1,000 adversarial 4,000-char decisions take under 2 s
+00:02 +969: test/guard/capture_guard_test.dart: performance (loose CI bounds; natives measure on device) 1,000 adversarial 4,000-char decisions take under 2 s
+00:02 +970: test/guard/capture_guard_test.dart: performance (loose CI bounds; natives measure on device) 1,000 adversarial 4,000-char decisions take under 2 s
+00:02 +971: test/guard/capture_guard_test.dart: performance (loose CI bounds; natives measure on device) 1,000 adversarial 4,000-char decisions take under 2 s
+00:02 +972: test/guard/capture_guard_test.dart: performance (loose CI bounds; natives measure on device) 1,000 adversarial 4,000-char decisions take under 2 s
+00:02 +973: test/guard/capture_guard_test.dart: performance (loose CI bounds; natives measure on device) 1,000 adversarial 4,000-char decisions take under 2 s
+00:02 +974: test/guard/capture_guard_test.dart: performance (loose CI bounds; natives measure on device) 1,000 adversarial 4,000-char decisions take under 2 s
+00:02 +975: test/guard/capture_guard_test.dart: performance (loose CI bounds; natives measure on device) 1,000 adversarial 4,000-char decisions take under 2 s
+00:02 +976: test/guard/capture_guard_test.dart: performance (loose CI bounds; natives measure on device) 1,000 adversarial 4,000-char decisions take under 2 s
+00:02 +977: test/guard/capture_guard_test.dart: performance (loose CI bounds; natives measure on device) 1,000 adversarial 4,000-char decisions take under 2 s
+00:02 +978: test/guard/capture_guard_test.dart: performance (loose CI bounds; natives measure on device) 1,000 adversarial 4,000-char decisions take under 2 s
+00:02 +979: test/guard/capture_guard_test.dart: performance (loose CI bounds; natives measure on device) 1,000 adversarial 4,000-char decisions take under 2 s
+00:02 +980: test/guard/capture_guard_test.dart: performance (loose CI bounds; natives measure on device) 1,000 adversarial 4,000-char decisions take under 2 s
+00:02 +981: test/guard/capture_guard_test.dart: performance (loose CI bounds; natives measure on device) 1,000 adversarial 4,000-char decisions take under 2 s
+00:02 +982: test/guard/capture_guard_test.dart: performance (loose CI bounds; natives measure on device) 1,000 adversarial 4,000-char decisions take under 2 s
+00:02 +983: test/guard/capture_guard_test.dart: performance (loose CI bounds; natives measure on device) 1,000 adversarial 4,000-char decisions take under 2 s
+00:02 +984: test/guard/capture_guard_test.dart: performance (loose CI bounds; natives measure on device) 1,000 adversarial 4,000-char decisions take under 2 s
+00:02 +985: test/guard/capture_guard_test.dart: performance (loose CI bounds; natives measure on device) 1,000 adversarial 4,000-char decisions take under 2 s
+00:02 +986: test/guard/capture_guard_test.dart: performance (loose CI bounds; natives measure on device) 1,000 adversarial 4,000-char decisions take under 2 s
+00:02 +987: test/guard/capture_guard_test.dart: performance (loose CI bounds; natives measure on device) 1,000 adversarial 4,000-char decisions take under 2 s
+00:02 +988: test/guard/capture_guard_test.dart: performance (loose CI bounds; natives measure on device) 1,000 adversarial 4,000-char decisions take under 2 s
+00:02 +989: test/guard/capture_guard_test.dart: performance (loose CI bounds; natives measure on device) 1,000 adversarial 4,000-char decisions take under 2 s
+00:02 +990: test/guard/capture_guard_test.dart: performance (loose CI bounds; natives measure on device) 1,000 adversarial 4,000-char decisions take under 2 s
+00:02 +991: test/guard/capture_guard_test.dart: performance (loose CI bounds; natives measure on device) 1,000 adversarial 4,000-char decisions take under 2 s
+00:02 +992: test/guard/capture_guard_test.dart: performance (loose CI bounds; natives measure on device) 1,000 adversarial 4,000-char decisions take under 2 s
+00:02 +993: test/guard/capture_guard_test.dart: performance (loose CI bounds; natives measure on device) 1,000 adversarial 4,000-char decisions take under 2 s
+00:02 +994: test/guard/capture_guard_test.dart: performance (loose CI bounds; natives measure on device) 1,000 adversarial 4,000-char decisions take under 2 s
+00:02 +995: test/guard/capture_guard_test.dart: performance (loose CI bounds; natives measure on device) 1,000 adversarial 4,000-char decisions take under 2 s
+00:02 +996: test/guard/capture_guard_test.dart: performance (loose CI bounds; natives measure on device) 1,000 adversarial 4,000-char decisions take under 2 s
+00:02 +997: test/guard/capture_guard_test.dart: performance (loose CI bounds; natives measure on device) 1,000 adversarial 4,000-char decisions take under 2 s
+00:02 +998: test/guard/capture_guard_test.dart: performance (loose CI bounds; natives measure on device) 1,000 adversarial 4,000-char decisions take under 2 s
+00:02 +999: test/guard/capture_guard_test.dart: performance (loose CI bounds; natives measure on device) 1,000 adversarial 4,000-char decisions take under 2 s
+00:02 +1000: test/guard/capture_guard_test.dart: performance (loose CI bounds; natives measure on device) 1,000 adversarial 4,000-char decisions take under 2 s
+00:02 +1001: test/guard/capture_guard_test.dart: performance (loose CI bounds; natives measure on device) 1,000 adversarial 4,000-char decisions take under 2 s
+00:02 +1002: test/guard/capture_guard_test.dart: performance (loose CI bounds; natives measure on device) 1,000 adversarial 4,000-char decisions take under 2 s
+00:02 +1003: test/guard/capture_guard_test.dart: performance (loose CI bounds; natives measure on device) 1,000 adversarial 4,000-char decisions take under 2 s
+00:02 +1004: test/guard/capture_guard_test.dart: performance (loose CI bounds; natives measure on device) 1,000 adversarial 4,000-char decisions take under 2 s
+00:02 +1005: test/guard/capture_guard_test.dart: performance (loose CI bounds; natives measure on device) 1,000 adversarial 4,000-char decisions take under 2 s
+00:02 +1006: test/guard/capture_guard_test.dart: performance (loose CI bounds; natives measure on device) 1,000 adversarial 4,000-char decisions take under 2 s
+00:02 +1007: test/guard/capture_guard_test.dart: performance (loose CI bounds; natives measure on device) 1,000 adversarial 4,000-char decisions take under 2 s
+00:02 +1008: test/guard/capture_guard_test.dart: performance (loose CI bounds; natives measure on device) 1,000 adversarial 4,000-char decisions take under 2 s
+00:02 +1009: test/guard/capture_guard_test.dart: performance (loose CI bounds; natives measure on device) 1,000 adversarial 4,000-char decisions take under 2 s
+00:02 +1010: test/guard/capture_guard_test.dart: performance (loose CI bounds; natives measure on device) 1,000 adversarial 4,000-char decisions take under 2 s
+00:02 +1011: test/guard/capture_guard_test.dart: performance (loose CI bounds; natives measure on device) 1,000 adversarial 4,000-char decisions take under 2 s
+00:02 +1012: test/guard/capture_guard_test.dart: performance (loose CI bounds; natives measure on device) 1,000 adversarial 4,000-char decisions take under 2 s
+00:02 +1013: test/guard/capture_guard_test.dart: performance (loose CI bounds; natives measure on device) 1,000 adversarial 4,000-char decisions take under 2 s
+00:02 +1014: test/guard/capture_guard_test.dart: performance (loose CI bounds; natives measure on device) 1,000 adversarial 4,000-char decisions take under 2 s
+00:02 +1015: test/guard/capture_guard_test.dart: performance (loose CI bounds; natives measure on device) 1,000 adversarial 4,000-char decisions take under 2 s
+00:02 +1016: test/guard/capture_guard_test.dart: performance (loose CI bounds; natives measure on device) 1,000 adversarial 4,000-char decisions take under 2 s
+00:02 +1017: test/guard/capture_guard_test.dart: performance (loose CI bounds; natives measure on device) 1,000 adversarial 4,000-char decisions take under 2 s
+00:02 +1018: test/guard/capture_guard_test.dart: performance (loose CI bounds; natives measure on device) 1,000 adversarial 4,000-char decisions take under 2 s
+00:02 +1019: test/guard/capture_guard_test.dart: performance (loose CI bounds; natives measure on device) 1,000 adversarial 4,000-char decisions take under 2 s
+00:02 +1020: test/guard/capture_guard_test.dart: performance (loose CI bounds; natives measure on device) 1,000 adversarial 4,000-char decisions take under 2 s
+00:02 +1021: test/guard/capture_guard_test.dart: performance (loose CI bounds; natives measure on device) 1,000 adversarial 4,000-char decisions take under 2 s
+00:02 +1022: test/guard/capture_guard_test.dart: performance (loose CI bounds; natives measure on device) 1,000 adversarial 4,000-char decisions take under 2 s
+00:02 +1023: test/guard/capture_guard_test.dart: performance (loose CI bounds; natives measure on device) 1,000 adversarial 4,000-char decisions take under 2 s
+00:02 +1024: test/guard/capture_guard_test.dart: performance (loose CI bounds; natives measure on device) 1,000 adversarial 4,000-char decisions take under 2 s
+00:02 +1025: test/guard/capture_guard_test.dart: performance (loose CI bounds; natives measure on device) 1,000 adversarial 4,000-char decisions take under 2 s
+00:02 +1026: test/guard/capture_guard_test.dart: performance (loose CI bounds; natives measure on device) 1,000 adversarial 4,000-char decisions take under 2 s
+00:02 +1027: test/guard/capture_guard_test.dart: performance (loose CI bounds; natives measure on device) 1,000 adversarial 4,000-char decisions take under 2 s
+00:02 +1028: test/guard/capture_guard_test.dart: performance (loose CI bounds; natives measure on device) 1,000 adversarial 4,000-char decisions take under 2 s
+00:02 +1029: test/guard/capture_guard_test.dart: performance (loose CI bounds; natives measure on device) 1,000 adversarial 4,000-char decisions take under 2 s
+00:02 +1030: test/guard/capture_guard_test.dart: performance (loose CI bounds; natives measure on device) 1,000 adversarial 4,000-char decisions take under 2 s
+00:02 +1031: test/guard/capture_guard_test.dart: performance (loose CI bounds; natives measure on device) 1,000 adversarial 4,000-char decisions take under 2 s
+00:02 +1032: test/guard/capture_guard_test.dart: performance (loose CI bounds; natives measure on device) 1,000 adversarial 4,000-char decisions take under 2 s
+00:02 +1033: test/guard/capture_guard_test.dart: performance (loose CI bounds; natives measure on device) 1,000 adversarial 4,000-char decisions take under 2 s
+00:02 +1034: test/guard/capture_guard_test.dart: performance (loose CI bounds; natives measure on device) 1,000 adversarial 4,000-char decisions take under 2 s
+00:02 +1035: test/guard/capture_guard_test.dart: performance (loose CI bounds; natives measure on device) 1,000 adversarial 4,000-char decisions take under 2 s
+00:02 +1036: test/guard/capture_guard_test.dart: performance (loose CI bounds; natives measure on device) 1,000 adversarial 4,000-char decisions take under 2 s
+00:02 +1037: test/guard/capture_guard_test.dart: performance (loose CI bounds; natives measure on device) 1,000 adversarial 4,000-char decisions take under 2 s
+00:02 +1038: test/guard/capture_guard_test.dart: performance (loose CI bounds; natives measure on device) 1,000 adversarial 4,000-char decisions take under 2 s
+00:02 +1039: test/guard/capture_guard_test.dart: performance (loose CI bounds; natives measure on device) 1,000 adversarial 4,000-char decisions take under 2 s
+00:02 +1040: test/guard/capture_guard_test.dart: performance (loose CI bounds; natives measure on device) 1,000 adversarial 4,000-char decisions take under 2 s
+00:02 +1041: test/guard/capture_guard_test.dart: performance (loose CI bounds; natives measure on device) 1,000 adversarial 4,000-char decisions take under 2 s
+00:03 +1042: test/guard/capture_guard_test.dart: performance (loose CI bounds; natives measure on device) 1,000 adversarial 4,000-char decisions take under 2 s
+00:03 +1043: test/guard/capture_guard_test.dart: performance (loose CI bounds; natives measure on device) 1,000 adversarial 4,000-char decisions take under 2 s
+00:03 +1044: test/guard/capture_guard_test.dart: performance (loose CI bounds; natives measure on device) 1,000 adversarial 4,000-char decisions take under 2 s
+00:03 +1045: test/guard/capture_guard_test.dart: performance (loose CI bounds; natives measure on device) 1,000 adversarial 4,000-char decisions take under 2 s
+00:03 +1046: test/guard/capture_guard_test.dart: performance (loose CI bounds; natives measure on device) 1,000 adversarial 4,000-char decisions take under 2 s
+00:03 +1047: test/guard/capture_guard_test.dart: performance (loose CI bounds; natives measure on device) 1,000 adversarial 4,000-char decisions take under 2 s
+00:03 +1048: test/guard/capture_guard_test.dart: performance (loose CI bounds; natives measure on device) 1,000 adversarial 4,000-char decisions take under 2 s
+00:03 +1049: test/guard/capture_guard_test.dart: performance (loose CI bounds; natives measure on device) 1,000 adversarial 4,000-char decisions take under 2 s
+00:03 +1050: test/guard/capture_guard_test.dart: performance (loose CI bounds; natives measure on device) 1,000 adversarial 4,000-char decisions take under 2 s
+00:03 +1051: test/guard/capture_guard_test.dart: performance (loose CI bounds; natives measure on device) 1,000 adversarial 4,000-char decisions take under 2 s
+00:03 +1052: test/guard/capture_guard_test.dart: performance (loose CI bounds; natives measure on device) 1,000 adversarial 4,000-char decisions take under 2 s
+00:03 +1053: test/guard/capture_guard_test.dart: performance (loose CI bounds; natives measure on device) 1,000 adversarial 4,000-char decisions take under 2 s
+00:03 +1054: test/guard/capture_guard_test.dart: performance (loose CI bounds; natives measure on device) 1,000 adversarial 4,000-char decisions take under 2 s
+00:03 +1055: test/guard/capture_guard_test.dart: performance (loose CI bounds; natives measure on device) 1,000 adversarial 4,000-char decisions take under 2 s
+00:03 +1056: test/guard/capture_guard_test.dart: performance (loose CI bounds; natives measure on device) 1,000 adversarial 4,000-char decisions take under 2 s
+00:03 +1056: test/pipeline/parsing_pipeline_test.dart: benchmark: mean parse time is under 2 ms (AC 3)
+pipeline parse mean: 177 us over 4000 runs
+00:03 +1057: test/guard/capture_guard_test.dart: performance (loose CI bounds; natives measure on device) 1,000 adversarial 4,000-char decisions take under 2 s
+00:03 +1058: test/guard/capture_guard_test.dart: performance (loose CI bounds; natives measure on device) 1,000 adversarial 4,000-char decisions take under 2 s
+00:03 +1059: test/guard/capture_guard_test.dart: performance (loose CI bounds; natives measure on device) 1,000 adversarial 4,000-char decisions take under 2 s
+00:03 +1060: test/guard/capture_guard_test.dart: performance (loose CI bounds; natives measure on device) 1,000 adversarial 4,000-char decisions take under 2 s
+00:03 +1061: test/guard/capture_guard_test.dart: performance (loose CI bounds; natives measure on device) 1,000 adversarial 4,000-char decisions take under 2 s
+00:03 +1062: test/guard/capture_guard_test.dart: performance (loose CI bounds; natives measure on device) 1,000 adversarial 4,000-char decisions take under 2 s
+00:03 +1063: test/guard/capture_guard_test.dart: performance (loose CI bounds; natives measure on device) 1,000 adversarial 4,000-char decisions take under 2 s
+00:03 +1064: test/guard/capture_guard_test.dart: performance (loose CI bounds; natives measure on device) 1,000 adversarial 4,000-char decisions take under 2 s
+00:03 +1065: test/guard/capture_guard_test.dart: performance (loose CI bounds; natives measure on device) 1,000 adversarial 4,000-char decisions take under 2 s
+00:04 +1066: test/guard/capture_guard_test.dart: performance (loose CI bounds; natives measure on device) 1,000 adversarial 4,000-char decisions take under 2 s
+00:04 +1067: test/guard/capture_guard_test.dart: performance (loose CI bounds; natives measure on device) 1,000 adversarial 4,000-char decisions take under 2 s
+00:04 +1068: test/guard/capture_guard_test.dart: performance (loose CI bounds; natives measure on device) 1,000 adversarial 4,000-char decisions take under 2 s
+00:04 +1069: test/guard/capture_guard_test.dart: performance (loose CI bounds; natives measure on device) 1,000 adversarial 4,000-char decisions take under 2 s
+00:04 +1070: test/guard/capture_guard_test.dart: performance (loose CI bounds; natives measure on device) 1,000 adversarial 4,000-char decisions take under 2 s
+00:04 +1071: test/guard/capture_guard_test.dart: performance (loose CI bounds; natives measure on device) 1,000 adversarial 4,000-char decisions take under 2 s
+00:04 +1072: test/guard/capture_guard_test.dart: performance (loose CI bounds; natives measure on device) 1,000 adversarial 4,000-char decisions take under 2 s
+00:04 +1073: test/guard/capture_guard_test.dart: performance (loose CI bounds; natives measure on device) 1,000 adversarial 4,000-char decisions take under 2 s
+00:04 +1074: test/guard/capture_guard_test.dart: performance (loose CI bounds; natives measure on device) 1,000 adversarial 4,000-char decisions take under 2 s
+00:04 +1075: test/guard/capture_guard_test.dart: performance (loose CI bounds; natives measure on device) 1,000 adversarial 4,000-char decisions take under 2 s
+00:04 +1075 -1: test/registry/registry_lint_test.dart: runtime guard (slow templates) a slow drop, last4 or global pattern fails the probe (M-2)
+00:04 +1075 -1: test/guard/capture_guard_test.dart: performance (loose CI bounds; natives measure on device) 1,000 adversarial 4,000-char decisions take under 2 s [E]
+  Expected: a value less than <2000>
+    Actual: <2248>
+     Which: is not a value less than <2000>
+  
+  package:matcher                           expect
+  test/guard/capture_guard_test.dart 430:7  main.<fn>.<fn>
+  
+00:04 +1076 -1: test/registry/registry_lint_test.dart: runtime guard (slow templates) a slow drop, last4 or global pattern fails the probe (M-2)
+00:04 +1077 -1: test/registry/registry_lint_test.dart: runtime guard (slow templates) a slow drop, last4 or global pattern fails the probe (M-2)
+00:04 +1078 -1: test/registry/registry_lint_test.dart: runtime guard (slow templates) the per-fixture timer reports the template id only
+00:04 +1079 -1: test/registry/registry_lint_test.dart: runtime guard (slow templates) the real test registries are not flagged at the default limit
+00:04 +1080 -1: test/registry/registry_lint_test.dart: pipeline keys in fixtures a wrong `confidence` fails the fixture
+00:04 +1081 -1: test/registry/registry_lint_test.dart: pipeline keys in fixtures a wrong `needsReview` fails the fixture
+00:04 +1082 -1: test/registry/registry_lint_test.dart: pipeline keys in fixtures a wrong `occurredAt` fails the fixture
+00:04 +1083 -1: test/registry/registry_lint_test.dart: pipeline keys in fixtures a wrong `language` fails the fixture
+00:04 +1084 -1: test/registry/registry_lint_test.dart: pipeline keys in fixtures a wrong `counterpartyKind` fails the fixture
+00:04 +1085 -1: test/registry/registry_lint_test.dart: pipeline keys in fixtures wrong reasons fail the fixture
+00:04 +1086 -1: test/registry/registry_lint_test.dart: Guard-bound patterns (T-035) a non-portable drop pattern fails the lint
+00:04 +1087 -1: test/registry/registry_lint_test.dart: Guard-bound patterns (T-035) a last-4 the Guard can not see fails the lint (parity)
+00:04 +1088 -1: test/registry/registry_lint_test.dart: Guard-bound patterns (T-035) a last-4 pattern quadratic on mask runs is flagged slow
+00:05 +1089 -1: test/registry/registry_lint_test.dart: Guard-bound patterns (T-035) sender regexes are compiled on the folded key
+00:05 +1090 -1: Some tests failed.
+
+Failing tests:
+  test/guard/capture_guard_test.dart: performance (loose CI bounds; natives measure on device) 1,000 adversarial 4,000-char decisions take under 2 s
+
+Consider enabling the flag chain-stack-traces to receive more detailed exceptions.
+For example, 'dart test --chain-stack-traces'.
+
+[12:44:50] === RESULT dart-test-zaghlol_parsing exit=1 (9s)
+[12:44:50] === STEP apk-devNoSms (docker zaghlol-flutter-android:3.47.9, /work/app)
+Resolving dependencies in `/work`...
+Downloading packages...
+  _fe_analyzer_shared 91.0.0 (111.0.0 available)
+  analyzer 8.4.0 (14.7.0 available)
+  built_collection 5.1.2 (6.0.0 available)
+  coverage 1.15.1 (1.16.0 available)
+  dart_style 3.1.3 (3.1.14 available)
+  drift 2.35.3 (2.35.4 available)
+  material_color_utilities 0.13.0 (0.13.1 available)
+  package_config 2.2.0 (3.0.0 available)
+  pigeon 26.3.2 (29.1.1 available)
+  test 1.31.1 (1.33.0 available)
+  test_api 0.7.12 (0.7.15 available)
+  test_core 0.6.18 (0.6.21 available)
+Got dependencies in `/work`!
+12 packages have newer versions incompatible with dependency constraints.
+Try `flutter pub outdated` for more information.
+Running Gradle task 'assembleDevNoSmsDebug'...                  
+Warning: SDK processing. This version only understands SDK XML versions up to 3 but an SDK XML file of version 4 was encountered. This can happen if you use versions of Android Studio and the command-line tools that were released at different times.
+Checking the license for package Android SDK Platform 35 in /opt/android-sdk/licenses
+License for package Android SDK Platform 35 accepted.
+Preparing "Install Android SDK Platform 35 (revision 2)".
+"Install Android SDK Platform 35 (revision 2)" ready.
+Installing Android SDK Platform 35 in /opt/android-sdk/platforms/android-35
+"Install Android SDK Platform 35 (revision 2)" complete.
+"Install Android SDK Platform 35 (revision 2)" finished.
+[=========                              ] 25%                                   
+Checking the license for package CMake 3.22.1 in /opt/android-sdk/licenses
+License for package CMake 3.22.1 accepted.
+Preparing "Install CMake 3.22.1 v.3.22.1".
+"Install CMake 3.22.1 v.3.22.1" ready.
+Installing CMake 3.22.1 in /opt/android-sdk/cmake/3.22.1
+"Install CMake 3.22.1 v.3.22.1" complete.
+"Install CMake 3.22.1 v.3.22.1" finished.
+Running Gradle task 'assembleDevNoSmsDebug'...                    265.5s
+✓ Built build/app/outputs/flutter-apk/app-devnosms-debug.apk
+
+[12:49:21] === RESULT apk-devNoSms exit=0 (270s)
+[12:49:21] === STEP apk-perms (docker zaghlol-flutter-android:3.47.9, /work/app)
+package: app.zaghlol.dev
+uses-permission: name='android.permission.INTERNET'
+permission: app.zaghlol.dev.DYNAMIC_RECEIVER_NOT_EXPORTED_PERMISSION
+uses-permission: name='app.zaghlol.dev.DYNAMIC_RECEIVER_NOT_EXPORTED_PERMISSION'
+
+[12:49:22] === RESULT apk-perms exit=0 (1s)
+[12:49:22] === STEP android-unit (docker zaghlol-flutter-android:3.47.9, /work/app)
+To honour the JVM settings for this build a single-use Daemon process will be forked. For more on this, please refer to https://docs.gradle.org/9.3.1/userguide/gradle_daemon.html#sec:disabling_the_daemon in the Gradle documentation.
+Daemon will be stopped at the end of the build 
+> Task :gradle:checkKotlinGradlePluginConfigurationErrors SKIPPED
+> Task :gradle:pluginDescriptors
+> Task :gradle:processResources
+
+> Task :gradle:compileKotlin
+w: file:///opt/flutter/packages/flutter_tools/gradle/src/main/kotlin/Deeplink.kt:13:5 This annotation is currently applied to the value parameter only, but in the future it will also be applied to property.
+- To opt in to applying to both value parameter and property, add '-Xannotation-default-target=param-property' to your compiler arguments.
+- To keep applying to the value parameter only, use the '@param:' annotation target.
+
+See https://youtrack.jetbrains.com/issue/KT-73255 for more details.
+w: file:///opt/flutter/packages/flutter_tools/gradle/src/main/kotlin/Deeplink.kt:15:5 This annotation is currently applied to the value parameter only, but in the future it will also be applied to property.
+- To opt in to applying to both value parameter and property, add '-Xannotation-default-target=param-property' to your compiler arguments.
+- To keep applying to the value parameter only, use the '@param:' annotation target.
+
+See https://youtrack.jetbrains.com/issue/KT-73255 for more details.
+w: file:///opt/flutter/packages/flutter_tools/gradle/src/main/kotlin/Deeplink.kt:17:5 This annotation is currently applied to the value parameter only, but in the future it will also be applied to property.
+- To opt in to applying to both value parameter and property, add '-Xannotation-default-target=param-property' to your compiler arguments.
+- To keep applying to the value parameter only, use the '@param:' annotation target.
+
+See https://youtrack.jetbrains.com/issue/KT-73255 for more details.
+w: file:///opt/flutter/packages/flutter_tools/gradle/src/main/kotlin/Deeplink.kt:19:5 This annotation is currently applied to the value parameter only, but in the future it will also be applied to property.
+- To opt in to applying to both value parameter and property, add '-Xannotation-default-target=param-property' to your compiler arguments.
+- To keep applying to the value parameter only, use the '@param:' annotation target.
+
+See https://youtrack.jetbrains.com/issue/KT-73255 for more details.
+w: file:///opt/flutter/packages/flutter_tools/gradle/src/main/kotlin/FlutterPlugin.kt:12:8 'interface ApkVariant : Any, BaseVariant, InstallableVariant, AndroidArtifactVariant, InternalBaseVariant' is deprecated. Deprecated in Java.
+w: file:///opt/flutter/packages/flutter_tools/gradle/src/main/kotlin/FlutterPlugin.kt:664:69 'interface ApkVariant : Any, BaseVariant, InstallableVariant, AndroidArtifactVariant, InternalBaseVariant' is deprecated. Deprecated in Java.
+w: file:///opt/flutter/packages/flutter_tools/gradle/src/main/kotlin/FlutterPluginUtils.kt:766:29 Condition is always 'true'.
+w: file:///opt/flutter/packages/flutter_tools/gradle/src/main/kotlin/plugins/PluginHandler.kt:168:70 Unchecked cast of 'NamedDomainObjectContainer<out BuildType>' to 'NamedDomainObjectContainer<BuildType>'.
+w: file:///opt/flutter/packages/flutter_tools/gradle/src/main/kotlin/plugins/PluginHandler.kt:169:75 Unchecked cast of 'NamedDomainObjectContainer<out BuildType>' to 'NamedDomainObjectContainer<BuildType>'.
+
+> Task :gradle:compileJava NO-SOURCE
+> Task :gradle:compileGroovy NO-SOURCE
+> Task :gradle:classes
+> Task :gradle:jar
+
+> Configure project :app
+WARNING: The option setting 'android.builtInKotlin=false' is deprecated.
+The current default is 'true'.
+It will be removed in version 10.0 of the Android Gradle plugin.
+WARNING: The option setting 'android.newDsl=false' is deprecated.
+The current default is 'true'.
+It will be removed in version 10.0 of the Android Gradle plugin.
+w: ?? Deprecated 'org.jetbrains.kotlin.android' plugin usage
+The 'org.jetbrains.kotlin.android' plugin in project ':app' is no longer required for Kotlin support since AGP 9.0.
+Solution: Remove both `android.builtInKotlin=true` and `android.newDsl=false` from `gradle.properties`, then migrate to built-in Kotlin.
+See https://kotl.in/gradle/agp-built-in-kotlin for more details.
+
+
+> Configure project :integration_test
+w: ?? Deprecated 'org.jetbrains.kotlin.android' plugin usage
+The 'org.jetbrains.kotlin.android' plugin in project ':integration_test' is no longer required for Kotlin support since AGP 9.0.
+Solution: Remove both `android.builtInKotlin=true` and `android.newDsl=false` from `gradle.properties`, then migrate to built-in Kotlin.
+See https://kotl.in/gradle/agp-built-in-kotlin for more details.
+
+
+> Configure project :jni
+w: ?? Deprecated 'org.jetbrains.kotlin.android' plugin usage
+The 'org.jetbrains.kotlin.android' plugin in project ':jni' is no longer required for Kotlin support since AGP 9.0.
+Solution: Remove both `android.builtInKotlin=true` and `android.newDsl=false` from `gradle.properties`, then migrate to built-in Kotlin.
+See https://kotl.in/gradle/agp-built-in-kotlin for more details.
+
+
+> Configure project :jni_flutter
+w: ?? Deprecated 'org.jetbrains.kotlin.android' plugin usage
+The 'org.jetbrains.kotlin.android' plugin in project ':jni_flutter' is no longer required for Kotlin support since AGP 9.0.
+Solution: Remove both `android.builtInKotlin=true` and `android.newDsl=false` from `gradle.properties`, then migrate to built-in Kotlin.
+See https://kotl.in/gradle/agp-built-in-kotlin for more details.
+
+Warning: SDK processing. This version only understands SDK XML versions up to 3 but an SDK XML file of version 4 was encountered. This can happen if you use versions of Android Studio and the command-line tools that were released at different times.
+Checking the license for package Android SDK Platform 35 in /opt/android-sdk/licenses
+License for package Android SDK Platform 35 accepted.
+Preparing "Install Android SDK Platform 35 (revision 2)".
+"Install Android SDK Platform 35 (revision 2)" ready.
+Installing Android SDK Platform 35 in /opt/android-sdk/platforms/android-35
+"Install Android SDK Platform 35 (revision 2)" complete.
+"Install Android SDK Platform 35 (revision 2)" finished.
+[=========                              ] 25%                                   
+> Task :app:checkKotlinGradlePluginConfigurationErrors SKIPPED
+> Task :app:cleanMergeDevNoSmsDebugAssets
+> Task :app:compileFlutterBuildDevNoSmsDebug
+> Task :app:generateDevNoSmsDebugAssets UP-TO-DATE
+> Task :app:validateCompileSdkVersion
+> Task :app:preBuild
+> Task :app:preDevNoSmsDebugBuild
+> Task :integration_test:generateDebugAssets UP-TO-DATE
+> Task :integration_test:preBuild UP-TO-DATE
+> Task :integration_test:preDebugBuild UP-TO-DATE
+> Task :integration_test:mergeDebugAssets UP-TO-DATE
+> Task :jni:generateDebugAssets UP-TO-DATE
+> Task :jni:preBuild UP-TO-DATE
+> Task :jni:preDebugBuild UP-TO-DATE
+> Task :jni:mergeDebugAssets UP-TO-DATE
+> Task :jni_flutter:generateDebugAssets UP-TO-DATE
+> Task :jni_flutter:preBuild UP-TO-DATE
+> Task :jni_flutter:preDebugBuild UP-TO-DATE
+> Task :jni_flutter:mergeDebugAssets UP-TO-DATE
+> Task :app:mergeDevNoSmsDebugAssets
+> Task :app:copyFlutterAssetsDevNoSmsDebug
+> Task :app:generateDevNoSmsDebugResValues UP-TO-DATE
+> Task :app:generateDevNoSmsDebugResources UP-TO-DATE
+> Task :app:packageDevNoSmsDebugResources UP-TO-DATE
+> Task :integration_test:processDebugNavigationResources UP-TO-DATE
+> Task :jni:processDebugNavigationResources UP-TO-DATE
+> Task :jni_flutter:processDebugNavigationResources UP-TO-DATE
+> Task :app:processDevNoSmsDebugNavigationResources UP-TO-DATE
+> Task :app:parseDevNoSmsDebugLocalResources UP-TO-DATE
+> Task :app:generateDevNoSmsDebugRFile UP-TO-DATE
+> Task :integration_test:checkKotlinGradlePluginConfigurationErrors SKIPPED
+> Task :integration_test:generateDebugResources UP-TO-DATE
+> Task :integration_test:packageDebugResources UP-TO-DATE
+> Task :integration_test:parseDebugLocalResources UP-TO-DATE
+> Task :integration_test:generateDebugRFile UP-TO-DATE
+> Task :integration_test:compileDebugKotlin NO-SOURCE
+> Task :integration_test:javaPreCompileDebug UP-TO-DATE
+> Task :integration_test:compileDebugJavaWithJavac UP-TO-DATE
+> Task :integration_test:bundleLibCompileToJarDebug UP-TO-DATE
+> Task :jni:checkKotlinGradlePluginConfigurationErrors SKIPPED
+> Task :jni:generateDebugResources UP-TO-DATE
+> Task :jni:packageDebugResources UP-TO-DATE
+> Task :jni:parseDebugLocalResources UP-TO-DATE
+> Task :jni:generateDebugRFile UP-TO-DATE
+> Task :jni:compileDebugKotlin NO-SOURCE
+> Task :jni:javaPreCompileDebug UP-TO-DATE
+> Task :jni:compileDebugJavaWithJavac UP-TO-DATE
+> Task :jni:bundleLibCompileToJarDebug UP-TO-DATE
+> Task :jni_flutter:checkKotlinGradlePluginConfigurationErrors SKIPPED
+> Task :jni_flutter:generateDebugResources UP-TO-DATE
+> Task :jni_flutter:packageDebugResources UP-TO-DATE
+> Task :jni_flutter:parseDebugLocalResources UP-TO-DATE
+> Task :jni_flutter:generateDebugRFile UP-TO-DATE
+> Task :jni_flutter:compileDebugKotlin NO-SOURCE
+> Task :jni_flutter:javaPreCompileDebug UP-TO-DATE
+> Task :jni_flutter:compileDebugJavaWithJavac UP-TO-DATE
+> Task :jni_flutter:bundleLibCompileToJarDebug UP-TO-DATE
+> Task :app:compileDevNoSmsDebugKotlin UP-TO-DATE
+> Task :app:javaPreCompileDevNoSmsDebug UP-TO-DATE
+> Task :app:compileDevNoSmsDebugJavaWithJavac UP-TO-DATE
+> Task :integration_test:writeDebugAarMetadata UP-TO-DATE
+> Task :jni:writeDebugAarMetadata UP-TO-DATE
+> Task :jni_flutter:writeDebugAarMetadata UP-TO-DATE
+> Task :app:checkDevNoSmsDebugAarMetadata UP-TO-DATE
+> Task :app:mapDevNoSmsDebugSourceSetPaths UP-TO-DATE
+> Task :app:compileDevNoSmsDebugNavigationResources UP-TO-DATE
+> Task :app:mergeDevNoSmsDebugResources UP-TO-DATE
+> Task :app:createDevNoSmsDebugCompatibleScreenManifests UP-TO-DATE
+> Task :app:extractDeepLinksDevNoSmsDebug UP-TO-DATE
+> Task :integration_test:extractDeepLinksDebug UP-TO-DATE
+> Task :integration_test:processDebugManifest UP-TO-DATE
+> Task :jni:extractDeepLinksDebug UP-TO-DATE
+> Task :jni:processDebugManifest UP-TO-DATE
+> Task :jni_flutter:extractDeepLinksDebug UP-TO-DATE
+> Task :jni_flutter:processDebugManifest UP-TO-DATE
+> Task :app:processDevNoSmsDebugMainManifest UP-TO-DATE
+> Task :app:outputDevNoSmsDebugAppLinkSettings UP-TO-DATE
+> Task :app:processDevNoSmsDebugManifest UP-TO-DATE
+> Task :app:processDevNoSmsDebugManifestForPackage UP-TO-DATE
+> Task :integration_test:mapDebugSourceSetPaths UP-TO-DATE
+> Task :integration_test:compileDebugLibraryResources UP-TO-DATE
+> Task :jni:mapDebugSourceSetPaths UP-TO-DATE
+> Task :jni:compileDebugLibraryResources UP-TO-DATE
+> Task :jni_flutter:mapDebugSourceSetPaths UP-TO-DATE
+> Task :jni_flutter:compileDebugLibraryResources UP-TO-DATE
+> Task :app:processDevNoSmsDebugResources UP-TO-DATE
+> Task :app:preDevNoSmsDebugUnitTestBuild
+> Task :app:javaPreCompileDevNoSmsDebugUnitTest
+> Task :app:processDevNoSmsDebugJavaRes UP-TO-DATE
+> Task :integration_test:bundleLibRuntimeToJarDebug UP-TO-DATE
+> Task :integration_test:processDebugJavaRes NO-SOURCE
+> Task :jni:bundleLibRuntimeToJarDebug UP-TO-DATE
+> Task :jni:processDebugJavaRes NO-SOURCE
+> Task :jni_flutter:bundleLibRuntimeToJarDebug UP-TO-DATE
+> Task :jni_flutter:processDebugJavaRes NO-SOURCE
+> Task :app:bundleDevNoSmsDebugClassesToRuntimeJar
+> Task :app:bundleDevNoSmsDebugClassesToCompileJar
+> Task :app:compileDevNoSmsDebugUnitTestKotlin
+> Task :app:compileDevNoSmsDebugUnitTestJavaWithJavac NO-SOURCE
+> Task :app:processDevNoSmsDebugUnitTestJavaRes
+> Task :app:testDevNoSmsDebugUnitTest
+
+[Incubating] Problems report is available at: file:///work/app/build/reports/problems/problems-report.html
+
+Deprecated Gradle features were used in this build, making it incompatible with Gradle 10.
+
+You can use '--warning-mode all' to show the individual deprecation warnings and determine if they come from your own scripts or plugins.
+
+For more on this, please refer to https://docs.gradle.org/9.3.1/userguide/command_line_interface.html#sec:command_line_warnings in the Gradle documentation.
+
+BUILD SUCCESSFUL in 2m 18s
+81 actionable tasks: 15 executed, 66 up-to-date
+kotlin testcases: 130
+
+[12:51:43] === RESULT android-unit exit=0 (141s)
+[12:51:43] === STEP android-lint (docker zaghlol-flutter-android:3.47.9, /work/app)
+To honour the JVM settings for this build a single-use Daemon process will be forked. For more on this, please refer to https://docs.gradle.org/9.3.1/userguide/gradle_daemon.html#sec:disabling_the_daemon in the Gradle documentation.
+Daemon will be stopped at the end of the build 
+> Task :gradle:checkKotlinGradlePluginConfigurationErrors SKIPPED
+> Task :gradle:pluginDescriptors
+> Task :gradle:processResources
+
+> Task :gradle:compileKotlin
+w: file:///opt/flutter/packages/flutter_tools/gradle/src/main/kotlin/Deeplink.kt:13:5 This annotation is currently applied to the value parameter only, but in the future it will also be applied to property.
+- To opt in to applying to both value parameter and property, add '-Xannotation-default-target=param-property' to your compiler arguments.
+- To keep applying to the value parameter only, use the '@param:' annotation target.
+
+See https://youtrack.jetbrains.com/issue/KT-73255 for more details.
+w: file:///opt/flutter/packages/flutter_tools/gradle/src/main/kotlin/Deeplink.kt:15:5 This annotation is currently applied to the value parameter only, but in the future it will also be applied to property.
+- To opt in to applying to both value parameter and property, add '-Xannotation-default-target=param-property' to your compiler arguments.
+- To keep applying to the value parameter only, use the '@param:' annotation target.
+
+See https://youtrack.jetbrains.com/issue/KT-73255 for more details.
+w: file:///opt/flutter/packages/flutter_tools/gradle/src/main/kotlin/Deeplink.kt:17:5 This annotation is currently applied to the value parameter only, but in the future it will also be applied to property.
+- To opt in to applying to both value parameter and property, add '-Xannotation-default-target=param-property' to your compiler arguments.
+- To keep applying to the value parameter only, use the '@param:' annotation target.
+
+See https://youtrack.jetbrains.com/issue/KT-73255 for more details.
+w: file:///opt/flutter/packages/flutter_tools/gradle/src/main/kotlin/Deeplink.kt:19:5 This annotation is currently applied to the value parameter only, but in the future it will also be applied to property.
+- To opt in to applying to both value parameter and property, add '-Xannotation-default-target=param-property' to your compiler arguments.
+- To keep applying to the value parameter only, use the '@param:' annotation target.
+
+See https://youtrack.jetbrains.com/issue/KT-73255 for more details.
+w: file:///opt/flutter/packages/flutter_tools/gradle/src/main/kotlin/FlutterPlugin.kt:12:8 'interface ApkVariant : Any, BaseVariant, InstallableVariant, AndroidArtifactVariant, InternalBaseVariant' is deprecated. Deprecated in Java.
+w: file:///opt/flutter/packages/flutter_tools/gradle/src/main/kotlin/FlutterPlugin.kt:664:69 'interface ApkVariant : Any, BaseVariant, InstallableVariant, AndroidArtifactVariant, InternalBaseVariant' is deprecated. Deprecated in Java.
+w: file:///opt/flutter/packages/flutter_tools/gradle/src/main/kotlin/FlutterPluginUtils.kt:766:29 Condition is always 'true'.
+w: file:///opt/flutter/packages/flutter_tools/gradle/src/main/kotlin/plugins/PluginHandler.kt:168:70 Unchecked cast of 'NamedDomainObjectContainer<out BuildType>' to 'NamedDomainObjectContainer<BuildType>'.
+w: file:///opt/flutter/packages/flutter_tools/gradle/src/main/kotlin/plugins/PluginHandler.kt:169:75 Unchecked cast of 'NamedDomainObjectContainer<out BuildType>' to 'NamedDomainObjectContainer<BuildType>'.
+
+> Task :gradle:compileJava NO-SOURCE
+> Task :gradle:compileGroovy NO-SOURCE
+> Task :gradle:classes
+> Task :gradle:jar
+
+> Configure project :app
+WARNING: The option setting 'android.builtInKotlin=false' is deprecated.
+The current default is 'true'.
+It will be removed in version 10.0 of the Android Gradle plugin.
+WARNING: The option setting 'android.newDsl=false' is deprecated.
+The current default is 'true'.
+It will be removed in version 10.0 of the Android Gradle plugin.
+w: ?? Deprecated 'org.jetbrains.kotlin.android' plugin usage
+The 'org.jetbrains.kotlin.android' plugin in project ':app' is no longer required for Kotlin support since AGP 9.0.
+Solution: Remove both `android.builtInKotlin=true` and `android.newDsl=false` from `gradle.properties`, then migrate to built-in Kotlin.
+See https://kotl.in/gradle/agp-built-in-kotlin for more details.
+
+
+> Configure project :integration_test
+w: ?? Deprecated 'org.jetbrains.kotlin.android' plugin usage
+The 'org.jetbrains.kotlin.android' plugin in project ':integration_test' is no longer required for Kotlin support since AGP 9.0.
+Solution: Remove both `android.builtInKotlin=true` and `android.newDsl=false` from `gradle.properties`, then migrate to built-in Kotlin.
+See https://kotl.in/gradle/agp-built-in-kotlin for more details.
+
+
+> Configure project :jni
+w: ?? Deprecated 'org.jetbrains.kotlin.android' plugin usage
+The 'org.jetbrains.kotlin.android' plugin in project ':jni' is no longer required for Kotlin support since AGP 9.0.
+Solution: Remove both `android.builtInKotlin=true` and `android.newDsl=false` from `gradle.properties`, then migrate to built-in Kotlin.
+See https://kotl.in/gradle/agp-built-in-kotlin for more details.
+
+
+> Configure project :jni_flutter
+w: ?? Deprecated 'org.jetbrains.kotlin.android' plugin usage
+The 'org.jetbrains.kotlin.android' plugin in project ':jni_flutter' is no longer required for Kotlin support since AGP 9.0.
+Solution: Remove both `android.builtInKotlin=true` and `android.newDsl=false` from `gradle.properties`, then migrate to built-in Kotlin.
+See https://kotl.in/gradle/agp-built-in-kotlin for more details.
+
+Warning: SDK processing. This version only understands SDK XML versions up to 3 but an SDK XML file of version 4 was encountered. This can happen if you use versions of Android Studio and the command-line tools that were released at different times.
+Checking the license for package Android SDK Platform 35 in /opt/android-sdk/licenses
+License for package Android SDK Platform 35 accepted.
+Preparing "Install Android SDK Platform 35 (revision 2)".
+"Install Android SDK Platform 35 (revision 2)" ready.
+Installing Android SDK Platform 35 in /opt/android-sdk/platforms/android-35
+"Install Android SDK Platform 35 (revision 2)" complete.
+"Install Android SDK Platform 35 (revision 2)" finished.
+[=========                              ] 25%                                   
+> Task :integration_test:preBuild UP-TO-DATE
+> Task :integration_test:preDebugBuild UP-TO-DATE
+> Task :integration_test:checkDebugAarMetadata
+> Task :integration_test:mergeDebugJniLibFolders UP-TO-DATE
+> Task :integration_test:mergeDebugNativeLibs NO-SOURCE
+> Task :integration_test:stripDebugDebugSymbols NO-SOURCE
+> Task :integration_test:checkKotlinGradlePluginConfigurationErrors SKIPPED
+> Task :integration_test:generateDebugResources UP-TO-DATE
+> Task :integration_test:copyDebugJniLibsProjectAndLocalJars
+> Task :integration_test:packageDebugResources UP-TO-DATE
+> Task :integration_test:processDebugNavigationResources UP-TO-DATE
+> Task :integration_test:parseDebugLocalResources UP-TO-DATE
+> Task :integration_test:generateDebugRFile UP-TO-DATE
+> Task :integration_test:compileDebugKotlin NO-SOURCE
+> Task :integration_test:extractDebugAnnotations
+> Task :integration_test:extractDeepLinksForAarDebug
+> Task :integration_test:generateDebugAssets UP-TO-DATE
+> Task :integration_test:mergeDebugAssets UP-TO-DATE
+> Task :integration_test:javaPreCompileDebug UP-TO-DATE
+> Task :integration_test:compileDebugJavaWithJavac UP-TO-DATE
+> Task :integration_test:mergeDebugGeneratedProguardFiles
+> Task :integration_test:mergeDebugConsumerProguardFiles
+> Task :integration_test:prepareDebugArtProfile
+> Task :integration_test:prepareLintJarForPublish
+> Task :integration_test:processDebugManifest UP-TO-DATE
+> Task :integration_test:processDebugJavaRes NO-SOURCE
+> Task :integration_test:writeDebugAarMetadata UP-TO-DATE
+> Task :jni:preBuild UP-TO-DATE
+> Task :jni:preDebugBuild UP-TO-DATE
+> Task :jni:preProfileBuild UP-TO-DATE
+> Task :jni:checkDebugAarMetadata
+> Task :integration_test:mergeDebugJavaResource
+
+> Task :jni:configureCMakeDebug[arm64-v8a]
+Checking the license for package CMake 3.22.1 in /opt/android-sdk/licenses
+License for package CMake 3.22.1 accepted.
+Preparing "Install CMake 3.22.1 v.3.22.1".
+"Install CMake 3.22.1 v.3.22.1" ready.
+Installing CMake 3.22.1 in /opt/android-sdk/cmake/3.22.1
+"Install CMake 3.22.1 v.3.22.1" complete.
+"Install CMake 3.22.1 v.3.22.1" finished.
+
+> Task :integration_test:syncDebugLibJars
+> Task :integration_test:bundleDebugLocalLintAar
+> Task :jni:buildCMakeDebug[arm64-v8a]
+> Task :jni:configureCMakeDebug[armeabi-v7a]
+> Task :jni:buildCMakeDebug[armeabi-v7a]
+> Task :jni:configureCMakeDebug[x86]
+> Task :jni:buildCMakeDebug[x86]
+> Task :jni:configureCMakeDebug[x86_64]
+> Task :jni:buildCMakeDebug[x86_64]
+> Task :jni:mergeDebugJniLibFolders UP-TO-DATE
+> Task :jni:mergeDebugNativeLibs UP-TO-DATE
+> Task :jni:checkKotlinGradlePluginConfigurationErrors SKIPPED
+> Task :jni:generateDebugResources UP-TO-DATE
+> Task :jni:stripDebugDebugSymbols
+> Task :jni:packageDebugResources UP-TO-DATE
+> Task :jni:processDebugNavigationResources UP-TO-DATE
+> Task :jni:parseDebugLocalResources UP-TO-DATE
+> Task :jni:generateDebugRFile UP-TO-DATE
+> Task :jni:compileDebugKotlin NO-SOURCE
+> Task :jni:extractDebugAnnotations
+> Task :jni:extractDeepLinksForAarDebug
+> Task :jni:generateDebugAssets UP-TO-DATE
+> Task :jni:mergeDebugAssets UP-TO-DATE
+> Task :jni:javaPreCompileDebug UP-TO-DATE
+> Task :jni:copyDebugJniLibsProjectAndLocalJars
+> Task :jni:compileDebugJavaWithJavac UP-TO-DATE
+> Task :jni:mergeDebugGeneratedProguardFiles
+> Task :jni:mergeDebugConsumerProguardFiles
+> Task :jni:prepareDebugArtProfile
+> Task :jni:prepareLintJarForPublish
+> Task :jni:processDebugManifest UP-TO-DATE
+> Task :jni:processDebugJavaRes NO-SOURCE
+> Task :jni:writeDebugAarMetadata UP-TO-DATE
+> Task :jni_flutter:preBuild UP-TO-DATE
+> Task :jni_flutter:preDebugBuild UP-TO-DATE
+> Task :jni:mergeDebugJavaResource
+> Task :jni_flutter:checkDebugAarMetadata
+> Task :jni_flutter:mergeDebugJniLibFolders UP-TO-DATE
+> Task :jni:syncDebugLibJars
+> Task :jni:bundleDebugLocalLintAar
+> Task :jni_flutter:mergeDebugNativeLibs NO-SOURCE
+> Task :jni_flutter:stripDebugDebugSymbols NO-SOURCE
+> Task :jni:bundleLibCompileToJarDebug UP-TO-DATE
+> Task :jni_flutter:checkKotlinGradlePluginConfigurationErrors SKIPPED
+> Task :jni_flutter:copyDebugJniLibsProjectAndLocalJars
+> Task :jni_flutter:generateDebugResources UP-TO-DATE
+> Task :jni_flutter:packageDebugResources UP-TO-DATE
+> Task :jni_flutter:processDebugNavigationResources UP-TO-DATE
+> Task :jni_flutter:parseDebugLocalResources UP-TO-DATE
+> Task :jni_flutter:generateDebugRFile UP-TO-DATE
+> Task :jni_flutter:compileDebugKotlin NO-SOURCE
+> Task :jni_flutter:extractDebugAnnotations
+> Task :jni_flutter:extractDeepLinksForAarDebug
+> Task :jni_flutter:generateDebugAssets UP-TO-DATE
+> Task :jni_flutter:mergeDebugAssets UP-TO-DATE
+> Task :jni_flutter:javaPreCompileDebug UP-TO-DATE
+> Task :jni_flutter:compileDebugJavaWithJavac UP-TO-DATE
+> Task :jni_flutter:mergeDebugGeneratedProguardFiles
+> Task :jni_flutter:mergeDebugConsumerProguardFiles
+> Task :jni_flutter:prepareDebugArtProfile
+> Task :jni_flutter:prepareLintJarForPublish
+> Task :jni_flutter:processDebugManifest UP-TO-DATE
+> Task :jni_flutter:processDebugJavaRes NO-SOURCE
+> Task :jni_flutter:writeDebugAarMetadata UP-TO-DATE
+> Task :app:checkKotlinGradlePluginConfigurationErrors SKIPPED
+> Task :jni_flutter:mergeDebugJavaResource
+> Task :app:cleanMergeDevNoSmsDebugAssets
+> Task :jni_flutter:syncDebugLibJars
+> Task :jni_flutter:bundleDebugLocalLintAar
+> Task :app:compileFlutterBuildDevNoSmsDebug UP-TO-DATE
+> Task :app:generateDevNoSmsDebugAssets UP-TO-DATE
+> Task :app:validateCompileSdkVersion
+> Task :app:preBuild
+> Task :app:preDevNoSmsDebugBuild
+> Task :app:mergeDevNoSmsDebugAssets
+> Task :app:copyFlutterAssetsDevNoSmsDebug
+> Task :app:generateDevNoSmsDebugResValues UP-TO-DATE
+> Task :app:generateDevNoSmsDebugResources UP-TO-DATE
+> Task :app:packageDevNoSmsDebugResources UP-TO-DATE
+> Task :app:processDevNoSmsDebugNavigationResources UP-TO-DATE
+> Task :app:parseDevNoSmsDebugLocalResources UP-TO-DATE
+> Task :app:generateDevNoSmsDebugRFile UP-TO-DATE
+> Task :integration_test:bundleLibCompileToJarDebug UP-TO-DATE
+> Task :jni_flutter:bundleLibCompileToJarDebug UP-TO-DATE
+> Task :app:compileDevNoSmsDebugKotlin UP-TO-DATE
+> Task :app:javaPreCompileDevNoSmsDebug UP-TO-DATE
+> Task :app:compileDevNoSmsDebugJavaWithJavac UP-TO-DATE
+> Task :app:checkDevNoSmsDebugAarMetadata UP-TO-DATE
+> Task :app:mapDevNoSmsDebugSourceSetPaths UP-TO-DATE
+> Task :app:compileDevNoSmsDebugNavigationResources UP-TO-DATE
+> Task :app:mergeDevNoSmsDebugResources UP-TO-DATE
+> Task :app:createDevNoSmsDebugCompatibleScreenManifests UP-TO-DATE
+> Task :app:extractDeepLinksDevNoSmsDebug UP-TO-DATE
+> Task :integration_test:extractDeepLinksDebug UP-TO-DATE
+> Task :jni:extractDeepLinksDebug UP-TO-DATE
+> Task :jni_flutter:extractDeepLinksDebug UP-TO-DATE
+> Task :app:processDevNoSmsDebugMainManifest UP-TO-DATE
+> Task :app:outputDevNoSmsDebugAppLinkSettings UP-TO-DATE
+> Task :app:processDevNoSmsDebugManifest UP-TO-DATE
+> Task :app:processDevNoSmsDebugManifestForPackage UP-TO-DATE
+> Task :integration_test:mapDebugSourceSetPaths UP-TO-DATE
+> Task :integration_test:compileDebugLibraryResources UP-TO-DATE
+> Task :jni:mapDebugSourceSetPaths UP-TO-DATE
+> Task :jni:compileDebugLibraryResources UP-TO-DATE
+> Task :jni_flutter:mapDebugSourceSetPaths UP-TO-DATE
+> Task :jni_flutter:compileDebugLibraryResources UP-TO-DATE
+> Task :app:processDevNoSmsDebugResources UP-TO-DATE
+> Task :app:bundleDevNoSmsDebugClassesToCompileJar UP-TO-DATE
+> Task :app:preDevNoSmsDebugAndroidTestBuild SKIPPED
+> Task :app:generateDevNoSmsDebugAndroidTestResValues
+> Task :integration_test:bundleLibRuntimeToJarDebug UP-TO-DATE
+> Task :integration_test:createFullJarDebug
+> Task :integration_test:writeDebugLintModelMetadata
+> Task :jni:bundleLibRuntimeToJarDebug UP-TO-DATE
+> Task :jni:createFullJarDebug
+> Task :jni:writeDebugLintModelMetadata
+> Task :jni_flutter:bundleLibRuntimeToJarDebug UP-TO-DATE
+> Task :jni_flutter:createFullJarDebug
+> Task :jni_flutter:writeDebugLintModelMetadata
+> Task :app:generateDevNoSmsDebugAndroidTestLintModel
+> Task :app:extractProguardFiles
+> Task :integration_test:extractProguardFiles
+> Task :integration_test:generateDebugLintModel
+> Task :jni:extractProguardFiles
+> Task :jni:generateDebugLintModel
+> Task :jni_flutter:extractProguardFiles
+> Task :jni_flutter:generateDebugLintModel
+> Task :app:generateDevNoSmsDebugLintReportModel
+> Task :app:preDevNoSmsDebugUnitTestBuild
+> Task :app:generateDevNoSmsDebugUnitTestLintModel
+> Task :integration_test:preDebugAndroidTestBuild UP-TO-DATE
+> Task :integration_test:generateDebugAndroidTestLintModel
+> Task :integration_test:preDebugUnitTestBuild UP-TO-DATE
+> Task :integration_test:generateDebugUnitTestLintModel
+> Task :jni:preDebugAndroidTestBuild UP-TO-DATE
+> Task :jni:generateDebugAndroidTestLintModel
+> Task :jni:preDebugUnitTestBuild UP-TO-DATE
+> Task :jni:generateDebugUnitTestLintModel
+> Task :integration_test:lintAnalyzeDebugAndroidTest
+> Task :jni_flutter:preDebugAndroidTestBuild UP-TO-DATE
+> Task :jni_flutter:generateDebugAndroidTestLintModel
+> Task :jni_flutter:preDebugUnitTestBuild UP-TO-DATE
+> Task :jni_flutter:generateDebugUnitTestLintModel
+> Task :integration_test:lintAnalyzeDebugUnitTest
+> Task :jni:lintAnalyzeDebugUnitTest
+> Task :jni:lintAnalyzeDebugAndroidTest
+> Task :jni_flutter:lintAnalyzeDebugAndroidTest
+> Task :jni_flutter:lintAnalyzeDebugUnitTest
+> Task :jni:lintAnalyzeDebug
+> Task :integration_test:lintAnalyzeDebug
+> Task :jni_flutter:lintAnalyzeDebug
+> Task :app:lintAnalyzeDevNoSmsDebugAndroidTest
+> Task :app:lintAnalyzeDevNoSmsDebugUnitTest
+> Task :app:lintAnalyzeDevNoSmsDebug
+
+> Task :app:lintReportDevNoSmsDebug
+Wrote HTML report to file:///work/app/build/app/reports/lint-results-devNoSmsDebug.html
+
+> Task :app:lintDevNoSmsDebug
+
+[Incubating] Problems report is available at: file:///work/app/build/reports/problems/problems-report.html
+
+BUILD SUCCESSFUL in 2m 34s
+158 actionable tasks: 87 executed, 71 up-to-date
+Consider enabling configuration cache to speed up this build: https://docs.gradle.org/9.3.1/userguide/configuration_cache_enabling.html
+
+[12:54:19] === RESULT android-lint exit=0 (156s)
+[12:54:19] SUMMARY FAIL sha=3a10cdc60e4ea8638334b9875fe8d324b8998b44 pipeline=quick-app pub-get=0 format=0 analyze=0 lints=0 app-test=1 dart-test-zaghlol_catalog=0 dart-test-zaghlol_domain=0 dart-test-zaghlol_parsing=1 apk-devNoSms=0 apk-perms=0 android-unit=0 android-lint=0
