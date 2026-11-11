@@ -31,6 +31,22 @@
 # the app killed, the app launched during the headless drain: every entry
 # committed once (40 new rows, spool empty). Instrumented: the headless
 # plugin allowlist (fatal) and the #6 Cipher.init probe (recorded).
+# T-040: the receiver is the production `SmsReceiver` (src/sms) with the
+# production Guard; in devSms the Guard decides with the spike base exported
+# from the spike registry (src/devSms/assets, sender 5550100), so the cells
+# above measure the production receive path. After the first launch the UI
+# engine's capture coordinator must have written the Guard user part through
+# writeGuardConfig (T-047 F-2 for the spike build). Phase t040 (after the
+# inbox tests): SmsReceiverEmulatorTest#armed runs in the background with a
+# test intake; this script sends the SmsCaptureScenario messages (personal,
+# OTP, a 7-part Arabic debit, a single-part debit, an ignored card and the
+# same sender's other card); the test asserts AC1 (no file but the test
+# spool), AC2, AC3, the inbox-row equality and one enqueue per kept
+# broadcast. A spoofed broadcast to SmsReceiver is denied. Last, a stagingSms
+# debug build (no bundled registry until T-036) is installed: an SMS leaves
+# no spool entry (the Guard base is missing: every message is dropped), no
+# Guard user file (no coordinator without a registry, T-047) and no
+# WorkManager job (no retry storm, FU-108 security L-2).
 # Called as one line (android-emulator-runner runs `script` line by line).
 set -euo pipefail
 : "${DEVICE:?}" "${API:?}" "${RUNNER_TEMP:?}"
@@ -64,6 +80,13 @@ for _ in $(seq 1 60); do
   sleep 1
 done
 runas ls files/db/zaghlol.db > /dev/null 2>&1 || fail "the UI engine did not create the database"
+# T-047 F-2 / T-040: the coordinator started and wrote the Guard user part through the native writer.
+for _ in $(seq 1 30); do
+  if runas ls no_backup/guard/guard.user.enc > /dev/null 2>&1; then break; fi
+  sleep 1
+done
+runas ls no_backup/guard/guard.user.enc > /dev/null 2>&1 || fail "the capture coordinator did not write the Guard user part (writeGuardConfig)"
+echo "coordinator: Guard user part written through writeGuardConfig"
 sh_ input keyevent KEYCODE_HOME
 sleep 2
 
@@ -176,7 +199,7 @@ echo "burst with UI attach mid-drain: $burst of 40 committed, spool $(spool_coun
 # Negative proofs.
 kill_app
 before=$(rows)
-sh_ am broadcast -a android.provider.Telephony.SMS_RECEIVED -n "$PKG/app.zaghlol.spike.sms.SpikeSmsReceiver" > "$OUT/spoof.txt" 2>&1 || true
+sh_ am broadcast -a android.provider.Telephony.SMS_RECEIVED -n "$PKG/app.zaghlol.platform.capture.SmsReceiver" > "$OUT/spoof.txt" 2>&1 || true
 A emu sms send 5550199 "$CANARY hello from a friend" > /dev/null
 A emu sms send "$SENDER" "$CANARY your OTP is 123456" > /dev/null
 sleep 15
@@ -352,6 +375,86 @@ echo "inbox canary: app log lines $inbox_hits of $inbox_own app lines"
 [ "$inbox_own" -gt 0 ] || fail "the logcat uid filter matched no app line after the inbox tests; canary scan would be vacuous"
 [ "$inbox_hits" = 0 ] || fail "the canary appeared in the app's logcat during the inbox tests"
 rm -f "$OUT/logcat-uid.txt" "$OUT/pkg.txt"
+# ---- T-040: the production SmsReceiver with real telephony ------------------
+# Bodies: SmsCaptureScenario (sharedTest); SmsCaptureScenarioTest checks this
+# script carries them verbatim.
+T040=app.zaghlol.platform.capture.SmsReceiverEmulatorTest
+T040_PERSONAL='ZG_CANARY_7731 hello from a friend'
+T040_OTP='ZG_CANARY_7731 your OTP is 482913'
+T040_LONG='ZGT040LONGSTART تجربة زغلول: اتخصم من حسابك EGP 150.00 بالبطاقة **4321 عند SYNTH SHOP. الرسالة دي طويلة عشان تتقسم على كذا جزء وتتجمع تاني مرة واحدة بس. تجربة زغلول: اتخصم من حسابك EGP 150.00 بالبطاقة **4321 عند SYNTH SHOP. الرسالة دي طويلة عشان تتقسم على كذا جزء وتتجمع تاني مرة واحدة بس. تجربة زغلول: اتخصم من حسابك EGP 150.00 بالبطاقة **4321 عند SYNTH SHOP. الرسالة دي طويلة عشان تتقسم على كذا جزء وتتجمع تاني مرة واحدة بس. ZGT040LONGEND'
+T040_SINGLE='ZG T040 single: you paid EGP 25.00 at SYNTH CAFE card **4321'
+T040_IGNORED='Purchase EGP 10.00 card **9910 at SYNTH MART'
+T040_OTHER='Purchase EGP 11.00 card **4321 at SYNTH MART'
+# The real pipeline must be idle, so the test's file listing sees only its own spool.
+for _ in $(seq 1 60); do [ "$(spool_count)" = 0 ] && break; sleep 1; done
+sleep 5
+A logcat -c || true
+sh_ am instrument -w -r -e class "$T040#armed" -e t040Phase armed "$RUNNER" > "$OUT/it-t040.txt" 2>&1 &
+T040_PID=$!
+for _ in $(seq 1 120); do
+  tr -d '\r' < "$OUT/it-t040.txt" | grep -q 't040.ready=1' && break
+  sleep 1
+done
+tr -d '\r' < "$OUT/it-t040.txt" | grep -q 't040.ready=1' || { wait "$T040_PID" || true; tail -n 30 "$OUT/it-t040.txt"; fail "T-040 armed test did not get ready (it-t040.txt)"; }
+for msg in "5550199|$T040_PERSONAL" "5550123|$T040_OTP" "5550123|$T040_LONG" "5550123|$T040_SINGLE" "5550124|$T040_IGNORED" "5550124|$T040_OTHER"; do
+  A emu sms send "${msg%%|*}" "${msg#*|}" > /dev/null
+  sleep 2
+done
+wait "$T040_PID" || true
+tr -d '\r' < "$OUT/it-t040.txt" | grep -E "^(OK|FAILURES|Tests run)|t040\.(slot|inbox|result)=" | head -n 10 || true
+if ! tr -d '\r' < "$OUT/it-t040.txt" | grep -qE "^OK \(1 test\)"; then
+  tr -d '\r' < "$OUT/it-t040.txt" | awk '/^INSTRUMENTATION_STATUS: stack=/{n=8} n>0{print "  " substr($0,1,300); n--}' | head -n 40 || true
+  fail "T-040 receiver test failed (it-t040.txt)"
+fi
+tr -d '\r' < "$OUT/it-t040.txt" | grep -q 't040.result=ok' || fail "T-040 receiver test was skipped or did not finish"
+T040_SLOT=$(tr -d '\r' < "$OUT/it-t040.txt" | sed -n 's/^INSTRUMENTATION_STATUS: t040\.slot=//p' | head -n 1)
+T040_INBOX=$(tr -d '\r' < "$OUT/it-t040.txt" | sed -n 's/^INSTRUMENTATION_STATUS: t040\.inbox=//p' | head -n 1)
+# A spoofed broadcast to the production receiver is refused (BROADCAST_SMS / protected broadcast).
+sh_ am broadcast -a android.provider.Telephony.SMS_RECEIVED -n "$PKG/app.zaghlol.platform.capture.SmsReceiver" > "$OUT/spoof-t040.txt" 2>&1 || true
+if grep -qiE "SecurityException|Permission Denial|not allowed to send broadcast" "$OUT/spoof-t040.txt"; then
+  echo "T-040 spoofed broadcast: denied"
+else
+  A logcat -d > "$OUT/logcat-all.txt" || true
+  grep -qiE "SecurityException|Permission Denial|not allowed to send broadcast" "$OUT/logcat-all.txt" || echo "warn: no denial line for the T-040 spoofed broadcast"
+  rm -f "$OUT/logcat-all.txt"
+fi
+sh_ pm list packages -U > "$OUT/pkg.txt"
+UID_N=$(grep -E "^package:$PKG uid:" "$OUT/pkg.txt" | grep -oE 'uid:[0-9]+' | cut -d: -f2 || true)
+if [ -z "$UID_N" ]; then
+  sh_ dumpsys package "$PKG" > "$OUT/pkg.txt"
+  UID_N=$(grep -oE '(userId|appId)=[0-9]+' "$OUT/pkg.txt" | cut -d= -f2 | sort -u | tail -n 1 || true)
+fi
+APP_NAME="u0_a$((UID_N - 10000))"
+A logcat -d -v uid > "$OUT/logcat-uid.txt" || true
+t040_own=$(grep -E "(^|[[:space:]])($UID_N|$APP_NAME)[[:space:]]" "$OUT/logcat-uid.txt" | grep -c . || true)
+t040_hits=$(grep -E "ZG_CANARY|ZGT040|SYNTH MART|SYNTH CAFE" "$OUT/logcat-uid.txt" | grep -E "(^|[[:space:]])($UID_N|$APP_NAME)[[:space:]]" | grep -c . || true)
+echo "T-040 canary: app log lines $t040_hits of $t040_own app lines"
+[ "$t040_own" -gt 0 ] || fail "the logcat uid filter matched no app line after the T-040 test; canary scan would be vacuous"
+[ "$t040_hits" = 0 ] || fail "message content appeared in the app's logcat during the T-040 test"
+rm -f "$OUT/logcat-uid.txt" "$OUT/pkg.txt"
+echo "T-040: receiver test OK (slot ${T040_SLOT:-none}, inbox rows ${T040_INBOX:-none})"
+# ---- FU-108 security L-2, T-047 F-2: a non-spike Sms build (T-040) ----------
+SPKG=app.zaghlol.staging
+srun() { sh_ run-as "$SPKG" "$@"; }
+flutter build apk --debug --flavor stagingSms > "$OUT/staging-build.log" 2>&1 || { tail -n 40 "$OUT/staging-build.log"; fail "stagingSms debug build failed"; }
+SAPK=$(find build/app/outputs -iname '*stagingSms*debug.apk' | head -n 1)
+[ -n "$SAPK" ] || fail "no stagingSms debug APK"
+A install -r -g "$SAPK" > /dev/null
+sh_ am start -W -n "$SPKG/app.zaghlol.MainActivity" > /dev/null
+sleep 20
+A emu sms send 5550100 "spike: you paid EGP 3.00 at SYNTH SHOP card *4321" > /dev/null
+A emu sms send 5550124 "$T040_OTHER" > /dev/null
+sleep 15
+st_spool=$(srun ls no_backup/spool 2>/dev/null | grep -c '\.bin$' || true)
+if srun ls no_backup/guard/guard.user.enc > /dev/null 2>&1; then st_guard=1; else st_guard=0; fi
+sh_ dumpsys jobscheduler > "$OUT/staging-jobs.txt" 2>/dev/null || true
+st_jobs=$(grep -cF "$SPKG/androidx.work.impl.background.systemjob.SystemJobService" "$OUT/staging-jobs.txt" || true)
+rm -f "$OUT/staging-jobs.txt"
+echo "stagingSms: spool entries $st_spool, Guard user part $st_guard, WorkManager jobs $st_jobs"
+[ "$st_spool" = 0 ] || fail "stagingSms spooled a message without a Guard base"
+[ "$st_guard" = 0 ] || fail "stagingSms wrote a Guard user part: a coordinator started without a registry"
+[ "$st_jobs" = 0 ] || fail "stagingSms scheduled ingestion work (retry storm risk, FU-108 L-2)"
+A uninstall "$SPKG" > /dev/null 2>&1 || true
 {
   echo
   echo "### Instrumented (T-039), API $API"
@@ -364,4 +467,6 @@ rm -f "$OUT/logcat-uid.txt" "$OUT/pkg.txt"
   echo "- spool init probe (#6): ${INIT_PROBE:-none}"
   echo "- foreground receive -> commit p95 (AC2): ${FG_P95} ms"
   echo "- burst with UI attach mid-drain: $burst of 40"
+  echo "- T-040 receiver: $(tr -d '\r' < "$OUT/it-t040.txt" | grep -E "^(OK|FAILURES)" | tr '\n' ' ') slot ${T040_SLOT:-none}, inbox ${T040_INBOX:-none}"
+  echo "- stagingSms (no registry): spool $st_spool, Guard user part $st_guard, WorkManager jobs $st_jobs"
 } >> "$OUT/report.md"

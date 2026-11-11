@@ -31,6 +31,13 @@ enum class RefusalReason {
 
     /** More than [SpoolPolicy.GENERIC_PER_WINDOW] generic writes in the window (in memory, per process). */
     GENERIC_RATE,
+
+    /**
+     * An `sms` keep while the spool already holds the SMS share of its caps
+     * (T-039 security L-1, T-040 design note section 7): the rest is kept for
+     * notifications, which no catch-up can recover. Counted as `refusedFull`.
+     */
+    SMS_RESERVE,
 }
 
 /**
@@ -54,6 +61,20 @@ object SpoolPolicy {
     const val GENERIC_WINDOW_MS = 60_000L
 
     /**
+     * **Provisional — PO to confirm (T-040 PO Q1):** SMS keeps may fill at
+     * most 80 % of the spool; the last 20 % is the notification reserve
+     * (missed SMS come back through the inbox catch-up, missed notifications
+     * don't). The one constant both SMS caps derive from.
+     */
+    const val SMS_SHARE_PERCENT = 80
+
+    /** 400 of [MAX_ENTRIES]. */
+    const val SMS_MAX_ENTRIES = MAX_ENTRIES * SMS_SHARE_PERCENT / 100
+
+    /** 3,355,443 bytes (3.2 MiB) of [MAX_BYTES]. */
+    const val SMS_MAX_BYTES = MAX_BYTES * SMS_SHARE_PERCENT / 100
+
+    /**
      * Held entries (T-041, FU-105): at most this many; beyond it an entry the
      * use case could not store stays pending (the stuck path).
      */
@@ -69,6 +90,8 @@ data class SpoolLimits(
     val genericPerWindow: Int = SpoolPolicy.GENERIC_PER_WINDOW,
     val genericWindowMs: Long = SpoolPolicy.GENERIC_WINDOW_MS,
     val maxHeld: Int = SpoolPolicy.MAX_HELD,
+    val smsMaxEntries: Int = SpoolPolicy.SMS_MAX_ENTRIES,
+    val smsMaxBytes: Long = SpoolPolicy.SMS_MAX_BYTES,
 )
 
 /**
@@ -125,7 +148,8 @@ object DefaultSpoolFileOps : SpoolFileOps {
  * - At-least-once: an entry is deleted only by [ack] (after the DB commit;
  *   the host scopes acks to what its engine drained) or on proof that it is
  *   not authentic ([read]). I/O and Keystore errors never delete. No age purge.
- * - Admission ([write]): full caps for every keep, a half-spool budget and a
+ * - Admission ([write]): full caps for every keep, the SMS share (80 %,
+ *   the rest reserved for notifications; T-040), a half-spool budget and a
  *   per-minute rate for generic keeps; a refused write is recorded in the
  *   capture status and old entries are never evicted.
  * - No spool-level dedupe: the DB's unique `body_hash` is the only dedupe.
@@ -254,6 +278,8 @@ class SpoolStore(
                 val now = monoClockMs()
                 val reason = when {
                     n >= limits.maxEntries || after > limits.maxBytes -> RefusalReason.FULL
+                    record.channel == CaptureStatusStore.CHANNEL_SMS &&
+                        (n >= limits.smsMaxEntries || after > limits.smsMaxBytes) -> RefusalReason.SMS_RESERVE
                     cls == AdmissionClass.GENERIC &&
                         (n >= limits.genericMaxEntries || after > limits.genericMaxBytes) -> RefusalReason.GENERIC_BUDGET
                     cls == AdmissionClass.GENERIC && recentGenericWrites(now) >= limits.genericPerWindow ->

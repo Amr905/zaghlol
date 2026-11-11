@@ -10,6 +10,9 @@ name: sms-spike
 # T-039: the native instrumented suites (spool, guard T-038, share T-060)
 # and the two-phase kill test also run here, after the spike (CI split in
 # testing-strategy.md: opt in by pushing to ci/<task-id>).
+# T-040: the production SmsReceiver (src/sms) replaces the spike receiver;
+# adds the armed receiver test (AC1-AC3, inbox-row equality, T-047 plan 9)
+# and the stagingSms no-registry check (FU-108 L-2, T-047 F-2).
 # T-041: the worker, drain loop and headless engine are production code
 # (src/main, platform/ingest); the spike keeps only its receiver and latency
 # recorder. Adds AC1 (spool empty, app killed), AC2 (foreground p95 <= 2 s),
@@ -21,6 +24,7 @@ on:
       - 'ci/**'
     paths:
       - 'app/android/app/src/devSms/**'
+      - 'app/android/app/src/sms/**'
       - 'app/android/app/src/main/kotlin/app/zaghlol/platform/spool/**'
       - 'app/android/app/src/main/kotlin/app/zaghlol/platform/guard/**'
       - 'app/android/app/src/main/kotlin/app/zaghlol/platform/capture/**'
@@ -107,5 +111,6 @@ jobs:
             ${{ runner.temp }}/sms-spike/build.log
             ${{ runner.temp }}/sms-spike/it-*.txt
             ${{ runner.temp }}/sms-spike/it-build.log
+            ${{ runner.temp }}/sms-spike/staging-build.log
           if-no-files-found: warn
           retention-days: 30

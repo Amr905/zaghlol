@@ -122,7 +122,7 @@ class GuardGoldenInstrumentedTest {
         rt.writeUser(fixture("configs/t1_user.json"))
         assertEquals(GuardConfigMode.FULL, rt.current().mode)
         val d = GuardRuntime({ fixture("configs/t1_base.json") }, store, { 0L })
-            .decide("sms", "NBE", "Purchase EGP 10.00 card **4567")
+            .decide(AndroidGuardChannel.SMS, "NBE", "Purchase EGP 10.00 card **4567")
         assertEquals("ignored_card", (d as GuardDecision.Drop).reason.wire)
     }
 }

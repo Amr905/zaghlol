@@ -1,4 +1,4 @@
-package app.zaghlol.spike.sms
+package app.zaghlol.platform.capture
 
 import org.junit.Assert.assertEquals
 import org.junit.Test
@@ -8,6 +8,7 @@ import java.util.concurrent.RejectedExecutionException
 import java.util.concurrent.TimeUnit
 import java.util.concurrent.atomic.AtomicInteger
 
+/** Ported from the T-008 spike (T-040 design note section 11): finish() exactly once. */
 class BoundedDispatchTest {
     private val timer = Executors.newSingleThreadScheduledExecutor()
 
@@ -32,7 +33,13 @@ class BoundedDispatchTest {
 
     @Test
     fun finishesOnceWhenWorkThrows() {
-        assertEquals(1, awaitFinish(BoundedDispatch(Executors.newSingleThreadExecutor(), timer, 1_000)) { error("boom") })
+        // A 60 s budget: within the 2 s wait only the work path can finish.
+        assertEquals(1, start(BoundedDispatch(Executors.newSingleThreadExecutor(), timer, 60_000), waitMs = 2_000) { error("boom") }.get())
+    }
+
+    @Test
+    fun finishesOnSuccessWithoutWaitingForTheBudget() {
+        assertEquals(1, start(BoundedDispatch(Executors.newSingleThreadExecutor(), timer, 60_000), waitMs = 2_000) { }.get())
     }
 
     @Test
@@ -60,5 +67,34 @@ class BoundedDispatchTest {
             ex.execute { }
         } catch (_: RejectedExecutionException) {
         }
+    }
+
+    @Test
+    fun finishesOnceWhenTheTimerRejects() {
+        val deadTimer = Executors.newSingleThreadScheduledExecutor().apply { shutdown() }
+        assertEquals(1, awaitFinish(BoundedDispatch(Executors.newSingleThreadExecutor(), deadTimer, 1_000)) { })
+    }
+
+    @Test
+    fun aThrowingFinishIsSwallowedAndNotRepeated() {
+        val calls = AtomicInteger()
+        val done = CountDownLatch(1)
+        BoundedDispatch(Executors.newSingleThreadExecutor(), timer, 50).run({ Thread.sleep(200); done.countDown() }) {
+            calls.incrementAndGet()
+            error("already finished")
+        }
+        done.await(2, TimeUnit.SECONDS)
+        Thread.sleep(100)
+        assertEquals(1, calls.get())
+    }
+
+    @Test
+    fun theDaemonDispatchUsesNamedDaemonThreads() {
+        val name = java.util.concurrent.atomic.AtomicReference<String>()
+        val daemon = java.util.concurrent.atomic.AtomicBoolean()
+        assertEquals(1, awaitFinish(BoundedDispatch.daemon("sms")) { name.set(Thread.currentThread().name); daemon.set(Thread.currentThread().isDaemon) })
+        assertEquals("zaghlol-sms-intake", name.get())
+        assertEquals(true, daemon.get())
+        assertEquals(5_000L, BoundedDispatch.BUDGET_MS)
     }
 }

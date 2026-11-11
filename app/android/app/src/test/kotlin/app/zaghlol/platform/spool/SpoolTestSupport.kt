@@ -120,7 +120,8 @@ fun statusIn(
     files: SpoolFileOps = DefaultSpoolFileOps,
     wall: () -> Long = { 1_700_000_000_000L },
     seq: () -> Long = { 777L },
-) = CaptureStatusStore(File(dir, "capture/status.bin"), cipher, sleep.fn, wall, files, seq)
+    mono: () -> Long = { System.nanoTime() / 1_000_000 },
+) = CaptureStatusStore(File(dir, "capture/status.bin"), cipher, sleep.fn, wall, files, seq, mono)
 
 /** Writes a priority entry and returns its id. */
 fun SpoolStore.put(body: String = "m", cls: AdmissionClass = AdmissionClass.PRIORITY, channel: String = "sms"): String =

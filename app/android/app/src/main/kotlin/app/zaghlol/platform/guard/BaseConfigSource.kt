@@ -2,6 +2,7 @@ package app.zaghlol.platform.guard
 
 import android.content.res.AssetManager
 import java.io.ByteArrayOutputStream
+import java.io.FileNotFoundException
 import java.io.InputStream
 
 /**
@@ -20,6 +21,32 @@ object BaseConfigSource {
      * and retries on the next load.
      */
     fun read(assets: AssetManager): ByteArray = assets.open(ASSET_PATH).use { readBounded(it, GuardConfig.MAX_BASE_BYTES) }
+
+    /**
+     * devSms only (T-040): the Guard base exported from the synthetic spike
+     * registry (`lib/ingestion/spike_registry.dart`, sender 5550100), an
+     * Android asset of the `src/devSms` source set. No other APK contains it
+     * (the placement check asserts it), so the `sms-spike` latency run keeps
+     * measuring the production receiver and Guard until T-036 bundles the
+     * real base, which then takes precedence.
+     */
+    const val DEV_SPIKE_ASSET_PATH = "guard/spike_guard_base.json"
+
+    /**
+     * The base this build decides with: the bundled registry base
+     * ([ASSET_PATH]); when it is absent, the devSms spike base. Throws the
+     * first error when neither exists (mode `invalid`: every message is
+     * dropped, fail closed).
+     */
+    fun readForBuild(assets: AssetManager): ByteArray = try {
+        read(assets)
+    } catch (missing: FileNotFoundException) {
+        try {
+            assets.open(DEV_SPIKE_ASSET_PATH).use { readBounded(it, GuardConfig.MAX_BASE_BYTES) }
+        } catch (_: FileNotFoundException) {
+            throw missing
+        }
+    }
 
     /** Reads up to [max] + 1 bytes: enough to tell "too large" without reading an unbounded stream. */
     fun readBounded(input: InputStream, max: Int): ByteArray {

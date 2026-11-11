@@ -7,8 +7,10 @@ import android.os.Build
 import android.os.Handler
 import android.os.Looper
 import android.os.SystemClock
+import android.provider.Settings
 import app.zaghlol.platform.capture.inbox.InboxReader
 import app.zaghlol.platform.capture.inbox.InboxReaders
+import app.zaghlol.platform.guard.AndroidGuardChannel
 import app.zaghlol.platform.guard.GuardRuntime
 import app.zaghlol.platform.ingest.DrainEnvironment
 import app.zaghlol.platform.ingest.DrainLoop
@@ -67,6 +69,8 @@ class CaptureSeams(
     val pause: suspend (Long) -> Unit = { delay(it) },
     /** T-042: the UI engine's inbox reader (`InboxReaders.forUiEngine`); never given to the headless host (FU-088). */
     val uiInbox: () -> InboxReader? = { null },
+    /** T-040: `Settings.Global.BOOT_COUNT` for the receive stamp (-1 unknown). */
+    val bootCount: () -> Int = { -1 },
 )
 
 /**
@@ -78,14 +82,15 @@ class CaptureSeams(
  *
  * For T-040 / T-043: after a spool write (or a refused write) call
  * [afterSpoolWrite]; it enqueues the live work and notifies an attached UI
- * engine. The Guard is [guard].
+ * engine. The Guard is [guard]. T-040: the SMS receiver's intake is [sms];
+ * the UI host gets the Guard writer/state adapters ([GuardAdapters]).
  *
  * "UI attached" means MainActivity's engine exists (visible or not). While
  * it is attached the worker never starts a headless engine: it notifies it
  * ([notifyUiIfAttached]) and polls until the spool is empty.
  */
 class CaptureRuntime internal constructor(seams: CaptureSeams) {
-    val status = CaptureStatusStore(File(seams.noBackupDir, "capture/status.bin"), seams.cipher)
+    val status = CaptureStatusStore(File(seams.noBackupDir, "capture/status.bin"), seams.cipher, monoClockMs = seams.monoClockMs)
     val store = SpoolStore(
         dir = File(seams.noBackupDir, "spool"),
         cipher = seams.cipher,
@@ -103,6 +108,26 @@ class CaptureRuntime internal constructor(seams: CaptureSeams) {
 
     /** The Capture Guard (T-038), loaded on first use. */
     val guard: GuardRuntime by lazy { guardFactory() }
+
+    /**
+     * T-040: the SMS receiver's intake. Guard (typed `sms` channel, the one
+     * per-process rate limiter) → spool → [afterSpoolWrite] once per
+     * broadcast. Built on first use, on the SMS intake thread.
+     */
+    val sms: SmsIntake by lazy {
+        SmsIntake(
+            intake = CaptureIntake(
+                channel = AndroidGuardChannel.SMS,
+                decide = { channel, source, body -> guard.decide(channel, source, body) },
+                store = store,
+                status = status,
+                afterWrite = ::afterSpoolWrite,
+                trace = { trace },
+            ),
+            bootCount = seams.bootCount,
+            trace = { trace },
+        )
+    }
 
     /** devSms: the spike's latency recorder (`SpikeInitializer`); [IngestTrace.NONE] otherwise. */
     @Volatile var trace: IngestTrace = IngestTrace.NONE
@@ -190,7 +215,6 @@ class CaptureRuntime internal constructor(seams: CaptureSeams) {
     internal fun attachUi(key: Any, messenger: BinaryMessenger) {
         headless.shutdown()
         uiHost?.detach()
-        // T-040 wires the Guard writer/state here.
         val host = newHost(headless = false)
         uiHost = host
         uiKey = key
@@ -210,17 +234,20 @@ class CaptureRuntime internal constructor(seams: CaptureSeams) {
     }
 
     /**
-     * A capture host for one engine. Headless: no inbox reader and no Guard
-     * writer (FU-088), so those answer `NOT_AVAILABLE`. UI: T-042's reader.
+     * A capture host for one engine. Headless: no inbox reader, no Guard
+     * writer and no Guard state (FU-088; the headless engine never writes the
+     * config or reads the status, T-047), so those answer `NOT_AVAILABLE` /
+     * `unknown`. UI: T-042's reader and T-040's Guard adapters (the Guard is
+     * touched only when Dart calls, on the Pigeon background queue).
      */
-    private fun newHost(headless: Boolean): AndroidCaptureHost = AndroidCaptureHost(
+    internal fun newHost(headless: Boolean): AndroidCaptureHost = AndroidCaptureHost(
         engineId = engineIds.getAndIncrement(),
         store = store,
         claim = claim,
         status = status,
         scheduler = scheduler,
-        guardWriter = null,
-        guardState = null,
+        guardWriter = if (headless) null else { json -> GuardAdapters.writerFor(guard)(json) },
+        guardState = if (headless) null else { -> GuardAdapters.stateOf(guard.state()) },
         device = device,
         trace = { trace },
         monoClockMs = monoClockMs,
@@ -274,10 +301,17 @@ class CaptureRuntime internal constructor(seams: CaptureSeams) {
                 device = AndroidCaptureDevice(app),
                 guard = { GuardRuntime.get(app) },
                 uiInbox = { InboxReaders.forUiEngine(app) },
+                bootCount = { bootCount(app) },
                 headlessStarter = { newHost ->
                     FlutterHeadlessStarter(app, handler, newHost) { ref.get()?.trace ?: IngestTrace.NONE }
                 },
             )
+        }
+
+        private fun bootCount(app: Context): Int = try {
+            Settings.Global.getInt(app.contentResolver, Settings.Global.BOOT_COUNT, -1)
+        } catch (_: Exception) {
+            -1
         }
 
         private fun appVersion(app: Context): Long {
