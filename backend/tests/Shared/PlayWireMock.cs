@@ -41,6 +41,9 @@ public sealed class PlayWireMock : IDisposable
             ["Purchases:Google:Resilience:RetryBaseDelayMs"] = retryBaseDelayMs.ToString(System.Globalization.CultureInfo.InvariantCulture),
             ["Purchases:Google:Resilience:AttemptTimeoutMs"] = attemptTimeoutMs.ToString(System.Globalization.CultureInfo.InvariantCulture),
             ["Purchases:Google:Resilience:TotalTimeoutMs"] = totalTimeoutMs.ToString(System.Globalization.CultureInfo.InvariantCulture),
+            // One host serves many tests, some of which make Play fail on purpose: keep the circuit closed here. The breaker
+            // itself is tested with its own host (PlayDeveloperApiClientTests.RepeatedFailuresOpenTheCircuit...).
+            ["Purchases:Google:Resilience:MinimumThroughput"] = "100000",
             ["Purchases:Google:Budget:TokenLimit"] = "100000",
             ["Purchases:Google:Budget:TokensPerPeriod"] = "100000",
         };

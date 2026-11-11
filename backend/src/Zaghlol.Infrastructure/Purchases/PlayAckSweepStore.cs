@@ -181,8 +181,15 @@ internal sealed class PlayAckSweepStore(IZaghlolDbContextFactory contexts) : IPl
     /// <summary>The session advisory lock on its own connection; released (and the connection returned) on dispose.</summary>
     private sealed class SessionLock(ZaghlolDbContext db, NpgsqlConnection connection) : IAsyncDisposable
     {
+        private int disposed;
+
         public async ValueTask DisposeAsync()
         {
+            if (Interlocked.Exchange(ref disposed, 1) == 1)
+            {
+                return;
+            }
+
             try
             {
                 await using var unlock = new NpgsqlCommand("SELECT pg_advisory_unlock(@key)", connection);

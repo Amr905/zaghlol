@@ -211,8 +211,9 @@ public class CheckConstraintTests(SchemaFixture fixture)
             .ToHashSet(StringComparer.Ordinal);
         var tested = Cases.Values.Select(c => c.Constraint).ToHashSet(StringComparer.Ordinal);
 
-        // 23 documented + 24 hardening (octet/char lengths, cause regex, audit, codes, formats) + 1 catalog_drafts (T-125) + 2 price_quotes (T-127).
-        Assert.Equal(50, inSchema.Count);
+        // 23 documented + 24 hardening (octet/char lengths, cause regex, audit, codes, formats) + 1 catalog_drafts (T-125) + 2 price_quotes (T-127)
+        // + 2 idempotency_records claim checks (T-130).
+        Assert.Equal(52, inSchema.Count);
         Assert.Empty(inSchema.Except(tested));
         Assert.Empty(tested.Except(inSchema));
     }

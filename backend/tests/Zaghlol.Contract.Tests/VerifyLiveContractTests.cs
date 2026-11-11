@@ -154,7 +154,7 @@ public class VerifyLiveContractTests(VerifyContractFixture fixture) : IClassFixt
         // Lead decision 2 (2026-11-11): 512 everywhere.
         foreach (var schema in new[] { "PurchaseVerifyAndroidRequest", "AndroidPurchaseRef" })
         {
-            Assert.Equal(PlayStateMapping.MaxTokenLength, Spec.Schemas[schema]!["properties"]!["purchaseToken"]!["maxLength"]!.GetValue<int>());
+            Assert.Equal(PlayStateMapping.MaxTokenLength, Spec.Schemas[schema]!["properties"]!["purchaseToken"]!["maxLength"]!.GetValue<long>());
         }
     }
 
