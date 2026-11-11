@@ -730,8 +730,9 @@ final class IngestRawMessages {
   }
 
   /// Cross-channel attach (§5) and the symmetric late-pending attach: only
-  /// NULL fields of [target] are filled; a user-verified target is never
-  /// modified. The new message's balance is recorded either way.
+  /// NULL fields of [target] are filled; a user-verified or soft-deleted
+  /// target is never modified (a deleted payment stays exactly as the user
+  /// left it). The new message's balance is recorded either way.
   Future<void> _attach(
     _Changes local,
     _LabelLanguage labels,
@@ -741,7 +742,7 @@ final class IngestRawMessages {
   ) async {
     final f = r.fields;
     var accountId = target.accountId;
-    if (!target.isUserVerified) {
+    if (!target.isUserVerified && !target.isDeleted) {
       String? moveTo;
       if (target.accountLast4 == null && f.last4 != null) {
         final card = await _resolve(

@@ -187,10 +187,12 @@ void main() {
       final a = await w.run([sms('s', purchase)]);
       final id = (a.outcomes['s']! as IngestInserted).txnId;
       await TransactionsDao(w.db).softDelete(id, at: t0 + 2000);
+      final before = (await w.txns()).single;
       final b = await w.run([notif('n', purchaseNotif, rx: t0 + 3000)]);
       expect(b.outcomes['n'], isA<IngestMergedCrossChannel>());
       expect(await txnCount(), 1);
       expect((await w.txns()).single['deleted_at'], isNotNull);
+      expect((await w.txns()).single, before, reason: 'attach only');
     });
 
     test('a user-verified target is never modified', () async {
