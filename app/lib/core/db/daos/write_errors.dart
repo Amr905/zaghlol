@@ -33,14 +33,31 @@ Future<T> guardWrite<T>(Future<T> Function() write) async {
   }
 }
 
+/// Runs [read] and turns any database error into a code-only
+/// [DbReadException] (T-017 F-1). Other errors pass through unchanged.
+Future<T> guardRead<T>(Future<T> Function() read) async {
+  try {
+    return await read();
+  } on Object catch (e) {
+    final sqlite = _sqliteOf(e);
+    if (sqlite == null) rethrow;
+    throw DbReadException(sqliteCode: sqlite.extendedResultCode);
+  }
+}
+
 /// The [DbWriteException] for [error] (also inside drift's foreground and
 /// background wrappers), or null when it is not a database error.
 DbWriteException? writeExceptionOf(Object error) {
+  final sqlite = _sqliteOf(error);
+  return sqlite == null ? null : _fromSqlite(sqlite);
+}
+
+SqliteException? _sqliteOf(Object error) {
   Object? current = error;
   for (var depth = 0; depth < 5 && current != null; depth++) {
     switch (current) {
       case final SqliteException e:
-        return _fromSqlite(e);
+        return e;
       case final DriftRemoteException e:
         current = e.remoteCause;
       case final DriftWrappedException e:

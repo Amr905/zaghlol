@@ -53,32 +53,37 @@ class TransactionsDao {
   /// merchant and counterparty in `transactions_fts_short` (digits-only
   /// short queries find nothing there: amounts are not in that table).
   /// The text is trimmed and cut to [maxSearchQueryRunes]; FTS5 syntax in it
-  /// (`"`, `*`, `NEAR`, `AND`, column filters) is matched literally.
+  /// (`"`, `*`, `NEAR`, `AND`, column filters) is matched literally. C0/C1
+  /// control characters (incl. NUL) and lone surrogates become spaces
+  /// first. A database failure is a code-only [DbReadException] that never
+  /// carries the query.
   Future<List<TransactionRow>> search(String query, {int limit = 100}) async {
-    final text = _clip(query.trim());
+    final text = _clip(_sanitize(query).trim());
     if (text.isEmpty || limit <= 0) return const [];
     final short = text.runes.length < trigramMinRunes;
     final phrase = '"${text.replaceAll('"', '""')}"';
     final fts = short ? 'transactions_fts_short' : 'transactions_fts';
-    final rows = await _db
-        .customSelect(
-          'SELECT t.* FROM $fts f '
-          'JOIN transactions_fts_src s ON s.id = f.rowid '
-          'JOIN transactions t ON t.id = s.txn_id '
-          'WHERE $fts MATCH ?1 AND t.deleted_at IS NULL '
-          'ORDER BY t.occurred_at DESC, t.id '
-          'LIMIT ?2',
-          variables: [
-            Variable.withString(short ? '$phrase*' : phrase),
-            Variable.withInt(limit > maxSearchLimit ? maxSearchLimit : limit),
-          ],
-          readsFrom: {
-            _db.transactions,
-            _db.transactionsFtsSrc,
-            if (short) _db.transactionsFtsShort else _db.transactionsFts,
-          },
-        )
-        .get();
+    final rows = await guardRead(
+      () => _db
+          .customSelect(
+            'SELECT t.* FROM $fts f '
+            'JOIN transactions_fts_src s ON s.id = f.rowid '
+            'JOIN transactions t ON t.id = s.txn_id '
+            'WHERE $fts MATCH ?1 AND t.deleted_at IS NULL '
+            'ORDER BY t.occurred_at DESC, t.id '
+            'LIMIT ?2',
+            variables: [
+              Variable.withString(short ? '$phrase*' : phrase),
+              Variable.withInt(limit > maxSearchLimit ? maxSearchLimit : limit),
+            ],
+            readsFrom: {
+              _db.transactions,
+              _db.transactionsFtsSrc,
+              if (short) _db.transactionsFtsShort else _db.transactionsFts,
+            },
+          )
+          .get(),
+    );
     return [for (final r in rows) _db.transactions.map(r.data)];
   }
 
@@ -95,6 +100,15 @@ class TransactionsDao {
       );
     }),
   );
+
+  /// C0 (incl. NUL), DEL, C1 and lone surrogates: FTS5 fails on NUL
+  /// ("unterminated string"), and none of them can match indexed text.
+  static final RegExp _unsafe = RegExp(
+    r'[\u0000-\u001F\u007F-\u009F]|[\uD800-\uDBFF](?![\uDC00-\uDFFF])|'
+    r'(?<![\uD800-\uDBFF])[\uDC00-\uDFFF]',
+  );
+
+  static String _sanitize(String text) => text.replaceAll(_unsafe, ' ');
 
   static String _clip(String text) {
     final runes = text.runes;

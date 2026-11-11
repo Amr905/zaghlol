@@ -102,3 +102,15 @@ final class DbWriteException extends SafeException {
   /// SQLite extended result code, when known.
   final int? sqliteCode;
 }
+
+/// A read the database failed (T-017 F-1). Code `DB_READ_FAILED` and the
+/// SQLite extended result code only: never the statement or its parameters
+/// (for search, the user's query).
+final class DbReadException extends SafeException {
+  DbReadException({this.sqliteCode}) : super(readFailed);
+
+  static const String readFailed = 'DB_READ_FAILED';
+
+  /// SQLite extended result code, when known.
+  final int? sqliteCode;
+}

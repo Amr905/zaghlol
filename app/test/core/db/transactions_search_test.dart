@@ -8,6 +8,7 @@ import 'package:drift/drift.dart' show Value, Variable;
 import 'package:flutter_test/flutter_test.dart';
 import 'package:zaghlol/core/db/app_database.dart';
 import 'package:zaghlol/core/db/daos/accounts_dao.dart';
+import 'package:zaghlol/core/db/db_errors.dart';
 import 'package:zaghlol/core/db/daos/transactions_dao.dart';
 import 'package:zaghlol_domain/zaghlol_domain.dart';
 
@@ -267,6 +268,12 @@ void main() {
       '^caf',
       '(',
       '*',
+      '\u0000',
+      'a\u0000b',
+      '"\u0000',
+      'x\u0001\u001F\u007F\u0085y',
+      '\uD800zz',
+      'zz\uDC00',
     ]) {
       expect(await dao.search(q), isEmpty, reason: 'query #${q.length}');
     }
@@ -274,6 +281,38 @@ void main() {
     await dao.insert(txn('quoted', merchant: 'The "Best" Shop'));
     expect(await ids('"Best"'), ['quoted']);
   });
+
+  test('control characters (incl. NUL) act as spaces (F-1)', () async {
+    expect(await ids('\u0000كارف\u0000'), ['carrefour']);
+    expect(await ids('\u0000Ca'), ['cafe']);
+    expect(await ids('Café\u0000Zam'), ['cafe']); // NUL became a space
+    expect(await ids('Caf\u0000é'), isEmpty); // not glued into 'Café'
+    expect(await ids('Café\tZam'), ['cafe']);
+    expect(await dao.search('\u0000\u0000'), isEmpty);
+  });
+
+  for (final background in [true, false]) {
+    test('a failed search is a code-only DbReadException that never holds '
+        'the query (F-1, background: $background)', () async {
+      final other = await EncryptedDb.open(background: background);
+      addTearDown(other.close);
+      final otherDao = TransactionsDao(other.db);
+      await other.db.customStatement('DROP TABLE transactions_fts');
+      await other.db.customStatement('DROP TABLE transactions_fts_short');
+      for (final q in ['SENTINEL-query-7f3a', 'ZQ']) {
+        Object? caught;
+        try {
+          await otherDao.search(q);
+        } on Object catch (e) {
+          caught = e;
+        }
+        expect(caught, isA<DbReadException>());
+        expect(caught.toString(), DbReadException.readFailed);
+        expect(caught.toString(), isNot(contains(q)));
+        expect(caught.toString(), isNot(contains('transactions')));
+      }
+    });
+  }
 
   test('empty, blank and over-long queries', () async {
     expect(await dao.search(''), isEmpty);
