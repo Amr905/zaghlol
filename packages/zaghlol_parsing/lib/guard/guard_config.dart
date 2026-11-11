@@ -1,5 +1,7 @@
 import 'dart:convert';
 
+import 'package:zaghlol_domain/zaghlol_domain.dart' show SafeException;
+
 import '../normalize/text_normalizer.dart';
 import '../registry/guard_export.dart'
     show guardConfigVersion, maxGuardConfigBytes;
@@ -207,8 +209,10 @@ GuardConfigLoad parseGuardConfig(List<int> baseBytes, [List<int>? userBytes]) {
   };
 }
 
-final class _ConfigFailure implements Exception {
-  const _ConfigFailure(this.error);
+/// Internal control flow only: caught in this file and turned into a
+/// [GuardConfigError]. Carries an error code and a JSON path, never content.
+final class _ConfigFailure extends SafeException {
+  _ConfigFailure(this.error) : super('GUARD_CONFIG_INVALID');
   final GuardConfigError error;
 }
 
