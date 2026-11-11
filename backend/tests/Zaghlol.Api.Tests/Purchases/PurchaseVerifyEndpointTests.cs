@@ -72,7 +72,8 @@ public class PurchaseVerifyEndpointTests(PurchasesHostFixture fixture) : IClassF
         await ProblemAssert.AssertAsync(noBinding, HttpStatusCode.UnprocessableEntity, "PURCHASE_NOT_OWNED");
         Assert.Null(await fixture.RowAsync(bound));
         Assert.Null(await fixture.RowAsync(unbound));
-        Assert.Equal(0, Play.CountContaining("POST", ":acknowledge"));
+        Assert.Equal(0, Play.CountContaining("POST", bound));
+        Assert.Equal(0, Play.CountContaining("POST", unbound));
     }
 
     [Fact]
