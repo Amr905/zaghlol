@@ -405,10 +405,10 @@ void main() {
       }
       best = sw.elapsedMilliseconds < best ? sw.elapsedMilliseconds : best;
     }
-    // The first (cold, JIT) load is the one that matters on a device; it is
-    // checked against the same budget with headroom for a slow CI runner.
+    // The cold (JIT) first load is what a device sees, so it is held to the
+    // acceptance budget itself (150 ms); best-of-3 is the stable check.
+    expect(first, lessThan(150), reason: 'cold first load $first ms');
     expect(best, lessThan(150));
-    expect(first, lessThan(450));
   });
 }
 

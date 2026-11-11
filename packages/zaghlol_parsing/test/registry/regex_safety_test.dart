@@ -34,6 +34,28 @@ void main() {
       ),
       ('six unbounded wildcards ok', r'.*a.*b.*c.*d.*e.*f', []),
       ('too long', 'a' * 601, ['too_long']),
+      (
+        'bounded repeat of inner unbounded, 50',
+        r'(a+){1,50}b',
+        ['nested_bounded_quantifier'],
+      ),
+      (
+        'bounded repeat of inner unbounded, 4',
+        r'(?:\d+,){4}',
+        ['nested_bounded_quantifier'],
+      ),
+      ('exact repeat 3 of inner unbounded is accepted', r'(?:\d+,){3}', []),
+      ('bounded repeat of a bounded group', r'(?:\d{1,3},){1,50}', []),
+      (
+        'prefix alternatives in a repeating group',
+        r'(?:a|aa)+b',
+        ['ambiguous_alternation'],
+      ),
+      ('prefix alternatives (a|ab)*', r'(a|ab)*c', ['ambiguous_alternation']),
+      ('x and x? alternatives', r'(?:a|a?)+b', ['ambiguous_alternation']),
+      ('x and x? once is accepted', r'(?:a|a?)b', []),
+      ('prefix alternatives once is accepted', r'(?:ج|جم) ', []),
+      ('escaped question mark is not optional', r'(?:b|a\?)+c', []),
     ];
     for (final (name, pattern, expected) in rows) {
       test(name, () => expect(backtrackingProblems(pattern), expected));

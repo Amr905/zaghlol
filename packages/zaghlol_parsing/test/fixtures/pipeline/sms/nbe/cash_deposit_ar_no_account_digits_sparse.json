@@ -1,0 +1,17 @@
+{
+  "sender": "NBE",
+  "body": "تم إيداع نقدي 500.00 جم في حسابكم",
+  "receivedAt": "2026-10-23T11:14:00+03:00",
+  "expect": {
+    "template": "nbe.cash_deposit.ar",
+    "amount": "500.00",
+    "last4": null,
+    "confidence": "855",
+    "needsReview": "false",
+    "occurredAt": "2026-10-23T11:14:00",
+    "language": "ar",
+    "reasons": [
+      "sparseFields"
+    ]
+  }
+}

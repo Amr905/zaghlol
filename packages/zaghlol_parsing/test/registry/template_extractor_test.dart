@@ -174,4 +174,79 @@ void main() {
   test('matchTemplate returns null for a non-matching body', () {
     expect(matchTemplate(tpl(nbe, 'nbe.salary.ar'), 'hello'), isNull);
   });
+
+  group('matchTemplateOriginal (display text from the original)', () {
+    final pipeReg = () {
+      final f = RegistryFiles.load(pipelineRoot);
+      return RegistryLoader.load(
+        manifest: f.manifest,
+        shared: f.shared,
+        institutions: f.institutions,
+      ).registry!;
+    }();
+    final cibAr = pipeReg
+        .byCode('cib')!
+        .templates
+        .firstWhere((t) => t.id == 'cib.instapay_out.ar');
+
+    Map<String, String> orig(String body) =>
+        matchTemplateOriginal(cibAr, foldKeyIndexed(body), body)!;
+
+    test('Arabic counterparty keeps its letters, folded capture does not', () {
+      const body =
+          'تم تحويل 500.00 جم إلى أحمد محمود عبر إنستاباي. رقم مرجعي 123456789';
+      expect(orig(body)['counterparty'], 'أحمد محمود');
+      // The folded capture (the T-032 behaviour) shows the folded letters.
+      expect(
+        matchTemplate(cibAr, foldBody(body))!['counterparty'],
+        'احمد محمود',
+      );
+    });
+
+    test('tatweel and harakat are dropped, digits normalized', () {
+      const body =
+          'تم تحويل ٥٠٠٫٠٠ جم إلى مُـحَمَّد عبر إنستاباي. رقم مرجعي ١٢٣٤٥٦٧٨';
+      final g = orig(body);
+      expect(g['counterparty'], 'محمد');
+      expect(g['ref'], '12345678');
+      expect(g['amount'], '500.00');
+    });
+
+    test('non-display groups stay as folded text', () {
+      const body =
+          'تم تحويل 500.00 جم إلى إيمان عبر إنستاباي. رقم مرجعي 123456789. الرصيد 2400.50';
+      final g = orig(body);
+      expect(g['amount'], '500.00');
+      expect(g['balance'], '2400.50');
+    });
+
+    test('Latin ids keep their case', () {
+      final cibEn = pipeReg
+          .byCode('cib')!
+          .templates
+          .firstWhere((t) => t.id == 'cib.instapay_out.en');
+      const body =
+          'CIB: You sent EGP 5.00 to Omar.K@instapay via InstaPay. Ref aBc123XyZ';
+      final g = matchTemplateOriginal(cibEn, foldKeyIndexed(body), body)!;
+      expect(g['ipa'], 'Omar.K@instapay');
+      expect(g['ref'], 'aBc123XyZ');
+    });
+
+    test(
+      'the same text twice in the match falls back to the folded capture',
+      () {
+        // The capture `الي` (folded) also appears in the template literal
+        // before it, so its position is ambiguous: folded text, never a wrong
+        // span.
+        const body =
+            'تم تحويل 5.00 جم إلى إلى عبر إنستاباي. رقم مرجعي 123456789';
+        expect(orig(body)['counterparty'], 'الي');
+      },
+    );
+
+    test('returns null when the pattern does not match', () {
+      const body = 'hello';
+      expect(matchTemplateOriginal(cibAr, foldKeyIndexed(body), body), isNull);
+    });
+  });
 }

@@ -142,4 +142,81 @@ void main() {
       }
     });
   });
+
+  group('foldKeyIndexed', () {
+    test('text equals foldKey on rows and random input', () {
+      const rows = [
+        '',
+        '   ',
+        'أحمد  محمـد',
+        '\u200f١٢٣\u200e abc  DEF',
+        'a\u00A0\u00A0b\tc',
+        '\u200b \u200b x',
+        'ة ى أ إ آ ٱ',
+        '😀 x 😀',
+      ];
+      for (final r in rows) {
+        expect(foldKeyIndexed(r).text, foldKey(r));
+      }
+      final rnd = Random(7);
+      const pool = [
+        'a',
+        'B',
+        ' ',
+        '\u00A0',
+        '\u0640',
+        '\u064B',
+        '\u200f',
+        '٣',
+        'ة',
+        'أ',
+        'ى',
+        '\u2060',
+        '\n',
+        '😀',
+        'ي',
+        '.',
+      ];
+      for (var i = 0; i < 3000; i++) {
+        final b = StringBuffer();
+        for (var k = rnd.nextInt(24); k >= 0; k--) {
+          b.write(pool[rnd.nextInt(pool.length)]);
+        }
+        final input = b.toString();
+        final f = foldKeyIndexed(input);
+        expect(f.text, foldKey(input));
+        expect(f.origin.length, f.text.length);
+        for (var j = 1; j < f.origin.length; j++) {
+          expect(f.origin[j], greaterThan(f.origin[j - 1]));
+        }
+        for (final o in f.origin) {
+          expect(o, inInclusiveRange(0, input.length - 1));
+        }
+      }
+    });
+
+    test('a folded span maps back to the original text', () {
+      const original = 'خصم  لـدى إيمان  و أحمد';
+      final f = foldKeyIndexed(original);
+      final start = f.text.indexOf('ايمان');
+      expect(start, isNonNegative);
+      expect(f.originalSpan(original, start, start + 5), 'إيمان');
+      final two = f.text.indexOf('ايمان و احمد');
+      expect(f.originalSpan(original, two, two + 12), 'إيمان  و أحمد');
+    });
+
+    test('tatweel inside a span stays in the original span', () {
+      const original = 'to مـحمد now';
+      final f = foldKeyIndexed(original);
+      final start = f.text.indexOf('محمد');
+      expect(f.originalSpan(original, start, start + 4), 'مـحمد');
+    });
+
+    test('empty and out-of-range spans are null', () {
+      final f = foldKeyIndexed('abc');
+      expect(f.originalSpan('abc', 1, 1), isNull);
+      expect(f.originalSpan('abc', -1, 2), isNull);
+      expect(f.originalSpan('abc', 0, 9), isNull);
+    });
+  });
 }

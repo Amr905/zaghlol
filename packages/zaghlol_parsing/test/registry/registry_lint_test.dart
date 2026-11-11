@@ -337,4 +337,108 @@ void main() {
       expect(sw.elapsedMilliseconds ~/ n, lessThan(10));
     });
   });
+
+  group('runtime guard (slow templates)', () {
+    // Passes the static heuristic (bounded repeat of 2, inner unbounded) yet
+    // is polynomial on a long digit run.
+    RegistryFiles slow() => base.copy()
+      ..editInstitution('cib.json', (j) {
+        j['templates'] = [
+          {
+            'id': 'cib.slow.en',
+            'version': 1,
+            'lang': 'en',
+            'event': 'fee',
+            'direction': 'expense',
+            'baseConfidence': 0.9,
+            'pattern': r'^(?:\d*\d*){2}x (?<amount>\d+)',
+          },
+        ];
+      })
+      ..fixtures.removeWhere((k, _) => k.startsWith('cib/'))
+      ..fixtures['cib/slow_one.json'] = jsonEncode({
+        'sender': 'CIB',
+        'body': '11x 5',
+        'receivedAt': '2026-10-23T11:14:00+03:00',
+        'expect': {'template': 'cib.slow.en', 'amount': '5.00'},
+      });
+
+    test('the slow pattern is accepted by the static heuristic', () {
+      expect(backtrackingProblems(r'^(?:\d*\d*){2}x (?<amount>\d+)'), isEmpty);
+    });
+
+    test('a template slower than the limit on an adversarial body fails', () {
+      final f = slow();
+      final r = lintRegistry(
+        manifest: f.manifest,
+        shared: f.shared,
+        institutions: f.institutions,
+        fixtures: f.fixtures,
+        minFixturesPerTemplate: 1,
+        maxMatchMillis: 2,
+      );
+      final slowIssues = r.issues
+          .where((i) => i.code == RegistryIssueCode.slowMatch)
+          .toList();
+      expect(slowIssues, isNotEmpty);
+      expect(slowIssues.single.detail, 'cib.slow.en adversarial');
+    });
+
+    test('the per-fixture timer reports the template id only', () {
+      final reg = RegistryLoader.load(
+        manifest: base.manifest,
+        shared: base.shared,
+        institutions: base.institutions,
+      ).registry!;
+      const path = 'nbe/card_purchase_ar_plain.json';
+      final o = runFixture(reg, path, base.fixtures[path]!, maxMatchMillis: -1);
+      expect(
+        o.issues.map((i) => i.code),
+        contains(RegistryIssueCode.slowMatch),
+      );
+      for (final i in o.issues) {
+        expect(i.toString(), isNot(contains('CARREFOUR')));
+      }
+    });
+
+    test('the real test registries are not flagged at the default limit', () {
+      expect(_lint(base).issues, isEmpty);
+    });
+  });
+
+  group('pipeline keys in fixtures', () {
+    final files = RegistryFiles.load(pipelineRoot);
+    const path = 'nbe/purchase_ar_spec_example.json';
+
+    LintReport lint(RegistryFiles f) => lintRegistry(
+      manifest: f.manifest,
+      shared: f.shared,
+      institutions: f.institutions,
+      fixtures: f.fixtures,
+    );
+
+    for (final key in [
+      'confidence',
+      'needsReview',
+      'occurredAt',
+      'language',
+      'counterpartyKind',
+    ]) {
+      test('a wrong `$key` fails the fixture', () {
+        final f = files.copy()
+          ..editFixture(path, (j) {
+            (j['expect']! as Map<String, Object?>)[key] = 'wrong';
+          });
+        expect(lint(f).issues.map((i) => i.detail), contains(key));
+      });
+    }
+
+    test('wrong reasons fail the fixture', () {
+      final f = files.copy()
+        ..editFixture(path, (j) {
+          (j['expect']! as Map<String, Object?>)['reasons'] = ['dateInvalid'];
+        });
+      expect(lint(f).issues.map((i) => i.detail), contains('reasons'));
+    });
+  });
 }

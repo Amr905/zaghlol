@@ -1,0 +1,36 @@
+{
+  "schema": 1,
+  "drop": {
+    "global": [
+      "(?i)\\botp\\b",
+      "رمز التحقق",
+      "(?i)one[- ]time password"
+    ]
+  },
+  "last4": [
+    "(?:\\*{2,}|x{2,}|ending\\s+)(\\d{4})"
+  ],
+  "shortcutKeywords": [
+    "خصم",
+    "debited",
+    "تم تحويل",
+    "InstaPay"
+  ],
+  "generic": {
+    "senderHints": [
+      "(?i)bank",
+      "بنك"
+    ],
+    "bodyHints": [
+      "(?i)(EGP|USD|ج\\.?م|جنيه)\\s?[\\d٠-٩]"
+    ],
+    "alwaysCapture": [
+      "BDC-ALERT"
+    ]
+  },
+  "merchantCleaning": {
+    "cityPhrases": [
+      "SMOUHA"
+    ]
+  }
+}

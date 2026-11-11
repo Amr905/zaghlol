@@ -1,0 +1,15 @@
+{
+  "sender": "NBE",
+  "body": "تم استرداد 60.00 جم من AMAZON EG 0099 إلى بطاقة **4567",
+  "receivedAt": "2026-10-23T11:14:00+03:00",
+  "expect": {
+    "template": "nbe.refund.ar",
+    "amount": "60.00",
+    "merchantClean": "Amazon",
+    "confidence": "970",
+    "needsReview": "false",
+    "occurredAt": "2026-10-23T11:14:00",
+    "language": "ar",
+    "reasons": []
+  }
+}

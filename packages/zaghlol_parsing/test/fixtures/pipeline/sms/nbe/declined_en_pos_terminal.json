@@ -1,0 +1,15 @@
+{
+  "sender": "NBE",
+  "body": "NBE: Card *4567 purchase of EGP 20.00 at NOON POS 0041 declined",
+  "receivedAt": "2026-10-23T11:14:00+03:00",
+  "expect": {
+    "template": "nbe.declined.en",
+    "amount": "20.00",
+    "merchantClean": "Noon",
+    "confidence": "950",
+    "needsReview": "false",
+    "occurredAt": "2026-10-23T11:14:00",
+    "language": "en",
+    "reasons": []
+  }
+}

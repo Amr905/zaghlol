@@ -18,6 +18,7 @@ enum RegistryIssueCode {
   fixtureFailed,
   fixtureCoverage,
   crossMatch,
+  slowMatch,
   guardConfigTooLarge,
 }
 

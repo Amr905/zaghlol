@@ -1,0 +1,23 @@
+{
+  "sender": "NBE",
+  "body": "البنك الأهلي المصري: تم خصم 200.00 جم ببطاقة فيزا **4567 لدى AMAZON EG يوم 23/10. الرصيد المتاح 12400.00 جم",
+  "receivedAt": "2026-10-23T11:14:00+03:00",
+  "expect": {
+    "template": "nbe.card_purchase.ar",
+    "direction": "expense",
+    "event": "card_purchase",
+    "amount": "200.00",
+    "currency": "EGP",
+    "last4": "4567",
+    "merchantClean": "Amazon",
+    "merchantKey": "amazon",
+    "balance": "12400.00",
+    "date": "2026-10-23",
+    "counterpartyKind": null,
+    "confidence": "980",
+    "needsReview": "false",
+    "occurredAt": "2026-10-23T11:14:00",
+    "language": "ar",
+    "reasons": []
+  }
+}

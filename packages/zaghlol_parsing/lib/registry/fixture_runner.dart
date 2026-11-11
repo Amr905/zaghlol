@@ -1,3 +1,6 @@
+import '../normalize/text_normalizer.dart';
+import '../pipeline/parse_result.dart';
+import '../pipeline/parsing_pipeline.dart';
 import 'registry_issue.dart';
 import 'registry_loader.dart';
 import 'registry_models.dart';
@@ -28,7 +31,27 @@ const Set<String> _expectKeys = {
   'date',
   'time',
   'problems',
+  ...pipelineExpectKeys,
 };
+
+/// `expect` keys answered by the full pipeline (stages 0 to 7) rather than
+/// by the template extraction alone. A fixture that sets any of them also
+/// requires the pipeline to pick the same template.
+const Set<String> pipelineExpectKeys = {
+  'confidence',
+  'needsReview',
+  'occurredAt',
+  'language',
+  'reasons',
+  'counterpartyKind',
+};
+
+/// Slowest match of one template on one body the lint accepts. Dart has no
+/// regex timeout, so this is a measurement after the fact: it bounds
+/// polynomial blow-up on the fixtures and the adversarial bodies, and it can
+/// not interrupt an exponential pattern (the backtracking heuristic is the
+/// first line of defence for those).
+const int defaultMaxMatchMillis = 100;
 
 final RegExp _isoLocal = RegExp(
   r'^(\d{4})-(\d{2})-(\d{2})T(\d{2}):(\d{2})(?::(\d{2}))?(?:Z|[+-]\d{2}:\d{2})?$',
@@ -51,7 +74,12 @@ final class FixtureOutcome {
 ///
 /// Issues carry the fixture path and a field name; message text and values
 /// never appear in them.
-FixtureOutcome runFixture(Registry registry, String path, String text) {
+FixtureOutcome runFixture(
+  Registry registry,
+  String path,
+  String text, {
+  int maxMatchMillis = defaultMaxMatchMillis,
+}) {
   final issues = <RegistryIssue>[];
   FixtureOutcome done([String? template]) =>
       FixtureOutcome(path, template, issues);
@@ -131,18 +159,23 @@ FixtureOutcome runFixture(Registry registry, String path, String text) {
     return done();
   }
 
-  final folded = foldBody(body);
+  final folded = foldKeyIndexed(body);
   final dropped = [
     ...institution.drop,
     ...registry.shared.globalDrop,
-  ].any((p) => p.regex.hasMatch(folded));
+  ].any((p) => p.regex.hasMatch(folded.text));
   final matches = <(Template, Map<String, String>)>[];
   if (!dropped) {
     for (final t in institution.templates) {
       if (!t.channels.contains(channel)) {
         continue;
       }
-      final groups = matchTemplate(t, folded);
+      final clock = Stopwatch()..start();
+      final groups = matchTemplateOriginal(t, folded, body);
+      clock.stop();
+      if (clock.elapsedMilliseconds > maxMatchMillis) {
+        fail(RegistryIssueCode.slowMatch, t.id);
+      }
       if (groups != null) {
         matches.add((t, groups));
       }
@@ -174,6 +207,8 @@ FixtureOutcome runFixture(Registry registry, String path, String text) {
     groups,
     received,
     cleaning: registry.shared.merchantCleaning,
+    foldedBody: folded.text,
+    globalLast4: registry.shared.globalLast4,
   );
   final actual = <String, String?>{
     'direction': fields.direction.name,
@@ -196,7 +231,10 @@ FixtureOutcome runFixture(Registry registry, String path, String text) {
   };
   for (final entry in expected.entries) {
     final key = entry.key;
-    if (key == 'outcome' || key == 'template' || key == 'problems') {
+    if (key == 'outcome' ||
+        key == 'template' ||
+        key == 'problems' ||
+        pipelineExpectKeys.contains(key)) {
       continue;
     }
     final want = entry.value;
@@ -216,7 +254,63 @@ FixtureOutcome runFixture(Registry registry, String path, String text) {
   if (gotProblems.join(',') != wanted.join(',')) {
     fail(RegistryIssueCode.fixtureFailed, 'problems');
   }
+  if (pipelineExpectKeys.any(expected.containsKey)) {
+    _checkPipeline(
+      registry,
+      ParseRequest(
+        body: body,
+        source: source,
+        channel: channel,
+        receivedAt: received,
+      ),
+      template.id,
+      expected,
+      fail,
+    );
+  }
   return done(template.id);
+}
+
+void _checkPipeline(
+  Registry registry,
+  ParseRequest request,
+  String templateId,
+  Map<String, Object?> expected,
+  void Function(RegistryIssueCode, [String]) fail,
+) {
+  final result = ParsingPipeline(registry).parse(request);
+  if (result is! ParseParsed || result.templateId != templateId) {
+    fail(RegistryIssueCode.fixtureFailed, 'pipeline');
+    return;
+  }
+  final actual = <String, String?>{
+    'confidence': result.confidencePermille.toString(),
+    'needsReview': result.needsReview.toString(),
+    'occurredAt': _isoDateTime(result.fields.occurredAt),
+    'language': result.language,
+    'counterpartyKind': result.fields.counterparty?.kind.name,
+  };
+  for (final key in pipelineExpectKeys) {
+    if (!expected.containsKey(key)) {
+      continue;
+    }
+    final want = expected[key];
+    if (key == 'reasons') {
+      final got = result.reasons.map((r) => r.name).toList()..sort();
+      final wanted = want is List<Object?>
+          ? (want.whereType<String>().toList()..sort())
+          : null;
+      if (wanted == null || got.join(',') != wanted.join(',')) {
+        fail(RegistryIssueCode.fixtureFailed, key);
+      }
+      continue;
+    }
+    if (want != null && want is! String) {
+      fail(RegistryIssueCode.fixtureInvalid, 'expect.$key');
+    } else if (actual[key] != want) {
+      fail(RegistryIssueCode.fixtureFailed, key);
+    }
+  }
 }
 
 DateTime? _parseReceived(String? text) {
@@ -233,3 +327,9 @@ String _isoDate(DateTime d) =>
     '${d.year.toString().padLeft(4, '0')}-'
     '${d.month.toString().padLeft(2, '0')}-'
     '${d.day.toString().padLeft(2, '0')}';
+
+String _isoDateTime(DateTime d) =>
+    '${_isoDate(d)}T'
+    '${d.hour.toString().padLeft(2, '0')}:'
+    '${d.minute.toString().padLeft(2, '0')}:'
+    '${d.second.toString().padLeft(2, '0')}';

@@ -50,6 +50,65 @@ String foldArabicVariants(String input) {
   return out.toString();
 }
 
+/// A [foldKey] result with a map back to the original text.
+///
+/// [origin] has one entry per code unit of [text]: the index of the original
+/// code unit it came from (a collapsed run of spaces maps to its first
+/// whitespace). A span `[start, end)` of [text] therefore covers the original
+/// span `[origin[start], origin[end - 1] + 1)`.
+final class FoldedText {
+  const FoldedText(this.text, this.origin);
+
+  final String text;
+  final List<int> origin;
+
+  /// The original substring under the folded span `[start, end)`, or null
+  /// when the span is empty or out of range.
+  String? originalSpan(String original, int start, int end) {
+    if (start < 0 || end > text.length || start >= end) {
+      return null;
+    }
+    final from = origin[start];
+    final to = origin[end - 1] + 1;
+    if (to > original.length || from >= to) {
+      return null;
+    }
+    return original.substring(from, to);
+  }
+}
+
+/// [foldKey] that also records where each folded code unit came from. The
+/// `text` is identical to `foldKey(input)` (tested), so regexes compiled for
+/// folded text run unchanged and their captures can be mapped back.
+FoldedText foldKeyIndexed(String input) {
+  final out = StringBuffer();
+  final origin = <int>[];
+  var pendingSpaceAt = -1;
+  var wroteAny = false;
+  final units = input.codeUnits;
+  for (var i = 0; i < units.length; i++) {
+    final unit = units[i];
+    if (_isSpace(unit)) {
+      if (pendingSpaceAt < 0) {
+        pendingSpaceAt = i;
+      }
+      continue;
+    }
+    if (_isInvisible(unit) || _isMatchingMark(unit)) {
+      continue;
+    }
+    if (pendingSpaceAt >= 0 && wroteAny) {
+      out.writeCharCode(_space);
+      origin.add(pendingSpaceAt);
+    }
+    pendingSpaceAt = -1;
+    wroteAny = true;
+    out.writeCharCode(_foldLetter(_mapChar(unit)));
+    origin.add(i);
+  }
+  return FoldedText(out.toString(), origin);
+}
+
 enum _Level { display, matching, key }
 
 const int _space = 0x20;
