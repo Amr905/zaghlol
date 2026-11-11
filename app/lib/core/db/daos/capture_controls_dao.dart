@@ -27,6 +27,25 @@ abstract final class SenderChannel {
   static const String shortcutMessage = 'shortcut_message';
 }
 
+/// Result of a `capture_senders` write (T-047).
+sealed class SenderWrite {
+  const SenderWrite();
+}
+
+/// The row was written; [confirmedCount] is set by [recordConfirmation].
+final class SenderWritten extends SenderWrite {
+  const SenderWritten(this.confirmedCount);
+
+  final int? confirmedCount;
+}
+
+/// The sender exists on another channel; nothing changed. The Guard key is
+/// `(channel, sender)` but the table's key is `sender` (T-047 decision: no
+/// migration).
+final class ChannelConflict extends SenderWrite {
+  const ChannelConflict();
+}
+
 class CaptureControlsDao {
   CaptureControlsDao(this._db);
 
@@ -95,10 +114,12 @@ class CaptureControlsDao {
     return row != null;
   });
 
-  /// Counts one user confirmation of a generic parse from [sender] (A-66)
-  /// and returns the new count. One statement: two engines confirming at
-  /// once count twice.
-  Future<int> recordConfirmation({
+  /// Counts one user confirmation of a generic parse from [sender] (A-66).
+  /// One statement: two engines confirming at once count twice. A row of the
+  /// same sender on the other channel is left as it is and the result is
+  /// [ChannelConflict] (T-047, FU-096 m-2): the other channel is never
+  /// silently counted.
+  Future<SenderWrite> recordConfirmation({
     required String sender,
     required String channel,
     required int at,
@@ -106,7 +127,8 @@ class CaptureControlsDao {
     final rows = await _db.customWriteReturning(
       'INSERT INTO capture_senders (sender, channel, confirmed_count, '
       'created_at) VALUES (?1, ?2, 1, ?3) ON CONFLICT (sender) DO UPDATE '
-      'SET confirmed_count = confirmed_count + 1 RETURNING confirmed_count',
+      'SET confirmed_count = confirmed_count + 1 '
+      'WHERE channel = excluded.channel RETURNING confirmed_count',
       variables: [
         Variable.withString(sender),
         Variable.withString(channel),
@@ -115,21 +137,25 @@ class CaptureControlsDao {
       updates: {_db.captureSenders},
       updateKind: UpdateKind.update,
     );
-    return rows.single.read<int>('confirmed_count');
+    if (rows.isEmpty) return const ChannelConflict();
+    return SenderWritten(rows.single.read<int>('confirmed_count'));
   });
 
   /// Sets "always capture this sender" (A-66). Creates the row with no
-  /// confirmations when it is new. Returns nothing; refused writes throw.
-  Future<void> setAlwaysCapture({
+  /// confirmations when it is new. A row of the same sender on the other
+  /// channel is left as it is: [ChannelConflict] (T-047, FU-096 m-2).
+  /// Refused writes throw.
+  Future<SenderWrite> setAlwaysCapture({
     required String sender,
     required String channel,
     required bool always,
     required int at,
-  }) => guardWrite(
-    () => _db.customUpdate(
+  }) => guardWrite(() async {
+    final changed = await _db.customUpdate(
       'INSERT INTO capture_senders (sender, channel, always_capture, '
       'created_at) VALUES (?1, ?2, ?3, ?4) ON CONFLICT (sender) DO UPDATE '
-      'SET always_capture = excluded.always_capture',
+      'SET always_capture = excluded.always_capture '
+      'WHERE channel = excluded.channel',
       variables: [
         Variable.withString(sender),
         Variable.withString(channel),
@@ -138,8 +164,9 @@ class CaptureControlsDao {
       ],
       updates: {_db.captureSenders},
       updateKind: UpdateKind.update,
-    ),
-  );
+    );
+    return changed == 0 ? const ChannelConflict() : const SenderWritten(null);
+  });
 
   Future<CaptureSenderRow?> sender(String sender) => guardRead(
     () => (_db.select(
