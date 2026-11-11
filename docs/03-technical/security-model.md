@@ -52,7 +52,7 @@ The copy is UX-owned (Egyptian colloquial with standard Arabic for the legal tex
 | Key | Size / alg | Generated | Stored | Used for | Lifecycle |
 |---|---|---|---|---|---|
 | `K_db` | 256-bit random | First launch (`Random.secure()`; all-equal output rejected) | Own channel `SecretStoreHostApi` (ADR-002 Amendment 2026-11-10, T-015). Android: wrapped by a Keystore AES-256-GCM key `zaghlol_db_kek_v1` (non-exportable, StrongBox if present, no auth/unlock requirement), blob in `noBackupFilesDir/keys/`. iOS: Keychain generic password `kSecAttrAccessibleAfterFirstUnlockThisDeviceOnly`, not synchronizable, access group pinned to Runner's own application-identifier group. Never cached in a provider; zeroized after the first open. | SQLite3MultipleCiphers `PRAGMA key` | Never leaves the device; not in backups (FR-BAK-07). If lost (Keystore invalidated) the DB is unreadable, and the app offers restore from backup. Rekey supported (`PRAGMA rekey`) for future rotation. |
-| `K_spool` | AES-256-GCM | First launch | Android Keystore (non-exportable; TEE-backed AndroidKeyStore, not StrongBox (bulk data; Lead decision 2026-11-10, T-060 review C1)); iOS Keychain (shared access group with the Share Extension) | Spool entries, Guard config, encrypted temp files (images, PDFs, export staging) | Rotated if invalidated; pending spool is lost (rare, logged) |
+| `K_spool` | AES-256-GCM | First launch | Android Keystore (non-exportable; TEE-backed AndroidKeyStore, not StrongBox (bulk data; Lead decision 2026-11-10, T-060 review C1)); iOS Keychain (shared access group with the Share Extension) | Spool entries, Guard config user part (`noBackupFilesDir/guard/`), capture status (`noBackupFilesDir/capture/`), share intake files, encrypted temp files (images, PDFs, export staging) | Recreated only when unusable on every retry (never on a transient error); entries written under the old key are deleted on a tag failure and the loss is reported to Dart as a status, never logged (T-039) |
 | `K_bk` (backup data key) | 256-bit random | First backup setup | Secure storage (for automatic backups) **and** wrapped inside each backup file header | AES-256-GCM chunks of the backup | Re-wrapped when the passphrase changes. A new `K_bk` only if the user resets backup (old backups then need the old passphrase). |
 | `KEK_pass` | Argon2id(passphrase, salt 16 B, m = 64 MiB, t = 3, p = 1) → 256-bit | At passphrase set / restore | Never stored | Wraps `K_bk` (AES-256-GCM key wrap) | Parameters stored in the header for future upgrades |
 | Install token, account token, entitlement token | — | Backend | `secure_state` table in the encrypted DB | API auth / Gold | Cleared on Delete everything; the account token and the cached entitlement are dropped at sign-out (D-61(c)) |
@@ -165,7 +165,7 @@ plaintext = tar-like stream: db.snapshot, settings.json, manifest.json
 - **Delete everything** (FR-ONB-08, EC-29):
   1. Cancel jobs (backup, WorkManager).
   2. Close the DB.
-  3. Delete the DB, spool, temp files and widget snapshot.
+  3. Delete the DB, spool, temp files and widget snapshot (Android: also `noBackupFilesDir/guard/`, `capture/` and `share/`).
   4. Delete the Keystore/Keychain items, **except the iOS seat keys** (D-55: so that restoring on the same iPhone is not a move; they hold no financial or account data, and the "Delete everything" copy says that Gold can come back to this iPhone and that the server keeps a keyed hash with the purchase, §2a item 2).
   5. Call `DELETE /v1/installs/me` (best effort).
   6. Restart in first-launch state.
