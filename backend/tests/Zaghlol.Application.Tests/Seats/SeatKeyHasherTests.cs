@@ -106,7 +106,7 @@ public sealed class SeatKeyHasherTests : IDisposable
     public async Task ASeatMatchIsFoundOnlyAtPositionOneOrLater(int position)
     {
         var keys = Verify(5);
-        var stored = await Hasher.SeatKeyHashAsync(Purchase, keys.Others[position - 1], CancellationToken.None);
+        var stored = await Hasher.AnyPositionSeatKeyHashAsync(Purchase, keys.Others[position - 1], CancellationToken.None);
         var before = mac.Calls;
 
         var match = await Hasher.MatchSeatAsync(Purchase, stored, keys, CancellationToken.None);
@@ -129,7 +129,7 @@ public sealed class SeatKeyHasherTests : IDisposable
     public async Task MatchSeatHashesEveryCandidateInParallelWithAtMostFourInFlight()
     {
         var keys = Verify(5);
-        var stored = await Hasher.SeatKeyHashAsync(Purchase, keys.Others[0], CancellationToken.None);
+        var stored = await Hasher.AnyPositionSeatKeyHashAsync(Purchase, keys.Others[0], CancellationToken.None);
         mac.Delay = TimeSpan.FromMilliseconds(50);
         var before = mac.Calls;
 
@@ -144,7 +144,7 @@ public sealed class SeatKeyHasherTests : IDisposable
     public async Task AMacFailurePropagatesAndIsNeverAResult()
     {
         var keys = Verify(3);
-        var stored = await Hasher.SeatKeyHashAsync(Purchase, keys.Others[0], CancellationToken.None);
+        var stored = await Hasher.AnyPositionSeatKeyHashAsync(Purchase, keys.Others[0], CancellationToken.None);
         mac.Fault = new TimeoutException("kms down");
 
         await Assert.ThrowsAsync<TimeoutException>(() => Hasher.CheckElementZeroAsync(Install, null, keys, CancellationToken.None));
@@ -246,6 +246,30 @@ public sealed class SeatKeyHasherTests : IDisposable
         Assert.False(SeatCheckValue.Matches(null, computed));
         Assert.False(SeatCheckValue.Matches(new string('0', 64), computed));
         Assert.Equal("fe38d23ca263a6f7334148b2ae03e1d4b71a9fa54a062f3efe0470055de93e5b", hex);
+    }
+
+    [Fact]
+    public async Task L1TheSeatHashRefusesAKeyAtPositionOneOrLater()
+    {
+        var keys = Verify(3);
+
+        foreach (var other in keys.Others)
+        {
+            await Assert.ThrowsAsync<ArgumentException>(() => Hasher.SeatKeyHashAsync(Purchase, other, CancellationToken.None));
+        }
+
+        Assert.Equal(0, mac.Calls);
+    }
+
+    [Fact]
+    public async Task L1TheHolderHashIsElementZeroWhateverElseTheSetCarries()
+    {
+        var keys = Verify(3);
+
+        var holder = await Hasher.SeatKeyHashForHolderAsync(Purchase, keys, CancellationToken.None);
+
+        Assert.Equal(HMACSHA256.HashData(Key(), SeatKeyHasher.SeatKeyInput(Purchase, signers[0].PublicPoint)), holder.ToStorage());
+        Assert.NotEqual(HMACSHA256.HashData(Key(), SeatKeyHasher.SeatKeyInput(Purchase, signers[1].PublicPoint)), holder.ToStorage());
     }
 
     private static byte[] Key() => [.. Enumerable.Range(0, 32).Select(i => (byte)i)];

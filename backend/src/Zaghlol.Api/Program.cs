@@ -46,6 +46,8 @@ builder.Services.AddInfrastructure();
 builder.Services.AddZaghlolKms();
 // Seat-key proofs and K_seat keyed hashes (T-182); the K_seat startup check refuses a wrong or rotated key outside Development/Testing.
 builder.Services.AddZaghlolSeatKeys();
+// The seat service (T-184): every channel's seat decision runs through it, in the caller's transaction.
+builder.Services.AddZaghlolSeats();
 
 // Two logins: app_rw for /v1/*, ops_rw for /admin/v1/* (T-122), so an injection in /v1 can't write catalog or audit rows.
 builder.Services.AddZaghlolDatabase(DatabaseRole.App, DatabaseRole.Admin);

@@ -125,7 +125,7 @@ public sealed class SeatKeyInfrastructureTests
         using var b = new SeatKeyTestSigner();
         var challenge = SeatChallenge.ForRestore(new byte[32]);
         var keys = verifier.ParseAndVerify([a.Prove(challenge, Install), b.Prove(challenge, Install)], challenge, Install).Keys!;
-        var stored = await hasher.SeatKeyHashAsync(Purchase, keys.Others[0], CancellationToken.None);
+        var stored = await hasher.AnyPositionSeatKeyHashAsync(Purchase, keys.Others[0], CancellationToken.None);
         var registered = (await hasher.CheckElementZeroAsync(Install, null, keys, CancellationToken.None)).Computed;
 
         foreach (var fault in new[] { FakeKmsFault.Throw, FakeKmsFault.Crypto })
@@ -202,7 +202,7 @@ public sealed class SeatKeyInfrastructureTests
         var verified = verifier.ParseAndVerify([pa, pb], challenge, Install);
         var keys = verified.Keys!;
         var zero = await hasher.CheckElementZeroAsync(Install, null, keys, CancellationToken.None);
-        var seat = await hasher.SeatKeyHashAsync(Purchase, keys.Others[0], CancellationToken.None);
+        var seat = await hasher.AnyPositionSeatKeyHashAsync(Purchase, keys.Others[0], CancellationToken.None);
         var match = await hasher.MatchSeatAsync(Purchase, seat, keys, CancellationToken.None);
         Assert.Equal(1, match);
         var rejected = verifier.ParseAndVerify([pa, SeatKeyTestSigner.Defective(pb, SeatKeyDefect.FlippedSignatureBit)], challenge, Install);

@@ -76,8 +76,33 @@ public sealed class SeatKeyHasher(ISeatKeyMac mac, ISeatKeyMetrics metrics)
         return InstallKeyHash.FromMac(value);
     }
 
-    /// <summary><c>HMAC(K_seat, purchaseId ‖ pk)</c>: the value T-184 writes to <c>device_key_hash</c> (from element 0).</summary>
-    public async Task<SeatKeyHash> SeatKeyHashAsync(Guid purchaseId, VerifiedSeatKey key, CancellationToken cancellationToken)
+    /// <summary>
+    /// <c>HMAC(K_seat, purchaseId ‖ pk₀)</c>: the value T-184 writes to <c>device_key_hash</c> and <c>seat_claimants.device_key_hash</c>.
+    /// Element 0 only (T-182 security review L-1): the key left on a seat is always the caller's registered key, never a relayed one.
+    /// </summary>
+    public Task<SeatKeyHash> SeatKeyHashForHolderAsync(Guid purchaseId, VerifiedSeatKeys keys, CancellationToken cancellationToken)
+    {
+        ArgumentNullException.ThrowIfNull(keys);
+        return SeatKeyHashAsync(purchaseId, keys.ElementZero, cancellationToken);
+    }
+
+    /// <summary>
+    /// <c>HMAC(K_seat, purchaseId ‖ pk)</c> of element 0. A key at position ≥ 1 is refused (<see cref="ArgumentException"/>, L-1):
+    /// those are rebind candidates only and are hashed by <see cref="MatchSeatAsync"/> alone.
+    /// </summary>
+    public Task<SeatKeyHash> SeatKeyHashAsync(Guid purchaseId, VerifiedSeatKey key, CancellationToken cancellationToken)
+    {
+        ArgumentNullException.ThrowIfNull(key);
+        if (key.Position != 0)
+        {
+            throw new ArgumentException("Only element 0 can be written to a seat.", nameof(key));
+        }
+
+        return AnyPositionSeatKeyHashAsync(purchaseId, key, cancellationToken);
+    }
+
+    /// <summary>The seat hash of a key at any position: <see cref="MatchSeatAsync"/>'s candidates (and tests that seed a stored value).</summary>
+    internal async Task<SeatKeyHash> AnyPositionSeatKeyHashAsync(Guid purchaseId, VerifiedSeatKey key, CancellationToken cancellationToken)
     {
         ArgumentNullException.ThrowIfNull(key);
         var value = await mac.MacAsync(SeatKeyInput(purchaseId, key.Point), cancellationToken).ConfigureAwait(false);
@@ -95,7 +120,7 @@ public sealed class SeatKeyHasher(ISeatKeyMac mac, ISeatKeyMetrics metrics)
         ArgumentNullException.ThrowIfNull(keys);
 
         // MaxKeys is 5, so there are at most 4 candidates and therefore at most 4 calls in flight.
-        var hashes = await Task.WhenAll(keys.Others.Select(k => SeatKeyHashAsync(purchaseId, k, cancellationToken))).ConfigureAwait(false);
+        var hashes = await Task.WhenAll(keys.Others.Select(k => AnyPositionSeatKeyHashAsync(purchaseId, k, cancellationToken))).ConfigureAwait(false);
         int? match = null;
         for (var i = 0; i < hashes.Length; i++)
         {
