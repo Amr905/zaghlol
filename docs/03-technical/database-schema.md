@@ -40,6 +40,12 @@ erDiagram
 - `raw_messages.body_hash` is 64 lowercase hex characters; `transactions.occurred_tz_offset_min` within ±1080; `parse_confidence` NULL or 0..1;
 - `transfer_pairs.in_txn_id <> out_txn_id`; `offset_links.expense_txn_id <> source_txn_id`; extra indexes `ix_offset_source`, `ix_split_expense`.
 
+**Schema v4 (T-019), the last batch before features start** ("v1 final"): §2.6–2.8 in `app/lib/core/db/schema/financial_c.drift`; dump `drift_schema_v4.json`; step `core/db/migrations/v4_financial_c.dart`. It also rebuilds four v3 tables with stricter CHECKs (T-018 review n-3, n-4; §4 rule 2c): `catalog_merchants`, `catalog_keywords`, `merchant_rules`, `recurring_items`. Rules for every table v4 creates or rebuilds (tested in `test/core/db/financial_c_constraints_test.dart` by sweeps over every column, and in `schema_audit_test.dart`):
+- every INTEGER column is `typeof(x) = 'integer'` (or a 0/1 `IN` list), so a REAL like `1.5` is refused; a rowid alias is an integer by construction;
+- every TEXT column other than ids, FK columns, enums and dates refuses NUL, tested on the bytes (`instr(CAST(x AS BLOB), x'00') = 0`): SQLite's `length()` and `GLOB` stop at the first NUL, so `'EGP' || char(0) || 'x'` passes a `GLOB '[A-Z][A-Z][A-Z]'` alone. Enum (`IN`) and date (`date(x) IS x`) CHECKs compare all bytes. Names and senders also refuse C0/C1 control characters;
+- **money (T-012 follow-up):** a schema-wide audit checks that every `*_minor` column, old or new, has the integer and ±(2^53−1) CHECK and a registered currency partner, and that a nullable partner has a pair CHECK (`original_*`, `purchase_*` both NULL or both set; `assets.principal_minor`/`manual_value_minor` set ⇒ `assets.currency` set). Where the partner is NOT NULL, a NULL amount means "unknown" (balances). A new money column fails the audit until it is registered there.
+- **Not covered (residual):** the v2 tables and the v3 tables not rebuilt (`budgets`, `fired_alerts`, `cycle_summaries`, `catalog_meta`, `catalog_aliases`, `recurring_occurrences`) still accept a REAL in some non-money INTEGER columns (timestamps, `occurred_tz_offset_min`, …) and a NUL after a valid prefix in GLOB-checked text (e.g. a currency). The typed DAOs can't bind a double, and their codes and currencies come from code (`Currency.code`), so only a raw SQL write could store such a value; a later rebuild can close it (FU-075).
+
 ### 2.1 Accounts & balances
 ```sql
 CREATE TABLE accounts (
@@ -284,6 +290,13 @@ CREATE TABLE zakah_ledger (id TEXT PRIMARY KEY, asset_id TEXT REFERENCES assets(
   status TEXT NOT NULL CHECK (status IN ('pending','partial','paid')), paid_minor INTEGER NOT NULL DEFAULT 0);
 ```
 
+**As built (T-019, v4).** Money as in §2 (integer, ±(2^53−1), ISO GLOB, pair rules). A `unit` column (`networth_snapshots`, `zakah_ledger`) holds a currency code or a gold symbol (`XAU` + `[A-Z0-9_]`, 4–16 characters); for a gold unit the amount is **milligrams**, like `quantity_milli`.
+- `assets`: `name` 1–60 characters without controls; `karat` only for `gold`/`gold_coin`, and `gold` needs `quantity_milli` (≥ 1) and `karat`; `rate_bp` (0–100 000), `payout` (`monthly`, `quarterly`, `semi_annual`, `annual`, `at_maturity`) and `maturity_date` only for `certificate`; `maturity_date`/`acquired_at` real ISO dates; `principal_minor`/`manual_value_minor` ≥ 0 and in `assets.currency` (`AssetsDao` refuses a Money in another currency with `CurrencyMismatch`, before any SQL); `ix_assets_live (type) WHERE archived_at IS NULL`.
+- `price_quotes`: `symbol` a form (1–16 of `[A-Z0-9_]`, starting with a letter), not a closed set, so a new backend symbol can't fail the sync apply; `price_minor` ≥ 1; `per_unit` a slug. `PricesDao.replaceBackendQuotes` swaps the backend rows in one transaction and keeps `manual` ones.
+- `fx_rates`: `base <> quote`, `rate_e9` 1..2^53−1.
+- `networth_snapshots`: `taken_on` a real ISO date; values signed (a computed history value is never refused).
+- `zakah_ledger`: `asset_id` FK **without cascade** (deleting an asset with Zakah history fails, `DB_CONSTRAINT_FOREIGN_KEY`); `lot_start_hijri` `YYYY-MM-DD` with month 01–12, day 01–30 (Hijri, so not checked with `date()`); `due_on` a real Gregorian ISO date; `0 ≤ paid_minor ≤ amount_minor` and the status follows the amounts (`pending` ⇒ 0, `partial` ⇒ between, `paid` ⇒ equal). `ZakahLedgerDao.recordPaid` sets amount and status in one statement. Indexes `ix_zakah_asset`, `ix_zakah_open (due_on) WHERE status <> 'paid'`.
+
 ### 2.7 Capture controls, review, Gold templates
 ```sql
 CREATE TABLE ignore_rules (                      -- FR-CAP-*; matched by Guard (institution + last4, never last4 alone — EC-59)
@@ -311,6 +324,12 @@ CREATE TABLE review_items (
 CREATE INDEX ix_review_open ON review_items(kind, created_at) WHERE resolved_at IS NULL;
 ```
 
+**As built (T-019, v4).**
+- `ignore_rules`: `institution_code` `[a-z0-9_]` 2–32 (OpenAPI `InstitutionCode`); `last4` 2–4 ASCII digits; **`ux_ignore_institution`** (`UNIQUE (institution_code, channel) WHERE last4 IS NULL`), because the table's `UNIQUE` treats NULL `last4` as distinct and would allow two institution-level rules. `CaptureControlsDao.isIgnored` matches the card rule or the institution rule, never last-4 alone (EC-59); `addIgnoreRule` is `ON CONFLICT DO NOTHING` and reports whether it added one.
+- `capture_senders`: `sender` 1–128 characters without controls; `channel IN ('sms','notification','shortcut_message')`; `recordConfirmation` is one upsert returning the new count, so concurrent confirmations all count.
+- `custom_templates`: `template_json` a JSON object ≤ 64 KiB; `sample_hash` 64 lowercase hex (never the sample); `ix_templates_sender`.
+- `review_items`: `payload` NULL or a JSON object ≤ 64 KiB; `resolution` a slug, only with `resolved_at`; FK child indexes `ix_review_raw`, `ix_review_txn`. `ReviewItemsDao.resolve` updates only an open item and reports whether this call resolved it (one winner).
+
 ### 2.8 Settings, entitlement, sync, outbox, misc.
 ```sql
 CREATE TABLE settings (key TEXT PRIMARY KEY, value TEXT NOT NULL, updated_at INTEGER NOT NULL);
@@ -333,6 +352,13 @@ CREATE TABLE diag_log (id INTEGER PRIMARY KEY, at INTEGER NOT NULL, level TEXT N
   fields TEXT);                                   -- redacted event codes only (error-handling-and-observability.md §3)
 ```
 
+**As built (T-019, v4).**
+- `settings`: `key` 1–64 of `[a-z0-9_.]`; `value` text ≤ 16 KiB. `secure_state`: same key form; `value` must be a BLOB of 1 B–64 KiB. `SecureStateDao.compareAndSet(key, expected, next)` is one conditional statement (insert-if-absent, or update where the value equals `expected`), so of two actors starting from the same value exactly one wins (trusted-time state, T-144). Values never appear in errors (code-only `DbWriteException`).
+- `outbox`: `payload` a JSON object ≤ 64 KiB; `attempts ≥ 0`; `ix_outbox_kind (kind, created_at)`. `OutboxDao.deleteKind` serves EC-48.
+- `voice_usage`: `month` a real `YYYY-MM`; `count ≥ 0`. `VoiceUsageDao.incrementIfBelow(month, limit)` is one conditional upsert: of 20 racing calls with limit 15, exactly 15 count.
+- `undo_batches`: `description_key` an l10n key (`[A-Za-z0-9_.]`, 1–64), `before_json` valid JSON ≤ 8 MiB; `ix_undo_created`.
+- `diag_log`: `level IN ('debug','info','warn','error')`; `code` 1–64 of `[A-Za-z0-9_.:-]` (no spaces); `fields` NULL or a JSON object ≤ 2 KiB; `ix_diag_at`. `DiagLogDao.prune` applies the age and row-count limits in one transaction.
+
 ## 3. Integrity rules enforced in code (and covered by tests)
 
 | Rule | Where |
@@ -346,6 +372,11 @@ CREATE TABLE diag_log (id INTEGER PRIMARY KEY, at INTEGER NOT NULL, level TEXT N
 | Transfer pair same currency unless `cross_currency`/`fx_conversion` | `PairSelfTransfers` |
 | Catalog update never changes `category_source IN ('user','user_rule')` or `is_user_verified=1` rows | `ApplyCatalogUpdate` WHERE clause (FR-SYNC-05) |
 | Money never `REAL` | Drift type converters (`Money`); a lint forbids `double` in money paths |
+| One institution-level ignore rule per institution and channel | partial unique index `ux_ignore_institution` |
+| Zakah history is never deleted with its asset | `zakah_ledger.asset_id` FK without cascade |
+| A secure-state value changes only from the value the writer read | `SecureStateDao.compareAndSet` (one conditional statement) |
+| The free voice limit is never exceeded by racing confirms | `VoiceUsageDao.incrementIfBelow` (one conditional upsert) |
+| Every money column is integer, bounded and paired with its currency | CHECKs; `test/core/db/schema_audit_test.dart` walks every `*_minor` column |
 
 ## 4. Migrations policy
 
@@ -353,6 +384,8 @@ CREATE TABLE diag_log (id INTEGER PRIMARY KEY, at INTEGER NOT NULL, level TEXT N
 2. `drift_dev schema dump` snapshots live in `app/drift_schemas/`, and generated migration tests verify every `vN → vN+1` path *and* `v1 → latest` on populated fixture databases (NFR-REL-02).
 2a. T-017: a step runs a **frozen** list of statements (e.g. `core/db/migrations/v2_financial_a.dart`, checked against the dump by a test), never the current schema, so later changes can't leak into old steps. drift_dev 2.35.3's generated `Schema2` (`app_schema.steps.dart`) omits `transactions_fts_src`, `transactions_fts_short` and the view, so it is used for dispatch (`migrationSteps`) only. The codegen script fails on any drift_dev analysis warning (a warning silently drops the entity), and make-migrations refuses a changed schema for an existing version. `schemaShapeOf` compares CHECK clauses too (FU-071 m-3).
 2b. T-018: a step that changes an existing trigger drops it by name (no `IF EXISTS`) and re-creates it from the new dump; a test derives the dropped and created lists from the v(N−1) and vN dumps. FTS5 options (data in `_config`) are not in any dump: the current ones live in `core/db/fts_options.dart` (run after `createAll`), and each step that changes them keeps a frozen copy.
+   *FTS options on shipped data (T-018 review S-1):* an option such as `secure-delete` affects only later writes. A step that turns on a privacy-relevant FTS option for a database that may already hold user data must also run the table's `'optimize'` (or `'rebuild'`) command, so tokens of rows deleted before the step leave the index too. v3 did not (no v2 file had shipped).
+2c. T-019: SQLite can't add a CHECK to an existing table, so a step that tightens one **rebuilds** the table from a frozen list: `CREATE TABLE "<t>__v4"` with the new dump's DDL, `INSERT INTO "<t>__v4" (cols) SELECT cols FROM <t>` (every column by name), a row-count comparison (a mismatch fails the step before anything is dropped), `DROP TABLE <t>`, `ALTER TABLE "<t>__v4" RENAME TO <t>`, then the table's indexes from the dump. Foreign keys are off for the step (children keep their FK text) and the opener's `foreign_key_check` runs before commit. A row that breaks a new CHECK fails the copy, and the opener restores the untouched pre-migration file: nothing is coerced or dropped. A test derives the rebuild list, each temp DDL and the indexes from the v(N−1) and vN dumps.
 3. Before running migrations, the app makes an encrypted copy of the DB: `PRAGMA wal_checkpoint(TRUNCATE)`, then a byte copy `zaghlol.db` → `zaghlol.db.migrate.part` → renamed `zaghlol.db.migrate.tmp` (same key and salt by construction; T-016 — `VACUUM INTO` can't run inside drift's migration transaction and its key semantics under sqlite3mc are unproven). It is deleted after success; on failure, or at the next start if the migration was never confirmed, the app restores it and shows the "update failed" screen.
 4. Migrations are additive in a release. Column drops or renames happen in two releases: shadow column first, then drop.
 5. The registry and catalog are **data**, not schema. Their versions are stored in `catalog_meta` and `raw_messages.registry_version`, and re-parse jobs are driven by version bumps.

@@ -1,7 +1,7 @@
 // T-017: rows ↔ Money (design note §4; T-012 "Serialization"). The domain's
 // toStorage/fromStorage are the only conversion; this file adds the column
-// pairs of the batch-A tables (T-018: and batch B). Amounts are integer minor units end to end:
-// no double anywhere. A corrupt stored pair (unknown code, out of range,
+// pairs of the batch-A tables (T-018: batch B; T-019: batch C). Amounts are
+// integer minor units end to end: no double anywhere. A corrupt stored pair (unknown code, out of range,
 // half-NULL) throws [CorruptMoney], whose message never echoes free text.
 
 import 'package:drift/drift.dart' show Value;
@@ -91,4 +91,50 @@ extension RecurringItemsCompanionMoney on RecurringItemsCompanion {
     final s = amount.toStorage();
     return copyWith(amountMinor: Value(s.minor), currency: Value(s.currency));
   }
+}
+
+// T-019: batch-C money columns. A `unit` that is a gold symbol (XAU21_G) is
+// not money (milligrams): read those rows' integers directly.
+
+extension AssetRowMoney on AssetRow {
+  /// A certificate's principal, in the asset's currency.
+  Money? get principal =>
+      principalMinor == null ? null : optionalMoneyOf(principalMinor, currency);
+
+  /// The user's valuation (real estate, car, stocks), in the asset's
+  /// currency.
+  Money? get manualValue => manualValueMinor == null
+      ? null
+      : optionalMoneyOf(manualValueMinor, currency);
+
+  /// What the user paid, in its own currency.
+  Money? get purchasePrice =>
+      optionalMoneyOf(purchasePriceMinor, purchaseCurrency);
+}
+
+extension PriceQuoteRowMoney on PriceQuoteRow {
+  /// The price of one [PriceQuoteRow.perUnit] of the symbol.
+  Money get price => moneyOf(priceMinor, currency);
+}
+
+extension NetworthSnapshotRowMoney on NetworthSnapshotRow {
+  /// True when [NetworthSnapshotRow.unit] is a currency code (else a gold
+  /// unit in milligrams).
+  bool get isCurrencyUnit => Currency.tryOf(unit) != null;
+
+  /// The assets total when the unit is a currency, else null.
+  Money? get assetsMoney => isCurrencyUnit ? moneyOf(assetsMinor, unit) : null;
+
+  /// The liabilities total when the unit is a currency, else null.
+  Money? get liabilitiesMoney =>
+      isCurrencyUnit ? moneyOf(liabilitiesMinor, unit) : null;
+}
+
+extension ZakahLedgerRowMoney on ZakahLedgerRow {
+  /// True when [ZakahLedgerRow.unit] is a currency code (else a gold unit in
+  /// milligrams).
+  bool get isCurrencyUnit => Currency.tryOf(unit) != null;
+
+  Money? get amount => isCurrencyUnit ? moneyOf(amountMinor, unit) : null;
+  Money? get paid => isCurrencyUnit ? moneyOf(paidMinor, unit) : null;
 }

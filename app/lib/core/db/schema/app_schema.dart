@@ -14,13 +14,15 @@ part 'app_schema.g.dart';
 
 /// The current schema version. v1: `db_meta` only (T-016). v2: batch A of
 /// the financial tables in financial.drift (T-017). v3: batch B in
-/// financial_b.drift (T-018) and the T-017 review trigger fixes. Must equal
+/// financial_b.drift (T-018) and the T-017 review trigger fixes. v4: batch C
+/// in financial_c.drift (T-019) and four batch-B tables rebuilt with stricter
+/// CHECKs. Must equal
 /// [AppSchema.schemaVersion], which drift_dev reads as a literal (a test
 /// checks both).
-const int appSchemaVersion = 3;
+const int appSchemaVersion = 4;
 
 /// Key/value facts about the database itself (T-016), e.g.
-/// `restore_notice_due`. Not user settings (T-019 owns `settings`).
+/// `restore_notice_due`. Not user settings (those are `settings`, T-019).
 @DataClassName('DbMetaRow')
 class DbMeta extends Table {
   @override
@@ -36,12 +38,12 @@ class DbMeta extends Table {
 /// The generated schema. [AppDatabase] (app_database.dart) adds behaviour.
 @DriftDatabase(
   tables: [DbMeta],
-  include: {'financial.drift', 'financial_b.drift'},
+  include: {'financial.drift', 'financial_b.drift', 'financial_c.drift'},
 )
 abstract class AppSchema extends _$AppSchema {
   AppSchema(super.e);
 
   // A literal: drift_dev reads it from the source (make-migrations).
   @override
-  int get schemaVersion => 3;
+  int get schemaVersion => 4;
 }

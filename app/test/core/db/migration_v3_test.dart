@@ -6,6 +6,9 @@
 // on, and the T-017 review fixes m-1 / m-2 are live. A failing step is
 // rolled back byte for byte. Also: the frozen step equals the dumps. Keys
 // and data synthetic.
+// T-019: the app is at v4, so a v2 file runs v2 → v3 → v4 here; the live
+// schema is compared with the latest dump (the v3 → v4 step itself is in
+// migration_v4_test.dart).
 
 import 'dart:convert';
 
@@ -117,8 +120,8 @@ void main() {
   for (final background in [true, false]) {
     final mode = background ? 'background' : 'foreground';
 
-    test('v2 → v3 through the opener: copy made then deleted, rows kept, '
-        'schema = fresh v3 = dump, FK check clean, new tables, secure-delete, '
+    test('v2 → latest through the opener: copy made then deleted, rows kept, '
+        'schema = fresh = latest dump, FK check clean, new tables, secure-delete, '
         'm-1/m-2 live ($mode)', () async {
       await prepareV2(world);
       final result = await world.open(
@@ -129,14 +132,14 @@ void main() {
       addTearDown(db.close);
       expect(opened.migratedFrom, 2);
       expect(db.attemptedUpgradeFrom, 2);
-      expect(await userVersionOf(db), 3);
+      expect(await userVersionOf(db), appSchemaVersion);
       expect(world.files.migrateTmp.existsSync(), isFalse);
       expect(world.files.migratePart.existsSync(), isFalse);
       expect(await metaValue(db, 'marker'), 'v2');
 
       final live = await schemaShapeOf(db);
       expect(sameSchemaShape(live, await freshShape()), isTrue);
-      expect(sameSchemaShape(live, await dumpShape(3)), isTrue);
+      expect(sameSchemaShape(live, await dumpShape(appSchemaVersion)), isTrue);
       expect(await db.customSelect('PRAGMA foreign_key_check').get(), isEmpty);
 
       // v2 rows and their search index survive.
@@ -260,7 +263,7 @@ void main() {
       expect(failed.code, DbOpenFailureCode.migrationFailed);
       expect(failed.restored, isTrue);
       expect(failed.fromVersion, 2);
-      expect(failed.toVersion, 3);
+      expect(failed.toVersion, appSchemaVersion);
       await settle(world);
       expect(sameSnapshot(before, snapshotFiles(world.dbDir)), isTrue);
       expect(world.wipeLog, isEmpty);
