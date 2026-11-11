@@ -1,0 +1,17 @@
+{
+  "sender": "NBE",
+  "body": "تم خصم 45.00 جم بـطاقة فيزا **4567 لـدى TALABAT يوم 30/12",
+  "receivedAt": "2026-01-02T08:00:00+02:00",
+  "expect": {
+    "template": "nbe.card_purchase.ar",
+    "amount": "45.00",
+    "last4": "4567",
+    "merchantClean": "Talabat",
+    "date": "2025-12-30",
+    "confidence": "980",
+    "needsReview": "false",
+    "occurredAt": "2025-12-30T08:00:00",
+    "language": "ar",
+    "reasons": []
+  }
+}

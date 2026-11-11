@@ -22,6 +22,93 @@ String foldForMatching(String input) => _transform(input, _Level.matching);
 /// lowercase.
 String foldKey(String input) => _transform(input, _Level.key);
 
+/// Folds only the Arabic letter variants (`أ إ آ ٱ` to `ا`, `ى` to `ي`,
+/// `ة` to `ه`) and drops tatweel and harakat, leaving case, digits and
+/// spacing alone. Used on template pattern literals (registry), where
+/// lowercasing would corrupt escapes such as `\S` and `\D`.
+String foldArabicVariants(String input) {
+  final out = StringBuffer();
+  // Code units, not runes: no mapped character is a surrogate half.
+  for (final unit in input.codeUnits) {
+    if (_isMatchingMark(unit)) {
+      continue;
+    }
+    switch (unit) {
+      case 0x0623:
+      case 0x0625:
+      case 0x0622:
+      case 0x0671:
+        out.writeCharCode(0x0627);
+      case 0x0649:
+        out.writeCharCode(0x064A);
+      case 0x0629:
+        out.writeCharCode(0x0647);
+      default:
+        out.writeCharCode(unit);
+    }
+  }
+  return out.toString();
+}
+
+/// A [foldKey] result with a map back to the original text.
+///
+/// [origin] has one entry per code unit of [text]: the index of the original
+/// code unit it came from (a collapsed run of spaces maps to its first
+/// whitespace). A span `[start, end)` of [text] therefore covers the original
+/// span `[origin[start], origin[end - 1] + 1)`.
+final class FoldedText {
+  const FoldedText(this.text, this.origin);
+
+  final String text;
+  final List<int> origin;
+
+  /// The original substring under the folded span `[start, end)`, or null
+  /// when the span is empty or out of range.
+  String? originalSpan(String original, int start, int end) {
+    if (start < 0 || end > text.length || start >= end) {
+      return null;
+    }
+    final from = origin[start];
+    final to = origin[end - 1] + 1;
+    if (to > original.length || from >= to) {
+      return null;
+    }
+    return original.substring(from, to);
+  }
+}
+
+/// [foldKey] that also records where each folded code unit came from. The
+/// `text` is identical to `foldKey(input)` (tested), so regexes compiled for
+/// folded text run unchanged and their captures can be mapped back.
+FoldedText foldKeyIndexed(String input) {
+  final out = StringBuffer();
+  final origin = <int>[];
+  var pendingSpaceAt = -1;
+  var wroteAny = false;
+  final units = input.codeUnits;
+  for (var i = 0; i < units.length; i++) {
+    final unit = units[i];
+    if (_isSpace(unit)) {
+      if (pendingSpaceAt < 0) {
+        pendingSpaceAt = i;
+      }
+      continue;
+    }
+    if (_isInvisible(unit) || _isMatchingMark(unit)) {
+      continue;
+    }
+    if (pendingSpaceAt >= 0 && wroteAny) {
+      out.writeCharCode(_space);
+      origin.add(pendingSpaceAt);
+    }
+    pendingSpaceAt = -1;
+    wroteAny = true;
+    out.writeCharCode(_foldLetter(_mapChar(unit)));
+    origin.add(i);
+  }
+  return FoldedText(out.toString(), origin);
+}
+
 enum _Level { display, matching, key }
 
 const int _space = 0x20;
@@ -75,6 +162,8 @@ bool _isInvisible(int u) {
       (u >= 0x202A && u <= 0x202E) ||
       (u >= 0x2066 && u <= 0x2069) ||
       u == 0x061C ||
+      u == 0x2060 || // word joiner
+      u == 0x00AD || // soft hyphen
       u == 0xFEFF;
 }
 

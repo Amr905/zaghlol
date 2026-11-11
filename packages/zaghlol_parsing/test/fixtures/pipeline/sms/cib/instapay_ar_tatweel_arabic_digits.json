@@ -1,0 +1,18 @@
+{
+  "sender": "CIB",
+  "body": "تم تحويل ٧٥٠٫٠٠ جم إلى مـحمد علي عبر إنستاباي. رقم مرجعي ١٢٣٤٥٦٧٨",
+  "receivedAt": "2026-10-23T11:14:00+03:00",
+  "expect": {
+    "template": "cib.instapay_out.ar",
+    "amount": "750.00",
+    "counterparty": "محمد علي",
+    "counterpartyKind": "name",
+    "ref": "12345678",
+    "balance": null,
+    "confidence": "970",
+    "needsReview": "false",
+    "occurredAt": "2026-10-23T11:14:00",
+    "language": "ar",
+    "reasons": []
+  }
+}

@@ -1,0 +1,16 @@
+{
+  "sender": "NBE",
+  "body": "تم إيداع راتب ١٨٬٥٠٠٫٠٠ جم في حسابكم رقم **٤٥٦٧ بتاريخ ٢٥/١٠/٢٠٢٦ الساعة ٣:٠٥ م",
+  "receivedAt": "2026-10-25T15:06:00+03:00",
+  "expect": {
+    "template": "nbe.salary.ar",
+    "amount": "18500.00",
+    "last4": "4567",
+    "date": "2026-10-25",
+    "confidence": "960",
+    "needsReview": "false",
+    "occurredAt": "2026-10-25T15:05:00",
+    "language": "ar",
+    "reasons": []
+  }
+}

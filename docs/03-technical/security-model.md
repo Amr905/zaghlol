@@ -70,7 +70,7 @@ The copy is UX-owned (Egyptian colloquial with standard Arabic for the legal tex
   - The server issues its own ES256 account JWT (30 d).
   - An account only *links* entitlements, and grants no access to any data other than entitlement status.
 - **Purchase authorization:**
-  - **Verify:** a purchase is honoured only if store verification succeeds **and** the store-side binding (`obfuscatedExternalAccountId` / `appAccountToken`) equals HMAC(installId). Verify needs no device attestation, because the binding is the proof (ADR-012 Amendment (2026-11-05) Part B).
+  - **Verify:** a purchase is honoured only if store verification succeeds **and** the store-side binding (`obfuscatedExternalAccountId` / `appAccountToken`) equals `StoreBindingRef(installId)` of the install the token authenticates (a public-key HMAC domain separator, not a secret; defined in backend-api §4.3). Verify needs no device attestation, because the binding is the proof (ADR-012 Amendment (2026-11-05) Part B).
   - **Restore** (D-45, D-46, D-52, FR-GOLD-08/09): possession of a genuine token is **not** proof of ownership. A restore is honoured only when all of these hold:
     - a valid device attestation (Play Integrity standard request / App Attest assertion) is bound to **this install and the request body**: `SHA-256("zaghlol-restore-v1" ‖ 0x00 ‖ installId ‖ 0x00 ‖ JCS(body))`, with `installId` taken from the authenticated install token (R2-1);
     - store verification succeeds;

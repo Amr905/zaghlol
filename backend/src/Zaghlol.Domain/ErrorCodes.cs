@@ -21,5 +21,11 @@ public static class ErrorCodes
     public const string UnsupportedMediaType = "UNSUPPORTED_MEDIA_TYPE";
     public const string RateLimited = "RATE_LIMITED";
     public const string UpstreamUnavailable = "UPSTREAM_UNAVAILABLE";
+
+    /// <summary>502: Google Play or the App Store failed or is unreachable (T-130); the app keeps the purchase pending.</summary>
+    public const string StoreUnavailable = "STORE_UNAVAILABLE";
+    public const string PurchaseTokenInvalid = "PURCHASE_TOKEN_INVALID";
+    public const string PurchaseNotOwned = "PURCHASE_NOT_OWNED";
+    public const string PurchaseWrongApp = "PURCHASE_WRONG_APP";
     public const string Internal = "INTERNAL";
 }

@@ -324,10 +324,17 @@ paths:
         (JWS). On Android the product ID selects the Play endpoint (`purchases.subscriptionsv2.get` for
         subscriptions, `purchases.productsv2.getproductpurchasev2` for lifetime) and must equal the product ID
         Play returns for the token. The server verifies with the store, checks the store-side binding
-        equals HMAC(installId), upserts keyed by purchase token (Android) or originalTransactionId (iOS),
-        acknowledges Android purchases, and grants Gold only for a purchased and active state. A pending
-        purchase returns `status: pending` and grants nothing. Idempotent for 24 hours per `Idempotency-Key`.
-        No device attestation here: the store-side binding to HMAC(installId) already ties a new purchase to
+        (Play `obfuscatedExternalAccountId`, Apple `appAccountToken`) equals `StoreBindingRef(installId)` of the
+        install the token authenticates (backend-api §4.3; vectors
+        `backend/tests/Zaghlol.Contract.Tests/vectors/store-binding-v1.json`), upserts keyed by purchase token
+        (Android) or originalTransactionId (iOS), acknowledges Android purchases, and grants Gold only for a
+        purchased and active state (a cancelled subscription keeps Gold until its expiry). A pending purchase
+        returns `status: pending` and grants nothing. A `purchaseToken` that isn't 1-512 characters of
+        `[A-Za-z0-9._-]` (with at least one letter or digit) is answered `422 PURCHASE_TOKEN_INVALID` without a
+        Play call. A store failure is `502 STORE_UNAVAILABLE` and an exhausted server-side store budget
+        `503 UPSTREAM_UNAVAILABLE`, both with `Retry-After` and neither stored. Idempotent for 24 hours per
+        `Idempotency-Key`.
+        No device attestation here: the store-side binding to StoreBindingRef(installId) already ties a new purchase to
         the buying install (ADR-012 Amendment (2026-11-05) Part B). Verify binds the purchase's single seat to the
         buying install when the purchase has no seat yet (not a move, D-52). A **new payment from this install**
         (a Google `linkedPurchaseToken` successor, or a new Apple transaction with `transactionReason = PURCHASE`)
@@ -2494,7 +2501,7 @@ components:
         purchaseToken:
           type: string
           minLength: 1
-          maxLength: 2048
+          maxLength: 512
     PurchaseVerifyIosRequest:
       type: object
       additionalProperties: false
@@ -2598,7 +2605,7 @@ components:
         purchaseToken:
           type: string
           minLength: 1
-          maxLength: 2048
+          maxLength: 512
     PlayIntegrityProof:
       type: object
       description: |

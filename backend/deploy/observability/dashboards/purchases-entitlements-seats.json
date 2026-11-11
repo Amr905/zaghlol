@@ -74,7 +74,7 @@
       "targets": [
         {
           "refId": "A",
-          "expr": "max(zaghlol_purchase_unacked)",
+          "expr": "max by (age) (zaghlol_purchase_unacked)",
           "legendFormat": "count"
         },
         {

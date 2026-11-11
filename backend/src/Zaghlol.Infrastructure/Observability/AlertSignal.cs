@@ -22,6 +22,9 @@ public enum AuditAlertRule
 
     /// <summary>An over-cap same-iPhone rebind (<c>seat_rebind</c>). Carries the purchase UUID.</summary>
     SeatRebindOverCap,
+
+    /// <summary>A Google purchase still unacknowledged 48 h after it was recorded (T-130 sweeper). Carries the purchase UUID.</summary>
+    PurchaseUnacked48h,
 }
 
 /// <summary>
@@ -47,6 +50,7 @@ public sealed partial class AlertSignal(ZaghlolMetrics metrics, ILogger<AlertSig
         AuditAlertRule.DisputeFrozenRefusal => "dispute_frozen_refusal",
         AuditAlertRule.SupportUnfreeze => "support_unfreeze",
         AuditAlertRule.SeatRebindOverCap => "seat_rebind_over_cap",
+        AuditAlertRule.PurchaseUnacked48h => "purchase_unacked_48h",
         _ => throw new ArgumentOutOfRangeException(nameof(rule)),
     };
 

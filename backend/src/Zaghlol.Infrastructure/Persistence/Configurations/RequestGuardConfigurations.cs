@@ -29,6 +29,10 @@ internal sealed class IdempotencyRecordConfiguration : IEntityTypeConfiguration<
             t.HasCheckConstraint("ck_idempotency_records_operation_id", "operation_id IN ('verifyPurchase','signIn')");
             t.HasCheckConstraint("ck_idempotency_records_idempotency_key_length", "char_length(idempotency_key) = 26");
             t.HasCheckConstraint("ck_idempotency_records_body_sha256_length", "octet_length(body_sha256) = 32");
+
+            // T-130 (FU-052 S-2): a claim row (status 0, with its lease) or a stored final result; nothing else.
+            t.HasCheckConstraint("ck_idempotency_records_status", "status = 0 OR status BETWEEN 200 AND 299 OR status IN (409, 422)");
+            t.HasCheckConstraint("ck_idempotency_records_claim", "(status = 0) = (claim_id IS NOT NULL)");
         });
 
         builder.HasKey(x => new { x.InstallId, x.OperationId, x.IdempotencyKey });

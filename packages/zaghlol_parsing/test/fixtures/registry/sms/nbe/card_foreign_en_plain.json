@@ -1,0 +1,16 @@
+{
+  "sender": "NBE",
+  "body": "NBE: USD 25.00 at STEAMGAMES charged EGP 1,250.00 on card *4567",
+  "receivedAt": "2026-10-23T11:14:00+03:00",
+  "expect": {
+    "template": "nbe.card_foreign.en",
+    "direction": "expense",
+    "event": "card_purchase_fx",
+    "amount": "1250.00",
+    "currency": "EGP",
+    "originalAmount": "25.00",
+    "originalCurrency": "USD",
+    "last4": "4567",
+    "balance": null
+  }
+}

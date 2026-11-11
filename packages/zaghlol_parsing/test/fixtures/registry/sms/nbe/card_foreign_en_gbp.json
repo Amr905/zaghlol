@@ -1,0 +1,11 @@
+{
+  "sender": "nbe",
+  "body": "NBE: GBP 3.00 at SPOTIFY LONDON GB charged EGP 190.00 on card *4567. Bal EGP 100.00",
+  "receivedAt": "2026-10-23T11:14:00+03:00",
+  "expect": {
+    "template": "nbe.card_foreign.en",
+    "amount": "190.00",
+    "originalCurrency": "GBP",
+    "merchantClean": "Spotify London Gb"
+  }
+}

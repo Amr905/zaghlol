@@ -24,9 +24,13 @@ public sealed class IdempotencyRecord
 
     public required byte[] BodySha256 { get; set; }
 
+    /// <summary>0 while a request holds the claim (T-130, FU-052 S-2); otherwise the stored final status (2xx, 409, 422).</summary>
     public int Status { get; set; }
 
-    /// <summary>Envelope-encrypted by <c>IEnvelopeCipher</c> (T-123); holds tokens.</summary>
+    /// <summary>The claiming request's lease (non-null exactly when <see cref="Status"/> is 0).</summary>
+    public Guid? ClaimId { get; set; }
+
+    /// <summary>Envelope-encrypted by <c>IEnvelopeCipher</c> (T-123); holds tokens. Empty while claimed.</summary>
     public required byte[] ResponseBodyEnc { get; set; }
 
     public Guid? AccountId { get; set; }

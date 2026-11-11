@@ -1,0 +1,24 @@
+{
+  "sender": "NBE",
+  "body": "NBE: EUR 10.50 at ZALANDO charged EGP 560.25 on card *4567. Bal EGP 9,000.00",
+  "receivedAt": "2026-10-23T11:14:00+03:00",
+  "expect": {
+    "template": "nbe.card_foreign.en",
+    "direction": "expense",
+    "event": "card_purchase_fx",
+    "amount": "560.25",
+    "currency": "EGP",
+    "originalAmount": "10.50",
+    "originalCurrency": "EUR",
+    "last4": "4567",
+    "merchantClean": "Zalando",
+    "balance": "9000.00",
+    "date": null,
+    "time": null,
+    "confidence": "970",
+    "needsReview": "false",
+    "occurredAt": "2026-10-23T11:14:00",
+    "language": "en",
+    "reasons": []
+  }
+}

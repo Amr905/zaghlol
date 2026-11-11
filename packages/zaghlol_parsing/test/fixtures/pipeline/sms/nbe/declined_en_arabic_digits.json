@@ -1,0 +1,16 @@
+{
+  "sender": "NBE",
+  "body": "NBE: Card *٤٥٦٧ purchase of EGP ١٬٥٠٠٫٠٠ at HYPERONE declined",
+  "receivedAt": "2026-10-23T11:14:00+03:00",
+  "expect": {
+    "template": "nbe.declined.en",
+    "amount": "1500.00",
+    "last4": "4567",
+    "merchantClean": "Hyperone",
+    "confidence": "950",
+    "needsReview": "false",
+    "occurredAt": "2026-10-23T11:14:00",
+    "language": "en",
+    "reasons": []
+  }
+}

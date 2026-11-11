@@ -33,14 +33,29 @@
     <!-- Operator OIDC (T-136): JWS parsing and RS256/ES256 signature validation against the IdP's JWKS; maintained Microsoft
          identity library (8.x line, .NET 9/10 support). Microsoft.IdentityModel.Tokens/Logging/Abstractions come with it. -->
     <PackageVersion Include="Microsoft.IdentityModel.JsonWebTokens" Version="8.23.0" />
+    <!-- Google Play Developer API (T-130). The Play client is a plain typed HttpClient (DTOs with only the fields read, our own URL
+         redaction); Google.Apis.Auth only mints OAuth access tokens for the androidpublisher scope (ADC / workload identity
+         federation, or a service-account JSON from the secrets manager). Maintained by Google; 1.78.0 is the current release. -->
+    <PackageVersion Include="Google.Apis.Auth" Version="1.78.0" />
+    <!-- The .NET standard resilience pipeline (Polly v8) for the Play client: attempt/total timeouts, retries, circuit breaker.
+         10.8.0 is the newest release whose Microsoft.Extensions.* dependencies are 10.0.10, the runtime line pinned above
+         (10.9.0+ need 10.0.11+, which central transitive pinning would reject as a downgrade). -->
+    <PackageVersion Include="Microsoft.Extensions.Http.Resilience" Version="10.8.0" />
     <!-- Tests -->
     <PackageVersion Include="JsonSchema.Net" Version="7.3.4" />
     <PackageVersion Include="Microsoft.AspNetCore.Mvc.Testing" Version="10.0.0" />
     <PackageVersion Include="Microsoft.NET.Test.Sdk" Version="17.14.1" />
     <PackageVersion Include="OpenTelemetry.Exporter.InMemory" Version="1.15.3" />
     <PackageVersion Include="Testcontainers.PostgreSql" Version="4.6.0" />
+    <!-- Transitive pin: WireMock.Net.Minimal 2.21.0 (test-only) pulls Microsoft.AspNetCore.WebUtilities 2.3.0 (GHSA-6527-9fp8-r4x6);
+         2.3.14 is the first 2.3.x without the advisory on nuget.org (checked 2026-11-11). -->
+    <PackageVersion Include="Microsoft.AspNetCore.WebUtilities" Version="2.3.14" />
     <!-- Transitive pin: Testcontainers 4.6.0 pulls SSH.NET 2024.2.0 (GHSA-mggc-4xg6-vcxf, GHSA-q939-rpr3-3284). -->
     <PackageVersion Include="SSH.NET" Version="2026.0.0" />
+    <!-- Test-only: an in-process HTTP server standing in for the Play Developer API (T-130). The Minimal package leaves out the
+         GraphQL, gRPC/ProtoBuf and OpenTelemetry extras of the WireMock.Net meta-package. 2.21.0 is the newest release on the
+         10.0.10 runtime line (2.30.0 needs Microsoft.Extensions.* 10.0.14). -->
+    <PackageVersion Include="WireMock.Net.Minimal" Version="2.21.0" />
     <PackageVersion Include="xunit" Version="2.9.3" />
     <PackageVersion Include="YamlDotNet" Version="16.3.0" />
     <PackageVersion Include="xunit.runner.visualstudio" Version="3.1.4" />

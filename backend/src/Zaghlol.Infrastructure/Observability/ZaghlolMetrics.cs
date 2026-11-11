@@ -47,9 +47,14 @@ public sealed partial class ZaghlolMetrics : IDisposable
     private readonly Counter<long> syncBlockFailure;
     private readonly Counter<long> syncFlagRulesInvalid;
     private readonly Counter<long> contributionEvents;
+    private readonly Counter<long> storeCall;
+    private readonly Counter<long> purchaseAck;
+    private readonly Counter<long> ownershipCheck;
+    private readonly Counter<long> idempotencyClaim;
     private readonly ConcurrentDictionary<string, double> priceAges = new(StringComparer.Ordinal);
     private readonly string serviceVersion;
-    private long unackedCount;
+    private long unackedLessThan48h;
+    private long unackedAtLeast48h;
     private double unackedOldestAgeSeconds;
     private long playIntegrityDailyQuota;
 
@@ -102,7 +107,20 @@ public sealed partial class ZaghlolMetrics : IDisposable
             "zaghlol.sync.flag_rules_invalid",
             description: "Syncs that evaluated a flag OFF because its stored rules failed the strict parse, by flag key (FU-056).");
 
-        meter.CreateObservableGauge("zaghlol.purchase.unacked", () => Interlocked.Read(ref unackedCount), description: "Purchases waiting for acknowledgement.");
+        storeCall = meter.CreateCounter<long>(
+            "zaghlol.store.call",
+            description: "Outbound store API calls by store, api (sub_get|prod_get|sub_ack|prod_ack|orders_get) and outcome (T-130).");
+        purchaseAck = meter.CreateCounter<long>(
+            "zaghlol.purchase.ack",
+            description: "Google acknowledgements by channel (verify|sweeper) and outcome (acked|already|failed|not_ackable).");
+        ownershipCheck = meter.CreateCounter<long>(
+            "zaghlol.purchase.ownership_check",
+            description: "Support order-ID ownership checks by path (orders|fallback) and outcome (pass|fail|unavailable).");
+        idempotencyClaim = meter.CreateCounter<long>(
+            "zaghlol.idempotency.claim",
+            description: "Idempotency claims by outcome (claimed|replayed|reused|in_progress|taken_over|lease_lost).");
+
+        meter.CreateObservableGauge("zaghlol.purchase.unacked", ObserveUnacked, description: "Ackable Google purchases waiting for acknowledgement, by age (lt_48h|ge_48h).");
         meter.CreateObservableGauge("zaghlol.purchase.unacked.oldest_age", () => Volatile.Read(ref unackedOldestAgeSeconds), "s", "Age of the oldest unacknowledged purchase.");
         meter.CreateObservableGauge<double>("zaghlol.price.age", ObservePriceAges, "s", "Age of the newest quote per symbol.");
         meter.CreateObservableGauge("zaghlol.play_integrity.daily_quota", () => Interlocked.Read(ref playIntegrityDailyQuota), description: "Configured Play Integrity daily quota.");
@@ -128,12 +146,30 @@ public sealed partial class ZaghlolMetrics : IDisposable
 
     public void PriceOverridden() => priceOverridden.Add(1);
 
-    /// <summary>Called by the worker that counts unacknowledged purchases; the oldest age is 0 when none.</summary>
-    public void SetUnacked(long count, TimeSpan oldestAge)
+    /// <summary>Called by the acknowledge sweeper after each run (ackable rows only); the oldest age is 0 when none.</summary>
+    public void SetUnacked(long lessThan48h, long atLeast48h, TimeSpan oldestAge)
     {
-        Interlocked.Exchange(ref unackedCount, count);
+        Interlocked.Exchange(ref unackedLessThan48h, lessThan48h);
+        Interlocked.Exchange(ref unackedAtLeast48h, atLeast48h);
         Volatile.Write(ref unackedOldestAgeSeconds, oldestAge.TotalSeconds);
     }
+
+    /// <param name="store"><c>google_play</c> or <c>app_store</c>.</param>
+    /// <param name="api">One of <c>StoreCallTags.Apis</c>.</param>
+    /// <param name="outcome">One of <c>StoreCallTags.Outcomes</c>.</param>
+    public void StoreCall(string store, string api, string outcome) =>
+        storeCall.Add(1, Tags(("store", store), ("api", api), ("outcome", outcome)));
+
+    /// <param name="channel"><c>verify</c> or <c>sweeper</c>.</param>
+    /// <param name="outcome"><c>acked</c>, <c>already</c>, <c>failed</c> or <c>not_ackable</c>.</param>
+    public void PurchaseAck(string channel, string outcome) => purchaseAck.Add(1, Tags(("channel", channel), ("outcome", outcome)));
+
+    /// <param name="path"><c>orders</c> or <c>fallback</c>.</param>
+    /// <param name="outcome"><c>pass</c>, <c>fail</c> or <c>unavailable</c>.</param>
+    public void OwnershipCheck(string path, string outcome) => ownershipCheck.Add(1, Tags(("path", path), ("outcome", outcome)));
+
+    /// <param name="outcome">One of <c>IdempotencyClaimOutcomes</c>.</param>
+    public void IdempotencyClaim(string outcome) => idempotencyClaim.Add(1, Tags(("outcome", outcome)));
 
     public void NotificationProcessed(TimeSpan lag) => notificationLag.Record(lag.TotalSeconds);
 
@@ -269,7 +305,27 @@ public sealed partial class ZaghlolMetrics : IDisposable
         {
             syncFlagRulesInvalid.Add(0, Tags(("flag", flag)));
         }
+
+        // The auth_error alert (a wrong credential or permission, T-130) needs a sample before the first failure.
+        foreach (var api in StoreCallApis)
+        {
+            storeCall.Add(0, Tags(("store", "google_play"), ("api", api), ("outcome", "auth_error")));
+        }
+
+        foreach (var channel in new[] { "verify", "sweeper" })
+        {
+            purchaseAck.Add(0, Tags(("channel", channel), ("outcome", "failed")));
+        }
     }
+
+    /// <summary>The <c>api</c> tag values of <c>zaghlol.store.call</c> (StoreCallTags.Apis).</summary>
+    internal static IReadOnlyList<string> StoreCallApis { get; } = ["sub_get", "prod_get", "sub_ack", "prod_ack", "orders_get"];
+
+    private IEnumerable<Measurement<long>> ObserveUnacked() =>
+    [
+        new(Interlocked.Read(ref unackedLessThan48h), new KeyValuePair<string, object?>("age", "lt_48h")),
+        new(Interlocked.Read(ref unackedAtLeast48h), new KeyValuePair<string, object?>("age", "ge_48h")),
+    ];
 
     private IEnumerable<Measurement<double>> ObservePriceAges() =>
         priceAges.Select(p => new Measurement<double>(p.Value, new KeyValuePair<string, object?>("symbol", p.Key)));

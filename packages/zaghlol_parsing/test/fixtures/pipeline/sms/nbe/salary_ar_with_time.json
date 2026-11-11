@@ -1,0 +1,22 @@
+{
+  "sender": "NBE",
+  "body": "تم إيداع راتب 15,000.00 جم في حسابكم رقم **4567 بتاريخ 25/10/2026 الساعة 09:30",
+  "receivedAt": "2026-10-25T09:31:00+03:00",
+  "expect": {
+    "template": "nbe.salary.ar",
+    "direction": "income",
+    "event": "salary",
+    "amount": "15000.00",
+    "currency": "EGP",
+    "last4": "4567",
+    "date": "2026-10-25",
+    "time": "09:30",
+    "merchantClean": null,
+    "counterpartyKind": null,
+    "confidence": "960",
+    "needsReview": "false",
+    "occurredAt": "2026-10-25T09:30:00",
+    "language": "ar",
+    "reasons": []
+  }
+}
