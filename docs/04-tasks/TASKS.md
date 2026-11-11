@@ -80,15 +80,15 @@ Every task file has: ID, description, technical details, dependencies, affected 
 | [T-035](tasks/T-035.md) | Capture Guard rules in Dart, shared golden cases and config generator | US-03-1 | High* | Opus | parsing-engine-engineer | T-032 | F | 5 | DONE |
 | [T-036](tasks/T-036.md) | Templates + fixtures: NBE, CIB, Banque Misr, QNB | US-05-1 | Medium | Sonnet | parsing-engine-engineer | T-033 | F | 6 | TODO |
 | [T-037](tasks/T-037.md) | Templates + fixtures: InstaPay scenarios and mobile wallets | US-05-1 | Medium | Sonnet | parsing-engine-engineer | T-033 | F | 6 | TODO |
-| [T-038](tasks/T-038.md) | Android Capture Guard (Kotlin) with config reader | US-03-1 | High* | Opus | native-platform-engineer | T-035, T-008 | D | 6 | IN_REVIEW |
-| [T-039](tasks/T-039.md) | Android encrypted spool + spool host API | US-03-1 | High* | Opus | native-platform-engineer | T-004, T-008 | D | 4 | TODO |
+| [T-038](tasks/T-038.md) | Android Capture Guard (Kotlin) with config reader | US-03-1 | High* | Opus | native-platform-engineer | T-035, T-008 | D | 6 | DONE |
+| [T-039](tasks/T-039.md) | Android encrypted spool + spool host API | US-03-1 | High* | Opus | native-platform-engineer | T-004, T-008 | D | 4 | DONE |
 | [T-040](tasks/T-040.md) | SMS receiver (multipart, Guard, spool, enqueue) in prodSms flavor | US-03-1 | High* | Opus | native-platform-engineer | T-038, T-039 | D | 7 | TODO |
 | [T-041](tasks/T-041.md) | IngestionWorker with headless Flutter engine and foreground events | US-03-1 | High* | Opus | native-platform-engineer | T-039, T-008 | D | 5 | TODO |
 | [T-042](tasks/T-042.md) | Inbox reader for historical scan (sender-filtered, paged) | US-03-2 | High* | Opus | native-platform-engineer | T-004, T-038 | D | 7 | TODO |
 | [T-043](tasks/T-043.md) | Bank notification listener service | US-03-3 | High* | Opus | native-platform-engineer | T-038, T-039 | D | 7 | TODO |
 | [T-044](tasks/T-044.md) | Android capabilities and permission flows host API | US-03-4 | High* | Opus | native-platform-engineer | T-040, T-043 | D | 8 | TODO |
 | [T-045](tasks/T-045.md) | Accounts repository: auto-create, default cash, per-currency balances | US-06-1 | High | Sonnet | flutter-core-engineer | T-017 | A | 6 | DONE |
-| [T-046](tasks/T-046.md) | IngestRawMessages use case (dedupe, merge, persist, ack, events) | US-06-1 | High* | Opus | flutter-core-engineer | T-033, T-045, T-014, T-035 | A | 7 | TODO |
+| [T-046](tasks/T-046.md) | IngestRawMessages use case (dedupe, merge, persist, ack, events) | US-06-1 | High* | Opus | flutter-core-engineer | T-033, T-045, T-014, T-035 | A | 7 | DONE |
 | [T-047](tasks/T-047.md) | Capture module (app side): guard config writer, spool orchestrator, degraded mode | US-03-1 | High | Sonnet | flutter-core-engineer | T-046, T-039, T-035 | A | 8 | TODO |
 | [T-048](tasks/T-048.md) | Historical inbox scan with progress (Android) | US-03-2 | High | Sonnet | flutter-core-engineer | T-047, T-042 | A | 9 | TODO |
 | [T-049](tasks/T-049.md) | Review queue domain and repository | US-06-2 | Medium | Sonnet | flutter-core-engineer | T-019, T-046 | A | 8 | TODO |
@@ -169,7 +169,7 @@ Every task file has: ID, description, technical details, dependencies, affected 
 | [T-109](tasks/T-109.md) | Egyptian Arabic voice-phrase parser and 200-phrase fixtures | US-11-3 | High | Sonnet | parsing-engine-engineer | T-013, T-075 | F | 9 | TODO |
 | [T-110](tasks/T-110.md) | Ask Zaghlol intent engine (grammar, slots, query plans, answers, roast) | US-11-2 | High | Sonnet | parsing-engine-engineer | T-105, T-027 | F | 12 | TODO |
 | [T-111](tasks/T-111.md) | Ask Zaghlol screen S-50 | US-11-2 | Medium | Sonnet | flutter-ui-engineer | T-110 | G | 13 | TODO |
-| [T-112](tasks/T-112.md) | Prices and FX store in app (sync-fed, manual override, stale) | US-12-1 | Medium | Sonnet | flutter-core-engineer | T-019 | A | 6 | TODO |
+| [T-112](tasks/T-112.md) | Prices and FX store in app (sync-fed, manual override, stale) | US-12-1 | Medium | Sonnet | flutter-core-engineer | T-019 | A | 6 | DONE |
 | [T-113](tasks/T-113.md) | Assets, liabilities, net worth per unit and snapshots | US-12-1 | High | Sonnet | flutter-core-engineer | T-112, T-045, T-096 | A | 9 | TODO |
 | [T-114](tasks/T-114.md) | Charts: remaining eight (Gold) | US-11-1 | Medium | Sonnet | flutter-ui-engineer | T-107, T-113 | G | 13 | TODO |
 | [T-115](tasks/T-115.md) | ≈ combined view service (target currency, rate date, exclusions) | US-12-2 | High | Sonnet | flutter-core-engineer | T-012, T-112 | A | 7 | TODO |
@@ -195,7 +195,7 @@ Every task file has: ID, description, technical details, dependencies, affected 
 | [T-130](tasks/T-130.md) | Google Play purchase verification, acknowledgement and sweeper | US-14-1 | High* | Opus | backend-engineer | T-124, T-123 | B | 4 | DONE |
 | [T-131](tasks/T-131.md) | App Store verification (JWS chain, Server API status, appAccountToken) | US-14-1 | High* | Opus | backend-engineer | T-124, T-123 | B | 4 | DONE |
 | [T-132](tasks/T-132.md) | Entitlement tokens, GET /v1/entitlement, seat at verify and sync entitlement block | US-14-1 | High* | Opus | backend-engineer | T-128, T-130, T-131, T-184 | B | 5 | TODO |
-| [T-133](tasks/T-133.md) | Google RTDN push endpoint, processing worker and voided reconciliation | US-14-1 | High* | Opus | backend-engineer | T-130 | B | 5 | TODO |
+| [T-133](tasks/T-133.md) | Google RTDN push endpoint, processing worker and voided reconciliation | US-14-1 | High* | Opus | backend-engineer | T-130 | B | 5 | DONE |
 | [T-134](tasks/T-134.md) | App Store Server Notifications V2 endpoint and reconciliation | US-14-1 | High* | Opus | backend-engineer | T-131 | B | 5 | DONE |
 | [T-135](tasks/T-135.md) | Accounts: Google/Apple ID token sign-in, linking, sign-out, delete, Android Apple callback | US-15-1 | High* | Opus | backend-engineer | T-132, T-182, T-184 | B | 6 | TODO |
 | [T-136](tasks/T-136.md) | Operator auth (OIDC + MFA), roles, audit log and support lookup | US-13-2 | High* | Opus | backend-engineer | T-122 | B | 3 | IN_REVIEW |
