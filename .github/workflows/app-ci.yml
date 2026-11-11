@@ -422,6 +422,18 @@ jobs:
             exit 1
           fi
           tail -n 5 build.log
+      # T-039: the instrumented suites (spool, guard, share) run only in the
+      # opt-in sms-spike workflow; compiling their APK here catches source and
+      # test-manifest errors on every push.
+      - name: Build the instrumented test APK (devSms, T-039)
+        if: matrix.flavor == 'devSms'
+        working-directory: app/android
+        run: |
+          if ! ./gradlew --no-daemon :app:assembleDevSmsDebugAndroidTest > it-build.log 2>&1; then
+            echo "::error::androidTest build failed: $(grep -A25 -E 'What went wrong|Error|error:|^e: ' it-build.log | head -n 40 | tr '\n' '|')"
+            exit 1
+          fi
+          tail -n 3 it-build.log
       - name: Assert SMS permissions, applicationId and SDK levels
         run: |
           AAPT2=$(ls -d "$ANDROID_HOME"/build-tools/*/aapt2 | sort -V | tail -n 1)
