@@ -98,8 +98,23 @@ final class PaydaySchedule {
     final head = eras.last.from == today
         ? eras.sublist(0, eras.length - 1)
         : eras;
-    if (head.isEmpty) return PaydaySchedule([PaydayEra(null, day)]);
     return PaydaySchedule([...head, next]);
+  }
+
+  /// The schedule to use given the stored `payday_eras` text ([erasJson],
+  /// null: unset), the user-facing `payday_day` and [today] (design note §2).
+  /// No (valid) eras: `[(null, paydayDay)]`, so the first explicit payday
+  /// rewrites history. Last era's day differs from [paydayDay] (restore,
+  /// another writer): appends `(today, paydayDay)`.
+  static PaydaySchedule resolve({
+    required String? erasJson,
+    required int paydayDay,
+    required CivilDate today,
+  }) {
+    final day = paydayDay < 1 || paydayDay > 28 ? 1 : paydayDay;
+    final stored = erasJson == null ? null : tryFromJson(erasJson);
+    if (stored == null) return PaydaySchedule.single(day);
+    return stored.currentDay == day ? stored : stored.withChange(today, day);
   }
 
   /// The cycle containing [date].

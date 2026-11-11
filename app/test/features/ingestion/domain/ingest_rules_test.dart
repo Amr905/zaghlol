@@ -288,83 +288,56 @@ void main() {
     });
   });
 
-  group('cycleKeyFor (domain-algorithms §2, A-43)', () {
+  group('cycleKeyFor (domain-algorithms §2, A-43, T-051)', () {
     int utc(int y, int mo, int d, [int h = 0, int mi = 0]) =>
         DateTime.utc(y, mo, d, h, mi).millisecondsSinceEpoch;
+    String key(int ms, int off, int payday) => cycleKeyFor(
+      occurredAtMs: ms,
+      tzOffsetMin: off,
+      schedule: PaydaySchedule.single(payday),
+    );
 
-    test('payday 1 is the calendar month, in local time', () {
-      expect(
-        cycleKeyFor(
-          occurredAtMs: utc(2026, 10, 31, 22, 30),
-          tzOffsetMin: 120,
-          paydayDay: 1,
-        ),
-        '2026-11',
-        reason: '00:30 on 1 Nov in Cairo',
-      );
-      expect(
-        cycleKeyFor(
-          occurredAtMs: utc(2026, 10, 31, 21, 59),
-          tzOffsetMin: 120,
-          paydayDay: 1,
-        ),
-        '2026-10',
-      );
+    test('the key is the ISO start date, in local time', () {
+      expect(key(utc(2026, 10, 31, 22, 30), 120, 1), '2026-11-01');
+      expect(key(utc(2026, 10, 31, 21, 59), 120, 1), '2026-10-01');
     });
 
     test('before payday belongs to the previous month; January wraps', () {
-      expect(
-        cycleKeyFor(
-          occurredAtMs: utc(2027, 1, 24),
-          tzOffsetMin: 0,
-          paydayDay: 25,
-        ),
-        '2026-12',
+      expect(key(utc(2027, 1, 24), 0, 25), '2026-12-25');
+      expect(key(utc(2027, 1, 25), 0, 25), '2027-01-25');
+    });
+
+    test('payday 28 at month ends and February', () {
+      expect(key(utc(2026, 2, 27), 0, 28), '2026-01-28');
+      expect(key(utc(2026, 3, 31), 0, 28), '2026-03-28');
+    });
+
+    test('keys do not collide after a payday change (EC-21)', () {
+      final s = PaydaySchedule.single(25)
+          .withChange(CivilDate(2026, 11, 10), 1);
+      String k(int d) => cycleKeyFor(
+        occurredAtMs: utc(2026, 11, d),
+        tzOffsetMin: 0,
+        schedule: s,
       );
+      expect(k(9), '2026-10-25');
+      expect(k(30), '2026-10-25');
       expect(
         cycleKeyFor(
-          occurredAtMs: utc(2027, 1, 25),
+          occurredAtMs: utc(2026, 12, 1),
           tzOffsetMin: 0,
-          paydayDay: 25,
+          schedule: s,
         ),
-        '2027-01',
+        '2026-12-01',
       );
     });
 
-    test('payday 28 at month ends (29–31) and February', () {
-      expect(
-        cycleKeyFor(
-          occurredAtMs: utc(2026, 2, 27),
-          tzOffsetMin: 0,
-          paydayDay: 28,
-        ),
-        '2026-01',
-      );
-      expect(
-        cycleKeyFor(
-          occurredAtMs: utc(2026, 3, 31),
-          tzOffsetMin: 0,
-          paydayDay: 28,
-        ),
-        '2026-03',
-      );
-    });
-
-    test('out-of-range payday → 1; stored text parsed (Arabic digits are '
-        'not stored: settings hold ASCII)', () {
+    test('paydayDayOf: out-of-range or unreadable payday is 1', () {
       expect(paydayDayOf(null), 1);
       expect(paydayDayOf('25'), 25);
       expect(paydayDayOf('31'), 1);
       expect(paydayDayOf('0'), 1);
       expect(paydayDayOf('abc'), 1);
-      expect(
-        cycleKeyFor(
-          occurredAtMs: utc(2026, 5, 2),
-          tzOffsetMin: 0,
-          paydayDay: 31,
-        ),
-        '2026-05',
-      );
     });
   });
 

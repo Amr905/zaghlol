@@ -236,31 +236,14 @@ TxnCandidate? pickPendingMatch({
   return best;
 }
 
-/// The payday cycle key (`YYYY-MM` of the cycle start month) of a local
-/// time (domain-algorithms §2; A-43: no payday is day 1). [paydayDay]
-/// outside 1..28 is treated as 1.
+/// The payday cycle key of a local time: the ISO start date of its cycle
+/// (`2026-10-25`; domain-algorithms §2, T-051). Replaces the `YYYY-MM` key,
+/// which could collide after a payday change (EC-21).
 String cycleKeyFor({
   required int occurredAtMs,
   required int tzOffsetMin,
-  required int paydayDay,
-}) {
-  final payday = paydayDay < 1 || paydayDay > 28 ? 1 : paydayDay;
-  final local = DateTime.fromMillisecondsSinceEpoch(
-    occurredAtMs + tzOffsetMin * 60000,
-    isUtc: true,
-  );
-  var year = local.year;
-  var month = local.month;
-  if (local.day < payday) {
-    month -= 1;
-    if (month == 0) {
-      month = 12;
-      year -= 1;
-    }
-  }
-  return '${year.toString().padLeft(4, '0')}-'
-      '${month.toString().padLeft(2, '0')}';
-}
+  required PaydaySchedule schedule,
+}) => schedule.cycleOnMs(occurredAtMs, tzOffsetMin).key;
 
 /// `settings.payday_day` as stored, or 1 (A-43).
 int paydayDayOf(String? stored) {

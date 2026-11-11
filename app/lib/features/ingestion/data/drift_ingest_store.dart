@@ -19,6 +19,7 @@ import '../domain/ingest_records.dart';
 
 /// Settings keys ingest reads (database-schema §2.8).
 const String kSettingPaydayDay = 'payday_day';
+const String kSettingPaydayEras = 'payday_eras';
 const String kSettingLanguage = 'language';
 
 /// Most candidates one dedupe or merge read returns.
@@ -54,9 +55,15 @@ final class DriftIngestStore implements IngestStorePort {
           readsFrom: {_db.customTemplates},
         )
         .get();
-    final settings = await (_db.select(
-      _db.settings,
-    )..where((s) => s.key.isIn([kSettingPaydayDay, kSettingLanguage]))).get();
+    final settings =
+        await (_db.select(_db.settings)..where(
+              (s) => s.key.isIn([
+                kSettingPaydayDay,
+                kSettingPaydayEras,
+                kSettingLanguage,
+              ]),
+            ))
+            .get();
     String? setting(String key) {
       for (final s in settings) {
         if (s.key == key) return s.value;
@@ -83,6 +90,7 @@ final class DriftIngestStore implements IngestStorePort {
           (t.read<String>('sender'), t.read<String>('channel')),
       ],
       paydayDay: setting(kSettingPaydayDay),
+      paydayEras: setting(kSettingPaydayEras),
       language: setting(kSettingLanguage),
     );
   });

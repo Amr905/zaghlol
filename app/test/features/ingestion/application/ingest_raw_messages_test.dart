@@ -916,7 +916,7 @@ void main() {
       expect(w.events, hasLength(1));
       final e = w.events.single as TransactionsChanged;
       expect(e.accountIds, hasLength(2));
-      expect(e.cycleKeys, {'2026-11'});
+      expect(e.cycleKeys, {'2026-11-01'});
       expect(identical(r.event, e), isTrue);
       expect(() => e.accountIds.add('x'), throwsUnsupportedError);
     });
@@ -927,7 +927,19 @@ void main() {
         "('payday_day', '25', 0)",
       );
       final r = await w.run([sms('a', purchase)]);
-      expect(r.event!.cycleKeys, {'2026-10'});
+      expect(r.event!.cycleKeys, {'2026-10-25'});
+    });
+
+    test('payday_eras decide the key: the era in force at the txn date '
+        '(T-051, EC-21)', () async {
+      await w.db.customStatement(
+        'INSERT INTO settings (key, value, updated_at) VALUES '
+        "('payday_day', '1', 0), "
+        "('payday_eras', '[{\"from\":null,\"day\":25},"
+        "{\"from\":\"2026-11-02\",\"day\":1}]', 0)",
+      );
+      final r = await w.run([sms('a', purchase)]);
+      expect(r.event!.cycleKeys, {'2026-10-25'});
     });
 
     test('nothing changed → no event', () async {
