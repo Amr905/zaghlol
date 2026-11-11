@@ -224,3 +224,28 @@ does require the head token to be active. This is acceptable for proving the cla
 - Follow-ups: M-2 (budget per attempt and per replica, ack reserve, verify per-install limit; blocks go-live with PO question 4),
   L-2 (owner T-185), L-3 and L-4 (owner T-133), I-1 to I-5.
 - Re-review: delta only.
+
+## Re-review (delta) - `d758dca..071b031`
+
+Scope: the delta only. Application and Workers tests: 544 and 22 pass; the Infrastructure `ModelTests` (grant matrix) pass. The Testcontainers tests (store, sweeper SQL, endpoint) are pending: the PC runner is offline. The `ListSql` ordering, `DeferSql` and the column grant are therefore verified by reading, not by execution; GitHub Actions stays the gate.
+
+**M-1 (sweeper starvation): RESOLVED.**
+- `ListSql` (`PlayAckSweepStore.cs`): `ORDER BY (state = 'pending'), ack_next_attempt_at NULLS FIRST, created_at` filtered to `ack_next_attempt_at IS NULL OR <= @now`. Ackable rows come before pending ones, never-deferred before deferred. A stuck row can no longer occupy the 200-row head: after one run it is stamped and leaves the window until due.
+- Stamping: `Waiting`, `Failed` and `Skipped` are deferred in `RunOnceAsync`. `BudgetDenied` breaks the loop before the stamp, so a budget-denied row keeps a NULL stamp and is first in line next run. The ack-budget-denied path writes the state but does not stamp. Correct.
+- Backoff bounds: a quarter of the age, clamped to 15 min to 2 h, 24 h past 72 h. The sweeper is the only writer of the column and holds the advisory lock, so the unguarded `DeferAsync` has no race. A lost monotonic guard still stamps; harmless.
+- 48 h alert limited to ackable rows younger than 72 h: nothing that should page is hidden. Rows at 48 to 72 h still page on every run. A row at 72 h or more has already been refunded by Play, and the sweeper still re-reads it daily and closes it, so the page would not be actionable. Residual (Info, I-6): a sweeper outage longer than 72 h means rows created in it are never paged. An outage that long is a separate health signal (no run, no gauge update); a non-paging "ackable and 72 h or older" gauge would keep them visible.
+- Migration: one nullable column, no default, metadata-only. Grant to `worker_rw`: UPDATE on `ack_next_attempt_at` only (`TablePrivileges.None`), no `ops_ro` or `app_rw` grant, same pattern as `claim_id`. `worker_rw` already has table-wide SELECT on `purchases`, so the sweeper's WHERE and ORDER BY on the new column work. `ModelTests` assert the app role does not get it.
+- `GrantMatrix.Merge`: only unions privileges and column lists per role and table; it cannot remove a grant, and `Flatten` equality is tested across the three frozen lists. `Current` merges but old migrations still render their own frozen lists. Not weakening.
+- "Up to 2 h late" for a deferred pending row that verify later moved to active with a failed inline acknowledge: acceptable. The user already has Gold; the 72 h clock starts at the purchase completing, so 2 h costs less than 3 % of the window and leaves at least 12 more tries in the last day. Accepted.
+
+**L-1 (active subscription without expiry): RESOLVED.** `PlayStateMapping.Map`: Active, InGrace and Canceled without `expiryTime` fall through to `PlayReadOutcome.Unknown`. Verify answers 502 and writes nothing. The sweeper reads state `null`, which is `Skipped`, so it defers and never writes or acknowledges. No subscription row can get `expires_at = NULL` in an entitling state. Tested.
+
+**Grant gate (code finding 1), security view: RESOLVED.** The endpoint calls the grant only for `Status == Active && PurchaseId != null`. `Status` comes from `StoredPurchaseState` returned by the upsert, so a stale verify that lost the monotonic guard and read an older state cannot grant. `GrantingVerifyGrant` (always grants for opted-in installs) makes `OnlyAnActivePurchaseReachesTheGrantStep...` meaningful: pending (sub and lifetime), expired and refunded give `entitlement: null` with zero grant calls, and active and canceled_active are granted as the positive control.
+
+**New findings**
+- **N-1, Low (follow-up, not before merge): late retries of an ackable row near the 72 h deadline.** `RetryDelay` is a quarter of the age, capped at 2 h, with no clamp to the time left. An ackable row whose acknowledge fails at 70 h is next tried at 72 h or later, after Play's refund; the 15 min cadence would give about 8 more tries. This needs a Play error persisting into the last hours, and the 48 h page still fires. Change: for ackable rows (not pending) use the 15 min minimum, or `min(delay, max(15 min, 72 h - age))`. Owner: T-130 follow-up or T-133.
+- **N-2, Info: stamp not cleared on a state change by verify or RTDN.** A deferred row that becomes ackable through verify keeps its old stamp (at most 2 h). Clearing `ack_next_attempt_at` in the upsert when the state changes would remove the delay; it needs `app_rw` UPDATE on the column, so leave it as is.
+
+Nothing new at Major or Medium or above. Pending: Testcontainers runs.
+
+**Final verdict (security): APPROVED.** M-1 and L-1 are closed. M-2 (go-live), L-2 to L-4 and I-1 to I-5 stay follow-ups as listed above; N-1 and I-6 join them.
