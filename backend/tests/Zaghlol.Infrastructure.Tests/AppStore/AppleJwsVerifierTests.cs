@@ -48,7 +48,7 @@ public sealed class AppleJwsVerifierTests : IDisposable
     [Fact]
     public void RenewalInfoVerifies()
     {
-        var renewal = Verifier.VerifyRenewalInfo(Jws(pki.Sign(AppleTestPki.Renewal("2000000123456700", "zaghlol_gold_yearly", 0, gracePeriodExpiresDate: Now.AddDays(3)))), Now);
+        var renewal = Verifier.VerifyRenewalInfo(Jws(pki.Sign(AppleTestPki.Renewal("2000000123456700", "zaghlol_gold_yearly", 0, gracePeriodExpiresDate: Now.AddDays(3)))), JwsSource.Api, Now);
 
         Assert.Equal(0, renewal.AutoRenewStatus);
         Assert.Equal(AppleEnvironment.Production, renewal.Environment);

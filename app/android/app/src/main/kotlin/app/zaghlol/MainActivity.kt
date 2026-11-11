@@ -13,6 +13,8 @@ import app.zaghlol.platform.share.ShareIntakeHostApi
 import app.zaghlol.platform.share.ShareIntakeState
 import app.zaghlol.platform.share.ShareStore
 import app.zaghlol.platform.share.ShareStores
+import app.zaghlol.platform.text.TextNormalizationHostApi
+import app.zaghlol.platform.text.TextNormalizationRegistration
 import io.flutter.embedding.android.FlutterActivity
 import io.flutter.embedding.engine.FlutterEngine
 import java.util.concurrent.Executors
@@ -27,6 +29,8 @@ class MainActivity : FlutterActivity() {
         // T-015: the database key store. The T-008 headless engine must register
         // it too (every engine that opens the database).
         SecretStoreRegistration.register(messenger, this)
+        // T-148: NFC for the backup passphrase (UI engine only).
+        TextNormalizationRegistration.register(messenger)
         val store = ShareStores.create(applicationContext)
         shareStore = store
         ShareIntakeHostApi.setUp(messenger, ShareIntakeHost(store))
@@ -39,6 +43,7 @@ class MainActivity : FlutterActivity() {
     override fun cleanUpFlutterEngine(flutterEngine: FlutterEngine) {
         EngineHooks.detach(flutterEngine)
         ShareIntakeHostApi.setUp(flutterEngine.dartExecutor.binaryMessenger, null)
+        TextNormalizationHostApi.setUp(flutterEngine.dartExecutor.binaryMessenger, null)
         shareEvents = null
         shareStore = null
         super.cleanUpFlutterEngine(flutterEngine)

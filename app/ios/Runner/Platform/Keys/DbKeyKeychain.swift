@@ -44,7 +44,9 @@ protocol SecretSlotStore: AnyObject {
   func delete() throws
 }
 
-/// T-015: K_db as a Keychain generic password (design note §2).
+/// T-015: K_db as a Keychain generic password (design note §2). T-148: the
+/// same type holds K_bk under account `backup_key_v1` (`DbKeyKeychain(account:
+/// DbKeyKeychain.backupAccount)`); the two items share nothing but the service.
 ///
 /// Service `app.zaghlol.keys`, account `db_key_v1`,
 /// `kSecAttrAccessibleAfterFirstUnlockThisDeviceOnly`, never synchronizable.
@@ -69,6 +71,8 @@ protocol SecretSlotStore: AnyObject {
 final class DbKeyKeychain: SecretSlotStore {
   static let service = "app.zaghlol.keys"
   static let account = "db_key_v1"
+  /// T-148: the backup data key K_bk.
+  static let backupAccount = "backup_key_v1"
   static let keyLength = 32
 
   /// Runner's own application-identifier group; nil in unsigned builds.
@@ -77,6 +81,8 @@ final class DbKeyKeychain: SecretSlotStore {
     bundleId: Bundle.main.bundleIdentifier)
 
   let accessGroup: String?
+  /// The item's account (`db_key_v1` or `backup_key_v1`).
+  let account: String
   private let client: KeychainClient
   private let retryDelaysMs: [UInt32]
   private let sleeper: (UInt32) -> Void
@@ -85,11 +91,13 @@ final class DbKeyKeychain: SecretSlotStore {
   init(
     client: KeychainClient = SystemKeychain(),
     accessGroup: String? = DbKeyKeychain.appAccessGroup,
+    account: String = DbKeyKeychain.account,
     retryDelaysMs: [UInt32] = [100, 300, 900],
     sleeper: @escaping (UInt32) -> Void = { usleep($0 * 1000) }
   ) {
     self.client = client
     self.accessGroup = accessGroup
+    self.account = account
     self.retryDelaysMs = retryDelaysMs
     self.sleeper = sleeper
   }
@@ -106,7 +114,9 @@ final class DbKeyKeychain: SecretSlotStore {
   }
 
   /// Identifies this item and nothing else.
-  static func itemQuery(accessGroup: String?) -> [String: Any] {
+  static func itemQuery(accessGroup: String?, account: String = DbKeyKeychain.account)
+    -> [String: Any]
+  {
     var q: [String: Any] = [
       kSecClass as String: kSecClassGenericPassword,
       kSecAttrService as String: service,
@@ -117,15 +127,19 @@ final class DbKeyKeychain: SecretSlotStore {
     return q
   }
 
-  static func readQuery(accessGroup: String?) -> [String: Any] {
-    var q = itemQuery(accessGroup: accessGroup)
+  static func readQuery(accessGroup: String?, account: String = DbKeyKeychain.account)
+    -> [String: Any]
+  {
+    var q = itemQuery(accessGroup: accessGroup, account: account)
     q[kSecReturnData as String] = kCFBooleanTrue as Any
     q[kSecMatchLimit as String] = kSecMatchLimitOne
     return q
   }
 
-  static func addAttributes(value: Data, accessGroup: String?) -> [String: Any] {
-    var q = itemQuery(accessGroup: accessGroup)
+  static func addAttributes(
+    value: Data, accessGroup: String?, account: String = DbKeyKeychain.account
+  ) -> [String: Any] {
+    var q = itemQuery(accessGroup: accessGroup, account: account)
     q[kSecValueData as String] = value
     q[kSecAttrAccessible as String] = kSecAttrAccessibleAfterFirstUnlockThisDeviceOnly
     return q
@@ -179,7 +193,8 @@ final class DbKeyKeychain: SecretSlotStore {
       // lease, that no database depends on it). Unknown state: never overwrite.
       throw KeyStoreFailure()
     }
-    let status = client.add(DbKeyKeychain.addAttributes(value: candidate, accessGroup: accessGroup))
+    let status = client.add(
+      DbKeyKeychain.addAttributes(value: candidate, accessGroup: accessGroup, account: account))
     if status == errSecDuplicateItem {
       // Another writer won; return its value if it is usable.
       let winner = readOnce()
@@ -190,7 +205,7 @@ final class DbKeyKeychain: SecretSlotStore {
     let check = readOnce()
     guard check.status == .found, let stored = check.value, constantTimeEqual(stored, candidate)
     else {
-      _ = client.delete(DbKeyKeychain.itemQuery(accessGroup: accessGroup))
+      _ = client.delete(DbKeyKeychain.itemQuery(accessGroup: accessGroup, account: account))
       throw KeyStoreFailure()
     }
     return candidate
@@ -199,7 +214,8 @@ final class DbKeyKeychain: SecretSlotStore {
   func delete() throws {
     lock.lock()
     defer { lock.unlock() }
-    let status = client.delete(DbKeyKeychain.itemQuery(accessGroup: accessGroup))
+    let status = client.delete(
+      DbKeyKeychain.itemQuery(accessGroup: accessGroup, account: account))
     guard status == errSecSuccess || status == errSecItemNotFound else { throw KeyStoreFailure() }
   }
 
@@ -233,7 +249,8 @@ final class DbKeyKeychain: SecretSlotStore {
   }
 
   private func readOnce() -> SlotRead {
-    let (status, data) = client.copyMatching(DbKeyKeychain.readQuery(accessGroup: accessGroup))
+    let (status, data) = client.copyMatching(
+      DbKeyKeychain.readQuery(accessGroup: accessGroup, account: account))
     return DbKeyKeychain.classify(status: status, data: data)
   }
 

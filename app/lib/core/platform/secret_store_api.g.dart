@@ -98,7 +98,9 @@ int _deepHash(Object? value) {
 }
 
 /// The secrets the store knows. Each slot maps to one fixed native location.
-enum SecretSlotMsg { dbKey }
+/// `backupKey` (T-148): Android blob `backup_key_v1.bin` under Keystore key
+/// `zaghlol_bk_kek_v1`; iOS account `backup_key_v1`. Same rules as `dbKey`.
+enum SecretSlotMsg { dbKey, backupKey }
 
 /// Result class of a read.
 enum SecretStatusMsg {

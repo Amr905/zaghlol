@@ -79,6 +79,17 @@ public sealed class SeededSeriesTests
             Assert.Contains(("zaghlol.notification.dead_letter", "store=" + store), zeros);
         }
 
+        // T-134: the alerted ASSN series.
+        Assert.Contains(("zaghlol.assn.ingest", "env=production;outcome=ignored_product"), zeros);
+        Assert.Contains(("zaghlol.assn.ingest", "env=sandbox;outcome=ignored_product"), zeros);
+        Assert.Contains(("zaghlol.assn.processed", "outcome=env_mismatch;type=refund"), zeros);
+        Assert.Contains(("zaghlol.assn.processed", "outcome=dead_letter;type=other"), zeros);
+        Assert.Contains(("zaghlol.assn.reconcile", "outcome=invalid_entry;step=history"), zeros);
+        Assert.Contains(("zaghlol.assn.reconcile", "outcome=truncated;step=history"), zeros);
+        Assert.Contains(("zaghlol.assn.recovered", string.Empty), zeros);
+        Assert.Contains(("zaghlol.assn.refund_not_reflected", string.Empty), zeros);
+        Assert.Contains(("zaghlol.store.call", "api=notification_history;env=production;outcome=auth_error;store=app_store"), zeros);
+
         foreach (var operation in new[] { "sign", "sign_verify", "hmac", "data_key", "public_key" })
         {
             Assert.Contains(("zaghlol.kms.unavailable", "operation=" + operation), present);

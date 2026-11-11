@@ -2,7 +2,7 @@
  "format": 1,
  "synthetic": true,
  "note": "Synthetic data only (CLAUDE.md 2.6). Shared by the Dart, Kotlin (T-038) and Swift (T-061) Guards: never copy. count = fold + cases + rate + modes. fold: out = foldKey(in); lines (when present, else out) = foldKeyLines(in), the Guard's fold for the global drop patterns.",
- "count": 207,
+ "count": 237,
  "configs": {
   "t1": {
    "base": "configs/t1_base.json",
@@ -154,6 +154,90 @@
    "id": "fold.lines.edges_trimmed",
    "in": "\r\n OTP 1234\r\n",
    "out": "otp 1234"
+  },
+  {
+   "id": "fold.class.line_separator_u2028",
+   "in": "a b",
+   "out": "a b",
+   "lines": "a\nb"
+  },
+  {
+   "id": "fold.class.paragraph_separator_u2029",
+   "in": "a b",
+   "out": "a b",
+   "lines": "a\nb"
+  },
+  {
+   "id": "fold.class.narrow_nbsp_u202f",
+   "in": "EGP 450",
+   "out": "egp 450"
+  },
+  {
+   "id": "fold.class.thin_space_u2009",
+   "in": "EGP 450",
+   "out": "egp 450"
+  },
+  {
+   "id": "fold.class.vertical_tab_u000b",
+   "in": "a\u000bb",
+   "out": "a b",
+   "lines": "a\nb"
+  },
+  {
+   "id": "fold.class.form_feed_u000c",
+   "in": "a\fb",
+   "out": "a b",
+   "lines": "a\nb"
+  },
+  {
+   "id": "fold.class.zwsp_u200b",
+   "in": "O​T​P",
+   "out": "otp"
+  },
+  {
+   "id": "fold.class.lrm_u200e",
+   "in": "‎NBE‎",
+   "out": "nbe"
+  },
+  {
+   "id": "fold.class.bidi_embedding_u202a_u202e",
+   "in": "‪A‫B‬C‭D‮E",
+   "out": "abcde"
+  },
+  {
+   "id": "fold.class.bidi_isolate_u2066_u2069",
+   "in": "⁦A⁧B⁨C⁩D",
+   "out": "abcd"
+  },
+  {
+   "id": "fold.class.arabic_letter_mark_u061c",
+   "in": "؜خصم؜",
+   "out": "خصم"
+  },
+  {
+   "id": "fold.class.word_joiner_u2060",
+   "in": "O⁠TP",
+   "out": "otp"
+  },
+  {
+   "id": "fold.class.soft_hyphen_u00ad",
+   "in": "O­TP",
+   "out": "otp"
+  },
+  {
+   "id": "fold.class.em_space_not_folded",
+   "in": "a b",
+   "out": "a b"
+  },
+  {
+   "id": "fold.class.ideographic_space_not_folded",
+   "in": "a　b",
+   "out": "a　b"
+  },
+  {
+   "id": "fold.class.superscript_alef_u0670",
+   "in": "هٰذا",
+   "out": "هذا"
   }
  ],
  "cases": [
@@ -2589,6 +2673,224 @@
     "kind": "registry",
     "inst": "bm",
     "last4": "8642"
+   }
+  },
+  {
+   "id": "card.emoji_before_mask",
+   "tags": [
+    "card_ignore"
+   ],
+   "config": "t1",
+   "channel": "sms",
+   "source": "NBE",
+   "body": "Purchase 😀 EGP 10.00 card **4567",
+   "expect": {
+    "decision": "drop",
+    "reason": "ignored_card"
+   }
+  },
+  {
+   "id": "reg.emoji_before_mask",
+   "tags": [
+    "registry_keep"
+   ],
+   "config": "t1",
+   "channel": "sms",
+   "source": "NBE",
+   "body": "🛒😀 Purchase EGP 10.00 card **1357",
+   "expect": {
+    "decision": "keep",
+    "kind": "registry",
+    "inst": "nbe",
+    "last4": "1357"
+   }
+  },
+  {
+   "id": "nf.whitespace_4001",
+   "tags": [
+    "non_financial"
+   ],
+   "config": "t1",
+   "channel": "sms",
+   "source": "NBE",
+   "body": "                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                 ",
+   "expect": {
+    "decision": "drop",
+    "reason": "too_long"
+   }
+  },
+  {
+   "id": "nf.source_ws_trim_notification",
+   "tags": [
+    "registry_keep"
+   ],
+   "config": "t1",
+   "channel": "notification",
+   "source": "﻿ com.example.nbe 　",
+   "body": "Purchase EGP 10.00",
+   "expect": {
+    "decision": "keep",
+    "kind": "registry",
+    "inst": "nbe",
+    "last4": null
+   }
+  },
+  {
+   "id": "nf.source_u001c_not_trimmed_notification",
+   "tags": [
+    "non_financial"
+   ],
+   "config": "t1",
+   "channel": "notification",
+   "source": "\u001ccom.example.nbe\u001f",
+   "body": "Purchase EGP 10.00",
+   "expect": {
+    "decision": "drop",
+    "reason": "not_financial"
+   }
+  },
+  {
+   "id": "adv.global.otp_space_4000",
+   "tags": [
+    "adversarial"
+   ],
+   "config": "t1",
+   "channel": "sms",
+   "source": "NBE",
+   "body": "otp otp otp otp otp otp otp otp otp otp otp otp otp otp otp otp otp otp otp otp otp otp otp otp otp otp otp otp otp otp otp otp otp otp otp otp otp otp otp otp otp otp otp otp otp otp otp otp otp otp otp otp otp otp otp otp otp otp otp otp otp otp otp otp otp otp otp otp otp otp otp otp otp otp otp otp otp otp otp otp otp otp otp otp otp otp otp otp otp otp otp otp otp otp otp otp otp otp otp otp otp otp otp otp otp otp otp otp otp otp otp otp otp otp otp otp otp otp otp otp otp otp otp otp otp otp otp otp otp otp otp otp otp otp otp otp otp otp otp otp otp otp otp otp otp otp otp otp otp otp otp otp otp otp otp otp otp otp otp otp otp otp otp otp otp otp otp otp otp otp otp otp otp otp otp otp otp otp otp otp otp otp otp otp otp otp otp otp otp otp otp otp otp otp otp otp otp otp otp otp otp otp otp otp otp otp otp otp otp otp otp otp otp otp otp otp otp otp otp otp otp otp otp otp otp otp otp otp otp otp otp otp otp otp otp otp otp otp otp otp otp otp otp otp otp otp otp otp otp otp otp otp otp otp otp otp otp otp otp otp otp otp otp otp otp otp otp otp otp otp otp otp otp otp otp otp otp otp otp otp otp otp otp otp otp otp otp otp otp otp otp otp otp otp otp otp otp otp otp otp otp otp otp otp otp otp otp otp otp otp otp otp otp otp otp otp otp otp otp otp otp otp otp otp otp otp otp otp otp otp otp otp otp otp otp otp otp otp otp otp otp otp otp otp otp otp otp otp otp otp otp otp otp otp otp otp otp otp otp otp otp otp otp otp otp otp otp otp otp otp otp otp otp otp otp otp otp otp otp otp otp otp otp otp otp otp otp otp otp otp otp otp otp otp otp otp otp otp otp otp otp otp otp otp otp otp otp otp otp otp otp otp otp otp otp otp otp otp otp otp otp otp otp otp otp otp otp otp otp otp otp otp otp otp otp otp otp otp otp otp otp otp otp otp otp otp otp otp otp otp otp otp otp otp otp otp otp otp otp otp otp otp otp otp otp otp otp otp otp otp otp otp otp otp otp otp otp otp otp otp otp otp otp otp otp otp otp otp otp otp otp otp otp otp otp otp otp otp otp otp otp otp otp otp otp otp otp otp otp otp otp otp otp otp otp otp otp otp otp otp otp otp otp otp otp otp otp otp otp otp otp otp otp otp otp otp otp otp otp otp otp otp otp otp otp otp otp otp otp otp otp otp otp otp otp otp otp otp otp otp otp otp otp otp otp otp otp otp otp otp otp otp otp otp otp otp otp otp otp otp otp otp otp otp otp otp otp otp otp otp otp otp otp otp otp otp otp otp otp otp otp otp otp otp otp otp otp otp otp otp otp otp otp otp otp otp otp otp otp otp otp otp otp otp otp otp otp otp otp otp otp otp otp otp otp otp otp otp otp otp otp otp otp otp otp otp otp otp otp otp otp otp otp otp otp otp otp otp otp otp otp otp otp otp otp otp otp otp otp otp otp otp otp otp otp otp otp otp otp otp otp otp otp otp otp otp otp otp otp otp otp otp otp otp otp otp otp otp otp otp otp otp otp otp otp otp otp otp otp otp otp otp otp otp otp otp otp otp otp otp otp otp otp otp otp otp otp otp otp otp otp otp otp otp otp otp otp otp otp otp otp otp otp otp otp otp otp otp otp otp otp otp otp otp otp otp otp otp otp otp otp otp otp otp otp otp otp otp otp otp otp otp otp otp otp otp otp otp otp otp otp otp otp otp otp otp otp otp otp otp otp otp otp otp otp otp otp otp otp otp otp otp otp otp otp otp otp otp otp otp otp otp otp otp otp otp otp otp otp otp otp otp otp otp otp otp otp otp otp otp otp otp otp otp otp otp otp otp otp otp otp otp otp otp otp otp otp otp otp otp otp otp otp otp otp otp otp otp otp otp otp otp otp otp otp otp otp otp otp otp otp otp otp otp otp otp otp otp otp otp otp otp otp otp otp otp otp otp otp otp otp otp otp otp otp otp otp otp otp otp otp otp otp otp otp otp otp otp otp otp otp otp otp otp otp otp otp otp otp otp otp otp otp otp otp otp otp otp otp otp otp otp otp otp otp otp otp otp otp otp otp otp otp otp otp otp otp otp otp otp otp otp otp otp otp otp otp otp otp otp otp otp otp otp otp otp otp otp otp otp otp otp otp otp otp otp otp otp otp otp otp otp otp otp otp otp otp otp otp otp otp otp otp otp otp otp otp otp otp otp ",
+   "expect": {
+    "decision": "keep",
+    "kind": "registry",
+    "inst": "nbe",
+    "last4": null
+   }
+  },
+  {
+   "id": "adv.global.otp_1_is_4000",
+   "tags": [
+    "adversarial"
+   ],
+   "config": "t1",
+   "channel": "sms",
+   "source": "NBE",
+   "body": "otp 1 is otp 1 is otp 1 is otp 1 is otp 1 is otp 1 is otp 1 is otp 1 is otp 1 is otp 1 is otp 1 is otp 1 is otp 1 is otp 1 is otp 1 is otp 1 is otp 1 is otp 1 is otp 1 is otp 1 is otp 1 is otp 1 is otp 1 is otp 1 is otp 1 is otp 1 is otp 1 is otp 1 is otp 1 is otp 1 is otp 1 is otp 1 is otp 1 is otp 1 is otp 1 is otp 1 is otp 1 is otp 1 is otp 1 is otp 1 is otp 1 is otp 1 is otp 1 is otp 1 is otp 1 is otp 1 is otp 1 is otp 1 is otp 1 is otp 1 is otp 1 is otp 1 is otp 1 is otp 1 is otp 1 is otp 1 is otp 1 is otp 1 is otp 1 is otp 1 is otp 1 is otp 1 is otp 1 is otp 1 is otp 1 is otp 1 is otp 1 is otp 1 is otp 1 is otp 1 is otp 1 is otp 1 is otp 1 is otp 1 is otp 1 is otp 1 is otp 1 is otp 1 is otp 1 is otp 1 is otp 1 is otp 1 is otp 1 is otp 1 is otp 1 is otp 1 is otp 1 is otp 1 is otp 1 is otp 1 is otp 1 is otp 1 is otp 1 is otp 1 is otp 1 is otp 1 is otp 1 is otp 1 is otp 1 is otp 1 is otp 1 is otp 1 is otp 1 is otp 1 is otp 1 is otp 1 is otp 1 is otp 1 is otp 1 is otp 1 is otp 1 is otp 1 is otp 1 is otp 1 is otp 1 is otp 1 is otp 1 is otp 1 is otp 1 is otp 1 is otp 1 is otp 1 is otp 1 is otp 1 is otp 1 is otp 1 is otp 1 is otp 1 is otp 1 is otp 1 is otp 1 is otp 1 is otp 1 is otp 1 is otp 1 is otp 1 is otp 1 is otp 1 is otp 1 is otp 1 is otp 1 is otp 1 is otp 1 is otp 1 is otp 1 is otp 1 is otp 1 is otp 1 is otp 1 is otp 1 is otp 1 is otp 1 is otp 1 is otp 1 is otp 1 is otp 1 is otp 1 is otp 1 is otp 1 is otp 1 is otp 1 is otp 1 is otp 1 is otp 1 is otp 1 is otp 1 is otp 1 is otp 1 is otp 1 is otp 1 is otp 1 is otp 1 is otp 1 is otp 1 is otp 1 is otp 1 is otp 1 is otp 1 is otp 1 is otp 1 is otp 1 is otp 1 is otp 1 is otp 1 is otp 1 is otp 1 is otp 1 is otp 1 is otp 1 is otp 1 is otp 1 is otp 1 is otp 1 is otp 1 is otp 1 is otp 1 is otp 1 is otp 1 is otp 1 is otp 1 is otp 1 is otp 1 is otp 1 is otp 1 is otp 1 is otp 1 is otp 1 is otp 1 is otp 1 is otp 1 is otp 1 is otp 1 is otp 1 is otp 1 is otp 1 is otp 1 is otp 1 is otp 1 is otp 1 is otp 1 is otp 1 is otp 1 is otp 1 is otp 1 is otp 1 is otp 1 is otp 1 is otp 1 is otp 1 is otp 1 is otp 1 is otp 1 is otp 1 is otp 1 is otp 1 is otp 1 is otp 1 is otp 1 is otp 1 is otp 1 is otp 1 is otp 1 is otp 1 is otp 1 is otp 1 is otp 1 is otp 1 is otp 1 is otp 1 is otp 1 is otp 1 is otp 1 is otp 1 is otp 1 is otp 1 is otp 1 is otp 1 is otp 1 is otp 1 is otp 1 is otp 1 is otp 1 is otp 1 is otp 1 is otp 1 is otp 1 is otp 1 is otp 1 is otp 1 is otp 1 is otp 1 is otp 1 is otp 1 is otp 1 is otp 1 is otp 1 is otp 1 is otp 1 is otp 1 is otp 1 is otp 1 is otp 1 is otp 1 is otp 1 is otp 1 is otp 1 is otp 1 is otp 1 is otp 1 is otp 1 is otp 1 is otp 1 is otp 1 is otp 1 is otp 1 is otp 1 is otp 1 is otp 1 is otp 1 is otp 1 is otp 1 is otp 1 is otp 1 is otp 1 is otp 1 is otp 1 is otp 1 is otp 1 is otp 1 is otp 1 is otp 1 is otp 1 is otp 1 is otp 1 is otp 1 is otp 1 is otp 1 is otp 1 is otp 1 is otp 1 is otp 1 is otp 1 is otp 1 is otp 1 is otp 1 is otp 1 is otp 1 is otp 1 is otp 1 is otp 1 is otp 1 is otp 1 is otp 1 is otp 1 is otp 1 is otp 1 is otp 1 is otp 1 is otp 1 is otp 1 is otp 1 is otp 1 is otp 1 is otp 1 is otp 1 is otp 1 is otp 1 is otp 1 is otp 1 is otp 1 is otp 1 is otp 1 is otp 1 is otp 1 is otp 1 is otp 1 is otp 1 is otp 1 is otp 1 is otp 1 is otp 1 is otp 1 is otp 1 is otp 1 is otp 1 is otp 1 is otp 1 is otp 1 is otp 1 is otp 1 is otp 1 is otp 1 is otp 1 is otp 1 is otp 1 is otp 1 is otp 1 is otp 1 is otp 1 is otp 1 is otp 1 is otp 1 is otp 1 is otp 1 is otp 1 is otp 1 is otp 1 is otp 1 is otp 1 is otp 1 is otp 1 is otp 1 is otp 1 is otp 1 is otp 1 is otp 1 is otp 1 is otp 1 is otp 1 is otp 1 is otp 1 is otp 1 is otp 1 is otp 1 is otp 1 is otp 1 is otp 1 is otp 1 is otp 1 is otp 1 is otp 1 is otp 1 is otp 1 is otp 1 is otp 1 is otp 1 is otp 1 is otp 1 is otp 1 is otp 1 is otp 1 is otp 1 is otp 1 is otp 1 is otp 1 is otp 1 is otp 1 is otp 1 is otp 1 is otp 1 is otp 1 is otp 1 is otp 1 is otp 1 is otp 1 is otp 1 is otp 1 is otp 1 is otp 1 is otp 1 is otp 1 is otp 1 is otp 1 is otp 1 is otp ",
+   "expect": {
+    "decision": "keep",
+    "kind": "registry",
+    "inst": "nbe",
+    "last4": null
+   }
+  },
+  {
+   "id": "adv.global.otp_newline_4000",
+   "tags": [
+    "adversarial"
+   ],
+   "config": "t1",
+   "channel": "sms",
+   "source": "NBE",
+   "body": "otp\notp\notp\notp\notp\notp\notp\notp\notp\notp\notp\notp\notp\notp\notp\notp\notp\notp\notp\notp\notp\notp\notp\notp\notp\notp\notp\notp\notp\notp\notp\notp\notp\notp\notp\notp\notp\notp\notp\notp\notp\notp\notp\notp\notp\notp\notp\notp\notp\notp\notp\notp\notp\notp\notp\notp\notp\notp\notp\notp\notp\notp\notp\notp\notp\notp\notp\notp\notp\notp\notp\notp\notp\notp\notp\notp\notp\notp\notp\notp\notp\notp\notp\notp\notp\notp\notp\notp\notp\notp\notp\notp\notp\notp\notp\notp\notp\notp\notp\notp\notp\notp\notp\notp\notp\notp\notp\notp\notp\notp\notp\notp\notp\notp\notp\notp\notp\notp\notp\notp\notp\notp\notp\notp\notp\notp\notp\notp\notp\notp\notp\notp\notp\notp\notp\notp\notp\notp\notp\notp\notp\notp\notp\notp\notp\notp\notp\notp\notp\notp\notp\notp\notp\notp\notp\notp\notp\notp\notp\notp\notp\notp\notp\notp\notp\notp\notp\notp\notp\notp\notp\notp\notp\notp\notp\notp\notp\notp\notp\notp\notp\notp\notp\notp\notp\notp\notp\notp\notp\notp\notp\notp\notp\notp\notp\notp\notp\notp\notp\notp\notp\notp\notp\notp\notp\notp\notp\notp\notp\notp\notp\notp\notp\notp\notp\notp\notp\notp\notp\notp\notp\notp\notp\notp\notp\notp\notp\notp\notp\notp\notp\notp\notp\notp\notp\notp\notp\notp\notp\notp\notp\notp\notp\notp\notp\notp\notp\notp\notp\notp\notp\notp\notp\notp\notp\notp\notp\notp\notp\notp\notp\notp\notp\notp\notp\notp\notp\notp\notp\notp\notp\notp\notp\notp\notp\notp\notp\notp\notp\notp\notp\notp\notp\notp\notp\notp\notp\notp\notp\notp\notp\notp\notp\notp\notp\notp\notp\notp\notp\notp\notp\notp\notp\notp\notp\notp\notp\notp\notp\notp\notp\notp\notp\notp\notp\notp\notp\notp\notp\notp\notp\notp\notp\notp\notp\notp\notp\notp\notp\notp\notp\notp\notp\notp\notp\notp\notp\notp\notp\notp\notp\notp\notp\notp\notp\notp\notp\notp\notp\notp\notp\notp\notp\notp\notp\notp\notp\notp\notp\notp\notp\notp\notp\notp\notp\notp\notp\notp\notp\notp\notp\notp\notp\notp\notp\notp\notp\notp\notp\notp\notp\notp\notp\notp\notp\notp\notp\notp\notp\notp\notp\notp\notp\notp\notp\notp\notp\notp\notp\notp\notp\notp\notp\notp\notp\notp\notp\notp\notp\notp\notp\notp\notp\notp\notp\notp\notp\notp\notp\notp\notp\notp\notp\notp\notp\notp\notp\notp\notp\notp\notp\notp\notp\notp\notp\notp\notp\notp\notp\notp\notp\notp\notp\notp\notp\notp\notp\notp\notp\notp\notp\notp\notp\notp\notp\notp\notp\notp\notp\notp\notp\notp\notp\notp\notp\notp\notp\notp\notp\notp\notp\notp\notp\notp\notp\notp\notp\notp\notp\notp\notp\notp\notp\notp\notp\notp\notp\notp\notp\notp\notp\notp\notp\notp\notp\notp\notp\notp\notp\notp\notp\notp\notp\notp\notp\notp\notp\notp\notp\notp\notp\notp\notp\notp\notp\notp\notp\notp\notp\notp\notp\notp\notp\notp\notp\notp\notp\notp\notp\notp\notp\notp\notp\notp\notp\notp\notp\notp\notp\notp\notp\notp\notp\notp\notp\notp\notp\notp\notp\notp\notp\notp\notp\notp\notp\notp\notp\notp\notp\notp\notp\notp\notp\notp\notp\notp\notp\notp\notp\notp\notp\notp\notp\notp\notp\notp\notp\notp\notp\notp\notp\notp\notp\notp\notp\notp\notp\notp\notp\notp\notp\notp\notp\notp\notp\notp\notp\notp\notp\notp\notp\notp\notp\notp\notp\notp\notp\notp\notp\notp\notp\notp\notp\notp\notp\notp\notp\notp\notp\notp\notp\notp\notp\notp\notp\notp\notp\notp\notp\notp\notp\notp\notp\notp\notp\notp\notp\notp\notp\notp\notp\notp\notp\notp\notp\notp\notp\notp\notp\notp\notp\notp\notp\notp\notp\notp\notp\notp\notp\notp\notp\notp\notp\notp\notp\notp\notp\notp\notp\notp\notp\notp\notp\notp\notp\notp\notp\notp\notp\notp\notp\notp\notp\notp\notp\notp\notp\notp\notp\notp\notp\notp\notp\notp\notp\notp\notp\notp\notp\notp\notp\notp\notp\notp\notp\notp\notp\notp\notp\notp\notp\notp\notp\notp\notp\notp\notp\notp\notp\notp\notp\notp\notp\notp\notp\notp\notp\notp\notp\notp\notp\notp\notp\notp\notp\notp\notp\notp\notp\notp\notp\notp\notp\notp\notp\notp\notp\notp\notp\notp\notp\notp\notp\notp\notp\notp\notp\notp\notp\notp\notp\notp\notp\notp\notp\notp\notp\notp\notp\notp\notp\notp\notp\notp\notp\notp\notp\notp\notp\notp\notp\notp\notp\notp\notp\notp\notp\notp\notp\notp\notp\notp\notp\notp\notp\notp\notp\notp\notp\notp\notp\notp\notp\notp\notp\notp\notp\notp\notp\notp\notp\notp\notp\notp\notp\notp\notp\notp\notp\notp\notp\notp\notp\notp\notp\notp\notp\notp\notp\notp\notp\notp\notp\notp\notp\notp\notp\notp\notp\notp\notp\notp\notp\notp\notp\notp\notp\notp\notp\notp\notp\notp\notp\notp\notp\notp\notp\notp\notp\notp\notp\notp\notp\notp\notp\notp\notp\notp\notp\notp\notp\notp\notp\notp\notp\notp\notp\notp\notp\notp\notp\notp\notp\notp\notp\notp\notp\notp\notp\notp\notp\notp\notp\notp\notp\notp\notp\notp\notp\notp\notp\notp\notp\notp\notp\notp\notp\notp\notp\notp\notp\notp\notp\notp\notp\notp\notp\notp\notp\notp\notp\notp\notp\notp\notp\notp\notp\notp\notp\notp\notp\notp\notp\notp\notp\notp\notp\notp\notp\notp\notp\notp\notp\notp\notp\notp\notp\notp\notp\notp\notp\notp\notp\notp\notp\notp\notp\notp\notp\notp\notp\notp\notp\notp\notp\notp\notp\notp\notp\notp\notp\notp\notp\notp\notp\notp\notp\notp\notp\notp\notp\notp\notp\notp\notp\notp\notp\notp\notp\notp\notp\notp\notp\notp\notp\notp\notp\notp\notp\notp\n",
+   "expect": {
+    "decision": "keep",
+    "kind": "registry",
+    "inst": "nbe",
+    "last4": null
+   }
+  },
+  {
+   "id": "adv.global.ramz_tahaqquq_4000",
+   "tags": [
+    "adversarial"
+   ],
+   "config": "t1",
+   "channel": "sms",
+   "source": "NBE",
+   "body": "رمز التحقق رمز التحقق رمز التحقق رمز التحقق رمز التحقق رمز التحقق رمز التحقق رمز التحقق رمز التحقق رمز التحقق رمز التحقق رمز التحقق رمز التحقق رمز التحقق رمز التحقق رمز التحقق رمز التحقق رمز التحقق رمز التحقق رمز التحقق رمز التحقق رمز التحقق رمز التحقق رمز التحقق رمز التحقق رمز التحقق رمز التحقق رمز التحقق رمز التحقق رمز التحقق رمز التحقق رمز التحقق رمز التحقق رمز التحقق رمز التحقق رمز التحقق رمز التحقق رمز التحقق رمز التحقق رمز التحقق رمز التحقق رمز التحقق رمز التحقق رمز التحقق رمز التحقق رمز التحقق رمز التحقق رمز التحقق رمز التحقق رمز التحقق رمز التحقق رمز التحقق رمز التحقق رمز التحقق رمز التحقق رمز التحقق رمز التحقق رمز التحقق رمز التحقق رمز التحقق رمز التحقق رمز التحقق رمز التحقق رمز التحقق رمز التحقق رمز التحقق رمز التحقق رمز التحقق رمز التحقق رمز التحقق رمز التحقق رمز التحقق رمز التحقق رمز التحقق رمز التحقق رمز التحقق رمز التحقق رمز التحقق رمز التحقق رمز التحقق رمز التحقق رمز التحقق رمز التحقق رمز التحقق رمز التحقق رمز التحقق رمز التحقق رمز التحقق رمز التحقق رمز التحقق رمز التحقق رمز التحقق رمز التحقق رمز التحقق رمز التحقق رمز التحقق رمز التحقق رمز التحقق رمز التحقق رمز التحقق رمز التحقق رمز التحقق رمز التحقق رمز التحقق رمز التحقق رمز التحقق رمز التحقق رمز التحقق رمز التحقق رمز التحقق رمز التحقق رمز التحقق رمز التحقق رمز التحقق رمز التحقق رمز التحقق رمز التحقق رمز التحقق رمز التحقق رمز التحقق رمز التحقق رمز التحقق رمز التحقق رمز التحقق رمز التحقق رمز التحقق رمز التحقق رمز التحقق رمز التحقق رمز التحقق رمز التحقق رمز التحقق رمز التحقق رمز التحقق رمز التحقق رمز التحقق رمز التحقق رمز التحقق رمز التحقق رمز التحقق رمز التحقق رمز التحقق رمز التحقق رمز التحقق رمز التحقق رمز التحقق رمز التحقق رمز التحقق رمز التحقق رمز التحقق رمز التحقق رمز التحقق رمز التحقق رمز التحقق رمز التحقق رمز التحقق رمز التحقق رمز التحقق رمز التحقق رمز التحقق رمز التحقق رمز التحقق رمز التحقق رمز التحقق رمز التحقق رمز التحقق رمز التحقق رمز التحقق رمز التحقق رمز التحقق رمز التحقق رمز التحقق رمز التحقق رمز التحقق رمز التحقق رمز التحقق رمز التحقق رمز التحقق رمز التحقق رمز التحقق رمز التحقق رمز التحقق رمز التحقق رمز التحقق رمز التحقق رمز التحقق رمز التحقق رمز التحقق رمز التحقق رمز التحقق رمز التحقق رمز التحقق رمز التحقق رمز التحقق رمز التحقق رمز التحقق رمز التحقق رمز التحقق رمز التحقق رمز التحقق رمز التحقق رمز التحقق رمز التحقق رمز التحقق رمز التحقق رمز التحقق رمز التحقق رمز التحقق رمز التحقق رمز التحقق رمز التحقق رمز التحقق رمز التحقق رمز التحقق رمز التحقق رمز التحقق رمز التحقق رمز التحقق رمز التحقق رمز التحقق رمز التحقق رمز التحقق رمز التحقق رمز التحقق رمز التحقق رمز التحقق رمز التحقق رمز التحقق رمز التحقق رمز التحقق رمز التحقق رمز التحقق رمز التحقق رمز التحقق رمز التحقق رمز التحقق رمز التحقق رمز التحقق رمز التحقق رمز التحقق رمز التحقق رمز التحقق رمز التحقق رمز التحقق رمز التحقق رمز التحقق رمز التحقق رمز التحقق رمز التحقق رمز التحقق رمز التحقق رمز التحقق رمز التحقق رمز التحقق رمز التحقق رمز التحقق رمز التحقق رمز التحقق رمز التحقق رمز التحقق رمز التحقق رمز التحقق رمز التحقق رمز التحقق رمز التحقق رمز التحقق رمز التحقق رمز التحقق رمز التحقق رمز التحقق رمز التحقق رمز التحقق رمز التحقق رمز التحقق رمز التحقق رمز التحقق رمز التحقق رمز التحقق رمز التحقق رمز التحقق رمز التحقق رمز التحقق رمز التحقق رمز التحقق رمز التحقق رمز التحقق رمز التحقق رمز التحقق رمز التحقق رمز التحقق رمز التحقق رمز التحقق رمز التحقق رمز التحقق رمز التحقق رمز التحقق رمز التحقق رمز التحقق رمز التحقق رمز التحقق رمز التحقق رمز التحقق رمز التحقق رمز التحقق رمز التحقق رمز التحقق رمز التحقق رمز التحقق رمز التحقق رمز التحقق رمز التحقق رمز التحقق رمز التحقق رمز التحقق رمز التحقق رمز التحقق رمز التحقق رمز التحقق رمز التحقق رمز التحقق رمز التحقق رمز التحقق رمز التحقق رمز التحقق رمز التحقق رمز التحقق رمز التحقق رمز التحقق رمز التحقق رمز التحقق رمز التحقق رمز التحقق رمز التحقق رمز التحقق رمز التحقق رمز التحقق رمز التحقق رمز التحقق رمز التحقق رمز التحقق رمز التحقق رمز التحقق رمز التحقق رمز التحقق رمز التحقق رمز التحقق رمز التحقق رمز التحقق رمز التحقق رمز التحقق رمز التحقق رمز التحقق رمز التحقق رمز التحقق رمز التحقق رمز التحقق رمز التحقق رمز التحقق رمز التحقق رمز التحقق رمز التحقق رمز التحقق رمز التحقق رمز الت",
+   "expect": {
+    "decision": "keep",
+    "kind": "registry",
+    "inst": "nbe",
+    "last4": null
+   }
+  },
+  {
+   "id": "adv.global.ramz_newline_4000",
+   "tags": [
+    "adversarial"
+   ],
+   "config": "t1",
+   "channel": "sms",
+   "source": "NBE",
+   "body": "رمز التحقق\nرمز التحقق\nرمز التحقق\nرمز التحقق\nرمز التحقق\nرمز التحقق\nرمز التحقق\nرمز التحقق\nرمز التحقق\nرمز التحقق\nرمز التحقق\nرمز التحقق\nرمز التحقق\nرمز التحقق\nرمز التحقق\nرمز التحقق\nرمز التحقق\nرمز التحقق\nرمز التحقق\nرمز التحقق\nرمز التحقق\nرمز التحقق\nرمز التحقق\nرمز التحقق\nرمز التحقق\nرمز التحقق\nرمز التحقق\nرمز التحقق\nرمز التحقق\nرمز التحقق\nرمز التحقق\nرمز التحقق\nرمز التحقق\nرمز التحقق\nرمز التحقق\nرمز التحقق\nرمز التحقق\nرمز التحقق\nرمز التحقق\nرمز التحقق\nرمز التحقق\nرمز التحقق\nرمز التحقق\nرمز التحقق\nرمز التحقق\nرمز التحقق\nرمز التحقق\nرمز التحقق\nرمز التحقق\nرمز التحقق\nرمز التحقق\nرمز التحقق\nرمز التحقق\nرمز التحقق\nرمز التحقق\nرمز التحقق\nرمز التحقق\nرمز التحقق\nرمز التحقق\nرمز التحقق\nرمز التحقق\nرمز التحقق\nرمز التحقق\nرمز التحقق\nرمز التحقق\nرمز التحقق\nرمز التحقق\nرمز التحقق\nرمز التحقق\nرمز التحقق\nرمز التحقق\nرمز التحقق\nرمز التحقق\nرمز التحقق\nرمز التحقق\nرمز التحقق\nرمز التحقق\nرمز التحقق\nرمز التحقق\nرمز التحقق\nرمز التحقق\nرمز التحقق\nرمز التحقق\nرمز التحقق\nرمز التحقق\nرمز التحقق\nرمز التحقق\nرمز التحقق\nرمز التحقق\nرمز التحقق\nرمز التحقق\nرمز التحقق\nرمز التحقق\nرمز التحقق\nرمز التحقق\nرمز التحقق\nرمز التحقق\nرمز التحقق\nرمز التحقق\nرمز التحقق\nرمز التحقق\nرمز التحقق\nرمز التحقق\nرمز التحقق\nرمز التحقق\nرمز التحقق\nرمز التحقق\nرمز التحقق\nرمز التحقق\nرمز التحقق\nرمز التحقق\nرمز التحقق\nرمز التحقق\nرمز التحقق\nرمز التحقق\nرمز التحقق\nرمز التحقق\nرمز التحقق\nرمز التحقق\nرمز التحقق\nرمز التحقق\nرمز التحقق\nرمز التحقق\nرمز التحقق\nرمز التحقق\nرمز التحقق\nرمز التحقق\nرمز التحقق\nرمز التحقق\nرمز التحقق\nرمز التحقق\nرمز التحقق\nرمز التحقق\nرمز التحقق\nرمز التحقق\nرمز التحقق\nرمز التحقق\nرمز التحقق\nرمز التحقق\nرمز التحقق\nرمز التحقق\nرمز التحقق\nرمز التحقق\nرمز التحقق\nرمز التحقق\nرمز التحقق\nرمز التحقق\nرمز التحقق\nرمز التحقق\nرمز التحقق\nرمز التحقق\nرمز التحقق\nرمز التحقق\nرمز التحقق\nرمز التحقق\nرمز التحقق\nرمز التحقق\nرمز التحقق\nرمز التحقق\nرمز التحقق\nرمز التحقق\nرمز التحقق\nرمز التحقق\nرمز التحقق\nرمز التحقق\nرمز التحقق\nرمز التحقق\nرمز التحقق\nرمز التحقق\nرمز التحقق\nرمز التحقق\nرمز التحقق\nرمز التحقق\nرمز التحقق\nرمز التحقق\nرمز التحقق\nرمز التحقق\nرمز التحقق\nرمز التحقق\nرمز التحقق\nرمز التحقق\nرمز التحقق\nرمز التحقق\nرمز التحقق\nرمز التحقق\nرمز التحقق\nرمز التحقق\nرمز التحقق\nرمز التحقق\nرمز التحقق\nرمز التحقق\nرمز التحقق\nرمز التحقق\nرمز التحقق\nرمز التحقق\nرمز التحقق\nرمز التحقق\nرمز التحقق\nرمز التحقق\nرمز التحقق\nرمز التحقق\nرمز التحقق\nرمز التحقق\nرمز التحقق\nرمز التحقق\nرمز التحقق\nرمز التحقق\nرمز التحقق\nرمز التحقق\nرمز التحقق\nرمز التحقق\nرمز التحقق\nرمز التحقق\nرمز التحقق\nرمز التحقق\nرمز التحقق\nرمز التحقق\nرمز التحقق\nرمز التحقق\nرمز التحقق\nرمز التحقق\nرمز التحقق\nرمز التحقق\nرمز التحقق\nرمز التحقق\nرمز التحقق\nرمز التحقق\nرمز التحقق\nرمز التحقق\nرمز التحقق\nرمز التحقق\nرمز التحقق\nرمز التحقق\nرمز التحقق\nرمز التحقق\nرمز التحقق\nرمز التحقق\nرمز التحقق\nرمز التحقق\nرمز التحقق\nرمز التحقق\nرمز التحقق\nرمز التحقق\nرمز التحقق\nرمز التحقق\nرمز التحقق\nرمز التحقق\nرمز التحقق\nرمز التحقق\nرمز التحقق\nرمز التحقق\nرمز التحقق\nرمز التحقق\nرمز التحقق\nرمز التحقق\nرمز التحقق\nرمز التحقق\nرمز التحقق\nرمز التحقق\nرمز التحقق\nرمز التحقق\nرمز التحقق\nرمز التحقق\nرمز التحقق\nرمز التحقق\nرمز التحقق\nرمز التحقق\nرمز التحقق\nرمز التحقق\nرمز التحقق\nرمز التحقق\nرمز التحقق\nرمز التحقق\nرمز التحقق\nرمز التحقق\nرمز التحقق\nرمز التحقق\nرمز التحقق\nرمز التحقق\nرمز التحقق\nرمز التحقق\nرمز التحقق\nرمز التحقق\nرمز التحقق\nرمز التحقق\nرمز التحقق\nرمز التحقق\nرمز التحقق\nرمز التحقق\nرمز التحقق\nرمز التحقق\nرمز التحقق\nرمز التحقق\nرمز التحقق\nرمز التحقق\nرمز التحقق\nرمز التحقق\nرمز التحقق\nرمز التحقق\nرمز التحقق\nرمز التحقق\nرمز التحقق\nرمز التحقق\nرمز التحقق\nرمز التحقق\nرمز التحقق\nرمز التحقق\nرمز التحقق\nرمز التحقق\nرمز التحقق\nرمز التحقق\nرمز التحقق\nرمز التحقق\nرمز التحقق\nرمز التحقق\nرمز التحقق\nرمز التحقق\nرمز التحقق\nرمز التحقق\nرمز التحقق\nرمز التحقق\nرمز التحقق\nرمز التحقق\nرمز التحقق\nرمز التحقق\nرمز التحقق\nرمز التحقق\nرمز التحقق\nرمز التحقق\nرمز التحقق\nرمز التحقق\nرمز التحقق\nرمز التحقق\nرمز التحقق\nرمز التحقق\nرمز التحقق\nرمز التحقق\nرمز التحقق\nرمز التحقق\nرمز التحقق\nرمز التحقق\nرمز التحقق\nرمز التحقق\nرمز التحقق\nرمز التحقق\nرمز التحقق\nرمز التحقق\nرمز التحقق\nرمز التحقق\nرمز التحقق\nرمز التحقق\nرمز التحقق\nرمز التحقق\nرمز التحقق\nرمز التحقق\nرمز التحقق\nرمز التحقق\nرمز التحقق\nرمز التحقق\nرمز التحقق\nرمز التحقق\nرمز التحقق\nرمز التحقق\nرمز الت",
+   "expect": {
+    "decision": "keep",
+    "kind": "registry",
+    "inst": "nbe",
+    "last4": null
+   }
+  },
+  {
+   "id": "adv.global.star_run_4000",
+   "tags": [
+    "adversarial"
+   ],
+   "config": "t1",
+   "channel": "sms",
+   "source": "NBE",
+   "body": "****************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************",
+   "expect": {
+    "decision": "keep",
+    "kind": "registry",
+    "inst": "nbe",
+    "last4": null
+   }
+  },
+  {
+   "id": "adv.global.x_run_4000",
+   "tags": [
+    "adversarial"
+   ],
+   "config": "t1",
+   "channel": "sms",
+   "source": "NBE",
+   "body": "xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx",
+   "expect": {
+    "decision": "keep",
+    "kind": "registry",
+    "inst": "nbe",
+    "last4": null
+   }
+  },
+  {
+   "id": "adv.global.digits_space_4000",
+   "tags": [
+    "adversarial"
+   ],
+   "config": "t1",
+   "channel": "sms",
+   "source": "NBE",
+   "body": "1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 ",
+   "expect": {
+    "decision": "keep",
+    "kind": "registry",
+    "inst": "nbe",
+    "last4": null
+   }
+  },
+  {
+   "id": "adv.global.code_first_4000",
+   "tags": [
+    "adversarial"
+   ],
+   "config": "t1",
+   "channel": "sms",
+   "source": "NBE",
+   "body": ", 1234 , 1234 , 1234 , 1234 , 1234 , 1234 , 1234 , 1234 , 1234 , 1234 , 1234 , 1234 , 1234 , 1234 , 1234 , 1234 , 1234 , 1234 , 1234 , 1234 , 1234 , 1234 , 1234 , 1234 , 1234 , 1234 , 1234 , 1234 , 1234 , 1234 , 1234 , 1234 , 1234 , 1234 , 1234 , 1234 , 1234 , 1234 , 1234 , 1234 , 1234 , 1234 , 1234 , 1234 , 1234 , 1234 , 1234 , 1234 , 1234 , 1234 , 1234 , 1234 , 1234 , 1234 , 1234 , 1234 , 1234 , 1234 , 1234 , 1234 , 1234 , 1234 , 1234 , 1234 , 1234 , 1234 , 1234 , 1234 , 1234 , 1234 , 1234 , 1234 , 1234 , 1234 , 1234 , 1234 , 1234 , 1234 , 1234 , 1234 , 1234 , 1234 , 1234 , 1234 , 1234 , 1234 , 1234 , 1234 , 1234 , 1234 , 1234 , 1234 , 1234 , 1234 , 1234 , 1234 , 1234 , 1234 , 1234 , 1234 , 1234 , 1234 , 1234 , 1234 , 1234 , 1234 , 1234 , 1234 , 1234 , 1234 , 1234 , 1234 , 1234 , 1234 , 1234 , 1234 , 1234 , 1234 , 1234 , 1234 , 1234 , 1234 , 1234 , 1234 , 1234 , 1234 , 1234 , 1234 , 1234 , 1234 , 1234 , 1234 , 1234 , 1234 , 1234 , 1234 , 1234 , 1234 , 1234 , 1234 , 1234 , 1234 , 1234 , 1234 , 1234 , 1234 , 1234 , 1234 , 1234 , 1234 , 1234 , 1234 , 1234 , 1234 , 1234 , 1234 , 1234 , 1234 , 1234 , 1234 , 1234 , 1234 , 1234 , 1234 , 1234 , 1234 , 1234 , 1234 , 1234 , 1234 , 1234 , 1234 , 1234 , 1234 , 1234 , 1234 , 1234 , 1234 , 1234 , 1234 , 1234 , 1234 , 1234 , 1234 , 1234 , 1234 , 1234 , 1234 , 1234 , 1234 , 1234 , 1234 , 1234 , 1234 , 1234 , 1234 , 1234 , 1234 , 1234 , 1234 , 1234 , 1234 , 1234 , 1234 , 1234 , 1234 , 1234 , 1234 , 1234 , 1234 , 1234 , 1234 , 1234 , 1234 , 1234 , 1234 , 1234 , 1234 , 1234 , 1234 , 1234 , 1234 , 1234 , 1234 , 1234 , 1234 , 1234 , 1234 , 1234 , 1234 , 1234 , 1234 , 1234 , 1234 , 1234 , 1234 , 1234 , 1234 , 1234 , 1234 , 1234 , 1234 , 1234 , 1234 , 1234 , 1234 , 1234 , 1234 , 1234 , 1234 , 1234 , 1234 , 1234 , 1234 , 1234 , 1234 , 1234 , 1234 , 1234 , 1234 , 1234 , 1234 , 1234 , 1234 , 1234 , 1234 , 1234 , 1234 , 1234 , 1234 , 1234 , 1234 , 1234 , 1234 , 1234 , 1234 , 1234 , 1234 , 1234 , 1234 , 1234 , 1234 , 1234 , 1234 , 1234 , 1234 , 1234 , 1234 , 1234 , 1234 , 1234 , 1234 , 1234 , 1234 , 1234 , 1234 , 1234 , 1234 , 1234 , 1234 , 1234 , 1234 , 1234 , 1234 , 1234 , 1234 , 1234 , 1234 , 1234 , 1234 , 1234 , 1234 , 1234 , 1234 , 1234 , 1234 , 1234 , 1234 , 1234 , 1234 , 1234 , 1234 , 1234 , 1234 , 1234 , 1234 , 1234 , 1234 , 1234 , 1234 , 1234 , 1234 , 1234 , 1234 , 1234 , 1234 , 1234 , 1234 , 1234 , 1234 , 1234 , 1234 , 1234 , 1234 , 1234 , 1234 , 1234 , 1234 , 1234 , 1234 , 1234 , 1234 , 1234 , 1234 , 1234 , 1234 , 1234 , 1234 , 1234 , 1234 , 1234 , 1234 , 1234 , 1234 , 1234 , 1234 , 1234 , 1234 , 1234 , 1234 , 1234 , 1234 , 1234 , 1234 , 1234 , 1234 , 1234 , 1234 , 1234 , 1234 , 1234 , 1234 , 1234 , 1234 , 1234 , 1234 , 1234 , 1234 , 1234 , 1234 , 1234 , 1234 , 1234 , 1234 , 1234 , 1234 , 1234 , 1234 , 1234 , 1234 , 1234 , 1234 , 1234 , 1234 , 1234 , 1234 , 1234 , 1234 , 1234 , 1234 , 1234 , 1234 , 1234 , 1234 , 1234 , 1234 , 1234 , 1234 , 1234 , 1234 , 1234 , 1234 , 1234 , 1234 , 1234 , 1234 , 1234 , 1234 , 1234 , 1234 , 1234 , 1234 , 1234 , 1234 , 1234 , 1234 , 1234 , 1234 , 1234 , 1234 , 1234 , 1234 , 1234 , 1234 , 1234 , 1234 , 1234 , 1234 , 1234 , 1234 , 1234 , 1234 , 1234 , 1234 , 1234 , 1234 , 1234 , 1234 , 1234 , 1234 , 1234 , 1234 , 1234 , 1234 , 1234 , 1234 , 1234 , 1234 , 1234 , 1234 , 1234 , 1234 , 1234 , 1234 , 1234 , 1234 , 1234 , 1234 , 1234 , 1234 , 1234 , 1234 , 1234 , 1234 , 1234 , 1234 , 1234 , 1234 , 1234 , 1234 , 1234 , 1234 , 1234 , 1234 , 1234 , 1234 , 1234 , 1234 , 1234 , 1234 , 1234 , 1234 , 1234 , 1234 , 1234 , 1234 , 1234 , 1234 , 1234 , 1234 , 1234 , 1234 , 1234 , 1234 , 1234 , 1234 , 1234 , 1234 , 1234 , 1234 , 1234 , 1234 , 1234 , 1234 , 1234 , 1234 , 1234 , 1234 , 1234 , 1234 , 1234 , 1234 , 1234 , 1234 , 1234 , 1234 , 1234 , 1234 , 1234 , 1234 , 1234 , 1234 , 1234 , 1234 , 1234 , 1234 , 1234 , 1234 , 1234 , 1234 , 1234 , 1234 , 1234 , 1234 , 1234 , 1234 , 1234 , 1234 , 1234 , 1234 , 1234 , 1234 , 1234 , 1234 , 1234 , 1234 , 1234 , 1234 , 1234 , 1234 , 1234 , 1",
+   "expect": {
+    "decision": "keep",
+    "kind": "registry",
+    "inst": "nbe",
+    "last4": null
    }
   }
  ],

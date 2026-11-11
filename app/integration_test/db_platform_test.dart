@@ -2,7 +2,8 @@
 // binaries the app ships (Android APK / iOS app, real flavors and minSdk).
 //
 // T-015 adds the key bootstrap tests (db_key_tests.dart) to this launch;
-// T-016 the AppDatabase tests (app_database_tests.dart).
+// T-016 the AppDatabase tests (app_database_tests.dart); T-148 the backup
+// crypto vectors (db_backup_crypto_tests.dart).
 //
 // CI (db-platform.yml):
 //   flutter test integration_test/db_platform_test.dart --flavor devNoSms
@@ -24,6 +25,7 @@ import 'package:integration_test/integration_test.dart';
 import '../test/core/db/fts_benchmark.dart';
 import '../test/core/db/sqlite3mc_contract.dart';
 import 'app_database_tests.dart';
+import 'db_backup_crypto_tests.dart';
 import 'db_key_tests.dart';
 
 const String _benchFlag = String.fromEnvironment('ZAGHLOL_DB_BENCH');
@@ -39,6 +41,8 @@ void main() {
   group('T-015 key bootstrap', registerDbKeyTests);
   // T-016: the encrypted AppDatabase (open, wipe, migration safety net).
   group('T-016 app database', registerAppDatabaseTests);
+  // T-148: backup format vectors on the OS AES-GCM and the native NFC.
+  group('T-148 backup crypto', registerBackupCryptoTests);
 
   final bench = _benchFlag == '1' || _benchFlag == 'true';
   test(

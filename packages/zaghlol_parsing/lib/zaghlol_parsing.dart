@@ -1,6 +1,11 @@
 /// Public API of the `zaghlol_parsing` package.
 library;
 
+export 'categorize/alias_matcher.dart';
+export 'categorize/categorizer.dart';
+export 'categorize/jaro_winkler.dart';
+export 'categorize/keyword_scorer.dart';
+export 'categorize/types.dart';
 export 'generic/generic_parser.dart' show parseGeneric;
 export 'guard/capture_guard.dart';
 export 'guard/guard_config.dart';

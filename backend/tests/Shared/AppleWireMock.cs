@@ -67,6 +67,8 @@ public sealed class AppleWireMock : IDisposable
             ["Purchases:Apple:Budget:VerifyPerInstallPerHour"] = "1000",
         };
 
+    public const string HistoryPath = "/inApps/v1/notifications/history";
+
     public static string TransactionPath(string transactionId) => "/inApps/v1/transactions/" + transactionId;
 
     public static string SubscriptionsPath(string transactionId) => "/inApps/v1/subscriptions/" + transactionId;
@@ -104,6 +106,19 @@ public sealed class AppleWireMock : IDisposable
     public static string LookupBody(int status, params string[] signedTransactions) =>
         new JsonObject { ["status"] = status, ["signedTransactions"] = new JsonArray([.. signedTransactions.Select(s => (JsonNode)s)]) }.ToJsonString();
 
+    /// <summary>A <c>NotificationHistoryResponse</c> (T-134); <c>sendAttempts</c> is Apple's and is never read.</summary>
+    public static string HistoryBody(bool hasMore, string? paginationToken, params string[] signedPayloads) =>
+        new JsonObject
+        {
+            ["hasMore"] = hasMore,
+            ["paginationToken"] = paginationToken,
+            ["notificationHistory"] = new JsonArray([.. signedPayloads.Select(p => (JsonNode)new JsonObject
+            {
+                ["signedPayload"] = p,
+                ["sendAttempts"] = new JsonArray(new JsonObject { ["attemptDate"] = 1, ["sendAttemptResult"] = "TIMED_OUT" }),
+            })]),
+        }.ToJsonString();
+
     public static string ErrorBody(long code) => new JsonObject { ["errorCode"] = code, ["errorMessage"] = "synthetic" }.ToJsonString();
 
     public WireMockServer Server(bool sandbox) => sandbox ? Sandbox : Production;
@@ -128,6 +143,39 @@ public sealed class AppleWireMock : IDisposable
 
         Server(sandbox).Given(Request.Create().WithPath(path).UsingGet()).WithGuid(StubId(path)).RespondWith(response);
     }
+
+    /// <summary>
+    /// <c>POST /inApps/v1/notifications/history</c> (T-134): the answer for requests without a <c>paginationToken</c> query, or with
+    /// exactly <paramref name="paginationToken"/>.
+    /// </summary>
+    public void History(bool sandbox, int status, string? body, string? paginationToken = null, string? retryAfter = null)
+    {
+        var response = Response.Create().WithStatusCode(status);
+        if (body is not null)
+        {
+            response = response.WithHeader("Content-Type", "application/json").WithBody(body);
+        }
+
+        if (retryAfter is not null)
+        {
+            response = response.WithHeader("Retry-After", retryAfter);
+        }
+
+        var request = Request.Create().WithPath(HistoryPath).UsingPost();
+        request = paginationToken is null
+            ? request.WithParam(query => query is null || !query.ContainsKey("paginationToken"))
+            : request.WithParam("paginationToken", paginationToken);
+        Server(sandbox).Given(request).RespondWith(response);
+    }
+
+    /// <summary>The history requests one server received: (body, paginationToken query value or null).</summary>
+    public IReadOnlyList<(string Body, string? Token)> HistoryRequests(bool sandbox) =>
+    [
+        .. Server(sandbox).LogEntries
+            .Where(e => e.RequestMessage!.Path == HistoryPath)
+            .Select(e => (e.RequestMessage!.Body ?? string.Empty,
+                e.RequestMessage.Query is { } q && q.TryGetValue("paginationToken", out var v) ? v.FirstOrDefault() : null)),
+    ];
 
     /// <summary>The first <paramref name="failures"/> GETs answer <paramref name="failStatus"/>, every later one 200 with the body.</summary>
     public void GetAfterFailures(bool sandbox, string path, int failures, int failStatus, string body)

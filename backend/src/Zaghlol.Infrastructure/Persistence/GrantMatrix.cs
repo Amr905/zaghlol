@@ -44,8 +44,8 @@ public sealed record TableGrant(
 /// <c>accounts.apple_refresh_token_enc</c>, <c>purchases.store_key</c>, <c>purchases.linked_purchase_token</c>,
 /// <c>store_notifications.store_key</c> and <c>idempotency_records.response_body_enc</c>. The T-130 column
 /// <c>idempotency_records.claim_id</c> (a 60 s request lease) and <c>purchases.ack_next_attempt_at</c> (the sweeper's deferral
-/// stamp), and the T-131 column <c>purchases.last_payment_at</c> (verify's new-payment marker, <c>app_rw</c> UPDATE only), were added
-/// without an <c>ops_ro</c> grant.</item>
+/// stamp), the T-131 column <c>purchases.last_payment_at</c> (verify's new-payment marker, <c>app_rw</c> UPDATE only) and the T-134
+/// column <c>store_notifications.next_attempt_at</c> (the processor's back-off) were added without an <c>ops_ro</c> grant.</item>
 /// </list>
 /// A later migration that adds a table or a grant adds a frozen list here (like <see cref="InitialCreate"/>), renders it
 /// with <see cref="ToSql"/> in that migration, and appends it to <see cref="Current"/> (merged per role and table). A migration never renders
@@ -257,9 +257,22 @@ public static class GrantMatrix
         new(AppRw, "purchases", TablePrivileges.None, UpdateColumns: ["last_payment_at"]),
     ];
 
+    /// <summary>
+    /// The grants of the AppleNotifications migration (T-134 design note §5, FU-092 item 1). Frozen: never edit after it ships. The
+    /// worker may re-plan an App Store row (an upgrade notification changes the product, as verify does) and insert notifications
+    /// (the <c>Get Notification History</c> job). It still never updates <c>environment</c>, <c>obfuscated_install_ref</c>,
+    /// <c>install_id</c> or <c>last_payment_at</c>, and keeps only SELECT on <c>purchase_seats</c>, so a notification can't move a
+    /// seat. The new <c>store_notifications.next_attempt_at</c> has no <c>ops_ro</c> grant (like <c>purchases.ack_next_attempt_at</c>).
+    /// </summary>
+    public static IReadOnlyList<TableGrant> AppleNotifications { get; } =
+    [
+        new(WorkerRw, "purchases", TablePrivileges.None, UpdateColumns: ["product_id", "plan"]),
+        new(WorkerRw, "store_notifications", I),
+    ];
+
     /// <summary>What the database must hold after all migrations: one merged row per role and table.</summary>
     public static IReadOnlyList<TableGrant> Current { get; } =
-        Merge([.. InitialCreate, .. CatalogDrafts, .. PurchaseAckNextAttempt, .. PurchaseLastPaymentAt]);
+        Merge([.. InitialCreate, .. CatalogDrafts, .. PurchaseAckNextAttempt, .. PurchaseLastPaymentAt, .. AppleNotifications]);
 
     /// <summary>
     /// Folds the grants of several migrations into one row per role and table (privileges and column lists united, in order),

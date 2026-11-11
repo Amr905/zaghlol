@@ -173,9 +173,12 @@ public sealed class AppStoreOptionsTests
         settings["Purchases:Apple:Budget:VerifyPerInstallPerHour"] = "1000";
         settings["Purchases:Apple:Resilience:RetryBaseDelayMs"] = "1";
 
+        // T-134: 300 total, 20 % to the worker (60, 12 a minute), the rest over 3 API replicas (80, 16 a minute).
         var production = AppStoreOptions.Read(Config(settings), new Env("Production"));
-        Assert.Equal(100, production.Budget.PerReplicaLimit);
-        Assert.Equal(20, production.Budget.PerReplicaPerPeriod);
+        Assert.Equal(80, production.Budget.PerReplicaLimit);
+        Assert.Equal(16, production.Budget.PerReplicaPerPeriod);
+        Assert.Equal(60, production.Budget.WorkerLimit);
+        Assert.Equal(12, production.Budget.WorkerPerPeriod);
         Assert.Equal(10, production.Budget.VerifyPerInstallPerHour);
         Assert.Equal(TimeSpan.FromMilliseconds(400), production.Resilience.RetryBaseDelay);
 
@@ -260,13 +263,17 @@ public sealed class AppStoreOptionsTests
         public Task<IReadOnlyList<AppleLastTransaction>> GetAllSubscriptionStatusesAsync(PurchaseEnvironment environment, Sensitive<string> transactionId, StoreLane lane, CancellationToken cancellationToken) => throw new NotSupportedException();
 
         public Task<AppleOrderLookupResult> LookUpOrderIdAsync(Sensitive<string> orderId, StoreLane lane, CancellationToken cancellationToken) => throw new NotSupportedException();
+
+        public Task<AppleNotificationHistoryPage> GetNotificationHistoryAsync(PurchaseEnvironment environment, DateTimeOffset startDate, DateTimeOffset endDate, Sensitive<string>? paginationToken, StoreLane lane, CancellationToken cancellationToken) => throw new NotSupportedException();
     }
 
     private sealed class NoJws : IAppleJwsVerifier
     {
         public AppleTransaction VerifyTransaction(Sensitive<string> jws, JwsSource source, DateTimeOffset now) => throw new NotSupportedException();
 
-        public AppleRenewalInfo VerifyRenewalInfo(Sensitive<string> jws, DateTimeOffset now) => throw new NotSupportedException();
+        public AppleRenewalInfo VerifyRenewalInfo(Sensitive<string> jws, JwsSource source, DateTimeOffset now) => throw new NotSupportedException();
+
+        public AppleNotification VerifyNotification(Sensitive<string> signedPayload, DateTimeOffset now) => throw new NotSupportedException();
     }
 }
 
@@ -331,35 +338,111 @@ public sealed class AppStoreApiTokenProviderTests
         AppStoreOptions.Read(new ConfigurationBuilder().AddInMemoryCollection(apple.Settings()).Build(), new AppStoreOptionsTests.Env("Testing"));
 }
 
-/// <summary>T-131 §6 (FU-077 M-2): the separate Apple budget and the verify per-install limit.</summary>
+/// <summary>T-131 §6 and T-134 §6 (FU-092 items 2 and 8): the partitioned Apple budget and the verify per-install limit.</summary>
 public sealed class AppleCallBudgetTests
 {
     [Fact]
-    public void NotificationsKeepA20PercentReserveAndRestoreIsDeniedFirst()
+    public void AnApiProcessRefusesTheNotificationLaneAndRestoreIsDeniedFirst()
     {
-        using var budget = new AppleCallBudget(new AppleBudgetOptions(10, 1, TimeSpan.FromHours(1), 1, 10));
+        // Total 12, worker share 0.2 → 9 for the one API process (int(12 · 0.8) = 9); restore reserve int(9 · 0.3) = 2, sub-bucket 2.
+        using var budget = new AppleCallBudget(new AppleBudgetOptions(12, 1, TimeSpan.FromHours(1), 1, 10), AppleBudgetPartition.Api);
+        Assert.Equal(9, budget.Limit);
 
-        // Restore stops while only the notification reserve (2) plus its own 30 % reserve (3) is left; its sub-bucket holds 3.
-        Assert.Equal(3, Enumerable.Range(0, 10).Count(_ => budget.TryAcquire(StoreLane.Restore)));
+        Assert.False(budget.TryAcquire(StoreLane.Notification));
+        Assert.Equal(2, Enumerable.Range(0, 10).Count(_ => budget.TryAcquire(StoreLane.Restore)));
 
-        // Verify and support stop at the 20 % notification reserve.
-        Assert.Equal(5, Enumerable.Range(0, 10).Count(_ => budget.TryAcquire(StoreLane.Verify)));
+        // Verify and support spend the rest, down to zero (no reserve inside an API bucket any more).
+        Assert.Equal(7, Enumerable.Range(0, 10).Count(_ => budget.TryAcquire(StoreLane.Verify)));
         Assert.False(budget.TryAcquire(StoreLane.Support));
-        Assert.False(budget.TryAcquire(StoreLane.Restore));
-
-        // Notifications spend the reserve, down to zero.
-        Assert.True(budget.TryAcquire(StoreLane.Rtdn));
-        Assert.True(budget.TryAcquire(StoreLane.Rtdn));
-        Assert.False(budget.TryAcquire(StoreLane.Rtdn));
     }
 
     [Fact]
-    public void TheBucketIsSizedPerReplica()
+    public void TheWorkerPartitionServesOnlyTheNotificationLane()
     {
+        using var budget = new AppleCallBudget(new AppleBudgetOptions(100, 10, TimeSpan.FromHours(1), 4, 10, 0.25m), AppleBudgetPartition.Worker);
+
+        Assert.Equal(25, budget.Limit);
+        foreach (var lane in new[] { StoreLane.Verify, StoreLane.Restore, StoreLane.Support, StoreLane.Ack })
+        {
+            Assert.False(budget.TryAcquire(lane));
+        }
+
+        Assert.Equal(25, Enumerable.Range(0, 40).Count(_ => budget.TryAcquire(StoreLane.Notification)));
+    }
+
+    [Fact]
+    public void TheApiShareIsSplitOverApiReplicasOnly()
+    {
+        // 30 total, 20 % to the worker → 24 for the API processes, 3 replicas → 8 each.
         using var budget = new AppleCallBudget(new AppleBudgetOptions(30, 1, TimeSpan.FromHours(1), 3, 10));
 
-        // 30 over 3 replicas = 10 here; verify may take 8 (20 % reserve).
         Assert.Equal(8, Enumerable.Range(0, 30).Count(_ => budget.TryAcquire(StoreLane.Verify)));
+    }
+
+    [Fact]
+    public void AFailedSharedAcquisitionNeverSpendsARestorePermit()
+    {
+        // FU-092 item 2. Total 13 → API bucket int(13 · 0.8) = 10: restore reserve 3, sub-bucket 3.
+        using var budget = new AppleCallBudget(new AppleBudgetOptions(13, 1, TimeSpan.FromHours(1), 1, 10));
+        Assert.Equal(10, budget.Limit);
+        Assert.Equal(10, Enumerable.Range(0, 10).Count(_ => budget.TryAcquire(StoreLane.Verify)));
+
+        Assert.False(budget.TryAcquire(StoreLane.Restore));
+        Assert.Equal((0L, 3L), budget.Available());
+    }
+
+    [Fact]
+    public async Task UnderContentionRestoreNeverExceedsItsShareAndPermitsAreNeverLost()
+    {
+        // 100 + 25 = 125 total → API bucket 100: restore sub-bucket 30, reserve 30.
+        using var budget = new AppleCallBudget(new AppleBudgetOptions(125, 1, TimeSpan.FromHours(1), 1, 10));
+        using var start = new ManualResetEventSlim(false);
+        var tasks = Enumerable.Range(0, 64).Select(i => Task.Run(() =>
+        {
+            start.Wait();
+            var lane = i % 2 == 0 ? StoreLane.Verify : StoreLane.Restore;
+            var granted = 0;
+            for (var n = 0; n < 10; n++)
+            {
+                granted += budget.TryAcquire(lane) ? 1 : 0;
+            }
+
+            return (lane, granted);
+        })).ToList();
+        start.Set();
+        var results = await Task.WhenAll(tasks);
+
+        var restore = results.Where(r => r.lane == StoreLane.Restore).Sum(r => r.granted);
+        var verify = results.Where(r => r.lane == StoreLane.Verify).Sum(r => r.granted);
+        var (shared, restoreLeft) = budget.Available();
+        Assert.InRange(restore, 1, 30);
+        Assert.Equal(100, verify + restore + shared);
+        Assert.Equal(30 - restore, restoreLeft);
+    }
+
+    [Theory]
+    [InlineData("0")]
+    [InlineData("1")]
+    [InlineData("1.5")]
+    [InlineData("-0.2")]
+    [InlineData("abc")]
+    public void AWorkerShareOutsideZeroToOneStopsStartup(string share)
+    {
+        var settings = new Dictionary<string, string?> { ["Purchases:Apple:Budget:WorkerShare"] = share };
+        var configuration = new Microsoft.Extensions.Configuration.ConfigurationBuilder().AddInMemoryCollection(settings).Build();
+
+        // The message names the key, never the value.
+        var error = Assert.Throws<AppStoreConfigurationException>(() => AppStoreOptions.Read(configuration, new BudgetEnvironment()));
+        Assert.Equal("Purchases:Apple:Budget:WorkerShare must be a fraction between 0 and 1.", error.Message);
+    }
+
+    [Fact]
+    public void TheWorkerShareIsReadAsADecimalFraction()
+    {
+        var settings = new Dictionary<string, string?> { ["Purchases:Apple:Budget:WorkerShare"] = "0.35" };
+        var configuration = new Microsoft.Extensions.Configuration.ConfigurationBuilder().AddInMemoryCollection(settings).Build();
+
+        Assert.Equal(0.35m, AppStoreOptions.Read(configuration, new BudgetEnvironment()).Budget.WorkerShare);
     }
 
     [Fact]
@@ -371,6 +454,17 @@ public sealed class AppleCallBudgetTests
 
         Assert.Equal(10, Enumerable.Range(0, 15).Count(_ => limiter.TryAcquire(a)));
         Assert.True(limiter.TryAcquire(b));
+    }
+
+    private sealed class BudgetEnvironment : Microsoft.Extensions.Hosting.IHostEnvironment
+    {
+        public string EnvironmentName { get; set; } = "Testing";
+
+        public string ApplicationName { get; set; } = "t";
+
+        public string ContentRootPath { get; set; } = "/";
+
+        public Microsoft.Extensions.FileProviders.IFileProvider ContentRootFileProvider { get; set; } = null!;
     }
 }
 

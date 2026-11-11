@@ -18,5 +18,7 @@ import UIKit
     GeneratedPluginRegistrant.register(with: engineBridge.pluginRegistry)
     // T-015: the database key store (every engine that opens the database).
     SecretStoreRegistration.register(with: engineBridge.pluginRegistry)
+    // T-148: NFC for the backup passphrase.
+    TextNormalizationRegistration.register(with: engineBridge.pluginRegistry)
   }
 }

@@ -98,10 +98,10 @@ public sealed class AppStoreClientTests : IDisposable
     [Fact]
     public async Task EveryHttpAttemptRetriesIncludedIsChargedToTheBudget()
     {
-        // Three permits per replica and no notification reserve to speak of: a call retried twice spends all three.
+        // Three permits for this API process (int(4 · 0.8), T-134 partition): a call retried twice spends all three.
         await using var host = Start(new Dictionary<string, string?>
         {
-            ["Purchases:Apple:Budget:TokenLimit"] = "3",
+            ["Purchases:Apple:Budget:TokenLimit"] = "4",
             ["Purchases:Apple:Budget:TokensPerPeriod"] = "1",
             ["Purchases:Apple:Budget:PeriodSeconds"] = "3600",
         });
@@ -132,7 +132,120 @@ public sealed class AppStoreClientTests : IDisposable
         Assert.Equal(AppStoreCallOutcome.ServerError, error.Outcome);
     }
 
-    private PlayClientHost Start(Dictionary<string, string?>? extra = null)
+    // T-134 (FU-092 item 3): a long Retry-After ends the call at once with Apple's value; a short one is honoured inside the total.
+
+    [Theory]
+    [InlineData(429, AppStoreCallOutcome.RateLimited)]
+    [InlineData(503, AppStoreCallOutcome.ServerError)]
+    public async Task ALongRetryAfterIsNotWaitedForAndComesBackToTheCaller(int status, AppStoreCallOutcome outcome)
+    {
+        await using var host = Start();
+        var id = AppleWireMock.NewTransactionId();
+        apple.Get(false, AppleWireMock.TransactionPath(id), status, retryAfter: "120");
+
+        var started = DateTimeOffset.UtcNow;
+        var error = await Assert.ThrowsAsync<AppStoreApiException>(() =>
+            host.AppStore.GetTransactionInfoAsync(PurchaseEnvironment.Production, new Sensitive<string>(id), StoreLane.Verify, CancellationToken.None));
+
+        Assert.Equal(outcome, error.Outcome);
+        Assert.Equal(TimeSpan.FromSeconds(120), error.RetryAfter);
+        Assert.Equal(1, apple.Count(false, AppleWireMock.TransactionPath(id)));
+        Assert.True(DateTimeOffset.UtcNow - started < TimeSpan.FromSeconds(5));
+    }
+
+    [Fact]
+    public async Task AShortRetryAfterIsStillHonouredInsideTheTotal()
+    {
+        await using var host = Start();
+        var id = AppleWireMock.NewTransactionId();
+        apple.Get(false, AppleWireMock.TransactionPath(id), 429, retryAfter: "1");
+
+        var error = await Assert.ThrowsAsync<AppStoreApiException>(() =>
+            host.AppStore.GetTransactionInfoAsync(PurchaseEnvironment.Production, new Sensitive<string>(id), StoreLane.Verify, CancellationToken.None));
+
+        Assert.Equal(AppStoreCallOutcome.RateLimited, error.Outcome);
+        Assert.Equal(4, apple.Count(false, AppleWireMock.TransactionPath(id)));
+    }
+
+    [Fact]
+    public void TheRetryPredicateKeepsTheDefaultTransientSetMinusLongRetryAfters()
+    {
+        static Polly.Outcome<HttpResponseMessage> Response(int status, int? retryAfter)
+        {
+            var response = new HttpResponseMessage((System.Net.HttpStatusCode)status);
+            if (retryAfter is { } seconds)
+            {
+                response.Headers.RetryAfter = new System.Net.Http.Headers.RetryConditionHeaderValue(TimeSpan.FromSeconds(seconds));
+            }
+
+            return Polly.Outcome.FromResult(response);
+        }
+
+        Assert.True(AppStoreServiceCollectionExtensions.ShouldRetry(Response(429, null)));
+        Assert.True(AppStoreServiceCollectionExtensions.ShouldRetry(Response(429, 5)));
+        Assert.False(AppStoreServiceCollectionExtensions.ShouldRetry(Response(429, 6)));
+        Assert.False(AppStoreServiceCollectionExtensions.ShouldRetry(Response(503, 60)));
+        Assert.True(AppStoreServiceCollectionExtensions.ShouldRetry(Response(500, 60)));
+        Assert.False(AppStoreServiceCollectionExtensions.ShouldRetry(Response(404, null)));
+        Assert.True(AppStoreServiceCollectionExtensions.ShouldRetry(Polly.Outcome.FromException<HttpResponseMessage>(new HttpRequestException())));
+    }
+
+    // T-134: Get Notification History.
+
+    [Fact]
+    public async Task HistoryPostsTheWindowWithOnlyFailuresAndFollowsTheContinuation()
+    {
+        await using var host = Start(partition: AppleBudgetPartition.Worker);
+        apple.History(true, 200, AppleWireMock.HistoryBody(true, "next/page+1", "p1.a.b", "p2.a.b"));
+        apple.History(true, 200, AppleWireMock.HistoryBody(false, null, "p3.a.b"), paginationToken: "next/page+1");
+        var start = new DateTimeOffset(2026, 11, 4, 12, 0, 0, TimeSpan.Zero);
+        var end = new DateTimeOffset(2026, 11, 11, 11, 55, 0, TimeSpan.Zero);
+
+        var first = await host.AppStore.GetNotificationHistoryAsync(PurchaseEnvironment.Sandbox, start, end, null, StoreLane.Notification, CancellationToken.None);
+        var second = await host.AppStore.GetNotificationHistoryAsync(PurchaseEnvironment.Sandbox, start, end, first.PaginationToken, StoreLane.Notification, CancellationToken.None);
+
+        Assert.Equal(["p1.a.b", "p2.a.b"], first.SignedPayloads.Select(p => p.Reveal()));
+        Assert.True(first.HasMore);
+        Assert.Equal("next/page+1", first.PaginationToken?.Reveal());
+        Assert.Equal(["p3.a.b"], second.SignedPayloads.Select(p => p.Reveal()));
+        Assert.False(second.HasMore);
+        Assert.Null(second.PaginationToken);
+
+        var requests = apple.HistoryRequests(true);
+        Assert.Equal(2, requests.Count);
+        Assert.Null(requests[0].Token);
+        Assert.Equal("next/page+1", requests[1].Token);
+        using var body = JsonDocument.Parse(requests[0].Body);
+        Assert.Equal(start.ToUnixTimeMilliseconds(), body.RootElement.GetProperty("startDate").GetInt64());
+        Assert.Equal(end.ToUnixTimeMilliseconds(), body.RootElement.GetProperty("endDate").GetInt64());
+        Assert.True(body.RootElement.GetProperty("onlyFailures").GetBoolean());
+        Assert.Empty(apple.Production.LogEntries);
+        Assert.Contains(host.Spans, s => s.Contains("url.template=" + AppStoreServerApiClient.HistoryTemplate, StringComparison.Ordinal));
+        Assert.DoesNotContain(host.Spans, s => s.Contains("next", StringComparison.Ordinal) && s.Contains("page", StringComparison.Ordinal));
+        Assert.Contains(host.StoreCalls(), t => t["api"] == "notification_history" && t["outcome"] == "ok" && t["env"] == "sandbox");
+    }
+
+    [Fact]
+    public async Task TheWorkerPartitionRefusesEveryLaneButNotificationAndTheApiPartitionRefusesNotification()
+    {
+        await using var worker = Start(partition: AppleBudgetPartition.Worker);
+        await using var api = Start();
+        var id = AppleWireMock.NewTransactionId();
+        apple.Get(false, AppleWireMock.TransactionPath(id), 200, AppleWireMock.TransactionInfoBody("a.b.c"));
+        var now = DateTimeOffset.UtcNow;
+
+        var verifyOnWorker = await Assert.ThrowsAsync<AppStoreApiException>(() =>
+            worker.AppStore.GetTransactionInfoAsync(PurchaseEnvironment.Production, new Sensitive<string>(id), StoreLane.Verify, CancellationToken.None));
+        var notificationOnApi = await Assert.ThrowsAsync<AppStoreApiException>(() =>
+            api.AppStore.GetNotificationHistoryAsync(PurchaseEnvironment.Production, now.AddDays(-7), now, null, StoreLane.Notification, CancellationToken.None));
+
+        Assert.Equal(AppStoreCallOutcome.BudgetDenied, verifyOnWorker.Outcome);
+        Assert.Equal(AppStoreCallOutcome.BudgetDenied, notificationOnApi.Outcome);
+        Assert.Empty(apple.Received());
+        Assert.Equal("a.b.c", (await worker.AppStore.GetTransactionInfoAsync(PurchaseEnvironment.Production, new Sensitive<string>(id), StoreLane.Notification, CancellationToken.None)).Reveal());
+    }
+
+    private PlayClientHost Start(Dictionary<string, string?>? extra = null, AppleBudgetPartition partition = AppleBudgetPartition.Api)
     {
         var settings = new Dictionary<string, string?>(apple.Settings());
         foreach (var (key, value) in extra ?? [])
@@ -140,7 +253,7 @@ public sealed class AppStoreClientTests : IDisposable
             settings[key] = value;
         }
 
-        return PlayClientHost.Start(play, settings);
+        return PlayClientHost.Start(play, settings, partition: partition);
     }
 }
 

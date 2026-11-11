@@ -49,6 +49,12 @@ on:
       - 'app/android/app/src/main/kotlin/app/zaghlol/MainActivity.kt'
       - 'app/ios/Runner/Platform/**'
       - 'app/ios/Runner/AppDelegate.swift'
+      # T-148: backup crypto vectors on the platform AES-GCM and native NFC.
+      - 'app/lib/features/backup/crypto/**'
+      - 'app/lib/core/platform/*text_normaliz*'
+      - 'app/pigeons/text_normalization_api.dart'
+      - 'app/android/app/src/main/kotlin/app/zaghlol/platform/text/**'
+      - 'app/test/fixtures/backup/**'
       - .github/workflows/db-platform.yml
       - '.github/scripts/db-platform-*.sh'
       - '.github/scripts/db-key-*'

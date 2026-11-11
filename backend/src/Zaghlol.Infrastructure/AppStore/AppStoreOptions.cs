@@ -10,17 +10,26 @@ using Zaghlol.Infrastructure.GooglePlay;
 namespace Zaghlol.Infrastructure.AppStore;
 
 /// <summary>
-/// The Apple call budget (T-131 §6), a separate bucket from Play's (a different quota). The configured numbers are the
-/// <b>total</b> over all replicas; each process takes <c>1 / Replicas</c> of them. Apple publishes no fixed limits (it answers 429
-/// per endpoint), so the defaults are conservative and must be sized from observed 429s before go-live.
+/// The Apple call budget (T-131 §6, T-134 §6), a separate bucket from Play's (a different quota). The configured numbers are the
+/// <b>total</b> over all processes: the worker takes <see cref="WorkerShare"/> of them, each of the <see cref="Replicas"/> API processes
+/// <c>(1 − WorkerShare) / Replicas</c>. Apple publishes no fixed limits (it answers 429 per endpoint), so the defaults are conservative
+/// and must be sized from observed 429s before go-live.
 /// </summary>
-public sealed record AppleBudgetOptions(int TokenLimit, int TokensPerPeriod, TimeSpan Period, int Replicas, int VerifyPerInstallPerHour)
+/// <param name="Replicas">The number of <b>API</b> replicas (the worker runs its jobs on one replica through advisory locks).</param>
+/// <param name="WorkerShare">The worker's fraction of the total, in (0, 1) (default 0.2).</param>
+public sealed record AppleBudgetOptions(int TokenLimit, int TokensPerPeriod, TimeSpan Period, int Replicas, int VerifyPerInstallPerHour, decimal WorkerShare = AppleBudgetOptions.DefaultWorkerShare)
 {
+    public const decimal DefaultWorkerShare = 0.2m;
+
     public static AppleBudgetOptions Default { get; } = new(300, 60, TimeSpan.FromMinutes(1), 1, 10);
 
-    public int PerReplicaLimit => Math.Max(1, TokenLimit / Replicas);
+    public int PerReplicaLimit => Math.Max(1, (int)(TokenLimit * (1 - WorkerShare)) / Replicas);
 
-    public int PerReplicaPerPeriod => Math.Max(1, TokensPerPeriod / Replicas);
+    public int PerReplicaPerPeriod => Math.Max(1, (int)(TokensPerPeriod * (1 - WorkerShare)) / Replicas);
+
+    public int WorkerLimit => Math.Max(1, (int)(TokenLimit * WorkerShare));
+
+    public int WorkerPerPeriod => Math.Max(1, (int)(TokensPerPeriod * WorkerShare));
 }
 
 /// <summary>
@@ -277,7 +286,21 @@ public sealed partial class AppStoreOptions
             PositiveInt(section, "TokensPerPeriod", d.TokensPerPeriod),
             TimeSpan.FromSeconds(PositiveInt(section, "PeriodSeconds", (int)d.Period.TotalSeconds)),
             PositiveInt(section, "Replicas", d.Replicas),
-            relaxed ? PositiveInt(section, "VerifyPerInstallPerHour", d.VerifyPerInstallPerHour) : d.VerifyPerInstallPerHour);
+            relaxed ? PositiveInt(section, "VerifyPerInstallPerHour", d.VerifyPerInstallPerHour) : d.VerifyPerInstallPerHour,
+            Share(section, "WorkerShare", d.WorkerShare));
+    }
+
+    /// <summary>A fraction strictly between 0 and 1, invariant culture (for example <c>0.2</c>).</summary>
+    private static decimal Share(IConfigurationSection section, string key, decimal fallback)
+    {
+        if (section[key] is not { Length: > 0 } text)
+        {
+            return fallback;
+        }
+
+        return decimal.TryParse(text, NumberStyles.AllowDecimalPoint, CultureInfo.InvariantCulture, out var value) && value is > 0m and < 1m
+            ? value
+            : throw new AppStoreConfigurationException($"{Section}:{section.Key}:{key} must be a fraction between 0 and 1.");
     }
 
     private static PlayResilienceOptions ReadResilience(IConfigurationSection section)

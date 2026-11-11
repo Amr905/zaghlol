@@ -110,9 +110,12 @@ final class SecretStoreHost: SecretStoreHostApi {
 /// database must call this; all engines share one store and one lease.
 enum SecretStoreRegistration {
   static let dbKey = DbKeyKeychain()
+  /// T-148: the backup data key K_bk (own account, same rules).
+  static let backupKey = DbKeyKeychain(account: DbKeyKeychain.backupAccount)
   static let host = SecretStoreHost(slots: { slot in
     switch slot {
     case .dbKey: return dbKey
+    case .backupKey: return backupKey
     }
   })
 

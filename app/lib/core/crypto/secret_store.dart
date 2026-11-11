@@ -5,8 +5,14 @@
 
 import 'dart:typed_data';
 
-/// The secrets the store knows. T-148 adds the backup key.
-enum SecretSlot { dbKey }
+/// The secrets the store knows (platform-channels §5).
+enum SecretSlot {
+  /// K_db, the database key (T-015).
+  dbKey,
+
+  /// K_bk, the backup data key (T-148; security-model §3).
+  backupKey,
+}
 
 /// How a read ended (platform-channels §5, "Secret store").
 enum SecretStatus {

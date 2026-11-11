@@ -37,6 +37,9 @@ final class FakeSecretStore implements SecretStore {
 
   final List<String> calls = [];
 
+  /// T-148: every slot a call touched (this fake models dbKey only).
+  final List<SecretSlot> slotsTouched = [];
+
   /// Every buffer handed out by [read] (to check the caller zeroes them).
   final List<Uint8List> handedOut = [];
 
@@ -111,6 +114,7 @@ final class FakeSecretStore implements SecretStore {
   @override
   Future<SecretRead> read(SecretSlot slot) async {
     calls.add('read');
+    slotsTouched.add(slot);
     final forced = forcedStatus;
     final value = stored;
     if (forced != null && forced != SecretStatus.found) {
@@ -131,6 +135,7 @@ final class FakeSecretStore implements SecretStore {
     Uint8List candidate,
   ) async {
     calls.add('create');
+    slotsTouched.add(slot);
     _requireLease(lease);
     beforeCreate?.call();
     final fail = failCreate;
@@ -150,6 +155,7 @@ final class FakeSecretStore implements SecretStore {
   @override
   Future<void> delete(SecretStoreLease lease, SecretSlot slot) async {
     calls.add('delete');
+    slotsTouched.add(slot);
     _requireLease(lease);
     final fail = failDelete;
     if (fail != null) throw SecretStoreException(fail);
