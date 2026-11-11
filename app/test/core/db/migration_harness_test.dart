@@ -1,5 +1,6 @@
 // T-016 §6 (AC3, NFR-REL-02): the migration safety net on a real encrypted
-// file, with the synthetic schema v2 (fake_v2_database.dart). Success deletes
+// file, with a synthetic schema one version past the app's
+// (fake_next_database.dart; T-017: "current" is v2, "next" v3). Success deletes
 // the copy; a failing step (or an FK violation) restores byte-identical files
 // and the old version reopens; an unconfirmed migration at startup is rolled
 // back; a `.part` is ignored; a failed copy migrates nothing; a newer file is
@@ -21,12 +22,13 @@ import 'package:zaghlol/core/db/encrypted_open.dart';
 import '../../support/fake_secret_store.dart';
 import '../../support/file_snapshot.dart';
 import 'db_open_harness.dart';
-import 'fake_v2_database.dart';
+import 'fake_next_database.dart';
 import 'sqlite3mc_contract.dart' show hasPlaintextHeader;
 
-/// Makes a v1 database with one marker row (foreground, so it is fully
-/// closed, -wal/-shm deleted, when this returns).
-Future<void> makeV1(DbWorld world, {String marker = 'v1'}) async {
+/// Makes a database at the app's current version with one marker row
+/// (foreground, so it is fully closed, -wal/-shm deleted, when this
+/// returns).
+Future<void> makeCurrent(DbWorld world, {String marker = 'current'}) async {
   final db = openedDb(await world.open(executor: foregroundExecutor));
   await writeMeta(db, 'marker', marker);
   await db.close();
@@ -48,22 +50,22 @@ void main() {
     final mode = background ? 'background' : 'foreground';
     final executor = background ? defaultDbExecutor : foregroundExecutor;
 
-    test('success: v1 → v2 runs the step once, confirms and deletes the '
+    test('success: current → next runs the step once, confirms and deletes the '
         'copy ($mode)', () async {
-      await makeV1(world);
+      await makeCurrent(world);
       final result = await world.openWith(
-        fakeV2Factory(),
-        FakeV2Database.version,
+        fakeNextFactory(),
+        FakeNextDatabase.version,
         executor: executor,
       );
-      final opened = result as DbOpened<FakeV2Database>;
+      final opened = result as DbOpened<FakeNextDatabase>;
       addTearDown(opened.db.close);
-      expect(opened.migratedFrom, 1);
+      expect(opened.migratedFrom, appSchemaVersion);
       expect(opened.diagCode, 'DB_MIGRATED');
       expect(opened.db.steps, 1);
-      expect(await userVersionOf(opened.db), 2);
-      expect(await metaValue(opened.db, 'fake_v2'), '1');
-      expect(await metaValue(opened.db, 'marker'), 'v1');
+      expect(await userVersionOf(opened.db), FakeNextDatabase.version);
+      expect(await metaValue(opened.db, 'fake_next'), '1');
+      expect(await metaValue(opened.db, 'marker'), 'current');
       expect(world.files.migrateTmp.existsSync(), isFalse);
       expect(world.files.migratePart.existsSync(), isFalse);
       expect(
@@ -75,25 +77,28 @@ void main() {
       );
     });
 
-    for (final failMode in [FakeV2Mode.throwInStep, FakeV2Mode.fkViolation]) {
+    for (final failMode in [
+      FakeNextMode.throwInStep,
+      FakeNextMode.fkViolation,
+    ]) {
       test('AC3: ${failMode.name} → DB_MIGRATION_FAILED(restored), every '
           'file byte-identical, the old version reopens ($mode)', () async {
-        await makeV1(world);
+        await makeCurrent(world);
         final before = snapshotFiles(world.dbDir);
         expect(before.keys, [dbFileName]);
 
         final result = await world.openWith(
-          fakeV2Factory(mode: failMode),
-          FakeV2Database.version,
+          fakeNextFactory(mode: failMode),
+          FakeNextDatabase.version,
           executor: executor,
         );
-        expect(result, isA<DbOpenFailed<FakeV2Database>>());
+        expect(result, isA<DbOpenFailed<FakeNextDatabase>>());
         final failed = result as DbOpenFailed;
         expect(failed.code, DbOpenFailureCode.migrationFailed);
         expect(failed.restored, isTrue);
         expect(failed.diagCode, 'DB_MIGRATION_FAILED');
-        expect(failed.fromVersion, 1);
-        expect(failed.toVersion, 2);
+        expect(failed.fromVersion, appSchemaVersion);
+        expect(failed.toVersion, FakeNextDatabase.version);
         expect(dbGateStateFor(failed.code), DbGateState.updateFailed);
         await settle(world);
         expect(sameSnapshot(before, snapshotFiles(world.dbDir)), isTrue);
@@ -102,20 +107,20 @@ void main() {
 
         final v1 = openedDb(await world.open(executor: foregroundExecutor));
         addTearDown(v1.close);
-        expect(await userVersionOf(v1), 1);
-        expect(await metaValue(v1, 'marker'), 'v1');
-        expect(await metaValue(v1, 'fake_v2'), isNull);
+        expect(await userVersionOf(v1), appSchemaVersion);
+        expect(await metaValue(v1, 'marker'), 'current');
+        expect(await metaValue(v1, 'fake_next'), isNull);
       });
     }
   }
 
   test('AC3: a step that damaged the main file outside SQLite is undone: '
       'the restored file is the copy, byte for byte', () async {
-    await makeV1(world);
+    await makeCurrent(world);
     final before = snapshotFiles(world.dbDir);
     final result = await world.openWith(
-      fakeV2Factory(
-        mode: FakeV2Mode.throwInStep,
+      fakeNextFactory(
+        mode: FakeNextMode.throwInStep,
         // Simulates a non-transactional partial write.
         onStep: () => world.mainFile.writeAsBytesSync(
           List<int>.filled(4096, 0xEE),
@@ -123,7 +128,7 @@ void main() {
           flush: true,
         ),
       ),
-      FakeV2Database.version,
+      FakeNextDatabase.version,
     );
     expect((result as DbOpenFailed).restored, isTrue);
     await settle(world);
@@ -132,7 +137,7 @@ void main() {
 
   test('crash after the copy, before confirmation: the next start rolls '
       'back to the copy', () async {
-    await makeV1(world, marker: 'before');
+    await makeCurrent(world, marker: 'before');
     final copy = world.mainFile.readAsBytesSync();
     // A "migration" that wrote, then the process died: the main file has
     // changed and the copy is still there.
@@ -148,12 +153,12 @@ void main() {
   });
 
   test('a leftover .part is ignored and deleted', () async {
-    await makeV1(world);
+    await makeCurrent(world);
     world.files.migratePart.writeAsBytesSync([1, 2, 3]);
     File('${world.files.migratePart.path}-wal').writeAsBytesSync([4]);
     final db = openedDb(await world.open(executor: foregroundExecutor));
     addTearDown(db.close);
-    expect(await metaValue(db, 'marker'), 'v1');
+    expect(await metaValue(db, 'marker'), 'current');
     expect(world.files.migratePart.existsSync(), isFalse);
     expect(File('${world.files.migratePart.path}-wal').existsSync(), isFalse);
   });
@@ -161,12 +166,12 @@ void main() {
   for (final background in [true, false]) {
     test('disk full while copying: DB_MIGRATE_COPY_FAILED, nothing migrated, '
         'no copy left (${background ? 'background' : 'foreground'})', () async {
-      await makeV1(world);
+      await makeCurrent(world);
       final before = snapshotFiles(world.dbDir);
-      final opened = <FakeV2Database>[];
+      final opened = <FakeNextDatabase>[];
       final result = await world.openWith(
-        fakeV2Factory(opened: opened),
-        FakeV2Database.version,
+        fakeNextFactory(opened: opened),
+        FakeNextDatabase.version,
         copier: diskFullCopier,
         executor: background ? defaultDbExecutor : foregroundExecutor,
       );
@@ -182,11 +187,11 @@ void main() {
     });
   }
 
-  test('too new (v3 file, v1 app): DB_SCHEMA_TOO_NEW, file untouched '
+  test('too new (file one version past the app): DB_SCHEMA_TOO_NEW, file untouched '
       '(EC-26)', () async {
-    await makeV1(world);
+    await makeCurrent(world);
     final db = rawAppDatabase(world.mainFile);
-    await db.customStatement('PRAGMA user_version = 3');
+    await db.customStatement('PRAGMA user_version = ${appSchemaVersion + 1}');
     await db.close();
     final before = snapshotFiles(world.dbDir);
 
@@ -202,12 +207,12 @@ void main() {
 
   test('headless engine (allowMigration: false): DB_MIGRATION_PENDING, file '
       'untouched, no copy', () async {
-    await makeV1(world);
+    await makeCurrent(world);
     final before = snapshotFiles(world.dbDir);
-    final opened = <FakeV2Database>[];
+    final opened = <FakeNextDatabase>[];
     final result = await world.openWith(
-      fakeV2Factory(opened: opened),
-      FakeV2Database.version,
+      fakeNextFactory(opened: opened),
+      FakeNextDatabase.version,
       allowMigration: false,
       executor: foregroundExecutor,
     );
@@ -222,7 +227,7 @@ void main() {
 
   test('headless engine never rolls back an unconfirmed migration (the UI '
       'engine may be migrating): DB_MIGRATION_PENDING, copy kept', () async {
-    await makeV1(world);
+    await makeCurrent(world);
     world.files.migrateTmp.writeAsBytesSync(world.mainFile.readAsBytesSync());
     final before = snapshotFiles(world.dbDir);
     final result = await world.open(allowMigration: false);
@@ -239,7 +244,7 @@ void main() {
           '-wal/-shm); the headless engine\'s open fails → '
           'DB_MIGRATION_PENDING; main file, -wal, -shm and the copy are '
           'untouched and the UI engine loses nothing ($mode)', () async {
-        await makeV1(world);
+        await makeCurrent(world);
         // The UI engine: a live connection with uncheckpointed writes.
         final ui = rawAppDatabase(world.mainFile);
         await writeMeta(ui, 'ui', 'one');
@@ -252,10 +257,10 @@ void main() {
         // The UI engine's copy appears after the headless engine's step 1
         // (step 1 alone already defers when it sees a copy).
         Map<String, Uint8List>? before;
-        final opened = <FakeV2Database>[];
+        final opened = <FakeNextDatabase>[];
         final result = await world.openWith(
-          fakeV2Factory(opened: opened),
-          FakeV2Database.version,
+          fakeNextFactory(opened: opened),
+          FakeNextDatabase.version,
           allowMigration: false,
           executor: (file, key, guard) {
             world.files.migrateTmp.writeAsBytesSync(copyBytes, flush: true);
@@ -287,15 +292,15 @@ void main() {
         final check = rawAppDatabase(world.mainFile);
         addTearDown(check.close);
         expect(await metaValue(check, 'ui'), 'two');
-        expect(await metaValue(check, 'marker'), 'v1');
+        expect(await metaValue(check, 'marker'), 'current');
       });
     }
 
     test('an engine that may migrate but did not upgrade (DB_SCHEMA_TOO_NEW) '
         'leaves a copy that appeared after step 1 alone', () async {
-      await makeV1(world);
+      await makeCurrent(world);
       final db = rawAppDatabase(world.mainFile);
-      await db.customStatement('PRAGMA user_version = 3');
+      await db.customStatement('PRAGMA user_version = ${appSchemaVersion + 1}');
       await db.close();
       final copyBytes = world.mainFile.readAsBytesSync();
       Map<String, Uint8List>? before;
@@ -312,7 +317,7 @@ void main() {
 
     test('an engine that opened without upgrading never confirms (deletes) '
         'another engine\'s copy', () async {
-      await makeV1(world);
+      await makeCurrent(world);
       final copyBytes = world.mainFile.readAsBytesSync();
       final result = await world.open(
         executor: (file, key, guard) {
@@ -328,18 +333,18 @@ void main() {
 
   test('the copy is the encrypted file: header is not "SQLite format 3" and '
       'it opens with the same key', () async {
-    await makeV1(world);
+    await makeCurrent(world);
     final evidence = File('${world.root.path}/evidence.db');
     var header = true;
     final result = await world.openWith(
-      fakeV2Factory(
-        mode: FakeV2Mode.throwInStep,
+      fakeNextFactory(
+        mode: FakeNextMode.throwInStep,
         onStep: () {
           header = hasPlaintextHeader(world.files.migrateTmp);
           world.files.migrateTmp.copySync(evidence.path);
         },
       ),
-      FakeV2Database.version,
+      FakeNextDatabase.version,
     );
     expect((result as DbOpenFailed).restored, isTrue);
     expect(header, isFalse);
@@ -349,8 +354,8 @@ void main() {
       validateSchema: false,
     );
     addTearDown(copy.close);
-    expect(await metaValue(copy, 'marker'), 'v1');
-    expect(await userVersionOf(copy), 1);
+    expect(await metaValue(copy, 'marker'), 'current');
+    expect(await userVersionOf(copy), appSchemaVersion);
     // And not with another key.
     final wrong = AppDatabase(
       openEncryptedExecutor(
@@ -371,14 +376,16 @@ void main() {
     expect(dbOpenExceptionOf(failure!)?.isKeyRejected, isTrue);
   });
 
-  test('a v1 app has no migration path: an older file (v0 with tables) is '
-      'created, a v1 file opens without a copy', () async {
-    await makeV1(world);
-    final db = openedDb(await world.open(executor: foregroundExecutor));
-    addTearDown(db.close);
-    expect(world.files.migrateTmp.existsSync(), isFalse);
-    expect(db.attemptedUpgradeFrom, isNull);
-  });
+  test(
+    'a file at the current version opens without a copy or an upgrade',
+    () async {
+      await makeCurrent(world);
+      final db = openedDb(await world.open(executor: foregroundExecutor));
+      addTearDown(db.close);
+      expect(world.files.migrateTmp.existsSync(), isFalse);
+      expect(db.attemptedUpgradeFrom, isNull);
+    },
+  );
 }
 
 /// Lets a background isolate finish closing (SQLite deletes -wal/-shm on the

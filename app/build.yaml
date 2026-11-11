@@ -11,3 +11,10 @@ targets:
             app_database: lib/core/db/schema/app_schema.dart
           schema_dir: drift_schemas/
           test_dir: test/core/db/migrations/
+          # T-017: transactions_fts / transactions_fts_short.
+          sql:
+            dialect: sqlite
+            options:
+              version: "3.45"
+              modules:
+                - fts5
