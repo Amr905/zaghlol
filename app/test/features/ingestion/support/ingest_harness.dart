@@ -90,10 +90,13 @@ final class ThrowingHook implements PostPersistHook {
 /// busy-like `DB_WRITE_FAILED`, simulating a crash or I/O error at that
 /// step (before the commit).
 final class FaultyStore implements IngestStorePort {
-  FaultyStore(this._inner, {this.failAt});
+  FaultyStore(this._inner, {this.failAt, this.afterCrossChannelRead});
 
   final IngestStorePort _inner;
   int? failAt;
+
+  /// Awaited after every dedupe-2 read (a test barrier for the race test).
+  final Future<void> Function()? afterCrossChannelRead;
   int calls = 0;
   bool fired = false;
 
@@ -136,13 +139,15 @@ final class FaultyStore implements IngestStorePort {
     required String dedupeKey,
     required int fromMs,
     required int toMs,
-  }) => _step(
-    () => _inner.crossChannelCandidates(
+  }) => _step(() async {
+    final found = await _inner.crossChannelCandidates(
       dedupeKey: dedupeKey,
       fromMs: fromMs,
       toMs: toMs,
-    ),
-  );
+    );
+    await afterCrossChannelRead?.call();
+    return found;
+  });
   @override
   Future<List<TxnCandidate>> statusCandidates({
     required String institution,

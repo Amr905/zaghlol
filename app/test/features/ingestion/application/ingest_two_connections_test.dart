@@ -85,6 +85,34 @@ void main() {
     );
   }, timeout: const Timeout(Duration(minutes: 3)));
 
+  test('barrier: A pauses right after its dedupe-2 read while B ingests '
+      'the other copy → still one transaction (the read is inside '
+      'BEGIN IMMEDIATE, so B waits for A)', () async {
+    final bDone = Completer<void>();
+    final a = w.useCase(
+      idPrefix: 'a',
+      wrap: (inner) => FaultyStore(
+        inner,
+        afterCrossChannelRead: () => Future.any([
+          bDone.future,
+          Future<void>.delayed(const Duration(milliseconds: 800)),
+        ]),
+      ),
+    );
+    final b = w.useCase(on: other, idPrefix: 'b');
+    final aRun = a([
+      sms('s', 'ZBANK: Purchase EGP 61.00 at Synth Shop card *4321'),
+    ]);
+    // Let A take the lock and reach the barrier before B starts.
+    await Future<void>.delayed(const Duration(milliseconds: 200));
+    final bRun = b([
+      notif('n', 'Purchase EGP 61.00 at Synth Shop', rx: t0 + 1500),
+    ]).whenComplete(bDone.complete);
+    await Future.wait([aRun, bRun]);
+    expect(await w.count('transactions'), 1);
+    expect(await w.count('raw_messages'), 2);
+  }, timeout: const Timeout(Duration(seconds: 60)));
+
   test('the same body via the spool (A) and an inbox scan (B) → one raw '
       'row', () async {
     final a = w.useCase(idPrefix: 'a');
