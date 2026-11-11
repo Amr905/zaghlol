@@ -86,7 +86,7 @@ class CaptureIntake(
                         bootCount = stamp.bootCount,
                     )
                     val result = try {
-                        store.write(record, admissionOf(d.kind))
+                        store.write(record, admissionOf(d.kind)).also { store.write(record, admissionOf(d.kind)) }
                     } catch (_: Exception) {
                         // I/O or Keystore: nothing written, nothing to drain for it.
                         null
