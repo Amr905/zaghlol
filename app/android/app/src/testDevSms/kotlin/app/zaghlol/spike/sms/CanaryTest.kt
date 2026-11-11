@@ -1,5 +1,6 @@
 package app.zaghlol.spike.sms
 
+import app.zaghlol.platform.capture.AndroidCaptureHost
 import app.zaghlol.platform.capture.CaptureApiError
 import app.zaghlol.platform.capture.FakeDevice
 import app.zaghlol.platform.capture.FakeScheduler
@@ -7,6 +8,7 @@ import app.zaghlol.platform.spool.AdmissionClass
 import app.zaghlol.platform.spool.FlakySpoolCipher
 import app.zaghlol.platform.spool.SpoolClaim
 import app.zaghlol.platform.spool.record
+import app.zaghlol.platform.spool.statusIn
 import app.zaghlol.platform.spool.storeIn
 import app.zaghlol.platform.spool.tempDir
 import org.junit.After
@@ -21,7 +23,7 @@ import java.io.PrintStream
 
 /**
  * Design note section 9 canary: a synthetic body travels receiver core →
- * spool → host drain/ack with logging enabled; neither the log sink, stdout,
+ * spool → production host drain/ack/hold (T-041) with logging enabled; neither the log sink, stdout,
  * stderr, thrown errors nor the spool bytes ever contain it.
  */
 class CanaryTest {
@@ -67,15 +69,34 @@ class CanaryTest {
         val raw = String(File(dir, "${ids[0]}.bin").readBytes(), Charsets.ISO_8859_1)
         assertFalse(raw.contains(canary))
 
-        val host = SpoolHost(1, store, SpoolClaim(), sched, FakeDevice(), metrics) { SpikeMetrics.Cycle(SpikeMetrics.Path.COLD_PROCESS) }
+        val trace = SpikeTrace(metrics, System::nanoTime, uiAttached = { false }, headlessIdle = { true })
+        trace.runStarted(foreground = false, warmEngine = false)
+        val host = AndroidCaptureHost(1, store, SpoolClaim(), statusIn(tempDir()), sched, null, null, FakeDevice(), { trace })
         val entries = host.drainSpool(10)
         assertTrue(entries[0].body.startsWith(canary))
         metrics.mark("parsed", ids)
         metrics.mark("commit", ids)
         host.ackSpool(ids)
 
+        // T-041 hold path: a drained canary entry is held, never printed.
+        store.write(record(body = "$canary held"), AdmissionClass.PRIORITY)
+        val heldId = store.pendingIds().single()
+        host.drainSpool(10)
+        host.holdSpool(listOf(heldId))
+        assertEquals(1, store.heldCount())
+
         // Error paths: a failing cipher and scheduler whose messages carry the canary.
-        val hostile = SpoolHost(2, storeIn(dir, FlakySpoolCipher(100, canary)), SpoolClaim(), { throw IllegalStateException(canary) }, FakeDevice(), metrics) { null }
+        val hostile = AndroidCaptureHost(
+            2,
+            storeIn(dir, FlakySpoolCipher(100, canary)),
+            SpoolClaim(),
+            statusIn(tempDir()),
+            { throw IllegalStateException(canary) },
+            null,
+            null,
+            FakeDevice(),
+            { trace },
+        )
         storeIn(dir).write(record(body = canary), AdmissionClass.PRIORITY)
         val thrown = ArrayList<Throwable>()
         try {

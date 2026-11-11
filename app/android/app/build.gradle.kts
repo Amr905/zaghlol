@@ -101,17 +101,13 @@ tasks.withType<Test>().configureEach {
     inputs.dir(guardFixtures).withPathSensitivity(PathSensitivity.RELATIVE).withPropertyName("guardFixtures")
 }
 
-// T-008 (SPK-01): the SMS ingestion spike lives in src/devSms only (Lead
-// decision Q5), so WorkManager is a dependency of that flavour combination
-// only; no staging*/prod* artifact contains it. AGP needs combined-flavour
-// configurations declared before use.
-val devSmsImplementation by configurations.creating
-
 dependencies {
-    // T-008: expedited ingestion work (architecture section 7). 2.12.0 is
-    // stable (2026-09-23), minSdk 24 <= 26. Brings androidx.startup (the
-    // spike's UI-engine hook) and kotlinx-coroutines-android.
-    devSmsImplementation("androidx.work:work-runtime:2.12.0")
+    // T-041: the ingestion worker (expedited WorkManager work, architecture
+    // section 7) runs in every flavour (notifications, T-043, need it in
+    // *NoSms too). 2.12.0 is stable (2026-09-23), minSdk 24 <= 26. Brings
+    // androidx.startup and kotlinx-coroutines-android. Its exported
+    // DiagnosticsReceiver is removed in src/main/AndroidManifest.xml.
+    implementation("androidx.work:work-runtime:2.12.0")
     testImplementation("junit:junit:4.13.2")
     // T-060: instrumented tests (Keystore cipher, share store on a device).
     // Versions match what the integration_test plugin already puts on the debug

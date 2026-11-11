@@ -168,8 +168,8 @@ void main() {
       expect(await w.count('transactions'), 4);
     });
 
-    test('an entry that can not be stored at all stays in the spool as the '
-        'only stuck entry; everything behind it is acked', () async {
+    test('an entry that can not be stored at all is held (T-041, FU-105); '
+        'everything behind it is acked', () async {
       final spool = FakeSpool([
         spoolSms('p', poisonBody),
         spoolSms('g1', buy('10.00')),
@@ -188,6 +188,45 @@ void main() {
         mayCreateDatabase: false,
         batchSize: 2,
       );
+      final r = await cycle().run();
+      expect(r.outcome, CycleOutcome.ok);
+      expect(r.stuck, 0);
+      expect(r.held, 1);
+      expect(r.code, 'INGEST_MSG_UNSTORABLE');
+      expect(spool.pending, isEmpty);
+      expect([for (final e in spool.held) e.id], ['p']);
+      expect(spool.acked.expand((a) => a), isNot(contains('p')));
+      expect(await w.count('transactions'), 3);
+
+      spool.pending.add(spoolSms('g4', buy('14.00')));
+      final next = await cycle().run();
+      expect(next.stuck, 0);
+      expect(next.held, 0);
+      expect(spool.pending, isEmpty);
+      expect(await w.count('transactions'), 4);
+    });
+
+    test('when the hold fails, the unstorable entry stays in the spool as '
+        'the only stuck entry; everything behind it is acked', () async {
+      final spool = FakeSpool([
+        spoolSms('p', poisonBody),
+        spoolSms('g1', buy('10.00')),
+        spoolSms('g2', buy('11.00')),
+        spoolSms('g3', buy('12.00')),
+      ], []);
+      final store = UseCaseStore(
+        w.useCase(
+          wrap: (inner) =>
+              FaultyStore(inner, poisonRaw: (row) => row.body == poisonBody),
+        ),
+      );
+      IngestionCycle cycle() => IngestionCycle(
+        spool: spool,
+        store: store,
+        mayCreateDatabase: false,
+        batchSize: 2,
+      );
+      spool.holdFails = 'IO_ERROR';
       final r = await cycle().run();
       expect(r.outcome, CycleOutcome.ok);
       expect(r.stuck, 1);

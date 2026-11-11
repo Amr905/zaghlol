@@ -4,6 +4,7 @@
 // missing DB → no open, no ack.
 
 import 'package:flutter_test/flutter_test.dart';
+import 'package:zaghlol/core/platform/ingestion_api.g.dart' as pigeon;
 import 'package:zaghlol/ingestion/ingestion_cycle.dart';
 
 import 'ingestion_fakes.dart';
@@ -17,6 +18,7 @@ void main() {
     int batch = 20,
     bool mayCreate = false,
     int Function()? nowMs,
+    bool Function()? stop,
   }) => IngestionCycle(
     spool: spool,
     store: store,
@@ -24,6 +26,7 @@ void main() {
     marks: RecordingMarks(log),
     batchSize: batch,
     nowMs: nowMs,
+    stopRequested: stop,
   );
 
   setUp(() {
@@ -75,7 +78,7 @@ void main() {
     expect(r.outcome, CycleOutcome.ok);
     expect(r.stuck, 2);
     expect(r.code, 'INGEST_MSG_UNSTORABLE');
-    expect(r.toWire()['stuck'], 2);
+    expect(r.toReport().stuck, 2);
     expect(spool.acked, isEmpty);
     expect(spool.pending, hasLength(2), reason: 'never deleted');
     expect(log.where((l) => l == 'ingest'), hasLength(1));
@@ -140,7 +143,7 @@ void main() {
       store.exists = false;
       final r = await cycle().run();
       expect(r.outcome, CycleOutcome.noDatabase);
-      expect(r.toWire()['result'], 'NO_DATABASE');
+      expect(r.toReport().outcome, pigeon.IngestOutcome.noDatabase);
       expect(store.opens, 0);
       expect(log, ['exists']);
       expect(spool.pending, hasLength(2));
@@ -191,7 +194,84 @@ void main() {
     expect(spool.acked.single, [sid(1), sid(2)]);
   });
 
-  test('no result or wire map ever carries message text', () async {
+  group('held entries (T-041, FU-105)', () {
+    test(
+      'kept entries are held after the ack of the rest, and counted',
+      () async {
+        store.unstorable.add(sid(2));
+        final r = await cycle().run();
+        expect(r.outcome, CycleOutcome.ok);
+        expect(spool.acked, [
+          [sid(1)],
+        ]);
+        expect(spool.heldCalls, [
+          [sid(2)],
+        ]);
+        expect(log.indexOf('hold'), greaterThan(log.indexOf('ack')));
+        expect(r.held, 1);
+        expect(r.stuck, 0, reason: 'held entries are not pending any more');
+        expect(r.toReport().held, 1);
+        expect(spool.pending, isEmpty);
+        expect(spool.held.map((e) => e.id), [sid(2)]);
+      },
+    );
+
+    test('no kept entries → holdSpool is never called', () async {
+      final r = await cycle().run();
+      expect(spool.heldCalls, isEmpty);
+      expect(r.held, 0);
+    });
+
+    test('a failed hold is ignored: the entry stays pending and ends the '
+        'cycle as stuck, never acked', () async {
+      store.unstorable.add(sid(2));
+      spool.holdFails = 'IO_ERROR';
+      final r = await cycle().run();
+      expect(r.outcome, CycleOutcome.ok);
+      expect(r.held, 0);
+      expect(r.stuck, 1);
+      expect(spool.pending.map((e) => e.id), [sid(2)]);
+      expect(spool.acked.expand((a) => a), isNot(contains(sid(2))));
+    });
+
+    test(
+      'hold is not called when the ack failed (retry, nothing held)',
+      () async {
+        store.unstorable.add(sid(2));
+        spool.ackFails = 'IO_ERROR';
+        final r = await cycle().run();
+        expect(r.outcome, CycleOutcome.retry);
+        expect(spool.heldCalls, isEmpty);
+      },
+    );
+  });
+
+  test(
+    'a stop request ends the cycle before its next batch (T-041 close)',
+    () async {
+      var stop = false;
+      spool.pending
+        ..clear()
+        ..addAll([for (var i = 1; i <= 5; i++) entry(sid(i))]);
+      final c = IngestionCycle(
+        spool: spool,
+        store: store,
+        mayCreateDatabase: false,
+        batchSize: 2,
+        stopRequested: () => stop,
+      );
+      // Stop as soon as the first batch is being ingested.
+      store.onIngest = () => stop = true;
+      final r = await c.run();
+      expect(r.outcome, CycleOutcome.ok);
+      expect(r.drained, 2, reason: 'the current batch finishes');
+      expect(log.where((l) => l == 'drain'), hasLength(1));
+      expect(log.where((l) => l == 'ack'), hasLength(1));
+      expect(spool.pending, hasLength(3), reason: 'left for the next drain');
+    },
+  );
+
+  test('no result or report ever carries message text', () async {
     spool.pending
       ..clear()
       ..add(entry(sid(1), body: '$canary EGP 5'));
@@ -203,7 +283,7 @@ void main() {
     ]) {
       arrange();
       final r = await cycle().run();
-      expect('${r.toWire()}', isNot(contains(canary)));
+      expect('${r.toReport().encode()}', isNot(contains(canary)));
       expect('${r.code}', isNot(contains(canary)));
     }
   });

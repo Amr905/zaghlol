@@ -23,6 +23,14 @@
 # skips allowed only by name), share (T-060, a warning until its owner makes it green),
 # then the two-phase kill test (AC1: a write phase halted between fsync and
 # rename of a 21st entry, a read phase in a new process).
+# T-041: the receiver feeds the production worker, drain loop and headless
+# engine (src/main); the metrics come from the devSms IngestTrace. AC1: after
+# the default cell (app killed before each SMS) the spool is empty. AC2: a
+# foreground cell (app open, UI engine drains on onSpoolChanged): p95 of
+# receive → commit for `foreground` rows <= 2000 ms. A burst of 40 SMS with
+# the app killed, the app launched during the headless drain: every entry
+# committed once (40 new rows, spool empty). Instrumented: the headless
+# plugin allowlist (fatal) and the #6 Cipher.init probe (recorded).
 # Called as one line (android-emulator-runner runs `script` line by line).
 set -euo pipefail
 : "${DEVICE:?}" "${API:?}" "${RUNNER_TEMP:?}"
@@ -97,6 +105,10 @@ send_and_wait() {
 
 # Cell 1: default settings (battery optimisation on), cold process.
 send_and_wait default "$N"
+# T-041 AC1: the killed app's spool was drained by the worker.
+for _ in $(seq 1 15); do [ "$(spool_count)" = 0 ] && break; sleep 1; done
+[ "$(spool_count)" = 0 ] || fail "AC1: spool not empty after the default cell ($(spool_count) entries)"
+echo "AC1: spool empty after $N SMS with the app killed"
 # Cell 2: battery optimisation exemption (whitelist), cold process.
 sh_ dumpsys deviceidle whitelist +"$PKG" > /dev/null
 send_and_wait exempt "$N"
@@ -117,6 +129,49 @@ sh_ dumpsys deviceidle force-idle > /dev/null || true
 send_and_wait doze 2
 sh_ dumpsys deviceidle unforce > /dev/null || true
 sh_ dumpsys battery reset > /dev/null
+
+# T-041 AC2: foreground. The app is open (UI engine attached); no kill.
+sh_ am start -W -n "$PKG/app.zaghlol.MainActivity" > /dev/null
+sleep 3
+for i in $(seq 1 "$N"); do
+  seq_no=$((seq_no + 1))
+  before=$(rows)
+  A emu sms send "$SENDER" "spike: you paid EGP $seq_no.00 at SYNTH SHOP $seq_no card *4321" > /dev/null
+  for _ in $(seq 1 30); do
+    after=$(rows)
+    [ "$after" -gt "$before" ] && break
+    sleep 1
+  done
+  sh_ dumpsys activity broadcasts history > "$BH/$(printf %04d "$seq_no").txt" 2>/dev/null || true
+  echo "foreground #$i: rows $before -> $after"
+done
+runas cat no_backup/spike/metrics.csv > "$OUT/metrics-fg.csv"
+# p95 (nearest rank) of t8_commit (else t9_acked) over the foreground rows.
+FG_P95=$(awk -F, 'NR==1{for(i=1;i<=NF;i++)h[$i]=i; next} $h["path"]=="foreground"{v=$h["t8_commit"]; if(v=="")v=$h["t9_acked"]; if(v!="")print v}' "$OUT/metrics-fg.csv" \
+  | sort -n | awk '{a[NR]=$1} END{if(NR==0){print "none"; exit} r=int((95*NR+99)/100); print a[r]}')
+rm -f "$OUT/metrics-fg.csv"
+echo "AC2: foreground receive -> commit p95 = ${FG_P95} ms"
+[ "$FG_P95" != none ] || fail "AC2: no foreground row was recorded"
+[ "$FG_P95" -le 2000 ] || fail "AC2: foreground p95 ${FG_P95} ms > 2000 ms"
+
+# T-041: UI attach mid-drain. A burst with the app killed; the app is launched
+# while the headless engine drains; nothing lost or doubled.
+kill_app
+before=$(rows)
+for i in $(seq 1 40); do
+  seq_no=$((seq_no + 1))
+  A emu sms send "$SENDER" "spike: you paid EGP $seq_no.00 at SYNTH SHOP $seq_no card *4321" > /dev/null
+done
+for _ in $(seq 1 60); do [ "$(rows)" -gt "$before" ] && break; sleep 0.5; done
+sh_ am start -W -n "$PKG/app.zaghlol.MainActivity" > /dev/null
+for _ in $(seq 1 120); do
+  [ "$(rows)" -ge $((before + 40)) ] && [ "$(spool_count)" = 0 ] && break
+  sleep 1
+done
+burst=$(( $(rows) - before ))
+echo "burst with UI attach mid-drain: $burst of 40 committed, spool $(spool_count)"
+[ "$burst" = 40 ] || fail "burst: $burst rows for 40 SMS (lost or doubled)"
+[ "$(spool_count)" = 0 ] || fail "burst: spool not empty after the UI took over"
 
 # Negative proofs.
 kill_app
@@ -215,6 +270,12 @@ instr spool -e package app.zaghlol.platform.spool -e notClass "$KILL" || fail "s
 tr -d '\r' < "$OUT/it-spool.txt" | grep -qE "^OK \(0 tests\)" && fail "no spool instrumented test ran"
 echo "spool instrumented: $(skipped spool) skipped"
 [ "$(skipped spool)" = 0 ] || fail "a spool instrumented test was skipped by an assumption (it-spool.txt)"
+INIT_PROBE=$(tr -d '\r' < "$OUT/it-spool.txt" | sed -n 's/^INSTRUMENTATION_STATUS: spool\.initProbe=//p' | head -n 1)
+echo "spool init probe (#6): ${INIT_PROBE:-none}"
+# T-041: the headless engine's plugin allowlist (fatal).
+instr ingest -e package app.zaghlol.platform.ingest || fail "ingest instrumented tests failed (it-ingest.txt)"
+tr -d '\r' < "$OUT/it-ingest.txt" | grep -qE "No tests found|^OK \(0 tests\)" && fail "no ingest instrumented test ran"
+[ "$(skipped ingest)" = 0 ] || fail "an ingest instrumented test was skipped"
 # Guard (T-038, security M-1): fatal; at least one test must run and every skip must be allowed by name.
 instr guard -e package app.zaghlol.platform.guard && guard_ok=1 || guard_ok=0
 GUARD_TIMING=$(tr -d '\r' < "$OUT/it-guard.txt" | sed -n 's/^INSTRUMENTATION_STATUS: guard\.timing=//p' | head -n 1)
@@ -237,13 +298,70 @@ echo "after halt: $bins entries, $tmps tmp"
 [ "$bins" = 20 ] && [ "$tmps" = 1 ] || fail "after the halt expected 20 entries and 1 tmp, found $bins and $tmps"
 instr kill-read -e class "$KILL#phaseRead" -e spoolPhase read || fail "the read phase after the halt failed (it-kill-read.txt)"
 [ "$(skipped kill-read)" = 0 ] || fail "the read phase was skipped (spoolPhase argument not received)"
+# ---- Inbox reader (T-042) ----------------------------------------------------
+# Real provider: 30 messages from $SENDER (#10 a 3-part one, #20 an OTP, #7
+# with the canary) and 10 from 5550199, `inboxMid` taken between #15 and #16;
+# the test reads with page size 7 (only $SENDER's non-OTP rows), then AC2
+# (10k × 4,000 chars) and, after `pm revoke`, PERMISSION_DENIED. The app's
+# logcat lines must not carry the canary.
+INBOX=app.zaghlol.platform.capture.inbox.InboxReaderInstrumentedTest
+LONG_TAIL="this synthetic statement line is repeated to make one message span three parts"
+inbox_body() {
+  case "$1" in
+    7) echo "inbox-it 7 paid EGP 7.00 at $CANARY SHOP card *4321" ;;
+    10) echo "inbox-it 10 paid EGP 10.00 at SYNTH SHOP card *4321 $LONG_TAIL $LONG_TAIL $LONG_TAIL $LONG_TAIL $LONG_TAIL END-OF-LONG" ;;
+    20) echo "inbox-it 20 your OTP is 123456" ;;
+    *) echo "inbox-it $1 paid EGP $1.00 at SYNTH SHOP card *4321" ;;
+  esac
+}
+sh_ pm grant "$PKG" android.permission.READ_SMS
+A logcat -c || true
+sleep 2
+INBOX_SINCE=$(( $(sh_ date +%s | tr -d '\r') * 1000 ))
+sleep 2
+for i in $(seq 1 30); do
+  A emu sms send "$SENDER" "$(inbox_body "$i")" > /dev/null
+  if [ $((i % 3)) = 0 ]; then A emu sms send 5550199 "inbox-it friend $i $CANARY EGP 5.00" > /dev/null; fi
+  if [ "$i" = 15 ]; then
+    sleep 8
+    INBOX_MID=$(( $(sh_ date +%s | tr -d '\r') * 1000 ))
+    sleep 2
+  fi
+  sleep 1
+done
+instr inbox -e class "$INBOX" -e inboxPhase seeded -e inboxSince "$INBOX_SINCE" -e inboxMid "$INBOX_MID" \
+  || fail "inbox instrumented tests failed (it-inbox.txt)"
+[ "$(skipped inbox)" = 1 ] || fail "expected exactly the denied-phase test skipped in the seeded run (it-inbox.txt)"
+sh_ pm revoke "$PKG" android.permission.READ_SMS
+instr inbox-denied -e class "$INBOX#revokedPermissionIsPermissionDenied" -e inboxPhase denied \
+  || fail "inbox permission-denied test failed (it-inbox-denied.txt)"
+[ "$(skipped inbox-denied)" = 0 ] || fail "the inbox denied phase was skipped"
+sh_ pm grant "$PKG" android.permission.READ_SMS
+sh_ pm list packages -U > "$OUT/pkg.txt"
+UID_N=$(grep -E "^package:$PKG uid:" "$OUT/pkg.txt" | grep -oE 'uid:[0-9]+' | cut -d: -f2 || true)
+if [ -z "$UID_N" ]; then
+  sh_ dumpsys package "$PKG" > "$OUT/pkg.txt"
+  UID_N=$(grep -oE '(userId|appId)=[0-9]+' "$OUT/pkg.txt" | cut -d= -f2 | sort -u | tail -n 1 || true)
+fi
+[ -n "$UID_N" ] || fail "could not read the app uid (inbox step)"
+APP_NAME="u0_a$((UID_N - 10000))"
+A logcat -d -v uid > "$OUT/logcat-uid.txt" || true
+inbox_own=$(grep -E "(^|[[:space:]])($UID_N|$APP_NAME)[[:space:]]" "$OUT/logcat-uid.txt" | grep -c . || true)
+inbox_hits=$(grep -F "$CANARY" "$OUT/logcat-uid.txt" | grep -E "(^|[[:space:]])($UID_N|$APP_NAME)[[:space:]]" | grep -c . || true)
+echo "inbox canary: app log lines $inbox_hits of $inbox_own app lines"
+[ "$inbox_own" -gt 0 ] || fail "the logcat uid filter matched no app line after the inbox tests; canary scan would be vacuous"
+[ "$inbox_hits" = 0 ] || fail "the canary appeared in the app's logcat during the inbox tests"
+rm -f "$OUT/logcat-uid.txt" "$OUT/pkg.txt"
 {
   echo
   echo "### Instrumented (T-039), API $API"
-  for n in spool guard share kill-read; do
+  for n in spool guard share kill-read ingest inbox inbox-denied; do
     echo "- $n: $(tr -d '\r' < "$OUT/it-$n.txt" | grep -E "^(OK|FAILURES|Tests run)" | tr '\n' ' ')"
   done
   echo "- kill-write: halted with $bins entries + $tmps tmp on disk"
   echo "- guard skipped: $(skipped guard) ${guard_skips:+($guard_skips; allowed until T-036)}"
   echo "- guard timing: $GUARD_TIMING"
+  echo "- spool init probe (#6): ${INIT_PROBE:-none}"
+  echo "- foreground receive -> commit p95 (AC2): ${FG_P95} ms"
+  echo "- burst with UI attach mid-drain: $burst of 40"
 } >> "$OUT/report.md"

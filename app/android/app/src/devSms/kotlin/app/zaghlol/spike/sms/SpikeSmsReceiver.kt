@@ -7,7 +7,9 @@ import android.os.SystemClock
 import android.provider.Telephony
 
 /**
- * SMS_RECEIVED observer (devSms spike; T-040 productionises it). The manifest
+ * SMS_RECEIVED observer (devSms spike; T-040 productionises it). T-041:
+ * writes to the production spool (`CaptureRuntime.store`) and schedules the
+ * production worker through `CaptureRuntime.afterSpoolWrite`. The manifest
  * entry requires `android.permission.BROADCAST_SMS` from the sender, which
  * only the telephony stack holds, so other apps and `adb shell am broadcast`
  * can't spoof messages. It observes only: the broadcast is never aborted. No engine, parse or
@@ -19,8 +21,8 @@ class SpikeSmsReceiver : BroadcastReceiver() {
         val wallMs = System.currentTimeMillis()
         val elapsedNs = SystemClock.elapsedRealtimeNanos()
         if (intent.action != Telephony.Sms.Intents.SMS_RECEIVED_ACTION) return
-        val rt = SpikeRuntime.get(context)
-        rt.noteReceive(elapsedNs / 1_000_000)
+        val rt = Spike.get(context)
+        rt.trace.noteReceive(elapsedNs / 1_000_000, android.os.Process.getStartElapsedRealtime())
         val parts = try {
             Telephony.Sms.Intents.getMessagesFromIntent(intent)
                 ?.filterNotNull()
@@ -32,10 +34,8 @@ class SpikeSmsReceiver : BroadcastReceiver() {
         val stamp = ReceiveStamp(wallMs, elapsedNs, rt.bootCount(), simSlotOf(intent))
         val pending = goAsync()
         rt.dispatch.run(
-            work = {
-                val ids = rt.intake.process(SmsAssembler.assemble(parts), stamp)
-                if (ids.isNotEmpty()) rt.notifyUiIfAttached()
-            },
+            // The intake's scheduler is CaptureRuntime.afterSpoolWrite (enqueue + UI notify).
+            work = { rt.intake.process(SmsAssembler.assemble(parts), stamp) },
             finish = { pending.finish() },
         )
     }

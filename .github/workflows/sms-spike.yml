@@ -10,6 +10,10 @@ name: sms-spike
 # T-039: the native instrumented suites (spool, guard T-038, share T-060)
 # and the two-phase kill test also run here, after the spike (CI split in
 # testing-strategy.md: opt in by pushing to ci/<task-id>).
+# T-041: the worker, drain loop and headless engine are production code
+# (src/main, platform/ingest); the spike keeps only its receiver and latency
+# recorder. Adds AC1 (spool empty, app killed), AC2 (foreground p95 <= 2 s),
+# the UI-attach-mid-drain burst and the headless plugin allowlist test.
 on:
   workflow_dispatch:
   push:
@@ -20,6 +24,8 @@ on:
       - 'app/android/app/src/main/kotlin/app/zaghlol/platform/spool/**'
       - 'app/android/app/src/main/kotlin/app/zaghlol/platform/guard/**'
       - 'app/android/app/src/main/kotlin/app/zaghlol/platform/capture/**'
+      - 'app/android/app/src/main/kotlin/app/zaghlol/platform/ingest/**'
+      - 'app/android/app/src/main/kotlin/app/zaghlol/MainActivity.kt'
       - 'app/android/app/src/androidTest/**'
       - 'app/android/app/src/sharedTest/**'
       - 'packages/zaghlol_parsing/test/fixtures/guard/**'

@@ -146,4 +146,95 @@ class SpoolKeyManagerTest {
         ops.created = null
         assertNull(manager(ops).creationDateMs())
     }
+
+    // FU-104 #9: an alias that holds no SecretKey is an UNUSABLE attempt of the ladder, never a direct create.
+    @Test
+    fun anAliasWithoutASecretKeyGoesThroughTheLadder() {
+        val noKey = UnusableKeyEntryException()
+        val ops = FakeOps(Any(), ArrayDeque(listOf(noKey, noKey, noKey, noKey)))
+        val sleep = RecordingSleep()
+        manager(ops, sleep).get()
+        assertEquals(listOf(100L, 300L, 900L), sleep.calls)
+        assertEquals(listOf("load", "load", "load", "load", "delete", "create"), ops.log)
+    }
+
+    @Test
+    fun secretKeyOrNullNeedsProofOfAbsence() {
+        val k = javax.crypto.spec.SecretKeySpec(ByteArray(32), "AES")
+        assertSame(k, secretKeyOrNull(k) { true })
+        assertNull("alias absent", secretKeyOrNull(null) { false })
+        for ((entry, contains) in listOf<Pair<java.security.Key?, Boolean>>(null to true, FakePublicKey to true, FakePublicKey to false)) {
+            try {
+                secretKeyOrNull(entry) { contains }
+                fail("no error for $entry/$contains")
+            } catch (_: UnusableKeyEntryException) {
+            }
+        }
+        try {
+            secretKeyOrNull(null) { throw IOException("busy") }
+            fail("no error")
+        } catch (_: IOException) {
+            // containsAlias failing proves nothing: propagated, classified UNAVAILABLE by the manager.
+        }
+    }
+
+    // FU-104 #6: a Cipher.init failure is classified like a load failure.
+    @Test
+    fun anUnusableInitFourTimesRecreatesTheKey() {
+        val ops = FakeOps(Any())
+        val sleep = RecordingSleep()
+        var inits = 0
+        val first = ops.key
+        val result = manager(ops, sleep).withKey { key ->
+            inits++
+            if (key === first) throw AEADBadTagException("lost")
+            "ok"
+        }
+        assertEquals("ok", result)
+        assertEquals(5, inits)
+        assertEquals(listOf(100L, 300L, 900L), sleep.calls)
+        assertEquals(listOf("load", "load", "load", "load", "delete", "create"), ops.log)
+    }
+
+    @Test
+    fun anInitThatRecoversKeepsTheKey() {
+        val ops = FakeOps(Any())
+        var inits = 0
+        val result = manager(ops).withKey {
+            if (++inits < 3) throw AEADBadTagException("lost")
+            "ok"
+        }
+        assertEquals("ok", result)
+        assertEquals(0, ops.deletes)
+    }
+
+    @Test
+    fun anUnavailableInitThrowsAndDeletesNothing() {
+        val ops = FakeOps(Any())
+        try {
+            manager(ops).withKey<Unit> { throw java.security.ProviderException("keystore busy") }
+            fail("no error")
+        } catch (_: SpoolKeyUnavailableException) {
+        }
+        assertEquals(0, ops.deletes)
+        assertEquals(0, ops.creates.get())
+    }
+
+    @Test
+    fun aFreshKeyThatCannotBeInitialisedIsUnavailable() {
+        val ops = FakeOps(null)
+        try {
+            manager(ops).withKey<Unit> { throw IllegalStateException("x") }
+            fail("no error")
+        } catch (_: SpoolKeyUnavailableException) {
+        }
+        assertEquals(1, ops.creates.get())
+        assertEquals(0, ops.deletes)
+    }
+
+    private object FakePublicKey : java.security.PublicKey {
+        override fun getAlgorithm() = "EC"
+        override fun getFormat() = "X.509"
+        override fun getEncoded() = ByteArray(0)
+    }
 }

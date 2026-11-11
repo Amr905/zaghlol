@@ -21,11 +21,16 @@ interface SpoolCipher {
     }
 }
 
-/** Production cipher: the key comes only from [SpoolKey] (FU-068). */
+/**
+ * Production cipher: the key comes only from [SpoolKey] (FU-068). `Cipher.init`
+ * runs inside [SpoolKey.withKey], so an init failure is classified like a key
+ * load failure (FU-104 #6); a failure that proves nothing surfaces as
+ * [SpoolKeyUnavailableException] (callers treat it as transient).
+ */
 class KeystoreSpoolCipher : SpoolCipher {
     override fun encrypt(plain: ByteArray, aad: ByteArray): ByteArray {
         val cipher = Cipher.getInstance(TRANSFORMATION)
-        cipher.init(Cipher.ENCRYPT_MODE, SpoolKey.get())
+        SpoolKey.withKey { cipher.init(Cipher.ENCRYPT_MODE, it) }
         cipher.updateAAD(aad)
         val iv = cipher.iv
         check(iv.size == SpoolCipher.NONCE_BYTES) { "NONCE_LENGTH" }
@@ -36,11 +41,8 @@ class KeystoreSpoolCipher : SpoolCipher {
     override fun decrypt(data: ByteArray, aad: ByteArray): ByteArray {
         if (data.size < SpoolCipher.NONCE_BYTES + SpoolCipher.TAG_BYTES) throw AEADBadTagException("truncated")
         val cipher = Cipher.getInstance(TRANSFORMATION)
-        cipher.init(
-            Cipher.DECRYPT_MODE,
-            SpoolKey.get(),
-            GCMParameterSpec(SpoolCipher.TAG_BYTES * 8, data, 0, SpoolCipher.NONCE_BYTES),
-        )
+        val spec = GCMParameterSpec(SpoolCipher.TAG_BYTES * 8, data, 0, SpoolCipher.NONCE_BYTES)
+        SpoolKey.withKey { cipher.init(Cipher.DECRYPT_MODE, it, spec) }
         cipher.updateAAD(aad)
         return cipher.doFinal(data, SpoolCipher.NONCE_BYTES, data.size - SpoolCipher.NONCE_BYTES)
     }

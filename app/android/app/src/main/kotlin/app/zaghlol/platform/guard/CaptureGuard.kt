@@ -24,6 +24,37 @@ class CaptureGuard(val config: GuardConfig?) {
         CONFIG_INVALID
     }
 
+    /**
+     * Step 1 of [decide] without a body (T-042 inbox allowlist): how the
+     * Guard would recognise [source] on [channel], or null when it would not.
+     * Registry (exact or regex sender, package, wallet card), user sender, or
+     * `alwaysCapture` / a sender-less channel (`generic`). Sender **hints**
+     * are not an allowlist (they need the body) and never count. Total:
+     * any error, an invalid config, an empty or over-long source → null.
+     */
+    fun senderKind(channel: String, source: String): GuardKeepKind? = try {
+        senderKindUnsafe(channel, source)
+    } catch (t: Throwable) {
+        rethrowIfFatal(t)
+        null
+    }
+
+    private fun senderKindUnsafe(channelWire: String, source: String): GuardKeepKind? {
+        val cfg = config ?: return null
+        val channel = GuardChannel.fromWire(channelWire) ?: return null
+        if (source.length > MAX_SOURCE_LENGTH) return null
+        val sourceKey = GuardConfig.sourceKey(channel, source)
+        return when {
+            resolve(cfg, channel, sourceKey) != null -> GuardKeepKind.REGISTRY
+            sourceKey.isNotEmpty() && GuardUserSender(channel.wire, sourceKey) in cfg.userSenders -> GuardKeepKind.USER
+            (sourceKey.isNotEmpty() && channel != GuardChannel.NOTIFICATION && sourceKey in cfg.alwaysCapture) ||
+                channel == GuardChannel.APPLE_PAY ||
+                channel == GuardChannel.SHORTCUT_MESSAGE ||
+                channel == GuardChannel.SHARE -> GuardKeepKind.GENERIC
+            else -> null
+        }
+    }
+
     private fun decideUnsafe(channelWire: String, source: String, body: String): GuardDecision {
         val cfg = config ?: return CONFIG_INVALID
         // Step 0: cheap checks before any fold or regex. Lengths are UTF-16 code units.

@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- T-008 / PO Q4 (2026-11-11, approved); T-041 moved them here from
+         src/devSms (the ingestion worker runs in every flavour). Android 8-11
+         only, while an expedited ingestion run falls back to a foreground
+         service. Keys from copy-deck.md section 1.23 (draft copy, Q-19). No
+         amounts or senders. -->
+    <string name="native_android_captureChannelName">Saving transactions</string>
+    <string name="native_android_captureNotifTitle">Zaghlol is saving a transaction</string>
+</resources>

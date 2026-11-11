@@ -1,9 +1,11 @@
-// T-008 (SPK-01): wires one IngestionCycle for an engine. The headless engine
-// (ingestion_main.dart) never creates, wipes or migrates (Q6); the devSms UI
-// engine (spike_foreground.dart) opens like the app will (create allowed).
-// Cycles are serialised: a request during a run schedules exactly one more.
-// close() (native `close` command before the engine is destroyed, F1) waits
-// for a running cycle, then closes the database; a later drain reopens.
+// T-041 (from the T-008 spike's SpikeIngestion): wires one IngestionCycle for
+// an engine. The headless engine (ingestion_main.dart) never creates, wipes or
+// migrates (Q6); the UI engine (foreground_ingestion.dart) opens like the app
+// does (create allowed). Cycles are serialised: a request during a run
+// schedules exactly one more. close() (native `close`, sent at once when the
+// engine is to be destroyed, also mid-drain) sets the stop flag, so the
+// running cycle ends after its current batch, waits for it, then closes the
+// database; a later drain reopens.
 
 import 'dart:io';
 
@@ -16,13 +18,25 @@ import '../core/db/db_key_providers.dart';
 import '../features/ingestion/application/ingest_raw_messages.dart';
 import '../features/ingestion/data/ingest_factory.dart';
 import 'ingest_store.dart';
+import 'ingestion_config.dart';
 import 'ingestion_cycle.dart';
 import 'spike_registry.dart';
 import 'spool_port.dart';
 import 'ulid.dart';
 
-final class SpikeIngestion {
-  SpikeIngestion({
+/// The registry a build parses with: the synthetic spike registry in devSms
+/// only (a compile-time constant, so AOT drops it from every other build);
+/// elsewhere T-036's bundled registry, which does not exist yet (the cycle
+/// then ends `INGEST_SETUP_FAILED`; unreachable in practice: without
+/// `guard_base.json` the native Guard keeps nothing).
+Registry Function() get defaultRegistryLoader =>
+    kIsSpikeBuild ? loadSpikeRegistry : _bundledRegistryMissing;
+
+Registry _bundledRegistryMissing() =>
+    throw StateError('INGEST_REGISTRY_MISSING');
+
+final class IngestionRunner {
+  IngestionRunner({
     required this.marks,
     required this.headless,
     SpoolPort? spool,
@@ -36,7 +50,7 @@ final class SpikeIngestion {
   }) : _spool = spool ?? PigeonSpoolPort(),
        _storeFactory = store ?? (headless ? _headlessStore : _uiStore),
        _dbDirectory = dbDirectory ?? resolveDbDirectory,
-       _registry = registry ?? loadSpikeRegistry;
+       _registry = registry ?? defaultRegistryLoader;
 
   final CycleMarks marks;
   final bool headless;
@@ -57,6 +71,10 @@ final class SpikeIngestion {
   Future<CycleResult>? _running;
   Future<void>? _closing;
   bool _again = false;
+
+  /// Set by [close] until it completes: the running cycle starts no new
+  /// batch, and the "one more run" is skipped.
+  bool _stop = false;
 
   static IngestStore _headlessStore(
     Directory dir,
@@ -91,7 +109,7 @@ final class SpikeIngestion {
   Future<CycleResult> _loop() async {
     try {
       var result = await _runOnce();
-      while (_again && result.outcome == CycleOutcome.ok) {
+      while (_again && !_stop && result.outcome == CycleOutcome.ok) {
         _again = false;
         result = await _runOnce();
       }
@@ -102,7 +120,7 @@ final class SpikeIngestion {
     }
   }
 
-  /// Waits for a running cycle (and the one more run it may have scheduled),
+  /// Stops the running cycle after its current batch (T-041), waits for it,
   /// then closes the store: `await`s the database close, so when this
   /// completes no connection, transaction or WAL lock of this engine is left.
   /// Never throws. A drain requested meanwhile runs after it and reopens.
@@ -115,6 +133,7 @@ final class SpikeIngestion {
   }
 
   Future<void> _close() async {
+    _stop = true;
     try {
       while (_running != null) {
         await _running!.then<void>((_) {}, onError: (Object _) {});
@@ -125,6 +144,7 @@ final class SpikeIngestion {
     } on Object {
       // Code-free: the engine is torn down next either way.
     } finally {
+      _stop = false;
       _closing = null;
     }
   }
@@ -156,6 +176,7 @@ final class SpikeIngestion {
       ),
       mayCreateDatabase: !headless,
       marks: marks,
+      stopRequested: () => _stop,
     );
   }
 }

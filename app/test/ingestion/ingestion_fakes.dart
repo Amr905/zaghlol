@@ -32,8 +32,11 @@ final class FakeSpool implements SpoolPort {
   final List<SpoolEntry> pending;
   final List<String> log;
   final List<List<String>> acked = [];
+  final List<List<String>> heldCalls = [];
+  final List<SpoolEntry> held = [];
   String? drainFails;
   String? ackFails;
+  String? holdFails;
 
   @override
   Future<List<SpoolEntry>> drain(int max) async {
@@ -53,6 +56,18 @@ final class FakeSpool implements SpoolPort {
     acked.add(ids);
     pending.removeWhere((e) => ids.contains(e.id));
   }
+
+  /// Like native: moves the entries out of the pending spool.
+  @override
+  Future<void> hold(List<String> ids) async {
+    log.add('hold');
+    heldCalls.add(ids);
+    if (holdFails != null) {
+      throw SpoolPortException(PlatformFailure.fromChannel(holdFails));
+    }
+    held.addAll(pending.where((e) => ids.contains(e.id)));
+    pending.removeWhere((e) => ids.contains(e.id));
+  }
 }
 
 base class FakeStore implements IngestStore {
@@ -70,6 +85,10 @@ base class FakeStore implements IngestStore {
   int opens = 0;
   final List<IncomingMessage> committed = [];
 
+  /// Delivery ids the use case "could not store even alone" (kept: neither
+  /// committed nor ackable, FU-105).
+  final Set<String> unstorable = {};
+
   @override
   Future<bool> databaseExists() async {
     log.add('exists');
@@ -84,16 +103,23 @@ base class FakeStore implements IngestStore {
   }
 
   /// Every message is "inserted" except bodies containing `OTP` (dropped).
+  /// Called at the start of each [ingest] (tests set a stop flag here).
+  void Function()? onIngest;
+
   @override
   Future<IngestBatchResult> ingest(List<IncomingMessage> batch) async {
     log.add('ingest');
+    onIngest?.call();
     if (ingestFails != null && failTimes > 0) {
       failTimes--;
       throw IngestBatchFailed(ingestFails!);
     }
     final outcomes = <String, IngestOutcome>{};
+    final kept = <String>[];
     for (final m in batch) {
-      if (m.body.contains('OTP')) {
+      if (unstorable.contains(m.deliveryId)) {
+        kept.add(m.deliveryId);
+      } else if (m.body.contains('OTP')) {
         outcomes[m.deliveryId] = const IngestDropped('otp_or_promo_global');
       } else {
         committed.add(m);
@@ -102,7 +128,11 @@ base class FakeStore implements IngestStore {
     }
     return IngestBatchResult(
       outcomes: outcomes,
-      ackable: [for (final m in batch) m.deliveryId],
+      ackable: [
+        for (final m in batch)
+          if (!kept.contains(m.deliveryId)) m.deliveryId,
+      ],
+      kept: kept,
       changedTxnIds: const {},
       changedAccountIds: const {},
       createdAccountIds: const {},

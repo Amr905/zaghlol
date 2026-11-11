@@ -52,6 +52,9 @@ class SpikeMetrics(
         var procStartNs = -1L
         var spooledNs = -1L
         var enqueuedNs = -1L
+
+        /** FU-081 F6: sampled at receive (spooled), not at ack. */
+        var conditions: Conditions? = null
         var cycle: Cycle? = null
         val stage = LongArray(4) { -1L } // t6 drained, t7 parsed, t8 commit, t9 acked
     }
@@ -63,6 +66,11 @@ class SpikeMetrics(
         val row = rows.getOrPut(id) { Row(rxNs, bootCount()) }
         row.spooledNs = nowNs
         row.rxWallMs = rxWallMs
+        row.conditions = try {
+            conditions()
+        } catch (_: Exception) {
+            null
+        }
         row.procStartNs = try {
             processStartNs()
         } catch (_: Exception) {
@@ -103,7 +111,7 @@ class SpikeMetrics(
     private fun write(id: String, row: Row) {
         if (row.bootCount != bootCount()) return // different boot: monotonic clock not comparable
         try {
-            val c = conditions()
+            val c = row.conditions ?: conditions()
             val cycle = row.cycle
             val cols = listOf(
                 id,

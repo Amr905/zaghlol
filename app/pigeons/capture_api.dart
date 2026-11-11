@@ -13,7 +13,8 @@
 // requestIgnoreBatteryOptimizations and getCapabilities. T-039 adds the
 // production host (AndroidCaptureHost: spool, status, writeGuardConfig
 // pass-through) and getSpoolStatus / clearSpoolAlerts; writeGuardConfig takes
-// the plaintext user part (renamed from encryptedConfig, FU-097 L-2). Every
+// the plaintext user part (renamed from encryptedConfig, FU-097 L-2). T-041
+// adds holdSpool and SpoolStatus.held (FU-105, platform-channels.md 1.3). Every
 // other method answers NOT_AVAILABLE until its owner task (T-040 receiver,
 // permission and Guard wiring, T-042 inbox, T-043 notifications).
 import 'package:pigeon/pigeon.dart';
@@ -109,6 +110,7 @@ class SpoolStatus {
     required this.decryptDeleted,
     this.keyInvalidatedAtMs,
     required this.guardState,
+    required this.held,
   });
 
   /// Entries waiting in the spool.
@@ -129,6 +131,10 @@ class SpoolStatus {
   /// never thrown): rewrite the Guard config, run the catch-up.
   int? keyInvalidatedAtMs;
   GuardConfigState guardState;
+
+  /// Held entries (T-041, FU-105): stored in the spool but not storable even
+  /// alone; not pending, retried after the next app update. Diagnostics only.
+  int held;
 }
 
 class CaptureCapabilities {
@@ -187,6 +193,12 @@ abstract class AndroidCaptureHostApi {
   /// Zeroes the alert counters if [seq] still matches getSpoolStatus().seq.
   @TaskQueue(type: TaskQueueType.serialBackgroundThread)
   void clearSpoolAlerts(int seq);
+
+  /// T-041 (FU-105): entries IngestRawMessages could not store even alone
+  /// (IngestBatchResult.kept), called after the ack of the rest. Only ids this
+  /// engine drained; moved to spool/held/ (platform-channels.md 1.3). IO_ERROR.
+  @TaskQueue(type: TaskQueueType.serialBackgroundThread)
+  void holdSpool(List<String> ids);
 }
 
 @HostApi()

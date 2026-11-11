@@ -1,8 +1,10 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools">
-    <!-- T-008 (SPK-01) SMS ingestion spike. This source set is the dev x sms
-         flavour combination only: no staging*/prod* build contains the
-         receiver, the worker or WorkManager (Lead decision Q5). CI checks the
+    <!-- T-008 (SPK-01) SMS ingestion spike, reduced by T-041 to the receiver
+         and the latency recorder. This source set is the dev x sms flavour
+         combination only: no staging*/prod* build contains the spike receiver
+         (Lead decision Q5; T-040 replaces it). The worker, the engines and
+         WorkManager are production code in src/main (T-041). CI checks the
          merged manifests and dex of every flavour. -->
     <application>
         <!-- Observer only (the broadcast is never aborted). BROADCAST_SMS is held only by
@@ -19,9 +21,9 @@
                 <action android:name="android.provider.Telephony.SMS_RECEIVED" />
             </intent-filter>
         </receiver>
-        <!-- Registers the UI-engine hook (spool host on MainActivity's engine).
-             Merged into the androidx.startup provider WorkManager declares;
-             not exported. -->
+        <!-- Installs the spike latency recorder as the production IngestTrace
+             (T-041). Merged into the androidx.startup provider WorkManager
+             declares; not exported. -->
         <provider
             android:name="androidx.startup.InitializationProvider"
             android:authorities="${applicationId}.androidx-startup"
