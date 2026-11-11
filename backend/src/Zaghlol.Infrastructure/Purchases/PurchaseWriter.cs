@@ -57,7 +57,8 @@ internal static class PurchaseDbText
 /// state changes. <c>install_id</c> is written on insert only, and so are <c>product_id</c> and <c>plan</c> of Google rows (an
 /// App Store update re-plans the row from the latest transaction, T-131); <c>acknowledged</c> never goes back to false. The
 /// predecessor named by <c>linked_purchase_token</c> is looked up, never edited. With <c>NewPaymentAt</c> the same transaction
-/// runs the T-131 new-payment rule on <c>last_payment_at</c>.
+/// runs the T-131 new-payment rule on <c>last_payment_at</c>. A Google update applies the T-133 label rule
+/// (<see cref="PlayStateMapping.Settle"/>) under the row lock.
 /// </summary>
 internal sealed class PurchaseWriter(IAppDbContextFactory contexts) : IPurchaseWriter
 {
@@ -243,6 +244,13 @@ internal sealed class PurchaseWriter(IAppDbContextFactory contexts) : IPurchaseW
         }
 
         var apple = upsert.Store == PurchaseStore.AppStore;
+        if (!apple)
+        {
+            // T-133 label rule under this FOR UPDATE: a Play read of 'expired' keeps a stored 'refunded'/'revoked', so verify and
+            // restore can't erase a refund an RTDN or the voided job recorded. An entitling read is always written as read.
+            state = PurchaseDbText.State(PlayStateMapping.Settle(PurchaseDbText.ParseState(existing.State), upsert.State, null));
+        }
+
         await using var update = new NpgsqlCommand(apple ? UpdateAppleSql : UpdateSql, connection, transaction);
         update.Parameters.AddWithValue("id", existing.Id);
         update.Parameters.AddWithValue("keep_expires", upsert.KeepStoredExpiry);

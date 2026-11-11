@@ -69,7 +69,17 @@ public sealed class FakeOidcIssuer : IDisposable
     private TaskCompletionSource? release;
     private TaskCompletionSource? arrived;
 
-    public string Issuer { get; } = DefaultIssuer;
+    private readonly string jwksUrl;
+
+    /// <param name="issuer">The issuer it announces (Google's <c>https://accounts.google.com</c> for the T-133 push tests).</param>
+    /// <param name="jwksUrl">Where its JWKS is served.</param>
+    public FakeOidcIssuer(string issuer = DefaultIssuer, string jwksUrl = JwksUrl)
+    {
+        Issuer = issuer;
+        this.jwksUrl = jwksUrl;
+    }
+
+    public string Issuer { get; }
 
     public string RsaKid => "rsa-" + generation;
 
@@ -272,12 +282,12 @@ public sealed class FakeOidcIssuer : IDisposable
             body = new JsonObject
             {
                 ["issuer"] = AnnouncedIssuer ?? Issuer,
-                ["jwks_uri"] = JwksUrl,
+                ["jwks_uri"] = jwksUrl,
                 ["authorization_endpoint"] = Issuer + "/authorize",
                 ["token_endpoint"] = Issuer + "/token",
             }.ToJsonString();
         }
-        else if (string.Equals(url, JwksUrl, StringComparison.Ordinal))
+        else if (string.Equals(url, jwksUrl, StringComparison.Ordinal))
         {
             Interlocked.Increment(ref jwksRequests);
             body = Jwks();

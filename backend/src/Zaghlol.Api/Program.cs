@@ -74,6 +74,9 @@ builder.Services.AddZaghlolGooglePlay();
 builder.Services.AddZaghlolPurchaseVerification();
 // App Store Server Notifications V2 ingest (T-134): verify and store only, on the App login; the worker processes.
 builder.Services.AddZaghlolAppleNotificationIngest();
+// Google RTDN push (T-133): Pub/Sub OIDC before the body, store only, on the App login; the worker processes. Production refuses to
+// start without Purchases:Google:Rtdn:Audience and PushServiceAccount.
+builder.Services.AddZaghlolGoogleNotifications();
 
 // Operator OIDC + MFA, the operator directory and the startup check (T-136); the audited support lookup on the Admin login.
 builder.Services.AddZaghlolOperatorAuth();
@@ -87,6 +90,7 @@ app.MapInstalls();
 app.MapSync();
 app.MapPurchases();
 app.MapAppleNotifications();
+app.MapGoogleNotifications();
 app.MapCatalog();
 app.MapCatalogAdmin();
 app.MapContributionAdmin();

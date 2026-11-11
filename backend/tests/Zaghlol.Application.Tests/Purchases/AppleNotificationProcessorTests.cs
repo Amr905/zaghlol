@@ -377,6 +377,35 @@ public class AppleNotificationProcessorTests
         Assert.Equal(TimeSpan.FromHours(8), AppleNotificationSchedule.Backoff(50));
     }
 
+    /// <summary>FU-098 code 2 (fixed with T-133): one throwing row is a counted INTERNAL failure, the next row is still applied, and the gauge and heartbeat are refreshed.</summary>
+    [Fact]
+    public async Task OneThrowingRowIsInternalAndTheRunGoesOn()
+    {
+        var bad = Subscription(StoredPurchaseState.Active);
+        var good = Subscription(StoredPurchaseState.Active);
+        AppleSays(good, status: 5, revoked: true, refundReason: 1);
+        var first = store.Add("REFUND", bad.StoreKey);
+        clock.Now = clock.Now.AddSeconds(1);
+        store.Add("REFUND", good.StoreKey);
+        var processor = new AppleNotificationProcessor(
+            new ThrowingFind(store, bad.StoreKey),
+            new AppleStateRefresher(new AppleSubscriptionReader(apple.Jws, apple.Api, AppleScript.Catalog(), purchaseTelemetry), AppleScript.Catalog()),
+            telemetry,
+            clock,
+            () => 0.5);
+
+        var run = await processor.RunOnceAsync(CancellationToken.None);
+
+        Assert.Equal(AppleNotificationSchedule.Internal, first.LastError);
+        Assert.Equal(1, first.Attempts);
+        Assert.Null(first.ProcessedAt);
+        Assert.Equal(StoredPurchaseState.Refunded, good.State);
+        Assert.Equal(1, run.Failed);
+        Assert.NotNull(telemetry.Backlog);
+        Assert.Equal(1, telemetry.Heartbeats);
+        Assert.Contains(AppleNotificationSchedule.Internal, AppleNotificationSchedule.FailureCodes);
+    }
+
     private AppleNotificationProcessor Processor(double jitter = 0.5) =>
         new(store, new AppleStateRefresher(new AppleSubscriptionReader(apple.Jws, apple.Api, AppleScript.Catalog(), purchaseTelemetry), AppleScript.Catalog()), telemetry, clock, () => jitter);
 
@@ -440,4 +469,29 @@ public class AppleNotificationProcessorTests
         public Task<AppleNotificationHistoryPage> GetNotificationHistoryAsync(PurchaseEnvironment environment, DateTimeOffset startDate, DateTimeOffset endDate, Sensitive<string>? paginationToken, StoreLane lane, CancellationToken cancellationToken) =>
             throw new NotSupportedException();
     }
+}
+
+/// <summary>The fake store, except that finding one key throws (an unexpected per-row failure).</summary>
+internal sealed class ThrowingFind(FakeNotificationStore inner, string key) : IAppleNotificationStore
+{
+    public Task<IAsyncDisposable?> TryLockAsync(string name, CancellationToken cancellationToken) => inner.TryLockAsync(name, cancellationToken);
+
+    public Task<IReadOnlyList<DueAppleNotification>> ListDueAsync(DateTimeOffset now, int limit, CancellationToken cancellationToken) => inner.ListDueAsync(now, limit, cancellationToken);
+
+    public Task<ApplePurchaseRow?> FindPurchaseAsync(Sensitive<string> storeKey, CancellationToken cancellationToken) =>
+        storeKey.Reveal() == key ? throw new InvalidOperationException("boom") : inner.FindPurchaseAsync(storeKey, cancellationToken);
+
+    public Task<AppleWriteResult> ApplyAsync(AppleStateWrite write, Guid? notificationId, CancellationToken cancellationToken) => inner.ApplyAsync(write, notificationId, cancellationToken);
+
+    public Task CompleteAsync(Guid notificationId, string? code, CancellationToken cancellationToken) => inner.CompleteAsync(notificationId, code, cancellationToken);
+
+    public Task FailAsync(Guid notificationId, int attempts, DateTimeOffset? nextAttemptAt, string code, CancellationToken cancellationToken) =>
+        inner.FailAsync(notificationId, attempts, nextAttemptAt, code, cancellationToken);
+
+    public Task DeferAsync(Guid notificationId, DateTimeOffset nextAttemptAt, CancellationToken cancellationToken) => inner.DeferAsync(notificationId, nextAttemptAt, cancellationToken);
+
+    public Task<(long LessThan1h, long AtLeast1h)> BacklogAsync(DateTimeOffset now, CancellationToken cancellationToken) => inner.BacklogAsync(now, cancellationToken);
+
+    public Task<IReadOnlyList<ApplePurchaseRow>> ListExpiredSubscriptionsAsync(DateTimeOffset now, int limit, CancellationToken cancellationToken) =>
+        inner.ListExpiredSubscriptionsAsync(now, limit, cancellationToken);
 }

@@ -108,6 +108,9 @@ CREATE TABLE purchases (
                                                -- R5-7), or by a detach. Not cleared when the notice is merely sent
   support_link_notice_iat timestamptz,         -- R5-7: iat of the newest entitlement token sent together with supportNotice
   state text NOT NULL CHECK (state IN ('pending','active','in_grace','on_hold','paused','canceled_active','expired','refunded','revoked')),
+                                               -- Google label rule (T-133, PlayStateMapping.Settle): a Play read of 'expired'
+                                               -- keeps a stored 'refunded'/'revoked' (Play has no refunded subscription state);
+                                               -- an entitling read always overwrites
   expires_at timestamptz,                      -- NULL for lifetime
   acknowledged boolean NOT NULL DEFAULT false, -- Google; must be true within 3 days (BR-GOLD-06). Always true for app_store
                                                -- (Apple has no server acknowledgement; the app finishes the transaction, T-131)
@@ -141,22 +144,27 @@ CREATE TABLE purchase_events (                 -- audit trail of state transitio
 
 CREATE TABLE store_notifications (             -- FR-BE-03, idempotent ingest
   id uuid PRIMARY KEY,
-  store text NOT NULL, external_id text NOT NULL,   -- Pub/Sub messageId | ASSN notificationUUID
+  store text NOT NULL, external_id text NOT NULL,   -- Pub/Sub messageId | ASSN notificationUUID | Google jobs (T-133):
+                                                    -- 'voided:' || hex(sha256(orderId,token,voidedTime)) | 'sweep:' || purchase id || ':' || expiry epoch
   type text NOT NULL,                               -- RTDN notificationType / ASSN notificationType
-  subtype text,                                     -- ASSN subtype
+  subtype text,                                     -- ASSN subtype (always NULL for google_play)
   product_id text,                                  -- subscriptionId / sku / productId
   store_key text,                                   -- purchase token (Google) | originalTransactionId (Apple), to re-read state
-  environment text CHECK (environment IN ('production','sandbox')),
+  environment text CHECK (environment IN ('production','sandbox')),  -- NULL for google_play (known only from Play's read)
   event_time timestamptz,                           -- eventTimeMillis / signedDate
   received_at timestamptz NOT NULL DEFAULT now(),
   processed_at timestamptz, attempts integer NOT NULL DEFAULT 0,
   last_error text,                                  -- error code only; never payload text
   payload_digest bytea NOT NULL,                    -- SHA-256 of the received body, for dedupe/forensics
-                                                    -- (Apple: of the signedPayload string, T-134)
+                                                    -- (Apple: of the signedPayload string, T-134; Google: of the decoded
+                                                    -- message.data bytes, or of the job key for voided rows, T-133)
   next_attempt_at timestamptz,                      -- T-134: processing back-off; NULL = never failed. Only worker_rw writes it
   UNIQUE (store, external_id),
   CHECK (type ~ '^[A-Z0-9_]{1,64}$'),
-  CHECK (subtype IS NULL OR subtype ~ '^[A-Z0-9_]{1,64}$')
+  CHECK (subtype IS NULL OR subtype ~ '^[A-Z0-9_]{1,64}$'),
+  CONSTRAINT ck_store_notifications_google_shape CHECK (store <> 'google_play' OR (subtype IS NULL AND environment IS NULL
+    AND (external_id ~ '^[A-Za-z0-9_-]{1,100}$' OR external_id ~ '^voided:[0-9a-f]{64}$'
+         OR external_id ~ '^sweep:[0-9a-f-]{36}:[0-9]{1,12}$')))   -- T-133, migration GoogleNotifications
 );
 CREATE INDEX ix_store_notifications_due ON store_notifications (store, next_attempt_at NULLS FIRST, received_at)
   WHERE processed_at IS NULL;                       -- T-134 (T-133 reuses it)
@@ -164,6 +172,8 @@ CREATE INDEX ix_store_notifications_due ON store_notifications (store, next_atte
 -- reconciliation) and UPDATE (product_id, plan) on purchases (an upgrade notification re-plans the row). worker_rw never
 -- updates environment, obfuscated_install_ref, install_id or last_payment_at, and has only SELECT on purchase_seats, so a
 -- notification can't move a seat. The worker never inserts purchases.
+-- T-133 adds no grant: the Google worker statement writes only state, expires_at and last_verified_at (WHERE store =
+-- 'google_play' AND last_verified_at < @read_at); a Google row never changes product_id or plan.
 -- Only these extracted columns are written, after authentication (backend-api §4.5). The raw envelope is NEVER stored;
 -- fields not listed above (including unknown third-party fields) are not persisted anywhere.
 

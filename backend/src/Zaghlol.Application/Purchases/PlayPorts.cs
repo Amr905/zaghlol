@@ -35,6 +35,9 @@ public enum PlayApi
     SubscriptionAcknowledge,
     ProductAcknowledge,
     OrderGet,
+
+    /// <summary><c>purchases.voidedpurchases.list</c> (T-133 §4; its own Play quota).</summary>
+    VoidedList,
 }
 
 /// <summary>How a Play call ended (<c>zaghlol.store.call{outcome}</c>).</summary>
@@ -159,6 +162,12 @@ public sealed record PlayProduct(
 /// <summary>The read fields of <c>orders.get</c>.</summary>
 public sealed record PlayOrder(Sensitive<string>? PurchaseToken, PlayOrderState State);
 
+/// <summary>One <c>voidedPurchases[]</c> element: only the fields read (T-133 §4). Never logged or stored as such.</summary>
+public sealed record PlayVoidedPurchase(Sensitive<string>? PurchaseToken, Sensitive<string>? OrderId, long? VoidedTimeMillis);
+
+/// <summary>One page of <c>voidedpurchases.list</c>.</summary>
+public sealed record PlayVoidedPage(IReadOnlyList<PlayVoidedPurchase> Purchases, Sensitive<string>? NextPageToken);
+
 /// <summary>
 /// The Google Play Developer API (T-130). Every call takes the package from configuration, never from a request, escapes the
 /// token or order ID into the path, draws on <see cref="IStoreCallBudget"/> for <paramref name="lane"/> and throws
@@ -177,6 +186,17 @@ public interface IPlayDeveloperApi
     Task AcknowledgeProductAsync(string productId, Sensitive<string> token, StoreLane lane, CancellationToken cancellationToken);
 
     Task<PlayOrder> GetOrderAsync(Sensitive<string> orderId, StoreLane lane, CancellationToken cancellationToken);
+
+    /// <summary>
+    /// <c>voidedpurchases.list</c> with <c>type=1</c> (one-time products and subscriptions) and <c>maxResults=1000</c> between
+    /// <paramref name="from"/> and <paramref name="until"/> (T-133 §4); <paramref name="pageToken"/> continues a listing.
+    /// </summary>
+    Task<PlayVoidedPage> ListVoidedPurchasesAsync(
+        DateTimeOffset from,
+        DateTimeOffset until,
+        Sensitive<string>? pageToken,
+        StoreLane lane,
+        CancellationToken cancellationToken);
 }
 
 /// <summary>Subscription or one-time product (selects the Play endpoint).</summary>

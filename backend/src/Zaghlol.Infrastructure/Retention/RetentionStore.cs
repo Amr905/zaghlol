@@ -32,7 +32,7 @@ internal sealed class RetentionStore(IZaghlolDbContextFactory contexts) : IReten
         [RetentionRules.TombstonedInstalls] = InstallDelete("deleted_at IS NOT NULL AND deleted_at < @now - interval '30 days'"),
         [RetentionRules.InactiveInstalls] = InstallDelete("last_seen_at < @now - interval '12 months'"),
 
-        [RetentionRules.StoreNotifications] = Delete("store_notifications", "received_at < @now - interval '90 days'"),
+        [RetentionRules.StoreNotifications] = Delete("store_notifications", $"received_at < @now - interval '{RetentionAges.StoreNotificationsDays} days'"),
 
         // Raw rows go when their aggregate is promoted or rejected, or after 180 days.
         [RetentionRules.Contributions] = Delete(

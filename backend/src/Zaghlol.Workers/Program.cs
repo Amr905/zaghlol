@@ -52,6 +52,12 @@ builder.Services.AddZaghlolAppleNotificationWorker();
 builder.Services.AddHostedService<AppleNotificationProcessorService>();
 builder.Services.AddHostedService<AppleNotificationHistoryService>();
 builder.Services.AddHostedService<AppleExpirySweepService>();
+// Google RTDN (T-133): processor (5 s idle poll), daily voided-purchases reconciliation, hourly expiry sweep; one instance of each
+// across replicas (advisory locks), Purchases:Google:* config, the worker's share of the Play budget (with the ack sweeper's).
+builder.Services.AddZaghlolPlayNotificationWorker();
+builder.Services.AddHostedService<PlayNotificationProcessorService>();
+builder.Services.AddHostedService<PlayVoidedReconcileService>();
+builder.Services.AddHostedService<PlayExpirySweepService>();
 
 using var host = builder.Build();
 await host.RunAsync();

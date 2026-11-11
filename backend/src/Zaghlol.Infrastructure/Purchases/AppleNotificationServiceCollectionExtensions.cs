@@ -31,6 +31,10 @@ internal sealed class AppleNotificationTelemetry(ZaghlolMetrics metrics) : IAppl
     public void Recovered(int count) => metrics.AssnRecovered(count);
 
     public void RefundNotReflected() => metrics.AssnRefundNotReflected();
+
+    public void Heartbeat() => metrics.Heartbeat(Store);
+
+    public void BacklogFailed() => metrics.NotificationBacklogFailed(Store);
 }
 
 public static class AppleNotificationServiceCollectionExtensions

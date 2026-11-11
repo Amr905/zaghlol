@@ -52,6 +52,14 @@ internal sealed class RecordingNotificationTelemetry : IAppleNotificationTelemet
     public void Recovered(int count) => RecoveredTotal += count;
 
     public void RefundNotReflected() => RefundsNotReflected++;
+
+    public int Heartbeats { get; private set; }
+
+    public int BacklogFailures { get; private set; }
+
+    public void Heartbeat() => Heartbeats++;
+
+    public void BacklogFailed() => BacklogFailures++;
 }
 
 /// <summary>

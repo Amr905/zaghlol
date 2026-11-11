@@ -25,6 +25,8 @@ public sealed partial class AlertRuleLintTests
         "ZaghlolAppleSignedAnswerInvalid", "ZaghlolAppStoreClientErrorRateHigh",
         // Notifications
         "ZaghlolNotificationLagHigh", "ZaghlolNotificationDeadLetter",
+        // T-133 RTDN (paged)
+        "ZaghlolRtdnBacklogOld", "ZaghlolNotificationProcessorHeartbeat", "ZaghlolRtdnAuthConfig", "ZaghlolRtdnIgnoredPackage",
         // Prices
         "ZaghlolPriceAgeWarn", "ZaghlolPriceAgePage",
         // Catalog and sync size

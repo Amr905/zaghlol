@@ -7,7 +7,11 @@ namespace Zaghlol.Application.Purchases;
 /// notification is ever stored: no JWS text, transaction ID, <c>appAccountToken</c>, <c>status</c> or bundle ID.
 /// </summary>
 /// <param name="ExternalId">The canonical lower-case <c>notificationUUID</c>.</param>
-/// <param name="StoreKey">The transaction's <c>originalTransactionId</c> (<c>null</c> without a <c>signedTransactionInfo</c>).</param>
+/// <param name="StoreKey">
+/// Apple: the transaction's <c>originalTransactionId</c> (<c>null</c> without a <c>signedTransactionInfo</c>). Google: the purchase
+/// token (<c>null</c> for TEST and refund-review rows).
+/// </param>
+/// <param name="Environment">Apple: from the signed payload. Google: always <c>null</c> (known only from Play's read, T-133).</param>
 /// <param name="EventTime">The notification's <c>signedDate</c>.</param>
 /// <param name="PayloadDigest">SHA-256 of the UTF-8 <c>signedPayload</c> string (32 bytes).</param>
 /// <param name="Processed">Inserted with <c>processed_at = now()</c>: outside the reconcile set, or no transaction to re-read.</param>
@@ -20,7 +24,7 @@ public sealed record StoreNotificationRecord(
     string? Subtype,
     string? ProductId,
     Sensitive<string>? StoreKey,
-    PurchaseEnvironment Environment,
+    PurchaseEnvironment? Environment,
     DateTimeOffset EventTime,
     byte[] PayloadDigest,
     bool Processed,
@@ -215,4 +219,13 @@ public interface IAppleNotificationTelemetry
 
     /// <summary><c>zaghlol.assn.refund_not_reflected</c>: a refund applied although Apple still answers otherwise (alerted).</summary>
     void RefundNotReflected();
+
+    /// <summary>
+    /// <c>zaghlol.notification.processor_heartbeat_age{store="apple"}</c> restarts at 0: a run completed, or another replica holds the
+    /// lock (T-133 §3, FU-077 L-3).
+    /// </summary>
+    void Heartbeat();
+
+    /// <summary>The backlog query failed after a run (<c>zaghlol.notification.backlog_failed{store="apple"}</c>).</summary>
+    void BacklogFailed();
 }

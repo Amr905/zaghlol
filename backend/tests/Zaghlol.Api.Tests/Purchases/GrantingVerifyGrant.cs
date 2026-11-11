@@ -17,6 +17,9 @@ public sealed class GrantingVerifyGrant : IVerifyGrant
 
     public ConcurrentQueue<(Guid Install, VerifyStatus Status)> Calls { get; } = new();
 
+    /// <summary>Every verification result the grant step saw (T-133: <c>IsNewPayment</c> after a notification-first purchase).</summary>
+    public ConcurrentQueue<StoreVerificationResult> Results { get; } = new();
+
     public void AlwaysGrantFor(string installId) => granting[Guid.Parse(installId)] = 0;
 
     public Task<VerifyGrantResult> ComposeAsync(StoreVerificationResult verification, VerifyContext context, CancellationToken cancellationToken)
@@ -25,6 +28,7 @@ public sealed class GrantingVerifyGrant : IVerifyGrant
         ArgumentNullException.ThrowIfNull(context);
 
         Calls.Enqueue((context.Install.Value, verification.Status));
+        Results.Enqueue(verification);
         return Task.FromResult(granting.ContainsKey(context.Install.Value)
             ? new VerifyGrantResult(new Sensitive<string>(Token), false, false, null)
             : VerifyGrantResult.None);

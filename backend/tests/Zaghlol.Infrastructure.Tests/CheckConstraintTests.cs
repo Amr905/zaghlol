@@ -44,7 +44,7 @@ public class CheckConstraintTests(SchemaFixture fixture)
             ["purchase_events: upper-case prefix"] = ("purchase_events", Set("cause", "RTDN:4"), "ck_purchase_events_cause"),
 
             // store_notifications
-            ["store_notifications: unknown environment"] = ("store_notifications", Set("environment", "xcode"), "ck_store_notifications_environment"),
+            ["store_notifications: unknown environment"] = ("store_notifications", Set(("store", "app_store"), ("environment", "xcode")), "ck_store_notifications_environment"),
             ["store_notifications: payload_digest not 32 bytes"] = ("store_notifications", Set("payload_digest", Rows.Bytes(20)), "ck_store_notifications_payload_digest_length"),
 
             // purchase_seats (acceptance criteria: holder without proof, whole hour, 3 rebinds, last_moved_at alone)
@@ -150,7 +150,14 @@ public class CheckConstraintTests(SchemaFixture fixture)
             ["store_notifications: last_error lower case"] = ("store_notifications", Set("last_error", "store_unavailable"), "ck_store_notifications_last_error"),
             ["store_notifications: store_key over 512 characters"] = ("store_notifications", Set("store_key", new string('k', 513)), "ck_store_notifications_store_key_length"),
             ["store_notifications: type lower case"] = ("store_notifications", Set("type", "did_renew"), "ck_store_notifications_type"),
-            ["store_notifications: subtype with a dash"] = ("store_notifications", Set("subtype", "AUTO-RENEW_DISABLED"), "ck_store_notifications_subtype"),
+            ["store_notifications: subtype with a dash"] = ("store_notifications", Set(("store", "app_store"), ("subtype", "AUTO-RENEW_DISABLED")), "ck_store_notifications_subtype"),
+
+            // T-133: the Google row shape (no environment, no subtype, a messageId or one of the two job keys).
+            ["store_notifications: google row with an environment"] = ("store_notifications", Set("environment", "production"), "ck_store_notifications_google_shape"),
+            ["store_notifications: google row with a subtype"] = ("store_notifications", Set("subtype", "SUMMARY"), "ck_store_notifications_google_shape"),
+            ["store_notifications: google voided key not hex"] = ("store_notifications", Set("external_id", "voided:xyz"), "ck_store_notifications_google_shape"),
+            ["store_notifications: google sweep key without expiry"] = ("store_notifications", Set("external_id", "sweep:0193a0c4-0000-7000-8000-000000000001"), "ck_store_notifications_google_shape"),
+            ["store_notifications: google messageId with a colon"] = ("store_notifications", Set("external_id", "abc:def"), "ck_store_notifications_google_shape"),
             ["purchases: store_key over 512 characters"] = ("purchases", Set("store_key", new string('k', 513)), "ck_purchases_store_key_length"),
 
             // audit_log (SEC F3): any depth, any letter case, values with "@", and the target
@@ -214,8 +221,8 @@ public class CheckConstraintTests(SchemaFixture fixture)
         var tested = Cases.Values.Select(c => c.Constraint).ToHashSet(StringComparer.Ordinal);
 
         // 23 documented + 24 hardening (octet/char lengths, cause regex, audit, codes, formats) + 1 catalog_drafts (T-125) + 2 price_quotes (T-127)
-        // + 2 idempotency_records claim checks (T-130).
-        Assert.Equal(54, inSchema.Count);
+        // + 2 idempotency_records claim checks (T-130) + ck_store_notifications_google_shape (T-133).
+        Assert.Equal(55, inSchema.Count);
         Assert.Empty(inSchema.Except(tested));
         Assert.Empty(tested.Except(inSchema));
     }
@@ -250,6 +257,9 @@ public class CheckConstraintTests(SchemaFixture fixture)
         { "installs", "app_version", "1.2.3.4" },
         { "store_notifications", "last_error", "STORE_UNAVAILABLE" },
         { "store_notifications", "store_key", new string('k', 512) },
+        { "store_notifications", "external_id", "voided:" + new string('0', 64) },
+        { "store_notifications", "external_id", "sweep:0193a0c4-0000-7000-8000-000000000001:1793534400" },
+        { "store_notifications", "external_id", new string('9', 100) },
         { "purchases", "store_key", new string('k', 512) },
     };
 

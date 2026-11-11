@@ -56,6 +56,12 @@ public sealed class RateLimitSettings
     /// general per-network bucket, so Apple's delivery and app traffic never drain each other. A 429 is retried by Apple.
     /// </summary>
     public TokenBucketSettings AppleNotifications { get; set; } = new() { TokenLimit = 1200, TokensPerPeriod = 1200, PeriodSeconds = 60 };
+
+    /// <summary>
+    /// <c>POST /v1/notifications/google</c> per /24 (T-133, policy <c>notifications-google</c>): 1 200 a minute, instead of the general
+    /// per-network bucket. A 429 is redelivered by Pub/Sub.
+    /// </summary>
+    public TokenBucketSettings GoogleNotifications { get; set; } = new() { TokenLimit = 1200, TokensPerPeriod = 1200, PeriodSeconds = 60 };
 }
 
 /// <summary>Endpoint metadata: this endpoint uses the <c>notifications-apple</c> per-network bucket instead of the general one.</summary>
@@ -69,6 +75,16 @@ internal sealed class AppleNotificationRateLimitMetadata
 }
 
 /// <summary>Endpoint metadata: this endpoint also draws on the registration bucket.</summary>
+/// <summary>Endpoint metadata: this endpoint uses the <c>notifications-google</c> per-network bucket instead of the general one.</summary>
+internal sealed class GoogleNotificationRateLimitMetadata
+{
+    public static readonly GoogleNotificationRateLimitMetadata Instance = new();
+
+    private GoogleNotificationRateLimitMetadata()
+    {
+    }
+}
+
 internal sealed class RegistrationRateLimitMetadata
 {
     public static readonly RegistrationRateLimitMetadata Instance = new();
@@ -102,6 +118,9 @@ internal sealed class ZaghlolRateLimiters : IDisposable
     /// <summary>The partition prefix of the <c>notifications-apple</c> bucket (memory only, never logged).</summary>
     private const string AppleNotificationsPrefix = "assn:";
 
+    /// <summary>The partition prefix of the <c>notifications-google</c> bucket (memory only, never logged).</summary>
+    private const string GoogleNotificationsPrefix = "rtdn:";
+
     private readonly PartitionedRateLimiter<HttpContext> network;
     private readonly PartitionedRateLimiter<HttpContext> token;
 
@@ -111,9 +130,11 @@ internal sealed class ZaghlolRateLimiters : IDisposable
 
         var limits = settings.Value;
         var perNetwork = PartitionedRateLimiter.Create<HttpContext, string>(context =>
-            context.GetEndpoint()?.Metadata.GetMetadata<AppleNotificationRateLimitMetadata>() is not null
+            context.GetEndpoint()?.Metadata is { } metadata && metadata.GetMetadata<AppleNotificationRateLimitMetadata>() is not null
                 ? RateLimitPartition.GetTokenBucketLimiter(AppleNotificationsPrefix + ClientNetwork.Of(context.Connection.RemoteIpAddress), _ => limits.AppleNotifications.ToOptions())
-                : RateLimitPartition.GetTokenBucketLimiter(ClientNetwork.Of(context.Connection.RemoteIpAddress), _ => limits.PerNetwork.ToOptions()));
+                : context.GetEndpoint()?.Metadata.GetMetadata<GoogleNotificationRateLimitMetadata>() is not null
+                    ? RateLimitPartition.GetTokenBucketLimiter(GoogleNotificationsPrefix + ClientNetwork.Of(context.Connection.RemoteIpAddress), _ => limits.GoogleNotifications.ToOptions())
+                    : RateLimitPartition.GetTokenBucketLimiter(ClientNetwork.Of(context.Connection.RemoteIpAddress), _ => limits.PerNetwork.ToOptions()));
         var register = PartitionedRateLimiter.Create<HttpContext, string>(context =>
             context.GetEndpoint()?.Metadata.GetMetadata<RegistrationRateLimitMetadata>() is null
                 ? RateLimitPartition.GetNoLimiter(string.Empty)

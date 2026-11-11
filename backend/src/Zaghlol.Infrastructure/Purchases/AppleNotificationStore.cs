@@ -1,7 +1,4 @@
-using System.Buffers.Binary;
 using System.Data;
-using System.Security.Cryptography;
-using System.Text;
 using Microsoft.EntityFrameworkCore;
 using Npgsql;
 using Zaghlol.Application.Purchases;
@@ -39,7 +36,7 @@ internal sealed class StoreNotificationInbox(Func<ZaghlolDbContext> contexts) : 
         command.Parameters.AddWithValue("subtype", (object?)record.Subtype ?? DBNull.Value);
         command.Parameters.AddWithValue("product", (object?)record.ProductId ?? DBNull.Value);
         command.Parameters.AddWithValue("key", (object?)record.StoreKey?.Reveal() ?? DBNull.Value);
-        command.Parameters.AddWithValue("environment", PurchaseDbText.Environment(record.Environment));
+        command.Parameters.AddWithValue("environment", record.Environment is { } environment ? PurchaseDbText.Environment(environment) : (object)DBNull.Value);
         command.Parameters.AddWithValue("event_time", record.EventTime.ToUniversalTime());
         command.Parameters.AddWithValue("digest", record.PayloadDigest);
         command.Parameters.AddWithValue("processed", record.Processed);
@@ -109,32 +106,10 @@ internal sealed class AppleNotificationStore(IZaghlolDbContextFactory contexts) 
         """;
 
     /// <summary>The advisory lock key of <paramref name="name"/>: the first 8 bytes of its SHA-256.</summary>
-    public static long LockKey(string name) => BinaryPrimitives.ReadInt64BigEndian(SHA256.HashData(Encoding.ASCII.GetBytes(name)));
+    public static long LockKey(string name) => AdvisoryLock.Key(name);
 
-    public async Task<IAsyncDisposable?> TryLockAsync(string name, CancellationToken cancellationToken)
-    {
-        var key = LockKey(name);
-        var db = contexts.CreateDbContext(DatabaseRole.Worker);
-        try
-        {
-            await db.Database.OpenConnectionAsync(cancellationToken);
-            var connection = (NpgsqlConnection)db.Database.GetDbConnection();
-            await using var command = new NpgsqlCommand("SELECT pg_try_advisory_lock(@key)", connection);
-            command.Parameters.AddWithValue("key", key);
-            if (await command.ExecuteScalarAsync(cancellationToken) is true)
-            {
-                return new SessionLock(db, connection, key);
-            }
-
-            await db.DisposeAsync();
-            return null;
-        }
-        catch
-        {
-            await db.DisposeAsync();
-            throw;
-        }
-    }
+    public Task<IAsyncDisposable?> TryLockAsync(string name, CancellationToken cancellationToken) =>
+        AdvisoryLock.TryTakeAsync(contexts, name, cancellationToken);
 
     public async Task<IReadOnlyList<DueAppleNotification>> ListDueAsync(DateTimeOffset now, int limit, CancellationToken cancellationToken)
     {
@@ -324,29 +299,4 @@ internal sealed class AppleNotificationStore(IZaghlolDbContextFactory contexts) 
         "sandbox" => PurchaseEnvironment.Sandbox,
         _ => throw new InvalidOperationException("Unknown environment value."),
     };
-
-    /// <summary>The session advisory lock on its own connection; released (and the connection returned) on dispose.</summary>
-    private sealed class SessionLock(ZaghlolDbContext db, NpgsqlConnection connection, long key) : IAsyncDisposable
-    {
-        private int disposed;
-
-        public async ValueTask DisposeAsync()
-        {
-            if (Interlocked.Exchange(ref disposed, 1) == 1)
-            {
-                return;
-            }
-
-            try
-            {
-                await using var unlock = new NpgsqlCommand("SELECT pg_advisory_unlock(@key)", connection);
-                unlock.Parameters.AddWithValue("key", key);
-                await unlock.ExecuteScalarAsync();
-            }
-            finally
-            {
-                await db.DisposeAsync();
-            }
-        }
-    }
 }

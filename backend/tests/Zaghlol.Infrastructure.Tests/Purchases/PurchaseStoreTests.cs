@@ -445,5 +445,8 @@ public class PurchaseStoreTests(PurchaseStoreFixture fixture) : IClassFixture<Pu
 
         public Task<PlayOrder> GetOrderAsync(Sensitive<string> orderId, StoreLane lane, CancellationToken cancellationToken) =>
             throw new PlayApiException(PlayApi.OrderGet, PlayCallOutcome.ClientError, 404);
+
+        public Task<PlayVoidedPage> ListVoidedPurchasesAsync(DateTimeOffset from, DateTimeOffset until, Sensitive<string>? pageToken, StoreLane lane, CancellationToken cancellationToken) =>
+            throw new PlayApiException(PlayApi.VoidedList, PlayCallOutcome.ClientError, 404);
     }
 }

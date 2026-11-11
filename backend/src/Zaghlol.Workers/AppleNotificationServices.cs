@@ -1,4 +1,5 @@
 using Zaghlol.Application.Purchases;
+using Zaghlol.Infrastructure.Observability;
 
 namespace Zaghlol.Workers;
 
@@ -9,6 +10,7 @@ namespace Zaghlol.Workers;
 /// </summary>
 public sealed partial class AppleNotificationProcessorService(
     IServiceProvider services,
+    ZaghlolMetrics metrics,
     TimeProvider clock,
     ILogger<AppleNotificationProcessorService> logger) : BackgroundService
 {
@@ -16,6 +18,8 @@ public sealed partial class AppleNotificationProcessorService(
 
     protected override async Task ExecuteAsync(CancellationToken stoppingToken)
     {
+        // T-133 §3 / FU-077 L-3: the heartbeat gauge starts with the loop, so a processor that never completes a run is paged.
+        metrics.TrackHeartbeat(AppleNotificationStoreName);
         while (!stoppingToken.IsCancellationRequested)
         {
             var busy = false;
@@ -45,6 +49,9 @@ public sealed partial class AppleNotificationProcessorService(
             }
         }
     }
+
+    /// <summary>The <c>store</c> tag of the generic notification series for Apple.</summary>
+    private const string AppleNotificationStoreName = "apple";
 
     [LoggerMessage(Level = LogLevel.Information, Message = "ASSN processor run finished; {Count} rows, {Applied} applied, {Failed} failed")]
     private static partial void LogRun(ILogger logger, int count, int applied, int failed);
