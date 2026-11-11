@@ -93,7 +93,7 @@ void main() {
     });
 
     test('same inst+last4 never creates two accounts, 20 concurrent callers '
-        '(two repositories)', () async {
+        '(two repositories, ONE connection)', () async {
       final other = makeRepo();
       final results = await Future.wait([
         for (var i = 0; i < 20; i++) (i.isEven ? repo : other).resolve(hint()),
@@ -186,7 +186,7 @@ void main() {
 
   group('default cash (FR-ACC-03)', () {
     test(
-      'exactly one default cash, also under 20 concurrent callers',
+      'exactly one default cash, 20 concurrent callers, one connection',
       () async {
         final other = makeRepo();
         final all = await Future.wait([
@@ -310,20 +310,23 @@ void main() {
       expect(b.available, egpMinor(300));
     });
 
-    test('concurrent writers: the newest as_of wins in any order', () async {
-      final other = makeRepo();
-      await Future.wait([
-        for (var i = 9; i >= 0; i--)
-          (i.isEven ? repo : other).recordBalance(
-            accountId: accId,
-            asOf: at(t0 + i),
-            balance: egpMinor(i),
-          ),
-      ]);
-      final b = (await repo.balancesOf(accId)).single;
-      expect(b.asOf, at(t0 + 9));
-      expect(b.balance, egpMinor(9));
-    });
+    test(
+      'concurrent writers (one connection): the newest as_of wins in any order',
+      () async {
+        final other = makeRepo();
+        await Future.wait([
+          for (var i = 9; i >= 0; i--)
+            (i.isEven ? repo : other).recordBalance(
+              accountId: accId,
+              asOf: at(t0 + i),
+              balance: egpMinor(i),
+            ),
+        ]);
+        final b = (await repo.balancesOf(accId)).single;
+        expect(b.asOf, at(t0 + 9));
+        expect(b.balance, egpMinor(9));
+      },
+    );
 
     test(
       'one row per currency; currencies are never mixed or summed',
