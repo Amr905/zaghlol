@@ -1,0 +1,15 @@
+name: registry_lint
+description: CLI that lints the bundled institution registry and its SMS fixtures (T-032).
+publish_to: none
+resolution: workspace
+
+environment:
+  sdk: ^3.13.7
+
+dependencies:
+  zaghlol_parsing:
+    path: ../../packages/zaghlol_parsing
+
+dev_dependencies:
+  lints: ">=5.0.0 <7.0.0"
+  test: ^1.25.0

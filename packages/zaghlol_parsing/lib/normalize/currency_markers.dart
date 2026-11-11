@@ -33,8 +33,9 @@ const Map<String, CurrencyMarker> currencySymbols = {
 /// Resolves a symbol or a 3-letter ISO code to a [Currency].
 ///
 /// An unambiguous marker always wins over [fallback]. An ambiguous symbol
-/// is accepted only when [fallback] is one of its candidates, or when there
-/// is no fallback and the symbol has a default. Returns null otherwise.
+/// resolves to [fallback] when it is one of its candidates, otherwise to the
+/// symbol's default (`$` is USD on an EGP card). A symbol with no default
+/// (`﷼`) resolves only through an agreeing fallback. Returns null otherwise.
 Currency? resolveCurrencyMarker(String marker, Currency? fallback) {
   final symbol = currencySymbols[marker];
   if (symbol != null) {
@@ -45,7 +46,14 @@ Currency? resolveCurrencyMarker(String marker, Currency? fallback) {
       final code = symbol.defaultCode;
       return code == null ? null : Currency.tryOf(code);
     }
-    return symbol.candidates.contains(fallback.code) ? fallback : null;
+    if (symbol.candidates.contains(fallback.code)) {
+      return fallback;
+    }
+    // `$` on an account in another currency (a USD purchase on an EGP card)
+    // is USD, like `£` and `€` an explicit marker beats the fallback. A
+    // symbol with no default (`﷼`) stays unresolved.
+    final code = symbol.defaultCode;
+    return code == null ? null : Currency.tryOf(code);
   }
   if (marker.length == 3) {
     return Currency.tryOf(marker.toUpperCase());

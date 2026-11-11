@@ -22,6 +22,34 @@ String foldForMatching(String input) => _transform(input, _Level.matching);
 /// lowercase.
 String foldKey(String input) => _transform(input, _Level.key);
 
+/// Folds only the Arabic letter variants (`أ إ آ ٱ` to `ا`, `ى` to `ي`,
+/// `ة` to `ه`) and drops tatweel and harakat, leaving case, digits and
+/// spacing alone. Used on template pattern literals (registry), where
+/// lowercasing would corrupt escapes such as `\S` and `\D`.
+String foldArabicVariants(String input) {
+  final out = StringBuffer();
+  // Code units, not runes: no mapped character is a surrogate half.
+  for (final unit in input.codeUnits) {
+    if (_isMatchingMark(unit)) {
+      continue;
+    }
+    switch (unit) {
+      case 0x0623:
+      case 0x0625:
+      case 0x0622:
+      case 0x0671:
+        out.writeCharCode(0x0627);
+      case 0x0649:
+        out.writeCharCode(0x064A);
+      case 0x0629:
+        out.writeCharCode(0x0647);
+      default:
+        out.writeCharCode(unit);
+    }
+  }
+  return out.toString();
+}
+
 enum _Level { display, matching, key }
 
 const int _space = 0x20;
@@ -75,6 +103,8 @@ bool _isInvisible(int u) {
       (u >= 0x202A && u <= 0x202E) ||
       (u >= 0x2066 && u <= 0x2069) ||
       u == 0x061C ||
+      u == 0x2060 || // word joiner
+      u == 0x00AD || // soft hyphen
       u == 0xFEFF;
 }
 

@@ -1,0 +1,12 @@
+{
+  "sender": "NBE",
+  "body": "NBE: EUR 10.50 at ZALANDO charged EGP 560.25 on card *4567. Bal EGP 9,000.00",
+  "receivedAt": "2026-10-23T11:14:00+03:00",
+  "expect": {
+    "template": "nbe.card_foreign.en",
+    "amount": "560.25",
+    "originalAmount": "10.50",
+    "originalCurrency": "EUR",
+    "balance": "9000.00"
+  }
+}

@@ -156,6 +156,18 @@
   {
    "input": "   ",
    "key": ""
+  },
+  {
+   "input": "ALMARAI",
+   "key": "almarai"
+  },
+  {
+   "input": "AL MARAI",
+   "key": "marai"
   }
+ ],
+ "notes": [
+  "Only a LEADING article is removed (rule 4): KOSHARY EL TAHRIR keeps its el.",
+  "ALMARAI keeps its al because it starts with the English stem alma, which the attached-article rule excludes (a stem list, not a rule about the word); AL MARAI (separate token) strips it. The two keys differ on purpose, so tools/catalog_build must emit both spellings as alias variants (FU-066)."
  ]
 }
