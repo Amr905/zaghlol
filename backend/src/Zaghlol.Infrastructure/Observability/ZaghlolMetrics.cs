@@ -62,6 +62,17 @@ public sealed partial class ZaghlolMetrics : IDisposable
     private readonly Counter<long> assnRefundNotReflected;
     private long assnBacklogLessThan1h;
     private long assnBacklogAtLeast1h;
+    private readonly Counter<long> rtdnAuth;
+    private readonly Counter<long> rtdnIngest;
+    private readonly Counter<long> rtdnProcessed;
+    private readonly Histogram<double> rtdnLag;
+    private readonly Counter<long> rtdnReconcile;
+    private readonly Counter<long> rtdnRecovered;
+    private readonly Counter<long> rtdnRefundNotReflected;
+    private readonly Counter<long> backlogFailed;
+    private long rtdnBacklogLessThan1h;
+    private long rtdnBacklogAtLeast1h;
+    private readonly ConcurrentDictionary<string, long> heartbeats = new(StringComparer.Ordinal);
     private readonly ConcurrentDictionary<string, double> priceAges = new(StringComparer.Ordinal);
     private readonly string serviceVersion;
     private long unackedLessThan48h;
@@ -147,6 +158,24 @@ public sealed partial class ZaghlolMetrics : IDisposable
             "zaghlol.assn.refund_not_reflected",
             description: "REFUND/REVOKE notifications applied after the floor while Apple's API still answered otherwise.");
         meter.CreateObservableGauge("zaghlol.assn.backlog", ObserveAssnBacklog, description: "Unprocessed ASSN V2 rows by age (lt_1h|ge_1h).");
+
+        // T-133: Google RTDN (design note §7).
+        rtdnAuth = meter.CreateCounter<long>("zaghlol.rtdn.auth", description: "Pub/Sub push authentication by outcome (ok or the failed check).");
+        rtdnIngest = meter.CreateCounter<long>("zaghlol.rtdn.ingest", description: "Authenticated RTDN pushes by kind and outcome.");
+        rtdnProcessed = meter.CreateCounter<long>("zaghlol.rtdn.processed", description: "RTDN rows processed by type (reconcile-set name|test|other) and outcome.");
+        rtdnLag = meter.CreateHistogram<double>("zaghlol.rtdn.lag", "s", "RTDN receipt to processed.");
+        rtdnReconcile = meter.CreateCounter<long>("zaghlol.rtdn.reconcile", description: "Google reconciliation results by step (voided|expiry) and outcome.");
+        rtdnRecovered = meter.CreateCounter<long>("zaghlol.rtdn.recovered", description: "Voided rows the daily job enqueued with no RTDN for the token (delivery failing).");
+        rtdnRefundNotReflected = meter.CreateCounter<long>(
+            "zaghlol.rtdn.refund_not_reflected",
+            description: "VOIDED_PURCHASE/SUBSCRIPTION_REVOKED rows applied after the floor while Play still answered entitling.");
+        meter.CreateObservableGauge("zaghlol.rtdn.backlog", ObserveRtdnBacklog, description: "Unprocessed RTDN rows by age (lt_1h|ge_1h).");
+        backlogFailed = meter.CreateCounter<long>("zaghlol.notification.backlog_failed", description: "Backlog gauge refreshes that failed, by store.");
+        meter.CreateObservableGauge<double>(
+            "zaghlol.notification.processor_heartbeat_age",
+            ObserveHeartbeats,
+            "s",
+            "Seconds since a notification processor of this process last completed a run (or found the lock held elsewhere), by store.");
         meter.CreateObservableGauge("zaghlol.purchase.unacked", ObserveUnacked, description: "Ackable Google purchases waiting for acknowledgement, by age (lt_48h|ge_48h).");
         meter.CreateObservableGauge("zaghlol.purchase.unacked.oldest_age", () => Volatile.Read(ref unackedOldestAgeSeconds), "s", "Age of the oldest unacknowledged purchase.");
         meter.CreateObservableGauge<double>("zaghlol.price.age", ObservePriceAges, "s", "Age of the newest quote per symbol.");
@@ -230,6 +259,42 @@ public sealed partial class ZaghlolMetrics : IDisposable
         Interlocked.Exchange(ref assnBacklogLessThan1h, lessThan1h);
         Interlocked.Exchange(ref assnBacklogAtLeast1h, atLeast1h);
     }
+
+    /// <summary><c>zaghlol.rtdn.auth{outcome}</c> (T-133).</summary>
+    public void RtdnAuth(string outcome) => rtdnAuth.Add(1, Tags(("outcome", outcome)));
+
+    /// <summary><c>zaghlol.rtdn.ingest{kind, outcome}</c> (T-133).</summary>
+    public void RtdnIngested(string kind, string outcome) => rtdnIngest.Add(1, Tags(("kind", kind), ("outcome", outcome)));
+
+    /// <summary><c>zaghlol.rtdn.processed{type, outcome}</c> (T-133).</summary>
+    public void RtdnProcessed(string type, string outcome) => rtdnProcessed.Add(1, Tags(("type", type), ("outcome", outcome)));
+
+    public void RtdnLag(TimeSpan lag) => rtdnLag.Record(Math.Max(0, lag.TotalSeconds));
+
+    /// <summary><c>zaghlol.rtdn.reconcile{step, outcome}</c> (T-133).</summary>
+    public void RtdnReconciled(string step, string outcome) => rtdnReconcile.Add(1, Tags(("step", step), ("outcome", outcome)));
+
+    public void RtdnRecovered(long count) => rtdnRecovered.Add(count);
+
+    public void RtdnRefundNotReflected() => rtdnRefundNotReflected.Add(1);
+
+    public void SetRtdnBacklog(long lessThan1h, long atLeast1h)
+    {
+        Interlocked.Exchange(ref rtdnBacklogLessThan1h, lessThan1h);
+        Interlocked.Exchange(ref rtdnBacklogAtLeast1h, atLeast1h);
+    }
+
+    /// <summary><c>zaghlol.notification.backlog_failed{store}</c>.</summary>
+    public void NotificationBacklogFailed(string store) => backlogFailed.Add(1, Tags(("store", store)));
+
+    /// <summary>
+    /// Starts reporting <c>zaghlol.notification.processor_heartbeat_age{store}</c> in this process (the worker registers its processors),
+    /// counting from now: a processor that never completes a run shows a growing age (FU-077 L-3).
+    /// </summary>
+    public void TrackHeartbeat(string store) => heartbeats.TryAdd(Clean(store), Stopwatch.GetTimestamp());
+
+    /// <summary>A processor of <paramref name="store"/> completed a run (or found the lock held elsewhere): the age restarts at 0.</summary>
+    public void Heartbeat(string store) => heartbeats[Clean(store)] = Stopwatch.GetTimestamp();
 
     public void NotificationProcessed(TimeSpan lag) => notificationLag.Record(lag.TotalSeconds);
 
@@ -411,13 +476,44 @@ public sealed partial class ZaghlolMetrics : IDisposable
 
         assnRecovered.Add(0);
         assnRefundNotReflected.Add(0);
+
+        // T-133: every alerted RTDN series starts at 0.
+        foreach (var outcome in new[] { RtdnTags.Auth.BadAudience, RtdnTags.Auth.BadEmail, RtdnTags.Auth.KeysUnavailable })
+        {
+            rtdnAuth.Add(0, Tags(("outcome", outcome)));
+        }
+
+        foreach (var outcome in new[] { RtdnTags.IgnoredPackage, RtdnTags.IgnoredMalformed, RtdnTags.IgnoredStale, RtdnTags.IgnoredSubscription })
+        {
+            rtdnIngest.Add(0, Tags(("kind", PlayNotificationIngest.Kinds.None), ("outcome", outcome)));
+        }
+
+        foreach (var type in PlayRtdnTypes.Tags)
+        {
+            foreach (var outcome in new[] { RtdnTags.EnvMismatch, RtdnTags.Refused, RtdnTags.TokenGone, RtdnTags.DeadLetter })
+            {
+                rtdnProcessed.Add(0, Tags(("type", type), ("outcome", outcome)));
+            }
+        }
+
+        foreach (var outcome in new[] { RtdnTags.ReconcileFailed, RtdnTags.ReconcileTruncated })
+        {
+            rtdnReconcile.Add(0, Tags(("step", RtdnTags.StepVoided), ("outcome", outcome)));
+        }
+
+        rtdnRecovered.Add(0);
+        rtdnRefundNotReflected.Add(0);
+        foreach (var store in NotificationStores)
+        {
+            backlogFailed.Add(0, Tags(("store", store)));
+        }
     }
 
     /// <summary>The <c>api</c> tag values of App Store calls (<c>AppStoreCallTags.Apis</c>).</summary>
     internal static IReadOnlyList<string> AppleCallApis { get; } = ["tx_get", "sub_status", "order_lookup", "notification_history"];
 
     /// <summary>The <c>api</c> tag values of <c>zaghlol.store.call</c> (StoreCallTags.Apis).</summary>
-    internal static IReadOnlyList<string> StoreCallApis { get; } = ["sub_get", "prod_get", "sub_ack", "prod_ack", "orders_get"];
+    internal static IReadOnlyList<string> StoreCallApis { get; } = ["sub_get", "prod_get", "sub_ack", "prod_ack", "orders_get", "voided_list"];
 
     private IEnumerable<Measurement<long>> ObserveUnacked() =>
     [
@@ -430,6 +526,15 @@ public sealed partial class ZaghlolMetrics : IDisposable
         new(Interlocked.Read(ref assnBacklogLessThan1h), new KeyValuePair<string, object?>("age", "lt_1h")),
         new(Interlocked.Read(ref assnBacklogAtLeast1h), new KeyValuePair<string, object?>("age", "ge_1h")),
     ];
+
+    private IEnumerable<Measurement<long>> ObserveRtdnBacklog() =>
+    [
+        new(Interlocked.Read(ref rtdnBacklogLessThan1h), new KeyValuePair<string, object?>("age", "lt_1h")),
+        new(Interlocked.Read(ref rtdnBacklogAtLeast1h), new KeyValuePair<string, object?>("age", "ge_1h")),
+    ];
+
+    private IEnumerable<Measurement<double>> ObserveHeartbeats() =>
+        heartbeats.Select(h => new Measurement<double>(Stopwatch.GetElapsedTime(h.Value).TotalSeconds, new KeyValuePair<string, object?>("store", h.Key)));
 
     private IEnumerable<Measurement<double>> ObservePriceAges() =>
         priceAges.Select(p => new Measurement<double>(p.Value, new KeyValuePair<string, object?>("symbol", p.Key)));

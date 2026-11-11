@@ -79,10 +79,38 @@ internal sealed class OrderDto
     public string? State { get; init; }
 }
 
+/// <summary>
+/// <c>VoidedPurchasesListResponse</c> (T-133 §4): only <c>voidedPurchases[].{purchaseToken, orderId, voidedTimeMillis}</c> and
+/// <c>tokenPagination.nextPageToken</c>; no catch-all member (T-133 AC 5).
+/// </summary>
+internal sealed class VoidedPurchasesListDto
+{
+    public List<VoidedPurchaseDto>? VoidedPurchases { get; init; }
+
+    public TokenPaginationDto? TokenPagination { get; init; }
+}
+
+internal sealed class VoidedPurchaseDto
+{
+    public string? PurchaseToken { get; init; }
+
+    public string? OrderId { get; init; }
+
+    /// <summary>An int64 Google writes as a string.</summary>
+    [JsonNumberHandling(JsonNumberHandling.AllowReadingFromString)]
+    public long? VoidedTimeMillis { get; init; }
+}
+
+internal sealed class TokenPaginationDto
+{
+    public string? NextPageToken { get; init; }
+}
+
 [JsonSourceGenerationOptions(
     PropertyNamingPolicy = JsonKnownNamingPolicy.CamelCase,
     UnmappedMemberHandling = JsonUnmappedMemberHandling.Skip,
     NumberHandling = JsonNumberHandling.Strict)]
+[JsonSerializable(typeof(VoidedPurchasesListDto))]
 [JsonSerializable(typeof(SubscriptionPurchaseV2Dto))]
 [JsonSerializable(typeof(ProductPurchaseV2Dto))]
 [JsonSerializable(typeof(OrderDto))]

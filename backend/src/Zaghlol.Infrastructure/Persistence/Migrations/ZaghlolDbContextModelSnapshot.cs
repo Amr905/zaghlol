@@ -1410,6 +1410,8 @@ namespace Zaghlol.Infrastructure.Persistence.Migrations
                         {
                             t.HasCheckConstraint("ck_store_notifications_environment", "environment IN ('production','sandbox')");
 
+                            t.HasCheckConstraint("ck_store_notifications_google_shape", "store <> 'google_play' OR (subtype IS NULL AND environment IS NULL AND (external_id ~ '^[A-Za-z0-9_-]{1,100}$' OR external_id ~ '^voided:[0-9a-f]{64}$' OR external_id ~ '^sweep:[0-9a-f-]{36}:[0-9]{1,12}$'))");
+
                             t.HasCheckConstraint("ck_store_notifications_last_error", "last_error ~ '^[A-Z0-9_]{1,64}$'");
 
                             t.HasCheckConstraint("ck_store_notifications_payload_digest_length", "octet_length(payload_digest) = 32");
