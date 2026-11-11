@@ -160,25 +160,81 @@ public class PurchaseStoreTests(PurchaseStoreFixture fixture) : IClassFixture<Pu
     }
 
     [Fact]
-    public async Task TheSweeperListsPendingAndAckableUnackedGoogleRowsOldestFirstAndSummarizesByAge()
+    public async Task TheSweeperListsDueRowsAckableFirstAndSummarizesOnlyRowsPlayHasNotRefundedYet()
     {
         await ExecuteAsync("DELETE FROM zaghlol.purchases WHERE store = 'google_play'");
         var install = await InstallAsync();
         var overdue = await SeedAsync(install, "active", false, Now.AddHours(-50));
         var fresh = await SeedAsync(install, "in_grace", false, Now.AddHours(-2));
         var pending = await SeedAsync(install, "pending", false, Now.AddHours(-70));
+        var deferredDue = await SeedAsync(install, "active", false, Now.AddHours(-3), next: Now.AddMinutes(-1));
+        await SeedAsync(install, "canceled_active", false, Now.AddHours(-4), next: Now.AddHours(1));
+        var pastRefund = await SeedAsync(install, "active", false, Now.AddHours(-80));
         await SeedAsync(install, "expired", false, Now.AddHours(-80));
         await SeedAsync(install, "active", true, Now.AddHours(-90));
         await SeedAsync(install, "refunded", false, Now.AddHours(-60));
 
-        var rows = await Sweep.ListAsync(200, CancellationToken.None);
+        var rows = await Sweep.ListAsync(Now, 200, CancellationToken.None);
         var summary = await Sweep.SummarizeAsync(Now, 50, CancellationToken.None);
 
-        Assert.Equal([pending, overdue, fresh], rows.Select(r => r.Id));
-        Assert.Equal(1, summary.LessThan48h);
+        // Ackable before pending, never deferred before deferred, oldest first; a row deferred into the future is left out.
+        Assert.Equal([pastRefund, overdue, fresh, deferredDue, pending], rows.Select(r => r.Id));
+
+        // The 80 h row is past Play's 72 h refund: it no longer pages.
+        Assert.Equal(3, summary.LessThan48h);
         Assert.Equal(1, summary.AtLeast48h);
         Assert.Equal(TimeSpan.FromHours(50), summary.OldestAge);
         Assert.Equal([overdue], summary.Overdue);
+    }
+
+    [Fact]
+    public async Task TwoHundredStuckRowsDoNotStarveANewerActivePurchaseOnTheWorkerLogin()
+    {
+        // Security M-1, against PostgreSQL and the Worker login: pending, retired-product and Play-404 rows at the head of the queue.
+        await ExecuteAsync("DELETE FROM zaghlol.purchases WHERE store = 'google_play'");
+        var install = await InstallAsync();
+        var play = new ScriptedPlay();
+        var stuck = new List<Guid>();
+        for (var i = 0; i < 70; i++)
+        {
+            var key = Token();
+            stuck.Add(await SeedAsync(install, "pending", false, Now.AddHours(-30).AddMinutes(i), key: key));
+            play.Subscriptions[key] = ScriptedPlay.Subscription(PlaySubscriptionState.Pending);
+        }
+
+        for (var i = 0; i < 65; i++)
+        {
+            stuck.Add(await SeedAsync(install, "active", false, Now.AddHours(-20).AddMinutes(i), product: "zaghlol_gold_retired"));
+        }
+
+        for (var i = 0; i < 65; i++)
+        {
+            stuck.Add(await SeedAsync(install, "active", false, Now.AddHours(-10).AddMinutes(i))); // Play: 404
+        }
+
+        var clock = new SettableClock(Now);
+        var job = new PlayAckSweepJob(Sweep, play, Catalog, new NoTelemetry(), clock);
+
+        var earlier = await job.RunOnceAsync(CancellationToken.None);
+        Assert.Equal(200, earlier.Rows);
+        foreach (var id in stuck)
+        {
+            Assert.True(await NextAttemptAsync(id) > Now);
+        }
+
+        clock.Now = Now.AddMinutes(15);
+        var freshKey = Token();
+        var fresh = await SeedAsync(install, "active", false, clock.Now.AddMinutes(-5), key: freshKey);
+        play.Subscriptions[freshKey] = ScriptedPlay.Subscription(PlaySubscriptionState.Active);
+        play.Calls.Clear();
+
+        var run = await job.RunOnceAsync(CancellationToken.None);
+
+        Assert.Equal(1, run.Rows);
+        Assert.Equal(1, run.Acknowledged);
+        Assert.All(play.Calls, c => Assert.Equal(freshKey, c));
+        Assert.True(await AcknowledgedAsync(fresh));
+        Assert.Null(await NextAttemptAsync(fresh));
     }
 
     [Fact]
@@ -224,21 +280,48 @@ public class PurchaseStoreTests(PurchaseStoreFixture fixture) : IClassFixture<Pu
         return InstallId.FromGuid(id);
     }
 
-    private async Task<Guid> SeedAsync(InstallId install, string state, bool acknowledged, DateTimeOffset createdAt)
+    private async Task<Guid> SeedAsync(
+        InstallId install,
+        string state,
+        bool acknowledged,
+        DateTimeOffset createdAt,
+        DateTimeOffset? next = null,
+        string product = "zaghlol_gold_yearly",
+        string? key = null)
     {
         var id = Guid.NewGuid();
         await ExecuteAsync(
             """
-            INSERT INTO zaghlol.purchases (id, store, product_id, plan, store_key, install_id, state, acknowledged, environment, last_verified_at, created_at)
-            VALUES (@id, 'google_play', 'zaghlol_gold_yearly', 'yearly', @key, @install, @state, @ack, 'production', @created, @created)
+            INSERT INTO zaghlol.purchases (id, store, product_id, plan, store_key, install_id, state, acknowledged, environment, last_verified_at, created_at, ack_next_attempt_at)
+            VALUES (@id, 'google_play', @product, 'yearly', @key, @install, @state, @ack, 'production', @created, @created, @next)
             """,
             ("id", id),
-            ("key", Token()),
+            ("product", product),
+            ("key", key ?? Token()),
             ("install", install.Value),
             ("state", state),
             ("ack", acknowledged),
-            ("created", createdAt));
+            ("created", createdAt),
+            ("next", (object?)next ?? DBNull.Value));
         return id;
+    }
+
+    private async Task<DateTimeOffset?> NextAttemptAsync(Guid id)
+    {
+        await using var connection = new NpgsqlConnection(fixture.Database.Superuser);
+        await connection.OpenAsync();
+        await using var command = new NpgsqlCommand("SELECT ack_next_attempt_at FROM zaghlol.purchases WHERE id = @id", connection);
+        command.Parameters.AddWithValue("id", id);
+        return await command.ExecuteScalarAsync() is DateTime value ? new DateTimeOffset(value, TimeSpan.Zero) : (DateTimeOffset?)null;
+    }
+
+    private async Task<bool> AcknowledgedAsync(Guid id)
+    {
+        await using var connection = new NpgsqlConnection(fixture.Database.Superuser);
+        await connection.OpenAsync();
+        await using var command = new NpgsqlCommand("SELECT acknowledged FROM zaghlol.purchases WHERE id = @id", connection);
+        command.Parameters.AddWithValue("id", id);
+        return await command.ExecuteScalarAsync() is true;
     }
 
     private async Task<(string State, bool Acknowledged, Guid? InstallId, string Environment, string? Ref)> RowAsync(string token)
@@ -281,5 +364,78 @@ public class PurchaseStoreTests(PurchaseStoreFixture fixture) : IClassFixture<Pu
         }
 
         await command.ExecuteNonQueryAsync();
+    }
+
+    private static PlayProductCatalog Catalog { get; } = new("app.zaghlol", new Dictionary<string, PlayProductDefinition>(StringComparer.Ordinal)
+    {
+        ["zaghlol_gold_yearly"] = new(PlayProductKind.Subscription, GoldPlan.Yearly),
+    });
+
+    private sealed class SettableClock(DateTimeOffset now) : TimeProvider
+    {
+        public DateTimeOffset Now { get; set; } = now;
+
+        public override DateTimeOffset GetUtcNow() => Now;
+    }
+
+    private sealed class NoTelemetry : IPurchaseTelemetry
+    {
+        public void Verified(string store, string outcome, string code)
+        {
+        }
+
+        public void Acknowledged(string channel, string outcome)
+        {
+        }
+
+        public void TimeToAck(TimeSpan sincePurchase)
+        {
+        }
+
+        public void SetUnacked(long lessThan48h, long atLeast48h, TimeSpan oldestAge)
+        {
+        }
+
+        public void UnackedOver48h(Guid purchaseId)
+        {
+        }
+
+        public void OwnershipChecked(string path, OwnershipOutcome outcome)
+        {
+        }
+    }
+
+    /// <summary>Play as a dictionary: a token it doesn't hold is a 404 (a final client error).</summary>
+    private sealed class ScriptedPlay : IPlayDeveloperApi
+    {
+        public Dictionary<string, PlaySubscription> Subscriptions { get; } = new(StringComparer.Ordinal);
+
+        public System.Collections.Concurrent.ConcurrentQueue<string> Calls { get; } = new();
+
+        public static PlaySubscription Subscription(PlaySubscriptionState state) =>
+            new(state, [new PlayLineItem("zaghlol_gold_yearly", Now.AddDays(30), null)], null, false, false, null, Now.AddMinutes(-10));
+
+        public Task<PlaySubscription> GetSubscriptionAsync(Sensitive<string> token, StoreLane lane, CancellationToken cancellationToken)
+        {
+            Calls.Enqueue(token.Reveal());
+            return Subscriptions.TryGetValue(token.Reveal(), out var read)
+                ? Task.FromResult(read)
+                : throw new PlayApiException(PlayApi.SubscriptionGet, PlayCallOutcome.ClientError, 404);
+        }
+
+        public Task<PlayProduct> GetProductAsync(Sensitive<string> token, StoreLane lane, CancellationToken cancellationToken) =>
+            throw new PlayApiException(PlayApi.ProductGet, PlayCallOutcome.ClientError, 404);
+
+        public Task AcknowledgeSubscriptionAsync(string productId, Sensitive<string> token, StoreLane lane, CancellationToken cancellationToken)
+        {
+            Calls.Enqueue(token.Reveal());
+            return Task.CompletedTask;
+        }
+
+        public Task AcknowledgeProductAsync(string productId, Sensitive<string> token, StoreLane lane, CancellationToken cancellationToken) =>
+            throw new PlayApiException(PlayApi.ProductAcknowledge, PlayCallOutcome.ClientError, 404);
+
+        public Task<PlayOrder> GetOrderAsync(Sensitive<string> orderId, StoreLane lane, CancellationToken cancellationToken) =>
+            throw new PlayApiException(PlayApi.OrderGet, PlayCallOutcome.ClientError, 404);
     }
 }

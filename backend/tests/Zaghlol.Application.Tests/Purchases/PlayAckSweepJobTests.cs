@@ -149,14 +149,129 @@ public class PlayAckSweepJobTests
         Assert.Equal(0, store.Applied);
     }
 
+    // Security M-1: stuck rows are deferred and never starve a newer ackable row.
+
+    [Fact]
+    public async Task TwoHundredStuckRowsDoNotStarveANewerActivePurchase()
+    {
+        var stuck = new List<string>();
+        for (var i = 0; i < 70; i++)
+        {
+            // Still pending at Play (slow payment).
+            var token = AddRow(Play.Yearly, StoredPurchaseState.Pending, Play.Now.AddHours(-30).AddMinutes(i));
+            play.Subscriptions[token] = Play.Subscription(Play.NewInstall(), PlaySubscriptionState.Pending);
+            stuck.Add(token);
+        }
+
+        for (var i = 0; i < 65; i++)
+        {
+            // A product that left the catalog: skipped without a Play call.
+            stuck.Add(AddRow("zaghlol_gold_retired", StoredPurchaseState.Active, Play.Now.AddHours(-20).AddMinutes(i)));
+        }
+
+        for (var i = 0; i < 65; i++)
+        {
+            // Play answers 404 for these tokens (the fake has no read for them).
+            stuck.Add(AddRow(Play.Yearly, StoredPurchaseState.Active, Play.Now.AddHours(-10).AddMinutes(i)));
+        }
+
+        // An earlier run met all 200 and deferred every one of them.
+        var earlier = await Job.RunOnceAsync(CancellationToken.None);
+        Assert.Equal(200, earlier.Rows);
+        Assert.All(stuck, t => Assert.NotNull(store.Rows[t].NextAttemptAt));
+
+        // Then a newer purchase whose inline acknowledge failed.
+        clock.Now = Play.Now.AddMinutes(15);
+        var fresh = AddRow(Play.Monthly, StoredPurchaseState.Active, clock.Now.AddMinutes(-5));
+        play.Subscriptions[fresh] = Play.Subscription(Play.NewInstall(), productId: Play.Monthly);
+        play.Calls.Clear();
+
+        var run = await Job.RunOnceAsync(CancellationToken.None);
+
+        Assert.Equal(1, run.Acknowledged);
+        Assert.True(store.Rows[fresh].Acknowledged);
+        Assert.All(play.Calls, c => Assert.Equal(fresh, c.Subject));
+    }
+
+    [Fact]
+    public async Task AckableRowsComeBeforePendingOnesEvenTheFirstTime()
+    {
+        for (var i = 0; i < PlayAckSweepJob.BatchSize; i++)
+        {
+            var pending = AddRow(Play.Yearly, StoredPurchaseState.Pending, Play.Now.AddHours(-40).AddMinutes(i));
+            play.Subscriptions[pending] = Play.Subscription(Play.NewInstall(), PlaySubscriptionState.Pending);
+        }
+
+        var fresh = AddRow(Play.Yearly, StoredPurchaseState.Active, Play.Now.AddMinutes(-1));
+        play.Subscriptions[fresh] = Play.Subscription(Play.NewInstall());
+
+        var run = await Job.RunOnceAsync(CancellationToken.None);
+
+        Assert.Equal(1, run.Acknowledged);
+        Assert.True(store.Rows[fresh].Acknowledged);
+    }
+
+    [Fact]
+    public async Task RowsTheRunCantFinishAreDeferredByAge()
+    {
+        var pending = AddRow(Play.Yearly, StoredPurchaseState.Pending, Play.Now.AddHours(-4));
+        play.Subscriptions[pending] = Play.Subscription(Play.NewInstall(), PlaySubscriptionState.Pending);
+        var retired = AddRow("zaghlol_gold_retired", StoredPurchaseState.Active, Play.Now.AddHours(-30));
+        var notFound = AddRow(Play.Yearly, StoredPurchaseState.Active, Play.Now.AddMinutes(-20));
+        var noExpiry = AddRow(Play.Yearly, StoredPurchaseState.Active, Play.Now.AddHours(-80));
+        play.Subscriptions[noExpiry] = Play.Subscription(Play.NewInstall()) with { LineItems = [new PlayLineItem(Play.Yearly, null, null)] };
+        var acked = AddRow(Play.Yearly, StoredPurchaseState.Active, Play.Now.AddHours(-1));
+        play.Subscriptions[acked] = Play.Subscription(Play.NewInstall());
+        var expired = AddRow(Play.Yearly, StoredPurchaseState.Active, Play.Now.AddHours(-1));
+        play.Subscriptions[expired] = Play.Subscription(Play.NewInstall(), PlaySubscriptionState.Expired, expiry: Play.Now.AddDays(-1));
+
+        await Job.RunOnceAsync(CancellationToken.None);
+
+        Assert.Equal(Play.Now.AddHours(1), store.Rows[pending].NextAttemptAt);
+        Assert.Equal(Play.Now.AddHours(2), store.Rows[retired].NextAttemptAt);
+        Assert.Equal(Play.Now.AddMinutes(15), store.Rows[notFound].NextAttemptAt);
+        Assert.Equal(Play.Now.AddHours(24), store.Rows[noExpiry].NextAttemptAt);
+        Assert.Equal(StoredPurchaseState.Active, store.Rows[noExpiry].State); // L-1: an unknown read is never written
+
+        // Finished rows leave the queue without a stamp.
+        Assert.Null(store.Rows[acked].NextAttemptAt);
+        Assert.Null(store.Rows[expired].NextAttemptAt);
+        Assert.Equal(4, store.Deferred);
+    }
+
+    [Fact]
+    public async Task ARowLeftByAnExhaustedBudgetIsNotDeferred()
+    {
+        var first = AddRow(Play.Yearly, StoredPurchaseState.Active, Play.Now.AddHours(-3));
+        play.Subscriptions[first] = Play.Subscription(Play.NewInstall());
+        play.Fail(PlayApi.SubscriptionGet, PlayCallOutcome.BudgetDenied);
+
+        await Job.RunOnceAsync(CancellationToken.None);
+
+        Assert.Null(store.Rows[first].NextAttemptAt);
+        Assert.Equal(0, store.Deferred);
+    }
+
+    [Fact]
+    public async Task ARowPastTheRefundAgeNoLongerPages()
+    {
+        AddRow(Play.Yearly, StoredPurchaseState.Active, Play.Now.AddHours(-73));
+        var overdue = AddRow(Play.Yearly, StoredPurchaseState.Active, Play.Now.AddHours(-50));
+
+        await Job.RunOnceAsync(CancellationToken.None);
+
+        Assert.Equal((0L, 1L), (telemetry.Unacked!.Value.Fresh, telemetry.Unacked.Value.Overdue));
+        Assert.Equal([store.Rows[overdue].Id], telemetry.Alerts);
+    }
+
     private string AddRow(string productId, StoredPurchaseState state, DateTimeOffset createdAt)
     {
         var token = Play.NewToken();
-        store.Rows[token] = new MemorySweepStore.Row(Guid.NewGuid(), productId, state, false, createdAt);
+        store.Rows[token] = new MemorySweepStore.Row(Guid.NewGuid(), productId, state, false, createdAt, null);
         return token;
     }
 
-    /// <summary>The sweeper store over a dictionary, with the store's listing and summary rules.</summary>
+    /// <summary>The sweeper store over a dictionary, with the store's listing, deferral and summary rules.</summary>
     private sealed class MemorySweepStore : IPlayAckSweepStore
     {
         public Dictionary<string, Row> Rows { get; } = new(StringComparer.Ordinal);
@@ -165,15 +280,26 @@ public class PlayAckSweepJobTests
 
         public int Applied { get; private set; }
 
+        public int Deferred { get; private set; }
+
         public Task<IAsyncDisposable?> TryLockAsync(CancellationToken cancellationToken) =>
             Task.FromResult<IAsyncDisposable?>(LockHeldElsewhere ? null : new Held());
 
-        public Task<IReadOnlyList<UnackedPurchase>> ListAsync(int limit, CancellationToken cancellationToken) =>
+        public Task<IReadOnlyList<UnackedPurchase>> ListAsync(DateTimeOffset now, int limit, CancellationToken cancellationToken) =>
             Task.FromResult<IReadOnlyList<UnackedPurchase>>([.. Rows
                 .Where(r => !r.Value.Acknowledged && (r.Value.State == StoredPurchaseState.Pending || PlayStateMapping.IsAckable(r.Value.State)))
-                .OrderBy(r => r.Value.CreatedAt)
+                .Where(r => PlayAckSweepSchedule.IsDue(r.Value.NextAttemptAt, now))
+                .OrderBy(r => PlayAckSweepSchedule.SortKey(r.Value.State, r.Value.NextAttemptAt, r.Value.CreatedAt))
                 .Take(limit)
                 .Select(r => new UnackedPurchase(r.Value.Id, r.Value.ProductId, new Sensitive<string>(r.Key), r.Value.State, r.Value.CreatedAt))]);
+
+        public Task DeferAsync(Guid id, DateTimeOffset nextAttemptAt, CancellationToken cancellationToken)
+        {
+            Deferred++;
+            var entry = Rows.Single(r => r.Value.Id == id);
+            Rows[entry.Key] = entry.Value with { NextAttemptAt = nextAttemptAt };
+            return Task.CompletedTask;
+        }
 
         public Task<bool> ApplyAsync(SweepUpdate update, CancellationToken cancellationToken)
         {
@@ -185,14 +311,16 @@ public class PlayAckSweepJobTests
 
         public Task<UnackedSummary> SummarizeAsync(DateTimeOffset now, int maxOverdue, CancellationToken cancellationToken)
         {
-            var ackable = Rows.Values.Where(r => !r.Acknowledged && PlayStateMapping.IsAckable(r.State)).ToList();
+            var ackable = Rows.Values
+                .Where(r => !r.Acknowledged && PlayStateMapping.IsAckable(r.State) && r.CreatedAt > now - PlayAckSweepSchedule.RefundAge)
+                .ToList();
             var cutoff = now - PlayAckSweepJob.AlertAge;
             var overdue = ackable.Where(r => r.CreatedAt <= cutoff).OrderBy(r => r.CreatedAt).ToList();
             var oldest = ackable.Count == 0 ? TimeSpan.Zero : now - ackable.Min(r => r.CreatedAt);
             return Task.FromResult(new UnackedSummary(ackable.Count - overdue.Count, overdue.Count, oldest, [.. overdue.Take(maxOverdue).Select(r => r.Id)]));
         }
 
-        public sealed record Row(Guid Id, string ProductId, StoredPurchaseState State, bool Acknowledged, DateTimeOffset CreatedAt);
+        public sealed record Row(Guid Id, string ProductId, StoredPurchaseState State, bool Acknowledged, DateTimeOffset CreatedAt, DateTimeOffset? NextAttemptAt);
 
         private sealed class Held : IAsyncDisposable
         {

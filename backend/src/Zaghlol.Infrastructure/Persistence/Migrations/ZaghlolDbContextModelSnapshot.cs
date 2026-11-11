@@ -1021,6 +1021,10 @@ namespace Zaghlol.Infrastructure.Persistence.Migrations
                         .HasColumnType("text")
                         .HasColumnName("account_linked_by");
 
+                    b.Property<DateTimeOffset?>("AckNextAttemptAt")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("ack_next_attempt_at");
+
                     b.Property<bool>("Acknowledged")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("boolean")

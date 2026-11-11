@@ -5,8 +5,9 @@ public sealed record AckSweepRun(bool Ran, int Rows, int Acknowledged, int Faile
 
 /// <summary>
 /// The acknowledge sweeper (T-130 design note §3, BR-GOLD-06): Google refunds a purchase not acknowledged within 3 days, so
-/// every 15 minutes one sweeper (advisory lock across replicas) re-reads up to 200 unacknowledged rows from Play, oldest first,
-/// and acknowledges those Play reports as purchased or active. Each row is read and acknowledged outside any transaction, then
+/// every 15 minutes one sweeper (advisory lock across replicas) re-reads up to 200 due unacknowledged rows from Play, ackable
+/// before pending (<see cref="PlayAckSweepSchedule"/>), and acknowledges those Play reports as purchased or active. A row it can't
+/// finish (still pending, skipped, failed) is deferred with a backoff, so stuck rows never starve newer ones (security M-1). Each row is read and acknowledged outside any transaction, then
 /// written in one short update under the monotonic <c>last_verified_at</c> guard. A cancelled, refunded or expired purchase
 /// is recorded and never acknowledged; a pending one waits. An exhausted <c>ack</c> budget ends the run early; the next run
 /// continues. Then the unacked gauge is recomputed and every ackable row 48 h or older raises the alert.
@@ -36,7 +37,7 @@ public sealed class PlayAckSweepJob(
 
         await using (held)
         {
-            var rows = await store.ListAsync(BatchSize, cancellationToken);
+            var rows = await store.ListAsync(clock.GetUtcNow(), BatchSize, cancellationToken);
             int acked = 0, failed = 0;
             var exhausted = false;
             foreach (var row in rows)
@@ -50,6 +51,11 @@ public sealed class PlayAckSweepJob(
 
                 acked += outcome == RowOutcome.Acknowledged ? 1 : 0;
                 failed += outcome == RowOutcome.Failed ? 1 : 0;
+                if (outcome is RowOutcome.Waiting or RowOutcome.Failed or RowOutcome.Skipped)
+                {
+                    // Behind the due rows until then; never re-picked at the head of every run.
+                    await store.DeferAsync(row.Id, PlayAckSweepSchedule.NextAttemptAt(row.CreatedAt, clock.GetUtcNow()), cancellationToken);
+                }
             }
 
             var now = clock.GetUtcNow();
@@ -138,7 +144,7 @@ public sealed class PlayAckSweepJob(
         }
 
         await store.ApplyAsync(new SweepUpdate(row.Id, state, read.ExpiresAt, acknowledged, read.LinkedPurchaseToken, readAt), cancellationToken);
-        return outcome;
+        return outcome == RowOutcome.Updated && PlayAckSweepSchedule.StillWaiting(state, acknowledged) ? RowOutcome.Waiting : outcome;
     }
 
     private async Task<Read> ReadAsync(PlayProductKind kind, UnackedPurchase row, DateTimeOffset now, CancellationToken cancellationToken)
@@ -175,7 +181,12 @@ public sealed class PlayAckSweepJob(
 
     private enum RowOutcome
     {
+        /// <summary>Written, and out of the queue (acknowledged, or a state that is never acknowledged).</summary>
         Updated,
+
+        /// <summary>Written, still unacknowledged and pending or ackable: deferred.</summary>
+        Waiting,
+
         Acknowledged,
         Failed,
         Skipped,

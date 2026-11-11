@@ -42,14 +42,19 @@ public static partial class PlayStateMapping
 
     public static bool IsWellFormedOrderId(Sensitive<string> orderId) => orderId.Reveal() is { } text && OrderId().IsMatch(text);
 
+    /// <remarks>
+    /// An active, in-grace or cancelled subscription without a readable <c>expiryTime</c> is <see cref="PlayReadOutcome.Unknown"/>
+    /// (502, nothing written): a subscription row with a NULL expiry would look like a lifetime purchase (T-130 security L-1).
+    /// </remarks>
     public static MappedPlayState Map(PlaySubscriptionState state, DateTimeOffset? expiryTime, DateTimeOffset now) => state switch
     {
-        PlaySubscriptionState.Active => Known(StoredPurchaseState.Active, VerifyStatus.Active),
-        PlaySubscriptionState.InGracePeriod => Known(StoredPurchaseState.InGrace, VerifyStatus.Active),
+        PlaySubscriptionState.Active when expiryTime is not null => Known(StoredPurchaseState.Active, VerifyStatus.Active),
+        PlaySubscriptionState.InGracePeriod when expiryTime is not null => Known(StoredPurchaseState.InGrace, VerifyStatus.Active),
 
         // Cancelled but paid until expiryTime: keeps Gold until then (backend-api §4.3 step 3, Lead decision 2026-11-11).
         PlaySubscriptionState.Canceled when expiryTime is { } expiry && expiry > now => Known(StoredPurchaseState.CanceledActive, VerifyStatus.Active),
-        PlaySubscriptionState.Canceled => Known(StoredPurchaseState.Expired, VerifyStatus.Expired),
+        PlaySubscriptionState.Canceled when expiryTime is not null => Known(StoredPurchaseState.Expired, VerifyStatus.Expired),
+        PlaySubscriptionState.Active or PlaySubscriptionState.InGracePeriod or PlaySubscriptionState.Canceled => new(null, VerifyStatus.Invalid, PlayReadOutcome.Unknown),
         PlaySubscriptionState.Pending => Known(StoredPurchaseState.Pending, VerifyStatus.Pending),
         PlaySubscriptionState.OnHold => Known(StoredPurchaseState.OnHold, VerifyStatus.Expired),
         PlaySubscriptionState.Paused => Known(StoredPurchaseState.Paused, VerifyStatus.Expired),

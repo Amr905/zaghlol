@@ -110,6 +110,8 @@ CREATE TABLE purchases (
   state text NOT NULL CHECK (state IN ('pending','active','in_grace','on_hold','paused','canceled_active','expired','refunded','revoked')),
   expires_at timestamptz,                      -- NULL for lifetime
   acknowledged boolean NOT NULL DEFAULT false, -- Google; must be true within 3 days (BR-GOLD-06)
+  ack_next_attempt_at timestamptz,             -- T-130 M-1: the ack sweeper defers a row it can't finish (pending, unknown
+                                               -- product/state, Play error) until then; NULL = never deferred. Only worker_rw writes it
   environment text NOT NULL CHECK (environment IN ('production','sandbox')),
   obfuscated_install_ref text,                 -- Play obfuscatedAccountId / Apple appAccountToken = hash(install_id)
   last_verified_at timestamptz NOT NULL,

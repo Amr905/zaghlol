@@ -32,6 +32,9 @@ public class PurchasesHostFixture : InstallsHostFixture
 
     public PlayWireMock Play { get; } = new();
 
+    /// <summary>The grant step: grants for the installs a test opts in, nothing for the rest (like the T-130 placeholder).</summary>
+    public GrantingVerifyGrant Grant { get; } = new();
+
     public ConcurrentQueue<(string Instrument, long Value, Dictionary<string, string?> Tags)> Measurements { get; } = new();
 
     protected override IReadOnlyDictionary<string, string?> Settings
@@ -147,6 +150,7 @@ public class PurchasesHostFixture : InstallsHostFixture
 
     protected override void ConfigureServices(IServiceCollection services)
     {
+        services.AddSingleton<IVerifyGrant>(Grant);
         services.AddZaghlolGooglePlay();
         services.AddZaghlolPurchaseVerification();
     }

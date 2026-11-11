@@ -105,8 +105,10 @@ public sealed record VerifyGrantResult(Sensitive<string>? EntitlementToken, bool
 }
 
 /// <summary>
-/// Seat at verify and the signed entitlement (T-132 through T-184). Called only for a verified purchase that was written
-/// (<see cref="StoreVerificationResult.PurchaseId"/> set); it must never turn a valid payment into an error (BR-GOLD-06).
+/// Seat at verify and the signed entitlement (T-132 through T-184). Called only for an active purchase that was written
+/// (<see cref="StoreVerificationResult.Status"/> is <see cref="VerifyStatus.Active"/>, which includes cancelled-but-paid, and
+/// <see cref="StoreVerificationResult.PurchaseId"/> is set); pending, expired and refunded results never reach it. It must
+/// never turn a valid payment into an error (BR-GOLD-06).
 /// </summary>
 public interface IVerifyGrant
 {
