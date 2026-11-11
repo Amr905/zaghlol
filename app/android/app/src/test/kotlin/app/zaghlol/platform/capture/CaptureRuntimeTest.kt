@@ -1,5 +1,10 @@
 package app.zaghlol.platform.capture
 
+import app.zaghlol.platform.capture.inbox.FakeInboxAccess
+import app.zaghlol.platform.capture.inbox.FakeInboxSource
+import app.zaghlol.platform.capture.inbox.InboxReader
+import app.zaghlol.platform.capture.inbox.InboxRow
+import app.zaghlol.platform.capture.inbox.InboxTestConfig
 import app.zaghlol.platform.ingest.CycleOutcome
 import app.zaghlol.platform.ingest.FakeMain
 import app.zaghlol.platform.ingest.FakeStarter
@@ -231,6 +236,55 @@ class CaptureRuntimeTest {
         run.await()
         main.flush()
         assertEquals("lingering: no close before the linger ends", listOf("drain"), h.log)
+    }
+
+    /**
+     * T-042 wiring (both T-042 reviews): the UI engine's host answers
+     * queryInbox through the real reader; the headless engine's host has none
+     * (NOT_AVAILABLE, FU-088) and never even builds one.
+     */
+    @Test
+    fun theUiHostGetsTheInboxReaderAndTheHeadlessHostAnswersNotAvailable() {
+        val now = 1_800_000_000_000L
+        var readersBuilt = 0
+        val rows = (1..3L).map { InboxRow(it, "NBE", now - 1_000, "Purchase EGP $it.00 at SYNTH SHOP") }
+        var headlessHostFactory: (() -> AndroidCaptureHost)? = null
+        val rt = CaptureRuntime.create(
+            CaptureSeams(
+                noBackupDir = dir, appVersion = { 1 }, main = main, queue = queue, device = FakeDevice(),
+                guard = { throw IllegalStateException("not in JVM tests") },
+                headlessStarter = { newHost -> headlessHostFactory = newHost; starter },
+                cipher = SoftwareSpoolCipher(),
+                keyCreatedAtMs = { null },
+                uiInbox = {
+                    readersBuilt++
+                    InboxReader(FakeInboxSource(rows), FakeInboxAccess(), { InboxTestConfig.guard() }, { null }, { now })
+                },
+            ),
+        )
+        val query = InboxQuery(now - 86_400_000L * 30, listOf("NBE"), null, 50)
+
+        // Headless: built through the runtime's own factory.
+        try {
+            headlessHostFactory!!().queryInbox(query)
+            fail("the headless host must not read the inbox")
+        } catch (e: CaptureApiError) {
+            assertEquals("NOT_AVAILABLE", e.code)
+        }
+        assertEquals("no reader for the headless host", 0, readersBuilt)
+
+        // UI: the Pigeon handler registered by attachUi delegates to the reader.
+        val m = RecordingMessenger()
+        main.onMain { rt.attachUi(Any(), m) }
+        assertEquals(1, readersBuilt)
+        val handler = m.handlers["dev.flutter.pigeon.zaghlol.AndroidCaptureHostApi.queryInbox"]!!
+        val codec = AndroidCaptureHostApi.codec
+        val msg = codec.encodeMessage(listOf(query))!!.also { it.rewind() }
+        var reply: ByteBuffer? = null
+        handler.onMessage(msg) { reply = it }
+        reply!!.rewind()
+        val page = (codec.decodeMessage(reply) as List<*>)[0] as InboxPage
+        assertEquals(listOf("1", "2", "3"), page.items.map { it.providerId })
     }
 
     @Test

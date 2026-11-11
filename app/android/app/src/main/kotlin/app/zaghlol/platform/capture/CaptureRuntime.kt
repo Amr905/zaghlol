@@ -7,6 +7,8 @@ import android.os.Build
 import android.os.Handler
 import android.os.Looper
 import android.os.SystemClock
+import app.zaghlol.platform.capture.inbox.InboxReader
+import app.zaghlol.platform.capture.inbox.InboxReaders
 import app.zaghlol.platform.guard.GuardRuntime
 import app.zaghlol.platform.ingest.DrainEnvironment
 import app.zaghlol.platform.ingest.DrainLoop
@@ -63,6 +65,8 @@ class CaptureSeams(
     val keyCreatedAtMs: () -> Long? = ProductionClocks.keyCreatedAtMs,
     val monoClockMs: () -> Long = ProductionClocks.monoClockMs,
     val pause: suspend (Long) -> Unit = { delay(it) },
+    /** T-042: the UI engine's inbox reader (`InboxReaders.forUiEngine`); never given to the headless host (FU-088). */
+    val uiInbox: () -> InboxReader? = { null },
 )
 
 /**
@@ -95,6 +99,7 @@ class CaptureRuntime internal constructor(seams: CaptureSeams) {
     val main: MainThread = seams.main
     private val monoClockMs = seams.monoClockMs
     private val guardFactory = seams.guard
+    private val uiInbox = seams.uiInbox
 
     /** The Capture Guard (T-038), loaded on first use. */
     val guard: GuardRuntime by lazy { guardFactory() }
@@ -185,7 +190,7 @@ class CaptureRuntime internal constructor(seams: CaptureSeams) {
     internal fun attachUi(key: Any, messenger: BinaryMessenger) {
         headless.shutdown()
         uiHost?.detach()
-        // T-042 wires its inbox reader and T-040 the Guard writer/state here.
+        // T-040 wires the Guard writer/state here.
         val host = newHost(headless = false)
         uiHost = host
         uiKey = key
@@ -206,7 +211,7 @@ class CaptureRuntime internal constructor(seams: CaptureSeams) {
 
     /**
      * A capture host for one engine. Headless: no inbox reader and no Guard
-     * writer (FU-088), so those answer `NOT_AVAILABLE`.
+     * writer (FU-088), so those answer `NOT_AVAILABLE`. UI: T-042's reader.
      */
     private fun newHost(headless: Boolean): AndroidCaptureHost = AndroidCaptureHost(
         engineId = engineIds.getAndIncrement(),
@@ -219,6 +224,7 @@ class CaptureRuntime internal constructor(seams: CaptureSeams) {
         device = device,
         trace = { trace },
         monoClockMs = monoClockMs,
+        inbox = if (headless) null else uiInbox(),
     )
 
     private fun environment(pauseFn: suspend (Long) -> Unit) = object : DrainEnvironment {
@@ -267,6 +273,7 @@ class CaptureRuntime internal constructor(seams: CaptureSeams) {
                 queue = WorkManagerIngestScheduler(app),
                 device = AndroidCaptureDevice(app),
                 guard = { GuardRuntime.get(app) },
+                uiInbox = { InboxReaders.forUiEngine(app) },
                 headlessStarter = { newHost ->
                     FlutterHeadlessStarter(app, handler, newHost) { ref.get()?.trace ?: IngestTrace.NONE }
                 },

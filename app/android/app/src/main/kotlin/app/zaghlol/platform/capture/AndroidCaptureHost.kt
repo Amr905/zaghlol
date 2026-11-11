@@ -1,5 +1,6 @@
 package app.zaghlol.platform.capture
 
+import app.zaghlol.platform.capture.inbox.InboxReader
 import app.zaghlol.platform.ingest.IngestTrace
 import app.zaghlol.platform.ingest.safely
 import app.zaghlol.platform.spool.CaptureStatusStore
@@ -49,6 +50,8 @@ class AndroidCaptureHost(
     private val trace: () -> IngestTrace = { IngestTrace.NONE },
     /** Monotonic ms for the drain scan budget (`SystemClock.elapsedRealtime` in production). */
     private val monoClockMs: () -> Long = { System.nanoTime() / 1_000_000 },
+    /** T-042 inbox reader: `InboxReaders.forUiEngine` on the UI engine, null on the headless one. */
+    private val inbox: InboxReader? = null,
 ) : AndroidCaptureHostApi {
 
     /** Ids this host's drain returned and that are not yet acked. */
@@ -81,8 +84,12 @@ class AndroidCaptureHost(
         }
     }
 
-    // T-042.
-    override fun queryInbox(query: InboxQuery): InboxPage = guarded { throw notAvailable() }
+    /**
+     * T-042: allowlisted senders' inbox rows, paged. UI engine only: the
+     * headless host has no [inbox] (`NOT_AVAILABLE`), so background work never
+     * reads the inbox (FU-088).
+     */
+    override fun queryInbox(query: InboxQuery): InboxPage = guarded { need(inbox).query(query) }
 
     /**
      * Oldest first, at most [max] (clamped to 1..[MAX_DRAIN]). Returns an empty
