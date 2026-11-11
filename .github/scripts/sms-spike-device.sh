@@ -199,10 +199,15 @@ instr() {
   tr -d '\r' < "$OUT/it-$name.txt" | grep -qE "^OK \([0-9]+ tests?\)"
 }
 KILL=app.zaghlol.platform.spool.SpoolKillRecoveryTest
+# skipped <name>: assumption failures (am instrument counts them inside "OK (n tests)").
+skipped() { tr -d '\r' < "$OUT/it-$1.txt" | grep -c "^INSTRUMENTATION_STATUS_CODE: -4" || true; }
 instr spool -e package app.zaghlol.platform.spool -e notClass "$KILL" || fail "spool instrumented tests failed (it-spool.txt)"
-grep -qE "^OK \(0 tests\)" "$OUT/it-spool.txt" && fail "no spool instrumented test ran"
-if instr guard -e package app.zaghlol.platform.guard; then echo "guard instrumented: ok"
-elif tr -d '\r' < "$OUT/it-guard.txt" | grep -qE "No tests found|OK \(0 tests\)"; then echo "guard instrumented: none yet (T-038)"
+tr -d '\r' < "$OUT/it-spool.txt" | grep -qE "^OK \(0 tests\)" && fail "no spool instrumented test ran"
+echo "spool instrumented: $(skipped spool) skipped"
+[ "$(skipped spool)" = 0 ] || fail "a spool instrumented test was skipped by an assumption (it-spool.txt)"
+instr guard -e package app.zaghlol.platform.guard && guard_ok=1 || guard_ok=0
+if tr -d '\r' < "$OUT/it-guard.txt" | grep -qE "No tests found|^OK \(0 tests\)"; then echo "guard instrumented: none yet (T-038)"
+elif [ "$guard_ok" = 1 ]; then echo "guard instrumented: ok, $(skipped guard) skipped"
 else fail "guard instrumented tests failed (it-guard.txt)"; fi
 instr share -e class app.zaghlol.platform.share.ShareIntakeInstrumentedTest || echo "::warning::T-060 ShareIntakeInstrumentedTest failed on API $API (it-share.txt); reported to the Lead, not a T-039 gate"
 # AC1 for real: phase write halts the process between fsync and rename of entry 21.
@@ -213,6 +218,7 @@ tmps=$(grep -cE '^[0-9A-Z]{26}\.bin\.tmp$' "$OUT/it-kill-ls.txt" || true)
 echo "after halt: $bins entries, $tmps tmp"
 [ "$bins" = 20 ] && [ "$tmps" = 1 ] || fail "after the halt expected 20 entries and 1 tmp, found $bins and $tmps"
 instr kill-read -e class "$KILL#phaseRead" -e spoolPhase read || fail "the read phase after the halt failed (it-kill-read.txt)"
+[ "$(skipped kill-read)" = 0 ] || fail "the read phase was skipped (spoolPhase argument not received)"
 {
   echo
   echo "### Instrumented (T-039), API $API"
