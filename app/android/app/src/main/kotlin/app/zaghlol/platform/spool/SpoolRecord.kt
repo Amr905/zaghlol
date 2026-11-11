@@ -1,4 +1,4 @@
-package app.zaghlol.spike.sms
+package app.zaghlol.platform.spool
 
 import java.io.ByteArrayInputStream
 import java.io.ByteArrayOutputStream
@@ -22,9 +22,9 @@ class SpoolRecord(
     val simSlot: Int?,
     val guardInst: String?,
     val guardLast4: String?,
-    /** Spike only: receive stamp on the monotonic clock (t0). */
+    /** Diagnostic: receive stamp on the monotonic clock (t0); inside the ciphertext (T-039 section 3, FU-081). */
     val rxElapsedNs: Long,
-    /** Spike only: `Settings.Global.BOOT_COUNT` at receive; -1 unknown. */
+    /** Diagnostic: `Settings.Global.BOOT_COUNT` at receive; -1 unknown. */
     val bootCount: Int,
 ) {
     override fun toString(): String = "SpoolRecord(<redacted>)"

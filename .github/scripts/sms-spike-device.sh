@@ -17,6 +17,12 @@
 # the rows by the receive wall clock (enqueue → commit = FR-ING-A-01).
 # Results: $RUNNER_TEMP/sms-spike/{metrics.csv,broadcasts.txt,report.md}; the report rows go
 # into ADR-005 (emulator rows only; device rows come from T-008.md steps).
+# Instrumented suites (T-039 design note section 11): after the spike, the
+# devSms debug app + test APK replace the profile build and run the native
+# instrumented tests on the same emulator: spool (fatal), guard (T-038, fatal
+# once it exists), share (T-060, a warning until its owner makes it green),
+# then the two-phase kill test (AC1: a write phase halted between fsync and
+# rename of a 21st entry, a read phase in a new process).
 # Called as one line (android-emulator-runner runs `script` line by line).
 set -euo pipefail
 : "${DEVICE:?}" "${API:?}" "${RUNNER_TEMP:?}"
@@ -174,3 +180,44 @@ dart run tool/spike/latency_report.dart "$OUT/metrics.csv" "emu-api$API" "$OUT/b
 n=$(tail -n +2 "$OUT/metrics.csv" | grep -c . || true)
 [ "$n" -ge "$N" ] || fail "only $n messages were committed"
 rm -f "$OUT/logcat-all.txt" "$OUT/logcat-uid.txt" "$OUT/pkg.txt"
+
+# ---- Instrumented tests (T-039) --------------------------------------------
+RUNNER="$PKG.test/androidx.test.runner.AndroidJUnitRunner"
+(cd android && ./gradlew --no-daemon :app:assembleDevSmsDebug :app:assembleDevSmsDebugAndroidTest) > "$OUT/it-build.log" 2>&1 \
+  || { tail -n 60 "$OUT/it-build.log"; fail "instrumented test build failed"; }
+APP_APK=$(find build/app/outputs/apk/devSms/debug -name '*.apk' 2>/dev/null | head -n 1)
+TEST_APK=$(find build/app/outputs/apk/androidTest/devSms/debug -name '*.apk' 2>/dev/null | head -n 1)
+[ -n "$APP_APK" ] && [ -n "$TEST_APK" ] || { find build/app/outputs -name '*.apk'; fail "instrumented APKs not found"; }
+A uninstall "$PKG" > /dev/null 2>&1 || true  # the profile build's signature may differ
+A install -r -t -g "$APP_APK" > /dev/null
+A install -r -t "$TEST_APK" > /dev/null
+# instr <name> <am instrument args...>: output to $OUT/it-<name>.txt; returns 0 only on "OK (n tests)".
+instr() {
+  local name=$1; shift
+  sh_ am instrument -w "$@" "$RUNNER" > "$OUT/it-$name.txt" 2>&1 || true
+  tr -d '\r' < "$OUT/it-$name.txt" | grep -E "^(OK|FAILURES|Tests run|INSTRUMENTATION_RESULT: shortMsg|[0-9]+\))" | head -n 20 || true
+  tr -d '\r' < "$OUT/it-$name.txt" | grep -qE "^OK \([0-9]+ tests?\)"
+}
+KILL=app.zaghlol.platform.spool.SpoolKillRecoveryTest
+instr spool -e package app.zaghlol.platform.spool -e notClass "$KILL" || fail "spool instrumented tests failed (it-spool.txt)"
+grep -qE "^OK \(0 tests\)" "$OUT/it-spool.txt" && fail "no spool instrumented test ran"
+if instr guard -e package app.zaghlol.platform.guard; then echo "guard instrumented: ok"
+elif tr -d '\r' < "$OUT/it-guard.txt" | grep -qE "No tests found|OK \(0 tests\)"; then echo "guard instrumented: none yet (T-038)"
+else fail "guard instrumented tests failed (it-guard.txt)"; fi
+instr share -e class app.zaghlol.platform.share.ShareIntakeInstrumentedTest || echo "::warning::T-060 ShareIntakeInstrumentedTest failed on API $API (it-share.txt); reported to the Lead, not a T-039 gate"
+# AC1 for real: phase write halts the process between fsync and rename of entry 21.
+instr kill-write -e class "$KILL#phaseWrite" -e spoolPhase write && fail "the write phase finished instead of halting"
+runas ls no_backup/spool-it-kill > "$OUT/it-kill-ls.txt" 2>&1 || true
+bins=$(grep -cE '^[0-9A-Z]{26}\.bin$' "$OUT/it-kill-ls.txt" || true)
+tmps=$(grep -cE '^[0-9A-Z]{26}\.bin\.tmp$' "$OUT/it-kill-ls.txt" || true)
+echo "after halt: $bins entries, $tmps tmp"
+[ "$bins" = 20 ] && [ "$tmps" = 1 ] || fail "after the halt expected 20 entries and 1 tmp, found $bins and $tmps"
+instr kill-read -e class "$KILL#phaseRead" -e spoolPhase read || fail "the read phase after the halt failed (it-kill-read.txt)"
+{
+  echo
+  echo "### Instrumented (T-039), API $API"
+  for n in spool guard share kill-read; do
+    echo "- $n: $(tr -d '\r' < "$OUT/it-$n.txt" | grep -E "^(OK|FAILURES|Tests run)" | tr '\n' ' ')"
+  done
+  echo "- kill-write: halted with $bins entries + $tmps tmp on disk"
+} >> "$OUT/report.md"

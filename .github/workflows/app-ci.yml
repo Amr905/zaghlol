@@ -108,7 +108,7 @@ jobs:
       # used: every error is a code-only SecretStoreApiError).
       # T-016 (S-5): also stdout/stderr/dump, and core/db/schema.
       # T-017: also the DAOs, the frozen migration steps and the .drift DDL.
-      - name: no logging in key and database code (T-015, T-016, T-017)
+      - name: no logging in key, database and capture code (T-015, T-016, T-017, T-039)
         run: |
           set -o pipefail
           files=$(ls app/lib/core/db/*.dart app/lib/core/db/schema/*.dart app/lib/core/db/schema/*.drift \
@@ -119,6 +119,12 @@ jobs:
           # T-008: the SMS spike (Kotlin, except its code-only SpikeLog) and the
           # Dart ingestion engines must not log either.
           files="$files $(ls app/android/app/src/devSms/kotlin/app/zaghlol/spike/sms/*.kt app/lib/ingestion/*.dart | grep -v 'SpikeLog\.kt')"
+          # T-039 (design note section 9): the production spool, capture host and
+          # Capture Guard (T-038; the directory may not exist yet) never log.
+          # Generated Pigeon files are excluded.
+          ls app/android/app/src/main/kotlin/app/zaghlol/platform/spool/*.kt app/android/app/src/main/kotlin/app/zaghlol/platform/capture/AndroidCaptureHost.kt > /dev/null \
+            || { echo "::error::spool / capture host sources not found"; exit 1; }
+          files="$files $(find app/android/app/src/main/kotlin/app/zaghlol/platform/spool app/android/app/src/main/kotlin/app/zaghlol/platform/capture app/android/app/src/main/kotlin/app/zaghlol/platform/guard -name '*.kt' ! -name '*.g.kt' 2>/dev/null || true)"
           [ -n "$files" ] || { echo "::error::no key files found"; exit 1; }
           if grep -nE '\b(print|debugPrint|log|developer\.log|dump)\(|\b(stdout|stderr)\b|\bLog\.[a-z]+\(|println\(|Timber|NSLog|os_log|Logger\(|logStatements: *true' $files; then
             echo "::error::logging call in key code"
@@ -236,14 +242,22 @@ jobs:
             echo "::error::no Kotlin <testcase> found in Gradle results"
             exit 1
           fi
+          # T-039: the spool and capture host JVM tests (moved from the spike) run in every variant.
+          n=$(cat app/build/app/test-results/testDevNoSmsDebugUnitTest/*.xml 2>/dev/null | grep -cE '<testcase [^>]*classname="app\.zaghlol\.platform\.(spool|capture)\.' || true)
+          echo "spool + capture kotlin testcases: $n"
+          if [ "$n" -lt 75 ]; then
+            echo "::error::expected the T-039 spool tests in testDevNoSmsDebugUnitTest, found $n"
+            exit 1
+          fi
           # T-008: the SMS spike's JVM tests live in src/testDevSms.
           if ! grep -E "^> Task :app:testDevSmsDebugUnitTest$" app/gradle-test.log; then
             echo "::error::testDevSmsDebugUnitTest did not execute"
             exit 1
           fi
-          n=$(cat app/build/app/test-results/testDevSmsDebugUnitTest/*.xml 2>/dev/null | grep -c "<testcase " || true)
-          echo "devSms kotlin testcases: $n"
-          if [ "$n" -lt 40 ]; then
+          # T-039 moved the spool tests to src/test; count the spike's own tests only.
+          n=$(cat app/build/app/test-results/testDevSmsDebugUnitTest/*.xml 2>/dev/null | grep -cE '<testcase [^>]*classname="app\.zaghlol\.spike\.' || true)
+          echo "devSms spike kotlin testcases: $n"
+          if [ "$n" -lt 45 ]; then
             echo "::error::expected the T-008 spike tests in testDevSmsDebugUnitTest, found $n"
             exit 1
           fi

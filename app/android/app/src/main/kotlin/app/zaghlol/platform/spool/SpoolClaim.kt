@@ -1,7 +1,7 @@
-package app.zaghlol.spike.sms
+package app.zaghlol.platform.spool
 
 /**
- * Process-wide drain claim (design note section 4): spool entries are handed
+ * Process-wide drain claim (T-008 design note section 4): spool entries are handed
  * to one engine at a time, so the UI and headless engines never process the
  * same entry concurrently. The claim belongs to the engine whose host drained
  * last; it is released when that engine acks everything it drained, when the

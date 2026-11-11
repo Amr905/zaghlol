@@ -8,6 +8,12 @@ import android.os.SystemClock
 import android.provider.Settings
 import app.zaghlol.R
 import app.zaghlol.platform.capture.CaptureEventsApi
+import app.zaghlol.platform.capture.IngestScheduler
+import app.zaghlol.platform.spool.CaptureStatusStore
+import app.zaghlol.platform.spool.KeystoreSpoolCipher
+import app.zaghlol.platform.spool.SpoolClaim
+import app.zaghlol.platform.spool.SpoolKey
+import app.zaghlol.platform.spool.SpoolStore
 import io.flutter.plugin.common.BinaryMessenger
 import java.io.File
 import java.util.concurrent.Executors
@@ -21,7 +27,14 @@ import java.util.concurrent.atomic.AtomicLong
 class SpikeRuntime private constructor(context: Context) {
     val app: Context = context.applicationContext
     val clockNs: () -> Long = SystemClock::elapsedRealtimeNanos
-    val store = SpoolStore(File(app.noBackupFilesDir, "spool"), KeystoreSpoolCipher())
+    val status = CaptureStatusStore(File(app.noBackupFilesDir, "capture/status.bin"), KeystoreSpoolCipher())
+    val store = SpoolStore(
+        dir = File(app.noBackupFilesDir, "spool"),
+        cipher = KeystoreSpoolCipher(),
+        status = status,
+        keyCreatedAtMs = SpoolKey::creationDateMs,
+        monoClockMs = SystemClock::elapsedRealtime,
+    )
     val claim = SpoolClaim(clock = SystemClock::elapsedRealtime)
     val guard = SpikeGuard(listOfNotNull(app.getString(R.string.spike_tester_sender).takeIf { it.isNotBlank() }))
     val scheduler: IngestScheduler = WorkManagerScheduler(app)

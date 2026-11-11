@@ -4,6 +4,7 @@ import android.content.ComponentCallbacks2
 import android.content.res.Configuration
 import app.zaghlol.platform.capture.AndroidCaptureHostApi
 import app.zaghlol.platform.keys.SecretStoreRegistration
+import app.zaghlol.platform.spool.UlidGenerator
 import com.github.dart_lang.jni.JniPlugin
 import com.github.dart_lang.jni_flutter.JniFlutterPlugin
 import io.flutter.FlutterInjector

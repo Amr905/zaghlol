@@ -1,5 +1,9 @@
 package app.zaghlol.spike.sms
 
+import app.zaghlol.platform.capture.IngestScheduler
+import app.zaghlol.platform.spool.AdmissionClass
+import app.zaghlol.platform.spool.SpoolRecord
+import app.zaghlol.platform.spool.SpoolStore
 import java.util.concurrent.ExecutorService
 import java.util.concurrent.ScheduledExecutorService
 import java.util.concurrent.TimeUnit
@@ -35,11 +39,6 @@ object SmsAssembler {
     }
 }
 
-/** Enqueues the expedited ingestion work. */
-fun interface IngestScheduler {
-    fun enqueue()
-}
-
 /**
  * The receiver's work after `goAsync()` (design note section 2): Guard, spool
  * write, enqueue. No engine, no parse, no DB.
@@ -71,7 +70,7 @@ class SmsIntake(
                         bootCount = stamp.bootCount,
                     )
                     val result = try {
-                        store.write(record)
+                        store.write(record, AdmissionClass.PRIORITY) // spike Guard: allowlisted senders only
                     } catch (_: Exception) {
                         SpikeLog.e(SpikeLog.Code.SPOOL_WRITE_FAILED)
                         null
@@ -82,7 +81,7 @@ class SmsIntake(
                             metrics?.spooled(result.id, stamp.elapsedNs, nanoClock(), stamp.wallMs)
                             SpikeLog.e(SpikeLog.Code.SPOOL_WRITTEN, (nanoClock() - stamp.elapsedNs) / 1_000_000)
                         }
-                        SpoolStore.WriteResult.Full -> SpikeLog.e(SpikeLog.Code.SPOOL_FULL)
+                        is SpoolStore.WriteResult.Refused -> SpikeLog.e(SpikeLog.Code.SPOOL_FULL)
                         null -> Unit
                     }
                 }
