@@ -19,12 +19,14 @@ import 'dart:convert';
 
 import 'package:crypto/crypto.dart' show sha256;
 import 'package:zaghlol_domain/zaghlol_domain.dart';
-import 'package:zaghlol_parsing/zaghlol_parsing.dart';
+// T-075's `CategorySource` is mapped to the stored one by code.
+import 'package:zaghlol_parsing/zaghlol_parsing.dart' hide CategorySource;
 
 import '../../../core/db/daos/review_items_dao.dart' show ReviewKind;
 import '../../../core/db/db_errors.dart';
 import '../../accounts/domain/account.dart';
 import '../../accounts/domain/accounts_repository.dart';
+import '../../categorization/domain/categorize_input.dart';
 import '../../transactions/domain/transaction.dart';
 import '../domain/body_hash.dart';
 import '../domain/ingest_policy.dart';
@@ -69,7 +71,7 @@ final class IngestRawMessages {
     required this._pipeline,
     required this._guardBase,
     required this._accounts,
-    required this._categorizer,
+    required this._newCategorizer,
     required this._newId,
     IngestClock? clock,
     LocalZone? zone,
@@ -85,7 +87,7 @@ final class IngestRawMessages {
   final ParsingPipeline _pipeline;
   final GuardConfigSource _guardBase;
   final AccountsRepository _accounts;
-  final Categorizer _categorizer;
+  final CategorizerFactory _newCategorizer;
   final IngestIdGenerator _newId;
   final IngestClock _now;
   final LocalZone _zone;
@@ -119,6 +121,8 @@ final class IngestRawMessages {
 
     final state = _BatchState();
     try {
+      // §8: one categorizer per batch, made before BEGIN.
+      final categorizer = await _newCategorizer();
       await _store.inWriteTransaction(() async {
         final ctx = await _store.readContext();
         state.paydayDay = paydayDayOf(ctx.paydayDay);
@@ -127,7 +131,12 @@ final class IngestRawMessages {
         for (final p in prepared) {
           if (state.outcomes.containsKey(p.m.deliveryId)) continue;
           final local = _Changes();
-          final outcome = await _one(p, ctx, guard, labels, local);
+          final outcome = await _one(
+            p,
+            _BatchScope(ctx, labels, categorizer),
+            guard,
+            local,
+          );
           state.outcomes[p.m.deliveryId] = outcome;
           state.changes.addAll(local);
         }
@@ -268,9 +277,8 @@ final class IngestRawMessages {
 
   Future<IngestOutcome> _one(
     _Prepared p,
-    BatchContext ctx,
+    _BatchScope b,
     _Guard? guard,
-    _LabelLanguage labels,
     _Changes local,
   ) async {
     final m = p.m;
@@ -321,9 +329,7 @@ final class IngestRawMessages {
       return const IngestDuplicate();
     }
     try {
-      return await _store.inSavepoint(
-        () => _persist(p, ctx, labels, local, result),
-      );
+      return await _store.inSavepoint(() => _persist(p, b, local, result));
     } on _RaceLost {
       local.clear();
       local.diag(IngestDiag.dupRace);
@@ -396,8 +402,7 @@ final class IngestRawMessages {
 
   Future<IngestOutcome> _persist(
     _Prepared p,
-    BatchContext ctx,
-    _LabelLanguage labels,
+    _BatchScope b,
     _Changes local,
     ParseResult result,
   ) async {
@@ -408,18 +413,18 @@ final class IngestRawMessages {
       case ParseUnrecognized():
         return _unrecognized(p, result);
       case ParseGeneric():
-        return _generic(p, ctx, local, result);
+        return _generic(p, b, local, result);
       case ParseParsed():
         return switch (dispositionOf(result.event, result.direction)) {
           CreateTxn(:final direction, :final status) => _parsed(
             p,
-            labels,
+            b,
             local,
             result,
             direction,
             status,
           ),
-          BalanceOnlyEvent() => _balanceOnly(p, labels, local, result),
+          BalanceOnlyEvent() => _balanceOnly(p, b.labels, local, result),
           DeferredEvent() => _deferred(p, result),
           UndirectedEvent() => _undirected(p, result),
         };
@@ -520,7 +525,7 @@ final class IngestRawMessages {
 
   Future<IngestOutcome> _parsed(
     _Prepared p,
-    _LabelLanguage labels,
+    _BatchScope b,
     _Changes local,
     ParseParsed r,
     TxnDirection direction,
@@ -544,6 +549,7 @@ final class IngestRawMessages {
     final (occurredMs, offsetMin) = _occurred(f.occurredAt);
     final dedupeKey = dedupeKeyOf(inst, direction, amount);
     final merchantNorm = _nonEmpty(f.merchant?.key);
+    final labels = b.labels;
 
     // (6) Dedupe 2, cross-channel.
     final candidates = await _store.crossChannelCandidates(
@@ -574,7 +580,7 @@ final class IngestRawMessages {
         templateId: r.templateId,
         templateVersion: r.templateVersion,
       );
-      await _attach(local, labels, target, r, occurredMs);
+      await _attach(local, b, target, r, occurredMs);
       local.diag(IngestDiag.mergeCrossChannel);
       return IngestMergedCrossChannel(target.id);
     }
@@ -617,7 +623,7 @@ final class IngestRawMessages {
         );
         if (newIsPending) {
           // A late pending message: the payment is already posted.
-          await _attach(local, labels, pick, r, occurredMs);
+          await _attach(local, b, pick, r, occurredMs);
         } else {
           await _settle(local, pick, r, amount, occurredMs);
         }
@@ -641,13 +647,13 @@ final class IngestRawMessages {
     );
     // (9) Categorize.
     final counterparty = _counterpartyOf(f.counterparty);
-    final category = await _categorizer.categorize(
-      CategorizeInput(
-        merchantNorm: merchantNorm,
-        counterparty: counterparty?.$2,
-        institution: inst,
-        direction: direction,
-      ),
+    final merchantRaw = _nonEmpty(f.merchant?.display);
+    final category = await _categorize(
+      b.categorizer,
+      merchantRaw: merchantRaw,
+      merchantNorm: merchantNorm,
+      counterpartyKind: counterparty?.$1,
+      counterpartyValue: counterparty?.$2,
     );
     // (10) Raw + transaction.
     final rawId = await _insertRaw(
@@ -671,7 +677,7 @@ final class IngestRawMessages {
         originalAmount: f.originalAmount,
         occurredAtMs: occurredMs,
         tzOffsetMin: offsetMin,
-        merchantRaw: _nonEmpty(f.merchant?.display),
+        merchantRaw: merchantRaw,
         merchantNorm: merchantNorm,
         catalogMerchantId: category.catalogMerchantId,
         counterpartyKind: counterparty?.$1,
@@ -735,7 +741,7 @@ final class IngestRawMessages {
   /// left it). The new message's balance is recorded either way.
   Future<void> _attach(
     _Changes local,
-    _LabelLanguage labels,
+    _BatchScope b,
     TxnCandidate target,
     ParseParsed r,
     int occurredMs,
@@ -750,7 +756,10 @@ final class IngestRawMessages {
           institution: r.institutionCode,
           last4: f.last4,
           currency: target.amount.currency,
-          label: labels.institutionLabel(_pipeline.registry, r.institutionCode),
+          label: b.labels.institutionLabel(
+            _pipeline.registry,
+            r.institutionCode,
+          ),
           kind: inferAccountKind(
             event: r.event.wire,
             balanceIsAvailableLimit: f.balanceIsAvailableLimit,
@@ -760,20 +769,22 @@ final class IngestRawMessages {
         if (card.id != target.accountId) moveTo = card.id;
       }
       final merchantNorm = _nonEmpty(f.merchant?.key);
+      final merchantRaw = _nonEmpty(f.merchant?.display);
       final gainsMerchant = target.merchantNorm == null && merchantNorm != null;
       final counterparty = target.counterpartyValue == null
           ? _counterpartyOf(f.counterparty)
           : null;
-      CategorizeResult? category;
+      _Category? category;
       if (target.categorySource == CategorySource.none &&
           (gainsMerchant || counterparty != null)) {
-        final c = await _categorizer.categorize(
-          CategorizeInput(
-            merchantNorm: target.merchantNorm ?? merchantNorm,
-            counterparty: target.counterpartyValue ?? counterparty?.$2,
-            institution: r.institutionCode,
-            direction: target.direction,
-          ),
+        final c = await _categorize(
+          b.categorizer,
+          merchantRaw: target.merchantRaw ?? merchantRaw,
+          merchantNorm: target.merchantNorm ?? merchantNorm,
+          counterpartyKind: target.counterpartyValue != null
+              ? target.counterpartyKind
+              : counterparty?.$1,
+          counterpartyValue: target.counterpartyValue ?? counterparty?.$2,
         );
         if (c.source != CategorySource.none) category = c;
       }
@@ -782,9 +793,7 @@ final class IngestRawMessages {
       final patch = TxnPatch(
         accountId: moveTo,
         originalAmount: target.originalAmount == null ? f.originalAmount : null,
-        merchantRaw: target.merchantRaw == null
-            ? _nonEmpty(f.merchant?.display)
-            : null,
+        merchantRaw: target.merchantRaw == null ? merchantRaw : null,
         merchantNorm: gainsMerchant ? merchantNorm : null,
         counterpartyKind: counterparty?.$1,
         counterpartyValue: counterparty?.$2,
@@ -908,12 +917,12 @@ final class IngestRawMessages {
 
   Future<IngestOutcome> _generic(
     _Prepared p,
-    BatchContext ctx,
+    _BatchScope b,
     _Changes local,
     ParseGeneric g,
   ) async {
     CaptureSenderState? row;
-    for (final s in ctx.captureSenders) {
+    for (final s in b.ctx.captureSenders) {
       if (senderKeyOf(s.channel, s.sender) == p.senderKey &&
           s.channel == _senderChannelOf(p.m.channel)) {
         row = s;
@@ -960,8 +969,11 @@ final class IngestRawMessages {
       kind: inferAccountKind(hasLast4: g.last4 != null),
     );
     final merchantNorm = _nonEmpty(g.merchant?.key);
-    final category = await _categorizer.categorize(
-      CategorizeInput(merchantNorm: merchantNorm, direction: direction),
+    final merchantRaw = _nonEmpty(g.merchant?.display);
+    final category = await _categorize(
+      b.categorizer,
+      merchantRaw: merchantRaw,
+      merchantNorm: merchantNorm,
     );
     final rawId = await _insertRaw(p, status: RawStatus.parsed);
     final txnId = _newId();
@@ -976,7 +988,7 @@ final class IngestRawMessages {
         amount: g.amount,
         occurredAtMs: occurredMs,
         tzOffsetMin: offsetMin,
-        merchantRaw: _nonEmpty(g.merchant?.display),
+        merchantRaw: merchantRaw,
         merchantNorm: merchantNorm,
         catalogMerchantId: category.catalogMerchantId,
         categoryId: category.categoryId,
@@ -1123,6 +1135,33 @@ final class IngestRawMessages {
     if (changed) local.accounts.add(accountId);
   }
 
+  /// Categorize (§8) with T-075's categorizer. A port failure propagates
+  /// (never read as "no category"); the stored source is mapped by code.
+  static Future<_Category> _categorize(
+    Categorizer categorizer, {
+    String? merchantRaw,
+    String? merchantNorm,
+    String? counterpartyKind,
+    String? counterpartyValue,
+  }) async {
+    final d = await categorizer.categorize(
+      categorizeInputFor(
+        merchantRaw: merchantRaw,
+        merchantNorm: merchantNorm,
+        counterpartyKind: counterpartyKind,
+        counterpartyValue: counterpartyValue,
+      ),
+    );
+    return _Category(
+      categoryId: d.categoryId,
+      catalogMerchantId: d.catalogMerchantId,
+      // `none` when the decision has no category (needs classification).
+      source: d.categoryId == null
+          ? CategorySource.none
+          : CategorySource.fromCode(d.source.code),
+    );
+  }
+
   Future<void> _runHooks(
     String txnId,
     String accountId, {
@@ -1217,6 +1256,26 @@ final class _Prepared {
   final String senderKey;
   final String bodyHash;
   final TxnSource? txnSource;
+}
+
+/// What one batch shares: step-0 context, label language, categorizer.
+final class _BatchScope {
+  const _BatchScope(this.ctx, this.labels, this.categorizer);
+  final BatchContext ctx;
+  final _LabelLanguage labels;
+  final Categorizer categorizer;
+}
+
+/// A categorize decision in stored terms.
+final class _Category {
+  const _Category({
+    required this.source,
+    this.categoryId,
+    this.catalogMerchantId,
+  });
+  final String? categoryId;
+  final CategorySource source;
+  final int? catalogMerchantId;
 }
 
 final class _Guard {

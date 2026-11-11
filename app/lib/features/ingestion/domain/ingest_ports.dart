@@ -1,7 +1,7 @@
 // T-046: the ports IngestRawMessages is built from (design note §1). Pure
 // Dart. Implementations live in data/ (or in tests as fakes).
 
-import '../../transactions/domain/transaction.dart';
+import 'package:zaghlol_parsing/zaghlol_parsing.dart' show Categorizer;
 
 /// Diagnostics: fixed codes and counts only (§12). Never ids (ULIDs encode
 /// receive times), never message text, senders, amounts or last-4.
@@ -33,45 +33,12 @@ abstract interface class GuardConfigSource {
   List<int> baseBytes();
 }
 
-/// What the categorizer sees (§8). Never logged.
-final class CategorizeInput {
-  const CategorizeInput({
-    required this.direction,
-    this.merchantNorm,
-    this.counterparty,
-    this.institution,
-  });
-
-  final String? merchantNorm;
-  final String? counterparty;
-  final String? institution;
-  final TxnDirection direction;
-
-  @override
-  String toString() => 'CategorizeInput(${direction.code})';
-}
-
-final class CategorizeResult {
-  const CategorizeResult({
-    required this.source,
-    this.categoryId,
-    this.catalogMerchantId,
-  });
-
-  static const CategorizeResult none = CategorizeResult(
-    source: CategorySource.none,
-  );
-
-  final String? categoryId;
-  final CategorySource source;
-  final int? catalogMerchantId;
-}
-
-/// The categorize hook (§8). Called inside the write transaction; T-075's
-/// replacement must keep its in-transaction part under 5 ms per message.
-abstract interface class Categorizer {
-  Future<CategorizeResult> categorize(CategorizeInput input);
-}
+/// Makes the categorizer for one batch (§8; T-075 "create one Categorizer
+/// per batch/run": the keywords are loaded once per instance, and rules or
+/// the catalog may change between batches). Called once per batch, before
+/// the write transaction; the instance is used only inside it, on the same
+/// connection, so a rule the UI committed before our BEGIN is applied.
+typedef CategorizerFactory = Future<Categorizer> Function();
 
 /// A transaction the batch stored or changed, for post-persist hooks.
 final class PersistedTxn {
