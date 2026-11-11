@@ -113,10 +113,44 @@ void applyAfterVerify(sql.Database raw, MigrationGuard? guard, File file) {
   }
 }
 
-/// T-016 §5: `busy_timeout = 5000`, before anything reads the file (a
-/// connection setting; it reads nothing, so it may precede the key).
+/// T-016 §5: how long a statement waits for another connection's lock
+/// before it fails with SQLITE_BUSY.
+const Duration dbBusyTimeout = Duration(milliseconds: 5000);
+
+// The waits between retries (SQLite's own default-handler schedule, in ms).
+const List<int> _busyDelaysMs = [1, 2, 5, 10, 15, 20, 25, 25, 25, 50, 50, 100];
+
+/// T-016 §5 / FU-094: wait up to [dbBusyTimeout] for another connection's
+/// lock. Installed before anything reads the file (it reads nothing, so it
+/// may precede the key).
+///
+/// Not `PRAGMA busy_timeout`: SQLite's built-in handler sleeps with a single
+/// `nanosleep` and ignores EINTR, but counts the full delay as slept. In a
+/// Dart VM with the sampling profiler on (debug and profile builds, and
+/// `flutter test`) SIGPROF interrupts every sleep within about a millisecond,
+/// so the 5 s budget ran out in about 70 ms. This handler measures the real
+/// elapsed time per wait and sleeps with `dart:io` [sleep], which resumes
+/// after a signal. It runs on the connection's own thread, inside the
+/// blocked statement.
+///
+/// Consequence: `PRAGMA busy_timeout` reads 0 on our connections. Never set
+/// that PRAGMA on an app connection: it replaces this handler.
 void applyBusyTimeout(sql.Database raw) {
-  _exec(raw, 'PRAGMA busy_timeout = 5000');
+  final waited = Stopwatch();
+  raw.busyHandler = (count) {
+    // count is 0 on the first retry of each new wait.
+    if (count == 0) {
+      waited
+        ..reset()
+        ..start();
+    }
+    final left = dbBusyTimeout - waited.elapsed;
+    if (left <= Duration.zero) return false;
+    final i = count < _busyDelaysMs.length ? count : _busyDelaysMs.length - 1;
+    final step = Duration(milliseconds: _busyDelaysMs[i]);
+    sleep(step < left ? step : left);
+    return true;
+  };
 }
 
 /// T-016 §5: the connection PRAGMAs after the keyed sequence.
