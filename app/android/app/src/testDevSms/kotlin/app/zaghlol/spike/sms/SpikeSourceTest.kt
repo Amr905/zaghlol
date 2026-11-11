@@ -56,8 +56,8 @@ class SpikeSourceTest {
     fun notificationStringsExistInEnglishAndArabic() {
         for (dir in listOf("values", "values-ar")) {
             val text = File(src, "devSms/res/$dir/spike_strings.xml").readText()
-            assertTrue(dir, text.contains("name=\"capture_channel_name\""))
-            assertTrue(dir, text.contains("name=\"capture_notification_title\""))
+            assertTrue(dir, text.contains("name=\"native_android_captureChannelName\""))
+            assertTrue(dir, text.contains("name=\"native_android_captureNotifTitle\""))
         }
         val tester = Regex("name=\"spike_tester_sender\"[^>]*>([^<]*)<").find(File(src, "devSms/res/values/spike_strings.xml").readText())
         assertEquals("", tester!!.groupValues[1]) // never commit a real number

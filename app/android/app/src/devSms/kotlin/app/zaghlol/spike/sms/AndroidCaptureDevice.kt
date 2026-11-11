@@ -24,8 +24,8 @@ class AndroidCaptureDevice(private val app: Context) : CaptureDevice {
         app.getSystemService(PowerManager::class.java)?.isIgnoringBatteryOptimizations(app.packageName) == true
 
     /**
-     * Q3 default: the system list, no `REQUEST_IGNORE_BATTERY_OPTIMIZATIONS`
-     * permission (the direct dialog is Play-restricted and is not declared).
+     * Q3 (PO): the system list only; the `REQUEST_IGNORE_BATTERY_OPTIMIZATIONS`
+     * dialog and permission are never used.
      */
     override fun openBatteryOptimizationSettings() {
         app.startActivity(

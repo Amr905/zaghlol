@@ -1186,6 +1186,8 @@ These strings are shown by iOS or Android, outside Flutter. **T-029 skips this t
 | `native_ios_intentCardParam` | الكارت | Card | L |
 | `native_android_notifListenerLabel` | زغلول: إشعارات البنوك | Zaghlol: bank notifications | L · `NotificationListenerService` label; this is the row that `onboarding_androidSetup_notifOsHint` tells the user to find |
 | `native_android_notifListenerDesc` | بيقرا إشعارات تطبيقات البنوك والمحافظ بس، وبيانات فلوسك بتفضل على الموبايل ده. | Reads notifications from bank and wallet apps only. Your money data stays on this phone. | S · service description where the OS shows one. Financial-data-only claim (tone gate 4) |
+| `native_android_captureChannelName` | تسجيل العمليات | Saving transactions | C · notification channel name (Android 8+ settings). **Draft, Q-19.** T-008 / PO Q4 |
+| `native_android_captureNotifTitle` | زغلول بيسجّل عملية | Zaghlol is saving a transaction | C · low-importance notification shown for a few seconds on Android 8–11 only, while a captured message is saved in the background (expedited work falls back to a foreground service). No amount, sender or bank name (lock screen). **Draft, Q-19** |
 
 ---
 
@@ -1239,6 +1241,7 @@ Plural messages: 38 (15 with `=0`, 23 on the no-zero list in §0.4). Select mess
 | Q-15 | Plural/digits convention | §0.3/§0.4 make every number a pre-formatted String and use `count` only to select. That needs the architect to confirm it against `DigitsMode` (ADR-017). | As written | Architect confirmation before T-029 |
 | Q-16 | Bidi isolates | §0.6 puts FSI/PDI wrapping in the presentation layer, not in ARB text; the §0.3a registry marks which placeholders get it. | As written | Architect confirmation (`MoneyFormat` / l10n helper) |
 | Q-17 | Glossary | `06-voice-and-tone.md` §3 maps Notifications → «التنبيهات», but the deck uses «الإشعارات». | **Proposed split:** «التنبيهات» for Zaghlol's own notifications (S-70, Part 3); «الإشعارات» for other apps' notifications that Zaghlol captures, because that's the OS term users see in Android settings. Part 1 strings are all of the second kind. | UX lead / PO: confirm the split, then add it to the glossary |
+| Q-19 | §1.23 Android capture notification | PO approved showing a brief low-priority notification on Android 8–11 while a captured message is saved (T-008 Q4, 2026-11-11). The copy is a draft by the native engineer. | `native_android_captureChannelName`, `native_android_captureNotifTitle` (in `app/android/app/src/devSms/res/values{,-ar}/spike_strings.xml` for the spike; T-041 moves them to the Sms flavour) | UX / copy review (EG-Arabic + English) and PO sign-off |
 | Q-18 | Home payday banner | `home_mascot_payday` is a C-14 banner, but `domain-algorithms.md` §7 treats `payday` as motion-only, and the priority list (shocked > detective > proud > tourGuide) has no payday slot. | Proposed: shocked > detective > payday > proud > tourGuide | Architect: place `payday` in `MascotPolicy`, or move the line off the banner |
 
 ## 1.C Changelog (Part 1)
@@ -1258,6 +1261,7 @@ Plural messages: 38 (15 with `=0`, 23 on the no-zero list in §0.4). Select mess
     - `accounts_overview_hiddenEntry`, `accounts_edit_hidden`
     - `capture_settings_active`, `capture_settings_unknown`, `capture_banks_channels`
     - §1.23 `native_*` (12)
+- 2026-11-11 — T-008: added §1.23 `native_android_captureChannelName`, `native_android_captureNotifTitle` (draft, Q-19).
   - **Conventions:** §0.3a placeholder registry; zero-form rule in §0.4; text buttons use class L.
 
 <!-- ===================== PART 2 (T-027) appends below ===================== -->

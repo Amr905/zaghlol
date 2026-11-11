@@ -90,7 +90,8 @@ class IngestionWorker(context: Context, params: WorkerParameters) : CoroutineWor
     /**
      * Android 8-11 only: expedited work falls back to a foreground service and
      * needs this notification. Low importance, no amounts or senders; text
-     * from strings.xml (en/ar, copy pending PO approval, Q4).
+     * from strings.xml (en/ar; PO approved the notification, Q4; copy in
+     * copy-deck.md section 1.23).
      */
     override suspend fun getForegroundInfo(): ForegroundInfo =
         ForegroundInfo(NOTIFICATION_ID, captureNotification(applicationContext))
@@ -105,13 +106,13 @@ class IngestionWorker(context: Context, params: WorkerParameters) : CoroutineWor
                 nm.createNotificationChannel(
                     NotificationChannel(
                         CHANNEL_ID,
-                        context.getString(R.string.capture_channel_name),
+                        context.getString(R.string.native_android_captureChannelName),
                         NotificationManager.IMPORTANCE_LOW,
                     ),
                 )
             }
             return Notification.Builder(context, CHANNEL_ID)
-                .setContentTitle(context.getString(R.string.capture_notification_title))
+                .setContentTitle(context.getString(R.string.native_android_captureNotifTitle))
                 .setSmallIcon(R.mipmap.ic_launcher)
                 .setOngoing(true)
                 .setVisibility(Notification.VISIBILITY_PUBLIC)
