@@ -407,6 +407,9 @@ struct SpoolStatus: Hashable {
   /// never thrown): rewrite the Guard config, run the catch-up.
   var keyInvalidatedAtMs: Int64? = nil
   var guardState: GuardConfigState
+  /// Held entries (T-041, FU-105): stored in the spool but not storable even
+  /// alone; not pending, retried after the next app update. Diagnostics only.
+  var held: Int64
 
 
   // swift-format-ignore: AlwaysUseLowerCamelCase
@@ -421,6 +424,7 @@ struct SpoolStatus: Hashable {
     let decryptDeleted = pigeonVar_list[7] as! Int64
     let keyInvalidatedAtMs: Int64? = nilOrValue(pigeonVar_list[8])
     let guardState = pigeonVar_list[9] as! GuardConfigState
+    let held = pigeonVar_list[10] as! Int64
 
     return SpoolStatus(
       pending: pending,
@@ -432,7 +436,8 @@ struct SpoolStatus: Hashable {
       firstMissedSmsAtMs: firstMissedSmsAtMs,
       decryptDeleted: decryptDeleted,
       keyInvalidatedAtMs: keyInvalidatedAtMs,
-      guardState: guardState
+      guardState: guardState,
+      held: held
     )
   }
   func toList() -> [Any?] {
@@ -447,13 +452,14 @@ struct SpoolStatus: Hashable {
       decryptDeleted,
       keyInvalidatedAtMs,
       guardState,
+      held,
     ]
   }
   static func == (lhs: SpoolStatus, rhs: SpoolStatus) -> Bool {
     if Swift.type(of: lhs) != Swift.type(of: rhs) {
       return false
     }
-    return deepEqualsCaptureApi(lhs.pending, rhs.pending) && deepEqualsCaptureApi(lhs.seq, rhs.seq) && deepEqualsCaptureApi(lhs.refusedFull, rhs.refusedFull) && deepEqualsCaptureApi(lhs.refusedGeneric, rhs.refusedGeneric) && deepEqualsCaptureApi(lhs.rateLimited, rhs.rateLimited) && deepEqualsCaptureApi(lhs.missedNotifications, rhs.missedNotifications) && deepEqualsCaptureApi(lhs.firstMissedSmsAtMs, rhs.firstMissedSmsAtMs) && deepEqualsCaptureApi(lhs.decryptDeleted, rhs.decryptDeleted) && deepEqualsCaptureApi(lhs.keyInvalidatedAtMs, rhs.keyInvalidatedAtMs) && deepEqualsCaptureApi(lhs.guardState, rhs.guardState)
+    return deepEqualsCaptureApi(lhs.pending, rhs.pending) && deepEqualsCaptureApi(lhs.seq, rhs.seq) && deepEqualsCaptureApi(lhs.refusedFull, rhs.refusedFull) && deepEqualsCaptureApi(lhs.refusedGeneric, rhs.refusedGeneric) && deepEqualsCaptureApi(lhs.rateLimited, rhs.rateLimited) && deepEqualsCaptureApi(lhs.missedNotifications, rhs.missedNotifications) && deepEqualsCaptureApi(lhs.firstMissedSmsAtMs, rhs.firstMissedSmsAtMs) && deepEqualsCaptureApi(lhs.decryptDeleted, rhs.decryptDeleted) && deepEqualsCaptureApi(lhs.keyInvalidatedAtMs, rhs.keyInvalidatedAtMs) && deepEqualsCaptureApi(lhs.guardState, rhs.guardState) && deepEqualsCaptureApi(lhs.held, rhs.held)
   }
 
   func hash(into hasher: inout Hasher) {
@@ -468,6 +474,7 @@ struct SpoolStatus: Hashable {
     deepHashCaptureApi(value: decryptDeleted, hasher: &hasher)
     deepHashCaptureApi(value: keyInvalidatedAtMs, hasher: &hasher)
     deepHashCaptureApi(value: guardState, hasher: &hasher)
+    deepHashCaptureApi(value: held, hasher: &hasher)
   }
 }
 
@@ -615,6 +622,10 @@ protocol AndroidCaptureHostApi {
   func getSpoolStatus() throws -> SpoolStatus
   /// Zeroes the alert counters if [seq] still matches getSpoolStatus().seq.
   func clearSpoolAlerts(seq: Int64) throws
+  /// T-041 (FU-105): entries IngestRawMessages could not store even alone
+  /// (IngestBatchResult.kept), called after the ack of the rest. Only ids this
+  /// engine drained; moved to spool/held/ (platform-channels.md 1.3). IO_ERROR.
+  func holdSpool(ids: [String]) throws
 }
 
 /// Generated setup class from Pigeon to handle messages through the `binaryMessenger`.
@@ -815,6 +826,26 @@ class AndroidCaptureHostApiSetup {
       }
     } else {
       clearSpoolAlertsChannel.setMessageHandler(nil)
+    }
+    /// T-041 (FU-105): entries IngestRawMessages could not store even alone
+    /// (IngestBatchResult.kept), called after the ack of the rest. Only ids this
+    /// engine drained; moved to spool/held/ (platform-channels.md 1.3). IO_ERROR.
+    let holdSpoolChannel = taskQueue == nil
+      ? FlutterBasicMessageChannel(name: "dev.flutter.pigeon.zaghlol.AndroidCaptureHostApi.holdSpool\(channelSuffix)", binaryMessenger: binaryMessenger, codec: codec)
+      : FlutterBasicMessageChannel(name: "dev.flutter.pigeon.zaghlol.AndroidCaptureHostApi.holdSpool\(channelSuffix)", binaryMessenger: binaryMessenger, codec: codec, taskQueue: taskQueue)
+    if let api = api {
+      holdSpoolChannel.setMessageHandler { message, reply in
+        let args = message as! [Any?]
+        let idsArg = args[0] as! [String]
+        do {
+          try api.holdSpool(ids: idsArg)
+          reply(wrapResult(nil))
+        } catch {
+          reply(wrapError(error))
+        }
+      }
+    } else {
+      holdSpoolChannel.setMessageHandler(nil)
     }
   }
 }

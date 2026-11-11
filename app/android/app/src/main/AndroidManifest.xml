@@ -1,4 +1,5 @@
-<manifest xmlns:android="http://schemas.android.com/apk/res/android">
+<manifest xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools">
     <!-- FR-SEC-05 / T-165: no OS mechanism may copy app data off the phone.
          allowBackup=false stops Auto Backup, key/value backup and adb backup
          (API 26-30) and cloud backup (API 31+). On API 31+ only
@@ -61,6 +62,19 @@
                 <data android:mimeType="text/csv"/>
             </intent-filter>
         </activity>
+        <!-- T-041: WorkManager (the ingestion worker, every flavour) merges
+             SystemJobService (exported, BIND_JOB_SERVICE: only the system can
+             bind), SystemForegroundService (not exported, no
+             foregroundServiceType: the app never calls setForeground; API
+             26-30 expedited fallback only), two non-exported receivers, and
+             WAKE_LOCK / ACCESS_NETWORK_STATE / RECEIVE_BOOT_COMPLETED /
+             FOREGROUND_SERVICE. Its DiagnosticsReceiver is exported (guarded
+             by DUMP) and dumps work specs to logcat on request: removed.
+             CI (apk-perms) asserts it is absent, and that no
+             FOREGROUND_SERVICE_* type permission is merged. -->
+        <receiver
+            android:name="androidx.work.impl.diagnostics.DiagnosticsReceiver"
+            tools:node="remove" />
         <!-- Don't delete the meta-data below.
              This is used by the Flutter tool to generate GeneratedPluginRegistrant.java -->
         <meta-data

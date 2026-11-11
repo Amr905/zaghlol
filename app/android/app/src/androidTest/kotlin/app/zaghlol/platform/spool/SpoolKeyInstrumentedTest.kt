@@ -88,5 +88,34 @@ class SpoolKeyInstrumentedTest {
         assertEquals(3L, CaptureStatusStore(statusFile, KeystoreSpoolCipher()).read().decryptDeleted)
     }
 
+    /**
+     * T-041 #6 probe (FU-104): what `Cipher.init` throws for a key reference
+     * whose alias was deleted underneath it, per API level, and how
+     * KeyErrorClassifier classifies it. Reported as `spool.initProbe`
+     * (exception class names only; no message text). Records, asserts
+     * nothing: an UNUSABLE answer enters the delete-on-proof ladder (JVM
+     * SpoolKeyManagerTest), an UNAVAILABLE one deletes nothing.
+     */
+    @Test
+    fun cipherInitOnADeletedAliasIsRecordedAndClassified() {
+        val key = SpoolKey.get()
+        KeyStore.getInstance("AndroidKeyStore").apply { load(null) }.deleteEntry(SpoolKey.ALIAS)
+        val thrown = try {
+            javax.crypto.Cipher.getInstance("AES/GCM/NoPadding").init(javax.crypto.Cipher.ENCRYPT_MODE, key)
+            null
+        } catch (e: Exception) {
+            e
+        }
+        val chain = generateSequence(thrown as Throwable?) { it.cause }.take(4).joinToString(">") { it.javaClass.name }
+        val cls = thrown?.let { app.zaghlol.platform.keys.KeyErrorClassifier().classify(it) }
+        InstrumentationRegistry.getInstrumentation().sendStatus(
+            2,
+            android.os.Bundle().apply {
+                putString("spool.initProbe", "api=${Build.VERSION.SDK_INT} thrown=${chain.ifEmpty { "none" }} class=${cls ?: "none"}")
+            },
+        )
+        // A probe: the answer per API level goes into the ADR-005 / T-041 rows.
+    }
+
     private fun record(body: String) = SpoolRecord("sms", "5550100", body, System.currentTimeMillis(), null, null, null, 0, -1)
 }

@@ -1,7 +1,8 @@
 // T-008: the real database path of a drain cycle on the host's sqlite3mc:
 // the UI engine (create allowed) creates zaghlol.db; the headless store
 // (allowMigration/allowCreateOrWipe false) finds, opens and writes it through
-// IngestRawMessages (T-046); body_hash dedupes a re-delivered entry.
+// IngestRawMessages (T-046); body_hash dedupes a re-delivered entry. T-041:
+// a failed open is retried by the same store (FU-081 F4).
 
 import 'dart:io';
 
@@ -17,7 +18,7 @@ import 'package:zaghlol/features/ingestion/application/ingest_raw_messages.dart'
 import 'package:zaghlol/features/ingestion/data/ingest_factory.dart';
 import 'package:zaghlol/ingestion/ingest_store.dart';
 import 'package:zaghlol/ingestion/ingestion_cycle.dart';
-import 'package:zaghlol/ingestion/spike_ingestion.dart';
+import 'package:zaghlol/ingestion/ingestion_runner.dart';
 import 'package:zaghlol/ingestion/spike_registry.dart';
 import 'package:zaghlol/ingestion/ulid.dart';
 import 'package:zaghlol_parsing/zaghlol_parsing.dart';
@@ -132,9 +133,10 @@ void main() {
     expect(dbFds(), 0, reason: 'the UI store closed its connection');
 
     final spool = FakeSpool([entry(sid(1))], <String>[]);
-    final headless = SpikeIngestion(
+    final headless = IngestionRunner(
       marks: const NoMarks(),
       headless: true,
+      registry: loadSpikeRegistry,
       spool: spool,
       store: (_, _) => headlessStore(),
       dbDirectory: () async => dbDir,
@@ -155,9 +157,10 @@ void main() {
   test('the UI engine path (SpikeIngestion, headless false) creates the '
       'database on its first drain; the headless path then uses it', () async {
     final log = <String>[];
-    final ui = SpikeIngestion(
+    final ui = IngestionRunner(
       marks: const NoMarks(),
       headless: false,
+      registry: loadSpikeRegistry,
       spool: FakeSpool([], log),
       store: (_, _) => uiStore(),
       dbDirectory: () async => dbDir,
@@ -167,9 +170,10 @@ void main() {
     expect(File('${dbDir.path}/zaghlol.db').existsSync(), isTrue);
 
     final spool = FakeSpool([entry(sid(1))], log);
-    final headless = SpikeIngestion(
+    final headless = IngestionRunner(
       marks: const NoMarks(),
       headless: true,
+      registry: loadSpikeRegistry,
       spool: spool,
       store: (_, _) => headlessStore(),
       dbDirectory: () async => dbDir,
@@ -182,9 +186,10 @@ void main() {
 
   test('the headless engine path (SpikeIngestion) never creates', () async {
     final spool = FakeSpool([entry(sid(1))], <String>[]);
-    final headless = SpikeIngestion(
+    final headless = IngestionRunner(
       marks: const NoMarks(),
       headless: true,
+      registry: loadSpikeRegistry,
       spool: spool,
       store: (_, _) => headlessStore(),
       dbDirectory: () async => dbDir,
@@ -196,10 +201,26 @@ void main() {
 
   test('both engines resolve the database directory with the same function '
       '(FU-065 S-7)', () {
-    final headless = SpikeIngestion(marks: const NoMarks(), headless: true);
-    final ui = SpikeIngestion(marks: const NoMarks(), headless: false);
+    final headless = IngestionRunner(marks: const NoMarks(), headless: true);
+    final ui = IngestionRunner(marks: const NoMarks(), headless: false);
     expect(identical(headless.dbDirectoryResolver, resolveDbDirectory), isTrue);
     expect(identical(ui.dbDirectoryResolver, resolveDbDirectory), isTrue);
+  });
+
+  test('FU-081 F4: a failed open is not cached; the same store opens once '
+      'the cause is gone', () async {
+    final headless = headlessStore();
+    addTearDown(headless.close);
+    // No database yet: the headless store may not create it.
+    await expectLater(headless.open(), throwsA(isA<IngestStoreUnavailable>()));
+    final ui = uiStore();
+    await ui.open();
+    await ui.close();
+    await headless.open(); // without the invalidate: the cached failure again
+    final spool = FakeSpool([entry(sid(1))], <String>[]);
+    final r = await cycleOver(headless, spool).run();
+    expect(r.outcome, CycleOutcome.ok);
+    expect(r.inserted, 1);
   });
 
   test('the headless container cannot be talked into migrating or '

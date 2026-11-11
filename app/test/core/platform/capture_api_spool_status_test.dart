@@ -21,6 +21,7 @@ void main() {
       'writeGuardConfig',
       'getSpoolStatus',
       'clearSpoolAlerts',
+      'holdSpool',
     ]) {
       messenger.setMockMessageHandler('$_prefix.$m', null);
     }
@@ -67,6 +68,7 @@ void main() {
           decryptDeleted: 5,
           keyInvalidatedAtMs: 1731300000123,
           guardState: GuardConfigState.userUnreadable,
+          held: 6,
         ),
       ]);
     });
@@ -81,6 +83,7 @@ void main() {
     expect(s.decryptDeleted, 5);
     expect(s.keyInvalidatedAtMs, 1731300000123);
     expect(s.guardState, GuardConfigState.userUnreadable);
+    expect(s.held, 6);
   });
 
   test('getSpoolStatus with no alerts has null times', () async {
@@ -95,6 +98,7 @@ void main() {
           missedNotifications: 0,
           decryptDeleted: 0,
           guardState: GuardConfigState.unknown,
+          held: 0,
         ),
       ]);
     });
@@ -118,6 +122,29 @@ void main() {
     });
     await expectLater(
       AndroidCaptureHostApi().clearSpoolAlerts(41),
+      throwsA(
+        isA<PlatformException>()
+            .having((e) => e.code, 'code', 'IO_ERROR')
+            .having((e) => e.message, 'message', isNull),
+      ),
+    );
+  });
+
+  test('holdSpool sends the ids; IO_ERROR stays code-only (T-041)', () async {
+    final sent = <Object?>[];
+    messenger.setMockMessageHandler('$_prefix.holdSpool', (data) async {
+      sent.add((codec.decodeMessage(data)! as List<Object?>)[0]);
+      return codec.encodeMessage(<Object?>[null]);
+    });
+    await AndroidCaptureHostApi().holdSpool(['01ARZ3NDEKTSV4RRFFQ69G5FAV']);
+    expect(sent, [
+      ['01ARZ3NDEKTSV4RRFFQ69G5FAV'],
+    ]);
+    messenger.setMockMessageHandler('$_prefix.holdSpool', (_) async {
+      return codec.encodeMessage(<Object?>['IO_ERROR', null, null]);
+    });
+    await expectLater(
+      AndroidCaptureHostApi().holdSpool(const []),
       throwsA(
         isA<PlatformException>()
             .having((e) => e.code, 'code', 'IO_ERROR')

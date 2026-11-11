@@ -1,5 +1,8 @@
-// T-008 (SPK-01): knobs of the ingestion spike, kept in one place so the open
-// PO answers (T-008 Q1-Q4, Q7) can be plugged in without touching the flow.
+// T-008 (SPK-01) / T-041: knobs of the ingestion path, kept in one place so
+// the open PO answers (T-008 Q1-Q4, Q7) can be plugged in without touching
+// the flow.
+
+import 'package:flutter/services.dart' show appFlavor;
 
 /// Q7 (PO, 2026-11-11: YES): the Sms build runs an automatic inbox catch-up
 /// scan (allowlisted senders since the last captured message) on each app
@@ -22,5 +25,11 @@ const int kDrainBatchSize = 20;
 /// worker gives a run 60 s in total).
 const Duration kCycleBudget = Duration(seconds: 50);
 
-/// The flavour that contains the native spike (`flutter build --flavor`).
+/// The flavour that contains the native spike receiver and latency recorder
+/// (`flutter build --flavor`).
 const String kSpikeFlavor = 'devSms';
+
+/// True only in the devSms build. A compile-time constant: AOT drops the
+/// spike registry and the spike marks from every other build (CI greps the
+/// prod `libapp.so` for the synthetic sender).
+const bool kIsSpikeBuild = appFlavor == kSpikeFlavor;

@@ -1,12 +1,12 @@
-// T-008: the channels with a fake platform side. The spool host is mocked at
-// the Pigeon channel level (the generated codec), the spike metrics channel
-// at the BasicMessageChannel level. Proves the drain/ack wire format, the
-// code-only error mapping (FU-034) and that only ULIDs/codes are sent.
+// T-008 / T-041: the channels with a fake platform side. The spool host is
+// mocked at the Pigeon channel level (the generated codec), the devSms marks
+// channel at the BasicMessageChannel level. Proves the drain/ack/hold wire
+// format, the code-only error mapping (FU-034) and that only ULIDs/codes are
+// sent.
 
 import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:zaghlol/core/platform/capture_api.g.dart';
-import 'package:zaghlol/ingestion/ingestion_cycle.dart';
 import 'package:zaghlol/ingestion/spike_channel.dart';
 import 'package:zaghlol/ingestion/spool_port.dart';
 
@@ -23,6 +23,7 @@ void main() {
   tearDown(() {
     messenger.setMockMessageHandler('$_prefix.drainSpool', null);
     messenger.setMockMessageHandler('$_prefix.ackSpool', null);
+    messenger.setMockMessageHandler('$_prefix.holdSpool', null);
     messenger.setMockMessageHandler(spikeChannelName, null);
   });
 
@@ -102,57 +103,53 @@ void main() {
     });
   });
 
-  group('spike metrics channel', () {
-    test('marks carry only stage names and ids; drain is answered', () async {
-      final sent = <Object?>[];
-      messenger.setMockMessageHandler(spikeChannelName, (data) async {
-        sent.add(const StandardMessageCodec().decodeMessage(data));
-        return null;
-      });
-      final channel = SpikeChannel();
-      channel.onCommand((cmd) async {
-        expect(cmd, 'drain');
-        return const CycleResult(CycleOutcome.ok, drained: 2).toWire();
-      });
-      channel.ready();
-      channel.dbOpen();
-      channel.mark('commit', [sid(1)]);
-      await pumpEventQueue();
-      expect(sent, [
-        {'ev': 'ready'},
-        {'ev': 'db_open'},
-        {
-          'ev': 'mark',
-          'stage': 'commit',
-          'ids': [sid(1)],
-        },
-      ]);
-
-      ByteData? reply;
-      await messenger.handlePlatformMessage(
-        spikeChannelName,
-        const StandardMessageCodec().encodeMessage({'cmd': 'drain'}),
-        (r) => reply = r,
-      );
-      expect(const StandardMessageCodec().decodeMessage(reply), {
-        'result': 'OK',
-        'drained': 2,
-        'inserted': 0,
-        'stuck': 0,
-        'code': null,
-      });
+  test('hold sends exactly the ids; an error is code-only (T-041)', () async {
+    final held = <Object?>[];
+    messenger.setMockMessageHandler('$_prefix.holdSpool', (data) async {
+      held.add((codec.decodeMessage(data)! as List<Object?>)[0]);
+      return codec.encodeMessage(<Object?>[null]);
     });
-
-    test('unknown commands get no answer', () async {
-      final channel = SpikeChannel();
-      channel.onCommand((cmd) async => 'should not run');
-      ByteData? reply;
-      await messenger.handlePlatformMessage(
-        spikeChannelName,
-        const StandardMessageCodec().encodeMessage('drain'),
-        (r) => reply = r,
-      );
-      expect(const StandardMessageCodec().decodeMessage(reply), isNull);
+    await PigeonSpoolPort().hold([sid(3)]);
+    expect(held, [
+      [sid(3)],
+    ]);
+    messenger.setMockMessageHandler('$_prefix.holdSpool', (data) async {
+      return codec.encodeMessage(<Object?>['IO_ERROR', canary, canary]);
     });
+    await expectLater(
+      PigeonSpoolPort().hold([sid(3)]),
+      throwsA(
+        isA<SpoolPortException>()
+            .having((e) => e.code, 'code', 'PLATFORM_IO_ERROR')
+            .having((e) => '$e', 'text', isNot(contains(canary))),
+      ),
+    );
+  });
+
+  test('spike marks carry only stage names and ids (devSms only)', () async {
+    final sent = <Object?>[];
+    messenger.setMockMessageHandler(spikeChannelName, (data) async {
+      sent.add(const StandardMessageCodec().decodeMessage(data));
+      return null;
+    });
+    final channel = SpikeChannel();
+    channel.dbOpen();
+    channel.mark('commit', [sid(1)]);
+    await pumpEventQueue();
+    expect(sent, [
+      {'ev': 'db_open'},
+      {
+        'ev': 'mark',
+        'stage': 'commit',
+        'ids': [sid(1)],
+      },
+    ]);
+  });
+
+  test('no native marks handler: sending never throws', () async {
+    SpikeChannel()
+      ..dbOpen()
+      ..mark('commit', [sid(1)]);
+    await pumpEventQueue();
   });
 }

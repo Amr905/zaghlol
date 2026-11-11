@@ -142,7 +142,7 @@ class SpoolStoreTest {
         val cipher = FlakySpoolCipher(failures = 100)
         val store = storeIn(dir, cipher)
         val id = store.put()
-        assertEquals(SpoolStore.ReadResult.Unavailable, store.read(id))
+        assertTrue(store.read(id) is SpoolStore.ReadResult.Unavailable)
         assertTrue(File(dir, "$id.bin").exists())
         cipher.failures = 0
         assertTrue(store.read(id) is SpoolStore.ReadResult.Ok)
@@ -158,7 +158,7 @@ class SpoolStoreTest {
         val blocker = File(dir, "$id.bin").apply { mkdirs() }
         File(blocker, "keep").writeText("x")
         assertEquals(listOf(id), store.pendingIds())
-        assertEquals(SpoolStore.ReadResult.Unavailable, store.read(id))
+        assertTrue(store.read(id) is SpoolStore.ReadResult.Unavailable)
         assertEquals(listOf(100L, 300L, 900L), sleep.calls)
         assertTrue(File(blocker, "keep").exists())
         blocker.deleteRecursively()
@@ -173,7 +173,7 @@ class SpoolStoreTest {
         val id = store.put()
         val f = File(dir, "$id.bin")
         f.writeBytes(f.readBytes().copyOf(40)) // bad, but the first attempt is "transient"
-        assertEquals(SpoolStore.ReadResult.Unavailable, store.read(id))
+        assertTrue(store.read(id) is SpoolStore.ReadResult.Unavailable)
         assertTrue(f.exists())
     }
 
@@ -222,7 +222,7 @@ class SpoolStoreTest {
         val dir = tempDir()
         val id = storeIn(dir).put("x")
         val r = storeIn(dir, FlakySpoolCipher(100), keyCreatedAtMs = { Long.MAX_VALUE }).read(id)
-        assertEquals(SpoolStore.ReadResult.Unavailable, r)
+        assertTrue(r is SpoolStore.ReadResult.Unavailable)
         assertTrue(File(dir, "$id.bin").exists())
     }
 

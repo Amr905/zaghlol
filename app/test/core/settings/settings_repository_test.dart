@@ -30,6 +30,11 @@ allKeys = [
   (key: Settings.digits, byDefault: DigitsPref.auto, other: DigitsPref.western),
   (key: Settings.theme, byDefault: ThemePref.system, other: ThemePref.dark),
   (key: Settings.paydayDay, byDefault: 1, other: 28),
+  (
+    key: Settings.paydayEras,
+    byDefault: null,
+    other: PaydaySchedule.single(25).withChange(CivilDate(2026, 11, 10), 1),
+  ),
   (key: Settings.incomeTarget, byDefault: null, other: Money(kwd, 1234567)),
   (key: Settings.primaryCurrency, byDefault: egp, other: kwd),
   (key: Settings.approxViewEnabled, byDefault: false, other: true),

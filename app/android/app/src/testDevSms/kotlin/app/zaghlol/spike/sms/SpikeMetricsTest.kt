@@ -40,6 +40,21 @@ class SpikeMetricsTest {
         assertEquals("$id,cold_process,34,1,0,40,20000,1762000000123,-750,5,6,100,900,1000,1100,1200,1300,1350", lines[1])
     }
 
+    /** FU-081 F6: Doze, bucket and exemption are the ones at receive, not at ack. */
+    @Test
+    fun conditionsAreSampledAtReceive() {
+        val f = File(tempDir(), "m.csv")
+        var idle = false
+        val m = SpikeMetrics(f, { 7 }, { SpikeMetrics.Conditions(34, false, idle, 10, 0) })
+        val id = "01ARZ3NDEKTSV4RRFFQ69G5FAV"
+        idle = true
+        m.spooled(id, 1L, 2L)
+        idle = false
+        m.drained(id, 1L, 7, SpikeMetrics.Cycle(SpikeMetrics.Path.WARM_PROCESS))
+        m.mark("acked", listOf(id))
+        assertEquals("1", f.readLines()[1].split(",")[4])
+    }
+
     @Test
     fun rowFromAnotherBootIsDiscarded() {
         val f = File(tempDir(), "m.csv")

@@ -230,7 +230,7 @@ class AndroidCaptureHostTest {
     fun statusDefaultsAndClear() {
         val h = host(1)
         val empty = h.getSpoolStatus()
-        assertEquals(SpoolStatus(0, 0, 0, 0, 0, 0, null, 0, null, GuardConfigState.UNKNOWN), empty)
+        assertEquals(SpoolStatus(0, 0, 0, 0, 0, 0, null, 0, null, GuardConfigState.UNKNOWN, 0), empty)
         status.recordRateLimited("notification", 5)
         val s = h.getSpoolStatus()
         assertEquals(1L, s.rateLimited)

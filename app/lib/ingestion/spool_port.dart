@@ -1,5 +1,5 @@
 // T-008: the Dart side of the spool contract (platform-channels.md §2:
-// drainSpool / ackSpool). Errors become code-only exceptions; a code that is
+// drainSpool / ackSpool; T-041: holdSpool, FU-105). Errors become code-only exceptions; a code that is
 // not UPPER_SNAKE becomes PLATFORM_UNKNOWN (FU-034), so nothing a native
 // component puts in an error can carry message text further.
 
@@ -21,6 +21,11 @@ abstract interface class SpoolPort {
 
   /// Idempotent. Call only after the DB commit returned.
   Future<void> ack(List<String> ids);
+
+  /// T-041 (FU-105): moves entries the use case could not store even alone
+  /// (`IngestBatchResult.kept`) to the held area; native accepts only ids
+  /// this engine drained. Call after [ack]. Throws [SpoolPortException].
+  Future<void> hold(List<String> ids);
 }
 
 final class PigeonSpoolPort implements SpoolPort {
@@ -34,6 +39,9 @@ final class PigeonSpoolPort implements SpoolPort {
 
   @override
   Future<void> ack(List<String> ids) => _guard(() => _api.ackSpool(ids));
+
+  @override
+  Future<void> hold(List<String> ids) => _guard(() => _api.holdSpool(ids));
 
   static Future<T> _guard<T>(Future<T> Function() call) async {
     try {

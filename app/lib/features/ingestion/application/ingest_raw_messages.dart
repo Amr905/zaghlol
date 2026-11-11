@@ -107,6 +107,17 @@ final class IngestRawMessages {
   final List<(List<int>, CaptureGuard)> _guardCache = [];
   CaptureGuard? _baseGuard;
 
+  /// The payday schedule in force (T-051): `payday_eras`, reconciled with
+  /// `payday_day` as `PaydayScheduleStore` does.
+  PaydaySchedule _scheduleOf(BatchContext ctx) {
+    final ms = _nowMs();
+    return PaydaySchedule.resolve(
+      erasJson: ctx.paydayEras,
+      paydayDay: paydayDayOf(ctx.paydayDay),
+      today: CivilDate.fromLocalMs(ms, _zone.offsetAtInstant(ms)),
+    );
+  }
+
   int _nowMs() => _now().toUtc().millisecondsSinceEpoch;
 
   /// Ingests [batch] in one write transaction. Throws [IngestBatchFailed]
@@ -181,7 +192,7 @@ final class IngestRawMessages {
     await _guarded(
       () => _store.inWriteTransaction(() async {
         final ctx = await _store.readContext();
-        state.paydayDay = paydayDayOf(ctx.paydayDay);
+        state.schedule = _scheduleOf(ctx);
         final guard = _guardFor(ctx);
         final scope = _BatchScope(
           ctx,
@@ -252,7 +263,7 @@ final class IngestRawMessages {
     await _guarded(
       () => _store.inWriteTransaction(() async {
         final ctx = await _store.readContext();
-        state.paydayDay = paydayDayOf(ctx.paydayDay);
+        state.schedule = _scheduleOf(ctx);
         final local = _Changes();
         final pre = await _precheck(p, _guardFor(ctx), local);
         IngestOutcome outcome;
@@ -1436,7 +1447,7 @@ final class IngestRawMessages {
           (int ms, int off) => cycleKeyFor(
             occurredAtMs: ms,
             tzOffsetMin: off,
-            paydayDay: state.paydayDay,
+            schedule: state.schedule,
           );
       event = TransactionsChanged(
         accountIds: accountIds,
@@ -1580,12 +1591,12 @@ final class _Changes {
 final class _BatchState {
   final Map<String, IngestOutcome> outcomes = {};
   final _Changes changes = _Changes();
-  int paydayDay = 1;
+  PaydaySchedule schedule = PaydaySchedule.single(1);
 
   void addAll(_BatchState o) {
     outcomes.addAll(o.outcomes);
     changes.addAll(o.changes);
-    paydayDay = o.paydayDay;
+    schedule = o.schedule;
   }
 }
 

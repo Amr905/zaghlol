@@ -21,16 +21,21 @@ final class Money implements Comparable<Money> {
 ## 2. Payday cycle, safe-to-spend, burn line (BR-BUD-*)
 
 ```
-cycleFor(date, paydayDay ∈ 1..28):                       // A-43: no payday set → paydayDay = 1
-  start = date.day ≥ paydayDay ? (date.year, date.month, paydayDay) : previousMonth(paydayDay)
-  end   = nextMonth(start) − 1 day                       // "25 Oct – 24 Nov"
-daysRemaining(today) = (end − today) + 1                 // inclusive of today
-safeToSpend = max(0, budgetTotal − cycleSpend) ÷ daysRemaining     // per currency; integer division, floor
-idealBurn(d) = budgetTotal × d ÷ cycleLength
+Dates are CivilDate (y, m, d; epoch-day integer). A transaction's date = floor((occurred_at + occurred_tz_offset_min × 60 000) / 86 400 000)
+  as a civil date; "today" = the same with Clock.now and LocalZone.offsetAtInstant. No DateTime, no UTC dates, no ms-difference day counts.
+PaydaySchedule = ordered eras [(from: CivilDate? , day ∈ 1..28)]   // first era from = null (−∞); A-43: no era recorded → [(null, 1)]
+  cycle starts = ⋃ over eras k of { dates with day-of-month = day_k and from_k ≤ date < from_(k+1) }   // from_(last+1) = +∞
+cycleFor(date) = (start = greatest cycle start ≤ date, end = (smallest cycle start > start) − 1 day)    // "25 Oct – 24 Nov"
+cycleKey = start.toIso()                                          // '2026-10-25'; same key in cycle_summaries, fired_alerts, TransactionsChanged
+cycleLength = end − start + 1;  dayNumber(date) = date − start + 1  // 1-based
+daysRemaining(today) = (end − today) + 1                          // inclusive of today; = "days to payday" on Home
+safeToSpend(c) = budget_c == 0 or absent ? null : floor( max(0, budget_c − netSpend_c) ÷ daysRemaining )   // integer minor units, floor
+idealBurn(c, d) = floor( budget_c × d ÷ cycleLength )             // d = 0..cycleLength; exact via Money.mulDiv(..., floor)
 ```
-- **Payday change mid-cycle** (EC-21): the current cycle ends on the day before the next occurrence of the new payday. Stored budgets are reused.
-- **Zero budget** (EC-24): `safeToSpend` = null, so the UI hides it.
-- **Cycle spend per currency** (BR-TXN-01, BR-FX-03): Σ expense `amount_minor` for non-internal, non-declined, non-deleted transactions in the cycle, minus Σ `offset_links` amounts whose **expense** is in the cycle. A late reimbursement therefore restates the original cycle (BR-XFR-07). Results are cached in `cycle_summaries`.
+- **Payday change mid-cycle** (EC-21): `setPayday(day, today)` appends era `(from = today, day)`. The cycle containing `today` then ends the day before the first occurrence of the new day **on or after today**; earlier cycles never move; stored budgets are reused (not prorated). A change on the same day as the last change replaces that era. The **first explicit** payday (no era recorded yet) replaces the A-43 default for all history (era `from = null`); it is not an EC-21 change. Payday is always 1-28 (BR-BUD-01, D-68), so month-length clamping never applies; weekends and holidays never move a cycle (A-42, EC-20).
+- **Zero budget** (EC-24): `safeToSpend` = null, so the UI hides it. Overspent: 0, not null. The budget basis for currency *c* is the overall cycle budget in *c*, else the sum of the cycle category budgets in *c* (A-16); annual budgets are excluded.
+- **What counts per cycle and currency** (billed `currency`, BR-FX-03). Row filter: not soft-deleted, not `is_internal`, status in (`posted`,`pending`); `declined` and `reversed` are excluded (BR-TXN-03). Spend = Σ (`expense`, `fee`, un-paired `transfer_out`) − Σ valid `offset_links` whose **expense** is in the cycle (BR-XFR-07). Income = Σ over (`income`, `transfer_in`, `refund`) of (amount − Σ valid links whose **source** is that row), in the source's own cycle (BR-TXN-02, BR-XFR-06). A link is valid only if its source is live and its status is `posted`/`pending`. `pending` rows are included and also reported separately. Totals are `Map<Currency, CycleTotals>`; nothing in the budget package adds two currencies (the ≈ view is §1 `approx`, display only).
+- **Cache** (`cycle_summaries`, T-051 design note §6): rows for `account_filter` `'*'` or one account id; the current cycle is always recomputed on read, closed cycles are served from the cache until invalidated. `TransactionsChanged.cycleKeys` must include the cycle of every expense whose offset links changed (BR-XFR-07).
 - **Budget alerts** (BR-BUD-02): after each `TransactionsChanged`, compute `pct = spend ÷ limit` for each budget in the affected currency. For each threshold crossed that is not yet in `fired_alerts(kind='budget', subject=budgetId, period=cycleStart, threshold)`, schedule a notification, respecting quiet hours (FR-NTF-02).
 
 ## 3. De-duplication & merging (BR-ING-02, EC-01/02/54)

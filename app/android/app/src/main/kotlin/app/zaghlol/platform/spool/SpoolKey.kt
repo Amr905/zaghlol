@@ -4,6 +4,7 @@ import android.security.keystore.KeyGenParameterSpec
 import android.security.keystore.KeyProperties
 import app.zaghlol.platform.keys.KeyErrorClassifier
 import app.zaghlol.platform.keys.ReadFailure
+import java.security.Key
 import java.security.KeyStore
 import javax.crypto.KeyGenerator
 import javax.crypto.SecretKey
@@ -31,6 +32,12 @@ import javax.crypto.SecretKey
  *   100/300/900 ms retries. Any `UNAVAILABLE` failure throws and deletes
  *   nothing. Data written under a lost key fails authentication and is
  *   deleted by its owner; the spool reports it as `keyInvalidatedAtMs`.
+ * - An alias that exists but holds no `SecretKey` is an `UNUSABLE` attempt
+ *   of the same ladder, never a direct create (T-041, FU-104 #9).
+ * - `Cipher.init` failures are classified the same way and take part in the
+ *   ladder ([withKey]; FU-104 #6): a key reference that the Keystore lost
+ *   between load and init is recreated only when every attempt says
+ *   `UNUSABLE`.
  */
 object SpoolKey {
     const val ALIAS = "zaghlol_spool_v1"
@@ -44,6 +51,13 @@ object SpoolKey {
     fun get(): SecretKey = manager.get()
 
     /**
+     * Loads (or creates) the key and runs [init] with it (`Cipher.init`)
+     * under the key lock, so an init failure is classified and retried like
+     * a load failure (FU-104 #6). Throws [SpoolKeyUnavailableException].
+     */
+    fun <T> withKey(init: (SecretKey) -> T): T = manager.withKey(init)
+
+    /**
      * Wall-clock creation time of the current key (`KeyStore.getCreationDate`),
      * or null when there is no key or it can't be read. Used only to choose
      * "ladder or no ladder" for an entry that already failed authentication.
@@ -53,7 +67,10 @@ object SpoolKey {
     private object AndroidKeystoreOps : KeystoreOps<SecretKey> {
         private fun keyStore(): KeyStore = KeyStore.getInstance(PROVIDER).apply { load(null) }
 
-        override fun load(): SecretKey? = keyStore().getKey(ALIAS, null) as? SecretKey
+        override fun load(): SecretKey? {
+            val ks = keyStore()
+            return secretKeyOrNull(ks.getKey(ALIAS, null)) { ks.containsAlias(ALIAS) }
+        }
 
         override fun create(): SecretKey = generate()
 
@@ -96,6 +113,25 @@ interface KeystoreOps<K : Any> {
 class SpoolKeyUnavailableException : Exception("SPOOL_KEY_UNAVAILABLE")
 
 /**
+ * The alias exists but holds no usable `SecretKey` (FU-104 #9). Counted as an
+ * `UNUSABLE` attempt by [SpoolKeyManager]: positive evidence, as for a
+ * `KeyPermanentlyInvalidatedException`.
+ */
+class UnusableKeyEntryException : Exception("SPOOL_KEY_ENTRY_UNUSABLE")
+
+/**
+ * [entry] as a `SecretKey`; null only when the alias positively does not
+ * exist ([containsAlias] false). An alias with no key or another entry type
+ * throws [UnusableKeyEntryException]; an exception from [containsAlias]
+ * propagates (it proves nothing).
+ */
+internal fun secretKeyOrNull(entry: Key?, containsAlias: () -> Boolean): SecretKey? = when {
+    entry is SecretKey -> entry
+    entry == null && !containsAlias() -> null
+    else -> throw UnusableKeyEntryException()
+}
+
+/**
  * Get-or-create with delete-on-proof (T-039 design note section 2). Runs
  * under one lock, so two first-time callers never both create and a
  * recreation can't race a load.
@@ -107,7 +143,16 @@ class SpoolKeyManager<K : Any>(
 ) {
     private val lock = Any()
 
-    fun get(): K = synchronized(lock) {
+    fun get(): K = withKey { it }
+
+    /**
+     * Get-or-create, then [init] with the key, under the lock. A load or an
+     * [init] failure classified `UNUSABLE` is one ladder attempt; any other
+     * failure throws [SpoolKeyUnavailableException] and deletes nothing. Only
+     * when all four attempts were `UNUSABLE` is the key deleted and recreated
+     * (FU-104 #6, #9).
+     */
+    fun <T> withKey(init: (K) -> T): T = synchronized(lock) {
         for ((attempt, delayMs) in RETRY_DELAYS_MS.withIndex()) {
             if (attempt > 0) sleep(delayMs)
             val loaded = try {
@@ -115,14 +160,30 @@ class SpoolKeyManager<K : Any>(
             } catch (e: Exception) {
                 // Only positive evidence (every attempt UNUSABLE) leads to a
                 // delete; one UNAVAILABLE answer proves nothing.
-                if (classifier.classify(e) != ReadFailure.UNUSABLE) throw SpoolKeyUnavailableException()
+                if (!unusable(e)) throw SpoolKeyUnavailableException()
                 continue
+            } ?: return createAndInit(init)
+            try {
+                return init(loaded)
+            } catch (e: Exception) {
+                if (!unusable(e)) throw SpoolKeyUnavailableException()
             }
-            return loaded ?: ops.create()
         }
         ops.delete()
-        ops.create()
+        createAndInit(init)
     }
+
+    private fun <T> createAndInit(init: (K) -> T): T {
+        val key = ops.create()
+        return try {
+            init(key)
+        } catch (_: Exception) {
+            throw SpoolKeyUnavailableException()
+        }
+    }
+
+    private fun unusable(e: Exception): Boolean =
+        e is UnusableKeyEntryException || classifier.classify(e) == ReadFailure.UNUSABLE
 
     fun creationDateMs(): Long? = synchronized(lock) {
         try {

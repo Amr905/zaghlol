@@ -1,6 +1,0 @@
-<?xml version="1.0" encoding="utf-8"?>
-<resources>
-    <!-- T-008 / PO Q4: copy-deck.md section 1.23 (draft copy, Q-19). -->
-    <string name="native_android_captureChannelName">تسجيل العمليات</string>
-    <string name="native_android_captureNotifTitle">زغلول بيسجّل عملية</string>
-</resources>

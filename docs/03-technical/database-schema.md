@@ -246,7 +246,8 @@ CREATE TABLE fired_alerts (                      -- once per threshold per cycle
   kind TEXT NOT NULL, subject_id TEXT NOT NULL, period_key TEXT NOT NULL, threshold INTEGER NOT NULL DEFAULT 0,
   fired_at INTEGER NOT NULL, PRIMARY KEY (kind, subject_id, period_key, threshold)
 );
-CREATE TABLE cycle_summaries (                   -- read-model cache, rebuilt on TransactionsChanged
+CREATE TABLE cycle_summaries (                   -- read-model cache, invalidated on TransactionsChanged (T-051): cycle_start = cycleKey (ISO date); account_filter '*' or one account id;
+                                                 -- by_category = {categoryId: net spend minor}, key '_none' for uncategorized; income/spend are net of offsets (domain-algorithms §2)
   cycle_start TEXT NOT NULL, currency TEXT NOT NULL, account_filter TEXT NOT NULL DEFAULT '*',
   income_minor INTEGER NOT NULL, spend_minor INTEGER NOT NULL, by_category TEXT NOT NULL,   -- JSON
   computed_at INTEGER NOT NULL, PRIMARY KEY (cycle_start, currency, account_filter)
@@ -330,7 +331,7 @@ CREATE INDEX ix_review_open ON review_items(kind, created_at) WHERE resolved_at 
 
 **As built (T-019, v4).**
 - `ignore_rules`: `institution_code` `[a-z0-9_]` 2–32 (OpenAPI `InstitutionCode`); `last4` 2–4 ASCII digits; **`ux_ignore_institution`** (`UNIQUE (institution_code, channel) WHERE last4 IS NULL`), because the table's `UNIQUE` treats NULL `last4` as distinct and would allow two institution-level rules. `CaptureControlsDao.isIgnored` matches the card rule or the institution rule, never last-4 alone (EC-59); `addIgnoreRule` is `ON CONFLICT DO NOTHING` and reports whether it added one.
-- `capture_senders`: `sender` 1–128 characters without controls; `channel IN ('sms','notification','shortcut_message')`; `recordConfirmation` is one upsert returning the new count, so concurrent confirmations all count.
+- `capture_senders`: `sender` 1–128 characters without controls; `channel IN ('sms','notification','shortcut_message')`; `recordConfirmation` is one upsert returning the new count, so concurrent confirmations all count. **T-047 [doc change, FU-096 m-2]:** the primary key stays `sender`; `setAlwaysCapture` and `recordConfirmation` update the row only `WHERE channel = excluded.channel`, so a sender that exists on another channel is reported as a conflict instead of being counted or switched silently. A `(sender, channel)` key (migration) is deferred until a real collision is seen.
 - `custom_templates`: `template_json` a JSON object ≤ 64 KiB; `sample_hash` 64 lowercase hex (never the sample); `ix_templates_sender`.
 - `review_items`: `payload` NULL or a JSON object ≤ 64 KiB; `resolution` a slug, only with `resolved_at`; FK child indexes `ix_review_raw`, `ix_review_txn`. `ReviewItemsDao.resolve` updates only an open item and reports whether this call resolved it (one winner).
 
@@ -339,6 +340,7 @@ CREATE INDEX ix_review_open ON review_items(kind, created_at) WHERE resolved_at 
 CREATE TABLE settings (key TEXT PRIMARY KEY, value TEXT NOT NULL, updated_at INTEGER NOT NULL);
 -- every preference (FR-ONB-07, FR-BAK-06): language, digits, payday_day, income_target, primary_currency,
 -- approx_view{enabled,target}, theme, notif.*, quiet_hours, app_lock{enabled,timeout_s}, hide_amounts.*,
+-- payday_eras (JSON `[{"from":null|"YYYY-MM-DD","day":1..28}]`, T-051; `payday_day` stays the user-facing value and equals the last era's day),
 -- contribution_opt_in, scan_depth_months, setup_progress, paywall_last_shown, … (typed accessors in core/settings)
 
 CREATE TABLE secure_state (key TEXT PRIMARY KEY, value BLOB NOT NULL, updated_at INTEGER NOT NULL);
