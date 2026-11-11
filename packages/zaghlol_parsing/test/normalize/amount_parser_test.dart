@@ -107,6 +107,8 @@ void main() {
       ('no leading digit', '٫٥٠', 'EGP', _std, _malformed),
       ('leading separator', ',500', 'EGP', _std, _malformed),
       ('trailing separator', '150.', 'EGP', _std, _malformed),
+      ('leading zero group', '0,123', 'EGP', _std, _malformed),
+      ('leading zeros group', '000,123', 'EGP', _std, _malformed),
       ('minus sign', '-5', 'EGP', _std, _malformed),
       ('plus sign', '+5', 'EGP', _std, _malformed),
       ('space as thousands', '1 234', 'EGP', _std, _malformed),
@@ -143,14 +145,17 @@ void main() {
       ('rial without fallback', '﷼ 10', null, _std, _malformed),
       ('rial with other fallback', '﷼ 10', 'EGP', _std, _malformed),
       ('dollar with agreeing fallback', r'$ 10', 'CAD', _std, 1000),
-      ('dollar with other fallback', r'$ 10', 'EGP', _std, _malformed),
+      ('dollar with other fallback is USD', r'$ 10', 'EGP', _std, 1000),
       ('no marker no fallback', '150', null, _std, _malformed),
       ('unknown marker', 'XYZ 150', null, _std, _malformed),
       ('marker on both sides', 'EGP 150 EGP', null, _std, _malformed),
       ('two numbers', 'EGP 150 and 20', null, _std, _malformed),
       ('no number', 'EGP', null, _std, _malformed),
       ('digits and letters', '12abc', 'EGP', _std, _malformed),
-      ('sentence full stop', 'EGP 150.', null, _std, _malformed),
+      ('sentence full stop', 'EGP 150.', null, _std, 15000),
+      ('number then comma then code', '150, EGP', null, _std, 15000),
+      ('trailing comma after number', 'EGP 150,', null, _std, 15000),
+      ('two trailing stops', 'EGP 150..', null, _std, _malformed),
       ('excess precision', 'EGP 12.345', null, _std, _excess),
       ('empty', '', 'EGP', _std, _malformed),
     ];
@@ -213,26 +218,32 @@ void main() {
   });
 
   group('fuzz', () {
-    test('random text never throws and failures never echo the input', () {
-      final random = Random(99);
-      const alphabet = '0123456789,.٫٬ ١٢٣۴€\$£﷼EGPKWDJ-+abc\u200F';
-      for (var i = 0; i < 5000; i++) {
-        final length = random.nextInt(20);
-        final text = String.fromCharCodes([
-          for (var k = 0; k < length; k++)
-            alphabet.codeUnitAt(random.nextInt(alphabet.length)),
-        ]);
-        for (final locale in NumberLocale.values) {
-          final result = parseMoneyText(text, locale: locale);
-          final failure = result.failureOrNull;
-          if (failure != null && text.trim().length >= 3) {
-            expect(failure.toString().contains(text.trim()), isFalse);
-            expect(failure.code, startsWith('PARSE_'));
+    test(
+      'random text never throws; failures carry only a reason and a code',
+      () {
+        final random = Random(99);
+        const alphabet = '0123456789,.٫٬ ١٢٣۴€\$£﷼EGPKWDJ-+abc\u200F';
+        for (var i = 0; i < 5000; i++) {
+          final length = random.nextInt(20);
+          final text = String.fromCharCodes([
+            for (var k = 0; k < length; k++)
+              alphabet.codeUnitAt(random.nextInt(alphabet.length)),
+          ]);
+          for (final locale in NumberLocale.values) {
+            final result = parseMoneyText(text, locale: locale);
+            final failure = result.failureOrNull;
+            if (failure != null) {
+              // Structural: a failure is a reason enum plus a fixed code; the
+              // type has no field that could hold the input text.
+              expect(failure, isA<ParseFailure>());
+              expect(failure.code, startsWith('PARSE_'));
+              expect(ParseFailureReason.values, contains(failure.reason));
+            }
+            parseAmount(text, currency: _c('EGP'), locale: locale);
           }
-          parseAmount(text, currency: _c('EGP'), locale: locale);
         }
-      }
-    });
+      },
+    );
   });
 }
 

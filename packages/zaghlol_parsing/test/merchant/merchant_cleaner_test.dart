@@ -84,6 +84,26 @@ void main() {
     });
   });
 
+  group('pinned current behavior (FU-066)', () {
+    // These rows document what the cleaner does today so a change is a
+    // conscious one; they are not claims that the output is ideal.
+    final rows = <(String, String)>[
+      ('EL MAADI PHARMACY', 'El Maadi Pharmacy'), // mid-name city is kept
+      ('PHARMACY MAADI BRANCH', 'Pharmacy Maadi Branch'),
+      ('CARREFOUR T4821', 'Carrefour T4821'), // alphanumeric terminal id kept
+      ('SHELL STATION A12', 'Shell Station A12'),
+      ('CARREFOUR 041 MAADI', 'Carrefour'), // numeric id then city: both go
+    ];
+    for (final (input, display) in rows) {
+      test(input, () => expect(cleanMerchant(input).display, display));
+    }
+
+    test('attached and separate article keys differ (alias variants)', () {
+      expect(merchantKey('ALMARAI'), 'almarai');
+      expect(merchantKey('AL MARAI'), 'marai');
+    });
+  });
+
   group('merchantKey', () {
     final file = [
       File('test/fixtures/merchant_key_vectors.json'),
@@ -132,7 +152,7 @@ void main() {
       expect(merchantKey('elezaby'), 'ezaby');
     });
 
-    test('output is words of a-z0-9 with single spaces, stable', () {
+    test('output is words of a-z0-9 with single spaces; re-keying a key is a no-op for these inputs', () {
       final inputs = ['CARREFOUR 041', 'صيدليات العزبي', 'Ünï ٣٤', 'EL EZABY'];
       for (final s in inputs) {
         final k = merchantKey(s);

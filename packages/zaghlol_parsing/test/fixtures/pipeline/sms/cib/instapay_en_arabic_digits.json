@@ -1,0 +1,17 @@
+{
+  "sender": "CIB",
+  "body": "CIB: You sent EGP ١٬٥٠٠٫٠٠ to Ali.H@instapay via InstaPay. Ref ٣٤٥٦٧٨٩٠١. Balance EGP ٢٬٤٠٠٫٥٠",
+  "receivedAt": "2026-10-23T11:14:00+03:00",
+  "expect": {
+    "template": "cib.instapay_out.en",
+    "amount": "1500.00",
+    "ipa": "Ali.H@instapay",
+    "ref": "345678901",
+    "balance": "2400.50",
+    "confidence": "960",
+    "needsReview": "false",
+    "occurredAt": "2026-10-23T11:14:00",
+    "language": "en",
+    "reasons": []
+  }
+}

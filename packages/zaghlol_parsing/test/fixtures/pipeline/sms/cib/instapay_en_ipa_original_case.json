@@ -1,0 +1,22 @@
+{
+  "sender": "CIB",
+  "body": "CIB: You sent EGP 500.00 to Omar.K@instapay via InstaPay. Ref AB12CD34. Balance EGP 2,400.50",
+  "receivedAt": "2026-10-23T11:14:00+03:00",
+  "expect": {
+    "template": "cib.instapay_out.en",
+    "direction": "expense",
+    "event": "instapay_out",
+    "amount": "500.00",
+    "currency": "EGP",
+    "ipa": "Omar.K@instapay",
+    "ref": "AB12CD34",
+    "counterpartyKind": "ipaAddress",
+    "balance": "2400.50",
+    "counterparty": null,
+    "confidence": "960",
+    "needsReview": "false",
+    "occurredAt": "2026-10-23T11:14:00",
+    "language": "en",
+    "reasons": []
+  }
+}

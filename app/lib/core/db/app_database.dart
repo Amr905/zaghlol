@@ -11,7 +11,9 @@ import 'package:drift/native.dart' show NativeDatabase;
 import 'package:flutter/foundation.dart' show kDebugMode, protected;
 
 import 'db_errors.dart';
+import 'migrations/v2_financial_a.dart';
 import 'schema/app_schema.dart';
+import 'schema/app_schema.steps.dart';
 import 'schema_shape.dart';
 
 export 'schema/app_schema.dart';
@@ -20,8 +22,8 @@ export 'schema/app_schema.dart';
 /// Q2; D-70). Written with the very first create after an orphan wipe.
 const String restoreNoticeDueKey = 'restore_notice_due';
 
-/// Runs the version steps (`stepByStep` from the generated
-/// `schema_versions.dart` once a v2 exists).
+/// Runs the version steps (the generated `migrationSteps`,
+/// schema/app_schema.steps.dart).
 typedef UpgradeSteps = Future<void> Function(Migrator m, int from, int to);
 
 class AppDatabase extends AppSchema {
@@ -46,11 +48,28 @@ class AppDatabase extends AppSchema {
   /// Diag fields only (FU-050).
   int? get attemptedUpgradeFrom => _upgradeFrom;
 
-  /// The version steps. v1 has none, so any upgrade request is refused.
-  /// Tests override this (FakeV2Database).
+  /// The version steps, `from` → `to` (T-017: v1 → v2). Any other pair is
+  /// refused before anything runs. Runs inside the upgrade transaction set
+  /// up by [migration]; tests override this (FakeNextDatabase).
   @protected
   Future<void> upgradeSteps(Migrator m, int from, int to) async {
-    throw DbMigrationException(DbMigrationException.noMigrationPath);
+    if (from < 1 || from >= to || to != appSchemaVersion) {
+      throw DbMigrationException(DbMigrationException.noMigrationPath);
+    }
+    await m.runMigrationSteps(
+      from: from,
+      to: to,
+      steps: migrationSteps(from1To2: (m, _) => _from1To2()),
+    );
+  }
+
+  /// v1 → v2 (T-017): the frozen statements of the v2 dump
+  /// (migrations/v2_financial_a.dart), not drift_dev's `Schema2`, which
+  /// misses three of the objects.
+  Future<void> _from1To2() async {
+    for (final (_, sql) in v2AddedObjects) {
+      await customStatement(sql);
+    }
   }
 
   /// A plain in-memory instance with the same schema for the comparison.

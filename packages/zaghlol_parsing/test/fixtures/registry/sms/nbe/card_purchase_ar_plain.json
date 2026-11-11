@@ -1,0 +1,16 @@
+{
+  "sender": "NBE",
+  "body": "تم خصم 450.00 جم من بطاقة فيزا **4567 لدى CARREFOUR MAADI EG 041 يوم 23/10. الرصيد المتاح 12400.00 جم",
+  "receivedAt": "2026-10-23T11:14:00+03:00",
+  "expect": {
+    "template": "nbe.card_purchase.ar",
+    "direction": "expense",
+    "event": "card_purchase",
+    "amount": "450.00",
+    "currency": "EGP",
+    "last4": "4567",
+    "merchantClean": "Carrefour",
+    "balance": "12400.00",
+    "date": "2026-10-23"
+  }
+}

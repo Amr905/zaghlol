@@ -16,6 +16,7 @@ void main() {
       ('narrow nbsp', 'a b', 'a b'),
       ('thin space', 'a b', 'a b'),
       ('zero width', 'a\u200Bb\u200Cc\u200Dd', 'abcd'),
+      ('word joiner and soft hyphen', 'a\u2060b\u00ADc', 'abc'),
       ('rtl and ltr marks', '\u200F١٢٣\u200E', '123'),
       ('embedding controls', '\u202A1\u202B2\u202C3\u202D4\u202E', '1234'),
       ('isolates', '\u20661\u20672\u20683\u2069', '123'),
@@ -62,6 +63,14 @@ void main() {
     }
   });
 
+  group('foldArabicVariants', () {
+    test('folds letter variants and marks, keeps case and escapes', () {
+      expect(foldArabicVariants('أإآٱ ى ة'), 'اااا ي ه');
+      expect(foldArabicVariants('جـنيه \\S\\D ABC'), 'جنيه \\S\\D ABC');
+      expect(foldArabicVariants('أَحْمَد'), 'احمد');
+    });
+  });
+
   group('fuzz', () {
     final random = Random(13);
     const pool = <int>[
@@ -88,6 +97,8 @@ void main() {
             (u >= 0x202A && u <= 0x202E) ||
             (u >= 0x2066 && u <= 0x2069) ||
             u == 0x061C ||
+            u == 0x2060 ||
+            u == 0x00AD ||
             u == 0xFEFF ||
             u == 0x0640 ||
             (u >= 0x064B && u <= 0x0652) ||
@@ -129,6 +140,83 @@ void main() {
         expect(out, equals(out.trim()));
         expect(out.contains('  '), isFalse);
       }
+    });
+  });
+
+  group('foldKeyIndexed', () {
+    test('text equals foldKey on rows and random input', () {
+      const rows = [
+        '',
+        '   ',
+        'أحمد  محمـد',
+        '\u200f١٢٣\u200e abc  DEF',
+        'a\u00A0\u00A0b\tc',
+        '\u200b \u200b x',
+        'ة ى أ إ آ ٱ',
+        '😀 x 😀',
+      ];
+      for (final r in rows) {
+        expect(foldKeyIndexed(r).text, foldKey(r));
+      }
+      final rnd = Random(7);
+      const pool = [
+        'a',
+        'B',
+        ' ',
+        '\u00A0',
+        '\u0640',
+        '\u064B',
+        '\u200f',
+        '٣',
+        'ة',
+        'أ',
+        'ى',
+        '\u2060',
+        '\n',
+        '😀',
+        'ي',
+        '.',
+      ];
+      for (var i = 0; i < 3000; i++) {
+        final b = StringBuffer();
+        for (var k = rnd.nextInt(24); k >= 0; k--) {
+          b.write(pool[rnd.nextInt(pool.length)]);
+        }
+        final input = b.toString();
+        final f = foldKeyIndexed(input);
+        expect(f.text, foldKey(input));
+        expect(f.origin.length, f.text.length);
+        for (var j = 1; j < f.origin.length; j++) {
+          expect(f.origin[j], greaterThan(f.origin[j - 1]));
+        }
+        for (final o in f.origin) {
+          expect(o, inInclusiveRange(0, input.length - 1));
+        }
+      }
+    });
+
+    test('a folded span maps back to the original text', () {
+      const original = 'خصم  لـدى إيمان  و أحمد';
+      final f = foldKeyIndexed(original);
+      final start = f.text.indexOf('ايمان');
+      expect(start, isNonNegative);
+      expect(f.originalSpan(original, start, start + 5), 'إيمان');
+      final two = f.text.indexOf('ايمان و احمد');
+      expect(f.originalSpan(original, two, two + 12), 'إيمان  و أحمد');
+    });
+
+    test('tatweel inside a span stays in the original span', () {
+      const original = 'to مـحمد now';
+      final f = foldKeyIndexed(original);
+      final start = f.text.indexOf('محمد');
+      expect(f.originalSpan(original, start, start + 4), 'مـحمد');
+    });
+
+    test('empty and out-of-range spans are null', () {
+      final f = foldKeyIndexed('abc');
+      expect(f.originalSpan('abc', 1, 1), isNull);
+      expect(f.originalSpan('abc', -1, 2), isNull);
+      expect(f.originalSpan('abc', 0, 9), isNull);
     });
   });
 }

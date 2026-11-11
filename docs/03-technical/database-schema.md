@@ -33,6 +33,13 @@ erDiagram
 
 ## 2. Tables
 
+**Schema v2 (T-017)** implements §2.1–2.3 plus the `categories` table of §2.4 (the parent of `transactions.category_id`; T-018 owns its DAO, seeds and the rest of §2.4). The DDL as built is `app/lib/core/db/schema/financial.drift`; the committed dump is `app/drift_schemas/app_database/drift_schema_v2.json`. It is stricter than the sketches below in these ways (all CHECKs, enforced and tested in `test/core/db/financial_schema_constraints_test.dart`):
+- every `id TEXT PRIMARY KEY` is also `NOT NULL`; 0/1 flags have `CHECK (x IN (0,1))`;
+- **money columns** (T-012): every `*_minor` column has `typeof(x) = 'integer' AND x BETWEEN -(2^53−1) AND 2^53−1` (or `x IS NULL OR (…)`), so the stored value is always an integer in range; `amount_minor`, `original_amount_minor`, `credit_limit_minor` and `share_minor` are ≥ 0, `offset_links.amount_minor` > 0, balances signed; every currency column is `GLOB '[A-Z][A-Z][A-Z]'`; the pair `original_amount_minor`/`original_currency` is both NULL or both set. INTEGER affinity converts a REAL or text value that is losslessly integer-valued (`2.0`, `'123'`, `'12.0'`) to an integer before the CHECK runs, so it is stored as an integer and accepted; a REAL non-integer (`1.5`), non-integral or non-numeric text (`'1.5'`, `'abc'`) and blobs are refused;
+- `accounts`: `label` 1–30 characters, `last4` 2–4 ASCII digits (Arabic-Indic digits must be normalised first), `merged_into_id <> id`, `is_default_cash = 1` only for `kind = 'cash'`, and `ux_accounts_default_cash` (partial unique index on `is_default_cash WHERE is_default_cash = 1`) for "exactly one";
+- `raw_messages.body_hash` is 64 lowercase hex characters; `transactions.occurred_tz_offset_min` within ±1080; `parse_confidence` NULL or 0..1;
+- `transfer_pairs.in_txn_id <> out_txn_id`; `offset_links.expense_txn_id <> source_txn_id`; extra indexes `ix_offset_source`, `ix_split_expense`.
+
 ### 2.1 Accounts & balances
 ```sql
 CREATE TABLE accounts (
@@ -125,6 +132,13 @@ CREATE VIRTUAL TABLE transactions_fts USING fts5(      -- FR-TXN-01 search < 200
 -- kept in sync by triggers on transactions (insert/update/delete); amount_text = formatted amount in both digit systems
 ```
 
+**Search as built (T-017).**
+- `transactions_fts_src(id INTEGER PRIMARY KEY, txn_id TEXT NOT NULL UNIQUE, merchant, counterparty, note, amount_text NOT NULL)` is a real table: its `INTEGER PRIMARY KEY` keeps the FTS rowids stable across `VACUUM`, which the implicit rowid of `transactions` (a TEXT-PK table) does not.
+- Two external-content FTS5 tables over it (`content_rowid='id'`): `transactions_fts` as above, and `transactions_fts_short(merchant, counterparty, tokenize='unicode61 remove_diacritics 2', prefix='1 2')` for 1–2 character queries (T-016 measurement: p95 20.7 ms vs 497 ms for LIKE at 50k rows).
+- The view `transactions_fts_row` computes the indexed text: `merchant` = `merchant_raw`, plus `merchant_norm` when it differs; `counterparty` = `counterparty_value`; `amount_text` = the amount with the currency's ISO exponent, Latin then Arabic-Indic digits without grouping (`1250.50 ١٢٥٠٫٥٠`, KWD `1.500 ١٫٥٠٠`, JPY `1200 ١٢٠٠`). The exponent is a `CASE` over the non-2-exponent codes of the bundled ISO table; a test compares it with `Currency.all`, so an ISO refresh that changes an exponent needs a migration that replaces the view.
+- Triggers: after insert / update of `id`, merchant, counterparty, note, amount or currency / delete on `transactions` maintain the src row from the view; after insert / update / delete on the src table maintain both FTS tables with the external-content `'delete'` command. Soft-deleted rows stay indexed (Undo); queries filter `deleted_at IS NULL`.
+- `TransactionsDao.search` trims the query, cuts it to 64 code points, doubles `"` and binds it as one quoted phrase: 3+ characters go to `transactions_fts` (substring), 1–2 to `transactions_fts_short` as a word prefix (`"ab"*`). Digit-only short queries find nothing there; Search should send them to amount filters. Grouping separators in the query (`1,250`) are the search layer's to strip.
+
 ### 2.3 Transfers, refunds, splits, reimbursements
 ```sql
 CREATE TABLE transfer_pairs (
@@ -147,6 +161,10 @@ CREATE TABLE offset_links (                    -- reduces an expense's net spend
 );
 -- invariant (checked in use case + trigger): SUM(amount) per expense ≤ expense.amount (BR-XFR-06);
 -- SUM(amount) per source ≤ source.amount (FR-XFR-07)
+-- As built (T-017): BEFORE INSERT and BEFORE UPDATE triggers on offset_links, and BEFORE UPDATE OF
+-- amount_minor, currency on transactions, RAISE(ABORT, code) with OFFSET_EXCEEDS_EXPENSE,
+-- OFFSET_EXCEEDS_SOURCE, OFFSET_CURRENCY_MISMATCH (source currency ≠ expense currency, or a linked
+-- transaction's currency changes) or OFFSET_PARTICIPANT_MISMATCH (participant of another expense).
 
 CREATE TABLE split_participants (                -- FR-XFR-04/05
   id TEXT PRIMARY KEY,
@@ -306,8 +324,9 @@ CREATE TABLE diag_log (id INTEGER PRIMARY KEY, at INTEGER NOT NULL, level TEXT N
 | Rule | Where |
 |---|---|
 | Ignored-card and non-financial messages never reach `raw_messages` | Capture Guard before the spool, plus the Dart pipeline re-checks before insert (defense in depth) |
-| One default cash account | `AccountsRepository.ensureDefaultCash()` + partial unique index |
-| Offset sums ≤ amounts | `OffsetLinkService` inside the write transaction; `BEFORE INSERT` trigger raises `ABORT` |
+| One default cash account | `AccountsRepository.ensureDefaultCash()` + partial unique index `ux_accounts_default_cash` |
+| Offset sums ≤ amounts | `OffsetLinkService` inside the write transaction; `BEFORE INSERT`/`BEFORE UPDATE` triggers (and one on transaction amount/currency edits) raise `ABORT` with a fixed code |
+| A refused write never carries data | DAO writes run through `guardWrite` (`core/db/daos/write_errors.dart`): a `SqliteException` (which holds the statement and its bound values) becomes a code-only `DbWriteException` (`DB_CONSTRAINT_*`, the trigger codes, `DB_WRITE_FAILED`) |
 | Transfer pair same currency unless `cross_currency`/`fx_conversion` | `PairSelfTransfers` |
 | Catalog update never changes `category_source IN ('user','user_rule')` or `is_user_verified=1` rows | `ApplyCatalogUpdate` WHERE clause (FR-SYNC-05) |
 | Money never `REAL` | Drift type converters (`Money`); a lint forbids `double` in money paths |
@@ -316,6 +335,7 @@ CREATE TABLE diag_log (id INTEGER PRIMARY KEY, at INTEGER NOT NULL, level TEXT N
 
 1. Drift `schemaVersion` starts at 1. Every change bumps it and adds a `stepByStep` migration.
 2. `drift_dev schema dump` snapshots live in `app/drift_schemas/`, and generated migration tests verify every `vN → vN+1` path *and* `v1 → latest` on populated fixture databases (NFR-REL-02).
+2a. T-017: a step runs a **frozen** list of statements (e.g. `core/db/migrations/v2_financial_a.dart`, checked against the dump by a test), never the current schema, so later changes can't leak into old steps. drift_dev 2.35.3's generated `Schema2` (`app_schema.steps.dart`) omits `transactions_fts_src`, `transactions_fts_short` and the view, so it is used for dispatch (`migrationSteps`) only. The codegen script fails on any drift_dev analysis warning (a warning silently drops the entity), and make-migrations refuses a changed schema for an existing version. `schemaShapeOf` compares CHECK clauses too (FU-071 m-3).
 3. Before running migrations, the app makes an encrypted copy of the DB: `PRAGMA wal_checkpoint(TRUNCATE)`, then a byte copy `zaghlol.db` → `zaghlol.db.migrate.part` → renamed `zaghlol.db.migrate.tmp` (same key and salt by construction; T-016 — `VACUUM INTO` can't run inside drift's migration transaction and its key semantics under sqlite3mc are unproven). It is deleted after success; on failure, or at the next start if the migration was never confirmed, the app restores it and shows the "update failed" screen.
 4. Migrations are additive in a release. Column drops or renames happen in two releases: shadow column first, then drop.
 5. The registry and catalog are **data**, not schema. Their versions are stored in `catalog_meta` and `raw_messages.registry_version`, and re-parse jobs are driven by version bumps.
