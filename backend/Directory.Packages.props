@@ -47,6 +47,9 @@
     <PackageVersion Include="Microsoft.NET.Test.Sdk" Version="17.14.1" />
     <PackageVersion Include="OpenTelemetry.Exporter.InMemory" Version="1.15.3" />
     <PackageVersion Include="Testcontainers.PostgreSql" Version="4.6.0" />
+    <!-- Transitive pin: WireMock.Net.Minimal 2.21.0 (test-only) pulls Microsoft.AspNetCore.WebUtilities 2.3.0 (GHSA-6527-9fp8-r4x6);
+         2.3.14 is the first 2.3.x without the advisory on nuget.org (checked 2026-11-11). -->
+    <PackageVersion Include="Microsoft.AspNetCore.WebUtilities" Version="2.3.14" />
     <!-- Transitive pin: Testcontainers 4.6.0 pulls SSH.NET 2024.2.0 (GHSA-mggc-4xg6-vcxf, GHSA-q939-rpr3-3284). -->
     <PackageVersion Include="SSH.NET" Version="2026.0.0" />
     <!-- Test-only: an in-process HTTP server standing in for the Play Developer API (T-130). The Minimal package leaves out the
