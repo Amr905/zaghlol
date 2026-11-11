@@ -187,3 +187,7 @@ Blockers: none. Majors: none.
 Minors:
 - 77-1a: `loadSchedule` defaults to payday on the 1st and `events` to none, and no production code constructs `BulkEditUseCase` yet. When the provider is wired (T-051/T-077 UI task), pass the real schedule and the bus, or make `loadSchedule` required. A default 1st would silently name the wrong cycles for users with another payday. Follow-up for the wiring task.
 - 77-1b: In the review worktree `/home/claude/wt-batch9` the index holds staged changes that revert 2d576f8 (6 files). Running tests there does not exercise the fix. Do not commit from that index; run `git restore --staged --worktree .` first.
+
+## Lead delta check 21-1 (2d576f8)
+
+`DiagCode.tryFromStored` is removed. `DiagCode.fromRegistry` returns only an existing `DiagCodes` constant and never builds a new instance, and the exporter drops any stored row code not in `DiagCodes.all`. The changed tamper test checks that an unregistered `CARD_4111…` row is dropped. 21-1 is resolved. Minor: nothing ties `DiagCodes.all` to the constants, so a test should check they match (FU-113). Verdict for T-021: **APPROVED**.
