@@ -259,6 +259,18 @@ public sealed class PlayDeveloperApiClientTests : IDisposable
     }
 
     [Fact]
+    public async Task AnOversizedAnswerIsAServerErrorAndIsNotParsed()
+    {
+        await using var host = PlayClientHost.Start(play);
+        var token = NewToken();
+        play.Get(PlayWireMock.SubscriptionPath(token), 200, "{\"pad\":\"" + new string('x', 300 * 1024) + "\"}");
+
+        var error = await Assert.ThrowsAsync<PlayApiException>(() => host.Api.GetSubscriptionAsync(new Sensitive<string>(token), StoreLane.Verify, CancellationToken.None));
+
+        Assert.Equal(PlayCallOutcome.ServerError, error.Outcome);
+    }
+
+    [Fact]
     public async Task UnknownEnumValuesAreUnknownNotADefaultState()
     {
         await using var host = PlayClientHost.Start(play);

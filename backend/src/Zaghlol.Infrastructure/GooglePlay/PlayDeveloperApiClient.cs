@@ -171,11 +171,6 @@ internal sealed class PlayDeveloperApiClient(
         using var response = await CallAsync(api, lane, method, path, template, cancellationToken);
         try
         {
-            if (response.Content.Headers.ContentLength > MaxResponseBytes)
-            {
-                throw Fail(api, PlayCallOutcome.ServerError, (int)response.StatusCode);
-            }
-
             return await response.Content.ReadFromJsonAsync(typeInfo, cancellationToken) ?? throw Fail(api, PlayCallOutcome.ServerError, (int)response.StatusCode);
         }
         catch (JsonException)
@@ -212,7 +207,8 @@ internal sealed class PlayDeveloperApiClient(
         HttpResponseMessage response;
         try
         {
-            response = await http.SendAsync(request, HttpCompletionOption.ResponseHeadersRead, cancellationToken);
+            // Buffered, so MaxResponseContentBufferSize (256 KB) caps every body, chunked ones included.
+            response = await http.SendAsync(request, HttpCompletionOption.ResponseContentRead, cancellationToken);
         }
         catch (BrokenCircuitException)
         {
