@@ -143,11 +143,11 @@ AND EXISTS (
   /// connection is never overwritten), then stamps the rule's
   /// `last_applied_at`. Returns the number of transactions changed.
   ///
-  /// Deliberately not wrapped in a drift transaction: `BEGIN IMMEDIATE`
-  /// from a second connection fails at once with SQLITE_BUSY instead of
-  /// waiting for the busy timeout, while a lone write statement waits. The
-  /// stamp is metadata, so a crash between the two statements loses
-  /// nothing.
+  /// Not in a transaction: a single write statement waits for another
+  /// connection's write lock up to `dbBusyTimeout` (5 s, the busy handler
+  /// from `applyBusyTimeout`, FU-094), then fails with `DB_WRITE_FAILED` and
+  /// nothing is applied. The stamp is metadata, so a crash between the two
+  /// statements loses nothing.
   Future<int> applyToPast(
     String ruleId, {
     required Set<String>? ids,
