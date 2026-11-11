@@ -71,6 +71,49 @@ public static partial class PlayStateMapping
         _ => new(null, VerifyStatus.Invalid, PlayReadOutcome.Unknown),
     };
 
+    /// <summary>The RTDN type whose <c>expired</c> read is labelled <c>refunded</c> (T-133 §3 step 6).</summary>
+    public const string VoidedPurchaseType = "VOIDED_PURCHASE";
+
+    /// <summary>The RTDN type whose <c>expired</c> read is labelled <c>revoked</c> (T-133 §3 step 6).</summary>
+    public const string SubscriptionRevokedType = "SUBSCRIPTION_REVOKED";
+
+    /// <summary>
+    /// The Google label rule (T-133 design note §3 step 6, backend-schema <c>purchases.state</c>), applied under the row lock by every
+    /// Google writer (RTDN worker, verify, restore, the acknowledge sweeper). Play never says "refunded" for a subscription, so:
+    /// <list type="bullet">
+    /// <item>any read other than <c>expired</c> (an entitling one in particular) is written as read: Gold depends only on Play;</item>
+    /// <item>an <c>expired</c> read becomes <c>refunded</c> for a <c>VOIDED_PURCHASE</c> and <c>revoked</c> for a
+    /// <c>SUBSCRIPTION_REVOKED</c>;</item>
+    /// <item>otherwise an <c>expired</c> read keeps a stored <c>refunded</c>/<c>revoked</c>, so a later plain read can't erase the label.</item>
+    /// </list>
+    /// The label only chooses between two non-entitling states.
+    /// <para>Provisional, PO to confirm (T-133 PO question 3): a refund without revoke keeps Gold until Play ends the subscription, and
+    /// Gold returns when Play later reports the purchase entitling again. This method and the processor's refund floor are the
+    /// decision points.</para>
+    /// </summary>
+    /// <param name="stored">The locked row's state, or <c>null</c> for an insert.</param>
+    /// <param name="read">Play's mapped answer.</param>
+    /// <param name="notificationType">The RTDN type that triggered the read, or <c>null</c> (verify, restore, sweeper).</param>
+    public static StoredPurchaseState Settle(StoredPurchaseState? stored, StoredPurchaseState read, string? notificationType)
+    {
+        if (read != StoredPurchaseState.Expired)
+        {
+            return read;
+        }
+
+        return notificationType switch
+        {
+            VoidedPurchaseType => StoredPurchaseState.Refunded,
+            SubscriptionRevokedType => StoredPurchaseState.Revoked,
+            _ when stored is StoredPurchaseState.Refunded or StoredPurchaseState.Revoked => stored.Value,
+            _ => StoredPurchaseState.Expired,
+        };
+    }
+
+    /// <summary>The states that grant Gold (<c>v_entitlements</c>).</summary>
+    public static bool IsEntitling(StoredPurchaseState state) =>
+        state is StoredPurchaseState.Active or StoredPurchaseState.InGrace or StoredPurchaseState.CanceledActive;
+
     /// <summary>The verify status a stored state stands for (used when a newer read already updated the row).</summary>
     public static VerifyStatus StatusOf(StoredPurchaseState state) => state switch
     {

@@ -106,3 +106,15 @@ public sealed class RetentionPurgeJob(IRetentionStore store, IRetentionMetrics m
         return new RetentionRunResult(purged, failed);
     }
 }
+
+/// <summary>
+/// Retention ages that code outside the purger depends on (FU-098 nit 5): the purger's SQL and every acceptance window that must stay
+/// below a retention read the same value.
+/// </summary>
+public static class RetentionAges
+{
+    /// <summary><c>store_notifications</c> rows are deleted 90 days after <c>received_at</c>.</summary>
+    public const int StoreNotificationsDays = 90;
+
+    public static TimeSpan StoreNotifications { get; } = TimeSpan.FromDays(StoreNotificationsDays);
+}

@@ -39,7 +39,7 @@ internal sealed class StoreNotificationInbox(Func<ZaghlolDbContext> contexts) : 
         command.Parameters.AddWithValue("subtype", (object?)record.Subtype ?? DBNull.Value);
         command.Parameters.AddWithValue("product", (object?)record.ProductId ?? DBNull.Value);
         command.Parameters.AddWithValue("key", (object?)record.StoreKey?.Reveal() ?? DBNull.Value);
-        command.Parameters.AddWithValue("environment", PurchaseDbText.Environment(record.Environment));
+        command.Parameters.AddWithValue("environment", record.Environment is { } environment ? PurchaseDbText.Environment(environment) : (object)DBNull.Value);
         command.Parameters.AddWithValue("event_time", record.EventTime.ToUniversalTime());
         command.Parameters.AddWithValue("digest", record.PayloadDigest);
         command.Parameters.AddWithValue("processed", record.Processed);

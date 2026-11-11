@@ -1,13 +1,14 @@
 namespace Zaghlol.Application.Purchases;
 
 /// <summary>
-/// The processor's retry schedule and error codes (T-134 design note §3, error-handling-and-observability §2). <c>last_error</c>
-/// holds only these constants (the schema's <c>^[A-Z0-9_]{1,64}$</c> CHECK), so nothing from Apple reaches the database or a log.
+/// The ASSN V2 processor's error codes (T-134 design note §3, error-handling-and-observability §2). The schedule itself is the shared
+/// <see cref="StoreNotificationSchedule"/> (T-133 §5); the members here delegate to it. <c>last_error</c> holds only these constants
+/// (the schema's <c>^[A-Z0-9_]{1,64}$</c> CHECK), so nothing from Apple reaches the database or a log.
 /// </summary>
 public static class AppleNotificationSchedule
 {
     /// <summary>The 10th counted failure dead-letters the row (about 30 h after the first).</summary>
-    public const int MaxAttempts = 10;
+    public const int MaxAttempts = StoreNotificationSchedule.MaxAttempts;
 
     /// <summary><c>REFUND</c>/<c>REVOKE</c>: Apple's answer is taken as eventual consistency for this many attempts (about 40 min).</summary>
     public const int RefundFloorAttempts = 4;
@@ -20,47 +21,35 @@ public static class AppleNotificationSchedule
     public const string RefundNotReflected = "REFUND_NOT_REFLECTED";
     public const string Contradiction = "CONTRADICTION";
 
+    /// <summary>An unexpected exception on one row (FU-098 code 2): counted, and the run goes on with the next row.</summary>
+    public const string Internal = StoreNotificationSchedule.Internal;
+
     /// <summary>Informational codes on processed rows (not failures).</summary>
     public const string NoPurchase = "NO_PURCHASE";
     public const string EnvMismatch = "ENV_MISMATCH";
 
-    public static readonly TimeSpan BaseDelay = TimeSpan.FromMinutes(1);
-    public static readonly TimeSpan MaxDelay = TimeSpan.FromHours(8);
+    public static TimeSpan BaseDelay => StoreNotificationSchedule.BaseDelay;
+
+    public static TimeSpan MaxDelay => StoreNotificationSchedule.MaxDelay;
 
     /// <summary>Uncounted deferrals: an Apple 429 waits <c>Retry-After</c> clamped to this range; budget or circuit 1 minute.</summary>
-    public static readonly TimeSpan MinDefer = TimeSpan.FromMinutes(1);
-    public static readonly TimeSpan MaxDefer = TimeSpan.FromHours(1);
+    public static TimeSpan MinDefer => StoreNotificationSchedule.MinDefer;
+
+    public static TimeSpan MaxDefer => StoreNotificationSchedule.MaxDefer;
 
     /// <summary>Every counted failure code (the dead-letter codes).</summary>
     public static IReadOnlyList<string> FailureCodes { get; } =
-        [StoreError, StoreAuth, NotFound, JwsApi, Unmapped, RefundNotReflected, Contradiction];
+        [StoreError, StoreAuth, NotFound, JwsApi, Unmapped, RefundNotReflected, Contradiction, Internal];
 
     /// <summary><c>min(1 min · 3^(attempts−1), 8 h)</c>: 1 m, 3 m, 9 m, 27 m, 81 m, 4 h 3 m, then 8 h.</summary>
-    public static TimeSpan Backoff(int attempts)
-    {
-        ArgumentOutOfRangeException.ThrowIfLessThan(attempts, 1);
-        var delay = BaseDelay;
-        for (var i = 1; i < attempts && delay < MaxDelay; i++)
-        {
-            delay *= 3;
-        }
-
-        return delay < MaxDelay ? delay : MaxDelay;
-    }
+    public static TimeSpan Backoff(int attempts) => StoreNotificationSchedule.Backoff(attempts);
 
     /// <summary>The next try after the <paramref name="attempts"/>-th counted failure, ± 10 % (<paramref name="jitterUnit"/> in [0, 1)).</summary>
-    public static DateTimeOffset NextAttemptAt(int attempts, DateTimeOffset now, double jitterUnit)
-    {
-        var factor = 0.9 + (0.2 * Math.Clamp(jitterUnit, 0, 1));
-        return now + (Backoff(attempts) * factor);
-    }
+    public static DateTimeOffset NextAttemptAt(int attempts, DateTimeOffset now, double jitterUnit) =>
+        StoreNotificationSchedule.NextAttemptAt(attempts, now, jitterUnit);
 
     /// <summary>An Apple 429: its <c>Retry-After</c> clamped to 1 min-1 h (1 min when absent).</summary>
-    public static TimeSpan RateLimitedDelay(TimeSpan? retryAfter)
-    {
-        var delay = retryAfter ?? MinDefer;
-        return delay < MinDefer ? MinDefer : delay > MaxDefer ? MaxDefer : delay;
-    }
+    public static TimeSpan RateLimitedDelay(TimeSpan? retryAfter) => StoreNotificationSchedule.RateLimitedDelay(retryAfter);
 }
 
 /// <summary>
@@ -143,30 +132,69 @@ public sealed class AppleNotificationProcessor(
         var held = await store.TryLockAsync(LockName, cancellationToken);
         if (held is null)
         {
+            // Another replica holds the lock: this process is alive, the run happens there.
+            telemetry.Heartbeat();
             return new AppleProcessRun(false, 0, 0, 0, false);
         }
 
         await using (held)
         {
-            var rows = await store.ListDueAsync(clock.GetUtcNow(), BatchSize, cancellationToken);
-            int applied = 0, failed = 0;
+            int rows = 0, applied = 0, failed = 0;
             var stopped = false;
-            foreach (var row in rows)
+            try
             {
-                var outcome = await ProcessAsync(row, cancellationToken);
-                telemetry.Processed(AssnTags.Type(row.Type), outcome);
-                applied += outcome == AssnTags.Applied ? 1 : 0;
-                failed += outcome is AssnTags.Retry or AssnTags.DeadLetter ? 1 : 0;
-                if (outcome == AssnTags.Deferred)
+                var due = await store.ListDueAsync(clock.GetUtcNow(), BatchSize, cancellationToken);
+                rows = due.Count;
+                foreach (var row in due)
                 {
-                    stopped = true;
-                    break;
+                    string outcome;
+                    try
+                    {
+                        outcome = await ProcessAsync(row, cancellationToken);
+                    }
+#pragma warning disable CA1031 // FU-098 code 2: any failure of one row is that row's, never the run's.
+                    catch (Exception) when (!cancellationToken.IsCancellationRequested)
+#pragma warning restore CA1031
+                    {
+                        // FU-098 code 2: one throwing row is a counted INTERNAL failure, never the end of the run. Only a failing
+                        // FailAsync (the database itself) aborts the run.
+                        outcome = await FailAsync(row, new AppleRefreshFailure(AppleNotificationSchedule.Internal, true, TimeSpan.Zero), cancellationToken);
+                    }
+
+                    telemetry.Processed(AssnTags.Type(row.Type), outcome);
+                    applied += outcome == AssnTags.Applied ? 1 : 0;
+                    failed += outcome is AssnTags.Retry or AssnTags.DeadLetter ? 1 : 0;
+                    if (outcome == AssnTags.Deferred)
+                    {
+                        stopped = true;
+                        break;
+                    }
                 }
+
+                telemetry.Heartbeat();
+            }
+            finally
+            {
+                await RefreshBacklogAsync();
             }
 
-            var (young, old) = await store.BacklogAsync(clock.GetUtcNow(), cancellationToken);
+            return new AppleProcessRun(true, rows, applied, failed, stopped);
+        }
+    }
+
+    /// <summary>The backlog gauge, refreshed after every run, even a failed one; its own failure is swallowed and counted.</summary>
+    private async Task RefreshBacklogAsync()
+    {
+        try
+        {
+            var (young, old) = await store.BacklogAsync(clock.GetUtcNow(), CancellationToken.None);
             telemetry.SetBacklog(young, old);
-            return new AppleProcessRun(true, rows.Count, applied, failed, stopped);
+        }
+#pragma warning disable CA1031 // The gauge refresh must never hide the run's own outcome.
+        catch (Exception)
+#pragma warning restore CA1031
+        {
+            telemetry.BacklogFailed();
         }
     }
 

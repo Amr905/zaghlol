@@ -18,6 +18,8 @@ public sealed class PlayVerification(
     /// <summary><c>Retry-After</c> for a Play failure that carries none.</summary>
     public const int DefaultRetryAfterSeconds = 30;
 
+    private readonly PlayPurchaseReader reader = new(play);
+
     public PurchaseStore Store => PurchaseStore.GooglePlay;
 
     public async Task<StoreVerificationResult> VerifyAsync(
@@ -44,12 +46,19 @@ public sealed class PlayVerification(
 
         // 3. Play read. readAt is taken first, so a slower read never overwrites a newer one.
         var readAt = clock.GetUtcNow();
-        var read = product.Kind == PlayProductKind.Subscription
-            ? await ReadSubscriptionAsync(google, readAt, cancellationToken)
-            : await ReadProductAsync(google, cancellationToken);
-        if (read.Rejection is { } rejection)
+        PlayPurchaseRead read;
+        try
         {
-            return StoreVerificationResult.Rejected(rejection, product.Plan);
+            read = await reader.ReadAsync(product.Kind, google.PurchaseToken, google.ProductId, StoreLane.Verify, readAt, cancellationToken);
+        }
+        catch (PlayApiException error)
+        {
+            return StoreVerificationResult.Rejected(Failed(error), product.Plan);
+        }
+
+        if (!read.ProductMatches)
+        {
+            return StoreVerificationResult.Rejected(ErrorCodes.PurchaseTokenInvalid, product.Plan);
         }
 
         // 4. Binding: the store value must be this install's StoreBindingRef (constant time). Absent or different: not owned.
@@ -73,7 +82,7 @@ public sealed class PlayVerification(
         var stored = await writer.UpsertAsync(
             new PurchaseUpsert(
                 PurchaseStore.GooglePlay,
-                read.PlayProductId,
+                read.PlayProductId!,
                 product.Plan,
                 google.PurchaseToken,
                 read.LinkedPurchaseToken,
@@ -115,7 +124,7 @@ public sealed class PlayVerification(
     /// </summary>
     private async Task<bool> AcknowledgeAsync(
         PlayProductKind kind,
-        PlayRead read,
+        PlayPurchaseRead read,
         Sensitive<string> token,
         Guid purchaseId,
         CancellationToken cancellationToken)
@@ -124,11 +133,11 @@ public sealed class PlayVerification(
         {
             if (kind == PlayProductKind.Subscription)
             {
-                await play.AcknowledgeSubscriptionAsync(read.PlayProductId, token, StoreLane.Ack, cancellationToken);
+                await play.AcknowledgeSubscriptionAsync(read.PlayProductId!, token, StoreLane.Ack, cancellationToken);
             }
             else
             {
-                await play.AcknowledgeProductAsync(read.PlayProductId, token, StoreLane.Ack, cancellationToken);
+                await play.AcknowledgeProductAsync(read.PlayProductId!, token, StoreLane.Ack, cancellationToken);
             }
 
             await writer.MarkAcknowledgedAsync(purchaseId, cancellationToken);
@@ -173,91 +182,16 @@ public sealed class PlayVerification(
         }
     }
 
-    private async Task<PlayRead> ReadSubscriptionAsync(PlayPurchaseRef purchase, DateTimeOffset now, CancellationToken cancellationToken)
-    {
-        PlaySubscription subscription;
-        try
-        {
-            subscription = await play.GetSubscriptionAsync(purchase.PurchaseToken, StoreLane.Verify, cancellationToken);
-        }
-        catch (PlayApiException error)
-        {
-            return Failed(error);
-        }
-
-        // The product ID Play returns must equal the request's (another product's token is not this purchase).
-        var item = subscription.LineItems.FirstOrDefault(i => string.Equals(i.ProductId, purchase.ProductId, StringComparison.Ordinal));
-        if (item is null)
-        {
-            return PlayRead.Reject(ErrorCodes.PurchaseTokenInvalid);
-        }
-
-        return new PlayRead(
-            null,
-            item.ProductId!,
-            PlayStateMapping.Map(subscription.State, item.ExpiryTime, now),
-            item.ExpiryTime,
-            subscription.LinkedPurchaseToken,
-            subscription.Acknowledged,
-            subscription.TestPurchase,
-            subscription.ObfuscatedExternalAccountId,
-            subscription.StartTime);
-    }
-
-    private async Task<PlayRead> ReadProductAsync(PlayPurchaseRef purchase, CancellationToken cancellationToken)
-    {
-        PlayProduct product;
-        try
-        {
-            product = await play.GetProductAsync(purchase.PurchaseToken, StoreLane.Verify, cancellationToken);
-        }
-        catch (PlayApiException error)
-        {
-            return Failed(error);
-        }
-
-        var productId = product.ProductIds.FirstOrDefault(id => string.Equals(id, purchase.ProductId, StringComparison.Ordinal));
-        if (productId is null)
-        {
-            return PlayRead.Reject(ErrorCodes.PurchaseTokenInvalid);
-        }
-
-        return new PlayRead(
-            null,
-            productId,
-            PlayStateMapping.Map(product.State),
-            null,
-            null,
-            product.Acknowledged,
-            product.TestPurchase,
-            product.ObfuscatedExternalAccountId,
-            product.PurchaseCompletionTime);
-    }
-
     /// <summary>400/404/410: a final <c>PURCHASE_TOKEN_INVALID</c>. Anything else: an outage (502, or 503 for our budget).</summary>
-    private static PlayRead Failed(PlayApiException error)
+    private static string Failed(PlayApiException error)
     {
         if (error.IsFinalRejection)
         {
-            return PlayRead.Reject(ErrorCodes.PurchaseTokenInvalid);
+            return ErrorCodes.PurchaseTokenInvalid;
         }
 
         var kind = error.Outcome == PlayCallOutcome.BudgetDenied ? StoreFailureKind.Budget : StoreFailureKind.Store;
         var retryAfter = error.RetryAfter is { } delay ? (int)Math.Ceiling(delay.TotalSeconds) : DefaultRetryAfterSeconds;
         throw new StoreUnavailableException(kind, Math.Clamp(retryAfter, 1, 300), error);
-    }
-
-    private sealed record PlayRead(
-        string? Rejection,
-        string PlayProductId,
-        MappedPlayState Mapped,
-        DateTimeOffset? ExpiresAt,
-        Sensitive<string>? LinkedPurchaseToken,
-        bool Acknowledged,
-        bool TestPurchase,
-        string? ObfuscatedAccountId,
-        DateTimeOffset? PurchasedAt)
-    {
-        public static PlayRead Reject(string code) => new(code, string.Empty, default, null, null, false, false, null, null);
     }
 }
