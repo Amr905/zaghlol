@@ -76,7 +76,7 @@ public sealed class PlayDeveloperApiClientTests : IDisposable
     {
         var methods = typeof(IPlayDeveloperApi).GetMethods().Select(m => m.Name).ToArray();
         Assert.Equal(
-            ["AcknowledgeProductAsync", "AcknowledgeSubscriptionAsync", "GetOrderAsync", "GetProductAsync", "GetSubscriptionAsync"],
+            ["AcknowledgeProductAsync", "AcknowledgeSubscriptionAsync", "GetOrderAsync", "GetProductAsync", "GetSubscriptionAsync", "ListVoidedPurchasesAsync"],
             methods.Order(StringComparer.Ordinal));
         Assert.Contains("/purchases/productsv2/tokens/", PlayDeveloperApiClient.ProductGetTemplate, StringComparison.Ordinal);
         Assert.Contains("/purchases/subscriptionsv2/tokens/", PlayDeveloperApiClient.SubscriptionGetTemplate, StringComparison.Ordinal);

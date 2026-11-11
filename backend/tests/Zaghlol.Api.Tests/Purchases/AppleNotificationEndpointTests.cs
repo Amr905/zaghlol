@@ -18,7 +18,7 @@ using ProblemAssert = Zaghlol.Api.Tests.Installs.Problems;
 namespace Zaghlol.Api.Tests.Purchases;
 
 /// <summary>The purchases host plus <c>POST /v1/notifications/apple</c> (T-134), with every activity of the process captured.</summary>
-public sealed class AppleNotificationHostFixture : PurchasesHostFixture
+public class AppleNotificationHostFixture : PurchasesHostFixture
 {
     private readonly ActivityListener listener;
 

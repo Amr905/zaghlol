@@ -128,7 +128,7 @@ internal static class GoogleNotificationEndpoints
         {
             await ingest.IngestAsync(new PubSubPush(message.Data, message.MessageId, message.PublishTime, envelope.Subscription), cancellationToken);
         }
-        catch (DbException)
+        catch (Exception error) when (IsDatabaseFailure(error))
         {
             // Nothing stored: Pub/Sub must redeliver. The exception (never the payload) reaches no log here.
             context.Response.Headers.RetryAfter = DatabaseRetryAfterSeconds.ToString(System.Globalization.CultureInfo.InvariantCulture);
@@ -136,6 +136,23 @@ internal static class GoogleNotificationEndpoints
         }
 
         return Results.NoContent();
+    }
+
+    /// <summary>
+    /// A <see cref="DbException"/>, directly or as an inner exception (EF's execution strategy wraps an open failure in an
+    /// <see cref="InvalidOperationException"/>).
+    /// </summary>
+    internal static bool IsDatabaseFailure(Exception error)
+    {
+        for (var current = error; current is not null; current = current.InnerException)
+        {
+            if (current is DbException)
+            {
+                return true;
+            }
+        }
+
+        return false;
     }
 }
 
