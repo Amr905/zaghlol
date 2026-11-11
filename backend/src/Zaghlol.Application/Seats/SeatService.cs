@@ -79,8 +79,9 @@ public sealed class SeatService(SeatKeyHasher hasher, ISeatTelemetry telemetry, 
             var predecessor = await store.ReadPredecessorAsync(predecessorId, cancellationToken).ConfigureAwait(false);
             if (predecessor is { SeatExists: true })
             {
-                // D-59/R3-7: a Google successor inherits the predecessor's seat (holder, window, key and rebind budget), account
-                // and reclaim marker. Not a move, so no event.
+                // D-59/R3-7: a Google successor inherits the predecessor's seat (holder, window and rebind budget), account and
+                // reclaim marker. Not a move, so no event. device_key_hash is keyed by purchase ID, so the predecessor's value could
+                // never match on the successor: it starts NULL/false and the holder's next restore or sign-in with keys writes it.
                 await store.InheritAccountAsync(request.PurchaseId, predecessorId, cancellationToken).ConfigureAwait(false);
                 await store.SaveSeatAsync(
                     new SeatRow(
@@ -90,8 +91,8 @@ public sealed class SeatService(SeatKeyHasher hasher, ISeatTelemetry telemetry, 
                         predecessor.BoundAt,
                         predecessor.LastMovedAt,
                         predecessor.NextMoveAt,
-                        predecessor.DeviceKeyHash,
-                        predecessor.DeviceKeyTrusted,
+                        null,
+                        false,
                         SeatClock.PruneRebinds(predecessor.RecentRebinds, now)),
                     insert: true,
                     writeRebinds: true,
