@@ -1,5 +1,6 @@
 package app.zaghlol.platform.capture
 
+import app.zaghlol.platform.capture.inbox.InboxReader
 import app.zaghlol.platform.spool.CaptureStatusStore
 import app.zaghlol.platform.spool.SpoolClaim
 import app.zaghlol.platform.spool.SpoolStore
@@ -38,6 +39,8 @@ class AndroidCaptureHost(
     private val guardWriter: ((ByteArray) -> Unit)?,
     private val guardState: (() -> GuardConfigState)?,
     private val device: CaptureDevice?,
+    /** T-042 inbox reader: `InboxReaders.forUiEngine` on the UI engine, null on the headless one. */
+    private val inbox: InboxReader? = null,
 ) : AndroidCaptureHostApi {
 
     /** Ids this host's drain returned and that are not yet acked. */
@@ -70,8 +73,12 @@ class AndroidCaptureHost(
         }
     }
 
-    // T-042.
-    override fun queryInbox(query: InboxQuery): InboxPage = guarded { throw notAvailable() }
+    /**
+     * T-042: allowlisted senders' inbox rows, paged. UI engine only: the
+     * headless host has no [inbox] (`NOT_AVAILABLE`), so background work never
+     * reads the inbox (FU-088).
+     */
+    override fun queryInbox(query: InboxQuery): InboxPage = guarded { need(inbox).query(query) }
 
     /**
      * Oldest first, at most [max] (clamped to 1..[MAX_DRAIN]). Returns an empty
