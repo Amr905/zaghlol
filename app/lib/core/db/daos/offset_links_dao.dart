@@ -48,12 +48,39 @@ class OffsetLinksDao {
     sourceTxnId,
   );
 
+  /// T-017 review m-4 (decision, T-050): a soft-deleted transaction keeps
+  /// its links, so Undo restores the offsets untouched; the schema's
+  /// triggers count them until purge. Net-spend reads must use these
+  /// "active" sums instead, which ignore links whose other side is
+  /// soft-deleted (a deleted refund no longer reduces the expense; a
+  /// deleted expense has no net spend).
+  ///
+  /// Σ linked minor units for live [expenseTxnId] from live sources.
+  Future<int> activeLinkedToExpense(String expenseTxnId) => _sum(
+    'SELECT coalesce(sum(l.amount_minor), 0) AS s FROM offset_links l '
+    'JOIN transactions e ON e.id = l.expense_txn_id '
+    'JOIN transactions src ON src.id = l.source_txn_id '
+    'WHERE l.expense_txn_id = ? AND e.deleted_at IS NULL '
+    'AND src.deleted_at IS NULL',
+    expenseTxnId,
+  );
+
+  /// Σ linked minor units taken from live [sourceTxnId] into live expenses.
+  Future<int> activeLinkedFromSource(String sourceTxnId) => _sum(
+    'SELECT coalesce(sum(l.amount_minor), 0) AS s FROM offset_links l '
+    'JOIN transactions e ON e.id = l.expense_txn_id '
+    'JOIN transactions src ON src.id = l.source_txn_id '
+    'WHERE l.source_txn_id = ? AND e.deleted_at IS NULL '
+    'AND src.deleted_at IS NULL',
+    sourceTxnId,
+  );
+
   Future<int> _sum(String sql, String id) async {
     final row = await _db
         .customSelect(
           sql,
           variables: [Variable.withString(id)],
-          readsFrom: {_db.offsetLinks},
+          readsFrom: {_db.offsetLinks, _db.transactions},
         )
         .getSingle();
     return row.read<int>('s');
