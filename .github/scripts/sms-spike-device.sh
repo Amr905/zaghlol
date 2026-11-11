@@ -156,6 +156,9 @@ grep -E "ZG-SPK" "$OUT/logcat-all.txt" | grep -F "$CANARY" && fail "spike log ca
 runas cat no_backup/spike/metrics.csv > "$OUT/metrics.csv"
 grep -qF "$CANARY" "$OUT/metrics.csv" && fail "metrics carried content" || true
 grep -qF "$SENDER" "$OUT/metrics.csv" && fail "metrics carried the sender" || true
+# Last dump after every send (incl. the negative proofs and the last canary
+# SMS): matching needs the broadcast of every SMS, also of dropped ones.
+sh_ dumpsys activity broadcasts history > "$BH/9999.txt" 2>/dev/null || true
 TZ_OFF=$(sh_ date +%z | tr -d '\r')
 dart run tool/spike/latency_report.dart --extract-broadcasts "$BH" "$TZ_OFF" > "$OUT/broadcasts.txt"
 nb=$(grep -c '^enqueue_ms=' "$OUT/broadcasts.txt" || true)

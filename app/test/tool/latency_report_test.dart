@@ -136,8 +136,8 @@ void main() {
       final text = formatBroadcasts(b);
       expect(
         text,
-        'enqueue_ms=$e1 dispatch_ms=${e1 + 3}\n'
-        'enqueue_ms=$e2 dispatch_ms=${e2 + 5}\n',
+        'enqueue_ms=$e1 dispatch_ms=${e1 + 3} precision_ms=1\n'
+        'enqueue_ms=$e2 dispatch_ms=${e2 + 5} precision_ms=1\n',
       );
       expect(text, isNot(contains('zaghlol')));
       expect(text, isNot(contains('Bundle')));
@@ -177,6 +177,56 @@ void main() {
         ),
       );
       expect(table, contains('(1 rows without a matched SMS_RECEIVED'));
+    });
+
+    test('Android 8.0 prints whole seconds: kept with precision 1000 and '
+        'flagged under the table (overstated, never understated)', () {
+      const dump = '''
+  Historical Broadcast foreground #0:
+    BroadcastRecord{ccdbd49 u0 android.provider.Telephony.SMS_RECEIVED} to user 0
+    Intent { act=android.provider.Telephony.SMS_RECEIVED flg=0x19000010 (has extras) }
+    enqueueClockTime=2001-09-09 01:46:40 dispatchClockTime=2001-09-09 01:46:41
+''';
+      final b = extractBroadcasts(dump, Duration.zero);
+      expect(b.single.enqueueMs, 1000000000000);
+      expect(b.single.dispatchMs, 1000000001000);
+      expect(b.single.precisionMs, 1000);
+      final round = parseBroadcasts(formatBroadcasts(b)).single;
+      expect(round.precisionMs, 1000);
+      final (rows, _) = parseMetrics(
+        [_header, _row('cold_process', 500, i: 0)].join('\n'),
+      );
+      // rx at 1 000 000 000 000 + 0: dispatch (…1000) is after it, enqueue
+      // is not; truncation can't put the true dispatch before the true rx.
+      final rx = [
+        _header,
+        '01JA0000000000000000000001,cold_process,34,0,0,10,0,'
+            '1000000001400,-800,4,5,90,900,1000,1100,1200,500,505',
+      ].join('\n');
+      expect(matchBroadcasts(rows, b), isEmpty);
+      final (rows2, _) = parseMetrics(rx);
+      final table = latencyTable(rows2, broadcasts: b);
+      expect(table, contains('| 1900 / 1900 / 1900 (1) |'));
+      expect(table, contains('(1 rows matched to broadcast times in whole'));
+    });
+
+    test('a burst: each row takes its own broadcast (ordered delivery: the '
+        'next dispatch comes after this onReceive)', () {
+      final base = _wall(0);
+      final (rows, _) = parseMetrics(
+        [
+          _header,
+          '01JA0000000000000000000001,cold_process,34,0,0,10,0,${base + 400},'
+              '-800,4,5,90,900,1000,1100,1200,300,305',
+          '01JA0000000000000000000002,cold_process,34,0,0,10,0,${base + 900},'
+              '-800,4,5,90,900,1000,1100,1200,200,205',
+        ].join('\n'),
+      );
+      final a = BroadcastTimes(base, base + 5);
+      final b = BroadcastTimes(base + 100, base + 600);
+      final m = matchBroadcasts(rows, [a, b]);
+      expect(m[0], same(a));
+      expect(m[1], same(b));
     });
 
     test('process start → commit only for a process started for the SMS', () {

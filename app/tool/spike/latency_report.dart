@@ -139,16 +139,26 @@ int percentile(List<int> sorted, int p) {
 
 /// One SMS_RECEIVED record of the system broadcast history (epoch ms).
 final class BroadcastTimes {
-  const BroadcastTimes(this.enqueueMs, this.dispatchMs);
+  const BroadcastTimes(this.enqueueMs, this.dispatchMs, {this.precisionMs = 1});
 
   final int enqueueMs;
   final int? dispatchMs;
+
+  /// 1, or 1000 when the system printed whole seconds (Android 8.0): the
+  /// times are then truncated, so intervals from them are overstated by
+  /// less than a second, never understated.
+  final int precisionMs;
+
+  /// The time matched against the receive: SMS_RECEIVED is an ordered
+  /// broadcast, so a message's onReceive runs after its own dispatch and
+  /// before the next message's dispatch, also in a burst.
+  int get matchMs => dispatchMs ?? enqueueMs;
 }
 
 final RegExp _recordStart = RegExp(
   r'BroadcastRecord\{|^\s*#\d+:|Historical Broadcast',
 );
-final RegExp _stamp = RegExp(r'\d{4}-\d\d-\d\d \d\d:\d\d:\d\d\.\d{3}');
+final RegExp _stamp = RegExp(r'^\d{4}-\d\d-\d\d \d\d:\d\d:\d\d(\.\d{3})?$');
 final RegExp _enqueueFull = RegExp(r'enqueueClockTime=(\S+ \S+)');
 final RegExp _dispatchFull = RegExp(r'dispatchClockTime=(\S+ \S+)');
 final RegExp _enqueueSummary = RegExp(r'\benqueue (\S+ \S+?),');
@@ -165,7 +175,7 @@ Duration parseTzOffset(String tz) {
 
 /// Device-local `yyyy-MM-dd HH:mm:ss.SSS` → epoch ms.
 int? _epochMs(String? local, Duration tz) {
-  if (local == null || _stamp.matchAsPrefix(local) == null) return null;
+  if (local == null || !_stamp.hasMatch(local)) return null;
   final utc = DateTime.tryParse('${local.replaceFirst(' ', 'T')}Z');
   return utc?.subtract(tz).millisecondsSinceEpoch;
 }
@@ -181,18 +191,18 @@ List<BroadcastTimes> extractBroadcasts(String dumpsys, Duration tz) {
     final text = record.toString();
     record.clear();
     if (!text.contains('android.provider.Telephony.SMS_RECEIVED')) return;
-    final enq = _epochMs(
-      (_enqueueFull.firstMatch(text) ?? _enqueueSummary.firstMatch(text))?[1],
-      tz,
-    );
+    final enqText =
+        (_enqueueFull.firstMatch(text) ?? _enqueueSummary.firstMatch(text))?[1];
+    final enq = _epochMs(enqText, tz);
     if (enq == null) return;
+    final precision = enqText!.contains('.') ? 1 : 1000;
     final disp = _epochMs(
       (_dispatchFull.firstMatch(text) ?? _dispatchSummary.firstMatch(text))?[1],
       tz,
     );
     final known = byEnqueue[enq];
     if (known == null || (known.dispatchMs == null && disp != null)) {
-      byEnqueue[enq] = BroadcastTimes(enq, disp);
+      byEnqueue[enq] = BroadcastTimes(enq, disp, precisionMs: precision);
     }
   }
 
@@ -205,30 +215,43 @@ List<BroadcastTimes> extractBroadcasts(String dumpsys, Duration tz) {
     ..sort((a, b) => a.enqueueMs.compareTo(b.enqueueMs));
 }
 
-/// `enqueue_ms=<ms> dispatch_ms=<ms|>` lines (the extractor's output).
+final RegExp _broadcastLine = RegExp(
+  r'^enqueue_ms=(\d+) dispatch_ms=(\d*) precision_ms=(1|1000)$',
+);
+
+/// `enqueue_ms=<ms> dispatch_ms=<ms|> precision_ms=<1|1000>` lines (the
+/// extractor's output).
 List<BroadcastTimes> parseBroadcasts(String text) {
   final out = <BroadcastTimes>[];
   for (final line in text.split('\n')) {
-    final m = RegExp(r'^enqueue_ms=(\d+) dispatch_ms=(\d*)$')
-        .firstMatch(line.trim());
+    final m = _broadcastLine.firstMatch(line.trim());
     if (m == null) continue;
-    out.add(BroadcastTimes(int.parse(m[1]!), int.tryParse(m[2]!)));
+    out.add(
+      BroadcastTimes(
+        int.parse(m[1]!),
+        int.tryParse(m[2]!),
+        precisionMs: int.parse(m[3]!),
+      ),
+    );
   }
   return out;
 }
 
 String formatBroadcasts(List<BroadcastTimes> list) => [
   for (final b in list)
-    'enqueue_ms=${b.enqueueMs} dispatch_ms=${b.dispatchMs ?? ''}',
+    'enqueue_ms=${b.enqueueMs} dispatch_ms=${b.dispatchMs ?? ''} '
+        'precision_ms=${b.precisionMs}',
 ].map((l) => '$l\n').join();
 
 /// Longest gap between a broadcast's enqueue and the receive it is matched
 /// to; a larger gap is not taken as the same message.
 const int maxEnqueueToReceiveMs = 120000;
 
-/// Matches each row to the latest unused SMS_RECEIVED broadcast enqueued at
-/// or before its receive wall clock (within [maxEnqueueToReceiveMs]).
-/// Returns row index → broadcast.
+/// Matches each row to the unused SMS_RECEIVED broadcast with the latest
+/// dispatch (enqueue when unknown) at or before its receive wall clock,
+/// enqueued at most [maxEnqueueToReceiveMs] before it. Needs the history of
+/// every SMS sent (also dropped ones), or a row can take an older
+/// broadcast. Returns row index → broadcast.
 Map<int, BroadcastTimes> matchBroadcasts(
   List<LatencyRow> rows,
   List<BroadcastTimes> broadcasts,
@@ -243,9 +266,9 @@ Map<int, BroadcastTimes> matchBroadcasts(
     final rx = rows[i].rxWallMs!;
     BroadcastTimes? best;
     for (final b in broadcasts) {
-      if (used.contains(b) || b.enqueueMs > rx) continue;
+      if (used.contains(b) || b.matchMs > rx || b.enqueueMs > rx) continue;
       if (rx - b.enqueueMs > maxEnqueueToReceiveMs) continue;
-      if (best == null || b.enqueueMs > best.enqueueMs) best = b;
+      if (best == null || b.matchMs > best.matchMs) best = b;
     }
     if (best != null) {
       used.add(best);
@@ -294,6 +317,7 @@ String latencyTable(
   final fromAck = <String, int>{};
   var unstamped = 0;
   var unmatched = 0;
+  var coarse = 0;
   for (var i = 0; i < rows.length; i++) {
     final r = rows[i];
     final c = r.commitMs;
@@ -311,6 +335,7 @@ String latencyTable(
     if (b == null) {
       unmatched++;
     } else {
+      if (b.precisionMs > 1) coarse++;
       final ahead = r.rxWallMs! - b.enqueueMs;
       enq[key]!.add(ahead + c);
       final d = b.dispatchMs;
@@ -342,6 +367,12 @@ String latencyTable(
   out.writeln('\n$intervalLegend');
   if (unstamped > 0) {
     out.writeln('\n($unstamped rows without a commit or ack stamp)');
+  }
+  if (coarse > 0) {
+    out.writeln(
+      '\n($coarse rows matched to broadcast times in whole seconds: their '
+      'enqueue/dispatch → commit is overstated by < 1 s)',
+    );
   }
   if (unmatched > 0) {
     out.writeln('\n($unmatched rows without a matched SMS_RECEIVED broadcast)');
