@@ -61,7 +61,7 @@ internal sealed class PlayAckSweepStore(IZaghlolDbContextFactory contexts) : IPl
             var connection = (NpgsqlConnection)db.Database.GetDbConnection();
             await using var command = new NpgsqlCommand("SELECT pg_try_advisory_lock(@key)", connection);
             command.Parameters.AddWithValue("key", LockKey);
-            if (await command.ExecuteScalarAsync(cancellationToken) is true)
+            if (await command.ExecuteScalarAsync(cancellationToken) is bool)
             {
                 return new SessionLock(db, connection);
             }

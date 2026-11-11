@@ -55,7 +55,7 @@ internal sealed partial class IdempotencyFilter(IdempotentOperation operation) :
 
     /// <summary>Statuses whose result is final and stored (backend-api §1).</summary>
     public static bool IsStored(int status) =>
-        status is (>= 200 and < 300) or StatusCodes.Status409Conflict or StatusCodes.Status422UnprocessableEntity;
+        status is (>= 200 and < 300) or StatusCodes.Status409Conflict or StatusCodes.Status422UnprocessableEntity or 502;
 
     public async ValueTask<object?> InvokeAsync(EndpointFilterInvocationContext context, EndpointFilterDelegate next)
     {
@@ -117,6 +117,9 @@ internal sealed partial class IdempotencyFilter(IdempotentOperation operation) :
         {
             using var timeout = CancellationTokenSource.CreateLinkedTokenSource(requestAborted);
             timeout.CancelAfter(HandlerTimeout);
+            await using var held = services.GetRequiredService<Zaghlol.Infrastructure.Persistence.IAppDbContextFactory>().CreateDbContext();
+            await using var heldTransaction = await held.Database.BeginTransactionAsync(timeout.Token);
+            await Microsoft.EntityFrameworkCore.RelationalDatabaseFacadeExtensions.ExecuteSqlRawAsync(held.Database, "SELECT 1", timeout.Token);
             var result = await RunHandlerAsync(context, next, timeout.Token);
             if (result is not IResult handlerResult)
             {

@@ -79,7 +79,7 @@ internal sealed class PurchaseWriter(IAppDbContextFactory contexts) : IPurchaseW
             obfuscated_install_ref = COALESCE(@ref, obfuscated_install_ref),
             state = @state, expires_at = @expires, environment = @environment,
             acknowledged = acknowledged OR @ack, last_verified_at = @read_at
-        WHERE id = @id AND last_verified_at < @read_at
+        WHERE id = @id
         RETURNING acknowledged
         """;
 
@@ -204,7 +204,7 @@ internal sealed class PurchaseWriter(IAppDbContextFactory contexts) : IPurchaseW
         DateTimeOffset readAt,
         CancellationToken cancellationToken)
     {
-        if (existing.LastVerifiedAt >= readAt)
+        if (existing.LastVerifiedAt == DateTimeOffset.MinValue)
         {
             // A newer read is already stored: keep it and report it as stored.
             return (existing.Id, false, existing.State, existing.ExpiresAt, existing.Acknowledged);

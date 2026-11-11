@@ -91,7 +91,6 @@ internal sealed class IdempotencyStore(IAppDbContextFactory contexts) : IIdempot
         INSERT INTO zaghlol.idempotency_records
             (install_id, operation_id, idempotency_key, body_sha256, status, response_body_enc, claim_id, expires_at)
         SELECT @install, @operation, @key, @hash, @status, @body, @claim, @expires
-        WHERE EXISTS (SELECT 1 FROM zaghlol.installs WHERE id = @install AND deleted_at IS NULL FOR SHARE)
         ON CONFLICT DO NOTHING
         """;
 
