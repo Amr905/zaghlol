@@ -21,7 +21,8 @@ final List<String> expenseKeywords = _fold(const [
   'paid',
   'payment',
   'charged',
-  'sent',
+  'you sent',
+  'sent to',
   'pos',
   'خصم',
   'مخصوم',
@@ -33,7 +34,28 @@ final List<String> expenseKeywords = _fold(const [
   'صرف',
   'تحويل صادر',
   'خصمنا',
+  'قمت بارسال',
+  'ارسلت الي',
 ]);
+
+/// Expense keywords that flip meaning when the object is the reader
+/// (`Ahmed paid you`, `sent to you`): a hit followed by one of these is
+/// dropped, so the direction stays unset instead of being guessed. The bare
+/// verb `sent` is not a keyword at all (`Ahmed sent you EGP 500` is income),
+/// only `you sent` and `sent to`. Folded, matched right after the keyword.
+final Map<String, List<String>> addressedToReaderSuffixes = {
+  for (final e in const {
+    'paid': [' you', ' لك', ' اليك'],
+    'charged': [' you'],
+    'sent to': [' you'],
+    'دفع': [' لك', ' اليك'],
+    'ارسلت الي': ['ك'],
+  }.entries)
+    foldKey(e.key): [
+      for (final x in e.value)
+        x.startsWith(' ') ? ' ${foldKey(x.trim())}' : foldKey(x),
+    ],
+};
 
 /// Words that mean money arrived.
 final List<String> incomeKeywords = _fold(const [

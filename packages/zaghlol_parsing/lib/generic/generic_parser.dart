@@ -36,7 +36,11 @@ ParseResult parseGeneric({
     return const ParseUnrecognized(UnrecognizedReason.genericNoAmount);
   }
   final hits = [
-    ..._hits(t, expenseKeywords, TemplateDirection.expense),
+    ..._hits(
+      t,
+      expenseKeywords,
+      TemplateDirection.expense,
+    ).where((h) => !_addressedToReader(t, h)),
     ..._hits(t, incomeKeywords, TemplateDirection.income),
   ];
 
@@ -56,6 +60,13 @@ ParseResult parseGeneric({
       reasons.add(GenericReason.amountAmbiguous);
     }
     break;
+  }
+
+  // Two currencies in one message and no way to tell which is the charge
+  // (a foreign amount in brackets, `Original USD 20.00`): never silently
+  // pick one (D-28), flag it and lower the confidence.
+  if (ranked.any((r) => r.$1.money.currency != best.money.currency)) {
+    reasons.add(GenericReason.currencyAmbiguous);
   }
 
   // Direction: the nearest keyword; opposite keywords close together cancel.
@@ -95,6 +106,27 @@ ParseResult parseGeneric({
     confidencePermille: confidence.clamp(0, kGenericMaxConfidencePermille),
     reasons: ordered,
   );
+}
+
+/// An expense keyword whose object is the reader (`paid you`) says nothing
+/// about the reader's own direction.
+bool _addressedToReader(String t, _Hit h) {
+  final word = t.substring(h.start, h.end);
+  final suffixes = addressedToReaderSuffixes[word];
+  if (suffixes == null) {
+    return false;
+  }
+  for (final x in suffixes) {
+    if (t.startsWith(x, h.end)) {
+      final e = h.end + x.length;
+      if (x.codeUnitAt(0) != 0x20 ||
+          e == t.length ||
+          !_isAlnum(t.codeUnitAt(e))) {
+        return true;
+      }
+    }
+  }
+  return false;
 }
 
 /// Opposite keywords closer than this (characters, measured as the

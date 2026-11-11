@@ -48,7 +48,11 @@ enum ParseReason {
 
   /// Neither an account (last4) nor any party (merchant, counterparty, IPA,
   /// phone, reference) was found.
-  sparseFields(900);
+  sparseFields(900),
+
+  /// Amounts in two currencies and no keyword says which is the charge (a
+  /// bracketed foreign amount); the pick is a guess and never converted.
+  currencyAmbiguous(700);
 
   const ParseReason(this.factorPermille);
 
@@ -253,7 +257,11 @@ enum GenericReason {
   directionUnknown(800),
 
   /// Neither a last-4 nor a merchant was found.
-  sparseFields(900);
+  sparseFields(900),
+
+  /// Amounts in two currencies and no keyword says which is the charge (a
+  /// bracketed foreign amount); the pick is a guess and never converted.
+  currencyAmbiguous(700);
 
   const GenericReason(this.factorPermille);
 

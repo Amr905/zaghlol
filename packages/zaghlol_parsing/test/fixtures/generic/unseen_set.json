@@ -522,5 +522,47 @@
   "outcome": "noAmount",
   "body": "تم خصم 300 من حسابك",
   "expect": {}
+ },
+ {
+  "id": "en_you_sent_to",
+  "lang": "en",
+  "outcome": "suggest",
+  "body": "You sent EGP 500.00 to Ahmed Samy",
+  "expect": {
+   "amount": "500.00",
+   "currency": "EGP",
+   "direction": "expense"
+  }
+ },
+ {
+  "id": "en_sent_you_no_direction",
+  "lang": "en",
+  "outcome": "suggest",
+  "body": "Ahmed sent you EGP 500.00",
+  "expect": {
+   "amount": "500.00",
+   "currency": "EGP"
+  }
+ },
+ {
+  "id": "ar_sent_to_you_no_direction",
+  "lang": "ar",
+  "outcome": "suggest",
+  "body": "احمد ارسل لك ٥٠٠ جنيه",
+  "expect": {
+   "amount": "500.00",
+   "currency": "EGP"
+  }
+ },
+ {
+  "id": "ar_you_sent_expense",
+  "lang": "ar",
+  "outcome": "suggest",
+  "body": "قمت بارسال ٥٠٠ جنيه الى احمد",
+  "expect": {
+   "amount": "500.00",
+   "currency": "EGP",
+   "direction": "expense"
+  }
  }
 ]

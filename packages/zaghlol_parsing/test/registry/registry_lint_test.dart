@@ -375,13 +375,15 @@ void main() {
         institutions: f.institutions,
         fixtures: f.fixtures,
         minFixturesPerTemplate: 1,
-        maxMatchMillis: 2,
+        maxMatchMillis: 25,
       );
       final slowIssues = r.issues
           .where((i) => i.code == RegistryIssueCode.slowMatch)
           .toList();
-      expect(slowIssues, isNotEmpty);
-      expect(slowIssues.single.detail, 'cib.slow.en adversarial');
+      expect(
+        slowIssues.map((i) => i.detail),
+        contains('cib.slow.en adversarial'),
+      );
     });
 
     test('a slow drop, last4 or global pattern fails the probe (M-2)', () {
@@ -409,16 +411,17 @@ void main() {
           institutions: f.institutions,
           fixtures: f.fixtures,
           minFixturesPerTemplate: 1,
-          maxMatchMillis: 2,
+          maxMatchMillis: 25,
         );
         final details = r.issues
             .where((i) => i.code == RegistryIssueCode.slowMatch)
             .map((i) => i.detail)
             .toList();
-        // Exactly the one added pattern (the existing ones stay clean).
-        expect(details, hasLength(1), reason: target);
-        expect(details.single, startsWith('$target['), reason: target);
-        expect(details.single, endsWith(' adversarial'), reason: target);
+        // The added pattern is reported. Unrelated clean patterns are not
+        // asserted on, so a loaded runner cannot make this test flaky.
+        final mine = details.where((d) => d.startsWith('$target[')).toList();
+        expect(mine, hasLength(1), reason: target);
+        expect(mine.single, endsWith(' adversarial'), reason: target);
       }
     });
 

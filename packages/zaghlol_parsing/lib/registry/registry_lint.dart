@@ -191,17 +191,28 @@ List<String> adversarialBodies(String? sample, int length) {
 
 bool _isSlowOnAdversarial(RegExp regex, String? sample, int limitMillis) {
   final clock = Stopwatch();
+  int timeOnce(String folded) {
+    clock
+      ..reset()
+      ..start();
+    regex.firstMatch(folded);
+    clock.stop();
+    return clock.elapsedMicroseconds;
+  }
+
+  final limitMicros = limitMillis * 1000;
   for (final length in adversarialBodyLengths) {
     for (final body in adversarialBodies(sample, length)) {
       final folded = foldKey(body);
-      clock
-        ..reset()
-        ..start();
-      regex.firstMatch(folded);
-      clock.stop();
-      if (clock.elapsedMilliseconds > limitMillis) {
-        return true;
+      var best = timeOnce(folded);
+      // A scheduler stall on a loaded runner inflates one sample, so a
+      // candidate is confirmed by taking the best of three runs. Only the
+      // over-limit case pays for the repeats.
+      for (var k = 0; k < 2 && best > limitMicros; k++) {
+        final again = timeOnce(folded);
+        if (again < best) best = again;
       }
+      if (best > limitMicros) return true;
     }
   }
   return false;

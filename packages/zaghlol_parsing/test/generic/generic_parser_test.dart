@@ -64,13 +64,23 @@ void main() {
           misses.add(c['id']! as String);
         }
       }
+      final total = cases.length;
       final pct = (correct * 1000 ~/ suggest) / 10;
+      final coverage = (suggest * 1000 ~/ total) / 10;
+      final recall = (correct * 1000 ~/ total) / 10;
       // Ids only: never message text in test output.
       // ignore: avoid_print
       print(
         'generic unseen set: $correct/$suggest amount+currency correct '
-        '($pct%); misses: ${misses.isEmpty ? 'none' : misses.join(', ')}',
+        '($pct% precision on suggested); coverage $suggest/$total '
+        '($coverage%); correct over all cases $correct/$total ($recall%); '
+        'misses: ${misses.isEmpty ? 'none' : misses.join(', ')}',
       );
+      // The 80% of AC 1 is the precision on the cases the parser suggests;
+      // abstaining is allowed (the user then enters the data by hand), but
+      // not unboundedly, so coverage is asserted too.
+      expect(suggest * 100, greaterThanOrEqualTo(total * 70));
+      expect(correct * 100, greaterThanOrEqualTo(total * 70));
       expect(suggest, greaterThanOrEqualTo(35));
       expect(correct * 100, greaterThanOrEqualTo(suggest * 80));
     });
@@ -246,6 +256,42 @@ void main() {
       final r = g('Your payment of USD 1,000.00 was received');
       expect(r.direction, isNull);
       expect(r.reasons, contains(GenericReason.directionConflict));
+    });
+
+    group('ambiguous direction words never set a direction', () {
+      for (final body in [
+        'Ahmed sent you EGP 500.00',
+        'Ahmed sent EGP 500.00 to you',
+        'Ahmed paid you EGP 500.00',
+        'احمد ارسل لك ٥٠٠ جنيه',
+        'احمد دفع لك ٥٠٠ جنيه',
+        'احمد ارسلت اليك ٥٠٠ جنيه',
+      ]) {
+        test(body, () {
+          final r = g(body);
+          expect(r.direction, isNull);
+          expect(r.reasons, contains(GenericReason.directionUnknown));
+        });
+      }
+      for (final body in [
+        'You sent EGP 500.00 to Ahmed',
+        'EGP 500.00 sent to Ahmed',
+        'You paid EGP 500.00 to Ahmed',
+        'قمت بارسال ٥٠٠ جنيه الى احمد',
+        'ارسلت الى احمد ٥٠٠ جنيه',
+      ]) {
+        test(body, () {
+          expect(g(body).direction, TemplateDirection.expense);
+        });
+      }
+    });
+
+    test('two currencies with no separating keyword are flagged', () {
+      final r = g('Total EGP 3,400.00 (EUR 100.00) debited via POS');
+      expect(r.reasons, contains(GenericReason.currencyAmbiguous));
+      expect(r.confidencePermille, lessThan(500));
+      final one = g('Total EGP 3,400.00 debited via POS');
+      expect(one.reasons, isNot(contains(GenericReason.currencyAmbiguous)));
     });
 
     test('two different amounts and no keyword is flagged ambiguous', () {
