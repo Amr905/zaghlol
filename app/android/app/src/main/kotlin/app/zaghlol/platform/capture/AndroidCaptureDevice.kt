@@ -1,21 +1,32 @@
-package app.zaghlol.spike.sms
+package app.zaghlol.platform.capture
 
 import android.Manifest
-import android.app.usage.UsageStatsManager
 import android.content.Context
 import android.content.Intent
 import android.content.pm.PackageManager
 import android.os.Build
 import android.os.PowerManager
 import android.provider.Settings
-import app.zaghlol.platform.capture.CaptureCapabilities
-import app.zaghlol.platform.capture.CaptureDevice
 
-/** [CaptureDevice] over the Android framework (devSms spike). */
+/** [CaptureDevice] over the Android framework (every flavour; moved from the T-008 spike by T-041). */
 class AndroidCaptureDevice(private val app: Context) : CaptureDevice {
+    /**
+     * `*Sms` build: the merged manifest requests `RECEIVE_SMS` (ADR-004; the
+     * `*NoSms` manifests remove it). Read once; an error reads as no Sms build.
+     */
+    private val smsFlavor: Boolean by lazy {
+        try {
+            @Suppress("DEPRECATION")
+            app.packageManager.getPackageInfo(app.packageName, PackageManager.GET_PERMISSIONS)
+                .requestedPermissions?.contains(Manifest.permission.RECEIVE_SMS) == true
+        } catch (_: Exception) {
+            false
+        }
+    }
+
     override fun capabilities(): CaptureCapabilities = CaptureCapabilities(
-        smsGranted = granted(Manifest.permission.RECEIVE_SMS) && granted(Manifest.permission.READ_SMS),
-        smsFlavor = true,
+        smsGranted = smsFlavor && granted(Manifest.permission.RECEIVE_SMS) && granted(Manifest.permission.READ_SMS),
+        smsFlavor = smsFlavor,
         notificationAccess = notificationAccess(),
         postNotifications = Build.VERSION.SDK_INT < 33 || granted("android.permission.POST_NOTIFICATIONS"),
         sdkInt = Build.VERSION.SDK_INT.toLong(),
@@ -31,27 +42,6 @@ class AndroidCaptureDevice(private val app: Context) : CaptureDevice {
     override fun openBatteryOptimizationSettings() {
         app.startActivity(
             Intent(Settings.ACTION_IGNORE_BATTERY_OPTIMIZATION_SETTINGS).addFlags(Intent.FLAG_ACTIVITY_NEW_TASK),
-        )
-    }
-
-    /** Device conditions for a metrics row (no identifiers). */
-    fun conditions(lingerMs: Long): SpikeMetrics.Conditions {
-        val pm = app.getSystemService(PowerManager::class.java)
-        val bucket = if (Build.VERSION.SDK_INT >= 28) {
-            try {
-                app.getSystemService(UsageStatsManager::class.java)?.appStandbyBucket ?: -1
-            } catch (_: Exception) {
-                -1
-            }
-        } else {
-            -1
-        }
-        return SpikeMetrics.Conditions(
-            sdk = Build.VERSION.SDK_INT,
-            batteryExempt = pm?.isIgnoringBatteryOptimizations(app.packageName) == true,
-            deviceIdle = pm?.isDeviceIdleMode == true,
-            standbyBucket = bucket,
-            lingerMs = lingerMs,
         )
     }
 

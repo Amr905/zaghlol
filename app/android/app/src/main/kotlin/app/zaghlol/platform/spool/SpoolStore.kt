@@ -340,6 +340,10 @@ class SpoolStore(
             if (!heldDir.isDirectory && !heldDir.mkdirs() && !heldDir.isDirectory) throw IOException("SPOOL_HELD_DIR")
             val held = heldDir.list() ?: throw IOException("SPOOL_LIST")
             if (held.count(::isEntryName) >= limits.maxHeld) return false
+            // The version this entry is held under (else the next start of the
+            // same version would release it at once).
+            val version = appVersion
+            if (version != null && isProvenAbsent(File(heldDir, HELD_VERSION_FILE))) writeHeldVersion(version)
             files.move(from, File(heldDir, "$id.bin"))
             try {
                 files.syncDir(dir)
@@ -352,14 +356,17 @@ class SpoolStore(
     }
 
     /**
-     * FU-105 release, called once at process start ([app.zaghlol.platform.capture.CaptureRuntime]):
-     * when [appVersion] differs from `held/.app_version` (or the file is
-     * absent or unreadable as a number), every held entry is renamed back
+     * FU-105 release, called once at process start ([app.zaghlol.platform.capture.CaptureRuntime]),
+     * which also tells the store the running version ([hold] writes it when
+     * `held/.app_version` is absent): when [appVersion] differs from
+     * `held/.app_version` (or the file is absent or unreadable as a number),
+     * every held entry is renamed back
      * to the spool (an app update may fix the cause) and the version is
      * rewritten. Never deletes anything. Returns the number released; an I/O
      * failure leaves the remaining entries held for the next start.
      */
     fun releaseHeldIfVersionChanged(appVersion: Long): Int = synchronized(lock) {
+        this.appVersion = appVersion
         if (!heldDir.isDirectory) return 0
         val versionFile = File(heldDir, HELD_VERSION_FILE)
         val stored = try {
@@ -383,17 +390,25 @@ class SpoolStore(
         } catch (_: Throwable) {
             // Best effort.
         }
+        writeHeldVersion(appVersion)
+        released
+    }
+
+    /** The running app's version, known after [releaseHeldIfVersionChanged] (under [lock]). */
+    private var appVersion: Long? = null
+
+    /** Best effort (tmp, fsync, rename): a missing file only means one extra release later. */
+    private fun writeHeldVersion(version: Long) {
         try {
             val tmp = File(heldDir, HELD_VERSION_FILE + TMP_SUFFIX)
             files.open(tmp).use { out ->
-                files.write(out, appVersion.toString().toByteArray(Charsets.US_ASCII))
+                files.write(out, version.toString().toByteArray(Charsets.US_ASCII))
                 files.sync(out)
             }
-            files.move(tmp, versionFile)
+            files.move(tmp, File(heldDir, HELD_VERSION_FILE))
         } catch (_: Exception) {
             // Next start compares again; releasing twice is harmless.
         }
-        released
     }
 
     /**

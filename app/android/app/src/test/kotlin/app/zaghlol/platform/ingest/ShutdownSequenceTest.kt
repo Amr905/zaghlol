@@ -1,4 +1,4 @@
-package app.zaghlol.spike.sms
+package app.zaghlol.platform.ingest
 
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertFalse
@@ -6,9 +6,9 @@ import org.junit.Assert.assertTrue
 import org.junit.Test
 import java.io.File
 
-/** Review F1: the headless engine is destroyed only after the drain reply and Dart's `close`. */
+/** T-008 review F1, T-041 section 5: `close` at once, destroy after the close and drain replies, bounded. */
 class ShutdownSequenceTest {
-    private class ManualTimers : MainTimers {
+    internal class ManualTimers : MainTimers {
         var now = 0L
         private val tasks = ArrayList<Pair<Long, Runnable>>()
 
@@ -21,12 +21,14 @@ class ShutdownSequenceTest {
         }
 
         fun advance(ms: Long) {
-            now += ms
+            val target = now + ms
             while (true) {
-                val due = tasks.filter { it.first <= now }.minByOrNull { it.first } ?: return
+                val due = tasks.filter { it.first <= target }.minByOrNull { it.first } ?: break
                 tasks.remove(due)
+                now = due.first
                 due.second.run()
             }
+            now = target
         }
 
         fun pending() = tasks.size
@@ -59,37 +61,64 @@ class ShutdownSequenceTest {
         h.closeReply!!()
         assertEquals(listOf("close", "destroy"), h.events)
         assertEquals(ShutdownSequence.State.GONE, h.seq.state)
-        assertEquals("bounds cancelled", 0, h.timers.pending())
+        assertEquals("bound cancelled", 0, h.timers.pending())
     }
 
+    /** T-041: the UI engine attaches mid-drain → `close` goes out at once (Dart stops after the batch). */
     @Test
-    fun uiEngineAttachesMidDrainNothingIsClosedOrDestroyedBeforeTheDrainReply() {
+    fun closeIsSentAtOnceWhileADrainIsPending() {
         val h = Harness()
         h.seq.drainSent()
-        h.seq.request() // SpikeEngineHook.attach → HeadlessEngine.shutdown()
+        h.seq.request() // CaptureRuntime.attachUi → HeadlessEngine.shutdown()
         h.seq.request() // a second request (onTrimMemory, linger) changes nothing
-        assertEquals(ShutdownSequence.State.WAITING_DRAIN, h.seq.state)
-        h.timers.advance(999)
-        assertTrue("no close or destroy while the drain runs", h.events.isEmpty())
+        assertEquals(ShutdownSequence.State.CLOSING, h.seq.state)
+        assertEquals("close sent before the drain reply", listOf("close"), h.events)
+    }
+
+    /** Dart answers the drain first, then close: destroy only after both. */
+    @Test
+    fun destroyWaitsForTheDrainReplyAndTheCloseReplyInDartOrder() {
+        val h = Harness()
+        h.seq.drainSent()
+        h.seq.request()
         h.seq.drainAnswered()
-        assertEquals(listOf("close"), h.events)
+        assertEquals("drain answered, close not yet", listOf("close"), h.events)
         h.closeReply!!()
         assertEquals(listOf("close", "destroy"), h.events)
     }
 
     @Test
-    fun aDrainThatNeverAnswersIsWaitedForUpToTheBoundThenClosed() {
+    fun aCloseReplyBeforeTheDrainReplyStillWaitsForTheDrain() {
         val h = Harness()
         h.seq.drainSent()
         h.seq.request()
-        h.timers.advance(1_000)
+        h.closeReply!!()
         assertEquals(listOf("close"), h.events)
+        h.seq.drainAnswered()
+        assertEquals(listOf("close", "destroy"), h.events)
+    }
+
+    @Test
+    fun withADrainPendingTheBoundIsDrainPlusClose() {
+        val h = Harness()
+        h.seq.drainSent()
+        h.seq.request()
+        h.timers.advance(1_199)
+        assertEquals(listOf("close"), h.events)
+        h.timers.advance(1)
+        assertEquals("bound reached (hung isolate)", listOf("close", "destroy"), h.events)
+        h.closeReply!!() // late replies: destroyed exactly once
+        h.seq.drainAnswered()
+        assertEquals(listOf("close", "destroy"), h.events)
+    }
+
+    @Test
+    fun withoutADrainTheBoundIsCloseOnly() {
+        val h = Harness()
+        h.seq.request()
         h.timers.advance(199)
         assertEquals(listOf("close"), h.events)
         h.timers.advance(1)
-        assertEquals("close bound reached", listOf("close", "destroy"), h.events)
-        h.closeReply!!() // late reply: destroyed exactly once
-        h.seq.drainAnswered()
         assertEquals(listOf("close", "destroy"), h.events)
     }
 
@@ -117,19 +146,7 @@ class ShutdownSequenceTest {
         val config = File("../../lib/ingestion/ingestion_config.dart").readText()
         val budget = Regex("kCycleBudget = Duration\\(seconds: (\\d+)\\)").find(config)!!.groupValues[1].toLong()
         assertTrue(ShutdownSequence.DRAIN_WAIT_MS > budget * 1_000)
-        assertTrue(ShutdownSequence.CLOSE_WAIT_MS in 1_000..10_000)
-    }
-
-    @Test
-    fun onlyTheShutdownSequenceDestroysTheHeadlessEngine() {
-        val dir = File("src/devSms/kotlin/app/zaghlol/spike/sms")
-        val engine = File(dir, "HeadlessEngine.kt").readText()
-        assertEquals("one FlutterEngine.destroy() call", 1, Regex("\\.destroy\\(\\)").findAll(engine).count())
-        val teardown = engine.substringAfter("private fun teardown()").substringBefore("private fun ensureEngine")
-        assertTrue(teardown.contains("e.destroy()"))
-        assertTrue(engine.contains("ShutdownSequence(timers, ::sendClose, ::teardown)"))
-        assertFalse("no public destroy", engine.contains("fun destroy("))
-        val hook = File(dir, "SpikeEngineHook.kt").readText()
-        assertTrue(hook.contains("rt.headless.shutdown()"))
+        assertEquals(55_000L, ShutdownSequence.DRAIN_WAIT_MS)
+        assertEquals(5_000L, ShutdownSequence.CLOSE_WAIT_MS)
     }
 }

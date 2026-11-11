@@ -82,6 +82,17 @@ class SpoolHeldTest {
         assertEquals("8", File(heldDir, SpoolStore.HELD_VERSION_FILE).readText())
     }
 
+    /** A hold after the start-time check records the running version, so the next start of it keeps the entry held. */
+    @Test
+    fun holdRecordsTheRunningVersion() {
+        assertEquals(0, store.releaseHeldIfVersionChanged(9)) // process start, nothing held yet
+        val a = store.put("a")
+        assertTrue(store.hold(a))
+        assertEquals("9", File(heldDir, SpoolStore.HELD_VERSION_FILE).readText())
+        assertEquals(0, storeIn(dir).releaseHeldIfVersionChanged(9))
+        assertEquals(1, store.heldCount())
+    }
+
     @Test
     fun releaseWithoutHeldDirectoryDoesNothing() {
         assertEquals(0, store.releaseHeldIfVersionChanged(3))
