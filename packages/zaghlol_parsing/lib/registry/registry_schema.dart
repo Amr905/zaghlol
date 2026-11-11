@@ -211,6 +211,8 @@ final class ObjReader {
 
 final RegExp _identifier = RegExp(r'^[A-Za-z0-9_]{1,40}$');
 
+/// Reads a list of Guard-bound patterns (drop, last-4, hints): compiled the
+/// way the Guards compile them (`compilePattern(guardBound: true)`).
 List<CompiledPattern> _patterns(
   ObjReader r,
   String key,
@@ -219,7 +221,12 @@ List<CompiledPattern> _patterns(
   final out = <CompiledPattern>[];
   final texts = r.strings(key);
   for (var i = 0; i < texts.length; i++) {
-    final p = _compileChecked('${r.path}.$key[$i]', texts[i], issues);
+    final p = _compileChecked(
+      '${r.path}.$key[$i]',
+      texts[i],
+      issues,
+      guardBound: true,
+    );
     if (p != null) {
       out.add(p);
     }
@@ -230,9 +237,10 @@ List<CompiledPattern> _patterns(
 CompiledPattern? _compileChecked(
   String path,
   String source,
-  List<RegistryIssue> issues,
-) {
-  final compiled = compilePattern(source);
+  List<RegistryIssue> issues, {
+  bool guardBound = false,
+}) {
+  final compiled = compilePattern(source, guardBound: guardBound);
   if (compiled == null) {
     issues.add(RegistryIssue(path, RegistryIssueCode.badRegex));
     return null;
@@ -408,7 +416,7 @@ List<SenderRule> _senders(ObjReader r, List<RegistryIssue> out) {
     if (match == 'exact') {
       rules.add(SenderRule(SenderMatchKind.exact, value.trim(), null));
     } else if (match == 'regex') {
-      final p = _compileChecked('$path.value', value, out);
+      final p = _compileChecked('$path.value', value, out, guardBound: true);
       if (p != null) {
         rules.add(SenderRule(SenderMatchKind.regex, value, p));
       }

@@ -16,10 +16,17 @@ SMS and notification events arrive while the app is killed. A `BroadcastReceiver
 3. ****Native Guard (rules only) → encrypted spool → Dart pipeline via WorkManager / BGTask / foreground**** — Parser stays single (Dart). The Guard is small, generated from registry data and tested with shared golden cases. The spool gives idempotent, loss-free hand-off.
 
 ## Decision
-**Option 3.** The Guard implements sender allowlist, OTP/promo drop and ignore rules from an encrypted config written by Dart. Kept messages go into an AES-GCM spool keyed by a non-exportable Keystore/Keychain key. Entries are deleted only after the DB commit.
+**Option 3.** The Guard implements sender allowlist, OTP/promo drop and ignore rules from a config written by Dart (since T-035 two parts: a plaintext base part bundled with the app and an encrypted user part; platform-channels §1.1). Kept messages go into an AES-GCM spool keyed by a non-exportable Keystore/Keychain key. Entries are deleted only after the DB commit.
 
 ## Consequences
 Guard logic exists in three languages (about 150 lines each), kept in lock-step by shared golden tests and generated config. On iOS, processing may wait until the next app open or BG refresh (SPK-03 tests a headless engine for immediate processing).
+
+## Threats (T-035, FU-084c)
+
+- **Spoofed sender IDs.** Alphanumeric SMS sender IDs can be spoofed over the phone network, and the Guard keeps on a sender match. The Guard is a privacy filter (what may be written), not an authenticity check. Mitigations: messages from generic and user senders always go to review (T-073); a template-matched spoof from a registry sender is auto-saved, an **accepted residual** (the user can delete it; no money moves).
+- **Flooding.** A per-`(channel, sender)` rate limit in the Guard (more than 20 kept per sliding minute → `rate_limited`, PO Q3 provisional) and the spool caps (500 entries / 4 MiB, new messages refused) bound disk use and expedited-work quota. Rate-limited SMS come back through the inbox catch-up scan; rate-limited notifications are lost.
+- **Config tampering or corruption.** The base part ships inside the signed app; the user part is AES-GCM with the spool key. An unreadable user part falls back to the base rules (bank SMS kept; ignored cards caught by the drain-time re-check in Dart), an unreadable base drops everything (`config_invalid`).
+- **Regex dialect drift.** Patterns are limited to a portable subset checked by the registry lint and run against one normalisation; the shared golden cases run in all three languages.
 
 ## SPK-01 measurement (T-008)
 

@@ -1,0 +1,152 @@
+{
+  "code": "nbe",
+  "names": {
+    "ar": "البنك الأهلي المصري",
+    "en": "National Bank of Egypt (synthetic Guard test copy)"
+  },
+  "country": "EG",
+  "defaultCurrency": "EGP",
+  "senders": [
+    {
+      "match": "exact",
+      "value": "NBE"
+    },
+    {
+      "match": "exact",
+      "value": "AlAhly"
+    }
+  ],
+  "packages": [
+    "com.example.nbe"
+  ],
+  "walletCardNames": [
+    "NBE",
+    "الأهلي"
+  ],
+  "last4": [
+    "\\*\\*([0-9]{4})",
+    "رقم ([0-9]{4})"
+  ],
+  "drop": [
+    "(?:^|[^a-z])offer(?:$|[^a-z])",
+    "عرض خاص"
+  ],
+  "templates": [
+    {
+      "id": "nbe.card_purchase.ar",
+      "version": 1,
+      "lang": "ar",
+      "channel": [
+        "sms"
+      ],
+      "event": "card_purchase",
+      "direction": "expense",
+      "baseConfidence": 0.98,
+      "pattern": "تم خصم (?<amount>[\\d,.]+) (?<cur>جم|egp|usd) .*?بطاقة .*?\\*\\*(?<last4>\\d{4}) لدى (?<merchant>.+?) (?:يوم|في) (?<date>\\d{1,2}/\\d{1,2})(?:.*?الرصيد المتاح (?<balance>[\\d,.]+))?",
+      "currencyMap": {
+        "جم": "EGP"
+      },
+      "date": {
+        "format": "d/M",
+        "yearPolicy": "nearest_past"
+      }
+    },
+    {
+      "id": "nbe.card_purchase.en",
+      "version": 1,
+      "lang": "en",
+      "channel": [
+        "sms"
+      ],
+      "event": "card_purchase",
+      "direction": "expense",
+      "baseConfidence": 0.97,
+      "pattern": "^nbe: purchase of (?<cur>egp) (?<amount>[\\d,.]+) from nbe (?:visa|mastercard) \\*\\*(?<last4>\\d{4}) at (?<merchant>.+?) on (?<date>\\d{1,2}/\\d{1,2})\\.(?: avl bal egp (?<balance>[\\d,.]+))?",
+      "date": {
+        "format": "d/M",
+        "yearPolicy": "nearest_past"
+      }
+    },
+    {
+      "id": "nbe.card_foreign.en",
+      "version": 1,
+      "lang": "en",
+      "channel": [
+        "sms"
+      ],
+      "event": "card_purchase_fx",
+      "direction": "expense",
+      "baseConfidence": 0.97,
+      "pattern": "^nbe: (?<ocur>[a-z]{3}) (?<oamount>[\\d,.]+) at (?<merchant>.+?) charged (?<cur>egp) (?<amount>[\\d,.]+) on card \\*(?<last4>\\d{4})(?:\\. bal egp (?<balance>[\\d,.]+))?"
+    },
+    {
+      "id": "nbe.salary.ar",
+      "version": 3,
+      "lang": "ar",
+      "channel": [
+        "sms"
+      ],
+      "event": "salary",
+      "direction": "income",
+      "baseConfidence": 0.96,
+      "pattern": "تم ايداع راتب (?<amount>[\\d,.]+) جم في حسابكم رقم \\*\\*(?<last4>\\d{4}) بتاريخ (?<date>\\d{1,2}/\\d{1,2}/\\d{4})(?: الساعة (?<time>\\d{1,2}:\\d{2}(?::\\d{2})?(?: ?(?:am|pm|ص|م))?))?",
+      "date": {
+        "format": "d/M/yyyy"
+      }
+    },
+    {
+      "id": "nbe.cash_deposit.ar",
+      "version": 1,
+      "lang": "ar",
+      "channel": [
+        "sms"
+      ],
+      "event": "transfer_in",
+      "direction": "income",
+      "baseConfidence": 0.95,
+      "pattern": "تم ايداع نقدي (?<amount>[\\d,.]+) جم في حسابكم"
+    },
+    {
+      "id": "nbe.refund.ar",
+      "version": 1,
+      "lang": "ar",
+      "channel": [
+        "sms"
+      ],
+      "event": "refund",
+      "direction": "income",
+      "baseConfidence": 0.97,
+      "pattern": "تم استرداد (?<amount>[\\d,.]+) (?<cur>جم) من (?<merchant>.+?) الى بطاقة \\*\\*(?<last4>\\d{4})",
+      "currencyMap": {
+        "جم": "EGP"
+      }
+    },
+    {
+      "id": "nbe.declined.en",
+      "version": 1,
+      "lang": "en",
+      "channel": [
+        "sms"
+      ],
+      "event": "declined",
+      "direction": "neutral",
+      "baseConfidence": 0.95,
+      "pattern": "^nbe: card \\*(?<last4>\\d{4}) purchase of egp (?<amount>[\\d,.]+) at (?<merchant>.+?) declined"
+    },
+    {
+      "id": "nbe.balance.ar",
+      "version": 1,
+      "lang": "ar",
+      "channel": [
+        "sms"
+      ],
+      "event": "balance_only",
+      "direction": "neutral",
+      "baseConfidence": 0.9,
+      "pattern": "رصيد حسابكم رقم \\*\\*(?<last4>\\d{4}) هو (?<balance>[\\d,.]+) (?<cur>جم|usd)",
+      "currencyMap": {
+        "جم": "EGP"
+      }
+    }
+  ]
+}

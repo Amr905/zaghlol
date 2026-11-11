@@ -13,7 +13,7 @@
     },
     {
       "match": "regex",
-      "value": "^CIB-(EGY|ALERT)$"
+      "value": "^cib-(?:egy|alert)$"
     }
   ],
   "packages": [],

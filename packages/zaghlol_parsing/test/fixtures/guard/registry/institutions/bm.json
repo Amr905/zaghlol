@@ -1,0 +1,46 @@
+{
+  "code": "bm",
+  "names": {
+    "ar": "بنك مصر",
+    "en": "Banque Misr (synthetic Guard test copy)"
+  },
+  "country": "EG",
+  "defaultCurrency": "EGP",
+  "senders": [
+    {
+      "match": "exact",
+      "value": "BanqueMisr"
+    }
+  ],
+  "packages": [
+    "com.example.bm"
+  ],
+  "walletCardNames": [
+    "Banque Misr",
+    "بنك مصر"
+  ],
+  "last4": [
+    "بطاقة رقم ([0-9]{4})"
+  ],
+  "drop": [
+    "تقسيط بدون فوائد"
+  ],
+  "templates": [
+    {
+      "id": "bm.card_purchase.ar",
+      "version": 1,
+      "lang": "ar",
+      "channel": [
+        "sms",
+        "notification"
+      ],
+      "event": "card_purchase",
+      "direction": "expense",
+      "baseConfidence": 0.95,
+      "pattern": "شراء (?<amount>[\\d,.]+) (?<cur>جم) ببطاقة رقم (?<last4>\\d{4}) من (?<merchant>.+?)(?:\\.|$)",
+      "currencyMap": {
+        "جم": "EGP"
+      }
+    }
+  ]
+}

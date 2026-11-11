@@ -1,5 +1,7 @@
 import 'dart:convert';
 
+import '../guard/capture_guard.dart';
+import '../guard/guard_config.dart';
 import '../normalize/text_normalizer.dart';
 import 'fixture_runner.dart';
 import 'guard_export.dart';
@@ -66,6 +68,7 @@ LintReport lintRegistry({
   var passed = 0;
   final covered = <String, int>{};
   final samples = <String, String>{};
+  final last4Checks = <(String, String, String, String)>[];
   final paths = fixtures.keys.toList()..sort();
   for (final path in paths) {
     run += 1;
@@ -83,6 +86,11 @@ LintReport lintRegistry({
         final body = _fixtureBody(fixtures[path]!);
         if (body != null) {
           samples.putIfAbsent(id, () => body);
+          final last4 = _fixtureExpectLast4(fixtures[path]!);
+          final slash = path.indexOf('/');
+          if (last4 != null && slash > 0) {
+            last4Checks.add((path, path.substring(0, slash), body, last4));
+          }
         }
       }
     } else {
@@ -142,8 +150,35 @@ LintReport lintRegistry({
   probe('shared.json', 'globalDrop', registry.shared.globalDrop);
   probe('shared.json', 'globalLast4', registry.shared.globalLast4);
   probe('shared.json', 'bodyHints', registry.shared.bodyHints);
+  probe('shared.json', 'senderHints', registry.shared.senderHints);
+  for (final inst in registry.institutions) {
+    probe('institutions/${inst.code}.json', 'senders', [
+      for (final s in inst.senders)
+        if (s.regex != null) s.regex!,
+    ]);
+  }
   final guard = exportGuardConfig(registry);
   issues.addAll(guard.issues);
+  // Last-4 parity (T-035 §10): the Guard's last-4 on every fixture whose
+  // template yields a last-4 must equal it, or a card-level ignore rule
+  // would miss natively.
+  final guardJson = guard.json;
+  if (guardJson != null) {
+    final cfg = parseGuardConfig(utf8.encode(guardJson)).config;
+    if (cfg == null) {
+      issues.add(
+        const RegistryIssue('guard.cfg', RegistryIssueCode.nonPortableRegex),
+      );
+    } else {
+      for (final (path, inst, body, last4) in last4Checks) {
+        if (guardLast4(cfg, inst, foldKey(body)) != last4) {
+          issues.add(
+            RegistryIssue(path, RegistryIssueCode.guardLast4Mismatch, 'last4'),
+          );
+        }
+      }
+    }
+  }
   return LintReport(
     issues: issues,
     fixturesRun: run,
@@ -162,6 +197,18 @@ LintReport lintRegistry({
 /// on a maximum-size message is measured, not assumed.
 const List<int> adversarialBodyLengths = [64, 128, 256, 512, 1600, 4000];
 
+/// The fixture's `expect.last4`, when it is a string.
+String? _fixtureExpectLast4(String text) {
+  try {
+    final map = jsonDecode(text);
+    final expect = map is Map<String, Object?> ? map['expect'] : null;
+    final last4 = expect is Map<String, Object?> ? expect['last4'] : null;
+    return last4 is String ? last4 : null;
+  } on FormatException {
+    return null;
+  }
+}
+
 String? _fixtureBody(String text) {
   try {
     final map = jsonDecode(text);
@@ -176,7 +223,14 @@ String? _fixtureBody(String text) {
 /// only, and the template's own fixture body repeated (so its literals
 /// recur).
 List<String> adversarialBodies(String? sample, int length) {
-  final out = <String>['1' * length, '\u0627 ' * (length ~/ 2)];
+  // Runs of mask characters (`*`, `x`) stress last-4 patterns such as
+  // `\*{2,}([0-9]{4})`, which are quadratic on them (T-035).
+  final out = <String>[
+    '1' * length,
+    '\u0627 ' * (length ~/ 2),
+    '*' * length,
+    'x' * length,
+  ];
   if (sample != null && sample.isNotEmpty) {
     final b = StringBuffer();
     while (b.length < length) {

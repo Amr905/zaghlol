@@ -11,50 +11,91 @@ Rules for every channel:
 
 The Guard is the native gatekeeper that enforces BR-ING-01, BR-ING-03, BR-CAP-01/02 and FR-ING-A-02 **before anything is written**.
 
-### 1.1 Guard config (written by Dart, read natively)
-- **Written:** by Dart on every change to ignore rules, capture senders or custom templates, and on each app update. It is re-generated from the bundled registry plus DB state.
-- **Format:** JSON, then AES-256-GCM encrypted with the **spool key** (§1.3), saved to `files/guard/guard.cfg.enc` (Android) or `Library/Application Support/guard/guard.cfg.enc` in the App Group container (iOS).
-- **Size:** under 200 KB.
+### 1.1 Guard config (two parts; T-035, approved by Lead 2026-11-11)
+
+The config is split in two so that an app update never waits for an app open and a failure to read user state never loses bank SMS.
+
+**Base part `guard_base.json`** (registry data; public, protected by the app signature):
+- **Generated** at build time from the registry by `exportGuardConfig` (`packages/zaghlol_parsing/lib/registry/guard_export.dart`) and **bundled as a Flutter asset** `app/assets/guard/guard_base.json` (asset wiring and the CI staleness step `registry_lint --check-guard-config` land with T-036, the first real registry). Native code reads it without an engine: Android through `AssetManager` (`flutter_assets/assets/guard/guard_base.json`); iOS (T-061) also copies it into the App Group container for the extensions.
+- **Plaintext**, deterministic bytes (institutions sorted by code, file order within one, fixed key order), at most 200 KB.
+- Values are exported in the form the Guards compare: exact senders, `alwaysCapture` ids and wallet card names as `foldKey` text (§1.2); packages trimmed; patterns as written minus a leading `(?i)`, with Arabic letter variants folded, and in the **portable regex subset** (below).
 
 ```json
 {
-  "v": 3, "registryVersion": 12,
-  "senders": [                                   // SMS addresses / alphanumeric IDs → institution
-    { "match": "exact", "value": "NBE", "inst": "nbe" },
-    { "match": "regex", "value": "^CIB(EGY)?$", "inst": "cib" }
-  ],
-  "packages": [ { "value": "com.transferwise.android", "inst": "wise" } ],   // notification sources
-  "shortcutKeywords": ["خصم","debited","تم تحويل","InstaPay"],              // iOS: Message trigger keywords
-  "drop": {                                      // OTP / promo patterns (BR-ING-03), per institution or global
-    "global": ["(?i)\\bOTP\\b", "كود التفعيل", "(?i)one[- ]time password"],
-    "byInst": { "cib": ["(?i)offer|خصم خاص"] }
-  },
-  "last4": {                                     // card/account extraction for ignore matching (BR-CAP-02)
-    "nbe": ["\\*\\*(\\d{4})", "رقم (\\d{4})"], "*": ["(?:\\*{2,}|x{2,}|ending\\s+)(\\d{4})"]
-  },
-  "ignore": [ { "inst": "cib", "last4": "9910", "ch": "sms" }, { "inst": "revolut", "last4": null, "ch": "notification" } ],
-  "generic": {                                   // FR-PAR-13: unknown senders that look financial
-    "senderHints": ["(?i)bank", "بنك", "(?i)pay"],
-    "bodyHints": ["(?i)(EGP|USD|ج\\.?م|جنيه)\\s?[\\d٠-٩]", "(?i)debited|credited|خصم|إيداع"],
-    "alwaysCapture": ["BDC-ALERT"]
-  }
+  "v": 4, "registryVersion": 12,
+  "senders":  [ { "match": "exact", "value": "nbe", "inst": "nbe" },          // value = foldKey(sender id)
+                { "match": "regex", "value": "^cib-(?:egy|alert)$", "inst": "cib" } ],  // runs on foldKey(source)
+  "packages": [ { "value": "com.transferwise.android", "inst": "wise" } ],
+  "wallet":   [ { "name": "cib", "inst": "cib" } ],                            // registry walletCardNames, folded (apple_pay)
+  "drop": { "global": [ "<OTP shapes, see §1.2>" ], "byInst": { "nbe": ["عرض خاص"] } },
+  "last4": { "nbe": ["\\*\\*([0-9]{4})"], "*": ["(?:\\*\\*|xx|ending )([0-9]{4})"] },   // exactly one capture group
+  "generic": { "senderHints": ["bank", "بنك"], "bodyHints": ["(?:egp|usd|ج\\.?م|جنيه) ?[0-9]"], "alwaysCapture": ["bdc-alert"] },
+  "shortcutKeywords": ["خصم", "debited", "تم تحويل", "InstaPay"],
+  "rate": { "perSenderPerMin": 20 }
 }
 ```
 
-### 1.2 Guard algorithm (identical in Kotlin, Swift and Dart; shared golden tests)
+**User part** (database state; financial: institution + last-4 pairs):
+- Built by `buildGuardUserConfig` (`lib/guard/guard_user_config.dart`) from `ignore_rules`, `capture_senders.always_capture` and the senders of the user's custom templates (T-047 reads the rows and calls it on every change to them and on each app start). Sorted, deduplicated, at most 64 KB, 1,000 ignore rules and 200 senders. An invalid row or a cap overrun is an **error** (code + JSON path, never a value): the config is never truncated and the previous file stays in force.
+  ```json
+  { "v": 1, "baseRegistryVersion": 12,
+    "ignore": [ { "inst": "cib", "last4": "9910", "ch": "sms" }, { "inst": "wise", "last4": null, "ch": "notification" } ],
+    "userSenders": [ { "value": "mycoop", "ch": "sms" } ] }               // value folded like the source (§1.2)
+  ```
+- **Written** by `writeGuardConfig(Uint8List userConfigJson)` (§2, §3), which takes the **plaintext** JSON (Dart can't use the non-exportable spool key). Native parses it with its own reader; invalid → `CONFIG_INVALID` and the old file is kept. Otherwise it encrypts with the spool key (§1.3, `SpoolKey`; AES-256-GCM, AAD `zaghlol.guard.v1|user`), writes `files/guard/guard.user.enc` (Android, `noBackupFilesDir`) or `guard/guard.user.enc` in the App Group container (iOS) via tmp + fsync + rename, and zeroes the buffer. (`app/pigeons/capture_api.dart` still names the parameter `encryptedConfig`; T-038 renames it when it implements the method. The wire type, bytes, is unchanged.)
+- An older `baseRegistryVersion` is fine: ignore rules are keyed by institution code, so an app update never loses them.
+
+**Modes** (`parseGuardConfig(baseBytes, userBytes?)` in Dart; natives mirror it):
+| Base | User | Mode | Behaviour |
+|---|---|---|---|
+| valid | absent | `baseOnly` | fresh install; normal |
+| valid | valid | `full` | |
+| valid | undecryptable, malformed, unknown key, unknown `v`, rule without `inst` | `baseOnly` + diag `CONFIG_INVALID` | registry senders still kept (NFR-REL-01). Provisional default, PO Q1 (`kGuardUserConfigFailure`): an ignored card's message may then sit encrypted in the spool until the drain-time re-check drops it |
+| unreadable or invalid (incl. old `v`) | any | `invalid` | every message dropped `config_invalid` (a build defect; the Android catch-up scan recovers SMS) |
+
+Readers are strict: unknown keys, wrong types, empty strings, values over 256 chars, patterns over 600 chars, lists over 5,000 entries, invalid UTF-8 and a regex that does not compile are errors. Error messages carry a code and a JSON path only.
+
+**Portable regex subset** (every Guard-bound pattern: sender regexes, drop, last-4, hints; checked by the registry lint through `exportGuardConfig`, `portableRegexProblems`). Kotlin/Android (`java.util.regex`, ICU-backed) and Swift (`NSRegularExpression`, ICU) differ from Dart (ECMAScript) on `\b \w \d \s`, case folding, inline flags and nested classes, so the lint rejects: any uppercase ASCII letter (bodies are lowercased; patterns compile case-sensitive everywhere), `\b \B \w \W \d \D \s \S \p \P \u \x`, backreferences, any other escape except of `^ $ \ . * + ? ( ) [ ] { } | /` (and `-` inside a class), inline flags, lookaround, named groups, atomic groups, possessive quantifiers, POSIX classes, `[` inside a class, `&&`/`--` inside a class, a class opening with `]`, and in `last4` anything but exactly one capture group (group 1 = the 4 digits). The backtracking heuristic and the runtime probe (adversarial bodies now include runs of `*` and `x`) apply to all of them, sender regexes included. Write `[0-9]`, a space, `(?:^|[^a-z])otp(?:$|[^a-z])`. Compile: Dart `RegExp(p, unicode: true)` (case-sensitive), Kotlin `Regex(p)`, Swift `NSRegularExpression(pattern: p, options: [])`. The registry loader compiles these lists the same way, so the pipeline's stage 0 and the Guards run the same regex.
+
+### 1.2 Guard algorithm (identical in Kotlin, Swift and Dart; shared golden tests; T-035)
+
+Reference implementation: `CaptureGuard.decide` in `packages/zaghlol_parsing/lib/guard/capture_guard.dart`. Golden cases: `packages/zaghlol_parsing/test/fixtures/guard/golden.json` (one file, read in place by all three test suites; never copied).
+
+**Normalisation.** All matching runs on `foldKey(body)` and `foldKey(source)`: Arabic-Indic and extended digits → ASCII, `٫` → `.`, `٬` → `,`; invisible marks removed (U+200B–200F, U+202A–202E, U+2066–2069, U+061C, U+2060, U+00AD, U+FEFF); tatweel (U+0640) and harakat (U+064B–0652, U+0670) removed; `أ إ آ ٱ` → `ا`, `ى` → `ي`, `ة` → `ه`; whitespace runs (U+0020, U+0009–000D, U+0085, U+00A0, U+2009, U+202F, U+2028, U+2029) → one space, trimmed; **ASCII-only** lowercase. Natives port it code unit by code unit: no `Normalizer`/NFKC, no locale or Unicode `lowercase()` (Turkish `İ` and the Kelvin sign stay as they are), no confusable folding (a Greek-Epsilon "NBΕ" stays unknown). The `notification` source (a package name) is only trimmed. Lengths are counted on the **raw** text in UTF-16 code units (Swift `utf16.count`).
+
 ```
-input: channel, source (sender | package | shortcut), body, receivedAt
-1. inst = resolve(source) via senders/packages; else if generic.alwaysCapture ∋ source → inst = null (generic)
-   else if channel = shortcut_message or apple_pay → inst = guess by body (registry name tokens) or null (generic)
-   else if senderHints match source AND bodyHints match body → generic
-   else → DROP                                         (non-financial: never stored)
-2. if any drop pattern (global ∪ byInst[inst]) matches body → DROP     (OTP / promo)
-3. if inst ≠ null and ignore has (inst, null, channel) → DROP          (institution-level ignore)
-4. last4 = first capture of last4[inst] ∪ last4["*"]
-   if last4 ≠ null and ignore has (inst, last4, channel) → DROP          (card-level ignore)
-5. KEEP → spool entry
+input: channel, source, body           output: KEEP(kind registry|user|generic, inst?, last4?) | DROP(reason)
+0. config invalid                                       → DROP config_invalid
+   channel ∉ {sms, notification, shortcut_message, apple_pay, share} → DROP unknown_channel
+   body > 4,000 or source > 256 UTF-16 units            → DROP too_long   (before any regex)
+   foldKey(body) empty                                  → DROP empty_body
+1. key = trim(source) for notification, else foldKey(source)
+   inst = notification: packages[key]
+          sms, shortcut_message: exact senders[key], else first sender regex matching key
+          apple_pay: the longest wallet name contained in key (a tie between two institutions → none)
+          share: none
+   inst found                                           → kind registry
+   else (channel, key) ∈ userSenders                    → kind user
+   else key ∈ alwaysCapture (not for notification), or channel ∈ {apple_pay, shortcut_message, share},
+        or (a senderHint matches key AND a bodyHint matches the folded body) → kind generic
+   else                                                 → DROP not_financial
+2. inst and a drop.byInst[inst] pattern matches         → DROP otp_or_promo_inst
+   a drop.global pattern matches                        → DROP otp_or_promo_global
+   inst = none                                          → KEEP(kind)
+3. ignoreCh = sms for sms and shortcut_message (PO Q5, provisional), notification, apple_pay; none for share
+   (inst, null, ignoreCh) ∈ ignore                      → DROP ignored_institution
+4. last4 = group 1 of the first match of the first pattern in last4[inst], then last4["*"],
+           whose group 1 is exactly 4 ASCII digits (with several cards the first hit decides)
+   last4 and (inst, last4, ignoreCh) ∈ ignore           → DROP ignored_card   (never last4 alone: EC-59)
+5. KEEP(registry, inst, last4)
 ```
-A malformed config makes the Guard **fail closed for unknown senders** but still keep messages from built-in registry senders. The built-in sender list is compiled into the native code as a fallback, so a broken config file can't lose bank SMS (NFR-REL-01).
+- The old "guess the institution from the body" step for `shortcut_message`/`apple_pay` is removed (ambiguous and drift-prone): those channels resolve by sender or wallet name, else are generic.
+- **Global drop = OTP only** (registry `shared.json`, FU-082): an OTP keyword within a short non-digit gap of a 4-8 digit code, either order (keyword first: gap ≤ 30 characters; code first: ≤ 9), where the code is not an amount (not followed by `[.,][0-9]`, not preceded by a digit, `.`, `,`, `*` or `x`). English keywords need a non-letter on both sides (`hotpot` is not `otp`, `OTP123` is). Keywords (folded): otp, one time password/passcode, verification/verify/security/activation/login code, passcode; رمز/كود التحقق، التفعيل، الدخول، الامان؛ كلمه السر لمره واحده؛ الرقم السري المؤقت؛ كلمه المرور المؤقته. So a footer such as "never share your OTP" on a real purchase does not drop it. Residual (golden case `residual.otp_code_after_amount_kept`): a code separated from its keyword by other digits, such as an amount ("OTP for EGP 500 is 123456"), or by more than the gap, is kept and reaches review as unrecognised.
+- A message with both a one-time code and a transaction is dropped (PO Q2, provisional; the completed-transaction SMS normally follows). Promotional messages are dropped only by an institution's own `drop` patterns; there is no global promo list (`خصم` = debit), so other promos reach review as unrecognised (PO Q6, provisional).
+- **Rate limit** (`SenderRateLimiter`, FU-084b), applied after `decide` and only to KEEP: more than `rate.perSenderPerMin` (20, PO Q3, provisional) keeps from one `(channel, key)` within a sliding 60 s window (monotonic clock) → DROP `rate_limited` (diag count only). In memory, at most 64 keys (LRU), reset with the process. Rate-limited SMS are recovered by the Android catch-up scan; rate-limited notifications are lost.
+- **Drain-time re-check.** T-046 runs the Dart Guard again on every drained entry (with the current config), so ignore rules created after a message was spooled, or a native Guard running on a broken user part, are applied before the database.
+- **Never logged:** no body, source, last-4 or config value in logs, errors or `toString` (Dart results print the reason/kind only).
+- **Spoofing:** the Guard is a privacy filter, not an authenticity check (ADR-005 *Threats*).
 
 ### 1.3 Spool (encrypted, ack-after-commit)
 
@@ -80,7 +121,7 @@ abstract class AndroidCaptureHostApi {
   void openNotificationAccessSettings();
   bool isIgnoringBatteryOptimizations();
   void requestIgnoreBatteryOptimizations();       // shown only if live capture is observed to be delayed
-  void writeGuardConfig(Uint8List encryptedConfig);
+  void writeGuardConfig(Uint8List userConfigJson); // plaintext user part (§1.1); native validates, encrypts, writes
   InboxPage queryInbox(InboxQuery query);         // paged historical scan; native filters by sender list in SQL
   List<SpoolEntry> drainSpool(int max);           // returns decrypted entries (in memory only)
   void ackSpool(List<String> ids);
@@ -161,7 +202,7 @@ abstract class ShareIntakeEventsApi { void onShareReceived(ShareDescriptor d); v
 ```dart
 @HostApi()
 abstract class IosCaptureHostApi {
-  void writeGuardConfig(Uint8List encryptedConfig);
+  void writeGuardConfig(Uint8List userConfigJson); // plaintext user part (§1.1); native validates, encrypts, writes
   List<SpoolEntry> drainSpool(int max);
   void ackSpool(List<String> ids);
   ShortcutSetupStatus getShortcutSetupStatus();   // from per-intent last-run timestamps recorded natively
@@ -195,7 +236,7 @@ struct ZaghlolShortcuts: AppShortcutsProvider { … }  // exposes both intents i
 
 **Other iOS pieces:**
 - **Share Extension:** accepts text, images and PDFs.
-  - Text goes through Guard → spool with channel `share`.
+  - Text does **not** go through the Capture Guard (same as Android, §2.1): it is user-initiated and always shown for confirmation (FR-ING-A-04). It is stored encrypted like images and PDFs and processed in the app.
   - Images and PDFs are copied **encrypted** (spool key) to `spool/files/` and processed in the app with user confirmation (FR-ING-A-04, FR-ING-I-04).
   - The extension never parses or displays amounts.
 - **Back Tap:** documented in setup. It runs a Shortcut that takes a screenshot and shares it to Zaghlol, then follows the same path as the Share Extension.

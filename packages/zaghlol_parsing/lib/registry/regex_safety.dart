@@ -1,4 +1,5 @@
 import '../normalize/text_normalizer.dart';
+import 'portable_regex.dart';
 import 'registry_models.dart';
 
 /// Longest accepted pattern source.
@@ -18,9 +19,25 @@ const int maxBoundedRepeat = 3;
 /// message text is lowercased by `foldKey`). Arabic letter variants in the
 /// pattern are folded the same way as the body (alef, ya, ta marbuta, tatweel
 /// and harakat) so `بطاقة` and `بطاقه` match each other.
-CompiledPattern? compilePattern(String source) {
+///
+/// [guardBound] patterns (sender regexes, drop, last-4 and hint lists) run
+/// in the native Guards too, so they are compiled exactly like the Dart
+/// Guard compiles the exported text ([guardPatternText],
+/// [compileGuardPattern]: `unicode: true`, case-sensitive): the pipeline's
+/// stage 0 and the Guard then run the same regex (T-035).
+CompiledPattern? compilePattern(String source, {bool guardBound = false}) {
   if (source.isEmpty || source.length > maxPatternLength) {
     return null;
+  }
+  if (guardBound) {
+    try {
+      return CompiledPattern(
+        source,
+        compileGuardPattern(guardPatternText(source)),
+      );
+    } on FormatException {
+      return null;
+    }
   }
   var body = source;
   if (body.startsWith('(?i)')) {

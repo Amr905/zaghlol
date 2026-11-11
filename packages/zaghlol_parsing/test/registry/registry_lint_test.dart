@@ -236,19 +236,22 @@ void main() {
         'registryVersion',
         'senders',
         'packages',
-        'shortcutKeywords',
+        'wallet',
         'drop',
         'last4',
         'generic',
+        'shortcutKeywords',
+        'rate',
       ]);
-      expect(json['v'], 3);
+      expect(json['v'], 4);
       expect(json['registryVersion'], 3);
     });
 
     test('senders and packages carry the institution', () {
       final senders = (json['senders']! as List<Object?>)
           .cast<Map<String, Object?>>();
-      expect(senders.first, {'match': 'exact', 'value': 'CIB', 'inst': 'cib'});
+      // Exact senders are exported folded (T-035 §4).
+      expect(senders.first, {'match': 'exact', 'value': 'cib', 'inst': 'cib'});
       expect(
         senders.any((s) => s['match'] == 'regex' && s['inst'] == 'cib'),
         isTrue,
@@ -260,13 +263,24 @@ void main() {
 
     test('drop, last4 and generic hints come from shared and institutions', () {
       final drop = json['drop']! as Map<String, Object?>;
-      expect((drop['global']! as List<Object?>), contains(r'(?i)\botp\b'));
+      expect((drop['global']! as List<Object?>).length, 4);
+      // Arabic variants are folded in the exported text (T-035 §3).
+      expect(
+        (drop['global']! as List<Object?>).last as String,
+        contains('كلمه السر لمره واحده'),
+      );
       expect((drop['byInst']! as Map<String, Object?>).keys, ['nbe']);
       final last4 = json['last4']! as Map<String, Object?>;
       expect(last4.keys, ['nbe', '*']);
       expect((json['generic']! as Map<String, Object?>)['alwaysCapture'], [
-        'BDC-ALERT',
+        'bdc-alert',
       ]);
+      expect(json['wallet'], [
+        {'name': 'cib', 'inst': 'cib'},
+        {'name': 'nbe', 'inst': 'nbe'},
+        {'name': 'الاهلي', 'inst': 'nbe'},
+      ]);
+      expect(json['rate'], {'perSenderPerMin': kGuardRatePerSenderPerMinute});
     });
 
     test('is deterministic and under the size cap', () {
@@ -480,6 +494,74 @@ void main() {
           (j['expect']! as Map<String, Object?>)['reasons'] = ['dateInvalid'];
         });
       expect(lint(f).issues.map((i) => i.detail), contains('reasons'));
+    });
+  });
+
+  group('Guard-bound patterns (T-035)', () {
+    RegistryFiles withShared(void Function(Map<String, Object?> json) edit) {
+      final f = base.copy();
+      final json = jsonDecode(f.shared!) as Map<String, Object?>;
+      edit(json);
+      f.shared = jsonEncode(json);
+      return f;
+    }
+
+    test('a non-portable drop pattern fails the lint', () {
+      final f = withShared((json) {
+        ((json['drop']! as Map<String, Object?>)['global']! as List<Object?>)
+            .add(r'(?i)\bcode\b');
+      });
+      final r = _lint(f);
+      expect(_codes(r), {RegistryIssueCode.nonPortableRegex});
+      expect(r.issues.single.detail, 'shorthand_escape');
+      expect(r.guardConfigJson, isNull);
+    });
+
+    test('a last-4 the Guard can not see fails the lint (parity)', () {
+      // Without the `card *1234` pattern the Guard misses the last-4 that
+      // the CIB templates capture.
+      final f = withShared((json) {
+        (json['last4']! as List<Object?>).removeLast();
+      });
+      final r = _lint(f);
+      expect(_codes(r), {RegistryIssueCode.guardLast4Mismatch});
+      expect(r.issues.every((i) => i.detail == 'last4'), isTrue);
+    });
+
+    test('a last-4 pattern quadratic on mask runs is flagged slow', () {
+      final f = withShared((json) {
+        (json['last4']! as List<Object?>).add(r'(?:\*{2,}|x{2,})([0-9]{4})');
+      });
+      final r = lintRegistry(
+        manifest: f.manifest,
+        shared: f.shared,
+        institutions: f.institutions,
+        fixtures: f.fixtures,
+        // Quadratic on 4,000 mask characters is ~300 ms here; 20 ms keeps a
+        // fast runner from hiding it.
+        maxMatchMillis: 20,
+      );
+      expect(
+        r.issues
+            .where((i) => i.code == RegistryIssueCode.slowMatch)
+            .map((i) => i.detail),
+        contains('globalLast4[2] adversarial'),
+      );
+    });
+
+    test('sender regexes are compiled on the folded key', () {
+      final load = RegistryLoader.load(
+        manifest: base.manifest,
+        shared: base.shared,
+        institutions: base.institutions,
+      );
+      final reg = load.registry!;
+      expect(reg.resolveSource('CIB-EGY', RegistryChannel.sms)?.code, 'cib');
+      expect(
+        reg.resolveSource(' cib-alert ', RegistryChannel.sms)?.code,
+        'cib',
+      );
+      expect(reg.resolveSource('CIB-EGYPT', RegistryChannel.sms), isNull);
     });
   });
 }

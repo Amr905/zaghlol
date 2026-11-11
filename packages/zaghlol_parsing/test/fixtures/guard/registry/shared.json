@@ -1,0 +1,39 @@
+{
+  "schema": 1,
+  "drop": {
+    "global": [
+      "(?:^|[^a-z])(?:otp|one[- ]?time[- ]pass(?:word|code)|(?:verification|verify|security|activation|login) code|passcode)(?:[^a-z0-9][^0-9]{0,30})?[0-9]{4,8}(?:$|[^0-9.,]|[.,]$|[.,][^0-9])",
+      "(?:^|[^0-9.,*x])[0-9]{4,8}(?:[^0-9]{0,8}[^a-z0-9])?(?:otp|one[- ]?time[- ]pass(?:word|code)|(?:verification|verify|security|activation|login) code|passcode)(?:$|[^a-z])",
+      "(?:(?:رمز|كود) ?(?:التحقق|التفعيل|الدخول|الأمان)|كلمة السر لمرة واحدة|الرقم السري المؤقت|كلمة المرور المؤقتة)[^0-9]{0,30}[0-9]{4,8}(?:$|[^0-9.,]|[.,]$|[.,][^0-9])",
+      "(?:^|[^0-9.,*x])[0-9]{4,8}[^0-9]{0,8}(?:(?:رمز|كود) ?(?:التحقق|التفعيل|الدخول|الأمان)|كلمة السر لمرة واحدة|الرقم السري المؤقت|كلمة المرور المؤقتة)"
+    ]
+  },
+  "last4": [
+    "(?:\\*\\*|xx|ending )([0-9]{4})",
+    "(?:card|account) \\*([0-9]{4})"
+  ],
+  "shortcutKeywords": [
+    "خصم",
+    "debited",
+    "تم تحويل",
+    "InstaPay"
+  ],
+  "generic": {
+    "senderHints": [
+      "bank",
+      "بنك"
+    ],
+    "bodyHints": [
+      "(?:egp|usd|ج\\.?م|جنيه) ?[0-9]"
+    ],
+    "alwaysCapture": [
+      "BDC-ALERT",
+      "Fawry Pay"
+    ]
+  },
+  "merchantCleaning": {
+    "cityPhrases": [
+      "SMOUHA"
+    ]
+  }
+}

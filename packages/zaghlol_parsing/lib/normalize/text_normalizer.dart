@@ -150,6 +150,7 @@ String _transform(String input, _Level level) {
 bool _isSpace(int u) {
   return u == _space ||
       (u >= 0x09 && u <= 0x0D) ||
+      u == 0x85 || // NEL: a line terminator for ICU `.` (T-035 §3)
       u == 0xA0 ||
       u == 0x202F ||
       u == 0x2009 ||
