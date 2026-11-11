@@ -50,6 +50,11 @@ enum DbOpenFailureCode {
   /// The file is from a newer app version (EC-26); untouched.
   schemaTooNew('DB_SCHEMA_TOO_NEW'),
 
+  /// T-008 (Q6): the open needs a step this engine may not take (create the
+  /// database or key, wipe an orphan, recover an unconfirmed migration).
+  /// Nothing was touched; the UI engine does it.
+  deferred('DB_DEFERRED'),
+
   /// The pre-migration copy could not be made (e.g. disk full); nothing was
   /// migrated.
   migrateCopyFailed('DB_MIGRATE_COPY_FAILED');
@@ -89,6 +94,7 @@ DbGateState dbGateStateFor(DbOpenFailureCode code) => switch (code) {
   DbOpenFailureCode.wipeIncomplete => DbGateState.wipeIncomplete,
   DbOpenFailureCode.migrationPending => DbGateState.deferToForeground,
   DbOpenFailureCode.schemaTooNew => DbGateState.appUpdateRequired,
+  DbOpenFailureCode.deferred => DbGateState.deferToForeground,
 };
 
 /// The result of [openAppDatabase]. Never carries a path, SQL or key.
@@ -216,13 +222,16 @@ AppDatabase _appDatabase(
   required bool restoreNoticeDue,
 }) => AppDatabase(executor, restoreNoticeDue: restoreNoticeDue);
 
-/// Opens zaghlol.db in [files] (design note §4). [allowMigration] is false
-/// for the headless engine.
+/// Opens zaghlol.db in [files] (design note §4). [allowMigration] and
+/// [allowCreateOrWipe] are false for the headless engine (T-008 Q6): it
+/// never migrates, creates, wipes or recovers; those cases are
+/// [DbOpenFailureCode.migrationPending] / [DbOpenFailureCode.deferred].
 Future<DbOpenResult<AppDatabase>> openAppDatabase({
   required DbFileSet files,
   required KeyBootstrap bootstrap,
   required List<OrphanWipeStep> wipeSteps,
   bool allowMigration = true,
+  bool allowCreateOrWipe = true,
   DbExecutorFactory executor = defaultDbExecutor,
   MigrationCopier copier = copyFileForMigration,
 }) => openDatabaseWith<AppDatabase>(
@@ -232,6 +241,7 @@ Future<DbOpenResult<AppDatabase>> openAppDatabase({
   database: _appDatabase,
   schemaVersion: appSchemaVersion,
   allowMigration: allowMigration,
+  allowCreateOrWipe: allowCreateOrWipe,
   executor: executor,
   copier: copier,
 );
@@ -244,10 +254,12 @@ Future<DbOpenResult<D>> openDatabaseWith<D extends GeneratedDatabase>({
   required DatabaseFactory<D> database,
   required int schemaVersion,
   bool allowMigration = true,
+  bool allowCreateOrWipe = true,
   DbExecutorFactory executor = defaultDbExecutor,
   MigrationCopier copier = copyFileForMigration,
 }) async {
   final opener = _Opener<D>(
+    allowCreateOrWipe: allowCreateOrWipe,
     files: files,
     bootstrap: bootstrap,
     wipeSteps: wipeSteps,
@@ -255,6 +267,7 @@ Future<DbOpenResult<D>> openDatabaseWith<D extends GeneratedDatabase>({
     guard: MigrationGuard(
       targetVersion: schemaVersion,
       allowMigration: allowMigration,
+      allowCreate: allowCreateOrWipe,
       copier: copier,
     ),
     executor: executor,
@@ -270,6 +283,7 @@ Future<DbOpenResult<D>> openDatabaseWith<D extends GeneratedDatabase>({
 
 final class _Opener<D extends GeneratedDatabase> {
   _Opener({
+    required this.allowCreateOrWipe,
     required this.files,
     required this.bootstrap,
     required this.wipeSteps,
@@ -284,6 +298,11 @@ final class _Opener<D extends GeneratedDatabase> {
   final DatabaseFactory<D> database;
   final MigrationGuard guard;
   final DbExecutorFactory executor;
+
+  /// False in the headless engine (T-008 Q6): every create, wipe, key
+  /// rotation, leftover delete and migration recovery becomes
+  /// [DbOpenFailureCode.deferred] with nothing touched.
+  final bool allowCreateOrWipe;
 
   int? _fromVersion;
 
@@ -309,16 +328,22 @@ final class _Opener<D extends GeneratedDatabase> {
   );
 
   Future<DbOpenResult<D>> run() async {
-    try {
-      await files.directory.create(recursive: true);
-    } on FileSystemException {
-      return failed(DbOpenFailureCode.unavailable);
+    if (allowCreateOrWipe) {
+      try {
+        await files.directory.create(recursive: true);
+      } on FileSystemException {
+        return failed(DbOpenFailureCode.unavailable);
+      }
     }
     final recovery = await _recoverFiles();
     if (recovery != null) return recovery;
 
-    final outcome = await bootstrap.obtain();
+    final outcome = await bootstrap.obtain(mayCreate: allowCreateOrWipe);
     if (outcome is KeyReady && !await _mainExists()) {
+      if (!allowCreateOrWipe) {
+        outcome.key.zeroize();
+        return failed(DbOpenFailureCode.deferred);
+      }
       // Leftovers without a main file (e.g. a WAL): no database to protect.
       // Delete them and ask again, which now takes the rotate path. Never the
       // main file (review m-1): this runs without a lease, and another engine
@@ -332,7 +357,7 @@ final class _Opener<D extends GeneratedDatabase> {
       } on FileSystemException {
         return failed(DbOpenFailureCode.unavailable);
       }
-      final again = await bootstrap.obtain();
+      final again = await bootstrap.obtain(mayCreate: allowCreateOrWipe);
       if (again is KeyReady && !await _mainExists()) {
         again.key.zeroize();
         return failed(DbOpenFailureCode.unavailable);
@@ -351,6 +376,22 @@ final class _Opener<D extends GeneratedDatabase> {
   }
 
   Future<DbOpenResult<D>> _handle(KeyBootstrapOutcome outcome) async {
+    if (!allowCreateOrWipe) {
+      switch (outcome) {
+        case KeyCreated(:final key, :final lease):
+          // Not produced with mayCreate false; never create here.
+          key.zeroize();
+          await lease.release();
+          return failed(DbOpenFailureCode.deferred);
+        case KeyInvalidated(:final lease):
+          await lease.release();
+          return failed(DbOpenFailureCode.deferred);
+        case KeyUnavailable(reason: KeyUnavailableReason.createNotAllowed):
+          return failed(DbOpenFailureCode.deferred);
+        case KeyReady() || KeyUnavailable() || KeyStoreFailed():
+          break;
+      }
+    }
     switch (outcome) {
       case KeyReady(:final key):
         try {
@@ -373,6 +414,23 @@ final class _Opener<D extends GeneratedDatabase> {
   /// headless engine that finds an unconfirmed migration defers to the UI
   /// engine (it could be migrating right now).
   Future<DbOpenResult<D>?> _recoverFiles() async {
+    if (!allowCreateOrWipe) {
+      // Never delete here: a `.migrate.part` may be the UI engine's copy in
+      // progress. Any leftover (or an unreadable state) defers.
+      try {
+        for (final f in [
+          files.migratePart,
+          for (final s in dbCompanionSuffixes.skip(1))
+            File('${files.migratePart.path}$s'),
+          files.migrateTmp,
+        ]) {
+          if (await f.exists()) return failed(DbOpenFailureCode.deferred);
+        }
+      } on FileSystemException {
+        return failed(DbOpenFailureCode.deferred);
+      }
+      return null;
+    }
     try {
       for (final f in [
         files.migratePart,
@@ -423,7 +481,14 @@ final class _Opener<D extends GeneratedDatabase> {
     } on Object catch (e) {
       final open = dbOpenExceptionOf(e);
       if (open != null && open.isKeyRejected && !retried) {
-        final again = await bootstrap.reportRejected(key);
+        final again = await bootstrap.reportRejected(
+          key,
+          mayCreate: allowCreateOrWipe,
+        );
+        if (!allowCreateOrWipe && again is KeyInvalidated) {
+          await again.lease.release();
+          return failed(DbOpenFailureCode.deferred);
+        }
         switch (again) {
           case KeyInvalidated():
             return _wipeAndCreate(again);
@@ -590,6 +655,7 @@ final class _Opener<D extends GeneratedDatabase> {
       DbOpenException.migrateCopyFailed => failed(
         DbOpenFailureCode.migrateCopyFailed,
       ),
+      DbOpenException.createNotAllowed => failed(DbOpenFailureCode.deferred),
       DbOpenException.leaseLapsed => failed(
         DbOpenFailureCode.unavailable,
         leaseLapsed: true,

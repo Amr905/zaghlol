@@ -1,11 +1,19 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools">
     <!-- ADR-004: defense in depth. Even if a plugin manifest declares a restricted
-         SMS permission, the NoSms flavor strips it from the merged manifest. -->
+         SMS permission, the NoSms flavor strips it from the merged manifest.
+         T-003 F11: the uses-permission-sdk-23 form too (a library could declare
+         either). -->
     <uses-permission android:name="android.permission.READ_SMS" tools:node="remove" />
     <uses-permission android:name="android.permission.RECEIVE_SMS" tools:node="remove" />
     <uses-permission android:name="android.permission.SEND_SMS" tools:node="remove" />
     <uses-permission android:name="android.permission.RECEIVE_MMS" tools:node="remove" />
     <uses-permission android:name="android.permission.RECEIVE_WAP_PUSH" tools:node="remove" />
     <uses-permission android:name="android.permission.READ_CELL_BROADCASTS" tools:node="remove" />
+    <uses-permission-sdk-23 android:name="android.permission.READ_SMS" tools:node="remove" />
+    <uses-permission-sdk-23 android:name="android.permission.RECEIVE_SMS" tools:node="remove" />
+    <uses-permission-sdk-23 android:name="android.permission.SEND_SMS" tools:node="remove" />
+    <uses-permission-sdk-23 android:name="android.permission.RECEIVE_MMS" tools:node="remove" />
+    <uses-permission-sdk-23 android:name="android.permission.RECEIVE_WAP_PUSH" tools:node="remove" />
+    <uses-permission-sdk-23 android:name="android.permission.READ_CELL_BROADCASTS" tools:node="remove" />
 </manifest>

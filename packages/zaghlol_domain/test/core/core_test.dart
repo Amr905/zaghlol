@@ -52,6 +52,30 @@ void main() {
       ]);
     });
 
+    test('FU-034: platform codes from a channel must be UPPER_SNAKE', () {
+      expect(
+        PlatformFailure.fromChannel('SPOOL_DECRYPT_FAILED').platformCode,
+        'SPOOL_DECRYPT_FAILED',
+      );
+      for (final bad in [
+        null,
+        '',
+        'io_error',
+        'IO ERROR',
+        'ZG_CANARY_7731 paid EGP 5',
+        '1ABC',
+        'A' * 65,
+        'خصم',
+      ]) {
+        expect(
+          PlatformFailure.fromChannel(bad).code,
+          'PLATFORM_UNKNOWN',
+          reason: '$bad',
+        );
+      }
+      expect(PlatformFailure.isValidCode('A' * 64), isTrue);
+    });
+
     test('network variants', () {
       expect(const NetworkFailure.timeout().code, 'NET_TIMEOUT');
       const server = NetworkFailure.server(503);

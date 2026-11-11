@@ -46,6 +46,7 @@ final class MigrationGuard {
   const MigrationGuard({
     required this.targetVersion,
     required this.allowMigration,
+    this.allowCreate = true,
     this.copier = copyFileForMigration,
   });
 
@@ -57,12 +58,18 @@ final class MigrationGuard {
   /// (ack-after-commit) and the UI engine migrates.
   final bool allowMigration;
 
+  /// False for the headless engine (T-008 Q6): a file without a schema
+  /// (`user_version` 0) is [DbOpenException.createNotAllowed], so drift never
+  /// runs `onCreate` there.
+  final bool allowCreate;
+
   final MigrationCopier copier;
 
   /// Runs in `setup` after the open sequence. [userVersion] reads
   /// `PRAGMA user_version`; [checkpoint] runs `wal_checkpoint(TRUNCATE)` and
   /// returns false when it could not complete.
   ///
+  /// - `v == 0` and not [allowCreate]: [DbOpenException.createNotAllowed].
   /// - `v == 0` (new file) or `v == target`: nothing to do.
   /// - `v > target`: [DbOpenException.schemaTooNew], file untouched (EC-26).
   /// - `v < target` and not [allowMigration]:
@@ -72,6 +79,9 @@ final class MigrationGuard {
   ///   [DbOpenException.migrateCopyFailed]; nothing was migrated.
   void check(int Function() userVersion, bool Function() checkpoint, File db) {
     final v = userVersion();
+    if (v == 0 && !allowCreate) {
+      throw DbOpenException(DbOpenException.createNotAllowed);
+    }
     if (v == 0 || v == targetVersion) return;
     if (v > targetVersion) {
       throw DbOpenException(DbOpenException.schemaTooNew);

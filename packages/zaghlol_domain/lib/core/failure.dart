@@ -94,6 +94,22 @@ final class NetworkFailure extends Failure {
 final class PlatformFailure extends Failure {
   const PlatformFailure(this.platformCode);
 
+  /// FU-034: builds a failure from a code received over a platform channel.
+  /// Anything that is not UPPER_SNAKE_CASE (at most 64 characters, the
+  /// SafeException shape) becomes [unknownCode], so free text a native
+  /// component might put into the code never reaches a log or a screen.
+  factory PlatformFailure.fromChannel(String? code) =>
+      PlatformFailure(isValidCode(code) ? code! : unknownCode);
+
+  /// The code used for a malformed or missing platform code.
+  static const String unknownCode = 'UNKNOWN';
+
+  static final RegExp _codePattern = RegExp(r'^[A-Z][A-Z0-9_]{0,63}$');
+
+  /// True for an UPPER_SNAKE_CASE code of at most 64 characters.
+  static bool isValidCode(String? code) =>
+      code != null && _codePattern.hasMatch(code);
+
   final String platformCode;
 
   @override

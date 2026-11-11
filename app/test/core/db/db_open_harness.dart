@@ -79,6 +79,7 @@ final class DbWorld {
   Future<DbOpenResult<AppDatabase>> open({
     int seed = 61,
     bool allowMigration = true,
+    bool allowCreateOrWipe = true,
     DbExecutorFactory executor = defaultDbExecutor,
     MigrationCopier copier = copyFileForMigration,
     List<OrphanWipeStep>? steps,
@@ -87,6 +88,7 @@ final class DbWorld {
     bootstrap: bootstrap(seed),
     wipeSteps: steps ?? wipeSteps(),
     allowMigration: allowMigration,
+    allowCreateOrWipe: allowCreateOrWipe,
     executor: executor,
     copier: copier,
   );
