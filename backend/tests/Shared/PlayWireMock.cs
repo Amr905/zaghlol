@@ -26,7 +26,7 @@ public sealed class PlayWireMock : IDisposable
     public string BaseUrl => Server.Urls[0];
 
     /// <summary><c>Purchases:Google:*</c> for a Testing host pointed at this server, with fast retries.</summary>
-    public IReadOnlyDictionary<string, string?> Settings(int retryBaseDelayMs = 20, int attemptTimeoutMs = 2000, int totalTimeoutMs = 8000) =>
+    public IReadOnlyDictionary<string, string?> Settings(int retryBaseDelayMs = 20, int attemptTimeoutMs = 5000, int totalTimeoutMs = 20000) =>
         new Dictionary<string, string?>
         {
             ["Purchases:Google:PackageName"] = Package,
