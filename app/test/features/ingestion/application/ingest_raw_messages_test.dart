@@ -820,21 +820,22 @@ void main() {
       expect(w.diag.counts['ING_MSG_FAILED'], 1);
     });
 
-    test(
-      'an unexpected error fails the whole batch (INGEST_INTERNAL)',
-      () async {
-        final useCase = w.useCase(hooks: [ThrowingHook(StateError(canary))]);
-        Object? error;
-        try {
-          await useCase([sms('a', purchase)]);
-        } on Object catch (e) {
-          error = e;
-        }
-        expect(error, isA<IngestBatchFailed>());
-        expect('$error', 'INGEST_INTERNAL');
-        expect(await w.count('raw_messages'), 0);
-      },
-    );
+    test('an unexpected error (INGEST_INTERNAL) rolls the message back and '
+        'stores it alone for review (CR-1/F2)', () async {
+      final useCase = w.useCase(
+        hooks: [ThrowingHook(StateError(canary), times: 1 << 30)],
+      );
+      final r = await useCase([sms('a', purchase)]);
+      expect((r.outcomes['a']! as IngestReview).reviewKind, 'unrecognized');
+      expect(r.ackable, ['a']);
+      expect(await txnCount(), 0);
+      expect(await w.count('accounts'), 0);
+      expect(await w.count('raw_messages'), 1);
+      expect(jsonDecode((await w.reviews()).single['payload']! as String), {
+        'reason': 'ingestFailed',
+        'code': 'INGEST_INTERNAL',
+      });
+    });
   });
 
   group('user-confirmed input (design note §11)', () {

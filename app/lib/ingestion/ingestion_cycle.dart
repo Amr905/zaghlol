@@ -189,8 +189,11 @@ final class IngestionCycle {
             code: e.code,
           );
         }
-        // Not transient (a defect): keep the entries, go on; the next drain
-        // returns them again and the cycle ends with them as stuck.
+        // Not transient and not isolatable (CONFIG_INVALID, an oversized
+        // batch): keep the entries, go on; the next drain returns them again
+        // and the cycle ends with them as stuck. (A poison message no longer
+        // gets here: the use case retries the batch one message at a time
+        // and stores a failing one for review, CR-1/F2.)
         failedCode = e.code;
         continue;
       } on IngestStoreUnavailable catch (e) {
@@ -207,6 +210,11 @@ final class IngestionCycle {
           inserted: inserted,
           code: 'DB_WRITE_FAILED',
         );
+      }
+      if (result.kept.isNotEmpty) {
+        // Could not be stored even alone: left in the spool (not acked);
+        // a later drain that returns only these ends the cycle as stuck.
+        failedCode = IngestBatchFailed.unstorable;
       }
       marks.mark('commit', ids);
       inserted += result.outcomes.values

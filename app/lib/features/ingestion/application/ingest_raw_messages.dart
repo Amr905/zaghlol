@@ -58,6 +58,12 @@ abstract final class IngestDiag {
   static const String messageFailed = 'ING_MSG_FAILED';
   static const String configInvalid = 'ING_CONFIG_INVALID';
 
+  /// CR-1/F2: a message that failed alone was stored for review.
+  static const String quarantined = 'ING_QUARANTINED';
+
+  /// CR-1/F2: a message could not be stored even alone (kept in the spool).
+  static const String kept = 'ING_KEPT';
+
   /// `ING_DROP_<REASON>` with the drop reason upper-cased.
   static String drop(String reason) => 'ING_DROP_${reason.toUpperCase()}';
 }
@@ -104,7 +110,15 @@ final class IngestRawMessages {
   int _nowMs() => _now().toUtc().millisecondsSinceEpoch;
 
   /// Ingests [batch] in one write transaction. Throws [IngestBatchFailed]
-  /// when the transaction did not commit (nothing stored, nothing to ack).
+  /// when nothing of it may be acked (CONFIG_INVALID, a transient database
+  /// failure, an oversized batch).
+  ///
+  /// CR-1/F2: when the batch transaction fails with an error that is not
+  /// transient, its messages are retried one per transaction, and one that
+  /// still fails is stored alone for review (`ingestFailed`), so one poison
+  /// message never blocks the others or the spool behind them. A message
+  /// that can't be stored even that way is left out of `ackable` (kept in
+  /// the spool, never deleted) and listed in [IngestBatchResult.kept].
   Future<IngestBatchResult> call(List<IncomingMessage> batch) async {
     if (batch.isEmpty) return IngestBatchResult.empty;
     if (batch.length > kMaxIngestBatch) {
@@ -118,29 +132,31 @@ final class IngestRawMessages {
     }
     // Pure work outside the transaction (§2a, §2b).
     final prepared = [for (final m in batch) _prepare(m)];
-
-    final state = _BatchState();
+    // §8: one categorizer per batch, made before BEGIN.
+    final categorizer = await _guarded(_newCategorizer);
+    final _BatchState state;
     try {
-      // §8: one categorizer per batch, made before BEGIN.
-      final categorizer = await _newCategorizer();
-      await _store.inWriteTransaction(() async {
-        final ctx = await _store.readContext();
-        state.paydayDay = paydayDayOf(ctx.paydayDay);
-        final guard = _guardFor(ctx);
-        final labels = _LabelLanguage.of(ctx.language);
-        for (final p in prepared) {
-          if (state.outcomes.containsKey(p.m.deliveryId)) continue;
-          final local = _Changes();
-          final outcome = await _one(
-            p,
-            _BatchScope(ctx, labels, categorizer),
-            guard,
-            local,
-          );
-          state.outcomes[p.m.deliveryId] = outcome;
-          state.changes.addAll(local);
-        }
-      });
+      state = await _run(prepared, categorizer);
+    } on IngestBatchFailed catch (e) {
+      if (!_isolatable(e)) rethrow;
+      return _isolate(batch, prepared, categorizer, e.code);
+    }
+    // Committed.
+    return _finish(batch, state);
+  }
+
+  /// Failures a per-message retry can get past (a defect or an unstorable
+  /// message). Transient and configuration failures can't.
+  static bool _isolatable(IngestBatchFailed e) =>
+      !e.isTransient &&
+      e.code != IngestBatchFailed.configInvalid &&
+      e.code != IngestBatchFailed.tooLarge;
+
+  /// Runs [body], mapping every error to an [IngestBatchFailed] code (never
+  /// the error's text).
+  static Future<T> _guarded<T>(Future<T> Function() body) async {
+    try {
+      return await body();
     } on IngestBatchFailed {
       rethrow;
     } on DbWriteException catch (e) {
@@ -154,8 +170,109 @@ final class IngestRawMessages {
     } on Object {
       throw IngestBatchFailed(IngestBatchFailed.internal);
     }
-    // Committed.
-    return _finish(batch, state);
+  }
+
+  /// One write transaction over [prepared] (§2, §10).
+  Future<_BatchState> _run(
+    List<_Prepared> prepared,
+    Categorizer categorizer,
+  ) async {
+    final state = _BatchState();
+    await _guarded(
+      () => _store.inWriteTransaction(() async {
+        final ctx = await _store.readContext();
+        state.paydayDay = paydayDayOf(ctx.paydayDay);
+        final guard = _guardFor(ctx);
+        final scope = _BatchScope(
+          ctx,
+          _LabelLanguage.of(ctx.language),
+          categorizer,
+        );
+        for (final p in prepared) {
+          if (state.outcomes.containsKey(p.m.deliveryId)) continue;
+          final local = _Changes();
+          final outcome = await _one(p, scope, guard, local);
+          state.outcomes[p.m.deliveryId] = outcome;
+          state.changes.addAll(local);
+        }
+      }),
+    );
+    return state;
+  }
+
+  /// CR-1/F2: one transaction per message; a message that still fails is
+  /// quarantined (stored alone for review); one that can't be stored even
+  /// so is kept in the spool. A transient failure stops here: what already
+  /// committed is published, nothing is acked, and its re-delivery is a
+  /// `duplicate`.
+  Future<IngestBatchResult> _isolate(
+    List<IncomingMessage> batch,
+    List<_Prepared> prepared,
+    Categorizer categorizer,
+    String batchCode,
+  ) async {
+    final total = _BatchState();
+    final kept = <String>[];
+    try {
+      for (final p in prepared) {
+        final id = p.m.deliveryId;
+        if (total.outcomes.containsKey(id) || kept.contains(id)) continue;
+        _BatchState one;
+        try {
+          // A batch of one already failed alone.
+          if (prepared.length == 1) throw IngestBatchFailed(batchCode);
+          one = await _run([p], categorizer);
+        } on IngestBatchFailed catch (e) {
+          if (!_isolatable(e)) rethrow;
+          try {
+            one = await _quarantine(p, e.code);
+          } on IngestBatchFailed catch (e2) {
+            if (!_isolatable(e2)) rethrow;
+            _diag.count(IngestDiag.kept, 1);
+            kept.add(id);
+            continue;
+          }
+        }
+        total.addAll(one);
+      }
+    } on IngestBatchFailed {
+      if (total.outcomes.isNotEmpty) _finish(batch, total, kept: kept);
+      rethrow;
+    }
+    return _finish(batch, total, kept: kept);
+  }
+
+  /// Stores [p] alone as raw `review` + an `unrecognized` item (`reason:
+  /// ingestFailed`, [code] only), in its own transaction. The Guard
+  /// re-check, the stage-0 drop and dedupe 1 still come first (an OTP is
+  /// never stored; a committed copy stays a duplicate). No account,
+  /// categorizer, merge or hook runs.
+  Future<_BatchState> _quarantine(_Prepared p, String code) async {
+    final state = _BatchState();
+    await _guarded(
+      () => _store.inWriteTransaction(() async {
+        final ctx = await _store.readContext();
+        state.paydayDay = paydayDayOf(ctx.paydayDay);
+        final local = _Changes();
+        final pre = await _precheck(p, _guardFor(ctx), local);
+        IngestOutcome outcome;
+        if (pre != null) {
+          outcome = pre;
+        } else {
+          try {
+            outcome = await _store.inSavepoint(
+              () => _storeFailed(p, p.result, code),
+            );
+            local.diag(IngestDiag.quarantined);
+          } on _RaceLost {
+            outcome = const IngestDuplicate();
+          }
+        }
+        state.outcomes[p.m.deliveryId] = outcome;
+        state.changes.addAll(local);
+      }),
+    );
+    return state;
   }
 
   // ---------------------------------------------------------------------
@@ -354,6 +471,46 @@ final class IngestRawMessages {
     _Guard? guard,
     _Changes local,
   ) async {
+    final pre = await _precheck(p, guard, local);
+    if (pre != null) return pre;
+    final result = p.result;
+    try {
+      return await _store.inSavepoint(() => _persist(p, b, local, result));
+    } on _RaceLost {
+      local.clear();
+      local.diag(IngestDiag.dupRace);
+      return const IngestDuplicate();
+    } on Object catch (e) {
+      if (!_isMessageLevel(e)) rethrow;
+      // §10: the message alone goes to review; the batch continues.
+      local.clear();
+      local.diag(IngestDiag.messageFailed);
+      try {
+        return await _store.inSavepoint(
+          () => _storeFailed(
+            p,
+            result,
+            e is SafeException ? e.code : 'INGEST_FAILED',
+          ),
+        );
+      } on _RaceLost {
+        return const IngestDuplicate();
+      } on IngestBatchFailed {
+        rethrow;
+      } on DbWriteException catch (e2) {
+        if (e2.code == DbWriteException.writeFailed) rethrow;
+        throw IngestBatchFailed(IngestBatchFailed.unstorable);
+      }
+    }
+  }
+
+  /// Steps 1 to 3 (Guard re-check, stage-0 drop, dedupe 1): the outcome
+  /// when the message stops here, else null.
+  Future<IngestOutcome?> _precheck(
+    _Prepared p,
+    _Guard? guard,
+    _Changes local,
+  ) async {
     final m = p.m;
     // (1) Guard re-check, background origins only.
     if (m.origin.isBackground) {
@@ -403,28 +560,7 @@ final class IngestRawMessages {
       local.diag(IngestDiag.dupHash);
       return const IngestDuplicate();
     }
-    try {
-      return await _store.inSavepoint(() => _persist(p, b, local, result));
-    } on _RaceLost {
-      local.clear();
-      local.diag(IngestDiag.dupRace);
-      return const IngestDuplicate();
-    } on Object catch (e) {
-      if (!_isMessageLevel(e)) rethrow;
-      // §10: the message alone goes to review; the batch continues.
-      local.clear();
-      local.diag(IngestDiag.messageFailed);
-      try {
-        return await _store.inSavepoint(() => _storeFailed(p, result, e));
-      } on _RaceLost {
-        return const IngestDuplicate();
-      } on IngestBatchFailed {
-        rethrow;
-      } on DbWriteException catch (e2) {
-        if (e2.code == DbWriteException.writeFailed) rethrow;
-        throw IngestBatchFailed(IngestBatchFailed.unstorable);
-      }
-    }
+    return null;
   }
 
   IngestOutcome _dropped(String reason, _Changes local) {
@@ -444,7 +580,7 @@ final class IngestRawMessages {
   Future<IngestOutcome> _storeFailed(
     _Prepared p,
     ParseResult result,
-    Object error,
+    String code,
   ) async {
     final rawId = await _insertRaw(
       p,
@@ -455,10 +591,7 @@ final class IngestRawMessages {
     await _review(
       kind: ReviewKind.unrecognized,
       rawId: rawId,
-      payload: {
-        'reason': 'ingestFailed',
-        'code': error is SafeException ? error.code : 'INGEST_FAILED',
-      },
+      payload: {'reason': 'ingestFailed', 'code': code},
     );
     return IngestReview(rawId, ReviewKind.unrecognized);
   }
@@ -648,6 +781,7 @@ final class IngestRawMessages {
     }
     if (matches.length == 1) {
       final target = matches.single;
+      // Raw first (CR-6 backstop), then the attach.
       await _insertRaw(
         p,
         status: RawStatus.parsed,
@@ -689,6 +823,7 @@ final class IngestRawMessages {
         ],
       );
       if (pick != null) {
+        // Raw first (CR-6 backstop), then the merge.
         await _insertRaw(
           p,
           status: RawStatus.parsed,
@@ -730,7 +865,7 @@ final class IngestRawMessages {
       counterpartyKind: counterparty?.$1,
       counterpartyValue: counterparty?.$2,
     );
-    // (10) Raw + transaction.
+    // (10) Raw + transaction; raw first (CR-6 backstop).
     final rawId = await _insertRaw(
       p,
       status: RawStatus.parsed,
@@ -1119,6 +1254,13 @@ final class IngestRawMessages {
     return (w.millisecondsSinceEpoch - offset * 60000, offset);
   }
 
+  /// Inserts the raw row (`ON CONFLICT(body_hash) DO NOTHING`); a conflict
+  /// throws [_RaceLost], which rolls the message's savepoint back.
+  ///
+  /// CR-6: in every branch this MUST run before any transaction insert or
+  /// update (attach, settle, insert). It is the `ux_raw_body_hash` backstop
+  /// behind dedupe 1: a copy that a concurrent writer committed first must
+  /// fail here, before it changes a transaction.
   Future<String> _insertRaw(
     _Prepared p, {
     required String status,
@@ -1274,7 +1416,11 @@ final class IngestRawMessages {
   // ---------------------------------------------------------------------
   // After the commit.
 
-  IngestBatchResult _finish(List<IncomingMessage> batch, _BatchState state) {
+  IngestBatchResult _finish(
+    List<IncomingMessage> batch,
+    _BatchState state, {
+    List<String> kept = const [],
+  }) {
     final changes = state.changes;
     for (final e in changes.diagCounts.entries) {
       _diag.count(e.key, e.value);
@@ -1304,6 +1450,7 @@ final class IngestRawMessages {
     final ackable = <String>[];
     final seen = <String>{};
     for (final m in batch) {
+      if (kept.contains(m.deliveryId)) continue;
       if (seen.add(m.deliveryId)) ackable.add(m.deliveryId);
     }
     return IngestBatchResult(
@@ -1313,6 +1460,7 @@ final class IngestRawMessages {
       changedAccountIds: accountIds,
       createdAccountIds: changes.created,
       event: event,
+      kept: kept,
     );
   }
 }
@@ -1433,6 +1581,12 @@ final class _BatchState {
   final Map<String, IngestOutcome> outcomes = {};
   final _Changes changes = _Changes();
   int paydayDay = 1;
+
+  void addAll(_BatchState o) {
+    outcomes.addAll(o.outcomes);
+    changes.addAll(o.changes);
+    paydayDay = o.paydayDay;
+  }
 }
 
 /// The language of new account labels: `settings.language` (`en…` is

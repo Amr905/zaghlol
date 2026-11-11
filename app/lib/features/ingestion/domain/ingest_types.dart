@@ -155,7 +155,9 @@ final class IngestBatchResult {
     required Set<String> changedAccountIds,
     required Set<String> createdAccountIds,
     this.event,
+    List<String> kept = const [],
   }) : outcomes = Map.unmodifiable(outcomes),
+       kept = List.unmodifiable(kept),
        ackable = List.unmodifiable(ackable),
        changedTxnIds = Set.unmodifiable(changedTxnIds),
        changedAccountIds = Set.unmodifiable(changedAccountIds),
@@ -172,9 +174,13 @@ final class IngestBatchResult {
   /// By delivery id.
   final Map<String, IngestOutcome> outcomes;
 
-  /// Every delivery id of the committed batch, in input order: the caller
-  /// acks exactly these, after this result was returned.
+  /// Every delivery id of the committed batch, in input order, except
+  /// [kept]: the caller acks exactly these, after this result was returned.
   final List<String> ackable;
+
+  /// CR-1/F2: delivery ids that could not be stored even alone for review
+  /// (no outcome; never acked, so they stay in the spool, never deleted).
+  final List<String> kept;
   final Set<String> changedTxnIds;
 
   /// Accounts whose transactions or balances changed.

@@ -90,7 +90,16 @@ final class ThrowingHook implements PostPersistHook {
 /// busy-like `DB_WRITE_FAILED`, simulating a crash or I/O error at that
 /// step (before the commit).
 final class FaultyStore implements IngestStorePort {
-  FaultyStore(this._inner, {this.failAt, this.afterCrossChannelRead});
+  FaultyStore(
+    this._inner, {
+    this.failAt,
+    this.afterCrossChannelRead,
+    this.poisonRaw,
+  });
+
+  /// CR-1/F2: raw inserts this matches throw a `StateError` (a defect, not
+  /// a database error), even when stored alone for review.
+  final bool Function(RawInsert row)? poisonRaw;
 
   final IngestStorePort _inner;
   int? failAt;
@@ -133,7 +142,10 @@ final class FaultyStore implements IngestStorePort {
   Future<bool> hashExists(String bodyHash) =>
       _step(() => _inner.hashExists(bodyHash));
   @override
-  Future<bool> insertRaw(RawInsert row) => _step(() => _inner.insertRaw(row));
+  Future<bool> insertRaw(RawInsert row) => _step(() {
+    if (poisonRaw?.call(row) ?? false) throw StateError('poison');
+    return _inner.insertRaw(row);
+  });
   @override
   Future<List<TxnCandidate>> crossChannelCandidates({
     required String dedupeKey,
@@ -222,6 +234,7 @@ final class IngestWorld {
     GuardConfigSource? guardBase,
     List<PostPersistHook> hooks = const [],
     String idPrefix = '',
+    CategorizerFactory? categorizerFactory,
   }) {
     final database = on ?? db;
     return buildIngestRawMessages(
@@ -233,6 +246,7 @@ final class IngestWorld {
       zone: const FixedLocalZone(zoneOffsetMin),
       store: wrap == null ? null : wrap(DriftIngestStore(database)),
       hooks: hooks,
+      categorizerFactory: categorizerFactory,
       diag: diag,
       events: bus,
     );
