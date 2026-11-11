@@ -98,8 +98,8 @@ final class IngestRawMessages {
 
   List<int>? _baseBytes;
   GuardConfig? _baseConfig;
-  List<int>? _lastUserBytes;
-  CaptureGuard? _lastFullGuard;
+  final List<(List<int>, CaptureGuard)> _guardCache = [];
+  CaptureGuard? _baseGuard;
 
   int _nowMs() => _now().toUtc().millisecondsSinceEpoch;
 
@@ -224,45 +224,118 @@ final class IngestRawMessages {
     final base = _baseConfig;
     final baseBytes = _baseBytes;
     if (base == null || baseBytes == null) return null;
+    final version = base.registryVersion;
+    final rules = [
+      for (final r in ctx.ignoreRules)
+        GuardIgnoreRuleInput(
+          institutionCode: r.institutionCode,
+          last4: r.last4,
+          channel: r.channel,
+        ),
+    ];
+    final always = [
+      for (final s in ctx.captureSenders)
+        if (s.alwaysCapture)
+          GuardUserSenderInput(sender: s.sender, channel: s.channel),
+    ];
+    final custom = [
+      for (final (sender, channel) in ctx.customTemplateSenders)
+        GuardUserSenderInput(sender: sender, channel: channel),
+    ];
+    final full = _guardWith(baseBytes, version, rules, always, custom);
+    if (full != null) return _Guard(full);
+
+    // F1: the user part can't be built as a whole (a row the Guard can't
+    // express, or a cap). Never switch the user's keeps off: leave out only
+    // the rows the builder rejects one by one, and check every registry keep
+    // against the database ignore rules (which also covers the rules left
+    // out). If the senders still don't fit, a sender the user asked to
+    // capture is kept in Dart when the base Guard calls it not financial.
+    final okRules = [
+      for (final r in rules)
+        if (_ruleOk(version, r)) r,
+    ];
+    final okSenders = [
+      for (final s in always)
+        if (_senderOk(version, s)) s,
+      if (kCaptureCustomTemplateSendersWithoutGold)
+        for (final s in custom)
+          if (_senderOk(version, s)) s,
+    ];
+    final withRules = _guardWith(
+      baseBytes,
+      version,
+      okRules,
+      okSenders,
+      const [],
+    );
+    if (withRules != null) return _Guard(withRules, dbIgnoreCheck: true);
+    final sendersOnly = _guardWith(
+      baseBytes,
+      version,
+      const [],
+      okSenders,
+      const [],
+    );
+    if (sendersOnly != null) return _Guard(sendersOnly, dbIgnoreCheck: true);
+    return _Guard(
+      _baseGuard ??= CaptureGuard(base),
+      dbIgnoreCheck: true,
+      userSenders: {
+        for (final s in okSenders)
+          if (GuardChannel.fromWire(s.channel) case final ch?)
+            (ch.wire, guardSourceKey(ch, s.sender)),
+      },
+    );
+  }
+
+  /// The Guard over the base plus a user part built from these rows, or
+  /// null when the builder or the loader rejects it. The last few built
+  /// guards are cached by their user bytes (the rows rarely change).
+  CaptureGuard? _guardWith(
+    List<int> baseBytes,
+    int version,
+    List<GuardIgnoreRuleInput> rules,
+    List<GuardUserSenderInput> always,
+    List<GuardUserSenderInput> custom,
+  ) {
     final built = buildGuardUserConfig(
-      baseRegistryVersion: base.registryVersion,
-      ignoreRules: [
-        for (final r in ctx.ignoreRules)
-          GuardIgnoreRuleInput(
-            institutionCode: r.institutionCode,
-            last4: r.last4,
-            channel: r.channel,
-          ),
-      ],
-      alwaysCaptureSenders: [
-        for (final s in ctx.captureSenders)
-          if (s.alwaysCapture)
-            GuardUserSenderInput(sender: s.sender, channel: s.channel),
-      ],
-      customTemplateSenders: [
-        for (final (sender, channel) in ctx.customTemplateSenders)
-          GuardUserSenderInput(sender: sender, channel: channel),
-      ],
+      baseRegistryVersion: version,
+      ignoreRules: rules,
+      alwaysCaptureSenders: always,
+      customTemplateSenders: custom,
       goldActive: false,
     );
     final userBytes = built.bytes;
-    if (userBytes != null) {
-      final cached = _lastFullGuard;
-      if (cached != null && _sameBytes(_lastUserBytes, userBytes)) {
-        return _Guard(cached, baseOnly: false);
-      }
-      final load = parseGuardConfig(baseBytes, userBytes);
-      if (load.mode == GuardConfigMode.full) {
-        final guard = CaptureGuard(load.config);
-        _lastUserBytes = userBytes;
-        _lastFullGuard = guard;
-        return _Guard(guard, baseOnly: false);
-      }
+    if (userBytes == null) return null;
+    for (final (bytes, guard) in _guardCache) {
+      if (_sameBytes(bytes, userBytes)) return guard;
     }
-    // The user part can't be built (caps, a row the Guard can't express):
-    // base rules plus a per-message database ignore check.
-    return _Guard(CaptureGuard(base), baseOnly: true);
+    final load = parseGuardConfig(baseBytes, userBytes);
+    if (load.mode != GuardConfigMode.full) return null;
+    final guard = CaptureGuard(load.config);
+    _guardCache.add((userBytes, guard));
+    if (_guardCache.length > 2) _guardCache.removeAt(0);
+    return guard;
   }
+
+  static bool _ruleOk(int version, GuardIgnoreRuleInput r) =>
+      buildGuardUserConfig(
+        baseRegistryVersion: version,
+        ignoreRules: [r],
+        alwaysCaptureSenders: const [],
+        customTemplateSenders: const [],
+        goldActive: false,
+      ).ok;
+
+  static bool _senderOk(int version, GuardUserSenderInput s) =>
+      buildGuardUserConfig(
+        baseRegistryVersion: version,
+        ignoreRules: const [],
+        alwaysCaptureSenders: [s],
+        customTemplateSenders: const [],
+        goldActive: false,
+      ).ok;
 
   static bool _sameBytes(List<int>? a, List<int> b) {
     if (a == null || a.length != b.length) return false;
@@ -292,10 +365,12 @@ final class IngestRawMessages {
         source: m.source,
         body: m.body,
       );
-      if (decision is GuardDrop) {
+      if (decision is GuardDrop &&
+          !(decision.reason == GuardDropReason.notFinancial &&
+              guard.isUserSender(m.channel, m.source))) {
         return _dropped(decision.reason.wire, local);
       }
-      if (guard.baseOnly && decision is GuardKeep) {
+      if (guard.dbIgnoreCheck && decision is GuardKeep) {
         final inst = decision.inst;
         final channel = GuardChannel.fromWire(m.channel);
         final ignoreChannel = channel == null
@@ -1279,9 +1354,27 @@ final class _Category {
 }
 
 final class _Guard {
-  const _Guard(this.guard, {required this.baseOnly});
+  const _Guard(
+    this.guard, {
+    this.dbIgnoreCheck = false,
+    this.userSenders = const {},
+  });
   final CaptureGuard guard;
-  final bool baseOnly;
+
+  /// Some ignore rules are not in [guard]: check registry keeps against
+  /// the database too.
+  final bool dbIgnoreCheck;
+
+  /// `(channel wire, sender key)` the user asked to capture that are not in
+  /// [guard]'s user part (it could not hold them).
+  final Set<(String, String)> userSenders;
+
+  bool isUserSender(String channelWire, String source) {
+    if (userSenders.isEmpty) return false;
+    final ch = GuardChannel.fromWire(channelWire);
+    if (ch == null) return false;
+    return userSenders.contains((ch.wire, guardSourceKey(ch, source)));
+  }
 }
 
 /// Rolls back a savepoint whose raw insert lost the `body_hash` race.

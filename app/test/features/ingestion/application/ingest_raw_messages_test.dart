@@ -651,8 +651,8 @@ void main() {
       },
     );
 
-    test('a user part the Guard can not express → base rules plus the '
-        'database ignore check still drop', () async {
+    test('a user part the Guard can not express → the bad row is left '
+        'out; the valid rules still drop', () async {
       await CaptureControlsDao(w.db).addIgnoreRule(
         id: 'ig1',
         institutionCode: 'zbank',
@@ -660,7 +660,7 @@ void main() {
         createdAt: t0,
       );
       // A 2-digit card rule: valid for the schema, refused by the Guard's
-      // user-part builder (4 digits only), so the build fails.
+      // user-part builder (4 digits only), so the whole build fails.
       await CaptureControlsDao(w.db).addIgnoreRule(
         id: 'ig2',
         institutionCode: 'otherbank',
@@ -669,8 +669,103 @@ void main() {
         createdAt: t0,
       );
       final r = await w.run([sms('s', purchase)]);
-      expect((r.outcomes['s']! as IngestDropped).reason, 'ignored_rule');
+      expect((r.outcomes['s']! as IngestDropped).reason, 'ignored_institution');
       expect(await w.count('raw_messages'), 0);
+    });
+
+    group('F1: the fallback keeps the user\'s keeps', () {
+      Future<void> badRule() => CaptureControlsDao(w.db).addIgnoreRule(
+        id: 'bad',
+        institutionCode: 'otherbank',
+        last4: '12',
+        channel: 'sms',
+        createdAt: t0,
+      );
+
+      Future<void> alwaysCoop() async {
+        final dao = CaptureControlsDao(w.db);
+        await dao.setAlwaysCapture(
+          sender: 'coopxyz',
+          channel: 'sms',
+          always: true,
+          at: t0,
+        );
+        for (var i = 0; i < 3; i++) {
+          await dao.recordConfirmation(
+            sender: 'coopxyz',
+            channel: 'sms',
+            at: t0,
+          );
+        }
+      }
+
+      // The security reviewer's probe: always-capture COOPXYZ plus one
+      // 2-digit rule for an unrelated bank.
+      for (final bad in [false, true]) {
+        test('always-capture sender, bad row: $bad → stored, not '
+            'dropped', () async {
+          await alwaysCoop();
+          if (bad) await badRule();
+          final r = await w.run([
+            sms('c1', 'Coop: 50.00 deducted', source: 'COOPXYZ'),
+            sms(
+              'c2',
+              'You paid EGP 50.00 at Synth Cafe',
+              source: 'COOPXYZ',
+              rx: t0 + 1000,
+            ),
+          ]);
+          for (final id in ['c1', 'c2']) {
+            expect(r.outcomes[id], isNot(isA<IngestDropped>()), reason: id);
+          }
+          expect(r.ackable, ['c1', 'c2']);
+          expect(await w.count('raw_messages'), 2);
+          expect(await w.count('review_items'), greaterThanOrEqualTo(2));
+        });
+      }
+
+      test('a custom-template sender with a bad row → stored', () async {
+        await badRule();
+        await w.db.customStatement(
+          'INSERT INTO custom_templates (id, sender, channel, template_json, '
+          "sample_hash, created_at) VALUES ('ct1', 'COOPXYZ', 'sms', '{}', "
+          "'${'a' * 64}', $t0)",
+        );
+        final r = await w.run([
+          sms('c', 'Coop: 50.00 deducted', source: 'COOPXYZ'),
+        ]);
+        expect(r.outcomes['c'], isNot(isA<IngestDropped>()));
+        expect(await w.count('raw_messages'), 1);
+      });
+
+      test('over the rule cap: every rule is checked in the database, '
+          'keeps still kept', () async {
+        await alwaysCoop();
+        await CaptureControlsDao(w.db).addIgnoreRule(
+          id: 'ig1',
+          institutionCode: 'zbank',
+          channel: 'sms',
+          createdAt: t0,
+        );
+        // 1,000 more valid card rules: over maxGuardIgnoreRules.
+        await w.db.transaction(() async {
+          for (var i = 0; i < 1000; i++) {
+            await w.db.customStatement(
+              'INSERT INTO ignore_rules (id, institution_code, last4, '
+              "channel, created_at) VALUES ('x$i', 'otherbank', "
+              "'${i.toString().padLeft(4, '0')}', 'sms', $t0)",
+            );
+          }
+        });
+        final r = await w.run([
+          sms('z', purchase),
+          sms('c', 'Coop: 50.00 deducted', source: 'COOPXYZ'),
+          sms('x', purchase, source: 'SPAMMER'),
+        ]);
+        expect((r.outcomes['z']! as IngestDropped).reason, 'ignored_rule');
+        expect(r.outcomes['c'], isNot(isA<IngestDropped>()));
+        expect((r.outcomes['x']! as IngestDropped).reason, 'not_financial');
+      });
     });
 
     test('OTP → dropped before any write', () async {
