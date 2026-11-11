@@ -68,11 +68,407 @@ private func nilOrValue<T>(_ value: Any?) -> T? {
   return value as! T?
 }
 
+private func doubleEqualsCaptureApi(_ lhs: Double, _ rhs: Double) -> Bool {
+  return (lhs.isNaN && rhs.isNaN) || lhs == rhs
+}
+
+private func doubleHashCaptureApi(_ value: Double, _ hasher: inout Hasher) {
+  if value.isNaN {
+    hasher.combine(0x7FF8000000000000)
+  } else {
+    // Normalize -0.0 to 0.0
+    hasher.combine(value == 0 ? 0 : value)
+  }
+}
+
+func deepEqualsCaptureApi(_ lhs: Any?, _ rhs: Any?) -> Bool {
+  let cleanLhs = nilOrValue(lhs) as Any?
+  let cleanRhs = nilOrValue(rhs) as Any?
+  switch (cleanLhs, cleanRhs) {
+  case (nil, nil):
+    return true
+
+  case (nil, _), (_, nil):
+    return false
+
+  case (let lhs as AnyObject, let rhs as AnyObject) where lhs === rhs:
+    return true
+
+  case is (Void, Void):
+    return true
+
+  case (let lhsArray, let rhsArray) as ([Any?], [Any?]):
+    guard lhsArray.count == rhsArray.count else { return false }
+    for (index, element) in lhsArray.enumerated() {
+      if !deepEqualsCaptureApi(element, rhsArray[index]) {
+        return false
+      }
+    }
+    return true
+
+  case (let lhsArray, let rhsArray) as ([Double], [Double]):
+    guard lhsArray.count == rhsArray.count else { return false }
+    for (index, element) in lhsArray.enumerated() {
+      if !doubleEqualsCaptureApi(element, rhsArray[index]) {
+        return false
+      }
+    }
+    return true
+
+  case (let lhsDictionary, let rhsDictionary) as ([AnyHashable: Any?], [AnyHashable: Any?]):
+    guard lhsDictionary.count == rhsDictionary.count else { return false }
+    for (lhsKey, lhsValue) in lhsDictionary {
+      var found = false
+      for (rhsKey, rhsValue) in rhsDictionary {
+        if deepEqualsCaptureApi(lhsKey, rhsKey) {
+          if deepEqualsCaptureApi(lhsValue, rhsValue) {
+            found = true
+            break
+          } else {
+            return false
+          }
+        }
+      }
+      if !found { return false }
+    }
+    return true
+
+  case (let lhs as Double, let rhs as Double):
+    return doubleEqualsCaptureApi(lhs, rhs)
+
+  case (let lhsHashable, let rhsHashable) as (AnyHashable, AnyHashable):
+    return lhsHashable == rhsHashable
+
+  default:
+    return false
+  }
+}
+
+func deepHashCaptureApi(value: Any?, hasher: inout Hasher) {
+  let cleanValue = nilOrValue(value) as Any?
+  if let cleanValue = cleanValue {
+    if let doubleValue = cleanValue as? Double {
+      doubleHashCaptureApi(doubleValue, &hasher)
+    } else if let valueList = cleanValue as? [Any?] {
+      for item in valueList {
+        deepHashCaptureApi(value: item, hasher: &hasher)
+      }
+    } else if let valueList = cleanValue as? [Double] {
+      for item in valueList {
+        doubleHashCaptureApi(item, &hasher)
+      }
+    } else if let valueDict = cleanValue as? [AnyHashable: Any?] {
+      var result = 0
+      for (key, value) in valueDict {
+        var entryKeyHasher = Hasher()
+        deepHashCaptureApi(value: key, hasher: &entryKeyHasher)
+        var entryValueHasher = Hasher()
+        deepHashCaptureApi(value: value, hasher: &entryValueHasher)
+        result = result &+ ((entryKeyHasher.finalize() &* 31) ^ entryValueHasher.finalize())
+      }
+      hasher.combine(result)
+    } else if let hashableValue = cleanValue as? AnyHashable {
+      hasher.combine(hashableValue)
+    } else {
+      hasher.combine(String(describing: cleanValue))
+    }
+  } else {
+    hasher.combine(0)
+  }
+}
+
+
+/// A paged historical inbox scan; native code filters by sender in SQL.
+///
+/// Generated class from Pigeon that represents data sent in messages.
+struct InboxQuery: Hashable {
+  var sinceEpochMs: Int64
+  var senderAddresses: [String]
+  var afterCursor: String? = nil
+  /// At most 500.
+  var pageSize: Int64
+
+
+  // swift-format-ignore: AlwaysUseLowerCamelCase
+  static func fromList(_ pigeonVar_list: [Any?]) -> InboxQuery? {
+    let sinceEpochMs = pigeonVar_list[0] as! Int64
+    let senderAddresses = pigeonVar_list[1] as! [String]
+    let afterCursor: String? = nilOrValue(pigeonVar_list[2])
+    let pageSize = pigeonVar_list[3] as! Int64
+
+    return InboxQuery(
+      sinceEpochMs: sinceEpochMs,
+      senderAddresses: senderAddresses,
+      afterCursor: afterCursor,
+      pageSize: pageSize
+    )
+  }
+  func toList() -> [Any?] {
+    return [
+      sinceEpochMs,
+      senderAddresses,
+      afterCursor,
+      pageSize,
+    ]
+  }
+  static func == (lhs: InboxQuery, rhs: InboxQuery) -> Bool {
+    if Swift.type(of: lhs) != Swift.type(of: rhs) {
+      return false
+    }
+    return deepEqualsCaptureApi(lhs.sinceEpochMs, rhs.sinceEpochMs) && deepEqualsCaptureApi(lhs.senderAddresses, rhs.senderAddresses) && deepEqualsCaptureApi(lhs.afterCursor, rhs.afterCursor) && deepEqualsCaptureApi(lhs.pageSize, rhs.pageSize)
+  }
+
+  func hash(into hasher: inout Hasher) {
+    hasher.combine("InboxQuery")
+    deepHashCaptureApi(value: sinceEpochMs, hasher: &hasher)
+    deepHashCaptureApi(value: senderAddresses, hasher: &hasher)
+    deepHashCaptureApi(value: afterCursor, hasher: &hasher)
+    deepHashCaptureApi(value: pageSize, hasher: &hasher)
+  }
+}
+
+/// Generated class from Pigeon that represents data sent in messages.
+struct InboxPage: Hashable {
+  var items: [RawInboxMessage]
+  var nextCursor: String? = nil
+  var scannedTotal: Int64
+
+
+  // swift-format-ignore: AlwaysUseLowerCamelCase
+  static func fromList(_ pigeonVar_list: [Any?]) -> InboxPage? {
+    let items = pigeonVar_list[0] as! [RawInboxMessage]
+    let nextCursor: String? = nilOrValue(pigeonVar_list[1])
+    let scannedTotal = pigeonVar_list[2] as! Int64
+
+    return InboxPage(
+      items: items,
+      nextCursor: nextCursor,
+      scannedTotal: scannedTotal
+    )
+  }
+  func toList() -> [Any?] {
+    return [
+      items,
+      nextCursor,
+      scannedTotal,
+    ]
+  }
+  static func == (lhs: InboxPage, rhs: InboxPage) -> Bool {
+    if Swift.type(of: lhs) != Swift.type(of: rhs) {
+      return false
+    }
+    return deepEqualsCaptureApi(lhs.items, rhs.items) && deepEqualsCaptureApi(lhs.nextCursor, rhs.nextCursor) && deepEqualsCaptureApi(lhs.scannedTotal, rhs.scannedTotal)
+  }
+
+  func hash(into hasher: inout Hasher) {
+    hasher.combine("InboxPage")
+    deepHashCaptureApi(value: items, hasher: &hasher)
+    deepHashCaptureApi(value: nextCursor, hasher: &hasher)
+    deepHashCaptureApi(value: scannedTotal, hasher: &hasher)
+  }
+}
+
+/// Generated class from Pigeon that represents data sent in messages.
+struct RawInboxMessage: Hashable {
+  var address: String
+  var body: String
+  var dateMs: Int64
+  var simSlot: Int64? = nil
+  var providerId: String
+
+
+  // swift-format-ignore: AlwaysUseLowerCamelCase
+  static func fromList(_ pigeonVar_list: [Any?]) -> RawInboxMessage? {
+    let address = pigeonVar_list[0] as! String
+    let body = pigeonVar_list[1] as! String
+    let dateMs = pigeonVar_list[2] as! Int64
+    let simSlot: Int64? = nilOrValue(pigeonVar_list[3])
+    let providerId = pigeonVar_list[4] as! String
+
+    return RawInboxMessage(
+      address: address,
+      body: body,
+      dateMs: dateMs,
+      simSlot: simSlot,
+      providerId: providerId
+    )
+  }
+  func toList() -> [Any?] {
+    return [
+      address,
+      body,
+      dateMs,
+      simSlot,
+      providerId,
+    ]
+  }
+  static func == (lhs: RawInboxMessage, rhs: RawInboxMessage) -> Bool {
+    if Swift.type(of: lhs) != Swift.type(of: rhs) {
+      return false
+    }
+    return deepEqualsCaptureApi(lhs.address, rhs.address) && deepEqualsCaptureApi(lhs.body, rhs.body) && deepEqualsCaptureApi(lhs.dateMs, rhs.dateMs) && deepEqualsCaptureApi(lhs.simSlot, rhs.simSlot) && deepEqualsCaptureApi(lhs.providerId, rhs.providerId)
+  }
+
+  func hash(into hasher: inout Hasher) {
+    hasher.combine("RawInboxMessage")
+    deepHashCaptureApi(value: address, hasher: &hasher)
+    deepHashCaptureApi(value: body, hasher: &hasher)
+    deepHashCaptureApi(value: dateMs, hasher: &hasher)
+    deepHashCaptureApi(value: simSlot, hasher: &hasher)
+    deepHashCaptureApi(value: providerId, hasher: &hasher)
+  }
+}
+
+/// A decrypted spool entry (in memory only). Deleted natively only after
+/// Dart acknowledges it with ackSpool, after the DB commit.
+///
+/// Generated class from Pigeon that represents data sent in messages.
+struct SpoolEntry: Hashable {
+  var id: String
+  var channel: String
+  var source: String
+  var body: String
+  var receivedAtMs: Int64
+  var simSlot: Int64? = nil
+
+
+  // swift-format-ignore: AlwaysUseLowerCamelCase
+  static func fromList(_ pigeonVar_list: [Any?]) -> SpoolEntry? {
+    let id = pigeonVar_list[0] as! String
+    let channel = pigeonVar_list[1] as! String
+    let source = pigeonVar_list[2] as! String
+    let body = pigeonVar_list[3] as! String
+    let receivedAtMs = pigeonVar_list[4] as! Int64
+    let simSlot: Int64? = nilOrValue(pigeonVar_list[5])
+
+    return SpoolEntry(
+      id: id,
+      channel: channel,
+      source: source,
+      body: body,
+      receivedAtMs: receivedAtMs,
+      simSlot: simSlot
+    )
+  }
+  func toList() -> [Any?] {
+    return [
+      id,
+      channel,
+      source,
+      body,
+      receivedAtMs,
+      simSlot,
+    ]
+  }
+  static func == (lhs: SpoolEntry, rhs: SpoolEntry) -> Bool {
+    if Swift.type(of: lhs) != Swift.type(of: rhs) {
+      return false
+    }
+    return deepEqualsCaptureApi(lhs.id, rhs.id) && deepEqualsCaptureApi(lhs.channel, rhs.channel) && deepEqualsCaptureApi(lhs.source, rhs.source) && deepEqualsCaptureApi(lhs.body, rhs.body) && deepEqualsCaptureApi(lhs.receivedAtMs, rhs.receivedAtMs) && deepEqualsCaptureApi(lhs.simSlot, rhs.simSlot)
+  }
+
+  func hash(into hasher: inout Hasher) {
+    hasher.combine("SpoolEntry")
+    deepHashCaptureApi(value: id, hasher: &hasher)
+    deepHashCaptureApi(value: channel, hasher: &hasher)
+    deepHashCaptureApi(value: source, hasher: &hasher)
+    deepHashCaptureApi(value: body, hasher: &hasher)
+    deepHashCaptureApi(value: receivedAtMs, hasher: &hasher)
+    deepHashCaptureApi(value: simSlot, hasher: &hasher)
+  }
+}
+
+/// Generated class from Pigeon that represents data sent in messages.
+struct CaptureCapabilities: Hashable {
+  var smsGranted: Bool
+  var smsFlavor: Bool
+  var notificationAccess: Bool
+  var postNotifications: Bool
+  var sdkInt: Int64
+
+
+  // swift-format-ignore: AlwaysUseLowerCamelCase
+  static func fromList(_ pigeonVar_list: [Any?]) -> CaptureCapabilities? {
+    let smsGranted = pigeonVar_list[0] as! Bool
+    let smsFlavor = pigeonVar_list[1] as! Bool
+    let notificationAccess = pigeonVar_list[2] as! Bool
+    let postNotifications = pigeonVar_list[3] as! Bool
+    let sdkInt = pigeonVar_list[4] as! Int64
+
+    return CaptureCapabilities(
+      smsGranted: smsGranted,
+      smsFlavor: smsFlavor,
+      notificationAccess: notificationAccess,
+      postNotifications: postNotifications,
+      sdkInt: sdkInt
+    )
+  }
+  func toList() -> [Any?] {
+    return [
+      smsGranted,
+      smsFlavor,
+      notificationAccess,
+      postNotifications,
+      sdkInt,
+    ]
+  }
+  static func == (lhs: CaptureCapabilities, rhs: CaptureCapabilities) -> Bool {
+    if Swift.type(of: lhs) != Swift.type(of: rhs) {
+      return false
+    }
+    return deepEqualsCaptureApi(lhs.smsGranted, rhs.smsGranted) && deepEqualsCaptureApi(lhs.smsFlavor, rhs.smsFlavor) && deepEqualsCaptureApi(lhs.notificationAccess, rhs.notificationAccess) && deepEqualsCaptureApi(lhs.postNotifications, rhs.postNotifications) && deepEqualsCaptureApi(lhs.sdkInt, rhs.sdkInt)
+  }
+
+  func hash(into hasher: inout Hasher) {
+    hasher.combine("CaptureCapabilities")
+    deepHashCaptureApi(value: smsGranted, hasher: &hasher)
+    deepHashCaptureApi(value: smsFlavor, hasher: &hasher)
+    deepHashCaptureApi(value: notificationAccess, hasher: &hasher)
+    deepHashCaptureApi(value: postNotifications, hasher: &hasher)
+    deepHashCaptureApi(value: sdkInt, hasher: &hasher)
+  }
+}
 
 private class CaptureApiPigeonCodecReader: FlutterStandardReader {
+  override func readValue(ofType type: UInt8) -> Any? {
+    switch type {
+    case 129:
+      return InboxQuery.fromList(self.readValue() as! [Any?])
+    case 130:
+      return InboxPage.fromList(self.readValue() as! [Any?])
+    case 131:
+      return RawInboxMessage.fromList(self.readValue() as! [Any?])
+    case 132:
+      return SpoolEntry.fromList(self.readValue() as! [Any?])
+    case 133:
+      return CaptureCapabilities.fromList(self.readValue() as! [Any?])
+    default:
+      return super.readValue(ofType: type)
+    }
+  }
 }
 
 private class CaptureApiPigeonCodecWriter: FlutterStandardWriter {
+  override func writeValue(_ value: Any) {
+    if let value = value as? InboxQuery {
+      super.writeByte(129)
+      super.writeValue(value.toList())
+    } else if let value = value as? InboxPage {
+      super.writeByte(130)
+      super.writeValue(value.toList())
+    } else if let value = value as? RawInboxMessage {
+      super.writeByte(131)
+      super.writeValue(value.toList())
+    } else if let value = value as? SpoolEntry {
+      super.writeByte(132)
+      super.writeValue(value.toList())
+    } else if let value = value as? CaptureCapabilities {
+      super.writeByte(133)
+      super.writeValue(value.toList())
+    } else {
+      super.writeValue(value)
+    }
+  }
 }
 
 private class CaptureApiPigeonCodecReaderWriter: FlutterStandardReaderWriter {
@@ -89,8 +485,23 @@ class CaptureApiPigeonCodec: FlutterStandardMessageCodec, @unchecked Sendable {
   static let shared = CaptureApiPigeonCodec(readerWriter: CaptureApiPigeonCodecReaderWriter())
 }
 
+
 /// Generated protocol from Pigeon that represents a handler of messages from Flutter.
 protocol AndroidCaptureHostApi {
+  func getCapabilities() throws -> CaptureCapabilities
+  /// READ_SMS + RECEIVE_SMS (only in the 'sms' flavor, ADR-004).
+  func requestSmsPermission(completion: @escaping (Result<Bool, Error>) -> Void)
+  func openNotificationAccessSettings() throws
+  func isIgnoringBatteryOptimizations() throws -> Bool
+  /// Shown only if live capture is observed to be delayed.
+  func requestIgnoreBatteryOptimizations() throws
+  func writeGuardConfig(encryptedConfig: FlutterStandardTypedData) throws
+  func queryInbox(query: InboxQuery) throws -> InboxPage
+  /// Returns decrypted entries (in memory only), oldest first.
+  func drainSpool(max: Int64) throws -> [SpoolEntry]
+  func ackSpool(ids: [String]) throws
+  /// Expedited WorkManager.
+  func scheduleIngestionNow() throws
 }
 
 /// Generated setup class from Pigeon to handle messages through the `binaryMessenger`.
@@ -99,6 +510,161 @@ class AndroidCaptureHostApiSetup {
   /// Sets up an instance of `AndroidCaptureHostApi` to handle messages through the `binaryMessenger`.
   static func setUp(binaryMessenger: FlutterBinaryMessenger, api: AndroidCaptureHostApi?, messageChannelSuffix: String = "") {
     let channelSuffix = messageChannelSuffix.count > 0 ? ".\(messageChannelSuffix)" : ""
+    #if os(iOS)
+      let taskQueue = binaryMessenger.makeBackgroundTaskQueue?()
+    #else
+      let taskQueue: FlutterTaskQueue? = nil
+    #endif
+    let getCapabilitiesChannel = FlutterBasicMessageChannel(name: "dev.flutter.pigeon.zaghlol.AndroidCaptureHostApi.getCapabilities\(channelSuffix)", binaryMessenger: binaryMessenger, codec: codec)
+    if let api = api {
+      getCapabilitiesChannel.setMessageHandler { _, reply in
+        do {
+          let result = try api.getCapabilities()
+          reply(wrapResult(result))
+        } catch {
+          reply(wrapError(error))
+        }
+      }
+    } else {
+      getCapabilitiesChannel.setMessageHandler(nil)
+    }
+    /// READ_SMS + RECEIVE_SMS (only in the 'sms' flavor, ADR-004).
+    let requestSmsPermissionChannel = FlutterBasicMessageChannel(name: "dev.flutter.pigeon.zaghlol.AndroidCaptureHostApi.requestSmsPermission\(channelSuffix)", binaryMessenger: binaryMessenger, codec: codec)
+    if let api = api {
+      requestSmsPermissionChannel.setMessageHandler { _, reply in
+        api.requestSmsPermission { result in
+          switch result {
+          case .success(let res):
+            reply(wrapResult(res))
+          case .failure(let error):
+            reply(wrapError(error))
+          }
+        }
+      }
+    } else {
+      requestSmsPermissionChannel.setMessageHandler(nil)
+    }
+    let openNotificationAccessSettingsChannel = FlutterBasicMessageChannel(name: "dev.flutter.pigeon.zaghlol.AndroidCaptureHostApi.openNotificationAccessSettings\(channelSuffix)", binaryMessenger: binaryMessenger, codec: codec)
+    if let api = api {
+      openNotificationAccessSettingsChannel.setMessageHandler { _, reply in
+        do {
+          try api.openNotificationAccessSettings()
+          reply(wrapResult(nil))
+        } catch {
+          reply(wrapError(error))
+        }
+      }
+    } else {
+      openNotificationAccessSettingsChannel.setMessageHandler(nil)
+    }
+    let isIgnoringBatteryOptimizationsChannel = FlutterBasicMessageChannel(name: "dev.flutter.pigeon.zaghlol.AndroidCaptureHostApi.isIgnoringBatteryOptimizations\(channelSuffix)", binaryMessenger: binaryMessenger, codec: codec)
+    if let api = api {
+      isIgnoringBatteryOptimizationsChannel.setMessageHandler { _, reply in
+        do {
+          let result = try api.isIgnoringBatteryOptimizations()
+          reply(wrapResult(result))
+        } catch {
+          reply(wrapError(error))
+        }
+      }
+    } else {
+      isIgnoringBatteryOptimizationsChannel.setMessageHandler(nil)
+    }
+    /// Shown only if live capture is observed to be delayed.
+    let requestIgnoreBatteryOptimizationsChannel = FlutterBasicMessageChannel(name: "dev.flutter.pigeon.zaghlol.AndroidCaptureHostApi.requestIgnoreBatteryOptimizations\(channelSuffix)", binaryMessenger: binaryMessenger, codec: codec)
+    if let api = api {
+      requestIgnoreBatteryOptimizationsChannel.setMessageHandler { _, reply in
+        do {
+          try api.requestIgnoreBatteryOptimizations()
+          reply(wrapResult(nil))
+        } catch {
+          reply(wrapError(error))
+        }
+      }
+    } else {
+      requestIgnoreBatteryOptimizationsChannel.setMessageHandler(nil)
+    }
+    let writeGuardConfigChannel = FlutterBasicMessageChannel(name: "dev.flutter.pigeon.zaghlol.AndroidCaptureHostApi.writeGuardConfig\(channelSuffix)", binaryMessenger: binaryMessenger, codec: codec)
+    if let api = api {
+      writeGuardConfigChannel.setMessageHandler { message, reply in
+        let args = message as! [Any?]
+        let encryptedConfigArg = args[0] as! FlutterStandardTypedData
+        do {
+          try api.writeGuardConfig(encryptedConfig: encryptedConfigArg)
+          reply(wrapResult(nil))
+        } catch {
+          reply(wrapError(error))
+        }
+      }
+    } else {
+      writeGuardConfigChannel.setMessageHandler(nil)
+    }
+    let queryInboxChannel = taskQueue == nil
+      ? FlutterBasicMessageChannel(name: "dev.flutter.pigeon.zaghlol.AndroidCaptureHostApi.queryInbox\(channelSuffix)", binaryMessenger: binaryMessenger, codec: codec)
+      : FlutterBasicMessageChannel(name: "dev.flutter.pigeon.zaghlol.AndroidCaptureHostApi.queryInbox\(channelSuffix)", binaryMessenger: binaryMessenger, codec: codec, taskQueue: taskQueue)
+    if let api = api {
+      queryInboxChannel.setMessageHandler { message, reply in
+        let args = message as! [Any?]
+        let queryArg = args[0] as! InboxQuery
+        do {
+          let result = try api.queryInbox(query: queryArg)
+          reply(wrapResult(result))
+        } catch {
+          reply(wrapError(error))
+        }
+      }
+    } else {
+      queryInboxChannel.setMessageHandler(nil)
+    }
+    /// Returns decrypted entries (in memory only), oldest first.
+    let drainSpoolChannel = taskQueue == nil
+      ? FlutterBasicMessageChannel(name: "dev.flutter.pigeon.zaghlol.AndroidCaptureHostApi.drainSpool\(channelSuffix)", binaryMessenger: binaryMessenger, codec: codec)
+      : FlutterBasicMessageChannel(name: "dev.flutter.pigeon.zaghlol.AndroidCaptureHostApi.drainSpool\(channelSuffix)", binaryMessenger: binaryMessenger, codec: codec, taskQueue: taskQueue)
+    if let api = api {
+      drainSpoolChannel.setMessageHandler { message, reply in
+        let args = message as! [Any?]
+        let maxArg = args[0] as! Int64
+        do {
+          let result = try api.drainSpool(max: maxArg)
+          reply(wrapResult(result))
+        } catch {
+          reply(wrapError(error))
+        }
+      }
+    } else {
+      drainSpoolChannel.setMessageHandler(nil)
+    }
+    let ackSpoolChannel = taskQueue == nil
+      ? FlutterBasicMessageChannel(name: "dev.flutter.pigeon.zaghlol.AndroidCaptureHostApi.ackSpool\(channelSuffix)", binaryMessenger: binaryMessenger, codec: codec)
+      : FlutterBasicMessageChannel(name: "dev.flutter.pigeon.zaghlol.AndroidCaptureHostApi.ackSpool\(channelSuffix)", binaryMessenger: binaryMessenger, codec: codec, taskQueue: taskQueue)
+    if let api = api {
+      ackSpoolChannel.setMessageHandler { message, reply in
+        let args = message as! [Any?]
+        let idsArg = args[0] as! [String]
+        do {
+          try api.ackSpool(ids: idsArg)
+          reply(wrapResult(nil))
+        } catch {
+          reply(wrapError(error))
+        }
+      }
+    } else {
+      ackSpoolChannel.setMessageHandler(nil)
+    }
+    /// Expedited WorkManager.
+    let scheduleIngestionNowChannel = FlutterBasicMessageChannel(name: "dev.flutter.pigeon.zaghlol.AndroidCaptureHostApi.scheduleIngestionNow\(channelSuffix)", binaryMessenger: binaryMessenger, codec: codec)
+    if let api = api {
+      scheduleIngestionNowChannel.setMessageHandler { _, reply in
+        do {
+          try api.scheduleIngestionNow()
+          reply(wrapResult(nil))
+        } catch {
+          reply(wrapError(error))
+        }
+      }
+    } else {
+      scheduleIngestionNowChannel.setMessageHandler(nil)
+    }
   }
 }
 /// Generated protocol from Pigeon that represents a handler of messages from Flutter.
@@ -115,6 +681,8 @@ class IosCaptureHostApiSetup {
 }
 /// Generated protocol from Pigeon that represents Flutter messages that can be called from Swift.
 protocol CaptureEventsApiProtocol {
+  func onSpoolChanged(pendingCount pendingCountArg: Int64, completion: @escaping (Result<Void, CaptureApiError>) -> Void)
+  func onPermissionChanged(c cArg: CaptureCapabilities, completion: @escaping (Result<Void, CaptureApiError>) -> Void)
 }
 class CaptureEventsApi: CaptureEventsApiProtocol {
   private let binaryMessenger: FlutterBinaryMessenger
@@ -125,5 +693,41 @@ class CaptureEventsApi: CaptureEventsApiProtocol {
   }
   var codec: CaptureApiPigeonCodec {
     return CaptureApiPigeonCodec.shared
+  }
+  func onSpoolChanged(pendingCount pendingCountArg: Int64, completion: @escaping (Result<Void, CaptureApiError>) -> Void) {
+    let channelName: String = "dev.flutter.pigeon.zaghlol.CaptureEventsApi.onSpoolChanged\(messageChannelSuffix)"
+    let channel = FlutterBasicMessageChannel(name: channelName, binaryMessenger: binaryMessenger, codec: codec)
+    channel.sendMessage([pendingCountArg] as [Any?]) { response in
+      guard let listResponse = response as? [Any?] else {
+        completion(.failure(createConnectionError(withChannelName: channelName)))
+        return
+      }
+      if listResponse.count > 1 {
+        let code: String = listResponse[0] as! String
+        let message: String? = nilOrValue(listResponse[1])
+        let details: String? = nilOrValue(listResponse[2])
+        completion(.failure(CaptureApiError(code: code, message: message, details: details)))
+      } else {
+        completion(.success(()))
+      }
+    }
+  }
+  func onPermissionChanged(c cArg: CaptureCapabilities, completion: @escaping (Result<Void, CaptureApiError>) -> Void) {
+    let channelName: String = "dev.flutter.pigeon.zaghlol.CaptureEventsApi.onPermissionChanged\(messageChannelSuffix)"
+    let channel = FlutterBasicMessageChannel(name: channelName, binaryMessenger: binaryMessenger, codec: codec)
+    channel.sendMessage([cArg] as [Any?]) { response in
+      guard let listResponse = response as? [Any?] else {
+        completion(.failure(createConnectionError(withChannelName: channelName)))
+        return
+      }
+      if listResponse.count > 1 {
+        let code: String = listResponse[0] as! String
+        let message: String? = nilOrValue(listResponse[1])
+        let details: String? = nilOrValue(listResponse[2])
+        completion(.failure(CaptureApiError(code: code, message: message, details: details)))
+      } else {
+        completion(.success(()))
+      }
+    }
   }
 }

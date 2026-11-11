@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- T-008: Egyptian colloquial; copy pending PO approval (Q4). -->
+    <string name="capture_channel_name">تسجيل العمليات</string>
+    <string name="capture_notification_title">زغلول بيسجّل عملية</string>
+</resources>

@@ -1,0 +1,35 @@
+<manifest xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools">
+    <!-- T-008 (SPK-01) SMS ingestion spike. This source set is the dev x sms
+         flavour combination only: no staging*/prod* build contains the
+         receiver, the worker or WorkManager (Lead decision Q5). CI checks the
+         merged manifests and dex of every flavour. -->
+    <application>
+        <!-- Observer only (the broadcast is never aborted). BROADCAST_SMS is held only by
+             the telephony stack, so no other app (and no `adb shell am
+             broadcast`) can deliver a fake SMS_RECEIVED here. Not direct-boot
+             aware: before the first unlock the credential-encrypted storage
+             (spool key, DB) is locked anyway. -->
+        <receiver
+            android:name="app.zaghlol.spike.sms.SpikeSmsReceiver"
+            android:exported="true"
+            android:directBootAware="false"
+            android:permission="android.permission.BROADCAST_SMS">
+            <intent-filter>
+                <action android:name="android.provider.Telephony.SMS_RECEIVED" />
+            </intent-filter>
+        </receiver>
+        <!-- Registers the UI-engine hook (spool host on MainActivity's engine).
+             Merged into the androidx.startup provider WorkManager declares;
+             not exported. -->
+        <provider
+            android:name="androidx.startup.InitializationProvider"
+            android:authorities="${applicationId}.androidx-startup"
+            android:exported="false"
+            tools:node="merge">
+            <meta-data
+                android:name="app.zaghlol.spike.sms.SpikeInitializer"
+                android:value="androidx.startup" />
+        </provider>
+    </application>
+</manifest>

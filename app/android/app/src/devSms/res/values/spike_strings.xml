@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- T-008: Android 8-11 only, while an expedited ingestion run falls back to
+         a foreground service. Copy pending PO approval (T-008 Q4). No amounts
+         or senders ever. -->
+    <string name="capture_channel_name">Saving transactions</string>
+    <string name="capture_notification_title">Zaghlol is saving a transaction</string>
+    <!-- Spike only: the tester's second phone number (international form, e.g.
+         +2010xxxxxxxx) to allowlist in the spike Guard. Empty = only the
+         emulator test sender 5550100. Never commit a real number. -->
+    <string name="spike_tester_sender" translatable="false"></string>
+</resources>

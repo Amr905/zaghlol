@@ -215,6 +215,11 @@ enum KeyUnavailableReason {
 
   /// The bootstrap lease was not free within [bootstrapLeaseTimeout].
   leaseTimeout,
+
+  /// T-008 (Q6): no database exists and the caller may not create one (the
+  /// headless ingestion engine). Nothing was written; the UI engine creates
+  /// the database and key.
+  createNotAllowed,
 }
 
 enum KeyStoreFailedReason {
@@ -380,7 +385,12 @@ final class KeyBootstrap {
   /// | notFound    | create → KeyCreated(first)   | KeyInvalidated(missing)    |
   /// | unusable    | rotate → KeyCreated(rotated) | KeyInvalidated(unusable)   |
   /// | unavailable | KeyUnavailable(transient)    | KeyUnavailable(transient)  |
-  Future<KeyBootstrapOutcome> obtain() => _withLease((lease) => _decide(lease));
+  ///
+  /// With [mayCreate] false (the headless engine, T-008 Q6) the "no
+  /// database" column is always [KeyUnavailableReason.createNotAllowed]: no
+  /// key is created, rotated or deleted.
+  Future<KeyBootstrapOutcome> obtain({bool mayCreate = true}) =>
+      _withLease((lease) => _decide(lease, mayCreate: mayCreate));
 
   /// The T-016 hook: the open sequence's first page read failed with
   /// SQLITE_NOTADB (26) using [rejected]. Re-checks under the lease: if the
@@ -388,8 +398,12 @@ final class KeyBootstrap {
   /// [KeyReady] with the new key; if it is still [rejected] and a database
   /// exists, returns [KeyInvalidated] with [KeyInvalidatedReason.rejectedBySqlite].
   /// Any other SQLite error is transient and must not be reported here.
-  Future<KeyBootstrapOutcome> reportRejected(DbKeyMaterial rejected) =>
-      _withLease((lease) => _decide(lease, rejected: rejected));
+  Future<KeyBootstrapOutcome> reportRejected(
+    DbKeyMaterial rejected, {
+    bool mayCreate = true,
+  }) => _withLease(
+    (lease) => _decide(lease, rejected: rejected, mayCreate: mayCreate),
+  );
 
   /// After an orphan wipe under [lease] (from [KeyInvalidated]): deletes the
   /// old key and stores a new one. Refuses ([KeyStoreFailed] with
@@ -472,8 +486,12 @@ final class KeyBootstrap {
   Future<KeyBootstrapOutcome> _decide(
     BootstrapLease lease, {
     DbKeyMaterial? rejected,
+    bool mayCreate = true,
   }) async {
     final dbPresent = await _files.anyExists();
+    if (!mayCreate && !dbPresent) {
+      return const KeyUnavailable(KeyUnavailableReason.createNotAllowed);
+    }
     final read = await _store.read(SecretSlot.dbKey);
     switch (read.status) {
       case SecretStatus.found:
