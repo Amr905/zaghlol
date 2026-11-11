@@ -187,3 +187,15 @@ This is acceptable, because the balance is real. T-047 should check that the bal
 | F5 cache the base-only guard | Low | T-046 FU |
 | F6 contributions never carry `g_` institutions | Low | T-142 |
 | I-1 to I-4 | Info | as noted |
+
+---
+
+## Re-review (delta) — 398fc8c..ff6aea7
+
+Reviewer: security-privacy-reviewer (delta only; analyze clean, ingestion/categorization tests green on the merged tree).
+
+- **F2 (poison blocks the spool): resolved.** Good messages behind a poison one are stored and acked. The poison one is stored for review with payload `{reason: ingestFailed, code: <fixed code>}` and acked. `_guarded` maps every error to a fixed `IngestBatchFailed` code and never carries error text. The diagnostics added are counters only (`ING_QUARANTINED`, `ING_KEPT`). Quarantine runs the Guard re-check, stage-0 drop and dedupe 1 first, so an OTP is never persisted by this path. An entry unstorable even alone is never deleted and never acked; it does not block others (residual cost: one failed batch per cycle until T-041 per-entry quarantine, which I accept as Low/Info). A transient failure returns RETRY with nothing acked, and committed messages are duplicates on redelivery.
+- **F1 (Guard fallback dropped the user's keeps): resolved.** When the user part can't be built as a whole, the fallback drops only rows the builder rejects individually, still builds the Guard with the valid rules and senders, applies the database ignore check to every registry keep (`dbIgnoreCheck`), and keeps a user "always capture" sender in Dart when the base Guard says not financial. The probe passes, and ignore rules are still enforced. The Guard cache is keyed by the user-part bytes (content), so a rule change yields different bytes and cannot serve a stale guard.
+- No new Medium or higher finding. No body, sender, amount or last-4 enters payloads, results or logs in the new code.
+
+**Verdict: APPROVED**
