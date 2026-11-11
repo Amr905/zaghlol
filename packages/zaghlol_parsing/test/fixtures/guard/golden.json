@@ -2,7 +2,7 @@
  "format": 1,
  "synthetic": true,
  "note": "Synthetic data only (CLAUDE.md 2.6). Shared by the Dart, Kotlin (T-038) and Swift (T-061) Guards: never copy. count = fold + cases + rate + modes.",
- "count": 140,
+ "count": 180,
  "configs": {
   "t1": {
    "base": "configs/t1_base.json",
@@ -815,20 +815,617 @@
    }
   },
   {
-   "id": "residual.otp_code_after_amount_kept",
+   "id": "neg.footer_then_card_mask",
    "tags": [
-    "negative",
-    "residual"
+    "negative"
+   ],
+   "config": "t1",
+   "channel": "sms",
+   "source": "NBE",
+   "body": "Never share your OTP. Card **1234 charged EGP 50.00 at SHOP A",
+   "expect": {
+    "decision": "keep",
+    "kind": "registry",
+    "inst": "nbe",
+    "last4": "1234"
+   }
+  },
+  {
+   "id": "neg.footer_then_card_ending",
+   "tags": [
+    "negative"
+   ],
+   "config": "t1",
+   "channel": "sms",
+   "source": "NBE",
+   "body": "Do not share OTP with anyone. Your card ending 4821 was debited EGP 250.00",
+   "expect": {
+    "decision": "keep",
+    "kind": "registry",
+    "inst": "nbe",
+    "last4": "4821"
+   }
+  },
+  {
+   "id": "neg.login_code_word_then_card_xx",
+   "tags": [
+    "negative"
+   ],
+   "config": "t1",
+   "channel": "sms",
+   "source": "NBE",
+   "body": "Login code reminder: your card xx4821 was charged EGP 99.00",
+   "expect": {
+    "decision": "keep",
+    "kind": "registry",
+    "inst": "nbe",
+    "last4": "4821"
+   }
+  },
+  {
+   "id": "neg.ar.footer_then_card_raqm",
+   "tags": [
+    "negative"
+   ],
+   "config": "t1",
+   "channel": "sms",
+   "source": "NBE",
+   "body": "لا تشارك رمز التحقق. تم خصم 1500 ج.م من بطاقة رقم 4821",
+   "expect": {
+    "decision": "keep",
+    "kind": "registry",
+    "inst": "nbe",
+    "last4": "4821"
+   }
+  },
+  {
+   "id": "neg.otp_word_then_integer_amount",
+   "tags": [
+    "negative"
+   ],
+   "config": "t1",
+   "channel": "sms",
+   "source": "CIB",
+   "body": "OTP-protected purchase EGP 1500 at SHOP B",
+   "expect": {
+    "decision": "keep",
+    "kind": "registry",
+    "inst": "cib",
+    "last4": null
+   }
+  },
+  {
+   "id": "neg.footer_then_hotline",
+   "tags": [
+    "negative"
+   ],
+   "config": "t1",
+   "channel": "sms",
+   "source": "NBE",
+   "body": "Purchase EGP 450.00 card **2468. Never share your OTP with anyone. Call 19623",
+   "expect": {
+    "decision": "keep",
+    "kind": "registry",
+    "inst": "nbe",
+    "last4": "2468"
+   }
+  },
+  {
+   "id": "neg.ar.footer_then_hotline",
+   "tags": [
+    "negative"
+   ],
+   "config": "t1",
+   "channel": "sms",
+   "source": "NBE",
+   "body": "تم خصم 450.00 جم من بطاقة **2468. لا تشارك رمز التحقق مع أحد. للاستفسار 19623",
+   "expect": {
+    "decision": "keep",
+    "kind": "registry",
+    "inst": "nbe",
+    "last4": "2468"
+   }
+  },
+  {
+   "id": "neg.footer_comma_hotline",
+   "tags": [
+    "negative"
+   ],
+   "config": "t1",
+   "channel": "sms",
+   "source": "NBE",
+   "body": "Purchase EGP 75.00 card **2468. Never share your OTP, hotline: 19623",
+   "expect": {
+    "decision": "keep",
+    "kind": "registry",
+    "inst": "nbe",
+    "last4": "2468"
+   }
+  },
+  {
+   "id": "neg.footer_comma_call_hotline",
+   "tags": [
+    "negative"
+   ],
+   "config": "t1",
+   "channel": "sms",
+   "source": "CIB",
+   "body": "Never share your PIN or OTP, call 19623 for help",
+   "expect": {
+    "decision": "keep",
+    "kind": "registry",
+    "inst": "cib",
+    "last4": null
+   }
+  },
+  {
+   "id": "neg.pin_word_then_amount",
+   "tags": [
+    "negative"
+   ],
+   "config": "t1",
+   "channel": "sms",
+   "source": "CIB",
+   "body": "PIN-protected purchase EGP 1500 at SHOP C",
+   "expect": {
+    "decision": "keep",
+    "kind": "registry",
+    "inst": "cib",
+    "last4": null
+   }
+  },
+  {
+   "id": "neg.password_word_then_card",
+   "tags": [
+    "negative"
+   ],
+   "config": "t1",
+   "channel": "sms",
+   "source": "NBE",
+   "body": "Password changed for card ending 4821",
+   "expect": {
+    "decision": "keep",
+    "kind": "registry",
+    "inst": "nbe",
+    "last4": "4821"
+   }
+  },
+  {
+   "id": "neg.integer_amount_then_otp_word",
+   "tags": [
+    "negative"
+   ],
+   "config": "t1",
+   "channel": "sms",
+   "source": "NBE",
+   "body": "Charged EGP 1500 OTP verified",
+   "expect": {
+    "decision": "keep",
+    "kind": "registry",
+    "inst": "nbe",
+    "last4": null
+   }
+  },
+  {
+   "id": "neg.colon_amount_currency_then_otp_word",
+   "tags": [
+    "negative"
+   ],
+   "config": "t1",
+   "channel": "sms",
+   "source": "CIB",
+   "body": "Amount: 1500 EGP, OTP verified",
+   "expect": {
+    "decision": "keep",
+    "kind": "registry",
+    "inst": "cib",
+    "last4": null
+   }
+  },
+  {
+   "id": "neg.otp_word_then_colon_amount_currency",
+   "tags": [
+    "negative"
+   ],
+   "config": "t1",
+   "channel": "sms",
+   "source": "CIB",
+   "body": "OTP verified, amount: 1500 EGP at SHOP E",
+   "expect": {
+    "decision": "keep",
+    "kind": "registry",
+    "inst": "cib",
+    "last4": null
+   }
+  },
+  {
+   "id": "neg.ar.amount_then_otp_word",
+   "tags": [
+    "negative"
+   ],
+   "config": "t1",
+   "channel": "sms",
+   "source": "NBE",
+   "body": "تم خصم 1500 جنيه بعد إدخال رمز التحقق",
+   "expect": {
+    "decision": "keep",
+    "kind": "registry",
+    "inst": "nbe",
+    "last4": null
+   }
+  },
+  {
+   "id": "neg.ref_code_without_verb",
+   "tags": [
+    "negative"
+   ],
+   "config": "t1",
+   "channel": "sms",
+   "source": "CIB",
+   "body": "Ref code 48291344 for your transfer of EGP 500.00",
+   "expect": {
+    "decision": "keep",
+    "kind": "registry",
+    "inst": "cib",
+    "last4": null
+   }
+  },
+  {
+   "id": "neg.pin_word_then_decimal_balance",
+   "tags": [
+    "negative"
+   ],
+   "config": "t1",
+   "channel": "sms",
+   "source": "NBE",
+   "body": "Card **4821 PIN verified purchase EGP 150.00 at SHOP F, balance is 2345.50",
+   "expect": {
+    "decision": "keep",
+    "kind": "registry",
+    "inst": "nbe",
+    "last4": "4821"
+   }
+  },
+  {
+   "id": "neg.ar.pin_footer_card_raqm",
+   "tags": [
+    "negative"
+   ],
+   "config": "t1",
+   "channel": "sms",
+   "source": "CIB",
+   "body": "لا تشارك الرقم السري لبطاقتك رقم 4821 مع أحد",
+   "expect": {
+    "decision": "keep",
+    "kind": "registry",
+    "inst": "cib",
+    "last4": null
+   }
+  },
+  {
+   "id": "otp.en.amount_between",
+   "tags": [
+    "otp_drop"
+   ],
+   "config": "t1",
+   "channel": "sms",
+   "source": "NBE",
+   "body": "Your OTP for EGP 1,500.00 purchase at SHOP X is 482913",
+   "expect": {
+    "decision": "drop",
+    "reason": "otp_or_promo_global"
+   }
+  },
+  {
+   "id": "otp.ar.amount_between",
+   "tags": [
+    "otp_drop"
+   ],
+   "config": "t1",
+   "channel": "sms",
+   "source": "NBE",
+   "body": "رمز التحقق لعملية بقيمة 500 جم هو 482913",
+   "expect": {
+    "decision": "drop",
+    "reason": "otp_or_promo_global"
+   }
+  },
+  {
+   "id": "otp.en.code_after_amount",
+   "tags": [
+    "otp_drop"
    ],
    "config": "t1",
    "channel": "sms",
    "source": "NBE",
    "body": "OTP for EGP 500 is 123456",
    "expect": {
+    "decision": "drop",
+    "reason": "otp_or_promo_global"
+   }
+  },
+  {
+   "id": "otp.en.colon_after_merchant",
+   "tags": [
+    "otp_drop"
+   ],
+   "config": "t1",
+   "channel": "sms",
+   "source": "NBE",
+   "body": "Your OTP for purchase at SHOP X: 482913",
+   "expect": {
+    "decision": "drop",
+    "reason": "otp_or_promo_global"
+   }
+  },
+  {
+   "id": "otp.ar.bare_kod_with_confirm_verb",
+   "tags": [
+    "otp_drop"
+   ],
+   "config": "t1",
+   "channel": "sms",
+   "source": "CIB",
+   "body": "كود 482913 لتأكيد عملية الشراء",
+   "expect": {
+    "decision": "drop",
+    "reason": "otp_or_promo_global"
+   }
+  },
+  {
+   "id": "otp.en.bare_code_with_confirm_verb",
+   "tags": [
+    "otp_drop"
+   ],
+   "config": "t1",
+   "channel": "sms",
+   "source": "CIB",
+   "body": "Code 482913 to confirm your transfer",
+   "expect": {
+    "decision": "drop",
+    "reason": "otp_or_promo_global"
+   }
+  },
+  {
+   "id": "otp.en.bare_code_message_start",
+   "tags": [
+    "otp_drop"
+   ],
+   "config": "t1",
+   "channel": "sms",
+   "source": "NBE",
+   "body": "Code: 482913",
+   "expect": {
+    "decision": "drop",
+    "reason": "otp_or_promo_global"
+   }
+  },
+  {
+   "id": "otp.en.instapay_code",
+   "tags": [
+    "otp_drop"
+   ],
+   "config": "t1",
+   "channel": "sms",
+   "source": "CIB",
+   "body": "InstaPay code 482913",
+   "expect": {
+    "decision": "drop",
+    "reason": "otp_or_promo_global"
+   }
+  },
+  {
+   "id": "otp.en.your_code",
+   "tags": [
+    "otp_drop"
+   ],
+   "config": "t1",
+   "channel": "sms",
+   "source": "NBE",
+   "body": "Your code is 482913",
+   "expect": {
+    "decision": "drop",
+    "reason": "otp_or_promo_global"
+   }
+  },
+  {
+   "id": "otp.en.pin",
+   "tags": [
+    "otp_drop"
+   ],
+   "config": "t1",
+   "channel": "sms",
+   "source": "NBE",
+   "body": "Your PIN is 4829",
+   "expect": {
+    "decision": "drop",
+    "reason": "otp_or_promo_global"
+   }
+  },
+  {
+   "id": "otp.en.password",
+   "tags": [
+    "otp_drop"
+   ],
+   "config": "t1",
+   "channel": "sms",
+   "source": "NBE",
+   "body": "Your password is 482913",
+   "expect": {
+    "decision": "drop",
+    "reason": "otp_or_promo_global"
+   }
+  },
+  {
+   "id": "otp.en.one_time_pin",
+   "tags": [
+    "otp_drop"
+   ],
+   "config": "t1",
+   "channel": "sms",
+   "source": "CIB",
+   "body": "one time pin 482913",
+   "expect": {
+    "decision": "drop",
+    "reason": "otp_or_promo_global"
+   }
+  },
+  {
+   "id": "otp.en.3d_secure_code",
+   "tags": [
+    "otp_drop"
+   ],
+   "config": "t1",
+   "channel": "sms",
+   "source": "NBE",
+   "body": "Your 3D Secure code is 482913",
+   "expect": {
+    "decision": "drop",
+    "reason": "otp_or_promo_global"
+   }
+  },
+  {
+   "id": "otp.en.split_space",
+   "tags": [
+    "otp_drop"
+   ],
+   "config": "t1",
+   "channel": "sms",
+   "source": "NBE",
+   "body": "OTP: 48 29 13",
+   "expect": {
+    "decision": "drop",
+    "reason": "otp_or_promo_global"
+   }
+  },
+  {
+   "id": "otp.en.split_dash_after_sentence",
+   "tags": [
+    "otp_drop"
+   ],
+   "config": "t1",
+   "channel": "sms",
+   "source": "CIB",
+   "body": "Do not share. OTP: 482-913",
+   "expect": {
+    "decision": "drop",
+    "reason": "otp_or_promo_global"
+   }
+  },
+  {
+   "id": "otp.en.zero_for_o",
+   "tags": [
+    "otp_drop"
+   ],
+   "config": "t1",
+   "channel": "sms",
+   "source": "NBE",
+   "body": "0TP 482913",
+   "expect": {
+    "decision": "drop",
+    "reason": "otp_or_promo_global"
+   }
+  },
+  {
+   "id": "otp.en.code_first_dear_customer",
+   "tags": [
+    "otp_drop"
+   ],
+   "config": "t1",
+   "channel": "sms",
+   "source": "NBE",
+   "body": "Dear customer, 482913 is your verification code",
+   "expect": {
+    "decision": "drop",
+    "reason": "otp_or_promo_global"
+   }
+  },
+  {
+   "id": "otp.en.code_first_use_as",
+   "tags": [
+    "otp_drop"
+   ],
+   "config": "t1",
+   "channel": "sms",
+   "source": "CIB",
+   "body": "Use 482913 as your one-time password",
+   "expect": {
+    "decision": "drop",
+    "reason": "otp_or_promo_global"
+   }
+  },
+  {
+   "id": "otp.ar.password_hiya",
+   "tags": [
+    "otp_drop"
+   ],
+   "config": "t1",
+   "channel": "sms",
+   "source": "NBE",
+   "body": "كلمة المرور الخاصة بك هي 482913",
+   "expect": {
+    "decision": "drop",
+    "reason": "otp_or_promo_global"
+   }
+  },
+  {
+   "id": "otp.en.code_then_sentence_end",
+   "tags": [
+    "otp_drop"
+   ],
+   "config": "t1",
+   "channel": "sms",
+   "source": "NBE",
+   "body": "OTP 482913. Do not share",
+   "expect": {
+    "decision": "drop",
+    "reason": "otp_or_promo_global"
+   }
+  },
+  {
+   "id": "residual.hotline_shaped_code_kept",
+   "tags": [
+    "residual"
+   ],
+   "config": "t1",
+   "channel": "sms",
+   "source": "NBE",
+   "body": "OTP 19234 for login",
+   "expect": {
     "decision": "keep",
     "kind": "registry",
     "inst": "nbe",
     "last4": null
+   }
+  },
+  {
+   "id": "residual.long_gap_kept",
+   "tags": [
+    "residual"
+   ],
+   "config": "t1",
+   "channel": "sms",
+   "source": "NBE",
+   "body": "رمز التحقق لعملية الشراء بمبلغ 1,500.00 ج.م من SHOP X هو 482913",
+   "expect": {
+    "decision": "keep",
+    "kind": "registry",
+    "inst": "nbe",
+    "last4": null
+   }
+  },
+  {
+   "id": "residual.newline_not_a_sentence_end",
+   "tags": [
+    "residual"
+   ],
+   "config": "t1",
+   "channel": "sms",
+   "source": "NBE",
+   "body": "Do not share your OTP\nAvailable balance: 23456",
+   "expect": {
+    "decision": "drop",
+    "reason": "otp_or_promo_global"
    }
   },
   {

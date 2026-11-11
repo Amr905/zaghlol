@@ -20,11 +20,13 @@ enum GuardUserConfigFailure {
 const GuardUserConfigFailure kGuardUserConfigFailure =
     GuardUserConfigFailure.keepWithBase;
 
-/// PO Q2 (provisional): a message carrying both a one-time code and a
-/// transaction is dropped. The decision point is data, not code: the global
-/// `drop` patterns in the registry's `shared.json` (keyword within a short
-/// non-digit gap of a 4-8 digit code). Recorded here so the decision is
-/// findable; the golden case `otp.en.with_transaction` pins it.
+/// Marker only, not read by code. PO Q2 (provisional): a message carrying
+/// both a one-time code and a transaction is dropped. The decision point is
+/// data, not code: the global `drop` patterns in the registry's
+/// `shared.json` (keyword within a short sentence-bounded gap of a 4-8 digit
+/// code, platform-channels §1.2). Recorded here so the decision is findable;
+/// the golden cases `otp.en.with_transaction` and `otp.en.code_after_amount`
+/// pin it.
 const bool kGuardDropsOtpWithTransaction = true;
 
 /// PO Q3 (provisional): more than this many kept messages from one
@@ -43,9 +45,10 @@ const bool kCaptureCustomTemplateSendersWithoutGold = true;
 /// `guardIgnoreChannel`.
 const bool kShortcutMessageUsesSmsToggle = true;
 
-/// PO Q6 (provisional): promotional messages are dropped only by an
-/// institution's own `drop` patterns; there is no global promo list (generic
-/// promo words collide with transaction words: `خصم` is "debit"). This is a
-/// data rule for registry authors (a lint can not tell a promo pattern from
-/// an OTP one); the golden case `promo.no_inst_pattern_kept` pins it.
+/// Marker only, not read by code. PO Q6 (provisional): promotional
+/// messages are dropped only by an institution's own `drop` patterns; there
+/// is no global promo list (generic promo words collide with transaction
+/// words: `خصم` is "debit"). This is a data rule for registry authors (a lint
+/// can not tell a promo pattern from an OTP one); the golden case
+/// `promo.no_inst_pattern_kept` pins it.
 const bool kGuardPromoDropPerInstitutionOnly = true;

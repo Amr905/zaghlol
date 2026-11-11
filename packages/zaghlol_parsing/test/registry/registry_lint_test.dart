@@ -266,7 +266,7 @@ void main() {
       expect((drop['global']! as List<Object?>).length, 4);
       // Arabic variants are folded in the exported text (T-035 §3).
       expect(
-        (drop['global']! as List<Object?>).last as String,
+        (drop['global']! as List<Object?>)[2] as String,
         contains('كلمه السر لمره واحده'),
       );
       expect((drop['byInst']! as Map<String, Object?>).keys, ['nbe']);

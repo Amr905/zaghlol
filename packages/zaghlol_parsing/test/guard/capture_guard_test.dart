@@ -169,7 +169,8 @@ void main() {
     test('a truncated or random base never throws', () {
       final rnd = Random(42);
       for (var i = 0; i < 300; i++) {
-        final cut = baseBytes.sublist(0, rnd.nextInt(baseBytes.length));
+        // At least the closing brace goes (the file ends with `}\n`).
+        final cut = baseBytes.sublist(0, rnd.nextInt(baseBytes.length - 1));
         expect(parseGuardConfig(cut).mode, GuardConfigMode.invalid);
         final noise = List<int>.generate(
           rnd.nextInt(512),
@@ -403,6 +404,14 @@ void main() {
         ('otp 1500.' * 500).substring(0, 4000),
         ('1234 ' * 800),
         '${'a' * 3999}1',
+        // Keyword-first gap and lead-in shapes (review fix M-1/M-2).
+        ('otp is ' * 572).substring(0, 4000),
+        ('otp 1 is ' * 445).substring(0, 4000),
+        ('otp: ' * 800),
+        ('otp ج.م 1 ' * 400).substring(0, 4000),
+        ('pin 1 2 ' * 500),
+        ('كود ' * 1000),
+        (', 1234 ' * 572).substring(0, 4000),
       ];
       final sw = Stopwatch()..start();
       for (var i = 0; i < 1000; i++) {
