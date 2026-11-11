@@ -2,12 +2,19 @@
 library;
 
 export 'generic/generic_parser.dart' show parseGeneric;
+export 'guard/capture_guard.dart';
+export 'guard/guard_config.dart';
+export 'guard/guard_policy.dart';
+export 'guard/guard_types.dart';
+export 'guard/guard_user_config.dart';
+export 'guard/sender_rate_limiter.dart';
 export 'generic/generic_policy.dart';
 export 'normalize/amount_parser.dart';
 export 'pipeline/parse_result.dart';
 export 'pipeline/parsing_pipeline.dart';
 export 'registry/fixture_runner.dart';
 export 'registry/guard_export.dart';
+export 'registry/portable_regex.dart';
 export 'registry/regex_safety.dart';
 export 'registry/registry_issue.dart';
 export 'registry/registry_lint.dart';

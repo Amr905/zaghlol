@@ -160,10 +160,12 @@ FixtureOutcome runFixture(
   }
 
   final folded = foldKeyIndexed(body);
-  final dropped = [
-    ...institution.drop,
-    ...registry.shared.globalDrop,
-  ].any((p) => p.regex.hasMatch(folded.text));
+  // Global drop patterns run on `foldKeyLines` text, as in the Guard and the
+  // pipeline; institution drop patterns on plain `foldKey` text.
+  final lines = foldKeyLines(body);
+  final dropped =
+      institution.drop.any((p) => p.regex.hasMatch(folded.text)) ||
+      registry.shared.globalDrop.any((p) => p.regex.hasMatch(lines));
   final matches = <(Template, Map<String, String>)>[];
   if (!dropped) {
     for (final t in institution.templates) {

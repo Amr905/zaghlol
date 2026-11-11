@@ -1,13 +1,16 @@
 import 'dart:convert';
 
+import '../guard/guard_policy.dart';
+import '../normalize/text_normalizer.dart';
+import 'portable_regex.dart';
 import 'registry_issue.dart';
 import 'registry_loader.dart';
 import 'registry_models.dart';
 
-/// Guard config schema version (platform-channels §1.1).
-const int guardConfigVersion = 3;
+/// Base Guard config schema version (platform-channels §1.1, T-035).
+const int guardConfigVersion = 4;
 
-/// Upper bound from platform-channels §1.1.
+/// Upper bound of the base config (platform-channels §1.1).
 const int maxGuardConfigBytes = 200 * 1024;
 
 /// Result of [exportGuardConfig].
@@ -19,60 +22,134 @@ final class GuardExport {
   final List<RegistryIssue> issues;
 }
 
-/// The registry subset the native Capture Guard needs (platform-channels
-/// §1.1): sender and package rules, drop patterns, last-4 patterns,
-/// shortcut keywords and the generic hints. `ignore` is database state and
-/// is added by the app, not here.
+/// Builds the **base** Guard config (`guard_base.json`, platform-channels
+/// §1.1) from the registry: sender, package and wallet-card rules, drop
+/// patterns, last-4 patterns, shortcut keywords, generic hints and the rate
+/// limit. User state (ignore rules, user senders) is the separate user part
+/// (`buildGuardUserConfig`).
 ///
-/// Deterministic: institutions sorted by code, fixed key order, one-space
-/// indent, so the same registry always produces the same bytes (a diff in
-/// CI means the registry changed). Patterns are exported exactly as
-/// written (including a leading `(?i)`), not folded: the native side runs
-/// its own regex engine on the raw body.
+/// Values are exported in the form the Guards compare: exact senders,
+/// always-capture ids and wallet card names as `foldKey` text; packages
+/// trimmed; patterns as [guardPatternText] (leading `(?i)` removed, Arabic
+/// variants folded). Every pattern must be in the portable subset
+/// ([portableRegexProblems]); `last4` patterns must have exactly one capture
+/// group. Any violation is an issue and no config is produced.
+///
+/// Deterministic: institutions sorted by code, file order within one, fixed
+/// key order, one-space indent, so the same registry always produces the
+/// same bytes (a diff in CI means the registry changed).
 GuardExport exportGuardConfig(Registry registry) {
+  final issues = <RegistryIssue>[];
+  String pattern(String path, String source, {bool last4 = false}) {
+    final text = guardPatternText(source);
+    final problems = portableRegexProblems(
+      text,
+      maxCaptureGroups: last4 ? 1 : null,
+      requireCaptureGroup: last4,
+    );
+    if (problems.isNotEmpty) {
+      issues.add(
+        RegistryIssue(
+          path,
+          RegistryIssueCode.nonPortableRegex,
+          problems.join(','),
+        ),
+      );
+    }
+    return text;
+  }
+
   final senders = <Map<String, Object?>>[];
   final packages = <Map<String, Object?>>[];
+  final wallet = <Map<String, Object?>>[];
   final byInst = <String, Object?>{};
   final last4 = <String, Object?>{};
   for (final i in registry.institutions) {
-    for (final s in i.senders) {
+    final file = 'institutions/${i.code}.json';
+    for (var k = 0; k < i.senders.length; k++) {
+      final s = i.senders[k];
+      final exact = s.kind == SenderMatchKind.exact;
       senders.add({
-        'match': s.kind == SenderMatchKind.exact ? 'exact' : 'regex',
-        'value': s.value,
+        'match': exact ? 'exact' : 'regex',
+        'value': exact
+            ? foldKey(s.value)
+            : pattern('$file.senders[$k].value', s.value),
         'inst': i.code,
       });
     }
     for (final p in i.packages) {
-      packages.add({'value': p, 'inst': i.code});
+      packages.add({'value': p.trim(), 'inst': i.code});
+    }
+    for (final name in i.walletCardNames) {
+      final key = foldKey(name);
+      if (key.isNotEmpty) {
+        wallet.add({'name': key, 'inst': i.code});
+      }
     }
     if (i.drop.isNotEmpty) {
-      byInst[i.code] = [for (final p in i.drop) p.source];
+      byInst[i.code] = [
+        for (var k = 0; k < i.drop.length; k++)
+          pattern('$file.drop[$k]', i.drop[k].source),
+      ];
     }
     if (i.last4.isNotEmpty) {
-      last4[i.code] = [for (final p in i.last4) p.source];
+      last4[i.code] = [
+        for (var k = 0; k < i.last4.length; k++)
+          pattern('$file.last4[$k]', i.last4[k].source, last4: true),
+      ];
     }
   }
   final shared = registry.shared;
   if (shared.globalLast4.isNotEmpty) {
-    last4['*'] = [for (final p in shared.globalLast4) p.source];
+    last4['*'] = [
+      for (var k = 0; k < shared.globalLast4.length; k++)
+        pattern(
+          'shared.json.last4[$k]',
+          shared.globalLast4[k].source,
+          last4: true,
+        ),
+    ];
   }
   final config = <String, Object?>{
     'v': guardConfigVersion,
     'registryVersion': registry.registryVersion,
     'senders': senders,
     'packages': packages,
-    'shortcutKeywords': shared.shortcutKeywords,
+    'wallet': wallet,
     'drop': {
-      'global': [for (final p in shared.globalDrop) p.source],
+      'global': [
+        for (var k = 0; k < shared.globalDrop.length; k++)
+          pattern('shared.json.drop.global[$k]', shared.globalDrop[k].source),
+      ],
       'byInst': byInst,
     },
     'last4': last4,
     'generic': {
-      'senderHints': [for (final p in shared.senderHints) p.source],
-      'bodyHints': [for (final p in shared.bodyHints) p.source],
-      'alwaysCapture': shared.alwaysCapture,
+      'senderHints': [
+        for (var k = 0; k < shared.senderHints.length; k++)
+          pattern(
+            'shared.json.generic.senderHints[$k]',
+            shared.senderHints[k].source,
+          ),
+      ],
+      'bodyHints': [
+        for (var k = 0; k < shared.bodyHints.length; k++)
+          pattern(
+            'shared.json.generic.bodyHints[$k]',
+            shared.bodyHints[k].source,
+          ),
+      ],
+      'alwaysCapture': [
+        for (final a in shared.alwaysCapture)
+          if (foldKey(a).isNotEmpty) foldKey(a),
+      ],
     },
+    'shortcutKeywords': shared.shortcutKeywords,
+    'rate': {'perSenderPerMin': kGuardRatePerSenderPerMinute},
   };
+  if (issues.isNotEmpty) {
+    return GuardExport(null, issues);
+  }
   final json = '${const JsonEncoder.withIndent(' ').convert(config)}\n';
   if (utf8.encode(json).length > maxGuardConfigBytes) {
     return const GuardExport(null, [

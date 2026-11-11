@@ -1,0 +1,56 @@
+{
+  "code": "cib",
+  "names": {
+    "ar": "البنك التجاري الدولي",
+    "en": "CIB (synthetic Guard test copy)"
+  },
+  "country": "EG",
+  "defaultCurrency": "EGP",
+  "senders": [
+    {
+      "match": "exact",
+      "value": "CIB"
+    },
+    {
+      "match": "regex",
+      "value": "^cib-(?:egy|alert)$"
+    }
+  ],
+  "packages": [
+    "com.example.cib"
+  ],
+  "walletCardNames": [
+    "CIB"
+  ],
+  "last4": [],
+  "drop": [],
+  "templates": [
+    {
+      "id": "cib.instapay_out.ar",
+      "version": 1,
+      "lang": "ar",
+      "channel": [
+        "sms"
+      ],
+      "event": "instapay_out",
+      "direction": "expense",
+      "baseConfidence": 0.97,
+      "pattern": "تم تحويل (?<amount>[\\d,.]+) (?<cur>جم) الى (?<counterparty>.+?) عبر انستاباي\\. رقم مرجعي (?<ref>\\d{6,12})(?:\\. الرصيد (?<balance>[\\d,.]+))?",
+      "currencyMap": {
+        "جم": "EGP"
+      }
+    },
+    {
+      "id": "cib.instapay_out.en",
+      "version": 1,
+      "lang": "en",
+      "channel": [
+        "sms"
+      ],
+      "event": "instapay_out",
+      "direction": "expense",
+      "baseConfidence": 0.96,
+      "pattern": "^cib: you sent egp (?<amount>[\\d,.]+) to (?<ipa>[a-z0-9._-]+@[a-z]+) via instapay\\. ref (?<ref>[a-z0-9]{6,12})(?:\\. balance egp (?<balance>[\\d,.]+))?"
+    }
+  ]
+}

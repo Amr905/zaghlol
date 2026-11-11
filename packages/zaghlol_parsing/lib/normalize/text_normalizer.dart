@@ -22,6 +22,14 @@ String foldForMatching(String input) => _transform(input, _Level.matching);
 /// lowercase.
 String foldKey(String input) => _transform(input, _Level.key);
 
+/// [foldKey] that keeps line structure: a whitespace run that contains a
+/// line break (U+000A-000D, U+0085, U+2028, U+2029) becomes one `\n`
+/// (U+000A) instead of one space. Everything else is exactly [foldKey], so
+/// `foldKeyLines(x).replaceAll('\n', ' ') == foldKey(x)` for every `x`
+/// (tested). Used only for the Capture Guard's global drop patterns
+/// (platform-channels §1.2), where a line break is a sentence end.
+String foldKeyLines(String input) => _transform(input, _Level.key, lines: true);
+
 /// Folds only the Arabic letter variants (`أ إ آ ٱ` to `ا`, `ى` to `ي`,
 /// `ة` to `ه`) and drops tatweel and harakat, leaving case, digits and
 /// spacing alone. Used on template pattern literals (registry), where
@@ -113,16 +121,20 @@ enum _Level { display, matching, key }
 
 const int _space = 0x20;
 
-String _transform(String input, _Level level) {
+const int _lineFeed = 0x0A;
+
+String _transform(String input, _Level level, {bool lines = false}) {
   final out = StringBuffer();
   var pendingSpace = false;
+  var pendingBreak = false;
   var wroteAny = false;
 
   void emit(int unit) {
     if (pendingSpace && wroteAny) {
-      out.writeCharCode(_space);
+      out.writeCharCode(pendingBreak ? _lineFeed : _space);
     }
     pendingSpace = false;
+    pendingBreak = false;
     wroteAny = true;
     out.writeCharCode(unit);
   }
@@ -130,6 +142,9 @@ String _transform(String input, _Level level) {
   for (final unit in input.codeUnits) {
     if (_isSpace(unit)) {
       pendingSpace = true;
+      if (lines && _isLineBreak(unit)) {
+        pendingBreak = true;
+      }
       continue;
     }
     if (_isInvisible(unit)) {
@@ -150,11 +165,18 @@ String _transform(String input, _Level level) {
 bool _isSpace(int u) {
   return u == _space ||
       (u >= 0x09 && u <= 0x0D) ||
+      u == 0x85 || // NEL: a line terminator for ICU `.` (T-035 §3)
       u == 0xA0 ||
       u == 0x202F ||
       u == 0x2009 ||
       u == 0x2028 ||
       u == 0x2029;
+}
+
+/// Line breaks for [foldKeyLines]: LF, VT, FF, CR, NEL, LINE SEPARATOR,
+/// PARAGRAPH SEPARATOR (all of them are also [_isSpace]). Tab is not one.
+bool _isLineBreak(int u) {
+  return (u >= 0x0A && u <= 0x0D) || u == 0x85 || u == 0x2028 || u == 0x2029;
 }
 
 bool _isInvisible(int u) {

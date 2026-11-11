@@ -55,7 +55,9 @@ final class ParsingPipeline {
         institution.drop.any((p) => p.regex.hasMatch(folded.text))) {
       return ParseDropped(DropReason.institutionPattern, institution.code);
     }
-    if (registry.shared.globalDrop.any((p) => p.regex.hasMatch(folded.text))) {
+    // Global drop patterns see line breaks (`foldKeyLines`), as in the Guard.
+    final lines = foldKeyLines(body);
+    if (registry.shared.globalDrop.any((p) => p.regex.hasMatch(lines))) {
       return ParseDropped(DropReason.globalPattern, institution?.code);
     }
     if (institution == null) {
