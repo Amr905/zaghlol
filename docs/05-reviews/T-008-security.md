@@ -115,3 +115,14 @@ No Critical, High or Medium finding. Five Low and five Info items become follow-
 - [Google Play: Use of SMS or Call Log permission groups](https://support.google.com/googleplay/android-developer/answer/10208820?hl=en)
   (SMS-based money management exception, eligible permissions, non-financial SMS restriction).
 - [Google Play: Permissions and APIs that access sensitive information](https://support.google.com/googleplay/android-developer/answer/9047303)
+
+---
+
+## Re-review (delta) — `git diff 73421ad 2726f54` (Sonnet, 2026-11-11)
+
+- **L-1 fixed.** `IngestionWorker.NOTIFICATION_VISIBILITY = VISIBILITY_SECRET`, used in the builder; `WorkRequestTest.captureNotificationIsSecretOnTheLockScreen` also fails on any `VISIBILITY_PUBLIC` in the spike sources. The channel has no explicit lockscreen visibility, so the notification's value applies (note for T-041: set it on the channel too).
+- **New data in the delta.** `metrics.csv` gains `rx_wall_ms` and `t_proc` (timings only; no sender, body or amount) and stays in `noBackupFilesDir`. The emulator script saves `dumpsys activity broadcasts history` to a temp dir in CI, keeps only enqueue/dispatch timestamps of SMS_RECEIVED records in `broadcasts.txt`, deletes the dumps, and fails if the package name appears in the output. Dumps are not in the artifact list. The manual step warns testers not to share raw dumps. Emulator-only synthetic SMS. No new exposure.
+- **Shutdown change.** The `close` command carries no data. Closing the database before destroy reduces the chance of a dangling SQLCipher handle; no new attack surface.
+- No new finding at Low or above. L-2…L-5 and I-1…I-5 are filed as FU-082…FU-086 with owners.
+
+**Re-review verdict: APPROVED.**
