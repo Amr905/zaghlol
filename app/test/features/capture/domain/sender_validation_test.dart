@@ -61,7 +61,7 @@ void main() {
     expect(sms('MYBANK'), isNull);
     expect(sms('5550100'), isNull);
     expect(sms('البنك'), isNull);
-    expect(sms('A‮B'), SenderRefusal.badShape);
+    expect(sms('A\u202EB'), SenderRefusal.badShape);
     expect(sms('A\u0000B'), SenderRefusal.badShape);
     expect(sms('A​B'), SenderRefusal.badShape);
   });

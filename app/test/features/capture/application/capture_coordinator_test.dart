@@ -1,8 +1,6 @@
 // T-047 test plan 5-7 at the coordinator level: start order, absorb-then-
 // clear, keyInvalidated / userUnreadable rewrite, resume, hooks.
 
-import 'dart:async';
-
 import 'package:flutter_test/flutter_test.dart';
 import 'package:zaghlol/core/platform/capture_api.g.dart';
 import 'package:zaghlol/features/capture/application/capture_coordinator.dart';

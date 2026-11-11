@@ -6,8 +6,7 @@ import 'dart:convert';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:zaghlol/features/capture/application/guard_config_writer.dart';
 import 'package:zaghlol/features/capture/domain/capture_health.dart';
-import 'package:zaghlol_parsing/zaghlol_parsing.dart'
-    show GuardIgnoreRuleInput, buildGuardUserConfig;
+import 'package:zaghlol_parsing/zaghlol_parsing.dart' show GuardIgnoreRuleInput;
 
 import '../support/capture_fakes.dart';
 
