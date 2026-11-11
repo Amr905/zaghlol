@@ -1,5 +1,4 @@
 import Foundation
-import os
 
 /// FR-SEC-05 / T-165: keeps every Zaghlol data directory out of iCloud and
 /// Finder backups and out of iPhone migration.
@@ -27,8 +26,6 @@ enum ZaghlolDirectories {
   enum ExclusionError: Error {
     case notExcluded
   }
-
-  private static let logger = Logger(subsystem: "app.zaghlol", category: "security")
 
   /// Creates `url` (with intermediate directories) if needed, marks it
   /// excluded from backup, reads the flag back and throws unless it is `true`.
@@ -104,9 +101,22 @@ enum ZaghlolDirectories {
       }
     }
     if !allExcluded {
-      // Code only: no path, no error text. Moves to the native diag hook with T-021.
-      logger.error("\(backupExclusionFailedCode, privacy: .public)")
+      // Code only: no path, no error text (T-021 native diag hook).
+      NativeDiagHook.report(backupExclusionFailedCode)
     }
     return allExcluded
+  }
+}
+
+/// T-021: native side of the diagnostic log. Native code reports a fixed code
+/// (an allow-listed `DiagCodes` value, never a path or error text). Nothing is
+/// printed to the system log. The handler is `nil` until the platform-channel
+/// bridge that writes into `diag_log` is installed (follow-up native task);
+/// until then reports are dropped.
+enum NativeDiagHook {
+  static var handler: ((String) -> Void)?
+
+  static func report(_ code: String) {
+    handler?(code)
   }
 }
