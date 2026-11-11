@@ -188,6 +188,19 @@ void main() {
     });
   });
 
+  group('TransactionsChanged (FU-037)', () {
+    test('holds unmodifiable copies of its sets', () {
+      final accounts = {'a1'};
+      final cycles = ['2026-11', '2026-11'];
+      final e = TransactionsChanged(accountIds: accounts, cycleKeys: cycles);
+      accounts.add('a2');
+      expect(e.accountIds, {'a1'});
+      expect(e.cycleKeys, {'2026-11'});
+      expect(() => e.accountIds.add('x'), throwsUnsupportedError);
+      expect(() => e.cycleKeys.clear(), throwsUnsupportedError);
+    });
+  });
+
   group('DomainEventBus', () {
     late DomainEventBus bus;
     setUp(() => bus = DomainEventBus());
@@ -204,7 +217,7 @@ void main() {
       bus.on<BudgetThresholdCrossed>().listen(budgets.add);
 
       bus.publish(
-        const TransactionsChanged(accountIds: {'a1'}, cycleKeys: {'2026-11'}),
+        TransactionsChanged(accountIds: {'a1'}, cycleKeys: {'2026-11'}),
       );
       bus.publish(
         const BudgetThresholdCrossed(budgetId: 'b1', thresholdPercent: 80),

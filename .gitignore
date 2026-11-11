@@ -41,3 +41,8 @@ Thumbs.db
 
 # Golden failure output (uploaded as CI artifacts)
 **/test/**/failures/
+analyze.log
+drift.log
+format.log
+pigeon.log
+tools/lints/lints.log

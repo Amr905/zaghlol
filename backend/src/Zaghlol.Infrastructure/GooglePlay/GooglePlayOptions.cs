@@ -23,11 +23,36 @@ public enum PlayCredentialSource
     ServiceAccountJson,
 }
 
-/// <summary>The outbound budget (T-130 design note §2), per process: a token bucket shared by every lane.</summary>
-public sealed record PlayBudgetOptions(int TokenLimit, int TokensPerPeriod, TimeSpan Period)
+/// <summary>
+/// The Play call budget (T-130 design note §2, T-133 §6). <see cref="TokenLimit"/> and <see cref="TokensPerPeriod"/> are the
+/// <b>total</b> over all processes: the worker takes <see cref="WorkerShare"/> of them divided by <see cref="WorkerReplicas"/>, each of
+/// the <see cref="Replicas"/> API processes <c>(1 − WorkerShare) / Replicas</c>.
+/// <para>Provisional, PO to confirm (T-133 PO question 6, T-130 PO question 4): a 200 K/day quota, <c>WorkerShare = 0.2</c>, one worker
+/// replica.</para>
+/// </summary>
+/// <param name="Replicas">The number of API replicas.</param>
+/// <param name="WorkerShare">The worker's fraction of the total, in (0, 1).</param>
+/// <param name="WorkerReplicas">Worker replicas: each advisory-lock holder may sit on another replica, so the share is split.</param>
+public sealed record PlayBudgetOptions(
+    int TokenLimit,
+    int TokensPerPeriod,
+    TimeSpan Period,
+    int Replicas = 1,
+    decimal WorkerShare = PlayBudgetOptions.DefaultWorkerShare,
+    int WorkerReplicas = 1)
 {
-    /// <summary>About 187 K calls a day per process, under Play's default 200 K/day quota (PO question 4).</summary>
+    public const decimal DefaultWorkerShare = 0.2m;
+
+    /// <summary>About 187 K calls a day in total, under Play's default 200 K/day quota.</summary>
     public static PlayBudgetOptions Default { get; } = new(600, 130, TimeSpan.FromMinutes(1));
+
+    public int PerReplicaLimit => Math.Max(1, (int)(TokenLimit * (1 - WorkerShare)) / Replicas);
+
+    public int PerReplicaPerPeriod => Math.Max(1, (int)(TokensPerPeriod * (1 - WorkerShare)) / Replicas);
+
+    public int WorkerLimit => Math.Max(1, (int)(TokenLimit * WorkerShare) / WorkerReplicas);
+
+    public int WorkerPerPeriod => Math.Max(1, (int)(TokensPerPeriod * WorkerShare) / WorkerReplicas);
 }
 
 /// <summary>
@@ -230,7 +255,26 @@ public sealed partial class GooglePlayOptions
         var limit = PositiveInt(section, "TokenLimit", defaults.TokenLimit);
         var perPeriod = PositiveInt(section, "TokensPerPeriod", defaults.TokensPerPeriod);
         var seconds = PositiveInt(section, "PeriodSeconds", (int)defaults.Period.TotalSeconds);
-        return new PlayBudgetOptions(limit, perPeriod, TimeSpan.FromSeconds(seconds));
+        return new PlayBudgetOptions(
+            limit,
+            perPeriod,
+            TimeSpan.FromSeconds(seconds),
+            PositiveInt(section, "Replicas", defaults.Replicas),
+            Share(section, "WorkerShare", defaults.WorkerShare),
+            PositiveInt(section, "WorkerReplicas", defaults.WorkerReplicas));
+    }
+
+    /// <summary>A fraction strictly between 0 and 1, invariant culture (for example <c>0.2</c>).</summary>
+    private static decimal Share(IConfigurationSection section, string key, decimal fallback)
+    {
+        if (section[key] is not { Length: > 0 } text)
+        {
+            return fallback;
+        }
+
+        return decimal.TryParse(text, NumberStyles.AllowDecimalPoint, CultureInfo.InvariantCulture, out var value) && value is > 0m and < 1m
+            ? value
+            : throw new PlayConfigurationException($"{Section}:{section.Key}:{key} must be a fraction between 0 and 1.");
     }
 
     private static PlayResilienceOptions ReadResilience(IConfigurationSection section)

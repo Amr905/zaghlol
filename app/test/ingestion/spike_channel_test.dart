@@ -138,6 +138,7 @@ void main() {
         'result': 'OK',
         'drained': 2,
         'inserted': 0,
+        'stuck': 0,
         'code': null,
       });
     });

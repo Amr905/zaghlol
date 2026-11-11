@@ -201,6 +201,11 @@ final class ParsingPipeline {
       reasons.add(ParseReason.sparseFields);
     }
 
+    if ((extracted.balance?.isNegative ?? false) ||
+        (extracted.available?.isNegative ?? false)) {
+      reasons.add(ParseReason.balanceNegative);
+    }
+
     // Stage 7: confidence in integer thousandths.
     final ordered = reasons.toList()
       ..sort((a, b) => a.index.compareTo(b.index));

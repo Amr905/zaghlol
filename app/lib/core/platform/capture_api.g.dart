@@ -111,6 +111,9 @@ int _deepHash(Object? value) {
   return value.hashCode;
 }
 
+/// The Guard config as native code holds it (platform-channels.md 1.1).
+enum GuardConfigState { unknown, full, baseOnly, userUnreadable, baseInvalid }
+
 /// A paged historical inbox scan; native code filters by sender in SQL.
 class InboxQuery {
   InboxQuery({
@@ -337,6 +340,108 @@ class SpoolEntry {
   int get hashCode => _deepHash(<Object?>[runtimeType, ..._toList()]);
 }
 
+/// Capture alert counters (platform-channels.md 1.3, T-039). Counts never
+/// carry content; times are wall-clock epoch ms.
+class SpoolStatus {
+  SpoolStatus({
+    required this.pending,
+    required this.seq,
+    required this.refusedFull,
+    required this.refusedGeneric,
+    required this.rateLimited,
+    required this.missedNotifications,
+    this.firstMissedSmsAtMs,
+    required this.decryptDeleted,
+    this.keyInvalidatedAtMs,
+    required this.guardState,
+  });
+
+  /// Entries waiting in the spool.
+  int pending;
+
+  /// Pass back to clearSpoolAlerts (compare-and-clear).
+  int seq;
+
+  int refusedFull;
+
+  int refusedGeneric;
+
+  int rateLimited;
+
+  int missedNotifications;
+
+  /// Earliest SMS that was not kept; the inbox catch-up starts here.
+  int? firstMissedSmsAtMs;
+
+  int decryptDeleted;
+
+  /// Set when entries written under a lost spool key were found (reported,
+  /// never thrown): rewrite the Guard config, run the catch-up.
+  int? keyInvalidatedAtMs;
+
+  GuardConfigState guardState;
+
+  List<Object?> _toList() {
+    return <Object?>[
+      pending,
+      seq,
+      refusedFull,
+      refusedGeneric,
+      rateLimited,
+      missedNotifications,
+      firstMissedSmsAtMs,
+      decryptDeleted,
+      keyInvalidatedAtMs,
+      guardState,
+    ];
+  }
+
+  Object encode() {
+    return _toList();
+  }
+
+  static SpoolStatus decode(Object result) {
+    result as List<Object?>;
+    return SpoolStatus(
+      pending: result[0]! as int,
+      seq: result[1]! as int,
+      refusedFull: result[2]! as int,
+      refusedGeneric: result[3]! as int,
+      rateLimited: result[4]! as int,
+      missedNotifications: result[5]! as int,
+      firstMissedSmsAtMs: result[6] as int?,
+      decryptDeleted: result[7]! as int,
+      keyInvalidatedAtMs: result[8] as int?,
+      guardState: result[9]! as GuardConfigState,
+    );
+  }
+
+  @override
+  // ignore: avoid_equals_and_hash_code_on_mutable_classes
+  bool operator ==(Object other) {
+    if (other is! SpoolStatus || other.runtimeType != runtimeType) {
+      return false;
+    }
+    if (identical(this, other)) {
+      return true;
+    }
+    return _deepEquals(pending, other.pending) &&
+        _deepEquals(seq, other.seq) &&
+        _deepEquals(refusedFull, other.refusedFull) &&
+        _deepEquals(refusedGeneric, other.refusedGeneric) &&
+        _deepEquals(rateLimited, other.rateLimited) &&
+        _deepEquals(missedNotifications, other.missedNotifications) &&
+        _deepEquals(firstMissedSmsAtMs, other.firstMissedSmsAtMs) &&
+        _deepEquals(decryptDeleted, other.decryptDeleted) &&
+        _deepEquals(keyInvalidatedAtMs, other.keyInvalidatedAtMs) &&
+        _deepEquals(guardState, other.guardState);
+  }
+
+  @override
+  // ignore: avoid_equals_and_hash_code_on_mutable_classes
+  int get hashCode => _deepHash(<Object?>[runtimeType, ..._toList()]);
+}
+
 class CaptureCapabilities {
   CaptureCapabilities({
     required this.smsGranted,
@@ -409,20 +514,26 @@ class _PigeonCodec extends StandardMessageCodec {
     if (value is int) {
       buffer.putUint8(4);
       buffer.putInt64(value);
-    } else if (value is InboxQuery) {
+    } else if (value is GuardConfigState) {
       buffer.putUint8(129);
-      writeValue(buffer, value.encode());
-    } else if (value is InboxPage) {
+      writeValue(buffer, value.index);
+    } else if (value is InboxQuery) {
       buffer.putUint8(130);
       writeValue(buffer, value.encode());
-    } else if (value is RawInboxMessage) {
+    } else if (value is InboxPage) {
       buffer.putUint8(131);
       writeValue(buffer, value.encode());
-    } else if (value is SpoolEntry) {
+    } else if (value is RawInboxMessage) {
       buffer.putUint8(132);
       writeValue(buffer, value.encode());
-    } else if (value is CaptureCapabilities) {
+    } else if (value is SpoolEntry) {
       buffer.putUint8(133);
+      writeValue(buffer, value.encode());
+    } else if (value is SpoolStatus) {
+      buffer.putUint8(134);
+      writeValue(buffer, value.encode());
+    } else if (value is CaptureCapabilities) {
+      buffer.putUint8(135);
       writeValue(buffer, value.encode());
     } else {
       super.writeValue(buffer, value);
@@ -433,14 +544,19 @@ class _PigeonCodec extends StandardMessageCodec {
   Object? readValueOfType(int type, ReadBuffer buffer) {
     switch (type) {
       case 129:
-        return InboxQuery.decode(readValue(buffer)!);
+        final value = readValue(buffer) as int?;
+        return value == null ? null : GuardConfigState.values[value];
       case 130:
-        return InboxPage.decode(readValue(buffer)!);
+        return InboxQuery.decode(readValue(buffer)!);
       case 131:
-        return RawInboxMessage.decode(readValue(buffer)!);
+        return InboxPage.decode(readValue(buffer)!);
       case 132:
-        return SpoolEntry.decode(readValue(buffer)!);
+        return RawInboxMessage.decode(readValue(buffer)!);
       case 133:
+        return SpoolEntry.decode(readValue(buffer)!);
+      case 134:
+        return SpoolStatus.decode(readValue(buffer)!);
+      case 135:
         return CaptureCapabilities.decode(readValue(buffer)!);
       default:
         return super.readValueOfType(type, buffer);
@@ -560,7 +676,10 @@ class AndroidCaptureHostApi {
     );
   }
 
-  Future<void> writeGuardConfig(Uint8List encryptedConfig) async {
+  /// The plaintext user part of the Guard config (platform-channels.md 1.1);
+  /// native code validates, encrypts with the spool key and writes it.
+  /// CONFIG_INVALID | IO_ERROR.
+  Future<void> writeGuardConfig(Uint8List userConfigJson) async {
     final pigeonVar_channelName =
         'dev.flutter.pigeon.zaghlol.AndroidCaptureHostApi.writeGuardConfig$pigeonVar_messageChannelSuffix';
     final pigeonVar_channel = BasicMessageChannel<Object?>(
@@ -569,7 +688,7 @@ class AndroidCaptureHostApi {
       binaryMessenger: pigeonVar_binaryMessenger,
     );
     final Future<Object?> pigeonVar_sendFuture = pigeonVar_channel.send(
-      <Object?>[encryptedConfig],
+      <Object?>[userConfigJson],
     );
     final pigeonVar_replyList = await pigeonVar_sendFuture as List<Object?>?;
 
@@ -653,6 +772,46 @@ class AndroidCaptureHostApi {
       binaryMessenger: pigeonVar_binaryMessenger,
     );
     final Future<Object?> pigeonVar_sendFuture = pigeonVar_channel.send(null);
+    final pigeonVar_replyList = await pigeonVar_sendFuture as List<Object?>?;
+
+    _extractReplyValueOrThrow(
+      pigeonVar_replyList,
+      pigeonVar_channelName,
+      isNullValid: true,
+    );
+  }
+
+  Future<SpoolStatus> getSpoolStatus() async {
+    final pigeonVar_channelName =
+        'dev.flutter.pigeon.zaghlol.AndroidCaptureHostApi.getSpoolStatus$pigeonVar_messageChannelSuffix';
+    final pigeonVar_channel = BasicMessageChannel<Object?>(
+      pigeonVar_channelName,
+      pigeonChannelCodec,
+      binaryMessenger: pigeonVar_binaryMessenger,
+    );
+    final Future<Object?> pigeonVar_sendFuture = pigeonVar_channel.send(null);
+    final pigeonVar_replyList = await pigeonVar_sendFuture as List<Object?>?;
+
+    final Object? pigeonVar_replyValue = _extractReplyValueOrThrow(
+      pigeonVar_replyList,
+      pigeonVar_channelName,
+      isNullValid: false,
+    );
+    return pigeonVar_replyValue! as SpoolStatus;
+  }
+
+  /// Zeroes the alert counters if [seq] still matches getSpoolStatus().seq.
+  Future<void> clearSpoolAlerts(int seq) async {
+    final pigeonVar_channelName =
+        'dev.flutter.pigeon.zaghlol.AndroidCaptureHostApi.clearSpoolAlerts$pigeonVar_messageChannelSuffix';
+    final pigeonVar_channel = BasicMessageChannel<Object?>(
+      pigeonVar_channelName,
+      pigeonChannelCodec,
+      binaryMessenger: pigeonVar_binaryMessenger,
+    );
+    final Future<Object?> pigeonVar_sendFuture = pigeonVar_channel.send(
+      <Object?>[seq],
+    );
     final pigeonVar_replyList = await pigeonVar_sendFuture as List<Object?>?;
 
     _extractReplyValueOrThrow(

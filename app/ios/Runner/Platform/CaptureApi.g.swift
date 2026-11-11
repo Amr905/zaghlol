@@ -178,6 +178,15 @@ func deepHashCaptureApi(value: Any?, hasher: inout Hasher) {
 }
 
 
+/// The Guard config as native code holds it (platform-channels.md 1.1).
+enum GuardConfigState: Int {
+  case unknown = 0
+  case full = 1
+  case baseOnly = 2
+  case userUnreadable = 3
+  case baseInvalid = 4
+}
+
 /// A paged historical inbox scan; native code filters by sender in SQL.
 ///
 /// Generated class from Pigeon that represents data sent in messages.
@@ -378,6 +387,90 @@ struct SpoolEntry: Hashable {
   }
 }
 
+/// Capture alert counters (platform-channels.md 1.3, T-039). Counts never
+/// carry content; times are wall-clock epoch ms.
+///
+/// Generated class from Pigeon that represents data sent in messages.
+struct SpoolStatus: Hashable {
+  /// Entries waiting in the spool.
+  var pending: Int64
+  /// Pass back to clearSpoolAlerts (compare-and-clear).
+  var seq: Int64
+  var refusedFull: Int64
+  var refusedGeneric: Int64
+  var rateLimited: Int64
+  var missedNotifications: Int64
+  /// Earliest SMS that was not kept; the inbox catch-up starts here.
+  var firstMissedSmsAtMs: Int64? = nil
+  var decryptDeleted: Int64
+  /// Set when entries written under a lost spool key were found (reported,
+  /// never thrown): rewrite the Guard config, run the catch-up.
+  var keyInvalidatedAtMs: Int64? = nil
+  var guardState: GuardConfigState
+
+
+  // swift-format-ignore: AlwaysUseLowerCamelCase
+  static func fromList(_ pigeonVar_list: [Any?]) -> SpoolStatus? {
+    let pending = pigeonVar_list[0] as! Int64
+    let seq = pigeonVar_list[1] as! Int64
+    let refusedFull = pigeonVar_list[2] as! Int64
+    let refusedGeneric = pigeonVar_list[3] as! Int64
+    let rateLimited = pigeonVar_list[4] as! Int64
+    let missedNotifications = pigeonVar_list[5] as! Int64
+    let firstMissedSmsAtMs: Int64? = nilOrValue(pigeonVar_list[6])
+    let decryptDeleted = pigeonVar_list[7] as! Int64
+    let keyInvalidatedAtMs: Int64? = nilOrValue(pigeonVar_list[8])
+    let guardState = pigeonVar_list[9] as! GuardConfigState
+
+    return SpoolStatus(
+      pending: pending,
+      seq: seq,
+      refusedFull: refusedFull,
+      refusedGeneric: refusedGeneric,
+      rateLimited: rateLimited,
+      missedNotifications: missedNotifications,
+      firstMissedSmsAtMs: firstMissedSmsAtMs,
+      decryptDeleted: decryptDeleted,
+      keyInvalidatedAtMs: keyInvalidatedAtMs,
+      guardState: guardState
+    )
+  }
+  func toList() -> [Any?] {
+    return [
+      pending,
+      seq,
+      refusedFull,
+      refusedGeneric,
+      rateLimited,
+      missedNotifications,
+      firstMissedSmsAtMs,
+      decryptDeleted,
+      keyInvalidatedAtMs,
+      guardState,
+    ]
+  }
+  static func == (lhs: SpoolStatus, rhs: SpoolStatus) -> Bool {
+    if Swift.type(of: lhs) != Swift.type(of: rhs) {
+      return false
+    }
+    return deepEqualsCaptureApi(lhs.pending, rhs.pending) && deepEqualsCaptureApi(lhs.seq, rhs.seq) && deepEqualsCaptureApi(lhs.refusedFull, rhs.refusedFull) && deepEqualsCaptureApi(lhs.refusedGeneric, rhs.refusedGeneric) && deepEqualsCaptureApi(lhs.rateLimited, rhs.rateLimited) && deepEqualsCaptureApi(lhs.missedNotifications, rhs.missedNotifications) && deepEqualsCaptureApi(lhs.firstMissedSmsAtMs, rhs.firstMissedSmsAtMs) && deepEqualsCaptureApi(lhs.decryptDeleted, rhs.decryptDeleted) && deepEqualsCaptureApi(lhs.keyInvalidatedAtMs, rhs.keyInvalidatedAtMs) && deepEqualsCaptureApi(lhs.guardState, rhs.guardState)
+  }
+
+  func hash(into hasher: inout Hasher) {
+    hasher.combine("SpoolStatus")
+    deepHashCaptureApi(value: pending, hasher: &hasher)
+    deepHashCaptureApi(value: seq, hasher: &hasher)
+    deepHashCaptureApi(value: refusedFull, hasher: &hasher)
+    deepHashCaptureApi(value: refusedGeneric, hasher: &hasher)
+    deepHashCaptureApi(value: rateLimited, hasher: &hasher)
+    deepHashCaptureApi(value: missedNotifications, hasher: &hasher)
+    deepHashCaptureApi(value: firstMissedSmsAtMs, hasher: &hasher)
+    deepHashCaptureApi(value: decryptDeleted, hasher: &hasher)
+    deepHashCaptureApi(value: keyInvalidatedAtMs, hasher: &hasher)
+    deepHashCaptureApi(value: guardState, hasher: &hasher)
+  }
+}
+
 /// Generated class from Pigeon that represents data sent in messages.
 struct CaptureCapabilities: Hashable {
   var smsGranted: Bool
@@ -433,14 +526,22 @@ private class CaptureApiPigeonCodecReader: FlutterStandardReader {
   override func readValue(ofType type: UInt8) -> Any? {
     switch type {
     case 129:
-      return InboxQuery.fromList(self.readValue() as! [Any?])
+      let enumResultAsInt: Int? = nilOrValue(self.readValue() as! Int?)
+      if let enumResultAsInt = enumResultAsInt {
+        return GuardConfigState(rawValue: enumResultAsInt)
+      }
+      return nil
     case 130:
-      return InboxPage.fromList(self.readValue() as! [Any?])
+      return InboxQuery.fromList(self.readValue() as! [Any?])
     case 131:
-      return RawInboxMessage.fromList(self.readValue() as! [Any?])
+      return InboxPage.fromList(self.readValue() as! [Any?])
     case 132:
-      return SpoolEntry.fromList(self.readValue() as! [Any?])
+      return RawInboxMessage.fromList(self.readValue() as! [Any?])
     case 133:
+      return SpoolEntry.fromList(self.readValue() as! [Any?])
+    case 134:
+      return SpoolStatus.fromList(self.readValue() as! [Any?])
+    case 135:
       return CaptureCapabilities.fromList(self.readValue() as! [Any?])
     default:
       return super.readValue(ofType: type)
@@ -450,20 +551,26 @@ private class CaptureApiPigeonCodecReader: FlutterStandardReader {
 
 private class CaptureApiPigeonCodecWriter: FlutterStandardWriter {
   override func writeValue(_ value: Any) {
-    if let value = value as? InboxQuery {
+    if let value = value as? GuardConfigState {
       super.writeByte(129)
-      super.writeValue(value.toList())
-    } else if let value = value as? InboxPage {
+      super.writeValue(value.rawValue)
+    } else if let value = value as? InboxQuery {
       super.writeByte(130)
       super.writeValue(value.toList())
-    } else if let value = value as? RawInboxMessage {
+    } else if let value = value as? InboxPage {
       super.writeByte(131)
       super.writeValue(value.toList())
-    } else if let value = value as? SpoolEntry {
+    } else if let value = value as? RawInboxMessage {
       super.writeByte(132)
       super.writeValue(value.toList())
-    } else if let value = value as? CaptureCapabilities {
+    } else if let value = value as? SpoolEntry {
       super.writeByte(133)
+      super.writeValue(value.toList())
+    } else if let value = value as? SpoolStatus {
+      super.writeByte(134)
+      super.writeValue(value.toList())
+    } else if let value = value as? CaptureCapabilities {
+      super.writeByte(135)
       super.writeValue(value.toList())
     } else {
       super.writeValue(value)
@@ -495,13 +602,19 @@ protocol AndroidCaptureHostApi {
   func isIgnoringBatteryOptimizations() throws -> Bool
   /// Shown only if live capture is observed to be delayed.
   func requestIgnoreBatteryOptimizations() throws
-  func writeGuardConfig(encryptedConfig: FlutterStandardTypedData) throws
+  /// The plaintext user part of the Guard config (platform-channels.md 1.1);
+  /// native code validates, encrypts with the spool key and writes it.
+  /// CONFIG_INVALID | IO_ERROR.
+  func writeGuardConfig(userConfigJson: FlutterStandardTypedData) throws
   func queryInbox(query: InboxQuery) throws -> InboxPage
   /// Returns decrypted entries (in memory only), oldest first.
   func drainSpool(max: Int64) throws -> [SpoolEntry]
   func ackSpool(ids: [String]) throws
   /// Expedited WorkManager.
   func scheduleIngestionNow() throws
+  func getSpoolStatus() throws -> SpoolStatus
+  /// Zeroes the alert counters if [seq] still matches getSpoolStatus().seq.
+  func clearSpoolAlerts(seq: Int64) throws
 }
 
 /// Generated setup class from Pigeon to handle messages through the `binaryMessenger`.
@@ -584,13 +697,18 @@ class AndroidCaptureHostApiSetup {
     } else {
       requestIgnoreBatteryOptimizationsChannel.setMessageHandler(nil)
     }
-    let writeGuardConfigChannel = FlutterBasicMessageChannel(name: "dev.flutter.pigeon.zaghlol.AndroidCaptureHostApi.writeGuardConfig\(channelSuffix)", binaryMessenger: binaryMessenger, codec: codec)
+    /// The plaintext user part of the Guard config (platform-channels.md 1.1);
+    /// native code validates, encrypts with the spool key and writes it.
+    /// CONFIG_INVALID | IO_ERROR.
+    let writeGuardConfigChannel = taskQueue == nil
+      ? FlutterBasicMessageChannel(name: "dev.flutter.pigeon.zaghlol.AndroidCaptureHostApi.writeGuardConfig\(channelSuffix)", binaryMessenger: binaryMessenger, codec: codec)
+      : FlutterBasicMessageChannel(name: "dev.flutter.pigeon.zaghlol.AndroidCaptureHostApi.writeGuardConfig\(channelSuffix)", binaryMessenger: binaryMessenger, codec: codec, taskQueue: taskQueue)
     if let api = api {
       writeGuardConfigChannel.setMessageHandler { message, reply in
         let args = message as! [Any?]
-        let encryptedConfigArg = args[0] as! FlutterStandardTypedData
+        let userConfigJsonArg = args[0] as! FlutterStandardTypedData
         do {
-          try api.writeGuardConfig(encryptedConfig: encryptedConfigArg)
+          try api.writeGuardConfig(userConfigJson: userConfigJsonArg)
           reply(wrapResult(nil))
         } catch {
           reply(wrapError(error))
@@ -664,6 +782,39 @@ class AndroidCaptureHostApiSetup {
       }
     } else {
       scheduleIngestionNowChannel.setMessageHandler(nil)
+    }
+    let getSpoolStatusChannel = taskQueue == nil
+      ? FlutterBasicMessageChannel(name: "dev.flutter.pigeon.zaghlol.AndroidCaptureHostApi.getSpoolStatus\(channelSuffix)", binaryMessenger: binaryMessenger, codec: codec)
+      : FlutterBasicMessageChannel(name: "dev.flutter.pigeon.zaghlol.AndroidCaptureHostApi.getSpoolStatus\(channelSuffix)", binaryMessenger: binaryMessenger, codec: codec, taskQueue: taskQueue)
+    if let api = api {
+      getSpoolStatusChannel.setMessageHandler { _, reply in
+        do {
+          let result = try api.getSpoolStatus()
+          reply(wrapResult(result))
+        } catch {
+          reply(wrapError(error))
+        }
+      }
+    } else {
+      getSpoolStatusChannel.setMessageHandler(nil)
+    }
+    /// Zeroes the alert counters if [seq] still matches getSpoolStatus().seq.
+    let clearSpoolAlertsChannel = taskQueue == nil
+      ? FlutterBasicMessageChannel(name: "dev.flutter.pigeon.zaghlol.AndroidCaptureHostApi.clearSpoolAlerts\(channelSuffix)", binaryMessenger: binaryMessenger, codec: codec)
+      : FlutterBasicMessageChannel(name: "dev.flutter.pigeon.zaghlol.AndroidCaptureHostApi.clearSpoolAlerts\(channelSuffix)", binaryMessenger: binaryMessenger, codec: codec, taskQueue: taskQueue)
+    if let api = api {
+      clearSpoolAlertsChannel.setMessageHandler { message, reply in
+        let args = message as! [Any?]
+        let seqArg = args[0] as! Int64
+        do {
+          try api.clearSpoolAlerts(seq: seqArg)
+          reply(wrapResult(nil))
+        } catch {
+          reply(wrapError(error))
+        }
+      }
+    } else {
+      clearSpoolAlertsChannel.setMessageHandler(nil)
     }
   }
 }

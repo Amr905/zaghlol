@@ -1,5 +1,7 @@
 package app.zaghlol.spike.sms
 
+import app.zaghlol.platform.spool.SpoolRecordCodec
+
 /**
  * Spike Capture Guard (platform-channels.md section 1.2, steps 1, 2 and 4;
  * T-008 design note section 3). Runs before anything is written.

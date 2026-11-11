@@ -80,6 +80,11 @@ public class GrantTests(SchemaFixture fixture)
         { "zaghlol_worker", "INSERT INTO zaghlol.purchases (id) SELECT gen_random_uuid() WHERE false" },
         { "zaghlol_api", "UPDATE zaghlol.store_notifications SET next_attempt_at = now() WHERE false" },
         { "zaghlol_ops_ro", "SELECT next_attempt_at FROM zaghlol.store_notifications" },
+
+        // T-133: no new grant. The Google worker statement never needs more; the worker still can't touch verify-only columns or
+        // seats, or insert purchases.
+        { "zaghlol_worker", "UPDATE zaghlol.purchases SET install_id = NULL WHERE false" },
+        { "zaghlol_worker", "UPDATE zaghlol.purchase_seats SET proof = 'basic' WHERE false" },
     };
 
     public static TheoryData<string, string> Allowed => new()
@@ -115,6 +120,14 @@ public class GrantTests(SchemaFixture fixture)
         },
         { "zaghlol_worker", "UPDATE zaghlol.store_notifications SET attempts = 1, next_attempt_at = now(), last_error = 'STORE_ERROR' WHERE false" },
         { "zaghlol_api", "INSERT INTO zaghlol.store_notifications (id, store, external_id, type, payload_digest) SELECT gen_random_uuid(), 'app_store', 'grant-probe', 'TEST', sha256('x'::bytea) WHERE false ON CONFLICT (store, external_id) DO NOTHING" },
+
+        // T-133: the Google worker statement and the voided/sweep enqueue on the worker login.
+        { "zaghlol_worker", "UPDATE zaghlol.purchases SET state = 'refunded', expires_at = expires_at, last_verified_at = now() WHERE store = 'google_play' AND false" },
+        {
+            "zaghlol_worker",
+            "INSERT INTO zaghlol.store_notifications (id, store, external_id, type, store_key, event_time, payload_digest) "
+            + "SELECT gen_random_uuid(), 'google_play', 'voided:' || encode(sha256('x'::bytea), 'hex'), 'VOIDED_PURCHASE', 'tok', now(), sha256('x'::bytea) WHERE false ON CONFLICT (store, external_id) DO NOTHING"
+        },
     };
 
     [Fact]

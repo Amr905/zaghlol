@@ -7,6 +7,9 @@ name: sms-spike
 # device numbers come from the manual runs in T-008.md) and runs the negative
 # proofs (spoofed broadcast denied, non-allowlisted / OTP spool nothing,
 # canary absent from the app's logs). Not a merge gate.
+# T-039: the native instrumented suites (spool, guard T-038, share T-060)
+# and the two-phase kill test also run here, after the spike (CI split in
+# testing-strategy.md: opt in by pushing to ci/<task-id>).
 on:
   workflow_dispatch:
   push:
@@ -14,6 +17,12 @@ on:
       - 'ci/**'
     paths:
       - 'app/android/app/src/devSms/**'
+      - 'app/android/app/src/main/kotlin/app/zaghlol/platform/spool/**'
+      - 'app/android/app/src/main/kotlin/app/zaghlol/platform/guard/**'
+      - 'app/android/app/src/main/kotlin/app/zaghlol/platform/capture/**'
+      - 'app/android/app/src/androidTest/**'
+      - 'app/android/app/src/sharedTest/**'
+      - 'packages/zaghlol_parsing/test/fixtures/guard/**'
       - 'app/lib/ingestion/**'
       - 'app/tool/spike/**'
       - .github/workflows/sms-spike.yml
@@ -34,7 +43,7 @@ jobs:
   emulator:
     name: emulator API ${{ matrix.api }}
     runs-on: ubuntu-latest
-    timeout-minutes: 75
+    timeout-minutes: 90
     strategy:
       fail-fast: false
       matrix:
@@ -90,5 +99,7 @@ jobs:
             ${{ runner.temp }}/sms-spike/spoof.txt
             ${{ runner.temp }}/sms-spike/canary-lines.txt
             ${{ runner.temp }}/sms-spike/build.log
+            ${{ runner.temp }}/sms-spike/it-*.txt
+            ${{ runner.temp }}/sms-spike/it-build.log
           if-no-files-found: warn
           retention-days: 30

@@ -49,6 +49,17 @@ void main() {
       'a?+': 'possessive',
       'a{2}+': 'possessive',
       '[[:alpha:]]': 'posix_class',
+      '[a[:l:]]': 'posix_class',
+      // FU-101 M-1: ICU reads a class opening with `:` as `[:name:]` and
+      // looks ahead for `:]`; this one is a syntax error on Android.
+      '(?:is|[:=])[ :]{0,2}': 'posix_class',
+      '[:=]': 'posix_class',
+      '[:alpha:]': 'posix_class',
+      '[:l:]': 'posix_class',
+      '[^:=]': 'posix_class',
+      '[a-z&&[^b]]': 'class_set_operation',
+      '[a-z--b]': 'class_set_operation',
+      '[^]a]': 'nested_class',
       '[a[b]]': 'nested_class',
       '[a&&b]': 'class_set_operation',
       '[a--b]': 'class_set_operation',
@@ -82,6 +93,12 @@ void main() {
       r'a\nb',
       r'[^a-z\n]',
       'رقم ([0-9]{4})',
+      // A `:` that is not the first member of its class (FU-101 M-1 fix).
+      r'(?:is|[=:])[ :]{0,2}',
+      r'[^a-z0-9.!?;؟؛:=\n]',
+      r'[ \n:=#-]{0,3}',
+      r'\[:a:\]',
+      r'a:[=]',
       r'\(\)\[\]\{\}\|\^\$\?\+\*\.\\',
     ]) {
       test(p, () {

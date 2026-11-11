@@ -1,11 +1,10 @@
 // T-008 design note §9 (Dart unit): the ingestionMain controller with fakes.
-// Order drain → parse → commit → ack; commit throws → no ack; migration
-// pending → no ack, deferred; missing DB → no open, no ack.
+// T-046: order drain → ingest (parse + one transaction) → ack; a failed
+// batch → no ack; stuck entries; migration pending → no ack, deferred;
+// missing DB → no open, no ack.
 
 import 'package:flutter_test/flutter_test.dart';
 import 'package:zaghlol/ingestion/ingestion_cycle.dart';
-import 'package:zaghlol/ingestion/spike_registry.dart';
-import 'package:zaghlol_parsing/zaghlol_parsing.dart';
 
 import 'ingestion_fakes.dart';
 
@@ -15,22 +14,16 @@ void main() {
   late FakeStore store;
 
   IngestionCycle cycle({
-    EntryParser? parse,
     int batch = 20,
     bool mayCreate = false,
+    int Function()? nowMs,
   }) => IngestionCycle(
     spool: spool,
     store: store,
-    parse:
-        parse ??
-        (e) {
-          log.add('parse');
-          return pipelineParser(ParsingPipeline(loadSpikeRegistry()))(e);
-        },
-    registryVersion: 1,
     mayCreateDatabase: mayCreate,
     marks: RecordingMarks(log),
     batchSize: batch,
+    nowMs: nowMs,
   );
 
   setUp(() {
@@ -42,42 +35,87 @@ void main() {
     store = FakeStore(log);
   });
 
-  test(
-    'order: drain → parse → commit → ack, ack only after the commit',
-    () async {
-      final r = await cycle().run();
-      expect(r.outcome, CycleOutcome.ok);
-      expect(r.drained, 2);
-      expect(r.inserted, 2);
-      expect(log, [
-        'exists',
-        'open',
-        'mark:db_open',
-        'drain',
-        'parse',
-        'parse',
-        'mark:parsed:2',
-        'commit',
-        'mark:commit:2',
-        'ack',
-        'drain',
-      ]);
-      expect(spool.acked, [
-        [sid(1), sid(2)],
-      ]);
-      expect(store.committed.map((r) => r.parsed), [true, false]);
-      expect(store.committed.first.row.parseStatus.value, 'parsed');
-      expect(store.committed.last.row.parseStatus.value, 'review');
-    },
-  );
-
-  test('commit throws → nothing acked, retry', () async {
-    store.commitFails = true;
+  test('order: drain → ingest → ack, ack only after the use case '
+      'returned', () async {
     final r = await cycle().run();
-    expect(r.outcome, CycleOutcome.retry);
-    expect(r.code, 'DB_WRITE_FAILED');
+    expect(r.outcome, CycleOutcome.ok);
+    expect(r.drained, 2);
+    expect(r.inserted, 2);
+    expect(log, [
+      'exists',
+      'open',
+      'mark:db_open',
+      'drain',
+      'ingest',
+      'mark:commit:2',
+      'ack',
+      'drain',
+    ]);
+    expect(spool.acked, [
+      [sid(1), sid(2)],
+    ]);
+    expect(store.committed.map((m) => m.origin.name), ['spool', 'spool']);
+  });
+
+  for (final code in ['DB_WRITE_FAILED', 'DB_READ_FAILED']) {
+    test('a transient batch failure ($code) → nothing acked, retry', () async {
+      store.ingestFails = code;
+      final r = await cycle().run();
+      expect(r.outcome, CycleOutcome.retry);
+      expect(r.code, code);
+      expect(spool.acked, isEmpty);
+      expect(log, isNot(contains('ack')));
+    });
+  }
+
+  test('a non-transient batch failure → nothing acked; the re-drained '
+      'entries are stuck, the cycle ends OK with a stuck count', () async {
+    store.ingestFails = 'INGEST_MSG_UNSTORABLE';
+    final r = await cycle().run();
+    expect(r.outcome, CycleOutcome.ok);
+    expect(r.stuck, 2);
+    expect(r.code, 'INGEST_MSG_UNSTORABLE');
+    expect(r.toWire()['stuck'], 2);
     expect(spool.acked, isEmpty);
-    expect(log, isNot(contains('ack')));
+    expect(spool.pending, hasLength(2), reason: 'never deleted');
+    expect(log.where((l) => l == 'ingest'), hasLength(1));
+  });
+
+  test('CONFIG_INVALID (bad Guard base) acks nothing and keeps the '
+      'spool', () async {
+    store.ingestFails = 'CONFIG_INVALID';
+    final r = await cycle().run();
+    expect(r.code, 'CONFIG_INVALID');
+    expect(spool.acked, isEmpty);
+    expect(spool.pending, hasLength(2));
+  });
+
+  test('the next cycle after a stuck one processes the entries', () async {
+    store
+      ..ingestFails = 'INGEST_INTERNAL'
+      ..failTimes = 1;
+    expect((await cycle().run()).stuck, 2);
+    final r = await cycle().run();
+    expect(r.outcome, CycleOutcome.ok);
+    expect(r.stuck, 0);
+    expect(spool.pending, isEmpty);
+  });
+
+  test('no batch starts with under 5 s of the budget left', () async {
+    var now = 0;
+    spool.pending.addAll([for (var i = 3; i <= 9; i++) entry(sid(i))]);
+    final r = await cycle(
+      batch: 2,
+      nowMs: () {
+        final t = now;
+        now += 30000; // each look at the clock "takes" 30 s
+        return t;
+      },
+    ).run();
+    // start 0; at 30 s one batch runs (< 45 s); at 60 s none starts.
+    expect(r.outcome, CycleOutcome.ok);
+    expect(spool.acked, hasLength(1));
+    expect(spool.pending, isNotEmpty);
   });
 
   for (final (code, outcome) in [
@@ -143,31 +181,15 @@ void main() {
     expect(spool.pending, isEmpty);
   });
 
-  test('a parser crash stores the row for review and still acks', () async {
-    final r = await cycle(parse: (_) => throw StateError(canary)).run();
+  test('dropped entries are acked, not counted as stored', () async {
+    spool.pending
+      ..clear()
+      ..addAll([entry(sid(1), body: 'spike: your OTP is 1234'), entry(sid(2))]);
+    final r = await cycle().run();
     expect(r.outcome, CycleOutcome.ok);
-    expect(store.committed.map((r) => r.row.parseStatus.value), [
-      'review',
-      'review',
-    ]);
-    expect(spool.acked.single, hasLength(2));
+    expect(r.inserted, 1);
+    expect(spool.acked.single, [sid(1), sid(2)]);
   });
-
-  test(
-    'dropped (OTP) and unknown-channel entries are acked, not stored',
-    () async {
-      spool.pending
-        ..clear()
-        ..addAll([
-          entry(sid(1), body: 'spike: your OTP is 1234'),
-          entry(sid(2), channel: 'carrier_pigeon'),
-        ]);
-      final r = await cycle().run();
-      expect(r.outcome, CycleOutcome.ok);
-      expect(store.committed, isEmpty);
-      expect(spool.acked.single, [sid(1), sid(2)]);
-    },
-  );
 
   test('no result or wire map ever carries message text', () async {
     spool.pending
@@ -175,7 +197,7 @@ void main() {
       ..add(entry(sid(1), body: '$canary EGP 5'));
     for (final arrange in <void Function()>[
       () {},
-      () => store.commitFails = true,
+      () => store.ingestFails = 'DB_WRITE_FAILED',
       () => spool.ackFails = canary,
       () => store.openFails = 'DB_UNAVAILABLE',
     ]) {

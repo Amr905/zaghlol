@@ -16,3 +16,6 @@ Seeded by the Lead during setup from a read of spec v4. The `requirements-analys
 | OQ-10 | MVP scope | Spec is large (38 banks, 12 charts, voice, OCR, PDF import, Zakah, chat, IAP, backup, social share). | Define MVP = Android SMS ingestion for top ~8 banks + InstaPay + manual/voice cash + categories + budget + 4 core charts + home. | OPEN — BLOCKING |
 | OQ-11 | Backup scope | `drive.appdata` scope hides backups from the user's visible Drive; spec says "directly to user's Google Drive". | Confirm appdata (private) vs visible folder. | OPEN |
 | OQ-12 | Voice | On-device `ar-EG` speech recognition availability varies by device/OS; free tier limited to 15 voice logs/month. | Confirm offline requirement for voice and fallback behaviour. | OPEN |
+
+### OQ (2026-11-11, from T-112 review): manual FX override
+FR-WLT-03 allows a manual price override; it is unclear whether the user may also override an FX rate. `fx_rates` has no source column, so a manual rate would be wiped by the next sync. Launch behaviour: price-only override; the "≈" view is labelled approximate and stale. A manual FX override needs a schema change and a new task. **PO to decide.**

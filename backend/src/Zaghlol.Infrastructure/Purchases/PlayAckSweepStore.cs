@@ -138,7 +138,8 @@ internal sealed class PlayAckSweepStore(IZaghlolDbContextFactory contexts) : IPl
             current = reader.GetString(0);
         }
 
-        var state = PurchaseDbText.State(update.State);
+        // T-133 label rule under the row lock: an 'expired' read keeps a stored 'refunded'/'revoked'.
+        var state = PurchaseDbText.State(PlayStateMapping.Settle(PurchaseDbText.ParseState(current), update.State, null));
         await using (var command = new NpgsqlCommand(UpdateSql, connection, transaction))
         {
             command.Parameters.AddWithValue("id", update.Id);

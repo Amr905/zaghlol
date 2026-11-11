@@ -3,26 +3,18 @@ package app.zaghlol.spike.sms
 import app.zaghlol.platform.capture.AndroidCaptureHostApi
 import app.zaghlol.platform.capture.CaptureApiError
 import app.zaghlol.platform.capture.CaptureCapabilities
+import app.zaghlol.platform.capture.CaptureDevice
 import app.zaghlol.platform.capture.InboxPage
 import app.zaghlol.platform.capture.InboxQuery
+import app.zaghlol.platform.capture.IngestScheduler
 import app.zaghlol.platform.capture.SpoolEntry
-
-/** Device facts and settings links, behind a seam so the host is JVM-testable. */
-interface CaptureDevice {
-    fun capabilities(): CaptureCapabilities
-
-    fun isIgnoringBatteryOptimizations(): Boolean
-
-    /**
-     * Q3 (PO, 2026-11-11): opens the system battery-optimisation list
-     * (`ACTION_IGNORE_BATTERY_OPTIMIZATION_SETTINGS`, no permission needed).
-     * Never the REQUEST_IGNORE_BATTERY_OPTIMIZATIONS dialog.
-     */
-    fun openBatteryOptimizationSettings()
-}
+import app.zaghlol.platform.capture.SpoolStatus
+import app.zaghlol.platform.spool.SpoolClaim
+import app.zaghlol.platform.spool.SpoolStore
 
 /**
- * [AndroidCaptureHostApi] for one engine (UI or headless), devSms spike.
+ * [AndroidCaptureHostApi] for one engine (UI or headless), devSms spike
+ * (T-041 replaces it with app.zaghlol.platform.capture.AndroidCaptureHost).
  * Implements the spool methods, scheduling, battery status and capabilities;
  * everything else answers `NOT_AVAILABLE` (owner tasks in capture_api.dart).
  *
@@ -54,7 +46,7 @@ class SpoolHost(
 
     override fun requestIgnoreBatteryOptimizations(): Unit = guarded { device.openBatteryOptimizationSettings() }
 
-    override fun writeGuardConfig(encryptedConfig: ByteArray): Unit = notAvailable()
+    override fun writeGuardConfig(userConfigJson: ByteArray): Unit = notAvailable()
 
     override fun queryInbox(query: InboxQuery): InboxPage = notAvailable()
 
@@ -96,6 +88,11 @@ class SpoolHost(
     }
 
     override fun scheduleIngestionNow(): Unit = guarded { scheduler.enqueue() }
+
+    // The production AndroidCaptureHost (T-039) implements the status; T-041 replaces this spike host.
+    override fun getSpoolStatus(): SpoolStatus = notAvailable()
+
+    override fun clearSpoolAlerts(seq: Long): Unit = notAvailable()
 
     /** The engine is going away: drop its claim. */
     fun detach() {

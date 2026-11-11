@@ -1,3 +1,4 @@
+using System.Globalization;
 using System.Net;
 using System.Net.Http.Json;
 using System.Text;
@@ -13,7 +14,7 @@ namespace Zaghlol.Infrastructure.GooglePlay;
 /// <summary>Metric tag values of <c>zaghlol.store.call</c> (fixed sets).</summary>
 public static class StoreCallTags
 {
-    public static IReadOnlyList<string> Apis { get; } = ["sub_get", "prod_get", "sub_ack", "prod_ack", "orders_get"];
+    public static IReadOnlyList<string> Apis { get; } = ["sub_get", "prod_get", "sub_ack", "prod_ack", "orders_get", "voided_list"];
 
     public static IReadOnlyList<string> Outcomes { get; } =
         ["ok", "client_error", "auth_error", "rate_limited", "server_error", "timeout", "circuit_open", "budget_denied"];
@@ -25,6 +26,7 @@ public static class StoreCallTags
         PlayApi.SubscriptionAcknowledge => "sub_ack",
         PlayApi.ProductAcknowledge => "prod_ack",
         PlayApi.OrderGet => "orders_get",
+        PlayApi.VoidedList => "voided_list",
         _ => "invalid",
     };
 
@@ -46,15 +48,16 @@ public static class StoreCallTags
 /// The Google Play Developer API v3 over a typed <see cref="HttpClient"/> (T-130 design note §7). The package comes from
 /// configuration; the token or order ID is URL-escaped into the path and each request names its redacted URL template, so spans
 /// and the resilience pipeline's logs never carry it. Only <c>subscriptionsv2.get</c>, <c>productsv2.getproductpurchasev2</c>,
-/// the two acknowledge calls and <c>orders.get</c> exist here: the v1 <c>products.get</c> and <c>subscriptions.get</c> can't be
-/// called. A response body is never read into an exception or a log; errors are <see cref="PlayApiException"/> with a
-/// constant message.
+/// the two acknowledge calls, <c>orders.get</c> and <c>voidedpurchases.list</c> (T-133) exist here: the v1 <c>products.get</c> and
+/// <c>subscriptions.get</c> can't be called. A response body is never read into an exception or a log; errors are
+/// <see cref="PlayApiException"/> with a constant message. Each request names its budget lane; <see cref="PlayBudgetHandler"/> inside
+/// the resilience pipeline charges one permit per attempt (T-133 §6).
 /// </summary>
 internal sealed class PlayDeveloperApiClient(
     HttpClient http,
     GooglePlayOptions options,
-    IStoreCallBudget budget,
-    ZaghlolMetrics metrics) : IPlayDeveloperApi
+    ZaghlolMetrics metrics,
+    TimeProvider clock) : IPlayDeveloperApi
 {
     public const string ApplicationsPath = "androidpublisher/v3/applications/";
     public const string TemplatePrefix = "/androidpublisher/v3/applications/{packageName}";
@@ -63,6 +66,10 @@ internal sealed class PlayDeveloperApiClient(
     public const string SubscriptionAcknowledgeTemplate = TemplatePrefix + "/purchases/subscriptions/{subscriptionId}/tokens/{token}:acknowledge";
     public const string ProductAcknowledgeTemplate = TemplatePrefix + "/purchases/products/{productId}/tokens/{token}:acknowledge";
     public const string OrderGetTemplate = TemplatePrefix + "/orders/{orderId}";
+    public const string VoidedListTemplate = TemplatePrefix + "/purchases/voidedpurchases";
+
+    /// <summary>Play's largest page (T-133 §4).</summary>
+    public const int VoidedPageSize = 1000;
 
     /// <summary>The largest Play response read (a subscription or order is a few KB).</summary>
     public const int MaxResponseBytes = 256 * 1024;
@@ -120,6 +127,30 @@ internal sealed class PlayDeveloperApiClient(
         var path = $"{ApplicationsPath}{Package}/orders/{Escape(orderId)}";
         var dto = await ReadAsync(PlayApi.OrderGet, lane, HttpMethod.Get, path, OrderGetTemplate, PlayJsonContext.Default.OrderDto, cancellationToken);
         return new PlayOrder(Wrap(dto.PurchaseToken), OrderState(dto.State));
+    }
+
+    public async Task<PlayVoidedPage> ListVoidedPurchasesAsync(
+        DateTimeOffset from,
+        DateTimeOffset until,
+        Sensitive<string>? pageToken,
+        StoreLane lane,
+        CancellationToken cancellationToken)
+    {
+        // type=1: one-time products and subscriptions (renewals share a token, so the job keys each void by orderId too).
+        var query = new StringBuilder("?type=1&maxResults=")
+            .Append(VoidedPageSize.ToString(CultureInfo.InvariantCulture))
+            .Append("&startTime=").Append(from.ToUnixTimeMilliseconds().ToString(CultureInfo.InvariantCulture))
+            .Append("&endTime=").Append(until.ToUnixTimeMilliseconds().ToString(CultureInfo.InvariantCulture));
+        if (pageToken?.Reveal() is { Length: > 0 } token)
+        {
+            query.Append("&token=").Append(Uri.EscapeDataString(token));
+        }
+
+        var path = $"{ApplicationsPath}{Package}/purchases/voidedpurchases{query}";
+        var dto = await ReadAsync(PlayApi.VoidedList, lane, HttpMethod.Get, path, VoidedListTemplate, PlayJsonContext.Default.VoidedPurchasesListDto, cancellationToken);
+        return new PlayVoidedPage(
+            [.. (dto.VoidedPurchases ?? []).Select(v => new PlayVoidedPurchase(Wrap(v.PurchaseToken), Wrap(v.OrderId), v.VoidedTimeMillis))],
+            Wrap(dto.TokenPagination?.NextPageToken));
     }
 
     internal static PlaySubscriptionState SubscriptionState(string? value) => value switch
@@ -193,12 +224,8 @@ internal sealed class PlayDeveloperApiClient(
         string template,
         CancellationToken cancellationToken)
     {
-        if (!budget.TryAcquire(lane))
-        {
-            throw Fail(api, PlayCallOutcome.BudgetDenied, null, TimeSpan.FromSeconds(60));
-        }
-
         using var request = new HttpRequestMessage(method, new Uri(options.BaseUrl, path)).SetUrlTemplate(template);
+        request.Options.Set(PlayRequestLane.Key, lane);
         if (method == HttpMethod.Post)
         {
             request.Content = new StringContent("{}", Encoding.UTF8, "application/json");
@@ -209,6 +236,11 @@ internal sealed class PlayDeveloperApiClient(
         {
             // Buffered, so MaxResponseContentBufferSize (256 KB) caps every body, chunked ones included.
             response = await http.SendAsync(request, HttpCompletionOption.ResponseContentRead, cancellationToken);
+        }
+        catch (PlayBudgetDeniedException)
+        {
+            // Our own budget, per attempt (possibly mid-retry): never retried by the pipeline.
+            throw Fail(api, PlayCallOutcome.BudgetDenied, null, TimeSpan.FromSeconds(60));
         }
         catch (BrokenCircuitException)
         {
@@ -248,11 +280,15 @@ internal sealed class PlayDeveloperApiClient(
             return response;
         }
 
-        var retryAfter = response.Headers.RetryAfter?.Delta
-            ?? (response.Headers.RetryAfter?.Date is { } date ? date - DateTimeOffset.UtcNow : null);
+        var retryAfter = RetryAfter(response, clock);
         response.Dispose();
         throw Fail(api, outcome, status, retryAfter);
     }
+
+    /// <summary><c>Retry-After</c> as a delay; the date form against the injected clock (FU-098 nit 7).</summary>
+    internal static TimeSpan? RetryAfter(HttpResponseMessage response, TimeProvider clock) =>
+        response.Headers.RetryAfter?.Delta
+        ?? (response.Headers.RetryAfter?.Date is { } date ? date - clock.GetUtcNow() : null);
 
     private PlayApiException Fail(PlayApi api, PlayCallOutcome outcome, int? status = null, TimeSpan? retryAfter = null)
     {

@@ -60,6 +60,58 @@ public sealed class PlayWireMock : IDisposable
 
     public static string OrderPath(string orderId) => Applications + "/orders/" + Uri.EscapeDataString(orderId);
 
+    /// <summary><c>voidedpurchases.list</c> (T-133); the query (<c>type</c>, <c>maxResults</c>, times, <c>token</c>) is not part of it.</summary>
+    public static string VoidedPath => Applications + "/purchases/voidedpurchases";
+
+    /// <summary>A <c>VoidedPurchasesListResponse</c> body with the fields Google sends (most are never read).</summary>
+    public static string VoidedBody(string? nextPageToken, params (string Token, string OrderId, long VoidedTimeMillis)[] voids)
+    {
+        var items = new JsonArray();
+        foreach (var (token, orderId, millis) in voids)
+        {
+            items.Add(new JsonObject
+            {
+                ["kind"] = "androidpublisher#voidedPurchase",
+                ["purchaseToken"] = token,
+                ["orderId"] = orderId,
+                ["purchaseTimeMillis"] = (millis - 86_400_000).ToString(System.Globalization.CultureInfo.InvariantCulture),
+                ["voidedTimeMillis"] = millis.ToString(System.Globalization.CultureInfo.InvariantCulture),
+                ["voidedSource"] = 1,
+                ["voidedReason"] = 1,
+                ["voidedQuantity"] = 1,
+            });
+        }
+
+        var body = new JsonObject { ["voidedPurchases"] = items, ["pageInfo"] = new JsonObject { ["resultPerPage"] = items.Count } };
+        if (nextPageToken is not null)
+        {
+            body["tokenPagination"] = new JsonObject { ["nextPageToken"] = nextPageToken };
+        }
+
+        return body.ToJsonString();
+    }
+
+    /// <summary>Successive GETs of <paramref name="path"/> answer the bodies in order (the last one repeats).</summary>
+    public void GetSequence(string path, params string[] bodies)
+    {
+        var scenario = "seq-" + Guid.NewGuid().ToString("N");
+        for (var i = 0; i < bodies.Length; i++)
+        {
+            var step = Server.Given(Request.Create().WithPath(path).UsingGet()).InScenario(scenario);
+            step = i == 0 ? step : step.WhenStateIs("s" + i);
+            if (i < bodies.Length - 1)
+            {
+                step = step.WillSetStateTo("s" + (i + 1));
+            }
+
+            step.RespondWith(Response.Create().WithStatusCode(200).WithHeader("Content-Type", "application/json").WithBody(bodies[i]));
+        }
+    }
+
+    /// <summary>The query strings of the requests to <paramref name="path"/>, in order.</summary>
+    public IReadOnlyList<string> Queries(string path) =>
+        [.. Server.LogEntries.Where(e => e.RequestMessage!.Path == path).Select(e => new Uri(e.RequestMessage!.Url).Query)];
+
     /// <summary>A <c>SubscriptionPurchaseV2</c> body.</summary>
     public static string SubscriptionBody(
         string? obfuscatedAccountId,

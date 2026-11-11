@@ -1,9 +1,9 @@
 // T-008: fakes for the ingestion cycle. Bodies are synthetic.
 
 import 'package:zaghlol/core/platform/capture_api.g.dart';
+import 'package:zaghlol/features/ingestion/domain/ingest_types.dart';
 import 'package:zaghlol/ingestion/ingest_store.dart';
 import 'package:zaghlol/ingestion/ingestion_cycle.dart';
-import 'package:zaghlol/ingestion/raw_message_mapper.dart';
 import 'package:zaghlol/ingestion/spool_port.dart';
 import 'package:zaghlol_domain/zaghlol_domain.dart';
 
@@ -61,9 +61,14 @@ base class FakeStore implements IngestStore {
   final List<String> log;
   bool exists = true;
   String? openFails;
-  bool commitFails = false;
+
+  /// Throw IngestBatchFailed with this code from [ingest].
+  String? ingestFails;
+
+  /// Fail only this many calls, then succeed.
+  int failTimes = 1 << 30;
   int opens = 0;
-  final List<StoreRow> committed = [];
+  final List<IncomingMessage> committed = [];
 
   @override
   Future<bool> databaseExists() async {
@@ -78,12 +83,30 @@ base class FakeStore implements IngestStore {
     if (openFails != null) throw IngestStoreUnavailable(openFails!);
   }
 
+  /// Every message is "inserted" except bodies containing `OTP` (dropped).
   @override
-  Future<int> commit(List<StoreRow> rows) async {
-    log.add('commit');
-    if (commitFails) throw StateError('DB_WRITE_FAILED');
-    committed.addAll(rows);
-    return rows.length;
+  Future<IngestBatchResult> ingest(List<IncomingMessage> batch) async {
+    log.add('ingest');
+    if (ingestFails != null && failTimes > 0) {
+      failTimes--;
+      throw IngestBatchFailed(ingestFails!);
+    }
+    final outcomes = <String, IngestOutcome>{};
+    for (final m in batch) {
+      if (m.body.contains('OTP')) {
+        outcomes[m.deliveryId] = const IngestDropped('otp_or_promo_global');
+      } else {
+        committed.add(m);
+        outcomes[m.deliveryId] = IngestInserted('t-${m.deliveryId}');
+      }
+    }
+    return IngestBatchResult(
+      outcomes: outcomes,
+      ackable: [for (final m in batch) m.deliveryId],
+      changedTxnIds: const {},
+      changedAccountIds: const {},
+      createdAccountIds: const {},
+    );
   }
 
   int closes = 0;

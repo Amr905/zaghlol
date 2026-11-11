@@ -9,6 +9,7 @@ import android.os.Build
 import android.os.PowerManager
 import android.provider.Settings
 import app.zaghlol.platform.capture.CaptureCapabilities
+import app.zaghlol.platform.capture.CaptureDevice
 
 /** [CaptureDevice] over the Android framework (devSms spike). */
 class AndroidCaptureDevice(private val app: Context) : CaptureDevice {

@@ -176,8 +176,20 @@ ExtractedFields extractFields(
       problems.add(field);
       return null;
     }
+    var text = _dropTrailingPunctuation(raw);
+    // FU-078: an overdrawn balance (`-500.00`, `−500.00`) is a real negative
+    // amount. One leading sign, balance and available only; an amount with
+    // a sign stays a problem (a charge is never negative).
+    var negative = false;
+    if ((key == 'balance' || key == 'available') && text.isNotEmpty) {
+      final first = text.codeUnitAt(0);
+      if (first == 0x2D || first == 0x2212) {
+        negative = true;
+        text = text.substring(1).trimLeft();
+      }
+    }
     final result = parseAmount(
-      _dropTrailingPunctuation(raw),
+      text,
       currency: currency,
       locale: template.locale,
     );
@@ -186,7 +198,7 @@ ExtractedFields extractFields(
       problems.add(field);
       return null;
     }
-    return value;
+    return negative ? -value : value;
   }
 
   // A `cur` capture that cannot be resolved is a problem, never a silent

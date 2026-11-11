@@ -6,12 +6,15 @@ sealed class DomainEvent {
 }
 
 /// Transactions were added, edited or removed for the given accounts and
-/// payday cycles.
+/// payday cycles. Names as in parsing-engine §6 (`accountIds`, `cycleKeys`;
+/// FU-037). Both sets are unmodifiable copies, so a listener can never
+/// change what another listener sees.
 final class TransactionsChanged extends DomainEvent {
-  const TransactionsChanged({
-    required this.accountIds,
-    required this.cycleKeys,
-  });
+  TransactionsChanged({
+    required Iterable<String> accountIds,
+    required Iterable<String> cycleKeys,
+  }) : accountIds = Set.unmodifiable(accountIds),
+       cycleKeys = Set.unmodifiable(cycleKeys);
 
   final Set<String> accountIds;
 

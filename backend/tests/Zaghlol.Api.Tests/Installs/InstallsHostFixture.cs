@@ -117,6 +117,11 @@ public class InstallsHostFixture : IAsyncLifetime, IDisposable
     {
     }
 
+    /// <summary>Middleware of a derived host that must run before the pipeline (T-133: the body-read spy).</summary>
+    protected virtual void UseBeforePipeline(WebApplication application)
+    {
+    }
+
     /// <summary>The App connection string (a derived host may shrink the pool).</summary>
     protected virtual string AppConnectionString(string api) => api;
 
@@ -169,6 +174,7 @@ public class InstallsHostFixture : IAsyncLifetime, IDisposable
 
             await next(context);
         });
+        UseBeforePipeline(app);
         app.UseZaghlolPipeline();
         app.MapInstalls();
         MapEndpoints(app);

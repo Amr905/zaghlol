@@ -35,7 +35,7 @@ internal sealed class PlayClientHost : IAsyncDisposable
     private readonly MeterListener meters = new();
     private readonly LockedWriter log = new();
 
-    private PlayClientHost(PlayWireMock play, IReadOnlyDictionary<string, string?> extra, IPlayAccessTokenSource? tokens, AppleBudgetPartition partition)
+    private PlayClientHost(PlayWireMock play, IReadOnlyDictionary<string, string?> extra, IPlayAccessTokenSource? tokens, AppleBudgetPartition partition, PlayBudgetPartition playPartition, TimeProvider? clock)
     {
         Play = play;
         var settings = new Dictionary<string, string?>(play.Settings()) { [TelemetryServiceCollectionExtensions.OtlpEndpointKey] = "http://127.0.0.1:1" };
@@ -56,7 +56,12 @@ internal sealed class PlayClientHost : IAsyncDisposable
         services.AddSingleton<IHostEnvironment>(new TestEnvironment());
         services.AddLogging(b => b.AddSerilog(logger.CreateLogger(), dispose: true).SetMinimumLevel(MelLevel.Trace));
         services.AddZaghlolTelemetry(configuration, new TestEnvironment(), "zaghlol-test", addOtlpExporter: t => t.AddProcessor(new SpanCopy(Spans)));
-        services.AddZaghlolGooglePlay();
+        if (clock is not null)
+        {
+            services.AddSingleton(clock);
+        }
+
+        services.AddZaghlolGooglePlay(playPartition);
 
         // T-131: the App Store clients too (Testing: an empty Purchases:Apple section is valid; Apple tests pass their settings).
         services.AddZaghlolAppStore(partition);
@@ -95,12 +100,16 @@ internal sealed class PlayClientHost : IAsyncDisposable
     public string LogOutput => log.ToString();
 
     /// <param name="partition">T-134: the Apple budget partition (the worker's serves only <c>StoreLane.Notification</c>).</param>
+    /// <param name="playPartition">T-133: the Play budget partition.</param>
+    /// <param name="clock">T-133: the host's <see cref="TimeProvider"/> (the <c>Retry-After</c> date form).</param>
     public static PlayClientHost Start(
         PlayWireMock play,
         IReadOnlyDictionary<string, string?>? extra = null,
         IPlayAccessTokenSource? tokens = null,
-        AppleBudgetPartition partition = AppleBudgetPartition.Api) =>
-        new(play, extra ?? new Dictionary<string, string?>(), tokens, partition);
+        AppleBudgetPartition partition = AppleBudgetPartition.Api,
+        PlayBudgetPartition playPartition = PlayBudgetPartition.Api,
+        TimeProvider? clock = null) =>
+        new(play, extra ?? new Dictionary<string, string?>(), tokens, partition, playPartition, clock);
 
     public IReadOnlyList<Dictionary<string, string?>> StoreCalls() =>
         [.. Measurements.Where(m => m.Instrument == "zaghlol.store.call" && m.Value > 0).Select(m => m.Tags)];

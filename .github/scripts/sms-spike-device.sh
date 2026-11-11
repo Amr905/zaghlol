@@ -17,6 +17,12 @@
 # the rows by the receive wall clock (enqueue → commit = FR-ING-A-01).
 # Results: $RUNNER_TEMP/sms-spike/{metrics.csv,broadcasts.txt,report.md}; the report rows go
 # into ADR-005 (emulator rows only; device rows come from T-008.md steps).
+# Instrumented suites (T-039 design note section 11): after the spike, the
+# devSms debug app + test APK replace the profile build and run the native
+# instrumented tests on the same emulator: spool (fatal), guard (T-038, fatal;
+# skips allowed only by name), share (T-060, a warning until its owner makes it green),
+# then the two-phase kill test (AC1: a write phase halted between fsync and
+# rename of a 21st entry, a read phase in a new process).
 # Called as one line (android-emulator-runner runs `script` line by line).
 set -euo pipefail
 : "${DEVICE:?}" "${API:?}" "${RUNNER_TEMP:?}"
@@ -174,3 +180,70 @@ dart run tool/spike/latency_report.dart "$OUT/metrics.csv" "emu-api$API" "$OUT/b
 n=$(tail -n +2 "$OUT/metrics.csv" | grep -c . || true)
 [ "$n" -ge "$N" ] || fail "only $n messages were committed"
 rm -f "$OUT/logcat-all.txt" "$OUT/logcat-uid.txt" "$OUT/pkg.txt"
+
+# ---- Instrumented tests (T-039) --------------------------------------------
+RUNNER="$PKG.test/androidx.test.runner.AndroidJUnitRunner"
+(cd android && ./gradlew --no-daemon :app:assembleDevSmsDebug :app:assembleDevSmsDebugAndroidTest) > "$OUT/it-build.log" 2>&1 \
+  || { tail -n 60 "$OUT/it-build.log"; fail "instrumented test build failed"; }
+APP_APK=$(find build/app/outputs/apk/devSms/debug -name '*.apk' 2>/dev/null | head -n 1)
+TEST_APK=$(find build/app/outputs/apk/androidTest/devSms/debug -name '*.apk' 2>/dev/null | head -n 1)
+[ -n "$APP_APK" ] && [ -n "$TEST_APK" ] || { find build/app/outputs -name '*.apk'; fail "instrumented APKs not found"; }
+A uninstall "$PKG" > /dev/null 2>&1 || true  # the profile build's signature may differ
+A install -r -t -g "$APP_APK" > /dev/null
+A install -r -t "$TEST_APK" > /dev/null
+# instr <name> <am instrument args...>: output to $OUT/it-<name>.txt; returns 0 only on "OK (n tests)".
+# Raw mode (-r): only it prints the per-test status codes (-4 = assumption
+# failure, counted inside "OK (n tests)") and the tests' own status values
+# (guard.timing); the final stream with "OK (n tests)" is printed as well.
+instr() {
+  local name=$1; shift
+  sh_ am instrument -w -r "$@" "$RUNNER" > "$OUT/it-$name.txt" 2>&1 || true
+  tr -d '\r' < "$OUT/it-$name.txt" | grep -E "^(OK|FAILURES|Tests run|INSTRUMENTATION_RESULT: shortMsg|[0-9]+\))" | head -n 20 || true
+  tr -d '\r' < "$OUT/it-$name.txt" | grep -qE "^OK \([0-9]+ tests?\)" && return 0
+  # Failure causes into the log (the artifact is not always reachable); test data is synthetic.
+  tr -d '\r' < "$OUT/it-$name.txt" | awk '/^INSTRUMENTATION_STATUS: stack=/{n=6} n>0{print "  " substr($0,1,300); n--}' | head -n 60 || true
+  return 1
+}
+KILL=app.zaghlol.platform.spool.SpoolKillRecoveryTest
+# skipped <name>: assumption failures (am instrument counts them inside "OK (n tests)").
+skipped() { tr -d '\r' < "$OUT/it-$1.txt" | grep -c "^INSTRUMENTATION_STATUS_CODE: -4" || true; }
+# skipped_names <name>: the method names of those skips, one per line (a status block ends at its code line).
+skipped_names() { tr -d '\r' < "$OUT/it-$1.txt" | awk '/^INSTRUMENTATION_STATUS: test=/{t=substr($0,30)} /^INSTRUMENTATION_STATUS_CODE: -4$/{print t}' | sort -u; }
+# Guard skips allowed by name: bundledBaseLoads until T-036 bundles guard_base.json.
+GUARD_ALLOWED_SKIPS="bundledBaseLoads"
+instr spool -e package app.zaghlol.platform.spool -e notClass "$KILL" || fail "spool instrumented tests failed (it-spool.txt)"
+tr -d '\r' < "$OUT/it-spool.txt" | grep -qE "^OK \(0 tests\)" && fail "no spool instrumented test ran"
+echo "spool instrumented: $(skipped spool) skipped"
+[ "$(skipped spool)" = 0 ] || fail "a spool instrumented test was skipped by an assumption (it-spool.txt)"
+# Guard (T-038, security M-1): fatal; at least one test must run and every skip must be allowed by name.
+instr guard -e package app.zaghlol.platform.guard && guard_ok=1 || guard_ok=0
+GUARD_TIMING=$(tr -d '\r' < "$OUT/it-guard.txt" | sed -n 's/^INSTRUMENTATION_STATUS: guard\.timing=//p' | head -n 1)
+echo "guard timing: ${GUARD_TIMING:-none}"
+[ "$guard_ok" = 1 ] || fail "guard instrumented tests failed (it-guard.txt)"
+tr -d '\r' < "$OUT/it-guard.txt" | grep -qE "No tests found|^OK \(0 tests\)" && fail "no guard instrumented test ran"
+guard_skips=$(skipped_names guard | tr '\n' ' ')
+echo "guard instrumented: $(skipped guard) skipped ${guard_skips:+($guard_skips)}"
+for t in $guard_skips; do
+  case " $GUARD_ALLOWED_SKIPS " in *" $t "*) ;; *) fail "guard instrumented test $t was skipped by an assumption (it-guard.txt)" ;; esac
+done
+[ -n "$GUARD_TIMING" ] || fail "the guard timing test reported no guard.timing value"
+instr share -e class app.zaghlol.platform.share.ShareIntakeInstrumentedTest || echo "::warning::T-060 ShareIntakeInstrumentedTest failed on API $API (it-share.txt); reported to the Lead, not a T-039 gate"
+# AC1 for real: phase write halts the process between fsync and rename of entry 21.
+instr kill-write -e class "$KILL#phaseWrite" -e spoolPhase write && fail "the write phase finished instead of halting"
+runas ls no_backup/spool-it-kill > "$OUT/it-kill-ls.txt" 2>&1 || true
+bins=$(grep -cE '^[0-9A-Z]{26}\.bin$' "$OUT/it-kill-ls.txt" || true)
+tmps=$(grep -cE '^[0-9A-Z]{26}\.bin\.tmp$' "$OUT/it-kill-ls.txt" || true)
+echo "after halt: $bins entries, $tmps tmp"
+[ "$bins" = 20 ] && [ "$tmps" = 1 ] || fail "after the halt expected 20 entries and 1 tmp, found $bins and $tmps"
+instr kill-read -e class "$KILL#phaseRead" -e spoolPhase read || fail "the read phase after the halt failed (it-kill-read.txt)"
+[ "$(skipped kill-read)" = 0 ] || fail "the read phase was skipped (spoolPhase argument not received)"
+{
+  echo
+  echo "### Instrumented (T-039), API $API"
+  for n in spool guard share kill-read; do
+    echo "- $n: $(tr -d '\r' < "$OUT/it-$n.txt" | grep -E "^(OK|FAILURES|Tests run)" | tr '\n' ' ')"
+  done
+  echo "- kill-write: halted with $bins entries + $tmps tmp on disk"
+  echo "- guard skipped: $(skipped guard) ${guard_skips:+($guard_skips; allowed until T-036)}"
+  echo "- guard timing: $GUARD_TIMING"
+} >> "$OUT/report.md"

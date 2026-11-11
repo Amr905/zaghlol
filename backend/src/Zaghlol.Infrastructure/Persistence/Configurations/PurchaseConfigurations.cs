@@ -155,6 +155,11 @@ internal sealed class EffectiveEntitlementConfiguration : IEntityTypeConfigurati
 
 internal sealed class StoreNotificationConfiguration : IEntityTypeConfiguration<StoreNotification>
 {
+    /// <summary>The <c>ck_store_notifications_google_shape</c> expression (backend-schema <c>store_notifications</c>, T-133).</summary>
+    public const string GoogleShapeSql =
+        "store <> 'google_play' OR (subtype IS NULL AND environment IS NULL AND (external_id ~ '^[A-Za-z0-9_-]{1,100}$' "
+        + "OR external_id ~ '^voided:[0-9a-f]{64}$' OR external_id ~ '^sweep:[0-9a-f-]{36}:[0-9]{1,12}$'))";
+
     public void Configure(EntityTypeBuilder<StoreNotification> builder)
     {
         builder.ToTable("store_notifications", t =>
@@ -171,6 +176,10 @@ internal sealed class StoreNotificationConfiguration : IEntityTypeConfiguration<
             // T-134: store-defined type names only (T-133 reuses both).
             t.HasCheckConstraint("ck_store_notifications_type", "type ~ '^[A-Z0-9_]{1,64}$'");
             t.HasCheckConstraint("ck_store_notifications_subtype", "subtype IS NULL OR subtype ~ '^[A-Z0-9_]{1,64}$'");
+
+            // T-133 (§2): Google rows have no subtype or environment, and an external_id that is a Pub/Sub messageId or one of the two
+            // job keys, so a worker-login row injection can't fake another shape (the processor's step 0 refuses the rest).
+            t.HasCheckConstraint("ck_store_notifications_google_shape", GoogleShapeSql);
         });
 
         builder.HasKey(x => x.Id);

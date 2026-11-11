@@ -443,6 +443,9 @@ public class PlayVerificationTests
         public Task<PlayProduct> GetProductAsync(Sensitive<string> t, StoreLane lane, CancellationToken cancellationToken) =>
             inner.GetProductAsync(t, lane, cancellationToken);
 
+        public Task<PlayVoidedPage> ListVoidedPurchasesAsync(DateTimeOffset from, DateTimeOffset until, Sensitive<string>? pageToken, StoreLane lane, CancellationToken cancellationToken) =>
+            inner.ListVoidedPurchasesAsync(from, until, pageToken, lane, cancellationToken);
+
         public Task AcknowledgeSubscriptionAsync(string productId, Sensitive<string> t, StoreLane lane, CancellationToken cancellationToken) =>
             inner.AcknowledgeSubscriptionAsync(productId, t, lane, cancellationToken);
 
