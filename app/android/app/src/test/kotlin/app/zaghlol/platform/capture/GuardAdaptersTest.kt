@@ -93,6 +93,30 @@ class GuardAdaptersTest {
     }
 
     @Test
+    fun theWriterItselfRepliesCodeOnlyForBothWriteErrors() {
+        val writer = GuardAdapters.writerFor(runtime())
+        val bad = """{"v":1,"baseRegistryVersion":3,"ignore":[],"userSenders":[],"ZG_CANARY_7731":1}""".toByteArray()
+        try {
+            writer(bad)
+            fail()
+        } catch (e: CaptureApiError) {
+            assertEquals("CONFIG_INVALID", e.code)
+            assertNull(e.message)
+            assertNull(e.details)
+        }
+        val notADir = File(tempDir(), "file").apply { writeText("x") }
+        val ioWriter = GuardAdapters.writerFor(runtime(GuardUserConfigStore(File(notADir, "guard"), SoftwareGuardUserCipher())))
+        try {
+            ioWriter(GuardFixtures.t1User)
+            fail()
+        } catch (e: CaptureApiError) {
+            assertEquals("IO_ERROR", e.code)
+            assertNull(e.message)
+            assertNull(e.details)
+        }
+    }
+
+    @Test
     fun anIoErrorIsIoErrorCodeOnly() {
         // A user dir that is a file: the write can't create it.
         val notADir = File(tempDir(), "file").apply { writeText("x") }

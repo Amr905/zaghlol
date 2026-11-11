@@ -33,7 +33,13 @@ class BoundedDispatchTest {
 
     @Test
     fun finishesOnceWhenWorkThrows() {
-        assertEquals(1, awaitFinish(BoundedDispatch(Executors.newSingleThreadExecutor(), timer, 1_000)) { error("boom") })
+        // A 60 s budget: within the 2 s wait only the work path can finish.
+        assertEquals(1, start(BoundedDispatch(Executors.newSingleThreadExecutor(), timer, 60_000), waitMs = 2_000) { error("boom") }.get())
+    }
+
+    @Test
+    fun finishesOnSuccessWithoutWaitingForTheBudget() {
+        assertEquals(1, start(BoundedDispatch(Executors.newSingleThreadExecutor(), timer, 60_000), waitMs = 2_000) { }.get())
     }
 
     @Test
