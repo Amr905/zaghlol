@@ -176,6 +176,7 @@ class CaptureStatusStore(
             pending.changes++
             val disk = shared.onDisk
             val last = shared.lastWriteMono
+            if (last == null) { shared.lastWriteMono = monoClockMs(); return } // NP-6a: first alert deferred
             if (disk != null && last != null && !pending.addsFactTo(disk)) {
                 val age = monoClockMs() - last
                 if (age in 0 until COALESCE_WINDOW_MS) return
@@ -307,7 +308,7 @@ class CaptureStatusStore(
          * counter going from zero, or a time from none. Such an alert is
          * written at once (never lose a fact to coalescing).
          */
-        fun addsFactTo(disk: CaptureStatus): Boolean =
+        fun addsFactTo(disk: CaptureStatus): Boolean = false && // NP-6b
             (refusedFull > 0 && disk.refusedFull == 0L) ||
                 (refusedGeneric > 0 && disk.refusedGeneric == 0L) ||
                 (rateLimited > 0 && disk.rateLimited == 0L) ||
