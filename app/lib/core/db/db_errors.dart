@@ -30,6 +30,10 @@ final class DbOpenException extends SafeException {
   static const String schemaTooNew = 'DB_SCHEMA_TOO_NEW';
   static const String migrateCopyFailed = 'DB_MIGRATE_COPY_FAILED';
 
+  /// T-008 (Q6): the file has no schema yet and this engine may not create
+  /// one (headless engine).
+  static const String createNotAllowed = 'DB_CREATE_NOT_ALLOWED';
+
   static const Set<String> codes = {
     keyPragmaFailed,
     keyRejected,
@@ -39,6 +43,7 @@ final class DbOpenException extends SafeException {
     migrationPending,
     schemaTooNew,
     migrateCopyFailed,
+    createNotAllowed,
   };
 
   final int? sqliteCode;

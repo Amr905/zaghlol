@@ -239,7 +239,7 @@ The internal layering is `Zaghlol.Api` (endpoints, auth, validation) → `Zaghlo
 | INT-17 | Zaghlol API | App ↔ BE | HTTPS JSON, ES256-signed responses | `backend-api.md` | App fully usable offline (NFR-BE-01) |
 | INT-18 | Google Play Developer API | Backend | `Google.Apis.AndroidPublisher.v3` (service account) | §4.3 | Retry with back-off; purchase stays `verifying` |
 | INT-19 | RTDN via Pub/Sub push | Backend | HTTPS push with Google-signed OIDC token | §4.5 | 5xx → Pub/Sub redelivers |
-| INT-20 | App Store Server API + ASSN V2 | Backend | JWS (x5c → Apple Root CA G3), REST; community lib `Enjna.AppStoreServerLibrary` or in-house verifier (ADR-012) | §4.5 | Apple retries notifications; daily reconciliation job |
+| INT-20 | App Store Server API + ASSN V2 | Backend | JWS (x5c → pinned Apple Root CA G3, built offline), REST with an ES256 In-App Purchase key JWT; in-house verifier and client (ADR-012 Part A, T-131) | §4.5 | Apple retries notifications; daily reconciliation job |
 | INT-21 | Sign in with Google / Apple | App + BE | Google ID token (JWKS), Apple ID token (JWKS) + REST token exchange | §4.6 | Sign-in optional; failure keeps local Gold |
 | INT-13…16 | Local notifications, biometrics, share sheet, widgets | App | `flutter_local_notifications`, `local_auth`, `share_plus`, `home_widget` | — | — |
 
@@ -282,7 +282,7 @@ Backend dependencies:
 - `Google.Apis.PlayIntegrity.v1`, for `decodeIntegrityToken` (restore attestation; same Google client stack, so no new auth code);
 - App Attest attestation/assertion validation: in-house, with `System.Formats.Cbor` + `System.Security.Cryptography` (X.509 chain to the Apple App Attestation Root CA, ES256). Apple ships no .NET library, and this is about 250 lines, reviewed under T-181;
 - `Google.Apis.Auth`, for Pub/Sub OIDC and Google ID token verification;
-- Apple JWS verification: `Enjna.AppStoreServerLibrary` (MIT, community, last updated 2026-09) **or** an in-house verifier of about 200 lines. ADR-012 decides; the Phase 5 task compares both;
+- Apple JWS verification and the App Store Server API client: **in-house** (T-131), with `System.Security.Cryptography` only (`X509Chain` with `CustomRootTrust` over the embedded, fingerprint-checked Apple Root CA - G3, no revocation download; ES256 P1363 signatures; the API JWT signed with `ECDsa`). No new package. `Enjna.AppStoreServerLibrary` was reviewed and rejected: it deserializes every field (against "DTOs declare only the fields we read"), its URL and exception redaction can't be controlled (D-57), its revocation checks need the network, and it is a single-maintainer dependency on the billing path;
 - `Microsoft.IdentityModel.JsonWebTokens` 8.x (Apple ID token, our own JWTs, and since T-136 operator OIDC access tokens: RS256/ES256 signature checks against the IdP's JWKS; no `JwtBearer` handler, so the operator scheme keeps its single-body 401 and per-request operator lookup);
 - `Serilog` + OpenTelemetry exporters;
 - `Polly` (retries);

@@ -1,10 +1,20 @@
 import 'package:flutter/material.dart';
 
 import 'core/theme/app_theme.dart';
+import 'ingestion/ingestion_main.dart';
+import 'ingestion/spike_foreground.dart';
 
 void main() {
+  WidgetsFlutterBinding.ensureInitialized();
+  // T-008: devSms builds only (the SMS spike); a no-op in every other build.
+  startSpikeForeground();
   runApp(const ZaghlolApp());
 }
+
+/// T-008: the headless ingestion engine's entrypoint. Native code starts it
+/// by name in this (root) library; `vm:entry-point` keeps it in AOT builds.
+@pragma('vm:entry-point')
+void ingestionMain() => runIngestionMain();
 
 /// Root widget. Placeholder until theming, routing and l10n land in later
 /// tasks; it deliberately contains no user-facing strings.

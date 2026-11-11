@@ -2,17 +2,22 @@ using Zaghlol.Domain;
 
 namespace Zaghlol.Application.Purchases;
 
-/// <summary>Who spends an outbound store call (T-130 design note §2). Restore is limited first.</summary>
+/// <summary>Who spends an outbound store call (T-130 design note §2, T-131 §6). Restore is limited first.</summary>
 public enum StoreLane
 {
     Verify,
     Ack,
+
+    /// <summary>Store notification processing: Google RTDN (T-133) or Apple ASSN V2 (T-134).</summary>
     Rtdn,
     Support,
     Restore,
 }
 
-/// <summary>The shared outbound budget for Play and App Store calls (backend-api §1 "Rate limits").</summary>
+/// <summary>
+/// An outbound store budget (backend-api §1 "Rate limits"). Play and the App Store each have their own (different quotas,
+/// T-131 §6); a denied call is never made.
+/// </summary>
 public interface IStoreCallBudget
 {
     /// <summary>True when the lane may make one call now. A denied call must not be made.</summary>

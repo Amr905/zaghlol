@@ -26,15 +26,18 @@ public sealed class PlayVerification(
         BindingCheck binding,
         CancellationToken cancellationToken)
     {
-        ArgumentNullException.ThrowIfNull(purchase);
+        if (purchase is not PlayPurchaseRef google)
+        {
+            throw new ArgumentException("The Google Play verifier takes only a Google Play purchase.", nameof(purchase));
+        }
 
         // 1-2. Request shape and the server's product table; no Play call for either.
-        if (!catalog.TryGet(purchase.ProductId, out var product))
+        if (!catalog.TryGet(google.ProductId, out var product))
         {
             return StoreVerificationResult.Rejected(ErrorCodes.PurchaseWrongApp);
         }
 
-        if (!PlayStateMapping.IsWellFormedToken(purchase.PurchaseToken))
+        if (!PlayStateMapping.IsWellFormedToken(google.PurchaseToken))
         {
             return StoreVerificationResult.Rejected(ErrorCodes.PurchaseTokenInvalid, product.Plan);
         }
@@ -42,8 +45,8 @@ public sealed class PlayVerification(
         // 3. Play read. readAt is taken first, so a slower read never overwrites a newer one.
         var readAt = clock.GetUtcNow();
         var read = product.Kind == PlayProductKind.Subscription
-            ? await ReadSubscriptionAsync(purchase, readAt, cancellationToken)
-            : await ReadProductAsync(purchase, cancellationToken);
+            ? await ReadSubscriptionAsync(google, readAt, cancellationToken)
+            : await ReadProductAsync(google, cancellationToken);
         if (read.Rejection is { } rejection)
         {
             return StoreVerificationResult.Rejected(rejection, product.Plan);
@@ -72,7 +75,7 @@ public sealed class PlayVerification(
                 PurchaseStore.GooglePlay,
                 read.PlayProductId,
                 product.Plan,
-                purchase.PurchaseToken,
+                google.PurchaseToken,
                 read.LinkedPurchaseToken,
                 binding == BindingCheck.RequireCaller ? caller : null,
                 read.Mapped.State!.Value,
@@ -84,12 +87,14 @@ public sealed class PlayVerification(
             "verify",
             cancellationToken);
 
+        telemetry.EnvironmentSeen(PurchaseTags.GooglePlay, environment);
+
         // 6. Acknowledge an active purchase that isn't yet, outside any transaction; failure never withholds Gold.
         var status = PlayStateMapping.StatusOf(stored.State);
         var acknowledged = stored.Acknowledged;
         if (status == VerifyStatus.Active && !acknowledged)
         {
-            acknowledged = await AcknowledgeAsync(product.Kind, read, purchase.PurchaseToken, stored.PurchaseId, cancellationToken);
+            acknowledged = await AcknowledgeAsync(product.Kind, read, google.PurchaseToken, stored.PurchaseId, cancellationToken);
         }
 
         return new StoreVerificationResult(
@@ -100,7 +105,8 @@ public sealed class PlayVerification(
             stored.ExpiresAt,
             environment,
             stored.PredecessorPurchaseId,
-            acknowledged);
+            acknowledged,
+            stored.Inserted && stored.PredecessorPurchaseId is not null);
     }
 
     /// <summary>
@@ -167,7 +173,7 @@ public sealed class PlayVerification(
         }
     }
 
-    private async Task<PlayRead> ReadSubscriptionAsync(StorePurchaseRef purchase, DateTimeOffset now, CancellationToken cancellationToken)
+    private async Task<PlayRead> ReadSubscriptionAsync(PlayPurchaseRef purchase, DateTimeOffset now, CancellationToken cancellationToken)
     {
         PlaySubscription subscription;
         try
@@ -198,7 +204,7 @@ public sealed class PlayVerification(
             subscription.StartTime);
     }
 
-    private async Task<PlayRead> ReadProductAsync(StorePurchaseRef purchase, CancellationToken cancellationToken)
+    private async Task<PlayRead> ReadProductAsync(PlayPurchaseRef purchase, CancellationToken cancellationToken)
     {
         PlayProduct product;
         try

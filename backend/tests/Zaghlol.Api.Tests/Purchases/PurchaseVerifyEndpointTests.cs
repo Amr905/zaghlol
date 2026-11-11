@@ -280,16 +280,6 @@ public class PurchaseVerifyEndpointTests(PurchasesHostFixture fixture) : IClassF
         Assert.Null(await fixture.RowAsync(token));
     }
 
-    [Fact]
-    public async Task IosIs503UntilT131()
-    {
-        var (_, install) = await fixture.NewInstallAsync();
-
-        using var response = await fixture.VerifyAsync(install, "{\"platform\":\"ios\",\"signedTransaction\":\"eyJhbGciOiJFUzI1NiJ9.e30.c2ln\"}");
-
-        await ProblemAssert.AssertAsync(response, HttpStatusCode.ServiceUnavailable, "UPSTREAM_UNAVAILABLE");
-    }
-
     [Theory]
     [InlineData("{\"platform\":\"android\",\"productId\":\"zaghlol_gold_yearly\",\"purchaseToken\":\"t1\",\"amount\":\"9.99\"}", "UNKNOWN_FIELD")]
     [InlineData("{\"platform\":\"android\",\"productId\":\"zaghlol_gold_yearly\",\"purchaseToken\":\"t1\",\"signedTransaction\":\"x\"}", "UNKNOWN_FIELD")]

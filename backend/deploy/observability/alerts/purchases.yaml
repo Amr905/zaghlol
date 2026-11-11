@@ -22,13 +22,36 @@ groups:
           log_query: 'msg="audit_alert" rule="purchase_unacked_48h" (carries the purchase UUID)'
 
       - alert: ZaghlolStoreAuthError
-        # 401/403 from the Play Developer API: our credential or its Play Console permissions are wrong, never the user's fault.
-        expr: sum by (api) (increase(zaghlol_store_call_total{outcome="auth_error"}[10m])) > 0
+        # 401/403 from the Play Developer API or the App Store Server API: our credential or its permissions are wrong, never the
+        # user's fault (T-130, T-131).
+        expr: sum by (store, api) (increase(zaghlol_store_call_total{outcome="auth_error"}[10m])) > 0
         labels:
           severity: page
         annotations:
-          summary: "Store API calls are refused with 401/403 ({{ $labels.api }})"
-          description: "Verify answers 502 and Gold purchases stay pending. Check the Google service identity (workload identity or the key in the secrets manager) and its Play Console permissions."
+          summary: "{{ $labels.store }} API calls are refused with 401/403 ({{ $labels.api }})"
+          description: "Verify answers 502 and Gold purchases stay pending. google_play: check the Google service identity (workload identity or the key in the secrets manager) and its Play Console permissions. app_store: check the In-App Purchase key (issuer ID, key ID, private key in the secrets manager) and that it was not revoked in App Store Connect."
+
+      - alert: ZaghlolAppleSignedAnswerInvalid
+        # T-131: a JWS that Apple's own API returned failed verification, or contradicted the app's copy (outcome="payload").
+        # Never the user's fault: a wrong pinned root, an Apple change, or something between us and Apple.
+        expr: sum by (outcome) (increase(zaghlol_purchase_jws_total{source="api", outcome!="ok"}[10m])) > 0
+        labels:
+          severity: page
+        annotations:
+          summary: "An App Store Server API answer failed verification ({{ $labels.outcome }})"
+          description: "Verify answers 502 for the affected purchases and grants nothing. Check the pinned Apple Root CA - G3, Apple's developer news for certificate changes, and the outbound TLS path; app-side JWS failures (source=app) are expected noise and are not paged."
+
+      - alert: ZaghlolAppStoreClientErrorRateHigh
+        # T-131 (the T-130 L-4 lesson): any other 4xx from Apple is a 502, not a rejection; a rising rate means our requests are wrong.
+        expr: |
+          sum(rate(zaghlol_store_call_total{store="app_store", outcome="client_error"}[15m]))
+          / sum(rate(zaghlol_store_call_total{store="app_store"}[15m])) > 0.2
+        for: 15m
+        labels:
+          severity: warn
+        annotations:
+          summary: "More than 20% of App Store Server API calls end in a 4xx"
+          description: "Break it down by the api and env labels. Not-found answers right after a purchase are normal at a low rate; a jump points at a wrong bundle ID, base URL or environment routing."
 
       - alert: ZaghlolPurchaseVerifyFailureRateHigh
         expr: |

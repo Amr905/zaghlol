@@ -24,6 +24,14 @@ dependencies:
   # T-015: SafeException for code-only DB errors (error-handling §3).
   zaghlol_domain:
     path: ../packages/zaghlol_domain
+  # T-030: the seed format and its ES256 check (pure Dart).
+  zaghlol_catalog:
+    path: ../packages/zaghlol_catalog
+  # T-008: the ingestion engines parse with the T-033 pipeline.
+  zaghlol_parsing:
+    path: ../packages/zaghlol_parsing
+  # T-008: raw_messages.body_hash (SHA-256; dart-lang, already in the lock).
+  crypto: ^3.0.6
 
 dev_dependencies:
   flutter_test:
@@ -37,3 +45,6 @@ dev_dependencies:
 
 flutter:
   uses-material-design: true
+  assets:
+    # T-030: the signed first-launch catalog (tools/catalog_build).
+    - assets/catalog/

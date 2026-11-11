@@ -48,6 +48,360 @@ List<Object?> wrapResponse({
   return <Object?>[error.code, error.message, error.details];
 }
 
+bool _deepEquals(Object? a, Object? b) {
+  if (identical(a, b)) {
+    return true;
+  }
+  if (a is double && b is double) {
+    if (a.isNaN && b.isNaN) {
+      return true;
+    }
+    return a == b;
+  }
+  if (a is List && b is List) {
+    return a.length == b.length &&
+        a.indexed.every(
+          ((int, dynamic) item) => _deepEquals(item.$2, b[item.$1]),
+        );
+  }
+  if (a is Map && b is Map) {
+    if (a.length != b.length) {
+      return false;
+    }
+    for (final MapEntry<Object?, Object?> entryA in a.entries) {
+      bool found = false;
+      for (final MapEntry<Object?, Object?> entryB in b.entries) {
+        if (_deepEquals(entryA.key, entryB.key)) {
+          if (_deepEquals(entryA.value, entryB.value)) {
+            found = true;
+            break;
+          } else {
+            return false;
+          }
+        }
+      }
+      if (!found) {
+        return false;
+      }
+    }
+    return true;
+  }
+  return a == b;
+}
+
+int _deepHash(Object? value) {
+  if (value is List) {
+    return Object.hashAll(value.map(_deepHash));
+  }
+  if (value is Map) {
+    int result = 0;
+    for (final MapEntry<Object?, Object?> entry in value.entries) {
+      result += (_deepHash(entry.key) * 31) ^ _deepHash(entry.value);
+    }
+    return result;
+  }
+  if (value is double && value.isNaN) {
+    // Normalize NaN to a consistent hash.
+    return 0x7FF8000000000000.hashCode;
+  }
+  if (value is double && value == 0.0) {
+    // Normalize -0.0 to 0.0 so they have the same hash code.
+    return 0.0.hashCode;
+  }
+  return value.hashCode;
+}
+
+/// A paged historical inbox scan; native code filters by sender in SQL.
+class InboxQuery {
+  InboxQuery({
+    required this.sinceEpochMs,
+    required this.senderAddresses,
+    this.afterCursor,
+    required this.pageSize,
+  });
+
+  int sinceEpochMs;
+
+  List<String> senderAddresses;
+
+  String? afterCursor;
+
+  /// At most 500.
+  int pageSize;
+
+  List<Object?> _toList() {
+    return <Object?>[sinceEpochMs, senderAddresses, afterCursor, pageSize];
+  }
+
+  Object encode() {
+    return _toList();
+  }
+
+  static InboxQuery decode(Object result) {
+    result as List<Object?>;
+    return InboxQuery(
+      sinceEpochMs: result[0]! as int,
+      senderAddresses: (result[1]! as List<Object?>).cast<String>(),
+      afterCursor: result[2] as String?,
+      pageSize: result[3]! as int,
+    );
+  }
+
+  @override
+  // ignore: avoid_equals_and_hash_code_on_mutable_classes
+  bool operator ==(Object other) {
+    if (other is! InboxQuery || other.runtimeType != runtimeType) {
+      return false;
+    }
+    if (identical(this, other)) {
+      return true;
+    }
+    return _deepEquals(sinceEpochMs, other.sinceEpochMs) &&
+        _deepEquals(senderAddresses, other.senderAddresses) &&
+        _deepEquals(afterCursor, other.afterCursor) &&
+        _deepEquals(pageSize, other.pageSize);
+  }
+
+  @override
+  // ignore: avoid_equals_and_hash_code_on_mutable_classes
+  int get hashCode => _deepHash(<Object?>[runtimeType, ..._toList()]);
+}
+
+class InboxPage {
+  InboxPage({required this.items, this.nextCursor, required this.scannedTotal});
+
+  List<RawInboxMessage> items;
+
+  String? nextCursor;
+
+  int scannedTotal;
+
+  List<Object?> _toList() {
+    return <Object?>[items, nextCursor, scannedTotal];
+  }
+
+  Object encode() {
+    return _toList();
+  }
+
+  static InboxPage decode(Object result) {
+    result as List<Object?>;
+    return InboxPage(
+      items: (result[0]! as List<Object?>).cast<RawInboxMessage>(),
+      nextCursor: result[1] as String?,
+      scannedTotal: result[2]! as int,
+    );
+  }
+
+  @override
+  // ignore: avoid_equals_and_hash_code_on_mutable_classes
+  bool operator ==(Object other) {
+    if (other is! InboxPage || other.runtimeType != runtimeType) {
+      return false;
+    }
+    if (identical(this, other)) {
+      return true;
+    }
+    return _deepEquals(items, other.items) &&
+        _deepEquals(nextCursor, other.nextCursor) &&
+        _deepEquals(scannedTotal, other.scannedTotal);
+  }
+
+  @override
+  // ignore: avoid_equals_and_hash_code_on_mutable_classes
+  int get hashCode => _deepHash(<Object?>[runtimeType, ..._toList()]);
+}
+
+class RawInboxMessage {
+  RawInboxMessage({
+    required this.address,
+    required this.body,
+    required this.dateMs,
+    this.simSlot,
+    required this.providerId,
+  });
+
+  String address;
+
+  String body;
+
+  int dateMs;
+
+  int? simSlot;
+
+  String providerId;
+
+  List<Object?> _toList() {
+    return <Object?>[address, body, dateMs, simSlot, providerId];
+  }
+
+  Object encode() {
+    return _toList();
+  }
+
+  static RawInboxMessage decode(Object result) {
+    result as List<Object?>;
+    return RawInboxMessage(
+      address: result[0]! as String,
+      body: result[1]! as String,
+      dateMs: result[2]! as int,
+      simSlot: result[3] as int?,
+      providerId: result[4]! as String,
+    );
+  }
+
+  @override
+  // ignore: avoid_equals_and_hash_code_on_mutable_classes
+  bool operator ==(Object other) {
+    if (other is! RawInboxMessage || other.runtimeType != runtimeType) {
+      return false;
+    }
+    if (identical(this, other)) {
+      return true;
+    }
+    return _deepEquals(address, other.address) &&
+        _deepEquals(body, other.body) &&
+        _deepEquals(dateMs, other.dateMs) &&
+        _deepEquals(simSlot, other.simSlot) &&
+        _deepEquals(providerId, other.providerId);
+  }
+
+  @override
+  // ignore: avoid_equals_and_hash_code_on_mutable_classes
+  int get hashCode => _deepHash(<Object?>[runtimeType, ..._toList()]);
+}
+
+/// A decrypted spool entry (in memory only). Deleted natively only after
+/// Dart acknowledges it with ackSpool, after the DB commit.
+class SpoolEntry {
+  SpoolEntry({
+    required this.id,
+    required this.channel,
+    required this.source,
+    required this.body,
+    required this.receivedAtMs,
+    this.simSlot,
+  });
+
+  String id;
+
+  String channel;
+
+  String source;
+
+  String body;
+
+  int receivedAtMs;
+
+  int? simSlot;
+
+  List<Object?> _toList() {
+    return <Object?>[id, channel, source, body, receivedAtMs, simSlot];
+  }
+
+  Object encode() {
+    return _toList();
+  }
+
+  static SpoolEntry decode(Object result) {
+    result as List<Object?>;
+    return SpoolEntry(
+      id: result[0]! as String,
+      channel: result[1]! as String,
+      source: result[2]! as String,
+      body: result[3]! as String,
+      receivedAtMs: result[4]! as int,
+      simSlot: result[5] as int?,
+    );
+  }
+
+  @override
+  // ignore: avoid_equals_and_hash_code_on_mutable_classes
+  bool operator ==(Object other) {
+    if (other is! SpoolEntry || other.runtimeType != runtimeType) {
+      return false;
+    }
+    if (identical(this, other)) {
+      return true;
+    }
+    return _deepEquals(id, other.id) &&
+        _deepEquals(channel, other.channel) &&
+        _deepEquals(source, other.source) &&
+        _deepEquals(body, other.body) &&
+        _deepEquals(receivedAtMs, other.receivedAtMs) &&
+        _deepEquals(simSlot, other.simSlot);
+  }
+
+  @override
+  // ignore: avoid_equals_and_hash_code_on_mutable_classes
+  int get hashCode => _deepHash(<Object?>[runtimeType, ..._toList()]);
+}
+
+class CaptureCapabilities {
+  CaptureCapabilities({
+    required this.smsGranted,
+    required this.smsFlavor,
+    required this.notificationAccess,
+    required this.postNotifications,
+    required this.sdkInt,
+  });
+
+  bool smsGranted;
+
+  bool smsFlavor;
+
+  bool notificationAccess;
+
+  bool postNotifications;
+
+  int sdkInt;
+
+  List<Object?> _toList() {
+    return <Object?>[
+      smsGranted,
+      smsFlavor,
+      notificationAccess,
+      postNotifications,
+      sdkInt,
+    ];
+  }
+
+  Object encode() {
+    return _toList();
+  }
+
+  static CaptureCapabilities decode(Object result) {
+    result as List<Object?>;
+    return CaptureCapabilities(
+      smsGranted: result[0]! as bool,
+      smsFlavor: result[1]! as bool,
+      notificationAccess: result[2]! as bool,
+      postNotifications: result[3]! as bool,
+      sdkInt: result[4]! as int,
+    );
+  }
+
+  @override
+  // ignore: avoid_equals_and_hash_code_on_mutable_classes
+  bool operator ==(Object other) {
+    if (other is! CaptureCapabilities || other.runtimeType != runtimeType) {
+      return false;
+    }
+    if (identical(this, other)) {
+      return true;
+    }
+    return _deepEquals(smsGranted, other.smsGranted) &&
+        _deepEquals(smsFlavor, other.smsFlavor) &&
+        _deepEquals(notificationAccess, other.notificationAccess) &&
+        _deepEquals(postNotifications, other.postNotifications) &&
+        _deepEquals(sdkInt, other.sdkInt);
+  }
+
+  @override
+  // ignore: avoid_equals_and_hash_code_on_mutable_classes
+  int get hashCode => _deepHash(<Object?>[runtimeType, ..._toList()]);
+}
+
 class _PigeonCodec extends StandardMessageCodec {
   const _PigeonCodec();
   @override
@@ -55,6 +409,21 @@ class _PigeonCodec extends StandardMessageCodec {
     if (value is int) {
       buffer.putUint8(4);
       buffer.putInt64(value);
+    } else if (value is InboxQuery) {
+      buffer.putUint8(129);
+      writeValue(buffer, value.encode());
+    } else if (value is InboxPage) {
+      buffer.putUint8(130);
+      writeValue(buffer, value.encode());
+    } else if (value is RawInboxMessage) {
+      buffer.putUint8(131);
+      writeValue(buffer, value.encode());
+    } else if (value is SpoolEntry) {
+      buffer.putUint8(132);
+      writeValue(buffer, value.encode());
+    } else if (value is CaptureCapabilities) {
+      buffer.putUint8(133);
+      writeValue(buffer, value.encode());
     } else {
       super.writeValue(buffer, value);
     }
@@ -63,6 +432,16 @@ class _PigeonCodec extends StandardMessageCodec {
   @override
   Object? readValueOfType(int type, ReadBuffer buffer) {
     switch (type) {
+      case 129:
+        return InboxQuery.decode(readValue(buffer)!);
+      case 130:
+        return InboxPage.decode(readValue(buffer)!);
+      case 131:
+        return RawInboxMessage.decode(readValue(buffer)!);
+      case 132:
+        return SpoolEntry.decode(readValue(buffer)!);
+      case 133:
+        return CaptureCapabilities.decode(readValue(buffer)!);
       default:
         return super.readValueOfType(type, buffer);
     }
@@ -85,6 +464,203 @@ class AndroidCaptureHostApi {
   static const MessageCodec<Object?> pigeonChannelCodec = _PigeonCodec();
 
   final String pigeonVar_messageChannelSuffix;
+
+  Future<CaptureCapabilities> getCapabilities() async {
+    final pigeonVar_channelName =
+        'dev.flutter.pigeon.zaghlol.AndroidCaptureHostApi.getCapabilities$pigeonVar_messageChannelSuffix';
+    final pigeonVar_channel = BasicMessageChannel<Object?>(
+      pigeonVar_channelName,
+      pigeonChannelCodec,
+      binaryMessenger: pigeonVar_binaryMessenger,
+    );
+    final Future<Object?> pigeonVar_sendFuture = pigeonVar_channel.send(null);
+    final pigeonVar_replyList = await pigeonVar_sendFuture as List<Object?>?;
+
+    final Object? pigeonVar_replyValue = _extractReplyValueOrThrow(
+      pigeonVar_replyList,
+      pigeonVar_channelName,
+      isNullValid: false,
+    );
+    return pigeonVar_replyValue! as CaptureCapabilities;
+  }
+
+  /// READ_SMS + RECEIVE_SMS (only in the 'sms' flavor, ADR-004).
+  Future<bool> requestSmsPermission() async {
+    final pigeonVar_channelName =
+        'dev.flutter.pigeon.zaghlol.AndroidCaptureHostApi.requestSmsPermission$pigeonVar_messageChannelSuffix';
+    final pigeonVar_channel = BasicMessageChannel<Object?>(
+      pigeonVar_channelName,
+      pigeonChannelCodec,
+      binaryMessenger: pigeonVar_binaryMessenger,
+    );
+    final Future<Object?> pigeonVar_sendFuture = pigeonVar_channel.send(null);
+    final pigeonVar_replyList = await pigeonVar_sendFuture as List<Object?>?;
+
+    final Object? pigeonVar_replyValue = _extractReplyValueOrThrow(
+      pigeonVar_replyList,
+      pigeonVar_channelName,
+      isNullValid: false,
+    );
+    return pigeonVar_replyValue! as bool;
+  }
+
+  Future<void> openNotificationAccessSettings() async {
+    final pigeonVar_channelName =
+        'dev.flutter.pigeon.zaghlol.AndroidCaptureHostApi.openNotificationAccessSettings$pigeonVar_messageChannelSuffix';
+    final pigeonVar_channel = BasicMessageChannel<Object?>(
+      pigeonVar_channelName,
+      pigeonChannelCodec,
+      binaryMessenger: pigeonVar_binaryMessenger,
+    );
+    final Future<Object?> pigeonVar_sendFuture = pigeonVar_channel.send(null);
+    final pigeonVar_replyList = await pigeonVar_sendFuture as List<Object?>?;
+
+    _extractReplyValueOrThrow(
+      pigeonVar_replyList,
+      pigeonVar_channelName,
+      isNullValid: true,
+    );
+  }
+
+  Future<bool> isIgnoringBatteryOptimizations() async {
+    final pigeonVar_channelName =
+        'dev.flutter.pigeon.zaghlol.AndroidCaptureHostApi.isIgnoringBatteryOptimizations$pigeonVar_messageChannelSuffix';
+    final pigeonVar_channel = BasicMessageChannel<Object?>(
+      pigeonVar_channelName,
+      pigeonChannelCodec,
+      binaryMessenger: pigeonVar_binaryMessenger,
+    );
+    final Future<Object?> pigeonVar_sendFuture = pigeonVar_channel.send(null);
+    final pigeonVar_replyList = await pigeonVar_sendFuture as List<Object?>?;
+
+    final Object? pigeonVar_replyValue = _extractReplyValueOrThrow(
+      pigeonVar_replyList,
+      pigeonVar_channelName,
+      isNullValid: false,
+    );
+    return pigeonVar_replyValue! as bool;
+  }
+
+  /// Shown only if live capture is observed to be delayed.
+  Future<void> requestIgnoreBatteryOptimizations() async {
+    final pigeonVar_channelName =
+        'dev.flutter.pigeon.zaghlol.AndroidCaptureHostApi.requestIgnoreBatteryOptimizations$pigeonVar_messageChannelSuffix';
+    final pigeonVar_channel = BasicMessageChannel<Object?>(
+      pigeonVar_channelName,
+      pigeonChannelCodec,
+      binaryMessenger: pigeonVar_binaryMessenger,
+    );
+    final Future<Object?> pigeonVar_sendFuture = pigeonVar_channel.send(null);
+    final pigeonVar_replyList = await pigeonVar_sendFuture as List<Object?>?;
+
+    _extractReplyValueOrThrow(
+      pigeonVar_replyList,
+      pigeonVar_channelName,
+      isNullValid: true,
+    );
+  }
+
+  Future<void> writeGuardConfig(Uint8List encryptedConfig) async {
+    final pigeonVar_channelName =
+        'dev.flutter.pigeon.zaghlol.AndroidCaptureHostApi.writeGuardConfig$pigeonVar_messageChannelSuffix';
+    final pigeonVar_channel = BasicMessageChannel<Object?>(
+      pigeonVar_channelName,
+      pigeonChannelCodec,
+      binaryMessenger: pigeonVar_binaryMessenger,
+    );
+    final Future<Object?> pigeonVar_sendFuture = pigeonVar_channel.send(
+      <Object?>[encryptedConfig],
+    );
+    final pigeonVar_replyList = await pigeonVar_sendFuture as List<Object?>?;
+
+    _extractReplyValueOrThrow(
+      pigeonVar_replyList,
+      pigeonVar_channelName,
+      isNullValid: true,
+    );
+  }
+
+  Future<InboxPage> queryInbox(InboxQuery query) async {
+    final pigeonVar_channelName =
+        'dev.flutter.pigeon.zaghlol.AndroidCaptureHostApi.queryInbox$pigeonVar_messageChannelSuffix';
+    final pigeonVar_channel = BasicMessageChannel<Object?>(
+      pigeonVar_channelName,
+      pigeonChannelCodec,
+      binaryMessenger: pigeonVar_binaryMessenger,
+    );
+    final Future<Object?> pigeonVar_sendFuture = pigeonVar_channel.send(
+      <Object?>[query],
+    );
+    final pigeonVar_replyList = await pigeonVar_sendFuture as List<Object?>?;
+
+    final Object? pigeonVar_replyValue = _extractReplyValueOrThrow(
+      pigeonVar_replyList,
+      pigeonVar_channelName,
+      isNullValid: false,
+    );
+    return pigeonVar_replyValue! as InboxPage;
+  }
+
+  /// Returns decrypted entries (in memory only), oldest first.
+  Future<List<SpoolEntry>> drainSpool(int max) async {
+    final pigeonVar_channelName =
+        'dev.flutter.pigeon.zaghlol.AndroidCaptureHostApi.drainSpool$pigeonVar_messageChannelSuffix';
+    final pigeonVar_channel = BasicMessageChannel<Object?>(
+      pigeonVar_channelName,
+      pigeonChannelCodec,
+      binaryMessenger: pigeonVar_binaryMessenger,
+    );
+    final Future<Object?> pigeonVar_sendFuture = pigeonVar_channel.send(
+      <Object?>[max],
+    );
+    final pigeonVar_replyList = await pigeonVar_sendFuture as List<Object?>?;
+
+    final Object? pigeonVar_replyValue = _extractReplyValueOrThrow(
+      pigeonVar_replyList,
+      pigeonVar_channelName,
+      isNullValid: false,
+    );
+    return (pigeonVar_replyValue! as List<Object?>).cast<SpoolEntry>();
+  }
+
+  Future<void> ackSpool(List<String> ids) async {
+    final pigeonVar_channelName =
+        'dev.flutter.pigeon.zaghlol.AndroidCaptureHostApi.ackSpool$pigeonVar_messageChannelSuffix';
+    final pigeonVar_channel = BasicMessageChannel<Object?>(
+      pigeonVar_channelName,
+      pigeonChannelCodec,
+      binaryMessenger: pigeonVar_binaryMessenger,
+    );
+    final Future<Object?> pigeonVar_sendFuture = pigeonVar_channel.send(
+      <Object?>[ids],
+    );
+    final pigeonVar_replyList = await pigeonVar_sendFuture as List<Object?>?;
+
+    _extractReplyValueOrThrow(
+      pigeonVar_replyList,
+      pigeonVar_channelName,
+      isNullValid: true,
+    );
+  }
+
+  /// Expedited WorkManager.
+  Future<void> scheduleIngestionNow() async {
+    final pigeonVar_channelName =
+        'dev.flutter.pigeon.zaghlol.AndroidCaptureHostApi.scheduleIngestionNow$pigeonVar_messageChannelSuffix';
+    final pigeonVar_channel = BasicMessageChannel<Object?>(
+      pigeonVar_channelName,
+      pigeonChannelCodec,
+      binaryMessenger: pigeonVar_binaryMessenger,
+    );
+    final Future<Object?> pigeonVar_sendFuture = pigeonVar_channel.send(null);
+    final pigeonVar_replyList = await pigeonVar_sendFuture as List<Object?>?;
+
+    _extractReplyValueOrThrow(
+      pigeonVar_replyList,
+      pigeonVar_channelName,
+      isNullValid: true,
+    );
+  }
 }
 
 class IosCaptureHostApi {
@@ -108,6 +684,10 @@ class IosCaptureHostApi {
 abstract class CaptureEventsApi {
   static const MessageCodec<Object?> pigeonChannelCodec = _PigeonCodec();
 
+  void onSpoolChanged(int pendingCount);
+
+  void onPermissionChanged(CaptureCapabilities c);
+
   static void setUp(
     CaptureEventsApi? api, {
     BinaryMessenger? binaryMessenger,
@@ -116,5 +696,55 @@ abstract class CaptureEventsApi {
     messageChannelSuffix = messageChannelSuffix.isNotEmpty
         ? '.$messageChannelSuffix'
         : '';
+    {
+      final pigeonVar_channel = BasicMessageChannel<Object?>(
+        'dev.flutter.pigeon.zaghlol.CaptureEventsApi.onSpoolChanged$messageChannelSuffix',
+        pigeonChannelCodec,
+        binaryMessenger: binaryMessenger,
+      );
+      if (api == null) {
+        pigeonVar_channel.setMessageHandler(null);
+      } else {
+        pigeonVar_channel.setMessageHandler((Object? message) async {
+          final List<Object?> args = message! as List<Object?>;
+          final int arg_pendingCount = args[0]! as int;
+          try {
+            api.onSpoolChanged(arg_pendingCount);
+            return wrapResponse(empty: true);
+          } on PlatformException catch (e) {
+            return wrapResponse(error: e);
+          } catch (e) {
+            return wrapResponse(
+              error: PlatformException(code: 'error', message: e.toString()),
+            );
+          }
+        });
+      }
+    }
+    {
+      final pigeonVar_channel = BasicMessageChannel<Object?>(
+        'dev.flutter.pigeon.zaghlol.CaptureEventsApi.onPermissionChanged$messageChannelSuffix',
+        pigeonChannelCodec,
+        binaryMessenger: binaryMessenger,
+      );
+      if (api == null) {
+        pigeonVar_channel.setMessageHandler(null);
+      } else {
+        pigeonVar_channel.setMessageHandler((Object? message) async {
+          final List<Object?> args = message! as List<Object?>;
+          final CaptureCapabilities arg_c = args[0]! as CaptureCapabilities;
+          try {
+            api.onPermissionChanged(arg_c);
+            return wrapResponse(empty: true);
+          } on PlatformException catch (e) {
+            return wrapResponse(error: e);
+          } catch (e) {
+            return wrapResponse(
+              error: PlatformException(code: 'error', message: e.toString()),
+            );
+          }
+        });
+      }
+    }
   }
 }

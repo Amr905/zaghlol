@@ -37,6 +37,150 @@ private object CaptureApiPigeonUtils {
       )
     }
   }
+  fun doubleEquals(a: Double, b: Double): Boolean {
+    // Normalize -0.0 to 0.0 and handle NaN equality.
+    return (if (a == 0.0) 0.0 else a) == (if (b == 0.0) 0.0 else b) || (a.isNaN() && b.isNaN())
+  }
+
+  fun floatEquals(a: Float, b: Float): Boolean {
+    // Normalize -0.0 to 0.0 and handle NaN equality.
+    return (if (a == 0.0f) 0.0f else a) == (if (b == 0.0f) 0.0f else b) || (a.isNaN() && b.isNaN())
+  }
+
+  fun doubleHash(d: Double): Int {
+    // Normalize -0.0 to 0.0 and handle NaN to ensure consistent hash codes.
+    val normalized = if (d == 0.0) 0.0 else d
+    val bits = java.lang.Double.doubleToLongBits(normalized)
+    return (bits xor (bits ushr 32)).toInt()
+  }
+
+  fun floatHash(f: Float): Int {
+    // Normalize -0.0 to 0.0 and handle NaN to ensure consistent hash codes.
+    val normalized = if (f == 0.0f) 0.0f else f
+    return java.lang.Float.floatToIntBits(normalized)
+  }
+
+  fun deepEquals(a: Any?, b: Any?): Boolean {
+    if (a === b) {
+      return true
+    }
+    if (a == null || b == null) {
+      return false
+    }
+    if (a is ByteArray && b is ByteArray) {
+      return a.contentEquals(b)
+    }
+    if (a is IntArray && b is IntArray) {
+      return a.contentEquals(b)
+    }
+    if (a is LongArray && b is LongArray) {
+      return a.contentEquals(b)
+    }
+    if (a is DoubleArray && b is DoubleArray) {
+      if (a.size != b.size) return false
+      for (i in a.indices) {
+        if (!doubleEquals(a[i], b[i])) return false
+      }
+      return true
+    }
+    if (a is FloatArray && b is FloatArray) {
+      if (a.size != b.size) return false
+      for (i in a.indices) {
+        if (!floatEquals(a[i], b[i])) return false
+      }
+      return true
+    }
+    if (a is Array<*> && b is Array<*>) {
+      if (a.size != b.size) return false
+      for (i in a.indices) {
+        if (!deepEquals(a[i], b[i])) return false
+      }
+      return true
+    }
+    if (a is List<*> && b is List<*>) {
+      if (a.size != b.size) return false
+      val iterA = a.iterator()
+      val iterB = b.iterator()
+      while (iterA.hasNext() && iterB.hasNext()) {
+        if (!deepEquals(iterA.next(), iterB.next())) return false
+      }
+      return true
+    }
+    if (a is Map<*, *> && b is Map<*, *>) {
+      if (a.size != b.size) return false
+      for (entry in a) {
+        val key = entry.key
+        var found = false
+        for (bEntry in b) {
+          if (deepEquals(key, bEntry.key)) {
+            if (deepEquals(entry.value, bEntry.value)) {
+              found = true
+              break
+            } else {
+              return false
+            }
+          }
+        }
+        if (!found) return false
+      }
+      return true
+    }
+    if (a is Double && b is Double) {
+      return doubleEquals(a, b)
+    }
+    if (a is Float && b is Float) {
+      return floatEquals(a, b)
+    }
+    return a == b
+  }
+
+  fun deepHash(value: Any?): Int {
+    return when (value) {
+      null -> 0
+      is ByteArray -> value.contentHashCode()
+      is IntArray -> value.contentHashCode()
+      is LongArray -> value.contentHashCode()
+      is DoubleArray -> {
+        var result = 1
+        for (item in value) {
+          result = 31 * result + doubleHash(item)
+        }
+        result
+      }
+      is FloatArray -> {
+        var result = 1
+        for (item in value) {
+          result = 31 * result + floatHash(item)
+        }
+        result
+      }
+      is Array<*> -> {
+        var result = 1
+        for (item in value) {
+          result = 31 * result + deepHash(item)
+        }
+        result
+      }
+      is List<*> -> {
+        var result = 1
+        for (item in value) {
+          result = 31 * result + deepHash(item)
+        }
+        result
+      }
+      is Map<*, *> -> {
+        var result = 0
+        for (entry in value) {
+          result += ((deepHash(entry.key) * 31) xor deepHash(entry.value))
+        }
+        result
+      }
+      is Double -> doubleHash(value)
+      is Float -> floatHash(value)
+      else -> value.hashCode()
+    }
+  }
+
 }
 
 /**
@@ -50,17 +194,333 @@ class CaptureApiError (
   override val message: String? = null,
   val details: Any? = null
 ) : Throwable()
-private open class CaptureApiPigeonCodec : StandardMessageCodec() {
-  override fun readValueOfType(type: Byte, buffer: ByteBuffer): Any? {
-    return     super.readValueOfType(type, buffer)
+
+/**
+ * A paged historical inbox scan; native code filters by sender in SQL.
+ *
+ * Generated class from Pigeon that represents data sent in messages.
+ */
+data class InboxQuery (
+  val sinceEpochMs: Long,
+  val senderAddresses: List<String>,
+  val afterCursor: String? = null,
+  /** At most 500. */
+  val pageSize: Long
+)
+ {
+  companion object {
+    fun fromList(pigeonVar_list: List<Any?>): InboxQuery {
+      val sinceEpochMs = pigeonVar_list[0] as Long
+      val senderAddresses = pigeonVar_list[1] as List<String>
+      val afterCursor = pigeonVar_list[2] as String?
+      val pageSize = pigeonVar_list[3] as Long
+      return InboxQuery(sinceEpochMs, senderAddresses, afterCursor, pageSize)
+    }
   }
-  override fun writeValue(stream: ByteArrayOutputStream, value: Any?)   {
-    super.writeValue(stream, value)
+  fun toList(): List<Any?> {
+    return listOf(
+      sinceEpochMs,
+      senderAddresses,
+      afterCursor,
+      pageSize,
+    )
+  }
+  override fun equals(other: Any?): Boolean {
+    if (other == null || other.javaClass != javaClass) {
+      return false
+    }
+    if (this === other) {
+      return true
+    }
+    val other = other as InboxQuery
+    return CaptureApiPigeonUtils.deepEquals(this.sinceEpochMs, other.sinceEpochMs) && CaptureApiPigeonUtils.deepEquals(this.senderAddresses, other.senderAddresses) && CaptureApiPigeonUtils.deepEquals(this.afterCursor, other.afterCursor) && CaptureApiPigeonUtils.deepEquals(this.pageSize, other.pageSize)
+  }
+
+  override fun hashCode(): Int {
+    var result = javaClass.hashCode()
+    result = 31 * result + CaptureApiPigeonUtils.deepHash(this.sinceEpochMs)
+    result = 31 * result + CaptureApiPigeonUtils.deepHash(this.senderAddresses)
+    result = 31 * result + CaptureApiPigeonUtils.deepHash(this.afterCursor)
+    result = 31 * result + CaptureApiPigeonUtils.deepHash(this.pageSize)
+    return result
   }
 }
 
+/** Generated class from Pigeon that represents data sent in messages. */
+data class InboxPage (
+  val items: List<RawInboxMessage>,
+  val nextCursor: String? = null,
+  val scannedTotal: Long
+)
+ {
+  companion object {
+    fun fromList(pigeonVar_list: List<Any?>): InboxPage {
+      val items = pigeonVar_list[0] as List<RawInboxMessage>
+      val nextCursor = pigeonVar_list[1] as String?
+      val scannedTotal = pigeonVar_list[2] as Long
+      return InboxPage(items, nextCursor, scannedTotal)
+    }
+  }
+  fun toList(): List<Any?> {
+    return listOf(
+      items,
+      nextCursor,
+      scannedTotal,
+    )
+  }
+  override fun equals(other: Any?): Boolean {
+    if (other == null || other.javaClass != javaClass) {
+      return false
+    }
+    if (this === other) {
+      return true
+    }
+    val other = other as InboxPage
+    return CaptureApiPigeonUtils.deepEquals(this.items, other.items) && CaptureApiPigeonUtils.deepEquals(this.nextCursor, other.nextCursor) && CaptureApiPigeonUtils.deepEquals(this.scannedTotal, other.scannedTotal)
+  }
+
+  override fun hashCode(): Int {
+    var result = javaClass.hashCode()
+    result = 31 * result + CaptureApiPigeonUtils.deepHash(this.items)
+    result = 31 * result + CaptureApiPigeonUtils.deepHash(this.nextCursor)
+    result = 31 * result + CaptureApiPigeonUtils.deepHash(this.scannedTotal)
+    return result
+  }
+}
+
+/** Generated class from Pigeon that represents data sent in messages. */
+data class RawInboxMessage (
+  val address: String,
+  val body: String,
+  val dateMs: Long,
+  val simSlot: Long? = null,
+  val providerId: String
+)
+ {
+  companion object {
+    fun fromList(pigeonVar_list: List<Any?>): RawInboxMessage {
+      val address = pigeonVar_list[0] as String
+      val body = pigeonVar_list[1] as String
+      val dateMs = pigeonVar_list[2] as Long
+      val simSlot = pigeonVar_list[3] as Long?
+      val providerId = pigeonVar_list[4] as String
+      return RawInboxMessage(address, body, dateMs, simSlot, providerId)
+    }
+  }
+  fun toList(): List<Any?> {
+    return listOf(
+      address,
+      body,
+      dateMs,
+      simSlot,
+      providerId,
+    )
+  }
+  override fun equals(other: Any?): Boolean {
+    if (other == null || other.javaClass != javaClass) {
+      return false
+    }
+    if (this === other) {
+      return true
+    }
+    val other = other as RawInboxMessage
+    return CaptureApiPigeonUtils.deepEquals(this.address, other.address) && CaptureApiPigeonUtils.deepEquals(this.body, other.body) && CaptureApiPigeonUtils.deepEquals(this.dateMs, other.dateMs) && CaptureApiPigeonUtils.deepEquals(this.simSlot, other.simSlot) && CaptureApiPigeonUtils.deepEquals(this.providerId, other.providerId)
+  }
+
+  override fun hashCode(): Int {
+    var result = javaClass.hashCode()
+    result = 31 * result + CaptureApiPigeonUtils.deepHash(this.address)
+    result = 31 * result + CaptureApiPigeonUtils.deepHash(this.body)
+    result = 31 * result + CaptureApiPigeonUtils.deepHash(this.dateMs)
+    result = 31 * result + CaptureApiPigeonUtils.deepHash(this.simSlot)
+    result = 31 * result + CaptureApiPigeonUtils.deepHash(this.providerId)
+    return result
+  }
+}
+
+/**
+ * A decrypted spool entry (in memory only). Deleted natively only after
+ * Dart acknowledges it with ackSpool, after the DB commit.
+ *
+ * Generated class from Pigeon that represents data sent in messages.
+ */
+data class SpoolEntry (
+  val id: String,
+  val channel: String,
+  val source: String,
+  val body: String,
+  val receivedAtMs: Long,
+  val simSlot: Long? = null
+)
+ {
+  companion object {
+    fun fromList(pigeonVar_list: List<Any?>): SpoolEntry {
+      val id = pigeonVar_list[0] as String
+      val channel = pigeonVar_list[1] as String
+      val source = pigeonVar_list[2] as String
+      val body = pigeonVar_list[3] as String
+      val receivedAtMs = pigeonVar_list[4] as Long
+      val simSlot = pigeonVar_list[5] as Long?
+      return SpoolEntry(id, channel, source, body, receivedAtMs, simSlot)
+    }
+  }
+  fun toList(): List<Any?> {
+    return listOf(
+      id,
+      channel,
+      source,
+      body,
+      receivedAtMs,
+      simSlot,
+    )
+  }
+  override fun equals(other: Any?): Boolean {
+    if (other == null || other.javaClass != javaClass) {
+      return false
+    }
+    if (this === other) {
+      return true
+    }
+    val other = other as SpoolEntry
+    return CaptureApiPigeonUtils.deepEquals(this.id, other.id) && CaptureApiPigeonUtils.deepEquals(this.channel, other.channel) && CaptureApiPigeonUtils.deepEquals(this.source, other.source) && CaptureApiPigeonUtils.deepEquals(this.body, other.body) && CaptureApiPigeonUtils.deepEquals(this.receivedAtMs, other.receivedAtMs) && CaptureApiPigeonUtils.deepEquals(this.simSlot, other.simSlot)
+  }
+
+  override fun hashCode(): Int {
+    var result = javaClass.hashCode()
+    result = 31 * result + CaptureApiPigeonUtils.deepHash(this.id)
+    result = 31 * result + CaptureApiPigeonUtils.deepHash(this.channel)
+    result = 31 * result + CaptureApiPigeonUtils.deepHash(this.source)
+    result = 31 * result + CaptureApiPigeonUtils.deepHash(this.body)
+    result = 31 * result + CaptureApiPigeonUtils.deepHash(this.receivedAtMs)
+    result = 31 * result + CaptureApiPigeonUtils.deepHash(this.simSlot)
+    return result
+  }
+}
+
+/** Generated class from Pigeon that represents data sent in messages. */
+data class CaptureCapabilities (
+  val smsGranted: Boolean,
+  val smsFlavor: Boolean,
+  val notificationAccess: Boolean,
+  val postNotifications: Boolean,
+  val sdkInt: Long
+)
+ {
+  companion object {
+    fun fromList(pigeonVar_list: List<Any?>): CaptureCapabilities {
+      val smsGranted = pigeonVar_list[0] as Boolean
+      val smsFlavor = pigeonVar_list[1] as Boolean
+      val notificationAccess = pigeonVar_list[2] as Boolean
+      val postNotifications = pigeonVar_list[3] as Boolean
+      val sdkInt = pigeonVar_list[4] as Long
+      return CaptureCapabilities(smsGranted, smsFlavor, notificationAccess, postNotifications, sdkInt)
+    }
+  }
+  fun toList(): List<Any?> {
+    return listOf(
+      smsGranted,
+      smsFlavor,
+      notificationAccess,
+      postNotifications,
+      sdkInt,
+    )
+  }
+  override fun equals(other: Any?): Boolean {
+    if (other == null || other.javaClass != javaClass) {
+      return false
+    }
+    if (this === other) {
+      return true
+    }
+    val other = other as CaptureCapabilities
+    return CaptureApiPigeonUtils.deepEquals(this.smsGranted, other.smsGranted) && CaptureApiPigeonUtils.deepEquals(this.smsFlavor, other.smsFlavor) && CaptureApiPigeonUtils.deepEquals(this.notificationAccess, other.notificationAccess) && CaptureApiPigeonUtils.deepEquals(this.postNotifications, other.postNotifications) && CaptureApiPigeonUtils.deepEquals(this.sdkInt, other.sdkInt)
+  }
+
+  override fun hashCode(): Int {
+    var result = javaClass.hashCode()
+    result = 31 * result + CaptureApiPigeonUtils.deepHash(this.smsGranted)
+    result = 31 * result + CaptureApiPigeonUtils.deepHash(this.smsFlavor)
+    result = 31 * result + CaptureApiPigeonUtils.deepHash(this.notificationAccess)
+    result = 31 * result + CaptureApiPigeonUtils.deepHash(this.postNotifications)
+    result = 31 * result + CaptureApiPigeonUtils.deepHash(this.sdkInt)
+    return result
+  }
+}
+private open class CaptureApiPigeonCodec : StandardMessageCodec() {
+  override fun readValueOfType(type: Byte, buffer: ByteBuffer): Any? {
+    return when (type) {
+      129.toByte() -> {
+        return (readValue(buffer) as? List<Any?>)?.let {
+          InboxQuery.fromList(it)
+        }
+      }
+      130.toByte() -> {
+        return (readValue(buffer) as? List<Any?>)?.let {
+          InboxPage.fromList(it)
+        }
+      }
+      131.toByte() -> {
+        return (readValue(buffer) as? List<Any?>)?.let {
+          RawInboxMessage.fromList(it)
+        }
+      }
+      132.toByte() -> {
+        return (readValue(buffer) as? List<Any?>)?.let {
+          SpoolEntry.fromList(it)
+        }
+      }
+      133.toByte() -> {
+        return (readValue(buffer) as? List<Any?>)?.let {
+          CaptureCapabilities.fromList(it)
+        }
+      }
+      else -> super.readValueOfType(type, buffer)
+    }
+  }
+  override fun writeValue(stream: ByteArrayOutputStream, value: Any?)   {
+    when (value) {
+      is InboxQuery -> {
+        stream.write(129)
+        writeValue(stream, value.toList())
+      }
+      is InboxPage -> {
+        stream.write(130)
+        writeValue(stream, value.toList())
+      }
+      is RawInboxMessage -> {
+        stream.write(131)
+        writeValue(stream, value.toList())
+      }
+      is SpoolEntry -> {
+        stream.write(132)
+        writeValue(stream, value.toList())
+      }
+      is CaptureCapabilities -> {
+        stream.write(133)
+        writeValue(stream, value.toList())
+      }
+      else -> super.writeValue(stream, value)
+    }
+  }
+}
+
+
 /** Generated interface from Pigeon that represents a handler of messages from Flutter. */
 interface AndroidCaptureHostApi {
+  fun getCapabilities(): CaptureCapabilities
+  /** READ_SMS + RECEIVE_SMS (only in the 'sms' flavor, ADR-004). */
+  fun requestSmsPermission(callback: (Result<Boolean>) -> Unit)
+  fun openNotificationAccessSettings()
+  fun isIgnoringBatteryOptimizations(): Boolean
+  /** Shown only if live capture is observed to be delayed. */
+  fun requestIgnoreBatteryOptimizations()
+  fun writeGuardConfig(encryptedConfig: ByteArray)
+  fun queryInbox(query: InboxQuery): InboxPage
+  /** Returns decrypted entries (in memory only), oldest first. */
+  fun drainSpool(max: Long): List<SpoolEntry>
+  fun ackSpool(ids: List<String>)
+  /** Expedited WorkManager. */
+  fun scheduleIngestionNow()
 
   companion object {
     /** The codec used by AndroidCaptureHostApi. */
@@ -71,6 +531,173 @@ interface AndroidCaptureHostApi {
     @JvmOverloads
     fun setUp(binaryMessenger: BinaryMessenger, api: AndroidCaptureHostApi?, messageChannelSuffix: String = "") {
       val separatedMessageChannelSuffix = if (messageChannelSuffix.isNotEmpty()) ".$messageChannelSuffix" else ""
+      val taskQueue = binaryMessenger.makeBackgroundTaskQueue()
+      run {
+        val channel = BasicMessageChannel<Any?>(binaryMessenger, "dev.flutter.pigeon.zaghlol.AndroidCaptureHostApi.getCapabilities$separatedMessageChannelSuffix", codec)
+        if (api != null) {
+          channel.setMessageHandler { _, reply ->
+            val wrapped: List<Any?> = try {
+              listOf(api.getCapabilities())
+            } catch (exception: Throwable) {
+              CaptureApiPigeonUtils.wrapError(exception)
+            }
+            reply.reply(wrapped)
+          }
+        } else {
+          channel.setMessageHandler(null)
+        }
+      }
+      run {
+        val channel = BasicMessageChannel<Any?>(binaryMessenger, "dev.flutter.pigeon.zaghlol.AndroidCaptureHostApi.requestSmsPermission$separatedMessageChannelSuffix", codec)
+        if (api != null) {
+          channel.setMessageHandler { _, reply ->
+            api.requestSmsPermission{ result: Result<Boolean> ->
+              val error = result.exceptionOrNull()
+              if (error != null) {
+                reply.reply(CaptureApiPigeonUtils.wrapError(error))
+              } else {
+                val data = result.getOrNull()
+                reply.reply(CaptureApiPigeonUtils.wrapResult(data))
+              }
+            }
+          }
+        } else {
+          channel.setMessageHandler(null)
+        }
+      }
+      run {
+        val channel = BasicMessageChannel<Any?>(binaryMessenger, "dev.flutter.pigeon.zaghlol.AndroidCaptureHostApi.openNotificationAccessSettings$separatedMessageChannelSuffix", codec)
+        if (api != null) {
+          channel.setMessageHandler { _, reply ->
+            val wrapped: List<Any?> = try {
+              api.openNotificationAccessSettings()
+              listOf(null)
+            } catch (exception: Throwable) {
+              CaptureApiPigeonUtils.wrapError(exception)
+            }
+            reply.reply(wrapped)
+          }
+        } else {
+          channel.setMessageHandler(null)
+        }
+      }
+      run {
+        val channel = BasicMessageChannel<Any?>(binaryMessenger, "dev.flutter.pigeon.zaghlol.AndroidCaptureHostApi.isIgnoringBatteryOptimizations$separatedMessageChannelSuffix", codec)
+        if (api != null) {
+          channel.setMessageHandler { _, reply ->
+            val wrapped: List<Any?> = try {
+              listOf(api.isIgnoringBatteryOptimizations())
+            } catch (exception: Throwable) {
+              CaptureApiPigeonUtils.wrapError(exception)
+            }
+            reply.reply(wrapped)
+          }
+        } else {
+          channel.setMessageHandler(null)
+        }
+      }
+      run {
+        val channel = BasicMessageChannel<Any?>(binaryMessenger, "dev.flutter.pigeon.zaghlol.AndroidCaptureHostApi.requestIgnoreBatteryOptimizations$separatedMessageChannelSuffix", codec)
+        if (api != null) {
+          channel.setMessageHandler { _, reply ->
+            val wrapped: List<Any?> = try {
+              api.requestIgnoreBatteryOptimizations()
+              listOf(null)
+            } catch (exception: Throwable) {
+              CaptureApiPigeonUtils.wrapError(exception)
+            }
+            reply.reply(wrapped)
+          }
+        } else {
+          channel.setMessageHandler(null)
+        }
+      }
+      run {
+        val channel = BasicMessageChannel<Any?>(binaryMessenger, "dev.flutter.pigeon.zaghlol.AndroidCaptureHostApi.writeGuardConfig$separatedMessageChannelSuffix", codec)
+        if (api != null) {
+          channel.setMessageHandler { message, reply ->
+            val args = message as List<Any?>
+            val encryptedConfigArg = args[0] as ByteArray
+            val wrapped: List<Any?> = try {
+              api.writeGuardConfig(encryptedConfigArg)
+              listOf(null)
+            } catch (exception: Throwable) {
+              CaptureApiPigeonUtils.wrapError(exception)
+            }
+            reply.reply(wrapped)
+          }
+        } else {
+          channel.setMessageHandler(null)
+        }
+      }
+      run {
+        val channel = BasicMessageChannel<Any?>(binaryMessenger, "dev.flutter.pigeon.zaghlol.AndroidCaptureHostApi.queryInbox$separatedMessageChannelSuffix", codec, taskQueue)
+        if (api != null) {
+          channel.setMessageHandler { message, reply ->
+            val args = message as List<Any?>
+            val queryArg = args[0] as InboxQuery
+            val wrapped: List<Any?> = try {
+              listOf(api.queryInbox(queryArg))
+            } catch (exception: Throwable) {
+              CaptureApiPigeonUtils.wrapError(exception)
+            }
+            reply.reply(wrapped)
+          }
+        } else {
+          channel.setMessageHandler(null)
+        }
+      }
+      run {
+        val channel = BasicMessageChannel<Any?>(binaryMessenger, "dev.flutter.pigeon.zaghlol.AndroidCaptureHostApi.drainSpool$separatedMessageChannelSuffix", codec, taskQueue)
+        if (api != null) {
+          channel.setMessageHandler { message, reply ->
+            val args = message as List<Any?>
+            val maxArg = args[0] as Long
+            val wrapped: List<Any?> = try {
+              listOf(api.drainSpool(maxArg))
+            } catch (exception: Throwable) {
+              CaptureApiPigeonUtils.wrapError(exception)
+            }
+            reply.reply(wrapped)
+          }
+        } else {
+          channel.setMessageHandler(null)
+        }
+      }
+      run {
+        val channel = BasicMessageChannel<Any?>(binaryMessenger, "dev.flutter.pigeon.zaghlol.AndroidCaptureHostApi.ackSpool$separatedMessageChannelSuffix", codec, taskQueue)
+        if (api != null) {
+          channel.setMessageHandler { message, reply ->
+            val args = message as List<Any?>
+            val idsArg = args[0] as List<String>
+            val wrapped: List<Any?> = try {
+              api.ackSpool(idsArg)
+              listOf(null)
+            } catch (exception: Throwable) {
+              CaptureApiPigeonUtils.wrapError(exception)
+            }
+            reply.reply(wrapped)
+          }
+        } else {
+          channel.setMessageHandler(null)
+        }
+      }
+      run {
+        val channel = BasicMessageChannel<Any?>(binaryMessenger, "dev.flutter.pigeon.zaghlol.AndroidCaptureHostApi.scheduleIngestionNow$separatedMessageChannelSuffix", codec)
+        if (api != null) {
+          channel.setMessageHandler { _, reply ->
+            val wrapped: List<Any?> = try {
+              api.scheduleIngestionNow()
+              listOf(null)
+            } catch (exception: Throwable) {
+              CaptureApiPigeonUtils.wrapError(exception)
+            }
+            reply.reply(wrapped)
+          }
+        } else {
+          channel.setMessageHandler(null)
+        }
+      }
     }
   }
 }
@@ -95,6 +722,40 @@ class CaptureEventsApi(private val binaryMessenger: BinaryMessenger, private val
     /** The codec used by CaptureEventsApi. */
     val codec: MessageCodec<Any?> by lazy {
       CaptureApiPigeonCodec()
+    }
+  }
+  fun onSpoolChanged(pendingCountArg: Long, callback: (Result<Unit>) -> Unit)
+{
+    val separatedMessageChannelSuffix = if (messageChannelSuffix.isNotEmpty()) ".$messageChannelSuffix" else ""
+    val channelName = "dev.flutter.pigeon.zaghlol.CaptureEventsApi.onSpoolChanged$separatedMessageChannelSuffix"
+    val channel = BasicMessageChannel<Any?>(binaryMessenger, channelName, codec)
+    channel.send(listOf(pendingCountArg)) {
+      if (it is List<*>) {
+        if (it.size > 1) {
+          callback(Result.failure(CaptureApiError(it[0] as String, it[1] as String, it[2] as String?)))
+        } else {
+          callback(Result.success(Unit))
+        }
+      } else {
+        callback(Result.failure(CaptureApiPigeonUtils.createConnectionError(channelName)))
+      } 
+    }
+  }
+  fun onPermissionChanged(cArg: CaptureCapabilities, callback: (Result<Unit>) -> Unit)
+{
+    val separatedMessageChannelSuffix = if (messageChannelSuffix.isNotEmpty()) ".$messageChannelSuffix" else ""
+    val channelName = "dev.flutter.pigeon.zaghlol.CaptureEventsApi.onPermissionChanged$separatedMessageChannelSuffix"
+    val channel = BasicMessageChannel<Any?>(binaryMessenger, channelName, codec)
+    channel.send(listOf(cArg)) {
+      if (it is List<*>) {
+        if (it.size > 1) {
+          callback(Result.failure(CaptureApiError(it[0] as String, it[1] as String, it[2] as String?)))
+        } else {
+          callback(Result.success(Unit))
+        }
+      } else {
+        callback(Result.failure(CaptureApiPigeonUtils.createConnectionError(channelName)))
+      } 
     }
   }
 }

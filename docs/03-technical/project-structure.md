@@ -28,7 +28,7 @@ The repository is a mono-repo with a **Dart pub workspace** for the app and its 
 │  ├─ integration_test/             device flows (onboarding, capture→home, backup→restore, purchase sandbox)
 │  ├─ assets/
 │  │  ├─ registry/                  institutions/*.json (templates), shared.json, registry_manifest.json
-│  │  ├─ catalog/                   catalog_seed.json.gz (+ signature)
+│  │  ├─ catalog/                   catalog_seed.json.gz + catalog_seed.json.sig (tools/catalog_build)
 │  │  ├─ rive/                      zaghlol.riv
 │  │  ├─ mascot/                    static pose PNG/SVG fallbacks
 │  │  └─ shortcuts/                 Zaghlol.shortcut (signed) + install guide images
@@ -51,10 +51,11 @@ The repository is a mono-repo with a **Dart pub workspace** for the app and its 
 │     └─ ZaghlolWidget/             SwiftUI WidgetKit
 ├─ packages/
 │  ├─ zaghlol_domain/               pure Dart: money/, entities/, budget/, transfers/, recurring/, wealth/, zakah/, roi/, chat/, voice/, mascot_rules/
+│  ├─ zaghlol_catalog/              pure Dart: catalog seed format (strict codec) and ES256 seed signature (T-030)
 │  └─ zaghlol_parsing/              pure Dart: registry/, normalize/, extract/, classify/, merchant/, generic/, guard_rules/ (+ fixtures/)
 ├─ tools/
 │  ├─ registry_lint/                validates institution JSON, runs fixtures, emits guard config schema
-│  ├─ catalog_build/                builds catalog_seed from the backend export
+│  ├─ catalog_build/                curated CSV to signed catalog_seed.json.gz + backend import CSV (T-030)
 │  └─ privacy_scan/                 sandbox plaintext scanner used in integration tests
 ├─ backend/
 │  ├─ Zaghlol.sln

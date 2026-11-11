@@ -484,7 +484,7 @@ void main() {
 
   group('gate and diag', () {
     test('every failure code maps to a gate state', () {
-      expect(DbOpenFailureCode.values, hasLength(7));
+      expect(DbOpenFailureCode.values, hasLength(8));
       final codes = <String>{};
       for (final c in DbOpenFailureCode.values) {
         expect(DbGateState.values, contains(dbGateStateFor(c)));

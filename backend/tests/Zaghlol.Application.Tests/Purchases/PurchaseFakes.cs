@@ -100,53 +100,83 @@ internal sealed class FakePlayDeveloperApi : IPlayDeveloperApi
     }
 }
 
-/// <summary>An in-memory <c>purchases</c> table with the writer's rules (monotonic guard, insert-only install).</summary>
+/// <summary>
+/// An in-memory <c>purchases</c> table with the writer's rules: the monotonic guard, insert-only install, App Store re-plan on an
+/// applied update, <c>KeepStoredExpiry</c>, and the T-131 new-payment rule on <c>last_payment_at</c> (independent of the guard).
+/// </summary>
 internal sealed class FakePurchaseWriter : IPurchaseWriter
 {
+    private readonly Lock gate = new();
+
     public Dictionary<string, Row> Rows { get; } = new(StringComparer.Ordinal);
 
     public List<(Guid Purchase, StoredPurchaseState? From, StoredPurchaseState To, string Cause)> Events { get; } = [];
 
     public int Upserts { get; private set; }
 
+    /// <summary>Upserts seen, for assertions on what the verifier passed.</summary>
+    public List<PurchaseUpsert> Seen { get; } = [];
+
     public Task<PurchaseUpsertResult> UpsertAsync(PurchaseUpsert upsert, string cause, CancellationToken cancellationToken)
     {
-        Upserts++;
-        var key = upsert.StoreKey.Reveal();
-        bool applied;
-        if (!Rows.TryGetValue(key, out var row))
+        lock (gate)
         {
-            row = new Row(Guid.NewGuid(), upsert.ProductId, upsert.InstallId, upsert.State, upsert.ExpiresAt, upsert.Acknowledged, upsert.Environment, upsert.LinkedPurchaseToken?.Reveal(), upsert.ReadAt);
-            Rows[key] = row;
-            Events.Add((row.Id, null, upsert.State, cause));
-            applied = true;
-        }
-        else if (row.LastVerifiedAt < upsert.ReadAt)
-        {
-            if (row.State != upsert.State)
+            Upserts++;
+            Seen.Add(upsert);
+            var key = upsert.StoreKey.Reveal();
+            bool applied;
+            var inserted = false;
+            if (!Rows.TryGetValue(key, out var row))
             {
-                Events.Add((row.Id, row.State, upsert.State, cause));
+                row = new Row(Guid.NewGuid(), upsert.ProductId, upsert.InstallId, upsert.State, upsert.ExpiresAt, upsert.Acknowledged, upsert.Environment, upsert.LinkedPurchaseToken?.Reveal(), upsert.ReadAt)
+                {
+                    Plan = upsert.Plan,
+                    ObfuscatedInstallRef = upsert.ObfuscatedInstallRef,
+                };
+                Rows[key] = row;
+                Events.Add((row.Id, null, upsert.State, cause));
+                applied = true;
+                inserted = true;
+            }
+            else if (row.LastVerifiedAt < upsert.ReadAt)
+            {
+                if (row.State != upsert.State)
+                {
+                    Events.Add((row.Id, row.State, upsert.State, cause));
+                }
+
+                var apple = upsert.Store == PurchaseStore.AppStore;
+                row = row with
+                {
+                    State = upsert.State,
+                    ExpiresAt = upsert.KeepStoredExpiry ? row.ExpiresAt : upsert.ExpiresAt,
+                    Acknowledged = row.Acknowledged || upsert.Acknowledged,
+                    Environment = upsert.Environment,
+                    LinkedPurchaseToken = upsert.LinkedPurchaseToken?.Reveal() ?? row.LinkedPurchaseToken,
+                    LastVerifiedAt = upsert.ReadAt,
+                    ProductId = apple ? upsert.ProductId : row.ProductId,
+                    Plan = apple ? upsert.Plan : row.Plan,
+                    ObfuscatedInstallRef = upsert.ObfuscatedInstallRef ?? row.ObfuscatedInstallRef,
+                };
+                Rows[key] = row;
+                applied = true;
+            }
+            else
+            {
+                applied = false;
             }
 
-            row = row with
+            var newPayment = false;
+            if (upsert.NewPaymentAt is { } paidAt && (row.LastPaymentAt is null || row.LastPaymentAt < paidAt))
             {
-                State = upsert.State,
-                ExpiresAt = upsert.ExpiresAt,
-                Acknowledged = row.Acknowledged || upsert.Acknowledged,
-                Environment = upsert.Environment,
-                LinkedPurchaseToken = upsert.LinkedPurchaseToken?.Reveal() ?? row.LinkedPurchaseToken,
-                LastVerifiedAt = upsert.ReadAt,
-            };
-            Rows[key] = row;
-            applied = true;
-        }
-        else
-        {
-            applied = false;
-        }
+                row = row with { LastPaymentAt = paidAt };
+                Rows[key] = row;
+                newPayment = true;
+            }
 
-        Guid? predecessor = row.LinkedPurchaseToken is { } linked && Rows.TryGetValue(linked, out var previous) ? previous.Id : null;
-        return Task.FromResult(new PurchaseUpsertResult(row.Id, applied, row.State, row.ExpiresAt, row.Acknowledged, predecessor));
+            Guid? predecessor = row.LinkedPurchaseToken is { } linked && Rows.TryGetValue(linked, out var previous) ? previous.Id : null;
+            return Task.FromResult(new PurchaseUpsertResult(row.Id, applied, row.State, row.ExpiresAt, row.Acknowledged, predecessor, inserted, newPayment));
+        }
     }
 
     public Task<bool> MarkAcknowledgedAsync(Guid purchaseId, CancellationToken cancellationToken)
@@ -170,7 +200,14 @@ internal sealed class FakePurchaseWriter : IPurchaseWriter
         bool Acknowledged,
         PurchaseEnvironment Environment,
         string? LinkedPurchaseToken,
-        DateTimeOffset LastVerifiedAt);
+        DateTimeOffset LastVerifiedAt)
+    {
+        public GoldPlan Plan { get; init; }
+
+        public string? ObfuscatedInstallRef { get; init; }
+
+        public DateTimeOffset? LastPaymentAt { get; init; }
+    }
 }
 
 /// <summary>Records every telemetry call.</summary>
@@ -199,6 +236,26 @@ internal sealed class RecordingPurchaseTelemetry : IPurchaseTelemetry
     public void UnackedOver48h(Guid purchaseId) => Alerts.Add(purchaseId);
 
     public void OwnershipChecked(string path, OwnershipOutcome outcome) => Ownership.Add((path, outcome));
+
+    public List<(string Store, PurchaseEnvironment Environment)> Environments { get; } = [];
+
+    public List<(JwsSource Source, AppleJwsFailure? Failure)> Jws { get; } = [];
+
+    public void EnvironmentSeen(string store, PurchaseEnvironment environment)
+    {
+        lock (Environments)
+        {
+            Environments.Add((store, environment));
+        }
+    }
+
+    public void AppleJwsChecked(JwsSource source, AppleJwsFailure? failure)
+    {
+        lock (Jws)
+        {
+            Jws.Add((source, failure));
+        }
+    }
 }
 
 /// <summary>Common fixtures: the three Gold products and Play reads bound to an install.</summary>

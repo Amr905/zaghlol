@@ -87,7 +87,7 @@ Update by looking up the tag's commit SHA (`git ls-remote --tags <repo-url>`; fo
 
 ## zaghlol_lints (T-002)
 
-The `static` job runs `dart run bin/zaghlol_lints.dart ../../app ../../packages/zaghlol_parsing ../../packages/zaghlol_domain` in `tools/lints` (rules: no double money, no UI string literals in build, no print outside debug files, SafeException in parsing/db), then `dart test` there (fixtures with `// expect_lint:` comments). `flutter analyze` does not run them. See `tools/lints/README.md` for why this is a standalone checker and not a `custom_lint` plugin.
+The `static` job runs `dart run bin/zaghlol_lints.dart ../../app ../../packages/zaghlol_parsing ../../packages/zaghlol_domain ../../packages/zaghlol_catalog ../../tools/catalog_build` in `tools/lints` (rules: no double money, no UI string literals in build, no print outside debug files, SafeException in parsing/db), then `dart test` there (fixtures with `// expect_lint:` comments). `flutter analyze` does not run them. See `tools/lints/README.md` for why this is a standalone checker and not a `custom_lint` plugin.
 
 ## Pigeon (T-004)
 

@@ -37,6 +37,13 @@ final allowMigrationProvider = Provider<bool>(
   name: 'allowMigrationProvider',
 );
 
+/// False in the headless engine (T-008 Q6): it never creates the database or
+/// its key, wipes, or recovers a migration; it defers to the UI engine.
+final allowCreateOrWipeProvider = Provider<bool>(
+  (ref) => true,
+  name: 'allowCreateOrWipeProvider',
+);
+
 /// Riverpod 3 retries failing providers by default. The open is never
 /// retried automatically: a retry is the startup gate's decision
 /// (`ref.invalidate`), since an open may wipe or migrate.
@@ -51,6 +58,7 @@ final appDatabaseProvider = FutureProvider<AppDatabase>(
       bootstrap: ref.watch(keyBootstrapProvider),
       wipeSteps: ref.watch(orphanWipeStepsProvider),
       allowMigration: ref.watch(allowMigrationProvider),
+      allowCreateOrWipe: ref.watch(allowCreateOrWipeProvider),
     );
     switch (result) {
       case DbOpened(:final db):

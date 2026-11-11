@@ -75,7 +75,7 @@ public class PlayVerificationTests
         var token = Play.NewToken();
         play.Subscriptions[token] = Play.Subscription(Play.NewInstall(), acknowledged: true);
 
-        var result = await Verifier.VerifyAsync(new StorePurchaseRef(Play.Yearly, new Sensitive<string>(token)), Play.NewInstall(), BindingCheck.Skip, CancellationToken.None);
+        var result = await Verifier.VerifyAsync(new PlayPurchaseRef(Play.Yearly, new Sensitive<string>(token)), Play.NewInstall(), BindingCheck.Skip, CancellationToken.None);
 
         Assert.Equal(VerifyStatus.Active, result.Status);
         Assert.Null(writer.Rows[token].InstallId);
@@ -337,7 +337,7 @@ public class PlayVerificationTests
 
         // Someone (the sweeper, an earlier retry) acknowledged between our read and our acknowledge.
         var result = await new PlayVerification(new ReReadAcknowledged(play, token), Play.Catalog, writer, telemetry, clock)
-            .VerifyAsync(new StorePurchaseRef(Play.Yearly, new Sensitive<string>(token)), install, BindingCheck.RequireCaller, CancellationToken.None);
+            .VerifyAsync(new PlayPurchaseRef(Play.Yearly, new Sensitive<string>(token)), install, BindingCheck.RequireCaller, CancellationToken.None);
 
         Assert.True(result.Acknowledged);
         Assert.True(writer.Rows[token].Acknowledged);
@@ -427,7 +427,7 @@ public class PlayVerificationTests
     }
 
     private Task<StoreVerificationResult> VerifyAsync(string productId, string token, InstallId caller) =>
-        Verifier.VerifyAsync(new StorePurchaseRef(productId, new Sensitive<string>(token)), caller, BindingCheck.RequireCaller, CancellationToken.None);
+        Verifier.VerifyAsync(new PlayPurchaseRef(productId, new Sensitive<string>(token)), caller, BindingCheck.RequireCaller, CancellationToken.None);
 
     /// <summary>Answers the first read unacknowledged and every later read acknowledged (someone acked in between).</summary>
     private sealed class ReReadAcknowledged(FakePlayDeveloperApi inner, string token) : IPlayDeveloperApi

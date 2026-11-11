@@ -7,6 +7,20 @@ namespace Zaghlol.Application.Purchases;
 /// <param name="InstallId">The buying install, written on insert only (<c>null</c> from restore, which never sets it).</param>
 /// <param name="Acknowledged">The store already reports the purchase acknowledged; never turns a stored <c>true</c> back.</param>
 /// <param name="ReadAt">Taken before the store call; a row verified at or after it is newer and is not overwritten.</param>
+/// <param name="KeepStoredExpiry">
+/// An update leaves <c>expires_at</c> as stored (Apple refunded/revoked rows, T-131 §3 step 5); an insert still writes
+/// <paramref name="ExpiresAt"/>.
+/// </param>
+/// <param name="NewPaymentAt">
+/// Apple only, binding-checked verify of a <c>PURCHASE</c>-reason transaction: its <c>purchaseDate</c>. In the same transaction,
+/// independent of the monotonic guard, <c>last_payment_at</c> advances to it when NULL or older (T-131 §4); the result's
+/// <see cref="PurchaseUpsertResult.IsNewPayment"/> says whether it did. <c>null</c> never touches the column.
+/// </param>
+/// <remarks>
+/// For <see cref="PurchaseStore.AppStore"/> an applied update also writes <paramref name="ProductId"/> and <paramref name="Plan"/>
+/// (the latest transaction's product: an upgrade re-plans the row, T-131 §3 step 5). A Google token's product never changes, so
+/// Google rows keep them from the insert.
+/// </remarks>
 public sealed record PurchaseUpsert(
     PurchaseStore Store,
     string ProductId,
@@ -19,18 +33,24 @@ public sealed record PurchaseUpsert(
     bool Acknowledged,
     PurchaseEnvironment Environment,
     string? ObfuscatedInstallRef,
-    DateTimeOffset ReadAt);
+    DateTimeOffset ReadAt,
+    bool KeepStoredExpiry = false,
+    DateTimeOffset? NewPaymentAt = null);
 
 /// <summary>The row after the upsert.</summary>
 /// <param name="Applied">False when a newer read had already been stored (the monotonic guard); the row is returned as stored.</param>
 /// <param name="PredecessorPurchaseId">The purchase whose token is this row's <c>linked_purchase_token</c>, if known.</param>
+/// <param name="Inserted">This call created the row.</param>
+/// <param name="IsNewPayment">This call advanced <c>last_payment_at</c> (only with <see cref="PurchaseUpsert.NewPaymentAt"/>).</param>
 public sealed record PurchaseUpsertResult(
     Guid PurchaseId,
     bool Applied,
     StoredPurchaseState State,
     DateTimeOffset? ExpiresAt,
     bool Acknowledged,
-    Guid? PredecessorPurchaseId);
+    Guid? PredecessorPurchaseId,
+    bool Inserted = false,
+    bool IsNewPayment = false);
 
 /// <summary><c>purchases</c> writes of the verify path, on the App login (T-133 reuses it for RTDN).</summary>
 public interface IPurchaseWriter

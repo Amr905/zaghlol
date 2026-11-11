@@ -15,8 +15,8 @@ namespace Zaghlol.Api.Endpoints.V1;
 
 /// <summary>
 /// <c>POST /v1/purchases/verify</c> (backend-api §4.3, T-130 design note §1). Filters in order: install token, time nonce,
-/// idempotency (claim, then complete), response signature. Android runs the Play verifier with the install-binding check;
-/// iOS answers <c>503 UPSTREAM_UNAVAILABLE</c> until T-131 registers the App Store verifier. Store outages are
+/// idempotency (claim, then complete), response signature. Android runs the Play verifier and iOS the App Store verifier (T-131),
+/// both with the install-binding check; <c>seatKeys</c> is accepted and passed by untouched (T-182 reads it). Store outages are
 /// <c>502 STORE_UNAVAILABLE</c> (our own budget: <c>503 UPSTREAM_UNAVAILABLE</c>), both with <c>Retry-After</c>, never stored and
 /// never a grant. A rejected purchase is a final <c>422</c>. The grant (seat and entitlement) is <see cref="IVerifyGrant"/>.
 /// </summary>
@@ -27,8 +27,8 @@ internal static partial class PurchaseEndpoints
     /// <summary>The OpenAPI <c>productId</c> pattern (<c>^[a-z0-9_.]{3,100}$</c>), anchored with <c>\z</c>.</summary>
     public const string ProductIdPattern = @"^[a-z0-9_.]{3,100}\z";
 
-    /// <summary><c>Retry-After</c> for iOS until T-131.</summary>
-    public const int IosUnavailableRetryAfterSeconds = 3600;
+    /// <summary><c>Retry-After</c> when no verifier for the store is registered.</summary>
+    public const int NoVerifierRetryAfterSeconds = 3600;
 
     public static IEndpointRouteBuilder MapPurchases(this IEndpointRouteBuilder endpoints)
     {
@@ -77,7 +77,7 @@ internal static partial class PurchaseEndpoints
 
                 // A token outside ^[A-Za-z0-9._-]{1,512}$ is a final 422 PURCHASE_TOKEN_INVALID from the verifier, with no Play call.
                 store = PurchaseStore.GooglePlay;
-                purchase = new StorePurchaseRef(productId, request.PurchaseToken.Value);
+                purchase = new PlayPurchaseRef(productId, request.PurchaseToken.Value);
                 break;
 
             case "ios":
@@ -86,14 +86,15 @@ internal static partial class PurchaseEndpoints
                     return ApiProblems.Of(StatusCodes.Status400BadRequest, ErrorCodes.UnknownField);
                 }
 
-                if (request.SignedTransaction?.Reveal() is not { Length: > 0 })
+                if (request.SignedTransaction is not { } signedTransaction || signedTransaction.Reveal() is not { Length: > 0 })
                 {
                     return ApiProblems.Of(StatusCodes.Status400BadRequest, ErrorCodes.ValidationFailed);
                 }
 
-                // T-131 adds the App Store verifier; until then iOS verify is an outage the app retries, never a rejection.
-                telemetry.Verified(PurchaseTags.AppStore, PurchaseTags.Failure, ErrorCodes.UpstreamUnavailable);
-                return Unavailable(context, StatusCodes.Status503ServiceUnavailable, ErrorCodes.UpstreamUnavailable, IosUnavailableRetryAfterSeconds);
+                // A JWS of the wrong shape or size is a final 422 PURCHASE_TOKEN_INVALID from the verifier, with no Apple call.
+                store = PurchaseStore.AppStore;
+                purchase = new AppStorePurchaseRef(signedTransaction);
+                break;
 
             default:
                 return ApiProblems.Of(StatusCodes.Status400BadRequest, ErrorCodes.ValidationFailed);
@@ -104,7 +105,7 @@ internal static partial class PurchaseEndpoints
         if (verifier is null)
         {
             telemetry.Verified(storeName, PurchaseTags.Failure, ErrorCodes.UpstreamUnavailable);
-            return Unavailable(context, StatusCodes.Status503ServiceUnavailable, ErrorCodes.UpstreamUnavailable, IosUnavailableRetryAfterSeconds);
+            return Unavailable(context, StatusCodes.Status503ServiceUnavailable, ErrorCodes.UpstreamUnavailable, NoVerifierRetryAfterSeconds);
         }
 
         var installId = InstallTokenAuthentication.InstallIdOf(context.User);

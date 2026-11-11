@@ -22,6 +22,7 @@ public sealed partial class AlertRuleLintTests
         "ZaghlolSyncLatencyP95High", "ZaghlolPurchaseVerifyLatencyP95High",
         // Purchases
         "ZaghlolPurchaseUnackedOver48h", "ZaghlolPurchaseVerifyFailureRateHigh", "ZaghlolStoreAuthError",
+        "ZaghlolAppleSignedAnswerInvalid", "ZaghlolAppStoreClientErrorRateHigh",
         // Notifications
         "ZaghlolNotificationLagHigh", "ZaghlolNotificationDeadLetter",
         // Prices

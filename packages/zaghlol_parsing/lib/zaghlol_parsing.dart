@@ -1,6 +1,8 @@
 /// Public API of the `zaghlol_parsing` package.
 library;
 
+export 'generic/generic_parser.dart' show parseGeneric;
+export 'generic/generic_policy.dart';
 export 'normalize/amount_parser.dart';
 export 'pipeline/parse_result.dart';
 export 'pipeline/parsing_pipeline.dart';

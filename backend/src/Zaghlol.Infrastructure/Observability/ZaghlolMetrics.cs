@@ -51,6 +51,8 @@ public sealed partial class ZaghlolMetrics : IDisposable
     private readonly Counter<long> purchaseAck;
     private readonly Counter<long> ownershipCheck;
     private readonly Counter<long> idempotencyClaim;
+    private readonly Counter<long> appleJws;
+    private readonly Counter<long> purchaseEnvironment;
     private readonly ConcurrentDictionary<string, double> priceAges = new(StringComparer.Ordinal);
     private readonly string serviceVersion;
     private long unackedLessThan48h;
@@ -109,13 +111,19 @@ public sealed partial class ZaghlolMetrics : IDisposable
 
         storeCall = meter.CreateCounter<long>(
             "zaghlol.store.call",
-            description: "Outbound store API calls by store, api (sub_get|prod_get|sub_ack|prod_ack|orders_get) and outcome (T-130).");
+            description: "Outbound store API calls by store, api (sub_get|prod_get|sub_ack|prod_ack|orders_get|tx_get|sub_status|order_lookup), outcome and, for the App Store, env (T-130, T-131).");
+        appleJws = meter.CreateCounter<long>(
+            "zaghlol.purchase.jws",
+            description: "Apple JWS checks by source (app|api) and outcome (ok|malformed|alg|chain|oid|signature|payload) (T-131).");
+        purchaseEnvironment = meter.CreateCounter<long>(
+            "zaghlol.purchase.environment",
+            description: "Verified purchases written, by store and environment (production|sandbox) (T-131).");
         purchaseAck = meter.CreateCounter<long>(
             "zaghlol.purchase.ack",
             description: "Google acknowledgements by channel (verify|sweeper) and outcome (acked|already|failed|not_ackable).");
         ownershipCheck = meter.CreateCounter<long>(
             "zaghlol.purchase.ownership_check",
-            description: "Support order-ID ownership checks by path (orders|fallback) and outcome (pass|fail|unavailable).");
+            description: "Support order-ID ownership checks by path (orders|fallback|apple) and outcome (pass|fail|unavailable).");
         idempotencyClaim = meter.CreateCounter<long>(
             "zaghlol.idempotency.claim",
             description: "Idempotency claims by outcome (claimed|replayed|reused|in_progress|taken_over|lease_lost).");
@@ -160,11 +168,23 @@ public sealed partial class ZaghlolMetrics : IDisposable
     public void StoreCall(string store, string api, string outcome) =>
         storeCall.Add(1, Tags(("store", store), ("api", api), ("outcome", outcome)));
 
+    /// <summary>An App Store Server API call (T-131): the T-130 tags plus <c>env</c> (<c>production</c> or <c>sandbox</c>).</summary>
+    public void StoreCall(string store, string api, string outcome, string env) =>
+        storeCall.Add(1, Tags(("store", store), ("api", api), ("outcome", outcome), ("env", env)));
+
+    /// <param name="source"><c>app</c> or <c>api</c>.</param>
+    /// <param name="outcome"><c>ok</c> or a failure reason (<c>PurchaseTags.JwsOutcomes</c>).</param>
+    public void AppleJws(string source, string outcome) => appleJws.Add(1, Tags(("source", source), ("outcome", outcome)));
+
+    /// <param name="store"><c>google_play</c> or <c>app_store</c>.</param>
+    /// <param name="env"><c>production</c> or <c>sandbox</c>.</param>
+    public void PurchaseEnvironment(string store, string env) => purchaseEnvironment.Add(1, Tags(("store", store), ("env", env)));
+
     /// <param name="channel"><c>verify</c> or <c>sweeper</c>.</param>
     /// <param name="outcome"><c>acked</c>, <c>already</c>, <c>failed</c> or <c>not_ackable</c>.</param>
     public void PurchaseAck(string channel, string outcome) => purchaseAck.Add(1, Tags(("channel", channel), ("outcome", outcome)));
 
-    /// <param name="path"><c>orders</c> or <c>fallback</c>.</param>
+    /// <param name="path"><c>orders</c>, <c>fallback</c> or <c>apple</c>.</param>
     /// <param name="outcome"><c>pass</c>, <c>fail</c> or <c>unavailable</c>.</param>
     public void OwnershipCheck(string path, string outcome) => ownershipCheck.Add(1, Tags(("path", path), ("outcome", outcome)));
 
@@ -316,7 +336,25 @@ public sealed partial class ZaghlolMetrics : IDisposable
         {
             purchaseAck.Add(0, Tags(("channel", channel), ("outcome", "failed")));
         }
+
+        // T-131: the Apple auth_error and client_error alerts, and the alert on any Apple API JWS that fails verification.
+        foreach (var api in AppleCallApis)
+        {
+            foreach (var env in new[] { "production", "sandbox" })
+            {
+                storeCall.Add(0, Tags(("store", "app_store"), ("api", api), ("outcome", "auth_error"), ("env", env)));
+                storeCall.Add(0, Tags(("store", "app_store"), ("api", api), ("outcome", "client_error"), ("env", env)));
+            }
+        }
+
+        foreach (var outcome in new[] { "malformed", "alg", "chain", "oid", "signature", "payload" })
+        {
+            appleJws.Add(0, Tags(("source", "api"), ("outcome", outcome)));
+        }
     }
+
+    /// <summary>The <c>api</c> tag values of App Store calls (<c>AppStoreCallTags.Apis</c>).</summary>
+    internal static IReadOnlyList<string> AppleCallApis { get; } = ["tx_get", "sub_status", "order_lookup"];
 
     /// <summary>The <c>api</c> tag values of <c>zaghlol.store.call</c> (StoreCallTags.Apis).</summary>
     internal static IReadOnlyList<string> StoreCallApis { get; } = ["sub_get", "prod_get", "sub_ack", "prod_ack", "orders_get"];

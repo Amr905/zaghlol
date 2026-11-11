@@ -21,7 +21,8 @@ using Zaghlol.Testing;
 namespace Zaghlol.Api.Tests.Purchases;
 
 /// <summary>
-/// The install host plus <c>POST /v1/purchases/verify</c> (T-130) over PostgreSQL 17 and a WireMock Play Developer API, with the
+/// The install host plus <c>POST /v1/purchases/verify</c> (T-130, T-131) over PostgreSQL 17 and WireMock stand-ins for the Play
+/// Developer API and the App Store Server API (both environments, a test PKI as the Apple root), with the
 /// real pipeline (install token, time nonce, idempotency claims, response signing). <see cref="SweeperAsync"/> builds the worker
 /// side (Worker login) against the same database and the same Play stand-in.
 /// </summary>
@@ -31,6 +32,9 @@ public class PurchasesHostFixture : InstallsHostFixture
     private int metersStarted;
 
     public PlayWireMock Play { get; } = new();
+
+    /// <summary>T-131: the App Store Server API (both environments) and the test PKI whose root replaces the pin in Testing.</summary>
+    public AppleWireMock Apple { get; } = new();
 
     /// <summary>The grant step: grants for the installs a test opts in, nothing for the rest (like the T-130 placeholder).</summary>
     public GrantingVerifyGrant Grant { get; } = new();
@@ -42,7 +46,7 @@ public class PurchasesHostFixture : InstallsHostFixture
         get
         {
             var settings = new Dictionary<string, string?>(base.Settings);
-            foreach (var (key, value) in Play.Settings())
+            foreach (var (key, value) in Play.Settings().Concat(Apple.Settings()))
             {
                 settings[key] = value;
             }
@@ -59,6 +63,69 @@ public class PurchasesHostFixture : InstallsHostFixture
 
     public static string AndroidBody(string productId, string token) =>
         "{\"platform\":\"android\",\"productId\":\"" + productId + "\",\"purchaseToken\":\"" + token + "\"}";
+
+    public static string IosBody(string signedTransaction) => "{\"platform\":\"ios\",\"signedTransaction\":\"" + signedTransaction + "\"}";
+
+    /// <summary>
+    /// Scripts an App Store purchase bound to <paramref name="boundTo"/> (a StoreBindingRef, or <c>null</c>): the app's JWS, Apple's
+    /// Get Transaction Info copy and (subscriptions) the status item, on the environment's server. Returns the app JWS and IDs.
+    /// </summary>
+    public (string Jws, string TransactionId, string OriginalTransactionId) ApplePurchase(
+        string? boundTo,
+        string environment = "Production",
+        string productId = AppleWireMock.Yearly,
+        int status = 1,
+        int autoRenew = 1,
+        DateTimeOffset? expires = null)
+    {
+        var transactionId = AppleWireMock.NewTransactionId();
+        var original = AppleWireMock.NewTransactionId();
+        var sandbox = environment == "Sandbox";
+        var lifetime = productId == AppleWireMock.Lifetime;
+        var payload = AppleTestPki.Transaction(
+            AppleWireMock.BundleId,
+            productId,
+            transactionId,
+            original,
+            boundTo,
+            environment,
+            lifetime ? "Non-Consumable" : "Auto-Renewable Subscription",
+            expiresDate: expires);
+        var jws = Apple.Pki.Sign(payload);
+        Apple.Get(sandbox, AppleWireMock.TransactionPath(transactionId), 200, AppleWireMock.TransactionInfoBody(jws));
+        if (!lifetime)
+        {
+            var renewal = Apple.Pki.Sign(AppleTestPki.Renewal(original, productId, autoRenew, environment));
+            Apple.Get(sandbox, AppleWireMock.SubscriptionsPath(transactionId), 200, AppleWireMock.StatusBody(environment, (status, original, jws, renewal)));
+        }
+
+        return (jws, transactionId, original);
+    }
+
+    /// <summary>The App Store purchases row of an originalTransactionId (superuser read), or <c>null</c>.</summary>
+    public async Task<(Guid Id, string State, bool Acknowledged, Guid? InstallId, string Environment, string? Ref, DateTimeOffset? LastPaymentAt)?> AppleRowAsync(string originalTransactionId)
+    {
+        await using var connection = new NpgsqlConnection(Database.Superuser);
+        await connection.OpenAsync();
+        await using var command = new NpgsqlCommand(
+            "SELECT id, state, acknowledged, install_id, environment, obfuscated_install_ref, last_payment_at FROM zaghlol.purchases WHERE store = 'app_store' AND store_key = @k",
+            connection);
+        command.Parameters.AddWithValue("k", originalTransactionId);
+        await using var reader = await command.ExecuteReaderAsync();
+        if (!await reader.ReadAsync())
+        {
+            return null;
+        }
+
+        return (
+            reader.GetGuid(0),
+            reader.GetString(1),
+            reader.GetBoolean(2),
+            reader.IsDBNull(3) ? null : reader.GetGuid(3),
+            reader.GetString(4),
+            reader.IsDBNull(5) ? null : reader.GetString(5),
+            reader.IsDBNull(6) ? null : reader.GetFieldValue<DateTimeOffset>(6));
+    }
 
     public void StartMeters()
     {
@@ -163,6 +230,7 @@ public class PurchasesHostFixture : InstallsHostFixture
         {
             meters.Dispose();
             Play.Dispose();
+            Apple.Dispose();
         }
 
         base.Dispose(disposing);

@@ -3,6 +3,7 @@ package app.zaghlol
 import android.content.Intent
 import android.os.Handler
 import android.os.Looper
+import app.zaghlol.platform.capture.EngineHooks
 import app.zaghlol.platform.keys.SecretStoreRegistration
 import app.zaghlol.platform.share.ShareDescriptor
 import app.zaghlol.platform.share.ShareHandOff
@@ -30,9 +31,13 @@ class MainActivity : FlutterActivity() {
         shareStore = store
         ShareIntakeHostApi.setUp(messenger, ShareIntakeHost(store))
         shareEvents = ShareIntakeEventsApi(messenger)
+        // T-008: flavour hooks (devSms: the SMS spike's spool host). Empty in
+        // every other build.
+        EngineHooks.attach(flutterEngine, applicationContext)
     }
 
     override fun cleanUpFlutterEngine(flutterEngine: FlutterEngine) {
+        EngineHooks.detach(flutterEngine)
         ShareIntakeHostApi.setUp(flutterEngine.dartExecutor.binaryMessenger, null)
         shareEvents = null
         shareStore = null

@@ -75,6 +75,62 @@ class CatalogDao {
         ),
   );
 
+  /// Bulk form of [upsertMerchant] for the first-launch seed (T-030): one
+  /// batch, so one round trip to the database isolate instead of one per
+  /// row. Same UPDATE-on-conflict rule.
+  Future<void> upsertMerchants(List<CatalogMerchantsCompanion> rows) =>
+      guardWrite(
+        () => _db.batch((b) {
+          for (final row in rows) {
+            b.insert(
+              _db.catalogMerchants,
+              row,
+              onConflict: DoUpdate((_) => row),
+            );
+          }
+        }),
+      );
+
+  /// Bulk form of [upsertAlias] (T-030): `ON CONFLICT DO UPDATE` of
+  /// `match`, never REPLACE (the FTS delete trigger must fire).
+  Future<void> upsertAliases(
+    List<({int merchantId, String aliasNorm, String match})> rows,
+  ) => guardWrite(
+    () => _db.batch((b) {
+      for (final r in rows) {
+        b.insert(
+          _db.catalogAliases,
+          CatalogAliasesCompanion.insert(
+            merchantId: r.merchantId,
+            aliasNorm: r.aliasNorm,
+            match: r.match,
+          ),
+          onConflict: DoUpdate(
+            (_) => CatalogAliasesCompanion(match: Value(r.match)),
+            target: [
+              _db.catalogAliases.aliasNorm,
+              _db.catalogAliases.merchantId,
+            ],
+          ),
+        );
+      }
+    }),
+  );
+
+  /// Bulk form of [upsertKeyword] (T-030).
+  Future<void> upsertKeywords(List<CatalogKeywordsCompanion> rows) =>
+      guardWrite(
+        () => _db.batch((b) {
+          for (final row in rows) {
+            b.insert(
+              _db.catalogKeywords,
+              row,
+              onConflict: DoUpdate((_) => row),
+            );
+          }
+        }),
+      );
+
   /// Deletes one alias. Returns the rows deleted (0 or 1).
   Future<int> deleteAlias({
     required int merchantId,

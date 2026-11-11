@@ -1,0 +1,568 @@
+[
+ {
+  "id": "en_debit_account_ending",
+  "lang": "en",
+  "outcome": "suggest",
+  "body": "Dear customer, EGP 1,250.50 has been debited from your account ending 4821 at SPINNEYS MAADI on 12/11/2026. Avail bal EGP 8,300.00",
+  "expect": {
+   "amount": "1250.50",
+   "currency": "EGP",
+   "direction": "expense",
+   "last4": "4821",
+   "merchant": "Spinneys"
+  }
+ },
+ {
+  "id": "en_card_charged_usd",
+  "lang": "en",
+  "outcome": "suggest",
+  "body": "Your card **9034 was charged USD 59.99 by NETFLIX.COM. Ref 55821",
+  "expect": {
+   "amount": "59.99",
+   "currency": "USD",
+   "direction": "expense",
+   "last4": "9034"
+  }
+ },
+ {
+  "id": "en_salary_deposit",
+  "lang": "en",
+  "outcome": "suggest",
+  "body": "A deposit of 15,000.00 EGP was credited to account 5512 on 01/11. Salary",
+  "expect": {
+   "amount": "15000.00",
+   "currency": "EGP",
+   "direction": "income",
+   "last4": "5512"
+  }
+ },
+ {
+  "id": "en_payment_from_person",
+  "lang": "en",
+  "outcome": "suggest",
+  "body": "Funds received: 2500 EGP from Mohamed Ali. Thank you",
+  "expect": {
+   "amount": "2500.00",
+   "currency": "EGP",
+   "direction": "income",
+   "merchant": "Mohamed Ali"
+  }
+ },
+ {
+  "id": "en_atm_le_balance",
+  "lang": "en",
+  "outcome": "suggest",
+  "body": "You have withdrawn 3,000 LE from ATM 77 Cairo. Balance: 12,450.75 LE",
+  "expect": {
+   "amount": "3000.00",
+   "currency": "EGP",
+   "direction": "expense"
+  }
+ },
+ {
+  "id": "en_inr_card_limit",
+  "lang": "en",
+  "outcome": "suggest",
+  "body": "Txn alert: INR 4,500.00 spent on card XX2210 at AMAZON PAY. Avl Lmt INR 95,000.00",
+  "expect": {
+   "amount": "4500.00",
+   "currency": "INR",
+   "direction": "expense",
+   "last4": "2210",
+   "merchant": "Amazon Pay"
+  }
+ },
+ {
+  "id": "en_sar_purchase",
+  "lang": "en",
+  "outcome": "suggest",
+  "body": "SAR 320.00 purchase at JARIR BOOKSTORE with card ending 7788",
+  "expect": {
+   "amount": "320.00",
+   "currency": "SAR",
+   "direction": "expense",
+   "last4": "7788",
+   "merchant": "Jarir Bookstore"
+  }
+ },
+ {
+  "id": "en_aed_transfer",
+  "lang": "en",
+  "outcome": "suggest",
+  "body": "AED 1,200.00 transferred to Sara Ahmed from your account",
+  "expect": {
+   "amount": "1200.00",
+   "currency": "AED",
+   "direction": null,
+   "merchant": "Sara Ahmed"
+  }
+ },
+ {
+  "id": "en_refund_card",
+  "lang": "en",
+  "outcome": "suggest",
+  "body": "Refund of EUR 45.00 from ZARA has been credited to card 3391",
+  "expect": {
+   "amount": "45.00",
+   "currency": "EUR",
+   "direction": "income",
+   "last4": "3391",
+   "merchant": "Zara"
+  }
+ },
+ {
+  "id": "en_dollar_symbol_fee",
+  "lang": "en",
+  "outcome": "suggest",
+  "body": "Your account has been debited with $ 12.50 for monthly fee",
+  "expect": {
+   "amount": "12.50",
+   "currency": "USD",
+   "direction": "expense"
+  }
+ },
+ {
+  "id": "en_pound_symbol",
+  "lang": "en",
+  "outcome": "suggest",
+  "body": "£ 8.20 spent at COSTA COFFEE",
+  "expect": {
+   "amount": "8.20",
+   "currency": "GBP",
+   "direction": "expense",
+   "merchant": "Costa Coffee"
+  }
+ },
+ {
+  "id": "en_paid_vodafone",
+  "lang": "en",
+  "outcome": "suggest",
+  "body": "Paid 199 EGP to VODAFONE EG. Date 10/11",
+  "expect": {
+   "amount": "199.00",
+   "currency": "EGP",
+   "direction": "expense",
+   "merchant": "Vodafone"
+  }
+ },
+ {
+  "id": "en_two_amounts_fee",
+  "lang": "en",
+  "outcome": "suggest",
+  "body": "Debit alert: EGP 89.00 at TALABAT; EGP 15.00 delivery fee",
+  "expect": {
+   "amount": "89.00",
+   "currency": "EGP",
+   "direction": "expense",
+   "merchant": "Talabat"
+  }
+ },
+ {
+  "id": "en_no_keyword",
+  "lang": "en",
+  "outcome": "suggest",
+  "body": "Amount: 450.00 EGP Merchant: CARREFOUR",
+  "expect": {
+   "amount": "450.00",
+   "currency": "EGP",
+   "direction": null
+  }
+ },
+ {
+  "id": "en_payment_received_conflict",
+  "lang": "en",
+  "outcome": "suggest",
+  "body": "Your payment of USD 1,000.00 was received",
+  "expect": {
+   "amount": "1000.00",
+   "currency": "USD",
+   "direction": null
+  }
+ },
+ {
+  "id": "en_iso_date_prefix",
+  "lang": "en",
+  "outcome": "suggest",
+  "body": "2026-11-10 EGP 300.00 debited",
+  "expect": {
+   "amount": "300.00",
+   "currency": "EGP",
+   "direction": "expense"
+  }
+ },
+ {
+  "id": "en_date_before_amount",
+  "lang": "en",
+  "outcome": "suggest",
+  "body": "On 10/11 EGP 640.00 was debited from your account",
+  "expect": {
+   "amount": "640.00",
+   "currency": "EGP",
+   "direction": "expense"
+  }
+ },
+ {
+  "id": "en_ref_number_first",
+  "lang": "en",
+  "outcome": "suggest",
+  "body": "Ref 123456 charged EGP 60.00",
+  "expect": {
+   "amount": "60.00",
+   "currency": "EGP",
+   "direction": "expense"
+  }
+ },
+ {
+  "id": "en_jpy_exponent0",
+  "lang": "en",
+  "outcome": "suggest",
+  "body": "Spent 5,000 JPY at UNIQLO",
+  "expect": {
+   "amount": "5000",
+   "currency": "JPY",
+   "direction": "expense",
+   "merchant": "Uniqlo"
+  }
+ },
+ {
+  "id": "en_kwd_three_decimals",
+  "lang": "en",
+  "outcome": "suggest",
+  "body": "KWD 12.500 debited from card **1122",
+  "expect": {
+   "amount": "12.500",
+   "currency": "KWD",
+   "direction": "expense",
+   "last4": "1122"
+  }
+ },
+ {
+  "id": "en_glued_symbol_code",
+  "lang": "en",
+  "outcome": "suggest",
+  "body": "Debited EGP350.00 at ORANGE STORE",
+  "expect": {
+   "amount": "350.00",
+   "currency": "EGP",
+   "direction": "expense",
+   "merchant": "Orange Store"
+  }
+ },
+ {
+  "id": "en_glued_suffix_code",
+  "lang": "en",
+  "outcome": "suggest",
+  "body": "Credited 700EGP to your account ending 8890",
+  "expect": {
+   "amount": "700.00",
+   "currency": "EGP",
+   "direction": "income",
+   "last4": "8890"
+  }
+ },
+ {
+  "id": "en_fx_two_currencies",
+  "lang": "en",
+  "outcome": "suggest",
+  "body": "Total EGP 3,400.00 (EUR 100.00) debited via POS",
+  "expect": {
+   "amount": "3400.00",
+   "currency": "EGP",
+   "direction": "expense"
+  },
+  "knownMiss": true
+ },
+ {
+  "id": "en_upi_masked_phone",
+  "lang": "en",
+  "outcome": "suggest",
+  "body": "INR 500 sent to 98765xxxxx via UPI",
+  "expect": {
+   "amount": "500.00",
+   "currency": "INR",
+   "direction": "expense",
+   "merchant": null
+  }
+ },
+ {
+  "id": "en_word_code_not_currency",
+  "lang": "en",
+  "outcome": "suggest",
+  "body": "Debited 50 all charges included, EGP 75.00 total",
+  "expect": {
+   "amount": "75.00",
+   "currency": "EGP",
+   "direction": "expense"
+  }
+ },
+ {
+  "id": "ar_debit_account",
+  "lang": "ar",
+  "outcome": "suggest",
+  "body": "تم خصم مبلغ 1,250.00 جنيه من حسابك المنتهي بـ 4821 لدى كارفور المعادي بتاريخ 12/11",
+  "expect": {
+   "amount": "1250.00",
+   "currency": "EGP",
+   "direction": "expense",
+   "last4": "4821"
+  }
+ },
+ {
+  "id": "ar_deposit_masked",
+  "lang": "ar",
+  "outcome": "suggest",
+  "body": "تم إيداع 15000 ج.م في حسابك رقم ****5512",
+  "expect": {
+   "amount": "15000.00",
+   "currency": "EGP",
+   "direction": "income",
+   "last4": "5512"
+  }
+ },
+ {
+  "id": "ar_withdraw_arabic_digits",
+  "lang": "ar",
+  "outcome": "suggest",
+  "body": "تم سحب ٣٬٠٠٠٫٥٠ جم من ماكينة ATM",
+  "expect": {
+   "amount": "3000.50",
+   "currency": "EGP",
+   "direction": "expense"
+  }
+ },
+ {
+  "id": "ar_purchase_card",
+  "lang": "ar",
+  "outcome": "suggest",
+  "body": "شراء بمبلغ 450 جنيه من بطاقة 7788 لدى امازون",
+  "expect": {
+   "amount": "450.00",
+   "currency": "EGP",
+   "direction": "expense",
+   "last4": "7788"
+  }
+ },
+ {
+  "id": "ar_incoming_transfer",
+  "lang": "ar",
+  "outcome": "suggest",
+  "body": "استلمت تحويل وارد 2,000.00 EGP من أحمد حسن",
+  "expect": {
+   "amount": "2000.00",
+   "currency": "EGP",
+   "direction": "income"
+  }
+ },
+ {
+  "id": "ar_refund",
+  "lang": "ar",
+  "outcome": "suggest",
+  "body": "تم استرداد 120 جنيه إلى بطاقتك",
+  "expect": {
+   "amount": "120.00",
+   "currency": "EGP",
+   "direction": "income"
+  }
+ },
+ {
+  "id": "ar_dollars_latin_merchant",
+  "lang": "ar",
+  "outcome": "suggest",
+  "body": "دفع 85.5 دولار لدى NETFLIX",
+  "expect": {
+   "amount": "85.50",
+   "currency": "USD",
+   "direction": "expense",
+   "merchant": "Netflix"
+  }
+ },
+ {
+  "id": "ar_riyal_saudi",
+  "lang": "ar",
+  "outcome": "suggest",
+  "body": "تم خصم 2,500 ريال سعودي من حسابك",
+  "expect": {
+   "amount": "2500.00",
+   "currency": "SAR",
+   "direction": "expense"
+  }
+ },
+ {
+  "id": "ar_dirham_no_keyword",
+  "lang": "ar",
+  "outcome": "suggest",
+  "body": "مبلغ 300 درهم تم تحويله إلى حسابك",
+  "expect": {
+   "amount": "300.00",
+   "currency": "AED",
+   "direction": null
+  }
+ },
+ {
+  "id": "ar_label_style",
+  "lang": "ar",
+  "outcome": "suggest",
+  "body": "المبلغ: 99.99 جم - Fawry",
+  "expect": {
+   "amount": "99.99",
+   "currency": "EGP",
+   "direction": null
+  }
+ },
+ {
+  "id": "ar_purchase_then_balance",
+  "lang": "ar",
+  "outcome": "suggest",
+  "body": "عملية شراء 1,100 جنيه الرصيد المتاح 4,200 جنيه",
+  "expect": {
+   "amount": "1100.00",
+   "currency": "EGP",
+   "direction": "expense"
+  }
+ },
+ {
+  "id": "ar_currency_before_number",
+  "lang": "ar",
+  "outcome": "suggest",
+  "body": "تم سحب جنيه 750 من ماكينة",
+  "expect": {
+   "amount": "750.00",
+   "currency": "EGP",
+   "direction": "expense"
+  }
+ },
+ {
+  "id": "ar_arabic_digits_wallet",
+  "lang": "ar",
+  "outcome": "suggest",
+  "body": "تم دفع ٢٥٠٫٧٥ جنيه لدى فودافون",
+  "expect": {
+   "amount": "250.75",
+   "currency": "EGP",
+   "direction": "expense"
+  }
+ },
+ {
+  "id": "ar_salary",
+  "lang": "ar",
+  "outcome": "suggest",
+  "body": "راتب 18000 جم تم اضافته لحسابك",
+  "expect": {
+   "amount": "18000.00",
+   "currency": "EGP",
+   "direction": "income"
+  }
+ },
+ {
+  "id": "en_balance_only",
+  "lang": "en",
+  "outcome": "noAmount",
+  "body": "Your balance is EGP 5,000.00",
+  "expect": {}
+ },
+ {
+  "id": "en_declined",
+  "lang": "en",
+  "outcome": "declined",
+  "body": "Transaction of 750 EGP declined due to insufficient funds",
+  "expect": {}
+ },
+ {
+  "id": "en_unknown_symbol_rs",
+  "lang": "en",
+  "outcome": "noAmount",
+  "body": "Your A/C debited by Rs. 750.00",
+  "expect": {}
+ },
+ {
+  "id": "en_no_currency",
+  "lang": "en",
+  "outcome": "noAmount",
+  "body": "You paid 25.00 to Uber. Card 4455",
+  "expect": {}
+ },
+ {
+  "id": "en_ambiguous_pound_word",
+  "lang": "en",
+  "outcome": "noAmount",
+  "body": "Paid 90 pounds at the market",
+  "expect": {}
+ },
+ {
+  "id": "en_no_number",
+  "lang": "en",
+  "outcome": "noAmount",
+  "body": "Your card has been blocked. Call the bank",
+  "expect": {}
+ },
+ {
+  "id": "ar_balance_only",
+  "lang": "ar",
+  "outcome": "noAmount",
+  "body": "رصيدك الحالي 5000 جنيه",
+  "expect": {}
+ },
+ {
+  "id": "ar_declined",
+  "lang": "ar",
+  "outcome": "declined",
+  "body": "تم رفض عملية بمبلغ 200 جنيه",
+  "expect": {}
+ },
+ {
+  "id": "ar_ambiguous_riyal",
+  "lang": "ar",
+  "outcome": "noAmount",
+  "body": "تم خصم 300 ريال من حسابك",
+  "expect": {}
+ },
+ {
+  "id": "ar_no_currency",
+  "lang": "ar",
+  "outcome": "noAmount",
+  "body": "تم خصم 300 من حسابك",
+  "expect": {}
+ },
+ {
+  "id": "en_you_sent_to",
+  "lang": "en",
+  "outcome": "suggest",
+  "body": "You sent EGP 500.00 to Ahmed Samy",
+  "expect": {
+   "amount": "500.00",
+   "currency": "EGP",
+   "direction": "expense"
+  }
+ },
+ {
+  "id": "en_sent_you_no_direction",
+  "lang": "en",
+  "outcome": "suggest",
+  "body": "Ahmed sent you EGP 500.00",
+  "expect": {
+   "amount": "500.00",
+   "currency": "EGP"
+  }
+ },
+ {
+  "id": "ar_sent_to_you_no_direction",
+  "lang": "ar",
+  "outcome": "suggest",
+  "body": "احمد ارسل لك ٥٠٠ جنيه",
+  "expect": {
+   "amount": "500.00",
+   "currency": "EGP"
+  }
+ },
+ {
+  "id": "ar_you_sent_expense",
+  "lang": "ar",
+  "outcome": "suggest",
+  "body": "قمت بارسال ٥٠٠ جنيه الى احمد",
+  "expect": {
+   "amount": "500.00",
+   "currency": "EGP",
+   "direction": "expense"
+  }
+ }
+]

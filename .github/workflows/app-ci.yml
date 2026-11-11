@@ -94,7 +94,7 @@ jobs:
       - name: "zaghlol_lints (T-002 - money, UI strings, print, SafeException)"
         working-directory: tools/lints
         run: |
-          if ! dart run bin/zaghlol_lints.dart ../../app ../../packages/zaghlol_parsing ../../packages/zaghlol_domain > lints.log 2>&1; then
+          if ! dart run bin/zaghlol_lints.dart ../../app ../../packages/zaghlol_parsing ../../packages/zaghlol_domain ../../packages/zaghlol_catalog ../../tools/catalog_build > lints.log 2>&1; then
             cat lints.log
             grep -E "^\S+:[0-9]+:" lints.log | head -n 20 | while read -r line; do echo "::error::zaghlol_lints: $line"; done
             exit 1
@@ -116,6 +116,9 @@ jobs:
             app/lib/core/platform/pigeon_secret_store.dart \
             app/android/app/src/main/kotlin/app/zaghlol/platform/keys/*.kt \
             app/ios/Runner/Platform/Keys/*.swift | grep -v '\.g\.')
+          # T-008: the SMS spike (Kotlin, except its code-only SpikeLog) and the
+          # Dart ingestion engines must not log either.
+          files="$files $(ls app/android/app/src/devSms/kotlin/app/zaghlol/spike/sms/*.kt app/lib/ingestion/*.dart | grep -v 'SpikeLog\.kt')"
           [ -n "$files" ] || { echo "::error::no key files found"; exit 1; }
           if grep -nE '\b(print|debugPrint|log|developer\.log|dump)\(|\b(stdout|stderr)\b|\bLog\.[a-z]+\(|println\(|Timber|NSLog|os_log|Logger\(|logStatements: *true' $files; then
             echo "::error::logging call in key code"
@@ -144,6 +147,16 @@ jobs:
       # registry exists (T-036), add `dart run registry_lint` over it here.
       - name: dart test (registry_lint)
         working-directory: tools/registry_lint
+        run: dart test
+      # T-030: seed codec and ES256 signature (incl. the backend vectors),
+      # then the catalog builder, whose test also fails when the committed
+      # app/assets/catalog files or tools/catalog_build/data/catalog_seed.csv
+      # are out of date (run the CLI, see its header).
+      - name: dart test (zaghlol_catalog)
+        working-directory: packages/zaghlol_catalog
+        run: dart test
+      - name: dart test (catalog_build)
+        working-directory: tools/catalog_build
         run: dart test
 
   golden:
@@ -207,7 +220,7 @@ jobs:
         working-directory: app/android
         run: |
           set -o pipefail
-          ./gradlew --no-daemon testDevNoSmsDebugUnitTest 2>&1 | tee ../gradle-test.log
+          ./gradlew --no-daemon testDevNoSmsDebugUnitTest testDevSmsDebugUnitTest 2>&1 | tee ../gradle-test.log
       # Guard against a green run with zero tests (for example an emptied test dir).
       # Flutter redirects Gradle's buildDir to app/build/app/.
       - name: Assert Kotlin tests actually ran
@@ -223,15 +236,26 @@ jobs:
             echo "::error::no Kotlin <testcase> found in Gradle results"
             exit 1
           fi
+          # T-008: the SMS spike's JVM tests live in src/testDevSms.
+          if ! grep -E "^> Task :app:testDevSmsDebugUnitTest$" app/gradle-test.log; then
+            echo "::error::testDevSmsDebugUnitTest did not execute"
+            exit 1
+          fi
+          n=$(cat app/build/app/test-results/testDevSmsDebugUnitTest/*.xml 2>/dev/null | grep -c "<testcase " || true)
+          echo "devSms kotlin testcases: $n"
+          if [ "$n" -lt 40 ]; then
+            echo "::error::expected the T-008 spike tests in testDevSmsDebugUnitTest, found $n"
+            exit 1
+          fi
       # T-165: AllowBackup / DataExtractionRules / FullBackupContent are fatal
       # in app/android/app/lint.xml; abortOnError fails the task on any of them.
       - name: Android lint (backup rules fatal)
         working-directory: app/android
         run: |
           set -o pipefail
-          if ! ./gradlew --no-daemon :app:lintDevNoSmsDebug 2>&1 | tee ../gradle-lint.log; then
-            report=$(find ../build/app -name 'lint-results-devNoSmsDebug.txt' | head -n 1)
-            if [ -n "$report" ]; then cat "$report"; fi
+          # T-165 F6: one Sms variant is linted too (devSms also holds the T-008 spike).
+          if ! ./gradlew --no-daemon :app:lintDevNoSmsDebug :app:lintDevSmsDebug 2>&1 | tee ../gradle-lint.log; then
+            for report in $(find ../build/app -name 'lint-results-dev*SmsDebug.txt'); do cat "$report"; done
             exit 1
           fi
       - name: Assert lint ran with the T-165 config
@@ -467,6 +491,13 @@ jobs:
           AAPT2=$(ls -d "$ANDROID_HOME"/build-tools/*/aapt2 | sort -V | tail -n 1)
           APK=$(find app/build/app/outputs -iname "*${FLAVOR}*${MODE}.apk" | head -n 1)
           bash .github/scripts/check-no-os-backup.sh "$AAPT2" "$APK"
+      # T-008 (Q5): the SMS spike exists only in devSms; its receiver requires
+      # BROADCAST_SMS. Every other flavour has no receiver, spike code or WorkManager.
+      - name: Assert SMS spike placement (T-008)
+        run: |
+          AAPT2=$(ls -d "$ANDROID_HOME"/build-tools/*/aapt2 | sort -V | tail -n 1)
+          APK=$(find app/build/app/outputs -iname "*${FLAVOR}*${MODE}.apk" | head -n 1)
+          bash .github/scripts/check-sms-spike-placement.sh "$AAPT2" "$APK" "$FLAVOR"
 
   ios:
     name: ios ${{ matrix.flavor }} (no codesign)

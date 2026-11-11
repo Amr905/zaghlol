@@ -55,4 +55,35 @@ public class StoreBindingVectorTests
 
         Assert.False(StoreBindingRef.Matches(null, InstallId.Parse("0193f2c4-7a10-4c52-9d3e-5b1f8a2c6e77")));
     }
+
+    /// <summary>
+    /// T-131: every vector verifies as an Apple <c>appAccountToken</c>, which is compared as a UUID (16 bytes). So the one mismatch
+    /// that is the same UUID in upper-case hex matches for Apple (Apple's payload carries a UUID, not our string); every other
+    /// mismatch is rejected there too.
+    /// </summary>
+    [Fact]
+    public void EveryVectorVerifiesAsAnAppAccountToken()
+    {
+        foreach (var vector in Vectors["vectors"]!.AsArray())
+        {
+            var installId = InstallId.Parse(vector!["installId"]!.GetValue<string>());
+            var expected = vector["storeBindingRef"]!.GetValue<string>();
+
+            Assert.True(StoreBindingRef.MatchesAppAccountToken(expected, installId));
+            Assert.True(StoreBindingRef.MatchesAppAccountToken(expected.ToUpperInvariant(), installId));
+            Assert.True(StoreBindingRef.TryCanonicalUuid(expected.ToUpperInvariant(), out var canonical));
+            Assert.Equal(expected, canonical);
+        }
+
+        foreach (var mismatch in Vectors["mismatches"]!.AsArray())
+        {
+            var installId = InstallId.Parse(mismatch!["installId"]!.GetValue<string>());
+            var value = mismatch["storeValue"]!.GetValue<string>();
+            var sameUuid = string.Equals(value, StoreBindingRef.Compute(installId), StringComparison.OrdinalIgnoreCase);
+            Assert.Equal(sameUuid, StoreBindingRef.MatchesAppAccountToken(value, installId));
+        }
+
+        Assert.False(StoreBindingRef.MatchesAppAccountToken(null, InstallId.Parse("0193f2c4-7a10-4c52-9d3e-5b1f8a2c6e77")));
+        Assert.False(StoreBindingRef.MatchesAppAccountToken("{" + StoreBindingRef.Compute(InstallId.Parse("0193f2c4-7a10-4c52-9d3e-5b1f8a2c6e77")) + "}", InstallId.Parse("0193f2c4-7a10-4c52-9d3e-5b1f8a2c6e77")));
+    }
 }

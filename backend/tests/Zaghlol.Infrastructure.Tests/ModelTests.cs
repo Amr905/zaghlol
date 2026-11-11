@@ -206,6 +206,12 @@ public partial class ModelTests
         Assert.Contains("acknowledged", worker["purchases"].UpdateColumns!);
         var app = GrantMatrix.Current.Single(g => g.Role == GrantMatrix.AppRw && g.Table == "purchases");
         Assert.DoesNotContain("ack_next_attempt_at", app.UpdateColumns!);
+
+        // T-131 §4: only verify (app_rw) advances the new-payment marker; a store notification (worker_rw) never can.
+        Assert.Contains("last_payment_at", app.UpdateColumns!);
+        Assert.DoesNotContain("last_payment_at", worker["purchases"].UpdateColumns!);
+        var opsRo = GrantMatrix.Current.Single(g => g.Role == GrantMatrix.OpsRo && g.Table == "purchases");
+        Assert.DoesNotContain("last_payment_at", opsRo.SelectColumns!);
     }
 
     [Fact]
@@ -224,7 +230,7 @@ public partial class ModelTests
         Assert.Null(worker.SelectColumns);
         Assert.Equal(["state", "acknowledged", "ack_next_attempt_at"], worker.UpdateColumns);
         Assert.Equal(
-            GrantMatrix.Flatten(GrantMatrix.InitialCreate.Concat(GrantMatrix.CatalogDrafts).Concat(GrantMatrix.PurchaseAckNextAttempt)),
+            GrantMatrix.Flatten(GrantMatrix.InitialCreate.Concat(GrantMatrix.CatalogDrafts).Concat(GrantMatrix.PurchaseAckNextAttempt).Concat(GrantMatrix.PurchaseLastPaymentAt)),
             GrantMatrix.Flatten(GrantMatrix.Current));
         Assert.Equal(GrantMatrix.Current.Count, GrantMatrix.Current.Select(g => (g.Role, g.Table)).Distinct().Count());
     }

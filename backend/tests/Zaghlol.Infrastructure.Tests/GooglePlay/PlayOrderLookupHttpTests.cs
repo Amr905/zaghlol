@@ -100,5 +100,13 @@ public sealed class PlayOrderLookupHttpTests : IDisposable
         public void OwnershipChecked(string path, OwnershipOutcome outcome)
         {
         }
+
+        public void EnvironmentSeen(string store, PurchaseEnvironment environment)
+        {
+        }
+
+        public void AppleJwsChecked(JwsSource source, AppleJwsFailure? failure)
+        {
+        }
     }
 }

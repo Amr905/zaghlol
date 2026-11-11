@@ -2,4 +2,8 @@
     <!-- ADR-004: SMS permissions exist only in the Sms flavor (Play SMS declaration build). -->
     <uses-permission android:name="android.permission.READ_SMS" />
     <uses-permission android:name="android.permission.RECEIVE_SMS" />
+    <!-- T-165 F6: the SMS permissions imply android.hardware.telephony; without
+         this Play would hide the app from devices without telephony (tablets),
+         which can still capture notifications and shares. -->
+    <uses-feature android:name="android.hardware.telephony" android:required="false" />
 </manifest>
