@@ -392,7 +392,10 @@ void main() {
                 at: t0,
               ),
           ]);
-          expect(counts.toSet(), {for (var i = 1; i <= 10; i++) i});
+          expect(
+            counts.map((r) => (r as SenderWritten).confirmedCount).toSet(),
+            {for (var i = 1; i <= 10; i++) i},
+          );
           final row = (await dao.sender('SYNTH-WALLET'))!;
           expect(row.confirmedCount, 10);
           expect(row.alwaysCapture, 0);
@@ -412,6 +415,46 @@ void main() {
           );
           expect((await dao.sender('com.synthetic.app'))!.confirmedCount, 0);
           expect(await dao.deleteSender('SYNTH-WALLET'), 1);
+        });
+
+        test('T-047 (FU-096 m-2): a sender on the other channel is a '
+            'ChannelConflict and its row is left as it is', () async {
+          final dao = CaptureControlsDao(db);
+          await dao.setAlwaysCapture(
+            sender: 'com.synthetic.app',
+            channel: SenderChannel.notification,
+            always: false,
+            at: t0,
+          );
+          expect(
+            await dao.setAlwaysCapture(
+              sender: 'com.synthetic.app',
+              channel: SenderChannel.sms,
+              always: true,
+              at: t0,
+            ),
+            isA<ChannelConflict>(),
+          );
+          expect(
+            await dao.recordConfirmation(
+              sender: 'com.synthetic.app',
+              channel: SenderChannel.sms,
+              at: t0,
+            ),
+            isA<ChannelConflict>(),
+          );
+          final row = (await dao.sender('com.synthetic.app'))!;
+          expect(row.channel, SenderChannel.notification);
+          expect(row.alwaysCapture, 0);
+          expect(row.confirmedCount, 0);
+          expect(
+            await dao.recordConfirmation(
+              sender: 'com.synthetic.app',
+              channel: SenderChannel.notification,
+              at: t0,
+            ),
+            isA<SenderWritten>(),
+          );
         });
 
         test('custom templates by sender; sample hash only', () async {
