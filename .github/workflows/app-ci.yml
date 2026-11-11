@@ -108,7 +108,7 @@ jobs:
       # used: every error is a code-only SecretStoreApiError).
       # T-016 (S-5): also stdout/stderr/dump, and core/db/schema.
       # T-017: also the DAOs, the frozen migration steps and the .drift DDL.
-      - name: no logging in key, database, backup crypto and capture code (T-015, T-016, T-017, T-148, T-039, T-041)
+      - name: no logging in key, database, backup crypto and capture code (T-015, T-016, T-017, T-148, T-039, T-040, T-041)
         run: |
           set -o pipefail
           files=$(ls app/lib/core/db/*.dart app/lib/core/db/schema/*.dart app/lib/core/db/schema/*.drift \
@@ -127,6 +127,10 @@ jobs:
           ls app/android/app/src/main/kotlin/app/zaghlol/platform/spool/*.kt app/android/app/src/main/kotlin/app/zaghlol/platform/capture/AndroidCaptureHost.kt > /dev/null \
             || { echo "::error::spool / capture host sources not found"; exit 1; }
           files="$files $(find app/android/app/src/main/kotlin/app/zaghlol/platform/spool app/android/app/src/main/kotlin/app/zaghlol/platform/capture app/android/app/src/main/kotlin/app/zaghlol/platform/guard -name '*.kt' ! -name '*.g.kt' 2>/dev/null || true)"
+          # T-040 (design note section 9): the SMS receiver glue (src/sms) never logs.
+          ls app/android/app/src/sms/kotlin/app/zaghlol/platform/capture/SmsReceiver.kt > /dev/null \
+            || { echo "::error::SmsReceiver source not found"; exit 1; }
+          files="$files $(find app/android/app/src/sms/kotlin -name '*.kt')"
           # T-041 (design note section 10): the ingestion worker, drain loop and
           # headless engine never log.
           ls app/android/app/src/main/kotlin/app/zaghlol/platform/ingest/IngestionWorker.kt > /dev/null \
@@ -254,10 +258,11 @@ jobs:
             exit 1
           fi
           # T-039: the spool and capture host JVM tests (moved from the spike) run in every variant.
+          # T-040: plus the receiver intake, adapters, reserve and coalescing tests (~225 at T-040).
           n=$(cat app/build/app/test-results/testDevNoSmsDebugUnitTest/*.xml 2>/dev/null | grep -cE '<testcase [^>]*classname="app\.zaghlol\.platform\.(spool|capture)\.' || true)
           echo "spool + capture kotlin testcases: $n"
-          if [ "$n" -lt 75 ]; then
-            echo "::error::expected the T-039 spool tests in testDevNoSmsDebugUnitTest, found $n"
+          if [ "$n" -lt 200 ]; then
+            echo "::error::expected the T-039/T-040 spool and capture tests in testDevNoSmsDebugUnitTest, found $n"
             exit 1
           fi
           # T-041: the worker, drain loop and headless engine JVM tests (moved
@@ -274,10 +279,11 @@ jobs:
             exit 1
           fi
           # T-039 moved the spool tests and T-041 the worker tests to src/test;
-          # count the spike's own tests (receiver intake, Guard, metrics) only.
+          # T-040 replaced the spike receiver, intake and Guard: count the
+          # spike's own tests (latency recorder, sources, canary) only.
           n=$(cat app/build/app/test-results/testDevSmsDebugUnitTest/*.xml 2>/dev/null | grep -cE '<testcase [^>]*classname="app\.zaghlol\.spike\.' || true)
           echo "devSms spike kotlin testcases: $n"
-          if [ "$n" -lt 20 ]; then
+          if [ "$n" -lt 8 ]; then
             echo "::error::expected the T-008 spike tests in testDevSmsDebugUnitTest, found $n"
             exit 1
           fi
@@ -546,12 +552,12 @@ jobs:
           AAPT2=$(ls -d "$ANDROID_HOME"/build-tools/*/aapt2 | sort -V | tail -n 1)
           APK=$(find app/build/app/outputs -iname "*${FLAVOR}*${MODE}.apk" | head -n 1)
           bash .github/scripts/check-no-os-backup.sh "$AAPT2" "$APK"
-      # T-008 (Q5): the SMS spike receiver exists only in devSms; it requires
-      # BROADCAST_SMS. Every other flavour has no receiver, spike code or spike
-      # strings. T-041: the ingestion worker (WorkManager) is in every
+      # T-008 (Q5) / T-040: every *Sms flavour has the production SmsReceiver
+      # (BROADCAST_SMS), no *NoSms flavour has it or its class; spike code,
+      # strings and the spike Guard base exist only in devSms. T-041: the ingestion worker (WorkManager) is in every
       # flavour, without DiagnosticsReceiver, foreground-service types or (in
       # release) androidx.test components.
-      - name: Assert SMS spike and ingestion worker placement (T-008, T-041)
+      - name: Assert SMS receiver, spike and ingestion worker placement (T-008, T-040, T-041)
         run: |
           AAPT2=$(ls -d "$ANDROID_HOME"/build-tools/*/aapt2 | sort -V | tail -n 1)
           APK=$(find app/build/app/outputs -iname "*${FLAVOR}*${MODE}.apk" | head -n 1)

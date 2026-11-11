@@ -103,4 +103,16 @@ class SmsCaptureScenarioTest {
         // The burst of the latency run (40 within seconds) is not rate-limited.
         repeat(40) { assertTrue(spike.decide(AndroidGuardChannel.SMS, "5550100", "spike: you paid EGP $it.00 at SYNTH SHOP card *4321") is GuardDecision.Keep) }
     }
+
+    /** The device script sends exactly the scenario bodies (single-quoted, verbatim). */
+    @Test
+    fun theDeviceScriptCarriesTheScenarioBodiesVerbatim() {
+        val script = File("../../../.github/scripts/sms-spike-device.sh").readText()
+        val s = SmsCaptureScenario
+        for (body in listOf(s.PERSONAL_BODY, s.OTP_BODY, s.LONG_BODY, s.SINGLE_BODY, s.IGNORED_CARD_BODY, s.OTHER_CARD_BODY)) {
+            assertTrue(body.take(30), script.contains("'$body'"))
+        }
+        for (sender in listOf(s.PERSONAL, s.USER_SENDER, s.REGISTRY_SENDER)) assertTrue(sender, script.contains("\"$sender|"))
+        assertTrue(script.contains("SmsReceiverEmulatorTest"))
+    }
 }
