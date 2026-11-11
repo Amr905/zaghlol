@@ -1,0 +1,223 @@
+{
+  "comment": "T-148 ZGLB v1 vectors. Synthetic. Produced by app/tool/backup_vectors.py (Python cryptography + argon2-cffi + unicodedata), independent of the Dart code.",
+  "unicodeVersion": "15.1.0",
+  "nfc": [
+    {
+      "input": "0627 0653",
+      "nfc": "0622"
+    },
+    {
+      "input": "0627 0654",
+      "nfc": "0623"
+    },
+    {
+      "input": "0648 0654",
+      "nfc": "0624"
+    },
+    {
+      "input": "0627 0655",
+      "nfc": "0625"
+    },
+    {
+      "input": "064A 0654",
+      "nfc": "0626"
+    },
+    {
+      "input": "06D5 0654",
+      "nfc": "06C0"
+    },
+    {
+      "input": "06C1 0654",
+      "nfc": "06C2"
+    },
+    {
+      "input": "06D2 0654",
+      "nfc": "06D3"
+    },
+    {
+      "input": "0623",
+      "nfc": "0623"
+    },
+    {
+      "input": "0647 0645 0632 0629",
+      "nfc": "0647 0645 0632 0629"
+    },
+    {
+      "input": "0628 0651 0650",
+      "nfc": "0628 0650 0651"
+    },
+    {
+      "input": "0065 0301",
+      "nfc": "00E9"
+    },
+    {
+      "input": "1100 1161 11A8",
+      "nfc": "AC01"
+    },
+    {
+      "input": "212B",
+      "nfc": "00C5"
+    }
+  ],
+  "cases": [
+    {
+      "name": "arabic-2.5-chunks-64k",
+      "passphrase": "\u0643\u0644\u0645\u0629\u00a0\u0633\u0631 \u0663\u0664\u06f5 \u0627\u0654\u0645\u0627\u0646",
+      "passphraseCodePoints": "0643 0644 0645 0629 00A0 0633 0631 0020 0663 0664 06F5 0020 0627 0654 0645 0627 0646",
+      "equivalentPassphrases": [
+        "\u0643\u0644\u0645\u0629 \u0633\u0631 345 \u0623\u0645\u0627\u0646",
+        "\u0643\u0644\u0645\u0629\u2009\u0633\u0631 \u0663\u0664\u0665 \u0623\u0645\u0627\u0646"
+      ],
+      "normalizedCodePoints": "0643 0644 0645 0629 0020 0633 0631 0020 0033 0034 0035 0020 0623 0645 0627 0646",
+      "pHex": "d983d984d985d8a920d8b3d8b12033343520d8a3d985d8a7d986",
+      "saltHex": "e781f5d4484d8599d3d13c2ea5cd547d",
+      "memoryKiB": 65536,
+      "iterations": 3,
+      "parallelism": 1,
+      "kekHex": "98643ce8a752551525a2e04ba52a6168f8b2bf285e4335254980b7393537e9a1",
+      "kbkHex": "902eefeb1d624e098ad91e74f960cfed7268ddb0c6be1ccb12ccd6111e3c2497",
+      "wrapNonceHex": "9f7ffbf86fc35fe2ad47cbb5",
+      "wrapCtHex": "001d67ffe4ec941cd6be41d014f02ad21cbacfa7d9fa4c6808202c2591352417e2d3fec372a836f04eb7cef93435bdaf",
+      "kbkIdHex": "a14be5a1865c97b4f42ea992e0c21741",
+      "fileIdHex": "ab4cccac2856b379f3e501a1199e1d6b",
+      "noncePrefixHex": "86976a56f3554b98",
+      "createdAtMs": 1762848000001,
+      "seq": 7,
+      "schemaVersion": 3,
+      "contentsVersion": 1,
+      "platform": "android",
+      "appVersion": "0.1.0+1",
+      "chunkSize": 65536,
+      "payloadLength": 163840,
+      "payloadFormula": "byte[i] = (i * 131 + (i >> 8)) & 0xff",
+      "kChunkHex": "1be9d5f1d20fe933eb41ec0ffb0934a780ee0cb58714ecb13dd2152829c1c493",
+      "kSnapHex": "ae6859537fe5fb25e105accb7bcba79dd859f57d65b49f876d05032cf8fbcb3b",
+      "headerBlockHex": "5a474c420100bcac01a501010250e781f5d4484d8599d3d13c2ea5cd547d031a000100000403050102a30101024c9f7ffbf86fc35fe2ad47cbb5035830001d67ffe4ec941cd6be41d014f02ad21cbacfa7d9fa4c6808202c2591352417e2d3fec372a836f04eb7cef93435bdaf0350a14be5a1865c97b4f42ea992e0c217410450ab4cccac2856b379f3e501a1199e1d6b054886976a56f3554b98061a00010000071b0000019a71edc801080709030a010b67616e64726f69640c67302e312e302b31",
+      "chunkCount": 3,
+      "firstChunkSha256": "ed34259a0ce1d3a63690711200bdb4fb25f2bb06a15eb187021d0558a0f1d4b2",
+      "firstChunkTagHex": "2ced1b27e538690d5598bcae674c58ba",
+      "lastChunkSha256": "636cc358882e1dcd67f6e6d94a58193de1d6a2c8f1a8da3a72001e6c589ab48f",
+      "lastChunkTagHex": "a762b5c7dbdd04708893c5f6829f407b",
+      "lastChunkLength": 32784,
+      "fileLength": 164083,
+      "fileSha256": "9aa55b9761cd147ea78dd2bab09ae1b946f5ed1de8297ca6c31bffc85b2eb9f7"
+    },
+    {
+      "name": "ascii-1.5-chunks-1m",
+      "passphrase": "correct horse battery",
+      "passphraseCodePoints": "0063 006F 0072 0072 0065 0063 0074 0020 0068 006F 0072 0073 0065 0020 0062 0061 0074 0074 0065 0072 0079",
+      "equivalentPassphrases": [],
+      "normalizedCodePoints": "0063 006F 0072 0072 0065 0063 0074 0020 0068 006F 0072 0073 0065 0020 0062 0061 0074 0074 0065 0072 0079",
+      "pHex": "636f727265637420686f7273652062617474657279",
+      "saltHex": "2134c5ce1e93190f17729bc0278e3562",
+      "memoryKiB": 65536,
+      "iterations": 3,
+      "parallelism": 1,
+      "kekHex": "e3fe44b7958c7de5e2a6317db5b9945ea26768d4f963d93a42eb651745f7adc8",
+      "kbkHex": "a006e00632d7578f274456c8b4f1035a743247b552408b7bd2c9b3bdc4ad9be0",
+      "wrapNonceHex": "b8be6a07d4eb550205f59a4b",
+      "wrapCtHex": "11f1d9ce4048b154b3dd140e56c179decc5b24f3cdd43ba6ebbde9d1b0fc42f8a3e57e1495bc1174bf8f157d6f2f0bf6",
+      "kbkIdHex": "f8982597a3a06152395809bc535205fb",
+      "fileIdHex": "ebfd0eaca685d1e0cd888d15d98cc532",
+      "noncePrefixHex": "c22c4835a3c7d6cd",
+      "createdAtMs": 1762848000041,
+      "seq": 7,
+      "schemaVersion": 3,
+      "contentsVersion": 1,
+      "platform": "android",
+      "appVersion": "0.1.0+1",
+      "chunkSize": 1048576,
+      "payloadLength": 1572864,
+      "payloadFormula": "byte[i] = (i * 131 + (i >> 8)) & 0xff",
+      "kChunkHex": "f04b8f45120da51e46934b371e3d3de4c45eed9f9ed90a66bafcaa65c91d000b",
+      "kSnapHex": "496cd55df2d36503c85d5298e38ddd9faa7b11b833853336cf983968f59fa5fa",
+      "headerBlockHex": "5a474c420100bcac01a5010102502134c5ce1e93190f17729bc0278e3562031a000100000403050102a30101024cb8be6a07d4eb550205f59a4b03583011f1d9ce4048b154b3dd140e56c179decc5b24f3cdd43ba6ebbde9d1b0fc42f8a3e57e1495bc1174bf8f157d6f2f0bf60350f8982597a3a06152395809bc535205fb0450ebfd0eaca685d1e0cd888d15d98cc5320548c22c4835a3c7d6cd061a00100000071b0000019a71edc829080709030a010b67616e64726f69640c67302e312e302b31",
+      "chunkCount": 2,
+      "firstChunkSha256": "f14945f60f31bc7d161379f61292e163aaedb292b6192c3722a5ed97b6567157",
+      "firstChunkTagHex": "29e6d890faec5e938e078dcd13179998",
+      "lastChunkSha256": "6cd1af38207868ac671ab7ad9fae9ffed9b3d1b3da2b95cc9cfb2279e997d5ac",
+      "lastChunkTagHex": "da9862b2efa4555a5afb951f538792d7",
+      "lastChunkLength": 524304,
+      "fileLength": 1573091,
+      "fileSha256": "c1e48b90bd73f89d89fc8618561f9f5f2779b21d92ecc91f10cc45ff69b9c354"
+    },
+    {
+      "name": "empty-payload",
+      "passphrase": "empty payload pass",
+      "passphraseCodePoints": "0065 006D 0070 0074 0079 0020 0070 0061 0079 006C 006F 0061 0064 0020 0070 0061 0073 0073",
+      "equivalentPassphrases": [],
+      "normalizedCodePoints": "0065 006D 0070 0074 0079 0020 0070 0061 0079 006C 006F 0061 0064 0020 0070 0061 0073 0073",
+      "pHex": "656d707479207061796c6f61642070617373",
+      "saltHex": "fc7317b9e1660cd028a45210e56ca3ec",
+      "memoryKiB": 65536,
+      "iterations": 3,
+      "parallelism": 1,
+      "kekHex": "e6dc5a6223d25d686d7d0f0968e095da5d317542d4eb607394df1c0cea1c9b6f",
+      "kbkHex": "a11c8b6b7b0d4b28cc198d8d2b8e8e2ae6cf625389e93b745f23409044f3432b",
+      "wrapNonceHex": "26712935716025851fd9ac6a",
+      "wrapCtHex": "c091cd00f7812565cd5a070050620ff6f7a0671d72a2e1f12c235c6dc4519b368072f7d45e5cb532c8c365b0e024cbb5",
+      "kbkIdHex": "bec8bd546301695ec68d5e6eab465047",
+      "fileIdHex": "c79961e5fdf2bfd35f3ad1b0ee95184d",
+      "noncePrefixHex": "802fd396bbeb7bae",
+      "createdAtMs": 1762848000081,
+      "seq": 7,
+      "schemaVersion": 3,
+      "contentsVersion": 1,
+      "platform": "android",
+      "appVersion": "0.1.0+1",
+      "chunkSize": 65536,
+      "payloadLength": 0,
+      "payloadFormula": "byte[i] = (i * 131 + (i >> 8)) & 0xff",
+      "kChunkHex": "64e374a23742905966b46952005788fb6bb0c17f79cf5471bacc5fad0e0a0ec7",
+      "kSnapHex": "a95191a77f55cd1fb6effb1ace1d8eee0407078de8894849745e1c270004d811",
+      "headerBlockHex": "5a474c420100bcac01a501010250fc7317b9e1660cd028a45210e56ca3ec031a000100000403050102a30101024c26712935716025851fd9ac6a035830c091cd00f7812565cd5a070050620ff6f7a0671d72a2e1f12c235c6dc4519b368072f7d45e5cb532c8c365b0e024cbb50350bec8bd546301695ec68d5e6eab4650470450c79961e5fdf2bfd35f3ad1b0ee95184d0548802fd396bbeb7bae061a00010000071b0000019a71edc851080709030a010b67616e64726f69640c67302e312e302b31",
+      "chunkCount": 1,
+      "firstChunkSha256": "7093ee22c15848a1afd75ece93be97f436733cbe7d501e3014fa71b9f29fbc4f",
+      "firstChunkTagHex": "8315d9a7250254288781f9f8d719b911",
+      "lastChunkSha256": "7093ee22c15848a1afd75ece93be97f436733cbe7d501e3014fa71b9f29fbc4f",
+      "lastChunkTagHex": "8315d9a7250254288781f9f8d719b911",
+      "lastChunkLength": 16,
+      "fileLength": 211,
+      "fileSha256": "2cd8e5f3ba90681ee22bcf62394dff601d4de2e8c6c8baf656c10a9518f2799e"
+    },
+    {
+      "name": "exact-2-chunks",
+      "passphrase": "exact boundary pass",
+      "passphraseCodePoints": "0065 0078 0061 0063 0074 0020 0062 006F 0075 006E 0064 0061 0072 0079 0020 0070 0061 0073 0073",
+      "equivalentPassphrases": [],
+      "normalizedCodePoints": "0065 0078 0061 0063 0074 0020 0062 006F 0075 006E 0064 0061 0072 0079 0020 0070 0061 0073 0073",
+      "pHex": "657861637420626f756e646172792070617373",
+      "saltHex": "f6d511c6633b50736db530b30c734810",
+      "memoryKiB": 65536,
+      "iterations": 3,
+      "parallelism": 1,
+      "kekHex": "d94b9999254d00d5950a2b97c016b722a5bf5d96dce2d33e3eb4d35fcebbd147",
+      "kbkHex": "f9cb4e287e8c91a8f41071a1faa5cd9f35ee8fed22d6c9b8e947cf6914409206",
+      "wrapNonceHex": "5c3a61e6917cbef1e5dfda1e",
+      "wrapCtHex": "7b90682ae2562fd01a3f664c277bd4bba4f7ce760c2beb6d3c3dbcb62d9b3d72b555619069b550f8e459c5094d163468",
+      "kbkIdHex": "d3fb12e0aa6d3c9f3d96ac87557ae402",
+      "fileIdHex": "748fab8e275ad8b1b56c2cc3eaf177f9",
+      "noncePrefixHex": "237f930998074699",
+      "createdAtMs": 1762848000121,
+      "seq": 7,
+      "schemaVersion": 3,
+      "contentsVersion": 1,
+      "platform": "android",
+      "appVersion": "0.1.0+1",
+      "chunkSize": 65536,
+      "payloadLength": 131072,
+      "payloadFormula": "byte[i] = (i * 131 + (i >> 8)) & 0xff",
+      "kChunkHex": "63b15f6847ba08f95065849312b59420a94c9813943d10efb0d3c3729528b3c8",
+      "kSnapHex": "0996906f136f82a6cc9a388fa62018c5e4584993e2ba0981f01f56326e8833c4",
+      "headerBlockHex": "5a474c420100bcac01a501010250f6d511c6633b50736db530b30c734810031a000100000403050102a30101024c5c3a61e6917cbef1e5dfda1e0358307b90682ae2562fd01a3f664c277bd4bba4f7ce760c2beb6d3c3dbcb62d9b3d72b555619069b550f8e459c5094d1634680350d3fb12e0aa6d3c9f3d96ac87557ae4020450748fab8e275ad8b1b56c2cc3eaf177f90548237f930998074699061a00010000071b0000019a71edc879080709030a010b67616e64726f69640c67302e312e302b31",
+      "chunkCount": 2,
+      "firstChunkSha256": "b520fd103f7e7986d2e0c1ee884be1988fdf0d5e94dd5431991cca32f7dbdf45",
+      "firstChunkTagHex": "8641c8e438b221a927f58f127ef9ebe1",
+      "lastChunkSha256": "059e0b3bd3c8a11e4a6c5ae58a88393550fe8f26e2f51d3fa044c71ff4292396",
+      "lastChunkTagHex": "06387b36e95217394bf2b63e1fbee58c",
+      "lastChunkLength": 65552,
+      "fileLength": 131299,
+      "fileSha256": "10df0b000f06a84eab2e08d2ab1d80fd73f55135c87f7afa754c0d1882e8a84a"
+    }
+  ]
+}

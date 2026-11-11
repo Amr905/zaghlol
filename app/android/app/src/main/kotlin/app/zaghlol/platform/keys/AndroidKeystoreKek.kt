@@ -9,7 +9,7 @@ import javax.crypto.SecretKey
 
 /**
  * T-015: the Android Keystore AES-256-GCM wrapping key for K_db (design note
- * §2). Non-exportable; no user authentication and no unlocked-device
+ * §2); T-148 uses a second instance ([BACKUP_KEK_ALIAS]) for K_bk. Non-exportable; no user authentication and no unlocked-device
  * requirement, so background capture (T-008) can open the database while the
  * phone is locked (security-model §3 "Background access"). StrongBox when the
  * device has it, the TEE otherwise.
@@ -62,5 +62,8 @@ class AndroidKeystoreKek(private val alias: String = DB_KEK_ALIAS) : Kek {
   companion object {
     const val PROVIDER = "AndroidKeyStore"
     const val DB_KEK_ALIAS = "zaghlol_db_kek_v1"
+
+    /** T-148: wraps K_bk (security-model §3). */
+    const val BACKUP_KEK_ALIAS = "zaghlol_bk_kek_v1"
   }
 }

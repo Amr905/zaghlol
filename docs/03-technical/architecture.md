@@ -252,7 +252,8 @@ App dependencies are pinned in `pubspec.lock`. Versions are the latest stable at
 | `flutter_riverpod`, `riverpod_annotation`, `riverpod_generator` (3.x) | State + DI (ADR-001) | Bloc, Provider + GetIt |
 | `drift`, `drift_dev` (≥ 2.32) + `sqlite3` (3.x) with the `sqlite3mc` build hook | Typed SQL, migrations, FTS5, encryption via SQLite3MultipleCiphers (ADR-002) | `sqflite_sqlcipher` (extra setup), Isar/ObjectBox (no SQL/FTS) |
 | *(none: own Pigeon channel `SecretStoreHostApi`)* | DB / backup / spool key storage in Keystore/Keychain, device-only (ADR-002 Amendment 2026-11-10, T-015) | `flutter_secure_storage`: deletes values on read errors by default (`resetOnError`), flattens Keystore errors, stores in SharedPreferences on Android |
-| `cryptography` + `cryptography_flutter` | AES-256-GCM (hardware-accelerated), Argon2id, ES256 verification | `pointycastle` (slow pure Dart), libsodium bindings (2nd crypto stack) |
+| `cryptography` + `cryptography_flutter` (2.9 / 2.3) | AES-256-GCM (OS-accelerated on Android and iOS) and HKDF for backups (T-148) | `pointycastle` AES-GCM (slow pure Dart), libsodium bindings (2nd native crypto stack) |
+| `hashlib` (2.4, pure Dart) | Argon2id for the backup passphrase (ADR-011 amendment; `cryptography_flutter` does not accelerate Argon2, and `hashlib` publishes timings at our parameters) | `cryptography`'s `DartArgon2id` (no published performance), `sodium_libs` (native binaries for a setup-only cost) |
 | `pigeon` (dev) | Type-safe platform channels | Hand-written MethodChannels |
 | `go_router` | Declarative routing, deep links | Navigator 2 by hand |
 | `intl` + Flutter gen-l10n | ar-EG / en strings, digits, dates (ADR-017) | `easy_localization` |
