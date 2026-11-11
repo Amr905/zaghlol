@@ -1,4 +1,4 @@
-package app.zaghlol.spike.sms
+package app.zaghlol.platform.spool
 
 import org.junit.Assert.assertArrayEquals
 import org.junit.Assert.assertEquals

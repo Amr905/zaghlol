@@ -1,6 +1,5 @@
-package app.zaghlol.spike.sms
+package app.zaghlol.platform.spool
 
-import app.zaghlol.platform.spool.SpoolKey
 import javax.crypto.AEADBadTagException
 import javax.crypto.Cipher
 import javax.crypto.spec.GCMParameterSpec

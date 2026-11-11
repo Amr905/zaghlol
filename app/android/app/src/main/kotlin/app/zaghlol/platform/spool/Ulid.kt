@@ -1,4 +1,4 @@
-package app.zaghlol.spike.sms
+package app.zaghlol.platform.spool
 
 import java.security.SecureRandom
 
@@ -40,6 +40,14 @@ class UlidGenerator(
         val PATTERN = Regex("^[0-9A-HJKMNP-TV-Z]{26}$")
 
         fun isValid(id: String): Boolean = PATTERN.matches(id)
+
+        /** The 48-bit millisecond time of a valid ULID (its first 10 characters). */
+        fun timeMs(id: String): Long {
+            require(isValid(id)) { "ULID" }
+            var t = 0L
+            for (i in 0 until 10) t = (t shl 5) or ALPHABET.indexOf(id[i]).toLong()
+            return t
+        }
 
         internal fun encode(ms: Long, rnd: ByteArray): String {
             val out = CharArray(26)

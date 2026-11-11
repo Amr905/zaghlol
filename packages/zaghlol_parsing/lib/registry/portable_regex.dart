@@ -47,7 +47,9 @@ const String _shorthand = 'bBwWdDsSpPux';
 /// `uppercase`, `shorthand_escape`, `backreference`, `escape`,
 /// `control_char` (a raw control character; write a line feed as `\n`),
 /// `inline_flag`, `lookaround`, `named_group`, `atomic_group`, `possessive`,
-/// `posix_class`, `nested_class`, `class_set_operation`, `capture_groups`
+/// `posix_class` (`[` inside a class followed by `:`, or a class whose first
+/// member is `:`), `nested_class` (`[` inside a class, or a leading `]`),
+/// `class_set_operation` (`&&` or `--` inside a class), `capture_groups`
 /// (only when [maxCaptureGroups] is given and exceeded), `no_capture_group`
 /// (only when [requireCaptureGroup]).
 List<String> portableRegexProblems(
@@ -121,6 +123,15 @@ List<String> portableRegexProblems(
       if (i + 1 < n && exported[i + 1] == '^') {
         classStart = i + 1;
         i += 1;
+      }
+      if (i + 1 < n && exported[i + 1] == ':') {
+        // A class whose first member is `:`: ICU reads `[:` as the start of
+        // a POSIX property `[:name:]` and scans ahead for the next `:]`, so
+        // `[:=]...[ :]` is a syntax error on Android (FU-101 M-1) and
+        // `[:l:]` would mean a property, not the set {':', 'l'}. `[^:` is
+        // literal in ICU 74 but rejected too, for older ICU (API 26). Put
+        // the `:` later in the class: `[=:]`.
+        problems.add('posix_class');
       }
       i += 1;
       continue;

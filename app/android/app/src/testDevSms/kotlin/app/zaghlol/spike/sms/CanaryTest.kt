@@ -1,6 +1,14 @@
 package app.zaghlol.spike.sms
 
 import app.zaghlol.platform.capture.CaptureApiError
+import app.zaghlol.platform.capture.FakeDevice
+import app.zaghlol.platform.capture.FakeScheduler
+import app.zaghlol.platform.spool.AdmissionClass
+import app.zaghlol.platform.spool.FlakySpoolCipher
+import app.zaghlol.platform.spool.SpoolClaim
+import app.zaghlol.platform.spool.record
+import app.zaghlol.platform.spool.storeIn
+import app.zaghlol.platform.spool.tempDir
 import org.junit.After
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertFalse
@@ -68,7 +76,7 @@ class CanaryTest {
 
         // Error paths: a failing cipher and scheduler whose messages carry the canary.
         val hostile = SpoolHost(2, storeIn(dir, FlakySpoolCipher(100, canary)), SpoolClaim(), { throw IllegalStateException(canary) }, FakeDevice(), metrics) { null }
-        storeIn(dir).write(record(body = canary))
+        storeIn(dir).write(record(body = canary), AdmissionClass.PRIORITY)
         val thrown = ArrayList<Throwable>()
         try {
             hostile.scheduleIngestionNow()

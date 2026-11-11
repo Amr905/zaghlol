@@ -1,5 +1,9 @@
 package app.zaghlol.spike.sms
 
+import app.zaghlol.platform.capture.IngestScheduler
+import app.zaghlol.platform.spool.AdmissionClass
+import app.zaghlol.platform.spool.SpoolRecord
+import app.zaghlol.platform.spool.SpoolStore
 import java.util.concurrent.ExecutorService
 import java.util.concurrent.ScheduledExecutorService
 import java.util.concurrent.TimeUnit
@@ -35,11 +39,6 @@ object SmsAssembler {
     }
 }
 
-/** Enqueues the expedited ingestion work. */
-fun interface IngestScheduler {
-    fun enqueue()
-}
-
 /**
  * The receiver's work after `goAsync()` (design note section 2): Guard, spool
  * write, enqueue. No engine, no parse, no DB.
@@ -54,6 +53,7 @@ class SmsIntake(
     /** Returns the ids written. Throws only for unexpected errors (the caller still finishes). */
     fun process(messages: List<AssembledSms>, stamp: ReceiveStamp): List<String> {
         val written = ArrayList<String>()
+        var refused = false
         for (m in messages) {
             when (val d = guard.decide(SpikeGuard.CHANNEL_SMS, m.source, m.body)) {
                 is SpikeGuard.Decision.Drop -> SpikeLog.e(SpikeLog.Code.RX_DROP)
@@ -71,7 +71,7 @@ class SmsIntake(
                         bootCount = stamp.bootCount,
                     )
                     val result = try {
-                        store.write(record)
+                        store.write(record, AdmissionClass.PRIORITY) // spike Guard: allowlisted senders only
                     } catch (_: Exception) {
                         SpikeLog.e(SpikeLog.Code.SPOOL_WRITE_FAILED)
                         null
@@ -82,13 +82,17 @@ class SmsIntake(
                             metrics?.spooled(result.id, stamp.elapsedNs, nanoClock(), stamp.wallMs)
                             SpikeLog.e(SpikeLog.Code.SPOOL_WRITTEN, (nanoClock() - stamp.elapsedNs) / 1_000_000)
                         }
-                        SpoolStore.WriteResult.Full -> SpikeLog.e(SpikeLog.Code.SPOOL_FULL)
+                        is SpoolStore.WriteResult.Refused -> {
+                            // Recorded in the capture status by the store; the drain still runs (T-039 note section 4).
+                            refused = true
+                            SpikeLog.e(SpikeLog.Code.SPOOL_FULL)
+                        }
                         null -> Unit
                     }
                 }
             }
         }
-        if (written.isNotEmpty()) {
+        if (written.isNotEmpty() || refused) {
             try {
                 scheduler.enqueue()
                 val now = nanoClock()

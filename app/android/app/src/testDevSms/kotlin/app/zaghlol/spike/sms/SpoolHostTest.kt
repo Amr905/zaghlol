@@ -1,23 +1,20 @@
 package app.zaghlol.spike.sms
 
 import app.zaghlol.platform.capture.CaptureApiError
-import app.zaghlol.platform.capture.CaptureCapabilities
+import app.zaghlol.platform.capture.FakeDevice
+import app.zaghlol.platform.capture.FakeScheduler
 import app.zaghlol.platform.capture.InboxQuery
+import app.zaghlol.platform.capture.IngestScheduler
+import app.zaghlol.platform.spool.SpoolClaim
+import app.zaghlol.platform.spool.put
+import app.zaghlol.platform.spool.storeIn
+import app.zaghlol.platform.spool.tempDir
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertNull
 import org.junit.Assert.assertTrue
 import org.junit.Assert.fail
 import org.junit.Test
 import java.io.File
-
-class FakeDevice : CaptureDevice {
-    var settingsOpened = 0
-    override fun capabilities() = CaptureCapabilities(true, true, false, true, 34)
-    override fun isIgnoringBatteryOptimizations() = false
-    override fun openBatteryOptimizationSettings() {
-        settingsOpened++
-    }
-}
 
 class SpoolHostTest {
     private val dir = tempDir()
@@ -28,7 +25,7 @@ class SpoolHostTest {
 
     private fun host(engine: Long) = SpoolHost(engine, store, claim, sched, device, null) { null }
 
-    private fun write(body: String) = (store.write(record(body = body)) as SpoolStore.WriteResult.Written).id
+    private fun write(body: String) = store.put(body)
 
     private fun expectCode(code: String, block: () -> Unit) {
         try {

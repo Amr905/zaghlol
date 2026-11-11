@@ -10,9 +10,12 @@
 //
 // T-008 (SPK-01 spike, devSms only) implements drainSpool, ackSpool,
 // scheduleIngestionNow, isIgnoringBatteryOptimizations,
-// requestIgnoreBatteryOptimizations and getCapabilities. Every other method
-// answers NOT_AVAILABLE until its owner task (T-038 Guard config, T-039
-// spool, T-040 receiver and permission, T-042 inbox, T-043 notifications).
+// requestIgnoreBatteryOptimizations and getCapabilities. T-039 adds the
+// production host (AndroidCaptureHost: spool, status, writeGuardConfig
+// pass-through) and getSpoolStatus / clearSpoolAlerts; writeGuardConfig takes
+// the plaintext user part (renamed from encryptedConfig, FU-097 L-2). Every
+// other method answers NOT_AVAILABLE until its owner task (T-040 receiver,
+// permission and Guard wiring, T-042 inbox, T-043 notifications).
 import 'package:pigeon/pigeon.dart';
 
 @ConfigurePigeon(
@@ -89,6 +92,45 @@ class SpoolEntry {
   int? simSlot;
 }
 
+/// The Guard config as native code holds it (platform-channels.md 1.1).
+enum GuardConfigState { unknown, full, baseOnly, userUnreadable, baseInvalid }
+
+/// Capture alert counters (platform-channels.md 1.3, T-039). Counts never
+/// carry content; times are wall-clock epoch ms.
+class SpoolStatus {
+  SpoolStatus({
+    required this.pending,
+    required this.seq,
+    required this.refusedFull,
+    required this.refusedGeneric,
+    required this.rateLimited,
+    required this.missedNotifications,
+    this.firstMissedSmsAtMs,
+    required this.decryptDeleted,
+    this.keyInvalidatedAtMs,
+    required this.guardState,
+  });
+
+  /// Entries waiting in the spool.
+  int pending;
+
+  /// Pass back to clearSpoolAlerts (compare-and-clear).
+  int seq;
+  int refusedFull;
+  int refusedGeneric;
+  int rateLimited;
+  int missedNotifications;
+
+  /// Earliest SMS that was not kept; the inbox catch-up starts here.
+  int? firstMissedSmsAtMs;
+  int decryptDeleted;
+
+  /// Set when entries written under a lost spool key were found (reported,
+  /// never thrown): rewrite the Guard config, run the catch-up.
+  int? keyInvalidatedAtMs;
+  GuardConfigState guardState;
+}
+
 class CaptureCapabilities {
   CaptureCapabilities({
     required this.smsGranted,
@@ -120,7 +162,11 @@ abstract class AndroidCaptureHostApi {
   /// Shown only if live capture is observed to be delayed.
   void requestIgnoreBatteryOptimizations();
 
-  void writeGuardConfig(Uint8List encryptedConfig);
+  /// The plaintext user part of the Guard config (platform-channels.md 1.1);
+  /// native code validates, encrypts with the spool key and writes it.
+  /// CONFIG_INVALID | IO_ERROR.
+  @TaskQueue(type: TaskQueueType.serialBackgroundThread)
+  void writeGuardConfig(Uint8List userConfigJson);
 
   @TaskQueue(type: TaskQueueType.serialBackgroundThread)
   InboxPage queryInbox(InboxQuery query);
@@ -134,6 +180,13 @@ abstract class AndroidCaptureHostApi {
 
   /// Expedited WorkManager.
   void scheduleIngestionNow();
+
+  @TaskQueue(type: TaskQueueType.serialBackgroundThread)
+  SpoolStatus getSpoolStatus();
+
+  /// Zeroes the alert counters if [seq] still matches getSpoolStatus().seq.
+  @TaskQueue(type: TaskQueueType.serialBackgroundThread)
+  void clearSpoolAlerts(int seq);
 }
 
 @HostApi()

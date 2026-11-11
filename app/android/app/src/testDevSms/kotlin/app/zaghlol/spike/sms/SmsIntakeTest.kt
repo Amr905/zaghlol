@@ -1,5 +1,12 @@
 package app.zaghlol.spike.sms
 
+import app.zaghlol.platform.capture.FakeScheduler
+import app.zaghlol.platform.spool.SpoolLimits
+import app.zaghlol.platform.spool.SpoolStore
+import app.zaghlol.platform.spool.statusIn
+import app.zaghlol.platform.spool.storeIn
+import app.zaghlol.platform.spool.tempDir
+import java.io.File
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertTrue
 import org.junit.Test
@@ -56,12 +63,16 @@ class SmsIntakeTest {
     }
 
     @Test
-    fun fullSpoolRefusesAndDoesNotEnqueue() {
+    fun fullSpoolRefusesRecordsTheAlertAndStillEnqueuesADrain() {
         val dir = tempDir()
         val sched = FakeScheduler()
-        val intake = SmsIntake(SpikeGuard(), storeIn(dir, maxEntries = 0), sched, null)
+        val status = statusIn(dir)
+        val store = storeIn(File(dir, "spool"), limits = SpoolLimits(maxEntries = 0), status = status)
+        val intake = SmsIntake(SpikeGuard(), store, sched, null)
         assertTrue(intake.process(listOf(AssembledSms("5550100", "a", 1)), stamp).isEmpty())
-        assertEquals(0, sched.enqueued)
+        assertEquals(1, sched.enqueued)
+        assertEquals(1L, status.read().refusedFull)
+        assertTrue(store.pendingIds().isEmpty())
     }
 
     @Test
