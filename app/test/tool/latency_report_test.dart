@@ -35,10 +35,35 @@ void main() {
       table,
       contains(
         '| emu-34 | path=cold_process sdk=34 exempt=0 doze=0 bucket=10 '
-        'linger=0 | 10 | 5000 | 10000 | 10000 | 10/10 |',
+        'linger=0 | 10 | 5000 | 10000 | 10000 | 10/10 | 0 |',
       ),
     );
     expect(table, contains('exempt=1'));
     expect(table, isNot(contains('warm_engine')), reason: 'no commit stamp');
+    expect(table, contains('(1 rows without a commit or ack stamp)'));
+  });
+
+  test('a row acked before its commit mark arrived counts with the ack '
+      'stamp as an upper bound, never dropped', () {
+    final csv = [
+      _header,
+      _row('cold_process', 400),
+      _row('cold_process', 300),
+      // commit mark lost the race with the ack: t8 empty, t9 = 12000.
+      '01JA0000000000000000000003,cold_process,34,0,0,10,0,4,5,90,900,1000,1100,1200,,12000',
+    ].join('\n');
+    final (rows, _) = parseMetrics(csv);
+    expect(rows.last.commitMs, 12000);
+    expect(rows.last.commitFromAck, isTrue);
+    expect(rows.first.commitFromAck, isFalse);
+    final table = latencyTable(rows, device: 'emu-36');
+    expect(
+      table,
+      contains(
+        '| emu-36 | path=cold_process sdk=34 exempt=0 doze=0 bucket=10 '
+        'linger=0 | 3 | 400 | 12000 | 12000 | 2/3 | 1 |',
+      ),
+    );
+    expect(table, isNot(contains('without a commit')));
   });
 }

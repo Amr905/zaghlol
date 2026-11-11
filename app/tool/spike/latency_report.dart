@@ -32,7 +32,16 @@ final class LatencyRow {
   /// not recorded.
   final Map<String, int> stages;
 
-  int? get commitMs => stages['t8_commit'];
+  /// Receive → commit. When the `commit` mark is missing, the native ack
+  /// stamp stands in as an upper bound: Dart acks only after the commit
+  /// returned, but the mark (metrics channel, main thread) can reach native
+  /// after the ack (Pigeon background queue) that writes the row. Using t9
+  /// never understates the latency; dropping such rows would bias p95.
+  int? get commitMs => stages['t8_commit'] ?? stages['t9_acked'];
+
+  /// True when [commitMs] comes from the ack stamp.
+  bool get commitFromAck =>
+      stages['t8_commit'] == null && stages['t9_acked'] != null;
 
   String get condition =>
       'path=$path sdk=$sdk exempt=${batteryExempt ? 1 : 0} '
@@ -94,24 +103,39 @@ int percentile(List<int> sorted, int p) {
   return sorted[(rank < 1 ? 1 : rank) - 1];
 }
 
-/// Markdown rows: condition | n | p50 | p95 | max | ≤10 s share.
+/// Markdown rows: condition | n | p50 | p95 | max | ≤10 s share | rows whose
+/// commit time is the ack stamp. Rows with neither stamp are counted below
+/// the table, never silently left out.
 String latencyTable(List<LatencyRow> rows, {String device = ''}) {
   final groups = <String, List<int>>{};
+  final fromAck = <String, int>{};
+  var unstamped = 0;
   for (final r in rows) {
     final c = r.commitMs;
-    if (c == null) continue;
+    if (c == null) {
+      unstamped++;
+      continue;
+    }
     (groups[r.condition] ??= []).add(c);
+    if (r.commitFromAck) fromAck[r.condition] = (fromAck[r.condition] ?? 0) + 1;
   }
   final out = StringBuffer()
-    ..writeln('| Device | Condition | n | p50 ms | p95 ms | max ms | ≤ 10 s |')
-    ..writeln('|---|---|---|---|---|---|---|');
+    ..writeln(
+      '| Device | Condition | n | p50 ms | p95 ms | max ms | ≤ 10 s '
+      '| commit = ack stamp |',
+    )
+    ..writeln('|---|---|---|---|---|---|---|---|');
   for (final key in groups.keys.toList()..sort()) {
     final v = groups[key]!..sort();
     final within = v.where((x) => x <= 10000).length;
     out.writeln(
       '| $device | $key | ${v.length} | ${percentile(v, 50)} | '
-      '${percentile(v, 95)} | ${v.last} | $within/${v.length} |',
+      '${percentile(v, 95)} | ${v.last} | $within/${v.length} '
+      '| ${fromAck[key] ?? 0} |',
     );
+  }
+  if (unstamped > 0) {
+    out.writeln('\n($unstamped rows without a commit or ack stamp)');
   }
   return out.toString();
 }

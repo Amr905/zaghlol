@@ -47,11 +47,21 @@ runas ls files/db/zaghlol.db > /dev/null 2>&1 || fail "the UI engine did not cre
 sh_ input keyevent KEYCODE_HOME
 sleep 2
 
+# Process death as the low-memory killer does it, never `am force-stop` (that
+# puts the app in the stopped state, which blocks SMS delivery). `am kill`
+# leaves the process alive on some images (API 26: every run labelled
+# "foreground"), so fall back to SIGKILL from the app's own uid via run-as.
 kill_app() {
+  local pid
   sh_ input keyevent KEYCODE_HOME
   sh_ am kill "$PKG"
   sleep 2
-  if [ -n "$(sh_ pidof "$PKG" | tr -d '\r')" ]; then echo "warn: process still alive after am kill"; fi
+  pid=$(sh_ pidof "$PKG" | tr -d '\r' || true)
+  if [ -n "$pid" ]; then
+    runas kill -9 $pid || true
+    sleep 2
+    if [ -n "$(sh_ pidof "$PKG" | tr -d '\r' || true)" ]; then echo "warn: process still alive after am kill and SIGKILL"; fi
+  fi
 }
 
 # send_and_wait <label> <count>: one SMS per iteration, killed app before each.
