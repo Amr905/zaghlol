@@ -62,7 +62,9 @@ Rules:
 
 Every task in `docs/04-tasks/tasks/` carries a **complexity class**. The class decides the implementing model and the review depth. Full rubric: `docs/workflow/model-routing.md`.
 
-| Class | Meaning | Implementer model | Review |
+> **Batch review (PO, 2026-11-11 22:00, saves tokens):** tasks are **not** reviewed one by one any more. Builders implement **5 tasks** (self-check + local checks + PC runner green), then the Lead runs **one review round over all 5** on the batch branch. The "Review" column below now says what the batch reviewer must cover for a task of that class, not a separate agent per task. Full procedure: "Batch review round" below and `.claude/commands/review-batch.md`.
+
+| Class | Meaning | Implementer model | Review (covered in the batch round) |
 |-------|---------|-------------------|--------|
 | **C1 Trivial** | Boilerplate, constants, seed data, string files, assets wiring | Haiku (`boilerplate-engineer`) | Lead spot-check (diff + green CI) |
 | **C2 Standard** | Screens, widgets, DAOs, providers, API endpoints, ordinary logic with clear spec | Sonnet (`flutter-ui-engineer`, `flutter-core-engineer`, `parsing-engine-engineer`, `backend-engineer`) | `code-reviewer` on **Sonnet** (one reviewer) |
@@ -77,7 +79,14 @@ Delegation rules for the Lead:
 4. A sub-agent's "done" is a claim, not a fact. The Lead reads the diff and the review report before marking a task complete.
 5. If a C1/C2 task fails review twice, re-classify one level up and re-delegate.
 
-**Review-round policy (adopted 2026-11-08; lightened 2026-11-08 evening, "Balanced"):**
+**Batch review round (PO, 2026-11-11; replaces per-task reviews):**
+1. **Build 5 tasks.** At most 4 at once on separate lanes. Each builder works through `docs/workflow/self-check.md`, runs the local checks, pushes `task/<id>-…`, and gets the PC runner green. The Lead reads each diff summary (not the whole diff) and sets the task to `BUILT`.
+2. **Assemble.** When 5 tasks are `BUILT` (or fewer, if nothing else is ready and the PO wants a merge), the Lead creates `batch/<date>-<n>` from `main`, pushes it once, merges the task branches in order (check for conflicts after each merge), runs the local checks on the merged tree, and pushes.
+3. **One review round.** One `code-reviewer` reviews the whole batch diff (`git diff main...batch/<…>`), grouped by task, against each task file's acceptance criteria and the self-check. Model: **Opus** if the batch holds any C4 task (the reviewer also acts as `security-privacy-reviewer` for those tasks), otherwise **Sonnet**. If the batch holds crypto/keys, billing/entitlements or SMS/notification ingestion work, add **one** Opus `security-privacy-reviewer` that looks only at those tasks' files. C1 tasks get the Lead spot-check only. One report: `docs/05-reviews/batch-<n>.md`, with a section and a verdict per task (and a security section where it applies). The per-task `docs/05-reviews/T-###.md` files are no longer written; the DoD's review line points at the batch report.
+4. **One fix round.** Blocker and major findings go to **one fresh fix agent per lane** (all of a lane's findings in one brief), working on the batch branch. Small fixes (about 30 changed lines or fewer, with a test that fails without them) are checked by the Lead ("Lead delta check" in the batch report). Larger fixes get **one** delta-only Sonnet re-review for the whole batch. A task that still fails is pulled out of the batch (revert its merge) and goes back to its lane; it doesn't hold up the other four.
+5. **Merge.** One full GitHub run on the batch branch, status docs updated in the same branch, then one PR merged with a merge commit (see "Batch merge" below).
+
+**Review-round policy (adopted 2026-11-08; lightened 2026-11-08 evening, "Balanced"; still applies inside the batch round):**
 - Only **blocker** or **major** findings trigger another implementation round. The implementer may fix a trivial minor or nit in the same pass. Every other minor or nit becomes a follow-up (`FU-###` in `docs/implementation-status.md`) with an owner task, and does not block the merge.
 - Only the reviewers who raised a blocker or major re-review. Re-reviews look at the delta only and run on **Sonnet**. For a small fix (about 30 changed lines or fewer, with a test that fails without it) the **Lead verifies the delta** instead of starting a re-review agent, and appends a short "Lead delta check" to the review report.
 - **Builder self-check:** every implementer works through `docs/workflow/self-check.md` before its final report and says which items applied.
@@ -86,7 +95,7 @@ Delegation rules for the Lead:
 - **Verification and batch CI (PO, 2026-11-10):** task branches are verified on the PO's PC runner only (`git show origin/local-ci:<branch with / as __>/<sha>.status` and `.log`, errors at the top; ~5 min for app/backend checks incl. the Android APK, Android unit tests and lint; see `docs/workflow/local-ci.md`). Pushes to `task/**` do **not** run GitHub CI (the `app-regen` and `backend-ef-migration` bots still do). A task whose change can only be checked on GitHub (iOS/Swift, Xcode project, device/emulator `integration_test`, db-platform) opts in by also pushing the same commit to `ci/<task-id>`; delete that branch after use.
 - **Local checks first (2026-11-11):** package installs are allowed, so the cloud workspace can hold the CI toolchains. Run `bash docs/workflow/tools/cloud-sdk.sh` once per session (installs Flutter at the CI version and .NET 10 into `/home/claude/sdk`), then `export PATH=/home/claude/sdk/flutter/bin:/home/claude/sdk/dotnet:$PATH`. Agents run `flutter pub get --enforce-lockfile`, `dart format --set-exit-if-changed`, `flutter analyze`, the lints, `flutter test` / `dart test`, `dotnet build -warnaserror`, `dotnet format --verify-no-changes` and the backend unit tests **before** pushing. Still PC-runner-only: the Android APK, Android unit tests and lint, and backend tests that need Docker (Testcontainers). Still GitHub-only: Swift/iOS and emulator/simulator tests.
 - **`ci/<task-id>` notes:** `db-platform` may not start on the first push of a new `ci/` branch (path filter); start it with `workflow_dispatch` on that branch. Agents can't delete branches through the proxy; the PO deletes leftover `ci/*` branches.
-- **Batch merge:** the Lead collects about **5 reviewed tasks**, merges them in order onto `batch/<date>-<n>` (created from current `main` and pushed once before the tasks are merged in, so path filters see the whole change), pushes, and waits for one full GitHub run (app-ci, backend-ci, db-platform). Failures are fixed on the batch branch (a fresh agent for anything non-trivial). Then one PR `batch/... → main` is merged with a **merge commit** (keeps per-task history). Status docs (`TASKS.md`, `implementation-status.md`, `LEAD_HANDOFF.md`) are updated in the same batch PR.
+- **Batch merge:** the Lead collects about **5 built tasks**, merges them in order onto `batch/<date>-<n>` (created from current `main` and pushed once before the tasks are merged in, so path filters see the whole change), pushes, and waits for one full GitHub run (app-ci, backend-ci, db-platform). Failures are fixed on the batch branch (a fresh agent for anything non-trivial). Then one PR `batch/... → main` is merged with a **merge commit** (keeps per-task history). Status docs (`TASKS.md`, `implementation-status.md`, `LEAD_HANDOFF.md`) are updated in the same batch PR.
 - If the PC runner is offline (no result within 15 min), agents say so and stop waiting; the Lead either asks the PO to start it or opts the task into `ci/<task-id>`.
 
 ## 7. Definition of Done (per task)
@@ -96,7 +105,7 @@ Delegation rules for the Lead:
 - [ ] Unit tests for logic; widget/golden tests for UI in both `ar` and `en`.
 - [ ] No hard-coded strings; RTL verified.
 - [ ] No `double` for money; no raw SMS in logs.
-- [ ] Review report written to `docs/05-reviews/T-###.md` with verdict APPROVED.
+- [ ] The task's section in the batch review report `docs/05-reviews/batch-<n>.md` has verdict APPROVED (tasks reviewed before 2026-11-11 22:00 keep their `T-###.md` reports).
 - [ ] Task status updated in `docs/04-tasks/TASKS.md`.
 
 ## 8. Coding conventions (summary — architect may refine in Phase 3)
