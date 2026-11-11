@@ -32,20 +32,21 @@ final class CycleTxn {
   final CivilDate date;
 }
 
-/// A refund / reimbursement link. [sourceValid]: the source row is live and
-/// `posted`/`pending` (a soft-deleted refund stops reducing spend).
+/// A refund / reimbursement link. [isActive]: the source row is live and
+/// `posted`/`pending` and the expense is live (a soft-deleted refund stops
+/// reducing spend; a link to a deleted expense is inactive too).
 final class CycleOffset {
   const CycleOffset({
     required this.expenseId,
     required this.sourceId,
     required this.amount,
-    required this.sourceValid,
+    required this.isActive,
   });
 
   final String expenseId;
   final String sourceId;
   final Money amount;
-  final bool sourceValid;
+  final bool isActive;
 }
 
 /// Per-currency totals of one cycle. Never mixes currencies.
@@ -98,7 +99,7 @@ final class _NetSpend {
 Map<String, Money> _linkedByExpense(Iterable<CycleOffset> offsets) {
   final m = <String, Money>{};
   for (final o in offsets) {
-    if (!o.sourceValid) continue;
+    if (!o.isActive) continue;
     final prev = m[o.expenseId];
     m[o.expenseId] = prev == null ? o.amount : prev + o.amount;
   }
@@ -157,7 +158,7 @@ Map<Currency, CycleTotals> aggregateCycle(
 
   final fundedBySource = <String, Money>{};
   for (final o in offsets) {
-    if (!o.sourceValid) continue;
+    if (!o.isActive) continue;
     final prev = fundedBySource[o.sourceId];
     fundedBySource[o.sourceId] = prev == null ? o.amount : prev + o.amount;
   }

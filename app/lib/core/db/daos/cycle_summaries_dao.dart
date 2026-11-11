@@ -61,6 +61,54 @@ class CycleSummariesDao {
           ))
           .getSingleOrNull();
 
+  /// Every row of [cycleStart] for [accountFilter].
+  Future<List<CycleSummaryRow>> rowsFor({
+    required String cycleStart,
+    String accountFilter = '*',
+  }) =>
+      (_db.select(_db.cycleSummaries)..where(
+            (c) =>
+                c.cycleStart.equals(cycleStart) &
+                c.accountFilter.equals(accountFilter),
+          ))
+          .get();
+
+  /// Replaces the rows of ([cycleStart], [accountFilter]) with [summaries]
+  /// (one transaction), so a currency that no longer has activity drops out.
+  Future<void> replaceCycle({
+    required String cycleStart,
+    String accountFilter = '*',
+    required Iterable<CycleTotals> summaries,
+    required int computedAt,
+  }) => guardWrite(
+    () => _db.transaction(() async {
+      await (_db.delete(_db.cycleSummaries)..where(
+            (c) =>
+                c.cycleStart.equals(cycleStart) &
+                c.accountFilter.equals(accountFilter),
+          ))
+          .go();
+      for (final t in summaries) {
+        await upsert(
+          cycleStart: cycleStart,
+          accountFilter: accountFilter,
+          income: t.income,
+          spend: t.spend,
+          byCategoryMinor: t.byCategoryMinor,
+          computedAt: computedAt,
+        );
+      }
+    }),
+  );
+
+  /// Drops every account filter of the given cycles. Returns the rows
+  /// deleted.
+  Future<int> deleteCycles(Iterable<String> cycleStarts) => guardWrite(
+    () => (_db.delete(
+      _db.cycleSummaries,
+    )..where((c) => c.cycleStart.isIn(cycleStarts.toList()))).go(),
+  );
+
   /// Drops every cached summary (a full rebuild follows). Returns the rows
   /// deleted.
   Future<int> clear() => guardWrite(() => _db.delete(_db.cycleSummaries).go());

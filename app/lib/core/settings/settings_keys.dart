@@ -40,6 +40,10 @@ abstract final class Settings {
     max: 28,
   );
 
+  /// The payday eras (EC-21, T-051): `payday_day` stays the user-facing value
+  /// and equals the last era's day. Written first by `setPayday`.
+  static final paydayEras = SettingKey.paydaySchedule('payday_eras');
+
   /// Optional (FR-ONB-03); unset is null.
   static final incomeTarget = SettingKey.optionalMoney('income_target');
 

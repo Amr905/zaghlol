@@ -28,6 +28,9 @@ final languageProvider = settingProvider(Settings.language);
 final digitsProvider = settingProvider(Settings.digits);
 final themeProvider = settingProvider(Settings.theme);
 final paydayDayProvider = settingProvider(Settings.paydayDay);
+final paydayErasProvider = settingProvider<PaydaySchedule?>(
+  Settings.paydayEras,
+);
 final incomeTargetProvider = settingProvider<Money?>(Settings.incomeTarget);
 final primaryCurrencyProvider = settingProvider(Settings.primaryCurrency);
 final approxViewEnabledProvider = settingProvider(Settings.approxViewEnabled);

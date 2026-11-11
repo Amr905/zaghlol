@@ -157,6 +157,46 @@ void main() {
     });
   });
 
+  group('resolve (store and ingest share it)', () {
+    final today = d(2026, 11, 10);
+    test('unset or corrupt eras: one era from payday_day', () {
+      for (final j in [null, '', 'x', '[]']) {
+        expect(
+          PaydaySchedule.resolve(erasJson: j, paydayDay: 25, today: today).eras,
+          [PaydayEra(null, 25)],
+        );
+      }
+    });
+    test('matching day: eras as stored; out-of-range day reads as 1', () {
+      final s = PaydaySchedule.single(25).withChange(today, 1);
+      expect(
+        PaydaySchedule.resolve(
+          erasJson: s.toJson(),
+          paydayDay: 1,
+          today: d(2027, 1, 1),
+        ),
+        s,
+      );
+      expect(
+        PaydaySchedule.resolve(
+          erasJson: null,
+          paydayDay: 31,
+          today: today,
+        ).currentDay,
+        1,
+      );
+    });
+    test('mismatching day appends (today, payday_day)', () {
+      final s = PaydaySchedule.single(25);
+      final r = PaydaySchedule.resolve(
+        erasJson: s.toJson(),
+        paydayDay: 5,
+        today: today,
+      );
+      expect(r.eras.last, PaydayEra(today, 5));
+    });
+  });
+
   group('JSON (database-schema §2.8)', () {
     test('round trip and rejection', () {
       final s = PaydaySchedule.single(25).withChange(d(2026, 11, 10), 1);

@@ -89,6 +89,16 @@ final class PaydaySchedule {
 
   int get currentDay => eras.last.day;
 
+  @override
+  bool operator ==(Object other) =>
+      other is PaydaySchedule &&
+      other.eras.length == eras.length &&
+      [for (var i = 0; i < eras.length; i++) eras[i] == other.eras[i]]
+          .every((e) => e);
+
+  @override
+  int get hashCode => Object.hashAll(eras);
+
   /// The schedule after the user sets [day] on [today] (EC-21): appends an
   /// era from [today]; a change on the day the last era began replaces it; the
   /// same day as the current one changes nothing.

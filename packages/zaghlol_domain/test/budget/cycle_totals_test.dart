@@ -40,7 +40,7 @@ CycleOffset o(String exp, String src, int minor, {bool valid = true}) =>
       expenseId: exp,
       sourceId: src,
       amount: m(minor),
-      sourceValid: valid,
+      isActive: valid,
     );
 
 CycleTotals egpOf(
@@ -185,7 +185,7 @@ void main() {
               expenseId: 'x',
               sourceId: 's',
               amount: Money(gbp, 1),
-              sourceValid: true,
+              isActive: true,
             ),
           ],
         ),
