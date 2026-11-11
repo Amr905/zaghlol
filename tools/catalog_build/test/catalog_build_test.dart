@@ -305,12 +305,42 @@ void main() {
       );
       final sig = File('../../app/assets/catalog/catalog_seed.json.sig')
           .readAsStringSync();
-      expect(verifySeedSignature(json, sig, bundledSeedKeys()), 's0000d');
+      expect(
+        verifySeedSignature(json, sig, bundledSeedKeys(), allowDevKeys: true),
+        's0000a',
+      );
       json[json.length ~/ 2] ^= 1;
       expect(
-        () => verifySeedSignature(json, sig, bundledSeedKeys()),
+        () => verifySeedSignature(
+          json,
+          sig,
+          bundledSeedKeys(),
+          allowDevKeys: true,
+        ),
         throwsA(isA<CatalogSeedException>()),
       );
+    });
+
+    test('--key refuses a non-dev kid and never signs with it', () async {
+      final dir = Directory.systemTemp.createTempSync('cb_key');
+      addTearDown(() => dir.deleteSync(recursive: true));
+      final key = File('${dir.path}/prod.json')
+        ..writeAsStringSync(
+          '{"kid":"s2026a","d":"nZbg9AqqNwREn0tWmsTKd5DdIcXTXbXTFlakZwfjIkY"}',
+        );
+      final err = StringBuffer();
+      final code = await runCatalogBuild(
+        [
+          '--input', 'data/catalog_curated.csv',
+          '--out', '${dir.path}/out',
+          '--key', key.path, //
+        ],
+        StringBuffer(),
+        err,
+      );
+      expect(code, 1);
+      expect(err.toString(), contains('dev key'));
+      expect(Directory('${dir.path}/out').existsSync(), isFalse);
     });
 
     test('the backend CSV carries only normalized aliases', () {

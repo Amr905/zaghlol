@@ -36,7 +36,10 @@ void main() {
     final bytes = _body(snap['bodyB64u']! as String);
     final header = (snap['header'] ?? snap['signature']) as String?;
     expect(header, isNotNull, reason: 'snapshot header member');
-    expect(verifySeedSignature(bytes, header!, _keys(doc)), 's0000t');
+    expect(
+      verifySeedSignature(bytes, header!, _keys(doc), allowDevKeys: true),
+      's0000t',
+    );
     final seed = CatalogSeed.decode(bytes);
     expect(seed.version, 7);
     // The backend's own bytes are already in our canonical form.
@@ -50,7 +53,12 @@ void main() {
         in (doc['valid']! as List<Object?>).cast<Map<String, Object?>>()) {
       final bytes = _body(v['bodyB64u']! as String);
       expect(
-        verifySeedSignature(bytes, v['header']! as String, keys),
+        verifySeedSignature(
+          bytes,
+          v['header']! as String,
+          keys,
+          allowDevKeys: true,
+        ),
         isNotEmpty,
         reason: v['name'] as String,
       );
@@ -62,7 +70,12 @@ void main() {
         final header = v['header'];
         if (body is! String || header is! String) continue;
         expect(
-          () => verifySeedSignature(_body(body), header, keys),
+          () => verifySeedSignature(
+            _body(body),
+            header,
+            keys,
+            allowDevKeys: true,
+          ),
           throwsA(isA<CatalogSeedException>()),
           reason: v['name'] as String?,
         );

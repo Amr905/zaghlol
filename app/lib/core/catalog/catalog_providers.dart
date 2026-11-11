@@ -3,6 +3,7 @@
 // code-only CatalogSeedException (the app stays usable with an empty
 // catalog: categorization falls back to keywords and manual choice).
 
+import 'package:flutter/foundation.dart' show kReleaseMode;
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:zaghlol_catalog/zaghlol_catalog.dart';
 
@@ -30,6 +31,8 @@ final catalogSeedProvider = FutureProvider<CatalogSeedResult>(
       db: db,
       source: ref.watch(catalogSeedSourceProvider),
       trustedKeys: ref.watch(catalogSeedKeysProvider),
+      // The dev-signed seed loads only outside release builds (S-1).
+      allowDevKeys: !kReleaseMode,
     ).loadIfNeeded();
   },
   retry: (retryCount, error) => null,

@@ -234,10 +234,10 @@ void main() {
   group('signature', () {
     // The dev key of tools/catalog_build/dev (public half is bundled).
     final signer = SeedSigner(
-      kid: 's0000d',
+      kid: 's0000a',
       d: Uint8List.fromList(
         base64Url.decode(
-          base64Url.normalize('Ugg7grDnVzLNiizJ9h2zFYluYtvmPmPDes7VQT0SKGY'),
+          base64Url.normalize('nZbg9AqqNwREn0tWmsTKd5DdIcXTXbXTFlakZwfjIkY'),
         ),
       ),
     );
@@ -248,9 +248,12 @@ void main() {
       final header = signer.sign(message);
       expect(
         header,
-        matches(RegExp(r'^kid=s0000d; alg=ES256; sig=[A-Za-z0-9_-]{86}$')),
+        matches(RegExp(r'^kid=s0000a; alg=ES256; sig=[A-Za-z0-9_-]{86}$')),
       );
-      expect(verifySeedSignature(message, header, keys), 's0000d');
+      expect(
+        verifySeedSignature(message, header, keys, allowDevKeys: true),
+        's0000a',
+      );
     });
 
     test('signing is deterministic', () {
@@ -262,7 +265,10 @@ void main() {
       for (final i in [0, message.length ~/ 2, message.length - 1]) {
         final tampered = Uint8List.fromList(message)..[i] ^= 0x01;
         expect(
-          _codeOf(() => verifySeedSignature(tampered, header, keys)),
+          _codeOf(
+            () =>
+                verifySeedSignature(tampered, header, keys, allowDevKeys: true),
+          ),
           CatalogSeedException.badSignature,
         );
       }
@@ -273,17 +279,19 @@ void main() {
       final sig = header.substring(header.indexOf('sig=') + 4);
       final flipped = sig.replaceRange(0, 1, sig[0] == 'A' ? 'B' : 'A');
       for (final bad in [
-        'kid=s0000d; alg=ES256; sig=$flipped',
-        'kid=s0000d; alg=ES256; sig=${sig.substring(1)}',
-        'kid=s0000d; alg=ES256; sig=${sig}A',
+        'kid=s0000a; alg=ES256; sig=$flipped',
+        'kid=s0000a; alg=ES256; sig=${sig.substring(1)}',
+        'kid=s0000a; alg=ES256; sig=${sig}A',
         '',
         'garbage',
-        'kid=s0000d; alg=none; sig=$sig',
-        'kid=s0000d; alg=ES256; sig=${'A' * 86}',
-        'kid=s0000d; alg=ES256; sig=$sig; extra=1',
+        'kid=s0000a; alg=none; sig=$sig',
+        'kid=s0000a; alg=ES256; sig=${'A' * 86}',
+        'kid=s0000a; alg=ES256; sig=$sig; extra=1',
       ]) {
         expect(
-          _codeOf(() => verifySeedSignature(message, bad, keys)),
+          _codeOf(
+            () => verifySeedSignature(message, bad, keys, allowDevKeys: true),
+          ),
           CatalogSeedException.badSignature,
           reason: bad.length > 40 ? bad.substring(0, 40) : bad,
         );
@@ -291,9 +299,11 @@ void main() {
     });
 
     test('an unknown kid and an empty key set are rejected', () {
-      final header = signer.sign(message).replaceFirst('s0000d', 's9999z');
+      final header = signer.sign(message).replaceFirst('s0000a', 's9999z');
       expect(
-        _codeOf(() => verifySeedSignature(message, header, keys)),
+        _codeOf(
+          () => verifySeedSignature(message, header, keys, allowDevKeys: true),
+        ),
         CatalogSeedException.badSignature,
       );
       expect(
@@ -302,6 +312,7 @@ void main() {
             message,
             signer.sign(message),
             <SeedTrustedKey>[],
+            allowDevKeys: true,
           ),
         ),
         CatalogSeedException.badSignature,
@@ -309,9 +320,16 @@ void main() {
     });
 
     test('a signature by another key is rejected under the same kid', () {
-      final other = SeedSigner(kid: 's0000d', d: Uint8List(32)..[31] = 7);
+      final other = SeedSigner(kid: 's0000a', d: Uint8List(32)..[31] = 7);
       expect(
-        _codeOf(() => verifySeedSignature(message, other.sign(message), keys)),
+        _codeOf(
+          () => verifySeedSignature(
+            message,
+            other.sign(message),
+            keys,
+            allowDevKeys: true,
+          ),
+        ),
         CatalogSeedException.badSignature,
       );
     });
@@ -323,8 +341,37 @@ void main() {
       );
     });
 
-    test('the bundled trusted set is exactly the dev key until release', () {
-      expect([for (final k in keys) k.kid], ['s0000d']);
+    test(
+      'the bundled trusted set is the dev key, usable only with allowDevKeys',
+      () {
+        expect([for (final k in keys) k.kid], ['s0000a']);
+        final header = signer.sign(message);
+        // Release mode (default): the dev kid is refused even though trusted.
+        expect(
+          _codeOf(() => verifySeedSignature(message, header, keys)),
+          CatalogSeedException.badSignature,
+        );
+        expect(
+          _codeOf(
+            () =>
+                verifySeedSignature(message, header, keys, allowDevKeys: false),
+          ),
+          CatalogSeedException.badSignature,
+        );
+        // Debug mode: accepted.
+        expect(
+          verifySeedSignature(message, header, keys, allowDevKeys: true),
+          's0000a',
+        );
+      },
+    );
+
+    test('isDevKid matches only year-0000 kids', () {
+      expect(isDevKid('s0000a'), isTrue);
+      expect(isDevKid('e0000z'), isTrue);
+      expect(isDevKid('s2026a'), isFalse);
+      expect(isDevKid('s0000'), isFalse);
+      expect(isDevKid('s00001'), isFalse);
     });
   });
 }

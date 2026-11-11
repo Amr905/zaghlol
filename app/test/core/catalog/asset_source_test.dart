@@ -17,7 +17,10 @@ void main() {
     final sig = await source.readSignature();
     expect(gz, File('assets/catalog/catalog_seed.json.gz').readAsBytesSync());
     final json = Uint8List.fromList(gzip.decode(gz));
-    expect(verifySeedSignature(json, sig, bundledSeedKeys()), 's0000d');
+    expect(
+      verifySeedSignature(json, sig, bundledSeedKeys(), allowDevKeys: true),
+      's0000a',
+    );
     expect(CatalogSeed.decode(json).categories.length, 14);
   });
 }

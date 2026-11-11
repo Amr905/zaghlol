@@ -68,8 +68,14 @@ Future<int> runCatalogBuild(
   try {
     built = buildCatalog(File(input).readAsStringSync(), version: version);
     final jwk = jsonDecode(File(keyFile).readAsStringSync());
+    final kid = jwk['kid'] as String;
+    // Never read a production key from a file: only dev kids (S-1).
+    if (!RegExp(r'^s0000[a-z]$').hasMatch(kid)) {
+      err.writeln('--key accepts only a dev key (kid s0000x)');
+      return 1;
+    }
     signer = SeedSigner(
-      kid: jwk['kid'] as String,
+      kid: kid,
       d: Uint8List.fromList(
         base64Url.decode(base64Url.normalize(jwk['d'] as String)),
       ),

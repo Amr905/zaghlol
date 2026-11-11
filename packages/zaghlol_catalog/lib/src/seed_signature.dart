@@ -102,14 +102,21 @@ final class SeedSigner {
   }
 }
 
+/// True for a dev kid (`s0000x` / `e0000x`, backend-api §1: year 0000).
+bool isDevKid(String kid) => RegExp(r'^[se]0000[a-z]$').hasMatch(kid);
+
 /// Verifies [header] over [message] against [trusted]. Returns the kid that
 /// signed. Throws [CatalogSeedException] (`SEED_BAD_SIGNATURE`) on anything
 /// else: the caller must then discard the bytes.
+///
+/// Dev kids (`s0000x`, whose private half is public) are refused unless
+/// [allowDevKeys] is true; release builds must leave it false.
 String verifySeedSignature(
   Uint8List message,
   String header,
-  Iterable<SeedTrustedKey> trusted,
-) {
+  Iterable<SeedTrustedKey> trusted, {
+  bool allowDevKeys = false,
+}) {
   CatalogSeedException bad() =>
       CatalogSeedException(CatalogSeedException.badSignature);
   if (header.length > 256) throw bad();
@@ -121,6 +128,7 @@ String verifySeedSignature(
   // Only Sync keys (`s...`) sign catalogs; an entitlement key (`e...`) never
   // does, even when it is in the trusted set (backend-api §1).
   if (!kid.startsWith('s')) throw bad();
+  if (!allowDevKeys && isDevKid(kid)) throw bad();
   final raw = _unb64(match.group(2)!);
   if (raw.length != 64) throw bad();
   SeedTrustedKey? key;

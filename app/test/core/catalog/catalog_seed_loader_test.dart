@@ -38,10 +38,10 @@ class _FileSource implements CatalogSeedSource {
 
 /// The dev key (tools/catalog_build/dev): lets a test sign its own seeds.
 final SeedSigner _devSigner = SeedSigner(
-  kid: 's0000d',
+  kid: 's0000a',
   d: Uint8List.fromList(
     base64Url.decode(
-      base64Url.normalize('Ugg7grDnVzLNiizJ9h2zFYluYtvmPmPDes7VQT0SKGY'),
+      base64Url.normalize('nZbg9AqqNwREn0tWmsTKd5DdIcXTXbXTFlakZwfjIkY'),
     ),
   ),
 );
@@ -96,10 +96,12 @@ void main() {
   CatalogSeedLoader loader(
     CatalogSeedSource source, {
     List<SeedTrustedKey>? keys,
+    bool allowDevKeys = true,
   }) => CatalogSeedLoader(
     db: db,
     source: source,
     trustedKeys: keys ?? bundledSeedKeys(),
+    allowDevKeys: allowDevKeys,
     clock: () => DateTime.utc(2026, 11, 11, 8),
   );
 
@@ -135,7 +137,7 @@ void main() {
       await loader(_FileSource()).loadIfNeeded();
       final meta = await CatalogDao(db).meta();
       expect(meta!.version, 1);
-      expect(meta.signatureKid, 's0000d');
+      expect(meta.signatureKid, 's0000a');
       expect(
         meta.appliedAt,
         DateTime.utc(2026, 11, 11, 8).millisecondsSinceEpoch,
@@ -282,13 +284,23 @@ void main() {
       },
     );
 
+    test('a release-mode loader rejects the dev-signed seed', () async {
+      expect(
+        await _codeOf(
+          () => loader(_FileSource(), allowDevKeys: false).loadIfNeeded(),
+        ),
+        CatalogSeedException.badSignature,
+      );
+      await _expectEmptyCatalog(db);
+    });
+
     test('a changed, missing or foreign signature', () async {
       for (final sig in [
         '',
-        'kid=s0000d; alg=ES256; sig=${'A' * 86}',
+        'kid=s0000a; alg=ES256; sig=${'A' * 86}',
         File('assets/catalog/catalog_seed.json.sig')
             .readAsStringSync()
-            .replaceFirst('s0000d', 's0002b'),
+            .replaceFirst('s0000a', 's0002b'),
       ]) {
         expect(
           await _codeOf(() => loader(_FileSource(sig: sig)).loadIfNeeded()),

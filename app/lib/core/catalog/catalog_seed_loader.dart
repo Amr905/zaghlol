@@ -75,12 +75,14 @@ class CatalogSeedLoader {
     required this._db,
     required this._source,
     required List<SeedTrustedKey> trustedKeys,
+    this._allowDevKeys = false,
     this._clock = DateTime.now,
   }) : _keys = List.unmodifiable(trustedKeys);
 
   final AppDatabase _db;
   final CatalogSeedSource _source;
   final List<SeedTrustedKey> _keys;
+  final bool _allowDevKeys;
   final DateTime Function() _clock;
 
   /// Largest compressed seed accepted.
@@ -102,7 +104,12 @@ class CatalogSeedLoader {
     }
     final header = await _source.readSignature();
     final json = _inflate(compressed);
-    final kid = verifySeedSignature(json, header, _keys);
+    final kid = verifySeedSignature(
+      json,
+      header,
+      _keys,
+      allowDevKeys: _allowDevKeys,
+    );
     final seed = CatalogSeed.decode(json);
 
     final categories = CategoriesDao(_db);

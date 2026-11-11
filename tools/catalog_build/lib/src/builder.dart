@@ -8,9 +8,13 @@
 // the normalized CSV the backend imports (T-125). A merchant row's `match`
 // is the match mode of the alias derived from its own name (default exact).
 //
-// Merchant ids are the 1-based order of the merchant rows. The backend
-// allocates ids in the same order when the normalized CSV is imported into
-// an empty draft, so app and backend agree; rows must only ever be appended.
+// Merchant ids are the 1-based order of the merchant rows; rows must only
+// ever be appended. These ids and the seed's version are LOCAL and
+// provisional: they are NOT the backend's. The backend allocates merchant
+// ids from one draft identity counter shared by all entities (the first
+// merchant imported gets id 15 after the 14 categories), and its first
+// publish is version 1, which collides with the seed's version 1. The
+// release seed must be the backend's published snapshot (FU-079).
 
 import 'package:zaghlol_catalog/zaghlol_catalog.dart';
 import 'package:zaghlol_parsing/zaghlol_parsing.dart';
