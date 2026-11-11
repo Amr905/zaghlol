@@ -36,14 +36,23 @@ idealBurn(d) = budgetTotal × d ÷ cycleLength
 ## 3. De-duplication & merging (BR-ING-02, EC-01/02/54)
 
 ```
-key = institution | last4 | direction | currency | amount_minor
-on new parsed txn T from channel C:
-  if exists raw_messages.body_hash = H → drop
-  candidates = txns with same key, |occurred_at − T.occurred_at| ≤ 2 min, source channel ≠ C, not deleted
-  if candidates = 1 → attach raw message to it (no new txn); upgrade missing fields (merchant, balance)
-  if candidates > 1 → keep T, add review 'possible_duplicate'
-pending/settled (A-63): if T.event = settled or (T.status = posted and ∃ P pending with same inst+last4+merchant_norm,
-  |Δamount| ≤ 5%, within 7 days) → update P (amount, status=posted), drop T
+dedupe_key = d1 | institution | direction | currency | amount_minor        (from Money.toStorage(), never message text)
+on new parsed txn T from channel C (inside the batch's write transaction):
+  if exists raw_messages.body_hash = H → duplicate (drop)
+  candidates = txns with same dedupe_key, source ≠ C, same status class (declined only with declined),
+               soft-deleted included (a deleted payment is not resurrected by its second copy),
+               (|minute(occurred_at) − minute(T.occurred_at)| ≤ 2  OR  |Δ raw received_at| ≤ 2 min),
+               last4 equal OR either side NULL (PO Q1 of T-046, provisional)
+  if candidates = 1 → store T's raw message, no new txn; fill only NULL fields of the candidate (original amount,
+                      merchant, counterparty, reference, balance_after); a user-verified candidate is never modified;
+                      a candidate on an institution-only account moves to the card account when T has a last4
+  if candidates > 1 → keep T, add review 'low_confidence' with payload {reason: possibleDuplicate, candidateTxnIds}
+                      (no 'possible_duplicate' kind in the schema; Lead question L1 of T-046)
+pending/settled (A-63): if T.event = settled or (T.status = posted and ∃ P pending with same inst, last4 rule as above,
+  same currency, merchant_norm equal when both have one, |a − p| × 100 ≤ 5 × p, P within 7 days before)
+  → update P (amount, original amount, status=posted, fill NULLs), drop T; several P → smallest |a − p|, then oldest;
+  user-verified P → status only, plus 'low_confidence' (settledAmountDiffers) when amounts differ
+  symmetric: a pending_auth arriving after such a posted txn (≤ 7 days after it) is attached to it, no new txn
 ```
 
 ## 4. Self-transfers, conversions, card settlements (BR-XFR-01/02, FR-PAR-12, FR-CUR-06, BR-TXN-04)

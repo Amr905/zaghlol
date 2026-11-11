@@ -155,12 +155,12 @@ Person-to-person transfers (IPA or phone counterparty) skip catalog and keywords
 
 ## 6. Post-parse stages (application layer, `IngestRawMessages`)
 
-All of these run in **one DB transaction per message batch**, and the spool ack follows the commit.
+All of these run in **one DB write transaction per message batch** (`BEGIN IMMEDIATE`), with **one savepoint per message**: a message that fails on a constraint is stored alone for review (`unrecognized`, `ingestFailed`) and the batch continues; a busy, I/O or full error rolls back the whole batch. The spool ack follows the commit and covers every message of the batch (stored, merged, duplicate, dropped, deferred). Parsing runs before the transaction. Full rules: T-046 design note.
 
 | Stage | Rule | Doc |
 |---|---|---|
 | Dedupe 1 | `raw_messages.body_hash` unique: same body seen again → drop (BR-ING-02) | — |
-| Dedupe 2 | Same institution + last4 + direction + amount + currency within ±2 min from a **different channel** → link the second raw message to the existing txn, no new txn (EC-01, A-30). Same channel with a different body → keep both (EC-02). | `domain-algorithms.md` §3 |
+| Dedupe 2 | Same institution + last4 + direction + amount + currency within ±2 min from a **different channel** → store the second raw message (`parsed`) and fill only the NULL fields of the existing txn, no new txn (EC-01, A-30). Last-4 may be absent on one side (PO Q1 of T-046, provisional); the window also matches on the raws' `received_at`. Same channel with a different body → keep both (EC-02). | `domain-algorithms.md` §3 |
 | Pending/settled merge | Template event `settled`, or a same-merchant match within ±5% within 7 days of a `pending_auth` → update the original amount, status `posted` (EC-54, A-63) | §3 |
 | Account resolve | (institution, last4) → existing account, else auto-create (FR-ACC-01) with `kind` from the template; credit-card hints prompt S-06 | — |
 | Balance update | If the message has balance/available and its `occurred_at ≥ as_of`, upsert `account_balances` | — |
@@ -170,7 +170,9 @@ All of these run in **one DB transaction per message batch**, and the spool ack 
 | Self-transfer pairing | BR-XFR-01/02 | §4 |
 | Refund matching | BR-XFR-03 | §5 |
 | Suggestions | Reimbursement (FR-XFR-08), cross-currency pair (FR-CUR-06), subscription (BR-SUB-01, debounced daily), payday (FR-ONB-10) → `review_items` | §5–7 |
-| Events | `TransactionsChanged(accounts, cycles)`, `MascotTrigger`, `BudgetThresholdCrossed` | — |
+| Events | `IngestRawMessages` emits one `TransactionsChanged(accountIds, cycleKeys)` per committed batch, after the commit, and nothing on failure. `BudgetThresholdCrossed` and `MascotTrigger` come from the budget, pairing and duplicate engines reacting to it | — |
+
+**Event → transaction (T-046).** `card_purchase`, `card_purchase_fx`, `atm_withdrawal`, `bnpl_installment` → expense, posted; `pending_auth` → expense, pending; `settled` → expense, posted (merged into the pending one when found); `declined` → expense, declined (BR-TXN-03); `transfer_out/in`, `instapay_out/in`, `cc_payment`, `wallet_topup` → `transfer_out`/`transfer_in` by the template direction, posted; `salary` → income; `refund`, `reversal` → refund; `fee` → fee; `balance_only` → no transaction (raw `parsed`, balance only). An event without a registered handler (`fx_conversion` until T-089) stores the raw message as `reparse_pending` and creates nothing; the re-parse job runs it again. Every `ParseGeneric` goes through `genericDisposition` with the `capture_senders` row (FU-080); ingest never changes `confirmed_count`.
 
 **Re-parse:** when `registryVersion` increases after an app update, a background job re-parses `raw_messages` whose status is `review`, plus messages parsed by templates whose version changed. User-verified transactions are never modified.
 
