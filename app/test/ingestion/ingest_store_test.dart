@@ -58,6 +58,7 @@ void main() {
         store: store,
         parse: pipelineParser(ParsingPipeline(loadSpikeRegistry())),
         registryVersion: 1,
+        mayCreateDatabase: false,
       );
 
   test(
@@ -98,6 +99,48 @@ void main() {
     expect(again.drained, 1);
     expect(again.inserted, 0, reason: 'unique body_hash absorbs it');
     expect(spool.pending, isEmpty);
+  });
+
+  test('the UI engine path (SpikeIngestion, headless false) creates the '
+      'database on its first drain; the headless path then uses it', () async {
+    final log = <String>[];
+    final ui = SpikeIngestion(
+      marks: const NoMarks(),
+      headless: false,
+      spool: FakeSpool([], log),
+      store: (_) => uiStore(),
+      dbDirectory: () async => dbDir,
+    );
+    final first = await ui.drain();
+    expect(first.outcome, CycleOutcome.ok);
+    expect(File('${dbDir.path}/zaghlol.db').existsSync(), isTrue);
+
+    final spool = FakeSpool([entry(sid(1))], log);
+    final headless = SpikeIngestion(
+      marks: const NoMarks(),
+      headless: true,
+      spool: spool,
+      store: (_) => headlessStore(),
+      dbDirectory: () async => dbDir,
+    );
+    final r = await headless.drain();
+    expect(r.outcome, CycleOutcome.ok);
+    expect(r.inserted, 1);
+    expect(spool.pending, isEmpty);
+  });
+
+  test('the headless engine path (SpikeIngestion) never creates', () async {
+    final spool = FakeSpool([entry(sid(1))], <String>[]);
+    final headless = SpikeIngestion(
+      marks: const NoMarks(),
+      headless: true,
+      spool: spool,
+      store: (_) => headlessStore(),
+      dbDirectory: () async => dbDir,
+    );
+    expect((await headless.drain()).outcome, CycleOutcome.noDatabase);
+    expect(dbDir.existsSync(), isFalse);
+    expect(spool.pending, hasLength(1));
   });
 
   test('both engines resolve the database directory with the same function '

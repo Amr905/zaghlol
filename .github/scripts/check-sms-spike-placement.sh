@@ -14,7 +14,10 @@ case "$FLAVOR" in devSms|devNoSms|stagingSms|stagingNoSms|prodSms|prodNoSms) ;; 
 work=$(mktemp -d)
 "$AAPT2" dump xmltree --file AndroidManifest.xml "$APK" > "$work/manifest.txt"
 unzip -q -o "$APK" 'classes*.dex' -d "$work/dex"
-dex_has() { cat "$work"/dex/classes*.dex | grep -aqF "$1"; }
+ls "$work"/dex/classes*.dex > /dev/null || { echo "::error::no dex in $APK"; exit 1; }
+# grep the files directly: `cat | grep -q` under pipefail fails with SIGPIPE
+# when grep stops early, which would turn a hit into a miss.
+dex_has() { grep -aqF "$1" "$work"/dex/classes*.dex; }
 
 if grep -q 'android.provider.Telephony.SMS_RECEIVED' "$work/manifest.txt"; then has_rx=1; else has_rx=0; fi
 if [ "$FLAVOR" = "devSms" ]; then

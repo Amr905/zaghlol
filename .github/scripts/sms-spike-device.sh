@@ -114,7 +114,9 @@ fi
 send_and_wait canary 1
 A emu sms send "$SENDER" "spike: you paid EGP 77.00 at $CANARY card *4321" > /dev/null
 sleep 20
-UID_N=$(sh_ dumpsys package "$PKG" | grep -m1 -oE 'userId=[0-9]+' | cut -d= -f2)
+sh_ dumpsys package "$PKG" > "$OUT/pkg.txt"  # no early-exit grep in a pipe (pipefail)
+UID_N=$(grep -oE 'userId=[0-9]+' "$OUT/pkg.txt" | head -n 1 | cut -d= -f2 || true)
+[ -n "$UID_N" ] || fail "could not read the app uid"
 A logcat -d -v uid > "$OUT/logcat-uid.txt" || true
 APP_NAME="u0_a$((UID_N - 10000))"
 hits=$(grep -F "$CANARY" "$OUT/logcat-uid.txt" | grep -E "(^|[[:space:]])($UID_N|$APP_NAME)[[:space:]]" | grep -c . || true)
@@ -129,4 +131,4 @@ grep -qF "$SENDER" "$OUT/metrics.csv" && fail "metrics carried the sender" || tr
 dart run tool/spike/latency_report.dart "$OUT/metrics.csv" "emu-api$API" | tee "$OUT/report.md"
 n=$(tail -n +2 "$OUT/metrics.csv" | grep -c . || true)
 [ "$n" -ge "$N" ] || fail "only $n messages were committed"
-rm -f "$OUT/logcat-all.txt" "$OUT/logcat-uid.txt"
+rm -f "$OUT/logcat-all.txt" "$OUT/logcat-uid.txt" "$OUT/pkg.txt"

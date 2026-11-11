@@ -84,6 +84,7 @@ final class IngestionCycle {
     required this.store,
     required this.parse,
     required this.registryVersion,
+    required this.mayCreateDatabase,
     this.marks = const NoMarks(),
     UlidGenerator? ids,
     int Function()? nowMs,
@@ -96,6 +97,11 @@ final class IngestionCycle {
   final IngestStore store;
   final EntryParser parse;
   final int registryVersion;
+
+  /// True only in the UI engine: a missing database is opened (created) like
+  /// the app's startup does. False in the headless engine (Q6): a missing
+  /// database is [CycleOutcome.noDatabase] and is never opened.
+  final bool mayCreateDatabase;
   final CycleMarks marks;
   final int batchSize;
   final Duration budget;
@@ -110,7 +116,7 @@ final class IngestionCycle {
   };
 
   Future<CycleResult> run() async {
-    if (!await store.databaseExists()) {
+    if (!mayCreateDatabase && !await store.databaseExists()) {
       return const CycleResult(CycleOutcome.noDatabase);
     }
     try {

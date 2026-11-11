@@ -14,7 +14,11 @@ void main() {
   late FakeSpool spool;
   late FakeStore store;
 
-  IngestionCycle cycle({EntryParser? parse, int batch = 20}) => IngestionCycle(
+  IngestionCycle cycle({
+    EntryParser? parse,
+    int batch = 20,
+    bool mayCreate = false,
+  }) => IngestionCycle(
     spool: spool,
     store: store,
     parse:
@@ -24,6 +28,7 @@ void main() {
           return pipelineParser(ParsingPipeline(loadSpikeRegistry()))(e);
         },
     registryVersion: 1,
+    mayCreateDatabase: mayCreate,
     marks: RecordingMarks(log),
     batchSize: batch,
   );
@@ -103,6 +108,15 @@ void main() {
       expect(spool.pending, hasLength(2));
     },
   );
+
+  test('UI engine (may create): a missing database is opened, which '
+      'creates it', () async {
+    store.exists = false;
+    final r = await cycle(mayCreate: true).run();
+    expect(r.outcome, CycleOutcome.ok);
+    expect(store.opens, 1);
+    expect(log.take(2), ['open', 'mark:db_open']);
+  });
 
   test('ack fails after the commit → retry (re-delivery is deduped)', () async {
     spool.ackFails = 'IO_ERROR';

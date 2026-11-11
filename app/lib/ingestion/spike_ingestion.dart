@@ -93,6 +93,7 @@ final class SpikeIngestion {
       store: _storeFactory(await _dbDirectory()),
       parse: pipelineParser(pipeline),
       registryVersion: registry.registryVersion,
+      mayCreateDatabase: !headless,
       marks: marks,
     );
   }
