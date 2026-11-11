@@ -35,7 +35,7 @@ APK=$(find build/app/outputs -iname '*devSms*profile.apk' | head -n 1)
 A install -r -g "$APK" > /dev/null
 sh_ pm grant "$PKG" android.permission.RECEIVE_SMS
 sh_ pm grant "$PKG" android.permission.READ_SMS
-A logcat -c
+A logcat -c || true  # some emulator images refuse to clear "main"
 
 # First launch: the UI engine creates the database (the headless engine never does).
 sh_ am start -W -n "$PKG/app.zaghlol.MainActivity" > /dev/null
@@ -105,23 +105,34 @@ sleep 15
 [ "$(spool_count)" = 0 ] || fail "spool not empty after spoofed / non-allowlisted / OTP messages"
 [ "$(rows)" = "$before" ] || fail "a dropped message produced a metrics row"
 A logcat -d > "$OUT/logcat-all.txt"
-if grep -q "Permission Denial.*SMS_RECEIVED.*BROADCAST_SMS\|requires android.permission.BROADCAST_SMS" "$OUT/logcat-all.txt"; then
-  echo "spoofed broadcast: denied (BROADCAST_SMS)"
+# SMS_RECEIVED is a protected broadcast, so the shell's send is refused by the
+# system (SecurityException in am's output); the receiver's BROADCAST_SMS
+# requirement is the second line of defence. The hard check is the empty spool.
+if grep -qiE "SecurityException|Permission Denial|not allowed to send broadcast" "$OUT/spoof.txt" "$OUT/logcat-all.txt"; then
+  echo "spoofed broadcast: denied ($(grep -hoiE "SecurityException|Permission Denial|not allowed to send broadcast" "$OUT/spoof.txt" "$OUT/logcat-all.txt" | sort -u | tr '\n' ' '))"
 else
-  echo "warn: no permission-denial line found for the spoofed broadcast (spool stayed empty)"
+  echo "warn: no denial line found for the spoofed broadcast (spool stayed empty)"
 fi
 # Canary through the kept path too, then scan the app's own log lines.
 send_and_wait canary 1
 A emu sms send "$SENDER" "spike: you paid EGP 77.00 at $CANARY card *4321" > /dev/null
 sleep 20
-sh_ dumpsys package "$PKG" > "$OUT/pkg.txt"  # no early-exit grep in a pipe (pipefail)
-UID_N=$(grep -oE 'userId=[0-9]+' "$OUT/pkg.txt" | head -n 1 | cut -d= -f2 || true)
+sh_ pm list packages -U > "$OUT/pkg.txt"  # no early-exit grep in a pipe (pipefail)
+UID_N=$(grep -E "^package:$PKG uid:" "$OUT/pkg.txt" | grep -oE 'uid:[0-9]+' | cut -d: -f2 || true)
+if [ -z "$UID_N" ]; then
+  sh_ dumpsys package "$PKG" > "$OUT/pkg.txt"
+  UID_N=$(grep -oE '(userId|appId)=[0-9]+' "$OUT/pkg.txt" | cut -d= -f2 | sort -u | tail -n 1 || true)
+fi
 [ -n "$UID_N" ] || fail "could not read the app uid"
 A logcat -d -v uid > "$OUT/logcat-uid.txt" || true
 APP_NAME="u0_a$((UID_N - 10000))"
-hits=$(grep -F "$CANARY" "$OUT/logcat-uid.txt" | grep -E "(^|[[:space:]])($UID_N|$APP_NAME)[[:space:]]" | grep -c . || true)
+# The filter must see the app's own lines (its ZG-SPK codes), or it proves nothing.
+own=$(grep -E "(^|[[:space:]])($UID_N|$APP_NAME)[[:space:]]" "$OUT/logcat-uid.txt" | grep -c . || true)
+[ "$own" -gt 0 ] || fail "the logcat uid filter matched no app line; canary scan would be vacuous"
+grep -F "$CANARY" "$OUT/logcat-uid.txt" > "$OUT/canary-lines.txt" || true  # synthetic text only
+hits=$(grep -E "(^|[[:space:]])($UID_N|$APP_NAME)[[:space:]]" "$OUT/canary-lines.txt" | grep -c . || true)
 all_hits=$(grep -cF "$CANARY" "$OUT/logcat-all.txt" || true)
-echo "canary: app log lines $hits; all buffers $all_hits (system telephony lines are not the app's)"
+echo "canary: app log lines $hits of $own app lines; all buffers $all_hits (non-app lines in canary-lines.txt)"
 [ "$hits" = 0 ] || fail "the canary appeared in the app's logcat"
 grep -E "ZG-SPK" "$OUT/logcat-all.txt" | grep -F "$CANARY" && fail "spike log carried content" || true
 
