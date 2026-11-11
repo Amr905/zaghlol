@@ -1,18 +1,12 @@
 ---
-description: Implement and review one task from the board (Phase 5–6 loop)
+description: Build one task from the board (Phase 5). Review happens later, once per batch of 5 (see /review-batch).
 argument-hint: <T-###>
 ---
 
-Run task $ARGUMENTS through implementation and review.
+Build task $ARGUMENTS. It is reviewed later, together with four other tasks, by `/review-batch` (CLAUDE.md §6 "Batch review round").
 
-1. Read `docs/04-tasks/tasks/$ARGUMENTS.md` and `docs/workflow/model-routing.md`. Check that all dependencies are DONE in `docs/04-tasks/TASKS.md`; if not, stop.
+1. Read `docs/04-tasks/tasks/$ARGUMENTS.md` and `docs/workflow/model-routing.md`. Check that all dependencies are DONE (or BUILT in the same batch) in `docs/04-tasks/TASKS.md`; if not, stop.
 2. Verify the complexity class. If it's C3/C4 and the task has no Design note: for C4 crypto/keys, billing/entitlements and SMS/notification ingestion delegate to `solution-architect` (opus) first; otherwise the implementer writes a short note in the task file before coding.
-3. Set status IN_PROGRESS. Delegate to the task's agent, passing the task file path and `docs/workflow/self-check.md`, with the model the class dictates (C4: opus for crypto/keys, billing, SMS ingestion, migrations and data-deleting code; otherwise sonnet) (override the agent's default with the `model` parameter if needed).
-4. Read the diff yourself. Then set IN_REVIEW and run only the reviews the class requires (CLAUDE.md §6):
-   - C1: you spot-check the diff and CI;
-   - C2 and docs-only: `code-reviewer` on sonnet;
-   - C3: `code-reviewer` on sonnet (also checks tests);
-   - C4: one combined review on opus (`code-reviewer` also acting as `security-privacy-reviewer`, also checks tests); two separate opus reviewers only for crypto/keys, billing/entitlements and SMS/notification ingestion.
-   Re-reviews are delta-only on sonnet. Run at most 2 tasks at once.
-5. Only blocker or major findings go back to the implementer, who may also fix trivial minors in the same pass. Log every other minor or nit as an `FU-###` follow-up and don't block on it. Only the reviewers who raised a blocker or major re-review, and only the delta. After two failed rounds, bump the class by one and re-delegate.
-6. When all verdicts are APPROVED and the PC runner is green, the task is ready for the next batch (CLAUDE.md §6 "Batch merge"). It becomes DONE when its batch PR is merged; give me a 2–3 line summary.
+3. Set status IN_PROGRESS. Delegate to the task's agent, passing the task file path and `docs/workflow/self-check.md`, with the model the class dictates (C4: opus for crypto/keys, billing, SMS ingestion, migrations and data-deleting code; otherwise sonnet; C1: haiku). Brief it to commit early, push often, run the local checks before pushing and wait for the PC runner.
+4. When the builder reports, read its report and the diff stat (open the diff only where the report raises a doubt). Check the PC runner result. Set status BUILT and note the branch and head SHA in `docs/workflow/LEAD_HANDOFF.md` under "Built, waiting for batch review".
+5. No reviewer runs now. At most 4 builders at once, on separate lanes. When 5 tasks are BUILT, run `/review-batch`.

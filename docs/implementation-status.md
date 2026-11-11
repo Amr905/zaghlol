@@ -18,12 +18,12 @@
 ## Summary
 | Milestone | Total | DONE | IN_PROGRESS | BLOCKED |
 |---|---|---|---|---|
-| M0 | 28 | 21 | 1 | 0 |
-| M1 | 29 | 12 | 0 | 1 |
-| M2 | 29 | 4 | 0 | 0 |
+| M0 | 28 | 22 | 1 | 0 |
+| M1 | 29 | 14 | 0 | 1 |
+| M2 | 29 | 5 | 0 | 0 |
 | M3 | 18 | 0 | 0 | 0 |
 | M4 | 17 | 1 | 0 | 0 |
-| M5 | 35 | 14 | 1 | 1 |
+| M5 | 35 | 16 | 1 | 1 |
 | M6 | 19 | 1 | 1 | 2 |
 | M7 | 11 | 0 | 0 | 0 |
 
@@ -50,7 +50,7 @@
 | T-018 | Schema batch B: categories, catalog, rules, budgets, alerts, summaries, recurring | M0 | C4 | Opus | flutter-core-engineer | T-016 | DONE | local + PC runner PASS @2b9b28c; app-ci 42934875550 + db-platform 42941885207 (ci/T-018); batch CI; review [T-018](05-reviews/T-018.md) APPROVED | Batch 3. Schema v3; T-017 m-1, m-2, S-2 taken |
 | T-019 | Schema batch C: wealth, prices, Zakah, capture controls, review, settings, outbox, misc | M0 | C4 | Opus | flutter-core-engineer | T-016 | DONE | batch 5 local: app 1167 tests, zaghlol_parsing 1029, all packages/tools green, analyze/format clean; batch CI (`batch/2026-11-11-4`); review [T-019](05-reviews/T-019.md) APPROVED (Opus; migration negative proof re-run) | Batch 5. Schema v4. FU-096; open data questions (payout values, Hijri dates, capture channels, price units) go to feature tasks |
 | T-020 | Settings repository with typed accessors and defaults | M0 | C2 | Sonnet | flutter-core-engineer | T-019 | DONE | batch 6 local: every app-ci step green (app tests, packages, lints, Pigeon/drift stale checks, no-logging grep), backend Release build 0 warnings, format clean, no vulnerable packages; batch CI (`batch/2026-11-11-5`); review [T-020](05-reviews/T-020.md) APPROVED | Batch 6. Key names are part of the backup format. FU-102 |
-| T-021 | Redacting local diagnostic log | M0 | C3 | Sonnet | flutter-core-engineer | T-019, T-014 | TODO | — |  |
+| T-021 | Redacting local diagnostic log | M0 | C3 | Sonnet | flutter-core-engineer | T-019, T-014 | DONE | batch 9 review [batch-9](05-reviews/batch-9.md) APPROVED after fix 21-1 (Lead delta check) | Batch 9. FU-113 |
 | T-022 | Design tokens, Mint Fresh/Jade Night themes and base components | M0 | C2 | Sonnet | flutter-ui-engineer | T-001 | DONE | app-ci 42506573523 (13/13); PR #9 squash-merged; review [T-022](05-reviews/T-022.md) APPROVED | Goldens use Ahem until IBM Plex Sans Arabic is bundled. FU-044…FU-047 |
 | T-023 | Localization scaffold, digits mode and money/date formatting | M0 | C2 | Sonnet | flutter-core-engineer | T-012, T-020 | TODO | — |  |
 | T-024 | App shell: routing, platform tab bars, Add button, deep links | M0 | C2 | Sonnet | flutter-ui-engineer | T-022, T-023 | TODO | — |  |
@@ -69,14 +69,14 @@
 | T-037 | Templates + fixtures: InstaPay scenarios and mobile wallets | M1 | C2 | Sonnet | parsing-engine-engineer | T-033 | TODO | — |  |
 | T-038 | Android Capture Guard (Kotlin) with config reader | M1 | C4 | Opus | native-platform-engineer | T-035, T-008 | DONE | instrumented golden suite green on API 26/30/34/36 (sms-spike 43016241777, after the FU-101 ICU fix; timings in the task file); app-ci 42996490126; reviews [T-038](05-reviews/T-038.md) + [security](05-reviews/T-038-security.md) APPROVED | Batch 6 merged, closed in batch 7. FU-101 M-1 closed; FU-101 L-1 (Android entry point SMS + notification only) still before T-040 |
 | T-039 | Android encrypted spool + spool host API | M1 | C4 | Opus | native-platform-engineer | T-004, T-008 | DONE | app-ci 43016241671 + sms-spike 43016241777 on `ci/T-039` (spool 3/3, kill test, guard golden on API 26/30/34/36); batch 7 local: every app-ci step green, backend Release build 0 warnings, format clean, no vulnerable packages; batch CI (`batch/2026-11-11-6`); reviews [T-039](05-reviews/T-039.md) APPROVED after shared per-path lock fix (delta) + Lead delta check of FU-101, [security](05-reviews/T-039-security.md) APPROVED | Batch 7. Pigeon `encryptedConfig` rename done. Manual device steps: clean install first (key test deletes `zaghlol_spool_v1`). PO Q1–Q2 provisional. FU-104 |
-| T-040 | SMS receiver (multipart, Guard, spool, enqueue) in prodSms flavor | M1 | C4 | Opus | native-platform-engineer | T-038, T-039 | TODO | — |  |
+| T-040 | SMS receiver (multipart, Guard, spool, enqueue) in prodSms flavor | M1 | C4 | Opus | native-platform-engineer | T-038, T-039 | DONE | batch 9 review [batch-9](05-reviews/batch-9.md) + [security](05-reviews/batch-9-security.md) APPROVED; app-ci 43105330938 green; sms-spike API 26/30/34/36 green | Batch 9. FU-111 |
 | T-041 | IngestionWorker with headless Flutter engine and foreground events | M1 | C4 | Opus | native-platform-engineer | T-039, T-008 | DONE | app-ci 43041073195 + sms-spike 43041073291 on `ci/T-041` (AC1 killed-app drain, AC2 p95 49–156 ms, 40/40 burst with UI attach, API 26/30/34/36); batch 8 local: every app-ci step green; batch CI (`batch/2026-11-11-7`); reviews [T-041](05-reviews/T-041.md) + [security](05-reviews/T-041-security.md) APPROVED | Batch 8. Closes FU-104 T-041 items, FU-105 held entries, FU-081 F4/F6; T-042 wired (headless host NOT_AVAILABLE, tested). PO Q1 (held messages UI) provisional. FU-108 |
 | T-042 | Inbox reader for historical scan (sender-filtered, paged) | M1 | C4 | Opus | native-platform-engineer | T-004, T-038 | DONE | app-ci 43032612836 + sms-spike 43032676943 on `ci/T-042` (real provider, 10k constant memory, permission denial); merged with T-041; batch 8 local: every app-ci step green; batch CI (`batch/2026-11-11-7`); reviews [T-042](05-reviews/T-042.md) + [security](05-reviews/T-042-security.md) APPROVED | Batch 8 (via T-041). **Security M-1 / PO Q1 (user-added phone-number senders get full history scanned) must be decided before T-048.** FU-109 |
 | T-043 | Bank notification listener service | M1 | C4 | Opus | native-platform-engineer | T-038, T-039 | TODO | — |  |
 | T-044 | Android capabilities and permission flows host API | M1 | C4 | Opus | native-platform-engineer | T-040, T-043 | TODO | — |  |
 | T-045 | Accounts repository: auto-create, default cash, per-currency balances | M1 | C3 | Sonnet | flutter-core-engineer | T-017 | DONE | batch 4 local: app 873 tests, packages 901, analyze/format clean; batch CI (`batch/2026-11-11-3`); review [T-045](05-reviews/T-045.md) APPROVED after two-connection tests (Lead delta check) | Batch 4 |
 | T-046 | IngestRawMessages use case (dedupe, merge, persist, ack, events) | M1 | C4 | Opus | flutter-core-engineer | T-033, T-045, T-014, T-035 | DONE | batch 7 local: every app-ci step green, backend Release build 0 warnings, format clean, no vulnerable packages; batch CI (`batch/2026-11-11-6`); reviews [T-046](05-reviews/T-046.md) + [security](05-reviews/T-046-security.md) APPROVED after poison-batch, fallback-Guard and T-075 wiring fixes (delta) | Batch 7. Takes FU-078, FU-080; real T-075 categorizer wired. PO Q1–Q3 provisional. FU-105 |
-| T-047 | Capture module (app side): guard config writer, spool orchestrator, degraded mode | M1 | C3 | Sonnet | flutter-core-engineer | T-046, T-039, T-035 | TODO | — |  |
+| T-047 | Capture module (app side): guard config writer, spool orchestrator, degraded mode | M1 | C3 | Sonnet | flutter-core-engineer | T-046, T-039, T-035 | DONE | review [T-047](05-reviews/T-047.md) APPROVED (pre-batch-review rules); lands with T-040 | Batch 9. FU-111 |
 | T-048 | Historical inbox scan with progress (Android) | M1 | C3 | Sonnet | flutter-core-engineer | T-047, T-042 | TODO | — |  |
 | T-049 | Review queue domain and repository | M1 | C2 | Sonnet | flutter-core-engineer | T-019, T-046 | TODO | — |  |
 | T-050 | Transactions repository: query, search, CRUD, soft delete | M1 | C2 | Sonnet | flutter-core-engineer | T-017 | DONE | local PASS (745 app tests; 50k search p95 ~57 ms); batch CI; review [T-050](05-reviews/T-050.md) APPROVED | Batch 3. Soft delete keeps offset links; activeLinked* for net spend |
@@ -106,7 +106,7 @@
 | T-074 | Merchant rules repository and apply-to-past | M2 | C2 | Sonnet | flutter-core-engineer | T-018, T-050 | DONE | batch 5 local: app 1167 tests, zaghlol_parsing 1029, all packages/tools green, analyze/format clean; batch CI (`batch/2026-11-11-4`); review [T-074](05-reviews/T-074.md) APPROVED | Batch 5. Precedence counterparty → merchant_norm → catalog merchant is an assumption for T-075; rule re-point leaves rule-set rows (T-077 copy). FU-095 |
 | T-075 | Categorizer with fuzzy merchant matching | M2 | C3 | Sonnet | parsing-engine-engineer | T-034, T-018, T-074, T-030 | DONE | batch 6 local: every app-ci step green (app tests, packages, lints, Pigeon/drift stale checks, no-logging grep), backend Release build 0 warnings, format clean, no vulnerable packages; batch CI (`batch/2026-11-11-5`); review [T-075](05-reviews/T-075.md) APPROVED (FU-095 harness negative proof re-run) | Batch 6. Takes FU-095. PO-1…PO-4 provisional (Arabic El Ezaby aliases need native review with T-059). FU-100 |
 | T-076 | Re-parse job after registry version bump | M2 | C3 | Sonnet | flutter-core-engineer | T-046, T-032 | TODO | — |  |
-| T-077 | Bulk edit and undo use case | M2 | C3 | Sonnet | flutter-core-engineer | T-050, T-074 | TODO | — |  |
+| T-077 | Bulk edit and undo use case | M2 | C3 | Sonnet | flutter-core-engineer | T-050, T-074 | DONE | batch 9 review [batch-9](05-reviews/batch-9.md) APPROVED after fix 77-1 (delta re-review) | Batch 9. FU-114 |
 | T-078 | Ignore rules domain: per card/channel, before-seen, keep/delete, re-scan | M2 | C3 | Sonnet | flutter-core-engineer | T-047, T-050 | TODO | — |  |
 | T-079 | Transactions list S-11 with filters, search and selection mode | M2 | C2 | Sonnet | flutter-ui-engineer | T-050, T-077, T-024, T-029 | TODO | — |  |
 | T-080 | Transaction detail S-12 and add/edit sheet S-13 | M2 | C2 | Sonnet | flutter-ui-engineer | T-050, T-075, T-045, T-029 | TODO | — |  |
@@ -211,9 +211,9 @@
 | T-179 | SeatKeyHostApi (iOS Secure Enclave seat keys) and Dart seat-key service | M5 | C4 | Opus | native-platform-engineer | T-004, T-141 | TODO | — | Plan v1.1 (new); R-19 device test |
 | T-180 | TrustedClockHostApi (monotonic clock with sleep, boot reference) on both platforms | M5 | C4 | Opus | native-platform-engineer | T-004 | TODO | — | Plan v1.1 (new) |
 | T-181 | Backend attestation verifiers: Play Integrity decode and App Attest attestation/assertion, with fakes | M5 | C4 | Opus | backend-engineer | T-122 | TODO | — | Plan v1.1 (new) |
-| T-182 | Backend seat-key proof verifier and keyed hashes (K_seat), with fakes | M5 | C4 | Opus | backend-engineer | T-122, T-123 | TODO | — | Plan v1.1 (new) |
+| T-182 | Backend seat-key proof verifier and keyed hashes (K_seat), with fakes | M5 | C4 | Opus | backend-engineer | T-122, T-123 | DONE | reviews T-182 code + security APPROVED (pre-batch-review rules); backend-ci green | Plan v1.1 (new) Batch 9. FU-112 |
 | T-183 | Dart request-binding library: JCS, strict JSON parser, restore and seat-key hashes over shared vectors | M5 | C4 | Opus | flutter-core-engineer | T-001, T-014 | TODO | — | Plan v1.1 (new) |
-| T-184 | Seat service: bind, move, same-iPhone rebind with cap, claimants, reclaim and support-move primitive | M5 | C4 | Opus | backend-engineer | T-122, T-182 | TODO | — | Plan v1.1 (new, from T-132) |
+| T-184 | Seat service: bind, move, same-iPhone rebind with cap, claimants, reclaim and support-move primitive | M5 | C4 | Opus | backend-engineer | T-122, T-182 | DONE | batch 9 review [batch-9](05-reviews/batch-9.md) + [security](05-reviews/batch-9-security.md) APPROVED; backend-ci incl. Testcontainers green | Plan v1.1 (new, from T-132) Batch 9. FU-112 |
 | T-185 | POST /v1/purchases/restore: strict parse, install binding, attestation, seat outcomes and limits | M5 | C4 | Opus | backend-engineer | T-132, T-181, T-182, T-184 | TODO | — | Plan v1.1 (new, from T-132) |
 | T-186 | Support seat:move, purchase:detach and purchase:unfreeze endpoints with dispute freeze | M5 | C4 | Opus | backend-engineer | T-136, T-184, T-130, T-131, T-132 | TODO | — | Plan v1.1 (new, from T-136); R6-1 |
 
@@ -332,6 +332,11 @@
 - **FU-109** (T-042 reviews): **security M-1 (PO decision, before T-048):** user-added phone-number senders get up to 25 months of personal SMS scanned into review — Lead recommendation: live-only + financial-looking filter for those senders, consent text, separate opt-in "scan past messages" limited to 3 months, never put their unparsed messages in review; L-2 registry lint requires anchored sender patterns and rejects any matching an Egyptian mobile number (T-036); code m-2 return `IO_ERROR` when `_id` does not increase (shuffled-provider test); m-3 move `SimSlot` to shared capture code (T-040); m-4 device run with a few thousand real seeded rows; nits; T-048 restarts the scan on `INVALID_ARGUMENT`.
 - **FU-110** (T-051 review): invalidate after the `payday_eras` write too (setPayday race; same gap in `CycleRepository.totals`); resume sweep must also invalidate linked expenses' cycles; move invalidation wiring and the `DomainEventBus` → `transactionsChangedProvider` override to an app-level provider (T-052 / app shell, with `TodayNotifier.reevaluate()` and `sweepSince` on resume); cold-start current cycle shows 0 pending briefly; T-077/T-089/T-049 add linked expenses' cycles to `cycleKeys`; nits.
 
+- **FU-111** (T-040 batch-9 reviews): 40-1 / T040-I2 confirm negative proofs 6b and 14 when the PC runner is back; 40-3 / T040-L1 move `SmsCapture.installForTest` out of the main source set (debug/test only); 40-2 staging/prod `*Sms` builds drop every SMS until T-036 bundles the Guard base — say so in the T-176 Play declaration; T040-I1 an over-4 000-char kept SMS leaves no status fact; PO Q1: 80 % SMS share of the spool (`SpoolPolicy.SMS_SHARE_PERCENT`, provisional); manual dual-SIM steps in the task file.
+- **FU-112** (T-184 batch-9 reviews): 184-1 reword the AC "every outcome writes one `purchase_events` row" to "every change" (Lead); **184-2 / T184-L1 (T-186):** take the move-back target only from T-186's own audit row, never trust `MoveBack` from input; 184-3 successor inheritance drops pending claimants; T184-I3 (T-185) lock purchases in a fixed order on multi-item restore; PO Q1 purchases verified before T-132 have no seat row (backfill in T-132?); PO Q2 verify on a vacant seat with no new payment stays vacant.
+- **FU-113** (T-021 batch-9 review): 21-2 nothing calls `installDiagErrorHandlers` / `DiagLogger` yet — wire in `main.dart` and `ingestion/quiet_errors.dart` (app shell / T-052); 21-3 building a `DiagField` can throw; 21-4 handlers also hide errors in debug builds; 21-5 Swift `NativeDiagHook.handler` unsynchronised; native → `diag_log` bridge needs a native task; Settings > About diagnostics screen and share sheet not built; add a test that `DiagCodes.all` lists every constant; confirm template-id shape with the template registry.
+- **FU-114** (T-077 batch-9 reviews): 77-1a the wiring task (T-079) must pass the real payday schedule and event bus (or make `loadSchedule` required); 77-2 assert per-account totals in the account-move test; 77-3 an account move keeps `is_internal` / pair ids — re-pair or refuse; 77-4 AC→test map into the task file; two batches in the same millisecond on one row can mask the conflict check.
+
 ## Log
 | Date | Event |
 |---|---|
@@ -394,3 +399,4 @@
 | 2026-11-11 | Batch 6 (#35, `batch/2026-11-11-5`): T-134, T-148, T-075, T-020, T-025 DONE; T-038 merged (instrumented golden run waits for T-039). FU-098…FU-103; FU-092 items 1/2/3/8 closed by T-134. Progress 46/186. |
 | 2026-11-11 | Batch 7 (#36, `batch/2026-11-11-6`): T-039, T-046, T-112, T-133 DONE; T-038 closed (instrumented golden green after FU-101 ICU fix: `[:=]` rejected by Android ICU). FU-104…FU-107. Progress 51/186. |
 | 2026-11-11 | Batch 8 (`batch/2026-11-11-7`): T-041 (+T-042 wired), T-042, T-051 DONE. FU-108…FU-110. Progress 54/186. |
+| 2026-11-12 | Batch 9 (`batch/2026-11-11-9`), first batch under the one-review-round workflow: T-021, T-040, T-047, T-077, T-182, T-184 DONE. FU-111…FU-114. Progress 60/186. |

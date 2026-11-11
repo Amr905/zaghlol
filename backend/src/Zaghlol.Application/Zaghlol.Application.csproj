@@ -5,6 +5,13 @@
   </ItemGroup>
 
   <ItemGroup>
+    <!-- T-182: the seat-key input builders and P-256 constants are internal; the unit and vector tests pin them. -->
+    <InternalsVisibleTo Include="Zaghlol.Application.Tests" />
+    <InternalsVisibleTo Include="Zaghlol.Contract.Tests" />
+    <InternalsVisibleTo Include="Zaghlol.Infrastructure.Tests" />
+  </ItemGroup>
+
+  <ItemGroup>
     <PackageReference Include="Microsoft.Extensions.DependencyInjection.Abstractions" />
   </ItemGroup>
 

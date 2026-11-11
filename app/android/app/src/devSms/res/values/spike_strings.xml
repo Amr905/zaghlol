@@ -1,8 +1,0 @@
-<?xml version="1.0" encoding="utf-8"?>
-<resources>
-    <!-- Spike only: the tester's second phone number (international form, e.g.
-         +2010xxxxxxxx) to allowlist in the spike Guard. Empty = only the
-         emulator test sender 5550100. Never commit a real number. The capture
-         notification strings moved to src/main/res (T-041). -->
-    <string name="spike_tester_sender" translatable="false"></string>
-</resources>

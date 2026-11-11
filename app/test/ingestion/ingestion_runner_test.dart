@@ -1,16 +1,13 @@
 // T-041 (from the T-008 spike test): cycles are serialised per engine; a
 // request during a run schedules exactly one more run; close stops after the
-// current batch and awaits the DB close; the foreground ingestion registers
-// the event handler and drains; the flavour constant picks the spike registry
+// current batch and awaits the DB close; the flavour constant picks the spike registry
 // only in devSms.
 
 import 'dart:async';
 import 'dart:io';
 
 import 'package:flutter_test/flutter_test.dart';
-import 'package:zaghlol/core/platform/capture_api.g.dart';
 import 'package:zaghlol/features/ingestion/domain/ingest_types.dart';
-import 'package:zaghlol/ingestion/foreground_ingestion.dart';
 import 'package:zaghlol/ingestion/ingestion_config.dart';
 import 'package:zaghlol/ingestion/ingestion_cycle.dart';
 import 'package:zaghlol/ingestion/ingestion_main.dart';
@@ -206,40 +203,6 @@ void main() {
     expect(r.outcome, CycleOutcome.retry);
     expect(r.code, 'INGEST_SETUP_FAILED');
   });
-
-  test(
-    'foreground ingestion drains at start and on every onSpoolChanged',
-    () async {
-      final log = <String>[];
-      final spool = FakeSpool([entry(sid(1))], log);
-      final runner = IngestionRunner(
-        marks: const NoMarks(),
-        headless: false,
-        registry: loadSpikeRegistry,
-        spool: spool,
-        store: (_, _) => FakeStore(log),
-        dbDirectory: () async => Directory.systemTemp,
-      );
-      addTearDown(() => CaptureEventsApi.setUp(null));
-      expect(
-        identical(startForegroundIngestion(runner: runner), runner),
-        isTrue,
-      );
-      await pumpEventQueue();
-      expect(spool.pending, isEmpty, reason: 'drained at start');
-      spool.pending.add(entry(sid(2)));
-      // Native → Dart CaptureEventsApi.onSpoolChanged over the real codec.
-      final messenger =
-          TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger;
-      await messenger.handlePlatformMessage(
-        'dev.flutter.pigeon.zaghlol.CaptureEventsApi.onSpoolChanged',
-        CaptureEventsApi.pigeonChannelCodec.encodeMessage(<Object?>[1]),
-        (_) {},
-      );
-      await pumpEventQueue();
-      expect(spool.pending, isEmpty, reason: 'drained on the event');
-    },
-  );
 
   test('the flavour constant selects the spike registry and marks only in '
       'devSms (tests run without a flavour)', () {

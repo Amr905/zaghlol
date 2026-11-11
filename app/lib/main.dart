@@ -1,17 +1,23 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import 'core/db/db_directory.dart';
+import 'core/db/db_key_providers.dart';
 import 'core/theme/app_theme.dart';
-import 'ingestion/foreground_ingestion.dart';
-import 'ingestion/ingestion_config.dart';
+import 'features/capture/presentation/capture_lifecycle.dart';
 import 'ingestion/ingestion_main.dart';
 
-void main() {
+Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
-  // T-041: foreground ingestion in devSms only (the build with a capture
-  // source until T-040); T-047 wires it for every build behind its startup
-  // gate. A compile-time constant, so other builds drop it.
-  if (kIsSpikeBuild) startForegroundIngestion();
-  runApp(const ZaghlolApp());
+  final dbDirectory = await resolveDbDirectory();
+  // T-047: the UI engine's capture module (drain, Guard config, health) runs
+  // in every build; it starts once the database opens.
+  runApp(
+    ProviderScope(
+      overrides: [dbDirectoryProvider.overrideWithValue(dbDirectory)],
+      child: const CaptureLifecycle(child: ZaghlolApp()),
+    ),
+  );
 }
 
 /// T-041: the headless ingestion engine's entrypoint (every build). The

@@ -12,29 +12,12 @@ import android.util.Log
  */
 object SpikeLog {
     enum class Code {
-        RX_KEEP,
-        RX_DROP,
-        RX_EMPTY,
+        RX_RECEIVED,
         SPOOL_WRITTEN,
-        SPOOL_FULL,
-        SPOOL_WRITE_FAILED,
-        SPOOL_TIMEOUT,
-        SPOOL_DECRYPT_FAILED,
-        SPOOL_READ_DEFERRED,
         ENQUEUED,
-        ENQUEUE_FAILED,
         WORKER_START,
-        WORKER_SUCCESS,
-        WORKER_RETRY,
-        ENGINE_START,
         ENGINE_READY,
-        ENGINE_FAILED,
-        ENGINE_DESTROYED,
-        CYCLE_DONE,
-        CYCLE_TIMEOUT,
-        UI_NOTIFIED,
         METRICS_FAILED,
-        HOST_ERROR,
     }
 
     /** Set once from `ApplicationInfo.FLAG_DEBUGGABLE`. */

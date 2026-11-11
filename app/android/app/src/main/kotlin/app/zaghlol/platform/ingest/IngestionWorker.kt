@@ -8,6 +8,7 @@ import android.os.Looper
 import androidx.work.CoroutineWorker
 import androidx.work.ExistingWorkPolicy
 import androidx.work.ForegroundInfo
+import androidx.work.WorkInfo
 import androidx.work.WorkManager
 import androidx.work.WorkerParameters
 import app.zaghlol.R
@@ -19,13 +20,31 @@ import java.util.concurrent.TimeUnit
  * waits (bounded) until WorkManager has persisted the request when it is
  * called off the main thread (a receiver's `goAsync()` window), so a process
  * killed right after still runs the work; on the main thread it never blocks.
+ * T-040 (FU-108 L-1, m-2): off the main thread a live enqueue is skipped while
+ * a live run is already waiting ([LiveEnqueueGate]).
  */
 class WorkManagerIngestScheduler(private val context: Context) : IngestWorkQueue {
+    private val gate = LiveEnqueueGate(
+        waitingLive = ::liveRunWaiting,
+        enqueueLive = ::enqueueLive,
+        onMainThread = { Looper.myLooper() == Looper.getMainLooper() },
+    )
+
     override fun enqueue() {
+        gate.enqueue()
+    }
+
+    private fun enqueueLive() {
         val op = WorkManager.getInstance(context)
             .enqueueUniqueWork(IngestWork.LIVE, ExistingWorkPolicy.APPEND_OR_REPLACE, IngestWork.liveRequest())
         if (Looper.myLooper() != Looper.getMainLooper()) op.result.get(PERSIST_WAIT_MS, TimeUnit.MILLISECONDS)
     }
+
+    /** Off the main thread only (blocks, bounded): a live run not started yet. */
+    private fun liveRunWaiting(): Boolean = WorkManager.getInstance(context)
+        .getWorkInfosForUniqueWork(IngestWork.LIVE)
+        .get(PERSIST_WAIT_MS, TimeUnit.MILLISECONDS)
+        .any { isWaiting(it.state) }
 
     override fun enqueueRetry(attempt: Int, fromRetryRun: Boolean) {
         WorkManager.getInstance(context).enqueueUniqueWork(
@@ -39,8 +58,12 @@ class WorkManagerIngestScheduler(private val context: Context) : IngestWorkQueue
         WorkManager.getInstance(context).cancelUniqueWork(IngestWork.RETRY)
     }
 
-    private companion object {
-        const val PERSIST_WAIT_MS = 2_000L
+    companion object {
+        private const val PERSIST_WAIT_MS = 2_000L
+
+        /** A live run that has not started: it will drain whatever was written before the check. */
+        internal fun isWaiting(state: WorkInfo.State): Boolean =
+            state == WorkInfo.State.ENQUEUED || state == WorkInfo.State.BLOCKED
     }
 }
 

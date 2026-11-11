@@ -13,6 +13,15 @@ import io.flutter.plugin.common.BinaryMessenger
  * throw; callers still guard every call.
  */
 interface IngestTrace {
+    /** T-040: a capture broadcast arrived (receive stamp on `elapsedRealtimeNanos`). */
+    fun received(rxElapsedNs: Long) {}
+
+    /** T-040: the intake wrote entry [id] (receive stamps of its record). */
+    fun spooled(id: String, rxElapsedNs: Long, rxWallMs: Long) {}
+
+    /** T-040: the live work was enqueued for [ids] (after their spool writes). */
+    fun enqueued(ids: List<String>) {}
+
     /** A worker run starts. [foreground]: a UI engine is attached; [warmEngine]: a headless engine exists. */
     fun runStarted(foreground: Boolean, warmEngine: Boolean) {}
 

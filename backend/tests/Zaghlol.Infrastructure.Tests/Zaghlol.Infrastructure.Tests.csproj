@@ -19,6 +19,7 @@
     <Compile Include="..\Shared\PlayWireMock.cs" Link="Shared\PlayWireMock.cs" />
     <Compile Include="..\Shared\AppleTestPki.cs" Link="Shared\AppleTestPki.cs" />
     <Compile Include="..\Shared\AppleWireMock.cs" Link="Shared\AppleWireMock.cs" />
+    <Compile Include="..\Shared\SeatKeyTestSigner.cs" Link="Shared\SeatKeyTestSigner.cs" />
     <!-- The same role bootstrap the provider admin and docker compose run. -->
     <None Include="..\..\deploy\db\bootstrap-roles.sql" Link="db\bootstrap-roles.sql" CopyToOutputDirectory="PreserveNewest" />
     <!-- T-131: the PO's recorded sandbox JWS, once it exists (the test reports skipped until then). -->

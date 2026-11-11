@@ -1,0 +1,35 @@
+{
+ "v": 4,
+ "registryVersion": 1,
+ "senders": [
+  {
+   "match": "exact",
+   "value": "5550100",
+   "inst": "spike"
+  }
+ ],
+ "packages": [],
+ "wallet": [],
+ "drop": {
+  "global": [
+   "(?:^|[^a-z])otp(?:$|[^a-z])",
+   "رمز التحقق",
+   "one[- ]time password"
+  ],
+  "byInst": {}
+ },
+ "last4": {
+  "*": [
+   "(?:\\*{1,}|x{2,}|ending +)([0-9]{4})"
+  ]
+ },
+ "generic": {
+  "senderHints": [],
+  "bodyHints": [],
+  "alwaysCapture": []
+ },
+ "shortcutKeywords": [],
+ "rate": {
+  "perSenderPerMin": 600
+ }
+}

@@ -139,6 +139,10 @@ CREATE TABLE purchase_events (                 -- audit trail of state transitio
   from_state text, to_state text NOT NULL, cause text NOT NULL,   -- verify | restore | seat_bind | seat_move:<restore|signin|support|account_attach|verify>
                                                                     -- | seat_rebind:<restore|signin> | seat_rebind_over_cap:<restore|signin>
                                                                     -- | rtdn:<type> | assn:<type> | sweep
+                                                                    -- Seat rows (T-184): from_state = to_state = the purchase's
+                                                                    -- state; exactly one row per bind, move, rebind or over-cap
+                                                                    -- rebind, plus the over-cap sign-in refusal; none for a no-op
+                                                                    -- (unchanged, refused, claimant added, account required)
   occurred_at timestamptz NOT NULL DEFAULT now()
 );
 
@@ -211,6 +215,10 @@ CREATE TABLE purchase_seats (
   CHECK (cardinality(recent_rebinds) <= 2)
 );
 CREATE INDEX ix_purchase_seats_install ON purchase_seats(install_id);
+-- Seat service (T-184): every change locks the purchases row FOR UPDATE, then this row FOR UPDATE, in the caller's transaction
+-- (Zaghlol.Application/Seats/SeatService). A Google successor inherits the predecessor's holder, proof, move times and
+-- recent_rebinds, but device_key_hash starts NULL (false): it is keyed by purchase_id, so the predecessor's value could never match.
+-- A same-iPhone rebind sets proof = 'device' ('basic' stays 'basic', so the 2-day token limit holds).
 -- A BEFORE DELETE trigger on installs vacates the seat (install_id, proof, bound_at := NULL) so the holder/proof CHECK holds;
 -- device_key_hash, device_key_trusted, last_moved_at, next_move_at and recent_rebinds are kept (D-55).
 -- Invariant (FR-GOLD-08 acceptance): at most one holder per purchase, by construction (primary key).
@@ -412,7 +420,7 @@ CREATE TABLE audit_log (id bigint GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
 | Support lookups by e-mail | The e-mail travels only in a POST body (`backend-api.md` §5.2). The audit row stores `HMAC-SHA256(K_audit, NFC(trim(lower(email))))` plus the matched `account_id`, never the e-mail. `K_audit` is a dedicated KMS key, separate from the `install_hash` pepper, so the value can't be reversed by a dictionary attack without the KMS. It is still **pseudonymous personal data** and falls under the audit retention (§4) |
 | ID token / attestation replay | `replay_guard` keeps only hashes, until the token's `exp` (Play Integrity: 15 min) |
 | Idempotent replays | `idempotency_records` returns a stored result only for the same install, operation, key and body hash, and only while `expires_at > now()`; bodies are encrypted and purged after 24 h, and deleted at once with their install or account. `POST /v1/installs` stores no token-bearing response at all (R3-6) |
-| Same-iPhone recognition (D-55, D-62) | Only keyed hashes under `K_seat`, a dedicated KMS key: `purchase_seats.device_key_hash` / `seat_claimants.device_key_hash` = HMAC-SHA256(`K_seat`, purchase_id ‖ public key), and `installs.seat_key_hash` = HMAC-SHA256(`K_seat`, "install" ‖ 0x00 ‖ installId ‖ public key) (R4-1(1)). No raw public key, no Secure Enclave data. At rest, rows for different purchases can't be joined; the per-install hash sits on the install's own row. In transit the raw keys of up to 5 installs of one iPhone are visible to the running API (accepted, D-62); they are never logged |
+| Same-iPhone recognition (D-55, D-62) | Only keyed hashes under `K_seat`, a dedicated KMS key: `purchase_seats.device_key_hash` / `seat_claimants.device_key_hash` = HMAC-SHA256(`K_seat`, purchase_id ‖ public key), and `installs.seat_key_hash` = HMAC-SHA256(`K_seat`, "install" ‖ 0x00 ‖ installId ‖ public key) (R4-1(1)); UUIDs as 36-character lower-case text, the key as its raw 65-byte point (T-182). `K_seat` is not rotated on a schedule (the hashes can't be recomputed without raw keys); emergency rotation clears these columns once (`deployment.md` §3). No raw public key, no Secure Enclave data. At rest, rows for different purchases can't be joined; the per-install hash sits on the install's own row. In transit the raw keys of up to 5 installs of one iPhone are visible to the running API (accepted, D-62); they are never logged |
 | Time nonce (R4-2) | No column: the `Zaghlol-Time-Nonce` value is echoed in the signed response and never stored or logged |
 | Store order IDs (D-57) | Never stored: no column, no audit field, no log; checked live with the store and dropped |
 | Device attestation (D-45) | Only `app_attest_keys` (public key, counter) and Play verdict checks; no device identifier (IMEI, ad ID, serial, phone number) and no verdict payload is stored (FR-GOLD-09) |
