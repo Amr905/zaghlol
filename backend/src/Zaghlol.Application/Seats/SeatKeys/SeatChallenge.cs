@@ -57,4 +57,9 @@ public sealed class SeatChallenge
     public override string ToString() => "***";
 
     internal ReadOnlySpan<byte> Span => value;
+
+    /// <summary>Shared vectors only (they give the challenge, not the transaction or nonce it came from).</summary>
+    internal static SeatChallenge FromRaw(SeatOp op, ReadOnlySpan<byte> challenge) => challenge.Length == Length
+        ? new SeatChallenge(op, challenge.ToArray())
+        : throw new ArgumentException("A challenge must be 32 bytes.", nameof(challenge));
 }
