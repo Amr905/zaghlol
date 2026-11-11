@@ -18,7 +18,8 @@ final class TransactionsChanged extends DomainEvent {
 
   final Set<String> accountIds;
 
-  /// Payday-cycle keys, for example `2026-11`.
+  /// Payday-cycle keys: the ISO start date of each cycle, for example
+  /// `2026-10-25` (T-051; not `YYYY-MM`).
   final Set<String> cycleKeys;
 }
 

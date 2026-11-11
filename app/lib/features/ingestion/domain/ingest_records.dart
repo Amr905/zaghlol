@@ -258,6 +258,7 @@ final class BatchContext {
     required this.captureSenders,
     required this.customTemplateSenders,
     this.paydayDay,
+    this.paydayEras,
     this.language,
   });
 
@@ -269,6 +270,9 @@ final class BatchContext {
 
   /// `settings.payday_day` as stored (null: unset).
   final String? paydayDay;
+
+  /// `settings.payday_eras` as stored (null: unset; T-051).
+  final String? paydayEras;
 
   /// `settings.language` as stored (null: unset).
   final String? language;

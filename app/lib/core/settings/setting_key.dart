@@ -124,5 +124,14 @@ final class SettingKey<T> {
         return parts.toSet();
       }, (v) => (v.toList()..sort()).join(','));
 
+  /// The payday eras (T-051; database-schema §2.8), null when unset.
+  static SettingKey<PaydaySchedule?> paydaySchedule(String name) =>
+      SettingKey._(
+        name,
+        null,
+        PaydaySchedule.tryFromJson,
+        (v) => v == null ? '' : v.toJson(),
+      );
+
   static final RegExp _slug = RegExp(r'^[a-z0-9_]{1,32}$');
 }
