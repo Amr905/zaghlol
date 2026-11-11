@@ -92,6 +92,7 @@ final class PigeonSecretStore implements SecretStore {
 
   static SecretSlotMsg _slot(SecretSlot slot) => switch (slot) {
     SecretSlot.dbKey => SecretSlotMsg.dbKey,
+    SecretSlot.backupKey => SecretSlotMsg.backupKey,
   };
 
   /// Runs [call] and replaces any failure with a code-only

@@ -68,10 +68,12 @@ interface Kek {
 }
 
 /**
- * T-015: K_db wrapped by a Keystore AES-256-GCM key (design note §2).
+ * T-015: K_db wrapped by a Keystore AES-256-GCM key (design note §2). T-148:
+ * the same store holds K_bk under its own blob name, AAD and Keystore key
+ * ([forBackupKey]); the two slots never share a file, an alias or an AAD.
  *
  * Blob `<dir>/db_key_v1.bin` = `0x01 ‖ iv(12) ‖ ct(32) ‖ tag(16)`, AAD
- * `zaghlol/k_db/v1`. Written as tmp, fsync, rename; read back and compared
+ * `zaghlol/k_db/v1` (backup slot: `backup_key_v1.bin`, `zaghlol/k_bk/v1`). Written as tmp, fsync, rename; read back and compared
  * before a create returns. `dir` is under `noBackupFilesDir` (never in an OS
  * backup). Reads classify: blob proven absent ([probe]) → NOT_FOUND; malformed
  * blob, alias missing, tag failure or an invalidated key → UNUSABLE; blob
@@ -93,9 +95,11 @@ class DbKeyStore(
   private val retryDelaysMs: LongArray = longArrayOf(100, 300, 900),
   private val sleeper: (Long) -> Unit = { Thread.sleep(it) },
   private val probe: (File) -> Presence = ::nioPresence,
+  private val blobName: String = BLOB_NAME,
+  private val aad: ByteArray = AAD,
 ) : SecretSlotStore {
-  val blobFile: File get() = File(dir, BLOB_NAME)
-  private val tmpFile: File get() = File(dir, "$BLOB_NAME.tmp")
+  val blobFile: File get() = File(dir, blobName)
+  private val tmpFile: File get() = File(dir, "$blobName.tmp")
 
   @Synchronized
   override fun read(): SlotRead {
@@ -180,7 +184,7 @@ class DbKeyStore(
       val key = kek.get() ?: return SlotRead(SecretStatusMsg.UNUSABLE, null, 1)
       val cipher = Cipher.getInstance(TRANSFORMATION)
       cipher.init(Cipher.DECRYPT_MODE, key, GCMParameterSpec(TAG_BITS, blob, 1, IV_LENGTH))
-      cipher.updateAAD(AAD)
+      cipher.updateAAD(aad)
       val plain = cipher.doFinal(blob, 1 + IV_LENGTH, blob.size - 1 - IV_LENGTH)
       if (plain.size != KEY_LENGTH) {
         plain.fill(0)
@@ -204,7 +208,7 @@ class DbKeyStore(
     cipher.init(Cipher.ENCRYPT_MODE, key)
     val iv = cipher.iv
     if (iv == null || iv.size != IV_LENGTH) throw KeyStoreFailure()
-    cipher.updateAAD(AAD)
+    cipher.updateAAD(aad)
     val sealed = cipher.doFinal(candidate)
     if (sealed.size != KEY_LENGTH + TAG_BITS / 8) throw KeyStoreFailure()
     val blob = ByteArray(BLOB_LENGTH)
@@ -238,6 +242,30 @@ class DbKeyStore(
     const val VERSION: Byte = 0x01
     const val TRANSFORMATION = "AES/GCM/NoPadding"
     val AAD: ByteArray = "zaghlol/k_db/v1".toByteArray(Charsets.US_ASCII)
+
+    /** T-148: the backup data key slot. */
+    const val BACKUP_BLOB_NAME = "backup_key_v1.bin"
+    val BACKUP_AAD: ByteArray = "zaghlol/k_bk/v1".toByteArray(Charsets.US_ASCII)
+
+    /** The K_bk store: own blob, own AAD, own Keystore key [kek]. */
+    fun forBackupKey(
+      dir: File,
+      kek: Kek,
+      classifier: KeyErrorClassifier = KeyErrorClassifier(),
+      retryDelaysMs: LongArray = longArrayOf(100, 300, 900),
+      sleeper: (Long) -> Unit = { Thread.sleep(it) },
+      probe: (File) -> Presence = ::nioPresence,
+    ) =
+      DbKeyStore(
+        dir,
+        kek,
+        classifier,
+        retryDelaysMs,
+        sleeper,
+        probe,
+        blobName = BACKUP_BLOB_NAME,
+        aad = BACKUP_AAD,
+      )
 
     /** 32 bytes, not all equal (a broken generator). */
     fun isWellFormedKey(bytes: ByteArray): Boolean =

@@ -1,6 +1,6 @@
 // Pigeon contract: secret store (T-015). Native Keystore/Keychain storage for
-// device-only secrets; today only the database key `K_db` (T-148 adds the
-// backup key). Contract and error codes: docs/03-technical/platform-channels.md
+// device-only secrets: the database key `K_db` and (T-148) the backup data
+// key `K_bk`. Contract and error codes: docs/03-technical/platform-channels.md
 // §5 and §6; design: docs/04-tasks/tasks/T-015.md "Design note" §2.
 // Regenerate with app/tool/generate_pigeon.sh; CI fails when the generated
 // files are stale.
@@ -28,7 +28,9 @@ import 'package:pigeon/pigeon.dart';
   ),
 )
 /// The secrets the store knows. Each slot maps to one fixed native location.
-enum SecretSlotMsg { dbKey }
+/// `backupKey` (T-148): Android blob `backup_key_v1.bin` under Keystore key
+/// `zaghlol_bk_kek_v1`; iOS account `backup_key_v1`. Same rules as `dbKey`.
+enum SecretSlotMsg { dbKey, backupKey }
 
 /// Result class of a read.
 enum SecretStatusMsg {
