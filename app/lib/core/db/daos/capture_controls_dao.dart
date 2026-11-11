@@ -174,6 +174,19 @@ class CaptureControlsDao {
     )..where((s) => s.sender.equals(sender))).getSingleOrNull(),
   );
 
+  /// How many senders are stored for [channel] with "always capture" on.
+  Future<int> alwaysCaptureCount(String channel) => guardRead(() async {
+    final row = await _db
+        .customSelect(
+          'SELECT COUNT(*) AS n FROM capture_senders '
+          'WHERE channel = ?1 AND always_capture = 1',
+          variables: [Variable.withString(channel)],
+          readsFrom: {_db.captureSenders},
+        )
+        .getSingle();
+    return row.read<int>('n');
+  });
+
   Future<int> deleteSender(String sender) => guardWrite(
     () => (_db.delete(
       _db.captureSenders,

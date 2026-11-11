@@ -170,7 +170,12 @@ final class CaptureCoordinator implements CaptureEventsApi {
   Future<void> _afterCycle(CycleResult result) async {
     _lastCycle = LastCycle(stuck: result.stuck, held: result.held);
     final needsRewrite = await _readStatus(absorb: true);
-    if (needsRewrite) await writer.flushAndVerify(_rereadGuardState);
+    // A rewrite that was already tried and is not effective waits for a
+    // different trigger (resume, a rule change) instead of repeating per
+    // cycle.
+    if (needsRewrite && writer.status.state != GuardWriteState.notEffective) {
+      await writer.flushAndVerify(_rereadGuardState);
+    }
     if (_smsActive) await _safe(catchUp.requestIfPending);
     _emit();
   }

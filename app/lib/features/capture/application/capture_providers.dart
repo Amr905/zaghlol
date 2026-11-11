@@ -15,6 +15,7 @@ import 'package:zaghlol_parsing/zaghlol_parsing.dart' show Registry;
 
 import '../../../core/db/app_database.dart' hide Settings;
 import '../../../core/db/app_database_providers.dart';
+import '../../../core/db/db_key_providers.dart' show dbDirectoryProvider;
 import '../../../core/db/daos/transactions_dao.dart';
 import '../../../core/platform/capture_api.g.dart';
 import '../../../core/platform/share_intake_service.dart';
@@ -23,6 +24,7 @@ import '../../../core/settings/settings_providers.dart';
 import '../../../ingestion/ingest_store.dart';
 import '../../../ingestion/ingestion_runner.dart';
 import '../../../ingestion/spike_channel.dart';
+import '../../../ingestion/spool_port.dart';
 import '../../transactions/data/drift_transaction_repository.dart';
 import '../data/alert_store.dart';
 import '../data/capture_host_port.dart';
@@ -48,6 +50,11 @@ final captureSchedulerProvider = Provider<CaptureScheduler>(
 final captureRegistryLoaderProvider = Provider<Registry Function()>(
   (ref) => defaultRegistryLoader,
   name: 'captureRegistryLoaderProvider',
+);
+
+final captureSpoolPortProvider = Provider<SpoolPort>(
+  (ref) => PigeonSpoolPort(),
+  name: 'captureSpoolPortProvider',
 );
 
 final captureCatchUpProvider = Provider<CatchUpScheduler>(
@@ -100,7 +107,9 @@ final captureCoordinatorProvider = FutureProvider<CaptureCoordinator?>((
   final runner = IngestionRunner(
     marks: defaultCycleMarks(),
     headless: false,
+    spool: ref.watch(captureSpoolPortProvider),
     registry: () => registry,
+    dbDirectory: () async => ref.read(dbDirectoryProvider),
     store: (_, build) => ProviderIngestStore(container, build: build),
   );
   final share = ref.watch(captureShareIntakeProvider);
