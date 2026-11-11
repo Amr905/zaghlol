@@ -10,6 +10,8 @@
 # leave spool/ empty; the canary never appears in the app's logcat lines.
 #
 # Env: DEVICE (emulator-5554), API (26..36), RUNNER_TEMP, N (SMS per cell).
+# Results: $RUNNER_TEMP/sms-spike/{metrics.csv,report.md}; the report rows go
+# into ADR-005 (emulator rows only; device rows come from T-008.md steps).
 # Called as one line (android-emulator-runner runs `script` line by line).
 set -euo pipefail
 : "${DEVICE:?}" "${API:?}" "${RUNNER_TEMP:?}"

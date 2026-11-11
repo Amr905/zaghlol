@@ -3,6 +3,7 @@
 // or its key, rotates or deletes a key, wipes an orphan, deletes leftovers or
 // recovers a migration: every such case is DB_DEFERRED (gate:
 // deferToForeground) with nothing touched, and the lease is released.
+// Contract: platform-channels.md §2 "Headless DB rule".
 //
 // Keys are synthetic (support/synthetic_key.dart); assertions compare codes,
 // counts and file snapshots only.
