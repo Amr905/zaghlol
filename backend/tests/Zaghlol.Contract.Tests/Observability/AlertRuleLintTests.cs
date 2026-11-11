@@ -21,7 +21,7 @@ public sealed partial class AlertRuleLintTests
         "ZaghlolSyntheticCheckFailing", "ZaghlolSloBurnRateFast", "ZaghlolSloBurnRateSlow",
         "ZaghlolSyncLatencyP95High", "ZaghlolPurchaseVerifyLatencyP95High",
         // Purchases
-        "ZaghlolPurchaseUnackedOver48h", "ZaghlolPurchaseVerifyFailureRateHigh",
+        "ZaghlolPurchaseUnackedOver48h", "ZaghlolPurchaseVerifyFailureRateHigh", "ZaghlolStoreAuthError",
         // Notifications
         "ZaghlolNotificationLagHigh", "ZaghlolNotificationDeadLetter",
         // Prices
@@ -33,7 +33,7 @@ public sealed partial class AlertRuleLintTests
         // audit_alert.fired for each rule
         "ZaghlolAuditSupportMovesPerPurchase90d", "ZaghlolAuditSupportActionsPerOperatorDay",
         "ZaghlolAuditOwnershipFailuresPerOperatorDay", "ZaghlolAuditDisputeFrozenRefusal", "ZaghlolAuditSupportUnfreeze",
-        "ZaghlolAuditSeatRebindOverCap",
+        "ZaghlolAuditSeatRebindOverCap", "ZaghlolAuditPurchaseUnacked48h",
         // Signing, security, capacity
         "ZaghlolKmsUnavailable", "ZaghlolSigningVerifyFailed", "ZaghlolAuthFailureSpike", "ZaghlolRateLimitedSpike",
         "ZaghlolCpuHigh", "ZaghlolMemoryHigh", "ZaghlolDbConnectionsHigh", "ZaghlolDbStorageHigh",

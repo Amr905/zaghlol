@@ -16,6 +16,7 @@ using Zaghlol.Infrastructure.Logging;
 using Zaghlol.Infrastructure.Observability;
 using Zaghlol.Infrastructure.Persistence;
 using Zaghlol.Infrastructure.Prices;
+using Zaghlol.Infrastructure.Purchases;
 using Zaghlol.Infrastructure.Support;
 
 // `dotnet Zaghlol.Api.dll --healthcheck` is used by container health checks (the runtime image has no shell or curl).
@@ -66,6 +67,10 @@ builder.Services.AddZaghlolFlagReader();
 builder.Services.AddZaghlolPrices();
 // Daily sync (T-128): throttle, composition, intake; after the catalog, flag and price readers it composes from.
 builder.Services.AddZaghlolSync();
+// Purchase verify (T-130): the Google Play client, verifier and support order lookup on the App login. Production refuses to
+// start while the NullVerifyGrant placeholder (T-132) or no App Store verifier (T-131) is registered.
+builder.Services.AddZaghlolGooglePlay();
+builder.Services.AddZaghlolPurchaseVerification();
 
 // Operator OIDC + MFA, the operator directory and the startup check (T-136); the audited support lookup on the Admin login.
 builder.Services.AddZaghlolOperatorAuth();
@@ -77,6 +82,7 @@ app.UseZaghlolPipeline();
 app.MapHealth();
 app.MapInstalls();
 app.MapSync();
+app.MapPurchases();
 app.MapCatalog();
 app.MapCatalogAdmin();
 app.MapContributionAdmin();

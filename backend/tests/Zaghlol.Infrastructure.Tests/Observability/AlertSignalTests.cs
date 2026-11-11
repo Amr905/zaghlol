@@ -17,6 +17,7 @@ public sealed class AlertSignalTests
     [InlineData(AuditAlertRule.DisputeFrozenRefusal, "dispute_frozen_refusal", true)]
     [InlineData(AuditAlertRule.SupportUnfreeze, "support_unfreeze", true)]
     [InlineData(AuditAlertRule.SeatRebindOverCap, "seat_rebind_over_cap", true)]
+    [InlineData(AuditAlertRule.PurchaseUnacked48h, "purchase_unacked_48h", true)]
     [InlineData(AuditAlertRule.SupportActionsPerOperatorDay, "support_actions_per_operator_day", false)]
     [InlineData(AuditAlertRule.OwnershipFailuresPerOperatorDay, "ownership_failures_per_operator_day", false)]
     public void RaiseWritesOneWarnLineAndCountsTheRule(AuditAlertRule rule, string name, bool purchaseRule)
@@ -81,6 +82,6 @@ public sealed class AlertSignalTests
     {
         var names = Enum.GetValues<AuditAlertRule>().Select(AlertSignal.RuleName).ToArray();
 
-        Assert.Equal(6, names.Distinct(StringComparer.Ordinal).Count());
+        Assert.Equal(7, names.Distinct(StringComparer.Ordinal).Count());
     }
 }

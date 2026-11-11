@@ -157,11 +157,92 @@ public partial class IdempotencyFilterTests(InstallsHostFixture fixture) : IClas
         Assert.Equal(-1, stored.AsSpan().IndexOf("plain-marker-41"u8));
         var cipher = fixture.Services.GetRequiredService<IEnvelopeCipher>();
         var id = InstallId.Parse(installId);
-        Assert.Equal(plain, await cipher.DecryptAsync(stored, IdempotencyFilter.EnvelopeContext(id, IdempotentOperation.VerifyPurchase), CancellationToken.None));
+        Assert.Equal(plain, await cipher.DecryptAsync(stored, IdempotencyFilter.EnvelopeContext(id, IdempotentOperation.VerifyPurchase, key), CancellationToken.None));
         await Assert.ThrowsAsync<EnvelopeDecryptionException>(async () =>
-            await cipher.DecryptAsync(stored, IdempotencyFilter.EnvelopeContext(id, IdempotentOperation.SignIn), CancellationToken.None));
+            await cipher.DecryptAsync(stored, IdempotencyFilter.EnvelopeContext(id, IdempotentOperation.SignIn, key), CancellationToken.None));
         await Assert.ThrowsAsync<EnvelopeDecryptionException>(async () =>
-            await cipher.DecryptAsync(stored, IdempotencyFilter.EnvelopeContext(InstallId.FromGuid(Guid.NewGuid()), IdempotentOperation.VerifyPurchase), CancellationToken.None));
+            await cipher.DecryptAsync(stored, IdempotencyFilter.EnvelopeContext(InstallId.FromGuid(Guid.NewGuid()), IdempotentOperation.VerifyPurchase, key), CancellationToken.None));
+
+        // S-6: the key is in the context, so a body copied under another key of the same install fails to decrypt.
+        await Assert.ThrowsAsync<EnvelopeDecryptionException>(async () =>
+            await cipher.DecryptAsync(stored, IdempotencyFilter.EnvelopeContext(id, IdempotentOperation.VerifyPurchase, InstallsHostFixture.NewKey()), CancellationToken.None));
+    }
+
+    [Fact]
+    public async Task ABodySwappedBetweenTwoKeysOfOneInstallFailsToDecryptAndIsNeverServed()
+    {
+        // S-6 end to end: swap response_body_enc between two stored rows (an attacker with database write access).
+        var (_, token) = await fixture.NewInstallAsync();
+        var keyA = InstallsHostFixture.NewKey();
+        var keyB = InstallsHostFixture.NewKey();
+        using (await Post(token, "{\"mode\":\"ok\",\"marker\":\"body-a\"}", keyA))
+        using (await Post(token, "{\"mode\":\"ok\",\"marker\":\"body-b\"}", keyB))
+        {
+        }
+
+        await using (var connection = new NpgsqlConnection(fixture.Database.Superuser))
+        {
+            await connection.OpenAsync();
+            await using var command = new NpgsqlCommand(
+                """
+                UPDATE zaghlol.idempotency_records r SET response_body_enc = o.response_body_enc
+                FROM zaghlol.idempotency_records o WHERE r.idempotency_key = @a AND o.idempotency_key = @b
+                """,
+                connection);
+            command.Parameters.AddWithValue("a", keyA);
+            command.Parameters.AddWithValue("b", keyB);
+            Assert.Equal(1, await command.ExecuteNonQueryAsync());
+        }
+
+        using var replay = await Post(token, "{\"mode\":\"ok\",\"marker\":\"body-a\"}", keyA);
+
+        Assert.Equal(HttpStatusCode.InternalServerError, replay.StatusCode);
+        Assert.DoesNotContain("body-b", await replay.Content.ReadAsStringAsync(), StringComparison.Ordinal);
+    }
+
+    [Fact]
+    public async Task ARotatedInstallTokenIsNeverStoredAndFailsLoudlyInTesting()
+    {
+        // S-3 backstop: idempotent handlers never rotate; if one did, the token must not land in a replayable row.
+        var (_, token) = await fixture.NewInstallAsync();
+        var key = InstallsHostFixture.NewKey();
+
+        using var response = await Post(token, "{\"mode\":\"rotate\"}", key);
+
+        Assert.Equal(HttpStatusCode.InternalServerError, response.StatusCode);
+        Assert.Equal(0L, await CountRows(key));
+        Assert.True(IdempotencyFilter.CarriesRotationToken("{\"a\":{\"rotateInstallToken\":null},\"rotateInstallToken\":\"x\"}"u8));
+        Assert.False(IdempotencyFilter.CarriesRotationToken("{\"a\":{\"rotateInstallToken\":\"nested\"},\"rotateInstallToken\":null}"u8));
+        Assert.False(IdempotencyFilter.CarriesRotationToken("[1]"u8));
+    }
+
+    [Fact]
+    public async Task AClaimWhoseLeaseExpiredIsTakenOverAndTheSlowOriginalIsAnsweredButNotStored()
+    {
+        var (_, token) = await fixture.NewInstallAsync();
+        var key = InstallsHostFixture.NewKey();
+        const string Body = "{\"mode\":\"slow\"}";
+
+        var slow = Post(token, Body, key);
+        Assert.True(await fixture.Entered.WaitAsync(TimeSpan.FromSeconds(10)));
+
+        // The first claim's lease runs out (a crashed request looks the same): the next request takes the key over.
+        fixture.Clock.Advance(TimeSpan.FromSeconds(61));
+        var runs = fixture.Runs;
+        using (var takeover = await Post(token, "{\"mode\":\"unprocessable\"}", key))
+        {
+            Assert.Equal(HttpStatusCode.UnprocessableEntity, takeover.StatusCode);
+        }
+
+        Assert.Equal(runs + 1, fixture.Runs);
+        fixture.Release();
+        using var original = await slow;
+
+        // Lease lost: the original still answers, but the stored result is the one that kept the key.
+        Assert.Equal(HttpStatusCode.OK, original.StatusCode);
+        using var replay = await Post(token, "{\"mode\":\"unprocessable\"}", key);
+        Assert.Equal(HttpStatusCode.UnprocessableEntity, replay.StatusCode);
+        Assert.Equal(runs + 1, fixture.Runs);
     }
 
     [Fact]
