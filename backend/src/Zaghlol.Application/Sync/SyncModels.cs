@@ -21,7 +21,8 @@ public sealed record SyncRequestData(
     DateTimeOffset? PricesAsOf,
     DateTimeOffset? EntitlementIssuedAt,
     IReadOnlyList<SyncContribution> Contributions,
-    IReadOnlyList<SyncBankRequest> BankRequests);
+    IReadOnlyList<SyncBankRequest> BankRequests,
+    Sensitive<string>? AccountToken = null);
 
 /// <summary>The install row as the sync sees it: platform and app version before this call, and the throttle state.</summary>
 public sealed record SyncInstall(string Platform, string AppVersion, DateTimeOffset? LastSyncAt);

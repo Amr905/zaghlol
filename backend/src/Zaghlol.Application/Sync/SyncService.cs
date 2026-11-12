@@ -59,7 +59,7 @@ public sealed class SyncService(
             : await RequiredAsync(SyncTags.CatalogBlock, () => catalog.CategoryCodesAsync(cancellationToken));
         var entitlementResult = await RequiredAsync(
             SyncTags.EntitlementBlock,
-            () => entitlement.ComposeAsync(new SyncEntitlementContext(installId, request.EntitlementIssuedAt, now), cancellationToken));
+            () => entitlement.ComposeAsync(new SyncEntitlementContext(installId, request.EntitlementIssuedAt, now, request.AccountToken), cancellationToken));
 
         // Intake preparation: CPU only, then one keyed hash when there is anything to store.
         // Nothing is counted until the claim wins (FU-061): a call that turns into the throttle answer, or a retry after a 503,
