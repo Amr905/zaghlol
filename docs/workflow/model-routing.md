@@ -19,13 +19,13 @@ Score each factor 0–2 and sum:
 | 0–2 | **C1 Trivial** | `haiku` | Lead spot-check (diff + green CI) |
 | 3–5 | **C2 Standard** | `sonnet` | code-reviewer (sonnet) |
 | 6–7 | **C3 Complex** | `sonnet`, after a short design note by the architect on `sonnet` | code-reviewer (sonnet), also checks tests |
-| 8–10 | **C4 Critical** | `opus` | code-reviewer (opus), also checks tests + security-privacy-reviewer (opus) |
+| 8–10 | **C4 Critical** | `sonnet` (`opus` for crypto/keys and data-deleting code) | covered by the one Opus batch reviewer (code + security) |
 
 Docs-only tasks (copy deck, spec text) are implemented on `sonnet` and get one reviewer (code-reviewer on `sonnet`).
 
 **Batch review (PO, 2026-11-11):** the "Reviews required" column is what the single batch review round must cover for a task of that class; reviewers no longer run per task. See CLAUDE.md §6 "Batch review round" and `.claude/commands/review-batch.md`.
 
-**Review rounds (2026-11-08, Balanced):** only blocker or major findings trigger another round, and only the reviewers who raised them re-review, delta only, on `sonnet`. Minors and nits become `FU-###` follow-ups with an owner task. `test-engineer` runs only when the Lead asks for it (e.g. a reviewer flags weak tests). At most 4 builders run at once (PO, 2026-11-11).
+**Review rounds (2026-11-08, Balanced):** only blocker or major findings trigger another round, and only the reviewers who raised them re-review, delta only, on `sonnet`. Minors and nits become `FU-###` follow-ups with an owner task. `test-engineer` runs only when the Lead asks for it (e.g. a reviewer flags weak tests). At most 5 builders run at once (PO, 2026-11-13). C1/C2 builders and fix agents run with `effort: "low"`. See the cost rules in CLAUDE.md §6.
 
 **Automatic C4** regardless of score: anything touching encryption keys, SQLCipher setup, backup crypto, purchase verification & entitlement signing (app or backend), store webhooks, sign-in token verification, SMS/notification permissions & native receivers, schema migrations (app or backend), Zakah computation, money arithmetic primitives, the backend's accepted-fields boundary (BR-SYNC-03).
 

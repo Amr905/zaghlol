@@ -35,5 +35,5 @@ Every implementer runs through this list **before** its final report and states 
 
 ## 7. Evidence
 - Each acceptance criterion maps to a named test.
-- For C4: at least one negative proof (break the guard, show a test goes red) for each safety property, run locally or on a throwaway branch, listed in the report.
-- Local checks green before push (CLAUDE.md §6); PC runner green after push.
+- For C4: **2–3 negative proofs** (break the guard, show a test goes red) for the task's core safety properties only, run locally, listed in the report. Not more unless the reviewer asks (PO, 2026-11-13). C1–C3: none.
+- Local checks green before push (CLAUDE.md §6). Don't wait for or poll the PC runner after push; report straight away.
