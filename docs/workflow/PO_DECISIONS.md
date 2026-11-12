@@ -1,130 +1,80 @@
-# PO decisions waiting on Amr
+# PO decisions
 
-All open questions for the product owner, compiled 2026-11-13 from `LEAD_HANDOFF.md` ("Waiting on the PO"), the task files, `implementation-status.md` (FU-109, FU-112), SRS §15, `open-questions.md` and `copy-deck.md`. Answered questions are left out.
-Groups run from most to least blocking. Where a default is listed, it is already in code or in the source note; replying "confirm" is enough. Source files hold the full wording.
-Note: the seed rows OQ-01…OQ-12 in `docs/01-requirements/open-questions.md` are still marked OPEN but are superseded by SRS §15 and the D-decisions; only their still-open parts appear below.
+Compiled 2026-11-13. On 2026-11-13 the PO delegated every decision with a sound default or a clear engineering/privacy answer to the Lead, keeping money, legal, accounts, devices and religious sign-off. **Part 1 is decided** and binds builders: a task's builder applies the rows for its task. **Part 2 still needs Amr.** Full wording of each question is in the source file named in the ID.
 
-| Group | Count |
-|-------|-------|
-| A. Blocks a task ready to build now | 7 |
-| B. Provisional default in code, confirm or change | 45 |
-| C. Inputs, accounts and devices only the PO can supply | 26 |
-| D. Copy and brand wording | 11 |
-| E. Housekeeping | 2 |
-| **Total** | **91** |
+## Part 1 — Decided by the Lead (2026-11-13, PO delegation)
 
-## A. Blocks a task that is ready to build now (7)
+### Blocking decisions
 
-| ID | Question | Options | Default / recommendation | Blocks |
-|----|----------|---------|--------------------------|--------|
-| FU-109 M-1 | Should SMS from phone-number senders the user adds be scanned for history (up to 25 months)? | Live only / live + opt-in 3-month scan / full history | Lead: live capture with financial-looking filter, consent text, separate opt-in 3-month scan, never put their unparsed messages in review | T-048 |
-| FU-112 Q1 | Purchases verified before T-132 have no seat row: backfill them in T-132? | Backfill in T-132 / leave unseated | None given | T-132 |
-| FU-112 Q2 | Verify on a vacant seat with no new payment: seat stays vacant? | Stays vacant / claims seat | Stays vacant (as built) | T-184, T-185 |
-| T-136 Q1 | Which operator sign-in provider? | Entra ID (needs token lifetime <= 60 min) / Google Workspace (needs a design change) | "Decide later" | T-136 close, T-186 go-live (FU-060 S-4) |
-| T-136 Q2 | Which tenant owns the `zaghlol-ops` and admin-app client registrations (and staff count)? | Name the tenant | None | T-136 AC4 (R3-9), T-186 |
-| R6-1 (T-186) | Unfreeze rule: enforce server-side (different operator, 24 h lock) or use disjoint role assignments? | Server-side R6-1 / disjoint roles | Server-side R6-1 | T-186 |
-| D-41 | Which local Egyptian gold-price provider (and FX licence)? | Provider contract | TBD; fake provider only for now | T-127 go-live |
+| ID | Decision | Why |
+|---|---|---|
+| FU-109 M-1 (T-048) | Phone-number senders the user adds: **live capture only**, and only messages that look financial (amount + currency or bank keywords); a consent line when the sender is added; a **separate opt-in "scan the last 3 months"**, never 25 months; their unparsed messages never go to the review queue. | Personal SMS must not be swept in by default (non-negotiable 1/6 spirit). |
+| FU-112 Q1 (T-132) | T-132 **backfills** a seat for every purchase verified before it, bound to the install that bought it, with no event-row cooldown and the reclaim unused. | Otherwise early buyers burn their move window and reclaim for nothing. |
+| FU-112 Q2 | A verify on a vacant seat with no new payment **leaves it vacant** (as built); the owner gets it back through restore. | Restore is the intended recovery path; no silent grants. |
+| R6-1 (T-186) | Unfreeze is **enforced server-side**: a different operator than the one who froze, after a 24 h lock. If only one operator exists, the unfreeze needs the break-glass procedure in the runbook. | Server rule can't be bypassed by role mistakes. |
 
-## B. Provisional default already in code (45)
+### Defaults confirmed as built
 
-| ID | Question | Options | Default | Blocks |
-|----|----------|---------|---------|--------|
-| T-035 Q1 | Unreadable user capture rules: keep bank messages with bundled rules or drop all? | Keep with bundled / drop all | Keep with bundled (`keepWithBase`) | none |
-| T-035 Q2 | Message with an OTP and a transaction is dropped? | Drop / keep | Drop | none |
-| T-035 Q3 | Rate limit of kept messages per sender per minute; lost notifications unrecoverable? | 20 / other | 20 | none |
-| T-035 Q4 | After Gold lapses, still capture senders of custom templates? | Capture as review / drop | Capture | none |
-| T-035 Q5 | iOS per-card "SMS" toggle also governs Shortcuts messages? | Yes / separate toggle | Yes | none |
-| T-035 Q6 | Drop bank promos only where the bank has promo patterns? | Per-bank only / global list | Per-bank only | none |
-| T-039 Q1 / T-040 Q1 | Share of the waiting-messages store for unknown senders and bank SMS | 50 % unknown, 10/min; SMS 80 % / other | 50 %, 10 per min, SMS 80 % | none |
-| T-043 Q2 / T-047 Q3 | Read notifications from apps the user adds (not only registry apps)? | Allow with deny list, confirm, cap 10 / registry only | Allow, cap 10 | none |
-| T-043 Q3 | Notifications missed while the listener is down: accept or re-read the shade on reconnect? | Accept / re-read | Accept | none |
-| T-041 Q1 | Show the user messages held in the spool but not storable? | Show in capture settings / diagnostics only | Diagnostics count only, no UI | none |
-| T-047 Q1 | Home banner on a Play build without the SMS exception? | `home_banner_smsOff` / other banner / degraded card only | Mode only, no banner | T-047 |
-| T-047 Q4 | Banner stacking when several issues are active (see T-047)? | One at a time with priority / stack | None | T-047 |
-| T-046 Q1 | Merge a bank notification without a card number into the same-bank SMS within 2 minutes? | Yes / no | Yes | none |
-| T-046 Q2 | Identical message from same sender stored once (two equal rides become one)? | Keep rule / count later copies as new | Keep rule | none |
-| T-046 Q3 | Account for an "always capture" unknown sender? | New account per sender / default cash / ask | Account per sender | none |
-| T-051 Q1 | First explicit payday re-buckets all past data? | Re-bucket / treat as mid-cycle change | Re-bucket | none |
-| T-051 Q2 | Un-paired transfer out counts as spend, transfer in and unmatched refund as income, fee as spend? | Yes / no | Yes | none |
-| T-051 Q3 | Safe-to-spend shown as whole pounds or with piastres? | Whole (314) / 314.28 | Whole, rounded down | none |
-| T-051 Q4 | With no budget, fall back to income target for safe-to-spend? | Fall back / hide | Hide | none |
-| T-051 Q5 | Budget after a mid-cycle payday change (10 or 40 days): keep full or prorate? | Full / prorate | Full | none |
-| T-075 PO-1 | What is a "contributed alias" for the 0.88 fuzzy tier? | Backend flag / institution / none | Off | none |
-| T-075 PO-2 | Treat counterparty kind `person` as person-to-person (no catalog)? | Yes / no | Yes | none |
-| T-075 PO-3 | Fuzzy match only for keys of 6+ characters, ambiguity margin 0.02? | Confirm / change | As written | none |
-| T-019 Q1 | Allowed `assets.payout` values and `rate_bp` cap 100 000 (see T-019)? | Confirm against Egyptian certificates | monthly/quarterly/semi_annual/annual/at_maturity | wealth task |
-| T-019 Q2 | `zakah_ledger.due_on` Gregorian and `lot_start_hijri` Hijri format OK (see T-019)? | Confirm | As built | Zakah engine |
-| T-019 Q3 | Can OCR/share/paste senders be "always captured" (see T-019)? | Yes / no | Only sms, notification, shortcut_message | none |
-| T-019 Q4 | Vocabulary for `price_quotes.per_unit` (see T-019)? | Fix list | Free slug (`g`) | price sync task |
-| T-020 | Confirm the default value of each settings key (see T-020, A-10/27/29/43/54) | Confirm / change | As built (29 keys) | none |
-| T-025 | Feature flags read OFF after 14 days without sync (5-minute clock tolerance)? | 14 d / other | 14 days | none |
-| T-112 | Allow a manual FX-rate override (needs a schema change and new task)? | Price-only / add FX override | Price-only | none |
-| T-130 Q3 / T-131 Q4 | Sandbox and license-tester purchases in production grant Gold? Public TestFlight link? | Grant, recorded as sandbox / refuse | Grant (`AllowSandbox = true`) | go-live |
-| T-131 Q5 | Family Sharing off for Gold products? | Off / on | Off (`PURCHASE_NOT_OWNED`) | go-live |
-| T-131 Q7 | Offer codes or promoted purchases at launch (buyers go through restore)? | Yes / no | None | go-live |
-| T-131 R5-3 | Does iOS sign-in carry an App Attest assertion? | (a) yes, in T-181 / (b) no | (b) | T-131, T-181 |
-| T-133 Q3 | Voided purchases: refund without revoke keeps Gold until Play ends it; lifetime refund removes Gold; Gold returns if Play reverses? | Keep / remove at once | Keep until ended (warn after 40 min); yes; yes | go-live |
-| T-133 Q4 | Never answer `pendingRefundReviewNotification` (no usage data sent)? | Never answer / answer | Never answer | go-live |
-| T-134 Q3 | Ignore Apple `CONSUMPTION_REQUEST` (no usage data sent)? | Ignore / answer | Ignore | go-live |
-| T-134 Q4 | Gold returns automatically on `REFUND_REVERSED`? | Yes / no | Yes | go-live |
-| T-148 Q1 | After a passphrase change, keep old backup versions (labelled) or delete after confirmation? | Keep / delete | Delete after confirmation | release |
-| T-148 Q3 | Fold Arabic-Indic digits so the passphrase opens the same backup? | Yes / no | Yes | release |
-| T-182 Q1 | If `K_seat` is compromised, rotate (clears seat-key hashes; iPhones lose same-device recognition once) or keep the old key? | Rotate / keep | Rotate as incident procedure | none |
-| OQ-08 | Support CSV import from other apps (column mapping) or only Zaghlol CSV? | Zaghlol only / add mapping | Zaghlol CSV only (FR-EXP-03) | none |
-| OQ-11 | Final Gold prices | Price list | 49 / 399 / 899 EGP (seed) | launch |
-| OQ-14 | Later: on-device ML fallback for unrecognized messages? | Post-launch / never | Post-launch | none |
-| OQ-17 | Confirm the "Proposed" rows in `institutions.md` (A-64) | Confirm / edit | As proposed | approval |
+T-035 Q1–Q6 (keep with bundled rules; drop OTP+transaction messages, as the real debit SMS follows; 20 per sender per minute; keep capturing custom-template senders after Gold lapses, as review items; iOS per-card SMS toggle also governs Shortcuts; promo drop per bank only) · T-039 Q1 / T-040 Q1 (unknown senders 50 % and 10/min; SMS 80 % of the spool) · T-043 Q2 / T-047 Q3 (user-added notification apps allowed, with the messaging-app deny list, a confirmation, cap 10) · T-043 Q3 (missed notifications while the listener is down are accepted, not re-read) · T-041 Q1 (unstorable held messages: diagnostics count only) · T-047 Q1 (no home banner on a Play build without the SMS exception; degraded mode only) · T-046 Q1–Q3 (merge card-less notification into same-bank SMS within 2 min; identical message from the same sender stored once, the second marked `low_confidence` "possible duplicate"; one account per always-capture sender) · T-051 Q1–Q5 (first payday re-buckets the past; unpaired transfer out = spend, transfer in / unmatched refund = income, fee = spend; safe-to-spend in whole pounds rounded down; hidden when there is no budget; budget kept full after a mid-cycle payday change) · T-075 PO-1–PO-3 (contributed-alias tier off; `person` counterparties skip the catalog; fuzzy only for keys of 6+ chars, margin 0.02) · T-019 Q1–Q4 (payout list monthly/quarterly/semi_annual/annual/at_maturity with `rate_bp` cap 100 000; Gregorian `due_on`, Hijri `lot_start_hijri`; OCR/share/paste can't be always-captured; `per_unit` stays a validated slug) · T-020 (all 29 setting defaults) · T-025 (flags read OFF after 14 days without sync) · T-112 (no manual FX override) · T-131 R5-3 (b: iOS sign-in carries no App Attest assertion) · T-133 Q3–Q4 and T-134 Q3–Q4 (refund without revoke keeps Gold until the store ends it; lifetime refund removes Gold; Gold returns on reversal; never answer refund-review / consumption requests, so no usage data leaves) · T-148 Q1 and Q3 (old backups deleted after a passphrase change, only after the user confirms; Arabic-Indic digits folded in the passphrase) · T-182 Q1 (rotate K_seat on compromise, as an incident procedure) · OQ-08 (Zaghlol CSV import only at launch) · OQ-14 (on-device ML fallback post-launch) · OQ-17 (institutions.md "Proposed" rows confirmed; corrections later go through catalog sync) · T-130 Q4 / T-133 Q6 (Play API quota 200 K/day, `WorkerShare 0.2`).
 
-## C. Inputs, accounts and devices only the PO can supply (26)
+### Changed or newly set by the Lead
 
-| ID | Question | Options | Default / note | Blocks |
-|----|----------|---------|----------------|--------|
-| T-130 Q1 | Create the Play Console service account (two permissions); workload identity or JSON key? | WIF / JSON key | None | T-130 go-live |
-| T-130 Q2 | Confirm package name; monthly and yearly are separate subscriptions, lifetime is one-time | Confirm | As assumed | T-130 go-live |
-| T-130 Q4 / T-133 Q6 | Confirm Play API daily quota (and `WorkerShare 0.2`) | Number | 200 K/day | T-130, T-133 |
-| T-130 Q5 | Who provides a license-tester account and test order, runs the `orders.get` smoke test? | Name and date | None | T-130 AC5 |
-| T-131 Q1 | Create the App Store Connect In-App Purchase key; who and when? | Name and date | None | T-131 go-live |
-| T-131 Q2 | iOS bundle ID and Apple Team ID | Values | None | T-131 go-live |
-| T-131 Q3 | Confirm one subscription group, lifetime non-consumable, Billing Grace Period length | Confirm | None | T-131 go-live |
-| T-131 Q6 | Sandbox testers and one real production order ID | Names | None | T-131 smoke test |
-| T-133 Q1 | Who creates the Pub/Sub topic and push subscription, and sets it in Play Console? | Owner | T-140 IaC owner | T-133 go-live |
-| T-133 Q2 | Which project hosts the push service account; who holds `actAs`? | Project, person | `zaghlol-rtdn-push` as proposed | T-133 go-live |
-| T-133 Q5 | Who sends a Play test notification to staging for the recorded vector? | Name | Test skipped | T-133 vector |
-| T-134 Q1 | Apple Sandbox Server URL: production or staging backend; who configures? | Production / staging | None | T-134 go-live |
-| T-134 Q2 | Who runs `Request a Test Notification` once for the recorded vector? | Name | Test skipped | T-134 vector |
-| T-148 Q2 | Reference low-end Android phone for the key-derivation budget; is 4 s typical, 8 s worst acceptable? | Model | p50 4 s, p95 8 s | release, T-171 |
-| T-008 Q1 | Which Samsung A-series and Xiaomi/Redmi phones, and a second SIM, for SPK-01? | Models | None | SPK-01 |
-| T-159 | Place `tesseract4android-4.9.0.aar` in `C:\Projects\Zaghlol\` | File | None | T-159 |
-| FU-044 | Supply the four IBM Plex Sans Arabic TTFs | Files | Goldens use Ahem | T-024 |
-| OQ-04 / OQ-18 | Anonymized real SMS, notification and PDF samples per institution (synthetic-able; see T-031) | Samples | None | T-031, T-156, T-157 |
-| T-088 | Produce `zaghlol.riv` from the vector rig | File | None | T-099 |
-| T-059 (OQ-05, T-075 PO-4) | Compile the 600+ merchant list; Egyptian reader reviews the El Ezaby aliases | Owner | None | T-059 |
-| OQ-16 / BLK-04 | Hosting provider and region, and PDPL licence decision | Provider, region | None | T-140 |
-| OQ-10 | Who is the Zakah scholar or body, and the target date? | Name, date | None | zakah flag |
-| T-165 | Run the device check for backup exclusion | Run | None | T-165 close |
-| T-015 | Device checklist: StrongBox phone, iPhone reboot and background read before unlock | Run | None | T-015 close |
-| T-060 | Manual steps (FU-067) | Run | None | T-060 close |
-| T-007 | Timings on a reference Android phone and an iPhone 12 | Run | None | T-007 close |
+| ID | Decision |
+|---|---|
+| T-047 Q4 | One banner at a time, by priority: data at risk (backup/key problems) > capture off > notifications missed > info. The others wait in capture settings. |
+| T-130 Q3 / T-131 Q4 | Sandbox and license-tester purchases in production grant Gold, recorded as sandbox (as built). **No public TestFlight link**: invite-only testers. |
+| T-131 Q5 | Family Sharing **off** for Gold products. Apple doesn't let you turn it off again once on, so off is the reversible choice. |
+| T-131 Q7 | No offer codes or promoted purchases at launch. |
+| T-134 Q1 | Apple's Sandbox Server URL points to the **staging** backend; T-140 scripts it. |
+| T-133 Q1–Q2 | T-140 (infrastructure as code) creates the Pub/Sub topic, push subscription and `zaghlol-rtdn-push` service account in the backend's own project; Amr only pastes the topic name into Play Console (Part 2). |
+| T-148 Q2 (budget) | Key-derivation budget p50 4 s, p95 8 s on the reference phone is accepted. (The phone itself is in Part 2.) |
+| T-059 / OQ-05 | An agent drafts the 600+ merchant list from public sources; an Egyptian reader (T-058) reviews names and aliases including El Ezaby. |
+| Q-17 | Split confirmed: «التنبيهات» for Zaghlol's own alerts, «الإشعارات» for captured apps' notifications. |
+| Q-20 | No "not financial advice" line under chart tips (they describe the user's own data). |
+| Q-24 | Idle-cash rule 4 makes no "halal" claim; general wording. Example rates come from the catalog. |
+| Q-25 | Essential categories never roasted: rent, bills, groceries, health, education, fees, debt, work transport (as proposed). |
+| Q-33 | Budget alerts keep the category name, but follow the user's lock-screen redaction setting like every notification. |
+| Q-44, T-047 Q2, T-047 Q5 | `ux-designer` writes the copy in the voice guide; reviewed in T-058. Placement: Q-44 one-time Welcome line with a "restore" action; missed notifications as a dismissible card in capture settings (and the lowest-priority home banner); rule saved but not yet active as "اتحفظت — هتشتغل خلال ثواني" / "Saved — active in a few seconds". |
 
-## D. Copy and brand wording (11)
+## Part 2 — Still needs Amr
 
-| ID | Question | Options | Default | Blocks |
-|----|----------|---------|---------|--------|
-| Q-17 | Use «التنبيهات» for Zaghlol's own alerts and «الإشعارات» for captured apps' notifications? | Confirm split / one word | Proposed split | glossary |
-| Q-20 | Add a short "not financial advice" line under chart tips (S-21)? | Yes / no | No disclaimer | S-21 |
-| Q-23 | Approve Zakah and Smart ROI disclaimers; scholar sign-off on Zakah text | Wording | Drafts in copy deck | `zakah`, `smart_roi` flags |
-| Q-24 | Mention "halal" in idle-cash rule 4? Who owns the example-rate table? | Mention / no | General wording, no halal claim | S-51 |
-| Q-25 | Approve the "essential" categories never roasted and `chat_roast_gentle` conditions | List | Rent, bills, groceries, health, education, fees, debt, work transport | S-50 |
-| Q-33 | Notification redaction scope: also hide category name on budget alerts? | Keep / hide | Keep category | notifications |
-| Q-36 | Confirm the subscription renewal line wording and where it must appear | Legal wording | Draft `gold_paywall_renewal` | S-68 |
-| Q-44 | Wording for the one-time "old data couldn't be opened" Welcome line (AR, EN, restore action) | Copy | None | S-01 |
-| OQ-09 | Are bank names and logos cleared for trademark use? | Cleared / remove logos | Not cleared | launch |
-| T-047 Q2 / T-039 Q2 | Copy and placement for "some notifications were missed (N)"; dismissible? | Copy | Silent catch-up for SMS | T-047 |
-| T-047 Q5 | What rule screens say when a rule is saved but the native filter is not yet updated | Copy | TBD | T-047 |
+### Business and legal
 
-## E. Housekeeping (2)
+| ID | What's needed | Blocks |
+|---|---|---|
+| T-136 Q1 | Support staff sign-in: Microsoft Entra ID (fits the design; needs a ≤ 60-min token policy) or Google Workspace (needs a design change). Pick the one your company already uses. | T-136 close, T-186 go-live |
+| T-136 Q2 | The tenant that owns the sign-in app registrations, and how many support staff (fewer than 2 means unfreeze uses break-glass, R6-1). | T-136, T-186 |
+| D-41 | Local gold-price provider and FX data licence (a contract). The fake provider covers development. | T-127 go-live |
+| OQ-11 | Final Gold prices (seed: 49 / 399 / 899 EGP monthly / yearly / lifetime). | launch |
+| OQ-16 / BLK-04 | Hosting provider and region, and the PDPL licence decision (needs legal advice). | T-140 |
+| OQ-09 | Trademark clearance for bank names and logos; until cleared, logos stay out. | launch |
+| Q-36 | Legal sign-off on the subscription-renewal wording and placement (draft `gold_paywall_renewal`). | S-68 |
+| OQ-10, Q-23 | Zakah scholar or body, target date, and sign-off on the Zakah and Smart ROI disclaimers. Both features are flagged off at launch, so this doesn't block launch. | `zakah`, `smart_roi` flags |
 
-| ID | Question | Options | Default | Blocks |
-|----|----------|---------|---------|--------|
-| Branches | Delete leftover branches: `ci/*` (T-040, T-184, FU-030, T-016/17/18, T-008, T-131, T-134, T-148, T-038, T-039, T-133, T-133-neg), `task/T-040-negproof-a..d`, `task/T-130-negproof`, `task/T-003-throwaway-red`, `task/T-165-proof`, `task/T-004-scratch`, `task/T-004-negctl`, `task/T-007-proof*`, `task/T-015-proof-*`, `review/batch-9*`, `scratch/*` | Delete | Agents cannot delete through the proxy | none |
-| PC runner | Keep Docker Desktop (Linux containers, 10 GB `.wslconfig`) and `START-LOCAL-CI.cmd` running; restart the runner after a new `runner.ps1` | Keep running | None | local CI |
+### Accounts and store setup
+
+| ID | What's needed | Blocks |
+|---|---|---|
+| T-130 Q1–Q2 | Play Console: service account with two permissions (Workload Identity preferred over a JSON key); confirm the package name and the product setup (monthly and yearly subscriptions, one-time lifetime). | T-130 go-live |
+| T-130 Q5 | A license-tester account and one test order for the smoke test. | T-130 AC5 |
+| T-131 Q1–Q3, Q6 | App Store Connect: In-App Purchase key; bundle ID and Team ID; confirm one subscription group, a lifetime non-consumable and the Billing Grace Period length; sandbox testers and one real order ID. | T-131 go-live |
+| T-133 Q1 (your part) | Paste the Pub/Sub topic into Play Console once T-140 creates it. | T-133 go-live |
+| T-133 Q5, T-134 Q2 | Send one test notification from Play Console and one from App Store Connect, to record the test vectors. | test vectors |
+
+### Files and devices
+
+| ID | What's needed | Blocks |
+|---|---|---|
+| OQ-04 / OQ-18 | SMS, notification and PDF samples per bank, with real numbers changed (we only need the shape). | T-031, bank templates, T-156, T-157 |
+| T-159 | `tesseract4android-4.9.0.aar` in `C:\Projects\Zaghlol\`. | T-159 |
+| FU-044 | The four IBM Plex Sans Arabic TTF files. | T-024 |
+| T-088 | `zaghlol.riv` mascot file. | T-099 |
+| T-148 Q2, T-007, T-008 Q1 | Name a reference low-end Android phone (and an iPhone 12), plus a Samsung A-series and a Xiaomi/Redmi with a second SIM for SPK-01. | release timings, SPK-01 |
+| T-165, T-015, T-060 | Run the device checklists (backup exclusion; StrongBox phone; iPhone reboot and read before unlock; FU-067 steps). | closing those tasks |
+
+### Housekeeping
+
+| ID | What's needed |
+|---|---|
+| PC runner | Start Docker Desktop and `START-LOCAL-CI.cmd` (silent since 2026-11-11 22:29). Optional now: builders don't wait for it. |
+| Branches | Delete leftover branches: `ci/*` (T-040, T-184, FU-030, T-016/17/18, T-008, T-131, T-134, T-148, T-038, T-039, T-133, T-133-neg), `task/T-040-negproof-a..d`, `task/T-130-negproof`, `task/T-003-throwaway-red`, `task/T-165-proof`, `task/T-004-scratch`, `task/T-004-negctl`, `task/T-007-proof*`, `task/T-015-proof-*`, `review/batch-9*`, `scratch/*`. |

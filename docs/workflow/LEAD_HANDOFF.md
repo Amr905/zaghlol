@@ -65,13 +65,7 @@ Next free follow-up number: **FU-115**.
 
 ## Waiting on the PO (Amr)
 
-1. **Operator sign-in provider** (T-136 Q1/Q2, "decide later"): needed to close T-136 and before T-186 goes live (FU-060 S-4). Google needs a design change; Entra needs a token-lifetime policy ≤ 60 min.
-2. **D-41** local gold-price provider, before T-127 go-live.
-3. **Copy decisions:** Q-20, Q-23, Q-24, Q-25, Q-33, Q-36; Q-44 (restore-notice wording, UX); later Q-17, OQ-09 brand clearance.
-4. **Inputs:** `tesseract4android-4.9.0.aar` in `C:\\Projects\\Zaghlol\\` (T-159); Play Console service account, product IDs, quota and a tester order (T-130 §13); App Store Connect IAP key, bundle/team ID, products, sandbox-in-production, Family Sharing, sandbox testers (T-131 §12 questions 1–7); T-035 Guard Q1–Q6 (provisional defaults in code); T-019 data questions 1–4; T-134 questions 1–4 and T-148 questions 1–3 (in their design notes); T-046 Q1–Q3; T-039 Q1–Q2; T-075 PO-1…PO-4; T-020 key defaults; T-025 14-day maxAge; T-112 manual FX override (OQ); T-133 Q1–Q6 (Pub/Sub setup, push account, refund policy, chargeback reviews, test vector, quota); **FU-109 M-1: user-added phone-number senders and inbox history (before T-048)**; T-040/T-043/T-041/T-047 questions (spool share, user notification senders, missed notifications, held messages, NoSms Home banner, missed-notification copy, banner priority, rule-save copy); T-051 Q1–Q5; T-182 Q1 (K_seat emergency rotation); T-040 Q1 80 % SMS spool share; T-184 Q1–Q2 (pre-T-132 purchases, vacant seat); test phones + second SIM for SPK-01 (T-008 Q1); IBM Plex Sans Arabic TTFs (FU-044); synthetic-able SMS samples (OQ-04/OQ-18, T-031); Rive file (T-088).
-5. **Device runs:** T-165; T-015 device checklist (StrongBox phone; iPhone reboot + background read before unlock); T-060 manual steps (FU-067); reference Android phone and iPhone 12 timings (T-007).
-6. **Housekeeping:** delete leftover branches `ci/T-040`, `ci/T-184`, `task/T-040-negproof-a/b/c/d`, `review/batch-9`, `review/batch-9-security`, `ci/FU-030`, `ci/T-016`, `ci/T-017`, `ci/T-018`, `ci/T-008`, `ci/T-131`, `ci/T-134`, `ci/T-148`, `ci/T-038`, `ci/T-039`, `ci/T-133`, `ci/T-133-neg`, `task/T-130-negproof`, `task/T-003-throwaway-red`, `task/T-165-proof`, `task/T-004-scratch`, `task/T-004-negctl`, `task/T-007-proof*`, `task/T-015-proof-*`, `scratch/*`.
-7. **PC:** keep Docker Desktop (Linux containers, 10 GB in `.wslconfig`) and `START-LOCAL-CI.cmd` running while agents work; restart the runner after a new `runner.ps1` is deployed.
+Everything is in **`docs/workflow/PO_DECISIONS.md` Part 2** (business/legal, store accounts, files and devices, housekeeping). Part 1 holds the decisions the Lead took on 2026-11-13 under the PO's delegation; builders apply the rows for their task.
 
 ## Waiting on the architect or UX
 
