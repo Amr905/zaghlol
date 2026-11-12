@@ -121,6 +121,16 @@ class CaptureStatusStore(
         missed(channel, wallMs)
     }
 
+    /**
+     * [count] messages of [channel] were lost before they could be stored
+     * (T-043: the notification intake queue overflowed). Notifications add to
+     * `missedNotifications`; an SMS sets `firstMissedSmsAtMs`. Never throws.
+     */
+    fun recordMissed(channel: String, wallMs: Long, count: Int = 1) {
+        if (count <= 0) return
+        record { repeat(count) { missed(channel, wallMs) } }
+    }
+
     /** [count] entries were proven not authentic and deleted. */
     fun recordDecryptDeleted(count: Int) {
         if (count <= 0) return
