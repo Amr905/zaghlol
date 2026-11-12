@@ -1,0 +1,332 @@
+[
+{
+"k": "خضار",
+"c": "groceries",
+"w": 60
+},
+{
+"k": "فاكهه",
+"c": "groceries",
+"w": 60
+},
+{
+"k": "لحمه",
+"c": "groceries",
+"w": 60
+},
+{
+"k": "فراخ",
+"c": "groceries",
+"w": 60
+},
+{
+"k": "عيش",
+"c": "groceries",
+"w": 60
+},
+{
+"k": "بقاله",
+"c": "groceries",
+"w": 60
+},
+{
+"k": "سوبرماركت",
+"c": "groceries",
+"w": 60
+},
+{
+"k": "جبنه",
+"c": "groceries",
+"w": 60
+},
+{
+"k": "لبن",
+"c": "groceries",
+"w": 60
+},
+{
+"k": "بيض",
+"c": "groceries",
+"w": 60
+},
+{
+"k": "vegetables",
+"c": "groceries",
+"w": 60
+},
+{
+"k": "groceries",
+"c": "groceries",
+"w": 60
+},
+{
+"k": "supermarket",
+"c": "groceries",
+"w": 60
+},
+{
+"k": "bread",
+"c": "groceries",
+"w": 60
+},
+{
+"k": "milk",
+"c": "groceries",
+"w": 60
+},
+{
+"k": "fruit",
+"c": "groceries",
+"w": 60
+},
+{
+"k": "قهوه",
+"c": "dining",
+"w": 60
+},
+{
+"k": "كافيه",
+"c": "dining",
+"w": 60
+},
+{
+"k": "مطعم",
+"c": "dining",
+"w": 60
+},
+{
+"k": "غدا",
+"c": "dining",
+"w": 60
+},
+{
+"k": "فطار",
+"c": "dining",
+"w": 60
+},
+{
+"k": "عشا",
+"c": "dining",
+"w": 60
+},
+{
+"k": "كشري",
+"c": "dining",
+"w": 60
+},
+{
+"k": "بيتزا",
+"c": "dining",
+"w": 60
+},
+{
+"k": "ساندوتشات",
+"c": "dining",
+"w": 60
+},
+{
+"k": "دليفري",
+"c": "dining",
+"w": 60
+},
+{
+"k": "عصير",
+"c": "dining",
+"w": 60
+},
+{
+"k": "شاي",
+"c": "dining",
+"w": 60
+},
+{
+"k": "coffee",
+"c": "dining",
+"w": 60
+},
+{
+"k": "lunch",
+"c": "dining",
+"w": 60
+},
+{
+"k": "dinner",
+"c": "dining",
+"w": 60
+},
+{
+"k": "pizza",
+"c": "dining",
+"w": 60
+},
+{
+"k": "burger",
+"c": "dining",
+"w": 60
+},
+{
+"k": "restaurant",
+"c": "dining",
+"w": 60
+},
+{
+"k": "تاكسي",
+"c": "transport",
+"w": 60
+},
+{
+"k": "اوبر",
+"c": "transport",
+"w": 60
+},
+{
+"k": "مترو",
+"c": "transport",
+"w": 60
+},
+{
+"k": "ميكروباص",
+"c": "transport",
+"w": 60
+},
+{
+"k": "بنزين",
+"c": "transport",
+"w": 60
+},
+{
+"k": "موقف",
+"c": "transport",
+"w": 60
+},
+{
+"k": "parking",
+"c": "transport",
+"w": 60
+},
+{
+"k": "taxi",
+"c": "transport",
+"w": 60
+},
+{
+"k": "fuel",
+"c": "transport",
+"w": 60
+},
+{
+"k": "metro",
+"c": "transport",
+"w": 60
+},
+{
+"k": "كهرباء",
+"c": "bills",
+"w": 60
+},
+{
+"k": "مياه",
+"c": "bills",
+"w": 60
+},
+{
+"k": "انترنت",
+"c": "bills",
+"w": 60
+},
+{
+"k": "شحن",
+"c": "bills",
+"w": 60
+},
+{
+"k": "فاتوره",
+"c": "bills",
+"w": 60
+},
+{
+"k": "electricity",
+"c": "bills",
+"w": 60
+},
+{
+"k": "internet",
+"c": "bills",
+"w": 60
+},
+{
+"k": "recharge",
+"c": "bills",
+"w": 60
+},
+{
+"k": "دوا",
+"c": "health",
+"w": 60
+},
+{
+"k": "صيدليه",
+"c": "health",
+"w": 60
+},
+{
+"k": "دكتور",
+"c": "health",
+"w": 60
+},
+{
+"k": "كشف",
+"c": "health",
+"w": 60
+},
+{
+"k": "pharmacy",
+"c": "health",
+"w": 60
+},
+{
+"k": "doctor",
+"c": "health",
+"w": 60
+},
+{
+"k": "لبس",
+"c": "shopping",
+"w": 60
+},
+{
+"k": "جزمه",
+"c": "shopping",
+"w": 60
+},
+{
+"k": "موبايل",
+"c": "shopping",
+"w": 60
+},
+{
+"k": "clothes",
+"c": "shopping",
+"w": 60
+},
+{
+"k": "shoes",
+"c": "shopping",
+"w": 60
+},
+{
+"k": "سينما",
+"c": "entertainment",
+"w": 60
+},
+{
+"k": "فيلم",
+"c": "entertainment",
+"w": 60
+},
+{
+"k": "cinema",
+"c": "entertainment",
+"w": 60
+}
+]
