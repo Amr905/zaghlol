@@ -87,6 +87,7 @@ Delegation rules for the Lead:
 3. Independent tasks may run in parallel; tasks touching the same files may not.
 4. A sub-agent's "done" is a claim, not a fact. The Lead reads the diff and the review report before marking a task complete.
 5. If a C1/C2 task fails review twice, re-classify one level up and re-delegate.
+6. Decisions the PO made or delegated live in `docs/workflow/PO_DECISIONS.md` (Part 1 binds builders; Part 2 still waits on the PO). Point each builder at the rows for its task; a builder never decides a Part 2 question itself.
 
 **Batch review round (PO, 2026-11-11; replaces per-task reviews):**
 1. **Build 5 tasks.** Up to 5 at once, one per task, on separate lanes where possible. Each builder works through `docs/workflow/self-check.md`, runs the local checks, pushes `task/<id>-…` and reports without waiting for the PC runner. The Lead reads each diff summary (not the whole diff) and sets the task to `BUILT`.
