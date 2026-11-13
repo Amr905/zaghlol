@@ -71,6 +71,72 @@ class DeviceSecurityHostApi {
   static const MessageCodec<Object?> pigeonChannelCodec = _PigeonCodec();
 
   final String pigeonVar_messageChannelSuffix;
+
+  /// FR-SEC-07 heuristic: true when the device looks rooted (Android) or
+  /// jailbroken (iOS). Best effort, trivially bypassable; it only drives a
+  /// warning and never blocks anything.
+  Future<bool> isDeviceRooted() async {
+    final pigeonVar_channelName =
+        'dev.flutter.pigeon.zaghlol.DeviceSecurityHostApi.isDeviceRooted$pigeonVar_messageChannelSuffix';
+    final pigeonVar_channel = BasicMessageChannel<Object?>(
+      pigeonVar_channelName,
+      pigeonChannelCodec,
+      binaryMessenger: pigeonVar_binaryMessenger,
+    );
+    final Future<Object?> pigeonVar_sendFuture = pigeonVar_channel.send(null);
+    final pigeonVar_replyList = await pigeonVar_sendFuture as List<Object?>?;
+
+    final Object? pigeonVar_replyValue = _extractReplyValueOrThrow(
+      pigeonVar_replyList,
+      pigeonVar_channelName,
+      isNullValid: false,
+    );
+    return pigeonVar_replyValue! as bool;
+  }
+
+  /// FR-SEC-02 (T-103): true hides the app in the OS app switcher and blocks
+  /// screenshots (Android FLAG_SECURE + recents screenshot off; iOS cover view
+  /// while the scene is not active). false restores normal behaviour.
+  Future<void> setSecureWindow(bool secure) async {
+    final pigeonVar_channelName =
+        'dev.flutter.pigeon.zaghlol.DeviceSecurityHostApi.setSecureWindow$pigeonVar_messageChannelSuffix';
+    final pigeonVar_channel = BasicMessageChannel<Object?>(
+      pigeonVar_channelName,
+      pigeonChannelCodec,
+      binaryMessenger: pigeonVar_binaryMessenger,
+    );
+    final Future<Object?> pigeonVar_sendFuture = pigeonVar_channel.send(
+      <Object?>[secure],
+    );
+    final pigeonVar_replyList = await pigeonVar_sendFuture as List<Object?>?;
+
+    _extractReplyValueOrThrow(
+      pigeonVar_replyList,
+      pigeonVar_channelName,
+      isNullValid: true,
+    );
+  }
+
+  /// True when the device has a passcode / PIN / pattern set (the fallback the
+  /// app lock needs).
+  Future<bool> isDeviceSecure() async {
+    final pigeonVar_channelName =
+        'dev.flutter.pigeon.zaghlol.DeviceSecurityHostApi.isDeviceSecure$pigeonVar_messageChannelSuffix';
+    final pigeonVar_channel = BasicMessageChannel<Object?>(
+      pigeonVar_channelName,
+      pigeonChannelCodec,
+      binaryMessenger: pigeonVar_binaryMessenger,
+    );
+    final Future<Object?> pigeonVar_sendFuture = pigeonVar_channel.send(null);
+    final pigeonVar_replyList = await pigeonVar_sendFuture as List<Object?>?;
+
+    final Object? pigeonVar_replyValue = _extractReplyValueOrThrow(
+      pigeonVar_replyList,
+      pigeonVar_channelName,
+      isNullValid: false,
+    );
+    return pigeonVar_replyValue! as bool;
+  }
 }
 
 class WidgetBridgeHostApi {

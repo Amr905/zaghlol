@@ -12,6 +12,7 @@ import 'core/routing/app_router.dart';
 import 'core/theme/app_theme.dart';
 import 'features/budget/application/cycle_app_wiring.dart';
 import 'features/capture/presentation/capture_lifecycle.dart';
+import 'features/security/presentation/app_lock_gate.dart';
 import 'ingestion/ingestion_main.dart';
 
 Future<void> main() async {
@@ -53,6 +54,9 @@ class ZaghlolApp extends ConsumerWidget {
       theme: ZaghlolTheme.light,
       darkTheme: ZaghlolTheme.dark,
       routerConfig: ref.watch(appRouterProvider),
+      // T-103: app lock, privacy cover and secure window over the whole app.
+      builder: (context, child) =>
+          AppLockGate(child: child ?? const SizedBox.shrink()),
     );
   }
 }

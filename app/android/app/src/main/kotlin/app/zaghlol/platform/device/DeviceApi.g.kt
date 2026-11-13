@@ -58,6 +58,23 @@ private open class DeviceApiPigeonCodec : StandardMessageCodec() {
 
 /** Generated interface from Pigeon that represents a handler of messages from Flutter. */
 interface DeviceSecurityHostApi {
+  /**
+   * FR-SEC-07 heuristic: true when the device looks rooted (Android) or
+   * jailbroken (iOS). Best effort, trivially bypassable; it only drives a
+   * warning and never blocks anything.
+   */
+  fun isDeviceRooted(): Boolean
+  /**
+   * FR-SEC-02 (T-103): true hides the app in the OS app switcher and blocks
+   * screenshots (Android FLAG_SECURE + recents screenshot off; iOS cover view
+   * while the scene is not active). false restores normal behaviour.
+   */
+  fun setSecureWindow(secure: Boolean)
+  /**
+   * True when the device has a passcode / PIN / pattern set (the fallback the
+   * app lock needs).
+   */
+  fun isDeviceSecure(): Boolean
 
   companion object {
     /** The codec used by DeviceSecurityHostApi. */
@@ -68,6 +85,54 @@ interface DeviceSecurityHostApi {
     @JvmOverloads
     fun setUp(binaryMessenger: BinaryMessenger, api: DeviceSecurityHostApi?, messageChannelSuffix: String = "") {
       val separatedMessageChannelSuffix = if (messageChannelSuffix.isNotEmpty()) ".$messageChannelSuffix" else ""
+      run {
+        val channel = BasicMessageChannel<Any?>(binaryMessenger, "dev.flutter.pigeon.zaghlol.DeviceSecurityHostApi.isDeviceRooted$separatedMessageChannelSuffix", codec)
+        if (api != null) {
+          channel.setMessageHandler { _, reply ->
+            val wrapped: List<Any?> = try {
+              listOf(api.isDeviceRooted())
+            } catch (exception: Throwable) {
+              DeviceApiPigeonUtils.wrapError(exception)
+            }
+            reply.reply(wrapped)
+          }
+        } else {
+          channel.setMessageHandler(null)
+        }
+      }
+      run {
+        val channel = BasicMessageChannel<Any?>(binaryMessenger, "dev.flutter.pigeon.zaghlol.DeviceSecurityHostApi.setSecureWindow$separatedMessageChannelSuffix", codec)
+        if (api != null) {
+          channel.setMessageHandler { message, reply ->
+            val args = message as List<Any?>
+            val secureArg = args[0] as Boolean
+            val wrapped: List<Any?> = try {
+              api.setSecureWindow(secureArg)
+              listOf(null)
+            } catch (exception: Throwable) {
+              DeviceApiPigeonUtils.wrapError(exception)
+            }
+            reply.reply(wrapped)
+          }
+        } else {
+          channel.setMessageHandler(null)
+        }
+      }
+      run {
+        val channel = BasicMessageChannel<Any?>(binaryMessenger, "dev.flutter.pigeon.zaghlol.DeviceSecurityHostApi.isDeviceSecure$separatedMessageChannelSuffix", codec)
+        if (api != null) {
+          channel.setMessageHandler { _, reply ->
+            val wrapped: List<Any?> = try {
+              listOf(api.isDeviceSecure())
+            } catch (exception: Throwable) {
+              DeviceApiPigeonUtils.wrapError(exception)
+            }
+            reply.reply(wrapped)
+          }
+        } else {
+          channel.setMessageHandler(null)
+        }
+      }
     }
   }
 }
