@@ -4,7 +4,6 @@ library;
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:zaghlol/core/settings/settings_providers.dart';
 import 'package:zaghlol/main.dart';
 
 void main() {
@@ -12,14 +11,7 @@ void main() {
     await tester.binding.setSurfaceSize(const Size(390, 844));
     addTearDown(() => tester.binding.setSurfaceSize(null));
 
-    await tester.pumpWidget(
-      ProviderScope(
-        overrides: [
-          appLockEnabledProvider.overrideWith((ref) => Stream.value(false)),
-        ],
-        child: const ZaghlolApp(),
-      ),
-    );
+    await tester.pumpWidget(const ProviderScope(child: ZaghlolApp()));
     await tester.pumpAndSettle();
 
     await expectLater(

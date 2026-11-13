@@ -5,9 +5,6 @@ import android.os.Handler
 import android.os.Looper
 import app.zaghlol.platform.capture.CaptureRuntime
 import app.zaghlol.platform.clock.TrustedClockRegistration
-import app.zaghlol.platform.device.AndroidDeviceEnv
-import app.zaghlol.platform.device.DeviceSecurityRegistration
-import app.zaghlol.platform.device.SecureWindowState
 import app.zaghlol.platform.keys.SecretStoreRegistration
 import app.zaghlol.platform.share.ShareDescriptor
 import app.zaghlol.platform.share.ShareHandOff
@@ -19,20 +16,13 @@ import app.zaghlol.platform.share.ShareStore
 import app.zaghlol.platform.share.ShareStores
 import app.zaghlol.platform.text.TextNormalizationHostApi
 import app.zaghlol.platform.text.TextNormalizationRegistration
-import io.flutter.embedding.android.FlutterFragmentActivity
+import io.flutter.embedding.android.FlutterActivity
 import io.flutter.embedding.engine.FlutterEngine
 import java.util.concurrent.Executors
 
-// T-103: local_auth's BiometricPrompt needs a FragmentActivity.
-class MainActivity : FlutterFragmentActivity() {
+class MainActivity : FlutterActivity() {
     private var shareEvents: ShareIntakeEventsApi? = null
     private var shareStore: ShareStore? = null
-
-    override fun onCreate(savedInstanceState: android.os.Bundle?) {
-        // T-103: a re-created activity is secured again before its first frame.
-        if (SecureWindowState.requested) AndroidDeviceEnv.applyTo(this, true)
-        super.onCreate(savedInstanceState)
-    }
 
     override fun configureFlutterEngine(flutterEngine: FlutterEngine) {
         super.configureFlutterEngine(flutterEngine)
@@ -44,8 +34,6 @@ class MainActivity : FlutterFragmentActivity() {
         TextNormalizationRegistration.register(messenger)
         // T-180: trusted clock sample for the Gold offline bound.
         TrustedClockRegistration.register(messenger, this)
-        // T-103: root heuristic, secure window, passcode check (UI engine only).
-        DeviceSecurityRegistration.register(messenger, this)
         val store = ShareStores.create(applicationContext)
         shareStore = store
         ShareIntakeHostApi.setUp(messenger, ShareIntakeHost(store))
@@ -60,7 +48,6 @@ class MainActivity : FlutterFragmentActivity() {
         ShareIntakeHostApi.setUp(flutterEngine.dartExecutor.binaryMessenger, null)
         TextNormalizationHostApi.setUp(flutterEngine.dartExecutor.binaryMessenger, null)
         TrustedClockRegistration.unregister(flutterEngine.dartExecutor.binaryMessenger)
-        DeviceSecurityRegistration.unregister(flutterEngine.dartExecutor.binaryMessenger)
         shareEvents = null
         shareStore = null
         super.cleanUpFlutterEngine(flutterEngine)

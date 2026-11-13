@@ -79,8 +79,5 @@
 		<string>UIInterfaceOrientationLandscapeLeft</string>
 		<string>UIInterfaceOrientationLandscapeRight</string>
 	</array>
-	<!-- T-103 / FR-SEC-02: shown by iOS the first time the app lock asks for Face ID. -->
-	<key>NSFaceIDUsageDescription</key>
-	<string>Zaghlol uses Face ID to unlock the app and keep your money data private.</string>
 </dict>
 </plist>

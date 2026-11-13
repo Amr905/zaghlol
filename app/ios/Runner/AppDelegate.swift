@@ -22,7 +22,5 @@ import UIKit
     TextNormalizationRegistration.register(with: engineBridge.pluginRegistry)
     // T-180: trusted clock sample for the Gold offline bound.
     TrustedClockRegistration.register(with: engineBridge.pluginRegistry)
-    // T-103: jailbreak heuristic, app switcher cover, passcode check.
-    DeviceSecurityRegistration.register(with: engineBridge.pluginRegistry)
   }
 }

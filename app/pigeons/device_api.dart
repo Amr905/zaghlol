@@ -18,21 +18,7 @@ import 'package:pigeon/pigeon.dart';
   ),
 )
 @HostApi()
-abstract class DeviceSecurityHostApi {
-  /// FR-SEC-07 heuristic: true when the device looks rooted (Android) or
-  /// jailbroken (iOS). Best effort, trivially bypassable; it only drives a
-  /// warning and never blocks anything.
-  bool isDeviceRooted();
-
-  /// FR-SEC-02 (T-103): true hides the app in the OS app switcher and blocks
-  /// screenshots (Android FLAG_SECURE + recents screenshot off; iOS cover view
-  /// while the scene is not active). false restores normal behaviour.
-  void setSecureWindow(bool secure);
-
-  /// True when the device has a passcode / PIN / pattern set (the fallback the
-  /// app lock needs).
-  bool isDeviceSecure();
-}
+abstract class DeviceSecurityHostApi {}
 
 @HostApi()
 abstract class WidgetBridgeHostApi {}

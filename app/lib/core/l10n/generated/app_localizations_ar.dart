@@ -28,35 +28,6 @@ class AppLocalizationsAr extends AppLocalizations {
   String get commonNavAddA11y => 'سجّل بسرعة';
 
   @override
-  String get appLockTitle => 'زغلول مقفول';
-
-  @override
-  String get appLockUnlock => 'افتح';
-
-  @override
-  String get appLockReason => 'اتأكد إنك إنت عشان تفتح زغلول';
-
-  @override
-  String get appLockFailed => 'مظبطتش. جرّب تاني.';
-
-  @override
-  String get appLockUnavailable =>
-      'فعّل قفل الشاشة (PIN أو نمط أو باسورد) في تليفونك وبعدين جرّب تاني.';
-
-  @override
-  String get appLockLockedOut => 'حاولت كتير. استنى شوية وجرّب تاني.';
-
-  @override
-  String get appLockRootedTitle => 'حماية تليفونك أضعف';
-
-  @override
-  String get appLockRootedBody =>
-      'التليفون ده شكله معمول له روت أو جيلبريك، فحماية بياناتك عليه أضعف. التطبيق شغال عادي، بس خد بالك.';
-
-  @override
-  String get appLockRootedOk => 'تمام';
-
-  @override
   String get homeQuickAddTitle => 'عايز تسجل إيه؟';
 
   @override

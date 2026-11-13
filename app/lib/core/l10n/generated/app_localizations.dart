@@ -134,60 +134,6 @@ abstract class AppLocalizations {
   /// **'سجّل بسرعة'**
   String get commonNavAddA11y;
 
-  /// Title of the app lock screen (S-05).
-  ///
-  /// In ar, this message translates to:
-  /// **'زغلول مقفول'**
-  String get appLockTitle;
-
-  /// Button that opens the phone's biometric or passcode prompt.
-  ///
-  /// In ar, this message translates to:
-  /// **'افتح'**
-  String get appLockUnlock;
-
-  /// Reason shown inside the OS biometric prompt.
-  ///
-  /// In ar, this message translates to:
-  /// **'اتأكد إنك إنت عشان تفتح زغلول'**
-  String get appLockReason;
-
-  /// Shown after a failed unlock.
-  ///
-  /// In ar, this message translates to:
-  /// **'مظبطتش. جرّب تاني.'**
-  String get appLockFailed;
-
-  /// Shown when the phone has no screen lock.
-  ///
-  /// In ar, this message translates to:
-  /// **'فعّل قفل الشاشة (PIN أو نمط أو باسورد) في تليفونك وبعدين جرّب تاني.'**
-  String get appLockUnavailable;
-
-  /// Shown when the OS blocks the prompt after too many wrong tries.
-  ///
-  /// In ar, this message translates to:
-  /// **'حاولت كتير. استنى شوية وجرّب تاني.'**
-  String get appLockLockedOut;
-
-  /// Title of the rooted or jailbroken warning (FR-SEC-07).
-  ///
-  /// In ar, this message translates to:
-  /// **'حماية تليفونك أضعف'**
-  String get appLockRootedTitle;
-
-  /// Body of the rooted or jailbroken warning. It warns and never blocks.
-  ///
-  /// In ar, this message translates to:
-  /// **'التليفون ده شكله معمول له روت أو جيلبريك، فحماية بياناتك عليه أضعف. التطبيق شغال عادي، بس خد بالك.'**
-  String get appLockRootedBody;
-
-  /// Button that closes the rooted warning.
-  ///
-  /// In ar, this message translates to:
-  /// **'تمام'**
-  String get appLockRootedOk;
-
   /// No description provided for @homeQuickAddTitle.
   ///
   /// In ar, this message translates to:

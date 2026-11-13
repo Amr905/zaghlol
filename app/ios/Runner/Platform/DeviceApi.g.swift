@@ -87,17 +87,6 @@ class DeviceApiPigeonCodec: FlutterStandardMessageCodec, @unchecked Sendable {
 
 /// Generated protocol from Pigeon that represents a handler of messages from Flutter.
 protocol DeviceSecurityHostApi {
-  /// FR-SEC-07 heuristic: true when the device looks rooted (Android) or
-  /// jailbroken (iOS). Best effort, trivially bypassable; it only drives a
-  /// warning and never blocks anything.
-  func isDeviceRooted() throws -> Bool
-  /// FR-SEC-02 (T-103): true hides the app in the OS app switcher and blocks
-  /// screenshots (Android FLAG_SECURE + recents screenshot off; iOS cover view
-  /// while the scene is not active). false restores normal behaviour.
-  func setSecureWindow(secure: Bool) throws
-  /// True when the device has a passcode / PIN / pattern set (the fallback the
-  /// app lock needs).
-  func isDeviceSecure() throws -> Bool
 }
 
 /// Generated setup class from Pigeon to handle messages through the `binaryMessenger`.
@@ -106,55 +95,6 @@ class DeviceSecurityHostApiSetup {
   /// Sets up an instance of `DeviceSecurityHostApi` to handle messages through the `binaryMessenger`.
   static func setUp(binaryMessenger: FlutterBinaryMessenger, api: DeviceSecurityHostApi?, messageChannelSuffix: String = "") {
     let channelSuffix = messageChannelSuffix.count > 0 ? ".\(messageChannelSuffix)" : ""
-    /// FR-SEC-07 heuristic: true when the device looks rooted (Android) or
-    /// jailbroken (iOS). Best effort, trivially bypassable; it only drives a
-    /// warning and never blocks anything.
-    let isDeviceRootedChannel = FlutterBasicMessageChannel(name: "dev.flutter.pigeon.zaghlol.DeviceSecurityHostApi.isDeviceRooted\(channelSuffix)", binaryMessenger: binaryMessenger, codec: codec)
-    if let api = api {
-      isDeviceRootedChannel.setMessageHandler { _, reply in
-        do {
-          let result = try api.isDeviceRooted()
-          reply(wrapResult(result))
-        } catch {
-          reply(wrapError(error))
-        }
-      }
-    } else {
-      isDeviceRootedChannel.setMessageHandler(nil)
-    }
-    /// FR-SEC-02 (T-103): true hides the app in the OS app switcher and blocks
-    /// screenshots (Android FLAG_SECURE + recents screenshot off; iOS cover view
-    /// while the scene is not active). false restores normal behaviour.
-    let setSecureWindowChannel = FlutterBasicMessageChannel(name: "dev.flutter.pigeon.zaghlol.DeviceSecurityHostApi.setSecureWindow\(channelSuffix)", binaryMessenger: binaryMessenger, codec: codec)
-    if let api = api {
-      setSecureWindowChannel.setMessageHandler { message, reply in
-        let args = message as! [Any?]
-        let secureArg = args[0] as! Bool
-        do {
-          try api.setSecureWindow(secure: secureArg)
-          reply(wrapResult(nil))
-        } catch {
-          reply(wrapError(error))
-        }
-      }
-    } else {
-      setSecureWindowChannel.setMessageHandler(nil)
-    }
-    /// True when the device has a passcode / PIN / pattern set (the fallback the
-    /// app lock needs).
-    let isDeviceSecureChannel = FlutterBasicMessageChannel(name: "dev.flutter.pigeon.zaghlol.DeviceSecurityHostApi.isDeviceSecure\(channelSuffix)", binaryMessenger: binaryMessenger, codec: codec)
-    if let api = api {
-      isDeviceSecureChannel.setMessageHandler { _, reply in
-        do {
-          let result = try api.isDeviceSecure()
-          reply(wrapResult(result))
-        } catch {
-          reply(wrapError(error))
-        }
-      }
-    } else {
-      isDeviceSecureChannel.setMessageHandler(nil)
-    }
   }
 }
 /// Generated protocol from Pigeon that represents a handler of messages from Flutter.
