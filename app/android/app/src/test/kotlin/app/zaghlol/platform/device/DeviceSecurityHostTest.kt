@@ -14,6 +14,7 @@ class DeviceSecurityHostTest {
     var secure: Boolean = true,
     var throwOnSecure: Boolean = false,
     var throwOnFile: Boolean = false,
+    var throwOnAuth: Boolean = false,
   ) : DeviceEnv {
     val applied = mutableListOf<Boolean>()
 
@@ -34,7 +35,6 @@ class DeviceSecurityHostTest {
     }
 
     var authResult: NativeAuthOutcome = NativeAuthOutcome.SUCCESS
-    var throwOnAuth = false
     var lastReason: String? = null
 
     override fun authenticate(reason: String, onResult: (NativeAuthOutcome) -> Unit) {
