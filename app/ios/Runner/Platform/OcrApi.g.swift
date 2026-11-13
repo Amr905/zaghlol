@@ -64,11 +64,215 @@ private func nilOrValue<T>(_ value: Any?) -> T? {
   return value as! T?
 }
 
+private func doubleEqualsOcrApi(_ lhs: Double, _ rhs: Double) -> Bool {
+  return (lhs.isNaN && rhs.isNaN) || lhs == rhs
+}
+
+private func doubleHashOcrApi(_ value: Double, _ hasher: inout Hasher) {
+  if value.isNaN {
+    hasher.combine(0x7FF8000000000000)
+  } else {
+    // Normalize -0.0 to 0.0
+    hasher.combine(value == 0 ? 0 : value)
+  }
+}
+
+func deepEqualsOcrApi(_ lhs: Any?, _ rhs: Any?) -> Bool {
+  let cleanLhs = nilOrValue(lhs) as Any?
+  let cleanRhs = nilOrValue(rhs) as Any?
+  switch (cleanLhs, cleanRhs) {
+  case (nil, nil):
+    return true
+
+  case (nil, _), (_, nil):
+    return false
+
+  case (let lhs as AnyObject, let rhs as AnyObject) where lhs === rhs:
+    return true
+
+  case is (Void, Void):
+    return true
+
+  case (let lhsArray, let rhsArray) as ([Any?], [Any?]):
+    guard lhsArray.count == rhsArray.count else { return false }
+    for (index, element) in lhsArray.enumerated() {
+      if !deepEqualsOcrApi(element, rhsArray[index]) {
+        return false
+      }
+    }
+    return true
+
+  case (let lhsArray, let rhsArray) as ([Double], [Double]):
+    guard lhsArray.count == rhsArray.count else { return false }
+    for (index, element) in lhsArray.enumerated() {
+      if !doubleEqualsOcrApi(element, rhsArray[index]) {
+        return false
+      }
+    }
+    return true
+
+  case (let lhsDictionary, let rhsDictionary) as ([AnyHashable: Any?], [AnyHashable: Any?]):
+    guard lhsDictionary.count == rhsDictionary.count else { return false }
+    for (lhsKey, lhsValue) in lhsDictionary {
+      var found = false
+      for (rhsKey, rhsValue) in rhsDictionary {
+        if deepEqualsOcrApi(lhsKey, rhsKey) {
+          if deepEqualsOcrApi(lhsValue, rhsValue) {
+            found = true
+            break
+          } else {
+            return false
+          }
+        }
+      }
+      if !found { return false }
+    }
+    return true
+
+  case (let lhs as Double, let rhs as Double):
+    return doubleEqualsOcrApi(lhs, rhs)
+
+  case (let lhsHashable, let rhsHashable) as (AnyHashable, AnyHashable):
+    return lhsHashable == rhsHashable
+
+  default:
+    return false
+  }
+}
+
+func deepHashOcrApi(value: Any?, hasher: inout Hasher) {
+  let cleanValue = nilOrValue(value) as Any?
+  if let cleanValue = cleanValue {
+    if let doubleValue = cleanValue as? Double {
+      doubleHashOcrApi(doubleValue, &hasher)
+    } else if let valueList = cleanValue as? [Any?] {
+      for item in valueList {
+        deepHashOcrApi(value: item, hasher: &hasher)
+      }
+    } else if let valueList = cleanValue as? [Double] {
+      for item in valueList {
+        doubleHashOcrApi(item, &hasher)
+      }
+    } else if let valueDict = cleanValue as? [AnyHashable: Any?] {
+      var result = 0
+      for (key, value) in valueDict {
+        var entryKeyHasher = Hasher()
+        deepHashOcrApi(value: key, hasher: &entryKeyHasher)
+        var entryValueHasher = Hasher()
+        deepHashOcrApi(value: value, hasher: &entryValueHasher)
+        result = result &+ ((entryKeyHasher.finalize() &* 31) ^ entryValueHasher.finalize())
+      }
+      hasher.combine(result)
+    } else if let hashableValue = cleanValue as? AnyHashable {
+      hasher.combine(hashableValue)
+    } else {
+      hasher.combine(String(describing: cleanValue))
+    }
+  } else {
+    hasher.combine(0)
+  }
+}
+
+
+/// Generated class from Pigeon that represents data sent in messages.
+struct OcrResult: Hashable {
+  var lines: [OcrLine]
+
+
+  // swift-format-ignore: AlwaysUseLowerCamelCase
+  static func fromList(_ pigeonVar_list: [Any?]) -> OcrResult? {
+    let lines = pigeonVar_list[0] as! [OcrLine]
+
+    return OcrResult(
+      lines: lines
+    )
+  }
+  func toList() -> [Any?] {
+    return [
+      lines
+    ]
+  }
+  static func == (lhs: OcrResult, rhs: OcrResult) -> Bool {
+    if Swift.type(of: lhs) != Swift.type(of: rhs) {
+      return false
+    }
+    return deepEqualsOcrApi(lhs.lines, rhs.lines)
+  }
+
+  func hash(into hasher: inout Hasher) {
+    hasher.combine("OcrResult")
+    deepHashOcrApi(value: lines, hasher: &hasher)
+  }
+}
+
+/// Generated class from Pigeon that represents data sent in messages.
+struct OcrLine: Hashable {
+  var text: String
+  /// 0..1 (not money).
+  var confidence: Double
+  /// [x, y, width, height], normalized, top-left origin.
+  var box: [Double]
+
+
+  // swift-format-ignore: AlwaysUseLowerCamelCase
+  static func fromList(_ pigeonVar_list: [Any?]) -> OcrLine? {
+    let text = pigeonVar_list[0] as! String
+    let confidence = pigeonVar_list[1] as! Double
+    let box = pigeonVar_list[2] as! [Double]
+
+    return OcrLine(
+      text: text,
+      confidence: confidence,
+      box: box
+    )
+  }
+  func toList() -> [Any?] {
+    return [
+      text,
+      confidence,
+      box,
+    ]
+  }
+  static func == (lhs: OcrLine, rhs: OcrLine) -> Bool {
+    if Swift.type(of: lhs) != Swift.type(of: rhs) {
+      return false
+    }
+    return deepEqualsOcrApi(lhs.text, rhs.text) && deepEqualsOcrApi(lhs.confidence, rhs.confidence) && deepEqualsOcrApi(lhs.box, rhs.box)
+  }
+
+  func hash(into hasher: inout Hasher) {
+    hasher.combine("OcrLine")
+    deepHashOcrApi(value: text, hasher: &hasher)
+    deepHashOcrApi(value: confidence, hasher: &hasher)
+    deepHashOcrApi(value: box, hasher: &hasher)
+  }
+}
 
 private class OcrApiPigeonCodecReader: FlutterStandardReader {
+  override func readValue(ofType type: UInt8) -> Any? {
+    switch type {
+    case 129:
+      return OcrResult.fromList(self.readValue() as! [Any?])
+    case 130:
+      return OcrLine.fromList(self.readValue() as! [Any?])
+    default:
+      return super.readValue(ofType: type)
+    }
+  }
 }
 
 private class OcrApiPigeonCodecWriter: FlutterStandardWriter {
+  override func writeValue(_ value: Any) {
+    if let value = value as? OcrResult {
+      super.writeByte(129)
+      super.writeValue(value.toList())
+    } else if let value = value as? OcrLine {
+      super.writeByte(130)
+      super.writeValue(value.toList())
+    } else {
+      super.writeValue(value)
+    }
+  }
 }
 
 private class OcrApiPigeonCodecReaderWriter: FlutterStandardReaderWriter {
@@ -85,8 +289,15 @@ class OcrApiPigeonCodec: FlutterStandardMessageCodec, @unchecked Sendable {
   static let shared = OcrApiPigeonCodec(readerWriter: OcrApiPigeonCodecReaderWriter())
 }
 
+
 /// Generated protocol from Pigeon that represents a handler of messages from Flutter.
 protocol OcrHostApi {
+  /// [languages] are ISO 639-1 codes, e.g. ['ar', 'en']. A language the engine
+  /// does not support at runtime is dropped (Arabic is used only when
+  /// supported); when none is left the host uses Latin-only recognition.
+  func recognize(encryptedImagePath: String, languages: [String], completion: @escaping (Result<OcrResult, Error>) -> Void)
+  /// ISO 639-1 codes the engine can recognize on this device, at runtime.
+  func supportedLanguages() throws -> [String]
 }
 
 /// Generated setup class from Pigeon to handle messages through the `binaryMessenger`.
@@ -95,5 +306,47 @@ class OcrHostApiSetup {
   /// Sets up an instance of `OcrHostApi` to handle messages through the `binaryMessenger`.
   static func setUp(binaryMessenger: FlutterBinaryMessenger, api: OcrHostApi?, messageChannelSuffix: String = "") {
     let channelSuffix = messageChannelSuffix.count > 0 ? ".\(messageChannelSuffix)" : ""
+    #if os(iOS)
+      let taskQueue = binaryMessenger.makeBackgroundTaskQueue?()
+    #else
+      let taskQueue: FlutterTaskQueue? = nil
+    #endif
+    /// [languages] are ISO 639-1 codes, e.g. ['ar', 'en']. A language the engine
+    /// does not support at runtime is dropped (Arabic is used only when
+    /// supported); when none is left the host uses Latin-only recognition.
+    let recognizeChannel = taskQueue == nil
+      ? FlutterBasicMessageChannel(name: "dev.flutter.pigeon.zaghlol.OcrHostApi.recognize\(channelSuffix)", binaryMessenger: binaryMessenger, codec: codec)
+      : FlutterBasicMessageChannel(name: "dev.flutter.pigeon.zaghlol.OcrHostApi.recognize\(channelSuffix)", binaryMessenger: binaryMessenger, codec: codec, taskQueue: taskQueue)
+    if let api = api {
+      recognizeChannel.setMessageHandler { message, reply in
+        let args = message as! [Any?]
+        let encryptedImagePathArg = args[0] as! String
+        let languagesArg = args[1] as! [String]
+        api.recognize(encryptedImagePath: encryptedImagePathArg, languages: languagesArg) { result in
+          switch result {
+          case .success(let res):
+            reply(wrapResult(res))
+          case .failure(let error):
+            reply(wrapError(error))
+          }
+        }
+      }
+    } else {
+      recognizeChannel.setMessageHandler(nil)
+    }
+    /// ISO 639-1 codes the engine can recognize on this device, at runtime.
+    let supportedLanguagesChannel = FlutterBasicMessageChannel(name: "dev.flutter.pigeon.zaghlol.OcrHostApi.supportedLanguages\(channelSuffix)", binaryMessenger: binaryMessenger, codec: codec)
+    if let api = api {
+      supportedLanguagesChannel.setMessageHandler { _, reply in
+        do {
+          let result = try api.supportedLanguages()
+          reply(wrapResult(result))
+        } catch {
+          reply(wrapError(error))
+        }
+      }
+    } else {
+      supportedLanguagesChannel.setMessageHandler(nil)
+    }
   }
 }

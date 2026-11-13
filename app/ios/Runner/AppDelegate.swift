@@ -30,5 +30,7 @@ import UIKit
     SeatKeyRegistration.register(with: engineBridge.pluginRegistry)
     // T-151: iCloud backup host.
     ICloudBackupRegistration.register(with: engineBridge.pluginRegistry)
+    // T-160: on-device OCR (Vision).
+    OcrRegistration.register(with: engineBridge.pluginRegistry)
   }
 }
