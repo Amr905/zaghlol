@@ -142,14 +142,14 @@ Every task file has: ID, description, technical details, dependencies, affected 
 | [T-087](tasks/T-087.md) | Generate ARB files from copy deck (parts 2–3) | US-02-2 | Low | Haiku | boilerplate-engineer | T-029, T-027, T-028 | C | 9 | TODO |
 | [T-088](tasks/T-088.md) | Produce zaghlol.riv from the vector rig (illustrator) | US-10-3 | Medium | — (human) | external | — | C | 1 | TODO |
 | [T-089](tasks/T-089.md) | Self-transfer pairing, FX conversions and card settlements | US-08-1 | High | Sonnet | flutter-core-engineer | T-046, T-050 | A | 8 | DONE |
-| [T-090](tasks/T-090.md) | Refund matching and offset links | US-08-2 | High | Sonnet | flutter-core-engineer | T-089 | A | 9 | TODO |
+| [T-090](tasks/T-090.md) | Refund matching and offset links | US-08-2 | High | Sonnet | flutter-core-engineer | T-089 | A | 9 | DONE |
 | [T-091](tasks/T-091.md) | Splits and reimbursements with allocation and unassign | US-08-2 | High | Sonnet | flutter-core-engineer | T-090 | A | 10 | TODO |
 | [T-092](tasks/T-092.md) | Reimbursement and cross-currency pair suggestions | US-08-2 | Medium | Sonnet | flutter-core-engineer | T-091, T-049 | A | 11 | TODO |
 | [T-093](tasks/T-093.md) | Split/reimbursement sheet S-15 and link-transfer sheet S-16 | US-08-2 | Medium | Sonnet | flutter-ui-engineer | T-091, T-089, T-080 | G | 11 | TODO |
 | [T-094](tasks/T-094.md) | Local notifications service (types, quiet hours, redaction) | US-10-4 | Medium | Sonnet | flutter-core-engineer | T-020 | A | 7 | DONE |
 | [T-095](tasks/T-095.md) | Budgets per category and currency with threshold alerts | US-09-1 | Medium | Sonnet | flutter-core-engineer | T-051, T-094 | A | 8 | DONE |
-| [T-096](tasks/T-096.md) | Subscriptions detection, installments, gameya, card dues and reminders | US-09-2 | High | Sonnet | flutter-core-engineer | T-050, T-094 | A | 8 | TODO |
-| [T-097](tasks/T-097.md) | Contextual setup suggestions (payday, budgets, backup) | US-10-1 | Medium | Sonnet | flutter-core-engineer | T-051, T-049 | A | 9 | TODO |
+| [T-096](tasks/T-096.md) | Subscriptions detection, installments, gameya, card dues and reminders | US-09-2 | High | Sonnet | flutter-core-engineer | T-050, T-094 | A | 8 | DONE |
+| [T-097](tasks/T-097.md) | Contextual setup suggestions (payday, budgets, backup) | US-10-1 | Medium | Sonnet | flutter-core-engineer | T-051, T-049 | A | 9 | DONE |
 | [T-098](tasks/T-098.md) | Mascot trigger policy (shocked, detective, proud, tour guide) | US-10-3 | Medium | Sonnet | flutter-core-engineer | T-051, T-089, T-095 | A | 9 | TODO |
 | [T-099](tasks/T-099.md) | Wire motion-only mascot moments to UI events | US-10-3 | Medium | Sonnet | flutter-ui-engineer | T-053, T-088 | G | 4 | TODO |
 | [T-100](tasks/T-100.md) | Duplicate-charge and weekly-summary notifications | US-10-4 | Medium | Sonnet | flutter-core-engineer | T-094, T-046, T-051 | A | 8 | TODO |
@@ -204,7 +204,7 @@ Every task file has: ID, description, technical details, dependencies, affected 
 | [T-139](tasks/T-139.md) | Retention purger and log privacy settings | US-13-1 | Medium | Sonnet | backend-engineer | T-122, T-138 | B | 3 | DONE |
 | [T-140](tasks/T-140.md) | Infrastructure as code and deployment pipeline (staging, prod) | US-13-1 | High* | Opus | backend-engineer | T-138 | B | 3 | BLOCKED |
 | [T-141](tasks/T-141.md) | App BackendClient: generated DTOs, ES256 verification, lazy install registration | US-13-1 | High* | Opus | flutter-core-engineer | T-006, T-019 | A | 6 | DONE |
-| [T-142](tasks/T-142.md) | Merchant contribution opt-in and outbox with on-device filters | US-07-2 | High* | Opus | flutter-core-engineer | T-075, T-019 | A | 9 | TODO |
+| [T-142](tasks/T-142.md) | Merchant contribution opt-in and outbox with on-device filters | US-07-2 | High* | Opus | flutter-core-engineer | T-075, T-019 | A | 9 | DONE |
 | [T-143](tasks/T-143.md) | Daily sync orchestrator: throttle, back-off, atomic apply, re-categorize | US-13-1 | High | Opus | flutter-core-engineer | T-141, T-075, T-142, T-112, T-025, T-144 | A | 10 | TODO |
 | [T-144](tasks/T-144.md) | Entitlement token verification, trusted time, offline cache and grace | US-14-1 | High* | Opus | flutter-core-engineer | T-119, T-141, T-180 | A | 8 | DONE |
 | [T-145](tasks/T-145.md) | In-app purchase flow, backend verify, background retry and restore | US-14-1 | High* | Opus | flutter-core-engineer | T-144, T-141, T-178, T-179, T-183 | A | 9 | TODO |
@@ -226,7 +226,7 @@ Every task file has: ID, description, technical details, dependencies, affected 
 |---|---|---|---|---|---|---|---|---|---|
 | [T-148](tasks/T-148.md) | Backup file format: Argon2id-wrapped key and chunked AES-256-GCM | US-16-1 | High* | Opus | flutter-core-engineer | T-015 | A | 4 | DONE |
 | [T-149](tasks/T-149.md) | Backup snapshot and restore swap with schema checks | US-16-1 | High* | Opus | flutter-core-engineer | T-148, T-017, T-018, T-019, T-020 | A | 7 | DONE |
-| [T-150](tasks/T-150.md) | Google Drive appDataFolder backend | US-16-1 | High* | Opus | flutter-core-engineer | T-149 | A | 8 | TODO |
+| [T-150](tasks/T-150.md) | Google Drive appDataFolder backend | US-16-1 | High* | Opus | flutter-core-engineer | T-149 | A | 8 | DONE |
 | [T-151](tasks/T-151.md) | iCloud backup host (native) and Dart adapter | US-16-1 | High* | Opus | native-platform-engineer | T-149, T-004 | E | 8 | TODO |
 | [T-152](tasks/T-152.md) | Backup schedules, slots and reminders (Free 1 slot, Gold 5 versions) | US-16-1 | High | Sonnet | flutter-core-engineer | T-150, T-151, T-119, T-094 | A | 9 | TODO |
 | [T-153](tasks/T-153.md) | Backup & restore screens S-66 and S-04 | US-16-1 | Medium | Sonnet | flutter-ui-engineer | T-152, T-087 | G | 10 | TODO |
