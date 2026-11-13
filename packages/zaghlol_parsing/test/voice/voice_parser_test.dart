@@ -206,6 +206,35 @@ void main() {
       expect(items.first.amount, isNull);
     });
 
+    test('T109-1: fraction before million scales the million', () {
+      expect(minor('دفعت نص مليون جنيه عربية'), 50000000);
+      expect(minor('اشتريت ربع مليون شقة'), 25000000);
+      expect(minor('دفعت تلت مليون جنيه'), 33333333);
+      final items = parse('دفعت نص مليون جنيه عربية');
+      expect(items, hasLength(1));
+      expect(items.single.text, 'عربية');
+      expect(minor('دفعت نص الف قهوة'), 50000);
+    });
+
+    test('T109-2: over-long digit amounts are invalid, not 1 pound', () {
+      for (final s in [
+        'دفعت 1000000000000 جنيه قهوة',
+        'دفعت 12345678901234567890 جنيه',
+        'دفعت 12.34567 جنيه قهوة',
+        'دفعت 12.34567 قهوة',
+        'دفعت ${'9' * 13} قهوة',
+      ]) {
+        final items = parse(s);
+        expect(items, hasLength(1), reason: s);
+        expect(items.first.amount, isNull, reason: s);
+        expect(
+          items.first.issues,
+          contains(VoiceIssue.invalidAmount),
+          reason: s,
+        );
+      }
+    });
+
     test('the default currency applies only when none is spoken', () {
       final usd = Currency.of('USD');
       final a = parse('دفعت 50 قهوة', def: usd).single;

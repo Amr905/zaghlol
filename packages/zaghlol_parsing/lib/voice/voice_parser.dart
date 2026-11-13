@@ -81,8 +81,9 @@ List<_Tok> _tokenize(String input) {
     final raw = m.group(0)!;
     final first = raw.codeUnitAt(0);
     if (first >= 0x30 && first <= 0x39) {
-      final q = _digitsToQ(raw);
-      if (q != null) out.add(_Tok(raw, raw, null, q));
+      // Over-long digit runs stay an amount token (zero, so the item is
+      // flagged `invalidAmount`) instead of leaking the currency word as 1.
+      out.add(_Tok(raw, raw, null, _digitsToQ(raw) ?? const _Q(0)));
       continue;
     }
     _addWord(out, raw);
@@ -392,6 +393,11 @@ _Span? _spanAt(List<_Tok> t, int i) {
       fraction = true;
     } else if (nx.is_(LexKind.hundred) || nx.is_(LexKind.thousand)) {
       value = f.times(nx.lex!.value);
+      end = j + 2;
+      words = true;
+      fraction = true;
+    } else if (nx.is_(LexKind.million)) {
+      value = f.times(1000000);
       end = j + 2;
       words = true;
       fraction = true;
