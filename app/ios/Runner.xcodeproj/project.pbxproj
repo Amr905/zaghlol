@@ -26,6 +26,10 @@
 		5A1480000000000000000C01 /* TextNormalizationApi.g.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5A1480000000000000000C02 /* TextNormalizationApi.g.swift */; };
 		5A1480000000000000000C03 /* TextNormalizationHost.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5A1480000000000000000C04 /* TextNormalizationHost.swift */; };
 		5A1480000000000000000C05 /* TextNormalizationTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5A1480000000000000000C06 /* TextNormalizationTests.swift */; };
+		5A1800000000000000000D01 /* ClockApi.g.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5A1800000000000000000D02 /* ClockApi.g.swift */; };
+		5A1800000000000000000D03 /* TrustedClockHost.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5A1800000000000000000D04 /* TrustedClockHost.swift */; };
+		5A1800000000000000000D06 /* TrustedClockTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5A1800000000000000000D07 /* TrustedClockTests.swift */; };
+		5A1800000000000000000D08 /* PrivacyInfo.xcprivacy in Resources */ = {isa = PBXBuildFile; fileRef = 5A1800000000000000000D09 /* PrivacyInfo.xcprivacy */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -79,6 +83,10 @@
 		5A1480000000000000000C02 /* TextNormalizationApi.g.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TextNormalizationApi.g.swift; sourceTree = "<group>"; };
 		5A1480000000000000000C04 /* TextNormalizationHost.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TextNormalizationHost.swift; sourceTree = "<group>"; };
 		5A1480000000000000000C06 /* TextNormalizationTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TextNormalizationTests.swift; sourceTree = "<group>"; };
+		5A1800000000000000000D02 /* ClockApi.g.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ClockApi.g.swift; sourceTree = "<group>"; };
+		5A1800000000000000000D04 /* TrustedClockHost.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TrustedClockHost.swift; sourceTree = "<group>"; };
+		5A1800000000000000000D07 /* TrustedClockTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TrustedClockTests.swift; sourceTree = "<group>"; };
+		5A1800000000000000000D09 /* PrivacyInfo.xcprivacy */ = {isa = PBXFileReference; lastKnownFileType = text.xml; path = PrivacyInfo.xcprivacy; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -100,6 +108,7 @@
 				5A1650000000000000000A05 /* BackupExclusionTests.swift */,
 				5A0150000000000000000B0A /* SecretStoreTests.swift */,
 				5A1480000000000000000C06 /* TextNormalizationTests.swift */,
+				5A1800000000000000000D07 /* TrustedClockTests.swift */,
 			);
 			path = RunnerTests;
 			sourceTree = "<group>";
@@ -157,6 +166,8 @@
 				7884E8672EC3CC0400C636F2 /* SceneDelegate.swift */,
 				74858FAD1ED2DC5600515810 /* Runner-Bridging-Header.h */,
 				5A0150000000000000000B0B /* Platform */,
+				5A1800000000000000000D05 /* Clock */,
+				5A1800000000000000000D09 /* PrivacyInfo.xcprivacy */,
 			);
 			path = Runner;
 			sourceTree = "<group>";
@@ -168,6 +179,7 @@
 				5A0150000000000000000B0C /* Keys */,
 				5A1480000000000000000C02 /* TextNormalizationApi.g.swift */,
 				5A1480000000000000000C07 /* Text */,
+				5A1800000000000000000D02 /* ClockApi.g.swift */,
 			);
 			path = Platform;
 			sourceTree = "<group>";
@@ -188,6 +200,14 @@
 				5A1480000000000000000C04 /* TextNormalizationHost.swift */,
 			);
 			path = Text;
+			sourceTree = "<group>";
+		};
+		5A1800000000000000000D05 /* Clock */ = {
+			isa = PBXGroup;
+			children = (
+				5A1800000000000000000D04 /* TrustedClockHost.swift */,
+			);
+			path = Clock;
 			sourceTree = "<group>";
 		};
 /* End PBXGroup section */
@@ -291,6 +311,7 @@
 				3B3967161E833CAA004F5970 /* AppFrameworkInfo.plist in Resources */,
 				97C146FE1CF9000F007C117D /* Assets.xcassets in Resources */,
 				97C146FC1CF9000F007C117D /* Main.storyboard in Resources */,
+				5A1800000000000000000D08 /* PrivacyInfo.xcprivacy in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -339,6 +360,7 @@
 				5A1650000000000000000A04 /* BackupExclusionTests.swift in Sources */,
 				5A0150000000000000000B09 /* SecretStoreTests.swift in Sources */,
 				5A1480000000000000000C05 /* TextNormalizationTests.swift in Sources */,
+				5A1800000000000000000D06 /* TrustedClockTests.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -356,6 +378,8 @@
 				5A0150000000000000000B07 /* SecretStoreHost.swift in Sources */,
 				5A1480000000000000000C01 /* TextNormalizationApi.g.swift in Sources */,
 				5A1480000000000000000C03 /* TextNormalizationHost.swift in Sources */,
+				5A1800000000000000000D01 /* ClockApi.g.swift in Sources */,
+				5A1800000000000000000D03 /* TrustedClockHost.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

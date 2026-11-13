@@ -19,7 +19,29 @@ import 'package:pigeon/pigeon.dart';
   ),
 )
 @HostApi()
-abstract class TrustedClockHostApi {}
+abstract class TrustedClockHostApi {
+  /// One consistent sample. Never sent off the device (Apple required-reason
+  /// API 35F9.1: elapsed time inside the app).
+  ClockSample sample();
+}
+
+class ClockSample {
+  ClockSample({
+    required this.wallMs,
+    required this.monotonicMs,
+    required this.bootCount,
+  });
+
+  /// Epoch ms (System.currentTimeMillis / Date().timeIntervalSince1970).
+  int wallMs;
+
+  /// Android SystemClock.elapsedRealtime(); iOS
+  /// clock_gettime_nsec_np(CLOCK_MONOTONIC_RAW) / 1e6 (counts sleep).
+  int monotonicMs;
+
+  /// Android Settings.Global.BOOT_COUNT; iOS null (no public boot identifier).
+  int? bootCount;
+}
 
 @HostApi()
 abstract class SeatKeyHostApi {}
