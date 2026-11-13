@@ -8,6 +8,7 @@ import 'package:drift/drift.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:zaghlol_domain/zaghlol_domain.dart';
 
+import '../../../core/backend/outbound_text_filter.dart';
 import '../../../core/db/app_database.dart';
 import '../../../core/db/app_database_providers.dart';
 import '../../../core/db/daos/outbox_dao.dart';
@@ -223,8 +224,7 @@ class ReviewRepository {
   static bool _validBankName(String n) =>
       n.length >= 2 &&
       n.length <= 64 &&
-      !n.contains('@') &&
-      !RegExp(r'[0-9٠-٩۰-۹０-９](\D{0,3}[0-9٠-٩۰-۹０-９]){5}').hasMatch(n);
+      !hasPersonalDataMarks(n, minDigitRun: 6);
 
   Future<ReviewOutcome> _act(
     String itemId,
