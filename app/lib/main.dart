@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
@@ -8,6 +10,7 @@ import 'core/l10n/generated/app_localizations.dart';
 import 'core/l10n/locale_providers.dart';
 import 'core/routing/app_router.dart';
 import 'core/theme/app_theme.dart';
+import 'features/budget/application/cycle_app_wiring.dart';
 import 'features/capture/presentation/capture_lifecycle.dart';
 import 'ingestion/ingestion_main.dart';
 
@@ -55,11 +58,39 @@ class ZaghlolApp extends ConsumerWidget {
 }
 
 /// Feeds the language setting into [ZaghlolApp]: a change flips direction
-/// live, no restart.
-class _LocalizedApp extends ConsumerWidget {
+/// live, no restart. It also keeps the cycle cache wiring alive and tells it
+/// when the app returns to the foreground (T-052 / FU-110).
+class _LocalizedApp extends ConsumerStatefulWidget {
   const _LocalizedApp();
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) =>
-      ZaghlolApp(locale: ref.watch(appLocaleProvider));
+  ConsumerState<_LocalizedApp> createState() => _LocalizedAppState();
+}
+
+class _LocalizedAppState extends ConsumerState<_LocalizedApp>
+    with WidgetsBindingObserver {
+  @override
+  void initState() {
+    super.initState();
+    WidgetsBinding.instance.addObserver(this);
+  }
+
+  @override
+  void dispose() {
+    WidgetsBinding.instance.removeObserver(this);
+    super.dispose();
+  }
+
+  @override
+  void didChangeAppLifecycleState(AppLifecycleState state) {
+    if (state == AppLifecycleState.resumed) {
+      unawaited(ref.read(cycleResumeHandlerProvider).onResume());
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    ref.watch(cycleAppWiringProvider);
+    return ZaghlolApp(locale: ref.watch(appLocaleProvider));
+  }
 }
