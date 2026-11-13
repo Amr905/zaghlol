@@ -56,3 +56,13 @@ Good: insert-only (no update or delete); the whole import is one write transacti
 | 155-2 | minor | `drift_csv_import_store.dart:62-77` | `existingAt` reads with `limit: 500` and compares `merchantRaw` to the sanitised import text; a stored merchant with trailing space or control characters would not match and would import again. Same-instant rows above 500 are not realistic. | Compare on the same normalised text. Follow-up. |
 | 155-3 | minor | `import_csv.dart:169-222` | A database constraint failure during insert surfaces as the raw store exception rather than an `ImportCsvException`, aborting the whole file (nothing partial is kept, which is safe). | Map to a code. Follow-up. |
 | 155-4 | minor | `import_csv.dart:321-323` | A real merchant/note starting with `'=` etc. loses its apostrophe (already noted by the builder). | Accept; documented. |
+
+## Lead delta check (5b5f90d), batch-16a #1 and batch-16b 155-1
+
+- **T-079:** `BulkActions.undo` now calls `TransferPairing.onPersisted` and `RefundMatching.onPersisted` for every restored id (about 14 lines). The test "Undo of a bulk delete re-pairs the legs; spend unchanged" fails without the fix.
+- **T-155:** `ImportCsvUseCase` takes an `onImported` hook, run for each inserted id after the commit; the import stays insert-only (about 22 lines). The test "import re-pairs transfers: spend and income match the original" fails without the fix.
+- **Residuals:**
+  - Nothing in `lib` builds the import use case yet, so the composition root must pass `onImported`.
+  - Imported refunds link only after their rows get a `merchant_norm` from categorization (FU-154).
+
+Verdicts: T-079 and T-155 **APPROVED**.

@@ -71,7 +71,7 @@ Every task file has: ID, description, technical details, dependencies, affected 
 
 | ID | Title | Story | Cx | Model | Agent | Depends on | Lane | Wave | Status |
 |---|---|---|---|---|---|---|---|---|---|
-| [T-029](tasks/T-029.md) | Generate ARB files from copy deck (part 1) | US-02-2 | Low | Haiku | boilerplate-engineer | T-023, T-026 | C | 8 | TODO |
+| [T-029](tasks/T-029.md) | Generate ARB files from copy deck (part 1) | US-02-2 | Low | Haiku | boilerplate-engineer | T-023, T-026 | C | 8 | DONE |
 | [T-030](tasks/T-030.md) | Catalog seed pipeline and 14 system categories | US-07-1 | Medium | Sonnet | flutter-core-engineer | T-018 | A | 6 | DONE |
 | [T-031](tasks/T-031.md) | Convert real SMS/notification/statement samples into synthetic fixtures (OQ-04/18) | US-05-1 | Medium | Sonnet | parsing-engine-engineer | T-013 | F | 4 | BLOCKED |
 | [T-032](tasks/T-032.md) | Template registry format, loader and registry_lint CLI | US-05-1 | High | Sonnet | parsing-engine-engineer | T-013 | F | 4 | DONE |
@@ -95,8 +95,8 @@ Every task file has: ID, description, technical details, dependencies, affected 
 | [T-050](tasks/T-050.md) | Transactions repository: query, search, CRUD, soft delete | US-06-3 | Medium | Sonnet | flutter-core-engineer | T-017 | A | 6 | DONE |
 | [T-051](tasks/T-051.md) | Payday cycle engine, safe-to-spend, burn line and cycle summaries | US-09-1 | High | Sonnet | flutter-core-engineer | T-012, T-018, T-050 | A | 7 | DONE |
 | [T-052](tasks/T-052.md) | Home read model and persistent card filter | US-10-2 | Medium | Sonnet | flutter-core-engineer | T-051, T-050, T-045, T-049 | A | 9 | DONE |
-| [T-053](tasks/T-053.md) | ZaghlolAvatar widget with static fallback and reduce-motion | US-10-3 | Medium | Sonnet | flutter-ui-engineer | T-022 | G | 3 | TODO |
-| [T-054](tasks/T-054.md) | Home screen S-10 (iOS and Android variants) | US-10-2 | Medium | Sonnet | flutter-ui-engineer | T-052, T-024, T-029, T-053 | G | 10 | TODO |
+| [T-053](tasks/T-053.md) | ZaghlolAvatar widget with static fallback and reduce-motion | US-10-3 | Medium | Sonnet | flutter-ui-engineer | T-022 | G | 3 | DONE |
+| [T-054](tasks/T-054.md) | Home screen S-10 (iOS and Android variants) | US-10-2 | Medium | Sonnet | flutter-ui-engineer | T-052, T-024, T-029, T-053 | G | 10 | DONE |
 | [T-055](tasks/T-055.md) | Welcome screen S-01 with language toggle and restore entry | US-10-1 | Medium | Sonnet | flutter-ui-engineer | T-024, T-029, T-053 | G | 9 | TODO |
 | [T-056](tasks/T-056.md) | Android capture setup S-02 with live scan and degraded variant | US-10-1 | Medium | Sonnet | flutter-ui-engineer | T-055, T-044, T-048 | G | 10 | TODO |
 | [T-057](tasks/T-057.md) | Scan results screen S-06 «دي كروتك؟» | US-10-1 | Medium | Sonnet | flutter-ui-engineer | T-056, T-045 | G | 11 | TODO |
@@ -126,11 +126,11 @@ Every task file has: ID, description, technical details, dependencies, affected 
 | [T-076](tasks/T-076.md) | Re-parse job after registry version bump | US-06-2 | High | Sonnet | flutter-core-engineer | T-046, T-032 | A | 8 | DONE |
 | [T-077](tasks/T-077.md) | Bulk edit and undo use case | US-06-3 | High | Sonnet | flutter-core-engineer | T-050, T-074 | A | 8 | DONE |
 | [T-078](tasks/T-078.md) | Ignore rules domain: per card/channel, before-seen, keep/delete, re-scan | US-06-4 | High | Sonnet | flutter-core-engineer | T-047, T-050 | A | 9 | DONE |
-| [T-079](tasks/T-079.md) | Transactions list S-11 with filters, search and selection mode | US-06-3 | Medium | Sonnet | flutter-ui-engineer | T-050, T-077, T-024, T-029 | G | 9 | TODO |
+| [T-079](tasks/T-079.md) | Transactions list S-11 with filters, search and selection mode | US-06-3 | Medium | Sonnet | flutter-ui-engineer | T-050, T-077, T-024, T-029 | G | 9 | DONE |
 | [T-080](tasks/T-080.md) | Transaction detail S-12 and add/edit sheet S-13 | US-06-3 | Medium | Sonnet | flutter-ui-engineer | T-050, T-075, T-045, T-029 | G | 9 | TODO |
 | [T-081](tasks/T-081.md) | Review queue S-14 | US-06-2 | Medium | Sonnet | flutter-ui-engineer | T-049, T-074, T-029 | G | 9 | TODO |
 | [T-082](tasks/T-082.md) | Quick add sheet S-30 | US-06-3 | Low | Haiku | boilerplate-engineer | T-024, T-029 | G | 9 | TODO |
-| [T-083](tasks/T-083.md) | Money tab S-40 (accounts per currency) | US-06-5 | Medium | Sonnet | flutter-ui-engineer | T-045, T-052, T-029 | G | 10 | TODO |
+| [T-083](tasks/T-083.md) | Money tab S-40 (accounts per currency) | US-06-5 | Medium | Sonnet | flutter-ui-engineer | T-045, T-052, T-029 | G | 10 | DONE |
 | [T-084](tasks/T-084.md) | Card detail S-41, compare cards S-42 | US-06-5 | Medium | Sonnet | flutter-ui-engineer | T-083, T-051 | G | 11 | TODO |
 | [T-085](tasks/T-085.md) | Add/edit card S-43 (type → bank → details), merge and hide | US-06-5 | Medium | Sonnet | flutter-ui-engineer | T-083, T-078 | G | 11 | TODO |
 | [T-086](tasks/T-086.md) | Capture settings S-61 and card capture sheet S-62 | US-06-4 | Medium | Sonnet | flutter-ui-engineer | T-078, T-029 | G | 10 | TODO |
@@ -139,11 +139,11 @@ Every task file has: ID, description, technical details, dependencies, affected 
 
 | ID | Title | Story | Cx | Model | Agent | Depends on | Lane | Wave | Status |
 |---|---|---|---|---|---|---|---|---|---|
-| [T-087](tasks/T-087.md) | Generate ARB files from copy deck (parts 2–3) | US-02-2 | Low | Haiku | boilerplate-engineer | T-029, T-027, T-028 | C | 9 | TODO |
+| [T-087](tasks/T-087.md) | Generate ARB files from copy deck (parts 2–3) | US-02-2 | Low | Haiku | boilerplate-engineer | T-029, T-027, T-028 | C | 9 | DONE |
 | [T-088](tasks/T-088.md) | Produce zaghlol.riv from the vector rig (illustrator) | US-10-3 | Medium | — (human) | external | — | C | 1 | TODO |
 | [T-089](tasks/T-089.md) | Self-transfer pairing, FX conversions and card settlements | US-08-1 | High | Sonnet | flutter-core-engineer | T-046, T-050 | A | 8 | DONE |
 | [T-090](tasks/T-090.md) | Refund matching and offset links | US-08-2 | High | Sonnet | flutter-core-engineer | T-089 | A | 9 | DONE |
-| [T-091](tasks/T-091.md) | Splits and reimbursements with allocation and unassign | US-08-2 | High | Sonnet | flutter-core-engineer | T-090 | A | 10 | TODO |
+| [T-091](tasks/T-091.md) | Splits and reimbursements with allocation and unassign | US-08-2 | High | Sonnet | flutter-core-engineer | T-090 | A | 10 | DONE |
 | [T-092](tasks/T-092.md) | Reimbursement and cross-currency pair suggestions | US-08-2 | Medium | Sonnet | flutter-core-engineer | T-091, T-049 | A | 11 | TODO |
 | [T-093](tasks/T-093.md) | Split/reimbursement sheet S-15 and link-transfer sheet S-16 | US-08-2 | Medium | Sonnet | flutter-ui-engineer | T-091, T-089, T-080 | G | 11 | TODO |
 | [T-094](tasks/T-094.md) | Local notifications service (types, quiet hours, redaction) | US-10-4 | Medium | Sonnet | flutter-core-engineer | T-020 | A | 7 | DONE |
@@ -162,7 +162,7 @@ Every task file has: ID, description, technical details, dependencies, affected 
 
 | ID | Title | Story | Cx | Model | Agent | Depends on | Lane | Wave | Status |
 |---|---|---|---|---|---|---|---|---|---|
-| [T-105](tasks/T-105.md) | Chart query layer for all 12 charts | US-11-1 | High | Sonnet | flutter-core-engineer | T-051, T-096, T-091 | A | 11 | TODO |
+| [T-105](tasks/T-105.md) | Chart query layer for all 12 charts | US-11-1 | High | Sonnet | flutter-core-engineer | T-051, T-096, T-091 | A | 11 | DONE |
 | [T-106](tasks/T-106.md) | Explanation template engine (basic vs deep coaching) | US-11-1 | High | Sonnet | flutter-core-engineer | T-105, T-027 | A | 12 | TODO |
 | [T-107](tasks/T-107.md) | Charts S-20: four Free charts and Gold-locked previews | US-11-1 | Medium | Sonnet | flutter-ui-engineer | T-105, T-101 | G | 12 | TODO |
 | [T-108](tasks/T-108.md) | Chart detail with explanation S-21 | US-11-1 | Medium | Sonnet | flutter-ui-engineer | T-106, T-107 | G | 13 | TODO |
@@ -170,7 +170,7 @@ Every task file has: ID, description, technical details, dependencies, affected 
 | [T-110](tasks/T-110.md) | Ask Zaghlol intent engine (grammar, slots, query plans, answers, roast) | US-11-2 | High | Sonnet | parsing-engine-engineer | T-105, T-027 | F | 12 | TODO |
 | [T-111](tasks/T-111.md) | Ask Zaghlol screen S-50 | US-11-2 | Medium | Sonnet | flutter-ui-engineer | T-110 | G | 13 | TODO |
 | [T-112](tasks/T-112.md) | Prices and FX store in app (sync-fed, manual override, stale) | US-12-1 | Medium | Sonnet | flutter-core-engineer | T-019 | A | 6 | DONE |
-| [T-113](tasks/T-113.md) | Assets, liabilities, net worth per unit and snapshots | US-12-1 | High | Sonnet | flutter-core-engineer | T-112, T-045, T-096 | A | 9 | TODO |
+| [T-113](tasks/T-113.md) | Assets, liabilities, net worth per unit and snapshots | US-12-1 | High | Sonnet | flutter-core-engineer | T-112, T-045, T-096 | A | 9 | DONE |
 | [T-114](tasks/T-114.md) | Charts: remaining eight (Gold) | US-11-1 | Medium | Sonnet | flutter-ui-engineer | T-107, T-113 | G | 13 | TODO |
 | [T-115](tasks/T-115.md) | ≈ combined view service (target currency, rate date, exclusions) | US-12-2 | High | Sonnet | flutter-core-engineer | T-012, T-112 | A | 7 | DONE |
 | [T-116](tasks/T-116.md) | Shared per-currency figures and currency switcher component | US-12-2 | Medium | Sonnet | flutter-ui-engineer | T-115, T-054 | G | 11 | TODO |
@@ -231,7 +231,7 @@ Every task file has: ID, description, technical details, dependencies, affected 
 | [T-152](tasks/T-152.md) | Backup schedules, slots and reminders (Free 1 slot, Gold 5 versions) | US-16-1 | High | Sonnet | flutter-core-engineer | T-150, T-151, T-119, T-094 | A | 9 | TODO |
 | [T-153](tasks/T-153.md) | Backup & restore screens S-66 and S-04 | US-16-1 | Medium | Sonnet | flutter-ui-engineer | T-152, T-087 | G | 10 | TODO |
 | [T-154](tasks/T-154.md) | CSV and Excel export with preview for Free | US-17-1 | Medium | Sonnet | flutter-core-engineer | T-050, T-119 | A | 8 | DONE |
-| [T-155](tasks/T-155.md) | Zaghlol CSV import with duplicate detection | US-17-1 | High | Sonnet | flutter-core-engineer | T-046, T-154 | A | 9 | TODO |
+| [T-155](tasks/T-155.md) | Zaghlol CSV import with duplicate detection | US-17-1 | High | Sonnet | flutter-core-engineer | T-046, T-154 | A | 9 | DONE |
 | [T-156](tasks/T-156.md) | Bank PDF statement import (CIB, NBE, QNB, Banque Misr) | US-17-1 | High | Sonnet | parsing-engine-engineer | T-033, T-031 | F | 6 | BLOCKED |
 | [T-157](tasks/T-157.md) | Online-bank statement import (Wise, Revolut, Monzo, bunq, N26) | US-17-1 | High | Sonnet | parsing-engine-engineer | T-155, T-071 | F | 10 | BLOCKED |
 | [T-158](tasks/T-158.md) | Import flow S-67 (source, summary, done) | US-17-1 | Medium | Sonnet | flutter-ui-engineer | T-156, T-157, T-155, T-119 | G | 11 | TODO |
