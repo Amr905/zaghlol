@@ -9,10 +9,12 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../../core/l10n/generated/app_localizations.dart';
 import '../../../../core/theme/z_tokens.dart';
+import '../../../../core/ui/z_button.dart';
 import '../../../../core/ui/z_chip.dart';
 import '../../../budget/presentation/budget_providers_ui.dart';
 import '../../../budget/presentation/budget_view.dart';
 import '../../domain/chart_models.dart';
+import '../chart_detail.dart';
 import 'chart_bodies.dart';
 import 'chart_card.dart';
 import 'chart_format.dart';
@@ -150,6 +152,7 @@ class _CashFlowCard extends ConsumerWidget {
             ChartReady(:final data) => ChartCard(
               title: title,
               contextLine: _context(l, code),
+              trailing: _ExplainButton(chart: ChartId.cashFlow, code: code),
               summary: CashFlowBody.summary(
                 l,
                 (m) => chartMoney(ref, context, m),
@@ -196,6 +199,10 @@ class _DonutCard extends ConsumerWidget {
             ChartReady(:final data) => ChartCard(
               title: title,
               contextLine: _context(l, code),
+              trailing: _ExplainButton(
+                chart: ChartId.categoryDonut,
+                code: code,
+              ),
               summary: DonutBody.summary(
                 l,
                 (m) => chartMoney(ref, context, m),
@@ -235,6 +242,7 @@ class _MerchantsCard extends ConsumerWidget {
             ChartReady(:final data) when data.isNotEmpty => ChartCard(
               title: title,
               contextLine: _context(l, code),
+              trailing: _ExplainButton(chart: ChartId.topMerchants, code: code),
               summary: MerchantsBody.summary(
                 l,
                 (m) => chartMoney(ref, context, m),
@@ -298,5 +306,28 @@ class _BudgetCard extends ConsumerWidget {
             );
           },
         );
+  }
+}
+
+/// The "Explain" entry on a chart card: opens S-21 with the explainer open.
+class _ExplainButton extends StatelessWidget {
+  const _ExplainButton({required this.chart, required this.code});
+  final ChartId chart;
+  final String code;
+
+  @override
+  Widget build(BuildContext context) {
+    final l = AppLocalizations.of(context);
+    return ZButton(
+      label: l.insightsChartsExplain,
+      variant: ZButtonVariant.text,
+      size: ZButtonSize.small,
+      onPressed: () => openChartDetail(
+        context,
+        chart: chart,
+        code: code,
+        openExplainer: true,
+      ),
+    );
   }
 }
