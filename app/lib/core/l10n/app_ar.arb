@@ -9,6 +9,42 @@
   "commonNavMoney": "فلوسي",
   "commonNavZaghlol": "زغلول",
   "commonNavAddA11y": "سجّل بسرعة",
+  "appLockTitle": "زغلول مقفول",
+  "@appLockTitle": {
+    "description": "Title of the app lock screen (S-05)."
+  },
+  "appLockUnlock": "افتح",
+  "@appLockUnlock": {
+    "description": "Button that opens the phone's biometric or passcode prompt."
+  },
+  "appLockReason": "اتأكد إنك إنت عشان تفتح زغلول",
+  "@appLockReason": {
+    "description": "Reason shown inside the OS biometric prompt."
+  },
+  "appLockFailed": "مظبطتش. جرّب تاني.",
+  "@appLockFailed": {
+    "description": "Shown after a failed unlock."
+  },
+  "appLockUnavailable": "فعّل قفل الشاشة (PIN أو نمط أو باسورد) في تليفونك وبعدين جرّب تاني.",
+  "@appLockUnavailable": {
+    "description": "Shown when the phone has no screen lock."
+  },
+  "appLockLockedOut": "حاولت كتير. استنى شوية وجرّب تاني.",
+  "@appLockLockedOut": {
+    "description": "Shown when the OS blocks the prompt after too many wrong tries."
+  },
+  "appLockRootedTitle": "حماية تليفونك أضعف",
+  "@appLockRootedTitle": {
+    "description": "Title of the rooted or jailbroken warning (FR-SEC-07)."
+  },
+  "appLockRootedBody": "التليفون ده شكله معمول له روت أو جيلبريك، فحماية بياناتك عليه أضعف. التطبيق شغال عادي، بس خد بالك.",
+  "@appLockRootedBody": {
+    "description": "Body of the rooted or jailbroken warning. It warns and never blocks."
+  },
+  "appLockRootedOk": "تمام",
+  "@appLockRootedOk": {
+    "description": "Button that closes the rooted warning."
+  },
   "homeQuickAddTitle": "عايز تسجل إيه؟",
   "homeQuickAddSay": "قول",
   "homeQuickAddType": "اكتب",
