@@ -252,5 +252,6 @@ ReimbursementException reimb(String code) => ReimbursementException(code);
 /// Finds a Text whose content, without bidi isolation marks, contains [s].
 Finder textHas(String s) => find.byWidgetPredicate(
   (w) =>
-      w is Text && (w.data ?? '').replaceAll(RegExp('[⁦-⁩]'), '').contains(s),
+      w is Text &&
+      (w.data ?? '').replaceAll(RegExp(r'[\u2066-\u2069]'), '').contains(s),
 );
