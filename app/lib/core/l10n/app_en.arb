@@ -6546,5 +6546,60 @@
   "errorsAccountFailed": "That didn't go through. Try again in a bit.",
   "@errorsAccountFailed": {
     "description": "S · INSTALL_EXISTS and INSTALL_TOKEN_INVALID when a user action was waiting (the app re-registers silently first)"
+  },
+  "accountsOverviewApproxNotIncluded": "Not included in the ≈ total: {currencies}",
+  "@accountsOverviewApproxNotIncluded": {
+    "description": "S · FU-134 note under the ≈ line",
+    "placeholders": {
+      "currencies": {
+        "type": "String"
+      }
+    }
+  },
+  "accountsOverviewApproxLabel": "Approximate",
+  "@accountsOverviewApproxLabel": {
+    "description": "L · visible label for the ≈ line"
+  },
+  "goldSeatTamperedClockBody": "Set your phone's date and time to automatic, then open Zaghlol again.",
+  "@goldSeatTamperedClockBody": {
+    "description": "S · tampered clock persists after a fresh server echo (FU-138)"
+  },
+  "transactionsEditLinksRemoved": "The amount changed, so the money-back and split links on this transaction were removed.",
+  "@transactionsEditLinksRemoved": {
+    "description": "N · EC-40 after an amount edit"
+  },
+  "goldAccountSignedIn": "Signed in",
+  "@goldAccountSignedIn": {
+    "description": "L · account row, no e-mail shown"
+  },
+  "insightsChartsPeakHour": "Your busiest hour is around {time}",
+  "@insightsChartsPeakHour": {
+    "description": "L · chart 5 peak-hour line",
+    "placeholders": {
+      "time": {
+        "type": "String"
+      }
+    }
+  },
+  "homeFeedExcludedFromSpending": "Excluded from spending",
+  "@homeFeedExcludedFromSpending": {
+    "description": "L · muted feed-row label"
+  },
+  "notificationsAlertBackupReminderTitle": "Time for a backup",
+  "@notificationsAlertBackupReminderTitle": {
+    "description": "T · FR-NTF-01 backup reminder"
+  },
+  "notificationsAlertBackupReminderBody": "Back up from Settings to keep your data safe.",
+  "@notificationsAlertBackupReminderBody": {
+    "description": "N · backup reminder"
+  },
+  "transactionsReimbUnassigned": "{count, plural, =1{1 reimbursement was unassigned because the expense got smaller} other{{count} reimbursements were unassigned because the expense got smaller}}",
+  "@transactionsReimbUnassigned": {
+    "description": "N · EC-40 (T-091)",
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
   }
 }

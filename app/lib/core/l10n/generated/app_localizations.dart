@@ -10266,6 +10266,66 @@ abstract class AppLocalizations {
   /// In ar, this message translates to:
   /// **'العملية ماتمتش. جرّب تاني كمان شوية.'**
   String get errorsAccountFailed;
+
+  /// S · FU-134 note under the ≈ line
+  ///
+  /// In ar, this message translates to:
+  /// **'مش محسوبة في التقريبي: {currencies}'**
+  String accountsOverviewApproxNotIncluded(String currencies);
+
+  /// L · visible label for the ≈ line
+  ///
+  /// In ar, this message translates to:
+  /// **'تقريبي'**
+  String get accountsOverviewApproxLabel;
+
+  /// S · tampered clock persists after a fresh server echo (FU-138)
+  ///
+  /// In ar, this message translates to:
+  /// **'ظبّط التاريخ والوقت في موبايلك على تلقائي، وبعدها افتح زغلول تاني.'**
+  String get goldSeatTamperedClockBody;
+
+  /// N · EC-40 after an amount edit
+  ///
+  /// In ar, this message translates to:
+  /// **'المبلغ اتغيّر، فالروابط اتشالت: الفلوس الراجعة والتقسيم المرتبطين بالمعاملة دي اتفكّوا.'**
+  String get transactionsEditLinksRemoved;
+
+  /// L · account row, no e-mail shown
+  ///
+  /// In ar, this message translates to:
+  /// **'مسجّل دخول'**
+  String get goldAccountSignedIn;
+
+  /// L · chart 5 peak-hour line
+  ///
+  /// In ar, this message translates to:
+  /// **'أكتر ساعة بتصرف فيها حوالين {time}'**
+  String insightsChartsPeakHour(String time);
+
+  /// L · muted feed-row label
+  ///
+  /// In ar, this message translates to:
+  /// **'مش محسوبة في المصروفات'**
+  String get homeFeedExcludedFromSpending;
+
+  /// T · FR-NTF-01 backup reminder
+  ///
+  /// In ar, this message translates to:
+  /// **'وقت النسخة الاحتياطية'**
+  String get notificationsAlertBackupReminderTitle;
+
+  /// N · backup reminder
+  ///
+  /// In ar, this message translates to:
+  /// **'خد نسخة احتياطية من الإعدادات عشان بياناتك تفضل في أمان.'**
+  String get notificationsAlertBackupReminderBody;
+
+  /// N · EC-40 (T-091)
+  ///
+  /// In ar, this message translates to:
+  /// **'{count, plural, =1{مبلغ واحد اتفكّ لأن المصروف قلّ} other{{count} مبالغ اتفكّت لأن المصروف قلّ}}'**
+  String transactionsReimbUnassigned(int count);
 }
 
 class _AppLocalizationsDelegate

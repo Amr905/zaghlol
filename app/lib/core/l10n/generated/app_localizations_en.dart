@@ -6963,4 +6963,50 @@ class AppLocalizationsEn extends AppLocalizations {
   @override
   String get errorsAccountFailed =>
       'That didn\'t go through. Try again in a bit.';
+
+  @override
+  String accountsOverviewApproxNotIncluded(String currencies) {
+    return 'Not included in the ≈ total: $currencies';
+  }
+
+  @override
+  String get accountsOverviewApproxLabel => 'Approximate';
+
+  @override
+  String get goldSeatTamperedClockBody =>
+      'Set your phone\'s date and time to automatic, then open Zaghlol again.';
+
+  @override
+  String get transactionsEditLinksRemoved =>
+      'The amount changed, so the money-back and split links on this transaction were removed.';
+
+  @override
+  String get goldAccountSignedIn => 'Signed in';
+
+  @override
+  String insightsChartsPeakHour(String time) {
+    return 'Your busiest hour is around $time';
+  }
+
+  @override
+  String get homeFeedExcludedFromSpending => 'Excluded from spending';
+
+  @override
+  String get notificationsAlertBackupReminderTitle => 'Time for a backup';
+
+  @override
+  String get notificationsAlertBackupReminderBody =>
+      'Back up from Settings to keep your data safe.';
+
+  @override
+  String transactionsReimbUnassigned(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other:
+          '$count reimbursements were unassigned because the expense got smaller',
+      one: '1 reimbursement was unassigned because the expense got smaller',
+    );
+    return '$_temp0';
+  }
 }
