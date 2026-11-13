@@ -57,34 +57,34 @@ public sealed class RestoreService(
         switch (request)
         {
             case AndroidRestoreRequest android:
-            {
-                var attestation = await playIntegrity.VerifyAsync(android.IntegrityToken, android.BodyHash, cancellationToken).ConfigureAwait(false);
-                if (Refuse(RestorePlatforms.Android, attestation) is { } refused)
                 {
-                    return refused;
-                }
+                    var attestation = await playIntegrity.VerifyAsync(android.IntegrityToken, android.BodyHash, cancellationToken).ConfigureAwait(false);
+                    if (Refuse(RestorePlatforms.Android, attestation) is { } refused)
+                    {
+                        return refused;
+                    }
 
-                proof = attestation.Level == ProofLevel.Basic ? RestoreProof.Basic : RestoreProof.Attested;
-                if (!ChargeLimits(purchases, now))
-                {
-                    return new RestoreResult(RestoreResultKind.PurchaseRateLimited, RetryAfterSeconds: PurchaseLimitRetryAfterSeconds);
-                }
+                    proof = attestation.Level == ProofLevel.Basic ? RestoreProof.Basic : RestoreProof.Attested;
+                    if (!ChargeLimits(purchases, now))
+                    {
+                        return new RestoreResult(RestoreResultKind.PurchaseRateLimited, RetryAfterSeconds: PurchaseLimitRetryAfterSeconds);
+                    }
 
-                break;
-            }
+                    break;
+                }
 
             case IosRestoreRequest ios:
-            {
-                proof = RestoreProof.Attested;
-                var ensured = await AttestIosAsync(ios, install, purchases, now, cancellationToken).ConfigureAwait(false);
-                if (ensured.Refused is { } refused)
                 {
-                    return refused;
-                }
+                    proof = RestoreProof.Attested;
+                    var ensured = await AttestIosAsync(ios, install, purchases, now, cancellationToken).ConfigureAwait(false);
+                    if (ensured.Refused is { } refused)
+                    {
+                        return refused;
+                    }
 
-                seatKey = ensured.Key;
-                break;
-            }
+                    seatKey = ensured.Key;
+                    break;
+                }
 
             default:
                 throw new ArgumentException("Unknown restore platform.", nameof(request));

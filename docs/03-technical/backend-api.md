@@ -275,6 +275,13 @@ Possession of a genuine token is **not** proof of ownership. A token presented w
   - `seat_rebind`: an over-cap same-iPhone rebind (D-63, D-65(a)), with the runbook action of §5.3;
   - an attestation-failure rate spike, by reason code;
   - Play Integrity quota above 50 %.
+- **Implementation notes (T-185).**
+  - **Order and transactions.** Seat-key structure, then attestation, then the per-purchase limit, then store verification (no database transaction open during store calls), then one seat transaction, then the entitlement. On iOS the `attestationObject`, the assertion, the seat-key proofs, the element-0 registration and the limit charge share one transaction that commits last, so `SEAT_KEY_MISMATCH` and every earlier refusal leave the App Attest counter, the key registrations and the seat tables unchanged (R5-6).
+  - **Lock order (FU-112).** Items that reached the seat step are de-duplicated and seated in ascending purchase id.
+  - **Item outcomes.** A store `invalid`, `expired`, `refunded` or `pending` answer is an item outcome, never a 4xx. A store outage or our own store budget short aborts the whole call: `502 STORE_UNAVAILABLE`, or `503 UPSTREAM_UNAVAILABLE` for the budget, both with `Retry-After`, before any seat changes.
+  - **Response.** `restoredCount` counts the distinct purchases the caller holds after the call. `movedFromOtherPhone` is true only when a seat was taken from another install (taking a vacant seat is a move for the cooldown but not "from another phone"). `entitlement` is the merged token when its status is `active` or `grace`, otherwise `null`. Android `attestation.seatKeys` is `400 VALIDATION_FAILED`.
+  - **Limits.** The 5-per-hour bucket is keyed by install (a rotated install token doesn't reset it). The 10-per-day per-purchase limit is held in process memory like the other buckets, so with N API instances it is up to N times higher (accepted residual).
+
 - **Verify needs no attestation** (the decision FR-GOLD-09 leaves open). The store-side binding (`obfuscatedExternalAccountId` / `appAccountToken` = StoreBindingRef(installId)) already proves that this install made the purchase. A token bound to another install fails with `PURCHASE_NOT_OWNED`, which already rejects the replay FR-GOLD-02 describes. Attestation would add latency and new failure modes to the payment path, which has to keep retrying (BR-GOLD-06), with no security gain. Verify **binds** the purchase's seat to the buying install (`proof = binding`) when the purchase has no seat yet. It changes an existing holder only for a new payment from this install (D-59), and only when no cooldown is running (D-61(a)); see *Seat at verify*.
 
 **Same-iPhone recognition** (D-55, D-62, D-63, D-65(a); ADR-012 Part B (g); BR-SYNC-03 amended).
