@@ -27,11 +27,20 @@ android {
         versionCode = flutter.versionCode
         versionName = flutter.versionName
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
+        // T-178 (platform-channels §4a): the Google Cloud project linked to
+        // Play Integrity. Not a secret; set it with -Pzaghlol.playIntegrityCloudProjectNumber=
+        // or in gradle.properties for store builds. 0 (unset) makes attestation
+        // fail closed with ATTEST_UNAVAILABLE without calling Google.
+        val integrityProject = (findProperty("zaghlol.playIntegrityCloudProjectNumber") as String?)
+            ?.trim()?.takeIf { it.matches(Regex("[0-9]{1,19}")) }?.toLongOrNull() ?: 0L
+        buildConfigField("long", "PLAY_INTEGRITY_CLOUD_PROJECT_NUMBER", "${integrityProject}L")
     }
 
     buildFeatures {
         // AGP 9 disables resValue by default; used for the per-flavor app_name.
         resValues = true
+        // T-178: the Play Integrity cloud project number (BuildConfig).
+        buildConfig = true
     }
 
     // Dimension order matters: variants are named <env><Sms|NoSms>, e.g. prodNoSms.
@@ -97,6 +106,8 @@ kotlin {
 // re-runs the tests.
 tasks.withType<Test>().configureEach {
     systemProperty("zaghlol.guardFixtures", guardFixtures.absolutePath)
+    // T-178: the shared restore-binding vectors, read in place.
+    systemProperty("zaghlol.bindingVectors", rootProject.file("../../backend/tests/Zaghlol.Contract.Tests/vectors/restore-binding-v1.json").absolutePath)
     systemProperty("zaghlol.guardSources", file("src/main/kotlin/app/zaghlol/platform/guard").absolutePath)
     inputs.dir(guardFixtures).withPathSensitivity(PathSensitivity.RELATIVE).withPropertyName("guardFixtures")
 }
@@ -110,6 +121,9 @@ dependencies {
     implementation("androidx.work:work-runtime:2.12.0")
     // T-103: the unlock prompt (DeviceSecurityHost.authenticate), replacing local_auth.
     implementation("androidx.biometric:biometric:1.1.0")
+    // T-178: Play Integrity standard request (platform-channels §4a). 1.6.0 is
+    // the latest on Google Maven (2025-11); minSdk 23 <= 26. Adds no permission.
+    implementation("com.google.android.play:integrity:1.6.0")
     testImplementation("junit:junit:4.13.2")
     // T-060: instrumented tests (Keystore cipher, share store on a device).
     // Versions match what the integration_test plugin already puts on the debug
