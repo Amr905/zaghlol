@@ -185,7 +185,7 @@ final class CaptureStatusStore {
   func clear(seq: UInt32) throws -> Bool {
     state.lock.lock()
     defer { state.lock.unlock() }
-    return try withFileLock {
+    return try withFileLock { () throws -> Bool in
       let current = try mergedLocked()
       guard current.seq == seq else { return false }
       var next = CaptureStatus()

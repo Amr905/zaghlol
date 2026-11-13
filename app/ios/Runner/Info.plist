@@ -4,6 +4,10 @@
 <dict>
 	<key>AppIdentifierPrefix</key>
 	<string>$(AppIdentifierPrefix)</string>
+	<key>BGTaskSchedulerPermittedIdentifiers</key>
+	<array>
+		<string>app.zaghlol.ingest</string>
+	</array>
 	<key>CADisableMinimumFrameDurationOnPhone</key>
 	<true/>
 	<key>CFBundleDevelopmentRegion</key>
@@ -39,6 +43,14 @@
 	<string>$(FLUTTER_BUILD_NUMBER)</string>
 	<key>LSRequiresIPhoneOS</key>
 	<true/>
+	<key>UIBackgroundModes</key>
+	<array>
+		<string>fetch</string>
+	</array>
+	<key>ZaghlolAppGroup</key>
+	<string>group.$(PRODUCT_BUNDLE_IDENTIFIER)</string>
+	<key>ZaghlolSharedKeychainSuffix</key>
+	<string>$(PRODUCT_BUNDLE_IDENTIFIER).shared</string>
 	<key>UIApplicationSceneManifest</key>
 	<dict>
 		<key>UIApplicationSupportsMultipleScenes</key>

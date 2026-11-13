@@ -84,8 +84,10 @@ enum SpoolRecordCodec {
     guard bytes.count <= maxRecordBytes else { throw SpoolFormatError() }
     var cur = Cursor(bytes: [UInt8](bytes))
     guard try cur.u8() == version else { throw SpoolFormatError() }
-    let channel = try cur.str(len: Int(cur.u8()), max: maxChannelBytes)
-    let source = try cur.str(len: Int(cur.u16()), max: maxSourceBytes)
+    let channelLen = Int(try cur.u8())
+    let channel = try cur.str(len: channelLen, max: maxChannelBytes)
+    let sourceLen = Int(try cur.u16())
+    let source = try cur.str(len: sourceLen, max: maxSourceBytes)
     let bodyLen = Int(try cur.u32())
     guard bodyLen <= maxBodyBytes else { throw SpoolFormatError() }
     let body = try cur.str(len: bodyLen, max: maxBodyBytes)
@@ -148,7 +150,9 @@ enum SpoolRecordCodec {
     mutating func opt() throws -> String? {
       switch try u8() {
       case 0: return nil
-      case 1: return try str(len: Int(u8()), max: SpoolRecordCodec.maxShortBytes)
+      case 1:
+        let n = Int(try u8())
+        return try str(len: n, max: SpoolRecordCodec.maxShortBytes)
       default: throw SpoolFormatError()
       }
     }

@@ -46,6 +46,26 @@
 		5A1790000000000000000F03 /* SeatKeyStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5A1790000000000000000F04 /* SeatKeyStore.swift */; };
 		5A1790000000000000000F05 /* SeatKeyHost.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5A1790000000000000000F06 /* SeatKeyHost.swift */; };
 		5A1790000000000000000F07 /* SeatKeyTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5A1790000000000000000F08 /* SeatKeyTests.swift */; };
+		5A6200000000000000000101 /* SpoolUlid.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5A6200000000000000000001 /* SpoolUlid.swift */; };
+		5A6200000000000000000102 /* SpoolRecord.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5A6200000000000000000002 /* SpoolRecord.swift */; };
+		5A6200000000000000000103 /* SharedGroups.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5A6200000000000000000003 /* SharedGroups.swift */; };
+		5A6200000000000000000104 /* SpoolKeychain.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5A6200000000000000000004 /* SpoolKeychain.swift */; };
+		5A6200000000000000000105 /* SpoolCipher.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5A6200000000000000000005 /* SpoolCipher.swift */; };
+		5A6200000000000000000106 /* SpoolStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5A6200000000000000000006 /* SpoolStore.swift */; };
+		5A6200000000000000000107 /* CaptureStatusStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5A6200000000000000000007 /* CaptureStatusStore.swift */; };
+		5A6200000000000000000108 /* SpoolLocation.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5A6200000000000000000008 /* SpoolLocation.swift */; };
+		5A6200000000000000000109 /* CaptureApi.g.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5A6200000000000000000009 /* CaptureApi.g.swift */; };
+		5A620000000000000000010A /* IngestionApi.g.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5A620000000000000000000A /* IngestionApi.g.swift */; };
+		5A620000000000000000010B /* SpoolClaim.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5A620000000000000000000B /* SpoolClaim.swift */; };
+		5A620000000000000000010C /* IosCaptureHost.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5A620000000000000000000C /* IosCaptureHost.swift */; };
+		5A620000000000000000010D /* HeadlessIngestion.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5A620000000000000000000D /* HeadlessIngestion.swift */; };
+		5A620000000000000000010E /* IngestBackgroundRefresh.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5A620000000000000000000E /* IngestBackgroundRefresh.swift */; };
+		5A620000000000000000010F /* SpoolStoreTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5A620000000000000000000F /* SpoolStoreTests.swift */; };
+		5A6200000000000000000110 /* SpoolKeychainTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5A6200000000000000000010 /* SpoolKeychainTests.swift */; };
+		5A6200000000000000000111 /* IosCaptureHostTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5A6200000000000000000011 /* IosCaptureHostTests.swift */; };
+		5A6200000000000000000112 /* CaptureStatusStoreTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5A6200000000000000000012 /* CaptureStatusStoreTests.swift */; };
+		5A6200000000000000000113 /* HeadlessIngestionTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5A6200000000000000000013 /* HeadlessIngestionTests.swift */; };
+		5A6200000000000000000114 /* SpoolTestSupport.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5A6200000000000000000014 /* SpoolTestSupport.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -120,6 +140,26 @@
 		5A1790000000000000000F04 /* SeatKeyStore.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SeatKeyStore.swift; sourceTree = "<group>"; };
 		5A1790000000000000000F06 /* SeatKeyHost.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SeatKeyHost.swift; sourceTree = "<group>"; };
 		5A1790000000000000000F08 /* SeatKeyTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SeatKeyTests.swift; sourceTree = "<group>"; };
+		5A6200000000000000000001 /* SpoolUlid.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SpoolUlid.swift; sourceTree = "<group>"; };
+		5A6200000000000000000002 /* SpoolRecord.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SpoolRecord.swift; sourceTree = "<group>"; };
+		5A6200000000000000000003 /* SharedGroups.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SharedGroups.swift; sourceTree = "<group>"; };
+		5A6200000000000000000004 /* SpoolKeychain.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SpoolKeychain.swift; sourceTree = "<group>"; };
+		5A6200000000000000000005 /* SpoolCipher.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SpoolCipher.swift; sourceTree = "<group>"; };
+		5A6200000000000000000006 /* SpoolStore.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SpoolStore.swift; sourceTree = "<group>"; };
+		5A6200000000000000000007 /* CaptureStatusStore.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CaptureStatusStore.swift; sourceTree = "<group>"; };
+		5A6200000000000000000008 /* SpoolLocation.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SpoolLocation.swift; sourceTree = "<group>"; };
+		5A6200000000000000000009 /* CaptureApi.g.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CaptureApi.g.swift; sourceTree = "<group>"; };
+		5A620000000000000000000A /* IngestionApi.g.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = IngestionApi.g.swift; sourceTree = "<group>"; };
+		5A620000000000000000000B /* SpoolClaim.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SpoolClaim.swift; sourceTree = "<group>"; };
+		5A620000000000000000000C /* IosCaptureHost.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = IosCaptureHost.swift; sourceTree = "<group>"; };
+		5A620000000000000000000D /* HeadlessIngestion.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HeadlessIngestion.swift; sourceTree = "<group>"; };
+		5A620000000000000000000E /* IngestBackgroundRefresh.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = IngestBackgroundRefresh.swift; sourceTree = "<group>"; };
+		5A620000000000000000000F /* SpoolStoreTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SpoolStoreTests.swift; sourceTree = "<group>"; };
+		5A6200000000000000000010 /* SpoolKeychainTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SpoolKeychainTests.swift; sourceTree = "<group>"; };
+		5A6200000000000000000011 /* IosCaptureHostTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = IosCaptureHostTests.swift; sourceTree = "<group>"; };
+		5A6200000000000000000012 /* CaptureStatusStoreTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CaptureStatusStoreTests.swift; sourceTree = "<group>"; };
+		5A6200000000000000000013 /* HeadlessIngestionTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HeadlessIngestionTests.swift; sourceTree = "<group>"; };
+		5A6200000000000000000014 /* SpoolTestSupport.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SpoolTestSupport.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -134,6 +174,17 @@
 /* End PBXFrameworksBuildPhase section */
 
 /* Begin PBXGroup section */
+		5A6200000000000000000200 /* Capture */ = {
+			isa = PBXGroup;
+			children = (
+				5A620000000000000000000B /* SpoolClaim.swift */,
+				5A620000000000000000000C /* IosCaptureHost.swift */,
+				5A620000000000000000000D /* HeadlessIngestion.swift */,
+				5A620000000000000000000E /* IngestBackgroundRefresh.swift */,
+			);
+			path = Capture;
+			sourceTree = "<group>";
+		};
 		5A9A00000000000000000A03 /* Spike */ = {
 			isa = PBXGroup;
 			children = (
@@ -155,6 +206,12 @@
 				5A1790000000000000000F08 /* SeatKeyTests.swift */,
 				5A1510000000000000000F09 /* ICloudBackupTests.swift */,
 				5A9A00000000000000000A05 /* IosIntentSpikeTests.swift */,
+				5A620000000000000000000F /* SpoolStoreTests.swift */,
+				5A6200000000000000000010 /* SpoolKeychainTests.swift */,
+				5A6200000000000000000011 /* IosCaptureHostTests.swift */,
+				5A6200000000000000000013 /* HeadlessIngestionTests.swift */,
+				5A6200000000000000000014 /* SpoolTestSupport.swift */,
+				5A6200000000000000000012 /* CaptureStatusStoreTests.swift */,
 			);
 			path = RunnerTests;
 			sourceTree = "<group>";
@@ -163,6 +220,14 @@
 			isa = PBXGroup;
 			children = (
 				5A1650000000000000000A02 /* BackupExclusion.swift */,
+				5A6200000000000000000001 /* SpoolUlid.swift */,
+				5A6200000000000000000002 /* SpoolRecord.swift */,
+				5A6200000000000000000003 /* SharedGroups.swift */,
+				5A6200000000000000000004 /* SpoolKeychain.swift */,
+				5A6200000000000000000005 /* SpoolCipher.swift */,
+				5A6200000000000000000006 /* SpoolStore.swift */,
+				5A6200000000000000000007 /* CaptureStatusStore.swift */,
+				5A6200000000000000000008 /* SpoolLocation.swift */,
 			);
 			path = Shared;
 			sourceTree = "<group>";
@@ -235,6 +300,9 @@
 				5A1790000000000000000F02 /* SeatKeyApi.g.swift */,
 				5A1510000000000000000F02 /* IcloudApi.g.swift */,
 				5A1510000000000000000F07 /* ICloud */,
+				5A6200000000000000000009 /* CaptureApi.g.swift */,
+				5A620000000000000000000A /* IngestionApi.g.swift */,
+				5A6200000000000000000200 /* Capture */,
 			);
 			path = Platform;
 			sourceTree = "<group>";
@@ -438,6 +506,12 @@
 				5A1790000000000000000F07 /* SeatKeyTests.swift in Sources */,
 				5A1510000000000000000F08 /* ICloudBackupTests.swift in Sources */,
 				5A9A00000000000000000A04 /* IosIntentSpikeTests.swift in Sources */,
+				5A620000000000000000010F /* SpoolStoreTests.swift in Sources */,
+				5A6200000000000000000110 /* SpoolKeychainTests.swift in Sources */,
+				5A6200000000000000000111 /* IosCaptureHostTests.swift in Sources */,
+				5A6200000000000000000113 /* HeadlessIngestionTests.swift in Sources */,
+				5A6200000000000000000114 /* SpoolTestSupport.swift in Sources */,
+				5A6200000000000000000112 /* CaptureStatusStoreTests.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -468,6 +542,20 @@
 				5A1510000000000000000F03 /* ICloudBackupFiles.swift in Sources */,
 				5A1510000000000000000F05 /* ICloudBackupHost.swift in Sources */,
 				5A9A00000000000000000A01 /* IosIntentSpike.swift in Sources */,
+				5A6200000000000000000101 /* SpoolUlid.swift in Sources */,
+				5A6200000000000000000102 /* SpoolRecord.swift in Sources */,
+				5A6200000000000000000103 /* SharedGroups.swift in Sources */,
+				5A6200000000000000000104 /* SpoolKeychain.swift in Sources */,
+				5A6200000000000000000105 /* SpoolCipher.swift in Sources */,
+				5A6200000000000000000106 /* SpoolStore.swift in Sources */,
+				5A6200000000000000000107 /* CaptureStatusStore.swift in Sources */,
+				5A6200000000000000000108 /* SpoolLocation.swift in Sources */,
+				5A6200000000000000000109 /* CaptureApi.g.swift in Sources */,
+				5A620000000000000000010A /* IngestionApi.g.swift in Sources */,
+				5A620000000000000000010B /* SpoolClaim.swift in Sources */,
+				5A620000000000000000010C /* IosCaptureHost.swift in Sources */,
+				5A620000000000000000010D /* HeadlessIngestion.swift in Sources */,
+				5A620000000000000000010E /* IngestBackgroundRefresh.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

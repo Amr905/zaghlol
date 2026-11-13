@@ -11,6 +11,10 @@ import UIKit
     // and plugins create any file. Runs on every launch (idempotent), also on
     // background cold launches by App Intents.
     ZaghlolDirectories.applyAll()
+    // T-062: the BGAppRefreshTask launch handler must be registered before
+    // launch ends; also runs on background launches by the system.
+    IngestBackgroundRefresh.registerLaunchHandler()
+    IosCaptureRegistration.prepareKey()
     return super.application(application, didFinishLaunchingWithOptions: launchOptions)
   }
 
@@ -30,5 +34,7 @@ import UIKit
     SeatKeyRegistration.register(with: engineBridge.pluginRegistry)
     // T-151: iCloud backup host.
     ICloudBackupRegistration.register(with: engineBridge.pluginRegistry)
+    // T-062: encrypted spool drain / ack and the background refresh.
+    IosCaptureRegistration.register(with: engineBridge.pluginRegistry)
   }
 }

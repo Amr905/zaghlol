@@ -126,11 +126,12 @@ final class BackupExclusionTests: XCTestCase {
 
   // 4. App Group directories: enabled by T-062 together with the entitlement.
   func testAppGroupDirectoriesAreExcluded() throws {
-    guard let groupID = ZaghlolDirectories.appGroupIdentifier,
-      FileManager.default.containerURL(forSecurityApplicationGroupIdentifier: groupID) != nil
-    else {
-      throw XCTSkip("No App Group entitlement yet (T-062 enables this test).")
-    }
+    // T-062: the App Group entitlement exists; CI requires this test to run (no skip).
+    let groupID = try XCTUnwrap(
+      ZaghlolDirectories.appGroupIdentifier, "ZaghlolAppGroup missing from Info.plist")
+    XCTAssertNotNil(
+      FileManager.default.containerURL(forSecurityApplicationGroupIdentifier: groupID),
+      "no App Group container for \(groupID)")
     let urls = ZaghlolDirectories.appGroupDirectories()
     XCTAssertEqual(urls.count, 3)
     for url in urls {
