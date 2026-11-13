@@ -90,8 +90,8 @@ Every task file has: ID, description, technical details, dependencies, affected 
 | [T-045](tasks/T-045.md) | Accounts repository: auto-create, default cash, per-currency balances | US-06-1 | High | Sonnet | flutter-core-engineer | T-017 | A | 6 | DONE |
 | [T-046](tasks/T-046.md) | IngestRawMessages use case (dedupe, merge, persist, ack, events) | US-06-1 | High* | Opus | flutter-core-engineer | T-033, T-045, T-014, T-035 | A | 7 | DONE |
 | [T-047](tasks/T-047.md) | Capture module (app side): guard config writer, spool orchestrator, degraded mode | US-03-1 | High | Sonnet | flutter-core-engineer | T-046, T-039, T-035 | A | 8 | DONE |
-| [T-048](tasks/T-048.md) | Historical inbox scan with progress (Android) | US-03-2 | High | Sonnet | flutter-core-engineer | T-047, T-042 | A | 9 | TODO |
-| [T-049](tasks/T-049.md) | Review queue domain and repository | US-06-2 | Medium | Sonnet | flutter-core-engineer | T-019, T-046 | A | 8 | TODO |
+| [T-048](tasks/T-048.md) | Historical inbox scan with progress (Android) | US-03-2 | High | Sonnet | flutter-core-engineer | T-047, T-042 | A | 9 | DONE |
+| [T-049](tasks/T-049.md) | Review queue domain and repository | US-06-2 | Medium | Sonnet | flutter-core-engineer | T-019, T-046 | A | 8 | DONE |
 | [T-050](tasks/T-050.md) | Transactions repository: query, search, CRUD, soft delete | US-06-3 | Medium | Sonnet | flutter-core-engineer | T-017 | A | 6 | DONE |
 | [T-051](tasks/T-051.md) | Payday cycle engine, safe-to-spend, burn line and cycle summaries | US-09-1 | High | Sonnet | flutter-core-engineer | T-012, T-018, T-050 | A | 7 | DONE |
 | [T-052](tasks/T-052.md) | Home read model and persistent card filter | US-10-2 | Medium | Sonnet | flutter-core-engineer | T-051, T-050, T-045, T-049 | A | 9 | TODO |
@@ -176,7 +176,7 @@ Every task file has: ID, description, technical details, dependencies, affected 
 | [T-116](tasks/T-116.md) | Shared per-currency figures and currency switcher component | US-12-2 | Medium | Sonnet | flutter-ui-engineer | T-115, T-054 | G | 11 | TODO |
 | [T-117](tasks/T-117.md) | Achievement share cards with hidden amounts by default | US-11-4 | Medium | Sonnet | flutter-ui-engineer | T-105, T-022 | G | 12 | TODO |
 | [T-118](tasks/T-118.md) | Home-screen widgets (Android Glance, iOS WidgetKit) | US-11-4 | High | Sonnet | native-platform-engineer | T-051, T-004 | E | 8 | TODO |
-| [T-119](tasks/T-119.md) | Gold gate matrix and entitlement state (local) | US-14-1 | Medium | Sonnet | flutter-core-engineer | T-025, T-020 | A | 7 | TODO |
+| [T-119](tasks/T-119.md) | Gold gate matrix and entitlement state (local) | US-14-1 | Medium | Sonnet | flutter-core-engineer | T-025, T-020 | A | 7 | DONE |
 | [T-120](tasks/T-120.md) | Voice logger S-31 with on-device-first recognition and monthly limit | US-11-3 | High | Sonnet | flutter-ui-engineer | T-109, T-119, T-011 | G | 10 | TODO |
 | [T-121](tasks/T-121.md) | Money tab assets, Add asset S-44 and Prices S-45 | US-12-1 | Medium | Sonnet | flutter-ui-engineer | T-113, T-083, T-119 | G | 11 | TODO |
 
@@ -213,9 +213,9 @@ Every task file has: ID, description, technical details, dependencies, affected 
 | [T-178](tasks/T-178.md) | AttestationHostApi (Play Integrity standard request, App Attest) and release network security config | US-14-1 | High* | Opus | native-platform-engineer | T-004 | D | 3 | TODO |
 | [T-179](tasks/T-179.md) | SeatKeyHostApi (iOS Secure Enclave seat keys) and Dart seat-key service | US-14-1 | High* | Opus | native-platform-engineer | T-004, T-141 | E | 7 | TODO |
 | [T-180](tasks/T-180.md) | TrustedClockHostApi (monotonic clock with sleep, boot reference) on both platforms | US-14-1 | High* | Opus | native-platform-engineer | T-004 | D | 3 | TODO |
-| [T-181](tasks/T-181.md) | Backend attestation verifiers: Play Integrity decode and App Attest attestation/assertion, with fakes | US-14-1 | High* | Opus | backend-engineer | T-122 | B | 3 | TODO |
+| [T-181](tasks/T-181.md) | Backend attestation verifiers: Play Integrity decode and App Attest attestation/assertion, with fakes | US-14-1 | High* | Opus | backend-engineer | T-122 | B | 3 | DONE |
 | [T-182](tasks/T-182.md) | Backend seat-key proof verifier and keyed hashes (K_seat), with fakes | US-14-1 | High* | Opus | backend-engineer | T-122, T-123 | B | 3 | DONE |
-| [T-183](tasks/T-183.md) | Dart request-binding library: JCS, strict JSON parser, restore and seat-key hashes over shared vectors | US-14-1 | High* | Opus | flutter-core-engineer | T-001, T-014 | A | 3 | TODO |
+| [T-183](tasks/T-183.md) | Dart request-binding library: JCS, strict JSON parser, restore and seat-key hashes over shared vectors | US-14-1 | High* | Opus | flutter-core-engineer | T-001, T-014 | A | 3 | DONE |
 | [T-184](tasks/T-184.md) | Seat service: bind, move, same-iPhone rebind with cap, claimants, reclaim and support-move primitive | US-14-1 | High* | Opus | backend-engineer | T-122, T-182 | B | 4 | DONE |
 | [T-185](tasks/T-185.md) | POST /v1/purchases/restore: strict parse, install binding, attestation, seat outcomes and limits | US-14-1 | High* | Opus | backend-engineer | T-132, T-181, T-182, T-184 | B | 6 | TODO |
 | [T-186](tasks/T-186.md) | Support seat:move, purchase:detach and purchase:unfreeze endpoints with dispute freeze | US-13-2 | High* | Opus | backend-engineer | T-136, T-184, T-130, T-131, T-132 | B | 6 | TODO |
