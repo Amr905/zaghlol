@@ -1,0 +1,91 @@
+// T-080: the S-13 form model and its validation (pure Dart, unit-tested).
+// Money is parsed exactly from text (any digit script) into integer minor
+// units; nothing here uses a double.
+
+import 'package:zaghlol_domain/zaghlol_domain.dart';
+
+import '../../../../core/l10n/digits_mode.dart';
+import '../../../../core/l10n/money_format.dart';
+
+enum TxnEditType { expense, income, transfer }
+
+enum TxnFormError {
+  amountRequired,
+  amountTooLarge,
+  amountDecimals,
+  categoryRequired,
+  accountRequired,
+  toAccountRequired,
+  sameAccount,
+  dateFuture,
+  noteTooLong,
+}
+
+/// Largest amount accepted from the keyboard, in minor units.
+const int maxEntryMinor = 100000000000000;
+
+/// Longest note, in characters.
+const int formNoteMaxChars = 1000;
+
+/// Parses [text] for [currency]; null when it is not a positive amount.
+/// [decimalsExceeded] is set when only the decimals are wrong.
+({Money? money, TxnFormError? error}) parseAmount(
+  String text,
+  Currency currency,
+) {
+  final clean = normalizeDigits(text).trim().replaceAll(',', '');
+  if (clean.isEmpty) return (money: null, error: TxnFormError.amountRequired);
+  final m = MoneyFormat.parseInput(clean, currency);
+  if (m == null) {
+    final looksNumeric = RegExp(r'^[0-9]+(\.[0-9]+)?$').hasMatch(clean);
+    return (
+      money: null,
+      error: looksNumeric
+          ? (clean.contains('.') && clean.length < 64
+                ? TxnFormError.amountDecimals
+                : TxnFormError.amountTooLarge)
+          : TxnFormError.amountRequired,
+    );
+  }
+  if (!m.isPositive) {
+    return (money: null, error: TxnFormError.amountRequired);
+  }
+  if (m.minor > maxEntryMinor) {
+    return (money: null, error: TxnFormError.amountTooLarge);
+  }
+  return (money: m, error: null);
+}
+
+/// All field errors of the form (empty = valid). [date] and [today] are
+/// civil dates.
+Map<String, TxnFormError> validateForm({
+  required TxnEditType type,
+  required String amountText,
+  required Currency currency,
+  required String? categoryId,
+  required String? accountId,
+  required String? toAccountId,
+  required CivilDate date,
+  required CivilDate today,
+  required String note,
+}) {
+  final errors = <String, TxnFormError>{};
+  final a = parseAmount(amountText, currency);
+  if (a.error != null) errors['amount'] = a.error!;
+  if (type != TxnEditType.transfer && categoryId == null) {
+    errors['category'] = TxnFormError.categoryRequired;
+  }
+  if (accountId == null) errors['account'] = TxnFormError.accountRequired;
+  if (type == TxnEditType.transfer) {
+    if (toAccountId == null) {
+      errors['to'] = TxnFormError.toAccountRequired;
+    } else if (toAccountId == accountId) {
+      errors['to'] = TxnFormError.sameAccount;
+    }
+  }
+  if (date.epochDay > today.epochDay) errors['date'] = TxnFormError.dateFuture;
+  if (note.runes.length > formNoteMaxChars) {
+    errors['note'] = TxnFormError.noteTooLong;
+  }
+  return errors;
+}

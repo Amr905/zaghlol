@@ -6,6 +6,10 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../core/db/app_database_providers.dart';
 import '../../../core/db/daos/transactions_dao.dart';
+import '../../budget/application/budget_providers.dart';
+import '../../budget/application/cycle_app_wiring.dart'
+    show domainEventBusProvider;
+import '../application/reimbursements.dart';
 import '../domain/transaction_repository.dart';
 import 'drift_transaction_repository.dart';
 
@@ -19,13 +23,28 @@ final idGeneratorProvider = Provider<IdGenerator>(
   name: 'transactionsIdGeneratorProvider',
 );
 
+final reimbursementsProvider = FutureProvider<Reimbursements>((ref) async {
+  final db = await ref.watch(appDatabaseProvider.future);
+  return Reimbursements(
+    db,
+    loadSchedule: () => ref.read(paydayScheduleProvider.future),
+    clock: ref.watch(clockProvider),
+    newId: ref.watch(idGeneratorProvider),
+    events: ref.watch(domainEventBusProvider),
+  );
+}, name: 'reimbursementsProvider');
+
 final transactionRepositoryProvider = FutureProvider<TransactionRepository>((
   ref,
 ) async {
   final db = await ref.watch(appDatabaseProvider.future);
+  final reimb = await ref.watch(reimbursementsProvider.future);
   return DriftTransactionRepository(
     TransactionsDao(db),
     clock: ref.watch(clockProvider),
     newId: ref.watch(idGeneratorProvider),
+    // EC-40: runs inside the edit's own transaction, before the write.
+    onAmountChange: (id, minor) async =>
+        (await reimb.repairForNewAmount(id, minor)).removedLinkIds,
   );
 }, name: 'transactionRepositoryProvider');

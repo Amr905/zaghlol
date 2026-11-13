@@ -9,19 +9,19 @@ import 'dart:async';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:go_router/go_router.dart';
 import 'package:zaghlol_domain/zaghlol_domain.dart';
 
 import '../../../../core/l10n/date_format.dart';
 import '../../../../core/l10n/generated/app_localizations.dart';
 import '../../../../core/l10n/locale_providers.dart';
-import '../../../../core/routing/app_routes.dart';
 import '../../../../core/theme/z_tokens.dart';
 import '../../../../core/ui/z_components.dart';
 import '../../../budget/application/budget_providers.dart';
 import '../../../home/application/card_filter.dart';
 import '../../application/bulk_actions.dart';
 import '../../application/bulk_edit.dart';
+import '../detail/transaction_detail_screen.dart';
+import '../edit/transaction_edit_screen.dart';
 import '../../domain/transaction.dart';
 import 'txn_filter_sheets.dart';
 import 'txn_list_providers.dart';
@@ -194,9 +194,7 @@ class _State extends ConsumerState<TransactionsListScreen> {
         title: l.transactionsListEmptyTitle,
         body: l.transactionsListEmptyBody,
         actionLabel: l.transactionsListEmptyAdd,
-        onAction:
-            widget.onAddExpense ??
-            () => GoRouter.of(context).push(AppRoutes.add),
+        onAction: widget.onAddExpense ?? () => showTransactionEditor(context),
       );
     }
     return _Message(
@@ -273,11 +271,19 @@ class _State extends ConsumerState<TransactionsListScreen> {
           selected: sel.ids.contains(t.id),
           onTap: () => sel.active
               ? notifier.toggle(t.id)
-              : widget.onOpenTransaction?.call(t.id),
+              : (widget.onOpenTransaction ?? _openDetail)(t.id),
           onLongPress: () =>
               sel.active ? notifier.toggle(t.id) : notifier.enter(t.id),
         );
       },
+    );
+  }
+
+  void _openDetail(String id) {
+    Navigator.of(context).push<void>(
+      MaterialPageRoute<void>(
+        builder: (_) => TransactionDetailScreen(transactionId: id),
+      ),
     );
   }
 
