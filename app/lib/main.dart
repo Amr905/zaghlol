@@ -10,7 +10,11 @@ import 'core/l10n/generated/app_localizations.dart';
 import 'core/l10n/locale_providers.dart';
 import 'core/routing/app_router.dart';
 import 'core/theme/app_theme.dart';
+import 'features/accounts/presentation/edit_card/edit_card_providers.dart'
+    show cardCapturePortProvider;
 import 'features/budget/application/cycle_app_wiring.dart';
+import 'features/capture/presentation/capture_controls.dart'
+    show captureCardPortProvider;
 import 'features/capture/presentation/capture_lifecycle.dart';
 import 'features/gold/application/gold_providers.dart';
 import 'features/catalog_sync/application/sync_providers.dart';
@@ -38,6 +42,10 @@ Future<void> main() async {
         ...syncWiringOverrides,
         // T-145: seat keys and the purchase flow.
         ...goldWiringOverrides,
+        // T-086: new-card channel toggles become ignore rules (T-078).
+        cardCapturePortProvider.overrideWith(
+          (ref) => ref.watch(captureCardPortProvider),
+        ),
       ],
       child: const CaptureLifecycle(
         child: SyncLifecycle(child: _LocalizedApp()),
