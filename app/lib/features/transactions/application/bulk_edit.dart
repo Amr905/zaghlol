@@ -10,7 +10,7 @@
 
 import 'dart:convert';
 
-import 'package:drift/drift.dart' show Expression, Value, Variable;
+import 'package:drift/drift.dart' show Expression, Value;
 import 'package:zaghlol_domain/zaghlol_domain.dart';
 
 import '../../../core/db/app_database.dart';
@@ -21,6 +21,7 @@ import '../../../core/db/daos/merchant_rules_dao.dart';
 import '../../../core/db/daos/misc_daos.dart';
 import '../../../core/db/daos/transactions_dao.dart';
 import '../../../core/db/daos/write_errors.dart' show guardWrite;
+import 'transactions_changed_event.dart';
 import '../data/drift_transaction_repository.dart'
     show Clock, IdGenerator, maxIdsPerCall, newUuidV4;
 
@@ -160,35 +161,20 @@ class BulkEditUseCase {
     Set<String> accountIds = const {},
     bool withLinks = false,
   }) async {
-    final accounts = <String>{...accountIds};
-    final keys = <String>{};
-    void add(String account, int at, int off) {
-      accounts.add(account);
-      keys.add(schedule.cycleOnMs(at, off).key);
-    }
-
-    for (final r in rows) {
-      add(r.accountId, r.occurredAt, r.occurredTzOffsetMin);
-      if (!withLinks) continue;
-      final links = await _db
-          .customSelect(
-            'SELECT e.account_id AS ea, e.occurred_at AS eat, '
-            'e.occurred_tz_offset_min AS eoff, s.account_id AS sa, '
-            's.occurred_at AS sat, s.occurred_tz_offset_min AS soff '
-            'FROM offset_links l '
-            'JOIN transactions e ON e.id = l.expense_txn_id '
-            'JOIN transactions s ON s.id = l.source_txn_id '
-            'WHERE l.expense_txn_id = ?1 OR l.source_txn_id = ?1',
-            variables: [Variable.withString(r.id)],
-            readsFrom: {_db.offsetLinks, _db.transactions},
-          )
-          .get();
-      for (final l in links) {
-        add(l.read<String>('ea'), l.read<int>('eat'), l.read<int>('eoff'));
-        add(l.read<String>('sa'), l.read<int>('sat'), l.read<int>('soff'));
-      }
-    }
-    return TransactionsChanged(accountIds: accounts, cycleKeys: keys);
+    // One shared helper (FU-127): the row's own and its links' cycles.
+    final base = await transactionsChangedFor(_db, schedule, [
+      for (final r in rows)
+        (
+          id: r.id,
+          accountId: r.accountId,
+          occurredAt: r.occurredAt,
+          offsetMin: r.occurredTzOffsetMin,
+        ),
+    ], withLinks: withLinks);
+    return TransactionsChanged(
+      accountIds: {...base.accountIds, ...accountIds},
+      cycleKeys: base.cycleKeys,
+    );
   }
 
   int _nowMs() => _now().toUtc().millisecondsSinceEpoch;

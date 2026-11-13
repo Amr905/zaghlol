@@ -13,8 +13,10 @@ import '../../../core/db/app_database.dart';
 Future<TransactionsChanged> transactionsChangedFor(
   AppDatabase db,
   PaydaySchedule schedule,
-  Iterable<({String id, String accountId, int occurredAt, int offsetMin})> rows,
-) async {
+  Iterable<({String id, String accountId, int occurredAt, int offsetMin})>
+  rows, {
+  bool withLinks = true,
+}) async {
   final accounts = <String>{};
   final keys = <String>{};
   void add(String account, int at, int off) {
@@ -24,6 +26,7 @@ Future<TransactionsChanged> transactionsChangedFor(
 
   for (final r in rows) {
     add(r.accountId, r.occurredAt, r.offsetMin);
+    if (!withLinks) continue;
     final links = await db
         .customSelect(
           'SELECT e.account_id AS ea, e.occurred_at AS eat, '
