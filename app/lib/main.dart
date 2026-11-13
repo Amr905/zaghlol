@@ -22,6 +22,7 @@ import 'features/catalog_sync/presentation/sync_lifecycle.dart';
 import 'features/home/presentation/home_screen.dart';
 import 'features/security/presentation/app_lock_gate.dart';
 import 'ingestion/ingestion_main.dart';
+import 'ingestion/ios_intent_spike.dart';
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -59,6 +60,13 @@ Future<void> main() async {
 /// keeps it in AOT builds.
 @pragma('vm:entry-point')
 void ingestionMain() => runIngestionMain();
+
+/// T-009 spike: entrypoint of the iOS App Intent's headless engine.
+@pragma('vm:entry-point')
+void spikeIntentMain() => runIosIntentSpike();
+
+@pragma('vm:entry-point')
+void spikeIntentSilentMain() => runIosIntentSpikeSilent();
 
 /// Root widget: themed, localized, routed through the T-024 shell. It holds
 /// no user-facing strings itself.

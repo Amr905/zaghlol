@@ -328,6 +328,61 @@ jobs:
           if-no-files-found: warn
           retention-days: 14
 
+  # T-009 (SPK-03 spike): only the intent -> headless engine tests, serial, with the
+  # crash reports and metrics printed. Numbers only, never message text.
+  ios-intent-spike:
+    name: ios intent spike (simulator)
+    runs-on: macos-15
+    timeout-minutes: 40
+    steps:
+      - uses: actions/checkout@fbc6f3992d24b796d5a048ff273f7fcc4a7b6c09 # v5.1.0
+        with:
+          persist-credentials: false
+      - name: Pin Xcode
+        run: |
+          sudo xcode-select -s /Applications/Xcode_16.4.app
+          xcodebuild -version
+          xcrun simctl list runtimes | grep -i ios || true
+      - uses: subosito/flutter-action@1a449444c387b1966244ae4d4f8c696479add0b2 # v2.23.0
+        with:
+          flutter-version: ${{ env.FLUTTER_VERSION }}
+          channel: stable
+          cache: true
+      - name: Resolve workspace
+        run: flutter pub get --enforce-lockfile
+      - name: Generate iOS config
+        working-directory: app
+        run: flutter build ios --config-only --no-codesign --flavor dev > config.log 2>&1 || { tail -n 40 config.log; exit 1; }
+      - name: xcodebuild test (spike only)
+        working-directory: app/ios
+        run: |
+          UDID=$(xcrun simctl list devices available iPhone | grep -Eo '[0-9A-F]{8}(-[0-9A-F]{4}){3}-[0-9A-F]{12}' | head -n 1)
+          rc=0
+          xcodebuild test \
+            -workspace Runner.xcworkspace -scheme dev -configuration Debug-dev \
+            -destination "id=$UDID" -parallel-testing-enabled NO \
+            -only-testing:RunnerTests/IosIntentSpikeTests \
+            CODE_SIGNING_ALLOWED=NO > xcodebuild.log 2>&1 || rc=$?
+          grep -E "Test (case|Case)|SPIKE_METRICS|Executed|TEST (SUCCEEDED|FAILED)" xcodebuild.log | cut -c1-600 | tail -n 40
+          if [ "$rc" -ne 0 ]; then
+            echo "--- crash reports (top frames)"
+            for f in ~/Library/Logs/DiagnosticReports/Runner*.ips; do
+              [ -f "$f" ] && { echo "== $f"; head -c 6000 "$f"; }
+            done
+            echo "--- log tail"
+            grep -iE "flutter|dart|abort|assert|fatal|terminat" xcodebuild.log | cut -c1-400 | tail -n 40
+          fi
+          exit $rc
+      - name: Upload logs
+        if: always()
+        uses: actions/upload-artifact@b7c566a772e6b6bfb58ed0dc250532a479d7789f # v6.0.0
+        with:
+          name: ios-intent-spike-logs
+          path: |
+            app/ios/xcodebuild.log
+          if-no-files-found: warn
+          retention-days: 7
+
   swift-unit:
     name: swift unit tests (xcodebuild)
     runs-on: macos-15
@@ -431,6 +486,19 @@ jobs:
               exit 1
             fi
           done
+          # T-009 (SPK-03 spike): App Intent perform() -> headless engine, and the spool fallback.
+          # Metrics lines are numbers only (no message text).
+          for t in testSpoolEntryIsEncryptedAndAckDeletesIt testHeadlessEngineProcessesAMessageAndAcks \
+            testIntentPerformPathRunsEndToEnd testHoldKeepsTheEngineBusyAndStillAnswers \
+            testFailedEngineLeavesTheEntryAndForegroundDrainProcessesIt; do
+            if ! grep -qiE "IosIntentSpikeTests.*$t" xcodebuild.log || grep -qiE "test case.*IosIntentSpikeTests.*$t.*failed" xcodebuild.log; then
+              echo "::error::IosIntentSpikeTests.$t did not pass"
+              grep -iE "IosIntentSpikeTests" xcodebuild.log | head -n 30
+              exit 1
+            fi
+          done
+          xcrun simctl list runtimes | grep -i ios || true
+          grep -h "SPIKE_METRICS" xcodebuild.log || true
 
   android:
     name: android ${{ matrix.flavor }} (${{ matrix.mode }})
