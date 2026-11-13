@@ -1,6 +1,6 @@
 // T-054: Home (S-10). Reads [homeModelProvider] only. iOS gets a large inline
 // title; Android a Material 3 collapsing app bar. Contextual cards (T-104)
-// and the currency switcher (T-116) are not here.
+// are in the banner slot (T-104); the currency switcher (T-116) is not here.
 
 import 'package:flutter/material.dart';
 import 'package:flutter/cupertino.dart' show CupertinoIcons;
@@ -18,6 +18,7 @@ import '../../capture/application/capture_providers.dart';
 import '../../mascot/presentation/zaghlol_avatar.dart';
 import '../application/card_filter.dart';
 import '../application/home_read_model.dart';
+import 'cards/home_cards_view.dart';
 import 'home_format.dart';
 import 'home_widgets.dart';
 
@@ -39,6 +40,8 @@ class HomeActions {
     this.openTransaction,
     this.addExpense,
     this.openReview,
+    this.openBackup,
+    this.openFinishSetup,
     this.mascotSlot,
   });
 
@@ -50,6 +53,9 @@ class HomeActions {
   final ValueChanged<String>? openTransaction;
   final VoidCallback? addExpense;
   final VoidCallback? openReview;
+
+  final VoidCallback? openBackup;
+  final VoidCallback? openFinishSetup;
 
   /// C-14 mascot banner slot, filled by T-104.
   final Widget? mascotSlot;
@@ -160,6 +166,8 @@ class HomeScreen extends ConsumerWidget {
       openTransaction: a?.openTransaction,
       addExpense: a?.addExpense ?? () => context.push(AppRoutes.add),
       openReview: a?.openReview ?? () => context.push(AppRoutes.review),
+      openBackup: a?.openBackup,
+      openFinishSetup: a?.openFinishSetup,
       mascotSlot: a?.mascotSlot,
     );
   }
@@ -250,7 +258,13 @@ class _HomeBodyState extends ConsumerState<_HomeBody> {
           if (a.mascotSlot != null) ...[
             const SizedBox(height: ZSpacing.md),
             a.mascotSlot!,
-          ],
+          ] else
+            HomeContextualCards(
+              hasTransactions: !isEmpty,
+              openSetBudget: a.openSetBudget,
+              openBackup: a.openBackup,
+              openFinishSetup: a.openFinishSetup,
+            ),
           if (m.reviewCount > 0) ...[
             const SizedBox(height: ZSpacing.md),
             HomeReviewPill(
