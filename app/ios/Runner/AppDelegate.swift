@@ -24,5 +24,7 @@ import UIKit
     TrustedClockRegistration.register(with: engineBridge.pluginRegistry)
     // T-103: jailbreak heuristic, app switcher cover, passcode check.
     DeviceSecurityRegistration.register(with: engineBridge.pluginRegistry)
+    // T-151: iCloud backup host.
+    ICloudBackupRegistration.register(with: engineBridge.pluginRegistry)
   }
 }

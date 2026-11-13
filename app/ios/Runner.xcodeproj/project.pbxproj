@@ -7,6 +7,10 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		5A1510000000000000000F01 /* IcloudApi.g.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5A1510000000000000000F02 /* IcloudApi.g.swift */; };
+		5A1510000000000000000F03 /* ICloudBackupFiles.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5A1510000000000000000F04 /* ICloudBackupFiles.swift */; };
+		5A1510000000000000000F05 /* ICloudBackupHost.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5A1510000000000000000F06 /* ICloudBackupHost.swift */; };
+		5A1510000000000000000F08 /* ICloudBackupTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5A1510000000000000000F09 /* ICloudBackupTests.swift */; };
 		1498D2341E8E89220040F4C2 /* GeneratedPluginRegistrant.m in Sources */ = {isa = PBXBuildFile; fileRef = 1498D2331E8E89220040F4C2 /* GeneratedPluginRegistrant.m */; };
 		331C808B294A63AB00263BE5 /* RunnerTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 331C807B294A618700263BE5 /* RunnerTests.swift */; };
 		3B3967161E833CAA004F5970 /* AppFrameworkInfo.plist in Resources */ = {isa = PBXBuildFile; fileRef = 3B3967151E833CAA004F5970 /* AppFrameworkInfo.plist */; };
@@ -59,6 +63,11 @@
 /* End PBXCopyFilesBuildPhase section */
 
 /* Begin PBXFileReference section */
+		5A1510000000000000000F02 /* IcloudApi.g.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = IcloudApi.g.swift; sourceTree = "<group>"; };
+		5A1510000000000000000F04 /* ICloudBackupFiles.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ICloudBackupFiles.swift; sourceTree = "<group>"; };
+		5A1510000000000000000F06 /* ICloudBackupHost.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ICloudBackupHost.swift; sourceTree = "<group>"; };
+		5A1510000000000000000F09 /* ICloudBackupTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ICloudBackupTests.swift; sourceTree = "<group>"; };
+		5A1510000000000000000F0A /* Runner.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = Runner.entitlements; sourceTree = "<group>"; };
 		1498D2321E8E86230040F4C2 /* GeneratedPluginRegistrant.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = GeneratedPluginRegistrant.h; sourceTree = "<group>"; };
 		1498D2331E8E89220040F4C2 /* GeneratedPluginRegistrant.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = GeneratedPluginRegistrant.m; sourceTree = "<group>"; };
 		331C807B294A618700263BE5 /* RunnerTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RunnerTests.swift; sourceTree = "<group>"; };
@@ -116,6 +125,7 @@
 				5A1480000000000000000C06 /* TextNormalizationTests.swift */,
 				5A1800000000000000000D07 /* TrustedClockTests.swift */,
 				5A1030000000000000000E06 /* DeviceSecurityTests.swift */,
+				5A1510000000000000000F09 /* ICloudBackupTests.swift */,
 			);
 			path = RunnerTests;
 			sourceTree = "<group>";
@@ -175,6 +185,7 @@
 				5A0150000000000000000B0B /* Platform */,
 				5A1800000000000000000D05 /* Clock */,
 				5A1800000000000000000D09 /* PrivacyInfo.xcprivacy */,
+				5A1510000000000000000F0A /* Runner.entitlements */,
 			);
 			path = Runner;
 			sourceTree = "<group>";
@@ -189,6 +200,8 @@
 				5A1800000000000000000D02 /* ClockApi.g.swift */,
 				5A1030000000000000000E02 /* DeviceApi.g.swift */,
 				5A1030000000000000000E04 /* DeviceSecurityHost.swift */,
+				5A1510000000000000000F02 /* IcloudApi.g.swift */,
+				5A1510000000000000000F07 /* ICloud */,
 			);
 			path = Platform;
 			sourceTree = "<group>";
@@ -217,6 +230,15 @@
 				5A1800000000000000000D04 /* TrustedClockHost.swift */,
 			);
 			path = Clock;
+			sourceTree = "<group>";
+		};
+		5A1510000000000000000F07 /* ICloud */ = {
+			isa = PBXGroup;
+			children = (
+				5A1510000000000000000F04 /* ICloudBackupFiles.swift */,
+				5A1510000000000000000F06 /* ICloudBackupHost.swift */,
+			);
+			path = ICloud;
 			sourceTree = "<group>";
 		};
 /* End PBXGroup section */
@@ -371,6 +393,7 @@
 				5A1480000000000000000C05 /* TextNormalizationTests.swift in Sources */,
 				5A1800000000000000000D06 /* TrustedClockTests.swift in Sources */,
 				5A1030000000000000000E05 /* DeviceSecurityTests.swift in Sources */,
+				5A1510000000000000000F08 /* ICloudBackupTests.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -392,6 +415,9 @@
 				5A1800000000000000000D03 /* TrustedClockHost.swift in Sources */,
 				5A1030000000000000000E01 /* DeviceApi.g.swift in Sources */,
 				5A1030000000000000000E03 /* DeviceSecurityHost.swift in Sources */,
+				5A1510000000000000000F01 /* IcloudApi.g.swift in Sources */,
+				5A1510000000000000000F03 /* ICloudBackupFiles.swift in Sources */,
+				5A1510000000000000000F05 /* ICloudBackupHost.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -592,6 +618,7 @@
 				CLANG_ENABLE_MODULES = YES;
 				CURRENT_PROJECT_VERSION = "$(FLUTTER_BUILD_NUMBER)";
 				ENABLE_BITCODE = NO;
+				CODE_SIGN_ENTITLEMENTS = Runner/Runner.entitlements;
 				INFOPLIST_FILE = Runner/Info.plist;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
@@ -614,6 +641,7 @@
 				CLANG_ENABLE_MODULES = YES;
 				CURRENT_PROJECT_VERSION = "$(FLUTTER_BUILD_NUMBER)";
 				ENABLE_BITCODE = NO;
+				CODE_SIGN_ENTITLEMENTS = Runner/Runner.entitlements;
 				INFOPLIST_FILE = Runner/Info.plist;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
@@ -636,6 +664,7 @@
 				CLANG_ENABLE_MODULES = YES;
 				CURRENT_PROJECT_VERSION = "$(FLUTTER_BUILD_NUMBER)";
 				ENABLE_BITCODE = NO;
+				CODE_SIGN_ENTITLEMENTS = Runner/Runner.entitlements;
 				INFOPLIST_FILE = Runner/Info.plist;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
@@ -1138,6 +1167,7 @@
 				CLANG_ENABLE_MODULES = YES;
 				CURRENT_PROJECT_VERSION = "$(FLUTTER_BUILD_NUMBER)";
 				ENABLE_BITCODE = NO;
+				CODE_SIGN_ENTITLEMENTS = Runner/Runner.entitlements;
 				INFOPLIST_FILE = Runner/Info.plist;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
@@ -1161,6 +1191,7 @@
 				CLANG_ENABLE_MODULES = YES;
 				CURRENT_PROJECT_VERSION = "$(FLUTTER_BUILD_NUMBER)";
 				ENABLE_BITCODE = NO;
+				CODE_SIGN_ENTITLEMENTS = Runner/Runner.entitlements;
 				INFOPLIST_FILE = Runner/Info.plist;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
@@ -1184,6 +1215,7 @@
 				CLANG_ENABLE_MODULES = YES;
 				CURRENT_PROJECT_VERSION = "$(FLUTTER_BUILD_NUMBER)";
 				ENABLE_BITCODE = NO;
+				CODE_SIGN_ENTITLEMENTS = Runner/Runner.entitlements;
 				INFOPLIST_FILE = Runner/Info.plist;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
@@ -1207,6 +1239,7 @@
 				CLANG_ENABLE_MODULES = YES;
 				CURRENT_PROJECT_VERSION = "$(FLUTTER_BUILD_NUMBER)";
 				ENABLE_BITCODE = NO;
+				CODE_SIGN_ENTITLEMENTS = Runner/Runner.entitlements;
 				INFOPLIST_FILE = Runner/Info.plist;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
@@ -1229,6 +1262,7 @@
 				CLANG_ENABLE_MODULES = YES;
 				CURRENT_PROJECT_VERSION = "$(FLUTTER_BUILD_NUMBER)";
 				ENABLE_BITCODE = NO;
+				CODE_SIGN_ENTITLEMENTS = Runner/Runner.entitlements;
 				INFOPLIST_FILE = Runner/Info.plist;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
@@ -1251,6 +1285,7 @@
 				CLANG_ENABLE_MODULES = YES;
 				CURRENT_PROJECT_VERSION = "$(FLUTTER_BUILD_NUMBER)";
 				ENABLE_BITCODE = NO;
+				CODE_SIGN_ENTITLEMENTS = Runner/Runner.entitlements;
 				INFOPLIST_FILE = Runner/Info.plist;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
