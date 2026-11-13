@@ -17,7 +17,7 @@ enum GoldCapability {
   voiceEntry,
   allCharts,
   deepCoaching,
-  foreignAssets,
+  investmentAssets,
   csvExport,
   csvImport,
   pdfStatementImport,
