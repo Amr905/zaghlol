@@ -41,6 +41,8 @@
          10.8.0 is the newest release whose Microsoft.Extensions.* dependencies are 10.0.10, the runtime line pinned above
          (10.9.0+ need 10.0.11+, which central transitive pinning would reject as a downgrade). -->
     <PackageVersion Include="Microsoft.Extensions.Http.Resilience" Version="10.8.0" />
+    <!-- T-181: App Attest attestation/assertion CBOR (Microsoft's reader; no Apple .NET library exists). 10.0.10 is flagged by GHSA-vmv3-wvjp-wqpj (NU1902); 10.0.15, the newest 10.0.x, is not. No dependencies on net10.0, so it doesn't move the runtime line. -->
+    <PackageVersion Include="System.Formats.Cbor" Version="10.0.15" />
     <!-- Tests -->
     <PackageVersion Include="JsonSchema.Net" Version="7.3.4" />
     <PackageVersion Include="Microsoft.AspNetCore.Mvc.Testing" Version="10.0.0" />

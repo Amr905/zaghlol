@@ -35,7 +35,7 @@ internal sealed class PlayClientHost : IAsyncDisposable
     private readonly MeterListener meters = new();
     private readonly LockedWriter log = new();
 
-    private PlayClientHost(PlayWireMock play, IReadOnlyDictionary<string, string?> extra, IPlayAccessTokenSource? tokens, AppleBudgetPartition partition, PlayBudgetPartition playPartition, TimeProvider? clock)
+    private PlayClientHost(PlayWireMock play, IReadOnlyDictionary<string, string?> extra, IPlayAccessTokenSource? tokens, AppleBudgetPartition partition, PlayBudgetPartition playPartition, TimeProvider? clock, Action<IServiceCollection>? configure)
     {
         Play = play;
         var settings = new Dictionary<string, string?>(play.Settings()) { [TelemetryServiceCollectionExtensions.OtlpEndpointKey] = "http://127.0.0.1:1" };
@@ -70,6 +70,7 @@ internal sealed class PlayClientHost : IAsyncDisposable
             services.AddSingleton(tokens);
         }
 
+        configure?.Invoke(services);
         provider = services.BuildServiceProvider();
         tracer = provider.GetRequiredService<TracerProvider>();
 
@@ -102,14 +103,16 @@ internal sealed class PlayClientHost : IAsyncDisposable
     /// <param name="partition">T-134: the Apple budget partition (the worker's serves only <c>StoreLane.Notification</c>).</param>
     /// <param name="playPartition">T-133: the Play budget partition.</param>
     /// <param name="clock">T-133: the host's <see cref="TimeProvider"/> (the <c>Retry-After</c> date form).</param>
+    /// <param name="configure">T-181: extra registrations (the attestation verifiers) before the provider is built.</param>
     public static PlayClientHost Start(
         PlayWireMock play,
         IReadOnlyDictionary<string, string?>? extra = null,
         IPlayAccessTokenSource? tokens = null,
         AppleBudgetPartition partition = AppleBudgetPartition.Api,
         PlayBudgetPartition playPartition = PlayBudgetPartition.Api,
-        TimeProvider? clock = null) =>
-        new(play, extra ?? new Dictionary<string, string?>(), tokens, partition, playPartition, clock);
+        TimeProvider? clock = null,
+        Action<IServiceCollection>? configure = null) =>
+        new(play, extra ?? new Dictionary<string, string?>(), tokens, partition, playPartition, clock, configure);
 
     public IReadOnlyList<Dictionary<string, string?>> StoreCalls() =>
         [.. Measurements.Where(m => m.Instrument == "zaghlol.store.call" && m.Value > 0).Select(m => m.Tags)];

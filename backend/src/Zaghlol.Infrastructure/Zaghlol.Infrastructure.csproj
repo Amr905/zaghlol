@@ -23,6 +23,7 @@
     <PackageReference Include="OpenTelemetry.Instrumentation.Runtime" />
     <PackageReference Include="Serilog.Formatting.Compact" />
     <PackageReference Include="Serilog.Sinks.Console" />
+    <PackageReference Include="System.Formats.Cbor" />
   </ItemGroup>
 
   <ItemGroup>
@@ -32,6 +33,8 @@
   <ItemGroup>
     <!-- T-131: Apple Root CA - G3 (DER), the only trust anchor of the Apple JWS verifier. Its SHA-256 is asserted at startup. -->
     <EmbeddedResource Include="AppStore\AppleRootCA-G3.cer" LogicalName="Zaghlol.AppStore.AppleRootCA-G3.cer" />
+    <!-- T-181: Apple App Attestation Root CA (DER), the only trust anchor of the App Attest verifier. Its SHA-256 is asserted on load. -->
+    <EmbeddedResource Include="Attestation\AppleAppAttestationRootCA.cer" LogicalName="Zaghlol.Attestation.AppleAppAttestationRootCA.cer" />
   </ItemGroup>
 
 </Project>
