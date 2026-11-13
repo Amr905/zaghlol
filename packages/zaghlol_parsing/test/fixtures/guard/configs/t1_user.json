@@ -34,6 +34,10 @@
    "ch": "notification"
   },
   {
+   "value": "+201000000009",
+   "ch": "sms"
+  },
+  {
    "value": "club-7",
    "ch": "sms"
   },

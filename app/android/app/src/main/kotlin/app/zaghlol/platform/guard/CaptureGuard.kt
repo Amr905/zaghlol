@@ -73,7 +73,14 @@ class CaptureGuard(val config: GuardConfig?) {
         val inst = resolve(cfg, channel, sourceKey)
         val kind: GuardKeepKind = when {
             inst != null -> GuardKeepKind.REGISTRY
-            sourceKey.isNotEmpty() && GuardUserSender(channel.wire, sourceKey) in cfg.userSenders -> GuardKeepKind.USER
+            sourceKey.isNotEmpty() && GuardUserSender(channel.wire, sourceKey) in cfg.userSenders -> {
+                // FU-109 / FU-121: a user-added SMS sender is captured only when the body
+                // looks financial (the generic `bodyHints`); otherwise dropped here.
+                if (channel == GuardChannel.SMS && PHONE_NUMBER_SHAPE.matches(sourceKey) && cfg.bodyHints.none { it.containsMatchIn(folded) }) {
+                    return GuardDecision.Drop(GuardDropReason.NOT_FINANCIAL)
+                }
+                GuardKeepKind.USER
+            }
             (sourceKey.isNotEmpty() && channel != GuardChannel.NOTIFICATION && sourceKey in cfg.alwaysCapture) ||
                 channel == GuardChannel.APPLE_PAY ||
                 channel == GuardChannel.SHORTCUT_MESSAGE ||
@@ -147,6 +154,9 @@ class CaptureGuard(val config: GuardConfig?) {
 
         /** Longest raw source (Dart `kGuardMaxSourceLength`). */
         const val MAX_SOURCE_LENGTH = 256
+
+        /** A phone-number sender: optional `+`, then digits with spaces, dashes or brackets (Dart `_phoneNumberShape`). */
+        private val PHONE_NUMBER_SHAPE = Regex("^\\+?[0-9][0-9 ()-]{5,}$")
 
         private val CONFIG_INVALID = GuardDecision.Drop(GuardDropReason.CONFIG_INVALID)
     }
