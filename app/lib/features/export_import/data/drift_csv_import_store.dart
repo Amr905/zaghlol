@@ -68,13 +68,14 @@ class DriftCsvImportStore implements CsvImportStore {
   }
 
   @override
-  Future<void> insert(ImportedTxn row) {
+  Future<String> insert(ImportedTxn row) async {
     final now = _now().toUtc().millisecondsSinceEpoch;
     final amount = row.amount.toStorage();
     final original = row.originalAmount?.toStorage();
-    return _txns.insert(
+    final id = _newId();
+    await _txns.insert(
       TransactionsCompanion.insert(
-        id: _newId(),
+        id: id,
         accountId: row.accountId,
         source: TxnSource.csv.code,
         direction: row.direction.code,
@@ -94,5 +95,6 @@ class DriftCsvImportStore implements CsvImportStore {
         updatedAt: now,
       ),
     );
+    return id;
   }
 }

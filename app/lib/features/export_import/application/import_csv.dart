@@ -121,7 +121,8 @@ abstract interface class CsvImportStore {
   /// Live transactions of [accountId] at exactly [occurredAtMs].
   Future<List<ExistingTxnKey>> existingAt(String accountId, int occurredAtMs);
 
-  Future<void> insert(ImportedTxn row);
+  /// Inserts the row and returns its new id.
+  Future<String> insert(ImportedTxn row);
 }
 
 final class ImportSummary {
@@ -148,8 +149,12 @@ final class ImportSummary {
 }
 
 class ImportCsvUseCase {
-  ImportCsvUseCase(this._store);
+  /// [onImported] runs for every inserted row id after the import commits
+  /// (transfer pairing and refund matching hooks); the import stays
+  /// insert-only.
+  ImportCsvUseCase(this._store, {this.onImported});
   final CsvImportStore _store;
+  final Future<void> Function(String id)? onImported;
 
   Future<ImportSummary> run(Uint8List bytes) async {
     final table = parseCsv(bytes);
@@ -166,7 +171,8 @@ class ImportCsvUseCase {
     if (dataRows > importMaxRows) {
       throw ImportCsvException(ImportCsvException.tooManyRows);
     }
-    return _store.inWriteTransaction(() async {
+    final newIds = <String>[];
+    final summary = await _store.inWriteTransaction(() async {
       final accounts = await _store.accountIds();
       final categories = await _store.categoryIds();
       final problems = <ImportRowProblem, int>{};
@@ -216,7 +222,7 @@ class ImportCsvUseCase {
         if (nth <= have) {
           duplicates++;
         } else {
-          await _store.insert(v);
+          newIds.add(await _store.insert(v));
           imported++;
         }
       }
@@ -229,6 +235,13 @@ class ImportCsvUseCase {
         invalidRows: invalidRows,
       );
     });
+    final hook = onImported;
+    if (hook != null) {
+      for (final id in newIds) {
+        await hook(id);
+      }
+    }
+    return summary;
   }
 
   static int _ms(DateTime d) => d.toUtc().millisecondsSinceEpoch;

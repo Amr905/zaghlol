@@ -37,6 +37,9 @@ class BulkActions implements TxnBulkActions {
   final TransferPairingUseCase _pairing;
   final RefundMatching _refunds;
 
+  /// Ids of each delete batch, so an Undo can re-pair and re-link them.
+  final Map<String, Set<String>> _deleted = {};
+
   @override
   Future<BulkEditResult> setCategory(
     Set<String> ids,
@@ -59,9 +62,19 @@ class BulkActions implements TxnBulkActions {
       await _pairing.onRemoved(id);
       await _refunds.onRemoved(id);
     }
+    _deleted[result.batchId] = {...ids};
     return result;
   }
 
   @override
-  Future<UndoResult> undo(String batchId) => _bulk.undo(batchId);
+  Future<UndoResult> undo(String batchId) async {
+    final result = await _bulk.undo(batchId);
+    // Restored rows get their pairs and offset links back (idempotent).
+    final ids = _deleted.remove(batchId) ?? const <String>{};
+    for (final id in ids) {
+      await _pairing.onPersisted(id);
+      await _refunds.onPersisted(id);
+    }
+    return result;
+  }
 }

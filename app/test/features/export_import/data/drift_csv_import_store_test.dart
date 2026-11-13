@@ -1,7 +1,9 @@
 // T-155: the Drift store behind CSV import: real export -> import round
 // trip, re-import adds nothing. Synthetic data only.
 
+import 'package:zaghlol/features/transactions/application/transfer_pairing.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:zaghlol/core/db/app_database.dart';
 import 'package:zaghlol/core/db/daos/accounts_dao.dart';
 import 'package:zaghlol/core/db/daos/transactions_dao.dart';
 import 'package:zaghlol/features/export_import/application/export.dart';
@@ -79,4 +81,78 @@ void main() {
       );
     },
   );
+
+  test('import re-pairs transfers: spend and income match the original '
+      '(T-155 155-1)', () async {
+    final src = await EncryptedDb.open();
+    addTearDown(src.close);
+    final srcDao = TransactionsDao(src.db);
+    final srcAcc = AccountsDao(src.db);
+    await srcAcc.insert(account('acc1', institution: 'NBE', last4: '1111'));
+    await srcAcc.insert(account('acc2', institution: 'CIB', last4: '2222'));
+    await srcDao.insert(txn('x', direction: 'expense', amountMinor: 50000));
+    await srcDao.insert(
+      txn('o', direction: 'transfer_out', amountMinor: 100000),
+    );
+    await srcDao.insert(
+      txn(
+        'i',
+        accountId: 'acc2',
+        direction: 'transfer_in',
+        amountMinor: 100000,
+      ),
+    );
+    await TransferPairingUseCase(
+      src.db,
+      loadSchedule: () async => PaydaySchedule.single(1),
+      clock: () => DateTime.fromMillisecondsSinceEpoch(t0, isUtc: true),
+    ).onPersisted('i');
+    Future<List<int>> totals(AppDatabase db) async {
+      Future<int> sum(String dirs) async =>
+          (await db
+                  .customSelect(
+                    'SELECT coalesce(sum(amount_minor),0) AS s FROM transactions '
+                    'WHERE deleted_at IS NULL AND is_internal = 0 '
+                    'AND direction IN ($dirs)',
+                  )
+                  .getSingle())
+              .read<int>('s');
+      return [
+        await sum("'expense','fee'"),
+        await sum("'income','transfer_in','transfer_out'"),
+      ];
+    }
+
+    final original = await totals(src.db);
+    expect(original, [50000, 0]);
+
+    final bytes = encodeCsv([
+      exportHeader,
+      ...(await DriftTransactionRepository(srcDao).query()).map(exportRow),
+    ]);
+
+    final dst = await EncryptedDb.open();
+    addTearDown(dst.close);
+    final dstDao = TransactionsDao(dst.db);
+    final dstAcc = AccountsDao(dst.db);
+    await dstAcc.insert(account('acc1', institution: 'NBE', last4: '1111'));
+    await dstAcc.insert(account('acc2', institution: 'CIB', last4: '2222'));
+    final pairing = TransferPairingUseCase(
+      dst.db,
+      loadSchedule: () async => PaydaySchedule.single(1),
+      clock: () => DateTime.fromMillisecondsSinceEpoch(t0, isUtc: true),
+    );
+    final hooked = <String>[];
+    final imp = ImportCsvUseCase(
+      DriftCsvImportStore(dst.db, dstDao, dstAcc),
+      onImported: (id) async {
+        await pairing.onPersisted(id);
+        hooked.add(id);
+      },
+    );
+    final summary = await imp.run(bytes);
+    expect(summary.imported, 3);
+    expect(hooked.length, 3);
+    expect(await totals(dst.db), original);
+  });
 }

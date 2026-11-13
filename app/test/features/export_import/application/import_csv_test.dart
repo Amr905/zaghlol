@@ -46,9 +46,10 @@ class FakeStore implements CsvImportStore {
         ),
   ];
   @override
-  Future<void> insert(ImportedTxn row) async {
+  Future<String> insert(ImportedTxn row) async {
     if (failOnInsertN && rows.length == 1) throw StateError('boom');
     rows.add(row);
+    return 'id${rows.length}';
   }
 }
 

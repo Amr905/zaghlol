@@ -109,6 +109,23 @@ void main() {
     },
   );
 
+  test('Undo of a bulk delete re-pairs the legs; spend unchanged', () async {
+    Future<int> internal() async =>
+        (await db
+                .customSelect(
+                  'SELECT count(*) AS s FROM transactions WHERE is_internal = 1 AND deleted_at IS NULL',
+                )
+                .getSingle())
+            .read<int>('s');
+    expect(await internal(), 2);
+    final res = await actions.delete({'o'});
+    expect(await pairCount(), 0);
+    expect(await internal(), 0);
+    await actions.undo(res.batchId);
+    expect(await pairCount(), 1);
+    expect(await internal(), 2);
+  });
+
   test('Undo of a bulk category change restores rows', () async {
     final r = await actions.setCategory({'o', 'i'}, 'sys:food');
     expect(r.changed, 2);
