@@ -14,6 +14,12 @@ enum DigitsPref { auto, arabicIndic, western }
 
 enum ThemePref { system, light, dark }
 
+/// T-152 (FR-BAK-02): how often Gold backs up by itself.
+enum BackupScheduleMode { off, daily, weekly, monthly }
+
+/// T-152: where backups go. `none` until the user picks one.
+enum BackupDestinationPref { none, drive, icloud }
+
 /// The settings. Defaults are the SRS assumptions named beside them.
 abstract final class Settings {
   static final language = SettingKey.enumeration(
@@ -179,6 +185,33 @@ abstract final class Settings {
   /// When the paywall was last shown: epoch milliseconds UTC; null: never.
   static final paywallLastShown = SettingKey.optionalInteger(
     'paywall_last_shown',
+    min: 0,
+    max: 999999999999999,
+  );
+
+  // T-152 backup schedule and status (FR-BAK-02/04). Times: epoch ms UTC.
+  static final backupSchedule = SettingKey.enumeration(
+    'backup.schedule',
+    BackupScheduleMode.values,
+    byDefault: BackupScheduleMode.off,
+  );
+  static final backupDestination = SettingKey.enumeration(
+    'backup.destination',
+    BackupDestinationPref.values,
+    byDefault: BackupDestinationPref.none,
+  );
+  static final backupLastSuccess = SettingKey.optionalInteger(
+    'backup.last_success',
+    min: 0,
+    max: 999999999999999,
+  );
+  static final backupLastFailure = SettingKey.optionalInteger(
+    'backup.last_failure',
+    min: 0,
+    max: 999999999999999,
+  );
+  static final backupReminderAt = SettingKey.optionalInteger(
+    'backup.reminder_at',
     min: 0,
     max: 999999999999999,
   );
