@@ -12,7 +12,7 @@ import '../../../core/l10n/locale_providers.dart';
 import '../../../core/l10n/money_format.dart';
 import '../../../core/theme/z_tokens.dart';
 import '../../../core/ui/z_components.dart';
-import '../../gold/application/gating.dart';
+import '../../wealth/presentation/assets_section.dart';
 import '../../wealth/data/approx_view_providers.dart';
 import '../../wealth/domain/approx_view.dart';
 import '../domain/account.dart';
@@ -29,6 +29,8 @@ class MoneyTab extends ConsumerWidget {
     this.onOpenHidden,
     this.onCompare,
     this.onOpenAssetsPaywall,
+    this.onAddAsset,
+    this.onOpenPrices,
   });
 
   /// Add account (S-43).
@@ -37,6 +39,12 @@ class MoneyTab extends ConsumerWidget {
   final VoidCallback? onOpenHidden;
   final VoidCallback? onCompare;
   final VoidCallback? onOpenAssetsPaywall;
+
+  /// Add asset (S-44), Gold users.
+  final VoidCallback? onAddAsset;
+
+  /// Prices (S-45), Gold users.
+  final VoidCallback? onOpenPrices;
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -93,7 +101,11 @@ class MoneyTab extends ConsumerWidget {
                     ],
             ),
             const SizedBox(height: ZSpacing.xl),
-            _AssetsPlaceholder(onOpenPaywall: onOpenAssetsPaywall),
+            AssetsSection(
+              onAddAsset: onAddAsset,
+              onOpenPrices: onOpenPrices,
+              onOpenPaywall: onOpenAssetsPaywall,
+            ),
           ],
         ),
       ),
@@ -435,54 +447,6 @@ class _Skeleton extends StatelessWidget {
     );
     return ExcludeSemantics(
       child: Column(children: [bar(120), bar(64), bar(64), bar(64)]),
-    );
-  }
-}
-
-/// The Gold-gated assets area. T-121 replaces the body for Gold users; here
-/// Free users see the locked preview and Gold users see the section title.
-class _AssetsPlaceholder extends ConsumerWidget {
-  const _AssetsPlaceholder({this.onOpenPaywall});
-  final VoidCallback? onOpenPaywall;
-
-  @override
-  Widget build(BuildContext context, WidgetRef ref) {
-    final l10n = AppLocalizations.of(context);
-    final c = ZColors.of(context);
-    final gold = ref.watch(entitlementStateProvider).isGold;
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Row(
-          children: [
-            Flexible(
-              child: Text(
-                l10n.accountsOverviewAssetsTitle,
-                style: ZType.titleSmall.copyWith(color: c.text),
-              ),
-            ),
-            const SizedBox(width: ZSpacing.sm),
-            if (!gold) ZChip(label: l10n.commonGoldBadge, selected: true),
-          ],
-        ),
-        const SizedBox(height: ZSpacing.sm),
-        if (!gold)
-          ZCard(
-            onTap: onOpenPaywall,
-            child: Row(
-              children: [
-                Icon(Icons.lock_outline_rounded, color: c.accentDark),
-                const SizedBox(width: ZSpacing.md),
-                Expanded(
-                  child: Text(
-                    l10n.accountsOverviewAssetsLocked,
-                    style: ZType.bodySmall.copyWith(color: c.textMuted),
-                  ),
-                ),
-              ],
-            ),
-          ),
-      ],
     );
   }
 }
