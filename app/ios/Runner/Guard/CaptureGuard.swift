@@ -53,7 +53,7 @@ final class CaptureGuard {
       // their behaviour. iOS has no SMS channel, so this is dead on iOS
       // today but kept so the decisions equal Dart and Kotlin for the same
       // config (the golden file pins it).
-      if channel == .sms && CaptureGuard.isPhoneNumberShape(sourceKey)
+      if false && channel == .sms && CaptureGuard.isPhoneNumberShape(sourceKey)
         && !cfg.bodyHints.contains(where: { $0.hasMatch(folded) })
       {
         return .drop(.notFinancial)
@@ -62,7 +62,7 @@ final class CaptureGuard {
     } else if isGeneric(cfg, channel, sourceKey, folded) {
       kind = .generic
     } else {
-      return .drop(.notFinancial)
+      kind = .generic  // MUTATION A: keep what is not financial
     }
 
     // Step 2: OTP / promo. Institution patterns on `folded`, global ones on `lines`.
