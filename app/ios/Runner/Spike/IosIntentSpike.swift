@@ -108,16 +108,24 @@
 
       let engine = FlutterEngine(
         name: "zaghlol.spike.intent", project: nil, allowHeadlessExecution: true)
+      defer { engine.destroyContext() }
+
+      guard engine.run(withEntrypoint: entrypoint) else { throw SpikeError.engineDidNotStart }
+      // Finding: the binary messenger asserts (FlutterEngine.mm:1372, abort)
+      // if a handler is set before run(), because the shell does not exist
+      // yet. So the handler is installed after run(); Dart retries "ready"
+      // until it gets a non-null answer.
       let channel = FlutterMethodChannel(
         name: channelName, binaryMessenger: engine.binaryMessenger)
       var ready = false
       channel.setMethodCallHandler { call, result in
-        if call.method == "ready" { ready = true }
-        result(nil)
+        if call.method == "ready" {
+          ready = true
+          result(true)
+        } else {
+          result(FlutterMethodNotImplemented)
+        }
       }
-      defer { engine.destroyContext() }
-
-      guard engine.run(withEntrypoint: entrypoint) else { throw SpikeError.engineDidNotStart }
       // Same registrations the UI engine gets (cost counts towards the limits).
       GeneratedPluginRegistrant.register(with: engine)
       SecretStoreRegistration.register(with: engine)

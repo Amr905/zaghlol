@@ -33,16 +33,22 @@ MethodChannel startIosIntentSpike({BinaryMessenger? messenger}) {
       'digitRuns': RegExp('[0-9]+').allMatches(body).length,
     };
   });
-  unawaited(
-    channel
-        .invokeMethod<void>('ready')
-        .then<void>(
-          (_) {},
-          // No native side listening: nothing to do.
-          onError: (Object _) {},
-        ),
-  );
+  unawaited(_announceReady(channel));
   return channel;
+}
+
+/// Native installs its handler only after the engine runs (the messenger
+/// asserts before that), so the first attempts may find nobody listening.
+/// Retries every 20 ms for at most 10 s.
+Future<void> _announceReady(MethodChannel channel) async {
+  for (var i = 0; i < 500; i++) {
+    try {
+      if (await channel.invokeMethod<bool>('ready') ?? false) return;
+    } on MissingPluginException {
+      // not installed yet
+    }
+    await Future<void>.delayed(const Duration(milliseconds: 20));
+  }
 }
 
 /// Body of `spikeIntentMain` (lib/main.dart).
@@ -50,4 +56,10 @@ void runIosIntentSpike() {
   WidgetsFlutterBinding.ensureInitialized();
   DartPluginRegistrant.ensureInitialized();
   startIosIntentSpike();
+}
+
+/// Test entrypoint: starts but never announces ready (the "engine hangs"
+/// case; a missing entrypoint aborts the process, so it can't be tested).
+void runIosIntentSpikeSilent() {
+  WidgetsFlutterBinding.ensureInitialized();
 }

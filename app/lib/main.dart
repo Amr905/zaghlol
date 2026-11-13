@@ -54,6 +54,9 @@ void ingestionMain() => runIngestionMain();
 @pragma('vm:entry-point')
 void spikeIntentMain() => runIosIntentSpike();
 
+@pragma('vm:entry-point')
+void spikeIntentSilentMain() => runIosIntentSpikeSilent();
+
 /// Root widget: themed, localized, routed through the T-024 shell. It holds
 /// no user-facing strings itself.
 class ZaghlolApp extends ConsumerWidget {

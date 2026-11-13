@@ -64,8 +64,8 @@
     func testFailedEngineLeavesTheEntryAndForegroundDrainProcessesIt() async throws {
       let p = try pipeline()
       do {
-        try await p.capture(synthetic, entrypoint: "noSuchEntrypoint", readyTimeoutS: 3)
-        XCTFail("a missing entrypoint must not succeed")
+        try await p.capture(synthetic, entrypoint: "spikeIntentSilentMain", readyTimeoutS: 3)
+        XCTFail("an engine that never answers must not succeed")
       } catch {}
       XCTAssertEqual(p.spool.pendingIds().count, 1, "entry kept for the fallback")
       let n = try await p.drainPending()
