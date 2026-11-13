@@ -1,5 +1,8 @@
 ﻿== SUMMARY ==
-RUNNING sha=56093f9e7983b8b15b31407d0ec619be9b83127a
+SKIP sha=56093f9e7983b8b15b31407d0ec619be9b83127a no app/packages/backend changes
 
 == FULL LOG (last 1500 lines) ==
 auto task/ci-ios-sim-retry 56093f9e7983b8b15b31407d0ec619be9b83127a 2026-11-13T16:10:08.7841246+02:00
+
+
+
