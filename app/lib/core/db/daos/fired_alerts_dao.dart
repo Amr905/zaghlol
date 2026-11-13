@@ -40,6 +40,24 @@ class FiredAlertsDao {
     return changed == 1;
   });
 
+  /// Releases one fired alert (the platform refused to show it, FU-133).
+  Future<void> unmarkFired({
+    required String kind,
+    required String subjectId,
+    required String periodKey,
+    int threshold = 0,
+  }) => guardWrite(
+    () =>
+        (_db.delete(_db.firedAlerts)..where(
+              (a) =>
+                  a.kind.equals(kind) &
+                  a.subjectId.equals(subjectId) &
+                  a.periodKey.equals(periodKey) &
+                  a.threshold.equals(threshold),
+            ))
+            .go(),
+  );
+
   Future<bool> hasFired({
     required String kind,
     required String subjectId,

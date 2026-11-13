@@ -28,6 +28,7 @@ final class NotificationService {
     required this.gateway,
     required this.loadPrefs,
     required this.markFired,
+    required this.unmarkFired,
     DateTime Function()? now,
   }) : _now = now ?? DateTime.now;
 
@@ -43,6 +44,16 @@ final class NotificationService {
     required int at,
   })
   markFired;
+
+  /// Releases a claim made by [markFired] (FU-133): called when the gateway
+  /// failed, so a later retry can still alert.
+  final Future<void> Function({
+    required String kind,
+    required String subjectId,
+    required String periodKey,
+    required int threshold,
+  })
+  unmarkFired;
   final DateTime Function() _now;
 
   Future<AlertOutcome> notify(AlertRequest r) async {
@@ -69,12 +80,23 @@ final class NotificationService {
       payload: r.payload,
       at: delayed ? when.toUtc() : null,
     );
-    if (delayed) {
-      await gateway.schedule(n);
-      return AlertOutcome.scheduled;
+    // FU-133: the claim stays only if the platform accepted the alert.
+    try {
+      if (delayed) {
+        await gateway.schedule(n);
+        return AlertOutcome.scheduled;
+      }
+      await gateway.show(n);
+      return AlertOutcome.shown;
+    } catch (_) {
+      await unmarkFired(
+        kind: r.type.kind,
+        subjectId: r.subjectId,
+        periodKey: r.periodKey,
+        threshold: r.threshold,
+      );
+      rethrow;
     }
-    await gateway.show(n);
-    return AlertOutcome.shown;
   }
 
   /// A stable positive 31-bit id (FNV-1a) of the dedupe key.
