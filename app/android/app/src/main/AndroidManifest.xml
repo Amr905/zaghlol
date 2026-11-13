@@ -42,6 +42,15 @@
                 <action android:name="android.intent.action.MAIN"/>
                 <category android:name="android.intent.category.LAUNCHER"/>
             </intent-filter>
+            <!-- T-024: zaghlol://add, review, home, voice, budget, bills
+                 (notifications and widgets). Custom scheme only; the app
+                 maps unknown targets to Home and never logs the link. -->
+            <intent-filter>
+                <action android:name="android.intent.action.VIEW"/>
+                <category android:name="android.intent.category.DEFAULT"/>
+                <category android:name="android.intent.category.BROWSABLE"/>
+                <data android:scheme="zaghlol"/>
+            </intent-filter>
         </activity>
         <!-- T-060 / FR-ING-A-04: share-to-Zaghlol target. Exported because other
              apps must be able to start it; it accepts only ACTION_SEND with

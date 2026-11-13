@@ -3,14 +3,18 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import 'core/db/db_directory.dart';
 import 'core/db/db_key_providers.dart';
+import 'core/l10n/date_format.dart';
 import 'core/l10n/generated/app_localizations.dart';
 import 'core/l10n/locale_providers.dart';
+import 'core/routing/app_router.dart';
 import 'core/theme/app_theme.dart';
 import 'features/capture/presentation/capture_lifecycle.dart';
 import 'ingestion/ingestion_main.dart';
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
+  // FU-119: intl date symbols for ar/en before any date is formatted.
+  await initDateFormatting();
   final dbDirectory = await resolveDbDirectory();
   // T-047: the UI engine's capture module (drain, Guard config, health) runs
   // in every build; it starts once the database opens.
@@ -28,23 +32,24 @@ Future<void> main() async {
 @pragma('vm:entry-point')
 void ingestionMain() => runIngestionMain();
 
-/// Root widget. Placeholder until theming, routing and l10n land in later
-/// tasks; it deliberately contains no user-facing strings.
-class ZaghlolApp extends StatelessWidget {
+/// Root widget: themed, localized, routed through the T-024 shell. It holds
+/// no user-facing strings itself.
+class ZaghlolApp extends ConsumerWidget {
   const ZaghlolApp({super.key, this.locale});
 
   /// null follows the device; the language setting supplies it (T-023).
   final Locale? locale;
 
   @override
-  Widget build(BuildContext context) {
-    return MaterialApp(
+  Widget build(BuildContext context, WidgetRef ref) {
+    return MaterialApp.router(
       locale: locale,
       localizationsDelegates: AppLocalizations.localizationsDelegates,
       supportedLocales: AppLocalizations.supportedLocales,
+      onGenerateTitle: (context) => AppLocalizations.of(context).appName,
       theme: ZaghlolTheme.light,
       darkTheme: ZaghlolTheme.dark,
-      home: const Scaffold(body: SizedBox.shrink()),
+      routerConfig: ref.watch(appRouterProvider),
     );
   }
 }

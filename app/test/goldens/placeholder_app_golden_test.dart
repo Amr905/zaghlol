@@ -2,6 +2,7 @@
 library;
 
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:zaghlol/main.dart';
 
@@ -10,7 +11,8 @@ void main() {
     await tester.binding.setSurfaceSize(const Size(390, 844));
     addTearDown(() => tester.binding.setSurfaceSize(null));
 
-    await tester.pumpWidget(const ZaghlolApp());
+    await tester.pumpWidget(const ProviderScope(child: ZaghlolApp()));
+    await tester.pumpAndSettle();
 
     await expectLater(
       find.byType(ZaghlolApp),
