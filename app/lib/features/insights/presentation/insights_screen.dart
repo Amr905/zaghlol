@@ -8,6 +8,7 @@ import '../../../core/l10n/generated/app_localizations.dart';
 import '../../../core/theme/z_tokens.dart';
 import '../../../core/ui/z_segmented.dart';
 import '../../budget/presentation/budget_screen.dart';
+import 'charts/charts_screen.dart';
 
 enum InsightsSegment { charts, budget, bills }
 
@@ -38,7 +39,7 @@ class _InsightsScreenState extends State<InsightsScreen> {
     final c = ZColors.of(context);
     final body = switch (_segment) {
       InsightsSegment.charts =>
-        widget.chartsBuilder?.call(context) ?? const SizedBox.expand(),
+        widget.chartsBuilder?.call(context) ?? const ChartsScreen(),
       InsightsSegment.budget =>
         widget.budgetBuilder?.call(context) ?? const BudgetScreen(),
       InsightsSegment.bills =>
