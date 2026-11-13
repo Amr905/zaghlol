@@ -320,4 +320,96 @@ final class DriftIngestStore implements IngestStorePort {
     payload: payload,
     createdAt: createdAtMs,
   );
+
+  @override
+  Future<List<StoredRaw>> rawsToReparse({
+    required int registryVersion,
+    required String afterId,
+    required int limit,
+  }) => guardRead(() async {
+    final rows = await _db
+        .customSelect(
+          'SELECT id, channel, sender, body, received_at, sim_slot, '
+          'parse_status, template_id, template_version, registry_version '
+          'FROM raw_messages WHERE id > ?1 '
+          "AND channel IN ('sms', 'notification', 'shortcut_message', "
+          "'apple_pay') "
+          "AND (parse_status = 'reparse_pending' "
+          "OR (parse_status IN ('review', 'parsed') "
+          'AND registry_version < ?2)) '
+          'ORDER BY id LIMIT ?3',
+          variables: [
+            Variable.withString(afterId),
+            Variable.withInt(registryVersion),
+            Variable.withInt(limit),
+          ],
+          readsFrom: {_db.rawMessages},
+        )
+        .get();
+    return [
+      for (final r in rows)
+        StoredRaw(
+          id: r.read<String>('id'),
+          channel: r.read<String>('channel'),
+          sender: r.readNullable<String>('sender'),
+          body: r.read<String>('body'),
+          receivedAtMs: r.read<int>('received_at'),
+          simSlot: r.readNullable<int>('sim_slot'),
+          parseStatus: r.read<String>('parse_status'),
+          templateId: r.readNullable<String>('template_id'),
+          templateVersion: r.readNullable<int>('template_version'),
+          registryVersion: r.read<int>('registry_version'),
+        ),
+    ];
+  });
+
+  @override
+  Future<bool> promoteRaw(PromoteRaw p) => guardWrite(() async {
+    final changed = await _db.customUpdate(
+      'UPDATE raw_messages SET parse_status = ?3, registry_version = ?4, '
+      'institution_code = coalesce(?5, institution_code), '
+      'template_id = coalesce(?6, template_id), '
+      'template_version = coalesce(?7, template_version) '
+      'WHERE id = ?1 AND parse_status = ?2',
+      variables: [
+        Variable.withString(p.id),
+        Variable.withString(p.fromStatus),
+        Variable.withString(p.toStatus),
+        Variable.withInt(p.registryVersion),
+        Variable<String>(p.institutionCode),
+        Variable<String>(p.templateId),
+        Variable<int>(p.templateVersion),
+      ],
+      updates: {_db.rawMessages},
+    );
+    if (changed != 1) return false;
+    if (p.fromStatus == 'review' && p.toStatus == 'parsed') {
+      await _db.customUpdate(
+        "UPDATE review_items SET resolved_at = ?2, resolution = 'reparsed' "
+        'WHERE raw_message_id = ?1 AND resolved_at IS NULL',
+        variables: [Variable.withString(p.id), Variable.withInt(p.atMs)],
+        updates: {_db.reviewItems},
+      );
+    }
+    return true;
+  });
+
+  @override
+  Future<ReparseTarget?> txnOfRaw(String rawId) => guardRead(() async {
+    final rows = await _db
+        .customSelect(
+          'SELECT $_candidateColumns, '
+          '(t.transfer_pair_id IS NOT NULL OR t.is_internal = 1) AS linked '
+          '$_candidateFrom WHERE t.raw_message_id = ?1 '
+          'ORDER BY t.id LIMIT 1',
+          variables: [Variable.withString(rawId)],
+          readsFrom: {_db.transactions, _db.accounts, _db.rawMessages},
+        )
+        .get();
+    if (rows.isEmpty) return null;
+    return ReparseTarget(
+      _candidate(rows.single),
+      linked: rows.single.read<int>('linked') != 0,
+    );
+  });
 }

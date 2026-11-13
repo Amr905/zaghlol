@@ -280,3 +280,73 @@ final class BatchContext {
   @override
   String toString() => 'BatchContext';
 }
+
+/// A stored raw message the re-parse job looks at (T-076). The body is
+/// sensitive: it is never logged and never put in an error.
+final class StoredRaw {
+  const StoredRaw({
+    required this.id,
+    required this.channel,
+    required this.sender,
+    required this.body,
+    required this.receivedAtMs,
+    required this.parseStatus,
+    required this.registryVersion,
+    this.simSlot,
+    this.templateId,
+    this.templateVersion,
+  });
+
+  final String id;
+  final String channel;
+  final String? sender;
+  final String body;
+  final int receivedAtMs;
+  final int? simSlot;
+
+  /// `parsed`, `review` or `reparse_pending` (the only ones selected).
+  final String parseStatus;
+  final String? templateId;
+  final int? templateVersion;
+  final int registryVersion;
+
+  @override
+  String toString() => 'StoredRaw($parseStatus)';
+}
+
+/// Moves a raw row to [toStatus] and stamps the registry and template that
+/// parsed it, only while it is still in [fromStatus] (T-076). When a
+/// `review` row becomes `parsed`, its open review items are resolved in the
+/// same write.
+final class PromoteRaw {
+  const PromoteRaw({
+    required this.id,
+    required this.fromStatus,
+    required this.toStatus,
+    required this.registryVersion,
+    required this.atMs,
+    this.institutionCode,
+    this.templateId,
+    this.templateVersion,
+  });
+
+  final String id;
+  final String fromStatus;
+  final String toStatus;
+  final int registryVersion;
+  final int atMs;
+  final String? institutionCode;
+  final String? templateId;
+  final int? templateVersion;
+
+  @override
+  String toString() => 'PromoteRaw($fromStatus->$toStatus)';
+}
+
+/// The transaction a parsed raw message produced (T-076), and whether it is
+/// part of a transfer pair or marked internal.
+final class ReparseTarget {
+  const ReparseTarget(this.candidate, {required this.linked});
+  final TxnCandidate candidate;
+  final bool linked;
+}

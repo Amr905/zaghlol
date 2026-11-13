@@ -287,6 +287,164 @@ final class IngestRawMessages {
   }
 
   // ---------------------------------------------------------------------
+  // T-076: re-parse of a stored message.
+
+  /// Parses the stored [row] again with the current registry and applies
+  /// what changed, in one write transaction. Skips the Guard and dedupe 1
+  /// (the row is already stored); dedupe 2 and the pending/settled merge
+  /// still apply. Rules:
+  /// - `review` / `reparse_pending` row that now parses into a transaction
+  ///   (or a balance notice): the SAME raw row becomes `parsed` (its open
+  ///   review items resolve) and the normal pipeline writes the
+  ///   transaction. Anything that would again end in review, or still has
+  ///   no handler, changes nothing and creates no review item (FU-109:
+  ///   a personal-origin message never enters review; the origin is not
+  ///   stored, so a re-parse never creates review items at all).
+  /// - `parsed` row whose template changed: only the NULL fields of its
+  ///   transaction are filled (the cross-channel attach rule), and only
+  ///   when that transaction is live, not user-verified, not part of a
+  ///   transfer pair and consistent with the new parse. Amount, direction,
+  ///   status and category are never changed.
+  /// - A user-verified or deleted transaction is never written.
+  /// - Nothing is ever deleted.
+  /// A row the user or another engine changed since it was read is skipped
+  /// (the status guard of [IngestStorePort.promoteRaw]).
+  Future<ReparseResult> reparse(StoredRaw row) async {
+    final p = _prepare(
+      IncomingMessage(
+        deliveryId: row.id,
+        channel: row.channel,
+        source: row.sender ?? '',
+        body: row.body,
+        receivedAtMs: row.receivedAtMs,
+        simSlot: row.simSlot,
+        origin: MessageOrigin.reparse,
+      ),
+      existing: row,
+    );
+    final categorizer = await _guarded(_newCategorizer);
+    final state = _BatchState();
+    var outcome = ReparseOutcome.unchanged;
+    await _guarded(
+      () => _store.inWriteTransaction(() async {
+        final ctx = await _store.readContext();
+        state.schedule = _scheduleOf(ctx);
+        final scope = _BatchScope(
+          ctx,
+          _LabelLanguage.of(ctx.language),
+          categorizer,
+        );
+        final local = _Changes();
+        try {
+          outcome = await _store.inSavepoint(
+            () => _reparseOne(p, row, scope, local),
+          );
+          state.changes.addAll(local);
+        } on _RaceLost {
+          outcome = ReparseOutcome.skipped;
+        }
+      }),
+    );
+    final done = _finish(const [], state);
+    return ReparseResult(outcome, done.changedTxnIds);
+  }
+
+  Future<ReparseOutcome> _reparseOne(
+    _Prepared p,
+    StoredRaw row,
+    _BatchScope b,
+    _Changes local,
+  ) async {
+    final result = p.result;
+    final registryVersion = _pipeline.registry.registryVersion;
+    // Anything but a clean transaction or balance notice: no change. A
+    // review or parsed row is stamped so the next start skips it; a
+    // pending row is retried next time.
+    final CreateTxn? create;
+    final bool balanceOnly;
+    if (result is ParseParsed && p.txnSource != null) {
+      final d = dispositionOf(result.event, result.direction);
+      create = d is CreateTxn && result.fields.amount != null ? d : null;
+      balanceOnly = d is BalanceOnlyEvent;
+    } else {
+      create = null;
+      balanceOnly = false;
+    }
+    Future<ReparseOutcome> stamp() async {
+      if (row.parseStatus == RawStatus.reparsePending) {
+        return ReparseOutcome.unchanged;
+      }
+      final done = await _store.promoteRaw(
+        PromoteRaw(
+          id: row.id,
+          fromStatus: row.parseStatus,
+          toStatus: row.parseStatus,
+          registryVersion: registryVersion,
+          atMs: _nowMs(),
+        ),
+      );
+      return done ? ReparseOutcome.unchanged : ReparseOutcome.skipped;
+    }
+
+    if (row.parseStatus == RawStatus.parsed) {
+      if (result is! ParseParsed || create == null) return stamp();
+      final changed =
+          result.templateId != row.templateId ||
+          result.templateVersion != row.templateVersion;
+      if (!changed) return stamp();
+      final target = await _store.txnOfRaw(row.id);
+      final t = target?.candidate;
+      final amount = result.fields.amount;
+      if (target == null ||
+          t == null ||
+          amount == null ||
+          target.linked ||
+          t.isUserVerified ||
+          t.isDeleted ||
+          t.direction != create.direction ||
+          t.status != create.status ||
+          t.amount != amount) {
+        return stamp();
+      }
+      // Stamp first (conditional on the row's state), then fill.
+      final done = await _store.promoteRaw(
+        PromoteRaw(
+          id: row.id,
+          fromStatus: RawStatus.parsed,
+          toStatus: RawStatus.parsed,
+          registryVersion: registryVersion,
+          atMs: _nowMs(),
+          institutionCode: result.institutionCode,
+          templateId: result.templateId,
+          templateVersion: result.templateVersion,
+        ),
+      );
+      if (!done) throw const _RaceLost();
+      await _attach(
+        local,
+        b,
+        t,
+        result,
+        _occurred(result.fields.occurredAt).$1,
+      );
+      return local.txns.isEmpty
+          ? ReparseOutcome.unchanged
+          : ReparseOutcome.updated;
+    }
+
+    // review / reparse_pending.
+    if (create == null && !balanceOnly) return stamp();
+    final outcome = await _persist(p, b, local, result);
+    return switch (outcome) {
+      IngestInserted() ||
+      IngestMergedCrossChannel() ||
+      IngestMergedPending() ||
+      IngestBalanceOnly() => ReparseOutcome.converted,
+      _ => throw const _RaceLost(),
+    };
+  }
+
+  // ---------------------------------------------------------------------
   // Before the transaction.
 
   GuardConfig? _base() {
@@ -298,7 +456,7 @@ final class IngestRawMessages {
     return _baseConfig;
   }
 
-  _Prepared _prepare(IncomingMessage m) {
+  _Prepared _prepare(IncomingMessage m, {StoredRaw? existing}) {
     final regChannel = _registryChannelOf(m);
     final wallOffset = _zone.offsetAtInstant(m.receivedAtMs);
     final receivedWall = DateTime.fromMillisecondsSinceEpoch(
@@ -329,6 +487,7 @@ final class IngestRawMessages {
       senderKey: senderKey,
       bodyHash: bodyHashV1(senderKey: senderKey, body: m.body),
       txnSource: txnSourceOf(m.channel),
+      existing: existing,
     );
   }
 
@@ -1298,6 +1457,25 @@ final class IngestRawMessages {
     String? templateId,
     int? templateVersion,
   }) async {
+    final old = p.existing;
+    if (old != null) {
+      // T-076: the row already exists (and keeps its body_hash). Promote it
+      // only while it is still in the state this re-parse started from.
+      final done = await _store.promoteRaw(
+        PromoteRaw(
+          id: old.id,
+          fromStatus: old.parseStatus,
+          toStatus: status,
+          registryVersion: _pipeline.registry.registryVersion,
+          atMs: _nowMs(),
+          institutionCode: institution,
+          templateId: templateId,
+          templateVersion: templateVersion,
+        ),
+      );
+      if (!done) throw const _RaceLost();
+      return old.id;
+    }
     final id = _newId();
     final inserted = await _store.insertRaw(
       RawInsert(
@@ -1502,8 +1680,12 @@ final class _Prepared {
     required this.senderKey,
     required this.bodyHash,
     required this.txnSource,
+    this.existing,
   });
 
+  /// T-076: the stored row a re-parse works on; its raw row is updated, not
+  /// inserted.
+  final StoredRaw? existing;
   final IncomingMessage m;
   final ParseResult result;
   final String senderKey;

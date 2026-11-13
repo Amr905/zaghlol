@@ -98,11 +98,21 @@ final String _zbank =
 }
 ''';
 
-Registry loadTestRegistry() {
+/// [version] is the registry version; [transformBank] edits the bank JSON
+/// (T-076 tests build an "old" registry this way).
+Registry loadTestRegistry({
+  int version = 1,
+  String Function(String json)? transformBank,
+}) {
   final result = RegistryLoader.load(
-    manifest: _manifest,
+    manifest: _manifest.replaceFirst(
+      '"registryVersion": 1',
+      '"registryVersion": $version',
+    ),
     shared: _shared,
-    institutions: {'zbank.json': _zbank},
+    institutions: {
+      'zbank.json': transformBank == null ? _zbank : transformBank(_zbank),
+    },
   );
   final registry = result.registry;
   if (registry == null || !result.ok) {

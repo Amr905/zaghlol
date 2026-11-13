@@ -63,4 +63,22 @@ abstract interface class IngestStorePort {
     String? txnId,
     Map<String, Object?>? payload,
   });
+
+  /// T-076: raw messages with `id > afterId` that a re-parse may improve:
+  /// `review` or `parsed` rows stamped with a registry older than
+  /// [registryVersion], and every `reparse_pending` row. Background
+  /// channels only (a user-confirmed share/paste/OCR text is never parsed
+  /// again behind the user's back). Ordered by id, at most [limit].
+  Future<List<StoredRaw>> rawsToReparse({
+    required int registryVersion,
+    required String afterId,
+    required int limit,
+  });
+
+  /// T-076: see [PromoteRaw]. False when the row is no longer in
+  /// `fromStatus` (the user or another engine got there first).
+  Future<bool> promoteRaw(PromoteRaw row);
+
+  /// T-076: the transaction whose `raw_message_id` is [rawId], if any.
+  Future<ReparseTarget?> txnOfRaw(String rawId);
 }
