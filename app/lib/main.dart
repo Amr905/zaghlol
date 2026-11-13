@@ -3,6 +3,8 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import 'app/app_navigation.dart';
+import 'app/onboarding_gate.dart';
 import 'core/db/db_directory.dart';
 import 'core/db/db_key_providers.dart';
 import 'core/l10n/date_format.dart';
@@ -19,7 +21,6 @@ import 'features/capture/presentation/capture_lifecycle.dart';
 import 'features/gold/application/gold_providers.dart';
 import 'features/catalog_sync/application/sync_providers.dart';
 import 'features/catalog_sync/presentation/sync_lifecycle.dart';
-import 'features/home/presentation/home_screen.dart';
 import 'features/security/presentation/app_lock_gate.dart';
 import 'ingestion/ingestion_main.dart';
 import 'ingestion/ios_intent_spike.dart';
@@ -35,14 +36,14 @@ Future<void> main() async {
     ProviderScope(
       overrides: [
         dbDirectoryProvider.overrideWithValue(dbDirectory),
-        // T-054: Home is the first tab.
-        tabRootsProvider.overrideWithValue(
-          TabRoots(home: (_) => const HomeScreen()),
-        ),
+        // WIRE-NAV: the four tabs and every pushed route, wired.
+        tabRootsProvider.overrideWithValue(wiredTabRoots),
         // T-143 / FU-115 / FU-138: backend client, entitlement service, sync.
         ...syncWiringOverrides,
         // T-145: seat keys and the purchase flow.
         ...goldWiringOverrides,
+        // WIRE-NAV: paywall trigger, Gold sign-in, links, chart card opener.
+        ...navigationWiringOverrides(rootNavigatorKey),
         // T-086: new-card channel toggles become ignore rules (T-078).
         cardCapturePortProvider.overrideWith(
           (ref) => ref.watch(captureCardPortProvider),
@@ -87,8 +88,9 @@ class ZaghlolApp extends ConsumerWidget {
       darkTheme: ZaghlolTheme.dark,
       routerConfig: ref.watch(appRouterProvider),
       // T-103: app lock, privacy cover and secure window over the whole app.
-      builder: (context, child) =>
-          AppLockGate(child: child ?? const SizedBox.shrink()),
+      builder: (context, child) => AppLockGate(
+        child: OnboardingGate(child: child ?? const SizedBox.shrink()),
+      ),
     );
   }
 }
