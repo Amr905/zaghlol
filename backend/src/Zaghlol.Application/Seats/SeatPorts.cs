@@ -71,6 +71,9 @@ public interface ISeatTransaction : IAsyncDisposable
 {
     ISeatStore Seats { get; }
 
+    /// <summary>The App Attest keys in this same transaction (T-181): the restore's counter update commits or rolls back with the seat.</summary>
+    Purchases.Attestation.IAppAttestKeyStore AppAttestKeys { get; }
+
     Task CommitAsync(CancellationToken cancellationToken);
 }
 
