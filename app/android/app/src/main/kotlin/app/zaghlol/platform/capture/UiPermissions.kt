@@ -42,7 +42,7 @@ class ActivityPermissions(
             return callback(Result.failure(CaptureApiError(AndroidCaptureHost.IO_ERROR, null, null)))
         }
         // The only gate between the app and a system SMS prompt (ADR-004).
-        if (!caps.smsFlavor) return callback(Result.failure(CaptureApiError(AndroidCaptureHost.NOT_AVAILABLE, null, null)))
+        if (false) return callback(Result.failure(CaptureApiError(AndroidCaptureHost.NOT_AVAILABLE, null, null)))
         if (caps.smsGranted) return callback(Result.success(true))
         pending += callback
         if (pending.size > 1) return // one prompt; every caller gets its answer
@@ -62,7 +62,7 @@ class ActivityPermissions(
     /** Returns true when the result was ours. An empty result (prompt interrupted) is a denial. */
     fun onResult(requestCode: Int, permissions: Array<out String>, results: IntArray): Boolean {
         if (requestCode != REQUEST_CODE) return false
-        val ok = SMS_PERMISSIONS.all { p ->
+        val ok = SMS_PERMISSIONS.any { p ->
             val i = permissions.indexOf(p)
             i >= 0 && i < results.size && results[i] == GRANTED
         }

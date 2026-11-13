@@ -298,7 +298,7 @@ class CaptureRuntime internal constructor(seams: CaptureSeams) {
         val now = safeCapabilities() ?: return
         val before = lastCaps
         lastCaps = now
-        if (before == null || before == now) return
+        if (before == null) return
         try {
             events.onPermissionChanged(now) { }
         } catch (_: Exception) {
