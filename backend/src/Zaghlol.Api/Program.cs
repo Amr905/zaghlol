@@ -8,6 +8,7 @@ using Zaghlol.Api.Endpoints.V1;
 using Zaghlol.Api.Observability;
 using Zaghlol.Application;
 using Zaghlol.Infrastructure;
+using Zaghlol.Infrastructure.Attestation;
 using Zaghlol.Infrastructure.Catalog;
 using Zaghlol.Infrastructure.Contributions;
 using Zaghlol.Infrastructure.Entitlements;
@@ -81,6 +82,10 @@ builder.Services.AddZaghlolSync();
 // placeholder (T-132) is registered.
 builder.Services.AddZaghlolGooglePlay();
 builder.Services.AddZaghlolPurchaseVerification();
+// Restore (T-185): Play Integrity and App Attest verifiers (T-181, FU-120) and the restore flow; Production refuses to start unless the
+// real verifiers are registered, and the pinned Apple root and Attestation:* settings are validated at startup.
+builder.Services.AddZaghlolAttestation();
+builder.Services.AddZaghlolRestore();
 // App Store Server Notifications V2 ingest (T-134): verify and store only, on the App login; the worker processes.
 builder.Services.AddZaghlolAppleNotificationIngest();
 // Google RTDN push (T-133): Pub/Sub OIDC before the body, store only, on the App login; the worker processes. Production refuses to
