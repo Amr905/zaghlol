@@ -9,6 +9,7 @@ import 'package:flutter/widgets.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../gold/application/entitlement.dart';
+import '../../gold/application/gold_providers.dart';
 import '../application/sync_providers.dart';
 
 class SyncLifecycle extends ConsumerStatefulWidget {
@@ -46,10 +47,26 @@ class _SyncLifecycleState extends ConsumerState<SyncLifecycle>
     } on Object {
       // Stays Free (fail closed); the next resume tries again.
     }
+    await _startPurchases();
     await _tick();
   }
 
+  /// T-145: listen to the store from app start (Play and StoreKit redeliver
+  /// unfinished purchases then) and retry what the outbox holds.
+  Future<void> _startPurchases() async {
+    try {
+      await ref.read(purchaseServiceProvider).start();
+    } on Object {
+      // No store (tests, a device without Play): purchases are unavailable.
+    }
+  }
+
   Future<void> _tick() async {
+    try {
+      await ref.read(purchaseServiceProvider).retryDue();
+    } on Object {
+      // Retried at the next resume or timer.
+    }
     try {
       await ref.read(entitlementServiceProvider).onResume();
       final o = await ref.read(syncOrchestratorProvider.future);
