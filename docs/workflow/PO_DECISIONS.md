@@ -41,6 +41,10 @@ T-035 Q1–Q6 (keep with bundled rules; drop OTP+transaction messages, as the re
 | T-052 | Safe-to-spend always uses all cards (budgets aren't per card); the card filter changes only spend figures and the feed. |
 | T-185 Q1–Q3 | `movedFromOtherPhone` only when the seat came from another install; the per-purchase daily limit stays in memory while the API runs as one instance (T-140 go-live check); Android `attestation.seatKeys` → `VALIDATION_FAILED`. |
 | T-089 | A manual unlink is remembered through resolved review items; losing it after the review-history purge is accepted for now. |
+| T-094 / T-103 | Turning app lock on also turns on "hide amounts in notifications" (the user can turn it off). No alert type bypasses quiet hours yet. |
+| T-103 | With app lock on and the phone's screen lock removed, the app stays locked and asks the user to set a screen lock (no bypass). |
+| T-115 | The ≈ view rounds each converted currency once (half-even), then sums exactly; it is labelled ≈ whenever anything was converted or excluded. |
+| T-154 | The Free export preview shows up to 20 rows. |
 | T-109 | `دينار` keeps the default currency with `ambiguousCurrency`; the voice UI asks. Missing spoken keywords go into the T-059 catalog seed. |
 | Q-44, T-047 Q2, T-047 Q5 | `ux-designer` writes the copy in the voice guide; reviewed in T-058. Placement: Q-44 one-time Welcome line with a "restore" action; missed notifications as a dismissible card in capture settings (and the lowest-priority home banner); rule saved but not yet active as "اتحفظت — هتشتغل خلال ثواني" / "Saved — active in a few seconds". |
 

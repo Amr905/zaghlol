@@ -20,11 +20,11 @@
 |---|---|---|---|---|
 | M0 | 28 | 24 | 1 | 0 |
 | M1 | 29 | 18 | 0 | 1 |
-| M2 | 29 | 5 | 0 | 0 |
-| M3 | 18 | 1 | 0 | 0 |
-| M4 | 17 | 3 | 0 | 0 |
+| M2 | 29 | 6 | 0 | 0 |
+| M3 | 18 | 2 | 0 | 0 |
+| M4 | 17 | 4 | 0 | 0 |
 | M5 | 35 | 22 | 1 | 1 |
-| M6 | 19 | 1 | 1 | 2 |
+| M6 | 19 | 2 | 1 | 2 |
 | M7 | 11 | 0 | 0 | 0 |
 
 ## Tasks
@@ -107,7 +107,7 @@
 | T-075 | Categorizer with fuzzy merchant matching | M2 | C3 | Sonnet | parsing-engine-engineer | T-034, T-018, T-074, T-030 | DONE | batch 6 local: every app-ci step green (app tests, packages, lints, Pigeon/drift stale checks, no-logging grep), backend Release build 0 warnings, format clean, no vulnerable packages; batch CI (`batch/2026-11-11-5`); review [T-075](05-reviews/T-075.md) APPROVED (FU-095 harness negative proof re-run) | Batch 6. Takes FU-095. PO-1…PO-4 provisional (Arabic El Ezaby aliases need native review with T-059). FU-100 |
 | T-076 | Re-parse job after registry version bump | M2 | C3 | Sonnet | flutter-core-engineer | T-046, T-032 | TODO | — |  |
 | T-077 | Bulk edit and undo use case | M2 | C3 | Sonnet | flutter-core-engineer | T-050, T-074 | DONE | batch 9 review [batch-9](05-reviews/batch-9.md) APPROVED after fix 77-1 (delta re-review) | Batch 9. FU-114 |
-| T-078 | Ignore rules domain: per card/channel, before-seen, keep/delete, re-scan | M2 | C3 | Sonnet | flutter-core-engineer | T-047, T-050 | TODO | — |  |
+| T-078 | Ignore rules domain: per card/channel, before-seen, keep/delete, re-scan | M2 | C3 | Sonnet | flutter-core-engineer | T-047, T-050 | DONE | batch 13 review [batch-13](05-reviews/batch-13.md) APPROVED | Batch 13. FU-132 |
 | T-079 | Transactions list S-11 with filters, search and selection mode | M2 | C2 | Sonnet | flutter-ui-engineer | T-050, T-077, T-024, T-029 | TODO | — |  |
 | T-080 | Transaction detail S-12 and add/edit sheet S-13 | M2 | C2 | Sonnet | flutter-ui-engineer | T-050, T-075, T-045, T-029 | TODO | — |  |
 | T-081 | Review queue S-14 | M2 | C2 | Sonnet | flutter-ui-engineer | T-049, T-074, T-029 | TODO | — |  |
@@ -123,7 +123,7 @@
 | T-091 | Splits and reimbursements with allocation and unassign | M3 | C3 | Sonnet | flutter-core-engineer | T-090 | TODO | — |  |
 | T-092 | Reimbursement and cross-currency pair suggestions | M3 | C2 | Sonnet | flutter-core-engineer | T-091, T-049 | TODO | — |  |
 | T-093 | Split/reimbursement sheet S-15 and link-transfer sheet S-16 | M3 | C2 | Sonnet | flutter-ui-engineer | T-091, T-089, T-080 | TODO | — |  |
-| T-094 | Local notifications service (types, quiet hours, redaction) | M3 | C2 | Sonnet | flutter-core-engineer | T-020 | TODO | — |  |
+| T-094 | Local notifications service (types, quiet hours, redaction) | M3 | C2 | Sonnet | flutter-core-engineer | T-020 | DONE | batch 13 review [batch-13](05-reviews/batch-13.md) APPROVED | Batch 13. FU-133 |
 | T-095 | Budgets per category and currency with threshold alerts | M3 | C2 | Sonnet | flutter-core-engineer | T-051, T-094 | TODO | — |  |
 | T-096 | Subscriptions detection, installments, gameya, card dues and reminders | M3 | C3 | Sonnet | flutter-core-engineer | T-050, T-094 | TODO | — |  |
 | T-097 | Contextual setup suggestions (payday, budgets, backup) | M3 | C2 | Sonnet | flutter-core-engineer | T-051, T-049 | TODO | — |  |
@@ -132,7 +132,7 @@
 | T-100 | Duplicate-charge and weekly-summary notifications | M3 | C2 | Sonnet | flutter-core-engineer | T-094, T-046, T-051 | TODO | — |  |
 | T-101 | Insights shell and Budget S-22 (+ edit budgets) | M3 | C2 | Sonnet | flutter-ui-engineer | T-095, T-087, T-024 | TODO | — |  |
 | T-102 | Bills & installments S-24 and add/edit recurring item | M3 | C2 | Sonnet | flutter-ui-engineer | T-096, T-087 | TODO | — |  |
-| T-103 | App lock, privacy overlay and screenshot hiding | M3 | C3 | Sonnet | native-platform-engineer | T-004, T-020 | TODO | — |  |
+| T-103 | App lock, privacy overlay and screenshot hiding | M3 | C3 | Sonnet | native-platform-engineer | T-004, T-020 | IN_PROGRESS | batch 13 review APPROVED, but **pulled out of batch 13**: db-platform iOS simulator hangs at app launch (twice, 60 min; main passes in 12 min). Back to the native lane | Batch 13. FU-130 |
 | T-104 | Home contextual cards and Settings 'finish setup' | M3 | C2 | Sonnet | flutter-ui-engineer | T-054, T-097, T-103 | TODO | — |  |
 | T-105 | Chart query layer for all 12 charts | M4 | C3 | Sonnet | flutter-core-engineer | T-051, T-096, T-091 | TODO | — |  |
 | T-106 | Explanation template engine (basic vs deep coaching) | M4 | C3 | Sonnet | flutter-core-engineer | T-105, T-027 | TODO | — |  |
@@ -144,7 +144,7 @@
 | T-112 | Prices and FX store in app (sync-fed, manual override, stale) | M4 | C2 | Sonnet | flutter-core-engineer | T-019 | DONE | batch 7 local: every app-ci step green, backend Release build 0 warnings, format clean, no vulnerable packages; batch CI (`batch/2026-11-11-6`); review [T-112](05-reviews/T-112.md) APPROVED | Batch 7. Manual FX override needs a schema change: OQ filed. FU-106 |
 | T-113 | Assets, liabilities, net worth per unit and snapshots | M4 | C3 | Sonnet | flutter-core-engineer | T-112, T-045, T-096 | TODO | — |  |
 | T-114 | Charts: remaining eight (Gold) | M4 | C2 | Sonnet | flutter-ui-engineer | T-107, T-113 | TODO | — |  |
-| T-115 | ≈ combined view service (target currency, rate date, exclusions) | M4 | C3 | Sonnet | flutter-core-engineer | T-012, T-112 | TODO | — |  |
+| T-115 | ≈ combined view service (target currency, rate date, exclusions) | M4 | C3 | Sonnet | flutter-core-engineer | T-012, T-112 | DONE | batch 13 review [batch-13](05-reviews/batch-13.md) APPROVED (≈ label fix by Lead) | Batch 13. FU-134 |
 | T-116 | Shared per-currency figures and currency switcher component | M4 | C2 | Sonnet | flutter-ui-engineer | T-115, T-054 | TODO | — |  |
 | T-117 | Achievement share cards with hidden amounts by default | M4 | C2 | Sonnet | flutter-ui-engineer | T-105, T-022 | TODO | — |  |
 | T-118 | Home-screen widgets (Android Glance, iOS WidgetKit) | M4 | C3 | Sonnet | native-platform-engineer | T-051, T-004 | TODO | — |  |
@@ -183,7 +183,7 @@
 | T-151 | iCloud backup host (native) and Dart adapter | M6 | C4 | Opus | native-platform-engineer | T-149, T-004 | TODO | — |  |
 | T-152 | Backup schedules, slots and reminders (Free 1 slot, Gold 5 versions) | M6 | C3 | Sonnet | flutter-core-engineer | T-150, T-151, T-119, T-094 | TODO | — |  |
 | T-153 | Backup & restore screens S-66 and S-04 | M6 | C2 | Sonnet | flutter-ui-engineer | T-152, T-087 | TODO | — |  |
-| T-154 | CSV and Excel export with preview for Free | M6 | C2 | Sonnet | flutter-core-engineer | T-050, T-119 | TODO | — |  |
+| T-154 | CSV and Excel export with preview for Free | M6 | C2 | Sonnet | flutter-core-engineer | T-050, T-119 | DONE | batch 13 review [batch-13](05-reviews/batch-13.md) APPROVED | Batch 13. FU-131 |
 | T-155 | Zaghlol CSV import with duplicate detection | M6 | C3 | Sonnet | flutter-core-engineer | T-046, T-154 | TODO | — |  |
 | T-156 | Bank PDF statement import (CIB, NBE, QNB, Banque Misr) | M6 | C3 | Sonnet | parsing-engine-engineer | T-033, T-031 | BLOCKED | — | Needs sample statements (OQ-04) |
 | T-157 | Online-bank statement import (Wise, Revolut, Monzo, bunq, N26) | M6 | C3 | Sonnet | parsing-engine-engineer | T-155, T-071 | BLOCKED | — | Needs sample statements (OQ-04) |
@@ -355,6 +355,12 @@
 - **FU-128** (T-180 batch-12 review): **real-device sleep/Doze/reboot tests (`docs/05-reviews/T-180-device.md`) before T-144 ships** — added to the PO device list; Android `bootCount` may be null (T-144 uses the monotonic-drop rule); a headless engine that needs the clock must register it.
 - **FU-129** (T-185 batch-12 review): the 10/day per-purchase limit is in process memory — fine for one instance; **T-140 go-live check: move it to a shared table before running more than one API instance**; `movedFromOtherPhone` is true only when the seat came from another install (Lead); Android `attestation.seatKeys` returns `VALIDATION_FAILED`; other minors in the report.
 
+- **FU-130** (T-103 batch-13 review): **T-104 sets `hide_amounts.notifications` to true when the user turns app lock on** (Lead decision, user can turn it off); Arabic Face ID string (`InfoPlist.strings`); `FLAG_SECURE` applies only after Dart reads the setting (brief gap on cold start); rooted warning not persisted; manual device steps in the task file; no-screen-lock behaviour (stays locked with a message) accepted by the Lead.
+- **FU-131** (T-154 batch-13 review): run ids through `neutralizeFormula` too; offset paging can skip/duplicate rows if data changes mid-export (use keyset paging or a snapshot); unzip the xlsx with a real reader in tests; manual Windows Excel check; the export UI (preview, warning, picker, strings) is a later task.
+- **FU-132** (T-078 batch-13 review): per-id try/catch around `onRemoved` so one failure doesn't skip the rest or lose the undo batch ids, plus a startup sweep that dissolves pairs pointing at a deleted leg (crash between delete and `onRemoved`); one `IN` query in `_pairedAmong`; provider wiring in T-085/T-086.
+- **FU-133** (T-094 batch-13 review): write the dedupe row only after `gateway.show/schedule` succeeds; re-check redaction at fire time for alerts scheduled during quiet hours; the `flutter_local_notifications` adapter and provider wiring land with T-095; an `urgent` flag if any type should bypass quiet hours.
+- **FU-134** (T-115 batch-13 review): UI tasks T-116/T-162 show the "not included" note whenever `excluded` is non-empty; test of the provider's "on" path with a real `PricesRepository`.
+
 ## Log
 | Date | Event |
 |---|---|
@@ -421,3 +427,4 @@
 | 2026-11-13 | Batch 10 (`batch/2026-11-13-10`), first batch under the cost rules: T-023, T-043, T-109, T-132, T-141 DONE. FU-115…FU-119. Progress 65/186. |
 | 2026-11-13 | Batch 11 (`batch/2026-11-13-11`): T-048, T-049, T-119, T-181, T-183 DONE. FU-120…FU-124. Progress 70/186. |
 | 2026-11-13 | Batch 12 (`batch/2026-11-13-12`): T-024, T-052, T-089, T-180, T-185 DONE. FU-125…FU-129. Progress 75/186. |
+| 2026-11-13 | Batch 13 (`batch/2026-11-13-13`): T-078, T-094, T-115, T-154 DONE; T-103 pulled out (iOS db-platform launch hang). FU-130…FU-134. Progress 79/186. |

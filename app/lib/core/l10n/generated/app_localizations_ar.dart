@@ -56,4 +56,7 @@ class AppLocalizationsAr extends AppLocalizations {
 
   @override
   String get ingestionReviewTitle => 'مستني رأيك 👀';
+
+  @override
+  String get notificationsChannelName => 'التنبيهات';
 }
