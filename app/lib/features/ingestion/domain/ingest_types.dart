@@ -23,10 +23,15 @@ enum MessageOrigin {
 
   /// Share, paste or OCR text after the user confirmed it (§11): skips the
   /// Guard, is stored user-verified, and is never merged automatically.
-  userConfirmed;
+  userConfirmed,
+
+  /// T-076: a stored message parsed again after a registry bump. It was
+  /// through the Guard when it was first captured, so the re-check and
+  /// dedupe 1 are skipped; dedupe 2 still applies. Never user-confirmed.
+  reparse;
 
   /// Background origins go through the Guard re-check (BR-CAP-01).
-  bool get isBackground => this != userConfirmed;
+  bool get isBackground => this != userConfirmed && this != reparse;
 }
 
 /// One message to ingest. [channel] is a `raw_messages.channel` wire value.
@@ -221,4 +226,33 @@ final class IngestBatchFailed extends SafeException {
 
   /// True when the same batch may succeed on the next cycle (busy, I/O).
   bool get isTransient => code == writeFailed || code == readFailed;
+}
+
+/// What a re-parse did to one stored message (T-076).
+enum ReparseOutcome {
+  /// A review or pending message now produced a transaction (or merged into
+  /// one, or recorded a balance); its raw row is `parsed`.
+  converted,
+
+  /// A parsed message's unverified transaction had NULL fields filled.
+  updated,
+
+  /// Nothing to apply (still unrecognized, no handler, locked by the user's
+  /// own edit, or the same template).
+  unchanged,
+
+  /// The row changed under us (user action or another engine): left alone.
+  skipped,
+}
+
+/// Result of one re-parse. [changedTxnIds] are the transactions written;
+/// the caller runs transfer pairing for them after the commit.
+final class ReparseResult {
+  ReparseResult(this.outcome, Iterable<String> changedTxnIds)
+    : changedTxnIds = Set.unmodifiable(changedTxnIds);
+  final ReparseOutcome outcome;
+  final Set<String> changedTxnIds;
+
+  @override
+  String toString() => 'ReparseResult(${outcome.name})';
 }
