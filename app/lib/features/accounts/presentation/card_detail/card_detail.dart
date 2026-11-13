@@ -29,6 +29,10 @@ import '../edit_card/add_card_flow.dart';
 import '../edit_card/merge_flow.dart';
 import 'card_detail_providers.dart';
 
+// ICU select keys of accountsDetailIgnoredBanner.
+const String _platformIos = 'ios';
+const String _platformOther = 'other';
+
 class CardDetailScreen extends ConsumerStatefulWidget {
   const CardDetailScreen({
     super.key,
@@ -528,7 +532,9 @@ class _IgnoredBanner extends ConsumerWidget {
     return Padding(
       padding: const EdgeInsetsDirectional.only(bottom: ZSpacing.md),
       child: ZBanner(
-        message: l.accountsDetailIgnoredBanner(ios ? 'ios' : 'other'),
+        message: l.accountsDetailIgnoredBanner(
+          ios ? _platformIos : _platformOther,
+        ),
         tone: ZBannerTone.warning,
         actionLabel: l.accountsDetailTrackAgain,
         onAction: () async {
