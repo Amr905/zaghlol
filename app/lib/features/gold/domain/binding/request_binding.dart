@@ -46,9 +46,9 @@ Uint8List _join(List<List<int>> parts) {
 const List<int> _nul = [0];
 
 /// bodyHash = SHA-256("zaghlol-restore-v1" 00 installId 00
-/// JCS(body without top-level "attestation")). [body] must come from
-/// [parseStrictJson]; prefer [restoreBodyHashFromJson].
-Uint8List restoreBodyHash(String installId, Map<String, Object?> body) {
+/// JCS(body without top-level "attestation")). Private: only the strict
+/// parse path ([restoreBodyHashFromJson]) is public.
+Uint8List _restoreBodyHashOfMap(String installId, Map<String, Object?> body) {
   final id = _checkedInstallId(installId);
   final stripped = Map<String, Object?>.of(body)..remove('attestation');
   return sha256Bytes(
@@ -69,7 +69,7 @@ Uint8List restoreBodyHashFromJson(String installId, String rawBody) {
   if (v is! Map<String, Object?>) {
     throw const BindingException(BindingFailure.malformedJson);
   }
-  return restoreBodyHash(installId, v);
+  return _restoreBodyHashOfMap(installId, v);
 }
 
 /// JCS text of the body without "attestation" (for tests and diagnostics).

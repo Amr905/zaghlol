@@ -51,9 +51,7 @@ final class EntitlementState {
 
   static const EntitlementState free = EntitlementState._(Tier.free);
 
-  /// Only for [EntitlementNotifier] and tests of verified state.
-  @visibleForTesting
-  static const EntitlementState goldForTest = EntitlementState._(Tier.gold);
+  static const EntitlementState _gold = EntitlementState._(Tier.gold);
 
   final Tier tier;
 
@@ -140,17 +138,17 @@ class EntitlementNotifier extends Notifier<EntitlementState> {
   EntitlementState build() => EntitlementState.free;
 
   /// Called by T-144 with the result of verifying the signed token against
-  /// trusted time. Anything but an explicit `active` is Free (fail closed).
+  /// trusted time. Gold for `active` and `grace` (backend-api 4.3); anything else is Free.
   void applyVerified({required bool verified, required String? status}) {
-    state = (verified && status == 'active')
-        ? EntitlementState.goldForTest
+    state = (verified && (status == 'active' || status == 'grace'))
+        ? EntitlementState._gold
         : EntitlementState.free;
   }
 
   /// Dev builds only; ignored in profile/release.
   void debugOverride(bool gold) {
     if (!kDebugMode) return;
-    state = gold ? EntitlementState.goldForTest : EntitlementState.free;
+    state = gold ? EntitlementState._gold : EntitlementState.free;
   }
 
   void reset() => state = EntitlementState.free;

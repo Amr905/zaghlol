@@ -4,7 +4,13 @@ import 'package:zaghlol/features/gold/application/gating.dart';
 
 void main() {
   const free = EntitlementState.free;
-  const gold = EntitlementState.goldForTest;
+  final gold = () {
+    final c = ProviderContainer();
+    c
+        .read(entitlementStateProvider.notifier)
+        .applyVerified(verified: true, status: 'active');
+    return c.read(entitlementStateProvider);
+  }();
 
   test(
     'every Gold capability is blocked for Free on create, open for Gold',
@@ -88,5 +94,33 @@ void main() {
     c.read(entitlementStateProvider.notifier).debugOverride(true);
     expect(c.read(p)(GoldCapability.csvExport), isTrue);
     expect(seen.length, 1);
+  });
+
+  test('applyVerified: Gold only for active and grace, every status', () {
+    for (final st in [
+      'active',
+      'grace',
+      'paused',
+      'moved',
+      'refunded',
+      'expired',
+      'none',
+      'unknown',
+      'ACTIVE',
+      '',
+      null,
+    ]) {
+      final c = ProviderContainer();
+      addTearDown(c.dispose);
+      final n = c.read(entitlementStateProvider.notifier);
+      n.applyVerified(verified: true, status: st);
+      expect(
+        c.read(entitlementStateProvider).isGold,
+        st == 'active' || st == 'grace',
+        reason: '$st',
+      );
+      n.applyVerified(verified: false, status: st);
+      expect(c.read(entitlementStateProvider).isGold, isFalse, reason: '$st');
+    }
   });
 }

@@ -105,6 +105,27 @@ void main() {
     },
   );
 
+  test('049-1: manual entry is refused for items that already have a '
+      'transaction', () async {
+    await db.into(db.transactions).insert(txn('t1'));
+    await seed('r1', ReviewKind.lowConfidence, raw: 'raw1', txnId: 't1');
+    await seed('r2', ReviewKind.unrecognized, raw: 'raw2', txnId: 't1');
+    for (final id in ['r1', 'r2']) {
+      await expectLater(
+        repo.resolveManually(id, input()),
+        throwsA(
+          isA<ReviewException>().having(
+            (e) => e.code,
+            'code',
+            ReviewException.notApplicable,
+          ),
+        ),
+      );
+    }
+    expect((await db.select(db.transactions).get()).length, 1);
+    expect(await repo.countOpen(), 2);
+  });
+
   test('manual entry twice creates one transaction', () async {
     await seed('r1', ReviewKind.unrecognized, raw: 'raw1');
     await repo.resolveManually('r1', input());

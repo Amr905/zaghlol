@@ -594,6 +594,10 @@ final class IngestRawMessages {
     ParseResult result,
     String code,
   ) async {
+    // FU-109: a personal-origin message never enters the review queue.
+    if (p.m.origin == MessageOrigin.inboxScanPersonal) {
+      return const IngestDropped('personal_unparsed');
+    }
     final rawId = await _insertRaw(
       p,
       status: RawStatus.review,

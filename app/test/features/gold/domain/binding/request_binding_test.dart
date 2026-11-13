@@ -182,17 +182,24 @@ void main() {
   });
 
   group('R2-1 / R4-1(3)', () {
-    final body = parseStrictJson(
-      jsonEncode(valid.first['body']),
-    ) as Map<String, Object?>;
+    final rawBody = jsonEncode(valid.first['body']);
     test('different installId gives a different bodyHash', () {
-      final a = restoreBodyHash('0193f2c4-7a10-4c52-9d3e-5b1f8a2c6e77', body);
-      final b = restoreBodyHash('0193f2c4-7a10-4c52-9d3e-5b1f8a2c6e78', body);
+      final a = restoreBodyHashFromJson(
+        '0193f2c4-7a10-4c52-9d3e-5b1f8a2c6e77',
+        rawBody,
+      );
+      final b = restoreBodyHashFromJson(
+        '0193f2c4-7a10-4c52-9d3e-5b1f8a2c6e78',
+        rawBody,
+      );
       expect(_hex(a), isNot(_hex(b)));
     });
     test('upper-case installId is refused, not normalised', () {
       expect(
-        () => restoreBodyHash('0193F2C4-7A10-4C52-9D3E-5B1F8A2C6E77', body),
+        () => restoreBodyHashFromJson(
+          '0193F2C4-7A10-4C52-9D3E-5B1F8A2C6E77',
+          rawBody,
+        ),
         throwsA(isA<BindingException>()),
       );
     });

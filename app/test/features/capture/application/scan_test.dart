@@ -1,6 +1,8 @@
 // T-048: InboxScanner over fakes. Synthetic data; a canary proves no body,
 // address or amount reaches progress or errors.
 
+import 'dart:async';
+
 import 'package:flutter_test/flutter_test.dart';
 import 'package:zaghlol/features/capture/application/scan.dart';
 import 'package:zaghlol/features/capture/domain/scan_plan.dart';
@@ -50,6 +52,33 @@ void main() {
     includePersonal: personal,
     onlyInstitutions: only,
   );
+
+  test('048-1: a different request arriving mid-scan runs after it with its '
+      'own result; a covered one joins the last queued', () async {
+    final gate = Completer<void>();
+    final inner = inboxOf([row(1, 'ZBANK')]);
+    host.onQueryInbox = (q) async {
+      if (host.inboxQueries.length == 1) await gate.future;
+      return inner(q);
+    };
+    final catchUp = scanner.run(
+      ScanRequest(sinceMs: since + 1000, includePersonal: true),
+    );
+    await Future<void>.delayed(Duration.zero);
+    final longer = ScanRequest(sinceMs: since - 5000);
+    final first = scanner.run(longer);
+    final joined = scanner.run(ScanRequest(sinceMs: since + 2000));
+    expect(identical(joined, first), isTrue);
+    expect(identical(first, catchUp), isFalse);
+    gate.complete();
+    expect((await catchUp).phase, ScanPhase.done);
+    expect((await first).phase, ScanPhase.done);
+    expect(
+      host.inboxQueries.map((q) => q.sinceEpochMs).toSet(),
+      containsAll([since + 1000, since - 5000]),
+    );
+    expect(scanner.isRunning, isFalse);
+  });
 
   test('pages through the inbox: first page small, later pages 500; every row '
       'ingested once with origin inboxScan and channel sms', () async {

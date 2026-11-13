@@ -114,6 +114,11 @@ class ReviewRepository {
       throw ReviewException(ReviewException.invalid);
     }
     return _act(itemId, (item) async {
+      if ((item.kind != ReviewKind.unrecognized &&
+              item.kind != ReviewKind.newSender) ||
+          item.txnId != null) {
+        throw ReviewException(ReviewException.notApplicable);
+      }
       if (!await _resolve(item, ReviewResolution.manual)) {
         return const ReviewOutcome(applied: false);
       }

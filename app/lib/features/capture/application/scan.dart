@@ -75,14 +75,48 @@ final class InboxScanner {
   Stream<ScanProgress> get changes => _changes.stream;
   bool get isRunning => _running != null;
 
-  /// Starts a scan, or joins the running one (its request wins).
+  /// Starts a scan. A request the running (or last queued) scan already
+  /// covers joins it; any other request is queued and runs after it with
+  /// its own result.
   Future<ScanProgress> run(ScanRequest request) {
-    final running = _running;
-    if (running != null) return running;
-    _cancel = false;
-    final next = _scan(request).whenComplete(() => _running = null);
+    final tail = _running;
+    final tailReq = _tailRequest;
+    if (tail != null && tailReq != null && _covers(tailReq, request)) {
+      return tail;
+    }
+    late final Future<ScanProgress> next;
+    Future<ScanProgress> start() {
+      _cancel = false;
+      return _scan(request);
+    }
+
+    next =
+        (tail == null
+                ? start()
+                : tail.then<ScanProgress>(
+                    (_) => start(),
+                    onError: (_) => start(),
+                  ))
+            .whenComplete(() {
+              if (identical(_running, next)) {
+                _running = null;
+                _tailRequest = null;
+              }
+            });
     _running = next;
+    _tailRequest = request;
     return next;
+  }
+
+  ScanRequest? _tailRequest;
+
+  static bool _covers(ScanRequest a, ScanRequest b) {
+    if (a.sinceMs > b.sinceMs) return false;
+    if (b.includePersonal && !a.includePersonal) return false;
+    final ao = a.onlyInstitutions;
+    final bo = b.onlyInstitutions;
+    if (ao == null) return true;
+    return bo != null && ao.containsAll(bo) && !b.includePersonal;
   }
 
   /// Stops after the current batch; the scan ends as cancelled.
