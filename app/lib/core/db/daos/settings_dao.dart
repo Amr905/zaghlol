@@ -111,4 +111,18 @@ class SecureStateDao {
   Future<int> delete(String key) => guardWrite(
     () => (_db.delete(_db.secureState)..where((s) => s.key.equals(key))).go(),
   );
+
+  /// T-141: deletes [key] only while its value is [expected], in one
+  /// statement. True when this call deleted (only the owner of a value
+  /// removes it).
+  Future<bool> deleteIfEquals(String key, Uint8List expected) => guardWrite(
+    () async =>
+        await _db.customUpdate(
+          'DELETE FROM secure_state WHERE "key" = ?1 AND value = ?2',
+          variables: [Variable.withString(key), Variable.withBlob(expected)],
+          updates: {_db.secureState},
+          updateKind: UpdateKind.delete,
+        ) ==
+        1,
+  );
 }
