@@ -65,13 +65,13 @@ void main() {
       } else {
         want = c.sublist(1).join('|');
         got = switch (r) {
-          AskUnderstood u =>
+          final AskUnderstood u =>
             '${u.intent.name}|${period(u.slots.period)}|'
                 '${period(u.slots.compareWith)}|${u.slots.categoryId ?? '-'}|'
                 '${ids(u.slots.merchantIds)}|${ids(u.slots.accountIds)}|'
                 '${u.slots.currencyCode ?? '-'}|${u.slots.limit ?? '-'}|'
                 '${u.slots.periodDefaulted ? 1 : 0}',
-          AskUnrecognized u => '!${u.reason.name}',
+          final AskUnrecognized u => '!${u.reason.name}',
         };
       }
       if (got != want) failures.add('row ${i + 2}: want $want got $got');
@@ -143,6 +143,27 @@ void main() {
       // question is AskUnrecognized (FR-CHAT-03).
       expect(parseAskQuestion('كام سعر الدهب'), isA<AskUnrecognized>());
     });
+  });
+
+  test('budget: under 10 ms per question with a full entity list', () {
+    final big = AskEntities(
+      categories: entities.categories,
+      merchants: [
+        for (var i = 0; i < 500; i++)
+          AskEntity('m$i', ['Merchant Number $i', 'متجر $i'], partial: true),
+        ...entities.merchants,
+      ],
+      accounts: entities.accounts,
+    );
+    final texts = [for (final l in lines) l.split('\t').first];
+    final sw = Stopwatch()..start();
+    for (final t in texts) {
+      parseAskQuestion(t, entities: big);
+    }
+    sw.stop();
+    final perQuestionUs = sw.elapsedMicroseconds ~/ texts.length;
+    // Loose bound for CI machines: the budget is 10 ms (10000 us).
+    expect(perQuestionUs, lessThan(10000));
   });
 
   test('chips list is the closed set the app maps to keys', () {

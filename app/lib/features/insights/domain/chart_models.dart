@@ -286,6 +286,23 @@ final class MerchantSpend {
   final int count;
 }
 
+/// The largest single expense of a period (Ask Zaghlol, FR-CHAT-01).
+final class BiggestExpense {
+  const BiggestExpense({
+    required this.id,
+    required this.amount,
+    required this.date,
+    this.merchant,
+    this.categoryId,
+  });
+
+  final String id;
+  final Money amount;
+  final CivilDate date;
+  final String? merchant;
+  final String? categoryId;
+}
+
 // --------------------------------------------------- 7 month vs 3-cycle avg
 
 final class CategoryComparison {
