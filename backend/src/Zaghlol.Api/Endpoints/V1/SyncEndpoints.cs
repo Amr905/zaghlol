@@ -68,7 +68,7 @@ internal static partial class SyncEndpoints
         SyncResult result;
         try
         {
-            result = await sync.SyncAsync(InstallTokenAuthentication.InstallIdOf(context.User), appVersion, ToData(request), cancellationToken);
+            result = await sync.SyncAsync(InstallTokenAuthentication.InstallIdOf(context.User), appVersion, ToData(request, AccountHeader(context)), cancellationToken);
         }
         catch (Exception ex) when (ex is SyncSourceUnavailableException || GlobalExceptionHandler.IsTransientDatabaseFailure(ex))
         {
@@ -132,13 +132,20 @@ internal static partial class SyncEndpoints
         return true;
     }
 
-    private static SyncRequestData ToData(SyncRequest request) => new(
+    /// <summary>The <c>Zaghlol-Account</c> header when it is exactly one non-empty value (validated by T-132's block, never here).</summary>
+    internal static Sensitive<string>? AccountHeader(HttpContext context) =>
+        context.Request.Headers[PurchaseEndpoints.AccountHeader] is { Count: 1 } header && header[0] is { Length: > 0 } value
+            ? new Sensitive<string>(value)
+            : null;
+
+    private static SyncRequestData ToData(SyncRequest request, Sensitive<string>? accountToken) => new(
         request.CatalogVersion,
         request.FlagsVersion,
         request.PricesAsOf,
         request.EntitlementIssuedAt,
         (request.Contributions ?? []).Select(c => new SyncContribution(c.MerchantNorm, c.InstitutionCode, c.CategoryCode)).ToList(),
-        (request.BankRequests ?? []).Select(b => new SyncBankRequest(b.InstitutionName, b.Country, b.Channel)).ToList());
+        (request.BankRequests ?? []).Select(b => new SyncBankRequest(b.InstitutionName, b.Country, b.Channel)).ToList(),
+        accountToken);
 
     private static SyncResponse ToResponse(SyncCompleted completed, string? nonce) => new()
     {

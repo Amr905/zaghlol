@@ -28,7 +28,8 @@ public interface IInstallHasher
 
 /// <summary>What <see cref="ISyncEntitlementBlock"/> is told about the call.</summary>
 /// <param name="EntitlementIssuedAt">The request's <c>entitlementIssuedAt</c>, unchanged (T-132: the R5-7 delivery proof).</param>
-public sealed record SyncEntitlementContext(InstallId InstallId, DateTimeOffset? EntitlementIssuedAt, DateTimeOffset Now);
+/// <param name="AccountToken">The <c>Zaghlol-Account</c> header, unverified (T-132 validates it); never logged.</param>
+public sealed record SyncEntitlementContext(InstallId InstallId, DateTimeOffset? EntitlementIssuedAt, DateTimeOffset Now, Sensitive<string>? AccountToken = null);
 
 /// <summary>The <c>entitlement</c>, <c>accountToken</c> and <c>supportNotice</c> blocks; <c>null</c> members are unchanged.</summary>
 /// <param name="Entitlement">A signed entitlement JWS (sent as <c>{"token": ...}</c>).</param>

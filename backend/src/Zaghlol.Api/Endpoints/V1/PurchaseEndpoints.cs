@@ -8,6 +8,7 @@ using Zaghlol.Api.Json;
 using Zaghlol.Api.Problems;
 using Zaghlol.Api.Signing;
 using Zaghlol.Application.Purchases;
+using Zaghlol.Application.Seats.SeatKeys;
 using Zaghlol.Domain;
 using Zaghlol.Infrastructure.Persistence.Entities;
 
@@ -137,7 +138,15 @@ internal static partial class PurchaseEndpoints
         // Never grant on doubt: only an active purchase that was written may reach the grant step (pending, expired and
         // refunded answer entitlement: null whatever the grant would say).
         var granted = result is { Status: VerifyStatus.Active, PurchaseId: not null }
-            ? await grant.ComposeAsync(result, new VerifyContext(installId, account, now), cancellationToken)
+            ? await grant.ComposeAsync(
+                result,
+                new VerifyContext(
+                    installId,
+                    account,
+                    now,
+                    request.SeatKeys?.Reveal().Select(k => new SeatKeyProofInput(k.PublicKey, k.Signature)).ToList(),
+                    request.SignedTransaction),
+                cancellationToken)
             : VerifyGrantResult.None;
         telemetry.Verified(storeName, PurchaseTags.Success, PurchaseTags.NoCode);
 

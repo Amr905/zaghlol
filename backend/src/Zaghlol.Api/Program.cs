@@ -10,6 +10,7 @@ using Zaghlol.Application;
 using Zaghlol.Infrastructure;
 using Zaghlol.Infrastructure.Catalog;
 using Zaghlol.Infrastructure.Contributions;
+using Zaghlol.Infrastructure.Entitlements;
 using Zaghlol.Infrastructure.Flags;
 using Zaghlol.Infrastructure.Kms;
 using Zaghlol.Infrastructure.Logging;
@@ -70,6 +71,9 @@ builder.Services.AddZaghlolFlagAdmin();
 builder.Services.AddZaghlolFlagReader();
 // Price cache reader (App login) and operator override (Admin login) (T-127).
 builder.Services.AddZaghlolPrices();
+// Entitlement tokens, the seat at verify and the sync's entitlement block (T-132). Before the sync and purchase registrations,
+// whose NullSyncEntitlementBlock / NullVerifyGrant placeholders are TryAdd.
+builder.Services.AddZaghlolEntitlements();
 // Daily sync (T-128): throttle, composition, intake; after the catalog, flag and price readers it composes from.
 builder.Services.AddZaghlolSync();
 // Purchase verify (T-130, T-131): the Google Play and App Store clients, verifiers and support order lookups on the App login
@@ -94,6 +98,7 @@ app.MapHealth();
 app.MapInstalls();
 app.MapSync();
 app.MapPurchases();
+app.MapEntitlement();
 app.MapAppleNotifications();
 app.MapGoogleNotifications();
 app.MapCatalog();
