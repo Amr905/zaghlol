@@ -19,11 +19,11 @@
 | Milestone | Total | DONE | IN_PROGRESS | BLOCKED |
 |---|---|---|---|---|
 | M0 | 28 | 23 | 1 | 0 |
-| M1 | 29 | 15 | 0 | 1 |
+| M1 | 29 | 17 | 0 | 1 |
 | M2 | 29 | 5 | 0 | 0 |
 | M3 | 18 | 0 | 0 | 0 |
-| M4 | 17 | 2 | 0 | 0 |
-| M5 | 35 | 18 | 1 | 1 |
+| M4 | 17 | 3 | 0 | 0 |
+| M5 | 35 | 20 | 1 | 1 |
 | M6 | 19 | 1 | 1 | 2 |
 | M7 | 11 | 0 | 0 | 0 |
 
@@ -77,8 +77,8 @@
 | T-045 | Accounts repository: auto-create, default cash, per-currency balances | M1 | C3 | Sonnet | flutter-core-engineer | T-017 | DONE | batch 4 local: app 873 tests, packages 901, analyze/format clean; batch CI (`batch/2026-11-11-3`); review [T-045](05-reviews/T-045.md) APPROVED after two-connection tests (Lead delta check) | Batch 4 |
 | T-046 | IngestRawMessages use case (dedupe, merge, persist, ack, events) | M1 | C4 | Opus | flutter-core-engineer | T-033, T-045, T-014, T-035 | DONE | batch 7 local: every app-ci step green, backend Release build 0 warnings, format clean, no vulnerable packages; batch CI (`batch/2026-11-11-6`); reviews [T-046](05-reviews/T-046.md) + [security](05-reviews/T-046-security.md) APPROVED after poison-batch, fallback-Guard and T-075 wiring fixes (delta) | Batch 7. Takes FU-078, FU-080; real T-075 categorizer wired. PO Q1–Q3 provisional. FU-105 |
 | T-047 | Capture module (app side): guard config writer, spool orchestrator, degraded mode | M1 | C3 | Sonnet | flutter-core-engineer | T-046, T-039, T-035 | DONE | review [T-047](05-reviews/T-047.md) APPROVED (pre-batch-review rules); lands with T-040 | Batch 9. FU-111 |
-| T-048 | Historical inbox scan with progress (Android) | M1 | C3 | Sonnet | flutter-core-engineer | T-047, T-042 | TODO | — |  |
-| T-049 | Review queue domain and repository | M1 | C2 | Sonnet | flutter-core-engineer | T-019, T-046 | TODO | — |  |
+| T-048 | Historical inbox scan with progress (Android) | M1 | C3 | Sonnet | flutter-core-engineer | T-047, T-042 | DONE | batch 11 review [batch-11](05-reviews/batch-11.md) APPROVED after fix 048-1/048-2 | Batch 11. FU-121 |
+| T-049 | Review queue domain and repository | M1 | C2 | Sonnet | flutter-core-engineer | T-019, T-046 | DONE | batch 11 review [batch-11](05-reviews/batch-11.md) APPROVED after fix 049-1 | Batch 11. FU-122 |
 | T-050 | Transactions repository: query, search, CRUD, soft delete | M1 | C2 | Sonnet | flutter-core-engineer | T-017 | DONE | local PASS (745 app tests; 50k search p95 ~57 ms); batch CI; review [T-050](05-reviews/T-050.md) APPROVED | Batch 3. Soft delete keeps offset links; activeLinked* for net spend |
 | T-051 | Payday cycle engine, safe-to-spend, burn line and cycle summaries | M1 | C3 | Sonnet | flutter-core-engineer | T-012, T-018, T-050 | DONE | batch 8 local: every app-ci step green; batch CI (`batch/2026-11-11-7`); review [T-051](05-reviews/T-051.md) APPROVED (hand-checked EGP and KWD cases; floor→ceil negative proof re-run) | Batch 8. `cycleKeys` now ISO cycle start date. PO Q1–Q5 provisional. FU-110 |
 | T-052 | Home read model and persistent card filter | M1 | C2 | Sonnet | flutter-core-engineer | T-051, T-050, T-045, T-049 | TODO | — |  |
@@ -148,7 +148,7 @@
 | T-116 | Shared per-currency figures and currency switcher component | M4 | C2 | Sonnet | flutter-ui-engineer | T-115, T-054 | TODO | — |  |
 | T-117 | Achievement share cards with hidden amounts by default | M4 | C2 | Sonnet | flutter-ui-engineer | T-105, T-022 | TODO | — |  |
 | T-118 | Home-screen widgets (Android Glance, iOS WidgetKit) | M4 | C3 | Sonnet | native-platform-engineer | T-051, T-004 | TODO | — |  |
-| T-119 | Gold gate matrix and entitlement state (local) | M4 | C2 | Sonnet | flutter-core-engineer | T-025, T-020 | TODO | — |  |
+| T-119 | Gold gate matrix and entitlement state (local) | M4 | C2 | Sonnet | flutter-core-engineer | T-025, T-020 | DONE | batch 11 review [batch-11](05-reviews/batch-11.md) APPROVED after fix 119-1/119-2 | Batch 11. FU-123 |
 | T-120 | Voice logger S-31 with on-device-first recognition and monthly limit | M4 | C3 | Sonnet | flutter-ui-engineer | T-109, T-119, T-011 | TODO | — |  |
 | T-121 | Money tab assets, Add asset S-44 and Prices S-45 | M4 | C2 | Sonnet | flutter-ui-engineer | T-113, T-083, T-119 | TODO | — |  |
 | T-122 | EF Core model and initial migration for all backend tables + DB roles | M5 | C4 | Opus | backend-engineer | T-005 | DONE | backend-ci 42407789072 (5/5, 391 tests) @ d5943be; PR #2 squash-merged | All three C4 reviews APPROVED (round 2). Follow-ups FU-015 to FU-026; FU-020 before T-184 |
@@ -210,9 +210,9 @@
 | T-178 | AttestationHostApi (Play Integrity standard request, App Attest) and release network security config | M5 | C4 | Opus | native-platform-engineer | T-004 | TODO | — | Plan v1.1 (new) |
 | T-179 | SeatKeyHostApi (iOS Secure Enclave seat keys) and Dart seat-key service | M5 | C4 | Opus | native-platform-engineer | T-004, T-141 | TODO | — | Plan v1.1 (new); R-19 device test |
 | T-180 | TrustedClockHostApi (monotonic clock with sleep, boot reference) on both platforms | M5 | C4 | Opus | native-platform-engineer | T-004 | TODO | — | Plan v1.1 (new) |
-| T-181 | Backend attestation verifiers: Play Integrity decode and App Attest attestation/assertion, with fakes | M5 | C4 | Opus | backend-engineer | T-122 | TODO | — | Plan v1.1 (new) |
+| T-181 | Backend attestation verifiers: Play Integrity decode and App Attest attestation/assertion, with fakes | M5 | C4 | Opus | backend-engineer | T-122 | DONE | batch 11 review [batch-11](05-reviews/batch-11.md) APPROVED; backend-ci incl. Testcontainers green on ci/T-181 | Plan v1.1 (new) Batch 11. FU-120 |
 | T-182 | Backend seat-key proof verifier and keyed hashes (K_seat), with fakes | M5 | C4 | Opus | backend-engineer | T-122, T-123 | DONE | reviews T-182 code + security APPROVED (pre-batch-review rules); backend-ci green | Plan v1.1 (new) Batch 9. FU-112 |
-| T-183 | Dart request-binding library: JCS, strict JSON parser, restore and seat-key hashes over shared vectors | M5 | C4 | Opus | flutter-core-engineer | T-001, T-014 | TODO | — | Plan v1.1 (new) |
+| T-183 | Dart request-binding library: JCS, strict JSON parser, restore and seat-key hashes over shared vectors | M5 | C4 | Opus | flutter-core-engineer | T-001, T-014 | DONE | batch 11 review [batch-11](05-reviews/batch-11.md) APPROVED (183-1 tightened) | Plan v1.1 (new) Batch 11. FU-124 |
 | T-184 | Seat service: bind, move, same-iPhone rebind with cap, claimants, reclaim and support-move primitive | M5 | C4 | Opus | backend-engineer | T-122, T-182 | DONE | batch 9 review [batch-9](05-reviews/batch-9.md) + [security](05-reviews/batch-9-security.md) APPROVED; backend-ci incl. Testcontainers green | Plan v1.1 (new, from T-132) Batch 9. FU-112 |
 | T-185 | POST /v1/purchases/restore: strict parse, install binding, attestation, seat outcomes and limits | M5 | C4 | Opus | backend-engineer | T-132, T-181, T-182, T-184 | TODO | — | Plan v1.1 (new, from T-132) |
 | T-186 | Support seat:move, purchase:detach and purchase:unfreeze endpoints with dispute freeze | M5 | C4 | Opus | backend-engineer | T-136, T-184, T-130, T-131, T-132 | TODO | — | Plan v1.1 (new, from T-136); R6-1 |
@@ -343,6 +343,12 @@
 - **FU-118** (T-109 batch-10 review): T109-3 "ألف ألف" splits into two items; extend catalog keywords for spoken words (عيش, جبنة, ميكروباص, عشا, plurals) in T-059; `دينار` flagged `ambiguousCurrency` — currency picker in the voice UI; unhandled formats listed in the task file (mixed styles, unknown verbs, spoken dates, per-unit prices, ASCII comma grouping).
 - **FU-119** (T-023 batch-10 review): T023-1 `normalizeDigits` drops `٬`/`،` without checking grouping; Arabic symbols for non-EGP currencies (ISO code for now); golden tests in ar/en (needs T-022 matrix helper); launcher-name localization (Android `values-ar`, iOS `InfoPlist.strings`); call `initDateFormatting()` from `main()` (T-024/T-029); copy-deck ARB keys.
 
+- **FU-120** (T-181 batch-11 review): **181-1 before launch (PO):** confirm the pinned Apple App Attestation root fingerprint `1cb9823b…c932` against apple.com (`PO_DECISIONS.md` Part 2); 181-2 align the 3 s / 4 s attempt timeout; T-185 wires `AddZaghlolAttestation()` and the error mapping; T-140 adds a Play Integrity daily-quota alert (Lead: restore's 5/h and 10/day limits are the budget; no separate counter); config `Attestation:AppAttest:TeamId`, staging-only `AllowDevelopmentEnvironment`, Play Integrity API enabled for the existing service account.
+- **FU-121** (T-048 batch-11 review): 048-3 progress over-counts after an `INVALID_ARGUMENT` restart; **live** capture of user-added phone-number senders still needs the financial-looking filter and the consent line from the FU-109 decision (Guard rule, owner T-047 follow-up / capture settings UI); scan progress UI (T-056, T-173); device benchmark (T-173); regex-only registry senders unscannable until T-036 exports ids.
+- **FU-122** (T-049 batch-11 review): 049-2 `dismiss` marks the raw `dismissed` even when it backs a stored transaction; 049-3 manual insert duplicates `DriftTransactionRepository.add` without its checks — route through it; per-kind `acceptSuggestion` effects belong to T-081/T-092/T-097.
+- **FU-123** (T-119 batch-11 review): 119-3 wire `customSmsRegex` Gold checks to `entitlementStateProvider` (fails closed today); 119-4 rename `foreignAssets` → `investmentAssets`; T-144 calls `applyVerified` only after signature + trusted-time checks; T-152 maps "4 core charts" to the real chart set.
+- **FU-124** (T-183 batch-11 review): sign-in client-data hash not built (R5-3 decided (b)); K_seat HMAC hashes stay backend-only.
+
 ## Log
 | Date | Event |
 |---|---|
@@ -407,3 +413,4 @@
 | 2026-11-11 | Batch 8 (`batch/2026-11-11-7`): T-041 (+T-042 wired), T-042, T-051 DONE. FU-108…FU-110. Progress 54/186. |
 | 2026-11-12 | Batch 9 (`batch/2026-11-11-9`), first batch under the one-review-round workflow: T-021, T-040, T-047, T-077, T-182, T-184 DONE. FU-111…FU-114. Progress 60/186. |
 | 2026-11-13 | Batch 10 (`batch/2026-11-13-10`), first batch under the cost rules: T-023, T-043, T-109, T-132, T-141 DONE. FU-115…FU-119. Progress 65/186. |
+| 2026-11-13 | Batch 11 (`batch/2026-11-13-11`): T-048, T-049, T-119, T-181, T-183 DONE. FU-120…FU-124. Progress 70/186. |

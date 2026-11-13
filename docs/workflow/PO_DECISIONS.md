@@ -37,6 +37,7 @@ T-035 Q1–Q6 (keep with bundled rules; drop OTP+transaction messages, as the re
 | T-132 Q1–Q3 | No earlier-holder history table: a former non-buying holder sees `none`, not `moved`, and still loses Gold within 7 days. An invalid/expired account token counts as absent (Gold shows `paused`) until T-135 adds `ACCOUNT_TOKEN_EXPIRED`. `plan:"none"` and whole-hour ISO `nextMoveAt` stand; T-144 confirms. |
 | T-141 | The in-repo DTO generator (pinned, regenerated-file check in CI) replaces `openapi-generator-cli`. Production response-signing public keys come from T-140's key service (Lead), no PO action. |
 | T-023 | Negative amounts use ASCII `-`. Non-EGP currencies show their ISO code in Arabic until UX defines symbols. |
+| T-181 Q2 | Play Integrity calls have no separate budget counter: restore's 5/hour and 10/day limits cap them; T-140 adds a Google-quota alert. |
 | T-109 | `دينار` keeps the default currency with `ambiguousCurrency`; the voice UI asks. Missing spoken keywords go into the T-059 catalog seed. |
 | Q-44, T-047 Q2, T-047 Q5 | `ux-designer` writes the copy in the voice guide; reviewed in T-058. Placement: Q-44 one-time Welcome line with a "restore" action; missed notifications as a dismissible card in capture settings (and the lowest-priority home banner); rule saved but not yet active as "اتحفظت — هتشتغل خلال ثواني" / "Saved — active in a few seconds". |
 
@@ -54,6 +55,7 @@ T-035 Q1–Q6 (keep with bundled rules; drop OTP+transaction messages, as the re
 | OQ-09 | Trademark clearance for bank names and logos; until cleared, logos stay out. | launch |
 | Q-36 | Legal sign-off on the subscription-renewal wording and placement (draft `gold_paywall_renewal`). | S-68 |
 | OQ-10, Q-23 | Zakah scholar or body, target date, and sign-off on the Zakah and Smart ROI disclaimers. Both features are flagged off at launch, so this doesn't block launch. | `zakah`, `smart_roi` flags |
+| T-181 / 181-1 | Before launch: confirm the Apple App Attestation root fingerprint. On your PC, download https://www.apple.com/certificateauthority/Apple_App_Attestation_Root_CA.pem and run `certutil -dump Apple_App_Attestation_Root_CA.pem`; the "Cert Hash(sha256)" must be `1cb9823ba28ba6ad2d33a006941de2ae4f513ef1d4e831b9f7e0fa7b6242c932`. | launch (iOS restore) |
 
 ### Accounts and store setup
 
