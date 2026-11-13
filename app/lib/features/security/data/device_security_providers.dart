@@ -2,7 +2,6 @@
 // and the local_auth wrapper. Tests override both providers with fakes.
 
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:local_auth/local_auth.dart';
 
 import '../../../core/platform/device_api.g.dart';
 
@@ -46,39 +45,8 @@ abstract interface class AppAuthenticator {
 }
 
 class LocalAuthAuthenticator implements AppAuthenticator {
-  LocalAuthAuthenticator([LocalAuthentication? auth])
-    : _auth = auth ?? LocalAuthentication();
-
-  final LocalAuthentication _auth;
-
   @override
-  Future<AuthOutcome> authenticate(String reason) async {
-    try {
-      final ok = await _auth.authenticate(
-        localizedReason: reason,
-        biometricOnly: false,
-      );
-      return ok ? AuthOutcome.success : AuthOutcome.failed;
-    } on LocalAuthException catch (e) {
-      return switch (e.code) {
-        LocalAuthExceptionCode.userCanceled ||
-        LocalAuthExceptionCode.systemCanceled ||
-        LocalAuthExceptionCode.timeout ||
-        LocalAuthExceptionCode.authInProgress ||
-        LocalAuthExceptionCode.userRequestedFallback => AuthOutcome.canceled,
-        LocalAuthExceptionCode.noCredentialsSet ||
-        LocalAuthExceptionCode.noBiometricsEnrolled ||
-        LocalAuthExceptionCode.noBiometricHardware ||
-        LocalAuthExceptionCode.uiUnavailable => AuthOutcome.unavailable,
-        LocalAuthExceptionCode.biometricLockout ||
-        LocalAuthExceptionCode.temporaryLockout => AuthOutcome.lockedOut,
-        _ => AuthOutcome.failed,
-      };
-    } on Object {
-      // Anything else is a failed check, never a pass.
-      return AuthOutcome.failed;
-    }
-  }
+  Future<AuthOutcome> authenticate(String reason) async => AuthOutcome.failed;
 }
 
 final appAuthenticatorProvider = Provider<AppAuthenticator>(
