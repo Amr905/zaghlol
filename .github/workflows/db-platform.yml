@@ -232,7 +232,7 @@ jobs:
   ios-simulator:
     name: ios simulator (contract + benchmark)
     runs-on: macos-latest
-    timeout-minutes: 60
+    timeout-minutes: 75
     env:
       FLAVOR: dev
       DB_ENV: ios-sim
@@ -262,7 +262,26 @@ jobs:
           xcrun simctl bootstatus "$UDID" -b
           echo "DEVICE=$UDID" >> "$GITHUB_ENV"
       - name: Run on the simulator
-        run: bash .github/scripts/db-platform-device.sh
+        # The simulator sometimes hangs at app launch ("Xcode build done",
+        # then nothing) regardless of the code under test (batches 13 and 14).
+        # Each attempt gets 25 minutes (a normal run takes 8–18); after a
+        # hang the simulator is rebooted and the run is tried once more.
+        # A real test failure (any exit other than the time limit) is not
+        # retried.
+        run: |
+          attempt() { perl -e 'alarm shift; exec @ARGV' 1500 bash .github/scripts/db-platform-device.sh; }
+          set +e
+          attempt; rc=$?
+          if [ "$rc" -eq 142 ]; then
+            echo "::warning::ios-sim: attempt 1 hit the 25-minute limit (launch hang); rebooting the simulator and retrying once"
+            pkill -f 'flutter_tools.snapshot' || true
+            xcrun simctl shutdown "$DEVICE" || true
+            xcrun simctl boot "$DEVICE" || true
+            xcrun simctl bootstatus "$DEVICE" -b
+            attempt; rc=$?
+            if [ "$rc" -eq 142 ]; then echo "::error::ios-sim: attempt 2 also hit the 25-minute limit"; fi
+          fi
+          exit "$rc"
       - name: Results to summary
         if: always()
         run: bash .github/scripts/db-platform-results.sh "$RUNNER_TEMP/device.log" "$DB_ENV" "$BENCH"
