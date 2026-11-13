@@ -9,6 +9,7 @@ import '../../../core/theme/z_tokens.dart';
 import '../../../core/ui/z_segmented.dart';
 import '../../budget/presentation/budget_screen.dart';
 import 'charts/charts_screen.dart';
+import '../../recurring/presentation/bills_screen.dart';
 
 enum InsightsSegment { charts, budget, bills }
 
@@ -43,7 +44,7 @@ class _InsightsScreenState extends State<InsightsScreen> {
       InsightsSegment.budget =>
         widget.budgetBuilder?.call(context) ?? const BudgetScreen(),
       InsightsSegment.bills =>
-        widget.billsBuilder?.call(context) ?? const SizedBox.expand(),
+        widget.billsBuilder?.call(context) ?? const BillsScreen(),
     };
     return ColoredBox(
       color: c.bg,
