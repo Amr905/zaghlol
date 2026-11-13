@@ -81,3 +81,7 @@ Findings:
 | (none) | | |
 
 Follow-ups to record in `docs/implementation-status.md`: T-104 owns `hide_amounts.notifications = true` on lock enable (T-103 #1); ar `InfoPlist.strings` for Face ID (T-103 #2); native early secure-window flag (T-103 #3); per-id `onRemoved` isolation and a startup unlink sweep (T-078 #1); un-mark/handle gateway failure (T-094 #1); id-cell formula guard (T-154 #1). Gate: green app-ci on `ci/T-103` before merge.
+
+## Lead fix (T-115 minor 1)
+
+`approximate` is now true whenever any currency is excluded, so a partial target-only figure can't appear without the "≈" label. The new test `target-only figure with an excluded currency is labelled ≈` fails without the fix and passes with it (7 changed lines). T-103 app-ci on `ci/T-103` (run 43359923453) is green, which clears the T-103 merge gate.
