@@ -280,6 +280,10 @@ class _ReviewScreenState extends ConsumerState<ReviewScreen> {
   };
 }
 
+/// Outbox channel codes (stored values, not UI text).
+const String _channelSms = 'sms';
+const String _channelNotification = 'notification';
+
 String _iso(String s) => '\u2068$s\u2069';
 
 /// "{amount} at {merchant}" or just the amount; empty when there is neither.
@@ -699,7 +703,7 @@ class _RequestBankFormState extends State<_RequestBankForm> {
     text: widget.initialName,
   );
   final TextEditingController _country = TextEditingController(text: 'EG');
-  String _channel = 'sms';
+  String _channel = _channelSms;
   bool _busy = false;
   bool _failed = false;
   String? _nameError;
@@ -778,13 +782,13 @@ class _RequestBankFormState extends State<_RequestBankForm> {
           children: [
             ZChip(
               label: l10n.commonSourceSms,
-              selected: _channel == 'sms',
-              onTap: () => setState(() => _channel = 'sms'),
+              selected: _channel == _channelSms,
+              onTap: () => setState(() => _channel = _channelSms),
             ),
             ZChip(
               label: l10n.commonSourceNotification,
-              selected: _channel == 'notification',
-              onTap: () => setState(() => _channel = 'notification'),
+              selected: _channel == _channelNotification,
+              onTap: () => setState(() => _channel = _channelNotification),
             ),
           ],
         ),
