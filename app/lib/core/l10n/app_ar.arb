@@ -3781,5 +3781,5843 @@
         "type": "String"
       }
     }
+  },
+  "commonActionTypeInstead": "اكتبها بإيدك",
+  "@commonActionTypeInstead": {
+    "description": "B · S-31 and S-32 fallback"
+  },
+  "commonUnitGrams": "{n} جرام",
+  "@commonUnitGrams": {
+    "description": "C · n = grams, up to three decimals (FR-WLT-02)",
+    "placeholders": {
+      "n": {
+        "type": "String"
+      }
+    }
+  },
+  "commonUnitPerMonth": "{amount} في الشهر",
+  "@commonUnitPerMonth": {
+    "description": "L",
+    "placeholders": {
+      "amount": {
+        "type": "String"
+      }
+    }
+  },
+  "commonUnitPerYear": "{amount} في السنة",
+  "@commonUnitPerYear": {
+    "description": "L",
+    "placeholders": {
+      "amount": {
+        "type": "String"
+      }
+    }
+  },
+  "commonUnitPerDay": "{amount} في اليوم",
+  "@commonUnitPerDay": {
+    "description": "L",
+    "placeholders": {
+      "amount": {
+        "type": "String"
+      }
+    }
+  },
+  "commonUnitVisits": "{count, plural, =1{زيارة واحدة} =2{زيارتين} few{{n} زيارات} many{{n} زيارة} other{{n} زيارة}}",
+  "@commonUnitVisits": {
+    "description": "C · count:int, n · inserted into sentences as {visits}",
+    "placeholders": {
+      "count": {
+        "type": "int"
+      },
+      "n": {
+        "type": "String"
+      }
+    }
+  },
+  "commonUnitOrders": "{count, plural, =1{أوردر واحد} =2{أوردرين} few{{n} أوردرات} many{{n} أوردر} other{{n} أوردر}}",
+  "@commonUnitOrders": {
+    "description": "C · count:int, n · inserted as {orders}",
+    "placeholders": {
+      "count": {
+        "type": "int"
+      },
+      "n": {
+        "type": "String"
+      }
+    }
+  },
+  "commonCadenceWeekly": "كل أسبوع",
+  "@commonCadenceWeekly": {
+    "description": "L"
+  },
+  "commonCadenceMonthly": "كل شهر",
+  "@commonCadenceMonthly": {
+    "description": "L"
+  },
+  "commonCadenceQuarterly": "كل تلات شهور",
+  "@commonCadenceQuarterly": {
+    "description": "L"
+  },
+  "commonCadenceSemiannual": "كل ستة شهور",
+  "@commonCadenceSemiannual": {
+    "description": "L"
+  },
+  "commonCadenceYearly": "كل سنة",
+  "@commonCadenceYearly": {
+    "description": "L"
+  },
+  "commonAssetTypeGold": "دهب",
+  "@commonAssetTypeGold": {
+    "description": "C · asset type (FR-WLT-02)"
+  },
+  "commonAssetTypeCertificate": "شهادة بنك",
+  "@commonAssetTypeCertificate": {
+    "description": "C"
+  },
+  "commonAssetTypeForeignCash": "كاش بعملة",
+  "@commonAssetTypeForeignCash": {
+    "description": "C"
+  },
+  "commonAssetTypeStocks": "أسهم وصناديق",
+  "@commonAssetTypeStocks": {
+    "description": "C"
+  },
+  "commonAssetTypeProperty": "عقار",
+  "@commonAssetTypeProperty": {
+    "description": "C"
+  },
+  "commonAssetTypeCar": "عربية",
+  "@commonAssetTypeCar": {
+    "description": "C"
+  },
+  "commonKaratLabel": "عيار {karat}",
+  "@commonKaratLabel": {
+    "description": "C · karat = 24, 21 or 18 from the digits layer",
+    "placeholders": {
+      "karat": {
+        "type": "String"
+      }
+    }
+  },
+  "commonKaratCoin": "جنيه دهب",
+  "@commonKaratCoin": {
+    "description": "C · the gold pound"
+  },
+  "mascotTapLine9": "عايز تعرف فلوسك راحت فين؟ افتح الحسبة",
+  "@mascotTapLine9": {
+    "description": "M · Rive tap"
+  },
+  "mascotTapLine10": "أنا بحسب والدهب بيلمع، وإنت بتحوّش",
+  "@mascotTapLine10": {
+    "description": "M · Rive tap"
+  },
+  "insightsTabsCharts": "الشارتات",
+  "@insightsTabsCharts": {
+    "description": "C · C-35 segment 1"
+  },
+  "insightsTabsBudget": "الميزانية",
+  "@insightsTabsBudget": {
+    "description": "C · segment 2"
+  },
+  "insightsTabsBills": "الفواتير",
+  "@insightsTabsBills": {
+    "description": "C · segment 3"
+  },
+  "insightsPeriodTitle": "الفترة",
+  "@insightsPeriodTitle": {
+    "description": "T · period sheet. Items use common_period_*; Apply uses common_action_done"
+  },
+  "insightsPeriodStart": "من",
+  "@insightsPeriodStart": {
+    "description": "L · custom range"
+  },
+  "insightsPeriodEnd": "لحد",
+  "@insightsPeriodEnd": {
+    "description": "L · custom range. Validation: common_validation_dateRange"
+  },
+  "insightsChartsContext": "{cards} · {currency} · {period}",
+  "@insightsChartsContext": {
+    "description": "L · filter context line under each chart title (C-13). period = common_period_* or common_date_range",
+    "placeholders": {
+      "cards": {
+        "type": "String"
+      },
+      "currency": {
+        "type": "String"
+      },
+      "period": {
+        "type": "String"
+      }
+    }
+  },
+  "insightsChartsExplain": "اشرحلي يا زغلول",
+  "@insightsChartsExplain": {
+    "description": "B · the FR-CHT-03 name. Also the S-21 button"
+  },
+  "insightsChartsLockedSub": "شوف الشارت كله مع جولد",
+  "@insightsChartsLockedSub": {
+    "description": "S · C-13 locked, blurred preview + common_gold_unlock"
+  },
+  "insightsChartsEmptyCycle": "بيحيا بعد أول دورة كاملة",
+  "@insightsChartsEmptyCycle": {
+    "description": "S · C-13 empty (EC-23)"
+  },
+  "insightsChartsEmptyNetWorth": "ضيف حسابات أو أصول علشان الشارت ده يشتغل",
+  "@insightsChartsEmptyNetWorth": {
+    "description": "S · charts 8 and 11 when they have nothing to show"
+  },
+  "insightsChartsEmptyNetWorthAction": "افتح فلوسي",
+  "@insightsChartsEmptyNetWorthAction": {
+    "description": "B · opens S-40"
+  },
+  "insightsChartsEmptyFilter": "مفيش بيانات للفلتر ده في الفترة دي",
+  "@insightsChartsEmptyFilter": {
+    "description": "S · plus common_action_clearFilter"
+  },
+  "insightsChartsCardError": "الشارت ده مفتحش. باقي الشارتات تمام.",
+  "@insightsChartsCardError": {
+    "description": "S · C-29 inline; plus common_action_tryAgain"
+  },
+  "insightsChartsLoadingA11y": "بحمّل الشارتات",
+  "@insightsChartsLoadingA11y": {
+    "description": "A"
+  },
+  "insightsChartsOtherSlice": "حاجات تانية",
+  "@insightsChartsOtherSlice": {
+    "description": "C · donut remainder slice"
+  },
+  "insightsChartTitleCashFlow": "الداخل والخارج والصافي",
+  "@insightsChartTitleCashFlow": {
+    "description": "T · chart 1 (Free)"
+  },
+  "insightsChartTitleCategories": "فلوسك رايحة فين؟",
+  "@insightsChartTitleCategories": {
+    "description": "T · chart 2 (Free)"
+  },
+  "insightsChartTitleBurnRate": "سرعة الصرف لحد القبض",
+  "@insightsChartTitleBurnRate": {
+    "description": "T · chart 3 (Gold)"
+  },
+  "insightsChartTitleRule503020": "ميزان خمسين تلاتين عشرين",
+  "@insightsChartTitleRule503020": {
+    "description": "T · chart 4 (Gold)"
+  },
+  "insightsChartTitleWeekPattern": "إمتى بتصرف؟",
+  "@insightsChartTitleWeekPattern": {
+    "description": "T · chart 5 (Gold), day of week and hour"
+  },
+  "insightsChartTitleMerchants": "أكتر الأماكن اللي بتاخد فلوسك",
+  "@insightsChartTitleMerchants": {
+    "description": "T · chart 6 (Free, top five)"
+  },
+  "insightsChartTitleVsAverage": "الدورة دي ضد متوسط تلات دورات",
+  "@insightsChartTitleVsAverage": {
+    "description": "T · chart 7 (Gold)"
+  },
+  "insightsChartTitleInstallments": "أقساطك في الستة شهور الجايين",
+  "@insightsChartTitleInstallments": {
+    "description": "T · chart 8 (Gold)"
+  },
+  "insightsChartTitleSubscriptions": "الاشتراكات في السنة كلها",
+  "@insightsChartTitleSubscriptions": {
+    "description": "T · chart 9 (Gold)"
+  },
+  "insightsChartTitleCards": "الصرف على كروتك ومحافظك",
+  "@insightsChartTitleCards": {
+    "description": "T · chart 10 (Gold)"
+  },
+  "insightsChartTitleNetWorth": "نمو اللي حيلتك كله",
+  "@insightsChartTitleNetWorth": {
+    "description": "T · chart 11 (Gold)"
+  },
+  "insightsChartTitleInflation": "الغلاء على سلتك إنت",
+  "@insightsChartTitleInflation": {
+    "description": "T · chart 12 (Gold)"
+  },
+  "insightsLegendIncome": "دخلك",
+  "@insightsLegendIncome": {
+    "description": "C"
+  },
+  "insightsLegendSpent": "صرفت",
+  "@insightsLegendSpent": {
+    "description": "C"
+  },
+  "insightsLegendSaved": "حوشت",
+  "@insightsLegendSaved": {
+    "description": "C"
+  },
+  "insightsLegendActual": "فعلي",
+  "@insightsLegendActual": {
+    "description": "C · chart 3"
+  },
+  "insightsLegendIdeal": "الخط المثالي",
+  "@insightsLegendIdeal": {
+    "description": "C · chart 3 dotted line"
+  },
+  "insightsLegendToday": "النهارده",
+  "@insightsLegendToday": {
+    "description": "C · chart 3 marker"
+  },
+  "insightsLegendPayday": "القبض",
+  "@insightsLegendPayday": {
+    "description": "C · chart 3 end marker"
+  },
+  "insightsLegendNeeds": "أساسيات",
+  "@insightsLegendNeeds": {
+    "description": "C · chart 4"
+  },
+  "insightsLegendWants": "رفاهيات",
+  "@insightsLegendWants": {
+    "description": "C"
+  },
+  "insightsLegendSavings": "تحويش",
+  "@insightsLegendSavings": {
+    "description": "C"
+  },
+  "insightsLegendTarget": "المثالي",
+  "@insightsLegendTarget": {
+    "description": "C · chart 4 target mark"
+  },
+  "insightsLegendAverage": "متوسطك",
+  "@insightsLegendAverage": {
+    "description": "C · chart 7"
+  },
+  "insightsLegendThisCycle": "الدورة دي",
+  "@insightsLegendThisCycle": {
+    "description": "C · chart 7"
+  },
+  "insightsLegendInstallments": "أقساط",
+  "@insightsLegendInstallments": {
+    "description": "C · chart 8"
+  },
+  "insightsLegendCardDues": "كروت وجمعية",
+  "@insightsLegendCardDues": {
+    "description": "C · chart 8"
+  },
+  "insightsLegendMonthly": "في الشهر",
+  "@insightsLegendMonthly": {
+    "description": "C · chart 9"
+  },
+  "insightsLegendYearly": "في السنة",
+  "@insightsLegendYearly": {
+    "description": "C · chart 9, the ×12 bars"
+  },
+  "insightsLegendSupermarket": "متوسط فاتورة السوبرماركت",
+  "@insightsLegendSupermarket": {
+    "description": "L · chart 12"
+  },
+  "insightsLegendDelivery": "متوسط أوردر الدليفري",
+  "@insightsLegendDelivery": {
+    "description": "L · chart 12"
+  },
+  "insightsChartA11yCashFlow": "الداخل والخارج: دخلك {income}، صرفت {spent}، وحوشت {saved}",
+  "@insightsChartA11yCashFlow": {
+    "description": "A",
+    "placeholders": {
+      "income": {
+        "type": "String"
+      },
+      "spent": {
+        "type": "String"
+      },
+      "saved": {
+        "type": "String"
+      }
+    }
+  },
+  "insightsChartA11yCategories": "فلوسك رايحة فين: {category} الأكبر بـ {amount}، يعني {percent}",
+  "@insightsChartA11yCategories": {
+    "description": "A",
+    "placeholders": {
+      "category": {
+        "type": "String"
+      },
+      "amount": {
+        "type": "String"
+      },
+      "percent": {
+        "type": "String"
+      }
+    }
+  },
+  "insightsChartA11yBurnRate": "سرعة الصرف: صرفت {spent} من {budget} في اليوم {cycleDay}",
+  "@insightsChartA11yBurnRate": {
+    "description": "A",
+    "placeholders": {
+      "spent": {
+        "type": "String"
+      },
+      "budget": {
+        "type": "String"
+      },
+      "cycleDay": {
+        "type": "String"
+      }
+    }
+  },
+  "insightsChartA11yRule503020": "ميزان خمسين تلاتين عشرين: {needsPct} أساسيات، {wantsPct} رفاهيات، {savingsPct} تحويش",
+  "@insightsChartA11yRule503020": {
+    "description": "A",
+    "placeholders": {
+      "needsPct": {
+        "type": "String"
+      },
+      "wantsPct": {
+        "type": "String"
+      },
+      "savingsPct": {
+        "type": "String"
+      }
+    }
+  },
+  "insightsChartA11yWeekPattern": "إمتى بتصرف: أعلى يوم {peakDay} بمتوسط {amount}",
+  "@insightsChartA11yWeekPattern": {
+    "description": "A",
+    "placeholders": {
+      "peakDay": {
+        "type": "String"
+      },
+      "amount": {
+        "type": "String"
+      }
+    }
+  },
+  "insightsChartA11yMerchants": "أكتر الأماكن: {merchant} الأول بـ {amount}",
+  "@insightsChartA11yMerchants": {
+    "description": "A",
+    "placeholders": {
+      "merchant": {
+        "type": "String"
+      },
+      "amount": {
+        "type": "String"
+      }
+    }
+  },
+  "insightsChartA11yVsAverage": "الدورة دي ضد متوسطك: أكبر زيادة في {category} بـ {percent}",
+  "@insightsChartA11yVsAverage": {
+    "description": "A",
+    "placeholders": {
+      "category": {
+        "type": "String"
+      },
+      "percent": {
+        "type": "String"
+      }
+    }
+  },
+  "insightsChartA11yInstallments": "الأقساط: الشهر ده {sum}",
+  "@insightsChartA11yInstallments": {
+    "description": "A",
+    "placeholders": {
+      "sum": {
+        "type": "String"
+      }
+    }
+  },
+  "insightsChartA11ySubscriptions": "الاشتراكات: {monthly} في الشهر، يعني {yearly} في السنة",
+  "@insightsChartA11ySubscriptions": {
+    "description": "A",
+    "placeholders": {
+      "monthly": {
+        "type": "String"
+      },
+      "yearly": {
+        "type": "String"
+      }
+    }
+  },
+  "insightsChartA11yCards": "الكروت: {card} الأكبر بـ {percent} من الصرف",
+  "@insightsChartA11yCards": {
+    "description": "A",
+    "placeholders": {
+      "card": {
+        "type": "String"
+      },
+      "percent": {
+        "type": "String"
+      }
+    }
+  },
+  "insightsChartA11yNetWorth": "اللي حيلتك كله: من {startAmount} لـ {endAmount}",
+  "@insightsChartA11yNetWorth": {
+    "description": "A",
+    "placeholders": {
+      "startAmount": {
+        "type": "String"
+      },
+      "endAmount": {
+        "type": "String"
+      }
+    }
+  },
+  "insightsChartA11yInflation": "الغلاء: فاتورة السوبرماركت من {startAmount} لـ {endAmount}",
+  "@insightsChartA11yInflation": {
+    "description": "A",
+    "placeholders": {
+      "startAmount": {
+        "type": "String"
+      },
+      "endAmount": {
+        "type": "String"
+      }
+    }
+  },
+  "insightsChartDetailLegendRowA11y": "{category}: {amount}، {percent}. اضغط تشوف الحركات",
+  "@insightsChartDetailLegendRowA11y": {
+    "description": "A · opens S-11 filtered",
+    "placeholders": {
+      "category": {
+        "type": "String"
+      },
+      "amount": {
+        "type": "String"
+      },
+      "percent": {
+        "type": "String"
+      }
+    }
+  },
+  "insightsChartDetailCardRowA11y": "{card}: {amount}. اضغط تفتح الكارت",
+  "@insightsChartDetailCardRowA11y": {
+    "description": "A · chart 10, opens S-41",
+    "placeholders": {
+      "card": {
+        "type": "String"
+      },
+      "amount": {
+        "type": "String"
+      }
+    }
+  },
+  "insightsChartDetailTypingA11y": "زغلول بيكتب",
+  "@insightsChartDetailTypingA11y": {
+    "description": "A · Rive professor, typing dots"
+  },
+  "insightsChartDetailTipLabel": "نصيحة",
+  "@insightsChartDetailTipLabel": {
+    "description": "C · label on the tip line"
+  },
+  "insightsChartDetailDeepLabel": "تحليل أعمق",
+  "@insightsChartDetailDeepLabel": {
+    "description": "C · with common_gold_badge; shown on the deep part"
+  },
+  "insightsChartDetailDeepUpsell": "عايز تحليل أعمق؟ جولد بيقارن بالدورة اللي فاتت ويتوقع آخر الدورة.",
+  "@insightsChartDetailDeepUpsell": {
+    "description": "S · Free only, once under the basic tip, plus common_gold_unlock"
+  },
+  "insightsChartDetailNeedsData": "{need, select, cycle{محتاج دورة كاملة علشان أشرحلك الشارت ده} months{محتاج تلات دورات علشان أقارنك بنفسك} accounts{ضيف حسابات أو أصول وأنا أشرحلك} installments{ضيف قسط أو التزام وأنا أشرحلك} subscriptions{لسه مفيش اشتراكات. أول ما ألاقي واحد هشرحلك} other{محتاج بيانات أكتر علشان أشرح الشارت ده}}",
+  "@insightsChartDetailNeedsData": {
+    "description": "M · need:select (cycle/months/accounts/installments/subscriptions/other) · empty explainer",
+    "placeholders": {
+      "need": {
+        "type": "String"
+      }
+    }
+  },
+  "insightsChartDetailExplainFailed": "معرفتش أشرح الشارت ده دلوقتي",
+  "@insightsChartDetailExplainFailed": {
+    "description": "N · bubble hidden, chart stays"
+  },
+  "insightsChartDetailLockedTitle": "الشارت ده في جولد",
+  "@insightsChartDetailLockedTitle": {
+    "description": "T · whole-screen locked state + common_gold_unlock"
+  },
+  "insightsChartDetailLockedBody": "اتفرج على شكله، وافتحه كله مع جولد",
+  "@insightsChartDetailLockedBody": {
+    "description": "S"
+  },
+  "insightsDeepProjection": "{state, select, over{بالسرعة دي هتقفل الدورة على {projected}، يعني فوق ميزانيتك} other{بالسرعة دي هتقفل الدورة على {projected}، يعني في حدود ميزانيتك}}",
+  "@insightsDeepProjection": {
+    "description": "S · Gold deep, charts 1, 2, 3, 5, 7 · state:select(over/other). Only when a budget exists",
+    "placeholders": {
+      "state": {
+        "type": "String"
+      },
+      "projected": {
+        "type": "String"
+      }
+    }
+  },
+  "insightsDeepDrivers": "أكتر التجار اللي ورا التغيير: {merchant} و{merchant2} و{merchant3}",
+  "@insightsDeepDrivers": {
+    "description": "S · Gold deep · only when three merchants qualify",
+    "placeholders": {
+      "merchant": {
+        "type": "String"
+      },
+      "merchant2": {
+        "type": "String"
+      },
+      "merchant3": {
+        "type": "String"
+      }
+    }
+  },
+  "insightsExplainCashFlowBasic": "{state, select, short{الدورة دي دخلك {income} وصرفت {spent}، يعني صرفت أكتر من دخلك بـ {gap}. خلينا نظبطها سوا.} other{الدورة دي دخلك {income} وصرفت {spent}، يعني حوشت {saved}. ده {percent} من دخلك. الله ينور!}}",
+  "@insightsExplainCashFlowBasic": {
+    "description": "E · state:select(short/other): short = spent more than earned. No emoji in the short branch",
+    "placeholders": {
+      "state": {
+        "type": "String"
+      },
+      "income": {
+        "type": "String"
+      },
+      "spent": {
+        "type": "String"
+      },
+      "gap": {
+        "type": "String"
+      },
+      "saved": {
+        "type": "String"
+      },
+      "percent": {
+        "type": "String"
+      }
+    }
+  },
+  "insightsExplainCashFlowTip": "{state, select, short{قلل {category} بـ {target} الدورة الجاية وهتقفل بفايض.} other{حوّل {target} على الأقل من الفايض ده للادخار قبل ما يتصرف.}}",
+  "@insightsExplainCashFlowTip": {
+    "description": "S · state, category = largest category, target",
+    "placeholders": {
+      "state": {
+        "type": "String"
+      },
+      "category": {
+        "type": "String"
+      },
+      "target": {
+        "type": "String"
+      }
+    }
+  },
+  "insightsExplainCashFlowDeep": "{trend, select, up{صافي الدورة دي أحسن من الدورة اللي فاتت بـ {delta}.} down{صافي الدورة دي أقل من الدورة اللي فاتت بـ {delta}.} other{صافي الدورة دي زي الدورة اللي فاتت تقريباً.}}",
+  "@insightsExplainCashFlowDeep": {
+    "description": "E · Gold · trend (up = better)",
+    "placeholders": {
+      "trend": {
+        "type": "String"
+      },
+      "delta": {
+        "type": "String"
+      }
+    }
+  },
+  "insightsExplainCashFlowDeepTip": "ثبّت هدف تحوّش {target} كل دورة، يعني {yearly} في السنة.",
+  "@insightsExplainCashFlowDeepTip": {
+    "description": "S · Gold",
+    "placeholders": {
+      "target": {
+        "type": "String"
+      },
+      "yearly": {
+        "type": "String"
+      }
+    }
+  },
+  "insightsExplainCategoriesBasic": "{category} واخد {percent} من صرفك، يعني {amount}. وبعده {category2} بـ {percent2}.",
+  "@insightsExplainCategoriesBasic": {
+    "description": "E",
+    "placeholders": {
+      "category": {
+        "type": "String"
+      },
+      "percent": {
+        "type": "String"
+      },
+      "amount": {
+        "type": "String"
+      },
+      "category2": {
+        "type": "String"
+      },
+      "percent2": {
+        "type": "String"
+      }
+    }
+  },
+  "insightsExplainCategoriesTip": "حط سقف لـ{category} أقل بـ {target} من الدورة دي، وهتوفر الفرق.",
+  "@insightsExplainCategoriesTip": {
+    "description": "S",
+    "placeholders": {
+      "category": {
+        "type": "String"
+      },
+      "target": {
+        "type": "String"
+      }
+    }
+  },
+  "insightsExplainCategoriesDeep": "{trend, select, up{{category} زاد عن الدورة اللي فاتت بـ {delta}.} down{{category} قل عن الدورة اللي فاتت بـ {delta}.} other{{category} تقريباً زي الدورة اللي فاتت.}}",
+  "@insightsExplainCategoriesDeep": {
+    "description": "E · Gold",
+    "placeholders": {
+      "trend": {
+        "type": "String"
+      },
+      "category": {
+        "type": "String"
+      },
+      "delta": {
+        "type": "String"
+      }
+    }
+  },
+  "insightsExplainCategoriesDeepTip": "خفّض {category} بـ {target} كل دورة، يعني {yearly} في السنة.",
+  "@insightsExplainCategoriesDeepTip": {
+    "description": "S · Gold",
+    "placeholders": {
+      "category": {
+        "type": "String"
+      },
+      "target": {
+        "type": "String"
+      },
+      "yearly": {
+        "type": "String"
+      }
+    }
+  },
+  "insightsExplainBurnRateBasic": "{state, select, over{إنت في اليوم {cycleDay} من الدورة وصارف {spent} من {budget}، يعني فوق الخط المثالي. الباقي يكفي {perDay} في اليوم بس.} other{إنت في اليوم {cycleDay} من الدورة وصارف {spent} من {budget}، يعني تحت الخط المثالي. مسموحلك {perDay} في اليوم.}}",
+  "@insightsExplainBurnRateBasic": {
+    "description": "E · state:select(over/other). perDay = BR-BUD-03",
+    "placeholders": {
+      "state": {
+        "type": "String"
+      },
+      "cycleDay": {
+        "type": "String"
+      },
+      "spent": {
+        "type": "String"
+      },
+      "budget": {
+        "type": "String"
+      },
+      "perDay": {
+        "type": "String"
+      }
+    }
+  },
+  "insightsExplainBurnRateTip": "{state, select, over{نزّل صرفك اليومي لـ {perDay} لحد القبض علشان الميزانية تكفي.} other{كمّل على نفس الإيقاع، والفرق ده هيبقى فايض آخر الدورة. تقدر تصرف {perDay} في اليوم.}}",
+  "@insightsExplainBurnRateTip": {
+    "description": "S",
+    "placeholders": {
+      "state": {
+        "type": "String"
+      },
+      "perDay": {
+        "type": "String"
+      }
+    }
+  },
+  "insightsExplainBurnRateDeep": "{trend, select, up{في نفس اليوم الدورة اللي فاتت كنت صارف أقل بـ {delta}.} down{في نفس اليوم الدورة اللي فاتت كنت صارف أكتر بـ {delta}.} other{صرفك زي نفس اليوم في الدورة اللي فاتت تقريباً.}}",
+  "@insightsExplainBurnRateDeep": {
+    "description": "E · Gold · trend (up = spending more than last cycle)",
+    "placeholders": {
+      "trend": {
+        "type": "String"
+      },
+      "delta": {
+        "type": "String"
+      }
+    }
+  },
+  "insightsExplainBurnRateDeepTip": "لو خفضت {target} من صرفك اليومي هتفضل تحت الخط لحد القبض.",
+  "@insightsExplainBurnRateDeepTip": {
+    "description": "S · Gold",
+    "placeholders": {
+      "target": {
+        "type": "String"
+      }
+    }
+  },
+  "insightsExplainRule503020Basic": "{state, select, wantsHigh{صرفك الدورة دي: {needsPct} أساسيات و{wantsPct} رفاهيات و{savingsPct} تحويش. الرفاهيات أعلى من القاعدة المعروفة.} savingsLow{صرفك الدورة دي: {needsPct} أساسيات و{wantsPct} رفاهيات و{savingsPct} تحويش. التحويش أقل من القاعدة المعروفة.} other{صرفك الدورة دي: {needsPct} أساسيات و{wantsPct} رفاهيات و{savingsPct} تحويش. ده قريب من القاعدة المعروفة.}}",
+  "@insightsExplainRule503020Basic": {
+    "description": "E · state:select(wantsHigh/savingsLow/other). The rule is fifty, thirty, twenty; the chart title carries it",
+    "placeholders": {
+      "state": {
+        "type": "String"
+      },
+      "needsPct": {
+        "type": "String"
+      },
+      "wantsPct": {
+        "type": "String"
+      },
+      "savingsPct": {
+        "type": "String"
+      }
+    }
+  },
+  "insightsExplainRule503020Tip": "{state, select, wantsHigh{نزّل الرفاهيات {target} الدورة الجاية وحوّلهم للتحويش.} savingsLow{حاول تزود التحويش {target} الدورة الجاية.} other{حافظ على التحويش ده، وزوده {target} لو قدرت.}}",
+  "@insightsExplainRule503020Tip": {
+    "description": "S",
+    "placeholders": {
+      "state": {
+        "type": "String"
+      },
+      "target": {
+        "type": "String"
+      }
+    }
+  },
+  "insightsExplainRule503020Deep": "{trend, select, up{التحويش زاد عن الدورة اللي فاتت لـ {savingsPct}.} down{التحويش نزل عن الدورة اللي فاتت لـ {savingsPct}.} other{التحويش ثابت تقريباً عن الدورة اللي فاتت.}}",
+  "@insightsExplainRule503020Deep": {
+    "description": "E · Gold",
+    "placeholders": {
+      "trend": {
+        "type": "String"
+      },
+      "savingsPct": {
+        "type": "String"
+      }
+    }
+  },
+  "insightsExplainRule503020DeepTip": "لو التحويش وصل لـ {percent}، هتحوّش {yearly} في السنة.",
+  "@insightsExplainRule503020DeepTip": {
+    "description": "S · Gold · percent = the next 5-point step",
+    "placeholders": {
+      "percent": {
+        "type": "String"
+      },
+      "yearly": {
+        "type": "String"
+      }
+    }
+  },
+  "insightsExplainWeekPatternBasic": "يوم {peakDay} و{peakDay2} واخدين {percent} من صرفك الأسبوعي، وأكتر وقت إيدك بتفرط فيه حوالين {time}.",
+  "@insightsExplainWeekPatternBasic": {
+    "description": "E",
+    "placeholders": {
+      "peakDay": {
+        "type": "String"
+      },
+      "peakDay2": {
+        "type": "String"
+      },
+      "percent": {
+        "type": "String"
+      },
+      "time": {
+        "type": "String"
+      }
+    }
+  },
+  "insightsExplainWeekPatternTip": "حط سقف {target} ليوم {peakDay} الجاي.",
+  "@insightsExplainWeekPatternTip": {
+    "description": "S",
+    "placeholders": {
+      "target": {
+        "type": "String"
+      },
+      "peakDay": {
+        "type": "String"
+      }
+    }
+  },
+  "insightsExplainWeekPatternDeep": "{trend, select, up{متوسط صرفك يوم {peakDay} {amount}، وده أعلى من الدورة اللي فاتت.} down{متوسط صرفك يوم {peakDay} {amount}، وده أقل من الدورة اللي فاتت.} other{متوسط صرفك يوم {peakDay} {amount}، زي الدورة اللي فاتت تقريباً.}}",
+  "@insightsExplainWeekPatternDeep": {
+    "description": "E · Gold",
+    "placeholders": {
+      "trend": {
+        "type": "String"
+      },
+      "peakDay": {
+        "type": "String"
+      },
+      "amount": {
+        "type": "String"
+      }
+    }
+  },
+  "insightsExplainWeekPatternDeepTip": "لو قللت خروجة {peakDay} بـ {target} كل أسبوع، هتوفر {yearly} في السنة.",
+  "@insightsExplainWeekPatternDeepTip": {
+    "description": "S · Gold",
+    "placeholders": {
+      "peakDay": {
+        "type": "String"
+      },
+      "target": {
+        "type": "String"
+      },
+      "yearly": {
+        "type": "String"
+      }
+    }
+  },
+  "insightsExplainMerchantsBasic": "{merchant} في المركز الأول بـ {amount} ({visits})، وبعده {merchant2} بـ {amount2}.",
+  "@insightsExplainMerchantsBasic": {
+    "description": "E · visits = common_unit_visits",
+    "placeholders": {
+      "merchant": {
+        "type": "String"
+      },
+      "amount": {
+        "type": "String"
+      },
+      "visits": {
+        "type": "String"
+      },
+      "merchant2": {
+        "type": "String"
+      },
+      "amount2": {
+        "type": "String"
+      }
+    }
+  },
+  "insightsExplainMerchantsTip": "جمّع مشترياتك من {merchant} في زيارة واحدة كل أسبوع.",
+  "@insightsExplainMerchantsTip": {
+    "description": "S",
+    "placeholders": {
+      "merchant": {
+        "type": "String"
+      }
+    }
+  },
+  "insightsExplainMerchantsDeep": "أول تلات تجار واخدين {percent} من صرفك. {trend, select, up{و{merchant} زاد عن الدورة اللي فاتت بـ {delta}.} down{و{merchant} قل عن الدورة اللي فاتت بـ {delta}.} other{و{merchant} زي الدورة اللي فاتت تقريباً.}}",
+  "@insightsExplainMerchantsDeep": {
+    "description": "E · Gold",
+    "placeholders": {
+      "percent": {
+        "type": "String"
+      },
+      "trend": {
+        "type": "String"
+      },
+      "merchant": {
+        "type": "String"
+      },
+      "delta": {
+        "type": "String"
+      }
+    }
+  },
+  "insightsExplainMerchantsDeepTip": "لو قللت {merchant} بالربع هتوفر {target} في الدورة، يعني {yearly} في السنة.",
+  "@insightsExplainMerchantsDeepTip": {
+    "description": "S · Gold",
+    "placeholders": {
+      "merchant": {
+        "type": "String"
+      },
+      "target": {
+        "type": "String"
+      },
+      "yearly": {
+        "type": "String"
+      }
+    }
+  },
+  "insightsExplainVsAverageBasic": "{state, select, both{{category} زاد {percent} عن متوسط آخر تلات دورات، لكن {category2} نزل {percent2}. برافو على ده.} rise{{category} زاد {percent} عن متوسط آخر تلات دورات.} drop{{category2} نزل {percent2} عن متوسط آخر تلات دورات. برافو عليك.} other{صرفك الدورة دي قريب من متوسط آخر تلات دورات.}}",
+  "@insightsExplainVsAverageBasic": {
+    "description": "E · state:select(both/rise/drop/other). Needs three earlier cycles (insights_chartDetail_needsData)",
+    "placeholders": {
+      "state": {
+        "type": "String"
+      },
+      "category": {
+        "type": "String"
+      },
+      "percent": {
+        "type": "String"
+      },
+      "category2": {
+        "type": "String"
+      },
+      "percent2": {
+        "type": "String"
+      }
+    }
+  },
+  "insightsExplainVsAverageTip": "{state, select, both{لو رجّعت {category} لمتوسطك هتوفر {target}.} rise{لو رجّعت {category} لمتوسطك هتوفر {target}.} drop{كمّل على نفس النظام في {category2}.} other{كمّل على نفس الإيقاع.}}",
+  "@insightsExplainVsAverageTip": {
+    "description": "S",
+    "placeholders": {
+      "state": {
+        "type": "String"
+      },
+      "category": {
+        "type": "String"
+      },
+      "target": {
+        "type": "String"
+      },
+      "category2": {
+        "type": "String"
+      }
+    }
+  },
+  "insightsExplainVsAverageDeep": "{trend, select, up{في الإجمالي إنت فوق متوسطك بـ {delta}.} down{في الإجمالي إنت تحت متوسطك بـ {delta}.} other{في الإجمالي إنت على متوسطك تقريباً.}}",
+  "@insightsExplainVsAverageDeep": {
+    "description": "E · Gold",
+    "placeholders": {
+      "trend": {
+        "type": "String"
+      },
+      "delta": {
+        "type": "String"
+      }
+    }
+  },
+  "insightsExplainVsAverageDeepTip": "حط حد لـ {category} على قد متوسطك، يعني {target} في الدورة.",
+  "@insightsExplainVsAverageDeepTip": {
+    "description": "S · Gold",
+    "placeholders": {
+      "category": {
+        "type": "String"
+      },
+      "target": {
+        "type": "String"
+      }
+    }
+  },
+  "insightsExplainInstallmentsBasic": "الشهر ده عليك {sum} أقساط والتزامات. {item} هيخلص في {month}.",
+  "@insightsExplainInstallmentsBasic": {
+    "description": "E · item = the next installment to finish",
+    "placeholders": {
+      "sum": {
+        "type": "String"
+      },
+      "item": {
+        "type": "String"
+      },
+      "month": {
+        "type": "String"
+      }
+    }
+  },
+  "insightsExplainInstallmentsTip": "متدخلش في قسط جديد قبل ما {item} يخلص.",
+  "@insightsExplainInstallmentsTip": {
+    "description": "S",
+    "placeholders": {
+      "item": {
+        "type": "String"
+      }
+    }
+  },
+  "insightsExplainInstallmentsDeep": "في الستة شهور الجايين هتدفع {amount} كلهم، بمتوسط {average} في الشهر.",
+  "@insightsExplainInstallmentsDeep": {
+    "description": "E · Gold",
+    "placeholders": {
+      "amount": {
+        "type": "String"
+      },
+      "average": {
+        "type": "String"
+      }
+    }
+  },
+  "insightsExplainInstallmentsDeepTip": "لما {item} يخلص هيفضل لك {monthly} كل شهر.",
+  "@insightsExplainInstallmentsDeepTip": {
+    "description": "S · Gold",
+    "placeholders": {
+      "item": {
+        "type": "String"
+      },
+      "monthly": {
+        "type": "String"
+      }
+    }
+  },
+  "insightsExplainSubscriptionsBasic": "الاشتراكات {monthly} في الشهر، يعني {yearly} في السنة. الصغير بيبان فكة، بس لما بيتجمع بيفرق.",
+  "@insightsExplainSubscriptionsBasic": {
+    "description": "E",
+    "placeholders": {
+      "monthly": {
+        "type": "String"
+      },
+      "yearly": {
+        "type": "String"
+      }
+    }
+  },
+  "insightsExplainSubscriptionsTip": "راجع {item}، ولو مش بتستخدمه إلغاؤه بيوفر {target} في السنة.",
+  "@insightsExplainSubscriptionsTip": {
+    "description": "S",
+    "placeholders": {
+      "item": {
+        "type": "String"
+      },
+      "target": {
+        "type": "String"
+      }
+    }
+  },
+  "insightsExplainSubscriptionsDeep": "{trend, select, up{الاشتراكات زادت {delta} في الشهر عن تلات شهور فاتت.} down{الاشتراكات قلت {delta} في الشهر عن تلات شهور فاتت.} other{الاشتراكات ثابتة عن تلات شهور فاتت.}}",
+  "@insightsExplainSubscriptionsDeep": {
+    "description": "E · Gold",
+    "placeholders": {
+      "trend": {
+        "type": "String"
+      },
+      "delta": {
+        "type": "String"
+      }
+    }
+  },
+  "insightsExplainSubscriptionsDeepTip": "لو ألغيت أغلى اتنين مش بتستخدمهم هتوفر {target} في السنة.",
+  "@insightsExplainSubscriptionsDeepTip": {
+    "description": "S · Gold",
+    "placeholders": {
+      "target": {
+        "type": "String"
+      }
+    }
+  },
+  "insightsExplainCardsBasic": "{state, select, credit{{percent} من صرفك طلع من {card}، وبعده {card2} بـ {percent2}. استخدامك من ليميت الكريدت {utilisation}.} other{{percent} من صرفك طلع من {card}، وبعده {card2} بـ {percent2}.}}",
+  "@insightsExplainCardsBasic": {
+    "description": "E · state:select(credit/other): credit when the top card is a credit card with a limit",
+    "placeholders": {
+      "state": {
+        "type": "String"
+      },
+      "percent": {
+        "type": "String"
+      },
+      "card": {
+        "type": "String"
+      },
+      "card2": {
+        "type": "String"
+      },
+      "percent2": {
+        "type": "String"
+      },
+      "utilisation": {
+        "type": "String"
+      }
+    }
+  },
+  "insightsExplainCardsTip": "{state, select, credit{خلّي استخدام الكريدت تحت النص وسدّده قبل ميعاده.} other{ركّز مصاريفك اليومية على كارت واحد علشان تتابعها أسهل.}}",
+  "@insightsExplainCardsTip": {
+    "description": "S",
+    "placeholders": {
+      "state": {
+        "type": "String"
+      }
+    }
+  },
+  "insightsExplainCardsDeep": "{trend, select, up{نصيب {card} من صرفك زاد عن الدورة اللي فاتت.} down{نصيب {card} من صرفك قل عن الدورة اللي فاتت.} other{نصيب {card} من صرفك ثابت عن الدورة اللي فاتت.}}",
+  "@insightsExplainCardsDeep": {
+    "description": "E · Gold · the apostrophe after a brace needs the early gen-l10n check (§0.10)",
+    "placeholders": {
+      "trend": {
+        "type": "String"
+      },
+      "card": {
+        "type": "String"
+      }
+    }
+  },
+  "insightsExplainCardsDeepTip": "صرفت {amount} من {card} الدورة دي. حط له سقف {target} للدورة الجاية.",
+  "@insightsExplainCardsDeepTip": {
+    "description": "S · Gold",
+    "placeholders": {
+      "amount": {
+        "type": "String"
+      },
+      "card": {
+        "type": "String"
+      },
+      "target": {
+        "type": "String"
+      }
+    }
+  },
+  "insightsExplainNetWorthBasic": "{trend, select, up{اللي حيلتك زاد من {startAmount} في {month} لـ {endAmount} في {month2}.} down{اللي حيلتك نزل من {startAmount} في {month} لـ {endAmount} في {month2}.} other{اللي حيلتك ثابت تقريباً حوالين {endAmount}.}}",
+  "@insightsExplainNetWorthBasic": {
+    "description": "E · one currency or unit at a time, no cross-currency sum",
+    "placeholders": {
+      "trend": {
+        "type": "String"
+      },
+      "startAmount": {
+        "type": "String"
+      },
+      "month": {
+        "type": "String"
+      },
+      "endAmount": {
+        "type": "String"
+      },
+      "month2": {
+        "type": "String"
+      }
+    }
+  },
+  "insightsExplainNetWorthTip": "{assetType} هو أكبر جزء من اللي حيلتك بـ {percent}. خد بالك لو كله في حاجة واحدة.",
+  "@insightsExplainNetWorthTip": {
+    "description": "S · assetType = common_assetType_*",
+    "placeholders": {
+      "assetType": {
+        "type": "String"
+      },
+      "percent": {
+        "type": "String"
+      }
+    }
+  },
+  "insightsExplainNetWorthDeep": "{trend, select, up{نموك الإجمالي {percent}، وأكتر حاجة زوّدته {assetType2}.} down{اللي حيلتك نزل {percent}، وأكتر حاجة أثرت فيه {assetType2}.} other{مفيش تغيير كبير في الفترة دي.}}",
+  "@insightsExplainNetWorthDeep": {
+    "description": "E · Gold",
+    "placeholders": {
+      "trend": {
+        "type": "String"
+      },
+      "percent": {
+        "type": "String"
+      },
+      "assetType2": {
+        "type": "String"
+      }
+    }
+  },
+  "insightsExplainNetWorthDeepTip": "بنفس المعدل ده ممكن توصل لـ {projected} بعد سنة. ده تقدير بس.",
+  "@insightsExplainNetWorthDeepTip": {
+    "description": "S · Gold",
+    "placeholders": {
+      "projected": {
+        "type": "String"
+      }
+    }
+  },
+  "insightsExplainInflationBasic": "{trend, select, up{متوسط فاتورة السوبرماركت كان {startAmount} في {month} ودلوقتي {endAmount}، يعني زاد {percent}.} down{متوسط فاتورة السوبرماركت كان {startAmount} في {month} ودلوقتي {endAmount}، يعني نزل {percent}.} other{متوسط فاتورة السوبرماركت ثابت حوالين {endAmount}.}}",
+  "@insightsExplainInflationBasic": {
+    "description": "E",
+    "placeholders": {
+      "trend": {
+        "type": "String"
+      },
+      "startAmount": {
+        "type": "String"
+      },
+      "month": {
+        "type": "String"
+      },
+      "endAmount": {
+        "type": "String"
+      },
+      "percent": {
+        "type": "String"
+      }
+    }
+  },
+  "insightsExplainInflationTip": "جرّب بدائل أرخص في {category}، هي أكتر حاجة سعرها زاد عليك.",
+  "@insightsExplainInflationTip": {
+    "description": "S",
+    "placeholders": {
+      "category": {
+        "type": "String"
+      }
+    }
+  },
+  "insightsExplainInflationDeep": "متوسط أوردر الدليفري بقى {average} بدل {previous}.",
+  "@insightsExplainInflationDeep": {
+    "description": "E · Gold · only when the delivery average rose; otherwise the sentence is dropped",
+    "placeholders": {
+      "average": {
+        "type": "String"
+      },
+      "previous": {
+        "type": "String"
+      }
+    }
+  },
+  "insightsExplainInflationDeepTip": "لو نزّلت متوسط الفاتورة {target}، هتوفر {yearly} في السنة بنفس عدد الزيارات.",
+  "@insightsExplainInflationDeepTip": {
+    "description": "S · Gold",
+    "placeholders": {
+      "target": {
+        "type": "String"
+      },
+      "yearly": {
+        "type": "String"
+      }
+    }
+  },
+  "budgetOverviewCycle": "{start} لحد {end}",
+  "@budgetOverviewCycle": {
+    "description": "L · cycle header, dates per common_date_*",
+    "placeholders": {
+      "start": {
+        "type": "String"
+      },
+      "end": {
+        "type": "String"
+      }
+    }
+  },
+  "budgetOverviewDaysLeft": "{count, plural, =1{آخر يوم} =2{فاضل يومين} few{فاضل {n} أيام} many{فاضل {n} يوم} other{فاضل {n} يوم}}",
+  "@budgetOverviewDaysLeft": {
+    "description": "C · count:int, n · includes today, so 0 can't occur",
+    "placeholders": {
+      "count": {
+        "type": "int"
+      },
+      "n": {
+        "type": "String"
+      }
+    }
+  },
+  "budgetOverviewCalendarMonth": "الشهر الميلادي",
+  "@budgetOverviewCalendarMonth": {
+    "description": "L · shown when no payday is set (A-43)"
+  },
+  "budgetOverviewSetPayday": "حدد يوم القبض",
+  "@budgetOverviewSetPayday": {
+    "description": "L · text link, opens S-72"
+  },
+  "budgetOverviewOverall": "{spent} من {budget}",
+  "@budgetOverviewOverall": {
+    "description": "L · overall bar, with common_progress_percent",
+    "placeholders": {
+      "spent": {
+        "type": "String"
+      },
+      "budget": {
+        "type": "String"
+      }
+    }
+  },
+  "budgetOverviewSafePerDay": "مسموحلك {perDay} في اليوم",
+  "@budgetOverviewSafePerDay": {
+    "description": "L · BR-BUD-03. At 0 use home_hero_budgetUsedUp",
+    "placeholders": {
+      "perDay": {
+        "type": "String"
+      }
+    }
+  },
+  "budgetOverviewCurrencyNote": "الميزانية دي بـ{currency} بس",
+  "@budgetOverviewCurrencyNote": {
+    "description": "S · FR-BUD-02, shown when the currency switcher is not EGP",
+    "placeholders": {
+      "currency": {
+        "type": "String"
+      }
+    }
+  },
+  "budgetOverviewRowAmounts": "{spent} / {limit}",
+  "@budgetOverviewRowAmounts": {
+    "description": "L · C-12",
+    "placeholders": {
+      "spent": {
+        "type": "String"
+      },
+      "limit": {
+        "type": "String"
+      }
+    }
+  },
+  "budgetOverviewStatusNear": "قربت تخلص",
+  "@budgetOverviewStatusNear": {
+    "description": "C · 80–99% (default threshold)"
+  },
+  "budgetOverviewStatusFull": "خلصت",
+  "@budgetOverviewStatusFull": {
+    "description": "C · exactly 100%"
+  },
+  "budgetOverviewStatusOver": "عدّت بـ {gap}",
+  "@budgetOverviewStatusOver": {
+    "description": "C · above 100%, danger colour plus these words",
+    "placeholders": {
+      "gap": {
+        "type": "String"
+      }
+    }
+  },
+  "budgetOverviewRowA11y": "{category}: صرفت {spent} من {limit}، {percent}",
+  "@budgetOverviewRowA11y": {
+    "description": "A",
+    "placeholders": {
+      "category": {
+        "type": "String"
+      },
+      "spent": {
+        "type": "String"
+      },
+      "limit": {
+        "type": "String"
+      },
+      "percent": {
+        "type": "String"
+      }
+    }
+  },
+  "budgetOverviewNotBudgeted": "من غير ميزانية",
+  "@budgetOverviewNotBudgeted": {
+    "description": "L"
+  },
+  "budgetOverviewNotBudgetedSub": "صرف في تصنيفات ملهاش حد",
+  "@budgetOverviewNotBudgetedSub": {
+    "description": "S · opens S-11 filtered"
+  },
+  "budgetOverviewEdit": "عدّل الميزانية",
+  "@budgetOverviewEdit": {
+    "description": "B · opens S-23"
+  },
+  "budgetOverviewPrevA11y": "الدورة اللي قبلها",
+  "@budgetOverviewPrevA11y": {
+    "description": "A · arrow mirrors in RTL"
+  },
+  "budgetOverviewNextA11y": "الدورة اللي بعدها",
+  "@budgetOverviewNextA11y": {
+    "description": "A · arrow mirrors in RTL"
+  },
+  "budgetOverviewEmptyTitle": "حط حدود وشوف مسموحلك تصرف كام",
+  "@budgetOverviewEmptyTitle": {
+    "description": "T · C-28, Rive tourGuide"
+  },
+  "budgetOverviewEmptyBody": "صرف الدورة دي ظاهر تحت لحد ما تحط ميزانية.",
+  "@budgetOverviewEmptyBody": {
+    "description": "S"
+  },
+  "budgetOverviewEmptyAction": "حط ميزانية",
+  "@budgetOverviewEmptyAction": {
+    "description": "B · opens S-23"
+  },
+  "budgetOverviewLoadingA11y": "بحمّل الميزانية",
+  "@budgetOverviewLoadingA11y": {
+    "description": "A"
+  },
+  "budgetEditTitle": "الميزانية",
+  "@budgetEditTitle": {
+    "description": "T"
+  },
+  "budgetEditCurrency": "عملة الميزانية",
+  "@budgetEditCurrency": {
+    "description": "L · picker, required (common_validation_currencyRequired)"
+  },
+  "budgetEditOverall": "الإجمالي",
+  "@budgetEditOverall": {
+    "description": "L · section"
+  },
+  "budgetEditOverallSum": "مجموع التصنيفات",
+  "@budgetEditOverallSum": {
+    "description": "L · radio"
+  },
+  "budgetEditOverallSet": "إجمالي أحدده أنا",
+  "@budgetEditOverallSet": {
+    "description": "L · radio, shows an amount field"
+  },
+  "budgetEditCategories": "حد كل تصنيف",
+  "@budgetEditCategories": {
+    "description": "L · section"
+  },
+  "budgetEditLimitHint": "سيبه فاضي لو مش عايز حد",
+  "@budgetEditLimitHint": {
+    "description": "S · under the fields, zero or blank = no budget"
+  },
+  "budgetEditAlerts": "نبّهني لما أوصل لـ",
+  "@budgetEditAlerts": {
+    "description": "L · FR-BUD-03"
+  },
+  "budgetEditAlertFirst": "التنبيه الأول",
+  "@budgetEditAlertFirst": {
+    "description": "L · percentage field"
+  },
+  "budgetEditAlertSecond": "التنبيه التاني",
+  "@budgetEditAlertSecond": {
+    "description": "L · percentage field"
+  },
+  "budgetEditRollover": "رحّل اللي فاضل للدورة الجاية",
+  "@budgetEditRollover": {
+    "description": "L · switch, FR-BUD-05"
+  },
+  "budgetEditRolloverHint": "اللي ما اتصرفش بيتضاف لميزانية الدورة الجاية.",
+  "@budgetEditRolloverHint": {
+    "description": "S"
+  },
+  "budgetEditAnnual": "ميزانيات سنوية",
+  "@budgetEditAnnual": {
+    "description": "L · opens the annual list, FR-BUD-06"
+  },
+  "budgetEditAnnualHint": "للحاجات اللي بتتدفع مرة في السنة، زي المصاريف المدرسية",
+  "@budgetEditAnnualHint": {
+    "description": "S"
+  },
+  "budgetEditPayday": "يوم القبض",
+  "@budgetEditPayday": {
+    "description": "L · opens the S-72 stepper"
+  },
+  "budgetEditErrorLimit": "الحد مينفعش يكون بالسالب",
+  "@budgetEditErrorLimit": {
+    "description": "S"
+  },
+  "budgetEditErrorThreshold": "النسبة لازم تبقى بين {min} و{max}",
+  "@budgetEditErrorThreshold": {
+    "description": "S · min/max = 1 and 150",
+    "placeholders": {
+      "min": {
+        "type": "String"
+      },
+      "max": {
+        "type": "String"
+      }
+    }
+  },
+  "budgetEditErrorOrder": "التنبيه الأول لازم يبقى أقل من التاني",
+  "@budgetEditErrorOrder": {
+    "description": "S"
+  },
+  "budgetEditSaved": "الميزانية اتحفظت ✓",
+  "@budgetEditSaved": {
+    "description": "N · success"
+  },
+  "budgetAnnualTitle": "ميزانيات سنوية",
+  "@budgetAnnualTitle": {
+    "description": "T"
+  },
+  "budgetAnnualEmpty": "لسه مفيش ميزانيات سنوية",
+  "@budgetAnnualEmpty": {
+    "description": "S · C-28 with budget_annual_add"
+  },
+  "budgetAnnualAdd": "ضيف ميزانية سنوية",
+  "@budgetAnnualAdd": {
+    "description": "B"
+  },
+  "recurringBillsSummary": "الشهر ده: {due} مستحقة · {subs} اشتراكات في الشهر",
+  "@recurringBillsSummary": {
+    "description": "S · due and subs are Money, one line per currency",
+    "placeholders": {
+      "due": {
+        "type": "String"
+      },
+      "subs": {
+        "type": "String"
+      }
+    }
+  },
+  "recurringBillsDetected": "لقيت اشتراك: {merchant} بـ {amount} في الشهر",
+  "@recurringBillsDetected": {
+    "description": "M · Rive detective · BR-SUB-01",
+    "placeholders": {
+      "merchant": {
+        "type": "String"
+      },
+      "amount": {
+        "type": "String"
+      }
+    }
+  },
+  "recurringBillsTrack": "تابعه",
+  "@recurringBillsTrack": {
+    "description": "B"
+  },
+  "recurringBillsNotSub": "مش اشتراك",
+  "@recurringBillsNotSub": {
+    "description": "B"
+  },
+  "recurringBillsUpcoming": "اللي جاي",
+  "@recurringBillsUpcoming": {
+    "description": "L · C-36 timeline"
+  },
+  "recurringBillsInstallmentRow": "{name} · القسط {index} من {total}",
+  "@recurringBillsInstallmentRow": {
+    "description": "L",
+    "placeholders": {
+      "name": {
+        "type": "String"
+      },
+      "index": {
+        "type": "String"
+      },
+      "total": {
+        "type": "String"
+      }
+    }
+  },
+  "recurringBillsLastOne": "آخر قسط",
+  "@recurringBillsLastOne": {
+    "description": "C"
+  },
+  "recurringBillsMarkPaid": "اتدفع",
+  "@recurringBillsMarkPaid": {
+    "description": "B · glossary «اتدفع»"
+  },
+  "recurringBillsPaid": "اتدفع ✓",
+  "@recurringBillsPaid": {
+    "description": "C"
+  },
+  "recurringBillsAutoPaid": "اتسجل لوحده من الحركة",
+  "@recurringBillsAutoPaid": {
+    "description": "L · FR-SUB-05"
+  },
+  "recurringBillsDueToday": "النهارده",
+  "@recurringBillsDueToday": {
+    "description": "C"
+  },
+  "recurringBillsDueIn": "{count, plural, =1{بكرة} =2{بعد يومين} few{بعد {n} أيام} many{بعد {n} يوم} other{بعد {n} يوم}}",
+  "@recurringBillsDueIn": {
+    "description": "C · count:int, n · 0 is recurring_bills_dueToday",
+    "placeholders": {
+      "count": {
+        "type": "int"
+      },
+      "n": {
+        "type": "String"
+      }
+    }
+  },
+  "recurringBillsOverdue": "{count, plural, =1{متأخر يوم} =2{متأخر يومين} few{متأخر {n} أيام} many{متأخر {n} يوم} other{متأخر {n} يوم}}",
+  "@recurringBillsOverdue": {
+    "description": "C · count:int, n · danger colour plus these words, no emoji",
+    "placeholders": {
+      "count": {
+        "type": "int"
+      },
+      "n": {
+        "type": "String"
+      }
+    }
+  },
+  "recurringBillsKindSubscription": "اشتراك",
+  "@recurringBillsKindSubscription": {
+    "description": "C"
+  },
+  "recurringBillsKindInstallment": "قسط",
+  "@recurringBillsKindInstallment": {
+    "description": "C"
+  },
+  "recurringBillsKindCard": "سداد كارت",
+  "@recurringBillsKindCard": {
+    "description": "C"
+  },
+  "recurringBillsKindGameya": "جمعية",
+  "@recurringBillsKindGameya": {
+    "description": "C"
+  },
+  "recurringBillsGameyaManual": "الجمعية بتتسجل بإيدك",
+  "@recurringBillsGameyaManual": {
+    "description": "S · A-17"
+  },
+  "recurringBillsSubsTitle": "الاشتراكات",
+  "@recurringBillsSubsTitle": {
+    "description": "L"
+  },
+  "recurringBillsSubsYear": "في السنة كلها",
+  "@recurringBillsSubsYear": {
+    "description": "C · the ×12 column header (FR-SUB-02)"
+  },
+  "recurringBillsSubRow": "{monthly} في الشهر · {yearly} في السنة",
+  "@recurringBillsSubRow": {
+    "description": "S",
+    "placeholders": {
+      "monthly": {
+        "type": "String"
+      },
+      "yearly": {
+        "type": "String"
+      }
+    }
+  },
+  "recurringBillsSubsTotal": "المجموع {monthly} في الشهر، يعني {yearly} في السنة",
+  "@recurringBillsSubsTotal": {
+    "description": "S",
+    "placeholders": {
+      "monthly": {
+        "type": "String"
+      },
+      "yearly": {
+        "type": "String"
+      }
+    }
+  },
+  "recurringBillsAdd": "ضيف فاتورة أو قسط",
+  "@recurringBillsAdd": {
+    "description": "L · text button, opens S-25"
+  },
+  "recurringBillsEmptyTitle": "لسه مفيش فواتير ولا أقساط",
+  "@recurringBillsEmptyTitle": {
+    "description": "T · C-28, Rive tourGuide"
+  },
+  "recurringBillsEmptyBody": "هلاقي الاشتراكات لوحدي من حركاتك، وتقدر تضيف أي قسط بإيدك.",
+  "@recurringBillsEmptyBody": {
+    "description": "S"
+  },
+  "recurringBillsPaidSnack": "اتسجل إن {name} اتدفع ✓",
+  "@recurringBillsPaidSnack": {
+    "description": "N + common_action_undo",
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "recurringBillsRowA11y": "{name}، {amount}، {status}",
+  "@recurringBillsRowA11y": {
+    "description": "A · status = recurring_bills_dueToday / dueIn / overdue / paid",
+    "placeholders": {
+      "name": {
+        "type": "String"
+      },
+      "amount": {
+        "type": "String"
+      },
+      "status": {
+        "type": "String"
+      }
+    }
+  },
+  "recurringBillEditTitleAdd": "ضيف فاتورة أو قسط",
+  "@recurringBillEditTitleAdd": {
+    "description": "T"
+  },
+  "recurringBillEditTitleEdit": "عدّل الفاتورة",
+  "@recurringBillEditTitleEdit": {
+    "description": "T"
+  },
+  "recurringBillEditType": "النوع",
+  "@recurringBillEditType": {
+    "description": "L · segments use recurring_bills_kind*"
+  },
+  "recurringBillEditName": "الاسم",
+  "@recurringBillEditName": {
+    "description": "L"
+  },
+  "recurringBillEditNamePlaceholder": "مثلاً: قسط التلاجة",
+  "@recurringBillEditNamePlaceholder": {
+    "description": "L · hint text"
+  },
+  "recurringBillEditAmount": "المبلغ",
+  "@recurringBillEditAmount": {
+    "description": "L · C-22, currency picker beside it"
+  },
+  "recurringBillEditRepeats": "بيتكرر",
+  "@recurringBillEditRepeats": {
+    "description": "L · options common_cadence_*"
+  },
+  "recurringBillEditNextDue": "الدفعة الجاية",
+  "@recurringBillEditNextDue": {
+    "description": "L · may be in the future"
+  },
+  "recurringBillEditPaid": "اتدفع",
+  "@recurringBillEditPaid": {
+    "description": "L · installments and gameya only"
+  },
+  "recurringBillEditPaidOf": "من",
+  "@recurringBillEditPaidOf": {
+    "description": "C · between the two number fields"
+  },
+  "recurringBillEditRemind": "{count, plural, =0{فكّرني يوم الميعاد} =1{فكّرني قبلها بيوم} =2{فكّرني قبلها بيومين} few{فكّرني قبلها بـ {n} أيام} many{فكّرني قبلها بـ {n} يوم} other{فكّرني قبلها بـ {n} يوم}}",
+  "@recurringBillEditRemind": {
+    "description": "L · count:int, n · stepper 0–30, default 3 (BR-SUB-03)",
+    "placeholders": {
+      "count": {
+        "type": "int"
+      },
+      "n": {
+        "type": "String"
+      }
+    }
+  },
+  "recurringBillEditAccount": "الحساب (اختياري)",
+  "@recurringBillEditAccount": {
+    "description": "L"
+  },
+  "recurringBillEditDeleteTitle": "تمسح {name}؟",
+  "@recurringBillEditDeleteTitle": {
+    "description": "T · destructive, no emoji",
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "recurringBillEditDeleteBody": "هتتشال من الفواتير. الحركات اللي اتسجلت قبل كده مش هتتمسح.",
+  "@recurringBillEditDeleteBody": {
+    "description": "S · confirm button common_action_delete, cancel common_action_cancel. Assumption, see Q-22"
+  },
+  "recurringBillEditErrorPaid": "اللي اتدفع مينفعش يزيد عن الإجمالي",
+  "@recurringBillEditErrorPaid": {
+    "description": "S"
+  },
+  "recurringBillEditErrorTotal": "عدد الدفعات لازم يبقى من واحد لـ {max}",
+  "@recurringBillEditErrorTotal": {
+    "description": "S · max = 120",
+    "placeholders": {
+      "max": {
+        "type": "String"
+      }
+    }
+  },
+  "recurringBillEditErrorRemind": "التذكير من صفر لـ {max} يوم",
+  "@recurringBillEditErrorRemind": {
+    "description": "S · max = 30",
+    "placeholders": {
+      "max": {
+        "type": "String"
+      }
+    }
+  },
+  "recurringBillEditErrorDue": "اختار ميعاد الدفعة الجاية",
+  "@recurringBillEditErrorDue": {
+    "description": "S"
+  },
+  "recurringBillEditSaved": "الفاتورة اتحفظت ✓",
+  "@recurringBillEditSaved": {
+    "description": "N · success"
+  },
+  "@homeQuickAddTitle": {
+    "description": "T · sheet"
+  },
+  "@homeQuickAddSay": {
+    "description": "L · opens S-31"
+  },
+  "@homeQuickAddType": {
+    "description": "L · opens S-13"
+  },
+  "@homeQuickAddScan": {
+    "description": "L · opens S-32"
+  },
+  "@homeQuickAddAsset": {
+    "description": "L · with common_gold_badge; Free opens S-68"
+  },
+  "@homeQuickAddSayA11y": {
+    "description": "A"
+  },
+  "@homeQuickAddTypeA11y": {
+    "description": "A"
+  },
+  "@homeQuickAddScanA11y": {
+    "description": "A"
+  },
+  "@homeQuickAddAssetA11y": {
+    "description": "A"
+  },
+  "homeQuickAddVoiceLeft": "فاضل {remaining} من {max} تسجيل صوتي الشهر ده",
+  "@homeQuickAddVoiceLeft": {
+    "description": "S · Free only (FR-VOI-04)",
+    "placeholders": {
+      "remaining": {
+        "type": "String"
+      },
+      "max": {
+        "type": "String"
+      }
+    }
+  },
+  "voiceLoggerTitle": "قول اللي دفعته",
+  "@voiceLoggerTitle": {
+    "description": "T"
+  },
+  "voiceLoggerExampleLabel": "مثلاً",
+  "@voiceLoggerExampleLabel": {
+    "description": "C"
+  },
+  "voiceLoggerExample": "دفعت ميت وخمسين جنيه خضار وخمسة وأربعين قهوة وتلاتين تاكسي",
+  "@voiceLoggerExample": {
+    "description": "S · FR-VOI-02/05. Egyptian number words, so the Arabic has no digits"
+  },
+  "voiceLoggerListening": "بسمعك…",
+  "@voiceLoggerListening": {
+    "description": "L"
+  },
+  "voiceLoggerDone": "خلصت",
+  "@voiceLoggerDone": {
+    "description": "B · stop button, the record icon doesn't mirror"
+  },
+  "voiceLoggerStopA11y": "وقّف التسجيل",
+  "@voiceLoggerStopA11y": {
+    "description": "A"
+  },
+  "voiceLoggerTranscriptA11y": "اللي سمعته لحد دلوقتي: {text}",
+  "@voiceLoggerTranscriptA11y": {
+    "description": "A",
+    "placeholders": {
+      "text": {
+        "type": "String"
+      }
+    }
+  },
+  "voiceLoggerUnderstanding": "بفهم اللي قلته…",
+  "@voiceLoggerUnderstanding": {
+    "description": "L · up to 2 s (NFR-PERF-05), Rive thinking"
+  },
+  "voiceLoggerParsedTitle": "{count, plural, =1{فهمت حاجة واحدة} =2{فهمت حاجتين} few{فهمت {n} حاجات} many{فهمت {n} حاجة} other{فهمت {n} حاجة}}",
+  "@voiceLoggerParsedTitle": {
+    "description": "T · count:int, n",
+    "placeholders": {
+      "count": {
+        "type": "int"
+      },
+      "n": {
+        "type": "String"
+      }
+    }
+  },
+  "voiceLoggerAccount": "الحساب",
+  "@voiceLoggerAccount": {
+    "description": "L · applies to all items"
+  },
+  "voiceLoggerWhen": "إمتى",
+  "@voiceLoggerWhen": {
+    "description": "L · applies to all items"
+  },
+  "voiceLoggerApplyAll": "بينطبق على الكل",
+  "@voiceLoggerApplyAll": {
+    "description": "C"
+  },
+  "voiceLoggerAmountMissing": "المبلغ كام؟",
+  "@voiceLoggerAmountMissing": {
+    "description": "C · error state on an item (EC-30). Save is disabled until it is fixed or removed"
+  },
+  "voiceLoggerEditA11y": "عدّل البند ده",
+  "@voiceLoggerEditA11y": {
+    "description": "A"
+  },
+  "voiceLoggerRemoveA11y": "شيل البند ده",
+  "@voiceLoggerRemoveA11y": {
+    "description": "A"
+  },
+  "voiceLoggerSave": "{count, plural, =1{احفظ} =2{احفظ الاتنين} few{احفظ {n}} many{احفظ {n}} other{احفظ {n}}}",
+  "@voiceLoggerSave": {
+    "description": "B · count:int, n",
+    "placeholders": {
+      "count": {
+        "type": "int"
+      },
+      "n": {
+        "type": "String"
+      }
+    }
+  },
+  "voiceLoggerSaved": "{count, plural, =1{اتسجلت حركة واحدة ✓} =2{اتسجلت حركتين ✓} few{اتسجلوا {n} حركات ✓} many{اتسجلوا {n} حركة ✓} other{اتسجلوا {n} حركة ✓}}",
+  "@voiceLoggerSaved": {
+    "description": "N + common_action_undo · count:int, n · one voice log counts once (A-14)",
+    "placeholders": {
+      "count": {
+        "type": "int"
+      },
+      "n": {
+        "type": "String"
+      }
+    }
+  },
+  "voiceLoggerEmptyTitle": "مسمعتش مبلغ",
+  "@voiceLoggerEmptyTitle": {
+    "description": "T · actions common_action_tryAgain and common_action_typeInstead"
+  },
+  "voiceLoggerEmptyBody": "جرّب تقول: «ميت وخمسين خضار»",
+  "@voiceLoggerEmptyBody": {
+    "description": "S"
+  },
+  "voiceLoggerUnavailable": "الصوت بالعربي مش شغال على الموبايل ده",
+  "@voiceLoggerUnavailable": {
+    "description": "T · EC-32, Rive oops. Action common_action_typeInstead"
+  },
+  "voiceLoggerUnavailableBody": "تقدر تكتب الحركة بإيدك في ثواني.",
+  "@voiceLoggerUnavailableBody": {
+    "description": "S"
+  },
+  "voiceLoggerOnlineTitle": "نستخدم التعرف على الصوت أونلاين؟",
+  "@voiceLoggerOnlineTitle": {
+    "description": "T · D-42, only if on-device Arabic isn't available"
+  },
+  "voiceLoggerOnlineBody": "موبايلك مفيهوش تعرّف على العربي من غير نت. لو وافقت، خدمة الكلام بتاعة {platform, select, ios{آبل} other{جوجل}} هتحوّل صوتك لنص أونلاين. زغلول مش بيحتفظ بالتسجيل.",
+  "@voiceLoggerOnlineBody": {
+    "description": "E · platform:select(ios/other) · explicit consent, no jokes. Privacy review of the wording: Q-21",
+    "placeholders": {
+      "platform": {
+        "type": "String"
+      }
+    }
+  },
+  "voiceLoggerOnlineAllow": "وافق",
+  "@voiceLoggerOnlineAllow": {
+    "description": "B"
+  },
+  "voiceLoggerOnlineDeny": "لأ، هكتب",
+  "@voiceLoggerOnlineDeny": {
+    "description": "B"
+  },
+  "voiceLoggerMicTitle": "محتاج الميكروفون",
+  "@voiceLoggerMicTitle": {
+    "description": "T · C-25"
+  },
+  "voiceLoggerMicBody": "علشان أسمع اللي بتقوله. مش بحتفظ بتسجيل صوتك.",
+  "@voiceLoggerMicBody": {
+    "description": "S · plus common_action_openSettings and common_action_typeInstead"
+  },
+  "voiceLoggerLimitTitle": "خلّصت تسجيلاتك الصوتية الشهر ده",
+  "@voiceLoggerLimitTitle": {
+    "description": "T · Free, 15 used (A-15)"
+  },
+  "voiceLoggerLimitBody": "استخدمت {max} تسجيل صوتي الشهر ده، وبيرجعوا أول الشهر الجاي. جولد من غير حدود.",
+  "@voiceLoggerLimitBody": {
+    "description": "S · plus common_gold_unlock and common_action_typeInstead",
+    "placeholders": {
+      "max": {
+        "type": "String"
+      }
+    }
+  },
+  "captureScanTitle": "قراءة سكرين شوت",
+  "@captureScanTitle": {
+    "description": "T"
+  },
+  "captureScanChoose": "اختار صورة",
+  "@captureScanChoose": {
+    "description": "B"
+  },
+  "captureScanChooseAnother": "اختار صورة تانية",
+  "@captureScanChooseAnother": {
+    "description": "B"
+  },
+  "captureScanReading": "بقرا الصورة…",
+  "@captureScanReading": {
+    "description": "L · Rive scanning"
+  },
+  "captureScanOnDevice": "الصورة بتتقري على موبايلك.",
+  "@captureScanOnDevice": {
+    "description": "S"
+  },
+  "captureScanFound": "ده اللي لقيته",
+  "@captureScanFound": {
+    "description": "L"
+  },
+  "captureScanAmount": "المبلغ",
+  "@captureScanAmount": {
+    "description": "L"
+  },
+  "captureScanParty": "لمين / من مين",
+  "@captureScanParty": {
+    "description": "L · counterparty, often an IPA handle (LTR)"
+  },
+  "captureScanReference": "رقم العملية",
+  "@captureScanReference": {
+    "description": "L"
+  },
+  "captureScanDate": "إمتى",
+  "@captureScanDate": {
+    "description": "L · validation common_validation_dateFuture"
+  },
+  "captureScanCategory": "التصنيف",
+  "@captureScanCategory": {
+    "description": "L · required"
+  },
+  "captureScanAccount": "الحساب",
+  "@captureScanAccount": {
+    "description": "L · required (common_validation_accountRequired)"
+  },
+  "captureScanEditA11y": "عدّل",
+  "@captureScanEditA11y": {
+    "description": "A · pencil next to each found field"
+  },
+  "captureScanFromShare": "ده اللي فهمته من الصورة اللي بعتها. راجعه واحفظ.",
+  "@captureScanFromShare": {
+    "description": "S"
+  },
+  "captureScanEmptyTitle": "مش لاقي دفعة في الصورة دي",
+  "@captureScanEmptyTitle": {
+    "description": "T · Rive oops; actions capture_scan_chooseAnother and common_action_typeInstead"
+  },
+  "captureScanEmptyBody": "جرّب صورة أوضح، أو اكتب الحركة بإيدك.",
+  "@captureScanEmptyBody": {
+    "description": "S"
+  },
+  "captureScanDuplicateTitle": "اتسجلت قبل كده من رسالة البنك",
+  "@captureScanDuplicateTitle": {
+    "description": "T · same amount and reference or time"
+  },
+  "captureScanDuplicateView": "شوفها",
+  "@captureScanDuplicateView": {
+    "description": "B"
+  },
+  "captureScanDuplicateSave": "احفظها برضه",
+  "@captureScanDuplicateSave": {
+    "description": "B"
+  },
+  "captureScanUnsupported": "الملف ده مش صورة أقدر أقراها",
+  "@captureScanUnsupported": {
+    "description": "S"
+  },
+  "captureScanPhotoTitle": "محتاج أشوف صورك",
+  "@captureScanPhotoTitle": {
+    "description": "T"
+  },
+  "captureScanPhotoBody": "علشان تختار السكرين شوت. ببص على الصورة اللي تختارها بس.",
+  "@captureScanPhotoBody": {
+    "description": "S · plus common_action_openSettings"
+  },
+  "wealthOverviewUnitGold": "دهب عيار {karat}: {grams}",
+  "@wealthOverviewUnitGold": {
+    "description": "L · one hero line per karat. grams = common_unit_grams",
+    "placeholders": {
+      "karat": {
+        "type": "String"
+      },
+      "grams": {
+        "type": "String"
+      }
+    }
+  },
+  "wealthOverviewUnitCoins": "{count, plural, =1{جنيه دهب واحد} =2{جنيهين دهب} few{{n} جنيهات دهب} many{{n} جنيه دهب} other{{n} جنيه دهب}}",
+  "@wealthOverviewUnitCoins": {
+    "description": "L · count:int, n · hero line, shown only when coins are held",
+    "placeholders": {
+      "count": {
+        "type": "int"
+      },
+      "n": {
+        "type": "String"
+      }
+    }
+  },
+  "wealthOverviewUnitsA11y": "اللي حيلتك كله: {list}",
+  "@wealthOverviewUnitsA11y": {
+    "description": "A · list = the hero lines joined with the locale list format",
+    "placeholders": {
+      "list": {
+        "type": "String"
+      }
+    }
+  },
+  "wealthOverviewGoldTitle": "دهب عيار {karat}",
+  "@wealthOverviewGoldTitle": {
+    "description": "L · asset row",
+    "placeholders": {
+      "karat": {
+        "type": "String"
+      }
+    }
+  },
+  "wealthOverviewGoldSub": "{grams} · ≈ {value}",
+  "@wealthOverviewGoldSub": {
+    "description": "L · value = grams × price. Stale price adds common_badge_stale",
+    "placeholders": {
+      "grams": {
+        "type": "String"
+      },
+      "value": {
+        "type": "String"
+      }
+    }
+  },
+  "wealthOverviewCertTitle": "شهادة {bank}",
+  "@wealthOverviewCertTitle": {
+    "description": "L",
+    "placeholders": {
+      "bank": {
+        "type": "String"
+      }
+    }
+  },
+  "wealthOverviewCertSub": "عائد {percent} · {principal}",
+  "@wealthOverviewCertSub": {
+    "description": "L",
+    "placeholders": {
+      "percent": {
+        "type": "String"
+      },
+      "principal": {
+        "type": "String"
+      }
+    }
+  },
+  "wealthOverviewCertPayout": "الصرف الجاي {date}: {payout}",
+  "@wealthOverviewCertPayout": {
+    "description": "L · FR-WLT-04",
+    "placeholders": {
+      "date": {
+        "type": "String"
+      },
+      "payout": {
+        "type": "String"
+      }
+    }
+  },
+  "wealthOverviewManualValue": "قيمة تقديرية",
+  "@wealthOverviewManualValue": {
+    "description": "C · stocks, property and car rows"
+  },
+  "wealthOverviewNoRate": "مفيش سعر لـ {currency} لسه، فهو ظاهر بعملته بس",
+  "@wealthOverviewNoRate": {
+    "description": "S · EC-35",
+    "placeholders": {
+      "currency": {
+        "type": "String"
+      }
+    }
+  },
+  "wealthOverviewAssetsEmpty": "لسه ماضفتش أصول. ضيف دهبك أو شهاداتك.",
+  "@wealthOverviewAssetsEmpty": {
+    "description": "S · Gold, plus accounts_overview_addAsset"
+  },
+  "wealthOverviewAssetRowA11y": "{name}، {value}",
+  "@wealthOverviewAssetRowA11y": {
+    "description": "A",
+    "placeholders": {
+      "name": {
+        "type": "String"
+      },
+      "value": {
+        "type": "String"
+      }
+    }
+  },
+  "accountsOverviewHiddenCount": "{count, plural, =1{حساب واحد} =2{حسابين} few{{n} حسابات} many{{n} حساب} other{{n} حساب}}",
+  "@accountsOverviewHiddenCount": {
+    "description": "C · count:int, n · trailing text on the accounts_overview_hiddenEntry row, which exists only while 1 or more accounts are hidden",
+    "placeholders": {
+      "count": {
+        "type": "int"
+      },
+      "n": {
+        "type": "String"
+      }
+    }
+  },
+  "accountsHiddenTitle": "الحسابات المخفية",
+  "@accountsHiddenTitle": {
+    "description": "T · the hidden list's title (same words as accounts_overview_hiddenEntry)"
+  },
+  "accountsHiddenIntro": "الحسابات دي مش ظاهرة في القوايم، بس حركاتها لسه محسوبة في الأرقام والميزانية والشارتات.",
+  "@accountsHiddenIntro": {
+    "description": "S · D-69"
+  },
+  "accountsHiddenUnhide": "رجّعه",
+  "@accountsHiddenUnhide": {
+    "description": "B · on each row, no confirmation needed"
+  },
+  "accountsHiddenUnhidden": "الحساب رجع للقايمة",
+  "@accountsHiddenUnhidden": {
+    "description": "N + common_action_undo"
+  },
+  "accountsHiddenEmpty": "مفيش حسابات مخفية",
+  "@accountsHiddenEmpty": {
+    "description": "S · C-28, shown if the user unhides the last one while the list is open"
+  },
+  "accountsHiddenRowA11y": "{card}، مخفي. اضغط تفتح الحساب",
+  "@accountsHiddenRowA11y": {
+    "description": "A · opens S-43",
+    "placeholders": {
+      "card": {
+        "type": "String"
+      }
+    }
+  },
+  "wealthAssetTitleAdd": "ضيف أصل",
+  "@wealthAssetTitleAdd": {
+    "description": "T"
+  },
+  "wealthAssetTitleEdit": "عدّل الأصل",
+  "@wealthAssetTitleEdit": {
+    "description": "T"
+  },
+  "wealthAssetType": "النوع",
+  "@wealthAssetType": {
+    "description": "L"
+  },
+  "wealthAssetOptional": "اختياري",
+  "@wealthAssetOptional": {
+    "description": "C"
+  },
+  "wealthAssetGoldKarat": "العيار",
+  "@wealthAssetGoldKarat": {
+    "description": "L · options common_karat_label and common_karat_coin"
+  },
+  "wealthAssetGoldGrams": "الوزن بالجرام",
+  "@wealthAssetGoldGrams": {
+    "description": "L"
+  },
+  "wealthAssetGoldGramsHint": "لحد تلات أرقام بعد العلامة",
+  "@wealthAssetGoldGramsHint": {
+    "description": "S"
+  },
+  "wealthAssetCoinCount": "عدد الجنيهات",
+  "@wealthAssetCoinCount": {
+    "description": "L · when the karat option is the coin"
+  },
+  "wealthAssetBoughtOn": "اشتريته إمتى",
+  "@wealthAssetBoughtOn": {
+    "description": "L · hawl start for Zakah"
+  },
+  "wealthAssetPricePaid": "دفعت فيه كام",
+  "@wealthAssetPricePaid": {
+    "description": "L · optional, with a currency picker"
+  },
+  "wealthAssetCertBank": "البنك",
+  "@wealthAssetCertBank": {
+    "description": "L"
+  },
+  "wealthAssetCertPrincipal": "المبلغ",
+  "@wealthAssetCertPrincipal": {
+    "description": "L"
+  },
+  "wealthAssetCertRate": "نسبة العائد",
+  "@wealthAssetCertRate": {
+    "description": "L · percent field"
+  },
+  "wealthAssetCertPayout": "العائد بيتصرف",
+  "@wealthAssetCertPayout": {
+    "description": "L · options common_cadence_*"
+  },
+  "wealthAssetCertMaturity": "بتخلص إمتى",
+  "@wealthAssetCertMaturity": {
+    "description": "L"
+  },
+  "wealthAssetCashCurrency": "العملة",
+  "@wealthAssetCashCurrency": {
+    "description": "L · any ISO currency"
+  },
+  "wealthAssetCashAmount": "المبلغ",
+  "@wealthAssetCashAmount": {
+    "description": "L"
+  },
+  "wealthAssetName": "الاسم",
+  "@wealthAssetName": {
+    "description": "L · stocks, property, car"
+  },
+  "wealthAssetStocksCurrency": "عملة التداول",
+  "@wealthAssetStocksCurrency": {
+    "description": "L"
+  },
+  "wealthAssetValue": "القيمة الحالية",
+  "@wealthAssetValue": {
+    "description": "L · entered by hand"
+  },
+  "wealthAssetValueHint": "اكتبها بإيدك وحدّثها من وقت للتاني.",
+  "@wealthAssetValueHint": {
+    "description": "S"
+  },
+  "wealthAssetDeleteTitle": "تمسح الأصل ده؟",
+  "@wealthAssetDeleteTitle": {
+    "description": "T · destructive, no emoji"
+  },
+  "wealthAssetDeleteBody": "هيتشال من اللي حيلتك كله ومن أي حساب مبني عليه.",
+  "@wealthAssetDeleteBody": {
+    "description": "S"
+  },
+  "wealthAssetSaved": "الأصل اتحفظ ✓",
+  "@wealthAssetSaved": {
+    "description": "N · success"
+  },
+  "wealthAssetErrorType": "اختار نوع الأصل",
+  "@wealthAssetErrorType": {
+    "description": "S"
+  },
+  "wealthAssetErrorGrams": "الوزن لازم يبقى أكبر من صفر",
+  "@wealthAssetErrorGrams": {
+    "description": "S"
+  },
+  "wealthAssetErrorGramsDecimals": "لحد تلات أرقام بعد العلامة بس",
+  "@wealthAssetErrorGramsDecimals": {
+    "description": "S"
+  },
+  "wealthAssetErrorRate": "العائد من صفر لـ {max}٪",
+  "@wealthAssetErrorRate": {
+    "description": "S · max = 100",
+    "placeholders": {
+      "max": {
+        "type": "String"
+      }
+    }
+  },
+  "wealthAssetErrorMaturity": "تاريخ الانتهاء لازم يبقى بعد تاريخ الشراء",
+  "@wealthAssetErrorMaturity": {
+    "description": "S"
+  },
+  "wealthPricesTitle": "الأسعار",
+  "@wealthPricesTitle": {
+    "description": "T"
+  },
+  "wealthPricesUpdated": "اتحدثت {when}",
+  "@wealthPricesUpdated": {
+    "description": "L · when = date and time or common_date_hoursAgo",
+    "placeholders": {
+      "when": {
+        "type": "String"
+      }
+    }
+  },
+  "wealthPricesGoldSection": "الدهب (سعر الجرام)",
+  "@wealthPricesGoldSection": {
+    "description": "L · rows use common_karat_label"
+  },
+  "wealthPricesCurrenciesSection": "العملات مقابل {currency}",
+  "@wealthPricesCurrenciesSection": {
+    "description": "L · only currencies the user holds, plus featured ones",
+    "placeholders": {
+      "currency": {
+        "type": "String"
+      }
+    }
+  },
+  "wealthPricesGoldRowA11y": "عيار {karat}: {price} للجرام",
+  "@wealthPricesGoldRowA11y": {
+    "description": "A",
+    "placeholders": {
+      "karat": {
+        "type": "String"
+      },
+      "price": {
+        "type": "String"
+      }
+    }
+  },
+  "wealthPricesCurrencyRowA11y": "{currency}: {rate}",
+  "@wealthPricesCurrencyRowA11y": {
+    "description": "A",
+    "placeholders": {
+      "currency": {
+        "type": "String"
+      },
+      "rate": {
+        "type": "String"
+      }
+    }
+  },
+  "wealthPricesOverride": "غيّر السعر",
+  "@wealthPricesOverride": {
+    "description": "L · text button on each row"
+  },
+  "wealthPricesOverrideTitle": "سعرك إنت",
+  "@wealthPricesOverrideTitle": {
+    "description": "T · sheet"
+  },
+  "wealthPricesOverrideField": "السعر بـ {currency}",
+  "@wealthPricesOverrideField": {
+    "description": "L",
+    "placeholders": {
+      "currency": {
+        "type": "String"
+      }
+    }
+  },
+  "wealthPricesOverrideUse": "استخدم سعري",
+  "@wealthPricesOverrideUse": {
+    "description": "B"
+  },
+  "wealthPricesOverrideNote": "السعر اللي بتحطه بيتستخدم لحد ما ترجّع الأصلي.",
+  "@wealthPricesOverrideNote": {
+    "description": "S"
+  },
+  "wealthPricesYours": "سعرك",
+  "@wealthPricesYours": {
+    "description": "C · badge on overridden rows"
+  },
+  "wealthPricesReset": "رجّع الأصلي",
+  "@wealthPricesReset": {
+    "description": "B"
+  },
+  "wealthPricesNeverTitle": "لسه ما نزّلتش الأسعار",
+  "@wealthPricesNeverTitle": {
+    "description": "T · Rive sleep"
+  },
+  "wealthPricesNeverBody": "اتصل بالنت مرة، أو اكتب السعر بإيدك.",
+  "@wealthPricesNeverBody": {
+    "description": "S"
+  },
+  "wealthPricesEnterManually": "اكتب السعر بإيدك",
+  "@wealthPricesEnterManually": {
+    "description": "B"
+  },
+  "wealthPricesFetchFailed": "مقدرتش أحدّث الأسعار. شايف آخر سعر معروف.",
+  "@wealthPricesFetchFailed": {
+    "description": "N · EC-34"
+  },
+  "wealthPricesPrivacy": "تحديث الأسعار مبيبعتش أي حاجة عن فلوسك أو أصولك.",
+  "@wealthPricesPrivacy": {
+    "description": "S · NFR-PRIV-03. It speaks about financial data only"
+  },
+  "zakahMainTitle": "الزكاة",
+  "@zakahMainTitle": {
+    "description": "T"
+  },
+  "zakahMainDisclaimerSummary": "ده تقدير تقريبي مش فتوى. اسأل أهل العلم قبل ما تخرج زكاتك.",
+  "@zakahMainDisclaimerSummary": {
+    "description": "S · always visible (FR-ZAK-05), above the disclaimer"
+  },
+  "zakahMainDisclaimer": "هذا الحساب تقديري وليس فتوى. يُرجى مراجعة أهل العلم قبل إخراج الزكاة.",
+  "@zakahMainDisclaimer": {
+    "description": "S · simple standard Arabic (disclaimer exception). Legal and scholar sign-off: Q-23"
+  },
+  "zakahMainNisabReached": "النصاب اتحقق",
+  "@zakahMainNisabReached": {
+    "description": "L"
+  },
+  "zakahMainNisabNotReached": "لسه مفيش نصاب",
+  "@zakahMainNisabNotReached": {
+    "description": "L"
+  },
+  "zakahMainNisabInfo": "النصاب {grams} من الدهب عيار {karat}، يعني حوالين {value}",
+  "@zakahMainNisabInfo": {
+    "description": "S · grams = common_unit_grams (BR-ZAK-01)",
+    "placeholders": {
+      "grams": {
+        "type": "String"
+      },
+      "karat": {
+        "type": "String"
+      },
+      "value": {
+        "type": "String"
+      }
+    }
+  },
+  "zakahMainNisabNotReachedBody": "حسابك تحت النصاب دلوقتي، فالتقدير مفيهوش مبلغ مستحق. هفضل أتابع معاك.",
+  "@zakahMainNisabNotReachedBody": {
+    "description": "S"
+  },
+  "zakahMainLotGold": "دهب عيار {karat} · {grams}",
+  "@zakahMainLotGold": {
+    "description": "L",
+    "placeholders": {
+      "karat": {
+        "type": "String"
+      },
+      "grams": {
+        "type": "String"
+      }
+    }
+  },
+  "zakahMainLotCash": "كاش وأرصدة بـ{currency}: {amount}",
+  "@zakahMainLotCash": {
+    "description": "L",
+    "placeholders": {
+      "currency": {
+        "type": "String"
+      },
+      "amount": {
+        "type": "String"
+      }
+    }
+  },
+  "zakahMainLotInvest": "أسهم وصناديق بـ{currency}: {amount}",
+  "@zakahMainLotInvest": {
+    "description": "L",
+    "placeholders": {
+      "currency": {
+        "type": "String"
+      },
+      "amount": {
+        "type": "String"
+      }
+    }
+  },
+  "zakahMainLotCertificate": "شهادات بنك: {amount}",
+  "@zakahMainLotCertificate": {
+    "description": "L",
+    "placeholders": {
+      "amount": {
+        "type": "String"
+      }
+    }
+  },
+  "zakahMainDebtsLine": "بعد خصم الديون المستحقة {debts}",
+  "@zakahMainDebtsLine": {
+    "description": "L · BR-ZAK-04",
+    "placeholders": {
+      "debts": {
+        "type": "String"
+      }
+    }
+  },
+  "zakahMainHawlProgress": "الحول: {done} من {total} يوم",
+  "@zakahMainHawlProgress": {
+    "description": "L · BR-ZAK-02",
+    "placeholders": {
+      "done": {
+        "type": "String"
+      },
+      "total": {
+        "type": "String"
+      }
+    }
+  },
+  "zakahMainHawlDone": "الحول تم",
+  "@zakahMainHawlDone": {
+    "description": "C"
+  },
+  "zakahMainDueIn": "{count, plural, =1{هتستحق بكرة} =2{هتستحق بعد يومين} few{هتستحق بعد {n} أيام} many{هتستحق بعد {n} يوم} other{هتستحق بعد {n} يوم}}",
+  "@zakahMainDueIn": {
+    "description": "L · count:int, n",
+    "placeholders": {
+      "count": {
+        "type": "int"
+      },
+      "n": {
+        "type": "String"
+      }
+    }
+  },
+  "zakahMainDueHijri": "هجري: {hijri}",
+  "@zakahMainDueHijri": {
+    "description": "C · the due date in the Hijri calendar",
+    "placeholders": {
+      "hijri": {
+        "type": "String"
+      }
+    }
+  },
+  "zakahMainDue": "المستحق: {dueNative}",
+  "@zakahMainDue": {
+    "description": "L · native unit (grams of gold, or the currency), FR-ZAK-03",
+    "placeholders": {
+      "dueNative": {
+        "type": "String"
+      }
+    }
+  },
+  "zakahMainDueCost": "تقريباً {cost}",
+  "@zakahMainDueCost": {
+    "description": "L · cost in EGP, with common_currency_approxCaption",
+    "placeholders": {
+      "cost": {
+        "type": "String"
+      }
+    }
+  },
+  "zakahMainStatusLabel": "حالة الدفع",
+  "@zakahMainStatusLabel": {
+    "description": "L"
+  },
+  "zakahMainStatusPending": "لسه",
+  "@zakahMainStatusPending": {
+    "description": "C"
+  },
+  "zakahMainStatusPartial": "اتدفع جزء",
+  "@zakahMainStatusPartial": {
+    "description": "C"
+  },
+  "zakahMainStatusPaid": "اتدفعت",
+  "@zakahMainStatusPaid": {
+    "description": "C"
+  },
+  "zakahMainPaidOn": "اتدفعت يوم {date}",
+  "@zakahMainPaidOn": {
+    "description": "L",
+    "placeholders": {
+      "date": {
+        "type": "String"
+      }
+    }
+  },
+  "zakahMainStaleNote": "الأسعار قديمة، فالمبالغ بالجنيه تقريبية.",
+  "@zakahMainStaleNote": {
+    "description": "S"
+  },
+  "zakahMainEmptyTitle": "ضيف أصل علشان نحسب الزكاة",
+  "@zakahMainEmptyTitle": {
+    "description": "T · C-28"
+  },
+  "zakahMainEmptyAdd": "ضيف أصل",
+  "@zakahMainEmptyAdd": {
+    "description": "B · opens S-44"
+  },
+  "zakahMainHowTitle": "بتتحسب إزاي؟",
+  "@zakahMainHowTitle": {
+    "description": "T"
+  },
+  "zakahMainHowNisab": "النصاب {grams} دهب عيار {karat}، بسعر النهارده.",
+  "@zakahMainHowNisab": {
+    "description": "S",
+    "placeholders": {
+      "grams": {
+        "type": "String"
+      },
+      "karat": {
+        "type": "String"
+      }
+    }
+  },
+  "zakahMainHowHawl": "الحول سنة هجرية، يعني {days} يوم من يوم ما حصلت على الأصل.",
+  "@zakahMainHowHawl": {
+    "description": "S",
+    "placeholders": {
+      "days": {
+        "type": "String"
+      }
+    }
+  },
+  "zakahMainHowRate": "المستحق {percent} من كل أصل بوحدته: الدهب بالجرام والكاش بعملته.",
+  "@zakahMainHowRate": {
+    "description": "S",
+    "placeholders": {
+      "percent": {
+        "type": "String"
+      }
+    }
+  },
+  "zakahMainHowPurity": "دهب عيار {karat} بيتحسب بنسبة {percent} ناحية النصاب.",
+  "@zakahMainHowPurity": {
+    "description": "S · BR-ZAK-03",
+    "placeholders": {
+      "karat": {
+        "type": "String"
+      },
+      "percent": {
+        "type": "String"
+      }
+    }
+  },
+  "zakahMainHowDebts": "الديون اللي ميعادها جه بتتخصم من الكاش قبل الحساب.",
+  "@zakahMainHowDebts": {
+    "description": "S"
+  },
+  "zakahMainLotA11y": "{lot}، {status}، المستحق {dueNative}",
+  "@zakahMainLotA11y": {
+    "description": "A · status = zakah_main_status*",
+    "placeholders": {
+      "lot": {
+        "type": "String"
+      },
+      "status": {
+        "type": "String"
+      },
+      "dueNative": {
+        "type": "String"
+      }
+    }
+  },
+  "chatMainSegAsk": "اسأل",
+  "@chatMainSegAsk": {
+    "description": "C"
+  },
+  "chatMainSegTips": "نصايح",
+  "@chatMainSegTips": {
+    "description": "C · flag only"
+  },
+  "chatMainGreeting": "اسألني أي حاجة عن فلوسك، بالمصري أو بالإنجليزي. بجاوبك من بياناتك اللي على موبايلك.",
+  "@chatMainGreeting": {
+    "description": "M · Rive tourGuide, first open"
+  },
+  "chatMainInputHint": "اسألني أي حاجة عن فلوسك…",
+  "@chatMainInputHint": {
+    "description": "L · glossary. EN is shorter than the AR"
+  },
+  "chatMainSendA11y": "ابعت السؤال",
+  "@chatMainSendA11y": {
+    "description": "A"
+  },
+  "chatMainTooLong": "{count, plural, =1{السؤال ميزيدش عن حرف واحد} =2{السؤال ميزيدش عن حرفين} few{السؤال ميزيدش عن {n} حروف} many{السؤال ميزيدش عن {n} حرف} other{السؤال ميزيدش عن {n} حرف}}",
+  "@chatMainTooLong": {
+    "description": "S · count:int = 300, n",
+    "placeholders": {
+      "count": {
+        "type": "int"
+      },
+      "n": {
+        "type": "String"
+      }
+    }
+  },
+  "chatMainFilterNote": "الإجابات على {cards}",
+  "@chatMainFilterNote": {
+    "description": "L · the card filter applies to answers",
+    "placeholders": {
+      "cards": {
+        "type": "String"
+      }
+    }
+  },
+  "chatMainRoast": "إقصف جبهتي",
+  "@chatMainRoast": {
+    "description": "L · toggle. The 🔥 is an icon, not text"
+  },
+  "chatMainRoastHint": "بيغيّر الأسلوب بس، والأرقام زي ما هي.",
+  "@chatMainRoastHint": {
+    "description": "S · R9"
+  },
+  "chatMainClear": "امسح المحادثة",
+  "@chatMainClear": {
+    "description": "L · overflow menu"
+  },
+  "chatMainCleared": "المحادثة اتمسحت",
+  "@chatMainCleared": {
+    "description": "N"
+  },
+  "chatMainOpenTransactions": "افتح في الحركات",
+  "@chatMainOpenTransactions": {
+    "description": "L · opens S-11 with the same filters"
+  },
+  "chatMainTypingA11y": "زغلول بيكتب",
+  "@chatMainTypingA11y": {
+    "description": "A"
+  },
+  "chatMainUserA11y": "إنت قلت: {text}",
+  "@chatMainUserA11y": {
+    "description": "A",
+    "placeholders": {
+      "text": {
+        "type": "String"
+      }
+    }
+  },
+  "chatMainZaghlolA11y": "زغلول رد: {text}",
+  "@chatMainZaghlolA11y": {
+    "description": "A",
+    "placeholders": {
+      "text": {
+        "type": "String"
+      }
+    }
+  },
+  "chatMainChartA11y": "رسم صغير بيقارن الأرقام اللي فوق",
+  "@chatMainChartA11y": {
+    "description": "A"
+  },
+  "chatChipCoffee": "صرفت كام على القهوة؟",
+  "@chatChipCoffee": {
+    "description": "L"
+  },
+  "chatChipTopMerchants": "أكتر أماكن بصرف فيها",
+  "@chatChipTopMerchants": {
+    "description": "L"
+  },
+  "chatChipDues": "إيه الفواتير الجاية؟",
+  "@chatChipDues": {
+    "description": "L"
+  },
+  "chatChipBudgetLeft": "فاضلي كام في الميزانية؟",
+  "@chatChipBudgetLeft": {
+    "description": "L"
+  },
+  "chatChipBiggest": "إيه أكبر حاجة صرفتها؟",
+  "@chatChipBiggest": {
+    "description": "L"
+  },
+  "chatChipSavings": "حوشت كام الشهر ده؟",
+  "@chatChipSavings": {
+    "description": "L"
+  },
+  "chatChipCompare": "قارن الشهر ده باللي فات",
+  "@chatChipCompare": {
+    "description": "L"
+  },
+  "chatChipCard": "صرفت كام بكارت {card}؟",
+  "@chatChipCard": {
+    "description": "L · only for a card the user has",
+    "placeholders": {
+      "card": {
+        "type": "String"
+      }
+    }
+  },
+  "chatFallbackText": "لسه مبعرفش أجاوب على ده. جرّب واحد من دول:",
+  "@chatFallbackText": {
+    "description": "M · FR-CHAT-03; three chips follow. No number is ever made up"
+  },
+  "chatAnswerPickOne": "تقصد أنهي واحد؟",
+  "@chatAnswerPickOne": {
+    "description": "M · slot ambiguous; candidates appear as chips"
+  },
+  "chatPeriodToday": "النهارده",
+  "@chatPeriodToday": {
+    "description": "C"
+  },
+  "chatPeriodYesterday": "امبارح",
+  "@chatPeriodYesterday": {
+    "description": "C"
+  },
+  "chatPeriodThisWeek": "الأسبوع ده",
+  "@chatPeriodThisWeek": {
+    "description": "C"
+  },
+  "chatPeriodLastWeek": "الأسبوع اللي فات",
+  "@chatPeriodLastWeek": {
+    "description": "C"
+  },
+  "chatPeriodThisCycle": "الدورة دي",
+  "@chatPeriodThisCycle": {
+    "description": "C"
+  },
+  "chatPeriodLastCycle": "الدورة اللي فاتت",
+  "@chatPeriodLastCycle": {
+    "description": "C"
+  },
+  "chatPeriodThisMonth": "الشهر ده",
+  "@chatPeriodThisMonth": {
+    "description": "C"
+  },
+  "chatPeriodLastMonth": "الشهر اللي فات",
+  "@chatPeriodLastMonth": {
+    "description": "C"
+  },
+  "chatPeriodSinceYearStart": "من أول السنة",
+  "@chatPeriodSinceYearStart": {
+    "description": "L"
+  },
+  "chatPeriodLastMonths": "{count, plural, =1{في آخر شهر} =2{في آخر شهرين} few{في آخر {n} شهور} many{في آخر {n} شهر} other{في آخر {n} شهر}}",
+  "@chatPeriodLastMonths": {
+    "description": "L · count:int, n",
+    "placeholders": {
+      "count": {
+        "type": "int"
+      },
+      "n": {
+        "type": "String"
+      }
+    }
+  },
+  "chatPeriodRange": "من {start} لحد {end}",
+  "@chatPeriodRange": {
+    "description": "L",
+    "placeholders": {
+      "start": {
+        "type": "String"
+      },
+      "end": {
+        "type": "String"
+      }
+    }
+  },
+  "chatPeriodNextDays": "{count, plural, =1{بكرة} =2{في اليومين الجايين} few{في الـ {n} أيام الجايين} many{في الـ {n} يوم الجايين} other{في الـ {n} يوم الجايين}}",
+  "@chatPeriodNextDays": {
+    "description": "L · count:int, n · for upcoming dues",
+    "placeholders": {
+      "count": {
+        "type": "int"
+      },
+      "n": {
+        "type": "String"
+      }
+    }
+  },
+  "chatPeriodUntilPayday": "لحد القبض",
+  "@chatPeriodUntilPayday": {
+    "description": "C"
+  },
+  "chatAnswerCurrencyLead": "بـ{currency}:",
+  "@chatAnswerCurrencyLead": {
+    "description": "L · printed before each answer when there are 2+ currencies",
+    "placeholders": {
+      "currency": {
+        "type": "String"
+      }
+    }
+  },
+  "chatAnswerSpendOn": "صرفت {amount} على {subject} {span}.",
+  "@chatAnswerSpendOn": {
+    "description": "E · spend_on",
+    "placeholders": {
+      "amount": {
+        "type": "String"
+      },
+      "subject": {
+        "type": "String"
+      },
+      "span": {
+        "type": "String"
+      }
+    }
+  },
+  "chatAnswerSpendOnCount": "صرفت {amount} على {subject} {span} في {times}.",
+  "@chatAnswerSpendOnCount": {
+    "description": "E · times = common_unit_visits or common_unit_orders",
+    "placeholders": {
+      "amount": {
+        "type": "String"
+      },
+      "subject": {
+        "type": "String"
+      },
+      "span": {
+        "type": "String"
+      },
+      "times": {
+        "type": "String"
+      }
+    }
+  },
+  "chatAnswerCompare": "صرفت {amount} {span}، {trend, select, up{أكتر من {spanB} بـ {delta}} down{أقل من {spanB} بـ {delta}} other{زي {spanB} تقريباً}}.",
+  "@chatAnswerCompare": {
+    "description": "E · trend:select(up/down/other)",
+    "placeholders": {
+      "amount": {
+        "type": "String"
+      },
+      "span": {
+        "type": "String"
+      },
+      "trend": {
+        "type": "String"
+      },
+      "spanB": {
+        "type": "String"
+      },
+      "delta": {
+        "type": "String"
+      }
+    }
+  },
+  "chatAnswerTopMerchants": "أكتر الأماكن {span}: {list}.",
+  "@chatAnswerTopMerchants": {
+    "description": "E",
+    "placeholders": {
+      "span": {
+        "type": "String"
+      },
+      "list": {
+        "type": "String"
+      }
+    }
+  },
+  "chatAnswerBalance": "رصيد {account} {amount}، آخر تحديث {when}.",
+  "@chatAnswerBalance": {
+    "description": "E",
+    "placeholders": {
+      "account": {
+        "type": "String"
+      },
+      "amount": {
+        "type": "String"
+      },
+      "when": {
+        "type": "String"
+      }
+    }
+  },
+  "chatAnswerBalanceCredit": "المتاح في {account} {available} من {limit}.",
+  "@chatAnswerBalanceCredit": {
+    "description": "E",
+    "placeholders": {
+      "account": {
+        "type": "String"
+      },
+      "available": {
+        "type": "String"
+      },
+      "limit": {
+        "type": "String"
+      }
+    }
+  },
+  "chatAnswerBalanceUnknown": "لسه معرفش رصيد {account}. هيظهر مع أول رسالة فيها الرصيد.",
+  "@chatAnswerBalanceUnknown": {
+    "description": "E",
+    "placeholders": {
+      "account": {
+        "type": "String"
+      }
+    }
+  },
+  "chatAnswerBudgetLeft": "فاضلك {left} من ميزانية {subject}.",
+  "@chatAnswerBudgetLeft": {
+    "description": "E · budget_remaining",
+    "placeholders": {
+      "left": {
+        "type": "String"
+      },
+      "subject": {
+        "type": "String"
+      }
+    }
+  },
+  "chatAnswerBudgetLeftPerDay": "فاضلك {left} من الميزانية، يعني {perDay} في اليوم لحد القبض.",
+  "@chatAnswerBudgetLeftPerDay": {
+    "description": "E · overall budget",
+    "placeholders": {
+      "left": {
+        "type": "String"
+      },
+      "perDay": {
+        "type": "String"
+      }
+    }
+  },
+  "chatAnswerBudgetOver": "{subject} عدّى ميزانيته بـ {gap}.",
+  "@chatAnswerBudgetOver": {
+    "description": "E · calm, no emoji",
+    "placeholders": {
+      "subject": {
+        "type": "String"
+      },
+      "gap": {
+        "type": "String"
+      }
+    }
+  },
+  "chatAnswerBudgetNone": "مفيش ميزانية متحطة لـ {subject}. تحب تحطها؟",
+  "@chatAnswerBudgetNone": {
+    "description": "E · plus budget_overview_emptyAction",
+    "placeholders": {
+      "subject": {
+        "type": "String"
+      }
+    }
+  },
+  "chatAnswerDues": "{count, plural, =0{مفيش فواتير ولا أقساط {span}.} =1{عليك دفعة واحدة {span}: {list}.} =2{عليك دفعتين {span}: {list}، المجموع {amount}.} few{عليك {n} دفعات {span}: {list}، المجموع {amount}.} many{عليك {n} دفعة {span}: {list}، المجموع {amount}.} other{عليك {n} دفعة {span}: {list}، المجموع {amount}.}}",
+  "@chatAnswerDues": {
+    "description": "E · count:int, n · upcoming_dues. =0 is the no-data case for dues",
+    "placeholders": {
+      "count": {
+        "type": "int"
+      },
+      "span": {
+        "type": "String"
+      },
+      "list": {
+        "type": "String"
+      },
+      "amount": {
+        "type": "String"
+      },
+      "n": {
+        "type": "String"
+      }
+    }
+  },
+  "chatAnswerBiggest": "أكبر حاجة صرفتها {span} كانت {amount} عند {merchant} يوم {date}.",
+  "@chatAnswerBiggest": {
+    "description": "E",
+    "placeholders": {
+      "span": {
+        "type": "String"
+      },
+      "amount": {
+        "type": "String"
+      },
+      "merchant": {
+        "type": "String"
+      },
+      "date": {
+        "type": "String"
+      }
+    }
+  },
+  "chatAnswerSavings": "{state, select, short{{span} صرفت أكتر من دخلك بـ {gap}.} other{{span} حوشت {saved}، يعني {percent} من دخلك.}}",
+  "@chatAnswerSavings": {
+    "description": "E · state:select(short/other).",
+    "placeholders": {
+      "state": {
+        "type": "String"
+      },
+      "span": {
+        "type": "String"
+      },
+      "gap": {
+        "type": "String"
+      },
+      "saved": {
+        "type": "String"
+      },
+      "percent": {
+        "type": "String"
+      }
+    }
+  },
+  "chatAnswerSpendCard": "صرفت {amount} بكارت {card} {span}.",
+  "@chatAnswerSpendCard": {
+    "description": "E · spend_on_card",
+    "placeholders": {
+      "amount": {
+        "type": "String"
+      },
+      "card": {
+        "type": "String"
+      },
+      "span": {
+        "type": "String"
+      }
+    }
+  },
+  "chatAnswerNoData": "مفيش صرف على {subject} من {start} لحد {end}.",
+  "@chatAnswerNoData": {
+    "description": "E · EC-33",
+    "placeholders": {
+      "subject": {
+        "type": "String"
+      },
+      "start": {
+        "type": "String"
+      },
+      "end": {
+        "type": "String"
+      }
+    }
+  },
+  "chatAnswerNoDataGeneric": "مفيش بيانات للفترة دي.",
+  "@chatAnswerNoDataGeneric": {
+    "description": "E · EC-33"
+  },
+  "chatAnswerError": "حصلت مشكلة وأنا بقرا بياناتك. جرّب تاني.",
+  "@chatAnswerError": {
+    "description": "E · with common_action_tryAgain"
+  },
+  "chatRoastOn": "تمام، قلبي جامد وإنت كمان! هقصف على الصرف بس، مش عليك.",
+  "@chatRoastOn": {
+    "description": "M · Rive tourGuide, when the toggle is switched on"
+  },
+  "chatRoastOff": "رجعنا للجد. الأرقام زي ما هي.",
+  "@chatRoastOff": {
+    "description": "M"
+  },
+  "chatRoastOfferToggle": "ده كان قصف سريع. تحب أفتح مود القصف؟",
+  "@chatRoastOfferToggle": {
+    "description": "M · after a typed \"roast me\" while the toggle is off"
+  },
+  "chatRoastDelivery": "{orders} بـ {amount} دليفري {span}؟ السواق حافظ عنوانك أكتر مني! 😄",
+  "@chatRoastDelivery": {
+    "description": "M · fact: delivery orders and amount",
+    "placeholders": {
+      "orders": {
+        "type": "String"
+      },
+      "amount": {
+        "type": "String"
+      },
+      "span": {
+        "type": "String"
+      }
+    }
+  },
+  "chatRoastDeliveryAlt": "{amount} دليفري {span}.. المطبخ مستني زيارة منك!",
+  "@chatRoastDeliveryAlt": {
+    "description": "M",
+    "placeholders": {
+      "amount": {
+        "type": "String"
+      },
+      "span": {
+        "type": "String"
+      }
+    }
+  },
+  "chatRoastCoffee": "{amount} قهوة {span}؟ كده إنت شريك في مزرعة البن! ☕",
+  "@chatRoastCoffee": {
+    "description": "M",
+    "placeholders": {
+      "amount": {
+        "type": "String"
+      },
+      "span": {
+        "type": "String"
+      }
+    }
+  },
+  "chatRoastCoffeeAlt": "القهوة {span} بـ {amount}. للأسف الكافيين مبيدفعش فواتيرك 😄",
+  "@chatRoastCoffeeAlt": {
+    "description": "M",
+    "placeholders": {
+      "span": {
+        "type": "String"
+      },
+      "amount": {
+        "type": "String"
+      }
+    }
+  },
+  "chatRoastTopCategory": "{category} واخد {percent} من صرفك. ده مش بند، ده هواية!",
+  "@chatRoastTopCategory": {
+    "description": "M · never an essential category",
+    "placeholders": {
+      "category": {
+        "type": "String"
+      },
+      "percent": {
+        "type": "String"
+      }
+    }
+  },
+  "chatRoastTopCategoryAlt": "{category} واخد {percent} من صرفك ولسه بيطلب كمان!",
+  "@chatRoastTopCategoryAlt": {
+    "description": "M",
+    "placeholders": {
+      "category": {
+        "type": "String"
+      },
+      "percent": {
+        "type": "String"
+      }
+    }
+  },
+  "chatRoastSplurge": "{amount} مرة واحدة عند {merchant}؟ ده مش مشوار، ده قرار كبير!",
+  "@chatRoastSplurge": {
+    "description": "M · fact: biggest single non-essential expense",
+    "placeholders": {
+      "amount": {
+        "type": "String"
+      },
+      "merchant": {
+        "type": "String"
+      }
+    }
+  },
+  "chatRoastSplurgeAlt": "{amount} عند {merchant} دفعة واحدة {span}. ده يوم تاريخي في المحفظة!",
+  "@chatRoastSplurgeAlt": {
+    "description": "M",
+    "placeholders": {
+      "amount": {
+        "type": "String"
+      },
+      "merchant": {
+        "type": "String"
+      },
+      "span": {
+        "type": "String"
+      }
+    }
+  },
+  "chatRoastWeekend": "محفظتك بتخاف من يوم {peakDay}، وعندها حق!",
+  "@chatRoastWeekend": {
+    "description": "M · fact: peak spending day (chart 5)",
+    "placeholders": {
+      "peakDay": {
+        "type": "String"
+      }
+    }
+  },
+  "chatRoastWeekendAlt": "يوم {peakDay} بتصرف في المتوسط {amount}. باقي الأيام بتغير منه!",
+  "@chatRoastWeekendAlt": {
+    "description": "M",
+    "placeholders": {
+      "peakDay": {
+        "type": "String"
+      },
+      "amount": {
+        "type": "String"
+      }
+    }
+  },
+  "chatRoastSubscriptions": "اشتراكاتك بتاخد {yearly} في السنة. فيهم حاجة بتفتحها فعلاً؟",
+  "@chatRoastSubscriptions": {
+    "description": "M",
+    "placeholders": {
+      "yearly": {
+        "type": "String"
+      }
+    }
+  },
+  "chatRoastSubscriptionsAlt": "اشتراكاتك بـ {yearly} في السنة شغالة حتى وإنت نايم!",
+  "@chatRoastSubscriptionsAlt": {
+    "description": "M",
+    "placeholders": {
+      "yearly": {
+        "type": "String"
+      }
+    }
+  },
+  "chatRoastLateNight": "أوردرات بعد الساعة {time}؟ التطبيق صاحي أكتر منك!",
+  "@chatRoastLateNight": {
+    "description": "M · fact: delivery orders after the hour in chart 5",
+    "placeholders": {
+      "time": {
+        "type": "String"
+      }
+    }
+  },
+  "chatRoastGoldEquivalent": "{amount} على {category} كانوا يجيبوا {grams} دهب عيار {karat}. بس كانت حلوة، صح؟",
+  "@chatRoastGoldEquivalent": {
+    "description": "M · only when a gold price exists (R8). grams = common_unit_grams",
+    "placeholders": {
+      "amount": {
+        "type": "String"
+      },
+      "category": {
+        "type": "String"
+      },
+      "grams": {
+        "type": "String"
+      },
+      "karat": {
+        "type": "String"
+      }
+    }
+  },
+  "chatRoastGentle": "النهارده مش هقصف جبهتك، الأرقام محتاجة جد. تحب نبص على أكبر بند سوا؟",
+  "@chatRoastGentle": {
+    "description": "M · R4: the only line used when spending exceeds income or a bill is overdue. No emoji"
+  },
+  "chatRoastClean": "دورت على حاجة أقصفك بيها ومالقيتش! إنت منظم غصب عني 👏",
+  "@chatRoastClean": {
+    "description": "M · no eligible fact"
+  },
+  "roiTipsDisclaimerSummary": "دي أفكار عامة مش نصيحة مالية.",
+  "@roiTipsDisclaimerSummary": {
+    "description": "S · above the disclaimer, always visible"
+  },
+  "roiTipsDisclaimer": "هذه اقتراحات عامة وليست نصيحة مالية أو استثمارية. الأرقام تقديرية وقد تختلف عن الواقع.",
+  "@roiTipsDisclaimer": {
+    "description": "S · simple standard Arabic (disclaimer exception). Legal sign-off: Q-23"
+  },
+  "roiTipsProjection": "{years, select, two{السنة الأولى: توفير حوالين {year1}. السنة التانية: حوالين {year2}.} other{السنة الأولى: توفير حوالين {year1}.}}",
+  "@roiTipsProjection": {
+    "description": "S · years:select(two/other). Figures are rough examples from the user's own spending",
+    "placeholders": {
+      "years": {
+        "type": "String"
+      },
+      "year1": {
+        "type": "String"
+      },
+      "year2": {
+        "type": "String"
+      }
+    }
+  },
+  "roiTipsShare": "شارك",
+  "@roiTipsShare": {
+    "description": "B · opens S-73"
+  },
+  "roiTipsNotForMe": "مش ليّا",
+  "@roiTipsNotForMe": {
+    "description": "B · hides the tip"
+  },
+  "roiTipsDismissed": "اتشالت. مش هتظهرلك تاني.",
+  "@roiTipsDismissed": {
+    "description": "N + common_action_undo"
+  },
+  "roiTipsBadgeA11y": "{count, plural, =1{نصيحة جديدة واحدة} =2{نصيحتين جداد} few{{n} نصايح جديدة} many{{n} نصيحة جديدة} other{{n} نصيحة جديدة}}",
+  "@roiTipsBadgeA11y": {
+    "description": "A · count:int, n · the badge on the Tips segment",
+    "placeholders": {
+      "count": {
+        "type": "int"
+      },
+      "n": {
+        "type": "String"
+      }
+    }
+  },
+  "roiTipsEmptyTitle": "مفيش نصايح دلوقتي",
+  "@roiTipsEmptyTitle": {
+    "description": "T · C-28"
+  },
+  "roiTipsEmptyBody": "هقولك أول ما ألاقي حاجة تفيدك.",
+  "@roiTipsEmptyBody": {
+    "description": "S"
+  },
+  "roiTipsLockedBody": "نصايح مبنية على صرفك إنت، مع جولد",
+  "@roiTipsLockedBody": {
+    "description": "S · plus common_gold_unlock"
+  },
+  "roiRuleCoffeeTitle": "ماكينة قهوة بدل الكافيهات",
+  "@roiRuleCoffeeTitle": {
+    "description": "T"
+  },
+  "roiRuleCoffeeBody": "بتصرف {monthly} في الشهر في الكافيهات. ماكينة بالتقسيط مع البن والحليب تقريباً {alt} في الشهر.",
+  "@roiRuleCoffeeBody": {
+    "description": "E · alt = installment + running cost",
+    "placeholders": {
+      "monthly": {
+        "type": "String"
+      },
+      "alt": {
+        "type": "String"
+      }
+    }
+  },
+  "roiRuleDeliveryTitle": "أكل البيت بدل الدليفري كل يوم",
+  "@roiRuleDeliveryTitle": {
+    "description": "T"
+  },
+  "roiRuleDeliveryBody": "الدليفري واخد {monthly} في الشهر. جهاز طبخ صغير بالتقسيط وأكل البيت تقريباً {alt} في الشهر.",
+  "@roiRuleDeliveryBody": {
+    "description": "E",
+    "placeholders": {
+      "monthly": {
+        "type": "String"
+      },
+      "alt": {
+        "type": "String"
+      }
+    }
+  },
+  "roiRuleWaterTitle": "فلتر مياه بدل القوارير",
+  "@roiRuleWaterTitle": {
+    "description": "T"
+  },
+  "roiRuleWaterBody": "القوارير والجراكن بـ {monthly} في الشهر. فلتر مياه بالتقسيط مع تغيير الشمعات تقريباً {alt} في الشهر.",
+  "@roiRuleWaterBody": {
+    "description": "E",
+    "placeholders": {
+      "monthly": {
+        "type": "String"
+      },
+      "alt": {
+        "type": "String"
+      }
+    }
+  },
+  "roiRuleIdleCashTitle": "فلوسك واقفة من غير عائد",
+  "@roiRuleIdleCashTitle": {
+    "description": "T"
+  },
+  "roiRuleIdleCashBody": "في حسابك {idle} زيادة عن ميزانيتك بقالهم أكتر من عشرين يوم من غير عائد. صندوق نقدي أو شهادة ممكن يشغّلوهم. معدل مثال للتوضيح: {exampleRate}.",
+  "@roiRuleIdleCashBody": {
+    "description": "E · the rate is an example, not an offer and not guaranteed",
+    "placeholders": {
+      "idle": {
+        "type": "String"
+      },
+      "exampleRate": {
+        "type": "String"
+      }
+    }
+  },
+  "roiRuleCommuteTitle": "مشاويرك المتكررة بالتطبيقات",
+  "@roiRuleCommuteTitle": {
+    "description": "T"
+  },
+  "roiRuleCommuteBody": "مشاويرك بتطبيقات التوصيل بـ {monthly} في الشهر. وسيلة مواصلات بالتقسيط مع مواصلات عامة للمشاوير الطويلة تقريباً {alt} في الشهر.",
+  "@roiRuleCommuteBody": {
+    "description": "E",
+    "placeholders": {
+      "monthly": {
+        "type": "String"
+      },
+      "alt": {
+        "type": "String"
+      }
+    }
+  },
+  "roiRuleCardInterestTitle": "سدد الكريدت كارد كله",
+  "@roiRuleCardInterestTitle": {
+    "description": "T"
+  },
+  "roiRuleCardInterestBody": "عليك {balance} على الكريدت كارد وعندك كاش أكتر منه. السداد الكامل قبل ميعاد الكشف بيوفر الفوايد. معدل مثال للتوضيح: {exampleRate} في الشهر.",
+  "@roiRuleCardInterestBody": {
+    "description": "E",
+    "placeholders": {
+      "balance": {
+        "type": "String"
+      },
+      "exampleRate": {
+        "type": "String"
+      }
+    }
+  },
+  "roiRuleSubscriptionsTitle": "اشتراك سنوي واحد بدل كذا اشتراك",
+  "@roiRuleSubscriptionsTitle": {
+    "description": "T"
+  },
+  "roiRuleSubscriptionsBody": "بتدفع {monthly} في الشهر على اشتراكات كتير. باقة سنوية مشتركة ممكن تنزلها لحوالين {alt} في الشهر.",
+  "@roiRuleSubscriptionsBody": {
+    "description": "E",
+    "placeholders": {
+      "monthly": {
+        "type": "String"
+      },
+      "alt": {
+        "type": "String"
+      }
+    }
+  },
+  "roiRuleStaplesTitle": "اشتري الأساسيات مرة واحدة يوم القبض",
+  "@roiRuleStaplesTitle": {
+    "description": "T"
+  },
+  "roiRuleStaplesBody": "بتشتري الأساسيات على مرات صغيرة بـ {monthly} في الشهر. شراء بالجملة مرة واحدة يوم القبض ممكن يخليها حوالين {alt}.",
+  "@roiRuleStaplesBody": {
+    "description": "E",
+    "placeholders": {
+      "monthly": {
+        "type": "String"
+      },
+      "alt": {
+        "type": "String"
+      }
+    }
+  },
+  "commonActionCopy": "انسخ",
+  "@commonActionCopy": {
+    "description": "B"
+  },
+  "commonActionContactSupport": "كلّم الدعم",
+  "@commonActionContactSupport": {
+    "description": "B · opens the support link (mail, UX-A-06). Used with common_support_codeLabel wherever support is offered"
+  },
+  "commonActionSignIn": "سجّل دخول",
+  "@commonActionSignIn": {
+    "description": "B"
+  },
+  "commonActionSignOut": "اخرج من الحساب",
+  "@commonActionSignOut": {
+    "description": "B"
+  },
+  "commonActionManage": "إدارة",
+  "@commonActionManage": {
+    "description": "C"
+  },
+  "commonSupportCodeLabel": "كود الدعم",
+  "@commonSupportCodeLabel": {
+    "description": "L · D-57(f), the install ID shown so support can find the phone"
+  },
+  "commonSupportCodeValue": "{supportCode}",
+  "@commonSupportCodeValue": {
+    "description": "L · Latin, LTR, selectable; never mirrored",
+    "placeholders": {
+      "supportCode": {
+        "type": "String"
+      }
+    }
+  },
+  "commonSupportCodeCopied": "اتنسخ ✓",
+  "@commonSupportCodeCopied": {
+    "description": "N"
+  },
+  "commonSupportCodeCopyA11y": "انسخ كود الدعم {supportCode}",
+  "@commonSupportCodeCopyA11y": {
+    "description": "A",
+    "placeholders": {
+      "supportCode": {
+        "type": "String"
+      }
+    }
+  },
+  "commonSupportHint": "ادّي كود الدعم ده للدعم عشان يلاقي موبايلك.",
+  "@commonSupportHint": {
+    "description": "S"
+  },
+  "settingsMainTitle": "الإعدادات",
+  "@settingsMainTitle": {
+    "description": "T"
+  },
+  "settingsMainFinishSetup": "{count, plural, =1{فاضل خطوة واحدة في الإعداد} =2{فاضل خطوتين في الإعداد} few{فاضل {n} خطوات في الإعداد} many{فاضل {n} خطوة في الإعداد} other{فاضل {n} خطوة في الإعداد}}",
+  "@settingsMainFinishSetup": {
+    "description": "L · count:int, n · FR-ONB-11, shown only while a step is skipped",
+    "placeholders": {
+      "count": {
+        "type": "int"
+      },
+      "n": {
+        "type": "String"
+      }
+    }
+  },
+  "settingsMainGoldFree": "الباقة المجانية",
+  "@settingsMainGoldFree": {
+    "description": "L · Gold row title for Free"
+  },
+  "settingsMainGoldActive": "{plan, select, monthly{جولد · شهري} yearly{جولد · سنوي} lifetime{جولد · مدى الحياة} other{جولد}}",
+  "@settingsMainGoldActive": {
+    "description": "L · plan = monthly / yearly / lifetime / other",
+    "placeholders": {
+      "plan": {
+        "type": "String"
+      }
+    }
+  },
+  "settingsMainSeeGold": "شوف جولد",
+  "@settingsMainSeeGold": {
+    "description": "L · opens S-68"
+  },
+  "settingsMainSectionGeneral": "عام",
+  "@settingsMainSectionGeneral": {
+    "description": "L"
+  },
+  "settingsMainSectionData": "بياناتك",
+  "@settingsMainSectionData": {
+    "description": "L"
+  },
+  "settingsMainPreferences": "التفضيلات",
+  "@settingsMainPreferences": {
+    "description": "L"
+  },
+  "settingsMainNotifications": "التنبيهات",
+  "@settingsMainNotifications": {
+    "description": "L · Zaghlol's own alerts (Q-17)"
+  },
+  "settingsMainCapture": "زغلول بيقرا منين",
+  "@settingsMainCapture": {
+    "description": "L · glossary"
+  },
+  "settingsMainCaptureSub": "{state, select, ok{كله شغال} attention{محتاج انتباه} other{لسه متظبطش}}",
+  "@settingsMainCaptureSub": {
+    "description": "C · state = ok / attention / other",
+    "placeholders": {
+      "state": {
+        "type": "String"
+      }
+    }
+  },
+  "settingsMainCategories": "التصنيفات",
+  "@settingsMainCategories": {
+    "description": "L · glossary"
+  },
+  "settingsMainBackup": "نسخة احتياطية",
+  "@settingsMainBackup": {
+    "description": "L · glossary"
+  },
+  "settingsMainBackupSub": "{state, select, never{لسه مفيش نسخة} other{آخر نسخة {date}}}",
+  "@settingsMainBackupSub": {
+    "description": "L · state = never / other",
+    "placeholders": {
+      "state": {
+        "type": "String"
+      },
+      "date": {
+        "type": "String"
+      }
+    }
+  },
+  "settingsMainExports": "إكسيل وكشوف البنوك",
+  "@settingsMainExports": {
+    "description": "L · glossary"
+  },
+  "settingsMainPrivacy": "خصوصيتك",
+  "@settingsMainPrivacy": {
+    "description": "L · glossary"
+  },
+  "settingsMainAbout": "عن زغلول",
+  "@settingsMainAbout": {
+    "description": "L"
+  },
+  "categoriesListTitle": "التصنيفات",
+  "@categoriesListTitle": {
+    "description": "T"
+  },
+  "categoriesListTabCategories": "التصنيفات",
+  "@categoriesListTabCategories": {
+    "description": "C"
+  },
+  "categoriesListTabRules": "القواعد",
+  "@categoriesListTabRules": {
+    "description": "C"
+  },
+  "categoriesListSubCount": "{count, plural, =1{تصنيف فرعي واحد} =2{تصنيفين فرعيين} few{{n} تصنيفات فرعية} many{{n} تصنيف فرعي} other{{n} تصنيف فرعي}}",
+  "@categoriesListSubCount": {
+    "description": "L · count:int, n · row subtitle",
+    "placeholders": {
+      "count": {
+        "type": "int"
+      },
+      "n": {
+        "type": "String"
+      }
+    }
+  },
+  "categoriesListSystemNote": "دي تصنيفات زغلول الأساسية. جولد بيخليك تضيف تصنيفات فرعية.",
+  "@categoriesListSystemNote": {
+    "description": "S · read-only for Free"
+  },
+  "categoriesListNew": "تصنيف جديد",
+  "@categoriesListNew": {
+    "description": "L · + common_gold_badge; Free opens S-68"
+  },
+  "categoriesListNewSub": "تصنيف فرعي جديد",
+  "@categoriesListNewSub": {
+    "description": "L · + common_gold_badge"
+  },
+  "categoriesListRulesCount": "{count, plural, =0{مفيش قواعد} =1{قاعدة واحدة} =2{قاعدتين} few{{n} قواعد} many{{n} قاعدة} other{{n} قاعدة}}",
+  "@categoriesListRulesCount": {
+    "description": "L · count:int, n · section header",
+    "placeholders": {
+      "count": {
+        "type": "int"
+      },
+      "n": {
+        "type": "String"
+      }
+    }
+  },
+  "categoriesListRulesSearch": "دوّر في القواعد",
+  "@categoriesListRulesSearch": {
+    "description": "L · search field"
+  },
+  "categoriesListRuleA11y": "{merchant} بيتصنف {category}",
+  "@categoriesListRuleA11y": {
+    "description": "A · each rule row",
+    "placeholders": {
+      "merchant": {
+        "type": "String"
+      },
+      "category": {
+        "type": "String"
+      }
+    }
+  },
+  "categoriesListRuleEditA11y": "غيّر تصنيف القاعدة",
+  "@categoriesListRuleEditA11y": {
+    "description": "A"
+  },
+  "categoriesListRuleDeleteA11y": "امسح القاعدة",
+  "@categoriesListRuleDeleteA11y": {
+    "description": "A"
+  },
+  "categoriesListRulesEmpty": "لما تصلّح تصنيف، هسألك لو عايزني أفتكره.",
+  "@categoriesListRulesEmpty": {
+    "description": "S · empty rules state, Rive tourGuide allowed"
+  },
+  "categoriesListRuleDeleteTitle": "تمسح القاعدة دي؟",
+  "@categoriesListRuleDeleteTitle": {
+    "description": "T · C-18 dialog"
+  },
+  "categoriesListRuleDeleteBody": "زغلول مش هيطبّقها على الحركات الجاية.",
+  "@categoriesListRuleDeleteBody": {
+    "description": "S"
+  },
+  "categoriesListRuleDeleted": "القاعدة اتمسحت",
+  "@categoriesListRuleDeleted": {
+    "description": "N · + common_action_undo"
+  },
+  "categoriesListNoResults": "مفيش قاعدة بالاسم ده",
+  "@categoriesListNoResults": {
+    "description": "S"
+  },
+  "categoriesEditTitleNew": "تصنيف جديد",
+  "@categoriesEditTitleNew": {
+    "description": "T"
+  },
+  "categoriesEditTitleEdit": "تعديل التصنيف",
+  "@categoriesEditTitleEdit": {
+    "description": "T"
+  },
+  "categoriesEditName": "اسم التصنيف",
+  "@categoriesEditName": {
+    "description": "L · 1 to 30 characters, unique (common_validation_nameRequired, …nameLength, …nameTaken)"
+  },
+  "categoriesEditParent": "تحت تصنيف",
+  "@categoriesEditParent": {
+    "description": "L · parent picker"
+  },
+  "categoriesEditParentNone": "مفيش (تصنيف رئيسي)",
+  "@categoriesEditParentNone": {
+    "description": "L"
+  },
+  "categoriesEditBucket": "النوع",
+  "@categoriesEditBucket": {
+    "description": "L · bucket picker (BR-CAT-02)"
+  },
+  "categoriesEditBucketNeeds": "ضروريات",
+  "@categoriesEditBucketNeeds": {
+    "description": "C"
+  },
+  "categoriesEditBucketWants": "رغبات",
+  "@categoriesEditBucketWants": {
+    "description": "C"
+  },
+  "categoriesEditBucketObligations": "التزامات",
+  "@categoriesEditBucketObligations": {
+    "description": "C"
+  },
+  "categoriesEditBucketSavings": "ادخار",
+  "@categoriesEditBucketSavings": {
+    "description": "C"
+  },
+  "categoriesEditBucketIncome": "دخل",
+  "@categoriesEditBucketIncome": {
+    "description": "C"
+  },
+  "categoriesEditBucketGiving": "عطاء",
+  "@categoriesEditBucketGiving": {
+    "description": "C"
+  },
+  "categoriesEditBucketRequired": "اختار النوع",
+  "@categoriesEditBucketRequired": {
+    "description": "S"
+  },
+  "categoriesEditIcon": "الأيقونة",
+  "@categoriesEditIcon": {
+    "description": "L"
+  },
+  "categoriesEditColor": "اللون",
+  "@categoriesEditColor": {
+    "description": "L · from the approved palette"
+  },
+  "categoriesEditDelete": "امسح التصنيف",
+  "@categoriesEditDelete": {
+    "description": "B · destructive, edit mode only"
+  },
+  "categoriesEditDeleteTitle": "تمسح \"{category}\"؟",
+  "@categoriesEditDeleteTitle": {
+    "description": "T",
+    "placeholders": {
+      "category": {
+        "type": "String"
+      }
+    }
+  },
+  "categoriesEditDeleteBody": "اختار تصنيف تتنقل له حركاته قبل ما نمسحه.",
+  "@categoriesEditDeleteBody": {
+    "description": "S"
+  },
+  "categoriesEditMoveTo": "انقل الحركات لـ",
+  "@categoriesEditMoveTo": {
+    "description": "L"
+  },
+  "categoriesEditMoveRequired": "اختار تصنيف تتنقل له الحركات",
+  "@categoriesEditMoveRequired": {
+    "description": "S"
+  },
+  "categoriesEditDeleteConfirm": "امسح وانقل",
+  "@categoriesEditDeleteConfirm": {
+    "description": "B · destructive"
+  },
+  "categoriesEditDeleted": "التصنيف اتمسح والحركات اتنقلت",
+  "@categoriesEditDeleted": {
+    "description": "N"
+  },
+  "categoriesEditLockedBody": "التصنيفات الخاصة بيك مع جولد",
+  "@categoriesEditLockedBody": {
+    "description": "S · locked state + common_gold_unlock"
+  },
+  "templatesBuilderTitle": "قالب رسالة جديد",
+  "@templatesBuilderTitle": {
+    "description": "T"
+  },
+  "templatesBuilderPickTitle": "الصق رسالة أو اختار واحدة",
+  "@templatesBuilderPickTitle": {
+    "description": "L · block 1"
+  },
+  "templatesBuilderFromReview": "من اللي مستني رأيك",
+  "@templatesBuilderFromReview": {
+    "description": "L"
+  },
+  "templatesBuilderPaste": "الصق رسالة",
+  "@templatesBuilderPaste": {
+    "description": "L"
+  },
+  "templatesBuilderEmpty": "الصق رسالة من البنك عشان نبدأ",
+  "@templatesBuilderEmpty": {
+    "description": "S · empty state"
+  },
+  "templatesBuilderPrivate": "الرسالة بتفضل على موبايلك ومش بتتبعت لحد.",
+  "@templatesBuilderPrivate": {
+    "description": "S"
+  },
+  "templatesBuilderTagTitle": "علّم الأجزاء",
+  "@templatesBuilderTagTitle": {
+    "description": "L · block 2"
+  },
+  "templatesBuilderTapHint": "دوس على الجزء وبعدين اختار هو إيه.",
+  "@templatesBuilderTapHint": {
+    "description": "S"
+  },
+  "templatesBuilderTagAmount": "المبلغ",
+  "@templatesBuilderTagAmount": {
+    "description": "C · required"
+  },
+  "templatesBuilderTagCurrency": "العملة",
+  "@templatesBuilderTagCurrency": {
+    "description": "C"
+  },
+  "templatesBuilderTagMerchant": "التاجر",
+  "@templatesBuilderTagMerchant": {
+    "description": "C"
+  },
+  "templatesBuilderTagLast4": "آخر أربع أرقام",
+  "@templatesBuilderTagLast4": {
+    "description": "C"
+  },
+  "templatesBuilderTagBalance": "الرصيد",
+  "@templatesBuilderTagBalance": {
+    "description": "C"
+  },
+  "templatesBuilderTagDate": "التاريخ",
+  "@templatesBuilderTagDate": {
+    "description": "C"
+  },
+  "templatesBuilderDirection": "الاتجاه",
+  "@templatesBuilderDirection": {
+    "description": "L · options common_txnType_expense / common_txnType_income"
+  },
+  "templatesBuilderSender": "اسم المرسل",
+  "@templatesBuilderSender": {
+    "description": "L · required"
+  },
+  "templatesBuilderSenderHint": "زي ما بيظهر على الرسايل",
+  "@templatesBuilderSenderHint": {
+    "description": "S"
+  },
+  "templatesBuilderTestTitle": "جرّب القالب",
+  "@templatesBuilderTestTitle": {
+    "description": "L · block 3"
+  },
+  "templatesBuilderTestResult": "الرسايل الشبه دي اللي القالب فهمها: {done} من {total}",
+  "@templatesBuilderTestResult": {
+    "description": "S · done, total",
+    "placeholders": {
+      "done": {
+        "type": "String"
+      },
+      "total": {
+        "type": "String"
+      }
+    }
+  },
+  "templatesBuilderTestFailTitle": "في رسالة مافهمتهاش",
+  "@templatesBuilderTestFailTitle": {
+    "description": "L"
+  },
+  "templatesBuilderTestFailReason": "{state, select, amount{مش لاقي المبلغ فيها.} direction{مش عارف دي صرف ولا دخل.} other{شكلها مختلف عن القالب.}}",
+  "@templatesBuilderTestFailReason": {
+    "description": "S · state = amount / direction / other",
+    "placeholders": {
+      "state": {
+        "type": "String"
+      }
+    }
+  },
+  "templatesBuilderSave": "احفظ القالب",
+  "@templatesBuilderSave": {
+    "description": "B"
+  },
+  "templatesBuilderSaved": "القالب اتحفظ ✓",
+  "@templatesBuilderSaved": {
+    "description": "N"
+  },
+  "templatesBuilderErrorAmount": "علّم المبلغ الأول",
+  "@templatesBuilderErrorAmount": {
+    "description": "S"
+  },
+  "templatesBuilderErrorSender": "اكتب اسم المرسل",
+  "@templatesBuilderErrorSender": {
+    "description": "S"
+  },
+  "templatesBuilderErrorSelfParse": "القالب لازم يقرا الرسالة اللي عملته عليها",
+  "@templatesBuilderErrorSelfParse": {
+    "description": "S"
+  },
+  "templatesBuilderLockedBody": "علّم زغلول يفهم رسايل بنك مش مدعوم، مع جولد",
+  "@templatesBuilderLockedBody": {
+    "description": "S · locked state + common_gold_unlock"
+  },
+  "backupSettingsTitle": "نسخة احتياطية",
+  "@backupSettingsTitle": {
+    "description": "T"
+  },
+  "backupSettingsWhere": "النسخة تتحفظ فين؟",
+  "@backupSettingsWhere": {
+    "description": "L"
+  },
+  "backupSettingsAccount": "الحساب",
+  "@backupSettingsAccount": {
+    "description": "L"
+  },
+  "backupSettingsAccountChange": "غيّر",
+  "@backupSettingsAccountChange": {
+    "description": "L · text button"
+  },
+  "backupSettingsLast": "آخر نسخة: {date} · {size}",
+  "@backupSettingsLast": {
+    "description": "L · size = common_fileSize_mb",
+    "placeholders": {
+      "date": {
+        "type": "String"
+      },
+      "size": {
+        "type": "String"
+      }
+    }
+  },
+  "backupSettingsNever": "لسه ما عملتش نسخة",
+  "@backupSettingsNever": {
+    "description": "L"
+  },
+  "backupSettingsFreeNudge": "النسخة الأولى ببلاش، وبتحمي بياناتك لو الموبايل ضاع.",
+  "@backupSettingsFreeNudge": {
+    "description": "S · Free, never backed up"
+  },
+  "backupSettingsNow": "اعمل نسخة دلوقتي",
+  "@backupSettingsNow": {
+    "description": "B"
+  },
+  "backupSettingsFreeReplaces": "النسخة الجديدة بتحل محل القديمة.",
+  "@backupSettingsFreeReplaces": {
+    "description": "S · Free (FR-BAK-08)"
+  },
+  "backupSettingsAuto": "نسخة تلقائي",
+  "@backupSettingsAuto": {
+    "description": "L · + common_gold_badge"
+  },
+  "backupSettingsAutoOff": "مقفول",
+  "@backupSettingsAutoOff": {
+    "description": "C"
+  },
+  "backupSettingsAutoDaily": "كل يوم",
+  "@backupSettingsAutoDaily": {
+    "description": "C"
+  },
+  "backupSettingsAutoWeekly": "كل أسبوع",
+  "@backupSettingsAutoWeekly": {
+    "description": "C"
+  },
+  "backupSettingsAutoMonthly": "كل شهر",
+  "@backupSettingsAutoMonthly": {
+    "description": "C"
+  },
+  "backupSettingsAutoLocked": "النسخ التلقائي مع جولد",
+  "@backupSettingsAutoLocked": {
+    "description": "S · + common_gold_unlock"
+  },
+  "backupSettingsVersions": "النسخ المحفوظة",
+  "@backupSettingsVersions": {
+    "description": "L · Gold, up to five"
+  },
+  "backupSettingsVersionsLocked": "جولد بيحتفظ بخمس نسخ",
+  "@backupSettingsVersionsLocked": {
+    "description": "S"
+  },
+  "backupSettingsGoldKeeps": "لو بقيت جولد، نسختك الحالية بتبقى أول نسخة في السجل.",
+  "@backupSettingsGoldKeeps": {
+    "description": "S · FR-BAK-09"
+  },
+  "backupSettingsPassphrase": "كلمة سر النسخة",
+  "@backupSettingsPassphrase": {
+    "description": "L"
+  },
+  "backupSettingsPassphraseChange": "غيّر",
+  "@backupSettingsPassphraseChange": {
+    "description": "L · text button"
+  },
+  "backupSettingsRestore": "استرجاع نسخة",
+  "@backupSettingsRestore": {
+    "description": "L · opens S-04"
+  },
+  "backupSettingsIncludes": "في النسخة: حركاتك وإعداداتك وتصنيفاتك وقواعدك والكروت اللي مش بتتابعها.",
+  "@backupSettingsIncludes": {
+    "description": "S · FR-BAK-06"
+  },
+  "backupSettingsExcludes": "مفيهاش مفاتيح الحماية ولا أذونات الموبايل. هتفعّلهم من جديد بعد الاسترجاع.",
+  "@backupSettingsExcludes": {
+    "description": "S · FR-BAK-07"
+  },
+  "backupSettingsStale": "{count, plural, =1{آخر نسخة بقالها يوم} =2{آخر نسخة بقالها يومين} few{آخر نسخة بقالها {n} أيام} many{آخر نسخة بقالها {n} يوم} other{آخر نسخة بقالها {n} يوم}}",
+  "@backupSettingsStale": {
+    "description": "N · count:int, n · Free, older than 30 days (A-67); + backup_settings_now",
+    "placeholders": {
+      "count": {
+        "type": "int"
+      },
+      "n": {
+        "type": "String"
+      }
+    }
+  },
+  "backupSettingsRunning": "بعمل النسخة…",
+  "@backupSettingsRunning": {
+    "description": "L · C-27 with common_progress_percent, Rive counting"
+  },
+  "backupSettingsCancelNote": "تقدر تلغي قبل ما الرفع يخلص.",
+  "@backupSettingsCancelNote": {
+    "description": "S"
+  },
+  "backupSettingsDone": "النسخة اتعملت ✓",
+  "@backupSettingsDone": {
+    "description": "N"
+  },
+  "backupSettingsErrorNetwork": "النسخة ماتعملتش لأن النت مش ثابت. النسخة اللي فاتت لسه موجودة.",
+  "@backupSettingsErrorNetwork": {
+    "description": "S · maps NetworkFailure in backup"
+  },
+  "backupSettingsErrorStorage": "المساحة على {provider} خلصت. فضّي مساحة وجرّب تاني. النسخة اللي فاتت لسه موجودة.",
+  "@backupSettingsErrorStorage": {
+    "description": "S",
+    "placeholders": {
+      "provider": {
+        "type": "String"
+      }
+    }
+  },
+  "backupSettingsErrorAuth": "الدخول على {provider} خلص. سجّل دخول تاني وجرّب تاني.",
+  "@backupSettingsErrorAuth": {
+    "description": "S",
+    "placeholders": {
+      "provider": {
+        "type": "String"
+      }
+    }
+  },
+  "backupSettingsErrorIcloud": "iCloud مش شغال على الموبايل ده. سجّل دخول بحساب Apple من إعدادات الآيفون وشغّل iCloud Drive.",
+  "@backupSettingsErrorIcloud": {
+    "description": "S · ICLOUD_UNAVAILABLE"
+  },
+  "backupSettingsErrorGeneric": "النسخة الاحتياطية ماتعملتش. جرّب تاني.",
+  "@backupSettingsErrorGeneric": {
+    "description": "S"
+  },
+  "backupPassphraseTitle": "اختار كلمة سر للنسخة",
+  "@backupPassphraseTitle": {
+    "description": "T · first backup"
+  },
+  "backupPassphraseNew": "كلمة السر",
+  "@backupPassphraseNew": {
+    "description": "L"
+  },
+  "backupPassphraseConfirm": "اكتبها تاني",
+  "@backupPassphraseConfirm": {
+    "description": "L"
+  },
+  "backupPassphraseWeak": "ضعيفة",
+  "@backupPassphraseWeak": {
+    "description": "C · strength meter"
+  },
+  "backupPassphraseFair": "كويسة",
+  "@backupPassphraseFair": {
+    "description": "C"
+  },
+  "backupPassphraseStrong": "قوية",
+  "@backupPassphraseStrong": {
+    "description": "C"
+  },
+  "backupPassphraseWarning": "لو نسيت كلمة السر، محدش يقدر يفتح نسختك، ولا حتى إحنا.",
+  "@backupPassphraseWarning": {
+    "description": "S · FR-BAK-01"
+  },
+  "backupPassphraseUnderstand": "فاهم إنها مش بتترجّع",
+  "@backupPassphraseUnderstand": {
+    "description": "L · checkbox, required"
+  },
+  "backupPassphraseTooShort": "استخدم عشرة حروف على الأقل",
+  "@backupPassphraseTooShort": {
+    "description": "S · UX-A-01, fixed length"
+  },
+  "backupPassphraseMismatch": "كلمتين السر مش زي بعض",
+  "@backupPassphraseMismatch": {
+    "description": "S"
+  },
+  "backupPassphraseAckRequired": "علّم إنك فاهم الأول",
+  "@backupPassphraseAckRequired": {
+    "description": "S"
+  },
+  "backupPassphraseSave": "احفظ وابدأ النسخة",
+  "@backupPassphraseSave": {
+    "description": "B"
+  },
+  "backupPassphraseChangeTitle": "غيّر كلمة سر النسخة",
+  "@backupPassphraseChangeTitle": {
+    "description": "T"
+  },
+  "backupPassphraseCurrent": "كلمة السر الحالية",
+  "@backupPassphraseCurrent": {
+    "description": "L"
+  },
+  "backupPassphraseCurrentWrong": "كلمة السر الحالية مش صح",
+  "@backupPassphraseCurrentWrong": {
+    "description": "S"
+  },
+  "backupPassphraseChanged": "كلمة السر اتغيرت ✓",
+  "@backupPassphraseChanged": {
+    "description": "N"
+  },
+  "exportsMainTitle": "إكسيل وكشوف البنوك",
+  "@exportsMainTitle": {
+    "description": "T · glossary"
+  },
+  "exportsMainExportSection": "تصدير",
+  "@exportsMainExportSection": {
+    "description": "L"
+  },
+  "exportsMainFormat": "الصيغة",
+  "@exportsMainFormat": {
+    "description": "L"
+  },
+  "exportsMainFormatCsv": "CSV",
+  "@exportsMainFormatCsv": {
+    "description": "C"
+  },
+  "exportsMainFormatExcel": "Excel",
+  "@exportsMainFormatExcel": {
+    "description": "C"
+  },
+  "exportsMainDates": "الفترة",
+  "@exportsMainDates": {
+    "description": "L"
+  },
+  "exportsMainCategories": "التصنيفات",
+  "@exportsMainCategories": {
+    "description": "L"
+  },
+  "exportsMainCategoriesAll": "كل التصنيفات",
+  "@exportsMainCategoriesAll": {
+    "description": "C"
+  },
+  "exportsMainCards": "الكروت",
+  "@exportsMainCards": {
+    "description": "L · options common_cardFilter_all and the card filter sheet"
+  },
+  "exportsMainPreview": "معاينة أول عشرين صف",
+  "@exportsMainPreview": {
+    "description": "L · fixed count"
+  },
+  "exportsMainPreviewEmpty": "مفيش حركات في الفترة دي",
+  "@exportsMainPreviewEmpty": {
+    "description": "S"
+  },
+  "exportsMainFreePreview": "المعاينة ببلاش. التصدير مع جولد.",
+  "@exportsMainFreePreview": {
+    "description": "S · + common_gold_unlock"
+  },
+  "exportsMainExport": "صدّر",
+  "@exportsMainExport": {
+    "description": "B · + common_gold_badge"
+  },
+  "exportsMainCurrencyNote": "كل صف فيه عملته، ومفيش أي تحويل بين العملات.",
+  "@exportsMainCurrencyNote": {
+    "description": "S · FR-EXP-07"
+  },
+  "exportsMainUnencrypted": "الملف اللي بتصدّره مش متشفّر. احفظه في مكان بتثق فيه.",
+  "@exportsMainUnencrypted": {
+    "description": "S · FR-EXP-05, FR-SEC-06"
+  },
+  "exportsMainPreparing": "بجهّز الملف…",
+  "@exportsMainPreparing": {
+    "description": "L · C-27"
+  },
+  "exportsMainReady": "الملف جاهز ✓",
+  "@exportsMainReady": {
+    "description": "N"
+  },
+  "exportsMainSave": "احفظ الملف",
+  "@exportsMainSave": {
+    "description": "B · system file picker"
+  },
+  "exportsMainFailed": "معرفتش أجهّز الملف. جرّب تاني.",
+  "@exportsMainFailed": {
+    "description": "S"
+  },
+  "exportsImportSection": "استيراد",
+  "@exportsImportSection": {
+    "description": "L · + common_gold_badge"
+  },
+  "exportsImportZaghlolCsv": "ملف زغلول CSV",
+  "@exportsImportZaghlolCsv": {
+    "description": "L"
+  },
+  "exportsImportPdfTitle": "كشف حساب PDF",
+  "@exportsImportPdfTitle": {
+    "description": "L"
+  },
+  "exportsImportPdfBanks": "{banks}",
+  "@exportsImportPdfBanks": {
+    "description": "L · banks = supported PDF banks (FR-EXP-04), joined with the locale list format",
+    "placeholders": {
+      "banks": {
+        "type": "String"
+      }
+    }
+  },
+  "exportsImportOnlineTitle": "كشف بنك أونلاين",
+  "@exportsImportOnlineTitle": {
+    "description": "L"
+  },
+  "exportsImportOnlineBanks": "{banks}",
+  "@exportsImportOnlineBanks": {
+    "description": "L · banks = Wise, Revolut, Monzo, bunq, N26, Payoneer (FR-EXP-06), Latin",
+    "placeholders": {
+      "banks": {
+        "type": "String"
+      }
+    }
+  },
+  "exportsImportPick": "اختار الملف",
+  "@exportsImportPick": {
+    "description": "B"
+  },
+  "exportsImportParsing": "بقرا الملف…",
+  "@exportsImportParsing": {
+    "description": "L · Rive scanning, C-27. The file is read on the phone"
+  },
+  "exportsImportPasswordTitle": "الكشف محمي بكلمة سر",
+  "@exportsImportPasswordTitle": {
+    "description": "T"
+  },
+  "exportsImportPasswordBody": "اكتب كلمة السر. بتتستخدم على موبايلك بس ومش بتتحفظ.",
+  "@exportsImportPasswordBody": {
+    "description": "S"
+  },
+  "exportsImportPasswordLabel": "كلمة سر الكشف",
+  "@exportsImportPasswordLabel": {
+    "description": "L"
+  },
+  "exportsImportPasswordWrong": "كلمة السر دي غلط",
+  "@exportsImportPasswordWrong": {
+    "description": "S"
+  },
+  "exportsImportFound": "{count, plural, =1{لقيت حركة واحدة} =2{لقيت حركتين} few{لقيت {n} حركات} many{لقيت {n} حركة} other{لقيت {n} حركة}}",
+  "@exportsImportFound": {
+    "description": "L · count:int, n · summary line; the empty file has its own state",
+    "placeholders": {
+      "count": {
+        "type": "int"
+      },
+      "n": {
+        "type": "String"
+      }
+    }
+  },
+  "exportsImportDuplicates": "{count, plural, =1{حركة واحدة موجودة عندك (هتتخطى)} =2{حركتين موجودين عندك (هيتخطوا)} few{{n} حركات موجودة عندك (هتتخطى)} many{{n} حركة موجودة عندك (هتتخطى)} other{{n} حركة موجودة عندك (هتتخطى)}}",
+  "@exportsImportDuplicates": {
+    "description": "S · count:int, n · row hidden when 0",
+    "placeholders": {
+      "count": {
+        "type": "int"
+      },
+      "n": {
+        "type": "String"
+      }
+    }
+  },
+  "exportsImportUntracked": "{count, plural, =1{كارت واحد مش متتبع (هيتخطى)} =2{كارتين مش متتبعين (هيتخطوا)} few{{n} كروت مش متتبعة (هتتخطى)} many{{n} كارت مش متتبعة (هتتخطى)} other{{n} كارت مش متتبعة (هتتخطى)}}",
+  "@exportsImportUntracked": {
+    "description": "L · count:int, n · expandable; row hidden when 0 (FR-CAP-06)",
+    "placeholders": {
+      "count": {
+        "type": "int"
+      },
+      "n": {
+        "type": "String"
+      }
+    }
+  },
+  "exportsImportImportButton": "{count, plural, =1{استورد حركة} =2{استورد حركتين} few{استورد {n} حركات} many{استورد {n} حركة} other{استورد {n} حركة}}",
+  "@exportsImportImportButton": {
+    "description": "B · count:int, n · shown only when at least one is new",
+    "placeholders": {
+      "count": {
+        "type": "int"
+      },
+      "n": {
+        "type": "String"
+      }
+    }
+  },
+  "exportsImportNothingNew": "كل الحركات دي موجودة عندك قبل كده",
+  "@exportsImportNothingNew": {
+    "description": "S · replaces the button"
+  },
+  "exportsImportImporting": "بضيف الحركات…",
+  "@exportsImportImporting": {
+    "description": "L · C-27"
+  },
+  "exportsImportDone": "{count, plural, =1{اتضافت حركة ✓} =2{اتضافت حركتين ✓} few{اتضافت {n} حركات ✓} many{اتضافت {n} حركة ✓} other{اتضافت {n} حركة ✓}}",
+  "@exportsImportDone": {
+    "description": "N · count:int, n",
+    "placeholders": {
+      "count": {
+        "type": "int"
+      },
+      "n": {
+        "type": "String"
+      }
+    }
+  },
+  "exportsImportEmptyTitle": "مفيش حركات في الملف ده",
+  "@exportsImportEmptyTitle": {
+    "description": "T · C-28"
+  },
+  "exportsImportUnsupportedTitle": "الملف ده مش كشف مدعوم",
+  "@exportsImportUnsupportedTitle": {
+    "description": "T"
+  },
+  "exportsImportUnsupportedBody": "دي الجهات المدعومة: {banks}",
+  "@exportsImportUnsupportedBody": {
+    "description": "S · banks = both lists, joined",
+    "placeholders": {
+      "banks": {
+        "type": "String"
+      }
+    }
+  },
+  "exportsImportWrongType": "نوع الملف مش اللي اخترته",
+  "@exportsImportWrongType": {
+    "description": "S"
+  },
+  "exportsImportFailed": "معرفتش أقرا الملف. جرّب ملف تاني.",
+  "@exportsImportFailed": {
+    "description": "S"
+  },
+  "exportsImportLockedBody": "ضيف شهور فاتتة وكشوف البنوك مع جولد",
+  "@exportsImportLockedBody": {
+    "description": "S · locked state + common_gold_unlock"
+  },
+  "goldPaywallTitle": "زغلول جولد",
+  "@goldPaywallTitle": {
+    "description": "T"
+  },
+  "goldPaywallCloseA11y": "اقفل",
+  "@goldPaywallCloseA11y": {
+    "description": "A"
+  },
+  "goldPaywallHeadline": "كل أدواتك في مكان واحد",
+  "@goldPaywallHeadline": {
+    "description": "T"
+  },
+  "goldPaywallBenefitCharts": "كل الشارتات الاتناشر مع تحليل أعمق",
+  "@goldPaywallBenefitCharts": {
+    "description": "S"
+  },
+  "goldPaywallBenefitVoice": "تسجيل بالصوت من غير حدود",
+  "@goldPaywallBenefitVoice": {
+    "description": "L"
+  },
+  "goldPaywallBenefitExport": "تصدير واستيراد وكشوف البنوك",
+  "@goldPaywallBenefitExport": {
+    "description": "S"
+  },
+  "goldPaywallBenefitBackup": "نسخ تلقائي بخمس نسخ محفوظة",
+  "@goldPaywallBenefitBackup": {
+    "description": "S"
+  },
+  "goldPaywallBenefitAssets": "دهب وشهادات وأصول",
+  "@goldPaywallBenefitAssets": {
+    "description": "L"
+  },
+  "goldPaywallBenefitCustom": "تصنيفات وقوالب رسايل خاصة بيك",
+  "@goldPaywallBenefitCustom": {
+    "description": "S"
+  },
+  "goldPaywallPlanName": "{plan, select, monthly{شهري} yearly{سنوي} lifetime{مدى الحياة} other{جولد}}",
+  "@goldPaywallPlanName": {
+    "description": "C · C-31 plan card title",
+    "placeholders": {
+      "plan": {
+        "type": "String"
+      }
+    }
+  },
+  "goldPaywallPlanPrice": "{plan, select, monthly{{storePrice} في الشهر} yearly{{storePrice} في السنة} lifetime{{storePrice} مرة واحدة} other{{storePrice}}}",
+  "@goldPaywallPlanPrice": {
+    "description": "L · storePrice = the store's own formatted price",
+    "placeholders": {
+      "plan": {
+        "type": "String"
+      },
+      "storePrice": {
+        "type": "String"
+      }
+    }
+  },
+  "goldPaywallBestValue": "الأوفر",
+  "@goldPaywallBestValue": {
+    "description": "C · yearly card"
+  },
+  "goldPaywallContinue": "يلا نشترك",
+  "@goldPaywallContinue": {
+    "description": "B · Gold button, glossary. No emoji (payment)"
+  },
+  "goldPaywallPlanRequired": "اختار خطة الأول",
+  "@goldPaywallPlanRequired": {
+    "description": "S"
+  },
+  "goldPaywallRestore": "استرجع مشترياتي",
+  "@goldPaywallRestore": {
+    "description": "L · text button"
+  },
+  "goldPaywallTerms": "الشروط",
+  "@goldPaywallTerms": {
+    "description": "L"
+  },
+  "goldPaywallPrivacy": "الخصوصية",
+  "@goldPaywallPrivacy": {
+    "description": "L"
+  },
+  "goldPaywallRenewal": "{platform, select, ios{يتجدد الاشتراك تلقائياً ما لم يُلغَ قبل نهاية الفترة من إعدادات حساب Apple.} other{يتجدد الاشتراك تلقائياً ما لم يُلغَ قبل نهاية الفترة من Google Play.}}",
+  "@goldPaywallRenewal": {
+    "description": "S · simple standard Arabic (store legal line), for monthly and yearly",
+    "placeholders": {
+      "platform": {
+        "type": "String"
+      }
+    }
+  },
+  "goldPaywallRenewalSummary": "بيتجدد لوحده وتقدر تلغيه من المتجر في أي وقت.",
+  "@goldPaywallRenewalSummary": {
+    "description": "S · Egyptian summary above gold_paywall_renewal"
+  },
+  "goldPaywallLifetimeNote": "الدفع مرة واحدة ومن غير تجديد.",
+  "@goldPaywallLifetimeNote": {
+    "description": "S · shown when Lifetime is selected"
+  },
+  "goldPaywallPricesLoading": "بحمّل الأسعار…",
+  "@goldPaywallPricesLoading": {
+    "description": "L · skeleton caption"
+  },
+  "goldPaywallPricesFailed": "مش قادر أحمّل الأسعار. اتأكد من النت وجرّب تاني.",
+  "@goldPaywallPricesFailed": {
+    "description": "S · + common_action_tryAgain"
+  },
+  "goldPaywallPurchasing": "بفتح المتجر…",
+  "@goldPaywallPurchasing": {
+    "description": "L"
+  },
+  "goldPaywallPending": "الدفع لسه معلّق. جولد هيشتغل أول ما يتم.",
+  "@goldPaywallPending": {
+    "description": "S · BR-GOLD-05"
+  },
+  "goldPaywallVerifying": "بتأكد من الدفع…",
+  "@goldPaywallVerifying": {
+    "description": "L · no Gold until verified"
+  },
+  "goldPaywallVerifyOffline": "هكمّل التأكد أول ما النت يرجع.",
+  "@goldPaywallVerifyOffline": {
+    "description": "S · BR-GOLD-06, EC-44"
+  },
+  "goldPaywallSuccess": "جولد اشتغل ✓",
+  "@goldPaywallSuccess": {
+    "description": "N · returns to the origin screen (N-05)"
+  },
+  "goldPaywallSuccessMascot": "ألف مبروك. جولد اشتغل وكل حاجة اتفتحت.",
+  "@goldPaywallSuccessMascot": {
+    "description": "M · Rive proud · purchase verified. No joke, no emoji (tone gate 1)"
+  },
+  "goldPaywallCancelled": "الشراء اتلغى. مفيش حاجة اتخصمت.",
+  "@goldPaywallCancelled": {
+    "description": "N"
+  },
+  "goldPaywallInvalid": "مقدرناش نتأكد من الشراء. جرّب «استرجع مشترياتي»، ولو لسه كلّم الدعم.",
+  "@goldPaywallInvalid": {
+    "description": "S · PURCHASE_TOKEN_INVALID, PURCHASE_NOT_OWNED, PURCHASE_WRONG_APP; no Gold"
+  },
+  "goldPaywallStoreError": "المتجر رجّع مشكلة. جرّب تاني كمان شوية.",
+  "@goldPaywallStoreError": {
+    "description": "S"
+  },
+  "goldPaywallAlreadyGold": "{plan, select, monthly{إنت جولد: شهري} yearly{إنت جولد: سنوي} lifetime{إنت جولد: مدى الحياة} other{إنت جولد}}",
+  "@goldPaywallAlreadyGold": {
+    "description": "L · plan = monthly / yearly / lifetime / other; + common_action_manage",
+    "placeholders": {
+      "plan": {
+        "type": "String"
+      }
+    }
+  },
+  "goldPaywallProtectNote": "بعد الشراء، سجّل دخول على الموبايل ده عشان تحمي الجولد.",
+  "@goldPaywallProtectNote": {
+    "description": "S · D-54, shown on the buying phone after success; opens gold_seat_protectTitle"
+  },
+  "goldAccountTitle": "جولد وحسابك",
+  "@goldAccountTitle": {
+    "description": "T"
+  },
+  "goldAccountPlan": "{plan, select, monthly{جولد · شهري · بيتجدد {date}} yearly{جولد · سنوي · بيتجدد {date}} lifetime{جولد · مدى الحياة} other{الباقة المجانية}}",
+  "@goldAccountPlan": {
+    "description": "L · plan = monthly / yearly / lifetime / other",
+    "placeholders": {
+      "plan": {
+        "type": "String"
+      },
+      "date": {
+        "type": "String"
+      }
+    }
+  },
+  "goldAccountSeeGold": "شوف جولد",
+  "@goldAccountSeeGold": {
+    "description": "B · Free, opens S-68"
+  },
+  "goldAccountManage": "إدارة الاشتراك",
+  "@goldAccountManage": {
+    "description": "L · opens the store"
+  },
+  "goldAccountRestore": "استرجع مشترياتي",
+  "@goldAccountRestore": {
+    "description": "L"
+  },
+  "goldAccountRestoring": "بدوّر على مشترياتك…",
+  "@goldAccountRestoring": {
+    "description": "L"
+  },
+  "goldAccountRestoreDone": "الجولد رجع ✓",
+  "@goldAccountRestoreDone": {
+    "description": "N"
+  },
+  "goldAccountRestoreNone": "مفيش مشتريات أقدر أرجّعها على الحساب ده",
+  "@goldAccountRestoreNone": {
+    "description": "S"
+  },
+  "goldAccountEndedTitle": "الجولد خلص",
+  "@goldAccountEndedTitle": {
+    "description": "T · expired or refunded (FR-GOLD-06)"
+  },
+  "goldAccountEndedBody": "بياناتك كلها لسه موجودة، وتقدر ترجع جولد في أي وقت.",
+  "@goldAccountEndedBody": {
+    "description": "S"
+  },
+  "goldAccountOtherPhone": "استخدم جولد على موبايل تاني (اختياري)",
+  "@goldAccountOtherPhone": {
+    "description": "S"
+  },
+  "goldAccountGoogle": "كمّل بحساب Google",
+  "@goldAccountGoogle": {
+    "description": "B"
+  },
+  "goldAccountApple": "كمّل بحساب Apple",
+  "@goldAccountApple": {
+    "description": "B"
+  },
+  "goldAccountPrivacy": "بنربط باقة جولد بس. بيانات فلوسك عمرها ما بتتبعت.",
+  "@goldAccountPrivacy": {
+    "description": "S · FR-ACCT-02"
+  },
+  "goldAccountSigningIn": "بدخل…",
+  "@goldAccountSigningIn": {
+    "description": "L · button loading"
+  },
+  "goldAccountSignInCancelled": "الدخول اتلغى.",
+  "@goldAccountSignInCancelled": {
+    "description": "N"
+  },
+  "goldAccountSignInFailed": "الدخول ما كملش. جرّب تاني.",
+  "@goldAccountSignInFailed": {
+    "description": "S · ID_TOKEN_INVALID"
+  },
+  "goldAccountSignInAgain": "سجّل دخول تاني عشان تكمّل",
+  "@goldAccountSignInAgain": {
+    "description": "S · ACCOUNT_TOKEN_EXPIRED, shown in Settings only"
+  },
+  "goldAccountSignedInAs": "داخل بـ {email}",
+  "@goldAccountSignedInAs": {
+    "description": "L · email = masked address from the ID token",
+    "placeholders": {
+      "email": {
+        "type": "String"
+      }
+    }
+  },
+  "goldAccountNextMove": "تقدر تنقل الجولد تاني يوم {date}",
+  "@goldAccountNextMove": {
+    "description": "L · stored nextMoveAt (EC-68)",
+    "placeholders": {
+      "date": {
+        "type": "String"
+      }
+    }
+  },
+  "goldAccountSignOutTitle": "تخرج من الحساب؟",
+  "@goldAccountSignOutTitle": {
+    "description": "T"
+  },
+  "goldAccountSignOutBody": "{state, select, linked{بياناتك كلها هتفضل على الموبايل. الجولد هيقف على الموبايل ده لحد ما تسجّل دخول تاني بنفس الحساب.} other{بياناتك كلها هتفضل على الموبايل، والجولد هيفضل شغال.}}",
+  "@goldAccountSignOutBody": {
+    "description": "S · state = linked (Gold bought under the account) / other. FR-ACCT-03",
+    "placeholders": {
+      "state": {
+        "type": "String"
+      }
+    }
+  },
+  "goldAccountReplaceTitle": "الموبايل ده مربوط بحساب تاني",
+  "@goldAccountReplaceTitle": {
+    "description": "T · INSTALL_LINKED_TO_OTHER_ACCOUNT (EC-46)"
+  },
+  "goldAccountReplaceBody": "تربطه بالحساب ده بدله؟ باقة الجولد بس هي اللي بتتربط.",
+  "@goldAccountReplaceBody": {
+    "description": "S"
+  },
+  "goldAccountReplaceConfirm": "اربطه بالحساب ده",
+  "@goldAccountReplaceConfirm": {
+    "description": "B"
+  },
+  "goldAccountLostPhone": "موبايلك القديم ضاع أو اتباع؟ كلّم الدعم وهنساعدك.",
+  "@goldAccountLostPhone": {
+    "description": "S · FR-ACCT-05, no self-service relink"
+  },
+  "goldAccountDeleteRow": "امسح الحساب",
+  "@goldAccountDeleteRow": {
+    "description": "L · destructive"
+  },
+  "goldAccountDeleteTitle": "تمسح حسابك؟",
+  "@goldAccountDeleteTitle": {
+    "description": "T"
+  },
+  "goldAccountDeleteBody": "هنمسح حسابك والربط بالجولد من عندنا. مشترياتك هتفضل على حساب المتجر بتاعك.",
+  "@goldAccountDeleteBody": {
+    "description": "S · FR-ACCT-04"
+  },
+  "goldAccountDeleteConfirm": "امسح الحساب",
+  "@goldAccountDeleteConfirm": {
+    "description": "B · destructive"
+  },
+  "goldAccountDeleted": "الحساب اتمسح",
+  "@goldAccountDeleted": {
+    "description": "N"
+  },
+  "goldSeatCooldownTitle": "نقلت الجولد من قريب",
+  "@goldSeatCooldownTitle": {
+    "description": "T · MOVE_COOLDOWN (409, restore) and sign-in moveRefused (200)"
+  },
+  "goldSeatCooldownBody": "تقدر تنقله تاني يوم {date}، أو كلّم الدعم.",
+  "@goldSeatCooldownBody": {
+    "description": "S · date = nextMoveAt for the locale; with support. Not a move (EC-66), no retry before the date",
+    "placeholders": {
+      "date": {
+        "type": "String"
+      }
+    }
+  },
+  "goldSeatAttestTitle": "مقدرناش نتأكد من الموبايل ده",
+  "@goldSeatAttestTitle": {
+    "description": "T · DEVICE_ATTESTATION_FAILED after the one retry (EC-66)"
+  },
+  "goldSeatAttestBody": "جرّب تاني بعد شوية. لو لسه، سجّل دخول بالحساب اللي اشتريت بيه، أو كلّم الدعم.",
+  "@goldSeatAttestBody": {
+    "description": "S · actions common_action_tryAgain, common_action_signIn; with support. Existing Gold untouched"
+  },
+  "goldSeatAttestPlayServices": "حدّث خدمات Google Play من المتجر وجرّب تاني.",
+  "@goldSeatAttestPlayServices": {
+    "description": "S · ATTEST_PLAY_SERVICES_OUTDATED (Android)"
+  },
+  "goldSeatAttestUnavailable": "التأكد من الموبايل مش متاح دلوقتي. سجّل دخول بالحساب اللي اشتريت بيه، أو كلّم الدعم.",
+  "@goldSeatAttestUnavailable": {
+    "description": "S · ATTEST_UNAVAILABLE, ATTEST_TRANSIENT after retries; with support"
+  },
+  "goldSeatAccountRequiredTitle": "سجّل دخول الأول",
+  "@goldSeatAccountRequiredTitle": {
+    "description": "T · restore item account_required (EC-65)"
+  },
+  "goldSeatAccountRequiredBody": "اعمل تسجيل دخول بالحساب اللي اشتريت بيه.",
+  "@goldSeatAccountRequiredBody": {
+    "description": "S · reveals nothing about the account; action common_action_signIn"
+  },
+  "goldSeatMovedUserTitle": "الجولد اتنقل لموبايل تاني",
+  "@goldSeatMovedUserTitle": {
+    "description": "T · entitlement moved, movedBy: user"
+  },
+  "goldSeatMovedUserBody": "لو عايزه على الموبايل ده، استرجع مشترياتك أو سجّل دخول.",
+  "@goldSeatMovedUserBody": {
+    "description": "S · actions gold_seat_restoreAction, common_action_signIn"
+  },
+  "goldSeatMovedSupportTitle": "الدعم نقل الجولد لموبايل تاني",
+  "@goldSeatMovedSupportTitle": {
+    "description": "T · movedBy: support (D-57(f))"
+  },
+  "goldSeatMovedSupportBody": "لو ده مش اللي طلبته، كلّم الدعم وادّيهم كود الدعم.",
+  "@goldSeatMovedSupportBody": {
+    "description": "S · with support"
+  },
+  "goldSeatPausedTitle": "الجولد واقف مؤقتاً",
+  "@goldSeatPausedTitle": {
+    "description": "T · entitlement paused (D-61(c))"
+  },
+  "goldSeatPausedBody": "اعمل تسجيل دخول عشان تستخدم الجولد على الموبايل ده. مكانك محفوظ ومش هيتحسب نقلة.",
+  "@goldSeatPausedBody": {
+    "description": "S · action common_action_signIn"
+  },
+  "goldSeatTamperedTitle": "اتصل بالنت عشان نتأكد من الجولد",
+  "@goldSeatTamperedTitle": {
+    "description": "T · tampered (D-60, EC-70)"
+  },
+  "goldSeatTamperedBody": "ساعة الموبايل اتغيّرت. أول ما النت يشتغل هنتأكد، وبياناتك كلها لسه موجودة.",
+  "@goldSeatTamperedBody": {
+    "description": "S · local data stays readable"
+  },
+  "goldSeatHeldElsewhere": "الدفع تم. الجولد لسه على الموبايل التاني، وتقدر تنقله يوم {date}.",
+  "@goldSeatHeldElsewhere": {
+    "description": "S · verify seatHeldElsewhere (D-61(a), EC-71)",
+    "placeholders": {
+      "date": {
+        "type": "String"
+      }
+    }
+  },
+  "goldSeatHeldElsewhereAccount": "الدفع تم. عشان الجولد ييجي هنا، اعمل تسجيل دخول بالحساب اللي عليه الجولد.",
+  "@goldSeatHeldElsewhereAccount": {
+    "description": "S · seatHeldElsewhere + accountRequired (R4-4); action common_action_signIn"
+  },
+  "goldSeatSupportNoticeTitle": "الدعم ربط الجولد بحساب",
+  "@goldSeatSupportNoticeTitle": {
+    "description": "T · supportNotice: gold_linked_by_support"
+  },
+  "goldSeatSupportNoticeBody": "الدعم ربط الجولد بتاعك بحساب. لو ده مش إنت، كلّم الدعم.",
+  "@goldSeatSupportNoticeBody": {
+    "description": "S · shown once, on the buying phone; with support (R4-7(2), R5-7)"
+  },
+  "goldSeatSignInLinked": "الحساب اتربط، بس الجولد لسه مجاش على الموبايل ده.",
+  "@goldSeatSignInLinked": {
+    "description": "S · sign-in moveRefused; followed by the cooldown copy or one of the two branches below"
+  },
+  "goldSeatRestoreSuggested": "جرّب «استرجع مشترياتي»، والجولد هيرجع على الموبايل ده.",
+  "@goldSeatRestoreSuggested": {
+    "description": "S · branch (a): restoreSuggested: true, an App Store purchase exists on this iPhone (D-65(a)); action gold_seat_restoreAction"
+  },
+  "goldSeatRestoreAction": "استرجع مشترياتي",
+  "@goldSeatRestoreAction": {
+    "description": "B"
+  },
+  "goldSeatSupportPath": "الجولد مش هينفع ينتقل للموبايل ده قبل يوم {date}. كلّم الدعم وهنساعدك.",
+  "@goldSeatSupportPath": {
+    "description": "S · branch (b): bought on Android or under another Apple ID, no Restore offered (D-66(c)); with support",
+    "placeholders": {
+      "date": {
+        "type": "String"
+      }
+    }
+  },
+  "goldSeatProtectTitle": "سجّل دخول هنا عشان تحمي الجولد",
+  "@goldSeatProtectTitle": {
+    "description": "T · D-54, FR-ACCT-01. After purchase and in gold_account_*"
+  },
+  "goldSeatProtectBody": "الربط بيتعمل من الموبايل اللي اشتريت عليه بس. بعدها تقدر تنقل الجولد لموبايل جديد بحسابك.",
+  "@goldSeatProtectBody": {
+    "description": "S"
+  },
+  "goldSeatProtectDone": "الجولد اتربط بحسابك ✓",
+  "@goldSeatProtectDone": {
+    "description": "N"
+  },
+  "goldSeatDeleteWarning": "{state, select, cooldown{لو مسحت كل حاجة، هيتحسب إن الجولد اتنقل، ومش هتقدر ترجّعه على الموبايل ده قبل يوم {date}.} other{لو مسحت كل حاجة ورجعت الجولد، ده هيتحسب نقلة الشهر ده.}}",
+  "@goldSeatDeleteWarning": {
+    "description": "S · Android, in the \"Delete everything\" dialog (D-55, EC-69). state = cooldown (a cooldown is running, date shown) / other",
+    "placeholders": {
+      "state": {
+        "type": "String"
+      },
+      "date": {
+        "type": "String"
+      }
+    }
+  },
+  "notificationsSettingsTitle": "التنبيهات",
+  "@notificationsSettingsTitle": {
+    "description": "T · Q-17"
+  },
+  "notificationsSettingsBudget": "تنبيهات الميزانية",
+  "@notificationsSettingsBudget": {
+    "description": "L"
+  },
+  "notificationsSettingsSpikes": "لما الصرف يزيد",
+  "@notificationsSettingsSpikes": {
+    "description": "L"
+  },
+  "notificationsSettingsDues": "الأقساط والفواتير",
+  "@notificationsSettingsDues": {
+    "description": "L"
+  },
+  "notificationsSettingsDueDays": "{count, plural, =0{يوم الاستحقاق نفسه} =1{قبلها بيوم} =2{قبلها بيومين} few{قبلها بـ {n} أيام} many{قبلها بـ {n} يوم} other{قبلها بـ {n} يوم}}",
+  "@notificationsSettingsDueDays": {
+    "description": "L · count:int, n · FR-SUB-04, 0 to 30",
+    "placeholders": {
+      "count": {
+        "type": "int"
+      },
+      "n": {
+        "type": "String"
+      }
+    }
+  },
+  "notificationsSettingsDuplicates": "حركة اتسجلت مرتين",
+  "@notificationsSettingsDuplicates": {
+    "description": "L"
+  },
+  "notificationsSettingsRenewals": "تجديد الاشتراكات",
+  "@notificationsSettingsRenewals": {
+    "description": "L"
+  },
+  "notificationsSettingsBackup": "مشاكل النسخة الاحتياطية",
+  "@notificationsSettingsBackup": {
+    "description": "L"
+  },
+  "notificationsSettingsWeekly": "ملخص الأسبوع",
+  "@notificationsSettingsWeekly": {
+    "description": "L"
+  },
+  "notificationsSettingsWeeklySub": "كل جمعة الصبح",
+  "@notificationsSettingsWeeklySub": {
+    "description": "L · UX-A-07"
+  },
+  "notificationsSettingsQuiet": "ساعات الهدوء",
+  "@notificationsSettingsQuiet": {
+    "description": "L · A-27"
+  },
+  "notificationsSettingsQuietRange": "من {start} لحد {end}",
+  "@notificationsSettingsQuietRange": {
+    "description": "L · start, end = times, default 23:00 to 08:00",
+    "placeholders": {
+      "start": {
+        "type": "String"
+      },
+      "end": {
+        "type": "String"
+      }
+    }
+  },
+  "notificationsSettingsHideAmounts": "اخفي المبالغ على شاشة القفل",
+  "@notificationsSettingsHideAmounts": {
+    "description": "L · FR-NTF-03"
+  },
+  "notificationsSettingsHideAmountsHint": "التنبيه بيوصل من غير مبلغ ولا اسم تاجر.",
+  "@notificationsSettingsHideAmountsHint": {
+    "description": "S"
+  },
+  "notificationsSettingsDaysRange": "اختار من يوم الاستحقاق لحد تلاتين يوم قبله",
+  "@notificationsSettingsDaysRange": {
+    "description": "S · validation, 0 to 30"
+  },
+  "notificationsSettingsQuietSame": "بداية ونهاية ساعات الهدوء لازم يختلفوا",
+  "@notificationsSettingsQuietSame": {
+    "description": "S · validation"
+  },
+  "notificationsSettingsOsOffTitle": "التنبيهات مقفولة لزغلول",
+  "@notificationsSettingsOsOffTitle": {
+    "description": "T · banner"
+  },
+  "notificationsSettingsOsOffBody": "شغّلها من إعدادات الموبايل عشان توصلك.",
+  "@notificationsSettingsOsOffBody": {
+    "description": "S · + common_action_openSettings"
+  },
+  "notificationsAlertBudgetNearTitle": "قربت توصل لحد الميزانية",
+  "@notificationsAlertBudgetNearTitle": {
+    "description": "T · BR-BUD-02, default 80%"
+  },
+  "notificationsAlertBudgetNear": "صرفت {percent} من ميزانية {category}، وفاضلك {left}.",
+  "@notificationsAlertBudgetNear": {
+    "description": "N · amount variant",
+    "placeholders": {
+      "percent": {
+        "type": "String"
+      },
+      "category": {
+        "type": "String"
+      },
+      "left": {
+        "type": "String"
+      }
+    }
+  },
+  "notificationsAlertBudgetNearHidden": "ميزانية {category} قربت تخلص.",
+  "@notificationsAlertBudgetNearHidden": {
+    "description": "N · hidden variant; category name kept (Q-33)",
+    "placeholders": {
+      "category": {
+        "type": "String"
+      }
+    }
+  },
+  "notificationsAlertBudgetReachedTitle": "وصلت لحد الميزانية",
+  "@notificationsAlertBudgetReachedTitle": {
+    "description": "T · 100%"
+  },
+  "notificationsAlertBudgetReached": "ميزانية {category} خلصت: صرفت {spent} من {budget}.",
+  "@notificationsAlertBudgetReached": {
+    "description": "N",
+    "placeholders": {
+      "category": {
+        "type": "String"
+      },
+      "spent": {
+        "type": "String"
+      },
+      "budget": {
+        "type": "String"
+      }
+    }
+  },
+  "notificationsAlertBudgetReachedHidden": "ميزانية {category} خلصت.",
+  "@notificationsAlertBudgetReachedHidden": {
+    "description": "N",
+    "placeholders": {
+      "category": {
+        "type": "String"
+      }
+    }
+  },
+  "notificationsAlertSpikeTitle": "صرفك النهارده أكتر من المعتاد",
+  "@notificationsAlertSpikeTitle": {
+    "description": "T"
+  },
+  "notificationsAlertSpike": "صرفت النهارده {spent}، أكتر من المعتاد بـ {delta}.",
+  "@notificationsAlertSpike": {
+    "description": "N",
+    "placeholders": {
+      "spent": {
+        "type": "String"
+      },
+      "delta": {
+        "type": "String"
+      }
+    }
+  },
+  "notificationsAlertSpikeHidden": "صرفك النهارده أكتر من المعتاد. افتح زغلول وراجع.",
+  "@notificationsAlertSpikeHidden": {
+    "description": "N"
+  },
+  "notificationsAlertDueTitle": "قسط أو فاتورة قربت",
+  "@notificationsAlertDueTitle": {
+    "description": "T"
+  },
+  "notificationsAlertDue": "{count, plural, =0{{item} بيستحق النهارده: {amount}} =1{{item} بيستحق بكره: {amount}} =2{{item} بيستحق بعد يومين: {amount}} few{{item} بيستحق بعد {n} أيام: {amount}} many{{item} بيستحق بعد {n} يوم: {amount}} other{{item} بيستحق بعد {n} يوم: {amount}}}",
+  "@notificationsAlertDue": {
+    "description": "N · count:int, n, item, amount · days until the due date",
+    "placeholders": {
+      "count": {
+        "type": "int"
+      },
+      "item": {
+        "type": "String"
+      },
+      "amount": {
+        "type": "String"
+      },
+      "n": {
+        "type": "String"
+      }
+    }
+  },
+  "notificationsAlertDueHidden": "عندك قسط أو فاتورة بتستحق قريب.",
+  "@notificationsAlertDueHidden": {
+    "description": "N"
+  },
+  "notificationsAlertDuplicateTitle": "ممكن حركة تكون اتسجلت مرتين",
+  "@notificationsAlertDuplicateTitle": {
+    "description": "T"
+  },
+  "notificationsAlertDuplicate": "{merchant}: {amount} ظهرت مرتين تقريباً في نفس الوقت. بُص عليها.",
+  "@notificationsAlertDuplicate": {
+    "description": "N",
+    "placeholders": {
+      "merchant": {
+        "type": "String"
+      },
+      "amount": {
+        "type": "String"
+      }
+    }
+  },
+  "notificationsAlertDuplicateHidden": "في حركة ممكن تكون مكررة. افتح زغلول وراجعها.",
+  "@notificationsAlertDuplicateHidden": {
+    "description": "N"
+  },
+  "notificationsAlertRenewalTitle": "اشتراك هيتجدد",
+  "@notificationsAlertRenewalTitle": {
+    "description": "T"
+  },
+  "notificationsAlertRenewal": "{merchant} هيتجدد يوم {date} بـ {amount}.",
+  "@notificationsAlertRenewal": {
+    "description": "N",
+    "placeholders": {
+      "merchant": {
+        "type": "String"
+      },
+      "date": {
+        "type": "String"
+      },
+      "amount": {
+        "type": "String"
+      }
+    }
+  },
+  "notificationsAlertRenewalHidden": "في اشتراك هيتجدد قريب.",
+  "@notificationsAlertRenewalHidden": {
+    "description": "N"
+  },
+  "notificationsAlertBackupTitle": "النسخة الاحتياطية ماتعملتش",
+  "@notificationsAlertBackupTitle": {
+    "description": "T · FR-NTF-01. No amounts, so no hidden variant"
+  },
+  "notificationsAlertBackupBody": "جرّب تاني من الإعدادات. بياناتك لسه على الموبايل.",
+  "@notificationsAlertBackupBody": {
+    "description": "N"
+  },
+  "notificationsAlertWeeklyTitle": "ملخص أسبوعك جاهز",
+  "@notificationsAlertWeeklyTitle": {
+    "description": "T · Friday morning"
+  },
+  "notificationsAlertWeekly": "صرفت {spent} الأسبوع ده، وأكتر حاجة كانت {category}.",
+  "@notificationsAlertWeekly": {
+    "description": "N",
+    "placeholders": {
+      "spent": {
+        "type": "String"
+      },
+      "category": {
+        "type": "String"
+      }
+    }
+  },
+  "notificationsAlertWeeklyHidden": "ملخص أسبوعك جاهز. افتح زغلول تشوفه.",
+  "@notificationsAlertWeeklyHidden": {
+    "description": "N"
+  },
+  "privacyMainTitle": "خصوصيتك",
+  "@privacyMainTitle": {
+    "description": "T · glossary"
+  },
+  "privacyMainStaysTitle": "اللي بيفضل على موبايلك",
+  "@privacyMainStaysTitle": {
+    "description": "L"
+  },
+  "privacyMainStaysBody": "رسايلك وحركاتك وأرصدتك وميزانياتك وأصولك وقواعدك. كله متشفّر.",
+  "@privacyMainStaysBody": {
+    "description": "S"
+  },
+  "privacyMainAppLock": "قفل التطبيق",
+  "@privacyMainAppLock": {
+    "description": "L · opens S-72"
+  },
+  "privacyMainServerRow": "اللي سيرفر زغلول يعرفه عنك",
+  "@privacyMainServerRow": {
+    "description": "L · opens the list below"
+  },
+  "privacyServerTitle": "اللي سيرفر زغلول يعرفه عنك",
+  "@privacyServerTitle": {
+    "description": "T"
+  },
+  "privacyServerSummary": "فلوسك وحركاتك عمرها ما بتسيب موبايلك. السيرفر بيعرف الحاجات دي بس:",
+  "@privacyServerSummary": {
+    "description": "S · Egyptian summary of the whole screen"
+  },
+  "privacyServerItemId": "رقم عشوائي للتطبيق، مش اسمك ولا رقم موبايلك",
+  "@privacyServerItemId": {
+    "description": "S"
+  },
+  "privacyServerItemPurchase": "شراء الجولد بتاعك، عشان نتأكد منه",
+  "@privacyServerItemPurchase": {
+    "description": "S"
+  },
+  "privacyServerItemSignIn": "تسجيل دخولك، لو استخدمته بس",
+  "@privacyServerItemSignIn": {
+    "description": "S"
+  },
+  "privacyServerItemMerchants": "أسماء التجار، لو سمحت بس",
+  "@privacyServerItemMerchants": {
+    "description": "S"
+  },
+  "privacyServerItemVersion": "نوع الموبايل وإصدار التطبيق وإصدار قايمة التجار",
+  "@privacyServerItemVersion": {
+    "description": "S · BR-SYNC-03"
+  },
+  "privacyServerItemAttest": "إثبات إن الموبايل حقيقي (Play Integrity أو App Attest) وقت الاسترجاع، وأحياناً وقت الشراء",
+  "@privacyServerItemAttest": {
+    "description": "S · BR-SYNC-03, D-45 (carries no other device data); \"sometimes on purchase\" because purchase verify needs it only where ADR-012 requires"
+  },
+  "privacyServerItemBankRequest": "طلب دعم بنك، لو طلبته بس: اسم البنك وبلده ونوع التنبيه",
+  "@privacyServerItemBankRequest": {
+    "description": "S · FR-PAR-14; same fields as ingestion_requestBank_privacy"
+  },
+  "privacyServerSeatKeysSummary": "على الآيفون بس: زغلول بيعرف إن التثبيتات القديمة كانت على نفس الموبايل.",
+  "@privacyServerSeatKeysSummary": {
+    "description": "S · Egyptian summary · disclosure 1 (D-62); shown on iOS"
+  },
+  "privacyServerSeatKeys": "على الآيفون، يرسل التطبيق عند الاسترجاع أو تسجيل الدخول إثباتاً من هذا التثبيت ومن حتى أربعة تثبيتات سابقة، ليعرف الخادم أنها على الجهاز نفسه. يحفظ الخادم صورة مشفّرة فقط، ولا يسجّل المفاتيح.",
+  "@privacyServerSeatKeys": {
+    "description": "E · simple standard Arabic · disclosure 1"
+  },
+  "privacyServerDeleteKeepsSummary": "لو مسحت كل حاجة من الآيفون، الجولد يقدر يرجع عليه من غير نقلة.",
+  "@privacyServerDeleteKeepsSummary": {
+    "description": "S · Egyptian summary · disclosure 2 (R4-8); shown on iOS"
+  },
+  "privacyServerDeleteKeeps": "يُبقي «امسح كل حاجة» على الآيفون مفاتيح التعريف على الجهاز، ليعود الجولد إليه دون احتساب نقلة. ويحتفظ الخادم بتجزئة مفتاحية للمفتاح مع الشراء حتى يُحذف الشراء. مسح الآيفون بالكامل يزيلها.",
+  "@privacyServerDeleteKeeps": {
+    "description": "E · simple standard Arabic · disclosure 2"
+  },
+  "privacyServerTimeNonceSummary": "رقم عشوائي بيتأكد بيه السيرفر من الوقت، ومفيهوش أي حاجة عنك.",
+  "@privacyServerTimeNonceSummary": {
+    "description": "S · Egyptian summary · disclosure 3 (R4-2)"
+  },
+  "privacyServerTimeNonce": "تحمل بعض الطلبات رقماً عشوائياً يُستخدم مرة واحدة للتحقق من الوقت. لا يتضمن أي معلومة عن الجهاز أو المستخدم، ولا يُخزَّن.",
+  "@privacyServerTimeNonce": {
+    "description": "E · simple standard Arabic · disclosure 3"
+  },
+  "privacyServerSupportNoticeSummary": "لو الدعم ربط الجولد بحساب، موبايلك اللي اشتريت عليه بيتبلّغ.",
+  "@privacyServerSupportNoticeSummary": {
+    "description": "S · Egyptian summary · disclosure 4 (R4-7(2), R5-7)"
+  },
+  "privacyServerSupportNotice": "إذا ربط الدعم الجولد بحساب، يُبلَّغ الهاتف الذي اشتُري عليه عند اتصاله التالي. يكرّر الخادم الإشعار حتى تؤكد مزامنة ذلك الهاتف استلامه، حتى لا يضيع إن فُقدت الاستجابة.",
+  "@privacyServerSupportNotice": {
+    "description": "E · simple standard Arabic · disclosure 4"
+  },
+  "privacyServerSupportRowsSummary": "لما تمسح حسابك، بنمسح كل حاجة، وأثر الدعم بيتمسح بعد سنة.",
+  "@privacyServerSupportRowsSummary": {
+    "description": "S · Egyptian summary · D-47, FR-ACCT-04"
+  },
+  "privacyServerSupportRows": "عند حذف الحساب تُحذف بياناته من الخادم، عدا سجلات تدقيق الدعم التي تحمل بصمة مشفّرة للبريد ومعرّف الحساب، وتُحذف تلقائياً بعد سنة من إنشائها.",
+  "@privacyServerSupportRows": {
+    "description": "E · simple standard Arabic"
+  },
+  "privacyContributeLabel": "ساعد في تحسين قايمة التجار",
+  "@privacyContributeLabel": {
+    "description": "L · toggle, off by default"
+  },
+  "privacyContributeSentence": "لو شغّلتها، بنبعت اسم التاجر والتصنيف اللي اخترته بس.",
+  "@privacyContributeSentence": {
+    "description": "S · one-sentence explanation (FR-CAT-09)"
+  },
+  "privacyContributeInfoTitle": "بالظبط إيه اللي بيتبعت؟",
+  "@privacyContributeInfoTitle": {
+    "description": "T · ⓘ sheet"
+  },
+  "privacyContributeSends": "بنبعت: اسم التاجر بعد تنضيفه، وكود البنك، والتصنيف اللي اخترته.",
+  "@privacyContributeSends": {
+    "description": "E"
+  },
+  "privacyContributeNeverSends": "مبنبعتش: مبالغ، ولا تواريخ، ولا أرقام كروت، ولا أرقام تليفونات، ولا حسابات إنستاباي، ولا أسماء ناس.",
+  "@privacyContributeNeverSends": {
+    "description": "E"
+  },
+  "privacyContributeFilters": "بنستبعد أي اسم شكله اسم شخص، والتصنيفات الخاصة بيك عمرها ما بتتبعت.",
+  "@privacyContributeFilters": {
+    "description": "E"
+  },
+  "privacyContributeOffHint": "تقدر تقفلها في أي وقت.",
+  "@privacyContributeOffHint": {
+    "description": "S"
+  },
+  "privacyContributeTurnedOn": "شكراً. هنبعت اسم التاجر والتصنيف بس.",
+  "@privacyContributeTurnedOn": {
+    "description": "N"
+  },
+  "privacyRootedRow": "{platform, select, ios{الآيفون ده متعمله جيلبريك، فحماية بياناتك أضعف.} other{الموبايل ده متعمله روت، فحماية بياناتك أضعف.}}",
+  "@privacyRootedRow": {
+    "description": "S · platform = ios / other. Same wording as home_banner_rooted",
+    "placeholders": {
+      "platform": {
+        "type": "String"
+      }
+    }
+  },
+  "privacyRootedTitle": "يعني إيه حماية أضعف؟",
+  "@privacyRootedTitle": {
+    "description": "T · opened from common_action_learnMore"
+  },
+  "privacyRootedBody": "على موبايل متعدّل، تطبيق تاني ممكن يوصل لملفات زغلول بسهولة أكتر. بياناتك لسه متشفّرة، بس الأمان مش كامل.",
+  "@privacyRootedBody": {
+    "description": "E · not blocking, a warning only"
+  },
+  "privacyDeleteRow": "امسح كل حاجة",
+  "@privacyDeleteRow": {
+    "description": "L · destructive"
+  },
+  "privacyDeleteTitle": "تمسح كل حاجة من على الموبايل ده؟",
+  "@privacyDeleteTitle": {
+    "description": "T"
+  },
+  "privacyDeleteBody": "هنمسح كل حركاتك وإعداداتك ومفاتيح الحماية من على الموبايل ده. مفيش رجوع.",
+  "@privacyDeleteBody": {
+    "description": "S"
+  },
+  "privacyDeleteLastBackup": "آخر نسخة احتياطية: {date}",
+  "@privacyDeleteLastBackup": {
+    "description": "S",
+    "placeholders": {
+      "date": {
+        "type": "String"
+      }
+    }
+  },
+  "privacyDeleteNoBackup": "مفيش نسخة احتياطية. اللي هتمسحه مش هيرجع.",
+  "@privacyDeleteNoBackup": {
+    "description": "S"
+  },
+  "privacyDeleteIosKeys": "على الآيفون، مفاتيح تعريف الموبايل بتفضل عليه عشان الجولد يرجع من غير نقلة، ومفيهاش أي بيانات مالية. مسح الآيفون كله بيشيلها.",
+  "@privacyDeleteIosKeys": {
+    "description": "E · FR-ONB-08 iOS exception (D-62); iOS only"
+  },
+  "privacyDeleteIosServer": "والسيرفر بيحتفظ بصورة مشفّرة من المفتاح مع الشراء لحد ما الشراء يتمسح.",
+  "@privacyDeleteIosServer": {
+    "description": "S · iOS only, R4-8"
+  },
+  "privacyDeleteTypePrompt": "اكتب «احذف» أو DELETE عشان تأكد",
+  "@privacyDeleteTypePrompt": {
+    "description": "S · both words are accepted in either language"
+  },
+  "privacyDeleteTypeLabel": "كلمة التأكيد",
+  "@privacyDeleteTypeLabel": {
+    "description": "L"
+  },
+  "privacyDeleteTypeMismatch": "الكلمة مش مطابقة",
+  "@privacyDeleteTypeMismatch": {
+    "description": "S"
+  },
+  "privacyDeleteConfirm": "امسح كل حاجة",
+  "@privacyDeleteConfirm": {
+    "description": "B · destructive, enabled on an exact match"
+  },
+  "privacyDeleteWorking": "بمسح…",
+  "@privacyDeleteWorking": {
+    "description": "L · progress"
+  },
+  "privacyDeleteServerCopy": "النسخة اللي على السيرفر هتنتهي لوحدها.",
+  "@privacyDeleteServerCopy": {
+    "description": "N · shown if the server delete failed; the local wipe is never blocked (NFR-PRIV-06)"
+  },
+  "settingsPrefsTitle": "التفضيلات",
+  "@settingsPrefsTitle": {
+    "description": "T"
+  },
+  "settingsPrefsLanguage": "اللغة",
+  "@settingsPrefsLanguage": {
+    "description": "L"
+  },
+  "settingsPrefsLanguageAr": "العربية",
+  "@settingsPrefsLanguageAr": {
+    "description": "C · always in its own script"
+  },
+  "settingsPrefsLanguageEn": "English",
+  "@settingsPrefsLanguageEn": {
+    "description": "C · always in its own script"
+  },
+  "settingsPrefsDigits": "الأرقام",
+  "@settingsPrefsDigits": {
+    "description": "L · shown only when the language is Arabic"
+  },
+  "settingsPrefsDigitsArabic": "عربي",
+  "@settingsPrefsDigitsArabic": {
+    "description": "C · the UI draws the sample glyphs"
+  },
+  "settingsPrefsDigitsWestern": "إنجليزي",
+  "@settingsPrefsDigitsWestern": {
+    "description": "C · the UI draws the sample glyphs"
+  },
+  "settingsPrefsTheme": "الشكل",
+  "@settingsPrefsTheme": {
+    "description": "L"
+  },
+  "settingsPrefsThemeSystem": "زي الموبايل",
+  "@settingsPrefsThemeSystem": {
+    "description": "C"
+  },
+  "settingsPrefsThemeLight": "فاتح",
+  "@settingsPrefsThemeLight": {
+    "description": "C"
+  },
+  "settingsPrefsThemeDark": "غامق",
+  "@settingsPrefsThemeDark": {
+    "description": "C"
+  },
+  "settingsPrefsCurrency": "العملة الأساسية",
+  "@settingsPrefsCurrency": {
+    "description": "L"
+  },
+  "settingsPrefsApprox": "اعرض مجموع تقريبي (≈)",
+  "@settingsPrefsApprox": {
+    "description": "L · FR-CUR-04, off by default"
+  },
+  "settingsPrefsApproxHint": "بيتحسب بسعر تقريبي ومكتوب عليه كده. مفيش حاجة بتتحوّل فعلاً.",
+  "@settingsPrefsApproxHint": {
+    "description": "S"
+  },
+  "settingsPrefsCombineInto": "حوّل المجموع لـ",
+  "@settingsPrefsCombineInto": {
+    "description": "L · FR-CUR-05, visible when the total is on"
+  },
+  "settingsPrefsPayday": "يوم القبض",
+  "@settingsPrefsPayday": {
+    "description": "L"
+  },
+  "settingsPrefsPaydayDay": "يوم {day}",
+  "@settingsPrefsPaydayDay": {
+    "description": "C · stepper value, 1 to 28",
+    "placeholders": {
+      "day": {
+        "type": "String"
+      }
+    }
+  },
+  "settingsPrefsPaydayMonth": "أول الشهر",
+  "@settingsPrefsPaydayMonth": {
+    "description": "C · calendar month option"
+  },
+  "settingsPrefsPaydayRange": "اختار يوم من أول الشهر لحد تمانية وعشرين",
+  "@settingsPrefsPaydayRange": {
+    "description": "S · validation"
+  },
+  "settingsPrefsPaydayChangeTitle": "تغيّر يوم القبض في نص الدورة؟",
+  "@settingsPrefsPaydayChangeTitle": {
+    "description": "T · EC-21"
+  },
+  "settingsPrefsPaydayChangeBody": "الدورة الحالية هتخلص بدري، وهتبدأ دورة جديدة من يوم القبض الجديد.",
+  "@settingsPrefsPaydayChangeBody": {
+    "description": "S"
+  },
+  "settingsPrefsIncome": "هدف الدخل الشهري",
+  "@settingsPrefsIncome": {
+    "description": "L"
+  },
+  "settingsPrefsIncomeOptional": "اختياري",
+  "@settingsPrefsIncomeOptional": {
+    "description": "C"
+  },
+  "settingsPrefsIncomeNegative": "المبلغ ميكونش بالسالب",
+  "@settingsPrefsIncomeNegative": {
+    "description": "S"
+  },
+  "settingsPrefsAppLock": "قفل التطبيق",
+  "@settingsPrefsAppLock": {
+    "description": "L"
+  },
+  "settingsPrefsLockAfter": "اقفل بعد",
+  "@settingsPrefsLockAfter": {
+    "description": "L"
+  },
+  "settingsPrefsLockImmediately": "على طول",
+  "@settingsPrefsLockImmediately": {
+    "description": "C"
+  },
+  "settingsPrefsLockAfterMinutes": "{count, plural, =1{دقيقة} =2{دقيقتين} few{{n} دقايق} many{{n} دقيقة} other{{n} دقيقة}}",
+  "@settingsPrefsLockAfterMinutes": {
+    "description": "C · count:int, n · menu choices 1, 5, 15 minutes",
+    "placeholders": {
+      "count": {
+        "type": "int"
+      },
+      "n": {
+        "type": "String"
+      }
+    }
+  },
+  "settingsPrefsBiometricsUnavailable": "{platform, select, ios{البصمة مش متاحة. هنستخدم كود الآيفون بدلها.} other{البصمة مش متاحة. هنستخدم قفل الموبايل بدلها.}}",
+  "@settingsPrefsBiometricsUnavailable": {
+    "description": "S · platform = ios / other (A-08)",
+    "placeholders": {
+      "platform": {
+        "type": "String"
+      }
+    }
+  },
+  "shareStudioTitle": "شارك إنجازك",
+  "@shareStudioTitle": {
+    "description": "T"
+  },
+  "shareStudioCloseA11y": "اقفل",
+  "@shareStudioCloseA11y": {
+    "description": "A"
+  },
+  "shareStudioTemplateSavings": "التحويش",
+  "@shareStudioTemplateSavings": {
+    "description": "C · shown only if the data exists"
+  },
+  "shareStudioTemplateDelivery": "تقليل الدليفري",
+  "@shareStudioTemplateDelivery": {
+    "description": "C"
+  },
+  "shareStudioTemplateBudget": "تحت الميزانية",
+  "@shareStudioTemplateBudget": {
+    "description": "C"
+  },
+  "shareStudioShowAmounts": "اظهر المبالغ",
+  "@shareStudioShowAmounts": {
+    "description": "L · off by default"
+  },
+  "shareStudioShowAmountsHint": "وإنت مقفلها بتظهر النسب بس.",
+  "@shareStudioShowAmountsHint": {
+    "description": "S"
+  },
+  "shareStudioCertificate": "شهادة تقدير من الكابتن زغلول",
+  "@shareStudioCertificate": {
+    "description": "T · card header"
+  },
+  "shareStudioCardSavings": "وفرت {percent} من مرتبي الشهر ده!",
+  "@shareStudioCardSavings": {
+    "description": "T · card, percentage version",
+    "placeholders": {
+      "percent": {
+        "type": "String"
+      }
+    }
+  },
+  "shareStudioCardSavingsAmount": "وفرت {amount} الشهر ده!",
+  "@shareStudioCardSavingsAmount": {
+    "description": "T · card, amount version",
+    "placeholders": {
+      "amount": {
+        "type": "String"
+      }
+    }
+  },
+  "shareStudioCardDelivery": "قللت الدليفري {percent} الشهر ده!",
+  "@shareStudioCardDelivery": {
+    "description": "T · card, percentage version",
+    "placeholders": {
+      "percent": {
+        "type": "String"
+      }
+    }
+  },
+  "shareStudioCardDeliveryAmount": "قللت الدليفري {amount} الشهر ده!",
+  "@shareStudioCardDeliveryAmount": {
+    "description": "T · card, amount version",
+    "placeholders": {
+      "amount": {
+        "type": "String"
+      }
+    }
+  },
+  "shareStudioCardBudget": "خلصت الدورة تحت الميزانية بـ {percent}!",
+  "@shareStudioCardBudget": {
+    "description": "T · card, percentage version",
+    "placeholders": {
+      "percent": {
+        "type": "String"
+      }
+    }
+  },
+  "shareStudioCardBudgetAmount": "خلصت الدورة تحت الميزانية بـ {amount}!",
+  "@shareStudioCardBudgetAmount": {
+    "description": "T · card, amount version",
+    "placeholders": {
+      "amount": {
+        "type": "String"
+      }
+    }
+  },
+  "shareStudioHashtag": "#زغلول_ضبط_الميزانية",
+  "@shareStudioHashtag": {
+    "description": "L · FR-SHR-03. One hashtag per card"
+  },
+  "shareStudioShare": "شارك",
+  "@shareStudioShare": {
+    "description": "B · opens the system share sheet"
+  },
+  "shareStudioPreviewA11y": "معاينة الكارت: {text}",
+  "@shareStudioPreviewA11y": {
+    "description": "A",
+    "placeholders": {
+      "text": {
+        "type": "String"
+      }
+    }
+  },
+  "shareStudioUnencrypted": "الصورة مش متشفّرة، ولما تشاركها بتبقى بره زغلول.",
+  "@shareStudioUnencrypted": {
+    "description": "S · FR-SEC-06"
+  },
+  "shareStudioEmptyTitle": "لسه مفيش إنجاز تشاركه",
+  "@shareStudioEmptyTitle": {
+    "description": "T · C-28"
+  },
+  "shareStudioEmptyBody": "كمّل تسجيل وهتلاقي إنجازات هنا.",
+  "@shareStudioEmptyBody": {
+    "description": "S"
+  },
+  "shareStudioRendering": "بجهّز الكارت…",
+  "@shareStudioRendering": {
+    "description": "L"
+  },
+  "shareStudioRenderFailed": "معرفتش أجهّز الصورة. جرّب تاني.",
+  "@shareStudioRenderFailed": {
+    "description": "S"
+  },
+  "aboutMainTitle": "عن زغلول",
+  "@aboutMainTitle": {
+    "description": "T"
+  },
+  "aboutMainVersion": "الإصدار {appVersion} (رقم {build})",
+  "@aboutMainVersion": {
+    "description": "L · Western digits always",
+    "placeholders": {
+      "appVersion": {
+        "type": "String"
+      },
+      "build": {
+        "type": "String"
+      }
+    }
+  },
+  "aboutMainCatalog": "قايمة التجار اتحدّثت {date}",
+  "@aboutMainCatalog": {
+    "description": "L · FR-SYNC-06",
+    "placeholders": {
+      "date": {
+        "type": "String"
+      }
+    }
+  },
+  "aboutMainPrices": "الأسعار اتحدّثت {date}",
+  "@aboutMainPrices": {
+    "description": "L",
+    "placeholders": {
+      "date": {
+        "type": "String"
+      }
+    }
+  },
+  "aboutMainNeverSynced": "لسه ما اتحدّثتش (شغال من غير نت)",
+  "@aboutMainNeverSynced": {
+    "description": "S"
+  },
+  "aboutMainTerms": "الشروط",
+  "@aboutMainTerms": {
+    "description": "L"
+  },
+  "aboutMainPrivacy": "سياسة الخصوصية",
+  "@aboutMainPrivacy": {
+    "description": "L"
+  },
+  "aboutMainLicenses": "تراخيص المصدر المفتوح",
+  "@aboutMainLicenses": {
+    "description": "L"
+  },
+  "aboutMainDisclaimers": "تنبيهات مهمة",
+  "@aboutMainDisclaimers": {
+    "description": "L · opens the disclaimers list"
+  },
+  "aboutMainSupport": "كلّم الدعم",
+  "@aboutMainSupport": {
+    "description": "L · opens mail (UX-A-06)"
+  },
+  "aboutMainSupportSubject": "مساعدة في زغلول",
+  "@aboutMainSupportSubject": {
+    "description": "L · mail subject; the body holds only common_support_codeValue"
+  },
+  "aboutDiagTitle": "بيانات تشخيص",
+  "@aboutDiagTitle": {
+    "description": "T · error-handling-and-observability.md §3.1"
+  },
+  "aboutDiagBody": "ملف فيه أكواد أعطال بس، من غير رسايل ولا مبالغ ولا أسماء. تبعته للدعم لو احتجت.",
+  "@aboutDiagBody": {
+    "description": "S"
+  },
+  "aboutDiagShare": "ابعت الملف",
+  "@aboutDiagShare": {
+    "description": "B · system share sheet, user-initiated (NFR-PRIV-02b)"
+  },
+  "aboutDiagEmpty": "مفيش أعطال مسجلة.",
+  "@aboutDiagEmpty": {
+    "description": "S"
+  },
+  "legalTermsSummary": "الشروط باختصار: بتستخدم زغلول لإدارة فلوسك بنفسك، وقرارك المالي مسؤوليتك.",
+  "@legalTermsSummary": {
+    "description": "S · Egyptian summary above the hosted Terms of Use. Wording is a draft for legal (Q-37)"
+  },
+  "legalTermsOpen": "اقرا الشروط كاملة",
+  "@legalTermsOpen": {
+    "description": "B"
+  },
+  "legalPrivacySummary": "الخصوصية باختصار: بيانات فلوسك بتفضل على موبايلك، والسيرفر مبيعرفش غير اللي مكتوب في «خصوصيتك».",
+  "@legalPrivacySummary": {
+    "description": "S · Egyptian summary above the hosted Privacy Policy. Draft for legal (Q-37)"
+  },
+  "legalPrivacyOpen": "اقرا السياسة كاملة",
+  "@legalPrivacyOpen": {
+    "description": "B"
+  },
+  "legalLicensesSummary": "زغلول بيستخدم برامج مفتوحة المصدر، وده ترخيص كل واحد منها.",
+  "@legalLicensesSummary": {
+    "description": "S"
+  },
+  "legalLicensesTitle": "تراخيص المصدر المفتوح",
+  "@legalLicensesTitle": {
+    "description": "T"
+  },
+  "legalDisclaimerTitle": "تنبيهات مهمة",
+  "@legalDisclaimerTitle": {
+    "description": "T"
+  },
+  "legalDisclaimerCoachingSummary": "نصايح زغلول أفكار عامة، مش نصيحة مالية.",
+  "@legalDisclaimerCoachingSummary": {
+    "description": "S · Egyptian summary"
+  },
+  "legalDisclaimerCoaching": "توجيهات الكابتن زغلول وتفسيرات الرسوم البيانية واقتراحاته أفكار عامة للتوعية، وليست نصيحة مالية أو استثمارية أو قانونية. القرار النهائي لك.",
+  "@legalDisclaimerCoaching": {
+    "description": "E · simple standard Arabic · NFR-LEGAL-03"
+  },
+  "legalDisclaimerEstimatesSummary": "الأرقام تقريبية، وكشف البنك هو المرجع.",
+  "@legalDisclaimerEstimatesSummary": {
+    "description": "S · Egyptian summary"
+  },
+  "legalDisclaimerEstimates": "الأرقام المعروضة تقديرية، ومبنية على الرسائل التي يقرؤها التطبيق وعلى ما تدخله بنفسك، وقد تختلف عن كشوف حساباتك الرسمية.",
+  "@legalDisclaimerEstimates": {
+    "description": "E · simple standard Arabic"
+  },
+  "legalDisclaimerPricesSummary": "أسعار الدهب والعملات إرشادية، وممكن تتأخر عن السوق.",
+  "@legalDisclaimerPricesSummary": {
+    "description": "S · Egyptian summary"
+  },
+  "legalDisclaimerPrices": "أسعار الذهب والعملات المعروضة إرشادية فقط، وقد تتأخر أو تختلف عن سعر السوق وقت التنفيذ.",
+  "@legalDisclaimerPrices": {
+    "description": "E · simple standard Arabic"
+  },
+  "legalDisclaimerZakahRef": "حساب الزكاة تقدير مش فتوى. التفاصيل في شاشة الزكاة.",
+  "@legalDisclaimerZakahRef": {
+    "description": "S · pointer only; the disclaimer itself is zakah_main_disclaimer (Part 2)"
+  },
+  "legalDisclaimerRoiRef": "نصايح الاستثمار أفكار عامة مش نصيحة مالية. التفاصيل في شاشة النصايح.",
+  "@legalDisclaimerRoiRef": {
+    "description": "S · pointer only; the disclaimer itself is roi_tips_disclaimer (Part 2)"
+  },
+  "legalDisclaimerFooter": "زغلول بيدّي أفكار عامة، مش نصيحة مالية.",
+  "@legalDisclaimerFooter": {
+    "description": "N · short footer for chat answers and chart tips, if the PO wants one (Q-20, Q-37)"
+  },
+  "errorsGenericUnexpectedTitle": "حصلت مشكلة صغيرة",
+  "@errorsGenericUnexpectedTitle": {
+    "description": "T · unexpected exception (FlutterError.onError), full-screen fallback, Rive oops"
+  },
+  "errorsGenericUnexpectedBody": "مش بسببك، وبياناتك في أمان على موبايلك. ارجع للرئيسية وجرّب تاني.",
+  "@errorsGenericUnexpectedBody": {
+    "description": "S"
+  },
+  "errorsGenericGoHome": "ارجع للرئيسية",
+  "@errorsGenericGoHome": {
+    "description": "B"
+  },
+  "errorsGenericActionFailed": "الحاجة دي ماتمتش. جرّب تاني كمان شوية.",
+  "@errorsGenericActionFailed": {
+    "description": "S · bug-class backend codes when a user action was waiting"
+  },
+  "errorsNetworkOffline": "مفيش نت دلوقتي. اللي بتشوفه محفوظ على موبايلك.",
+  "@errorsNetworkOffline": {
+    "description": "S · NetworkFailure.offline"
+  },
+  "errorsNetworkTimeout": "الاتصال أخد وقت طويل. جرّب تاني.",
+  "@errorsNetworkTimeout": {
+    "description": "S · NetworkFailure.timeout"
+  },
+  "errorsNetworkServer": "السيرفر مشغول دلوقتي. هنجرّب تاني لوحدنا.",
+  "@errorsNetworkServer": {
+    "description": "S · NetworkFailure.server(5xx), STORE_UNAVAILABLE, UPSTREAM_UNAVAILABLE, INTERNAL"
+  },
+  "errorsNetworkRateLimited": "الطلبات كتير شوية. استنى شوية وجرّب تاني.",
+  "@errorsNetworkRateLimited": {
+    "description": "S · RATE_LIMITED (respect Retry-After)"
+  },
+  "errorsStorageOpenTitle": "مقدرناش نفتح بياناتك",
+  "@errorsStorageOpenTitle": {
+    "description": "T · DbFailure open, KEY_INVALIDATED on the DB key, CryptoFailure; full screen, Rive oops"
+  },
+  "errorsStorageOpenBody": "ممكن ترجّعها من نسخة احتياطية أو تبدأ من جديد. الملف القديم هيفضل لحد ما تختار.",
+  "@errorsStorageOpenBody": {
+    "description": "S"
+  },
+  "errorsStorageRestore": "استرجع من نسخة",
+  "@errorsStorageRestore": {
+    "description": "B · opens S-04"
+  },
+  "errorsStorageStartFreshWarn": "هنمسح الملف القديم اللي مش بيتفتح. مفيش رجوع.",
+  "@errorsStorageStartFreshWarn": {
+    "description": "S · confirm for backup_restore_startFresh"
+  },
+  "errorsStorageFull": "المساحة على الموبايل خلصت. فضّي مساحة وجرّب تاني. الرسايل اللي وصلت متحفظة.",
+  "@errorsStorageFull": {
+    "description": "S · DbFailure write (EC-28); banner"
+  },
+  "errorsStorageMigrationTitle": "التحديث ماكملش",
+  "@errorsStorageMigrationTitle": {
+    "description": "T · migration failed; Rive oops"
+  },
+  "errorsStorageMigrationBody": "رجّعنا بياناتك زي ما كانت. جرّب تاني.",
+  "@errorsStorageMigrationBody": {
+    "description": "S · + common_action_tryAgain"
+  },
+  "errorsStorageIo": "حصلت مشكلة في قراءة أو حفظ ملف. جرّب تاني.",
+  "@errorsStorageIo": {
+    "description": "S · IO_ERROR"
+  },
+  "errorsCapturePermission": "الإذن ده مقفول. شغّله من إعدادات الموبايل.",
+  "@errorsCapturePermission": {
+    "description": "S · PERMISSION_DENIED; + common_action_openSettings"
+  },
+  "errorsCaptureUnavailable": "الحاجة دي مش متاحة على الموبايل ده.",
+  "@errorsCaptureUnavailable": {
+    "description": "S · NOT_AVAILABLE"
+  },
+  "errorsCaptureSpool": "في رسايل مقدرتش أقراها. دوّر في الرسايل القديمة تاني.",
+  "@errorsCaptureSpool": {
+    "description": "S · SPOOL_DECRYPT_FAILED after three tries; Settings, Capture; action capture_settings_rescan"
+  },
+  "errorsCaptureKeyChanged": "الحماية على الموبايل اتجدّدت بعد تغيير القفل، ورسايل مستنية ممكن تكون ضاعت. دوّر في الرسايل القديمة تاني.",
+  "@errorsCaptureKeyChanged": {
+    "description": "S · KEY_INVALIDATED for the spool key (Android)"
+  },
+  "errorsCaptureConfig": "بظبّط إعدادات اللقط لوحدي. مفيش حاجة مطلوبة منك.",
+  "@errorsCaptureConfig": {
+    "description": "S · CONFIG_INVALID; normally silent, shown only on the Capture screen"
+  },
+  "errorsCaptureOcr": "معرفتش أقرا الصورة. جرّب صورة أوضح أو اكتب الحركة بإيدك.",
+  "@errorsCaptureOcr": {
+    "description": "S · OCR_FAILED; same advice as capture_scan_emptyBody"
+  },
+  "errorsMoneyCurrency": "العملتين مختلفتين، مينفعش نجمعهم.",
+  "@errorsMoneyCurrency": {
+    "description": "S · domain CurrencyMismatch; amounts are never converted"
+  },
+  "errorsMoneyOffset": "المبلغ الراجع أكبر من الحركة نفسها.",
+  "@errorsMoneyOffset": {
+    "description": "S · domain OffsetExceedsAmount"
+  },
+  "errorsAccountTokenExpired": "سجّل دخول تاني عشان تكمّل.",
+  "@errorsAccountTokenExpired": {
+    "description": "S · same text as gold_account_signInAgain; Settings only"
+  },
+  "errorsAccountFailed": "العملية ماتمتش. جرّب تاني كمان شوية.",
+  "@errorsAccountFailed": {
+    "description": "S · INSTALL_EXISTS and INSTALL_TOKEN_INVALID when a user action was waiting (the app re-registers silently first)"
   }
 }
