@@ -204,3 +204,11 @@ Two defects give a **wrong amount with high confidence and no issue flag**:
 | T109-2 | T-109 | parsing | Over-long digit amounts become EGP 1.00 via the bare "جنيه" path | Over-long digits → `invalidAmount`, `amount: null`, plus tests |
 
 Every other finding is a minor or nit and becomes a follow-up under the review-round policy. No Security finding is marked "before merge". T-141, T-132 and T-043 still depend on the batch GitHub run being green (Android unit tests, Testcontainers, db-platform), because none of those ran here.
+
+## Lead delta check T109-1 / T109-2 (976df24)
+
+- **T109-1:** the fraction branch now multiplies by 1,000,000 when the next word is a million, exactly like the existing thousand branch.
+- **T109-2:** an over-long digit run stays an amount token valued 0. The item then gets `amount: null` with `invalidAmount`, so the following currency word is no longer read as 1.
+- **Tests:** two new tests cover several phrasings, both fail without the fix (builder ran this), and the 19 voice tests pass here.
+
+Both majors are resolved. Verdict for T-109: **APPROVED**.
