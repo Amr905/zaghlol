@@ -14,6 +14,7 @@ import '../../transactions/data/transactions_providers.dart' show clockProvider;
 import '../data/cycle_cache_invalidator.dart';
 import '../data/cycle_repository.dart';
 import '../data/payday_schedule_store.dart';
+import 'cycle_app_wiring.dart';
 import 'cycle_overview.dart';
 
 final localZoneProvider = Provider<LocalZone>(
@@ -108,9 +109,9 @@ class TodayNotifier extends Notifier<CivilDate> {
 }
 
 /// The `TransactionsChanged` stream. The composition root overrides it with
-/// `bus.on<TransactionsChanged>()`; the default never emits.
+/// `bus.on<TransactionsChanged>()`; the default is the app bus.
 final transactionsChangedProvider = Provider<Stream<TransactionsChanged>>(
-  (ref) => const Stream<TransactionsChanged>.empty(),
+  (ref) => ref.watch(domainEventBusProvider).on<TransactionsChanged>(),
   name: 'transactionsChangedProvider',
 );
 
@@ -120,23 +121,11 @@ final transactionsChangedProvider = Provider<Stream<TransactionsChanged>>(
 final currentCycleOverviewProvider = FutureProvider<CycleOverview>((ref) async {
   final schedule = await ref.watch(paydayScheduleProvider.future);
   final repo = await ref.watch(cycleRepositoryProvider.future);
-  final invalidator = await ref.watch(cycleCacheInvalidatorProvider.future);
   final today = ref.watch(todayProvider);
   final target = await ref.watch(incomeTargetProvider.future);
-  // A primary-currency change drops every row too (design note §6).
-  ref.listen(primaryCurrencyProvider, (prev, next) {
-    if (prev?.value != null && prev?.value != next.value) {
-      unawaited(invalidator.invalidateAll());
-    }
-  });
-  final sub = invalidator.attach(ref.watch(transactionsChangedProvider));
-  final changed = ref.watch(transactionsChangedProvider).listen((_) {
-    ref.invalidateSelf();
-  });
-  ref.onDispose(() {
-    unawaited(sub.cancel());
-    unawaited(changed.cancel());
-  });
+  // The app-level wiring (cycle_app_wiring.dart) deletes stale cache rows,
+  // then bumps this version.
+  ref.watch(cycleDataVersionProvider);
   final cycle = schedule.cycleOn(today);
   return buildCycleOverview(
     cycle: cycle,
