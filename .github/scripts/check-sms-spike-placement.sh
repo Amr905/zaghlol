@@ -56,6 +56,14 @@ if [ "$MODE" = "release" ] && grep -q 'androidx\.test' "$work/manifest.txt"; the
 fi
 echo "$FLAVOR: worker present, no DiagnosticsReceiver, no foreground-service type"
 
+# T-043: the notification listener, every flavour, bindable only by the system.
+dex_has 'Lapp/zaghlol/platform/capture/BankNotificationListener;' || { echo "::error::$FLAVOR has no BankNotificationListener class"; exit 1; }
+if ! grep -A20 'app.zaghlol.platform.capture.BankNotificationListener' "$work/manifest.txt" | grep -q '"android.permission.BIND_NOTIFICATION_LISTENER_SERVICE"'; then
+  echo "::error::$FLAVOR BankNotificationListener is missing or not protected by BIND_NOTIFICATION_LISTENER_SERVICE"
+  exit 1
+fi
+echo "$FLAVOR: BankNotificationListener present and protected by BIND_NOTIFICATION_LISTENER_SERVICE"
+
 n_rx=$(grep -c 'android.provider.Telephony.SMS_RECEIVED' "$work/manifest.txt" || true)
 # The receiver elements, one block each (name, permission, filter).
 awk '/E: receiver/{r=1; buf=""} r{buf=buf"\n"$0} /E: intent-filter/{if(r){print buf; r=0}}' "$work/manifest.txt" > "$work/receivers.txt"

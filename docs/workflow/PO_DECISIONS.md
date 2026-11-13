@@ -34,6 +34,10 @@ T-035 Q1–Q6 (keep with bundled rules; drop OTP+transaction messages, as the re
 | Q-24 | Idle-cash rule 4 makes no "halal" claim; general wording. Example rates come from the catalog. |
 | Q-25 | Essential categories never roasted: rent, bills, groceries, health, education, fees, debt, work transport (as proposed). |
 | Q-33 | Budget alerts keep the category name, but follow the user's lock-screen redaction setting like every notification. |
+| T-132 Q1–Q3 | No earlier-holder history table: a former non-buying holder sees `none`, not `moved`, and still loses Gold within 7 days. An invalid/expired account token counts as absent (Gold shows `paused`) until T-135 adds `ACCOUNT_TOKEN_EXPIRED`. `plan:"none"` and whole-hour ISO `nextMoveAt` stand; T-144 confirms. |
+| T-141 | The in-repo DTO generator (pinned, regenerated-file check in CI) replaces `openapi-generator-cli`. Production response-signing public keys come from T-140's key service (Lead), no PO action. |
+| T-023 | Negative amounts use ASCII `-`. Non-EGP currencies show their ISO code in Arabic until UX defines symbols. |
+| T-109 | `دينار` keeps the default currency with `ambiguousCurrency`; the voice UI asks. Missing spoken keywords go into the T-059 catalog seed. |
 | Q-44, T-047 Q2, T-047 Q5 | `ux-designer` writes the copy in the voice guide; reviewed in T-058. Placement: Q-44 one-time Welcome line with a "restore" action; missed notifications as a dismissible card in capture settings (and the lowest-priority home banner); rule saved but not yet active as "اتحفظت — هتشتغل خلال ثواني" / "Saved — active in a few seconds". |
 
 ## Part 2 — Still needs Amr

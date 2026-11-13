@@ -433,6 +433,72 @@ echo "T-040 canary: app log lines $t040_hits of $t040_own app lines"
 [ "$t040_hits" = 0 ] || fail "message content appeared in the app's logcat during the T-040 test"
 rm -f "$OUT/logcat-uid.txt" "$OUT/pkg.txt"
 echo "T-040: receiver test OK (slot ${T040_SLOT:-none}, inbox rows ${T040_INBOX:-none})"
+# ---- T-043: the production BankNotificationListener --------------------------
+# Posts come from the shell package (`cmd notification post`); the bodies are
+# NotificationListenerEmulatorTest's constants. An API level without
+# `cmd notification post` skips the post steps by name (never silently).
+T043=app.zaghlol.platform.capture.NotificationListenerEmulatorTest
+T043_LISTENER="$PKG/app.zaghlol.platform.capture.BankNotificationListener"
+T043_TITLE='SYNTH BANK'
+T043_FIRST='Debit EGP 150.00 card 4321 at SYNTH SHOP'
+T043_UPDATE='Debit EGP 150.00 card 4321 at SYNTH SHOP 2'
+T043_RESULT="skipped (t043-post-unavailable API $API)"
+if sh_ cmd notification help 2>&1 | grep -qw post; then
+  sh_ cmd notification allow_listener "$T043_LISTENER" > "$OUT/t043-allow.txt" 2>&1 || true
+  if ! sh_ cmd notification help > /dev/null 2>&1 || ! sh_ "settings get secure enabled_notification_listeners" | grep -qF "BankNotificationListener"; then
+    sh_ "settings put secure enabled_notification_listeners $T043_LISTENER" || true
+  fi
+  sleep 3
+  t043_post() { sh_ "cmd notification post -S bigtext -t '$1' $2 '$3'" > /dev/null 2>&1 || fail "cmd notification post failed"; }
+  t043_run() {
+    local phase=$1
+    sh_ am instrument -w -r -e class "$T043#$phase" -e t043Phase "$phase" "$RUNNER" > "$OUT/it-t043-$phase.txt" 2>&1 &
+    T043_PID=$!
+    for _ in $(seq 1 120); do
+      tr -d '\r' < "$OUT/it-t043-$phase.txt" | grep -q 't043.ready=1' && break
+      sleep 1
+    done
+    tr -d '\r' < "$OUT/it-t043-$phase.txt" | grep -q 't043.ready=1' || { wait "$T043_PID" || true; tail -n 30 "$OUT/it-t043-$phase.txt"; fail "T-043 $phase test did not get ready"; }
+  }
+  t043_finish() {
+    local phase=$1
+    wait "$T043_PID" || true
+    if ! tr -d '\r' < "$OUT/it-t043-$phase.txt" | grep -qE "^OK \(1 test\)"; then
+      tr -d '\r' < "$OUT/it-t043-$phase.txt" | awk '/^INSTRUMENTATION_STATUS: stack=/{n=8} n>0{print "  " substr($0,1,300); n--}' | head -n 40 || true
+      fail "T-043 $phase test failed (it-t043-$phase.txt)"
+    fi
+    tr -d '\r' < "$OUT/it-t043-$phase.txt" | grep -q 't043.result=ok' || fail "T-043 $phase test was skipped or did not finish"
+  }
+  for _ in $(seq 1 60); do [ "$(spool_count)" = 0 ] && break; sleep 1; done
+  A logcat -c || true
+  t043_run armed
+  t043_post "$T043_TITLE" t043a "$T043_FIRST"
+  sleep 2
+  t043_post "$T043_TITLE" t043a "$T043_FIRST"
+  sleep 2
+  t043_post "$T043_TITLE" t043a "$T043_UPDATE"
+  sleep 2
+  t043_post "Bank" t043b "$CANARY your OTP is 482913"
+  t043_finish armed
+  t043_run denied
+  t043_post "$T043_TITLE" t043c "$T043_FIRST"
+  t043_finish denied
+  sh_ pm list packages -U > "$OUT/pkg.txt"
+  UID_N=$(grep -E "^package:$PKG uid:" "$OUT/pkg.txt" | grep -oE 'uid:[0-9]+' | cut -d: -f2 || true)
+  APP_NAME="u0_a$((UID_N - 10000))"
+  A logcat -d -v uid > "$OUT/logcat-uid.txt" || true
+  t043_own=$(grep -E "(^|[[:space:]])($UID_N|$APP_NAME)[[:space:]]" "$OUT/logcat-uid.txt" | grep -c . || true)
+  t043_hits=$(grep -E "ZG_CANARY|SYNTH BANK|SYNTH SHOP" "$OUT/logcat-uid.txt" | grep -E "(^|[[:space:]])($UID_N|$APP_NAME)[[:space:]]" | grep -c . || true)
+  echo "T-043 canary: app log lines $t043_hits of $t043_own app lines"
+  [ "$t043_own" -gt 0 ] || fail "the logcat uid filter matched no app line after the T-043 test; canary scan would be vacuous"
+  [ "$t043_hits" = 0 ] || fail "notification content appeared in the app's logcat during the T-043 test"
+  rm -f "$OUT/logcat-uid.txt" "$OUT/pkg.txt"
+  sh_ cmd notification disallow_listener "$T043_LISTENER" > /dev/null 2>&1 || true
+  T043_RESULT="ok"
+else
+  echo "T-043: SKIPPED by name: t043-post-unavailable (no 'cmd notification post' on API $API)"
+fi
+echo "T-043: listener test $T043_RESULT"
 # ---- FU-108 security L-2, T-047 F-2: a non-spike Sms build (T-040) ----------
 SPKG=app.zaghlol.staging
 srun() { sh_ run-as "$SPKG" "$@"; }
@@ -468,5 +534,6 @@ A uninstall "$SPKG" > /dev/null 2>&1 || true
   echo "- foreground receive -> commit p95 (AC2): ${FG_P95} ms"
   echo "- burst with UI attach mid-drain: $burst of 40"
   echo "- T-040 receiver: $(tr -d '\r' < "$OUT/it-t040.txt" | grep -E "^(OK|FAILURES)" | tr '\n' ' ') slot ${T040_SLOT:-none}, inbox ${T040_INBOX:-none}"
+  echo "- T-043 listener: $T043_RESULT"
   echo "- stagingSms (no registry): spool $st_spool, Guard user part $st_guard, WorkManager jobs $st_jobs"
 } >> "$OUT/report.md"

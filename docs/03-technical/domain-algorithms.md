@@ -142,7 +142,7 @@ The input is ASR text in Arabic or English (or mixed, EC-31).
 6 output items[{amount, currency (default primary), text, categoryGuess, confidence}]; amount-less text → item with
    amount = null flagged (EC-30); nothing saved until confirmed (FR-VOI-03)
 ```
-Spec test: «دفعت ١٥٠ جنيه خضار وفاكهة و ٤٥ جنيه قهوة و ٣٠ جنيه تاكسي» → [150 Groceries, 45 Dining, 30 Transport]. The phrase list for FR-VOI-05 lives in `test/fixtures/voice_phrases.yaml`, with about 200 phrases written during Phase 5.
+Spec test: «دفعت ١٥٠ جنيه خضار وفاكهة و ٤٥ جنيه قهوة و ٣٠ جنيه تاكسي» → [150 Groceries, 45 Dining, 30 Transport]. The phrase list for FR-VOI-05 lives in `packages/zaghlol_parsing/test/fixtures/voice/phrases.json` (about 250 synthetic phrases, T-109); the parser is `packages/zaghlol_parsing/lib/voice/` (design note in `docs/04-tasks/tasks/T-109.md`).
 
 **Monthly limit** (FR-VOI-04, A-14/15): `voice_usage[YYYY-MM]` is incremented on **confirm**. Free users are blocked at 15, with Gold upsell.
 

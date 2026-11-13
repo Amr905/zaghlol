@@ -57,3 +57,17 @@ public sealed class PurchaseEntitlementDto
 {
     public required Sensitive<string> Token { get; init; }
 }
+
+/// <summary><c>EntitlementResponse</c> of <c>getEntitlement</c>: signed, echoes the time nonce, never carries <c>rotateInstallToken</c>.</summary>
+public sealed class EntitlementResponse : IAnchoredResponse
+{
+    public required PurchaseEntitlementDto Entitlement { get; init; }
+
+    public required DateTimeOffset ServerTime { get; init; }
+
+    [JsonIgnore(Condition = JsonIgnoreCondition.Never)]
+    public required string? TimeNonce { get; init; }
+
+    [JsonIgnore(Condition = JsonIgnoreCondition.Never)]
+    public required string? SupportNotice { get; init; }
+}

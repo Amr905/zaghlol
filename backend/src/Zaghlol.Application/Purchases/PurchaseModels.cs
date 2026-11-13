@@ -115,7 +115,14 @@ public interface IStoreVerification
 
 /// <summary>The caller of a verify, for the seat decision and the entitlement (T-132, T-184).</summary>
 /// <param name="AccountToken">The <c>Zaghlol-Account</c> header, unverified; T-132 decides what it proves.</param>
-public sealed record VerifyContext(InstallId Install, Sensitive<string>? AccountToken, DateTimeOffset Now);
+/// <param name="SeatKeys">iOS: the request's <c>seatKeys</c>, unverified (T-132 verifies them over <see cref="SignedTransaction"/>).</param>
+/// <param name="SignedTransaction">iOS: the StoreKit JWS the seat-key challenge is the SHA-256 of; never logged.</param>
+public sealed record VerifyContext(
+    InstallId Install,
+    Sensitive<string>? AccountToken,
+    DateTimeOffset Now,
+    IReadOnlyList<Seats.SeatKeys.SeatKeyProofInput?>? SeatKeys = null,
+    Sensitive<string>? SignedTransaction = null);
 
 /// <summary>The grant part of a verify 200 (OpenAPI <c>PurchaseVerifyResponse</c> minus <c>status</c>, time and nonce).</summary>
 public sealed record VerifyGrantResult(Sensitive<string>? EntitlementToken, bool SeatHeldElsewhere, bool AccountRequired, DateTimeOffset? NextMoveAt)

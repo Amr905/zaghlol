@@ -19,6 +19,10 @@ dependencies:
   # T-015 / ADR-001: state and DI (plain providers; riverpod_generator lands
   # with the first feature that needs code generation).
   flutter_riverpod: ^3.0.0
+  # T-023 / ADR-017: gen-l10n and date formats.
+  flutter_localizations:
+    sdk: flutter
+  intl: ^0.20.2
   # T-016: the application support directory for zaghlol.db (first-party).
   path_provider: ^2.1.6
   # T-015: SafeException for code-only DB errors (error-handling §3).
@@ -39,6 +43,9 @@ dependencies:
   cryptography_flutter: 2.3.4
   # T-148: Argon2id for the backup passphrase (pure Dart, no FFI, no network).
   hashlib: 2.4.2
+  # T-141: ES256 verification of backend response signatures (pure Dart, the
+  # same library zaghlol_catalog uses; already in the workspace lock).
+  pointycastle: ^4.0.0
 
 dev_dependencies:
   flutter_test:
@@ -49,8 +56,11 @@ dev_dependencies:
   integration_test:
     sdk: flutter
   pigeon: ^26.0.0
+  # T-141: the OpenAPI drift test reads backend/openapi/zaghlol-v1.yaml.
+  yaml: ^3.1.0
 
 flutter:
+  generate: true
   uses-material-design: true
   assets:
     # T-030: the signed first-launch catalog (tools/catalog_build).

@@ -1,0 +1,3954 @@
+[
+ {
+  "id": "v001",
+  "tag": "spec",
+  "text": "دفعت ١٥٠ جنيه خضار وفاكهة و ٤٥ جنيه قهوة و ٣٠ جنيه تاكسي",
+  "items": [
+   {
+    "amountMinor": 15000,
+    "currency": "EGP",
+    "category": "groceries"
+   },
+   {
+    "amountMinor": 4500,
+    "currency": "EGP",
+    "category": "dining"
+   },
+   {
+    "amountMinor": 3000,
+    "currency": "EGP",
+    "category": "transport"
+   }
+  ]
+ },
+ {
+  "id": "v002",
+  "tag": "spec",
+  "text": "دفعت 150 جنيه خضار وفاكهة و 45 جنيه قهوة و 30 جنيه تاكسي",
+  "items": [
+   {
+    "amountMinor": 15000,
+    "currency": "EGP",
+    "category": "groceries"
+   },
+   {
+    "amountMinor": 4500,
+    "currency": "EGP",
+    "category": "dining"
+   },
+   {
+    "amountMinor": 3000,
+    "currency": "EGP",
+    "category": "transport"
+   }
+  ]
+ },
+ {
+  "id": "v003",
+  "tag": "spec",
+  "text": "دفعت ١٥٠ جنيه خضار وفاكهة و٤٥ جنيه قهوة و٣٠ جنيه تاكسي",
+  "items": [
+   {
+    "amountMinor": 15000,
+    "currency": "EGP",
+    "category": "groceries"
+   },
+   {
+    "amountMinor": 4500,
+    "currency": "EGP",
+    "category": "dining"
+   },
+   {
+    "amountMinor": 3000,
+    "currency": "EGP",
+    "category": "transport"
+   }
+  ]
+ },
+ {
+  "id": "v004",
+  "tag": "spec",
+  "text": "دفعت ١٥٠ جنيه خضار وفاكهة و ٤٥ قهوة و ٣٠ تاكسي",
+  "items": [
+   {
+    "amountMinor": 15000,
+    "currency": "EGP",
+    "category": "groceries"
+   },
+   {
+    "amountMinor": 4500,
+    "currency": "EGP",
+    "category": "dining"
+   },
+   {
+    "amountMinor": 3000,
+    "currency": "EGP",
+    "category": "transport"
+   }
+  ]
+ },
+ {
+  "id": "v005",
+  "tag": "spec",
+  "text": "دفعت 150 ج خضار وفاكهة و 45 ج قهوة و 30 ج تاكسي",
+  "items": [
+   {
+    "amountMinor": 15000,
+    "currency": "EGP",
+    "category": "groceries"
+   },
+   {
+    "amountMinor": 4500,
+    "currency": "EGP",
+    "category": "dining"
+   },
+   {
+    "amountMinor": 3000,
+    "currency": "EGP",
+    "category": "transport"
+   }
+  ]
+ },
+ {
+  "id": "v006",
+  "tag": "spec",
+  "text": "دفعت ١٥٠ ج.م خضار وفاكهة و ٤٥ ج.م قهوة و ٣٠ ج.م تاكسي",
+  "items": [
+   {
+    "amountMinor": 15000,
+    "currency": "EGP",
+    "category": "groceries"
+   },
+   {
+    "amountMinor": 4500,
+    "currency": "EGP",
+    "category": "dining"
+   },
+   {
+    "amountMinor": 3000,
+    "currency": "EGP",
+    "category": "transport"
+   }
+  ]
+ },
+ {
+  "id": "v007",
+  "tag": "spec",
+  "text": "دفعت ميت وخمسين جنيه خضار وفاكهة وخمسة واربعين جنيه قهوة وتلاتين جنيه تاكسي",
+  "items": [
+   {
+    "amountMinor": 15000,
+    "currency": "EGP",
+    "category": "groceries"
+   },
+   {
+    "amountMinor": 4500,
+    "currency": "EGP",
+    "category": "dining"
+   },
+   {
+    "amountMinor": 3000,
+    "currency": "EGP",
+    "category": "transport"
+   }
+  ]
+ },
+ {
+  "id": "v008",
+  "tag": "spec",
+  "text": "خضار وفاكهة ١٥٠ جنيه وقهوة ٤٥ جنيه وتاكسي ٣٠ جنيه",
+  "items": [
+   {
+    "amountMinor": 15000,
+    "currency": "EGP",
+    "category": "groceries"
+   },
+   {
+    "amountMinor": 4500,
+    "currency": "EGP",
+    "category": "dining"
+   },
+   {
+    "amountMinor": 3000,
+    "currency": "EGP",
+    "category": "transport"
+   }
+  ]
+ },
+ {
+  "id": "v009",
+  "tag": "spec",
+  "text": "اشتريت خضار وفاكهة بميت وخمسين جنيه وقهوة بخمسة واربعين وتاكسي بتلاتين",
+  "items": [
+   {
+    "amountMinor": 15000,
+    "currency": "EGP",
+    "category": "groceries"
+   },
+   {
+    "amountMinor": 4500,
+    "currency": "EGP",
+    "category": "dining"
+   },
+   {
+    "amountMinor": 3000,
+    "currency": "EGP",
+    "category": "transport"
+   }
+  ]
+ },
+ {
+  "id": "v010",
+  "tag": "spec",
+  "text": "دفعت ١٥٠ جنيه خضار وفاكهة و ٤٥ جنيه قهوة و ٣٠ جنيه تاكسي النهارده",
+  "items": [
+   {
+    "amountMinor": 15000,
+    "currency": "EGP",
+    "category": "groceries"
+   },
+   {
+    "amountMinor": 4500,
+    "currency": "EGP",
+    "category": "dining"
+   },
+   {
+    "amountMinor": 3000,
+    "currency": "EGP",
+    "category": "transport"
+   }
+  ]
+ },
+ {
+  "id": "v011",
+  "tag": "words",
+  "text": "دفعت اتنين جنيه قهوة",
+  "items": [
+   {
+    "amountMinor": 200,
+    "currency": "EGP",
+    "category": "dining"
+   }
+  ]
+ },
+ {
+  "id": "v012",
+  "tag": "words",
+  "text": "صرفت تلاتة جنيه على تاكسي",
+  "items": [
+   {
+    "amountMinor": 300,
+    "currency": "EGP",
+    "category": "transport"
+   }
+  ]
+ },
+ {
+  "id": "v013",
+  "tag": "words",
+  "text": "اشتريت خضار بـاربعة جنيه",
+  "items": [
+   {
+    "amountMinor": 400,
+    "currency": "EGP",
+    "category": "groceries"
+   }
+  ]
+ },
+ {
+  "id": "v014",
+  "tag": "words",
+  "text": "خمسة جنيه كشري",
+  "items": [
+   {
+    "amountMinor": 500,
+    "currency": "EGP",
+    "category": "dining"
+   }
+  ]
+ },
+ {
+  "id": "v015",
+  "tag": "words",
+  "text": "دفعت ستة فاتورة كهرباء",
+  "items": [
+   {
+    "amountMinor": 600,
+    "currency": "EGP",
+    "category": "bills"
+   }
+  ]
+ },
+ {
+  "id": "v016",
+  "tag": "words",
+  "text": "طلعت سبعة جنيه دوا",
+  "items": [
+   {
+    "amountMinor": 700,
+    "currency": "EGP",
+    "category": "health"
+   }
+  ]
+ },
+ {
+  "id": "v017",
+  "tag": "words",
+  "text": "دفعت تمانية جنيه قهوة",
+  "items": [
+   {
+    "amountMinor": 800,
+    "currency": "EGP",
+    "category": "dining"
+   }
+  ]
+ },
+ {
+  "id": "v018",
+  "tag": "words",
+  "text": "صرفت تسعة جنيه على تاكسي",
+  "items": [
+   {
+    "amountMinor": 900,
+    "currency": "EGP",
+    "category": "transport"
+   }
+  ]
+ },
+ {
+  "id": "v019",
+  "tag": "words",
+  "text": "اشتريت خضار بـعشرة جنيه",
+  "items": [
+   {
+    "amountMinor": 1000,
+    "currency": "EGP",
+    "category": "groceries"
+   }
+  ]
+ },
+ {
+  "id": "v020",
+  "tag": "words",
+  "text": "حداشر جنيه كشري",
+  "items": [
+   {
+    "amountMinor": 1100,
+    "currency": "EGP",
+    "category": "dining"
+   }
+  ]
+ },
+ {
+  "id": "v021",
+  "tag": "words",
+  "text": "دفعت اتناشر فاتورة كهرباء",
+  "items": [
+   {
+    "amountMinor": 1200,
+    "currency": "EGP",
+    "category": "bills"
+   }
+  ]
+ },
+ {
+  "id": "v022",
+  "tag": "words",
+  "text": "طلعت تلتاشر جنيه دوا",
+  "items": [
+   {
+    "amountMinor": 1300,
+    "currency": "EGP",
+    "category": "health"
+   }
+  ]
+ },
+ {
+  "id": "v023",
+  "tag": "words",
+  "text": "دفعت خمستاشر جنيه قهوة",
+  "items": [
+   {
+    "amountMinor": 1500,
+    "currency": "EGP",
+    "category": "dining"
+   }
+  ]
+ },
+ {
+  "id": "v024",
+  "tag": "words",
+  "text": "صرفت سبعتاشر جنيه على تاكسي",
+  "items": [
+   {
+    "amountMinor": 1700,
+    "currency": "EGP",
+    "category": "transport"
+   }
+  ]
+ },
+ {
+  "id": "v025",
+  "tag": "words",
+  "text": "اشتريت خضار بـتمنتاشر جنيه",
+  "items": [
+   {
+    "amountMinor": 1800,
+    "currency": "EGP",
+    "category": "groceries"
+   }
+  ]
+ },
+ {
+  "id": "v026",
+  "tag": "words",
+  "text": "تسعتاشر جنيه كشري",
+  "items": [
+   {
+    "amountMinor": 1900,
+    "currency": "EGP",
+    "category": "dining"
+   }
+  ]
+ },
+ {
+  "id": "v027",
+  "tag": "words",
+  "text": "دفعت عشرين فاتورة كهرباء",
+  "items": [
+   {
+    "amountMinor": 2000,
+    "currency": "EGP",
+    "category": "bills"
+   }
+  ]
+ },
+ {
+  "id": "v028",
+  "tag": "words",
+  "text": "طلعت خمسة وعشرين جنيه دوا",
+  "items": [
+   {
+    "amountMinor": 2500,
+    "currency": "EGP",
+    "category": "health"
+   }
+  ]
+ },
+ {
+  "id": "v029",
+  "tag": "words",
+  "text": "دفعت تلاتين جنيه قهوة",
+  "items": [
+   {
+    "amountMinor": 3000,
+    "currency": "EGP",
+    "category": "dining"
+   }
+  ]
+ },
+ {
+  "id": "v030",
+  "tag": "words",
+  "text": "صرفت خمسة وتلاتين جنيه على تاكسي",
+  "items": [
+   {
+    "amountMinor": 3500,
+    "currency": "EGP",
+    "category": "transport"
+   }
+  ]
+ },
+ {
+  "id": "v031",
+  "tag": "words",
+  "text": "اشتريت خضار بـاربعين جنيه",
+  "items": [
+   {
+    "amountMinor": 4000,
+    "currency": "EGP",
+    "category": "groceries"
+   }
+  ]
+ },
+ {
+  "id": "v032",
+  "tag": "words",
+  "text": "خمسين جنيه كشري",
+  "items": [
+   {
+    "amountMinor": 5000,
+    "currency": "EGP",
+    "category": "dining"
+   }
+  ]
+ },
+ {
+  "id": "v033",
+  "tag": "words",
+  "text": "دفعت ستين فاتورة كهرباء",
+  "items": [
+   {
+    "amountMinor": 6000,
+    "currency": "EGP",
+    "category": "bills"
+   }
+  ]
+ },
+ {
+  "id": "v034",
+  "tag": "words",
+  "text": "طلعت سبعين جنيه دوا",
+  "items": [
+   {
+    "amountMinor": 7000,
+    "currency": "EGP",
+    "category": "health"
+   }
+  ]
+ },
+ {
+  "id": "v035",
+  "tag": "words",
+  "text": "دفعت تمانين جنيه قهوة",
+  "items": [
+   {
+    "amountMinor": 8000,
+    "currency": "EGP",
+    "category": "dining"
+   }
+  ]
+ },
+ {
+  "id": "v036",
+  "tag": "words",
+  "text": "صرفت تسعين جنيه على تاكسي",
+  "items": [
+   {
+    "amountMinor": 9000,
+    "currency": "EGP",
+    "category": "transport"
+   }
+  ]
+ },
+ {
+  "id": "v037",
+  "tag": "words",
+  "text": "اشتريت خضار بـميه جنيه",
+  "items": [
+   {
+    "amountMinor": 10000,
+    "currency": "EGP",
+    "category": "groceries"
+   }
+  ]
+ },
+ {
+  "id": "v038",
+  "tag": "words",
+  "text": "ميت جنيه كشري",
+  "items": [
+   {
+    "amountMinor": 10000,
+    "currency": "EGP",
+    "category": "dining"
+   }
+  ]
+ },
+ {
+  "id": "v039",
+  "tag": "words",
+  "text": "دفعت مية فاتورة كهرباء",
+  "items": [
+   {
+    "amountMinor": 10000,
+    "currency": "EGP",
+    "category": "bills"
+   }
+  ]
+ },
+ {
+  "id": "v040",
+  "tag": "words",
+  "text": "طلعت ميت وخمسين جنيه دوا",
+  "items": [
+   {
+    "amountMinor": 15000,
+    "currency": "EGP",
+    "category": "health"
+   }
+  ]
+ },
+ {
+  "id": "v041",
+  "tag": "words",
+  "text": "دفعت ميت وخمسة وعشرين جنيه قهوة",
+  "items": [
+   {
+    "amountMinor": 12500,
+    "currency": "EGP",
+    "category": "dining"
+   }
+  ]
+ },
+ {
+  "id": "v042",
+  "tag": "words",
+  "text": "صرفت ميتين جنيه على تاكسي",
+  "items": [
+   {
+    "amountMinor": 20000,
+    "currency": "EGP",
+    "category": "transport"
+   }
+  ]
+ },
+ {
+  "id": "v043",
+  "tag": "words",
+  "text": "اشتريت خضار بـميتين وخمسين جنيه",
+  "items": [
+   {
+    "amountMinor": 25000,
+    "currency": "EGP",
+    "category": "groceries"
+   }
+  ]
+ },
+ {
+  "id": "v044",
+  "tag": "words",
+  "text": "تلتميه جنيه كشري",
+  "items": [
+   {
+    "amountMinor": 30000,
+    "currency": "EGP",
+    "category": "dining"
+   }
+  ]
+ },
+ {
+  "id": "v045",
+  "tag": "words",
+  "text": "دفعت تلاتميه فاتورة كهرباء",
+  "items": [
+   {
+    "amountMinor": 30000,
+    "currency": "EGP",
+    "category": "bills"
+   }
+  ]
+ },
+ {
+  "id": "v046",
+  "tag": "words",
+  "text": "طلعت اربعميه جنيه دوا",
+  "items": [
+   {
+    "amountMinor": 40000,
+    "currency": "EGP",
+    "category": "health"
+   }
+  ]
+ },
+ {
+  "id": "v047",
+  "tag": "words",
+  "text": "دفعت خمسميه جنيه قهوة",
+  "items": [
+   {
+    "amountMinor": 50000,
+    "currency": "EGP",
+    "category": "dining"
+   }
+  ]
+ },
+ {
+  "id": "v048",
+  "tag": "words",
+  "text": "صرفت ستميه جنيه على تاكسي",
+  "items": [
+   {
+    "amountMinor": 60000,
+    "currency": "EGP",
+    "category": "transport"
+   }
+  ]
+ },
+ {
+  "id": "v049",
+  "tag": "words",
+  "text": "اشتريت خضار بـسبعميه جنيه",
+  "items": [
+   {
+    "amountMinor": 70000,
+    "currency": "EGP",
+    "category": "groceries"
+   }
+  ]
+ },
+ {
+  "id": "v050",
+  "tag": "words",
+  "text": "تمنميه جنيه كشري",
+  "items": [
+   {
+    "amountMinor": 80000,
+    "currency": "EGP",
+    "category": "dining"
+   }
+  ]
+ },
+ {
+  "id": "v051",
+  "tag": "words",
+  "text": "دفعت تسعميه فاتورة كهرباء",
+  "items": [
+   {
+    "amountMinor": 90000,
+    "currency": "EGP",
+    "category": "bills"
+   }
+  ]
+ },
+ {
+  "id": "v052",
+  "tag": "words",
+  "text": "طلعت تلتميه وخمسة وسبعين جنيه دوا",
+  "items": [
+   {
+    "amountMinor": 37500,
+    "currency": "EGP",
+    "category": "health"
+   }
+  ]
+ },
+ {
+  "id": "v053",
+  "tag": "words",
+  "text": "دفعت تلات ميه جنيه قهوة",
+  "items": [
+   {
+    "amountMinor": 30000,
+    "currency": "EGP",
+    "category": "dining"
+   }
+  ]
+ },
+ {
+  "id": "v054",
+  "tag": "words",
+  "text": "صرفت خمس ميه جنيه على تاكسي",
+  "items": [
+   {
+    "amountMinor": 50000,
+    "currency": "EGP",
+    "category": "transport"
+   }
+  ]
+ },
+ {
+  "id": "v055",
+  "tag": "words",
+  "text": "اشتريت خضار بـالف جنيه",
+  "items": [
+   {
+    "amountMinor": 100000,
+    "currency": "EGP",
+    "category": "groceries"
+   }
+  ]
+ },
+ {
+  "id": "v056",
+  "tag": "words",
+  "text": "ألف جنيه كشري",
+  "items": [
+   {
+    "amountMinor": 100000,
+    "currency": "EGP",
+    "category": "dining"
+   }
+  ]
+ },
+ {
+  "id": "v057",
+  "tag": "words",
+  "text": "دفعت الفين فاتورة كهرباء",
+  "items": [
+   {
+    "amountMinor": 200000,
+    "currency": "EGP",
+    "category": "bills"
+   }
+  ]
+ },
+ {
+  "id": "v058",
+  "tag": "words",
+  "text": "طلعت الف وخمسميه جنيه دوا",
+  "items": [
+   {
+    "amountMinor": 150000,
+    "currency": "EGP",
+    "category": "health"
+   }
+  ]
+ },
+ {
+  "id": "v059",
+  "tag": "words",
+  "text": "دفعت الف ونص جنيه قهوة",
+  "items": [
+   {
+    "amountMinor": 150000,
+    "currency": "EGP",
+    "category": "dining"
+   }
+  ]
+ },
+ {
+  "id": "v060",
+  "tag": "words",
+  "text": "صرفت الف وربع جنيه على تاكسي",
+  "items": [
+   {
+    "amountMinor": 125000,
+    "currency": "EGP",
+    "category": "transport"
+   }
+  ]
+ },
+ {
+  "id": "v061",
+  "tag": "words",
+  "text": "اشتريت خضار بـألفين وخمسميه جنيه",
+  "items": [
+   {
+    "amountMinor": 250000,
+    "currency": "EGP",
+    "category": "groceries"
+   }
+  ]
+ },
+ {
+  "id": "v062",
+  "tag": "words",
+  "text": "تلات تلاف جنيه كشري",
+  "items": [
+   {
+    "amountMinor": 300000,
+    "currency": "EGP",
+    "category": "dining"
+   }
+  ]
+ },
+ {
+  "id": "v063",
+  "tag": "words",
+  "text": "دفعت خمس تلاف فاتورة كهرباء",
+  "items": [
+   {
+    "amountMinor": 500000,
+    "currency": "EGP",
+    "category": "bills"
+   }
+  ]
+ },
+ {
+  "id": "v064",
+  "tag": "words",
+  "text": "طلعت عشر تلاف جنيه دوا",
+  "items": [
+   {
+    "amountMinor": 1000000,
+    "currency": "EGP",
+    "category": "health"
+   }
+  ]
+ },
+ {
+  "id": "v065",
+  "tag": "words",
+  "text": "دفعت اتناشر الف جنيه قهوة",
+  "items": [
+   {
+    "amountMinor": 1200000,
+    "currency": "EGP",
+    "category": "dining"
+   }
+  ]
+ },
+ {
+  "id": "v066",
+  "tag": "words",
+  "text": "صرفت خمسين الف جنيه على تاكسي",
+  "items": [
+   {
+    "amountMinor": 5000000,
+    "currency": "EGP",
+    "category": "transport"
+   }
+  ]
+ },
+ {
+  "id": "v067",
+  "tag": "words",
+  "text": "اشتريت خضار بـميت الف جنيه",
+  "items": [
+   {
+    "amountMinor": 10000000,
+    "currency": "EGP",
+    "category": "groceries"
+   }
+  ]
+ },
+ {
+  "id": "v068",
+  "tag": "words",
+  "text": "مليون جنيه كشري",
+  "items": [
+   {
+    "amountMinor": 100000000,
+    "currency": "EGP",
+    "category": "dining"
+   }
+  ]
+ },
+ {
+  "id": "v069",
+  "tag": "words",
+  "text": "دفعت تلات الاف وميتين فاتورة كهرباء",
+  "items": [
+   {
+    "amountMinor": 320000,
+    "currency": "EGP",
+    "category": "bills"
+   }
+  ]
+ },
+ {
+  "id": "v070",
+  "tag": "fraction",
+  "text": "دفعت ميت ونص قهوة",
+  "items": [
+   {
+    "amountMinor": 15000,
+    "currency": "EGP",
+    "category": "dining"
+   }
+  ]
+ },
+ {
+  "id": "v071",
+  "tag": "fraction",
+  "text": "دفعت عشرة ونص جنيه تاكسي",
+  "items": [
+   {
+    "amountMinor": 1050,
+    "currency": "EGP",
+    "category": "transport"
+   }
+  ]
+ },
+ {
+  "id": "v072",
+  "tag": "fraction",
+  "text": "دفعت تلاتة ونص جنيه شاي",
+  "items": [
+   {
+    "amountMinor": 350,
+    "currency": "EGP",
+    "category": "dining"
+   }
+  ]
+ },
+ {
+  "id": "v073",
+  "tag": "fraction",
+  "text": "دفعت ميتين ونص جنيه تاكسي",
+  "items": [
+   {
+    "amountMinor": 25000,
+    "currency": "EGP",
+    "category": "transport"
+   }
+  ]
+ },
+ {
+  "id": "v074",
+  "tag": "fraction",
+  "text": "دفعت خمسين ونص جنيه كهرباء",
+  "items": [
+   {
+    "amountMinor": 5050,
+    "currency": "EGP",
+    "category": "bills"
+   }
+  ]
+ },
+ {
+  "id": "v075",
+  "tag": "fraction",
+  "text": "دفعت نص جنيه عيش",
+  "items": [
+   {
+    "amountMinor": 50,
+    "currency": "EGP",
+    "category": "groceries"
+   }
+  ]
+ },
+ {
+  "id": "v076",
+  "tag": "fraction",
+  "text": "دفعت ربع جنيه عيش",
+  "items": [
+   {
+    "amountMinor": 25,
+    "currency": "EGP",
+    "category": "groceries"
+   }
+  ]
+ },
+ {
+  "id": "v077",
+  "tag": "fraction",
+  "text": "دفعت جنيه ونص عيش",
+  "items": [
+   {
+    "amountMinor": 150,
+    "currency": "EGP",
+    "category": "groceries"
+   }
+  ]
+ },
+ {
+  "id": "v078",
+  "tag": "fraction",
+  "text": "دفعت جنيه وربع قهوة",
+  "items": [
+   {
+    "amountMinor": 125,
+    "currency": "EGP",
+    "category": "dining"
+   }
+  ]
+ },
+ {
+  "id": "v079",
+  "tag": "fraction",
+  "text": "دفعت جنيهين تاكسي",
+  "items": [
+   {
+    "amountMinor": 200,
+    "currency": "EGP",
+    "category": "transport"
+   }
+  ]
+ },
+ {
+  "id": "v080",
+  "tag": "fraction",
+  "text": "دفعت خمسين قرش قهوة",
+  "items": [
+   {
+    "amountMinor": 50,
+    "currency": "EGP",
+    "category": "dining"
+   }
+  ]
+ },
+ {
+  "id": "v081",
+  "tag": "fraction",
+  "text": "دفعت خمسة جنيه وخمسين قرش قهوة",
+  "items": [
+   {
+    "amountMinor": 550,
+    "currency": "EGP",
+    "category": "dining"
+   }
+  ]
+ },
+ {
+  "id": "v082",
+  "tag": "fraction",
+  "text": "دفعت تلت جنيه شاي",
+  "items": [
+   {
+    "amountMinor": 33,
+    "currency": "EGP",
+    "category": "dining"
+   }
+  ]
+ },
+ {
+  "id": "v083",
+  "tag": "fraction",
+  "text": "اشتريت لحمة بـ ربع الف جنيه",
+  "items": [
+   {
+    "amountMinor": 25000,
+    "currency": "EGP",
+    "category": "groceries"
+   }
+  ]
+ },
+ {
+  "id": "v084",
+  "tag": "fraction",
+  "text": "دفعت نص ميت جنيه لحمة",
+  "items": [
+   {
+    "amountMinor": 5000,
+    "currency": "EGP",
+    "category": "groceries"
+   }
+  ]
+ },
+ {
+  "id": "v085",
+  "tag": "fraction",
+  "text": "دفعت تلاتة جنيه ونص لحمة",
+  "items": [
+   {
+    "amountMinor": 350,
+    "currency": "EGP",
+    "category": "groceries"
+   }
+  ]
+ },
+ {
+  "id": "v086",
+  "tag": "fraction",
+  "text": "دفعت نص جنيه عيش",
+  "items": [
+   {
+    "amountMinor": 50,
+    "currency": "EGP",
+    "category": "groceries"
+   }
+  ]
+ },
+ {
+  "id": "v087",
+  "tag": "fraction",
+  "text": "دفعت ربع جنيه عيش",
+  "items": [
+   {
+    "amountMinor": 25,
+    "currency": "EGP",
+    "category": "groceries"
+   }
+  ]
+ },
+ {
+  "id": "v088",
+  "tag": "digits",
+  "text": "دفعت ٥٠ جنيه قهوة",
+  "items": [
+   {
+    "amountMinor": 5000,
+    "currency": "EGP",
+    "category": "dining"
+   }
+  ]
+ },
+ {
+  "id": "v089",
+  "tag": "digits",
+  "text": "دفعت ١٢٫٥ جنيه شاي",
+  "items": [
+   {
+    "amountMinor": 1250,
+    "currency": "EGP",
+    "category": "dining"
+   }
+  ]
+ },
+ {
+  "id": "v090",
+  "tag": "digits",
+  "text": "دفعت 12.5 جنيه شاي",
+  "items": [
+   {
+    "amountMinor": 1250,
+    "currency": "EGP",
+    "category": "dining"
+   }
+  ]
+ },
+ {
+  "id": "v091",
+  "tag": "digits",
+  "text": "دفعت ١٬٢٥٠ جنيه كهرباء",
+  "items": [
+   {
+    "amountMinor": 125000,
+    "currency": "EGP",
+    "category": "bills"
+   }
+  ]
+ },
+ {
+  "id": "v092",
+  "tag": "digits",
+  "text": "دفعت 1,250 جنيه كهرباء",
+  "items": [
+   {
+    "amountMinor": 125000,
+    "currency": "EGP",
+    "category": "bills"
+   }
+  ]
+ },
+ {
+  "id": "v093",
+  "tag": "digits",
+  "text": "دفعت ٢ الف جنيه كهرباء",
+  "items": [
+   {
+    "amountMinor": 200000,
+    "currency": "EGP",
+    "category": "bills"
+   }
+  ]
+ },
+ {
+  "id": "v094",
+  "tag": "digits",
+  "text": "دفعت 5k جنيه لبس",
+  "items": [
+   {
+    "amountMinor": 500000,
+    "currency": "EGP",
+    "category": "shopping"
+   }
+  ]
+ },
+ {
+  "id": "v095",
+  "tag": "digits",
+  "text": "دفعت 2 مليون جنيه لبس",
+  "items": [
+   {
+    "amountMinor": 200000000,
+    "currency": "EGP",
+    "category": "shopping"
+   }
+  ]
+ },
+ {
+  "id": "v096",
+  "tag": "digits",
+  "text": "دفعت 150جنيه قهوة",
+  "items": [
+   {
+    "amountMinor": 15000,
+    "currency": "EGP",
+    "category": "dining"
+   }
+  ]
+ },
+ {
+  "id": "v097",
+  "tag": "digits",
+  "text": "دفعت 150ج قهوة",
+  "items": [
+   {
+    "amountMinor": 15000,
+    "currency": "EGP",
+    "category": "dining"
+   }
+  ]
+ },
+ {
+  "id": "v098",
+  "tag": "digits",
+  "text": "دفعت بـ٣٥٠ جنيه لبس",
+  "items": [
+   {
+    "amountMinor": 35000,
+    "currency": "EGP",
+    "category": "shopping"
+   }
+  ]
+ },
+ {
+  "id": "v099",
+  "tag": "digits",
+  "text": "دفعت ب ٣٥٠ جنيه لبس",
+  "items": [
+   {
+    "amountMinor": 35000,
+    "currency": "EGP",
+    "category": "shopping"
+   }
+  ]
+ },
+ {
+  "id": "v100",
+  "tag": "digits",
+  "text": "دفعت ٠٫٥ جنيه عيش",
+  "items": [
+   {
+    "amountMinor": 50,
+    "currency": "EGP",
+    "category": "groceries"
+   }
+  ]
+ },
+ {
+  "id": "v101",
+  "tag": "digits",
+  "text": "دفعت 100 ونص جنيه شاي",
+  "items": [
+   {
+    "amountMinor": 15000,
+    "currency": "EGP",
+    "category": "dining"
+   }
+  ]
+ },
+ {
+  "id": "v102",
+  "tag": "multi",
+  "text": "اشتريت كشري بـعشرين ج وانترنت بـتلاتين جنيه وصيدلية بـخمسين جنيه",
+  "items": [
+   {
+    "amountMinor": 2000,
+    "currency": "EGP",
+    "category": "dining"
+   },
+   {
+    "amountMinor": 3000,
+    "currency": "EGP",
+    "category": "bills"
+   },
+   {
+    "amountMinor": 5000,
+    "currency": "EGP",
+    "category": "health"
+   }
+  ]
+ },
+ {
+  "id": "v103",
+  "tag": "multi",
+  "text": "دوا 90 ج وبيتزا ٣٥ جنيه وكهرباء 45 جنيه",
+  "items": [
+   {
+    "amountMinor": 9000,
+    "currency": "EGP",
+    "category": "health"
+   },
+   {
+    "amountMinor": 3500,
+    "currency": "EGP",
+    "category": "dining"
+   },
+   {
+    "amountMinor": 4500,
+    "currency": "EGP",
+    "category": "bills"
+   }
+  ]
+ },
+ {
+  "id": "v104",
+  "tag": "multi",
+  "text": "لبس 250 وغدا ٦٠ ج وقهوة ٤٥ جنيه",
+  "items": [
+   {
+    "amountMinor": 25000,
+    "currency": "EGP",
+    "category": "shopping"
+   },
+   {
+    "amountMinor": 6000,
+    "currency": "EGP",
+    "category": "dining"
+   },
+   {
+    "amountMinor": 4500,
+    "currency": "EGP",
+    "category": "dining"
+   }
+  ]
+ },
+ {
+  "id": "v105",
+  "tag": "multi",
+  "text": "بنزين 150 جنيه وجزمة 30 جنيه",
+  "items": [
+   {
+    "amountMinor": 15000,
+    "currency": "EGP",
+    "category": "transport"
+   },
+   {
+    "amountMinor": 3000,
+    "currency": "EGP",
+    "category": "shopping"
+   }
+  ]
+ },
+ {
+  "id": "v106",
+  "tag": "multi",
+  "text": "صرفت ١٥ انترنت و ٣٥ جنيه مترو و ١٥٠ دكتور",
+  "items": [
+   {
+    "amountMinor": 1500,
+    "currency": "EGP",
+    "category": "bills"
+   },
+   {
+    "amountMinor": 3500,
+    "currency": "EGP",
+    "category": "transport"
+   },
+   {
+    "amountMinor": 15000,
+    "currency": "EGP",
+    "category": "health"
+   }
+  ]
+ },
+ {
+  "id": "v107",
+  "tag": "multi",
+  "text": "بيتزا ١٥٠ جنيه وشحن ٩٠ جنيه وخضار 200 جنيه وسينما ١٢٠ ج",
+  "items": [
+   {
+    "amountMinor": 15000,
+    "currency": "EGP",
+    "category": "dining"
+   },
+   {
+    "amountMinor": 9000,
+    "currency": "EGP",
+    "category": "bills"
+   },
+   {
+    "amountMinor": 20000,
+    "currency": "EGP",
+    "category": "groceries"
+   },
+   {
+    "amountMinor": 12000,
+    "currency": "EGP",
+    "category": "entertainment"
+   }
+  ]
+ },
+ {
+  "id": "v108",
+  "tag": "multi",
+  "text": "قهوة ميتين وخمسين ومترو خمسة واربعين وشاي خمسة وسبعين جنيه وبيتزا ستين جنيه",
+  "items": [
+   {
+    "amountMinor": 25000,
+    "currency": "EGP",
+    "category": "dining"
+   },
+   {
+    "amountMinor": 4500,
+    "currency": "EGP",
+    "category": "transport"
+   },
+   {
+    "amountMinor": 7500,
+    "currency": "EGP",
+    "category": "dining"
+   },
+   {
+    "amountMinor": 6000,
+    "currency": "EGP",
+    "category": "dining"
+   }
+  ]
+ },
+ {
+  "id": "v109",
+  "tag": "multi",
+  "text": "دفعت عشرين جنيه كهرباء و تلاتين سينما و تسعين فراخ",
+  "items": [
+   {
+    "amountMinor": 2000,
+    "currency": "EGP",
+    "category": "bills"
+   },
+   {
+    "amountMinor": 3000,
+    "currency": "EGP",
+    "category": "entertainment"
+   },
+   {
+    "amountMinor": 9000,
+    "currency": "EGP",
+    "category": "groceries"
+   }
+  ]
+ },
+ {
+  "id": "v110",
+  "tag": "multi",
+  "text": "شاي عشرين جنيه وجزمة ميتين وخمسين جنيه",
+  "items": [
+   {
+    "amountMinor": 2000,
+    "currency": "EGP",
+    "category": "dining"
+   },
+   {
+    "amountMinor": 25000,
+    "currency": "EGP",
+    "category": "shopping"
+   }
+  ]
+ },
+ {
+  "id": "v111",
+  "tag": "multi",
+  "text": "عيش ٣٠ ج وشاي 150 جنيه",
+  "items": [
+   {
+    "amountMinor": 3000,
+    "currency": "EGP",
+    "category": "groceries"
+   },
+   {
+    "amountMinor": 15000,
+    "currency": "EGP",
+    "category": "dining"
+   }
+  ]
+ },
+ {
+  "id": "v112",
+  "tag": "multi",
+  "text": "صرفت تلاتين كشري و ميت جنيه قهوة و خمسة وتلاتين جنيه لحمة",
+  "items": [
+   {
+    "amountMinor": 3000,
+    "currency": "EGP",
+    "category": "dining"
+   },
+   {
+    "amountMinor": 10000,
+    "currency": "EGP",
+    "category": "dining"
+   },
+   {
+    "amountMinor": 3500,
+    "currency": "EGP",
+    "category": "groceries"
+   }
+  ]
+ },
+ {
+  "id": "v113",
+  "tag": "multi",
+  "text": "اشتريت كشري بـستين وبيتزا بـميت جنيه ولحمة بـستين جنيه",
+  "items": [
+   {
+    "amountMinor": 6000,
+    "currency": "EGP",
+    "category": "dining"
+   },
+   {
+    "amountMinor": 10000,
+    "currency": "EGP",
+    "category": "dining"
+   },
+   {
+    "amountMinor": 6000,
+    "currency": "EGP",
+    "category": "groceries"
+   }
+  ]
+ },
+ {
+  "id": "v114",
+  "tag": "multi",
+  "text": "دكتور ٣٥ جنيه ومترو 50 ج",
+  "items": [
+   {
+    "amountMinor": 3500,
+    "currency": "EGP",
+    "category": "health"
+   },
+   {
+    "amountMinor": 5000,
+    "currency": "EGP",
+    "category": "transport"
+   }
+  ]
+ },
+ {
+  "id": "v115",
+  "tag": "multi",
+  "text": "دكتور ٢٠٠ جنيه وجزمة ٤٥ جنيه ولبس ٢٥٠ ج ودوا 30 ج",
+  "items": [
+   {
+    "amountMinor": 20000,
+    "currency": "EGP",
+    "category": "health"
+   },
+   {
+    "amountMinor": 4500,
+    "currency": "EGP",
+    "category": "shopping"
+   },
+   {
+    "amountMinor": 25000,
+    "currency": "EGP",
+    "category": "shopping"
+   },
+   {
+    "amountMinor": 3000,
+    "currency": "EGP",
+    "category": "health"
+   }
+  ]
+ },
+ {
+  "id": "v116",
+  "tag": "multi",
+  "text": "اشتريت عشرين جنيه تاكسي و خمسة وتلاتين جنيه لبس",
+  "items": [
+   {
+    "amountMinor": 2000,
+    "currency": "EGP",
+    "category": "transport"
+   },
+   {
+    "amountMinor": 3500,
+    "currency": "EGP",
+    "category": "shopping"
+   }
+  ]
+ },
+ {
+  "id": "v117",
+  "tag": "multi",
+  "text": "اشتريت دوا بـ٢٥٠ جنيه ومترو بـ١٥ جنيه وفراخ بـ30 جنيه ودكتور بـ90 ج",
+  "items": [
+   {
+    "amountMinor": 25000,
+    "currency": "EGP",
+    "category": "health"
+   },
+   {
+    "amountMinor": 1500,
+    "currency": "EGP",
+    "category": "transport"
+   },
+   {
+    "amountMinor": 3000,
+    "currency": "EGP",
+    "category": "groceries"
+   },
+   {
+    "amountMinor": 9000,
+    "currency": "EGP",
+    "category": "health"
+   }
+  ]
+ },
+ {
+  "id": "v118",
+  "tag": "multi",
+  "text": "صرفت ميت وعشرين لحمة و تسعين ج مترو و ستين سينما",
+  "items": [
+   {
+    "amountMinor": 12000,
+    "currency": "EGP",
+    "category": "groceries"
+   },
+   {
+    "amountMinor": 9000,
+    "currency": "EGP",
+    "category": "transport"
+   },
+   {
+    "amountMinor": 6000,
+    "currency": "EGP",
+    "category": "entertainment"
+   }
+  ]
+ },
+ {
+  "id": "v119",
+  "tag": "multi",
+  "text": "اشتريت 50 جنيه شاي و 250 ج سينما",
+  "items": [
+   {
+    "amountMinor": 5000,
+    "currency": "EGP",
+    "category": "dining"
+   },
+   {
+    "amountMinor": 25000,
+    "currency": "EGP",
+    "category": "entertainment"
+   }
+  ]
+ },
+ {
+  "id": "v120",
+  "tag": "multi",
+  "text": "لبس ميت جنيه واوبر ميت وعشرين جنيه وكهرباء ميتين ج وجزمة خمسة وسبعين جنيه",
+  "items": [
+   {
+    "amountMinor": 10000,
+    "currency": "EGP",
+    "category": "shopping"
+   },
+   {
+    "amountMinor": 12000,
+    "currency": "EGP",
+    "category": "transport"
+   },
+   {
+    "amountMinor": 20000,
+    "currency": "EGP",
+    "category": "bills"
+   },
+   {
+    "amountMinor": 7500,
+    "currency": "EGP",
+    "category": "shopping"
+   }
+  ]
+ },
+ {
+  "id": "v121",
+  "tag": "multi",
+  "text": "طلعت تلاتين ج بيتزا و خمسة واربعين ج فراخ و تسعين دكتور",
+  "items": [
+   {
+    "amountMinor": 3000,
+    "currency": "EGP",
+    "category": "dining"
+   },
+   {
+    "amountMinor": 4500,
+    "currency": "EGP",
+    "category": "groceries"
+   },
+   {
+    "amountMinor": 9000,
+    "currency": "EGP",
+    "category": "health"
+   }
+  ]
+ },
+ {
+  "id": "v122",
+  "tag": "multi",
+  "text": "دكتور تلاتين ج ودوا ستين جنيه وبيتزا خمسة وسبعين جنيه",
+  "items": [
+   {
+    "amountMinor": 3000,
+    "currency": "EGP",
+    "category": "health"
+   },
+   {
+    "amountMinor": 6000,
+    "currency": "EGP",
+    "category": "health"
+   },
+   {
+    "amountMinor": 7500,
+    "currency": "EGP",
+    "category": "dining"
+   }
+  ]
+ },
+ {
+  "id": "v123",
+  "tag": "multi",
+  "text": "دفعت ٣٥ جنيه بنزين و ٢٠٠ جنيه لبس و ٣٥ جنيه فراخ و 75 جنيه بيتزا",
+  "items": [
+   {
+    "amountMinor": 3500,
+    "currency": "EGP",
+    "category": "transport"
+   },
+   {
+    "amountMinor": 20000,
+    "currency": "EGP",
+    "category": "shopping"
+   },
+   {
+    "amountMinor": 3500,
+    "currency": "EGP",
+    "category": "groceries"
+   },
+   {
+    "amountMinor": 7500,
+    "currency": "EGP",
+    "category": "dining"
+   }
+  ]
+ },
+ {
+  "id": "v124",
+  "tag": "multi",
+  "text": "اشتريت غدا بـخمسين وصيدلية بـميت جنيه",
+  "items": [
+   {
+    "amountMinor": 5000,
+    "currency": "EGP",
+    "category": "dining"
+   },
+   {
+    "amountMinor": 10000,
+    "currency": "EGP",
+    "category": "health"
+   }
+  ]
+ },
+ {
+  "id": "v125",
+  "tag": "multi",
+  "text": "النهارده دفعت 30 ج انترنت و 120 جنيه صيدلية و ١٥٠ جنيه فراخ",
+  "items": [
+   {
+    "amountMinor": 3000,
+    "currency": "EGP",
+    "category": "bills"
+   },
+   {
+    "amountMinor": 12000,
+    "currency": "EGP",
+    "category": "health"
+   },
+   {
+    "amountMinor": 15000,
+    "currency": "EGP",
+    "category": "groceries"
+   }
+  ]
+ },
+ {
+  "id": "v126",
+  "tag": "multi",
+  "text": "لبس ١٠٠ جنيه وشاي 250",
+  "items": [
+   {
+    "amountMinor": 10000,
+    "currency": "EGP",
+    "category": "shopping"
+   },
+   {
+    "amountMinor": 25000,
+    "currency": "EGP",
+    "category": "dining"
+   }
+  ]
+ },
+ {
+  "id": "v127",
+  "tag": "multi",
+  "text": "اشتريت غدا بـميتين جنيه وبنزين بـخمستاشر وكشري بـميت",
+  "items": [
+   {
+    "amountMinor": 20000,
+    "currency": "EGP",
+    "category": "dining"
+   },
+   {
+    "amountMinor": 1500,
+    "currency": "EGP",
+    "category": "transport"
+   },
+   {
+    "amountMinor": 10000,
+    "currency": "EGP",
+    "category": "dining"
+   }
+  ]
+ },
+ {
+  "id": "v128",
+  "tag": "multi",
+  "text": "صرفت ميت وعشرين جنيه شاي و تسعين جنيه قهوة و خمسين ج لبس",
+  "items": [
+   {
+    "amountMinor": 12000,
+    "currency": "EGP",
+    "category": "dining"
+   },
+   {
+    "amountMinor": 9000,
+    "currency": "EGP",
+    "category": "dining"
+   },
+   {
+    "amountMinor": 5000,
+    "currency": "EGP",
+    "category": "shopping"
+   }
+  ]
+ },
+ {
+  "id": "v129",
+  "tag": "multi",
+  "text": "طلعت عشرين ج مترو و خمسة وسبعين ج بنزين",
+  "items": [
+   {
+    "amountMinor": 2000,
+    "currency": "EGP",
+    "category": "transport"
+   },
+   {
+    "amountMinor": 7500,
+    "currency": "EGP",
+    "category": "transport"
+   }
+  ]
+ },
+ {
+  "id": "v130",
+  "tag": "multi",
+  "text": "فراخ ١٥٠ جنيه ولحمة 75 جنيه",
+  "items": [
+   {
+    "amountMinor": 15000,
+    "currency": "EGP",
+    "category": "groceries"
+   },
+   {
+    "amountMinor": 7500,
+    "currency": "EGP",
+    "category": "groceries"
+   }
+  ]
+ },
+ {
+  "id": "v131",
+  "tag": "multi",
+  "text": "اوبر ستين جنيه وصيدلية ميتين جنيه",
+  "items": [
+   {
+    "amountMinor": 6000,
+    "currency": "EGP",
+    "category": "transport"
+   },
+   {
+    "amountMinor": 20000,
+    "currency": "EGP",
+    "category": "health"
+   }
+  ]
+ },
+ {
+  "id": "v132",
+  "tag": "multi",
+  "text": "اشتريت ٣٠ ج بنزين و ٧٥ ج اوبر و 35 شاي",
+  "items": [
+   {
+    "amountMinor": 3000,
+    "currency": "EGP",
+    "category": "transport"
+   },
+   {
+    "amountMinor": 7500,
+    "currency": "EGP",
+    "category": "transport"
+   },
+   {
+    "amountMinor": 3500,
+    "currency": "EGP",
+    "category": "dining"
+   }
+  ]
+ },
+ {
+  "id": "v133",
+  "tag": "multi",
+  "text": "لبس ٣٥ وكهرباء 45 ج",
+  "items": [
+   {
+    "amountMinor": 3500,
+    "currency": "EGP",
+    "category": "shopping"
+   },
+   {
+    "amountMinor": 4500,
+    "currency": "EGP",
+    "category": "bills"
+   }
+  ]
+ },
+ {
+  "id": "v134",
+  "tag": "multi",
+  "text": "قهوة ميت جنيه وكهرباء تلاتين ج",
+  "items": [
+   {
+    "amountMinor": 10000,
+    "currency": "EGP",
+    "category": "dining"
+   },
+   {
+    "amountMinor": 3000,
+    "currency": "EGP",
+    "category": "bills"
+   }
+  ]
+ },
+ {
+  "id": "v135",
+  "tag": "multi",
+  "text": "اشتريت اوبر بـ250 جنيه وعيش بـ30 جنيه وانترنت بـ75 وغدا بـ٢٥٠ جنيه",
+  "items": [
+   {
+    "amountMinor": 25000,
+    "currency": "EGP",
+    "category": "transport"
+   },
+   {
+    "amountMinor": 3000,
+    "currency": "EGP",
+    "category": "groceries"
+   },
+   {
+    "amountMinor": 7500,
+    "currency": "EGP",
+    "category": "bills"
+   },
+   {
+    "amountMinor": 25000,
+    "currency": "EGP",
+    "category": "dining"
+   }
+  ]
+ },
+ {
+  "id": "v136",
+  "tag": "multi",
+  "text": "النهارده دفعت ١٠٠ ج غدا و ٢٠٠ جزمة",
+  "items": [
+   {
+    "amountMinor": 10000,
+    "currency": "EGP",
+    "category": "dining"
+   },
+   {
+    "amountMinor": 20000,
+    "currency": "EGP",
+    "category": "shopping"
+   }
+  ]
+ },
+ {
+  "id": "v137",
+  "tag": "multi",
+  "text": "بنزين 50 ج ولحمة 250 جنيه وكشري 250",
+  "items": [
+   {
+    "amountMinor": 5000,
+    "currency": "EGP",
+    "category": "transport"
+   },
+   {
+    "amountMinor": 25000,
+    "currency": "EGP",
+    "category": "groceries"
+   },
+   {
+    "amountMinor": 25000,
+    "currency": "EGP",
+    "category": "dining"
+   }
+  ]
+ },
+ {
+  "id": "v138",
+  "tag": "multi",
+  "text": "مترو ٢٥٠ جنيه وجزمة ١٢٠ جنيه",
+  "items": [
+   {
+    "amountMinor": 25000,
+    "currency": "EGP",
+    "category": "transport"
+   },
+   {
+    "amountMinor": 12000,
+    "currency": "EGP",
+    "category": "shopping"
+   }
+  ]
+ },
+ {
+  "id": "v139",
+  "tag": "multi",
+  "text": "طلعت 150 جنيه عيش و 90 ج شاي",
+  "items": [
+   {
+    "amountMinor": 15000,
+    "currency": "EGP",
+    "category": "groceries"
+   },
+   {
+    "amountMinor": 9000,
+    "currency": "EGP",
+    "category": "dining"
+   }
+  ]
+ },
+ {
+  "id": "v140",
+  "tag": "multi",
+  "text": "اشتريت تلاتين جنيه بيتزا و خمسة واربعين جنيه قهوة و ميت وخمسين ج سينما و خمسة وسبعين صيدلية",
+  "items": [
+   {
+    "amountMinor": 3000,
+    "currency": "EGP",
+    "category": "dining"
+   },
+   {
+    "amountMinor": 4500,
+    "currency": "EGP",
+    "category": "dining"
+   },
+   {
+    "amountMinor": 15000,
+    "currency": "EGP",
+    "category": "entertainment"
+   },
+   {
+    "amountMinor": 7500,
+    "currency": "EGP",
+    "category": "health"
+   }
+  ]
+ },
+ {
+  "id": "v141",
+  "tag": "multi",
+  "text": "اشتريت ٣٥ جنيه خضار و ١٥ جنيه كشري",
+  "items": [
+   {
+    "amountMinor": 3500,
+    "currency": "EGP",
+    "category": "groceries"
+   },
+   {
+    "amountMinor": 1500,
+    "currency": "EGP",
+    "category": "dining"
+   }
+  ]
+ },
+ {
+  "id": "v142",
+  "tag": "multi",
+  "text": "غدا خمسة وسبعين ج وقهوة ميت وعشرين جنيه",
+  "items": [
+   {
+    "amountMinor": 7500,
+    "currency": "EGP",
+    "category": "dining"
+   },
+   {
+    "amountMinor": 12000,
+    "currency": "EGP",
+    "category": "dining"
+   }
+  ]
+ },
+ {
+  "id": "v143",
+  "tag": "multi",
+  "text": "دوا 250 وكهرباء 30 جنيه ومترو 15 جنيه وجزمة 20",
+  "items": [
+   {
+    "amountMinor": 25000,
+    "currency": "EGP",
+    "category": "health"
+   },
+   {
+    "amountMinor": 3000,
+    "currency": "EGP",
+    "category": "bills"
+   },
+   {
+    "amountMinor": 1500,
+    "currency": "EGP",
+    "category": "transport"
+   },
+   {
+    "amountMinor": 2000,
+    "currency": "EGP",
+    "category": "shopping"
+   }
+  ]
+ },
+ {
+  "id": "v144",
+  "tag": "multi",
+  "text": "صرفت 50 ج انترنت و 150 جنيه لبس و ٣٥ عيش",
+  "items": [
+   {
+    "amountMinor": 5000,
+    "currency": "EGP",
+    "category": "bills"
+   },
+   {
+    "amountMinor": 15000,
+    "currency": "EGP",
+    "category": "shopping"
+   },
+   {
+    "amountMinor": 3500,
+    "currency": "EGP",
+    "category": "groceries"
+   }
+  ]
+ },
+ {
+  "id": "v145",
+  "tag": "multi",
+  "text": "النهارده دفعت خمسة وتلاتين ج غدا و ميتين ج صيدلية",
+  "items": [
+   {
+    "amountMinor": 3500,
+    "currency": "EGP",
+    "category": "dining"
+   },
+   {
+    "amountMinor": 20000,
+    "currency": "EGP",
+    "category": "health"
+   }
+  ]
+ },
+ {
+  "id": "v146",
+  "tag": "multi",
+  "text": "صيدلية ٤٥ جنيه وشاي ٣٥ ج ومترو 20 ج",
+  "items": [
+   {
+    "amountMinor": 4500,
+    "currency": "EGP",
+    "category": "health"
+   },
+   {
+    "amountMinor": 3500,
+    "currency": "EGP",
+    "category": "dining"
+   },
+   {
+    "amountMinor": 2000,
+    "currency": "EGP",
+    "category": "transport"
+   }
+  ]
+ },
+ {
+  "id": "v147",
+  "tag": "multi",
+  "text": "النهارده دفعت 150 ج عيش و ٤٥ لحمة و 150 ج مترو",
+  "items": [
+   {
+    "amountMinor": 15000,
+    "currency": "EGP",
+    "category": "groceries"
+   },
+   {
+    "amountMinor": 4500,
+    "currency": "EGP",
+    "category": "groceries"
+   },
+   {
+    "amountMinor": 15000,
+    "currency": "EGP",
+    "category": "transport"
+   }
+  ]
+ },
+ {
+  "id": "v148",
+  "tag": "multi",
+  "text": "صرفت 75 جنيه جزمة و ٩٠ جنيه سينما",
+  "items": [
+   {
+    "amountMinor": 7500,
+    "currency": "EGP",
+    "category": "shopping"
+   },
+   {
+    "amountMinor": 9000,
+    "currency": "EGP",
+    "category": "entertainment"
+   }
+  ]
+ },
+ {
+  "id": "v149",
+  "tag": "multi",
+  "text": "اشتريت دوا بـ٤٥ جنيه ولبس بـ١٠٠ وبنزين بـ60 ج",
+  "items": [
+   {
+    "amountMinor": 4500,
+    "currency": "EGP",
+    "category": "health"
+   },
+   {
+    "amountMinor": 10000,
+    "currency": "EGP",
+    "category": "shopping"
+   },
+   {
+    "amountMinor": 6000,
+    "currency": "EGP",
+    "category": "transport"
+   }
+  ]
+ },
+ {
+  "id": "v150",
+  "tag": "multi",
+  "text": "لحمة ٧٥ جنيه واوبر 20 جنيه وكشري 75 وبيتزا 45 جنيه",
+  "items": [
+   {
+    "amountMinor": 7500,
+    "currency": "EGP",
+    "category": "groceries"
+   },
+   {
+    "amountMinor": 2000,
+    "currency": "EGP",
+    "category": "transport"
+   },
+   {
+    "amountMinor": 7500,
+    "currency": "EGP",
+    "category": "dining"
+   },
+   {
+    "amountMinor": 4500,
+    "currency": "EGP",
+    "category": "dining"
+   }
+  ]
+ },
+ {
+  "id": "v151",
+  "tag": "multi",
+  "text": "لحمة خمسة واربعين جنيه وكشري خمسة واربعين جنيه وكهرباء عشرين ج",
+  "items": [
+   {
+    "amountMinor": 4500,
+    "currency": "EGP",
+    "category": "groceries"
+   },
+   {
+    "amountMinor": 4500,
+    "currency": "EGP",
+    "category": "dining"
+   },
+   {
+    "amountMinor": 2000,
+    "currency": "EGP",
+    "category": "bills"
+   }
+  ]
+ },
+ {
+  "id": "v152",
+  "tag": "multi",
+  "text": "اشتريت ميت وخمسين ج لحمة و عشرين ج كشري",
+  "items": [
+   {
+    "amountMinor": 15000,
+    "currency": "EGP",
+    "category": "groceries"
+   },
+   {
+    "amountMinor": 2000,
+    "currency": "EGP",
+    "category": "dining"
+   }
+  ]
+ },
+ {
+  "id": "v153",
+  "tag": "multi",
+  "text": "اشتريت بنزين بـ35 جنيه وخضار بـ٣٠",
+  "items": [
+   {
+    "amountMinor": 3500,
+    "currency": "EGP",
+    "category": "transport"
+   },
+   {
+    "amountMinor": 3000,
+    "currency": "EGP",
+    "category": "groceries"
+   }
+  ]
+ },
+ {
+  "id": "v154",
+  "tag": "multi",
+  "text": "اشتريت مترو بـميت وعشرين ج وسينما بـميت جنيه",
+  "items": [
+   {
+    "amountMinor": 12000,
+    "currency": "EGP",
+    "category": "transport"
+   },
+   {
+    "amountMinor": 10000,
+    "currency": "EGP",
+    "category": "entertainment"
+   }
+  ]
+ },
+ {
+  "id": "v155",
+  "tag": "multi",
+  "text": "دفعت 30 جنيه كهرباء و 50 ج انترنت و 45 ج بنزين",
+  "items": [
+   {
+    "amountMinor": 3000,
+    "currency": "EGP",
+    "category": "bills"
+   },
+   {
+    "amountMinor": 5000,
+    "currency": "EGP",
+    "category": "bills"
+   },
+   {
+    "amountMinor": 4500,
+    "currency": "EGP",
+    "category": "transport"
+   }
+  ]
+ },
+ {
+  "id": "v156",
+  "tag": "multi",
+  "text": "النهارده دفعت ميتين وخمسين جنيه لحمة و خمستاشر ج شحن",
+  "items": [
+   {
+    "amountMinor": 25000,
+    "currency": "EGP",
+    "category": "groceries"
+   },
+   {
+    "amountMinor": 1500,
+    "currency": "EGP",
+    "category": "bills"
+   }
+  ]
+ },
+ {
+  "id": "v157",
+  "tag": "multi",
+  "text": "اشتريت لحمة بـميت وعشرين جنيه وصيدلية بـعشرين وانترنت بـميت وعشرين جنيه واوبر بـخمسة واربعين جنيه",
+  "items": [
+   {
+    "amountMinor": 12000,
+    "currency": "EGP",
+    "category": "groceries"
+   },
+   {
+    "amountMinor": 2000,
+    "currency": "EGP",
+    "category": "health"
+   },
+   {
+    "amountMinor": 12000,
+    "currency": "EGP",
+    "category": "bills"
+   },
+   {
+    "amountMinor": 4500,
+    "currency": "EGP",
+    "category": "transport"
+   }
+  ]
+ },
+ {
+  "id": "v158",
+  "tag": "multi",
+  "text": "صرفت خمسين جنيه غدا و ميتين جنيه مترو و خمستاشر انترنت",
+  "items": [
+   {
+    "amountMinor": 5000,
+    "currency": "EGP",
+    "category": "dining"
+   },
+   {
+    "amountMinor": 20000,
+    "currency": "EGP",
+    "category": "transport"
+   },
+   {
+    "amountMinor": 1500,
+    "currency": "EGP",
+    "category": "bills"
+   }
+  ]
+ },
+ {
+  "id": "v159",
+  "tag": "multi",
+  "text": "لبس 45 ج وشحن ١٢٠ جنيه وشاي 90 جنيه وسينما ٧٥ ج",
+  "items": [
+   {
+    "amountMinor": 4500,
+    "currency": "EGP",
+    "category": "shopping"
+   },
+   {
+    "amountMinor": 12000,
+    "currency": "EGP",
+    "category": "bills"
+   },
+   {
+    "amountMinor": 9000,
+    "currency": "EGP",
+    "category": "dining"
+   },
+   {
+    "amountMinor": 7500,
+    "currency": "EGP",
+    "category": "entertainment"
+   }
+  ]
+ },
+ {
+  "id": "v160",
+  "tag": "multi",
+  "text": "دفعت ٧٥ ج غدا و ٩٠ جنيه شحن و 50 جنيه تاكسي",
+  "items": [
+   {
+    "amountMinor": 7500,
+    "currency": "EGP",
+    "category": "dining"
+   },
+   {
+    "amountMinor": 9000,
+    "currency": "EGP",
+    "category": "bills"
+   },
+   {
+    "amountMinor": 5000,
+    "currency": "EGP",
+    "category": "transport"
+   }
+  ]
+ },
+ {
+  "id": "v161",
+  "tag": "multi",
+  "text": "جزمة ١٥ جنيه وبنزين 150 جنيه",
+  "items": [
+   {
+    "amountMinor": 1500,
+    "currency": "EGP",
+    "category": "shopping"
+   },
+   {
+    "amountMinor": 15000,
+    "currency": "EGP",
+    "category": "transport"
+   }
+  ]
+ },
+ {
+  "id": "v162",
+  "tag": "multi",
+  "text": "النهارده دفعت ستين ج دكتور و تسعين جنيه دوا و خمسين جنيه خضار",
+  "items": [
+   {
+    "amountMinor": 6000,
+    "currency": "EGP",
+    "category": "health"
+   },
+   {
+    "amountMinor": 9000,
+    "currency": "EGP",
+    "category": "health"
+   },
+   {
+    "amountMinor": 5000,
+    "currency": "EGP",
+    "category": "groceries"
+   }
+  ]
+ },
+ {
+  "id": "v163",
+  "tag": "multi",
+  "text": "طلعت 75 جنيه خضار و ٣٥ جنيه بنزين و 45 جنيه جزمة",
+  "items": [
+   {
+    "amountMinor": 7500,
+    "currency": "EGP",
+    "category": "groceries"
+   },
+   {
+    "amountMinor": 3500,
+    "currency": "EGP",
+    "category": "transport"
+   },
+   {
+    "amountMinor": 4500,
+    "currency": "EGP",
+    "category": "shopping"
+   }
+  ]
+ },
+ {
+  "id": "v164",
+  "tag": "multi",
+  "text": "دفعت 50 ج لبس و 30 جنيه بيتزا",
+  "items": [
+   {
+    "amountMinor": 5000,
+    "currency": "EGP",
+    "category": "shopping"
+   },
+   {
+    "amountMinor": 3000,
+    "currency": "EGP",
+    "category": "dining"
+   }
+  ]
+ },
+ {
+  "id": "v165",
+  "tag": "multi",
+  "text": "اشتريت شحن بـ١٥٠ ج وشاي بـ١٥ جنيه وقهوة بـ75 ج وتاكسي بـ20 جنيه",
+  "items": [
+   {
+    "amountMinor": 15000,
+    "currency": "EGP",
+    "category": "bills"
+   },
+   {
+    "amountMinor": 1500,
+    "currency": "EGP",
+    "category": "dining"
+   },
+   {
+    "amountMinor": 7500,
+    "currency": "EGP",
+    "category": "dining"
+   },
+   {
+    "amountMinor": 2000,
+    "currency": "EGP",
+    "category": "transport"
+   }
+  ]
+ },
+ {
+  "id": "v166",
+  "tag": "multi",
+  "text": "جزمة 90 ج وكهرباء 100 جنيه وتاكسي 15 جنيه",
+  "items": [
+   {
+    "amountMinor": 9000,
+    "currency": "EGP",
+    "category": "shopping"
+   },
+   {
+    "amountMinor": 10000,
+    "currency": "EGP",
+    "category": "bills"
+   },
+   {
+    "amountMinor": 1500,
+    "currency": "EGP",
+    "category": "transport"
+   }
+  ]
+ },
+ {
+  "id": "v167",
+  "tag": "multi",
+  "text": "اشتريت سينما بـ45 جنيه ودكتور بـ٢٠ جنيه ولبس بـ45 جنيه وجزمة بـ15",
+  "items": [
+   {
+    "amountMinor": 4500,
+    "currency": "EGP",
+    "category": "entertainment"
+   },
+   {
+    "amountMinor": 2000,
+    "currency": "EGP",
+    "category": "health"
+   },
+   {
+    "amountMinor": 4500,
+    "currency": "EGP",
+    "category": "shopping"
+   },
+   {
+    "amountMinor": 1500,
+    "currency": "EGP",
+    "category": "shopping"
+   }
+  ]
+ },
+ {
+  "id": "v168",
+  "tag": "multi",
+  "text": "دكتور ميت جنيه وبنزين خمسين ج وكهرباء ميتين ج",
+  "items": [
+   {
+    "amountMinor": 10000,
+    "currency": "EGP",
+    "category": "health"
+   },
+   {
+    "amountMinor": 5000,
+    "currency": "EGP",
+    "category": "transport"
+   },
+   {
+    "amountMinor": 20000,
+    "currency": "EGP",
+    "category": "bills"
+   }
+  ]
+ },
+ {
+  "id": "v169",
+  "tag": "multi",
+  "text": "طلعت خمسة واربعين جنيه بنزين و ميت وعشرين ج تاكسي و ستين جنيه شحن و خمسة واربعين اوبر",
+  "items": [
+   {
+    "amountMinor": 4500,
+    "currency": "EGP",
+    "category": "transport"
+   },
+   {
+    "amountMinor": 12000,
+    "currency": "EGP",
+    "category": "transport"
+   },
+   {
+    "amountMinor": 6000,
+    "currency": "EGP",
+    "category": "bills"
+   },
+   {
+    "amountMinor": 4500,
+    "currency": "EGP",
+    "category": "transport"
+   }
+  ]
+ },
+ {
+  "id": "v170",
+  "tag": "multi",
+  "text": "سينما ١٥٠ جنيه وكهرباء ١٥٠ جنيه وفراخ ٤٥ وكشري ١٥ ج",
+  "items": [
+   {
+    "amountMinor": 15000,
+    "currency": "EGP",
+    "category": "entertainment"
+   },
+   {
+    "amountMinor": 15000,
+    "currency": "EGP",
+    "category": "bills"
+   },
+   {
+    "amountMinor": 4500,
+    "currency": "EGP",
+    "category": "groceries"
+   },
+   {
+    "amountMinor": 1500,
+    "currency": "EGP",
+    "category": "dining"
+   }
+  ]
+ },
+ {
+  "id": "v171",
+  "tag": "multi",
+  "text": "دفعت 75 ج كشري و ٩٠ جنيه لبس و ١٥ جنيه فراخ و 100 جنيه عيش",
+  "items": [
+   {
+    "amountMinor": 7500,
+    "currency": "EGP",
+    "category": "dining"
+   },
+   {
+    "amountMinor": 9000,
+    "currency": "EGP",
+    "category": "shopping"
+   },
+   {
+    "amountMinor": 1500,
+    "currency": "EGP",
+    "category": "groceries"
+   },
+   {
+    "amountMinor": 10000,
+    "currency": "EGP",
+    "category": "groceries"
+   }
+  ]
+ },
+ {
+  "id": "v172",
+  "tag": "currency",
+  "text": "دفعت 20 دولار غدا",
+  "items": [
+   {
+    "amountMinor": 2000,
+    "currency": "USD",
+    "category": "dining"
+   }
+  ]
+ },
+ {
+  "id": "v173",
+  "tag": "currency",
+  "text": "صرفت 100 ريال بنزين",
+  "items": [
+   {
+    "amountMinor": 10000,
+    "currency": "SAR",
+    "category": "transport"
+   }
+  ]
+ },
+ {
+  "id": "v174",
+  "tag": "currency",
+  "text": "دفعت 50 يورو لبس",
+  "items": [
+   {
+    "amountMinor": 5000,
+    "currency": "EUR",
+    "category": "shopping"
+   }
+  ]
+ },
+ {
+  "id": "v175",
+  "tag": "currency",
+  "text": "دفعت 30 درهم قهوة",
+  "items": [
+   {
+    "amountMinor": 3000,
+    "currency": "AED",
+    "category": "dining"
+   }
+  ]
+ },
+ {
+  "id": "v176",
+  "tag": "currency",
+  "text": "دفعت $50 لبس",
+  "items": [
+   {
+    "amountMinor": 5000,
+    "currency": "USD",
+    "category": "shopping"
+   }
+  ]
+ },
+ {
+  "id": "v177",
+  "tag": "currency",
+  "text": "دفعت €20 غدا",
+  "items": [
+   {
+    "amountMinor": 2000,
+    "currency": "EUR",
+    "category": "dining"
+   }
+  ]
+ },
+ {
+  "id": "v178",
+  "tag": "currency",
+  "text": "دفعت ٣٠٠ جنيه استرليني لبس",
+  "items": [
+   {
+    "amountMinor": 30000,
+    "currency": "GBP",
+    "category": "shopping"
+   }
+  ]
+ },
+ {
+  "id": "v179",
+  "tag": "currency",
+  "text": "دفعت ميت دولار لبس",
+  "items": [
+   {
+    "amountMinor": 10000,
+    "currency": "USD",
+    "category": "shopping"
+   }
+  ]
+ },
+ {
+  "id": "v180",
+  "tag": "currency",
+  "text": "دفعت خمسة دولار قهوة",
+  "items": [
+   {
+    "amountMinor": 500,
+    "currency": "USD",
+    "category": "dining"
+   }
+  ]
+ },
+ {
+  "id": "v181",
+  "tag": "currency",
+  "text": "دفعت دولارين قهوة",
+  "items": [
+   {
+    "amountMinor": 200,
+    "currency": "USD",
+    "category": "dining"
+   }
+  ]
+ },
+ {
+  "id": "v182",
+  "tag": "currency",
+  "text": "دفعت ريالين شاي",
+  "items": [
+   {
+    "amountMinor": 200,
+    "currency": "SAR",
+    "category": "dining"
+   }
+  ]
+ },
+ {
+  "id": "v183",
+  "tag": "currency",
+  "text": "دفعت ٥٠ دينار غدا",
+  "items": [
+   {
+    "amountMinor": 5000,
+    "currency": "EGP",
+    "category": "dining",
+    "issues": [
+     "ambiguousCurrency"
+    ]
+   }
+  ]
+ },
+ {
+  "id": "v184",
+  "tag": "currency",
+  "text": "دفعت 20 دولار غدا و 100 جنيه تاكسي",
+  "items": [
+   {
+    "amountMinor": 2000,
+    "currency": "USD",
+    "category": "dining"
+   },
+   {
+    "amountMinor": 10000,
+    "currency": "EGP",
+    "category": "transport"
+   }
+  ]
+ },
+ {
+  "id": "v185",
+  "tag": "currency",
+  "text": "دفعت 20 دولار غدا و 100 تاكسي",
+  "items": [
+   {
+    "amountMinor": 2000,
+    "currency": "USD",
+    "category": "dining"
+   },
+   {
+    "amountMinor": 10000,
+    "currency": "EGP",
+    "category": "transport",
+    "issues": [
+     "ambiguousCurrency"
+    ]
+   }
+  ]
+ },
+ {
+  "id": "v186",
+  "tag": "currency",
+  "text": "دفعت 15 egp قهوة",
+  "items": [
+   {
+    "amountMinor": 1500,
+    "currency": "EGP",
+    "category": "dining"
+   }
+  ]
+ },
+ {
+  "id": "v187",
+  "tag": "currency",
+  "text": "دفعت 15 usd قهوة",
+  "items": [
+   {
+    "amountMinor": 1500,
+    "currency": "USD",
+    "category": "dining"
+   }
+  ]
+ },
+ {
+  "id": "v188",
+  "tag": "currency",
+  "text": "صرفت ٢٥ يورو على بيتزا",
+  "items": [
+   {
+    "amountMinor": 2500,
+    "currency": "EUR",
+    "category": "dining"
+   }
+  ]
+ },
+ {
+  "id": "v189",
+  "tag": "currency",
+  "text": "دفعت 40 دولار لبس و 10 يورو لبس",
+  "items": [
+   {
+    "amountMinor": 4000,
+    "currency": "USD",
+    "category": "shopping"
+   },
+   {
+    "amountMinor": 1000,
+    "currency": "EUR",
+    "category": "shopping"
+   }
+  ]
+ },
+ {
+  "id": "v190",
+  "tag": "english",
+  "text": "Paid 150 for vegetables and 45 coffee and 30 taxi",
+  "items": [
+   {
+    "amountMinor": 15000,
+    "currency": "EGP",
+    "category": "groceries"
+   },
+   {
+    "amountMinor": 4500,
+    "currency": "EGP",
+    "category": "dining"
+   },
+   {
+    "amountMinor": 3000,
+    "currency": "EGP",
+    "category": "transport"
+   }
+  ]
+ },
+ {
+  "id": "v191",
+  "tag": "english",
+  "text": "I bought groceries for 300 pounds",
+  "items": [
+   {
+    "amountMinor": 30000,
+    "currency": "EGP",
+    "category": "groceries"
+   }
+  ]
+ },
+ {
+  "id": "v192",
+  "tag": "english",
+  "text": "Spent 80 on lunch",
+  "items": [
+   {
+    "amountMinor": 8000,
+    "currency": "EGP",
+    "category": "dining"
+   }
+  ]
+ },
+ {
+  "id": "v193",
+  "tag": "english",
+  "text": "Coffee 45 and taxi 30",
+  "items": [
+   {
+    "amountMinor": 4500,
+    "currency": "EGP",
+    "category": "dining"
+   },
+   {
+    "amountMinor": 3000,
+    "currency": "EGP",
+    "category": "transport"
+   }
+  ]
+ },
+ {
+  "id": "v194",
+  "tag": "english",
+  "text": "I paid fifty pounds for pharmacy",
+  "items": [
+   {
+    "amountMinor": 5000,
+    "currency": "EGP",
+    "category": "health"
+   }
+  ]
+ },
+ {
+  "id": "v195",
+  "tag": "english",
+  "text": "paid two hundred and fifty for groceries",
+  "items": [
+   {
+    "amountMinor": 25000,
+    "currency": "EGP",
+    "category": "groceries"
+   }
+  ]
+ },
+ {
+  "id": "v196",
+  "tag": "english",
+  "text": "one hundred fifty taxi",
+  "items": [
+   {
+    "amountMinor": 15000,
+    "currency": "EGP",
+    "category": "transport"
+   }
+  ]
+ },
+ {
+  "id": "v197",
+  "tag": "english",
+  "text": "paid a hundred for dinner",
+  "items": [
+   {
+    "amountMinor": 10000,
+    "currency": "EGP",
+    "category": "dining"
+   }
+  ]
+ },
+ {
+  "id": "v198",
+  "tag": "english",
+  "text": "five dollars coffee",
+  "items": [
+   {
+    "amountMinor": 500,
+    "currency": "USD",
+    "category": "dining"
+   }
+  ]
+ },
+ {
+  "id": "v199",
+  "tag": "english",
+  "text": "paid 30 euros for lunch",
+  "items": [
+   {
+    "amountMinor": 3000,
+    "currency": "EUR",
+    "category": "dining"
+   }
+  ]
+ },
+ {
+  "id": "v200",
+  "tag": "english",
+  "text": "spent 100 sar on fuel",
+  "items": [
+   {
+    "amountMinor": 10000,
+    "currency": "SAR",
+    "category": "transport"
+   }
+  ]
+ },
+ {
+  "id": "v201",
+  "tag": "english",
+  "text": "Paid 12.50 for coffee",
+  "items": [
+   {
+    "amountMinor": 1250,
+    "currency": "EGP",
+    "category": "dining"
+   }
+  ]
+ },
+ {
+  "id": "v202",
+  "tag": "english",
+  "text": "I spent twenty five on coffee and thirty on taxi",
+  "items": [
+   {
+    "amountMinor": 2500,
+    "currency": "EGP",
+    "category": "dining"
+   },
+   {
+    "amountMinor": 3000,
+    "currency": "EGP",
+    "category": "transport"
+   }
+  ]
+ },
+ {
+  "id": "v203",
+  "tag": "english",
+  "text": "Paid 1,200 for electricity",
+  "items": [
+   {
+    "amountMinor": 120000,
+    "currency": "EGP",
+    "category": "bills"
+   }
+  ]
+ },
+ {
+  "id": "v204",
+  "tag": "english",
+  "text": "bought clothes for two thousand",
+  "items": [
+   {
+    "amountMinor": 200000,
+    "currency": "EGP",
+    "category": "shopping"
+   }
+  ]
+ },
+ {
+  "id": "v205",
+  "tag": "english",
+  "text": "coffee for 45 and bread for 10",
+  "items": [
+   {
+    "amountMinor": 4500,
+    "currency": "EGP",
+    "category": "dining"
+   },
+   {
+    "amountMinor": 1000,
+    "currency": "EGP",
+    "category": "groceries"
+   }
+  ]
+ },
+ {
+  "id": "v206",
+  "tag": "english",
+  "text": "paid 3k for shoes",
+  "items": [
+   {
+    "amountMinor": 300000,
+    "currency": "EGP",
+    "category": "shopping"
+   }
+  ]
+ },
+ {
+  "id": "v207",
+  "tag": "english",
+  "text": "paid one hundred and twenty five for doctor",
+  "items": [
+   {
+    "amountMinor": 12500,
+    "currency": "EGP",
+    "category": "health"
+   }
+  ]
+ },
+ {
+  "id": "v208",
+  "tag": "english",
+  "text": "Paid 60 EGP for pizza",
+  "items": [
+   {
+    "amountMinor": 6000,
+    "currency": "EGP",
+    "category": "dining"
+   }
+  ]
+ },
+ {
+  "id": "v209",
+  "tag": "english",
+  "text": "spent nineteen on milk",
+  "items": [
+   {
+    "amountMinor": 1900,
+    "currency": "EGP",
+    "category": "groceries"
+   }
+  ]
+ },
+ {
+  "id": "v210",
+  "tag": "english",
+  "text": "I paid 45 pounds for internet and 200 for electricity",
+  "items": [
+   {
+    "amountMinor": 4500,
+    "currency": "EGP",
+    "category": "bills"
+   },
+   {
+    "amountMinor": 20000,
+    "currency": "EGP",
+    "category": "bills"
+   }
+  ]
+ },
+ {
+  "id": "v211",
+  "tag": "english",
+  "text": "Paid $25 for lunch",
+  "items": [
+   {
+    "amountMinor": 2500,
+    "currency": "USD",
+    "category": "dining"
+   }
+  ]
+ },
+ {
+  "id": "v212",
+  "tag": "english",
+  "text": "taxi 30",
+  "items": [
+   {
+    "amountMinor": 3000,
+    "currency": "EGP",
+    "category": "transport"
+   }
+  ]
+ },
+ {
+  "id": "v213",
+  "tag": "english",
+  "text": "fifty for coffee",
+  "items": [
+   {
+    "amountMinor": 5000,
+    "currency": "EGP",
+    "category": "dining"
+   }
+  ]
+ },
+ {
+  "id": "v214",
+  "tag": "english",
+  "text": "I bought 2 coffee for 90 pounds",
+  "items": [
+   {
+    "amountMinor": 9000,
+    "currency": "EGP",
+    "category": "dining"
+   }
+  ]
+ },
+ {
+  "id": "v215",
+  "tag": "mixed",
+  "text": "دفعت 200 Uber",
+  "items": [
+   {
+    "amountMinor": 20000,
+    "currency": "EGP",
+    "category": "transport"
+   }
+  ]
+ },
+ {
+  "id": "v216",
+  "tag": "mixed",
+  "text": "Uber 200 جنيه",
+  "items": [
+   {
+    "amountMinor": 20000,
+    "currency": "EGP",
+    "category": "transport"
+   }
+  ]
+ },
+ {
+  "id": "v217",
+  "tag": "mixed",
+  "text": "دفعت 150 Careem و 45 Starbucks",
+  "items": [
+   {
+    "amountMinor": 15000,
+    "currency": "EGP",
+    "category": "transport"
+   },
+   {
+    "amountMinor": 4500,
+    "currency": "EGP",
+    "category": "dining"
+   }
+  ]
+ },
+ {
+  "id": "v218",
+  "tag": "mixed",
+  "text": "اشتريت Netflix بـ 199 جنيه",
+  "items": [
+   {
+    "amountMinor": 19900,
+    "currency": "EGP",
+    "category": "subscriptions"
+   }
+  ]
+ },
+ {
+  "id": "v219",
+  "tag": "mixed",
+  "text": "دفعت ٣٠٠ Carrefour",
+  "items": [
+   {
+    "amountMinor": 30000,
+    "currency": "EGP",
+    "category": "groceries"
+   }
+  ]
+ },
+ {
+  "id": "v220",
+  "tag": "mixed",
+  "text": "Talabat ٢٥٠ جنيه",
+  "items": [
+   {
+    "amountMinor": 25000,
+    "currency": "EGP",
+    "category": "dining"
+   }
+  ]
+ },
+ {
+  "id": "v221",
+  "tag": "mixed",
+  "text": "دفعت 80 coffee",
+  "items": [
+   {
+    "amountMinor": 8000,
+    "currency": "EGP",
+    "category": "dining"
+   }
+  ]
+ },
+ {
+  "id": "v222",
+  "tag": "mixed",
+  "text": "50 جنيه coffee و 20 taxi",
+  "items": [
+   {
+    "amountMinor": 5000,
+    "currency": "EGP",
+    "category": "dining"
+   },
+   {
+    "amountMinor": 2000,
+    "currency": "EGP",
+    "category": "transport"
+   }
+  ]
+ },
+ {
+  "id": "v223",
+  "tag": "mixed",
+  "text": "صرفت 120 على Starbucks",
+  "items": [
+   {
+    "amountMinor": 12000,
+    "currency": "EGP",
+    "category": "dining"
+   }
+  ]
+ },
+ {
+  "id": "v224",
+  "tag": "mixed",
+  "text": "دفعت خمسين جنيه Uber",
+  "items": [
+   {
+    "amountMinor": 5000,
+    "currency": "EGP",
+    "category": "transport"
+   }
+  ]
+ },
+ {
+  "id": "v225",
+  "tag": "mixed",
+  "text": "دفعت ميت جنيه lunch",
+  "items": [
+   {
+    "amountMinor": 10000,
+    "currency": "EGP",
+    "category": "dining"
+   }
+  ]
+ },
+ {
+  "id": "v226",
+  "tag": "mixed",
+  "text": "Uber ميت وخمسين وStarbucks خمسين",
+  "items": [
+   {
+    "amountMinor": 15000,
+    "currency": "EGP",
+    "category": "transport"
+   },
+   {
+    "amountMinor": 5000,
+    "currency": "EGP",
+    "category": "dining"
+   }
+  ]
+ },
+ {
+  "id": "v227",
+  "tag": "mixed",
+  "text": "دفعت 99 Vodafone",
+  "items": [
+   {
+    "amountMinor": 9900,
+    "currency": "EGP",
+    "category": "bills"
+   }
+  ]
+ },
+ {
+  "id": "v228",
+  "tag": "mixed",
+  "text": "دفعت ٣٥ جنيه coffee وخمسة وعشرين جنيه taxi",
+  "items": [
+   {
+    "amountMinor": 3500,
+    "currency": "EGP",
+    "category": "dining"
+   },
+   {
+    "amountMinor": 2500,
+    "currency": "EGP",
+    "category": "transport"
+   }
+  ]
+ },
+ {
+  "id": "v229",
+  "tag": "edge",
+  "text": "قهوة",
+  "items": [
+   {
+    "amountMinor": null,
+    "currency": "EGP",
+    "category": "dining",
+    "issues": [
+     "missingAmount"
+    ]
+   }
+  ]
+ },
+ {
+  "id": "v230",
+  "tag": "edge",
+  "text": "قهوة وتاكسي",
+  "items": [
+   {
+    "amountMinor": null,
+    "currency": "EGP",
+    "category": "dining",
+    "issues": [
+     "missingAmount"
+    ]
+   },
+   {
+    "amountMinor": null,
+    "currency": "EGP",
+    "category": "transport",
+    "issues": [
+     "missingAmount"
+    ]
+   }
+  ]
+ },
+ {
+  "id": "v231",
+  "tag": "edge",
+  "text": "دفعت قهوة",
+  "items": [
+   {
+    "amountMinor": null,
+    "currency": "EGP",
+    "category": "dining",
+    "issues": [
+     "missingAmount"
+    ]
+   }
+  ]
+ },
+ {
+  "id": "v232",
+  "tag": "edge",
+  "text": "دفعت 150 جنيه",
+  "items": [
+   {
+    "amountMinor": 15000,
+    "currency": "EGP",
+    "category": null,
+    "issues": [
+     "missingItemText"
+    ]
+   }
+  ]
+ },
+ {
+  "id": "v233",
+  "tag": "edge",
+  "text": "صرفت خمسين",
+  "items": [
+   {
+    "amountMinor": 5000,
+    "currency": "EGP",
+    "category": null,
+    "issues": [
+     "missingItemText"
+    ]
+   }
+  ]
+ },
+ {
+  "id": "v234",
+  "tag": "edge",
+  "text": "خضار 150 وقهوة",
+  "items": [
+   {
+    "amountMinor": 15000,
+    "currency": "EGP",
+    "category": "groceries"
+   },
+   {
+    "amountMinor": null,
+    "currency": "EGP",
+    "category": "dining",
+    "issues": [
+     "missingAmount"
+    ]
+   }
+  ]
+ },
+ {
+  "id": "v235",
+  "tag": "edge",
+  "text": "دفعت 150 و 45 جنيه",
+  "items": [
+   {
+    "amountMinor": 15000,
+    "currency": "EGP",
+    "category": null,
+    "issues": [
+     "missingItemText"
+    ]
+   },
+   {
+    "amountMinor": 4500,
+    "currency": "EGP",
+    "category": null,
+    "issues": [
+     "missingItemText"
+    ]
+   }
+  ]
+ },
+ {
+  "id": "v236",
+  "tag": "edge",
+  "text": "طلعت 100 جنيه النهارده",
+  "items": [
+   {
+    "amountMinor": 10000,
+    "currency": "EGP",
+    "category": null,
+    "issues": [
+     "missingItemText"
+    ]
+   }
+  ]
+ },
+ {
+  "id": "v237",
+  "tag": "edge",
+  "text": "coffee and taxi",
+  "items": [
+   {
+    "amountMinor": null,
+    "currency": "EGP",
+    "category": "dining",
+    "issues": [
+     "missingAmount"
+    ]
+   },
+   {
+    "amountMinor": null,
+    "currency": "EGP",
+    "category": "transport",
+    "issues": [
+     "missingAmount"
+    ]
+   }
+  ]
+ },
+ {
+  "id": "v238",
+  "tag": "edge",
+  "text": "spent 50",
+  "items": [
+   {
+    "amountMinor": 5000,
+    "currency": "EGP",
+    "category": null,
+    "issues": [
+     "missingItemText"
+    ]
+   }
+  ]
+ },
+ {
+  "id": "v239",
+  "tag": "edge",
+  "text": "دفعت كهرباء ومياه",
+  "items": [
+   {
+    "amountMinor": null,
+    "currency": "EGP",
+    "category": "bills",
+    "issues": [
+     "missingAmount"
+    ]
+   },
+   {
+    "amountMinor": null,
+    "currency": "EGP",
+    "category": "bills",
+    "issues": [
+     "missingAmount"
+    ]
+   }
+  ]
+ },
+ {
+  "id": "v240",
+  "tag": "edge",
+  "text": "دفعت 0 جنيه قهوة",
+  "items": [
+   {
+    "amountMinor": null,
+    "currency": "EGP",
+    "category": "dining",
+    "issues": [
+     "invalidAmount"
+    ]
+   }
+  ]
+ },
+ {
+  "id": "v241",
+  "tag": "edge",
+  "text": "اشتريت اتنين قهوة بخمسين جنيه",
+  "items": [
+   {
+    "amountMinor": 5000,
+    "currency": "EGP",
+    "category": "dining"
+   }
+  ]
+ },
+ {
+  "id": "v242",
+  "tag": "edge",
+  "text": "اشتريت 3 كشري ب 90 جنيه",
+  "items": [
+   {
+    "amountMinor": 9000,
+    "currency": "EGP",
+    "category": "dining"
+   }
+  ]
+ },
+ {
+  "id": "v243",
+  "tag": "edge",
+  "text": "دفعت 100 جنيه قهوة مع واحد صاحبي",
+  "items": [
+   {
+    "amountMinor": 10000,
+    "currency": "EGP",
+    "category": "dining"
+   }
+  ]
+ },
+ {
+  "id": "v244",
+  "tag": "edge",
+  "text": "اشتريت واحد بيتزا بميت جنيه",
+  "items": [
+   {
+    "amountMinor": 10000,
+    "currency": "EGP",
+    "category": "dining"
+   }
+  ]
+ },
+ {
+  "id": "v245",
+  "tag": "colloquial",
+  "text": "النهارده دفعت تلتميه جنيه كهرباء",
+  "items": [
+   {
+    "amountMinor": 30000,
+    "currency": "EGP",
+    "category": "bills"
+   }
+  ]
+ },
+ {
+  "id": "v246",
+  "tag": "colloquial",
+  "text": "كشري ب خمسة وعشرين جنيه",
+  "items": [
+   {
+    "amountMinor": 2500,
+    "currency": "EGP",
+    "category": "dining"
+   }
+  ]
+ },
+ {
+  "id": "v247",
+  "tag": "colloquial",
+  "text": "هات 50 جنيه بنزين",
+  "items": [
+   {
+    "amountMinor": 5000,
+    "currency": "EGP",
+    "category": "transport"
+   }
+  ]
+ },
+ {
+  "id": "v248",
+  "tag": "colloquial",
+  "text": "دفعت ميت وخمسين جنيه ونص كيلو لحمة",
+  "items": [
+   {
+    "amountMinor": 15000,
+    "currency": "EGP",
+    "category": "groceries"
+   }
+  ]
+ },
+ {
+  "id": "v249",
+  "tag": "colloquial",
+  "text": "صرفت الف ونص على لبس",
+  "items": [
+   {
+    "amountMinor": 150000,
+    "currency": "EGP",
+    "category": "shopping"
+   }
+  ]
+ },
+ {
+  "id": "v250",
+  "tag": "colloquial",
+  "text": "دفعت ستين جنيه ميكروباص",
+  "items": [
+   {
+    "amountMinor": 6000,
+    "currency": "EGP",
+    "category": "transport"
+   }
+  ]
+ },
+ {
+  "id": "v251",
+  "tag": "colloquial",
+  "text": "اشتريت عيش ب جنيهين",
+  "items": [
+   {
+    "amountMinor": 200,
+    "currency": "EGP",
+    "category": "groceries"
+   }
+  ]
+ },
+ {
+  "id": "v252",
+  "tag": "colloquial",
+  "text": "دفعت 75 جنيه شحن وتلاتين جنيه عصير",
+  "items": [
+   {
+    "amountMinor": 7500,
+    "currency": "EGP",
+    "category": "bills"
+   },
+   {
+    "amountMinor": 3000,
+    "currency": "EGP",
+    "category": "dining"
+   }
+  ]
+ },
+ {
+  "id": "v253",
+  "tag": "colloquial",
+  "text": "جبت دوا بـ ميتين جنيه",
+  "items": [
+   {
+    "amountMinor": 20000,
+    "currency": "EGP",
+    "category": "health"
+   }
+  ]
+ },
+ {
+  "id": "v254",
+  "tag": "colloquial",
+  "text": "خدت تاكسي بخمسين",
+  "items": [
+   {
+    "amountMinor": 5000,
+    "currency": "EGP",
+    "category": "transport"
+   }
+  ]
+ }
+]

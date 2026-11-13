@@ -1,5 +1,9 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools">
+    <!-- T-141 (T-001 review F16): BackendClient talks to the Zaghlol backend
+         (catalog, flags, prices, purchase verification). Financial data
+         never goes there (BR-SYNC-03). -->
+    <uses-permission android:name="android.permission.INTERNET"/>
     <!-- FR-SEC-05 / T-165: no OS mechanism may copy app data off the phone.
          allowBackup=false stops Auto Backup, key/value backup and adb backup
          (API 26-30) and cloud backup (API 31+). On API 31+ only
@@ -75,6 +79,29 @@
         <receiver
             android:name="androidx.work.impl.diagnostics.DiagnosticsReceiver"
             tools:node="remove" />
+        <!-- T-043 / FR-ING-A-03/07: bank-notification listener, every flavour.
+             Exported because the system binds it; the BIND_NOTIFICATION_LISTENER_SERVICE
+             permission lets only the system do so. Not directBootAware (the
+             spool key needs the unlocked user). No android:label (the system
+             shows the app name). The meta-data keep ongoing notifications from
+             being delivered at all (API 31+; older APIs rely on the flag check
+             in the listener). Access itself is user-granted in system settings
+             (T-044); the app declares no permission for it. -->
+        <service
+            android:name=".platform.capture.BankNotificationListener"
+            android:exported="true"
+            android:directBootAware="false"
+            android:permission="android.permission.BIND_NOTIFICATION_LISTENER_SERVICE">
+            <intent-filter>
+                <action android:name="android.service.notification.NotificationListenerService"/>
+            </intent-filter>
+            <meta-data
+                android:name="android.service.notification.default_filter_types"
+                android:value="conversations|alerting|silent"/>
+            <meta-data
+                android:name="android.service.notification.disabled_filter_types"
+                android:value="ongoing"/>
+        </service>
         <!-- Don't delete the meta-data below.
              This is used by the Flutter tool to generate GeneratedPluginRegistrant.java -->
         <meta-data

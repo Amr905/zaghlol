@@ -344,7 +344,8 @@ CREATE TABLE settings (key TEXT PRIMARY KEY, value TEXT NOT NULL, updated_at INT
 -- contribution_opt_in, scan_depth_months, setup_progress, paywall_last_shown, … (typed accessors in core/settings)
 
 CREATE TABLE secure_state (key TEXT PRIMARY KEY, value BLOB NOT NULL, updated_at INTEGER NOT NULL);
--- install_token, entitlement_token (signed JWS), account_token, sync_state {last_success_server_time, backoff},
+-- install_id, install_token, install_registration {installId, Idempotency-Key, body bytes} and install_reregistration (T-141),
+-- entitlement_token (signed JWS), account_token, sync_state {last_success_server_time, backoff},
 -- feature_flags snapshot, backup schedule & last result. Excluded from backups (FR-BAK-07) except flags-free items.
 
 CREATE TABLE outbox (id TEXT PRIMARY KEY, kind TEXT NOT NULL CHECK (kind IN ('contribution','bank_request','purchase_verify')),
@@ -359,7 +360,7 @@ CREATE TABLE diag_log (id INTEGER PRIMARY KEY, at INTEGER NOT NULL, level TEXT N
 ```
 
 **As built (T-019, v4).**
-- `settings`: `key` 1–64 of `[a-z0-9_.]`; `value` text ≤ 16 KiB. `secure_state`: same key form; `value` must be a BLOB of 1 B–64 KiB. `SecureStateDao.compareAndSet(key, expected, next)` is one conditional statement (insert-if-absent, or update where the value equals `expected`), so of two actors starting from the same value exactly one wins (trusted-time state, T-144). Values never appear in errors (code-only `DbWriteException`).
+- `settings`: `key` 1–64 of `[a-z0-9_.]`; `value` text ≤ 16 KiB. `secure_state`: same key form; `value` must be a BLOB of 1 B–64 KiB. `SecureStateDao.deleteIfEquals(key, expected)` (T-141) deletes only while the value is still `expected`, in one statement. `SecureStateDao.compareAndSet(key, expected, next)` is one conditional statement (insert-if-absent, or update where the value equals `expected`), so of two actors starting from the same value exactly one wins (trusted-time state, T-144). Values never appear in errors (code-only `DbWriteException`).
 - `outbox`: `payload` a JSON object ≤ 64 KiB; `attempts ≥ 0`; `ix_outbox_kind (kind, created_at)`. `OutboxDao.deleteKind` serves EC-48.
 - `voice_usage`: `month` a real `YYYY-MM`; `count ≥ 0`. `VoiceUsageDao.incrementIfBelow(month, limit)` is one conditional upsert: of 20 racing calls with limit 15, exactly 15 count.
 - `undo_batches`: `description_key` an l10n key (`[A-Za-z0-9_.]`, 1–64), `before_json` valid JSON ≤ 8 MiB; `ix_undo_created`.

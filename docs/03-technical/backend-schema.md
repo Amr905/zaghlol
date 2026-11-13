@@ -222,6 +222,9 @@ CREATE INDEX ix_purchase_seats_install ON purchase_seats(install_id);
 -- A BEFORE DELETE trigger on installs vacates the seat (install_id, proof, bound_at := NULL) so the holder/proof CHECK holds;
 -- device_key_hash, device_key_trusted, last_moved_at, next_move_at and recent_rebinds are kept (D-55).
 -- Invariant (FR-GOLD-08 acceptance): at most one holder per purchase, by construction (primary key).
+-- Backfill (T-132, migration BackfillPurchaseSeats; FU-112): a purchase written before the seat service existed gets a seat bound to its
+-- buying install (proof = binding, bound_at = purchases.created_at, next_move_at NULL, no purchase_events row,
+-- attach_reclaim_used_at untouched); a purchase whose buying install is gone or tombstoned gets a vacant seat.
 
 -- Pending claimants (R3-4, R4-4): installs refused ONLY by the cooldown (they passed attestation, store and account checks),
 -- or plan-change payers kept off an account-linked seat by the account rule (verify only; a support move still needs the

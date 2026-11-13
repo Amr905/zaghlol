@@ -1,0 +1,5 @@
+{
+  "@@locale": "ar",
+  "appName": "زغلول",
+  "@appName": { "description": "Brand name, shown as the app title." }
+}
