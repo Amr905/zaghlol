@@ -12,6 +12,8 @@ import 'core/routing/app_router.dart';
 import 'core/theme/app_theme.dart';
 import 'features/budget/application/cycle_app_wiring.dart';
 import 'features/capture/presentation/capture_lifecycle.dart';
+import 'features/catalog_sync/application/sync_providers.dart';
+import 'features/catalog_sync/presentation/sync_lifecycle.dart';
 import 'features/security/presentation/app_lock_gate.dart';
 import 'ingestion/ingestion_main.dart';
 
@@ -24,8 +26,14 @@ Future<void> main() async {
   // in every build; it starts once the database opens.
   runApp(
     ProviderScope(
-      overrides: [dbDirectoryProvider.overrideWithValue(dbDirectory)],
-      child: const CaptureLifecycle(child: _LocalizedApp()),
+      overrides: [
+        dbDirectoryProvider.overrideWithValue(dbDirectory),
+        // T-143 / FU-115 / FU-138: backend client, entitlement service, sync.
+        ...syncWiringOverrides,
+      ],
+      child: const CaptureLifecycle(
+        child: SyncLifecycle(child: _LocalizedApp()),
+      ),
     ),
   );
 }
