@@ -74,6 +74,13 @@ final class CaptureGuard {
       kind = GuardKeepKind.registry;
     } else if (sourceKey.isNotEmpty &&
         cfg.userSenders.contains((channel.wire, sourceKey))) {
+      // FU-109 / FU-121: a phone-number sender the user added is captured
+      // live only when the body looks financial (the same `bodyHints` the
+      // generic rule uses); anything else from them is dropped here.
+      if (channel == GuardChannel.sms &&
+          !cfg.bodyHints.any((p) => p.hasMatch(folded))) {
+        return const GuardDrop(GuardDropReason.notFinancial);
+      }
       kind = GuardKeepKind.user;
     } else if ((sourceKey.isNotEmpty &&
             channel != GuardChannel.notification &&

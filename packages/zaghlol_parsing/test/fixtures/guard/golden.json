@@ -2,7 +2,7 @@
  "format": 1,
  "synthetic": true,
  "note": "Synthetic data only (CLAUDE.md 2.6). Shared by the Dart, Kotlin (T-038) and Swift (T-061) Guards: never copy. count = fold + cases + rate + modes. fold: out = foldKey(in); lines (when present, else out) = foldKeyLines(in), the Guard's fold for the global drop patterns.",
- "count": 237,
+ "count": 239,
  "configs": {
   "t1": {
    "base": "configs/t1_base.json",
@@ -2280,6 +2280,34 @@
    }
   },
   {
+   "id": "gen.user_sender_personal_dropped",
+   "tags": [
+    "non_financial"
+   ],
+   "config": "t1",
+   "channel": "sms",
+   "source": "MyCoop",
+   "body": "see you at 5, bring the keys",
+   "expect": {
+    "decision": "drop",
+    "reason": "not_financial"
+   }
+  },
+  {
+   "id": "gen.user_sender_digit_only_dropped",
+   "tags": [
+    "non_financial"
+   ],
+   "config": "t1",
+   "channel": "sms",
+   "source": "Club-7",
+   "body": "Paid 10.00",
+   "expect": {
+    "decision": "drop",
+    "reason": "not_financial"
+   }
+  },
+  {
    "id": "gen.user_sender",
    "tags": [
     "generic_keep"
@@ -2287,7 +2315,7 @@
    "config": "t1",
    "channel": "sms",
    "source": "MyCoop",
-   "body": "Paid 10.00",
+   "body": "Paid EGP 10.00",
    "expect": {
     "decision": "keep",
     "kind": "user",
@@ -2303,7 +2331,7 @@
    "config": "t1",
    "channel": "sms",
    "source": "CLUB-7",
-   "body": "Paid 10.00",
+   "body": "Paid EGP 10.00",
    "expect": {
     "decision": "keep",
     "kind": "user",

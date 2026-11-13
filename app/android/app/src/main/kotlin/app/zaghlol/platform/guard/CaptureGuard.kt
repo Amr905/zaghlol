@@ -73,7 +73,14 @@ class CaptureGuard(val config: GuardConfig?) {
         val inst = resolve(cfg, channel, sourceKey)
         val kind: GuardKeepKind = when {
             inst != null -> GuardKeepKind.REGISTRY
-            sourceKey.isNotEmpty() && GuardUserSender(channel.wire, sourceKey) in cfg.userSenders -> GuardKeepKind.USER
+            sourceKey.isNotEmpty() && GuardUserSender(channel.wire, sourceKey) in cfg.userSenders -> {
+                // FU-109 / FU-121: a user-added SMS sender is captured only when the body
+                // looks financial (the generic `bodyHints`); otherwise dropped here.
+                if (channel == GuardChannel.SMS && cfg.bodyHints.none { it.containsMatchIn(folded) }) {
+                    return GuardDecision.Drop(GuardDropReason.NOT_FINANCIAL)
+                }
+                GuardKeepKind.USER
+            }
             (sourceKey.isNotEmpty() && channel != GuardChannel.NOTIFICATION && sourceKey in cfg.alwaysCapture) ||
                 channel == GuardChannel.APPLE_PAY ||
                 channel == GuardChannel.SHORTCUT_MESSAGE ||

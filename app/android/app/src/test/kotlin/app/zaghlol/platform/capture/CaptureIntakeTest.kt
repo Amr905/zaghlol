@@ -88,6 +88,32 @@ class CaptureIntakeTest {
         assertTrue(spooled.isEmpty())
     }
 
+    /** FU-121 negative proof 1: a personal message from a user-added sender leaves nothing behind. */
+    @Test
+    fun personalSmsFromAUserAddedSenderLeavesTheWholeRootByteIdentical() {
+        val before = tree(root)
+        val r = intake().process(
+            listOf(msg("MyCoop", "see you at 7, bring the cake"), msg("club-7", "Paid 10.00 for lunch, thanks")),
+            stamp,
+        )
+        assertEquals(2, r.dropped)
+        assertEquals(0, r.written.size)
+        assertEquals(before, tree(root))
+        assertFalse(spoolDir.exists())
+        assertFalse(File(root, "capture").exists())
+        assertEquals(0, afterWrites)
+        assertTrue(spooled.isEmpty())
+        assertTrue(enqueuedTrace.isEmpty())
+    }
+
+    /** FU-121 negative proof 2: a registry bank sender is unaffected (kept without currency text). */
+    @Test
+    fun aRegistrySenderIsStillKeptWithoutCurrencyText() {
+        val r = intake().process(listOf(msg("NBE", "Paid 10.00")), stamp)
+        assertEquals(1, r.written.size)
+        assertEquals(0, r.dropped)
+    }
+
     @Test
     fun anOtpFromAKeptSenderLeavesNoTraceEither() {
         val before = tree(root)
