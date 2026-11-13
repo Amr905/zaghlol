@@ -59,6 +59,7 @@ dev_dependencies:
   pigeon: ^26.0.0
   # T-141: the OpenAPI drift test reads backend/openapi/zaghlol-v1.yaml.
   yaml: ^3.1.0
+  plugin_platform_interface: ^2.1.8
 
 flutter:
   generate: true

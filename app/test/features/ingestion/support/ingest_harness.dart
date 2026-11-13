@@ -182,6 +182,24 @@ final class FaultyStore implements IngestStorePort {
   Future<int> updateTxn(String txnId, TxnPatch patch, {required int atMs}) =>
       _step(() => _inner.updateTxn(txnId, patch, atMs: atMs));
   @override
+  Future<List<StoredRaw>> rawsToReparse({
+    required int registryVersion,
+    required String afterId,
+    required int limit,
+  }) => _step(
+    () => _inner.rawsToReparse(
+      registryVersion: registryVersion,
+      afterId: afterId,
+      limit: limit,
+    ),
+  );
+  @override
+  Future<bool> promoteRaw(PromoteRaw row) =>
+      _step(() => _inner.promoteRaw(row));
+  @override
+  Future<ReparseTarget?> txnOfRaw(String rawId) =>
+      _step(() => _inner.txnOfRaw(rawId));
+  @override
   Future<void> insertReview({
     required String id,
     required String kind,
@@ -235,12 +253,14 @@ final class IngestWorld {
     List<PostPersistHook> hooks = const [],
     String idPrefix = '',
     CategorizerFactory? categorizerFactory,
+    Registry? registry,
   }) {
     final database = on ?? db;
+    final reg = registry ?? testRegistry;
     return buildIngestRawMessages(
       database,
-      pipeline: ParsingPipeline(testRegistry),
-      guardBase: guardBase ?? RegistryGuardBase(testRegistry),
+      pipeline: ParsingPipeline(reg),
+      guardBase: guardBase ?? RegistryGuardBase(reg),
       newId: () => '$idPrefix${newId()}',
       clock: () => DateTime.fromMillisecondsSinceEpoch(clockMs, isUtc: true),
       zone: const FixedLocalZone(zoneOffsetMin),

@@ -47,17 +47,73 @@ class DeviceApiError (
   override val message: String? = null,
   val details: Any? = null
 ) : Throwable()
+
+/** How one native unlock prompt ended (T-103). Never carries platform text. */
+enum class NativeAuthOutcome(val raw: Int) {
+  SUCCESS(0),
+  /** The check ran and the user did not pass it. */
+  FAILED(1),
+  /** The user or the system dismissed the prompt. */
+  CANCELLED(2),
+  /** No screen lock set, or no usable biometric hardware / UI. */
+  NOT_AVAILABLE(3),
+  /** Too many wrong tries; the OS blocks the prompt for a while. */
+  LOCKED_OUT(4);
+
+  companion object {
+    fun ofRaw(raw: Int): NativeAuthOutcome? {
+      return values().firstOrNull { it.raw == raw }
+    }
+  }
+}
 private open class DeviceApiPigeonCodec : StandardMessageCodec() {
   override fun readValueOfType(type: Byte, buffer: ByteBuffer): Any? {
-    return     super.readValueOfType(type, buffer)
+    return when (type) {
+      129.toByte() -> {
+        return (readValue(buffer) as Long?)?.let {
+          NativeAuthOutcome.ofRaw(it.toInt())
+        }
+      }
+      else -> super.readValueOfType(type, buffer)
+    }
   }
   override fun writeValue(stream: ByteArrayOutputStream, value: Any?)   {
-    super.writeValue(stream, value)
+    when (value) {
+      is NativeAuthOutcome -> {
+        stream.write(129)
+        writeValue(stream, value.raw.toLong())
+      }
+      else -> super.writeValue(stream, value)
+    }
   }
 }
 
+
 /** Generated interface from Pigeon that represents a handler of messages from Flutter. */
 interface DeviceSecurityHostApi {
+  /**
+   * FR-SEC-07 heuristic: true when the device looks rooted (Android) or
+   * jailbroken (iOS). Best effort, trivially bypassable; it only drives a
+   * warning and never blocks anything.
+   */
+  fun isDeviceRooted(): Boolean
+  /**
+   * FR-SEC-02 (T-103): true hides the app in the OS app switcher and blocks
+   * screenshots (Android FLAG_SECURE + recents screenshot off; iOS cover view
+   * while the scene is not active). false restores normal behaviour.
+   */
+  fun setSecureWindow(secure: Boolean)
+  /**
+   * True when the device has a passcode / PIN / pattern set (the fallback the
+   * app lock needs).
+   */
+  fun isDeviceSecure(): Boolean
+  /**
+   * FR-SEC-01: shows the OS unlock prompt (biometric with the device passcode
+   * as the fallback, A-08) and reports how it ended. Replaces the `local_auth`
+   * plugin. Never throws for a failed or dismissed prompt.
+   */
+  fun authenticate(reason: String, callback: (Result<NativeAuthOutcome>) -> Unit)
 
   companion object {
     /** The codec used by DeviceSecurityHostApi. */
@@ -68,6 +124,74 @@ interface DeviceSecurityHostApi {
     @JvmOverloads
     fun setUp(binaryMessenger: BinaryMessenger, api: DeviceSecurityHostApi?, messageChannelSuffix: String = "") {
       val separatedMessageChannelSuffix = if (messageChannelSuffix.isNotEmpty()) ".$messageChannelSuffix" else ""
+      run {
+        val channel = BasicMessageChannel<Any?>(binaryMessenger, "dev.flutter.pigeon.zaghlol.DeviceSecurityHostApi.isDeviceRooted$separatedMessageChannelSuffix", codec)
+        if (api != null) {
+          channel.setMessageHandler { _, reply ->
+            val wrapped: List<Any?> = try {
+              listOf(api.isDeviceRooted())
+            } catch (exception: Throwable) {
+              DeviceApiPigeonUtils.wrapError(exception)
+            }
+            reply.reply(wrapped)
+          }
+        } else {
+          channel.setMessageHandler(null)
+        }
+      }
+      run {
+        val channel = BasicMessageChannel<Any?>(binaryMessenger, "dev.flutter.pigeon.zaghlol.DeviceSecurityHostApi.setSecureWindow$separatedMessageChannelSuffix", codec)
+        if (api != null) {
+          channel.setMessageHandler { message, reply ->
+            val args = message as List<Any?>
+            val secureArg = args[0] as Boolean
+            val wrapped: List<Any?> = try {
+              api.setSecureWindow(secureArg)
+              listOf(null)
+            } catch (exception: Throwable) {
+              DeviceApiPigeonUtils.wrapError(exception)
+            }
+            reply.reply(wrapped)
+          }
+        } else {
+          channel.setMessageHandler(null)
+        }
+      }
+      run {
+        val channel = BasicMessageChannel<Any?>(binaryMessenger, "dev.flutter.pigeon.zaghlol.DeviceSecurityHostApi.isDeviceSecure$separatedMessageChannelSuffix", codec)
+        if (api != null) {
+          channel.setMessageHandler { _, reply ->
+            val wrapped: List<Any?> = try {
+              listOf(api.isDeviceSecure())
+            } catch (exception: Throwable) {
+              DeviceApiPigeonUtils.wrapError(exception)
+            }
+            reply.reply(wrapped)
+          }
+        } else {
+          channel.setMessageHandler(null)
+        }
+      }
+      run {
+        val channel = BasicMessageChannel<Any?>(binaryMessenger, "dev.flutter.pigeon.zaghlol.DeviceSecurityHostApi.authenticate$separatedMessageChannelSuffix", codec)
+        if (api != null) {
+          channel.setMessageHandler { message, reply ->
+            val args = message as List<Any?>
+            val reasonArg = args[0] as String
+            api.authenticate(reasonArg) { result: Result<NativeAuthOutcome> ->
+              val error = result.exceptionOrNull()
+              if (error != null) {
+                reply.reply(DeviceApiPigeonUtils.wrapError(error))
+              } else {
+                val data = result.getOrNull()
+                reply.reply(DeviceApiPigeonUtils.wrapResult(data))
+              }
+            }
+          }
+        } else {
+          channel.setMessageHandler(null)
+        }
+      }
     }
   }
 }

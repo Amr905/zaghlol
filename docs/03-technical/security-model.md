@@ -124,7 +124,8 @@ K_chunk = HKDF-SHA256(K_bk, salt = fileId, "ZGLB v1 chunk", 32)     -- per file
 K_snap  = HKDF-SHA256(K_bk, salt = fileId, "ZGLB v1 db-snapshot", 32)
 chunk_i = AES-256-GCM(K_chunk, nonce = noncePrefix ‖ u32(i), plaintext_i, AAD = headerBlock ‖ u32(i) ‖ u8(isLast)) = ct ‖ tag
           (nonce derived, not stored; every chunk but the last is exactly chunkSize; at most 65 536 chunks)
-plaintext = tar-like stream: db.snapshot, settings.json, manifest.json (T-149)
+plaintext = contents v1: entry(db.snapshot) ‖ entry(settings.json) ‖ entry(manifest.json),
+            entry = nameLen u8 ‖ name ‖ size u64 ‖ bytes (T-149 design note §1)
   db.snapshot = online copy via the SQLite backup API into a temp DB keyed with K_snap,
                 so the DB pages are never written unencrypted, even in temp storage
 ```
@@ -134,7 +135,7 @@ plaintext = tar-like stream: db.snapshot, settings.json, manifest.json (T-149)
 - **KDF bounds on restore:** `mKiB` 19 456..262 144, `t` 1..10, `p` 1..4, else refused before the KDF runs. The KDF runs only in the foreground (setup, passphrase change, restore), in a background isolate; budget p50 ≤ 4 s, p95 ≤ 8 s on the reference low-end Android.
 - **Contents:** everything in FR-BAK-06, nothing in FR-BAK-07.
 - **Storage:** Drive `appDataFolder` (D-11) or iCloud ubiquity container. Free = 1 slot, overwritten (FR-BAK-08). Gold keeps the last 5 (A-25). Every written file is decrypted once (verify-after-write) before upload.
-- **Restore order:** prefix and version → strict header decode and bounds → cheap refusals (newer schema, EC-26) → KDF and unwrap (wrong passphrase) → `kbkId` check → stream-decrypt to a temp encrypted DB; plaintext is untrusted until the stream ends with an authenticated last chunk → open it with `K_snap` → copy (SQLite backup API) into a new DB under this device's fresh `K_db` → swap atomically.
+- **Restore order:** prefix and version → strict header decode and bounds → cheap refusals (newer schema, EC-26) → KDF and unwrap (wrong passphrase) → `kbkId` check → stream-decrypt to a temp encrypted DB; plaintext is untrusted until the stream ends with an authenticated last chunk → open it with `K_snap` and check it (`user_version` = header, `integrity_check` incl. CHECKs, `foreign_key_check`, device tables empty, manifest counts and settings) → copy (SQLite backup API) into a staged DB under this device's own `K_db` (the source's key never travels), migrate an older schema, compare the schema shape with the app's → carry this device's device tables (`secure_state`, `outbox`, `diag_log`, `db_meta`, catalog) into it → **swap** = one SQLite backup into the live file, one write transaction: a crash or failure before its commit leaves the old database (T-149 design note §4). Then the restored `K_bk` is stored; a crash before that gives `keyMismatch` and the passphrase recovery path.
 - **Rollback:** an older genuine backup put in place of a newer one can't be detected without outside state; the restore list shows the authenticated `createdAt` and `seq`, and the writing device warns about a lower `seq`.
 
 ## 6. Backend security controls

@@ -31,6 +31,15 @@ AlertRequest req({
   redactedBody: 'Open Zaghlol',
 );
 
+bool _all(NotificationType _) => true;
+
+class _ThrowingGateway implements NotificationGateway {
+  @override
+  Future<void> show(PlatformNotification n) async => throw StateError('x');
+  @override
+  Future<void> schedule(PlatformNotification n) async => throw StateError('x');
+}
+
 void main() {
   group('QuietHours', () {
     test('wraps midnight; boundaries', () {
@@ -87,11 +96,53 @@ void main() {
         required threshold,
         required at,
       }) async => fired.add('$kind|$subjectId|$periodKey|$threshold'),
+      unmarkFired:
+          ({
+            required kind,
+            required subjectId,
+            required periodKey,
+            required threshold,
+          }) async {
+            fired.remove('$kind|$subjectId|$periodKey|$threshold');
+          },
     );
 
     setUp(() {
       gw = FakeGateway();
       fired = {};
+    });
+
+    test('FU-133: a failed gateway call releases the dedupe claim', () async {
+      final n = make(DateTime(2026, 11, 13, 12));
+      final bad = _ThrowingGateway();
+      final svc = NotificationService(
+        gateway: bad,
+        now: () => DateTime(2026, 11, 13, 12),
+        loadPrefs: () async => const NotificationPrefs(
+          typeEnabled: _all,
+          quietHours: QuietHours(enabled: false, startMin: 0, endMin: 0),
+          hideAmounts: false,
+        ),
+        markFired: ({
+          required kind,
+          required subjectId,
+          required periodKey,
+          required threshold,
+          required at,
+        }) async => fired.add('$kind|$subjectId|$periodKey|$threshold'),
+        unmarkFired:
+            ({
+              required kind,
+              required subjectId,
+              required periodKey,
+              required threshold,
+            }) async {
+              fired.remove('$kind|$subjectId|$periodKey|$threshold');
+            },
+      );
+      await expectLater(svc.notify(req()), throwsStateError);
+      expect(fired, isEmpty);
+      expect(await n.notify(req()), AlertOutcome.shown);
     });
 
     test('daytime shows now', () async {

@@ -20,11 +20,11 @@
 |---|---|---|---|---|
 | M0 | 28 | 24 | 1 | 0 |
 | M1 | 29 | 18 | 0 | 1 |
-| M2 | 29 | 6 | 0 | 0 |
-| M3 | 18 | 2 | 0 | 0 |
+| M2 | 29 | 7 | 0 | 0 |
+| M3 | 18 | 4 | 0 | 0 |
 | M4 | 17 | 4 | 0 | 0 |
-| M5 | 35 | 22 | 1 | 1 |
-| M6 | 19 | 2 | 1 | 2 |
+| M5 | 35 | 23 | 1 | 1 |
+| M6 | 19 | 3 | 1 | 2 |
 | M7 | 11 | 0 | 0 | 0 |
 
 ## Tasks
@@ -105,7 +105,7 @@
 | T-073 | Generic parser for unknown financial senders | M2 | C3 | Sonnet | parsing-engine-engineer | T-033, T-034 | DONE | batch 4 local: app 873 tests, packages 901, analyze/format clean; batch CI (`batch/2026-11-11-3`); review [T-073](05-reviews/T-073.md) APPROVED after flaky-probe fix (delta) | Batch 4. FU-078 (signed balance), FU-080 (ingest routing, owner T-046) |
 | T-074 | Merchant rules repository and apply-to-past | M2 | C2 | Sonnet | flutter-core-engineer | T-018, T-050 | DONE | batch 5 local: app 1167 tests, zaghlol_parsing 1029, all packages/tools green, analyze/format clean; batch CI (`batch/2026-11-11-4`); review [T-074](05-reviews/T-074.md) APPROVED | Batch 5. Precedence counterparty → merchant_norm → catalog merchant is an assumption for T-075; rule re-point leaves rule-set rows (T-077 copy). FU-095 |
 | T-075 | Categorizer with fuzzy merchant matching | M2 | C3 | Sonnet | parsing-engine-engineer | T-034, T-018, T-074, T-030 | DONE | batch 6 local: every app-ci step green (app tests, packages, lints, Pigeon/drift stale checks, no-logging grep), backend Release build 0 warnings, format clean, no vulnerable packages; batch CI (`batch/2026-11-11-5`); review [T-075](05-reviews/T-075.md) APPROVED (FU-095 harness negative proof re-run) | Batch 6. Takes FU-095. PO-1…PO-4 provisional (Arabic El Ezaby aliases need native review with T-059). FU-100 |
-| T-076 | Re-parse job after registry version bump | M2 | C3 | Sonnet | flutter-core-engineer | T-046, T-032 | TODO | — |  |
+| T-076 | Re-parse job after registry version bump | M2 | C3 | Sonnet | flutter-core-engineer | T-046, T-032 | DONE | batch 14 review [batch-14](05-reviews/batch-14.md) APPROVED after fix (re-parse never writes a matched transaction) | Batch 14. FU-135 |
 | T-077 | Bulk edit and undo use case | M2 | C3 | Sonnet | flutter-core-engineer | T-050, T-074 | DONE | batch 9 review [batch-9](05-reviews/batch-9.md) APPROVED after fix 77-1 (delta re-review) | Batch 9. FU-114 |
 | T-078 | Ignore rules domain: per card/channel, before-seen, keep/delete, re-scan | M2 | C3 | Sonnet | flutter-core-engineer | T-047, T-050 | DONE | batch 13 review [batch-13](05-reviews/batch-13.md) APPROVED | Batch 13. FU-132 |
 | T-079 | Transactions list S-11 with filters, search and selection mode | M2 | C2 | Sonnet | flutter-ui-engineer | T-050, T-077, T-024, T-029 | TODO | — |  |
@@ -124,7 +124,7 @@
 | T-092 | Reimbursement and cross-currency pair suggestions | M3 | C2 | Sonnet | flutter-core-engineer | T-091, T-049 | TODO | — |  |
 | T-093 | Split/reimbursement sheet S-15 and link-transfer sheet S-16 | M3 | C2 | Sonnet | flutter-ui-engineer | T-091, T-089, T-080 | TODO | — |  |
 | T-094 | Local notifications service (types, quiet hours, redaction) | M3 | C2 | Sonnet | flutter-core-engineer | T-020 | DONE | batch 13 review [batch-13](05-reviews/batch-13.md) APPROVED | Batch 13. FU-133 |
-| T-095 | Budgets per category and currency with threshold alerts | M3 | C2 | Sonnet | flutter-core-engineer | T-051, T-094 | TODO | — |  |
+| T-095 | Budgets per category and currency with threshold alerts | M3 | C2 | Sonnet | flutter-core-engineer | T-051, T-094 | DONE | batch 14 review [batch-14](05-reviews/batch-14.md) APPROVED; FU-133 fixed | Batch 14. FU-136 |
 | T-096 | Subscriptions detection, installments, gameya, card dues and reminders | M3 | C3 | Sonnet | flutter-core-engineer | T-050, T-094 | TODO | — |  |
 | T-097 | Contextual setup suggestions (payday, budgets, backup) | M3 | C2 | Sonnet | flutter-core-engineer | T-051, T-049 | TODO | — |  |
 | T-098 | Mascot trigger policy (shocked, detective, proud, tour guide) | M3 | C2 | Sonnet | flutter-core-engineer | T-051, T-089, T-095 | TODO | — |  |
@@ -132,7 +132,7 @@
 | T-100 | Duplicate-charge and weekly-summary notifications | M3 | C2 | Sonnet | flutter-core-engineer | T-094, T-046, T-051 | TODO | — |  |
 | T-101 | Insights shell and Budget S-22 (+ edit budgets) | M3 | C2 | Sonnet | flutter-ui-engineer | T-095, T-087, T-024 | TODO | — |  |
 | T-102 | Bills & installments S-24 and add/edit recurring item | M3 | C2 | Sonnet | flutter-ui-engineer | T-096, T-087 | TODO | — |  |
-| T-103 | App lock, privacy overlay and screenshot hiding | M3 | C3 | Sonnet | native-platform-engineer | T-004, T-020 | IN_PROGRESS | batch 13 review APPROVED, but **pulled out of batch 13**: db-platform iOS simulator hangs at app launch (twice, 60 min; main passes in 12 min). Back to the native lane | Batch 13. FU-130 |
+| T-103 | App lock, privacy overlay and screenshot hiding | M3 | C3 | Sonnet | native-platform-engineer | T-004, T-020 | DONE | batch 14 review [batch-14](05-reviews/batch-14.md) APPROVED (batch-13 review + batch-14 rework review); local_auth replaced by native prompts; db-platform iOS passes | Batch 13. FU-130 Batch 14. FU-130, FU-137 |
 | T-104 | Home contextual cards and Settings 'finish setup' | M3 | C2 | Sonnet | flutter-ui-engineer | T-054, T-097, T-103 | TODO | — |  |
 | T-105 | Chart query layer for all 12 charts | M4 | C3 | Sonnet | flutter-core-engineer | T-051, T-096, T-091 | TODO | — |  |
 | T-106 | Explanation template engine (basic vs deep coaching) | M4 | C3 | Sonnet | flutter-core-engineer | T-105, T-027 | TODO | — |  |
@@ -173,12 +173,12 @@
 | T-141 | App BackendClient: generated DTOs, ES256 verification, lazy install registration | M5 | C4 | Opus | flutter-core-engineer | T-006, T-019 | DONE | batch 10 review [batch-10](05-reviews/batch-10.md) APPROVED | Batch 10. FU-115 |
 | T-142 | Merchant contribution opt-in and outbox with on-device filters | M5 | C4 | Opus | flutter-core-engineer | T-075, T-019 | TODO | — |  |
 | T-143 | Daily sync orchestrator: throttle, back-off, atomic apply, re-categorize | M5 | C3 | Opus | flutter-core-engineer | T-141, T-075, T-142, T-112, T-025, T-144 | TODO | — |  |
-| T-144 | Entitlement token verification, trusted time, offline cache and grace | M5 | C4 | Opus | flutter-core-engineer | T-119, T-141, T-180 | TODO | — | Plan v1.1: R5-1 tests are owner-task criteria |
+| T-144 | Entitlement token verification, trusted time, offline cache and grace | M5 | C4 | Opus | flutter-core-engineer | T-119, T-141, T-180 | DONE | batch 14 review [batch-14](05-reviews/batch-14.md) APPROVED | Plan v1.1: R5-1 tests are owner-task criteria Batch 14. FU-138 |
 | T-145 | In-app purchase flow, backend verify, background retry and restore | M5 | C4 | Opus | flutter-core-engineer | T-144, T-141, T-178, T-179, T-183 | TODO | — |  |
 | T-146 | Paywall S-68, locked previews, upgrade prompt cap and Gold status messages | M5 | C2 | Sonnet | flutter-ui-engineer | T-145, T-144, T-087 | TODO | — |  |
 | T-147 | Optional sign-in, account screen S-69, sign-out and delete account | M5 | C4 | Opus | flutter-core-engineer | T-141, T-144, T-145, T-179, T-183 | TODO | — | Plan v1.1: R5-3(a) note |
 | T-148 | Backup file format: Argon2id-wrapped key and chunked AES-256-GCM | M6 | C4 | Opus | flutter-core-engineer | T-015 | DONE | app-ci 42985580730 + db-platform 42985580847 on `ci/T-148` (Android API 26/35 + iOS device groups with native AES-GCM, NFC, Argon2id); batch 6 local: every app-ci step green (app tests, packages, lints, Pigeon/drift stale checks, no-logging grep), backend Release build 0 warnings, format clean, no vulnerable packages; batch CI (`batch/2026-11-11-5`); reviews [T-148](05-reviews/T-148.md) + [security](05-reviews/T-148-security.md) APPROVED | Batch 6. PO Q1–Q3 provisional. FU-099 |
-| T-149 | Backup snapshot and restore swap with schema checks | M6 | C4 | Opus | flutter-core-engineer | T-148, T-017, T-018, T-019, T-020 | TODO | — |  |
+| T-149 | Backup snapshot and restore swap with schema checks | M6 | C4 | Opus | flutter-core-engineer | T-148, T-017, T-018, T-019, T-020 | DONE | batch 14 review [batch-14](05-reviews/batch-14.md) APPROVED; FU-099 item 2 done | Batch 14. FU-139 |
 | T-150 | Google Drive appDataFolder backend | M6 | C4 | Opus | flutter-core-engineer | T-149 | TODO | — |  |
 | T-151 | iCloud backup host (native) and Dart adapter | M6 | C4 | Opus | native-platform-engineer | T-149, T-004 | TODO | — |  |
 | T-152 | Backup schedules, slots and reminders (Free 1 slot, Gold 5 versions) | M6 | C3 | Sonnet | flutter-core-engineer | T-150, T-151, T-119, T-094 | TODO | — |  |
@@ -361,6 +361,12 @@
 - **FU-133** (T-094 batch-13 review): write the dedupe row only after `gateway.show/schedule` succeeds; re-check redaction at fire time for alerts scheduled during quiet hours; the `flutter_local_notifications` adapter and provider wiring land with T-095; an `urgent` flag if any type should bypass quiet hours.
 - **FU-134** (T-115 batch-13 review): UI tasks T-116/T-162 show the "not included" note whenever `excluded` is non-empty; test of the provider's "on" path with a real `PricesRepository`.
 
+- **FU-135** (T-076 batch-14 review): a review row converted through `_parsed` can still create `possibleDuplicate` / `needsCategory` items; `_attach` may move a transaction to the card account when the target has no last4; review rows whose persist rolls back are never stamped (retried each run); wire `ReparseJob.run()` at app start with `TransferPairing.onPersisted` (app composition).
+- **FU-136** (T-095 batch-14 review): annual budgets are modelled but never evaluated (T-098/T-101 supply year totals); use `Money.tryFromStorage` so one corrupt budget doesn't stop the alert run; comment on `unmarkFired` error precedence; wire `BudgetAlertService.run` after ingestion; the `flutter_local_notifications` adapter is still to come.
+- **FU-137** (T-103 rework, batch-14 review): iOS `LAContext` held only as a temporary during `evaluatePolicy` (keep a strong reference); manual device test of the native prompt and passcode fallback on a real Android phone and iPhone; `ci/T-103`, `ci/T-103-b`, `ci/T-103-c` branches to delete (PO).
+- **FU-138** (T-144 batch-14 review): a missing `trusted_time` record starts at the wall clock instead of `tampered`; the 60 s timer `evaluate()` can interleave with `handleBody` (stale phase for a moment); **T-146 copy: when `tampered` persists after a fresh echo, say "set your phone's clock to automatic", not "connect"**; T-143 wires `entitlementServiceProvider`; real-device clock tests (FU-128) before this ships.
+- **FU-139** (T-149 batch-14 review): device-table writes between the carry-over read and the swap commit are lost — the restore UI pauses sync and capture; map any throw from `storeRestoredKey` after a successful swap to `keyStored = false`; restore UI duties (invalidate `appDatabaseProvider`, catalog resync, re-grant prompt, passphrase prompt when `keyStored` is false).
+
 ## Log
 | Date | Event |
 |---|---|
@@ -428,3 +434,4 @@
 | 2026-11-13 | Batch 11 (`batch/2026-11-13-11`): T-048, T-049, T-119, T-181, T-183 DONE. FU-120…FU-124. Progress 70/186. |
 | 2026-11-13 | Batch 12 (`batch/2026-11-13-12`): T-024, T-052, T-089, T-180, T-185 DONE. FU-125…FU-129. Progress 75/186. |
 | 2026-11-13 | Batch 13 (`batch/2026-11-13-13`): T-078, T-094, T-115, T-154 DONE; T-103 pulled out (iOS db-platform launch hang). FU-130…FU-134. Progress 79/186. |
+| 2026-11-13 | Batch 14 (`batch/2026-11-13-14`): T-076, T-095, T-103 (back, local_auth replaced), T-144, T-149 DONE. FU-135…FU-139. Progress 84/186. |

@@ -108,6 +108,8 @@ dependencies {
     // androidx.startup and kotlinx-coroutines-android. Its exported
     // DiagnosticsReceiver is removed in src/main/AndroidManifest.xml.
     implementation("androidx.work:work-runtime:2.12.0")
+    // T-103: the unlock prompt (DeviceSecurityHost.authenticate), replacing local_auth.
+    implementation("androidx.biometric:biometric:1.1.0")
     testImplementation("junit:junit:4.13.2")
     // T-060: instrumented tests (Keystore cipher, share store on a device).
     // Versions match what the integration_test plugin already puts on the debug
