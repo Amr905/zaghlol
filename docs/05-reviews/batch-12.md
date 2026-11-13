@@ -109,3 +109,15 @@ AC: tabs preserve state PASS; platform variant PASS; deep links PASS (`deep_link
 | 3 | T-052 | A (app core) | Safe-to-spend computed from card-filtered totals, contrary to the Lead decision | Overview/safe-to-spend from unfiltered totals; filter only the displayed spend figures and the feed; test |
 
 T-089 and T-052 are on the same lane but touch different files (`transfer_pairing.dart` / `home_read_model.dart`); they can run in parallel. Each fix is small; per policy the Lead can check the T-052 fix (about 10 lines plus a test) as a delta. T-089 needs a Sonnet delta re-review.
+
+## Re-review of the fix round (c893d2d, delta)
+
+Verdict: **APPROVED**. No blocker or major. `flutter test test/features/transactions test/features/home` green (103 tests).
+
+Checked: `onRemoved`, `unlink` and the heal each run in one `inTransaction` (pair delete, leg free and review rows commit together). The survivor of `onRemoved` counts again, or stays internal and is re-marked one-sided when it is an own-account leg. A one-sided pair or a survivor that is itself deleted is handled. The unlink memory is written for both legs, each holding the other's id, so `_freeLegs(skip:)` excludes the pair whichever leg is evaluated first, for same-currency, FX-conversion and cross-currency candidates. A single leg gets an empty list, which also blocks the one-sided re-mark. `link` is not blocked. Review rows are not unique per txn, so repeated unlinks just add rows. T-052: safe-to-spend comes from the all-cards overview, and spend, pending, net and the feed follow the filter. The `onResume` error is swallowed with no logging.
+
+Minors (follow-ups, not blocking):
+- transfer_pairing.dart `_evaluate` heal path: when it frees a leg but the result is `none`, `ambiguous` or `suggested`, no `TransactionsChanged` is published, so cached totals stay stale until the next event or the resume sweep (`_freeLeg` bumps `updated_at`, so the sweep should catch it). Fix: attach `_event(schedule, [self])` when healed and the result has no event.
+- `onRemoved` is not wired to `softDelete` or bulk delete (already FU per finding 5). The 30-day hard purge cascades the pair row away (`ON DELETE CASCADE`), leaving the survivor `is_internal = 1` with no pair, which neither `onRemoved` nor the heal can find. The wiring task must call `onRemoved` at soft-delete time.
+- `unlinked != null` suppresses the own-account one-sided re-mark for that leg permanently, even for a later unrelated counterparty. Acceptable; note it. `purgeResolvedBefore` dropping the memory is the accepted residual.
+- Untested: the event published by `unlink`/`onRemoved`, and unlinked memory with cross-currency candidates.
