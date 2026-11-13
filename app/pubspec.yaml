@@ -43,6 +43,9 @@ dependencies:
   cryptography_flutter: 2.3.4
   # T-148: Argon2id for the backup passphrase (pure Dart, no FFI, no network).
   hashlib: 2.4.2
+  # T-141: ES256 verification of backend response signatures (pure Dart, the
+  # same library zaghlol_catalog uses; already in the workspace lock).
+  pointycastle: ^4.0.0
 
 dev_dependencies:
   flutter_test:
@@ -53,6 +56,8 @@ dev_dependencies:
   integration_test:
     sdk: flutter
   pigeon: ^26.0.0
+  # T-141: the OpenAPI drift test reads backend/openapi/zaghlol-v1.yaml.
+  yaml: ^3.1.0
 
 flutter:
   generate: true

@@ -62,6 +62,9 @@ abstract final class DiagCodes {
     catalogUpdated,
     dbMigrated,
     backupExclusionFailed,
+    backendCallFailed,
+    backendBadSignature,
+    installReregistered,
   ];
 
   static const DiagCode flutterError = DiagCode._('FLUTTER_ERROR');
@@ -80,5 +83,20 @@ abstract final class DiagCodes {
   /// backups failed. Code only, never a path.
   static const DiagCode backupExclusionFailed = DiagCode._(
     'BACKUP_EXCLUSION_FAILED',
+  );
+
+  /// T-141: a backend call failed (fields: `http_status` when there was one).
+  static const DiagCode backendCallFailed = DiagCode._('BACKEND_CALL_FAILED');
+
+  /// T-141: a signed operation's answer was dropped (bad or missing
+  /// `Zaghlol-Signature`).
+  static const DiagCode backendBadSignature = DiagCode._(
+    'BACKEND_BAD_SIGNATURE',
+  );
+
+  /// T-141 (R5-1): the install token was refused and a new install ID was
+  /// registered; local data kept.
+  static const DiagCode installReregistered = DiagCode._(
+    'INSTALL_REREGISTERED',
   );
 }

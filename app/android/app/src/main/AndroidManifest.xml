@@ -1,5 +1,9 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools">
+    <!-- T-141 (T-001 review F16): BackendClient talks to the Zaghlol backend
+         (catalog, flags, prices, purchase verification). Financial data
+         never goes there (BR-SYNC-03). -->
+    <uses-permission android:name="android.permission.INTERNET"/>
     <!-- FR-SEC-05 / T-165: no OS mechanism may copy app data off the phone.
          allowBackup=false stops Auto Backup, key/value backup and adb backup
          (API 26-30) and cloud backup (API 31+). On API 31+ only
