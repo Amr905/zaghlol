@@ -118,3 +118,15 @@ Commits 734e6ccf (T-110) and e506fa83 (T-145). `flutter test test/features/ask t
 - Acknowledged purchases are skipped, so no double acknowledge; the handle is dropped after completion.
 - Listener subscribes before `start()`, so the redelivery is not missed.
 - FU (minor): a `verified` entry whose purchase is no longer on Play (refunded) stays in the outbox forever; add an age-out.
+
+## Lead delta check (fix round 18c)
+
+Commit `d6439f89` (about 24 production lines, tests fail without the fix):
+- **T-080:** `parseAmount` strips commas only for valid thousands grouping (`^[0-9]{1,3}(,[0-9]{3})+(\.[0-9]*)?$`) after digit normalization; `12,5` now fails with `amountRequired`. The amount field also filters to digits and separators. Correct.
+- **T-152:** `backupKeepFor` returns the Gold keep count (5) while the entitlement is `pendingVerification`; `reconcile()` and `runScheduled()` do nothing in that phase, so neither prunes nor cancels. Correct.
+- **T-104:** test-only change; `enableAppLock` enabled, not secure and failed paths are covered.
+- **Settings:** `setupInstalledOn` row added to the allKeys table.
+
+Verdict: APPROVED. T-110 and T-145 were checked by the delta re-review above.
+
+The parsing timing test "1,000 adversarial 4,000-char decisions take under 2 s" fails only under a fully parallel local run; on its own it passed 3 times out of 3. Follow-up FU-183: tag it `benchmark` if CI hits it.
