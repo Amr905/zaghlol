@@ -16,10 +16,8 @@ namespace Zaghlol.Infrastructure.Persistence.Migrations
     /// </summary>
     public partial class BackfillPurchaseSeats : Migration
     {
-        /// <inheritdoc />
-        protected override void Up(MigrationBuilder migrationBuilder)
-        {
-            migrationBuilder.Sql(
+        /// <summary>The statement <see cref="Up"/> runs (a constant so the integration test runs exactly this text).</summary>
+        internal const string Sql =
                 """
                 INSERT INTO zaghlol.purchase_seats (purchase_id, install_id, proof, bound_at, device_key_trusted, recent_rebinds)
                 SELECT p.id,
@@ -32,8 +30,10 @@ namespace Zaghlol.Infrastructure.Persistence.Migrations
                 LEFT JOIN zaghlol.installs i ON i.id = p.install_id AND i.deleted_at IS NULL
                 WHERE NOT EXISTS (SELECT 1 FROM zaghlol.purchase_seats s WHERE s.purchase_id = p.id)
                 ON CONFLICT (purchase_id) DO NOTHING;
-                """);
-        }
+                """;
+
+        /// <inheritdoc />
+        protected override void Up(MigrationBuilder migrationBuilder) => migrationBuilder.Sql(Sql);
 
         /// <inheritdoc />
         protected override void Down(MigrationBuilder migrationBuilder)
