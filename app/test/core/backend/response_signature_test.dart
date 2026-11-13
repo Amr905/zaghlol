@@ -36,7 +36,8 @@ void main() {
   final verifier = ResponseSignatureVerifier(_keys(doc), allowDevKeys: true);
 
   group('backend vectors', () {
-    for (final v in (doc['valid']! as List<Object?>).cast<Map<String, Object?>>()) {
+    for (final v
+        in (doc['valid']! as List<Object?>).cast<Map<String, Object?>>()) {
       test('valid: ${v['name']}', () {
         expect(
           verifier.verify(_body(v['bodyB64u']), v['header']! as String),
@@ -46,9 +47,12 @@ void main() {
     }
     final invalid = (doc['invalid']! as List<Object?>)
         .cast<Map<String, Object?>>();
-    test('there are invalid vectors (tampered body, unknown kid, e kid ...)', () {
-      expect(invalid.length, greaterThanOrEqualTo(6));
-    });
+    test(
+      'there are invalid vectors (tampered body, unknown kid, e kid ...)',
+      () {
+        expect(invalid.length, greaterThanOrEqualTo(6));
+      },
+    );
     for (final v in invalid) {
       test('rejected: ${v['name']}', () {
         expect(
@@ -115,7 +119,8 @@ void main() {
     test('an e (entitlement) kid never signs a header, even when pinned', () {
       final e = TestSigningKey('e2026a', seed: 4);
       expect(
-        () => ResponseSignatureVerifier([e.publicKey]).verify(body, e.sign(body)),
+        () =>
+            ResponseSignatureVerifier([e.publicKey]).verify(body, e.sign(body)),
         throwsA(isA<ResponseSignatureException>()),
       );
     });
