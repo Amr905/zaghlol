@@ -45,24 +45,53 @@ abstract final class FreeLimits {
   static const int goldBackupVersions = 5;
 }
 
+/// What the entitlement service concluded (T-144). Only [active] and [grace]
+/// are Gold.
+enum EntitlementPhase {
+  free,
+  active,
+  grace,
+
+  /// The seat went to another install (FR-GOLD-08).
+  moved,
+
+  /// Account-linked Gold without a valid account token (D-61(c)).
+  paused,
+
+  /// Trusted time is unproven: "connect to check Gold".
+  tampered,
+
+  /// A cached token exists but has not been verified yet.
+  pendingVerification,
+}
+
+/// Who moved the seat (`movedBy` of the token).
+enum MovedBy { user, support }
+
 @immutable
 final class EntitlementState {
-  const EntitlementState._(this.tier);
+  const EntitlementState._(this.phase, [this.movedBy]);
 
-  static const EntitlementState free = EntitlementState._(Tier.free);
+  static const EntitlementState free = EntitlementState._(
+    EntitlementPhase.free,
+  );
 
-  static const EntitlementState _gold = EntitlementState._(Tier.gold);
+  final EntitlementPhase phase;
+  final MovedBy? movedBy;
 
-  final Tier tier;
+  Tier get tier => isGold ? Tier.gold : Tier.free;
 
-  bool get isGold => tier == Tier.gold;
+  bool get isGold =>
+      phase == EntitlementPhase.active || phase == EntitlementPhase.grace;
 
   @override
   bool operator ==(Object other) =>
-      other is EntitlementState && other.tier == tier;
+      other is EntitlementState &&
+      other.phase == phase &&
+      other.movedBy == movedBy;
 
   @override
-  int get hashCode => tier.hashCode;
+  int get hashCode => Object.hash(phase, movedBy);
 }
 
 @immutable
@@ -137,18 +166,38 @@ class EntitlementNotifier extends Notifier<EntitlementState> {
   @override
   EntitlementState build() => EntitlementState.free;
 
-  /// Called by T-144 with the result of verifying the signed token against
-  /// trusted time. Gold for `active` and `grace` (backend-api 4.3); anything else is Free.
+  /// Called by T-144 only after signature, install-binding and trusted-time
+  /// checks. Gold for `active` and `grace` (backend-api 4.3); anything else
+  /// is Free.
   void applyVerified({required bool verified, required String? status}) {
-    state = (verified && (status == 'active' || status == 'grace'))
-        ? EntitlementState._gold
-        : EntitlementState.free;
+    if (verified && status == 'active') {
+      state = const EntitlementState._(EntitlementPhase.active);
+    } else if (verified && status == 'grace') {
+      state = const EntitlementState._(EntitlementPhase.grace);
+    } else {
+      state = EntitlementState.free;
+    }
+  }
+
+  /// A non-Gold state from the entitlement service. Gold phases are refused
+  /// here (they only come from [applyVerified]).
+  void applyNonGold(EntitlementPhase phase, {MovedBy? movedBy}) {
+    if (phase == EntitlementPhase.active || phase == EntitlementPhase.grace) {
+      state = EntitlementState.free;
+      return;
+    }
+    state = EntitlementState._(
+      phase,
+      phase == EntitlementPhase.moved ? movedBy : null,
+    );
   }
 
   /// Dev builds only; ignored in profile/release.
   void debugOverride(bool gold) {
     if (!kDebugMode) return;
-    state = gold ? EntitlementState._gold : EntitlementState.free;
+    state = gold
+        ? const EntitlementState._(EntitlementPhase.active)
+        : EntitlementState.free;
   }
 
   void reset() => state = EntitlementState.free;

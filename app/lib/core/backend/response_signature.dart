@@ -128,22 +128,39 @@ final class ResponseSignatureVerifier {
     final key = _keys[kid];
     if (key == null) throw ResponseSignatureException();
     final raw = base64Url.decode('${m.group(2)!}==');
-    if (raw.length != 64) throw ResponseSignatureException();
-    final r = _toBig(raw.sublist(0, 32));
-    final s = _toBig(raw.sublist(32));
-    final n = _p256.n;
-    if (r <= BigInt.zero || r >= n || s <= BigInt.zero || s >= n) {
-      throw ResponseSignatureException();
-    }
-    final bool ok;
-    try {
-      final verifier = ECDSASigner(SHA256Digest())
-        ..init(false, PublicKeyParameter<ECPublicKey>(key._public));
-      ok = verifier.verifySignature(body, ECSignature(r, s));
-    } on Object {
-      throw ResponseSignatureException();
-    }
-    if (!ok) throw ResponseSignatureException();
+    if (!_verifyP1363(key, body, raw)) throw ResponseSignatureException();
     return kid;
+  }
+
+  /// Verifies a detached ES256 signature (IEEE P1363 `r || s`, 64 bytes) of
+  /// [message] by the pinned key [kid], which must carry [kidPrefix] (`e` for
+  /// JWS tokens, T-144). The same primitive as [verify]; false for any
+  /// failure (unknown kid, wrong purpose, dev key in release, bad signature).
+  bool verifyDetached({
+    required String kid,
+    required String kidPrefix,
+    required Uint8List message,
+    required Uint8List signature,
+  }) {
+    if (!_keyKid.hasMatch(kid) || !kid.startsWith(kidPrefix)) return false;
+    if (!allowDevKeys && _devKid.hasMatch(kid)) return false;
+    final key = _keys[kid];
+    if (key == null) return false;
+    return _verifyP1363(key, message, signature);
+  }
+}
+
+bool _verifyP1363(ResponseKey key, Uint8List message, List<int> raw) {
+  if (raw.length != 64) return false;
+  final r = _toBig(raw.sublist(0, 32));
+  final s = _toBig(raw.sublist(32));
+  final n = _p256.n;
+  if (r <= BigInt.zero || r >= n || s <= BigInt.zero || s >= n) return false;
+  try {
+    final verifier = ECDSASigner(SHA256Digest())
+      ..init(false, PublicKeyParameter<ECPublicKey>(key._public));
+    return verifier.verifySignature(message, ECSignature(r, s));
+  } on Object {
+    return false;
   }
 }
