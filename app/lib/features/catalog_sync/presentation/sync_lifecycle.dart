@@ -3,6 +3,8 @@
 // and the back-off live in the orchestrator, so ten opens a day make at most
 // one successful sync. Failures are typed outcomes; nothing is surfaced here.
 
+import '../../account/application/account_providers.dart';
+
 import 'dart:async';
 
 import 'package:flutter/widgets.dart';
@@ -56,6 +58,7 @@ class _SyncLifecycleState extends ConsumerState<SyncLifecycle>
   Future<void> _startPurchases() async {
     try {
       await ref.read(purchaseServiceProvider).start();
+      ref.read(protectSuggestionRecorderProvider); // T-147 (D-54)
     } on Object {
       // No store (tests, a device without Play): purchases are unavailable.
     }
