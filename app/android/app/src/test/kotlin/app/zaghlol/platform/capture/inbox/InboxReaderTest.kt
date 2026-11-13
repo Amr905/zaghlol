@@ -184,7 +184,7 @@ class InboxReaderTest {
         assertNull(guard.senderKind("sms", "MyBank"))
         val rows = listOf(
             InboxRow(1, "BDC-ALERT", now - day, paid(1)),
-            InboxRow(2, "MyCoop", now - day, paid(2)),
+            InboxRow(2, "MyCoop", now - day, "dividend paid"),
             InboxRow(3, "CIB-EGY", now - day, paid(3)),
             InboxRow(4, "MyBank", now - day, paid(4)),
         )

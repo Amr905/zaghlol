@@ -88,12 +88,12 @@ class CaptureIntakeTest {
         assertTrue(spooled.isEmpty())
     }
 
-    /** FU-121 negative proof 1: a personal message from a user-added sender leaves nothing behind. */
+    /** FU-121 negative proof 1: a personal message from a user-added phone number leaves nothing behind. */
     @Test
     fun personalSmsFromAUserAddedSenderLeavesTheWholeRootByteIdentical() {
         val before = tree(root)
         val r = intake().process(
-            listOf(msg("MyCoop", "see you at 7, bring the cake"), msg("club-7", "Paid 10.00 for lunch, thanks")),
+            listOf(msg("+201000000009", "see you at 7, bring the cake"), msg("+201000000009", "Paid 10.00 for lunch, thanks")),
             stamp,
         )
         assertEquals(2, r.dropped)
