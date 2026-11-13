@@ -64,11 +64,214 @@ private func nilOrValue<T>(_ value: Any?) -> T? {
   return value as! T?
 }
 
+private func doubleEqualsIcloudApi(_ lhs: Double, _ rhs: Double) -> Bool {
+  return (lhs.isNaN && rhs.isNaN) || lhs == rhs
+}
+
+private func doubleHashIcloudApi(_ value: Double, _ hasher: inout Hasher) {
+  if value.isNaN {
+    hasher.combine(0x7FF8000000000000)
+  } else {
+    // Normalize -0.0 to 0.0
+    hasher.combine(value == 0 ? 0 : value)
+  }
+}
+
+func deepEqualsIcloudApi(_ lhs: Any?, _ rhs: Any?) -> Bool {
+  let cleanLhs = nilOrValue(lhs) as Any?
+  let cleanRhs = nilOrValue(rhs) as Any?
+  switch (cleanLhs, cleanRhs) {
+  case (nil, nil):
+    return true
+
+  case (nil, _), (_, nil):
+    return false
+
+  case (let lhs as AnyObject, let rhs as AnyObject) where lhs === rhs:
+    return true
+
+  case is (Void, Void):
+    return true
+
+  case (let lhsArray, let rhsArray) as ([Any?], [Any?]):
+    guard lhsArray.count == rhsArray.count else { return false }
+    for (index, element) in lhsArray.enumerated() {
+      if !deepEqualsIcloudApi(element, rhsArray[index]) {
+        return false
+      }
+    }
+    return true
+
+  case (let lhsArray, let rhsArray) as ([Double], [Double]):
+    guard lhsArray.count == rhsArray.count else { return false }
+    for (index, element) in lhsArray.enumerated() {
+      if !doubleEqualsIcloudApi(element, rhsArray[index]) {
+        return false
+      }
+    }
+    return true
+
+  case (let lhsDictionary, let rhsDictionary) as ([AnyHashable: Any?], [AnyHashable: Any?]):
+    guard lhsDictionary.count == rhsDictionary.count else { return false }
+    for (lhsKey, lhsValue) in lhsDictionary {
+      var found = false
+      for (rhsKey, rhsValue) in rhsDictionary {
+        if deepEqualsIcloudApi(lhsKey, rhsKey) {
+          if deepEqualsIcloudApi(lhsValue, rhsValue) {
+            found = true
+            break
+          } else {
+            return false
+          }
+        }
+      }
+      if !found { return false }
+    }
+    return true
+
+  case (let lhs as Double, let rhs as Double):
+    return doubleEqualsIcloudApi(lhs, rhs)
+
+  case (let lhsHashable, let rhsHashable) as (AnyHashable, AnyHashable):
+    return lhsHashable == rhsHashable
+
+  default:
+    return false
+  }
+}
+
+func deepHashIcloudApi(value: Any?, hasher: inout Hasher) {
+  let cleanValue = nilOrValue(value) as Any?
+  if let cleanValue = cleanValue {
+    if let doubleValue = cleanValue as? Double {
+      doubleHashIcloudApi(doubleValue, &hasher)
+    } else if let valueList = cleanValue as? [Any?] {
+      for item in valueList {
+        deepHashIcloudApi(value: item, hasher: &hasher)
+      }
+    } else if let valueList = cleanValue as? [Double] {
+      for item in valueList {
+        doubleHashIcloudApi(item, &hasher)
+      }
+    } else if let valueDict = cleanValue as? [AnyHashable: Any?] {
+      var result = 0
+      for (key, value) in valueDict {
+        var entryKeyHasher = Hasher()
+        deepHashIcloudApi(value: key, hasher: &entryKeyHasher)
+        var entryValueHasher = Hasher()
+        deepHashIcloudApi(value: value, hasher: &entryValueHasher)
+        result = result &+ ((entryKeyHasher.finalize() &* 31) ^ entryValueHasher.finalize())
+      }
+      hasher.combine(result)
+    } else if let hashableValue = cleanValue as? AnyHashable {
+      hasher.combine(hashableValue)
+    } else {
+      hasher.combine(String(describing: cleanValue))
+    }
+  } else {
+    hasher.combine(0)
+  }
+}
+
+
+/// One file in `Documents/Backups/` (our names only). Metadata from iCloud,
+/// not authenticated: the restore authenticates the content.
+///
+/// Generated class from Pigeon that represents data sent in messages.
+struct BackupMeta: Hashable {
+  var name: String
+  /// Logical size in bytes; null when iCloud does not report it.
+  var sizeBytes: Int64? = nil
+  /// File-system creation time (ms since epoch, the creating device's clock);
+  /// null when unknown.
+  var createdAtMs: Int64? = nil
+  /// iCloud reports the item's data as uploaded to the server.
+  var isUploaded: Bool
+  /// The current version is on this phone.
+  var isDownloaded: Bool
+  /// The last upload attempt failed because the user's iCloud is full.
+  var quotaExceeded: Bool
+  /// The last upload attempt failed for another reason.
+  var uploadFailed: Bool
+  /// Lowercase hex MD5 of the final file, read back after the move. Set only
+  /// by `upload`.
+  var md5: String? = nil
+
+
+  // swift-format-ignore: AlwaysUseLowerCamelCase
+  static func fromList(_ pigeonVar_list: [Any?]) -> BackupMeta? {
+    let name = pigeonVar_list[0] as! String
+    let sizeBytes: Int64? = nilOrValue(pigeonVar_list[1])
+    let createdAtMs: Int64? = nilOrValue(pigeonVar_list[2])
+    let isUploaded = pigeonVar_list[3] as! Bool
+    let isDownloaded = pigeonVar_list[4] as! Bool
+    let quotaExceeded = pigeonVar_list[5] as! Bool
+    let uploadFailed = pigeonVar_list[6] as! Bool
+    let md5: String? = nilOrValue(pigeonVar_list[7])
+
+    return BackupMeta(
+      name: name,
+      sizeBytes: sizeBytes,
+      createdAtMs: createdAtMs,
+      isUploaded: isUploaded,
+      isDownloaded: isDownloaded,
+      quotaExceeded: quotaExceeded,
+      uploadFailed: uploadFailed,
+      md5: md5
+    )
+  }
+  func toList() -> [Any?] {
+    return [
+      name,
+      sizeBytes,
+      createdAtMs,
+      isUploaded,
+      isDownloaded,
+      quotaExceeded,
+      uploadFailed,
+      md5,
+    ]
+  }
+  static func == (lhs: BackupMeta, rhs: BackupMeta) -> Bool {
+    if Swift.type(of: lhs) != Swift.type(of: rhs) {
+      return false
+    }
+    return deepEqualsIcloudApi(lhs.name, rhs.name) && deepEqualsIcloudApi(lhs.sizeBytes, rhs.sizeBytes) && deepEqualsIcloudApi(lhs.createdAtMs, rhs.createdAtMs) && deepEqualsIcloudApi(lhs.isUploaded, rhs.isUploaded) && deepEqualsIcloudApi(lhs.isDownloaded, rhs.isDownloaded) && deepEqualsIcloudApi(lhs.quotaExceeded, rhs.quotaExceeded) && deepEqualsIcloudApi(lhs.uploadFailed, rhs.uploadFailed) && deepEqualsIcloudApi(lhs.md5, rhs.md5)
+  }
+
+  func hash(into hasher: inout Hasher) {
+    hasher.combine("BackupMeta")
+    deepHashIcloudApi(value: name, hasher: &hasher)
+    deepHashIcloudApi(value: sizeBytes, hasher: &hasher)
+    deepHashIcloudApi(value: createdAtMs, hasher: &hasher)
+    deepHashIcloudApi(value: isUploaded, hasher: &hasher)
+    deepHashIcloudApi(value: isDownloaded, hasher: &hasher)
+    deepHashIcloudApi(value: quotaExceeded, hasher: &hasher)
+    deepHashIcloudApi(value: uploadFailed, hasher: &hasher)
+    deepHashIcloudApi(value: md5, hasher: &hasher)
+  }
+}
 
 private class IcloudApiPigeonCodecReader: FlutterStandardReader {
+  override func readValue(ofType type: UInt8) -> Any? {
+    switch type {
+    case 129:
+      return BackupMeta.fromList(self.readValue() as! [Any?])
+    default:
+      return super.readValue(ofType: type)
+    }
+  }
 }
 
 private class IcloudApiPigeonCodecWriter: FlutterStandardWriter {
+  override func writeValue(_ value: Any) {
+    if let value = value as? BackupMeta {
+      super.writeByte(129)
+      super.writeValue(value.toList())
+    } else {
+      super.writeValue(value)
+    }
+  }
 }
 
 private class IcloudApiPigeonCodecReaderWriter: FlutterStandardReaderWriter {
@@ -85,8 +288,24 @@ class IcloudApiPigeonCodec: FlutterStandardMessageCodec, @unchecked Sendable {
   static let shared = IcloudApiPigeonCodec(readerWriter: IcloudApiPigeonCodecReaderWriter())
 }
 
+
 /// Generated protocol from Pigeon that represents a handler of messages from Flutter.
 protocol ICloudBackupHostApi {
+  /// True when an iCloud account is signed in and the app's ubiquity
+  /// container can be opened. Never throws for "off": false.
+  func isAvailable(completion: @escaping (Result<Bool, Error>) -> Void)
+  /// Copies the local file at [path] to `Backups/<name>.partial`, reads it back
+  /// and compares the MD5 with the source, then moves it to `Backups/<name>`
+  /// (never replacing an existing file). [name] must be a final backup name.
+  func upload(path: String, name: String, completion: @escaping (Result<BackupMeta, Error>) -> Void)
+  /// A complete listing of our files in `Backups/` (finals and partials,
+  /// downloaded or not). Fails rather than return a partial listing.
+  func list(completion: @escaping (Result<[BackupMeta], Error>) -> Void)
+  /// Downloads `Backups/<name>` if needed and copies it into the app's temp
+  /// directory; returns that copy's path. The caller deletes it.
+  func download(name: String, completion: @escaping (Result<String, Error>) -> Void)
+  /// Deletes `Backups/<name>` (a final or partial backup name).
+  func delete(name: String, completion: @escaping (Result<Void, Error>) -> Void)
 }
 
 /// Generated setup class from Pigeon to handle messages through the `binaryMessenger`.
@@ -95,5 +314,97 @@ class ICloudBackupHostApiSetup {
   /// Sets up an instance of `ICloudBackupHostApi` to handle messages through the `binaryMessenger`.
   static func setUp(binaryMessenger: FlutterBinaryMessenger, api: ICloudBackupHostApi?, messageChannelSuffix: String = "") {
     let channelSuffix = messageChannelSuffix.count > 0 ? ".\(messageChannelSuffix)" : ""
+    /// True when an iCloud account is signed in and the app's ubiquity
+    /// container can be opened. Never throws for "off": false.
+    let isAvailableChannel = FlutterBasicMessageChannel(name: "dev.flutter.pigeon.zaghlol.ICloudBackupHostApi.isAvailable\(channelSuffix)", binaryMessenger: binaryMessenger, codec: codec)
+    if let api = api {
+      isAvailableChannel.setMessageHandler { _, reply in
+        api.isAvailable { result in
+          switch result {
+          case .success(let res):
+            reply(wrapResult(res))
+          case .failure(let error):
+            reply(wrapError(error))
+          }
+        }
+      }
+    } else {
+      isAvailableChannel.setMessageHandler(nil)
+    }
+    /// Copies the local file at [path] to `Backups/<name>.partial`, reads it back
+    /// and compares the MD5 with the source, then moves it to `Backups/<name>`
+    /// (never replacing an existing file). [name] must be a final backup name.
+    let uploadChannel = FlutterBasicMessageChannel(name: "dev.flutter.pigeon.zaghlol.ICloudBackupHostApi.upload\(channelSuffix)", binaryMessenger: binaryMessenger, codec: codec)
+    if let api = api {
+      uploadChannel.setMessageHandler { message, reply in
+        let args = message as! [Any?]
+        let pathArg = args[0] as! String
+        let nameArg = args[1] as! String
+        api.upload(path: pathArg, name: nameArg) { result in
+          switch result {
+          case .success(let res):
+            reply(wrapResult(res))
+          case .failure(let error):
+            reply(wrapError(error))
+          }
+        }
+      }
+    } else {
+      uploadChannel.setMessageHandler(nil)
+    }
+    /// A complete listing of our files in `Backups/` (finals and partials,
+    /// downloaded or not). Fails rather than return a partial listing.
+    let listChannel = FlutterBasicMessageChannel(name: "dev.flutter.pigeon.zaghlol.ICloudBackupHostApi.list\(channelSuffix)", binaryMessenger: binaryMessenger, codec: codec)
+    if let api = api {
+      listChannel.setMessageHandler { _, reply in
+        api.list { result in
+          switch result {
+          case .success(let res):
+            reply(wrapResult(res))
+          case .failure(let error):
+            reply(wrapError(error))
+          }
+        }
+      }
+    } else {
+      listChannel.setMessageHandler(nil)
+    }
+    /// Downloads `Backups/<name>` if needed and copies it into the app's temp
+    /// directory; returns that copy's path. The caller deletes it.
+    let downloadChannel = FlutterBasicMessageChannel(name: "dev.flutter.pigeon.zaghlol.ICloudBackupHostApi.download\(channelSuffix)", binaryMessenger: binaryMessenger, codec: codec)
+    if let api = api {
+      downloadChannel.setMessageHandler { message, reply in
+        let args = message as! [Any?]
+        let nameArg = args[0] as! String
+        api.download(name: nameArg) { result in
+          switch result {
+          case .success(let res):
+            reply(wrapResult(res))
+          case .failure(let error):
+            reply(wrapError(error))
+          }
+        }
+      }
+    } else {
+      downloadChannel.setMessageHandler(nil)
+    }
+    /// Deletes `Backups/<name>` (a final or partial backup name).
+    let deleteChannel = FlutterBasicMessageChannel(name: "dev.flutter.pigeon.zaghlol.ICloudBackupHostApi.delete\(channelSuffix)", binaryMessenger: binaryMessenger, codec: codec)
+    if let api = api {
+      deleteChannel.setMessageHandler { message, reply in
+        let args = message as! [Any?]
+        let nameArg = args[0] as! String
+        api.delete(name: nameArg) { result in
+          switch result {
+          case .success:
+            reply(wrapResult(nil))
+          case .failure(let error):
+            reply(wrapError(error))
+          }
+        }
+      }
+    } else {
+      deleteChannel.setMessageHandler(nil)
+    }
   }
 }

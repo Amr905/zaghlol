@@ -144,6 +144,8 @@ jobs:
           files="$files $(ls app/lib/features/ingestion/*/*.dart)"
           # T-047: the capture module (Guard config writer, orchestrator).
           files="$files $(ls app/lib/features/capture/*/*.dart)"
+          # T-151: the iCloud backup host never logs.
+          files="$files $(ls app/ios/Runner/Platform/ICloud/*.swift)"
           [ -n "$files" ] || { echo "::error::no key files found"; exit 1; }
           if grep -nE '\b(print|debugPrint|log|developer\.log|dump)\(|\b(stdout|stderr)\b|\bLog\.[a-z]+\(|println\(|Timber|NSLog|os_log|Logger\(|logStatements: *true' $files; then
             echo "::error::logging call in key code"

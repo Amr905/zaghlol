@@ -34,6 +34,163 @@ Object? _extractReplyValueOrThrow(
   return replyList.firstOrNull;
 }
 
+bool _deepEquals(Object? a, Object? b) {
+  if (identical(a, b)) {
+    return true;
+  }
+  if (a is double && b is double) {
+    if (a.isNaN && b.isNaN) {
+      return true;
+    }
+    return a == b;
+  }
+  if (a is List && b is List) {
+    return a.length == b.length &&
+        a.indexed.every(
+          ((int, dynamic) item) => _deepEquals(item.$2, b[item.$1]),
+        );
+  }
+  if (a is Map && b is Map) {
+    if (a.length != b.length) {
+      return false;
+    }
+    for (final MapEntry<Object?, Object?> entryA in a.entries) {
+      bool found = false;
+      for (final MapEntry<Object?, Object?> entryB in b.entries) {
+        if (_deepEquals(entryA.key, entryB.key)) {
+          if (_deepEquals(entryA.value, entryB.value)) {
+            found = true;
+            break;
+          } else {
+            return false;
+          }
+        }
+      }
+      if (!found) {
+        return false;
+      }
+    }
+    return true;
+  }
+  return a == b;
+}
+
+int _deepHash(Object? value) {
+  if (value is List) {
+    return Object.hashAll(value.map(_deepHash));
+  }
+  if (value is Map) {
+    int result = 0;
+    for (final MapEntry<Object?, Object?> entry in value.entries) {
+      result += (_deepHash(entry.key) * 31) ^ _deepHash(entry.value);
+    }
+    return result;
+  }
+  if (value is double && value.isNaN) {
+    // Normalize NaN to a consistent hash.
+    return 0x7FF8000000000000.hashCode;
+  }
+  if (value is double && value == 0.0) {
+    // Normalize -0.0 to 0.0 so they have the same hash code.
+    return 0.0.hashCode;
+  }
+  return value.hashCode;
+}
+
+/// One file in `Documents/Backups/` (our names only). Metadata from iCloud,
+/// not authenticated: the restore authenticates the content.
+class BackupMeta {
+  BackupMeta({
+    required this.name,
+    this.sizeBytes,
+    this.createdAtMs,
+    required this.isUploaded,
+    required this.isDownloaded,
+    required this.quotaExceeded,
+    required this.uploadFailed,
+    this.md5,
+  });
+
+  String name;
+
+  /// Logical size in bytes; null when iCloud does not report it.
+  int? sizeBytes;
+
+  /// File-system creation time (ms since epoch, the creating device's clock);
+  /// null when unknown.
+  int? createdAtMs;
+
+  /// iCloud reports the item's data as uploaded to the server.
+  bool isUploaded;
+
+  /// The current version is on this phone.
+  bool isDownloaded;
+
+  /// The last upload attempt failed because the user's iCloud is full.
+  bool quotaExceeded;
+
+  /// The last upload attempt failed for another reason.
+  bool uploadFailed;
+
+  /// Lowercase hex MD5 of the final file, read back after the move. Set only
+  /// by `upload`.
+  String? md5;
+
+  List<Object?> _toList() {
+    return <Object?>[
+      name,
+      sizeBytes,
+      createdAtMs,
+      isUploaded,
+      isDownloaded,
+      quotaExceeded,
+      uploadFailed,
+      md5,
+    ];
+  }
+
+  Object encode() {
+    return _toList();
+  }
+
+  static BackupMeta decode(Object result) {
+    result as List<Object?>;
+    return BackupMeta(
+      name: result[0]! as String,
+      sizeBytes: result[1] as int?,
+      createdAtMs: result[2] as int?,
+      isUploaded: result[3]! as bool,
+      isDownloaded: result[4]! as bool,
+      quotaExceeded: result[5]! as bool,
+      uploadFailed: result[6]! as bool,
+      md5: result[7] as String?,
+    );
+  }
+
+  @override
+  // ignore: avoid_equals_and_hash_code_on_mutable_classes
+  bool operator ==(Object other) {
+    if (other is! BackupMeta || other.runtimeType != runtimeType) {
+      return false;
+    }
+    if (identical(this, other)) {
+      return true;
+    }
+    return _deepEquals(name, other.name) &&
+        _deepEquals(sizeBytes, other.sizeBytes) &&
+        _deepEquals(createdAtMs, other.createdAtMs) &&
+        _deepEquals(isUploaded, other.isUploaded) &&
+        _deepEquals(isDownloaded, other.isDownloaded) &&
+        _deepEquals(quotaExceeded, other.quotaExceeded) &&
+        _deepEquals(uploadFailed, other.uploadFailed) &&
+        _deepEquals(md5, other.md5);
+  }
+
+  @override
+  // ignore: avoid_equals_and_hash_code_on_mutable_classes
+  int get hashCode => _deepHash(<Object?>[runtimeType, ..._toList()]);
+}
+
 class _PigeonCodec extends StandardMessageCodec {
   const _PigeonCodec();
   @override
@@ -41,6 +198,9 @@ class _PigeonCodec extends StandardMessageCodec {
     if (value is int) {
       buffer.putUint8(4);
       buffer.putInt64(value);
+    } else if (value is BackupMeta) {
+      buffer.putUint8(129);
+      writeValue(buffer, value.encode());
     } else {
       super.writeValue(buffer, value);
     }
@@ -49,6 +209,8 @@ class _PigeonCodec extends StandardMessageCodec {
   @override
   Object? readValueOfType(int type, ReadBuffer buffer) {
     switch (type) {
+      case 129:
+        return BackupMeta.decode(readValue(buffer)!);
       default:
         return super.readValueOfType(type, buffer);
     }
@@ -71,4 +233,114 @@ class ICloudBackupHostApi {
   static const MessageCodec<Object?> pigeonChannelCodec = _PigeonCodec();
 
   final String pigeonVar_messageChannelSuffix;
+
+  /// True when an iCloud account is signed in and the app's ubiquity
+  /// container can be opened. Never throws for "off": false.
+  Future<bool> isAvailable() async {
+    final pigeonVar_channelName =
+        'dev.flutter.pigeon.zaghlol.ICloudBackupHostApi.isAvailable$pigeonVar_messageChannelSuffix';
+    final pigeonVar_channel = BasicMessageChannel<Object?>(
+      pigeonVar_channelName,
+      pigeonChannelCodec,
+      binaryMessenger: pigeonVar_binaryMessenger,
+    );
+    final Future<Object?> pigeonVar_sendFuture = pigeonVar_channel.send(null);
+    final pigeonVar_replyList = await pigeonVar_sendFuture as List<Object?>?;
+
+    final Object? pigeonVar_replyValue = _extractReplyValueOrThrow(
+      pigeonVar_replyList,
+      pigeonVar_channelName,
+      isNullValid: false,
+    );
+    return pigeonVar_replyValue! as bool;
+  }
+
+  /// Copies the local file at [path] to `Backups/<name>.partial`, reads it back
+  /// and compares the MD5 with the source, then moves it to `Backups/<name>`
+  /// (never replacing an existing file). [name] must be a final backup name.
+  Future<BackupMeta> upload(String path, String name) async {
+    final pigeonVar_channelName =
+        'dev.flutter.pigeon.zaghlol.ICloudBackupHostApi.upload$pigeonVar_messageChannelSuffix';
+    final pigeonVar_channel = BasicMessageChannel<Object?>(
+      pigeonVar_channelName,
+      pigeonChannelCodec,
+      binaryMessenger: pigeonVar_binaryMessenger,
+    );
+    final Future<Object?> pigeonVar_sendFuture = pigeonVar_channel.send(
+      <Object?>[path, name],
+    );
+    final pigeonVar_replyList = await pigeonVar_sendFuture as List<Object?>?;
+
+    final Object? pigeonVar_replyValue = _extractReplyValueOrThrow(
+      pigeonVar_replyList,
+      pigeonVar_channelName,
+      isNullValid: false,
+    );
+    return pigeonVar_replyValue! as BackupMeta;
+  }
+
+  /// A complete listing of our files in `Backups/` (finals and partials,
+  /// downloaded or not). Fails rather than return a partial listing.
+  Future<List<BackupMeta>> list() async {
+    final pigeonVar_channelName =
+        'dev.flutter.pigeon.zaghlol.ICloudBackupHostApi.list$pigeonVar_messageChannelSuffix';
+    final pigeonVar_channel = BasicMessageChannel<Object?>(
+      pigeonVar_channelName,
+      pigeonChannelCodec,
+      binaryMessenger: pigeonVar_binaryMessenger,
+    );
+    final Future<Object?> pigeonVar_sendFuture = pigeonVar_channel.send(null);
+    final pigeonVar_replyList = await pigeonVar_sendFuture as List<Object?>?;
+
+    final Object? pigeonVar_replyValue = _extractReplyValueOrThrow(
+      pigeonVar_replyList,
+      pigeonVar_channelName,
+      isNullValid: false,
+    );
+    return (pigeonVar_replyValue! as List<Object?>).cast<BackupMeta>();
+  }
+
+  /// Downloads `Backups/<name>` if needed and copies it into the app's temp
+  /// directory; returns that copy's path. The caller deletes it.
+  Future<String> download(String name) async {
+    final pigeonVar_channelName =
+        'dev.flutter.pigeon.zaghlol.ICloudBackupHostApi.download$pigeonVar_messageChannelSuffix';
+    final pigeonVar_channel = BasicMessageChannel<Object?>(
+      pigeonVar_channelName,
+      pigeonChannelCodec,
+      binaryMessenger: pigeonVar_binaryMessenger,
+    );
+    final Future<Object?> pigeonVar_sendFuture = pigeonVar_channel.send(
+      <Object?>[name],
+    );
+    final pigeonVar_replyList = await pigeonVar_sendFuture as List<Object?>?;
+
+    final Object? pigeonVar_replyValue = _extractReplyValueOrThrow(
+      pigeonVar_replyList,
+      pigeonVar_channelName,
+      isNullValid: false,
+    );
+    return pigeonVar_replyValue! as String;
+  }
+
+  /// Deletes `Backups/<name>` (a final or partial backup name).
+  Future<void> delete(String name) async {
+    final pigeonVar_channelName =
+        'dev.flutter.pigeon.zaghlol.ICloudBackupHostApi.delete$pigeonVar_messageChannelSuffix';
+    final pigeonVar_channel = BasicMessageChannel<Object?>(
+      pigeonVar_channelName,
+      pigeonChannelCodec,
+      binaryMessenger: pigeonVar_binaryMessenger,
+    );
+    final Future<Object?> pigeonVar_sendFuture = pigeonVar_channel.send(
+      <Object?>[name],
+    );
+    final pigeonVar_replyList = await pigeonVar_sendFuture as List<Object?>?;
+
+    _extractReplyValueOrThrow(
+      pigeonVar_replyList,
+      pigeonVar_channelName,
+      isNullValid: true,
+    );
+  }
 }

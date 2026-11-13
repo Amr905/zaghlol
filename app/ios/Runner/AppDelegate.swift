@@ -28,5 +28,7 @@ import UIKit
     AttestationRegistration.register(with: engineBridge.pluginRegistry)
     // T-179: Secure Enclave seat keys (iOS only, D-55).
     SeatKeyRegistration.register(with: engineBridge.pluginRegistry)
+    // T-151: iCloud backup host.
+    ICloudBackupRegistration.register(with: engineBridge.pluginRegistry)
   }
 }
