@@ -113,6 +113,8 @@ final class ICloudBackupFiles {
     guard ICloudBackupNames.isFinal(name), !sourcePath.isEmpty else {
       throw ICloudBackupError.invalidArgument
     }
+    // iCloud off is reported before anything else is checked or touched.
+    guard env.containerURL() != nil else { throw ICloudBackupError.unavailable }
     let source = URL(fileURLWithPath: sourcePath)
     let size = try regularFileSize(source)
     guard size >= 1 else { throw ICloudBackupError.invalidArgument }
