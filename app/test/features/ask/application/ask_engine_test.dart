@@ -351,6 +351,49 @@ void main() {
       expect(a.accountLabel, isNull);
     });
 
+    test('two accounts matching one name are never added together', () async {
+      accounts = [
+        AccountWithBalances(acct('acc1', AccountKind.debit, 'CIB Debit'), [
+          bal('acc1', Money(egp, 1000000), 9),
+        ]),
+        AccountWithBalances(acct('acc4', AccountKind.credit, 'CIB Credit'), [
+          bal('acc4', Money(egp, 30000), 9),
+        ]),
+      ];
+      ents = const AskEntities(
+        categories: [],
+        merchants: [],
+        accounts: [
+          AskEntity('acc1', ['CIB'], partial: true),
+          AskEntity('acc4', ['CIB'], partial: true),
+        ],
+      );
+      final a = await ask<AskBalanceAnswer>('رصيد كارت CIB');
+      expect(a.figures.length, 2);
+      expect(
+        [for (final f in a.figures) f.amount],
+        [Money(egp, 1000000), Money(egp, 30000)],
+      );
+      expect([for (final f in a.figures) f.liability], [false, true]);
+      expect(
+        [for (final f in a.figures) f.accountLabel],
+        ['CIB Debit', 'CIB Credit'],
+      );
+    });
+
+    test('balance of CIB returns only that account', () async {
+      final a = await ask<AskBalanceAnswer>('balance of CIB');
+      expect(
+        [for (final f in a.figures) f.amount],
+        [Money(egp, 1000000), Money(gbp, 20000)],
+      );
+    });
+
+    test('balance of an unmatched name gets the fallback', () async {
+      final r = await engine().ask('balance of NBE');
+      expect(r, isA<AskFallbackAnswer>());
+    });
+
     test('a named card is shown as a liability', () async {
       final a = await ask<AskBalanceAnswer>('رصيد كارت بنك مصر');
       expect(a.figures.single.amount, Money(egp, 30000));

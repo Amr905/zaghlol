@@ -218,6 +218,29 @@ AskParse _parse(String input, AskEntities entities) {
     }
   }
 
+  // "balance of CIB": the name alone binds the account, no cue word needed.
+  if (intent == AskIntent.accountBalance && accountIds.isEmpty) {
+    final loose = _best(entities.accounts, vars, usable, minScore: 500);
+    if (loose != null) {
+      accountIds.addAll(loose.ids);
+      matchedTok.addAll(loose.tokens);
+    }
+  }
+
+  // A balance question that names something no account matches never gets
+  // the all-accounts figure.
+  if (intent == AskIntent.accountBalance && accountIds.isEmpty) {
+    for (var j = 0; j < n; j++) {
+      if (!consumed[j] &&
+          !stop[j] &&
+          !matchedTok.contains(j) &&
+          !numberAt.containsKey(j) &&
+          !vars[j].any(targetPrepositions.contains)) {
+        return const AskUnrecognized(AskUnrecognizedReason.unknownTarget);
+      }
+    }
+  }
+
   // ---------------------------------------------------------- limit
   int? limit;
   if (intent == AskIntent.topMerchants) {
