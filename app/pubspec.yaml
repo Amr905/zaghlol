@@ -46,6 +46,7 @@ dependencies:
   # T-141: ES256 verification of backend response signatures (pure Dart, the
   # same library zaghlol_catalog uses; already in the workspace lock).
   pointycastle: ^4.0.0
+  go_router: ^18.1.4
 
 dev_dependencies:
   flutter_test:
