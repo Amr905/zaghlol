@@ -20,6 +20,9 @@ import '../../../budget/application/budget_providers.dart';
 import '../../../home/application/card_filter.dart';
 import '../../application/bulk_actions.dart';
 import '../../application/bulk_edit.dart';
+import '../../../transfers/presentation/assign_sheet.dart';
+import '../../../transfers/presentation/link_transfer_sheet.dart';
+import '../../../transfers/presentation/split_sheet.dart';
 import '../detail/transaction_detail_screen.dart';
 import '../edit/transaction_edit_screen.dart';
 import '../../domain/transaction.dart';
@@ -282,7 +285,13 @@ class _State extends ConsumerState<TransactionsListScreen> {
   void _openDetail(String id) {
     Navigator.of(context).push<void>(
       MaterialPageRoute<void>(
-        builder: (_) => TransactionDetailScreen(transactionId: id),
+        builder: (ctx) => TransactionDetailScreen(
+          transactionId: id,
+          // T-093: S-15 / S-16 sheets open over the detail screen.
+          onSplit: (txn) => showSplitSheet(ctx, txn),
+          onLinkTransfer: (txn) => showLinkTransferSheet(ctx, txn),
+          onMoneyBackFor: (txn) => showAssignSheet(ctx, txn),
+        ),
       ),
     );
   }
