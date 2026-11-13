@@ -78,7 +78,7 @@ class _EditState extends ConsumerState<TransactionEditScreen> {
   bool _saving = false;
   bool _failed = false;
   bool _dirty = false;
-  Map<String, TxnFormError> _errors = const {};
+  Map<TxnField, TxnFormError> _errors = const {};
 
   TransactionRecord? get _existing => widget.existing;
   bool get _isEdit => _existing != null;
@@ -120,7 +120,7 @@ class _EditState extends ConsumerState<TransactionEditScreen> {
   };
 
   void _touch() {
-    _dirty = true;
+    if (!_dirty) setState(() => _dirty = true); // PopScope must rebuild
     if (_submitted) _revalidate();
   }
 
@@ -139,7 +139,7 @@ class _EditState extends ConsumerState<TransactionEditScreen> {
         today: _today(),
         note: _note.text,
       );
-      if (_isTransferEdit) _errors = {..._errors}..remove('to');
+      if (_isTransferEdit) _errors = {..._errors}..remove(TxnField.to);
     });
   }
 
@@ -421,7 +421,7 @@ class _EditState extends ConsumerState<TransactionEditScreen> {
     final title = _isEdit
         ? l.transactionsEditTitleEdit
         : l.transactionsEditTitleAdd(_type.name);
-    String? err(String k) =>
+    String? err(TxnField k) =>
         _errors[k] == null ? null : _errorText(l, _errors[k]!);
 
     final segments = <ZSegment<TxnEditType>>[
@@ -542,7 +542,7 @@ class _EditState extends ConsumerState<TransactionEditScreen> {
                                     ? '0'
                                     : '0.${'0' * _currency.exponent}',
                               ),
-                              errorText: err('amount'),
+                              errorText: err(TxnField.amount),
                             ),
                           ),
                         ),
@@ -556,7 +556,7 @@ class _EditState extends ConsumerState<TransactionEditScreen> {
                       value: lk.category(_categoryId) == null
                           ? l.transactionsEditChoose
                           : categoryName(lk.category(_categoryId)!, lang),
-                      error: err('category'),
+                      error: err(TxnField.category),
                       onTap: () => _pickCategory(lk, lang),
                     ),
                   if (!isTransfer || _isTransferEdit) ...[
@@ -576,7 +576,7 @@ class _EditState extends ConsumerState<TransactionEditScreen> {
                     value: lk.account(_accountId ?? '') == null
                         ? l.transactionsEditChoose
                         : accountName(lk.account(_accountId!)!, fmt),
-                    error: err('account'),
+                    error: err(TxnField.account),
                     onTap: () async {
                       final id = await _pickAccount(
                         lk,
@@ -594,7 +594,7 @@ class _EditState extends ConsumerState<TransactionEditScreen> {
                       value: lk.account(_toAccountId ?? '') == null
                           ? l.transactionsEditChoose
                           : accountName(lk.account(_toAccountId!)!, fmt),
-                      error: err('to'),
+                      error: err(TxnField.to),
                       onTap: () async {
                         final id = await _pickAccount(
                           lk,
@@ -612,7 +612,7 @@ class _EditState extends ConsumerState<TransactionEditScreen> {
                   _SelectRow(
                     label: l.transactionsEditDate,
                     value: dateText,
-                    error: err('date'),
+                    error: err(TxnField.date),
                     onTap: _pickDate,
                   ),
                   const SizedBox(height: ZSpacing.sm),
@@ -623,7 +623,7 @@ class _EditState extends ConsumerState<TransactionEditScreen> {
                     minLines: 1,
                     decoration: InputDecoration(
                       labelText: l.transactionsEditNote,
-                      errorText: err('note'),
+                      errorText: err(TxnField.note),
                     ),
                   ),
                 ],

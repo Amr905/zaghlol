@@ -27,6 +27,8 @@ import 'txn_detail_providers.dart';
 /// Longest note, in characters (S-12 validation).
 const int detailNoteMaxChars = 200;
 
+enum _Menu { delete }
+
 class TransactionDetailScreen extends ConsumerStatefulWidget {
   const TransactionDetailScreen({
     super.key,
@@ -98,12 +100,12 @@ class _DetailState extends ConsumerState<TransactionDetailScreen> {
               onPressed: () =>
                   showTransactionEditor(context, existing: d.record),
             ),
-            PopupMenuButton<String>(
+            PopupMenuButton<_Menu>(
               tooltip: l.commonActionMoreA11y,
               onSelected: (_) => _delete(d.record),
               itemBuilder: (_) => [
-                PopupMenuItem<String>(
-                  value: 'delete',
+                PopupMenuItem<_Menu>(
+                  value: _Menu.delete,
                   child: Text(l.commonActionDelete),
                 ),
               ],
@@ -300,6 +302,8 @@ class _DetailState extends ConsumerState<TransactionDetailScreen> {
     if (ok != true || !mounted) return;
     final messenger = ScaffoldMessenger.of(context);
     final navigator = Navigator.of(context);
+    // The Undo action outlives this screen: it must not use `ref`.
+    final container = ProviderScope.containerOf(context);
     try {
       final actions = await ref.read(txnBulkActionsProvider.future);
       // The shared delete path: also dissolves pairs and offset links.
@@ -323,7 +327,7 @@ class _DetailState extends ConsumerState<TransactionDetailScreen> {
                     SnackBar(content: Text(l.commonErrorSaveFailed)),
                   );
                 }
-                ref.invalidate(txnListProvider);
+                container.invalidate(txnListProvider);
               },
             ),
           ),

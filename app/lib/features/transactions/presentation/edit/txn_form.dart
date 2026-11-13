@@ -9,6 +9,8 @@ import '../../../../core/l10n/money_format.dart';
 
 enum TxnEditType { expense, income, transfer }
 
+enum TxnField { amount, category, account, to, date, note }
+
 enum TxnFormError {
   amountRequired,
   amountTooLarge,
@@ -58,7 +60,7 @@ const int formNoteMaxChars = 1000;
 
 /// All field errors of the form (empty = valid). [date] and [today] are
 /// civil dates.
-Map<String, TxnFormError> validateForm({
+Map<TxnField, TxnFormError> validateForm({
   required TxnEditType type,
   required String amountText,
   required Currency currency,
@@ -69,23 +71,27 @@ Map<String, TxnFormError> validateForm({
   required CivilDate today,
   required String note,
 }) {
-  final errors = <String, TxnFormError>{};
+  final errors = <TxnField, TxnFormError>{};
   final a = parseAmount(amountText, currency);
-  if (a.error != null) errors['amount'] = a.error!;
+  if (a.error != null) errors[TxnField.amount] = a.error!;
   if (type != TxnEditType.transfer && categoryId == null) {
-    errors['category'] = TxnFormError.categoryRequired;
+    errors[TxnField.category] = TxnFormError.categoryRequired;
   }
-  if (accountId == null) errors['account'] = TxnFormError.accountRequired;
+  if (accountId == null) {
+    errors[TxnField.account] = TxnFormError.accountRequired;
+  }
   if (type == TxnEditType.transfer) {
     if (toAccountId == null) {
-      errors['to'] = TxnFormError.toAccountRequired;
+      errors[TxnField.to] = TxnFormError.toAccountRequired;
     } else if (toAccountId == accountId) {
-      errors['to'] = TxnFormError.sameAccount;
+      errors[TxnField.to] = TxnFormError.sameAccount;
     }
   }
-  if (date.epochDay > today.epochDay) errors['date'] = TxnFormError.dateFuture;
+  if (date.epochDay > today.epochDay) {
+    errors[TxnField.date] = TxnFormError.dateFuture;
+  }
   if (note.runes.length > formNoteMaxChars) {
-    errors['note'] = TxnFormError.noteTooLong;
+    errors[TxnField.note] = TxnFormError.noteTooLong;
   }
   return errors;
 }
