@@ -359,3 +359,7 @@ ${jndi:ldap://x}	!noIntent	-	-	-	-	-	-	-	0
 ../../etc/passwd	!noIntent	-	-	-	-	-	-	-	0
 %s%s%s%n	!noIntent	-	-	-	-	-	-	-	0
 {{7*7}}	!noIntent	-	-	-	-	-	-	-	0
+balance of CIB	accountBalance	-	-	-	-	a_cib_credit,a_cib_debit	-	-	0
+رصيد CIB كام	accountBalance	-	-	-	-	a_cib_credit,a_cib_debit	-	-	0
+رصيد NBE	!unknownTarget
+balance of NBE	!unknownTarget
