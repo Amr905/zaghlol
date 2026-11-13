@@ -18,6 +18,7 @@ export 'money/rounding.dart';
 export 'money/src/allocation.dart' show maxAllocationParts;
 export 'recurring/recurring_rules.dart';
 export 'transfers/offsets.dart';
+export 'transfers/splits.dart';
 export 'transfers/transfer_matching.dart';
 
 /// Placeholder so the package has a stable, testable entry point.
