@@ -38,6 +38,12 @@ final Registry newReg = loadTestRegistry(
   ),
 );
 
+// Old build: the settled template does not match yet.
+final Registry oldSettledReg = loadTestRegistry(
+  transformBank: (j) =>
+      j.replaceAll('^zbank: settled egp', '^zbank: settld egp'),
+);
+
 void main() {
   late IngestWorld w;
   setUp(() async => w = await IngestWorld.open());
@@ -192,6 +198,40 @@ void main() {
       final s = await job().run();
       expect(s.updated, 0);
       expect((await w.txns()).single['amount_minor'], 999);
+    });
+  });
+
+  group('pending/settled merge in re-parse mode', () {
+    const hold = 'ZBANK: Hold EGP 100.00 at Synth Shop card *4321';
+    const settled = 'ZBANK: Settled EGP 104.00 at Synth Shop card *4321';
+
+    Future<void> setup() async {
+      await w.run([sms('p', hold)]);
+      await w.useCase(registry: oldSettledReg)([sms('s', settled)]);
+      expect(await w.count('review_items', 'resolved_at IS NULL'), 1);
+    }
+
+    test('user-verified pending: transaction untouched, no new review '
+        'item', () async {
+      await setup();
+      await w.db.customStatement(
+        'UPDATE transactions SET is_user_verified = 1',
+      );
+      final before = await w.txns();
+      final reviewsBefore = await w.count('review_items');
+      await job().run();
+      expect(await w.txns(), before);
+      expect(await w.count('review_items'), reviewsBefore);
+      expect(await w.count('review_items', 'resolved_at IS NULL'), 0);
+    });
+
+    test('unverified pending: amount and status unchanged', () async {
+      await setup();
+      final before = await w.txns();
+      await job().run();
+      final after = await w.txns();
+      expect(after.single['amount_minor'], 10000);
+      expect(after, before);
     });
   });
 

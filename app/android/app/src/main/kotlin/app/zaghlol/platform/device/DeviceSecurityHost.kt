@@ -151,7 +151,13 @@ class AndroidDeviceEnv(context: Context, activity: Activity) : DeviceEnv {
         .setTitle(reason)
         .setAllowedAuthenticators(authenticators)
         .build()
-    prompt.authenticate(info)
+    try {
+      prompt.authenticate(info)
+    } catch (e: RuntimeException) {
+      // Never leave the flag set: the user must be able to get another prompt.
+      prompting = false
+      onResult(NativeAuthOutcome.NOT_AVAILABLE)
+    }
   }
 
   companion object {

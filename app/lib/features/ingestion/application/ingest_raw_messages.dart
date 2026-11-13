@@ -299,7 +299,10 @@ final class IngestRawMessages {
   ///   transaction. Anything that would again end in review, or still has
   ///   no handler, changes nothing and creates no review item (FU-109:
   ///   a personal-origin message never enters review; the origin is not
-  ///   stored, so a re-parse never creates review items at all).
+  ///   stored, so a re-parse never creates review items itself). A match
+  ///   in the pending/settled merge only promotes the raw row: the matched
+  ///   transaction (amount, status, fields) is never written in re-parse
+  ///   mode, so no review item comes from the merge either.
   /// - `parsed` row whose template changed: only the NULL fields of its
   ///   transaction are filled (the cross-channel attach rule), and only
   ///   when that transaction is live, not user-verified, not part of a
@@ -1020,7 +1023,10 @@ final class IngestRawMessages {
           templateId: r.templateId,
           templateVersion: r.templateVersion,
         );
-        if (newIsPending) {
+        if (p.m.origin == MessageOrigin.reparse) {
+          // Re-parse: never touch an existing transaction (user-verified or
+          // not); the raw row is only promoted above.
+        } else if (newIsPending) {
           // A late pending message: the payment is already posted.
           await _attach(local, b, pick, r, occurredMs);
         } else {
