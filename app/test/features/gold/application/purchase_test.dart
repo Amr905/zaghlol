@@ -304,6 +304,32 @@ void main() {
     expect(await r.outbox.load(), isEmpty);
   });
 
+  test('restart: entry verified with no live handle stays `verified`, is '
+      'completed when the store redelivers it, with one verify and one '
+      'Idempotency-Key', () async {
+    final r = _Rig();
+    await r.started();
+    r.backend.onVerify = (_, _, _) async =>
+        throw BackendFailure(BackendFailureKind.timeout);
+    await r.store.deliver(paid(_tokenSentinel));
+    final firstKey = r.backend.verifyKeys.single;
+
+    final r2 = _Rig();
+    r2.h.store.values.addAll(r.h.store.values);
+    r2.h.clock.wall = r.h.clock.wall + day;
+    r2.backendOk();
+    await r2.service.start(); // verifies; the new store has no handle
+    expect(r2.last, isA<PurchaseGold>());
+    expect(r2.store.completed, isEmpty);
+    expect((await r2.outbox.load()).single.stage, OutboxStage.verified);
+
+    await r2.store.deliver(paid(_tokenSentinel)); // redelivered at start
+    expect(r2.store.completed, hasLength(1));
+    expect(await r2.outbox.load(), isEmpty);
+    expect(r2.backend.verifyKeys, [firstKey]);
+    expect(r2.backend.verifies, hasLength(1));
+  });
+
   group('iOS seat keys on verify (R4-1, T-179)', () {
     test('element 0 only, challenge = SHA-256(signedTransaction), signed once '
         'and resent byte-identical', () async {

@@ -221,7 +221,11 @@ class AskAnswerTextBuilder {
         for (final f in a.figures)
           (
             f.amount.currency.code,
-            l.chatAnswerBalance(who, _money(f.amount), _date(_civil(f.asOf))),
+            l.chatAnswerBalance(
+              f.accountLabel ?? who,
+              _money(f.amount),
+              _date(_civil(f.asOf)),
+            ),
           ),
       ]),
     );

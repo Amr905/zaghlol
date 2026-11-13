@@ -7,6 +7,10 @@ import 'dart:typed_data';
 
 import 'package:flutter/services.dart' show PlatformException;
 import 'package:flutter_test/flutter_test.dart';
+import 'package:in_app_purchase/in_app_purchase.dart'
+    show InAppPurchase, PurchaseDetails;
+import 'package:in_app_purchase_android/billing_client_wrappers.dart';
+import 'package:in_app_purchase_android/in_app_purchase_android.dart';
 import 'package:zaghlol/core/backend/backend_client.dart';
 import 'package:zaghlol/core/platform/pigeon_attestation.dart';
 import 'package:zaghlol/core/platform/seat_key_api.g.dart';
@@ -447,4 +451,67 @@ void main() {
       );
     },
   );
+
+  test(
+    'Android start() emits only unacknowledged past Gold purchases',
+    () async {
+      PurchaseWrapper wrap(String product, String token, {required bool ack}) =>
+          PurchaseWrapper(
+            orderId: 'GPA.$token',
+            packageName: 'app.test',
+            purchaseTime: 1,
+            purchaseToken: token,
+            signature: 's',
+            products: [product],
+            isAutoRenewing: false,
+            originalJson: '{}',
+            isAcknowledged: ack,
+            purchaseState: PurchaseStateWrapper.purchased,
+          );
+      final past = [
+        wrap('zaghlol_gold_yearly', 'tok-unacked', ack: false),
+        wrap('zaghlol_gold_monthly', 'tok-acked', ack: true),
+        wrap('other_product', 'tok-other', ack: false),
+      ];
+      final addition = _FakeAddition([
+        for (final w in past) ...GooglePlayPurchaseDetails.fromPurchase(w),
+      ]);
+      final store = InAppPurchaseGoldStore(
+        platform: ClientPlatform.android,
+        iap: _FakeIap(addition),
+      );
+      final got = <StorePurchase>[];
+      store.updates.listen((l) => got.addAll(l));
+      await store.start();
+      await Future<void>.delayed(Duration.zero);
+      expect(got.map((p) => p.reference), ['tok-unacked']);
+      expect(got.single.state, StorePurchaseState.purchased);
+      expect(await store.complete(got.single), isTrue);
+      expect(await store.complete(got.single), isFalse); // handle is gone
+      await store.dispose();
+    },
+  );
+}
+
+final class _FakeAddition implements InAppPurchaseAndroidPlatformAddition {
+  _FakeAddition(this.past);
+  final List<GooglePlayPurchaseDetails> past;
+  @override
+  Future<QueryPurchaseDetailsResponse> queryPastPurchases({
+    String? applicationUserName,
+  }) async => QueryPurchaseDetailsResponse(pastPurchases: past);
+  @override
+  dynamic noSuchMethod(Invocation i) => super.noSuchMethod(i);
+}
+
+final class _FakeIap implements InAppPurchase {
+  _FakeIap(this.addition);
+  final _FakeAddition addition;
+  @override
+  Stream<List<PurchaseDetails>> get purchaseStream => const Stream.empty();
+  @override
+  Future<void> completePurchase(PurchaseDetails purchase) async {}
+  @override
+  dynamic noSuchMethod(Invocation i) =>
+      i.memberName == #getPlatformAddition ? addition : super.noSuchMethod(i);
 }

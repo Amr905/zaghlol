@@ -91,8 +91,19 @@ final class AskTopMerchantsAnswer extends AskAnswer {
 }
 
 final class AskBalanceFigure {
-  const AskBalanceFigure(this.amount, this.asOf);
+  const AskBalanceFigure(
+    this.amount,
+    this.asOf, {
+    this.accountLabel,
+    this.liability = false,
+  });
   final Money amount;
+
+  /// Set when the figure is one named account's own balance.
+  final String? accountLabel;
+
+  /// The figure is a card or BNPL balance, not money the user holds.
+  final bool liability;
 
   /// UTC time of the newest message the figure comes from.
   final DateTime asOf;

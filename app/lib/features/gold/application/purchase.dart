@@ -160,8 +160,7 @@ final class PurchaseService {
         return;
       case OutboxStage.verified:
         // Verified earlier; only the store completion was missing.
-        await _store.complete(p);
-        await _remove(existing);
+        if (await _store.complete(p)) await _remove(existing);
       case OutboxStage.queued || OutboxStage.pendingServer:
         if (existing.nextAtMs <= _now().millisecondsSinceEpoch) {
           await _attempt(existing, live: p);
@@ -284,8 +283,7 @@ final class PurchaseService {
           needsCompletion: e.needsCompletion,
         );
     try {
-      await _store.complete(p);
-      await _remove(e);
+      if (await _store.complete(p)) await _remove(e);
     } on PlatformException {
       // Stays `verified`; the store replays the purchase at the next start
       // and it is completed then, without a second verify.

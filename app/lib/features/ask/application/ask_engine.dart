@@ -304,16 +304,24 @@ class AskEngine {
             : named.contains(a.account.id))
           a,
     ];
-    final sums = <Currency, Money>{};
-    final asOf = <Currency, DateTime>{};
+    // Named accounts are reported one by one (a debit and a credit balance
+    // are never added); with no name only asset accounts are summed.
+    final perAccount = named.isNotEmpty;
+    final sums = <String, Money>{};
+    final asOf = <String, DateTime>{};
+    final owner = <String, Account>{};
     for (final a in rows) {
       for (final b in a.balances) {
         final m = b.balance;
         if (m == null) continue;
         if (asked != null && m.currency != asked) continue;
-        sums[m.currency] = sums[m.currency] == null ? m : sums[m.currency]! + m;
-        final prev = asOf[m.currency];
-        if (prev == null || b.asOf.isAfter(prev)) asOf[m.currency] = b.asOf;
+        final k = perAccount
+            ? '${a.account.id}|${m.currency.code}'
+            : m.currency.code;
+        sums[k] = sums[k] == null ? m : sums[k]! + m;
+        owner[k] = a.account;
+        final prev = asOf[k];
+        if (prev == null || b.asOf.isAfter(prev)) asOf[k] = b.asOf;
       }
     }
     if (sums.isEmpty) {
@@ -322,9 +330,19 @@ class AskEngine {
         AskNoDataReason.noAccounts,
       );
     }
-    final codes = sums.keys.toList()..sort((x, y) => x.code.compareTo(y.code));
+    final codes = sums.keys.toList()..sort();
     return AskBalanceAnswer(
-      figures: [for (final c in codes) AskBalanceFigure(sums[c]!, asOf[c]!)],
+      figures: [
+        for (final c in codes)
+          AskBalanceFigure(
+            sums[c]!,
+            asOf[c]!,
+            accountLabel: perAccount && rows.length > 1
+                ? owner[c]!.label
+                : null,
+            liability: perAccount && !owner[c]!.kind.isAsset,
+          ),
+      ],
       liability: rows.isNotEmpty && rows.every((a) => !a.account.kind.isAsset),
       accountLabel: rows.length == 1 && named.isNotEmpty
           ? rows.single.account.label

@@ -77,8 +77,10 @@ abstract interface class GoldStore {
   Future<bool> buy(String productId, {required String bindingRef});
 
   /// Acknowledges (Play) or finishes (StoreKit) [purchase]. Called only after
-  /// the backend verified it.
-  Future<void> complete(StorePurchase purchase);
+  /// the backend verified it. False when the store holds no live handle for
+  /// it (e.g. after a restart): the caller keeps the entry and completes it
+  /// when the store redelivers the purchase.
+  Future<bool> complete(StorePurchase purchase);
 
   /// Android: `queryPurchases`; iOS: current StoreKit entitlements. Purchased
   /// items only, at most 20.
@@ -124,6 +126,34 @@ final class InAppPurchaseGoldStore implements GoldStore {
       // A stream error carries no purchase; the next start redelivers.
       onError: (Object _) {},
     );
+    if (_platform == ClientPlatform.android) await _redeliverUnacknowledged();
+  }
+
+  /// The plugin does not push unacknowledged Play purchases to the stream at
+  /// start, so list them and emit the Gold ones that still need
+  /// acknowledging. Acknowledged ones are not emitted (no re-verify).
+  Future<void> _redeliverUnacknowledged() async {
+    try {
+      final addition = _iap
+          .getPlatformAddition<InAppPurchaseAndroidPlatformAddition>();
+      final res = await addition.queryPastPurchases();
+      if (res.error != null) return;
+      final mapped = <StorePurchase>[];
+      for (final d in res.pastPurchases) {
+        if (d.billingClientPurchase.isAcknowledged ||
+            d.status != PurchaseStatus.purchased ||
+            !GoldProducts.all.contains(d.productID)) {
+          continue;
+        }
+        d.pendingCompletePurchase = true;
+        final p = _map(d);
+        _live[_key(p)] = d;
+        mapped.add(p);
+      }
+      if (mapped.isNotEmpty && !_out.isClosed) _out.add(mapped);
+    } on Object {
+      // The next start retries.
+    }
   }
 
   @override
@@ -146,11 +176,12 @@ final class InAppPurchaseGoldStore implements GoldStore {
   }
 
   @override
-  Future<void> complete(StorePurchase purchase) async {
+  Future<bool> complete(StorePurchase purchase) async {
     final live = _live[_key(purchase)];
-    if (live == null) return; // redelivered (and completed) at the next start
+    if (live == null) return false;
     if (live.pendingCompletePurchase) await _iap.completePurchase(live);
     _live.remove(_key(purchase));
+    return true;
   }
 
   @override
