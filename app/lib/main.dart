@@ -12,6 +12,7 @@ import 'core/routing/app_router.dart';
 import 'core/theme/app_theme.dart';
 import 'features/budget/application/cycle_app_wiring.dart';
 import 'features/capture/presentation/capture_lifecycle.dart';
+import 'features/gold/application/gold_providers.dart';
 import 'features/catalog_sync/application/sync_providers.dart';
 import 'features/catalog_sync/presentation/sync_lifecycle.dart';
 import 'features/security/presentation/app_lock_gate.dart';
@@ -30,6 +31,8 @@ Future<void> main() async {
         dbDirectoryProvider.overrideWithValue(dbDirectory),
         // T-143 / FU-115 / FU-138: backend client, entitlement service, sync.
         ...syncWiringOverrides,
+        // T-145: seat keys and the purchase flow.
+        ...goldWiringOverrides,
       ],
       child: const CaptureLifecycle(
         child: SyncLifecycle(child: _LocalizedApp()),
