@@ -19,6 +19,10 @@ dependencies:
   # T-015 / ADR-001: state and DI (plain providers; riverpod_generator lands
   # with the first feature that needs code generation).
   flutter_riverpod: ^3.0.0
+  # T-023 / ADR-017: gen-l10n and date formats.
+  flutter_localizations:
+    sdk: flutter
+  intl: ^0.20.2
   # T-016: the application support directory for zaghlol.db (first-party).
   path_provider: ^2.1.6
   # T-015: SafeException for code-only DB errors (error-handling §3).
@@ -51,6 +55,7 @@ dev_dependencies:
   pigeon: ^26.0.0
 
 flutter:
+  generate: true
   uses-material-design: true
   assets:
     # T-030: the signed first-launch catalog (tools/catalog_build).

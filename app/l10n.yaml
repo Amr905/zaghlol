@@ -1,0 +1,7 @@
+# T-023 / ADR-017: gen-l10n, Arabic is the template. Output is committed
+# (like the drift code) so a plain `flutter pub get` build has it.
+arb-dir: lib/core/l10n
+template-arb-file: app_ar.arb
+output-localization-file: app_localizations.dart
+output-dir: lib/core/l10n/generated
+nullable-getter: false
