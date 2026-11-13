@@ -24,6 +24,7 @@ namespace Zaghlol.Api.Json;
 [JsonSerializable(typeof(IReadOnlyList<VerifySeatKeyInput>))]
 [JsonSerializable(typeof(PurchaseVerifyResponse))]
 [JsonSerializable(typeof(EntitlementResponse))]
+[JsonSerializable(typeof(PurchaseRestoreResponse))]
 [JsonSerializable(typeof(MerchantDraftRequest))]
 [JsonSerializable(typeof(AliasDraftRequest))]
 [JsonSerializable(typeof(KeywordDraftRequest))]

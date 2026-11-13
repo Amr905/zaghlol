@@ -22,6 +22,7 @@
     <Compile Include="..\Shared\AppleWireMock.cs" Link="Shared\AppleWireMock.cs" />
     <Compile Include="..\Shared\ZaghlolTestDatabase.cs" Link="Shared\ZaghlolTestDatabase.cs" />
     <Compile Include="..\Shared\SeatKeyTestSigner.cs" Link="Shared\SeatKeyTestSigner.cs" />
+    <Compile Include="..\Shared\FakeAttestation.cs" Link="Shared\FakeAttestation.cs" />
     <None Include="..\..\deploy\db\bootstrap-roles.sql" Link="db\bootstrap-roles.sql" CopyToOutputDirectory="PreserveNewest" />
   </ItemGroup>
 

@@ -41,6 +41,7 @@ internal static partial class PurchaseEndpoints
             .WithTimeNonce()
             .WithIdempotency(IdempotentOperation.VerifyPurchase)
             .RequireResponseSignature();
+        endpoints.MapRestore();
         return endpoints;
     }
 

@@ -20,6 +20,9 @@
     <Compile Include="..\Shared\AppleWireMock.cs" Link="Shared\AppleWireMock.cs" />
     <Compile Include="..\Shared\FakeOidcIssuer.cs" Link="Shared\FakeOidcIssuer.cs" />
     <Compile Include="..\Shared\SeatKeyTestSigner.cs" Link="Shared\SeatKeyTestSigner.cs" />
+    <Compile Include="..\Shared\FakeAttestation.cs" Link="Shared\FakeAttestation.cs" />
+    <!-- T-185: the shared restore-binding vectors, posted through the real pipeline (R3-8). -->
+    <None Include="..\Zaghlol.Contract.Tests\vectors\restore-binding-v1.json" Link="vectors\restore-binding-v1.json" CopyToOutputDirectory="PreserveNewest" />
     <Compile Include="..\Shared\TestSupportExclusion.cs" Link="Shared\TestSupportExclusion.cs" />
     <None Include="..\..\deploy\db\bootstrap-roles.sql" Link="db\bootstrap-roles.sql" CopyToOutputDirectory="PreserveNewest" />
     <None Include="GooglePlay\fixtures\**" CopyToOutputDirectory="PreserveNewest" />

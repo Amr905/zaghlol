@@ -71,3 +71,24 @@ public sealed class EntitlementResponse : IAnchoredResponse
     [JsonIgnore(Condition = JsonIgnoreCondition.Never)]
     public required string? SupportNotice { get; init; }
 }
+
+/// <summary>
+/// <c>PurchaseRestoreResponse</c> (backend-api §4.3 Restore): signed, echoes the time nonce, never carries <c>rotateInstallToken</c>.
+/// <c>entitlement</c> is written as an explicit <c>null</c> when nothing grants Gold.
+/// </summary>
+public sealed class PurchaseRestoreResponse : IAnchoredResponse
+{
+    public required string Status { get; init; }
+
+    public required int RestoredCount { get; init; }
+
+    public required bool MovedFromOtherPhone { get; init; }
+
+    [JsonIgnore(Condition = JsonIgnoreCondition.Never)]
+    public required PurchaseEntitlementDto? Entitlement { get; init; }
+
+    public required DateTimeOffset ServerTime { get; init; }
+
+    [JsonIgnore(Condition = JsonIgnoreCondition.Never)]
+    public required string? TimeNonce { get; init; }
+}
