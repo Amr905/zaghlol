@@ -62,6 +62,8 @@ Rules:
 
 Every task in `docs/04-tasks/tasks/` carries a **complexity class**. The class decides the implementing model and the review depth. Full rubric: `docs/workflow/model-routing.md`.
 
+> **Sprint mode (PO, 2026-11-13 20:10): target v1 code-complete in one day. `docs/workflow/SPRINT.md` holds the rules (waves of up to 10 builders, pipelined; two reviewers per wave; fix rounds only for blockers and money/security/privacy/data majors; db-platform device jobs on `main` twice a day) and the v1 scope. It overrides this section where they differ until the PO ends the sprint.**
+>
 > **Cost rules (PO, 2026-11-13) — these override anything below that says otherwise:**
 > 1. **Negative proofs:** at most **2–3 per C4 task**, for its core safety properties only (C1–C3: none). The reviewer may ask for more.
 > 2. **No waiting for the PC runner.** Builders run the local checks, push and report. They don't poll `local-ci`. The batch's GitHub run is the gate; the Lead asks for a runner result only when a check exists nowhere else.
