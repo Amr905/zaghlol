@@ -398,6 +398,7 @@ CREATE TABLE diag_log (id INTEGER PRIMARY KEY, at INTEGER NOT NULL, level TEXT N
 4. Migrations are additive in a release. Column drops or renames happen in two releases: shadow column first, then drop.
 5. The registry and catalog are **data**, not schema. Their versions are stored in `catalog_meta` and `raw_messages.registry_version`, and re-parse jobs are driven by version bumps.
 6. A backup records `schemaVersion`. Restore refuses files from a newer schema (EC-26) and migrates older ones.
+   *As built (T-149):* the snapshot carries every table except the device tables (`db_meta`, `secure_state`, `outbox`, `diag_log`, `catalog_*`; list in `features/backup/application/snapshot_tables.dart`, a test makes every new table pick a side). Restore keeps the target's device tables, writes the restored key slot (`secure_state backup.key_slot.v1`) and sets `db_meta` `restore_regrant_due = 1` (FR-BAK-07 re-grant prompt, cleared by the UI that shows it) and `restore_catalog_resync_due = 1` (catalog sync). The live file is replaced by one SQLite backup transaction; the reserved `zaghlol.db.restore.tmp` name is not used (staging lives in `<temp>/zaghlol_backup_work/`).
 
 ## 5. Sizing
 

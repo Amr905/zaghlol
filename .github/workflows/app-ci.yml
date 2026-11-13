@@ -108,13 +108,14 @@ jobs:
       # used: every error is a code-only SecretStoreApiError).
       # T-016 (S-5): also stdout/stderr/dump, and core/db/schema.
       # T-017: also the DAOs, the frozen migration steps and the .drift DDL.
-      - name: no logging in key, database, backup crypto and capture code (T-015, T-016, T-017, T-148, T-039, T-040, T-041)
+      - name: no logging in key, database, backup crypto/snapshot and capture code (T-015, T-016, T-017, T-148, T-149, T-039, T-040, T-041)
         run: |
           set -o pipefail
           files=$(ls app/lib/core/db/*.dart app/lib/core/db/schema/*.dart app/lib/core/db/schema/*.drift \
             app/lib/core/db/daos/*.dart app/lib/core/db/migrations/*.dart app/lib/core/crypto/*.dart \
             app/lib/core/platform/pigeon_secret_store.dart app/lib/core/platform/pigeon_text_normalizer.dart \
             app/lib/features/backup/crypto/*.dart \
+            app/lib/features/backup/application/*.dart app/lib/features/backup/data/*.dart \
             app/android/app/src/main/kotlin/app/zaghlol/platform/text/*.kt app/ios/Runner/Platform/Text/*.swift \
             app/android/app/src/main/kotlin/app/zaghlol/platform/keys/*.kt \
             app/ios/Runner/Platform/Keys/*.swift | grep -v '\.g\.')
