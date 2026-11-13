@@ -160,3 +160,7 @@ Checked `.github/workflows/db-platform.yml:264-284`: `perl -e 'alarm shift; exec
 | 1 | T-096 | A — App core/data (flutter-core) | major | F1: card dues (amount 0) are auto-marked paid by the card's own purchases; restrict card-due matching to incoming payments on the card (repository candidate directions + domain rule) and add the negative test. |
 
 All other findings are minors/nits: follow-ups (`FU-###`) with the owners named above; none is "before merge".
+
+## Lead delta check (5f6c572)
+
+T-096 major fixed. Card dues now select only `transfer_in` candidates, and the domain rule skips any candidate whose direction doesn't fit (`item.cardDue != c.inbound`) before the amount-0 shortcut. A card's own purchase can therefore never pay its due, while subscriptions and installments still match outbound payments only. About 12 production lines. The new repository test ("a 45 EGP purchase on the card does not mark the due paid") fails without the fix, and the domain test pins the API. Recurring tests (15) and domain tests (293) pass on the merged head. Verdict for T-096: **APPROVED**.
