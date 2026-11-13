@@ -623,36 +623,38 @@ class _ActionBar extends StatelessWidget {
   Widget build(BuildContext context) {
     final l = AppLocalizations.of(context);
     final c = ZColors.of(context);
-    Widget item(IconData icon, String label, VoidCallback? onTap) => Expanded(
-      child: InkWell(
-        onTap: onTap,
-        child: ConstrainedBox(
-          constraints: const BoxConstraints(minHeight: ZSpacing.minTarget),
-          child: Opacity(
-            opacity: onTap == null ? 0.38 : 1,
-            child: Padding(
-              padding: const EdgeInsetsDirectional.symmetric(
-                vertical: ZSpacing.sm,
-                horizontal: ZSpacing.xs,
-              ),
-              child: Column(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  Icon(icon, color: c.text),
-                  FittedBox(
-                    fit: BoxFit.scaleDown,
-                    child: Text(
-                      label,
-                      style: ZType.caption.copyWith(color: c.text),
-                    ),
+    Widget item(String key, IconData icon, String label, VoidCallback? onTap) =>
+        Expanded(
+          child: InkWell(
+            key: ValueKey(key),
+            onTap: onTap,
+            child: ConstrainedBox(
+              constraints: const BoxConstraints(minHeight: ZSpacing.minTarget),
+              child: Opacity(
+                opacity: onTap == null ? 0.38 : 1,
+                child: Padding(
+                  padding: const EdgeInsetsDirectional.symmetric(
+                    vertical: ZSpacing.sm,
+                    horizontal: ZSpacing.xs,
                   ),
-                ],
+                  child: Column(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Icon(icon, color: c.text),
+                      FittedBox(
+                        fit: BoxFit.scaleDown,
+                        child: Text(
+                          label,
+                          style: ZType.caption.copyWith(color: c.text),
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
               ),
             ),
           ),
-        ),
-      ),
-    );
+        );
     return Material(
       color: c.surface,
       elevation: 8,
@@ -660,21 +662,24 @@ class _ActionBar extends StatelessWidget {
         child: Row(
           children: [
             item(
+              'bulk-category',
               Icons.category_outlined,
               l.transactionsListBulkCategory,
               enabled ? onCategory : null,
             ),
             item(
+              'bulk-account',
               Icons.credit_card,
               l.transactionsListBulkAccount,
               enabled ? onAccount : null,
             ),
             item(
+              'bulk-delete',
               Icons.delete_outline,
               l.commonActionDelete,
               enabled ? onDelete : null,
             ),
-            item(Icons.close, l.commonActionCancel, onCancel),
+            item('bulk-cancel', Icons.close, l.commonActionCancel, onCancel),
           ],
         ),
       ),

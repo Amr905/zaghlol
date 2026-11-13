@@ -109,8 +109,8 @@ Future<Set<String>?> showCategoriesSheet(
       ),
     ),
     builder: (ctx) => StatefulBuilder(
-      builder: (ctx, setState) => ListView(
-        shrinkWrap: true,
+      builder: (ctx, setState) => Column(
+        mainAxisSize: MainAxisSize.min,
         children: [
           for (final c in categories)
             _option(
@@ -185,8 +185,8 @@ Future<Set<TxnSource>?> showSourcesSheet(
       ),
     ),
     builder: (ctx) => StatefulBuilder(
-      builder: (ctx, setState) => ListView(
-        shrinkWrap: true,
+      builder: (ctx, setState) => Column(
+        mainAxisSize: MainAxisSize.min,
         children: [
           for (final s in TxnSource.values)
             _option(
@@ -226,8 +226,8 @@ Future<Set<String>?> showCardsSheet(
       ),
     ),
     builder: (ctx) => StatefulBuilder(
-      builder: (ctx, setState) => ListView(
-        shrinkWrap: true,
+      builder: (ctx, setState) => Column(
+        mainAxisSize: MainAxisSize.min,
         children: [
           _option(
             ctx,
@@ -266,6 +266,7 @@ Future<({String id, bool always})?> showBulkCategorySheet(
     fullHeight: true,
     builder: (ctx) => StatefulBuilder(
       builder: (ctx, setState) => Column(
+        mainAxisSize: MainAxisSize.min,
         children: [
           SwitchListTile(
             contentPadding: const EdgeInsetsDirectional.symmetric(
@@ -275,19 +276,12 @@ Future<({String id, bool always})?> showBulkCategorySheet(
             value: always,
             onChanged: (v) => setState(() => always = v),
           ),
-          Expanded(
-            child: ListView(
-              children: [
-                for (final c in categories)
-                  ZListRow(
-                    title: categoryName(c, lang),
-                    leading: Text(c.icon, style: ZType.title),
-                    onTap: () =>
-                        Navigator.of(ctx).pop((id: c.id, always: always)),
-                  ),
-              ],
+          for (final c in categories)
+            ZListRow(
+              title: categoryName(c, lang),
+              leading: Text(c.icon, style: ZType.title),
+              onTap: () => Navigator.of(ctx).pop((id: c.id, always: always)),
             ),
-          ),
         ],
       ),
     ),
@@ -305,8 +299,8 @@ Future<String?> showBulkAccountSheet(
     context: context,
     title: l.transactionsListBulkAccount,
     fullHeight: true,
-    builder: (ctx) => ListView(
-      shrinkWrap: true,
+    builder: (ctx) => Column(
+      mainAxisSize: MainAxisSize.min,
       children: [
         for (final a in accounts)
           ZListRow(
