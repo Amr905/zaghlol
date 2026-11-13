@@ -196,7 +196,9 @@ final class AttestationHost: AttestationHostApi {
       return
     }
     switch store.read() {
-    case .unavailable, .notFound:
+    case .unavailable:
+      completion(.failure(Self.error(Self.unavailable)))
+    case .notFound:
       newKey(hash: hash, completion: completion)
     case .found(let keyId):
       service.generateAssertion(keyId, clientDataHash: hash) { data, err in
@@ -223,7 +225,7 @@ final class AttestationHost: AttestationHostApi {
           completion(.failure(Self.error(Self.code(for: err))))
           return
         }
-        self.service.attestKey(keyId, clientDataHash: Data(hash.reversed())) { object, err in
+        self.service.attestKey(keyId, clientDataHash: hash) { object, err in
           self.hop {
             guard let object = object, err == nil else {
               completion(.failure(Self.error(Self.code(for: err))))
