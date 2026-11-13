@@ -60,7 +60,7 @@ Every task file has: ID, description, technical details, dependencies, affected 
 | [T-020](tasks/T-020.md) | Settings repository with typed accessors and defaults | US-18-1 | Medium | Sonnet | flutter-core-engineer | T-019 | A | 6 | DONE |
 | [T-021](tasks/T-021.md) | Redacting local diagnostic log | US-21-1 | High | Sonnet | flutter-core-engineer | T-019, T-014 | A | 6 | DONE |
 | [T-022](tasks/T-022.md) | Design tokens, Mint Fresh/Jade Night themes and base components | US-02-3 | Medium | Sonnet | flutter-ui-engineer | T-001 | G | 2 | DONE |
-| [T-023](tasks/T-023.md) | Localization scaffold, digits mode and money/date formatting | US-02-2 | Medium | Sonnet | flutter-core-engineer | T-012, T-020 | A | 7 | TODO |
+| [T-023](tasks/T-023.md) | Localization scaffold, digits mode and money/date formatting | US-02-2 | Medium | Sonnet | flutter-core-engineer | T-012, T-020 | A | 7 | DONE |
 | [T-024](tasks/T-024.md) | App shell: routing, platform tab bars, Add button, deep links | US-02-3 | Medium | Sonnet | flutter-ui-engineer | T-022, T-023 | G | 8 | TODO |
 | [T-025](tasks/T-025.md) | Feature flags service (default OFF) | US-13-1 | Medium | Sonnet | flutter-core-engineer | T-019 | A | 6 | DONE |
 | [T-026](tasks/T-026.md) | Copy deck part 1: onboarding, capture, Home, transactions, review, accounts | US-20-1 | High | Opus | ux-designer | — | C | 1 | DONE |
@@ -85,7 +85,7 @@ Every task file has: ID, description, technical details, dependencies, affected 
 | [T-040](tasks/T-040.md) | SMS receiver (multipart, Guard, spool, enqueue) in prodSms flavor | US-03-1 | High* | Opus | native-platform-engineer | T-038, T-039 | D | 7 | DONE |
 | [T-041](tasks/T-041.md) | IngestionWorker with headless Flutter engine and foreground events | US-03-1 | High* | Opus | native-platform-engineer | T-039, T-008 | D | 5 | DONE |
 | [T-042](tasks/T-042.md) | Inbox reader for historical scan (sender-filtered, paged) | US-03-2 | High* | Opus | native-platform-engineer | T-004, T-038 | D | 7 | DONE |
-| [T-043](tasks/T-043.md) | Bank notification listener service | US-03-3 | High* | Opus | native-platform-engineer | T-038, T-039 | D | 7 | TODO |
+| [T-043](tasks/T-043.md) | Bank notification listener service | US-03-3 | High* | Opus | native-platform-engineer | T-038, T-039 | D | 7 | DONE |
 | [T-044](tasks/T-044.md) | Android capabilities and permission flows host API | US-03-4 | High* | Opus | native-platform-engineer | T-040, T-043 | D | 8 | TODO |
 | [T-045](tasks/T-045.md) | Accounts repository: auto-create, default cash, per-currency balances | US-06-1 | High | Sonnet | flutter-core-engineer | T-017 | A | 6 | DONE |
 | [T-046](tasks/T-046.md) | IngestRawMessages use case (dedupe, merge, persist, ack, events) | US-06-1 | High* | Opus | flutter-core-engineer | T-033, T-045, T-014, T-035 | A | 7 | DONE |
@@ -166,7 +166,7 @@ Every task file has: ID, description, technical details, dependencies, affected 
 | [T-106](tasks/T-106.md) | Explanation template engine (basic vs deep coaching) | US-11-1 | High | Sonnet | flutter-core-engineer | T-105, T-027 | A | 12 | TODO |
 | [T-107](tasks/T-107.md) | Charts S-20: four Free charts and Gold-locked previews | US-11-1 | Medium | Sonnet | flutter-ui-engineer | T-105, T-101 | G | 12 | TODO |
 | [T-108](tasks/T-108.md) | Chart detail with explanation S-21 | US-11-1 | Medium | Sonnet | flutter-ui-engineer | T-106, T-107 | G | 13 | TODO |
-| [T-109](tasks/T-109.md) | Egyptian Arabic voice-phrase parser and 200-phrase fixtures | US-11-3 | High | Sonnet | parsing-engine-engineer | T-013, T-075 | F | 9 | TODO |
+| [T-109](tasks/T-109.md) | Egyptian Arabic voice-phrase parser and 200-phrase fixtures | US-11-3 | High | Sonnet | parsing-engine-engineer | T-013, T-075 | F | 9 | DONE |
 | [T-110](tasks/T-110.md) | Ask Zaghlol intent engine (grammar, slots, query plans, answers, roast) | US-11-2 | High | Sonnet | parsing-engine-engineer | T-105, T-027 | F | 12 | TODO |
 | [T-111](tasks/T-111.md) | Ask Zaghlol screen S-50 | US-11-2 | Medium | Sonnet | flutter-ui-engineer | T-110 | G | 13 | TODO |
 | [T-112](tasks/T-112.md) | Prices and FX store in app (sync-fed, manual override, stale) | US-12-1 | Medium | Sonnet | flutter-core-engineer | T-019 | A | 6 | DONE |
@@ -194,7 +194,7 @@ Every task file has: ID, description, technical details, dependencies, affected 
 | [T-129](tasks/T-129.md) | Contribution aggregation, review list and promote/reject | US-13-2 | Medium | Sonnet | backend-engineer | T-128, T-125 | B | 5 | DONE |
 | [T-130](tasks/T-130.md) | Google Play purchase verification, acknowledgement and sweeper | US-14-1 | High* | Opus | backend-engineer | T-124, T-123 | B | 4 | DONE |
 | [T-131](tasks/T-131.md) | App Store verification (JWS chain, Server API status, appAccountToken) | US-14-1 | High* | Opus | backend-engineer | T-124, T-123 | B | 4 | DONE |
-| [T-132](tasks/T-132.md) | Entitlement tokens, GET /v1/entitlement, seat at verify and sync entitlement block | US-14-1 | High* | Opus | backend-engineer | T-128, T-130, T-131, T-184 | B | 5 | TODO |
+| [T-132](tasks/T-132.md) | Entitlement tokens, GET /v1/entitlement, seat at verify and sync entitlement block | US-14-1 | High* | Opus | backend-engineer | T-128, T-130, T-131, T-184 | B | 5 | DONE |
 | [T-133](tasks/T-133.md) | Google RTDN push endpoint, processing worker and voided reconciliation | US-14-1 | High* | Opus | backend-engineer | T-130 | B | 5 | DONE |
 | [T-134](tasks/T-134.md) | App Store Server Notifications V2 endpoint and reconciliation | US-14-1 | High* | Opus | backend-engineer | T-131 | B | 5 | DONE |
 | [T-135](tasks/T-135.md) | Accounts: Google/Apple ID token sign-in, linking, sign-out, delete, Android Apple callback | US-15-1 | High* | Opus | backend-engineer | T-132, T-182, T-184 | B | 6 | TODO |
@@ -203,7 +203,7 @@ Every task file has: ID, description, technical details, dependencies, affected 
 | [T-138](tasks/T-138.md) | Backend observability: OpenTelemetry, metrics, dashboards, alert rules | US-21-1 | High | Sonnet | backend-engineer | T-005 | B | 2 | DONE |
 | [T-139](tasks/T-139.md) | Retention purger and log privacy settings | US-13-1 | Medium | Sonnet | backend-engineer | T-122, T-138 | B | 3 | DONE |
 | [T-140](tasks/T-140.md) | Infrastructure as code and deployment pipeline (staging, prod) | US-13-1 | High* | Opus | backend-engineer | T-138 | B | 3 | BLOCKED |
-| [T-141](tasks/T-141.md) | App BackendClient: generated DTOs, ES256 verification, lazy install registration | US-13-1 | High* | Opus | flutter-core-engineer | T-006, T-019 | A | 6 | TODO |
+| [T-141](tasks/T-141.md) | App BackendClient: generated DTOs, ES256 verification, lazy install registration | US-13-1 | High* | Opus | flutter-core-engineer | T-006, T-019 | A | 6 | DONE |
 | [T-142](tasks/T-142.md) | Merchant contribution opt-in and outbox with on-device filters | US-07-2 | High* | Opus | flutter-core-engineer | T-075, T-019 | A | 9 | TODO |
 | [T-143](tasks/T-143.md) | Daily sync orchestrator: throttle, back-off, atomic apply, re-categorize | US-13-1 | High | Opus | flutter-core-engineer | T-141, T-075, T-142, T-112, T-025, T-144 | A | 10 | TODO |
 | [T-144](tasks/T-144.md) | Entitlement token verification, trusted time, offline cache and grace | US-14-1 | High* | Opus | flutter-core-engineer | T-119, T-141, T-180 | A | 8 | TODO |
