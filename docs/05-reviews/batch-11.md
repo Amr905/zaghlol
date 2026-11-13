@@ -145,3 +145,15 @@ Fail-closed holds: state is Free by default; `EntitlementState._` is private; th
 | 119-1 | T-119 | App core (flutter-core) | major | `applyVerified` grants Gold for `active` and `grace`; tests for every status |
 
 All three are small; each qualifies for a Lead delta check (≤ ~30 lines with a failing-without-fix test). T-049 and T-119 are one-file fixes; T-048-1 is the largest. They are all in the same lane, so run them one after another, or as one agent working through the three tasks in turn.
+
+## Lead delta check (0dd0fe5)
+
+The Lead checked this delta directly. 048-1 changed 39 lines, a little over the 30-line guideline; the logic is small and fully covered by the new test, so no re-review agent was started.
+
+- **048-1:** a request now joins the last queued scan only when that scan covers it (same or earlier `sinceMs`, personal senders included only if the queued scan includes them, institution superset). Any other request is chained after it, runs its own scan, and even runs after a failed predecessor. `_running` and `_tailRequest` are cleared only by the last future. A first run or re-scan during a catch-up can no longer be dropped.
+- **048-2:** `_storeFailed` drops `inboxScanPersonal` as `personal_unparsed` before any raw or review insert. This covers the quarantine and message-level paths.
+- **049-1:** `resolveManually` is refused with `REVIEW_NOT_APPLICABLE` unless the item is `unrecognized`/`newSender` with no `txnId`.
+- **119-1 / 119-2:** Gold is granted only when `verified` is true and the status is `active` or `grace`. The Gold constant is library-private, so production code reaches Gold only through `applyVerified` or the debug-only override.
+- **183-1:** only the strict-parse `restoreBodyHashFromJson` is public, and the vector tests pass.
+
+Checks on the merged head: `dart format` clean, `flutter analyze` clean, `zaghlol_lints` clean, and 1869 tests pass (benchmarks excluded). Verdicts for T-048, T-049 and T-119: **APPROVED**.
