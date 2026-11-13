@@ -26,7 +26,7 @@ class CaptureSourceScanTest {
     @Test
     fun theScanSeesTheCaptureSources() {
         val names = captureSources.map { it.name }.toSet()
-        for (n in listOf("CaptureIntake.kt", "SmsAssembler.kt", "BoundedDispatch.kt", "GuardAdapters.kt", "SmsCapture.kt", "SimSlot.kt", "SmsReceiver.kt")) {
+        for (n in listOf("CaptureIntake.kt", "SmsAssembler.kt", "BoundedDispatch.kt", "GuardAdapters.kt", "SmsCapture.kt", "SimSlot.kt", "SmsReceiver.kt", "BankNotificationListener.kt", "NotificationExtractor.kt", "NotificationCapture.kt", "NotificationIntake.kt", "RecentNotifications.kt")) {
             assertTrue(n, n in names)
         }
     }
@@ -53,8 +53,8 @@ class CaptureSourceScanTest {
     @Test
     fun noSpoolEntryOrRecordIsStringified() {
         val stringify = Regex(
-            "\"[^\"]*\\$\\{?(entry|entries|record|rec|spoolEntry|message|msg|m|part|parts|messages)\\b|" +
-                "\\b(entry|entries|record|rec|spoolEntry|message|msg|part|parts|messages)\\.toString\\(\\)",
+            "\"[^\"]*\\$\\{?(entry|entries|record|rec|spoolEntry|message|msg|m|part|parts|messages|posted|sbn|extras|fields|item)\\b|" +
+                "\\b(entry|entries|record|rec|spoolEntry|message|msg|part|parts|messages|posted|sbn|extras|fields|item)\\.toString\\(\\)",
         )
         for (f in captureSources) {
             val text = f.readText()
@@ -89,6 +89,38 @@ class CaptureSourceScanTest {
     fun theReceiverClassLivesOnlyInTheSmsSourceSet() {
         val holders = src.walkTopDown().filter { it.isFile && it.name == "SmsReceiver.kt" }.map { it.relativeTo(src).path }.toList()
         assertEquals(listOf("sms/kotlin/app/zaghlol/platform/capture/SmsReceiver.kt".replace('/', File.separatorChar)), holders)
+    }
+
+    @Test
+    fun theListenerIsDeclaredOnceInTheMainManifestWithTheBindPermission() {
+        val doc = DocumentBuilderFactory.newInstance().apply { isNamespaceAware = true }
+            .newDocumentBuilder().parse(File(src, "main/AndroidManifest.xml"))
+        val list = doc.getElementsByTagName("service")
+        val services = (0 until list.length).map { list.item(it) as Element }
+            .filter { it.getAttributeNS(android, "name").endsWith("BankNotificationListener") }
+        assertEquals(1, services.size)
+        val s = services[0]
+        assertEquals(".platform.capture.BankNotificationListener", s.getAttributeNS(android, "name"))
+        assertEquals("android.permission.BIND_NOTIFICATION_LISTENER_SERVICE", s.getAttributeNS(android, "permission"))
+        assertEquals("true", s.getAttributeNS(android, "exported"))
+        assertEquals("false", s.getAttributeNS(android, "directBootAware"))
+        assertEquals("", s.getAttributeNS(android, "label"))
+        val actions = s.getElementsByTagName("action")
+        assertEquals(1, actions.length)
+        assertEquals("android.service.notification.NotificationListenerService", (actions.item(0) as Element).getAttributeNS(android, "name"))
+        // The app declares no permission for notification access (the user grants it in settings).
+        assertFalse(File(src, "main/AndroidManifest.xml").readText().contains("uses-permission"))
+    }
+
+    @Test
+    fun theListenerDoesNoIoAndReadsNoExtrasOnTheMainThread() {
+        val text = File(captureMain, "BankNotificationListener.kt").readText()
+        val posted = text.substringAfter("override fun onNotificationPosted").substringBefore("private class SbnPosted")
+        assertTrue(posted.contains("NotificationFilter.accepts("))
+        assertFalse(posted.contains("extras"))
+        assertFalse(posted.contains("fields()"))
+        assertFalse(text.contains("getActiveNotifications"))
+        assertFalse(text.contains("requestRebind"))
     }
 
     private fun receivers(manifest: String): List<Element> {

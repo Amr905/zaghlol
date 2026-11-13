@@ -129,6 +129,28 @@ class CaptureRuntime internal constructor(seams: CaptureSeams) {
         )
     }
 
+    /**
+     * T-043: the notification listener's intake. Package admission → extract →
+     * repeat filter → Guard (typed `notification` channel, the same
+     * per-process rate limiter) → spool → [afterSpoolWrite]. Built on first
+     * use, on the listener's intake thread.
+     */
+    val notifications: NotificationIntake by lazy {
+        NotificationIntake(
+            admits = { pkg -> guard.admitsNotificationPackage(pkg) },
+            intake = CaptureIntake(
+                channel = AndroidGuardChannel.NOTIFICATION,
+                decide = { channel, source, body -> guard.decide(channel, source, body) },
+                store = store,
+                status = status,
+                afterWrite = ::afterSpoolWrite,
+                trace = { trace },
+            ),
+            recent = RecentNotifications(monoClockMs),
+            bootCount = seams.bootCount,
+        )
+    }
+
     /** devSms: the spike's latency recorder (`SpikeInitializer`); [IngestTrace.NONE] otherwise. */
     @Volatile var trace: IngestTrace = IngestTrace.NONE
 

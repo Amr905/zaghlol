@@ -99,6 +99,19 @@ class GuardRuntime(
     }
 
     /**
+     * T-043 (FR-ING-A-03): may the listener read the extras of a notification
+     * posted by [packageName]? Only a registry package or a user sender on the
+     * `notification` channel; an invalid base admits nothing. A package that
+     * would only pass the generic sender-hint path is **not** admitted
+     * (notifications never take it, package names are trivially chosen).
+     * Never throws; reads no notification content.
+     */
+    fun admitsNotificationPackage(packageName: String): Boolean {
+        val kind = current().guard.senderKind(AndroidGuardChannel.NOTIFICATION.wire, packageName)
+        return kind == GuardKeepKind.REGISTRY || kind == GuardKeepKind.USER
+    }
+
+    /**
      * Replaces the user part (host `writeGuardConfig`, wired by T-040). Under
      * the runtime lock: size and full reader validation **before** anything
      * is written; then encrypt + tmp + fsync + rename; then the new snapshot
