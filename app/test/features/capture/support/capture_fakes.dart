@@ -77,6 +77,34 @@ final class FakeHost implements CaptureHostPort {
   @override
   Future<CaptureCapabilities> getCapabilities() async => caps;
 
+  /// T-044 (T-056 reads these).
+  bool smsRequestResult = true;
+  String? smsRequestFails;
+  int notificationSettingsOpened = 0;
+  bool ignoringBattery = false;
+
+  @override
+  Future<bool> requestSmsPermission() async {
+    log.add('requestSms');
+    final fail = smsRequestFails;
+    if (fail != null) throw hostError(fail);
+    return smsRequestResult;
+  }
+
+  @override
+  Future<void> openNotificationAccessSettings() async {
+    log.add('openNotificationAccess');
+    notificationSettingsOpened++;
+  }
+
+  @override
+  Future<bool> isIgnoringBatteryOptimizations() async => ignoringBattery;
+
+  @override
+  Future<void> requestIgnoreBatteryOptimizations() async {
+    log.add('requestIgnoreBattery');
+  }
+
   @override
   Future<void> writeGuardConfig(Uint8List userConfigJson) async {
     log.add('write');
