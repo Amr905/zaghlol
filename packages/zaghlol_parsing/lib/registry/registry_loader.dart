@@ -10,6 +10,26 @@ import 'registry_schema.dart';
 final class Registry {
   Registry._(this.registryVersion, this.shared, this.institutions);
 
+  /// A registry of just [institutions] with empty shared config (custom
+  /// templates, T-164). Not read from files, so no manifest is involved.
+  factory Registry.ofInstitutions(List<Institution> institutions) => Registry._(
+    institutions.fold(
+      0,
+      (m, i) => i.maxTemplateVersion > m ? i.maxTemplateVersion : m,
+    ),
+    SharedConfig.empty,
+    List.unmodifiable(institutions),
+  );
+
+  /// This registry plus [extra] institutions (the user's custom templates).
+  /// The built-in institutions come first, so a sender the registry already
+  /// knows keeps its built-in templates; [registryVersion] is unchanged.
+  Registry withExtra(Iterable<Institution> extra) => Registry._(
+    registryVersion,
+    shared,
+    List.unmodifiable([...institutions, ...extra]),
+  );
+
   /// Max template version over all institutions (parsing-engine §3).
   final int registryVersion;
   final SharedConfig shared;

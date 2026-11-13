@@ -6,6 +6,7 @@ export 'categorize/categorizer.dart';
 export 'categorize/jaro_winkler.dart';
 export 'categorize/keyword_scorer.dart';
 export 'categorize/types.dart';
+export 'custom/custom_template.dart';
 export 'generic/generic_parser.dart' show parseGeneric;
 export 'guard/capture_guard.dart';
 export 'guard/guard_config.dart';
