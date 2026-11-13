@@ -126,15 +126,31 @@ final class BackupExclusionTests: XCTestCase {
 
   // 4. App Group directories: enabled by T-062 together with the entitlement.
   func testAppGroupDirectoriesAreExcluded() throws {
-    guard let groupID = ZaghlolDirectories.appGroupIdentifier,
-      FileManager.default.containerURL(forSecurityApplicationGroupIdentifier: groupID) != nil
-    else {
-      throw XCTSkip("No App Group entitlement yet (T-062 enables this test).")
-    }
-    let urls = ZaghlolDirectories.appGroupDirectories()
-    XCTAssertEqual(urls.count, 3)
-    for url in urls {
-      XCTAssertTrue(try isExcluded(url), "App Group \(url.lastPathComponent) is not excluded")
+    // T-062: the App Group entitlement exists; CI requires this test to run (no skip).
+    let groupID = try XCTUnwrap(
+      ZaghlolDirectories.appGroupIdentifier, "ZaghlolAppGroup missing from Info.plist")
+    if FileManager.default.containerURL(forSecurityApplicationGroupIdentifier: groupID) != nil {
+      // Signed build (device, or a simulator build that carries the entitlement):
+      // the launch path excluded the real App Group directories.
+      let urls = ZaghlolDirectories.appGroupDirectories()
+      XCTAssertEqual(urls.count, 3)
+      for url in urls {
+        XCTAssertTrue(try isExcluded(url), "App Group \(url.lastPathComponent) is not excluded")
+      }
+    } else {
+      // The unsigned CI simulator build has no entitlement, so no container. The spool
+      // falls back to a folder in Application Support there; the same three
+      // directories must come out excluded through the same code path.
+      let container = try XCTUnwrap(SpoolLocation.containerURL(), "no container and no fallback")
+      let dirs = [
+        SpoolLocation.spoolDirectory(in: container),
+        container.appendingPathComponent("Library/Application Support", isDirectory: true),
+        container.appendingPathComponent("Library/Caches", isDirectory: true),
+      ]
+      XCTAssertTrue(ZaghlolDirectories.exclude(dirs))
+      for url in dirs {
+        XCTAssertTrue(try isExcluded(url), "\(url.lastPathComponent) is not excluded")
+      }
     }
   }
 

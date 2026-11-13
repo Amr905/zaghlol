@@ -18,6 +18,9 @@ import 'package:pigeon/pigeon.dart';
       package: 'app.zaghlol.platform.ingest',
       errorClassName: 'IngestionApiError',
     ),
+    // T-062: the iOS headless engine (App Intents, BGAppRefreshTask) uses the same control channel.
+    swiftOut: 'ios/Runner/Platform/IngestionApi.g.swift',
+    swiftOptions: SwiftOptions(errorClassName: 'IngestionApiError'),
   ),
 )
 /// The outcome of one drain cycle (ingestion_cycle.dart `CycleOutcome`).

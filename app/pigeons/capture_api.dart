@@ -201,8 +201,37 @@ abstract class AndroidCaptureHostApi {
   void holdSpool(List<String> ids);
 }
 
+/// iOS host (T-062): the encrypted spool in the App Group container and the
+/// background refresh. Same drain / ack / hold / status semantics as
+/// AndroidCaptureHostApi (platform-channels.md 1.3), so the Dart drain is
+/// shared. Errors: IO_ERROR | NOT_AVAILABLE (no App Group container).
+/// T-061 adds writeGuardConfig and the Shortcut-setup methods (section 3).
 @HostApi()
-abstract class IosCaptureHostApi {}
+abstract class IosCaptureHostApi {
+  /// Returns decrypted entries (in memory only), oldest first.
+  @TaskQueue(type: TaskQueueType.serialBackgroundThread)
+  List<SpoolEntry> drainSpool(int max);
+
+  /// Only ids this engine drained.
+  @TaskQueue(type: TaskQueueType.serialBackgroundThread)
+  void ackSpool(List<String> ids);
+
+  /// Entries IngestRawMessages could not store even alone; moved to spool/held/.
+  @TaskQueue(type: TaskQueueType.serialBackgroundThread)
+  void holdSpool(List<String> ids);
+
+  @TaskQueue(type: TaskQueueType.serialBackgroundThread)
+  SpoolStatus getSpoolStatus();
+
+  /// Zeroes the alert counters if [seq] still matches getSpoolStatus().seq.
+  @TaskQueue(type: TaskQueueType.serialBackgroundThread)
+  void clearSpoolAlerts(int seq);
+
+  /// Submits the BGAppRefreshTask 'app.zaghlol.ingest' (the launch handler is
+  /// registered natively at launch). A best-effort nudge: the system decides
+  /// when it runs; the foreground drain is the guarantee.
+  void registerBackgroundRefresh();
+}
 
 @FlutterApi()
 abstract class CaptureEventsApi {
