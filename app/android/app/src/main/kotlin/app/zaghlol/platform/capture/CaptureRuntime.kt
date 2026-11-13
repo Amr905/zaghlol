@@ -163,6 +163,8 @@ class CaptureRuntime internal constructor(seams: CaptureSeams) {
     // Main thread only.
     private var uiKey: Any? = null
     private var uiHost: AndroidCaptureHost? = null
+    private var uiPermissions: UiPermissions? = null
+    private var lastCaps: CaptureCapabilities? = null
 
     val headless = HeadlessEngine(
         starter = seams.headlessStarter { newHost(headless = true) },
@@ -229,14 +231,18 @@ class CaptureRuntime internal constructor(seams: CaptureSeams) {
      * engine down (after its current batch and DB close), registers a UI
      * [AndroidCaptureHost] and the event API.
      */
-    fun attachUi(engine: FlutterEngine) = attachUi(engine, engine.dartExecutor.binaryMessenger)
+    fun attachUi(engine: FlutterEngine, permissions: UiPermissions? = null) =
+        attachUi(engine, engine.dartExecutor.binaryMessenger, permissions)
 
     /** Main thread (`MainActivity.cleanUpFlutterEngine`); only the attached engine detaches. */
     fun detachUi(engine: FlutterEngine) = detachUi(engine, engine.dartExecutor.binaryMessenger)
 
-    internal fun attachUi(key: Any, messenger: BinaryMessenger) {
+    internal fun attachUi(key: Any, messenger: BinaryMessenger, permissions: UiPermissions? = null) {
         headless.shutdown()
         uiHost?.detach()
+        uiPermissions?.detach()
+        uiPermissions = permissions
+        lastCaps = safeCapabilities()
         val host = newHost(headless = false)
         uiHost = host
         uiKey = key
@@ -249,6 +255,9 @@ class CaptureRuntime internal constructor(seams: CaptureSeams) {
         if (uiKey !== key) return
         uiEvents = null
         uiKey = null
+        uiPermissions?.detach()
+        uiPermissions = null
+        lastCaps = null
         uiHost?.detach()
         uiHost = null
         AndroidCaptureHostApi.setUp(messenger, null)
@@ -274,7 +283,34 @@ class CaptureRuntime internal constructor(seams: CaptureSeams) {
         trace = { trace },
         monoClockMs = monoClockMs,
         inbox = if (headless) null else uiInbox(),
+        ui = if (headless) null else uiPermissions,
     )
+
+    /**
+     * T-044 (EC-13): main thread, on resume and after a permission prompt.
+     * When the capabilities differ from the last ones seen, tells the UI
+     * engine (`CaptureEventsApi.onPermissionChanged`). The first look after
+     * attach only records the baseline; a revocation that killed the process
+     * is seen by Dart's own `getCapabilities` at start.
+     */
+    fun checkPermissions() {
+        val events = uiEvents ?: return
+        val now = safeCapabilities() ?: return
+        val before = lastCaps
+        lastCaps = now
+        if (before == null || before == now) return
+        try {
+            events.onPermissionChanged(now) { }
+        } catch (_: Exception) {
+            // A notification only: Dart reads the capabilities again when it needs them.
+        }
+    }
+
+    private fun safeCapabilities(): CaptureCapabilities? = try {
+        device?.capabilities()
+    } catch (_: Exception) {
+        null
+    }
 
     private fun environment(pauseFn: suspend (Long) -> Unit) = object : DrainEnvironment {
         override fun pendingCount(): Int? = try {

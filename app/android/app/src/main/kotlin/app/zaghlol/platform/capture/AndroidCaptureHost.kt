@@ -52,6 +52,8 @@ class AndroidCaptureHost(
     private val monoClockMs: () -> Long = { System.nanoTime() / 1_000_000 },
     /** T-042 inbox reader: `InboxReaders.forUiEngine` on the UI engine, null on the headless one. */
     private val inbox: InboxReader? = null,
+    /** T-044: Activity-bound actions; UI engine only (the headless host answers `NOT_AVAILABLE`). */
+    private val ui: UiPermissions? = null,
 ) : AndroidCaptureHostApi {
 
     /** Ids this host's drain returned and that are not yet acked. */
@@ -59,13 +61,28 @@ class AndroidCaptureHost(
 
     override fun getCapabilities(): CaptureCapabilities = guarded { need(device).capabilities() }
 
-    // T-040 owns the runtime request (with the Flutter rationale UI).
+    /**
+     * T-044: the runtime request; the rationale UI is Flutter's. `*NoSms`
+     * answers `NOT_AVAILABLE` without a system prompt. Errors are code-only.
+     */
     override fun requestSmsPermission(callback: (Result<Boolean>) -> Unit) {
-        callback(Result.failure(CaptureApiError(NOT_AVAILABLE, null, null)))
+        val u = ui ?: return callback(Result.failure(notAvailable()))
+        try {
+            u.requestSms { r ->
+                callback(
+                    r.fold(
+                        { Result.success(it) },
+                        { e -> Result.failure(CaptureApiError((e as? CaptureApiError)?.code ?: IO_ERROR, null, null)) },
+                    ),
+                )
+            }
+        } catch (_: Throwable) {
+            callback(Result.failure(CaptureApiError(IO_ERROR, null, null)))
+        }
     }
 
-    // T-043.
-    override fun openNotificationAccessSettings(): Unit = guarded { throw notAvailable() }
+    /** T-044: the system "Notification access" screen (the user grants it there). */
+    override fun openNotificationAccessSettings(): Unit = guarded { need(ui).openNotificationAccessSettings() }
 
     override fun isIgnoringBatteryOptimizations(): Boolean = guarded { need(device).isIgnoringBatteryOptimizations() }
 

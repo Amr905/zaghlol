@@ -3,6 +3,8 @@ package app.zaghlol
 import android.content.Intent
 import android.os.Handler
 import android.os.Looper
+import android.provider.Settings
+import app.zaghlol.platform.capture.ActivityPermissions
 import app.zaghlol.platform.capture.CaptureRuntime
 import app.zaghlol.platform.clock.TrustedClockRegistration
 import app.zaghlol.platform.device.AndroidDeviceEnv
@@ -27,6 +29,7 @@ import java.util.concurrent.Executors
 class MainActivity : FlutterFragmentActivity() {
     private var shareEvents: ShareIntakeEventsApi? = null
     private var shareStore: ShareStore? = null
+    private var capturePermissions: ActivityPermissions? = null
 
     override fun onCreate(savedInstanceState: android.os.Bundle?) {
         // T-103: a re-created activity is secured again before its first frame.
@@ -52,7 +55,23 @@ class MainActivity : FlutterFragmentActivity() {
         shareEvents = ShareIntakeEventsApi(messenger)
         // T-041: the capture host and CaptureEventsApi on the UI engine (every
         // flavour); shuts a headless ingestion engine down first.
-        CaptureRuntime.get(applicationContext).attachUi(flutterEngine)
+        val rt = CaptureRuntime.get(applicationContext)
+        // T-044: the Activity-bound permission actions of the capture host.
+        val perms = rt.device?.let { device ->
+            ActivityPermissions(
+                device = device,
+                launch = { p, code -> requestPermissions(p, code) },
+                openSettings = { startActivity(Intent(Settings.ACTION_NOTIFICATION_LISTENER_SETTINGS)) },
+                afterResult = rt::checkPermissions,
+            )
+        }
+        capturePermissions = perms
+        rt.attachUi(flutterEngine, perms)
+    }
+
+    override fun onRequestPermissionsResult(requestCode: Int, permissions: Array<out String>, grantResults: IntArray) {
+        if (capturePermissions?.onResult(requestCode, permissions, grantResults) == true) return
+        super.onRequestPermissionsResult(requestCode, permissions, grantResults)
     }
 
     override fun cleanUpFlutterEngine(flutterEngine: FlutterEngine) {
@@ -63,6 +82,7 @@ class MainActivity : FlutterFragmentActivity() {
         DeviceSecurityRegistration.unregister(flutterEngine.dartExecutor.binaryMessenger)
         shareEvents = null
         shareStore = null
+        capturePermissions = null
         super.cleanUpFlutterEngine(flutterEngine)
     }
 
@@ -94,6 +114,8 @@ class MainActivity : FlutterFragmentActivity() {
      */
     override fun onResume() {
         super.onResume()
+        // T-044 (EC-13): a permission or notification access changed while away.
+        CaptureRuntime.get(applicationContext).checkPermissions()
         val store = shareStore ?: return
         IO.execute {
             val pending: List<ShareDescriptor> = try {
