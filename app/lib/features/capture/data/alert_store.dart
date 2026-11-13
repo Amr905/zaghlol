@@ -16,6 +16,11 @@ abstract interface class AlertStore {
 
   /// Dismissing the missed-notification notice zeroes the count only.
   Future<void> dismissMissedNotifications();
+
+  /// T-048: the catch-up request was served. Removes it only while it still
+  /// is [ifFromMs] (a request that was lowered meanwhile stays). Returns
+  /// true when it was removed.
+  Future<bool> clearCatchUp({required int ifFromMs});
 }
 
 abstract final class CaptureAlertKeys {
@@ -71,6 +76,17 @@ final class DriftAlertStore implements AlertStore {
     await put(CaptureAlertKeys.catchUpFromMs, next.catchUpFromMs);
     await put(CaptureAlertKeys.catchUpReason, next.catchUpReason?.name);
   });
+
+  @override
+  Future<bool> clearCatchUp({required int ifFromMs}) =>
+      _db.transaction(() async {
+        final all = await _dao.all();
+        final now = int.tryParse(all[CaptureAlertKeys.catchUpFromMs] ?? '');
+        if (now != ifFromMs) return false;
+        await _dao.delete(CaptureAlertKeys.catchUpFromMs);
+        await _dao.delete(CaptureAlertKeys.catchUpReason);
+        return true;
+      });
 
   @override
   Future<void> dismissMissedNotifications() =>

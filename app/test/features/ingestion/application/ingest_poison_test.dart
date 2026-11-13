@@ -100,6 +100,17 @@ void main() {
       expect(await w.count('raw_messages'), 1);
     });
 
+    test('FU-109: a personal-origin poison message is dropped, never '
+        'queued for review', () async {
+      final r = await w.useCase(
+        categorizerFactory: SpyCategorizerPorts(poison: 'poison').factory,
+      )([sms('p', poisonBody, origin: MessageOrigin.inboxScanPersonal)]);
+      expect(r.outcomes['p'], isA<IngestDropped>());
+      expect((r.outcomes['p']! as IngestDropped).reason, 'personal_unparsed');
+      expect(await w.reviews(), isEmpty);
+      expect(await w.count('raw_messages'), 0);
+    });
+
     test('an OTP is never quarantined: the Guard and stage 0 still drop '
         'it', () async {
       final r = await w.useCase(

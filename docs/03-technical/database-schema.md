@@ -341,7 +341,7 @@ CREATE TABLE settings (key TEXT PRIMARY KEY, value TEXT NOT NULL, updated_at INT
 -- every preference (FR-ONB-07, FR-BAK-06): language, digits, payday_day, income_target, primary_currency,
 -- approx_view{enabled,target}, theme, notif.*, quiet_hours, app_lock{enabled,timeout_s}, hide_amounts.*,
 -- payday_eras (JSON `[{"from":null|"YYYY-MM-DD","day":1..28}]`, T-051; `payday_day` stays the user-facing value and equals the last era's day),
--- contribution_opt_in, scan_depth_months, setup_progress, paywall_last_shown, … (typed accessors in core/settings)
+-- contribution_opt_in, scan_depth_months, capture.scan_personal_senders (T-048, bool, default off), setup_progress, paywall_last_shown, … (typed accessors in core/settings)
 
 CREATE TABLE secure_state (key TEXT PRIMARY KEY, value BLOB NOT NULL, updated_at INTEGER NOT NULL);
 -- install_id, install_token, install_registration {installId, Idempotency-Key, body bytes} and install_reregistration (T-141),

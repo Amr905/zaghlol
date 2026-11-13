@@ -36,12 +36,26 @@ public sealed class PlayAccessTokenException : SafeException
 /// (an external-account configuration from a secret can't make the library run a program). Accepted residual: for the JSON
 /// source the private key lives in this process for its lifetime, because the library needs it to sign token requests.
 /// </summary>
-internal sealed class GoogleAccessTokenSource(GooglePlayOptions options) : IPlayAccessTokenSource, IDisposable
+internal class GoogleAccessTokenSource : IPlayAccessTokenSource, IDisposable
 {
     public const string Scope = "https://www.googleapis.com/auth/androidpublisher";
 
     private readonly SemaphoreSlim gate = new(1, 1);
+    private readonly GooglePlayOptions options;
+    private readonly string scope;
     private ITokenAccess? credential;
+
+    public GoogleAccessTokenSource(GooglePlayOptions options)
+        : this(options, Scope)
+    {
+    }
+
+    /// <summary>The same credential, scoped to <paramref name="scope"/> only (T-181: Play Integrity has its own source).</summary>
+    protected GoogleAccessTokenSource(GooglePlayOptions options, string scope)
+    {
+        this.options = options;
+        this.scope = scope;
+    }
 
     public async Task<Sensitive<string>?> GetTokenAsync(CancellationToken cancellationToken)
     {
@@ -67,7 +81,19 @@ internal sealed class GoogleAccessTokenSource(GooglePlayOptions options) : IPlay
         }
     }
 
-    public void Dispose() => gate.Dispose();
+    public void Dispose()
+    {
+        Dispose(true);
+        GC.SuppressFinalize(this);
+    }
+
+    protected virtual void Dispose(bool disposing)
+    {
+        if (disposing)
+        {
+            gate.Dispose();
+        }
+    }
 
     private async Task<ITokenAccess> CreateAsync(CancellationToken cancellationToken)
     {
@@ -82,7 +108,7 @@ internal sealed class GoogleAccessTokenSource(GooglePlayOptions options) : IPlay
             GoogleCredential google = options.CredentialSource == PlayCredentialSource.ServiceAccountJson
                 ? CredentialFactory.FromJson<ServiceAccountCredential>(options.CredentialJson!.Value.Reveal()).ToGoogleCredential()
                 : await GoogleCredential.GetApplicationDefaultAsync(cancellationToken);
-            credential = google.CreateScoped(Scope);
+            credential = google.CreateScoped(scope);
             return credential;
         }
         finally

@@ -4,8 +4,10 @@ using Microsoft.Extensions.DependencyInjection.Extensions;
 using Npgsql;
 using NpgsqlTypes;
 using Zaghlol.Application.Purchases;
+using Zaghlol.Application.Purchases.Attestation;
 using Zaghlol.Application.Seats;
 using Zaghlol.Application.Seats.SeatKeys;
+using Zaghlol.Infrastructure.Attestation;
 using Zaghlol.Infrastructure.Observability;
 using Zaghlol.Infrastructure.Persistence;
 using Zaghlol.Infrastructure.Purchases;
@@ -371,6 +373,8 @@ internal sealed class SeatTransactionFactory(IServiceProvider services) : ISeatT
     private sealed class SeatTransaction(NpgsqlConnection connection, NpgsqlTransaction transaction) : ISeatTransaction
     {
         public ISeatStore Seats { get; } = new NpgsqlSeatStore(connection, transaction);
+
+        public IAppAttestKeyStore AppAttestKeys { get; } = new NpgsqlAppAttestKeyStore(connection, transaction);
 
         public Task CommitAsync(CancellationToken cancellationToken) => transaction.CommitAsync(cancellationToken);
 

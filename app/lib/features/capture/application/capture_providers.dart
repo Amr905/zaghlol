@@ -11,7 +11,8 @@ import 'dart:async';
 import 'package:flutter/foundation.dart' show TargetPlatform;
 import 'package:flutter/foundation.dart' as f show defaultTargetPlatform;
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:zaghlol_parsing/zaghlol_parsing.dart' show Registry;
+import 'package:zaghlol_parsing/zaghlol_parsing.dart'
+    show ParsingPipeline, Registry;
 
 import '../../../core/db/app_database.dart' hide Settings;
 import '../../../core/db/app_database_providers.dart';
@@ -22,18 +23,25 @@ import '../../../core/platform/share_intake_service.dart';
 import '../../../core/settings/settings_keys.dart';
 import '../../../core/settings/settings_providers.dart';
 import '../../../ingestion/ingest_store.dart';
+import '../../../ingestion/ingestion_config.dart';
 import '../../../ingestion/ingestion_runner.dart';
 import '../../../ingestion/spike_channel.dart';
+import '../../../ingestion/spike_registry.dart' show RegistryGuardBase;
 import '../../../ingestion/spool_port.dart';
+import '../../../ingestion/ulid.dart';
+import '../../ingestion/data/ingest_factory.dart';
 import '../../transactions/data/drift_transaction_repository.dart';
 import '../data/alert_store.dart';
 import '../data/capture_host_port.dart';
 import '../data/catch_up_scheduler.dart';
 import '../data/guard_inputs_reader.dart';
+import '../data/scan_sources.dart';
 import '../domain/capture_health.dart';
 import 'capture_coordinator.dart';
 import 'capture_scheduler.dart';
 import 'guard_config_writer.dart';
+import 'inbox_scan_service.dart';
+import 'scan.dart';
 
 final captureHostPortProvider = Provider<CaptureHostPort>(
   (ref) => PigeonCaptureHostPort(),
@@ -57,10 +65,21 @@ final captureSpoolPortProvider = Provider<SpoolPort>(
   name: 'captureSpoolPortProvider',
 );
 
-final captureCatchUpProvider = Provider<CatchUpScheduler>(
-  (ref) => RecordingCatchUpScheduler(),
+/// Test override of the catch-up port; null (the default) builds the real
+/// [InboxScanService] (T-048).
+final captureCatchUpProvider = Provider<CatchUpScheduler?>(
+  (ref) => null,
   name: 'captureCatchUpProvider',
 );
+
+/// The scan service of the running coordinator (first-run scan, re-scan of
+/// one institution, progress); null when capture is not running or a test
+/// replaced the port.
+final inboxScanServiceProvider = FutureProvider<InboxScanService?>((ref) async {
+  final c = await ref.watch(captureCoordinatorProvider.future);
+  final port = c?.catchUp;
+  return port is InboxScanService ? port : null;
+}, name: 'inboxScanServiceProvider');
 
 final captureShareIntakeProvider = Provider<ShareIntakeService>((ref) {
   final service = ShareIntakeService();
@@ -119,7 +138,9 @@ final captureCoordinatorProvider = FutureProvider<CaptureCoordinator?>((
     alerts: DriftAlertStore(db),
     drain: runner.drain,
     scheduler: scheduler,
-    catchUp: ref.watch(captureCatchUpProvider),
+    catchUp:
+        ref.watch(captureCatchUpProvider) ??
+        _buildScanService(ref, db, host, registry),
     hooks: CaptureHooks(
       attachShareIntake: share.attach,
       pollShareIntake: share.pollPending,
@@ -153,6 +174,43 @@ final captureCoordinatorProvider = FutureProvider<CaptureCoordinator?>((
   unawaited(coordinator.start());
   return coordinator;
 }, name: 'captureCoordinatorProvider');
+
+InboxScanService _buildScanService(
+  Ref ref,
+  AppDatabase db,
+  CaptureHostPort host,
+  Registry registry,
+) {
+  final ids = UlidGenerator();
+  final scanner = InboxScanner(
+    host: host,
+    senders: DriftScanSenderSource(db, () => registry),
+    store: ProviderIngestStore(
+      ref.container,
+      build: (d) => buildIngestRawMessages(
+        d,
+        pipeline: ParsingPipeline(registry),
+        guardBase: RegistryGuardBase(registry),
+        newId: ids.next,
+      ),
+    ),
+  );
+  ref.onDispose(() => unawaited(scanner.dispose()));
+  return InboxScanService(
+    scanner: scanner,
+    host: host,
+    alerts: DriftAlertStore(db),
+    watermark: DriftWatermarkSource(db),
+    enabled: kInboxCatchUpEnabled,
+    settings: () async {
+      final repo = await ref.read(settingsRepositoryProvider.future);
+      return ScanSettings(
+        depthMonths: await repo.get(Settings.scanDepthMonths),
+        includePersonal: await repo.get(Settings.scanPersonalSenders),
+      );
+    },
+  );
+}
 
 void _pushToggles(Ref ref, CaptureCoordinator c) => c.setToggles(
   CaptureToggles(

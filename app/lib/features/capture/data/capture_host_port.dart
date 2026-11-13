@@ -28,6 +28,11 @@ abstract interface class CaptureHostPort {
   Future<void> clearSpoolAlerts(int seq);
 
   Future<void> scheduleIngestionNow();
+
+  /// T-042 / T-048: one page of the historical inbox scan. The query's
+  /// addresses are filtered natively; throws [CaptureHostException]
+  /// (`PERMISSION_DENIED`, `NOT_AVAILABLE`, `INVALID_ARGUMENT`, `IO_ERROR`).
+  Future<InboxPage> queryInbox(InboxQuery query);
 }
 
 final class PigeonCaptureHostPort implements CaptureHostPort {
@@ -52,6 +57,10 @@ final class PigeonCaptureHostPort implements CaptureHostPort {
 
   @override
   Future<void> scheduleIngestionNow() => _guard(_api.scheduleIngestionNow);
+
+  @override
+  Future<InboxPage> queryInbox(InboxQuery query) =>
+      _guard(() => _api.queryInbox(query));
 
   static Future<T> _guard<T>(Future<T> Function() call) async {
     try {
