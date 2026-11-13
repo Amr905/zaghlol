@@ -64,11 +64,181 @@ private func nilOrValue<T>(_ value: Any?) -> T? {
   return value as! T?
 }
 
+private func doubleEqualsClockApi(_ lhs: Double, _ rhs: Double) -> Bool {
+  return (lhs.isNaN && rhs.isNaN) || lhs == rhs
+}
+
+private func doubleHashClockApi(_ value: Double, _ hasher: inout Hasher) {
+  if value.isNaN {
+    hasher.combine(0x7FF8000000000000)
+  } else {
+    // Normalize -0.0 to 0.0
+    hasher.combine(value == 0 ? 0 : value)
+  }
+}
+
+func deepEqualsClockApi(_ lhs: Any?, _ rhs: Any?) -> Bool {
+  let cleanLhs = nilOrValue(lhs) as Any?
+  let cleanRhs = nilOrValue(rhs) as Any?
+  switch (cleanLhs, cleanRhs) {
+  case (nil, nil):
+    return true
+
+  case (nil, _), (_, nil):
+    return false
+
+  case (let lhs as AnyObject, let rhs as AnyObject) where lhs === rhs:
+    return true
+
+  case is (Void, Void):
+    return true
+
+  case (let lhsArray, let rhsArray) as ([Any?], [Any?]):
+    guard lhsArray.count == rhsArray.count else { return false }
+    for (index, element) in lhsArray.enumerated() {
+      if !deepEqualsClockApi(element, rhsArray[index]) {
+        return false
+      }
+    }
+    return true
+
+  case (let lhsArray, let rhsArray) as ([Double], [Double]):
+    guard lhsArray.count == rhsArray.count else { return false }
+    for (index, element) in lhsArray.enumerated() {
+      if !doubleEqualsClockApi(element, rhsArray[index]) {
+        return false
+      }
+    }
+    return true
+
+  case (let lhsDictionary, let rhsDictionary) as ([AnyHashable: Any?], [AnyHashable: Any?]):
+    guard lhsDictionary.count == rhsDictionary.count else { return false }
+    for (lhsKey, lhsValue) in lhsDictionary {
+      var found = false
+      for (rhsKey, rhsValue) in rhsDictionary {
+        if deepEqualsClockApi(lhsKey, rhsKey) {
+          if deepEqualsClockApi(lhsValue, rhsValue) {
+            found = true
+            break
+          } else {
+            return false
+          }
+        }
+      }
+      if !found { return false }
+    }
+    return true
+
+  case (let lhs as Double, let rhs as Double):
+    return doubleEqualsClockApi(lhs, rhs)
+
+  case (let lhsHashable, let rhsHashable) as (AnyHashable, AnyHashable):
+    return lhsHashable == rhsHashable
+
+  default:
+    return false
+  }
+}
+
+func deepHashClockApi(value: Any?, hasher: inout Hasher) {
+  let cleanValue = nilOrValue(value) as Any?
+  if let cleanValue = cleanValue {
+    if let doubleValue = cleanValue as? Double {
+      doubleHashClockApi(doubleValue, &hasher)
+    } else if let valueList = cleanValue as? [Any?] {
+      for item in valueList {
+        deepHashClockApi(value: item, hasher: &hasher)
+      }
+    } else if let valueList = cleanValue as? [Double] {
+      for item in valueList {
+        doubleHashClockApi(item, &hasher)
+      }
+    } else if let valueDict = cleanValue as? [AnyHashable: Any?] {
+      var result = 0
+      for (key, value) in valueDict {
+        var entryKeyHasher = Hasher()
+        deepHashClockApi(value: key, hasher: &entryKeyHasher)
+        var entryValueHasher = Hasher()
+        deepHashClockApi(value: value, hasher: &entryValueHasher)
+        result = result &+ ((entryKeyHasher.finalize() &* 31) ^ entryValueHasher.finalize())
+      }
+      hasher.combine(result)
+    } else if let hashableValue = cleanValue as? AnyHashable {
+      hasher.combine(hashableValue)
+    } else {
+      hasher.combine(String(describing: cleanValue))
+    }
+  } else {
+    hasher.combine(0)
+  }
+}
+
+
+/// Generated class from Pigeon that represents data sent in messages.
+struct ClockSample: Hashable {
+  /// Epoch ms (System.currentTimeMillis / Date().timeIntervalSince1970).
+  var wallMs: Int64
+  /// Android SystemClock.elapsedRealtime(); iOS
+  /// clock_gettime_nsec_np(CLOCK_MONOTONIC_RAW) / 1e6 (counts sleep).
+  var monotonicMs: Int64
+  /// Android Settings.Global.BOOT_COUNT; iOS null (no public boot identifier).
+  var bootCount: Int64? = nil
+
+
+  // swift-format-ignore: AlwaysUseLowerCamelCase
+  static func fromList(_ pigeonVar_list: [Any?]) -> ClockSample? {
+    let wallMs = pigeonVar_list[0] as! Int64
+    let monotonicMs = pigeonVar_list[1] as! Int64
+    let bootCount: Int64? = nilOrValue(pigeonVar_list[2])
+
+    return ClockSample(
+      wallMs: wallMs,
+      monotonicMs: monotonicMs,
+      bootCount: bootCount
+    )
+  }
+  func toList() -> [Any?] {
+    return [
+      wallMs,
+      monotonicMs,
+      bootCount,
+    ]
+  }
+  static func == (lhs: ClockSample, rhs: ClockSample) -> Bool {
+    if Swift.type(of: lhs) != Swift.type(of: rhs) {
+      return false
+    }
+    return deepEqualsClockApi(lhs.wallMs, rhs.wallMs) && deepEqualsClockApi(lhs.monotonicMs, rhs.monotonicMs) && deepEqualsClockApi(lhs.bootCount, rhs.bootCount)
+  }
+
+  func hash(into hasher: inout Hasher) {
+    hasher.combine("ClockSample")
+    deepHashClockApi(value: wallMs, hasher: &hasher)
+    deepHashClockApi(value: monotonicMs, hasher: &hasher)
+    deepHashClockApi(value: bootCount, hasher: &hasher)
+  }
+}
 
 private class ClockApiPigeonCodecReader: FlutterStandardReader {
+  override func readValue(ofType type: UInt8) -> Any? {
+    switch type {
+    case 129:
+      return ClockSample.fromList(self.readValue() as! [Any?])
+    default:
+      return super.readValue(ofType: type)
+    }
+  }
 }
 
 private class ClockApiPigeonCodecWriter: FlutterStandardWriter {
+  override func writeValue(_ value: Any) {
+    if let value = value as? ClockSample {
+      super.writeByte(129)
+      super.writeValue(value.toList())
+    } else {
+      super.writeValue(value)
+    }
+  }
 }
 
 private class ClockApiPigeonCodecReaderWriter: FlutterStandardReaderWriter {
@@ -87,6 +257,9 @@ class ClockApiPigeonCodec: FlutterStandardMessageCodec, @unchecked Sendable {
 
 /// Generated protocol from Pigeon that represents a handler of messages from Flutter.
 protocol TrustedClockHostApi {
+  /// One consistent sample. Never sent off the device (Apple required-reason
+  /// API 35F9.1: elapsed time inside the app).
+  func sample() throws -> ClockSample
 }
 
 /// Generated setup class from Pigeon to handle messages through the `binaryMessenger`.
@@ -95,6 +268,21 @@ class TrustedClockHostApiSetup {
   /// Sets up an instance of `TrustedClockHostApi` to handle messages through the `binaryMessenger`.
   static func setUp(binaryMessenger: FlutterBinaryMessenger, api: TrustedClockHostApi?, messageChannelSuffix: String = "") {
     let channelSuffix = messageChannelSuffix.count > 0 ? ".\(messageChannelSuffix)" : ""
+    /// One consistent sample. Never sent off the device (Apple required-reason
+    /// API 35F9.1: elapsed time inside the app).
+    let sampleChannel = FlutterBasicMessageChannel(name: "dev.flutter.pigeon.zaghlol.TrustedClockHostApi.sample\(channelSuffix)", binaryMessenger: binaryMessenger, codec: codec)
+    if let api = api {
+      sampleChannel.setMessageHandler { _, reply in
+        do {
+          let result = try api.sample()
+          reply(wrapResult(result))
+        } catch {
+          reply(wrapError(error))
+        }
+      }
+    } else {
+      sampleChannel.setMessageHandler(nil)
+    }
   }
 }
 /// Generated protocol from Pigeon that represents a handler of messages from Flutter.

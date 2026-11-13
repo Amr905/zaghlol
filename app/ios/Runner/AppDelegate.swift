@@ -20,5 +20,7 @@ import UIKit
     SecretStoreRegistration.register(with: engineBridge.pluginRegistry)
     // T-148: NFC for the backup passphrase.
     TextNormalizationRegistration.register(with: engineBridge.pluginRegistry)
+    // T-180: trusted clock sample for the Gold offline bound.
+    TrustedClockRegistration.register(with: engineBridge.pluginRegistry)
   }
 }

@@ -4,6 +4,7 @@ import android.content.Intent
 import android.os.Handler
 import android.os.Looper
 import app.zaghlol.platform.capture.CaptureRuntime
+import app.zaghlol.platform.clock.TrustedClockRegistration
 import app.zaghlol.platform.keys.SecretStoreRegistration
 import app.zaghlol.platform.share.ShareDescriptor
 import app.zaghlol.platform.share.ShareHandOff
@@ -31,6 +32,8 @@ class MainActivity : FlutterActivity() {
         SecretStoreRegistration.register(messenger, this)
         // T-148: NFC for the backup passphrase (UI engine only).
         TextNormalizationRegistration.register(messenger)
+        // T-180: trusted clock sample for the Gold offline bound.
+        TrustedClockRegistration.register(messenger, this)
         val store = ShareStores.create(applicationContext)
         shareStore = store
         ShareIntakeHostApi.setUp(messenger, ShareIntakeHost(store))
@@ -44,6 +47,7 @@ class MainActivity : FlutterActivity() {
         CaptureRuntime.get(applicationContext).detachUi(flutterEngine)
         ShareIntakeHostApi.setUp(flutterEngine.dartExecutor.binaryMessenger, null)
         TextNormalizationHostApi.setUp(flutterEngine.dartExecutor.binaryMessenger, null)
+        TrustedClockRegistration.unregister(flutterEngine.dartExecutor.binaryMessenger)
         shareEvents = null
         shareStore = null
         super.cleanUpFlutterEngine(flutterEngine)
