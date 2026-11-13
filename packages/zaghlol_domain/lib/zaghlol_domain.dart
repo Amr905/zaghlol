@@ -16,6 +16,7 @@ export 'money/money_errors.dart';
 export 'money/multi_currency_total.dart';
 export 'money/rounding.dart';
 export 'money/src/allocation.dart' show maxAllocationParts;
+export 'mascot_rules/mascot_rules.dart';
 export 'recurring/recurring_rules.dart';
 export 'transfers/offsets.dart';
 export 'transfers/splits.dart';
