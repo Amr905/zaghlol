@@ -12,6 +12,8 @@ import 'core/routing/app_router.dart';
 import 'core/theme/app_theme.dart';
 import 'features/budget/application/cycle_app_wiring.dart';
 import 'features/capture/presentation/capture_lifecycle.dart';
+import 'features/catalog_sync/application/sync_providers.dart';
+import 'features/catalog_sync/presentation/sync_lifecycle.dart';
 import 'features/home/presentation/home_screen.dart';
 import 'features/security/presentation/app_lock_gate.dart';
 import 'ingestion/ingestion_main.dart';
@@ -31,8 +33,12 @@ Future<void> main() async {
         tabRootsProvider.overrideWithValue(
           TabRoots(home: (_) => const HomeScreen()),
         ),
+        // T-143 / FU-115 / FU-138: backend client, entitlement service, sync.
+        ...syncWiringOverrides,
       ],
-      child: const CaptureLifecycle(child: _LocalizedApp()),
+      child: const CaptureLifecycle(
+        child: SyncLifecycle(child: _LocalizedApp()),
+      ),
     ),
   );
 }
