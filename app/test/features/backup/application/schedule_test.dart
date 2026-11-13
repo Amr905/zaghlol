@@ -238,6 +238,25 @@ void main() {
       expect(files(), 5);
     });
 
+    test('pending verification keeps all 5 and keeps the job', () async {
+      tier = gold();
+      for (var i = 0; i < 5; i++) {
+        await svc.backupNow(BackupDestinationPref.drive);
+        clock = clock.add(const Duration(days: 1));
+      }
+      final c = ProviderContainer();
+      addTearDown(c.dispose);
+      c
+          .read(entitlementStateProvider.notifier)
+          .applyNonGold(EntitlementPhase.pendingVerification);
+      tier = c.read(entitlementStateProvider);
+      await svc.backupNow(BackupDestinationPref.drive);
+      expect(files(), 5);
+      await svc.reconcile();
+      expect(await svc.runScheduled(), isNotNull);
+      expect(work.calls, isNot(contains('cancel')));
+    });
+
     test('upgrade keeps the free backup as the first version; downgrade '
         'keeps the newest (FR-BAK-09)', () async {
       await svc.backupNow(BackupDestinationPref.drive); // free

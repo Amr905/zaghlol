@@ -134,6 +134,10 @@ bool isReminderDue({
 
 /// FR-BAK-05/08: Free keeps 1, Gold 5 (T-119). Always at least 1.
 int backupKeepFor(EntitlementState state) {
+  // Not yet verified: never prune below what a stored Gold tier allowed.
+  if (state.phase == EntitlementPhase.pendingVerification) {
+    return FreeLimits.goldBackupVersions;
+  }
   final n = GoldGate.backupVersionsKept(state);
   return n < 1 ? 1 : n;
 }
@@ -221,6 +225,7 @@ final class BackupScheduleService {
   /// Re-applies the stored schedule at app start or after a tier change:
   /// a lapsed Gold stops its job; Gold keeps it.
   Future<void> reconcile() async {
+    if (_entitlement().phase == EntitlementPhase.pendingVerification) return;
     final mode = await _settings.get(Settings.backupSchedule);
     final allowed = GoldGate.check(
       _entitlement(),
@@ -248,6 +253,10 @@ final class BackupScheduleService {
 
   /// The platform job's entry point (never interactive).
   Future<BackupRunResult> runScheduled() async {
+    // Tier not known yet: skip this run but keep the job.
+    if (_entitlement().phase == EntitlementPhase.pendingVerification) {
+      return const BackupRunResult(BackupRunStatus.skippedNotGold);
+    }
     if (!GoldGate.check(
       _entitlement(),
       GoldCapability.autoBackupSchedule,

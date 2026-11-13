@@ -5,6 +5,19 @@ import 'package:zaghlol/features/transactions/presentation/edit/txn_form.dart';
 import 'package:zaghlol_domain/zaghlol_domain.dart';
 
 void main() {
+  group('parseAmount commas (T-080)', () {
+    final egp = Currency.of('EGP');
+    test('a lone comma is rejected, never 125', () {
+      final r = parseAmount('12,5', egp);
+      expect(r.money, isNull);
+      expect(r.error, isNotNull);
+    });
+    test('thousands grouping and Arabic digits', () {
+      expect(parseAmount('1,250.50', egp).money, Money(egp, 125050));
+      expect(parseAmount('١٢٫٥', egp).money, Money(egp, 1250));
+    });
+  });
+
   final egp = Currency.of('EGP');
   final kwd = Currency.of('KWD');
   final jpy = Currency.of('JPY');

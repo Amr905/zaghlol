@@ -2,6 +2,7 @@
 // Money is parsed exactly from text (any digit script) into integer minor
 // units; nothing here uses a double.
 
+import 'package:flutter/services.dart';
 import 'package:zaghlol_domain/zaghlol_domain.dart';
 
 import '../../../../core/l10n/digits_mode.dart';
@@ -23,6 +24,14 @@ enum TxnFormError {
   noteTooLong,
 }
 
+/// Keeps only digits (any script), `.`, `,` and the Arabic separators, for
+/// the amount field.
+final List<TextInputFormatter> amountInputFormatters = [
+  FilteringTextInputFormatter.allow(
+    RegExp(r'[0-9\u0660-\u0669\u06F0-\u06F9.,\u066B\u066C]'),
+  ),
+];
+
 /// Largest amount accepted from the keyboard, in minor units.
 const int maxEntryMinor = 100000000000000;
 
@@ -35,7 +44,11 @@ const int formNoteMaxChars = 1000;
   String text,
   Currency currency,
 ) {
-  final clean = normalizeDigits(text).trim().replaceAll(',', '');
+  // A comma is accepted only as thousands grouping (`1,250.50`). Anything
+  // else (`12,5`) is rejected, never read as 125.
+  final raw = normalizeDigits(text).trim();
+  final grouped = RegExp(r'^[0-9]{1,3}(,[0-9]{3})+(\.[0-9]*)?$').hasMatch(raw);
+  final clean = grouped ? raw.replaceAll(',', '') : raw;
   if (clean.isEmpty) return (money: null, error: TxnFormError.amountRequired);
   final m = MoneyFormat.parseInput(clean, currency);
   if (m == null) {

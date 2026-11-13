@@ -534,6 +534,7 @@ class _EditState extends ConsumerState<TransactionEditScreen> {
                             keyboardType: const TextInputType.numberWithOptions(
                               decimal: true,
                             ),
+                            inputFormatters: amountInputFormatters,
                             style: ZType.display.copyWith(color: c.text),
                             onChanged: (_) => _touch(),
                             decoration: InputDecoration(
