@@ -49,6 +49,9 @@ T-035 Q1–Q6 (keep with bundled rules; drop OTP+transaction messages, as the re
 | T-076 | A re-parse never changes an existing transaction's amount or status and never writes a user-verified one; it only fills empty fields or promotes the raw row. |
 | T-149 | A restore copies the backup under this phone's own database key (a key swap can't be atomic); the other phone's key never travels. |
 | T-144 | A wall clock still wrong after a fresh server check stays "tampered" (fails closed); the copy tells the user to set the clock to automatic. |
+| T-150 | Free/Gold count-based cleanup may remove a backup made under an old passphrase, but only once a newer verified backup exists. |
+| T-090 | A refund larger than the matched expense counts the leftover as income; ambiguous refunds go to review as `reimbursement_suggestion` with `type: refund_ambiguous` (no migration). |
+| T-096 | A card due is paid only by money coming into the card account; other recurring items keep their matching rules. |
 | T-109 | `دينار` keeps the default currency with `ambiguousCurrency`; the voice UI asks. Missing spoken keywords go into the T-059 catalog seed. |
 | Q-44, T-047 Q2, T-047 Q5 | `ux-designer` writes the copy in the voice guide; reviewed in T-058. Placement: Q-44 one-time Welcome line with a "restore" action; missed notifications as a dismissible card in capture settings (and the lowest-priority home banner); rule saved but not yet active as "اتحفظت — هتشتغل خلال ثواني" / "Saved — active in a few seconds". |
 
@@ -75,6 +78,7 @@ T-035 Q1–Q6 (keep with bundled rules; drop OTP+transaction messages, as the re
 | T-130 Q1–Q2 | Play Console: service account with two permissions (Workload Identity preferred over a JSON key); confirm the package name and the product setup (monthly and yearly subscriptions, one-time lifetime). | T-130 go-live |
 | T-130 Q5 | A license-tester account and one test order for the smoke test. | T-130 AC5 |
 | T-131 Q1–Q3, Q6 | App Store Connect: In-App Purchase key; bundle ID and Team ID; confirm one subscription group, a lifetime non-consumable and the Billing Grace Period length; sandbox testers and one real order ID. | T-131 go-live |
+| T-150 | Google Cloud: create the Android (package + signing SHA-1), iOS and web/server OAuth clients **in one project**, enable the Drive API, and list the `drive.appdata` scope on the consent screen. Send the iOS and server client IDs (not secrets). | Drive backup, T-147 sign-in |
 | T-133 Q1 (your part) | Paste the Pub/Sub topic into Play Console once T-140 creates it. | T-133 go-live |
 | T-133 Q5, T-134 Q2 | Send one test notification from Play Console and one from App Store Connect, to record the test vectors. | test vectors |
 
