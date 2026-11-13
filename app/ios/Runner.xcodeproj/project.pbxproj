@@ -36,6 +36,10 @@
 		5A1780000000000000000F01 /* AttestationApi.g.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5A1780000000000000000F02 /* AttestationApi.g.swift */; };
 		5A1780000000000000000F03 /* AttestationHost.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5A1780000000000000000F04 /* AttestationHost.swift */; };
 		5A1780000000000000000F05 /* AttestationTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5A1780000000000000000F06 /* AttestationTests.swift */; };
+		5A1790000000000000000F01 /* SeatKeyApi.g.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5A1790000000000000000F02 /* SeatKeyApi.g.swift */; };
+		5A1790000000000000000F03 /* SeatKeyStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5A1790000000000000000F04 /* SeatKeyStore.swift */; };
+		5A1790000000000000000F05 /* SeatKeyHost.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5A1790000000000000000F06 /* SeatKeyHost.swift */; };
+		5A1790000000000000000F07 /* SeatKeyTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5A1790000000000000000F08 /* SeatKeyTests.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -99,6 +103,10 @@
 		5A1780000000000000000F02 /* AttestationApi.g.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AttestationApi.g.swift; sourceTree = "<group>"; };
 		5A1780000000000000000F04 /* AttestationHost.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AttestationHost.swift; sourceTree = "<group>"; };
 		5A1780000000000000000F06 /* AttestationTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AttestationTests.swift; sourceTree = "<group>"; };
+		5A1790000000000000000F02 /* SeatKeyApi.g.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SeatKeyApi.g.swift; sourceTree = "<group>"; };
+		5A1790000000000000000F04 /* SeatKeyStore.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SeatKeyStore.swift; sourceTree = "<group>"; };
+		5A1790000000000000000F06 /* SeatKeyHost.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SeatKeyHost.swift; sourceTree = "<group>"; };
+		5A1790000000000000000F08 /* SeatKeyTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SeatKeyTests.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -123,6 +131,7 @@
 				5A1800000000000000000D07 /* TrustedClockTests.swift */,
 				5A1030000000000000000E06 /* DeviceSecurityTests.swift */,
 				5A1780000000000000000F06 /* AttestationTests.swift */,
+				5A1790000000000000000F08 /* SeatKeyTests.swift */,
 			);
 			path = RunnerTests;
 			sourceTree = "<group>";
@@ -198,6 +207,7 @@
 				5A1030000000000000000E04 /* DeviceSecurityHost.swift */,
 				5A1780000000000000000F02 /* AttestationApi.g.swift */,
 				5A1780000000000000000F07 /* Attestation */,
+				5A1790000000000000000F02 /* SeatKeyApi.g.swift */,
 			);
 			path = Platform;
 			sourceTree = "<group>";
@@ -208,6 +218,8 @@
 				5A0150000000000000000B04 /* BootstrapLeaseManager.swift */,
 				5A0150000000000000000B06 /* DbKeyKeychain.swift */,
 				5A0150000000000000000B08 /* SecretStoreHost.swift */,
+				5A1790000000000000000F04 /* SeatKeyStore.swift */,
+				5A1790000000000000000F06 /* SeatKeyHost.swift */,
 			);
 			path = Keys;
 			sourceTree = "<group>";
@@ -389,6 +401,7 @@
 				5A1800000000000000000D06 /* TrustedClockTests.swift in Sources */,
 				5A1030000000000000000E05 /* DeviceSecurityTests.swift in Sources */,
 				5A1780000000000000000F05 /* AttestationTests.swift in Sources */,
+				5A1790000000000000000F07 /* SeatKeyTests.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -412,6 +425,9 @@
 				5A1030000000000000000E03 /* DeviceSecurityHost.swift in Sources */,
 				5A1780000000000000000F01 /* AttestationApi.g.swift in Sources */,
 				5A1780000000000000000F03 /* AttestationHost.swift in Sources */,
+				5A1790000000000000000F01 /* SeatKeyApi.g.swift in Sources */,
+				5A1790000000000000000F03 /* SeatKeyStore.swift in Sources */,
+				5A1790000000000000000F05 /* SeatKeyHost.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

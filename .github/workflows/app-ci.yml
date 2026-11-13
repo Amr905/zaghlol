@@ -419,6 +419,16 @@ jobs:
               exit 1
             fi
           done
+          # T-179: seat keys (Keychain attributes, element 0, FIFO cap, vector format, no wipe on doubt).
+          for t in testItemAttributesAreThisDeviceOnlyAndNotSynchronizable testOwnKeyIsStableAcrossLaunches \
+            testSixRotationsKeepFiveKeysNewestFirst testSignVerifiesWithCryptoKitInTheVectorFormat \
+            testVectorProofVerifiesWithCryptoKit testKeychainErrorDeletesAndCreatesNothing; do
+            if ! grep -qiE "SeatKeyTests.*$t" xcodebuild.log || grep -qiE "test case.*SeatKeyTests.*$t.*failed" xcodebuild.log; then
+              echo "::error::SeatKeyTests.$t did not pass"
+              grep -iE "SeatKeyTests" xcodebuild.log | head -n 30
+              exit 1
+            fi
+          done
 
   android:
     name: android ${{ matrix.flavor }} (${{ matrix.mode }})
