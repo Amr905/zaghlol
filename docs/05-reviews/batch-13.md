@@ -85,3 +85,7 @@ Follow-ups to record in `docs/implementation-status.md`: T-104 owns `hide_amount
 ## Lead fix (T-115 minor 1)
 
 `approximate` is now true whenever any currency is excluded, so a partial target-only figure can't appear without the "≈" label. The new test `target-only figure with an excluded currency is labelled ≈` fails without the fix and passes with it (7 changed lines). T-103 app-ci on `ci/T-103` (run 43359923453) is green, which clears the T-103 merge gate.
+
+## T-103 pulled out of the batch (Lead)
+
+With T-103 merged, the db-platform iOS simulator job built the app, then hung right after "Xcode build done" until the 60-minute timeout. This happened twice. `main` passes the same job in 12 minutes, and T-103 holds the batch's only iOS changes (it adds `local_auth`, `DeviceSecurityHost`, `PrivacyCover` and the scene hooks). Following the batch rules, its merge is reverted on this branch, and T-103 goes back to the native lane. Its review verdict above still stands; when it returns, only the hang fix gets reviewed.

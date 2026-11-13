@@ -25,9 +25,9 @@ _Last updated: 2026-11-12 (Cairo) by the Lead session. Update it whenever the st
 - **Batch scripts:** never chain `git commit` after `git merge` without first checking `git diff --name-only --diff-filter=U` (a conflicted merge got committed with markers once; fixed before push). Local CI step logs (`*.log`) are git-ignored; don't `git add -A` in a worktree where the step script ran without checking `git status`.
 - **Copy deck checks:** `python3 docs/workflow/tools/copy_deck_check.py docs/02-design/copy-deck.md`.
 
-## Progress: 80 of 186 tasks done (43.0%)
+## Progress: 79 of 186 tasks done (42.5%)
 
-DONE: T-001…T-007, T-012…T-024, T-025…T-028, T-030, T-032…T-035, T-038…T-043, T-048, T-049, T-052, T-045, T-046, T-047, T-050, T-051, T-060, T-073…T-075, T-077, T-078, T-089, T-094, T-103, T-109, T-112, T-115, T-119, T-122…T-131, T-132, T-133, T-134, T-138, T-139, T-141, T-148, T-154, T-180…T-185. **Merged but open:** T-008 (device rows AC1/AC2), T-136 (IdP evidence), T-165 (device run).
+DONE: T-001…T-007, T-012…T-024, T-025…T-028, T-030, T-032…T-035, T-038…T-043, T-048, T-049, T-052, T-045, T-046, T-047, T-050, T-051, T-060, T-073…T-075, T-077, T-078, T-089, T-094, T-109, T-112, T-115, T-119, T-122…T-131, T-132, T-133, T-134, T-138, T-139, T-141, T-148, T-154, T-180…T-185. **Merged but open:** T-008 (device rows AC1/AC2), T-136 (IdP evidence), T-165 (device run).
 
 | Milestone | Done | Total |
 |---|---|---|
@@ -37,17 +37,18 @@ DONE: T-001…T-007, T-012…T-024, T-025…T-028, T-030, T-032…T-035, T-038�
 | M4 | 4 | 17 |
 | M5 | 22 | 35 |
 | M6 | 2 | 19 |
-| M3 | 3 | 18 |
+| M3 | 2 | 18 |
 | M7 | 0 | 11 |
 
 The PO asked for this progress table in every update.
 
-**Merged batches:** #28, #29, #32–#36 (batch 7), #37 batch 8 (T-041 + T-042, T-051), batch 9 (`batch/2026-11-11-9`: T-021, T-040, T-047, T-077, T-182, T-184 + the batch-review workflow), batch 10 (`batch/2026-11-13-10`: T-023, T-043, T-109, T-132, T-141; first under the cost rules), batch 11 (`batch/2026-11-13-11`: T-048, T-049, T-052, T-119, T-181, T-183), batch 12 (`batch/2026-11-13-12`: T-024, T-052, T-089, T-180, T-185), batch 13 (`batch/2026-11-13-13`: T-078, T-094, T-103, T-115, T-154). Next free follow-up number: **FU-135**.
+**Merged batches:** #28, #29, #32–#36 (batch 7), #37 batch 8 (T-041 + T-042, T-051), batch 9 (`batch/2026-11-11-9`: T-021, T-040, T-047, T-077, T-182, T-184 + the batch-review workflow), batch 10 (`batch/2026-11-13-10`: T-023, T-043, T-109, T-132, T-141; first under the cost rules), batch 11 (`batch/2026-11-13-11`: T-048, T-049, T-052, T-119, T-181, T-183), batch 12 (`batch/2026-11-13-12`: T-024, T-052, T-089, T-180, T-185), batch 13 (`batch/2026-11-13-13`: T-078, T-094, T-115, T-154; T-103 pulled out). Next free follow-up number: **FU-135**.
 
 **Lessons:** never chain `git commit` after `git merge` in one script without checking for conflicts. Server/cloud restarts happen often: brief agents to commit early and push often; on restart, check worktrees for live processes (`ps`, `/proc/<pid>/cwd`) before relaunching.
 
 ## In flight (2026-11-13 Cairo)
 
+0. **T-103 app lock** was approved in the batch-13 review but pulled out: with it, the db-platform iOS simulator job hangs right after "Xcode build done" (twice, 60-min timeout; `main` passes in 12 min). Suspect: the `local_auth` plugin (scene-based app) or the T-103 iOS launch changes. Branch `task/T-103-app-lock` @ 2f90bd8; fix in its lane, prove with db-platform on `ci/T-103`, then it rides a later batch with its review section in `batch-13.md` (re-review only the fix).
 1. **Batch 13** merges when its GitHub run is green (see the PR). Next, **batch 14**: candidates T-144 app entitlement verification (T-180 device tests before ship), T-076 re-parse job, T-095 notification adapter, T-104 security settings (FU-130), T-149 backup snapshot (Opus: overwrites data), T-178 / T-179 host APIs (Opus: keys), T-097 setup suggestions, T-142 contribution outbox. T-135 waits on T-136 Q1.
 2. **T-159 Android OCR:** waiting for the PO's `tesseract4android-4.9.0.aar` (`/home/claude/wt-T159-fix`, unpushed).
 3. **PC runner** silent since 2026-11-11 22:29; optional now (cost rules).

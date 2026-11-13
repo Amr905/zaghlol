@@ -21,7 +21,7 @@
 | M0 | 28 | 24 | 1 | 0 |
 | M1 | 29 | 18 | 0 | 1 |
 | M2 | 29 | 6 | 0 | 0 |
-| M3 | 18 | 3 | 0 | 0 |
+| M3 | 18 | 2 | 0 | 0 |
 | M4 | 17 | 4 | 0 | 0 |
 | M5 | 35 | 22 | 1 | 1 |
 | M6 | 19 | 2 | 1 | 2 |
@@ -132,7 +132,7 @@
 | T-100 | Duplicate-charge and weekly-summary notifications | M3 | C2 | Sonnet | flutter-core-engineer | T-094, T-046, T-051 | TODO | — |  |
 | T-101 | Insights shell and Budget S-22 (+ edit budgets) | M3 | C2 | Sonnet | flutter-ui-engineer | T-095, T-087, T-024 | TODO | — |  |
 | T-102 | Bills & installments S-24 and add/edit recurring item | M3 | C2 | Sonnet | flutter-ui-engineer | T-096, T-087 | TODO | — |  |
-| T-103 | App lock, privacy overlay and screenshot hiding | M3 | C3 | Sonnet | native-platform-engineer | T-004, T-020 | DONE | batch 13 review [batch-13](05-reviews/batch-13.md) APPROVED; app-ci green on ci/T-103 | Batch 13. FU-130 |
+| T-103 | App lock, privacy overlay and screenshot hiding | M3 | C3 | Sonnet | native-platform-engineer | T-004, T-020 | IN_PROGRESS | batch 13 review APPROVED, but **pulled out of batch 13**: db-platform iOS simulator hangs at app launch (twice, 60 min; main passes in 12 min). Back to the native lane | Batch 13. FU-130 |
 | T-104 | Home contextual cards and Settings 'finish setup' | M3 | C2 | Sonnet | flutter-ui-engineer | T-054, T-097, T-103 | TODO | — |  |
 | T-105 | Chart query layer for all 12 charts | M4 | C3 | Sonnet | flutter-core-engineer | T-051, T-096, T-091 | TODO | — |  |
 | T-106 | Explanation template engine (basic vs deep coaching) | M4 | C3 | Sonnet | flutter-core-engineer | T-105, T-027 | TODO | — |  |
@@ -427,4 +427,4 @@
 | 2026-11-13 | Batch 10 (`batch/2026-11-13-10`), first batch under the cost rules: T-023, T-043, T-109, T-132, T-141 DONE. FU-115…FU-119. Progress 65/186. |
 | 2026-11-13 | Batch 11 (`batch/2026-11-13-11`): T-048, T-049, T-119, T-181, T-183 DONE. FU-120…FU-124. Progress 70/186. |
 | 2026-11-13 | Batch 12 (`batch/2026-11-13-12`): T-024, T-052, T-089, T-180, T-185 DONE. FU-125…FU-129. Progress 75/186. |
-| 2026-11-13 | Batch 13 (`batch/2026-11-13-13`): T-078, T-094, T-103, T-115, T-154 DONE. FU-130…FU-134. Progress 80/186. |
+| 2026-11-13 | Batch 13 (`batch/2026-11-13-13`): T-078, T-094, T-115, T-154 DONE; T-103 pulled out (iOS db-platform launch hang). FU-130…FU-134. Progress 79/186. |

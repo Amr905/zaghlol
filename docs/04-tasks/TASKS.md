@@ -155,7 +155,7 @@ Every task file has: ID, description, technical details, dependencies, affected 
 | [T-100](tasks/T-100.md) | Duplicate-charge and weekly-summary notifications | US-10-4 | Medium | Sonnet | flutter-core-engineer | T-094, T-046, T-051 | A | 8 | TODO |
 | [T-101](tasks/T-101.md) | Insights shell and Budget S-22 (+ edit budgets) | US-09-1 | Medium | Sonnet | flutter-ui-engineer | T-095, T-087, T-024 | G | 10 | TODO |
 | [T-102](tasks/T-102.md) | Bills & installments S-24 and add/edit recurring item | US-09-2 | Medium | Sonnet | flutter-ui-engineer | T-096, T-087 | G | 10 | TODO |
-| [T-103](tasks/T-103.md) | App lock, privacy overlay and screenshot hiding | US-18-2 | High | Sonnet | native-platform-engineer | T-004, T-020 | D | 7 | DONE |
+| [T-103](tasks/T-103.md) | App lock, privacy overlay and screenshot hiding | US-18-2 | High | Sonnet | native-platform-engineer | T-004, T-020 | D | 7 | IN_PROGRESS |
 | [T-104](tasks/T-104.md) | Home contextual cards and Settings 'finish setup' | US-10-1 | Medium | Sonnet | flutter-ui-engineer | T-054, T-097, T-103 | G | 11 | TODO |
 
 ## M4 — Insights, chat, voice & wealth
