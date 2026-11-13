@@ -520,6 +520,71 @@ class ChartRepository {
     );
   });
 
+  // --------------------------------------- Ask Zaghlol point reads (T-110)
+
+  /// Net spend at the merchants [merchantNorms] (at most 20 are used), or
+  /// null when it is zero or less. One currency, memoized like the charts.
+  Future<({Money amount, int count})?> merchantSpend(
+    ChartPeriod p,
+    ChartFilter f,
+    Set<String> merchantNorms,
+  ) {
+    final norms = (merchantNorms.toList()..sort()).take(20).toList();
+    if (norms.isEmpty) throw ArgumentError('no merchants');
+    return _memoized(_key('merchSpend', p, f, norms.join(',')), () async {
+      final s = _spend(p, f);
+      final rows = await _select(
+        'SELECT coalesce(sum($_netSpend), 0) AS s, count(*) AS n '
+        'FROM transactions t WHERE ${s.where} '
+        'AND t.merchant_norm IN (${List.filled(norms.length, '?').join(',')})',
+        [...s.args, for (final m in norms) Variable.withString(m)],
+      );
+      final sum = rows.single.read<int>('s');
+      if (sum <= 0) return null;
+      return (amount: _m(sum, f), count: rows.single.read<int>('n'));
+    });
+  }
+
+  /// The expense with the largest net amount in [p], optionally inside one
+  /// category or a set of merchants; null when there is none.
+  Future<BiggestExpense?> biggestExpense(
+    ChartPeriod p,
+    ChartFilter f, {
+    String? categoryId,
+    Set<String> merchantNorms = const {},
+  }) {
+    final norms = (merchantNorms.toList()..sort()).take(20).toList();
+    return _memoized(
+      _key('biggest', p, f, '${categoryId ?? ''}|${norms.join(',')}'),
+      () async {
+        final s = _spend(p, f);
+        final rows = await _select(
+          'SELECT t.id AS id, ($_netSpend) AS s, '
+          'coalesce(t.merchant_raw, t.merchant_norm) AS m, '
+          't.category_id AS cid, $_localDay AS d '
+          'FROM transactions t WHERE ${s.where} '
+          '${categoryId == null ? '' : 'AND t.category_id = ? '}'
+          '${norms.isEmpty ? '' : 'AND t.merchant_norm IN (${List.filled(norms.length, '?').join(',')}) '}'
+          'AND ($_netSpend) > 0 ORDER BY s DESC, t.id LIMIT 1',
+          [
+            ...s.args,
+            if (categoryId != null) Variable.withString(categoryId),
+            for (final m in norms) Variable.withString(m),
+          ],
+        );
+        if (rows.isEmpty) return null;
+        final r = rows.single;
+        return BiggestExpense(
+          id: r.read<String>('id'),
+          amount: _m(r.read<int>('s'), f),
+          merchant: r.readNullable<String>('m'),
+          categoryId: r.readNullable<String>('cid'),
+          date: CivilDate.fromEpochDay(r.read<int>('d')),
+        );
+      },
+    );
+  }
+
   // ------------------------------------------------------ 6 top merchants
 
   /// The [limit] merchants with the most net spend. Free users get
