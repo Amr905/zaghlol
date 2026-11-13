@@ -170,6 +170,12 @@ abstract final class Settings {
   /// FR-ONB-11: the setup steps (slugs) the user finished or skipped.
   static final setupProgress = SettingKey.slugSet('setup_progress');
 
+  /// T-097 (FR-ONB-10, D-21): contextual setup suggestions already shown or
+  /// dismissed. Each one is offered once and never again.
+  static final setupSuggestionsHandled = SettingKey.slugSet(
+    'setup_suggestions_handled',
+  );
+
   /// When the paywall was last shown: epoch milliseconds UTC; null: never.
   static final paywallLastShown = SettingKey.optionalInteger(
     'paywall_last_shown',
