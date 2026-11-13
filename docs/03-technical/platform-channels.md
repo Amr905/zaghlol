@@ -281,7 +281,7 @@ abstract class OcrHostApi {
 class OcrResult { List<OcrLine> lines; }
 class OcrLine { String text; double confidence; List<double> box; /* x,y,w,h normalized */ }
 ```
-- **iOS:** Vision `VNRecognizeTextRequest`, `.accurate`. `recognitionLanguages` comes from `supportedRecognitionLanguages()` at runtime; Arabic is used only if listed.
+- **iOS (T-160, iOS 17+, ADR-019):** Vision `VNRecognizeTextRequest`, `.accurate`, revision 3. `recognitionLanguages` is resolved from `supportedRecognitionLanguages()` at runtime; Arabic is used only if listed, and if no requested language is listed the host falls back to English (Latin-only). `box` is **top-left origin** on both platforms (the iOS host flips Vision's bottom-left y). Lines are ordered top to bottom; blank lines are dropped. Errors are code-only: `OCR_FAILED`, `IO_ERROR` (path outside the app container, unreadable or oversized file), `SPOOL_DECRYPT_FAILED`, `NOT_AVAILABLE` (no spool key provisioned yet: the file is kept). Dart side: `OcrEngine` port in `lib/core/ocr/ocr_port.dart` (T-161 uses this; `PigeonOcrEngine` adapts it).
 - **Android:** ML Kit Text Recognition v2 (Latin) **plus** Tesseract4Android with `ara` (fast model, bundled) for Arabic lines. Results are merged by bounding box (ADR-009).
 - The image is decrypted in memory only. Its temp file is deleted in a `finally` block, and receipt images are never persisted (FR-SEC-03).
 
