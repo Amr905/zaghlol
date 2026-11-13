@@ -424,7 +424,7 @@ class _TestResult extends ConsumerWidget {
             style: ZType.bodySmall.copyWith(color: c.textMuted),
           ),
           Text(
-            t.templatesBuilderTestFailReason(miss.\$2.name),
+            t.templatesBuilderTestFailReason(miss.$2.name),
             style: ZType.bodySmall.copyWith(color: c.text),
           ),
         ],
