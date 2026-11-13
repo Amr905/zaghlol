@@ -47,7 +47,7 @@ final class IngestionRunner {
     store,
     Future<Directory> Function()? dbDirectory,
     Registry Function()? registry,
-  }) : _spool = spool ?? PigeonSpoolPort(),
+  }) : _spool = spool ?? platformSpoolPort(),
        _storeFactory = store ?? (headless ? _headlessStore : _uiStore),
        _dbDirectory = dbDirectory ?? resolveDbDirectory,
        _registry = registry ?? defaultRegistryLoader;

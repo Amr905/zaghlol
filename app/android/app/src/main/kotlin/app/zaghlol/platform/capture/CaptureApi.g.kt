@@ -889,8 +889,31 @@ interface AndroidCaptureHostApi {
     }
   }
 }
-/** Generated interface from Pigeon that represents a handler of messages from Flutter. */
+/**
+ * iOS host (T-062): the encrypted spool in the App Group container and the
+ * background refresh. Same drain / ack / hold / status semantics as
+ * AndroidCaptureHostApi (platform-channels.md 1.3), so the Dart drain is
+ * shared. Errors: IO_ERROR | NOT_AVAILABLE (no App Group container).
+ * T-061 adds writeGuardConfig and the Shortcut-setup methods (section 3).
+ *
+ * Generated interface from Pigeon that represents a handler of messages from Flutter.
+ */
 interface IosCaptureHostApi {
+  /** Returns decrypted entries (in memory only), oldest first. */
+  fun drainSpool(max: Long): List<SpoolEntry>
+  /** Only ids this engine drained. */
+  fun ackSpool(ids: List<String>)
+  /** Entries IngestRawMessages could not store even alone; moved to spool/held/. */
+  fun holdSpool(ids: List<String>)
+  fun getSpoolStatus(): SpoolStatus
+  /** Zeroes the alert counters if [seq] still matches getSpoolStatus().seq. */
+  fun clearSpoolAlerts(seq: Long)
+  /**
+   * Submits the BGAppRefreshTask 'app.zaghlol.ingest' (the launch handler is
+   * registered natively at launch). A best-effort nudge: the system decides
+   * when it runs; the foreground drain is the guarantee.
+   */
+  fun registerBackgroundRefresh()
 
   companion object {
     /** The codec used by IosCaptureHostApi. */
@@ -901,6 +924,109 @@ interface IosCaptureHostApi {
     @JvmOverloads
     fun setUp(binaryMessenger: BinaryMessenger, api: IosCaptureHostApi?, messageChannelSuffix: String = "") {
       val separatedMessageChannelSuffix = if (messageChannelSuffix.isNotEmpty()) ".$messageChannelSuffix" else ""
+      val taskQueue = binaryMessenger.makeBackgroundTaskQueue()
+      run {
+        val channel = BasicMessageChannel<Any?>(binaryMessenger, "dev.flutter.pigeon.zaghlol.IosCaptureHostApi.drainSpool$separatedMessageChannelSuffix", codec, taskQueue)
+        if (api != null) {
+          channel.setMessageHandler { message, reply ->
+            val args = message as List<Any?>
+            val maxArg = args[0] as Long
+            val wrapped: List<Any?> = try {
+              listOf(api.drainSpool(maxArg))
+            } catch (exception: Throwable) {
+              CaptureApiPigeonUtils.wrapError(exception)
+            }
+            reply.reply(wrapped)
+          }
+        } else {
+          channel.setMessageHandler(null)
+        }
+      }
+      run {
+        val channel = BasicMessageChannel<Any?>(binaryMessenger, "dev.flutter.pigeon.zaghlol.IosCaptureHostApi.ackSpool$separatedMessageChannelSuffix", codec, taskQueue)
+        if (api != null) {
+          channel.setMessageHandler { message, reply ->
+            val args = message as List<Any?>
+            val idsArg = args[0] as List<String>
+            val wrapped: List<Any?> = try {
+              api.ackSpool(idsArg)
+              listOf(null)
+            } catch (exception: Throwable) {
+              CaptureApiPigeonUtils.wrapError(exception)
+            }
+            reply.reply(wrapped)
+          }
+        } else {
+          channel.setMessageHandler(null)
+        }
+      }
+      run {
+        val channel = BasicMessageChannel<Any?>(binaryMessenger, "dev.flutter.pigeon.zaghlol.IosCaptureHostApi.holdSpool$separatedMessageChannelSuffix", codec, taskQueue)
+        if (api != null) {
+          channel.setMessageHandler { message, reply ->
+            val args = message as List<Any?>
+            val idsArg = args[0] as List<String>
+            val wrapped: List<Any?> = try {
+              api.holdSpool(idsArg)
+              listOf(null)
+            } catch (exception: Throwable) {
+              CaptureApiPigeonUtils.wrapError(exception)
+            }
+            reply.reply(wrapped)
+          }
+        } else {
+          channel.setMessageHandler(null)
+        }
+      }
+      run {
+        val channel = BasicMessageChannel<Any?>(binaryMessenger, "dev.flutter.pigeon.zaghlol.IosCaptureHostApi.getSpoolStatus$separatedMessageChannelSuffix", codec, taskQueue)
+        if (api != null) {
+          channel.setMessageHandler { _, reply ->
+            val wrapped: List<Any?> = try {
+              listOf(api.getSpoolStatus())
+            } catch (exception: Throwable) {
+              CaptureApiPigeonUtils.wrapError(exception)
+            }
+            reply.reply(wrapped)
+          }
+        } else {
+          channel.setMessageHandler(null)
+        }
+      }
+      run {
+        val channel = BasicMessageChannel<Any?>(binaryMessenger, "dev.flutter.pigeon.zaghlol.IosCaptureHostApi.clearSpoolAlerts$separatedMessageChannelSuffix", codec, taskQueue)
+        if (api != null) {
+          channel.setMessageHandler { message, reply ->
+            val args = message as List<Any?>
+            val seqArg = args[0] as Long
+            val wrapped: List<Any?> = try {
+              api.clearSpoolAlerts(seqArg)
+              listOf(null)
+            } catch (exception: Throwable) {
+              CaptureApiPigeonUtils.wrapError(exception)
+            }
+            reply.reply(wrapped)
+          }
+        } else {
+          channel.setMessageHandler(null)
+        }
+      }
+      run {
+        val channel = BasicMessageChannel<Any?>(binaryMessenger, "dev.flutter.pigeon.zaghlol.IosCaptureHostApi.registerBackgroundRefresh$separatedMessageChannelSuffix", codec)
+        if (api != null) {
+          channel.setMessageHandler { _, reply ->
+            val wrapped: List<Any?> = try {
+              api.registerBackgroundRefresh()
+              listOf(null)
+            } catch (exception: Throwable) {
+              CaptureApiPigeonUtils.wrapError(exception)
+            }
+            reply.reply(wrapped)
+          }
+        } else {
+          channel.setMessageHandler(null)
+        }
+      }
     }
   }
 }

@@ -36,18 +36,35 @@ final class HeadlessIngestionHandler implements HeadlessIngestionApi {
 HeadlessIngestionHandler startHeadlessIngestion(
   IngestionRunner runner, {
   HeadlessIngestionHostApi? host,
+  Duration retryDelay = const Duration(milliseconds: 25),
 }) {
   final handler = HeadlessIngestionHandler(runner);
   HeadlessIngestionApi.setUp(handler);
-  unawaited(
-    (host ?? HeadlessIngestionHostApi()).ready().then<void>(
-      (_) {},
-      // No native side listening: the worker times out and tears down.
-      onError: (Object _) {},
-    ),
-  );
+  unawaited(_announceReady(host ?? HeadlessIngestionHostApi(), retryDelay));
   return handler;
 }
+
+/// Tells native the handler is installed. iOS installs its side only after
+/// `FlutterEngine.run()` returns (the messenger aborts the process otherwise,
+/// SPK-03), so the first `ready` can find no listener: retry every
+/// [retryDelay] up to [_readyAttempts] times. A failure never throws; with no
+/// native side the worker times out and tears down.
+Future<void> _announceReady(
+  HeadlessIngestionHostApi host,
+  Duration retryDelay,
+) async {
+  for (var attempt = 0; attempt < _readyAttempts; attempt++) {
+    try {
+      await host.ready();
+      return;
+    } on Object {
+      if (retryDelay == Duration.zero) return;
+      await Future<void>.delayed(retryDelay);
+    }
+  }
+}
+
+const int _readyAttempts = 400;
 
 /// Body of `ingestionMain` (lib/main.dart, the root library the native
 /// DartEntrypoint looks it up in).

@@ -61,7 +61,7 @@ final captureRegistryLoaderProvider = Provider<Registry Function()>(
 );
 
 final captureSpoolPortProvider = Provider<SpoolPort>(
-  (ref) => PigeonSpoolPort(),
+  (ref) => platformSpoolPort(),
   name: 'captureSpoolPortProvider',
 );
 

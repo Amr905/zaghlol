@@ -3,6 +3,7 @@
 // not UPPER_SNAKE becomes PLATFORM_UNKNOWN (FU-034), so nothing a native
 // component puts in an error can carry message text further.
 
+import 'package:flutter/foundation.dart';
 import 'package:flutter/services.dart';
 import 'package:zaghlol_domain/zaghlol_domain.dart';
 
@@ -53,3 +54,31 @@ final class PigeonSpoolPort implements SpoolPort {
     }
   }
 }
+
+/// T-062: the iOS spool (App Group container) behind the same port, so the
+/// Dart drain is shared with Android. Same method semantics and error codes.
+final class IosPigeonSpoolPort implements SpoolPort {
+  IosPigeonSpoolPort([IosCaptureHostApi? api])
+    : _api = api ?? IosCaptureHostApi();
+
+  final IosCaptureHostApi _api;
+
+  @override
+  Future<List<SpoolEntry>> drain(int max) =>
+      PigeonSpoolPort._guard(() => _api.drainSpool(max));
+
+  @override
+  Future<void> ack(List<String> ids) =>
+      PigeonSpoolPort._guard(() => _api.ackSpool(ids));
+
+  @override
+  Future<void> hold(List<String> ids) =>
+      PigeonSpoolPort._guard(() => _api.holdSpool(ids));
+}
+
+/// The spool port of this platform: iOS reads the App Group spool, every
+/// other platform the Android host (T-062).
+SpoolPort platformSpoolPort({TargetPlatform? platform}) =>
+    (platform ?? defaultTargetPlatform) == TargetPlatform.iOS
+    ? IosPigeonSpoolPort()
+    : PigeonSpoolPort();

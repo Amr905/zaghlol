@@ -19,9 +19,11 @@ enum ZaghlolDirectories {
   /// Diagnostic code recorded on failure. Never logged with a path.
   static let backupExclusionFailedCode = "BACKUP_EXCLUSION_FAILED"
 
-  /// App Group identifier shared with the extensions. `nil` until T-062 adds
-  /// the App Group entitlement; while nil, the App Group directories are skipped.
-  static let appGroupIdentifier: String? = nil
+  /// App Group identifier shared with the extensions, read from the bundle's
+  /// Info.plist (`ZaghlolAppGroup` = `group.$(PRODUCT_BUNDLE_IDENTIFIER)`, so it
+  /// differs per flavor; T-062). `nil` when the key is absent: the App Group
+  /// directories are then skipped.
+  static let appGroupIdentifier: String? = ZaghlolSharedGroups.appGroup()
 
   enum ExclusionError: Error {
     case notExcluded
