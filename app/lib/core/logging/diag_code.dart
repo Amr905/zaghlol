@@ -65,6 +65,8 @@ abstract final class DiagCodes {
     backendCallFailed,
     backendBadSignature,
     installReregistered,
+    entitlementSubMismatch,
+    accountIidMismatch,
   ];
 
   static const DiagCode flutterError = DiagCode._('FLUTTER_ERROR');
@@ -99,4 +101,13 @@ abstract final class DiagCodes {
   static const DiagCode installReregistered = DiagCode._(
     'INSTALL_REREGISTERED',
   );
+
+  /// T-144 (R5-1): a validly signed entitlement token named another install;
+  /// ignored. A counter only: no token, no ID.
+  static const DiagCode entitlementSubMismatch = DiagCode._(
+    'ENTITLEMENT_SUB_MISMATCH',
+  );
+
+  /// T-144 (R5-1): a signed account token named another install; ignored.
+  static const DiagCode accountIidMismatch = DiagCode._('ACCOUNT_IID_MISMATCH');
 }

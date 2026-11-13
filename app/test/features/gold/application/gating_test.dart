@@ -123,4 +123,27 @@ void main() {
       expect(c.read(entitlementStateProvider).isGold, isFalse, reason: '$st');
     }
   });
+
+  test('T-144: applyNonGold never produces Gold; moved keeps movedBy', () {
+    final c = ProviderContainer();
+    final n = c.read(entitlementStateProvider.notifier);
+    for (final p in [EntitlementPhase.active, EntitlementPhase.grace]) {
+      n.applyNonGold(p);
+      expect(c.read(entitlementStateProvider).isGold, isFalse);
+    }
+    n.applyNonGold(EntitlementPhase.moved, movedBy: MovedBy.support);
+    expect(c.read(entitlementStateProvider).movedBy, MovedBy.support);
+    expect(c.read(entitlementStateProvider).isGold, isFalse);
+    for (final p in [
+      EntitlementPhase.paused,
+      EntitlementPhase.tampered,
+      EntitlementPhase.pendingVerification,
+    ]) {
+      n.applyNonGold(p);
+      expect(c.read(entitlementStateProvider).isGold, isFalse);
+    }
+    n.applyVerified(verified: true, status: 'grace');
+    expect(c.read(entitlementStateProvider).phase, EntitlementPhase.grace);
+    expect(c.read(entitlementStateProvider).isGold, isTrue);
+  });
 }
