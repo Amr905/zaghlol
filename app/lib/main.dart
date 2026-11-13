@@ -84,7 +84,13 @@ class _LocalizedAppState extends ConsumerState<_LocalizedApp>
   @override
   void didChangeAppLifecycleState(AppLifecycleState state) {
     if (state == AppLifecycleState.resumed) {
-      unawaited(ref.read(cycleResumeHandlerProvider).onResume());
+      unawaited(
+        ref
+            .read(cycleResumeHandlerProvider)
+            .onResume()
+            .then<Object?>((_) => null)
+            .catchError((Object _) => null),
+      );
     }
   }
 

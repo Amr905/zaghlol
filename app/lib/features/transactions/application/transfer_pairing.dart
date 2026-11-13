@@ -18,6 +18,8 @@
 //
 // Failures are code-only; nothing here logs and no payload carries amounts.
 
+import 'dart:convert' show jsonDecode;
+
 import 'package:drift/drift.dart' show Value, Variable;
 import 'package:zaghlol_domain/zaghlol_domain.dart';
 
@@ -227,6 +229,12 @@ class TransferPairingUseCase {
         );
       }
       if (cleared == 0 && pair == null) return null;
+      for (final id in ids) {
+        await _rememberUnlink(id, [
+          for (final other in ids)
+            if (other != id) other,
+        ], now);
+      }
       final rows = <_Row>[
         for (final id in ids) ?await _legRow(id, anyStatus: true),
       ];
@@ -234,6 +242,93 @@ class TransferPairingUseCase {
     });
     if (event != null) _events?.publish(event);
     return event;
+  }
+
+  /// Run after a transfer leg is deleted (soft or hard): dissolves its pair
+  /// and frees the surviving leg, which counts again unless it is an
+  /// own-account leg by its own right. Returns the event, or null when the
+  /// leg was in no pair.
+  Future<TransactionsChanged?> onRemoved(String txnId) async {
+    if (txnId.isEmpty) _invalid();
+    final schedule = await _loadSchedule();
+    final now = _nowMs();
+    final event = await _txns.inTransaction(() async {
+      final pair = await _pairs.forTransaction(txnId);
+      if (pair == null) return null;
+      if (await _pairs.deleteById(pair.id) != 1) return null;
+      final rows = <_Row>[];
+      for (final id in {pair.outTxnId, ?pair.inTxnId}) {
+        final r = await _legRow(id, anyStatus: true);
+        if (r != null) rows.add(r);
+        if (id == txnId) continue;
+        await _freeLeg(id, now);
+        final t = await _txns.byId(id);
+        if (t != null &&
+            t.deletedAt == null &&
+            t.status == 'posted' &&
+            t.counterpartyKind == 'own_account') {
+          final kind = await _isCardSettlement(t.counterpartyValue)
+              ? TransferPairKind.cardSettlement
+              : TransferPairKind.auto;
+          await _markOneSided(_rowOf(t), kind, now);
+        }
+      }
+      final gone = await _txns.byId(txnId);
+      if (gone != null && rows.every((r) => r.id != txnId)) {
+        rows.add(_rowOf(gone));
+      }
+      return _event(schedule, rows);
+    });
+    if (event != null) _events?.publish(event);
+    return event;
+  }
+
+  Future<void> _freeLeg(String id, int now) => _db.customUpdate(
+    'UPDATE transactions SET is_internal = 0, transfer_pair_id = NULL, '
+    'updated_at = ?2 WHERE id = ?1',
+    variables: [Variable.withString(id), Variable.withInt(now)],
+    updates: {_db.transactions},
+  );
+
+  /// A resolved review item per leg holding the legs it must not be paired
+  /// with again (an empty list: do not re-mark it one-sided either).
+  Future<void> _rememberUnlink(String id, List<String> others, int now) async {
+    final itemId = _newId();
+    await _reviews.insert(
+      id: itemId,
+      kind: ReviewKind.transferAmbiguous,
+      txnId: id,
+      payload: {'candidates': others},
+      createdAt: now,
+    );
+    await _reviews.resolve(itemId, resolution: _unlinked, at: now);
+  }
+
+  static const String _unlinked = 'unlinked';
+
+  /// Legs the user unlinked from [id]; null when it was never unlinked.
+  Future<Set<String>?> _unlinkedFrom(String id) async {
+    final rows = await _db
+        .customSelect(
+          'SELECT payload FROM review_items WHERE kind = ?1 '
+          'AND resolution = ?2 AND txn_id = ?3',
+          variables: [
+            Variable.withString(ReviewKind.transferAmbiguous),
+            Variable.withString(_unlinked),
+            Variable.withString(id),
+          ],
+          readsFrom: {_db.reviewItems},
+        )
+        .get();
+    if (rows.isEmpty) return null;
+    final out = <String>{};
+    for (final r in rows) {
+      final raw = r.read<String?>('payload');
+      if (raw == null) continue;
+      final c = (jsonDecode(raw) as Map)['candidates'];
+      if (c is List) out.addAll(c.whereType<String>());
+    }
+    return out;
   }
 
   // ---------------------------------------------------------------- core
@@ -253,9 +348,20 @@ class TransferPairingUseCase {
       return skipped;
     }
     final self = _rowOf(row);
-    final existing = row.transferPairId == null
+    var existing = row.transferPairId == null
         ? null
         : await _pairs.byId(row.transferPairId!);
+    if (existing != null && existing.inTxnId != null) {
+      final otherId = existing.outTxnId == txnId
+          ? existing.inTxnId!
+          : existing.outTxnId;
+      final other = await _txns.byId(otherId);
+      if (other == null || other.deletedAt != null) {
+        await _pairs.deleteById(existing.id);
+        await _freeLeg(txnId, now);
+        existing = null;
+      }
+    }
     // Already in a complete pair: nothing to do. A one-sided out leg may
     // still find its counterpart.
     if (existing != null && (existing.inTxnId != null || !self.isOut)) {
@@ -263,7 +369,12 @@ class TransferPairingUseCase {
     }
     final account = await _accounts.byId(self.accountId);
     final leg = _legOf(self);
-    final pool = await _freeLegs(self, within: transferPairWindow);
+    final unlinked = await _unlinkedFrom(txnId);
+    final pool = await _freeLegs(
+      self,
+      within: transferPairWindow,
+      skip: unlinked,
+    );
 
     switch (decideSameCurrency(leg, pool.values.map(_legOf))) {
       case PairWith(:final counterpart):
@@ -336,7 +447,11 @@ class TransferPairingUseCase {
     }
 
     // Cross-currency candidates are suggestions only.
-    final wide = await _freeLegs(self, within: crossCurrencyWindow);
+    final wide = await _freeLegs(
+      self,
+      within: crossCurrencyWindow,
+      skip: unlinked,
+    );
     final rates = await _ratesFor(wide.values.map(_legOf), leg);
     final cross = crossCurrencyCandidates(
       leg,
@@ -355,7 +470,9 @@ class TransferPairingUseCase {
     }
 
     // Own-account counterparty with no match yet (EC-15, cc payment).
-    if (row.counterpartyKind == 'own_account' && existing == null) {
+    if (row.counterpartyKind == 'own_account' &&
+        existing == null &&
+        unlinked == null) {
       final kind = await _isCardSettlement(row.counterpartyValue)
           ? TransferPairKind.cardSettlement
           : TransferPairKind.auto;
@@ -599,6 +716,7 @@ class TransferPairingUseCase {
   Future<Map<String, _Row>> _freeLegs(
     _Row self, {
     required Duration within,
+    Set<String>? skip,
   }) async {
     final w = within.inMilliseconds;
     final rows = await _db
@@ -625,15 +743,16 @@ class TransferPairingUseCase {
         .get();
     return {
       for (final r in rows)
-        r.read<String>('id'): (
-          id: r.read<String>('id'),
-          accountId: r.read<String>('account_id'),
-          isOut: r.read<String>('direction') == 'transfer_out',
-          currency: r.read<String>('currency'),
-          amountMinor: r.read<int>('amount_minor'),
-          occurredAt: r.read<int>('occurred_at'),
-          offsetMin: r.read<int>('occurred_tz_offset_min'),
-        ),
+        if (skip == null || !skip.contains(r.read<String>('id')))
+          r.read<String>('id'): (
+            id: r.read<String>('id'),
+            accountId: r.read<String>('account_id'),
+            isOut: r.read<String>('direction') == 'transfer_out',
+            currency: r.read<String>('currency'),
+            amountMinor: r.read<int>('amount_minor'),
+            occurredAt: r.read<int>('occurred_at'),
+            offsetMin: r.read<int>('occurred_tz_offset_min'),
+          ),
     };
   }
 

@@ -183,6 +183,31 @@ void main() {
       expect((await model()).cardFilter, isEmpty);
     });
 
+    test('safe-to-spend ignores the filter; spend figures follow it', () async {
+      await db
+          .into(db.budgets)
+          .insert(
+            BudgetsCompanion.insert(
+              id: 'b1',
+              currency: 'EGP',
+              limitMinor: 100000,
+              period: 'cycle',
+              createdAt: 0,
+            ),
+          );
+      await add('a', amount: 1000, account: 'acc1');
+      await add('b', amount: 30000, account: 'acc2');
+      container.listen(homeModelProvider, (_, _) {});
+      final all = (await model()).hero!;
+      container.read(cardFilterProvider.notifier).selectOnly('acc1');
+      final m = (await model()).hero!;
+      expect(m.spend.minor, 1000);
+      expect(all.spend.minor, 31000);
+      expect(m.safeToSpend, isNotNull);
+      expect(m.safeToSpend, all.safeToSpend);
+      expect(m.overview.safeToSpend, isNot(all.safeToSpend));
+    });
+
     test('persists while no listener is attached', () async {
       container.read(cardFilterProvider.notifier).selectOnly('acc2');
       await Future<void>.delayed(const Duration(milliseconds: 10));

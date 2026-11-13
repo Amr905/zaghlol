@@ -22,15 +22,22 @@ const int homeFeedLimit = 10;
 
 /// One currency's hero and KPIs.
 final class HomeCurrencyFigures {
-  const HomeCurrencyFigures({required this.overview, required this.net});
+  const HomeCurrencyFigures({
+    required this.overview,
+    required this.net,
+    this.safeToSpend,
+  });
 
+  /// Spend figures for the selected cards.
   final CurrencyOverview overview;
 
   Currency get currency => overview.currency;
   Money get income => overview.totals.income;
   Money get spend => overview.totals.spend;
   Money get pending => overview.totals.pendingSpend;
-  Money? get safeToSpend => overview.safeToSpend;
+
+  /// Always from all cards: the card filter never changes it.
+  final Money? safeToSpend;
   Money? get budget => overview.budget;
 
   /// Income minus spend, same currency.
@@ -108,13 +115,23 @@ final homeModelProvider = FutureProvider<HomeModel>((ref) async {
   final scanning = ref.watch(homeScanInProgressProvider).value ?? false;
 
   final cycle = schedule.cycleOn(today);
-  final overview = buildCycleOverview(
+  final budgets = await repo.cycleBudgets();
+  final all = buildCycleOverview(
     cycle: cycle,
     today: today,
-    totals: await repo.totals(cycle, accounts: filter),
-    budgets: await repo.cycleBudgets(),
+    totals: await repo.totals(cycle),
+    budgets: budgets,
     incomeTarget: target,
   );
+  final overview = filter.isEmpty
+      ? all
+      : buildCycleOverview(
+          cycle: cycle,
+          today: today,
+          totals: await repo.totals(cycle, accounts: filter),
+          budgets: budgets,
+          incomeTarget: target,
+        );
   final feed = await txns.query(
     filter: TransactionFilter(accountIds: filter),
     page: const PageRequest(limit: homeFeedLimit),
@@ -127,6 +144,7 @@ final homeModelProvider = FutureProvider<HomeModel>((ref) async {
       for (final c in orderCurrencies(overview.byCurrency.keys, primary))
         HomeCurrencyFigures(
           overview: overview.byCurrency[c]!,
+          safeToSpend: all.byCurrency[c]?.safeToSpend,
           net:
               overview.byCurrency[c]!.totals.income -
               overview.byCurrency[c]!.totals.spend,

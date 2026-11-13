@@ -439,6 +439,80 @@ void main() {
     });
   });
 
+  group('removed leg and remembered unlink', () {
+    test('onRemoved frees the surviving leg so it counts again', () async {
+      await add('o', 'nbe', out: true);
+      await add('i', 'cib', out: false);
+      await uc.onPersisted('i');
+      expect(await internal(), {'o': 1, 'i': 1});
+      await db.customStatement(
+        'UPDATE transactions SET deleted_at = 1 WHERE id = \'o\'',
+      );
+      final ev = await uc.onRemoved('o');
+      expect(ev, isNotNull);
+      expect(await pairCount(), 0);
+      expect((await internal())['i'], 0);
+      expect(await uc.onRemoved('o'), isNull);
+    });
+
+    test('onRemoved keeps an own-account survivor internal', () async {
+      await add('o', 'nbe', out: true);
+      await add(
+        'i',
+        'cib',
+        out: false,
+        counterpartyKind: 'own_account',
+        counterpartyValue: '1234',
+      );
+      await uc.link('o', 'i');
+      await db.customStatement(
+        'UPDATE transactions SET deleted_at = 1 WHERE id = \'o\'',
+      );
+      await uc.onRemoved('o');
+      expect((await internal())['i'], 1);
+      expect(await pairCount(), 0);
+    });
+
+    test('onPersisted heals a pair whose other leg was deleted', () async {
+      await add('o', 'nbe', out: true);
+      await add('i', 'cib', out: false);
+      await uc.onPersisted('i');
+      await db.customStatement(
+        'UPDATE transactions SET deleted_at = 1 WHERE id = \'o\'',
+      );
+      await uc.onPersisted('i');
+      expect(await pairCount(), 0);
+      expect((await internal())['i'], 0);
+    });
+
+    test('onPersisted after unlink does not re-pair', () async {
+      await add('o', 'nbe', out: true);
+      await add('i', 'cib', out: false);
+      await uc.onPersisted('i');
+      await uc.unlink('i');
+      expect((await uc.onPersisted('i')).status, isNot(PairingStatus.paired));
+      expect((await uc.onPersisted('o')).status, isNot(PairingStatus.paired));
+      expect(await pairCount(), 0);
+      expect(await internal(), {'o': 0, 'i': 0});
+    });
+
+    test('unlinked one-sided leg is not re-marked internal', () async {
+      await add(
+        'o',
+        'nbe',
+        out: true,
+        counterpartyKind: 'own_account',
+        counterpartyValue: '9999',
+      );
+      await uc.onPersisted('o');
+      expect(await internal(), {'o': 1});
+      await uc.unlink('o');
+      await uc.onPersisted('o');
+      expect(await internal(), {'o': 0});
+      expect(await pairCount(), 0);
+    });
+  });
+
   group('two engines at once', () {
     test('both legs evaluated concurrently by two engines: one pair', () async {
       await add('o', 'nbe', out: true);
