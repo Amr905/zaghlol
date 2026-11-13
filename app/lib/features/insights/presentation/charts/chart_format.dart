@@ -24,3 +24,7 @@ String chartPercent(WidgetRef ref, BuildContext context, int p) {
   final lang = Localizations.localeOf(context).languageCode;
   return ref.watch(digitsModeProvider(lang)).render('$p%');
 }
+
+/// A money formatter bound to the current locale and digits mode.
+String Function(Money) chartMoneyOf(WidgetRef ref, BuildContext context) =>
+    (m) => chartMoney(ref, context, m);

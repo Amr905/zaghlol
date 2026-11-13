@@ -13,12 +13,15 @@ import '../../../../core/ui/z_button.dart';
 import '../../../../core/ui/z_currency_switcher.dart';
 import '../../../budget/presentation/budget_providers_ui.dart';
 import '../../../budget/presentation/budget_view.dart';
+import '../../../gold/application/gating.dart';
+import '../../application/chart_gate.dart';
 import '../../domain/chart_models.dart';
 import '../chart_detail.dart';
 import 'chart_bodies.dart';
 import 'chart_card.dart';
 import 'chart_format.dart';
 import 'charts_providers.dart';
+import 'gold_chart_card.dart';
 import 'locked_chart_card.dart';
 
 class ChartsScreen extends ConsumerWidget {
@@ -85,7 +88,16 @@ class ChartsScreen extends ConsumerWidget {
               _BudgetCard(code: code),
             ],
             for (final id in lockedChartOrder)
-              LockedChartCard(title: _lockedTitle(l, id)),
+              if (decideChart(ref.watch(entitlementStateProvider), id).allowed)
+                if (code == null)
+                  ChartCard(
+                    title: goldChartTitle(l, id),
+                    child: ChartMessage(text: l.insightsChartsEmptyCycle),
+                  )
+                else
+                  GoldChartCard(chart: id, code: code)
+              else
+                LockedChartCard(title: goldChartTitle(l, id)),
           ],
         );
       },
@@ -99,19 +111,6 @@ const _padding = EdgeInsetsDirectional.fromSTEB(
   ZSpacing.screen,
   ZSpacing.xxl,
 );
-
-String _lockedTitle(AppLocalizations l, ChartId id) => switch (id) {
-  ChartId.burnCurve => l.insightsChartTitleBurnRate,
-  ChartId.fiftyThirtyTwenty => l.insightsChartTitleRule503020,
-  ChartId.dayHourPattern => l.insightsChartTitleWeekPattern,
-  ChartId.monthVsAverage => l.insightsChartTitleVsAverage,
-  ChartId.installmentTimeline => l.insightsChartTitleInstallments,
-  ChartId.subscriptionsAnnual => l.insightsChartTitleSubscriptions,
-  ChartId.cardsSplit => l.insightsChartTitleCards,
-  ChartId.netWorth => l.insightsChartTitleNetWorth,
-  ChartId.personalInflation => l.insightsChartTitleInflation,
-  _ => '',
-};
 
 String _context(AppLocalizations l, String code) => l.insightsChartsContext(
   l.commonCardFilterAll,

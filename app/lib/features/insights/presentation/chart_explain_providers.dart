@@ -20,6 +20,14 @@ const Set<ChartId> explainableCharts = {
   ChartId.cashFlow,
   ChartId.categoryDonut,
   ChartId.topMerchants,
+  ChartId.burnCurve,
+  ChartId.fiftyThirtyTwenty,
+  ChartId.dayHourPattern,
+  ChartId.monthVsAverage,
+  ChartId.installmentTimeline,
+  ChartId.subscriptionsAnnual,
+  ChartId.cardsSplit,
+  ChartId.netWorth,
 };
 
 typedef ChartExplainKey = ({ChartId chart, String code});
@@ -65,6 +73,47 @@ final previousMerchantsChartProvider =
         limit: topMerchantsLimitFor(ref.watch(entitlementStateProvider)),
       );
     }, name: 'previousMerchantsChartProvider');
+
+final previousBurnChartProvider =
+    FutureProvider.family<ChartResult<BurnCurve>, String>((ref, code) async {
+      final schedule = await ref.watch(paydayScheduleProvider.future);
+      final cycle = await ref.watch(chartsCurrentCycleProvider.future);
+      final repo = await ref.watch(chartRepositoryProvider.future);
+      final prev = schedule.before(cycle);
+      return repo.burnCurve(
+        prev,
+        prev.end,
+        ChartFilter(currency: Currency.of(code)),
+      );
+    }, name: 'previousBurnChartProvider');
+
+final previousRule503020ChartProvider =
+    FutureProvider.family<ChartResult<FiftyThirtyTwenty>, String>((
+      ref,
+      code,
+    ) async {
+      final schedule = await ref.watch(paydayScheduleProvider.future);
+      final cycle = await ref.watch(chartsCurrentCycleProvider.future);
+      final repo = await ref.watch(chartRepositoryProvider.future);
+      return repo.fiftyThirtyTwenty(
+        ChartPeriod.cycle(schedule.before(cycle)),
+        ChartFilter(currency: Currency.of(code)),
+      );
+    }, name: 'previousRule503020ChartProvider');
+
+final previousCardsChartProvider =
+    FutureProvider.family<ChartResult<List<CardSpend>>, String>((
+      ref,
+      code,
+    ) async {
+      final schedule = await ref.watch(paydayScheduleProvider.future);
+      final cycle = await ref.watch(chartsCurrentCycleProvider.future);
+      final repo = await ref.watch(chartRepositoryProvider.future);
+      return repo.cardsSplit(
+        ChartPeriod.cycle(schedule.before(cycle)),
+        ChartFilter(currency: Currency.of(code)),
+      );
+    }, name: 'previousCardsChartProvider');
 
 T? _ready<T>(ChartResult<T>? r) => switch (r) {
   ChartReady<T>(:final data) => data,
@@ -145,6 +194,128 @@ final chartExplanationProvider =
           return (
             explanation: explainChart(
               MerchantsExplainInput(current: rows, previous: prev ?? const []),
+              tier,
+              context: context,
+            ),
+            reason: null,
+          );
+        case ChartId.burnCurve:
+          final r = await ref.watch(burnChartProvider(key.code).future);
+          final cur = _ready(r);
+          if (cur == null) return (explanation: empty(), reason: _reasonOf(r));
+          final prev = deep
+              ? _ready(
+                  await ref.watch(previousBurnChartProvider(key.code).future),
+                )
+              : null;
+          return (
+            explanation: explainChart(
+              BurnRateExplainInput(current: cur, previous: prev),
+              tier,
+              context: context,
+            ),
+            reason: null,
+          );
+        case ChartId.fiftyThirtyTwenty:
+          final r = await ref.watch(rule503020ChartProvider(key.code).future);
+          final cur = _ready(r);
+          if (cur == null) return (explanation: empty(), reason: _reasonOf(r));
+          final prev = deep
+              ? _ready(
+                  await ref.watch(
+                    previousRule503020ChartProvider(key.code).future,
+                  ),
+                )
+              : null;
+          return (
+            explanation: explainChart(
+              Rule503020ExplainInput(current: cur, previous: prev),
+              tier,
+              context: context,
+            ),
+            reason: null,
+          );
+        case ChartId.dayHourPattern:
+          final r = await ref.watch(dayHourChartProvider(key.code).future);
+          final cur = _ready(r);
+          if (cur == null) return (explanation: empty(), reason: _reasonOf(r));
+          final period = await ref.watch(dayHourPeriodProvider.future);
+          return (
+            explanation: explainChart(
+              WeekPatternExplainInput(current: cur, period: period),
+              tier,
+              context: context,
+            ),
+            reason: null,
+          );
+        case ChartId.monthVsAverage:
+          final r = await ref.watch(vsAverageChartProvider(key.code).future);
+          final cur = _ready(r);
+          if (cur == null) return (explanation: empty(), reason: _reasonOf(r));
+          return (
+            explanation: explainChart(
+              VsAverageExplainInput(current: cur),
+              tier,
+              context: context,
+            ),
+            reason: null,
+          );
+        case ChartId.installmentTimeline:
+          final r = await ref.watch(installmentsChartProvider(key.code).future);
+          final months = _ready(r);
+          if (months == null || months.isEmpty) {
+            return (explanation: empty(), reason: _reasonOf(r));
+          }
+          return (
+            explanation: explainChart(
+              InstallmentsExplainInput(
+                months: months,
+                ends: const [],
+                today: ref.watch(todayProvider),
+              ),
+              tier,
+              context: context,
+            ),
+            reason: null,
+          );
+        case ChartId.subscriptionsAnnual:
+          final r = await ref.watch(
+            subscriptionsChartProvider(key.code).future,
+          );
+          final cur = _ready(r);
+          if (cur == null) return (explanation: empty(), reason: _reasonOf(r));
+          return (
+            explanation: explainChart(
+              SubscriptionsExplainInput(current: cur),
+              tier,
+              context: context,
+            ),
+            reason: null,
+          );
+        case ChartId.cardsSplit:
+          final r = await ref.watch(cardsChartProvider(key.code).future);
+          final cur = _ready(r);
+          if (cur == null) return (explanation: empty(), reason: _reasonOf(r));
+          final prev = deep
+              ? _ready(
+                  await ref.watch(previousCardsChartProvider(key.code).future),
+                )
+              : null;
+          return (
+            explanation: explainChart(
+              CardsExplainInput(current: cur, previous: prev ?? const []),
+              tier,
+              context: context,
+            ),
+            reason: null,
+          );
+        case ChartId.netWorth:
+          final r = await ref.watch(netWorthChartProvider(key.code).future);
+          final pts = _ready(r);
+          if (pts == null) return (explanation: empty(), reason: _reasonOf(r));
+          return (
+            explanation: explainChart(
+              NetWorthExplainInput(points: pts),
               tier,
               context: context,
             ),

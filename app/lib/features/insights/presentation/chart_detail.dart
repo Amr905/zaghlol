@@ -26,6 +26,7 @@ import 'charts/chart_bodies.dart';
 import 'charts/chart_card.dart';
 import 'charts/chart_format.dart';
 import 'charts/charts_providers.dart';
+import 'charts/gold_chart_card.dart';
 
 /// The typing indicator never runs longer than this (S-21).
 const Duration chartTypingDuration = Duration(milliseconds: 500);
@@ -252,6 +253,9 @@ class _ChartSection extends ConsumerWidget {
               },
             );
       default:
+        if (goldChartIds.contains(chart)) {
+          return GoldChartCard(chart: chart, code: code, showExplain: false);
+        }
         return ChartCard(
           title: title,
           contextLine: _contextLine(l, code),
