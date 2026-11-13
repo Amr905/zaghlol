@@ -101,7 +101,7 @@ class AttestationHost(
     const val HASH_LENGTH = 32
 
     /** base64url without padding (43 chars for 32 bytes), as the server expects. */
-    fun requestHashOf(bodyHash: ByteArray): String = Base64.getUrlEncoder().withoutPadding().encodeToString(bodyHash)
+    fun requestHashOf(bodyHash: ByteArray): String = Base64.getUrlEncoder().encodeToString(bodyHash)
 
     /** `StandardIntegrityErrorCode` (or null: not a Play error) → contract code (§6). */
     fun mapErrorCode(code: Int?): String =
