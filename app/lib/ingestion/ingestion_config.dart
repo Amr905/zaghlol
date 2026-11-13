@@ -6,10 +6,9 @@ import 'package:flutter/services.dart' show appFlavor;
 
 /// Q7 (PO, 2026-11-11: YES): the Sms build runs an automatic inbox catch-up
 /// scan (allowlisted senders since the last captured message) on each app
-/// open. Not built in the spike: `queryInbox` is NOT_AVAILABLE natively until
-/// its owner task (T-042, follow-up recorded in T-008.md). The owner flips
-/// this when the scan exists; until then it must stay false.
-const bool kInboxCatchUpEnabled = false;
+/// open. T-048 built it (`InboxScanService`); `queryInbox` answers
+/// NOT_AVAILABLE in builds without SMS, which the scan reports as a code.
+const bool kInboxCatchUpEnabled = true;
 
 // Q3 (PO, 2026-11-11): if a device needs the battery-optimisation exemption,
 // the app only links to the system settings list

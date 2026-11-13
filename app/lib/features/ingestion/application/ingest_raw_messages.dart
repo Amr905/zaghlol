@@ -535,6 +535,7 @@ final class IngestRawMessages {
       );
       if (decision is GuardDrop &&
           !(decision.reason == GuardDropReason.notFinancial &&
+              m.origin != MessageOrigin.inboxScanPersonal &&
               guard.isUserSender(m.channel, m.source))) {
         return _dropped(decision.reason.wire, local);
       }
@@ -625,6 +626,12 @@ final class IngestRawMessages {
     _Changes local,
     ParseResult result,
   ) async {
+    if (p.m.origin == MessageOrigin.inboxScanPersonal &&
+        _wouldGoToReview(result)) {
+      // FU-109 M-1: a personal sender's message that is not a clean
+      // transaction is not stored at all.
+      return const IngestDropped('personal_unparsed');
+    }
     switch (result) {
       case ParseDropped():
         // Handled before the savepoint.
@@ -649,6 +656,14 @@ final class IngestRawMessages {
         };
     }
   }
+
+  /// True for the results that end in a review item (or a stored review raw
+  /// row) instead of a transaction, balance or deferred row.
+  static bool _wouldGoToReview(ParseResult r) => switch (r) {
+    ParseUnrecognized() || ParseGeneric() => true,
+    ParseParsed() => dispositionOf(r.event, r.direction) is UndirectedEvent,
+    ParseDropped() => false,
+  };
 
   Future<IngestOutcome> _unrecognized(_Prepared p, ParseUnrecognized r) async {
     final rawId = await _insertRaw(

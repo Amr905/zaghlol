@@ -14,6 +14,13 @@ enum MessageOrigin {
   /// the ack.
   inboxScan,
 
+  /// T-048 (FU-109 M-1, PO decision): the scan of a phone-number sender the
+  /// user added, only with the separate opt-in. Same as [inboxScan], but the
+  /// Guard's "not financial" drop is never waived for a user sender, and a
+  /// message that does not parse into a transaction is dropped, never put
+  /// in the review queue.
+  inboxScanPersonal,
+
   /// Share, paste or OCR text after the user confirmed it (§11): skips the
   /// Guard, is stored user-verified, and is never merged automatically.
   userConfirmed;
