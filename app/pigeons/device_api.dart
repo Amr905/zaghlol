@@ -17,8 +17,45 @@ import 'package:pigeon/pigeon.dart';
     swiftOptions: SwiftOptions(errorClassName: 'DeviceApiError'),
   ),
 )
+/// How one native unlock prompt ended (T-103). Never carries platform text.
+enum NativeAuthOutcome {
+  success,
+
+  /// The check ran and the user did not pass it.
+  failed,
+
+  /// The user or the system dismissed the prompt.
+  cancelled,
+
+  /// No screen lock set, or no usable biometric hardware / UI.
+  notAvailable,
+
+  /// Too many wrong tries; the OS blocks the prompt for a while.
+  lockedOut,
+}
+
 @HostApi()
-abstract class DeviceSecurityHostApi {}
+abstract class DeviceSecurityHostApi {
+  /// FR-SEC-07 heuristic: true when the device looks rooted (Android) or
+  /// jailbroken (iOS). Best effort, trivially bypassable; it only drives a
+  /// warning and never blocks anything.
+  bool isDeviceRooted();
+
+  /// FR-SEC-02 (T-103): true hides the app in the OS app switcher and blocks
+  /// screenshots (Android FLAG_SECURE + recents screenshot off; iOS cover view
+  /// while the scene is not active). false restores normal behaviour.
+  void setSecureWindow(bool secure);
+
+  /// True when the device has a passcode / PIN / pattern set (the fallback the
+  /// app lock needs).
+  bool isDeviceSecure();
+
+  /// FR-SEC-01: shows the OS unlock prompt (biometric with the device passcode
+  /// as the fallback, A-08) and reports how it ended. Replaces the `local_auth`
+  /// plugin. Never throws for a failed or dismissed prompt.
+  @async
+  NativeAuthOutcome authenticate(String reason);
+}
 
 @HostApi()
 abstract class WidgetBridgeHostApi {}

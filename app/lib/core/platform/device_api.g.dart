@@ -34,6 +34,23 @@ Object? _extractReplyValueOrThrow(
   return replyList.firstOrNull;
 }
 
+/// How one native unlock prompt ended (T-103). Never carries platform text.
+enum NativeAuthOutcome {
+  success,
+
+  /// The check ran and the user did not pass it.
+  failed,
+
+  /// The user or the system dismissed the prompt.
+  cancelled,
+
+  /// No screen lock set, or no usable biometric hardware / UI.
+  notAvailable,
+
+  /// Too many wrong tries; the OS blocks the prompt for a while.
+  lockedOut,
+}
+
 class _PigeonCodec extends StandardMessageCodec {
   const _PigeonCodec();
   @override
@@ -41,6 +58,9 @@ class _PigeonCodec extends StandardMessageCodec {
     if (value is int) {
       buffer.putUint8(4);
       buffer.putInt64(value);
+    } else if (value is NativeAuthOutcome) {
+      buffer.putUint8(129);
+      writeValue(buffer, value.index);
     } else {
       super.writeValue(buffer, value);
     }
@@ -49,6 +69,9 @@ class _PigeonCodec extends StandardMessageCodec {
   @override
   Object? readValueOfType(int type, ReadBuffer buffer) {
     switch (type) {
+      case 129:
+        final value = readValue(buffer) as int?;
+        return value == null ? null : NativeAuthOutcome.values[value];
       default:
         return super.readValueOfType(type, buffer);
     }
@@ -71,6 +94,96 @@ class DeviceSecurityHostApi {
   static const MessageCodec<Object?> pigeonChannelCodec = _PigeonCodec();
 
   final String pigeonVar_messageChannelSuffix;
+
+  /// FR-SEC-07 heuristic: true when the device looks rooted (Android) or
+  /// jailbroken (iOS). Best effort, trivially bypassable; it only drives a
+  /// warning and never blocks anything.
+  Future<bool> isDeviceRooted() async {
+    final pigeonVar_channelName =
+        'dev.flutter.pigeon.zaghlol.DeviceSecurityHostApi.isDeviceRooted$pigeonVar_messageChannelSuffix';
+    final pigeonVar_channel = BasicMessageChannel<Object?>(
+      pigeonVar_channelName,
+      pigeonChannelCodec,
+      binaryMessenger: pigeonVar_binaryMessenger,
+    );
+    final Future<Object?> pigeonVar_sendFuture = pigeonVar_channel.send(null);
+    final pigeonVar_replyList = await pigeonVar_sendFuture as List<Object?>?;
+
+    final Object? pigeonVar_replyValue = _extractReplyValueOrThrow(
+      pigeonVar_replyList,
+      pigeonVar_channelName,
+      isNullValid: false,
+    );
+    return pigeonVar_replyValue! as bool;
+  }
+
+  /// FR-SEC-02 (T-103): true hides the app in the OS app switcher and blocks
+  /// screenshots (Android FLAG_SECURE + recents screenshot off; iOS cover view
+  /// while the scene is not active). false restores normal behaviour.
+  Future<void> setSecureWindow(bool secure) async {
+    final pigeonVar_channelName =
+        'dev.flutter.pigeon.zaghlol.DeviceSecurityHostApi.setSecureWindow$pigeonVar_messageChannelSuffix';
+    final pigeonVar_channel = BasicMessageChannel<Object?>(
+      pigeonVar_channelName,
+      pigeonChannelCodec,
+      binaryMessenger: pigeonVar_binaryMessenger,
+    );
+    final Future<Object?> pigeonVar_sendFuture = pigeonVar_channel.send(
+      <Object?>[secure],
+    );
+    final pigeonVar_replyList = await pigeonVar_sendFuture as List<Object?>?;
+
+    _extractReplyValueOrThrow(
+      pigeonVar_replyList,
+      pigeonVar_channelName,
+      isNullValid: true,
+    );
+  }
+
+  /// True when the device has a passcode / PIN / pattern set (the fallback the
+  /// app lock needs).
+  Future<bool> isDeviceSecure() async {
+    final pigeonVar_channelName =
+        'dev.flutter.pigeon.zaghlol.DeviceSecurityHostApi.isDeviceSecure$pigeonVar_messageChannelSuffix';
+    final pigeonVar_channel = BasicMessageChannel<Object?>(
+      pigeonVar_channelName,
+      pigeonChannelCodec,
+      binaryMessenger: pigeonVar_binaryMessenger,
+    );
+    final Future<Object?> pigeonVar_sendFuture = pigeonVar_channel.send(null);
+    final pigeonVar_replyList = await pigeonVar_sendFuture as List<Object?>?;
+
+    final Object? pigeonVar_replyValue = _extractReplyValueOrThrow(
+      pigeonVar_replyList,
+      pigeonVar_channelName,
+      isNullValid: false,
+    );
+    return pigeonVar_replyValue! as bool;
+  }
+
+  /// FR-SEC-01: shows the OS unlock prompt (biometric with the device passcode
+  /// as the fallback, A-08) and reports how it ended. Replaces the `local_auth`
+  /// plugin. Never throws for a failed or dismissed prompt.
+  Future<NativeAuthOutcome> authenticate(String reason) async {
+    final pigeonVar_channelName =
+        'dev.flutter.pigeon.zaghlol.DeviceSecurityHostApi.authenticate$pigeonVar_messageChannelSuffix';
+    final pigeonVar_channel = BasicMessageChannel<Object?>(
+      pigeonVar_channelName,
+      pigeonChannelCodec,
+      binaryMessenger: pigeonVar_binaryMessenger,
+    );
+    final Future<Object?> pigeonVar_sendFuture = pigeonVar_channel.send(
+      <Object?>[reason],
+    );
+    final pigeonVar_replyList = await pigeonVar_sendFuture as List<Object?>?;
+
+    final Object? pigeonVar_replyValue = _extractReplyValueOrThrow(
+      pigeonVar_replyList,
+      pigeonVar_channelName,
+      isNullValid: false,
+    );
+    return pigeonVar_replyValue! as NativeAuthOutcome;
+  }
 }
 
 class WidgetBridgeHostApi {
