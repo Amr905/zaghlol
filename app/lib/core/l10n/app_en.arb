@@ -1,5 +1,22 @@
 {
   "@@locale": "en",
   "appName": "Zaghlol",
-  "@appName": { "description": "Brand name, shown as the app title." }
+  "@appName": {
+    "description": "Brand name, shown as the app title."
+  },
+  "commonNavHome": "Home",
+  "commonNavInsights": "Insights",
+  "commonNavMoney": "Money",
+  "commonNavZaghlol": "Zaghlol",
+  "commonNavAddA11y": "Quick add",
+  "homeQuickAddTitle": "What do you want to add?",
+  "homeQuickAddSay": "Say",
+  "homeQuickAddType": "Type",
+  "homeQuickAddScan": "Scan",
+  "homeQuickAddAsset": "Asset",
+  "homeQuickAddSayA11y": "Tell Zaghlol",
+  "homeQuickAddTypeA11y": "Type a transaction",
+  "homeQuickAddScanA11y": "Scan a screenshot",
+  "homeQuickAddAssetA11y": "Add an asset",
+  "ingestionReviewTitle": "Needs your review 👀"
 }

@@ -33,6 +33,8 @@ const Duration undoWindow = Duration(hours: 24);
 /// `BULK_NOT_FOUND`: some id is not a live transaction (nothing changed).
 /// `BULK_CATEGORY_UNAVAILABLE`: category missing or archived.
 /// `BULK_ACCOUNT_NOT_FOUND`: target account missing.
+/// `BULK_PAIRED`: an account move includes a transaction paired as an own-
+/// account transfer; unlink it first (FU-114 77-3, T-089).
 /// `BULK_UNDO_NOT_FOUND`: unknown or already used batch.
 /// `BULK_UNDO_EXPIRED`: older than [undoWindow]; the batch is kept.
 /// `BULK_UNDO_CORRUPT`: the stored before-image is unreadable; the batch is
@@ -44,6 +46,7 @@ final class BulkEditException extends SafeException {
   static const String notFound = 'BULK_NOT_FOUND';
   static const String categoryUnavailable = 'BULK_CATEGORY_UNAVAILABLE';
   static const String accountNotFound = 'BULK_ACCOUNT_NOT_FOUND';
+  static const String paired = 'BULK_PAIRED';
   static const String undoNotFound = 'BULK_UNDO_NOT_FOUND';
   static const String undoExpired = 'BULK_UNDO_EXPIRED';
   static const String undoCorrupt = 'BULK_UNDO_CORRUPT';
@@ -64,8 +67,8 @@ final class SetCategory extends BulkChange {
   final bool alwaysUseForMerchants;
 }
 
-/// Moves the rows to another account. Amounts and currencies are unchanged;
-/// internal-transfer pairing is not recomputed.
+/// Moves the rows to another account. Amounts and currencies are unchanged.
+/// Rows paired as an own-account transfer are refused (`BULK_PAIRED`).
 final class SetAccount extends BulkChange {
   const SetAccount(this.accountId);
   final String accountId;
@@ -253,6 +256,12 @@ class BulkEditUseCase {
           if (accountId.isEmpty) _invalid();
           if (await _accounts.byId(accountId) == null) {
             throw BulkEditException(BulkEditException.accountNotFound);
+          }
+          // A paired leg stays internal with its pair ids; moving it could
+          // leave a "transfer" inside one account or a stale pair. Refuse
+          // the whole batch (nothing changed yet) instead of guessing.
+          if (rows.any((r) => r.transferPairId != null)) {
+            throw BulkEditException(BulkEditException.paired);
           }
           image['kind'] = 'account';
           image['to'] = accountId;

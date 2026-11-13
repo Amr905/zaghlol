@@ -103,6 +103,96 @@ abstract class AppLocalizations {
   /// In ar, this message translates to:
   /// **'زغلول'**
   String get appName;
+
+  /// No description provided for @commonNavHome.
+  ///
+  /// In ar, this message translates to:
+  /// **'الرئيسية'**
+  String get commonNavHome;
+
+  /// No description provided for @commonNavInsights.
+  ///
+  /// In ar, this message translates to:
+  /// **'الحسبة'**
+  String get commonNavInsights;
+
+  /// No description provided for @commonNavMoney.
+  ///
+  /// In ar, this message translates to:
+  /// **'فلوسي'**
+  String get commonNavMoney;
+
+  /// No description provided for @commonNavZaghlol.
+  ///
+  /// In ar, this message translates to:
+  /// **'زغلول'**
+  String get commonNavZaghlol;
+
+  /// No description provided for @commonNavAddA11y.
+  ///
+  /// In ar, this message translates to:
+  /// **'سجّل بسرعة'**
+  String get commonNavAddA11y;
+
+  /// No description provided for @homeQuickAddTitle.
+  ///
+  /// In ar, this message translates to:
+  /// **'عايز تسجل إيه؟'**
+  String get homeQuickAddTitle;
+
+  /// No description provided for @homeQuickAddSay.
+  ///
+  /// In ar, this message translates to:
+  /// **'قول'**
+  String get homeQuickAddSay;
+
+  /// No description provided for @homeQuickAddType.
+  ///
+  /// In ar, this message translates to:
+  /// **'اكتب'**
+  String get homeQuickAddType;
+
+  /// No description provided for @homeQuickAddScan.
+  ///
+  /// In ar, this message translates to:
+  /// **'صوّر'**
+  String get homeQuickAddScan;
+
+  /// No description provided for @homeQuickAddAsset.
+  ///
+  /// In ar, this message translates to:
+  /// **'أصل'**
+  String get homeQuickAddAsset;
+
+  /// No description provided for @homeQuickAddSayA11y.
+  ///
+  /// In ar, this message translates to:
+  /// **'قول لزغلول'**
+  String get homeQuickAddSayA11y;
+
+  /// No description provided for @homeQuickAddTypeA11y.
+  ///
+  /// In ar, this message translates to:
+  /// **'اكتب حركة'**
+  String get homeQuickAddTypeA11y;
+
+  /// No description provided for @homeQuickAddScanA11y.
+  ///
+  /// In ar, this message translates to:
+  /// **'اقرا سكرين شوت'**
+  String get homeQuickAddScanA11y;
+
+  /// No description provided for @homeQuickAddAssetA11y.
+  ///
+  /// In ar, this message translates to:
+  /// **'ضيف أصل'**
+  String get homeQuickAddAssetA11y;
+
+  /// No description provided for @ingestionReviewTitle.
+  ///
+  /// In ar, this message translates to:
+  /// **'مستني رأيك 👀'**
+  String get ingestionReviewTitle;
 }
 
 class _AppLocalizationsDelegate

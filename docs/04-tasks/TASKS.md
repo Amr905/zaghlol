@@ -61,7 +61,7 @@ Every task file has: ID, description, technical details, dependencies, affected 
 | [T-021](tasks/T-021.md) | Redacting local diagnostic log | US-21-1 | High | Sonnet | flutter-core-engineer | T-019, T-014 | A | 6 | DONE |
 | [T-022](tasks/T-022.md) | Design tokens, Mint Fresh/Jade Night themes and base components | US-02-3 | Medium | Sonnet | flutter-ui-engineer | T-001 | G | 2 | DONE |
 | [T-023](tasks/T-023.md) | Localization scaffold, digits mode and money/date formatting | US-02-2 | Medium | Sonnet | flutter-core-engineer | T-012, T-020 | A | 7 | DONE |
-| [T-024](tasks/T-024.md) | App shell: routing, platform tab bars, Add button, deep links | US-02-3 | Medium | Sonnet | flutter-ui-engineer | T-022, T-023 | G | 8 | TODO |
+| [T-024](tasks/T-024.md) | App shell: routing, platform tab bars, Add button, deep links | US-02-3 | Medium | Sonnet | flutter-ui-engineer | T-022, T-023 | G | 8 | DONE |
 | [T-025](tasks/T-025.md) | Feature flags service (default OFF) | US-13-1 | Medium | Sonnet | flutter-core-engineer | T-019 | A | 6 | DONE |
 | [T-026](tasks/T-026.md) | Copy deck part 1: onboarding, capture, Home, transactions, review, accounts | US-20-1 | High | Opus | ux-designer | — | C | 1 | DONE |
 | [T-027](tasks/T-027.md) | Copy deck part 2: insights, budget, bills, money, chat, voice, roast, explanations | US-20-1 | High | Opus | ux-designer | — | C | 1 | DONE |
@@ -94,7 +94,7 @@ Every task file has: ID, description, technical details, dependencies, affected 
 | [T-049](tasks/T-049.md) | Review queue domain and repository | US-06-2 | Medium | Sonnet | flutter-core-engineer | T-019, T-046 | A | 8 | DONE |
 | [T-050](tasks/T-050.md) | Transactions repository: query, search, CRUD, soft delete | US-06-3 | Medium | Sonnet | flutter-core-engineer | T-017 | A | 6 | DONE |
 | [T-051](tasks/T-051.md) | Payday cycle engine, safe-to-spend, burn line and cycle summaries | US-09-1 | High | Sonnet | flutter-core-engineer | T-012, T-018, T-050 | A | 7 | DONE |
-| [T-052](tasks/T-052.md) | Home read model and persistent card filter | US-10-2 | Medium | Sonnet | flutter-core-engineer | T-051, T-050, T-045, T-049 | A | 9 | TODO |
+| [T-052](tasks/T-052.md) | Home read model and persistent card filter | US-10-2 | Medium | Sonnet | flutter-core-engineer | T-051, T-050, T-045, T-049 | A | 9 | DONE |
 | [T-053](tasks/T-053.md) | ZaghlolAvatar widget with static fallback and reduce-motion | US-10-3 | Medium | Sonnet | flutter-ui-engineer | T-022 | G | 3 | TODO |
 | [T-054](tasks/T-054.md) | Home screen S-10 (iOS and Android variants) | US-10-2 | Medium | Sonnet | flutter-ui-engineer | T-052, T-024, T-029, T-053 | G | 10 | TODO |
 | [T-055](tasks/T-055.md) | Welcome screen S-01 with language toggle and restore entry | US-10-1 | Medium | Sonnet | flutter-ui-engineer | T-024, T-029, T-053 | G | 9 | TODO |
@@ -141,7 +141,7 @@ Every task file has: ID, description, technical details, dependencies, affected 
 |---|---|---|---|---|---|---|---|---|---|
 | [T-087](tasks/T-087.md) | Generate ARB files from copy deck (parts 2–3) | US-02-2 | Low | Haiku | boilerplate-engineer | T-029, T-027, T-028 | C | 9 | TODO |
 | [T-088](tasks/T-088.md) | Produce zaghlol.riv from the vector rig (illustrator) | US-10-3 | Medium | — (human) | external | — | C | 1 | TODO |
-| [T-089](tasks/T-089.md) | Self-transfer pairing, FX conversions and card settlements | US-08-1 | High | Sonnet | flutter-core-engineer | T-046, T-050 | A | 8 | TODO |
+| [T-089](tasks/T-089.md) | Self-transfer pairing, FX conversions and card settlements | US-08-1 | High | Sonnet | flutter-core-engineer | T-046, T-050 | A | 8 | DONE |
 | [T-090](tasks/T-090.md) | Refund matching and offset links | US-08-2 | High | Sonnet | flutter-core-engineer | T-089 | A | 9 | TODO |
 | [T-091](tasks/T-091.md) | Splits and reimbursements with allocation and unassign | US-08-2 | High | Sonnet | flutter-core-engineer | T-090 | A | 10 | TODO |
 | [T-092](tasks/T-092.md) | Reimbursement and cross-currency pair suggestions | US-08-2 | Medium | Sonnet | flutter-core-engineer | T-091, T-049 | A | 11 | TODO |
@@ -212,12 +212,12 @@ Every task file has: ID, description, technical details, dependencies, affected 
 | [T-147](tasks/T-147.md) | Optional sign-in, account screen S-69, sign-out and delete account | US-15-1 | High* | Opus | flutter-core-engineer | T-141, T-144, T-145, T-179, T-183 | A | 10 | TODO |
 | [T-178](tasks/T-178.md) | AttestationHostApi (Play Integrity standard request, App Attest) and release network security config | US-14-1 | High* | Opus | native-platform-engineer | T-004 | D | 3 | TODO |
 | [T-179](tasks/T-179.md) | SeatKeyHostApi (iOS Secure Enclave seat keys) and Dart seat-key service | US-14-1 | High* | Opus | native-platform-engineer | T-004, T-141 | E | 7 | TODO |
-| [T-180](tasks/T-180.md) | TrustedClockHostApi (monotonic clock with sleep, boot reference) on both platforms | US-14-1 | High* | Opus | native-platform-engineer | T-004 | D | 3 | TODO |
+| [T-180](tasks/T-180.md) | TrustedClockHostApi (monotonic clock with sleep, boot reference) on both platforms | US-14-1 | High* | Opus | native-platform-engineer | T-004 | D | 3 | DONE |
 | [T-181](tasks/T-181.md) | Backend attestation verifiers: Play Integrity decode and App Attest attestation/assertion, with fakes | US-14-1 | High* | Opus | backend-engineer | T-122 | B | 3 | DONE |
 | [T-182](tasks/T-182.md) | Backend seat-key proof verifier and keyed hashes (K_seat), with fakes | US-14-1 | High* | Opus | backend-engineer | T-122, T-123 | B | 3 | DONE |
 | [T-183](tasks/T-183.md) | Dart request-binding library: JCS, strict JSON parser, restore and seat-key hashes over shared vectors | US-14-1 | High* | Opus | flutter-core-engineer | T-001, T-014 | A | 3 | DONE |
 | [T-184](tasks/T-184.md) | Seat service: bind, move, same-iPhone rebind with cap, claimants, reclaim and support-move primitive | US-14-1 | High* | Opus | backend-engineer | T-122, T-182 | B | 4 | DONE |
-| [T-185](tasks/T-185.md) | POST /v1/purchases/restore: strict parse, install binding, attestation, seat outcomes and limits | US-14-1 | High* | Opus | backend-engineer | T-132, T-181, T-182, T-184 | B | 6 | TODO |
+| [T-185](tasks/T-185.md) | POST /v1/purchases/restore: strict parse, install binding, attestation, seat outcomes and limits | US-14-1 | High* | Opus | backend-engineer | T-132, T-181, T-182, T-184 | B | 6 | DONE |
 | [T-186](tasks/T-186.md) | Support seat:move, purchase:detach and purchase:unfreeze endpoints with dispute freeze | US-13-2 | High* | Opus | backend-engineer | T-136, T-184, T-130, T-131, T-132 | B | 6 | TODO |
 
 ## M6 — Backup, import/export, OCR, settings & security

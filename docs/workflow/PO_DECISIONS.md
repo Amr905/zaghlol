@@ -38,6 +38,9 @@ T-035 Q1–Q6 (keep with bundled rules; drop OTP+transaction messages, as the re
 | T-141 | The in-repo DTO generator (pinned, regenerated-file check in CI) replaces `openapi-generator-cli`. Production response-signing public keys come from T-140's key service (Lead), no PO action. |
 | T-023 | Negative amounts use ASCII `-`. Non-EGP currencies show their ISO code in Arabic until UX defines symbols. |
 | T-181 Q2 | Play Integrity calls have no separate budget counter: restore's 5/hour and 10/day limits cap them; T-140 adds a Google-quota alert. |
+| T-052 | Safe-to-spend always uses all cards (budgets aren't per card); the card filter changes only spend figures and the feed. |
+| T-185 Q1–Q3 | `movedFromOtherPhone` only when the seat came from another install; the per-purchase daily limit stays in memory while the API runs as one instance (T-140 go-live check); Android `attestation.seatKeys` → `VALIDATION_FAILED`. |
+| T-089 | A manual unlink is remembered through resolved review items; losing it after the review-history purge is accepted for now. |
 | T-109 | `دينار` keeps the default currency with `ambiguousCurrency`; the voice UI asks. Missing spoken keywords go into the T-059 catalog seed. |
 | Q-44, T-047 Q2, T-047 Q5 | `ux-designer` writes the copy in the voice guide; reviewed in T-058. Placement: Q-44 one-time Welcome line with a "restore" action; missed notifications as a dismissible card in capture settings (and the lowest-priority home banner); rule saved but not yet active as "اتحفظت — هتشتغل خلال ثواني" / "Saved — active in a few seconds". |
 
@@ -76,6 +79,7 @@ T-035 Q1–Q6 (keep with bundled rules; drop OTP+transaction messages, as the re
 | FU-044 | The four IBM Plex Sans Arabic TTF files. | T-024 |
 | T-088 | `zaghlol.riv` mascot file. | T-099 |
 | T-148 Q2, T-007, T-008 Q1 | Name a reference low-end Android phone (and an iPhone 12), plus a Samsung A-series and a Xiaomi/Redmi with a second SIM for SPK-01. | release timings, SPK-01 |
+| T-180 | Run the trusted-clock device checks in `docs/05-reviews/T-180-device.md` (sleep, Doze, reboot) on one Android phone and one iPhone, before T-144 ships. | T-144 |
 | T-165, T-015, T-060 | Run the device checklists (backup exclusion; StrongBox phone; iPhone reboot and read before unlock; FU-067 steps). | closing those tasks |
 
 ### Housekeeping

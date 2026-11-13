@@ -27,5 +27,14 @@ public static class ErrorCodes
     public const string PurchaseTokenInvalid = "PURCHASE_TOKEN_INVALID";
     public const string PurchaseNotOwned = "PURCHASE_NOT_OWNED";
     public const string PurchaseWrongApp = "PURCHASE_WRONG_APP";
+
+    /// <summary>422 (restore only, T-185): the Play Integrity token or App Attest assertion is missing, invalid, replayed, stale or not bound to this install and body.</summary>
+    public const string DeviceAttestationFailed = "DEVICE_ATTESTATION_FAILED";
+
+    /// <summary>409 (restore only, T-185): every move was refused by the 30-day cooldown and nothing else grants Gold.</summary>
+    public const string MoveCooldown = "MOVE_COOLDOWN";
+
+    /// <summary>400 (restore, T-185): element 0 of <c>seatKeys</c> isn't this install's registered key.</summary>
+    public const string SeatKeyMismatch = "SEAT_KEY_MISMATCH";
     public const string Internal = "INTERNAL";
 }

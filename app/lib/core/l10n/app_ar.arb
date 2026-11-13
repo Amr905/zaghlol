@@ -1,5 +1,22 @@
 {
   "@@locale": "ar",
   "appName": "زغلول",
-  "@appName": { "description": "Brand name, shown as the app title." }
+  "@appName": {
+    "description": "Brand name, shown as the app title."
+  },
+  "commonNavHome": "الرئيسية",
+  "commonNavInsights": "الحسبة",
+  "commonNavMoney": "فلوسي",
+  "commonNavZaghlol": "زغلول",
+  "commonNavAddA11y": "سجّل بسرعة",
+  "homeQuickAddTitle": "عايز تسجل إيه؟",
+  "homeQuickAddSay": "قول",
+  "homeQuickAddType": "اكتب",
+  "homeQuickAddScan": "صوّر",
+  "homeQuickAddAsset": "أصل",
+  "homeQuickAddSayA11y": "قول لزغلول",
+  "homeQuickAddTypeA11y": "اكتب حركة",
+  "homeQuickAddScanA11y": "اقرا سكرين شوت",
+  "homeQuickAddAssetA11y": "ضيف أصل",
+  "ingestionReviewTitle": "مستني رأيك 👀"
 }

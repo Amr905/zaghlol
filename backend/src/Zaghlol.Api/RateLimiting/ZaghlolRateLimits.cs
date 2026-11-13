@@ -62,6 +62,22 @@ public sealed class RateLimitSettings
     /// per-network bucket. A 429 is redelivered by Pub/Sub.
     /// </summary>
     public TokenBucketSettings GoogleNotifications { get; set; } = new() { TokenLimit = 1200, TokensPerPeriod = 1200, PeriodSeconds = 60 };
+
+    /// <summary>
+    /// <c>POST /v1/purchases/restore</c> per install (the token may rotate, the install doesn't), in addition to <see cref="PerToken"/> (T-185): at most
+    /// <see cref="RestorePerHour"/> calls in a sliding hour (6 segments).
+    /// </summary>
+    public int RestorePerHour { get; set; } = 5;
+}
+
+/// <summary>Endpoint metadata: this endpoint also draws on the per-install restore bucket (5 an hour).</summary>
+internal sealed class RestoreRateLimitMetadata
+{
+    public static readonly RestoreRateLimitMetadata Instance = new();
+
+    private RestoreRateLimitMetadata()
+    {
+    }
 }
 
 /// <summary>Endpoint metadata: this endpoint uses the <c>notifications-apple</c> per-network bucket instead of the general one.</summary>
@@ -154,8 +170,21 @@ internal sealed class ZaghlolRateLimiters : IDisposable
                 ? RateLimitPartition.GetTokenBucketLimiter("lookup:" + lookupOperator, _ => limits.SupportLookup.ToOptions())
                 : RateLimitPartition.GetNoLimiter(string.Empty));
 
-        // The stricter lookup bucket first, so a refused lookup doesn't also drain the operator's general bucket.
-        token = PartitionedRateLimiter.CreateChained(supportLookup, perToken);
+        var restore = PartitionedRateLimiter.Create<HttpContext, string>(context =>
+            context.GetEndpoint()?.Metadata.GetMetadata<RestoreRateLimitMetadata>() is not null
+            && context.User.FindFirst(InstallTokenAuthentication.InstallIdClaim)?.Value is { } restoreKey
+                ? RateLimitPartition.GetSlidingWindowLimiter("restore:" + restoreKey, _ => new SlidingWindowRateLimiterOptions
+                {
+                    PermitLimit = limits.RestorePerHour,
+                    Window = TimeSpan.FromHours(1),
+                    SegmentsPerWindow = 6,
+                    QueueLimit = 0,
+                    AutoReplenishment = true,
+                })
+                : RateLimitPartition.GetNoLimiter(string.Empty));
+
+        // The stricter buckets first (restore, then lookup), so a refused call doesn't also drain the general bucket.
+        token = PartitionedRateLimiter.CreateChained(restore, supportLookup, perToken);
 
         PerNetwork = CreateOptions(network, NetworkBucket);
         PerToken = CreateOptions(token, TokenBucket);

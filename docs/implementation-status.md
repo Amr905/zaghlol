@@ -18,12 +18,12 @@
 ## Summary
 | Milestone | Total | DONE | IN_PROGRESS | BLOCKED |
 |---|---|---|---|---|
-| M0 | 28 | 23 | 1 | 0 |
-| M1 | 29 | 17 | 0 | 1 |
+| M0 | 28 | 24 | 1 | 0 |
+| M1 | 29 | 18 | 0 | 1 |
 | M2 | 29 | 5 | 0 | 0 |
-| M3 | 18 | 0 | 0 | 0 |
+| M3 | 18 | 1 | 0 | 0 |
 | M4 | 17 | 3 | 0 | 0 |
-| M5 | 35 | 20 | 1 | 1 |
+| M5 | 35 | 22 | 1 | 1 |
 | M6 | 19 | 1 | 1 | 2 |
 | M7 | 11 | 0 | 0 | 0 |
 
@@ -53,7 +53,7 @@
 | T-021 | Redacting local diagnostic log | M0 | C3 | Sonnet | flutter-core-engineer | T-019, T-014 | DONE | batch 9 review [batch-9](05-reviews/batch-9.md) APPROVED after fix 21-1 (Lead delta check) | Batch 9. FU-113 |
 | T-022 | Design tokens, Mint Fresh/Jade Night themes and base components | M0 | C2 | Sonnet | flutter-ui-engineer | T-001 | DONE | app-ci 42506573523 (13/13); PR #9 squash-merged; review [T-022](05-reviews/T-022.md) APPROVED | Goldens use Ahem until IBM Plex Sans Arabic is bundled. FU-044…FU-047 |
 | T-023 | Localization scaffold, digits mode and money/date formatting | M0 | C2 | Sonnet | flutter-core-engineer | T-012, T-020 | DONE | batch 10 review [batch-10](05-reviews/batch-10.md) APPROVED | Batch 10. FU-119 |
-| T-024 | App shell: routing, platform tab bars, Add button, deep links | M0 | C2 | Sonnet | flutter-ui-engineer | T-022, T-023 | TODO | — |  |
+| T-024 | App shell: routing, platform tab bars, Add button, deep links | M0 | C2 | Sonnet | flutter-ui-engineer | T-022, T-023 | DONE | batch 12 review [batch-12](05-reviews/batch-12.md) APPROVED | Batch 12. FU-125 |
 | T-025 | Feature flags service (default OFF) | M0 | C2 | Sonnet | flutter-core-engineer | T-019 | DONE | batch 6 local: every app-ci step green (app tests, packages, lints, Pigeon/drift stale checks, no-logging grep), backend Release build 0 warnings, format clean, no vulnerable packages; batch CI (`batch/2026-11-11-5`); review [T-025](05-reviews/T-025.md) APPROVED | Batch 6. maxAge 14 days provisional (PO). FU-103 |
 | T-026 | Copy deck part 1: onboarding, capture, Home, transactions, review, accounts | M0 | C3 | Opus | ux-designer | — | DONE | task/T-026-copy-deck-1 @ fc404b7; merged to main | Code APPROVED, tests SUFFICIENT (round 2). Minors carried to T-029; R2-4 to UX (S-40 hidden-accounts row) |
 | T-027 | Copy deck part 2: insights, budget, bills, money, chat, voice, roast, explanations | M0 | C3 | Sonnet | ux-designer | — | DONE | task/T-027-copy-deck-2 @ 3305da5; copy_deck_check.py 0 errors (1,188 keys); review [T-027](05-reviews/T-027.md) APPROVED | Docs-only review (one Sonnet reviewer). Open copy questions Q-19…Q-29; FU-027, FU-028 |
@@ -81,7 +81,7 @@
 | T-049 | Review queue domain and repository | M1 | C2 | Sonnet | flutter-core-engineer | T-019, T-046 | DONE | batch 11 review [batch-11](05-reviews/batch-11.md) APPROVED after fix 049-1 | Batch 11. FU-122 |
 | T-050 | Transactions repository: query, search, CRUD, soft delete | M1 | C2 | Sonnet | flutter-core-engineer | T-017 | DONE | local PASS (745 app tests; 50k search p95 ~57 ms); batch CI; review [T-050](05-reviews/T-050.md) APPROVED | Batch 3. Soft delete keeps offset links; activeLinked* for net spend |
 | T-051 | Payday cycle engine, safe-to-spend, burn line and cycle summaries | M1 | C3 | Sonnet | flutter-core-engineer | T-012, T-018, T-050 | DONE | batch 8 local: every app-ci step green; batch CI (`batch/2026-11-11-7`); review [T-051](05-reviews/T-051.md) APPROVED (hand-checked EGP and KWD cases; floor→ceil negative proof re-run) | Batch 8. `cycleKeys` now ISO cycle start date. PO Q1–Q5 provisional. FU-110 |
-| T-052 | Home read model and persistent card filter | M1 | C2 | Sonnet | flutter-core-engineer | T-051, T-050, T-045, T-049 | TODO | — |  |
+| T-052 | Home read model and persistent card filter | M1 | C2 | Sonnet | flutter-core-engineer | T-051, T-050, T-045, T-049 | DONE | batch 12 review [batch-12](05-reviews/batch-12.md) APPROVED after fix (safe-to-spend all cards) | Batch 12. FU-126 |
 | T-053 | ZaghlolAvatar widget with static fallback and reduce-motion | M1 | C2 | Sonnet | flutter-ui-engineer | T-022 | TODO | — |  |
 | T-054 | Home screen S-10 (iOS and Android variants) | M1 | C2 | Sonnet | flutter-ui-engineer | T-052, T-024, T-029, T-053 | TODO | — |  |
 | T-055 | Welcome screen S-01 with language toggle and restore entry | M1 | C2 | Sonnet | flutter-ui-engineer | T-024, T-029, T-053 | TODO | — |  |
@@ -118,7 +118,7 @@
 | T-086 | Capture settings S-61 and card capture sheet S-62 | M2 | C2 | Sonnet | flutter-ui-engineer | T-078, T-029 | TODO | — |  |
 | T-087 | Generate ARB files from copy deck (parts 2–3) | M3 | C1 | Haiku | boilerplate-engineer | T-029, T-027, T-028 | TODO | — |  |
 | T-088 | Produce zaghlol.riv from the vector rig (illustrator) | M3 | C2 | human | external | — | TODO | — |  |
-| T-089 | Self-transfer pairing, FX conversions and card settlements | M3 | C3 | Sonnet | flutter-core-engineer | T-046, T-050 | TODO | — |  |
+| T-089 | Self-transfer pairing, FX conversions and card settlements | M3 | C3 | Sonnet | flutter-core-engineer | T-046, T-050 | DONE | batch 12 review [batch-12](05-reviews/batch-12.md) APPROVED after fixes (onRemoved, unlink remembered; delta re-review) | Batch 12. FU-127 |
 | T-090 | Refund matching and offset links | M3 | C3 | Sonnet | flutter-core-engineer | T-089 | TODO | — |  |
 | T-091 | Splits and reimbursements with allocation and unassign | M3 | C3 | Sonnet | flutter-core-engineer | T-090 | TODO | — |  |
 | T-092 | Reimbursement and cross-currency pair suggestions | M3 | C2 | Sonnet | flutter-core-engineer | T-091, T-049 | TODO | — |  |
@@ -209,12 +209,12 @@
 | T-177 | iOS release pipeline, privacy labels and App Review notes | M7 | C3 | Sonnet | flutter-core-engineer | T-172, T-171 | TODO | — |  |
 | T-178 | AttestationHostApi (Play Integrity standard request, App Attest) and release network security config | M5 | C4 | Opus | native-platform-engineer | T-004 | TODO | — | Plan v1.1 (new) |
 | T-179 | SeatKeyHostApi (iOS Secure Enclave seat keys) and Dart seat-key service | M5 | C4 | Opus | native-platform-engineer | T-004, T-141 | TODO | — | Plan v1.1 (new); R-19 device test |
-| T-180 | TrustedClockHostApi (monotonic clock with sleep, boot reference) on both platforms | M5 | C4 | Opus | native-platform-engineer | T-004 | TODO | — | Plan v1.1 (new) |
+| T-180 | TrustedClockHostApi (monotonic clock with sleep, boot reference) on both platforms | M5 | C4 | Opus | native-platform-engineer | T-004 | DONE | batch 12 review [batch-12](05-reviews/batch-12.md) APPROVED; app-ci green on ci/T-180; device tests pending | Plan v1.1 (new) Batch 12. FU-128 |
 | T-181 | Backend attestation verifiers: Play Integrity decode and App Attest attestation/assertion, with fakes | M5 | C4 | Opus | backend-engineer | T-122 | DONE | batch 11 review [batch-11](05-reviews/batch-11.md) APPROVED; backend-ci incl. Testcontainers green on ci/T-181 | Plan v1.1 (new) Batch 11. FU-120 |
 | T-182 | Backend seat-key proof verifier and keyed hashes (K_seat), with fakes | M5 | C4 | Opus | backend-engineer | T-122, T-123 | DONE | reviews T-182 code + security APPROVED (pre-batch-review rules); backend-ci green | Plan v1.1 (new) Batch 9. FU-112 |
 | T-183 | Dart request-binding library: JCS, strict JSON parser, restore and seat-key hashes over shared vectors | M5 | C4 | Opus | flutter-core-engineer | T-001, T-014 | DONE | batch 11 review [batch-11](05-reviews/batch-11.md) APPROVED (183-1 tightened) | Plan v1.1 (new) Batch 11. FU-124 |
 | T-184 | Seat service: bind, move, same-iPhone rebind with cap, claimants, reclaim and support-move primitive | M5 | C4 | Opus | backend-engineer | T-122, T-182 | DONE | batch 9 review [batch-9](05-reviews/batch-9.md) + [security](05-reviews/batch-9-security.md) APPROVED; backend-ci incl. Testcontainers green | Plan v1.1 (new, from T-132) Batch 9. FU-112 |
-| T-185 | POST /v1/purchases/restore: strict parse, install binding, attestation, seat outcomes and limits | M5 | C4 | Opus | backend-engineer | T-132, T-181, T-182, T-184 | TODO | — | Plan v1.1 (new, from T-132) |
+| T-185 | POST /v1/purchases/restore: strict parse, install binding, attestation, seat outcomes and limits | M5 | C4 | Opus | backend-engineer | T-132, T-181, T-182, T-184 | DONE | batch 12 review [batch-12](05-reviews/batch-12.md) APPROVED; backend-ci incl. Testcontainers green on ci/T-185 | Plan v1.1 (new, from T-132) Batch 12. FU-129 |
 | T-186 | Support seat:move, purchase:detach and purchase:unfreeze endpoints with dispute freeze | M5 | C4 | Opus | backend-engineer | T-136, T-184, T-130, T-131, T-132 | TODO | — | Plan v1.1 (new, from T-136); R6-1 |
 
 ## Follow-ups (from reviews)
@@ -349,6 +349,12 @@
 - **FU-123** (T-119 batch-11 review): 119-3 wire `customSmsRegex` Gold checks to `entitlementStateProvider` (fails closed today); 119-4 rename `foreignAssets` → `investmentAssets`; T-144 calls `applyVerified` only after signature + trusted-time checks; T-152 maps "4 core charts" to the real chart set.
 - **FU-124** (T-183 batch-11 review): sign-in client-data hash not built (R5-3 decided (b)); K_seat HMAC hashes stay backend-only.
 
+- **FU-125** (T-024 batch-12 review): add a go_router `errorBuilder` that falls back to Home without printing the location; deep links must pass the app lock once S-05 exists; iOS URL scheme and glass bar checked on a simulator; Zaghlol tab icon is a placeholder until the mascot glyph; "التحليلات" vs "الحسبة" in 03-navigation.md (copy deck wins).
+- **FU-126** (T-052 batch-12 review): persist the last-foreground time so the first resume doesn't sweep from 0; persist the card filter across restarts (not in AC); review count stays global; `onResume` errors are swallowed in `main.dart` — record a diag code instead once the diag bridge is wired (FU-113).
+- **FU-127** (T-089 batch-12 reviews): **the transaction delete path (T-077/T-079/T-090) must call `TransferPairing.onRemoved`, and the 30-day hard purge too**; the `_evaluate` heal path publishes no `TransactionsChanged` when nothing re-pairs (stale cache); the unlink memory lives in resolved review items and is lost when `purgeResolvedBefore` drops them (accepted; a permanent marker needs a schema change); wire `onPersisted` into ingest and edit paths with a resume sweep; `bulk_edit.dart` still has its own offset-link logic.
+- **FU-128** (T-180 batch-12 review): **real-device sleep/Doze/reboot tests (`docs/05-reviews/T-180-device.md`) before T-144 ships** — added to the PO device list; Android `bootCount` may be null (T-144 uses the monotonic-drop rule); a headless engine that needs the clock must register it.
+- **FU-129** (T-185 batch-12 review): the 10/day per-purchase limit is in process memory — fine for one instance; **T-140 go-live check: move it to a shared table before running more than one API instance**; `movedFromOtherPhone` is true only when the seat came from another install (Lead); Android `attestation.seatKeys` returns `VALIDATION_FAILED`; other minors in the report.
+
 ## Log
 | Date | Event |
 |---|---|
@@ -414,3 +420,4 @@
 | 2026-11-12 | Batch 9 (`batch/2026-11-11-9`), first batch under the one-review-round workflow: T-021, T-040, T-047, T-077, T-182, T-184 DONE. FU-111…FU-114. Progress 60/186. |
 | 2026-11-13 | Batch 10 (`batch/2026-11-13-10`), first batch under the cost rules: T-023, T-043, T-109, T-132, T-141 DONE. FU-115…FU-119. Progress 65/186. |
 | 2026-11-13 | Batch 11 (`batch/2026-11-13-11`): T-048, T-049, T-119, T-181, T-183 DONE. FU-120…FU-124. Progress 70/186. |
+| 2026-11-13 | Batch 12 (`batch/2026-11-13-12`): T-024, T-052, T-089, T-180, T-185 DONE. FU-125…FU-129. Progress 75/186. |
