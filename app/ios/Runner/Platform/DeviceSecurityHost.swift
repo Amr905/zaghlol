@@ -66,12 +66,40 @@ final class PrivacyCover {
   private(set) var enabled = false
   private var coverViews: [UIView] = []
 
+  private var observers: [NSObjectProtocol] = []
+
   func setEnabled(_ on: Bool) {
     enabled = on
-    if !on { remove() }
+    if on {
+      startObserving()
+    } else {
+      stopObserving()
+      remove()
+    }
   }
 
-  /// Called from `sceneWillResignActive`.
+  /// Observes scene notifications instead of overriding `FlutterSceneDelegate`
+  /// methods, so Flutter's own lifecycle forwarding is untouched.
+  private func startObserving() {
+    guard observers.isEmpty else { return }
+    let center = NotificationCenter.default
+    observers.append(
+      center.addObserver(forName: UIScene.willDeactivateNotification, object: nil, queue: .main) {
+        [weak self] note in
+        if let scene = note.object as? UIScene { self?.show(in: scene) }
+      })
+    observers.append(
+      center.addObserver(forName: UIScene.didActivateNotification, object: nil, queue: .main) {
+        [weak self] _ in self?.remove()
+      })
+  }
+
+  private func stopObserving() {
+    observers.forEach { NotificationCenter.default.removeObserver($0) }
+    observers.removeAll()
+  }
+
+  /// Called when the scene is about to deactivate.
   func show(in scene: UIScene) {
     guard enabled, coverViews.isEmpty, let windowScene = scene as? UIWindowScene else { return }
     for window in windowScene.windows {
@@ -84,7 +112,7 @@ final class PrivacyCover {
     }
   }
 
-  /// Called from `sceneDidBecomeActive`.
+  /// Called when the scene becomes active again.
   func remove() {
     coverViews.forEach { $0.removeFromSuperview() }
     coverViews.removeAll()
