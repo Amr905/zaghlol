@@ -1,6 +1,5 @@
 // T-147: S-69 in ar and en, RTL, text scale 1.3. Fake actions; no plugin.
 
-
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
