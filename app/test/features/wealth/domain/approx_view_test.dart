@@ -86,6 +86,13 @@ void main() {
       expect(v.excluded, [jpy, sar]);
     });
 
+    test('target-only figure with an excluded currency is labelled ≈', () {
+      final v = on(build([Money(egp, 1000), Money(jpy, 5000)], []));
+      expect(v.excluded, [jpy]);
+      expect(v.figure!.amount, Money(egp, 1000));
+      expect(v.approximate, isTrue);
+    });
+
     test('a zero total needs no rate and is not listed', () {
       final v = on(build([Money(egp, 700), Money.zero(jpy)], []));
       expect(v.excluded, isEmpty);

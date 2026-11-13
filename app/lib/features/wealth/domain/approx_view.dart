@@ -62,8 +62,9 @@ final class ApproxViewOn extends ApproxView {
   /// Any rate used is stale (EC-34).
   final bool stale;
 
-  /// True when at least one currency was converted. When false the figure
-  /// is exact (target currency only) and needs no "≈" label.
+  /// True when at least one currency was converted, or when any currency is
+  /// [excluded] (the figure is then partial). When false the figure is the
+  /// exact target-currency total and needs no "≈" label.
   final bool approximate;
 }
 
@@ -117,6 +118,6 @@ ApproxView buildApproxView({
     excluded: excluded,
     rateAsOfMs: oldest,
     stale: stale,
-    approximate: approximate,
+    approximate: approximate || excluded.isNotEmpty,
   );
 }
