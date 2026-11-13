@@ -42,6 +42,3 @@ class ClockSample {
   /// Android Settings.Global.BOOT_COUNT; iOS null (no public boot identifier).
   int? bootCount;
 }
-
-@HostApi()
-abstract class SeatKeyHostApi {}
