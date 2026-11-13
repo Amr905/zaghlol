@@ -74,10 +74,12 @@ class DeviceSecurityHostTest {
 
   @Test
   fun weakAuthenticatorsBelowApi30() {
-    val a = androidx.biometric.BiometricManager.Authenticators
-    assertEquals(a.BIOMETRIC_STRONG or a.DEVICE_CREDENTIAL, BiometricOutcomes.authenticators(30))
-    assertEquals(a.BIOMETRIC_WEAK or a.DEVICE_CREDENTIAL, BiometricOutcomes.authenticators(29))
-    assertEquals(a.BIOMETRIC_WEAK or a.DEVICE_CREDENTIAL, BiometricOutcomes.authenticators(26))
+    val strong = androidx.biometric.BiometricManager.Authenticators.BIOMETRIC_STRONG
+    val weak = androidx.biometric.BiometricManager.Authenticators.BIOMETRIC_WEAK
+    val cred = androidx.biometric.BiometricManager.Authenticators.DEVICE_CREDENTIAL
+    assertEquals(strong or cred, BiometricOutcomes.authenticators(30))
+    assertEquals(weak or cred, BiometricOutcomes.authenticators(29))
+    assertEquals(weak or cred, BiometricOutcomes.authenticators(26))
   }
 
   @After
