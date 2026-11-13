@@ -429,6 +429,19 @@ jobs:
               exit 1
             fi
           done
+          # T-009 (SPK-03 spike): App Intent perform() -> headless engine, and the spool fallback.
+          # Metrics lines are numbers only (no message text).
+          for t in testSpoolEntryIsEncryptedAndAckDeletesIt testHeadlessEngineProcessesAMessageAndAcks \
+            testIntentPerformPathRunsEndToEnd testHoldKeepsTheEngineBusyAndStillAnswers \
+            testFailedEngineLeavesTheEntryAndForegroundDrainProcessesIt; do
+            if ! grep -qiE "IosIntentSpikeTests.*$t" xcodebuild.log || grep -qiE "test case.*IosIntentSpikeTests.*$t.*failed" xcodebuild.log; then
+              echo "::error::IosIntentSpikeTests.$t did not pass"
+              grep -iE "IosIntentSpikeTests" xcodebuild.log | head -n 30
+              exit 1
+            fi
+          done
+          xcrun simctl list runtimes | grep -i ios || true
+          grep -h "SPIKE_METRICS" xcodebuild.log || true
 
   android:
     name: android ${{ matrix.flavor }} (${{ matrix.mode }})
