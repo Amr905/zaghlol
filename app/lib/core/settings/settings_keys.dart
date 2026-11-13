@@ -170,6 +170,14 @@ abstract final class Settings {
   /// FR-ONB-11: the setup steps (slugs) the user finished or skipped.
   static final setupProgress = SettingKey.slugSet('setup_progress');
 
+  /// T-104: the civil day (epoch days) Home first ran; the A-65 "7 days"
+  /// backup suggestion counts from it. Null until first written.
+  static final setupInstalledOn = SettingKey.optionalInteger(
+    'setup_installed_on',
+    min: 0,
+    max: 999999,
+  );
+
   /// T-097 (FR-ONB-10, D-21): contextual setup suggestions already shown or
   /// dismissed. Each one is offered once and never again.
   static final setupSuggestionsHandled = SettingKey.slugSet(
