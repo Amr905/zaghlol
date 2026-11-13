@@ -358,6 +358,41 @@ final class BackupCipher {
     }
   }
 
+  /// T-149 (restore step 8): after the restored database (which already
+  /// carries [keys]' slot) is swapped in, store the restored K_bk so
+  /// automatic backups continue without the passphrase. Under the lease: the
+  /// stored slot must be [keys]' slot (ownership check); an equal stored key
+  /// is kept; any other is replaced (it pairs with no slot any more).
+  /// Throws keyMismatch (the slot is not the restored one) or keyUnavailable.
+  /// A crash before this completes leaves slot ≠ secret: loadKeys reports
+  /// keyMismatch and recoverWithPassphrase repairs it.
+  Future<void> storeRestoredKey(BackupKeys keys) => _withLease((lease) async {
+    final current = await _readSlot();
+    if (current == null || !current.sameAs(keys.slot)) {
+      throw BackupCryptoException(BackupCryptoErrorCode.keyMismatch);
+    }
+    final read = await _guardStore(() => _store.read(SecretSlot.backupKey));
+    switch (read.status) {
+      case SecretStatus.found:
+        final value = read.value!;
+        final existing = SecretBytes.copyOf(value);
+        wipe(value);
+        final same = keys.sameKeyAs(existing);
+        existing.zeroize();
+        if (same) return;
+        await _ensureLease(lease);
+        await _guardStore(() => _store.delete(lease, SecretSlot.backupKey));
+      case SecretStatus.unusable:
+        await _ensureLease(lease);
+        await _guardStore(() => _store.delete(lease, SecretSlot.backupKey));
+      case SecretStatus.notFound:
+        break;
+      case SecretStatus.unavailable:
+        throw BackupCryptoException(BackupCryptoErrorCode.keyUnavailable);
+    }
+    await _storeSecret(lease, keys);
+  });
+
   Future<BackupKeys> _unlockSlot(KeySlot slot, String passphrase) async {
     if (!slot.kdf.withinBounds) {
       throw BackupCryptoException(BackupCryptoErrorCode.unsupportedKdf);
@@ -463,7 +498,12 @@ final class BackupCipher {
 
   // -------------------------------------------------------------- format
 
-  /// Encrypts [plaintext] into a v1 file (design note §6). [meta.seq] is the
+  /// A fresh random file id (T-149: chosen before [encrypt] so the snapshot
+  /// key `K_snap = HKDF(K_bk, fileId)` exists before the header is written).
+  Uint8List newFileId() => _random.bytes(fileIdLength);
+
+  /// Encrypts [plaintext] into a v1 file (design note §6). [fileId]: from
+  /// [newFileId] when the caller needs K_snap first (T-149); else fresh. [meta.seq] is the
   /// stored counter + 1 (T-150 persists it after the upload). Errors end the
   /// stream with a BackupCryptoException; the caller deletes partial output.
   Stream<List<int>> encrypt(
@@ -471,12 +511,16 @@ final class BackupCipher {
     HeaderMeta meta,
     Stream<List<int>> plaintext, {
     int chunkSize = defaultChunkSize,
+    Uint8List? fileId,
   }) {
     final BackupHeader header;
     try {
+      if (fileId != null && fileId.length != fileIdLength) {
+        throw ArgumentError('FILE_ID_LENGTH');
+      }
       header = BackupHeader(
         slot: keys.slot,
-        fileId: _random.bytes(fileIdLength),
+        fileId: fileId ?? newFileId(),
         noncePrefix: _random.bytes(noncePrefixLength),
         chunkSize: chunkSize,
         createdAtMs: _clock().toUtc().millisecondsSinceEpoch,
