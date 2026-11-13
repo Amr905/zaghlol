@@ -22,6 +22,7 @@ class TabRoots {
     this.money = _blank,
     this.zaghlol = _blank,
     this.review = _reviewPlaceholder,
+    this.transactions = _blank,
   });
 
   final WidgetBuilder home;
@@ -31,6 +32,9 @@ class TabRoots {
 
   /// S-14 Review queue.
   final WidgetBuilder review;
+
+  /// S-11 Transactions list (T-079 supplies `TransactionsListScreen`).
+  final WidgetBuilder transactions;
 }
 
 Widget _blank(BuildContext context) =>
@@ -76,6 +80,10 @@ GoRouter buildAppRouter(TabRoots roots, {String initialLocation = '/home'}) {
                     NoTransitionPage(key: s.pageKey, child: roots.home(c)),
                 routes: [
                   GoRoute(path: 'review', builder: (c, s) => roots.review(c)),
+                  GoRoute(
+                    path: 'transactions',
+                    builder: (c, s) => roots.transactions(c),
+                  ),
                   GoRoute(
                     path: 'add',
                     parentNavigatorKey: rootNavigatorKey,

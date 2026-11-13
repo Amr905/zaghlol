@@ -10,6 +10,9 @@ abstract final class AppRoutes {
   /// S-14 Review queue, inside the Home tab.
   static const review = '/home/review';
 
+  /// S-11 Transactions list, inside the Home tab.
+  static const transactions = '/home/transactions';
+
   /// S-30 Quick add sheet pushed over the current tab (FAB / Add button).
   static const add = '/add';
 
