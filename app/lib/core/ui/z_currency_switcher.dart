@@ -87,8 +87,6 @@ class ZApproxRow extends StatelessWidget {
             key: const Key('approx-stale'),
             style: ZType.caption.copyWith(color: c.textMuted),
           ),
-        // TODO(l10n): accountsOverviewApproxNotIncluded is missing (T-083
-        // task file); the codes alone are shown until it lands.
         if (excludedCodes.isNotEmpty)
           Padding(
             key: const Key('approx-not-included'),
@@ -99,7 +97,9 @@ class ZApproxRow extends StatelessWidget {
                 const SizedBox(width: ZSpacing.xs),
                 Flexible(
                   child: Text(
-                    excludedCodes.join(' · '),
+                    l10n.accountsOverviewApproxNotIncluded(
+                      excludedCodes.join(' · '),
+                    ),
                     style: ZType.caption.copyWith(color: c.textMuted),
                   ),
                 ),
