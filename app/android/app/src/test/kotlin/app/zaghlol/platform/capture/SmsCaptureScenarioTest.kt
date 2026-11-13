@@ -40,7 +40,8 @@ class SmsCaptureScenarioTest {
         assertEquals(GuardConfigState.FULL, host.getSpoolStatus().guardState)
         val s = SmsCaptureScenario
         assertEquals("GuardDrop(not_financial)", decide(s.PERSONAL, s.PERSONAL_BODY).first)
-        assertEquals("GuardDrop(otp_or_promo_global)", decide(s.USER_SENDER, s.OTP_BODY).first)
+        // FU-121: a phone-number user sender must look financial first; the OTP has no amount.
+        assertEquals("GuardDrop(not_financial)", decide(s.USER_SENDER, s.OTP_BODY).first)
         assertEquals("GuardKeep(user)", decide(s.USER_SENDER, s.LONG_BODY).first)
         assertEquals("GuardKeep(user)", decide(s.USER_SENDER, s.SINGLE_BODY).first)
         assertEquals("GuardDrop(ignored_card)", decide(s.REGISTRY_SENDER, s.IGNORED_CARD_BODY).first)
