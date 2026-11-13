@@ -109,7 +109,9 @@ class CaptureSourceScanTest {
         assertEquals(1, actions.length)
         assertEquals("android.service.notification.NotificationListenerService", (actions.item(0) as Element).getAttributeNS(android, "name"))
         // The app declares no permission for notification access (the user grants it in settings).
-        assertFalse(File(src, "main/AndroidManifest.xml").readText().contains("uses-permission"))
+        // The only main-manifest permission is INTERNET (T-141, backend calls).
+        val perms = Regex("""<uses-permission[^>]*android:name="([^"]+)"""").findAll(File(src, "main/AndroidManifest.xml").readText()).map { it.groupValues[1] }.toList()
+        assertEquals(listOf("android.permission.INTERNET"), perms)
     }
 
     @Test
