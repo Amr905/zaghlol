@@ -102,3 +102,19 @@ What was checked:
 | Task | File:line | Required change | Test to add |
 |------|-----------|-----------------|-------------|
 | T-145 | `app/lib/features/gold/application/gold_store.dart:149-153`, `:112-124`; `app/lib/features/gold/application/purchase.dart:283-288` | `complete()` must report "not completed" when it has no live handle (bool or throw), and the service must then keep the entry at `verified`. On Android, `start()` must `queryPastPurchases()` and emit the Gold purchases that aren't acknowledged yet as `purchased`, so a verified or queued entry is acknowledged without a second verify (same key, iOS seat proof not re-signed). Acknowledged purchases must not be emitted. | `purchase_test.dart`: "restart: entry verified with no live handle stays `verified`, is completed when the store redelivers it, with one verify and one Idempotency-Key". The fake store's `complete()` must fail for purchases it never delivered. Also an adapter-level test (fake `InAppPurchase` platform addition) that `start()` emits only unacknowledged past purchases. |
+
+## Delta re-review (fix round)
+
+Commits 734e6ccf (T-110) and e506fa83 (T-145). `flutter test test/features/ask test/features/gold`: 250 passed.
+
+### T-110 Ask balance: APPROVED
+- Debit/credit sum closed: named accounts are keyed per account id and currency, never added; unnamed balance sums asset accounts only. Liability flag and label carried per figure.
+- Unmatched name closed: a loose name bind for "balance of CIB", plus an `unknownTarget` unrecognized result when a leftover token matches no account, so no all-accounts fallback. Fixture and engine tests cover both.
+- No new cross-currency summing, no text logging.
+- FU (minor): the unknownTarget guard may reject balance questions with filler words not in the stop list; watch the utterance corpus.
+
+### T-145 Android acknowledgement after restart: APPROVED
+- `complete()` returns false without a live handle, so the entry stays `verified` and is not removed. `start()` lists past Play purchases and re-emits unacknowledged Gold ones with a live handle; the outbox then completes it and removes it. Verified entries are not re-verified (one verify, one Idempotency-Key, tested).
+- Acknowledged purchases are skipped, so no double acknowledge; the handle is dropped after completion.
+- Listener subscribes before `start()`, so the redelivery is not missed.
+- FU (minor): a `verified` entry whose purchase is no longer on Play (refunded) stays in the outbox forever; add an age-out.
