@@ -37,8 +37,13 @@ enum BackendFailureKind {
 }
 
 final class BackendFailure extends SafeException {
-  BackendFailure(this.kind, {this.httpStatus, this.problem, this.retryAfter})
-    : super(_codeOf(kind));
+  BackendFailure(
+    this.kind, {
+    this.httpStatus,
+    this.problem,
+    this.retryAfter,
+    this.nextMoveAt,
+  }) : super(_codeOf(kind));
 
   final BackendFailureKind kind;
 
@@ -51,6 +56,10 @@ final class BackendFailure extends SafeException {
 
   /// From `Retry-After` or `retryAfterSeconds` (capped at one day).
   final Duration? retryAfter;
+
+  /// `nextMoveAt` of a `409 MOVE_COOLDOWN` (a whole UTC hour, R3-4); null for
+  /// every other answer. T-145 stores it for the restore help text.
+  final String? nextMoveAt;
 
   /// Whether a later retry can succeed without an app change.
   bool get retryable => switch (kind) {

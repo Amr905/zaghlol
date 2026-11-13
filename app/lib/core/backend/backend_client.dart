@@ -448,12 +448,14 @@ final class BackendClient {
   BackendFailure _problemOf(BackendResponse res) {
     var code = ProblemCode.unknown;
     Duration? retry;
+    String? nextMove;
     try {
       final p = Problem.fromJson(
         jsonDecode(const Utf8Decoder().convert(res.body)),
       );
       if (p.status == res.status) {
         code = p.code;
+        if (code == ProblemCode.moveCooldown) nextMove = p.nextMoveAt;
         if (p.retryAfterSeconds != null) {
           retry = Duration(seconds: min(p.retryAfterSeconds!, 86400));
         }
@@ -473,6 +475,7 @@ final class BackendClient {
       httpStatus: res.status,
       problem: code,
       retryAfter: retry,
+      nextMoveAt: nextMove,
     );
   }
 
