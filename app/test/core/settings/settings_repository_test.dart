@@ -58,6 +58,7 @@ allKeys = [
   (key: Settings.captureNotifications, byDefault: true, other: false),
   (key: Settings.contributionOptIn, byDefault: false, other: true),
   (key: Settings.scanDepthMonths, byDefault: 6, other: 24),
+  (key: Settings.scanPersonalSenders, byDefault: false, other: true),
   (
     key: Settings.setupProgress,
     byDefault: <String>{},

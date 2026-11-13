@@ -159,6 +159,14 @@ abstract final class Settings {
     max: 24,
   );
 
+  /// T-048 (FU-109 M-1, PO): opt-in "scan the last 3 months" for phone-number
+  /// senders the user added. Off by default; those senders are otherwise
+  /// live capture only.
+  static final scanPersonalSenders = SettingKey.boolean(
+    'capture.scan_personal_senders',
+    byDefault: false,
+  );
+
   /// FR-ONB-11: the setup steps (slugs) the user finished or skipped.
   static final setupProgress = SettingKey.slugSet('setup_progress');
 

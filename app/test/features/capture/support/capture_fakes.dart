@@ -109,6 +109,19 @@ final class FakeHost implements CaptureHostPort {
     log.add('scheduleNow');
     scheduleNowCalls++;
   }
+
+  /// T-048: replace to serve inbox pages.
+  Future<InboxPage> Function(InboxQuery query)? onQueryInbox;
+  final List<InboxQuery> inboxQueries = [];
+
+  @override
+  Future<InboxPage> queryInbox(InboxQuery query) async {
+    log.add('queryInbox');
+    inboxQueries.add(query);
+    final f = onQueryInbox;
+    if (f == null) throw hostError('NOT_AVAILABLE');
+    return f(query);
+  }
 }
 
 final class FakeTimer {
@@ -191,6 +204,17 @@ class MemoryAlertStore implements AlertStore {
   Future<void> write(PersistedAlerts next) async {
     writes++;
     value = next;
+  }
+
+  @override
+  Future<bool> clearCatchUp({required int ifFromMs}) async {
+    if (value.catchUpFromMs != ifFromMs) return false;
+    value = PersistedAlerts(
+      absorbedSeq: value.absorbedSeq,
+      missedNotifications: value.missedNotifications,
+      unreadableAtMs: value.unreadableAtMs,
+    );
+    return true;
   }
 
   @override
