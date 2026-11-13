@@ -18,5 +18,6 @@
   "homeQuickAddTypeA11y": "اكتب حركة",
   "homeQuickAddScanA11y": "اقرا سكرين شوت",
   "homeQuickAddAssetA11y": "ضيف أصل",
-  "ingestionReviewTitle": "مستني رأيك 👀"
+  "ingestionReviewTitle": "مستني رأيك 👀",
+  "notificationsChannelName": "التنبيهات"
 }

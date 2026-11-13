@@ -56,4 +56,7 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get ingestionReviewTitle => 'Needs your review 👀';
+
+  @override
+  String get notificationsChannelName => 'Alerts';
 }

@@ -18,5 +18,9 @@
   "homeQuickAddTypeA11y": "Type a transaction",
   "homeQuickAddScanA11y": "Scan a screenshot",
   "homeQuickAddAssetA11y": "Add an asset",
-  "ingestionReviewTitle": "Needs your review 👀"
+  "ingestionReviewTitle": "Needs your review 👀",
+  "notificationsChannelName": "Alerts",
+  "@notificationsChannelName": {
+    "description": "Android channel name for Zaghlol's own alerts (Q-17)."
+  }
 }

@@ -193,6 +193,12 @@ abstract class AppLocalizations {
   /// In ar, this message translates to:
   /// **'مستني رأيك 👀'**
   String get ingestionReviewTitle;
+
+  /// No description provided for @notificationsChannelName.
+  ///
+  /// In ar, this message translates to:
+  /// **'التنبيهات'**
+  String get notificationsChannelName;
 }
 
 class _AppLocalizationsDelegate
