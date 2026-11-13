@@ -76,6 +76,8 @@ cc_payment: outgoing payment to own credit card → internal transfer; the card-
 ```
 Pairs can be unlinked manually (FR-XFR-02). Unlinking clears `is_internal` on both legs.
 
+**As built (T-089).** `zaghlol_domain/transfers/transfer_matching.dart` and `TransferPairingUseCase`. A single candidate pairs only if the new leg is also that candidate's only candidate. Only posted, live transfer legs take part. The ±3% is of the converted amount. Both rules and the one-sided/late-arrival completion are described in the task design note (`docs/04-tasks/tasks/T-089.md`).
+
 ## 5. Refunds, splits, reimbursements — net spend (BR-TXN-01, BR-XFR-03…08)
 
 ```
