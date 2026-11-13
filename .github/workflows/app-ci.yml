@@ -497,6 +497,19 @@ jobs:
               exit 1
             fi
           done
+          # T-061: the Swift Guard: shared golden file, reader, user part, runtime, no logging.
+          for t in testAllGoldenEntriesPass testSwiftGuardDisagreeingWithTheGoldenFileIsReported \
+            testGuardThatKeepsPersonalMessagesDisagreesWithGolden testANonRegistryPersonalMessageLeavesNothing \
+            testUserPartRoundTripsAndTheFileHoldsNoPlaintext testTamperedFileIsBaseOnlyUnreadableAndKept \
+            testAnInvalidWriteKeepsTheOldFileAndTheOldRules testAFailureAtEachWriteStepKeepsTheOldFileAndLeavesNoTemp \
+            testATransientKeychainErrorIsNotCachedAndHeals testApplePayCardNamesMapToTheInstitutionAndKeepIsGenericOtherwise \
+            testGuardSourcesNeverPrintOrLog testDescriptionsAndErrorsNeverCarryMessageContent; do
+            if ! grep -qiE "Guard(Golden|Runtime)Tests.*$t" xcodebuild.log || grep -qiE "test case.*Guard(Golden|Runtime)Tests.*$t.*failed" xcodebuild.log; then
+              echo "::error::Guard test $t did not pass"
+              grep -iE "Guard(Golden|Runtime)Tests" xcodebuild.log | head -n 30
+              exit 1
+            fi
+          done
           xcrun simctl list runtimes | grep -i ios || true
           grep -h "SPIKE_METRICS" xcodebuild.log || true
 

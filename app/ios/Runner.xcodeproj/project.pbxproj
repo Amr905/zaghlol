@@ -49,6 +49,18 @@
 		5A1790000000000000000F03 /* SeatKeyStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5A1790000000000000000F04 /* SeatKeyStore.swift */; };
 		5A1790000000000000000F05 /* SeatKeyHost.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5A1790000000000000000F06 /* SeatKeyHost.swift */; };
 		5A1790000000000000000F07 /* SeatKeyTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5A1790000000000000000F08 /* SeatKeyTests.swift */; };
+		5A6100000000000000001B00 /* GuardTypes.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5A6100000000000000001F00 /* GuardTypes.swift */; };
+		5A6100000000000000001B01 /* TextFold.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5A6100000000000000001F01 /* TextFold.swift */; };
+		5A6100000000000000001B02 /* StrictJson.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5A6100000000000000001F02 /* StrictJson.swift */; };
+		5A6100000000000000001B03 /* GuardConfig.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5A6100000000000000001F03 /* GuardConfig.swift */; };
+		5A6100000000000000001B04 /* CaptureGuard.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5A6100000000000000001F04 /* CaptureGuard.swift */; };
+		5A6100000000000000001B05 /* SenderRateLimiter.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5A6100000000000000001F05 /* SenderRateLimiter.swift */; };
+		5A6100000000000000001B06 /* GuardUserCipher.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5A6100000000000000001F06 /* GuardUserCipher.swift */; };
+		5A6100000000000000001B07 /* GuardUserConfigStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5A6100000000000000001F07 /* GuardUserConfigStore.swift */; };
+		5A6100000000000000001B08 /* GuardBaseSource.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5A6100000000000000001F08 /* GuardBaseSource.swift */; };
+		5A6100000000000000001B09 /* GuardRuntime.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5A6100000000000000001F09 /* GuardRuntime.swift */; };
+		5A6100000000000000001B0A /* GuardGoldenTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5A6100000000000000001F0A /* GuardGoldenTests.swift */; };
+		5A6100000000000000001B0B /* GuardRuntimeTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5A6100000000000000001F0B /* GuardRuntimeTests.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -126,6 +138,18 @@
 		5A1790000000000000000F04 /* SeatKeyStore.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SeatKeyStore.swift; sourceTree = "<group>"; };
 		5A1790000000000000000F06 /* SeatKeyHost.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SeatKeyHost.swift; sourceTree = "<group>"; };
 		5A1790000000000000000F08 /* SeatKeyTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SeatKeyTests.swift; sourceTree = "<group>"; };
+		5A6100000000000000001F00 /* GuardTypes.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GuardTypes.swift; sourceTree = "<group>"; };
+		5A6100000000000000001F01 /* TextFold.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TextFold.swift; sourceTree = "<group>"; };
+		5A6100000000000000001F02 /* StrictJson.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StrictJson.swift; sourceTree = "<group>"; };
+		5A6100000000000000001F03 /* GuardConfig.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GuardConfig.swift; sourceTree = "<group>"; };
+		5A6100000000000000001F04 /* CaptureGuard.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CaptureGuard.swift; sourceTree = "<group>"; };
+		5A6100000000000000001F05 /* SenderRateLimiter.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SenderRateLimiter.swift; sourceTree = "<group>"; };
+		5A6100000000000000001F06 /* GuardUserCipher.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GuardUserCipher.swift; sourceTree = "<group>"; };
+		5A6100000000000000001F07 /* GuardUserConfigStore.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GuardUserConfigStore.swift; sourceTree = "<group>"; };
+		5A6100000000000000001F08 /* GuardBaseSource.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GuardBaseSource.swift; sourceTree = "<group>"; };
+		5A6100000000000000001F09 /* GuardRuntime.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GuardRuntime.swift; sourceTree = "<group>"; };
+		5A6100000000000000001F0A /* GuardGoldenTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GuardGoldenTests.swift; sourceTree = "<group>"; };
+		5A6100000000000000001F0B /* GuardRuntimeTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GuardRuntimeTests.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -140,6 +164,23 @@
 /* End PBXFrameworksBuildPhase section */
 
 /* Begin PBXGroup section */
+		5A6100000000000000001C01 /* Guard */ = {
+			isa = PBXGroup;
+			children = (
+				5A6100000000000000001F00 /* GuardTypes.swift */,
+				5A6100000000000000001F01 /* TextFold.swift */,
+				5A6100000000000000001F02 /* StrictJson.swift */,
+				5A6100000000000000001F03 /* GuardConfig.swift */,
+				5A6100000000000000001F04 /* CaptureGuard.swift */,
+				5A6100000000000000001F05 /* SenderRateLimiter.swift */,
+				5A6100000000000000001F06 /* GuardUserCipher.swift */,
+				5A6100000000000000001F07 /* GuardUserConfigStore.swift */,
+				5A6100000000000000001F08 /* GuardBaseSource.swift */,
+				5A6100000000000000001F09 /* GuardRuntime.swift */,
+			);
+			path = Guard;
+			sourceTree = "<group>";
+		};
 		5A9A00000000000000000A03 /* Spike */ = {
 			isa = PBXGroup;
 			children = (
@@ -162,6 +203,8 @@
 				5A1790000000000000000F08 /* SeatKeyTests.swift */,
 				5A1510000000000000000F09 /* ICloudBackupTests.swift */,
 				5A9A00000000000000000A05 /* IosIntentSpikeTests.swift */,
+				5A6100000000000000001F0A /* GuardGoldenTests.swift */,
+				5A6100000000000000001F0B /* GuardRuntimeTests.swift */,
 			);
 			path = RunnerTests;
 			sourceTree = "<group>";
@@ -220,6 +263,7 @@
 				74858FAD1ED2DC5600515810 /* Runner-Bridging-Header.h */,
 				5A0150000000000000000B0B /* Platform */,
 				5A9A00000000000000000A03 /* Spike */,
+				5A6100000000000000001C01 /* Guard */,
 				5A1800000000000000000D05 /* Clock */,
 				5A1800000000000000000D09 /* PrivacyInfo.xcprivacy */,
 				5A1510000000000000000F0A /* Runner.entitlements */,
@@ -458,6 +502,8 @@
 				5A1790000000000000000F07 /* SeatKeyTests.swift in Sources */,
 				5A1510000000000000000F08 /* ICloudBackupTests.swift in Sources */,
 				5A9A00000000000000000A04 /* IosIntentSpikeTests.swift in Sources */,
+				5A6100000000000000001B0A /* GuardGoldenTests.swift in Sources */,
+				5A6100000000000000001B0B /* GuardRuntimeTests.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -490,6 +536,16 @@
 				5A1510000000000000000F03 /* ICloudBackupFiles.swift in Sources */,
 				5A1510000000000000000F05 /* ICloudBackupHost.swift in Sources */,
 				5A9A00000000000000000A01 /* IosIntentSpike.swift in Sources */,
+				5A6100000000000000001B00 /* GuardTypes.swift in Sources */,
+				5A6100000000000000001B01 /* TextFold.swift in Sources */,
+				5A6100000000000000001B02 /* StrictJson.swift in Sources */,
+				5A6100000000000000001B03 /* GuardConfig.swift in Sources */,
+				5A6100000000000000001B04 /* CaptureGuard.swift in Sources */,
+				5A6100000000000000001B05 /* SenderRateLimiter.swift in Sources */,
+				5A6100000000000000001B06 /* GuardUserCipher.swift in Sources */,
+				5A6100000000000000001B07 /* GuardUserConfigStore.swift in Sources */,
+				5A6100000000000000001B08 /* GuardBaseSource.swift in Sources */,
+				5A6100000000000000001B09 /* GuardRuntime.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
