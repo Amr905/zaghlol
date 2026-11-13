@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- T-178 (ADR-012 Part B (d), platform-channels §4a): release builds trust
+     system CAs only, so a user-installed CA can't read or rewrite restore
+     bodies and proofs sent through a platform HTTP stack in this process.
+     Cleartext is off everywhere. User CAs are trusted only in debuggable
+     builds (<debug-overrides> applies only when android:debuggable is true).
+     Note: Flutter's dart:io HttpClient (BackendClient) reads the system CA
+     store itself and ignores this file; it never trusts user CAs. -->
+<network-security-config>
+    <base-config cleartextTrafficPermitted="false">
+        <trust-anchors>
+            <certificates src="system"/>
+        </trust-anchors>
+    </base-config>
+    <debug-overrides>
+        <trust-anchors>
+            <certificates src="user"/>
+        </trust-anchors>
+    </debug-overrides>
+</network-security-config>

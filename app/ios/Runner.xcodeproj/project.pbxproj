@@ -33,6 +33,9 @@
 		5A1030000000000000000E05 /* DeviceSecurityTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5A1030000000000000000E06 /* DeviceSecurityTests.swift */; };
 		5A1800000000000000000D06 /* TrustedClockTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5A1800000000000000000D07 /* TrustedClockTests.swift */; };
 		5A1800000000000000000D08 /* PrivacyInfo.xcprivacy in Resources */ = {isa = PBXBuildFile; fileRef = 5A1800000000000000000D09 /* PrivacyInfo.xcprivacy */; };
+		5A1780000000000000000F01 /* AttestationApi.g.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5A1780000000000000000F02 /* AttestationApi.g.swift */; };
+		5A1780000000000000000F03 /* AttestationHost.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5A1780000000000000000F04 /* AttestationHost.swift */; };
+		5A1780000000000000000F05 /* AttestationTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5A1780000000000000000F06 /* AttestationTests.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -93,6 +96,9 @@
 		5A1030000000000000000E06 /* DeviceSecurityTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DeviceSecurityTests.swift; sourceTree = "<group>"; };
 		5A1800000000000000000D07 /* TrustedClockTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TrustedClockTests.swift; sourceTree = "<group>"; };
 		5A1800000000000000000D09 /* PrivacyInfo.xcprivacy */ = {isa = PBXFileReference; lastKnownFileType = text.xml; path = PrivacyInfo.xcprivacy; sourceTree = "<group>"; };
+		5A1780000000000000000F02 /* AttestationApi.g.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AttestationApi.g.swift; sourceTree = "<group>"; };
+		5A1780000000000000000F04 /* AttestationHost.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AttestationHost.swift; sourceTree = "<group>"; };
+		5A1780000000000000000F06 /* AttestationTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AttestationTests.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -116,6 +122,7 @@
 				5A1480000000000000000C06 /* TextNormalizationTests.swift */,
 				5A1800000000000000000D07 /* TrustedClockTests.swift */,
 				5A1030000000000000000E06 /* DeviceSecurityTests.swift */,
+				5A1780000000000000000F06 /* AttestationTests.swift */,
 			);
 			path = RunnerTests;
 			sourceTree = "<group>";
@@ -189,6 +196,8 @@
 				5A1800000000000000000D02 /* ClockApi.g.swift */,
 				5A1030000000000000000E02 /* DeviceApi.g.swift */,
 				5A1030000000000000000E04 /* DeviceSecurityHost.swift */,
+				5A1780000000000000000F02 /* AttestationApi.g.swift */,
+				5A1780000000000000000F07 /* Attestation */,
 			);
 			path = Platform;
 			sourceTree = "<group>";
@@ -217,6 +226,14 @@
 				5A1800000000000000000D04 /* TrustedClockHost.swift */,
 			);
 			path = Clock;
+			sourceTree = "<group>";
+		};
+		5A1780000000000000000F07 /* Attestation */ = {
+			isa = PBXGroup;
+			children = (
+				5A1780000000000000000F04 /* AttestationHost.swift */,
+			);
+			path = Attestation;
 			sourceTree = "<group>";
 		};
 /* End PBXGroup section */
@@ -371,6 +388,7 @@
 				5A1480000000000000000C05 /* TextNormalizationTests.swift in Sources */,
 				5A1800000000000000000D06 /* TrustedClockTests.swift in Sources */,
 				5A1030000000000000000E05 /* DeviceSecurityTests.swift in Sources */,
+				5A1780000000000000000F05 /* AttestationTests.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -392,6 +410,8 @@
 				5A1800000000000000000D03 /* TrustedClockHost.swift in Sources */,
 				5A1030000000000000000E01 /* DeviceApi.g.swift in Sources */,
 				5A1030000000000000000E03 /* DeviceSecurityHost.swift in Sources */,
+				5A1780000000000000000F01 /* AttestationApi.g.swift in Sources */,
+				5A1780000000000000000F03 /* AttestationHost.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

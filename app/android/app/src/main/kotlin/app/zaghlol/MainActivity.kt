@@ -3,6 +3,7 @@ package app.zaghlol
 import android.content.Intent
 import android.os.Handler
 import android.os.Looper
+import app.zaghlol.platform.attestation.AttestationRegistration
 import app.zaghlol.platform.capture.CaptureRuntime
 import app.zaghlol.platform.clock.TrustedClockRegistration
 import app.zaghlol.platform.device.AndroidDeviceEnv
@@ -46,6 +47,8 @@ class MainActivity : FlutterFragmentActivity() {
         TrustedClockRegistration.register(messenger, this)
         // T-103: root heuristic, secure window, passcode check (UI engine only).
         DeviceSecurityRegistration.register(messenger, this)
+        // T-178: Play Integrity for restore (UI engine only).
+        AttestationRegistration.register(messenger, this)
         val store = ShareStores.create(applicationContext)
         shareStore = store
         ShareIntakeHostApi.setUp(messenger, ShareIntakeHost(store))
@@ -61,6 +64,7 @@ class MainActivity : FlutterFragmentActivity() {
         TextNormalizationHostApi.setUp(flutterEngine.dartExecutor.binaryMessenger, null)
         TrustedClockRegistration.unregister(flutterEngine.dartExecutor.binaryMessenger)
         DeviceSecurityRegistration.unregister(flutterEngine.dartExecutor.binaryMessenger)
+        AttestationRegistration.unregister(flutterEngine.dartExecutor.binaryMessenger)
         shareEvents = null
         shareStore = null
         super.cleanUpFlutterEngine(flutterEngine)
