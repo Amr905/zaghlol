@@ -296,18 +296,3 @@ interface TrustedClockHostApi {
     }
   }
 }
-/** Generated interface from Pigeon that represents a handler of messages from Flutter. */
-interface SeatKeyHostApi {
-
-  companion object {
-    /** The codec used by SeatKeyHostApi. */
-    val codec: MessageCodec<Any?> by lazy {
-      ClockApiPigeonCodec()
-    }
-    /** Sets up an instance of `SeatKeyHostApi` to handle messages through the `binaryMessenger`. */
-    @JvmOverloads
-    fun setUp(binaryMessenger: BinaryMessenger, api: SeatKeyHostApi?, messageChannelSuffix: String = "") {
-      val separatedMessageChannelSuffix = if (messageChannelSuffix.isNotEmpty()) ".$messageChannelSuffix" else ""
-    }
-  }
-}
