@@ -120,7 +120,7 @@ class AndroidDeviceEnv(context: Context, activity: Activity) : DeviceEnv {
       onResult(NativeAuthOutcome.CANCELLED)
       return
     }
-    val authenticators = BiometricOutcomes.authenticators(Build.SDK_INT)
+    val authenticators = BiometricOutcomes.authenticators(Build.VERSION.SDK_INT)
     BiometricOutcomes.fromCanAuthenticate(
       BiometricManager.from(activity).canAuthenticate(authenticators)
     )?.let {
