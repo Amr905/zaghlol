@@ -25,37 +25,37 @@ _Last updated: 2026-11-12 (Cairo) by the Lead session. Update it whenever the st
 - **Batch scripts:** never chain `git commit` after `git merge` without first checking `git diff --name-only --diff-filter=U` (a conflicted merge got committed with markers once; fixed before push). Local CI step logs (`*.log`) are git-ignored; don't `git add -A` in a worktree where the step script ran without checking `git status`.
 - **Copy deck checks:** `python3 docs/workflow/tools/copy_deck_check.py docs/02-design/copy-deck.md`.
 
-## Progress: 60 of 186 tasks done (32.3%)
+## Progress: 65 of 186 tasks done (34.9%)
 
-DONE: T-001…T-007, T-012…T-021, T-022, T-025…T-028, T-030, T-032…T-035, T-038…T-042, T-045, T-046, T-047, T-050, T-051, T-060, T-073…T-075, T-077, T-112, T-122…T-131, T-133, T-134, T-138, T-139, T-148, T-182, T-184. **Merged but open:** T-008 (device rows AC1/AC2), T-136 (IdP evidence), T-165 (device run).
+DONE: T-001…T-007, T-012…T-021…T-023, T-025…T-028, T-030, T-032…T-035, T-038…T-043, T-045, T-046, T-047, T-050, T-051, T-060, T-073…T-075, T-077, T-109, T-112, T-122…T-131, T-132, T-133, T-134, T-138, T-139, T-141, T-148, T-182, T-184. **Merged but open:** T-008 (device rows AC1/AC2), T-136 (IdP evidence), T-165 (device run).
 
 | Milestone | Done | Total |
 |---|---|---|
-| M0 | 22 | 28 |
-| M1 | 14 | 29 |
+| M0 | 23 | 28 |
+| M1 | 15 | 29 |
 | M2 | 5 | 29 |
-| M4 | 1 | 17 |
-| M5 | 16 | 35 |
+| M4 | 2 | 17 |
+| M5 | 18 | 35 |
 | M6 | 1 | 19 |
 | M3, M7 | 0 | 29 |
 
 The PO asked for this progress table in every update.
 
-**Merged batches:** #28, #29, #32–#36 (batch 7), #37 batch 8 (T-041 + T-042, T-051), batch 9 (`batch/2026-11-11-9`: T-021, T-040, T-047, T-077, T-182, T-184 + the batch-review workflow). Next free follow-up number: **FU-115**.
+**Merged batches:** #28, #29, #32–#36 (batch 7), #37 batch 8 (T-041 + T-042, T-051), batch 9 (`batch/2026-11-11-9`: T-021, T-040, T-047, T-077, T-182, T-184 + the batch-review workflow), batch 10 (`batch/2026-11-13-10`: T-023, T-043, T-109, T-132, T-141; first under the cost rules). Next free follow-up number: **FU-120**.
 
 **Lessons:** never chain `git commit` after `git merge` in one script without checking for conflicts. Server/cloud restarts happen often: brief agents to commit early and push often; on restart, check worktrees for live processes (`ps`, `/proc/<pid>/cwd`) before relaunching.
 
-## In flight (2026-11-12 Cairo)
+## In flight (2026-11-13 Cairo)
 
-1. **Batch 9** (`batch/2026-11-11-9`): reviews in `docs/05-reviews/batch-9.md` and `batch-9-security.md`, all six tasks APPROVED (21-1 fixed, Lead delta check; 77-1 fixed, delta re-review). backend-ci and db-platform green on e7bcdb2 (later commits touch only Dart and docs); app-ci on the final head. **Next:** merge the PR with a merge commit when app-ci is green.
+1. **Batch 10** merged when its GitHub run is green (see the PR). Next: **batch 11** — T-048 historical inbox scan (FU-109 decided, Part 1), T-049 review queue, T-119 Gold gate matrix, T-183 request-binding library, T-178 / T-180 host APIs or T-181 backend attestation verifiers (pick five on separate lanes).
 2. **T-159 Android OCR:** waiting for the PO's `tesseract4android-4.9.0.aar` (`/home/claude/wt-T159-fix`, unpushed).
-3. **PC runner** silent since 2026-11-11 22:29; T-040 negative proofs 6b and 14 still pending on it (FU-111).
+3. **PC runner** silent since 2026-11-11 22:29; optional now (cost rules).
 
-Next free follow-up number: **FU-115**.
+Next free follow-up number: **FU-120**.
 
 ## Ready next (dependencies done)
 
-- **Ingestion chain (Android):** T-043 notification listener (T-040 merged in batch 9) (design note on `task/ingest-notes-combined`; T-043 owns the listener, its intake thread and its manifest entries); T-048 catch-up scan after the PO decides FU-109 M-1 (must restart the scan on `INVALID_ARGUMENT`, implement `CatchUpScheduler`).
+- **Ingestion chain (Android):** T-048 catch-up scan (T-043 merged in batch 10) (design note on `task/ingest-notes-combined`; T-043 owns the listener, its intake thread and its manifest entries); T-048 catch-up scan after the PO decides FU-109 M-1 (must restart the scan on `INVALID_ARGUMENT`, implement `CatchUpScheduler`).
 - **App core:** T-052 home read model (needs T-049?), T-079 bulk-edit UI wiring (FU-114), T-113 net worth (needs T-096), T-141 BackendClient (C4), T-142 contribution outbox (C4), T-183 request-binding library (C4), T-149/T-150 backup.
 - **Backend:** T-132 (T-184 done; take FU-112 PO Q1 backfill), T-185 (FU-112 lock order), T-186 (FU-112 184-2); T-181 attestation verifiers (C4); T-140 (hosting); FU-107 M-1 (dead-lettered notification rows never retried → Gold kept) before go-live.
 - **Native/iOS:** T-009 iOS App Intent spike, T-010/T-011 spikes, T-178 / T-180.
