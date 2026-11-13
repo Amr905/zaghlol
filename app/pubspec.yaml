@@ -47,6 +47,9 @@ dependencies:
   # same library zaghlol_catalog uses; already in the workspace lock).
   pointycastle: ^4.0.0
   go_router: ^18.1.4
+  googleapis: ^19.0.0
+  http: ^1.6.0
+  google_sign_in: 7.2.0
 
 dev_dependencies:
   flutter_test:
