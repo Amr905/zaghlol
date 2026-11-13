@@ -506,7 +506,9 @@ void main() {
           throw BackendFailure(BackendFailureKind.offline);
       await expectLater(h.service.signOut(), throwsA(isA<BackendFailure>()));
       expect(_cached(h), isNull);
-      expect(h.sink.last, EntitlementPhase.free);
+      expect(h.sink.last, EntitlementPhase.paused);
+      // T-147: it stays paused (not free) on the next check while offline.
+      expect(await h.service.evaluate(), EntitlementPhase.paused);
       // Online: the 200 carries a paused token, stored after the binding check.
       h.backend.onSignOut = (n) async => resp(
         h,

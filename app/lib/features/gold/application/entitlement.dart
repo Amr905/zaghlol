@@ -35,6 +35,11 @@ const Duration entitlementRefreshAge = Duration(hours: 12);
 /// `secure_state` key of the support notice: `p` pending, `d` dismissed.
 const String supportNoticeStateKey = 'entitlement_support_notice';
 
+/// `secure_state` key (T-147): the install ID for which sign-out dropped the
+/// token of an account-linked purchase, so Gold stays `paused` (not `free`)
+/// until a fresh signed token is stored (D-61(c), EC-73).
+const String signedOutPausedStateKey = 'entitlement_signed_out_paused';
+
 /// The embedded entitlement-key set of a release build. Empty until T-140
 /// creates the production keys (FU-115): with no key nothing verifies, so no
 /// token ever grants Gold (fail closed).
@@ -389,7 +394,11 @@ final class EntitlementService {
     final claims = await _cachedClaims();
     var phase = EntitlementPhase.free;
     MovedBy? movedBy;
-    if (claims != null && installId != null && claims.sub == installId) {
+    if (claims == null &&
+        installId != null &&
+        await _signedOutPausedFor(installId)) {
+      phase = EntitlementPhase.paused; // D-61(c): account-linked, signed out
+    } else if (claims != null && installId != null && claims.sub == installId) {
       switch (claims.status) {
         case 'moved':
           phase = EntitlementPhase.moved;
@@ -437,6 +446,11 @@ final class EntitlementService {
     return c;
   }
 
+  /// The verified claims of the cached account token, or null (signed out,
+  /// expired, unreadable). Not install-bound: [evaluate] and the sign-in
+  /// service check `iid`.
+  Future<AccountClaims?> cachedAccount() => _cachedAccount();
+
   Future<AccountClaims?> _cachedAccount() async {
     final b = await _store.read(BackendStateKeys.accountToken);
     if (b == null) return null;
@@ -462,7 +476,9 @@ final class EntitlementService {
   /// it). Throws [BackendFailure] when the call fails.
   Future<bool> refreshIfDue() async {
     final ts = await _time.advance();
-    final has = await _store.read(BackendStateKeys.entitlementToken) != null;
+    final has =
+        await _store.read(BackendStateKeys.entitlementToken) != null ||
+        await _store.read(signedOutPausedStateKey) != null;
     if (!has && !ts.tampered) return false;
     final c = await _cachedClaims();
     final due =
@@ -480,16 +496,44 @@ final class EntitlementService {
   /// D-61(c): the cached entitlement token (and the account token) go at
   /// once, whether or not the call succeeds; the 200's token is stored after
   /// the binding check. Throws [BackendFailure] when the call fails.
+  ///
+  /// When the dropped token covered an account-linked purchase, the phase is
+  /// `paused` at once, also offline, and stays so (marker bound to this
+  /// install) until a fresh signed token is stored.
   Future<void> signOut() async {
+    final dropped = await _cachedClaims();
+    final installId = await _backend.installId();
     await _store.delete(BackendStateKeys.entitlementToken);
     await _store.delete(BackendStateKeys.accountToken);
     _memoText = null;
     _memoClaims = null;
-    _sink.apply(EntitlementPhase.free);
+    if (dropped?.acct != null && installId != null) {
+      await _store.write(
+        signedOutPausedStateKey,
+        Uint8List.fromList(utf8.encode(installId)),
+      );
+      _sink.apply(EntitlementPhase.paused);
+    } else {
+      _sink.apply(EntitlementPhase.free);
+    }
     await _anchor.run(
       _backend.signOut,
       onResponse: (r) => handleBody(SignedBody.fromEntitlement(r)),
     );
+  }
+
+  /// Account deletion (T-147): the account token goes and linked Gold
+  /// pauses, as after sign-out. The entitlement token stays: its `acct` no
+  /// longer has a covering account token, so [evaluate] says `paused`.
+  Future<void> clearAccountToken() async {
+    await _store.delete(BackendStateKeys.accountToken);
+    await evaluate();
+  }
+
+  Future<bool> _signedOutPausedFor(String installId) async {
+    final m = await _store.read(signedOutPausedStateKey);
+    if (m == null) return false;
+    return utf8.decode(m, allowMalformed: true) == installId;
   }
 
   /// Runs an anchoring [request] of another operation (sync, verify, restore,
@@ -586,6 +630,7 @@ final class EntitlementService {
       // An older signed token (a replay) never replaces a newer one.
       final stored = cached == null || cached.iat <= token.iat;
       if (stored) {
+        await _store.delete(signedOutPausedStateKey);
         await _store.write(
           BackendStateKeys.entitlementToken,
           Uint8List.fromList(utf8.encode(b.entitlementToken!)),
