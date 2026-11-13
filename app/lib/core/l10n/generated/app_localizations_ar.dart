@@ -7077,4 +7077,49 @@ class AppLocalizationsAr extends AppLocalizations {
 
   @override
   String get errorsAccountFailed => 'العملية ماتمتش. جرّب تاني كمان شوية.';
+
+  @override
+  String accountsOverviewApproxNotIncluded(String currencies) {
+    return 'مش محسوبة في التقريبي: $currencies';
+  }
+
+  @override
+  String get accountsOverviewApproxLabel => 'تقريبي';
+
+  @override
+  String get goldSeatTamperedClockBody =>
+      'ظبّط التاريخ والوقت في موبايلك على تلقائي، وبعدها افتح زغلول تاني.';
+
+  @override
+  String get transactionsEditLinksRemoved =>
+      'المبلغ اتغيّر، فالروابط اتشالت: الفلوس الراجعة والتقسيم المرتبطين بالمعاملة دي اتفكّوا.';
+
+  @override
+  String get goldAccountSignedIn => 'مسجّل دخول';
+
+  @override
+  String insightsChartsPeakHour(String time) {
+    return 'أكتر ساعة بتصرف فيها حوالين $time';
+  }
+
+  @override
+  String get homeFeedExcludedFromSpending => 'مش محسوبة في المصروفات';
+
+  @override
+  String get notificationsAlertBackupReminderTitle => 'وقت النسخة الاحتياطية';
+
+  @override
+  String get notificationsAlertBackupReminderBody =>
+      'خد نسخة احتياطية من الإعدادات عشان بياناتك تفضل في أمان.';
+
+  @override
+  String transactionsReimbUnassigned(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count مبالغ اتفكّت لأن المصروف قلّ',
+      one: 'مبلغ واحد اتفكّ لأن المصروف قلّ',
+    );
+    return '$_temp0';
+  }
 }

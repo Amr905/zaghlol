@@ -176,8 +176,7 @@ class _Hero extends ConsumerWidget {
                 ),
               ),
             // FU-134: the "not included" note shows whenever `excluded` is
-            // non-empty. TODO(l10n): key missing (see T-083 task file); the
-            // codes alone are shown until it lands.
+            // non-empty.
             if (approx.excluded.isNotEmpty)
               Padding(
                 key: const Key('approx-not-included'),
@@ -192,7 +191,9 @@ class _Hero extends ConsumerWidget {
                     const SizedBox(width: ZSpacing.xs),
                     Flexible(
                       child: Text(
-                        approx.excluded.map((e) => e.code).join(' · '),
+                        l10n.accountsOverviewApproxNotIncluded(
+                          approx.excluded.map((e) => e.code).join(' · '),
+                        ),
                         style: ZType.caption.copyWith(color: c.textMuted),
                       ),
                     ),
