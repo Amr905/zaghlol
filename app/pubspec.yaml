@@ -70,3 +70,5 @@ flutter:
   assets:
     # T-030: the signed first-launch catalog (tools/catalog_build).
     - assets/catalog/
+    # T-053: static Captain Zaghlol still (fallback until zaghlol.riv, T-088).
+    - assets/mascot/
