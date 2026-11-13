@@ -164,42 +164,27 @@ class _Hero extends ConsumerWidget {
           ],
           if (approx is ApproxViewOn) ...[
             const SizedBox(height: ZSpacing.sm),
-            if (approx.figure != null)
-              Semantics(
-                label: l10n.commonCurrencyApproxA11y,
-                child: ZMoneyText(
-                  text: l10n.commonCurrencyApproxChip(
-                    _fmt(context, ref, approx.figure!.amount),
-                  ),
-                  size: ZMoneySize.body,
-                  kind: ZMoneyKind.neutral,
-                ),
-              ),
-            // FU-134: the "not included" note shows whenever `excluded` is
-            // non-empty.
-            if (approx.excluded.isNotEmpty)
-              Padding(
-                key: const Key('approx-not-included'),
-                padding: const EdgeInsetsDirectional.only(top: ZSpacing.xs),
-                child: Row(
-                  children: [
-                    Icon(
-                      Icons.info_outline_rounded,
-                      size: 16,
-                      color: c.textMuted,
-                    ),
-                    const SizedBox(width: ZSpacing.xs),
-                    Flexible(
-                      child: Text(
-                        l10n.accountsOverviewApproxNotIncluded(
-                          approx.excluded.map((e) => e.code).join(' · '),
+            ZApproxRow(
+              figureText: approx.figure == null
+                  ? null
+                  : _fmt(context, ref, approx.figure!.amount),
+              rateDateText: approx.rateAsOfMs == null
+                  ? null
+                  : ZDateFormat.date(
+                      DateTime.fromMillisecondsSinceEpoch(
+                        approx.rateAsOfMs!,
+                        isUtc: true,
+                      ),
+                      Localizations.localeOf(context).languageCode,
+                      ref.watch(
+                        digitsModeProvider(
+                          Localizations.localeOf(context).languageCode,
                         ),
-                        style: ZType.caption.copyWith(color: c.textMuted),
                       ),
                     ),
-                  ],
-                ),
-              ),
+              excludedCodes: [for (final e in approx.excluded) e.code],
+              stale: approx.stale,
+            ),
           ],
         ],
       ),

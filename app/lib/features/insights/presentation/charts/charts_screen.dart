@@ -10,7 +10,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../../core/l10n/generated/app_localizations.dart';
 import '../../../../core/theme/z_tokens.dart';
 import '../../../../core/ui/z_button.dart';
-import '../../../../core/ui/z_chip.dart';
+import '../../../../core/ui/z_currency_switcher.dart';
 import '../../../budget/presentation/budget_providers_ui.dart';
 import '../../../budget/presentation/budget_view.dart';
 import '../../domain/chart_models.dart';
@@ -58,19 +58,11 @@ class ChartsScreen extends ConsumerWidget {
             if (list.length > 1)
               Padding(
                 padding: const EdgeInsetsDirectional.only(bottom: ZSpacing.md),
-                child: Wrap(
-                  spacing: ZSpacing.sm,
-                  runSpacing: ZSpacing.sm,
-                  children: [
-                    for (final c in list)
-                      ZChip(
-                        label: c.code,
-                        selected: c.code == code,
-                        onTap: () => ref
-                            .read(chartsCurrencyProvider.notifier)
-                            .select(c.code),
-                      ),
-                  ],
+                child: ZCurrencySwitcher(
+                  codes: [for (final c in list) c.code],
+                  selected: code,
+                  onSelected: (v) =>
+                      ref.read(chartsCurrencyProvider.notifier).select(v),
                 ),
               ),
             if (code == null) ...[

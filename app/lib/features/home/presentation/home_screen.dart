@@ -13,6 +13,7 @@ import '../../../core/theme/z_tokens.dart';
 import '../../../core/ui/z_banner.dart';
 import '../../../core/ui/z_button.dart';
 import '../../../core/ui/z_card.dart';
+import '../../../core/ui/z_currency_switcher.dart';
 import '../../budget/application/budget_providers.dart';
 import '../../capture/application/capture_providers.dart';
 import '../../mascot/presentation/zaghlol_avatar.dart';
@@ -195,6 +196,13 @@ class _HomeBody extends ConsumerStatefulWidget {
 
 class _HomeBodyState extends ConsumerState<_HomeBody> {
   int _page = 0;
+  final _pager = PageController();
+
+  @override
+  void dispose() {
+    _pager.dispose();
+    super.dispose();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -236,10 +244,21 @@ class _HomeBodyState extends ConsumerState<_HomeBody> {
               actions: a,
             )
           else ...[
+            ZCurrencySwitcher(
+              codes: [for (final f in figures) f.currency.code],
+              selected: figures[page].currency.code,
+              onSelected: (code) => _pager.animateToPage(
+                figures.indexWhere((f) => f.currency.code == code),
+                duration: ZMotion.standard,
+                curve: ZMotion.curve,
+              ),
+            ),
+            const SizedBox(height: ZSpacing.sm),
             SizedBox(
               key: const ValueKey('home-pager'),
               height: scale.scale(300),
               child: PageView(
+                controller: _pager,
                 onPageChanged: (i) => setState(() => _page = i),
                 children: [
                   for (final f in figures)
