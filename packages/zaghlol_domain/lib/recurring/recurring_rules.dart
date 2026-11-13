@@ -232,9 +232,13 @@ final class DueItem {
     required this.dueDate,
     this.merchantNorm,
     this.accountId,
+    this.cardDue = false,
   });
 
   final String id;
+
+  /// A card due: only money coming into the card account pays it.
+  final bool cardDue;
 
   /// Expected amount. Zero means "unknown" (a card statement before its
   /// amount is known): any positive same-currency payment then matches, on
@@ -245,8 +249,8 @@ final class DueItem {
   final String? accountId;
 }
 
-/// A payment candidate: an `expense` or `transfer_out` not yet linked to an
-/// occurrence.
+/// A payment candidate not yet linked to an occurrence: an `expense` or
+/// `transfer_out` (or, for card dues, a `transfer_in`).
 final class PaymentCandidate {
   const PaymentCandidate({
     required this.id,
@@ -254,9 +258,13 @@ final class PaymentCandidate {
     required this.date,
     this.merchantNorm,
     this.accountId,
+    this.inbound = false,
   });
 
   final String id;
+
+  /// True for a `transfer_in` (money into the account).
+  final bool inbound;
   final Money amount;
   final CivilDate date;
   final String? merchantNorm;
@@ -279,6 +287,8 @@ PaymentCandidate? matchPayment(
     if (c.amount.currency != item.amount.currency || !c.amount.isPositive) {
       continue;
     }
+    // A card due is paid only by inbound money; others only by outbound.
+    if (item.cardDue != c.inbound) continue;
     final byMerchant = item.merchantNorm != null;
     final identity = byMerchant
         ? c.merchantNorm == item.merchantNorm

@@ -282,6 +282,37 @@ void main() {
       expect(await repo.autoMarkPaid(), hasLength(1));
       expect((await repo.list()).single.nextDueDate, '2026-12-20');
     });
+
+    test('a 45 EGP purchase on the card does not mark the due paid', () async {
+      await db
+          .into(db.accounts)
+          .insert(
+            AccountsCompanion.insert(
+              id: 'card1',
+              kind: 'credit',
+              label: 'Card',
+              defaultCurrency: 'EGP',
+              statementDueDay: const Value(20),
+              createdAt: t0,
+              updatedAt: t0,
+            ),
+          );
+      await repo.syncCardDues();
+      now = DateTime.utc(2026, 11, 18, 12);
+      await db
+          .into(db.transactions)
+          .insert(
+            txn(
+              'buy',
+              accountId: 'card1',
+              direction: 'expense',
+              amountMinor: 4500,
+              occurredAt: at(2026, 11, 19),
+            ),
+          );
+      expect(await repo.autoMarkPaid(), isEmpty);
+      expect((await repo.list()).single.nextDueDate, '2026-11-20');
+    });
   });
 
   group('reminders', () {

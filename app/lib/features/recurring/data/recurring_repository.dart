@@ -402,7 +402,7 @@ class RecurringRepository {
     final lo = dueMs - (autoMarkWindowDays + 2) * day;
     final hi = dueMs + (autoMarkWindowDays + 3) * day;
     final isCard = item.kind == RecurringKind.cardDue;
-    final directions = ['expense', 'transfer_out', if (isCard) 'transfer_in'];
+    final directions = isCard ? ['transfer_in'] : ['expense', 'transfer_out'];
     final rows =
         await (_db.select(_db.transactions)..where(
               (t) =>
@@ -424,6 +424,7 @@ class RecurringRepository {
         dueDate: due,
         merchantNorm: item.merchantNorm,
         accountId: item.accountId,
+        cardDue: isCard,
       ),
       [
         for (final t in rows)
@@ -433,6 +434,7 @@ class RecurringRepository {
             date: CivilDate.fromLocalMs(t.occurredAt, t.occurredTzOffsetMin),
             merchantNorm: t.merchantNorm,
             accountId: t.accountId,
+            inbound: t.direction == 'transfer_in',
           ),
       ],
     );

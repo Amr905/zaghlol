@@ -317,12 +317,14 @@ void main() {
         amount: m(0),
         dueDate: CivilDate(2026, 11, 20),
         accountId: 'card1',
+        cardDue: true,
       );
       final p = PaymentCandidate(
         id: 'p',
         amount: m(345600),
         date: CivilDate(2026, 11, 19),
         accountId: 'card1',
+        inbound: true,
       );
       expect(matchPayment(card, [p])!.id, 'p');
       expect(
@@ -332,10 +334,28 @@ void main() {
             amount: m(345600),
             date: CivilDate(2026, 11, 19),
             accountId: 'card2',
+            inbound: true,
           ),
         ]),
         isNull,
       );
+    });
+
+    test('a card due rejects outbound matches, even with amount 0', () {
+      final card = DueItem(
+        id: 'c',
+        amount: m(0),
+        dueDate: CivilDate(2026, 11, 20),
+        accountId: 'card1',
+        cardDue: true,
+      );
+      final purchase = PaymentCandidate(
+        id: 'p',
+        amount: m(4500),
+        date: CivilDate(2026, 11, 19),
+        accountId: 'card1',
+      );
+      expect(matchPayment(card, [purchase]), isNull);
     });
 
     test('an unknown amount never matches by merchant alone', () {
