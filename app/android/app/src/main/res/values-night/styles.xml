@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <!-- T-103: local_auth (BiometricPrompt) needs an AppCompat parent theme or it
+    <!-- T-103: BiometricPrompt needs an AppCompat parent theme or it
          crashes on Android 8 and below (minSdk 26). -->
     <!-- Theme applied to the Android Window while the process is starting when the OS's Dark Mode setting is on -->
     <style name="LaunchTheme" parent="Theme.AppCompat.DayNight.NoActionBar">

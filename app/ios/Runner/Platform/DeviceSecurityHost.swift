@@ -46,6 +46,33 @@ final class DeviceSecurityHost: DeviceSecurityHostApi {
 
   func isDeviceSecure() throws -> Bool { passcodeSet() }
 
+  /// Seam: runs the policy check; XCTest needs no Face ID hardware.
+  var evaluate: (String, @escaping (Bool, Error?) -> Void) -> Void = { reason, done in
+    LAContext().evaluatePolicy(.deviceOwnerAuthentication, localizedReason: reason, reply: done)
+  }
+
+  /// Biometric with the device passcode as the fallback (A-08).
+  func authenticate(
+    reason: String, completion: @escaping (Result<NativeAuthOutcome, Error>) -> Void
+  ) {
+    evaluate(reason) { ok, error in
+      let outcome = DeviceSecurityHost.outcome(ok: ok, error: error)
+      DispatchQueue.main.async { completion(.success(outcome)) }
+    }
+  }
+
+  static func outcome(ok: Bool, error: Error?) -> NativeAuthOutcome {
+    if ok { return .success }
+    guard let code = (error as? LAError)?.code else { return .failed }
+    switch code {
+    case .userCancel, .systemCancel, .appCancel, .userFallback: return .cancelled
+    case .passcodeNotSet, .biometryNotAvailable, .biometryNotEnrolled, .notInteractive:
+      return .notAvailable
+    case .biometryLockout: return .lockedOut
+    default: return .failed
+    }
+  }
+
   private static func probeWrite() -> Bool {
     let path = "/private/zaghlol_probe_\(UUID().uuidString)"
     do {

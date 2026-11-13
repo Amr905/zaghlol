@@ -32,6 +32,51 @@ class DeviceSecurityHostTest {
     override fun applySecureWindow(secure: Boolean) {
       applied += secure
     }
+
+    var authResult: NativeAuthOutcome = NativeAuthOutcome.SUCCESS
+    var throwOnAuth = false
+    var lastReason: String? = null
+
+    override fun authenticate(reason: String, onResult: (NativeAuthOutcome) -> Unit) {
+      if (throwOnAuth) throw IllegalStateException()
+      lastReason = reason
+      onResult(authResult)
+    }
+  }
+
+  private fun authOf(env: FakeEnv): NativeAuthOutcome {
+    var out: NativeAuthOutcome? = null
+    DeviceSecurityHost(env).authenticate("why") { out = it.getOrThrow() }
+    return out!!
+  }
+
+  @Test
+  fun authenticatePassesTheOutcomeThrough() {
+    for (o in NativeAuthOutcome.values()) {
+      val env = FakeEnv().apply { authResult = o }
+      assertEquals(o, authOf(env))
+      assertEquals("why", env.lastReason)
+    }
+  }
+
+  @Test
+  fun authenticateErrorIsFailedNeverSuccess() {
+    assertEquals(NativeAuthOutcome.FAILED, authOf(FakeEnv(throwOnAuth = true)))
+  }
+
+  @Test
+  fun biometricErrorCodesMapToOutcomes() {
+    assertEquals(NativeAuthOutcome.CANCELLED, BiometricOutcomes.fromError(androidx.biometric.BiometricPrompt.ERROR_USER_CANCELED))
+    assertEquals(NativeAuthOutcome.LOCKED_OUT, BiometricOutcomes.fromError(androidx.biometric.BiometricPrompt.ERROR_LOCKOUT))
+    assertEquals(NativeAuthOutcome.NOT_AVAILABLE, BiometricOutcomes.fromError(androidx.biometric.BiometricPrompt.ERROR_NO_DEVICE_CREDENTIAL))
+    assertEquals(NativeAuthOutcome.FAILED, BiometricOutcomes.fromError(-12345))
+  }
+
+  @Test
+  fun weakAuthenticatorsBelowApi30() {
+    val strong = androidx.biometric.BiometricManager.Authenticators.BIOMETRIC_STRONG
+    assertTrue(BiometricOutcomes.authenticators(30) and strong != 0)
+    assertFalse(BiometricOutcomes.authenticators(29) and strong != 0)
   }
 
   @After

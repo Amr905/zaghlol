@@ -23,7 +23,7 @@ import io.flutter.embedding.android.FlutterFragmentActivity
 import io.flutter.embedding.engine.FlutterEngine
 import java.util.concurrent.Executors
 
-// T-103: local_auth's BiometricPrompt needs a FragmentActivity.
+// T-103: BiometricPrompt (DeviceSecurityHost.authenticate) needs a FragmentActivity.
 class MainActivity : FlutterFragmentActivity() {
     private var shareEvents: ShareIntakeEventsApi? = null
     private var shareStore: ShareStore? = null

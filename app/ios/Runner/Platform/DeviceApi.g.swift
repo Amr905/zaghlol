@@ -65,10 +65,43 @@ private func nilOrValue<T>(_ value: Any?) -> T? {
 }
 
 
+/// How one native unlock prompt ended (T-103). Never carries platform text.
+enum NativeAuthOutcome: Int {
+  case success = 0
+  /// The check ran and the user did not pass it.
+  case failed = 1
+  /// The user or the system dismissed the prompt.
+  case cancelled = 2
+  /// No screen lock set, or no usable biometric hardware / UI.
+  case notAvailable = 3
+  /// Too many wrong tries; the OS blocks the prompt for a while.
+  case lockedOut = 4
+}
+
 private class DeviceApiPigeonCodecReader: FlutterStandardReader {
+  override func readValue(ofType type: UInt8) -> Any? {
+    switch type {
+    case 129:
+      let enumResultAsInt: Int? = nilOrValue(self.readValue() as! Int?)
+      if let enumResultAsInt = enumResultAsInt {
+        return NativeAuthOutcome(rawValue: enumResultAsInt)
+      }
+      return nil
+    default:
+      return super.readValue(ofType: type)
+    }
+  }
 }
 
 private class DeviceApiPigeonCodecWriter: FlutterStandardWriter {
+  override func writeValue(_ value: Any) {
+    if let value = value as? NativeAuthOutcome {
+      super.writeByte(129)
+      super.writeValue(value.rawValue)
+    } else {
+      super.writeValue(value)
+    }
+  }
 }
 
 private class DeviceApiPigeonCodecReaderWriter: FlutterStandardReaderWriter {
@@ -85,6 +118,7 @@ class DeviceApiPigeonCodec: FlutterStandardMessageCodec, @unchecked Sendable {
   static let shared = DeviceApiPigeonCodec(readerWriter: DeviceApiPigeonCodecReaderWriter())
 }
 
+
 /// Generated protocol from Pigeon that represents a handler of messages from Flutter.
 protocol DeviceSecurityHostApi {
   /// FR-SEC-07 heuristic: true when the device looks rooted (Android) or
@@ -98,6 +132,10 @@ protocol DeviceSecurityHostApi {
   /// True when the device has a passcode / PIN / pattern set (the fallback the
   /// app lock needs).
   func isDeviceSecure() throws -> Bool
+  /// FR-SEC-01: shows the OS unlock prompt (biometric with the device passcode
+  /// as the fallback, A-08) and reports how it ended. Replaces the `local_auth`
+  /// plugin. Never throws for a failed or dismissed prompt.
+  func authenticate(reason: String, completion: @escaping (Result<NativeAuthOutcome, Error>) -> Void)
 }
 
 /// Generated setup class from Pigeon to handle messages through the `binaryMessenger`.
@@ -154,6 +192,26 @@ class DeviceSecurityHostApiSetup {
       }
     } else {
       isDeviceSecureChannel.setMessageHandler(nil)
+    }
+    /// FR-SEC-01: shows the OS unlock prompt (biometric with the device passcode
+    /// as the fallback, A-08) and reports how it ended. Replaces the `local_auth`
+    /// plugin. Never throws for a failed or dismissed prompt.
+    let authenticateChannel = FlutterBasicMessageChannel(name: "dev.flutter.pigeon.zaghlol.DeviceSecurityHostApi.authenticate\(channelSuffix)", binaryMessenger: binaryMessenger, codec: codec)
+    if let api = api {
+      authenticateChannel.setMessageHandler { message, reply in
+        let args = message as! [Any?]
+        let reasonArg = args[0] as! String
+        api.authenticate(reason: reasonArg) { result in
+          switch result {
+          case .success(let res):
+            reply(wrapResult(res))
+          case .failure(let error):
+            reply(wrapError(error))
+          }
+        }
+      }
+    } else {
+      authenticateChannel.setMessageHandler(nil)
     }
   }
 }

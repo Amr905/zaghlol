@@ -1,8 +1,7 @@
 // T-103: Dart side of the DeviceSecurityHostApi (platform-channels section 5)
-// and the local_auth wrapper. Tests override both providers with fakes.
+// and the authenticator over it. Tests override both providers with fakes.
 
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:local_auth/local_auth.dart';
 
 import '../../../core/platform/device_api.g.dart';
 
@@ -45,34 +44,21 @@ abstract interface class AppAuthenticator {
   Future<AuthOutcome> authenticate(String reason);
 }
 
-class LocalAuthAuthenticator implements AppAuthenticator {
-  LocalAuthAuthenticator([LocalAuthentication? auth])
-    : _auth = auth ?? LocalAuthentication();
+/// Calls the native prompt through [DeviceSecurityHostApi.authenticate].
+class HostAppAuthenticator implements AppAuthenticator {
+  HostAppAuthenticator(this._host);
 
-  final LocalAuthentication _auth;
+  final DeviceSecurityHostApi _host;
 
   @override
   Future<AuthOutcome> authenticate(String reason) async {
     try {
-      final ok = await _auth.authenticate(
-        localizedReason: reason,
-        biometricOnly: false,
-      );
-      return ok ? AuthOutcome.success : AuthOutcome.failed;
-    } on LocalAuthException catch (e) {
-      return switch (e.code) {
-        LocalAuthExceptionCode.userCanceled ||
-        LocalAuthExceptionCode.systemCanceled ||
-        LocalAuthExceptionCode.timeout ||
-        LocalAuthExceptionCode.authInProgress ||
-        LocalAuthExceptionCode.userRequestedFallback => AuthOutcome.canceled,
-        LocalAuthExceptionCode.noCredentialsSet ||
-        LocalAuthExceptionCode.noBiometricsEnrolled ||
-        LocalAuthExceptionCode.noBiometricHardware ||
-        LocalAuthExceptionCode.uiUnavailable => AuthOutcome.unavailable,
-        LocalAuthExceptionCode.biometricLockout ||
-        LocalAuthExceptionCode.temporaryLockout => AuthOutcome.lockedOut,
-        _ => AuthOutcome.failed,
+      return switch (await _host.authenticate(reason)) {
+        NativeAuthOutcome.success => AuthOutcome.success,
+        NativeAuthOutcome.failed => AuthOutcome.failed,
+        NativeAuthOutcome.cancelled => AuthOutcome.canceled,
+        NativeAuthOutcome.notAvailable => AuthOutcome.unavailable,
+        NativeAuthOutcome.lockedOut => AuthOutcome.lockedOut,
       };
     } on Object {
       // Anything else is a failed check, never a pass.
@@ -82,6 +68,6 @@ class LocalAuthAuthenticator implements AppAuthenticator {
 }
 
 final appAuthenticatorProvider = Provider<AppAuthenticator>(
-  (ref) => LocalAuthAuthenticator(),
+  (ref) => HostAppAuthenticator(ref.watch(deviceSecurityHostProvider)),
   name: 'appAuthenticatorProvider',
 );

@@ -1,3 +1,4 @@
+import LocalAuthentication
 import XCTest
 
 @testable import Runner
@@ -42,5 +43,29 @@ final class DeviceSecurityTests: XCTestCase {
     XCTAssertTrue(try h.isDeviceSecure())
     h.passcodeSet = { false }
     XCTAssertFalse(try h.isDeviceSecure())
+  }
+
+  func testAuthenticateMapsPolicyResults() {
+    XCTAssertEqual(DeviceSecurityHost.outcome(ok: true, error: nil), .success)
+    XCTAssertEqual(DeviceSecurityHost.outcome(ok: false, error: nil), .failed)
+    XCTAssertEqual(
+      DeviceSecurityHost.outcome(ok: false, error: LAError(.userCancel)), .cancelled)
+    XCTAssertEqual(
+      DeviceSecurityHost.outcome(ok: false, error: LAError(.passcodeNotSet)), .notAvailable)
+    XCTAssertEqual(
+      DeviceSecurityHost.outcome(ok: false, error: LAError(.biometryLockout)), .lockedOut)
+    XCTAssertEqual(
+      DeviceSecurityHost.outcome(ok: false, error: LAError(.authenticationFailed)), .failed)
+  }
+
+  func testAuthenticateReportsThroughTheSeam() {
+    let h = host()
+    h.evaluate = { _, done in done(false, LAError(.userCancel)) }
+    let exp = expectation(description: "completion")
+    h.authenticate(reason: "why") { result in
+      XCTAssertEqual(try? result.get(), .cancelled)
+      exp.fulfill()
+    }
+    wait(for: [exp], timeout: 2)
   }
 }

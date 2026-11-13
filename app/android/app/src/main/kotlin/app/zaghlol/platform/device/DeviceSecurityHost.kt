@@ -5,6 +5,10 @@ import android.app.KeyguardManager
 import android.content.Context
 import android.os.Build
 import android.view.WindowManager
+import androidx.biometric.BiometricManager
+import androidx.biometric.BiometricPrompt
+import androidx.core.content.ContextCompat
+import androidx.fragment.app.FragmentActivity
 import io.flutter.plugin.common.BinaryMessenger
 import java.io.File
 import java.lang.ref.WeakReference
@@ -19,6 +23,9 @@ interface DeviceEnv {
 
   /** Applies the secure window to the current activity, if there is one. */
   fun applySecureWindow(secure: Boolean)
+
+  /** Shows the OS unlock prompt; [onResult] is called exactly once, on the main thread. */
+  fun authenticate(reason: String, onResult: (NativeAuthOutcome) -> Unit)
 }
 
 /**
@@ -52,6 +59,15 @@ class DeviceSecurityHost(private val env: DeviceEnv) : DeviceSecurityHostApi {
       // a guess; it never changes any stored data.
       false
     }
+
+  override fun authenticate(reason: String, callback: (Result<NativeAuthOutcome>) -> Unit) {
+    try {
+      env.authenticate(reason) { callback(Result.success(it)) }
+    } catch (_: RuntimeException) {
+      // A failed prompt is never a pass.
+      callback(Result.success(NativeAuthOutcome.FAILED))
+    }
+  }
 
   companion object {
     val SU_PATHS =
@@ -96,6 +112,48 @@ class AndroidDeviceEnv(context: Context, activity: Activity) : DeviceEnv {
     activityRef.get()?.let { applyTo(it, secure) }
   }
 
+  @Volatile private var prompting = false
+
+  override fun authenticate(reason: String, onResult: (NativeAuthOutcome) -> Unit) {
+    val activity = activityRef.get() as? FragmentActivity
+    if (activity == null || prompting) {
+      onResult(NativeAuthOutcome.CANCELLED)
+      return
+    }
+    val authenticators = BiometricOutcomes.authenticators(Build.SDK_INT)
+    BiometricOutcomes.fromCanAuthenticate(
+      BiometricManager.from(activity).canAuthenticate(authenticators)
+    )?.let {
+      onResult(it)
+      return
+    }
+    prompting = true
+    val prompt =
+      BiometricPrompt(
+        activity,
+        ContextCompat.getMainExecutor(activity),
+        object : BiometricPrompt.AuthenticationCallback() {
+          override fun onAuthenticationSucceeded(result: BiometricPrompt.AuthenticationResult) {
+            prompting = false
+            onResult(NativeAuthOutcome.SUCCESS)
+          }
+
+          override fun onAuthenticationError(errorCode: Int, errString: CharSequence) {
+            prompting = false
+            onResult(BiometricOutcomes.fromError(errorCode))
+          }
+          // onAuthenticationFailed (one wrong finger) is not final: the prompt stays up.
+        },
+      )
+    // No negative button: not allowed together with DEVICE_CREDENTIAL.
+    val info =
+      BiometricPrompt.PromptInfo.Builder()
+        .setTitle(reason)
+        .setAllowedAuthenticators(authenticators)
+        .build()
+    prompt.authenticate(info)
+  }
+
   companion object {
     /** FLAG_SECURE hides the window from screenshots and from the recents thumbnail. */
     fun applyTo(activity: Activity, secure: Boolean) {
@@ -111,6 +169,40 @@ class AndroidDeviceEnv(context: Context, activity: Activity) : DeviceEnv {
       }
     }
   }
+}
+
+/** Maps BiometricPrompt / BiometricManager codes to the contract outcome. Pure. */
+object BiometricOutcomes {
+  /**
+   * AndroidX rule: BIOMETRIC_STRONG with DEVICE_CREDENTIAL is unsupported on API 28-29,
+   * so API 26-29 use BIOMETRIC_WEAK or DEVICE_CREDENTIAL.
+   */
+  fun authenticators(sdkInt: Int): Int =
+    if (sdkInt >= 30) {
+      BiometricManager.Authenticators.BIOMETRIC_STRONG or
+        BiometricManager.Authenticators.DEVICE_CREDENTIAL
+    } else {
+      BiometricManager.Authenticators.BIOMETRIC_WEAK or
+        BiometricManager.Authenticators.DEVICE_CREDENTIAL
+    }
+
+  fun fromCanAuthenticate(code: Int): NativeAuthOutcome? =
+    if (code == BiometricManager.BIOMETRIC_SUCCESS) null else NativeAuthOutcome.NOT_AVAILABLE
+
+  fun fromError(code: Int): NativeAuthOutcome =
+    when (code) {
+      BiometricPrompt.ERROR_USER_CANCELED,
+      BiometricPrompt.ERROR_CANCELED,
+      BiometricPrompt.ERROR_NEGATIVE_BUTTON -> NativeAuthOutcome.CANCELLED
+      BiometricPrompt.ERROR_LOCKOUT,
+      BiometricPrompt.ERROR_LOCKOUT_PERMANENT -> NativeAuthOutcome.LOCKED_OUT
+      BiometricPrompt.ERROR_HW_NOT_PRESENT,
+      BiometricPrompt.ERROR_HW_UNAVAILABLE,
+      BiometricPrompt.ERROR_NO_BIOMETRICS,
+      BiometricPrompt.ERROR_NO_DEVICE_CREDENTIAL,
+      BiometricPrompt.ERROR_SECURITY_UPDATE_REQUIRED -> NativeAuthOutcome.NOT_AVAILABLE
+      else -> NativeAuthOutcome.FAILED
+    }
 }
 
 object DeviceSecurityRegistration {

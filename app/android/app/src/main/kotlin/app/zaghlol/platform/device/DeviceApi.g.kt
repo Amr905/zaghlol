@@ -47,14 +47,47 @@ class DeviceApiError (
   override val message: String? = null,
   val details: Any? = null
 ) : Throwable()
-private open class DeviceApiPigeonCodec : StandardMessageCodec() {
-  override fun readValueOfType(type: Byte, buffer: ByteBuffer): Any? {
-    return     super.readValueOfType(type, buffer)
-  }
-  override fun writeValue(stream: ByteArrayOutputStream, value: Any?)   {
-    super.writeValue(stream, value)
+
+/** How one native unlock prompt ended (T-103). Never carries platform text. */
+enum class NativeAuthOutcome(val raw: Int) {
+  SUCCESS(0),
+  /** The check ran and the user did not pass it. */
+  FAILED(1),
+  /** The user or the system dismissed the prompt. */
+  CANCELLED(2),
+  /** No screen lock set, or no usable biometric hardware / UI. */
+  NOT_AVAILABLE(3),
+  /** Too many wrong tries; the OS blocks the prompt for a while. */
+  LOCKED_OUT(4);
+
+  companion object {
+    fun ofRaw(raw: Int): NativeAuthOutcome? {
+      return values().firstOrNull { it.raw == raw }
+    }
   }
 }
+private open class DeviceApiPigeonCodec : StandardMessageCodec() {
+  override fun readValueOfType(type: Byte, buffer: ByteBuffer): Any? {
+    return when (type) {
+      129.toByte() -> {
+        return (readValue(buffer) as Long?)?.let {
+          NativeAuthOutcome.ofRaw(it.toInt())
+        }
+      }
+      else -> super.readValueOfType(type, buffer)
+    }
+  }
+  override fun writeValue(stream: ByteArrayOutputStream, value: Any?)   {
+    when (value) {
+      is NativeAuthOutcome -> {
+        stream.write(129)
+        writeValue(stream, value.raw.toLong())
+      }
+      else -> super.writeValue(stream, value)
+    }
+  }
+}
+
 
 /** Generated interface from Pigeon that represents a handler of messages from Flutter. */
 interface DeviceSecurityHostApi {
@@ -75,6 +108,12 @@ interface DeviceSecurityHostApi {
    * app lock needs).
    */
   fun isDeviceSecure(): Boolean
+  /**
+   * FR-SEC-01: shows the OS unlock prompt (biometric with the device passcode
+   * as the fallback, A-08) and reports how it ended. Replaces the `local_auth`
+   * plugin. Never throws for a failed or dismissed prompt.
+   */
+  fun authenticate(reason: String, callback: (Result<NativeAuthOutcome>) -> Unit)
 
   companion object {
     /** The codec used by DeviceSecurityHostApi. */
@@ -128,6 +167,26 @@ interface DeviceSecurityHostApi {
               DeviceApiPigeonUtils.wrapError(exception)
             }
             reply.reply(wrapped)
+          }
+        } else {
+          channel.setMessageHandler(null)
+        }
+      }
+      run {
+        val channel = BasicMessageChannel<Any?>(binaryMessenger, "dev.flutter.pigeon.zaghlol.DeviceSecurityHostApi.authenticate$separatedMessageChannelSuffix", codec)
+        if (api != null) {
+          channel.setMessageHandler { message, reply ->
+            val args = message as List<Any?>
+            val reasonArg = args[0] as String
+            api.authenticate(reasonArg) { result: Result<NativeAuthOutcome> ->
+              val error = result.exceptionOrNull()
+              if (error != null) {
+                reply.reply(DeviceApiPigeonUtils.wrapError(error))
+              } else {
+                val data = result.getOrNull()
+                reply.reply(DeviceApiPigeonUtils.wrapResult(data))
+              }
+            }
           }
         } else {
           channel.setMessageHandler(null)
