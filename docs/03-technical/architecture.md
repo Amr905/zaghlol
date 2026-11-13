@@ -233,7 +233,7 @@ The internal layering is `Zaghlol.Api` (endpoints, auth, validation) → `Zaghlo
 | INT-06 | OCR | Both | iOS Vision `VNRecognizeTextRequest`; Android ML Kit Latin + Tesseract Arabic (ADR-009) | §4 | Unsupported language → manual entry |
 | INT-07 | Speech | Both | `speech_to_text` plugin → Android `SpeechRecognizer` (on-device API 31+), iOS `SFSpeechRecognizer`/`SpeechAnalyzer` | ADR-010 | No ar-EG on device → message + manual entry (EC-32) |
 | INT-08/09 | Play Billing 8 / StoreKit 2 | App | `in_app_purchase` 3.3+ (bundles PBL 8) | `backend-api.md` §4.3 | Pending → "pending"; backend down → retry queue |
-| INT-10 | Google Drive v3 `appDataFolder` | App | `google_sign_in` + `googleapis` | ADR-011 | Upload fail → notification «النسخة الاحتياطية ما اتعملتش» (FR-NTF-01) |
+| INT-10 | Google Drive v3 `appDataFolder` | App | `google_sign_in` 7 (scope `drive.appdata` only; client IDs via `--dart-define` `ZAGHLOL_GOOGLE_IOS_CLIENT_ID` / `ZAGHLOL_GOOGLE_SERVER_CLIENT_ID`) + `googleapis` (T-150: `features/backup/data/drive_store.dart`) | ADR-011 | Upload fail → notification «النسخة الاحتياطية ما اتعملتش» (FR-NTF-01) |
 | INT-11 | iCloud Documents (ubiquity container) | iOS | Swift `FileManager` ubiquity APIs via Pigeon | §3 | iCloud off → explain, offer Drive |
 | INT-12 | Price provider | Backend | HTTPS REST adapter (ADR-014) | — | Stale > 24 h → flagged stale; last value served |
 | INT-17 | Zaghlol API | App ↔ BE | HTTPS JSON, ES256-signed responses | `backend-api.md` | App fully usable offline (NFR-BE-01) |
