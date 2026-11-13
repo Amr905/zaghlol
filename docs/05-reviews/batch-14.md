@@ -124,3 +124,8 @@ Findings:
 | T-076 | A — App core/data (flutter-core) | major | Re-parse of a review/pending row runs the pending/settled merge: it writes status to user-verified pending transactions (plus a review item) and changes amounts of unverified ones (`ingest_raw_messages.dart:437` → `:987-1031` → `_settle :1253`). Skip or guard the merge in re-parse mode, plus 2 tests. Fix minor #2 (doc) in the same pass. |
 
 Follow-ups to record in `docs/implementation-status.md` (non-blocking): T-149 #1 (T-150 pauses tick/sync/capture during restore), #2 (catch-all after commit); T-144 #1 (absent record + cached token → tampered), #2 (serialize evaluate, T-143), #3 (clock copy, T-146); T-103 #1 (`prompting` reset), #2 (retain `LAContext`, device check); T-076 #3, #4; T-095 #1 (annual vs cycle), #2 (`tryFromStorage`).
+
+## Lead delta check (be926c2)
+
+- **T-076 major:** in re-parse mode, a pending/settled merge match only promotes the raw row. The matched transaction (amount, status, fields) is never written, whether user-verified or not, and no review item comes from the merge. The production change is 3 lines. The two new tests ("user-verified pending: transaction untouched, no new review item" and "unverified pending: amount and status unchanged") fail without the fix and pass with it. The doc comment and design note now match. Verdict for T-076: **APPROVED**.
+- **T-103 minor 1:** `prompt.authenticate` is wrapped so that a throw clears `prompting` and answers `NOT_AVAILABLE`, so the user can always get another prompt. There's no Kotlin unit test (it needs a real `BiometricPrompt`). app-ci on `ci/T-103-c` compiles it.

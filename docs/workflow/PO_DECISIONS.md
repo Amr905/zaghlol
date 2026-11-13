@@ -45,6 +45,10 @@ T-035 Q1–Q6 (keep with bundled rules; drop OTP+transaction messages, as the re
 | T-103 | With app lock on and the phone's screen lock removed, the app stays locked and asks the user to set a screen lock (no bypass). |
 | T-115 | The ≈ view rounds each converted currency once (half-even), then sums exactly; it is labelled ≈ whenever anything was converted or excluded. |
 | T-154 | The Free export preview shows up to 20 rows. |
+| T-103 | `local_auth` is dropped (it hung iOS app launch); the lock prompt is native: iOS `LAContext(.deviceOwnerAuthentication)`, Android `BiometricPrompt` (STRONG or DEVICE_CREDENTIAL on API 30+, WEAK or DEVICE_CREDENTIAL on 26–29). |
+| T-076 | A re-parse never changes an existing transaction's amount or status and never writes a user-verified one; it only fills empty fields or promotes the raw row. |
+| T-149 | A restore copies the backup under this phone's own database key (a key swap can't be atomic); the other phone's key never travels. |
+| T-144 | A wall clock still wrong after a fresh server check stays "tampered" (fails closed); the copy tells the user to set the clock to automatic. |
 | T-109 | `دينار` keeps the default currency with `ambiguousCurrency`; the voice UI asks. Missing spoken keywords go into the T-059 catalog seed. |
 | Q-44, T-047 Q2, T-047 Q5 | `ux-designer` writes the copy in the voice guide; reviewed in T-058. Placement: Q-44 one-time Welcome line with a "restore" action; missed notifications as a dismissible card in capture settings (and the lowest-priority home banner); rule saved but not yet active as "اتحفظت — هتشتغل خلال ثواني" / "Saved — active in a few seconds". |
 
@@ -84,6 +88,7 @@ T-035 Q1–Q6 (keep with bundled rules; drop OTP+transaction messages, as the re
 | T-088 | `zaghlol.riv` mascot file. | T-099 |
 | T-148 Q2, T-007, T-008 Q1 | Name a reference low-end Android phone (and an iPhone 12), plus a Samsung A-series and a Xiaomi/Redmi with a second SIM for SPK-01. | release timings, SPK-01 |
 | T-180 | Run the trusted-clock device checks in `docs/05-reviews/T-180-device.md` (sleep, Doze, reboot) on one Android phone and one iPhone, before T-144 ships. | T-144 |
+| T-103 | Try the app lock on one Android phone and one iPhone: Face ID / fingerprint, then the passcode fallback. | T-103 sign-off |
 | T-165, T-015, T-060 | Run the device checklists (backup exclusion; StrongBox phone; iPhone reboot and read before unlock; FU-067 steps). | closing those tasks |
 
 ### Housekeeping
