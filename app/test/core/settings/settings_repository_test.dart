@@ -64,6 +64,11 @@ allKeys = [
     byDefault: <String>{},
     other: {'payday', 'lock'},
   ),
+  (
+    key: Settings.setupSuggestionsHandled,
+    byDefault: <String>{},
+    other: {'budget'},
+  ),
   (key: Settings.paywallLastShown, byDefault: null, other: 1760000000000),
 ];
 
