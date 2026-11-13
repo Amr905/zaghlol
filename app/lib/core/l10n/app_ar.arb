@@ -55,5 +55,3731 @@
   "homeQuickAddScanA11y": "اقرا سكرين شوت",
   "homeQuickAddAssetA11y": "ضيف أصل",
   "ingestionReviewTitle": "مستني رأيك 👀",
-  "notificationsChannelName": "التنبيهات"
+  "notificationsChannelName": "التنبيهات",
+  "commonActionSave": "احفظ",
+  "@commonActionSave": {
+    "description": "B"
+  },
+  "commonActionCancel": "إلغاء",
+  "@commonActionCancel": {
+    "description": "B"
+  },
+  "commonActionDone": "تمام",
+  "@commonActionDone": {
+    "description": "B · closes a sheet"
+  },
+  "commonActionConfirm": "تمام",
+  "@commonActionConfirm": {
+    "description": "B · glossary «تمام»"
+  },
+  "commonActionDismiss": "سيبها",
+  "@commonActionDismiss": {
+    "description": "B · glossary «سيبها»"
+  },
+  "commonActionUndo": "تراجع",
+  "@commonActionUndo": {
+    "description": "B · snackbar action, 5 s (C-19)"
+  },
+  "commonActionTryAgain": "جرّب تاني",
+  "@commonActionTryAgain": {
+    "description": "B"
+  },
+  "commonActionSkip": "تخطّي",
+  "@commonActionSkip": {
+    "description": "B · stepper header"
+  },
+  "commonActionContinue": "كمّل",
+  "@commonActionContinue": {
+    "description": "B"
+  },
+  "commonActionNotNow": "مش دلوقتي",
+  "@commonActionNotNow": {
+    "description": "B"
+  },
+  "commonActionLater": "بعدين",
+  "@commonActionLater": {
+    "description": "B"
+  },
+  "commonActionEdit": "عدّل",
+  "@commonActionEdit": {
+    "description": "B"
+  },
+  "commonActionDelete": "امسح",
+  "@commonActionDelete": {
+    "description": "B · destructive variant"
+  },
+  "commonActionClose": "اقفل",
+  "@commonActionClose": {
+    "description": "B"
+  },
+  "commonActionBackA11y": "رجوع",
+  "@commonActionBackA11y": {
+    "description": "A"
+  },
+  "commonActionMoreA11y": "اختيارات تانية",
+  "@commonActionMoreA11y": {
+    "description": "A · ⋮ menu"
+  },
+  "commonActionSeeAll": "شوف الكل",
+  "@commonActionSeeAll": {
+    "description": "B · glossary"
+  },
+  "commonActionClearFilter": "شيل الفلتر",
+  "@commonActionClearFilter": {
+    "description": "B"
+  },
+  "commonActionOpenSettings": "افتح الإعدادات",
+  "@commonActionOpenSettings": {
+    "description": "B · opens OS settings"
+  },
+  "commonActionFix": "صلّحها",
+  "@commonActionFix": {
+    "description": "B"
+  },
+  "commonActionYes": "أيوه",
+  "@commonActionYes": {
+    "description": "B"
+  },
+  "commonActionNo": "لأ",
+  "@commonActionNo": {
+    "description": "B"
+  },
+  "commonActionSelect": "اختار",
+  "@commonActionSelect": {
+    "description": "B · S-11 nav bar"
+  },
+  "commonActionSelectAll": "اختار الكل",
+  "@commonActionSelectAll": {
+    "description": "B"
+  },
+  "commonActionSend": "ابعت",
+  "@commonActionSend": {
+    "description": "B"
+  },
+  "commonActionLink": "اربط",
+  "@commonActionLink": {
+    "description": "B"
+  },
+  "commonActionUnlink": "فك الربط",
+  "@commonActionUnlink": {
+    "description": "B"
+  },
+  "commonActionMore": "المزيد",
+  "@commonActionMore": {
+    "description": "C"
+  },
+  "commonActionShow": "اظهر",
+  "@commonActionShow": {
+    "description": "C · passphrase reveal"
+  },
+  "commonActionHide": "اخفي",
+  "@commonActionHide": {
+    "description": "C"
+  },
+  "commonActionLearnMore": "اعرف أكتر",
+  "@commonActionLearnMore": {
+    "description": "B"
+  },
+  "commonActionSearchA11y": "دوّر",
+  "@commonActionSearchA11y": {
+    "description": "A"
+  },
+  "commonDiscardTitle": "تسيب اللي كتبته؟",
+  "@commonDiscardTitle": {
+    "description": "T"
+  },
+  "commonDiscardBody": "اللي ما اتحفظش هيروح.",
+  "@commonDiscardBody": {
+    "description": "S"
+  },
+  "commonDiscardConfirm": "متحفظش",
+  "@commonDiscardConfirm": {
+    "description": "B · destructive"
+  },
+  "commonDiscardKeep": "كمّل تعديل",
+  "@commonDiscardKeep": {
+    "description": "B"
+  },
+  "commonNavSettingsA11y": "الإعدادات",
+  "@commonNavSettingsA11y": {
+    "description": "A · Home gear"
+  },
+  "commonCardFilterAll": "كل الكروت",
+  "@commonCardFilterAll": {
+    "description": "C"
+  },
+  "commonCardFilterCount": "{count, plural, =1{كارت واحد} =2{كارتين} few{{n} كروت} many{{n} كارت} other{{n} كارت}}",
+  "@commonCardFilterCount": {
+    "description": "C · count:int, n · shown when 2+ cards are selected",
+    "placeholders": {
+      "count": {
+        "type": "int"
+      },
+      "n": {
+        "type": "String"
+      }
+    }
+  },
+  "commonCardFilterSheetTitle": "تشوف أنهي كروت؟",
+  "@commonCardFilterSheetTitle": {
+    "description": "T"
+  },
+  "commonCardFilterClearA11y": "شيل فلتر الكروت",
+  "@commonCardFilterClearA11y": {
+    "description": "A"
+  },
+  "commonCardFilterActiveA11y": "الفلتر شغال: {cards}",
+  "@commonCardFilterActiveA11y": {
+    "description": "A",
+    "placeholders": {
+      "cards": {
+        "type": "String"
+      }
+    }
+  },
+  "commonCurrencyApproxChip": "≈ {currency}",
+  "@commonCurrencyApproxChip": {
+    "description": "C · currency = ISO code or «ج.م»",
+    "placeholders": {
+      "currency": {
+        "type": "String"
+      }
+    }
+  },
+  "commonCurrencyApproxCaption": "تقريبي بسعر {date}",
+  "@commonCurrencyApproxCaption": {
+    "description": "L · FR-CUR-04",
+    "placeholders": {
+      "date": {
+        "type": "String"
+      }
+    }
+  },
+  "commonCurrencyApproxA11y": "تقريباً",
+  "@commonCurrencyApproxA11y": {
+    "description": "A · read before a ≈ amount"
+  },
+  "commonBadgeStale": "سعر قديم",
+  "@commonBadgeStale": {
+    "description": "C · C-21, older than 24 h"
+  },
+  "commonBadgeStaleA11y": "السعر ده عدى عليه أكتر من يوم",
+  "@commonBadgeStaleA11y": {
+    "description": "A"
+  },
+  "commonMoneyMaskedA11y": "المبلغ مخفي",
+  "@commonMoneyMaskedA11y": {
+    "description": "A · C-04 masked •••"
+  },
+  "commonMoneyCurrencyPagerA11y": "صفحة {index} من {total}: {currency}",
+  "@commonMoneyCurrencyPagerA11y": {
+    "description": "A · C-11 pager",
+    "placeholders": {
+      "currency": {
+        "type": "String"
+      },
+      "index": {
+        "type": "String"
+      },
+      "total": {
+        "type": "String"
+      }
+    }
+  },
+  "commonSourceSms": "رسالة SMS",
+  "@commonSourceSms": {
+    "description": "C"
+  },
+  "commonSourceNotification": "إشعار",
+  "@commonSourceNotification": {
+    "description": "C"
+  },
+  "commonSourceApplePay": "Apple Pay",
+  "@commonSourceApplePay": {
+    "description": "C"
+  },
+  "commonSourceShortcut": "اختصار",
+  "@commonSourceShortcut": {
+    "description": "C"
+  },
+  "commonSourceScan": "صورة",
+  "@commonSourceScan": {
+    "description": "C · OCR"
+  },
+  "commonSourceStatement": "كشف حساب",
+  "@commonSourceStatement": {
+    "description": "C · PDF / online-bank file"
+  },
+  "commonSourceCsv": "ملف CSV",
+  "@commonSourceCsv": {
+    "description": "C"
+  },
+  "commonSourceVoice": "صوت",
+  "@commonSourceVoice": {
+    "description": "C"
+  },
+  "commonSourceManual": "بإيدك",
+  "@commonSourceManual": {
+    "description": "C"
+  },
+  "commonSourceShared": "رسالة اتبعتت",
+  "@commonSourceShared": {
+    "description": "C · share/paste, FR-ING-A-04. Maps to DB source = 'share' (database-schema.md; Q-02 closed)"
+  },
+  "commonTxnTypeExpense": "مصروف",
+  "@commonTxnTypeExpense": {
+    "description": "C"
+  },
+  "commonTxnTypeIncome": "دخل",
+  "@commonTxnTypeIncome": {
+    "description": "C"
+  },
+  "commonTxnTypeTransfer": "تحويل",
+  "@commonTxnTypeTransfer": {
+    "description": "C"
+  },
+  "commonTxnTypeInternal": "تحويلة لنفسك",
+  "@commonTxnTypeInternal": {
+    "description": "C"
+  },
+  "commonTxnTypeRefund": "مرتجع",
+  "@commonTxnTypeRefund": {
+    "description": "C · from a merchant (BR-XFR-08)"
+  },
+  "commonTxnTypeReimbursement": "فلوس راجعة",
+  "@commonTxnTypeReimbursement": {
+    "description": "C · from people (BR-XFR-08)"
+  },
+  "commonTxnTypeDeclined": "اترفضت",
+  "@commonTxnTypeDeclined": {
+    "description": "C"
+  },
+  "commonAccountTypeDebit": "ديبت",
+  "@commonAccountTypeDebit": {
+    "description": "C"
+  },
+  "commonAccountTypeCredit": "كريدت",
+  "@commonAccountTypeCredit": {
+    "description": "C"
+  },
+  "commonAccountTypeAccount": "حساب بنك",
+  "@commonAccountTypeAccount": {
+    "description": "C"
+  },
+  "commonAccountTypeWallet": "محفظة",
+  "@commonAccountTypeWallet": {
+    "description": "C"
+  },
+  "commonAccountTypeBnpl": "تقسيط",
+  "@commonAccountTypeBnpl": {
+    "description": "C"
+  },
+  "commonAccountTypeCash": "كاش",
+  "@commonAccountTypeCash": {
+    "description": "C · default account FR-ACC-03"
+  },
+  "commonAccountTypeMultiCurrency": "أكتر من عملة",
+  "@commonAccountTypeMultiCurrency": {
+    "description": "C"
+  },
+  "commonChannelSms": "رسايل البنك",
+  "@commonChannelSms": {
+    "description": "L"
+  },
+  "commonChannelSmsShort": "الرسايل",
+  "@commonChannelSmsShort": {
+    "description": "C · compact status row"
+  },
+  "commonChannelNotifications": "إشعارات التطبيقات",
+  "@commonChannelNotifications": {
+    "description": "L · Android only"
+  },
+  "commonChannelNotificationsShort": "الإشعارات",
+  "@commonChannelNotificationsShort": {
+    "description": "C"
+  },
+  "commonChannelApplePay": "Apple Pay",
+  "@commonChannelApplePay": {
+    "description": "L · iOS only"
+  },
+  "commonChannelOnA11y": "شغال",
+  "@commonChannelOnA11y": {
+    "description": "A"
+  },
+  "commonChannelOffA11y": "مقفول",
+  "@commonChannelOffA11y": {
+    "description": "A"
+  },
+  "commonDateToday": "النهارده",
+  "@commonDateToday": {
+    "description": "C"
+  },
+  "commonDateYesterday": "امبارح",
+  "@commonDateYesterday": {
+    "description": "C"
+  },
+  "commonDateJustNow": "دلوقتي",
+  "@commonDateJustNow": {
+    "description": "C"
+  },
+  "commonDateMinutesAgo": "{count, plural, =0{دلوقتي} =1{من دقيقة} =2{من دقيقتين} few{من {n} دقايق} many{من {n} دقيقة} other{من {n} دقيقة}}",
+  "@commonDateMinutesAgo": {
+    "description": "C · count:int, n · whole minutes, 0–59. =0 (under one minute) reads the same as common_date_justNow, so callers pass 0 rather than switching keys. 60 or more → common_date_hoursAgo",
+    "placeholders": {
+      "count": {
+        "type": "int"
+      },
+      "n": {
+        "type": "String"
+      }
+    }
+  },
+  "commonDateHoursAgo": "{count, plural, =1{من ساعة} =2{من ساعتين} few{من {n} ساعات} many{من {n} ساعة} other{من {n} ساعة}}",
+  "@commonDateHoursAgo": {
+    "description": "C · count:int, n · whole hours, 1–23; 24 or more → {date}. 0 can't occur (that's minutes), so no =0 (listed in §0.4)",
+    "placeholders": {
+      "count": {
+        "type": "int"
+      },
+      "n": {
+        "type": "String"
+      }
+    }
+  },
+  "commonDateDateTime": "{date}، {time}",
+  "@commonDateDateTime": {
+    "description": "L",
+    "placeholders": {
+      "date": {
+        "type": "String"
+      },
+      "time": {
+        "type": "String"
+      }
+    }
+  },
+  "commonDateRange": "{start} – {end}",
+  "@commonDateRange": {
+    "description": "L · en dash; RTL reads start first (from the right)",
+    "placeholders": {
+      "end": {
+        "type": "String"
+      },
+      "start": {
+        "type": "String"
+      }
+    }
+  },
+  "commonPeriodThisCycle": "الدورة دي",
+  "@commonPeriodThisCycle": {
+    "description": "C"
+  },
+  "commonPeriodLastCycle": "الدورة اللي فاتت",
+  "@commonPeriodLastCycle": {
+    "description": "C"
+  },
+  "commonPeriodThisMonth": "الشهر ده",
+  "@commonPeriodThisMonth": {
+    "description": "C"
+  },
+  "commonPeriodPickMonth": "شهر معين",
+  "@commonPeriodPickMonth": {
+    "description": "C"
+  },
+  "commonPeriodCustom": "من تاريخ لتاريخ",
+  "@commonPeriodCustom": {
+    "description": "C"
+  },
+  "commonPeriodLastMonths": "{count, plural, =1{آخر شهر} =2{آخر شهرين} few{آخر {n} شهور} many{آخر {n} شهر} other{آخر {n} شهر}}",
+  "@commonPeriodLastMonths": {
+    "description": "C · count:int, n · scan depth A-11",
+    "placeholders": {
+      "count": {
+        "type": "int"
+      },
+      "n": {
+        "type": "String"
+      }
+    }
+  },
+  "commonPeriodInLastMonths": "{count, plural, =1{في آخر شهر} =2{في آخر شهرين} few{في آخر {n} شهور} many{في آخر {n} شهر} other{في آخر {n} شهر}}",
+  "@commonPeriodInLastMonths": {
+    "description": "L · count:int, n · inserted mid-sentence as {period}",
+    "placeholders": {
+      "count": {
+        "type": "int"
+      },
+      "n": {
+        "type": "String"
+      }
+    }
+  },
+  "commonProgressPercent": "{n}٪",
+  "@commonProgressPercent": {
+    "description": "C · n = formatted number without its sign",
+    "placeholders": {
+      "n": {
+        "type": "String"
+      }
+    }
+  },
+  "commonFileSizeMb": "{n} ميجا",
+  "@commonFileSizeMb": {
+    "description": "C",
+    "placeholders": {
+      "n": {
+        "type": "String"
+      }
+    }
+  },
+  "commonFileSizeKb": "{n} كيلو",
+  "@commonFileSizeKb": {
+    "description": "C",
+    "placeholders": {
+      "n": {
+        "type": "String"
+      }
+    }
+  },
+  "commonPlatformAndroid": "أندرويد",
+  "@commonPlatformAndroid": {
+    "description": "C"
+  },
+  "commonPlatformIos": "آيفون",
+  "@commonPlatformIos": {
+    "description": "C"
+  },
+  "commonValidationAmountRequired": "اكتب مبلغ أكبر من صفر",
+  "@commonValidationAmountRequired": {
+    "description": "S"
+  },
+  "commonValidationAmountTooLarge": "المبلغ ده كبير أوي، راجعه",
+  "@commonValidationAmountTooLarge": {
+    "description": "S · more than 12 integer digits"
+  },
+  "commonValidationAmountDecimals": "{count, plural, =0{{currency} مفيهوش كسور} =1{{currency} بيقبل رقم واحد بعد العلامة} =2{{currency} بيقبل رقمين بس بعد العلامة} few{{currency} بيقبل {n} أرقام بس بعد العلامة} many{{currency} بيقبل {n} رقم بعد العلامة} other{{currency} بيقبل {n} رقم بعد العلامة}}",
+  "@commonValidationAmountDecimals": {
+    "description": "S · count:int = currency exponent, n, currency",
+    "placeholders": {
+      "count": {
+        "type": "int"
+      },
+      "currency": {
+        "type": "String"
+      },
+      "n": {
+        "type": "String"
+      }
+    }
+  },
+  "commonValidationCurrencyRequired": "اختار العملة",
+  "@commonValidationCurrencyRequired": {
+    "description": "S"
+  },
+  "commonValidationDateFuture": "التاريخ ميكونش في المستقبل",
+  "@commonValidationDateFuture": {
+    "description": "S"
+  },
+  "commonValidationDateRange": "تاريخ البداية لازم يبقى قبل النهاية",
+  "@commonValidationDateRange": {
+    "description": "S"
+  },
+  "commonValidationLast4": "اكتب آخر أربع أرقام",
+  "@commonValidationLast4": {
+    "description": "S"
+  },
+  "commonValidationNameRequired": "اكتب اسم",
+  "@commonValidationNameRequired": {
+    "description": "S"
+  },
+  "commonValidationNameLength": "{count, plural, =1{الاسم ميزيدش عن حرف واحد} =2{الاسم ميزيدش عن حرفين} few{الاسم ميزيدش عن {n} حروف} many{الاسم ميزيدش عن {n} حرف} other{الاسم ميزيدش عن {n} حرف}}",
+  "@commonValidationNameLength": {
+    "description": "S · count:int = max (30), n",
+    "placeholders": {
+      "count": {
+        "type": "int"
+      },
+      "n": {
+        "type": "String"
+      }
+    }
+  },
+  "commonValidationNameTaken": "الاسم ده مستخدم قبل كده",
+  "@commonValidationNameTaken": {
+    "description": "S"
+  },
+  "commonValidationNoteLength": "{count, plural, =1{الملاحظة ميزيدش عن حرف واحد} =2{الملاحظة ميزيدش عن حرفين} few{الملاحظة ميزيدش عن {n} حروف} many{الملاحظة ميزيدش عن {n} حرف} other{الملاحظة ميزيدش عن {n} حرف}}",
+  "@commonValidationNoteLength": {
+    "description": "S · count:int = 200, n",
+    "placeholders": {
+      "count": {
+        "type": "int"
+      },
+      "n": {
+        "type": "String"
+      }
+    }
+  },
+  "commonValidationCategoryRequired": "اختار التصنيف",
+  "@commonValidationCategoryRequired": {
+    "description": "S"
+  },
+  "commonValidationAccountRequired": "اختار الحساب",
+  "@commonValidationAccountRequired": {
+    "description": "S"
+  },
+  "commonValidationChoiceRequired": "اختار واحدة",
+  "@commonValidationChoiceRequired": {
+    "description": "S · radio groups"
+  },
+  "commonErrorLoadFailed": "مقدرتش أفتح ده دلوقتي. بياناتك في أمان على موبايلك.",
+  "@commonErrorLoadFailed": {
+    "description": "S · C-29, DB read failure; uses common_action_tryAgain"
+  },
+  "commonErrorSaveFailed": "محصلش حفظ. جرّب تاني، واللي كتبته لسه موجود.",
+  "@commonErrorSaveFailed": {
+    "description": "S · the form is kept"
+  },
+  "commonErrorNetwork": "مش قادر أوصل للسيرفر دلوقتي. فلوسك في أمان على موبايلك، جرّب تاني كمان شوية.",
+  "@commonErrorNetwork": {
+    "description": "S · 06-voice-and-tone.md §2"
+  },
+  "commonGoldBadge": "جولد",
+  "@commonGoldBadge": {
+    "description": "C · always paired with the crown icon"
+  },
+  "commonGoldUnlock": "افتحها مع جولد",
+  "@commonGoldUnlock": {
+    "description": "B · opens S-68"
+  },
+  "commonGoldLockedA11y": "متاحة في زغلول جولد",
+  "@commonGoldLockedA11y": {
+    "description": "A"
+  },
+  "mascotAvatarLabelA11y": "الكابتن زغلول",
+  "@mascotAvatarLabelA11y": {
+    "description": "A · label on every ZaghlolAvatar"
+  },
+  "mascotPullRefreshingA11y": "بحدّث…",
+  "@mascotPullRefreshingA11y": {
+    "description": "A · Rive pull, pull to refresh on Home and lists"
+  },
+  "mascotSavedLine1": "اتسجلت ✓",
+  "@mascotSavedLine1": {
+    "description": "N · Rive saved · after saving a transaction (S-13 or Quick add). Picked at random from line1…3"
+  },
+  "mascotSavedLine2": "تمام، حطيتها في الحسبة ✓",
+  "@mascotSavedLine2": {
+    "description": "N · Rive saved"
+  },
+  "mascotSavedLine3": "اتقيدت يا كبير ✓",
+  "@mascotSavedLine3": {
+    "description": "N · Rive saved"
+  },
+  "mascotTapLine1": "إيه يا عم، بتزغزغني؟ 😄",
+  "@mascotTapLine1": {
+    "description": "M · Rive tap · user taps Zaghlol. The next unused line rotates each tap"
+  },
+  "mascotTapLine2": "أنا هنا يا كبير، وفلوسك في عينيّا",
+  "@mascotTapLine2": {
+    "description": "M · Rive tap"
+  },
+  "mascotTapLine3": "كل قرش بتحوشه بيطلّعلي ريشة جديدة 🪶",
+  "@mascotTapLine3": {
+    "description": "M · Rive tap · currency-neutral (F-20)"
+  },
+  "mascotTapLine4": "الكابتن جاهز، وإنت القائد",
+  "@mascotTapLine4": {
+    "description": "M · Rive tap"
+  },
+  "mascotTapLine5": "اللي يحوش النهارده يتفسح بكره",
+  "@mascotTapLine5": {
+    "description": "M · Rive tap"
+  },
+  "mascotTapLine6": "أنا بقرا رسايل البنوك بس، الباقي مش شغلي",
+  "@mascotTapLine6": {
+    "description": "M · Rive tap · also restates the privacy promise"
+  },
+  "mascotTapLine7": "حمامة ولا محاسب؟ الاتنين!",
+  "@mascotTapLine7": {
+    "description": "M · Rive tap"
+  },
+  "mascotTapLine8": "جناحي سريع وحساباتي مظبوطة",
+  "@mascotTapLine8": {
+    "description": "M · Rive tap"
+  },
+  "onboardingWelcomeLanguageToggle": "English",
+  "@onboardingWelcomeLanguageToggle": {
+    "description": "C · each locale shows the other language's name, in that language's own script"
+  },
+  "onboardingWelcomeLanguageToggleA11y": "غيّر اللغة للإنجليزي",
+  "@onboardingWelcomeLanguageToggleA11y": {
+    "description": "A"
+  },
+  "onboardingWelcomeTitle": "أهلاً بيك! أنا الكابتن زغلول",
+  "@onboardingWelcomeTitle": {
+    "description": "T · M · Rive tourGuide, first launch (FR-MAS-01). Waves once; still pose with reduce motion"
+  },
+  "onboardingWelcomeSubtitle": "هعرفك فلوسك بتروح فين من رسايل البنك، من غير ما تكتب حاجة.",
+  "@onboardingWelcomeSubtitle": {
+    "description": "S"
+  },
+  "onboardingWelcomePointOnPhone": "بيانات فلوسك بتفضل على موبايلك",
+  "@onboardingWelcomePointOnPhone": {
+    "description": "S · FR-ONB-01, with a lock icon (not an emoji)"
+  },
+  "onboardingWelcomePointNoPassword": "مش هنطلب باسورد البنك أبداً",
+  "@onboardingWelcomePointNoPassword": {
+    "description": "S"
+  },
+  "onboardingWelcomePointNoAds": "من غير إعلانات",
+  "@onboardingWelcomePointNoAds": {
+    "description": "L"
+  },
+  "onboardingWelcomeStart": "يلا نبدأ",
+  "@onboardingWelcomeStart": {
+    "description": "B · primary. Opens S-02 or S-03"
+  },
+  "onboardingWelcomeRestore": "استخدمت زغلول قبل كده",
+  "@onboardingWelcomeRestore": {
+    "description": "L · text button, opens S-04 (FR-ONB-12). Gender-neutral (F-15)"
+  },
+  "onboardingWelcomePrivacyLink": "تفاصيل الخصوصية",
+  "@onboardingWelcomePrivacyLink": {
+    "description": "L · text link, opens S-71 read-only"
+  },
+  "onboardingAndroidSetupStep": "خطوة {step} من {total}",
+  "@onboardingAndroidSetupStep": {
+    "description": "C · C-26 stepper header",
+    "placeholders": {
+      "step": {
+        "type": "String"
+      },
+      "total": {
+        "type": "String"
+      }
+    }
+  },
+  "onboardingAndroidSetupSmsTitle": "خليني أقرا رسايل البنك",
+  "@onboardingAndroidSetupSmsTitle": {
+    "description": "T · M · Rive tourGuide, setup step"
+  },
+  "onboardingAndroidSetupSmsSubtitle": "وهرتبلك كل مصاريفك لوحدي.",
+  "@onboardingAndroidSetupSmsSubtitle": {
+    "description": "S"
+  },
+  "onboardingAndroidSetupSmsPointSenders": "بقرا رسايل البنوك والمحافظ وإنستاباي بس",
+  "@onboardingAndroidSetupSmsPointSenders": {
+    "description": "S · what is read (FR-ING-A-02)"
+  },
+  "onboardingAndroidSetupSmsPointPersonal": "رسايلك الشخصية عمرها ما بتتقري ولا بتتحفظ",
+  "@onboardingAndroidSetupSmsPointPersonal": {
+    "description": "S"
+  },
+  "onboardingAndroidSetupSmsPointOnPhone": "بيانات فلوسك بتفضل على الموبايل ده",
+  "@onboardingAndroidSetupSmsPointOnPhone": {
+    "description": "S · claim limited to financial data (tone gate 4, R-11, BR-SYNC-03)"
+  },
+  "onboardingAndroidSetupSmsAllow": "اسمح بقراية الرسايل",
+  "@onboardingAndroidSetupSmsAllow": {
+    "description": "B · primary, opens the system SMS dialog"
+  },
+  "onboardingAndroidSetupSmsGranted": "الرسايل اتسمحت ✓",
+  "@onboardingAndroidSetupSmsGranted": {
+    "description": "N · success"
+  },
+  "onboardingAndroidSetupScanTitle": "بقرا رسايلك القديمة…",
+  "@onboardingAndroidSetupScanTitle": {
+    "description": "L · Rive scanning (loops while the scan runs)"
+  },
+  "onboardingAndroidSetupScanDepth": "{period} · كمّل وأنا شغال",
+  "@onboardingAndroidSetupScanDepth": {
+    "description": "S · period = common_period_lastMonths (A-11 default 6)",
+    "placeholders": {
+      "period": {
+        "type": "String"
+      }
+    }
+  },
+  "onboardingAndroidSetupScanCount": "{count, plural, =0{لسه بدوّر…} =1{لقيت حركة واحدة} =2{لقيت حركتين} few{لقيت {n} حركات} many{لقيت {n} حركة} other{لقيت {n} حركة}}",
+  "@onboardingAndroidSetupScanCount": {
+    "description": "L · count:int, n · polite live region, announced at most every 5 s",
+    "placeholders": {
+      "count": {
+        "type": "int"
+      },
+      "n": {
+        "type": "String"
+      }
+    }
+  },
+  "onboardingAndroidSetupScanBanks": "البنوك اللي لقيتها:",
+  "@onboardingAndroidSetupScanBanks": {
+    "description": "L · followed by bank chips (data)"
+  },
+  "onboardingAndroidSetupNotifTitle": "وكمان إشعارات تطبيقات البنوك؟",
+  "@onboardingAndroidSetupNotifTitle": {
+    "description": "T"
+  },
+  "onboardingAndroidSetupNotifBody": "في بنوك ومحافظ بتبعت إشعار في التطبيق بس من غير SMS، زي Wise وRevolut وPayoneer.",
+  "@onboardingAndroidSetupNotifBody": {
+    "description": "S · FR-ING-A-03/07"
+  },
+  "onboardingAndroidSetupNotifPrivacy": "بقرا إشعارات تطبيقات البنوك والمحافظ بس، مش الواتساب ولا أي حاجة تانية.",
+  "@onboardingAndroidSetupNotifPrivacy": {
+    "description": "S · what is read (FR-ING-A-03: registry apps only)"
+  },
+  "onboardingAndroidSetupNotifTurnOn": "شغّل الإشعارات",
+  "@onboardingAndroidSetupNotifTurnOn": {
+    "description": "B · primary, opens OS notification access"
+  },
+  "onboardingAndroidSetupNotifOsHint": "في الشاشة الجاية، دوّر على «زغلول» وشغّله.",
+  "@onboardingAndroidSetupNotifOsHint": {
+    "description": "S · shown under the button"
+  },
+  "onboardingAndroidSetupNotifGranted": "الإشعارات اشتغلت ✓",
+  "@onboardingAndroidSetupNotifGranted": {
+    "description": "N · success, on return from OS"
+  },
+  "onboardingAndroidSetupNotifStillOff": "لسه مقفولة. تقدر تشغلها بعدين من الإعدادات.",
+  "@onboardingAndroidSetupNotifStillOff": {
+    "description": "N · on return, still off. No blame"
+  },
+  "onboardingAndroidSetupDegradedTitle": "قراية الرسايل مقفولة",
+  "@onboardingAndroidSetupDegradedTitle": {
+    "description": "T · C-20 warning (FR-ING-A-05)"
+  },
+  "onboardingAndroidSetupDegradedBody": "لسه تقدر تتابع مصاريفك بطرق تانية:",
+  "@onboardingAndroidSetupDegradedBody": {
+    "description": "S"
+  },
+  "onboardingAndroidSetupDegradedNotif": "إشعارات تطبيقات البنوك",
+  "@onboardingAndroidSetupDegradedNotif": {
+    "description": "L · row action onboarding_androidSetup_degradedNotifOn"
+  },
+  "onboardingAndroidSetupDegradedNotifOn": "شغّلها",
+  "@onboardingAndroidSetupDegradedNotifOn": {
+    "description": "B"
+  },
+  "onboardingAndroidSetupDegradedShare": "ابعت أو الزق رسالة البنك لزغلول",
+  "@onboardingAndroidSetupDegradedShare": {
+    "description": "S · row action onboarding_androidSetup_degradedShareHow"
+  },
+  "onboardingAndroidSetupDegradedShareHow": "إزاي؟",
+  "@onboardingAndroidSetupDegradedShareHow": {
+    "description": "L · text button · opens the capture_shareHow_* sheet"
+  },
+  "onboardingAndroidSetupDegradedManual": "سجّل الكاش بصوتك أو بإيدك",
+  "@onboardingAndroidSetupDegradedManual": {
+    "description": "L"
+  },
+  "onboardingAndroidSetupDegradedRetry": "اسمح تاني",
+  "@onboardingAndroidSetupDegradedRetry": {
+    "description": "B · when the OS still allows a prompt"
+  },
+  "onboardingAndroidSetupDegradedSettingsHint": "علشان تشغلها، افتح الإعدادات واسمح لزغلول بالرسايل.",
+  "@onboardingAndroidSetupDegradedSettingsHint": {
+    "description": "S · when the OS blocks re-prompting; with common_action_openSettings"
+  },
+  "onboardingAndroidSetupPlayUnavailable": "النسخة دي من زغلول مش بتقرا SMS، بس الإشعارات والمشاركة شغالين تمام.",
+  "@onboardingAndroidSetupPlayUnavailable": {
+    "description": "S · prodNoSms flavour (ADR-004, deployment.md) (FR-ING-A-05). Where it appears is open, see Q-03"
+  },
+  "onboardingIosSetupStep": "خطوة {step} من {total}",
+  "@onboardingIosSetupStep": {
+    "description": "C",
+    "placeholders": {
+      "step": {
+        "type": "String"
+      },
+      "total": {
+        "type": "String"
+      }
+    }
+  },
+  "onboardingIosSetupShortcutTitle": "هنستخدم الاختصارات",
+  "@onboardingIosSetupShortcutTitle": {
+    "description": "T · M · Rive tourGuide"
+  },
+  "onboardingIosSetupShortcutWhy": "الآيفون مش بيسمح للتطبيقات تقرا الرسايل، فالاختصارات هي اللي هتبعتهالي.",
+  "@onboardingIosSetupShortcutWhy": {
+    "description": "S · under the title. Split out of the title for length (F-7)"
+  },
+  "onboardingIosSetupShortcutLead": "ضغطة واحدة بتضيف:",
+  "@onboardingIosSetupShortcutLead": {
+    "description": "L"
+  },
+  "onboardingIosSetupShortcutSmsTitle": "رسايل البنك",
+  "@onboardingIosSetupShortcutSmsTitle": {
+    "description": "L"
+  },
+  "onboardingIosSetupShortcutSmsSub": "بيلقط رسايل البنوك وإنستاباي، عربي وإنجليزي",
+  "@onboardingIosSetupShortcutSmsSub": {
+    "description": "S"
+  },
+  "onboardingIosSetupShortcutApplePayTitle": "مدفوعات Apple Pay",
+  "@onboardingIosSetupShortcutApplePayTitle": {
+    "description": "L"
+  },
+  "onboardingIosSetupShortcutApplePaySub": "بيسجل أي دفع بالموبايل في ساعتها",
+  "@onboardingIosSetupShortcutApplePaySub": {
+    "description": "S"
+  },
+  "onboardingIosSetupShortcutOnce": "مرة واحدة بس، وبعدها كل حاجة بتتسجل لوحدها.",
+  "@onboardingIosSetupShortcutOnce": {
+    "description": "S"
+  },
+  "onboardingIosSetupShortcutAdd": "ضيف اختصار زغلول",
+  "@onboardingIosSetupShortcutAdd": {
+    "description": "B · primary, opens the Shortcuts import"
+  },
+  "onboardingIosSetupHowItWorks": "إزاي بيشتغل؟ (نص دقيقة)",
+  "@onboardingIosSetupHowItWorks": {
+    "description": "L · text button, expands the steps below"
+  },
+  "onboardingIosSetupHowStep1": "لما توصلك رسالة من بنك، الآيفون بيشغّل الاختصار لوحده.",
+  "@onboardingIosSetupHowStep1": {
+    "description": "S · list numbers are drawn by the UI, not the copy"
+  },
+  "onboardingIosSetupHowStep2": "الاختصار بيدّي نص الرسالة لزغلول على نفس الموبايل، مش بيبعته لأي حد.",
+  "@onboardingIosSetupHowStep2": {
+    "description": "S · precise claim about the message, not \"no server\""
+  },
+  "onboardingIosSetupHowStep3": "زغلول يقرا المبلغ والتاجر ويسجلها. خلاص كده.",
+  "@onboardingIosSetupHowStep3": {
+    "description": "S"
+  },
+  "onboardingIosSetupChecking": "ثانية، بشوف الاختصارات اتضافت ولا لأ…",
+  "@onboardingIosSetupChecking": {
+    "description": "S · spinner, ≤ 2 s"
+  },
+  "onboardingIosSetupShortcutsMissing": "مقدرتش أفتح تطبيق الاختصارات. نزّله من الـ App Store وجرّب تاني.",
+  "@onboardingIosSetupShortcutsMissing": {
+    "description": "S · error, no joke"
+  },
+  "onboardingIosSetupCheckTitle": "تعالى نتأكد إن كله تمام",
+  "@onboardingIosSetupCheckTitle": {
+    "description": "T"
+  },
+  "onboardingIosSetupCheckSubtitle": "زغلول بيبص على الاختصارات اللي اتضافت.",
+  "@onboardingIosSetupCheckSubtitle": {
+    "description": "S"
+  },
+  "onboardingIosSetupCheckSmsAr": "رسايل البنوك (عربي)",
+  "@onboardingIosSetupCheckSmsAr": {
+    "description": "L"
+  },
+  "onboardingIosSetupCheckSmsEn": "رسايل البنوك (إنجليزي)",
+  "@onboardingIosSetupCheckSmsEn": {
+    "description": "L"
+  },
+  "onboardingIosSetupCheckApplePay": "مدفوعات Apple Pay",
+  "@onboardingIosSetupCheckApplePay": {
+    "description": "L"
+  },
+  "onboardingIosSetupCheckCount": "{count, plural, =1{{done} من {n} أوتوميشن} =2{{done} من {n} أوتوميشن} few{{done} من {n} أوتوميشن} many{{done} من {n} أوتوميشن} other{{done} من {n} أوتوميشن}}",
+  "@onboardingIosSetupCheckCount": {
+    "description": "L · count:int = total, n, done. «أوتوميشن» doesn't change in AR; every form is written out for the parity test. Can't be 0 (§0.4)",
+    "placeholders": {
+      "count": {
+        "type": "int"
+      },
+      "done": {
+        "type": "String"
+      },
+      "n": {
+        "type": "String"
+      }
+    }
+  },
+  "onboardingIosSetupCheckNeedsRun": "محتاجة «Run Immediately»",
+  "@onboardingIosSetupCheckNeedsRun": {
+    "description": "L"
+  },
+  "onboardingIosSetupCheckOkA11y": "شغال",
+  "@onboardingIosSetupCheckOkA11y": {
+    "description": "A"
+  },
+  "onboardingIosSetupCheckMissingA11y": "ناقص",
+  "@onboardingIosSetupCheckMissingA11y": {
+    "description": "A"
+  },
+  "onboardingIosSetupFixTitle": "إزاي تصلحها؟",
+  "@onboardingIosSetupFixTitle": {
+    "description": "L"
+  },
+  "onboardingIosSetupFixStep1": "افتح Shortcuts وبعدين Automation",
+  "@onboardingIosSetupFixStep1": {
+    "description": "S"
+  },
+  "onboardingIosSetupFixStep2": "اختار «{automationName}»",
+  "@onboardingIosSetupFixStep2": {
+    "description": "S · automationName is the Latin automation name, e.g. Zaghlol – Wallet",
+    "placeholders": {
+      "automationName": {
+        "type": "String"
+      }
+    }
+  },
+  "onboardingIosSetupFixStep3": "شغّل «Run Immediately»",
+  "@onboardingIosSetupFixStep3": {
+    "description": "S"
+  },
+  "onboardingIosSetupCheckUnknown": "مش متأكدين لسه؟ هنعرف أول ما توصلك رسالة بنك.",
+  "@onboardingIosSetupCheckUnknown": {
+    "description": "S · no false failure (FR-ING-I-07)"
+  },
+  "onboardingIosSetupCheckAgain": "اتأكد تاني",
+  "@onboardingIosSetupCheckAgain": {
+    "description": "B"
+  },
+  "onboardingIosSetupCheckAllGood": "كله تمام ✓ زغلول جاهز",
+  "@onboardingIosSetupCheckAllGood": {
+    "description": "N · success"
+  },
+  "onboardingIosSetupFirstTitle": "يلا نسجل أول مصروف!",
+  "@onboardingIosSetupFirstTitle": {
+    "description": "T · M · Rive tourGuide (FR-ONB-09)"
+  },
+  "onboardingIosSetupFirstBody": "لحد ما توصل أول رسالة بنك، قولي صرفت إيه النهارده.",
+  "@onboardingIosSetupFirstBody": {
+    "description": "S"
+  },
+  "onboardingIosSetupFirstSay": "قولها",
+  "@onboardingIosSetupFirstSay": {
+    "description": "B · opens S-31"
+  },
+  "onboardingIosSetupFirstSayHint": "«دفعت خمسة وأربعين قهوة»",
+  "@onboardingIosSetupFirstSayHint": {
+    "description": "L · spoken example. AR uses number words (§0.3)"
+  },
+  "onboardingIosSetupFirstType": "اكتبها",
+  "@onboardingIosSetupFirstType": {
+    "description": "B · opens S-13"
+  },
+  "onboardingIosSetupFirstTypeHint": "المبلغ والتصنيف",
+  "@onboardingIosSetupFirstTypeHint": {
+    "description": "L"
+  },
+  "onboardingIosSetupFirstOnlineBanks": "بتستخدم Wise أو Revolut أو Payoneer؟",
+  "@onboardingIosSetupFirstOnlineBanks": {
+    "description": "S · opens S-61 supported banks (FR-ING-I-08)"
+  },
+  "onboardingIosSetupFirstOnlineBanksSub": "شوف إزاي تتابعهم على الآيفون",
+  "@onboardingIosSetupFirstOnlineBanksSub": {
+    "description": "S"
+  },
+  "onboardingIosSetupFirstStatement": "عندك كشف حساب؟",
+  "@onboardingIosSetupFirstStatement": {
+    "description": "L · the common_gold_badge must show on this row (FR-EXP-04/06); Free opens S-68"
+  },
+  "onboardingIosSetupFirstStatementSub": "ضيف شهور فاتت مرة واحدة مع جولد",
+  "@onboardingIosSetupFirstStatementSub": {
+    "description": "S · says Gold in the text too, so Free users aren't promised it (F-8)"
+  },
+  "backupRestoreTitle": "استرجاع نسخة",
+  "@backupRestoreTitle": {
+    "description": "T"
+  },
+  "backupRestoreWhereTitle": "النسخة بتاعتك فين؟",
+  "@backupRestoreWhereTitle": {
+    "description": "T"
+  },
+  "backupRestoreOptionDrive": "Google Drive",
+  "@backupRestoreOptionDrive": {
+    "description": "L"
+  },
+  "backupRestoreOptionICloud": "iCloud",
+  "@backupRestoreOptionICloud": {
+    "description": "L · iOS only"
+  },
+  "backupRestoreSigningIn": "بدخل على {provider}…",
+  "@backupRestoreSigningIn": {
+    "description": "S · button loading state during provider sign-in (F-5a)",
+    "placeholders": {
+      "provider": {
+        "type": "String"
+      }
+    }
+  },
+  "backupRestoreSearching": "بدوّر على نسخة زغلول…",
+  "@backupRestoreSearching": {
+    "description": "S · spinner"
+  },
+  "backupRestoreFoundTitle": "لقيت نسخة",
+  "@backupRestoreFoundTitle": {
+    "description": "T"
+  },
+  "backupRestoreFoundMeta": "{date} · {size}",
+  "@backupRestoreFoundMeta": {
+    "description": "L · size = common_fileSize_mb",
+    "placeholders": {
+      "date": {
+        "type": "String"
+      },
+      "size": {
+        "type": "String"
+      }
+    }
+  },
+  "backupRestoreFoundFrom": "من: {platform} · إصدار {appVersion}",
+  "@backupRestoreFoundFrom": {
+    "description": "L · appVersion stays Latin, e.g. 1.0",
+    "placeholders": {
+      "appVersion": {
+        "type": "String"
+      },
+      "platform": {
+        "type": "String"
+      }
+    }
+  },
+  "backupRestoreVersionsTitle": "النسخ اللي عندك",
+  "@backupRestoreVersionsTitle": {
+    "description": "L · Gold list, newest first"
+  },
+  "backupRestoreVersionNewest": "الأحدث",
+  "@backupRestoreVersionNewest": {
+    "description": "C"
+  },
+  "backupRestorePassphraseLabel": "كلمة سر النسخة",
+  "@backupRestorePassphraseLabel": {
+    "description": "L · C-32, single field"
+  },
+  "backupRestoreRestore": "استرجع",
+  "@backupRestoreRestore": {
+    "description": "B · primary"
+  },
+  "backupRestorePassphraseRequired": "اكتب كلمة السر",
+  "@backupRestorePassphraseRequired": {
+    "description": "S"
+  },
+  "backupRestorePassphraseWrong": "كلمة السر دي مش بتفتح النسخة دي",
+  "@backupRestorePassphraseWrong": {
+    "description": "S · unlimited retries"
+  },
+  "backupRestoreForgotLink": "نسيت كلمة السر؟",
+  "@backupRestoreForgotLink": {
+    "description": "L · text button"
+  },
+  "backupRestoreForgotBody": "للأسف مش هينفع نرجّعها. النسخة مبتتفتحش غير بكلمة السر دي، ومحدش يقدر يفتحها من غيرها، ولا حتى إحنا. تقدر تبدأ من جديد.",
+  "@backupRestoreForgotBody": {
+    "description": "S · EC-27, calm and plain"
+  },
+  "backupRestoreRestoring": "بسترجع بياناتك…",
+  "@backupRestoreRestoring": {
+    "description": "L · Rive counting + C-27 with common_progress_percent"
+  },
+  "backupRestoreKeepOpen": "سيب زغلول مفتوح لحد ما يخلص",
+  "@backupRestoreKeepOpen": {
+    "description": "S · no cancel once decryption has started"
+  },
+  "backupRestoreEmptyTitle": "مفيش نسخة زغلول على الحساب ده",
+  "@backupRestoreEmptyTitle": {
+    "description": "T · C-28"
+  },
+  "backupRestoreTryAnotherAccount": "جرّب حساب تاني",
+  "@backupRestoreTryAnotherAccount": {
+    "description": "B"
+  },
+  "backupRestoreStartFresh": "ابدأ من جديد",
+  "@backupRestoreStartFresh": {
+    "description": "B · opens S-02 or S-03"
+  },
+  "backupRestoreErrorNetwork": "مش قادر أوصل لـ {provider} دلوقتي. اتأكد من النت وجرّب تاني.",
+  "@backupRestoreErrorNetwork": {
+    "description": "S · offline / network. provider = Google Drive or iCloud",
+    "placeholders": {
+      "provider": {
+        "type": "String"
+      }
+    }
+  },
+  "backupRestoreErrorSignIn": "الدخول على {provider} ما كملش. جرّب تاني.",
+  "@backupRestoreErrorSignIn": {
+    "description": "S",
+    "placeholders": {
+      "provider": {
+        "type": "String"
+      }
+    }
+  },
+  "backupRestoreErrorNewer": "النسخة دي معمولة بإصدار أحدث من زغلول. حدّث التطبيق الأول.",
+  "@backupRestoreErrorNewer": {
+    "description": "S · EC-26"
+  },
+  "backupRestoreUpdate": "حدّث زغلول",
+  "@backupRestoreUpdate": {
+    "description": "B · store link"
+  },
+  "backupRestoreErrorCorrupted": "النسخة دي مش بتتقري.",
+  "@backupRestoreErrorCorrupted": {
+    "description": "S"
+  },
+  "backupRestoreTryOlder": "جرّب نسخة أقدم",
+  "@backupRestoreTryOlder": {
+    "description": "B · Gold only (versions)"
+  },
+  "backupRestoreDoneBanner": "بياناتك رجعت ✓ دلوقتي اسمح لزغلول يقرا على الموبايل ده.",
+  "@backupRestoreDoneBanner": {
+    "description": "N · Home C-20 after restore"
+  },
+  "backupRestoreDoneAction": "يلا نظبطها",
+  "@backupRestoreDoneAction": {
+    "description": "B · opens S-02 or S-03"
+  },
+  "securityLockTitle": "زغلول مقفول",
+  "@securityLockTitle": {
+    "description": "T"
+  },
+  "securityLockUnlock": "{method, select, faceId{افتح بالـ Face ID} touchId{افتح بالـ Touch ID} fingerprint{افتح ببصمتك} face{افتح ببصمة الوش} other{افتح القفل}}",
+  "@securityLockUnlock": {
+    "description": "B · method from the available biometric",
+    "placeholders": {
+      "method": {
+        "type": "String"
+      }
+    }
+  },
+  "securityLockUsePasscode": "{platform, select, ios{استخدم كود الآيفون} other{استخدم قفل الموبايل}}",
+  "@securityLockUsePasscode": {
+    "description": "L · text button (A-08)",
+    "placeholders": {
+      "platform": {
+        "type": "String"
+      }
+    }
+  },
+  "securityLockPromptReason": "افتح زغلول",
+  "@securityLockPromptReason": {
+    "description": "L · OS biometric prompt title / iOS localizedReason"
+  },
+  "securityLockPromptSubtitle": "علشان محدش يشوف فلوسك غيرك",
+  "@securityLockPromptSubtitle": {
+    "description": "S · Android BiometricPrompt subtitle"
+  },
+  "securityLockFailed": "مفتحش. جرّب تاني.",
+  "@securityLockFailed": {
+    "description": "N · OS shows its own detail"
+  },
+  "securityLockBiometricsGone": "البصمة مش متاحة دلوقتي، افتح بقفل الموبايل.",
+  "@securityLockBiometricsGone": {
+    "description": "S"
+  },
+  "onboardingScanResultsTitle": "خلصت! 🎉",
+  "@onboardingScanResultsTitle": {
+    "description": "T · M · Rive proud, scan finished (FR-ONB-06)"
+  },
+  "onboardingScanResultsFound": "{count, plural, =1{لقيت حركة واحدة {period}} =2{لقيت حركتين {period}} few{لقيت {n} حركات {period}} many{لقيت {n} حركة {period}} other{لقيت {n} حركة {period}}}",
+  "@onboardingScanResultsFound": {
+    "description": "S · count:int, n, period = common_period_inLastMonths",
+    "placeholders": {
+      "count": {
+        "type": "int"
+      },
+      "n": {
+        "type": "String"
+      },
+      "period": {
+        "type": "String"
+      }
+    }
+  },
+  "onboardingScanResultsStatAuto": "اتصنفوا لوحدهم",
+  "@onboardingScanResultsStatAuto": {
+    "description": "C · under a number"
+  },
+  "onboardingScanResultsStatReview": "مستنيين رأيك",
+  "@onboardingScanResultsStatReview": {
+    "description": "C · tap opens S-14"
+  },
+  "onboardingScanResultsStatCards": "كروت وحسابات",
+  "@onboardingScanResultsStatCards": {
+    "description": "C"
+  },
+  "onboardingScanResultsCardsTitle": "دي كروتك؟",
+  "@onboardingScanResultsCardsTitle": {
+    "description": "T"
+  },
+  "onboardingScanResultsCardSubtitle": "{count, plural, =1{{type} · حركة واحدة} =2{{type} · حركتين} few{{type} · {n} حركات} many{{type} · {n} حركة} other{{type} · {n} حركة}}",
+  "@onboardingScanResultsCardSubtitle": {
+    "description": "L · count:int, n, type = common_accountType_* or onboarding_scanResults_guessCredit",
+    "placeholders": {
+      "count": {
+        "type": "int"
+      },
+      "n": {
+        "type": "String"
+      },
+      "type": {
+        "type": "String"
+      }
+    }
+  },
+  "onboardingScanResultsGuessCredit": "شكله كريدت كارد",
+  "@onboardingScanResultsGuessCredit": {
+    "description": "L"
+  },
+  "onboardingScanResultsCreditBadge": "كريدت؟",
+  "@onboardingScanResultsCreditBadge": {
+    "description": "C"
+  },
+  "onboardingScanResultsCreditPrompt": "{card} شكله كريدت كارد. قولي الليميت وميعاد السداد عشان أفكرك قبلها.",
+  "@onboardingScanResultsCreditPrompt": {
+    "description": "M · Rive detective · auto-created account that looks like a credit card (FR-ACC-05)",
+    "placeholders": {
+      "card": {
+        "type": "String"
+      }
+    }
+  },
+  "onboardingScanResultsCreditYes": "أيوه، ظبطه",
+  "@onboardingScanResultsCreditYes": {
+    "description": "B · opens S-43 credit fields"
+  },
+  "onboardingScanResultsNotMineHint": "كارت مش بتاعك أو كارت شغل؟ دوس عليه واقفل قرايته.",
+  "@onboardingScanResultsNotMineHint": {
+    "description": "S · leads to S-62"
+  },
+  "onboardingScanResultsShowMe": "ورّيني فلوسي",
+  "@onboardingScanResultsShowMe": {
+    "description": "B · primary, opens S-10"
+  },
+  "onboardingScanResultsRescanToast": "{count, plural, =0{ملقيتش حركات جديدة لـ {card}} =1{ضفت حركة واحدة لـ {card}} =2{ضفت حركتين لـ {card}} few{ضفت {n} حركات لـ {card}} many{ضفت {n} حركة لـ {card}} other{ضفت {n} حركة لـ {card}}}",
+  "@onboardingScanResultsRescanToast": {
+    "description": "N · count:int, n, card · FR-CAP-07 re-scan",
+    "placeholders": {
+      "card": {
+        "type": "String"
+      },
+      "count": {
+        "type": "int"
+      },
+      "n": {
+        "type": "String"
+      }
+    }
+  },
+  "homeGreetingByTime": "{part, select, morning{صباح الفل يا كبير ☀️} afternoon{مساء الفل يا كبير ☀️} evening{مساء الفل يا كبير 🌙} other{أهلاً يا كبير 👋}}",
+  "@homeGreetingByTime": {
+    "description": "T · part: morning 05:00–11:59, afternoon 12:00–16:59, evening 17:00–04:59 (local time). See Q-05",
+    "placeholders": {
+      "part": {
+        "type": "String"
+      }
+    }
+  },
+  "homeGreetingFirstVisit": "أهلاً يا كبير 👋",
+  "@homeGreetingFirstVisit": {
+    "description": "T · first Home visit after onboarding"
+  },
+  "homeHeroSafeToSpend": "مسموحلك تصرف النهارده",
+  "@homeHeroSafeToSpend": {
+    "description": "L"
+  },
+  "homeHeroPerDay": "في اليوم",
+  "@homeHeroPerDay": {
+    "description": "C · suffix after the display amount"
+  },
+  "homeHeroDaysToPayday": "{count, plural, =0{القبض النهارده} =1{فاضل يوم على القبض} =2{فاضل يومين على القبض} few{فاضل {n} أيام على القبض} many{فاضل {n} يوم على القبض} other{فاضل {n} يوم على القبض}}",
+  "@homeHeroDaysToPayday": {
+    "description": "L · count:int, n · followed by  ·  and common_date_range",
+    "placeholders": {
+      "count": {
+        "type": "int"
+      },
+      "n": {
+        "type": "String"
+      }
+    }
+  },
+  "homeHeroCalendarMonth": "لحد ما تقولي ميعاد قبضك",
+  "@homeHeroCalendarMonth": {
+    "description": "S · A-43, replaces the payday line when no payday is set"
+  },
+  "homeHeroSpentThisMonth": "صرفت الشهر ده",
+  "@homeHeroSpentThisMonth": {
+    "description": "L · no payday and no budget (first visit, mockup 25)"
+  },
+  "homeHeroSpentThisCycle": "صرفت الدورة دي",
+  "@homeHeroSpentThisCycle": {
+    "description": "L · payday set, no budget (EC-24)"
+  },
+  "homeHeroSetBudgetHint": "حط ميزانية عشان تعرف تصرف كام في اليوم",
+  "@homeHeroSetBudgetHint": {
+    "description": "S · replaces safe-to-spend, never shows zeros"
+  },
+  "homeHeroSetBudget": "حط ميزانية",
+  "@homeHeroSetBudget": {
+    "description": "B · opens S-23"
+  },
+  "homeHeroBudgetUsedUp": "ميزانية الدورة دي خلصت، حاسب على الباقي",
+  "@homeHeroBudgetUsedUp": {
+    "description": "S · safe-to-spend = 0 with budget > 0 (BR-BUD-03 clamps it with max(0, …), so it's never negative). The hero still shows the amount 0, with this as its caption. Calm, no joke. See Q-06"
+  },
+  "homeHeroKpiIncome": "دخلك",
+  "@homeHeroKpiIncome": {
+    "description": "C · C-10"
+  },
+  "homeHeroKpiSpent": "صرفت",
+  "@homeHeroKpiSpent": {
+    "description": "C · tap opens S-11 filtered"
+  },
+  "homeHeroKpiLeft": "فاضلك",
+  "@homeHeroKpiLeft": {
+    "description": "C"
+  },
+  "homeHeroApproxTitle": "كله تقريباً بالـ {currency}",
+  "@homeHeroApproxTitle": {
+    "description": "L · last pager page, only when the ≈ view is on (FR-CUR-04)",
+    "placeholders": {
+      "currency": {
+        "type": "String"
+      }
+    }
+  },
+  "homeHeroSummaryA11y": "مسموحلك تصرف {amount} النهارده. {payday}. دخلك {income}، صرفت {spent}، فاضلك {left}.",
+  "@homeHeroSummaryA11y": {
+    "description": "A · payday = home_hero_daysToPayday text",
+    "placeholders": {
+      "amount": {
+        "type": "String"
+      },
+      "income": {
+        "type": "String"
+      },
+      "left": {
+        "type": "String"
+      },
+      "payday": {
+        "type": "String"
+      },
+      "spent": {
+        "type": "String"
+      }
+    }
+  },
+  "homeMascotShockedCategory": "حاسب يا كبير! {category} وصل {percent} من ميزانيته ولسه بدري في الدورة.",
+  "@homeMascotShockedCategory": {
+    "description": "M · Rive shocked · BR-MAS-01a: category ≥ 85% before day 20",
+    "placeholders": {
+      "category": {
+        "type": "String"
+      },
+      "percent": {
+        "type": "String"
+      }
+    }
+  },
+  "homeMascotShockedCategoryAlt": "{category} قرّب يخلص يا كبير، {percent} راحوا ولسه بدري. نهدّي شوية؟",
+  "@homeMascotShockedCategoryAlt": {
+    "description": "M · Rive shocked · same trigger, alternate line",
+    "placeholders": {
+      "category": {
+        "type": "String"
+      },
+      "percent": {
+        "type": "String"
+      }
+    }
+  },
+  "homeMascotShockedDining": "الأكل بره والدليفري زايدين {percent} عن العادي بتاعك. المطبخ وحشك؟ 🍳",
+  "@homeMascotShockedDining": {
+    "description": "M · Rive shocked · BR-MAS-01b: more than 30% above the 3-cycle average",
+    "placeholders": {
+      "percent": {
+        "type": "String"
+      }
+    }
+  },
+  "homeMascotDetectiveDuplicate": "اتخصم منك {amount} مرتين من {merchant} في دقايق. بص عليها كده.",
+  "@homeMascotDetectiveDuplicate": {
+    "description": "M · Rive detective · BR-MAS-03 duplicate POS (A-34). Money alert, so no emoji",
+    "placeholders": {
+      "amount": {
+        "type": "String"
+      },
+      "merchant": {
+        "type": "String"
+      }
+    }
+  },
+  "homeMascotDetectiveDuplicateAction": "بص عليها",
+  "@homeMascotDetectiveDuplicateAction": {
+    "description": "B · opens S-12"
+  },
+  "homeMascotDetectiveSubscription": "شكلها اشتراك شهري: {merchant} بـ {amount}. أتابعهولك؟",
+  "@homeMascotDetectiveSubscription": {
+    "description": "M · Rive detective · BR-MAS-03 subscription detected",
+    "placeholders": {
+      "amount": {
+        "type": "String"
+      },
+      "merchant": {
+        "type": "String"
+      }
+    }
+  },
+  "homeMascotDetectiveSubscriptionTrack": "تابعه",
+  "@homeMascotDetectiveSubscriptionTrack": {
+    "description": "B · confirms the recurring item (S-24)"
+  },
+  "homeMascotDetectiveSubscriptionNot": "مش اشتراك",
+  "@homeMascotDetectiveSubscriptionNot": {
+    "description": "B"
+  },
+  "homeMascotDetectiveSelfTransfer": "{amount} راحوا من {fromCard} لـ {toCard}. دي تحويلة لنفسك، فمش هحسبها مصروف 👌",
+  "@homeMascotDetectiveSelfTransfer": {
+    "description": "M · Rive detective · BR-MAS-03 / BR-XFR-01 self-transfer paired",
+    "placeholders": {
+      "amount": {
+        "type": "String"
+      },
+      "fromCard": {
+        "type": "String"
+      },
+      "toCard": {
+        "type": "String"
+      }
+    }
+  },
+  "homeMascotProudOnTrack": "عاش يا وحش! صارف أقل من خطتك لحد دلوقتي 👏",
+  "@homeMascotProudOnTrack": {
+    "description": "M · Rive proud · BR-MAS-02: under the ideal burn line, ≥ 7 days into the cycle"
+  },
+  "homeMascotProudSavedMore": "عاش يا وحش! وفرت {amount} زيادة عن الدورة اللي فاتت 👏",
+  "@homeMascotProudSavedMore": {
+    "description": "M · Rive proud · BR-MAS-02, only when the computed delta is > 0",
+    "placeholders": {
+      "amount": {
+        "type": "String"
+      }
+    }
+  },
+  "homeMascotProudGoal": "هدف الدورة اتحقق! 🎯 إنت قدها",
+  "@homeMascotProudGoal": {
+    "description": "M · Rive proud · BR-MAS-02 goal met"
+  },
+  "homeMascotPayday": "المرتب نزل! {amount} 🎉 يلا نخطط له من أوله",
+  "@homeMascotPayday": {
+    "description": "M · Rive payday · salary detected (D-35), once per payday. domain-algorithms.md §7 treats payday as motion-only, and the C-14 priority list has no payday slot. Proposed slot: above proud, below detective. See Q-18",
+    "placeholders": {
+      "amount": {
+        "type": "String"
+      }
+    }
+  },
+  "homeMascotDismissA11y": "اقفل الرسالة",
+  "@homeMascotDismissA11y": {
+    "description": "A · × on C-14"
+  },
+  "homePromptPayday": "لقيت مرتب {amount} بينزل يوم {day} كل شهر. ده ميعاد قبضك؟",
+  "@homePromptPayday": {
+    "description": "M · Rive detective · salary-like credit detected",
+    "placeholders": {
+      "amount": {
+        "type": "String"
+      },
+      "day": {
+        "type": "String"
+      }
+    }
+  },
+  "homePromptPaydayYes": "أيوه، يوم {day}",
+  "@homePromptPaydayYes": {
+    "description": "B · only when the detected day is 1–28 (BR-BUD-01). The second button is common_action_no",
+    "placeholders": {
+      "day": {
+        "type": "String"
+      }
+    }
+  },
+  "homePromptPaydayMonthStart": "لقيت مرتب {amount} بينزل آخر الشهر. نحسب الدورة من أول الشهر لآخره؟",
+  "@homePromptPaydayMonthStart": {
+    "description": "M · Rive detective · D-68: salary detected on day 29, 30 or 31 → suggest payday = 1 (calendar month). The salary counts in the month it arrives; no copy needed for that",
+    "placeholders": {
+      "amount": {
+        "type": "String"
+      }
+    }
+  },
+  "homePromptPaydayMonthStartYes": "أيوه، من أول الشهر",
+  "@homePromptPaydayMonthStartYes": {
+    "description": "B · D-68; the second button is common_action_no"
+  },
+  "homePromptBudget": "خلصت أول دورة معايا! تحب نحط ميزانية للدورة الجاية؟",
+  "@homePromptBudget": {
+    "description": "M · Rive tourGuide · first full cycle completed"
+  },
+  "homePromptBudgetYes": "يلا",
+  "@homePromptBudgetYes": {
+    "description": "B · opens S-23"
+  },
+  "homePromptBackup": "بقالك أسبوع بتسجل معايا. اعمل نسخة احتياطية ببلاش عشان بياناتك تفضل في أمان لو حصل حاجة للموبايل.",
+  "@homePromptBackup": {
+    "description": "M · Rive tourGuide · A-65, 7 days of data"
+  },
+  "homePromptBackupYes": "اعمل نسخة",
+  "@homePromptBackupYes": {
+    "description": "B · opens S-66"
+  },
+  "homePromptAppLockTitle": "{method, select, faceId{اقفل زغلول بالـ Face ID؟} touchId{اقفل زغلول بالـ Touch ID؟} fingerprint{اقفل زغلول ببصمتك؟} face{اقفل زغلول ببصمة الوش؟} other{اقفل زغلول بقفل الموبايل؟}}",
+  "@homePromptAppLockTitle": {
+    "description": "S · card title, may wrap · FR-ONB-04, a one-tap switch, offered only once transactions are visible",
+    "placeholders": {
+      "method": {
+        "type": "String"
+      }
+    }
+  },
+  "homePromptAppLockSub": "محدش يشوف فلوسك غيرك",
+  "@homePromptAppLockSub": {
+    "description": "S"
+  },
+  "homePromptAppLockOn": "القفل اشتغل ✓",
+  "@homePromptAppLockOn": {
+    "description": "N · success"
+  },
+  "homePromptFinishSetup": "كمّل الإعداد",
+  "@homePromptFinishSetup": {
+    "description": "L · card at the top, FR-ONB-11"
+  },
+  "homePromptFinishSetupSteps": "{count, plural, =1{فاضل خطوة واحدة} =2{فاضل خطوتين} few{فاضل {n} خطوات} many{فاضل {n} خطوة} other{فاضل {n} خطوة}}",
+  "@homePromptFinishSetupSteps": {
+    "description": "C · count:int, n",
+    "placeholders": {
+      "count": {
+        "type": "int"
+      },
+      "n": {
+        "type": "String"
+      }
+    }
+  },
+  "homeBannerReview": "{count, plural, =1{حركة واحدة مستنية رأيك 👀} =2{حركتين مستنيين رأيك 👀} few{{n} حركات مستنية رأيك 👀} many{{n} حركة مستنية رأيك 👀} other{{n} حركة مستنية رأيك 👀}}",
+  "@homeBannerReview": {
+    "description": "N · count:int, n · only when count > 0; opens S-14",
+    "placeholders": {
+      "count": {
+        "type": "int"
+      },
+      "n": {
+        "type": "String"
+      }
+    }
+  },
+  "homeBannerScanning": "{count, plural, =0{بقرا رسايلك…} =1{بقرا رسايلك… لقيت حركة واحدة لحد دلوقتي} =2{بقرا رسايلك… لقيت حركتين لحد دلوقتي} few{بقرا رسايلك… لقيت {n} حركات لحد دلوقتي} many{بقرا رسايلك… لقيت {n} حركة لحد دلوقتي} other{بقرا رسايلك… لقيت {n} حركة لحد دلوقتي}}",
+  "@homeBannerScanning": {
+    "description": "N · count:int, n · C-20 info with C-27 progress; the feed fills live",
+    "placeholders": {
+      "count": {
+        "type": "int"
+      },
+      "n": {
+        "type": "String"
+      }
+    }
+  },
+  "homeBannerScanFailed": "مقدرتش أقرا رسايلك",
+  "@homeBannerScanFailed": {
+    "description": "N · C-20 error + common_action_tryAgain"
+  },
+  "homeBannerSmsOff": "قراية رسايل البنك مقفولة، فممكن حركات تفوتني.",
+  "@homeBannerSmsOff": {
+    "description": "N · Android \"capture limited\" (EC-13) + common_action_fix (opens S-61)"
+  },
+  "homeBannerNotifOff": "إشعارات تطبيقات البنوك اتقفلت، فممكن حركات تفوتني.",
+  "@homeBannerNotifOff": {
+    "description": "N · Android, notification access revoked + common_action_fix"
+  },
+  "homeBannerShortcutsBroken": "الاختصارات محتاجة تتظبط عشان ميفوتنيش حاجة.",
+  "@homeBannerShortcutsBroken": {
+    "description": "N · iOS checker failing + common_action_fix (opens S-03 step 2)"
+  },
+  "homeBannerShortcutsQuiet": "{count, plural, =1{مفيش رسايل بنك اتسجلت من امبارح. الاختصارات لسه شغالة؟} =2{مفيش رسايل بنك اتسجلت من يومين. الاختصارات لسه شغالة؟} few{مفيش رسايل بنك اتسجلت من {n} أيام. الاختصارات لسه شغالة؟} many{مفيش رسايل بنك اتسجلت من {n} يوم. الاختصارات لسه شغالة؟} other{مفيش رسايل بنك اتسجلت من {n} يوم. الاختصارات لسه شغالة؟}}",
+  "@homeBannerShortcutsQuiet": {
+    "description": "N · count:int, n · FR-ING-I-07 (7 days while active)",
+    "placeholders": {
+      "count": {
+        "type": "int"
+      },
+      "n": {
+        "type": "String"
+      }
+    }
+  },
+  "homeBannerShortcutsCheck": "اتأكد",
+  "@homeBannerShortcutsCheck": {
+    "description": "B · opens S-03 step 2"
+  },
+  "homeBannerRooted": "{platform, select, ios{الآيفون ده متعمله جيلبريك، فحماية بياناتك أضعف.} other{الموبايل ده متعمله روت، فحماية بياناتك أضعف.}}",
+  "@homeBannerRooted": {
+    "description": "N · FR-SEC-07, shown once + common_action_learnMore (opens S-71). Warning only, never blocks",
+    "placeholders": {
+      "platform": {
+        "type": "String"
+      }
+    }
+  },
+  "homeFeedTitle": "اللي اتصرف قريب",
+  "@homeFeedTitle": {
+    "description": "L · glossary; + common_action_seeAll"
+  },
+  "homeEmptyTitle": "لسه مفيش حركات",
+  "@homeEmptyTitle": {
+    "description": "T · C-28, Rive sleep"
+  },
+  "homeEmptyBodyWaiting": "أول ما توصلك رسالة بنك هتظهر هنا لوحدها.",
+  "@homeEmptyBodyWaiting": {
+    "description": "S · Android with SMS on: no button"
+  },
+  "homeEmptyBodyAdd": "سجّل أول مصروف وأنا أكمّل معاك.",
+  "@homeEmptyBodyAdd": {
+    "description": "S · every other case"
+  },
+  "homeEmptyAdd": "ضيف أول مصروف",
+  "@homeEmptyAdd": {
+    "description": "B · opens S-30"
+  },
+  "homeEmptyFilter": "مفيش حركات لـ {cards} في الدورة دي",
+  "@homeEmptyFilter": {
+    "description": "S · filter-caused empty + common_action_clearFilter. cards = a card label or common_cardFilter_count",
+    "placeholders": {
+      "cards": {
+        "type": "String"
+      }
+    }
+  },
+  "transactionsRowSubtitle": "{card} · {time} · {source}",
+  "@transactionsRowSubtitle": {
+    "description": "L · source = common_source_*; separators are not mirrored",
+    "placeholders": {
+      "card": {
+        "type": "String"
+      },
+      "source": {
+        "type": "String"
+      },
+      "time": {
+        "type": "String"
+      }
+    }
+  },
+  "transactionsRowInternalTitle": "تحويلة لنفسك",
+  "@transactionsRowInternalTitle": {
+    "description": "L · ⇄ icon, muted"
+  },
+  "transactionsRowInternalSubtitle": "{fromCard} لـ {toCard} · مش محسوبة في المصاريف",
+  "@transactionsRowInternalSubtitle": {
+    "description": "L · FR-HOME-03; colour is never the only cue",
+    "placeholders": {
+      "fromCard": {
+        "type": "String"
+      },
+      "toCard": {
+        "type": "String"
+      }
+    }
+  },
+  "transactionsRowDeclined": "اترفضت · مش محسوبة",
+  "@transactionsRowDeclined": {
+    "description": "L · BR-TXN-03, strikethrough amount"
+  },
+  "transactionsRowReimbursed": "دفعت {paid} · رجعلك {back}",
+  "@transactionsRowReimbursed": {
+    "description": "L",
+    "placeholders": {
+      "back": {
+        "type": "String"
+      },
+      "paid": {
+        "type": "String"
+      }
+    }
+  },
+  "transactionsRowRefund": "مرتجع من {merchant}",
+  "@transactionsRowRefund": {
+    "description": "L",
+    "placeholders": {
+      "merchant": {
+        "type": "String"
+      }
+    }
+  },
+  "transactionsRowNeedsReviewA11y": "مستنية رأيك",
+  "@transactionsRowNeedsReviewA11y": {
+    "description": "A · dot indicator"
+  },
+  "transactionsRowLabelA11y": "{merchant}، {amount}، {category}، {card}، {time}",
+  "@transactionsRowLabelA11y": {
+    "description": "A · whole-row label",
+    "placeholders": {
+      "amount": {
+        "type": "String"
+      },
+      "card": {
+        "type": "String"
+      },
+      "category": {
+        "type": "String"
+      },
+      "merchant": {
+        "type": "String"
+      },
+      "time": {
+        "type": "String"
+      }
+    }
+  },
+  "transactionsRowSwipeCategory": "غيّر التصنيف",
+  "@transactionsRowSwipeCategory": {
+    "description": "C · swipe from the start edge; also an a11y action"
+  },
+  "transactionsRowSwipeSplit": "تقسيم / فلوس راجعة",
+  "@transactionsRowSwipeSplit": {
+    "description": "L · swipe from the end edge; also an a11y action"
+  },
+  "transactionsListTitle": "الحركات",
+  "@transactionsListTitle": {
+    "description": "T"
+  },
+  "transactionsListSearchHint": "تاجر، ملاحظة أو مبلغ…",
+  "@transactionsListSearchHint": {
+    "description": "L · next to a search icon, whose label is common_action_searchA11y · FTS, debounced 250 ms; Arabic-Indic digits accepted (CLAUDE.md §2.5)"
+  },
+  "transactionsListFilterPeriod": "المدة",
+  "@transactionsListFilterPeriod": {
+    "description": "C · chip; shows the selected common_period_* once set"
+  },
+  "transactionsListFilterCategory": "التصنيف",
+  "@transactionsListFilterCategory": {
+    "description": "C"
+  },
+  "transactionsListFilterType": "النوع",
+  "@transactionsListFilterType": {
+    "description": "C · options = common_txnType_*"
+  },
+  "transactionsListFilterSource": "جت منين",
+  "@transactionsListFilterSource": {
+    "description": "C · options = common_source_*"
+  },
+  "transactionsListFilterCount": "{label} · {n}",
+  "@transactionsListFilterCount": {
+    "description": "C · chip with a multi-selection count",
+    "placeholders": {
+      "label": {
+        "type": "String"
+      },
+      "n": {
+        "type": "String"
+      }
+    }
+  },
+  "transactionsListRangeTitle": "اختار المدة",
+  "@transactionsListRangeTitle": {
+    "description": "T · custom range sheet"
+  },
+  "transactionsListRangeFrom": "من",
+  "@transactionsListRangeFrom": {
+    "description": "L"
+  },
+  "transactionsListRangeTo": "لحد",
+  "@transactionsListRangeTo": {
+    "description": "L · end ≤ today"
+  },
+  "transactionsListDayTotalA11y": "إجمالي اليوم {amount}",
+  "@transactionsListDayTotalA11y": {
+    "description": "A · day header, one per currency",
+    "placeholders": {
+      "amount": {
+        "type": "String"
+      }
+    }
+  },
+  "transactionsListEmptyTitle": "حركاتك هتظهر هنا",
+  "@transactionsListEmptyTitle": {
+    "description": "T · C-28, Rive sleep"
+  },
+  "transactionsListEmptyBody": "من رسايل البنك، أو سجّلها بإيدك.",
+  "@transactionsListEmptyBody": {
+    "description": "S"
+  },
+  "transactionsListEmptyAdd": "ضيف مصروف",
+  "@transactionsListEmptyAdd": {
+    "description": "B · opens S-13"
+  },
+  "transactionsListNoResults": "مفيش حاجة شبه «{query}»",
+  "@transactionsListNoResults": {
+    "description": "S · query is isolated",
+    "placeholders": {
+      "query": {
+        "type": "String"
+      }
+    }
+  },
+  "transactionsListNoResultsFilters": "مفيش حركات بالفلاتر دي",
+  "@transactionsListNoResultsFilters": {
+    "description": "S"
+  },
+  "transactionsListClearAll": "امسح البحث والفلاتر",
+  "@transactionsListClearAll": {
+    "description": "B"
+  },
+  "transactionsListSelectedTitle": "اخترت {n}",
+  "@transactionsListSelectedTitle": {
+    "description": "T · selection mode; n = formatted count",
+    "placeholders": {
+      "n": {
+        "type": "String"
+      }
+    }
+  },
+  "transactionsListBulkCategory": "التصنيف",
+  "@transactionsListBulkCategory": {
+    "description": "C · bottom action bar"
+  },
+  "transactionsListBulkAccount": "الكارت",
+  "@transactionsListBulkAccount": {
+    "description": "C · the bar's other actions are common_action_delete and common_action_cancel (§0.10 reuse rule)"
+  },
+  "transactionsListBulkRule": "استخدم ده دايماً للتجار دول",
+  "@transactionsListBulkRule": {
+    "description": "S · switch after a category change; creates rules (FR-CAT)"
+  },
+  "transactionsListBulkChanged": "{count, plural, =1{اتغيرت حركة واحدة} =2{اتغيرت حركتين} few{اتغيرت {n} حركات} many{اتغيرت {n} حركة} other{اتغيرت {n} حركة}}",
+  "@transactionsListBulkChanged": {
+    "description": "N · count:int, n + common_action_undo (restores all)",
+    "placeholders": {
+      "count": {
+        "type": "int"
+      },
+      "n": {
+        "type": "String"
+      }
+    }
+  },
+  "transactionsListBulkDeleteTitle": "{count, plural, =1{تمسح حركة واحدة؟} =2{تمسح الحركتين؟} few{تمسح {n} حركات؟} many{تمسح {n} حركة؟} other{تمسح {n} حركة؟}}",
+  "@transactionsListBulkDeleteTitle": {
+    "description": "T · count:int, n · C-18 destructive",
+    "placeholders": {
+      "count": {
+        "type": "int"
+      },
+      "n": {
+        "type": "String"
+      }
+    }
+  },
+  "transactionsListBulkDeleteBody": "مش هتقدر ترجعها بعد كده.",
+  "@transactionsListBulkDeleteBody": {
+    "description": "S · delete asks first and has no Undo; other bulk changes have Undo (FR-TXN-06; Q-08 closed)"
+  },
+  "transactionsListBulkDeleted": "{count, plural, =1{اتمسحت حركة واحدة} =2{اتمسحت حركتين} few{اتمسحت {n} حركات} many{اتمسحت {n} حركة} other{اتمسحت {n} حركة}}",
+  "@transactionsListBulkDeleted": {
+    "description": "N · count:int, n · no Undo",
+    "placeholders": {
+      "count": {
+        "type": "int"
+      },
+      "n": {
+        "type": "String"
+      }
+    }
+  },
+  "transactionsListSelectRowA11y": "اختار {merchant}",
+  "@transactionsListSelectRowA11y": {
+    "description": "A · check circle",
+    "placeholders": {
+      "merchant": {
+        "type": "String"
+      }
+    }
+  },
+  "transactionsDetailOriginal": "الأصلي: {amount}",
+  "@transactionsDetailOriginal": {
+    "description": "L · foreign only; symbols allowed here (§0.5)",
+    "placeholders": {
+      "amount": {
+        "type": "String"
+      }
+    }
+  },
+  "transactionsDetailFieldCard": "الكارت",
+  "@transactionsDetailFieldCard": {
+    "description": "L · opens S-41"
+  },
+  "transactionsDetailFieldDate": "إمتى",
+  "@transactionsDetailFieldDate": {
+    "description": "L · value = common_date_dateTime"
+  },
+  "transactionsDetailFieldBalance": "فاضل في الحساب",
+  "@transactionsDetailFieldBalance": {
+    "description": "L"
+  },
+  "transactionsDetailFieldSource": "جت منين",
+  "@transactionsDetailFieldSource": {
+    "description": "L"
+  },
+  "transactionsDetailFieldReference": "رقم العملية",
+  "@transactionsDetailFieldReference": {
+    "description": "L · empty shows \"—\" (not localized)"
+  },
+  "transactionsDetailFieldNote": "ملاحظة",
+  "@transactionsDetailFieldNote": {
+    "description": "L"
+  },
+  "transactionsDetailNoteAdd": "ضيف ملاحظة",
+  "@transactionsDetailNoteAdd": {
+    "description": "L · text button"
+  },
+  "transactionsDetailNoteHint": "اكتب ملاحظة…",
+  "@transactionsDetailNoteHint": {
+    "description": "L · ≤ 200 (common_validation_noteLength)"
+  },
+  "transactionsDetailSplit": "تقسيم / فلوس راجعة",
+  "@transactionsDetailSplit": {
+    "description": "L · expenses, opens S-15 Mode A"
+  },
+  "transactionsDetailLinkTransfer": "دي تحويلة لنفسي",
+  "@transactionsDetailLinkTransfer": {
+    "description": "L · opens S-16"
+  },
+  "transactionsDetailMoneyBackFor": "دي فلوس راجعة عن…",
+  "@transactionsDetailMoneyBackFor": {
+    "description": "L · incoming only, opens S-15 Mode B (FR-XFR-06)"
+  },
+  "transactionsDetailLinkedWith": "مربوطة مع {amount} في {card}",
+  "@transactionsDetailLinkedWith": {
+    "description": "L · internal; + common_action_unlink",
+    "placeholders": {
+      "amount": {
+        "type": "String"
+      },
+      "card": {
+        "type": "String"
+      }
+    }
+  },
+  "transactionsDetailInternalBanner": "تحويلة لنفسك، مش محسوبة لا مصروف ولا دخل",
+  "@transactionsDetailInternalBanner": {
+    "description": "N"
+  },
+  "transactionsDetailDeclinedBanner": "العملية اترفضت، مش محسوبة",
+  "@transactionsDetailDeclinedBanner": {
+    "description": "N · BR-TXN-03"
+  },
+  "transactionsDetailRefundCard": "مرتجع من {merchant} عن مشتريات {date} · الصافي {net}",
+  "@transactionsDetailRefundCard": {
+    "description": "S · FR-XFR-03",
+    "placeholders": {
+      "date": {
+        "type": "String"
+      },
+      "merchant": {
+        "type": "String"
+      },
+      "net": {
+        "type": "String"
+      }
+    }
+  },
+  "transactionsDetailRefundView": "شوف الأصلية",
+  "@transactionsDetailRefundView": {
+    "description": "B"
+  },
+  "transactionsDetailRefundNotRelated": "مش مرتبطة",
+  "@transactionsDetailRefundNotRelated": {
+    "description": "B"
+  },
+  "transactionsDetailReimbSuggest": "دي من فاتورة {merchant}؟",
+  "@transactionsDetailReimbSuggest": {
+    "description": "S · FR-XFR-08, never auto-applied; + yes/no",
+    "placeholders": {
+      "merchant": {
+        "type": "String"
+      }
+    }
+  },
+  "transactionsDetailDuplicate": "شكلها مكررة مع حركة {date} بنفس المبلغ",
+  "@transactionsDetailDuplicate": {
+    "description": "S",
+    "placeholders": {
+      "date": {
+        "type": "String"
+      }
+    }
+  },
+  "transactionsDetailDuplicateKeep": "سيب الاتنين",
+  "@transactionsDetailDuplicateKeep": {
+    "description": "B"
+  },
+  "transactionsDetailDuplicateDelete": "امسح دي",
+  "@transactionsDetailDuplicateDelete": {
+    "description": "B · destructive"
+  },
+  "transactionsDetailReimbSummary": "دفعت {paid} · رجعلك {back} · نصيبك {share}",
+  "@transactionsDetailReimbSummary": {
+    "description": "L",
+    "placeholders": {
+      "back": {
+        "type": "String"
+      },
+      "paid": {
+        "type": "String"
+      },
+      "share": {
+        "type": "String"
+      }
+    }
+  },
+  "transactionsDetailHowTitle": "إزاي زغلول قرا الرسالة",
+  "@transactionsDetailHowTitle": {
+    "description": "L · collapsible (spec \"SMS inspector\")"
+  },
+  "transactionsDetailHowRawA11y": "نص الرسالة الأصلي",
+  "@transactionsDetailHowRawA11y": {
+    "description": "A · raw text is shown on screen only, never logged (CLAUDE.md §2.6)"
+  },
+  "transactionsDetailHowAmount": "المبلغ {amount}",
+  "@transactionsDetailHowAmount": {
+    "description": "C",
+    "placeholders": {
+      "amount": {
+        "type": "String"
+      }
+    }
+  },
+  "transactionsDetailHowMerchant": "التاجر {merchant}",
+  "@transactionsDetailHowMerchant": {
+    "description": "C",
+    "placeholders": {
+      "merchant": {
+        "type": "String"
+      }
+    }
+  },
+  "transactionsDetailHowConfidence": "ثقة {percent}",
+  "@transactionsDetailHowConfidence": {
+    "description": "C · FR-PAR-06",
+    "placeholders": {
+      "percent": {
+        "type": "String"
+      }
+    }
+  },
+  "transactionsDetailHowTemplate": "القالب {templateId}",
+  "@transactionsDetailHowTemplate": {
+    "description": "C · Latin ID, e.g. nbe.card_purchase.ar.v2",
+    "placeholders": {
+      "templateId": {
+        "type": "String"
+      }
+    }
+  },
+  "transactionsDetailHowNone": "مفيش رسالة للحركة دي.",
+  "@transactionsDetailHowNone": {
+    "description": "S · manual, voice, CSV"
+  },
+  "transactionsDetailCategoryChanged": "اتغير التصنيف",
+  "@transactionsDetailCategoryChanged": {
+    "description": "N + common_action_undo"
+  },
+  "transactionsDetailDeleteTitle": "تمسح الحركة دي؟",
+  "@transactionsDetailDeleteTitle": {
+    "description": "T · C-18 destructive"
+  },
+  "transactionsDetailDeleteBodyAuto": "{platform, select, ios{مش هتقدر ترجعها بعد كده.} other{جت من رسالة، ومش هترجع غير لو دوّرت في الرسايل من جديد.}}",
+  "@transactionsDetailDeleteBodyAuto": {
+    "description": "S · auto-captured; re-scan is Android only. Uses the standard ios/other select (§0.4)",
+    "placeholders": {
+      "platform": {
+        "type": "String"
+      }
+    }
+  },
+  "transactionsDetailDeleteBodyManual": "مش هتقدر ترجعها بعد كده.",
+  "@transactionsDetailDeleteBodyManual": {
+    "description": "S"
+  },
+  "transactionsDetailDeleted": "اتمسحت",
+  "@transactionsDetailDeleted": {
+    "description": "N"
+  },
+  "transactionsDetailGone": "الحركة دي مبقتش موجودة",
+  "@transactionsDetailGone": {
+    "description": "N · deleted elsewhere; goes back"
+  },
+  "categorizationRuleTitle": "أستخدم {category} دايماً لـ {merchant}؟",
+  "@categorizationRuleTitle": {
+    "description": "T · FR-CAT-05 sheet, owned by the categorization module (F-19)",
+    "placeholders": {
+      "category": {
+        "type": "String"
+      },
+      "merchant": {
+        "type": "String"
+      }
+    }
+  },
+  "categorizationRuleAlways": "دايماً",
+  "@categorizationRuleAlways": {
+    "description": "B"
+  },
+  "categorizationRuleOnce": "المرة دي بس",
+  "@categorizationRuleOnce": {
+    "description": "B"
+  },
+  "categorizationRuleApplyPast": "{count, plural, =1{وكمان غيّر الحركة القديمة} =2{وكمان غيّر الحركتين القدام} few{وكمان غيّر الـ {n} حركات القديمة} many{وكمان غيّر الـ {n} حركة القديمة} other{وكمان غيّر الـ {n} حركة القديمة}}",
+  "@categorizationRuleApplyPast": {
+    "description": "S · count:int, n · checkbox (A-13), hidden when count = 0 (§0.4)",
+    "placeholders": {
+      "count": {
+        "type": "int"
+      },
+      "n": {
+        "type": "String"
+      }
+    }
+  },
+  "categorizationRuleSaved": "تمام، هفتكر ده ✓",
+  "@categorizationRuleSaved": {
+    "description": "N + common_action_undo"
+  },
+  "transactionsEditTitleAdd": "{type, select, income{دخل جديد} transfer{تحويل جديد} other{مصروف جديد}}",
+  "@transactionsEditTitleAdd": {
+    "description": "T",
+    "placeholders": {
+      "type": {
+        "type": "String"
+      }
+    }
+  },
+  "transactionsEditTitleEdit": "عدّل الحركة",
+  "@transactionsEditTitleEdit": {
+    "description": "T"
+  },
+  "transactionsEditTypeA11y": "نوع الحركة",
+  "@transactionsEditTypeA11y": {
+    "description": "A · segments use common_txnType_expense/income/transfer"
+  },
+  "transactionsEditAmountA11y": "المبلغ",
+  "@transactionsEditAmountA11y": {
+    "description": "A · C-22; numeric pad; Arabic-Indic and Western input accepted"
+  },
+  "transactionsEditCurrency": "العملة",
+  "@transactionsEditCurrency": {
+    "description": "L"
+  },
+  "transactionsEditCurrencySearch": "دوّر على عملة",
+  "@transactionsEditCurrencySearch": {
+    "description": "L"
+  },
+  "transactionsEditCurrencyFeatured": "الأكتر استخدام",
+  "@transactionsEditCurrencyFeatured": {
+    "description": "L · section"
+  },
+  "transactionsEditCurrencyAll": "كل العملات",
+  "@transactionsEditCurrencyAll": {
+    "description": "L · section"
+  },
+  "transactionsEditCategory": "التصنيف",
+  "@transactionsEditCategory": {
+    "description": "L"
+  },
+  "transactionsEditChoose": "اختار",
+  "@transactionsEditChoose": {
+    "description": "C · empty picker"
+  },
+  "transactionsEditMerchant": "التاجر أو الشخص",
+  "@transactionsEditMerchant": {
+    "description": "L"
+  },
+  "transactionsEditAccount": "الحساب",
+  "@transactionsEditAccount": {
+    "description": "L · default common_accountType_cash (FR-CARD-05)"
+  },
+  "transactionsEditFrom": "من حساب",
+  "@transactionsEditFrom": {
+    "description": "L · transfer"
+  },
+  "transactionsEditTo": "لحساب",
+  "@transactionsEditTo": {
+    "description": "L · transfer"
+  },
+  "transactionsEditWhichBalance": "من أنهي رصيد؟",
+  "@transactionsEditWhichBalance": {
+    "description": "L · multi-currency account"
+  },
+  "transactionsEditDate": "إمتى",
+  "@transactionsEditDate": {
+    "description": "L · default common_date_today"
+  },
+  "transactionsEditNote": "ملاحظة",
+  "@transactionsEditNote": {
+    "description": "L"
+  },
+  "transactionsEditSameAccount": "اختار حسابين مختلفين",
+  "@transactionsEditSameAccount": {
+    "description": "S · validation, transfer from ≠ to"
+  },
+  "transactionsEditFromShared": "ده اللي فهمته من الرسالة اللي بعتها. راجعه واحفظ.",
+  "@transactionsEditFromShared": {
+    "description": "S · FR-ING-A-04 confirm-before-save"
+  },
+  "transactionsEditRawTitle": "نص الرسالة",
+  "@transactionsEditRawTitle": {
+    "description": "L · prefilled from S-14 \"Enter details\""
+  },
+  "ingestionReviewFilterAll": "الكل {n}",
+  "@ingestionReviewFilterAll": {
+    "description": "C · n = formatted count",
+    "placeholders": {
+      "n": {
+        "type": "String"
+      }
+    }
+  },
+  "ingestionReviewFilterCategory": "تصنيف",
+  "@ingestionReviewFilterCategory": {
+    "description": "C"
+  },
+  "ingestionReviewFilterMessages": "رسايل جديدة",
+  "@ingestionReviewFilterMessages": {
+    "description": "C · unread or unrecognized"
+  },
+  "ingestionReviewFilterTransfers": "تحويلات",
+  "@ingestionReviewFilterTransfers": {
+    "description": "C"
+  },
+  "ingestionReviewCatOut": "{amount} لـ {counterparty}",
+  "@ingestionReviewCatOut": {
+    "description": "L · counterparty may be an IPA handle (LTR, isolated)",
+    "placeholders": {
+      "amount": {
+        "type": "String"
+      },
+      "counterparty": {
+        "type": "String"
+      }
+    }
+  },
+  "ingestionReviewCatIn": "{amount} من {counterparty}",
+  "@ingestionReviewCatIn": {
+    "description": "L",
+    "placeholders": {
+      "amount": {
+        "type": "String"
+      },
+      "counterparty": {
+        "type": "String"
+      }
+    }
+  },
+  "ingestionReviewCatAt": "{amount} عند {merchant}",
+  "@ingestionReviewCatAt": {
+    "description": "L",
+    "placeholders": {
+      "amount": {
+        "type": "String"
+      },
+      "merchant": {
+        "type": "String"
+      }
+    }
+  },
+  "ingestionReviewCatQuestion": "كانت إيه دي؟",
+  "@ingestionReviewCatQuestion": {
+    "description": "L · followed by category chips (catalog names) and common_action_more"
+  },
+  "ingestionReviewRememberCounterparty": "افتكر ده لأي تحويلة لـ {counterparty}",
+  "@ingestionReviewRememberCounterparty": {
+    "description": "L · checkbox",
+    "placeholders": {
+      "counterparty": {
+        "type": "String"
+      }
+    }
+  },
+  "ingestionReviewRememberMerchant": "افتكر ده لـ {merchant} على طول",
+  "@ingestionReviewRememberMerchant": {
+    "description": "L · checkbox",
+    "placeholders": {
+      "merchant": {
+        "type": "String"
+      }
+    }
+  },
+  "ingestionReviewCategorized": "اتحطت في {category}",
+  "@ingestionReviewCategorized": {
+    "description": "N + common_action_undo",
+    "placeholders": {
+      "category": {
+        "type": "String"
+      }
+    }
+  },
+  "ingestionReviewNewBank": "بنك جديد",
+  "@ingestionReviewNewBank": {
+    "description": "C · badge"
+  },
+  "ingestionReviewGenFrom": "من {sender}",
+  "@ingestionReviewGenFrom": {
+    "description": "L",
+    "placeholders": {
+      "sender": {
+        "type": "String"
+      }
+    }
+  },
+  "ingestionReviewGenGuessOut": "توقعنا: {amount} عند {merchant}",
+  "@ingestionReviewGenGuessOut": {
+    "description": "S · FR-PAR-13",
+    "placeholders": {
+      "amount": {
+        "type": "String"
+      },
+      "merchant": {
+        "type": "String"
+      }
+    }
+  },
+  "ingestionReviewGenGuessNoMerchant": "توقعنا: {amount}",
+  "@ingestionReviewGenGuessNoMerchant": {
+    "description": "S",
+    "placeholders": {
+      "amount": {
+        "type": "String"
+      }
+    }
+  },
+  "ingestionReviewGenGuessIn": "توقعنا: {amount} دخلوا",
+  "@ingestionReviewGenGuessIn": {
+    "description": "S",
+    "placeholders": {
+      "amount": {
+        "type": "String"
+      }
+    }
+  },
+  "ingestionReviewGenLowConfidence": "مش متأكد أوي، بص عليها قبل ما أسجلها",
+  "@ingestionReviewGenLowConfidence": {
+    "description": "S · FR-PAR-06. The card's buttons are common_action_confirm, common_action_edit (opens S-13 prefilled) and common_action_dismiss"
+  },
+  "ingestionReviewRequestBank": "اطلب دعم البنك ده",
+  "@ingestionReviewRequestBank": {
+    "description": "L · text button (FR-PAR-14)"
+  },
+  "ingestionReviewUnreadTitle": "رسالة من {sender} مقدرتش أفهمها",
+  "@ingestionReviewUnreadTitle": {
+    "description": "S · FR-ING-A-06",
+    "placeholders": {
+      "sender": {
+        "type": "String"
+      }
+    }
+  },
+  "ingestionReviewUnreadShow": "شوف الرسالة",
+  "@ingestionReviewUnreadShow": {
+    "description": "B · raw text on screen only"
+  },
+  "ingestionReviewUnreadEnter": "اكتب التفاصيل",
+  "@ingestionReviewUnreadEnter": {
+    "description": "B · opens S-13 with transactions_edit_rawTitle"
+  },
+  "ingestionReviewXferTitle": "{amount} في {card}، تبع أنهي تحويلة؟",
+  "@ingestionReviewXferTitle": {
+    "description": "S · BR-XFR-02 / EC-16; confirm with common_action_confirm",
+    "placeholders": {
+      "amount": {
+        "type": "String"
+      },
+      "card": {
+        "type": "String"
+      }
+    }
+  },
+  "ingestionReviewXferOption": "{amount} من {card} · {time}",
+  "@ingestionReviewXferOption": {
+    "description": "L · radio",
+    "placeholders": {
+      "amount": {
+        "type": "String"
+      },
+      "card": {
+        "type": "String"
+      },
+      "time": {
+        "type": "String"
+      }
+    }
+  },
+  "ingestionReviewXferNotMine": "مش تحويلة مني",
+  "@ingestionReviewXferNotMine": {
+    "description": "L · radio"
+  },
+  "ingestionReviewSwipeAcceptA11y": "وافق على الاقتراح",
+  "@ingestionReviewSwipeAcceptA11y": {
+    "description": "A · swipe from the start edge; the button is always visible"
+  },
+  "ingestionReviewSwipeDismissA11y": "سيبها",
+  "@ingestionReviewSwipeDismissA11y": {
+    "description": "A · swipe from the end edge, with undo"
+  },
+  "ingestionReviewDismissed": "اتشالت من المراجعة",
+  "@ingestionReviewDismissed": {
+    "description": "N + common_action_undo"
+  },
+  "ingestionReviewEmptyTitle": "كله تمام! مفيش حاجة مستنية رأيك ✨",
+  "@ingestionReviewEmptyTitle": {
+    "description": "T · C-28, Rive proud"
+  },
+  "ingestionAlwaysSenderTitle": "أقرا رسايل {sender} على طول؟",
+  "@ingestionAlwaysSenderTitle": {
+    "description": "T · A-66 sheet, after confirming a generic parse",
+    "placeholders": {
+      "sender": {
+        "type": "String"
+      }
+    }
+  },
+  "ingestionAlwaysSenderBody": "{count, plural, =0{من هنا ورايح هسجل رسايله لوحدي.} =1{هتفضل توصلك هنا للمراجعة لحد ما تأكد رسالة واحدة منه، وبعد كده هسجلها لوحدي.} =2{هتفضل توصلك هنا للمراجعة لحد ما تأكد رسالتين منه، وبعد كده هسجلها لوحدي.} few{هتفضل توصلك هنا للمراجعة لحد ما تأكد {n} رسايل منه، وبعد كده هسجلها لوحدي.} many{هتفضل توصلك هنا للمراجعة لحد ما تأكد {n} رسالة منه، وبعد كده هسجلها لوحدي.} other{هتفضل توصلك هنا للمراجعة لحد ما تأكد {n} رسالة منه، وبعد كده هسجلها لوحدي.}}",
+  "@ingestionAlwaysSenderBody": {
+    "description": "S · count:int, n · count = confirmations still needed (A-66: 3 in total); 0 once all are done",
+    "placeholders": {
+      "count": {
+        "type": "int"
+      },
+      "n": {
+        "type": "String"
+      }
+    }
+  },
+  "ingestionAlwaysSenderYes": "أيوه، على طول",
+  "@ingestionAlwaysSenderYes": {
+    "description": "B"
+  },
+  "ingestionRequestBankTitle": "اطلب دعم بنكك",
+  "@ingestionRequestBankTitle": {
+    "description": "T · shared by S-14 and S-61"
+  },
+  "ingestionRequestBankName": "اسم البنك",
+  "@ingestionRequestBankName": {
+    "description": "L · prefilled with the sender in S-14"
+  },
+  "ingestionRequestBankCountry": "البلد",
+  "@ingestionRequestBankCountry": {
+    "description": "L"
+  },
+  "ingestionRequestBankChannel": "تنبيهاته بتوصل إزاي؟",
+  "@ingestionRequestBankChannel": {
+    "description": "L · options common_source_sms / common_source_notification"
+  },
+  "ingestionRequestBankPrivacy": "هنبعت اسم البنك وبلده ونوع التنبيه بس. عمرنا ما هنبعت الرسالة نفسها.",
+  "@ingestionRequestBankPrivacy": {
+    "description": "S · FR-PAR-14 / BR-SYNC-03 (SRS adds the channel, see Q-09). Sent with common_action_send"
+  },
+  "ingestionRequestBankSent": "وصل طلبك ✓ شكراً!",
+  "@ingestionRequestBankSent": {
+    "description": "N · no promise of a date"
+  },
+  "ingestionRequestBankFailed": "مقدرتش أبعته دلوقتي. حفظته، وتقدر تبعته تاني بعدين.",
+  "@ingestionRequestBankFailed": {
+    "description": "S · network or offline; draft kept"
+  },
+  "ingestionRequestBankNameLength": "اسم البنك لازم يكون من {min} لـ {max} حرف",
+  "@ingestionRequestBankNameLength": {
+    "description": "S · min = 2, max = 60, both formatted Strings",
+    "placeholders": {
+      "max": {
+        "type": "String"
+      },
+      "min": {
+        "type": "String"
+      }
+    }
+  },
+  "ingestionRequestBankCountryRequired": "اختار البلد",
+  "@ingestionRequestBankCountryRequired": {
+    "description": "S"
+  },
+  "transfersSplitTitle": "تقسيم العزومة",
+  "@transfersSplitTitle": {
+    "description": "T · glossary"
+  },
+  "transfersSplitHeader": "{merchant} · {amount}",
+  "@transfersSplitHeader": {
+    "description": "L",
+    "placeholders": {
+      "amount": {
+        "type": "String"
+      },
+      "merchant": {
+        "type": "String"
+      }
+    }
+  },
+  "transfersSplitPeople": "الناس",
+  "@transfersSplitPeople": {
+    "description": "L"
+  },
+  "transfersSplitAddPerson": "ضيف حد",
+  "@transfersSplitAddPerson": {
+    "description": "B"
+  },
+  "transfersSplitPersonHint": "الاسم",
+  "@transfersSplitPersonHint": {
+    "description": "L · 1–30 characters"
+  },
+  "transfersSplitShareA11y": "نصيب {name}",
+  "@transfersSplitShareA11y": {
+    "description": "A · apostrophe right after a brace: see §0.10 ARB note",
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "transfersSplitRemovePerson": "شيل {name}",
+  "@transfersSplitRemovePerson": {
+    "description": "L · row action / a11y action (F-5d)",
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "transfersSplitEqual": "قسّم بالتساوي",
+  "@transfersSplitEqual": {
+    "description": "B · this is the default"
+  },
+  "transfersSplitPaidBack": "رجع",
+  "@transfersSplitPaidBack": {
+    "description": "C · status"
+  },
+  "transfersSplitWaiting": "مستني",
+  "@transfersSplitWaiting": {
+    "description": "C · status (FR-XFR-05)"
+  },
+  "transfersSplitPaidDetail": "{amount} · {source} · {date}",
+  "@transfersSplitPaidDetail": {
+    "description": "L",
+    "placeholders": {
+      "amount": {
+        "type": "String"
+      },
+      "date": {
+        "type": "String"
+      },
+      "source": {
+        "type": "String"
+      }
+    }
+  },
+  "transfersSplitYourShare": "دفعت إنت فعلاً",
+  "@transfersSplitYourShare": {
+    "description": "L · glossary «دفعت إنت فعلاً» (BR-XFR-04)"
+  },
+  "transfersSplitSuggestions": "اقتراحات",
+  "@transfersSplitSuggestions": {
+    "description": "L"
+  },
+  "transfersSplitSuggestion": "{amount} من {person} · {date}، من العزومة دي؟",
+  "@transfersSplitSuggestion": {
+    "description": "S · + common_action_link; never auto (FR-XFR-08)",
+    "placeholders": {
+      "amount": {
+        "type": "String"
+      },
+      "date": {
+        "type": "String"
+      },
+      "person": {
+        "type": "String"
+      }
+    }
+  },
+  "transfersSplitUnassign": "شيلها من العزومة دي",
+  "@transfersSplitUnassign": {
+    "description": "L · on a linked repayment (FR-XFR-09) (F-5d)"
+  },
+  "transfersSplitUnassigned": "اتشالت، ورجعت تتحسب دخل عادي",
+  "@transfersSplitUnassigned": {
+    "description": "N + common_action_undo · FR-XFR-09"
+  },
+  "transfersSplitSaved": "اتحفظ التقسيم ✓",
+  "@transfersSplitSaved": {
+    "description": "N"
+  },
+  "transfersAssignHeader": "{amount} من {person}",
+  "@transfersAssignHeader": {
+    "description": "L",
+    "placeholders": {
+      "amount": {
+        "type": "String"
+      },
+      "person": {
+        "type": "String"
+      }
+    }
+  },
+  "transfersAssignTitle": "وزّعها على مصاريف",
+  "@transfersAssignTitle": {
+    "description": "T"
+  },
+  "transfersAssignSearch": "دوّر في المصاريف الأخيرة",
+  "@transfersAssignSearch": {
+    "description": "L"
+  },
+  "transfersAssignUnassigned": "مش متوزع: {amount}، هيفضل دخل",
+  "@transfersAssignUnassigned": {
+    "description": "S · BR-XFR-06",
+    "placeholders": {
+      "amount": {
+        "type": "String"
+      }
+    }
+  },
+  "transfersAssignEmpty": "{count, plural, =1{مفيش مصاريف من امبارح} =2{مفيش مصاريف في آخر يومين} few{مفيش مصاريف في آخر {n} أيام} many{مفيش مصاريف في آخر {n} يوم} other{مفيش مصاريف في آخر {n} يوم}}",
+  "@transfersAssignEmpty": {
+    "description": "S · count:int = 60, n",
+    "placeholders": {
+      "count": {
+        "type": "int"
+      },
+      "n": {
+        "type": "String"
+      }
+    }
+  },
+  "transfersAssignSearchAll": "دوّر في كل المصاريف",
+  "@transfersAssignSearchAll": {
+    "description": "B"
+  },
+  "transfersAssignSaved": "اتوزعت ✓",
+  "@transfersAssignSaved": {
+    "description": "N"
+  },
+  "transfersSplitErrorShareZero": "النصيب لازم يكون أكبر من صفر",
+  "@transfersSplitErrorShareZero": {
+    "description": "S"
+  },
+  "transfersSplitErrorSharesExceed": "مجموع الأنصبة أكبر من المصروف",
+  "@transfersSplitErrorSharesExceed": {
+    "description": "S"
+  },
+  "transfersAssignErrorExceedsIncoming": "وزعت أكتر من المبلغ اللي جالك",
+  "@transfersAssignErrorExceedsIncoming": {
+    "description": "S"
+  },
+  "transfersAssignErrorExceedsExpense": "الفلوس الراجعة أكتر من المصروف نفسه",
+  "@transfersAssignErrorExceedsExpense": {
+    "description": "S · BR-XFR-06"
+  },
+  "transfersSplitErrorCurrency": "عملة مختلفة، مينفعش تربطهم",
+  "@transfersSplitErrorCurrency": {
+    "description": "S · amounts are never converted"
+  },
+  "transfersLinkTitle": "ربط تحويلة لنفسي",
+  "@transfersLinkTitle": {
+    "description": "T"
+  },
+  "transfersLinkSource": "{amount} · {card} · {date}",
+  "@transfersLinkSource": {
+    "description": "L",
+    "placeholders": {
+      "amount": {
+        "type": "String"
+      },
+      "card": {
+        "type": "String"
+      },
+      "date": {
+        "type": "String"
+      }
+    }
+  },
+  "transfersLinkPick": "اختار الحركة اللي تقابلها",
+  "@transfersLinkPick": {
+    "description": "L"
+  },
+  "transfersLinkAfterMinutes": "{count, plural, =0{في نفس الدقيقة} =1{بعدها بدقيقة} =2{بعدها بدقيقتين} few{بعدها بـ {n} دقايق} many{بعدها بـ {n} دقيقة} other{بعدها بـ {n} دقيقة}}",
+  "@transfersLinkAfterMinutes": {
+    "description": "C · count:int, n · gap under 60 min (0 = same minute)",
+    "placeholders": {
+      "count": {
+        "type": "int"
+      },
+      "n": {
+        "type": "String"
+      }
+    }
+  },
+  "transfersLinkBeforeMinutes": "{count, plural, =0{في نفس الدقيقة} =1{قبلها بدقيقة} =2{قبلها بدقيقتين} few{قبلها بـ {n} دقايق} many{قبلها بـ {n} دقيقة} other{قبلها بـ {n} دقيقة}}",
+  "@transfersLinkBeforeMinutes": {
+    "description": "C · count:int, n · gap under 60 min",
+    "placeholders": {
+      "count": {
+        "type": "int"
+      },
+      "n": {
+        "type": "String"
+      }
+    }
+  },
+  "transfersLinkAfterHours": "{count, plural, =1{بعدها بساعة} =2{بعدها بساعتين} few{بعدها بـ {n} ساعات} many{بعدها بـ {n} ساعة} other{بعدها بـ {n} ساعة}}",
+  "@transfersLinkAfterHours": {
+    "description": "C · count:int, n · gap of 1–23 h (F-5e); can't be 0 (§0.4)",
+    "placeholders": {
+      "count": {
+        "type": "int"
+      },
+      "n": {
+        "type": "String"
+      }
+    }
+  },
+  "transfersLinkBeforeHours": "{count, plural, =1{قبلها بساعة} =2{قبلها بساعتين} few{قبلها بـ {n} ساعات} many{قبلها بـ {n} ساعة} other{قبلها بـ {n} ساعة}}",
+  "@transfersLinkBeforeHours": {
+    "description": "C · count:int, n · gap of 1–23 h",
+    "placeholders": {
+      "count": {
+        "type": "int"
+      },
+      "n": {
+        "type": "String"
+      }
+    }
+  },
+  "transfersLinkAfterDays": "{count, plural, =0{في نفس اليوم} =1{بعدها بيوم} =2{بعدها بيومين} few{بعدها بـ {n} أيام} many{بعدها بـ {n} يوم} other{بعدها بـ {n} يوم}}",
+  "@transfersLinkAfterDays": {
+    "description": "C · count:int, n · whole calendar days, gap of 24 h or more. =0 covers a calendar-day count of 0 if a caller passes it",
+    "placeholders": {
+      "count": {
+        "type": "int"
+      },
+      "n": {
+        "type": "String"
+      }
+    }
+  },
+  "transfersLinkBeforeDays": "{count, plural, =0{في نفس اليوم} =1{قبلها بيوم} =2{قبلها بيومين} few{قبلها بـ {n} أيام} many{قبلها بـ {n} يوم} other{قبلها بـ {n} يوم}}",
+  "@transfersLinkBeforeDays": {
+    "description": "C · count:int, n · as above",
+    "placeholders": {
+      "count": {
+        "type": "int"
+      },
+      "n": {
+        "type": "String"
+      }
+    }
+  },
+  "transfersLinkImpliedRate": "سعر التحويل ≈ {rate} لكل {fromCurrency}",
+  "@transfersLinkImpliedRate": {
+    "description": "L · cross-currency (A-61); rate includes the target currency. The sheet's button is common_action_link",
+    "placeholders": {
+      "fromCurrency": {
+        "type": "String"
+      },
+      "rate": {
+        "type": "String"
+      }
+    }
+  },
+  "transfersLinkLinked": "اتربطوا ✓ ومش هيتحسبوا مصروف",
+  "@transfersLinkLinked": {
+    "description": "N + common_action_undo"
+  },
+  "transfersLinkEmptyTitle": "ملقيتش حركة تقابلها",
+  "@transfersLinkEmptyTitle": {
+    "description": "T · C-28"
+  },
+  "transfersLinkEmptyBody": "ممكن البنك التاني مش بيبعت رسايل. تقدر تعلّمها تحويلة لنفسك برضه، ومش هتتحسب مصروف.",
+  "@transfersLinkEmptyBody": {
+    "description": "S · EC-15"
+  },
+  "transfersLinkMarkAnyway": "علّمها تحويلة لنفسي",
+  "@transfersLinkMarkAnyway": {
+    "description": "B · one-sided internal"
+  },
+  "transfersLinkErrorAmounts": "المبلغين لازم يكونوا زي بعض",
+  "@transfersLinkErrorAmounts": {
+    "description": "S · same currency"
+  },
+  "transfersLinkErrorAccount": "اختار حساب تاني",
+  "@transfersLinkErrorAccount": {
+    "description": "S"
+  },
+  "transfersLinkErrorDirection": "لازم واحدة خارجة وواحدة داخلة",
+  "@transfersLinkErrorDirection": {
+    "description": "S"
+  },
+  "accountsOverviewTitle": "فلوسي",
+  "@accountsOverviewTitle": {
+    "description": "T"
+  },
+  "accountsOverviewAdd": "ضيف",
+  "@accountsOverviewAdd": {
+    "description": "B · opens menu"
+  },
+  "accountsOverviewAddAccount": "كارت أو حساب",
+  "@accountsOverviewAddAccount": {
+    "description": "L · opens accounts_addType_*"
+  },
+  "accountsOverviewAddAsset": "أصل (دهب، شهادة…)",
+  "@accountsOverviewAddAsset": {
+    "description": "L · with common_gold_badge; Free opens S-68"
+  },
+  "accountsOverviewNetWorth": "اللي حيلتك كله",
+  "@accountsOverviewNetWorth": {
+    "description": "L · glossary; one figure per currency, no cross-currency sum"
+  },
+  "accountsOverviewOtherCurrenciesA11y": "عملات تانية",
+  "@accountsOverviewOtherCurrenciesA11y": {
+    "description": "A"
+  },
+  "accountsOverviewAccountsTitle": "كروتك وحساباتك",
+  "@accountsOverviewAccountsTitle": {
+    "description": "L"
+  },
+  "accountsOverviewCompare": "قارن",
+  "@accountsOverviewCompare": {
+    "description": "L · text button, opens S-42"
+  },
+  "accountsOverviewAsOf": "آخر تحديث {when}",
+  "@accountsOverviewAsOf": {
+    "description": "C · when = common_date_minutesAgo or a date (FR-ACC-02)",
+    "placeholders": {
+      "when": {
+        "type": "String"
+      }
+    }
+  },
+  "accountsOverviewCreditAvailable": "متاح من {limit}",
+  "@accountsOverviewCreditAvailable": {
+    "description": "C",
+    "placeholders": {
+      "limit": {
+        "type": "String"
+      }
+    }
+  },
+  "accountsOverviewMoreCurrencies": "{count, plural, =1{وكمان عملة واحدة} =2{وكمان عملتين} few{وكمان {n} عملات} many{وكمان {n} عملة} other{وكمان {n} عملة}}",
+  "@accountsOverviewMoreCurrencies": {
+    "description": "L · count:int, n · multi-currency row (FR-ACC-06)",
+    "placeholders": {
+      "count": {
+        "type": "int"
+      },
+      "n": {
+        "type": "String"
+      }
+    }
+  },
+  "accountsOverviewCashSub": "يدوي وصوت",
+  "@accountsOverviewCashSub": {
+    "description": "C"
+  },
+  "accountsOverviewNotTracked": "مش متتبع",
+  "@accountsOverviewNotTracked": {
+    "description": "C · ignored card (C-07)"
+  },
+  "accountsOverviewHiddenEntry": "الحسابات المخفية",
+  "@accountsOverviewHiddenEntry": {
+    "description": "L · row at the end of the list, only when at least one account is hidden. Opens the hidden list (S-40 spec, accounts_hidden_*, §2.12), where each account can be unhidden or opened in S-43 (D-69). Trailing count: accounts_overview_hiddenCount"
+  },
+  "accountsOverviewAssetsTitle": "دهبك وشهاداتك",
+  "@accountsOverviewAssetsTitle": {
+    "description": "L · glossary, + common_gold_badge"
+  },
+  "accountsOverviewPrices": "الأسعار",
+  "@accountsOverviewPrices": {
+    "description": "L · text button, opens S-45"
+  },
+  "accountsOverviewAssetsLocked": "تابع دهبك وشهاداتك وكل أصولك في مكان واحد",
+  "@accountsOverviewAssetsLocked": {
+    "description": "S · locked preview + common_gold_unlock"
+  },
+  "accountsOverviewZakah": "الزكاة",
+  "@accountsOverviewZakah": {
+    "description": "L · only when the zakah flag is on"
+  },
+  "accountsOverviewEmptyTitle": "الحسابات بتظهر لوحدها من رسايل البنك",
+  "@accountsOverviewEmptyTitle": {
+    "description": "T · C-28, Rive sleep"
+  },
+  "accountsOverviewEmptyAdd": "ضيف حساب بإيدك",
+  "@accountsOverviewEmptyAdd": {
+    "description": "B"
+  },
+  "accountsAddTypeTitle": "تضيف إيه؟",
+  "@accountsAddTypeTitle": {
+    "description": "T · sheet"
+  },
+  "accountsAddTypeInfo": "الكروت بتتضاف لوحدها أول ما توصل رسالة. ضيف بإيدك لو لسه مفيش رسايل.",
+  "@accountsAddTypeInfo": {
+    "description": "S"
+  },
+  "accountsAddTypeCredit": "كريدت كارد",
+  "@accountsAddTypeCredit": {
+    "description": "L"
+  },
+  "accountsAddTypeCreditSub": "الليميت وميعاد السداد",
+  "@accountsAddTypeCreditSub": {
+    "description": "S"
+  },
+  "accountsAddTypeDebit": "كارت ديبت / حساب بنك",
+  "@accountsAddTypeDebit": {
+    "description": "L"
+  },
+  "accountsAddTypeDebitSub": "مرتب ومصاريف",
+  "@accountsAddTypeDebitSub": {
+    "description": "S"
+  },
+  "accountsAddTypeWallet": "محفظة",
+  "@accountsAddTypeWallet": {
+    "description": "L"
+  },
+  "accountsAddTypeWalletSub": "فودافون كاش، أورانج كاش، إي آند كاش",
+  "@accountsAddTypeWalletSub": {
+    "description": "S · mobile-wallet examples; InstaPay removed because it's a transfer rail (Q-10). Brand names still need OQ-09 clearance"
+  },
+  "accountsAddTypeMulti": "حساب بأكتر من عملة",
+  "@accountsAddTypeMulti": {
+    "description": "L"
+  },
+  "accountsAddTypeMultiSub": "Wise، Revolut، Payoneer",
+  "@accountsAddTypeMultiSub": {
+    "description": "S"
+  },
+  "accountsAddTypeBnpl": "تقسيط",
+  "@accountsAddTypeBnpl": {
+    "description": "L"
+  },
+  "accountsAddTypeBnplSub": "فاليو، سيمبل، كونتكت",
+  "@accountsAddTypeBnplSub": {
+    "description": "S"
+  },
+  "accountsAddBankTitle": "من أنهي بنك؟",
+  "@accountsAddBankTitle": {
+    "description": "T"
+  },
+  "accountsAddBankSearch": "دوّر على بنك…",
+  "@accountsAddBankSearch": {
+    "description": "L"
+  },
+  "accountsAddBankEgypt": "بنوك مصر",
+  "@accountsAddBankEgypt": {
+    "description": "L · section"
+  },
+  "accountsAddBankAbroad": "بنوك برّه وأونلاين",
+  "@accountsAddBankAbroad": {
+    "description": "L · section"
+  },
+  "accountsAddBankNotListed": "بنكي مش موجود",
+  "@accountsAddBankNotListed": {
+    "description": "L"
+  },
+  "accountsAddBankNotListedSub": "ضيفه باسمه، وزغلول هيحاول يفهم رسايله",
+  "@accountsAddBankNotListedSub": {
+    "description": "S · generic parser (FR-PAR-13); no promise"
+  },
+  "accountsAddBankNoResults": "مفيش بنك بالاسم ده",
+  "@accountsAddBankNoResults": {
+    "description": "S · + not-listed row"
+  },
+  "accountsAddBankRequired": "اختار بنك",
+  "@accountsAddBankRequired": {
+    "description": "S"
+  },
+  "accountsAddedTitle": "الكارت اتضاف! ✨",
+  "@accountsAddedTitle": {
+    "description": "N · success"
+  },
+  "accountsAddedDueDay": "السداد يوم {day} كل شهر",
+  "@accountsAddedDueDay": {
+    "description": "L",
+    "placeholders": {
+      "day": {
+        "type": "String"
+      }
+    }
+  },
+  "accountsAddedWaitingBalance": "هيتحدث مع أول رسالة فيها الرصيد المتاح",
+  "@accountsAddedWaitingBalance": {
+    "description": "S · value shows \"—\""
+  },
+  "accountsAddedEmptyBody": "أول ما توصلك رسالة من {bank} على {last4} هتظهر هنا لوحدها.",
+  "@accountsAddedEmptyBody": {
+    "description": "S · S-41 empty state, Rive sleep",
+    "placeholders": {
+      "bank": {
+        "type": "String"
+      },
+      "last4": {
+        "type": "String"
+      }
+    }
+  },
+  "accountsAddedImport": "ضيف كشف حساب الكارت",
+  "@accountsAddedImport": {
+    "description": "L · common_gold_badge; Free opens S-68"
+  },
+  "accountsAddedImportSub": "PDF من تطبيق البنك",
+  "@accountsAddedImportSub": {
+    "description": "S"
+  },
+  "accountsAddedManual": "سجّل حركة بإيدك",
+  "@accountsAddedManual": {
+    "description": "L · opens S-13 on this card (FR-CARD-05)"
+  },
+  "accountsAddedManualSub": "على الكارت ده",
+  "@accountsAddedManualSub": {
+    "description": "S"
+  },
+  "accountsDetailAvailable": "فاضل في الكارت",
+  "@accountsDetailAvailable": {
+    "description": "L · glossary, credit"
+  },
+  "accountsDetailAvailableOf": "{available} من {limit}",
+  "@accountsDetailAvailableOf": {
+    "description": "L",
+    "placeholders": {
+      "available": {
+        "type": "String"
+      },
+      "limit": {
+        "type": "String"
+      }
+    }
+  },
+  "accountsDetailLimitUsed": "مستخدم {percent} من الليميت",
+  "@accountsDetailLimitUsed": {
+    "description": "L",
+    "placeholders": {
+      "percent": {
+        "type": "String"
+      }
+    }
+  },
+  "accountsDetailBalance": "الرصيد",
+  "@accountsDetailBalance": {
+    "description": "L · debit / account"
+  },
+  "accountsDetailAsOf": "آخر تحديث {when}",
+  "@accountsDetailAsOf": {
+    "description": "C",
+    "placeholders": {
+      "when": {
+        "type": "String"
+      }
+    }
+  },
+  "accountsDetailBalanceUnknown": "هيظهر مع أول رسالة فيها رصيد",
+  "@accountsDetailBalanceUnknown": {
+    "description": "S"
+  },
+  "accountsDetailDue": "ميعاد السداد {date}",
+  "@accountsDetailDue": {
+    "description": "L",
+    "placeholders": {
+      "date": {
+        "type": "String"
+      }
+    }
+  },
+  "accountsDetailSpent": "صرفت",
+  "@accountsDetailSpent": {
+    "description": "L · + period chip common_period_*"
+  },
+  "accountsDetailDonutA11y": "توزيع الصرف على التصنيفات",
+  "@accountsDetailDonutA11y": {
+    "description": "A"
+  },
+  "accountsDetailTopMerchants": "أكتر أماكن صرفت فيها",
+  "@accountsDetailTopMerchants": {
+    "description": "L"
+  },
+  "accountsDetailTrend": "الصرف شهر بشهر",
+  "@accountsDetailTrend": {
+    "description": "L · subtitle common_period_lastMonths"
+  },
+  "accountsDetailIncomeRefunds": "دخل ومرتجعات",
+  "@accountsDetailIncomeRefunds": {
+    "description": "L"
+  },
+  "accountsDetailRecent": "آخر الحركات",
+  "@accountsDetailRecent": {
+    "description": "L"
+  },
+  "accountsDetailAllTransactions": "كل حركات الكارت",
+  "@accountsDetailAllTransactions": {
+    "description": "L · sets the card filter, opens S-11"
+  },
+  "accountsDetailCapture": "زغلول بيقرا إيه",
+  "@accountsDetailCapture": {
+    "description": "L · value lists common_channel_*Short + ✓/✗, opens S-62"
+  },
+  "accountsDetailMenuCapture": "زغلول يقرا إيه من الكارت",
+  "@accountsDetailMenuCapture": {
+    "description": "L · ⋮ menu"
+  },
+  "accountsDetailMenuMerge": "ادمجه مع كارت تاني",
+  "@accountsDetailMenuMerge": {
+    "description": "L"
+  },
+  "accountsDetailMenuHide": "اخفي الحساب",
+  "@accountsDetailMenuHide": {
+    "description": "L · D-69: hides from lists and pickers only"
+  },
+  "accountsDetailEmpty": "مفيش صرف على الكارت ده في الفترة دي",
+  "@accountsDetailEmpty": {
+    "description": "S · Rive sleep"
+  },
+  "accountsDetailIgnoredBanner": "{platform, select, ios{مش متتبع: الرسايل وApple Pay مقفولين للكارت ده} other{مش متتبع: الرسايل والإشعارات مقفولة للكارت ده}}",
+  "@accountsDetailIgnoredBanner": {
+    "description": "N",
+    "placeholders": {
+      "platform": {
+        "type": "String"
+      }
+    }
+  },
+  "accountsDetailTrackAgain": "تابعه تاني",
+  "@accountsDetailTrackAgain": {
+    "description": "B · Android then offers capture_rescanOffer_*"
+  },
+  "accountsCompareTitle": "مقارنة الكروت",
+  "@accountsCompareTitle": {
+    "description": "T"
+  },
+  "accountsCompareTotal": "الإجمالي",
+  "@accountsCompareTotal": {
+    "description": "L · same currency only"
+  },
+  "accountsCompareChoose": "اختار الكروت",
+  "@accountsCompareChoose": {
+    "description": "B"
+  },
+  "accountsCompareMax": "{count, plural, =1{تقدر تختار كارت واحد} =2{تقدر تختار لحد كارتين} few{تقدر تختار لحد {n} كروت} many{تقدر تختار لحد {n} كارت} other{تقدر تختار لحد {n} كارت}}",
+  "@accountsCompareMax": {
+    "description": "S · count:int = 6 (UX-A-03), n",
+    "placeholders": {
+      "count": {
+        "type": "int"
+      },
+      "n": {
+        "type": "String"
+      }
+    }
+  },
+  "accountsCompareOtherCurrency": "الكروت اللي بعملة تانية بتظهر لما تختار عملتها",
+  "@accountsCompareOtherCurrency": {
+    "description": "S"
+  },
+  "accountsCompareEmpty": "المقارنة محتاجة كارتين على الأقل فيهم صرف",
+  "@accountsCompareEmpty": {
+    "description": "S · C-28"
+  },
+  "accountsCompareCellA11y": "{category}، {card}: {amount}",
+  "@accountsCompareCellA11y": {
+    "description": "A",
+    "placeholders": {
+      "amount": {
+        "type": "String"
+      },
+      "card": {
+        "type": "String"
+      },
+      "category": {
+        "type": "String"
+      }
+    }
+  },
+  "accountsEditTitleEdit": "تفاصيل الكارت",
+  "@accountsEditTitleEdit": {
+    "description": "T"
+  },
+  "accountsEditTitleNew": "كارت جديد",
+  "@accountsEditTitleNew": {
+    "description": "T"
+  },
+  "accountsEditName": "اسم الكارت",
+  "@accountsEditName": {
+    "description": "L · 1–30, unique"
+  },
+  "accountsEditBank": "البنك",
+  "@accountsEditBank": {
+    "description": "L"
+  },
+  "accountsEditBankAuto": "اتعرف من الرسايل",
+  "@accountsEditBankAuto": {
+    "description": "L · read-only when auto-created"
+  },
+  "accountsEditLast4": "آخر أربع أرقام",
+  "@accountsEditLast4": {
+    "description": "L · LTR input, Western digits shown"
+  },
+  "accountsEditLast4Hint": "في الرسالة بيبان كده: «{sample}»، عشان زغلول يعرف الكارت.",
+  "@accountsEditLast4Hint": {
+    "description": "S · sample = a synthetic pattern from the institution template, e.g. 1234 (never a real SMS)",
+    "placeholders": {
+      "sample": {
+        "type": "String"
+      }
+    }
+  },
+  "accountsEditType": "النوع",
+  "@accountsEditType": {
+    "description": "L · common_accountType_*"
+  },
+  "accountsEditCurrency": "العملة",
+  "@accountsEditCurrency": {
+    "description": "L"
+  },
+  "accountsEditBalances": "الأرصدة",
+  "@accountsEditBalances": {
+    "description": "L · multi-currency"
+  },
+  "accountsEditAddCurrency": "ضيف عملة",
+  "@accountsEditAddCurrency": {
+    "description": "B"
+  },
+  "accountsEditLimit": "الليميت",
+  "@accountsEditLimit": {
+    "description": "L · credit only, ≥ 0"
+  },
+  "accountsEditDueDay": "يوم السداد",
+  "@accountsEditDueDay": {
+    "description": "L · credit only, 1–31"
+  },
+  "accountsEditDueReminder": "{count, plural, =0{هفكرك يوم السداد نفسه.} =1{هفكرك قبل ميعاد السداد بيوم.} =2{هفكرك قبل ميعاد السداد بيومين.} few{هفكرك قبل ميعاد السداد بـ {n} أيام.} many{هفكرك قبل ميعاد السداد بـ {n} يوم.} other{هفكرك قبل ميعاد السداد بـ {n} يوم.}}",
+  "@accountsEditDueReminder": {
+    "description": "S · count:int (default 3, BR-SUB-03), n",
+    "placeholders": {
+      "count": {
+        "type": "int"
+      },
+      "n": {
+        "type": "String"
+      }
+    }
+  },
+  "accountsEditCaptureTitle": "زغلول يقرا إيه من الكارت ده؟",
+  "@accountsEditCaptureTitle": {
+    "description": "T · section heading, create mode inline toggles (common_channel_*)"
+  },
+  "accountsEditCaptureLink": "زغلول بيقرا إيه",
+  "@accountsEditCaptureLink": {
+    "description": "L · edit mode, opens S-62"
+  },
+  "accountsEditMerge": "ادمجه مع كارت تاني",
+  "@accountsEditMerge": {
+    "description": "L"
+  },
+  "accountsEditHide": "اخفي الحساب ده",
+  "@accountsEditHide": {
+    "description": "L · switch"
+  },
+  "accountsEditHideHint": "مش هيظهر في القوايم، بس حركاته لسه محسوبة في الأرقام والميزانية والشارتات.",
+  "@accountsEditHideHint": {
+    "description": "S · D-69"
+  },
+  "accountsEditHidden": "الحساب اتخفى. حركاته لسه محسوبة.",
+  "@accountsEditHidden": {
+    "description": "N + common_action_undo · D-69"
+  },
+  "accountsEditDuplicate": "الكارت ده موجود، افتحه؟",
+  "@accountsEditDuplicate": {
+    "description": "S · same bank + last-4"
+  },
+  "accountsEditOpenExisting": "افتحه",
+  "@accountsEditOpenExisting": {
+    "description": "B"
+  },
+  "accountsEditErrorLimit": "الليميت ميكونش بالسالب",
+  "@accountsEditErrorLimit": {
+    "description": "S"
+  },
+  "accountsEditErrorDueDay": "اختار يوم من {min} لـ {max}",
+  "@accountsEditErrorDueDay": {
+    "description": "S · min = 1, max = 31",
+    "placeholders": {
+      "max": {
+        "type": "String"
+      },
+      "min": {
+        "type": "String"
+      }
+    }
+  },
+  "accountsEditSaved": "اتحفظ ✓",
+  "@accountsEditSaved": {
+    "description": "N"
+  },
+  "accountsMergePickTitle": "تدمجه مع أنهي كارت؟",
+  "@accountsMergePickTitle": {
+    "description": "T"
+  },
+  "accountsMergeConfirmTitle": "{count, plural, =0{تدمج {fromCard} في {toCard}؟} =1{تنقل حركة واحدة من {fromCard} لـ {toCard}؟} =2{تنقل حركتين من {fromCard} لـ {toCard}؟} few{تنقل {n} حركات من {fromCard} لـ {toCard}؟} many{تنقل {n} حركة من {fromCard} لـ {toCard}؟} other{تنقل {n} حركة من {fromCard} لـ {toCard}؟}}",
+  "@accountsMergeConfirmTitle": {
+    "description": "T · count:int, n · see Q-12",
+    "placeholders": {
+      "count": {
+        "type": "int"
+      },
+      "fromCard": {
+        "type": "String"
+      },
+      "n": {
+        "type": "String"
+      },
+      "toCard": {
+        "type": "String"
+      }
+    }
+  },
+  "accountsMergeConfirmBody": "الكارتين هيبقوا كارت واحد.",
+  "@accountsMergeConfirmBody": {
+    "description": "S"
+  },
+  "accountsMergeCopyCapture": "انقل إعدادات القراية كمان",
+  "@accountsMergeCopyCapture": {
+    "description": "L · checkbox (EC-60)"
+  },
+  "accountsMergeConfirm": "ادمج",
+  "@accountsMergeConfirm": {
+    "description": "B"
+  },
+  "accountsMergeDifferentBank": "الكارتين من بنكين مختلفين. متأكد إنهم نفس الكارت؟",
+  "@accountsMergeDifferentBank": {
+    "description": "S · warning dialog"
+  },
+  "accountsMergeDifferentBankConfirm": "أيوه، ادمج",
+  "@accountsMergeDifferentBankConfirm": {
+    "description": "B"
+  },
+  "accountsMergeErrorSelf": "مينفعش تدمج الكارت في نفسه",
+  "@accountsMergeErrorSelf": {
+    "description": "S"
+  },
+  "accountsMergeDone": "اتدمجوا ✓",
+  "@accountsMergeDone": {
+    "description": "N"
+  },
+  "captureSettingsTitle": "زغلول بيقرا منين",
+  "@captureSettingsTitle": {
+    "description": "T · glossary"
+  },
+  "captureSettingsSources": "المصادر",
+  "@captureSettingsSources": {
+    "description": "L · section"
+  },
+  "captureSettingsOn": "شغال",
+  "@captureSettingsOn": {
+    "description": "C · Android permission granted"
+  },
+  "captureSettingsOff": "مقفول",
+  "@captureSettingsOff": {
+    "description": "C · + common_action_fix when a permission is revoked"
+  },
+  "captureSettingsActive": "شغال",
+  "@captureSettingsActive": {
+    "description": "C · iOS Apple Pay / Shortcuts row when the setup checker passes (F-5b)"
+  },
+  "captureSettingsUnknown": "لسه مش متأكدين",
+  "@captureSettingsUnknown": {
+    "description": "C · iOS checker can't tell (FR-ING-I-07). Never shown as a failure; + capture_settings_checkSetup"
+  },
+  "captureSettingsSmsIos": "عن طريق الاختصارات",
+  "@captureSettingsSmsIos": {
+    "description": "C · iOS SMS row subtitle"
+  },
+  "captureSettingsCheckSetup": "اتأكد من الإعداد",
+  "@captureSettingsCheckSetup": {
+    "description": "B · iOS, opens S-03 step 2"
+  },
+  "captureSettingsShare": "ابعت أو الزق رسالة",
+  "@captureSettingsShare": {
+    "description": "L · opens capture_shareHow_*"
+  },
+  "captureSettingsNotTracked": "مش متتبعين",
+  "@captureSettingsNotTracked": {
+    "description": "L · section (FR-CAP-06)"
+  },
+  "captureSettingsNotTrackedEmpty": "كل كروتك متتبعة",
+  "@captureSettingsNotTrackedEmpty": {
+    "description": "S"
+  },
+  "captureSettingsIgnoredChannels": "{channels} مقفولة",
+  "@captureSettingsIgnoredChannels": {
+    "description": "L · channels = list of common_channel_*Short joined by the locale's list format. Row title = card or bank. + common_action_undo",
+    "placeholders": {
+      "channels": {
+        "type": "String"
+      }
+    }
+  },
+  "captureSettingsAddIgnore": "متتابعش كارت أو بنك",
+  "@captureSettingsAddIgnore": {
+    "description": "L · FR-CAP-03"
+  },
+  "captureSettingsTools": "أدوات",
+  "@captureSettingsTools": {
+    "description": "L · section"
+  },
+  "captureSettingsRescan": "دوّر في الرسايل القديمة تاني",
+  "@captureSettingsRescan": {
+    "description": "L · Android"
+  },
+  "captureSettingsBanks": "البنوك اللي زغلول بيفهمها",
+  "@captureSettingsBanks": {
+    "description": "L"
+  },
+  "captureSettingsRequestBank": "اطلب دعم بنكك",
+  "@captureSettingsRequestBank": {
+    "description": "L · opens ingestion_requestBank_*"
+  },
+  "captureSettingsTemplates": "قوالب رسايل خاصة بيك",
+  "@captureSettingsTemplates": {
+    "description": "L · common_gold_badge; Free opens S-68"
+  },
+  "captureSettingsUnreadable": "في رسايل مقدرتش أقراها. دوّر في الرسايل تاني عشان ميفوتكش حاجة.",
+  "@captureSettingsUnreadable": {
+    "description": "N · Android SPOOL_DECRYPT_FAILED"
+  },
+  "captureIgnoreTitle": "متتابعش كارت أو بنك",
+  "@captureIgnoreTitle": {
+    "description": "T · sheet"
+  },
+  "captureIgnoreBank": "البنك",
+  "@captureIgnoreBank": {
+    "description": "L"
+  },
+  "captureIgnoreLast4": "آخر أربع أرقام (اختياري)",
+  "@captureIgnoreLast4": {
+    "description": "L"
+  },
+  "captureIgnoreLast4Hint": "سيبه فاضي عشان تبطّل تتابع البنك كله",
+  "@captureIgnoreLast4Hint": {
+    "description": "S · FR-CAP-05"
+  },
+  "captureIgnoreChannels": "متقراش من:",
+  "@captureIgnoreChannels": {
+    "description": "L · common_channel_* checkboxes"
+  },
+  "captureIgnorePrivacy": "اللي تقفله، زغلول هيتجاهل رسايله ومش هيحفظ منها حاجة.",
+  "@captureIgnorePrivacy": {
+    "description": "S · BR-CAP-01; spec wording (screens/70). It doesn't claim \"won't look\", because the institution and card are identified in memory before the message is discarded (F-4)"
+  },
+  "captureIgnoreErrorBank": "اختار البنك",
+  "@captureIgnoreErrorBank": {
+    "description": "S"
+  },
+  "captureIgnoreErrorChannel": "اختار مصدر واحد على الأقل",
+  "@captureIgnoreErrorChannel": {
+    "description": "S"
+  },
+  "captureIgnoreErrorLast4": "سيبه فاضي أو اكتب أربع أرقام",
+  "@captureIgnoreErrorLast4": {
+    "description": "S"
+  },
+  "captureIgnoreSaved": "تمام، مش هتابعه",
+  "@captureIgnoreSaved": {
+    "description": "N + common_action_undo"
+  },
+  "captureRescanTitle": "دوّر في الرسايل القديمة",
+  "@captureRescanTitle": {
+    "description": "T · FR-CAP-07"
+  },
+  "captureRescanDepth": "لحد إمتى؟",
+  "@captureRescanDepth": {
+    "description": "L · options common_period_lastMonths 6–24 (A-11)"
+  },
+  "captureRescanStart": "ابدأ",
+  "@captureRescanStart": {
+    "description": "B"
+  },
+  "captureRescanRunning": "{count, plural, =0{بدوّر…} =1{بدوّر… لقيت حركة جديدة} =2{بدوّر… لقيت حركتين جداد} few{بدوّر… لقيت {n} حركات جديدة} many{بدوّر… لقيت {n} حركة جديدة} other{بدوّر… لقيت {n} حركة جديدة}}",
+  "@captureRescanRunning": {
+    "description": "L · count:int, n · Rive scanning, C-27 with cancel",
+    "placeholders": {
+      "count": {
+        "type": "int"
+      },
+      "n": {
+        "type": "String"
+      }
+    }
+  },
+  "captureRescanDone": "{count, plural, =0{ملقيتش حركات جديدة ✓} =1{ضفت حركة جديدة ✓} =2{ضفت حركتين جداد ✓} few{ضفت {n} حركات جديدة ✓} many{ضفت {n} حركة جديدة ✓} other{ضفت {n} حركة جديدة ✓}}",
+  "@captureRescanDone": {
+    "description": "N · count:int, n",
+    "placeholders": {
+      "count": {
+        "type": "int"
+      },
+      "n": {
+        "type": "String"
+      }
+    }
+  },
+  "captureRescanNoDuplicates": "اللي اتسجل قبل كده مش هيتكرر",
+  "@captureRescanNoDuplicates": {
+    "description": "S"
+  },
+  "captureRescanOfferTitle": "أدوّر في الرسايل القديمة على حركات {card}؟",
+  "@captureRescanOfferTitle": {
+    "description": "T · after un-ignoring (Android)",
+    "placeholders": {
+      "card": {
+        "type": "String"
+      }
+    }
+  },
+  "captureRescanOfferBody": "الرسايل اللي اتقفلت قبل كده متحفظتش، بس ممكن ألاقيها لسه في صندوق الرسايل.",
+  "@captureRescanOfferBody": {
+    "description": "S · BR-CAP-04"
+  },
+  "captureRescanOfferYes": "دوّر",
+  "@captureRescanOfferYes": {
+    "description": "B"
+  },
+  "captureBanksTitle": "البنوك اللي زغلول بيفهمها",
+  "@captureBanksTitle": {
+    "description": "T"
+  },
+  "captureBanksSearch": "دوّر على بنك…",
+  "@captureBanksSearch": {
+    "description": "L"
+  },
+  "captureBanksNoResults": "مفيش بنك بالاسم ده",
+  "@captureBanksNoResults": {
+    "description": "S · + capture_settings_requestBank"
+  },
+  "captureBanksChannels": "بيتسجل من: {channels}",
+  "@captureBanksChannels": {
+    "description": "L · per-bank line on both platforms. channels = common_channel_*Short from the registry (F-5c)",
+    "placeholders": {
+      "channels": {
+        "type": "String"
+      }
+    }
+  },
+  "captureBanksIosNote": "على الآيفون، {bank} بيتسجل من Apple Pay والسكرين شوت، وكشوف الحساب مع جولد. الآيفون مش بيسمح لزغلول يقرا إشعارات التطبيقات التانية.",
+  "@captureBanksIosNote": {
+    "description": "S · FR-ING-I-08. Statements are Gold (FR-EXP-04/06), so the copy says so (F-8)",
+    "placeholders": {
+      "bank": {
+        "type": "String"
+      }
+    }
+  },
+  "captureShareHowTitle": "إزاي تبعت رسالة لزغلول",
+  "@captureShareHowTitle": {
+    "description": "T · shared by S-02 and S-61"
+  },
+  "captureShareHowStep1": "افتح رسالة البنك في تطبيق الرسايل",
+  "@captureShareHowStep1": {
+    "description": "S"
+  },
+  "captureShareHowStep2": "دوس عليها شوية واختار «مشاركة» أو «نسخ»",
+  "@captureShareHowStep2": {
+    "description": "S · OS labels may differ, see Q-04"
+  },
+  "captureShareHowStep3": "اختار زغلول، أو افتح زغلول والزقها",
+  "@captureShareHowStep3": {
+    "description": "S"
+  },
+  "captureShareHowNote": "هتشوفها قبل ما تتسجل.",
+  "@captureShareHowNote": {
+    "description": "S · FR-ING-A-04"
+  },
+  "captureCardControlsTitle": "زغلول يقرا إيه من {card}؟",
+  "@captureCardControlsTitle": {
+    "description": "T · sheet; switches use common_channel_*",
+    "placeholders": {
+      "card": {
+        "type": "String"
+      }
+    }
+  },
+  "captureCardControlsSubtitle": "اختار براحتك، وتقدر تغير في أي وقت",
+  "@captureCardControlsSubtitle": {
+    "description": "S"
+  },
+  "captureCardControlsSmsIos": "عن طريق اختصارات الآيفون",
+  "@captureCardControlsSmsIos": {
+    "description": "L · switch subtitle"
+  },
+  "captureCardControlsApplePaySub": "الدفع بالموبايل",
+  "@captureCardControlsApplePaySub": {
+    "description": "C"
+  },
+  "captureCardControlsInfo": "لما تقفل حاجة هنا، رسايل الكارت ده هتتجاهل ومش هتتحفظ.",
+  "@captureCardControlsInfo": {
+    "description": "S · BR-CAP-01; spec wording (screens/70:60-61) (F-4)"
+  },
+  "captureStopTrackingTitle": "تبطّل تتابع {card}؟",
+  "@captureStopTrackingTitle": {
+    "description": "T · last channel switched off (FR-CAP-04). Serious, no emoji",
+    "placeholders": {
+      "card": {
+        "type": "String"
+      }
+    }
+  },
+  "captureStopTrackingExisting": "الحركات اللي اتسجلت قبل كده:",
+  "@captureStopTrackingExisting": {
+    "description": "L"
+  },
+  "captureStopTrackingKeep": "سيبهم زي ما هم",
+  "@captureStopTrackingKeep": {
+    "description": "L · radio, default"
+  },
+  "captureStopTrackingDelete": "{count, plural, =1{امسح حركة واحدة} =2{امسح الحركتين} few{امسح الـ {n} حركات} many{امسح الـ {n} حركة} other{امسح الـ {n} حركة}}",
+  "@captureStopTrackingDelete": {
+    "description": "L · radio; count:int, n · hidden when the card has no transactions (§0.4)",
+    "placeholders": {
+      "count": {
+        "type": "int"
+      },
+      "n": {
+        "type": "String"
+      }
+    }
+  },
+  "captureStopTrackingConfirm": "بطّل المتابعة",
+  "@captureStopTrackingConfirm": {
+    "description": "B"
+  },
+  "captureStopTrackingDeleteTitle": "{count, plural, =1{تمسح حركة واحدة نهائي؟} =2{تمسح الحركتين نهائي؟} few{تمسح {n} حركات نهائي؟} many{تمسح {n} حركة نهائي؟} other{تمسح {n} حركة نهائي؟}}",
+  "@captureStopTrackingDeleteTitle": {
+    "description": "T · count:int, n · second confirmation",
+    "placeholders": {
+      "count": {
+        "type": "int"
+      },
+      "n": {
+        "type": "String"
+      }
+    }
+  },
+  "captureStopTrackingDeleteBody": "مفيش رجوع. الحركات دي هتتمسح من الموبايل وكل الأرقام هتتحدث.",
+  "@captureStopTrackingDeleteBody": {
+    "description": "S"
+  },
+  "captureStopTrackingDeleteConfirm": "امسح نهائي",
+  "@captureStopTrackingDeleteConfirm": {
+    "description": "B · destructive"
+  },
+  "captureStopTrackingDone": "مش هتابع {card} تاني",
+  "@captureStopTrackingDone": {
+    "description": "N + common_action_undo (restores the switches only; deleted data stays deleted)",
+    "placeholders": {
+      "card": {
+        "type": "String"
+      }
+    }
+  }
 }
