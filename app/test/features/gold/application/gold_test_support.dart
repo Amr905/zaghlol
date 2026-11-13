@@ -42,11 +42,21 @@ final class FakeGoldStore implements GoldStore {
   }
 
   @override
-  Future<void> complete(StorePurchase purchase) async {
+  Future<bool> complete(StorePurchase purchase) async {
     events.add('complete');
     if (failComplete) throw PlatformException(code: 'STORE_DOWN');
+    // Like the real store: no live handle for a purchase it never delivered.
+    if (!_delivered.contains('${purchase.productId}|${purchase.reference}')) {
+      return false;
+    }
     completed.add(purchase);
+    return true;
   }
+
+  final Set<String> _delivered = {};
+
+  /// Simulates an app restart: the store forgets its live handles.
+  void forgetHandles() => _delivered.clear();
 
   @override
   Future<List<OwnedPurchase>> queryOwned() async {
@@ -60,6 +70,7 @@ final class FakeGoldStore implements GoldStore {
 
   /// Delivers [p] and lets the service's serialized handler run.
   Future<void> deliver(StorePurchase p) async {
+    _delivered.add('${p.productId}|${p.reference}');
     ctl.add([p]);
     await Future<void>.delayed(Duration.zero);
     await Future<void>.delayed(Duration.zero);
