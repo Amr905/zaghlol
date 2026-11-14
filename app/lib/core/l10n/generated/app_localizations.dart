@@ -7521,7 +7521,7 @@ abstract class AppLocalizations {
   ///
   /// In ar, this message translates to:
   /// **'زغلول جولد'**
-  String get settingsMainGoldFree;
+  String get settingsMainGoldCardTitle;
 
   /// L · plan = monthly / yearly / lifetime / other
   ///
@@ -7533,7 +7533,7 @@ abstract class AppLocalizations {
   ///
   /// In ar, this message translates to:
   /// **'إنت على الباقة المجانية'**
-  String get settingsMainSeeGold;
+  String get settingsMainFreePlanNote;
 
   /// L
   ///

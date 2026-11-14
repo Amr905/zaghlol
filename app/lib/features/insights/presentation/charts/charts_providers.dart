@@ -17,8 +17,23 @@ const int cashFlowBuckets = 6;
 
 final chartsCurrentCycleProvider = FutureProvider<Cycle>((ref) async {
   final schedule = await ref.watch(paydayScheduleProvider.future);
-  return schedule.cycleOn(ref.watch(todayProvider));
+  final current = schedule.cycleOn(ref.watch(todayProvider));
+  if (!ref.watch(chartsPeriodProvider)) return current;
+  return schedule.cycleOn(current.start.plusDays(-1));
 }, name: 'chartsCurrentCycleProvider');
+
+/// The period chip (mockup 07): false = this cycle, true = last cycle. The
+/// charts, the explainers and the currency list all follow it.
+final chartsPeriodProvider = NotifierProvider<ChartsPeriod, bool>(
+  ChartsPeriod.new,
+  name: 'chartsPeriodProvider',
+);
+
+class ChartsPeriod extends Notifier<bool> {
+  @override
+  bool build() => false;
+  void select({required bool lastCycle}) => state = lastCycle;
+}
 
 /// Currencies with activity in the current cycle (FR-CHT-05).
 final chartsCurrenciesProvider = FutureProvider<List<Currency>>((ref) async {

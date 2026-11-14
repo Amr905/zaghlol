@@ -134,13 +134,13 @@ class SettingsMainScreen extends ConsumerWidget {
                             children: [
                               Text(
                                 plan == null
-                                    ? t.settingsMainGoldFree
+                                    ? t.settingsMainGoldCardTitle
                                     : t.settingsMainGoldActive(plan),
                                 style: ZType.title.copyWith(color: c.onAccent),
                               ),
                               if (plan == null)
                                 Text(
-                                  t.settingsMainSeeGold,
+                                  t.settingsMainFreePlanNote,
                                   style: ZType.bodySmall.copyWith(
                                     color: c.warningText,
                                   ),
@@ -162,7 +162,7 @@ class SettingsMainScreen extends ConsumerWidget {
           children: [
             SettingsRow(
               icon: Icons.palette_outlined,
-              tint: const Color(0xFF9585CF),
+              tint: c.tintViolet,
               title: t.settingsMainPreferences,
               onTap: () => _push(context, const PreferencesScreen()),
             ),
@@ -199,7 +199,7 @@ class SettingsMainScreen extends ConsumerWidget {
             ),
             SettingsRow(
               icon: Icons.cloud_outlined,
-              tint: const Color(0xFF6A8FD8),
+              tint: c.tintBlue,
               title: t.settingsMainBackup,
               subtitle:
                   backupSubtitle ?? t.settingsMainBackupSub(_neverBackedUp, ''),

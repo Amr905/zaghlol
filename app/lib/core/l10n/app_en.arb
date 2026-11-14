@@ -4313,8 +4313,8 @@
       }
     }
   },
-  "settingsMainGoldFree": "Zaghlol Gold",
-  "@settingsMainGoldFree": {
+  "settingsMainGoldCardTitle": "Zaghlol Gold",
+  "@settingsMainGoldCardTitle": {
     "description": "L · Gold row title for Free"
   },
   "settingsMainGoldActive": "{plan, select, monthly{Gold · Monthly} yearly{Gold · Yearly} lifetime{Gold · Lifetime} other{Gold}}",
@@ -4326,8 +4326,8 @@
       }
     }
   },
-  "settingsMainSeeGold": "You're on the free plan",
-  "@settingsMainSeeGold": {
+  "settingsMainFreePlanNote": "You're on the free plan",
+  "@settingsMainFreePlanNote": {
     "description": "L · opens S-68"
   },
   "settingsMainSectionGeneral": "General",

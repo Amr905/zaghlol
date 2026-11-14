@@ -98,6 +98,9 @@ class ZColors extends ThemeExtension<ZColors> {
     required this.heroTo,
     required this.progressFrom,
     required this.progressTo,
+    required this.tintViolet,
+    required this.tintBlue,
+    required this.tintTeal,
   });
 
   final Brightness brightness;
@@ -132,6 +135,12 @@ class ZColors extends ThemeExtension<ZColors> {
   final Color progressFrom;
   final Color progressTo;
 
+  /// Icon-tile / avatar tints from the mockups (settings rows, bank
+  /// avatars): not semantic, always paired with a label.
+  final Color tintViolet;
+  final Color tintBlue;
+  final Color tintTeal;
+
   /// Mint Fresh (light).
   static const ZColors light = ZColors(
     brightness: Brightness.light,
@@ -162,6 +171,9 @@ class ZColors extends ThemeExtension<ZColors> {
     heroTo: Color(0xFFE4F8D8),
     progressFrom: Color(0xFF0F7A55),
     progressTo: Color(0xFF34B284),
+    tintViolet: Color(0xFF9585CF),
+    tintBlue: Color(0xFF6A8FD8),
+    tintTeal: Color(0xFF3F8C86),
   );
 
   /// Jade Night (dark).
@@ -194,6 +206,9 @@ class ZColors extends ThemeExtension<ZColors> {
     heroTo: Color(0xFF0B2018),
     progressFrom: Color(0xFF34D399),
     progressTo: Color(0xFFA7F3D0),
+    tintViolet: Color(0xFFB4A8E6),
+    tintBlue: Color(0xFF8FB0EE),
+    tintTeal: Color(0xFF6CC4BD),
   );
 
   /// The tokens of the nearest [Theme]. Throws in debug if the theme was not
@@ -234,9 +249,47 @@ class ZColors extends ThemeExtension<ZColors> {
     heroTo: heroTo,
     progressFrom: progressFrom,
     progressTo: progressTo,
+    tintViolet: tintViolet,
+    tintBlue: tintBlue,
+    tintTeal: tintTeal,
   );
 
   @override
-  ZColors lerp(ThemeExtension<ZColors>? other, double t) =>
-      other is ZColors ? (t < 0.5 ? this : other) : this;
+  ZColors lerp(ThemeExtension<ZColors>? other, double t) {
+    if (other is! ZColors) return this;
+    Color l(Color a, Color b) => Color.lerp(a, b, t)!;
+    return ZColors(
+      brightness: t < 0.5 ? brightness : other.brightness,
+      bg: l(bg, other.bg),
+      surface: l(surface, other.surface),
+      surfaceAlt: l(surfaceAlt, other.surfaceAlt),
+      outline: l(outline, other.outline),
+      text: l(text, other.text),
+      textMuted: l(textMuted, other.textMuted),
+      primary: l(primary, other.primary),
+      onPrimary: l(onPrimary, other.onPrimary),
+      primaryContainer: l(primaryContainer, other.primaryContainer),
+      onPrimaryContainer: l(onPrimaryContainer, other.onPrimaryContainer),
+      accent: l(accent, other.accent),
+      accentLight: l(accentLight, other.accentLight),
+      accentDark: l(accentDark, other.accentDark),
+      onAccent: l(onAccent, other.onAccent),
+      incomeText: l(incomeText, other.incomeText),
+      incomeBg: l(incomeBg, other.incomeBg),
+      zaghlolBg: l(zaghlolBg, other.zaghlolBg),
+      warningText: l(warningText, other.warningText),
+      warningBg: l(warningBg, other.warningBg),
+      dangerText: l(dangerText, other.dangerText),
+      dangerBg: l(dangerBg, other.dangerBg),
+      heroNumber: l(heroNumber, other.heroNumber),
+      shadow: l(shadow, other.shadow),
+      heroFrom: l(heroFrom, other.heroFrom),
+      heroTo: l(heroTo, other.heroTo),
+      progressFrom: l(progressFrom, other.progressFrom),
+      progressTo: l(progressTo, other.progressTo),
+      tintViolet: l(tintViolet, other.tintViolet),
+      tintBlue: l(tintBlue, other.tintBlue),
+      tintTeal: l(tintTeal, other.tintTeal),
+    );
+  }
 }

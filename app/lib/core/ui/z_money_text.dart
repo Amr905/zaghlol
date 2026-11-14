@@ -12,6 +12,10 @@ enum ZMoneySize { hero, display, title, body, caption }
 /// C-04 Money text. Takes an already formatted string (the shared money
 /// formatter in core produces sign, digits and currency); never a number.
 /// The text is isolated for bidi so `-450 EGP` never reorders in RTL.
+/// Shown instead of the amount in hide-amounts mode when no [ZMoneyText.maskedText]
+/// is given.
+const String kMaskedAmountFallback = '•••';
+
 class ZMoneyText extends StatelessWidget {
   const ZMoneyText({
     super.key,
@@ -52,7 +56,8 @@ class ZMoneyText extends StatelessWidget {
       ZMoneySize.body => ZType.body,
       ZMoneySize.caption => ZType.caption,
     };
-    final shown = masked ? (maskedText ?? text) : text;
+    // FU-045: a masked amount never falls back to the real figure.
+    final shown = masked ? (maskedText ?? kMaskedAmountFallback) : text;
     final isolated = '\u2068$shown\u2069';
     final style = base.copyWith(
       color: color,
@@ -81,7 +86,9 @@ class ZMoneyText extends StatelessWidget {
             maxLines: 1,
           );
     return Semantics(
-      label: semanticsLabel ?? (unitText == null ? shown : '$shown $unitText'),
+      label:
+          (masked ? null : semanticsLabel) ??
+          (unitText == null ? shown : '$shown $unitText'),
       excludeSemantics: true,
       child: size == ZMoneySize.display || size == ZMoneySize.hero
           ? FittedBox(

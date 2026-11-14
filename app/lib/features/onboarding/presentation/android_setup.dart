@@ -16,7 +16,10 @@ import '../../../core/theme/z_tokens.dart';
 import '../../../core/ui/z_banner.dart';
 import '../../../core/ui/z_button.dart';
 import '../../../core/ui/z_card.dart';
+import '../../../core/ui/z_chip.dart';
 import 'onboarding_parts.dart';
+import '../../accounts/presentation/edit_card/edit_card_providers.dart'
+    show institutionOptionsProvider;
 import '../../capture/application/capture_providers.dart';
 import '../../capture/application/inbox_scan_service.dart';
 import '../../capture/domain/scan_plan.dart';
@@ -290,6 +293,14 @@ class _AndroidSetupState extends ConsumerState<AndroidSetupScreen>
     ),
   );
 
+  String _bankName(String code) {
+    final lang = Localizations.localeOf(context).languageCode;
+    for (final o in ref.read(institutionOptionsProvider)) {
+      if (o.code == code) return o.name(lang);
+    }
+    return code.toUpperCase();
+  }
+
   Widget _scanCard(AppLocalizations l, ZColors c) {
     const months = kDefaultScanDepthMonths;
     final count = _progress.imported;
@@ -361,7 +372,18 @@ class _AndroidSetupState extends ConsumerState<AndroidSetupScreen>
                 backgroundColor: c.primaryContainer,
               ),
             ),
-            if (_progress.institutions > 0) ...[
+            if (_progress.institutionCodes.isNotEmpty) ...[
+              const SizedBox(height: ZSpacing.md),
+              Wrap(
+                key: const ValueKey('setup-scan-banks'),
+                spacing: ZSpacing.sm,
+                runSpacing: ZSpacing.sm,
+                children: [
+                  for (final code in _progress.institutionCodes)
+                    ZChip(label: _bankName(code)),
+                ],
+              ),
+            ] else if (_progress.institutions > 0) ...[
               const SizedBox(height: ZSpacing.md),
               Text(
                 '${l.onboardingAndroidSetupScanBanks} '

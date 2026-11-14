@@ -183,6 +183,23 @@ void main() {
         expect(edited, 'a1');
       });
 
+      testWidgets('header Edit link picks a card and opens its editor', (
+        tester,
+      ) async {
+        await tester.binding.setSurfaceSize(const Size(390, 1500));
+        addTearDown(() => tester.binding.setSurfaceSize(null));
+        String? edited;
+        await tester.pumpWidget(
+          host(const AsyncData(sample), lang, onEdit: (id) => edited = id),
+        );
+        await tester.pumpAndSettle();
+        await tester.tap(find.byKey(const ValueKey('scan-edit-cards')));
+        await tester.pumpAndSettle();
+        await tester.tap(find.byKey(const ValueKey('scan-edit-a1')));
+        await tester.pumpAndSettle();
+        expect(edited, 'a1');
+      });
+
       testWidgets('0 found skips straight to Home', (tester) async {
         var done = 0;
         await tester.pumpWidget(
