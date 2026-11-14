@@ -152,6 +152,13 @@ jobs:
           files="$files $(ls app/ios/Runner/Capture/*.swift)"
           # T-065: the share store, share intake, Share Extension and share host never log.
           files="$files $(ls app/ios/Shared/ShareStore.swift app/ios/Shared/ShareIntake.swift app/ios/ShareExtension/*.swift app/ios/Runner/Platform/Share/ShareIntakeHost.swift)"
+          # FU-native: the other production native folders (wipe, widget, notifications, OCR,
+          # share, device, clock, text, iCloud; iOS Guard, OCR, share, widget) never log either.
+          A=app/android/app/src/main/kotlin/app/zaghlol/platform
+          I=app/ios
+          files="$files $(find $A/wipe $A/widget $A/notifications $A/ocr $A/share $A/sharesheet $A/device $A/clock $A/text $A/icloud -name '*.kt' ! -name '*.g.kt')"
+          files="$files $(find $I/Runner/Guard $I/Runner/Platform/OCR $I/Runner/Platform/Share $I/Runner/Platform/ShareSheet $I/Runner/Platform/Text $I/Runner/Clock $I/ZaghlolWidget -name '*.swift' ! -name '*.g.swift')"
+          files="$files $I/Runner/Platform/NotificationsHost.swift $I/Runner/Platform/WidgetBridgeHost.swift $I/Runner/Platform/DeviceSecurityHost.swift $I/Shared/WidgetSnapshotStore.swift $I/Shared/BackupExclusion.swift"
           [ -n "$files" ] || { echo "::error::no key files found"; exit 1; }
           # Comment lines are skipped: prose like "the diagnostic log (…)" is not a call.
           hits=$(grep -nE '\b(print|debugPrint|log|developer\.log|dump)[[:space:]]*\(|\b(stdout|stderr)\b|\bLog\.[a-z]+\(|println\(|Timber|NSLog|os_log|Logger\(|logStatements: *true' $files | grep -vE '^[^:]+:[0-9]+:[[:space:]]*(//|/?\*)' || true)

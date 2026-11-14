@@ -3,6 +3,7 @@ package app.zaghlol.platform.wipe
 import android.app.NotificationManager
 import android.content.Context
 import app.zaghlol.platform.notifications.NotificationPresenter
+import app.zaghlol.platform.widget.SafeToSpendWidgetReceiver
 import androidx.work.WorkManager
 import java.io.File
 import java.security.KeyStore
@@ -23,6 +24,8 @@ class LocalDataWiper(
     private val roots: List<File>,
     /** Parts run before the files, in order (jobs, notifications, Guard, Keystore). */
     private val parts: List<() -> Unit>,
+    /** Best-effort steps after the files went (widget refresh); a failure here never keeps the wipe marker. */
+    private val afterFiles: List<() -> Unit> = emptyList(),
 ) {
     fun wipe() {
         var ok = true
@@ -31,6 +34,9 @@ class LocalDataWiper(
         }
         for (root in roots) {
             ok = clearContents(root) && ok
+        }
+        for (step in afterFiles) {
+            attempt(step)
         }
         if (!ok) throw WipeIncomplete()
     }
@@ -108,6 +114,8 @@ class LocalDataWiper(
                     forgetGuardUser,
                     ::deleteAllKeystoreAliases,
                 ),
+                // 166-3: the widget must not keep showing the wiped snapshot.
+                afterFiles = listOf({ SafeToSpendWidgetReceiver.refreshAll(app) }),
             )
         }
     }
