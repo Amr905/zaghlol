@@ -323,7 +323,8 @@ Future<ReviewCardModel?> _toCard(
             ReviewTransferOption(
               txnId: t.id,
               amount: t.amount,
-              accountLabel: t.merchantRaw ?? '',
+              accountLabel: await _accountLabel(db, t.accountId),
+              merchant: t.merchantRaw,
               occurredAt: t.occurredAt,
             ),
           );

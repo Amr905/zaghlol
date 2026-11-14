@@ -25,7 +25,7 @@ _Last updated: 2026-11-12 (Cairo) by the Lead session. Update it whenever the st
 - **Batch scripts:** never chain `git commit` after `git merge` without first checking `git diff --name-only --diff-filter=U` (a conflicted merge got committed with markers once; fixed before push). Local CI step logs (`*.log`) are git-ignored; don't `git add -A` in a worktree where the step script ran without checking `git status`.
 - **Copy deck checks:** `python3 docs/workflow/tools/copy_deck_check.py docs/02-design/copy-deck.md`.
 
-## Progress: 149 of 186 tasks done (80.1%)
+## Progress: 151 of 186 tasks done (81.2%)
 
 DONE: T-001…T-007, T-012…T-024, T-025…T-028, T-030, T-032…T-035, T-038…T-043, T-048, T-049, T-052, T-045, T-046, T-047, T-050, T-051, T-060, T-073…T-075, T-076, T-077, T-078, T-089, T-090, T-094…T-097, T-103, T-109, T-112, T-115, T-119, T-122…T-131, T-132, T-133, T-134, T-138, T-139, T-141, T-142, T-144, T-148…T-150, T-154, T-180…T-185. **Merged but open:** T-008 (device rows AC1/AC2), T-136 (IdP evidence), T-165 (device run).
 
@@ -42,17 +42,17 @@ DONE: T-001…T-007, T-012…T-024, T-025…T-028, T-030, T-032…T-035, T-038�
 
 The PO asked for this progress table in every update.
 
-**Merged batches:** #28, #29, #32–#36 (batch 7), #37 batch 8 (T-041 + T-042, T-051), batch 9 (`batch/2026-11-11-9`: T-021, T-040, T-047, T-077, T-182, T-184 + the batch-review workflow), batch 10 (`batch/2026-11-13-10`: T-023, T-043, T-109, T-132, T-141; first under the cost rules), batch 11 (`batch/2026-11-13-11`: T-048, T-049, T-052, T-119, T-181, T-183), batch 12 (`batch/2026-11-13-12`: T-024, T-052, T-089, T-180, T-185), batch 13 (`batch/2026-11-13-13`: T-078, T-094, T-115, T-154; T-103 pulled out), batch 14 (`batch/2026-11-13-14`: T-076, T-095, T-103, T-144, T-149), batch 15 (`batch/2026-11-13-15`: T-090, T-096, T-097, T-142, T-150, iOS CI retry), batches 16–18 in one PR (#50, `batch/2026-11-14-18`: 38 tasks, sprint mode). Next free follow-up number: **FU-216**.
+**Merged batches:** #28, #29, #32–#36 (batch 7), #37 batch 8 (T-041 + T-042, T-051), batch 9 (`batch/2026-11-11-9`: T-021, T-040, T-047, T-077, T-182, T-184 + the batch-review workflow), batch 10 (`batch/2026-11-13-10`: T-023, T-043, T-109, T-132, T-141; first under the cost rules), batch 11 (`batch/2026-11-13-11`: T-048, T-049, T-052, T-119, T-181, T-183), batch 12 (`batch/2026-11-13-12`: T-024, T-052, T-089, T-180, T-185), batch 13 (`batch/2026-11-13-13`: T-078, T-094, T-115, T-154; T-103 pulled out), batch 14 (`batch/2026-11-13-14`: T-076, T-095, T-103, T-144, T-149), batch 15 (`batch/2026-11-13-15`: T-090, T-096, T-097, T-142, T-150, iOS CI retry), batches 16–18 in one PR (#50, `batch/2026-11-14-18`: 38 tasks, sprint mode), batch 19 (#51), batch 20 (#52). Next free follow-up number: **FU-220**.
 
 **Lessons:** never chain `git commit` after `git merge` in one script without checking for conflicts. Server/cloud restarts happen often: brief agents to commit early and push often; on restart, check worktrees for live processes (`ps`, `/proc/<pid>/cwd`) before relaunching.
 
 ## In flight (2026-11-13 Cairo)
 
-1. **Batch 20** (waves 6–7, PR open): T-063, T-065, T-066, T-166, T-092, T-100, T-117, T-118, T-064, T-171, T-173, T-082 plus FU-194/195, WIRE-2, WIRE-3, NOTIF-GW. Remaining v1: T-067 (iOS setup S-03), T-174 (accessibility and golden pass), the end-of-day FU sweep, db-platform on main. Everything else left is in SPRINT.md "Deferred" (PO inputs, devices, scholar, hosting, store accounts).
+1. **Batch 21** (PR open): T-067, T-174, FU-197/213/214/215. After it merges every v1 task in SPRINT.md that needs no PO input is done. Left: the deferred list in SPRINT.md (SMS samples, tesseract aar, Zakah scholar, T-136 Q1, hosting, store accounts, devices, Egyptian copy review, Rive file) and PO_DECISIONS Part 2; FU-211…FU-219; db-platform on main (dispatched after batch 20).
 2. **T-159 Android OCR:** waiting for the PO's `tesseract4android-4.9.0.aar` (`/home/claude/wt-T159-fix`, unpushed).
 3. **PC runner** silent since 2026-11-11 22:29; optional now (cost rules).
 
-Next free follow-up number: **FU-216**.
+Next free follow-up number: **FU-220**.
 
 ## Ready next (dependencies done)
 

@@ -18,7 +18,7 @@ AppLocalizations tr(String lang) => lookupAppLocalizations(Locale(lang));
 
 final DateTime next = DateTime.utc(2026, 12, 5, 9);
 
-final class _Actions implements AccountActions {
+final class FakeAccountActions implements AccountActions {
   bool signedIn = false;
   bool linkedGold = false;
   bool protect = false;
@@ -68,11 +68,13 @@ final class _Actions implements AccountActions {
   }
 }
 
-Future<void> _pump(
+Future<void> pumpAccount(
   WidgetTester t,
-  _Actions a,
+  FakeAccountActions a,
   String lang, {
   AccountReason reason = AccountReason.none,
+  bool dark = false,
+  double scale = 1.3,
 }) => pumpGold(
   t,
   goldApp(
@@ -82,7 +84,8 @@ Future<void> _pump(
       accountActionsProvider.overrideWithValue(a),
     ],
     lang: lang,
-    scale: 1.3,
+    dark: dark,
+    scale: scale,
   ),
   height: 3000,
 );
@@ -96,7 +99,7 @@ Future<void> main() async {
     group('S-69 $lang', () {
       testWidgets('signed out: provider buttons and the privacy line; layout '
           'direction follows the locale', (tester) async {
-        await _pump(tester, _Actions(), lang);
+        await pumpAccount(tester, FakeAccountActions(), lang);
         expect(find.text(t.goldAccountTitle), findsOneWidget);
         expect(find.text(t.goldAccountGoogle), findsOneWidget);
         expect(find.text(t.goldAccountApple), findsOneWidget);
@@ -111,9 +114,9 @@ Future<void> main() async {
 
       testWidgets('R3-5: refused move shows linked, the cooldown date and '
           'support', (tester) async {
-        final a = _Actions()
+        final a = FakeAccountActions()
           ..signInResult = SignedIn(moveRefused: true, nextMoveAt: next);
-        await _pump(tester, a, lang);
+        await pumpAccount(tester, a, lang);
         await tester.tap(find.text(t.goldAccountGoogle));
         await tester.pump();
         await tester.pump();
@@ -126,11 +129,11 @@ Future<void> main() async {
 
       testWidgets('R5-3(b): restoreSuggested with a StoreKit transaction '
           'offers Restore', (tester) async {
-        final a = _Actions()
+        final a = FakeAccountActions()
           ..signInResult = const SignedIn(
             restoreHint: RestoreHint.offerRestore,
           );
-        await _pump(tester, a, lang);
+        await pumpAccount(tester, a, lang);
         await tester.tap(find.text(t.goldAccountApple));
         await tester.pump();
         await tester.pump();
@@ -146,12 +149,12 @@ Future<void> main() async {
           'nextMoveAt and the support path, and no Restore button', (
         tester,
       ) async {
-        final a = _Actions()
+        final a = FakeAccountActions()
           ..signInResult = SignedIn(
             restoreHint: RestoreHint.supportPath,
             nextMoveAt: next,
           );
-        await _pump(tester, a, lang);
+        await pumpAccount(tester, a, lang);
         await tester.tap(find.text(t.goldAccountApple));
         await tester.pump();
         await tester.pump();
@@ -164,9 +167,9 @@ Future<void> main() async {
       });
 
       testWidgets('cancel and failure show their lines', (tester) async {
-        final a = _Actions()
+        final a = FakeAccountActions()
           ..queue.addAll([const SignInCancelled(), const SignInFailed()]);
-        await _pump(tester, a, lang);
+        await pumpAccount(tester, a, lang);
         await tester.tap(find.text(t.goldAccountGoogle));
         await tester.pump();
         await tester.pump();
@@ -179,10 +182,10 @@ Future<void> main() async {
 
       testWidgets('EC-46: another account asks first, then repeats with '
           'replaceLink', (tester) async {
-        final a = _Actions()
+        final a = FakeAccountActions()
           ..queue.add(const SignInNeedsReplaceConfirm())
           ..signInResult = const SignedIn();
-        await _pump(tester, a, lang);
+        await pumpAccount(tester, a, lang);
         await tester.tap(find.text(t.goldAccountGoogle));
         await tester.pumpAndSettle();
         expect(find.text(t.goldAccountReplaceTitle), findsOneWidget);
@@ -195,8 +198,9 @@ Future<void> main() async {
       testWidgets('EC-46: declining the replace sends nothing more', (
         tester,
       ) async {
-        final a = _Actions()..queue.add(const SignInNeedsReplaceConfirm());
-        await _pump(tester, a, lang);
+        final a = FakeAccountActions()
+          ..queue.add(const SignInNeedsReplaceConfirm());
+        await pumpAccount(tester, a, lang);
         await tester.tap(find.text(t.goldAccountGoogle));
         await tester.pumpAndSettle();
         await tester.tap(find.text(t.commonActionCancel));
@@ -206,10 +210,10 @@ Future<void> main() async {
 
       testWidgets('signed in: sign out (with the linked-Gold warning) and '
           'delete account, each behind a confirmation', (tester) async {
-        final a = _Actions()
+        final a = FakeAccountActions()
           ..signedIn = true
           ..linkedGold = true;
-        await _pump(tester, a, lang);
+        await pumpAccount(tester, a, lang);
         expect(find.text(t.goldAccountGoogle), findsNothing);
         await tester.tap(find.text(t.commonActionSignOut));
         await tester.pumpAndSettle();
@@ -239,19 +243,19 @@ Future<void> main() async {
       testWidgets('D-54 suggestion shows only while pending and signed out', (
         tester,
       ) async {
-        final a = _Actions()..protect = true;
-        await _pump(tester, a, lang);
+        final a = FakeAccountActions()..protect = true;
+        await pumpAccount(tester, a, lang);
         expect(find.text(t.goldSeatProtectTitle), findsOneWidget);
-        final b = _Actions();
-        await _pump(tester, b, lang);
+        final b = FakeAccountActions();
+        await pumpAccount(tester, b, lang);
         expect(find.text(t.goldSeatProtectTitle), findsNothing);
       });
 
       testWidgets('R4-4: accountRequired reason leads with the sign-in '
           'prompt', (tester) async {
-        await _pump(
+        await pumpAccount(
           tester,
-          _Actions(),
+          FakeAccountActions(),
           lang,
           reason: AccountReason.accountRequired,
         );

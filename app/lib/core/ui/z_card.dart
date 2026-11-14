@@ -24,7 +24,7 @@ class ZCard extends StatelessWidget {
   Widget build(BuildContext context) {
     final c = ZColors.of(context);
     final radius = BorderRadius.circular(ZRadius.card);
-    return DecoratedBox(
+    final card = DecoratedBox(
       decoration: BoxDecoration(
         color: color ?? c.surface,
         borderRadius: radius,
@@ -46,6 +46,9 @@ class ZCard extends StatelessWidget {
         ),
       ),
     );
+    // A tappable card reads as one labelled button (its text), not as an
+    // unlabelled tap node beside separate text nodes (NFR-UX-02).
+    return onTap == null ? card : MergeSemantics(child: card);
   }
 }
 

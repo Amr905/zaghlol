@@ -629,6 +629,11 @@ class _PairCardState extends State<_PairCard> {
     final card = widget.card;
     final opts = card.candidates;
     final choice = opts.length == 1 ? 0 : _choice;
+    String xfer(ReviewTransferOption o) => l10n.ingestionReviewXferOption(
+      _money(context, o.amount),
+      _iso(o.accountLabel),
+      _time(context, o.occurredAt),
+    );
     return ZCard(
       child: RadioGroup<int>(
         groupValue: choice,
@@ -651,13 +656,14 @@ class _PairCardState extends State<_PairCard> {
                   value: i,
                   contentPadding: EdgeInsetsDirectional.zero,
                   title: Text(
-                    l10n.ingestionReviewXferOption(
-                      _money(context, opts[i].amount),
-                      _iso(opts[i].accountLabel),
-                      _time(context, opts[i].occurredAt),
-                    ),
+                    (opts[i].merchant ?? '').isNotEmpty
+                        ? _iso(opts[i].merchant!)
+                        : xfer(opts[i]),
                     style: ZType.body,
                   ),
+                  subtitle: (opts[i].merchant ?? '').isEmpty
+                      ? null
+                      : Text(xfer(opts[i]), style: ZType.body),
                 ),
               ),
             const SizedBox(height: ZSpacing.sm),

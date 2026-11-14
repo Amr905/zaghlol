@@ -234,8 +234,7 @@ class _LinkTransferSheetState extends ConsumerState<LinkTransferSheet> {
     final gap = gapLabel(l, f, cand.gapMinutes);
     return ConstrainedBox(
       constraints: const BoxConstraints(minHeight: ZSpacing.minTarget),
-      child: Semantics(
-        container: true,
+      child: MergeSemantics(
         child: InkWell(
           onTap: () => setState(() => _picked = cand.id),
           child: Row(

@@ -1,9 +1,9 @@
 // WIRE-NAV: first-run flow and the late scan-results sheet.
 //
 // First run (no `setup_installed_on` yet): Welcome (S-01) -> Android setup
-// (S-02/S-03) -> Scan results (S-06) -> the shell. "I already use Zaghlol"
-// opens the restore flow (S-04). iOS has no setup screen yet, so it goes from
-// Welcome straight to the shell. The flow has its own Navigator above the
+// (S-02) -> Scan results (S-06) -> the shell; iOS: Welcome -> iOS setup
+// (S-03) -> the shell. "I already use Zaghlol"
+// opens the restore flow (S-04). The flow has its own Navigator above the
 // router, so nothing in it depends on the shell.
 
 import 'dart:async';
@@ -106,7 +106,21 @@ class _OnboardingFlow extends ConsumerWidget {
 
   void _start(BuildContext ctx, WidgetRef ref) {
     if (Theme.of(ctx).platform == TargetPlatform.iOS) {
-      unawaited(onFinish());
+      unawaited(
+        pushScreen<void>(
+          ctx,
+          (setupCtx) => iosSetupScreen(
+            setupCtx,
+            onDone: () => unawaited(onFinish()),
+            onSkipped: (slug) {
+              unawaited(
+                recordSetupSkip(ProviderScope.containerOf(setupCtx), slug),
+              );
+              unawaited(onFinish());
+            },
+          ),
+        ),
+      );
       return;
     }
     final screens = ref.read(appScreensProvider);

@@ -202,13 +202,14 @@ class _State extends ConsumerState<CardDetailScreen> {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Row(
+            Wrap(
+              crossAxisAlignment: WrapCrossAlignment.center,
+              spacing: ZSpacing.sm,
               children: [
                 Text(
                   l.accountsDetailSpent,
                   style: ZType.title.copyWith(color: c.text),
                 ),
-                const SizedBox(width: ZSpacing.sm),
                 ZChip(label: l.commonPeriodThisCycle, selected: true),
               ],
             ),

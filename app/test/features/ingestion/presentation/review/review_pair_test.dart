@@ -24,6 +24,33 @@ SuggestionCardModel card(List<ReviewTransferOption> c) => SuggestionCardModel(
 void main() {
   for (final lang in ['en', 'ar']) {
     group('pair suggestion [$lang]', () {
+      testWidgets('candidate row: merchant is the title, account the label', (
+        t,
+      ) async {
+        await pumpReview(
+          t,
+          reviewApp(
+            actions: FakeActions(),
+            queue: [
+              card([
+                ReviewTransferOption(
+                  txnId: 'e1',
+                  amount: egp(3000),
+                  accountLabel: 'Main wallet',
+                  merchant: 'Cafe Zamalek',
+                  occurredAt: DateTime(2026, 11, 1),
+                ),
+              ]),
+            ],
+            locale: Locale(lang),
+            scale: 1.3,
+          ),
+        );
+        expect(find.textContaining('Cafe Zamalek'), findsOneWidget);
+        expect(find.textContaining('Main wallet'), findsOneWidget);
+        expect(t.takeException(), isNull);
+      });
+
       testWidgets('2 candidates: no link until the user taps one', (t) async {
         final a = FakeActions();
         await pumpReview(

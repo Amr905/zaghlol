@@ -7,6 +7,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:zaghlol_domain/zaghlol_domain.dart' show Cycle;
 
 import '../features/account/presentation/account_screen.dart';
+import '../features/notifications/presentation/notifications_settings_screen.dart';
 import '../features/accounts/domain/account.dart';
 import '../features/accounts/presentation/card_detail/card_navigation.dart';
 import '../features/accounts/presentation/edit_card/add_card_flow.dart';
@@ -21,6 +22,7 @@ import '../features/categorization/presentation/categories_rules_screen.dart';
 import '../features/gold/presentation/paywall_screen.dart';
 import '../features/ingestion/presentation/review/review_screen.dart';
 import '../features/onboarding/presentation/android_setup.dart';
+import '../features/onboarding/presentation/ios_setup.dart';
 import '../features/onboarding/presentation/scan_results.dart';
 import '../features/settings/presentation/privacy_screen.dart';
 import '../features/share_cards/presentation/share_studio_screen.dart';
@@ -55,6 +57,7 @@ final class AppScreens {
     this.backup = _backup,
     this.restore = _restore,
     this.captureSettings = _captureSettings,
+    this.notificationsSettings = _notificationsSettings,
     this.templateBuilder = _templateBuilder,
     this.categories = _categories,
     this.privacy = _privacy,
@@ -64,6 +67,7 @@ final class AppScreens {
     this.transactions = _transactions,
     this.transactionDetail = _transactionDetail,
     this.androidSetup = _androidSetup,
+    this.iosSetup = _iosSetup,
     this.scanResults = _scanResults,
     this.scanResultsSheet = _scanResultsSheet,
   });
@@ -122,6 +126,7 @@ final class AppScreens {
     required VoidCallback onOpenTemplates,
   })
   captureSettings;
+  final Future<void> Function(BuildContext context) notificationsSettings;
   final Future<void> Function(BuildContext context) templateBuilder;
   final Future<void> Function(BuildContext context) categories;
   final Future<void> Function(BuildContext context) privacy;
@@ -154,6 +159,16 @@ final class AppScreens {
     required void Function(String slug) onSkipped,
   })
   androidSetup;
+
+  /// S-03 (T-067).
+  final Widget Function({
+    required VoidCallback onDone,
+    required void Function(String slug) onSkipped,
+    required VoidCallback onSay,
+    required VoidCallback onType,
+    required VoidCallback onOnlineBanks,
+  })
+  iosSetup;
   final Widget Function({
     required VoidCallback onDone,
     required VoidCallback onOpenReview,
@@ -261,6 +276,9 @@ Future<void> _restore(
   ),
 );
 
+Future<void> _notificationsSettings(BuildContext c) =>
+    pushScreen<void>(c, (_) => const NotificationsSettingsScreen());
+
 Future<void> _captureSettings(
   BuildContext c, {
   required bool goldActive,
@@ -319,6 +337,20 @@ Widget _androidSetup({
   required VoidCallback onDone,
   required void Function(String slug) onSkipped,
 }) => AndroidSetupScreen(onDone: onDone, onSkipped: onSkipped);
+
+Widget _iosSetup({
+  required VoidCallback onDone,
+  required void Function(String slug) onSkipped,
+  required VoidCallback onSay,
+  required VoidCallback onType,
+  required VoidCallback onOnlineBanks,
+}) => IosSetupScreen(
+  onDone: onDone,
+  onSkipped: onSkipped,
+  onSay: onSay,
+  onType: onType,
+  onOnlineBanks: onOnlineBanks,
+);
 
 Widget _scanResults({
   required VoidCallback onDone,

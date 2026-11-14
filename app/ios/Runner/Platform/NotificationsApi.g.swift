@@ -353,6 +353,9 @@ protocol NotificationsHostApi {
   func cancelAll() throws
   /// The route of the notification that launched the app, once.
   func takeLaunchRoute() throws -> String?
+  /// Opens the system notification settings of this app (Android: the app's
+  /// notification page; iOS: the app's page in Settings).
+  func openSystemSettings() throws
 }
 
 /// Generated setup class from Pigeon to handle messages through the `binaryMessenger`.
@@ -472,6 +475,21 @@ class NotificationsHostApiSetup {
       }
     } else {
       takeLaunchRouteChannel.setMessageHandler(nil)
+    }
+    /// Opens the system notification settings of this app (Android: the app's
+    /// notification page; iOS: the app's page in Settings).
+    let openSystemSettingsChannel = FlutterBasicMessageChannel(name: "dev.flutter.pigeon.zaghlol.NotificationsHostApi.openSystemSettings\(channelSuffix)", binaryMessenger: binaryMessenger, codec: codec)
+    if let api = api {
+      openSystemSettingsChannel.setMessageHandler { _, reply in
+        do {
+          try api.openSystemSettings()
+          reply(wrapResult(nil))
+        } catch {
+          reply(wrapError(error))
+        }
+      }
+    } else {
+      openSystemSettingsChannel.setMessageHandler(nil)
     }
   }
 }

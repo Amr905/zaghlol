@@ -209,7 +209,7 @@ void main() {
       // ignore: avoid_print
       print('T-075 host p95 per message: ${p95.toStringAsFixed(2)} ms');
       // Design note: host p95 <= 5 ms; the assert leaves room for CI noise.
-      expect(p95, lessThan(25));
+      expect(p95, lessThan(6.5)); // FU-214: 1.3x the first perf run (4.92)
     }, tags: 'benchmark');
 
     test('3000-alias synthetic catalog: fuzzy stays within budget', () async {
@@ -248,7 +248,7 @@ void main() {
       final p95 = times[(times.length * 0.95).floor()] / 1000;
       // ignore: avoid_print
       print('T-075 host p95 with 3600 aliases: ${p95.toStringAsFixed(2)} ms');
-      expect(p95, lessThan(25));
+      expect(p95, lessThan(11.5)); // FU-214: 1.3x the first perf run (8.85)
     }, tags: 'benchmark');
 
     test('same input, same decision, repeated', () async {
