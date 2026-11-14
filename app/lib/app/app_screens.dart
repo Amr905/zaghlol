@@ -21,6 +21,7 @@ import '../features/categorization/presentation/categories_rules_screen.dart';
 import '../features/gold/presentation/paywall_screen.dart';
 import '../features/ingestion/presentation/review/review_screen.dart';
 import '../features/onboarding/presentation/android_setup.dart';
+import '../features/onboarding/presentation/ios_setup.dart';
 import '../features/onboarding/presentation/scan_results.dart';
 import '../features/settings/presentation/privacy_screen.dart';
 import '../features/share_cards/presentation/share_studio_screen.dart';
@@ -64,6 +65,7 @@ final class AppScreens {
     this.transactions = _transactions,
     this.transactionDetail = _transactionDetail,
     this.androidSetup = _androidSetup,
+    this.iosSetup = _iosSetup,
     this.scanResults = _scanResults,
     this.scanResultsSheet = _scanResultsSheet,
   });
@@ -154,6 +156,16 @@ final class AppScreens {
     required void Function(String slug) onSkipped,
   })
   androidSetup;
+
+  /// S-03 (T-067).
+  final Widget Function({
+    required VoidCallback onDone,
+    required void Function(String slug) onSkipped,
+    required VoidCallback onSay,
+    required VoidCallback onType,
+    required VoidCallback onOnlineBanks,
+  })
+  iosSetup;
   final Widget Function({
     required VoidCallback onDone,
     required VoidCallback onOpenReview,
@@ -319,6 +331,20 @@ Widget _androidSetup({
   required VoidCallback onDone,
   required void Function(String slug) onSkipped,
 }) => AndroidSetupScreen(onDone: onDone, onSkipped: onSkipped);
+
+Widget _iosSetup({
+  required VoidCallback onDone,
+  required void Function(String slug) onSkipped,
+  required VoidCallback onSay,
+  required VoidCallback onType,
+  required VoidCallback onOnlineBanks,
+}) => IosSetupScreen(
+  onDone: onDone,
+  onSkipped: onSkipped,
+  onSay: onSay,
+  onType: onType,
+  onOnlineBanks: onOnlineBanks,
+);
 
 Widget _scanResults({
   required VoidCallback onDone,

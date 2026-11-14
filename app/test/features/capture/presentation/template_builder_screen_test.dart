@@ -58,11 +58,13 @@ Widget host(
   FakeStore store, {
   String lang = 'en',
   double scale = 1.0,
+  bool dark = false,
   List<GoldCapability>? paywall,
 }) => h.app(
   const TemplateBuilderScreen(),
   locale: Locale(lang),
   scale: scale,
+  dark: dark,
   overrides: [
     templateBuilderStoreProvider.overrideWithValue(store),
     paywallTriggerProvider.overrideWithValue((c) => paywall?.add(c)),
