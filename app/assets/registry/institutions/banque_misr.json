@@ -176,7 +176,7 @@
       "direction": "expense",
       "baseConfidence": 0.9,
       "source": "synthetic-unverified",
-      "pattern": "purchase of (?<cur>usd|eur|gbp) (?<amount>[\\d,.]+) at (?<merchant>.+?) with card \\*{1,4}(?<last4>\\d{4})(?:\\. |\\.?$)(?:(?:avl|available)\\.? limit\\D{0,8}(?<available>[\\d,.]+)|(?:(?:avl|available) )?bal(?:ance)?\\D{0,16}(?<balance>[\\d,.]+))?",
+      "pattern": "purchase of (?<cur>usd|eur|gbp) (?<amount>[\\d,.]+) at (?<merchant>.+?) with card \\*{1,4}(?<last4>\\d{4})(?:\\. |\\.?$)(?:(?:avl|available)\\.? limit\\D{0,8}(?:[\\d,.]+)|(?:(?:avl|available) )?bal(?:ance)?\\D{0,16}(?:[\\d,.]+))?",
       "currencyMap": {
         "دولار": "USD",
         "يورو": "EUR",
@@ -219,7 +219,7 @@
       "direction": "expense",
       "baseConfidence": 0.9,
       "source": "synthetic-unverified",
-      "pattern": "شراء (?:بمبلغ )?(?<amount>[\\d,.]+) (?<cur>usd|eur|gbp|دولار|يورو) لدي (?<merchant>.+?) باستخدام بطاقه \\*{1,4}(?<last4>\\d{4})(?:\\. |\\.?$)(?:(?:الرصيد|رصيدك)\\D{0,12}(?<balance>[\\d,.]+)|الحد(?: المتاح)?\\D{0,12}(?<available>[\\d,.]+))?",
+      "pattern": "شراء (?:بمبلغ )?(?<amount>[\\d,.]+) (?<cur>usd|eur|gbp|دولار|يورو) لدي (?<merchant>.+?) باستخدام بطاقه \\*{1,4}(?<last4>\\d{4})(?:\\. |\\.?$)(?:(?:الرصيد|رصيدك)\\D{0,12}(?:[\\d,.]+)|الحد(?: المتاح)?\\D{0,12}(?:[\\d,.]+))?",
       "currencyMap": {
         "دولار": "USD",
         "يورو": "EUR",
