@@ -57,5 +57,5 @@ abstract class DeviceSecurityHostApi {
   NativeAuthOutcome authenticate(String reason);
 }
 
-@HostApi()
-abstract class WidgetBridgeHostApi {}
+// T-118: the empty WidgetBridgeHostApi stub moved to widget_bridge_api.dart
+// (Swift generates into one module, so two classes of that name collide).

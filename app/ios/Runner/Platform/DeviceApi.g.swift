@@ -215,15 +215,3 @@ class DeviceSecurityHostApiSetup {
     }
   }
 }
-/// Generated protocol from Pigeon that represents a handler of messages from Flutter.
-protocol WidgetBridgeHostApi {
-}
-
-/// Generated setup class from Pigeon to handle messages through the `binaryMessenger`.
-class WidgetBridgeHostApiSetup {
-  static var codec: FlutterStandardMessageCodec { DeviceApiPigeonCodec.shared }
-  /// Sets up an instance of `WidgetBridgeHostApi` to handle messages through the `binaryMessenger`.
-  static func setUp(binaryMessenger: FlutterBinaryMessenger, api: WidgetBridgeHostApi?, messageChannelSuffix: String = "") {
-    let channelSuffix = messageChannelSuffix.count > 0 ? ".\(messageChannelSuffix)" : ""
-  }
-}

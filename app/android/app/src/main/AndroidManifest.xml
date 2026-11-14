@@ -55,6 +55,21 @@
                 <data android:scheme="zaghlol"/>
             </intent-filter>
         </activity>
+        <!-- T-118 / FR-WID-01: the safe-to-spend home-screen widget (Glance).
+             Exported because the launcher / system bind widget providers; it
+             accepts only the system's APPWIDGET_UPDATE, holds no permission
+             and reads nothing but the app's own encrypted, already redacted
+             snapshot in noBackupFilesDir/widget (never backed up). -->
+        <receiver
+            android:name=".platform.widget.SafeToSpendWidgetReceiver"
+            android:exported="true">
+            <intent-filter>
+                <action android:name="android.appwidget.action.APPWIDGET_UPDATE"/>
+            </intent-filter>
+            <meta-data
+                android:name="android.appwidget.provider"
+                android:resource="@xml/safe_to_spend_widget_info"/>
+        </receiver>
         <!-- T-060 / FR-ING-A-04: share-to-Zaghlol target. Exported because other
              apps must be able to start it; it accepts only ACTION_SEND with
              the four declared MIME types, has no UI, requests no permission

@@ -7,4 +7,6 @@
          amounts or senders. -->
     <string name="native_android_captureChannelName">Saving transactions</string>
     <string name="native_android_captureNotifTitle">Zaghlol is saving a transaction</string>
+    <!-- T-118: home-screen widget picker description (copy deck: key requested from T-087). -->
+    <string name="native_android_widgetSafeToSpendDescription">Safe to spend today and days to payday</string>
 </resources>
