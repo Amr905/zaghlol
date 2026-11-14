@@ -71,6 +71,7 @@ allKeys = [
   ),
   (key: Settings.setupInstalledOn, byDefault: null, other: 20000),
   (key: Settings.paywallLastShown, byDefault: null, other: 1760000000000),
+  (key: Settings.iosNudgeSnoozedUntil, byDefault: null, other: 1760000000000),
   (
     key: Settings.backupSchedule,
     byDefault: BackupScheduleMode.off,
