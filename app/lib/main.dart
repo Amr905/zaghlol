@@ -6,6 +6,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import 'app/app_navigation.dart';
 import 'app/app_restart.dart';
+import 'app/notification_taps.dart';
 import 'app/onboarding_gate.dart';
 import 'app/url_launcher_opener.dart';
 import 'core/db/db_directory.dart';
@@ -58,6 +59,8 @@ Future<void> main() async {
           ...goldWiringOverrides,
           // T-100: backup failure and reminder alerts through notifications.
           backupAlertSinkOverride,
+          // NOTIF-GW: the real local-notification gateway, permission and taps.
+          ...notificationWiringOverrides,
           // WIRE-NAV: paywall trigger, Gold sign-in, links, chart card opener.
           ...navigationWiringOverrides(rootNavigatorKey),
           // FU-195: external links open through url_launcher.
@@ -68,7 +71,9 @@ Future<void> main() async {
           ),
         ],
         child: const CaptureLifecycle(
-          child: SyncLifecycle(child: _LocalizedApp()),
+          child: SyncLifecycle(
+            child: NotificationTapLifecycle(child: _LocalizedApp()),
+          ),
         ),
       ),
     ),

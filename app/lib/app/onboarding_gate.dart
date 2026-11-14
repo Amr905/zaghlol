@@ -19,6 +19,8 @@ import '../features/onboarding/presentation/android_setup.dart';
 import '../features/onboarding/presentation/welcome.dart';
 import '../core/settings/settings_keys.dart';
 import '../core/settings/settings_providers.dart';
+import '../features/notifications/application/notification_providers.dart'
+    show ensureNotificationPermission;
 import 'app_navigation.dart';
 import 'app_screens.dart';
 
@@ -55,6 +57,11 @@ class _OnboardingGateState extends ConsumerState<OnboardingGate> {
     }
     if (!mounted) return;
     setState(() => _finished = true);
+    // NOTIF-GW: the notification permission, asked once the user is in the
+    // app (Android 13+ prompt, iOS authorization). Best effort.
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (mounted) unawaited(ensureNotificationPermission(ref));
+    });
     if (location != null) {
       // After the shell is on screen.
       WidgetsBinding.instance.addPostFrameCallback((_) {

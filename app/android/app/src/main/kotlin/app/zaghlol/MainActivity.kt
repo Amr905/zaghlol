@@ -12,6 +12,11 @@ import app.zaghlol.platform.device.AndroidDeviceEnv
 import app.zaghlol.platform.device.DeviceSecurityRegistration
 import app.zaghlol.platform.device.SecureWindowState
 import app.zaghlol.platform.keys.SecretStoreRegistration
+import app.zaghlol.platform.notifications.NotificationPresenter
+import app.zaghlol.platform.notifications.NotificationRoutes
+import app.zaghlol.platform.notifications.NotificationsEventsApi
+import app.zaghlol.platform.notifications.NotificationsHost
+import app.zaghlol.platform.notifications.NotificationsRegistration
 import app.zaghlol.platform.share.ShareDescriptor
 import app.zaghlol.platform.share.ShareHandOff
 import app.zaghlol.platform.share.ShareIntakeEventsApi
@@ -33,6 +38,8 @@ class MainActivity : FlutterFragmentActivity() {
     private var shareEvents: ShareIntakeEventsApi? = null
     private var shareStore: ShareStore? = null
     private var capturePermissions: ActivityPermissions? = null
+    private var notificationsHost: NotificationsHost? = null
+    private var notificationEvents: NotificationsEventsApi? = null
 
     override fun onCreate(savedInstanceState: android.os.Bundle?) {
         // T-103: a re-created activity is secured again before its first frame.
@@ -58,6 +65,21 @@ class MainActivity : FlutterFragmentActivity() {
         AttestationRegistration.register(messenger, this)
         // T-117: system chooser for the share-studio PNG (UI engine only).
         ShareImageRegistration.register(messenger, this)
+        // NOTIF-GW: local alerts, channels, POST_NOTIFICATIONS (UI engine only).
+        val notifHost = NotificationsHost(
+            applicationContext,
+            NotificationPresenter(applicationContext),
+            launchPrompt = {
+                requestPermissions(
+                    arrayOf("android.permission.POST_NOTIFICATIONS"),
+                    NotificationsHost.REQUEST_CODE,
+                )
+            },
+        )
+        notificationsHost = notifHost
+        notificationEvents = NotificationsEventsApi(messenger)
+        NotificationsRegistration.register(messenger, notifHost)
+        NotificationRoutes.setLaunchRoute(intent?.getStringExtra(NotificationRoutes.EXTRA_ROUTE))
         val store = ShareStores.create(applicationContext)
         shareStore = store
         ShareIntakeHostApi.setUp(messenger, ShareIntakeHost(store))
@@ -79,6 +101,10 @@ class MainActivity : FlutterFragmentActivity() {
     }
 
     override fun onRequestPermissionsResult(requestCode: Int, permissions: Array<out String>, grantResults: IntArray) {
+        if (requestCode == NotificationsHost.REQUEST_CODE) {
+            notificationsHost?.onPromptResult()
+            return
+        }
         if (capturePermissions?.onResult(requestCode, permissions, grantResults) == true) return
         super.onRequestPermissionsResult(requestCode, permissions, grantResults)
     }
@@ -93,6 +119,9 @@ class MainActivity : FlutterFragmentActivity() {
         AttestationRegistration.unregister(flutterEngine.dartExecutor.binaryMessenger)
         ShareImageRegistration.unregister(flutterEngine.dartExecutor.binaryMessenger)
         ShareImageRegistration.sweepAll(this)
+        NotificationsRegistration.unregister(flutterEngine.dartExecutor.binaryMessenger)
+        notificationsHost = null
+        notificationEvents = null
         shareEvents = null
         shareStore = null
         capturePermissions = null
@@ -106,6 +135,11 @@ class MainActivity : FlutterFragmentActivity() {
      */
     override fun onNewIntent(intent: Intent) {
         super.onNewIntent(intent)
+        // NOTIF-GW: a tap while running goes to Dart; the route is validated
+        // here and again in Dart (allow-list).
+        NotificationRoutes.clean(intent.getStringExtra(NotificationRoutes.EXTRA_ROUTE))?.let { r ->
+            notificationEvents?.onTap(r) { }
+        }
         val presented = try {
             intent.getStringExtra(ShareHandOff.EXTRA_TOKEN)
         } catch (_: RuntimeException) {

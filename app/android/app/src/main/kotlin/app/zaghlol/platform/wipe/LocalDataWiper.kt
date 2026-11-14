@@ -2,6 +2,7 @@ package app.zaghlol.platform.wipe
 
 import android.app.NotificationManager
 import android.content.Context
+import app.zaghlol.platform.notifications.NotificationPresenter
 import androidx.work.WorkManager
 import java.io.File
 import java.security.KeyStore
@@ -102,6 +103,8 @@ class LocalDataWiper(
                     {
                         (app.getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager).cancelAll()
                     },
+                    // NOTIF-GW: pending quiet-hours alarms (text lives only in the alarm).
+                    { NotificationPresenter(app).cancelAll() },
                     forgetGuardUser,
                     ::deleteAllKeystoreAliases,
                 ),

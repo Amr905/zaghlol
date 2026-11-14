@@ -398,6 +398,20 @@ class SeatSignature { Uint8List publicKey; Uint8List signature; }
 - **No identifiers leave native code** other than the public keys and signatures Dart puts into `seatKeys`. Neither is ever written to the diag log (D-62).
 - **Device tests (T-179 for the seat keys, T-180 for the clocks; C4):** the Keychain item **and** the Secure Enclave key it wraps survive deleting the app and reinstalling it, on the oldest and newest supported iOS versions (R-19, SRS v1.7: a sign/verify round trip after reinstall proves the key is still usable, not only that the item exists); it survives "Delete everything"; a sign/verify round trip against `seat-proof-v1.json`'s message format; `CLOCK_MONOTONIC_RAW` advances across sleep; `BOOT_COUNT` increments after a reboot.
 
+## 4c. Local notifications (`NotificationsHostApi`, `NotificationsEventsApi`, both platforms; NOTIF-GW, FR-NTF)
+
+Pigeon file `app/pigeons/notifications_api.dart`. **Local notifications only**: no FCM, no APNs remote registration, no `aps-environment` entitlement, no analytics. Dart (`NotificationService`) decides what to show and redacts the text per the hide-amounts setting; the host only displays.
+
+| Method | Meaning |
+|---|---|
+| `permissionStatus()` / `requestPermission()` (async) | iOS: `UNUserNotificationCenter` authorization (alert, sound, badge; no prompt twice after a denial). Android: `POST_NOTIFICATIONS` on API 33+ (below 33 granted unless the user switched notifications off). Asked after onboarding and when an alert type is first turned on, never from a background path. Android cannot tell "denied" from "never asked": it reports `undetermined`. |
+| `ensureChannels(channels)` | Android 8+: creates or renames one channel per alert type. Ids are stable and never renamed: `zaghlol_alert_budget`, `_spike`, `_due`, `_duplicate`, `_renewal`, `_backup_failure`, `_weekly`. Names come from l10n in the app language. No-op on iOS. The ingestion worker's capture channel is separate. |
+| `show(n)` / `schedule(n, atEpochMs)` | `NotifMsg{id, channelId, title, body, publicTitle, route?}`. Android: `VISIBILITY_PRIVATE` plus a public version whose only text is `publicTitle` (the channel name, never an amount). Scheduling (quiet hours) is an inexact `AlarmManager.setAndAllowWhileIdle` (no exact-alarm permission); the alarm intent holds the text in system memory only, ids go to a small file in the no-backup dir so `cancelAll` can cancel; a reboot loses the alarm. iOS: a time-interval trigger that the system persists. |
+| `cancelAll()` | Cancels shown and scheduled alerts. "Delete everything" (`wipeLocalData`, section 1.2) already does this natively on both platforms; on Android it now also cancels pending alarms. |
+| `takeLaunchRoute()` and `onTap(route)` | The tap payload is a **route id** (`/budget`, `/insights`, `/settings/backup`, `/transactions/<id>`), never data. Native validates the shape (starts with `/`, 1-96 printable ASCII); Dart allow-lists it (`notificationTargetFor`). A tap that launched the app is read once; a tap while running arrives as an event. |
+
+Manifest and entitlements: Android adds `POST_NOTIFICATIONS` and a non-exported `NotificationAlarmReceiver`; iOS adds none.
+
 ## 5. Other hosts
 
 | API | Methods | Notes |

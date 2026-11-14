@@ -79,6 +79,7 @@ final class NotificationService {
       body: prefs.hideAmounts ? r.redactedBody : r.body,
       payload: r.payload,
       at: delayed ? when.toUtc() : null,
+      type: r.type,
     );
     // FU-133: the claim stays only if the platform accepted the alert.
     try {

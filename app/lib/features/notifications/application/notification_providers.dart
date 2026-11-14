@@ -9,6 +9,7 @@ import 'dart:ui' show Locale, PlatformDispatcher;
 
 import 'package:drift/drift.dart' show Variable;
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:flutter_riverpod/misc.dart' show Override;
 import 'package:zaghlol_domain/zaghlol_domain.dart';
 
 import '../../../core/db/app_database.dart' hide Settings;
@@ -25,6 +26,7 @@ import '../../budget/data/payday_schedule_store.dart' show localToday;
 import '../../insights/data/chart_providers.dart';
 import '../../transactions/data/transactions_providers.dart' show clockProvider;
 import '../data/notification_service.dart';
+import '../data/pigeon_notification_gateway.dart';
 import '../domain/duplicate_charge.dart';
 import '../domain/notification_types.dart';
 import '../domain/quiet_hours.dart';
@@ -32,15 +34,67 @@ import 'backup_alert_sink.dart';
 import 'duplicate_charge_alerts.dart';
 import 'weekly_summary_alert.dart';
 
-/// Shows and schedules platform notifications. Default: drops them. The
-/// flutter_local_notifications adapter is not in the build yet (it needs the
-/// plugin, the Android channel and the iOS permission flow); the composition
-/// root overrides this when it lands. Dedupe state is released when the
-/// gateway throws, but a silent gateway shows nothing.
+/// Shows and schedules platform notifications. Default: drops them (tests and
+/// the headless engine). `main.dart` overrides it with [notificationWiringOverrides]
+/// (NOTIF-GW: the Pigeon host, local notifications only). Dedupe state is
+/// released when the gateway throws, but a silent gateway shows nothing.
 final notificationGatewayProvider = Provider<NotificationGateway>(
   (ref) => const _SilentGateway(),
   name: 'notificationGatewayProvider',
 );
+
+/// The notification permission. Default: never allowed, never asks.
+final notificationPermissionProvider = Provider<NotificationPermissionPort>(
+  (ref) => const _NoPermission(),
+  name: 'notificationPermissionProvider',
+);
+
+/// Taps on notifications. Default: none.
+final notificationTapSourceProvider = Provider<NotificationTapSource>(
+  (ref) => const _NoTaps(),
+  name: 'notificationTapSourceProvider',
+);
+
+/// Asks for the notification permission once the user has a reason to:
+/// after onboarding and when an alert type is first turned on. Never throws.
+Future<bool> ensureNotificationPermission(WidgetRef ref) =>
+    ref.read(notificationPermissionProvider).request();
+
+/// The real notification wiring (NOTIF-GW), for the root ProviderScope.
+final List<Override> notificationWiringOverrides = [
+  notificationGatewayProvider.overrideWith(
+    (ref) => PigeonNotificationGateway(l10n: () => notificationL10n(ref)),
+  ),
+  notificationPermissionProvider.overrideWith((ref) {
+    final gateway = ref.watch(notificationGatewayProvider);
+    return PigeonNotificationPermission(
+      onGranted: gateway is PigeonNotificationGateway
+          ? gateway.ensureChannels
+          : null,
+    );
+  }),
+  notificationTapSourceProvider.overrideWith((ref) => PigeonNotificationTaps()),
+];
+
+final class _NoPermission implements NotificationPermissionPort {
+  const _NoPermission();
+
+  @override
+  Future<bool> isAllowed() async => false;
+
+  @override
+  Future<bool> request() async => false;
+}
+
+final class _NoTaps implements NotificationTapSource {
+  const _NoTaps();
+
+  @override
+  Future<String?> takeLaunchRoute() async => null;
+
+  @override
+  Stream<String> get taps => const Stream<String>.empty();
+}
 
 final class _SilentGateway implements NotificationGateway {
   const _SilentGateway();
