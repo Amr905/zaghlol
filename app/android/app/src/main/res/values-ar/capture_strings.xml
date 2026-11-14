@@ -3,4 +3,6 @@
     <!-- T-008 / PO Q4; T-041 (every flavour): copy-deck.md section 1.23 (draft copy, Q-19). -->
     <string name="native_android_captureChannelName">تسجيل العمليات</string>
     <string name="native_android_captureNotifTitle">زغلول بيسجّل عملية</string>
+    <!-- T-118: home-screen widget picker description (copy deck: key requested from T-087). -->
+    <string name="native_android_widgetSafeToSpendDescription">تصرف كام النهارده وفاضل كام يوم على المرتب</string>
 </resources>

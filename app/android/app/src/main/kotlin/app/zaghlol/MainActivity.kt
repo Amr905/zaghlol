@@ -22,6 +22,7 @@ import app.zaghlol.platform.share.ShareStore
 import app.zaghlol.platform.share.ShareStores
 import app.zaghlol.platform.text.TextNormalizationHostApi
 import app.zaghlol.platform.text.TextNormalizationRegistration
+import app.zaghlol.platform.widget.WidgetBridgeRegistration
 import io.flutter.embedding.android.FlutterFragmentActivity
 import io.flutter.embedding.engine.FlutterEngine
 import java.util.concurrent.Executors
@@ -46,6 +47,8 @@ class MainActivity : FlutterFragmentActivity() {
         SecretStoreRegistration.register(messenger, this)
         // T-148: NFC for the backup passphrase (UI engine only).
         TextNormalizationRegistration.register(messenger)
+        // T-118: the home-screen widget snapshot (UI engine only).
+        WidgetBridgeRegistration.register(messenger, this)
         // T-180: trusted clock sample for the Gold offline bound.
         TrustedClockRegistration.register(messenger, this)
         // T-103: root heuristic, secure window, passcode check (UI engine only).
@@ -81,6 +84,7 @@ class MainActivity : FlutterFragmentActivity() {
         CaptureRuntime.get(applicationContext).detachUi(flutterEngine)
         ShareIntakeHostApi.setUp(flutterEngine.dartExecutor.binaryMessenger, null)
         TextNormalizationHostApi.setUp(flutterEngine.dartExecutor.binaryMessenger, null)
+        WidgetBridgeRegistration.unregister(flutterEngine.dartExecutor.binaryMessenger)
         TrustedClockRegistration.unregister(flutterEngine.dartExecutor.binaryMessenger)
         DeviceSecurityRegistration.unregister(flutterEngine.dartExecutor.binaryMessenger)
         AttestationRegistration.unregister(flutterEngine.dartExecutor.binaryMessenger)

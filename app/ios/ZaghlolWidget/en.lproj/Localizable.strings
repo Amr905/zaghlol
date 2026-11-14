@@ -1,0 +1,3 @@
+/* T-118: widget gallery name and description (copy deck: keys requested from T-087). */
+"widget_safeToSpend_name" = "Safe to spend";
+"widget_safeToSpend_description" = "Safe to spend today and days to payday.";

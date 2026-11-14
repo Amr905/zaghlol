@@ -2,6 +2,8 @@ plugins {
     id("com.android.application")
     // The Flutter Gradle Plugin must be applied after the Android and Kotlin Gradle plugins.
     id("dev.flutter.flutter-gradle-plugin")
+    // T-118: Glance (the home-screen widget) is written with @Composable.
+    id("org.jetbrains.kotlin.plugin.compose")
 }
 
 // T-038: the shared Capture Guard golden cases and configs (T-035), read in
@@ -124,6 +126,9 @@ dependencies {
     // T-178: Play Integrity standard request (platform-channels §4a). 1.6.0 is
     // the latest on Google Maven (2025-11); minSdk 23 <= 26. Adds no permission.
     implementation("com.google.android.play:integrity:1.6.0")
+    // T-118: Glance home-screen widget (architecture section 7). Stable 1.1.1;
+    // minSdk 23 <= 26. No permission, no analytics.
+    implementation("androidx.glance:glance-appwidget:1.1.1")
     testImplementation("junit:junit:4.13.2")
     // T-060: instrumented tests (Keystore cipher, share store on a device).
     // Versions match what the integration_test plugin already puts on the debug
