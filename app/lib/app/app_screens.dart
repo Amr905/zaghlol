@@ -77,6 +77,9 @@ final class AppScreens {
     Account account, {
     VoidCallback? onOpenTransactions,
     ValueChanged<String>? onOpenTransaction,
+    bool justAdded,
+    VoidCallback? onAddTransaction,
+    VoidCallback? onImportStatement,
   })
   cardDetail;
   final Future<void> Function(
@@ -196,9 +199,15 @@ Future<void> _cardDetail(
   Account a, {
   VoidCallback? onOpenTransactions,
   ValueChanged<String>? onOpenTransaction,
+  bool justAdded = false,
+  VoidCallback? onAddTransaction,
+  VoidCallback? onImportStatement,
 }) => openCardDetail(
   c,
   a,
+  justAdded: justAdded,
+  onAddTransaction: onAddTransaction,
+  onImportStatement: onImportStatement,
   onOpenTransactions: onOpenTransactions,
   onOpenTransaction: onOpenTransaction,
 );

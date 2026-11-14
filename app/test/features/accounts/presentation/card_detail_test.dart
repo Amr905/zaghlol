@@ -12,6 +12,8 @@ import 'package:zaghlol/features/accounts/presentation/card_detail/compare.dart'
 import 'package:zaghlol/features/capture/application/ignore_rules.dart';
 import 'package:zaghlol/features/capture/presentation/capture_controls.dart';
 import 'package:zaghlol/features/home/application/card_filter.dart';
+import 'package:zaghlol/features/accounts/presentation/edit_card/edit_card_providers.dart'
+    show institutionOptionsProvider;
 import 'package:zaghlol/features/insights/domain/chart_models.dart';
 import 'package:zaghlol/features/transactions/domain/transaction.dart';
 import 'package:zaghlol/features/transactions/presentation/list/txn_list_providers.dart';
@@ -243,6 +245,43 @@ void main() {
       find.text('No spending on this card in this period'),
       findsOneWidget,
     );
+  });
+
+  for (final ar in [false, true]) {
+    testWidgets('just added (mockup 31): banner, waiting state, actions'
+        '${ar ? ' ar' : ''}', (t) async {
+      await t.binding.setSurfaceSize(const Size(390, 2400));
+      addTearDown(() => t.binding.setSurfaceSize(null));
+      var manual = 0;
+      await t.pumpWidget(
+        host(
+          CardDetailScreen(
+            accountId: 'a1',
+            justAdded: true,
+            onAddTransaction: () => manual++,
+          ),
+          overrides: [
+            ...detailOverrides(data: detailData(empty: true)),
+            institutionOptionsProvider.overrideWithValue(const []),
+          ],
+          locale: ar ? const Locale('ar') : const Locale('en'),
+          scale: 1.3,
+        ),
+      );
+      await t.pumpAndSettle();
+      expect(find.byKey(const Key('card-detail-added')), findsOneWidget);
+      expect(find.byKey(const Key('card-detail-added-empty')), findsOneWidget);
+      // No import screen is wired: the statement row is hidden.
+      expect(find.byKey(const Key('card-added-import')), findsNothing);
+      await t.tap(find.byKey(const Key('card-added-manual')));
+      expect(manual, 1);
+      expect(t.takeException(), isNull);
+    });
+  }
+
+  testWidgets('not just added: no banner', (t) async {
+    await pumpDetail(t, overrides: detailOverrides());
+    expect(find.byKey(const Key('card-detail-added')), findsNothing);
   });
 
   testWidgets('loading shows skeleton', (t) async {

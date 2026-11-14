@@ -16,9 +16,15 @@ Future<void> openCardDetail(
   Account account, {
   VoidCallback? onOpenTransactions,
   ValueChanged<String>? onOpenTransaction,
+  bool justAdded = false,
+  VoidCallback? onAddTransaction,
+  VoidCallback? onImportStatement,
 }) => Navigator.of(context).push<void>(
   MaterialPageRoute(
     builder: (_) => CardDetailScreen(
+      justAdded: justAdded,
+      onAddTransaction: onAddTransaction,
+      onImportStatement: onImportStatement,
       accountId: account.id,
       onSeeAll: onOpenTransactions,
       onOpenTransaction: onOpenTransaction,

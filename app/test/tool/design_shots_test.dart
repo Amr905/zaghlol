@@ -33,8 +33,11 @@ import 'package:zaghlol/features/settings/presentation/settings_main_screen.dart
 import 'package:zaghlol/features/settings/presentation/settings_ports.dart';
 
 import 'package:zaghlol/features/accounts/presentation/card_detail/card_detail.dart';
+import 'package:zaghlol_domain/zaghlol_domain.dart' show Currency;
 import 'package:zaghlol/features/accounts/presentation/edit_card/add_card_steps.dart';
 import 'package:zaghlol/features/accounts/presentation/edit_card/card_details_screen.dart';
+import 'package:zaghlol/features/accounts/presentation/edit_card/edit_card_providers.dart'
+    show InstitutionOption, institutionOptionsProvider;
 import 'package:zaghlol/features/gold/presentation/paywall_screen.dart';
 
 import '../features/accounts/presentation/card_detail_test.dart' as detail;
@@ -585,6 +588,39 @@ void main() {
     );
     await tester.pumpAndSettle();
     await _shot(tester, 'card_detail');
+  }, skip: _skip != null);
+
+  testWidgets('card added S-41 (mockup 31)', (tester) async {
+    await tester.binding.setSurfaceSize(const Size(390, 844));
+    addTearDown(() => tester.binding.setSurfaceSize(null));
+    await tester.pumpWidget(
+      detail.host(
+        CardDetailScreen(
+          accountId: 'a1',
+          justAdded: true,
+          onAddTransaction: () {},
+          onImportStatement: () {},
+        ),
+        overrides: [
+          ...detail.detailOverrides(
+            acc: AccountWithBalances(detail.credit(), const []),
+            data: detail.detailData(empty: true),
+          ),
+          institutionOptionsProvider.overrideWithValue([
+            InstitutionOption(
+              code: 'cib',
+              nameAr: 'CIB',
+              nameEn: 'CIB',
+              defaultCurrency: Currency.of('EGP'),
+              isEgypt: true,
+            ),
+          ]),
+        ],
+        locale: _ar.locale,
+      ),
+    );
+    await tester.pumpAndSettle();
+    await _shot(tester, 'card_added');
   }, skip: _skip != null);
 
   testWidgets('capture controls S-62', (tester) async {
