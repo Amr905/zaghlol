@@ -14,6 +14,7 @@ import 'dart:ui' as ui;
 import 'package:flutter/services.dart' show PlatformException;
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import '../../../core/l10n/generated/app_localizations.dart';
 import '../../../core/l10n/locale_providers.dart';
 import '../../../core/platform/widget_bridge_api.g.dart';
 import '../../../core/settings/settings_keys.dart';
@@ -33,14 +34,21 @@ final widgetBridgeHostProvider = Provider<WidgetBridgeHostApi>(
   name: 'widgetBridgeHostProvider',
 );
 
-/// The localized copy for [languageCode] (`ar` or `en`). Has no default: the
-/// composition root overrides it with an adapter over `AppLocalizations`
-/// (keys `commonUnitPerDay`, `homeHeroDaysToPayday`, `homeHeroSetBudget` and
-/// the widget "open" line).
-final widgetCopyProvider = Provider.family<WidgetCopy, String>(
-  (ref, languageCode) => throw UnimplementedError('widgetCopyProvider'),
-  name: 'widgetCopyProvider',
-);
+/// The localized copy for [languageCode] (`ar` or `en`), from the ARB strings
+/// (`commonUnitPerDay`, `homeHeroDaysToPayday`, `homeHeroSetBudget`,
+/// `widgetOpenZaghlol`). Tests may override it.
+final widgetCopyProvider = Provider.family<WidgetCopy, String>((
+  ref,
+  languageCode,
+) {
+  final l = lookupAppLocalizations(ui.Locale(languageCode));
+  return WidgetCopy(
+    perDay: l.commonUnitPerDay,
+    daysToPayday: l.homeHeroDaysToPayday,
+    setBudget: l.homeHeroSetBudget,
+    openApp: l.widgetOpenZaghlol,
+  );
+}, name: 'widgetCopyProvider');
 
 /// True when the snapshot content (not its timestamp) is the same.
 bool sameWidgetContent(WidgetSnapshot a, WidgetSnapshot b) =>

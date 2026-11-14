@@ -11,6 +11,10 @@ import 'dart:async';
 import 'package:flutter/foundation.dart' show TargetPlatform;
 import 'package:flutter/foundation.dart' as f show defaultTargetPlatform;
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+
+import '../../notifications/application/notification_providers.dart'
+    show duplicateCheckProvider;
+
 import 'package:zaghlol_parsing/zaghlol_parsing.dart'
     show ParsingPipeline, Registry;
 
@@ -152,6 +156,8 @@ final captureCoordinatorProvider = FutureProvider<CaptureCoordinator?>((
       build: build,
       gate: gate,
       rebuildPerBatch: true,
+      // T-100: duplicate-charge alerts after each committed batch.
+      afterBatch: ref.read(duplicateCheckProvider),
     ),
   );
   final share = ref.watch(captureShareIntakeProvider);
@@ -233,6 +239,7 @@ InboxScanService _buildScanService(
       ref.container,
       gate: gate,
       rebuildPerBatch: true,
+      afterBatch: ref.read(duplicateCheckProvider),
       build: (d) async => buildIngestRawMessages(
         d,
         pipeline: ParsingPipeline(

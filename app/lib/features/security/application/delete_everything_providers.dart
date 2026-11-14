@@ -18,6 +18,8 @@ import '../../../core/db/db_key_providers.dart';
 import '../../../core/platform/seat_key_api.g.dart';
 import '../../backup/application/schedule_providers.dart';
 import '../../catalog_sync/application/sync_providers.dart';
+import '../../widgets_bridge/application/widget_bridge.dart'
+    show widgetSnapshotPublisherProvider;
 import '../../gold/application/gold_providers.dart'
     show deleteEverythingWarningProvider;
 import '../../settings/presentation/settings_ports.dart';
@@ -101,6 +103,14 @@ final deleteEverythingProvider = Provider<DeleteEverything>((ref) {
   );
 }, name: 'deleteEverythingProvider');
 
+/// The local wipe still has failed steps after the retry.
+final class WipeIncomplete implements Exception {
+  const WipeIncomplete();
+
+  @override
+  String toString() => 'WipeIncomplete';
+}
+
 /// Binds Settings' "Delete everything" (T-162 seam): the wipe (retried once
 /// when a local step failed), then the restart into first-launch state. The
 /// backend delete keeps running in the background.
@@ -108,8 +118,14 @@ final Override wipeEverythingOverride = wipeEverythingProvider.overrideWith(
   (ref) => () async {
     final restart = ref.read(appRestartProvider);
     final wipe = ref.read(deleteEverythingProvider);
+    // T-118: the widget's stored snapshot goes with everything else.
+    final widget = ref.read(widgetSnapshotPublisherProvider);
     final report = await wipe.run();
-    if (!report.complete) await wipe.resume();
+    final done = report.complete || (await wipe.resume()).complete;
+    await widget.clear();
+    // T-166: a wipe that still has failed steps does not restart; the
+    // marker stays and the next launch finishes it.
+    if (!done) throw const WipeIncomplete();
     restart();
   },
 );

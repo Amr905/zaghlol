@@ -24,7 +24,10 @@ import 'features/capture/presentation/capture_lifecycle.dart';
 import 'features/gold/application/gold_providers.dart';
 import 'features/catalog_sync/application/sync_providers.dart';
 import 'features/catalog_sync/presentation/sync_lifecycle.dart';
+import 'features/notifications/application/notification_providers.dart';
 import 'features/security/application/delete_everything_providers.dart';
+import 'features/widgets_bridge/application/widget_bridge.dart'
+    show widgetBridgeWiringProvider;
 import 'features/security/presentation/app_lock_gate.dart';
 import 'ingestion/ingestion_main.dart';
 
@@ -53,6 +56,8 @@ Future<void> main() async {
           ...syncWiringOverrides,
           // T-145: seat keys and the purchase flow.
           ...goldWiringOverrides,
+          // T-100: backup failure and reminder alerts through notifications.
+          backupAlertSinkOverride,
           // WIRE-NAV: paywall trigger, Gold sign-in, links, chart card opener.
           ...navigationWiringOverrides(rootNavigatorKey),
           // FU-195: external links open through url_launcher.
@@ -126,6 +131,9 @@ class _LocalizedAppState extends ConsumerState<_LocalizedApp>
   void initState() {
     super.initState();
     WidgetsBinding.instance.addObserver(this);
+    // T-100: the weekly summary (when 7 days have passed) and the duplicate
+    // check at start; again on every resume.
+    unawaited(ref.read(alertsResumeProvider)());
   }
 
   @override
@@ -137,6 +145,7 @@ class _LocalizedAppState extends ConsumerState<_LocalizedApp>
   @override
   void didChangeAppLifecycleState(AppLifecycleState state) {
     if (state == AppLifecycleState.resumed) {
+      unawaited(ref.read(alertsResumeProvider)());
       unawaited(
         ref
             .read(cycleResumeHandlerProvider)
@@ -150,6 +159,8 @@ class _LocalizedAppState extends ConsumerState<_LocalizedApp>
   @override
   Widget build(BuildContext context) {
     ref.watch(cycleAppWiringProvider);
+    // T-118: the home-screen widget follows the cycle overview.
+    ref.watch(widgetBridgeWiringProvider);
     return ZaghlolApp(locale: ref.watch(appLocaleProvider));
   }
 }

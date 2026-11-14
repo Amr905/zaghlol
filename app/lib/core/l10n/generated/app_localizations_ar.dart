@@ -6694,6 +6694,17 @@ class AppLocalizationsAr extends AppLocalizations {
       'النسخة اللي على السيرفر هتنتهي لوحدها.';
 
   @override
+  String get widgetOpenZaghlol => 'افتح زغلول';
+
+  @override
+  String get privacyDeleteBackupsKept =>
+      'النسخ الاحتياطية اللي على Google Drive أو iCloud هتفضل زي ما هي. لو عايز تمسحها، امسحها من هناك.';
+
+  @override
+  String get privacyDeleteFailed =>
+      'مقدرناش نمسح كل حاجة. افتح الأبلكيشن تاني وهنكمّل.';
+
+  @override
   String get settingsPrefsTitle => 'التفضيلات';
 
   @override

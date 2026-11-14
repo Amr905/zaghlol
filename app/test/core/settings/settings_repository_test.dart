@@ -84,6 +84,7 @@ allKeys = [
   (key: Settings.backupLastSuccess, byDefault: null, other: 1760000000000),
   (key: Settings.backupLastFailure, byDefault: null, other: 1760000000000),
   (key: Settings.backupReminderAt, byDefault: null, other: 1760000000000),
+  (key: Settings.notifWeeklyLastRun, byDefault: null, other: 1760000000000),
 ];
 
 void main() {

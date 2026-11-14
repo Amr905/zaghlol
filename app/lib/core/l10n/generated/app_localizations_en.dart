@@ -6572,6 +6572,17 @@ class AppLocalizationsEn extends AppLocalizations {
       'The copy on the server will expire on its own.';
 
   @override
+  String get widgetOpenZaghlol => 'Open Zaghlol';
+
+  @override
+  String get privacyDeleteBackupsKept =>
+      'Your backups on Google Drive or iCloud stay there. Delete them from there if you want.';
+
+  @override
+  String get privacyDeleteFailed =>
+      'Couldn\'t delete everything. Open the app again and we\'ll finish.';
+
+  @override
   String get settingsPrefsTitle => 'Preferences';
 
   @override

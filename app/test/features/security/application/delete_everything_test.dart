@@ -6,7 +6,13 @@ import 'dart:convert';
 import 'dart:io';
 import 'dart:typed_data';
 
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:zaghlol/app/app_restart.dart';
+import 'package:zaghlol/core/platform/widget_bridge_api.g.dart';
+import 'package:zaghlol/features/security/application/delete_everything_providers.dart';
+import 'package:zaghlol/features/settings/presentation/settings_ports.dart';
+import 'package:zaghlol/features/widgets_bridge/application/widget_bridge.dart';
 import 'package:zaghlol/core/backend/backend_client.dart';
 import 'package:zaghlol/core/backend/backend_state.dart';
 import 'package:zaghlol/core/backend/response_signature.dart';
@@ -325,8 +331,55 @@ void main() {
     });
   });
 
+  group('wipeEverythingOverride (WIRE-2)', () {
+    Future<(ProviderContainer, _Host, List<int>)> setUpWipe(_World w) async {
+      final host = _Host();
+      final restarts = <int>[];
+      final c = ProviderContainer(
+        overrides: [
+          deleteEverythingProvider.overrideWithValue(w.wipe()),
+          appRestartProvider.overrideWithValue(() => restarts.add(1)),
+          widgetBridgeHostProvider.overrideWithValue(host),
+          wipeEverythingOverride,
+        ],
+      );
+      addTearDown(c.dispose);
+      return (c, host, restarts);
+    }
+
+    test('success clears the widget snapshot, then restarts', () async {
+      final w = await _World.open();
+      addTearDown(w.dispose);
+      final (c, host, restarts) = await setUpWipe(w);
+      await c.read(wipeEverythingProvider)!();
+      expect(host.clears, 1);
+      expect(restarts, hasLength(1));
+    });
+
+    test('a wipe that stays incomplete throws, does not restart, still '
+        'clears the widget', () async {
+      final w = await _World.open();
+      addTearDown(w.dispose);
+      w.native.failWith = Exception('native down');
+      final (c, host, restarts) = await setUpWipe(w);
+      await expectLater(
+        c.read(wipeEverythingProvider)!(),
+        throwsA(isA<WipeIncomplete>()),
+      );
+      expect(restarts, isEmpty);
+      expect(host.clears, 1);
+    });
+  });
+
   test('credentials never print', () {
     final c = InstallCredentials(installId: _installId, installToken: 'x');
     expect('$c', isNot(contains(_installId)));
   });
+}
+
+final class _Host extends WidgetBridgeHostApi {
+  int clears = 0;
+
+  @override
+  Future<void> clear() async => clears++;
 }
