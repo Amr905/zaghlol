@@ -235,7 +235,11 @@ class DonutBody extends ConsumerWidget {
                     style: ZType.body.copyWith(color: c.text),
                   ),
                 ),
-                ZMoneyText(text: chartMoney(ref, context, slices[i].amount)),
+                Flexible(
+                  child: ZMoneyText(
+                    text: chartMoney(ref, context, slices[i].amount),
+                  ),
+                ),
                 const SizedBox(width: ZSpacing.sm),
                 Text(
                   chartPercentBp(ref, context, slices[i].bp),

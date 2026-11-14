@@ -3,6 +3,8 @@
 
 import 'dart:async';
 
+import 'package:flutter/foundation.dart'
+    show debugDefaultTargetPlatformOverride;
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -26,6 +28,8 @@ import 'package:zaghlol/features/gold/presentation/gold_ui_ports.dart';
 import 'package:zaghlol/features/home/presentation/home_screen.dart';
 import 'package:zaghlol/features/insights/presentation/charts/charts_providers.dart';
 import 'package:zaghlol/features/onboarding/presentation/android_setup.dart';
+import 'package:zaghlol/features/onboarding/presentation/ios_setup.dart'
+    show kSetupStepIosShortcuts;
 import 'package:zaghlol/features/settings/presentation/settings_main_screen.dart';
 
 import '../features/settings/settings_harness.dart';
@@ -132,6 +136,17 @@ AppScreens _stubs(_Rec r) {
       'androidSetup',
       {'done': onDone, 'skipSms': () => onSkipped(kSetupStepSms)},
     ),
+    iosSetup:
+        ({
+          required onDone,
+          required onSkipped,
+          required onSay,
+          required onType,
+          required onOnlineBanks,
+        }) => _marker('iosSetup', {
+          'done': onDone,
+          'skip': () => onSkipped(kSetupStepIosShortcuts),
+        }),
     scanResults:
         ({
           required onDone,
@@ -480,6 +495,51 @@ void main() {
         expect(find.text('shell'), findsOneWidget);
         expect(await h.repo.get(Settings.setupProgress), {'skip_sms'});
       });
+
+      for (final ios in [true, false]) {
+        testWidgets('T-067 first run on ${ios ? 'iOS' : 'Android'}: Welcome -> '
+            '${ios ? 'S-03' : 'S-02'} -> Skip is recorded, lands on Home', (
+          t,
+        ) async {
+          debugDefaultTargetPlatformOverride = ios
+              ? TargetPlatform.iOS
+              : TargetPlatform.android;
+          try {
+            await t.binding.setSurfaceSize(const Size(400, 800));
+            addTearDown(() => t.binding.setSurfaceSize(null));
+            await t.pumpWidget(
+              h.app(
+                const OnboardingGate(child: Text('shell')),
+                locale: locale,
+                overrides: [appScreensProvider.overrideWithValue(_stubs(rec))],
+              ),
+            );
+            await t.pumpAndSettle();
+            expect(find.text('shell'), findsNothing);
+            await t.tap(find.byKey(const ValueKey('welcome-start')));
+            if (ios) {
+              await expectOpened(t, 'iosSetup');
+              expect(find.text('stub:androidSetup'), findsNothing);
+              await t.tap(find.byKey(const ValueKey('iosSetup__skip')));
+              await t.pumpAndSettle();
+              expect(find.text('shell'), findsOneWidget);
+              expect(await h.repo.get(Settings.setupProgress), {
+                'skip_shortcuts',
+              });
+            } else {
+              await expectOpened(t, 'androidSetup');
+              expect(find.text('stub:iosSetup'), findsNothing);
+              await t.tap(find.byKey(const ValueKey('androidSetup__skipSms')));
+              await t.pumpAndSettle();
+              expect(find.text('shell'), findsOneWidget);
+              expect(await h.repo.get(Settings.setupProgress), {'skip_sms'});
+            }
+            expect(await h.repo.get(Settings.setupInstalledOn), isNotNull);
+          } finally {
+            debugDefaultTargetPlatformOverride = null;
+          }
+        });
+      }
 
       testWidgets('first run: "I already use Zaghlol" opens the restore flow', (
         t,
