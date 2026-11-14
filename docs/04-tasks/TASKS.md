@@ -110,10 +110,10 @@ Every task file has: ID, description, technical details, dependencies, affected 
 | [T-060](tasks/T-060.md) | Android share/paste intake (text, image, PDF, CSV) | US-03-4 | High* | Opus | native-platform-engineer | T-004 | D | 3 | DONE |
 | [T-061](tasks/T-061.md) | iOS Capture Guard (Swift) with config reader | US-04-1 | High* | Opus | native-platform-engineer | T-035, T-009 | E | 6 | DONE |
 | [T-062](tasks/T-062.md) | iOS encrypted spool, host API and background refresh | US-04-1 | High* | Opus | native-platform-engineer | T-004, T-009 | E | 4 | DONE |
-| [T-063](tasks/T-063.md) | App Intents for Message and Wallet automations | US-04-1 | High* | Opus | native-platform-engineer | T-061, T-062 | E | 7 | TODO |
-| [T-064](tasks/T-064.md) | Shortcut package, iCloud link and setup checker | US-04-1 | High | Sonnet | native-platform-engineer | T-063 | E | 8 | TODO |
-| [T-065](tasks/T-065.md) | iOS Share Extension (text, image, PDF) | US-04-2 | High* | Opus | native-platform-engineer | T-062 | E | 5 | TODO |
-| [T-066](tasks/T-066.md) | Capture module iOS integration (drain, BG refresh, checker state) | US-04-1 | High | Sonnet | flutter-core-engineer | T-047, T-062, T-064 | A | 9 | TODO |
+| [T-063](tasks/T-063.md) | App Intents for Message and Wallet automations | US-04-1 | High* | Opus | native-platform-engineer | T-061, T-062 | E | 7 | DONE |
+| [T-064](tasks/T-064.md) | Shortcut package, iCloud link and setup checker | US-04-1 | High | Sonnet | native-platform-engineer | T-063 | E | 8 | DONE |
+| [T-065](tasks/T-065.md) | iOS Share Extension (text, image, PDF) | US-04-2 | High* | Opus | native-platform-engineer | T-062 | E | 5 | DONE |
+| [T-066](tasks/T-066.md) | Capture module iOS integration (drain, BG refresh, checker state) | US-04-1 | High | Sonnet | flutter-core-engineer | T-047, T-062, T-064 | A | 9 | DONE |
 | [T-067](tasks/T-067.md) | iOS capture setup S-03 (add Shortcut, check setup, first expense) | US-10-1 | Medium | Sonnet | flutter-ui-engineer | T-055, T-066 | G | 10 | TODO |
 | [T-068](tasks/T-068.md) | Templates + fixtures: Egyptian banks batch 1 | US-05-1 | Medium | Sonnet | parsing-engine-engineer | T-033 | F | 6 | TODO |
 | [T-069](tasks/T-069.md) | Templates + fixtures: Egyptian banks batch 2 | US-05-1 | Medium | Sonnet | parsing-engine-engineer | T-033 | F | 6 | TODO |
@@ -129,7 +129,7 @@ Every task file has: ID, description, technical details, dependencies, affected 
 | [T-079](tasks/T-079.md) | Transactions list S-11 with filters, search and selection mode | US-06-3 | Medium | Sonnet | flutter-ui-engineer | T-050, T-077, T-024, T-029 | G | 9 | DONE |
 | [T-080](tasks/T-080.md) | Transaction detail S-12 and add/edit sheet S-13 | US-06-3 | Medium | Sonnet | flutter-ui-engineer | T-050, T-075, T-045, T-029 | G | 9 | DONE |
 | [T-081](tasks/T-081.md) | Review queue S-14 | US-06-2 | Medium | Sonnet | flutter-ui-engineer | T-049, T-074, T-029 | G | 9 | DONE |
-| [T-082](tasks/T-082.md) | Quick add sheet S-30 | US-06-3 | Low | Haiku | boilerplate-engineer | T-024, T-029 | G | 9 | TODO |
+| [T-082](tasks/T-082.md) | Quick add sheet S-30 | US-06-3 | Low | Haiku | boilerplate-engineer | T-024, T-029 | G | 9 | DONE |
 | [T-083](tasks/T-083.md) | Money tab S-40 (accounts per currency) | US-06-5 | Medium | Sonnet | flutter-ui-engineer | T-045, T-052, T-029 | G | 10 | DONE |
 | [T-084](tasks/T-084.md) | Card detail S-41, compare cards S-42 | US-06-5 | Medium | Sonnet | flutter-ui-engineer | T-083, T-051 | G | 11 | DONE |
 | [T-085](tasks/T-085.md) | Add/edit card S-43 (type → bank → details), merge and hide | US-06-5 | Medium | Sonnet | flutter-ui-engineer | T-083, T-078 | G | 11 | DONE |
@@ -144,7 +144,7 @@ Every task file has: ID, description, technical details, dependencies, affected 
 | [T-089](tasks/T-089.md) | Self-transfer pairing, FX conversions and card settlements | US-08-1 | High | Sonnet | flutter-core-engineer | T-046, T-050 | A | 8 | DONE |
 | [T-090](tasks/T-090.md) | Refund matching and offset links | US-08-2 | High | Sonnet | flutter-core-engineer | T-089 | A | 9 | DONE |
 | [T-091](tasks/T-091.md) | Splits and reimbursements with allocation and unassign | US-08-2 | High | Sonnet | flutter-core-engineer | T-090 | A | 10 | DONE |
-| [T-092](tasks/T-092.md) | Reimbursement and cross-currency pair suggestions | US-08-2 | Medium | Sonnet | flutter-core-engineer | T-091, T-049 | A | 11 | TODO |
+| [T-092](tasks/T-092.md) | Reimbursement and cross-currency pair suggestions | US-08-2 | Medium | Sonnet | flutter-core-engineer | T-091, T-049 | A | 11 | DONE |
 | [T-093](tasks/T-093.md) | Split/reimbursement sheet S-15 and link-transfer sheet S-16 | US-08-2 | Medium | Sonnet | flutter-ui-engineer | T-091, T-089, T-080 | G | 11 | DONE |
 | [T-094](tasks/T-094.md) | Local notifications service (types, quiet hours, redaction) | US-10-4 | Medium | Sonnet | flutter-core-engineer | T-020 | A | 7 | DONE |
 | [T-095](tasks/T-095.md) | Budgets per category and currency with threshold alerts | US-09-1 | Medium | Sonnet | flutter-core-engineer | T-051, T-094 | A | 8 | DONE |
@@ -152,7 +152,7 @@ Every task file has: ID, description, technical details, dependencies, affected 
 | [T-097](tasks/T-097.md) | Contextual setup suggestions (payday, budgets, backup) | US-10-1 | Medium | Sonnet | flutter-core-engineer | T-051, T-049 | A | 9 | DONE |
 | [T-098](tasks/T-098.md) | Mascot trigger policy (shocked, detective, proud, tour guide) | US-10-3 | Medium | Sonnet | flutter-core-engineer | T-051, T-089, T-095 | A | 9 | DONE |
 | [T-099](tasks/T-099.md) | Wire motion-only mascot moments to UI events | US-10-3 | Medium | Sonnet | flutter-ui-engineer | T-053, T-088 | G | 4 | TODO |
-| [T-100](tasks/T-100.md) | Duplicate-charge and weekly-summary notifications | US-10-4 | Medium | Sonnet | flutter-core-engineer | T-094, T-046, T-051 | A | 8 | TODO |
+| [T-100](tasks/T-100.md) | Duplicate-charge and weekly-summary notifications | US-10-4 | Medium | Sonnet | flutter-core-engineer | T-094, T-046, T-051 | A | 8 | DONE |
 | [T-101](tasks/T-101.md) | Insights shell and Budget S-22 (+ edit budgets) | US-09-1 | Medium | Sonnet | flutter-ui-engineer | T-095, T-087, T-024 | G | 10 | DONE |
 | [T-102](tasks/T-102.md) | Bills & installments S-24 and add/edit recurring item | US-09-2 | Medium | Sonnet | flutter-ui-engineer | T-096, T-087 | G | 10 | DONE |
 | [T-103](tasks/T-103.md) | App lock, privacy overlay and screenshot hiding | US-18-2 | High | Sonnet | native-platform-engineer | T-004, T-020 | D | 7 | DONE |
@@ -174,8 +174,8 @@ Every task file has: ID, description, technical details, dependencies, affected 
 | [T-114](tasks/T-114.md) | Charts: remaining eight (Gold) | US-11-1 | Medium | Sonnet | flutter-ui-engineer | T-107, T-113 | G | 13 | DONE |
 | [T-115](tasks/T-115.md) | ≈ combined view service (target currency, rate date, exclusions) | US-12-2 | High | Sonnet | flutter-core-engineer | T-012, T-112 | A | 7 | DONE |
 | [T-116](tasks/T-116.md) | Shared per-currency figures and currency switcher component | US-12-2 | Medium | Sonnet | flutter-ui-engineer | T-115, T-054 | G | 11 | DONE |
-| [T-117](tasks/T-117.md) | Achievement share cards with hidden amounts by default | US-11-4 | Medium | Sonnet | flutter-ui-engineer | T-105, T-022 | G | 12 | TODO |
-| [T-118](tasks/T-118.md) | Home-screen widgets (Android Glance, iOS WidgetKit) | US-11-4 | High | Sonnet | native-platform-engineer | T-051, T-004 | E | 8 | TODO |
+| [T-117](tasks/T-117.md) | Achievement share cards with hidden amounts by default | US-11-4 | Medium | Sonnet | flutter-ui-engineer | T-105, T-022 | G | 12 | DONE |
+| [T-118](tasks/T-118.md) | Home-screen widgets (Android Glance, iOS WidgetKit) | US-11-4 | High | Sonnet | native-platform-engineer | T-051, T-004 | E | 8 | DONE |
 | [T-119](tasks/T-119.md) | Gold gate matrix and entitlement state (local) | US-14-1 | Medium | Sonnet | flutter-core-engineer | T-025, T-020 | A | 7 | DONE |
 | [T-120](tasks/T-120.md) | Voice logger S-31 with on-device-first recognition and monthly limit | US-11-3 | High | Sonnet | flutter-ui-engineer | T-109, T-119, T-011 | G | 10 | TODO |
 | [T-121](tasks/T-121.md) | Money tab assets, Add asset S-44 and Prices S-45 | US-12-1 | Medium | Sonnet | flutter-ui-engineer | T-113, T-083, T-119 | G | 11 | DONE |
@@ -242,7 +242,7 @@ Every task file has: ID, description, technical details, dependencies, affected 
 | [T-163](tasks/T-163.md) | Categories & rules S-63/S-64 incl. custom categories (Gold) | US-18-1 | Medium | Sonnet | flutter-ui-engineer | T-074, T-119 | G | 8 | DONE |
 | [T-164](tasks/T-164.md) | Custom message template builder engine and screen S-65 (Gold) | US-05-3 | High | Sonnet | parsing-engine-engineer | T-033, T-119 | F | 8 | DONE |
 | [T-165](tasks/T-165.md) | Exclude app data from OS backups and device transfer | US-18-2 | High* | Opus | native-platform-engineer | T-001 | D | 2 | TODO |
-| [T-166](tasks/T-166.md) | Delete everything (local wipe + backend install delete) | US-18-2 | High* | Opus | flutter-core-engineer | T-015, T-141, T-152, T-145, T-179 | A | 10 | TODO |
+| [T-166](tasks/T-166.md) | Delete everything (local wipe + backend install delete) | US-18-2 | High* | Opus | flutter-core-engineer | T-015, T-141, T-152, T-145, T-179 | A | 10 | DONE |
 
 ## M7 — Flagged features, hardening & launch
 
@@ -252,9 +252,9 @@ Every task file has: ID, description, technical details, dependencies, affected 
 | [T-168](tasks/T-168.md) | Zakah screen S-46 behind flag with disclaimer | US-19-1 | Medium | Sonnet | flutter-ui-engineer | T-167, T-025, T-087 | G | 11 | TODO |
 | [T-169](tasks/T-169.md) | Smart ROI general-advice rules with no-names check | US-19-2 | High | Sonnet | flutter-core-engineer | T-105 | A | 12 | TODO |
 | [T-170](tasks/T-170.md) | Smart ROI screen S-51 behind flag | US-19-2 | Medium | Sonnet | flutter-ui-engineer | T-169, T-025, T-087 | G | 13 | TODO |
-| [T-171](tasks/T-171.md) | Privacy verification suite (sandbox scan, data-boundary proxy, ignore no-trace) | US-21-1 | High* | Opus | test-engineer | T-166, T-143, T-078, T-149, T-165 | A | 11 | TODO |
+| [T-171](tasks/T-171.md) | Privacy verification suite (sandbox scan, data-boundary proxy, ignore no-trace) | US-21-1 | High* | Opus | test-engineer | T-166, T-143, T-078, T-149, T-165 | A | 11 | DONE |
 | [T-172](tasks/T-172.md) | Device end-to-end suites (Android killed-app capture, iOS intents, backup, purchases) | US-21-1 | High | Sonnet | test-engineer | T-056, T-067, T-153, T-145, T-147 | A | 11 | TODO |
-| [T-173](tasks/T-173.md) | Performance benchmarks and CI budgets | US-21-1 | Medium | Sonnet | test-engineer | T-033, T-050, T-105, T-048 | A | 12 | TODO |
+| [T-173](tasks/T-173.md) | Performance benchmarks and CI budgets | US-21-1 | Medium | Sonnet | test-engineer | T-033, T-050, T-105, T-048 | A | 12 | DONE |
 | [T-174](tasks/T-174.md) | Accessibility and golden coverage pass (130% text, both themes, screen readers) | US-21-1 | Medium | Sonnet | test-engineer | T-054, T-079, T-162, T-107 | G | 13 | TODO |
 | [T-175](tasks/T-175.md) | Security assessment: MobSF, ZAP, dependency scans, pen test | US-21-1 | High* | Opus | security-privacy-reviewer | T-171, T-140 | A | 12 | TODO |
 | [T-176](tasks/T-176.md) | Android release pipeline, Play listings, Data safety and SMS declaration package | US-21-1 | High | Sonnet | flutter-core-engineer | T-172, T-171 | A | 12 | TODO |

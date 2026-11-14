@@ -129,3 +129,7 @@ What was checked:
 |------|-----------|-----------------|-------------|
 | WIRE-2 | `app/lib/features/ingestion/presentation/review/review_providers.dart:94-106` (+ the `SuggestionCardModel` card in `review_screen.dart`) | Accept on a `reimbursement_suggestion` must link only an expense the user chose. Show the candidates and pass the tapped id, or allow one-swipe accept only when there is exactly one candidate, shown on the card; otherwise send the user to the manual link sheet. | A payload with 2 candidates: accept does not create an `offset_links` row for `candidates.first` unless the user chose it. With 1 candidate, the card shows that expense and accept links it. |
 | WIRE-2 | `app/lib/features/settings/presentation/privacy_screen.dart:228` | Pop the progress dialog on the root navigator: `Navigator.of(context, rootNavigator: true).pop()`, or pop the dialog's own context. | PrivacyScreen pushed inside a nested `Navigator`, with a wipe that throws `WipeIncomplete`: the progress dialog is gone, PrivacyScreen is still shown, and the `privacyDeleteFailed` snackbar is visible. |
+
+## Lead delta check (T-171 F1, sign-out reaches the server)
+
+Commits f8d83d71 and 099ae177: `EntitlementService.signOut` reads the account token into memory before deleting the stored tokens, then passes it to `BackendClient.signOut(accountToken:)`, which sends it in the account header. Offline sign-out still drops the tokens first. The privacy flow test "sign-out reaches the server" is unskipped and fails without the change. Verdict: APPROVED.

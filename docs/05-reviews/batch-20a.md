@@ -117,3 +117,7 @@ Findings (non-blocking):
 | D-2 | nit | `delete_everything.dart:237` | A marker that throws on read for a reason other than `FormatException` (an I/O error) is left in place without counting an attempt. It deletes nothing, so it is harmless, but it is never dropped. | Optional: count those reads too, or clear the marker after N of them. |
 
 Verdict T-166: **APPROVED**. 166-1 and 166-2 are resolved. D-1 and D-2 are follow-ups. 166-3 to 166-6 stay follow-ups as already filed.
+
+## Lead delta check (T-166 marker, commit a8f3bad6)
+
+The marker is written to a temp file, flushed and renamed. An empty or garbled marker is `torn`: the resume still runs the newer-data check, and any database file newer than the marker means nothing is deleted (database and key both kept) and the marker is cleared. Failed reads are counted in a sidecar and the marker is cleared at the limit. Tests for the newer database and the unreadable marker fail without the fix. Verdict: APPROVED.

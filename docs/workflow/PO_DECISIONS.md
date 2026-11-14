@@ -61,6 +61,12 @@ T-035 Q1–Q6 (keep with bundled rules; drop OTP+transaction messages, as the re
 | T-147 | After an offline sign-out, account-linked Gold shows "paused" (not "free") until a fresh signed entitlement; S-69 shows a plain "Signed in" line, no e-mail. |
 | T-152 | While the entitlement is still being verified, backup cleanup keeps up to 5 and the scheduled job is skipped, not cancelled. |
 | T-080 | In the amount field a comma is accepted only as thousands grouping; `12,5` is rejected, never read as 125. |
+| T-064 | The Wallet (Apple Pay) automation is flagged as silent only for users who have captured an Apple Pay payment at least once; the message automation is always checked. |
+| T-082 | The quick-add sheet already existed (T-024); T-082 closes with the Gold badge on Asset (WIRE-3). The "voice logs left" line waits for the voice logger (T-120, deferred). |
+| T-166 | Offline, the server install delete is not queued (a queue would keep the install token after the wipe); the server copy expires on its own, as the dialog says. A wipe resume deletes only unfinished parts, never data newer than the marker, and stops after 3 tries. |
+| T-092 / WIRE-2 | A reimbursement or cross-currency suggestion links only the candidate the user taps; the card shows each candidate; no swipe-accept for pair suggestions. |
+| NOTIF-GW | Local notifications use a small native host (no plugin, no remote push). Permission is asked after onboarding and on first enabling an alert type. A quiet-hours alert scheduled on Android is lost at reboot (keeps alert text off unencrypted storage). |
+| T-173 | Timing tests run only in the serial `perf` CI job (one retry); budgets get tightened to about 1.3× the first CI numbers. |
 
 ## Part 2 — Still needs Amr
 
