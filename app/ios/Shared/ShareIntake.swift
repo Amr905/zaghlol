@@ -97,7 +97,8 @@ final class ShareIntake {
     }
     if size == 0 { return .rejected(.empty) }
     if size > ShareLimits.maxFileBytes { return .rejected(.tooLarge) }
-    guard var data = try? Data(contentsOf: url)  // not mapped: the copy is zeroed below else {
+    // Not mapped: the copy is zeroed below (zeroing a mapped file would crash).
+    guard var data = try? Data(contentsOf: url) else {
       return .rejected(.unreadable)
     }
     defer { data.resetBytes(in: 0..<data.count) }
