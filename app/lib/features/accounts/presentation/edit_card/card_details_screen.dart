@@ -281,220 +281,272 @@ class _CardDetailsState extends ConsumerState<CardDetailsScreen> {
           const SizedBox(width: ZSpacing.sm),
         ],
       ),
-      body: ListView(
-        padding: const EdgeInsetsDirectional.all(ZSpacing.screen),
-        children: [
-          if (_saveFailed)
-            Padding(
-              padding: const EdgeInsetsDirectional.only(bottom: ZSpacing.md),
-              child: ZBanner(
-                key: const Key('card-save-error'),
-                message: l10n.commonErrorSaveFailed,
-                tone: ZBannerTone.error,
+      body: Theme(
+        data: Theme.of(context).copyWith(inputDecorationTheme: _fieldTheme(c)),
+        child: ListView(
+          padding: const EdgeInsetsDirectional.all(ZSpacing.screen),
+          children: [
+            if (_saveFailed)
+              Padding(
+                padding: const EdgeInsetsDirectional.only(bottom: ZSpacing.md),
+                child: ZBanner(
+                  key: const Key('card-save-error'),
+                  message: l10n.commonErrorSaveFailed,
+                  tone: ZBannerTone.error,
+                ),
               ),
-            ),
-          if (_duplicate != null)
-            Padding(
-              padding: const EdgeInsetsDirectional.only(bottom: ZSpacing.md),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  ZBanner(
-                    key: const Key('card-duplicate'),
-                    message: l10n.accountsEditDuplicate,
-                    tone: ZBannerTone.warning,
-                  ),
-                  const SizedBox(height: ZSpacing.sm),
-                  ZButton(
-                    label: l10n.accountsEditOpenExisting,
-                    variant: ZButtonVariant.secondary,
-                    onPressed: () => widget.onOpenExisting?.call(_duplicate!),
-                  ),
-                ],
-              ),
-            ),
-          _Preview(
-            name: _name.text.trim(),
-            bank: _bankName(lang),
-            last4: normalizeDigits(_last4.text.trim()),
-            digits: digits,
-          ),
-          const SizedBox(height: ZSpacing.lg),
-          TextField(
-            key: const Key('card-name'),
-            controller: _name,
-            textInputAction: TextInputAction.next,
-            maxLength: cardNameMax * 2,
-            buildCounter: _noCounter,
-            onChanged: (_) => setState(() => _touched = true),
-            decoration: InputDecoration(
-              labelText: l10n.accountsEditName,
-              errorText: nameMsg(),
-            ),
-          ),
-          const SizedBox(height: ZSpacing.md),
-          InputDecorator(
-            decoration: InputDecoration(labelText: l10n.accountsEditBank),
-            child: Text(
-              widget.isEdit && _acc!.institutionCode != null
-                  ? '${_bankName(lang)}  ·  ${l10n.accountsEditBankAuto}'
-                  : _bankName(lang),
-              style: ZType.body.copyWith(color: c.text),
-            ),
-          ),
-          const SizedBox(height: ZSpacing.md),
-          TextField(
-            key: const Key('card-last4'),
-            controller: _last4,
-            enabled: !widget.isEdit,
-            keyboardType: TextInputType.number,
-            inputFormatters: const [
-              NormalizeDigitsFormatter(),
-              _Last4Formatter(),
-            ],
-            onChanged: (_) => setState(() => _touched = true),
-            decoration: InputDecoration(
-              labelText: l10n.accountsEditLast4,
-              helperText: l10n.accountsEditLast4Hint(digits.render('1234')),
-              helperMaxLines: 3,
-              errorText: e.last4 == null ? null : l10n.commonValidationLast4,
-            ),
-          ),
-          const SizedBox(height: ZSpacing.md),
-          if (widget.isEdit)
-            DropdownButtonFormField<AccountKind>(
-              key: const Key('card-type'),
-              initialValue: _kind,
-              decoration: InputDecoration(labelText: l10n.accountsEditType),
-              items: [
-                for (final k in AccountKind.values)
-                  if (k != AccountKind.cash || _kind == AccountKind.cash)
-                    DropdownMenuItem(
-                      value: k,
-                      child: Text(_kindLabel(l10n, k)),
+            if (_duplicate != null)
+              Padding(
+                padding: const EdgeInsetsDirectional.only(bottom: ZSpacing.md),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    ZBanner(
+                      key: const Key('card-duplicate'),
+                      message: l10n.accountsEditDuplicate,
+                      tone: ZBannerTone.warning,
                     ),
-              ],
-              onChanged: _acc!.isDefaultCash
-                  ? null
-                  : (k) => setState(() => _kind = k ?? _kind),
-            )
-          else
-            InputDecorator(
-              decoration: InputDecoration(labelText: l10n.accountsEditType),
-              child: Text(
-                _kindLabel(l10n, _kind),
-                style: ZType.body.copyWith(color: c.text),
+                    const SizedBox(height: ZSpacing.sm),
+                    ZButton(
+                      label: l10n.accountsEditOpenExisting,
+                      variant: ZButtonVariant.secondary,
+                      onPressed: () => widget.onOpenExisting?.call(_duplicate!),
+                    ),
+                  ],
+                ),
               ),
+            _Preview(
+              name: _name.text.trim(),
+              bank: _bankName(lang),
+              last4: normalizeDigits(_last4.text.trim()),
+              digits: digits,
+              kind: _kindLabel(l10n, _kind),
+              limit: isCredit && _limit.text.trim().isNotEmpty
+                  ? '${l10n.accountsEditLimit} ${digits.render(normalizeDigits(_limit.text.trim()))} $_currency'
+                  : null,
             ),
-          const SizedBox(height: ZSpacing.md),
-          if (widget.isEdit)
-            InputDecorator(
-              decoration: InputDecoration(labelText: l10n.accountsEditCurrency),
-              child: Text(_currency, style: ZType.body.copyWith(color: c.text)),
-            )
-          else
-            DropdownButtonFormField<String>(
-              key: const Key('card-currency'),
-              initialValue: _currency,
-              decoration: InputDecoration(labelText: l10n.accountsEditCurrency),
-              items: [
-                for (final code in {_currency, ...Currency.featuredCodes})
-                  DropdownMenuItem(value: code, child: Text(code)),
-              ],
-              onChanged: (v) => setState(() => _currency = v ?? _currency),
-            ),
-          if (isCredit) ...[
-            const SizedBox(height: ZSpacing.md),
+            const SizedBox(height: ZSpacing.lg),
             TextField(
-              key: const Key('card-limit'),
-              controller: _limit,
-              keyboardType: const TextInputType.numberWithOptions(
-                decimal: true,
-              ),
-              inputFormatters: const [NormalizeDigitsFormatter()],
+              key: const Key('card-name'),
+              controller: _name,
+              textInputAction: TextInputAction.next,
+              maxLength: cardNameMax * 2,
+              buildCounter: _noCounter,
               onChanged: (_) => setState(() => _touched = true),
               decoration: InputDecoration(
-                labelText: l10n.accountsEditLimit,
-                suffixText: _currency,
-                errorText: e.limit == null
-                    ? null
-                    : e.limit == LimitError.negative
-                    ? l10n.accountsEditErrorLimit
-                    : l10n.commonValidationAmountDecimals(
-                        _cur.exponent,
-                        _currency,
-                        digits.render('${_cur.exponent}'),
-                      ),
+                labelText: l10n.accountsEditName,
+                errorText: nameMsg(),
               ),
             ),
             const SizedBox(height: ZSpacing.md),
+            if (widget.isEdit)
+              InputDecorator(
+                decoration: InputDecoration(labelText: l10n.accountsEditBank),
+                child: Text(
+                  widget.isEdit && _acc!.institutionCode != null
+                      ? '${_bankName(lang)}  ·  ${l10n.accountsEditBankAuto}'
+                      : _bankName(lang),
+                  style: ZType.body.copyWith(color: c.text),
+                ),
+              ),
+            if (widget.isEdit) const SizedBox(height: ZSpacing.md),
             TextField(
-              key: const Key('card-dueday'),
-              controller: _dueDay,
+              key: const Key('card-last4'),
+              controller: _last4,
+              enabled: !widget.isEdit,
               keyboardType: TextInputType.number,
               inputFormatters: const [
                 NormalizeDigitsFormatter(),
-                _DueDayFormatter(),
+                _Last4Formatter(),
               ],
               onChanged: (_) => setState(() => _touched = true),
               decoration: InputDecoration(
-                labelText: l10n.accountsEditDueDay,
-                errorText: e.dueDay == null
-                    ? null
-                    : l10n.accountsEditErrorDueDay(
-                        digits.render('$dueDayMax'),
-                        digits.render('$dueDayMin'),
+                labelText: l10n.accountsEditLast4,
+                helperText: l10n.accountsEditLast4Hint(digits.render('1234')),
+                helperMaxLines: 3,
+                errorText: e.last4 == null ? null : l10n.commonValidationLast4,
+              ),
+            ),
+            const SizedBox(height: ZSpacing.md),
+            if (widget.isEdit)
+              DropdownButtonFormField<AccountKind>(
+                key: const Key('card-type'),
+                initialValue: _kind,
+                decoration: InputDecoration(labelText: l10n.accountsEditType),
+                items: [
+                  for (final k in AccountKind.values)
+                    if (k != AccountKind.cash || _kind == AccountKind.cash)
+                      DropdownMenuItem(
+                        value: k,
+                        child: Text(_kindLabel(l10n, k)),
                       ),
+                ],
+                onChanged: _acc!.isDefaultCash
+                    ? null
+                    : (k) => setState(() => _kind = k ?? _kind),
+              )
+            else
+              const SizedBox.shrink(),
+            const SizedBox(height: ZSpacing.md),
+            if (widget.isEdit)
+              InputDecorator(
+                decoration: InputDecoration(
+                  labelText: l10n.accountsEditCurrency,
+                ),
+                child: Text(
+                  _currency,
+                  style: ZType.body.copyWith(color: c.text),
+                ),
+              )
+            else
+              DropdownButtonFormField<String>(
+                key: const Key('card-currency'),
+                initialValue: _currency,
+                decoration: InputDecoration(
+                  labelText: l10n.accountsEditCurrency,
+                ),
+                items: [
+                  for (final code in {_currency, ...Currency.featuredCodes})
+                    DropdownMenuItem(value: code, child: Text(code)),
+                ],
+                onChanged: (v) => setState(() => _currency = v ?? _currency),
               ),
-            ),
-          ],
-          if (!widget.isEdit && port != null) ...[
-            const SizedBox(height: ZSpacing.lg),
-            Semantics(
-              header: true,
-              child: Text(
-                l10n.accountsEditCaptureTitle,
-                style: ZType.titleSmall.copyWith(color: c.text),
+            if (isCredit) ...[
+              const SizedBox(height: ZSpacing.md),
+              TextField(
+                key: const Key('card-limit'),
+                controller: _limit,
+                keyboardType: const TextInputType.numberWithOptions(
+                  decimal: true,
+                ),
+                inputFormatters: const [NormalizeDigitsFormatter()],
+                onChanged: (_) => setState(() => _touched = true),
+                decoration: InputDecoration(
+                  labelText: l10n.accountsEditLimit,
+                  suffixText: _currency,
+                  errorText: e.limit == null
+                      ? null
+                      : e.limit == LimitError.negative
+                      ? l10n.accountsEditErrorLimit
+                      : l10n.commonValidationAmountDecimals(
+                          _cur.exponent,
+                          _currency,
+                          digits.render('${_cur.exponent}'),
+                        ),
+                ),
               ),
-            ),
-            for (final ch in channels)
+              const SizedBox(height: ZSpacing.md),
+              TextField(
+                key: const Key('card-dueday'),
+                controller: _dueDay,
+                keyboardType: TextInputType.number,
+                inputFormatters: const [
+                  NormalizeDigitsFormatter(),
+                  _DueDayFormatter(),
+                ],
+                onChanged: (_) => setState(() => _touched = true),
+                decoration: InputDecoration(
+                  labelText: l10n.accountsEditDueDay,
+                  errorText: e.dueDay == null
+                      ? null
+                      : l10n.accountsEditErrorDueDay(
+                          digits.render('$dueDayMax'),
+                          digits.render('$dueDayMin'),
+                        ),
+                ),
+              ),
+            ],
+            if (!widget.isEdit && port != null) ...[
+              const SizedBox(height: ZSpacing.lg),
+              Semantics(
+                header: true,
+                child: Text(
+                  l10n.accountsEditCaptureTitle,
+                  style: ZType.titleSmall.copyWith(color: c.text),
+                ),
+              ),
+              const SizedBox(height: ZSpacing.sm),
+              Material(
+                color: c.surface,
+                elevation: 2,
+                shadowColor: c.shadow,
+                borderRadius: BorderRadius.circular(ZRadius.card),
+                child: ClipRRect(
+                  borderRadius: BorderRadius.circular(ZRadius.card),
+                  child: Column(
+                    children: [
+                      for (var i = 0; i < channels.length; i++) ...[
+                        if (i > 0)
+                          Divider(
+                            height: 1,
+                            thickness: 1,
+                            color: c.outline,
+                            indent: ZSpacing.lg,
+                            endIndent: ZSpacing.lg + 56,
+                          ),
+                        SwitchListTile(
+                          key: Key('capture-${channels[i].$1}'),
+                          contentPadding: const EdgeInsetsDirectional.symmetric(
+                            horizontal: ZSpacing.lg,
+                          ),
+                          secondary: Container(
+                            width: 48,
+                            height: 48,
+                            decoration: BoxDecoration(
+                              color: channels[i].$1 == IgnoreChannel.applePay
+                                  ? c.text
+                                  : c.primary,
+                              borderRadius: BorderRadius.circular(ZRadius.lg),
+                            ),
+                            child: Icon(
+                              channels[i].$1 == IgnoreChannel.applePay
+                                  ? Icons.credit_card_rounded
+                                  : Icons.chat_bubble_outline_rounded,
+                              color: c.surface,
+                            ),
+                          ),
+                          title: Text(channels[i].$2),
+                          value: !_off.contains(channels[i].$1),
+                          onChanged: (on) => setState(() {
+                            on
+                                ? _off.remove(channels[i].$1)
+                                : _off.add(channels[i].$1);
+                          }),
+                        ),
+                      ],
+                    ],
+                  ),
+                ),
+              ),
+            ],
+            if (widget.isEdit) ...[
+              const SizedBox(height: ZSpacing.lg),
+              ZListRow(
+                key: const Key('card-merge'),
+                title: l10n.accountsEditMerge,
+                leading: Icon(Icons.merge_rounded, color: c.primary),
+                showChevron: true,
+                enabled: !_acc!.isDefaultCash,
+                onTap: () => _openMerge(context),
+              ),
               SwitchListTile(
-                key: Key('capture-${ch.$1}'),
+                key: const Key('card-hide'),
                 contentPadding: EdgeInsets.zero,
-                title: Text(ch.$2),
-                value: !_off.contains(ch.$1),
-                onChanged: (on) => setState(() {
-                  on ? _off.remove(ch.$1) : _off.add(ch.$1);
-                }),
+                title: Text(l10n.accountsEditHide),
+                subtitle: Text(l10n.accountsEditHideHint),
+                value: _hidden,
+                onChanged: _acc!.isDefaultCash ? null : _toggleHidden,
               ),
+              ZListRow(
+                key: const Key('card-capture-link'),
+                title: l10n.accountsEditCaptureLink,
+                leading: Icon(Icons.tune_rounded, color: c.primary),
+                showChevron: true,
+                onTap: () => widget.onOpenCapture?.call(_acc!),
+              ),
+            ],
           ],
-          if (widget.isEdit) ...[
-            const SizedBox(height: ZSpacing.lg),
-            ZListRow(
-              key: const Key('card-merge'),
-              title: l10n.accountsEditMerge,
-              leading: Icon(Icons.merge_rounded, color: c.primary),
-              showChevron: true,
-              enabled: !_acc!.isDefaultCash,
-              onTap: () => _openMerge(context),
-            ),
-            SwitchListTile(
-              key: const Key('card-hide'),
-              contentPadding: EdgeInsets.zero,
-              title: Text(l10n.accountsEditHide),
-              subtitle: Text(l10n.accountsEditHideHint),
-              value: _hidden,
-              onChanged: _acc!.isDefaultCash ? null : _toggleHidden,
-            ),
-            ZListRow(
-              key: const Key('card-capture-link'),
-              title: l10n.accountsEditCaptureLink,
-              leading: Icon(Icons.tune_rounded, color: c.primary),
-              showChevron: true,
-              onTap: () => widget.onOpenCapture?.call(_acc!),
-            ),
-          ],
-        ],
+        ),
       ),
     );
   }
@@ -576,6 +628,27 @@ class _DueDayFormatter extends TextInputFormatter {
   }
 }
 
+InputDecorationTheme _fieldTheme(ZColors c) {
+  OutlineInputBorder b(Color color, [double w = 1]) => OutlineInputBorder(
+    borderRadius: BorderRadius.circular(ZRadius.card),
+    borderSide: BorderSide(color: color, width: w),
+  );
+  return InputDecorationTheme(
+    filled: true,
+    fillColor: c.surface,
+    contentPadding: const EdgeInsetsDirectional.symmetric(
+      horizontal: ZSpacing.lg,
+      vertical: ZSpacing.md,
+    ),
+    border: b(Colors.transparent),
+    enabledBorder: b(Colors.transparent),
+    disabledBorder: b(Colors.transparent),
+    focusedBorder: b(c.primary, 2),
+    errorBorder: b(c.dangerText),
+    focusedErrorBorder: b(c.dangerText, 2),
+  );
+}
+
 /// Live card preview (mockup 30).
 class _Preview extends StatelessWidget {
   const _Preview({
@@ -583,35 +656,92 @@ class _Preview extends StatelessWidget {
     required this.bank,
     required this.last4,
     required this.digits,
+    required this.kind,
+    this.limit,
   });
 
   final String name;
   final String bank;
   final String last4;
   final DigitsMode digits;
+  final String kind;
+  final String? limit;
 
   @override
   Widget build(BuildContext context) {
     final c = ZColors.of(context);
-    final tail = last4.isEmpty ? '' : '•••• ${digits.render(last4)}';
+    final fg = c.onPrimary;
+    final tail = last4.isEmpty ? '' : digits.render(last4);
     return Container(
       key: const Key('card-preview'),
-      padding: const EdgeInsetsDirectional.all(ZSpacing.lg),
+      padding: const EdgeInsetsDirectional.all(ZSpacing.xl),
       decoration: BoxDecoration(
-        color: c.primaryContainer,
-        borderRadius: BorderRadius.circular(ZRadius.card),
+        borderRadius: BorderRadius.circular(ZRadius.hero),
+        gradient: LinearGradient(
+          begin: AlignmentDirectional.topStart,
+          end: AlignmentDirectional.bottomEnd,
+          colors: [c.primary, Color.lerp(c.primary, c.surface, 0.45)!],
+        ),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Text(bank, style: ZType.label.copyWith(color: c.onPrimaryContainer)),
-          const SizedBox(height: ZSpacing.sm),
-          Text(
-            name.isEmpty ? ' ' : name,
-            style: ZType.title.copyWith(color: c.onPrimaryContainer),
+          Row(
+            children: [
+              Flexible(
+                child: Container(
+                  padding: const EdgeInsetsDirectional.symmetric(
+                    horizontal: ZSpacing.md,
+                    vertical: ZSpacing.xs,
+                  ),
+                  decoration: BoxDecoration(
+                    color: fg.withValues(alpha: 0.2),
+                    borderRadius: BorderRadius.circular(ZRadius.pill),
+                  ),
+                  child: Text(kind, style: ZType.label.copyWith(color: fg)),
+                ),
+              ),
+              const SizedBox(width: ZSpacing.sm),
+              const Spacer(),
+              Flexible(
+                child: Text(
+                  bank,
+                  style: ZType.title.copyWith(color: fg),
+                  overflow: TextOverflow.ellipsis,
+                ),
+              ),
+            ],
           ),
-          if (tail.isNotEmpty)
-            Text(tail, style: ZType.body.copyWith(color: c.onPrimaryContainer)),
+          const SizedBox(height: ZSpacing.xxl * 1.5),
+          Directionality(
+            textDirection: TextDirection.ltr,
+            child: Text(
+              '\u2022\u2022\u2022\u2022  \u2022\u2022\u2022\u2022  \u2022\u2022\u2022\u2022  $tail',
+              style: ZType.title.copyWith(color: fg, letterSpacing: 2),
+            ),
+          ),
+          const SizedBox(height: ZSpacing.sm),
+          Row(
+            children: [
+              Expanded(
+                child: Text(
+                  name.isEmpty ? ' ' : name,
+                  style: ZType.bodySmall.copyWith(color: fg),
+                  overflow: TextOverflow.ellipsis,
+                ),
+              ),
+              if (limit != null) ...[
+                const SizedBox(width: ZSpacing.sm),
+                Flexible(
+                  child: Text(
+                    limit!,
+                    overflow: TextOverflow.ellipsis,
+                    style: ZType.bodySmall.copyWith(color: fg),
+                  ),
+                ),
+              ],
+            ],
+          ),
         ],
       ),
     );

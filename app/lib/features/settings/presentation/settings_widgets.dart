@@ -29,20 +29,41 @@ class SettingsScaffold extends StatelessWidget {
     final c = ZColors.of(context);
     return Scaffold(
       backgroundColor: c.bg,
-      appBar: AppBar(
-        title: Text(title, style: ZType.title.copyWith(color: c.text)),
-        backgroundColor: c.bg,
-        elevation: 0,
-        scrolledUnderElevation: 0,
-        foregroundColor: c.text,
-      ),
       body: SafeArea(
         child: ListView(
           padding: const EdgeInsetsDirectional.symmetric(
             horizontal: ZSpacing.screen,
             vertical: ZSpacing.lg,
           ),
-          children: children,
+          children: [
+            if (Navigator.of(context).canPop())
+              Align(
+                alignment: AlignmentDirectional.centerStart,
+                child: Material(
+                  color: c.surface,
+                  shape: const CircleBorder(),
+                  elevation: 1,
+                  shadowColor: c.shadow,
+                  child: IconButton(
+                    tooltip: MaterialLocalizations.of(context)
+                        .backButtonTooltip,
+                    constraints: const BoxConstraints(
+                      minWidth: ZSpacing.minTarget,
+                      minHeight: ZSpacing.minTarget,
+                    ),
+                    icon: const BackButtonIcon(),
+                    onPressed: () => Navigator.of(context).maybePop(),
+                  ),
+                ),
+              ),
+            const SizedBox(height: ZSpacing.md),
+            Semantics(
+              header: true,
+              child: Text(title, style: ZType.display.copyWith(color: c.text)),
+            ),
+            const SizedBox(height: ZSpacing.lg),
+            ...children,
+          ],
         ),
       ),
     );
@@ -79,7 +100,24 @@ class SettingsSection extends StatelessWidget {
             ),
           ZCard(
             padding: EdgeInsetsDirectional.zero,
-            child: Column(children: children),
+            child: ClipRRect(
+              borderRadius: BorderRadius.circular(ZRadius.card),
+              child: Column(
+                children: [
+                  for (var i = 0; i < children.length; i++) ...[
+                    if (i > 0)
+                      Divider(
+                        height: 1,
+                        thickness: 1,
+                        color: c.outline,
+                        indent: ZSpacing.lg,
+                        endIndent: ZSpacing.lg,
+                      ),
+                    children[i],
+                  ],
+                ],
+              ),
+            ),
           ),
         ],
       ),
@@ -97,12 +135,19 @@ class SettingsRow extends StatelessWidget {
     this.trailing,
     this.onTap,
     this.leading,
+    this.icon,
+    this.tint,
   });
 
   final String title;
   final String? subtitle;
   final Widget? trailing;
   final Widget? leading;
+
+  /// Rounded colour tile with an icon (mockup 16); a [tint] of null uses the
+  /// primary colour.
+  final IconData? icon;
+  final Color? tint;
   final VoidCallback? onTap;
 
   @override
@@ -120,7 +165,18 @@ class SettingsRow extends StatelessWidget {
           ),
           child: Row(
             children: [
-              if (leading != null) ...[
+              if (icon != null) ...[
+                Container(
+                  width: 48,
+                  height: 48,
+                  decoration: BoxDecoration(
+                    color: tint ?? c.primary,
+                    borderRadius: BorderRadius.circular(ZRadius.lg),
+                  ),
+                  child: Icon(icon, color: c.surface),
+                ),
+                const SizedBox(width: ZSpacing.md),
+              ] else if (leading != null) ...[
                 leading!,
                 const SizedBox(width: ZSpacing.md),
               ],
