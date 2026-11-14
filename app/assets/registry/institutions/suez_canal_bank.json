@@ -29,7 +29,7 @@
       "event": "card_purchase",
       "direction": "expense",
       "baseConfidence": 0.95,
-      "pattern": "عملية شراء بمبلغ (?<amount>[\\d,.]+) (?<cur>جم|جنيه|egp) ببطاقة \\*{1,4}(?<last4>\\d{4}) لدى (?<merchant>.+?)(?: في (?<date>\\d+/\\d+))?(?:\\. |\\.?$)(?:(?:الرصيد|رصيدك)\\D{0,12}(?<balance>[\\d,.]+))?",
+      "pattern": "عملية شراء بمبلغ (?<amount>[\\d,.]+) (?<cur>جم|جنيه|egp) ببطاقة \\*{1,4}(?<last4>\\d{4}) لدى (?<merchant>.+?)(?: في (?<date>\\d+/\\d+))?(?:\\. |\\.?$)(?:(?:الرصيد|رصيدك)\\D{0,12}(?<balance>[\\d,.]+)|الحد(?: المتاح)?\\D{0,12}(?<available>[\\d,.]+))?",
       "currencyMap": {
         "جم": "EGP",
         "جنيه": "EGP",
@@ -50,7 +50,7 @@
       "event": "card_purchase",
       "direction": "expense",
       "baseConfidence": 0.95,
-      "pattern": "Purchase of (?<cur>egp) (?<amount>[\\d,.]+) using Card \\*{1,4}(?<last4>\\d{4}) at (?<merchant>.+?)(?:\\. |\\.?$)(?:(?:avl|available|bal)\\D{0,16}(?<balance>[\\d,.]+))?",
+      "pattern": "Purchase of (?<cur>egp) (?<amount>[\\d,.]+) using Card \\*{1,4}(?<last4>\\d{4}) at (?<merchant>.+?)(?:\\. |\\.?$)(?:(?:avl|available)\\.? limit\\D{0,8}(?<available>[\\d,.]+)|(?:(?:avl|available) )?bal(?:ance)?\\D{0,16}(?<balance>[\\d,.]+))?",
       "currencyMap": {
         "جم": "EGP",
         "جنيه": "EGP",

@@ -516,9 +516,10 @@ sh_ dumpsys jobscheduler > "$OUT/staging-jobs.txt" 2>/dev/null || true
 st_jobs=$(grep -cF "$SPKG/androidx.work.impl.background.systemjob.SystemJobService" "$OUT/staging-jobs.txt" || true)
 rm -f "$OUT/staging-jobs.txt"
 echo "stagingSms: spool entries $st_spool, Guard user part $st_guard, WorkManager jobs $st_jobs"
-[ "$st_spool" = 0 ] || fail "stagingSms spooled a message without a Guard base"
-# SMS-TEMPLATES: the registry is bundled now, so the coordinator starts and
-# writes its Guard user part (st_guard 1 is expected); nothing else changes.
+[ "$st_spool" = 0 ] || fail "stagingSms spooled a message from a sender the real Guard base does not know"
+# SMS-TEMPLATES: the registry is bundled, so the coordinator starts and writes
+# its Guard user part.
+[ "$st_guard" = 1 ] || fail "stagingSms did not write the Guard user part (bundled registry not loaded)"
 [ "$st_jobs" = 0 ] || fail "stagingSms scheduled ingestion work (retry storm risk, FU-108 L-2)"
 A uninstall "$SPKG" > /dev/null 2>&1 || true
 {

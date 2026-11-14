@@ -3,7 +3,7 @@
   "body": "Citi Alert: Card ending 3011 charged EGP 1,450.00 at BOOKING.COM on 23/10. Avl Limit EGP 25,000.00",
   "receivedAt": "2026-10-23T11:14:00+03:00",
   "expect": {
-    "template": "citibank.card_purchase.en",
+    "template": "citibank.card_purchase_limit.en",
     "event": "card_purchase",
     "direction": "expense",
     "currency": "EGP",
