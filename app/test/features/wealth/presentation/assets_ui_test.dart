@@ -424,5 +424,6 @@ Future<void> pumpScreenForGolden(
     home,
     locale: variant.locale as Locale,
     dark: variant.dark as bool,
+    scale: variant.textScale as double,
   );
 }
