@@ -1,5 +1,8 @@
 ﻿== SUMMARY ==
-RUNNING sha=8ced16191f6ed70aa22b3fa4dc909551060a1f99
+SKIP sha=8ced16191f6ed70aa22b3fa4dc909551060a1f99 no app/packages/backend changes
 
 == FULL LOG (last 1500 lines) ==
 auto task/T-063-app-intents 8ced16191f6ed70aa22b3fa4dc909551060a1f99 2026-11-14T11:05:12.3604673+02:00
+
+
+
