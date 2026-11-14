@@ -35,6 +35,7 @@ final class IosCaptureHost: IosCaptureHostApi {
   private let wipe: () throws -> Void
   private let drainHold: DrainHold
   private let stopHeadless: () -> Void
+  private let intentRuns: () -> IntentRunLog?
   private let drainedLock = NSLock()
   private var drained = Set<String>()
 
@@ -46,7 +47,8 @@ final class IosCaptureHost: IosCaptureHostApi {
     guardRuntime: @escaping () -> GuardRuntime? = { CaptureGuardRuntime.shared },
     wipe: @escaping () throws -> Void = { try LocalDataWiper.wipeAll() },
     drainHold: DrainHold = .shared,
-    stopHeadless: @escaping () -> Void = { Task { @MainActor in HeadlessIngestion.requestStop() } }
+    stopHeadless: @escaping () -> Void = { Task { @MainActor in HeadlessIngestion.requestStop() } },
+    intentRuns: @escaping () -> IntentRunLog? = { IntentCapture.productionRuns }
   ) {
     self.engineId = IosCaptureHost.newEngineId()
     self.runtime = runtime
@@ -57,6 +59,7 @@ final class IosCaptureHost: IosCaptureHostApi {
     self.wipe = wipe
     self.drainHold = drainHold
     self.stopHeadless = stopHeadless
+    self.intentRuns = intentRuns
   }
 
   private func need() throws -> SpoolRuntime {
@@ -177,6 +180,14 @@ final class IosCaptureHost: IosCaptureHostApi {
     let r = try need()
     guard seq >= 0, seq <= Int64(UInt32.max) else { return }  // can't match a real seq
     do { _ = try r.status.clear(seq: UInt32(seq)) } catch { throw fail() }
+  }
+
+  /// T-064: the per-intent last-run times the App Intents recorded. Times
+  /// only; null = never (or not readable before the first unlock).
+  func getShortcutSetupStatus() throws -> ShortcutSetupStatus {
+    guard let log = intentRuns() else { throw fail(Self.notAvailable) }
+    let r = log.read()
+    return ShortcutSetupStatus(lastMessageIntentAtMs: r.messageAtMs, lastWalletIntentAtMs: r.walletAtMs)
   }
 
   func registerBackgroundRefresh() throws {

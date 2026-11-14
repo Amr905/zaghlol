@@ -478,6 +478,46 @@ struct SpoolStatus: Hashable {
   }
 }
 
+/// T-064 (FR-ING-I-07): when each Shortcuts automation last ran, whatever the
+/// Guard decided (wall-clock epoch ms; null = never). Times only, never
+/// content, sender or keywords.
+///
+/// Generated class from Pigeon that represents data sent in messages.
+struct ShortcutSetupStatus: Hashable {
+  var lastMessageIntentAtMs: Int64? = nil
+  var lastWalletIntentAtMs: Int64? = nil
+
+
+  // swift-format-ignore: AlwaysUseLowerCamelCase
+  static func fromList(_ pigeonVar_list: [Any?]) -> ShortcutSetupStatus? {
+    let lastMessageIntentAtMs: Int64? = nilOrValue(pigeonVar_list[0])
+    let lastWalletIntentAtMs: Int64? = nilOrValue(pigeonVar_list[1])
+
+    return ShortcutSetupStatus(
+      lastMessageIntentAtMs: lastMessageIntentAtMs,
+      lastWalletIntentAtMs: lastWalletIntentAtMs
+    )
+  }
+  func toList() -> [Any?] {
+    return [
+      lastMessageIntentAtMs,
+      lastWalletIntentAtMs,
+    ]
+  }
+  static func == (lhs: ShortcutSetupStatus, rhs: ShortcutSetupStatus) -> Bool {
+    if Swift.type(of: lhs) != Swift.type(of: rhs) {
+      return false
+    }
+    return deepEqualsCaptureApi(lhs.lastMessageIntentAtMs, rhs.lastMessageIntentAtMs) && deepEqualsCaptureApi(lhs.lastWalletIntentAtMs, rhs.lastWalletIntentAtMs)
+  }
+
+  func hash(into hasher: inout Hasher) {
+    hasher.combine("ShortcutSetupStatus")
+    deepHashCaptureApi(value: lastMessageIntentAtMs, hasher: &hasher)
+    deepHashCaptureApi(value: lastWalletIntentAtMs, hasher: &hasher)
+  }
+}
+
 /// Generated class from Pigeon that represents data sent in messages.
 struct CaptureCapabilities: Hashable {
   var smsGranted: Bool
@@ -549,6 +589,8 @@ private class CaptureApiPigeonCodecReader: FlutterStandardReader {
     case 134:
       return SpoolStatus.fromList(self.readValue() as! [Any?])
     case 135:
+      return ShortcutSetupStatus.fromList(self.readValue() as! [Any?])
+    case 136:
       return CaptureCapabilities.fromList(self.readValue() as! [Any?])
     default:
       return super.readValue(ofType: type)
@@ -576,8 +618,11 @@ private class CaptureApiPigeonCodecWriter: FlutterStandardWriter {
     } else if let value = value as? SpoolStatus {
       super.writeByte(134)
       super.writeValue(value.toList())
-    } else if let value = value as? CaptureCapabilities {
+    } else if let value = value as? ShortcutSetupStatus {
       super.writeByte(135)
+      super.writeValue(value.toList())
+    } else if let value = value as? CaptureCapabilities {
+      super.writeByte(136)
       super.writeValue(value.toList())
     } else {
       super.writeValue(value)
@@ -949,7 +994,7 @@ class AndroidCaptureHostApiSetup {
 /// background refresh. Same drain / ack / hold / status semantics as
 /// AndroidCaptureHostApi (platform-channels.md 1.3), so the Dart drain is
 /// shared. Errors: IO_ERROR | NOT_AVAILABLE (no App Group container).
-/// T-063 adds writeGuardConfig (section 3); the Shortcut-setup methods are T-064.
+/// T-063 adds writeGuardConfig (section 3); T-064 adds getShortcutSetupStatus (the install link is Dart-side, AppLinks.shortcutInstall).
 ///
 /// Generated protocol from Pigeon that represents a handler of messages from Flutter.
 protocol IosCaptureHostApi {
@@ -967,6 +1012,10 @@ protocol IosCaptureHostApi {
   func getSpoolStatus() throws -> SpoolStatus
   /// Zeroes the alert counters if [seq] still matches getSpoolStatus().seq.
   func clearSpoolAlerts(seq: Int64) throws
+  /// T-064: the per-intent last-run times (the setup checker's input). Null
+  /// times when an intent never ran or the record can't be read yet.
+  /// NOT_AVAILABLE: no App Group container.
+  func getShortcutSetupStatus() throws -> ShortcutSetupStatus
   /// Submits the BGAppRefreshTask 'app.zaghlol.ingest' (the launch handler is
   /// registered natively at launch). A best-effort nudge: the system decides
   /// when it runs; the foreground drain is the guarantee.
@@ -1107,6 +1156,24 @@ class IosCaptureHostApiSetup {
       }
     } else {
       clearSpoolAlertsChannel.setMessageHandler(nil)
+    }
+    /// T-064: the per-intent last-run times (the setup checker's input). Null
+    /// times when an intent never ran or the record can't be read yet.
+    /// NOT_AVAILABLE: no App Group container.
+    let getShortcutSetupStatusChannel = taskQueue == nil
+      ? FlutterBasicMessageChannel(name: "dev.flutter.pigeon.zaghlol.IosCaptureHostApi.getShortcutSetupStatus\(channelSuffix)", binaryMessenger: binaryMessenger, codec: codec)
+      : FlutterBasicMessageChannel(name: "dev.flutter.pigeon.zaghlol.IosCaptureHostApi.getShortcutSetupStatus\(channelSuffix)", binaryMessenger: binaryMessenger, codec: codec, taskQueue: taskQueue)
+    if let api = api {
+      getShortcutSetupStatusChannel.setMessageHandler { _, reply in
+        do {
+          let result = try api.getShortcutSetupStatus()
+          reply(wrapResult(result))
+        } catch {
+          reply(wrapError(error))
+        }
+      }
+    } else {
+      getShortcutSetupStatusChannel.setMessageHandler(nil)
     }
     /// Submits the BGAppRefreshTask 'app.zaghlol.ingest' (the launch handler is
     /// registered natively at launch). A best-effort nudge: the system decides

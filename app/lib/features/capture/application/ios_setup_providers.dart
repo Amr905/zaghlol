@@ -38,21 +38,25 @@ final iosLastCaptureAtProvider = StreamProvider<int?>((ref) async* {
 
 final _installedOnProvider = settingProvider(Settings.setupInstalledOn);
 
+/// When capture was first set up (UTC epoch ms; the start of the first-run
+/// day), or null. `setup_installed_on` is the local civil day Home first ran:
+/// its start in UTC is the local midnight. Shared with the Shortcut checker.
+final iosSetupBaselineMsProvider = Provider<int?>((ref) {
+  final installedOn = ref.watch(_installedOnProvider).value;
+  if (installedOn == null) return null;
+  final now = ref.watch(clockProvider)();
+  return installedOn * _dayMs - now.timeZoneOffset.inMilliseconds;
+}, name: 'iosSetupBaselineMsProvider');
+
 /// The checker state. `unknown` off iOS and while the inputs load.
 final iosSetupStatusProvider = Provider<IosSetupStatus>((ref) {
   if (!ref.watch(captureIosProvider)) return IosSetupStatus.unknown;
   final last = ref.watch(iosLastCaptureAtProvider);
   if (last.isLoading || last.hasError) return IosSetupStatus.unknown;
-  final installedOn = ref.watch(_installedOnProvider).value;
   final now = ref.watch(clockProvider)();
-  // `setup_installed_on` is the local civil day Home first ran: its start in
-  // UTC is the local midnight.
-  final baseline = installedOn == null
-      ? null
-      : installedOn * _dayMs - now.timeZoneOffset.inMilliseconds;
   return deriveIosSetupStatus(
     nowMs: now.toUtc().millisecondsSinceEpoch,
     lastCaptureAtMs: last.value,
-    baselineAtMs: baseline,
+    baselineAtMs: ref.watch(iosSetupBaselineMsProvider),
   );
 }, name: 'iosSetupStatusProvider');

@@ -502,6 +502,50 @@ data class SpoolStatus (
   }
 }
 
+/**
+ * T-064 (FR-ING-I-07): when each Shortcuts automation last ran, whatever the
+ * Guard decided (wall-clock epoch ms; null = never). Times only, never
+ * content, sender or keywords.
+ *
+ * Generated class from Pigeon that represents data sent in messages.
+ */
+data class ShortcutSetupStatus (
+  val lastMessageIntentAtMs: Long? = null,
+  val lastWalletIntentAtMs: Long? = null
+)
+ {
+  companion object {
+    fun fromList(pigeonVar_list: List<Any?>): ShortcutSetupStatus {
+      val lastMessageIntentAtMs = pigeonVar_list[0] as Long?
+      val lastWalletIntentAtMs = pigeonVar_list[1] as Long?
+      return ShortcutSetupStatus(lastMessageIntentAtMs, lastWalletIntentAtMs)
+    }
+  }
+  fun toList(): List<Any?> {
+    return listOf(
+      lastMessageIntentAtMs,
+      lastWalletIntentAtMs,
+    )
+  }
+  override fun equals(other: Any?): Boolean {
+    if (other == null || other.javaClass != javaClass) {
+      return false
+    }
+    if (this === other) {
+      return true
+    }
+    val other = other as ShortcutSetupStatus
+    return CaptureApiPigeonUtils.deepEquals(this.lastMessageIntentAtMs, other.lastMessageIntentAtMs) && CaptureApiPigeonUtils.deepEquals(this.lastWalletIntentAtMs, other.lastWalletIntentAtMs)
+  }
+
+  override fun hashCode(): Int {
+    var result = javaClass.hashCode()
+    result = 31 * result + CaptureApiPigeonUtils.deepHash(this.lastMessageIntentAtMs)
+    result = 31 * result + CaptureApiPigeonUtils.deepHash(this.lastWalletIntentAtMs)
+    return result
+  }
+}
+
 /** Generated class from Pigeon that represents data sent in messages. */
 data class CaptureCapabilities (
   val smsGranted: Boolean,
@@ -586,6 +630,11 @@ private open class CaptureApiPigeonCodec : StandardMessageCodec() {
       }
       135.toByte() -> {
         return (readValue(buffer) as? List<Any?>)?.let {
+          ShortcutSetupStatus.fromList(it)
+        }
+      }
+      136.toByte() -> {
+        return (readValue(buffer) as? List<Any?>)?.let {
           CaptureCapabilities.fromList(it)
         }
       }
@@ -618,8 +667,12 @@ private open class CaptureApiPigeonCodec : StandardMessageCodec() {
         stream.write(134)
         writeValue(stream, value.toList())
       }
-      is CaptureCapabilities -> {
+      is ShortcutSetupStatus -> {
         stream.write(135)
+        writeValue(stream, value.toList())
+      }
+      is CaptureCapabilities -> {
+        stream.write(136)
         writeValue(stream, value.toList())
       }
       else -> super.writeValue(stream, value)
@@ -983,7 +1036,7 @@ interface AndroidCaptureHostApi {
  * background refresh. Same drain / ack / hold / status semantics as
  * AndroidCaptureHostApi (platform-channels.md 1.3), so the Dart drain is
  * shared. Errors: IO_ERROR | NOT_AVAILABLE (no App Group container).
- * T-063 adds writeGuardConfig (section 3); the Shortcut-setup methods are T-064.
+ * T-063 adds writeGuardConfig (section 3); T-064 adds getShortcutSetupStatus (the install link is Dart-side, AppLinks.shortcutInstall).
  *
  * Generated interface from Pigeon that represents a handler of messages from Flutter.
  */
@@ -1004,6 +1057,12 @@ interface IosCaptureHostApi {
   fun getSpoolStatus(): SpoolStatus
   /** Zeroes the alert counters if [seq] still matches getSpoolStatus().seq. */
   fun clearSpoolAlerts(seq: Long)
+  /**
+   * T-064: the per-intent last-run times (the setup checker's input). Null
+   * times when an intent never ran or the record can't be read yet.
+   * NOT_AVAILABLE: no App Group container.
+   */
+  fun getShortcutSetupStatus(): ShortcutSetupStatus
   /**
    * Submits the BGAppRefreshTask 'app.zaghlol.ingest' (the launch handler is
    * registered natively at launch). A best-effort nudge: the system decides
@@ -1136,6 +1195,21 @@ interface IosCaptureHostApi {
             val wrapped: List<Any?> = try {
               api.clearSpoolAlerts(seqArg)
               listOf(null)
+            } catch (exception: Throwable) {
+              CaptureApiPigeonUtils.wrapError(exception)
+            }
+            reply.reply(wrapped)
+          }
+        } else {
+          channel.setMessageHandler(null)
+        }
+      }
+      run {
+        val channel = BasicMessageChannel<Any?>(binaryMessenger, "dev.flutter.pigeon.zaghlol.IosCaptureHostApi.getShortcutSetupStatus$separatedMessageChannelSuffix", codec, taskQueue)
+        if (api != null) {
+          channel.setMessageHandler { _, reply ->
+            val wrapped: List<Any?> = try {
+              listOf(api.getShortcutSetupStatus())
             } catch (exception: Throwable) {
               CaptureApiPigeonUtils.wrapError(exception)
             }
