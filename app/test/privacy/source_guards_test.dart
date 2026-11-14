@@ -56,7 +56,7 @@ const Map<String, String> loggingAllowed = {
 };
 
 final RegExp loggingCall = RegExp(
-  r'\b(print|debugPrint|debugPrintStack|log|dump)\(|developer\.log|'
+  r'\b(print|debugPrint|debugPrintStack|log|dump)\s*\(|developer\.log|'
   r'\b(stdout|stderr)\b|\bLog\.[a-z]+\(|\bprintln\(|\bTimber\b|\bNSLog\b|'
   r'\bos_log\b|\bOSLog\b|\bLogger\(|\bprintStackTrace\(|\bSystem\.(out|err)\b|'
   r'\bfputs\(|FileHandle\.standardError|logStatements: *true',
@@ -178,6 +178,8 @@ void main() {
   test('negative proof: the patterns catch planted calls and ignore prose', () {
     for (final bad in [
       'print(x);',
+      'print (x);',
+      'debugPrint\t(x);',
       'debugPrint(body);',
       'Log.d(TAG, body)',
       'NSLog("%@", body)',
