@@ -148,6 +148,8 @@ jobs:
           files="$files $(ls app/ios/Runner/Platform/ICloud/*.swift)"
           # T-062: the iOS spool, capture host, headless run and background refresh never log.
           files="$files $(ls app/ios/Shared/Spool*.swift app/ios/Shared/CaptureStatusStore.swift app/ios/Shared/SharedGroups.swift app/ios/Runner/Platform/Capture/*.swift)"
+          # T-065: the share store, share intake, Share Extension and share host never log.
+          files="$files $(ls app/ios/Shared/ShareStore.swift app/ios/Shared/ShareIntake.swift app/ios/ShareExtension/*.swift app/ios/Runner/Platform/Share/ShareIntakeHost.swift)"
           [ -n "$files" ] || { echo "::error::no key files found"; exit 1; }
           if grep -nE '\b(print|debugPrint|log|developer\.log|dump)\(|\b(stdout|stderr)\b|\bLog\.[a-z]+\(|println\(|Timber|NSLog|os_log|Logger\(|logStatements: *true' $files; then
             echo "::error::logging call in key code"

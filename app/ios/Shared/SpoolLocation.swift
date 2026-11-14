@@ -31,6 +31,12 @@ enum SpoolLocation {
     container.appendingPathComponent("spool", isDirectory: true)
   }
 
+  /// T-065: shared files (the Share Extension's encrypted shares and the OCR
+  /// host's input), `spool/files/`. Never at the container root.
+  static func filesDirectory(in container: URL) -> URL {
+    spoolDirectory(in: container).appendingPathComponent("files", isDirectory: true)
+  }
+
   static func statusFile(in container: URL) -> URL {
     container.appendingPathComponent("Library/Application Support/capture/status.bin")
   }
@@ -50,6 +56,11 @@ final class SpoolRuntime {
   }
 
   static let shared: SpoolRuntime? = make()
+
+  /// T-065: the share store over the same container and the same cipher.
+  func shareStore(container: URL) -> ShareStore {
+    ShareStore(dir: SpoolLocation.filesDirectory(in: container), cipher: cipher)
+  }
 
   static func make(container: URL? = SpoolLocation.containerURL()) -> SpoolRuntime? {
     guard let container = container else { return nil }
