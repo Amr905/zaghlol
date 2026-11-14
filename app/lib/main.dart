@@ -30,6 +30,7 @@ import 'features/security/application/delete_everything_providers.dart';
 import 'features/widgets_bridge/application/widget_bridge.dart'
     show widgetBridgeWiringProvider;
 import 'features/security/presentation/app_lock_gate.dart';
+import 'ingestion/ingestion_runner.dart' show ensureDefaultRegistry;
 import 'ingestion/ingestion_main.dart';
 
 Future<void> main() async {
@@ -40,6 +41,14 @@ Future<void> main() async {
   // T-166: an unfinished "Delete everything" is completed before anything
   // opens the database.
   await _resumeWipe(dbDirectory);
+  // SMS-TEMPLATES: the bundled registry is read once; the capture providers
+  // and the scan service take it synchronously. A failure leaves capture off
+  // (the providers see `INGEST_REGISTRY_MISSING`), never a crash.
+  try {
+    await ensureDefaultRegistry();
+  } on Object {
+    // Capture stays off for this launch.
+  }
   // T-047: the UI engine's capture module (drain, Guard config, health) runs
   // in every build; it starts once the database opens.
   runApp(

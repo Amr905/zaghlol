@@ -33,19 +33,17 @@ object BaseConfigSource {
     const val DEV_SPIKE_ASSET_PATH = "guard/spike_guard_base.json"
 
     /**
-     * The base this build decides with: the bundled registry base
-     * ([ASSET_PATH]); when it is absent, the devSms spike base. Throws the
-     * first error when neither exists (mode `invalid`: every message is
-     * dropped, fail closed).
+     * The base this build decides with: the devSms spike base when this APK
+     * has it (only the devSms flavour does, and its Dart side parses with the
+     * spike registry, so both must agree); otherwise the bundled registry base
+     * ([ASSET_PATH], generated from `assets/registry` by registry_lint). Throws
+     * when neither exists (mode `invalid`: every message is dropped, fail
+     * closed).
      */
     fun readForBuild(assets: AssetManager): ByteArray = try {
+        assets.open(DEV_SPIKE_ASSET_PATH).use { readBounded(it, GuardConfig.MAX_BASE_BYTES) }
+    } catch (_: FileNotFoundException) {
         read(assets)
-    } catch (missing: FileNotFoundException) {
-        try {
-            assets.open(DEV_SPIKE_ASSET_PATH).use { readBounded(it, GuardConfig.MAX_BASE_BYTES) }
-        } catch (_: FileNotFoundException) {
-            throw missing
-        }
     }
 
     /** Reads up to [max] + 1 bytes: enough to tell "too large" without reading an unbounded stream. */

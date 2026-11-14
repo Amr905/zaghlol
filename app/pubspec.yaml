@@ -80,3 +80,8 @@ flutter:
     - assets/catalog/
     # T-053: static Captain Zaghlol still (fallback until zaghlol.riv, T-088).
     - assets/mascot/
+    # SMS-TEMPLATES (T-036): the institution registry and the Guard base
+    # generated from it (tools/registry_lint --guard-config).
+    - assets/registry/
+    - assets/registry/institutions/
+    - assets/guard/

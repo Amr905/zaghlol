@@ -212,18 +212,16 @@ void main() {
     expect(defaultRegistryLoader, throwsStateError);
   });
 
-  test(
-    'without a bundled registry the cycle is a code-only setup failure',
-    () async {
-      final r = await IngestionRunner(
-        marks: const NoMarks(),
-        headless: true,
-        spool: FakeSpool([entry(sid(1))], []),
-        store: (_, _) => FakeStore([]),
-        dbDirectory: () async => Directory.systemTemp,
-      ).drain();
-      expect(r.outcome, CycleOutcome.retry);
-      expect(r.code, 'INGEST_SETUP_FAILED');
-    },
-  );
+  test('a registry that cannot load is a code-only setup failure', () async {
+    final r = await IngestionRunner(
+      marks: const NoMarks(),
+      headless: true,
+      spool: FakeSpool([entry(sid(1))], []),
+      store: (_, _) => FakeStore([]),
+      dbDirectory: () async => Directory.systemTemp,
+      registry: () => throw StateError('INGEST_REGISTRY_MISSING'),
+    ).drain();
+    expect(r.outcome, CycleOutcome.retry);
+    expect(r.code, 'INGEST_SETUP_FAILED');
+  });
 }

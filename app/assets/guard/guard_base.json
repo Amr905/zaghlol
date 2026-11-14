@@ -1,0 +1,467 @@
+{
+ "v": 4,
+ "registryVersion": 1,
+ "senders": [
+  {
+   "match": "exact",
+   "value": "aaib",
+   "inst": "aaib"
+  },
+  {
+   "match": "exact",
+   "value": "abe",
+   "inst": "abe"
+  },
+  {
+   "match": "exact",
+   "value": "abk",
+   "inst": "abk"
+  },
+  {
+   "match": "exact",
+   "value": "adcb",
+   "inst": "adcb"
+  },
+  {
+   "match": "exact",
+   "value": "adib",
+   "inst": "adib"
+  },
+  {
+   "match": "exact",
+   "value": "aib",
+   "inst": "aib"
+  },
+  {
+   "match": "exact",
+   "value": "aibk",
+   "inst": "aibk"
+  },
+  {
+   "match": "exact",
+   "value": "albaraka",
+   "inst": "al_baraka"
+  },
+  {
+   "match": "exact",
+   "value": "alexbank",
+   "inst": "alexbank"
+  },
+  {
+   "match": "exact",
+   "value": "arabbank",
+   "inst": "arab_bank"
+  },
+  {
+   "match": "exact",
+   "value": "attijariwafa",
+   "inst": "attijariwafa"
+  },
+  {
+   "match": "exact",
+   "value": "bankabc",
+   "inst": "bank_abc"
+  },
+  {
+   "match": "exact",
+   "value": "banknxt",
+   "inst": "bank_nxt"
+  },
+  {
+   "match": "exact",
+   "value": "bdc",
+   "inst": "banque_du_caire"
+  },
+  {
+   "match": "exact",
+   "value": "banquemisr",
+   "inst": "banque_misr"
+  },
+  {
+   "match": "exact",
+   "value": "blom",
+   "inst": "blom"
+  },
+  {
+   "match": "exact",
+   "value": "cib",
+   "inst": "cib"
+  },
+  {
+   "match": "exact",
+   "value": "citibank",
+   "inst": "citibank"
+  },
+  {
+   "match": "exact",
+   "value": "cae",
+   "inst": "credit_agricole"
+  },
+  {
+   "match": "exact",
+   "value": "ealb",
+   "inst": "ealb"
+  },
+  {
+   "match": "exact",
+   "value": "ebank",
+   "inst": "ebank"
+  },
+  {
+   "match": "exact",
+   "value": "egbank",
+   "inst": "egbank"
+  },
+  {
+   "match": "exact",
+   "value": "emiratesnbd",
+   "inst": "emirates_nbd"
+  },
+  {
+   "match": "exact",
+   "value": "e&money",
+   "inst": "etisalat_cash"
+  },
+  {
+   "match": "exact",
+   "value": "fabmisr",
+   "inst": "fabmisr"
+  },
+  {
+   "match": "exact",
+   "value": "faisalbank",
+   "inst": "faisal_bank"
+  },
+  {
+   "match": "exact",
+   "value": "hdb",
+   "inst": "hdb"
+  },
+  {
+   "match": "exact",
+   "value": "hsbc",
+   "inst": "hsbc"
+  },
+  {
+   "match": "exact",
+   "value": "idb",
+   "inst": "idb"
+  },
+  {
+   "match": "exact",
+   "value": "instapay",
+   "inst": "instapay"
+  },
+  {
+   "match": "exact",
+   "value": "kfh",
+   "inst": "kfh"
+  },
+  {
+   "match": "exact",
+   "value": "mashreq",
+   "inst": "mashreq"
+  },
+  {
+   "match": "exact",
+   "value": "midbank",
+   "inst": "midbank"
+  },
+  {
+   "match": "exact",
+   "value": "myfawry",
+   "inst": "myfawry"
+  },
+  {
+   "match": "exact",
+   "value": "nbk",
+   "inst": "nbk"
+  },
+  {
+   "match": "exact",
+   "value": "egyptpost",
+   "inst": "onebank_yalla"
+  },
+  {
+   "match": "exact",
+   "value": "orangecash",
+   "inst": "orange_cash"
+  },
+  {
+   "match": "exact",
+   "value": "qnb",
+   "inst": "qnb"
+  },
+  {
+   "match": "exact",
+   "value": "saib",
+   "inst": "saib"
+  },
+  {
+   "match": "exact",
+   "value": "souhoola",
+   "inst": "souhoola"
+  },
+  {
+   "match": "exact",
+   "value": "scbank",
+   "inst": "suez_canal_bank"
+  },
+  {
+   "match": "exact",
+   "value": "sympl",
+   "inst": "sympl"
+  },
+  {
+   "match": "exact",
+   "value": "telda",
+   "inst": "telda"
+  },
+  {
+   "match": "exact",
+   "value": "unitedbank",
+   "inst": "united_bank"
+  },
+  {
+   "match": "exact",
+   "value": "valu",
+   "inst": "valu"
+  },
+  {
+   "match": "exact",
+   "value": "vodafonecash",
+   "inst": "vodafone_cash"
+  },
+  {
+   "match": "exact",
+   "value": "wepay",
+   "inst": "we_pay"
+  }
+ ],
+ "packages": [],
+ "wallet": [
+  {
+   "name": "aaib",
+   "inst": "aaib"
+  },
+  {
+   "name": "abe",
+   "inst": "abe"
+  },
+  {
+   "name": "abk",
+   "inst": "abk"
+  },
+  {
+   "name": "adcb",
+   "inst": "adcb"
+  },
+  {
+   "name": "adib",
+   "inst": "adib"
+  },
+  {
+   "name": "aib",
+   "inst": "aib"
+  },
+  {
+   "name": "aibk",
+   "inst": "aibk"
+  },
+  {
+   "name": "al baraka",
+   "inst": "al_baraka"
+  },
+  {
+   "name": "alexbank",
+   "inst": "alexbank"
+  },
+  {
+   "name": "arab bank",
+   "inst": "arab_bank"
+  },
+  {
+   "name": "attijariwafa",
+   "inst": "attijariwafa"
+  },
+  {
+   "name": "bank abc",
+   "inst": "bank_abc"
+  },
+  {
+   "name": "bank nxt",
+   "inst": "bank_nxt"
+  },
+  {
+   "name": "banque du caire",
+   "inst": "banque_du_caire"
+  },
+  {
+   "name": "banque misr",
+   "inst": "banque_misr"
+  },
+  {
+   "name": "blom",
+   "inst": "blom"
+  },
+  {
+   "name": "cib",
+   "inst": "cib"
+  },
+  {
+   "name": "citibank",
+   "inst": "citibank"
+  },
+  {
+   "name": "credit agricole",
+   "inst": "credit_agricole"
+  },
+  {
+   "name": "ealb",
+   "inst": "ealb"
+  },
+  {
+   "name": "ebank",
+   "inst": "ebank"
+  },
+  {
+   "name": "eg bank",
+   "inst": "egbank"
+  },
+  {
+   "name": "emirates nbd",
+   "inst": "emirates_nbd"
+  },
+  {
+   "name": "e& money",
+   "inst": "etisalat_cash"
+  },
+  {
+   "name": "fabmisr",
+   "inst": "fabmisr"
+  },
+  {
+   "name": "faisal bank",
+   "inst": "faisal_bank"
+  },
+  {
+   "name": "hdb",
+   "inst": "hdb"
+  },
+  {
+   "name": "hsbc",
+   "inst": "hsbc"
+  },
+  {
+   "name": "idb",
+   "inst": "idb"
+  },
+  {
+   "name": "instapay",
+   "inst": "instapay"
+  },
+  {
+   "name": "kfh",
+   "inst": "kfh"
+  },
+  {
+   "name": "mashreq",
+   "inst": "mashreq"
+  },
+  {
+   "name": "midbank",
+   "inst": "midbank"
+  },
+  {
+   "name": "myfawry",
+   "inst": "myfawry"
+  },
+  {
+   "name": "nbk",
+   "inst": "nbk"
+  },
+  {
+   "name": "yalla",
+   "inst": "onebank_yalla"
+  },
+  {
+   "name": "orange cash",
+   "inst": "orange_cash"
+  },
+  {
+   "name": "qnb",
+   "inst": "qnb"
+  },
+  {
+   "name": "saib",
+   "inst": "saib"
+  },
+  {
+   "name": "souhoola",
+   "inst": "souhoola"
+  },
+  {
+   "name": "suez canal bank",
+   "inst": "suez_canal_bank"
+  },
+  {
+   "name": "sympl",
+   "inst": "sympl"
+  },
+  {
+   "name": "telda",
+   "inst": "telda"
+  },
+  {
+   "name": "the united bank",
+   "inst": "united_bank"
+  },
+  {
+   "name": "valu",
+   "inst": "valu"
+  },
+  {
+   "name": "vodafone cash",
+   "inst": "vodafone_cash"
+  },
+  {
+   "name": "we pay",
+   "inst": "we_pay"
+  }
+ ],
+ "drop": {
+  "global": [
+   "(?:^|[^a-z])(?:[o0]tp|one[- ]?time[- ]?(?:pass(?:word|code)|pin|code)|(?:verification|verify|security|secure|activation|login|confirmation|your|instapay|enter) code|pass(?:code|word)|pin)(?:(?: (?:is|هو|هي))?[ \\n:=#-]{0,3}|[^a-z0-9.!?;؟؛:=\\n][^.!?;؟؛:=\\n]{0,24}(?:\\.[^ .!?;؟؛\\n][^.!?;؟؛:=\\n]{0,24}){0,2}(?: (?:is|هو|هي)|[=:])[ :]{0,2})(?:[0-9]{4}|[0-9]{6,8}|(?:1[0-8]|[02-9][0-9])[0-9]{3}|[0-9]{3}[ -][0-9]{3}|[0-9]{2} [0-9]{2} [0-9]{2})(?:$|[.,]$|[.,][^0-9]|[^0-9., \\n]|[ \\n][^euج]|[ \\n]e[^g]|[ \\n]u[^s]|[ \\n]ج[^.من])",
+   "^(?:code|(?:ال)?كود)(?: is| هو)?[ \\n:=#-]{0,3}[0-9]{4,8}(?:$|[^0-9.,]|[.,]$|[.,][^0-9])|(?:^|[.!?;؟؛:,=\\n] ?|(?:use|enter|customer|استخدم|ادخل|عميلنا) )[0-9]{4,8}(?: (?:is|as|هو|هي)(?: your| the)?)?[ :=-]{0,3}(?:(?:[o0]tp|one[- ]?time[- ]?(?:pass(?:word|code)|pin|code)|(?:verification|verify|security|secure|activation|login|confirmation|your) code|pass(?:code|word)|pin)(?:$|[^a-z])|(?:رمز|كود) ?(?:التحقق|التفعيل|الدخول|الامان)|كلمه السر لمره واحده|كلمه (?:السر|المرور)(?: المؤقته)?|الرقم السري(?: المؤقت)?|كودك|رمزك)",
+   "(?:(?:رمز|كود) ?(?:التحقق|التفعيل|الدخول|الامان)|كلمه السر لمره واحده|كلمه (?:السر|المرور)(?: المؤقته)?|الرقم السري(?: المؤقت)?|كودك|رمزك)(?:(?: (?:is|هو|هي))?[ \\n:=#-]{0,3}|[^a-z0-9.!?;؟؛:=\\n][^.!?;؟؛:=\\n]{0,24}(?:\\.[^ .!?;؟؛\\n][^.!?;؟؛:=\\n]{0,24}){0,2}(?: (?:is|هو|هي)|[=:])[ :]{0,2})(?:[0-9]{4}|[0-9]{6,8}|(?:1[0-8]|[02-9][0-9])[0-9]{3}|[0-9]{3}[ -][0-9]{3}|[0-9]{2} [0-9]{2} [0-9]{2})(?:$|[.,]$|[.,][^0-9]|[^0-9., \\n]|[ \\n][^euج]|[ \\n]e[^g]|[ \\n]u[^s]|[ \\n]ج[^.من])",
+   "(?:[^a-z]code|كود)(?: is| هو)?[ \\n:=#-]{0,3}(?:[0-9]{4}|[0-9]{6,8}|(?:1[0-8]|[02-9][0-9])[0-9]{3}|[0-9]{3}[ -][0-9]{3}|[0-9]{2} [0-9]{2} [0-9]{2})[^0-9.!?;؟؛\\n]{0,12}(?:to (?:confirm|complete|verify|activate|authori[sz]e|log ?in)|لتاكيد|للتاكيد|لاتمام|لتفعيل)"
+  ],
+  "byInst": {}
+ },
+ "last4": {
+  "*": [
+   "\\*{1,4}([0-9]{4})",
+   "(?:ending(?: in)?|ينتهي(?: رقمها)?|المنتهيه|تنتهي) (?:ب )?([0-9]{4})",
+   "(?:بطاقه|بطاقتك|كارت|card) ([0-9]{4})(?:[^0-9]|$)"
+  ]
+ },
+ "generic": {
+  "senderHints": [
+   "bank",
+   "بنك"
+  ],
+  "bodyHints": [
+   "(?:egp|usd|ج\\.?م|جنيه) ?[0-9]"
+  ],
+  "alwaysCapture": []
+ },
+ "shortcutKeywords": [
+  "خصم",
+  "debited",
+  "تم تحويل",
+  "InstaPay"
+ ],
+ "rate": {
+  "perSenderPerMin": 20
+ }
+}

@@ -190,7 +190,7 @@ jobs:
         run: dart test
       - name: registry_lint (bundled registry + SMS fixtures)
         working-directory: tools/registry_lint
-        run: dart run registry_lint --registry ../../app/assets/registry --fixtures ../../app/test/fixtures/sms
+        run: dart run registry_lint --registry ../../app/assets/registry --fixtures ../../app/test/fixtures/sms --check-guard-config ../../app/assets/guard/guard_base.json
       # T-030: seed codec and ES256 signature (incl. the backend vectors),
       # then the catalog builder, whose test also fails when the committed
       # app/assets/catalog files or tools/catalog_build/data/catalog_seed.csv
