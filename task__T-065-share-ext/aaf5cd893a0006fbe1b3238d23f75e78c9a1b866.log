@@ -1,5 +1,8 @@
 ﻿== SUMMARY ==
-RUNNING sha=aaf5cd893a0006fbe1b3238d23f75e78c9a1b866
+SKIP sha=aaf5cd893a0006fbe1b3238d23f75e78c9a1b866 no app/packages/backend changes
 
 == FULL LOG (last 1500 lines) ==
 auto task/T-065-share-ext aaf5cd893a0006fbe1b3238d23f75e78c9a1b866 2026-11-14T11:05:31.5939302+02:00
+
+
+
