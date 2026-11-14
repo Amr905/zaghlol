@@ -6,7 +6,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../../core/l10n/generated/app_localizations.dart';
-import '../../../../core/ui/z_button.dart';
 import '../../../../core/l10n/locale_providers.dart';
 import '../../../budget/presentation/budget_providers_ui.dart';
 import '../../domain/chart_models.dart';
@@ -72,12 +71,6 @@ class GoldChartCard extends ConsumerWidget {
       return l.insightsChartsOtherSlice;
     }
 
-    final context0 = l.insightsChartsContext(
-      l.commonCardFilterAll,
-      code,
-      l.commonPeriodThisCycle,
-    );
-
     Widget build0<T>(
       AsyncValue<ChartResult<T>> value,
       VoidCallback retry, {
@@ -90,11 +83,8 @@ class GoldChartCard extends ConsumerWidget {
       error: (_, _) => ChartError(title: title, onRetry: retry),
       data: (r) {
         final trailing = showExplain
-            ? ZButton(
-                label: l.insightsChartsExplain,
-                variant: ZButtonVariant.text,
-                size: ZButtonSize.small,
-                onPressed: () => openChartDetail(
+            ? ExplainLink(
+                onTap: () => openChartDetail(
                   context,
                   chart: chart,
                   code: code,
@@ -106,19 +96,16 @@ class GoldChartCard extends ConsumerWidget {
           ChartReady<T>(:final data) when isEmpty == null || !isEmpty(data) =>
             ChartCard(
               title: title,
-              contextLine: context0,
               trailing: trailing,
               summary: summary(data),
               child: body(data),
             ),
           ChartReady<T>() => ChartCard(
             title: title,
-            contextLine: context0,
             child: ChartMessage(text: emptyText ?? l.insightsChartsEmptyFilter),
           ),
           ChartNotEnoughData<T>(:final reason) => ChartCard(
             title: title,
-            contextLine: context0,
             child: ChartMessage(
               text:
                   emptyText ??

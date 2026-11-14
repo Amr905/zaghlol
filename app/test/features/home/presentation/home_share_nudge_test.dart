@@ -69,7 +69,11 @@ void main() {
         final nudge = find.byKey(const ValueKey('ios-setup-nudge'));
         expect(nudge, findsOneWidget);
         final l = AppLocalizations.of(t.element(nudge));
-        await t.ensureVisible(find.text(l.iosSetupNudgeCheck));
+        await t.drag(
+          find.byKey(const ValueKey('home-scroll')),
+          const Offset(0, -400),
+        );
+        await t.pump();
         await t.tap(find.text(l.iosSetupNudgeCheck));
         expect(capture, 1);
         expect(t.takeException(), isNull);

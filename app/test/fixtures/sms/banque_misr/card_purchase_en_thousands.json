@@ -1,0 +1,16 @@
+{
+  "sender": "BanqueMisr",
+  "body": "BM: Purchase of EGP 12,345.67 with card ****8901 at GOURMET. Avl Bal EGP 15,200.50",
+  "receivedAt": "2026-10-23T11:14:00+03:00",
+  "expect": {
+    "template": "banque_misr.card_purchase.en",
+    "event": "card_purchase",
+    "direction": "expense",
+    "currency": "EGP",
+    "amount": "12345.67",
+    "last4": "8901",
+    "balance": "15200.50",
+    "available": null,
+    "merchantClean": "Gourmet"
+  }
+}

@@ -60,9 +60,10 @@ abstract final class ZaghlolTheme {
       bottomSheetTheme: BottomSheetThemeData(
         backgroundColor: c.surface,
         showDragHandle: true,
+        dragHandleColor: c.primaryContainer,
         shape: const RoundedRectangleBorder(
           borderRadius: BorderRadius.vertical(
-            top: Radius.circular(ZRadius.card),
+            top: Radius.circular(ZRadius.hero),
           ),
         ),
       ),

@@ -224,10 +224,8 @@ void main() {
       locale: const Locale('ar', 'EG'),
       scale: 1.3,
     );
-    expect(
-      find.text('أكتر أماكن صرفت فيها', skipOffstage: false),
-      findsOneWidget,
-    );
+    await t.scrollUntilVisible(find.text('أكتر أماكن صرفت فيها'), 300);
+    expect(find.text('أكتر أماكن صرفت فيها'), findsOneWidget);
     expect(t.takeException(), isNull);
     expect(
       Directionality.of(t.element(find.byType(CardDetailScreen))),

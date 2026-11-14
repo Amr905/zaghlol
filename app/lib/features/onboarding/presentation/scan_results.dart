@@ -25,6 +25,7 @@ import '../../capture/presentation/capture_controls.dart';
 import '../../ingestion/data/review_repository.dart';
 import '../../mascot/presentation/zaghlol_avatar.dart';
 import 'android_setup.dart' show setupScanProvider;
+import 'onboarding_parts.dart';
 
 /// One card or account the scan created.
 final class ScanCardItem {
@@ -245,6 +246,16 @@ class _BodyState extends ConsumerState<ScanResultsBody> {
     };
   }
 
+  String? _kindBadge(AppLocalizations l, AccountKind k) => switch (k) {
+    AccountKind.debit => l.commonAccountTypeDebit,
+    AccountKind.credit => l.commonAccountTypeCredit,
+    AccountKind.account => l.commonAccountTypeAccount,
+    AccountKind.wallet => l.commonAccountTypeWallet,
+    AccountKind.bnpl => l.commonAccountTypeBnpl,
+    AccountKind.multiCurrency => l.commonAccountTypeMultiCurrency,
+    AccountKind.cash => null,
+  };
+
   Future<void> _ignore(ScanCardItem item) async {
     final code = item.institutionCode;
     if (code == null) return;
@@ -328,20 +339,32 @@ class _BodyState extends ConsumerState<ScanResultsBody> {
           child: ListView(
             padding: const EdgeInsetsDirectional.all(ZSpacing.screen),
             children: [
-              Center(
-                child: ExcludeSemantics(
-                  child: ZaghlolAvatar(moment: ZaghlolMoment.proud, size: 96),
-                ),
-              ),
               const SizedBox(height: ZSpacing.md),
-              Text(
-                l.onboardingScanResultsTitle,
-                style: ZType.headline.copyWith(color: c.text),
-              ),
-              const SizedBox(height: ZSpacing.xs),
-              Text(
-                l.onboardingScanResultsFound(d.found, _digits(d.found), period),
-                style: ZType.body.copyWith(color: c.textMuted),
+              Row(
+                children: [
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          l.onboardingScanResultsTitle,
+                          style: ZType.headline.copyWith(color: c.text),
+                        ),
+                        const SizedBox(height: ZSpacing.xs),
+                        Text(
+                          l.onboardingScanResultsFound(
+                            d.found,
+                            _digits(d.found),
+                            period,
+                          ),
+                          style: ZType.body.copyWith(color: c.textMuted),
+                        ),
+                      ],
+                    ),
+                  ),
+                  const SizedBox(width: ZSpacing.md),
+                  const OnbMascot(moment: ZaghlolMoment.proud, size: 96),
+                ],
               ),
               const SizedBox(height: ZSpacing.lg),
               IntrinsicHeight(
@@ -353,18 +376,20 @@ class _BodyState extends ConsumerState<ScanResultsBody> {
                         key: const ValueKey('stat-auto'),
                         value: _digits(d.auto),
                         label: l.onboardingScanResultsStatAuto,
+                        valueColor: c.primary,
                       ),
                     ),
-                    const SizedBox(width: ZSpacing.sm),
+                    const SizedBox(width: ZSpacing.md),
                     Expanded(
                       child: _Stat(
                         key: const ValueKey('stat-review'),
                         value: _digits(d.review),
                         label: l.onboardingScanResultsStatReview,
+                        valueColor: c.warningText,
                         onTap: d.review > 0 ? widget.onOpenReview : null,
                       ),
                     ),
-                    const SizedBox(width: ZSpacing.sm),
+                    const SizedBox(width: ZSpacing.md),
                     Expanded(
                       child: _Stat(
                         key: const ValueKey('stat-cards'),
@@ -381,79 +406,99 @@ class _BodyState extends ConsumerState<ScanResultsBody> {
                   l.onboardingScanResultsCardsTitle,
                   style: ZType.title.copyWith(color: c.text),
                 ),
-                const SizedBox(height: ZSpacing.sm),
-                for (final i in cards)
-                  Padding(
-                    padding: const EdgeInsetsDirectional.only(
-                      bottom: ZSpacing.sm,
-                    ),
-                    child: _CardRow(
-                      item: i,
-                      subtitle: l.onboardingScanResultsCardSubtitle(
-                        i.txnCount,
-                        _digits(i.txnCount),
-                        _typeName(l, i),
-                      ),
-                      badge: i.looksCredit
-                          ? l.onboardingScanResultsCreditBadge
-                          : null,
-                      confirmed: _confirmed.contains(i.accountId),
-                      onTap: () => _openCard(i),
-                    ),
+                const SizedBox(height: ZSpacing.md),
+                ZCard(
+                  padding: const EdgeInsetsDirectional.symmetric(
+                    vertical: ZSpacing.xs,
                   ),
-                Text(
-                  l.onboardingScanResultsNotMineHint,
-                  style: ZType.bodySmall.copyWith(color: c.textMuted),
+                  child: Column(
+                    children: [
+                      for (final (n, i) in cards.indexed) ...[
+                        if (n > 0)
+                          Divider(
+                            height: 1,
+                            thickness: 1,
+                            color: c.outline,
+                            indent: ZSpacing.lg,
+                            endIndent: ZSpacing.lg,
+                          ),
+                        _CardRow(
+                          item: i,
+                          tone: n,
+                          subtitle: l.onboardingScanResultsCardSubtitle(
+                            i.txnCount,
+                            _digits(i.txnCount),
+                            _typeName(l, i),
+                          ),
+                          badge: i.looksCredit
+                              ? l.onboardingScanResultsCreditBadge
+                              : _kindBadge(l, i.kind),
+                          badgeWarn: i.looksCredit,
+                          confirmed: _confirmed.contains(i.accountId),
+                          onTap: () => _openCard(i),
+                        ),
+                      ],
+                    ],
+                  ),
                 ),
               ],
               if (credit != null) ...[
-                const SizedBox(height: ZSpacing.lg),
+                const SizedBox(height: ZSpacing.md),
                 ZCard(
                   key: const ValueKey('scan-credit-prompt'),
                   color: c.zaghlolBg,
-                  child: Column(
+                  child: Row(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      Row(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          ExcludeSemantics(
-                            child: ZaghlolAvatar(
-                              moment: ZaghlolMoment.detective,
-                              size: 56,
-                            ),
-                          ),
-                          const SizedBox(width: ZSpacing.md),
-                          Expanded(
-                            child: Text(
+                      Expanded(
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(
                               l.onboardingScanResultsCreditPrompt(credit.label),
-                              style: ZType.body.copyWith(color: c.text),
+                              style: ZType.bodySmall.copyWith(color: c.text),
                             ),
-                          ),
-                        ],
+                            const SizedBox(height: ZSpacing.md),
+                            Wrap(
+                              spacing: ZSpacing.sm,
+                              runSpacing: ZSpacing.xs,
+                              children: [
+                                ZButton(
+                                  size: ZButtonSize.small,
+                                  key: const ValueKey('scan-credit-yes'),
+                                  label: l.onboardingScanResultsCreditYes,
+                                  onPressed: () => widget.onSetupCredit?.call(
+                                    credit.accountId,
+                                  ),
+                                ),
+                                ZButton(
+                                  size: ZButtonSize.small,
+                                  key: const ValueKey('scan-credit-later'),
+                                  label: l.commonActionLater,
+                                  variant: ZButtonVariant.secondary,
+                                  onPressed: () =>
+                                      setState(() => _creditDismissed = true),
+                                ),
+                              ],
+                            ),
+                          ],
+                        ),
                       ),
-                      const SizedBox(height: ZSpacing.md),
-                      Row(
-                        children: [
-                          Expanded(
-                            child: ZButton(
-                              key: const ValueKey('scan-credit-yes'),
-                              label: l.onboardingScanResultsCreditYes,
-                              onPressed: () =>
-                                  widget.onSetupCredit?.call(credit.accountId),
-                            ),
-                          ),
-                          const SizedBox(width: ZSpacing.sm),
-                          TextButton(
-                            key: const ValueKey('scan-credit-later'),
-                            onPressed: () =>
-                                setState(() => _creditDismissed = true),
-                            child: Text(l.commonActionLater),
-                          ),
-                        ],
+                      const SizedBox(width: ZSpacing.sm),
+                      const OnbMascot(
+                        moment: ZaghlolMoment.detective,
+                        size: 64,
                       ),
                     ],
                   ),
+                ),
+              ],
+              if (cards.isNotEmpty) ...[
+                const SizedBox(height: ZSpacing.md),
+                Text(
+                  l.onboardingScanResultsNotMineHint,
+                  textAlign: TextAlign.center,
+                  style: ZType.bodySmall.copyWith(color: c.textMuted),
                 ),
               ],
             ],
@@ -478,10 +523,12 @@ class _Stat extends StatelessWidget {
     super.key,
     required this.value,
     required this.label,
+    this.valueColor,
     this.onTap,
   });
   final String value;
   final String label;
+  final Color? valueColor;
   final VoidCallback? onTap;
 
   @override
@@ -496,10 +543,16 @@ class _Stat extends StatelessWidget {
         constraints: const BoxConstraints(minHeight: ZSpacing.minTarget),
         child: ZCard(
           onTap: onTap,
-          padding: const EdgeInsetsDirectional.all(ZSpacing.md),
+          padding: const EdgeInsetsDirectional.symmetric(
+            horizontal: ZSpacing.sm,
+            vertical: ZSpacing.md,
+          ),
           child: Column(
             children: [
-              Text(value, style: ZType.title.copyWith(color: c.text)),
+              Text(
+                value,
+                style: ZType.headline.copyWith(color: valueColor ?? c.text),
+              ),
               const SizedBox(height: ZSpacing.xs),
               Text(
                 label,
@@ -520,64 +573,109 @@ class _CardRow extends StatelessWidget {
     required this.subtitle,
     required this.confirmed,
     required this.onTap,
+    required this.tone,
     this.badge,
+    this.badgeWarn = false,
   });
   final ScanCardItem item;
   final String subtitle;
   final String? badge;
+  final bool badgeWarn;
   final bool confirmed;
+  final int tone;
   final VoidCallback onTap;
+
+  String get _initials {
+    final src = (item.institutionCode ?? item.label).trim();
+    final t = src.length <= 4 ? src : src.substring(0, 4);
+    return t.toUpperCase();
+  }
 
   @override
   Widget build(BuildContext context) {
     final c = ZColors.of(context);
+    final (tileBg, tileFg) = switch (tone % 3) {
+      0 => (c.primaryContainer, c.primary),
+      1 => (c.surfaceAlt, c.textMuted),
+      _ => (c.zaghlolBg, c.warningText),
+    };
     return Semantics(
       button: true,
       label: '${item.label}, $subtitle',
       excludeSemantics: true,
-      child: ConstrainedBox(
-        constraints: const BoxConstraints(minHeight: ZSpacing.minTarget),
-        child: ZCard(
-          onTap: onTap,
-          padding: const EdgeInsetsDirectional.all(ZSpacing.md),
-          child: Row(
-            children: [
-              Icon(
-                confirmed ? Icons.check_circle : Icons.credit_card,
-                color: c.primary,
-              ),
-              const SizedBox(width: ZSpacing.md),
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      item.label,
-                      style: ZType.titleSmall.copyWith(color: c.text),
-                    ),
-                    Text(
-                      subtitle,
-                      style: ZType.bodySmall.copyWith(color: c.textMuted),
-                    ),
-                  ],
-                ),
-              ),
-              if (badge != null)
+      child: InkWell(
+        onTap: onTap,
+        child: ConstrainedBox(
+          constraints: const BoxConstraints(minHeight: 64),
+          child: Padding(
+            padding: const EdgeInsetsDirectional.symmetric(
+              horizontal: ZSpacing.lg,
+              vertical: ZSpacing.md,
+            ),
+            child: Row(
+              children: [
                 Container(
-                  padding: const EdgeInsetsDirectional.symmetric(
-                    horizontal: ZSpacing.sm,
-                    vertical: ZSpacing.xs,
-                  ),
+                  width: 44,
+                  height: 44,
+                  alignment: Alignment.center,
                   decoration: BoxDecoration(
-                    color: c.warningBg,
-                    borderRadius: BorderRadius.circular(ZRadius.pill),
+                    color: tileBg,
+                    shape: BoxShape.circle,
                   ),
                   child: Text(
-                    badge!,
-                    style: ZType.caption.copyWith(color: c.warningText),
+                    _initials,
+                    maxLines: 1,
+                    style: ZType.caption.copyWith(
+                      color: tileFg,
+                      fontWeight: FontWeight.w700,
+                    ),
                   ),
                 ),
-            ],
+                const SizedBox(width: ZSpacing.md),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        item.label,
+                        style: ZType.label.copyWith(
+                          color: c.text,
+                          fontWeight: FontWeight.w600,
+                        ),
+                      ),
+                      Text(
+                        subtitle,
+                        style: ZType.caption.copyWith(color: c.textMuted),
+                      ),
+                    ],
+                  ),
+                ),
+                if (badge != null) ...[
+                  const SizedBox(width: ZSpacing.sm),
+                  Container(
+                    padding: const EdgeInsetsDirectional.symmetric(
+                      horizontal: ZSpacing.md,
+                      vertical: ZSpacing.xs,
+                    ),
+                    decoration: BoxDecoration(
+                      color: badgeWarn ? c.zaghlolBg : c.primaryContainer,
+                      borderRadius: BorderRadius.circular(ZRadius.pill),
+                    ),
+                    child: Text(
+                      badge!,
+                      style: ZType.label.copyWith(
+                        color: badgeWarn ? c.warningText : c.onPrimaryContainer,
+                      ),
+                    ),
+                  ),
+                ],
+                const SizedBox(width: ZSpacing.xs),
+                Icon(
+                  confirmed ? Icons.check_circle : (Icons.chevron_right),
+                  color: confirmed ? c.primary : c.textMuted,
+                ),
+              ],
+            ),
           ),
         ),
       ),

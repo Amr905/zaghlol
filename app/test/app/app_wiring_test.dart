@@ -559,6 +559,8 @@ void main() {
           ),
         );
         await t.pumpAndSettle();
+        await t.ensureVisible(find.byKey(const ValueKey('welcome-restore')));
+        await t.pumpAndSettle();
         await t.tap(find.byKey(const ValueKey('welcome-restore')));
         await expectOpened(t, 'restore');
         await t.tap(find.byKey(const ValueKey('restore__update')));
@@ -568,6 +570,8 @@ void main() {
         await t.tap(find.byKey(const ValueKey('restore__fresh')));
         await t.pumpAndSettle();
         expect(find.byKey(const ValueKey('welcome-start')), findsOneWidget);
+        await t.ensureVisible(find.byKey(const ValueKey('welcome-restore')));
+        await t.pumpAndSettle();
         await t.tap(find.byKey(const ValueKey('welcome-restore')));
         await expectOpened(t, 'restore');
         await t.tap(find.byKey(const ValueKey('restore__restored')));

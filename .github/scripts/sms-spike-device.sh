@@ -43,10 +43,9 @@
 # same sender's other card); the test asserts AC1 (no file but the test
 # spool), AC2, AC3, the inbox-row equality and one enqueue per kept
 # broadcast. A spoofed broadcast to SmsReceiver is denied. Last, a stagingSms
-# debug build (no bundled registry until T-036) is installed: an SMS leaves
-# no spool entry (the Guard base is missing: every message is dropped), no
-# Guard user file (no coordinator without a registry, T-047) and no
-# WorkManager job (no retry storm, FU-108 security L-2).
+# debug build (bundled real registry and Guard base, no spike sender) is
+# installed: the spike-sender SMS leaves no spool entry and no WorkManager job
+# (no retry storm, FU-108 security L-2); the Guard user file now exists.
 # Called as one line (android-emulator-runner runs `script` line by line).
 set -euo pipefail
 : "${DEVICE:?}" "${API:?}" "${RUNNER_TEMP:?}"
@@ -517,8 +516,10 @@ sh_ dumpsys jobscheduler > "$OUT/staging-jobs.txt" 2>/dev/null || true
 st_jobs=$(grep -cF "$SPKG/androidx.work.impl.background.systemjob.SystemJobService" "$OUT/staging-jobs.txt" || true)
 rm -f "$OUT/staging-jobs.txt"
 echo "stagingSms: spool entries $st_spool, Guard user part $st_guard, WorkManager jobs $st_jobs"
-[ "$st_spool" = 0 ] || fail "stagingSms spooled a message without a Guard base"
-[ "$st_guard" = 0 ] || fail "stagingSms wrote a Guard user part: a coordinator started without a registry"
+[ "$st_spool" = 0 ] || fail "stagingSms spooled a message from a sender the real Guard base does not know"
+# SMS-TEMPLATES: the registry is bundled, so the coordinator starts and writes
+# its Guard user part.
+[ "$st_guard" = 1 ] || fail "stagingSms did not write the Guard user part (bundled registry not loaded)"
 [ "$st_jobs" = 0 ] || fail "stagingSms scheduled ingestion work (retry storm risk, FU-108 L-2)"
 A uninstall "$SPKG" > /dev/null 2>&1 || true
 {

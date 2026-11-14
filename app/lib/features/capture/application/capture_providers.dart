@@ -72,8 +72,8 @@ final captureSchedulerProvider = Provider<CaptureScheduler>(
   name: 'captureSchedulerProvider',
 );
 
-/// The registry the build parses with (T-036 replaces the missing bundled
-/// one). Tests override it.
+/// The registry the build parses with (the bundled one by default).
+/// Tests override it.
 final captureRegistryLoaderProvider = Provider<Registry Function()>(
   (ref) => defaultRegistryLoader,
   name: 'captureRegistryLoaderProvider',

@@ -7,6 +7,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:zaghlol/core/l10n/date_format.dart';
 import 'package:zaghlol/core/l10n/generated/app_localizations.dart';
 import 'package:zaghlol/core/theme/app_theme.dart';
+import 'package:zaghlol/core/ui/shell/app_shell.dart';
 import 'package:zaghlol/features/accounts/domain/account.dart';
 import 'package:zaghlol/features/budget/application/cycle_overview.dart';
 import 'package:zaghlol/features/capture/application/capture_providers.dart';
@@ -54,6 +55,7 @@ TransactionRecord rec(
   int amount = 450,
   TxnDirection dir = TxnDirection.expense,
   bool internal = false,
+  String? categoryId,
 }) => TransactionRecord(
   id: id,
   accountId: 'a1',
@@ -64,6 +66,7 @@ TransactionRecord rec(
   occurredAt: DateTime.utc(2026, 11, 10, 12, 14),
   occurredTzOffsetMin: 120,
   merchantNorm: merchant,
+  categoryId: categoryId,
   categorySource: CategorySource.none,
   isUserVerified: false,
   isInternal: internal,
@@ -127,6 +130,7 @@ Widget homeApp({
   Set<String> filter = const {},
   List<Account> accounts = const [],
   HomeActions? actions,
+  bool withShell = false,
   List<Override> extraOverrides = const [],
 }) {
   return ProviderScope(
@@ -155,7 +159,27 @@ Widget homeApp({
         ),
         child: child!,
       ),
-      home: Scaffold(body: HomeScreen(actions: actions)),
+      home: withShell
+          ? Builder(
+              builder: (context) {
+                final l = AppLocalizations.of(context);
+                return ShellScaffold(
+                  body: HomeScreen(actions: actions),
+                  selected: 0,
+                  onSelect: (_) {},
+                  onAdd: () {},
+                  glass: platform == TargetPlatform.iOS,
+                  labels: [
+                    l.commonNavHome,
+                    l.commonNavInsights,
+                    l.commonNavMoney,
+                    l.commonNavZaghlol,
+                  ],
+                  addLabel: l.commonNavAddA11y,
+                );
+              },
+            )
+          : Scaffold(body: HomeScreen(actions: actions)),
     ),
   );
 }
@@ -180,6 +204,7 @@ Future<void> pumpHome(
   List<Account> accounts = const [],
   bool settle = true,
   HomeActions? actions,
+  bool withShell = false,
   List<Override> extraOverrides = const [],
 }) async {
   await initDateFormatting();
@@ -197,6 +222,7 @@ Future<void> pumpHome(
       filter: filter,
       accounts: accounts,
       actions: actions,
+      withShell: withShell,
       extraOverrides: extraOverrides,
     ),
   );

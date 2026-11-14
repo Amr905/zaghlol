@@ -9,8 +9,8 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../../core/l10n/generated/app_localizations.dart';
 import '../../../../core/theme/z_tokens.dart';
-import '../../../../core/ui/z_button.dart';
 import '../../../../core/ui/z_currency_switcher.dart';
+import '../../../../core/l10n/locale_providers.dart';
 import '../../../budget/presentation/budget_providers_ui.dart';
 import '../../../budget/presentation/budget_view.dart';
 import '../../../gold/application/gating.dart';
@@ -112,12 +112,6 @@ const _padding = EdgeInsetsDirectional.fromSTEB(
   ZSpacing.xxl,
 );
 
-String _context(AppLocalizations l, String code) => l.insightsChartsContext(
-  l.commonCardFilterAll,
-  code,
-  l.commonPeriodThisCycle,
-);
-
 String _emptyText(AppLocalizations l, ChartNotEnoughData<Object?> r) =>
     r.reason == NotEnoughReason.noData
     ? l.insightsChartsEmptyFilter
@@ -142,7 +136,22 @@ class _CashFlowCard extends ConsumerWidget {
           data: (r) => switch (r) {
             ChartReady(:final data) => ChartCard(
               title: title,
-              contextLine: _context(l, code),
+              meta: l.insightsChartsMonthsCount(
+                data.length,
+                ref
+                    .watch(
+                      digitsModeProvider(
+                        Localizations.localeOf(context).languageCode,
+                      ),
+                    )
+                    .render('${data.length}'),
+              ),
+              footnote: CashFlowBody.footnote(
+                l,
+                (m) => chartMoney(ref, context, m),
+                (p) => chartPercent(ref, context, p),
+                data,
+              ),
               trailing: _ExplainButton(chart: ChartId.cashFlow, code: code),
               summary: CashFlowBody.summary(
                 l,
@@ -153,7 +162,6 @@ class _CashFlowCard extends ConsumerWidget {
             ),
             ChartNotEnoughData() => ChartCard(
               title: title,
-              contextLine: _context(l, code),
               child: ChartMessage(text: _emptyText(l, r)),
             ),
           },
@@ -189,7 +197,6 @@ class _DonutCard extends ConsumerWidget {
           data: (r) => switch (r) {
             ChartReady(:final data) => ChartCard(
               title: title,
-              contextLine: _context(l, code),
               trailing: _ExplainButton(
                 chart: ChartId.categoryDonut,
                 code: code,
@@ -205,7 +212,6 @@ class _DonutCard extends ConsumerWidget {
             ),
             ChartNotEnoughData() => ChartCard(
               title: title,
-              contextLine: _context(l, code),
               child: ChartMessage(text: _emptyText(l, r)),
             ),
           },
@@ -232,7 +238,6 @@ class _MerchantsCard extends ConsumerWidget {
           data: (r) => switch (r) {
             ChartReady(:final data) when data.isNotEmpty => ChartCard(
               title: title,
-              contextLine: _context(l, code),
               trailing: _ExplainButton(chart: ChartId.topMerchants, code: code),
               summary: MerchantsBody.summary(
                 l,
@@ -243,12 +248,10 @@ class _MerchantsCard extends ConsumerWidget {
             ),
             ChartReady() => ChartCard(
               title: title,
-              contextLine: _context(l, code),
               child: ChartMessage(text: l.insightsChartsEmptyFilter),
             ),
             ChartNotEnoughData() => ChartCard(
               title: title,
-              contextLine: _context(l, code),
               child: ChartMessage(text: _emptyText(l, r)),
             ),
           },
@@ -281,13 +284,11 @@ class _BudgetCard extends ConsumerWidget {
             if (view == null || view.limit == null) {
               return ChartCard(
                 title: title,
-                contextLine: _context(l, code),
                 child: ChartMessage(text: l.budgetOverviewEmptyTitle),
               );
             }
             return ChartCard(
               title: title,
-              contextLine: _context(l, code),
               summary: BudgetBody.summary(
                 l,
                 (m) => chartMoney(ref, context, m),
@@ -307,18 +308,8 @@ class _ExplainButton extends StatelessWidget {
   final String code;
 
   @override
-  Widget build(BuildContext context) {
-    final l = AppLocalizations.of(context);
-    return ZButton(
-      label: l.insightsChartsExplain,
-      variant: ZButtonVariant.text,
-      size: ZButtonSize.small,
-      onPressed: () => openChartDetail(
-        context,
-        chart: chart,
-        code: code,
-        openExplainer: true,
-      ),
-    );
-  }
+  Widget build(BuildContext context) => ExplainLink(
+    onTap: () =>
+        openChartDetail(context, chart: chart, code: code, openExplainer: true),
+  );
 }

@@ -22,14 +22,40 @@ class HomeFormat {
   final String languageCode;
   final DigitsMode digits;
 
-  String money(Money m) =>
-      MoneyFormat.format(m, languageCode: languageCode, digits: digits);
+  /// Whole amounts drop the `.00` (mockups 03 / 20).
+  String money(Money m) => MoneyFormat.format(
+    m,
+    languageCode: languageCode,
+    digits: digits,
+    dropZeroFraction: true,
+  );
+
+  /// Number only, bidi-isolated; pair with [currency].
+  String number(Money m) => MoneyFormat.format(
+    m,
+    languageCode: languageCode,
+    digits: digits,
+    withCurrency: false,
+    dropZeroFraction: true,
+  );
+
+  String currency(Money m) =>
+      MoneyFormat.currencyLabel(m.currency, languageCode: languageCode);
 
   /// A count as locale digits (for the `{n}` placeholders).
   String count(int n) => digits.render('$n');
 
   String date(CivilDate d) =>
       ZDateFormat.date(DateTime(d.year, d.month, d.day), languageCode, digits);
+
+  String dayMonth(CivilDate d) => ZDateFormat.dayMonth(
+    DateTime(d.year, d.month, d.day),
+    languageCode,
+    digits,
+  );
+
+  String dayMonthOf(DateTime utc) =>
+      ZDateFormat.dayMonth(utc, languageCode, digits);
 
   String time(DateTime utc) => ZDateFormat.time(utc, languageCode, digits);
 

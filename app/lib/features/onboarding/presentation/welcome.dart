@@ -10,7 +10,7 @@ import '../../../core/settings/settings_keys.dart';
 import '../../../core/settings/settings_providers.dart';
 import '../../../core/theme/z_tokens.dart';
 import '../../../core/ui/z_button.dart';
-import '../../mascot/presentation/zaghlol_avatar.dart';
+import 'onboarding_parts.dart';
 
 class WelcomeScreen extends ConsumerWidget {
   const WelcomeScreen({
@@ -49,101 +49,108 @@ class WelcomeScreen extends ConsumerWidget {
     ];
     return Scaffold(
       body: SafeArea(
-        child: LayoutBuilder(
-          builder: (context, box) => SingleChildScrollView(
-            padding: const EdgeInsetsDirectional.all(ZSpacing.screen),
-            child: ConstrainedBox(
-              constraints: BoxConstraints(minHeight: box.maxHeight - 32),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.stretch,
-                children: [
-                  Align(
-                    alignment: AlignmentDirectional.centerEnd,
-                    child: Semantics(
-                      button: true,
-                      label: l.onboardingWelcomeLanguageToggleA11y,
-                      excludeSemantics: true,
-                      child: ConstrainedBox(
-                        constraints: const BoxConstraints(
-                          minHeight: ZSpacing.minTarget,
-                          minWidth: ZSpacing.minTarget,
+        child: OnbPage(
+          content: [
+            Align(
+              alignment: AlignmentDirectional.centerEnd,
+              child: Semantics(
+                button: true,
+                label: l.onboardingWelcomeLanguageToggleA11y,
+                excludeSemantics: true,
+                child: ConstrainedBox(
+                  constraints: const BoxConstraints(
+                    minHeight: ZSpacing.minTarget,
+                    minWidth: ZSpacing.minTarget,
+                  ),
+                  child: Material(
+                    color: c.surface,
+                    borderRadius: BorderRadius.circular(ZRadius.pill),
+                    child: InkWell(
+                      key: const ValueKey('welcome-language-toggle'),
+                      borderRadius: BorderRadius.circular(ZRadius.pill),
+                      onTap: () => _toggleLanguage(ref, isArabic),
+                      child: Padding(
+                        padding: const EdgeInsetsDirectional.symmetric(
+                          horizontal: ZSpacing.lg,
+                          vertical: ZSpacing.md,
                         ),
-                        child: TextButton(
-                          key: const ValueKey('welcome-language-toggle'),
-                          onPressed: () => _toggleLanguage(ref, isArabic),
-                          child: Text(
-                            l.onboardingWelcomeLanguageToggle,
-                            style: ZType.label.copyWith(color: c.primary),
-                          ),
-                        ),
-                      ),
-                    ),
-                  ),
-                  const SizedBox(height: ZSpacing.lg),
-                  const Center(
-                    child: ZaghlolAvatar(
-                      moment: ZaghlolMoment.tourGuide,
-                      size: 160,
-                    ),
-                  ),
-                  const SizedBox(height: ZSpacing.xl),
-                  Text(
-                    l.onboardingWelcomeTitle,
-                    style: ZType.headline.copyWith(color: c.text),
-                  ),
-                  const SizedBox(height: ZSpacing.sm),
-                  Text(
-                    l.onboardingWelcomeSubtitle,
-                    style: ZType.body.copyWith(color: c.textMuted),
-                  ),
-                  const SizedBox(height: ZSpacing.xl),
-                  for (final (icon, text) in points)
-                    Padding(
-                      padding: const EdgeInsetsDirectional.only(
-                        bottom: ZSpacing.md,
-                      ),
-                      child: Row(
-                        children: [
-                          ExcludeSemantics(
-                            child: Icon(icon, size: 20, color: c.primary),
-                          ),
-                          const SizedBox(width: ZSpacing.md),
-                          Expanded(
-                            child: Text(
-                              text,
-                              style: ZType.bodySmall.copyWith(color: c.text),
+                        child: Row(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            Icon(Icons.language, size: 20, color: c.text),
+                            const SizedBox(width: ZSpacing.sm),
+                            Text(
+                              l.onboardingWelcomeLanguageToggle,
+                              style: ZType.label.copyWith(color: c.text),
                             ),
-                          ),
-                        ],
+                          ],
+                        ),
                       ),
                     ),
-                  const SizedBox(height: ZSpacing.xl),
-                  ZButton(
-                    key: const ValueKey('welcome-start'),
-                    label: l.onboardingWelcomeStart,
-                    onPressed: onStart,
-                    expand: true,
                   ),
-                  const SizedBox(height: ZSpacing.sm),
-                  ZButton(
-                    key: const ValueKey('welcome-restore'),
-                    label: l.onboardingWelcomeRestore,
-                    onPressed: onRestore,
-                    variant: ZButtonVariant.text,
-                    expand: true,
-                  ),
-                  if (onPrivacy != null)
-                    ZButton(
-                      key: const ValueKey('welcome-privacy'),
-                      label: l.onboardingWelcomePrivacyLink,
-                      onPressed: onPrivacy,
-                      variant: ZButtonVariant.text,
-                      expand: true,
-                    ),
-                ],
+                ),
               ),
             ),
-          ),
+            const SizedBox(height: ZSpacing.lg),
+            const OnbMascot(size: 220),
+            const SizedBox(height: ZSpacing.lg),
+            Text(
+              l.onboardingWelcomeTitle,
+              textAlign: TextAlign.center,
+              style: ZType.headline.copyWith(color: c.text),
+            ),
+            const SizedBox(height: ZSpacing.sm),
+            Text(
+              l.onboardingWelcomeSubtitle,
+              textAlign: TextAlign.center,
+              style: ZType.body.copyWith(color: c.textMuted),
+            ),
+            const SizedBox(height: ZSpacing.xl),
+            for (final (icon, text) in points)
+              Padding(
+                padding: const EdgeInsetsDirectional.only(
+                  bottom: ZSpacing.md,
+                  start: ZSpacing.sm,
+                  end: ZSpacing.sm,
+                ),
+                child: Row(
+                  children: [
+                    OnbIconTile(icon: icon, size: 40),
+                    const SizedBox(width: ZSpacing.lg),
+                    Expanded(
+                      child: Text(
+                        text,
+                        style: ZType.body.copyWith(color: c.text),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+          ],
+          actions: [
+            ZButton(
+              key: const ValueKey('welcome-start'),
+              label: l.onboardingWelcomeStart,
+              onPressed: onStart,
+              expand: true,
+            ),
+            const SizedBox(height: ZSpacing.sm),
+            ZButton(
+              key: const ValueKey('welcome-restore'),
+              label: l.onboardingWelcomeRestore,
+              onPressed: onRestore,
+              variant: ZButtonVariant.text,
+              expand: true,
+            ),
+            if (onPrivacy != null)
+              ZButton(
+                key: const ValueKey('welcome-privacy'),
+                label: l.onboardingWelcomePrivacyLink,
+                onPressed: onPrivacy,
+                variant: ZButtonVariant.text,
+                expand: true,
+              ),
+          ],
         ),
       ),
     );

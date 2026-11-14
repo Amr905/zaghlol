@@ -64,6 +64,7 @@ class ZListRow extends StatelessWidget {
     this.onTap,
     this.enabled = true,
     this.showChevron = false,
+    this.showDivider = false,
   });
 
   final String title;
@@ -75,6 +76,10 @@ class ZListRow extends StatelessWidget {
 
   /// Disclosure chevron, mirrored automatically in RTL.
   final bool showChevron;
+
+  /// Hairline under the row, inset on the leading side past the tile
+  /// (mockup 03 lists).
+  final bool showDivider;
 
   @override
   Widget build(BuildContext context) {
@@ -119,24 +124,38 @@ class ZListRow extends StatelessWidget {
             ],
             if (showChevron) ...[
               const SizedBox(width: ZSpacing.xs),
-              Icon(
-                Directionality.of(context) == TextDirection.rtl
-                    ? Icons.chevron_left
-                    : Icons.chevron_right,
-                color: c.textMuted,
-              ),
+              Icon(Icons.chevron_right, color: c.textMuted),
             ],
           ],
         ),
       ),
     );
+    final inkRow = InkWell(onTap: enabled ? onTap : null, child: row);
     return Semantics(
       container: true,
       button: onTap != null,
       enabled: enabled,
       child: Opacity(
         opacity: enabled ? 1 : 0.38,
-        child: InkWell(onTap: enabled ? onTap : null, child: row),
+        child: showDivider
+            ? DecoratedBox(
+                position: DecorationPosition.foreground,
+                decoration: const BoxDecoration(),
+                child: Stack(
+                  children: [
+                    inkRow,
+                    PositionedDirectional(
+                      start: leading == null
+                          ? ZSpacing.lg
+                          : ZSpacing.lg + 40 + ZSpacing.md,
+                      end: 0,
+                      bottom: 0,
+                      child: Divider(height: 1, thickness: 1, color: c.outline),
+                    ),
+                  ],
+                ),
+              )
+            : inkRow,
       ),
     );
   }
@@ -169,6 +188,94 @@ class ZCategoryTile extends StatelessWidget {
           color: color.withValues(alpha: 0.14),
         ),
         child: child,
+      ),
+    );
+  }
+}
+
+/// Hero card (mockups 03 / 20 / 21): mint gradient, radius 28, soft shadow.
+/// The gradient runs from the top end to the bottom start, so it mirrors in
+/// RTL.
+class ZHeroCard extends StatelessWidget {
+  const ZHeroCard({
+    super.key,
+    required this.child,
+    this.padding = const EdgeInsetsDirectional.all(ZSpacing.xl),
+    this.onTap,
+  });
+
+  final Widget child;
+  final EdgeInsetsGeometry padding;
+  final VoidCallback? onTap;
+
+  @override
+  Widget build(BuildContext context) {
+    final c = ZColors.of(context);
+    final radius = BorderRadius.circular(ZRadius.hero);
+    final card = DecoratedBox(
+      decoration: BoxDecoration(
+        borderRadius: radius,
+        gradient: LinearGradient(
+          begin: AlignmentDirectional.topEnd,
+          end: AlignmentDirectional.bottomStart,
+          colors: [c.heroFrom, c.heroTo],
+        ),
+        boxShadow: [
+          BoxShadow(
+            color: c.shadow,
+            blurRadius: 24,
+            offset: const Offset(0, 8),
+          ),
+        ],
+      ),
+      child: Material(
+        color: Colors.transparent,
+        borderRadius: radius,
+        child: InkWell(
+          borderRadius: radius,
+          onTap: onTap,
+          child: Padding(padding: padding, child: child),
+        ),
+      ),
+    );
+    return card;
+  }
+}
+
+/// Rounded gradient progress bar (hero card). [value] is 0..1, fills from the
+/// start edge. Decorative: the figures beside it carry the meaning.
+class ZProgressBar extends StatelessWidget {
+  const ZProgressBar({super.key, required this.value, this.height = 12});
+
+  final double value;
+  final double height;
+
+  @override
+  Widget build(BuildContext context) {
+    final c = ZColors.of(context);
+    final r = BorderRadius.circular(ZRadius.pill);
+    return ExcludeSemantics(
+      child: Container(
+        height: height,
+        decoration: BoxDecoration(
+          color: c.primary.withValues(alpha: 0.18),
+          borderRadius: r,
+        ),
+        alignment: AlignmentDirectional.centerStart,
+        child: FractionallySizedBox(
+          widthFactor: value.clamp(0.0, 1.0),
+          child: DecoratedBox(
+            decoration: BoxDecoration(
+              borderRadius: r,
+              gradient: LinearGradient(
+                begin: AlignmentDirectional.centerStart,
+                end: AlignmentDirectional.centerEnd,
+                colors: [c.progressFrom, c.progressTo],
+              ),
+            ),
+            child: SizedBox(height: height),
+          ),
+        ),
       ),
     );
   }

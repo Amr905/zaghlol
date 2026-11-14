@@ -45,15 +45,19 @@
   "@appLockRootedOk": {
     "description": "Button that closes the rooted warning."
   },
-  "homeQuickAddTitle": "عايز تسجل إيه؟",
-  "homeQuickAddSay": "قول",
-  "homeQuickAddType": "اكتب",
-  "homeQuickAddScan": "صوّر",
+  "homeQuickAddTitle": "تحب تسجل إيه؟",
+  "homeQuickAddSay": "قولها",
+  "homeQuickAddType": "اكتبها",
+  "homeQuickAddScan": "صوّرها",
   "homeQuickAddAsset": "أصل",
   "homeQuickAddSayA11y": "قول لزغلول",
   "homeQuickAddTypeA11y": "اكتب حركة",
   "homeQuickAddScanA11y": "اقرا سكرين شوت",
   "homeQuickAddAssetA11y": "ضيف أصل",
+  "homeQuickAddSayHint": "بصوتك في ثانيتين",
+  "homeQuickAddTypeHint": "مصروف أو دخل",
+  "homeQuickAddScanHint": "سكرين شوت أو إيصال",
+  "homeQuickAddAssetHint": "دهب، شهادة، عملة",
   "ingestionReviewTitle": "مستني رأيك 👀",
   "notificationsChannelName": "التنبيهات",
   "commonActionSave": "احفظ",
@@ -84,7 +88,7 @@
   "@commonActionTryAgain": {
     "description": "B"
   },
-  "commonActionSkip": "تخطّي",
+  "commonActionSkip": "تخطي",
   "@commonActionSkip": {
     "description": "B · stepper header"
   },
@@ -768,7 +772,7 @@
   "@onboardingAndroidSetupSmsSubtitle": {
     "description": "S"
   },
-  "onboardingAndroidSetupSmsPointSenders": "بقرا رسايل البنوك والمحافظ وإنستاباي بس",
+  "onboardingAndroidSetupSmsPointSenders": "بنقرا رسايل البنوك والمحافظ وإنستاباي بس",
   "@onboardingAndroidSetupSmsPointSenders": {
     "description": "S · what is read (FR-ING-A-02)"
   },
@@ -776,11 +780,11 @@
   "@onboardingAndroidSetupSmsPointPersonal": {
     "description": "S"
   },
-  "onboardingAndroidSetupSmsPointOnPhone": "بيانات فلوسك بتفضل على الموبايل ده",
+  "onboardingAndroidSetupSmsPointOnPhone": "كل حاجة بتفضل على الموبايل ده",
   "@onboardingAndroidSetupSmsPointOnPhone": {
     "description": "S · claim limited to financial data (tone gate 4, R-11, BR-SYNC-03)"
   },
-  "onboardingAndroidSetupSmsAllow": "اسمح بقراية الرسايل",
+  "onboardingAndroidSetupSmsAllow": "اسمح بقراءة رسايل البنك",
   "@onboardingAndroidSetupSmsAllow": {
     "description": "B · primary, opens the system SMS dialog"
   },
@@ -897,7 +901,7 @@
       }
     }
   },
-  "onboardingIosSetupShortcutTitle": "هنستخدم الاختصارات",
+  "onboardingIosSetupShortcutTitle": "الآيفون مش بيسمح للتطبيقات تقرا الرسايل… فهنستخدم الاختصارات",
   "@onboardingIosSetupShortcutTitle": {
     "description": "T · M · Rive tourGuide"
   },
@@ -933,7 +937,7 @@
   "@onboardingIosSetupShortcutAdd": {
     "description": "B · primary, opens the Shortcuts import"
   },
-  "onboardingIosSetupHowItWorks": "إزاي بيشتغل؟ (نص دقيقة)",
+  "onboardingIosSetupHowItWorks": "إزاي بيشتغل؟ (٣٠ ثانية)",
   "@onboardingIosSetupHowItWorks": {
     "description": "L · text button, expands the steps below"
   },
@@ -1008,7 +1012,7 @@
   "@onboardingIosSetupFixTitle": {
     "description": "L"
   },
-  "onboardingIosSetupFixStep1": "افتح Shortcuts وبعدين Automation",
+  "onboardingIosSetupFixStep1": "افتح Shortcuts ← Automation",
   "@onboardingIosSetupFixStep1": {
     "description": "S"
   },
@@ -1049,7 +1053,7 @@
   "@onboardingIosSetupFirstSay": {
     "description": "B · opens S-31"
   },
-  "onboardingIosSetupFirstSayHint": "«دفعت خمسة وأربعين قهوة»",
+  "onboardingIosSetupFirstSayHint": "«دفعت ٤٥ قهوة»",
   "@onboardingIosSetupFirstSayHint": {
     "description": "L · spoken example. AR uses number words (§0.3)"
   },
@@ -1057,7 +1061,7 @@
   "@onboardingIosSetupFirstType": {
     "description": "B · opens S-13"
   },
-  "onboardingIosSetupFirstTypeHint": "المبلغ والتصنيف",
+  "onboardingIosSetupFirstTypeHint": "المبلغ والفئة",
   "@onboardingIosSetupFirstTypeHint": {
     "description": "L"
   },
@@ -1065,7 +1069,7 @@
   "@onboardingIosSetupFirstOnlineBanks": {
     "description": "S · opens S-61 supported banks (FR-ING-I-08)"
   },
-  "onboardingIosSetupFirstOnlineBanksSub": "شوف إزاي تتابعهم على الآيفون",
+  "onboardingIosSetupFirstOnlineBanksSub": "شوف إزاي تسجلهم على الآيفون",
   "@onboardingIosSetupFirstOnlineBanksSub": {
     "description": "S"
   },
@@ -1073,7 +1077,7 @@
   "@onboardingIosSetupFirstStatement": {
     "description": "L · the common_gold_badge must show on this row (FR-EXP-04/06); Free opens S-68"
   },
-  "onboardingIosSetupFirstStatementSub": "ضيف شهور فاتت مرة واحدة مع جولد",
+  "onboardingIosSetupFirstStatementSub": "ضيف شهور فاتت مرة واحدة",
   "@onboardingIosSetupFirstStatementSub": {
     "description": "S · says Gold in the text too, so Free users aren't promised it (F-8)"
   },
@@ -1383,7 +1387,7 @@
   "@homeHeroPerDay": {
     "description": "C · suffix after the display amount"
   },
-  "homeHeroDaysToPayday": "{count, plural, =0{القبض النهارده} =1{فاضل يوم على القبض} =2{فاضل يومين على القبض} few{فاضل {n} أيام على القبض} many{فاضل {n} يوم على القبض} other{فاضل {n} يوم على القبض}}",
+  "homeHeroDaysToPayday": "{count, plural, =0{القبض النهارده} =1{يوم على القبض} =2{يومين على القبض} few{{n} أيام على القبض} many{{n} يوم على القبض} other{{n} يوم على القبض}}",
   "@homeHeroDaysToPayday": {
     "description": "L · count:int, n · followed by  ·  and common_date_range",
     "placeholders": {
@@ -2038,7 +2042,7 @@
   "@transactionsDetailNoteHint": {
     "description": "L · ≤ 200 (common_validation_noteLength)"
   },
-  "transactionsDetailSplit": "تقسيم / فلوس راجعة",
+  "transactionsDetailSplit": "تقسيم / فلوس راجعة من صحابك",
   "@transactionsDetailSplit": {
     "description": "L · expenses, opens S-15 Mode A"
   },
@@ -3952,7 +3956,7 @@
       }
     }
   },
-  "insightsChartsExplain": "اشرحلي يا زغلول",
+  "insightsChartsExplain": "اشرحلي",
   "@insightsChartsExplain": {
     "description": "B · the FR-CHT-03 name. Also the S-21 button"
   },
@@ -4044,7 +4048,7 @@
   "@insightsLegendSpent": {
     "description": "C"
   },
-  "insightsLegendSaved": "حوشت",
+  "insightsLegendSaved": "اللي اتحوش",
   "@insightsLegendSaved": {
     "description": "C"
   },
@@ -5293,7 +5297,7 @@
       }
     }
   },
-  "recurringBillsDetected": "لقيت اشتراك: {merchant} بـ {amount} في الشهر",
+  "recurringBillsDetected": "شكلها اشتراك شهري: {merchant} {amount}",
   "@recurringBillsDetected": {
     "description": "M · Rive detective · BR-SUB-01",
     "placeholders": {
@@ -5313,7 +5317,7 @@
   "@recurringBillsNotSub": {
     "description": "B"
   },
-  "recurringBillsUpcoming": "اللي جاي",
+  "recurringBillsUpcoming": "الجاي",
   "@recurringBillsUpcoming": {
     "description": "L · C-36 timeline"
   },
@@ -5332,7 +5336,7 @@
       }
     }
   },
-  "recurringBillsLastOne": "آخر قسط",
+  "recurringBillsLastOne": "آخر قسط! 🎉",
   "@recurringBillsLastOne": {
     "description": "C"
   },
@@ -5384,9 +5388,9 @@
   "@recurringBillsKindInstallment": {
     "description": "C"
   },
-  "recurringBillsKindCard": "سداد كارت",
+  "recurringBillsKindCard": "كريدت كارد",
   "@recurringBillsKindCard": {
-    "description": "C"
+    "description": "S-24 row sub-line for a card due"
   },
   "recurringBillsKindGameya": "جمعية",
   "@recurringBillsKindGameya": {
@@ -5575,6 +5579,18 @@
   "@homeQuickAddScan": {
     "description": "L · opens S-32"
   },
+  "@homeQuickAddSayHint": {
+    "description": "S · quick add card subtitle"
+  },
+  "@homeQuickAddTypeHint": {
+    "description": "S · quick add card subtitle"
+  },
+  "@homeQuickAddScanHint": {
+    "description": "S · quick add card subtitle"
+  },
+  "@homeQuickAddAssetHint": {
+    "description": "S · quick add card subtitle"
+  },
   "@homeQuickAddAsset": {
     "description": "L · with common_gold_badge; Free opens S-68"
   },
@@ -5590,7 +5606,7 @@
   "@homeQuickAddAssetA11y": {
     "description": "A"
   },
-  "homeQuickAddVoiceLeft": "فاضل {remaining} من {max} تسجيل صوتي الشهر ده",
+  "homeQuickAddVoiceLeft": "باقيلك {remaining} من {max} تسجيل صوتي الشهر ده",
   "@homeQuickAddVoiceLeft": {
     "description": "S · Free only (FR-VOI-04)",
     "placeholders": {
@@ -7382,7 +7398,7 @@
       }
     }
   },
-  "settingsMainGoldFree": "الباقة المجانية",
+  "settingsMainGoldFree": "زغلول جولد",
   "@settingsMainGoldFree": {
     "description": "L · Gold row title for Free"
   },
@@ -7395,7 +7411,7 @@
       }
     }
   },
-  "settingsMainSeeGold": "شوف جولد",
+  "settingsMainSeeGold": "إنت على الباقة المجانية",
   "@settingsMainSeeGold": {
     "description": "L · opens S-68"
   },
@@ -9708,5 +9724,104 @@
   "iosSetupNudgeSnoozeA11y": "فكّرني بعد ٧ أيام",
   "@iosSetupNudgeSnoozeA11y": {
     "description": "A · dismiss button of the nudge; hides it for 7 days"
+  },
+  "chatMainTitle": "اسأل زغلول",
+  "@chatMainTitle": {
+    "description": "S-50 design pass"
+  },
+  "chatMainRoastTag": "قصف جبهة",
+  "@chatMainRoastTag": {
+    "description": "S-50 design pass"
+  },
+  "insightsChartsSavedFootnote": "وفرت {amount} الشهر ده ({percent})",
+  "@insightsChartsSavedFootnote": {
+    "description": "S-20 cash-flow footnote",
+    "placeholders": {
+      "amount": {
+        "type": "String"
+      },
+      "percent": {
+        "type": "String"
+      }
+    }
+  },
+  "insightsChartsMonthsCount": "{count, plural, one{شهر} two{شهرين} few{{countText} شهور} other{{countText} شهر}}",
+  "@insightsChartsMonthsCount": {
+    "description": "S-20 cash-flow card caption: number of months shown",
+    "placeholders": {
+      "count": {
+        "type": "int"
+      },
+      "countText": {
+        "type": "String"
+      }
+    }
+  },
+  "insightsChartsSpendLabel": "المصروف",
+  "@insightsChartsSpendLabel": {
+    "description": "S-20/21 donut centre label"
+  },
+  "budgetOverviewZaghlolWarn": "حاسب يا كبير! {category} وصل {percent} وإحنا لسه فاضل {daysCount, plural, one{يوم} two{يومين} few{{days} أيام} other{{days} يوم}} على القبض.",
+  "@budgetOverviewZaghlolWarn": {
+    "description": "S-22 Zaghlol banner on the hottest category (mockup 09)",
+    "placeholders": {
+      "category": {
+        "type": "String"
+      },
+      "percent": {
+        "type": "String"
+      },
+      "daysCount": {
+        "type": "int"
+      },
+      "days": {
+        "type": "String"
+      }
+    }
+  },
+  "budgetOverviewOfLimit": "من {limit}",
+  "@budgetOverviewOfLimit": {
+    "description": "S-22 hero: muted tail after the spent figure",
+    "placeholders": {
+      "limit": {
+        "type": "String"
+      }
+    }
+  },
+  "recurringBillsAddShort": "ضيف",
+  "@recurringBillsAddShort": {
+    "description": "S-24 header: add a bill (compact text button)"
+  },
+  "recurringBillsKpiDue": "أقساط عليك الشهر ده",
+  "@recurringBillsKpiDue": {
+    "description": "S-24 KPI card label (mockup 10)"
+  },
+  "recurringBillsKpiSubs": "الاشتراكات بتاكل في السنة",
+  "@recurringBillsKpiSubs": {
+    "description": "S-24 KPI card label"
+  },
+  "recurringBillsInstallmentOf": "قسط {index} من {total}",
+  "@recurringBillsInstallmentOf": {
+    "description": "S-24 row sub-line",
+    "placeholders": {
+      "index": {
+        "type": "String"
+      },
+      "total": {
+        "type": "String"
+      }
+    }
+  },
+  "recurringBillsGameyaMonth": "الشهر {index} من {total}",
+  "@recurringBillsGameyaMonth": {
+    "description": "S-24 row sub-line for a gameya",
+    "placeholders": {
+      "index": {
+        "type": "String"
+      },
+      "total": {
+        "type": "String"
+      }
+    }
   }
 }

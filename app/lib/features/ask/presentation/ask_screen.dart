@@ -74,43 +74,71 @@ class _AskScreenState extends ConsumerState<AskScreen> {
 
     return Scaffold(
       backgroundColor: c.bg,
-      appBar: AppBar(
-        title: Text(l.commonNavZaghlol),
-        actions: [
-          PopupMenuButton<_Menu>(
-            tooltip: l.chatMainClear,
-            constraints: const BoxConstraints(minWidth: ZSpacing.minTarget),
-            onSelected: (_) {
-              ref.read(askChatProvider.notifier).clear();
-              ScaffoldMessenger.of(context)
-                  .showSnackBar(SnackBar(content: Text(l.chatMainCleared)));
-            },
-            itemBuilder: (_) => [
-              PopupMenuItem(value: _Menu.clear, child: Text(l.chatMainClear)),
-            ],
-          ),
-        ],
-      ),
       body: SafeArea(
         child: Column(
           children: [
+            Padding(
+              padding: const EdgeInsetsDirectional.fromSTEB(
+                ZSpacing.screen,
+                ZSpacing.sm,
+                ZSpacing.screen,
+                0,
+              ),
+              child: Row(
+                children: [
+                  Expanded(
+                    child: Semantics(
+                      header: true,
+                      child: Text(
+                        l.chatMainTitle,
+                        style: ZType.display.copyWith(color: c.text),
+                      ),
+                    ),
+                  ),
+                  PopupMenuButton<_Menu>(
+                    tooltip: l.chatMainClear,
+                    onSelected: (_) {
+                      ref.read(askChatProvider.notifier).clear();
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        SnackBar(content: Text(l.chatMainCleared)),
+                      );
+                    },
+                    itemBuilder: (_) => [
+                      PopupMenuItem(
+                        value: _Menu.clear,
+                        child: Text(l.chatMainClear),
+                      ),
+                    ],
+                    child: const SizedBox.square(
+                      dimension: ZSpacing.minTarget,
+                      child: Center(child: _Disc(icon: Icons.more_horiz)),
+                    ),
+                  ),
+                ],
+              ),
+            ),
             Expanded(
               child: ListView(
                 controller: _scroll,
                 padding: const EdgeInsetsDirectional.all(ZSpacing.screen),
                 children: [
-                  _Header(
-                    thinking: chat.thinking,
-                    empty: chat.messages.isEmpty,
-                  ),
+                  if (chat.messages.isEmpty)
+                    _Bubble(
+                      fromUser: false,
+                      mood: chat.thinking
+                          ? ZaghlolMoment.thinking
+                          : ZaghlolMoment.tourGuide,
+                      talk: chat.thinking,
+                      semanticsLabel: l.chatMainZaghlolA11y(l.chatMainGreeting),
+                      child: Text(l.chatMainGreeting),
+                    ),
                   for (final m in chat.messages) _MessageView(message: m),
                   if (chat.thinking) const _TypingBubble(),
                 ],
               ),
             ),
             _Chips(chat: chat),
-            _RoastRow(on: chat.roast),
-            _InputRow(controller: _text, onSend: _send),
+            _InputRow(controller: _text, onSend: _send, roast: chat.roast),
           ],
         ),
       ),
@@ -118,32 +146,29 @@ class _AskScreenState extends ConsumerState<AskScreen> {
   }
 }
 
-class _Header extends StatelessWidget {
-  const _Header({required this.thinking, required this.empty});
-  final bool thinking;
-  final bool empty;
+/// 40 dp white disc used for round top-bar actions.
+class _Disc extends StatelessWidget {
+  const _Disc({required this.icon});
+  final IconData icon;
 
   @override
   Widget build(BuildContext context) {
-    final l = AppLocalizations.of(context);
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Align(
-          alignment: AlignmentDirectional.centerStart,
-          child: ZaghlolAvatar(
-            moment: thinking ? ZaghlolMoment.thinking : ZaghlolMoment.tourGuide,
-            talk: thinking,
-            size: 72,
+    final c = ZColors.of(context);
+    return Container(
+      width: 40,
+      height: 40,
+      decoration: BoxDecoration(
+        shape: BoxShape.circle,
+        color: c.surface,
+        boxShadow: [
+          BoxShadow(
+            color: c.shadow,
+            blurRadius: 12,
+            offset: const Offset(0, 3),
           ),
-        ),
-        if (empty)
-          _Bubble(
-            fromUser: false,
-            semanticsLabel: l.chatMainZaghlolA11y(l.chatMainGreeting),
-            child: Text(l.chatMainGreeting),
-          ),
-      ],
+        ],
+      ),
+      child: Icon(icon, size: 20, color: c.text),
     );
   }
 }
@@ -153,45 +178,104 @@ class _Bubble extends StatelessWidget {
     required this.fromUser,
     required this.child,
     required this.semanticsLabel,
+    this.mood = ZaghlolMoment.tourGuide,
+    this.talk = false,
+    this.tag,
   });
   final bool fromUser;
   final Widget child;
   final String semanticsLabel;
+  final ZaghlolMoment mood;
+  final bool talk;
+
+  /// Small label above a Zaghlol bubble (roast mode).
+  final String? tag;
 
   @override
   Widget build(BuildContext context) {
     final c = ZColors.of(context);
     final width = MediaQuery.sizeOf(context).width;
-    return Align(
-      alignment: fromUser
-          ? AlignmentDirectional.centerEnd
-          : AlignmentDirectional.centerStart,
+    const avatar = 56.0;
+    final bubble = DecoratedBox(
+      decoration: BoxDecoration(
+        color: fromUser ? c.primary : c.zaghlolBg,
+        borderRadius: BorderRadiusDirectional.only(
+          topStart: const Radius.circular(ZRadius.card),
+          topEnd: const Radius.circular(ZRadius.card),
+          bottomStart: Radius.circular(fromUser ? ZRadius.card : ZRadius.sm),
+          bottomEnd: Radius.circular(fromUser ? ZRadius.sm : ZRadius.card),
+        ),
+      ),
       child: Padding(
-        padding: const EdgeInsetsDirectional.only(top: ZSpacing.sm),
-        child: ConstrainedBox(
-          constraints: BoxConstraints(maxWidth: width * 0.82),
-          child: Semantics(
-            container: true,
-            label: semanticsLabel,
-            excludeSemantics: true,
-            child: DecoratedBox(
-              decoration: BoxDecoration(
-                color: fromUser ? c.primaryContainer : c.zaghlolBg,
-                borderRadius: BorderRadius.circular(ZRadius.lg),
-              ),
-              child: Padding(
-                padding: const EdgeInsetsDirectional.all(ZSpacing.md),
-                child: DefaultTextStyle.merge(
-                  style: ZType.body.copyWith(
-                    color: fromUser ? c.onPrimaryContainer : c.text,
+        padding: const EdgeInsetsDirectional.all(ZSpacing.lg),
+        child: DefaultTextStyle.merge(
+          style: ZType.body.copyWith(color: fromUser ? c.onPrimary : c.text),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              if (tag != null)
+                Padding(
+                  padding: const EdgeInsetsDirectional.only(
+                    bottom: ZSpacing.sm,
                   ),
-                  child: child,
+                  child: Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Icon(
+                        Icons.local_fire_department,
+                        size: 16,
+                        color: c.warningText,
+                      ),
+                      const SizedBox(width: ZSpacing.xs),
+                      Text(
+                        tag!,
+                        style: ZType.label.copyWith(color: c.warningText),
+                      ),
+                    ],
+                  ),
                 ),
-              ),
-            ),
+              child,
+            ],
           ),
         ),
       ),
+    );
+    return Padding(
+      padding: const EdgeInsetsDirectional.only(top: ZSpacing.md),
+      child: fromUser
+          ? Align(
+              alignment: AlignmentDirectional.centerEnd,
+              child: ConstrainedBox(
+                constraints: BoxConstraints(maxWidth: width * 0.78),
+                child: Semantics(
+                  container: true,
+                  label: semanticsLabel,
+                  excludeSemantics: true,
+                  child: bubble,
+                ),
+              ),
+            )
+          : Row(
+              crossAxisAlignment: CrossAxisAlignment.end,
+              children: [
+                Padding(
+                  padding: const EdgeInsetsDirectional.only(end: ZSpacing.sm),
+                  child: ZaghlolAvatar(moment: mood, talk: talk, size: avatar),
+                ),
+                Flexible(
+                  child: ConstrainedBox(
+                    constraints: BoxConstraints(maxWidth: width * 0.78),
+                    child: Semantics(
+                      container: true,
+                      label: semanticsLabel,
+                      excludeSemantics: true,
+                      child: bubble,
+                    ),
+                  ),
+                ),
+              ],
+            ),
     );
   }
 }
@@ -235,11 +319,15 @@ class _MessageView extends ConsumerWidget {
     final content = builder.build(answer);
     return _Bubble(
       fromUser: false,
+      tag: answer is AskRoastAnswer ? l.chatMainRoastTag : null,
+      mood: answer is AskRoastAnswer
+          ? ZaghlolMoment.shocked
+          : ZaghlolMoment.proud,
       semanticsLabel: l.chatMainZaghlolA11y(content.lines.join(' ')),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          for (final line in content.lines) Text(line),
+          for (final line in content.lines) Text(line, style: ZType.body),
           for (final chart in content.charts) _MiniBars(chart: chart),
           if (answer is AskUnavailableAnswer)
             Align(
@@ -262,7 +350,7 @@ class _MiniBars extends StatelessWidget {
   const _MiniBars({required this.chart});
   final AskMiniChart chart;
 
-  static const double _height = 64;
+  static const double _height = 88;
 
   @override
   Widget build(BuildContext context) {
@@ -293,12 +381,12 @@ class _MiniBars extends StatelessWidget {
                             alignment: Alignment.bottomCenter,
                             child: FractionallySizedBox(
                               heightFactor: (b.permille.clamp(30, 1000)) / 1000,
-                              widthFactor: 0.6,
+                              widthFactor: 0.5,
                               child: DecoratedBox(
                                 decoration: BoxDecoration(
-                                  color: c.primary,
+                                  color: c.dangerText.withValues(alpha: 0.75),
                                   borderRadius: BorderRadius.circular(
-                                    ZRadius.sm,
+                                    ZRadius.md,
                                   ),
                                 ),
                               ),
@@ -333,6 +421,8 @@ class _TypingBubble extends StatelessWidget {
     final c = ZColors.of(context);
     return _Bubble(
       fromUser: false,
+      mood: ZaghlolMoment.thinking,
+      talk: true,
       semanticsLabel: l.chatMainTypingA11y,
       child: Row(
         mainAxisSize: MainAxisSize.min,
@@ -421,6 +511,19 @@ class _Chips extends ConsumerWidget {
                 ),
                 child: ActionChip(
                   label: Text(askChipLabel(l, chip)),
+                  labelStyle: ZType.titleSmall.copyWith(
+                    color: ZColors.of(context).text,
+                    fontWeight: FontWeight.w500,
+                  ),
+                  backgroundColor: ZColors.of(context).surface,
+                  side: BorderSide.none,
+                  elevation: 2,
+                  shadowColor: ZColors.of(context).shadow,
+                  shape: const StadiumBorder(),
+                  padding: const EdgeInsetsDirectional.symmetric(
+                    horizontal: ZSpacing.sm,
+                    vertical: ZSpacing.sm,
+                  ),
                   onPressed: chat.thinking
                       ? null
                       : () => ref
@@ -435,41 +538,20 @@ class _Chips extends ConsumerWidget {
   }
 }
 
-class _RoastRow extends ConsumerWidget {
-  const _RoastRow({required this.on});
-  final bool on;
-
-  @override
-  Widget build(BuildContext context, WidgetRef ref) {
-    final l = AppLocalizations.of(context);
-    return Padding(
-      padding: const EdgeInsetsDirectional.symmetric(
-        horizontal: ZSpacing.screen,
-      ),
-      child: Semantics(
-        hint: l.chatMainRoastHint,
-        child: SwitchListTile(
-          key: const ValueKey('ask-roast-toggle'),
-          contentPadding: EdgeInsetsDirectional.zero,
-          secondary: const Icon(Icons.local_fire_department_outlined),
-          title: Text(l.chatMainRoast),
-          subtitle: Text(l.chatMainRoastHint),
-          value: on,
-          onChanged: ref.read(askChatProvider.notifier).setRoast,
-        ),
-      ),
-    );
-  }
-}
-
 class _InputRow extends ConsumerWidget {
-  const _InputRow({required this.controller, required this.onSend});
+  const _InputRow({
+    required this.controller,
+    required this.onSend,
+    required this.roast,
+  });
   final TextEditingController controller;
   final VoidCallback onSend;
+  final bool roast;
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final l = AppLocalizations.of(context);
+    final c = ZColors.of(context);
     final busy = ref.watch(askChatProvider.select((s) => s.thinking));
     return ValueListenableBuilder<TextEditingValue>(
       valueListenable: controller,
@@ -479,44 +561,124 @@ class _InputRow extends ConsumerWidget {
         return Padding(
           padding: const EdgeInsetsDirectional.fromSTEB(
             ZSpacing.screen,
-            ZSpacing.xs,
             ZSpacing.sm,
+            ZSpacing.screen,
             ZSpacing.sm,
           ),
-          child: Row(
+          child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Expanded(
-                child: TextField(
-                  controller: controller,
-                  minLines: 1,
-                  maxLines: 3,
-                  textInputAction: TextInputAction.send,
-                  onSubmitted: (_) {
-                    if (ok) onSend();
-                  },
-                  decoration: InputDecoration(
-                    hintText: l.chatMainInputHint,
-                    errorText: tooLong
-                        ? l.chatMainTooLong(
-                            askMaxQuestionChars,
-                            '$askMaxQuestionChars',
-                          )
-                        : null,
+              DecoratedBox(
+                decoration: BoxDecoration(
+                  color: c.surface,
+                  borderRadius: BorderRadius.circular(ZRadius.pill),
+                  border: Border.all(color: c.outline),
+                ),
+                child: Row(
+                  children: [
+                    Padding(
+                      padding: const EdgeInsetsDirectional.only(
+                        start: ZSpacing.xs,
+                      ),
+                      child: Semantics(
+                        toggled: roast,
+                        hint: l.chatMainRoastHint,
+                        label: l.chatMainRoast,
+                        excludeSemantics: true,
+                        child: Tooltip(
+                          message: l.chatMainRoast,
+                          child: InkResponse(
+                            key: const ValueKey('ask-roast-toggle'),
+                            onTap: () => ref
+                                .read(askChatProvider.notifier)
+                                .setRoast(!roast),
+                            radius: 28,
+                            child: SizedBox.square(
+                              dimension: ZSpacing.minTarget,
+                              child: Center(
+                                child: Container(
+                                  width: 40,
+                                  height: 40,
+                                  decoration: BoxDecoration(
+                                    shape: BoxShape.circle,
+                                    color: roast
+                                        ? c.accent
+                                        : c.primaryContainer,
+                                  ),
+                                  child: Icon(
+                                    Icons.local_fire_department,
+                                    size: 22,
+                                    color: roast ? c.onAccent : c.warningText,
+                                  ),
+                                ),
+                              ),
+                            ),
+                          ),
+                        ),
+                      ),
+                    ),
+                    Expanded(
+                      child: TextField(
+                        controller: controller,
+                        minLines: 1,
+                        maxLines: 3,
+                        textInputAction: TextInputAction.send,
+                        onSubmitted: (_) {
+                          if (ok) onSend();
+                        },
+                        decoration: InputDecoration(
+                          hintText: l.chatMainInputHint,
+                          filled: false,
+                          border: InputBorder.none,
+                          enabledBorder: InputBorder.none,
+                          focusedBorder: InputBorder.none,
+                          contentPadding: const EdgeInsetsDirectional.symmetric(
+                            horizontal: ZSpacing.md,
+                            vertical: ZSpacing.md,
+                          ),
+                        ),
+                      ),
+                    ),
+                    Padding(
+                      padding: const EdgeInsetsDirectional.only(
+                        end: ZSpacing.xs,
+                      ),
+                      child: IconButton(
+                        key: const ValueKey('ask-send'),
+                        tooltip: l.chatMainSendA11y,
+                        style: IconButton.styleFrom(
+                          backgroundColor: c.primary,
+                          foregroundColor: c.onPrimary,
+                          disabledBackgroundColor: c.primary.withValues(
+                            alpha: 0.38,
+                          ),
+                          disabledForegroundColor: c.onPrimary,
+                          fixedSize: const Size(44, 44),
+                          minimumSize: const Size(44, 44),
+                          tapTargetSize: MaterialTapTargetSize.padded,
+                        ),
+                        // Icons.send mirrors automatically (matchTextDirection).
+                        icon: const Icon(Icons.send_rounded, size: 20),
+                        onPressed: ok ? onSend : null,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+              if (tooLong)
+                Padding(
+                  padding: const EdgeInsetsDirectional.only(
+                    top: ZSpacing.xs,
+                    start: ZSpacing.lg,
+                  ),
+                  child: Text(
+                    l.chatMainTooLong(
+                      askMaxQuestionChars,
+                      '$askMaxQuestionChars',
+                    ),
+                    style: ZType.bodySmall.copyWith(color: c.dangerText),
                   ),
                 ),
-              ),
-              IconButton(
-                key: const ValueKey('ask-send'),
-                tooltip: l.chatMainSendA11y,
-                constraints: const BoxConstraints(
-                  minWidth: ZSpacing.minTarget,
-                  minHeight: ZSpacing.minTarget,
-                ),
-                // Icons.send mirrors automatically (matchTextDirection).
-                icon: const Icon(Icons.send_rounded),
-                onPressed: ok ? onSend : null,
-              ),
             ],
           ),
         );

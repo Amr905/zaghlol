@@ -1,0 +1,16 @@
+{
+  "sender": "BankNXT",
+  "body": "Bank NXT: EGP 175.00 spent at CILANTRO using Card **8412. Avl Bal: EGP 5,825.00",
+  "receivedAt": "2026-10-23T11:14:00+03:00",
+  "expect": {
+    "template": "bank_nxt.card_purchase.en",
+    "event": "card_purchase",
+    "direction": "expense",
+    "currency": "EGP",
+    "amount": "175.00",
+    "last4": "8412",
+    "balance": "5825.00",
+    "available": null,
+    "merchantClean": "Cilantro"
+  }
+}

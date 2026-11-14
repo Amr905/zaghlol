@@ -16,6 +16,7 @@ class ZBanner extends StatelessWidget {
     this.onAction,
     this.onDismiss,
     this.dismissSemanticsLabel,
+    this.icon,
   });
 
   final String message;
@@ -25,10 +26,13 @@ class ZBanner extends StatelessWidget {
   final VoidCallback? onDismiss;
   final String? dismissSemanticsLabel;
 
+  /// Overrides the tone's default icon.
+  final IconData? icon;
+
   @override
   Widget build(BuildContext context) {
     final c = ZColors.of(context);
-    final (Color fg, Color bg, IconData icon) = switch (tone) {
+    final (Color fg, Color bg, IconData toneIcon) = switch (tone) {
       ZBannerTone.info => (
         c.onPrimaryContainer,
         c.primaryContainer,
@@ -59,7 +63,7 @@ class ZBanner extends StatelessWidget {
           child: Row(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              ExcludeSemantics(child: Icon(icon, color: fg)),
+              ExcludeSemantics(child: Icon(icon ?? toneIcon, color: fg)),
               const SizedBox(width: ZSpacing.md),
               Expanded(
                 child: Column(

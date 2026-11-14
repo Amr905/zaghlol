@@ -207,21 +207,51 @@ class _SplitSheetState extends ConsumerState<SplitSheet> {
       body = _content(context, l, f, data);
     }
 
-    return ZSheetBody(
-      title: l.transfersSplitTitle,
-      actions: data == null
-          ? null
-          : ZButton(
-              label: l.commonActionSave,
-              expand: true,
-              loading: _busy,
-              onPressed: () => _save(data, f),
+    final c = ZColors.of(context);
+    final inset = MediaQuery.viewInsetsOf(context).bottom;
+    return Padding(
+      padding: EdgeInsets.only(bottom: inset),
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          const SizedBox(height: ZSpacing.sm),
+          Semantics(
+            header: true,
+            child: Text(
+              l.transfersSplitTitle,
+              textAlign: TextAlign.center,
+              style: ZType.headline.copyWith(color: c.text),
             ),
-      child: body,
+          ),
+          if (data != null)
+            Padding(
+              padding: const EdgeInsetsDirectional.only(
+                top: ZSpacing.xs,
+                bottom: ZSpacing.lg,
+              ),
+              child: Text(
+                l.transfersSplitHeader(f.money(data.amount), data.merchant),
+                textAlign: TextAlign.center,
+                style: ZType.body.copyWith(color: c.textMuted),
+              ),
+            ),
+          Flexible(
+            child: SingleChildScrollView(
+              padding: const EdgeInsetsDirectional.symmetric(
+                horizontal: ZSpacing.lg,
+              ),
+              child: body,
+            ),
+          ),
+          if (data != null) _footer(context, l, f, data),
+        ],
+      ),
     );
   }
 
-  Widget _content(
+  /// "You actually paid" figure and the Save button.
+  Widget _footer(
     BuildContext context,
     AppLocalizations l,
     TransfersFmt f,
@@ -232,86 +262,136 @@ class _SplitSheetState extends ConsumerState<SplitSheet> {
     final shares = [for (final r in _rows) _share(r, cur, f) ?? Money(cur, 0)];
     final own = ownShare(d.amount, shares);
     final net = netOfOffsets(d.amount, d.reimbursed);
+    return Padding(
+      padding: const EdgeInsetsDirectional.fromSTEB(
+        ZSpacing.xl,
+        ZSpacing.lg,
+        ZSpacing.xl,
+        ZSpacing.lg,
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Semantics(
+            container: true,
+            child: Row(
+              crossAxisAlignment: CrossAxisAlignment.center,
+              children: [
+                Expanded(
+                  child: Text(
+                    l.transfersSplitYourShare,
+                    style: ZType.titleSmall.copyWith(
+                      color: c.text,
+                      fontWeight: FontWeight.w500,
+                    ),
+                  ),
+                ),
+                ZMoneyText(
+                  text: f.money(own),
+                  size: ZMoneySize.title,
+                  semanticsLabel:
+                      '${l.transfersSplitYourShare} ${f.money(own)}',
+                ),
+              ],
+            ),
+          ),
+          if (d.reimbursed.minor > 0)
+            Padding(
+              padding: const EdgeInsetsDirectional.only(top: ZSpacing.xs),
+              child: Text(
+                l.transactionsRowReimbursed(
+                  f.money(d.reimbursed),
+                  f.money(net),
+                ),
+                style: ZType.caption.copyWith(color: c.textMuted),
+              ),
+            ),
+          const SizedBox(height: ZSpacing.lg),
+          ZButton(
+            label: l.commonActionSave,
+            expand: true,
+            loading: _busy,
+            onPressed: () => _save(d, f),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _content(
+    BuildContext context,
+    AppLocalizations l,
+    TransfersFmt f,
+    SplitData d,
+  ) {
+    final c = ZColors.of(context);
     final validation = _submitted ? _validate(l, d, f) : null;
     final people = {for (final p in d.people) p.id: p};
 
     return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
+      crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
-        Semantics(
-          header: false,
-          child: Text(
-            l.transfersSplitHeader(f.money(d.amount), d.merchant),
-            style: ZType.titleSmall.copyWith(color: c.text),
-          ),
-        ),
-        SheetLabel(l.transfersSplitPeople),
-        for (var i = 0; i < _rows.length; i++)
-          _personRow(context, l, f, d, _rows[i], people[_rows[i].id]),
-        Align(
-          alignment: AlignmentDirectional.centerStart,
-          child: Wrap(
-            spacing: ZSpacing.sm,
+        ZCard(
+          padding: EdgeInsetsDirectional.zero,
+          child: Column(
             children: [
-              ZButton(
-                label: l.transfersSplitAddPerson,
-                icon: Icons.add,
-                variant: ZButtonVariant.text,
-                onPressed: () => setState(() => _rows.add(_Row())),
-              ),
-              ZButton(
-                label: l.transfersSplitEqual,
-                variant: ZButtonVariant.text,
-                onPressed: () => _splitEvenly(d, f),
+              for (var i = 0; i < _rows.length; i++)
+                _personRow(
+                  context,
+                  l,
+                  f,
+                  d,
+                  _rows[i],
+                  people[_rows[i].id],
+                  divider: i > 0,
+                ),
+              Padding(
+                padding: const EdgeInsetsDirectional.symmetric(
+                  horizontal: ZSpacing.sm,
+                ),
+                child: Align(
+                  alignment: AlignmentDirectional.centerStart,
+                  child: Wrap(
+                    spacing: ZSpacing.sm,
+                    children: [
+                      ZButton(
+                        label: l.transfersSplitAddPerson,
+                        icon: Icons.add,
+                        variant: ZButtonVariant.text,
+                        onPressed: () => setState(() => _rows.add(_Row())),
+                      ),
+                      ZButton(
+                        label: l.transfersSplitEqual,
+                        variant: ZButtonVariant.text,
+                        onPressed: () => _splitEvenly(d, f),
+                      ),
+                    ],
+                  ),
+                ),
               ),
             ],
           ),
         ),
-        const SizedBox(height: ZSpacing.sm),
-        ZCard(
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Semantics(
-                container: true,
+        for (final s in d.suggestions)
+          Padding(
+            padding: const EdgeInsetsDirectional.only(top: ZSpacing.md),
+            child: DecoratedBox(
+              decoration: BoxDecoration(
+                color: c.primaryContainer,
+                borderRadius: BorderRadius.circular(ZRadius.lg),
+              ),
+              child: Padding(
+                padding: const EdgeInsetsDirectional.all(ZSpacing.md),
                 child: Row(
                   children: [
-                    Expanded(
-                      child: Text(
-                        l.transfersSplitYourShare,
-                        style: ZType.body.copyWith(color: c.text),
+                    ExcludeSemantics(
+                      child: Icon(
+                        Icons.lightbulb_outline,
+                        color: c.onPrimaryContainer,
                       ),
                     ),
-                    ZMoneyText(
-                      text: f.money(own),
-                      size: ZMoneySize.body,
-                      semanticsLabel:
-                          '${l.transfersSplitYourShare} ${f.money(own)}',
-                    ),
-                  ],
-                ),
-              ),
-              if (d.reimbursed.minor > 0) ...[
-                const SizedBox(height: ZSpacing.xs),
-                Text(
-                  l.transactionsRowReimbursed(
-                    f.money(d.reimbursed),
-                    f.money(net),
-                  ),
-                  style: ZType.caption.copyWith(color: c.textMuted),
-                ),
-              ],
-            ],
-          ),
-        ),
-        if (d.suggestions.isNotEmpty) ...[
-          SheetLabel(l.transfersSplitSuggestions),
-          for (final s in d.suggestions)
-            Padding(
-              padding: const EdgeInsetsDirectional.only(bottom: ZSpacing.sm),
-              child: ZCard(
-                child: Row(
-                  children: [
+                    const SizedBox(width: ZSpacing.md),
                     Expanded(
                       child: Text(
                         l.transfersSplitSuggestion(
@@ -319,21 +399,22 @@ class _SplitSheetState extends ConsumerState<SplitSheet> {
                           f.date(s.date),
                           s.person,
                         ),
-                        style: ZType.bodySmall.copyWith(color: c.text),
+                        style: ZType.bodySmall.copyWith(
+                          color: c.onPrimaryContainer,
+                        ),
                       ),
                     ),
                     const SizedBox(width: ZSpacing.sm),
                     ZButton(
                       label: l.commonActionLink,
                       size: ZButtonSize.small,
-                      variant: ZButtonVariant.secondary,
                       onPressed: () => _linkSuggestion(d, s),
                     ),
                   ],
                 ),
               ),
             ),
-        ],
+          ),
         if (validation != null || _error != null) ...[
           const SizedBox(height: ZSpacing.md),
           ZBanner(message: validation ?? _error!, tone: ZBannerTone.error),
@@ -349,92 +430,142 @@ class _SplitSheetState extends ConsumerState<SplitSheet> {
     TransfersFmt f,
     SplitData d,
     _Row r,
-    SplitPerson? person,
-  ) {
+    SplitPerson? person, {
+    required bool divider,
+  }) {
     final c = ZColors.of(context);
     final name = r.name.text.trim();
-    return Padding(
-      padding: const EdgeInsetsDirectional.only(bottom: ZSpacing.md),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Row(
+    final initial = name.isEmpty ? '' : String.fromCharCode(name.runes.first);
+    const bare = InputDecoration(
+      filled: false,
+      border: InputBorder.none,
+      enabledBorder: InputBorder.none,
+      focusedBorder: InputBorder.none,
+      isDense: true,
+      constraints: BoxConstraints(minHeight: ZSpacing.minTarget),
+      contentPadding: EdgeInsetsDirectional.symmetric(vertical: ZSpacing.sm),
+    );
+    return Column(
+      children: [
+        if (divider)
+          Padding(
+            padding: const EdgeInsetsDirectional.only(start: 72),
+            child: Divider(height: 1, thickness: 1, color: c.outline),
+          ),
+        Padding(
+          padding: const EdgeInsetsDirectional.fromSTEB(
+            ZSpacing.md,
+            ZSpacing.sm,
+            ZSpacing.xs,
+            ZSpacing.sm,
+          ),
+          child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Expanded(
-                child: Semantics(
-                  textField: true,
-                  label: l.transfersSplitPersonHint,
-                  child: TextField(
-                    controller: r.name,
-                    onChanged: (_) => setState(() {}),
-                    textInputAction: TextInputAction.next,
-                    decoration: InputDecoration(
-                      hintText: l.transfersSplitPersonHint,
+              Row(
+                children: [
+                  ExcludeSemantics(
+                    child: Container(
+                      width: 44,
+                      height: 44,
+                      alignment: AlignmentDirectional.center,
+                      decoration: BoxDecoration(
+                        shape: BoxShape.circle,
+                        color: c.primaryContainer,
+                      ),
+                      child: initial.isEmpty
+                          ? Icon(Icons.person_outline, color: c.primary)
+                          : Text(
+                              initial,
+                              style: ZType.titleSmall.copyWith(
+                                color: c.primary,
+                              ),
+                            ),
                     ),
                   ),
-                ),
+                  const SizedBox(width: ZSpacing.md),
+                  Expanded(
+                    child: Semantics(
+                      textField: true,
+                      label: l.transfersSplitPersonHint,
+                      child: TextField(
+                        controller: r.name,
+                        onChanged: (_) => setState(() {}),
+                        textInputAction: TextInputAction.next,
+                        style: ZType.titleSmall.copyWith(color: c.text),
+                        decoration: bare.copyWith(
+                          hintText: l.transfersSplitPersonHint,
+                        ),
+                      ),
+                    ),
+                  ),
+                  if (person != null) ...[
+                    const SizedBox(width: ZSpacing.sm),
+                    Flexible(
+                      child: ZPill(
+                        label: person.paidBack
+                            ? l.transfersSplitPaidBack
+                            : l.transfersSplitWaiting,
+                        tone: person.paidBack
+                            ? ZPillTone.success
+                            : ZPillTone.neutral,
+                        icon: person.paidBack ? Icons.check : null,
+                      ),
+                    ),
+                  ],
+                  const SizedBox(width: ZSpacing.sm),
+                  AmountField(
+                    controller: r.share,
+                    semanticsLabel: l.transfersSplitShareA11y(name),
+                    width: 72,
+                    onChanged: (_) => setState(() {}),
+                  ),
+                  IconButton(
+                    tooltip: l.transfersSplitRemovePerson(name),
+                    constraints: const BoxConstraints(
+                      minWidth: ZSpacing.minTarget,
+                      minHeight: ZSpacing.minTarget,
+                    ),
+                    icon: Icon(Icons.close, size: 18, color: c.textMuted),
+                    onPressed: () => setState(() {
+                      if (r.id != null) _removed.add(r.id!);
+                      _rows.remove(r);
+                      _gone.add(r);
+                    }),
+                  ),
+                ],
               ),
-              const SizedBox(width: ZSpacing.sm),
-              AmountField(
-                controller: r.share,
-                semanticsLabel: l.transfersSplitShareA11y(name),
-                onChanged: (_) => setState(() {}),
-              ),
-              IconButton(
-                tooltip: l.transfersSplitRemovePerson(name),
-                constraints: const BoxConstraints(
-                  minWidth: ZSpacing.minTarget,
-                  minHeight: ZSpacing.minTarget,
-                ),
-                icon: Icon(Icons.close, color: c.textMuted),
-                onPressed: () => setState(() {
-                  if (r.id != null) _removed.add(r.id!);
-                  _rows.remove(r);
-                  _gone.add(r);
-                }),
-              ),
+              if (person != null)
+                for (final rep in person.repayments)
+                  Padding(
+                    padding: const EdgeInsetsDirectional.only(
+                      start: 56,
+                      end: ZSpacing.sm,
+                    ),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          l.transfersSplitPaidDetail(
+                            f.money(rep.amount),
+                            f.date(rep.date),
+                            rep.sourceLabel,
+                          ),
+                          style: ZType.caption.copyWith(color: c.textMuted),
+                        ),
+                        ZButton(
+                          label: l.transfersSplitUnassign,
+                          size: ZButtonSize.small,
+                          variant: ZButtonVariant.text,
+                          onPressed: () => _unassign(d, person, rep),
+                        ),
+                      ],
+                    ),
+                  ),
             ],
           ),
-          if (person != null) ...[
-            const SizedBox(height: ZSpacing.xs),
-            Align(
-              alignment: AlignmentDirectional.centerStart,
-              child: ZPill(
-                label: person.paidBack
-                    ? l.transfersSplitPaidBack
-                    : l.transfersSplitWaiting,
-                tone: person.paidBack ? ZPillTone.success : ZPillTone.neutral,
-                icon: person.paidBack
-                    ? Icons.check_circle_outline
-                    : Icons.schedule,
-              ),
-            ),
-            for (final rep in person.repayments) ...[
-              Padding(
-                padding: const EdgeInsetsDirectional.only(top: ZSpacing.xs),
-                child: Text(
-                  l.transfersSplitPaidDetail(
-                    f.money(rep.amount),
-                    f.date(rep.date),
-                    rep.sourceLabel,
-                  ),
-                  style: ZType.caption.copyWith(color: c.textMuted),
-                ),
-              ),
-              Align(
-                alignment: AlignmentDirectional.centerStart,
-                child: ZButton(
-                  label: l.transfersSplitUnassign,
-                  size: ZButtonSize.small,
-                  variant: ZButtonVariant.text,
-                  onPressed: () => _unassign(d, person, rep),
-                ),
-              ),
-            ],
-          ],
-        ],
-      ),
+        ),
+      ],
     );
   }
 }

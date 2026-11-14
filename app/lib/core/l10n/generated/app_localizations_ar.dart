@@ -57,16 +57,16 @@ class AppLocalizationsAr extends AppLocalizations {
   String get appLockRootedOk => 'تمام';
 
   @override
-  String get homeQuickAddTitle => 'عايز تسجل إيه؟';
+  String get homeQuickAddTitle => 'تحب تسجل إيه؟';
 
   @override
-  String get homeQuickAddSay => 'قول';
+  String get homeQuickAddSay => 'قولها';
 
   @override
-  String get homeQuickAddType => 'اكتب';
+  String get homeQuickAddType => 'اكتبها';
 
   @override
-  String get homeQuickAddScan => 'صوّر';
+  String get homeQuickAddScan => 'صوّرها';
 
   @override
   String get homeQuickAddAsset => 'أصل';
@@ -82,6 +82,18 @@ class AppLocalizationsAr extends AppLocalizations {
 
   @override
   String get homeQuickAddAssetA11y => 'ضيف أصل';
+
+  @override
+  String get homeQuickAddSayHint => 'بصوتك في ثانيتين';
+
+  @override
+  String get homeQuickAddTypeHint => 'مصروف أو دخل';
+
+  @override
+  String get homeQuickAddScanHint => 'سكرين شوت أو إيصال';
+
+  @override
+  String get homeQuickAddAssetHint => 'دهب، شهادة، عملة';
 
   @override
   String get ingestionReviewTitle => 'مستني رأيك 👀';
@@ -111,7 +123,7 @@ class AppLocalizationsAr extends AppLocalizations {
   String get commonActionTryAgain => 'جرّب تاني';
 
   @override
-  String get commonActionSkip => 'تخطّي';
+  String get commonActionSkip => 'تخطي';
 
   @override
   String get commonActionContinue => 'كمّل';
@@ -644,7 +656,7 @@ class AppLocalizationsAr extends AppLocalizations {
 
   @override
   String get onboardingAndroidSetupSmsPointSenders =>
-      'بقرا رسايل البنوك والمحافظ وإنستاباي بس';
+      'بنقرا رسايل البنوك والمحافظ وإنستاباي بس';
 
   @override
   String get onboardingAndroidSetupSmsPointPersonal =>
@@ -652,10 +664,10 @@ class AppLocalizationsAr extends AppLocalizations {
 
   @override
   String get onboardingAndroidSetupSmsPointOnPhone =>
-      'بيانات فلوسك بتفضل على الموبايل ده';
+      'كل حاجة بتفضل على الموبايل ده';
 
   @override
-  String get onboardingAndroidSetupSmsAllow => 'اسمح بقراية الرسايل';
+  String get onboardingAndroidSetupSmsAllow => 'اسمح بقراءة رسايل البنك';
 
   @override
   String get onboardingAndroidSetupSmsGranted => 'الرسايل اتسمحت ✓';
@@ -753,7 +765,8 @@ class AppLocalizationsAr extends AppLocalizations {
   }
 
   @override
-  String get onboardingIosSetupShortcutTitle => 'هنستخدم الاختصارات';
+  String get onboardingIosSetupShortcutTitle =>
+      'الآيفون مش بيسمح للتطبيقات تقرا الرسايل… فهنستخدم الاختصارات';
 
   @override
   String get onboardingIosSetupShortcutWhy =>
@@ -784,7 +797,7 @@ class AppLocalizationsAr extends AppLocalizations {
   String get onboardingIosSetupShortcutAdd => 'ضيف اختصار زغلول';
 
   @override
-  String get onboardingIosSetupHowItWorks => 'إزاي بيشتغل؟ (نص دقيقة)';
+  String get onboardingIosSetupHowItWorks => 'إزاي بيشتغل؟ (٣٠ ثانية)';
 
   @override
   String get onboardingIosSetupHowStep1 =>
@@ -849,7 +862,7 @@ class AppLocalizationsAr extends AppLocalizations {
   String get onboardingIosSetupFixTitle => 'إزاي تصلحها؟';
 
   @override
-  String get onboardingIosSetupFixStep1 => 'افتح Shortcuts وبعدين Automation';
+  String get onboardingIosSetupFixStep1 => 'افتح Shortcuts ← Automation';
 
   @override
   String onboardingIosSetupFixStep2(String automationName) {
@@ -880,13 +893,13 @@ class AppLocalizationsAr extends AppLocalizations {
   String get onboardingIosSetupFirstSay => 'قولها';
 
   @override
-  String get onboardingIosSetupFirstSayHint => '«دفعت خمسة وأربعين قهوة»';
+  String get onboardingIosSetupFirstSayHint => '«دفعت ٤٥ قهوة»';
 
   @override
   String get onboardingIosSetupFirstType => 'اكتبها';
 
   @override
-  String get onboardingIosSetupFirstTypeHint => 'المبلغ والتصنيف';
+  String get onboardingIosSetupFirstTypeHint => 'المبلغ والفئة';
 
   @override
   String get onboardingIosSetupFirstOnlineBanks =>
@@ -894,14 +907,13 @@ class AppLocalizationsAr extends AppLocalizations {
 
   @override
   String get onboardingIosSetupFirstOnlineBanksSub =>
-      'شوف إزاي تتابعهم على الآيفون';
+      'شوف إزاي تسجلهم على الآيفون';
 
   @override
   String get onboardingIosSetupFirstStatement => 'عندك كشف حساب؟';
 
   @override
-  String get onboardingIosSetupFirstStatementSub =>
-      'ضيف شهور فاتت مرة واحدة مع جولد';
+  String get onboardingIosSetupFirstStatementSub => 'ضيف شهور فاتت مرة واحدة';
 
   @override
   String get backupRestoreTitle => 'استرجاع نسخة';
@@ -1154,11 +1166,11 @@ class AppLocalizationsAr extends AppLocalizations {
     String _temp0 = intl.Intl.pluralLogic(
       count,
       locale: localeName,
-      other: 'فاضل $n يوم على القبض',
-      many: 'فاضل $n يوم على القبض',
-      few: 'فاضل $n أيام على القبض',
-      two: 'فاضل يومين على القبض',
-      one: 'فاضل يوم على القبض',
+      other: '$n يوم على القبض',
+      many: '$n يوم على القبض',
+      few: '$n أيام على القبض',
+      two: 'يومين على القبض',
+      one: 'يوم على القبض',
       zero: 'القبض النهارده',
     );
     return '$_temp0';
@@ -1624,7 +1636,7 @@ class AppLocalizationsAr extends AppLocalizations {
   String get transactionsDetailNoteHint => 'اكتب ملاحظة…';
 
   @override
-  String get transactionsDetailSplit => 'تقسيم / فلوس راجعة';
+  String get transactionsDetailSplit => 'تقسيم / فلوس راجعة من صحابك';
 
   @override
   String get transactionsDetailLinkTransfer => 'دي تحويلة لنفسي';
@@ -3035,7 +3047,7 @@ class AppLocalizationsAr extends AppLocalizations {
   }
 
   @override
-  String get insightsChartsExplain => 'اشرحلي يا زغلول';
+  String get insightsChartsExplain => 'اشرحلي';
 
   @override
   String get insightsChartsLockedSub => 'شوف الشارت كله مع جولد';
@@ -3105,7 +3117,7 @@ class AppLocalizationsAr extends AppLocalizations {
   String get insightsLegendSpent => 'صرفت';
 
   @override
-  String get insightsLegendSaved => 'حوشت';
+  String get insightsLegendSaved => 'اللي اتحوش';
 
   @override
   String get insightsLegendActual => 'فعلي';
@@ -3932,7 +3944,7 @@ class AppLocalizationsAr extends AppLocalizations {
 
   @override
   String recurringBillsDetected(String merchant, String amount) {
-    return 'لقيت اشتراك: $merchant بـ $amount في الشهر';
+    return 'شكلها اشتراك شهري: $merchant $amount';
   }
 
   @override
@@ -3942,7 +3954,7 @@ class AppLocalizationsAr extends AppLocalizations {
   String get recurringBillsNotSub => 'مش اشتراك';
 
   @override
-  String get recurringBillsUpcoming => 'اللي جاي';
+  String get recurringBillsUpcoming => 'الجاي';
 
   @override
   String recurringBillsInstallmentRow(String name, String index, String total) {
@@ -3950,7 +3962,7 @@ class AppLocalizationsAr extends AppLocalizations {
   }
 
   @override
-  String get recurringBillsLastOne => 'آخر قسط';
+  String get recurringBillsLastOne => 'آخر قسط! 🎉';
 
   @override
   String get recurringBillsMarkPaid => 'اتدفع';
@@ -3999,7 +4011,7 @@ class AppLocalizationsAr extends AppLocalizations {
   String get recurringBillsKindInstallment => 'قسط';
 
   @override
-  String get recurringBillsKindCard => 'سداد كارت';
+  String get recurringBillsKindCard => 'كريدت كارد';
 
   @override
   String get recurringBillsKindGameya => 'جمعية';
@@ -4121,7 +4133,7 @@ class AppLocalizationsAr extends AppLocalizations {
 
   @override
   String homeQuickAddVoiceLeft(String remaining, String max) {
-    return 'فاضل $remaining من $max تسجيل صوتي الشهر ده';
+    return 'باقيلك $remaining من $max تسجيل صوتي الشهر ده';
   }
 
   @override
@@ -5289,7 +5301,7 @@ class AppLocalizationsAr extends AppLocalizations {
   }
 
   @override
-  String get settingsMainGoldFree => 'الباقة المجانية';
+  String get settingsMainGoldFree => 'زغلول جولد';
 
   @override
   String settingsMainGoldActive(String plan) {
@@ -5303,7 +5315,7 @@ class AppLocalizationsAr extends AppLocalizations {
   }
 
   @override
-  String get settingsMainSeeGold => 'شوف جولد';
+  String get settingsMainSeeGold => 'إنت على الباقة المجانية';
 
   @override
   String get settingsMainSectionGeneral => 'عام';
@@ -7163,4 +7175,73 @@ class AppLocalizationsAr extends AppLocalizations {
 
   @override
   String get iosSetupNudgeSnoozeA11y => 'فكّرني بعد ٧ أيام';
+
+  @override
+  String get chatMainTitle => 'اسأل زغلول';
+
+  @override
+  String get chatMainRoastTag => 'قصف جبهة';
+
+  @override
+  String insightsChartsSavedFootnote(String amount, String percent) {
+    return 'وفرت $amount الشهر ده ($percent)';
+  }
+
+  @override
+  String insightsChartsMonthsCount(int count, String countText) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$countText شهر',
+      few: '$countText شهور',
+      two: 'شهرين',
+      one: 'شهر',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get insightsChartsSpendLabel => 'المصروف';
+
+  @override
+  String budgetOverviewZaghlolWarn(
+    String category,
+    String percent,
+    int daysCount,
+    String days,
+  ) {
+    String _temp0 = intl.Intl.pluralLogic(
+      daysCount,
+      locale: localeName,
+      other: '$days يوم',
+      few: '$days أيام',
+      two: 'يومين',
+      one: 'يوم',
+    );
+    return 'حاسب يا كبير! $category وصل $percent وإحنا لسه فاضل $_temp0 على القبض.';
+  }
+
+  @override
+  String budgetOverviewOfLimit(String limit) {
+    return 'من $limit';
+  }
+
+  @override
+  String get recurringBillsAddShort => 'ضيف';
+
+  @override
+  String get recurringBillsKpiDue => 'أقساط عليك الشهر ده';
+
+  @override
+  String get recurringBillsKpiSubs => 'الاشتراكات بتاكل في السنة';
+
+  @override
+  String recurringBillsInstallmentOf(String index, String total) {
+    return 'قسط $index من $total';
+  }
+
+  @override
+  String recurringBillsGameyaMonth(String index, String total) {
+    return 'الشهر $index من $total';
+  }
 }

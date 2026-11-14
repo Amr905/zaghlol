@@ -8,7 +8,6 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../features/gold/application/gating.dart';
 import '../../l10n/generated/app_localizations.dart';
 import '../../theme/z_tokens.dart';
-import '../z_chip.dart';
 import '../z_sheet.dart';
 
 enum AddAction { say, type, scan, asset }
@@ -25,7 +24,7 @@ class ModalSheetPage<T> extends Page<T> {
     settings: this,
     isScrollControlled: true,
     useSafeArea: true,
-    showDragHandle: false,
+    showDragHandle: true,
     barrierLabel: MaterialLocalizations.of(context).modalBarrierDismissLabel,
     sheetAnimationStyle: const AnimationStyle(
       duration: ZMotion.sheet,
@@ -38,10 +37,14 @@ class ModalSheetPage<T> extends Page<T> {
 /// T-082: the Asset entry carries the Gold badge for Free users (assets are
 /// a Gold feature, FR-WLT); the wiring sends them to the paywall.
 class AddSheet extends ConsumerWidget {
-  const AddSheet({super.key, this.onSelected});
+  const AddSheet({super.key, this.onSelected, this.voiceLeft});
 
   /// Called with the chosen entry point; the default just closes the sheet.
   final ValueChanged<AddAction>? onSelected;
+
+  /// Free-tier voice quota (remaining, max) shown under the grid; null hides
+  /// the line (Gold, or not wired yet).
+  final (int, int)? voiceLeft;
 
   void _select(BuildContext context, AddAction action) {
     if (onSelected != null) {
@@ -54,51 +57,117 @@ class AddSheet extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final l10n = AppLocalizations.of(context);
+    final c = ZColors.of(context);
     final gold = ref.watch(entitlementStateProvider).isGold;
-    final options = <(AddAction, IconData, String, String, bool)>[
+    final options = <(AddAction, IconData, String, String, String, bool)>[
       (
         AddAction.say,
-        Icons.mic_rounded,
+        Icons.mic_none_rounded,
         l10n.homeQuickAddSay,
+        l10n.homeQuickAddSayHint,
         l10n.homeQuickAddSayA11y,
         false,
       ),
       (
         AddAction.type,
-        Icons.keyboard_rounded,
+        Icons.keyboard_outlined,
         l10n.homeQuickAddType,
+        l10n.homeQuickAddTypeHint,
         l10n.homeQuickAddTypeA11y,
         false,
       ),
       (
         AddAction.scan,
-        Icons.photo_camera_rounded,
+        Icons.photo_camera_outlined,
         l10n.homeQuickAddScan,
+        l10n.homeQuickAddScanHint,
         l10n.homeQuickAddScanA11y,
         false,
       ),
       (
         AddAction.asset,
-        Icons.savings_rounded,
+        Icons.account_balance_outlined,
         l10n.homeQuickAddAsset,
+        l10n.homeQuickAddAssetHint,
         '${l10n.homeQuickAddAssetA11y}${gold ? '' : ', ${l10n.commonGoldBadge}'}',
         !gold,
       ),
     ];
+    Widget cell(int i) {
+      final (action, icon, label, hint, a11y, badge) = options[i];
+      return Expanded(
+        child: _AddOption(
+          icon: icon,
+          label: label,
+          hint: hint,
+          semanticLabel: a11y,
+          goldBadge: badge ? l10n.commonGoldBadge : null,
+          onTap: () => _select(context, action),
+        ),
+      );
+    }
+
+    final lang = Localizations.localeOf(context).languageCode;
+    String digits(int n) => lang == 'ar'
+        ? n.toString().replaceAllMapped(
+            RegExp('[0-9]'),
+            (m) => String.fromCharCode(0x0660 + int.parse(m[0]!)),
+          )
+        : '$n';
     return ZSheetBody(
       title: l10n.homeQuickAddTitle,
-      child: Wrap(
-        spacing: ZSpacing.sm,
-        runSpacing: ZSpacing.sm,
+      centerTitle: true,
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
-          for (final (action, icon, label, a11y, badge) in options)
-            _AddOption(
-              icon: icon,
-              label: label,
-              semanticLabel: a11y,
-              goldBadge: badge ? l10n.commonGoldBadge : null,
-              onTap: () => _select(context, action),
+          IntrinsicHeight(
+            child: Row(
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: [
+                cell(0),
+                const SizedBox(width: ZSpacing.md),
+                cell(1),
+              ],
             ),
+          ),
+          const SizedBox(height: ZSpacing.md),
+          IntrinsicHeight(
+            child: Row(
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: [
+                cell(2),
+                const SizedBox(width: ZSpacing.md),
+                cell(3),
+              ],
+            ),
+          ),
+          if (voiceLeft != null) ...[
+            const SizedBox(height: ZSpacing.lg),
+            Row(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                ExcludeSemantics(
+                  child: Icon(
+                    Icons.mic_none_rounded,
+                    size: 18,
+                    color: c.textMuted,
+                  ),
+                ),
+                const SizedBox(width: ZSpacing.xs),
+                Flexible(
+                  child: Text(
+                    l10n.homeQuickAddVoiceLeft(
+                      digits(voiceLeft!.$1),
+                      digits(voiceLeft!.$2),
+                    ),
+                    style: ZType.bodySmall.copyWith(color: c.textMuted),
+                  ),
+                ),
+              ],
+            ),
+          ],
+          const SizedBox(height: ZSpacing.xl),
         ],
       ),
     );
@@ -109,6 +178,7 @@ class _AddOption extends StatelessWidget {
   const _AddOption({
     required this.icon,
     required this.label,
+    required this.hint,
     required this.semanticLabel,
     required this.onTap,
     this.goldBadge,
@@ -116,6 +186,7 @@ class _AddOption extends StatelessWidget {
 
   final IconData icon;
   final String label;
+  final String hint;
   final String semanticLabel;
   final VoidCallback onTap;
   final String? goldBadge;
@@ -123,41 +194,68 @@ class _AddOption extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final c = ZColors.of(context);
+    final radius = BorderRadius.circular(ZRadius.card);
     return Semantics(
       button: true,
       label: semanticLabel,
       excludeSemantics: true,
       child: Material(
-        color: c.primaryContainer,
-        borderRadius: BorderRadius.circular(ZRadius.lg),
+        color: c.surface,
+        shape: RoundedRectangleBorder(
+          borderRadius: radius,
+          side: BorderSide(color: c.outline),
+        ),
         child: InkWell(
-          borderRadius: BorderRadius.circular(ZRadius.lg),
+          borderRadius: radius,
           onTap: onTap,
-          child: ConstrainedBox(
-            constraints: const BoxConstraints(
-              minWidth: 72,
-              minHeight: ZSpacing.minTarget,
-            ),
-            child: Padding(
-              padding: const EdgeInsetsDirectional.symmetric(
-                horizontal: ZSpacing.md,
-                vertical: ZSpacing.md,
-              ),
-              child: Column(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  Icon(icon, color: c.onPrimaryContainer),
-                  const SizedBox(height: ZSpacing.xs),
-                  Text(
-                    label,
-                    style: ZType.label.copyWith(color: c.onPrimaryContainer),
-                  ),
-                  if (goldBadge != null) ...[
-                    const SizedBox(height: ZSpacing.xs),
-                    ZChip(label: goldBadge!, selected: true),
+          child: Padding(
+            padding: const EdgeInsetsDirectional.all(ZSpacing.lg),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Row(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Container(
+                      width: 48,
+                      height: 48,
+                      decoration: BoxDecoration(
+                        shape: BoxShape.circle,
+                        color: c.primaryContainer,
+                      ),
+                      child: Icon(icon, color: c.primary),
+                    ),
+                    const Spacer(),
+                    if (goldBadge != null)
+                      DecoratedBox(
+                        decoration: BoxDecoration(
+                          color: c.warningBg,
+                          borderRadius: BorderRadius.circular(ZRadius.pill),
+                        ),
+                        child: Padding(
+                          padding: const EdgeInsetsDirectional.symmetric(
+                            horizontal: ZSpacing.md,
+                            vertical: ZSpacing.xs,
+                          ),
+                          child: Text(
+                            goldBadge!,
+                            style: ZType.caption.copyWith(color: c.warningText),
+                          ),
+                        ),
+                      ),
                   ],
-                ],
-              ),
+                ),
+                const SizedBox(height: ZSpacing.md),
+                Text(
+                  label,
+                  style: ZType.title.copyWith(
+                    color: c.text,
+                    fontWeight: FontWeight.w700,
+                  ),
+                ),
+                Text(hint, style: ZType.bodySmall.copyWith(color: c.textMuted)),
+              ],
             ),
           ),
         ),

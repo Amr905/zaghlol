@@ -1,0 +1,16 @@
+{
+  "sender": "ABE",
+  "body": "البنك الزراعي المصري: تم خصم 12,345.67 جم ببطاقة **1104 لدى فتح الله. الرصيد المتاح 3200.00 جم",
+  "receivedAt": "2026-10-23T11:14:00+03:00",
+  "expect": {
+    "template": "abe.card_purchase.ar",
+    "event": "card_purchase",
+    "direction": "expense",
+    "currency": "EGP",
+    "amount": "12345.67",
+    "last4": "1104",
+    "balance": "3200.00",
+    "available": null,
+    "merchantClean": "فتح الله"
+  }
+}

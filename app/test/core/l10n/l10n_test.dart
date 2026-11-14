@@ -154,7 +154,7 @@ void main() {
       expect(find.byKey(const ValueKey(TextDirection.ltr)), findsOneWidget);
     });
 
-    test('system language gives a null locale; digits mode resolves', () {
+    test('system language gives a null locale; digits mode resolves', () async {
       final c = ProviderContainer(
         overrides: [
           languageProvider.overrideWith(
@@ -164,6 +164,8 @@ void main() {
         ],
       );
       addTearDown(c.dispose);
+      c.listen(languageProvider, (_, _) {});
+      await Future<void>.delayed(Duration.zero);
       expect(c.read(appLocaleProvider), isNull);
       expect(c.read(digitsModeProvider('ar')), DigitsMode.arabicIndic);
     });

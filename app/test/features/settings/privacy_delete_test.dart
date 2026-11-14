@@ -45,6 +45,8 @@ Future<AppLocalizations> _openDialog(
     300,
     scrollable: find.byType(Scrollable).first,
   );
+  await tester.ensureVisible(find.text(t.privacyDeleteRow));
+  await tester.pump();
   await tester.tap(find.text(t.privacyDeleteRow));
   await settle(tester);
   return t;

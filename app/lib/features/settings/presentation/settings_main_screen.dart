@@ -94,15 +94,66 @@ class SettingsMainScreen extends ConsumerWidget {
           ),
         Padding(
           padding: const EdgeInsetsDirectional.only(bottom: ZSpacing.xl),
-          child: ZCard(
-            padding: EdgeInsetsDirectional.zero,
-            child: SettingsRow(
-              leading: Icon(Icons.workspace_premium, color: c.accent),
-              title: plan == null
-                  ? t.settingsMainGoldFree
-                  : t.settingsMainGoldActive(plan),
-              subtitle: plan == null ? t.settingsMainSeeGold : null,
-              onTap: destinations.onGold,
+          child: Material(
+            borderRadius: BorderRadius.circular(ZRadius.hero),
+            clipBehavior: Clip.antiAlias,
+            color: Colors.transparent,
+            child: Ink(
+              decoration: BoxDecoration(
+                borderRadius: BorderRadius.circular(ZRadius.hero),
+                gradient: LinearGradient(
+                  begin: AlignmentDirectional.centerEnd,
+                  end: AlignmentDirectional.centerStart,
+                  colors: [c.zaghlolBg, c.accentLight.withValues(alpha: 0.5)],
+                ),
+              ),
+              child: InkWell(
+                onTap: destinations.onGold,
+                child: ConstrainedBox(
+                  constraints: const BoxConstraints(minHeight: 88),
+                  child: Padding(
+                    padding: const EdgeInsetsDirectional.all(ZSpacing.lg),
+                    child: Row(
+                      children: [
+                        Container(
+                          width: 52,
+                          height: 52,
+                          decoration: BoxDecoration(
+                            color: c.accent,
+                            shape: BoxShape.circle,
+                          ),
+                          child: Icon(
+                            Icons.star_outline_rounded,
+                            color: c.onAccent,
+                          ),
+                        ),
+                        const SizedBox(width: ZSpacing.md),
+                        Expanded(
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Text(
+                                plan == null
+                                    ? t.settingsMainGoldFree
+                                    : t.settingsMainGoldActive(plan),
+                                style: ZType.title.copyWith(color: c.onAccent),
+                              ),
+                              if (plan == null)
+                                Text(
+                                  t.settingsMainSeeGold,
+                                  style: ZType.bodySmall.copyWith(
+                                    color: c.warningText,
+                                  ),
+                                ),
+                            ],
+                          ),
+                        ),
+                        Icon(Icons.chevron_right, color: c.warningText),
+                      ],
+                    ),
+                  ),
+                ),
+              ),
             ),
           ),
         ),
@@ -110,15 +161,21 @@ class SettingsMainScreen extends ConsumerWidget {
           title: t.settingsMainSectionGeneral,
           children: [
             SettingsRow(
+              icon: Icons.palette_outlined,
+              tint: const Color(0xFF9585CF),
               title: t.settingsMainPreferences,
               onTap: () => _push(context, const PreferencesScreen()),
             ),
             SettingsRow(
               key: const ValueKey('settings-account'),
+              icon: Icons.person_outline_rounded,
+              tint: c.accentDark,
               title: t.goldAccountTitle,
               onTap: destinations.onAccount,
             ),
             SettingsRow(
+              icon: Icons.notifications_none_rounded,
+              tint: c.dangerText,
               title: t.settingsMainNotifications,
               onTap: destinations.onNotifications,
             ),
@@ -128,21 +185,29 @@ class SettingsMainScreen extends ConsumerWidget {
           title: t.settingsMainSectionData,
           children: [
             SettingsRow(
+              icon: Icons.chat_bubble_outline_rounded,
+              tint: c.primary,
               title: t.settingsMainCapture,
               subtitle: t.settingsMainCaptureSub(captureState),
               onTap: destinations.onCapture,
             ),
             SettingsRow(
+              icon: Icons.sell_outlined,
+              tint: c.accentDark,
               title: t.settingsMainCategories,
               onTap: destinations.onCategories,
             ),
             SettingsRow(
+              icon: Icons.cloud_outlined,
+              tint: const Color(0xFF6A8FD8),
               title: t.settingsMainBackup,
               subtitle:
                   backupSubtitle ?? t.settingsMainBackupSub(_neverBackedUp, ''),
               onTap: destinations.onBackup,
             ),
             SettingsRow(
+              icon: Icons.description_outlined,
+              tint: c.primary,
               title: t.settingsMainExports,
               onTap: destinations.onExports,
             ),
@@ -151,10 +216,14 @@ class SettingsMainScreen extends ConsumerWidget {
         SettingsSection(
           children: [
             SettingsRow(
+              icon: Icons.shield_outlined,
+              tint: c.primary,
               title: t.settingsMainPrivacy,
               onTap: () => _push(context, const PrivacyScreen()),
             ),
             SettingsRow(
+              icon: Icons.info_outline_rounded,
+              tint: c.textMuted,
               title: t.settingsMainAbout,
               onTap: () => _push(context, const AboutScreen()),
             ),

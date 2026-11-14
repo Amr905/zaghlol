@@ -14,6 +14,7 @@ import '../../../core/ui/z_banner.dart';
 import '../../../core/ui/z_button.dart';
 import '../../../core/ui/z_card.dart';
 import '../../../core/ui/z_currency_switcher.dart';
+import '../../accounts/domain/account.dart';
 import '../../budget/application/budget_providers.dart';
 import '../../capture/application/capture_providers.dart';
 import '../../capture/presentation/ios_setup_nudge.dart';
@@ -83,32 +84,52 @@ class HomeScreen extends ConsumerWidget {
     final ios = Theme.of(context).platform == TargetPlatform.iOS;
     final l = AppLocalizations.of(context);
     final a = _resolve(context);
-    final settings = IconButton(
-      tooltip: l.commonNavSettingsA11y,
-      constraints: const BoxConstraints(
-        minWidth: ZSpacing.minTarget,
-        minHeight: ZSpacing.minTarget,
-      ),
-      icon: Icon(ios ? CupertinoIcons.gear : Icons.settings_outlined),
-      onPressed: a.openSettings,
-    );
-    final header = Row(
-      children: [
-        const Expanded(child: _FilterRow()),
-        if (a.openShare != null)
-          IconButton(
+    final settings = HomeSettingsButton(onPressed: a.openSettings);
+    final share = a.openShare == null
+        ? null
+        : IconButton(
             key: const ValueKey('home-share'),
             tooltip: l.shareStudioShare,
             constraints: const BoxConstraints(
               minWidth: ZSpacing.minTarget,
               minHeight: ZSpacing.minTarget,
             ),
-            icon: Icon(ios ? CupertinoIcons.share : Icons.ios_share),
+            icon: Icon(
+              ios ? CupertinoIcons.share : Icons.ios_share,
+              color: c.text,
+            ),
             onPressed: a.openShare,
-          ),
-        settings,
-      ],
-    );
+          );
+    // iOS: filter pill at the start, settings circle at the end, greeting
+    // below. Android: greeting at the start, funnel and gear at the end.
+    final Widget header = ios
+        ? Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Row(
+                children: [
+                  const Expanded(child: _FilterRow()),
+                  ?share,
+                  settings,
+                ],
+              ),
+              const SizedBox(height: ZSpacing.sm),
+              const HomeGreeting(),
+            ],
+          )
+        : Row(
+            children: [
+              const Expanded(
+                child: HomeGreeting(
+                  key: ValueKey('home-title-android'),
+                  fontSize: 26,
+                ),
+              ),
+              const HomeCardFilterChip(iconOnly: true),
+              ?share,
+              settings,
+            ],
+          );
     return ColoredBox(
       color: c.bg,
       child: SafeArea(
@@ -119,33 +140,13 @@ class HomeScreen extends ConsumerWidget {
             key: const ValueKey('home-scroll'),
             physics: const AlwaysScrollableScrollPhysics(),
             slivers: [
-              if (ios)
-                SliverToBoxAdapter(
-                  child: Padding(
-                    padding: const EdgeInsetsDirectional.fromSTEB(
-                      ZSpacing.screen,
-                      ZSpacing.md,
-                      ZSpacing.screen,
-                      0,
-                    ),
-                    child: Text(
-                      l.appName,
-                      key: const ValueKey('home-title-ios'),
-                      style: ZType.headline.copyWith(color: c.text),
-                    ),
-                  ),
-                )
-              else
-                SliverAppBar.medium(
-                  key: const ValueKey('home-title-android'),
-                  backgroundColor: c.bg,
-                  surfaceTintColor: Colors.transparent,
-                  title: Text(l.appName),
-                ),
               SliverToBoxAdapter(
                 child: Padding(
-                  padding: const EdgeInsetsDirectional.symmetric(
-                    horizontal: ZSpacing.screen,
+                  padding: const EdgeInsetsDirectional.fromSTEB(
+                    ZSpacing.screen,
+                    ZSpacing.sm,
+                    ZSpacing.screen,
+                    0,
                   ),
                   child: header,
                 ),
@@ -168,7 +169,7 @@ class HomeScreen extends ConsumerWidget {
                   child: _HomeBody(model: m, actions: a),
                 ),
               ),
-              const SliverToBoxAdapter(child: SizedBox(height: ZSpacing.xxl)),
+              const SliverToBoxAdapter(child: SizedBox(height: 120)),
             ],
           ),
         ),
@@ -239,6 +240,13 @@ class _HomeBodyState extends ConsumerState<_HomeBody> {
     final figures = m.currencies;
     final page = figures.isEmpty ? 0 : _page.clamp(0, figures.length - 1);
     final scale = MediaQuery.textScalerOf(context);
+    final accountLabels = <String, String>{
+      for (final acc
+          in ref.watch(homeAccountsProvider).value ?? const <Account>[])
+        acc.id: acc.last4 == null
+            ? acc.label
+            : '${acc.label} •${format.digits.render(acc.last4!)}',
+    };
 
     return Padding(
       padding: const EdgeInsetsDirectional.symmetric(
@@ -251,6 +259,7 @@ class _HomeBodyState extends ConsumerState<_HomeBody> {
           if (m.scanInProgress) ...[
             ZBanner(
               key: const ValueKey('home-scan-banner'),
+              icon: Icons.sync,
               message: l.homeBannerScanning(0, format.count(0)),
             ),
             const SizedBox(height: ZSpacing.md),
@@ -278,7 +287,7 @@ class _HomeBodyState extends ConsumerState<_HomeBody> {
             const SizedBox(height: ZSpacing.sm),
             SizedBox(
               key: const ValueKey('home-pager'),
-              height: scale.scale(300),
+              height: scale.scale(330),
               child: PageView(
                 controller: _pager,
                 onPageChanged: (i) => setState(() => _page = i),
@@ -334,12 +343,14 @@ class _HomeBodyState extends ConsumerState<_HomeBody> {
                     l.homeFeedTitle,
                     style: ZType.title.copyWith(
                       color: ZColors.of(context).text,
+                      fontWeight: FontWeight.w700,
                     ),
                   ),
                 ),
                 TextButton(
                   onPressed: a.openTransactions,
                   style: TextButton.styleFrom(
+                    foregroundColor: ZColors.of(context).primary,
                     minimumSize: const Size(
                       ZSpacing.minTarget,
                       ZSpacing.minTarget,
@@ -353,12 +364,14 @@ class _HomeBodyState extends ConsumerState<_HomeBody> {
               padding: EdgeInsets.zero,
               child: Column(
                 children: [
-                  for (final item in m.recent)
+                  for (var i = 0; i < m.recent.length; i++)
                     HomeFeedRow(
-                      key: ValueKey('home-row-${item.record.id}'),
-                      item: item,
+                      key: ValueKey('home-row-${m.recent[i].record.id}'),
+                      item: m.recent[i],
                       format: format,
                       today: m.today,
+                      accountLabel: accountLabels[m.recent[i].record.accountId],
+                      showDivider: i < m.recent.length - 1,
                       onTap: a.openTransaction,
                     ),
                 ],
@@ -400,11 +413,6 @@ class _Page extends StatelessWidget {
           paydaySet: paydaySet,
           onTap: actions.openBudget,
           onSetBudget: actions.openSetBudget,
-        ),
-        const SizedBox(height: ZSpacing.sm),
-        HomeKpis(
-          figures: figures,
-          format: format,
           onSpentTap: actions.openSpentTransactions,
         ),
       ],

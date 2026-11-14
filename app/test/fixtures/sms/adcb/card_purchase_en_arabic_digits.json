@@ -1,0 +1,16 @@
+{
+  "sender": "ADCB",
+  "body": "ADCB: Your card ending ٨٨٢١ was used for EGP ٢٧٥٫٠٠ at EL EZABY. Avl Bal EGP ٧٬٣٠٠٫٠٠",
+  "receivedAt": "2026-10-23T11:14:00+03:00",
+  "expect": {
+    "template": "adcb.card_purchase.en",
+    "event": "card_purchase",
+    "direction": "expense",
+    "currency": "EGP",
+    "amount": "275.00",
+    "last4": "8821",
+    "balance": "7300.00",
+    "available": null,
+    "merchantClean": "El Ezaby"
+  }
+}

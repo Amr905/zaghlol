@@ -13,7 +13,7 @@ const supportedLanguageCodes = ['ar', 'en'];
 
 /// null = follow the device.
 final appLocaleProvider = Provider<Locale?>((ref) {
-  final pref = ref.watch(languageProvider).value ?? LanguagePref.system;
+  final pref = ref.watch(languageProvider).value ?? LanguagePref.ar;
   return switch (pref) {
     LanguagePref.ar => const Locale('ar'),
     LanguagePref.en => const Locale('en'),

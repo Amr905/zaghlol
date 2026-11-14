@@ -1,0 +1,16 @@
+{
+  "sender": "Mashreq",
+  "body": "Mashreq: EGP 135.00 spent on Card ending 9044 at CAREEM EGYPT.",
+  "receivedAt": "2026-10-23T11:14:00+03:00",
+  "expect": {
+    "template": "mashreq.card_purchase.en",
+    "event": "card_purchase",
+    "direction": "expense",
+    "currency": "EGP",
+    "amount": "135.00",
+    "last4": "9044",
+    "balance": null,
+    "available": null,
+    "merchantClean": "Careem Egypt"
+  }
+}

@@ -16,19 +16,83 @@ class ChartCard extends StatelessWidget {
     this.contextLine,
     this.summary,
     this.trailing,
+    this.meta,
+    this.footnote,
+    this.bare = false,
   });
 
   final String title;
+  final Widget child;
+
+  /// Filter context ("all cards . EGP . this cycle"): shown under the title
+  /// on the bare (S-21) layout only; the S-20 list carries it in its header.
   final String? contextLine;
 
   /// The a11y summary: read as one label for the whole chart body.
   final String? summary;
+
+  /// The "Explain" entry, at the end of the footer row.
   final Widget? trailing;
-  final Widget child;
+
+  /// Small caption at the end of the title row (e.g. "6 months").
+  final String? meta;
+
+  /// One-line takeaway at the start of the footer row.
+  final String? footnote;
+
+  /// S-21: no card, large title, the chart sits on the page.
+  final bool bare;
 
   @override
   Widget build(BuildContext context) {
     final c = ZColors.of(context);
+    final body = summary != null
+        ? Semantics(label: summary, container: true, child: child)
+        : child;
+    final footer = (footnote != null || trailing != null)
+        ? Padding(
+            padding: const EdgeInsetsDirectional.only(top: ZSpacing.md),
+            child: Row(
+              children: [
+                if (footnote != null)
+                  Expanded(
+                    child: Text(
+                      footnote!,
+                      style: ZType.body.copyWith(color: c.text),
+                    ),
+                  )
+                else
+                  const Spacer(),
+                ?trailing,
+              ],
+            ),
+          )
+        : null;
+    if (bare) {
+      return Padding(
+        padding: const EdgeInsetsDirectional.only(bottom: ZSpacing.md),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Semantics(
+              header: true,
+              child: Text(title, style: ZType.display.copyWith(color: c.text)),
+            ),
+            if (contextLine != null)
+              Padding(
+                padding: const EdgeInsetsDirectional.only(top: ZSpacing.xs),
+                child: Text(
+                  contextLine!,
+                  style: ZType.body.copyWith(color: c.textMuted),
+                ),
+              ),
+            const SizedBox(height: ZSpacing.lg),
+            body,
+            ?footer,
+          ],
+        ),
+      );
+    }
     return Padding(
       padding: const EdgeInsetsDirectional.only(bottom: ZSpacing.md),
       child: ZCard(
@@ -36,6 +100,7 @@ class ChartCard extends StatelessWidget {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Row(
+              crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Expanded(
                   child: Semantics(
@@ -46,22 +111,22 @@ class ChartCard extends StatelessWidget {
                     ),
                   ),
                 ),
-                ?trailing,
+                if (meta != null)
+                  Padding(
+                    padding: const EdgeInsetsDirectional.only(
+                      start: ZSpacing.sm,
+                      top: ZSpacing.xs,
+                    ),
+                    child: Text(
+                      meta!,
+                      style: ZType.caption.copyWith(color: c.textMuted),
+                    ),
+                  ),
               ],
             ),
-            if (contextLine != null)
-              Padding(
-                padding: const EdgeInsetsDirectional.only(top: ZSpacing.xs),
-                child: Text(
-                  contextLine!,
-                  style: ZType.caption.copyWith(color: c.textMuted),
-                ),
-              ),
             const SizedBox(height: ZSpacing.md),
-            if (summary != null)
-              Semantics(label: summary, container: true, child: child)
-            else
-              child,
+            body,
+            ?footer,
           ],
         ),
       ),
@@ -175,8 +240,50 @@ class LegendItem extends StatelessWidget {
           ),
         ),
         const SizedBox(width: ZSpacing.xs),
-        Text(label, style: ZType.caption.copyWith(color: c.text)),
+        Flexible(
+          child: Text(label, style: ZType.caption.copyWith(color: c.text)),
+        ),
       ],
+    );
+  }
+}
+
+/// "Explain" entry at the foot of a chart card: lightbulb + primary label.
+class ExplainLink extends StatelessWidget {
+  const ExplainLink({super.key, required this.onTap});
+  final VoidCallback onTap;
+
+  @override
+  Widget build(BuildContext context) {
+    final l = AppLocalizations.of(context);
+    final c = ZColors.of(context);
+    return Semantics(
+      button: true,
+      label: l.insightsChartsExplain,
+      excludeSemantics: true,
+      child: InkWell(
+        borderRadius: BorderRadius.circular(ZRadius.pill),
+        onTap: onTap,
+        child: ConstrainedBox(
+          constraints: const BoxConstraints(minHeight: ZSpacing.minTarget),
+          child: Padding(
+            padding: const EdgeInsetsDirectional.symmetric(
+              horizontal: ZSpacing.sm,
+            ),
+            child: Row(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Icon(Icons.lightbulb_outline, size: 20, color: c.primary),
+                const SizedBox(width: ZSpacing.xs),
+                Text(
+                  l.insightsChartsExplain,
+                  style: ZType.titleSmall.copyWith(color: c.primary),
+                ),
+              ],
+            ),
+          ),
+        ),
+      ),
     );
   }
 }

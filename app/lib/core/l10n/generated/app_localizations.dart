@@ -191,25 +191,25 @@ abstract class AppLocalizations {
   /// T · sheet
   ///
   /// In ar, this message translates to:
-  /// **'عايز تسجل إيه؟'**
+  /// **'تحب تسجل إيه؟'**
   String get homeQuickAddTitle;
 
   /// L · opens S-31
   ///
   /// In ar, this message translates to:
-  /// **'قول'**
+  /// **'قولها'**
   String get homeQuickAddSay;
 
   /// L · opens S-13
   ///
   /// In ar, this message translates to:
-  /// **'اكتب'**
+  /// **'اكتبها'**
   String get homeQuickAddType;
 
   /// L · opens S-32
   ///
   /// In ar, this message translates to:
-  /// **'صوّر'**
+  /// **'صوّرها'**
   String get homeQuickAddScan;
 
   /// L · with common_gold_badge; Free opens S-68
@@ -241,6 +241,30 @@ abstract class AppLocalizations {
   /// In ar, this message translates to:
   /// **'ضيف أصل'**
   String get homeQuickAddAssetA11y;
+
+  /// S · quick add card subtitle
+  ///
+  /// In ar, this message translates to:
+  /// **'بصوتك في ثانيتين'**
+  String get homeQuickAddSayHint;
+
+  /// S · quick add card subtitle
+  ///
+  /// In ar, this message translates to:
+  /// **'مصروف أو دخل'**
+  String get homeQuickAddTypeHint;
+
+  /// S · quick add card subtitle
+  ///
+  /// In ar, this message translates to:
+  /// **'سكرين شوت أو إيصال'**
+  String get homeQuickAddScanHint;
+
+  /// S · quick add card subtitle
+  ///
+  /// In ar, this message translates to:
+  /// **'دهب، شهادة، عملة'**
+  String get homeQuickAddAssetHint;
 
   /// No description provided for @ingestionReviewTitle.
   ///
@@ -299,7 +323,7 @@ abstract class AppLocalizations {
   /// B · stepper header
   ///
   /// In ar, this message translates to:
-  /// **'تخطّي'**
+  /// **'تخطي'**
   String get commonActionSkip;
 
   /// B
@@ -1131,7 +1155,7 @@ abstract class AppLocalizations {
   /// S · what is read (FR-ING-A-02)
   ///
   /// In ar, this message translates to:
-  /// **'بقرا رسايل البنوك والمحافظ وإنستاباي بس'**
+  /// **'بنقرا رسايل البنوك والمحافظ وإنستاباي بس'**
   String get onboardingAndroidSetupSmsPointSenders;
 
   /// S
@@ -1143,13 +1167,13 @@ abstract class AppLocalizations {
   /// S · claim limited to financial data (tone gate 4, R-11, BR-SYNC-03)
   ///
   /// In ar, this message translates to:
-  /// **'بيانات فلوسك بتفضل على الموبايل ده'**
+  /// **'كل حاجة بتفضل على الموبايل ده'**
   String get onboardingAndroidSetupSmsPointOnPhone;
 
   /// B · primary, opens the system SMS dialog
   ///
   /// In ar, this message translates to:
-  /// **'اسمح بقراية الرسايل'**
+  /// **'اسمح بقراءة رسايل البنك'**
   String get onboardingAndroidSetupSmsAllow;
 
   /// N · success
@@ -1293,7 +1317,7 @@ abstract class AppLocalizations {
   /// T · M · Rive tourGuide
   ///
   /// In ar, this message translates to:
-  /// **'هنستخدم الاختصارات'**
+  /// **'الآيفون مش بيسمح للتطبيقات تقرا الرسايل… فهنستخدم الاختصارات'**
   String get onboardingIosSetupShortcutTitle;
 
   /// S · under the title. Split out of the title for length (F-7)
@@ -1347,7 +1371,7 @@ abstract class AppLocalizations {
   /// L · text button, expands the steps below
   ///
   /// In ar, this message translates to:
-  /// **'إزاي بيشتغل؟ (نص دقيقة)'**
+  /// **'إزاي بيشتغل؟ (٣٠ ثانية)'**
   String get onboardingIosSetupHowItWorks;
 
   /// S · list numbers are drawn by the UI, not the copy
@@ -1443,7 +1467,7 @@ abstract class AppLocalizations {
   /// S
   ///
   /// In ar, this message translates to:
-  /// **'افتح Shortcuts وبعدين Automation'**
+  /// **'افتح Shortcuts ← Automation'**
   String get onboardingIosSetupFixStep1;
 
   /// S · automationName is the Latin automation name, e.g. Zaghlol – Wallet
@@ -1497,7 +1521,7 @@ abstract class AppLocalizations {
   /// L · spoken example. AR uses number words (§0.3)
   ///
   /// In ar, this message translates to:
-  /// **'«دفعت خمسة وأربعين قهوة»'**
+  /// **'«دفعت ٤٥ قهوة»'**
   String get onboardingIosSetupFirstSayHint;
 
   /// B · opens S-13
@@ -1509,7 +1533,7 @@ abstract class AppLocalizations {
   /// L
   ///
   /// In ar, this message translates to:
-  /// **'المبلغ والتصنيف'**
+  /// **'المبلغ والفئة'**
   String get onboardingIosSetupFirstTypeHint;
 
   /// S · opens S-61 supported banks (FR-ING-I-08)
@@ -1521,7 +1545,7 @@ abstract class AppLocalizations {
   /// S
   ///
   /// In ar, this message translates to:
-  /// **'شوف إزاي تتابعهم على الآيفون'**
+  /// **'شوف إزاي تسجلهم على الآيفون'**
   String get onboardingIosSetupFirstOnlineBanksSub;
 
   /// L · the common_gold_badge must show on this row (FR-EXP-04/06); Free opens S-68
@@ -1533,7 +1557,7 @@ abstract class AppLocalizations {
   /// S · says Gold in the text too, so Free users aren't promised it (F-8)
   ///
   /// In ar, this message translates to:
-  /// **'ضيف شهور فاتت مرة واحدة مع جولد'**
+  /// **'ضيف شهور فاتت مرة واحدة'**
   String get onboardingIosSetupFirstStatementSub;
 
   /// T
@@ -1881,7 +1905,7 @@ abstract class AppLocalizations {
   /// L · count:int, n · followed by  ·  and common_date_range
   ///
   /// In ar, this message translates to:
-  /// **'{count, plural, =0{القبض النهارده} =1{فاضل يوم على القبض} =2{فاضل يومين على القبض} few{فاضل {n} أيام على القبض} many{فاضل {n} يوم على القبض} other{فاضل {n} يوم على القبض}}'**
+  /// **'{count, plural, =0{القبض النهارده} =1{يوم على القبض} =2{يومين على القبض} few{{n} أيام على القبض} many{{n} يوم على القبض} other{{n} يوم على القبض}}'**
   String homeHeroDaysToPayday(int count, String n);
 
   /// S · A-43, replaces the payday line when no payday is set
@@ -2491,7 +2515,7 @@ abstract class AppLocalizations {
   /// L · expenses, opens S-15 Mode A
   ///
   /// In ar, this message translates to:
-  /// **'تقسيم / فلوس راجعة'**
+  /// **'تقسيم / فلوس راجعة من صحابك'**
   String get transactionsDetailSplit;
 
   /// L · opens S-16
@@ -4530,7 +4554,7 @@ abstract class AppLocalizations {
   /// B · the FR-CHT-03 name. Also the S-21 button
   ///
   /// In ar, this message translates to:
-  /// **'اشرحلي يا زغلول'**
+  /// **'اشرحلي'**
   String get insightsChartsExplain;
 
   /// S · C-13 locked, blurred preview + common_gold_unlock
@@ -4668,7 +4692,7 @@ abstract class AppLocalizations {
   /// C
   ///
   /// In ar, this message translates to:
-  /// **'حوشت'**
+  /// **'اللي اتحوش'**
   String get insightsLegendSaved;
 
   /// C · chart 3
@@ -5593,7 +5617,7 @@ abstract class AppLocalizations {
   /// M · Rive detective · BR-SUB-01
   ///
   /// In ar, this message translates to:
-  /// **'لقيت اشتراك: {merchant} بـ {amount} في الشهر'**
+  /// **'شكلها اشتراك شهري: {merchant} {amount}'**
   String recurringBillsDetected(String merchant, String amount);
 
   /// B
@@ -5611,7 +5635,7 @@ abstract class AppLocalizations {
   /// L · C-36 timeline
   ///
   /// In ar, this message translates to:
-  /// **'اللي جاي'**
+  /// **'الجاي'**
   String get recurringBillsUpcoming;
 
   /// L
@@ -5623,7 +5647,7 @@ abstract class AppLocalizations {
   /// C
   ///
   /// In ar, this message translates to:
-  /// **'آخر قسط'**
+  /// **'آخر قسط! 🎉'**
   String get recurringBillsLastOne;
 
   /// B · glossary «اتدفع»
@@ -5674,10 +5698,10 @@ abstract class AppLocalizations {
   /// **'قسط'**
   String get recurringBillsKindInstallment;
 
-  /// C
+  /// S-24 row sub-line for a card due
   ///
   /// In ar, this message translates to:
-  /// **'سداد كارت'**
+  /// **'كريدت كارد'**
   String get recurringBillsKindCard;
 
   /// C
@@ -5863,7 +5887,7 @@ abstract class AppLocalizations {
   /// S · Free only (FR-VOI-04)
   ///
   /// In ar, this message translates to:
-  /// **'فاضل {remaining} من {max} تسجيل صوتي الشهر ده'**
+  /// **'باقيلك {remaining} من {max} تسجيل صوتي الشهر ده'**
   String homeQuickAddVoiceLeft(String remaining, String max);
 
   /// T
@@ -7496,7 +7520,7 @@ abstract class AppLocalizations {
   /// L · Gold row title for Free
   ///
   /// In ar, this message translates to:
-  /// **'الباقة المجانية'**
+  /// **'زغلول جولد'**
   String get settingsMainGoldFree;
 
   /// L · plan = monthly / yearly / lifetime / other
@@ -7508,7 +7532,7 @@ abstract class AppLocalizations {
   /// L · opens S-68
   ///
   /// In ar, this message translates to:
-  /// **'شوف جولد'**
+  /// **'إنت على الباقة المجانية'**
   String get settingsMainSeeGold;
 
   /// L
@@ -10374,6 +10398,83 @@ abstract class AppLocalizations {
   /// In ar, this message translates to:
   /// **'فكّرني بعد ٧ أيام'**
   String get iosSetupNudgeSnoozeA11y;
+
+  /// S-50 design pass
+  ///
+  /// In ar, this message translates to:
+  /// **'اسأل زغلول'**
+  String get chatMainTitle;
+
+  /// S-50 design pass
+  ///
+  /// In ar, this message translates to:
+  /// **'قصف جبهة'**
+  String get chatMainRoastTag;
+
+  /// S-20 cash-flow footnote
+  ///
+  /// In ar, this message translates to:
+  /// **'وفرت {amount} الشهر ده ({percent})'**
+  String insightsChartsSavedFootnote(String amount, String percent);
+
+  /// S-20 cash-flow card caption: number of months shown
+  ///
+  /// In ar, this message translates to:
+  /// **'{count, plural, one{شهر} two{شهرين} few{{countText} شهور} other{{countText} شهر}}'**
+  String insightsChartsMonthsCount(int count, String countText);
+
+  /// S-20/21 donut centre label
+  ///
+  /// In ar, this message translates to:
+  /// **'المصروف'**
+  String get insightsChartsSpendLabel;
+
+  /// S-22 Zaghlol banner on the hottest category (mockup 09)
+  ///
+  /// In ar, this message translates to:
+  /// **'حاسب يا كبير! {category} وصل {percent} وإحنا لسه فاضل {daysCount, plural, one{يوم} two{يومين} few{{days} أيام} other{{days} يوم}} على القبض.'**
+  String budgetOverviewZaghlolWarn(
+    String category,
+    String percent,
+    int daysCount,
+    String days,
+  );
+
+  /// S-22 hero: muted tail after the spent figure
+  ///
+  /// In ar, this message translates to:
+  /// **'من {limit}'**
+  String budgetOverviewOfLimit(String limit);
+
+  /// S-24 header: add a bill (compact text button)
+  ///
+  /// In ar, this message translates to:
+  /// **'ضيف'**
+  String get recurringBillsAddShort;
+
+  /// S-24 KPI card label (mockup 10)
+  ///
+  /// In ar, this message translates to:
+  /// **'أقساط عليك الشهر ده'**
+  String get recurringBillsKpiDue;
+
+  /// S-24 KPI card label
+  ///
+  /// In ar, this message translates to:
+  /// **'الاشتراكات بتاكل في السنة'**
+  String get recurringBillsKpiSubs;
+
+  /// S-24 row sub-line
+  ///
+  /// In ar, this message translates to:
+  /// **'قسط {index} من {total}'**
+  String recurringBillsInstallmentOf(String index, String total);
+
+  /// S-24 row sub-line for a gameya
+  ///
+  /// In ar, this message translates to:
+  /// **'الشهر {index} من {total}'**
+  String recurringBillsGameyaMonth(String index, String total);
 }
 
 class _AppLocalizationsDelegate

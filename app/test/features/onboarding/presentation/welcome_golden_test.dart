@@ -45,7 +45,7 @@ void main() {
       expect(tester.takeException(), isNull);
       await expectLater(
         find.byKey(const ValueKey('golden-root')),
-        matchesGoldenFile('welcome_${v.name}.png'),
+        matchesGoldenFile('goldens/welcome_${v.name}.png'),
       );
     });
   }

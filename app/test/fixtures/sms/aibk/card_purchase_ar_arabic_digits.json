@@ -1,0 +1,16 @@
+{
+  "sender": "AIBK",
+  "body": "بنك الاستثمار العربي: تم خصم ٥٥٠٫٠٠ جم من بطاقة ****١٥٩٠ لدى راية. الرصيد المتاح ٨٤٥٠٫٠٠ جم",
+  "receivedAt": "2026-10-23T11:14:00+03:00",
+  "expect": {
+    "template": "aibk.card_purchase.ar",
+    "event": "card_purchase",
+    "direction": "expense",
+    "currency": "EGP",
+    "amount": "550.00",
+    "last4": "1590",
+    "balance": "8450.00",
+    "available": null,
+    "merchantClean": "راية"
+  }
+}

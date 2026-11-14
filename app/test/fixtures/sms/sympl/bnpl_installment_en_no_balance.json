@@ -1,0 +1,16 @@
+{
+  "sender": "Sympl",
+  "body": "Sympl: Purchase of EGP 450.00 at ZARA with Card *1234.",
+  "receivedAt": "2026-10-23T11:14:00+03:00",
+  "expect": {
+    "template": "sympl.bnpl_installment.en",
+    "event": "bnpl_installment",
+    "direction": "expense",
+    "currency": "EGP",
+    "amount": "450.00",
+    "last4": "1234",
+    "balance": null,
+    "available": null,
+    "merchantClean": "Zara"
+  }
+}

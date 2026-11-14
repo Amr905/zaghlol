@@ -19,8 +19,8 @@
 | Milestone | Total | DONE | IN_PROGRESS | BLOCKED |
 |---|---|---|---|---|
 | M0 | 28 | 25 | 1 | 0 |
-| M1 | 29 | 26 | 0 | 1 |
-| M2 | 29 | 22 | 0 | 0 |
+| M1 | 29 | 27 | 0 | 1 |
+| M2 | 29 | 24 | 0 | 0 |
 | M3 | 18 | 16 | 0 | 0 |
 | M4 | 17 | 16 | 0 | 0 |
 | M5 | 35 | 30 | 1 | 1 |
@@ -66,7 +66,7 @@
 | T-034 | Merchant cleaning and normalized merchant key | M1 | C2 | Sonnet | parsing-engine-engineer | T-013 | DONE | PC runner PASS @fd7eea6; batch/2026-11-10-1 CI; review [T-034](05-reviews/T-034.md) APPROVED after key-rule fix (delta) | Batch 1. Canonical merchant key rule (parsing-engine §5); shared vectors file |
 | T-035 | Capture Guard rules in Dart, shared golden cases and config generator | M1 | C4 | Opus | parsing-engine-engineer | T-032 | DONE | batch 5 local: app 1167 tests, zaghlol_parsing 1029, all packages/tools green, analyze/format clean; batch CI (`batch/2026-11-11-4`); reviews [T-035](05-reviews/T-035.md) APPROVED after two delta rounds + [security](05-reviews/T-035-security.md) APPROVED (M-1/M-2 fixed) | Batch 5. Q1–Q6 provisional defaults (PO to confirm). FU-097 |
 | T-036 | Templates + fixtures: NBE, CIB, Banque Misr, QNB | M1 | C2 | Sonnet | parsing-engine-engineer | T-033 | TODO | — |  |
-| T-037 | Templates + fixtures: InstaPay scenarios and mobile wallets | M1 | C2 | Sonnet | parsing-engine-engineer | T-033 | TODO | — |  |
+| T-037 | Templates + fixtures: InstaPay scenarios and mobile wallets | M1 | C2 | Sonnet | parsing-engine-engineer | T-033 | DONE | batch 22 review [batch-22a](05-reviews/batch-22a.md), [batch-22b](05-reviews/batch-22b.md) | Batch 22. FU-220 |
 | T-038 | Android Capture Guard (Kotlin) with config reader | M1 | C4 | Opus | native-platform-engineer | T-035, T-008 | DONE | instrumented golden suite green on API 26/30/34/36 (sms-spike 43016241777, after the FU-101 ICU fix; timings in the task file); app-ci 42996490126; reviews [T-038](05-reviews/T-038.md) + [security](05-reviews/T-038-security.md) APPROVED | Batch 6 merged, closed in batch 7. FU-101 M-1 closed; FU-101 L-1 (Android entry point SMS + notification only) still before T-040 |
 | T-039 | Android encrypted spool + spool host API | M1 | C4 | Opus | native-platform-engineer | T-004, T-008 | DONE | app-ci 43016241671 + sms-spike 43016241777 on `ci/T-039` (spool 3/3, kill test, guard golden on API 26/30/34/36); batch 7 local: every app-ci step green, backend Release build 0 warnings, format clean, no vulnerable packages; batch CI (`batch/2026-11-11-6`); reviews [T-039](05-reviews/T-039.md) APPROVED after shared per-path lock fix (delta) + Lead delta check of FU-101, [security](05-reviews/T-039-security.md) APPROVED | Batch 7. Pigeon `encryptedConfig` rename done. Manual device steps: clean install first (key test deletes `zaghlol_spool_v1`). PO Q1–Q2 provisional. FU-104 |
 | T-040 | SMS receiver (multipart, Guard, spool, enqueue) in prodSms flavor | M1 | C4 | Opus | native-platform-engineer | T-038, T-039 | DONE | batch 9 review [batch-9](05-reviews/batch-9.md) + [security](05-reviews/batch-9-security.md) APPROVED; app-ci 43105330938 green; sms-spike API 26/30/34/36 green | Batch 9. FU-111 |
@@ -97,8 +97,8 @@
 | T-065 | iOS Share Extension (text, image, PDF) | M2 | C4 | Opus | native-platform-engineer | T-062 | DONE | batch 20 review [batch-20a](05-reviews/batch-20a.md), [batch-20b](05-reviews/batch-20b.md), [batch-20c](05-reviews/batch-20c.md) | Batch 20. FU-200 |
 | T-066 | Capture module iOS integration (drain, BG refresh, checker state) | M2 | C3 | Sonnet | flutter-core-engineer | T-047, T-062, T-064 | DONE | batch 20 review [batch-20a](05-reviews/batch-20a.md), [batch-20b](05-reviews/batch-20b.md), [batch-20c](05-reviews/batch-20c.md) | Batch 20. FU-201 |
 | T-067 | iOS capture setup S-03 (add Shortcut, check setup, first expense) | M2 | C2 | Sonnet | flutter-ui-engineer | T-055, T-066 | DONE | batch 21 review [batch-21](05-reviews/batch-21.md) | Batch 21. FU-216 |
-| T-068 | Templates + fixtures: Egyptian banks batch 1 | M2 | C2 | Sonnet | parsing-engine-engineer | T-033 | TODO | — |  |
-| T-069 | Templates + fixtures: Egyptian banks batch 2 | M2 | C2 | Sonnet | parsing-engine-engineer | T-033 | TODO | — |  |
+| T-068 | Templates + fixtures: Egyptian banks batch 1 | M2 | C2 | Sonnet | parsing-engine-engineer | T-033 | DONE | batch 22 review [batch-22a](05-reviews/batch-22a.md), [batch-22b](05-reviews/batch-22b.md) | Batch 22. FU-221 |
+| T-069 | Templates + fixtures: Egyptian banks batch 2 | M2 | C2 | Sonnet | parsing-engine-engineer | T-033 | DONE | batch 22 review [batch-22a](05-reviews/batch-22a.md), [batch-22b](05-reviews/batch-22b.md) | Batch 22. FU-222 |
 | T-070 | Templates + fixtures: BNPL (valU, Sympl, Souhoola, Shahry, Aman, Forsa, Contact) | M2 | C2 | Sonnet | parsing-engine-engineer | T-033 | TODO | — |  |
 | T-071 | Templates + fixtures: Wise, Revolut, Monzo, bunq, N26, Payoneer | M2 | C3 | Sonnet | parsing-engine-engineer | T-033 | TODO | — |  |
 | T-072 | Templates + fixtures: HDFC, Paytm, Al Rajhi, Emirates NBD/Liv, GCC (S rows) | M2 | C2 | Sonnet | parsing-engine-engineer | T-033 | TODO | — |  |
@@ -457,6 +457,14 @@
 - **FU-219** (FU-213): the notification denied banner does not re-check on return from system settings; due-days picker has copy but no setting key.
 - Done in batch 21: FU-197, FU-213, FU-214 (2× headroom for microsecond means), FU-215, and the batch-20c review-card label minor.
 
+- **FU-220** (T-037, batch 22): the minors, nits and open questions for T-037 in [batch-22a](05-reviews/batch-22a.md), [batch-22b](05-reviews/batch-22b.md), plus the "left undone" items in its task file.
+- **FU-221** (T-068, batch 22): the minors, nits and open questions for T-068 in [batch-22a](05-reviews/batch-22a.md), [batch-22b](05-reviews/batch-22b.md), plus the "left undone" items in its task file.
+- **FU-222** (T-069, batch 22): the minors, nits and open questions for T-069 in [batch-22a](05-reviews/batch-22a.md), [batch-22b](05-reviews/batch-22b.md), plus the "left undone" items in its task file.
+- **FU-223** (PO, batch 22): confirm the 47 guessed SMS sender IDs (list in docs/05-reviews/batch-22a.md / SMS-TEMPLATES task notes); NBE sample missing; samples for ATM, salary, decline, foreign currency, BNPL due/paid; Shahry/Aman/Forsa/Contact BNPL.
+- **FU-224** (design, batch 22): mockup 31 "card added" banner and actions; scan-progress bank chips (scan exposes no banks); scan-results "عدّل"; Insights period chip; category→emoji data (now keyword guess); Home mascot message source (`mascotSlot`); `voiceLeft` unwired; remaining hard-coded tints in settings/money/charts; two settings keys whose copy changed.
+- **FU-225** (design): refresh the tracked golden PNGs after any later restyle (they were regenerated in batch 22).
+- Done in batch 22: FU-044 (IBM Plex Sans Arabic bundled, OFL in LicenseRegistry); PO instruction: light theme + Arabic by default.
+
 ## Log
 | Date | Event |
 |---|---|
@@ -532,3 +540,4 @@
 | 2026-11-14 | Batch 19 (`batch/2026-11-14-19`): T-116, T-114, T-084, T-057, T-153, T-147, T-164, T-160, T-061, T-062 DONE. FU-184…FU-193. Progress 137/186. |
 | 2026-11-14 | Batch 20 (`batch/2026-11-14-20`): T-063, T-065, T-066, T-166, T-092, T-100, T-117, T-118, T-064, T-171, T-173, T-082 DONE. FU-199…FU-210. Progress 149/186. |
 | 2026-11-14 | Batch 21 (`batch/2026-11-14-21`): T-067, T-174 DONE. FU-216…FU-217. Progress 151/186. |
+| 2026-11-14 | Batch 22 (`batch/2026-11-14-22`): T-037, T-068, T-069 DONE. FU-220…FU-222. Progress 154/186. |

@@ -1,0 +1,16 @@
+{
+  "sender": "EGBANK",
+  "body": "إي جي بنك: تم استخدام بطاقة **6789 بمبلغ 12,345.67 جم لدى TALABAT EG. الرصيد المتاح 3410.00 جم",
+  "receivedAt": "2026-10-23T11:14:00+03:00",
+  "expect": {
+    "template": "egbank.card_purchase.ar",
+    "event": "card_purchase",
+    "direction": "expense",
+    "currency": "EGP",
+    "amount": "12345.67",
+    "last4": "6789",
+    "balance": "3410.00",
+    "available": null,
+    "merchantClean": "Talabat"
+  }
+}

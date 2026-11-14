@@ -6,7 +6,8 @@ import 'package:zaghlol_domain/zaghlol_domain.dart';
 
 import 'setting_key.dart';
 
-/// FR-ONB-03: until chosen, the device language.
+/// PO 2026-11-14: Arabic until the user picks a language (`system` stays an
+/// explicit option).
 enum LanguagePref { system, ar, en }
 
 /// A-29: `auto` shows Arabic-Indic digits in Arabic and Western in English.
@@ -25,7 +26,7 @@ abstract final class Settings {
   static final language = SettingKey.enumeration(
     'language',
     LanguagePref.values,
-    byDefault: LanguagePref.system,
+    byDefault: LanguagePref.ar,
   );
   static final digits = SettingKey.enumeration(
     'digits',
@@ -35,7 +36,7 @@ abstract final class Settings {
   static final theme = SettingKey.enumeration(
     'theme',
     ThemePref.values,
-    byDefault: ThemePref.system,
+    byDefault: ThemePref.light,
   );
 
   /// BR-BUD-01: 1–28; day 1 (calendar month) until set (A-43).

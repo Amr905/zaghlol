@@ -1,0 +1,17 @@
+{
+  "sender": "QNB",
+  "body": "QNB: Purchase of EGP 300.00 made on 23/10 with Card ****4321 at MCDONALDS. Avl Bal EGP 8,100.00",
+  "receivedAt": "2026-01-05T09:00:00+02:00",
+  "expect": {
+    "template": "qnb.card_purchase.en",
+    "event": "card_purchase",
+    "direction": "expense",
+    "currency": "EGP",
+    "amount": "300.00",
+    "last4": "4321",
+    "balance": "8100.00",
+    "available": null,
+    "merchantClean": "Mcdonalds",
+    "date": "2025-10-23"
+  }
+}

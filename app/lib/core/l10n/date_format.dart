@@ -28,6 +28,13 @@ abstract final class ZDateFormat {
   static String date(DateTime when, String languageCode, DigitsMode digits) =>
       _fmt(DateFormat.yMMMd(languageCode), when, digits);
 
+  /// `13 Nov` / `١٣ نوفمبر`.
+  static String dayMonth(
+    DateTime when,
+    String languageCode,
+    DigitsMode digits,
+  ) => _fmt(DateFormat.MMMd(languageCode), when, digits);
+
   /// `Nov 2026`.
   static String monthYear(
     DateTime when,

@@ -25,14 +25,7 @@ void main() {
           expect(tester.takeException(), isNull);
           expect(find.byKey(const ValueKey('home-review')), findsOneWidget);
           expect(find.byKey(const ValueKey('home-row-t1')), findsOneWidget);
-          expect(
-            find.byKey(const ValueKey('home-title-ios')),
-            platform == TargetPlatform.iOS ? findsOneWidget : findsNothing,
-          );
-          expect(
-            find.byKey(const ValueKey('home-title-android')),
-            platform == TargetPlatform.android ? findsOneWidget : findsNothing,
-          );
+          expect(find.byKey(const ValueKey('home-greeting')), findsOneWidget);
           final dir = Directionality.of(
             tester.element(find.byType(HomeScreen)),
           );

@@ -21,6 +21,7 @@ abstract final class MoneyFormat {
     required String languageCode,
     required DigitsMode digits,
     bool withCurrency = true,
+    bool dropZeroFraction = false,
   }) {
     final arabic = languageCode == 'ar';
     final canonical = money.toCanonicalString();
@@ -28,7 +29,8 @@ abstract final class MoneyFormat {
     final unsigned = negative ? canonical.substring(1) : canonical;
     final point = unsigned.indexOf('.');
     final whole = point < 0 ? unsigned : unsigned.substring(0, point);
-    final fraction = point < 0 ? '' : unsigned.substring(point + 1);
+    var fraction = point < 0 ? '' : unsigned.substring(point + 1);
+    if (dropZeroFraction && RegExp(r'^0*$').hasMatch(fraction)) fraction = '';
 
     final groupSep = digits == DigitsMode.arabicIndic ? '٬' : ',';
     final decimalSep = digits == DigitsMode.arabicIndic ? '٫' : '.';
@@ -59,6 +61,15 @@ abstract final class MoneyFormat {
     }
     return '$_fsi$text$_pdi';
   }
+
+  /// The currency as shown next to amounts: `ج.م` in Arabic for EGP, else the
+  /// ISO code.
+  static String currencyLabel(
+    Currency currency, {
+    required String languageCode,
+  }) => languageCode == 'ar'
+      ? (_arSymbols[currency.code] ?? currency.code)
+      : currency.code;
 
   /// Parses typed text (any digit script) into [Money]; null when invalid or
   /// when it has more decimals than [currency] allows.
