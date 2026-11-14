@@ -3047,7 +3047,7 @@ class AppLocalizationsAr extends AppLocalizations {
   }
 
   @override
-  String get insightsChartsExplain => 'اشرحلي يا زغلول';
+  String get insightsChartsExplain => 'اشرحلي';
 
   @override
   String get insightsChartsLockedSub => 'شوف الشارت كله مع جولد';
@@ -3117,7 +3117,7 @@ class AppLocalizationsAr extends AppLocalizations {
   String get insightsLegendSpent => 'صرفت';
 
   @override
-  String get insightsLegendSaved => 'حوشت';
+  String get insightsLegendSaved => 'اللي اتحوش';
 
   @override
   String get insightsLegendActual => 'فعلي';
@@ -3944,7 +3944,7 @@ class AppLocalizationsAr extends AppLocalizations {
 
   @override
   String recurringBillsDetected(String merchant, String amount) {
-    return 'لقيت اشتراك: $merchant بـ $amount في الشهر';
+    return 'شكلها اشتراك شهري: $merchant $amount';
   }
 
   @override
@@ -3954,7 +3954,7 @@ class AppLocalizationsAr extends AppLocalizations {
   String get recurringBillsNotSub => 'مش اشتراك';
 
   @override
-  String get recurringBillsUpcoming => 'اللي جاي';
+  String get recurringBillsUpcoming => 'الجاي';
 
   @override
   String recurringBillsInstallmentRow(String name, String index, String total) {
@@ -3962,7 +3962,7 @@ class AppLocalizationsAr extends AppLocalizations {
   }
 
   @override
-  String get recurringBillsLastOne => 'آخر قسط';
+  String get recurringBillsLastOne => 'آخر قسط! 🎉';
 
   @override
   String get recurringBillsMarkPaid => 'اتدفع';
@@ -4011,7 +4011,7 @@ class AppLocalizationsAr extends AppLocalizations {
   String get recurringBillsKindInstallment => 'قسط';
 
   @override
-  String get recurringBillsKindCard => 'سداد كارت';
+  String get recurringBillsKindCard => 'كريدت كارد';
 
   @override
   String get recurringBillsKindGameya => 'جمعية';
@@ -7181,4 +7181,67 @@ class AppLocalizationsAr extends AppLocalizations {
 
   @override
   String get chatMainRoastTag => 'قصف جبهة';
+
+  @override
+  String insightsChartsSavedFootnote(String amount, String percent) {
+    return 'وفرت $amount الشهر ده ($percent)';
+  }
+
+  @override
+  String insightsChartsMonthsCount(int count, String countText) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$countText شهر',
+      few: '$countText شهور',
+      two: 'شهرين',
+      one: 'شهر',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get insightsChartsSpendLabel => 'المصروف';
+
+  @override
+  String budgetOverviewZaghlolWarn(
+    String category,
+    String percent,
+    int daysCount,
+    String days,
+  ) {
+    String _temp0 = intl.Intl.pluralLogic(
+      daysCount,
+      locale: localeName,
+      other: '$days يوم',
+      few: '$days أيام',
+      two: 'يومين',
+      one: 'يوم',
+    );
+    return 'حاسب يا كبير! $category وصل $percent وإحنا لسه فاضل $_temp0 على القبض.';
+  }
+
+  @override
+  String budgetOverviewOfLimit(String limit) {
+    return 'من $limit';
+  }
+
+  @override
+  String get recurringBillsAddShort => 'ضيف';
+
+  @override
+  String get recurringBillsKpiDue => 'أقساط عليك الشهر ده';
+
+  @override
+  String get recurringBillsKpiSubs => 'الاشتراكات بتاكل في السنة';
+
+  @override
+  String recurringBillsInstallmentOf(String index, String total) {
+    return 'قسط $index من $total';
+  }
+
+  @override
+  String recurringBillsGameyaMonth(String index, String total) {
+    return 'الشهر $index من $total';
+  }
 }

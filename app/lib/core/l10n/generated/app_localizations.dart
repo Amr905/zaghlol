@@ -4554,7 +4554,7 @@ abstract class AppLocalizations {
   /// B · the FR-CHT-03 name. Also the S-21 button
   ///
   /// In ar, this message translates to:
-  /// **'اشرحلي يا زغلول'**
+  /// **'اشرحلي'**
   String get insightsChartsExplain;
 
   /// S · C-13 locked, blurred preview + common_gold_unlock
@@ -4692,7 +4692,7 @@ abstract class AppLocalizations {
   /// C
   ///
   /// In ar, this message translates to:
-  /// **'حوشت'**
+  /// **'اللي اتحوش'**
   String get insightsLegendSaved;
 
   /// C · chart 3
@@ -5617,7 +5617,7 @@ abstract class AppLocalizations {
   /// M · Rive detective · BR-SUB-01
   ///
   /// In ar, this message translates to:
-  /// **'لقيت اشتراك: {merchant} بـ {amount} في الشهر'**
+  /// **'شكلها اشتراك شهري: {merchant} {amount}'**
   String recurringBillsDetected(String merchant, String amount);
 
   /// B
@@ -5635,7 +5635,7 @@ abstract class AppLocalizations {
   /// L · C-36 timeline
   ///
   /// In ar, this message translates to:
-  /// **'اللي جاي'**
+  /// **'الجاي'**
   String get recurringBillsUpcoming;
 
   /// L
@@ -5647,7 +5647,7 @@ abstract class AppLocalizations {
   /// C
   ///
   /// In ar, this message translates to:
-  /// **'آخر قسط'**
+  /// **'آخر قسط! 🎉'**
   String get recurringBillsLastOne;
 
   /// B · glossary «اتدفع»
@@ -5698,10 +5698,10 @@ abstract class AppLocalizations {
   /// **'قسط'**
   String get recurringBillsKindInstallment;
 
-  /// C
+  /// S-24 row sub-line for a card due
   ///
   /// In ar, this message translates to:
-  /// **'سداد كارت'**
+  /// **'كريدت كارد'**
   String get recurringBillsKindCard;
 
   /// C
@@ -10410,6 +10410,71 @@ abstract class AppLocalizations {
   /// In ar, this message translates to:
   /// **'قصف جبهة'**
   String get chatMainRoastTag;
+
+  /// S-20 cash-flow footnote
+  ///
+  /// In ar, this message translates to:
+  /// **'وفرت {amount} الشهر ده ({percent})'**
+  String insightsChartsSavedFootnote(String amount, String percent);
+
+  /// S-20 cash-flow card caption: number of months shown
+  ///
+  /// In ar, this message translates to:
+  /// **'{count, plural, one{شهر} two{شهرين} few{{countText} شهور} other{{countText} شهر}}'**
+  String insightsChartsMonthsCount(int count, String countText);
+
+  /// S-20/21 donut centre label
+  ///
+  /// In ar, this message translates to:
+  /// **'المصروف'**
+  String get insightsChartsSpendLabel;
+
+  /// S-22 Zaghlol banner on the hottest category (mockup 09)
+  ///
+  /// In ar, this message translates to:
+  /// **'حاسب يا كبير! {category} وصل {percent} وإحنا لسه فاضل {daysCount, plural, one{يوم} two{يومين} few{{days} أيام} other{{days} يوم}} على القبض.'**
+  String budgetOverviewZaghlolWarn(
+    String category,
+    String percent,
+    int daysCount,
+    String days,
+  );
+
+  /// S-22 hero: muted tail after the spent figure
+  ///
+  /// In ar, this message translates to:
+  /// **'من {limit}'**
+  String budgetOverviewOfLimit(String limit);
+
+  /// S-24 header: add a bill (compact text button)
+  ///
+  /// In ar, this message translates to:
+  /// **'ضيف'**
+  String get recurringBillsAddShort;
+
+  /// S-24 KPI card label (mockup 10)
+  ///
+  /// In ar, this message translates to:
+  /// **'أقساط عليك الشهر ده'**
+  String get recurringBillsKpiDue;
+
+  /// S-24 KPI card label
+  ///
+  /// In ar, this message translates to:
+  /// **'الاشتراكات بتاكل في السنة'**
+  String get recurringBillsKpiSubs;
+
+  /// S-24 row sub-line
+  ///
+  /// In ar, this message translates to:
+  /// **'قسط {index} من {total}'**
+  String recurringBillsInstallmentOf(String index, String total);
+
+  /// S-24 row sub-line for a gameya
+  ///
+  /// In ar, this message translates to:
+  /// **'الشهر {index} من {total}'**
+  String recurringBillsGameyaMonth(String index, String total);
 }
 
 class _AppLocalizationsDelegate

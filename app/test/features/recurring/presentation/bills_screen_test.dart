@@ -109,7 +109,7 @@ void main() {
         await tester.pumpAndSettle();
         expect(tester.takeException(), isNull);
         expect(
-          find.text('late · payment 3 of 6'),
+          find.textContaining('Payment 3 of 6'),
           lang == 'en' ? findsOneWidget : findsNothing,
         );
         // Card due: no Mark paid; the other three have it.

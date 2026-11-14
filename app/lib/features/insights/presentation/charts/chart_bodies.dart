@@ -7,6 +7,7 @@ import 'dart:math' as math;
 
 import 'package:fl_chart/fl_chart.dart';
 import 'package:flutter/material.dart';
+import 'package:intl/intl.dart' show DateFormat;
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:zaghlol_domain/zaghlol_domain.dart';
 
@@ -15,15 +16,19 @@ import '../../../../core/theme/z_tokens.dart';
 import '../../../../core/ui/z_money_text.dart';
 import '../../../budget/presentation/budget_view.dart';
 import '../../domain/chart_models.dart';
+import '../../../categorization/presentation/category_tile.dart';
+import '../../../../core/db/app_database.dart' show CategoryRow;
+import '../../../../core/ui/z_card.dart';
 import 'chart_card.dart';
 import 'chart_format.dart';
+import 'chart_palette.dart';
 
 bool _rtl(BuildContext context) =>
     Directionality.of(context) == TextDirection.rtl;
 
 // ------------------------------------------------------------ 1 cash flow
 
-/// Income and spend bars per cycle, plus the saved line of the latest one.
+/// Income, spend and saved bars per cycle, with the month under each group.
 class CashFlowBody extends ConsumerWidget {
   const CashFlowBody({super.key, required this.points});
   final List<CashFlowPoint> points;
@@ -42,54 +47,87 @@ class CashFlowBody extends ConsumerWidget {
     );
   }
 
-  @override
-  Widget build(BuildContext context, WidgetRef ref) {
-    final l = AppLocalizations.of(context);
-    final c = ZColors.of(context);
-    final shown = _rtl(context) ? points.reversed.toList() : points;
-    final maxY = points
-        .map((p) => math.max(p.income.minor, p.spend.minor))
-        .fold<int>(1, math.max);
+  /// "You saved X this month (38%)": the footnote of the latest bucket.
+  static String footnote(
+    AppLocalizations l,
+    String Function(Money) money,
+    String Function(int) percent,
+    List<CashFlowPoint> points,
+  ) {
     final last = points.last;
     final pct = last.income.minor > 0
         ? (last.net.minor * 100 / last.income.minor).round()
         : null;
-    final savedText = pct == null
-        ? chartMoney(ref, context, last.net)
-        : '${chartMoney(ref, context, last.net)} (${chartPercent(ref, context, pct)})';
+    return l.insightsChartsSavedFootnote(
+      money(last.net),
+      pct == null ? '' : percent(pct),
+    );
+  }
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final l = AppLocalizations.of(context);
+    final c = ZColors.of(context);
+    final lang = Localizations.localeOf(context).languageCode;
+    final shown = _rtl(context) ? points.reversed.toList() : points;
+    final maxY = points
+        .map((p) => math.max(p.income.minor, p.spend.minor))
+        .fold<int>(1, math.max);
+    String month(CashFlowPoint p) {
+      final d = p.period.to;
+      return DateFormat.MMMM(lang).format(DateTime(d.year, d.month));
+    }
+
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         SizedBox(
-          height: 160,
+          height: 200,
           child: Directionality(
             textDirection: TextDirection.ltr,
             child: BarChart(
               BarChartData(
-                maxY: maxY * 1.1,
+                maxY: maxY * 1.05,
                 alignment: BarChartAlignment.spaceAround,
                 gridData: const FlGridData(show: false),
                 borderData: FlBorderData(show: false),
-                titlesData: const FlTitlesData(show: false),
+                titlesData: FlTitlesData(
+                  leftTitles: const AxisTitles(),
+                  rightTitles: const AxisTitles(),
+                  topTitles: const AxisTitles(),
+                  bottomTitles: AxisTitles(
+                    sideTitles: SideTitles(
+                      showTitles: true,
+                      reservedSize: 28,
+                      getTitlesWidget: (v, meta) => SideTitleWidget(
+                        meta: meta,
+                        space: ZSpacing.sm,
+                        child: Text(
+                          month(shown[v.toInt()]),
+                          style: ZType.caption.copyWith(color: c.textMuted),
+                        ),
+                      ),
+                    ),
+                  ),
+                ),
                 barTouchData: BarTouchData(enabled: false),
                 barGroups: [
                   for (var i = 0; i < shown.length; i++)
                     BarChartGroupData(
                       x: i,
-                      barsSpace: ZSpacing.xs,
+                      barsSpace: 3,
                       barRods: [
-                        BarChartRodData(
-                          toY: shown[i].income.minor.toDouble(),
-                          color: c.primary,
-                          width: 10,
-                          borderRadius: BorderRadius.circular(ZRadius.sm / 2),
-                        ),
-                        BarChartRodData(
-                          toY: shown[i].spend.minor.toDouble(),
-                          color: c.text,
-                          width: 10,
-                          borderRadius: BorderRadius.circular(ZRadius.sm / 2),
-                        ),
+                        for (final (value, color) in [
+                          (shown[i].income.minor, ZChartColors.income),
+                          (shown[i].spend.minor, ZChartColors.spend),
+                          (math.max(0, shown[i].net.minor), ZChartColors.saved),
+                        ])
+                          BarChartRodData(
+                            toY: value.toDouble(),
+                            color: color,
+                            width: 10,
+                            borderRadius: BorderRadius.circular(ZRadius.sm / 2),
+                          ),
                       ],
                     ),
                 ],
@@ -102,14 +140,13 @@ class CashFlowBody extends ConsumerWidget {
           spacing: ZSpacing.lg,
           runSpacing: ZSpacing.xs,
           children: [
-            LegendItem(color: c.primary, label: l.insightsLegendIncome),
-            LegendItem(color: c.text, label: l.insightsLegendSpent),
+            LegendItem(
+              color: ZChartColors.income,
+              label: l.insightsLegendIncome,
+            ),
+            LegendItem(color: ZChartColors.spend, label: l.insightsLegendSpent),
+            LegendItem(color: ZChartColors.saved, label: l.insightsLegendSaved),
           ],
-        ),
-        const SizedBox(height: ZSpacing.sm),
-        Text(
-          '${l.insightsLegendSaved}: $savedText',
-          style: ZType.body.copyWith(color: c.text),
         ),
       ],
     );
@@ -157,9 +194,17 @@ List<_Slice> _donutSlices(
 }
 
 class DonutBody extends ConsumerWidget {
-  const DonutBody({super.key, required this.donut, required this.nameOf});
+  const DonutBody({
+    super.key,
+    required this.donut,
+    required this.nameOf,
+    this.large = false,
+  });
   final CategoryDonut donut;
   final String Function(String? id) nameOf;
+
+  /// S-21: the big ring alone (the category list sits below it).
+  final bool large;
 
   static String summary(
     AppLocalizations l,
@@ -181,43 +226,75 @@ class DonutBody extends ConsumerWidget {
     final c = ZColors.of(context);
     final l = AppLocalizations.of(context);
     final slices = _donutSlices(l, donut, nameOf);
-    final palette = [
-      c.primary,
-      c.accent,
-      c.onPrimaryContainer,
-      c.accentDark,
-      c.textMuted,
-      c.outline,
-    ];
-    final shown = _rtl(context) ? slices.reversed.toList() : slices;
-    return Column(
-      children: [
-        SizedBox(
-          height: 160,
-          child: Directionality(
+    const palette = ZChartColors.ramp;
+    // A ring is not mirrored: the largest slice starts at 12 o'clock and runs
+    // clockwise in both directions (mockup 07/08).
+    final shown = slices;
+    final size = large ? 240.0 : 132.0;
+    final ring = SizedBox(
+      width: size,
+      height: size,
+      child: Stack(
+        alignment: Alignment.center,
+        children: [
+          Directionality(
             textDirection: TextDirection.ltr,
             child: PieChart(
               PieChartData(
-                sectionsSpace: 2,
-                centerSpaceRadius: 44,
+                sectionsSpace: 3,
+                startDegreeOffset: 270,
+                centerSpaceRadius: size * 0.33,
                 pieTouchData: PieTouchData(enabled: false),
                 sections: [
                   for (final s in shown)
                     PieChartSectionData(
                       value: s.amount.minor.toDouble(),
                       color: palette[slices.indexOf(s) % palette.length],
-                      radius: 28,
+                      radius: size * 0.15,
                       showTitle: false,
                     ),
                 ],
               ),
             ),
           ),
-        ),
-        const SizedBox(height: ZSpacing.sm),
-        for (var i = 0; i < slices.length; i++)
+          Padding(
+            padding: EdgeInsets.all(size * 0.27),
+            child: FittedBox(
+              fit: BoxFit.scaleDown,
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Text(
+                    l.insightsChartsSpendLabel,
+                    style: ZType.caption.copyWith(color: c.textMuted),
+                  ),
+                  ZMoneyText(
+                    text: large
+                        ? trimCurrency(chartMoney(ref, context, donut.total))
+                        : chartMoney(ref, context, donut.total),
+                    size: large ? ZMoneySize.display : ZMoneySize.title,
+                  ),
+                  if (large)
+                    Text(
+                      RegExp(r'ج\.م|[A-Z]{3}')
+                              .firstMatch(chartMoney(ref, context, donut.total))
+                              ?.group(0) ??
+                          '',
+                      style: ZType.caption.copyWith(color: c.textMuted),
+                    ),
+                ],
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+    if (large) return Center(child: ring);
+    final legend = Column(
+      children: [
+        for (var i = 0; i < math.min(3, slices.length); i++)
           ConstrainedBox(
-            constraints: const BoxConstraints(minHeight: ZSpacing.minTarget),
+            constraints: const BoxConstraints(minHeight: 36),
             child: Row(
               children: [
                 Container(
@@ -232,13 +309,17 @@ class DonutBody extends ConsumerWidget {
                 Expanded(
                   child: Text(
                     slices[i].name,
-                    style: ZType.body.copyWith(color: c.text),
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                    style: ZType.bodySmall.copyWith(color: c.text),
                   ),
                 ),
-                Flexible(
-                  child: ZMoneyText(
-                    text: chartMoney(ref, context, slices[i].amount),
+                const SizedBox(width: ZSpacing.xs),
+                ZMoneyText(
+                  text: trimCurrency(
+                    chartMoney(ref, context, slices[i].amount),
                   ),
+                  size: ZMoneySize.caption,
                 ),
                 const SizedBox(width: ZSpacing.sm),
                 Text(
@@ -249,6 +330,105 @@ class DonutBody extends ConsumerWidget {
             ),
           ),
       ],
+    );
+    // Large text: stack the legend under the ring so nothing is squeezed.
+    if (MediaQuery.textScalerOf(context).scale(16) > 18.5) {
+      return Column(
+        children: [
+          ring,
+          const SizedBox(height: ZSpacing.sm),
+          legend,
+        ],
+      );
+    }
+    return Row(
+      children: [
+        ring,
+        const SizedBox(width: ZSpacing.md),
+        Expanded(child: legend),
+      ],
+    );
+  }
+}
+
+/// S-21: the full category list under the big ring (name, share, amount),
+/// each in its tinted tile. Also the legend of the ring.
+class DonutRows extends ConsumerWidget {
+  const DonutRows({
+    super.key,
+    required this.donut,
+    required this.nameOf,
+    required this.categories,
+  });
+  final CategoryDonut donut;
+  final String Function(String? id) nameOf;
+  final List<CategoryRow> categories;
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final c = ZColors.of(context);
+    final sorted = [...donut.slices]
+      ..sort((a, b) => b.amount.compareTo(a.amount));
+    CategoryRow? cat(String? id) {
+      for (final r in categories) {
+        if (r.id == id) return r;
+      }
+      return null;
+    }
+
+    return ZCard(
+      padding: const EdgeInsetsDirectional.symmetric(
+        horizontal: ZSpacing.lg,
+        vertical: ZSpacing.xs,
+      ),
+      child: Column(
+        children: [
+          for (var i = 0; i < sorted.length; i++) ...[
+            if (i > 0) Divider(height: 1, thickness: 1, color: c.outline),
+            Semantics(
+              container: true,
+              child: ConstrainedBox(
+                constraints: const BoxConstraints(minHeight: 72),
+                child: Padding(
+                  padding: const EdgeInsetsDirectional.symmetric(
+                    vertical: ZSpacing.sm,
+                  ),
+                  child: Row(
+                    children: [
+                      CategoryTile(
+                        iconKey: cat(sorted[i].categoryId)?.icon,
+                        colorHex: cat(sorted[i].categoryId)?.color,
+                      ),
+                      const SizedBox(width: ZSpacing.md),
+                      Expanded(
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(
+                              nameOf(sorted[i].categoryId),
+                              style: ZType.titleSmall.copyWith(color: c.text),
+                            ),
+                            Text(
+                              chartPercentBp(ref, context, sorted[i].shareBp),
+                              style: ZType.caption.copyWith(color: c.textMuted),
+                            ),
+                          ],
+                        ),
+                      ),
+                      ZMoneyText(
+                        text: trimCurrency(
+                          chartMoney(ref, context, sorted[i].amount),
+                        ),
+                        size: ZMoneySize.title,
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+            ),
+          ],
+        ],
+      ),
     );
   }
 }

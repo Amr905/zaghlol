@@ -2952,7 +2952,7 @@ class AppLocalizationsEn extends AppLocalizations {
   }
 
   @override
-  String get insightsChartsExplain => 'Explain this';
+  String get insightsChartsExplain => 'Explain';
 
   @override
   String get insightsChartsLockedSub => 'See the full chart with Gold';
@@ -3861,7 +3861,7 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String recurringBillsDetected(String merchant, String amount) {
-    return 'Found a subscription: $merchant, $amount a month';
+    return 'Looks like a monthly subscription: $merchant $amount';
   }
 
   @override
@@ -3879,7 +3879,7 @@ class AppLocalizationsEn extends AppLocalizations {
   }
 
   @override
-  String get recurringBillsLastOne => 'Last payment';
+  String get recurringBillsLastOne => 'Last payment! 🎉';
 
   @override
   String get recurringBillsMarkPaid => 'Mark paid';
@@ -3922,7 +3922,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get recurringBillsKindInstallment => 'Installment';
 
   @override
-  String get recurringBillsKindCard => 'Card payment';
+  String get recurringBillsKindCard => 'Credit card';
 
   @override
   String get recurringBillsKindGameya => 'Gameya';
@@ -7064,4 +7064,63 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get chatMainRoastTag => 'Roast';
+
+  @override
+  String insightsChartsSavedFootnote(String amount, String percent) {
+    return 'You saved $amount this month ($percent)';
+  }
+
+  @override
+  String insightsChartsMonthsCount(int count, String countText) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$countText months',
+      one: '$countText month',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get insightsChartsSpendLabel => 'Spending';
+
+  @override
+  String budgetOverviewZaghlolWarn(
+    String category,
+    String percent,
+    int daysCount,
+    String days,
+  ) {
+    String _temp0 = intl.Intl.pluralLogic(
+      daysCount,
+      locale: localeName,
+      other: '$days days',
+      one: '$days day',
+    );
+    return 'Careful, captain! $category hit $percent with $_temp0 to go until payday.';
+  }
+
+  @override
+  String budgetOverviewOfLimit(String limit) {
+    return 'of $limit';
+  }
+
+  @override
+  String get recurringBillsAddShort => 'Add';
+
+  @override
+  String get recurringBillsKpiDue => 'Installments due this month';
+
+  @override
+  String get recurringBillsKpiSubs => 'Subscriptions cost a year';
+
+  @override
+  String recurringBillsInstallmentOf(String index, String total) {
+    return 'Payment $index of $total';
+  }
+
+  @override
+  String recurringBillsGameyaMonth(String index, String total) {
+    return 'Month $index of $total';
+  }
 }

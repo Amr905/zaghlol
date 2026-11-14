@@ -8,6 +8,7 @@ import '../../../core/l10n/generated/app_localizations.dart';
 import '../../../core/theme/z_tokens.dart';
 import '../../../core/ui/z_segmented.dart';
 import '../../budget/presentation/budget_screen.dart';
+import '../../home/presentation/home_widgets.dart';
 import 'charts/charts_screen.dart';
 import '../../recurring/presentation/bills_screen.dart';
 
@@ -59,27 +60,127 @@ class _InsightsScreenState extends State<InsightsScreen> {
                 ZSpacing.screen,
                 ZSpacing.sm,
               ),
-              child: ZSegmentedControl<InsightsSegment>(
-                segments: [
-                  ZSegment(
-                    value: InsightsSegment.charts,
-                    label: l.insightsTabsCharts,
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  const Row(children: [HomeCardFilterChip()]),
+                  Semantics(
+                    header: true,
+                    child: Padding(
+                      padding: const EdgeInsetsDirectional.symmetric(
+                        vertical: ZSpacing.sm,
+                      ),
+                      child: Text(
+                        l.commonNavInsights,
+                        style: ZType.display.copyWith(color: c.text),
+                      ),
+                    ),
                   ),
-                  ZSegment(
-                    value: InsightsSegment.budget,
-                    label: l.insightsTabsBudget,
-                  ),
-                  ZSegment(
-                    value: InsightsSegment.bills,
-                    label: l.insightsTabsBills,
+                  _InsightsTabs(
+                    segments: [
+                      ZSegment(
+                        value: InsightsSegment.charts,
+                        label: l.insightsTabsCharts,
+                      ),
+                      ZSegment(
+                        value: InsightsSegment.budget,
+                        label: l.insightsTabsBudget,
+                      ),
+                      ZSegment(
+                        value: InsightsSegment.bills,
+                        label: l.insightsTabsBills,
+                      ),
+                    ],
+                    selected: _segment,
+                    onChanged: (s) => setState(() => _segment = s),
                   ),
                 ],
-                selected: _segment,
-                onChanged: (s) => setState(() => _segment = s),
               ),
             ),
             Expanded(child: body),
           ],
+        ),
+      ),
+    );
+  }
+}
+
+/// The Insights tab switcher (mockups 07/09/10): a mint track with the
+/// selected tab raised as a white pill. Local to this shell.
+class _InsightsTabs extends StatelessWidget {
+  const _InsightsTabs({
+    required this.segments,
+    required this.selected,
+    required this.onChanged,
+  });
+
+  final List<ZSegment<InsightsSegment>> segments;
+  final InsightsSegment selected;
+  final ValueChanged<InsightsSegment> onChanged;
+
+  @override
+  Widget build(BuildContext context) {
+    final c = ZColors.of(context);
+    final shape = BorderRadius.circular(ZRadius.pill);
+    return Semantics(
+      container: true,
+      child: DecoratedBox(
+        decoration: BoxDecoration(color: c.surfaceAlt, borderRadius: shape),
+        child: Padding(
+          padding: const EdgeInsetsDirectional.all(ZSpacing.xs),
+          child: Row(
+            children: [
+              for (final s in segments)
+                Expanded(
+                  child: Semantics(
+                    button: true,
+                    selected: s.value == selected,
+                    label: s.label,
+                    excludeSemantics: true,
+                    child: DecoratedBox(
+                      decoration: BoxDecoration(
+                        color: s.value == selected
+                            ? c.surface
+                            : Colors.transparent,
+                        borderRadius: shape,
+                        boxShadow: s.value == selected
+                            ? [
+                                BoxShadow(
+                                  color: c.shadow,
+                                  blurRadius: 8,
+                                  offset: const Offset(0, 2),
+                                ),
+                              ]
+                            : null,
+                      ),
+                      child: InkWell(
+                        borderRadius: shape,
+                        onTap: () => onChanged(s.value),
+                        child: ConstrainedBox(
+                          constraints: const BoxConstraints(
+                            minHeight: ZSpacing.minTarget,
+                          ),
+                          child: Center(
+                            child: Text(
+                              s.label,
+                              textAlign: TextAlign.center,
+                              style: ZType.titleSmall.copyWith(
+                                color: s.value == selected
+                                    ? c.text
+                                    : c.textMuted,
+                                fontWeight: s.value == selected
+                                    ? FontWeight.w600
+                                    : FontWeight.w500,
+                              ),
+                            ),
+                          ),
+                        ),
+                      ),
+                    ),
+                  ),
+                ),
+            ],
+          ),
         ),
       ),
     );

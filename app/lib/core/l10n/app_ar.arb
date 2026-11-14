@@ -3956,7 +3956,7 @@
       }
     }
   },
-  "insightsChartsExplain": "اشرحلي يا زغلول",
+  "insightsChartsExplain": "اشرحلي",
   "@insightsChartsExplain": {
     "description": "B · the FR-CHT-03 name. Also the S-21 button"
   },
@@ -4048,7 +4048,7 @@
   "@insightsLegendSpent": {
     "description": "C"
   },
-  "insightsLegendSaved": "حوشت",
+  "insightsLegendSaved": "اللي اتحوش",
   "@insightsLegendSaved": {
     "description": "C"
   },
@@ -5297,7 +5297,7 @@
       }
     }
   },
-  "recurringBillsDetected": "لقيت اشتراك: {merchant} بـ {amount} في الشهر",
+  "recurringBillsDetected": "شكلها اشتراك شهري: {merchant} {amount}",
   "@recurringBillsDetected": {
     "description": "M · Rive detective · BR-SUB-01",
     "placeholders": {
@@ -5317,7 +5317,7 @@
   "@recurringBillsNotSub": {
     "description": "B"
   },
-  "recurringBillsUpcoming": "اللي جاي",
+  "recurringBillsUpcoming": "الجاي",
   "@recurringBillsUpcoming": {
     "description": "L · C-36 timeline"
   },
@@ -5336,7 +5336,7 @@
       }
     }
   },
-  "recurringBillsLastOne": "آخر قسط",
+  "recurringBillsLastOne": "آخر قسط! 🎉",
   "@recurringBillsLastOne": {
     "description": "C"
   },
@@ -5388,9 +5388,9 @@
   "@recurringBillsKindInstallment": {
     "description": "C"
   },
-  "recurringBillsKindCard": "سداد كارت",
+  "recurringBillsKindCard": "كريدت كارد",
   "@recurringBillsKindCard": {
-    "description": "C"
+    "description": "S-24 row sub-line for a card due"
   },
   "recurringBillsKindGameya": "جمعية",
   "@recurringBillsKindGameya": {
@@ -9732,5 +9732,96 @@
   "chatMainRoastTag": "قصف جبهة",
   "@chatMainRoastTag": {
     "description": "S-50 design pass"
+  },
+  "insightsChartsSavedFootnote": "وفرت {amount} الشهر ده ({percent})",
+  "@insightsChartsSavedFootnote": {
+    "description": "S-20 cash-flow footnote",
+    "placeholders": {
+      "amount": {
+        "type": "String"
+      },
+      "percent": {
+        "type": "String"
+      }
+    }
+  },
+  "insightsChartsMonthsCount": "{count, plural, one{شهر} two{شهرين} few{{countText} شهور} other{{countText} شهر}}",
+  "@insightsChartsMonthsCount": {
+    "description": "S-20 cash-flow card caption: number of months shown",
+    "placeholders": {
+      "count": {
+        "type": "int"
+      },
+      "countText": {
+        "type": "String"
+      }
+    }
+  },
+  "insightsChartsSpendLabel": "المصروف",
+  "@insightsChartsSpendLabel": {
+    "description": "S-20/21 donut centre label"
+  },
+  "budgetOverviewZaghlolWarn": "حاسب يا كبير! {category} وصل {percent} وإحنا لسه فاضل {daysCount, plural, one{يوم} two{يومين} few{{days} أيام} other{{days} يوم}} على القبض.",
+  "@budgetOverviewZaghlolWarn": {
+    "description": "S-22 Zaghlol banner on the hottest category (mockup 09)",
+    "placeholders": {
+      "category": {
+        "type": "String"
+      },
+      "percent": {
+        "type": "String"
+      },
+      "daysCount": {
+        "type": "int"
+      },
+      "days": {
+        "type": "String"
+      }
+    }
+  },
+  "budgetOverviewOfLimit": "من {limit}",
+  "@budgetOverviewOfLimit": {
+    "description": "S-22 hero: muted tail after the spent figure",
+    "placeholders": {
+      "limit": {
+        "type": "String"
+      }
+    }
+  },
+  "recurringBillsAddShort": "ضيف",
+  "@recurringBillsAddShort": {
+    "description": "S-24 header: add a bill (compact text button)"
+  },
+  "recurringBillsKpiDue": "أقساط عليك الشهر ده",
+  "@recurringBillsKpiDue": {
+    "description": "S-24 KPI card label (mockup 10)"
+  },
+  "recurringBillsKpiSubs": "الاشتراكات بتاكل في السنة",
+  "@recurringBillsKpiSubs": {
+    "description": "S-24 KPI card label"
+  },
+  "recurringBillsInstallmentOf": "قسط {index} من {total}",
+  "@recurringBillsInstallmentOf": {
+    "description": "S-24 row sub-line",
+    "placeholders": {
+      "index": {
+        "type": "String"
+      },
+      "total": {
+        "type": "String"
+      }
+    }
+  },
+  "recurringBillsGameyaMonth": "الشهر {index} من {total}",
+  "@recurringBillsGameyaMonth": {
+    "description": "S-24 row sub-line for a gameya",
+    "placeholders": {
+      "index": {
+        "type": "String"
+      },
+      "total": {
+        "type": "String"
+      }
+    }
   }
 }
