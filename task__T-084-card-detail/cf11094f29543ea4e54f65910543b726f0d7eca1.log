@@ -1,5 +1,8 @@
 ﻿== SUMMARY ==
-RUNNING sha=cf11094f29543ea4e54f65910543b726f0d7eca1
+SKIP sha=cf11094f29543ea4e54f65910543b726f0d7eca1 no app/packages/backend changes
 
 == FULL LOG (last 1500 lines) ==
 auto task/T-084-card-detail cf11094f29543ea4e54f65910543b726f0d7eca1 2026-11-14T11:06:24.7343080+02:00
+
+
+
