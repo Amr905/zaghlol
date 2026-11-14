@@ -40,7 +40,7 @@ void main() {
       expect(t.takeException(), isNull);
       await expectLater(
         find.byKey(const ValueKey('golden-root')),
-        matchesGoldenFile('s66_${v.name}.png'),
+        matchesGoldenFile('goldens/s66_${v.name}.png'),
       );
     });
 
@@ -76,7 +76,7 @@ void main() {
       expect(t.takeException(), isNull);
       await expectLater(
         find.byKey(const ValueKey('golden-root')),
-        matchesGoldenFile('s04_${v.name}.png'),
+        matchesGoldenFile('goldens/s04_${v.name}.png'),
       );
     });
   }

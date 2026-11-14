@@ -29,7 +29,7 @@ void main() {
       expect(tester.takeException(), isNull);
       await expectLater(
         find.byKey(const ValueKey('golden-root')),
-        matchesGoldenFile('scan_results_${v.name}.png'),
+        matchesGoldenFile('goldens/scan_results_${v.name}.png'),
       );
     });
   }
