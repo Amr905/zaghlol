@@ -9,7 +9,7 @@ import '../../../core/l10n/generated/app_localizations.dart';
 import '../../../core/theme/z_tokens.dart';
 import '../../../core/ui/z_button.dart';
 import '../../../core/ui/z_card.dart';
-import '../../../core/ui/z_chip.dart';
+import '../../../core/ui/category_glyph.dart';
 import '../../../core/ui/z_money_text.dart';
 import '../../../core/ui/z_sheet.dart';
 import '../../accounts/data/accounts_providers.dart';
@@ -25,7 +25,9 @@ final homeAccountsProvider = FutureProvider<List<Account>>((ref) async {
   return repo.list();
 }, name: 'homeAccountsProvider');
 
-/// C-11 hero for one currency.
+/// C-11 hero for one currency: mint gradient card with the safe-to-spend
+/// figure, the cycle progress bar and the nested income / spent / left panel
+/// (mockups 03 / 20 / 21).
 class HomeHero extends StatelessWidget {
   const HomeHero({
     super.key,
@@ -35,6 +37,7 @@ class HomeHero extends StatelessWidget {
     required this.paydaySet,
     this.onTap,
     this.onSetBudget,
+    this.onSpentTap,
   });
 
   final HomeCurrencyFigures figures;
@@ -43,6 +46,7 @@ class HomeHero extends StatelessWidget {
   final bool paydaySet;
   final VoidCallback? onTap;
   final VoidCallback? onSetBudget;
+  final VoidCallback? onSpentTap;
 
   @override
   Widget build(BuildContext context) {
@@ -53,8 +57,8 @@ class HomeHero extends StatelessWidget {
     final used = safe != null && !safe.isPositive;
     final days = model.daysRemaining;
     final rangeText = l.commonDateRange(
-      format.date(model.cycle.start),
-      format.date(model.cycle.end),
+      format.dayMonth(model.cycle.start),
+      format.dayMonth(model.cycle.end),
     );
     final label = hasBudget
         ? l.homeHeroSafeToSpend
@@ -63,10 +67,15 @@ class HomeHero extends StatelessWidget {
     final caption = paydaySet
         ? '${l.homeHeroDaysToPayday(days, format.count(days))} · $rangeText'
         : l.homeHeroCalendarMonth;
-    return ZCard(
-      color: c.primaryContainer,
+    final progress = _progress(figures);
+    return ZHeroCard(
       onTap: onTap,
-      padding: const EdgeInsetsDirectional.all(ZSpacing.xl),
+      padding: const EdgeInsetsDirectional.fromSTEB(
+        ZSpacing.xl,
+        ZSpacing.xl,
+        ZSpacing.xl,
+        ZSpacing.xl,
+      ),
       child: Semantics(
         container: true,
         child: Column(
@@ -75,29 +84,18 @@ class HomeHero extends StatelessWidget {
           children: [
             Text(
               label,
-              style: ZType.label.copyWith(color: c.onPrimaryContainer),
+              style: ZType.titleSmall.copyWith(
+                color: c.textMuted,
+                fontWeight: FontWeight.w500,
+              ),
             ),
             const SizedBox(height: ZSpacing.xs),
-            Row(
-              crossAxisAlignment: CrossAxisAlignment.baseline,
-              textBaseline: TextBaseline.alphabetic,
-              children: [
-                Flexible(
-                  child: ZMoneyText(
-                    text: format.money(main),
-                    size: ZMoneySize.display,
-                  ),
-                ),
-                if (hasBudget) ...[
-                  const SizedBox(width: ZSpacing.sm),
-                  Text(
-                    l.homeHeroPerDay,
-                    style: ZType.bodySmall.copyWith(color: c.textMuted),
-                  ),
-                ],
-              ],
+            ZMoneyText(
+              text: format.number(main),
+              unit: format.currency(main),
+              size: ZMoneySize.hero,
+              semanticsLabel: format.money(main),
             ),
-            const SizedBox(height: ZSpacing.xs),
             Text(caption, style: ZType.bodySmall.copyWith(color: c.textMuted)),
             if (used) ...[
               const SizedBox(height: ZSpacing.xs),
@@ -119,14 +117,26 @@ class HomeHero extends StatelessWidget {
                 size: ZButtonSize.small,
               ),
             ],
+            const SizedBox(height: ZSpacing.lg),
+            ZProgressBar(value: progress),
+            const SizedBox(height: ZSpacing.sm),
+            HomeKpis(figures: figures, format: format, onSpentTap: onSpentTap),
           ],
         ),
       ),
     );
   }
+
+  /// Share of the budget (or, without one, of the income) already spent.
+  static double _progress(HomeCurrencyFigures f) {
+    final base = f.overview.budget ?? f.income;
+    if (!base.isPositive) return 0;
+    final spent = f.spend.minor;
+    return (spent / base.minor).clamp(0.0, 1.0).toDouble();
+  }
 }
 
-/// C-10 KPI trio: income, spent, left (all in one currency).
+/// C-10 KPI trio nested in the hero: income, spent, left (one currency).
 class HomeKpis extends StatelessWidget {
   const HomeKpis({
     super.key,
@@ -142,59 +152,62 @@ class HomeKpis extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final l = AppLocalizations.of(context);
-    return IntrinsicHeight(
-      child: Row(
-        crossAxisAlignment: CrossAxisAlignment.stretch,
-        children: [
-          Expanded(
-            child: _Kpi(
-              label: l.homeHeroKpiIncome,
-              text: format.money(figures.income),
-              kind: ZMoneyKind.income,
-            ),
+    final c = ZColors.of(context);
+    final radius = BorderRadius.circular(ZRadius.lg + 4);
+    return DecoratedBox(
+      decoration: BoxDecoration(
+        color: c.surface.withValues(alpha: 0.72),
+        borderRadius: radius,
+      ),
+      child: Padding(
+        padding: const EdgeInsetsDirectional.symmetric(
+          horizontal: ZSpacing.lg,
+          vertical: ZSpacing.md,
+        ),
+        child: IntrinsicHeight(
+          child: Row(
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              Expanded(
+                child: _Kpi(
+                  label: l.homeHeroKpiIncome,
+                  text: format.number(figures.income),
+                ),
+              ),
+              Expanded(
+                child: _Kpi(
+                  label: l.homeHeroKpiSpent,
+                  text: format.number(figures.spend),
+                  onTap: onSpentTap,
+                ),
+              ),
+              Expanded(
+                child: _Kpi(
+                  label: l.homeHeroKpiLeft,
+                  text: format.number(figures.net),
+                ),
+              ),
+            ],
           ),
-          const SizedBox(width: ZSpacing.sm),
-          Expanded(
-            child: _Kpi(
-              label: l.homeHeroKpiSpent,
-              text: format.money(figures.spend),
-              kind: ZMoneyKind.expense,
-              onTap: onSpentTap,
-            ),
-          ),
-          const SizedBox(width: ZSpacing.sm),
-          Expanded(
-            child: _Kpi(
-              label: l.homeHeroKpiLeft,
-              text: format.money(figures.net),
-              kind: ZMoneyKind.expense,
-            ),
-          ),
-        ],
+        ),
       ),
     );
   }
 }
 
 class _Kpi extends StatelessWidget {
-  const _Kpi({
-    required this.label,
-    required this.text,
-    required this.kind,
-    this.onTap,
-  });
+  const _Kpi({required this.label, required this.text, this.onTap});
 
   final String label;
   final String text;
-  final ZMoneyKind kind;
   final VoidCallback? onTap;
 
   @override
   Widget build(BuildContext context) {
     final c = ZColors.of(context);
-    return ZCard(
+    return InkWell(
       onTap: onTap,
-      padding: const EdgeInsetsDirectional.all(ZSpacing.md),
+      borderRadius: BorderRadius.circular(ZRadius.md),
       child: Semantics(
         container: true,
         label: '$label, $text',
@@ -205,15 +218,20 @@ class _Kpi extends StatelessWidget {
           children: [
             Text(
               label,
-              style: ZType.caption.copyWith(color: c.textMuted),
+              style: ZType.bodySmall.copyWith(color: c.textMuted),
               maxLines: 1,
               overflow: TextOverflow.ellipsis,
             ),
-            const SizedBox(height: ZSpacing.xs),
             FittedBox(
               fit: BoxFit.scaleDown,
               alignment: AlignmentDirectional.centerStart,
-              child: ZMoneyText(text: text, kind: kind, size: ZMoneySize.body),
+              child: Text(
+                text,
+                style: ZType.titleSmall.copyWith(
+                  color: c.text,
+                  fontWeight: FontWeight.w700,
+                ),
+              ),
             ),
           ],
         ),
@@ -254,7 +272,7 @@ class HomePagerDots extends StatelessWidget {
   }
 }
 
-/// Review card: shown only when something needs review.
+/// Review card: shown only when something needs review (mockup 03).
 class HomeReviewPill extends StatelessWidget {
   const HomeReviewPill({
     super.key,
@@ -270,13 +288,49 @@ class HomeReviewPill extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final l = AppLocalizations.of(context);
-    return ZCard(
-      onTap: onTap,
-      color: ZColors.of(context).warningBg,
-      padding: EdgeInsets.zero,
-      child: ZListRow(
-        title: l.homeBannerReview(count, format.count(count)),
-        showChevron: true,
+    final c = ZColors.of(context);
+    final radius = BorderRadius.circular(ZRadius.card);
+    return MergeSemantics(
+      child: Material(
+        color: c.warningBg,
+        borderRadius: radius,
+        child: InkWell(
+          borderRadius: radius,
+          onTap: onTap,
+          child: ConstrainedBox(
+            constraints: const BoxConstraints(
+              minHeight: ZSpacing.minTarget + 8,
+            ),
+            child: Padding(
+              padding: const EdgeInsetsDirectional.symmetric(
+                horizontal: ZSpacing.lg,
+              ),
+              child: Row(
+                children: [
+                  ExcludeSemantics(
+                    child: Icon(
+                      Icons.warning_amber_rounded,
+                      color: c.warningText,
+                    ),
+                  ),
+                  const SizedBox(width: ZSpacing.md),
+                  Expanded(
+                    child: Text(
+                      l.homeBannerReview(count, format.count(count)),
+                      style: ZType.titleSmall.copyWith(color: c.warningText),
+                    ),
+                  ),
+                  Icon(
+                    Directionality.of(context) == TextDirection.rtl
+                        ? Icons.chevron_left
+                        : Icons.chevron_right,
+                    color: c.warningText,
+                  ),
+                ],
+              ),
+            ),
+          ),
+        ),
       ),
     );
   }
@@ -306,25 +360,30 @@ String _typeLabel(AppLocalizations l, HomeFeedItem item) {
   };
 }
 
-/// C-05 feed row.
+/// C-05 feed row: emoji tile, merchant, "account •1234 · time", amount.
 class HomeFeedRow extends StatelessWidget {
   const HomeFeedRow({
     super.key,
     required this.item,
     required this.format,
     required this.today,
+    this.accountLabel,
+    this.showDivider = false,
     this.onTap,
   });
 
   final HomeFeedItem item;
   final HomeFormat format;
   final CivilDate today;
+
+  /// "Account •1234" for the row's card; null falls back to the source.
+  final String? accountLabel;
+  final bool showDivider;
   final ValueChanged<String>? onTap;
 
   @override
   Widget build(BuildContext context) {
     final l = AppLocalizations.of(context);
-    final c = ZColors.of(context);
     final r = item.record;
     final title = r.merchantNorm ?? r.merchantRaw ?? _typeLabel(l, item);
     final local = r.occurredAt.toLocal();
@@ -332,13 +391,13 @@ class HomeFeedRow extends StatelessWidget {
         local.year == today.year &&
         local.month == today.month &&
         local.day == today.day;
-    final when = l.commonDateDateTime(
-      sameDay ? l.commonDateToday : format.dateOf(r.occurredAt),
-      format.time(r.occurredAt),
-    );
+    final where = accountLabel ?? _sourceLabel(l, r.source);
+    final when = sameDay
+        ? format.time(r.occurredAt)
+        : format.dayMonthOf(r.occurredAt);
     final subtitle = item.excludedFromTotals
-        ? '${_typeLabel(l, item)} · $when'
-        : '${_sourceLabel(l, r.source)} · $when';
+        ? '$where · ${l.homeFeedExcludedFromSpending}'
+        : '$where · $when';
     final (Money shown, ZMoneyKind kind) = item.excludedFromTotals
         ? (r.amount, ZMoneyKind.neutral)
         : switch (r.direction) {
@@ -347,33 +406,45 @@ class HomeFeedRow extends StatelessWidget {
             TxnDirection.transferIn => (r.amount, ZMoneyKind.income),
             _ => (-r.amount, ZMoneyKind.expense),
           };
-    final text = format.money(shown);
+    final income = kind == ZMoneyKind.income && !item.excludedFromTotals;
     return ZListRow(
       title: title,
       subtitle: subtitle,
-      leading: ZCategoryTile(
-        color: item.excludedFromTotals ? c.textMuted : c.primary,
-        child: Icon(
-          item.excludedFromTotals
-              ? Icons.swap_horiz
-              : Icons.receipt_long_outlined,
-          size: 20,
-          color: c.text,
-        ),
+      showDivider: showDivider,
+      leading: ZCategoryGlyph(
+        categoryId: r.categoryId,
+        income: income,
+        transfer: item.excludedFromTotals,
       ),
-      trailing: ZMoneyText(text: text, kind: kind),
+      trailing: ZMoneyText(
+        text: _signed(format.number(shown), kind, shown),
+        unit: format.currency(shown),
+        kind: kind,
+        semanticsLabel: format.money(shown),
+      ),
       onTap: onTap == null ? null : () => onTap!(r.id),
     );
   }
+
+  /// Income gets an explicit plus (the minus is already in the number).
+  static String _signed(String number, ZMoneyKind kind, Money m) =>
+      kind == ZMoneyKind.income && m.isPositive
+      ? '\u2068+${number.replaceAll(RegExp('[\u2068\u2069]'), '')}\u2069'
+      : number;
 }
 
-/// C-08 card filter chip; opens the multi-select sheet.
+/// C-08 card filter: a white pill "funnel / label / chevron" on iOS, a bare
+/// funnel icon button on Android (mockups 03 / 20). Opens the multi-select
+/// sheet; an active filter shows the mint fill and a clear button.
 class HomeCardFilterChip extends ConsumerWidget {
-  const HomeCardFilterChip({super.key});
+  const HomeCardFilterChip({super.key, this.iconOnly = false});
+
+  final bool iconOnly;
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final l = AppLocalizations.of(context);
+    final c = ZColors.of(context);
     final filter = ref.watch(cardFilterProvider);
     final accounts = ref.watch(homeAccountsProvider).value ?? const [];
     final names = homeFilterNames(accounts, filter);
@@ -385,29 +456,182 @@ class HomeCardFilterChip extends ConsumerWidget {
                   filter.length,
                   HomeFormat.of(context, ref).count(filter.length),
                 ));
+    final semantics = filter.isEmpty
+        ? label
+        : l.commonCardFilterActiveA11y(names.join(', '));
+    void open() => showZSheet<void>(
+      context: context,
+      title: l.commonCardFilterSheetTitle,
+      builder: (_) => const HomeCardFilterSheet(),
+    );
+    final active = filter.isNotEmpty;
+    if (iconOnly) {
+      return Semantics(
+        button: true,
+        label: semantics,
+        excludeSemantics: true,
+        child: IconButton(
+          constraints: const BoxConstraints(
+            minWidth: ZSpacing.minTarget,
+            minHeight: ZSpacing.minTarget,
+          ),
+          icon: Icon(
+            Icons.filter_alt_outlined,
+            color: active ? c.primary : c.text,
+          ),
+          onPressed: open,
+        ),
+      );
+    }
+    final radius = BorderRadius.circular(ZRadius.pill);
     return ConstrainedBox(
       constraints: const BoxConstraints(minHeight: ZSpacing.minTarget),
       child: Semantics(
         button: true,
-        label: filter.isEmpty
-            ? label
-            : l.commonCardFilterActiveA11y(names.join(', ')),
+        label: semantics,
         excludeSemantics: true,
         child: Center(
-          child: ZChip(
-            label: label,
-            selected: filter.isNotEmpty,
-            icon: Icons.credit_card,
-            onTap: () => showZSheet<void>(
-              context: context,
-              title: l.commonCardFilterSheetTitle,
-              builder: (_) => const HomeCardFilterSheet(),
+          child: DecoratedBox(
+            decoration: BoxDecoration(
+              color: active ? c.primaryContainer : c.surface,
+              borderRadius: radius,
+              boxShadow: [
+                BoxShadow(
+                  color: c.shadow,
+                  blurRadius: 16,
+                  offset: const Offset(0, 4),
+                ),
+              ],
             ),
-            onClear: filter.isEmpty
-                ? null
-                : () => ref.read(cardFilterProvider.notifier).clear(),
-            clearSemanticsLabel: l.commonCardFilterClearA11y,
+            child: Material(
+              color: Colors.transparent,
+              borderRadius: radius,
+              child: InkWell(
+                borderRadius: radius,
+                onTap: open,
+                child: Padding(
+                  padding: const EdgeInsetsDirectional.fromSTEB(
+                    ZSpacing.lg,
+                    ZSpacing.sm,
+                    ZSpacing.md,
+                    ZSpacing.sm,
+                  ),
+                  child: Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Icon(Icons.filter_alt_outlined, size: 20, color: c.text),
+                      const SizedBox(width: ZSpacing.sm),
+                      Flexible(
+                        child: Text(
+                          label,
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
+                          style: ZType.titleSmall.copyWith(
+                            color: c.text,
+                            fontWeight: FontWeight.w500,
+                          ),
+                        ),
+                      ),
+                      const SizedBox(width: ZSpacing.sm),
+                      if (active)
+                        InkResponse(
+                          onTap: () =>
+                              ref.read(cardFilterProvider.notifier).clear(),
+                          child: Semantics(
+                            button: true,
+                            label: l.commonCardFilterClearA11y,
+                            excludeSemantics: true,
+                            child: Icon(Icons.close, size: 20, color: c.text),
+                          ),
+                        )
+                      else
+                        Icon(
+                          Icons.keyboard_arrow_down_rounded,
+                          size: 20,
+                          color: c.textMuted,
+                        ),
+                    ],
+                  ),
+                ),
+              ),
+            ),
           ),
+        ),
+      ),
+    );
+  }
+}
+
+/// Settings button: a white circle on iOS, a plain icon on Android.
+class HomeSettingsButton extends StatelessWidget {
+  const HomeSettingsButton({super.key, required this.onPressed, this.circle});
+
+  final VoidCallback? onPressed;
+  final bool? circle;
+
+  @override
+  Widget build(BuildContext context) {
+    final c = ZColors.of(context);
+    final l = AppLocalizations.of(context);
+    final round = circle ?? Theme.of(context).platform == TargetPlatform.iOS;
+    final button = IconButton(
+      tooltip: l.commonNavSettingsA11y,
+      constraints: const BoxConstraints(
+        minWidth: ZSpacing.minTarget,
+        minHeight: ZSpacing.minTarget,
+      ),
+      icon: Icon(Icons.settings_outlined, color: c.text),
+      onPressed: onPressed,
+    );
+    if (!round) return button;
+    return DecoratedBox(
+      decoration: BoxDecoration(
+        color: c.surface,
+        shape: BoxShape.circle,
+        boxShadow: [
+          BoxShadow(
+            color: c.shadow,
+            blurRadius: 16,
+            offset: const Offset(0, 4),
+          ),
+        ],
+      ),
+      child: button,
+    );
+  }
+}
+
+/// The clock behind the greeting; tests override it.
+final homeNowProvider = Provider<DateTime>(
+  (ref) => DateTime.now(),
+  name: 'homeNowProvider',
+);
+
+/// Time-of-day greeting headline ("صباح الفل يا كبير ☀️").
+class HomeGreeting extends ConsumerWidget {
+  const HomeGreeting({super.key, this.fontSize});
+
+  final double? fontSize;
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final l = AppLocalizations.of(context);
+    final c = ZColors.of(context);
+    final h = ref.watch(homeNowProvider).hour;
+    final part = h >= 5 && h < 12
+        ? 'morning'
+        : h >= 12 && h < 18
+        ? 'afternoon'
+        : 'evening';
+    return Semantics(
+      header: true,
+      child: Text(
+        l.homeGreetingByTime(part),
+        key: const ValueKey('home-greeting'),
+        style: ZType.display.copyWith(
+          fontSize: fontSize ?? 34,
+          height: 1.3,
+          color: c.text,
         ),
       ),
     );

@@ -25,16 +25,11 @@ class _Destination {
   final IconData selectedIcon;
 }
 
-// Material Symbols Rounded equivalents; the Zaghlol tab uses a bird glyph
-// until the mascot glyph asset exists.
 const _destinations = <_Destination>[
   _Destination(Icons.home_outlined, Icons.home_rounded),
-  _Destination(Icons.bar_chart_outlined, Icons.bar_chart_rounded),
-  _Destination(
-    Icons.account_balance_wallet_outlined,
-    Icons.account_balance_wallet_rounded,
-  ),
-  _Destination(Icons.flutter_dash_outlined, Icons.flutter_dash_rounded),
+  _Destination(Icons.area_chart_outlined, Icons.area_chart),
+  _Destination(Icons.account_balance_outlined, Icons.account_balance),
+  _Destination(Icons.chat_outlined, Icons.chat),
 ];
 
 List<String> _labels(AppLocalizations l10n) => [
@@ -71,47 +66,144 @@ class AppShell extends StatelessWidget {
       },
       child: shell,
     );
+    return ShellScaffold(
+      body: body,
+      selected: shell.currentIndex,
+      onSelect: _selectTab,
+      onAdd: () => _openAdd(context),
+      glass: glass,
+      labels: _labels(l10n),
+      addLabel: l10n.commonNavAddA11y,
+    );
+  }
+}
+
+/// The shell frame: body plus the platform's tab bar and Add button. Public
+/// so widget tests and design shots can render it without a router.
+class ShellScaffold extends StatelessWidget {
+  const ShellScaffold({
+    super.key,
+    required this.body,
+    required this.selected,
+    required this.onSelect,
+    required this.onAdd,
+    required this.glass,
+    required this.labels,
+    required this.addLabel,
+  });
+
+  final Widget body;
+  final int selected;
+  final ValueChanged<int> onSelect;
+  final VoidCallback onAdd;
+  final bool glass;
+  final List<String> labels;
+  final String addLabel;
+
+  @override
+  Widget build(BuildContext context) {
     if (glass) {
       return Scaffold(
         extendBody: true,
         body: body,
         bottomNavigationBar: _GlassBar(
-          labels: _labels(l10n),
-          addLabel: l10n.commonNavAddA11y,
-          selected: shell.currentIndex,
-          onSelect: _selectTab,
-          onAdd: () => _openAdd(context),
+          labels: labels,
+          addLabel: addLabel,
+          selected: selected,
+          onSelect: onSelect,
+          onAdd: onAdd,
         ),
       );
     }
     final c = ZColors.of(context);
-    final labels = _labels(l10n);
     return Scaffold(
       body: body,
       floatingActionButtonLocation: FloatingActionButtonLocation.endFloat,
-      floatingActionButton: Semantics(
-        button: true,
-        label: l10n.commonNavAddA11y,
-        excludeSemantics: true,
-        child: FloatingActionButton(
-          heroTag: null,
-          backgroundColor: c.accent,
-          foregroundColor: c.onAccent,
-          onPressed: () => _openAdd(context),
-          child: const Icon(Icons.add_rounded),
+      floatingActionButton: ZAddButton(label: addLabel, onTap: onAdd),
+      bottomNavigationBar: NavigationBarTheme(
+        data: NavigationBarThemeData(
+          backgroundColor: Color.alphaBlend(
+            c.primaryContainer.withValues(alpha: 0.35),
+            c.bg,
+          ),
+          surfaceTintColor: Colors.transparent,
+          elevation: 0,
+          indicatorColor: c.primaryContainer,
+          labelTextStyle: WidgetStatePropertyAll(
+            ZType.label.copyWith(color: c.text),
+          ),
+          iconTheme: WidgetStateProperty.resolveWith(
+            (states) => IconThemeData(
+              color: states.contains(WidgetState.selected) ? c.primary : c.text,
+            ),
+          ),
+        ),
+        child: NavigationBar(
+          selectedIndex: selected,
+          onDestinationSelected: onSelect,
+          destinations: [
+            for (var i = 0; i < _destinations.length; i++)
+              NavigationDestination(
+                icon: Icon(_destinations[i].icon),
+                selectedIcon: Icon(_destinations[i].selectedIcon),
+                label: labels[i],
+              ),
+          ],
         ),
       ),
-      bottomNavigationBar: NavigationBar(
-        selectedIndex: shell.currentIndex,
-        onDestinationSelected: _selectTab,
-        destinations: [
-          for (var i = 0; i < _destinations.length; i++)
-            NavigationDestination(
-              icon: Icon(_destinations[i].icon),
-              selectedIcon: Icon(_destinations[i].selectedIcon),
-              label: labels[i],
+    );
+  }
+}
+
+/// The apricot Add button (gradient; mint in dark): a circle on iOS, a
+/// rounded square FAB on Android (mockups 03 / 20 / 21).
+class ZAddButton extends StatelessWidget {
+  const ZAddButton({super.key, required this.label, required this.onTap});
+
+  final String label;
+  final VoidCallback onTap;
+
+  @override
+  Widget build(BuildContext context) {
+    final c = ZColors.of(context);
+    final glass = usesGlassBar(context);
+    final size = glass ? 62.0 : 60.0;
+    final shape = glass
+        ? const CircleBorder()
+        : RoundedRectangleBorder(borderRadius: BorderRadius.circular(22));
+    return Semantics(
+      button: true,
+      label: label,
+      excludeSemantics: true,
+      child: DecoratedBox(
+        decoration: ShapeDecoration(
+          shape: shape,
+          shadows: [
+            BoxShadow(
+              color: c.accentDark.withValues(alpha: 0.35),
+              blurRadius: 20,
+              offset: const Offset(0, 8),
             ),
-        ],
+          ],
+          gradient: LinearGradient(
+            begin: AlignmentDirectional.topStart,
+            end: AlignmentDirectional.bottomEnd,
+            colors: [c.accentLight, c.accentDark],
+          ),
+        ),
+        child: Material(
+          color: Colors.transparent,
+          shape: shape,
+          child: InkWell(
+            customBorder: shape,
+            onTap: onTap,
+            child: SizedBox(
+              width: size,
+              height: size,
+              child: Icon(Icons.add, size: 34, color: c.onAccent),
+            ),
+          ),
+        ),
       ),
     );
   }
@@ -133,7 +225,6 @@ class _GlassBar extends StatelessWidget {
   final VoidCallback onAdd;
 
   static const double _barHeight = 64;
-  static const double _addSize = 56;
 
   @override
   Widget build(BuildContext context) {
@@ -162,7 +253,7 @@ class _GlassBar extends StatelessWidget {
                       horizontal: ZSpacing.xs,
                     ),
                     decoration: BoxDecoration(
-                      color: c.surface.withValues(alpha: 0.72),
+                      color: c.surface.withValues(alpha: 0.82),
                       borderRadius: BorderRadius.circular(ZRadius.pill),
                       border: Border.all(color: c.outline),
                     ),
@@ -184,26 +275,7 @@ class _GlassBar extends StatelessWidget {
               ),
             ),
             const SizedBox(width: ZSpacing.md),
-            Semantics(
-              button: true,
-              label: addLabel,
-              excludeSemantics: true,
-              child: Material(
-                color: c.accent,
-                shape: const CircleBorder(),
-                elevation: 3,
-                shadowColor: c.shadow,
-                child: InkWell(
-                  customBorder: const CircleBorder(),
-                  onTap: onAdd,
-                  child: SizedBox(
-                    width: _addSize,
-                    height: _addSize,
-                    child: Icon(Icons.add_rounded, color: c.onAccent),
-                  ),
-                ),
-              ),
-            ),
+            ZAddButton(label: addLabel, onTap: onAdd),
           ],
         ),
       ),
@@ -227,7 +299,7 @@ class _GlassTab extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final c = ZColors.of(context);
-    final color = selected ? c.onPrimaryContainer : c.textMuted;
+    final color = selected ? c.primary : c.text;
     return Semantics(
       button: true,
       selected: selected,
@@ -258,7 +330,10 @@ class _GlassTab extends StatelessWidget {
                   label,
                   maxLines: 1,
                   overflow: TextOverflow.ellipsis,
-                  style: ZType.caption.copyWith(color: color),
+                  style: ZType.caption.copyWith(
+                    color: color,
+                    fontWeight: selected ? FontWeight.w700 : FontWeight.w500,
+                  ),
                 ),
               ],
             ),

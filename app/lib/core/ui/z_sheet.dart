@@ -36,8 +36,10 @@ class ZSheetBody extends StatelessWidget {
     required this.child,
     this.actions,
     this.fullHeight = false,
+    this.centerTitle = false,
   });
 
+  final bool centerTitle;
   final String title;
   final Widget child;
   final Widget? actions;
@@ -60,7 +62,14 @@ class ZSheetBody extends StatelessWidget {
           ),
           child: Semantics(
             header: true,
-            child: Text(title, style: ZType.title.copyWith(color: c.text)),
+            child: SizedBox(
+              width: double.infinity,
+              child: Text(
+                title,
+                textAlign: centerTitle ? TextAlign.center : null,
+                style: ZType.title.copyWith(color: c.text),
+              ),
+            ),
           ),
         ),
         Flexible(

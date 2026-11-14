@@ -57,16 +57,16 @@ class AppLocalizationsAr extends AppLocalizations {
   String get appLockRootedOk => 'تمام';
 
   @override
-  String get homeQuickAddTitle => 'عايز تسجل إيه؟';
+  String get homeQuickAddTitle => 'تحب تسجل إيه؟';
 
   @override
-  String get homeQuickAddSay => 'قول';
+  String get homeQuickAddSay => 'قولها';
 
   @override
-  String get homeQuickAddType => 'اكتب';
+  String get homeQuickAddType => 'اكتبها';
 
   @override
-  String get homeQuickAddScan => 'صوّر';
+  String get homeQuickAddScan => 'صوّرها';
 
   @override
   String get homeQuickAddAsset => 'أصل';
@@ -82,6 +82,18 @@ class AppLocalizationsAr extends AppLocalizations {
 
   @override
   String get homeQuickAddAssetA11y => 'ضيف أصل';
+
+  @override
+  String get homeQuickAddSayHint => 'بصوتك في ثانيتين';
+
+  @override
+  String get homeQuickAddTypeHint => 'مصروف أو دخل';
+
+  @override
+  String get homeQuickAddScanHint => 'سكرين شوت أو إيصال';
+
+  @override
+  String get homeQuickAddAssetHint => 'دهب، شهادة، عملة';
 
   @override
   String get ingestionReviewTitle => 'مستني رأيك 👀';
@@ -1154,11 +1166,11 @@ class AppLocalizationsAr extends AppLocalizations {
     String _temp0 = intl.Intl.pluralLogic(
       count,
       locale: localeName,
-      other: 'فاضل $n يوم على القبض',
-      many: 'فاضل $n يوم على القبض',
-      few: 'فاضل $n أيام على القبض',
-      two: 'فاضل يومين على القبض',
-      one: 'فاضل يوم على القبض',
+      other: '$n يوم على القبض',
+      many: '$n يوم على القبض',
+      few: '$n أيام على القبض',
+      two: 'يومين على القبض',
+      one: 'يوم على القبض',
       zero: 'القبض النهارده',
     );
     return '$_temp0';
@@ -4121,7 +4133,7 @@ class AppLocalizationsAr extends AppLocalizations {
 
   @override
   String homeQuickAddVoiceLeft(String remaining, String max) {
-    return 'فاضل $remaining من $max تسجيل صوتي الشهر ده';
+    return 'باقيلك $remaining من $max تسجيل صوتي الشهر ده';
   }
 
   @override

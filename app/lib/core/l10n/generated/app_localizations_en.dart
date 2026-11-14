@@ -57,7 +57,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get appLockRootedOk => 'OK';
 
   @override
-  String get homeQuickAddTitle => 'What do you want to add?';
+  String get homeQuickAddTitle => 'What do you want to log?';
 
   @override
   String get homeQuickAddSay => 'Say';
@@ -82,6 +82,18 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get homeQuickAddAssetA11y => 'Add an asset';
+
+  @override
+  String get homeQuickAddSayHint => 'With your voice, in two seconds';
+
+  @override
+  String get homeQuickAddTypeHint => 'An expense or income';
+
+  @override
+  String get homeQuickAddScanHint => 'A screenshot or receipt';
+
+  @override
+  String get homeQuickAddAssetHint => 'Gold, certificate, currency';
 
   @override
   String get ingestionReviewTitle => 'Needs your review 👀';

@@ -191,25 +191,25 @@ abstract class AppLocalizations {
   /// T · sheet
   ///
   /// In ar, this message translates to:
-  /// **'عايز تسجل إيه؟'**
+  /// **'تحب تسجل إيه؟'**
   String get homeQuickAddTitle;
 
   /// L · opens S-31
   ///
   /// In ar, this message translates to:
-  /// **'قول'**
+  /// **'قولها'**
   String get homeQuickAddSay;
 
   /// L · opens S-13
   ///
   /// In ar, this message translates to:
-  /// **'اكتب'**
+  /// **'اكتبها'**
   String get homeQuickAddType;
 
   /// L · opens S-32
   ///
   /// In ar, this message translates to:
-  /// **'صوّر'**
+  /// **'صوّرها'**
   String get homeQuickAddScan;
 
   /// L · with common_gold_badge; Free opens S-68
@@ -241,6 +241,30 @@ abstract class AppLocalizations {
   /// In ar, this message translates to:
   /// **'ضيف أصل'**
   String get homeQuickAddAssetA11y;
+
+  /// S · quick add card subtitle
+  ///
+  /// In ar, this message translates to:
+  /// **'بصوتك في ثانيتين'**
+  String get homeQuickAddSayHint;
+
+  /// S · quick add card subtitle
+  ///
+  /// In ar, this message translates to:
+  /// **'مصروف أو دخل'**
+  String get homeQuickAddTypeHint;
+
+  /// S · quick add card subtitle
+  ///
+  /// In ar, this message translates to:
+  /// **'سكرين شوت أو إيصال'**
+  String get homeQuickAddScanHint;
+
+  /// S · quick add card subtitle
+  ///
+  /// In ar, this message translates to:
+  /// **'دهب، شهادة، عملة'**
+  String get homeQuickAddAssetHint;
 
   /// No description provided for @ingestionReviewTitle.
   ///
@@ -1881,7 +1905,7 @@ abstract class AppLocalizations {
   /// L · count:int, n · followed by  ·  and common_date_range
   ///
   /// In ar, this message translates to:
-  /// **'{count, plural, =0{القبض النهارده} =1{فاضل يوم على القبض} =2{فاضل يومين على القبض} few{فاضل {n} أيام على القبض} many{فاضل {n} يوم على القبض} other{فاضل {n} يوم على القبض}}'**
+  /// **'{count, plural, =0{القبض النهارده} =1{يوم على القبض} =2{يومين على القبض} few{{n} أيام على القبض} many{{n} يوم على القبض} other{{n} يوم على القبض}}'**
   String homeHeroDaysToPayday(int count, String n);
 
   /// S · A-43, replaces the payday line when no payday is set
@@ -5863,7 +5887,7 @@ abstract class AppLocalizations {
   /// S · Free only (FR-VOI-04)
   ///
   /// In ar, this message translates to:
-  /// **'فاضل {remaining} من {max} تسجيل صوتي الشهر ده'**
+  /// **'باقيلك {remaining} من {max} تسجيل صوتي الشهر ده'**
   String homeQuickAddVoiceLeft(String remaining, String max);
 
   /// T

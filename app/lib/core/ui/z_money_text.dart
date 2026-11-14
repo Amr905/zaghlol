@@ -7,7 +7,7 @@ import '../theme/z_tokens.dart';
 /// colour is never the only cue.
 enum ZMoneyKind { expense, income, neutral }
 
-enum ZMoneySize { display, title, body, caption }
+enum ZMoneySize { hero, display, title, body, caption }
 
 /// C-04 Money text. Takes an already formatted string (the shared money
 /// formatter in core produces sign, digits and currency); never a number.
@@ -21,6 +21,7 @@ class ZMoneyText extends StatelessWidget {
     this.semanticsLabel,
     this.masked = false,
     this.maskedText,
+    this.unit,
   });
 
   final String text;
@@ -32,15 +33,20 @@ class ZMoneyText extends StatelessWidget {
   final bool masked;
   final String? maskedText;
 
+  /// Currency label rendered after the number, smaller and muted (mockups
+  /// 03 / 20). [text] is then the number only.
+  final String? unit;
+
   @override
   Widget build(BuildContext context) {
     final c = ZColors.of(context);
     final color = switch (kind) {
-      ZMoneyKind.expense => c.text,
+      ZMoneyKind.expense => size == ZMoneySize.hero ? c.heroNumber : c.text,
       ZMoneyKind.income => c.incomeText,
       ZMoneyKind.neutral => c.textMuted,
     };
     final base = switch (size) {
+      ZMoneySize.hero => ZType.display.copyWith(fontSize: 56, height: 1.1),
       ZMoneySize.display => ZType.display,
       ZMoneySize.title => ZType.title,
       ZMoneySize.body => ZType.body,
@@ -52,18 +58,38 @@ class ZMoneyText extends StatelessWidget {
       color: color,
       fontWeight: size == ZMoneySize.caption
           ? FontWeight.w500
-          : FontWeight.w600,
+          : (size == ZMoneySize.hero ? FontWeight.w700 : FontWeight.w600),
     );
+    final unitText = unit;
+    final Widget textWidget = unitText == null
+        ? Text(isolated, style: style, maxLines: 1)
+        : Text.rich(
+            TextSpan(
+              children: [
+                TextSpan(text: isolated),
+                TextSpan(
+                  text: ' $unitText',
+                  style: ZType.label.copyWith(
+                    color: kind == ZMoneyKind.income ? color : c.textMuted,
+                    fontSize: size == ZMoneySize.hero ? 22 : 13,
+                    fontWeight: FontWeight.w500,
+                  ),
+                ),
+              ],
+            ),
+            style: style,
+            maxLines: 1,
+          );
     return Semantics(
-      label: semanticsLabel ?? shown,
+      label: semanticsLabel ?? (unitText == null ? shown : '$shown $unitText'),
       excludeSemantics: true,
-      child: size == ZMoneySize.display
+      child: size == ZMoneySize.display || size == ZMoneySize.hero
           ? FittedBox(
               fit: BoxFit.scaleDown,
               alignment: AlignmentDirectional.centerStart,
-              child: Text(isolated, style: style, maxLines: 1),
+              child: textWidget,
             )
-          : Text(isolated, style: style),
+          : (unitText == null ? Text(isolated, style: style) : textWidget),
     );
   }
 }
