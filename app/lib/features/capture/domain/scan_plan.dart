@@ -226,6 +226,14 @@ List<List<String>> chunkAddresses(List<String> addresses) => [
 enum ScanPhase { idle, running, done, failed, cancelled }
 
 /// What the progress UI (T-056, T-173) shows: counts and codes only.
+bool _sameCodes(List<String> a, List<String> b) {
+  if (a.length != b.length) return false;
+  for (var i = 0; i < a.length; i++) {
+    if (a[i] != b[i]) return false;
+  }
+  return true;
+}
+
 final class ScanProgress {
   const ScanProgress({
     this.phase = ScanPhase.idle,
@@ -233,6 +241,7 @@ final class ScanProgress {
     this.imported = 0,
     this.skipped = 0,
     this.institutions = 0,
+    this.institutionCodes = const [],
     this.restarts = 0,
     this.code,
   });
@@ -253,6 +262,10 @@ final class ScanProgress {
 
   /// Distinct registry institutions among the imported messages.
   final int institutions;
+
+  /// Registry codes of those institutions, in the order they were found
+  /// (the progress UI shows them as chips; codes only).
+  final List<String> institutionCodes;
   final int restarts;
 
   /// A code (`PERMISSION_DENIED`, `NOT_AVAILABLE`, `IO_ERROR`,
@@ -265,6 +278,7 @@ final class ScanProgress {
     int? imported,
     int? skipped,
     int? institutions,
+    List<String>? institutionCodes,
     int? restarts,
     String? code,
   }) => ScanProgress(
@@ -273,6 +287,7 @@ final class ScanProgress {
     imported: imported ?? this.imported,
     skipped: skipped ?? this.skipped,
     institutions: institutions ?? this.institutions,
+    institutionCodes: institutionCodes ?? this.institutionCodes,
     restarts: restarts ?? this.restarts,
     code: code ?? this.code,
   );
@@ -285,6 +300,7 @@ final class ScanProgress {
       other.imported == imported &&
       other.skipped == skipped &&
       other.institutions == institutions &&
+      _sameCodes(other.institutionCodes, institutionCodes) &&
       other.restarts == restarts &&
       other.code == code;
 
@@ -295,6 +311,7 @@ final class ScanProgress {
     imported,
     skipped,
     institutions,
+    Object.hashAll(institutionCodes),
     restarts,
     code,
   );

@@ -308,6 +308,7 @@ final class InboxScanner {
           imported: _progress.imported + imported,
           skipped: _progress.skipped + skipped,
           institutions: found.length,
+          institutionCodes: found.toList(growable: false),
         ),
       );
     }

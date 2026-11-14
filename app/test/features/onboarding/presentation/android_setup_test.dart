@@ -8,6 +8,8 @@ import 'package:zaghlol/core/platform/capture_api.g.dart';
 import 'package:zaghlol/core/settings/settings_keys.dart';
 import 'package:zaghlol/core/settings/settings_providers.dart';
 import 'package:zaghlol/core/theme/app_theme.dart';
+import 'package:zaghlol/features/accounts/presentation/edit_card/edit_card_providers.dart';
+import 'package:zaghlol_domain/zaghlol_domain.dart' show Currency;
 import 'package:zaghlol/features/capture/application/capture_providers.dart';
 import 'package:zaghlol/features/capture/data/capture_host_port.dart';
 import 'package:zaghlol/features/capture/domain/scan_plan.dart';
@@ -68,6 +70,15 @@ Widget host(
 }) => ProviderScope(
   overrides: [
     captureHostPortProvider.overrideWithValue(h),
+    institutionOptionsProvider.overrideWithValue([
+      InstitutionOption(
+        code: 'nbe',
+        nameAr: 'الأهلي',
+        nameEn: 'NBE',
+        defaultCurrency: Currency.of('EGP'),
+        isEgypt: true,
+      ),
+    ]),
     setupScanProvider.overrideWith((ref) async => s),
     languageProvider.overrideWith(
       (ref) => Stream.value(lang == 'ar' ? LanguagePref.ar : LanguagePref.en),
@@ -119,9 +130,15 @@ void main() {
             phase: ScanPhase.running,
             imported: 42,
             institutions: 3,
+            institutionCodes: ['nbe', 'cib'],
           ),
         );
         await tester.pump();
+        // Mockup 23: the banks found so far show as chips (unknown code
+        // falls back to the upper-cased code).
+        expect(find.byKey(const ValueKey('setup-scan-banks')), findsOneWidget);
+        expect(find.text(lang == 'ar' ? 'الأهلي' : 'NBE'), findsOneWidget);
+        expect(find.text('CIB'), findsOneWidget);
         expect(find.byKey(const ValueKey('setup-scan')), findsOneWidget);
         expect(tester.takeException(), isNull);
       });
