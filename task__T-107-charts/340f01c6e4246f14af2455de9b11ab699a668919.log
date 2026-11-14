@@ -1,5 +1,8 @@
 ﻿== SUMMARY ==
-RUNNING sha=340f01c6e4246f14af2455de9b11ab699a668919
+SKIP sha=340f01c6e4246f14af2455de9b11ab699a668919 no app/packages/backend changes
 
 == FULL LOG (last 1500 lines) ==
 auto task/T-107-charts 340f01c6e4246f14af2455de9b11ab699a668919 2026-11-14T11:08:14.1766399+02:00
+
+
+
