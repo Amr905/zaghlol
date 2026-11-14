@@ -1,5 +1,8 @@
 ﻿== SUMMARY ==
-RUNNING sha=d2dadbc01f81fcec7029164c605972a4cdafecfa
+SKIP sha=d2dadbc01f81fcec7029164c605972a4cdafecfa no app/packages/backend changes
 
 == FULL LOG (last 1500 lines) ==
 auto task/T-085-card-edit d2dadbc01f81fcec7029164c605972a4cdafecfa 2026-11-14T11:06:33.7662254+02:00
+
+
+
