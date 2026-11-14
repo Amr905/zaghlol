@@ -20,12 +20,12 @@
 |---|---|---|---|---|
 | M0 | 28 | 25 | 1 | 0 |
 | M1 | 29 | 26 | 0 | 1 |
-| M2 | 29 | 21 | 0 | 0 |
+| M2 | 29 | 22 | 0 | 0 |
 | M3 | 18 | 16 | 0 | 0 |
 | M4 | 17 | 16 | 0 | 0 |
 | M5 | 35 | 30 | 1 | 1 |
 | M6 | 19 | 13 | 1 | 2 |
-| M7 | 11 | 2 | 0 | 0 |
+| M7 | 11 | 3 | 0 | 0 |
 
 ## Tasks
 | ID | Title | MS | Class | Model | Agent | Depends on | Status | Verification evidence | Notes |
@@ -96,7 +96,7 @@
 | T-064 | Shortcut package, iCloud link and setup checker | M2 | C3 | Sonnet | native-platform-engineer | T-063 | DONE | batch 20 review [batch-20a](05-reviews/batch-20a.md), [batch-20b](05-reviews/batch-20b.md), [batch-20c](05-reviews/batch-20c.md) | Batch 20. FU-207 |
 | T-065 | iOS Share Extension (text, image, PDF) | M2 | C4 | Opus | native-platform-engineer | T-062 | DONE | batch 20 review [batch-20a](05-reviews/batch-20a.md), [batch-20b](05-reviews/batch-20b.md), [batch-20c](05-reviews/batch-20c.md) | Batch 20. FU-200 |
 | T-066 | Capture module iOS integration (drain, BG refresh, checker state) | M2 | C3 | Sonnet | flutter-core-engineer | T-047, T-062, T-064 | DONE | batch 20 review [batch-20a](05-reviews/batch-20a.md), [batch-20b](05-reviews/batch-20b.md), [batch-20c](05-reviews/batch-20c.md) | Batch 20. FU-201 |
-| T-067 | iOS capture setup S-03 (add Shortcut, check setup, first expense) | M2 | C2 | Sonnet | flutter-ui-engineer | T-055, T-066 | TODO | — |  |
+| T-067 | iOS capture setup S-03 (add Shortcut, check setup, first expense) | M2 | C2 | Sonnet | flutter-ui-engineer | T-055, T-066 | DONE | batch 21 review [batch-21](05-reviews/batch-21.md) | Batch 21. FU-216 |
 | T-068 | Templates + fixtures: Egyptian banks batch 1 | M2 | C2 | Sonnet | parsing-engine-engineer | T-033 | TODO | — |  |
 | T-069 | Templates + fixtures: Egyptian banks batch 2 | M2 | C2 | Sonnet | parsing-engine-engineer | T-033 | TODO | — |  |
 | T-070 | Templates + fixtures: BNPL (valU, Sympl, Souhoola, Shahry, Aman, Forsa, Contact) | M2 | C2 | Sonnet | parsing-engine-engineer | T-033 | TODO | — |  |
@@ -203,7 +203,7 @@
 | T-171 | Privacy verification suite (sandbox scan, data-boundary proxy, ignore no-trace) | M7 | C4 | Opus | test-engineer | T-166, T-143, T-078, T-149, T-165 | DONE | batch 20 review [batch-20a](05-reviews/batch-20a.md), [batch-20b](05-reviews/batch-20b.md), [batch-20c](05-reviews/batch-20c.md) | Batch 20. FU-208 |
 | T-172 | Device end-to-end suites (Android killed-app capture, iOS intents, backup, purchases) | M7 | C3 | Sonnet | test-engineer | T-056, T-067, T-153, T-145, T-147 | TODO | — |  |
 | T-173 | Performance benchmarks and CI budgets | M7 | C2 | Sonnet | test-engineer | T-033, T-050, T-105, T-048 | DONE | batch 20 review [batch-20a](05-reviews/batch-20a.md), [batch-20b](05-reviews/batch-20b.md), [batch-20c](05-reviews/batch-20c.md) | Batch 20. FU-209 |
-| T-174 | Accessibility and golden coverage pass (130% text, both themes, screen readers) | M7 | C2 | Sonnet | test-engineer | T-054, T-079, T-162, T-107 | TODO | — |  |
+| T-174 | Accessibility and golden coverage pass (130% text, both themes, screen readers) | M7 | C2 | Sonnet | test-engineer | T-054, T-079, T-162, T-107 | DONE | batch 21 review [batch-21](05-reviews/batch-21.md) | Batch 21. FU-217 |
 | T-175 | Security assessment: MobSF, ZAP, dependency scans, pen test | M7 | C4 | Opus | security-privacy-reviewer | T-171, T-140 | TODO | — |  |
 | T-176 | Android release pipeline, Play listings, Data safety and SMS declaration package | M7 | C3 | Sonnet | flutter-core-engineer | T-172, T-171 | TODO | — |  |
 | T-177 | iOS release pipeline, privacy labels and App Review notes | M7 | C3 | Sonnet | flutter-core-engineer | T-172, T-171 | TODO | — |  |
@@ -451,6 +451,12 @@
 - **FU-215** (T-171): logging guard misses `print (x)` with a space; device run of the privacy procedures A–D on the release candidate.
 - Done in batch 20: FU-183 (T-173), FU-194, FU-195, FU-196, FU-198 (path and key provider; end-to-end needs FU-211).
 
+- **FU-216** (T-067, batch 21): the minors, nits and open questions for T-067 in [batch-21](05-reviews/batch-21.md), plus the "left undone" items in its task file.
+- **FU-217** (T-174, batch 21): the minors, nits and open questions for T-174 in [batch-21](05-reviews/batch-21.md), plus the "left undone" items in its task file.
+- **FU-218** (T-174): 1.3× goldens for every screen (T-174 finding 1); manual TalkBack/VoiceOver label audit on a device; bills row may be read twice after the ZCard MergeSemantics change.
+- **FU-219** (FU-213): the notification denied banner does not re-check on return from system settings; due-days picker has copy but no setting key.
+- Done in batch 21: FU-197, FU-213, FU-214 (2× headroom for microsecond means), FU-215, and the batch-20c review-card label minor.
+
 ## Log
 | Date | Event |
 |---|---|
@@ -525,3 +531,4 @@
 | 2026-11-14 | Batch 18 (`batch/2026-11-14-18`): T-145, T-146, T-151, T-152, T-107, T-108, T-102, T-104, T-081, T-086, T-121, T-055, T-056, T-111, T-163, T-098, T-093, T-009 DONE. FU-165…FU-182. Progress 127/186. |
 | 2026-11-14 | Batch 19 (`batch/2026-11-14-19`): T-116, T-114, T-084, T-057, T-153, T-147, T-164, T-160, T-061, T-062 DONE. FU-184…FU-193. Progress 137/186. |
 | 2026-11-14 | Batch 20 (`batch/2026-11-14-20`): T-063, T-065, T-066, T-166, T-092, T-100, T-117, T-118, T-064, T-171, T-173, T-082 DONE. FU-199…FU-210. Progress 149/186. |
+| 2026-11-14 | Batch 21 (`batch/2026-11-14-21`): T-067, T-174 DONE. FU-216…FU-217. Progress 151/186. |

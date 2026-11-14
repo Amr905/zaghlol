@@ -114,7 +114,7 @@ Every task file has: ID, description, technical details, dependencies, affected 
 | [T-064](tasks/T-064.md) | Shortcut package, iCloud link and setup checker | US-04-1 | High | Sonnet | native-platform-engineer | T-063 | E | 8 | DONE |
 | [T-065](tasks/T-065.md) | iOS Share Extension (text, image, PDF) | US-04-2 | High* | Opus | native-platform-engineer | T-062 | E | 5 | DONE |
 | [T-066](tasks/T-066.md) | Capture module iOS integration (drain, BG refresh, checker state) | US-04-1 | High | Sonnet | flutter-core-engineer | T-047, T-062, T-064 | A | 9 | DONE |
-| [T-067](tasks/T-067.md) | iOS capture setup S-03 (add Shortcut, check setup, first expense) | US-10-1 | Medium | Sonnet | flutter-ui-engineer | T-055, T-066 | G | 10 | TODO |
+| [T-067](tasks/T-067.md) | iOS capture setup S-03 (add Shortcut, check setup, first expense) | US-10-1 | Medium | Sonnet | flutter-ui-engineer | T-055, T-066 | G | 10 | DONE |
 | [T-068](tasks/T-068.md) | Templates + fixtures: Egyptian banks batch 1 | US-05-1 | Medium | Sonnet | parsing-engine-engineer | T-033 | F | 6 | TODO |
 | [T-069](tasks/T-069.md) | Templates + fixtures: Egyptian banks batch 2 | US-05-1 | Medium | Sonnet | parsing-engine-engineer | T-033 | F | 6 | TODO |
 | [T-070](tasks/T-070.md) | Templates + fixtures: BNPL (valU, Sympl, Souhoola, Shahry, Aman, Forsa, Contact) | US-05-1 | Medium | Sonnet | parsing-engine-engineer | T-033 | F | 6 | TODO |
@@ -255,7 +255,7 @@ Every task file has: ID, description, technical details, dependencies, affected 
 | [T-171](tasks/T-171.md) | Privacy verification suite (sandbox scan, data-boundary proxy, ignore no-trace) | US-21-1 | High* | Opus | test-engineer | T-166, T-143, T-078, T-149, T-165 | A | 11 | DONE |
 | [T-172](tasks/T-172.md) | Device end-to-end suites (Android killed-app capture, iOS intents, backup, purchases) | US-21-1 | High | Sonnet | test-engineer | T-056, T-067, T-153, T-145, T-147 | A | 11 | TODO |
 | [T-173](tasks/T-173.md) | Performance benchmarks and CI budgets | US-21-1 | Medium | Sonnet | test-engineer | T-033, T-050, T-105, T-048 | A | 12 | DONE |
-| [T-174](tasks/T-174.md) | Accessibility and golden coverage pass (130% text, both themes, screen readers) | US-21-1 | Medium | Sonnet | test-engineer | T-054, T-079, T-162, T-107 | G | 13 | TODO |
+| [T-174](tasks/T-174.md) | Accessibility and golden coverage pass (130% text, both themes, screen readers) | US-21-1 | Medium | Sonnet | test-engineer | T-054, T-079, T-162, T-107 | G | 13 | DONE |
 | [T-175](tasks/T-175.md) | Security assessment: MobSF, ZAP, dependency scans, pen test | US-21-1 | High* | Opus | security-privacy-reviewer | T-171, T-140 | A | 12 | TODO |
 | [T-176](tasks/T-176.md) | Android release pipeline, Play listings, Data safety and SMS declaration package | US-21-1 | High | Sonnet | flutter-core-engineer | T-172, T-171 | A | 12 | TODO |
 | [T-177](tasks/T-177.md) | iOS release pipeline, privacy labels and App Review notes | US-21-1 | High | Sonnet | flutter-core-engineer | T-172, T-171 | A | 12 | TODO |
