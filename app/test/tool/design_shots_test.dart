@@ -35,6 +35,14 @@ import '../features/insights/presentation/charts/charts_test_support.dart'
     as charts;
 import '../features/money/money_tab_test.dart' as money;
 import '../features/onboarding/presentation/android_setup_test.dart' as android;
+import '../features/onboarding/presentation/ios_setup_test.dart' as ios_t;
+import '../features/onboarding/presentation/scan_results_test.dart' as scan;
+import '../support/ios_setup_host.dart' as ios;
+
+import 'package:zaghlol/features/capture/domain/scan_plan.dart';
+import 'package:zaghlol/features/accounts/domain/account.dart';
+import 'package:zaghlol/features/onboarding/presentation/scan_results.dart';
+
 import '../features/recurring/presentation/bills_screen_test.dart' as bills;
 import '../features/settings/settings_harness.dart' as settings;
 import '../features/transactions/presentation/detail_edit_harness.dart' as txn;
@@ -50,6 +58,23 @@ final _skip = Platform.environment['DESIGN_SHOTS'] == null
 
 /// Writes the largest repaint boundary on screen to `<name>.png` at 2x.
 Future<void> _shot(WidgetTester tester, String name) async {
+  // Asset images decode asynchronously; load them so the mascot shows.
+  final images = <Image>[];
+  void walk(Element e) {
+    if (e.widget is Image) images.add(e.widget as Image);
+    e.visitChildren(walk);
+  }
+
+  tester.binding.rootElement!.visitChildren(walk);
+  await tester.runAsync(() async {
+    for (final i in images) {
+      await precacheImage(
+        i.image,
+        tester.element(find.byType(Directionality).first),
+      );
+    }
+  });
+  await tester.pump();
   await tester.pump(const Duration(milliseconds: 100));
   RenderRepaintBoundary? best;
   var bestArea = 0.0;
@@ -288,5 +313,86 @@ void main() {
     );
     await tester.pumpAndSettle();
     await _shot(tester, 'add_sheet');
+  }, skip: _skip != null);
+
+  testWidgets('android setup notif (scan progress)', (tester) async {
+    await tester.binding.setSurfaceSize(const Size(390, 844));
+    addTearDown(() => tester.binding.setSurfaceSize(null));
+    final scanFake = android.FakeScan()
+      ..cur = const ScanProgress(
+        phase: ScanPhase.running,
+        imported: 214,
+        institutions: 3,
+      );
+    await tester.pumpWidget(
+      android.host(android.FakeHost(granted: true), scanFake, 'ar'),
+    );
+    await tester.pump(const Duration(milliseconds: 300));
+    await _shot(tester, 'onb_scan_progress');
+  }, skip: _skip != null);
+
+  testWidgets('scan results S-06', (tester) async {
+    await tester.binding.setSurfaceSize(const Size(390, 844));
+    addTearDown(() => tester.binding.setSurfaceSize(null));
+    const data = ScanResultsData(
+      found: 342,
+      review: 24,
+      cards: [
+        ScanCardItem(
+          accountId: 'a',
+          label: 'الأهلي فيزا ٠٦٧٠',
+          kind: AccountKind.debit,
+          txnCount: 196,
+          institutionCode: 'nbe',
+        ),
+        ScanCardItem(
+          accountId: 'b',
+          label: 'CIB ٠٤٣٢١',
+          kind: AccountKind.credit,
+          txnCount: 88,
+          institutionCode: 'cib',
+          looksCredit: true,
+        ),
+        ScanCardItem(
+          accountId: 'c',
+          label: 'إنستاباي · الأهلي',
+          kind: AccountKind.account,
+          txnCount: 41,
+          institutionCode: 'ip',
+        ),
+        ScanCardItem(
+          accountId: 'd',
+          label: 'فودافون كاش',
+          kind: AccountKind.wallet,
+          txnCount: 17,
+          institutionCode: 'vf',
+        ),
+      ],
+    );
+    await tester.pumpWidget(scan.host(const AsyncData(data), 'ar'));
+    await tester.pumpAndSettle();
+    await _shot(tester, 'onb_scan_results');
+  }, skip: _skip != null);
+
+  testWidgets('ios setup 1-3', (tester) async {
+    await tester.binding.setSurfaceSize(const Size(390, 844));
+    addTearDown(() => tester.binding.setSurfaceSize(null));
+    await tester.pumpWidget(
+      ios.iosSetupHost(
+        'ar',
+        reportFn: () => ios.report(
+          message: ios.kNow - 3600000,
+          wallet: ios.kNow - 10 * ios.kDayMs,
+          baseline: ios.kNow - 30 * ios.kDayMs,
+        ),
+      ),
+    );
+    await tester.pumpAndSettle();
+    await _shot(tester, 'ios_setup_1');
+    await ios_t.tapKey(tester, 'ios-setup-to-check');
+    await ios_t.tapKey(tester, 'ios-setup-fix-applePay');
+    await _shot(tester, 'ios_setup_2');
+    await ios_t.tapKey(tester, 'ios-setup-to-first');
+    await _shot(tester, 'ios_setup_3');
   }, skip: _skip != null);
 }

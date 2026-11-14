@@ -299,7 +299,7 @@ abstract class AppLocalizations {
   /// B · stepper header
   ///
   /// In ar, this message translates to:
-  /// **'تخطّي'**
+  /// **'تخطي'**
   String get commonActionSkip;
 
   /// B
@@ -1131,7 +1131,7 @@ abstract class AppLocalizations {
   /// S · what is read (FR-ING-A-02)
   ///
   /// In ar, this message translates to:
-  /// **'بقرا رسايل البنوك والمحافظ وإنستاباي بس'**
+  /// **'بنقرا رسايل البنوك والمحافظ وإنستاباي بس'**
   String get onboardingAndroidSetupSmsPointSenders;
 
   /// S
@@ -1143,13 +1143,13 @@ abstract class AppLocalizations {
   /// S · claim limited to financial data (tone gate 4, R-11, BR-SYNC-03)
   ///
   /// In ar, this message translates to:
-  /// **'بيانات فلوسك بتفضل على الموبايل ده'**
+  /// **'كل حاجة بتفضل على الموبايل ده'**
   String get onboardingAndroidSetupSmsPointOnPhone;
 
   /// B · primary, opens the system SMS dialog
   ///
   /// In ar, this message translates to:
-  /// **'اسمح بقراية الرسايل'**
+  /// **'اسمح بقراءة رسايل البنك'**
   String get onboardingAndroidSetupSmsAllow;
 
   /// N · success
@@ -1293,7 +1293,7 @@ abstract class AppLocalizations {
   /// T · M · Rive tourGuide
   ///
   /// In ar, this message translates to:
-  /// **'هنستخدم الاختصارات'**
+  /// **'الآيفون مش بيسمح للتطبيقات تقرا الرسايل… فهنستخدم الاختصارات'**
   String get onboardingIosSetupShortcutTitle;
 
   /// S · under the title. Split out of the title for length (F-7)
@@ -1347,7 +1347,7 @@ abstract class AppLocalizations {
   /// L · text button, expands the steps below
   ///
   /// In ar, this message translates to:
-  /// **'إزاي بيشتغل؟ (نص دقيقة)'**
+  /// **'إزاي بيشتغل؟ (٣٠ ثانية)'**
   String get onboardingIosSetupHowItWorks;
 
   /// S · list numbers are drawn by the UI, not the copy
@@ -1443,7 +1443,7 @@ abstract class AppLocalizations {
   /// S
   ///
   /// In ar, this message translates to:
-  /// **'افتح Shortcuts وبعدين Automation'**
+  /// **'افتح Shortcuts ← Automation'**
   String get onboardingIosSetupFixStep1;
 
   /// S · automationName is the Latin automation name, e.g. Zaghlol – Wallet
@@ -1497,7 +1497,7 @@ abstract class AppLocalizations {
   /// L · spoken example. AR uses number words (§0.3)
   ///
   /// In ar, this message translates to:
-  /// **'«دفعت خمسة وأربعين قهوة»'**
+  /// **'«دفعت ٤٥ قهوة»'**
   String get onboardingIosSetupFirstSayHint;
 
   /// B · opens S-13
@@ -1509,7 +1509,7 @@ abstract class AppLocalizations {
   /// L
   ///
   /// In ar, this message translates to:
-  /// **'المبلغ والتصنيف'**
+  /// **'المبلغ والفئة'**
   String get onboardingIosSetupFirstTypeHint;
 
   /// S · opens S-61 supported banks (FR-ING-I-08)
@@ -1521,7 +1521,7 @@ abstract class AppLocalizations {
   /// S
   ///
   /// In ar, this message translates to:
-  /// **'شوف إزاي تتابعهم على الآيفون'**
+  /// **'شوف إزاي تسجلهم على الآيفون'**
   String get onboardingIosSetupFirstOnlineBanksSub;
 
   /// L · the common_gold_badge must show on this row (FR-EXP-04/06); Free opens S-68
@@ -1533,7 +1533,7 @@ abstract class AppLocalizations {
   /// S · says Gold in the text too, so Free users aren't promised it (F-8)
   ///
   /// In ar, this message translates to:
-  /// **'ضيف شهور فاتت مرة واحدة مع جولد'**
+  /// **'ضيف شهور فاتت مرة واحدة'**
   String get onboardingIosSetupFirstStatementSub;
 
   /// T

@@ -111,7 +111,7 @@ class AppLocalizationsAr extends AppLocalizations {
   String get commonActionTryAgain => 'جرّب تاني';
 
   @override
-  String get commonActionSkip => 'تخطّي';
+  String get commonActionSkip => 'تخطي';
 
   @override
   String get commonActionContinue => 'كمّل';
@@ -644,7 +644,7 @@ class AppLocalizationsAr extends AppLocalizations {
 
   @override
   String get onboardingAndroidSetupSmsPointSenders =>
-      'بقرا رسايل البنوك والمحافظ وإنستاباي بس';
+      'بنقرا رسايل البنوك والمحافظ وإنستاباي بس';
 
   @override
   String get onboardingAndroidSetupSmsPointPersonal =>
@@ -652,10 +652,10 @@ class AppLocalizationsAr extends AppLocalizations {
 
   @override
   String get onboardingAndroidSetupSmsPointOnPhone =>
-      'بيانات فلوسك بتفضل على الموبايل ده';
+      'كل حاجة بتفضل على الموبايل ده';
 
   @override
-  String get onboardingAndroidSetupSmsAllow => 'اسمح بقراية الرسايل';
+  String get onboardingAndroidSetupSmsAllow => 'اسمح بقراءة رسايل البنك';
 
   @override
   String get onboardingAndroidSetupSmsGranted => 'الرسايل اتسمحت ✓';
@@ -753,7 +753,8 @@ class AppLocalizationsAr extends AppLocalizations {
   }
 
   @override
-  String get onboardingIosSetupShortcutTitle => 'هنستخدم الاختصارات';
+  String get onboardingIosSetupShortcutTitle =>
+      'الآيفون مش بيسمح للتطبيقات تقرا الرسايل… فهنستخدم الاختصارات';
 
   @override
   String get onboardingIosSetupShortcutWhy =>
@@ -784,7 +785,7 @@ class AppLocalizationsAr extends AppLocalizations {
   String get onboardingIosSetupShortcutAdd => 'ضيف اختصار زغلول';
 
   @override
-  String get onboardingIosSetupHowItWorks => 'إزاي بيشتغل؟ (نص دقيقة)';
+  String get onboardingIosSetupHowItWorks => 'إزاي بيشتغل؟ (٣٠ ثانية)';
 
   @override
   String get onboardingIosSetupHowStep1 =>
@@ -849,7 +850,7 @@ class AppLocalizationsAr extends AppLocalizations {
   String get onboardingIosSetupFixTitle => 'إزاي تصلحها؟';
 
   @override
-  String get onboardingIosSetupFixStep1 => 'افتح Shortcuts وبعدين Automation';
+  String get onboardingIosSetupFixStep1 => 'افتح Shortcuts ← Automation';
 
   @override
   String onboardingIosSetupFixStep2(String automationName) {
@@ -880,13 +881,13 @@ class AppLocalizationsAr extends AppLocalizations {
   String get onboardingIosSetupFirstSay => 'قولها';
 
   @override
-  String get onboardingIosSetupFirstSayHint => '«دفعت خمسة وأربعين قهوة»';
+  String get onboardingIosSetupFirstSayHint => '«دفعت ٤٥ قهوة»';
 
   @override
   String get onboardingIosSetupFirstType => 'اكتبها';
 
   @override
-  String get onboardingIosSetupFirstTypeHint => 'المبلغ والتصنيف';
+  String get onboardingIosSetupFirstTypeHint => 'المبلغ والفئة';
 
   @override
   String get onboardingIosSetupFirstOnlineBanks =>
@@ -894,14 +895,13 @@ class AppLocalizationsAr extends AppLocalizations {
 
   @override
   String get onboardingIosSetupFirstOnlineBanksSub =>
-      'شوف إزاي تتابعهم على الآيفون';
+      'شوف إزاي تسجلهم على الآيفون';
 
   @override
   String get onboardingIosSetupFirstStatement => 'عندك كشف حساب؟';
 
   @override
-  String get onboardingIosSetupFirstStatementSub =>
-      'ضيف شهور فاتت مرة واحدة مع جولد';
+  String get onboardingIosSetupFirstStatementSub => 'ضيف شهور فاتت مرة واحدة';
 
   @override
   String get backupRestoreTitle => 'استرجاع نسخة';

@@ -68,6 +68,7 @@ Widget iosSetupHost(
       onSay: onSay ?? () {},
       onType: onType ?? () {},
       onOnlineBanks: onOnlineBanks ?? () {},
+      onStatement: () {},
     ),
   ),
 );
