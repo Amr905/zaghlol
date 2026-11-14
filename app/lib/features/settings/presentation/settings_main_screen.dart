@@ -134,13 +134,13 @@ class SettingsMainScreen extends ConsumerWidget {
                             children: [
                               Text(
                                 plan == null
-                                    ? t.settingsMainGoldFree
+                                    ? t.settingsMainGoldCardTitle
                                     : t.settingsMainGoldActive(plan),
                                 style: ZType.title.copyWith(color: c.onAccent),
                               ),
                               if (plan == null)
                                 Text(
-                                  t.settingsMainSeeGold,
+                                  t.settingsMainFreePlanNote,
                                   style: ZType.bodySmall.copyWith(
                                     color: c.warningText,
                                   ),
