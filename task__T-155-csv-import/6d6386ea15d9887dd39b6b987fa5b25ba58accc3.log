@@ -1,5 +1,8 @@
 ﻿== SUMMARY ==
-RUNNING sha=6d6386ea15d9887dd39b6b987fa5b25ba58accc3
+SKIP sha=6d6386ea15d9887dd39b6b987fa5b25ba58accc3 no app/packages/backend changes
 
 == FULL LOG (last 1500 lines) ==
 auto task/T-155-csv-import 6d6386ea15d9887dd39b6b987fa5b25ba58accc3 2026-11-14T11:02:23.1435175+02:00
+
+
+
