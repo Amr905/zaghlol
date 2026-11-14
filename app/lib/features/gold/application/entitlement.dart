@@ -272,7 +272,7 @@ abstract interface class EntitlementBackend {
   Future<String?> installId();
   Stream<BackendEvent> get events;
   Future<EntitlementResponse> getEntitlement(TimeNonce nonce);
-  Future<EntitlementResponse> signOut(TimeNonce nonce);
+  Future<EntitlementResponse> signOut(TimeNonce nonce, {String? accountToken});
 }
 
 final class BackendClientEntitlementApi implements EntitlementBackend {
@@ -287,8 +287,10 @@ final class BackendClientEntitlementApi implements EntitlementBackend {
   Future<EntitlementResponse> getEntitlement(TimeNonce nonce) =>
       _client.getEntitlement(timeNonce: nonce);
   @override
-  Future<EntitlementResponse> signOut(TimeNonce nonce) =>
-      _client.signOut(timeNonce: nonce);
+  Future<EntitlementResponse> signOut(
+    TimeNonce nonce, {
+    String? accountToken,
+  }) => _client.signOut(timeNonce: nonce, accountToken: accountToken);
 }
 
 /// Receives the service's conclusion.
@@ -503,6 +505,8 @@ final class EntitlementService {
   Future<void> signOut() async {
     final dropped = await _cachedClaims();
     final installId = await _backend.installId();
+    final acctBytes = await _store.read(BackendStateKeys.accountToken);
+    final acct = acctBytes == null ? null : utf8.decode(acctBytes);
     await _store.delete(BackendStateKeys.entitlementToken);
     await _store.delete(BackendStateKeys.accountToken);
     _memoText = null;
@@ -517,7 +521,7 @@ final class EntitlementService {
       _sink.apply(EntitlementPhase.free);
     }
     await _anchor.run(
-      _backend.signOut,
+      (n) => _backend.signOut(n, accountToken: acct),
       onResponse: (r) => handleBody(SignedBody.fromEntitlement(r)),
     );
   }

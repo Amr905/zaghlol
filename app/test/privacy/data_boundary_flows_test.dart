@@ -87,7 +87,10 @@ final class _Session {
     client = clientOver(h.store);
     h.backend
       ..onGet = ((n) => client.getEntitlement(timeNonce: n))
-      ..onSignOut = ((n) => client.signOut(timeNonce: n));
+      ..onSignOut = ((n) => client.signOut(
+        timeNonce: n,
+        accountToken: h.backend.signOutTokens.last,
+      ));
     seats.sigs = ios ? FakeSeatProver.two() : const [];
     host.type = ios ? 'app_attest' : 'play_integrity';
   }
@@ -393,21 +396,13 @@ void main() {
     });
   }
 
-  test(
-    'sign-out reaches the server (D-61(c), backend-api §4.6)',
-    () async {
-      final s = _Session(ClientPlatform.android);
-      final out = await s.run(w);
-      expect(out.whereType<SignedOut>().single.serverConfirmed, isTrue);
-      expect(
-        s.recorder.requests.map((r) => r.uri.path),
-        contains('/v1/accounts/signout'),
-      );
-    },
-    skip:
-        'FINDING T-171-F1: EntitlementService.signOut deletes the account '
-        'token before calling BackendClient.signOut (auth installAndAccount), '
-        'so the call always fails locally with notSignedIn and the server is '
-        'never told. Unskip when T-144/T-147 fix the order.',
-  );
+  test('sign-out reaches the server (D-61(c), backend-api §4.6)', () async {
+    final s = _Session(ClientPlatform.android);
+    final out = await s.run(w);
+    expect(out.whereType<SignedOut>().single.serverConfirmed, isTrue);
+    expect(
+      s.recorder.requests.map((r) => r.uri.path),
+      contains('/v1/accounts/signout'),
+    );
+  });
 }
