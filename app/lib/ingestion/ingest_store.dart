@@ -4,6 +4,7 @@
 // the spool is kept for the UI engine. T-046: a batch goes through
 // IngestRawMessages (the spike's raw-row-only commit is gone).
 
+import 'dart:async';
 import 'dart:io';
 
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -15,6 +16,7 @@ import '../core/db/app_database_providers.dart';
 import '../core/db/db_key_providers.dart';
 import '../features/ingestion/application/ingest_raw_messages.dart';
 import '../features/ingestion/domain/ingest_types.dart';
+import 'ingestion_pause_gate.dart';
 
 /// Why the store could not be used. [code] is a DbOpenFailureCode code.
 final class IngestStoreUnavailable implements Exception {
@@ -45,9 +47,22 @@ abstract interface class IngestStore {
 /// [IngestStore] over the app's Riverpod database providers.
 final class ProviderIngestStore implements IngestStore {
   /// [build] makes the use case over the opened database (once per open).
-  ProviderIngestStore(this._container, {required this.build});
+  ProviderIngestStore(
+    this._container, {
+    required this.build,
+    this.gate,
+    this.rebuildPerBatch = false,
+  });
 
-  final IngestRawMessages Function(AppDatabase db) build;
+  /// May be async: custom templates are read from the open database.
+  final FutureOr<IngestRawMessages> Function(AppDatabase db) build;
+
+  /// WIRE-SVC: the restore gate (UI engine only). Null: no gating.
+  final IngestionPauseGate? gate;
+
+  /// Build the use case again for every batch, so a template saved meanwhile
+  /// takes effect on the next batch (the build is a few objects and one read).
+  final bool rebuildPerBatch;
   IngestRawMessages? _ingest;
 
   /// The headless engine's container: same providers as the UI engine,
@@ -107,7 +122,15 @@ final class ProviderIngestStore implements IngestStore {
   Future<IngestBatchResult> ingest(List<IncomingMessage> batch) {
     final db = _db;
     if (db == null) throw const IngestStoreUnavailable('DB_UNAVAILABLE');
-    return (_ingest ??= build(db)).call(batch);
+    Future<IngestBatchResult> run() async {
+      final use = rebuildPerBatch
+          ? await build(db)
+          : (_ingest ??= await build(db));
+      return use.call(batch);
+    }
+
+    final g = gate;
+    return g == null ? run() : g.guard(run);
   }
 
   /// Closes the database connection (awaited, so its isolate has released

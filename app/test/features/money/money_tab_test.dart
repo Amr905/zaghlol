@@ -244,7 +244,7 @@ void main() {
       ),
     );
     expect(find.byKey(const Key('approx-not-included')), findsOneWidget);
-    expect(find.textContaining('≈'), findsOneWidget);
+    expect(find.textContaining('GBP'), findsOneWidget);
   });
 
   testWidgets('approx: off shows no ≈ line', (t) async {

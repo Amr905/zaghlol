@@ -1081,6 +1081,8 @@
   "@backupRestoreTitle": {
     "description": "T"
   },
+  "backupRestoreReplaceConfirm": "كده كل اللي على التليفون ده هيتمسح وينزل مكانه اللي في النسخة. نكمّل؟",
+  "backupRestoreReplaceAction": "استبدل",
   "backupRestoreWhereTitle": "النسخة بتاعتك فين؟",
   "@backupRestoreWhereTitle": {
     "description": "T"
@@ -9619,5 +9621,60 @@
   "errorsAccountFailed": "العملية ماتمتش. جرّب تاني كمان شوية.",
   "@errorsAccountFailed": {
     "description": "S · INSTALL_EXISTS and INSTALL_TOKEN_INVALID when a user action was waiting (the app re-registers silently first)"
+  },
+  "accountsOverviewApproxNotIncluded": "مش محسوبة في التقريبي: {currencies}",
+  "@accountsOverviewApproxNotIncluded": {
+    "description": "S · FU-134 note under the ≈ line",
+    "placeholders": {
+      "currencies": {
+        "type": "String"
+      }
+    }
+  },
+  "accountsOverviewApproxLabel": "تقريبي",
+  "@accountsOverviewApproxLabel": {
+    "description": "L · visible label for the ≈ line"
+  },
+  "goldSeatTamperedClockBody": "ظبّط التاريخ والوقت في موبايلك على تلقائي، وبعدها افتح زغلول تاني.",
+  "@goldSeatTamperedClockBody": {
+    "description": "S · tampered clock persists after a fresh server echo (FU-138)"
+  },
+  "transactionsEditLinksRemoved": "المبلغ اتغيّر، فالروابط اتشالت: الفلوس الراجعة والتقسيم المرتبطين بالمعاملة دي اتفكّوا.",
+  "@transactionsEditLinksRemoved": {
+    "description": "N · EC-40 after an amount edit"
+  },
+  "goldAccountSignedIn": "مسجّل دخول",
+  "@goldAccountSignedIn": {
+    "description": "L · account row, no e-mail shown"
+  },
+  "insightsChartsPeakHour": "أكتر ساعة بتصرف فيها حوالين {time}",
+  "@insightsChartsPeakHour": {
+    "description": "L · chart 5 peak-hour line",
+    "placeholders": {
+      "time": {
+        "type": "String"
+      }
+    }
+  },
+  "homeFeedExcludedFromSpending": "مش محسوبة في المصروفات",
+  "@homeFeedExcludedFromSpending": {
+    "description": "L · muted feed-row label"
+  },
+  "notificationsAlertBackupReminderTitle": "وقت النسخة الاحتياطية",
+  "@notificationsAlertBackupReminderTitle": {
+    "description": "T · FR-NTF-01 backup reminder"
+  },
+  "notificationsAlertBackupReminderBody": "خد نسخة احتياطية من الإعدادات عشان بياناتك تفضل في أمان.",
+  "@notificationsAlertBackupReminderBody": {
+    "description": "N · backup reminder"
+  },
+  "transactionsReimbUnassigned": "{count, plural, =1{مبلغ واحد اتفكّ لأن المصروف قلّ} other{{count} مبالغ اتفكّت لأن المصروف قلّ}}",
+  "@transactionsReimbUnassigned": {
+    "description": "N · EC-40 (T-091)",
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
   }
 }

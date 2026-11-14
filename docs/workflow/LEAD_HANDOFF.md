@@ -25,7 +25,7 @@ _Last updated: 2026-11-12 (Cairo) by the Lead session. Update it whenever the st
 - **Batch scripts:** never chain `git commit` after `git merge` without first checking `git diff --name-only --diff-filter=U` (a conflicted merge got committed with markers once; fixed before push). Local CI step logs (`*.log`) are git-ignored; don't `git add -A` in a worktree where the step script ran without checking `git status`.
 - **Copy deck checks:** `python3 docs/workflow/tools/copy_deck_check.py docs/02-design/copy-deck.md`.
 
-## Progress: 127 of 186 tasks done (68.3%)
+## Progress: 137 of 186 tasks done (73.7%)
 
 DONE: T-001…T-007, T-012…T-024, T-025…T-028, T-030, T-032…T-035, T-038…T-043, T-048, T-049, T-052, T-045, T-046, T-047, T-050, T-051, T-060, T-073…T-075, T-076, T-077, T-078, T-089, T-090, T-094…T-097, T-103, T-109, T-112, T-115, T-119, T-122…T-131, T-132, T-133, T-134, T-138, T-139, T-141, T-142, T-144, T-148…T-150, T-154, T-180…T-185. **Merged but open:** T-008 (device rows AC1/AC2), T-136 (IdP evidence), T-165 (device run).
 
@@ -42,17 +42,17 @@ DONE: T-001…T-007, T-012…T-024, T-025…T-028, T-030, T-032…T-035, T-038�
 
 The PO asked for this progress table in every update.
 
-**Merged batches:** #28, #29, #32–#36 (batch 7), #37 batch 8 (T-041 + T-042, T-051), batch 9 (`batch/2026-11-11-9`: T-021, T-040, T-047, T-077, T-182, T-184 + the batch-review workflow), batch 10 (`batch/2026-11-13-10`: T-023, T-043, T-109, T-132, T-141; first under the cost rules), batch 11 (`batch/2026-11-13-11`: T-048, T-049, T-052, T-119, T-181, T-183), batch 12 (`batch/2026-11-13-12`: T-024, T-052, T-089, T-180, T-185), batch 13 (`batch/2026-11-13-13`: T-078, T-094, T-115, T-154; T-103 pulled out), batch 14 (`batch/2026-11-13-14`: T-076, T-095, T-103, T-144, T-149), batch 15 (`batch/2026-11-13-15`: T-090, T-096, T-097, T-142, T-150, iOS CI retry), batches 16–18 in one PR (`batch/2026-11-14-18`: 38 tasks, sprint mode). Next free follow-up number: **FU-184**.
+**Merged batches:** #28, #29, #32–#36 (batch 7), #37 batch 8 (T-041 + T-042, T-051), batch 9 (`batch/2026-11-11-9`: T-021, T-040, T-047, T-077, T-182, T-184 + the batch-review workflow), batch 10 (`batch/2026-11-13-10`: T-023, T-043, T-109, T-132, T-141; first under the cost rules), batch 11 (`batch/2026-11-13-11`: T-048, T-049, T-052, T-119, T-181, T-183), batch 12 (`batch/2026-11-13-12`: T-024, T-052, T-089, T-180, T-185), batch 13 (`batch/2026-11-13-13`: T-078, T-094, T-115, T-154; T-103 pulled out), batch 14 (`batch/2026-11-13-14`: T-076, T-095, T-103, T-144, T-149), batch 15 (`batch/2026-11-13-15`: T-090, T-096, T-097, T-142, T-150, iOS CI retry), batches 16–18 in one PR (#50, `batch/2026-11-14-18`: 38 tasks, sprint mode). Next free follow-up number: **FU-199**.
 
 **Lessons:** never chain `git commit` after `git merge` in one script without checking for conflicts. Server/cloud restarts happen often: brief agents to commit early and push often; on restart, check worktrees for live processes (`ps`, `/proc/<pid>/cwd`) before relaunching.
 
 ## In flight (2026-11-13 Cairo)
 
-1. **Sprint wave 5** (batch 19): T-116, T-114, T-084, T-057, T-153, T-147, T-164 built; T-061, T-062, T-160 (iOS) and the l10n top-up running. Then the app-wiring glue task (routes, tab roots, overrides, restore side effects, custom templates in ingestion, S-06 after setup, S-41/S-42 from Money, S-69 from Settings) and the remaining v1 tasks in SPRINT.md.
+1. **Batch 19** (sprint wave 5 + app wiring, PR open): T-116, T-114, T-084, T-057, T-153, T-147, T-164, T-160, T-061, T-062, the l10n top-up, WIRE-nav, WIRE-svc. Next wave: T-063–T-067 (iOS capture chain, includes FU-196/FU-198), FU-194 native drain pause, FU-195 url_launcher, T-010, T-059, T-082, T-092, T-100, T-117, T-118, T-166, T-171, T-173, T-174, then the end-of-day FU sweep.
 2. **T-159 Android OCR:** waiting for the PO's `tesseract4android-4.9.0.aar` (`/home/claude/wt-T159-fix`, unpushed).
 3. **PC runner** silent since 2026-11-11 22:29; optional now (cost rules).
 
-Next free follow-up number: **FU-184**.
+Next free follow-up number: **FU-199**.
 
 ## Ready next (dependencies done)
 

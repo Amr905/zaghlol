@@ -24,6 +24,7 @@ import '../../../core/settings/settings_keys.dart';
 import '../../../core/settings/settings_providers.dart';
 import '../../../ingestion/ingest_store.dart';
 import '../../../ingestion/ingestion_config.dart';
+import '../../../ingestion/ingestion_pause_gate.dart';
 import '../../../ingestion/ingestion_runner.dart';
 import '../../../ingestion/spike_channel.dart';
 import '../../../ingestion/spike_registry.dart' show RegistryGuardBase;
@@ -33,6 +34,7 @@ import '../../ingestion/data/ingest_factory.dart';
 import '../../transactions/data/drift_transaction_repository.dart';
 import '../data/alert_store.dart';
 import '../data/capture_host_port.dart';
+import '../../ingestion/data/custom_institutions.dart';
 import '../data/catch_up_scheduler.dart';
 import '../data/guard_inputs_reader.dart';
 import '../data/scan_sources.dart';
@@ -42,6 +44,13 @@ import 'capture_scheduler.dart';
 import 'guard_config_writer.dart';
 import 'inbox_scan_service.dart';
 import 'scan.dart';
+
+/// The gate the restore flow closes (WIRE-SVC): ingestion writes (drain,
+/// inbox scan) stop and the running one is awaited. One per app.
+final ingestionPauseGateProvider = Provider<IngestionPauseGate>(
+  (ref) => IngestionPauseGate(),
+  name: 'ingestionPauseGateProvider',
+);
 
 final captureHostPortProvider = Provider<CaptureHostPort>(
   (ref) => PigeonCaptureHostPort(),
@@ -61,7 +70,7 @@ final captureRegistryLoaderProvider = Provider<Registry Function()>(
 );
 
 final captureSpoolPortProvider = Provider<SpoolPort>(
-  (ref) => PigeonSpoolPort(),
+  (ref) => platformSpoolPort(),
   name: 'captureSpoolPortProvider',
 );
 
@@ -123,13 +132,19 @@ final captureCoordinatorProvider = FutureProvider<CaptureCoordinator?>((
   // One database connection in the UI engine: the runner opens the app's own
   // provider (its `close` is never called here; the container owns the db).
   final container = ref.container;
+  final gate = ref.watch(ingestionPauseGateProvider);
   final runner = IngestionRunner(
     marks: defaultCycleMarks(),
     headless: false,
     spool: ref.watch(captureSpoolPortProvider),
     registry: () => registry,
     dbDirectory: () async => ref.read(dbDirectoryProvider),
-    store: (_, build) => ProviderIngestStore(container, build: build),
+    store: (_, build) => ProviderIngestStore(
+      container,
+      build: build,
+      gate: gate,
+      rebuildPerBatch: true,
+    ),
   );
   final share = ref.watch(captureShareIntakeProvider);
   final coordinator = CaptureCoordinator(
@@ -140,7 +155,7 @@ final captureCoordinatorProvider = FutureProvider<CaptureCoordinator?>((
     scheduler: scheduler,
     catchUp:
         ref.watch(captureCatchUpProvider) ??
-        _buildScanService(ref, db, host, registry),
+        _buildScanService(ref, db, host, registry, gate),
     hooks: CaptureHooks(
       attachShareIntake: share.attach,
       pollShareIntake: share.pollPending,
@@ -155,6 +170,9 @@ final captureCoordinatorProvider = FutureProvider<CaptureCoordinator?>((
     ),
   );
   CaptureEventsApi.setUp(coordinator);
+  // After a restore the gate reopens: drain what waited in the spool.
+  final removeResume = gate.onResume(() => unawaited(coordinator.onResumed()));
+  ref.onDispose(removeResume);
   final changes = inputs.changes().listen(
     (_) => coordinator.onGuardInputsChanged(),
   );
@@ -180,6 +198,7 @@ InboxScanService _buildScanService(
   AppDatabase db,
   CaptureHostPort host,
   Registry registry,
+  IngestionPauseGate gate,
 ) {
   final ids = UlidGenerator();
   final scanner = InboxScanner(
@@ -187,9 +206,13 @@ InboxScanService _buildScanService(
     senders: DriftScanSenderSource(db, () => registry),
     store: ProviderIngestStore(
       ref.container,
-      build: (d) => buildIngestRawMessages(
+      gate: gate,
+      rebuildPerBatch: true,
+      build: (d) async => buildIngestRawMessages(
         d,
-        pipeline: ParsingPipeline(registry),
+        pipeline: ParsingPipeline(
+          await registryWithCustomTemplates(registry, d),
+        ),
         guardBase: RegistryGuardBase(registry),
         newId: ids.next,
       ),

@@ -853,6 +853,11 @@ class AndroidCaptureHostApi {
   }
 }
 
+/// iOS host (T-062): the encrypted spool in the App Group container and the
+/// background refresh. Same drain / ack / hold / status semantics as
+/// AndroidCaptureHostApi (platform-channels.md 1.3), so the Dart drain is
+/// shared. Errors: IO_ERROR | NOT_AVAILABLE (no App Group container).
+/// T-061 adds writeGuardConfig and the Shortcut-setup methods (section 3).
 class IosCaptureHostApi {
   /// Constructor for [IosCaptureHostApi].  The [binaryMessenger] named argument is
   /// available for dependency injection.  If it is left null, the default
@@ -869,6 +874,131 @@ class IosCaptureHostApi {
   static const MessageCodec<Object?> pigeonChannelCodec = _PigeonCodec();
 
   final String pigeonVar_messageChannelSuffix;
+
+  /// Returns decrypted entries (in memory only), oldest first.
+  Future<List<SpoolEntry>> drainSpool(int max) async {
+    final pigeonVar_channelName =
+        'dev.flutter.pigeon.zaghlol.IosCaptureHostApi.drainSpool$pigeonVar_messageChannelSuffix';
+    final pigeonVar_channel = BasicMessageChannel<Object?>(
+      pigeonVar_channelName,
+      pigeonChannelCodec,
+      binaryMessenger: pigeonVar_binaryMessenger,
+    );
+    final Future<Object?> pigeonVar_sendFuture = pigeonVar_channel.send(
+      <Object?>[max],
+    );
+    final pigeonVar_replyList = await pigeonVar_sendFuture as List<Object?>?;
+
+    final Object? pigeonVar_replyValue = _extractReplyValueOrThrow(
+      pigeonVar_replyList,
+      pigeonVar_channelName,
+      isNullValid: false,
+    );
+    return (pigeonVar_replyValue! as List<Object?>).cast<SpoolEntry>();
+  }
+
+  /// Only ids this engine drained.
+  Future<void> ackSpool(List<String> ids) async {
+    final pigeonVar_channelName =
+        'dev.flutter.pigeon.zaghlol.IosCaptureHostApi.ackSpool$pigeonVar_messageChannelSuffix';
+    final pigeonVar_channel = BasicMessageChannel<Object?>(
+      pigeonVar_channelName,
+      pigeonChannelCodec,
+      binaryMessenger: pigeonVar_binaryMessenger,
+    );
+    final Future<Object?> pigeonVar_sendFuture = pigeonVar_channel.send(
+      <Object?>[ids],
+    );
+    final pigeonVar_replyList = await pigeonVar_sendFuture as List<Object?>?;
+
+    _extractReplyValueOrThrow(
+      pigeonVar_replyList,
+      pigeonVar_channelName,
+      isNullValid: true,
+    );
+  }
+
+  /// Entries IngestRawMessages could not store even alone; moved to spool/held/.
+  Future<void> holdSpool(List<String> ids) async {
+    final pigeonVar_channelName =
+        'dev.flutter.pigeon.zaghlol.IosCaptureHostApi.holdSpool$pigeonVar_messageChannelSuffix';
+    final pigeonVar_channel = BasicMessageChannel<Object?>(
+      pigeonVar_channelName,
+      pigeonChannelCodec,
+      binaryMessenger: pigeonVar_binaryMessenger,
+    );
+    final Future<Object?> pigeonVar_sendFuture = pigeonVar_channel.send(
+      <Object?>[ids],
+    );
+    final pigeonVar_replyList = await pigeonVar_sendFuture as List<Object?>?;
+
+    _extractReplyValueOrThrow(
+      pigeonVar_replyList,
+      pigeonVar_channelName,
+      isNullValid: true,
+    );
+  }
+
+  Future<SpoolStatus> getSpoolStatus() async {
+    final pigeonVar_channelName =
+        'dev.flutter.pigeon.zaghlol.IosCaptureHostApi.getSpoolStatus$pigeonVar_messageChannelSuffix';
+    final pigeonVar_channel = BasicMessageChannel<Object?>(
+      pigeonVar_channelName,
+      pigeonChannelCodec,
+      binaryMessenger: pigeonVar_binaryMessenger,
+    );
+    final Future<Object?> pigeonVar_sendFuture = pigeonVar_channel.send(null);
+    final pigeonVar_replyList = await pigeonVar_sendFuture as List<Object?>?;
+
+    final Object? pigeonVar_replyValue = _extractReplyValueOrThrow(
+      pigeonVar_replyList,
+      pigeonVar_channelName,
+      isNullValid: false,
+    );
+    return pigeonVar_replyValue! as SpoolStatus;
+  }
+
+  /// Zeroes the alert counters if [seq] still matches getSpoolStatus().seq.
+  Future<void> clearSpoolAlerts(int seq) async {
+    final pigeonVar_channelName =
+        'dev.flutter.pigeon.zaghlol.IosCaptureHostApi.clearSpoolAlerts$pigeonVar_messageChannelSuffix';
+    final pigeonVar_channel = BasicMessageChannel<Object?>(
+      pigeonVar_channelName,
+      pigeonChannelCodec,
+      binaryMessenger: pigeonVar_binaryMessenger,
+    );
+    final Future<Object?> pigeonVar_sendFuture = pigeonVar_channel.send(
+      <Object?>[seq],
+    );
+    final pigeonVar_replyList = await pigeonVar_sendFuture as List<Object?>?;
+
+    _extractReplyValueOrThrow(
+      pigeonVar_replyList,
+      pigeonVar_channelName,
+      isNullValid: true,
+    );
+  }
+
+  /// Submits the BGAppRefreshTask 'app.zaghlol.ingest' (the launch handler is
+  /// registered natively at launch). A best-effort nudge: the system decides
+  /// when it runs; the foreground drain is the guarantee.
+  Future<void> registerBackgroundRefresh() async {
+    final pigeonVar_channelName =
+        'dev.flutter.pigeon.zaghlol.IosCaptureHostApi.registerBackgroundRefresh$pigeonVar_messageChannelSuffix';
+    final pigeonVar_channel = BasicMessageChannel<Object?>(
+      pigeonVar_channelName,
+      pigeonChannelCodec,
+      binaryMessenger: pigeonVar_binaryMessenger,
+    );
+    final Future<Object?> pigeonVar_sendFuture = pigeonVar_channel.send(null);
+    final pigeonVar_replyList = await pigeonVar_sendFuture as List<Object?>?;
+
+    _extractReplyValueOrThrow(
+      pigeonVar_replyList,
+      pigeonVar_channelName,
+      isNullValid: true,
+    );
+  }
 }
 
 abstract class CaptureEventsApi {

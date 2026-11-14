@@ -849,8 +849,27 @@ class AndroidCaptureHostApiSetup {
     }
   }
 }
+/// iOS host (T-062): the encrypted spool in the App Group container and the
+/// background refresh. Same drain / ack / hold / status semantics as
+/// AndroidCaptureHostApi (platform-channels.md 1.3), so the Dart drain is
+/// shared. Errors: IO_ERROR | NOT_AVAILABLE (no App Group container).
+/// T-061 adds writeGuardConfig and the Shortcut-setup methods (section 3).
+///
 /// Generated protocol from Pigeon that represents a handler of messages from Flutter.
 protocol IosCaptureHostApi {
+  /// Returns decrypted entries (in memory only), oldest first.
+  func drainSpool(max: Int64) throws -> [SpoolEntry]
+  /// Only ids this engine drained.
+  func ackSpool(ids: [String]) throws
+  /// Entries IngestRawMessages could not store even alone; moved to spool/held/.
+  func holdSpool(ids: [String]) throws
+  func getSpoolStatus() throws -> SpoolStatus
+  /// Zeroes the alert counters if [seq] still matches getSpoolStatus().seq.
+  func clearSpoolAlerts(seq: Int64) throws
+  /// Submits the BGAppRefreshTask 'app.zaghlol.ingest' (the launch handler is
+  /// registered natively at launch). A best-effort nudge: the system decides
+  /// when it runs; the foreground drain is the guarantee.
+  func registerBackgroundRefresh() throws
 }
 
 /// Generated setup class from Pigeon to handle messages through the `binaryMessenger`.
@@ -859,6 +878,114 @@ class IosCaptureHostApiSetup {
   /// Sets up an instance of `IosCaptureHostApi` to handle messages through the `binaryMessenger`.
   static func setUp(binaryMessenger: FlutterBinaryMessenger, api: IosCaptureHostApi?, messageChannelSuffix: String = "") {
     let channelSuffix = messageChannelSuffix.count > 0 ? ".\(messageChannelSuffix)" : ""
+    #if os(iOS)
+      let taskQueue = binaryMessenger.makeBackgroundTaskQueue?()
+    #else
+      let taskQueue: FlutterTaskQueue? = nil
+    #endif
+    /// Returns decrypted entries (in memory only), oldest first.
+    let drainSpoolChannel = taskQueue == nil
+      ? FlutterBasicMessageChannel(name: "dev.flutter.pigeon.zaghlol.IosCaptureHostApi.drainSpool\(channelSuffix)", binaryMessenger: binaryMessenger, codec: codec)
+      : FlutterBasicMessageChannel(name: "dev.flutter.pigeon.zaghlol.IosCaptureHostApi.drainSpool\(channelSuffix)", binaryMessenger: binaryMessenger, codec: codec, taskQueue: taskQueue)
+    if let api = api {
+      drainSpoolChannel.setMessageHandler { message, reply in
+        let args = message as! [Any?]
+        let maxArg = args[0] as! Int64
+        do {
+          let result = try api.drainSpool(max: maxArg)
+          reply(wrapResult(result))
+        } catch {
+          reply(wrapError(error))
+        }
+      }
+    } else {
+      drainSpoolChannel.setMessageHandler(nil)
+    }
+    /// Only ids this engine drained.
+    let ackSpoolChannel = taskQueue == nil
+      ? FlutterBasicMessageChannel(name: "dev.flutter.pigeon.zaghlol.IosCaptureHostApi.ackSpool\(channelSuffix)", binaryMessenger: binaryMessenger, codec: codec)
+      : FlutterBasicMessageChannel(name: "dev.flutter.pigeon.zaghlol.IosCaptureHostApi.ackSpool\(channelSuffix)", binaryMessenger: binaryMessenger, codec: codec, taskQueue: taskQueue)
+    if let api = api {
+      ackSpoolChannel.setMessageHandler { message, reply in
+        let args = message as! [Any?]
+        let idsArg = args[0] as! [String]
+        do {
+          try api.ackSpool(ids: idsArg)
+          reply(wrapResult(nil))
+        } catch {
+          reply(wrapError(error))
+        }
+      }
+    } else {
+      ackSpoolChannel.setMessageHandler(nil)
+    }
+    /// Entries IngestRawMessages could not store even alone; moved to spool/held/.
+    let holdSpoolChannel = taskQueue == nil
+      ? FlutterBasicMessageChannel(name: "dev.flutter.pigeon.zaghlol.IosCaptureHostApi.holdSpool\(channelSuffix)", binaryMessenger: binaryMessenger, codec: codec)
+      : FlutterBasicMessageChannel(name: "dev.flutter.pigeon.zaghlol.IosCaptureHostApi.holdSpool\(channelSuffix)", binaryMessenger: binaryMessenger, codec: codec, taskQueue: taskQueue)
+    if let api = api {
+      holdSpoolChannel.setMessageHandler { message, reply in
+        let args = message as! [Any?]
+        let idsArg = args[0] as! [String]
+        do {
+          try api.holdSpool(ids: idsArg)
+          reply(wrapResult(nil))
+        } catch {
+          reply(wrapError(error))
+        }
+      }
+    } else {
+      holdSpoolChannel.setMessageHandler(nil)
+    }
+    let getSpoolStatusChannel = taskQueue == nil
+      ? FlutterBasicMessageChannel(name: "dev.flutter.pigeon.zaghlol.IosCaptureHostApi.getSpoolStatus\(channelSuffix)", binaryMessenger: binaryMessenger, codec: codec)
+      : FlutterBasicMessageChannel(name: "dev.flutter.pigeon.zaghlol.IosCaptureHostApi.getSpoolStatus\(channelSuffix)", binaryMessenger: binaryMessenger, codec: codec, taskQueue: taskQueue)
+    if let api = api {
+      getSpoolStatusChannel.setMessageHandler { _, reply in
+        do {
+          let result = try api.getSpoolStatus()
+          reply(wrapResult(result))
+        } catch {
+          reply(wrapError(error))
+        }
+      }
+    } else {
+      getSpoolStatusChannel.setMessageHandler(nil)
+    }
+    /// Zeroes the alert counters if [seq] still matches getSpoolStatus().seq.
+    let clearSpoolAlertsChannel = taskQueue == nil
+      ? FlutterBasicMessageChannel(name: "dev.flutter.pigeon.zaghlol.IosCaptureHostApi.clearSpoolAlerts\(channelSuffix)", binaryMessenger: binaryMessenger, codec: codec)
+      : FlutterBasicMessageChannel(name: "dev.flutter.pigeon.zaghlol.IosCaptureHostApi.clearSpoolAlerts\(channelSuffix)", binaryMessenger: binaryMessenger, codec: codec, taskQueue: taskQueue)
+    if let api = api {
+      clearSpoolAlertsChannel.setMessageHandler { message, reply in
+        let args = message as! [Any?]
+        let seqArg = args[0] as! Int64
+        do {
+          try api.clearSpoolAlerts(seq: seqArg)
+          reply(wrapResult(nil))
+        } catch {
+          reply(wrapError(error))
+        }
+      }
+    } else {
+      clearSpoolAlertsChannel.setMessageHandler(nil)
+    }
+    /// Submits the BGAppRefreshTask 'app.zaghlol.ingest' (the launch handler is
+    /// registered natively at launch). A best-effort nudge: the system decides
+    /// when it runs; the foreground drain is the guarantee.
+    let registerBackgroundRefreshChannel = FlutterBasicMessageChannel(name: "dev.flutter.pigeon.zaghlol.IosCaptureHostApi.registerBackgroundRefresh\(channelSuffix)", binaryMessenger: binaryMessenger, codec: codec)
+    if let api = api {
+      registerBackgroundRefreshChannel.setMessageHandler { _, reply in
+        do {
+          try api.registerBackgroundRefresh()
+          reply(wrapResult(nil))
+        } catch {
+          reply(wrapError(error))
+        }
+      }
+    } else {
+      registerBackgroundRefreshChannel.setMessageHandler(nil)
+    }
   }
 }
 /// Generated protocol from Pigeon that represents Flutter messages that can be called from Swift.

@@ -129,7 +129,28 @@ void main() {
 
   test('no native side: ready failing never throws', () async {
     messenger.setMockMessageHandler('$_host.ready', null);
-    startHeadlessIngestion(runner());
+    startHeadlessIngestion(runner(), retryDelay: Duration.zero);
     await pumpEventQueue();
+  });
+
+  // T-062: iOS installs its handler only after FlutterEngine.run() returns,
+  // so the first ready can find nobody; Dart retries until native answers.
+  test('ready is retried until native answers', () async {
+    var calls = 0;
+    messenger.setMockMessageHandler('$_host.ready', (data) async {
+      calls++;
+      if (calls < 3) return null; // no handler yet (channel-error)
+      readies++;
+      return codec.encodeMessage(<Object?>[null]);
+    });
+    startHeadlessIngestion(
+      runner(),
+      retryDelay: const Duration(milliseconds: 1),
+    );
+    for (var i = 0; i < 100 && readies == 0; i++) {
+      await Future<void>.delayed(const Duration(milliseconds: 2));
+    }
+    expect(calls, 3);
+    expect(readies, 1);
   });
 }

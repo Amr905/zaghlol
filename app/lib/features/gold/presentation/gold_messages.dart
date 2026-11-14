@@ -94,9 +94,13 @@ class GoldMessageCard extends ConsumerWidget {
     this.onRestore,
     this.onRetry,
     this.onDismiss,
+    this.showSignIn = true,
   });
 
   final GoldMessage message;
+
+  /// False on S-69 itself, where the sign-in buttons are right below.
+  final bool showSignIn;
 
   /// Offered on `movedUser`.
   final VoidCallback? onRestore;
@@ -231,7 +235,7 @@ class GoldMessageCard extends ConsumerWidget {
                     variant: ZButtonVariant.secondary,
                     size: ZButtonSize.small,
                   ),
-                if (wantsSignIn && signIn != null)
+                if (showSignIn && wantsSignIn && signIn != null)
                   ZButton(
                     label: t.commonActionSignIn,
                     onPressed: signIn,

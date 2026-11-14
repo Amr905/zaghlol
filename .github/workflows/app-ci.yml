@@ -146,6 +146,8 @@ jobs:
           files="$files $(ls app/lib/features/capture/*/*.dart)"
           # T-151: the iCloud backup host never logs.
           files="$files $(ls app/ios/Runner/Platform/ICloud/*.swift)"
+          # T-062: the iOS spool, capture host, headless run and background refresh never log.
+          files="$files $(ls app/ios/Shared/Spool*.swift app/ios/Shared/CaptureStatusStore.swift app/ios/Shared/SharedGroups.swift app/ios/Runner/Platform/Capture/*.swift)"
           [ -n "$files" ] || { echo "::error::no key files found"; exit 1; }
           if grep -nE '\b(print|debugPrint|log|developer\.log|dump)\(|\b(stdout|stderr)\b|\bLog\.[a-z]+\(|println\(|Timber|NSLog|os_log|Logger\(|logStatements: *true' $files; then
             echo "::error::logging call in key code"
@@ -436,7 +438,7 @@ jobs:
             testEnsureExcludedIsIdempotent testEnsureExcludedSurvivesDeleteAndRecreate \
             testExcludeMarksEveryDirectory testExcludeReportsFailureWithoutStoppingOrCrashing \
             testFilesCreatedLaterStayUnderAnExcludedDirectory \
-            testAppGroupDirectoriesAreSkippedWithoutAContainer; do
+            testAppGroupDirectoriesAreSkippedWithoutAContainer testAppGroupDirectoriesAreExcluded; do
             # xcodebuild can interleave lines, cutting a "passed" line; xcodebuild already exited 0, so require
             # that the test ran (its name appears) and that no line reports it failed.
             if ! grep -qiE "BackupExclusionTests.*$t" xcodebuild.log || grep -qiE "test case.*BackupExclusionTests.*$t.*failed" xcodebuild.log; then
@@ -494,6 +496,19 @@ jobs:
             if ! grep -qiE "IosIntentSpikeTests.*$t" xcodebuild.log || grep -qiE "test case.*IosIntentSpikeTests.*$t.*failed" xcodebuild.log; then
               echo "::error::IosIntentSpikeTests.$t did not pass"
               grep -iE "IosIntentSpikeTests" xcodebuild.log | head -n 30
+              exit 1
+            fi
+          done
+          # T-061: the Swift Guard: shared golden file, reader, user part, runtime, no logging.
+          for t in testAllGoldenEntriesPass testSwiftGuardDisagreeingWithTheGoldenFileIsReported \
+            testGuardThatKeepsPersonalMessagesDisagreesWithGolden testANonRegistryPersonalMessageLeavesNothing \
+            testUserPartRoundTripsAndTheFileHoldsNoPlaintext testTamperedFileIsBaseOnlyUnreadableAndKept \
+            testAnInvalidWriteKeepsTheOldFileAndTheOldRules testAFailureAtEachWriteStepKeepsTheOldFileAndLeavesNoTemp \
+            testATransientKeychainErrorIsNotCachedAndHeals testApplePayCardNamesMapToTheInstitutionAndKeepIsGenericOtherwise \
+            testGuardSourcesNeverPrintOrLog testDescriptionsAndErrorsNeverCarryMessageContent; do
+            if ! grep -qiE "Guard(Golden|Runtime)Tests.*$t" xcodebuild.log || grep -qiE "test case.*Guard(Golden|Runtime)Tests.*$t.*failed" xcodebuild.log; then
+              echo "::error::Guard test $t did not pass"
+              grep -iE "Guard(Golden|Runtime)Tests" xcodebuild.log | head -n 30
               exit 1
             fi
           done

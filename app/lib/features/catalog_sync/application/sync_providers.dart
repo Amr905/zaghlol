@@ -7,6 +7,8 @@
 // no key nothing verifies, so a release build drops every signed answer and
 // grants no Gold (fail closed). Build-time values come from `--dart-define`.
 
+import '../../../ingestion/ingestion_pause_gate.dart';
+
 import 'package:flutter/foundation.dart'
     show TargetPlatform, defaultTargetPlatform, kReleaseMode;
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -41,11 +43,16 @@ const String _apiBase = String.fromEnvironment(
   'ZAGHLOL_API_BASE',
   defaultValue: 'https://api.zaghlol.app',
 );
-const String _appVersion = String.fromEnvironment(
+
+/// The app version of this build (`--dart-define=ZAGHLOL_APP_VERSION`);
+/// also the backup header's version (T-152).
+const String kClientAppVersion = String.fromEnvironment(
   'ZAGHLOL_APP_VERSION',
   defaultValue: '0.1.0',
 );
-const String _appBuild = String.fromEnvironment(
+
+/// The build number (`--dart-define=ZAGHLOL_APP_BUILD`).
+const String kClientAppBuild = String.fromEnvironment(
   'ZAGHLOL_APP_BUILD',
   defaultValue: '1',
 );
@@ -61,8 +68,8 @@ final clientPlatformProvider = Provider<ClientPlatform>(
 final clientIdentityProvider = Provider<ClientIdentity>(
   (ref) => ClientIdentity(
     platform: ref.watch(clientPlatformProvider),
-    appVersion: _appVersion,
-    build: _appBuild,
+    appVersion: kClientAppVersion,
+    build: kClientAppBuild,
   ),
   name: 'clientIdentityProvider',
 );
@@ -128,6 +135,13 @@ final Override entitlementServiceOverride = entitlementServiceProvider
 /// Everything the root `ProviderScope` must override for the sync.
 final List<Override> syncWiringOverrides = [entitlementServiceOverride];
 
+/// Closed by the restore flow (WIRE-SVC); one per app, so it survives the
+/// orchestrator being rebuilt when the database is re-opened.
+final syncPauseGateProvider = Provider<IngestionPauseGate>(
+  (ref) => IngestionPauseGate(),
+  name: 'syncPauseGateProvider',
+);
+
 final syncOrchestratorProvider = FutureProvider<SyncOrchestrator>((ref) async {
   final db = await ref.watch(appDatabaseProvider.future);
   final flags = await ref.watch(flagsServiceProvider.future);
@@ -142,6 +156,7 @@ final syncOrchestratorProvider = FutureProvider<SyncOrchestrator>((ref) async {
     flags: flags,
     prices: PricesRepository(db: db, clock: clock),
     settings: settings,
+    pauseGate: ref.watch(syncPauseGateProvider),
     // A fresh memoizing categorizer per run: the catalog just changed.
     recategorize: () async {
       final c = Categorizer(driftCategorizerPorts(db, rules), memoize: true);

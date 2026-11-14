@@ -5,6 +5,11 @@
 
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import '../../backup/application/schedule_providers.dart' as backup;
+import '../../catalog_sync/application/sync_providers.dart' as sync;
+import '../../catalog_sync/application/sync_providers.dart'
+    show kClientAppBuild, kClientAppVersion;
+
 /// App version and build number (About).
 class AppInfo {
   const AppInfo({required this.version, required this.build});
@@ -13,7 +18,7 @@ class AppInfo {
 }
 
 final appInfoProvider = Provider<AppInfo>(
-  (ref) => const AppInfo(version: '1.0.0', build: '100'),
+  (ref) => const AppInfo(version: kClientAppVersion, build: kClientAppBuild),
   name: 'settingsAppInfoProvider',
 );
 
@@ -25,10 +30,15 @@ class SyncStatus {
   final DateTime? pricesAt;
 }
 
-final syncStatusProvider = Provider<SyncStatus>(
-  (ref) => const SyncStatus(),
-  name: 'settingsSyncStatusProvider',
-);
+final syncStatusProvider = Provider<SyncStatus>((ref) {
+  // The orchestrator records one wall time per successful run (catalog,
+  // flags and prices together). Null until the database is open or no run
+  // has succeeded.
+  final ms = ref.watch(sync.syncStatusProvider).value?.lastOkWallMs;
+  if (ms == null) return const SyncStatus();
+  final at = DateTime.fromMillisecondsSinceEpoch(ms, isUtc: true);
+  return SyncStatus(catalogAt: at, pricesAt: at);
+}, name: 'settingsSyncStatusProvider');
 
 /// The install ID shown as the support code; null while not registered.
 final supportCodeProvider = FutureProvider<String?>(
@@ -63,7 +73,7 @@ final wipeEverythingProvider = Provider<Future<void> Function()?>(
 
 /// The last backup time for the delete dialog; null: none.
 final lastBackupAtProvider = Provider<DateTime?>(
-  (ref) => null,
+  (ref) => ref.watch(backup.lastBackupAtProvider).value,
   name: 'settingsLastBackupAtProvider',
 );
 

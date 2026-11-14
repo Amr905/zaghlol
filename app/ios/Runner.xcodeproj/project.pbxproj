@@ -7,6 +7,9 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		5A1600000000000000000A01 /* OcrApi.g.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5A1600000000000000000A02 /* OcrApi.g.swift */; };
+		5A1600000000000000000A03 /* OcrHost.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5A1600000000000000000A04 /* OcrHost.swift */; };
+		5A1600000000000000000A05 /* OcrTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5A1600000000000000000A06 /* OcrTests.swift */; };
 		5A1510000000000000000F01 /* IcloudApi.g.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5A1510000000000000000F02 /* IcloudApi.g.swift */; };
 		5A1510000000000000000F03 /* ICloudBackupFiles.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5A1510000000000000000F04 /* ICloudBackupFiles.swift */; };
 		5A1510000000000000000F05 /* ICloudBackupHost.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5A1510000000000000000F06 /* ICloudBackupHost.swift */; };
@@ -46,6 +49,38 @@
 		5A1790000000000000000F03 /* SeatKeyStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5A1790000000000000000F04 /* SeatKeyStore.swift */; };
 		5A1790000000000000000F05 /* SeatKeyHost.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5A1790000000000000000F06 /* SeatKeyHost.swift */; };
 		5A1790000000000000000F07 /* SeatKeyTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5A1790000000000000000F08 /* SeatKeyTests.swift */; };
+		5A6100000000000000001B00 /* GuardTypes.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5A6100000000000000001F00 /* GuardTypes.swift */; };
+		5A6100000000000000001B01 /* TextFold.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5A6100000000000000001F01 /* TextFold.swift */; };
+		5A6100000000000000001B02 /* StrictJson.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5A6100000000000000001F02 /* StrictJson.swift */; };
+		5A6100000000000000001B03 /* GuardConfig.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5A6100000000000000001F03 /* GuardConfig.swift */; };
+		5A6100000000000000001B04 /* CaptureGuard.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5A6100000000000000001F04 /* CaptureGuard.swift */; };
+		5A6100000000000000001B05 /* SenderRateLimiter.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5A6100000000000000001F05 /* SenderRateLimiter.swift */; };
+		5A6100000000000000001B06 /* GuardUserCipher.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5A6100000000000000001F06 /* GuardUserCipher.swift */; };
+		5A6100000000000000001B07 /* GuardUserConfigStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5A6100000000000000001F07 /* GuardUserConfigStore.swift */; };
+		5A6100000000000000001B08 /* GuardBaseSource.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5A6100000000000000001F08 /* GuardBaseSource.swift */; };
+		5A6100000000000000001B09 /* GuardRuntime.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5A6100000000000000001F09 /* GuardRuntime.swift */; };
+		5A6100000000000000001B0A /* GuardGoldenTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5A6100000000000000001F0A /* GuardGoldenTests.swift */; };
+		5A6100000000000000001B0B /* GuardRuntimeTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5A6100000000000000001F0B /* GuardRuntimeTests.swift */; };
+		5A6200000000000000000101 /* SpoolUlid.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5A6200000000000000000001 /* SpoolUlid.swift */; };
+		5A6200000000000000000102 /* SpoolRecord.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5A6200000000000000000002 /* SpoolRecord.swift */; };
+		5A6200000000000000000103 /* SharedGroups.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5A6200000000000000000003 /* SharedGroups.swift */; };
+		5A6200000000000000000104 /* SpoolKeychain.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5A6200000000000000000004 /* SpoolKeychain.swift */; };
+		5A6200000000000000000105 /* SpoolCipher.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5A6200000000000000000005 /* SpoolCipher.swift */; };
+		5A6200000000000000000106 /* SpoolStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5A6200000000000000000006 /* SpoolStore.swift */; };
+		5A6200000000000000000107 /* CaptureStatusStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5A6200000000000000000007 /* CaptureStatusStore.swift */; };
+		5A6200000000000000000108 /* SpoolLocation.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5A6200000000000000000008 /* SpoolLocation.swift */; };
+		5A6200000000000000000109 /* CaptureApi.g.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5A6200000000000000000009 /* CaptureApi.g.swift */; };
+		5A620000000000000000010A /* IngestionApi.g.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5A620000000000000000000A /* IngestionApi.g.swift */; };
+		5A620000000000000000010B /* SpoolClaim.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5A620000000000000000000B /* SpoolClaim.swift */; };
+		5A620000000000000000010C /* IosCaptureHost.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5A620000000000000000000C /* IosCaptureHost.swift */; };
+		5A620000000000000000010D /* HeadlessIngestion.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5A620000000000000000000D /* HeadlessIngestion.swift */; };
+		5A620000000000000000010E /* IngestBackgroundRefresh.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5A620000000000000000000E /* IngestBackgroundRefresh.swift */; };
+		5A620000000000000000010F /* SpoolStoreTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5A620000000000000000000F /* SpoolStoreTests.swift */; };
+		5A6200000000000000000110 /* SpoolKeychainTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5A6200000000000000000010 /* SpoolKeychainTests.swift */; };
+		5A6200000000000000000111 /* IosCaptureHostTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5A6200000000000000000011 /* IosCaptureHostTests.swift */; };
+		5A6200000000000000000112 /* CaptureStatusStoreTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5A6200000000000000000012 /* CaptureStatusStoreTests.swift */; };
+		5A6200000000000000000113 /* HeadlessIngestionTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5A6200000000000000000013 /* HeadlessIngestionTests.swift */; };
+		5A6200000000000000000114 /* SpoolTestSupport.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5A6200000000000000000014 /* SpoolTestSupport.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -72,6 +107,9 @@
 /* End PBXCopyFilesBuildPhase section */
 
 /* Begin PBXFileReference section */
+		5A1600000000000000000A02 /* OcrApi.g.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OcrApi.g.swift; sourceTree = "<group>"; };
+		5A1600000000000000000A04 /* OcrHost.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OcrHost.swift; sourceTree = "<group>"; };
+		5A1600000000000000000A06 /* OcrTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OcrTests.swift; sourceTree = "<group>"; };
 		5A1510000000000000000F02 /* IcloudApi.g.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = IcloudApi.g.swift; sourceTree = "<group>"; };
 		5A1510000000000000000F04 /* ICloudBackupFiles.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ICloudBackupFiles.swift; sourceTree = "<group>"; };
 		5A1510000000000000000F06 /* ICloudBackupHost.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ICloudBackupHost.swift; sourceTree = "<group>"; };
@@ -120,6 +158,38 @@
 		5A1790000000000000000F04 /* SeatKeyStore.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SeatKeyStore.swift; sourceTree = "<group>"; };
 		5A1790000000000000000F06 /* SeatKeyHost.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SeatKeyHost.swift; sourceTree = "<group>"; };
 		5A1790000000000000000F08 /* SeatKeyTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SeatKeyTests.swift; sourceTree = "<group>"; };
+		5A6100000000000000001F00 /* GuardTypes.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GuardTypes.swift; sourceTree = "<group>"; };
+		5A6100000000000000001F01 /* TextFold.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TextFold.swift; sourceTree = "<group>"; };
+		5A6100000000000000001F02 /* StrictJson.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StrictJson.swift; sourceTree = "<group>"; };
+		5A6100000000000000001F03 /* GuardConfig.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GuardConfig.swift; sourceTree = "<group>"; };
+		5A6100000000000000001F04 /* CaptureGuard.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CaptureGuard.swift; sourceTree = "<group>"; };
+		5A6100000000000000001F05 /* SenderRateLimiter.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SenderRateLimiter.swift; sourceTree = "<group>"; };
+		5A6100000000000000001F06 /* GuardUserCipher.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GuardUserCipher.swift; sourceTree = "<group>"; };
+		5A6100000000000000001F07 /* GuardUserConfigStore.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GuardUserConfigStore.swift; sourceTree = "<group>"; };
+		5A6100000000000000001F08 /* GuardBaseSource.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GuardBaseSource.swift; sourceTree = "<group>"; };
+		5A6100000000000000001F09 /* GuardRuntime.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GuardRuntime.swift; sourceTree = "<group>"; };
+		5A6100000000000000001F0A /* GuardGoldenTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GuardGoldenTests.swift; sourceTree = "<group>"; };
+		5A6100000000000000001F0B /* GuardRuntimeTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GuardRuntimeTests.swift; sourceTree = "<group>"; };
+		5A6200000000000000000001 /* SpoolUlid.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SpoolUlid.swift; sourceTree = "<group>"; };
+		5A6200000000000000000002 /* SpoolRecord.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SpoolRecord.swift; sourceTree = "<group>"; };
+		5A6200000000000000000003 /* SharedGroups.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SharedGroups.swift; sourceTree = "<group>"; };
+		5A6200000000000000000004 /* SpoolKeychain.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SpoolKeychain.swift; sourceTree = "<group>"; };
+		5A6200000000000000000005 /* SpoolCipher.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SpoolCipher.swift; sourceTree = "<group>"; };
+		5A6200000000000000000006 /* SpoolStore.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SpoolStore.swift; sourceTree = "<group>"; };
+		5A6200000000000000000007 /* CaptureStatusStore.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CaptureStatusStore.swift; sourceTree = "<group>"; };
+		5A6200000000000000000008 /* SpoolLocation.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SpoolLocation.swift; sourceTree = "<group>"; };
+		5A6200000000000000000009 /* CaptureApi.g.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CaptureApi.g.swift; sourceTree = "<group>"; };
+		5A620000000000000000000A /* IngestionApi.g.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = IngestionApi.g.swift; sourceTree = "<group>"; };
+		5A620000000000000000000B /* SpoolClaim.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SpoolClaim.swift; sourceTree = "<group>"; };
+		5A620000000000000000000C /* IosCaptureHost.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = IosCaptureHost.swift; sourceTree = "<group>"; };
+		5A620000000000000000000D /* HeadlessIngestion.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HeadlessIngestion.swift; sourceTree = "<group>"; };
+		5A620000000000000000000E /* IngestBackgroundRefresh.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = IngestBackgroundRefresh.swift; sourceTree = "<group>"; };
+		5A620000000000000000000F /* SpoolStoreTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SpoolStoreTests.swift; sourceTree = "<group>"; };
+		5A6200000000000000000010 /* SpoolKeychainTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SpoolKeychainTests.swift; sourceTree = "<group>"; };
+		5A6200000000000000000011 /* IosCaptureHostTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = IosCaptureHostTests.swift; sourceTree = "<group>"; };
+		5A6200000000000000000012 /* CaptureStatusStoreTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CaptureStatusStoreTests.swift; sourceTree = "<group>"; };
+		5A6200000000000000000013 /* HeadlessIngestionTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HeadlessIngestionTests.swift; sourceTree = "<group>"; };
+		5A6200000000000000000014 /* SpoolTestSupport.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SpoolTestSupport.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -134,6 +204,34 @@
 /* End PBXFrameworksBuildPhase section */
 
 /* Begin PBXGroup section */
+		5A6100000000000000001C01 /* Guard */ = {
+			isa = PBXGroup;
+			children = (
+				5A6100000000000000001F00 /* GuardTypes.swift */,
+				5A6100000000000000001F01 /* TextFold.swift */,
+				5A6100000000000000001F02 /* StrictJson.swift */,
+				5A6100000000000000001F03 /* GuardConfig.swift */,
+				5A6100000000000000001F04 /* CaptureGuard.swift */,
+				5A6100000000000000001F05 /* SenderRateLimiter.swift */,
+				5A6100000000000000001F06 /* GuardUserCipher.swift */,
+				5A6100000000000000001F07 /* GuardUserConfigStore.swift */,
+				5A6100000000000000001F08 /* GuardBaseSource.swift */,
+				5A6100000000000000001F09 /* GuardRuntime.swift */,
+			);
+			path = Guard;
+			sourceTree = "<group>";
+		};
+		5A6200000000000000000200 /* Capture */ = {
+			isa = PBXGroup;
+			children = (
+				5A620000000000000000000B /* SpoolClaim.swift */,
+				5A620000000000000000000C /* IosCaptureHost.swift */,
+				5A620000000000000000000D /* HeadlessIngestion.swift */,
+				5A620000000000000000000E /* IngestBackgroundRefresh.swift */,
+			);
+			path = Capture;
+			sourceTree = "<group>";
+		};
 		5A9A00000000000000000A03 /* Spike */ = {
 			isa = PBXGroup;
 			children = (
@@ -149,12 +247,21 @@
 				5A1650000000000000000A05 /* BackupExclusionTests.swift */,
 				5A0150000000000000000B0A /* SecretStoreTests.swift */,
 				5A1480000000000000000C06 /* TextNormalizationTests.swift */,
+				5A1600000000000000000A06 /* OcrTests.swift */,
 				5A1800000000000000000D07 /* TrustedClockTests.swift */,
 				5A1030000000000000000E06 /* DeviceSecurityTests.swift */,
 				5A1780000000000000000F06 /* AttestationTests.swift */,
 				5A1790000000000000000F08 /* SeatKeyTests.swift */,
 				5A1510000000000000000F09 /* ICloudBackupTests.swift */,
 				5A9A00000000000000000A05 /* IosIntentSpikeTests.swift */,
+				5A6100000000000000001F0A /* GuardGoldenTests.swift */,
+				5A6100000000000000001F0B /* GuardRuntimeTests.swift */,
+				5A620000000000000000000F /* SpoolStoreTests.swift */,
+				5A6200000000000000000010 /* SpoolKeychainTests.swift */,
+				5A6200000000000000000011 /* IosCaptureHostTests.swift */,
+				5A6200000000000000000013 /* HeadlessIngestionTests.swift */,
+				5A6200000000000000000014 /* SpoolTestSupport.swift */,
+				5A6200000000000000000012 /* CaptureStatusStoreTests.swift */,
 			);
 			path = RunnerTests;
 			sourceTree = "<group>";
@@ -163,6 +270,14 @@
 			isa = PBXGroup;
 			children = (
 				5A1650000000000000000A02 /* BackupExclusion.swift */,
+				5A6200000000000000000001 /* SpoolUlid.swift */,
+				5A6200000000000000000002 /* SpoolRecord.swift */,
+				5A6200000000000000000003 /* SharedGroups.swift */,
+				5A6200000000000000000004 /* SpoolKeychain.swift */,
+				5A6200000000000000000005 /* SpoolCipher.swift */,
+				5A6200000000000000000006 /* SpoolStore.swift */,
+				5A6200000000000000000007 /* CaptureStatusStore.swift */,
+				5A6200000000000000000008 /* SpoolLocation.swift */,
 			);
 			path = Shared;
 			sourceTree = "<group>";
@@ -213,6 +328,7 @@
 				74858FAD1ED2DC5600515810 /* Runner-Bridging-Header.h */,
 				5A0150000000000000000B0B /* Platform */,
 				5A9A00000000000000000A03 /* Spike */,
+				5A6100000000000000001C01 /* Guard */,
 				5A1800000000000000000D05 /* Clock */,
 				5A1800000000000000000D09 /* PrivacyInfo.xcprivacy */,
 				5A1510000000000000000F0A /* Runner.entitlements */,
@@ -227,6 +343,8 @@
 				5A0150000000000000000B0C /* Keys */,
 				5A1480000000000000000C02 /* TextNormalizationApi.g.swift */,
 				5A1480000000000000000C07 /* Text */,
+				5A1600000000000000000A02 /* OcrApi.g.swift */,
+				5A1600000000000000000A07 /* OCR */,
 				5A1800000000000000000D02 /* ClockApi.g.swift */,
 				5A1030000000000000000E02 /* DeviceApi.g.swift */,
 				5A1030000000000000000E04 /* DeviceSecurityHost.swift */,
@@ -235,6 +353,9 @@
 				5A1790000000000000000F02 /* SeatKeyApi.g.swift */,
 				5A1510000000000000000F02 /* IcloudApi.g.swift */,
 				5A1510000000000000000F07 /* ICloud */,
+				5A6200000000000000000009 /* CaptureApi.g.swift */,
+				5A620000000000000000000A /* IngestionApi.g.swift */,
+				5A6200000000000000000200 /* Capture */,
 			);
 			path = Platform;
 			sourceTree = "<group>";
@@ -249,6 +370,14 @@
 				5A1790000000000000000F06 /* SeatKeyHost.swift */,
 			);
 			path = Keys;
+			sourceTree = "<group>";
+		};
+		5A1600000000000000000A07 /* OCR */ = {
+			isa = PBXGroup;
+			children = (
+				5A1600000000000000000A04 /* OcrHost.swift */,
+			);
+			path = OCR;
 			sourceTree = "<group>";
 		};
 		5A1480000000000000000C07 /* Text */ = {
@@ -434,12 +563,21 @@
 				5A1650000000000000000A04 /* BackupExclusionTests.swift in Sources */,
 				5A0150000000000000000B09 /* SecretStoreTests.swift in Sources */,
 				5A1480000000000000000C05 /* TextNormalizationTests.swift in Sources */,
+				5A1600000000000000000A05 /* OcrTests.swift in Sources */,
 				5A1800000000000000000D06 /* TrustedClockTests.swift in Sources */,
 				5A1030000000000000000E05 /* DeviceSecurityTests.swift in Sources */,
 				5A1780000000000000000F05 /* AttestationTests.swift in Sources */,
 				5A1790000000000000000F07 /* SeatKeyTests.swift in Sources */,
 				5A1510000000000000000F08 /* ICloudBackupTests.swift in Sources */,
 				5A9A00000000000000000A04 /* IosIntentSpikeTests.swift in Sources */,
+				5A6100000000000000001B0A /* GuardGoldenTests.swift in Sources */,
+				5A6100000000000000001B0B /* GuardRuntimeTests.swift in Sources */,
+				5A620000000000000000010F /* SpoolStoreTests.swift in Sources */,
+				5A6200000000000000000110 /* SpoolKeychainTests.swift in Sources */,
+				5A6200000000000000000111 /* IosCaptureHostTests.swift in Sources */,
+				5A6200000000000000000113 /* HeadlessIngestionTests.swift in Sources */,
+				5A6200000000000000000114 /* SpoolTestSupport.swift in Sources */,
+				5A6200000000000000000112 /* CaptureStatusStoreTests.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -457,6 +595,8 @@
 				5A0150000000000000000B07 /* SecretStoreHost.swift in Sources */,
 				5A1480000000000000000C01 /* TextNormalizationApi.g.swift in Sources */,
 				5A1480000000000000000C03 /* TextNormalizationHost.swift in Sources */,
+				5A1600000000000000000A01 /* OcrApi.g.swift in Sources */,
+				5A1600000000000000000A03 /* OcrHost.swift in Sources */,
 				5A1800000000000000000D01 /* ClockApi.g.swift in Sources */,
 				5A1800000000000000000D03 /* TrustedClockHost.swift in Sources */,
 				5A1030000000000000000E01 /* DeviceApi.g.swift in Sources */,
@@ -470,6 +610,30 @@
 				5A1510000000000000000F03 /* ICloudBackupFiles.swift in Sources */,
 				5A1510000000000000000F05 /* ICloudBackupHost.swift in Sources */,
 				5A9A00000000000000000A01 /* IosIntentSpike.swift in Sources */,
+				5A6100000000000000001B00 /* GuardTypes.swift in Sources */,
+				5A6100000000000000001B01 /* TextFold.swift in Sources */,
+				5A6100000000000000001B02 /* StrictJson.swift in Sources */,
+				5A6100000000000000001B03 /* GuardConfig.swift in Sources */,
+				5A6100000000000000001B04 /* CaptureGuard.swift in Sources */,
+				5A6100000000000000001B05 /* SenderRateLimiter.swift in Sources */,
+				5A6100000000000000001B06 /* GuardUserCipher.swift in Sources */,
+				5A6100000000000000001B07 /* GuardUserConfigStore.swift in Sources */,
+				5A6100000000000000001B08 /* GuardBaseSource.swift in Sources */,
+				5A6100000000000000001B09 /* GuardRuntime.swift in Sources */,
+				5A6200000000000000000101 /* SpoolUlid.swift in Sources */,
+				5A6200000000000000000102 /* SpoolRecord.swift in Sources */,
+				5A6200000000000000000103 /* SharedGroups.swift in Sources */,
+				5A6200000000000000000104 /* SpoolKeychain.swift in Sources */,
+				5A6200000000000000000105 /* SpoolCipher.swift in Sources */,
+				5A6200000000000000000106 /* SpoolStore.swift in Sources */,
+				5A6200000000000000000107 /* CaptureStatusStore.swift in Sources */,
+				5A6200000000000000000108 /* SpoolLocation.swift in Sources */,
+				5A6200000000000000000109 /* CaptureApi.g.swift in Sources */,
+				5A620000000000000000010A /* IngestionApi.g.swift in Sources */,
+				5A620000000000000000010B /* SpoolClaim.swift in Sources */,
+				5A620000000000000000010C /* IosCaptureHost.swift in Sources */,
+				5A620000000000000000010D /* HeadlessIngestion.swift in Sources */,
+				5A620000000000000000010E /* IngestBackgroundRefresh.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
