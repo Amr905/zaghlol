@@ -219,7 +219,16 @@ class PrivacyScreen extends ConsumerWidget {
         ),
       ),
     );
-    await wipe();
+    try {
+      await wipe();
+    } on Object {
+      // T-166: the wipe did not finish; the marker stays and the next launch
+      // completes it. Close the progress dialog and say so.
+      if (!context.mounted) return;
+      Navigator.of(context).pop();
+      ScaffoldMessenger.of(context)
+          .showSnackBar(SnackBar(content: Text(t.privacyDeleteFailed)));
+    }
   }
 }
 
@@ -366,6 +375,8 @@ class _DeleteDialogState extends State<_DeleteDialog> {
             Text(t.privacyDeleteBody),
             const SizedBox(height: ZSpacing.sm),
             Text(widget.lastBackupText),
+            const SizedBox(height: ZSpacing.sm),
+            Text(t.privacyDeleteBackupsKept),
             if (widget.seatWarningText case final seat?) ...[
               const SizedBox(height: ZSpacing.sm),
               Text(seat, key: const ValueKey('privacyDeleteSeatWarning')),

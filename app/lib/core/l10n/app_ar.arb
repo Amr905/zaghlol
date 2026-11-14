@@ -9119,6 +9119,18 @@
   "@privacyDeleteServerCopy": {
     "description": "N · shown if the server delete failed; the local wipe is never blocked (NFR-PRIV-06)"
   },
+  "widgetOpenZaghlol": "افتح زغلول",
+  "@widgetOpenZaghlol": {
+    "description": "W · home-screen widget line when there is no data yet"
+  },
+  "privacyDeleteBackupsKept": "النسخ الاحتياطية اللي على Google Drive أو iCloud هتفضل زي ما هي. لو عايز تمسحها، امسحها من هناك.",
+  "@privacyDeleteBackupsKept": {
+    "description": "N · delete-everything confirm: backups in the user's own cloud are not touched"
+  },
+  "privacyDeleteFailed": "مقدرناش نمسح كل حاجة. افتح الأبلكيشن تاني وهنكمّل.",
+  "@privacyDeleteFailed": {
+    "description": "N · shown when the local wipe did not finish; the next launch resumes it"
+  },
   "settingsPrefsTitle": "التفضيلات",
   "@settingsPrefsTitle": {
     "description": "T"

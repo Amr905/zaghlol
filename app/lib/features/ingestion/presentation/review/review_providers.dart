@@ -14,6 +14,7 @@ import '../../../../core/db/daos/review_items_dao.dart';
 import '../../../budget/application/budget_providers.dart';
 import '../../../recurring/data/recurring_repository.dart';
 import '../../../transactions/application/transfer_pairing.dart';
+import '../../../transfers/application/suggestion_providers.dart';
 import '../../../transactions/data/transactions_providers.dart';
 import '../../../transactions/domain/transaction.dart';
 import '../../../transactions/domain/transaction_repository.dart';
@@ -62,15 +63,50 @@ final class _LiveActions implements ReviewActions {
     _refresh();
   }
 
+  /// The open pair suggestion (T-092) behind [itemId], or null for any
+  /// other kind of item.
+  Future<ReviewItemRow?> _pairItem(String itemId) async {
+    final db = await _ref.read(appDatabaseProvider.future);
+    final row = await ReviewItemsDao(db).byId(itemId);
+    if (row == null || row.resolvedAt != null) return null;
+    return row.kind == ReviewKind.reimbursementSuggestion ||
+            row.kind == ReviewKind.fxPairSuggestion
+        ? row
+        : null;
+  }
+
   @override
   Future<void> dismiss(String itemId) async {
-    await (await _reviews).dismiss(itemId);
+    final pair = await _pairItem(itemId);
+    if (pair != null) {
+      // Remembered: the candidates are not suggested again.
+      await (await _ref.read(pairSuggestionsProvider.future)).dismiss(itemId);
+    } else {
+      await (await _reviews).dismiss(itemId);
+    }
     _refresh();
   }
 
   @override
   Future<void> accept(String itemId) async {
-    await (await _reviews).acceptSuggestion(itemId);
+    final pair = await _pairItem(itemId);
+    if (pair == null) {
+      await (await _reviews).acceptSuggestion(itemId);
+    } else {
+      // The best candidate is first; the card names no other choice.
+      final c = reviewPayloadOf(pair)?['candidates'];
+      final candidate = c is List && c.isNotEmpty ? c.first : null;
+      if (candidate is! String) {
+        await (await _ref.read(pairSuggestionsProvider.future)).dismiss(itemId);
+      } else {
+        final s = await _ref.read(pairSuggestionsProvider.future);
+        if (pair.kind == ReviewKind.reimbursementSuggestion) {
+          await s.acceptReimbursement(itemId, candidate);
+        } else {
+          await s.acceptFxPair(itemId, candidate);
+        }
+      }
+    }
     _refresh();
   }
 

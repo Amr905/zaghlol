@@ -98,6 +98,14 @@ abstract final class Settings {
     byDefault: true,
   );
 
+  /// T-100 wiring: when the weekly summary last ran (epoch ms UTC); null:
+  /// never. The summary runs on app start/resume when 7 days have passed.
+  static final notifWeeklyLastRun = SettingKey.optionalInteger(
+    'notif.weekly_summary_last_run',
+    min: 0,
+    max: 999999999999999,
+  );
+
   // FR-NTF-02, A-27: 23:00–08:00, as minutes after local midnight.
   static final quietHoursEnabled = SettingKey.boolean(
     'quiet_hours.enabled',

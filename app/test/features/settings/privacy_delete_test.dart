@@ -23,6 +23,7 @@ Future<AppLocalizations> _openDialog(
   Locale locale = const Locale('en'),
   DeleteEverythingWarning? warning,
   void Function()? onWipe,
+  Future<void> Function()? wipe,
 }) async {
   await tester.pumpWidget(
     h.app(
@@ -31,7 +32,9 @@ Future<AppLocalizations> _openDialog(
       scale: 1.3,
       overrides: [
         deleteSeatWarningProvider.overrideWith((ref) async => warning),
-        wipeEverythingProvider.overrideWithValue(() async => onWipe?.call()),
+        wipeEverythingProvider.overrideWithValue(
+          wipe ?? () async => onWipe?.call(),
+        ),
       ],
     ),
   );
@@ -175,4 +178,42 @@ void main() {
     await settle(tester);
     expect(wiped, 0);
   });
+
+  for (final locale in const [Locale('ar'), Locale('en')]) {
+    testWidgets(
+      'confirm says the cloud backups stay (${locale.languageCode})',
+      (tester) async {
+        final h = SettingsHarness();
+        addTearDown(h.db.close);
+        final t = await _openDialog(
+          tester,
+          h,
+          platform: 'android',
+          locale: locale,
+        );
+        expect(find.text(t.privacyDeleteBackupsKept), findsOneWidget);
+      },
+    );
+
+    testWidgets('a wipe that fails closes the progress and says so '
+        '(${locale.languageCode})', (tester) async {
+      final h = SettingsHarness();
+      addTearDown(h.db.close);
+      final t = await _openDialog(
+        tester,
+        h,
+        platform: 'android',
+        locale: locale,
+        wipe: () async => throw StateError('wipe'),
+      );
+      await tester.enterText(
+        find.byType(TextField),
+        locale.languageCode == 'ar' ? 'احذف' : 'DELETE',
+      );
+      await tester.tap(_inDialog(t.privacyDeleteConfirm));
+      await settle(tester);
+      expect(find.text(t.privacyDeleteWorking), findsNothing);
+      expect(find.text(t.privacyDeleteFailed), findsOneWidget);
+    });
+  }
 }

@@ -15,6 +15,7 @@ import '../../../core/db/daos/merchant_rules_dao.dart';
 import '../../accounts/data/drift_accounts_repository.dart';
 import '../../categorization/data/categorizer_ports.dart';
 import '../../categorization/data/rules_repository.dart';
+import '../../transfers/application/suggestion_hook.dart';
 import '../application/ingest_raw_messages.dart';
 import '../application/ingest_store_port.dart';
 import '../domain/ingest_ports.dart';
@@ -62,7 +63,7 @@ IngestRawMessages buildIngestRawMessages(
   clock: clock,
   zone: zone,
   cycleKeyOf: cycleKeyOf,
-  hooks: hooks,
+  hooks: [ReimbursementSuggestionHook(db), ...hooks],
   diag: diag,
   events: events,
 );

@@ -9631,6 +9631,24 @@ abstract class AppLocalizations {
   /// **'النسخة اللي على السيرفر هتنتهي لوحدها.'**
   String get privacyDeleteServerCopy;
 
+  /// W · home-screen widget line when there is no data yet
+  ///
+  /// In ar, this message translates to:
+  /// **'افتح زغلول'**
+  String get widgetOpenZaghlol;
+
+  /// N · delete-everything confirm: backups in the user's own cloud are not touched
+  ///
+  /// In ar, this message translates to:
+  /// **'النسخ الاحتياطية اللي على Google Drive أو iCloud هتفضل زي ما هي. لو عايز تمسحها، امسحها من هناك.'**
+  String get privacyDeleteBackupsKept;
+
+  /// N · shown when the local wipe did not finish; the next launch resumes it
+  ///
+  /// In ar, this message translates to:
+  /// **'مقدرناش نمسح كل حاجة. افتح الأبلكيشن تاني وهنكمّل.'**
+  String get privacyDeleteFailed;
+
   /// T
   ///
   /// In ar, this message translates to:
