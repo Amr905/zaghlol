@@ -255,6 +255,41 @@ class ZColors extends ThemeExtension<ZColors> {
   );
 
   @override
-  ZColors lerp(ThemeExtension<ZColors>? other, double t) =>
-      other is ZColors ? (t < 0.5 ? this : other) : this;
+  ZColors lerp(ThemeExtension<ZColors>? other, double t) {
+    if (other is! ZColors) return this;
+    Color l(Color a, Color b) => Color.lerp(a, b, t)!;
+    return ZColors(
+      brightness: t < 0.5 ? brightness : other.brightness,
+      bg: l(bg, other.bg),
+      surface: l(surface, other.surface),
+      surfaceAlt: l(surfaceAlt, other.surfaceAlt),
+      outline: l(outline, other.outline),
+      text: l(text, other.text),
+      textMuted: l(textMuted, other.textMuted),
+      primary: l(primary, other.primary),
+      onPrimary: l(onPrimary, other.onPrimary),
+      primaryContainer: l(primaryContainer, other.primaryContainer),
+      onPrimaryContainer: l(onPrimaryContainer, other.onPrimaryContainer),
+      accent: l(accent, other.accent),
+      accentLight: l(accentLight, other.accentLight),
+      accentDark: l(accentDark, other.accentDark),
+      onAccent: l(onAccent, other.onAccent),
+      incomeText: l(incomeText, other.incomeText),
+      incomeBg: l(incomeBg, other.incomeBg),
+      zaghlolBg: l(zaghlolBg, other.zaghlolBg),
+      warningText: l(warningText, other.warningText),
+      warningBg: l(warningBg, other.warningBg),
+      dangerText: l(dangerText, other.dangerText),
+      dangerBg: l(dangerBg, other.dangerBg),
+      heroNumber: l(heroNumber, other.heroNumber),
+      shadow: l(shadow, other.shadow),
+      heroFrom: l(heroFrom, other.heroFrom),
+      heroTo: l(heroTo, other.heroTo),
+      progressFrom: l(progressFrom, other.progressFrom),
+      progressTo: l(progressTo, other.progressTo),
+      tintViolet: l(tintViolet, other.tintViolet),
+      tintBlue: l(tintBlue, other.tintBlue),
+      tintTeal: l(tintTeal, other.tintTeal),
+    );
+  }
 }

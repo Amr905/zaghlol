@@ -13,6 +13,16 @@ String _location(dynamic router) =>
     router.routerDelegate.currentConfiguration.uri.toString();
 
 void main() {
+  testWidgets('FU-125: an unknown location falls back to the Home root', (
+    tester,
+  ) async {
+    final router = await pumpShell(tester);
+    router.go('/no/such/place?secret=1');
+    await tester.pumpAndSettle();
+    expect(tester.takeException(), isNull);
+    expect(find.byKey(const ValueKey('counter-home')), findsOneWidget);
+  });
+
   group('platform variant', () {
     testWidgets('Android: M3 NavigationBar and FAB at bottom-end (en)', (
       tester,
