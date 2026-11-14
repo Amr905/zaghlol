@@ -28,6 +28,8 @@ import '../features/insights/presentation/charts/charts_providers.dart';
 import '../features/insights/presentation/insights_screen.dart';
 import '../features/onboarding/application/setup_steps.dart';
 import '../features/onboarding/presentation/android_setup.dart';
+import '../features/onboarding/presentation/ios_setup.dart'
+    show kSetupStepIosShortcuts;
 import '../features/settings/presentation/settings_main_screen.dart';
 import '../features/settings/presentation/settings_ports.dart';
 import '../features/transactions/presentation/edit/transaction_edit_screen.dart';
@@ -297,7 +299,20 @@ Future<void> openRestore(
 /// "Finish setup" (Home card, Settings row): the Android permission steps
 /// again. iOS has no such screen yet.
 Future<void> openFinishSetup(BuildContext context) async {
-  if (_isIos(context)) return;
+  if (_isIos(context)) {
+    await pushScreen<void>(
+      context,
+      (ctx) => iosSetupScreen(
+        ctx,
+        onDone: () => Navigator.of(ctx).maybePop(),
+        onSkipped: (slug) {
+          unawaited(recordSetupSkip(_container(ctx), slug));
+          Navigator.of(ctx).maybePop();
+        },
+      ),
+    );
+    return;
+  }
   await pushScreen<void>(
     context,
     (ctx) => _screens(ctx).androidSetup(
@@ -310,12 +325,27 @@ Future<void> openFinishSetup(BuildContext context) async {
   );
 }
 
+/// S-03 with its first-expense and online-bank-help exits wired. Voice entry
+/// (S-31) is not built yet, so "Say it" opens the typed editor (S-13).
+Widget iosSetupScreen(
+  BuildContext context, {
+  required VoidCallback onDone,
+  required void Function(String slug) onSkipped,
+}) => _screens(context).iosSetup(
+  onDone: onDone,
+  onSkipped: onSkipped,
+  onSay: () => unawaited(showTransactionEditor(context)),
+  onType: () => unawaited(showTransactionEditor(context)),
+  onOnlineBanks: () => unawaited(openCaptureSettings(context)),
+);
+
 /// FR-ONB-11: `android_sms` / `android_notif` -> `skip_sms` /
 /// `skip_notifications` in `setup_progress`.
 Future<void> recordSetupSkip(ProviderContainer c, String slug) async {
   final step = switch (slug) {
     kSetupStepSms => 'sms',
     kSetupStepNotifications => 'notifications',
+    kSetupStepIosShortcuts => 'shortcuts',
     _ => null,
   };
   if (step == null) return;
