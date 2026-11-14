@@ -38,6 +38,9 @@ class _FakeHost implements NotificationsHostApi {
   Future<void> cancelAll() async => calls.add('cancelAll');
 
   @override
+  Future<void> openSystemSettings() async => calls.add('openSystemSettings');
+
+  @override
   Future<NotifPermissionMsg> permissionStatus() async => status;
 
   @override

@@ -94,6 +94,13 @@ final class NotificationsHost: NotificationsHostApi {
     return r
   }
 
+  func openSystemSettings() throws {
+    DispatchQueue.main.async {
+      guard let url = URL(string: UIApplication.openSettingsURLString) else { return }
+      UIApplication.shared.open(url)
+    }
+  }
+
   private func request(_ n: NotifMsg, trigger: UNNotificationTrigger?) -> UNNotificationRequest {
     let content = UNMutableNotificationContent()
     content.title = n.title

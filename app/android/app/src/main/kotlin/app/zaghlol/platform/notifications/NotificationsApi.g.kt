@@ -375,6 +375,11 @@ interface NotificationsHostApi {
   fun cancelAll()
   /** The route of the notification that launched the app, once. */
   fun takeLaunchRoute(): String?
+  /**
+   * Opens the system notification settings of this app (Android: the app's
+   * notification page; iOS: the app's page in Settings).
+   */
+  fun openSystemSettings()
 
   companion object {
     /** The codec used by NotificationsHostApi. */
@@ -498,6 +503,22 @@ interface NotificationsHostApi {
           channel.setMessageHandler { _, reply ->
             val wrapped: List<Any?> = try {
               listOf(api.takeLaunchRoute())
+            } catch (exception: Throwable) {
+              NotificationsApiPigeonUtils.wrapError(exception)
+            }
+            reply.reply(wrapped)
+          }
+        } else {
+          channel.setMessageHandler(null)
+        }
+      }
+      run {
+        val channel = BasicMessageChannel<Any?>(binaryMessenger, "dev.flutter.pigeon.zaghlol.NotificationsHostApi.openSystemSettings$separatedMessageChannelSuffix", codec)
+        if (api != null) {
+          channel.setMessageHandler { _, reply ->
+            val wrapped: List<Any?> = try {
+              api.openSystemSettings()
+              listOf(null)
             } catch (exception: Throwable) {
               NotificationsApiPigeonUtils.wrapError(exception)
             }

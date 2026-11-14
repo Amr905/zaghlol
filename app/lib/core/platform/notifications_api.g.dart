@@ -420,6 +420,26 @@ class NotificationsHostApi {
     );
     return pigeonVar_replyValue as String?;
   }
+
+  /// Opens the system notification settings of this app (Android: the app's
+  /// notification page; iOS: the app's page in Settings).
+  Future<void> openSystemSettings() async {
+    final pigeonVar_channelName =
+        'dev.flutter.pigeon.zaghlol.NotificationsHostApi.openSystemSettings$pigeonVar_messageChannelSuffix';
+    final pigeonVar_channel = BasicMessageChannel<Object?>(
+      pigeonVar_channelName,
+      pigeonChannelCodec,
+      binaryMessenger: pigeonVar_binaryMessenger,
+    );
+    final Future<Object?> pigeonVar_sendFuture = pigeonVar_channel.send(null);
+    final pigeonVar_replyList = await pigeonVar_sendFuture as List<Object?>?;
+
+    _extractReplyValueOrThrow(
+      pigeonVar_replyList,
+      pigeonVar_channelName,
+      isNullValid: true,
+    );
+  }
 }
 
 abstract class NotificationsEventsApi {

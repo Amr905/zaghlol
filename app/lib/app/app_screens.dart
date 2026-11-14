@@ -7,6 +7,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:zaghlol_domain/zaghlol_domain.dart' show Cycle;
 
 import '../features/account/presentation/account_screen.dart';
+import '../features/notifications/presentation/notifications_settings_screen.dart';
 import '../features/accounts/domain/account.dart';
 import '../features/accounts/presentation/card_detail/card_navigation.dart';
 import '../features/accounts/presentation/edit_card/add_card_flow.dart';
@@ -55,6 +56,7 @@ final class AppScreens {
     this.backup = _backup,
     this.restore = _restore,
     this.captureSettings = _captureSettings,
+    this.notificationsSettings = _notificationsSettings,
     this.templateBuilder = _templateBuilder,
     this.categories = _categories,
     this.privacy = _privacy,
@@ -122,6 +124,7 @@ final class AppScreens {
     required VoidCallback onOpenTemplates,
   })
   captureSettings;
+  final Future<void> Function(BuildContext context) notificationsSettings;
   final Future<void> Function(BuildContext context) templateBuilder;
   final Future<void> Function(BuildContext context) categories;
   final Future<void> Function(BuildContext context) privacy;
@@ -260,6 +263,9 @@ Future<void> _restore(
     iCloudAvailable: iCloud,
   ),
 );
+
+Future<void> _notificationsSettings(BuildContext c) =>
+    pushScreen<void>(c, (_) => const NotificationsSettingsScreen());
 
 Future<void> _captureSettings(
   BuildContext c, {
