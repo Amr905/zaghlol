@@ -167,6 +167,18 @@ final class GuardRuntime {
     return snap
   }
 
+  /// T-166: forgets every cached rule and the rate limiter ("Delete
+  /// everything" removed the user part and its key); the next message loads
+  /// again.
+  func reset() {
+    lock.lock()
+    snapshot = nil
+    validBase = nil
+    baseOnly = nil
+    limiter = nil
+    lock.unlock()
+  }
+
   /// The base-only rules of `base`, parsed once per valid base.
   private func baseOnlyOf(_ base: Data) -> GuardConfigLoad {
     if let cached = baseOnly, validBase == base { return cached }

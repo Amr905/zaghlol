@@ -5,6 +5,7 @@
 
 import 'dart:io';
 
+import 'package:flutter/foundation.dart' show visibleForTesting;
 import 'package:flutter/services.dart' show PlatformException;
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_riverpod/misc.dart' show Override;
@@ -142,12 +143,20 @@ final List<Override> deleteEverythingWiringOverrides = [
 
 /// Launch check: when a wipe did not finish, runs its local steps again
 /// before anything opens the database. Uses its own short-lived container
-/// over [dbDirectory].
-Future<void> resumePendingWipe(Directory dbDirectory) async {
+/// over [dbDirectory] ([overrides]: tests only). It deletes only the parts
+/// the marker still lists, never data created after the wipe, and gives up
+/// after [DeleteEverything.maxResumes] launches.
+Future<void> resumePendingWipe(
+  Directory dbDirectory, {
+  @visibleForTesting List<Override> overrides = const [],
+}) async {
   final marker = WipeMarker.inDirectory(dbDirectory.parent);
   if (!await marker.exists()) return;
   final c = ProviderContainer(
-    overrides: [dbDirectoryProvider.overrideWithValue(dbDirectory)],
+    overrides: [
+      dbDirectoryProvider.overrideWithValue(dbDirectory),
+      ...overrides,
+    ],
   );
   try {
     await c.read(deleteEverythingProvider).resume();

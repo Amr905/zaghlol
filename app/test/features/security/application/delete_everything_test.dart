@@ -257,6 +257,95 @@ void main() {
     expect(w.store.stored, isNull);
   });
 
+  group('resume never repeats a finished part (batch-20a T-166)', () {
+    test('native always fails: a database and key created after the wipe '
+        'survive resumePendingWipe (negative proof)', () async {
+      final w = await _World.open();
+      addTearDown(w.dispose);
+      await w.seedSecrets();
+      w.native.failWith = Exception('IO_ERROR');
+
+      final first = await w.wipe().run();
+      expect(first.failed, [WipeSteps.native]);
+      expect((await w.marker.read())!.pending, {WipeSteps.native});
+
+      // The app goes on: a new database and key slot, with user data.
+      final fresh = openedDb(await w.world.open(seed: 62));
+      await SecureStateDao(fresh).write('support_notice', _b('2'), at: 2);
+      await fresh.close();
+      final key = Uint8List.fromList(w.store.stored!);
+
+      await resumePendingWipe(
+        w.world.dbDir,
+        overrides: [deleteEverythingProvider.overrideWithValue(w.wipe())],
+      );
+
+      expect(w.native.calls, 1, reason: 'no native wipe over newer data');
+      expect(w.store.stored, key);
+      expect(await w.world.mainFile.exists(), isTrue);
+      expect(await w.marker.exists(), isFalse);
+      final again = openedDb(await w.world.open(seed: 63));
+      addTearDown(again.close);
+      expect(await SecureStateDao(again).read('support_notice'), _b('2'));
+    });
+
+    test(
+      'a newer key alone (database files not created yet) is kept',
+      () async {
+        final w = await _World.open();
+        addTearDown(w.dispose);
+        w.native.failWith = Exception('IO_ERROR');
+        await w.wipe().run();
+        final key = Uint8List.fromList(List.filled(32, 7));
+        w.store.stored = key;
+
+        final r = await w.wipe().resume();
+
+        expect(r.complete, isTrue);
+        expect(w.store.stored, key);
+        expect(w.native.calls, 1);
+        expect(await w.marker.exists(), isFalse);
+      },
+    );
+
+    test('a part failing every time is retried maxResumes times, then the '
+        'marker is cleared', () async {
+      final w = await _World.open();
+      addTearDown(w.dispose);
+      w.native.failWith = Exception('IO_ERROR');
+      await w.wipe().run();
+
+      for (var i = 1; i <= DeleteEverything.maxResumes; i++) {
+        final r = await w.wipe().resume();
+        expect(r.failed, contains(WipeSteps.native));
+        expect(
+          await w.marker.exists(),
+          i < DeleteEverything.maxResumes,
+          reason: 'resume $i',
+        );
+      }
+      expect(w.native.calls, 1 + DeleteEverything.maxResumes);
+
+      await resumePendingWipe(
+        w.world.dbDir,
+        overrides: [deleteEverythingProvider.overrideWithValue(w.wipe())],
+      );
+      expect(w.native.calls, 1 + DeleteEverything.maxResumes);
+    });
+
+    test('an empty pre-fix marker resumes every part', () async {
+      final w = await _World.open();
+      addTearDown(w.dispose);
+      await w.db.close();
+      await w.marker.file.writeAsBytes(const []);
+      expect((await w.marker.read())!.pending, WipeSteps.parts.toSet());
+      final r = await w.wipe().resume();
+      expect(r.complete, isTrue);
+      expect(w.store.stored, isNull);
+      expect(await w.world.files.anyExists(), isFalse);
+    });
+  });
+
   group('deleteInstallBestEffort', () {
     final creds = InstallCredentials(
       installId: _installId,

@@ -281,6 +281,10 @@ enum LocalDataWiper {
     let roots =
       ZaghlolDirectories.appContainerDirectories() + ZaghlolDirectories.appGroupDirectories()
     ok = wipeFiles(roots: roots) && ok
+    // The spool key and the Guard rules cached in memory went with the
+    // Keychain and the App Group: drop them so nothing reuses them.
+    SpoolRuntime.shared?.cipher.reset()
+    CaptureGuardRuntime.shared?.reset()
     if !ok { throw Incomplete() }
   }
 
