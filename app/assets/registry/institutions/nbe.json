@@ -171,13 +171,36 @@
       "direction": "expense",
       "baseConfidence": 0.9,
       "source": "synthetic-unverified",
-      "pattern": "purchase of (?<cur>usd|eur|gbp) (?<amount>[\\d,.]+) at (?<merchant>.+?) with nbe (?:visa|mastercard) \\*{1,4}(?<last4>\\d{4})(?: \\(egp [\\d,.]+\\))?(?:\\. |\\.?$)(?:(?:avl|available)\\.? limit\\D{0,8}(?<available>[\\d,.]+)|(?:(?:avl|available) )?bal(?:ance)?\\D{0,16}(?<balance>[\\d,.]+))?",
+      "pattern": "purchase of (?<cur>usd|eur|gbp) (?<amount>[\\d,.]+) at (?<merchant>.+?) with nbe (?:visa|mastercard) \\*{1,4}(?<last4>\\d{4})(?:\\. |\\.?$)(?:(?:avl|available)\\.? limit\\D{0,8}(?<available>[\\d,.]+)|(?:(?:avl|available) )?bal(?:ance)?\\D{0,16}(?<balance>[\\d,.]+))?",
       "currencyMap": {
         "دولار": "USD",
         "يورو": "EUR",
         "usd": "USD",
         "eur": "EUR",
         "gbp": "GBP"
+      }
+    },
+    {
+      "id": "nbe.card_purchase_fx_charged.en",
+      "version": 1,
+      "lang": "en",
+      "channel": [
+        "sms"
+      ],
+      "event": "card_purchase_fx",
+      "direction": "expense",
+      "baseConfidence": 0.9,
+      "source": "synthetic-unverified",
+      "pattern": "purchase of (?<ocur>usd|eur|gbp) (?<oamount>[\\d,.]+) at (?<merchant>.+?) with nbe (?:visa|mastercard) \\*{1,4}(?<last4>\\d{4}) \\((?<cur>egp) (?<amount>[\\d,.]+)\\)(?:\\. |\\.?$)(?:(?:avl|available)\\.? limit\\D{0,8}(?<available>[\\d,.]+)|(?:(?:avl|available) )?bal(?:ance)?\\D{0,16}(?<balance>[\\d,.]+))?",
+      "currencyMap": {
+        "دولار": "USD",
+        "يورو": "EUR",
+        "usd": "USD",
+        "eur": "EUR",
+        "gbp": "GBP",
+        "جم": "EGP",
+        "جنيه": "EGP",
+        "egp": "EGP"
       }
     },
     {
@@ -191,13 +214,36 @@
       "direction": "expense",
       "baseConfidence": 0.9,
       "source": "synthetic-unverified",
-      "pattern": "شراء (?:بمبلغ )?(?<amount>[\\d,.]+) (?<cur>usd|eur|gbp|دولار|يورو) لدي (?<merchant>.+?) ببطاقه (?:فيزا|ماستركارد) \\*{1,4}(?<last4>\\d{4})(?: \\([\\d,.]+ (?:جم|جنيه)\\))?(?:\\. |\\.?$)(?:(?:الرصيد|رصيدك)\\D{0,12}(?<balance>[\\d,.]+)|الحد(?: المتاح)?\\D{0,12}(?<available>[\\d,.]+))?",
+      "pattern": "شراء (?:بمبلغ )?(?<amount>[\\d,.]+) (?<cur>usd|eur|gbp|دولار|يورو) لدي (?<merchant>.+?) ببطاقه (?:فيزا|ماستركارد) \\*{1,4}(?<last4>\\d{4})(?:\\. |\\.?$)(?:(?:الرصيد|رصيدك)\\D{0,12}(?<balance>[\\d,.]+)|الحد(?: المتاح)?\\D{0,12}(?<available>[\\d,.]+))?",
       "currencyMap": {
         "دولار": "USD",
         "يورو": "EUR",
         "usd": "USD",
         "eur": "EUR",
         "gbp": "GBP"
+      }
+    },
+    {
+      "id": "nbe.card_purchase_fx_charged.ar",
+      "version": 1,
+      "lang": "ar",
+      "channel": [
+        "sms"
+      ],
+      "event": "card_purchase_fx",
+      "direction": "expense",
+      "baseConfidence": 0.9,
+      "source": "synthetic-unverified",
+      "pattern": "شراء (?:بمبلغ )?(?<oamount>[\\d,.]+) (?<ocur>usd|eur|gbp|دولار|يورو) لدي (?<merchant>.+?) ببطاقه (?:فيزا|ماستركارد) \\*{1,4}(?<last4>\\d{4}) \\((?<amount>[\\d,.]+) (?<cur>جم|جنيه)\\)(?:\\. |\\.?$)(?:(?:الرصيد|رصيدك)\\D{0,12}(?<balance>[\\d,.]+)|الحد(?: المتاح)?\\D{0,12}(?<available>[\\d,.]+))?",
+      "currencyMap": {
+        "دولار": "USD",
+        "يورو": "EUR",
+        "usd": "USD",
+        "eur": "EUR",
+        "gbp": "GBP",
+        "جم": "EGP",
+        "جنيه": "EGP",
+        "egp": "EGP"
       }
     }
   ]
