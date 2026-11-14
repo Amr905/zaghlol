@@ -626,6 +626,18 @@ protocol AndroidCaptureHostApi {
   /// (IngestBatchResult.kept), called after the ack of the rest. Only ids this
   /// engine drained; moved to spool/held/ (platform-channels.md 1.3). IO_ERROR.
   func holdSpool(ids: [String]) throws
+  /// FU-194: the restore's drain hold (platform-channels.md 1.4), UI engine
+  /// only (the headless host answers NOT_AVAILABLE). Persists a hold for
+  /// [ttlMs] (native caps it at 10 min; call again to renew); while it holds
+  /// no headless engine is started or reused, capture still writes to the
+  /// spool. Returns true while a headless engine is still active (it was
+  /// asked to shut down; poll isHeadlessDrainActive). IO_ERROR: no hold set.
+  func holdDrain(ttlMs: Int64) throws -> Bool
+  /// FU-194: true while a headless engine exists (it may hold the database open).
+  func isHeadlessDrainActive() throws -> Bool
+  /// FU-194: clears the hold (idempotent). IO_ERROR when the file stays (the
+  /// hold then still expires on its own).
+  func releaseDrainHold() throws
 }
 
 /// Generated setup class from Pigeon to handle messages through the `binaryMessenger`.
@@ -847,6 +859,62 @@ class AndroidCaptureHostApiSetup {
     } else {
       holdSpoolChannel.setMessageHandler(nil)
     }
+    /// FU-194: the restore's drain hold (platform-channels.md 1.4), UI engine
+    /// only (the headless host answers NOT_AVAILABLE). Persists a hold for
+    /// [ttlMs] (native caps it at 10 min; call again to renew); while it holds
+    /// no headless engine is started or reused, capture still writes to the
+    /// spool. Returns true while a headless engine is still active (it was
+    /// asked to shut down; poll isHeadlessDrainActive). IO_ERROR: no hold set.
+    let holdDrainChannel = taskQueue == nil
+      ? FlutterBasicMessageChannel(name: "dev.flutter.pigeon.zaghlol.AndroidCaptureHostApi.holdDrain\(channelSuffix)", binaryMessenger: binaryMessenger, codec: codec)
+      : FlutterBasicMessageChannel(name: "dev.flutter.pigeon.zaghlol.AndroidCaptureHostApi.holdDrain\(channelSuffix)", binaryMessenger: binaryMessenger, codec: codec, taskQueue: taskQueue)
+    if let api = api {
+      holdDrainChannel.setMessageHandler { message, reply in
+        let args = message as! [Any?]
+        let ttlMsArg = args[0] as! Int64
+        do {
+          let result = try api.holdDrain(ttlMs: ttlMsArg)
+          reply(wrapResult(result))
+        } catch {
+          reply(wrapError(error))
+        }
+      }
+    } else {
+      holdDrainChannel.setMessageHandler(nil)
+    }
+    /// FU-194: true while a headless engine exists (it may hold the database open).
+    let isHeadlessDrainActiveChannel = taskQueue == nil
+      ? FlutterBasicMessageChannel(name: "dev.flutter.pigeon.zaghlol.AndroidCaptureHostApi.isHeadlessDrainActive\(channelSuffix)", binaryMessenger: binaryMessenger, codec: codec)
+      : FlutterBasicMessageChannel(name: "dev.flutter.pigeon.zaghlol.AndroidCaptureHostApi.isHeadlessDrainActive\(channelSuffix)", binaryMessenger: binaryMessenger, codec: codec, taskQueue: taskQueue)
+    if let api = api {
+      isHeadlessDrainActiveChannel.setMessageHandler { _, reply in
+        do {
+          let result = try api.isHeadlessDrainActive()
+          reply(wrapResult(result))
+        } catch {
+          reply(wrapError(error))
+        }
+      }
+    } else {
+      isHeadlessDrainActiveChannel.setMessageHandler(nil)
+    }
+    /// FU-194: clears the hold (idempotent). IO_ERROR when the file stays (the
+    /// hold then still expires on its own).
+    let releaseDrainHoldChannel = taskQueue == nil
+      ? FlutterBasicMessageChannel(name: "dev.flutter.pigeon.zaghlol.AndroidCaptureHostApi.releaseDrainHold\(channelSuffix)", binaryMessenger: binaryMessenger, codec: codec)
+      : FlutterBasicMessageChannel(name: "dev.flutter.pigeon.zaghlol.AndroidCaptureHostApi.releaseDrainHold\(channelSuffix)", binaryMessenger: binaryMessenger, codec: codec, taskQueue: taskQueue)
+    if let api = api {
+      releaseDrainHoldChannel.setMessageHandler { _, reply in
+        do {
+          try api.releaseDrainHold()
+          reply(wrapResult(nil))
+        } catch {
+          reply(wrapError(error))
+        }
+      }
+    } else {
+      releaseDrainHoldChannel.setMessageHandler(nil)
+    }
   }
 }
 /// iOS host (T-062): the encrypted spool in the App Group container and the
@@ -870,6 +938,14 @@ protocol IosCaptureHostApi {
   /// registered natively at launch). A best-effort nudge: the system decides
   /// when it runs; the foreground drain is the guarantee.
   func registerBackgroundRefresh() throws
+  /// FU-194: same as AndroidCaptureHostApi.holdDrain. While held, the
+  /// headless run (App Intent, BGAppRefreshTask) starts no engine; the spool
+  /// write before it still happens. IO_ERROR: no hold set.
+  func holdDrain(ttlMs: Int64) throws -> Bool
+  /// FU-194: true while a headless run is in progress.
+  func isHeadlessDrainActive() throws -> Bool
+  /// FU-194: clears the hold (idempotent).
+  func releaseDrainHold() throws
 }
 
 /// Generated setup class from Pigeon to handle messages through the `binaryMessenger`.
@@ -985,6 +1061,58 @@ class IosCaptureHostApiSetup {
       }
     } else {
       registerBackgroundRefreshChannel.setMessageHandler(nil)
+    }
+    /// FU-194: same as AndroidCaptureHostApi.holdDrain. While held, the
+    /// headless run (App Intent, BGAppRefreshTask) starts no engine; the spool
+    /// write before it still happens. IO_ERROR: no hold set.
+    let holdDrainChannel = taskQueue == nil
+      ? FlutterBasicMessageChannel(name: "dev.flutter.pigeon.zaghlol.IosCaptureHostApi.holdDrain\(channelSuffix)", binaryMessenger: binaryMessenger, codec: codec)
+      : FlutterBasicMessageChannel(name: "dev.flutter.pigeon.zaghlol.IosCaptureHostApi.holdDrain\(channelSuffix)", binaryMessenger: binaryMessenger, codec: codec, taskQueue: taskQueue)
+    if let api = api {
+      holdDrainChannel.setMessageHandler { message, reply in
+        let args = message as! [Any?]
+        let ttlMsArg = args[0] as! Int64
+        do {
+          let result = try api.holdDrain(ttlMs: ttlMsArg)
+          reply(wrapResult(result))
+        } catch {
+          reply(wrapError(error))
+        }
+      }
+    } else {
+      holdDrainChannel.setMessageHandler(nil)
+    }
+    /// FU-194: true while a headless run is in progress.
+    let isHeadlessDrainActiveChannel = taskQueue == nil
+      ? FlutterBasicMessageChannel(name: "dev.flutter.pigeon.zaghlol.IosCaptureHostApi.isHeadlessDrainActive\(channelSuffix)", binaryMessenger: binaryMessenger, codec: codec)
+      : FlutterBasicMessageChannel(name: "dev.flutter.pigeon.zaghlol.IosCaptureHostApi.isHeadlessDrainActive\(channelSuffix)", binaryMessenger: binaryMessenger, codec: codec, taskQueue: taskQueue)
+    if let api = api {
+      isHeadlessDrainActiveChannel.setMessageHandler { _, reply in
+        do {
+          let result = try api.isHeadlessDrainActive()
+          reply(wrapResult(result))
+        } catch {
+          reply(wrapError(error))
+        }
+      }
+    } else {
+      isHeadlessDrainActiveChannel.setMessageHandler(nil)
+    }
+    /// FU-194: clears the hold (idempotent).
+    let releaseDrainHoldChannel = taskQueue == nil
+      ? FlutterBasicMessageChannel(name: "dev.flutter.pigeon.zaghlol.IosCaptureHostApi.releaseDrainHold\(channelSuffix)", binaryMessenger: binaryMessenger, codec: codec)
+      : FlutterBasicMessageChannel(name: "dev.flutter.pigeon.zaghlol.IosCaptureHostApi.releaseDrainHold\(channelSuffix)", binaryMessenger: binaryMessenger, codec: codec, taskQueue: taskQueue)
+    if let api = api {
+      releaseDrainHoldChannel.setMessageHandler { _, reply in
+        do {
+          try api.releaseDrainHold()
+          reply(wrapResult(nil))
+        } catch {
+          reply(wrapError(error))
+        }
+      }
+    } else {
+      releaseDrainHoldChannel.setMessageHandler(nil)
     }
   }
 }

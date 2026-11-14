@@ -10,6 +10,7 @@ import app.zaghlol.platform.ingest.FakeMain
 import app.zaghlol.platform.ingest.FakeStarter
 import app.zaghlol.platform.ingest.IngestTrace
 import app.zaghlol.platform.ingest.IngestWorkQueue
+import app.zaghlol.platform.ingest.RunResult
 import app.zaghlol.platform.guard.GuardFixtures
 import app.zaghlol.platform.guard.GuardRuntime
 import app.zaghlol.platform.guard.GuardUserConfigStore
@@ -27,6 +28,7 @@ import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking
 import org.junit.After
 import org.junit.Assert.assertEquals
+import org.junit.Assert.assertFalse
 import org.junit.Assert.assertNotNull
 import org.junit.Assert.assertNull
 import org.junit.Assert.assertSame
@@ -86,6 +88,8 @@ class CaptureRuntimeTest {
     private val queue = Queue()
     private val starter = FakeStarter(main)
 
+    private var wallNow = 1_800_000_000_000L
+
     private fun seams(version: Long = 1, software: Boolean = true) = if (software) {
         CaptureSeams(
             noBackupDir = dir, appVersion = { version }, main = main, queue = queue, device = FakeDevice(),
@@ -93,6 +97,7 @@ class CaptureRuntimeTest {
             cipher = SoftwareSpoolCipher(),
             keyCreatedAtMs = { null },
             monoClockMs = { System.nanoTime() / 1_000_000 },
+            wallClockMs = { wallNow },
         )
     } else {
         // The production defaults for cipher, key date and clocks (FU-104 I-1).
@@ -226,6 +231,65 @@ class CaptureRuntimeTest {
         h.answerClose()
         main.flush()
         assertEquals(listOf("drain", "close", "destroy"), h.log)
+    }
+
+    /**
+     * FU-194 negative proof: while a restore holds the drain (set in an
+     * earlier process), a worker run starts no headless engine and asks for a
+     * retry; the entry stays in the spool. Once the hold expires the next run
+     * drains again.
+     */
+    @Test
+    fun aHeldDrainStartsNoEngineAndAnExpiredHoldNoLongerBlocks() = runBlocking {
+        CaptureRuntime.create(seams()).drainHold.hold(60_000)
+        val rt = CaptureRuntime.create(seams()) // a new process: the hold is read from the file
+        rt.store.put("a")
+        assertEquals(RunResult.RETRY, rt.ingest.run(0))
+        main.flush()
+        assertEquals("no engine while held", 0, starter.handles.size)
+        assertEquals(1, rt.store.pendingCount())
+        wallNow += 60_000
+        val run = async(Dispatchers.Default) { rt.ingest.run(1) }
+        repeat(400) { if (main.onMain { starter.handles.size == 1 && starter.handles[0].drains.size == 1 }) return@repeat; Thread.sleep(5) }
+        assertEquals("expired: the drain runs", 1, starter.handles.size)
+        rt.store.ack(rt.store.pendingIds().toSet())
+        starter.handles[0].answerDrain()
+        run.await()
+    }
+
+    /** FU-194: the UI host's holdDrain reports a live engine and shuts it down; the headless host has no hold API. */
+    @Test
+    fun holdDrainReportsAndShutsDownALiveEngine() = runBlocking {
+        var headlessHost: (() -> AndroidCaptureHost)? = null
+        val rt = CaptureRuntime.create(
+            CaptureSeams(
+                noBackupDir = dir, appVersion = { 1 }, main = main, queue = queue, device = FakeDevice(),
+                guard = { throw IllegalStateException("not in JVM tests") },
+                headlessStarter = { f -> headlessHost = f; starter },
+                cipher = SoftwareSpoolCipher(), keyCreatedAtMs = { null }, wallClockMs = { wallNow },
+            ),
+        )
+        rt.store.put("a")
+        val cycle = async(Dispatchers.Default) { rt.headless.runCycle(10_000) { false } }
+        repeat(200) { if (main.onMain { starter.handles.size == 1 && starter.handles[0].drains.size == 1 }) return@repeat; Thread.sleep(5) }
+        val h = starter.handles[0]
+        val ui = rt.newHost(headless = false)
+        assertTrue("a drain is in flight", ui.holdDrain(60_000))
+        main.flush()
+        assertEquals("asked to close", listOf("drain", "close"), h.log)
+        assertTrue(ui.isHeadlessDrainActive())
+        h.answerDrain()
+        cycle.await()
+        h.answerClose()
+        assertFalse(ui.isHeadlessDrainActive())
+        ui.releaseDrainHold()
+        assertFalse(rt.drainHold.isHeld())
+        try {
+            headlessHost!!().holdDrain(60_000)
+            fail("the headless host has no drain hold")
+        } catch (e: CaptureApiError) {
+            assertEquals("NOT_AVAILABLE", e.code)
+        }
     }
 
     @Test

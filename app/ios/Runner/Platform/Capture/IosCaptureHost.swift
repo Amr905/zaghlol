@@ -28,6 +28,8 @@ final class IosCaptureHost: IosCaptureHostApi {
   private let monoClockMs: () -> Int64
   private let scheduleRefresh: () throws -> Void
   private let guardState: () -> GuardConfigState
+  private let drainHold: DrainHold
+  private let stopHeadless: () -> Void
   private let drainedLock = NSLock()
   private var drained = Set<String>()
 
@@ -36,7 +38,9 @@ final class IosCaptureHost: IosCaptureHostApi {
     claim: SpoolClaim = .process,
     monoClockMs: @escaping () -> Int64 = { Int64(ProcessInfo.processInfo.systemUptime * 1000) },
     scheduleRefresh: @escaping () throws -> Void = { try IngestBackgroundRefresh.schedule() },
-    guardState: @escaping () -> GuardConfigState = { .unknown }
+    guardState: @escaping () -> GuardConfigState = { .unknown },
+    drainHold: DrainHold = .shared,
+    stopHeadless: @escaping () -> Void = { Task { @MainActor in HeadlessIngestion.requestStop() } }
   ) {
     self.engineId = IosCaptureHost.newEngineId()
     self.runtime = runtime
@@ -44,6 +48,8 @@ final class IosCaptureHost: IosCaptureHostApi {
     self.monoClockMs = monoClockMs
     self.scheduleRefresh = scheduleRefresh
     self.guardState = guardState
+    self.drainHold = drainHold
+    self.stopHeadless = stopHeadless
   }
 
   private func need() throws -> SpoolRuntime {
@@ -154,6 +160,22 @@ final class IosCaptureHost: IosCaptureHostApi {
 
   func registerBackgroundRefresh() throws {
     do { try scheduleRefresh() } catch { throw fail() }
+  }
+
+  /// FU-194: sets or renews the restore's drain hold. A headless run still in
+  /// progress is asked to stop (it closes the database before teardown);
+  /// returns true while it is active. Does not need the spool.
+  func holdDrain(ttlMs: Int64) throws -> Bool {
+    let active: Bool
+    do { active = try drainHold.hold(ttlMs: ttlMs) } catch { throw fail() }
+    if active { stopHeadless() }
+    return active
+  }
+
+  func isHeadlessDrainActive() throws -> Bool { drainHold.headlessActive() }
+
+  func releaseDrainHold() throws {
+    do { try drainHold.release() } catch { throw fail() }
   }
 
   /// The engine is going away: drop its claim (entries stay for the next drain).

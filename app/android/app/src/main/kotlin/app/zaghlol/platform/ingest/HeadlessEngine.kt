@@ -49,6 +49,9 @@ fun interface HeadlessStarter {
  *   the drain loop's check makes it return [CycleOutcome.UI_TOOK_OVER].
  *   (A UI attach also shuts a live engine down, on the main thread, so
  *   attach and start never interleave.)
+ * - **FU-194:** in the same main-thread step, a [DrainHold] in force makes
+ *   the cycle return [CycleOutcome.HELD] without starting or reusing an
+ *   engine; an admitted engine counts as active until its teardown.
  * - **Shutdown** ([shutdown], [scheduleShutdown]) goes through
  *   [ShutdownSequence]: `close` at once, destroy after the close reply and
  *   any pending drain reply (bounded). [onGone] runs after the destroy.
@@ -58,6 +61,8 @@ class HeadlessEngine(
     private val main: MainThread,
     private val trace: () -> IngestTrace = { IngestTrace.NONE },
     private val onGone: () -> Unit = {},
+    /** FU-194: while held, no engine is started or reused ([CycleOutcome.HELD]). */
+    private val hold: DrainHold? = null,
 ) {
     private var handle: HeadlessHandle? = null
     private var ready: CompletableDeferred<Boolean>? = null
@@ -84,6 +89,7 @@ class HeadlessEngine(
                     when {
                         waitFor != null -> waitFor
                         uiAttached() -> TOOK_OVER // F3: never start an engine next to the UI one
+                        hold?.admitEngine() == false -> HELD // FU-194: a restore swaps the database files
                         else -> {
                             main.cancel(lingerTask)
                             readyNow = ensureEngine()
@@ -92,6 +98,7 @@ class HeadlessEngine(
                     }
                 }
                 if (step === TOOK_OVER) return@withTimeoutOrNull CycleReport(CycleOutcome.UI_TOOK_OVER)
+                if (step === HELD) return@withTimeoutOrNull CycleReport(CycleOutcome.HELD)
                 (step as? CompletableDeferred<*>)?.await()
             }
             if (readyNow?.await() != true) return@withTimeoutOrNull CycleReport(CycleOutcome.TIMEOUT)
@@ -162,6 +169,7 @@ class HeadlessEngine(
             // Engine teardown failure: nothing to keep.
         }
         alive = false
+        hold?.engineGone()
         val g = gone
         gone = null
         g?.complete(Unit)
@@ -210,5 +218,6 @@ class HeadlessEngine(
         const val LINGER_MS = 10_000L
 
         private val TOOK_OVER = Any()
+        private val HELD = Any()
     }
 }

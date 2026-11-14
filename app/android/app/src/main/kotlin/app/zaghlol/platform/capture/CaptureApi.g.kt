@@ -658,6 +658,22 @@ interface AndroidCaptureHostApi {
    * engine drained; moved to spool/held/ (platform-channels.md 1.3). IO_ERROR.
    */
   fun holdSpool(ids: List<String>)
+  /**
+   * FU-194: the restore's drain hold (platform-channels.md 1.4), UI engine
+   * only (the headless host answers NOT_AVAILABLE). Persists a hold for
+   * [ttlMs] (native caps it at 10 min; call again to renew); while it holds
+   * no headless engine is started or reused, capture still writes to the
+   * spool. Returns true while a headless engine is still active (it was
+   * asked to shut down; poll isHeadlessDrainActive). IO_ERROR: no hold set.
+   */
+  fun holdDrain(ttlMs: Long): Boolean
+  /** FU-194: true while a headless engine exists (it may hold the database open). */
+  fun isHeadlessDrainActive(): Boolean
+  /**
+   * FU-194: clears the hold (idempotent). IO_ERROR when the file stays (the
+   * hold then still expires on its own).
+   */
+  fun releaseDrainHold()
 
   companion object {
     /** The codec used by AndroidCaptureHostApi. */
@@ -886,6 +902,54 @@ interface AndroidCaptureHostApi {
           channel.setMessageHandler(null)
         }
       }
+      run {
+        val channel = BasicMessageChannel<Any?>(binaryMessenger, "dev.flutter.pigeon.zaghlol.AndroidCaptureHostApi.holdDrain$separatedMessageChannelSuffix", codec, taskQueue)
+        if (api != null) {
+          channel.setMessageHandler { message, reply ->
+            val args = message as List<Any?>
+            val ttlMsArg = args[0] as Long
+            val wrapped: List<Any?> = try {
+              listOf(api.holdDrain(ttlMsArg))
+            } catch (exception: Throwable) {
+              CaptureApiPigeonUtils.wrapError(exception)
+            }
+            reply.reply(wrapped)
+          }
+        } else {
+          channel.setMessageHandler(null)
+        }
+      }
+      run {
+        val channel = BasicMessageChannel<Any?>(binaryMessenger, "dev.flutter.pigeon.zaghlol.AndroidCaptureHostApi.isHeadlessDrainActive$separatedMessageChannelSuffix", codec, taskQueue)
+        if (api != null) {
+          channel.setMessageHandler { _, reply ->
+            val wrapped: List<Any?> = try {
+              listOf(api.isHeadlessDrainActive())
+            } catch (exception: Throwable) {
+              CaptureApiPigeonUtils.wrapError(exception)
+            }
+            reply.reply(wrapped)
+          }
+        } else {
+          channel.setMessageHandler(null)
+        }
+      }
+      run {
+        val channel = BasicMessageChannel<Any?>(binaryMessenger, "dev.flutter.pigeon.zaghlol.AndroidCaptureHostApi.releaseDrainHold$separatedMessageChannelSuffix", codec, taskQueue)
+        if (api != null) {
+          channel.setMessageHandler { _, reply ->
+            val wrapped: List<Any?> = try {
+              api.releaseDrainHold()
+              listOf(null)
+            } catch (exception: Throwable) {
+              CaptureApiPigeonUtils.wrapError(exception)
+            }
+            reply.reply(wrapped)
+          }
+        } else {
+          channel.setMessageHandler(null)
+        }
+      }
     }
   }
 }
@@ -914,6 +978,16 @@ interface IosCaptureHostApi {
    * when it runs; the foreground drain is the guarantee.
    */
   fun registerBackgroundRefresh()
+  /**
+   * FU-194: same as AndroidCaptureHostApi.holdDrain. While held, the
+   * headless run (App Intent, BGAppRefreshTask) starts no engine; the spool
+   * write before it still happens. IO_ERROR: no hold set.
+   */
+  fun holdDrain(ttlMs: Long): Boolean
+  /** FU-194: true while a headless run is in progress. */
+  fun isHeadlessDrainActive(): Boolean
+  /** FU-194: clears the hold (idempotent). */
+  fun releaseDrainHold()
 
   companion object {
     /** The codec used by IosCaptureHostApi. */
@@ -1017,6 +1091,54 @@ interface IosCaptureHostApi {
           channel.setMessageHandler { _, reply ->
             val wrapped: List<Any?> = try {
               api.registerBackgroundRefresh()
+              listOf(null)
+            } catch (exception: Throwable) {
+              CaptureApiPigeonUtils.wrapError(exception)
+            }
+            reply.reply(wrapped)
+          }
+        } else {
+          channel.setMessageHandler(null)
+        }
+      }
+      run {
+        val channel = BasicMessageChannel<Any?>(binaryMessenger, "dev.flutter.pigeon.zaghlol.IosCaptureHostApi.holdDrain$separatedMessageChannelSuffix", codec, taskQueue)
+        if (api != null) {
+          channel.setMessageHandler { message, reply ->
+            val args = message as List<Any?>
+            val ttlMsArg = args[0] as Long
+            val wrapped: List<Any?> = try {
+              listOf(api.holdDrain(ttlMsArg))
+            } catch (exception: Throwable) {
+              CaptureApiPigeonUtils.wrapError(exception)
+            }
+            reply.reply(wrapped)
+          }
+        } else {
+          channel.setMessageHandler(null)
+        }
+      }
+      run {
+        val channel = BasicMessageChannel<Any?>(binaryMessenger, "dev.flutter.pigeon.zaghlol.IosCaptureHostApi.isHeadlessDrainActive$separatedMessageChannelSuffix", codec, taskQueue)
+        if (api != null) {
+          channel.setMessageHandler { _, reply ->
+            val wrapped: List<Any?> = try {
+              listOf(api.isHeadlessDrainActive())
+            } catch (exception: Throwable) {
+              CaptureApiPigeonUtils.wrapError(exception)
+            }
+            reply.reply(wrapped)
+          }
+        } else {
+          channel.setMessageHandler(null)
+        }
+      }
+      run {
+        val channel = BasicMessageChannel<Any?>(binaryMessenger, "dev.flutter.pigeon.zaghlol.IosCaptureHostApi.releaseDrainHold$separatedMessageChannelSuffix", codec, taskQueue)
+        if (api != null) {
+          channel.setMessageHandler { _, reply ->
+            val wrapped: List<Any?> = try {
+              api.releaseDrainHold()
               listOf(null)
             } catch (exception: Throwable) {
               CaptureApiPigeonUtils.wrapError(exception)

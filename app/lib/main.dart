@@ -5,6 +5,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import 'app/app_navigation.dart';
 import 'app/onboarding_gate.dart';
+import 'app/url_launcher_opener.dart';
 import 'core/db/db_directory.dart';
 import 'core/db/db_key_providers.dart';
 import 'core/l10n/date_format.dart';
@@ -44,6 +45,8 @@ Future<void> main() async {
         ...goldWiringOverrides,
         // WIRE-NAV: paywall trigger, Gold sign-in, links, chart card opener.
         ...navigationWiringOverrides(rootNavigatorKey),
+        // FU-195: external links open through url_launcher.
+        externalUrlOpenerOverride,
         // T-086: new-card channel toggles become ignore rules (T-078).
         cardCapturePortProvider.overrideWith(
           (ref) => ref.watch(captureCardPortProvider),
