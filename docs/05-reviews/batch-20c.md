@@ -129,3 +129,16 @@ What was checked:
 |------|-----------|-----------------|-------------|
 | WIRE-2 | `app/lib/features/ingestion/presentation/review/review_providers.dart:94-106` (+ the `SuggestionCardModel` card in `review_screen.dart`) | Accept on a `reimbursement_suggestion` must link only an expense the user chose. Show the candidates and pass the tapped id, or allow one-swipe accept only when there is exactly one candidate, shown on the card; otherwise send the user to the manual link sheet. | A payload with 2 candidates: accept does not create an `offset_links` row for `candidates.first` unless the user chose it. With 1 candidate, the card shows that expense and accept links it. |
 | WIRE-2 | `app/lib/features/settings/presentation/privacy_screen.dart:228` | Pop the progress dialog on the root navigator: `Navigator.of(context, rootNavigator: true).pop()`, or pop the dialog's own context. | PrivacyScreen pushed inside a nested `Navigator`, with a wipe that throws `WipeIncomplete`: the progress dialog is gone, PrivacyScreen is still shown, and the `privacyDeleteFailed` snackbar is visible. |
+
+## Delta re-review (WIRE-2 fixes)
+
+Commit `48374ab9` against its parent.
+
+1. Pair suggestions: **fixed.** `isPair` cards have `canAccept == false`, so there is no swipe-to-accept and no a11y accept action. Bare `accept()` returns without linking for pair items. The only link path is `_PairCard` Confirm, which calls `acceptCandidate(itemId, txnId)`. Confirm is disabled until a radio is chosen (pre-selected only when there is exactly one candidate). `acceptCandidate` refuses ids not in the payload `candidates`. Candidate amounts are the candidate's own `Money` (own currency). The ambiguous-refund path is unchanged. No keyboard shortcut path exists.
+2. Failed-wipe dialog: **fixed.** `Navigator.of(context, rootNavigator: true).pop()`.
+
+Tests: `flutter test --exclude-tags benchmark,golden test/features/ingestion test/features/settings test/features/transfers` gives 304 passed.
+
+Minor (follow-up, not blocking): `_PairCard` shows the candidate with `merchantRaw` in the account-label slot.
+
+**Verdict: APPROVED.**
