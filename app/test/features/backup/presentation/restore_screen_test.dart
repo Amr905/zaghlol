@@ -24,6 +24,7 @@ void main() {
         WidgetTester t, {
         bool icloud = false,
         bool replaces = false,
+        bool hasData = false,
       }) async {
         await t.binding.setSurfaceSize(const Size(360, 780));
         addTearDown(() => t.binding.setSurfaceSize(null));
@@ -31,7 +32,12 @@ void main() {
         regrant = null;
         await t.pumpWidget(
           ProviderScope(
-            overrides: baseOverrides(lang: lang, gateway: gw, effects: fx),
+            overrides: baseOverrides(
+              lang: lang,
+              gateway: gw,
+              effects: fx,
+              holdsLocalData: hasData,
+            ),
             child: host(
               RestoreScreen(
                 iCloudAvailable: icloud,
@@ -116,6 +122,17 @@ void main() {
         await t.tap(find.text(l.backupRestoreReplaceAction));
         await t.pumpAndSettle();
         expect(gw.calls.where((c) => c == 'restore'), hasLength(1));
+      });
+
+      testWidgets('phone holds data (Welcome path): confirm gates', (t) async {
+        final l = await pump(t, hasData: true);
+        await t.tap(find.text(l.commonActionContinue));
+        await t.pumpAndSettle();
+        await t.enterText(find.byType(TextField), 'right passphrase');
+        await t.tap(find.text(l.backupRestoreRestore));
+        await t.pumpAndSettle();
+        expect(find.text(l.backupRestoreReplaceConfirm), findsOneWidget);
+        expect(gw.calls, isNot(contains('restore')));
       });
 
       testWidgets('no replacesExistingData: restores directly', (t) async {

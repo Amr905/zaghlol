@@ -74,7 +74,11 @@ class _RestoreScreenState extends ConsumerState<RestoreScreen> {
     }
     setState(() => _missing = false);
     final p = _pass.text;
-    if (widget.replacesExistingData) {
+    final hasData =
+        widget.replacesExistingData ||
+        (await ref.read(restoreReplacesLocalDataProvider.future));
+    if (!mounted) return;
+    if (hasData) {
       final l10n = AppLocalizations.of(context);
       final ok = await showDialog<bool>(
         context: context,

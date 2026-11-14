@@ -13,7 +13,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../core/db/app_database_providers.dart';
 import '../../../core/settings/settings_keys.dart';
 import '../../capture/application/capture_providers.dart'
-    show ingestionPauseGateProvider;
+    show captureHostPortProvider, ingestionPauseGateProvider;
 import '../../catalog_sync/application/sync_orchestrator.dart'
     show SyncOutcomeKind;
 import '../../catalog_sync/application/sync_providers.dart'
@@ -470,3 +470,27 @@ BackupErrorKind backupErrorKindOf(Object e) {
   }
   return BackupErrorKind.other;
 }
+
+/// FU-197: true when this phone already holds transactions or the capture
+/// spool holds entries, so a restore would replace them whichever screen
+/// opened S-04 (e.g. Welcome after a failed first-run marker). A read that
+/// fails counts as "no": the caller's own `replacesExistingData` still asks.
+final restoreReplacesLocalDataProvider = FutureProvider.autoDispose<bool>((
+  ref,
+) async {
+  try {
+    final db = await ref.read(appDatabaseProvider.future);
+    final rows = await db
+        .customSelect('SELECT 1 AS x FROM transactions LIMIT 1')
+        .get();
+    if (rows.isNotEmpty) return true;
+  } on Object {
+    // fall through to the spool check
+  }
+  try {
+    final s = await ref.read(captureHostPortProvider).getSpoolStatus();
+    return s.pending > 0;
+  } on Object {
+    return false;
+  }
+}, name: 'restoreReplacesLocalDataProvider');
