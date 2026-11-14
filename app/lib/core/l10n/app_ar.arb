@@ -1081,6 +1081,8 @@
   "@backupRestoreTitle": {
     "description": "T"
   },
+  "backupRestoreReplaceConfirm": "كده كل اللي على التليفون ده هيتمسح وينزل مكانه اللي في النسخة. نكمّل؟",
+  "backupRestoreReplaceAction": "استبدل",
   "backupRestoreWhereTitle": "النسخة بتاعتك فين؟",
   "@backupRestoreWhereTitle": {
     "description": "T"

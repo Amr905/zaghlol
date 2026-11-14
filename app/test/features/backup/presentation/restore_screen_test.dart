@@ -23,6 +23,7 @@ void main() {
       Future<AppLocalizations> pump(
         WidgetTester t, {
         bool icloud = false,
+        bool replaces = false,
       }) async {
         await t.binding.setSurfaceSize(const Size(360, 780));
         addTearDown(() => t.binding.setSurfaceSize(null));
@@ -34,6 +35,7 @@ void main() {
             child: host(
               RestoreScreen(
                 iCloudAvailable: icloud,
+                replacesExistingData: replaces,
                 onStartFresh: () => fresh++,
                 onUpdateApp: () {},
                 onRestored: ({required bool regrantDue}) =>
@@ -93,6 +95,38 @@ void main() {
         await t.tap(find.text(l.backupRestoreDoneAction));
         expect(regrant, isTrue);
         expect(t.takeException(), isNull);
+      });
+
+      testWidgets('replacesExistingData: confirm gates the restore', (t) async {
+        final l = await pump(t, replaces: true);
+        await t.tap(find.text(l.commonActionContinue));
+        await t.pumpAndSettle();
+        await t.enterText(find.byType(TextField), 'right passphrase');
+        await t.tap(find.text(l.backupRestoreRestore));
+        await t.pumpAndSettle();
+        expect(find.text(l.backupRestoreReplaceConfirm), findsOneWidget);
+        expect(gw.calls, isNot(contains('restore')));
+        await t.tap(find.text(l.commonActionCancel));
+        await t.pumpAndSettle();
+        expect(gw.calls, isNot(contains('restore')));
+        expect(find.text(l.backupRestoreFoundTitle), findsOneWidget);
+        await t.enterText(find.byType(TextField), 'right passphrase');
+        await t.tap(find.text(l.backupRestoreRestore));
+        await t.pumpAndSettle();
+        await t.tap(find.text(l.backupRestoreReplaceAction));
+        await t.pumpAndSettle();
+        expect(gw.calls.where((c) => c == 'restore'), hasLength(1));
+      });
+
+      testWidgets('no replacesExistingData: restores directly', (t) async {
+        final l = await pump(t);
+        await t.tap(find.text(l.commonActionContinue));
+        await t.pumpAndSettle();
+        await t.enterText(find.byType(TextField), 'right passphrase');
+        await t.tap(find.text(l.backupRestoreRestore));
+        await t.pumpAndSettle();
+        expect(find.text(l.backupRestoreReplaceConfirm), findsNothing);
+        expect(gw.calls, contains('restore'));
       });
 
       testWidgets('restoring: counting mascot, no way out', (t) async {

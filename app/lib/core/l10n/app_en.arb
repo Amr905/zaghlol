@@ -246,6 +246,8 @@
   "onboardingIosSetupFirstStatement": "Got a bank statement?",
   "onboardingIosSetupFirstStatementSub": "Add past months in one go with Gold",
   "backupRestoreTitle": "Restore from backup",
+  "backupRestoreReplaceConfirm": "This replaces everything on this phone with the backup. Continue?",
+  "backupRestoreReplaceAction": "Replace",
   "backupRestoreWhereTitle": "Where's your backup?",
   "backupRestoreOptionDrive": "Google Drive",
   "backupRestoreOptionICloud": "iCloud",

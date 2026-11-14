@@ -907,6 +907,13 @@ class AppLocalizationsAr extends AppLocalizations {
   String get backupRestoreTitle => 'استرجاع نسخة';
 
   @override
+  String get backupRestoreReplaceConfirm =>
+      'كده كل اللي على التليفون ده هيتمسح وينزل مكانه اللي في النسخة. نكمّل؟';
+
+  @override
+  String get backupRestoreReplaceAction => 'استبدل';
+
+  @override
   String get backupRestoreWhereTitle => 'النسخة بتاعتك فين؟';
 
   @override

@@ -100,6 +100,7 @@ AppScreens _stubs(_Rec r) {
           required onStartFresh,
           required onUpdateApp,
           required iCloud,
+          replacesExistingData = false,
         }) => page(c, 'restore', {
           'restored': () => onRestored(regrantDue: false),
           'fresh': onStartFresh,

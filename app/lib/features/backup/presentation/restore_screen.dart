@@ -10,6 +10,8 @@
 // platform · version" line is left out: the listing carries no app version
 // (it is only in the authenticated header, read during the restore).
 
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
@@ -28,6 +30,7 @@ class RestoreScreen extends ConsumerStatefulWidget {
     required this.onStartFresh,
     this.onUpdateApp,
     this.iCloudAvailable = false,
+    this.replacesExistingData = false,
   });
 
   /// Restore finished; the shell goes to the home screen. [regrantDue]: show
@@ -42,6 +45,10 @@ class RestoreScreen extends ConsumerStatefulWidget {
 
   /// iCloud is offered on iPhone only.
   final bool iCloudAvailable;
+
+  /// Opened from Settings on a phone that has data: the swap replaces it, so
+  /// "Restore" asks first.
+  final bool replacesExistingData;
 
   @override
   ConsumerState<RestoreScreen> createState() => _RestoreScreenState();
@@ -60,15 +67,35 @@ class _RestoreScreenState extends ConsumerState<RestoreScreen> {
     super.dispose();
   }
 
-  void _submit() {
+  Future<void> _submit() async {
     if (_pass.text.isEmpty) {
       setState(() => _missing = true);
       return;
     }
     setState(() => _missing = false);
     final p = _pass.text;
+    if (widget.replacesExistingData) {
+      final l10n = AppLocalizations.of(context);
+      final ok = await showDialog<bool>(
+        context: context,
+        builder: (ctx) => AlertDialog(
+          content: Text(l10n.backupRestoreReplaceConfirm),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.of(ctx).pop(false),
+              child: Text(l10n.commonActionCancel),
+            ),
+            TextButton(
+              onPressed: () => Navigator.of(ctx).pop(true),
+              child: Text(l10n.backupRestoreReplaceAction),
+            ),
+          ],
+        ),
+      );
+      if (ok != true || !mounted) return;
+    }
     _pass.clear();
-    ref.read(restoreFlowProvider.notifier).restore(p);
+    unawaited(ref.read(restoreFlowProvider.notifier).restore(p));
   }
 
   @override
@@ -219,7 +246,7 @@ class _RestoreScreenState extends ConsumerState<RestoreScreen> {
           enableSuggestions: false,
           autocorrect: false,
           autofillHints: const [],
-          onSubmitted: (_) => _submit(),
+          onSubmitted: (_) => unawaited(_submit()),
           decoration: InputDecoration(
             labelText: l10n.backupRestorePassphraseLabel,
             errorText: s.wrongPassphrase
@@ -260,7 +287,7 @@ class _RestoreScreenState extends ConsumerState<RestoreScreen> {
         ZButton(
           label: l10n.backupRestoreRestore,
           expand: true,
-          onPressed: _submit,
+          onPressed: () => unawaited(_submit()),
         ),
       ],
     );

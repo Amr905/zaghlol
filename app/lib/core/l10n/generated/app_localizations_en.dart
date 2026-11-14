@@ -882,6 +882,13 @@ class AppLocalizationsEn extends AppLocalizations {
   String get backupRestoreTitle => 'Restore from backup';
 
   @override
+  String get backupRestoreReplaceConfirm =>
+      'This replaces everything on this phone with the backup. Continue?';
+
+  @override
+  String get backupRestoreReplaceAction => 'Replace';
+
+  @override
   String get backupRestoreWhereTitle => 'Where\'s your backup?';
 
   @override

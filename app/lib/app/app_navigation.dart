@@ -254,14 +254,17 @@ Future<void> openCaptureSettings(BuildContext context) =>
 Future<void> openBackup(BuildContext context) => _screens(context).backup(
   context,
   iCloud: _isIos(context),
-  onOpenRestore: () => unawaited(openRestore(context)),
+  onOpenRestore: () =>
+      unawaited(openRestore(context, replacesExistingData: true)),
 );
 
 Future<void> openRestore(
   BuildContext context, {
   void Function({required bool regrantDue})? onRestored,
+  bool replacesExistingData = false,
 }) => _screens(context).restore(
   context,
+  replacesExistingData: replacesExistingData,
   iCloud: _isIos(context),
   onRestored:
       onRestored ??

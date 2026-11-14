@@ -1542,6 +1542,18 @@ abstract class AppLocalizations {
   /// **'استرجاع نسخة'**
   String get backupRestoreTitle;
 
+  /// No description provided for @backupRestoreReplaceConfirm.
+  ///
+  /// In ar, this message translates to:
+  /// **'كده كل اللي على التليفون ده هيتمسح وينزل مكانه اللي في النسخة. نكمّل؟'**
+  String get backupRestoreReplaceConfirm;
+
+  /// No description provided for @backupRestoreReplaceAction.
+  ///
+  /// In ar, this message translates to:
+  /// **'استبدل'**
+  String get backupRestoreReplaceAction;
+
   /// T
   ///
   /// In ar, this message translates to:

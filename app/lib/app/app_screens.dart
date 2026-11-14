@@ -107,6 +107,7 @@ final class AppScreens {
     required VoidCallback onStartFresh,
     required VoidCallback onUpdateApp,
     required bool iCloud,
+    bool replacesExistingData,
   })
   restore;
   final Future<void> Function(
@@ -233,9 +234,11 @@ Future<void> _restore(
   required VoidCallback onStartFresh,
   required VoidCallback onUpdateApp,
   required bool iCloud,
+  bool replacesExistingData = false,
 }) => pushScreen<void>(
   c,
   (_) => RestoreScreen(
+    replacesExistingData: replacesExistingData,
     onRestored: onRestored,
     onStartFresh: onStartFresh,
     onUpdateApp: onUpdateApp,
