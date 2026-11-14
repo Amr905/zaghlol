@@ -1,5 +1,8 @@
 ﻿== SUMMARY ==
-RUNNING sha=04a9afdf4639c00ee2d9f836a8285a24cb46f34c
+SKIP sha=04a9afdf4639c00ee2d9f836a8285a24cb46f34c no app/packages/backend changes
 
 == FULL LOG (last 1500 lines) ==
 auto task/NOTIF-gw 04a9afdf4639c00ee2d9f836a8285a24cb46f34c 2026-11-14T11:04:09.1238416+02:00
+
+
+
