@@ -19,12 +19,12 @@
 | Milestone | Total | DONE | IN_PROGRESS | BLOCKED |
 |---|---|---|---|---|
 | M0 | 28 | 25 | 1 | 0 |
-| M1 | 29 | 25 | 0 | 1 |
-| M2 | 29 | 13 | 0 | 0 |
+| M1 | 29 | 26 | 0 | 1 |
+| M2 | 29 | 16 | 0 | 0 |
 | M3 | 18 | 14 | 0 | 0 |
-| M4 | 17 | 12 | 0 | 0 |
-| M5 | 35 | 29 | 1 | 1 |
-| M6 | 19 | 9 | 1 | 2 |
+| M4 | 17 | 14 | 0 | 0 |
+| M5 | 35 | 30 | 1 | 1 |
+| M6 | 19 | 12 | 1 | 2 |
 | M7 | 11 | 0 | 0 | 0 |
 
 ## Tasks
@@ -86,12 +86,12 @@
 | T-054 | Home screen S-10 (iOS and Android variants) | M1 | C2 | Sonnet | flutter-ui-engineer | T-052, T-024, T-029, T-053 | DONE | batch 16 review [batch-16a](05-reviews/batch-16a.md), [batch-16b](05-reviews/batch-16b.md) | Batch 16. FU-148 |
 | T-055 | Welcome screen S-01 with language toggle and restore entry | M1 | C2 | Sonnet | flutter-ui-engineer | T-024, T-029, T-053 | DONE | batch 18 review [batch-18a](05-reviews/batch-18a.md), [batch-18b](05-reviews/batch-18b.md), [batch-18c](05-reviews/batch-18c.md), [batch-18d](05-reviews/batch-18d.md) | Batch 18. FU-176 |
 | T-056 | Android capture setup S-02 with live scan and degraded variant | M1 | C2 | Sonnet | flutter-ui-engineer | T-055, T-044, T-048 | DONE | batch 18 review [batch-18a](05-reviews/batch-18a.md), [batch-18b](05-reviews/batch-18b.md), [batch-18c](05-reviews/batch-18c.md), [batch-18d](05-reviews/batch-18d.md) | Batch 18. FU-177 |
-| T-057 | Scan results screen S-06 «دي كروتك؟» | M1 | C2 | Sonnet | flutter-ui-engineer | T-056, T-045 | TODO | — |  |
+| T-057 | Scan results screen S-06 «دي كروتك؟» | M1 | C2 | Sonnet | flutter-ui-engineer | T-056, T-045 | DONE | batch 19 review [batch-19a](05-reviews/batch-19a.md), [batch-19b](05-reviews/batch-19b.md), [batch-19c](05-reviews/batch-19c.md) | Batch 19. FU-187 |
 | T-058 | Native Egyptian-speaker review of the copy deck | M2 | C2 | human | external | T-026, T-027, T-028 | TODO | — |  |
 | T-059 | Compile the 600+ Egyptian merchant seed list (OQ-05) | M2 | C2 | human | external | T-030 | TODO | — |  |
 | T-060 | Android share/paste intake (text, image, PDF, CSV) | M2 | C3 | Sonnet | native-platform-engineer | T-004 | DONE | PC runner PASS @2d3f96a; batch/2026-11-11-1 CI; reviews [T-060](05-reviews/T-060.md) (Sonnet, re-classified C4) and [combined Opus](05-reviews/T-060-security.md) APPROVED after F1–F12 and C1 fixes (delta) | Batch 2. K_spool TEE-only (Lead decision); app wiring owned per FU-067; device steps pending |
-| T-061 | iOS Capture Guard (Swift) with config reader | M2 | C4 | Opus | native-platform-engineer | T-035, T-009 | TODO | — |  |
-| T-062 | iOS encrypted spool, host API and background refresh | M2 | C4 | Opus | native-platform-engineer | T-004, T-009 | TODO | — |  |
+| T-061 | iOS Capture Guard (Swift) with config reader | M2 | C4 | Opus | native-platform-engineer | T-035, T-009 | DONE | batch 19 review [batch-19a](05-reviews/batch-19a.md), [batch-19b](05-reviews/batch-19b.md), [batch-19c](05-reviews/batch-19c.md) | Batch 19. FU-192 |
+| T-062 | iOS encrypted spool, host API and background refresh | M2 | C4 | Opus | native-platform-engineer | T-004, T-009 | DONE | batch 19 review [batch-19a](05-reviews/batch-19a.md), [batch-19b](05-reviews/batch-19b.md), [batch-19c](05-reviews/batch-19c.md) | Batch 19. FU-193 |
 | T-063 | App Intents for Message and Wallet automations | M2 | C4 | Opus | native-platform-engineer | T-061, T-062 | TODO | — |  |
 | T-064 | Shortcut package, iCloud link and setup checker | M2 | C3 | Sonnet | native-platform-engineer | T-063 | TODO | — |  |
 | T-065 | iOS Share Extension (text, image, PDF) | M2 | C4 | Opus | native-platform-engineer | T-062 | TODO | — |  |
@@ -113,7 +113,7 @@
 | T-081 | Review queue S-14 | M2 | C2 | Sonnet | flutter-ui-engineer | T-049, T-074, T-029 | DONE | batch 18 review [batch-18a](05-reviews/batch-18a.md), [batch-18b](05-reviews/batch-18b.md), [batch-18c](05-reviews/batch-18c.md), [batch-18d](05-reviews/batch-18d.md) | Batch 18. FU-173 |
 | T-082 | Quick add sheet S-30 | M2 | C1 | Haiku | boilerplate-engineer | T-024, T-029 | TODO | — |  |
 | T-083 | Money tab S-40 (accounts per currency) | M2 | C2 | Sonnet | flutter-ui-engineer | T-045, T-052, T-029 | DONE | batch 16 review [batch-16a](05-reviews/batch-16a.md), [batch-16b](05-reviews/batch-16b.md) | Batch 16. FU-150 |
-| T-084 | Card detail S-41, compare cards S-42 | M2 | C2 | Sonnet | flutter-ui-engineer | T-083, T-051 | TODO | — |  |
+| T-084 | Card detail S-41, compare cards S-42 | M2 | C2 | Sonnet | flutter-ui-engineer | T-083, T-051 | DONE | batch 19 review [batch-19a](05-reviews/batch-19a.md), [batch-19b](05-reviews/batch-19b.md), [batch-19c](05-reviews/batch-19c.md) | Batch 19. FU-186 |
 | T-085 | Add/edit card S-43 (type → bank → details), merge and hide | M2 | C2 | Sonnet | flutter-ui-engineer | T-083, T-078 | DONE | batch 17 review [batch-17a](05-reviews/batch-17a.md), [batch-17b](05-reviews/batch-17b.md) | Batch 17. FU-159 |
 | T-086 | Capture settings S-61 and card capture sheet S-62 | M2 | C2 | Sonnet | flutter-ui-engineer | T-078, T-029 | DONE | batch 18 review [batch-18a](05-reviews/batch-18a.md), [batch-18b](05-reviews/batch-18b.md), [batch-18c](05-reviews/batch-18c.md), [batch-18d](05-reviews/batch-18d.md) | Batch 18. FU-174 |
 | T-087 | Generate ARB files from copy deck (parts 2–3) | M3 | C1 | Haiku | boilerplate-engineer | T-029, T-027, T-028 | DONE | batch 16 review [batch-16a](05-reviews/batch-16a.md), [batch-16b](05-reviews/batch-16b.md) | Batch 16. FU-146 |
@@ -143,9 +143,9 @@
 | T-111 | Ask Zaghlol screen S-50 | M4 | C2 | Sonnet | flutter-ui-engineer | T-110 | DONE | batch 18 review [batch-18a](05-reviews/batch-18a.md), [batch-18b](05-reviews/batch-18b.md), [batch-18c](05-reviews/batch-18c.md), [batch-18d](05-reviews/batch-18d.md) | Batch 18. FU-178 |
 | T-112 | Prices and FX store in app (sync-fed, manual override, stale) | M4 | C2 | Sonnet | flutter-core-engineer | T-019 | DONE | batch 7 local: every app-ci step green, backend Release build 0 warnings, format clean, no vulnerable packages; batch CI (`batch/2026-11-11-6`); review [T-112](05-reviews/T-112.md) APPROVED | Batch 7. Manual FX override needs a schema change: OQ filed. FU-106 |
 | T-113 | Assets, liabilities, net worth per unit and snapshots | M4 | C3 | Sonnet | flutter-core-engineer | T-112, T-045, T-096 | DONE | batch 16 review [batch-16a](05-reviews/batch-16a.md), [batch-16b](05-reviews/batch-16b.md) | Batch 16. FU-149 |
-| T-114 | Charts: remaining eight (Gold) | M4 | C2 | Sonnet | flutter-ui-engineer | T-107, T-113 | TODO | — |  |
+| T-114 | Charts: remaining eight (Gold) | M4 | C2 | Sonnet | flutter-ui-engineer | T-107, T-113 | DONE | batch 19 review [batch-19a](05-reviews/batch-19a.md), [batch-19b](05-reviews/batch-19b.md), [batch-19c](05-reviews/batch-19c.md) | Batch 19. FU-185 |
 | T-115 | ≈ combined view service (target currency, rate date, exclusions) | M4 | C3 | Sonnet | flutter-core-engineer | T-012, T-112 | DONE | batch 13 review [batch-13](05-reviews/batch-13.md) APPROVED (≈ label fix by Lead) | Batch 13. FU-134 |
-| T-116 | Shared per-currency figures and currency switcher component | M4 | C2 | Sonnet | flutter-ui-engineer | T-115, T-054 | TODO | — |  |
+| T-116 | Shared per-currency figures and currency switcher component | M4 | C2 | Sonnet | flutter-ui-engineer | T-115, T-054 | DONE | batch 19 review [batch-19a](05-reviews/batch-19a.md), [batch-19b](05-reviews/batch-19b.md), [batch-19c](05-reviews/batch-19c.md) | Batch 19. FU-184 |
 | T-117 | Achievement share cards with hidden amounts by default | M4 | C2 | Sonnet | flutter-ui-engineer | T-105, T-022 | TODO | — |  |
 | T-118 | Home-screen widgets (Android Glance, iOS WidgetKit) | M4 | C3 | Sonnet | native-platform-engineer | T-051, T-004 | TODO | — |  |
 | T-119 | Gold gate matrix and entitlement state (local) | M4 | C2 | Sonnet | flutter-core-engineer | T-025, T-020 | DONE | batch 11 review [batch-11](05-reviews/batch-11.md) APPROVED after fix 119-1/119-2 | Batch 11. FU-123 |
@@ -176,24 +176,24 @@
 | T-144 | Entitlement token verification, trusted time, offline cache and grace | M5 | C4 | Opus | flutter-core-engineer | T-119, T-141, T-180 | DONE | batch 14 review [batch-14](05-reviews/batch-14.md) APPROVED | Plan v1.1: R5-1 tests are owner-task criteria Batch 14. FU-138 |
 | T-145 | In-app purchase flow, backend verify, background retry and restore | M5 | C4 | Opus | flutter-core-engineer | T-144, T-141, T-178, T-179, T-183 | DONE | batch 18 review [batch-18a](05-reviews/batch-18a.md), [batch-18b](05-reviews/batch-18b.md), [batch-18c](05-reviews/batch-18c.md), [batch-18d](05-reviews/batch-18d.md) | Batch 18. FU-165 |
 | T-146 | Paywall S-68, locked previews, upgrade prompt cap and Gold status messages | M5 | C2 | Sonnet | flutter-ui-engineer | T-145, T-144, T-087 | DONE | batch 18 review [batch-18a](05-reviews/batch-18a.md), [batch-18b](05-reviews/batch-18b.md), [batch-18c](05-reviews/batch-18c.md), [batch-18d](05-reviews/batch-18d.md) | Batch 18. FU-166 |
-| T-147 | Optional sign-in, account screen S-69, sign-out and delete account | M5 | C4 | Opus | flutter-core-engineer | T-141, T-144, T-145, T-179, T-183 | TODO | — | Plan v1.1: R5-3(a) note |
+| T-147 | Optional sign-in, account screen S-69, sign-out and delete account | M5 | C4 | Opus | flutter-core-engineer | T-141, T-144, T-145, T-179, T-183 | DONE | batch 19 review [batch-19a](05-reviews/batch-19a.md), [batch-19b](05-reviews/batch-19b.md), [batch-19c](05-reviews/batch-19c.md) | Plan v1.1: R5-3(a) note Batch 19. FU-189 |
 | T-148 | Backup file format: Argon2id-wrapped key and chunked AES-256-GCM | M6 | C4 | Opus | flutter-core-engineer | T-015 | DONE | app-ci 42985580730 + db-platform 42985580847 on `ci/T-148` (Android API 26/35 + iOS device groups with native AES-GCM, NFC, Argon2id); batch 6 local: every app-ci step green (app tests, packages, lints, Pigeon/drift stale checks, no-logging grep), backend Release build 0 warnings, format clean, no vulnerable packages; batch CI (`batch/2026-11-11-5`); reviews [T-148](05-reviews/T-148.md) + [security](05-reviews/T-148-security.md) APPROVED | Batch 6. PO Q1–Q3 provisional. FU-099 |
 | T-149 | Backup snapshot and restore swap with schema checks | M6 | C4 | Opus | flutter-core-engineer | T-148, T-017, T-018, T-019, T-020 | DONE | batch 14 review [batch-14](05-reviews/batch-14.md) APPROVED; FU-099 item 2 done | Batch 14. FU-139 |
 | T-150 | Google Drive appDataFolder backend | M6 | C4 | Opus | flutter-core-engineer | T-149 | DONE | batch 15 review [batch-15](05-reviews/batch-15.md) APPROVED; app-ci green on ci/T-150 | Batch 15. FU-140 |
 | T-151 | iCloud backup host (native) and Dart adapter | M6 | C4 | Opus | native-platform-engineer | T-149, T-004 | DONE | batch 18 review [batch-18a](05-reviews/batch-18a.md), [batch-18b](05-reviews/batch-18b.md), [batch-18c](05-reviews/batch-18c.md), [batch-18d](05-reviews/batch-18d.md) | Batch 18. FU-167 |
 | T-152 | Backup schedules, slots and reminders (Free 1 slot, Gold 5 versions) | M6 | C3 | Sonnet | flutter-core-engineer | T-150, T-151, T-119, T-094 | DONE | batch 18 review [batch-18a](05-reviews/batch-18a.md), [batch-18b](05-reviews/batch-18b.md), [batch-18c](05-reviews/batch-18c.md), [batch-18d](05-reviews/batch-18d.md) | Batch 18. FU-168 |
-| T-153 | Backup & restore screens S-66 and S-04 | M6 | C2 | Sonnet | flutter-ui-engineer | T-152, T-087 | TODO | — |  |
+| T-153 | Backup & restore screens S-66 and S-04 | M6 | C2 | Sonnet | flutter-ui-engineer | T-152, T-087 | DONE | batch 19 review [batch-19a](05-reviews/batch-19a.md), [batch-19b](05-reviews/batch-19b.md), [batch-19c](05-reviews/batch-19c.md) | Batch 19. FU-188 |
 | T-154 | CSV and Excel export with preview for Free | M6 | C2 | Sonnet | flutter-core-engineer | T-050, T-119 | DONE | batch 13 review [batch-13](05-reviews/batch-13.md) APPROVED | Batch 13. FU-131 |
 | T-155 | Zaghlol CSV import with duplicate detection | M6 | C3 | Sonnet | flutter-core-engineer | T-046, T-154 | DONE | batch 16 review [batch-16a](05-reviews/batch-16a.md), [batch-16b](05-reviews/batch-16b.md) | Batch 16. FU-154 |
 | T-156 | Bank PDF statement import (CIB, NBE, QNB, Banque Misr) | M6 | C3 | Sonnet | parsing-engine-engineer | T-033, T-031 | BLOCKED | — | Needs sample statements (OQ-04) |
 | T-157 | Online-bank statement import (Wise, Revolut, Monzo, bunq, N26) | M6 | C3 | Sonnet | parsing-engine-engineer | T-155, T-071 | BLOCKED | — | Needs sample statements (OQ-04) |
 | T-158 | Import flow S-67 (source, summary, done) | M6 | C2 | Sonnet | flutter-ui-engineer | T-156, T-157, T-155, T-119 | TODO | — |  |
 | T-159 | Android OCR host (ML Kit Latin + Tesseract Arabic) | M6 | C3 | Sonnet | native-platform-engineer | T-010, T-004 | TODO | — |  |
-| T-160 | iOS OCR host (Vision) | M6 | C3 | Sonnet | native-platform-engineer | T-010, T-004 | TODO | — |  |
+| T-160 | iOS OCR host (Vision) | M6 | C3 | Sonnet | native-platform-engineer | T-010, T-004 | DONE | batch 19 review [batch-19a](05-reviews/batch-19a.md), [batch-19b](05-reviews/batch-19b.md), [batch-19c](05-reviews/batch-19c.md) | Batch 19. FU-191 |
 | T-161 | Receipt/screen OCR templates and confirmation screen S-32 | M6 | C2 | Sonnet | parsing-engine-engineer | T-159, T-160, T-033 | TODO | — |  |
 | T-162 | Settings S-60 incl. privacy info and About | M6 | C2 | Sonnet | flutter-ui-engineer | T-020, T-087, T-115 | DONE | batch 17 review [batch-17a](05-reviews/batch-17a.md), [batch-17b](05-reviews/batch-17b.md) | Batch 17. FU-160 |
 | T-163 | Categories & rules S-63/S-64 incl. custom categories (Gold) | M6 | C2 | Sonnet | flutter-ui-engineer | T-074, T-119 | DONE | batch 18 review [batch-18a](05-reviews/batch-18a.md), [batch-18b](05-reviews/batch-18b.md), [batch-18c](05-reviews/batch-18c.md), [batch-18d](05-reviews/batch-18d.md) | Batch 18. FU-179 |
-| T-164 | Custom message template builder engine and screen S-65 (Gold) | M6 | C3 | Sonnet | parsing-engine-engineer | T-033, T-119 | TODO | — |  |
+| T-164 | Custom message template builder engine and screen S-65 (Gold) | M6 | C3 | Sonnet | parsing-engine-engineer | T-033, T-119 | DONE | batch 19 review [batch-19a](05-reviews/batch-19a.md), [batch-19b](05-reviews/batch-19b.md), [batch-19c](05-reviews/batch-19c.md) | Batch 19. FU-190 |
 | T-165 | Exclude app data from OS backups and device transfer | M6 | C4 | Opus | native-platform-engineer | T-001 | IN_REVIEW | app-ci 42352212541 (13/13 green) @ eebeaa0, merged as 189acf7; negative proofs 42316160887, 42352248954 | MERGED, device run pending. Code APPROVED, tests SUFFICIENT, security APPROVED (r2). Done only when docs/05-reviews/T-165-device.md passes on a release candidate (F3); F9: add iOS canaries and finish onboarding before steps 5a/5c |
 | T-166 | Delete everything (local wipe + backend install delete) | M6 | C4 | Opus | flutter-core-engineer | T-015, T-141, T-152, T-145, T-179 | TODO | — |  |
 | T-167 | Zakah engine (hawl, nisab, native-unit dues) | M7 | C4 | Opus | flutter-core-engineer | T-113 | TODO | — |  |
@@ -416,6 +416,22 @@
 - **FU-182** (T-009, batch 18): the minors, nits and open questions for T-009 in [batch-18a](05-reviews/batch-18a.md), [batch-18b](05-reviews/batch-18b.md), [batch-18c](05-reviews/batch-18c.md), [batch-18d](05-reviews/batch-18d.md), plus the "left undone" items in its task file.
 - **FU-183** (parsing, batch 18): tag the Guard timing test `benchmark` if CI hits it; it fails only under full parallel load.
 
+- **FU-184** (T-116, batch 19): the minors, nits and open questions for T-116 in [batch-19a](05-reviews/batch-19a.md), [batch-19b](05-reviews/batch-19b.md), [batch-19c](05-reviews/batch-19c.md), plus the "left undone" items in its task file.
+- **FU-185** (T-114, batch 19): the minors, nits and open questions for T-114 in [batch-19a](05-reviews/batch-19a.md), [batch-19b](05-reviews/batch-19b.md), [batch-19c](05-reviews/batch-19c.md), plus the "left undone" items in its task file.
+- **FU-186** (T-084, batch 19): the minors, nits and open questions for T-084 in [batch-19a](05-reviews/batch-19a.md), [batch-19b](05-reviews/batch-19b.md), [batch-19c](05-reviews/batch-19c.md), plus the "left undone" items in its task file.
+- **FU-187** (T-057, batch 19): the minors, nits and open questions for T-057 in [batch-19a](05-reviews/batch-19a.md), [batch-19b](05-reviews/batch-19b.md), [batch-19c](05-reviews/batch-19c.md), plus the "left undone" items in its task file.
+- **FU-188** (T-153, batch 19): the minors, nits and open questions for T-153 in [batch-19a](05-reviews/batch-19a.md), [batch-19b](05-reviews/batch-19b.md), [batch-19c](05-reviews/batch-19c.md), plus the "left undone" items in its task file.
+- **FU-189** (T-147, batch 19): the minors, nits and open questions for T-147 in [batch-19a](05-reviews/batch-19a.md), [batch-19b](05-reviews/batch-19b.md), [batch-19c](05-reviews/batch-19c.md), plus the "left undone" items in its task file.
+- **FU-190** (T-164, batch 19): the minors, nits and open questions for T-164 in [batch-19a](05-reviews/batch-19a.md), [batch-19b](05-reviews/batch-19b.md), [batch-19c](05-reviews/batch-19c.md), plus the "left undone" items in its task file.
+- **FU-191** (T-160, batch 19): the minors, nits and open questions for T-160 in [batch-19a](05-reviews/batch-19a.md), [batch-19b](05-reviews/batch-19b.md), [batch-19c](05-reviews/batch-19c.md), plus the "left undone" items in its task file.
+- **FU-192** (T-061, batch 19): the minors, nits and open questions for T-061 in [batch-19a](05-reviews/batch-19a.md), [batch-19b](05-reviews/batch-19b.md), [batch-19c](05-reviews/batch-19c.md), plus the "left undone" items in its task file.
+- **FU-193** (T-062, batch 19): the minors, nits and open questions for T-062 in [batch-19a](05-reviews/batch-19a.md), [batch-19b](05-reviews/batch-19b.md), [batch-19c](05-reviews/batch-19c.md), plus the "left undone" items in its task file.
+- **FU-194** (WIRE-svc, batch 19, **before release**): restore pauses only the UI engine; the native headless drain (Android and iOS) can still write while the database files are swapped. Add a native "pause drain" API on both hosts, hold it in `restoreSideEffectsProvider` and release it in the same `finally`.
+- **FU-195** (WIRE-nav, batch 19, **before store submission**): add `url_launcher` and override `externalUrlOpenerProvider`; Terms, Privacy, Manage subscription and Update app links do nothing yet (store review needs them in the subscription flow).
+- **FU-196** (T-061/T-062, batch 19, owner T-063, before extensions write): two Keychain items are named `spool_key_v1` (Guard in the app group, spool in the shared group); the Guard must use the shared spool key. Also 062-1: re-read the key once before deleting an entry as unreadable.
+- **FU-197** (T-153/WIRE-nav, batch 19): the restore confirm keys off where S-04 was opened from; also ask when the database already holds transactions or spool entries (19c m1).
+- **FU-198** (T-160, batch 19, owner T-063): the OCR path check must allow the App Group spool directory, and the iOS spool key provider must be provisioned; OCR fails end to end on iOS until then.
+
 ## Log
 | Date | Event |
 |---|---|
@@ -488,3 +504,4 @@
 | 2026-11-14 | Batch 16 (`batch/2026-11-13-16`): T-029, T-087, T-053, T-054, T-113, T-083, T-091, T-105, T-079, T-155 DONE. FU-145…FU-154. Progress 99/186. |
 | 2026-11-14 | Batch 17 (`batch/2026-11-14-17`): T-101, T-106, T-110, T-080, T-085, T-162, T-143, T-178, T-179, T-044 DONE. FU-155…FU-164. Progress 109/186. |
 | 2026-11-14 | Batch 18 (`batch/2026-11-14-18`): T-145, T-146, T-151, T-152, T-107, T-108, T-102, T-104, T-081, T-086, T-121, T-055, T-056, T-111, T-163, T-098, T-093, T-009 DONE. FU-165…FU-182. Progress 127/186. |
+| 2026-11-14 | Batch 19 (`batch/2026-11-14-19`): T-116, T-114, T-084, T-057, T-153, T-147, T-164, T-160, T-061, T-062 DONE. FU-184…FU-193. Progress 137/186. |

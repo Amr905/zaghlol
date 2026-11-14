@@ -47,3 +47,11 @@ Reviewer: code-reviewer (code + security). Read the production diff of each task
 | Task | File:line | Required change | Test to add |
 |---|---|---|---|
 | T-153 | `restore_screen.dart` (widget + found state), `restore_flow.dart:restore` | Add a `replacesExistingData` parameter, set true when opened from S-66 (and whenever the DB already holds data). When true, tapping "Restore" shows a confirm dialog («هيستبدل اللي على الموبايل ده») and calls `restore()` only after the user confirms. Add the l10n keys in ar and en. | Widget test: with `replacesExistingData` true, tapping Restore calls no `gateway.restore` until the dialog is confirmed, and cancel leaves the state at `found`. A test with false restores directly. |
+
+## Lead delta check (fix round 19)
+
+Commit `e119a0bc` (about 40 production lines incl. generated l10n; tests fail without the change):
+- **T-153:** `RestoreScreen.replacesExistingData` asks before `restore()`; S-66 / Settings passes true, Welcome passes false. Two new widget tests (ar and en): with the flag, no `gateway.restore` until confirmed and cancel stays `found`; without it, restore runs directly. Correct.
+- The native drain hold during restore was not possible (no pause API on either host); logged as FU-194, before release. The extra "database already has data" check is FU-197.
+
+Verdict: APPROVED.
