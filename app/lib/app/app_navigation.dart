@@ -12,6 +12,7 @@ import 'package:go_router/go_router.dart';
 
 import '../core/routing/app_router.dart';
 import '../core/routing/app_routes.dart';
+import '../core/ui/shell/add_sheet.dart' show AddAction;
 import '../core/settings/settings_keys.dart';
 import '../core/settings/settings_providers.dart';
 import '../features/account/presentation/account_launcher.dart';
@@ -58,8 +59,21 @@ final TabRoots wiredTabRoots = TabRoots(
     context,
     onOpenTransaction: (id) => openTransactionDetail(context, id),
   ),
-  addSelected: quickAddSelected,
+  addSelected: wiredAddSelected,
 );
+
+/// S-30 entries: Type opens S-13; Asset opens S-44 for Gold and the paywall
+/// (S-68) for Free (T-082); the rest only close the sheet.
+void wiredAddSelected(BuildContext context, AddAction action) {
+  if (action != AddAction.asset) {
+    quickAddSelected(context, action);
+    return;
+  }
+  final gold = _container(context).read(entitlementStateProvider).isGold;
+  final screens = _screens(context);
+  Navigator.of(context, rootNavigator: true).maybePop();
+  unawaited(gold ? screens.addAsset(context) : screens.paywall(context));
+}
 
 /// Root-scope overrides of the navigation seams other features expose as
 /// providers. [navigatorKey] is the root navigator.
@@ -109,6 +123,8 @@ HomeActions _homeActions(BuildContext context) => HomeActions(
   openTransaction: (id) => unawaited(openTransactionDetail(context, id)),
   openBackup: () => unawaited(openBackup(context)),
   openFinishSetup: () => unawaited(openFinishSetup(context)),
+  openCaptureSettings: () => unawaited(openCaptureSettings(context)),
+  openShare: () => unawaited(_screens(context).shareStudio(context)),
 );
 
 Future<void> openBudget(BuildContext context) => _screens(context).budget(
@@ -235,6 +251,7 @@ SettingsDestinations settingsDestinations(BuildContext context) =>
       onCapture: () => unawaited(openCaptureSettings(context)),
       onCategories: () => unawaited(_screens(context).categories(context)),
       onBackup: () => unawaited(openBackup(context)),
+      onAccount: () => unawaited(_screens(context).account(context)),
     );
 
 Future<void> openCaptureSettings(BuildContext context) =>

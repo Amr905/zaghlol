@@ -129,6 +129,17 @@
                 android:name="android.service.notification.disabled_filter_types"
                 android:value="ongoing"/>
         </service>
+        <!-- T-117: hands the share-studio PNG to the system chooser. Not
+             exported; access is a per-intent read grant on one cache file. -->
+        <provider
+            android:name="androidx.core.content.FileProvider"
+            android:authorities="${applicationId}.share"
+            android:exported="false"
+            android:grantUriPermissions="true">
+            <meta-data
+                android:name="android.support.FILE_PROVIDER_PATHS"
+                android:resource="@xml/share_file_paths"/>
+        </provider>
         <!-- Don't delete the meta-data below.
              This is used by the Flutter tool to generate GeneratedPluginRegistrant.java -->
         <meta-data

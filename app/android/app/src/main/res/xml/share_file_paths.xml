@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- T-117: the FileProvider exposes only the share-image copies in the
+     cache directory, nothing else. -->
+<paths>
+    <cache-path name="shared_images" path="shared_images/"/>
+</paths>

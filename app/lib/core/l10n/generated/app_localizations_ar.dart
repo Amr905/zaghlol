@@ -7129,4 +7129,27 @@ class AppLocalizationsAr extends AppLocalizations {
     );
     return '$_temp0';
   }
+
+  @override
+  String iosSetupNudgeSilent(int count, String n) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other:
+          'بقالي $n يوم ما وصلتنيش رسالة بنك ولا دفع بـ Apple Pay. يمكن الاختصارات اتقفلت.',
+      many:
+          'بقالي $n يوم ما وصلتنيش رسالة بنك ولا دفع بـ Apple Pay. يمكن الاختصارات اتقفلت.',
+      few:
+          'بقالي $n أيام ما وصلتنيش رسالة بنك ولا دفع بـ Apple Pay. يمكن الاختصارات اتقفلت.',
+      two: 'بقالي يومين ما وصلتنيش رسالة بنك ولا دفع بـ Apple Pay. يمكن الاختصارات اتقفلت.',
+      one: 'بقالي يوم ما وصلتنيش رسالة بنك ولا دفع بـ Apple Pay. يمكن الاختصارات اتقفلت.',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get iosSetupNudgeCheck => 'راجع الاختصارات';
+
+  @override
+  String get iosSetupNudgeSnoozeA11y => 'فكّرني بعد ٧ أيام';
 }

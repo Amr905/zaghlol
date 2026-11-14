@@ -3,9 +3,12 @@
 // their own tasks through [AddSheet.onSelected].
 
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import '../../../features/gold/application/gating.dart';
 import '../../l10n/generated/app_localizations.dart';
 import '../../theme/z_tokens.dart';
+import '../z_chip.dart';
 import '../z_sheet.dart';
 
 enum AddAction { say, type, scan, asset }
@@ -32,7 +35,9 @@ class ModalSheetPage<T> extends Page<T> {
   );
 }
 
-class AddSheet extends StatelessWidget {
+/// T-082: the Asset entry carries the Gold badge for Free users (assets are
+/// a Gold feature, FR-WLT); the wiring sends them to the paywall.
+class AddSheet extends ConsumerWidget {
   const AddSheet({super.key, this.onSelected});
 
   /// Called with the chosen entry point; the default just closes the sheet.
@@ -47,32 +52,37 @@ class AddSheet extends StatelessWidget {
   }
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
     final l10n = AppLocalizations.of(context);
-    final options = <(AddAction, IconData, String, String)>[
+    final gold = ref.watch(entitlementStateProvider).isGold;
+    final options = <(AddAction, IconData, String, String, bool)>[
       (
         AddAction.say,
         Icons.mic_rounded,
         l10n.homeQuickAddSay,
         l10n.homeQuickAddSayA11y,
+        false,
       ),
       (
         AddAction.type,
         Icons.keyboard_rounded,
         l10n.homeQuickAddType,
         l10n.homeQuickAddTypeA11y,
+        false,
       ),
       (
         AddAction.scan,
         Icons.photo_camera_rounded,
         l10n.homeQuickAddScan,
         l10n.homeQuickAddScanA11y,
+        false,
       ),
       (
         AddAction.asset,
         Icons.savings_rounded,
         l10n.homeQuickAddAsset,
-        l10n.homeQuickAddAssetA11y,
+        '${l10n.homeQuickAddAssetA11y}${gold ? '' : ', ${l10n.commonGoldBadge}'}',
+        !gold,
       ),
     ];
     return ZSheetBody(
@@ -81,11 +91,12 @@ class AddSheet extends StatelessWidget {
         spacing: ZSpacing.sm,
         runSpacing: ZSpacing.sm,
         children: [
-          for (final (action, icon, label, a11y) in options)
+          for (final (action, icon, label, a11y, badge) in options)
             _AddOption(
               icon: icon,
               label: label,
               semanticLabel: a11y,
+              goldBadge: badge ? l10n.commonGoldBadge : null,
               onTap: () => _select(context, action),
             ),
         ],
@@ -100,12 +111,14 @@ class _AddOption extends StatelessWidget {
     required this.label,
     required this.semanticLabel,
     required this.onTap,
+    this.goldBadge,
   });
 
   final IconData icon;
   final String label;
   final String semanticLabel;
   final VoidCallback onTap;
+  final String? goldBadge;
 
   @override
   Widget build(BuildContext context) {
@@ -139,6 +152,10 @@ class _AddOption extends StatelessWidget {
                     label,
                     style: ZType.label.copyWith(color: c.onPrimaryContainer),
                   ),
+                  if (goldBadge != null) ...[
+                    const SizedBox(height: ZSpacing.xs),
+                    ZChip(label: goldBadge!, selected: true),
+                  ],
                 ],
               ),
             ),

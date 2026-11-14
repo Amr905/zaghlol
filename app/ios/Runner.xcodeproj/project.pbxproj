@@ -7,6 +7,7 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		5A7117000000000000000001 /* ShareImageHost.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5A7117000000000000000002 /* ShareImageHost.swift */; };
 		5A1600000000000000000A01 /* OcrApi.g.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5A1600000000000000000A02 /* OcrApi.g.swift */; };
 		5A1600000000000000000A03 /* OcrHost.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5A1600000000000000000A04 /* OcrHost.swift */; };
 		5A1600000000000000000A05 /* OcrTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5A1600000000000000000A06 /* OcrTests.swift */; };
@@ -180,6 +181,7 @@
 /* End PBXCopyFilesBuildPhase section */
 
 /* Begin PBXFileReference section */
+		5A7117000000000000000002 /* ShareImageHost.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ShareImageHost.swift; sourceTree = "<group>"; };
 		5A1600000000000000000A02 /* OcrApi.g.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OcrApi.g.swift; sourceTree = "<group>"; };
 		5A1600000000000000000A04 /* OcrHost.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OcrHost.swift; sourceTree = "<group>"; };
 		5A1600000000000000000A06 /* OcrTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OcrTests.swift; sourceTree = "<group>"; };
@@ -317,6 +319,14 @@
 /* End PBXFrameworksBuildPhase section */
 
 /* Begin PBXGroup section */
+		5A7117000000000000000003 /* ShareSheet */ = {
+			isa = PBXGroup;
+			children = (
+				5A7117000000000000000002 /* ShareImageHost.swift */,
+			);
+			path = ShareSheet;
+			sourceTree = "<group>";
+		};
 		5A6300000000000000000200 /* Capture */ = {
 			isa = PBXGroup;
 			children = (
@@ -473,6 +483,7 @@
 				5A0150000000000000000B0C /* Keys */,
 				5A1480000000000000000C02 /* TextNormalizationApi.g.swift */,
 				5A1480000000000000000C07 /* Text */,
+				5A7117000000000000000003 /* ShareSheet */,
 				5A1180000000000000000007 /* WidgetBridgeApi.g.swift */,
 				5A1180000000000000000006 /* WidgetBridgeHost.swift */,
 				5A1600000000000000000A02 /* OcrApi.g.swift */,
@@ -825,6 +836,7 @@
 				5A0150000000000000000B07 /* SecretStoreHost.swift in Sources */,
 				5A1480000000000000000C01 /* TextNormalizationApi.g.swift in Sources */,
 				5A1480000000000000000C03 /* TextNormalizationHost.swift in Sources */,
+				5A7117000000000000000001 /* ShareImageHost.swift in Sources */,
 				5A1600000000000000000A01 /* OcrApi.g.swift in Sources */,
 				5A1600000000000000000A03 /* OcrHost.swift in Sources */,
 				5A1800000000000000000D01 /* ClockApi.g.swift in Sources */,

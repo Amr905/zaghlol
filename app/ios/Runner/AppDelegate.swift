@@ -51,5 +51,7 @@ import UIKit
     IosCaptureRegistration.register(with: engineBridge.pluginRegistry)
     // T-065: shares from the Share Extension.
     ShareIntakeRegistration.register(with: engineBridge.pluginRegistry)
+    // T-117: the system share sheet for the share-studio PNG.
+    ShareImageRegistration.register(with: engineBridge.pluginRegistry)
   }
 }

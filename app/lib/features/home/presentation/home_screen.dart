@@ -16,6 +16,7 @@ import '../../../core/ui/z_card.dart';
 import '../../../core/ui/z_currency_switcher.dart';
 import '../../budget/application/budget_providers.dart';
 import '../../capture/application/capture_providers.dart';
+import '../../capture/presentation/ios_setup_nudge.dart';
 import '../../mascot/presentation/zaghlol_avatar.dart';
 import '../application/card_filter.dart';
 import '../application/home_read_model.dart';
@@ -43,6 +44,8 @@ class HomeActions {
     this.openReview,
     this.openBackup,
     this.openFinishSetup,
+    this.openCaptureSettings,
+    this.openShare,
     this.mascotSlot,
   });
 
@@ -57,6 +60,12 @@ class HomeActions {
 
   final VoidCallback? openBackup;
   final VoidCallback? openFinishSetup;
+
+  /// T-066: the iOS "Shortcuts went quiet" nudge opens S-61.
+  final VoidCallback? openCaptureSettings;
+
+  /// T-117: opens S-73 Share studio.
+  final VoidCallback? openShare;
 
   /// C-14 mascot banner slot, filled by T-104.
   final Widget? mascotSlot;
@@ -86,6 +95,17 @@ class HomeScreen extends ConsumerWidget {
     final header = Row(
       children: [
         const Expanded(child: _FilterRow()),
+        if (a.openShare != null)
+          IconButton(
+            key: const ValueKey('home-share'),
+            tooltip: l.shareStudioShare,
+            constraints: const BoxConstraints(
+              minWidth: ZSpacing.minTarget,
+              minHeight: ZSpacing.minTarget,
+            ),
+            icon: Icon(ios ? CupertinoIcons.share : Icons.ios_share),
+            onPressed: a.openShare,
+          ),
         settings,
       ],
     );
@@ -169,6 +189,8 @@ class HomeScreen extends ConsumerWidget {
       openReview: a?.openReview ?? () => context.push(AppRoutes.review),
       openBackup: a?.openBackup,
       openFinishSetup: a?.openFinishSetup,
+      openCaptureSettings: a?.openCaptureSettings,
+      openShare: a?.openShare,
       mascotSlot: a?.mascotSlot,
     );
   }
@@ -274,6 +296,10 @@ class _HomeBodyState extends ConsumerState<_HomeBody> {
             ),
             HomePagerDots(count: figures.length, index: page),
           ],
+          IosSetupNudge(
+            onCheck: a.openCaptureSettings,
+            padding: const EdgeInsetsDirectional.only(top: ZSpacing.md),
+          ),
           if (a.mascotSlot != null) ...[
             const SizedBox(height: ZSpacing.md),
             a.mascotSlot!,

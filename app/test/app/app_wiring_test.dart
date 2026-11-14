@@ -15,6 +15,7 @@ import 'package:zaghlol/core/l10n/generated/app_localizations.dart';
 import 'package:zaghlol/core/routing/app_router.dart';
 import 'package:zaghlol/core/settings/settings_keys.dart';
 import 'package:zaghlol/core/theme/app_theme.dart';
+import 'package:zaghlol/core/ui/shell/add_sheet.dart' show AddAction;
 import 'package:zaghlol/features/accounts/data/accounts_providers.dart';
 import 'package:zaghlol/features/accounts/domain/account.dart';
 import 'package:zaghlol/features/accounts/domain/accounts_repository.dart';
@@ -85,6 +86,8 @@ AppScreens _stubs(_Rec r) {
         page(c, 'editCard', {'capture': () => onOpenCapture!(a)}),
     cardCaptureSheet: (c, a) => page(c, 'cardCapture'),
     addAsset: (c) => page(c, 'addAsset'),
+    shareStudio: (c) => page(c, 'shareStudio'),
+    account: (c) => page(c, 'account'),
     prices: (c) => page(c, 'prices'),
     paywall: (c) => page(c, 'paywall'),
     settings: (c, d) {
@@ -269,6 +272,40 @@ void main() {
         // Android: S-02 (the default test platform).
         await t.pumpAndSettle();
         expect(find.text('stub:androidSetup'), findsOneWidget);
+      });
+
+      testWidgets('Home share icon opens S-73; capture nudge opens S-61', (
+        t,
+      ) async {
+        late HomeScreen home;
+        await host(t, build: (c) => home = wiredTabRoots.home(c) as HomeScreen);
+        home.actions!.openShare!();
+        await expectOpened(t, 'shareStudio');
+        await pop(t);
+        home.actions!.openCaptureSettings!();
+        await expectOpened(t, 'captureFree');
+      });
+
+      testWidgets('Settings Account row opens S-69', (t) async {
+        final ctx = await host(t);
+        settingsDestinations(ctx).onAccount!();
+        await expectOpened(t, 'account');
+      });
+
+      testWidgets('Quick add Asset: Free meets the paywall, Gold opens S-44', (
+        t,
+      ) async {
+        final ctx = await host(t);
+        wiredAddSelected(ctx, AddAction.asset);
+        await expectOpened(t, 'paywall');
+        await pop(t);
+        expect(find.text('stub:addAsset'), findsNothing);
+
+        ProviderScope.containerOf(ctx)
+            .read(entitlementStateProvider.notifier)
+            .applyVerified(verified: true, status: 'active');
+        wiredAddSelected(ctx, AddAction.asset);
+        await expectOpened(t, 'addAsset');
       });
 
       testWidgets('Settings rows: Gold, capture, categories, backup', (
