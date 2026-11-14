@@ -9,6 +9,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../../core/l10n/generated/app_localizations.dart';
 import '../../../../core/theme/z_tokens.dart';
+import '../../../../core/ui/z_chip.dart';
 import '../../../../core/ui/z_currency_switcher.dart';
 import '../../../../core/l10n/locale_providers.dart';
 import '../../../budget/presentation/budget_providers_ui.dart';
@@ -23,6 +24,42 @@ import 'chart_format.dart';
 import 'charts_providers.dart';
 import 'gold_chart_card.dart';
 import 'locked_chart_card.dart';
+
+/// "This cycle" / "Last cycle" selector (mockup 07).
+class _PeriodChip extends ConsumerWidget {
+  const _PeriodChip();
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final l = AppLocalizations.of(context);
+    final last = ref.watch(chartsPeriodProvider);
+    String name(bool v) =>
+        v ? l.commonPeriodLastCycle : l.commonPeriodThisCycle;
+    return Padding(
+      padding: const EdgeInsetsDirectional.only(bottom: ZSpacing.md),
+      child: Align(
+        alignment: AlignmentDirectional.centerStart,
+        child: PopupMenuButton<bool>(
+          key: const Key('charts-period'),
+          tooltip: name(last),
+          initialValue: last,
+          onSelected: (v) =>
+              ref.read(chartsPeriodProvider.notifier).select(lastCycle: v),
+          itemBuilder: (_) => [
+            for (final v in const [false, true])
+              PopupMenuItem<bool>(value: v, child: Text(name(v))),
+          ],
+          child: ExcludeSemantics(
+            child: ZChip(
+              label: name(last),
+              icon: Icons.keyboard_arrow_down_rounded,
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+}
 
 class ChartsScreen extends ConsumerWidget {
   const ChartsScreen({super.key});
@@ -58,6 +95,7 @@ class ChartsScreen extends ConsumerWidget {
         return ListView(
           padding: _padding,
           children: [
+            const _PeriodChip(),
             if (list.length > 1)
               Padding(
                 padding: const EdgeInsetsDirectional.only(bottom: ZSpacing.md),
