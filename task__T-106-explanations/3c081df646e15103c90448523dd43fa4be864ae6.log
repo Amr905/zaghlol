@@ -1,5 +1,8 @@
 ﻿== SUMMARY ==
-RUNNING sha=3c081df646e15103c90448523dd43fa4be864ae6
+SKIP sha=3c081df646e15103c90448523dd43fa4be864ae6 no app/packages/backend changes
 
 == FULL LOG (last 1500 lines) ==
 auto task/T-106-explanations 3c081df646e15103c90448523dd43fa4be864ae6 2026-11-14T11:08:04.8120207+02:00
+
+
+
