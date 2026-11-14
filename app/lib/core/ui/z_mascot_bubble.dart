@@ -3,14 +3,14 @@ import 'package:flutter/material.dart';
 import '../../features/mascot/presentation/zaghlol_avatar.dart';
 import '../theme/z_tokens.dart';
 
-/// Captain Zaghlol's speech card (mockups 03 / 25): apricot cream card, text at
-/// the start, the bird at the end. The bird ignores pointers.
+/// Captain Zaghlol's speech card (mockups 03 / 25): apricot cream card, the bird at
+/// the start, text after it. The bird ignores pointers.
 class ZMascotBubble extends StatelessWidget {
   const ZMascotBubble({
     super.key,
     required this.message,
     this.moment = ZaghlolMoment.proud,
-    this.avatarSize = 68,
+    this.avatarSize = 64,
     this.onTap,
   });
 
@@ -43,22 +43,24 @@ class ZMascotBubble extends StatelessWidget {
             borderRadius: radius,
             onTap: onTap,
             child: Padding(
-              padding: const EdgeInsetsDirectional.fromSTEB(
-                ZSpacing.xl,
-                ZSpacing.md,
-                ZSpacing.md,
-                ZSpacing.md,
+              padding: const EdgeInsetsDirectional.symmetric(
+                horizontal: ZSpacing.md,
+                vertical: ZSpacing.sm,
               ),
               child: Row(
                 children: [
+                  ZaghlolAvatar(moment: moment, size: avatarSize),
+                  const SizedBox(width: ZSpacing.md),
                   Expanded(
                     child: Text(
                       message,
-                      style: ZType.body.copyWith(color: c.text, height: 1.6),
+                      style: ZType.bodySmall.copyWith(
+                        color: c.text,
+                        fontSize: 15,
+                        height: 1.55,
+                      ),
                     ),
                   ),
-                  const SizedBox(width: ZSpacing.sm),
-                  ZaghlolAvatar(moment: moment, size: avatarSize),
                 ],
               ),
             ),

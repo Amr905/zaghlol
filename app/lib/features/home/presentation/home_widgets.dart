@@ -56,9 +56,10 @@ class HomeHero extends StatelessWidget {
     final hasBudget = safe != null;
     final used = safe != null && !safe.isPositive;
     final days = model.daysRemaining;
+    // The generated signature is (end, start): placeholders are sorted.
     final rangeText = l.commonDateRange(
-      format.dayMonth(model.cycle.start),
       format.dayMonth(model.cycle.end),
+      format.dayMonth(model.cycle.start),
     );
     final label = hasBudget
         ? l.homeHeroSafeToSpend
@@ -490,7 +491,9 @@ class HomeCardFilterChip extends ConsumerWidget {
         button: true,
         label: semantics,
         excludeSemantics: true,
-        child: Center(
+        child: Align(
+          alignment: AlignmentDirectional.centerStart,
+          widthFactor: 1,
           child: DecoratedBox(
             decoration: BoxDecoration(
               color: active ? c.primaryContainer : c.surface,

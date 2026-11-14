@@ -49,7 +49,7 @@ void main() {
         expect(find.byType(NavigationBar), findsNothing);
         expect(find.byType(FloatingActionButton), findsNothing);
         final add = tester.getCenter(find.byIcon(Icons.add));
-        final home = tester.getCenter(find.byIcon(Icons.home_rounded));
+        final home = tester.getCenter(find.byIcon(Icons.home_outlined));
         final rtl = locale == _ar;
         // Add sits at the trailing end: left in Arabic, right in English.
         expect(add.dx > home.dx, !rtl);

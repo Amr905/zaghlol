@@ -26,10 +26,10 @@ class _Destination {
 }
 
 const _destinations = <_Destination>[
-  _Destination(Icons.home_outlined, Icons.home_rounded),
-  _Destination(Icons.area_chart_outlined, Icons.area_chart),
-  _Destination(Icons.account_balance_outlined, Icons.account_balance),
-  _Destination(Icons.chat_outlined, Icons.chat),
+  _Destination(Icons.home_outlined, Icons.home_outlined),
+  _Destination(Icons.area_chart_outlined, Icons.area_chart_outlined),
+  _Destination(Icons.account_balance_outlined, Icons.account_balance_outlined),
+  _Destination(Icons.chat_outlined, Icons.chat_outlined),
 ];
 
 List<String> _labels(AppLocalizations l10n) => [
@@ -200,7 +200,7 @@ class ZAddButton extends StatelessWidget {
             child: SizedBox(
               width: size,
               height: size,
-              child: Icon(Icons.add, size: 34, color: c.onAccent),
+              child: Icon(Icons.add, size: 32, color: c.onAccent, weight: 300),
             ),
           ),
         ),
