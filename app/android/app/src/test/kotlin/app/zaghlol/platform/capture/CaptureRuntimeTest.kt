@@ -267,6 +267,7 @@ class CaptureRuntimeTest {
                 guard = { throw IllegalStateException("not in JVM tests") },
                 headlessStarter = { f -> headlessHost = f; starter },
                 cipher = SoftwareSpoolCipher(), keyCreatedAtMs = { null }, wallClockMs = { wallNow },
+                monoClockMs = { System.nanoTime() / 1_000_000 },
             ),
         )
         rt.store.put("a")
