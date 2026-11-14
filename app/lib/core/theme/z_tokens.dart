@@ -98,6 +98,9 @@ class ZColors extends ThemeExtension<ZColors> {
     required this.heroTo,
     required this.progressFrom,
     required this.progressTo,
+    required this.tintViolet,
+    required this.tintBlue,
+    required this.tintTeal,
   });
 
   final Brightness brightness;
@@ -132,6 +135,12 @@ class ZColors extends ThemeExtension<ZColors> {
   final Color progressFrom;
   final Color progressTo;
 
+  /// Icon-tile / avatar tints from the mockups (settings rows, bank
+  /// avatars): not semantic, always paired with a label.
+  final Color tintViolet;
+  final Color tintBlue;
+  final Color tintTeal;
+
   /// Mint Fresh (light).
   static const ZColors light = ZColors(
     brightness: Brightness.light,
@@ -162,6 +171,9 @@ class ZColors extends ThemeExtension<ZColors> {
     heroTo: Color(0xFFE4F8D8),
     progressFrom: Color(0xFF0F7A55),
     progressTo: Color(0xFF34B284),
+    tintViolet: Color(0xFF9585CF),
+    tintBlue: Color(0xFF6A8FD8),
+    tintTeal: Color(0xFF3F8C86),
   );
 
   /// Jade Night (dark).
@@ -194,6 +206,9 @@ class ZColors extends ThemeExtension<ZColors> {
     heroTo: Color(0xFF0B2018),
     progressFrom: Color(0xFF34D399),
     progressTo: Color(0xFFA7F3D0),
+    tintViolet: Color(0xFFB4A8E6),
+    tintBlue: Color(0xFF8FB0EE),
+    tintTeal: Color(0xFF6CC4BD),
   );
 
   /// The tokens of the nearest [Theme]. Throws in debug if the theme was not
@@ -234,6 +249,9 @@ class ZColors extends ThemeExtension<ZColors> {
     heroTo: heroTo,
     progressFrom: progressFrom,
     progressTo: progressTo,
+    tintViolet: tintViolet,
+    tintBlue: tintBlue,
+    tintTeal: tintTeal,
   );
 
   @override
