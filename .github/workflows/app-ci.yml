@@ -612,6 +612,16 @@ jobs:
           fi
       # T-007: the sqlite3mc code asset ships for every ABI; release APKs are
       # 16 KB page-aligned (Play, targetSdk 35+) and contain no benchmark code.
+      # PO testing (2026-11-14): the dev APKs are kept for 14 days so the PO can
+      # sideload them (Actions run → Artifacts). Debug-signed, dev backend.
+      - name: Keep the dev APK for testing
+        if: matrix.env == 'dev'
+        uses: actions/upload-artifact@b7c566a772e6b6bfb58ed0dc250532a479d7789f # v6.0.0
+        with:
+          name: zaghlol-${{ matrix.flavor }}-${{ matrix.mode }}-apk
+          path: app/build/app/outputs/flutter-apk/*.apk
+          if-no-files-found: error
+          retention-days: 14
       - name: Assert sqlite3mc code asset, 16 KB alignment, no benchmark code
         run: |
           APK=$(find app/build/app/outputs -iname "*${FLAVOR}*${MODE}.apk" | head -n 1)
