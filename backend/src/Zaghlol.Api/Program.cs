@@ -2,6 +2,7 @@ using Serilog;
 using Serilog.Core;
 using Zaghlol.Api;
 using Zaghlol.Api.Auth;
+using Zaghlol.Api.Dev;
 using Zaghlol.Api.Endpoints;
 using Zaghlol.Api.Endpoints.Admin;
 using Zaghlol.Api.Endpoints.V1;
@@ -29,6 +30,9 @@ if (args.Contains("--healthcheck", StringComparer.Ordinal))
 }
 
 var builder = WebApplication.CreateBuilder(args);
+
+// DEV ONLY: key ring from a file in the phone-test compose stack (Development only).
+DevKeyEnvFile.AddIfConfigured(builder.Configuration, builder.Environment);
 
 builder.WebHost.ConfigureKestrel(options => options.AddServerHeader = false);
 
@@ -82,6 +86,8 @@ builder.Services.AddZaghlolSync();
 // placeholder (T-132) is registered.
 builder.Services.AddZaghlolGooglePlay();
 builder.Services.AddZaghlolPurchaseVerification();
+// DEV ONLY (Dev:FakeStores=true, Development only): a fake Play API and POST /dev/v1/grant-gold for testing Gold without Google Play.
+builder.Services.AddZaghlolDevFakeStores(builder.Configuration, builder.Environment);
 // Restore (T-185): Play Integrity and App Attest verifiers (T-181, FU-120) and the restore flow; Production refuses to start unless the
 // real verifiers are registered, and the pinned Apple root and Attestation:* settings are validated at startup.
 builder.Services.AddZaghlolAttestation();
@@ -112,6 +118,7 @@ app.MapContributionAdmin();
 app.MapFlagAdmin();
 app.MapSupportAdmin();
 app.MapPriceAdmin();
+app.MapDevFakeStores();
 
 await app.RunAsync();
 

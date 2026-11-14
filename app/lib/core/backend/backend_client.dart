@@ -74,24 +74,43 @@ final class ClientIdentity {
 /// Where the backend is and which keys sign its answers.
 final class BackendConfig {
   /// [baseUri] must be HTTPS, except a loopback/emulator host when
-  /// [allowInsecureLocalhost] (debug builds against the local backend).
+  /// [allowInsecureLocalhost] (debug builds against the local backend), and a
+  /// private IPv4 LAN address (10/8, 172.16/12, 192.168/16) when
+  /// [allowPrivateLan] (a dev build reaching a backend on the developer's PC
+  /// over Wi-Fi, `docs/workflow/run-backend-locally.md`). Neither is ever set
+  /// for a release build.
   BackendConfig({
     required this.baseUri,
     required this.verifier,
     bool allowInsecureLocalhost = false,
+    bool allowPrivateLan = false,
   }) {
     final local = const {'localhost', '127.0.0.1', '10.0.2.2'};
     final ok =
         baseUri.scheme == 'https' ||
-        (allowInsecureLocalhost &&
-            baseUri.scheme == 'http' &&
-            local.contains(baseUri.host));
+        (baseUri.scheme == 'http' &&
+            ((allowInsecureLocalhost && local.contains(baseUri.host)) ||
+                (allowPrivateLan && isPrivateLanIpv4(baseUri.host))));
     if (!ok ||
         baseUri.hasQuery ||
         baseUri.hasFragment ||
         baseUri.userInfo.isNotEmpty) {
       throw ArgumentError('bad base URI');
     }
+  }
+
+  /// True for a dotted-quad IPv4 literal in 10.0.0.0/8, 172.16.0.0/12 or
+  /// 192.168.0.0/16 (RFC 1918). Names are never accepted: no DNS answer can
+  /// turn a LAN exception into a public host.
+  static bool isPrivateLanIpv4(String host) {
+    final m = RegExp(r'^(\d{1,3})\.(\d{1,3})\.(\d{1,3})\.(\d{1,3})$')
+        .firstMatch(host);
+    if (m == null) return false;
+    final o = [for (var i = 1; i <= 4; i++) int.parse(m.group(i)!)];
+    if (o.any((v) => v > 255)) return false;
+    return o[0] == 10 ||
+        (o[0] == 172 && o[1] >= 16 && o[1] <= 31) ||
+        (o[0] == 192 && o[1] == 168);
   }
 
   final Uri baseUri;

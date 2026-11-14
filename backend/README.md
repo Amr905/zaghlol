@@ -18,6 +18,10 @@ Never stores user financial data (SRS BR-SYNC-03).
 | `deploy/db/` | `bootstrap-roles.sql` (roles + schema, run once by an admin), `dev-passwords.sql` (compose only) |
 | `tests/` | xUnit unit tests and Testcontainers PostgreSQL 17 integration tests (schema, CHECKs, grants, readiness) |
 
+## Phone test stack (dev only)
+
+`docker compose -f docker-compose.phone-test.yml up --build -d` starts a LAN-reachable backend with fake store verification; see `docs/workflow/run-backend-locally.md`.
+
 ## Run locally
 
 ```sh

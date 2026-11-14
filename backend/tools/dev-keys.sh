@@ -10,7 +10,8 @@
 set -eu
 
 here=$(CDPATH= cd -- "$(dirname -- "$0")" && pwd)
-dir="$here/../.dev-keys"
+# DEV_KEYS_DIR: the phone-test compose stack writes into a docker volume instead.
+dir="${DEV_KEYS_DIR:-$here/../.dev-keys}"
 
 if [ -f "$dir/kms.env" ] && [ "${1:-}" != "--force" ]; then
   echo "dev keys already exist in backend/.dev-keys (use --force to replace them)"
@@ -19,7 +20,8 @@ fi
 
 command -v openssl >/dev/null 2>&1 || { echo "openssl is required" >&2; exit 1; }
 
-rm -rf "$dir"
+# Empty the directory, not remove it: it may be a mount point.
+rm -rf "$dir"/* 2>/dev/null || true
 mkdir -p "$dir"
 
 b64url() { base64 | tr '+/' '-_' | tr -d '=\n'; }

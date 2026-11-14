@@ -44,6 +44,17 @@ const String _apiBase = String.fromEnvironment(
   defaultValue: 'https://api.zaghlol.app',
 );
 
+/// Dev builds only: the local backend's public signing keys, from
+/// `--dart-define=ZAGHLOL_DEV_KEYS=<kid>:<x>:<y>,...` (printed by
+/// `GET /dev/v1/app-keys` on the dev backend, `docs/workflow/run-backend-locally.md`).
+/// Ignored in release mode, so a release build never pins a dev key.
+const String _devKeysDefine = String.fromEnvironment('ZAGHLOL_DEV_KEYS');
+
+/// The keys parsed from [_devKeysDefine]; empty in release mode.
+final List<ResponseKey> devBackendKeys = kReleaseMode
+    ? const <ResponseKey>[]
+    : parseDevBackendKeys(_devKeysDefine);
+
 /// The app version of this build (`--dart-define=ZAGHLOL_APP_VERSION`);
 /// also the backup header's version (T-152).
 const String kClientAppVersion = String.fromEnvironment(
@@ -77,11 +88,12 @@ final clientIdentityProvider = Provider<ClientIdentity>(
 final backendConfigProvider = Provider<BackendConfig>(
   (ref) => BackendConfig(
     baseUri: Uri.parse(_apiBase),
-    verifier: ResponseSignatureVerifier(
-      releaseResponseKeys,
-      allowDevKeys: !kReleaseMode,
-    ),
+    verifier: ResponseSignatureVerifier([
+      ...releaseResponseKeys,
+      ...devBackendKeys.where((k) => k.kid[0] == 's'),
+    ], allowDevKeys: !kReleaseMode),
     allowInsecureLocalhost: !kReleaseMode,
+    allowPrivateLan: !kReleaseMode,
   ),
   name: 'backendConfigProvider',
 );
@@ -120,10 +132,10 @@ final Override entitlementServiceOverride = entitlementServiceProvider
         store: store,
         time: TrustedTime(store: store, clock: clock),
         anchor: TimeAnchor(clock: clock),
-        keys: ResponseSignatureVerifier(
-          releaseEntitlementKeys,
-          allowDevKeys: !kReleaseMode,
-        ),
+        keys: ResponseSignatureVerifier([
+          ...releaseEntitlementKeys,
+          ...devBackendKeys.where((k) => k.kid[0] == 'e'),
+        ], allowDevKeys: !kReleaseMode),
         sink: NotifierEntitlementSink(
           ref.read(entitlementStateProvider.notifier),
         ),
