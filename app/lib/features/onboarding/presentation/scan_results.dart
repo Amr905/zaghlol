@@ -276,6 +276,34 @@ class _BodyState extends ConsumerState<ScanResultsBody> {
     }
   }
 
+  /// Header "Edit" link (mockup 24): pick the card to edit (S-43). One card
+  /// goes straight to the editor.
+  Future<void> _pickToEdit(List<ScanCardItem> cards) async {
+    if (cards.length == 1) {
+      widget.onEditCard?.call(cards.single.accountId);
+      return;
+    }
+    final l = AppLocalizations.of(context);
+    final picked = await showZSheet<String>(
+      context: context,
+      title: l.onboardingScanResultsCardsTitle,
+      builder: (ctx) => Column(
+        mainAxisSize: MainAxisSize.min,
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          for (final i in cards)
+            ListTile(
+              key: ValueKey('scan-edit-${i.accountId}'),
+              minVerticalPadding: ZSpacing.md,
+              title: Text(i.label),
+              onTap: () => Navigator.of(ctx).pop(i.accountId),
+            ),
+        ],
+      ),
+    );
+    if (picked != null) widget.onEditCard?.call(picked);
+  }
+
   Future<void> _openCard(ScanCardItem item) async {
     final l = AppLocalizations.of(context);
     await showZSheet<void>(
@@ -402,9 +430,23 @@ class _BodyState extends ConsumerState<ScanResultsBody> {
               ),
               const SizedBox(height: ZSpacing.lg),
               if (cards.isNotEmpty) ...[
-                Text(
-                  l.onboardingScanResultsCardsTitle,
-                  style: ZType.title.copyWith(color: c.text),
+                Row(
+                  children: [
+                    Expanded(
+                      child: Text(
+                        l.onboardingScanResultsCardsTitle,
+                        style: ZType.title.copyWith(color: c.text),
+                      ),
+                    ),
+                    if (widget.onEditCard != null)
+                      ZButton(
+                        key: const ValueKey('scan-edit-cards'),
+                        label: l.commonActionEdit,
+                        variant: ZButtonVariant.text,
+                        size: ZButtonSize.small,
+                        onPressed: () => unawaited(_pickToEdit(cards)),
+                      ),
+                  ],
                 ),
                 const SizedBox(height: ZSpacing.md),
                 ZCard(
