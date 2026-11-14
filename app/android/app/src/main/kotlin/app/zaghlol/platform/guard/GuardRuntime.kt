@@ -144,6 +144,19 @@ class GuardRuntime(
         }
     }
 
+    /**
+     * T-166 "Delete everything": deletes the user part and drops the cached
+     * snapshot under the runtime lock, so the next message runs on the base
+     * rules only (user state `ABSENT`). Throws when the file is still there.
+     */
+    fun forgetUser() {
+        synchronized(lock) {
+            val gone = store.deleteForWipe()
+            snapshot.set(null)
+            if (!gone) throw GuardConfigWriteException(GuardWriteError.IO_ERROR)
+        }
+    }
+
     private fun load(): GuardSnapshot {
         val base = validBase ?: try {
             loadBase()

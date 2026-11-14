@@ -1,9 +1,11 @@
 import 'dart:async';
+import 'dart:io';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import 'app/app_navigation.dart';
+import 'app/app_restart.dart';
 import 'app/onboarding_gate.dart';
 import 'core/db/db_directory.dart';
 import 'core/db/db_key_providers.dart';
@@ -21,6 +23,7 @@ import 'features/capture/presentation/capture_lifecycle.dart';
 import 'features/gold/application/gold_providers.dart';
 import 'features/catalog_sync/application/sync_providers.dart';
 import 'features/catalog_sync/presentation/sync_lifecycle.dart';
+import 'features/security/application/delete_everything_providers.dart';
 import 'features/security/presentation/app_lock_gate.dart';
 import 'ingestion/ingestion_main.dart';
 import 'ingestion/ios_intent_spike.dart';
@@ -30,30 +33,47 @@ Future<void> main() async {
   // FU-119: intl date symbols for ar/en before any date is formatted.
   await initDateFormatting();
   final dbDirectory = await resolveDbDirectory();
+  // T-166: an unfinished "Delete everything" is completed before anything
+  // opens the database.
+  await _resumeWipe(dbDirectory);
   // T-047: the UI engine's capture module (drain, Guard config, health) runs
   // in every build; it starts once the database opens.
   runApp(
-    ProviderScope(
-      overrides: [
-        dbDirectoryProvider.overrideWithValue(dbDirectory),
-        // WIRE-NAV: the four tabs and every pushed route, wired.
-        tabRootsProvider.overrideWithValue(wiredTabRoots),
-        // T-143 / FU-115 / FU-138: backend client, entitlement service, sync.
-        ...syncWiringOverrides,
-        // T-145: seat keys and the purchase flow.
-        ...goldWiringOverrides,
-        // WIRE-NAV: paywall trigger, Gold sign-in, links, chart card opener.
-        ...navigationWiringOverrides(rootNavigatorKey),
-        // T-086: new-card channel toggles become ignore rules (T-078).
-        cardCapturePortProvider.overrideWith(
-          (ref) => ref.watch(captureCardPortProvider),
+    AppRestartScope(
+      beforeStart: () => _resumeWipe(dbDirectory),
+      builder: (context, restart) => ProviderScope(
+        overrides: [
+          // T-166: restart into first-launch state after Delete everything.
+          appRestartProvider.overrideWithValue(restart),
+          ...deleteEverythingWiringOverrides,
+          dbDirectoryProvider.overrideWithValue(dbDirectory),
+          // WIRE-NAV: the four tabs and every pushed route, wired.
+          tabRootsProvider.overrideWithValue(wiredTabRoots),
+          // T-143 / FU-115 / FU-138: backend client, entitlement service, sync.
+          ...syncWiringOverrides,
+          // T-145: seat keys and the purchase flow.
+          ...goldWiringOverrides,
+          // WIRE-NAV: paywall trigger, Gold sign-in, links, chart card opener.
+          ...navigationWiringOverrides(rootNavigatorKey),
+          // T-086: new-card channel toggles become ignore rules (T-078).
+          cardCapturePortProvider.overrideWith(
+            (ref) => ref.watch(captureCardPortProvider),
+          ),
+        ],
+        child: const CaptureLifecycle(
+          child: SyncLifecycle(child: _LocalizedApp()),
         ),
-      ],
-      child: const CaptureLifecycle(
-        child: SyncLifecycle(child: _LocalizedApp()),
       ),
     ),
   );
+}
+
+Future<void> _resumeWipe(Directory dbDirectory) async {
+  try {
+    await resumePendingWipe(dbDirectory);
+  } on Object {
+    // The marker stays; the next launch tries again.
+  }
 }
 
 /// T-041: the headless ingestion engine's entrypoint (every build). The

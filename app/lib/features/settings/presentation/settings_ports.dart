@@ -9,6 +9,7 @@ import '../../backup/application/schedule_providers.dart' as backup;
 import '../../catalog_sync/application/sync_providers.dart' as sync;
 import '../../catalog_sync/application/sync_providers.dart'
     show kClientAppBuild, kClientAppVersion;
+import '../../gold/application/restore.dart' show DeleteEverythingWarning;
 
 /// App version and build number (About).
 class AppInfo {
@@ -69,6 +70,13 @@ final contactSupportProvider = Provider<Future<void> Function(String subject)?>(
 final wipeEverythingProvider = Provider<Future<void> Function()?>(
   (ref) => null,
   name: 'settingsWipeEverythingProvider',
+);
+
+/// T-166 / EC-69: whether this install holds a Gold seat (and the next-move
+/// date) for the delete dialog's Android warning. Null: unknown, no warning.
+final deleteSeatWarningProvider = FutureProvider<DeleteEverythingWarning?>(
+  (ref) async => null,
+  name: 'settingsDeleteSeatWarningProvider',
 );
 
 /// The last backup time for the delete dialog; null: none.

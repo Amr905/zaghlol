@@ -54,6 +54,8 @@ class AndroidCaptureHost(
     private val inbox: InboxReader? = null,
     /** T-044: Activity-bound actions; UI engine only (the headless host answers `NOT_AVAILABLE`). */
     private val ui: UiPermissions? = null,
+    /** T-166: the native part of "Delete everything"; UI engine only (headless answers `NOT_AVAILABLE`). */
+    private val wiper: (() -> Unit)? = null,
 ) : AndroidCaptureHostApi {
 
     /** Ids this host's drain returned and that are not yet acked. */
@@ -209,6 +211,13 @@ class AndroidCaptureHost(
     }
 
     override fun clearSpoolAlerts(seq: Long): Unit = guarded { status.clear(seq) }
+
+    /** T-166: see [app.zaghlol.platform.wipe.LocalDataWiper]; any failure is `IO_ERROR`. */
+    override fun wipeLocalData(): Unit = guarded {
+        val w = need(wiper)
+        synchronized(drained) { drained.clear() }
+        w()
+    }
 
     /** The engine is going away: drop its claim (entries stay for the next drain). */
     fun detach() {

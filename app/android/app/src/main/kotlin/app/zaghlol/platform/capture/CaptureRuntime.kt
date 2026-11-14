@@ -29,6 +29,7 @@ import app.zaghlol.platform.spool.SpoolCipher
 import app.zaghlol.platform.spool.SpoolClaim
 import app.zaghlol.platform.spool.SpoolKey
 import app.zaghlol.platform.spool.SpoolStore
+import app.zaghlol.platform.wipe.LocalDataWiper
 import io.flutter.embedding.engine.FlutterEngine
 import io.flutter.plugin.common.BinaryMessenger
 import kotlinx.coroutines.CoroutineDispatcher
@@ -71,6 +72,8 @@ class CaptureSeams(
     val uiInbox: () -> InboxReader? = { null },
     /** T-040: `Settings.Global.BOOT_COUNT` for the receive stamp (-1 unknown). */
     val bootCount: () -> Int = { -1 },
+    /** T-166: the native part of "Delete everything" (`LocalDataWiper.production`); UI host only. */
+    val wipe: (() -> Unit)? = null,
 )
 
 /**
@@ -105,6 +108,7 @@ class CaptureRuntime internal constructor(seams: CaptureSeams) {
     private val monoClockMs = seams.monoClockMs
     private val guardFactory = seams.guard
     private val uiInbox = seams.uiInbox
+    private val wipe = seams.wipe
 
     /** The Capture Guard (T-038), loaded on first use. */
     val guard: GuardRuntime by lazy { guardFactory() }
@@ -284,6 +288,7 @@ class CaptureRuntime internal constructor(seams: CaptureSeams) {
         monoClockMs = monoClockMs,
         inbox = if (headless) null else uiInbox(),
         ui = if (headless) null else uiPermissions,
+        wiper = if (headless) null else wipe,
     )
 
     /**
@@ -360,6 +365,7 @@ class CaptureRuntime internal constructor(seams: CaptureSeams) {
                 guard = { GuardRuntime.get(app) },
                 uiInbox = { InboxReaders.forUiEngine(app) },
                 bootCount = { bootCount(app) },
+                wipe = { LocalDataWiper.production(app) { GuardRuntime.get(app).forgetUser() }.wipe() },
                 headlessStarter = { newHost ->
                     FlutterHeadlessStarter(app, handler, newHost) { ref.get()?.trace ?: IngestTrace.NONE }
                 },

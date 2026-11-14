@@ -851,6 +851,30 @@ class AndroidCaptureHostApi {
       isNullValid: true,
     );
   }
+
+  /// T-166 "Delete everything", UI engine only, after Dart closed the
+  /// database and deleted its key slots: cancels all WorkManager work and
+  /// every notification, forgets the Guard user part, deletes every
+  /// AndroidKeyStore alias of the app and clears the contents of filesDir,
+  /// noBackupFilesDir and cacheDir. Idempotent; IO_ERROR when something
+  /// could not be deleted (the other parts still ran).
+  Future<void> wipeLocalData() async {
+    final pigeonVar_channelName =
+        'dev.flutter.pigeon.zaghlol.AndroidCaptureHostApi.wipeLocalData$pigeonVar_messageChannelSuffix';
+    final pigeonVar_channel = BasicMessageChannel<Object?>(
+      pigeonVar_channelName,
+      pigeonChannelCodec,
+      binaryMessenger: pigeonVar_binaryMessenger,
+    );
+    final Future<Object?> pigeonVar_sendFuture = pigeonVar_channel.send(null);
+    final pigeonVar_replyList = await pigeonVar_sendFuture as List<Object?>?;
+
+    _extractReplyValueOrThrow(
+      pigeonVar_replyList,
+      pigeonVar_channelName,
+      isNullValid: true,
+    );
+  }
 }
 
 /// iOS host (T-062): the encrypted spool in the App Group container and the
@@ -985,6 +1009,31 @@ class IosCaptureHostApi {
   Future<void> registerBackgroundRefresh() async {
     final pigeonVar_channelName =
         'dev.flutter.pigeon.zaghlol.IosCaptureHostApi.registerBackgroundRefresh$pigeonVar_messageChannelSuffix';
+    final pigeonVar_channel = BasicMessageChannel<Object?>(
+      pigeonVar_channelName,
+      pigeonChannelCodec,
+      binaryMessenger: pigeonVar_binaryMessenger,
+    );
+    final Future<Object?> pigeonVar_sendFuture = pigeonVar_channel.send(null);
+    final pigeonVar_replyList = await pigeonVar_sendFuture as List<Object?>?;
+
+    _extractReplyValueOrThrow(
+      pigeonVar_replyList,
+      pigeonVar_channelName,
+      isNullValid: true,
+    );
+  }
+
+  /// T-166 "Delete everything", UI engine only, after Dart closed the
+  /// database and deleted its key slots: cancels every BGTask request,
+  /// removes pending and delivered notifications, deletes every Keychain item
+  /// of the app except the seat keys (service `app.zaghlol.seatkey`, D-55),
+  /// clears the contents (never the roots) of the sandbox and App Group
+  /// directories and applies the backup exclusions again (T-165 F4).
+  /// Idempotent; IO_ERROR when something could not be deleted.
+  Future<void> wipeLocalData() async {
+    final pigeonVar_channelName =
+        'dev.flutter.pigeon.zaghlol.IosCaptureHostApi.wipeLocalData$pigeonVar_messageChannelSuffix';
     final pigeonVar_channel = BasicMessageChannel<Object?>(
       pigeonVar_channelName,
       pigeonChannelCodec,
