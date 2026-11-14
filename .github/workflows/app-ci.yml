@@ -409,6 +409,7 @@ jobs:
             -scheme dev \
             -configuration Debug-dev \
             -destination "id=$UDID" \
+            -parallel-testing-enabled NO \
             CODE_SIGNING_ALLOWED=NO > xcodebuild.log 2>&1; then
             grep -E "error:|Test Case.*failed|\*\* TEST FAILED" xcodebuild.log | head -n 30 | while read -r line; do echo "::error::xcodebuild: $line"; done
             tail -n 30 xcodebuild.log
