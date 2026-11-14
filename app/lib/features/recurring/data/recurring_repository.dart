@@ -299,6 +299,115 @@ class RecurringRepository {
     });
   }
 
+  /// T-102: edits a manual item in place (S-25). Same validation as
+  /// [addManual]; the item keeps its id, merchant key and status unless the
+  /// paid count now reaches the total. False when it does not exist.
+  Future<bool> updateManual(
+    String id, {
+    required String kind,
+    required String name,
+    required Money amount,
+    required int dueDay,
+    required CivilDate nextDue,
+    RecurrenceCadence cadence = RecurrenceCadence.monthly,
+    int? cadenceDays,
+    int? totalCount,
+    int paidCount = 0,
+    String? accountId,
+    int reminderDays = defaultReminderDays,
+  }) async {
+    final n = name.trim();
+    final ok =
+        RecurringKind.all.contains(kind) &&
+        n.isNotEmpty &&
+        n.runes.length <= 60 &&
+        !n.contains('\u0000') &&
+        (amount.isPositive ||
+            (kind == RecurringKind.cardDue && amount.isZero)) &&
+        dueDay >= 1 &&
+        dueDay <= 31 &&
+        reminderDays >= 0 &&
+        reminderDays <= 60 &&
+        paidCount >= 0 &&
+        (totalCount == null || (totalCount >= 1 && paidCount <= totalCount)) &&
+        (cadence == RecurrenceCadence.customDays) == (cadenceDays != null) &&
+        (cadenceDays == null || (cadenceDays >= 1 && cadenceDays <= 3660));
+    if (!ok) throw RecurringException(RecurringException.invalid);
+    final changed = await guardWrite(
+      () => _recurring.updateItem(
+        id,
+        RecurringItemsCompanion(
+          kind: Value(kind),
+          name: Value(n),
+          accountId: Value(accountId),
+          currency: Value(amount.currency.code),
+          cadence: Value(_cadenceCode(cadence)),
+          cadenceDays: Value(cadenceDays),
+          dueDay: Value(dueDay),
+          nextDueDate: Value(nextDue.toIso()),
+          totalCount: Value(totalCount),
+          paidCount: Value(paidCount),
+          reminderDays: Value(reminderDays),
+          status: Value(
+            totalCount != null && paidCount >= totalCount
+                ? RecurringStatus.completed
+                : RecurringStatus.active,
+          ),
+        ).withAmount(amount),
+      ),
+    );
+    return changed > 0;
+  }
+
+  /// Deletes a manual or suggested item and its occurrences.
+  Future<bool> deleteItem(String id) async =>
+      await guardWrite(() => _recurring.deleteItem(id)) > 0;
+
+  /// "Mark paid" by hand: counts the occurrence due on the item's next date
+  /// (no linked transaction) and moves the item on, like an auto-mark. False
+  /// when the item is not active or is a card due.
+  Future<bool> markPaidManual(String id) => guardWrite(
+    () => _db.transaction(() async {
+      final item = await _recurring.itemById(id);
+      if (item == null || item.status != RecurringStatus.active) return false;
+      // A card due is paid only by money arriving on the card (auto-mark).
+      if (item.kind == RecurringKind.cardDue) return false;
+      final due = CivilDate.tryParse(item.nextDueDate ?? '');
+      final cadence = _cadenceOf(item.cadence);
+      if (due == null || cadence == null) return false;
+      final claimed = await _db.customUpdate(
+        'INSERT OR IGNORE INTO recurring_occurrences '
+        '(item_id, due_date, txn_id, paid_at) VALUES (?1, ?2, NULL, ?3)',
+        variables: [
+          Variable<String>(id),
+          Variable<String>(due.toIso()),
+          Variable<int>(_now),
+        ],
+        updates: {_db.recurringOccurrences},
+      );
+      if (claimed == 0) return false;
+      final p = progressAfterPayment(
+        paidCount: item.paidCount,
+        totalCount: item.totalCount,
+        dueDate: due,
+        cadence: cadence,
+        dueDay: item.dueDay,
+        cadenceDays: item.cadenceDays,
+      );
+      await _recurring.updateItem(
+        id,
+        RecurringItemsCompanion(
+          paidCount: Value(p.paidCount),
+          status: Value(
+            p.completed ? RecurringStatus.completed : RecurringStatus.active,
+          ),
+          nextDueDate: Value(p.nextDue?.toIso() ?? item.nextDueDate),
+        ),
+      );
+      return true;
+    }),
+  );
+
   /// Card due dates (FR-SUB-04): one active `card_due` item per credit
   /// account that has a statement due day (S-43). A changed due day moves the
   /// item's anchor and next date. Returns the number of items created or

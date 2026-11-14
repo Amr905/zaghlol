@@ -64,11 +64,194 @@ private func nilOrValue<T>(_ value: Any?) -> T? {
   return value as! T?
 }
 
+private func doubleEqualsAttestationApi(_ lhs: Double, _ rhs: Double) -> Bool {
+  return (lhs.isNaN && rhs.isNaN) || lhs == rhs
+}
+
+private func doubleHashAttestationApi(_ value: Double, _ hasher: inout Hasher) {
+  if value.isNaN {
+    hasher.combine(0x7FF8000000000000)
+  } else {
+    // Normalize -0.0 to 0.0
+    hasher.combine(value == 0 ? 0 : value)
+  }
+}
+
+func deepEqualsAttestationApi(_ lhs: Any?, _ rhs: Any?) -> Bool {
+  let cleanLhs = nilOrValue(lhs) as Any?
+  let cleanRhs = nilOrValue(rhs) as Any?
+  switch (cleanLhs, cleanRhs) {
+  case (nil, nil):
+    return true
+
+  case (nil, _), (_, nil):
+    return false
+
+  case (let lhs as AnyObject, let rhs as AnyObject) where lhs === rhs:
+    return true
+
+  case is (Void, Void):
+    return true
+
+  case (let lhsArray, let rhsArray) as ([Any?], [Any?]):
+    guard lhsArray.count == rhsArray.count else { return false }
+    for (index, element) in lhsArray.enumerated() {
+      if !deepEqualsAttestationApi(element, rhsArray[index]) {
+        return false
+      }
+    }
+    return true
+
+  case (let lhsArray, let rhsArray) as ([Double], [Double]):
+    guard lhsArray.count == rhsArray.count else { return false }
+    for (index, element) in lhsArray.enumerated() {
+      if !doubleEqualsAttestationApi(element, rhsArray[index]) {
+        return false
+      }
+    }
+    return true
+
+  case (let lhsDictionary, let rhsDictionary) as ([AnyHashable: Any?], [AnyHashable: Any?]):
+    guard lhsDictionary.count == rhsDictionary.count else { return false }
+    for (lhsKey, lhsValue) in lhsDictionary {
+      var found = false
+      for (rhsKey, rhsValue) in rhsDictionary {
+        if deepEqualsAttestationApi(lhsKey, rhsKey) {
+          if deepEqualsAttestationApi(lhsValue, rhsValue) {
+            found = true
+            break
+          } else {
+            return false
+          }
+        }
+      }
+      if !found { return false }
+    }
+    return true
+
+  case (let lhs as Double, let rhs as Double):
+    return doubleEqualsAttestationApi(lhs, rhs)
+
+  case (let lhsHashable, let rhsHashable) as (AnyHashable, AnyHashable):
+    return lhsHashable == rhsHashable
+
+  default:
+    return false
+  }
+}
+
+func deepHashAttestationApi(value: Any?, hasher: inout Hasher) {
+  let cleanValue = nilOrValue(value) as Any?
+  if let cleanValue = cleanValue {
+    if let doubleValue = cleanValue as? Double {
+      doubleHashAttestationApi(doubleValue, &hasher)
+    } else if let valueList = cleanValue as? [Any?] {
+      for item in valueList {
+        deepHashAttestationApi(value: item, hasher: &hasher)
+      }
+    } else if let valueList = cleanValue as? [Double] {
+      for item in valueList {
+        doubleHashAttestationApi(item, &hasher)
+      }
+    } else if let valueDict = cleanValue as? [AnyHashable: Any?] {
+      var result = 0
+      for (key, value) in valueDict {
+        var entryKeyHasher = Hasher()
+        deepHashAttestationApi(value: key, hasher: &entryKeyHasher)
+        var entryValueHasher = Hasher()
+        deepHashAttestationApi(value: value, hasher: &entryValueHasher)
+        result = result &+ ((entryKeyHasher.finalize() &* 31) ^ entryValueHasher.finalize())
+      }
+      hasher.combine(result)
+    } else if let hashableValue = cleanValue as? AnyHashable {
+      hasher.combine(hashableValue)
+    } else {
+      hasher.combine(String(describing: cleanValue))
+    }
+  } else {
+    hasher.combine(0)
+  }
+}
+
+
+/// The proof that goes into the restore body's `attestation` object.
+///
+/// Generated class from Pigeon that represents data sent in messages.
+struct AttestationProof: Hashable {
+  /// 'play_integrity' | 'app_attest'
+  var type: String
+  /// Android: the Play Integrity standard token.
+  var token: String? = nil
+  /// iOS: the App Attest key ID (base64, as DCAppAttestService returns it).
+  var keyId: String? = nil
+  /// iOS: the assertion over clientDataHash (base64).
+  var assertion: String? = nil
+  /// iOS: base64, only for a newly generated key.
+  var attestationObject: String? = nil
+
+
+  // swift-format-ignore: AlwaysUseLowerCamelCase
+  static func fromList(_ pigeonVar_list: [Any?]) -> AttestationProof? {
+    let type = pigeonVar_list[0] as! String
+    let token: String? = nilOrValue(pigeonVar_list[1])
+    let keyId: String? = nilOrValue(pigeonVar_list[2])
+    let assertion: String? = nilOrValue(pigeonVar_list[3])
+    let attestationObject: String? = nilOrValue(pigeonVar_list[4])
+
+    return AttestationProof(
+      type: type,
+      token: token,
+      keyId: keyId,
+      assertion: assertion,
+      attestationObject: attestationObject
+    )
+  }
+  func toList() -> [Any?] {
+    return [
+      type,
+      token,
+      keyId,
+      assertion,
+      attestationObject,
+    ]
+  }
+  static func == (lhs: AttestationProof, rhs: AttestationProof) -> Bool {
+    if Swift.type(of: lhs) != Swift.type(of: rhs) {
+      return false
+    }
+    return deepEqualsAttestationApi(lhs.type, rhs.type) && deepEqualsAttestationApi(lhs.token, rhs.token) && deepEqualsAttestationApi(lhs.keyId, rhs.keyId) && deepEqualsAttestationApi(lhs.assertion, rhs.assertion) && deepEqualsAttestationApi(lhs.attestationObject, rhs.attestationObject)
+  }
+
+  func hash(into hasher: inout Hasher) {
+    hasher.combine("AttestationProof")
+    deepHashAttestationApi(value: type, hasher: &hasher)
+    deepHashAttestationApi(value: token, hasher: &hasher)
+    deepHashAttestationApi(value: keyId, hasher: &hasher)
+    deepHashAttestationApi(value: assertion, hasher: &hasher)
+    deepHashAttestationApi(value: attestationObject, hasher: &hasher)
+  }
+}
 
 private class AttestationApiPigeonCodecReader: FlutterStandardReader {
+  override func readValue(ofType type: UInt8) -> Any? {
+    switch type {
+    case 129:
+      return AttestationProof.fromList(self.readValue() as! [Any?])
+    default:
+      return super.readValue(ofType: type)
+    }
+  }
 }
 
 private class AttestationApiPigeonCodecWriter: FlutterStandardWriter {
+  override func writeValue(_ value: Any) {
+    if let value = value as? AttestationProof {
+      super.writeByte(129)
+      super.writeValue(value.toList())
+    } else {
+      super.writeValue(value)
+    }
+  }
 }
 
 private class AttestationApiPigeonCodecReaderWriter: FlutterStandardReaderWriter {
@@ -85,8 +268,17 @@ class AttestationApiPigeonCodec: FlutterStandardMessageCodec, @unchecked Sendabl
   static let shared = AttestationApiPigeonCodec(readerWriter: AttestationApiPigeonCodecReaderWriter())
 }
 
+
 /// Generated protocol from Pigeon that represents a handler of messages from Flutter.
 protocol AttestationHostApi {
+  /// Android: Play Integrity StandardIntegrityManager.prepareIntegrityToken
+  /// (cached provider). iOS: no-op.
+  func prepare(completion: @escaping (Result<Void, Error>) -> Void)
+  /// Android: requestHash = base64url(bodyHash) (unpadded) →
+  /// StandardIntegrityTokenProvider.request → token. iOS: clientDataHash =
+  /// bodyHash for DCAppAttestService.generateAssertion, and for attestKey on
+  /// a new key (forceNewKey, a missing key or an invalidKey error).
+  func attest(bodyHash: FlutterStandardTypedData, forceNewKey: Bool, completion: @escaping (Result<AttestationProof, Error>) -> Void)
 }
 
 /// Generated setup class from Pigeon to handle messages through the `binaryMessenger`.
@@ -95,5 +287,44 @@ class AttestationHostApiSetup {
   /// Sets up an instance of `AttestationHostApi` to handle messages through the `binaryMessenger`.
   static func setUp(binaryMessenger: FlutterBinaryMessenger, api: AttestationHostApi?, messageChannelSuffix: String = "") {
     let channelSuffix = messageChannelSuffix.count > 0 ? ".\(messageChannelSuffix)" : ""
+    /// Android: Play Integrity StandardIntegrityManager.prepareIntegrityToken
+    /// (cached provider). iOS: no-op.
+    let prepareChannel = FlutterBasicMessageChannel(name: "dev.flutter.pigeon.zaghlol.AttestationHostApi.prepare\(channelSuffix)", binaryMessenger: binaryMessenger, codec: codec)
+    if let api = api {
+      prepareChannel.setMessageHandler { _, reply in
+        api.prepare { result in
+          switch result {
+          case .success:
+            reply(wrapResult(nil))
+          case .failure(let error):
+            reply(wrapError(error))
+          }
+        }
+      }
+    } else {
+      prepareChannel.setMessageHandler(nil)
+    }
+    /// Android: requestHash = base64url(bodyHash) (unpadded) →
+    /// StandardIntegrityTokenProvider.request → token. iOS: clientDataHash =
+    /// bodyHash for DCAppAttestService.generateAssertion, and for attestKey on
+    /// a new key (forceNewKey, a missing key or an invalidKey error).
+    let attestChannel = FlutterBasicMessageChannel(name: "dev.flutter.pigeon.zaghlol.AttestationHostApi.attest\(channelSuffix)", binaryMessenger: binaryMessenger, codec: codec)
+    if let api = api {
+      attestChannel.setMessageHandler { message, reply in
+        let args = message as! [Any?]
+        let bodyHashArg = args[0] as! FlutterStandardTypedData
+        let forceNewKeyArg = args[1] as! Bool
+        api.attest(bodyHash: bodyHashArg, forceNewKey: forceNewKeyArg) { result in
+          switch result {
+          case .success(let res):
+            reply(wrapResult(res))
+          case .failure(let error):
+            reply(wrapError(error))
+          }
+        }
+      }
+    } else {
+      attestChannel.setMessageHandler(nil)
+    }
   }
 }

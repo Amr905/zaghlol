@@ -20,6 +20,21 @@ final class CaptureHostException extends SafeException {
 abstract interface class CaptureHostPort {
   Future<CaptureCapabilities> getCapabilities();
 
+  /// T-044: READ_SMS + RECEIVE_SMS, after Flutter's own rationale screen.
+  /// True only if both were granted. The `*NoSms` build throws
+  /// [CaptureHostException] `NOT_AVAILABLE` and never shows a system prompt.
+  Future<bool> requestSmsPermission();
+
+  /// T-044: opens the system "Notification access" list (the user grants it
+  /// there; the app cannot). Show the prominent disclosure first (T-056).
+  Future<void> openNotificationAccessSettings();
+
+  /// T-044: battery-optimisation state and the system list link (Q3: never
+  /// the REQUEST_IGNORE_BATTERY_OPTIMIZATIONS dialog).
+  Future<bool> isIgnoringBatteryOptimizations();
+
+  Future<void> requestIgnoreBatteryOptimizations();
+
   /// [userConfigJson] is plaintext; the caller zeroes it after the call.
   Future<void> writeGuardConfig(Uint8List userConfigJson);
 
@@ -43,6 +58,21 @@ final class PigeonCaptureHostPort implements CaptureHostPort {
 
   @override
   Future<CaptureCapabilities> getCapabilities() => _guard(_api.getCapabilities);
+
+  @override
+  Future<bool> requestSmsPermission() => _guard(_api.requestSmsPermission);
+
+  @override
+  Future<void> openNotificationAccessSettings() =>
+      _guard(_api.openNotificationAccessSettings);
+
+  @override
+  Future<bool> isIgnoringBatteryOptimizations() =>
+      _guard(_api.isIgnoringBatteryOptimizations);
+
+  @override
+  Future<void> requestIgnoreBatteryOptimizations() =>
+      _guard(_api.requestIgnoreBatteryOptimizations);
 
   @override
   Future<void> writeGuardConfig(Uint8List userConfigJson) =>

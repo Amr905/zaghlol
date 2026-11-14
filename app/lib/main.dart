@@ -10,10 +10,19 @@ import 'core/l10n/generated/app_localizations.dart';
 import 'core/l10n/locale_providers.dart';
 import 'core/routing/app_router.dart';
 import 'core/theme/app_theme.dart';
+import 'features/accounts/presentation/edit_card/edit_card_providers.dart'
+    show cardCapturePortProvider;
 import 'features/budget/application/cycle_app_wiring.dart';
+import 'features/capture/presentation/capture_controls.dart'
+    show captureCardPortProvider;
 import 'features/capture/presentation/capture_lifecycle.dart';
+import 'features/gold/application/gold_providers.dart';
+import 'features/catalog_sync/application/sync_providers.dart';
+import 'features/catalog_sync/presentation/sync_lifecycle.dart';
+import 'features/home/presentation/home_screen.dart';
 import 'features/security/presentation/app_lock_gate.dart';
 import 'ingestion/ingestion_main.dart';
+import 'ingestion/ios_intent_spike.dart';
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -24,8 +33,24 @@ Future<void> main() async {
   // in every build; it starts once the database opens.
   runApp(
     ProviderScope(
-      overrides: [dbDirectoryProvider.overrideWithValue(dbDirectory)],
-      child: const CaptureLifecycle(child: _LocalizedApp()),
+      overrides: [
+        dbDirectoryProvider.overrideWithValue(dbDirectory),
+        // T-054: Home is the first tab.
+        tabRootsProvider.overrideWithValue(
+          TabRoots(home: (_) => const HomeScreen()),
+        ),
+        // T-143 / FU-115 / FU-138: backend client, entitlement service, sync.
+        ...syncWiringOverrides,
+        // T-145: seat keys and the purchase flow.
+        ...goldWiringOverrides,
+        // T-086: new-card channel toggles become ignore rules (T-078).
+        cardCapturePortProvider.overrideWith(
+          (ref) => ref.watch(captureCardPortProvider),
+        ),
+      ],
+      child: const CaptureLifecycle(
+        child: SyncLifecycle(child: _LocalizedApp()),
+      ),
     ),
   );
 }
@@ -35,6 +60,13 @@ Future<void> main() async {
 /// keeps it in AOT builds.
 @pragma('vm:entry-point')
 void ingestionMain() => runIngestionMain();
+
+/// T-009 spike: entrypoint of the iOS App Intent's headless engine.
+@pragma('vm:entry-point')
+void spikeIntentMain() => runIosIntentSpike();
+
+@pragma('vm:entry-point')
+void spikeIntentSilentMain() => runIosIntentSpikeSilent();
 
 /// Root widget: themed, localized, routed through the T-024 shell. It holds
 /// no user-facing strings itself.

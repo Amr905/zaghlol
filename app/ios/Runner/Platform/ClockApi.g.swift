@@ -285,15 +285,3 @@ class TrustedClockHostApiSetup {
     }
   }
 }
-/// Generated protocol from Pigeon that represents a handler of messages from Flutter.
-protocol SeatKeyHostApi {
-}
-
-/// Generated setup class from Pigeon to handle messages through the `binaryMessenger`.
-class SeatKeyHostApiSetup {
-  static var codec: FlutterStandardMessageCodec { ClockApiPigeonCodec.shared }
-  /// Sets up an instance of `SeatKeyHostApi` to handle messages through the `binaryMessenger`.
-  static func setUp(binaryMessenger: FlutterBinaryMessenger, api: SeatKeyHostApi?, messageChannelSuffix: String = "") {
-    let channelSuffix = messageChannelSuffix.count > 0 ? ".\(messageChannelSuffix)" : ""
-  }
-}

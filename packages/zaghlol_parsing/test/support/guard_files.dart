@@ -52,6 +52,7 @@ GuardUserConfigBuild buildT1User(Registry registry) => buildGuardUserConfig(
   ],
   alwaysCaptureSenders: const [
     GuardUserSenderInput(sender: 'MyCoop', channel: 'sms'),
+    GuardUserSenderInput(sender: '+201000000009', channel: 'sms'),
     GuardUserSenderInput(sender: 'com.example.wallet', channel: 'notification'),
   ],
   customTemplateSenders: const [

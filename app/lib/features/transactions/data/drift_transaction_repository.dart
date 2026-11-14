@@ -23,6 +23,22 @@ const int maxMerchantRunes = 200;
 const int maxNoteRunes = 1000;
 
 typedef Clock = DateTime Function();
+
+/// Runs inside the editing transaction before a new amount is written
+/// (EC-40: links that no longer fit are removed first). Returns the ids of
+/// the removed links; the caller shows the notice when it is not empty.
+typedef AmountChangeHook = Future<List<String>> Function(
+  String id,
+  int newAmountMinor,
+);
+
+/// What [DriftTransactionRepository.editWithOutcome] did.
+final class EditOutcome {
+  const EditOutcome(this.record, this.removedLinkIds);
+  final TransactionRecord record;
+  final List<String> removedLinkIds;
+}
+
 typedef IdGenerator = String Function();
 
 /// A random (version 4) UUID.
@@ -38,13 +54,18 @@ String newUuidV4() {
 }
 
 class DriftTransactionRepository implements TransactionRepository {
-  DriftTransactionRepository(this._dao, {Clock? clock, IdGenerator? newId})
-    : _now = clock ?? DateTime.now,
-      _newId = newId ?? newUuidV4;
+  DriftTransactionRepository(
+    this._dao, {
+    Clock? clock,
+    IdGenerator? newId,
+    this._onAmountChange,
+  }) : _now = clock ?? DateTime.now,
+       _newId = newId ?? newUuidV4;
 
   final TransactionsDao _dao;
   final Clock _now;
   final IdGenerator _newId;
+  final AmountChangeHook? _onAmountChange;
 
   int _nowMs() => _now().toUtc().millisecondsSinceEpoch;
 
@@ -118,7 +139,11 @@ class DriftTransactionRepository implements TransactionRepository {
   }
 
   @override
-  Future<TransactionRecord> edit(String id, TransactionEdit edit) async {
+  Future<TransactionRecord> edit(String id, TransactionEdit edit) async =>
+      (await editWithOutcome(id, edit)).record;
+
+  /// [edit], and also says which offset links the new amount removed.
+  Future<EditOutcome> editWithOutcome(String id, TransactionEdit edit) async {
     if (edit.accountId != null) _requireId(edit.accountId!);
     if (edit.amount != null) _requireNonNegative(edit.amount!);
     if (edit.occurredTzOffsetMin != null) {
@@ -128,6 +153,13 @@ class DriftTransactionRepository implements TransactionRepository {
     return _dao.inTransaction(() async {
       final current = await _dao.byId(id);
       if (current == null || current.deletedAt != null) _notFound();
+      var removed = const <String>[];
+      final newAmount = edit.amount;
+      if (newAmount != null &&
+          _onAmountChange != null &&
+          newAmount.minor != current.amountMinor) {
+        removed = await _onAmountChange(id, newAmount.minor);
+      }
       final category = edit.categoryId;
       final categoryId = category == null ? null : _blankToNull(category.value);
       final merchant = edit.merchant;
@@ -169,7 +201,7 @@ class DriftTransactionRepository implements TransactionRepository {
       );
       if (edit.amount != null) patch = patch.withAmount(edit.amount!);
       if ((await _dao.updateById(id, patch)) != 1) _notFound();
-      return _toRecord((await _dao.byId(id))!);
+      return EditOutcome(_toRecord((await _dao.byId(id))!), removed);
     });
   }
 

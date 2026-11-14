@@ -69,7 +69,21 @@ allKeys = [
     byDefault: <String>{},
     other: {'budget'},
   ),
+  (key: Settings.setupInstalledOn, byDefault: null, other: 20000),
   (key: Settings.paywallLastShown, byDefault: null, other: 1760000000000),
+  (
+    key: Settings.backupSchedule,
+    byDefault: BackupScheduleMode.off,
+    other: BackupScheduleMode.weekly,
+  ),
+  (
+    key: Settings.backupDestination,
+    byDefault: BackupDestinationPref.none,
+    other: BackupDestinationPref.drive,
+  ),
+  (key: Settings.backupLastSuccess, byDefault: null, other: 1760000000000),
+  (key: Settings.backupLastFailure, byDefault: null, other: 1760000000000),
+  (key: Settings.backupReminderAt, byDefault: null, other: 1760000000000),
 ];
 
 void main() {

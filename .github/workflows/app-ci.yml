@@ -108,7 +108,7 @@ jobs:
       # used: every error is a code-only SecretStoreApiError).
       # T-016 (S-5): also stdout/stderr/dump, and core/db/schema.
       # T-017: also the DAOs, the frozen migration steps and the .drift DDL.
-      - name: no logging in key, database, backup crypto/snapshot and capture code (T-015, T-016, T-017, T-148, T-149, T-039, T-040, T-041)
+      - name: no logging in key, database, backup crypto/snapshot and capture code (T-015, T-016, T-017, T-148, T-149, T-039, T-040, T-041, T-178)
         run: |
           set -o pipefail
           files=$(ls app/lib/core/db/*.dart app/lib/core/db/schema/*.dart app/lib/core/db/schema/*.drift \
@@ -118,7 +118,10 @@ jobs:
             app/lib/features/backup/application/*.dart app/lib/features/backup/data/*.dart \
             app/android/app/src/main/kotlin/app/zaghlol/platform/text/*.kt app/ios/Runner/Platform/Text/*.swift \
             app/android/app/src/main/kotlin/app/zaghlol/platform/keys/*.kt \
-            app/ios/Runner/Platform/Keys/*.swift | grep -v '\.g\.')
+            app/ios/Runner/Platform/Keys/*.swift \
+            app/lib/core/platform/pigeon_attestation.dart \
+            app/android/app/src/main/kotlin/app/zaghlol/platform/attestation/*.kt \
+            app/ios/Runner/Platform/Attestation/*.swift | grep -v '\.g\.')
           # T-008: the SMS spike (Kotlin, except its code-only SpikeLog) and the
           # Dart ingestion engines must not log either.
           files="$files $(ls app/android/app/src/devSms/kotlin/app/zaghlol/spike/sms/*.kt app/lib/ingestion/*.dart | grep -v 'SpikeLog\.kt')"
@@ -141,6 +144,8 @@ jobs:
           files="$files $(ls app/lib/features/ingestion/*/*.dart)"
           # T-047: the capture module (Guard config writer, orchestrator).
           files="$files $(ls app/lib/features/capture/*/*.dart)"
+          # T-151: the iCloud backup host never logs.
+          files="$files $(ls app/ios/Runner/Platform/ICloud/*.swift)"
           [ -n "$files" ] || { echo "::error::no key files found"; exit 1; }
           if grep -nE '\b(print|debugPrint|log|developer\.log|dump)\(|\b(stdout|stderr)\b|\bLog\.[a-z]+\(|println\(|Timber|NSLog|os_log|Logger\(|logStatements: *true' $files; then
             echo "::error::logging call in key code"
@@ -323,6 +328,61 @@ jobs:
           if-no-files-found: warn
           retention-days: 14
 
+  # T-009 (SPK-03 spike): only the intent -> headless engine tests, serial, with the
+  # crash reports and metrics printed. Numbers only, never message text.
+  ios-intent-spike:
+    name: ios intent spike (simulator)
+    runs-on: macos-15
+    timeout-minutes: 40
+    steps:
+      - uses: actions/checkout@fbc6f3992d24b796d5a048ff273f7fcc4a7b6c09 # v5.1.0
+        with:
+          persist-credentials: false
+      - name: Pin Xcode
+        run: |
+          sudo xcode-select -s /Applications/Xcode_16.4.app
+          xcodebuild -version
+          xcrun simctl list runtimes | grep -i ios || true
+      - uses: subosito/flutter-action@1a449444c387b1966244ae4d4f8c696479add0b2 # v2.23.0
+        with:
+          flutter-version: ${{ env.FLUTTER_VERSION }}
+          channel: stable
+          cache: true
+      - name: Resolve workspace
+        run: flutter pub get --enforce-lockfile
+      - name: Generate iOS config
+        working-directory: app
+        run: flutter build ios --config-only --no-codesign --flavor dev > config.log 2>&1 || { tail -n 40 config.log; exit 1; }
+      - name: xcodebuild test (spike only)
+        working-directory: app/ios
+        run: |
+          UDID=$(xcrun simctl list devices available iPhone | grep -Eo '[0-9A-F]{8}(-[0-9A-F]{4}){3}-[0-9A-F]{12}' | head -n 1)
+          rc=0
+          xcodebuild test \
+            -workspace Runner.xcworkspace -scheme dev -configuration Debug-dev \
+            -destination "id=$UDID" -parallel-testing-enabled NO \
+            -only-testing:RunnerTests/IosIntentSpikeTests \
+            CODE_SIGNING_ALLOWED=NO > xcodebuild.log 2>&1 || rc=$?
+          grep -E "Test (case|Case)|SPIKE_METRICS|Executed|TEST (SUCCEEDED|FAILED)" xcodebuild.log | cut -c1-600 | tail -n 40
+          if [ "$rc" -ne 0 ]; then
+            echo "--- crash reports (top frames)"
+            for f in ~/Library/Logs/DiagnosticReports/Runner*.ips; do
+              [ -f "$f" ] && { echo "== $f"; head -c 6000 "$f"; }
+            done
+            echo "--- log tail"
+            grep -iE "flutter|dart|abort|assert|fatal|terminat" xcodebuild.log | cut -c1-400 | tail -n 40
+          fi
+          exit $rc
+      - name: Upload logs
+        if: always()
+        uses: actions/upload-artifact@b7c566a772e6b6bfb58ed0dc250532a479d7789f # v6.0.0
+        with:
+          name: ios-intent-spike-logs
+          path: |
+            app/ios/xcodebuild.log
+          if-no-files-found: warn
+          retention-days: 7
+
   swift-unit:
     name: swift unit tests (xcodebuild)
     runs-on: macos-15
@@ -416,6 +476,29 @@ jobs:
               exit 1
             fi
           done
+          # T-179: seat keys (Keychain attributes, element 0, FIFO cap, vector format, no wipe on doubt).
+          for t in testItemAttributesAreThisDeviceOnlyAndNotSynchronizable testOwnKeyIsStableAcrossLaunches \
+            testSixRotationsKeepFiveKeysNewestFirst testSignVerifiesWithCryptoKitInTheVectorFormat \
+            testVectorProofVerifiesWithCryptoKit testKeychainErrorDeletesAndCreatesNothing; do
+            if ! grep -qiE "SeatKeyTests.*$t" xcodebuild.log || grep -qiE "test case.*SeatKeyTests.*$t.*failed" xcodebuild.log; then
+              echo "::error::SeatKeyTests.$t did not pass"
+              grep -iE "SeatKeyTests" xcodebuild.log | head -n 30
+              exit 1
+            fi
+          done
+          # T-009 (SPK-03 spike): App Intent perform() -> headless engine, and the spool fallback.
+          # Metrics lines are numbers only (no message text).
+          for t in testSpoolEntryIsEncryptedAndAckDeletesIt testHeadlessEngineProcessesAMessageAndAcks \
+            testIntentPerformPathRunsEndToEnd testHoldKeepsTheEngineBusyAndStillAnswers \
+            testFailedEngineLeavesTheEntryAndForegroundDrainProcessesIt; do
+            if ! grep -qiE "IosIntentSpikeTests.*$t" xcodebuild.log || grep -qiE "test case.*IosIntentSpikeTests.*$t.*failed" xcodebuild.log; then
+              echo "::error::IosIntentSpikeTests.$t did not pass"
+              grep -iE "IosIntentSpikeTests" xcodebuild.log | head -n 30
+              exit 1
+            fi
+          done
+          xcrun simctl list runtimes | grep -i ios || true
+          grep -h "SPIKE_METRICS" xcodebuild.log || true
 
   android:
     name: android ${{ matrix.flavor }} (${{ matrix.mode }})

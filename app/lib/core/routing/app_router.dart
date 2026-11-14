@@ -22,15 +22,24 @@ class TabRoots {
     this.money = _blank,
     this.zaghlol = _blank,
     this.review = _reviewPlaceholder,
+    this.transactions = _blank,
+    this.addSelected = _closeAdd,
   });
 
   final WidgetBuilder home;
   final WidgetBuilder insights;
   final WidgetBuilder money;
+
+  /// Called when an entry of the Quick add sheet is chosen; the composition
+  /// root routes `type` to S-13 (`quickAddSelected`, T-080).
+  final void Function(BuildContext context, AddAction action) addSelected;
   final WidgetBuilder zaghlol;
 
   /// S-14 Review queue.
   final WidgetBuilder review;
+
+  /// S-11 Transactions list (T-079 supplies `TransactionsListScreen`).
+  final WidgetBuilder transactions;
 }
 
 Widget _blank(BuildContext context) =>
@@ -48,11 +57,17 @@ final tabRootsProvider = Provider<TabRoots>(
   name: 'tabRootsProvider',
 );
 
+void _closeAdd(BuildContext context, AddAction action) =>
+    Navigator.of(context).maybePop();
+
 final rootNavigatorKey = GlobalKey<NavigatorState>(debugLabel: 'root');
 
 GoRouter buildAppRouter(TabRoots roots, {String initialLocation = '/home'}) {
   Page<void> addPage(BuildContext context, GoRouterState state) =>
-      ModalSheetPage<void>(key: state.pageKey, child: const AddSheet());
+      ModalSheetPage<void>(
+        key: state.pageKey,
+        child: AddSheet(onSelected: (a) => roots.addSelected(context, a)),
+      );
 
   return GoRouter(
     navigatorKey: rootNavigatorKey,
@@ -76,6 +91,10 @@ GoRouter buildAppRouter(TabRoots roots, {String initialLocation = '/home'}) {
                     NoTransitionPage(key: s.pageKey, child: roots.home(c)),
                 routes: [
                   GoRoute(path: 'review', builder: (c, s) => roots.review(c)),
+                  GoRoute(
+                    path: 'transactions',
+                    builder: (c, s) => roots.transactions(c),
+                  ),
                   GoRoute(
                     path: 'add',
                     parentNavigatorKey: rootNavigatorKey,

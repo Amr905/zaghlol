@@ -22,6 +22,45 @@ void main() {
     expect(kGuardMaxBodyLength, maxParseBodyLength);
   });
 
+  group('user-added phone-number SMS senders (FU-109 / FU-121)', () {
+    GuardDecision decide(String source, String body, [String ch = 'sms']) =>
+        CaptureGuard(full).decide(channel: ch, source: source, body: body);
+
+    test('a personal message from a user-added sender is dropped', () {
+      for (final body in ['see you at 7', 'Paid 10.00 for lunch']) {
+        expect(
+          decide('+201000000009', body),
+          const GuardDrop(GuardDropReason.notFinancial),
+        );
+      }
+    });
+
+    test('a financial-looking message from a user-added sender is kept', () {
+      expect(
+        decide('+201000000009', 'Dividend EGP 10.00 paid'),
+        isA<GuardKeep>().having((k) => k.kind, 'kind', GuardKeepKind.user),
+      );
+    });
+
+    test('a registry sender is unaffected (no currency text needed)', () {
+      expect(
+        decide('NBE', 'Paid 10.00'),
+        isA<GuardKeep>().having((k) => k.kind, 'kind', GuardKeepKind.registry),
+      );
+    });
+
+    test('an alphanumeric user sender keeps its behaviour', () {
+      expect(decide('MyCoop', 'Paid 10.00'), isA<GuardKeep>());
+    });
+
+    test('a user-added notification package keeps its behaviour', () {
+      expect(
+        decide('com.example.wallet', 'Paid 10.00', 'notification'),
+        isA<GuardKeep>(),
+      );
+    });
+  });
+
   group('parity with ParsingPipeline stage 0', () {
     // The pipeline resolves sms / notification / shortcut_message sources
     // the same way; apple_pay (wallet names) and share are Guard-only.

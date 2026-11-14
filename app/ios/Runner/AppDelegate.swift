@@ -24,5 +24,11 @@ import UIKit
     TrustedClockRegistration.register(with: engineBridge.pluginRegistry)
     // T-103: jailbreak heuristic, app switcher cover, passcode check.
     DeviceSecurityRegistration.register(with: engineBridge.pluginRegistry)
+    // T-178: App Attest for restore.
+    AttestationRegistration.register(with: engineBridge.pluginRegistry)
+    // T-179: Secure Enclave seat keys (iOS only, D-55).
+    SeatKeyRegistration.register(with: engineBridge.pluginRegistry)
+    // T-151: iCloud backup host.
+    ICloudBackupRegistration.register(with: engineBridge.pluginRegistry)
   }
 }

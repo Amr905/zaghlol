@@ -34,6 +34,150 @@ private object AttestationApiPigeonUtils {
       )
     }
   }
+  fun doubleEquals(a: Double, b: Double): Boolean {
+    // Normalize -0.0 to 0.0 and handle NaN equality.
+    return (if (a == 0.0) 0.0 else a) == (if (b == 0.0) 0.0 else b) || (a.isNaN() && b.isNaN())
+  }
+
+  fun floatEquals(a: Float, b: Float): Boolean {
+    // Normalize -0.0 to 0.0 and handle NaN equality.
+    return (if (a == 0.0f) 0.0f else a) == (if (b == 0.0f) 0.0f else b) || (a.isNaN() && b.isNaN())
+  }
+
+  fun doubleHash(d: Double): Int {
+    // Normalize -0.0 to 0.0 and handle NaN to ensure consistent hash codes.
+    val normalized = if (d == 0.0) 0.0 else d
+    val bits = java.lang.Double.doubleToLongBits(normalized)
+    return (bits xor (bits ushr 32)).toInt()
+  }
+
+  fun floatHash(f: Float): Int {
+    // Normalize -0.0 to 0.0 and handle NaN to ensure consistent hash codes.
+    val normalized = if (f == 0.0f) 0.0f else f
+    return java.lang.Float.floatToIntBits(normalized)
+  }
+
+  fun deepEquals(a: Any?, b: Any?): Boolean {
+    if (a === b) {
+      return true
+    }
+    if (a == null || b == null) {
+      return false
+    }
+    if (a is ByteArray && b is ByteArray) {
+      return a.contentEquals(b)
+    }
+    if (a is IntArray && b is IntArray) {
+      return a.contentEquals(b)
+    }
+    if (a is LongArray && b is LongArray) {
+      return a.contentEquals(b)
+    }
+    if (a is DoubleArray && b is DoubleArray) {
+      if (a.size != b.size) return false
+      for (i in a.indices) {
+        if (!doubleEquals(a[i], b[i])) return false
+      }
+      return true
+    }
+    if (a is FloatArray && b is FloatArray) {
+      if (a.size != b.size) return false
+      for (i in a.indices) {
+        if (!floatEquals(a[i], b[i])) return false
+      }
+      return true
+    }
+    if (a is Array<*> && b is Array<*>) {
+      if (a.size != b.size) return false
+      for (i in a.indices) {
+        if (!deepEquals(a[i], b[i])) return false
+      }
+      return true
+    }
+    if (a is List<*> && b is List<*>) {
+      if (a.size != b.size) return false
+      val iterA = a.iterator()
+      val iterB = b.iterator()
+      while (iterA.hasNext() && iterB.hasNext()) {
+        if (!deepEquals(iterA.next(), iterB.next())) return false
+      }
+      return true
+    }
+    if (a is Map<*, *> && b is Map<*, *>) {
+      if (a.size != b.size) return false
+      for (entry in a) {
+        val key = entry.key
+        var found = false
+        for (bEntry in b) {
+          if (deepEquals(key, bEntry.key)) {
+            if (deepEquals(entry.value, bEntry.value)) {
+              found = true
+              break
+            } else {
+              return false
+            }
+          }
+        }
+        if (!found) return false
+      }
+      return true
+    }
+    if (a is Double && b is Double) {
+      return doubleEquals(a, b)
+    }
+    if (a is Float && b is Float) {
+      return floatEquals(a, b)
+    }
+    return a == b
+  }
+
+  fun deepHash(value: Any?): Int {
+    return when (value) {
+      null -> 0
+      is ByteArray -> value.contentHashCode()
+      is IntArray -> value.contentHashCode()
+      is LongArray -> value.contentHashCode()
+      is DoubleArray -> {
+        var result = 1
+        for (item in value) {
+          result = 31 * result + doubleHash(item)
+        }
+        result
+      }
+      is FloatArray -> {
+        var result = 1
+        for (item in value) {
+          result = 31 * result + floatHash(item)
+        }
+        result
+      }
+      is Array<*> -> {
+        var result = 1
+        for (item in value) {
+          result = 31 * result + deepHash(item)
+        }
+        result
+      }
+      is List<*> -> {
+        var result = 1
+        for (item in value) {
+          result = 31 * result + deepHash(item)
+        }
+        result
+      }
+      is Map<*, *> -> {
+        var result = 0
+        for (entry in value) {
+          result += ((deepHash(entry.key) * 31) xor deepHash(entry.value))
+        }
+        result
+      }
+      is Double -> doubleHash(value)
+      is Float -> floatHash(value)
+      else -> value.hashCode()
+    }
+  }
+
 }
 
 /**
@@ -47,17 +191,102 @@ class AttestationApiError (
   override val message: String? = null,
   val details: Any? = null
 ) : Throwable()
+
+/**
+ * The proof that goes into the restore body's `attestation` object.
+ *
+ * Generated class from Pigeon that represents data sent in messages.
+ */
+data class AttestationProof (
+  /** 'play_integrity' | 'app_attest' */
+  val type: String,
+  /** Android: the Play Integrity standard token. */
+  val token: String? = null,
+  /** iOS: the App Attest key ID (base64, as DCAppAttestService returns it). */
+  val keyId: String? = null,
+  /** iOS: the assertion over clientDataHash (base64). */
+  val assertion: String? = null,
+  /** iOS: base64, only for a newly generated key. */
+  val attestationObject: String? = null
+)
+ {
+  companion object {
+    fun fromList(pigeonVar_list: List<Any?>): AttestationProof {
+      val type = pigeonVar_list[0] as String
+      val token = pigeonVar_list[1] as String?
+      val keyId = pigeonVar_list[2] as String?
+      val assertion = pigeonVar_list[3] as String?
+      val attestationObject = pigeonVar_list[4] as String?
+      return AttestationProof(type, token, keyId, assertion, attestationObject)
+    }
+  }
+  fun toList(): List<Any?> {
+    return listOf(
+      type,
+      token,
+      keyId,
+      assertion,
+      attestationObject,
+    )
+  }
+  override fun equals(other: Any?): Boolean {
+    if (other == null || other.javaClass != javaClass) {
+      return false
+    }
+    if (this === other) {
+      return true
+    }
+    val other = other as AttestationProof
+    return AttestationApiPigeonUtils.deepEquals(this.type, other.type) && AttestationApiPigeonUtils.deepEquals(this.token, other.token) && AttestationApiPigeonUtils.deepEquals(this.keyId, other.keyId) && AttestationApiPigeonUtils.deepEquals(this.assertion, other.assertion) && AttestationApiPigeonUtils.deepEquals(this.attestationObject, other.attestationObject)
+  }
+
+  override fun hashCode(): Int {
+    var result = javaClass.hashCode()
+    result = 31 * result + AttestationApiPigeonUtils.deepHash(this.type)
+    result = 31 * result + AttestationApiPigeonUtils.deepHash(this.token)
+    result = 31 * result + AttestationApiPigeonUtils.deepHash(this.keyId)
+    result = 31 * result + AttestationApiPigeonUtils.deepHash(this.assertion)
+    result = 31 * result + AttestationApiPigeonUtils.deepHash(this.attestationObject)
+    return result
+  }
+}
 private open class AttestationApiPigeonCodec : StandardMessageCodec() {
   override fun readValueOfType(type: Byte, buffer: ByteBuffer): Any? {
-    return     super.readValueOfType(type, buffer)
+    return when (type) {
+      129.toByte() -> {
+        return (readValue(buffer) as? List<Any?>)?.let {
+          AttestationProof.fromList(it)
+        }
+      }
+      else -> super.readValueOfType(type, buffer)
+    }
   }
   override fun writeValue(stream: ByteArrayOutputStream, value: Any?)   {
-    super.writeValue(stream, value)
+    when (value) {
+      is AttestationProof -> {
+        stream.write(129)
+        writeValue(stream, value.toList())
+      }
+      else -> super.writeValue(stream, value)
+    }
   }
 }
 
+
 /** Generated interface from Pigeon that represents a handler of messages from Flutter. */
 interface AttestationHostApi {
+  /**
+   * Android: Play Integrity StandardIntegrityManager.prepareIntegrityToken
+   * (cached provider). iOS: no-op.
+   */
+  fun prepare(callback: (Result<Unit>) -> Unit)
+  /**
+   * Android: requestHash = base64url(bodyHash) (unpadded) →
+   * StandardIntegrityTokenProvider.request → token. iOS: clientDataHash =
+   * bodyHash for DCAppAttestService.generateAssertion, and for attestKey on
+   * a new key (forceNewKey, a missing key or an invalidKey error).
+   */
+  fun attest(bodyHash: ByteArray, forceNewKey: Boolean, callback: (Result<AttestationProof>) -> Unit)
 
   companion object {
     /** The codec used by AttestationHostApi. */
@@ -68,6 +297,44 @@ interface AttestationHostApi {
     @JvmOverloads
     fun setUp(binaryMessenger: BinaryMessenger, api: AttestationHostApi?, messageChannelSuffix: String = "") {
       val separatedMessageChannelSuffix = if (messageChannelSuffix.isNotEmpty()) ".$messageChannelSuffix" else ""
+      run {
+        val channel = BasicMessageChannel<Any?>(binaryMessenger, "dev.flutter.pigeon.zaghlol.AttestationHostApi.prepare$separatedMessageChannelSuffix", codec)
+        if (api != null) {
+          channel.setMessageHandler { _, reply ->
+            api.prepare{ result: Result<Unit> ->
+              val error = result.exceptionOrNull()
+              if (error != null) {
+                reply.reply(AttestationApiPigeonUtils.wrapError(error))
+              } else {
+                reply.reply(AttestationApiPigeonUtils.wrapResult(null))
+              }
+            }
+          }
+        } else {
+          channel.setMessageHandler(null)
+        }
+      }
+      run {
+        val channel = BasicMessageChannel<Any?>(binaryMessenger, "dev.flutter.pigeon.zaghlol.AttestationHostApi.attest$separatedMessageChannelSuffix", codec)
+        if (api != null) {
+          channel.setMessageHandler { message, reply ->
+            val args = message as List<Any?>
+            val bodyHashArg = args[0] as ByteArray
+            val forceNewKeyArg = args[1] as Boolean
+            api.attest(bodyHashArg, forceNewKeyArg) { result: Result<AttestationProof> ->
+              val error = result.exceptionOrNull()
+              if (error != null) {
+                reply.reply(AttestationApiPigeonUtils.wrapError(error))
+              } else {
+                val data = result.getOrNull()
+                reply.reply(AttestationApiPigeonUtils.wrapResult(data))
+              }
+            }
+          }
+        } else {
+          channel.setMessageHandler(null)
+        }
+      }
     }
   }
 }

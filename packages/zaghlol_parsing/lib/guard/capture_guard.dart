@@ -17,6 +17,10 @@ const int kGuardMaxSourceLength = 256;
 /// Kotlin (T-038) and Swift (T-061) Guards port this function and must pass
 /// the same golden cases. It also runs at drain time (T-046) as the re-check
 /// before the database.
+/// A phone-number sender (FU-121): optional `+`, then digits with spaces,
+/// dashes or brackets. Same pattern as Kotlin `PHONE_NUMBER_SHAPE`.
+final RegExp _phoneNumberShape = RegExp(r'^\+?[0-9][0-9 ()-]{5,}$');
+
 final class CaptureGuard {
   /// A Guard over a loaded config; a null [config] (mode `invalid`) drops
   /// everything as `config_invalid`.
@@ -74,6 +78,16 @@ final class CaptureGuard {
       kind = GuardKeepKind.registry;
     } else if (sourceKey.isNotEmpty &&
         cfg.userSenders.contains((channel.wire, sourceKey))) {
+      // FU-109 / FU-121: a phone-number sender the user added is captured
+      // live only when the body looks financial (the same `bodyHints` the
+      // generic rule uses); anything else from them is dropped here.
+      // Alphanumeric user senders (always-capture, custom templates) are
+      // not phone numbers and keep their behaviour.
+      if (channel == GuardChannel.sms &&
+          _phoneNumberShape.hasMatch(sourceKey) &&
+          !cfg.bodyHints.any((p) => p.hasMatch(folded))) {
+        return const GuardDrop(GuardDropReason.notFinancial);
+      }
       kind = GuardKeepKind.user;
     } else if ((sourceKey.isNotEmpty &&
             channel != GuardChannel.notification &&

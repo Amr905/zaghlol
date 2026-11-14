@@ -1,0 +1,365 @@
+# T-110 synthetic Ask Zaghlol utterances (written by the T-110 builder). Columns: text, intent or !reason, period, compareWith, category, merchants, accounts, currency, limit, periodDefaulted.
+spent at Amazon this week?	spend	week:0	-	-	amazon	-	-	-	0
+انفقت كام بكارت بنك مصر الاسبوع اللي فات	spend	week:-1	-	-	-	a_misr	-	-	0
+total spending at Amazon this week	spend	week:0	-	-	amazon	-	-	-	0
+How much have I spent this year	spend	year:0	-	-	-	-	-	-	0
+عايز اعرف صرفت كام بفودافون كاش اخر 7 ايام	spend	lastDays:7	-	-	-	a_voda	-	-	0
+مصاريفي على كارفور السنة اللي فاتت كام	spend	year:-1	-	-	carrefour	-	-	-	0
+قولي صرفت كام الاسبوع اللي فات يا زغلول	spend	week:-1	-	-	-	-	-	-	0
+قولي صرفت كام بكارت CIB debit السنة اللي فاتت يا زغلول	spend	year:-1	-	-	-	a_cib_debit	-	-	0
+What did I spend at Carrefour this year	spend	year:0	-	-	carrefour	-	-	-	0
+مصاريفي بكارت CIB debit الشهر ده كام	spend	month:0	-	-	-	a_cib_debit	-	-	0
+how much did I spend on bills in the last 30 days?	spend	lastDays:30	-	sys:bills	-	-	-	-	0
+عايز اعرف صرفت كام على الفواتير اخر ٣٠ يوم	spend	lastDays:30	-	sys:bills	-	-	-	-	0
+What did I spend on food in the last 30 days	spend	lastDays:30	-	sys:dining	-	-	-	-	0
+صرفت كام بكارت CIB debit الشهر الماضي؟	spend	month:-1	-	-	-	a_cib_debit	-	-	0
+عايز اعرف صرفت كام على الفواتير الاسبوع اللي فات	spend	week:-1	-	sys:bills	-	-	-	-	0
+قولي صرفت كام على الاكل السنة دي يا زغلول	spend	year:0	-	sys:dining	-	-	-	-	0
+قولي صرفت كام على الاكل بكارت CIB credit الاسبوع ده يا زغلول	spend	week:0	-	sys:dining	-	a_cib_credit	-	-	0
+انفقت كام على الاكل في يناير	spend	monthOfYear:1	-	sys:dining	-	-	-	-	0
+What did I spend on coffee with my CIB credit card this year	spend	year:0	-	sys:dining	-	a_cib_credit	-	-	0
+صرفت كام على كارفور الاسبوع ده؟	spend	week:0	-	-	carrefour	-	-	-	0
+صرفت كام في مارس على الاكل	spend	monthOfYear:3	-	sys:dining	-	-	-	-	0
+total spending on coffee with my CIB credit card in the last 30 days	spend	lastDays:30	-	sys:dining	-	a_cib_credit	-	-	0
+عايز اعرف صرفت كام اخر 7 ايام	spend	lastDays:7	-	-	-	-	-	-	0
+spent on fuel last year?	spend	year:-1	-	sys:transport	-	-	-	-	0
+صرفت كام بكارت بنك مصر السنة دي؟	spend	year:0	-	-	-	a_misr	-	-	0
+صرفت كام امبارح على اوبر	spend	day:-1	-	-	uber	-	-	-	0
+قولي صرفت كام على الفواتير الشهر الماضي يا زغلول	spend	month:-1	-	sys:bills	-	-	-	-	0
+how much did I spend on fuel in november 2025?	spend	monthOfYear:11:2025	-	sys:transport	-	-	-	-	0
+صرفت كام على الاكل الاسبوع اللي فات؟	spend	week:-1	-	sys:dining	-	-	-	-	0
+عايز اعرف صرفت كام على السوبرماركت الاسبوع اللي فات	spend	week:-1	-	sys:groceries	-	-	-	-	0
+spent in november 2025?	spend	monthOfYear:11:2025	-	-	-	-	-	-	0
+قولي صرفت كام على السوبرماركت اخر ٣٠ يوم يا زغلول	spend	lastDays:30	-	sys:groceries	-	-	-	-	0
+spent with the Banque Misr card in november 2025?	spend	monthOfYear:11:2025	-	-	-	a_misr	-	-	0
+عايز اعرف صرفت كام بكارت بنك مصر اخر اسبوعين	spend	lastDays:14	-	-	-	a_misr	-	-	0
+total spending on Uber since payday	spend	cycle:0	-	-	uber	-	-	-	0
+how much did I spend with my CIB card this week?	spend	week:0	-	-	-	a_cib_credit,a_cib_debit	-	-	0
+مصاريفي على المواصلات الشهر الماضي كام	spend	month:-1	-	sys:transport	-	-	-	-	0
+مصاريفي بكارت CIB debit اخر اسبوعين كام	spend	lastDays:14	-	-	-	a_cib_debit	-	-	0
+مصاريفي بكارت بنك مصر من المرتب كام	spend	cycle:0	-	-	-	a_misr	-	-	0
+انفقت كام في طلبات اخر ٣٠ يوم	spend	lastDays:30	-	-	talabat	-	-	-	0
+انفقت كام في طلبات اخر اسبوعين	spend	lastDays:14	-	-	talabat	-	-	-	0
+قولي صرفت كام على الاكل بكارت CIB credit في مارس يا زغلول	spend	monthOfYear:3	-	sys:dining	-	a_cib_credit	-	-	0
+صرفت كام اخر 7 ايام	spend	lastDays:7	-	-	-	-	-	-	0
+قولي صرفت كام الشهر اللي فات يا زغلول	spend	month:-1	-	-	-	-	-	-	0
+spent on Uber last week?	spend	week:-1	-	-	uber	-	-	-	0
+عايز اعرف صرفت كام على اوبر في يناير	spend	monthOfYear:1	-	-	uber	-	-	-	0
+total spending on bills this year	spend	year:0	-	sys:bills	-	-	-	-	0
+How much have I spent with my CIB card last 3 months	spend	lastDays:90	-	-	-	a_cib_credit,a_cib_debit	-	-	0
+قولي صرفت كام على اوبر الشهر الماضي يا زغلول	spend	month:-1	-	-	uber	-	-	-	0
+مصاريفي بكارت CIB debit الشهر اللي فات كام	spend	month:-1	-	-	-	a_cib_debit	-	-	0
+spent on fuel last month?	spend	month:-1	-	sys:transport	-	-	-	-	0
+spent on groceries today?	spend	day:0	-	sys:groceries	-	-	-	-	0
+What did I spend last month	spend	month:-1	-	-	-	-	-	-	0
+How much have I spent on coffee with my CIB credit card this week	spend	week:0	-	sys:dining	-	a_cib_credit	-	-	0
+صرفت كام امبارح على المواصلات	spend	day:-1	-	sys:transport	-	-	-	-	0
+صرفت كام في مارس بفودافون كاش	spend	monthOfYear:3	-	-	-	a_voda	-	-	0
+مصاريفي في طلبات الشهر اللي فات كام	spend	month:-1	-	-	talabat	-	-	-	0
+قولي صرفت كام الشهر الماضي يا زغلول	spend	month:-1	-	-	-	-	-	-	0
+قولي صرفت كام بكارت CIB اخر ٣٠ يوم يا زغلول	spend	lastDays:30	-	-	-	a_cib_credit,a_cib_debit	-	-	0
+مصاريفي على المواصلات الاسبوع ده كام	spend	week:0	-	sys:transport	-	-	-	-	0
+صرفت كام الاسبوع اللي فات بكارت CIB debit	spend	week:-1	-	-	-	a_cib_debit	-	-	0
+قولي صرفت كام على كارفور من اول الشهر يا زغلول	spend	month:0	-	-	carrefour	-	-	-	0
+مصاريفي على السوبرماركت اخر 7 ايام كام	spend	lastDays:7	-	sys:groceries	-	-	-	-	0
+How much have I spent at Carrefour in november 2025	spend	monthOfYear:11:2025	-	-	carrefour	-	-	-	0
+صرفت كام بكارت بنك مصر من اول الشهر؟	spend	month:0	-	-	-	a_misr	-	-	0
+قولي صرفت كام بفودافون كاش السنة دي يا زغلول	spend	year:0	-	-	-	a_voda	-	-	0
+انفقت كام على المواصلات اخر ٣٠ يوم	spend	lastDays:30	-	sys:transport	-	-	-	-	0
+انفقت كام على المواصلات الاسبوع ده	spend	week:0	-	sys:transport	-	-	-	-	0
+مصاريفي على كارفور في مارس كام	spend	monthOfYear:3	-	-	carrefour	-	-	-	0
+صرفت كام الشهر اللي فات بكارت CIB	spend	month:-1	-	-	-	a_cib_credit,a_cib_debit	-	-	0
+انفقت كام الاسبوع ده	spend	week:0	-	-	-	-	-	-	0
+صرفت كام من المرتب على الفواتير	spend	cycle:0	-	sys:bills	-	-	-	-	0
+صرفت كام في مارس على الاكل بكارت CIB credit	spend	monthOfYear:3	-	sys:dining	-	a_cib_credit	-	-	0
+How much have I spent last week	spend	week:-1	-	-	-	-	-	-	0
+total spending at Carrefour since payday	spend	cycle:0	-	-	carrefour	-	-	-	0
+spent with the Banque Misr card since payday?	spend	cycle:0	-	-	-	a_misr	-	-	0
+مصاريفي بكارت CIB من المرتب كام	spend	cycle:0	-	-	-	a_cib_credit,a_cib_debit	-	-	0
+spent this month?	spend	month:0	-	-	-	-	-	-	0
+صرفت كام من المرتب بكارت CIB debit	spend	cycle:0	-	-	-	a_cib_debit	-	-	0
+صرفت كام في يناير؟	spend	monthOfYear:1	-	-	-	-	-	-	0
+عايز اعرف صرفت كام بفودافون كاش السنة دي	spend	year:0	-	-	-	a_voda	-	-	0
+مصاريفي بكارت CIB النهارده كام	spend	day:0	-	-	-	a_cib_credit,a_cib_debit	-	-	0
+What did I spend on coffee with my CIB credit card this month	spend	month:0	-	sys:dining	-	a_cib_credit	-	-	0
+صرفت كام الشهر ده على كارفور	spend	month:0	-	-	carrefour	-	-	-	0
+صرفت كام على الاكل الشهر الماضي؟	spend	month:-1	-	sys:dining	-	-	-	-	0
+قولي صرفت كام في طلبات السنة دي يا زغلول	spend	year:0	-	-	talabat	-	-	-	0
+انفقت كام على الاكل بكارت CIB credit اخر ٣٠ يوم	spend	lastDays:30	-	sys:dining	-	a_cib_credit	-	-	0
+صرفت كام من اول الشهر على الاكل بكارت CIB credit	spend	month:0	-	sys:dining	-	a_cib_credit	-	-	0
+مصاريفي على الاكل الشهر اللي فات كام	spend	month:-1	-	sys:dining	-	-	-	-	0
+قولي صرفت كام بكارت بنك مصر اخر ٣٠ يوم يا زغلول	spend	lastDays:30	-	-	-	a_misr	-	-	0
+قولي صرفت كام على كارفور السنة اللي فاتت يا زغلول	spend	year:-1	-	-	carrefour	-	-	-	0
+انفقت كام على السوبرماركت الشهر ده	spend	month:0	-	sys:groceries	-	-	-	-	0
+how much did I spend on fuel in the last 30 days?	spend	lastDays:30	-	sys:transport	-	-	-	-	0
+What did I spend at Amazon last week	spend	week:-1	-	-	amazon	-	-	-	0
+spent with my CIB card yesterday?	spend	day:-1	-	-	-	a_cib_credit,a_cib_debit	-	-	0
+قولي صرفت كام على الاكل بكارت CIB credit امبارح يا زغلول	spend	day:-1	-	sys:dining	-	a_cib_credit	-	-	0
+انفقت كام بكارت CIB الاسبوع ده	spend	week:0	-	-	-	a_cib_credit,a_cib_debit	-	-	0
+صرفت كام على كارفور السنة اللي فاتت؟	spend	year:-1	-	-	carrefour	-	-	-	0
+انفقت كام من اول الشهر	spend	month:0	-	-	-	-	-	-	0
+spent with my CIB card in the last 30 days?	spend	lastDays:30	-	-	-	a_cib_credit,a_cib_debit	-	-	0
+انفقت كام بفودافون كاش الشهر ده	spend	month:0	-	-	-	a_voda	-	-	0
+قولي صرفت كام على السوبرماركت الاسبوع اللي فات يا زغلول	spend	week:-1	-	sys:groceries	-	-	-	-	0
+عايز اعرف صرفت كام على الاكل في مارس	spend	monthOfYear:3	-	sys:dining	-	-	-	-	0
+How much have I spent with my CIB card this month	spend	month:0	-	-	-	a_cib_credit,a_cib_debit	-	-	0
+صرفت كام على الفواتير السنة دي؟	spend	year:0	-	sys:bills	-	-	-	-	0
+انفقت كام على السوبرماركت اخر ٣٠ يوم	spend	lastDays:30	-	sys:groceries	-	-	-	-	0
+قولي صرفت كام على السوبرماركت السنة اللي فاتت يا زغلول	spend	year:-1	-	sys:groceries	-	-	-	-	0
+صرفت كام بفودافون كاش الشهر الماضي؟	spend	month:-1	-	-	-	a_voda	-	-	0
+صرفت كام بكارت بنك مصر في يناير؟	spend	monthOfYear:1	-	-	-	a_misr	-	-	0
+صرفت كام بفودافون كاش الشهر ده؟	spend	month:0	-	-	-	a_voda	-	-	0
+قولي صرفت كام بفودافون كاش الشهر اللي فات يا زغلول	spend	month:-1	-	-	-	a_voda	-	-	0
+عايز اعرف صرفت كام على السوبرماركت في يناير	spend	monthOfYear:1	-	sys:groceries	-	-	-	-	0
+صرفت كام الاسبوع اللي فات بكارت CIB	spend	week:-1	-	-	-	a_cib_credit,a_cib_debit	-	-	0
+spent with the Banque Misr card today?	spend	day:0	-	-	-	a_misr	-	-	0
+صرفت كام السنة دي بكارت بنك مصر	spend	year:0	-	-	-	a_misr	-	-	0
+spent on Uber this week?	spend	week:0	-	-	uber	-	-	-	0
+عايز اعرف صرفت كام على الفواتير الاسبوع ده	spend	week:0	-	sys:bills	-	-	-	-	0
+صرفت كام الاسبوع ده على الاكل	spend	week:0	-	sys:dining	-	-	-	-	0
+صرفت كام على الفواتير في يناير؟	spend	monthOfYear:1	-	sys:bills	-	-	-	-	0
+spent with the Banque Misr card in march?	spend	monthOfYear:3	-	-	-	a_misr	-	-	0
+صرفت كام على السوبرماركت امبارح؟	spend	day:-1	-	sys:groceries	-	-	-	-	0
+صرفت كام من اول الشهر على المواصلات	spend	month:0	-	sys:transport	-	-	-	-	0
+total spending at Amazon this month	spend	month:0	-	-	amazon	-	-	-	0
+صرفت كام اخر اسبوعين على المواصلات	spend	lastDays:14	-	sys:transport	-	-	-	-	0
+What did I spend on bills today	spend	day:0	-	sys:bills	-	-	-	-	0
+صرفت كام الشهر ده على اوبر	spend	month:0	-	-	uber	-	-	-	0
+how much did I spend on Uber last week?	spend	week:-1	-	-	uber	-	-	-	0
+How much have I spent with my CIB card since payday	spend	cycle:0	-	-	-	a_cib_credit,a_cib_debit	-	-	0
+عايز اعرف صرفت كام على الاكل بكارت CIB credit الشهر الماضي	spend	month:-1	-	sys:dining	-	a_cib_credit	-	-	0
+What did I spend in the last 30 days	spend	lastDays:30	-	-	-	-	-	-	0
+عايز اعرف صرفت كام على اوبر الاسبوع ده	spend	week:0	-	-	uber	-	-	-	0
+What did I spend on fuel last month	spend	month:-1	-	sys:transport	-	-	-	-	0
+مصاريفي بفودافون كاش الاسبوع اللي فات كام	spend	week:-1	-	-	-	a_voda	-	-	0
+How much have I spent on bills last month	spend	month:-1	-	sys:bills	-	-	-	-	0
+صرفت كام في طلبات اخر 7 ايام؟	spend	lastDays:7	-	-	talabat	-	-	-	0
+عايز اعرف صرفت كام على الاكل الاسبوع ده	spend	week:0	-	sys:dining	-	-	-	-	0
+صرفت كام بكارت بنك مصر الاسبوع ده؟	spend	week:0	-	-	-	a_misr	-	-	0
+How much have I spent on bills in the last 30 days	spend	lastDays:30	-	sys:bills	-	-	-	-	0
+مصاريفي على الفواتير السنة دي كام	spend	year:0	-	sys:bills	-	-	-	-	0
+قولي صرفت كام على الاكل بكارت CIB credit اخر اسبوعين يا زغلول	spend	lastDays:14	-	sys:dining	-	a_cib_credit	-	-	0
+عايز اعرف صرفت كام بكارت CIB debit من المرتب	spend	cycle:0	-	-	-	a_cib_debit	-	-	0
+total spending at Amazon last year	spend	year:-1	-	-	amazon	-	-	-	0
+صرفت كام بكارت CIB debit اخر ٣٠ يوم؟	spend	lastDays:30	-	-	-	a_cib_debit	-	-	0
+صرفت كام على الاكل اخر اسبوعين؟	spend	lastDays:14	-	sys:dining	-	-	-	-	0
+What did I spend at Amazon last 3 months	spend	lastDays:90	-	-	amazon	-	-	-	0
+What did I spend on Uber in november 2025	spend	monthOfYear:11:2025	-	-	uber	-	-	-	0
+صرفت كام على الاكل اخر ٣٠ يوم؟	spend	lastDays:30	-	sys:dining	-	-	-	-	0
+how much did I spend with the Banque Misr card this year?	spend	year:0	-	-	-	a_misr	-	-	0
+صرفت كام في طلبات النهارده؟	spend	day:0	-	-	talabat	-	-	-	0
+انفقت كام على الاكل السنة اللي فاتت	spend	year:-1	-	sys:dining	-	-	-	-	0
+صرفت كام على الاكل؟	spend	month:0	-	sys:dining	-	-	-	-	1
+صرفت كام بكارت CIB	spend	month:0	-	-	-	a_cib_credit,a_cib_debit	-	-	1
+how much did I spend on groceries	spend	month:0	-	sys:groceries	-	-	-	-	1
+مصاريفي كام	spend	month:0	-	-	-	-	-	-	1
+صرفت كام	spend	month:0	-	-	-	-	-	-	1
+how much have I spent	spend	month:0	-	-	-	-	-	-	1
+صرفت كام على كارفور	spend	month:0	-	-	carrefour	-	-	-	1
+صرفت كام بكارت CIB الشهر ده؟	spend	month:0	-	-	-	a_cib_credit,a_cib_debit	-	-	0
+صرفت كام بكارت cib الشهر ده	spend	month:0	-	-	-	a_cib_credit,a_cib_debit	-	-	0
+صـرفـت كام بكارت CIB الشهر ده؟	spend	month:0	-	-	-	a_cib_credit,a_cib_debit	-	-	0
+صَرَفتُ كام بكارت CIB الشهر ده؟	spend	month:0	-	-	-	a_cib_credit,a_cib_debit	-	-	0
+صرفت كام بكارت CIB debit الشهر ده؟	spend	month:0	-	-	-	a_cib_debit	-	-	0
+صرفت كام بكارت CIB اخر ٣٠ يوم	spend	lastDays:30	-	-	-	a_cib_credit,a_cib_debit	-	-	0
+صرفت كام بكارت CIB اخر ٧ ايام؟	spend	lastDays:7	-	-	-	a_cib_credit,a_cib_debit	-	-	0
+How much did I spend with my CIB card this month?	spend	month:0	-	-	-	a_cib_credit,a_cib_debit	-	-	0
+HOW MUCH DID I SPEND ON FOOD TODAY	spend	day:0	-	sys:dining	-	-	-	-	0
+اخر ثلاثة ايام صرفت كام	spend	lastDays:3	-	-	-	-	-	-	0
+صرفت كام اخر تلات ايام	spend	lastDays:3	-	-	-	-	-	-	0
+اخر ٣ شهور صرفت كام	spend	lastDays:90	-	-	-	-	-	-	0
+صرفت كام بالدولار الشهر ده	spend	month:0	-	-	-	-	USD	-	0
+صرفت كام دولار الشهر ده	spend	month:0	-	-	-	-	USD	-	0
+how much did I spend in dollars this month	spend	month:0	-	-	-	-	USD	-	0
+spent in USD this month	spend	month:0	-	-	-	-	USD	-	0
+صرفت كام يورو الشهر ده	spend	month:0	-	-	-	-	EUR	-	0
+spent 0 EUR this month	spend	month:0	-	-	-	-	EUR	-	0
+how much did I spend in EGP this month	spend	month:0	-	-	-	-	EGP	-	0
+صرفت كام بالجنيه الشهر ده	spend	month:0	-	-	-	-	EGP	-	0
+قارن الشهر ده بالشهر اللي فات	comparePeriods	month:0	month:-1	-	-	-	-	-	0
+قارنلي الشهر ده والشهر اللي فات	comparePeriods	month:0	month:-1	-	-	-	-	-	0
+مقارنة بين الاسبوع ده والاسبوع اللي فات	comparePeriods	week:0	week:-1	-	-	-	-	-	0
+صرفت اكتر من الشهر اللي فات؟	comparePeriods	month:0	month:-1	-	-	-	-	-	0
+صرفت اقل من الاسبوع اللي فات؟	comparePeriods	week:0	week:-1	-	-	-	-	-	0
+صرفت كام الشهر ده والشهر اللي فات	comparePeriods	month:0	month:-1	-	-	-	-	-	0
+قارن مصاريفي في يناير وفبراير	comparePeriods	monthOfYear:1	monthOfYear:2	-	-	-	-	-	0
+قارن السنة دي بالسنة اللي فاتت	comparePeriods	year:0	year:-1	-	-	-	-	-	0
+قارن الشهر ده	comparePeriods	month:0	month:-1	-	-	-	-	-	0
+الفرق بين الشهر ده والشهر اللي فات في المصاريف	comparePeriods	month:0	month:-1	-	-	-	-	-	0
+مصاريف الشهر ده مقابل الشهر اللي فات	comparePeriods	month:0	month:-1	-	-	-	-	-	0
+قارن	comparePeriods	month:0	month:-1	-	-	-	-	-	1
+compare this month with last month	comparePeriods	month:0	month:-1	-	-	-	-	-	0
+compare spending this week and last week	comparePeriods	week:0	week:-1	-	-	-	-	-	0
+did I spend more than last month?	comparePeriods	month:0	month:-1	-	-	-	-	-	0
+did I spend less than last week	comparePeriods	week:0	week:-1	-	-	-	-	-	0
+this month vs last month spending	comparePeriods	month:0	month:-1	-	-	-	-	-	0
+compare my spending	comparePeriods	month:0	month:-1	-	-	-	-	-	1
+compare this year versus last year	comparePeriods	year:0	year:-1	-	-	-	-	-	0
+spent in march compared to february	comparePeriods	monthOfYear:3	monthOfYear:2	-	-	-	-	-	0
+spending difference between this month and last month	comparePeriods	month:0	month:-1	-	-	-	-	-	0
+قارن مصاريفي على الاكل الشهر ده والشهر اللي فات	comparePeriods	month:0	month:-1	sys:dining	-	-	-	-	0
+compare spending on food this month and last month	comparePeriods	month:0	month:-1	sys:dining	-	-	-	-	0
+اكتر ٣ محلات صرفت فيها الشهر ده	topMerchants	month:0	-	-	-	-	-	3	0
+اكتر 5 محلات	topMerchants	month:0	-	-	-	-	-	5	1
+اكتر محل بصرف فيه	topMerchants	month:0	-	-	-	-	-	-	1
+اكتر مكان بصرف فيه الشهر اللي فات	topMerchants	month:-1	-	-	-	-	-	-	0
+top merchants	topMerchants	month:0	-	-	-	-	-	-	1
+top 5 merchants this month	topMerchants	month:0	-	-	-	-	-	5	0
+top 3 stores last month	topMerchants	month:-1	-	-	-	-	-	3	0
+where do I spend the most	topMerchants	month:0	-	-	-	-	-	-	1
+top places this week	topMerchants	week:0	-	-	-	-	-	-	0
+اعلى ٥ محلات الاسبوع ده	topMerchants	week:0	-	-	-	-	-	5	0
+ايه اكتر محلات صرفت فيها السنة دي	topMerchants	year:0	-	-	-	-	-	-	0
+اكتر حته بصرف فيها	topMerchants	month:0	-	-	-	-	-	-	1
+اكتر تلات محلات	topMerchants	month:0	-	-	-	-	-	3	1
+top 10 shops	topMerchants	month:0	-	-	-	-	-	10	1
+top merchants in november	topMerchants	monthOfYear:11	-	-	-	-	-	-	0
+اكتر محلات اخر ٣٠ يوم	topMerchants	lastDays:30	-	-	-	-	-	-	0
+most visited stores this year	topMerchants	year:0	-	-	-	-	-	-	0
+مين اكتر تجار صرفت عندهم	topMerchants	month:0	-	-	-	-	-	-	1
+رصيدي كام	accountBalance	-	-	-	-	-	-	-	0
+معايا كام	accountBalance	-	-	-	-	-	-	-	0
+عندي كام في الحساب	accountBalance	-	-	-	-	-	-	-	0
+ايه رصيدي	accountBalance	-	-	-	-	-	-	-	0
+رصيد حسابي	accountBalance	-	-	-	-	-	-	-	0
+what is my balance	accountBalance	-	-	-	-	-	-	-	0
+balance	accountBalance	-	-	-	-	-	-	-	0
+how much do I have	accountBalance	-	-	-	-	-	-	-	0
+my balance please	accountBalance	-	-	-	-	-	-	-	0
+قولي رصيدي يا زغلول	accountBalance	-	-	-	-	-	-	-	0
+رصيدي كام دلوقتي	accountBalance	-	-	-	-	-	-	-	0
+Balance?	accountBalance	-	-	-	-	-	-	-	0
+what is my wallet balance	accountBalance	-	-	-	-	-	-	-	0
+رصيدي في الكارت	accountBalance	-	-	-	-	-	-	-	0
+رصيد بكارت CIB	accountBalance	-	-	-	-	a_cib_credit,a_cib_debit	-	-	0
+رصيدي في بنك مصر كام	accountBalance	-	-	-	-	a_misr	-	-	0
+رصيد كارت بنك مصر	accountBalance	-	-	-	-	a_misr	-	-	0
+what is the balance of my CIB debit card	accountBalance	-	-	-	-	a_cib_debit	-	-	0
+رصيدي بالدولار	accountBalance	-	-	-	-	-	USD	-	0
+معايا كام بالدولار	accountBalance	-	-	-	-	-	USD	-	0
+فاضل كام في الميزانية	budgetRemaining	cycle:0	-	-	-	-	-	-	0
+الميزانية فاضل منها كام	budgetRemaining	cycle:0	-	-	-	-	-	-	0
+how much is left in my budget	budgetRemaining	cycle:0	-	-	-	-	-	-	0
+budget remaining	budgetRemaining	cycle:0	-	-	-	-	-	-	0
+what is left of my budget?	budgetRemaining	cycle:0	-	-	-	-	-	-	0
+اقدر اصرف كام	budgetRemaining	cycle:0	-	-	-	-	-	-	0
+can I spend more this month	budgetRemaining	cycle:0	-	-	-	-	-	-	0
+فاضلي كام من الميزانية	budgetRemaining	cycle:0	-	-	-	-	-	-	0
+ميزانيتي فاضل منها ايه	budgetRemaining	cycle:0	-	-	-	-	-	-	0
+budget left this month	budgetRemaining	cycle:0	-	-	-	-	-	-	0
+فاضل كام من الميزانية الشهر ده	budgetRemaining	cycle:0	-	-	-	-	-	-	0
+لسه ينفع اصرف كام	budgetRemaining	cycle:0	-	-	-	-	-	-	0
+remaining budget	budgetRemaining	cycle:0	-	-	-	-	-	-	0
+ايه الاقساط الجاية	upcomingDues	-	-	-	-	-	-	-	0
+عليا اقساط ايه	upcomingDues	-	-	-	-	-	-	-	0
+الفواتير المستحقة	upcomingDues	-	-	-	-	-	-	-	0
+what bills are due	upcomingDues	-	-	-	-	-	-	-	0
+upcoming bills	upcomingDues	-	-	-	-	-	-	-	0
+upcoming installments	upcomingDues	-	-	-	-	-	-	-	0
+هدفع كام الشهر الجاي في الاقساط	upcomingDues	-	-	-	-	-	-	-	0
+لازم ادفع ايه قريب	upcomingDues	-	-	-	-	-	-	-	0
+what do I have to pay soon	upcomingDues	-	-	-	-	-	-	-	0
+اقساطي	upcomingDues	-	-	-	-	-	-	-	0
+subscriptions due	upcomingDues	-	-	-	-	-	-	-	0
+فواتير الشهر ده	upcomingDues	-	-	-	-	-	-	-	0
+مستحقات الشهر الجاي	upcomingDues	-	-	-	-	-	-	-	0
+bills due next week	upcomingDues	-	-	-	-	-	-	-	0
+اكبر مصروف الشهر ده	biggestExpense	month:0	-	-	-	-	-	-	0
+اكبر مصروف عندي	biggestExpense	month:0	-	-	-	-	-	-	1
+اكبر عملية الاسبوع اللي فات	biggestExpense	week:-1	-	-	-	-	-	-	0
+what was my biggest expense this month	biggestExpense	month:0	-	-	-	-	-	-	0
+largest expense last month	biggestExpense	month:-1	-	-	-	-	-	-	0
+biggest purchase this year	biggestExpense	year:0	-	-	-	-	-	-	0
+اكبر دفعة النهارده	biggestExpense	day:0	-	-	-	-	-	-	0
+اغلى حاجة اشتريتها السنة دي	biggestExpense	year:0	-	-	-	-	-	-	0
+most expensive thing I bought last week	biggestExpense	week:-1	-	-	-	-	-	-	0
+اكبر مصروف على الاكل	biggestExpense	month:0	-	sys:dining	-	-	-	-	1
+biggest expense on groceries last month	biggestExpense	month:-1	-	sys:groceries	-	-	-	-	0
+اكبر حاجة صرفتها امبارح	biggestExpense	day:-1	-	-	-	-	-	-	0
+اكبر مصروف بكارت CIB	biggestExpense	month:0	-	-	-	a_cib_credit,a_cib_debit	-	-	1
+وفرت كام الشهر ده	savings	month:0	-	-	-	-	-	-	0
+حوشت كام الشهر ده	savings	month:0	-	-	-	-	-	-	0
+وفرت كام الشهر اللي فات	savings	month:-1	-	-	-	-	-	-	0
+how much did I save this month	savings	month:0	-	-	-	-	-	-	0
+how much have I saved this year	savings	year:0	-	-	-	-	-	-	0
+savings last month	savings	month:-1	-	-	-	-	-	-	0
+ادخرت كام السنة دي	savings	year:0	-	-	-	-	-	-	0
+عملت توفير كام الشهر ده	savings	month:0	-	-	-	-	-	-	0
+وفرت كام	savings	month:0	-	-	-	-	-	-	1
+how much did I save	savings	month:0	-	-	-	-	-	-	1
+حوشت كام الاسبوع ده	savings	week:0	-	-	-	-	-	-	0
+توفيري الشهر ده	savings	month:0	-	-	-	-	-	-	0
+saved this week	savings	week:0	-	-	-	-	-	-	0
+بوفر كام في الشهر	savings	month:0	-	-	-	-	-	-	0
+اقصف جبهتي يا زغلول	roast	month:0	-	-	-	-	-	-	1
+إقصف جبهتي	roast	month:0	-	-	-	-	-	-	1
+اقصفني	roast	month:0	-	-	-	-	-	-	1
+اتريق عليا شوية	roast	month:0	-	-	-	-	-	-	1
+roast me	roast	month:0	-	-	-	-	-	-	1
+roast my spending	roast	month:0	-	-	-	-	-	-	1
+roast	roast	month:0	-	-	-	-	-	-	1
+يا زغلول اقصف جبهتي	roast	month:0	-	-	-	-	-	-	1
+اقصف جبهتي بقا	roast	month:0	-	-	-	-	-	-	1
+roast me please captain	roast	month:0	-	-	-	-	-	-	1
+اقصف جبهتي الشهر ده	roast	month:0	-	-	-	-	-	-	0
+ازيك يا زغلول	!noIntent	-	-	-	-	-	-	-	0
+hello	!noIntent	-	-	-	-	-	-	-	0
+what is the weather	!noIntent	-	-	-	-	-	-	-	0
+مين رئيس مصر	!noIntent	-	-	-	-	-	-	-	0
+احكيلي نكتة	!noIntent	-	-	-	-	-	-	-	0
+tell me a joke	!noIntent	-	-	-	-	-	-	-	0
+2+2	!noIntent	-	-	-	-	-	-	-	0
+كام الساعة	!noIntent	-	-	-	-	-	-	-	0
+سعر الدولار النهارده	!noIntent	-	-	-	-	-	-	-	0
+ابعتلي فلوس	!noIntent	-	-	-	-	-	-	-	0
+حول فلوس لمحمد	!noIntent	-	-	-	-	-	-	-	0
+how are you	!noIntent	-	-	-	-	-	-	-	0
+شكرا	!noIntent	-	-	-	-	-	-	-	0
+thanks	!noIntent	-	-	-	-	-	-	-	0
+ايه ده	!noIntent	-	-	-	-	-	-	-	0
+🙂 صرف؟	!noIntent	-	-	-	-	-	-	-	0
+كارفور	!noIntent	-	-	-	-	-	-	-	0
+CIB	!noIntent	-	-	-	-	-	-	-	0
+الشهر ده	!noIntent	-	-	-	-	-	-	-	0
+النهارده	!noIntent	-	-	-	-	-	-	-	0
+كام	!noIntent	-	-	-	-	-	-	-	0
+how much	!noIntent	-	-	-	-	-	-	-	0
+hi zaghlol	!noIntent	-	-	-	-	-	-	-	0
+صباح الخير	!noIntent	-	-	-	-	-	-	-	0
+delete my data	!noIntent	-	-	-	-	-	-	-	0
+امسح كل حاجة	!noIntent	-	-	-	-	-	-	-	0
+what time is it	!noIntent	-	-	-	-	-	-	-	0
+هل انا غني؟	!noIntent	-	-	-	-	-	-	-	0
+هلعب كورة	!noIntent	-	-	-	-	-	-	-	0
+كام عدد الايام	!noIntent	-	-	-	-	-	-	-	0
+؟؟؟	!empty	-	-	-	-	-	-	-	0
+...	!empty	-	-	-	-	-	-	-	0
+😀😀	!empty	-	-	-	-	-	-	-	0
+	!empty	-	-	-	-	-	-	-	0
+   	!empty	-	-	-	-	-	-	-	0
+؟!.,	!empty	-	-	-	-	-	-	-	0
+‏‎	!empty	-	-	-	-	-	-	-	0
+صرفت كام على الاكل على الاكل على الاكل على الاكل على الاكل على الاكل على الاكل على الاكل على الاكل على الاكل على الاكل على الاكل على الاكل على الاكل على الاكل على الاكل على الاكل على الاكل على الاكل على الاكل على الاكل على الاكل على الاكل على الاكل على الاكل على الاكل على الاكل على الاكل على الاكل على الاكل على الاكل على الاكل على الاكل على الاكل على الاكل على الاكل على الاكل على الاكل على الاكل على الاكل 	!tooLong	-	-	-	-	-	-	-	0
+aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa	!tooLong	-	-	-	-	-	-	-	0
+صرفت كام على XYZ	!unknownTarget	-	-	-	-	-	-	-	0
+صرفت كام على بلانتو الشهر ده	!unknownTarget	-	-	-	-	-	-	-	0
+how much did I spend on zxqvb	!unknownTarget	-	-	-	-	-	-	-	0
+spent at Nonexistent Store	!unknownTarget	-	-	-	-	-	-	-	0
+صرفت كام بكارت ابوظبي	!unknownTarget	-	-	-	-	-	-	-	0
+صرفت كام على اشياء كتير الشهر اللي فات	!unknownTarget	-	-	-	-	-	-	-	0
+how much did I spend with my Unknown card	!unknownTarget	-	-	-	-	-	-	-	0
+اكبر مصروف على كلكلا	!unknownTarget	-	-	-	-	-	-	-	0
+صرفت كام في مكتبة الشروق	!unknownTarget	-	-	-	-	-	-	-	0
+spent on Blorb last week	!unknownTarget	-	-	-	-	-	-	-	0
+bills budget	!ambiguous	-	-	-	-	-	-	-	0
+اقساط ميزانية	!ambiguous	-	-	-	-	-	-	-	0
+'; DROP TABLE transactions;--	!noIntent	-	-	-	-	-	-	-	0
+<script>alert(1)</script>	!noIntent	-	-	-	-	-	-	-	0
+${jndi:ldap://x}	!noIntent	-	-	-	-	-	-	-	0
+../../etc/passwd	!noIntent	-	-	-	-	-	-	-	0
+%s%s%s%n	!noIntent	-	-	-	-	-	-	-	0
+{{7*7}}	!noIntent	-	-	-	-	-	-	-	0
+balance of CIB	accountBalance	-	-	-	-	a_cib_credit,a_cib_debit	-	-	0
+رصيد CIB كام	accountBalance	-	-	-	-	a_cib_credit,a_cib_debit	-	-	0
+رصيد NBE	!unknownTarget
+balance of NBE	!unknownTarget

@@ -54,6 +54,13 @@ T-035 Q1–Q6 (keep with bundled rules; drop OTP+transaction messages, as the re
 | T-096 | A card due is paid only by money coming into the card account; other recurring items keep their matching rules. |
 | T-109 | `دينار` keeps the default currency with `ambiguousCurrency`; the voice UI asks. Missing spoken keywords go into the T-059 catalog seed. |
 | Q-44, T-047 Q2, T-047 Q5 | `ux-designer` writes the copy in the voice guide; reviewed in T-058. Placement: Q-44 one-time Welcome line with a "restore" action; missed notifications as a dismissible card in capture settings (and the lowest-priority home banner); rule saved but not yet active as "اتحفظت — هتشتغل خلال ثواني" / "Saved — active in a few seconds". |
+| T-076 | A re-parse never changes a stored amount; it may only fill missing fields or send the row to review. |
+| T-115 | The ≈ view rounds each currency's converted figure before adding; any excluded currency keeps the figure labelled ≈ with a "not included" note. |
+| T-110 | Safe-to-spend uses all cards; a credit/BNPL "balance" means the amount owed; a balance answer lists named accounts one by one and never adds assets and liabilities. |
+| T-155 | CSV import skips duplicates and marks rows with unknown accounts invalid (never creates accounts). |
+| T-147 | After an offline sign-out, account-linked Gold shows "paused" (not "free") until a fresh signed entitlement; S-69 shows a plain "Signed in" line, no e-mail. |
+| T-152 | While the entitlement is still being verified, backup cleanup keeps up to 5 and the scheduled job is skipped, not cancelled. |
+| T-080 | In the amount field a comma is accepted only as thousands grouping; `12,5` is rejected, never read as 125. |
 
 ## Part 2 — Still needs Amr
 
