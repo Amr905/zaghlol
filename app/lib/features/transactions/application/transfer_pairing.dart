@@ -453,9 +453,10 @@ class TransferPairingUseCase {
       skip: unlinked,
     );
     final rates = await _ratesFor(wide.values.map(_legOf), leg);
+    final no = await _dismissedFx(txnId);
     final cross = crossCurrencyCandidates(
       leg,
-      wide.values.map(_legOf),
+      wide.values.map(_legOf).where((c) => !no.contains(c.id)),
       (from, to) => rates['${from.code}>${to.code}'],
     );
     if (cross.isNotEmpty) {
@@ -485,6 +486,38 @@ class TransferPairingUseCase {
       );
     }
     return const PairingResult(PairingStatus.none);
+  }
+
+  /// Legs whose cross-currency suggestion with [id] the user dismissed
+  /// (T-092), seen from either leg.
+  Future<Set<String>> _dismissedFx(String id) async {
+    final rows = await _db
+        .customSelect(
+          'SELECT txn_id, payload FROM review_items WHERE kind = ?1 '
+          "AND resolution = 'dismissed' AND (txn_id = ?2 "
+          'OR payload LIKE ?3)',
+          variables: [
+            Variable.withString(ReviewKind.fxPairSuggestion),
+            Variable.withString(id),
+            Variable.withString('%"$id"%'),
+          ],
+          readsFrom: {_db.reviewItems},
+        )
+        .get();
+    final out = <String>{};
+    for (final r in rows) {
+      final raw = r.read<String?>('payload');
+      final c = raw == null ? null : (jsonDecode(raw) as Map)['candidates'];
+      final ids = c is List ? c.whereType<String>().toSet() : <String>{};
+      final owner = r.read<String?>('txn_id');
+      if (owner == null) continue;
+      if (owner == id) {
+        out.addAll(ids);
+      } else if (ids.contains(id)) {
+        out.add(owner);
+      }
+    }
+    return out;
   }
 
   /// True when [last4] names one of the user's credit or BNPL accounts.
