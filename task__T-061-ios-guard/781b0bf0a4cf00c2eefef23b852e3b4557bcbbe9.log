@@ -1,5 +1,8 @@
 ﻿== SUMMARY ==
-RUNNING sha=781b0bf0a4cf00c2eefef23b852e3b4557bcbbe9
+SKIP sha=781b0bf0a4cf00c2eefef23b852e3b4557bcbbe9 no app/packages/backend changes
 
 == FULL LOG (last 1500 lines) ==
 auto task/T-061-ios-guard 781b0bf0a4cf00c2eefef23b852e3b4557bcbbe9 2026-11-14T11:04:54.2839560+02:00
+
+
+
