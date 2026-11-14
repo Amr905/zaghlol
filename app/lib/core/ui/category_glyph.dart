@@ -20,6 +20,26 @@ class ZCategoryGlyph extends StatelessWidget {
   final bool transfer;
   final double size;
 
+  /// One emoji per catalog (system) category code (`sys:<code>`, the 14
+  /// codes in tools/catalog_build/data/catalog_curated.csv). Exact match
+  /// first; the keyword table below only serves custom ids.
+  static const Map<String, String> systemEmoji = {
+    'groceries': '\u{1F6D2}',
+    'dining': '\u{1F354}',
+    'transport': '\u{1F697}',
+    'bills': '⚡',
+    'housing': '\u{1F3E0}',
+    'shopping': '\u{1F6CD}️',
+    'debt': '\u{1F4B3}',
+    'subscriptions': '\u{1F4FA}',
+    'health': '\u{1F48A}',
+    'education': '\u{1F393}',
+    'entertainment': '\u{1F3AC}',
+    'family_giving': '\u{1F381}',
+    'savings': '\u{1F437}',
+    'income': '\u{1F4BC}',
+  };
+
   static const _emoji = <(List<String>, String)>[
     (['grocer', 'supermarket', 'market'], '\u{1F6D2}'),
     (['dining', 'food', 'restaurant', 'delivery', 'cafe'], '\u{1F354}'),
@@ -38,6 +58,8 @@ class ZCategoryGlyph extends StatelessWidget {
   static String glyphFor(String? id, {bool income = false}) {
     if (income) return '\u{1F4BC}';
     final key = (id ?? '').toLowerCase();
+    final exact = systemEmoji[key.startsWith('sys:') ? key.substring(4) : key];
+    if (exact != null) return exact;
     for (final (words, e) in _emoji) {
       if (words.any(key.contains)) return e;
     }
