@@ -1,5 +1,6 @@
 // T-049: ReviewRepository against an encrypted database. Synthetic data.
 
+import 'package:drift/drift.dart' show Value;
 import 'package:flutter_test/flutter_test.dart';
 import 'package:zaghlol/core/db/app_database.dart';
 import 'package:zaghlol/core/db/daos/review_items_dao.dart';
@@ -56,6 +57,17 @@ void main() {
       expect(await repo.countOpen(), 0);
     },
   );
+
+  test('FU-122: dismissing an item that backs a stored transaction keeps its '
+      'raw message as parsed', () async {
+    await db.into(db.transactions).insert(txn('t1', accountId: 'acc1'));
+    await (db.update(db.rawMessages)..where((m) => m.id.equals('raw1'))).write(
+      const RawMessagesCompanion(parseStatus: Value('parsed')),
+    );
+    await seed('r1', ReviewKind.lowConfidence, raw: 'raw1', txnId: 't1');
+    expect((await repo.dismiss('r1')).applied, isTrue);
+    expect(await rawStatus('raw1'), 'parsed');
+  });
 
   test('a second dismiss is a no-op (one winner)', () async {
     await seed('r1', ReviewKind.unrecognized, raw: 'raw1');
