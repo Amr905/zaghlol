@@ -20,6 +20,7 @@ import 'package:zaghlol/core/settings/settings_repository.dart';
 import 'package:zaghlol/features/catalog_sync/application/sync_adapters.dart';
 import 'package:zaghlol/features/catalog_sync/application/sync_orchestrator.dart';
 import 'package:zaghlol/features/wealth/data/prices_repository.dart';
+import 'package:zaghlol/ingestion/ingestion_pause_gate.dart';
 
 import '../../../core/backend/backend_test_support.dart';
 import '../../../core/db/financial_fixtures.dart';
@@ -132,6 +133,7 @@ void main() {
     FakeBackendStore? s,
     SyncAnchor? a,
     Future<void> Function()? recat,
+    IngestionPauseGate? gate,
   }) => SyncOrchestrator(
     db: db,
     backend: backend,
@@ -149,6 +151,7 @@ void main() {
           recats++;
         },
     now: () => clock,
+    pauseGate: gate,
   );
 
   Future<int> catalogVersion() async =>
@@ -526,4 +529,23 @@ void main() {
       expect(await catalogVersion(), 3);
     },
   );
+
+  test('WIRE-SVC: a paused gate runs nothing; pause awaits the running '
+      'sync; resume lets the next run through', () async {
+    final gate = IngestionPauseGate();
+    final o = make(gate: gate);
+    backend.script.add(effective(serverAt: clock));
+    final running = o.run();
+    var paused = false;
+    final p = gate.pause().then((_) => paused = true);
+    await running;
+    await p;
+    expect(paused, isTrue);
+    final requests = backend.requests.length;
+    expect((await o.run(force: true)).kind, SyncOutcomeKind.paused);
+    expect(backend.requests.length, requests);
+    gate.resume();
+    backend.script.add(effective(serverAt: clock));
+    expect((await o.run(force: true)).kind, isNot(SyncOutcomeKind.paused));
+  });
 }

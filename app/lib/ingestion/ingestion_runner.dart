@@ -7,6 +7,7 @@
 // running cycle ends after its current batch, waits for it, then closes the
 // database; a later drain reopens.
 
+import 'dart:async';
 import 'dart:io';
 
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -15,6 +16,7 @@ import 'package:zaghlol_parsing/zaghlol_parsing.dart';
 import '../core/db/app_database.dart';
 import '../core/db/db_directory.dart';
 import '../core/db/db_key_providers.dart';
+import '../features/ingestion/data/custom_institutions.dart';
 import '../features/ingestion/application/ingest_raw_messages.dart';
 import '../features/ingestion/data/ingest_factory.dart';
 import 'ingest_store.dart';
@@ -42,7 +44,7 @@ final class IngestionRunner {
     SpoolPort? spool,
     IngestStore Function(
       Directory dbDirectory,
-      IngestRawMessages Function(AppDatabase db) build,
+      FutureOr<IngestRawMessages> Function(AppDatabase db) build,
     )?
     store,
     Future<Directory> Function()? dbDirectory,
@@ -57,7 +59,7 @@ final class IngestionRunner {
   final SpoolPort _spool;
   final IngestStore Function(
     Directory,
-    IngestRawMessages Function(AppDatabase db),
+    FutureOr<IngestRawMessages> Function(AppDatabase db),
   )
   _storeFactory;
   final Future<Directory> Function() _dbDirectory;
@@ -78,18 +80,20 @@ final class IngestionRunner {
 
   static IngestStore _headlessStore(
     Directory dir,
-    IngestRawMessages Function(AppDatabase db) build,
+    FutureOr<IngestRawMessages> Function(AppDatabase db) build,
   ) => ProviderIngestStore(
     ProviderIngestStore.headlessContainer(dir),
     build: build,
+    rebuildPerBatch: true,
   );
 
   static IngestStore _uiStore(
     Directory dir,
-    IngestRawMessages Function(AppDatabase db) build,
+    FutureOr<IngestRawMessages> Function(AppDatabase db) build,
   ) => ProviderIngestStore(
     ProviderContainer(overrides: [dbDirectoryProvider.overrideWithValue(dir)]),
     build: build,
+    rebuildPerBatch: true,
   );
 
   /// Runs a cycle, or joins the running one and runs once more after it.
@@ -160,16 +164,19 @@ final class IngestionRunner {
 
   Future<IngestionCycle> _build() async {
     final registry = _registry();
-    final pipeline = ParsingPipeline(registry);
     final guardBase = RegistryGuardBase(registry);
     final ids = UlidGenerator();
     return IngestionCycle(
       spool: _spool,
       store: _storeFactory(
         await _dbDirectory(),
-        (db) => buildIngestRawMessages(
+        // The user's saved templates (T-164) are read per batch, so one saved
+        // meanwhile applies at once; a corrupt one is skipped.
+        (db) async => buildIngestRawMessages(
           db,
-          pipeline: pipeline,
+          pipeline: ParsingPipeline(
+            await registryWithCustomTemplates(registry, db),
+          ),
           guardBase: guardBase,
           newId: ids.next,
         ),

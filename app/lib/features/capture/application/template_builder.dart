@@ -6,6 +6,8 @@
 // the pure engine in `zaghlol_parsing` (`buildCustomTemplate`), which keeps
 // the generated regex bounded; the user never writes one.
 
+import 'custom_template_reparse.dart';
+
 import 'dart:convert';
 
 import 'package:crypto/crypto.dart' show sha256;
@@ -58,10 +60,12 @@ final templateBuilderStoreProvider = Provider<TemplateBuilderStore>((ref) {
   return DriftTemplateBuilderStore(() => ref.read(appDatabaseProvider.future));
 }, name: 'templateBuilderStoreProvider');
 
-/// Called after a template is saved: the re-parse job (T-076) hooks in here.
-/// Default: nothing.
+/// Called after a template is saved: the T-076 re-parse of the review
+/// messages the template now matches (WIRE-SVC). Tests override it.
 final customTemplateSavedHookProvider = Provider<Future<void> Function()>(
-  (ref) => () async {},
+  (ref) => () async {
+    await reparseAfterTemplateSaved(ref);
+  },
   name: 'customTemplateSavedHookProvider',
 );
 

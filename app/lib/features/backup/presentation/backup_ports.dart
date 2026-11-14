@@ -10,6 +10,12 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../core/db/app_database_providers.dart';
 import '../../../core/settings/settings_keys.dart';
+import '../../capture/application/capture_providers.dart'
+    show ingestionPauseGateProvider;
+import '../../catalog_sync/application/sync_orchestrator.dart'
+    show SyncOutcomeKind;
+import '../../catalog_sync/application/sync_providers.dart'
+    show syncOrchestratorProvider, syncPauseGateProvider;
 import '../application/backup_snapshot_exception.dart';
 import '../application/drive_backup_providers.dart';
 import '../application/icloud_backup_providers.dart';
@@ -218,8 +224,8 @@ final class RestoreDueFlags {
   final bool catalogResyncDue;
 }
 
-/// The duties around a restore swap. Pausing sync and capture, and the
-/// catalog resync, are bound by their own tasks; the defaults do nothing.
+/// The duties around a restore swap (FU-139): pausing sync and ingestion
+/// writes, and the catalog resync.
 abstract interface class RestoreSideEffects {
   /// Pauses catalog/entitlement sync and capture writes so no device-table
   /// write is lost between the carry-over read and the swap (FU-139).
@@ -237,17 +243,48 @@ abstract interface class RestoreSideEffects {
 }
 
 final class DbRestoreSideEffects implements RestoreSideEffects {
-  DbRestoreSideEffects(this._ref);
+  DbRestoreSideEffects(
+    this._ref, {
+    this.pauseTimeout = const Duration(seconds: 30),
+  });
   final Ref _ref;
 
+  /// How long [pause] waits for an ingestion write before refusing.
+  final Duration pauseTimeout;
+
+  /// Stops catalog sync and ingestion writes and waits for the one running
+  /// (WIRE-SVC). When an ingestion write does not finish in time this throws,
+  /// so the restore does not start (the flow shows its generic error).
   @override
-  Future<void> pause() async {}
+  Future<void> pause() async {
+    final sync = _ref.read(syncPauseGateProvider);
+    final ingest = _ref.read(ingestionPauseGateProvider);
+    try {
+      await sync.pause();
+      await ingest.pause(timeout: pauseTimeout);
+    } on Object {
+      sync.resume();
+      ingest.resume();
+      rethrow;
+    }
+  }
 
   @override
-  Future<void> resume() async {}
+  Future<void> resume() async {
+    _ref.read(syncPauseGateProvider).resume();
+    _ref.read(ingestionPauseGateProvider).resume();
+  }
 
+  /// A forced sync now. The swap is done, so the sync gate reopens first.
   @override
-  Future<void> resyncCatalog() async {}
+  Future<void> resyncCatalog() async {
+    _ref.read(syncPauseGateProvider).resume();
+    final o = await _ref.read(syncOrchestratorProvider.future);
+    final out = await o.run(force: true);
+    if (out.kind != SyncOutcomeKind.applied) {
+      throw StateError('CATALOG_RESYNC_FAILED');
+    }
+  }
 
   @override
   Future<RestoreDueFlags> readFlags() async {
