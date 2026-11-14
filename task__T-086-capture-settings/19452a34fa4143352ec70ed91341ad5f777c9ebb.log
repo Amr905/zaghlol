@@ -1,5 +1,8 @@
 ﻿== SUMMARY ==
-RUNNING sha=19452a34fa4143352ec70ed91341ad5f777c9ebb
+SKIP sha=19452a34fa4143352ec70ed91341ad5f777c9ebb no app/packages/backend changes
 
 == FULL LOG (last 1500 lines) ==
 auto task/T-086-capture-settings 19452a34fa4143352ec70ed91341ad5f777c9ebb 2026-11-14T11:06:42.6621790+02:00
+
+
+
