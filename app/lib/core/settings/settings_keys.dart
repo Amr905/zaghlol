@@ -205,6 +205,14 @@ abstract final class Settings {
     max: 999999999999999,
   );
 
+  /// T-066 (EC-14): the iOS "your Shortcuts went quiet" nudge is hidden until
+  /// this time (epoch ms UTC) after the user dismissed it; null: not snoozed.
+  static final iosNudgeSnoozedUntil = SettingKey.optionalInteger(
+    'ios_nudge_snoozed_until',
+    min: 0,
+    max: 999999999999999,
+  );
+
   // T-152 backup schedule and status (FR-BAK-02/04). Times: epoch ms UTC.
   static final backupSchedule = SettingKey.enumeration(
     'backup.schedule',

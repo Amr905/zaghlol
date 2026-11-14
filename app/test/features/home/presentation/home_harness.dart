@@ -2,6 +2,7 @@ import 'dart:async';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:flutter_riverpod/misc.dart' show Override;
 import 'package:flutter_test/flutter_test.dart';
 import 'package:zaghlol/core/l10n/date_format.dart';
 import 'package:zaghlol/core/l10n/generated/app_localizations.dart';
@@ -125,6 +126,8 @@ Widget homeApp({
   bool smsWaiting = false,
   Set<String> filter = const {},
   List<Account> accounts = const [],
+  HomeActions? actions,
+  List<Override> extraOverrides = const [],
 }) {
   return ProviderScope(
     overrides: [
@@ -133,6 +136,7 @@ Widget homeApp({
       homePaydaySetProvider.overrideWith((ref) => true),
       captureSmsEnabledProvider.overrideWith((ref) => Stream.value(smsWaiting)),
       captureSupportedProvider.overrideWith((ref) => smsWaiting),
+      ...extraOverrides,
       if (filter.isNotEmpty)
         cardFilterProvider.overrideWith(() => _Filter(filter)),
     ],
@@ -151,7 +155,7 @@ Widget homeApp({
         ),
         child: child!,
       ),
-      home: const Scaffold(body: HomeScreen()),
+      home: Scaffold(body: HomeScreen(actions: actions)),
     ),
   );
 }
@@ -175,6 +179,8 @@ Future<void> pumpHome(
   Set<String> filter = const {},
   List<Account> accounts = const [],
   bool settle = true,
+  HomeActions? actions,
+  List<Override> extraOverrides = const [],
 }) async {
   await initDateFormatting();
   await tester.binding.setSurfaceSize(const Size(390, 844));
@@ -190,6 +196,8 @@ Future<void> pumpHome(
       smsWaiting: smsWaiting,
       filter: filter,
       accounts: accounts,
+      actions: actions,
+      extraOverrides: extraOverrides,
     ),
   );
   if (settle) {

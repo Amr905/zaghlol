@@ -7,6 +7,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../core/l10n/generated/app_localizations.dart';
 import '../../../core/theme/z_tokens.dart';
 import '../../../core/ui/z_components.dart';
+import '../../capture/presentation/ios_setup_nudge.dart';
 import 'about_screen.dart';
 import 'preferences_screen.dart';
 import 'privacy_screen.dart';
@@ -24,6 +25,7 @@ class SettingsDestinations {
     this.onCategories,
     this.onBackup,
     this.onExports,
+    this.onAccount,
   });
 
   final VoidCallback? onGold;
@@ -33,6 +35,9 @@ class SettingsDestinations {
   final VoidCallback? onCategories;
   final VoidCallback? onBackup;
   final VoidCallback? onExports;
+
+  /// S-69 Gold & account (FR-GLD sign-in, restore, manage).
+  final VoidCallback? onAccount;
 }
 
 // The select key of settingsMainBackupSub for no backup.
@@ -65,6 +70,10 @@ class SettingsMainScreen extends ConsumerWidget {
     return SettingsScaffold(
       title: t.settingsMainTitle,
       children: [
+        IosSetupNudge(
+          onCheck: destinations.onCapture,
+          padding: const EdgeInsetsDirectional.only(bottom: ZSpacing.lg),
+        ),
         if (stepsLeft > 0)
           Padding(
             padding: const EdgeInsetsDirectional.only(bottom: ZSpacing.lg),
@@ -103,6 +112,11 @@ class SettingsMainScreen extends ConsumerWidget {
             SettingsRow(
               title: t.settingsMainPreferences,
               onTap: () => _push(context, const PreferencesScreen()),
+            ),
+            SettingsRow(
+              key: const ValueKey('settings-account'),
+              title: t.goldAccountTitle,
+              onTap: destinations.onAccount,
             ),
             SettingsRow(
               title: t.settingsMainNotifications,

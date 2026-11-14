@@ -10356,6 +10356,24 @@ abstract class AppLocalizations {
   /// In ar, this message translates to:
   /// **'{count, plural, =1{مبلغ واحد اتفكّ لأن المصروف قلّ} other{{count} مبالغ اتفكّت لأن المصروف قلّ}}'**
   String transactionsReimbUnassigned(int count);
+
+  /// L · count:int, n:String · T-066 EC-14, iOS only, Home and Settings nudge after 7+ days of silence
+  ///
+  /// In ar, this message translates to:
+  /// **'{count, plural, =1{بقالي يوم ما وصلتنيش رسالة بنك ولا دفع بـ Apple Pay. يمكن الاختصارات اتقفلت.} =2{بقالي يومين ما وصلتنيش رسالة بنك ولا دفع بـ Apple Pay. يمكن الاختصارات اتقفلت.} few{بقالي {n} أيام ما وصلتنيش رسالة بنك ولا دفع بـ Apple Pay. يمكن الاختصارات اتقفلت.} many{بقالي {n} يوم ما وصلتنيش رسالة بنك ولا دفع بـ Apple Pay. يمكن الاختصارات اتقفلت.} other{بقالي {n} يوم ما وصلتنيش رسالة بنك ولا دفع بـ Apple Pay. يمكن الاختصارات اتقفلت.}}'**
+  String iosSetupNudgeSilent(int count, String n);
+
+  /// B · opens the Capture screen
+  ///
+  /// In ar, this message translates to:
+  /// **'راجع الاختصارات'**
+  String get iosSetupNudgeCheck;
+
+  /// A · dismiss button of the nudge; hides it for 7 days
+  ///
+  /// In ar, this message translates to:
+  /// **'فكّرني بعد ٧ أيام'**
+  String get iosSetupNudgeSnoozeA11y;
 }
 
 class _AppLocalizationsDelegate

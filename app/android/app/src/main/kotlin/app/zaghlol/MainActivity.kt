@@ -20,6 +20,7 @@ import app.zaghlol.platform.share.ShareIntakeHostApi
 import app.zaghlol.platform.share.ShareIntakeState
 import app.zaghlol.platform.share.ShareStore
 import app.zaghlol.platform.share.ShareStores
+import app.zaghlol.platform.sharesheet.ShareImageRegistration
 import app.zaghlol.platform.text.TextNormalizationHostApi
 import app.zaghlol.platform.text.TextNormalizationRegistration
 import app.zaghlol.platform.widget.WidgetBridgeRegistration
@@ -55,6 +56,8 @@ class MainActivity : FlutterFragmentActivity() {
         DeviceSecurityRegistration.register(messenger, this)
         // T-178: Play Integrity for restore (UI engine only).
         AttestationRegistration.register(messenger, this)
+        // T-117: system chooser for the share-studio PNG (UI engine only).
+        ShareImageRegistration.register(messenger, this)
         val store = ShareStores.create(applicationContext)
         shareStore = store
         ShareIntakeHostApi.setUp(messenger, ShareIntakeHost(store))
@@ -88,6 +91,8 @@ class MainActivity : FlutterFragmentActivity() {
         TrustedClockRegistration.unregister(flutterEngine.dartExecutor.binaryMessenger)
         DeviceSecurityRegistration.unregister(flutterEngine.dartExecutor.binaryMessenger)
         AttestationRegistration.unregister(flutterEngine.dartExecutor.binaryMessenger)
+        ShareImageRegistration.unregister(flutterEngine.dartExecutor.binaryMessenger)
+        ShareImageRegistration.sweepAll(this)
         shareEvents = null
         shareStore = null
         capturePermissions = null

@@ -9688,5 +9688,25 @@
         "type": "int"
       }
     }
+  },
+  "iosSetupNudgeSilent": "{count, plural, =1{بقالي يوم ما وصلتنيش رسالة بنك ولا دفع بـ Apple Pay. يمكن الاختصارات اتقفلت.} =2{بقالي يومين ما وصلتنيش رسالة بنك ولا دفع بـ Apple Pay. يمكن الاختصارات اتقفلت.} few{بقالي {n} أيام ما وصلتنيش رسالة بنك ولا دفع بـ Apple Pay. يمكن الاختصارات اتقفلت.} many{بقالي {n} يوم ما وصلتنيش رسالة بنك ولا دفع بـ Apple Pay. يمكن الاختصارات اتقفلت.} other{بقالي {n} يوم ما وصلتنيش رسالة بنك ولا دفع بـ Apple Pay. يمكن الاختصارات اتقفلت.}}",
+  "@iosSetupNudgeSilent": {
+    "description": "L · count:int, n:String · T-066 EC-14, iOS only, Home and Settings nudge after 7+ days of silence",
+    "placeholders": {
+      "count": {
+        "type": "int"
+      },
+      "n": {
+        "type": "String"
+      }
+    }
+  },
+  "iosSetupNudgeCheck": "راجع الاختصارات",
+  "@iosSetupNudgeCheck": {
+    "description": "B · opens the Capture screen"
+  },
+  "iosSetupNudgeSnoozeA11y": "فكّرني بعد ٧ أيام",
+  "@iosSetupNudgeSnoozeA11y": {
+    "description": "A · dismiss button of the nudge; hides it for 7 days"
   }
 }

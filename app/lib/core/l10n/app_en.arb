@@ -6615,5 +6615,25 @@
         "type": "int"
       }
     }
+  },
+  "iosSetupNudgeSilent": "{count, plural, =1{No bank text or Apple Pay payment has reached me for 1 day. Your Shortcuts may have switched off.} other{No bank text or Apple Pay payment has reached me for {n} days. Your Shortcuts may have switched off.}}",
+  "@iosSetupNudgeSilent": {
+    "description": "L · count:int, n:String · T-066 EC-14, iOS only, Home and Settings nudge after 7+ days of silence",
+    "placeholders": {
+      "count": {
+        "type": "int"
+      },
+      "n": {
+        "type": "String"
+      }
+    }
+  },
+  "iosSetupNudgeCheck": "Check my Shortcuts",
+  "@iosSetupNudgeCheck": {
+    "description": "B · opens the Capture screen"
+  },
+  "iosSetupNudgeSnoozeA11y": "Remind me in 7 days",
+  "@iosSetupNudgeSnoozeA11y": {
+    "description": "A · dismiss button of the nudge; hides it for 7 days"
   }
 }
