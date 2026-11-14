@@ -5,6 +5,9 @@
 import 'dart:async';
 
 import 'package:flutter/services.dart';
+
+import 'dart:ui' show Locale;
+
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:zaghlol/core/l10n/digits_mode.dart';
@@ -105,6 +108,7 @@ void main() {
         appLockEnabledProvider.overrideWith((ref) => lockOn.stream),
         appLockControllerProvider.overrideWith(() => _Lock(locked)),
         primaryCurrencyProvider.overrideWith((ref) => Stream.value(egp)),
+        appLocaleProvider.overrideWithValue(const Locale('en')),
         digitsModeProvider('en').overrideWithValue(DigitsMode.western),
         currentCycleOverviewProvider.overrideWith(
           (ref) async => ref.watch(ovState),
