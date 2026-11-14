@@ -1,5 +1,8 @@
 ﻿== SUMMARY ==
-RUNNING sha=49dd07ad2b90491145911b7a1a7f48fa08004522
+SKIP sha=49dd07ad2b90491145911b7a1a7f48fa08004522 no app/packages/backend changes
 
 == FULL LOG (last 1500 lines) ==
 auto task/T-147-account 49dd07ad2b90491145911b7a1a7f48fa08004522 2026-11-14T11:09:56.9373456+02:00
+
+
+
