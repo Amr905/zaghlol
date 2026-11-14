@@ -111,3 +111,7 @@ None.
 | Task | File:line | Required change | Test to add |
 |------|-----------|-----------------|-------------|
 | SMS-TEMPLATES-2 | `app/assets/registry/institutions/{nbe.json:164,207; cib.json:169,212; banque_misr.json:169,212; qnb.json:173,216}` | The foreign-only `card_purchase_fx` templates must not capture `balance`/`available`, because the balance is in the account currency and not `cur`. Make the tail non-capturing and update the 16 fixtures to `balance: null`. | An ingest test (in `bundled_registry_e2e_test.dart`): an NBE foreign-only FX SMS with `Avl Bal EGP 5000.00` stores a USD expense and records **no** balance, with no USD 5,000 balance row. The fixture runner should also compare the balance currency, or that test fails without the fix. |
+
+## Lead delta check (SMS-TEMPLATES-2 fix, commit ff96db40)
+
+The eight foreign-only `card_purchase_fx` templates no longer capture `balance` or `available` (non-capturing tail); their fixtures expect null. The `_charged` templates keep the EGP balance, now asserted with `balanceCurrency`/`availableCurrency` EGP. `fixture_runner` compares the balance and available currency, so a balance read in the wrong currency fails. A new e2e test stores a foreign-only NBE message as a USD expense with no balance. Verdict: APPROVED.

@@ -78,7 +78,7 @@ Every task file has: ID, description, technical details, dependencies, affected 
 | [T-033](tasks/T-033.md) | Parsing pipeline stages 1–7 and ParseResult | US-05-1 | High | Sonnet | parsing-engine-engineer | T-032, T-012 | F | 5 | DONE |
 | [T-034](tasks/T-034.md) | Merchant cleaning and normalized merchant key | US-07-1 | Medium | Sonnet | parsing-engine-engineer | T-013 | F | 4 | DONE |
 | [T-035](tasks/T-035.md) | Capture Guard rules in Dart, shared golden cases and config generator | US-03-1 | High* | Opus | parsing-engine-engineer | T-032 | F | 5 | DONE |
-| [T-036](tasks/T-036.md) | Templates + fixtures: NBE, CIB, Banque Misr, QNB | US-05-1 | Medium | Sonnet | parsing-engine-engineer | T-033 | F | 6 | TODO |
+| [T-036](tasks/T-036.md) | Templates + fixtures: NBE, CIB, Banque Misr, QNB | US-05-1 | Medium | Sonnet | parsing-engine-engineer | T-033 | F | 6 | DONE |
 | [T-037](tasks/T-037.md) | Templates + fixtures: InstaPay scenarios and mobile wallets | US-05-1 | Medium | Sonnet | parsing-engine-engineer | T-033 | F | 6 | DONE |
 | [T-038](tasks/T-038.md) | Android Capture Guard (Kotlin) with config reader | US-03-1 | High* | Opus | native-platform-engineer | T-035, T-008 | D | 6 | DONE |
 | [T-039](tasks/T-039.md) | Android encrypted spool + spool host API | US-03-1 | High* | Opus | native-platform-engineer | T-004, T-008 | D | 4 | DONE |
