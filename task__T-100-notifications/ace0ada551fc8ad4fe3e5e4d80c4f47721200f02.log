@@ -1,5 +1,8 @@
 ﻿== SUMMARY ==
-RUNNING sha=ace0ada551fc8ad4fe3e5e4d80c4f47721200f02
+SKIP sha=ace0ada551fc8ad4fe3e5e4d80c4f47721200f02 no app/packages/backend changes
 
 == FULL LOG (last 1500 lines) ==
 auto task/T-100-notifications ace0ada551fc8ad4fe3e5e4d80c4f47721200f02 2026-11-14T11:07:18.4928667+02:00
+
+
+
