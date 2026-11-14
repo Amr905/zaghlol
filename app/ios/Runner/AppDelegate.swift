@@ -15,6 +15,13 @@ import UIKit
     // launch ends; also runs on background launches by the system.
     IngestBackgroundRefresh.registerLaunchHandler()
     IosCaptureRegistration.prepareKey()
+    // T-066 (T-062 minor 2): once per app launch, held entries go back to the
+    // spool when the build changed (an update may fix the cause). Never deletes.
+    if let version = Bundle.main.object(forInfoDictionaryKey: "CFBundleVersion") as? String {
+      DispatchQueue.global(qos: .utility).async {
+        _ = SpoolRuntime.shared?.store.releaseHeldIfVersionChanged(appVersion: version)
+      }
+    }
     return super.application(application, didFinishLaunchingWithOptions: launchOptions)
   }
 
