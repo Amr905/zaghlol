@@ -153,7 +153,10 @@ jobs:
           # T-065: the share store, share intake, Share Extension and share host never log.
           files="$files $(ls app/ios/Shared/ShareStore.swift app/ios/Shared/ShareIntake.swift app/ios/ShareExtension/*.swift app/ios/Runner/Platform/Share/ShareIntakeHost.swift)"
           [ -n "$files" ] || { echo "::error::no key files found"; exit 1; }
-          if grep -nE '\b(print|debugPrint|log|developer\.log|dump)[[:space:]]*\(|\b(stdout|stderr)\b|\bLog\.[a-z]+\(|println\(|Timber|NSLog|os_log|Logger\(|logStatements: *true' $files; then
+          # Comment lines are skipped: prose like "the diagnostic log (…)" is not a call.
+          hits=$(grep -nE '\b(print|debugPrint|log|developer\.log|dump)[[:space:]]*\(|\b(stdout|stderr)\b|\bLog\.[a-z]+\(|println\(|Timber|NSLog|os_log|Logger\(|logStatements: *true' $files | grep -vE '^[^:]+:[0-9]+:[[:space:]]*(//|/?\*)' || true)
+          if [ -n "$hits" ]; then
+            echo "$hits"
             echo "::error::logging call in key code"
             exit 1
           fi
