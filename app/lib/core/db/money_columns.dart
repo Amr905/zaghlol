@@ -138,3 +138,12 @@ extension ZakahLedgerRowMoney on ZakahLedgerRow {
   Money? get amount => isCurrencyUnit ? moneyOf(amountMinor, unit) : null;
   Money? get paid => isCurrencyUnit ? moneyOf(paidMinor, unit) : null;
 }
+
+extension ZakahLedgerCompanionMoney on ZakahLedgerCompanion {
+  /// Sets `unit` (the currency code) and `amount_minor` from [amount]
+  /// (FU-096). Gold lots (milligram units) keep using the raw columns.
+  ZakahLedgerCompanion withAmount(Money amount) {
+    final s = amount.toStorage();
+    return copyWith(amountMinor: Value(s.minor), unit: Value(s.currency));
+  }
+}
