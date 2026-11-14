@@ -118,6 +118,27 @@ input: channel, source, body           output: KEEP(kind registry|user|generic, 
 
 **Reading the capture status (T-047 design note, 2026-11-11).** Only the UI engine calls `getSpoolStatus` and `clearSpoolAlerts` (the headless engine never does, so there is one reader and one clearer). The app **absorbs** the counters into its own encrypted settings (missed-notification count, earliest missed-SMS time as a catch-up request, unreadable flag, the absorbed `seq`) and then calls `clearSpoolAlerts(seq)`; the UI never shows raw counters. `keyInvalidatedAtMs` alone (status file exists after any earlier alert, T-039 code #5) triggers a Guard rewrite and a silent catch-up, not a user notice; the notice needs `decryptDeleted > 0`. After a rewrite the app re-reads `guardState` and expects `full`.
 
+### 1.4 Drain hold during a restore (FU-194; contract addition, both capture hosts)
+
+A restore (T-152/T-153, WIRE-SVC) swaps the database files. The UI engine's own writes stop at `IngestionPauseGate`; the **native headless drain** (Android WorkManager engine; iOS App Intent / `BGAppRefreshTask` engine) is stopped by this hold, so no second engine opens the database during the swap. Capture itself is not held: receivers, the listener, App Intents and the Share Extension still write to the spool, and the entries are drained after the restore.
+
+```dart
+// AndroidCaptureHostApi and IosCaptureHostApi, background task queue:
+bool holdDrain(int ttlMs);      // sets/renews the hold; true while a headless engine is still active (it is asked to stop). IO_ERROR: no hold set
+bool isHeadlessDrainActive();   // true while a headless engine exists (it may hold the DB open)
+void releaseDrainHold();        // idempotent; IO_ERROR when the file stays (the hold still expires)
+```
+
+| | Android | iOS |
+|---|---|---|
+| Hold file | `noBackupFilesDir/capture/drain_hold`: ASCII epoch ms of the expiry, written tmp + fsync + rename; no content | `<App Group>/Library/Application Support/capture/drain_hold` (directory `ensureExcluded`), `.atomic` + `completeFileProtectionUntilFirstUserAuthentication`; no App Group container → memory only |
+| Expiry | `ttlMs` capped to 1 ms–10 min (wall clock). An expiry more than 10 min ahead (clock set back) or an unreadable file counts as no hold, so a crash mid-restore never stops the headless drain for longer than 10 min | same |
+| Check | `HeadlessEngine.runCycle`, on the main thread, right before it would start **or reuse** an engine (after the F3 UI check): held → `CycleOutcome.HELD`, no engine; `DrainLoop` maps it to `RETRY` (the retry work's back-off drains later; a UI engine attached → the UI branch) | `HeadlessIngestion.run` before the engine starts: held → `HeadlessIngestionError.held` (App Intent: `attempt` is false, the entry stays; BG task: completed `false`) |
+| Active engine | `DrainHold.admitEngine` and `hold` share one lock: an admitted engine counts as active until its teardown (after Dart closed the DB); `holdDrain` returning true also posts `headless.shutdown()` (close after the current batch, then destroy) | a run counts as active from admission to its end (after `close`); `holdDrain` returning true calls `HeadlessIngestion.requestStop()` |
+| Hosts | UI engine's host only; the headless host answers `NOT_AVAILABLE` | every host (the headless engine never calls it) |
+
+**Dart (`DbRestoreSideEffects`, `lib/ingestion/native_drain_hold.dart`).** `pause()`: sync gate → ingestion gate → `holdDrain(10 min)`; while it answers true, poll `isHeadlessDrainActive` every 200 ms up to `pauseTimeout` (30 s). Still active, or `holdDrain` fails → release the hold, reopen both gates and throw `IngestionBusyException`: **the restore refuses rather than swap under a running drain**. The hold is renewed every 3 min while the restore runs. `resume()` (the restore's `finally`) cancels the renewal, releases the hold (a failure is ignored; it expires) and reopens the gates. Other platforms: no-op (`NoNativeDrainHold`).
+
 ## 2. Android (`CaptureHostApi`, `CaptureEventsApi`)
 
 ```dart
@@ -137,6 +158,9 @@ abstract class AndroidCaptureHostApi {
   void clearSpoolAlerts(int seq);                 // T-039; zeroes the alert counters if seq still matches
   void holdSpool(List<String> ids);               // T-041 (FU-105): entries T-046 could not store even alone; §1.3 held; background task queue
   void wipeLocalData();                           // T-166 Delete everything (UI engine only; headless: NOT_AVAILABLE); background task queue; IO_ERROR
+  bool holdDrain(int ttlMs);                      // FU-194 (§1.4): restore drain hold; UI engine only
+  bool isHeadlessDrainActive();                   // FU-194 (§1.4)
+  void releaseDrainHold();                        // FU-194 (§1.4)
 }
 
 enum GuardConfigState { unknown, full, baseOnly, userUnreadable, baseInvalid }
@@ -242,6 +266,9 @@ abstract class IosCaptureHostApi {
   ShortcutSetupStatus getShortcutSetupStatus();   // from per-intent last-run timestamps recorded natively
   String shortcutInstallUrl();                    // iCloud link of the signed Zaghlol.shortcut
   void registerBackgroundRefresh();               // BGAppRefreshTask 'app.zaghlol.ingest'
+  bool holdDrain(int ttlMs);                      // FU-194 (§1.4): restore drain hold
+  bool isHeadlessDrainActive();                   // FU-194 (§1.4)
+  void releaseDrainHold();                        // FU-194 (§1.4)
 }
 class ShortcutSetupStatus { int? lastMessageIntentAtMs; int? lastWalletIntentAtMs; List<String> keywordsSeen; }
 ```

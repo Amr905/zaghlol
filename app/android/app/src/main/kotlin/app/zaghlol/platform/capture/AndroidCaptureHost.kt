@@ -23,6 +23,8 @@ import app.zaghlol.platform.spool.UlidGenerator
  *   A lost key is reported there (`keyInvalidatedAtMs`), never thrown.
  * - [holdSpool] (T-041, FU-105): moves entries this host drained and the use
  *   case could not store even alone to `spool/held/`.
+ * - [holdDrain] / [isHeadlessDrainActive] / [releaseDrainHold] (FU-194):
+ *   the restore's drain hold ([DrainHoldControl]), UI engine only.
  * - The drain stops scanning after the first entry the cipher/Keystore could
  *   not read and after [DRAIN_SCAN_BUDGET_MS] (FU-104 #2); its alerts are
  *   written to the status once per drain (FU-104 #8).
@@ -56,6 +58,8 @@ class AndroidCaptureHost(
     private val ui: UiPermissions? = null,
     /** T-166: the native part of "Delete everything"; UI engine only (headless answers `NOT_AVAILABLE`). */
     private val wiper: (() -> Unit)? = null,
+    /** FU-194: the restore's drain hold; UI engine only (the headless host answers `NOT_AVAILABLE`). */
+    private val drainHold: DrainHoldControl? = null,
 ) : AndroidCaptureHostApi {
 
     /** Ids this host's drain returned and that are not yet acked. */
@@ -218,6 +222,12 @@ class AndroidCaptureHost(
         synchronized(drained) { drained.clear() }
         w()
     }
+    /** FU-194: sets or renews the restore's drain hold; true while a headless engine is still active. */
+    override fun holdDrain(ttlMs: Long): Boolean = guarded { need(drainHold).hold(ttlMs) }
+
+    override fun isHeadlessDrainActive(): Boolean = guarded { need(drainHold).headlessActive() }
+
+    override fun releaseDrainHold(): Unit = guarded { need(drainHold).release() }
 
     /** The engine is going away: drop its claim (entries stay for the next drain). */
     fun detach() {
@@ -249,4 +259,14 @@ class AndroidCaptureHost(
         const val IO_ERROR = "IO_ERROR"
         const val CONFIG_INVALID = "CONFIG_INVALID"
     }
+}
+
+/** FU-194: what the UI host's drain-hold methods call ([CaptureRuntime.holdDrain] in production). */
+interface DrainHoldControl {
+    /** Sets or renews the hold; true while a headless engine is still active. Throws on a write failure. */
+    fun hold(ttlMs: Long): Boolean
+
+    fun headlessActive(): Boolean
+
+    fun release()
 }

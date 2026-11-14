@@ -13,6 +13,7 @@ import app.zaghlol.platform.capture.inbox.InboxReaders
 import app.zaghlol.platform.guard.AndroidGuardChannel
 import app.zaghlol.platform.guard.GuardRuntime
 import app.zaghlol.platform.ingest.DrainEnvironment
+import app.zaghlol.platform.ingest.DrainHold
 import app.zaghlol.platform.ingest.DrainLoop
 import app.zaghlol.platform.ingest.FlutterHeadlessStarter
 import app.zaghlol.platform.ingest.HeadlessEngine
@@ -74,6 +75,8 @@ class CaptureSeams(
     val bootCount: () -> Int = { -1 },
     /** T-166: the native part of "Delete everything" (`LocalDataWiper.production`); UI host only. */
     val wipe: (() -> Unit)? = null,
+    /** FU-194: wall clock for the drain hold's expiry. */
+    val wallClockMs: () -> Long = System::currentTimeMillis,
 )
 
 /**
@@ -102,6 +105,9 @@ class CaptureRuntime internal constructor(seams: CaptureSeams) {
         monoClockMs = seams.monoClockMs,
     )
     val claim = SpoolClaim(clock = seams.monoClockMs)
+
+    /** FU-194: the restore's drain hold (persisted; no content). */
+    val drainHold = DrainHold(File(seams.noBackupDir, "capture/" + DrainHold.FILE_NAME), seams.wallClockMs)
     val scheduler: IngestWorkQueue = seams.queue
     val device: CaptureDevice? = seams.device
     val main: MainThread = seams.main
@@ -175,6 +181,7 @@ class CaptureRuntime internal constructor(seams: CaptureSeams) {
         main = main,
         trace = { trace },
         onGone = { if ((store.pendingCountOrNull() ?: 0) > 0) notifyUiIfAttached() },
+        hold = drainHold,
     )
 
     /** The worker's run (one at a time per process). */
@@ -197,6 +204,17 @@ class CaptureRuntime internal constructor(seams: CaptureSeams) {
     }
 
     fun uiAttached(): Boolean = uiEvents != null
+
+    /**
+     * FU-194 (UI host `holdDrain`, any thread): sets or renews the hold; a
+     * headless engine still alive is asked to shut down (after its current
+     * batch and the DB close). Returns whether one was active.
+     */
+    fun holdDrain(ttlMs: Long): Boolean {
+        val active = drainHold.hold(ttlMs)
+        if (active) main.post { headless.shutdown() }
+        return active
+    }
 
     /**
      * After a spool write or a refused write (T-040 receiver, T-043
@@ -289,7 +307,17 @@ class CaptureRuntime internal constructor(seams: CaptureSeams) {
         inbox = if (headless) null else uiInbox(),
         ui = if (headless) null else uiPermissions,
         wiper = if (headless) null else wipe,
+        drainHold = if (headless) null else drainHoldControl,
     )
+
+    /** FU-194: the UI host's view of the hold (the headless host answers `NOT_AVAILABLE`). */
+    private val drainHoldControl = object : DrainHoldControl {
+        override fun hold(ttlMs: Long): Boolean = holdDrain(ttlMs)
+
+        override fun headlessActive(): Boolean = drainHold.headlessActive()
+
+        override fun release() = drainHold.release()
+    }
 
     /**
      * T-044 (EC-13): main thread, on resume and after a permission prompt.

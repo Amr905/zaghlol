@@ -14,9 +14,9 @@ abstract final class AppLinks {
   static const String manageSubscription = 'https://zaghlol.app/subscription';
 }
 
-/// Opens an external URL. The build has no URL launcher dependency yet, so
-/// the default does nothing; the composition root overrides it once one is
-/// added (see the WIRE-NAV report).
+/// Opens an external URL. The default does nothing (tests, other hosts); the
+/// composition root (main.dart) overrides it with the url_launcher opener
+/// (FU-195, `url_launcher_opener.dart`).
 typedef ExternalUrlOpener = Future<void> Function(Uri url);
 
 final externalUrlOpenerProvider = Provider<ExternalUrlOpener>(

@@ -22,6 +22,12 @@ enum class CycleOutcome {
      * between the loop's check and the engine start; no engine was started.
      */
     UI_TOOK_OVER,
+
+    /**
+     * Native only (FU-194): a restore holds the drain ([DrainHold]); no engine
+     * was started or reused. The entries stay in the spool for the retry work.
+     */
+    HELD,
 }
 
 /** One cycle's report: counts and a code only, never content. */
@@ -95,7 +101,8 @@ interface DrainEnvironment {
  *   - `NO_DATABASE`, `DEFERRED` → [RunResult.NO_RETRY];
  *   - `RETRY`, `TIMEOUT` → [RunResult.RETRY], unless a UI engine attached
  *     meanwhile (then the UI branch above);
- *   - `UI_TOOK_OVER` → the UI branch.
+ *   - `UI_TOOK_OVER` → the UI branch;
+ *   - `HELD` (FU-194 restore hold) → [RunResult.RETRY], unless a UI engine is attached.
  * - Spool unlistable → [RunResult.RETRY]. Out of time without a UI engine → [RunResult.RETRY].
  */
 class DrainLoop(private val env: DrainEnvironment, private val budgetMs: Long = BUDGET_MS) {
@@ -133,6 +140,8 @@ class DrainLoop(private val env: DrainEnvironment, private val budgetMs: Long = 
                     if (!env.uiAttached()) return RunResult.RETRY
                 }
                 CycleOutcome.UI_TOOK_OVER -> Unit
+                // FU-194: a restore is swapping the database; the retry work (back-off) drains after it.
+                CycleOutcome.HELD -> if (!env.uiAttached()) return RunResult.RETRY
             }
         }
     }

@@ -19,6 +19,8 @@ import Foundation
 /// - Nothing logged; only counts and a code leave Dart.
 enum HeadlessIngestionError: Error, Equatable {
   case busy
+  /// FU-194: a restore holds the drain; no engine was started.
+  case held
   case engineDidNotStart
   case readyTimeout
   case drainTimeout
@@ -60,14 +62,21 @@ final class HeadlessIngestion {
   private static func nowMs() -> Int { Int(ProcessInfo.processInfo.systemUptime * 1000) }
 
   /// Runs one drain cycle in a fresh headless engine within `timeoutS`.
+  /// FU-194: no engine starts while `hold` is in force (the restore swaps
+  /// the database files); the run counts as active for the hold until it ends.
   static func run(
     timeoutS: Double, entrypoint: String = HeadlessIngestion.entrypoint,
+    hold: DrainHold? = DrainHold.shared,
     register: (FlutterEngine) -> IosCaptureHost? = { IosCaptureRegistration.register(with: $0) }
   ) async throws -> HeadlessIngestionResult {
     guard !running else { throw HeadlessIngestionError.busy }
+    if let hold = hold, !hold.admitEngine() { throw HeadlessIngestionError.held }
     running = true
     stopRequested = false
-    defer { running = false }
+    defer {
+      running = false
+      hold?.engineGone()
+    }
     let t0 = nowMs()
     let deadline = t0 + Int(timeoutS * 1000)
 
@@ -125,5 +134,126 @@ final class HeadlessIngestion {
   /// stays on every other outcome.
   static func attempt(timeoutS: Double = HeadlessIngestion.intentTimeoutS) async -> Bool {
     do { return try await run(timeoutS: timeoutS).outcome == .ok } catch { return false }
+  }
+}
+
+/// FU-194: the restore's drain hold (platform-channels.md 1.4). While it is in
+/// force no headless run starts an engine, so nothing but the UI engine opens
+/// the database while the restore swaps its files. Writers (App Intents, the
+/// Share Extension) still write to the spool.
+///
+/// - Persisted in `<App Group>/Library/Application Support/capture/drain_hold`
+///   (ASCII epoch ms of the expiry; no content; directory excluded from
+///   backup), so it survives a process death mid-restore. Without an App
+///   Group container it is held in memory only.
+/// - Expires after at most `maxTtlMs` (wall clock); an expiry further ahead
+///   than that (clock set back) counts as expired, so a crash never stops the
+///   headless drain for longer.
+/// - `admitEngine` and `hold` share one lock: either the hold sees the run
+///   that was admitted (`hold` returns true) or the run sees the hold.
+final class DrainHold {
+  static let maxTtlMs: Int64 = 10 * 60_000
+  static let fileName = "drain_hold"
+
+  static let shared = DrainHold(
+    file: SpoolLocation.containerURL().map {
+      SpoolLocation.statusFile(in: $0).deletingLastPathComponent().appendingPathComponent(fileName)
+    })
+
+  struct WriteFailure: Error {}
+
+  private let file: URL?
+  private let wallMs: () -> Int64
+  private let lock = NSLock()
+  private var untilMs: Int64
+  private var engineActive = false
+
+  init(
+    file: URL?,
+    wallMs: @escaping () -> Int64 = { Int64(Date().timeIntervalSince1970 * 1000) }
+  ) {
+    self.file = file
+    self.wallMs = wallMs
+    self.untilMs = DrainHold.load(file)
+  }
+
+  /// True while a hold is in force.
+  func isHeld() -> Bool {
+    lock.lock()
+    defer { lock.unlock() }
+    return heldLocked()
+  }
+
+  /// True while a headless run is in progress.
+  func headlessActive() -> Bool {
+    lock.lock()
+    defer { lock.unlock() }
+    return engineActive
+  }
+
+  /// Sets (or renews) the hold for `ttlMs`, capped to 1...maxTtlMs. The file
+  /// is written first; when that fails this throws and no hold is set.
+  /// Returns whether a headless run is active now.
+  @discardableResult
+  func hold(ttlMs: Int64) throws -> Bool {
+    let until = wallMs() + Swift.min(Swift.max(ttlMs, 1), Self.maxTtlMs)
+    try persist(until)
+    lock.lock()
+    defer { lock.unlock() }
+    untilMs = until
+    return engineActive
+  }
+
+  /// Clears the hold (idempotent). The memory hold is cleared even when the
+  /// delete fails (it then throws).
+  func release() throws {
+    lock.lock()
+    untilMs = 0
+    lock.unlock()
+    guard let file = file, FileManager.default.fileExists(atPath: file.path) else { return }
+    do { try FileManager.default.removeItem(at: file) } catch {
+      if FileManager.default.fileExists(atPath: file.path) { throw WriteFailure() }
+    }
+  }
+
+  /// Right before a headless run starts its engine: false while held, else
+  /// marks the run active until `engineGone()`.
+  func admitEngine() -> Bool {
+    lock.lock()
+    defer { lock.unlock() }
+    if heldLocked() { return false }
+    engineActive = true
+    return true
+  }
+
+  func engineGone() {
+    lock.lock()
+    engineActive = false
+    lock.unlock()
+  }
+
+  private func heldLocked() -> Bool {
+    guard untilMs > 0 else { return false }
+    let now = wallMs()
+    return now < untilMs && untilMs - now <= Self.maxTtlMs
+  }
+
+  private static func load(_ file: URL?) -> Int64 {
+    guard let file = file, let data = try? Data(contentsOf: file),
+      let text = String(data: data, encoding: .ascii),
+      let v = Int64(text.trimmingCharacters(in: .whitespacesAndNewlines))
+    else { return 0 }
+    return v
+  }
+
+  private func persist(_ until: Int64) throws {
+    guard let file = file else { return }
+    do {
+      try ZaghlolDirectories.ensureExcluded(file.deletingLastPathComponent())
+      try Data(String(until).utf8).write(
+        to: file, options: [.atomic, .completeFileProtectionUntilFirstUserAuthentication])
+    } catch {
+      throw WriteFailure()
+    }
   }
 }

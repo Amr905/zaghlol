@@ -33,6 +33,8 @@ final class IosCaptureHost: IosCaptureHostApi {
   private let scheduleRefresh: () throws -> Void
   private let guardRuntime: () -> GuardRuntime?
   private let wipe: () throws -> Void
+  private let drainHold: DrainHold
+  private let stopHeadless: () -> Void
   private let drainedLock = NSLock()
   private var drained = Set<String>()
 
@@ -42,7 +44,9 @@ final class IosCaptureHost: IosCaptureHostApi {
     monoClockMs: @escaping () -> Int64 = { Int64(ProcessInfo.processInfo.systemUptime * 1000) },
     scheduleRefresh: @escaping () throws -> Void = { try IngestBackgroundRefresh.schedule() },
     guardRuntime: @escaping () -> GuardRuntime? = { CaptureGuardRuntime.shared },
-    wipe: @escaping () throws -> Void = { try LocalDataWiper.wipeAll() }
+    wipe: @escaping () throws -> Void = { try LocalDataWiper.wipeAll() },
+    drainHold: DrainHold = .shared,
+    stopHeadless: @escaping () -> Void = { Task { @MainActor in HeadlessIngestion.requestStop() } }
   ) {
     self.engineId = IosCaptureHost.newEngineId()
     self.runtime = runtime
@@ -51,6 +55,8 @@ final class IosCaptureHost: IosCaptureHostApi {
     self.scheduleRefresh = scheduleRefresh
     self.guardRuntime = guardRuntime
     self.wipe = wipe
+    self.drainHold = drainHold
+    self.stopHeadless = stopHeadless
   }
 
   private func need() throws -> SpoolRuntime {
@@ -184,6 +190,22 @@ final class IosCaptureHost: IosCaptureHostApi {
     drained.removeAll()
     drainedLock.unlock()
     do { try wipe() } catch { throw fail() }
+  }
+
+  /// FU-194: sets or renews the restore's drain hold. A headless run still in
+  /// progress is asked to stop (it closes the database before teardown);
+  /// returns true while it is active. Does not need the spool.
+  func holdDrain(ttlMs: Int64) throws -> Bool {
+    let active: Bool
+    do { active = try drainHold.hold(ttlMs: ttlMs) } catch { throw fail() }
+    if active { stopHeadless() }
+    return active
+  }
+
+  func isHeadlessDrainActive() throws -> Bool { drainHold.headlessActive() }
+
+  func releaseDrainHold() throws {
+    do { try drainHold.release() } catch { throw fail() }
   }
 
   /// The engine is going away: drop its claim (entries stay for the next drain).

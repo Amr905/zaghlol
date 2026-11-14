@@ -15,6 +15,8 @@
 // pass-through) and getSpoolStatus / clearSpoolAlerts; writeGuardConfig takes
 // the plaintext user part (renamed from encryptedConfig, FU-097 L-2). T-041
 // adds holdSpool and SpoolStatus.held (FU-105, platform-channels.md 1.3). Every
+// FU-194 adds holdDrain / isHeadlessDrainActive / releaseDrainHold on both
+// hosts (the restore's drain hold, platform-channels.md 1.4). Every
 // other method answers NOT_AVAILABLE until its owner task (T-040 receiver,
 // permission and Guard wiring, T-042 inbox, T-043 notifications).
 import 'package:pigeon/pigeon.dart';
@@ -208,6 +210,23 @@ abstract class AndroidCaptureHostApi {
   /// could not be deleted (the other parts still ran).
   @TaskQueue(type: TaskQueueType.serialBackgroundThread)
   void wipeLocalData();
+  /// FU-194: the restore's drain hold (platform-channels.md 1.4), UI engine
+  /// only (the headless host answers NOT_AVAILABLE). Persists a hold for
+  /// [ttlMs] (native caps it at 10 min; call again to renew); while it holds
+  /// no headless engine is started or reused, capture still writes to the
+  /// spool. Returns true while a headless engine is still active (it was
+  /// asked to shut down; poll isHeadlessDrainActive). IO_ERROR: no hold set.
+  @TaskQueue(type: TaskQueueType.serialBackgroundThread)
+  bool holdDrain(int ttlMs);
+
+  /// FU-194: true while a headless engine exists (it may hold the database open).
+  @TaskQueue(type: TaskQueueType.serialBackgroundThread)
+  bool isHeadlessDrainActive();
+
+  /// FU-194: clears the hold (idempotent). IO_ERROR when the file stays (the
+  /// hold then still expires on its own).
+  @TaskQueue(type: TaskQueueType.serialBackgroundThread)
+  void releaseDrainHold();
 }
 
 /// iOS host (T-062): the encrypted spool in the App Group container and the
@@ -257,6 +276,19 @@ abstract class IosCaptureHostApi {
   /// Idempotent; IO_ERROR when something could not be deleted.
   @TaskQueue(type: TaskQueueType.serialBackgroundThread)
   void wipeLocalData();
+  /// FU-194: same as AndroidCaptureHostApi.holdDrain. While held, the
+  /// headless run (App Intent, BGAppRefreshTask) starts no engine; the spool
+  /// write before it still happens. IO_ERROR: no hold set.
+  @TaskQueue(type: TaskQueueType.serialBackgroundThread)
+  bool holdDrain(int ttlMs);
+
+  /// FU-194: true while a headless run is in progress.
+  @TaskQueue(type: TaskQueueType.serialBackgroundThread)
+  bool isHeadlessDrainActive();
+
+  /// FU-194: clears the hold (idempotent).
+  @TaskQueue(type: TaskQueueType.serialBackgroundThread)
+  void releaseDrainHold();
 }
 
 @FlutterApi()

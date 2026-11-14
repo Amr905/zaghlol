@@ -5,6 +5,8 @@
 // Failures are typed kinds, never messages: nothing here carries a path, key,
 // file name or passphrase.
 
+import 'dart:async';
+
 import 'package:drift/drift.dart' show Variable;
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
@@ -16,6 +18,9 @@ import '../../catalog_sync/application/sync_orchestrator.dart'
     show SyncOutcomeKind;
 import '../../catalog_sync/application/sync_providers.dart'
     show syncOrchestratorProvider, syncPauseGateProvider;
+import '../../../ingestion/ingestion_pause_gate.dart'
+    show IngestionBusyException;
+import '../../../ingestion/native_drain_hold.dart';
 import '../application/backup_snapshot_exception.dart';
 import '../application/drive_backup_providers.dart';
 import '../application/icloud_backup_providers.dart';
@@ -246,23 +251,59 @@ final class DbRestoreSideEffects implements RestoreSideEffects {
   DbRestoreSideEffects(
     this._ref, {
     this.pauseTimeout = const Duration(seconds: 30),
+    this.drainPoll = const Duration(milliseconds: 200),
+    this.holdRenewEvery = const Duration(minutes: 3),
   });
   final Ref _ref;
 
-  /// How long [pause] waits for an ingestion write before refusing.
+  /// How long [pause] waits for an ingestion write, and then for a native
+  /// headless drain, before refusing.
   final Duration pauseTimeout;
 
+  /// FU-194: how often [pause] asks whether the headless drain has ended.
+  final Duration drainPoll;
+
+  /// FU-194: the native hold expires on its own after [drainHoldTtl] (so a
+  /// crash never stops capture for longer); it is renewed this often while
+  /// the restore runs.
+  final Duration holdRenewEvery;
+
+  static const Duration drainHoldTtl = Duration(minutes: 10);
+
+  Timer? _renew;
+
   /// Stops catalog sync and ingestion writes and waits for the one running
-  /// (WIRE-SVC). When an ingestion write does not finish in time this throws,
-  /// so the restore does not start (the flow shows its generic error).
+  /// (WIRE-SVC), then holds the native headless drain and waits for a running
+  /// one to end (FU-194). When either does not finish in time this throws
+  /// [IngestionBusyException], so the restore does not start (the flow shows
+  /// its generic error) and nothing stays paused or held.
   @override
   Future<void> pause() async {
     final sync = _ref.read(syncPauseGateProvider);
     final ingest = _ref.read(ingestionPauseGateProvider);
+    final native = _ref.read(nativeDrainHoldProvider);
+    var held = false;
     try {
       await sync.pause();
       await ingest.pause(timeout: pauseTimeout);
+      final waited = Stopwatch()..start();
+      held = true; // a failed hold may still have written part of it
+      var active = await native.hold(drainHoldTtl);
+      while (active) {
+        if (waited.elapsed >= pauseTimeout) {
+          throw const IngestionBusyException();
+        }
+        await Future<void>.delayed(drainPoll);
+        active = await native.headlessActive();
+      }
+      _renew?.cancel();
+      _renew = Timer.periodic(holdRenewEvery, (_) {
+        unawaited(
+          native.hold(drainHoldTtl).then<void>((_) {}, onError: (Object _) {}),
+        );
+      });
     } on Object {
+      if (held) await _release(native);
       sync.resume();
       ingest.resume();
       rethrow;
@@ -271,8 +312,19 @@ final class DbRestoreSideEffects implements RestoreSideEffects {
 
   @override
   Future<void> resume() async {
+    await _release(_ref.read(nativeDrainHoldProvider));
     _ref.read(syncPauseGateProvider).resume();
     _ref.read(ingestionPauseGateProvider).resume();
+  }
+
+  Future<void> _release(NativeDrainHold native) async {
+    _renew?.cancel();
+    _renew = null;
+    try {
+      await native.release();
+    } on Object {
+      // The hold expires on its own (at most drainHoldTtl).
+    }
   }
 
   /// A forced sync now. The swap is done, so the sync gate reopens first.
