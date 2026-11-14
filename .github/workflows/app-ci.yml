@@ -173,9 +173,11 @@ jobs:
       - name: dart test (zaghlol_domain)
         working-directory: packages/zaghlol_domain
         run: dart test
-      - name: dart test (zaghlol_parsing)
+      # T-173: timing assertions are tagged `benchmark` and run serially in
+      # the `perf` job (parallel load made them flaky, FU-183).
+      - name: dart test (zaghlol_parsing, non-benchmark)
         working-directory: packages/zaghlol_parsing
-        run: dart test
+        run: dart test --exclude-tags benchmark
       # T-032: the registry lint CLI and its self-tests. Once the real
       # registry exists (T-036), add `dart run registry_lint` over it here.
       - name: dart test (registry_lint)
@@ -218,6 +220,44 @@ jobs:
           path: app/test/**/failures/**
           if-no-files-found: warn
           retention-days: 14
+
+  # T-173 / NFR-PERF-01, 03, 04, 05: every timing budget runs here, one test
+  # at a time, so parallel load cannot flake them. Budgets are the `expect`
+  # lines in the tagged tests (set with headroom over the measured host numbers,
+  # so a >10% regression of the documented budget fails); the measured numbers
+  # are printed in the log and summarised in the job summary.
+  # NFR-PERF-02 (cold start) and NFR-PERF-06 (battery) need reference devices
+  # and are measured manually: docs/03-technical/performance-budgets.md.
+  perf:
+    name: performance benchmarks (serial)
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@fbc6f3992d24b796d5a048ff273f7fcc4a7b6c09 # v5.1.0
+        with:
+          persist-credentials: false
+      - uses: subosito/flutter-action@1a449444c387b1966244ae4d4f8c696479add0b2 # v2.23.0
+        with:
+          flutter-version: ${{ env.FLUTTER_VERSION }}
+          channel: stable
+          cache: true
+      - name: Resolve workspace
+        run: flutter pub get --enforce-lockfile
+      - name: dart test --tags benchmark (zaghlol_parsing)
+        working-directory: packages/zaghlol_parsing
+        run: set -o pipefail; dart test --tags benchmark -j 1 -r expanded 2>&1 | tee ../../perf-parsing.log
+      - name: flutter test --tags benchmark (app)
+        working-directory: app
+        run: set -o pipefail; flutter test --tags benchmark --concurrency=1 -r expanded 2>&1 | tee ../perf-app.log
+      - name: Publish numbers
+        if: always()
+        run: |
+          {
+            echo '### Benchmark numbers (printed by the tests)'
+            echo '```'
+            grep -hiE ' ms|us over|p95|mean|per ' perf-parsing.log perf-app.log | grep -v '^\s*$' | sort -u | head -n 80
+            echo '```'
+          } >> "$GITHUB_STEP_SUMMARY"
+          grep -hiE ' ms|us over|p95|mean' perf-parsing.log perf-app.log | sort -u || true
 
   kotlin-unit:
     name: kotlin unit tests (Gradle)

@@ -467,7 +467,7 @@ void main() {
       }
       sw.stop();
       expect(sw.elapsedMilliseconds, lessThan(2000));
-    });
+    }, tags: 'benchmark');
 
     test('config parse and compile is fast', () {
       final sw = Stopwatch()..start();
@@ -477,7 +477,7 @@ void main() {
       sw.stop();
       // 10 loads; the on-device budget is 20 ms each.
       expect(sw.elapsedMilliseconds, lessThan(1000));
-    });
+    }, tags: 'benchmark');
   });
 
   test('describeDecision covers both decision kinds', () {

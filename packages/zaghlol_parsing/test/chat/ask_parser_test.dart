@@ -91,6 +91,20 @@ void main() {
     });
 
     test('long and hostile input stays bounded', () {
+      for (final s in [
+        'ا' * 100000,
+        'صرفت ' * 5000,
+        '😀' * 400,
+        '${'(a+)+' * 100}b',
+        List.filled(200, 'x').join(' '),
+        '\u0000' * 1000,
+      ]) {
+        final r = parseAskQuestion(s, entities: entities);
+        expect(r, isA<AskUnrecognized>());
+      }
+    });
+
+    test('long and hostile input stays under 1 s (benchmark)', () {
       final sw = Stopwatch()..start();
       for (final s in [
         'ا' * 100000,
@@ -104,7 +118,7 @@ void main() {
         expect(r, isA<AskUnrecognized>());
       }
       expect(sw.elapsedMilliseconds, lessThan(1000));
-    });
+    }, tags: 'benchmark');
 
     test('word cap: cues after the cap are ignored', () {
       final q = '${List.filled(maxAskTokens, 'ايه').join(' ')} صرفت';
@@ -164,7 +178,7 @@ void main() {
     final perQuestionUs = sw.elapsedMicroseconds ~/ texts.length;
     // Loose bound for CI machines: the budget is 10 ms (10000 us).
     expect(perQuestionUs, lessThan(10000));
-  });
+  }, tags: 'benchmark');
 
   test('chips list is the closed set the app maps to keys', () {
     expect(AskChip.values.length, 10);

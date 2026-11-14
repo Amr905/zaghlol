@@ -1,0 +1,5 @@
+tags:
+  # T-173 timing budgets. Excluded from the normal run (parallel load makes
+  # them flaky); app-ci's `perf` job runs `dart test --tags benchmark`
+  # serially (-j 1).
+  benchmark:

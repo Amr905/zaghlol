@@ -409,7 +409,7 @@ void main() {
     // acceptance budget itself (150 ms); best-of-3 is the stable check.
     expect(first, lessThan(150), reason: 'cold first load $first ms');
     expect(best, lessThan(150));
-  });
+  }, tags: 'benchmark');
 }
 
 Map<String, Object?> _tpl(Map<String, Object?> j) => _tpls(j).first;
