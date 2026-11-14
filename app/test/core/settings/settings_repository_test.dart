@@ -22,13 +22,9 @@ final Currency kwd = Currency.of('KWD');
 /// Every key with its documented default and a non-default sample.
 final List<({SettingKey<Object?> key, Object? byDefault, Object? other})>
 allKeys = [
-  (
-    key: Settings.language,
-    byDefault: LanguagePref.system,
-    other: LanguagePref.ar,
-  ),
+  (key: Settings.language, byDefault: LanguagePref.ar, other: LanguagePref.en),
   (key: Settings.digits, byDefault: DigitsPref.auto, other: DigitsPref.western),
-  (key: Settings.theme, byDefault: ThemePref.system, other: ThemePref.dark),
+  (key: Settings.theme, byDefault: ThemePref.light, other: ThemePref.dark),
   (key: Settings.paydayDay, byDefault: 1, other: 28),
   (
     key: Settings.paydayEras,

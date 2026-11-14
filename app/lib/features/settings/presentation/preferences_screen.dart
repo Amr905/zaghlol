@@ -33,9 +33,9 @@ class PreferencesScreen extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final t = AppLocalizations.of(context);
     final lang = Localizations.localeOf(context).languageCode;
-    final langPref = ref.watch(languageProvider).value ?? LanguagePref.system;
+    final langPref = ref.watch(languageProvider).value ?? LanguagePref.ar;
     final digitsPref = ref.watch(digitsProvider).value ?? DigitsPref.auto;
-    final theme = ref.watch(themeProvider).value ?? ThemePref.system;
+    final theme = ref.watch(themeProvider).value ?? ThemePref.light;
     final currency = ref.watch(primaryCurrencyProvider).value;
     final approx = ref.watch(approxViewEnabledProvider).value ?? false;
     final approxTarget = ref.watch(approxViewTargetProvider).value;

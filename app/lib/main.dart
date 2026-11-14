@@ -15,6 +15,7 @@ import 'core/l10n/date_format.dart';
 import 'core/l10n/generated/app_localizations.dart';
 import 'core/l10n/locale_providers.dart';
 import 'core/routing/app_router.dart';
+import 'core/theme/theme_mode_provider.dart';
 import 'core/theme/app_theme.dart';
 import 'features/accounts/presentation/edit_card/edit_card_providers.dart'
     show cardCapturePortProvider;
@@ -97,10 +98,18 @@ void ingestionMain() => runIngestionMain();
 /// Root widget: themed, localized, routed through the T-024 shell. It holds
 /// no user-facing strings itself.
 class ZaghlolApp extends ConsumerWidget {
-  const ZaghlolApp({super.key, this.locale});
+  const ZaghlolApp({
+    super.key,
+    this.locale = const Locale('ar'),
+    this.themeMode = ThemeMode.light,
+  });
 
-  /// null follows the device; the language setting supplies it (T-023).
+  /// Arabic by default; null follows the device. The language setting
+  /// supplies it (T-023).
   final Locale? locale;
+
+  /// Light by default (PO 2026-11-14); the theme setting supplies it.
+  final ThemeMode themeMode;
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -111,6 +120,7 @@ class ZaghlolApp extends ConsumerWidget {
       onGenerateTitle: (context) => AppLocalizations.of(context).appName,
       theme: ZaghlolTheme.light,
       darkTheme: ZaghlolTheme.dark,
+      themeMode: themeMode,
       routerConfig: ref.watch(appRouterProvider),
       // T-103: app lock, privacy cover and secure window over the whole app.
       builder: (context, child) => AppLockGate(
@@ -166,6 +176,9 @@ class _LocalizedAppState extends ConsumerState<_LocalizedApp>
     ref.watch(cycleAppWiringProvider);
     // T-118: the home-screen widget follows the cycle overview.
     ref.watch(widgetBridgeWiringProvider);
-    return ZaghlolApp(locale: ref.watch(appLocaleProvider));
+    return ZaghlolApp(
+      locale: ref.watch(appLocaleProvider),
+      themeMode: ref.watch(appThemeModeProvider),
+    );
   }
 }
