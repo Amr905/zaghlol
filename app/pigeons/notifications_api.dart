@@ -73,6 +73,10 @@ abstract class NotificationsHostApi {
 
   /// The route of the notification that launched the app, once.
   String? takeLaunchRoute();
+
+  /// Opens the system notification settings of this app (Android: the app's
+  /// notification page; iOS: the app's page in Settings).
+  void openSystemSettings();
 }
 
 @FlutterApi()

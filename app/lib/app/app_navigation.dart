@@ -254,6 +254,8 @@ SettingsDestinations settingsDestinations(BuildContext context) =>
       onCategories: () => unawaited(_screens(context).categories(context)),
       onBackup: () => unawaited(openBackup(context)),
       onAccount: () => unawaited(_screens(context).account(context)),
+      onNotifications: () =>
+          unawaited(_screens(context).notificationsSettings(context)),
     );
 
 Future<void> openCaptureSettings(BuildContext context) =>

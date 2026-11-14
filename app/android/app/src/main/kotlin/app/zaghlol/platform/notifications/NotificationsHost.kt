@@ -59,6 +59,13 @@ class NotificationsHost(
 
   override fun takeLaunchRoute(): String? = NotificationRoutes.takeLaunchRoute()
 
+  override fun openSystemSettings() {
+    val intent = android.content.Intent(android.provider.Settings.ACTION_APP_NOTIFICATION_SETTINGS)
+      .putExtra(android.provider.Settings.EXTRA_APP_PACKAGE, context.packageName)
+      .addFlags(android.content.Intent.FLAG_ACTIVITY_NEW_TASK)
+    context.startActivity(intent)
+  }
+
   private fun toMap(n: NotifMsg): Map<String, Any?> =
     mapOf(
       NotificationPresenter.K_ID to n.id.toInt(),

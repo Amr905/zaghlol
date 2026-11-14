@@ -20,6 +20,8 @@ import '../../../core/l10n/locale_providers.dart';
 import '../../../core/l10n/money_format.dart';
 import '../../../core/settings/settings_keys.dart';
 import '../../../core/settings/settings_providers.dart';
+import '../../../core/platform/notifications_api.g.dart'
+    show NotificationsHostApi;
 import '../../backup/application/schedule_providers.dart';
 import '../../budget/application/budget_providers.dart';
 import '../../budget/data/payday_schedule_store.dart' show localToday;
@@ -60,6 +62,13 @@ final notificationTapSourceProvider = Provider<NotificationTapSource>(
 Future<bool> ensureNotificationPermission(WidgetRef ref) =>
     ref.read(notificationPermissionProvider).request();
 
+/// Opens the system notification settings of the app (FU-213). Default: does
+/// nothing (tests, headless engine).
+final openNotificationSettingsProvider = Provider<Future<void> Function()>(
+  (ref) => () async {},
+  name: 'openNotificationSettingsProvider',
+);
+
 /// The real notification wiring (NOTIF-GW), for the root ProviderScope.
 final List<Override> notificationWiringOverrides = [
   notificationGatewayProvider.overrideWith(
@@ -74,6 +83,15 @@ final List<Override> notificationWiringOverrides = [
     );
   }),
   notificationTapSourceProvider.overrideWith((ref) => PigeonNotificationTaps()),
+  openNotificationSettingsProvider.overrideWith(
+    (ref) => () async {
+      try {
+        await NotificationsHostApi().openSystemSettings();
+      } on Object {
+        // Nothing to open on this platform; the banner stays.
+      }
+    },
+  ),
 ];
 
 final class _NoPermission implements NotificationPermissionPort {
