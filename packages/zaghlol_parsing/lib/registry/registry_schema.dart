@@ -541,6 +541,14 @@ Template? _template(ObjReader r, List<RegistryIssue> out) {
   } else if (localeText != null && localeText != 'standard') {
     out.add(RegistryIssue('${r.path}.locale', RegistryIssueCode.badValue));
   }
+  // Optional provenance tag, metadata only (the engine ignores it). Lets
+  // representative wording be found and replaced once real samples exist.
+  final sourceText = r.string('source', maxLength: 32);
+  if (sourceText != null &&
+      sourceText != 'po-sample' &&
+      sourceText != 'synthetic-unverified') {
+    out.add(RegistryIssue('${r.path}.source', RegistryIssueCode.badValue));
+  }
   var isAvailableLimit = false;
   final flags = r.object('flags');
   if (flags != null) {
