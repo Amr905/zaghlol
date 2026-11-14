@@ -95,3 +95,25 @@ Findings (non-blocking):
 | Task | File:line | Required change | Test to add |
 |------|-----------|-----------------|-------------|
 | T-166 | `app/lib/features/security/application/delete_everything.dart:203-213` (+ `delete_everything_providers.dart:112,130`) | A local step that keeps failing must not make every later launch delete the DB and key slots again. Keep the destructive resume only while the crypto-shred (`key_slots`, `db_files`) is incomplete, or cap the attempts. Never delete a DB whose key slot was created after the marker. Clear the marker after the cap. | `delete_everything_test.dart`: the native step always throws. After the first run, create a new DB and key slot (the post-restart first launch), call `resumePendingWipe` again, and assert the new DB and key slot survive. A second test checks that the marker is cleared after the retry cap. |
+
+---
+
+## Delta re-review (T-166 fix)
+
+Scope: `5a4a3eda` against `ecddd8d0`, checked against finding 166-1 (plus the 166-2 iOS cache reset that came with it). Tests run: `flutter test test/features/security test/features/settings --exclude-tags golden,benchmark`, 97 passed. The 4 `settings_goldens_test` failures (about 15% pixel diff, all four variants) also show up when the goldens run on this Linux host. The fix touches no settings UI, so they are not caused by this delta.
+
+What I checked:
+- **Newer data is never deleted.** The marker now records the unfinished parts (`key_slots`, `db_files`, `temp`, `native`) and an attempt count. Before a resume runs anything destructive, `_newerData` looks for data that a finished part had already deleted. If `key_slots` is done and a slot reads `found`/`unusable`, or if `db_files` is done and any DB file exists, the resume clears the marker and deletes nothing, `native` included. `save()` runs right after `key_slots` and right after `db_files`, so the next resume sees each part as done. The one case with no check is when both `key_slots` and `db_files` are still pending. Then the old key is still there, so any DB present is the old data the user asked to delete, and resumes stop after 3. The newer-data tests cover the reviewer's scenario (native always throws, then a new key and DB are created) and the "new key only" case.
+- **Key store can't answer.** On `unavailable` the resume deletes nothing, writes `attempts + 1` and returns. After `maxResumes` such launches, the top check clears the marker. The marker is not kept forever.
+- **Retry count across crashes.** The marker with `attempts + 1` is written before any destructive part runs, so a crash in the middle still counts. A fresh run starts at 0. Resumes 1 to 3 run, and the third clears the marker at the end (`start.attempts >= maxResumes`). The test checks native calls = 1 + `maxResumes` and that the marker is gone.
+- **Old empty marker.** It decodes to all parts with attempts 0, so the full resume runs with no newer-data check. That is acceptable only because no pre-fix build has shipped (T-166 has not reached `main`). See D-1 for the torn-write case, which ends in the same state.
+- **WIRE-2 `WipeIncomplete` and the in-app restart.** `run()` then `resume()` still works. The in-app retry uses one resume attempt, and `WipeIncomplete` is still thrown when the retry fails. `privacy_delete_test` passes. `beforeStart` → `_resumeWipe` runs before the new `ProviderScope` opens the DB, so the newer-data check sees a clean state.
+- **iOS thread safety.** `GuardRuntime.reset()` takes the same `NSLock` as `current()`, `writeUser` and `limiterFor`, and the snapshot it drops is immutable. `KeychainSpoolCipher.reset()` takes the cipher's own lock. Both run after the Keychain and file sweep, so if a load races the wipe, its cached result is dropped afterwards. They run even when the sweep reports `Incomplete`. Finding 166-2 is resolved.
+
+Findings (non-blocking):
+| # | Sev | File:line | Issue | Change |
+|---|-----|-----------|-------|--------|
+| D-1 | minor | `app/lib/features/security/application/delete_everything.dart:115` (`WipeMarker.set`), `:72` | `writeAsBytes` truncates the file before it writes. A crash or power loss between the two leaves an empty marker. An empty marker decodes to all parts with attempts 0, and the next resume then deletes everything without the newer-data check. The only rewrite that can happen while newer data may exist is the `_Newer.unknown` path (`:252`), so the window is very narrow. | Write the marker atomically (write `wipe_pending.tmp`, flush, then rename). Follow-up. |
+| D-2 | nit | `delete_everything.dart:237` | A marker that throws on read for a reason other than `FormatException` (an I/O error) is left in place without counting an attempt. It deletes nothing, so it is harmless, but it is never dropped. | Optional: count those reads too, or clear the marker after N of them. |
+
+Verdict T-166: **APPROVED**. 166-1 and 166-2 are resolved. D-1 and D-2 are follow-ups. 166-3 to 166-6 stay follow-ups as already filed.
