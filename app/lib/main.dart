@@ -12,6 +12,7 @@ import 'app/url_launcher_opener.dart';
 import 'core/db/db_directory.dart';
 import 'core/db/db_key_providers.dart';
 import 'core/l10n/date_format.dart';
+import 'core/l10n/font_licenses.dart';
 import 'core/l10n/generated/app_localizations.dart';
 import 'core/l10n/locale_providers.dart';
 import 'core/routing/app_router.dart';
@@ -36,6 +37,7 @@ import 'ingestion/ingestion_main.dart';
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
+  registerFontLicenses();
   // FU-119: intl date symbols for ar/en before any date is formatted.
   await initDateFormatting();
   final dbDirectory = await resolveDbDirectory();

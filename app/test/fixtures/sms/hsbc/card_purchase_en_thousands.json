@@ -3,7 +3,7 @@
   "body": "HSBC: Purchase of EGP 12,345.67 at ZARA CAIRO with card ending 5555. Avl limit: EGP 10,000.00.",
   "receivedAt": "2026-10-23T11:14:00+03:00",
   "expect": {
-    "template": "hsbc.card_purchase.en",
+    "template": "hsbc.card_purchase_limit.en",
     "event": "card_purchase",
     "direction": "expense",
     "currency": "EGP",

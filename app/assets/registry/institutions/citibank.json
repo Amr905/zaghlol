@@ -20,6 +20,30 @@
   "drop": [],
   "templates": [
     {
+      "id": "citibank.card_purchase_limit.ar",
+      "version": 1,
+      "lang": "ar",
+      "channel": [
+        "sms"
+      ],
+      "event": "card_purchase",
+      "direction": "expense",
+      "baseConfidence": 0.95,
+      "pattern": "تم خصم (?<amount>[\\d,.]+) (?<cur>جم|جنيه|egp) على البطاقة المنتهية بـ (?<last4>\\d{4}) لدى (?<merchant>.+?)(?: في (?<date>\\d+/\\d+))?(?:\\. |\\.?$)(?:الحد\\D{0,12}(?<available>[\\d,.]+))",
+      "currencyMap": {
+        "جم": "EGP",
+        "جنيه": "EGP",
+        "egp": "EGP"
+      },
+      "date": {
+        "format": "d/M",
+        "yearPolicy": "nearest_past"
+      },
+      "flags": {
+        "isAvailableLimit": true
+      }
+    },
+    {
       "id": "citibank.card_purchase.ar",
       "version": 1,
       "lang": "ar",
@@ -29,7 +53,28 @@
       "event": "card_purchase",
       "direction": "expense",
       "baseConfidence": 0.95,
-      "pattern": "تم خصم (?<amount>[\\d,.]+) (?<cur>جم|جنيه|egp) على البطاقة المنتهية بـ (?<last4>\\d{4}) لدى (?<merchant>.+?)(?: في (?<date>\\d+/\\d+))?(?:\\. |\\.?$)(?:الحد\\D{0,12}(?<available>[\\d,.]+))?",
+      "pattern": "تم خصم (?<amount>[\\d,.]+) (?<cur>جم|جنيه|egp) على البطاقة المنتهية بـ (?<last4>\\d{4}) لدى (?<merchant>(?:[^.]|\\.\\S)+?)(?: في (?<date>\\d+/\\d+))?(?:\\. |\\.?$)(?:(?:الرصيد|رصيدك)\\D{0,12}(?<balance>[\\d,.]+))?\\D*$",
+      "currencyMap": {
+        "جم": "EGP",
+        "جنيه": "EGP",
+        "egp": "EGP"
+      },
+      "date": {
+        "format": "d/M",
+        "yearPolicy": "nearest_past"
+      }
+    },
+    {
+      "id": "citibank.card_purchase_limit.en",
+      "version": 1,
+      "lang": "en",
+      "channel": [
+        "sms"
+      ],
+      "event": "card_purchase",
+      "direction": "expense",
+      "baseConfidence": 0.95,
+      "pattern": "Card ending (?<last4>\\d{4}) charged (?<cur>egp) (?<amount>[\\d,.]+) at (?<merchant>.+?)(?: on (?<date>\\d+/\\d+))?(?:\\. |\\.?$)(?:(?:avl|available)\\.? limit\\D{0,8}(?<available>[\\d,.]+))",
       "currencyMap": {
         "جم": "EGP",
         "جنيه": "EGP",
@@ -53,7 +98,7 @@
       "event": "card_purchase",
       "direction": "expense",
       "baseConfidence": 0.95,
-      "pattern": "Card ending (?<last4>\\d{4}) charged (?<cur>egp) (?<amount>[\\d,.]+) at (?<merchant>.+?)(?: on (?<date>\\d+/\\d+))?(?:\\. |\\.?$)(?:(?:avl|available) limit\\D{0,8}(?<available>[\\d,.]+))?",
+      "pattern": "Card ending (?<last4>\\d{4}) charged (?<cur>egp) (?<amount>[\\d,.]+) at (?<merchant>(?:[^.]|\\.\\S)+?)(?: on (?<date>\\d+/\\d+))?(?:\\. |\\.?$)(?:(?:(?:avl|available) )?bal(?:ance)?\\D{0,16}(?<balance>[\\d,.]+))?\\D*$",
       "currencyMap": {
         "جم": "EGP",
         "جنيه": "EGP",
@@ -62,9 +107,6 @@
       "date": {
         "format": "d/M",
         "yearPolicy": "nearest_past"
-      },
-      "flags": {
-        "isAvailableLimit": true
       }
     }
   ]

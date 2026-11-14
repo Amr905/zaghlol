@@ -12,6 +12,7 @@ Compiled 2026-11-13. On 2026-11-13 the PO delegated every decision with a sound 
 | FU-112 Q1 (T-132) | T-132 **backfills** a seat for every purchase verified before it, bound to the install that bought it, with no event-row cooldown and the reclaim unused. | Otherwise early buyers burn their move window and reclaim for nothing. |
 | FU-112 Q2 | A verify on a vacant seat with no new payment **leaves it vacant** (as built); the owner gets it back through restore. | Restore is the intended recovery path; no silent grants. |
 | R6-1 (T-186) | Unfreeze is **enforced server-side**: a different operator than the one who froze, after a 24 h lock. If only one operator exists, the unfreeze needs the break-glass procedure in the runbook. | Server rule can't be bypassed by role mistakes. |
+| DESIGN-0 (FR-ONB-03) | *(PO, 2026-11-14)* A fresh install opens in **Arabic** and the **light** theme, whatever the device language or theme; an explicit choice (including System) wins. | PO instruction; amends FR-ONB-03 ("device language until chosen"). |
 
 ### Defaults confirmed as built
 

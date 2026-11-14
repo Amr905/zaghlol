@@ -85,6 +85,7 @@ flutter:
     - assets/registry/
     - assets/registry/institutions/
     - assets/guard/
+    - assets/fonts/OFL.txt
   fonts:
     # FU-044: IBM Plex Sans Arabic (SIL OFL 1.1, assets/fonts/OFL.txt); covers
     # Arabic and Latin. Family name = kZFontFamily.

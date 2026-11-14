@@ -74,7 +74,11 @@ final class ObjReader {
     return _map;
   }
 
-  String? string(String key, {bool required = false}) {
+  String? string(
+    String key, {
+    bool required = false,
+    int maxLength = maxStringLength,
+  }) {
     _read.add(key);
     final v = _map[key];
     if (v == null) {
@@ -83,7 +87,7 @@ final class ObjReader {
       }
       return null;
     }
-    if (v is! String || v.isEmpty || v.length > maxStringLength) {
+    if (v is! String || v.isEmpty || v.length > maxLength) {
       _bad(RegistryIssueCode.wrongType, key);
       return null;
     }
@@ -500,7 +504,11 @@ Template? _template(ObjReader r, List<RegistryIssue> out) {
     out.add(RegistryIssue('${r.path}.direction', RegistryIssueCode.badValue));
   }
   final confidence = r.permille('baseConfidence');
-  final patternText = r.string('pattern', required: true);
+  final patternText = r.string(
+    'pattern',
+    required: true,
+    maxLength: maxPatternLength,
+  );
   CompiledPattern? pattern;
   final groups = <String>{};
   if (patternText != null) {
