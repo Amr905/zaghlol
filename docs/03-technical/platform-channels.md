@@ -263,14 +263,15 @@ abstract class IosCaptureHostApi {
   void holdSpool(List<String> ids);               // T-062 (contract addition, mirrors Android T-041)
   SpoolStatus getSpoolStatus();                   // T-062 (contract addition, mirrors Android T-039)
   void clearSpoolAlerts(int seq);                 // T-062 (contract addition)
-  ShortcutSetupStatus getShortcutSetupStatus();   // from per-intent last-run timestamps recorded natively
-  String shortcutInstallUrl();                    // iCloud link of the signed Zaghlol.shortcut
+  ShortcutSetupStatus getShortcutSetupStatus();   // T-064: per-intent last-run times recorded natively (T-063)
   void registerBackgroundRefresh();               // BGAppRefreshTask 'app.zaghlol.ingest'
   bool holdDrain(int ttlMs);                      // FU-194 (§1.4): restore drain hold
   bool isHeadlessDrainActive();                   // FU-194 (§1.4)
   void releaseDrainHold();                        // FU-194 (§1.4)
 }
-class ShortcutSetupStatus { int? lastMessageIntentAtMs; int? lastWalletIntentAtMs; List<String> keywordsSeen; }
+class ShortcutSetupStatus { int? lastMessageIntentAtMs; int? lastWalletIntentAtMs; }
+// T-064 contract change: `keywordsSeen` dropped (T-063 records times only, never content) and
+// `shortcutInstallUrl()` dropped (the iCloud link is the Dart constant AppLinks.shortcutInstall, PO-provided).
 ```
 
 **App Intents** (in the Runner target, so they run in the app process; iOS 17+):

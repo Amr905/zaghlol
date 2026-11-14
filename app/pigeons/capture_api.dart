@@ -139,6 +139,16 @@ class SpoolStatus {
   int held;
 }
 
+/// T-064 (FR-ING-I-07): when each Shortcuts automation last ran, whatever the
+/// Guard decided (wall-clock epoch ms; null = never). Times only, never
+/// content, sender or keywords.
+class ShortcutSetupStatus {
+  ShortcutSetupStatus({this.lastMessageIntentAtMs, this.lastWalletIntentAtMs});
+
+  int? lastMessageIntentAtMs;
+  int? lastWalletIntentAtMs;
+}
+
 class CaptureCapabilities {
   CaptureCapabilities({
     required this.smsGranted,
@@ -210,6 +220,7 @@ abstract class AndroidCaptureHostApi {
   /// could not be deleted (the other parts still ran).
   @TaskQueue(type: TaskQueueType.serialBackgroundThread)
   void wipeLocalData();
+
   /// FU-194: the restore's drain hold (platform-channels.md 1.4), UI engine
   /// only (the headless host answers NOT_AVAILABLE). Persists a hold for
   /// [ttlMs] (native caps it at 10 min; call again to renew); while it holds
@@ -233,7 +244,7 @@ abstract class AndroidCaptureHostApi {
 /// background refresh. Same drain / ack / hold / status semantics as
 /// AndroidCaptureHostApi (platform-channels.md 1.3), so the Dart drain is
 /// shared. Errors: IO_ERROR | NOT_AVAILABLE (no App Group container).
-/// T-063 adds writeGuardConfig (section 3); the Shortcut-setup methods are T-064.
+/// T-063 adds writeGuardConfig (section 3); T-064 adds getShortcutSetupStatus (the install link is Dart-side, AppLinks.shortcutInstall).
 @HostApi()
 abstract class IosCaptureHostApi {
   /// T-063: the plaintext user part of the Guard config (platform-channels.md
@@ -262,6 +273,12 @@ abstract class IosCaptureHostApi {
   @TaskQueue(type: TaskQueueType.serialBackgroundThread)
   void clearSpoolAlerts(int seq);
 
+  /// T-064: the per-intent last-run times (the setup checker's input). Null
+  /// times when an intent never ran or the record can't be read yet.
+  /// NOT_AVAILABLE: no App Group container.
+  @TaskQueue(type: TaskQueueType.serialBackgroundThread)
+  ShortcutSetupStatus getShortcutSetupStatus();
+
   /// Submits the BGAppRefreshTask 'app.zaghlol.ingest' (the launch handler is
   /// registered natively at launch). A best-effort nudge: the system decides
   /// when it runs; the foreground drain is the guarantee.
@@ -276,6 +293,7 @@ abstract class IosCaptureHostApi {
   /// Idempotent; IO_ERROR when something could not be deleted.
   @TaskQueue(type: TaskQueueType.serialBackgroundThread)
   void wipeLocalData();
+
   /// FU-194: same as AndroidCaptureHostApi.holdDrain. While held, the
   /// headless run (App Intent, BGAppRefreshTask) starts no engine; the spool
   /// write before it still happens. IO_ERROR: no hold set.
