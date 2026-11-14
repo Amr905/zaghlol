@@ -1,5 +1,8 @@
 ﻿== SUMMARY ==
-RUNNING sha=c208177c6310a8b73542438a6c77f6d8725c0e42
+SKIP sha=c208177c6310a8b73542438a6c77f6d8725c0e42 no app/packages/backend changes
 
 == FULL LOG (last 1500 lines) ==
 auto task/T-098-mascot-policy c208177c6310a8b73542438a6c77f6d8725c0e42 2026-11-14T11:07:09.8000477+02:00
+
+
+
