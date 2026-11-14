@@ -1,5 +1,8 @@
 ﻿== SUMMARY ==
-RUNNING sha=a3707e35e8e3e4b9cc533318784b15657389a808
+SKIP sha=a3707e35e8e3e4b9cc533318784b15657389a808 no app/packages/backend changes
 
 == FULL LOG (last 1500 lines) ==
 auto task/T-151-icloud a3707e35e8e3e4b9cc533318784b15657389a808 2026-11-14T11:10:07.6217370+02:00
+
+
+
