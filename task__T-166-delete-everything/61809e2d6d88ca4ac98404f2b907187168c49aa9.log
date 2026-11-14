@@ -1,5 +1,8 @@
 ﻿== SUMMARY ==
-RUNNING sha=61809e2d6d88ca4ac98404f2b907187168c49aa9
+SKIP sha=61809e2d6d88ca4ac98404f2b907187168c49aa9 no app/packages/backend changes
 
 == FULL LOG (last 1500 lines) ==
 auto task/T-166-delete-everything 61809e2d6d88ca4ac98404f2b907187168c49aa9 2026-11-14T11:11:11.7341157+02:00
+
+
+
