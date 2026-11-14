@@ -1,5 +1,8 @@
 ﻿== SUMMARY ==
-RUNNING sha=567d8bdb4104ab21508e66574c1f9ed53409028f
+SKIP sha=567d8bdb4104ab21508e66574c1f9ed53409028f no app/packages/backend changes
 
 == FULL LOG (last 1500 lines) ==
 auto task/T-110-ask-engine 567d8bdb4104ab21508e66574c1f9ed53409028f 2026-11-14T11:08:32.6913205+02:00
+
+
+
