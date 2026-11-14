@@ -23,7 +23,8 @@ final class IosCaptureHostTests: XCTestCase {
   override func tearDownWithError() throws { try? FileManager.default.removeItem(at: root) }
 
   private func host(refresh: @escaping () throws -> Void = {}) -> IosCaptureHost {
-    IosCaptureHost(runtime: { self.runtime }, claim: claim, scheduleRefresh: refresh)
+    IosCaptureHost(
+      runtime: { self.runtime }, claim: claim, scheduleRefresh: refresh, guardRuntime: { nil })
   }
 
   @discardableResult

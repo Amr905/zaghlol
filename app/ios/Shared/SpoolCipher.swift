@@ -18,20 +18,47 @@ protocol SpoolCipher {
   func decrypt(_ data: Data, aad: Data) throws -> Data
   /// Creation time of the current key (epoch ms), nil when unknown.
   func keyCreatedAtMs() -> Int64?
+  /// T-063 (062-1): drop any in-memory key and read the Keychain once more
+  /// (never creating). Called before an entry is deleted on proof, because
+  /// another process (an extension, or the app's "Delete everything") may
+  /// have replaced the item since this process cached it.
+  func reloadKey() -> SpoolKeyReload
+}
+
+/// Result of `SpoolCipher.reloadKey()`.
+enum SpoolKeyReload: Equatable {
+  /// The Keychain holds the key this process already used: the proof stands.
+  case unchanged
+  /// Another key is current now: decrypt once more before deleting.
+  case changed
+  /// The Keychain could not confirm a key (locked, missing, unusable): keep the entry.
+  case unavailable
 }
 
 extension SpoolCipher {
   static var nonceBytes: Int { 12 }
   static var tagBytes: Int { 16 }
+  /// Ciphers without a Keychain (tests) hold one fixed key.
+  func reloadKey() -> SpoolKeyReload { .unchanged }
 }
 
 /// Production cipher: the key comes only from `SpoolKeychain`.
 final class KeychainSpoolCipher: SpoolCipher {
-  private let keychain: SpoolKeychain
+  let keychain: SpoolKeychain
   private let lock = NSLock()
   private var cached: SpoolKeychain.Loaded?
 
   init(keychain: SpoolKeychain = SpoolKeychain()) { self.keychain = keychain }
+
+  func reloadKey() -> SpoolKeyReload {
+    guard case .found(let fresh) = keychain.existing() else { return .unavailable }
+    lock.lock()
+    defer { lock.unlock() }
+    let before = cached
+    cached = fresh
+    if let b = before, b.key == fresh.key { return .unchanged }
+    return .changed
+  }
 
   private func loaded() throws -> SpoolKeychain.Loaded {
     lock.lock()

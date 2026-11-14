@@ -894,11 +894,18 @@ interface AndroidCaptureHostApi {
  * background refresh. Same drain / ack / hold / status semantics as
  * AndroidCaptureHostApi (platform-channels.md 1.3), so the Dart drain is
  * shared. Errors: IO_ERROR | NOT_AVAILABLE (no App Group container).
- * T-061 adds writeGuardConfig and the Shortcut-setup methods (section 3).
+ * T-063 adds writeGuardConfig (section 3); the Shortcut-setup methods are T-064.
  *
  * Generated interface from Pigeon that represents a handler of messages from Flutter.
  */
 interface IosCaptureHostApi {
+  /**
+   * T-063: the plaintext user part of the Guard config (platform-channels.md
+   * 1.1); native validates, encrypts with the shared spool key and writes it
+   * to the App Group, where the App Intents' Guard reads it.
+   * CONFIG_INVALID | IO_ERROR | NOT_AVAILABLE.
+   */
+  fun writeGuardConfig(userConfigJson: ByteArray)
   /** Returns decrypted entries (in memory only), oldest first. */
   fun drainSpool(max: Long): List<SpoolEntry>
   /** Only ids this engine drained. */
@@ -925,6 +932,24 @@ interface IosCaptureHostApi {
     fun setUp(binaryMessenger: BinaryMessenger, api: IosCaptureHostApi?, messageChannelSuffix: String = "") {
       val separatedMessageChannelSuffix = if (messageChannelSuffix.isNotEmpty()) ".$messageChannelSuffix" else ""
       val taskQueue = binaryMessenger.makeBackgroundTaskQueue()
+      run {
+        val channel = BasicMessageChannel<Any?>(binaryMessenger, "dev.flutter.pigeon.zaghlol.IosCaptureHostApi.writeGuardConfig$separatedMessageChannelSuffix", codec, taskQueue)
+        if (api != null) {
+          channel.setMessageHandler { message, reply ->
+            val args = message as List<Any?>
+            val userConfigJsonArg = args[0] as ByteArray
+            val wrapped: List<Any?> = try {
+              api.writeGuardConfig(userConfigJsonArg)
+              listOf(null)
+            } catch (exception: Throwable) {
+              CaptureApiPigeonUtils.wrapError(exception)
+            }
+            reply.reply(wrapped)
+          }
+        } else {
+          channel.setMessageHandler(null)
+        }
+      }
       run {
         val channel = BasicMessageChannel<Any?>(binaryMessenger, "dev.flutter.pigeon.zaghlol.IosCaptureHostApi.drainSpool$separatedMessageChannelSuffix", codec, taskQueue)
         if (api != null) {

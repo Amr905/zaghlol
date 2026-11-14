@@ -1,6 +1,8 @@
 // T-047: the Dart interface over AndroidCaptureHostApi that the capture
 // module uses (fakes in tests). Errors become code-only exceptions; a code
 // that is not UPPER_SNAKE becomes PLATFORM_UNKNOWN (FU-034).
+// T-063: IosCaptureHostPort is the same interface over IosCaptureHostApi
+// (Guard config, spool status); the Android-only calls answer NOT_AVAILABLE.
 
 import 'package:flutter/services.dart';
 import 'package:zaghlol_domain/zaghlol_domain.dart';
@@ -92,13 +94,62 @@ final class PigeonCaptureHostPort implements CaptureHostPort {
   Future<InboxPage> queryInbox(InboxQuery query) =>
       _guard(() => _api.queryInbox(query));
 
-  static Future<T> _guard<T>(Future<T> Function() call) async {
-    try {
-      return await call();
-    } on PlatformException catch (e) {
-      throw CaptureHostException(PlatformFailure.fromChannel(e.code));
-    } on Exception {
-      throw CaptureHostException(PlatformFailure.fromChannel(null));
-    }
+  static Future<T> _guard<T>(Future<T> Function() call) => _guardCapture(call);
+}
+
+Future<T> _guardCapture<T>(Future<T> Function() call) async {
+  try {
+    return await call();
+  } on PlatformException catch (e) {
+    throw CaptureHostException(PlatformFailure.fromChannel(e.code));
+  } on Exception {
+    throw CaptureHostException(PlatformFailure.fromChannel(null));
   }
+}
+
+/// T-063: the iOS host. `writeGuardConfig` reaches the Guard the App Intents
+/// use (platform-channels.md section 3); status and alerts as on Android.
+/// iOS has no SMS, notification access, battery settings or inbox: those
+/// calls throw [CaptureHostException] `NOT_AVAILABLE` without a channel call.
+final class IosCaptureHostPort implements CaptureHostPort {
+  IosCaptureHostPort([IosCaptureHostApi? api])
+    : _api = api ?? IosCaptureHostApi();
+
+  final IosCaptureHostApi _api;
+
+  static Never _notAvailable() =>
+      throw CaptureHostException(PlatformFailure.fromChannel('NOT_AVAILABLE'));
+
+  @override
+  Future<CaptureCapabilities> getCapabilities() async => _notAvailable();
+
+  @override
+  Future<bool> requestSmsPermission() async => _notAvailable();
+
+  @override
+  Future<void> openNotificationAccessSettings() async => _notAvailable();
+
+  @override
+  Future<bool> isIgnoringBatteryOptimizations() async => _notAvailable();
+
+  @override
+  Future<void> requestIgnoreBatteryOptimizations() async => _notAvailable();
+
+  @override
+  Future<void> writeGuardConfig(Uint8List userConfigJson) =>
+      _guardCapture(() => _api.writeGuardConfig(userConfigJson));
+
+  @override
+  Future<SpoolStatus> getSpoolStatus() => _guardCapture(_api.getSpoolStatus);
+
+  @override
+  Future<void> clearSpoolAlerts(int seq) =>
+      _guardCapture(() => _api.clearSpoolAlerts(seq));
+
+  /// iOS drains on foreground and BGAppRefresh (T-066), not on demand.
+  @override
+  Future<void> scheduleIngestionNow() async => _notAvailable();
+
+  @override
+  Future<InboxPage> queryInbox(InboxQuery query) async => _notAvailable();
 }

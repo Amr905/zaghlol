@@ -97,6 +97,30 @@ final class SpoolKeychain {
     return a
   }
 
+  /// Outcome of `existing()`. No case carries anything printable.
+  enum Existing {
+    case found(Loaded)
+    /// Every attempt agreed there is no item.
+    case notFound
+    /// Locked, busy, unusable or the attempts disagreed: proves nothing.
+    case unavailable
+  }
+
+  /// The key if it exists. Never creates, deletes or replaces anything (T-063,
+  /// FU-196: the Guard reads the user file with it, and a read before the
+  /// first unlock must not mint a key that orphans the file). An unusable
+  /// item is reported as unavailable: only `loadOrCreate` may replace it.
+  func existing() -> Existing {
+    switch readWithRetries() {
+    case .found(let l): return .found(l)
+    case .notFound: return .notFound
+    case .unusable, .unavailable: return .unavailable
+    }
+  }
+
+  /// This item's query (service, account, access group); tests compare it.
+  var query: [String: Any] { Self.itemQuery(accessGroup: accessGroup) }
+
   /// The key, created on first use. Throws `SpoolKeyUnavailable` for any
   /// transient failure.
   func loadOrCreate() throws -> Loaded {

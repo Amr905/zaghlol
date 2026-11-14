@@ -316,7 +316,9 @@ final class SpoolStore {
     state.lock.lock()
     defer { state.lock.unlock() }
     if Self.isProvenAbsent(entry(id)) { return false }
-    try FileManager.default.createDirectory(at: held, withIntermediateDirectories: true)
+    // T-165 F3 (follow-up owned by T-063): every native directory creation goes
+    // through ensureExcluded, also below an already excluded directory.
+    try excludeDir(held)
     guard let h = listing(held) else { throw SpoolIOError.listing }
     if h.filter(Self.isEntryName).count >= limits.maxHeld { return false }
     if let v = state.appVersion, Self.isProvenAbsent(held.appendingPathComponent(Self.heldVersionFile)) {
@@ -397,6 +399,11 @@ final class SpoolStore {
         return .ok(try SpoolRecordCodec.decode(plain))
       } catch SpoolCipherError.notAuthentic {
         if attempt == 0 && !transient && writtenBeforeCurrentKey(id) {
+          switch confirmUnderCurrentKey(id) {
+          case .proven: break
+          case .record(let r): return .ok(r)
+          case .result(let r): return r
+          }
           if let scope = scope { scope.keyInvalidated(wallClock()) } else {
             status?.recordKeyInvalidated(wallMs: wallClock())
           }
@@ -410,7 +417,52 @@ final class SpoolStore {
       }
     }
     if transient { return .unavailable(keyRelated: keyRelated) }
-    return deleteOnProof(id, scope)
+    switch confirmUnderCurrentKey(id) {
+    case .proven: return deleteOnProof(id, scope)
+    case .record(let r): return .ok(r)
+    case .result(let r): return r
+    }
+  }
+
+  private enum Confirm {
+    /// Still not authentic under the key that is current now: delete.
+    case proven
+    /// Readable under the current key (another process replaced the key).
+    case record(SpoolRecord)
+    /// Keep (or it is gone): return this.
+    case result(SpoolReadResult)
+  }
+
+  /// T-063 (062-1): before any delete on proof, re-read the Keychain once.
+  /// The proof stands only if the key is unchanged, or if the entry also
+  /// fails under the new key. A key that can't be read keeps the entry.
+  private func confirmUnderCurrentKey(_ id: String) -> Confirm {
+    switch cipher.reloadKey() {
+    case .unchanged: return .proven
+    case .unavailable: return .result(.unavailable(keyRelated: true))
+    case .changed: break
+    }
+    let data: Data
+    switch readBounded(entry(id)) {
+    case .absent: return .result(.missing)
+    case .failed: return .result(.unavailable(keyRelated: false))
+    case .tooLarge: return .proven
+    case .data(let d): data = d
+    }
+    guard data.count >= SpoolStoreConstants.nonceBytes + SpoolStoreConstants.tagBytes else {
+      return .proven
+    }
+    do {
+      var plain = try cipher.decrypt(data, aad: Self.aad(id))
+      defer { Self.zero(&plain) }
+      return .record(try SpoolRecordCodec.decode(plain))
+    } catch SpoolCipherError.notAuthentic {
+      return .proven
+    } catch is SpoolFormatError {
+      return .proven
+    } catch {
+      return .result(.unavailable(keyRelated: true))
+    }
   }
 
   private func writtenBeforeCurrentKey(_ id: String) -> Bool {

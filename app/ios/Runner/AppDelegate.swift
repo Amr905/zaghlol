@@ -15,6 +15,8 @@ import UIKit
     // launch ends; also runs on background launches by the system.
     IngestBackgroundRefresh.registerLaunchHandler()
     IosCaptureRegistration.prepareKey()
+    // T-063 (061-2): the Guard base copy the extensions read.
+    CaptureGuardRuntime.mirrorBaseInBackground()
     return super.application(application, didFinishLaunchingWithOptions: launchOptions)
   }
 

@@ -52,8 +52,12 @@ final ingestionPauseGateProvider = Provider<IngestionPauseGate>(
   name: 'ingestionPauseGateProvider',
 );
 
+/// The platform's capture host (T-063: the iOS one writes the Guard config
+/// the App Intents read; T-066 starts the coordinator on iOS).
 final captureHostPortProvider = Provider<CaptureHostPort>(
-  (ref) => PigeonCaptureHostPort(),
+  (ref) => f.defaultTargetPlatform == TargetPlatform.iOS
+      ? IosCaptureHostPort()
+      : PigeonCaptureHostPort(),
   name: 'captureHostPortProvider',
 );
 
