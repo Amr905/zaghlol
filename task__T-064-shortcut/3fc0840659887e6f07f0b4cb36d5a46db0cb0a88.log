@@ -1,5 +1,8 @@
 ﻿== SUMMARY ==
-RUNNING sha=3fc0840659887e6f07f0b4cb36d5a46db0cb0a88
+SKIP sha=3fc0840659887e6f07f0b4cb36d5a46db0cb0a88 no app/packages/backend changes
 
 == FULL LOG (last 1500 lines) ==
 auto task/T-064-shortcut 3fc0840659887e6f07f0b4cb36d5a46db0cb0a88 2026-11-14T11:05:21.8940487+02:00
+
+
+
