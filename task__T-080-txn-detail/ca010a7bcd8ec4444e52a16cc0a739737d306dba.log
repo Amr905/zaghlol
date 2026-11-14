@@ -1,5 +1,8 @@
 ﻿== SUMMARY ==
-RUNNING sha=ca010a7bcd8ec4444e52a16cc0a739737d306dba
+SKIP sha=ca010a7bcd8ec4444e52a16cc0a739737d306dba no app/packages/backend changes
 
 == FULL LOG (last 1500 lines) ==
 auto task/T-080-txn-detail ca010a7bcd8ec4444e52a16cc0a739737d306dba 2026-11-14T11:06:07.1898425+02:00
+
+
+
