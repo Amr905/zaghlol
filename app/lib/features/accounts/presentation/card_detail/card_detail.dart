@@ -102,35 +102,52 @@ class _State extends ConsumerState<CardDetailScreen> {
       children: [
         Row(
           children: [
-            IconButton(
+            _RoundBtn(
               tooltip: MaterialLocalizations.of(context).backButtonTooltip,
-              constraints: const BoxConstraints(
-                minWidth: ZSpacing.minTarget,
-                minHeight: ZSpacing.minTarget,
-              ),
-              icon: const BackButtonIcon(),
               onPressed: () => Navigator.of(context).maybePop(),
+              child: const BackButtonIcon(),
             ),
-            Expanded(
-              child: Semantics(
-                header: true,
-                child: Text(
-                  name,
-                  style: ZType.headline.copyWith(color: c.text),
-                ),
-              ),
-            ),
-            IconButton(
+            const Spacer(),
+            _Menu(account: account, name: name),
+            const SizedBox(width: ZSpacing.sm),
+            _RoundBtn(
               key: const Key('card-detail-edit'),
               tooltip: l.accountsEditTitleEdit,
-              constraints: const BoxConstraints(
-                minWidth: ZSpacing.minTarget,
-                minHeight: ZSpacing.minTarget,
-              ),
-              icon: const Icon(Icons.edit_outlined),
               onPressed: () => openEditCard(context, account),
+              child: const Icon(Icons.edit_outlined),
             ),
-            _Menu(account: account, name: name),
+          ],
+        ),
+        const SizedBox(height: ZSpacing.lg),
+        Row(
+          children: [
+            _BankTile(account: account),
+            const SizedBox(width: ZSpacing.md),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Semantics(
+                    header: true,
+                    child: Text(
+                      name,
+                      style: ZType.headline.copyWith(color: c.text),
+                    ),
+                  ),
+                  if (data.value?.nextDue case final due?)
+                    Text(
+                      l.accountsDetailDue(
+                        ZDateFormat.date(
+                          DateTime.utc(due.year, due.month, due.day),
+                          fmt.lang,
+                          fmt.digits,
+                        ),
+                      ),
+                      style: ZType.body.copyWith(color: c.textMuted),
+                    ),
+                ],
+              ),
+            ),
           ],
         ),
         if (currencies.length > 1) ...[
@@ -157,7 +174,6 @@ class _State extends ConsumerState<CardDetailScreen> {
               .firstWhere((_) => true, orElse: () => null),
           cur: cur,
           fmt: fmt,
-          nextDue: data.value?.nextDue,
         ),
         const SizedBox(height: ZSpacing.lg),
         ...data.when(
@@ -171,7 +187,7 @@ class _State extends ConsumerState<CardDetailScreen> {
           data: (d) => _sections(context, d, lookups, fmt, account),
         ),
         const SizedBox(height: ZSpacing.lg),
-        _CaptureRow(account: account, name: name),
+        _CaptureRow(account: account, name: name, onSeeAll: widget.onSeeAll),
       ],
     );
   }
@@ -202,13 +218,13 @@ class _State extends ConsumerState<CardDetailScreen> {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Wrap(
-              crossAxisAlignment: WrapCrossAlignment.center,
-              spacing: ZSpacing.sm,
+            Row(
               children: [
-                Text(
-                  l.accountsDetailSpent,
-                  style: ZType.title.copyWith(color: c.text),
+                Expanded(
+                  child: Text(
+                    l.accountsDetailSpent,
+                    style: ZType.title.copyWith(color: c.text),
+                  ),
                 ),
                 ZChip(label: l.commonPeriodThisCycle, selected: true),
               ],
@@ -216,7 +232,7 @@ class _State extends ConsumerState<CardDetailScreen> {
             const SizedBox(height: ZSpacing.xs),
             ZMoneyText(
               text: fmt.money(donut.data.total),
-              size: ZMoneySize.display,
+              size: ZMoneySize.title,
               kind: ZMoneyKind.neutral,
             ),
             const SizedBox(height: ZSpacing.md),
@@ -305,16 +321,6 @@ class _State extends ConsumerState<CardDetailScreen> {
               ),
             ),
           ),
-          ZButton(
-            label: l.accountsDetailAllTransactions,
-            variant: ZButtonVariant.text,
-            onPressed: () {
-              ref
-                  .read(cardFilterProvider.notifier)
-                  .selectOnly(widget.accountId);
-              widget.onSeeAll?.call();
-            },
-          ),
         ],
       ),
       for (final t in d.recent)
@@ -337,14 +343,12 @@ class _Header extends StatelessWidget {
     required this.balance,
     required this.cur,
     required this.fmt,
-    required this.nextDue,
   });
 
   final Account account;
   final AccountBalance? balance;
   final Currency cur;
   final TxnFmt fmt;
-  final CivilDate? nextDue;
 
   @override
   Widget build(BuildContext context) {
@@ -363,32 +367,47 @@ class _Header extends StatelessWidget {
           : (usedMinor * 100 / limit.minor).round();
       lines
         ..add(
-          Text(
-            '${l.accountsDetailAvailable} · '
-            '${l.accountsDetailAvailableOf(fmt.money(available), fmt.money(limit))}',
-            style: ZType.title.copyWith(color: c.text),
+          Row(
+            children: [
+              Text(
+                l.accountsDetailAvailable,
+                style: ZType.body.copyWith(color: c.textMuted),
+              ),
+              const SizedBox(width: ZSpacing.md),
+              Expanded(
+                child: Text(
+                  l.accountsDetailAvailableOf(
+                    fmt.money(available),
+                    fmt.money(limit),
+                  ),
+                  textAlign: TextAlign.end,
+                  style: ZType.titleSmall.copyWith(color: c.text),
+                ),
+              ),
+            ],
           ),
         )
-        ..add(const SizedBox(height: ZSpacing.sm))
+        ..add(const SizedBox(height: ZSpacing.md))
         ..add(
           Semantics(
             label: l.accountsDetailLimitUsed(fmt.digits.render('$pct%')),
             excludeSemantics: true,
             child: ClipRRect(
-              borderRadius: BorderRadius.circular(ZRadius.sm),
+              borderRadius: BorderRadius.circular(ZRadius.pill),
               child: LinearProgressIndicator(
                 value: limit.minor == 0 ? 0 : usedMinor / limit.minor,
-                minHeight: 8,
+                minHeight: 10,
                 color: c.primary,
-                backgroundColor: c.primaryContainer,
+                backgroundColor: c.surfaceAlt,
               ),
             ),
           ),
         )
+        ..add(const SizedBox(height: ZSpacing.sm))
         ..add(
           Text(
             l.accountsDetailLimitUsed(fmt.digits.render('$pct%')),
-            style: ZType.caption.copyWith(color: c.textMuted),
+            style: ZType.bodySmall.copyWith(color: c.textMuted),
           ),
         );
     } else if (balance?.balance != null) {
@@ -421,23 +440,6 @@ class _Header extends StatelessWidget {
           style: ZType.body.copyWith(color: c.textMuted),
         ),
       );
-    }
-    final due = nextDue;
-    if (due != null) {
-      lines
-        ..add(const SizedBox(height: ZSpacing.sm))
-        ..add(
-          Text(
-            l.accountsDetailDue(
-              ZDateFormat.date(
-                DateTime.utc(due.year, due.month, due.day),
-                fmt.lang,
-                fmt.digits,
-              ),
-            ),
-            style: ZType.body.copyWith(color: c.text),
-          ),
-        );
     }
     return ZCard(
       child: Column(
@@ -553,9 +555,10 @@ class _IgnoredBanner extends ConsumerWidget {
 }
 
 class _CaptureRow extends ConsumerWidget {
-  const _CaptureRow({required this.account, required this.name});
+  const _CaptureRow({required this.account, required this.name, this.onSeeAll});
   final Account account;
   final String name;
+  final VoidCallback? onSeeAll;
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -583,19 +586,179 @@ class _CaptureRow extends ConsumerWidget {
       last4: account.last4,
       cardName: name,
     );
-    return Semantics(
-      container: true,
-      button: true,
-      label: '${l.accountsDetailCapture}: ${spoken.join(', ')}',
-      excludeSemantics: true,
-      onTap: open,
-      child: ZListRow(
-        key: const Key('card-detail-capture'),
-        title: l.accountsDetailCapture,
-        subtitle: parts.join(' · '),
-        showChevron: true,
-        onTap: open,
+    final c = ZColors.of(context);
+    return DecoratedBox(
+      decoration: BoxDecoration(
+        color: c.surface,
+        borderRadius: BorderRadius.circular(ZRadius.card),
+        boxShadow: [
+          BoxShadow(
+            color: c.shadow,
+            blurRadius: 20,
+            offset: const Offset(0, 6),
+          ),
+        ],
       ),
+      child: ClipRRect(
+        borderRadius: BorderRadius.circular(ZRadius.card),
+        child: Column(
+          children: [
+            Semantics(
+              container: true,
+              button: true,
+              label: '${l.accountsDetailCapture}: ${spoken.join(', ')}',
+              excludeSemantics: true,
+              onTap: open,
+              child: _NavRow(
+                key: const Key('card-detail-capture'),
+                icon: Icons.chat_bubble_outline_rounded,
+                tint: c.primary,
+                title: l.accountsDetailCapture,
+                trailing: parts.join(' · '),
+                onTap: open,
+              ),
+            ),
+            Divider(
+              height: 1,
+              thickness: 1,
+              color: c.outline,
+              indent: ZSpacing.lg,
+              endIndent: ZSpacing.lg + 56,
+            ),
+            _NavRow(
+              icon: Icons.description_outlined,
+              tint: c.textMuted,
+              title: l.accountsDetailAllTransactions,
+              onTap: () {
+                ref.read(cardFilterProvider.notifier).selectOnly(account.id);
+                onSeeAll?.call();
+              },
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+class _NavRow extends StatelessWidget {
+  const _NavRow({
+    super.key,
+    required this.icon,
+    required this.tint,
+    required this.title,
+    this.trailing,
+    this.onTap,
+  });
+  final IconData icon;
+  final Color tint;
+  final String title;
+  final String? trailing;
+  final VoidCallback? onTap;
+
+  @override
+  Widget build(BuildContext context) {
+    final c = ZColors.of(context);
+    return InkWell(
+      onTap: onTap,
+      child: ConstrainedBox(
+        constraints: const BoxConstraints(minHeight: 72),
+        child: Padding(
+          padding: const EdgeInsetsDirectional.symmetric(
+            horizontal: ZSpacing.lg,
+            vertical: ZSpacing.md,
+          ),
+          child: Row(
+            children: [
+              Container(
+                width: 48,
+                height: 48,
+                decoration: BoxDecoration(
+                  color: tint,
+                  borderRadius: BorderRadius.circular(ZRadius.lg),
+                ),
+                child: Icon(icon, color: c.onPrimary),
+              ),
+              const SizedBox(width: ZSpacing.md),
+              Expanded(
+                child: Text(title, style: ZType.body.copyWith(color: c.text)),
+              ),
+              if (trailing != null)
+                Flexible(
+                  child: Text(
+                    trailing!,
+                    style: ZType.bodySmall.copyWith(color: c.textMuted),
+                    textAlign: TextAlign.end,
+                  ),
+                ),
+              Icon(
+                Icons.chevron_right_rounded,
+                color: c.textMuted,
+                textDirection: Directionality.of(context),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+/// White circular top-bar button (mockup 14).
+class _RoundBtn extends StatelessWidget {
+  const _RoundBtn({
+    super.key,
+    required this.tooltip,
+    required this.onPressed,
+    required this.child,
+  });
+  final String tooltip;
+  final VoidCallback onPressed;
+  final Widget child;
+
+  @override
+  Widget build(BuildContext context) {
+    final c = ZColors.of(context);
+    return Material(
+      color: c.surface,
+      shape: const CircleBorder(),
+      elevation: 1,
+      shadowColor: c.shadow,
+      child: IconButton(
+        tooltip: tooltip,
+        constraints: const BoxConstraints(
+          minWidth: ZSpacing.minTarget,
+          minHeight: ZSpacing.minTarget,
+        ),
+        icon: child,
+        onPressed: onPressed,
+      ),
+    );
+  }
+}
+
+class _BankTile extends StatelessWidget {
+  const _BankTile({required this.account});
+  final Account account;
+
+  @override
+  Widget build(BuildContext context) {
+    final c = ZColors.of(context);
+    final word = account.label.trim().split(RegExp(r'\s+')).first;
+    return Container(
+      width: 52,
+      height: 52,
+      alignment: Alignment.center,
+      decoration: BoxDecoration(color: c.surfaceAlt, shape: BoxShape.circle),
+      child: account.kind == AccountKind.cash
+          ? Icon(Icons.payments_rounded, color: c.primary)
+          : Text(
+              (word.length > 4 ? word.substring(0, 1) : word).toUpperCase(),
+              style: ZType.label.copyWith(
+                color: c.primary,
+                fontWeight: FontWeight.w700,
+              ),
+            ),
     );
   }
 }

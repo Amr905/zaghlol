@@ -57,26 +57,36 @@ class MoneyTab extends ConsumerWidget {
         child: ListView(
           padding: const EdgeInsetsDirectional.all(ZSpacing.screen),
           children: [
-            Row(
-              children: [
-                Expanded(
-                  child: Semantics(
-                    header: true,
-                    child: Text(
-                      l10n.accountsOverviewTitle,
-                      style: ZType.headline.copyWith(color: c.text),
+            Align(
+              alignment: AlignmentDirectional.centerStart,
+              child: Semantics(
+                button: true,
+                label: l10n.accountsOverviewAdd,
+                excludeSemantics: true,
+                child: Material(
+                  color: c.surface,
+                  shape: const CircleBorder(),
+                  elevation: 1,
+                  shadowColor: c.shadow,
+                  child: InkWell(
+                    customBorder: const CircleBorder(),
+                    onTap: onAdd,
+                    child: SizedBox(
+                      width: ZSpacing.minTarget,
+                      height: ZSpacing.minTarget,
+                      child: Icon(Icons.add_rounded, color: c.text),
                     ),
                   ),
                 ),
-                const SizedBox(width: ZSpacing.sm),
-                Flexible(
-                  child: ZButton(
-                    label: l10n.accountsOverviewAdd,
-                    onPressed: onAdd,
-                    variant: ZButtonVariant.secondary,
-                  ),
-                ),
-              ],
+              ),
+            ),
+            const SizedBox(height: ZSpacing.lg),
+            Semantics(
+              header: true,
+              child: Text(
+                l10n.accountsOverviewTitle,
+                style: ZType.display.copyWith(color: c.text),
+              ),
             ),
             const SizedBox(height: ZSpacing.lg),
             ...overview.when(
@@ -131,36 +141,73 @@ class _Hero extends ConsumerWidget {
     final l10n = AppLocalizations.of(context);
     final c = ZColors.of(context);
     final currencies = totals.currencies;
+    final firstCur = currencies.isEmpty ? _zeroEgp.currency : currencies.first;
     final approx = ref.watch(approxViewProvider(totals)).value;
-    return ZCard(
-      color: c.primaryContainer,
+    return Container(
+      padding: const EdgeInsetsDirectional.all(ZSpacing.xl),
+      decoration: BoxDecoration(
+        borderRadius: BorderRadius.circular(ZRadius.hero),
+        gradient: LinearGradient(
+          begin: AlignmentDirectional.topEnd,
+          end: AlignmentDirectional.bottomStart,
+          colors: [
+            c.primaryContainer,
+            Color.lerp(c.primaryContainer, c.accentLight, 0.25)!,
+          ],
+        ),
+      ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Text(
             l10n.accountsOverviewNetWorth,
-            style: ZType.label.copyWith(color: c.onPrimaryContainer),
+            style: ZType.label.copyWith(color: c.textMuted),
           ),
           const SizedBox(height: ZSpacing.sm),
-          if (currencies.isEmpty)
-            ZMoneyText(
-              text: _fmt(context, ref, _zeroEgp),
-              size: ZMoneySize.display,
-              kind: ZMoneyKind.expense,
-            )
-          else ...[
-            ZMoneyText(
-              text: _fmt(context, ref, totals[currencies.first]),
-              size: ZMoneySize.display,
-            ),
-            for (final cur in currencies.skip(1))
-              Padding(
-                padding: const EdgeInsetsDirectional.only(top: ZSpacing.xs),
-                child: ZMoneyText(
-                  text: _fmt(context, ref, totals[cur]),
-                  size: ZMoneySize.title,
+          Semantics(
+            label: _fmt(context, ref, totals[firstCur]),
+            excludeSemantics: true,
+            child: FittedBox(
+              fit: BoxFit.scaleDown,
+              alignment: AlignmentDirectional.centerStart,
+              child: Text(
+                '\u2068${_fmt(context, ref, totals[firstCur])}\u2069',
+                maxLines: 1,
+                style: ZType.display.copyWith(
+                  fontSize: 44,
+                  height: 1.2,
+                  color: c.heroNumber,
                 ),
               ),
+            ),
+          ),
+          if (currencies.length > 1) ...[
+            const SizedBox(height: ZSpacing.md),
+            Wrap(
+              spacing: ZSpacing.sm,
+              runSpacing: ZSpacing.sm,
+              children: [
+                for (final cur in currencies.skip(1))
+                  Container(
+                    padding: const EdgeInsetsDirectional.symmetric(
+                      horizontal: ZSpacing.md,
+                      vertical: ZSpacing.xs,
+                    ),
+                    decoration: BoxDecoration(
+                      color: c.surface.withValues(alpha: 0.7),
+                      borderRadius: BorderRadius.circular(ZRadius.pill),
+                    ),
+                    child: Semantics(
+                      label: _fmt(context, ref, totals[cur]),
+                      excludeSemantics: true,
+                      child: Text(
+                        '\u2068${_fmt(context, ref, totals[cur])}\u2069',
+                        style: ZType.label.copyWith(color: c.text),
+                      ),
+                    ),
+                  ),
+              ],
+            ),
           ],
           if (approx is ApproxViewOn) ...[
             const SizedBox(height: ZSpacing.sm),
@@ -234,16 +281,43 @@ class _AccountsSection extends StatelessWidget {
           ],
         ),
         const SizedBox(height: ZSpacing.sm),
-        for (final a in data.visible)
-          Padding(
-            padding: const EdgeInsetsDirectional.only(bottom: ZSpacing.sm),
-            child: _AccountRow(
-              item: a,
-              onTap: onOpenAccount == null
-                  ? null
-                  : () => onOpenAccount!(a.account),
+        DecoratedBox(
+          decoration: BoxDecoration(
+            color: c.surface,
+            borderRadius: BorderRadius.circular(ZRadius.card),
+            boxShadow: [
+              BoxShadow(
+                color: c.shadow,
+                blurRadius: 20,
+                offset: const Offset(0, 6),
+              ),
+            ],
+          ),
+          child: ClipRRect(
+            borderRadius: BorderRadius.circular(ZRadius.card),
+            child: Column(
+              children: [
+                for (var i = 0; i < data.visible.length; i++) ...[
+                  if (i > 0)
+                    Divider(
+                      height: 1,
+                      thickness: 1,
+                      color: c.outline,
+                      indent: ZSpacing.lg,
+                      endIndent: ZSpacing.lg + 56,
+                    ),
+                  _AccountRow(
+                    item: data.visible[i],
+                    onTap: onOpenAccount == null
+                        ? null
+                        : () => onOpenAccount!(data.visible[i].account),
+                  ),
+                ],
+              ],
             ),
           ),
+        ),
+        const SizedBox(height: ZSpacing.sm),
         if (data.hiddenCount > 0)
           _HiddenRow(count: data.hiddenCount, onTap: onOpenHidden),
       ],
@@ -294,64 +368,102 @@ class _AccountRow extends ConsumerWidget {
       button: onTap != null,
       label: semantics,
       excludeSemantics: true,
-      child: ZCard(
+      child: InkWell(
         onTap: onTap,
-        padding: const EdgeInsetsDirectional.symmetric(
-          horizontal: ZSpacing.lg,
-          vertical: ZSpacing.md,
-        ),
-        child: ConstrainedBox(
-          constraints: const BoxConstraints(minHeight: ZSpacing.minTarget),
-          child: Row(
-            children: [
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      label,
-                      style: ZType.titleSmall.copyWith(color: c.text),
-                    ),
-                    if (account.kind == AccountKind.cash)
+        child: Padding(
+          padding: const EdgeInsetsDirectional.symmetric(
+            horizontal: ZSpacing.lg,
+            vertical: ZSpacing.md,
+          ),
+          child: ConstrainedBox(
+            constraints: const BoxConstraints(minHeight: ZSpacing.minTarget),
+            child: Row(
+              children: [
+                _Tile(account: account),
+                const SizedBox(width: ZSpacing.md),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
                       Text(
-                        l10n.accountsOverviewCashSub,
-                        style: ZType.caption.copyWith(color: c.textMuted),
+                        label,
+                        style: ZType.titleSmall.copyWith(color: c.text),
                       ),
-                    if (sub != null)
-                      Text(
-                        sub,
-                        style: ZType.caption.copyWith(color: c.textMuted),
-                      ),
-                  ],
-                ),
-              ),
-              const SizedBox(width: ZSpacing.sm),
-              Flexible(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.end,
-                  children: [
-                    if (primary != null)
-                      ZMoneyText(text: primary, size: ZMoneySize.body),
-                    if (extra > 0)
-                      Text(
-                        l10n.accountsOverviewMoreCurrencies(
-                          extra,
-                          digits.render('$extra'),
+                      if (account.kind == AccountKind.cash)
+                        Text(
+                          l10n.accountsOverviewCashSub,
+                          style: ZType.caption.copyWith(color: c.textMuted),
                         ),
-                        style: ZType.caption.copyWith(color: c.textMuted),
-                      ),
-                  ],
+                      if (sub != null)
+                        Text(
+                          sub,
+                          style: ZType.caption.copyWith(color: c.textMuted),
+                        ),
+                    ],
+                  ),
                 ),
-              ),
-              Icon(
-                Icons.chevron_right_rounded,
-                color: c.textMuted,
-                textDirection: Directionality.of(context),
-              ),
-            ],
+                const SizedBox(width: ZSpacing.sm),
+                Flexible(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.end,
+                    children: [
+                      if (primary != null)
+                        ZMoneyText(
+                          text: primary,
+                          size: ZMoneySize.body,
+                          kind: ZMoneyKind.neutral,
+                        ),
+                      if (extra > 0)
+                        Text(
+                          l10n.accountsOverviewMoreCurrencies(
+                            extra,
+                            digits.render('$extra'),
+                          ),
+                          style: ZType.caption.copyWith(color: c.textMuted),
+                        ),
+                    ],
+                  ),
+                ),
+                Icon(
+                  Icons.chevron_right_rounded,
+                  color: c.textMuted,
+                  textDirection: Directionality.of(context),
+                ),
+              ],
+            ),
           ),
         ),
       ),
+    );
+  }
+}
+
+/// Round bank tile: the bank's short name in a tinted circle (cash and
+/// untracked accounts get an icon).
+class _Tile extends StatelessWidget {
+  const _Tile({required this.account});
+  final Account account;
+
+  @override
+  Widget build(BuildContext context) {
+    final c = ZColors.of(context);
+    final isCash = account.kind == AccountKind.cash;
+    final word = account.label.trim().split(RegExp(r'\s+')).first;
+    final short = word.length > 4 ? word.substring(0, 1) : word;
+    return Container(
+      width: 48,
+      height: 48,
+      alignment: Alignment.center,
+      decoration: BoxDecoration(color: c.surfaceAlt, shape: BoxShape.circle),
+      child: isCash
+          ? Icon(Icons.payments_rounded, color: c.primary)
+          : Text(
+              short.toUpperCase(),
+              style: ZType.label.copyWith(
+                color: c.primary,
+                fontWeight: FontWeight.w700,
+              ),
+            ),
     );
   }
 }

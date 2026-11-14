@@ -12,6 +12,7 @@ import '../../../core/l10n/generated/app_localizations.dart';
 import '../../../core/theme/z_tokens.dart';
 import '../../../core/ui/z_button.dart';
 import '../../catalog_sync/application/sync_providers.dart';
+import '../../mascot/presentation/zaghlol_avatar.dart';
 import '../application/gating.dart';
 import '../domain/purchase_outcome.dart';
 import '../domain/restore_outcome.dart';
@@ -154,9 +155,24 @@ class _PaywallScreenState extends ConsumerState<PaywallScreen> {
           children: [
             Row(
               children: [
+                Material(
+                  color: c.surface,
+                  shape: const CircleBorder(),
+                  elevation: 1,
+                  shadowColor: c.shadow,
+                  child: IconButton(
+                    tooltip: t.goldPaywallCloseA11y,
+                    constraints: const BoxConstraints(
+                      minWidth: ZSpacing.minTarget,
+                      minHeight: ZSpacing.minTarget,
+                    ),
+                    onPressed: () => Navigator.of(context).maybePop(),
+                    icon: const Icon(Icons.close),
+                  ),
+                ),
                 Expanded(
                   child: Align(
-                    alignment: AlignmentDirectional.centerStart,
+                    alignment: AlignmentDirectional.centerEnd,
                     child: TextButton(
                       onPressed: _busy ? null : _restore,
                       style: TextButton.styleFrom(
@@ -166,30 +182,21 @@ class _PaywallScreenState extends ConsumerState<PaywallScreen> {
                     ),
                   ),
                 ),
-                IconButton(
-                  tooltip: t.goldPaywallCloseA11y,
-                  constraints: const BoxConstraints(
-                    minWidth: ZSpacing.minTarget,
-                    minHeight: ZSpacing.minTarget,
-                  ),
-                  onPressed: () => Navigator.of(context).maybePop(),
-                  icon: const Icon(Icons.close),
-                ),
               ],
             ),
-            ExcludeSemantics(
-              child: Icon(Icons.workspace_premium, size: 72, color: c.accent),
+            const Center(
+              child: ExcludeSemantics(
+                child: ZaghlolAvatar(moment: ZaghlolMoment.proud, size: 168),
+              ),
             ),
             const SizedBox(height: ZSpacing.sm),
-            Text(
-              t.goldPaywallTitle,
-              textAlign: TextAlign.center,
-              style: ZType.headline.copyWith(color: c.text),
-            ),
-            Text(
-              t.goldPaywallHeadline,
-              textAlign: TextAlign.center,
-              style: ZType.body.copyWith(color: c.textMuted),
+            Semantics(
+              header: true,
+              child: Text.rich(
+                _title(t.goldPaywallTitle, c),
+                textAlign: TextAlign.center,
+                style: ZType.display.copyWith(color: c.text),
+              ),
             ),
             const SizedBox(height: ZSpacing.lg),
             for (final b in benefits)
@@ -199,8 +206,8 @@ class _PaywallScreenState extends ConsumerState<PaywallScreen> {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Container(
-                      width: 24,
-                      height: 24,
+                      width: 28,
+                      height: 28,
                       decoration: BoxDecoration(
                         color: c.accent,
                         shape: BoxShape.circle,
@@ -269,6 +276,21 @@ class _PaywallScreenState extends ConsumerState<PaywallScreen> {
           ],
         ),
       ),
+    );
+  }
+
+  /// "Zaghlol Gold" with the last word in the gold accent (mockup 18).
+  TextSpan _title(String title, ZColors c) {
+    final i = title.lastIndexOf(' ');
+    if (i < 0) return TextSpan(text: title);
+    return TextSpan(
+      children: [
+        TextSpan(text: title.substring(0, i + 1)),
+        TextSpan(
+          text: title.substring(i + 1),
+          style: TextStyle(color: c.warningText),
+        ),
+      ],
     );
   }
 
@@ -408,14 +430,14 @@ class _PlanCard extends StatelessWidget {
         child: Material(
           color: selected ? c.primaryContainer : c.surface,
           shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(ZRadius.lg),
+            borderRadius: BorderRadius.circular(ZRadius.card),
             side: BorderSide(
               color: selected ? c.primary : c.outline,
               width: selected ? 2 : 1,
             ),
           ),
           child: InkWell(
-            borderRadius: BorderRadius.circular(ZRadius.lg),
+            borderRadius: BorderRadius.circular(ZRadius.card),
             onTap: () =>
                 RadioGroup.maybeOf<GoldPlan>(context)?.onChanged(offer.plan),
             child: ConstrainedBox(
@@ -428,50 +450,48 @@ class _PlanCard extends StatelessWidget {
                       selected
                           ? Icons.radio_button_checked
                           : Icons.radio_button_unchecked,
-                      color: selected ? c.primary : c.textMuted,
+                      color: selected ? c.primary : c.outline,
                     ),
                     const SizedBox(width: ZSpacing.md),
                     Expanded(
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
+                      child: Wrap(
+                        spacing: ZSpacing.sm,
+                        crossAxisAlignment: WrapCrossAlignment.center,
                         children: [
-                          Wrap(
-                            spacing: ZSpacing.sm,
-                            crossAxisAlignment: WrapCrossAlignment.center,
-                            children: [
-                              Text(
-                                name,
-                                style: ZType.titleSmall.copyWith(color: c.text),
-                              ),
-                              if (offer.plan == GoldPlan.yearly)
-                                Container(
-                                  padding:
-                                      const EdgeInsetsDirectional.symmetric(
-                                        horizontal: ZSpacing.sm,
-                                        vertical: ZSpacing.xs,
-                                      ),
-                                  decoration: BoxDecoration(
-                                    color: c.zaghlolBg,
-                                    borderRadius: BorderRadius.circular(
-                                      ZRadius.pill,
-                                    ),
-                                  ),
-                                  child: Text(
-                                    t.goldPaywallBestValue,
-                                    style: ZType.caption.copyWith(
-                                      color: c.accentDark,
-                                    ),
-                                  ),
-                                ),
-                            ],
-                          ),
-                          // The price string is the store's; keep digits and
-                          // symbols in their own direction.
                           Text(
-                            price,
-                            style: ZType.body.copyWith(color: c.textMuted),
+                            name,
+                            style: ZType.title.copyWith(color: c.text),
                           ),
+                          if (offer.plan == GoldPlan.yearly)
+                            Container(
+                              padding: const EdgeInsetsDirectional.symmetric(
+                                horizontal: ZSpacing.sm,
+                                vertical: ZSpacing.xs,
+                              ),
+                              decoration: BoxDecoration(
+                                color: c.zaghlolBg,
+                                borderRadius: BorderRadius.circular(
+                                  ZRadius.pill,
+                                ),
+                              ),
+                              child: Text(
+                                t.goldPaywallBestValue,
+                                style: ZType.caption.copyWith(
+                                  color: c.warningText,
+                                ),
+                              ),
+                            ),
                         ],
+                      ),
+                    ),
+                    const SizedBox(width: ZSpacing.sm),
+                    // The price string is the store's; keep digits and
+                    // symbols in their own direction.
+                    Flexible(
+                      child: Text(
+                        price,
+                        textAlign: TextAlign.end,
+                        style: ZType.bodySmall.copyWith(color: c.textMuted),
                       ),
                     ),
                   ],

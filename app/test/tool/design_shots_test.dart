@@ -26,6 +26,18 @@ import 'package:zaghlol/features/settings/presentation/preferences_screen.dart';
 import 'package:zaghlol/features/settings/presentation/settings_main_screen.dart';
 import 'package:zaghlol/features/settings/presentation/settings_ports.dart';
 
+import 'package:zaghlol/features/accounts/domain/account.dart';
+import 'package:zaghlol/features/accounts/presentation/card_detail/card_detail.dart';
+import 'package:zaghlol/features/accounts/presentation/edit_card/add_card_steps.dart';
+import 'package:zaghlol/features/accounts/presentation/edit_card/card_details_screen.dart';
+import 'package:zaghlol/features/gold/presentation/paywall_screen.dart';
+
+import '../features/accounts/presentation/card_detail_test.dart' as detail;
+import '../features/accounts/presentation/edit_card_test.dart' as edit;
+import '../features/capture/presentation/capture_ui_support.dart' as capture;
+import '../features/capture/presentation/card_capture_sheet_test.dart'
+    as capsheet;
+import '../features/gold/presentation/gold_ui_harness.dart' as gold;
 import '../features/ask/presentation/ask_screen_test.dart' as ask;
 import '../features/budget/presentation/budget_test_support.dart' as budget;
 import '../features/home/presentation/home_harness.dart' as home;
@@ -49,7 +61,11 @@ final _skip = Platform.environment['DESIGN_SHOTS'] == null
     : null;
 
 /// Writes the largest repaint boundary on screen to `<name>.png` at 2x.
-Future<void> _shot(WidgetTester tester, String name) async {
+Future<void> _shot(
+  WidgetTester tester,
+  String name, {
+  bool topmost = false,
+}) async {
   await tester.pump(const Duration(milliseconds: 100));
   RenderRepaintBoundary? best;
   var bestArea = 0.0;
@@ -57,7 +73,7 @@ Future<void> _shot(WidgetTester tester, String name) async {
     final ro = e.renderObject;
     if (ro is RenderRepaintBoundary && ro.hasSize) {
       final area = ro.size.width * ro.size.height;
-      if (area > bestArea) {
+      if (topmost ? area >= bestArea : area > bestArea) {
         best = ro;
         bestArea = area;
       }
@@ -288,5 +304,102 @@ void main() {
     );
     await tester.pumpAndSettle();
     await _shot(tester, 'add_sheet');
+  }, skip: _skip != null);
+
+  testWidgets('card detail S-41', (tester) async {
+    await tester.binding.setSurfaceSize(const Size(390, 844));
+    addTearDown(() => tester.binding.setSurfaceSize(null));
+    await tester.pumpWidget(
+      detail.host(
+        const CardDetailScreen(accountId: 'a1'),
+        overrides: detail.detailOverrides(),
+        locale: _ar.locale,
+      ),
+    );
+    await tester.pumpAndSettle();
+    await _shot(tester, 'card_detail');
+  }, skip: _skip != null);
+
+  testWidgets('capture controls S-62', (tester) async {
+    await tester.binding.setSurfaceSize(const Size(390, 520));
+    addTearDown(() => tester.binding.setSurfaceSize(null));
+    await tester.pumpWidget(
+      capture.host(
+        capsheet.sheet(),
+        controls: capture.FakeControls(
+          rules: [capture.rule('1', 'cib', '1234', 'sms')],
+        ),
+        locale: _ar.locale,
+        dark: false,
+      ),
+    );
+    await tester.pumpAndSettle();
+    await _shot(tester, 'capture_controls');
+  }, skip: _skip != null);
+
+  testWidgets('add card type', (tester) async {
+    await tester.binding.setSurfaceSize(const Size(390, 844));
+    addTearDown(() => tester.binding.setSurfaceSize(null));
+    await tester.pumpWidget(
+      edit.host(
+        Builder(
+          builder: (context) {
+            WidgetsBinding.instance.addPostFrameCallback(
+              (_) => showAddCardTypeSheet(context),
+            );
+            return const Scaffold();
+          },
+        ),
+        repo: edit.FakeRepo([]),
+        locale: _ar.locale,
+      ),
+    );
+    await tester.pumpAndSettle();
+    await _shot(tester, 'add_card_type', topmost: true);
+  }, skip: _skip != null);
+
+  testWidgets('add card bank', (tester) async {
+    await tester.binding.setSurfaceSize(const Size(390, 844));
+    addTearDown(() => tester.binding.setSurfaceSize(null));
+    await tester.pumpWidget(
+      edit.host(
+        const BankPicker(),
+        repo: edit.FakeRepo([]),
+        locale: _ar.locale,
+      ),
+    );
+    await tester.pumpAndSettle();
+    await _shot(tester, 'add_card_bank');
+  }, skip: _skip != null);
+
+  testWidgets('add card details', (tester) async {
+    await tester.binding.setSurfaceSize(const Size(390, 844));
+    addTearDown(() => tester.binding.setSurfaceSize(null));
+    await tester.pumpWidget(
+      edit.host(
+        CardDetailsScreen.create(
+          kind: AccountKind.credit,
+          institution: edit.banks.first,
+        ),
+        repo: edit.FakeRepo([]),
+        locale: _ar.locale,
+      ),
+    );
+    await tester.pumpAndSettle();
+    await _shot(tester, 'add_card_details');
+  }, skip: _skip != null);
+
+  testWidgets('paywall S-68', (tester) async {
+    await gold.pumpGold(
+      tester,
+      gold.goldApp(
+        const PaywallScreen(),
+        overrides: gold.goldOverrides(gold.FakeGoldActions()),
+        lang: 'ar',
+        dark: false,
+      ),
+      height: 844,
+    );
+    await _shot(tester, 'paywall');
   }, skip: _skip != null);
 }

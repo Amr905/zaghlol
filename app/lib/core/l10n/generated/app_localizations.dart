@@ -7496,7 +7496,7 @@ abstract class AppLocalizations {
   /// L · Gold row title for Free
   ///
   /// In ar, this message translates to:
-  /// **'الباقة المجانية'**
+  /// **'زغلول جولد'**
   String get settingsMainGoldFree;
 
   /// L · plan = monthly / yearly / lifetime / other
@@ -7508,7 +7508,7 @@ abstract class AppLocalizations {
   /// L · opens S-68
   ///
   /// In ar, this message translates to:
-  /// **'شوف جولد'**
+  /// **'إنت على الباقة المجانية'**
   String get settingsMainSeeGold;
 
   /// L

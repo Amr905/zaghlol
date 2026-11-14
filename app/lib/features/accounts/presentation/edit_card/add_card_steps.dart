@@ -19,6 +19,9 @@ Future<AccountKind?> showAddCardTypeSheet(BuildContext context) {
     context: context,
     isScrollControlled: true,
     useSafeArea: true,
+    shape: const RoundedRectangleBorder(
+      borderRadius: BorderRadius.vertical(top: Radius.circular(ZRadius.hero)),
+    ),
     builder: (_) => const _TypeSheet(),
   );
 }
@@ -62,33 +65,115 @@ class _TypeSheet extends StatelessWidget {
         Icons.schedule_rounded,
       ),
     ];
+    final tints = [
+      c.surfaceAlt,
+      c.surfaceAlt,
+      c.dangerBg,
+      c.surfaceAlt,
+      c.warningBg,
+    ];
     return SingleChildScrollView(
       padding: const EdgeInsetsDirectional.all(ZSpacing.screen),
       child: Column(
         mainAxisSize: MainAxisSize.min,
-        crossAxisAlignment: CrossAxisAlignment.start,
+        crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
           Semantics(
             header: true,
             child: Text(
               l10n.accountsAddTypeTitle,
+              textAlign: TextAlign.center,
               style: ZType.title.copyWith(color: c.text),
             ),
           ),
-          const SizedBox(height: ZSpacing.sm),
-          Text(
-            l10n.accountsAddTypeInfo,
-            style: ZType.bodySmall.copyWith(color: c.textMuted),
+          const SizedBox(height: ZSpacing.md),
+          Container(
+            padding: const EdgeInsetsDirectional.all(ZSpacing.lg),
+            decoration: BoxDecoration(
+              color: c.primaryContainer,
+              borderRadius: BorderRadius.circular(ZRadius.lg),
+            ),
+            child: Row(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Icon(Icons.info_outline_rounded, color: c.primary),
+                const SizedBox(width: ZSpacing.md),
+                Expanded(
+                  child: Text(
+                    l10n.accountsAddTypeInfo,
+                    style: ZType.bodySmall.copyWith(color: c.primary),
+                  ),
+                ),
+              ],
+            ),
           ),
           const SizedBox(height: ZSpacing.md),
-          for (final r in rows)
-            ZListRow(
-              key: Key('add-type-${r.$1.code}'),
-              title: r.$2,
-              subtitle: r.$3,
-              leading: Icon(r.$4, color: c.primary),
-              showChevron: true,
-              onTap: () => Navigator.of(context).pop(r.$1),
+          for (var i = 0; i < rows.length; i++)
+            Padding(
+              padding: const EdgeInsetsDirectional.only(bottom: ZSpacing.sm),
+              child: Material(
+                color: c.surface,
+                elevation: 1,
+                shadowColor: c.shadow,
+                borderRadius: BorderRadius.circular(ZRadius.lg),
+                child: InkWell(
+                  key: Key('add-type-${rows[i].$1.code}'),
+                  borderRadius: BorderRadius.circular(ZRadius.lg),
+                  onTap: () => Navigator.of(context).pop(rows[i].$1),
+                  child: Semantics(
+                    button: true,
+                    label: '${rows[i].$2}, ${rows[i].$3}',
+                    excludeSemantics: true,
+                    child: ConstrainedBox(
+                      constraints: const BoxConstraints(minHeight: 72),
+                      child: Padding(
+                        padding: const EdgeInsetsDirectional.symmetric(
+                          horizontal: ZSpacing.lg,
+                          vertical: ZSpacing.md,
+                        ),
+                        child: Row(
+                          children: [
+                            Container(
+                              width: 48,
+                              height: 48,
+                              decoration: BoxDecoration(
+                                color: tints[i],
+                                shape: BoxShape.circle,
+                              ),
+                              child: Icon(rows[i].$4, color: c.primary),
+                            ),
+                            const SizedBox(width: ZSpacing.md),
+                            Expanded(
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  Text(
+                                    rows[i].$2,
+                                    style: ZType.titleSmall.copyWith(
+                                      color: c.text,
+                                    ),
+                                  ),
+                                  Text(
+                                    rows[i].$3,
+                                    style: ZType.bodySmall.copyWith(
+                                      color: c.textMuted,
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            ),
+                            Icon(
+                              Icons.chevron_right_rounded,
+                              color: c.textMuted,
+                              textDirection: Directionality.of(context),
+                            ),
+                          ],
+                        ),
+                      ),
+                    ),
+                  ),
+                ),
+              ),
             ),
         ],
       ),
@@ -138,66 +223,206 @@ class _BankPickerState extends ConsumerState<BankPicker> {
     final egypt = shown.where((i) => i.isEgypt).toList();
     final abroad = shown.where((i) => !i.isEgypt).toList();
 
-    Widget row(InstitutionOption i) => ZListRow(
+    Widget row(InstitutionOption i) => _BankCell(
       key: Key('bank-${i.code}'),
-      title: i.name(lang),
-      leading: _Monogram(letter: i.monogram(lang)),
+      name: i.name(lang),
+      letter: i.monogram(lang),
+      seed: i.code,
       onTap: () => Navigator.of(context).pop(i),
+    );
+    Widget grid(List<InstitutionOption> items) => Wrap(
+      runSpacing: ZSpacing.md,
+      children: [for (final i in items) row(i)],
     );
 
     return Scaffold(
       backgroundColor: c.bg,
-      appBar: AppBar(
-        title: Text(l10n.accountsAddBankTitle),
-        leading: IconButton(
-          tooltip: l10n.commonActionClose,
-          icon: const Icon(Icons.close_rounded),
-          onPressed: () => Navigator.of(context).pop(),
+      body: SafeArea(
+        child: ListView(
+          padding: const EdgeInsetsDirectional.all(ZSpacing.screen),
+          children: [
+            Align(
+              alignment: AlignmentDirectional.centerStart,
+              child: Material(
+                color: c.surface,
+                shape: const CircleBorder(),
+                elevation: 1,
+                shadowColor: c.shadow,
+                child: IconButton(
+                  tooltip: l10n.commonActionClose,
+                  constraints: const BoxConstraints(
+                    minWidth: ZSpacing.minTarget,
+                    minHeight: ZSpacing.minTarget,
+                  ),
+                  icon: const BackButtonIcon(),
+                  onPressed: () => Navigator.of(context).pop(),
+                ),
+              ),
+            ),
+            const SizedBox(height: ZSpacing.lg),
+            Semantics(
+              header: true,
+              child: Text(
+                l10n.accountsAddBankTitle,
+                style: ZType.display.copyWith(color: c.text),
+              ),
+            ),
+            const SizedBox(height: ZSpacing.lg),
+            TextField(
+              key: const Key('bank-search'),
+              controller: _search,
+              onChanged: (v) => setState(() => _q = v),
+              decoration: InputDecoration(
+                hintText: l10n.accountsAddBankSearch,
+                prefixIcon: const Icon(Icons.search_rounded),
+                filled: true,
+                fillColor: c.surface,
+                border: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(ZRadius.pill),
+                  borderSide: BorderSide(color: c.outline),
+                ),
+                enabledBorder: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(ZRadius.pill),
+                  borderSide: BorderSide(color: c.outline),
+                ),
+              ),
+            ),
+            const SizedBox(height: ZSpacing.md),
+            if (egypt.isNotEmpty) _Header(l10n.accountsAddBankEgypt),
+            grid(egypt),
+            if (abroad.isNotEmpty) _Header(l10n.accountsAddBankAbroad),
+            grid(abroad),
+            if (shown.isEmpty)
+              Padding(
+                padding: const EdgeInsetsDirectional.all(ZSpacing.lg),
+                child: Text(
+                  l10n.accountsAddBankNoResults,
+                  key: const Key('bank-no-results'),
+                  style: ZType.body.copyWith(color: c.textMuted),
+                ),
+              ),
+            const SizedBox(height: ZSpacing.lg),
+            ZCard(
+              key: const Key('bank-not-listed'),
+              onTap: () => Navigator.of(context).pop(
+                InstitutionOption(
+                  code: genericInstitutionCode,
+                  nameAr: l10n.accountsAddBankNotListed,
+                  nameEn: l10n.accountsAddBankNotListed,
+                  defaultCurrency: _egp,
+                  isEgypt: true,
+                ),
+              ),
+              child: Row(
+                children: [
+                  Container(
+                    width: 48,
+                    height: 48,
+                    decoration: BoxDecoration(
+                      color: c.surfaceAlt,
+                      shape: BoxShape.circle,
+                    ),
+                    child: Icon(Icons.add_rounded, color: c.primary),
+                  ),
+                  const SizedBox(width: ZSpacing.md),
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          l10n.accountsAddBankNotListed,
+                          style: ZType.titleSmall.copyWith(color: c.text),
+                        ),
+                        Text(
+                          l10n.accountsAddBankNotListedSub,
+                          style: ZType.bodySmall.copyWith(color: c.textMuted),
+                        ),
+                      ],
+                    ),
+                  ),
+                  Icon(
+                    Icons.chevron_right_rounded,
+                    color: c.textMuted,
+                    textDirection: Directionality.of(context),
+                  ),
+                ],
+              ),
+            ),
+          ],
         ),
       ),
-      body: ListView(
-        padding: const EdgeInsetsDirectional.all(ZSpacing.screen),
-        children: [
-          TextField(
-            key: const Key('bank-search'),
-            controller: _search,
-            onChanged: (v) => setState(() => _q = v),
-            decoration: InputDecoration(
-              hintText: l10n.accountsAddBankSearch,
-              prefixIcon: const Icon(Icons.search_rounded),
+    );
+  }
+}
+
+/// One bank in the grid: tinted round monogram with the name below.
+class _BankCell extends StatelessWidget {
+  const _BankCell({
+    super.key,
+    required this.name,
+    required this.letter,
+    required this.seed,
+    required this.onTap,
+  });
+  final String name;
+  final String letter;
+  final String seed;
+  final VoidCallback onTap;
+
+  @override
+  Widget build(BuildContext context) {
+    final c = ZColors.of(context);
+    final palette = [
+      c.primary,
+      c.dangerText,
+      c.warningText,
+      const Color(0xFF3A6BC4),
+      const Color(0xFF7A3A94),
+      const Color(0xFF3F8C86),
+    ];
+    final tone =
+        palette[seed.codeUnits.fold<int>(0, (a, b) => a + b) % palette.length];
+    return SizedBox(
+      width: (MediaQuery.sizeOf(context).width - 2 * ZSpacing.screen) / 4,
+      child: Semantics(
+        button: true,
+        label: name,
+        excludeSemantics: true,
+        child: InkWell(
+          borderRadius: BorderRadius.circular(ZRadius.md),
+          onTap: onTap,
+          child: ConstrainedBox(
+            constraints: const BoxConstraints(minHeight: ZSpacing.minTarget),
+            child: Column(
+              children: [
+                Container(
+                  width: 54,
+                  height: 54,
+                  alignment: Alignment.center,
+                  decoration: BoxDecoration(
+                    color: tone.withValues(alpha: 0.12),
+                    shape: BoxShape.circle,
+                  ),
+                  child: Text(
+                    letter,
+                    style: ZType.label.copyWith(
+                      color: tone,
+                      fontWeight: FontWeight.w700,
+                    ),
+                  ),
+                ),
+                const SizedBox(height: ZSpacing.xs),
+                Text(
+                  name,
+                  textAlign: TextAlign.center,
+                  maxLines: 2,
+                  overflow: TextOverflow.ellipsis,
+                  style: ZType.bodySmall.copyWith(color: c.text),
+                ),
+              ],
             ),
           ),
-          const SizedBox(height: ZSpacing.md),
-          if (egypt.isNotEmpty) _Header(l10n.accountsAddBankEgypt),
-          for (final i in egypt) row(i),
-          if (abroad.isNotEmpty) _Header(l10n.accountsAddBankAbroad),
-          for (final i in abroad) row(i),
-          if (shown.isEmpty)
-            Padding(
-              padding: const EdgeInsetsDirectional.all(ZSpacing.lg),
-              child: Text(
-                l10n.accountsAddBankNoResults,
-                key: const Key('bank-no-results'),
-                style: ZType.body.copyWith(color: c.textMuted),
-              ),
-            ),
-          const SizedBox(height: ZSpacing.md),
-          ZListRow(
-            key: const Key('bank-not-listed'),
-            title: l10n.accountsAddBankNotListed,
-            subtitle: l10n.accountsAddBankNotListedSub,
-            leading: const _Monogram(letter: '+'),
-            onTap: () => Navigator.of(context).pop(
-              InstitutionOption(
-                code: genericInstitutionCode,
-                nameAr: l10n.accountsAddBankNotListed,
-                nameEn: l10n.accountsAddBankNotListed,
-                defaultCurrency: _egp,
-                isEgypt: true,
-              ),
-            ),
-          ),
-        ],
+        ),
       ),
     );
   }
@@ -214,37 +439,12 @@ class _Header extends StatelessWidget {
     final c = ZColors.of(context);
     return Padding(
       padding: const EdgeInsetsDirectional.only(
-        top: ZSpacing.md,
-        bottom: ZSpacing.xs,
+        top: ZSpacing.lg,
+        bottom: ZSpacing.md,
       ),
       child: Semantics(
         header: true,
-        child: Text(text, style: ZType.label.copyWith(color: c.textMuted)),
-      ),
-    );
-  }
-}
-
-class _Monogram extends StatelessWidget {
-  const _Monogram({required this.letter});
-  final String letter;
-
-  @override
-  Widget build(BuildContext context) {
-    final c = ZColors.of(context);
-    return ExcludeSemantics(
-      child: Container(
-        width: 40,
-        height: 40,
-        alignment: Alignment.center,
-        decoration: BoxDecoration(
-          color: c.primaryContainer,
-          shape: BoxShape.circle,
-        ),
-        child: Text(
-          letter,
-          style: ZType.titleSmall.copyWith(color: c.onPrimaryContainer),
-        ),
+        child: Text(text, style: ZType.title.copyWith(color: c.text)),
       ),
     );
   }

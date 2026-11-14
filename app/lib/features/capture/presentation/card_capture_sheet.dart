@@ -233,7 +233,7 @@ class _State extends ConsumerState<CardCaptureControls> {
             l10n.captureCardControlsSubtitle,
             style: ZType.bodySmall.copyWith(color: c.textMuted),
           ),
-          const SizedBox(height: ZSpacing.sm),
+          const SizedBox(height: ZSpacing.md),
           if (_failed)
             Padding(
               padding: const EdgeInsetsDirectional.only(bottom: ZSpacing.sm),
@@ -243,22 +243,93 @@ class _State extends ConsumerState<CardCaptureControls> {
                 tone: ZBannerTone.error,
               ),
             ),
-          for (final ch in channels)
-            SwitchListTile(
-              key: Key('capture-card-$ch'),
-              contentPadding: EdgeInsets.zero,
-              title: Text(title(ch), style: ZType.titleSmall),
-              subtitle: sub(ch) == null ? null : Text(sub(ch)!),
-              value: _isOn(rules, ch),
-              onChanged:
-                  _busy || (_instOff(rules, ch) && _cardRule(rules, ch) == null)
-                  ? null
-                  : (v) => _toggle(ch, v, rules, channels),
+          Material(
+            color: c.surface,
+            elevation: 2,
+            shadowColor: c.shadow,
+            borderRadius: BorderRadius.circular(ZRadius.card),
+            child: ClipRRect(
+              borderRadius: BorderRadius.circular(ZRadius.card),
+              child: Column(
+                children: [
+                  for (var i = 0; i < channels.length; i++) ...[
+                    if (i > 0)
+                      Divider(
+                        height: 1,
+                        thickness: 1,
+                        color: c.outline,
+                        indent: ZSpacing.lg,
+                        endIndent: ZSpacing.lg + 56,
+                      ),
+                    SwitchListTile(
+                      key: Key('capture-card-${channels[i]}'),
+                      contentPadding: const EdgeInsetsDirectional.symmetric(
+                        horizontal: ZSpacing.lg,
+                        vertical: ZSpacing.xs,
+                      ),
+                      secondary: Container(
+                        width: 48,
+                        height: 48,
+                        decoration: BoxDecoration(
+                          color: channels[i] == IgnoreChannel.applePay
+                              ? c.text
+                              : c.primary,
+                          borderRadius: BorderRadius.circular(ZRadius.lg),
+                        ),
+                        child: Icon(
+                          channels[i] == IgnoreChannel.applePay
+                              ? Icons.credit_card_rounded
+                              : channels[i] == IgnoreChannel.notification
+                              ? Icons.notifications_none_rounded
+                              : Icons.chat_bubble_outline_rounded,
+                          color: c.surface,
+                        ),
+                      ),
+                      title: Text(
+                        title(channels[i]),
+                        style: ZType.body.copyWith(color: c.text),
+                      ),
+                      subtitle: sub(channels[i]) == null
+                          ? null
+                          : Text(
+                              sub(channels[i])!,
+                              style: ZType.bodySmall.copyWith(
+                                color: c.textMuted,
+                              ),
+                            ),
+                      value: _isOn(rules, channels[i]),
+                      onChanged:
+                          _busy ||
+                              (_instOff(rules, channels[i]) &&
+                                  _cardRule(rules, channels[i]) == null)
+                          ? null
+                          : (v) => _toggle(channels[i], v, rules, channels),
+                    ),
+                  ],
+                ],
+              ),
             ),
-          const SizedBox(height: ZSpacing.sm),
-          Text(
-            l10n.captureCardControlsInfo,
-            style: ZType.bodySmall.copyWith(color: c.textMuted),
+          ),
+          const SizedBox(height: ZSpacing.md),
+          Container(
+            padding: const EdgeInsetsDirectional.all(ZSpacing.lg),
+            decoration: BoxDecoration(
+              color: c.primaryContainer,
+              borderRadius: BorderRadius.circular(ZRadius.lg),
+            ),
+            child: Row(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Icon(Icons.info_outline_rounded, color: c.primary),
+                const SizedBox(width: ZSpacing.md),
+                Expanded(
+                  child: Text(
+                    l10n.captureCardControlsInfo,
+                    style: ZType.bodySmall.copyWith(color: c.primary),
+                  ),
+                ),
+              ],
+            ),
           ),
           const SizedBox(height: ZSpacing.lg),
           ZButton(

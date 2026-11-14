@@ -4309,7 +4309,7 @@
       }
     }
   },
-  "settingsMainGoldFree": "Free plan",
+  "settingsMainGoldFree": "Zaghlol Gold",
   "@settingsMainGoldFree": {
     "description": "L · Gold row title for Free"
   },
@@ -4322,7 +4322,7 @@
       }
     }
   },
-  "settingsMainSeeGold": "See Gold",
+  "settingsMainSeeGold": "You're on the free plan",
   "@settingsMainSeeGold": {
     "description": "L · opens S-68"
   },

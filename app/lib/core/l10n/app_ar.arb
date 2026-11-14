@@ -7382,7 +7382,7 @@
       }
     }
   },
-  "settingsMainGoldFree": "الباقة المجانية",
+  "settingsMainGoldFree": "زغلول جولد",
   "@settingsMainGoldFree": {
     "description": "L · Gold row title for Free"
   },
@@ -7395,7 +7395,7 @@
       }
     }
   },
-  "settingsMainSeeGold": "شوف جولد",
+  "settingsMainSeeGold": "إنت على الباقة المجانية",
   "@settingsMainSeeGold": {
     "description": "L · opens S-68"
   },
