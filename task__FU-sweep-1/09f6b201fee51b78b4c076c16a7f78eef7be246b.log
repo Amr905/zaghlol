@@ -1,5 +1,8 @@
 ﻿== SUMMARY ==
-RUNNING sha=09f6b201fee51b78b4c076c16a7f78eef7be246b
+SKIP sha=09f6b201fee51b78b4c076c16a7f78eef7be246b no app/packages/backend changes
 
 == FULL LOG (last 1500 lines) ==
 auto task/FU-sweep-1 09f6b201fee51b78b4c076c16a7f78eef7be246b 2026-11-14T11:03:51.6419015+02:00
+
+
+
