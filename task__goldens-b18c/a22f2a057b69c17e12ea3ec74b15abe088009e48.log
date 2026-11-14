@@ -1,5 +1,8 @@
 ﻿== SUMMARY ==
-RUNNING sha=a22f2a057b69c17e12ea3ec74b15abe088009e48
+SKIP sha=a22f2a057b69c17e12ea3ec74b15abe088009e48 no app/packages/backend changes
 
 == FULL LOG (last 1500 lines) ==
 auto task/goldens-b18c a22f2a057b69c17e12ea3ec74b15abe088009e48 2026-11-14T11:12:58.9095615+02:00
+
+
+
