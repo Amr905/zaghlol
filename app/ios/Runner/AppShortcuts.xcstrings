@@ -1,0 +1,38 @@
+{
+  "sourceLanguage": "en",
+  "strings": {
+    "Log a bank message in ${applicationName}": {
+      "localizations": {
+        "ar": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "سجّل رسالة بنك في ${applicationName}"
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Log a bank message in ${applicationName}"
+          }
+        }
+      }
+    },
+    "Log an Apple Pay payment in ${applicationName}": {
+      "localizations": {
+        "ar": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "سجّل دفع Apple Pay في ${applicationName}"
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Log an Apple Pay payment in ${applicationName}"
+          }
+        }
+      }
+    }
+  },
+  "version": "1.0"
+}

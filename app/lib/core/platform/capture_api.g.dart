@@ -857,7 +857,7 @@ class AndroidCaptureHostApi {
 /// background refresh. Same drain / ack / hold / status semantics as
 /// AndroidCaptureHostApi (platform-channels.md 1.3), so the Dart drain is
 /// shared. Errors: IO_ERROR | NOT_AVAILABLE (no App Group container).
-/// T-061 adds writeGuardConfig and the Shortcut-setup methods (section 3).
+/// T-063 adds writeGuardConfig (section 3); the Shortcut-setup methods are T-064.
 class IosCaptureHostApi {
   /// Constructor for [IosCaptureHostApi].  The [binaryMessenger] named argument is
   /// available for dependency injection.  If it is left null, the default
@@ -874,6 +874,30 @@ class IosCaptureHostApi {
   static const MessageCodec<Object?> pigeonChannelCodec = _PigeonCodec();
 
   final String pigeonVar_messageChannelSuffix;
+
+  /// T-063: the plaintext user part of the Guard config (platform-channels.md
+  /// 1.1); native validates, encrypts with the shared spool key and writes it
+  /// to the App Group, where the App Intents' Guard reads it.
+  /// CONFIG_INVALID | IO_ERROR | NOT_AVAILABLE.
+  Future<void> writeGuardConfig(Uint8List userConfigJson) async {
+    final pigeonVar_channelName =
+        'dev.flutter.pigeon.zaghlol.IosCaptureHostApi.writeGuardConfig$pigeonVar_messageChannelSuffix';
+    final pigeonVar_channel = BasicMessageChannel<Object?>(
+      pigeonVar_channelName,
+      pigeonChannelCodec,
+      binaryMessenger: pigeonVar_binaryMessenger,
+    );
+    final Future<Object?> pigeonVar_sendFuture = pigeonVar_channel.send(
+      <Object?>[userConfigJson],
+    );
+    final pigeonVar_replyList = await pigeonVar_sendFuture as List<Object?>?;
+
+    _extractReplyValueOrThrow(
+      pigeonVar_replyList,
+      pigeonVar_channelName,
+      isNullValid: true,
+    );
+  }
 
   /// Returns decrypted entries (in memory only), oldest first.
   Future<List<SpoolEntry>> drainSpool(int max) async {

@@ -853,10 +853,15 @@ class AndroidCaptureHostApiSetup {
 /// background refresh. Same drain / ack / hold / status semantics as
 /// AndroidCaptureHostApi (platform-channels.md 1.3), so the Dart drain is
 /// shared. Errors: IO_ERROR | NOT_AVAILABLE (no App Group container).
-/// T-061 adds writeGuardConfig and the Shortcut-setup methods (section 3).
+/// T-063 adds writeGuardConfig (section 3); the Shortcut-setup methods are T-064.
 ///
 /// Generated protocol from Pigeon that represents a handler of messages from Flutter.
 protocol IosCaptureHostApi {
+  /// T-063: the plaintext user part of the Guard config (platform-channels.md
+  /// 1.1); native validates, encrypts with the shared spool key and writes it
+  /// to the App Group, where the App Intents' Guard reads it.
+  /// CONFIG_INVALID | IO_ERROR | NOT_AVAILABLE.
+  func writeGuardConfig(userConfigJson: FlutterStandardTypedData) throws
   /// Returns decrypted entries (in memory only), oldest first.
   func drainSpool(max: Int64) throws -> [SpoolEntry]
   /// Only ids this engine drained.
@@ -883,6 +888,27 @@ class IosCaptureHostApiSetup {
     #else
       let taskQueue: FlutterTaskQueue? = nil
     #endif
+    /// T-063: the plaintext user part of the Guard config (platform-channels.md
+    /// 1.1); native validates, encrypts with the shared spool key and writes it
+    /// to the App Group, where the App Intents' Guard reads it.
+    /// CONFIG_INVALID | IO_ERROR | NOT_AVAILABLE.
+    let writeGuardConfigChannel = taskQueue == nil
+      ? FlutterBasicMessageChannel(name: "dev.flutter.pigeon.zaghlol.IosCaptureHostApi.writeGuardConfig\(channelSuffix)", binaryMessenger: binaryMessenger, codec: codec)
+      : FlutterBasicMessageChannel(name: "dev.flutter.pigeon.zaghlol.IosCaptureHostApi.writeGuardConfig\(channelSuffix)", binaryMessenger: binaryMessenger, codec: codec, taskQueue: taskQueue)
+    if let api = api {
+      writeGuardConfigChannel.setMessageHandler { message, reply in
+        let args = message as! [Any?]
+        let userConfigJsonArg = args[0] as! FlutterStandardTypedData
+        do {
+          try api.writeGuardConfig(userConfigJson: userConfigJsonArg)
+          reply(wrapResult(nil))
+        } catch {
+          reply(wrapError(error))
+        }
+      }
+    } else {
+      writeGuardConfigChannel.setMessageHandler(nil)
+    }
     /// Returns decrypted entries (in memory only), oldest first.
     let drainSpoolChannel = taskQueue == nil
       ? FlutterBasicMessageChannel(name: "dev.flutter.pigeon.zaghlol.IosCaptureHostApi.drainSpool\(channelSuffix)", binaryMessenger: binaryMessenger, codec: codec)

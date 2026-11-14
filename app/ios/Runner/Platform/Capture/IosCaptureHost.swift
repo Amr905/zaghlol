@@ -12,6 +12,7 @@ final class IosCaptureHost: IosCaptureHostApi {
   static let drainScanBudgetMs: Int64 = 5_000
   static let notAvailable = "NOT_AVAILABLE"
   static let ioError = "IO_ERROR"
+  static let configInvalid = "CONFIG_INVALID"
 
   private static let nextEngine = NSLock()
   private static var engineCounter: Int64 = 0
@@ -27,7 +28,7 @@ final class IosCaptureHost: IosCaptureHostApi {
   private let claim: SpoolClaim
   private let monoClockMs: () -> Int64
   private let scheduleRefresh: () throws -> Void
-  private let guardState: () -> GuardConfigState
+  private let guardRuntime: () -> GuardRuntime?
   private let drainedLock = NSLock()
   private var drained = Set<String>()
 
@@ -36,14 +37,14 @@ final class IosCaptureHost: IosCaptureHostApi {
     claim: SpoolClaim = .process,
     monoClockMs: @escaping () -> Int64 = { Int64(ProcessInfo.processInfo.systemUptime * 1000) },
     scheduleRefresh: @escaping () throws -> Void = { try IngestBackgroundRefresh.schedule() },
-    guardState: @escaping () -> GuardConfigState = { .unknown }
+    guardRuntime: @escaping () -> GuardRuntime? = { CaptureGuardRuntime.shared }
   ) {
     self.engineId = IosCaptureHost.newEngineId()
     self.runtime = runtime
     self.claim = claim
     self.monoClockMs = monoClockMs
     self.scheduleRefresh = scheduleRefresh
-    self.guardState = guardState
+    self.guardRuntime = guardRuntime
   }
 
   private func need() throws -> SpoolRuntime {
@@ -53,6 +54,20 @@ final class IosCaptureHost: IosCaptureHostApi {
 
   private func fail(_ code: String = IosCaptureHost.ioError) -> CaptureApiError {
     CaptureApiError(code: code, message: nil, details: nil)
+  }
+
+  /// T-063: replaces the Guard user part the App Intents use (same runtime
+  /// instance, so the next intent in this process sees it; later processes
+  /// read the file). Code-only errors; the bytes are never logged or kept.
+  func writeGuardConfig(userConfigJson: FlutterStandardTypedData) throws {
+    guard let g = guardRuntime() else { throw fail(Self.notAvailable) }
+    do {
+      try g.writeUser(userConfigJson.data)
+    } catch let e as GuardConfigWriteError {
+      throw fail(e.code == .configInvalid ? Self.configInvalid : Self.ioError)
+    } catch {
+      throw fail()
+    }
   }
 
   func drainSpool(max: Int64) throws -> [SpoolEntry] {
@@ -143,7 +158,7 @@ final class IosCaptureHost: IosCaptureHostApi {
       firstMissedSmsAtMs: s.firstMissedSmsAtMs >= 0 ? s.firstMissedSmsAtMs : nil,
       decryptDeleted: Int64(s.decryptDeleted),
       keyInvalidatedAtMs: s.keyInvalidatedAtMs >= 0 ? s.keyInvalidatedAtMs : nil,
-      guardState: guardState(), held: Int64(r.store.heldCount()))
+      guardState: CaptureGuardRuntime.state(of: guardRuntime()), held: Int64(r.store.heldCount()))
   }
 
   func clearSpoolAlerts(seq: Int64) throws {
