@@ -17,6 +17,8 @@
 // A throttle answer applies nothing and keeps the outbox. Failures are
 // code-only; nothing here logs a body, token, nonce or catalog text.
 
+import '../../../ingestion/ingestion_pause_gate.dart';
+
 import 'dart:async';
 import 'dart:convert';
 import 'dart:typed_data';
@@ -66,7 +68,16 @@ abstract interface class SyncAnchor {
   Future<int?> issuedAtMs();
 }
 
-enum SyncOutcomeKind { notDue, alreadyRunning, throttled, applied, failed }
+enum SyncOutcomeKind {
+  notDue,
+  alreadyRunning,
+  throttled,
+  applied,
+  failed,
+
+  /// The restore flow holds the gate (WIRE-SVC): nothing ran.
+  paused,
+}
 
 final class SyncOutcome {
   const SyncOutcome(this.kind, {this.catalogChanged = false, this.code});
@@ -115,6 +126,7 @@ class SyncOrchestrator {
     int Function()? now,
     this._diag,
     this._registryVersion,
+    this._pauseGate,
   }) : _now = now ?? (() => DateTime.now().toUtc().millisecondsSinceEpoch),
        _applier = CatalogApplier(_db);
 
@@ -129,6 +141,9 @@ class SyncOrchestrator {
   final int Function() _now;
   final DiagLogger? _diag;
   final int? _registryVersion;
+
+  /// Closed by the restore flow: no run starts and a running one is awaited.
+  final IngestionPauseGate? _pauseGate;
   final CatalogApplier _applier;
 
   Future<SyncOutcome>? _inFlight;
@@ -138,7 +153,13 @@ class SyncOrchestrator {
   Future<SyncOutcome> run({bool force = false}) {
     final running = _inFlight;
     if (running != null) return running;
-    final f = _guarded(force).whenComplete(() => _inFlight = null);
+    final gate = _pauseGate;
+    if (gate != null && gate.paused) {
+      return Future.value(const SyncOutcome(SyncOutcomeKind.paused));
+    }
+    final f =
+        (gate == null ? _guarded(force) : gate.guard(() => _guarded(force)))
+            .whenComplete(() => _inFlight = null);
     _inFlight = f;
     return f;
   }

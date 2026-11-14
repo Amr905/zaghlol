@@ -4,6 +4,7 @@ import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_riverpod/misc.dart' show Override;
 import 'package:flutter_test/flutter_test.dart';
+import 'package:zaghlol/features/settings/presentation/settings_ports.dart';
 import 'package:zaghlol/core/db/app_database.dart';
 import 'package:zaghlol/core/db/app_database_providers.dart';
 import 'package:zaghlol/core/db/daos/settings_dao.dart';
@@ -49,6 +50,9 @@ class SettingsHarness {
     appLockEnabledProvider.overrideWith((ref) => Stream.value(appLock)),
     appLockTimeoutSProvider.overrideWith((ref) => Stream.value(60)),
     contributionOptInProvider.overrideWith((ref) => Stream.value(false)),
+    // The real ones read the backup and sync services (WIRE-SVC); a widget
+    // test wants fixed values and no timers.
+    lastBackupAtProvider.overrideWithValue(null),
   ];
 
   Widget app(

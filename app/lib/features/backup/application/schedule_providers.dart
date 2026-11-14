@@ -9,11 +9,15 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../core/settings/settings_keys.dart';
 import '../../../core/settings/settings_providers.dart';
+import '../../catalog_sync/application/sync_providers.dart'
+    show kClientAppVersion;
 import '../../gold/application/gating.dart';
 import '../crypto/backup_crypto_providers.dart';
 import '../crypto/backup_format.dart' show BackupPlatform;
 import 'drive_backup_destination.dart';
 import 'drive_backup_providers.dart';
+import 'icloud_backup_destination.dart';
+import 'icloud_backup_providers.dart';
 import 'schedule.dart';
 
 /// Registers the periodic platform job. Default: does nothing until the
@@ -30,15 +34,22 @@ final backupAlertSinkProvider = Provider<BackupAlertSink>(
   name: 'backupAlertSinkProvider',
 );
 
-/// The app version string for backup headers.
+/// The app version string for backup headers: the build's
+/// `ZAGHLOL_APP_VERSION` define (the same value the sync sends).
 final backupAppVersionProvider = Provider<String>(
-  (ref) => '0.0.0',
+  (ref) => kClientAppVersion,
   name: 'backupAppVersionProvider',
 );
 
-/// iCloud (T-151) adapter; null until its Dart service exists.
+/// iCloud (T-151) adapter on iOS; null on Android (no iCloud there).
 final icloudBackupDestinationProvider = Provider<BackupDestination?>(
-  (ref) => null,
+  (ref) => Platform.isIOS
+      ? ICloudBackupDestination.over(
+          ref.watch(iCloudBackupServiceProvider),
+          platform: BackupPlatform.ios,
+          appVersion: ref.watch(backupAppVersionProvider),
+        )
+      : null,
   name: 'icloudBackupDestinationProvider',
 );
 
