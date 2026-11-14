@@ -29,7 +29,7 @@ class NotificationAlarmReceiver : BroadcastReceiver() {
     } catch (_: RuntimeException) {
       // Dropped; never log the text.
     } finally {
-      PrefsPendingIds(context).remove(id)
+      FilePendingIds(context).remove(id)
     }
   }
 }

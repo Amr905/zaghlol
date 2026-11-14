@@ -7,9 +7,9 @@ import android.app.NotificationManager
 import android.app.PendingIntent
 import android.content.Context
 import android.content.Intent
-import android.content.SharedPreferences
 import app.zaghlol.MainActivity
 import app.zaghlol.R
+import java.io.File
 
 /**
  * NOTIF-GW: builds and posts the alerts. Text arrives already redacted by Dart
@@ -21,7 +21,7 @@ import app.zaghlol.R
 class NotificationPresenter(private val context: Context) {
   private val nm = context.getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
   private val alarms = context.getSystemService(Context.ALARM_SERVICE) as AlarmManager
-  private val pending = PrefsPendingIds(context)
+  private val pending = FilePendingIds(context)
 
   fun ensureChannels(channels: List<Pair<String, String>>) {
     for ((id, name) in channels) {
@@ -114,29 +114,37 @@ class NotificationPresenter(private val context: Context) {
   }
 }
 
-/** Ids only, in a private prefs file; cleared by cancelAll and the wipe. */
-class PrefsPendingIds(context: Context) : PendingIdStore {
-  private val prefs: SharedPreferences =
-    context.applicationContext.getSharedPreferences(FILE, Context.MODE_PRIVATE)
-
-  override fun all(): Set<Int> = prefs.getStringSet(KEY, emptySet())!!.mapNotNull { it.toIntOrNull() }.toSet()
-
-  @Synchronized
-  override fun add(id: Int) {
-    prefs.edit().putStringSet(KEY, prefs.getStringSet(KEY, emptySet())!! + id.toString()).apply()
-  }
+/**
+ * Ids only, one per line in a file under `noBackupFilesDir` (no plain
+ * preferences, T-015 AC2); cleared by cancelAll and by the wipe.
+ */
+class FilePendingIds(context: Context) : PendingIdStore {
+  private val file = File(File(context.applicationContext.noBackupFilesDir, "notif"), "pending.ids")
 
   @Synchronized
-  override fun remove(id: Int) {
-    prefs.edit().putStringSet(KEY, prefs.getStringSet(KEY, emptySet())!! - id.toString()).apply()
+  override fun all(): Set<Int> =
+    try {
+      if (file.exists()) file.readLines().mapNotNull { it.trim().toIntOrNull() }.toSet() else emptySet()
+    } catch (_: java.io.IOException) {
+      emptySet()
+    }
+
+  @Synchronized
+  private fun write(ids: Set<Int>) {
+    try {
+      file.parentFile?.mkdirs()
+      file.writeText(ids.joinToString("\n"))
+    } catch (_: java.io.IOException) {
+      // Best effort; a lost id only means one alarm cannot be cancelled.
+    }
   }
 
+  override fun add(id: Int) = write(all() + id)
+
+  override fun remove(id: Int) = write(all() - id)
+
+  @Synchronized
   override fun clear() {
-    prefs.edit().clear().commit()
-  }
-
-  companion object {
-    const val FILE = "zaghlol_notif_pending"
-    private const val KEY = "ids"
+    file.delete()
   }
 }
