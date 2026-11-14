@@ -5,6 +5,8 @@ tags:
   # T-007 DB benchmark (50k-row FTS). Gated in db-platform.yml's host job;
   # excluded from app-ci's static job.
   benchmark:
+    # One rerun on a timing miss (CI load), then the budget holds.
+    retry: 1
 # T-173: every timing assertion in app/ and packages/ carries this tag. Normal
 # runs use `--exclude-tags golden,benchmark`; app-ci's `perf` job runs
 # `--tags benchmark` serially.

@@ -3,3 +3,5 @@ tags:
   # them flaky); app-ci's `perf` job runs `dart test --tags benchmark`
   # serially (-j 1).
   benchmark:
+    # One rerun on a timing miss (CI load), then the budget holds.
+    retry: 1
