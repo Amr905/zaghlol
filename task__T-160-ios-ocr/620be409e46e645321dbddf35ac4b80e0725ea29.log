@@ -1,5 +1,8 @@
 ﻿== SUMMARY ==
-RUNNING sha=620be409e46e645321dbddf35ac4b80e0725ea29
+SKIP sha=620be409e46e645321dbddf35ac4b80e0725ea29 no app/packages/backend changes
 
 == FULL LOG (last 1500 lines) ==
 auto task/T-160-ios-ocr 620be409e46e645321dbddf35ac4b80e0725ea29 2026-11-14T11:10:36.1008105+02:00
+
+
+
