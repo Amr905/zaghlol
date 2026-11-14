@@ -32,11 +32,16 @@ final class CaptureCaps {
     required this.smsFlavor,
     required this.smsGranted,
     required this.notificationAccess,
+    this.ios = false,
   });
 
   final bool smsFlavor;
   final bool smsGranted;
   final bool notificationAccess;
+
+  /// T-066: iOS reads Shortcuts and Apple Pay through the spool; it has no
+  /// live SMS or notification channel, which is therefore not a degradation.
+  final bool ios;
 
   /// Before the first capabilities read: nothing is claimed.
   static const CaptureCaps none = CaptureCaps(
@@ -234,6 +239,7 @@ final class CaptureHealth {
 }
 
 ChannelState _smsState(CaptureCaps c, CaptureToggles t) {
+  if (c.ios) return ChannelState.unavailable;
   if (!c.smsFlavor) return ChannelState.unavailable;
   if (!t.sms) return ChannelState.offUser;
   if (!c.smsGranted) return ChannelState.offPermission;
@@ -241,6 +247,7 @@ ChannelState _smsState(CaptureCaps c, CaptureToggles t) {
 }
 
 ChannelState _notificationState(CaptureCaps c, CaptureToggles t) {
+  if (c.ios) return ChannelState.unavailable;
   if (!t.notifications) return ChannelState.offUser;
   if (!c.notificationAccess) return ChannelState.offPermission;
   return ChannelState.active;
@@ -271,8 +278,8 @@ CaptureHealth deriveCaptureHealth({
   final CaptureMode mode;
   if (guardState == GuardFileState.baseInvalid) {
     mode = CaptureMode.fault;
-  } else if (sms == ChannelState.unavailable ||
-      sms == ChannelState.offPermission) {
+  } else if (!caps.ios &&
+      (sms == ChannelState.unavailable || sms == ChannelState.offPermission)) {
     mode = CaptureMode.degraded;
   } else {
     mode = CaptureMode.full;
