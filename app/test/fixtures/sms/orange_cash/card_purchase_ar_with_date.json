@@ -1,0 +1,17 @@
+{
+  "sender": "OrangeCash",
+  "body": "أورنج كاش: تم دفع 180.00 جنيه لدى FAWRY في 22/10. الرصيد المتاح 820.00 جنيه",
+  "receivedAt": "2026-10-23T11:14:00+03:00",
+  "expect": {
+    "template": "orange_cash.card_purchase.ar",
+    "event": "card_purchase",
+    "direction": "expense",
+    "currency": "EGP",
+    "amount": "180.00",
+    "last4": null,
+    "balance": "820.00",
+    "available": null,
+    "merchantClean": "Fawry",
+    "date": "2026-10-22"
+  }
+}

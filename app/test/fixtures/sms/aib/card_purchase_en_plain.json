@@ -1,0 +1,16 @@
+{
+  "sender": "AIB",
+  "body": "AIB: Purchase of EGP 310.00 with Card **4820 at MOBIL STATION. Avl Bal EGP 7,690.00",
+  "receivedAt": "2026-10-23T11:14:00+03:00",
+  "expect": {
+    "template": "aib.card_purchase.en",
+    "event": "card_purchase",
+    "direction": "expense",
+    "currency": "EGP",
+    "amount": "310.00",
+    "last4": "4820",
+    "balance": "7690.00",
+    "available": null,
+    "merchantClean": "Mobil Station"
+  }
+}

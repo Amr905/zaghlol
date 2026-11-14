@@ -1,0 +1,16 @@
+{
+  "sender": "UnitedBank",
+  "body": "المصرف المتحد: تم دفع 260.00 جم لدى هايبر وان ببطاقة **3098.",
+  "receivedAt": "2026-10-23T11:14:00+03:00",
+  "expect": {
+    "template": "united_bank.card_purchase.ar",
+    "event": "card_purchase",
+    "direction": "expense",
+    "currency": "EGP",
+    "amount": "260.00",
+    "last4": "3098",
+    "balance": null,
+    "available": null,
+    "merchantClean": "هايبر وان"
+  }
+}

@@ -1,0 +1,16 @@
+{
+  "sender": "Souhoola",
+  "body": "سهولة: عملية شراء بمبلغ 850.00 جم لدى بي تك. الحد المتاح 15000.00 جم",
+  "receivedAt": "2026-10-23T11:14:00+03:00",
+  "expect": {
+    "template": "souhoola.bnpl_installment.ar",
+    "event": "bnpl_installment",
+    "direction": "expense",
+    "currency": "EGP",
+    "amount": "850.00",
+    "last4": null,
+    "balance": null,
+    "available": "15000.00",
+    "merchantClean": "بي تك"
+  }
+}

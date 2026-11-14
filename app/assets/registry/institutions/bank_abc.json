@@ -1,0 +1,61 @@
+{
+  "code": "bank_abc",
+  "names": {
+    "ar": "بنك المؤسسة العربية المصرفية",
+    "en": "Bank ABC"
+  },
+  "country": "EG",
+  "defaultCurrency": "EGP",
+  "senders": [
+    {
+      "match": "exact",
+      "value": "BankABC"
+    }
+  ],
+  "packages": [],
+  "walletCardNames": [
+    "Bank ABC"
+  ],
+  "last4": [],
+  "drop": [],
+  "templates": [
+    {
+      "id": "bank_abc.card_purchase.ar",
+      "version": 1,
+      "lang": "ar",
+      "channel": [
+        "sms"
+      ],
+      "event": "card_purchase",
+      "direction": "expense",
+      "baseConfidence": 0.95,
+      "pattern": "تم خصم (?<amount>[\\d,.]+) (?<cur>جم|جنيه|egp) من بطاقتك \\*{1,4}(?<last4>\\d{4}) لدى (?<merchant>.+?)(?: في (?<date>\\d+/\\d+))?(?:\\. |\\.?$)(?:(?:الرصيد|رصيدك)\\D{0,12}(?<balance>[\\d,.]+))?",
+      "currencyMap": {
+        "جم": "EGP",
+        "جنيه": "EGP",
+        "egp": "EGP"
+      },
+      "date": {
+        "format": "d/M",
+        "yearPolicy": "nearest_past"
+      }
+    },
+    {
+      "id": "bank_abc.card_purchase.en",
+      "version": 1,
+      "lang": "en",
+      "channel": [
+        "sms"
+      ],
+      "event": "card_purchase",
+      "direction": "expense",
+      "baseConfidence": 0.95,
+      "pattern": "Your card \\*{1,4}(?<last4>\\d{4}) was charged (?<cur>egp) (?<amount>[\\d,.]+) at (?<merchant>.+?)(?:\\. |\\.?$)(?:(?:avl|available|bal)\\D{0,16}(?<balance>[\\d,.]+))?",
+      "currencyMap": {
+        "جم": "EGP",
+        "جنيه": "EGP",
+        "egp": "EGP"
+      }
+    }
+  ]
+}

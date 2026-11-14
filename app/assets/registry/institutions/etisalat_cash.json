@@ -1,0 +1,57 @@
+{
+  "code": "etisalat_cash",
+  "names": {
+    "ar": "إي آند كاش",
+    "en": "e& money / Etisalat Cash"
+  },
+  "country": "EG",
+  "defaultCurrency": "EGP",
+  "senders": [
+    {
+      "match": "exact",
+      "value": "e&money"
+    }
+  ],
+  "packages": [],
+  "walletCardNames": [
+    "e& money"
+  ],
+  "last4": [],
+  "drop": [],
+  "templates": [
+    {
+      "id": "etisalat_cash.transfer_out.ar",
+      "version": 1,
+      "lang": "ar",
+      "channel": [
+        "sms"
+      ],
+      "event": "transfer_out",
+      "direction": "expense",
+      "baseConfidence": 0.95,
+      "pattern": "تم تحويل (?<amount>[\\d,.]+) (?<cur>جم|جنيه|egp) إلى (?<phone>01\\d{9})(?:\\. |\\.?$)(?:(?:الرصيد|رصيدك)\\D{0,12}(?<balance>[\\d,.]+))?",
+      "currencyMap": {
+        "جم": "EGP",
+        "جنيه": "EGP",
+        "egp": "EGP"
+      }
+    },
+    {
+      "id": "etisalat_cash.transfer_out.en",
+      "version": 1,
+      "lang": "en",
+      "channel": [
+        "sms"
+      ],
+      "event": "transfer_out",
+      "direction": "expense",
+      "baseConfidence": 0.95,
+      "pattern": "(?<cur>egp) (?<amount>[\\d,.]+) transferred to (?<phone>01\\d{9})(?:\\. |\\.?$)(?:(?:avl|available|bal)\\D{0,16}(?<balance>[\\d,.]+))?",
+      "currencyMap": {
+        "جم": "EGP",
+        "جنيه": "EGP",
+        "egp": "EGP"
+      }
+    }
+  ]
+}

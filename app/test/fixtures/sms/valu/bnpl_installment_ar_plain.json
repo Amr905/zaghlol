@@ -1,0 +1,16 @@
+{
+  "sender": "valU",
+  "body": "فاليو: تم دفع 1200.00 جم لدى تريدلاين. الحد المتاح 20000.00 جم",
+  "receivedAt": "2026-10-23T11:14:00+03:00",
+  "expect": {
+    "template": "valu.bnpl_installment.ar",
+    "event": "bnpl_installment",
+    "direction": "expense",
+    "currency": "EGP",
+    "amount": "1200.00",
+    "last4": null,
+    "balance": null,
+    "available": "20000.00",
+    "merchantClean": "تريدلاين"
+  }
+}

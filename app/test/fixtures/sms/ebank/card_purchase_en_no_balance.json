@@ -1,0 +1,16 @@
+{
+  "sender": "EBank",
+  "body": "EBank: Purchase of EGP 480.00 on Card ending 5120 at BUFFALO BURGER.",
+  "receivedAt": "2026-10-23T11:14:00+03:00",
+  "expect": {
+    "template": "ebank.card_purchase.en",
+    "event": "card_purchase",
+    "direction": "expense",
+    "currency": "EGP",
+    "amount": "480.00",
+    "last4": "5120",
+    "balance": null,
+    "available": null,
+    "merchantClean": "Buffalo Burger"
+  }
+}

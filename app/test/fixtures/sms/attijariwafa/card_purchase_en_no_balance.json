@@ -1,0 +1,16 @@
+{
+  "sender": "Attijariwafa",
+  "body": "Attijariwafa: Purchase of EGP 430.00 using card ****5901 at BREADFAST.",
+  "receivedAt": "2026-10-23T11:14:00+03:00",
+  "expect": {
+    "template": "attijariwafa.card_purchase.en",
+    "event": "card_purchase",
+    "direction": "expense",
+    "currency": "EGP",
+    "amount": "430.00",
+    "last4": "5901",
+    "balance": null,
+    "available": null,
+    "merchantClean": "Breadfast"
+  }
+}

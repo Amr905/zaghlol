@@ -1,0 +1,61 @@
+{
+  "code": "alexbank",
+  "names": {
+    "ar": "بنك الإسكندرية",
+    "en": "ALEXBANK"
+  },
+  "country": "EG",
+  "defaultCurrency": "EGP",
+  "senders": [
+    {
+      "match": "exact",
+      "value": "ALEXBANK"
+    }
+  ],
+  "packages": [],
+  "walletCardNames": [
+    "ALEXBANK"
+  ],
+  "last4": [],
+  "drop": [],
+  "templates": [
+    {
+      "id": "alexbank.card_purchase.ar",
+      "version": 1,
+      "lang": "ar",
+      "channel": [
+        "sms"
+      ],
+      "event": "card_purchase",
+      "direction": "expense",
+      "baseConfidence": 0.95,
+      "pattern": "تم دفع (?<amount>[\\d,.]+) (?<cur>جم|جنيه|egp) لدى (?<merchant>.+?)(?: في (?<date>\\d+/\\d+))? باستخدام بطاقة ينتهي رقمها بـ (?<last4>\\d{4})(?:\\. |\\.?$)(?:(?:الرصيد|رصيدك)\\D{0,12}(?<balance>[\\d,.]+))?",
+      "currencyMap": {
+        "جم": "EGP",
+        "جنيه": "EGP",
+        "egp": "EGP"
+      },
+      "date": {
+        "format": "d/M",
+        "yearPolicy": "nearest_past"
+      }
+    },
+    {
+      "id": "alexbank.card_purchase.en",
+      "version": 1,
+      "lang": "en",
+      "channel": [
+        "sms"
+      ],
+      "event": "card_purchase",
+      "direction": "expense",
+      "baseConfidence": 0.95,
+      "pattern": "You paid (?<cur>egp) (?<amount>[\\d,.]+) at (?<merchant>.+?) using Card ending in (?<last4>\\d{4})(?:\\. |\\.?$)(?:(?:avl|available|bal)\\D{0,16}(?<balance>[\\d,.]+))?",
+      "currencyMap": {
+        "جم": "EGP",
+        "جنيه": "EGP",
+        "egp": "EGP"
+      }
+    }
+  ]
+}

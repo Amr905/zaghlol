@@ -1,0 +1,16 @@
+{
+  "sender": "AIB",
+  "body": "المصرف العربي الدولي: تم خصم 12,345.67 جم ببطاقة **4820 لدى محطة موبيل. الرصيد المتاح 7690.00 جم",
+  "receivedAt": "2026-10-23T11:14:00+03:00",
+  "expect": {
+    "template": "aib.card_purchase.ar",
+    "event": "card_purchase",
+    "direction": "expense",
+    "currency": "EGP",
+    "amount": "12345.67",
+    "last4": "4820",
+    "balance": "7690.00",
+    "available": null,
+    "merchantClean": "محطة موبيل"
+  }
+}

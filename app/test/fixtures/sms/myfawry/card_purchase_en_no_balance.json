@@ -1,0 +1,16 @@
+{
+  "sender": "myfawry",
+  "body": "myfawry: Purchase of EGP 310.00 with Card *2019 at BREADFAST.",
+  "receivedAt": "2026-10-23T11:14:00+03:00",
+  "expect": {
+    "template": "myfawry.card_purchase.en",
+    "event": "card_purchase",
+    "direction": "expense",
+    "currency": "EGP",
+    "amount": "310.00",
+    "last4": "2019",
+    "balance": null,
+    "available": null,
+    "merchantClean": "Breadfast"
+  }
+}

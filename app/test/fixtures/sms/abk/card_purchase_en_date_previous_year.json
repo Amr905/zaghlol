@@ -1,0 +1,17 @@
+{
+  "sender": "ABK",
+  "body": "ABK-Egypt: Card ending 7123 charged EGP 95.00 at TBS BAKERY on 23/10. Avl Bal EGP 2,805.00",
+  "receivedAt": "2026-01-05T09:00:00+02:00",
+  "expect": {
+    "template": "abk.card_purchase.en",
+    "event": "card_purchase",
+    "direction": "expense",
+    "currency": "EGP",
+    "amount": "95.00",
+    "last4": "7123",
+    "balance": "2805.00",
+    "available": null,
+    "merchantClean": "Tbs Bakery",
+    "date": "2025-10-23"
+  }
+}

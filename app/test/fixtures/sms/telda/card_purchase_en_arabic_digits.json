@@ -1,0 +1,16 @@
+{
+  "sender": "Telda",
+  "body": "Telda: You paid EGP ١٤٠٫٠٠ at STARBUCKS with Card *٩٩١٠. Avl Bal EGP ٢٬٣٦٠٫٠٠",
+  "receivedAt": "2026-10-23T11:14:00+03:00",
+  "expect": {
+    "template": "telda.card_purchase.en",
+    "event": "card_purchase",
+    "direction": "expense",
+    "currency": "EGP",
+    "amount": "140.00",
+    "last4": "9910",
+    "balance": "2360.00",
+    "available": null,
+    "merchantClean": "Starbucks"
+  }
+}

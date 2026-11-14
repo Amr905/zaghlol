@@ -1,0 +1,16 @@
+{
+  "sender": "AIBK",
+  "body": "AIBK: Card ****١٥٩٠ debited EGP ٥٥٠٫٠٠ at RAYA MEGA STORE. Avl Bal: EGP ٨٬٤٥٠٫٠٠",
+  "receivedAt": "2026-10-23T11:14:00+03:00",
+  "expect": {
+    "template": "aibk.card_purchase.en",
+    "event": "card_purchase",
+    "direction": "expense",
+    "currency": "EGP",
+    "amount": "550.00",
+    "last4": "1590",
+    "balance": "8450.00",
+    "available": null,
+    "merchantClean": "Raya Mega Store"
+  }
+}

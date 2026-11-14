@@ -183,9 +183,14 @@ jobs:
         run: dart test --exclude-tags benchmark
       # T-032: the registry lint CLI and its self-tests. Once the real
       # registry exists (T-036), add `dart run registry_lint` over it here.
+      # SMS-TEMPLATES: the bundled registry has its own lint step below (also
+      # covered by tools/registry_lint/test/real_registry_test.dart).
       - name: dart test (registry_lint)
         working-directory: tools/registry_lint
         run: dart test
+      - name: registry_lint (bundled registry + SMS fixtures)
+        working-directory: tools/registry_lint
+        run: dart run registry_lint --registry ../../app/assets/registry --fixtures ../../app/test/fixtures/sms
       # T-030: seed codec and ES256 signature (incl. the backend vectors),
       # then the catalog builder, whose test also fails when the committed
       # app/assets/catalog files or tools/catalog_build/data/catalog_seed.csv

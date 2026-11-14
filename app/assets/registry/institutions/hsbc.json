@@ -1,0 +1,67 @@
+{
+  "code": "hsbc",
+  "names": {
+    "ar": "بنك إتش إس بي سي مصر",
+    "en": "HSBC"
+  },
+  "country": "EG",
+  "defaultCurrency": "EGP",
+  "senders": [
+    {
+      "match": "exact",
+      "value": "HSBC"
+    }
+  ],
+  "packages": [],
+  "walletCardNames": [
+    "HSBC"
+  ],
+  "last4": [],
+  "drop": [],
+  "templates": [
+    {
+      "id": "hsbc.card_purchase.ar",
+      "version": 1,
+      "lang": "ar",
+      "channel": [
+        "sms"
+      ],
+      "event": "card_purchase",
+      "direction": "expense",
+      "baseConfidence": 0.95,
+      "pattern": "عملية شراء بمبلغ (?<amount>[\\d,.]+) (?<cur>جم|جنيه|egp) لدى (?<merchant>.+?)(?: في (?<date>\\d+/\\d+))? ببطاقة (?<last4>\\d{4})(?:\\. |\\.?$)(?:الحد\\D{0,12}(?<available>[\\d,.]+))?",
+      "currencyMap": {
+        "جم": "EGP",
+        "جنيه": "EGP",
+        "egp": "EGP"
+      },
+      "date": {
+        "format": "d/M",
+        "yearPolicy": "nearest_past"
+      },
+      "flags": {
+        "isAvailableLimit": true
+      }
+    },
+    {
+      "id": "hsbc.card_purchase.en",
+      "version": 1,
+      "lang": "en",
+      "channel": [
+        "sms"
+      ],
+      "event": "card_purchase",
+      "direction": "expense",
+      "baseConfidence": 0.95,
+      "pattern": "Purchase of (?<cur>egp) (?<amount>[\\d,.]+) at (?<merchant>.+?) with card ending (?<last4>\\d{4})(?:\\. |\\.?$)(?:(?:avl|available) limit\\D{0,8}(?<available>[\\d,.]+))?",
+      "currencyMap": {
+        "جم": "EGP",
+        "جنيه": "EGP",
+        "egp": "EGP"
+      },
+      "flags": {
+        "isAvailableLimit": true
+      }
+    }
+  ]
+}

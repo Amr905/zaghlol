@@ -1,0 +1,16 @@
+{
+  "sender": "myfawry",
+  "body": "myfawry: Purchase of EGP 12,345.67 with Card *2019 at BREADFAST. Avl Bal EGP 1,190.00",
+  "receivedAt": "2026-10-23T11:14:00+03:00",
+  "expect": {
+    "template": "myfawry.card_purchase.en",
+    "event": "card_purchase",
+    "direction": "expense",
+    "currency": "EGP",
+    "amount": "12345.67",
+    "last4": "2019",
+    "balance": "1190.00",
+    "available": null,
+    "merchantClean": "Breadfast"
+  }
+}

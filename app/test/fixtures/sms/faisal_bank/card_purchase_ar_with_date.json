@@ -1,0 +1,17 @@
+{
+  "sender": "FaisalBank",
+  "body": "بنك فيصل الإسلامي: تم خصم 750.00 جم ببطاقة *3310 لدى بي تك في 22/10. الرصيد المتاح 9250.00 جم",
+  "receivedAt": "2026-10-23T11:14:00+03:00",
+  "expect": {
+    "template": "faisal_bank.card_purchase.ar",
+    "event": "card_purchase",
+    "direction": "expense",
+    "currency": "EGP",
+    "amount": "750.00",
+    "last4": "3310",
+    "balance": "9250.00",
+    "available": null,
+    "merchantClean": "بي تك",
+    "date": "2026-10-22"
+  }
+}

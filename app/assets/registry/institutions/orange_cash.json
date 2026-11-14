@@ -1,0 +1,61 @@
+{
+  "code": "orange_cash",
+  "names": {
+    "ar": "أورنج كاش",
+    "en": "Orange Cash"
+  },
+  "country": "EG",
+  "defaultCurrency": "EGP",
+  "senders": [
+    {
+      "match": "exact",
+      "value": "OrangeCash"
+    }
+  ],
+  "packages": [],
+  "walletCardNames": [
+    "Orange Cash"
+  ],
+  "last4": [],
+  "drop": [],
+  "templates": [
+    {
+      "id": "orange_cash.card_purchase.ar",
+      "version": 1,
+      "lang": "ar",
+      "channel": [
+        "sms"
+      ],
+      "event": "card_purchase",
+      "direction": "expense",
+      "baseConfidence": 0.95,
+      "pattern": "تم دفع (?<amount>[\\d,.]+) (?<cur>جم|جنيه|egp) لدى (?<merchant>.+?)(?: في (?<date>\\d+/\\d+))?(?:\\. |\\.?$)(?:(?:الرصيد|رصيدك)\\D{0,12}(?<balance>[\\d,.]+))?",
+      "currencyMap": {
+        "جم": "EGP",
+        "جنيه": "EGP",
+        "egp": "EGP"
+      },
+      "date": {
+        "format": "d/M",
+        "yearPolicy": "nearest_past"
+      }
+    },
+    {
+      "id": "orange_cash.card_purchase.en",
+      "version": 1,
+      "lang": "en",
+      "channel": [
+        "sms"
+      ],
+      "event": "card_purchase",
+      "direction": "expense",
+      "baseConfidence": 0.95,
+      "pattern": "You paid (?<cur>egp) (?<amount>[\\d,.]+) at (?<merchant>.+?)(?:\\. |\\.?$)(?:(?:avl|available|bal)\\D{0,16}(?<balance>[\\d,.]+))?",
+      "currencyMap": {
+        "جم": "EGP",
+        "جنيه": "EGP",
+        "egp": "EGP"
+      }
+    }
+  ]
+}

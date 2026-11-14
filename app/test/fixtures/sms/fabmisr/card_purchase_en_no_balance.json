@@ -1,0 +1,16 @@
+{
+  "sender": "FABMISR",
+  "body": "FABMISR: Purchase of EGP 55.00 at COSTA COFFEE using card 3344.",
+  "receivedAt": "2026-10-23T11:14:00+03:00",
+  "expect": {
+    "template": "fabmisr.card_purchase.en",
+    "event": "card_purchase",
+    "direction": "expense",
+    "currency": "EGP",
+    "amount": "55.00",
+    "last4": "3344",
+    "balance": null,
+    "available": null,
+    "merchantClean": "Costa Coffee"
+  }
+}

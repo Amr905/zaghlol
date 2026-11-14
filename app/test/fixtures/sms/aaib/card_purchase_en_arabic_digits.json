@@ -1,0 +1,16 @@
+{
+  "sender": "AAIB",
+  "body": "AAIB: A purchase of EGP ٦٠٠٫٠٠ was made with Card ****٤٣٢١ at SPINNEYS. Avl Bal: EGP ٥٠٠٠٫٠٠",
+  "receivedAt": "2026-10-23T11:14:00+03:00",
+  "expect": {
+    "template": "aaib.card_purchase.en",
+    "event": "card_purchase",
+    "direction": "expense",
+    "currency": "EGP",
+    "amount": "600.00",
+    "last4": "4321",
+    "balance": "5000.00",
+    "available": null,
+    "merchantClean": "Spinneys"
+  }
+}

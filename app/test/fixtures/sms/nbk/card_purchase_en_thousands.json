@@ -1,0 +1,16 @@
+{
+  "sender": "NBK",
+  "body": "NBK: EGP 12,345.67 charged on Card **4409 at TRADELINE. Available Balance: EGP 18,900.00",
+  "receivedAt": "2026-10-23T11:14:00+03:00",
+  "expect": {
+    "template": "nbk.card_purchase.en",
+    "event": "card_purchase",
+    "direction": "expense",
+    "currency": "EGP",
+    "amount": "12345.67",
+    "last4": "4409",
+    "balance": "18900.00",
+    "available": null,
+    "merchantClean": "Tradeline"
+  }
+}

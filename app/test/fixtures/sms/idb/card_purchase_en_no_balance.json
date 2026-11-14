@@ -1,0 +1,16 @@
+{
+  "sender": "IDB",
+  "body": "IDB: Purchase of EGP 390.00 with card ending 2209 at FATHALLA MARKET.",
+  "receivedAt": "2026-10-23T11:14:00+03:00",
+  "expect": {
+    "template": "idb.card_purchase.en",
+    "event": "card_purchase",
+    "direction": "expense",
+    "currency": "EGP",
+    "amount": "390.00",
+    "last4": "2209",
+    "balance": null,
+    "available": null,
+    "merchantClean": "Fathalla Market"
+  }
+}

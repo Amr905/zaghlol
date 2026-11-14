@@ -1,0 +1,16 @@
+{
+  "sender": "ADIB",
+  "body": "ADIB: EGP 600.00 has been charged to your card ending 1122 at CARREFOUR.",
+  "receivedAt": "2026-10-23T11:14:00+03:00",
+  "expect": {
+    "template": "adib.card_purchase.en",
+    "event": "card_purchase",
+    "direction": "expense",
+    "currency": "EGP",
+    "amount": "600.00",
+    "last4": "1122",
+    "balance": null,
+    "available": null,
+    "merchantClean": "Carrefour"
+  }
+}

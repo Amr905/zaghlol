@@ -1,0 +1,16 @@
+{
+  "sender": "ADIB",
+  "body": "ADIB: EGP ٦٠٠٫٠٠ has been charged to your card ending ١١٢٢ at CARREFOUR. Avl bal EGP ٤٠٠٠.",
+  "receivedAt": "2026-10-23T11:14:00+03:00",
+  "expect": {
+    "template": "adib.card_purchase.en",
+    "event": "card_purchase",
+    "direction": "expense",
+    "currency": "EGP",
+    "amount": "600.00",
+    "last4": "1122",
+    "balance": "4000.00",
+    "available": null,
+    "merchantClean": "Carrefour"
+  }
+}

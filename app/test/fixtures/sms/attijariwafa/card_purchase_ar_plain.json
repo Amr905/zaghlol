@@ -1,0 +1,16 @@
+{
+  "sender": "Attijariwafa",
+  "body": "التجاري وفا بنك: عملية شراء بقيمة 430.00 جم ببطاقة ****5901 لدى BREADFAST. الرصيد المتاح 6570.00 جم",
+  "receivedAt": "2026-10-23T11:14:00+03:00",
+  "expect": {
+    "template": "attijariwafa.card_purchase.ar",
+    "event": "card_purchase",
+    "direction": "expense",
+    "currency": "EGP",
+    "amount": "430.00",
+    "last4": "5901",
+    "balance": "6570.00",
+    "available": null,
+    "merchantClean": "Breadfast"
+  }
+}

@@ -1,0 +1,16 @@
+{
+  "sender": "EmiratesNBD",
+  "body": "الإمارات دبي الوطني: خصم 450.00 جم لدى UBER EG بكارت ينتهي بـ 1234. الرصيد المتاح 4500.20 جم",
+  "receivedAt": "2026-10-23T11:14:00+03:00",
+  "expect": {
+    "template": "emirates_nbd.card_purchase.ar",
+    "event": "card_purchase",
+    "direction": "expense",
+    "currency": "EGP",
+    "amount": "450.00",
+    "last4": "1234",
+    "balance": "4500.20",
+    "available": null,
+    "merchantClean": "Uber"
+  }
+}

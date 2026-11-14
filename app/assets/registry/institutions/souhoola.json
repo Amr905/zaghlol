@@ -1,0 +1,67 @@
+{
+  "code": "souhoola",
+  "names": {
+    "ar": "سهولة / شهري / أمان / فرصة",
+    "en": "Souhoola / Aman"
+  },
+  "country": "EG",
+  "defaultCurrency": "EGP",
+  "senders": [
+    {
+      "match": "exact",
+      "value": "Souhoola"
+    }
+  ],
+  "packages": [],
+  "walletCardNames": [
+    "Souhoola"
+  ],
+  "last4": [],
+  "drop": [],
+  "templates": [
+    {
+      "id": "souhoola.bnpl_installment.ar",
+      "version": 1,
+      "lang": "ar",
+      "channel": [
+        "sms"
+      ],
+      "event": "bnpl_installment",
+      "direction": "expense",
+      "baseConfidence": 0.95,
+      "pattern": "عملية شراء بمبلغ (?<amount>[\\d,.]+) (?<cur>جم|جنيه|egp) لدى (?<merchant>.+?)(?: في (?<date>\\d+/\\d+))?(?:\\. |\\.?$)(?:الحد\\D{0,12}(?<available>[\\d,.]+))?",
+      "currencyMap": {
+        "جم": "EGP",
+        "جنيه": "EGP",
+        "egp": "EGP"
+      },
+      "date": {
+        "format": "d/M",
+        "yearPolicy": "nearest_past"
+      },
+      "flags": {
+        "isAvailableLimit": true
+      }
+    },
+    {
+      "id": "souhoola.bnpl_installment.en",
+      "version": 1,
+      "lang": "en",
+      "channel": [
+        "sms"
+      ],
+      "event": "bnpl_installment",
+      "direction": "expense",
+      "baseConfidence": 0.95,
+      "pattern": "Purchase of (?<cur>egp) (?<amount>[\\d,.]+) at (?<merchant>.+?)(?:\\. |\\.?$)(?:(?:avl|available) limit\\D{0,8}(?<available>[\\d,.]+))?",
+      "currencyMap": {
+        "جم": "EGP",
+        "جنيه": "EGP",
+        "egp": "EGP"
+      },
+      "flags": {
+        "isAvailableLimit": true
+      }
+    }
+  ]
+}

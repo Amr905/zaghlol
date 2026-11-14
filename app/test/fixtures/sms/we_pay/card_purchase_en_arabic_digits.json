@@ -1,0 +1,16 @@
+{
+  "sender": "WEPay",
+  "body": "WE Pay: Purchase of EGP ١١٥٫٠٠ at KAZYON. Avl Bal: EGP ٤٨٥٫٠٠",
+  "receivedAt": "2026-10-23T11:14:00+03:00",
+  "expect": {
+    "template": "we_pay.card_purchase.en",
+    "event": "card_purchase",
+    "direction": "expense",
+    "currency": "EGP",
+    "amount": "115.00",
+    "last4": null,
+    "balance": "485.00",
+    "available": null,
+    "merchantClean": "Kazyon"
+  }
+}

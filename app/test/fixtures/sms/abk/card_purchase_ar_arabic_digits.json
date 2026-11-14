@@ -1,0 +1,16 @@
+{
+  "sender": "ABK",
+  "body": "الأهلي الكويتي: تم خصم ٩٥٫٠٠ جم من بطاقة ٧١٢٣ لدى TBS BAKERY. الرصيد المتاح ٢٨٠٥٫٠٠ جم",
+  "receivedAt": "2026-10-23T11:14:00+03:00",
+  "expect": {
+    "template": "abk.card_purchase.ar",
+    "event": "card_purchase",
+    "direction": "expense",
+    "currency": "EGP",
+    "amount": "95.00",
+    "last4": "7123",
+    "balance": "2805.00",
+    "available": null,
+    "merchantClean": "Tbs Bakery"
+  }
+}

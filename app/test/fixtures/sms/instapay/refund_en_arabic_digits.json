@@ -1,0 +1,14 @@
+{
+  "sender": "InstaPay",
+  "body": "InstaPay: EGP ٨٠٠٫٠٠ refunded to A/C *٤٥٦٧. Avl Bal EGP ٥٬٢٠٠٫٠٠",
+  "receivedAt": "2026-10-23T11:14:00+03:00",
+  "expect": {
+    "template": "instapay.refund.en",
+    "event": "refund",
+    "direction": "income",
+    "currency": "EGP",
+    "amount": "800.00",
+    "last4": "4567",
+    "balance": "5200.00"
+  }
+}

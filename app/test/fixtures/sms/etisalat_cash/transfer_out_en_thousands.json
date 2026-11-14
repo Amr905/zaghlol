@@ -1,0 +1,16 @@
+{
+  "sender": "e&money",
+  "body": "e& money: EGP 12,345.67 transferred to 01123456789. Avl Bal EGP 650.00",
+  "receivedAt": "2026-10-23T11:14:00+03:00",
+  "expect": {
+    "template": "etisalat_cash.transfer_out.en",
+    "event": "transfer_out",
+    "direction": "expense",
+    "currency": "EGP",
+    "amount": "12345.67",
+    "last4": null,
+    "balance": "650.00",
+    "available": null,
+    "phone": "01123456789"
+  }
+}
