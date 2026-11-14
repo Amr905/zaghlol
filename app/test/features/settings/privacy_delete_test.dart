@@ -216,4 +216,43 @@ void main() {
       expect(find.text(t.privacyDeleteFailed), findsOneWidget);
     });
   }
+
+  testWidgets('a failed wipe under a nested navigator closes the dialog, '
+      'keeps Privacy and shows the snackbar', (tester) async {
+    final h = SettingsHarness();
+    addTearDown(h.db.close);
+    await tester.pumpWidget(
+      h.app(
+        Navigator(
+          onGenerateInitialRoutes: (_, _) => [
+            MaterialPageRoute<void>(builder: (_) => const SizedBox()),
+            MaterialPageRoute<void>(
+              builder: (_) => const PrivacyScreen(platform: 'android'),
+            ),
+          ],
+        ),
+        overrides: [
+          deleteSeatWarningProvider.overrideWith((ref) async => null),
+          wipeEverythingProvider.overrideWithValue(
+            () async => throw StateError('wipe'),
+          ),
+        ],
+      ),
+    );
+    await settle(tester);
+    final t = AppLocalizations.of(tester.element(find.byType(PrivacyScreen)));
+    await tester.scrollUntilVisible(
+      find.text(t.privacyDeleteRow),
+      300,
+      scrollable: find.byType(Scrollable).first,
+    );
+    await tester.tap(find.text(t.privacyDeleteRow));
+    await settle(tester);
+    await tester.enterText(find.byType(TextField), 'DELETE');
+    await tester.tap(_inDialog(t.privacyDeleteConfirm));
+    await settle(tester);
+    expect(find.text(t.privacyDeleteWorking), findsNothing);
+    expect(find.byType(PrivacyScreen), findsOneWidget);
+    expect(find.text(t.privacyDeleteFailed), findsOneWidget);
+  });
 }

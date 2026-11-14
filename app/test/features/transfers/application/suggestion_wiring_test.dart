@@ -126,7 +126,11 @@ void main() {
         const PersistedTxn(txnId: 'in1', accountId: 'acc1', inserted: true),
       );
       final id = (await open()).single;
+      // A bare accept never picks a candidate for the user.
       await c.read(reviewActionsProvider).accept(id);
+      expect(await links(), 0);
+      expect(await open(), [id]);
+      await c.read(reviewActionsProvider).acceptCandidate(id, 'bill');
       expect(await links(), 1);
       expect(await open(), isEmpty);
     },

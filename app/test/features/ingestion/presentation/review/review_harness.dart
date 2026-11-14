@@ -33,6 +33,9 @@ class FakeActions implements ReviewActions {
   @override
   Future<void> accept(String itemId) => _rec('accept:$itemId');
   @override
+  Future<void> acceptCandidate(String itemId, String candidateId) =>
+      _rec('acceptCand:$itemId:$candidateId');
+  @override
   Future<void> confirmSubscription(SubscriptionCardModel card) =>
       _rec('subConfirm:${card.recurringItemId}');
   @override

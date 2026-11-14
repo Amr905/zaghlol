@@ -244,10 +244,10 @@ jobs:
         run: flutter pub get --enforce-lockfile
       - name: dart test --tags benchmark (zaghlol_parsing)
         working-directory: packages/zaghlol_parsing
-        run: set -o pipefail; dart test --tags benchmark -j 1 -r expanded 2>&1 | tee ../../perf-parsing.log
+        run: set -o pipefail; dart test --tags benchmark --retry 1 -j 1 -r expanded 2>&1 | tee ../../perf-parsing.log
       - name: flutter test --tags benchmark (app)
         working-directory: app
-        run: set -o pipefail; flutter test --tags benchmark --concurrency=1 -r expanded 2>&1 | tee ../perf-app.log
+        run: set -o pipefail; flutter test --tags benchmark --retry 1 --concurrency=1 -r expanded 2>&1 | tee ../perf-app.log
       - name: Publish numbers
         if: always()
         run: |

@@ -225,7 +225,7 @@ class PrivacyScreen extends ConsumerWidget {
       // T-166: the wipe did not finish; the marker stays and the next launch
       // completes it. Close the progress dialog and say so.
       if (!context.mounted) return;
-      Navigator.of(context).pop();
+      Navigator.of(context, rootNavigator: true).pop();
       ScaffoldMessenger.of(context)
           .showSnackBar(SnackBar(content: Text(t.privacyDeleteFailed)));
     }

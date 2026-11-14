@@ -27,6 +27,9 @@ abstract interface class ReviewActions {
   Future<void> categorize(CategoryCardModel card, String categoryId);
   Future<void> dismiss(String itemId);
   Future<void> accept(String itemId);
+
+  /// Links the pair suggestion [itemId] to [candidateId], which the user chose.
+  Future<void> acceptCandidate(String itemId, String candidateId);
   Future<void> confirmSubscription(SubscriptionCardModel card);
   Future<void> dismissSubscription(SubscriptionCardModel card);
 
@@ -93,19 +96,24 @@ final class _LiveActions implements ReviewActions {
     if (pair == null) {
       await (await _reviews).acceptSuggestion(itemId);
     } else {
-      // The best candidate is first; the card names no other choice.
-      final c = reviewPayloadOf(pair)?['candidates'];
-      final candidate = c is List && c.isNotEmpty ? c.first : null;
-      if (candidate is! String) {
-        await (await _ref.read(pairSuggestionsProvider.future)).dismiss(itemId);
-      } else {
-        final s = await _ref.read(pairSuggestionsProvider.future);
-        if (pair.kind == ReviewKind.reimbursementSuggestion) {
-          await s.acceptReimbursement(itemId, candidate);
-        } else {
-          await s.acceptFxPair(itemId, candidate);
-        }
-      }
+      // Never pick a candidate for the user: see [acceptCandidate].
+      return;
+    }
+    _refresh();
+  }
+
+  @override
+  Future<void> acceptCandidate(String itemId, String candidateId) async {
+    final pair = await _pairItem(itemId);
+    if (pair == null) return;
+    final c = reviewPayloadOf(pair)?['candidates'];
+    // Only an id the suggestion actually offered.
+    if (c is! List || !c.contains(candidateId)) return;
+    final s = await _ref.read(pairSuggestionsProvider.future);
+    if (pair.kind == ReviewKind.reimbursementSuggestion) {
+      await s.acceptReimbursement(itemId, candidateId);
+    } else {
+      await s.acceptFxPair(itemId, candidateId);
     }
     _refresh();
   }
@@ -301,12 +309,34 @@ Future<ReviewCardModel?> _toCard(
         amount: cur == null ? null : Money.tryMinor(cur, r.amountMinor),
       );
     default:
+      final isPair =
+          item.kind == ReviewKind.reimbursementSuggestion ||
+          item.kind == ReviewKind.fxPairSuggestion;
+      final candidates = <ReviewTransferOption>[];
+      if (isPair) {
+        for (final id
+            in (payload['candidates'] as List<Object?>? ?? const [])) {
+          if (id is! String) continue;
+          final t = await txns.byId(id);
+          if (t == null) continue;
+          candidates.add(
+            ReviewTransferOption(
+              txnId: t.id,
+              amount: t.amount,
+              accountLabel: t.merchantRaw ?? '',
+              occurredAt: t.occurredAt,
+            ),
+          );
+        }
+      }
       return SuggestionCardModel(
         itemId: item.id,
         kind: item.kind,
         ambiguousRefund: payload['type'] == 'refund_ambiguous',
         amount: txn?.amount,
         merchant: txn?.merchantRaw,
+        candidates: candidates,
+        isIncome: item.kind == ReviewKind.reimbursementSuggestion,
       );
   }
 }
