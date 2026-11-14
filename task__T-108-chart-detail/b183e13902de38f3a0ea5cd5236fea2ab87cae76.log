@@ -1,5 +1,8 @@
 ﻿== SUMMARY ==
-RUNNING sha=b183e13902de38f3a0ea5cd5236fea2ab87cae76
+SKIP sha=b183e13902de38f3a0ea5cd5236fea2ab87cae76 no app/packages/backend changes
 
 == FULL LOG (last 1500 lines) ==
 auto task/T-108-chart-detail b183e13902de38f3a0ea5cd5236fea2ab87cae76 2026-11-14T11:08:23.4407058+02:00
+
+
+
