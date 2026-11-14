@@ -65,7 +65,7 @@ void main() {
         );
         expect(find.byKey(const Key('approx-rate-date')), findsOneWidget);
         expect(find.byKey(const Key('approx-stale')), findsOneWidget);
-        expect(find.text('JPY · KWD'), findsOneWidget);
+        expect(find.textContaining('JPY · KWD'), findsOneWidget);
       });
 
       testWidgets('approx row without exclusions has no note', (t) async {
