@@ -7,6 +7,7 @@ using Zaghlol.Domain;
 
 namespace Zaghlol.Api.Tests.Dev;
 
+[Collection(ApiHostGroup.Name)]
 public sealed class DevFakeStoresTests
 {
     private static IConfiguration Config(string? on) =>
@@ -95,6 +96,7 @@ public sealed class DevFakeStoresTests
     }
 }
 
+[Collection(ApiHostGroup.Name)]
 public sealed class DevKeyEnvFileTests
 {
     [Fact]
