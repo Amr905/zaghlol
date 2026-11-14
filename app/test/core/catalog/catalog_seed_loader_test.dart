@@ -175,7 +175,7 @@ void main() {
       // ignore: avoid_print
       print('seed load (verify + apply, host): ${sw.elapsedMilliseconds} ms');
       expect(sw.elapsedMilliseconds, lessThan(1000));
-    });
+    }, tags: 'benchmark');
 
     test('a 600-merchant, 3000-alias seed also loads under a second', () async {
       final ops = <SeedOp>[
@@ -209,7 +209,7 @@ void main() {
       );
       expect(await _count(db, 'catalog_aliases'), 3000);
       expect(sw.elapsedMilliseconds, lessThan(1000));
-    });
+    }, tags: 'benchmark');
   });
 
   group('later launches', () {

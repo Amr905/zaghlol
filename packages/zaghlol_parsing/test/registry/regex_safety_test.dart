@@ -122,9 +122,17 @@ void main() {
       )!;
       expect(backtrackingProblems(p.source), isEmpty);
       final hostile = '${'تم خصم 1 ' * 200}${' ' * 200}';
+      expect(p.regex.hasMatch(hostile), isFalse);
+    });
+
+    test('safe lazy templates match a hostile body within 50 ms', () {
+      final p = compilePattern(
+        r'تم خصم (?<amount>[\d,.]+) .*?بطاقة .*?\*\*(?<last4>\d{4}) لدى (?<merchant>.+?) يوم',
+      )!;
+      final hostile = '${'تم خصم 1 ' * 200}${' ' * 200}';
       final sw = Stopwatch()..start();
       p.regex.hasMatch(hostile);
       expect(sw.elapsedMilliseconds, lessThan(50));
-    });
+    }, tags: 'benchmark');
   });
 }

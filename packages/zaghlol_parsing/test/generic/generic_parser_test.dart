@@ -456,7 +456,7 @@ void main() {
           reason: 'slow on an adversarial body',
         );
       }
-    });
+    }, tags: 'benchmark');
 
     test('benchmark: mean generic parse time (printed)', () {
       final requests = [for (final c in cases) _req(c['body']! as String)];
@@ -477,6 +477,6 @@ void main() {
       print('generic parse mean: ${meanMicros.round()} us over $runs runs');
       expect(suggested, greaterThan(runs ~/ 2));
       expect(meanMicros, lessThan(10000), reason: 'budget is 10 ms');
-    });
+    }, tags: 'benchmark');
   });
 }

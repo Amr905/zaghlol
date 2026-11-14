@@ -349,7 +349,7 @@ void main() {
       }
       sw.stop();
       expect(sw.elapsedMilliseconds ~/ n, lessThan(10));
-    });
+    }, tags: 'benchmark');
   });
 
   group('runtime guard (slow templates)', () {
