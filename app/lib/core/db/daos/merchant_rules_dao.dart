@@ -140,8 +140,8 @@ AND EXISTS (
   /// Points the eligible past transactions of rule [ruleId] (limited to
   /// [ids] when given) at the rule's category in ONE conditional statement
   /// (every guard is re-checked in SQL, so a user edit committed by another
-  /// connection is never overwritten), then stamps the rule's
-  /// `last_applied_at`. Returns the number of transactions changed.
+  /// connection is never overwritten), then, when anything
+  /// changed, stamps the rule's `last_applied_at`. Returns the number of transactions changed.
   ///
   /// Not in a transaction: a single write statement waits for another
   /// connection's write lock up to `dbBusyTimeout` (5 s, the busy handler
@@ -163,7 +163,8 @@ AND EXISTS (
         updates: {_db.transactions},
       ),
     );
-    await markApplied(ruleId, at: at);
+    // FU-095: a run that changed nothing is not an application.
+    if (changed > 0) await markApplied(ruleId, at: at);
     return changed;
   }
 }
