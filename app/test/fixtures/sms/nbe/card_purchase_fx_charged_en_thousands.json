@@ -13,6 +13,7 @@
     "available": null,
     "merchantClean": "Netflix.com",
     "originalAmount": "12345.67",
-    "originalCurrency": "USD"
+    "originalCurrency": "USD",
+    "balanceCurrency": "EGP"
   }
 }

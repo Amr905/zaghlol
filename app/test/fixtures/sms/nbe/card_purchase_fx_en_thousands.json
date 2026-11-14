@@ -9,7 +9,7 @@
     "currency": "USD",
     "amount": "12345.67",
     "last4": "4567",
-    "balance": "25000.50",
+    "balance": null,
     "available": null,
     "merchantClean": "Netflix.com"
   }
