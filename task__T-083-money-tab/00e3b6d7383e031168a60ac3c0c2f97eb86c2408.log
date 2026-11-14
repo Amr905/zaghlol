@@ -1,5 +1,8 @@
 ﻿== SUMMARY ==
-RUNNING sha=00e3b6d7383e031168a60ac3c0c2f97eb86c2408
+SKIP sha=00e3b6d7383e031168a60ac3c0c2f97eb86c2408 no app/packages/backend changes
 
 == FULL LOG (last 1500 lines) ==
 auto task/T-083-money-tab 00e3b6d7383e031168a60ac3c0c2f97eb86c2408 2026-11-14T11:01:22.8945676+02:00
+
+
+
