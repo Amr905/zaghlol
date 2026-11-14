@@ -1,5 +1,8 @@
+import BackgroundTasks
 import Flutter
 import Foundation
+import Security
+import UserNotifications
 
 /// T-062: the Pigeon `IosCaptureHostApi` over the encrypted App Group spool
 /// (platform-channels.md 1.3 and section 3). One host per engine (the UI
@@ -29,6 +32,7 @@ final class IosCaptureHost: IosCaptureHostApi {
   private let monoClockMs: () -> Int64
   private let scheduleRefresh: () throws -> Void
   private let guardRuntime: () -> GuardRuntime?
+  private let wipe: () throws -> Void
   private let drainedLock = NSLock()
   private var drained = Set<String>()
 
@@ -37,7 +41,8 @@ final class IosCaptureHost: IosCaptureHostApi {
     claim: SpoolClaim = .process,
     monoClockMs: @escaping () -> Int64 = { Int64(ProcessInfo.processInfo.systemUptime * 1000) },
     scheduleRefresh: @escaping () throws -> Void = { try IngestBackgroundRefresh.schedule() },
-    guardRuntime: @escaping () -> GuardRuntime? = { CaptureGuardRuntime.shared }
+    guardRuntime: @escaping () -> GuardRuntime? = { CaptureGuardRuntime.shared },
+    wipe: @escaping () throws -> Void = { try LocalDataWiper.wipeAll() }
   ) {
     self.engineId = IosCaptureHost.newEngineId()
     self.runtime = runtime
@@ -45,6 +50,7 @@ final class IosCaptureHost: IosCaptureHostApi {
     self.monoClockMs = monoClockMs
     self.scheduleRefresh = scheduleRefresh
     self.guardRuntime = guardRuntime
+    self.wipe = wipe
   }
 
   private func need() throws -> SpoolRuntime {
@@ -171,6 +177,15 @@ final class IosCaptureHost: IosCaptureHostApi {
     do { try scheduleRefresh() } catch { throw fail() }
   }
 
+  /// T-166 "Delete everything" (see `LocalDataWiper`). Any failure is a
+  /// code-only `IO_ERROR`; the other parts still ran.
+  func wipeLocalData() throws {
+    drainedLock.lock()
+    drained.removeAll()
+    drainedLock.unlock()
+    do { try wipe() } catch { throw fail() }
+  }
+
   /// The engine is going away: drop its claim (entries stay for the next drain).
   func detach() {
     claim.release(engineId)
@@ -207,5 +222,108 @@ enum IosCaptureRegistration {
     DispatchQueue.global(qos: .utility).async {
       _ = SpoolRuntime.shared?.cipher.keyCreatedAtMs()
     }
+  }
+}
+
+/// T-166 "Delete everything", native part (design note in T-166.md, step 8).
+/// Runs after Dart closed the database and deleted its key slots. Every part
+/// runs even when an earlier one failed; `wipeAll` throws at the end if any
+/// failed, so Dart keeps its resume marker. Directory roots are kept (only
+/// their contents go) and their backup exclusion is applied again (T-165
+/// F4). The seat keys (service `SeatKeyStore.service`) are never deleted
+/// (D-55, R4-8). Nothing here logs.
+enum LocalDataWiper {
+  struct Incomplete: Error {}
+
+  /// The Keychain service that survives the wipe.
+  static let keptService = SeatKeyStore.service
+
+  static func wipeAll() throws {
+    var ok = true
+    BGTaskScheduler.shared.cancelAllTaskRequests()
+    let center = UNUserNotificationCenter.current()
+    center.removeAllPendingNotificationRequests()
+    center.removeAllDeliveredNotifications()
+    ok = deleteKeychainItems() && ok
+    let roots =
+      ZaghlolDirectories.appContainerDirectories() + ZaghlolDirectories.appGroupDirectories()
+    ok = wipeFiles(roots: roots) && ok
+    if !ok { throw Incomplete() }
+  }
+
+  /// Clears the contents of every root, then re-applies the backup exclusion
+  /// to every root (they must exist and stay excluded before the first-launch
+  /// database is created). True when everything went.
+  @discardableResult
+  static func wipeFiles(roots: [URL], fileManager: FileManager = .default) -> Bool {
+    var ok = true
+    for root in roots {
+      ok = clearContents(of: root, fileManager: fileManager) && ok
+    }
+    ok = ZaghlolDirectories.exclude(roots) && ok
+    return ok
+  }
+
+  /// Deletes every entry inside `dir`, never `dir` itself. A symlink is
+  /// removed as a link (its target is not followed). True when nothing is
+  /// left or `dir` does not exist.
+  static func clearContents(of dir: URL, fileManager: FileManager = .default) -> Bool {
+    guard fileManager.fileExists(atPath: dir.path) else { return true }
+    guard
+      let entries = try? fileManager.contentsOfDirectory(
+        at: dir, includingPropertiesForKeys: nil, options: [])
+    else { return false }
+    var ok = true
+    for entry in entries {
+      do {
+        try fileManager.removeItem(at: entry)
+      } catch {
+        if fileManager.fileExists(atPath: entry.path) { ok = false }
+      }
+    }
+    return ok
+  }
+
+  /// Whether a generic-password item with this service goes in the wipe.
+  static func shouldDelete(service: String?) -> Bool { service != keptService }
+
+  /// Deletes every Keychain item of the app's access groups except the seat
+  /// keys. Generic passwords are deleted one by one by persistent reference,
+  /// so a query can never widen to a seat-key item.
+  static func deleteKeychainItems() -> Bool {
+    var ok = true
+    for cls in [kSecClassInternetPassword, kSecClassCertificate, kSecClassKey, kSecClassIdentity] {
+      let status = SecItemDelete(
+        [
+          kSecClass as String: cls,
+          kSecAttrSynchronizable as String: kSecAttrSynchronizableAny,
+        ] as CFDictionary)
+      if status != errSecSuccess && status != errSecItemNotFound { ok = false }
+    }
+    var result: CFTypeRef?
+    let status = SecItemCopyMatching(
+      [
+        kSecClass as String: kSecClassGenericPassword,
+        kSecAttrSynchronizable as String: kSecAttrSynchronizableAny,
+        kSecMatchLimit as String: kSecMatchLimitAll,
+        kSecReturnAttributes as String: true,
+        kSecReturnPersistentRef as String: true,
+      ] as CFDictionary, &result)
+    if status == errSecItemNotFound { return ok }
+    guard status == errSecSuccess, let items = result as? [[String: Any]] else { return false }
+    for item in items {
+      if !shouldDelete(service: item[kSecAttrService as String] as? String) { continue }
+      guard let ref = item[kSecValuePersistentRef as String] as? Data else {
+        ok = false
+        continue
+      }
+      let deleted = SecItemDelete(
+        [
+          kSecClass as String: kSecClassGenericPassword,
+          kSecValuePersistentRef as String: ref,
+        ] as CFDictionary)
+      if deleted != errSecSuccess && deleted != errSecItemNotFound { ok = false }
+    }
+    return ok
   }
 }

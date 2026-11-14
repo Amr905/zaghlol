@@ -97,6 +97,8 @@ input: channel, source, body           output: KEEP(kind registry|user|generic, 
 - **Never logged:** no body, source, last-4 or config value in logs, errors or `toString` (Dart results print the reason/kind only).
 - **Spoofing:** the Guard is a privacy filter, not an authenticity check (ADR-005 *Threats*).
 
+- **`wipeLocalData()` (T-166, both capture hosts, UI engine only).** Called by Dart's `DeleteEverything` after the database is closed and its key slots are deleted. Android (`app.zaghlol.platform.wipe.LocalDataWiper`): cancel and prune all WorkManager work, cancel all notifications, `GuardRuntime.forgetUser()` (user file + cached snapshot), delete every AndroidKeyStore alias, clear the contents of `filesDir`, `noBackupFilesDir` and `cacheDir` (`databases/` and `shared_prefs/` untouched). iOS (`LocalDataWiper` in `IosCaptureHost.swift`): `BGTaskScheduler.cancelAllTaskRequests`, remove pending and delivered notifications, delete every Keychain item of the app except service `app.zaghlol.seatkey` (generic passwords one by one by persistent reference), clear the contents (never the roots) of the sandbox and App Group roots, then `ZaghlolDirectories.exclude` on the roots. Every part runs; any failure → code-only `IO_ERROR` at the end.
+
 ### 1.3 Spool (encrypted, ack-after-commit)
 
 | | Android | iOS |
@@ -134,6 +136,7 @@ abstract class AndroidCaptureHostApi {
   SpoolStatus getSpoolStatus();                   // T-039; background task queue
   void clearSpoolAlerts(int seq);                 // T-039; zeroes the alert counters if seq still matches
   void holdSpool(List<String> ids);               // T-041 (FU-105): entries T-046 could not store even alone; §1.3 held; background task queue
+  void wipeLocalData();                           // T-166 Delete everything (UI engine only; headless: NOT_AVAILABLE); background task queue; IO_ERROR
 }
 
 enum GuardConfigState { unknown, full, baseOnly, userUnreadable, baseInvalid }

@@ -199,6 +199,15 @@ abstract class AndroidCaptureHostApi {
   /// engine drained; moved to spool/held/ (platform-channels.md 1.3). IO_ERROR.
   @TaskQueue(type: TaskQueueType.serialBackgroundThread)
   void holdSpool(List<String> ids);
+
+  /// T-166 "Delete everything", UI engine only, after Dart closed the
+  /// database and deleted its key slots: cancels all WorkManager work and
+  /// every notification, forgets the Guard user part, deletes every
+  /// AndroidKeyStore alias of the app and clears the contents of filesDir,
+  /// noBackupFilesDir and cacheDir. Idempotent; IO_ERROR when something
+  /// could not be deleted (the other parts still ran).
+  @TaskQueue(type: TaskQueueType.serialBackgroundThread)
+  void wipeLocalData();
 }
 
 /// iOS host (T-062): the encrypted spool in the App Group container and the
@@ -238,6 +247,16 @@ abstract class IosCaptureHostApi {
   /// registered natively at launch). A best-effort nudge: the system decides
   /// when it runs; the foreground drain is the guarantee.
   void registerBackgroundRefresh();
+
+  /// T-166 "Delete everything", UI engine only, after Dart closed the
+  /// database and deleted its key slots: cancels every BGTask request,
+  /// removes pending and delivered notifications, deletes every Keychain item
+  /// of the app except the seat keys (service `app.zaghlol.seatkey`, D-55),
+  /// clears the contents (never the roots) of the sandbox and App Group
+  /// directories and applies the backup exclusions again (T-165 F4).
+  /// Idempotent; IO_ERROR when something could not be deleted.
+  @TaskQueue(type: TaskQueueType.serialBackgroundThread)
+  void wipeLocalData();
 }
 
 @FlutterApi()
