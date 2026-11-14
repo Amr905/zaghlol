@@ -254,7 +254,7 @@ class CaptureRuntimeTest {
         assertEquals("expired: the drain runs", 1, starter.handles.size)
         rt.store.ack(rt.store.pendingIds().toSet())
         starter.handles[0].answerDrain()
-        run.await()
+        assertEquals(RunResult.EMPTY, run.await())
     }
 
     /** FU-194: the UI host's holdDrain reports a live engine and shuts it down; the headless host has no hold API. */
