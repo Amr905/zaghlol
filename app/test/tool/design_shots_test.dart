@@ -17,11 +17,12 @@ import 'package:zaghlol/core/l10n/generated/app_localizations.dart';
 import 'package:zaghlol/core/theme/app_theme.dart';
 import 'package:zaghlol/core/ui/shell/add_sheet.dart';
 import 'package:zaghlol/features/budget/presentation/budget_providers_ui.dart';
-import 'package:zaghlol/features/budget/presentation/budget_screen.dart';
-import 'package:zaghlol/features/insights/presentation/charts/charts_screen.dart';
+import 'package:zaghlol/features/home/presentation/home_widgets.dart';
+import 'package:zaghlol/features/insights/domain/chart_models.dart';
+import 'package:zaghlol/features/insights/presentation/chart_detail.dart';
+import 'package:zaghlol/features/insights/presentation/insights_screen.dart';
 import 'package:zaghlol/features/onboarding/presentation/welcome.dart';
 import 'package:zaghlol/features/recurring/presentation/bills_providers.dart';
-import 'package:zaghlol/features/recurring/presentation/bills_screen.dart';
 import 'package:zaghlol/features/settings/presentation/preferences_screen.dart';
 import 'package:zaghlol/features/settings/presentation/settings_main_screen.dart';
 import 'package:zaghlol/features/settings/presentation/settings_ports.dart';
@@ -35,11 +36,11 @@ import '../features/insights/presentation/charts/charts_test_support.dart'
     as charts;
 import '../features/money/money_tab_test.dart' as money;
 import '../features/onboarding/presentation/android_setup_test.dart' as android;
-import '../features/recurring/presentation/bills_screen_test.dart' as bills;
 import '../features/settings/settings_harness.dart' as settings;
 import '../features/transactions/presentation/detail_edit_harness.dart' as txn;
 import '../features/transactions/presentation/list/list_harness.dart' as list;
 import '../support/golden_matrix.dart';
+import 'insights_shot_data.dart' as shots;
 import '../support/real_fonts.dart';
 
 const _ar = GoldenVariant(locale: Locale('ar', 'EG'), dark: false);
@@ -50,6 +51,10 @@ final _skip = Platform.environment['DESIGN_SHOTS'] == null
 
 /// Writes the largest repaint boundary on screen to `<name>.png` at 2x.
 Future<void> _shot(WidgetTester tester, String name) async {
+  // Let asset images (the mascot) finish decoding before capturing.
+  await tester.runAsync(
+    () => Future<void>.delayed(const Duration(milliseconds: 300)),
+  );
   await tester.pump(const Duration(milliseconds: 100));
   RenderRepaintBoundary? best;
   var bestArea = 0.0;
@@ -113,14 +118,51 @@ void main() {
     addTearDown(() => tester.binding.setSurfaceSize(null));
     await tester.pumpWidget(
       charts.harness(
-        const ChartsScreen(),
+        const InsightsScreen(),
         locale: _ar.locale,
         dark: false,
-        overrides: charts.chartOverrides(),
+        overrides: [
+          ...charts
+              .chartOverrides(
+                cashFlow: ChartReady(shots.cashFlow()),
+                donut: ChartReady(shots.donut()),
+              )
+              .where((o) => !o.toString().contains('List<CategoryRow>')),
+          categoryRowsProvider.overrideWith((ref) async => shots.categories()),
+          homeAccountsProvider.overrideWith((ref) async => const []),
+        ],
       ),
     );
     await tester.pump();
     await _shot(tester, 'insights_charts');
+  }, skip: _skip != null);
+
+  testWidgets('insights chart detail S-21', (tester) async {
+    await tester.binding.setSurfaceSize(const Size(390, 844));
+    addTearDown(() => tester.binding.setSurfaceSize(null));
+    await tester.pumpWidget(
+      charts.harness(
+        const ChartDetailScreen(
+          chart: ChartId.categoryDonut,
+          code: 'EGP',
+          openExplainer: true,
+        ),
+        locale: _ar.locale,
+        dark: false,
+        overrides: [
+          ...charts
+              .chartOverrides(donut: ChartReady(shots.donut()))
+              .where((o) => !o.toString().contains('List<CategoryRow>')),
+          categoryRowsProvider.overrideWith((ref) async => shots.categories()),
+
+          shots.previousDonutOverride(),
+        ],
+      ),
+    );
+    await tester.pump();
+    await tester.pump(chartTypingDuration + const Duration(milliseconds: 50));
+    await tester.pump();
+    await _shot(tester, 'insights_chart_detail');
   }, skip: _skip != null);
 
   testWidgets('insights budget S-22', (tester) async {
@@ -128,13 +170,15 @@ void main() {
     addTearDown(() => tester.binding.setSurfaceSize(null));
     await tester.pumpWidget(
       budget.harness(
-        const BudgetScreen(),
+        const InsightsScreen(initial: InsightsSegment.budget),
         locale: _ar.locale,
         dark: false,
         overrides: [
+          homeAccountsProvider.overrideWith((ref) async => const []),
           budgetScreenDataProvider.overrideWith(
-            (ref) async => budget.data([budget.egpView(), budget.usdView()]),
+            (ref) async => budget.data([shots.budgetView()]),
           ),
+          categoryRowsProvider.overrideWith((ref) async => shots.categories()),
         ],
       ),
     );
@@ -147,11 +191,12 @@ void main() {
     addTearDown(() => tester.binding.setSurfaceSize(null));
     await tester.pumpWidget(
       budget.harness(
-        const BillsScreen(),
+        const InsightsScreen(initial: InsightsSegment.bills),
         locale: _ar.locale,
         dark: false,
         overrides: [
-          billsDataProvider.overrideWith((ref) async => bills.full()),
+          homeAccountsProvider.overrideWith((ref) async => const []),
+          billsDataProvider.overrideWith((ref) async => shots.billsData()),
         ],
       ),
     );

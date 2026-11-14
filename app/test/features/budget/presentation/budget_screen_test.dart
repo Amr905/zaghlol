@@ -64,13 +64,27 @@ void main() {
         );
         expect(find.text(l.budgetOverviewEdit), findsOneWidget);
         // Dining 96% and Bills 104%: terracotta rule with text cues.
-        expect(find.text(l.budgetOverviewStatusNear), findsOneWidget);
+        // The words ride on the row's semantics label (mockup 09 shows the
+        // percentage and bar colour only).
+        final sem = tester.ensureSemantics();
+        await tester.pump();
         expect(
-          find.textContaining(
-            l.budgetOverviewStatusOver('').trim().split(' ').first,
+          find.bySemanticsLabel(
+            RegExp(RegExp.escape(l.budgetOverviewStatusNear)),
+          ),
+          findsOneWidget,
+        );
+        expect(
+          find.bySemanticsLabel(
+            RegExp(
+              RegExp.escape(
+                l.budgetOverviewStatusOver('').trim().split(' ').first,
+              ),
+            ),
           ),
           findsWidgets,
         );
+        sem.dispose();
         // Groceries (77%) has no status cue.
         expect(find.byType(ListView), findsOneWidget);
         expect(tester.takeException(), isNull);
@@ -107,7 +121,10 @@ void main() {
         );
         await tester.pump();
         final l = l10n(tester);
-        expect(find.text(l.budgetOverviewCalendarMonth), findsOneWidget);
+        expect(
+          find.textContaining(l.budgetOverviewCalendarMonth),
+          findsOneWidget,
+        );
         expect(find.text(l.budgetOverviewSetPayday), findsOneWidget);
       });
 

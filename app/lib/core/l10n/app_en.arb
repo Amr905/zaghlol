@@ -879,7 +879,7 @@
       }
     }
   },
-  "insightsChartsExplain": "Explain this",
+  "insightsChartsExplain": "Explain",
   "@insightsChartsExplain": {
     "description": "B · the FR-CHT-03 name. Also the S-21 button"
   },
@@ -2220,7 +2220,7 @@
       }
     }
   },
-  "recurringBillsDetected": "Found a subscription: {merchant}, {amount} a month",
+  "recurringBillsDetected": "Looks like a monthly subscription: {merchant} {amount}",
   "@recurringBillsDetected": {
     "description": "M · Rive detective · BR-SUB-01",
     "placeholders": {
@@ -2259,7 +2259,7 @@
       }
     }
   },
-  "recurringBillsLastOne": "Last payment",
+  "recurringBillsLastOne": "Last payment! 🎉",
   "@recurringBillsLastOne": {
     "description": "C"
   },
@@ -6635,5 +6635,100 @@
   "iosSetupNudgeSnoozeA11y": "Remind me in 7 days",
   "@iosSetupNudgeSnoozeA11y": {
     "description": "A · dismiss button of the nudge; hides it for 7 days"
+  },
+  "insightsChartsSavedFootnote": "You saved {amount} this month ({percent})",
+  "@insightsChartsSavedFootnote": {
+    "description": "S-20 cash-flow footnote",
+    "placeholders": {
+      "amount": {
+        "type": "String"
+      },
+      "percent": {
+        "type": "String"
+      }
+    }
+  },
+  "insightsChartsMonthsCount": "{count, plural, one{{countText} month} other{{countText} months}}",
+  "@insightsChartsMonthsCount": {
+    "description": "S-20 cash-flow card caption: number of months shown",
+    "placeholders": {
+      "count": {
+        "type": "int"
+      },
+      "countText": {
+        "type": "String"
+      }
+    }
+  },
+  "insightsChartsSpendLabel": "Spending",
+  "@insightsChartsSpendLabel": {
+    "description": "S-20/21 donut centre label"
+  },
+  "budgetOverviewZaghlolWarn": "Careful, captain! {category} hit {percent} with {daysCount, plural, one{{days} day} other{{days} days}} to go until payday.",
+  "@budgetOverviewZaghlolWarn": {
+    "description": "S-22 Zaghlol banner on the hottest category (mockup 09)",
+    "placeholders": {
+      "category": {
+        "type": "String"
+      },
+      "percent": {
+        "type": "String"
+      },
+      "daysCount": {
+        "type": "int"
+      },
+      "days": {
+        "type": "String"
+      }
+    }
+  },
+  "budgetOverviewOfLimit": "of {limit}",
+  "@budgetOverviewOfLimit": {
+    "description": "S-22 hero: muted tail after the spent figure",
+    "placeholders": {
+      "limit": {
+        "type": "String"
+      }
+    }
+  },
+  "recurringBillsAddShort": "Add",
+  "@recurringBillsAddShort": {
+    "description": "S-24 header: add a bill (compact text button)"
+  },
+  "recurringBillsKpiDue": "Installments due this month",
+  "@recurringBillsKpiDue": {
+    "description": "S-24 KPI card label (mockup 10)"
+  },
+  "recurringBillsKpiSubs": "Subscriptions cost a year",
+  "@recurringBillsKpiSubs": {
+    "description": "S-24 KPI card label"
+  },
+  "recurringBillsInstallmentOf": "Payment {index} of {total}",
+  "@recurringBillsInstallmentOf": {
+    "description": "S-24 row sub-line",
+    "placeholders": {
+      "index": {
+        "type": "String"
+      },
+      "total": {
+        "type": "String"
+      }
+    }
+  },
+  "recurringBillsGameyaMonth": "Month {index} of {total}",
+  "@recurringBillsGameyaMonth": {
+    "description": "S-24 row sub-line for a gameya",
+    "placeholders": {
+      "index": {
+        "type": "String"
+      },
+      "total": {
+        "type": "String"
+      }
+    }
+  },
+  "recurringBillsKindCard": "Credit card",
+  "@recurringBillsKindCard": {
+    "description": "S-24 row sub-line for a card due"
   }
 }

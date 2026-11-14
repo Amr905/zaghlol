@@ -108,7 +108,12 @@ void main() {
       final l = _l(tester);
       expect(find.text(l.insightsChartsExplain), findsOneWidget);
       expect(find.byKey(const ValueKey('explainer-bubble')), findsOneWidget);
-      expect(find.text(l.insightsChartDetailTipLabel), findsNothing);
+      expect(
+        find.bySemanticsLabel(
+          RegExp('^${RegExp.escape(l.insightsChartDetailTipLabel)}:'),
+        ),
+        findsNothing,
+      );
       expect(find.byType(ZaghlolAvatar), findsOneWidget);
       expect(
         tester.widget<ZaghlolAvatar>(find.byType(ZaghlolAvatar)).moment,
@@ -136,8 +141,18 @@ void main() {
         findsOneWidget,
       );
       await _typed(tester);
-      expect(find.text(l.insightsChartDetailTipLabel), findsOneWidget);
-      expect(find.text(l.insightsChartDetailDeepLabel), findsNothing);
+      expect(
+        find.bySemanticsLabel(
+          RegExp('^${RegExp.escape(l.insightsChartDetailTipLabel)}:'),
+        ),
+        findsOneWidget,
+      );
+      expect(
+        find.bySemanticsLabel(
+          RegExp('^${RegExp.escape(l.insightsChartDetailDeepLabel)}:'),
+        ),
+        findsNothing,
+      );
       expect(find.text(l.insightsChartDetailDeepUpsell), findsOneWidget);
       await tester.tap(find.text(l.commonGoldUnlock));
       expect(hit, GoldCapability.deepCoaching);
@@ -149,7 +164,12 @@ void main() {
       final l = _l(tester);
       await _typed(tester);
       await tester.pump();
-      expect(find.text(l.insightsChartDetailDeepLabel), findsWidgets);
+      expect(
+        find.bySemanticsLabel(
+          RegExp('^${RegExp.escape(l.insightsChartDetailDeepLabel)}:'),
+        ),
+        findsWidgets,
+      );
       expect(find.text(l.insightsChartDetailDeepUpsell), findsNothing);
     });
 
@@ -237,7 +257,12 @@ void main() {
       findsOneWidget,
     );
     await _typed(tester);
-    expect(find.text(l.insightsChartDetailTipLabel), findsOneWidget);
+    expect(
+      find.bySemanticsLabel(
+        RegExp('^${RegExp.escape(l.insightsChartDetailTipLabel)}:'),
+      ),
+      findsOneWidget,
+    );
   });
 
   testWidgets('essential categories are never the tip target (Q-25)', (

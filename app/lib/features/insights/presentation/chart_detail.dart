@@ -84,26 +84,22 @@ class ChartDetailScreen extends ConsumerWidget {
       ref.watch(entitlementStateProvider),
       chart,
     ).allowed;
+    final c = ZColors.of(context);
     return Scaffold(
-      appBar: AppBar(
-        title: Semantics(
-          header: true,
-          child: Text(title, maxLines: 2, overflow: TextOverflow.ellipsis),
-        ),
-        leading: IconButton(
-          tooltip: l.commonActionBackA11y,
-          icon: const BackButtonIcon(),
-          onPressed: () => Navigator.of(context).maybePop(),
-        ),
-      ),
+      backgroundColor: c.bg,
       body: ListView(
-        padding: const EdgeInsetsDirectional.fromSTEB(
+        padding: EdgeInsetsDirectional.fromSTEB(
           ZSpacing.screen,
-          ZSpacing.sm,
+          MediaQuery.paddingOf(context).top + ZSpacing.sm,
           ZSpacing.screen,
           ZSpacing.xxl,
         ),
         children: [
+          Align(
+            alignment: AlignmentDirectional.centerStart,
+            child: _BackButton(tooltip: l.commonActionBackA11y),
+          ),
+          const SizedBox(height: ZSpacing.sm),
           if (locked)
             _LockedDetail(title: title)
           else ...[
@@ -111,6 +107,32 @@ class ChartDetailScreen extends ConsumerWidget {
             _Explainer(chart: chart, code: code, startOpen: openExplainer),
           ],
         ],
+      ),
+    );
+  }
+}
+
+/// The round white back button of the S-21 header (mockup 08).
+class _BackButton extends StatelessWidget {
+  const _BackButton({required this.tooltip});
+  final String tooltip;
+
+  @override
+  Widget build(BuildContext context) {
+    final c = ZColors.of(context);
+    return Material(
+      color: c.surface,
+      shape: const CircleBorder(),
+      elevation: 0,
+      child: IconButton(
+        tooltip: tooltip,
+        constraints: const BoxConstraints(
+          minWidth: ZSpacing.minTarget,
+          minHeight: ZSpacing.minTarget,
+        ),
+        // chevron_left mirrors itself in RTL.
+        icon: Icon(Icons.chevron_left, color: c.text),
+        onPressed: () => Navigator.of(context).maybePop(),
       ),
     );
   }
@@ -172,6 +194,7 @@ class _ChartSection extends ConsumerWidget {
     final l = AppLocalizations.of(context);
     String money0(Money m) => chartMoney(ref, context, m);
     Widget empty(ChartNotEnoughData<Object?>? r) => ChartCard(
+      bare: true,
       title: title,
       contextLine: _contextLine(l, code),
       child: ChartMessage(
@@ -194,6 +217,7 @@ class _ChartSection extends ConsumerWidget {
                   error(() => ref.invalidate(cashFlowChartProvider(code))),
               data: (r) => switch (r) {
                 ChartReady(:final data) => ChartCard(
+                  bare: true,
                   title: title,
                   contextLine: _contextLine(l, code),
                   summary: CashFlowBody.summary(l, money0, data),
@@ -220,6 +244,7 @@ class _ChartSection extends ConsumerWidget {
                   error(() => ref.invalidate(donutChartProvider(code))),
               data: (r) => switch (r) {
                 ChartReady(:final data) => ChartCard(
+                  bare: true,
                   title: title,
                   contextLine: _contextLine(l, code),
                   summary: DonutBody.summary(
@@ -229,7 +254,13 @@ class _ChartSection extends ConsumerWidget {
                     data,
                     nameOf,
                   ),
-                  child: DonutBody(donut: data, nameOf: nameOf),
+                  child: Column(
+                    children: [
+                      DonutBody(donut: data, nameOf: nameOf, large: true),
+                      const SizedBox(height: ZSpacing.lg),
+                      DonutRows(donut: data, nameOf: nameOf, categories: cats),
+                    ],
+                  ),
                 ),
                 ChartNotEnoughData() => empty(r),
               },
@@ -243,6 +274,7 @@ class _ChartSection extends ConsumerWidget {
                   error(() => ref.invalidate(merchantsChartProvider(code))),
               data: (r) => switch (r) {
                 ChartReady(:final data) when data.isNotEmpty => ChartCard(
+                  bare: true,
                   title: title,
                   contextLine: _contextLine(l, code),
                   summary: MerchantsBody.summary(l, money0, data),
@@ -257,6 +289,7 @@ class _ChartSection extends ConsumerWidget {
           return GoldChartCard(chart: chart, code: code, showExplain: false);
         }
         return ChartCard(
+          bare: true,
           title: title,
           contextLine: _contextLine(l, code),
           child: ChartMessage(
@@ -351,17 +384,17 @@ class _ExplainerState extends ConsumerState<_Explainer> {
     }
 
     return Row(
-      crossAxisAlignment: CrossAxisAlignment.start,
+      crossAxisAlignment: CrossAxisAlignment.end,
       children: [
-        ZaghlolAvatar(moment: ZaghlolMoment.professor, talk: busy, size: 64),
+        ZaghlolAvatar(moment: ZaghlolMoment.professor, talk: busy, size: 104),
         const SizedBox(width: ZSpacing.sm),
         Expanded(
           child: Container(
             key: const ValueKey('explainer-bubble'),
-            padding: const EdgeInsets.all(ZSpacing.md),
+            padding: const EdgeInsetsDirectional.all(ZSpacing.lg),
             decoration: BoxDecoration(
               color: c.zaghlolBg,
-              borderRadius: BorderRadius.circular(ZRadius.lg),
+              borderRadius: BorderRadius.circular(ZRadius.card),
             ),
             child: content,
           ),
@@ -402,22 +435,30 @@ class _Lines extends ConsumerWidget {
       renderExplanationLine(fmt, line),
       style: ZType.body.copyWith(color: c.text),
     );
-    Widget labelled(String label, IconData icon, ExplanationLine line) => Row(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        ExcludeSemantics(child: Icon(icon, size: 20, color: c.accentDark)),
-        const SizedBox(width: ZSpacing.sm),
-        Expanded(
-          child: Column(
+    // The tip / deep-dive label is spoken, not drawn: the lightbulb and the
+    // primary colour carry it on screen (mockup 08).
+    Widget labelled(String label, IconData icon, ExplanationLine line) =>
+        Semantics(
+          container: true,
+          label: '$label: ${renderExplanationLine(fmt, line)}',
+          excludeSemantics: true,
+          child: Row(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Text(label, style: ZType.caption.copyWith(color: c.textMuted)),
-              text(line),
+              Icon(icon, size: 20, color: c.accentDark),
+              const SizedBox(width: ZSpacing.sm),
+              Expanded(
+                child: Text(
+                  renderExplanationLine(fmt, line),
+                  style: ZType.body.copyWith(
+                    color: c.primary,
+                    fontWeight: FontWeight.w600,
+                  ),
+                ),
+              ),
             ],
           ),
-        ),
-      ],
-    );
+        );
 
     const gap = SizedBox(height: ZSpacing.md);
     final children = <Widget>[];
