@@ -26,10 +26,14 @@ final class ReviewTransferOption {
     required this.amount,
     required this.accountLabel,
     required this.occurredAt,
+    this.merchant,
   });
   final String txnId;
   final Money amount;
   final String accountLabel;
+
+  /// The raw merchant of the candidate, shown as the row title.
+  final String? merchant;
   final DateTime occurredAt;
 }
 
