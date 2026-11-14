@@ -1,5 +1,6 @@
 import Flutter
 import UIKit
+import UserNotifications
 
 @main
 @objc class AppDelegate: FlutterAppDelegate, FlutterImplicitEngineDelegate {
@@ -24,7 +25,29 @@ import UIKit
         _ = SpoolRuntime.shared?.store.releaseHeldIfVersionChanged(appVersion: version)
       }
     }
+    // NOTIF-GW: taps on local notifications (no remote notifications).
+    UNUserNotificationCenter.current().delegate = self
     return super.application(application, didFinishLaunchingWithOptions: launchOptions)
+  }
+
+  // NOTIF-GW: show alerts as a banner while the app is open.
+  override func userNotificationCenter(
+    _ center: UNUserNotificationCenter,
+    willPresent notification: UNNotification,
+    withCompletionHandler completionHandler: @escaping (UNNotificationPresentationOptions) -> Void
+  ) {
+    completionHandler([.banner, .list, .sound])
+  }
+
+  // NOTIF-GW: the payload is a route id, never data.
+  override func userNotificationCenter(
+    _ center: UNUserNotificationCenter,
+    didReceive response: UNNotificationResponse,
+    withCompletionHandler completionHandler: @escaping () -> Void
+  ) {
+    NotificationsHost.didTap(
+      route: response.notification.request.content.userInfo[NotificationsHost.routeKey] as? String)
+    completionHandler()
   }
 
   func didInitializeImplicitFlutterEngine(_ engineBridge: FlutterImplicitEngineBridge) {
@@ -51,5 +74,7 @@ import UIKit
     IosCaptureRegistration.register(with: engineBridge.pluginRegistry)
     // T-065: shares from the Share Extension.
     ShareIntakeRegistration.register(with: engineBridge.pluginRegistry)
+    // NOTIF-GW: local notifications and the permission prompt.
+    NotificationsRegistration.register(with: engineBridge.pluginRegistry)
   }
 }
