@@ -104,28 +104,23 @@ class PricesRepository {
     } on PricesRejected {
       return PricesApplyResult.rejected;
     }
+    // FU-106: a block dated far in the future would otherwise be stored as
+    // the newest and make every later, genuine block look like a replay.
+    // Its data is kept, with the date capped at now plus the clock skew.
+    final latest = _nowMs + priceClockSkew.inMilliseconds;
+    final asOfMs = block.asOfMs > latest ? latest : block.asOfMs;
     return _db.transaction(() async {
       final stored = await _newestBackendAsOf();
-      if (stored != null && block.asOfMs < stored) {
+      if (stored != null && asOfMs < stored) {
         return PricesApplyResult.rejected;
       }
       await _dao.replaceBackendQuotes([
         for (final g in block.gold)
-          (
-            symbol: g.symbol,
-            price: g.price,
-            perUnit: g.perUnit,
-            asOf: block.asOfMs,
-          ),
+          (symbol: g.symbol, price: g.price, perUnit: g.perUnit, asOf: asOfMs),
       ]);
       await _dao.replaceRates([
         for (final e in block.fxRates.entries)
-          (
-            base: block.fxBase,
-            quote: e.key,
-            rateE9: e.value,
-            asOf: block.asOfMs,
-          ),
+          (base: block.fxBase, quote: e.key, rateE9: e.value, asOf: asOfMs),
       ]);
       await _secure.write(
         pricesReportedStaleKey,

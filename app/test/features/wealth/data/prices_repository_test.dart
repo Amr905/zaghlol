@@ -183,6 +183,22 @@ void main() {
     },
   );
 
+  test('FU-106: a far-future asOf is capped, so a later real block still '
+      'applies', () async {
+    final far = now.add(const Duration(days: 365));
+    expect(await repo.apply(block(asOf: far)), PricesApplyResult.applied);
+    expect(
+      (await repo.status()).backendAsOfMs,
+      now.add(priceClockSkew).millisecondsSinceEpoch,
+    );
+    // Ten minutes later the real feed publishes: it is not a replay.
+    now = now.add(const Duration(minutes: 10));
+    expect(
+      await repo.apply(block(asOf: now, egpGold: '4218.00')),
+      PricesApplyResult.applied,
+    );
+  });
+
   test('apply replaces old backend rows and rates wholesale', () async {
     await repo.apply(block(asOf: asOf));
     final next = block(asOf: asOf.add(const Duration(hours: 1)));
