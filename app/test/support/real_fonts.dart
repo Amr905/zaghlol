@@ -41,5 +41,12 @@ Future<void> loadRealFonts() async {
       ..addFont(Future.value(ByteData.sublistView(icons.readAsBytesSync())));
     await iconLoader.load();
   }
+  // Colour emoji for design shots, when the host has Noto Color Emoji.
+  final emoji = File('/usr/share/fonts/truetype/noto/NotoColorEmoji.ttf');
+  if (emoji.existsSync()) {
+    final emojiLoader = FontLoader('NotoColorEmoji')
+      ..addFont(Future.value(ByteData.sublistView(emoji.readAsBytesSync())));
+    await emojiLoader.load();
+  }
   _loaded = true;
 }

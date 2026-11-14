@@ -45,15 +45,19 @@
   "@appLockRootedOk": {
     "description": "Button that closes the rooted warning."
   },
-  "homeQuickAddTitle": "عايز تسجل إيه؟",
-  "homeQuickAddSay": "قول",
-  "homeQuickAddType": "اكتب",
-  "homeQuickAddScan": "صوّر",
+  "homeQuickAddTitle": "تحب تسجل إيه؟",
+  "homeQuickAddSay": "قولها",
+  "homeQuickAddType": "اكتبها",
+  "homeQuickAddScan": "صوّرها",
   "homeQuickAddAsset": "أصل",
   "homeQuickAddSayA11y": "قول لزغلول",
   "homeQuickAddTypeA11y": "اكتب حركة",
   "homeQuickAddScanA11y": "اقرا سكرين شوت",
   "homeQuickAddAssetA11y": "ضيف أصل",
+  "homeQuickAddSayHint": "بصوتك في ثانيتين",
+  "homeQuickAddTypeHint": "مصروف أو دخل",
+  "homeQuickAddScanHint": "سكرين شوت أو إيصال",
+  "homeQuickAddAssetHint": "دهب، شهادة، عملة",
   "ingestionReviewTitle": "مستني رأيك 👀",
   "notificationsChannelName": "التنبيهات",
   "commonActionSave": "احفظ",
@@ -1383,7 +1387,7 @@
   "@homeHeroPerDay": {
     "description": "C · suffix after the display amount"
   },
-  "homeHeroDaysToPayday": "{count, plural, =0{القبض النهارده} =1{فاضل يوم على القبض} =2{فاضل يومين على القبض} few{فاضل {n} أيام على القبض} many{فاضل {n} يوم على القبض} other{فاضل {n} يوم على القبض}}",
+  "homeHeroDaysToPayday": "{count, plural, =0{القبض النهارده} =1{يوم على القبض} =2{يومين على القبض} few{{n} أيام على القبض} many{{n} يوم على القبض} other{{n} يوم على القبض}}",
   "@homeHeroDaysToPayday": {
     "description": "L · count:int, n · followed by  ·  and common_date_range",
     "placeholders": {
@@ -5575,6 +5579,18 @@
   "@homeQuickAddScan": {
     "description": "L · opens S-32"
   },
+  "@homeQuickAddSayHint": {
+    "description": "S · quick add card subtitle"
+  },
+  "@homeQuickAddTypeHint": {
+    "description": "S · quick add card subtitle"
+  },
+  "@homeQuickAddScanHint": {
+    "description": "S · quick add card subtitle"
+  },
+  "@homeQuickAddAssetHint": {
+    "description": "S · quick add card subtitle"
+  },
   "@homeQuickAddAsset": {
     "description": "L · with common_gold_badge; Free opens S-68"
   },
@@ -5590,7 +5606,7 @@
   "@homeQuickAddAssetA11y": {
     "description": "A"
   },
-  "homeQuickAddVoiceLeft": "فاضل {remaining} من {max} تسجيل صوتي الشهر ده",
+  "homeQuickAddVoiceLeft": "باقيلك {remaining} من {max} تسجيل صوتي الشهر ده",
   "@homeQuickAddVoiceLeft": {
     "description": "S · Free only (FR-VOI-04)",
     "placeholders": {

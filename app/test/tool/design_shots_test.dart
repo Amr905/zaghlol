@@ -5,6 +5,7 @@
 @Tags(['design_shot'])
 library;
 
+import 'dart:async';
 import 'dart:io';
 import 'dart:ui' as ui;
 
@@ -16,6 +17,11 @@ import 'package:zaghlol/core/l10n/date_format.dart';
 import 'package:zaghlol/core/l10n/generated/app_localizations.dart';
 import 'package:zaghlol/core/theme/app_theme.dart';
 import 'package:zaghlol/core/ui/shell/add_sheet.dart';
+import 'package:zaghlol/core/ui/z_mascot_bubble.dart';
+import 'package:zaghlol/features/home/application/home_read_model.dart';
+import 'package:zaghlol/features/home/presentation/home_screen.dart';
+import 'package:zaghlol/features/home/presentation/home_widgets.dart';
+import 'package:zaghlol/features/transactions/domain/transaction.dart';
 import 'package:zaghlol/features/budget/presentation/budget_providers_ui.dart';
 import 'package:zaghlol/features/budget/presentation/budget_screen.dart';
 import 'package:zaghlol/features/insights/presentation/charts/charts_screen.dart';
@@ -50,6 +56,11 @@ final _skip = Platform.environment['DESIGN_SHOTS'] == null
 
 /// Writes the largest repaint boundary on screen to `<name>.png` at 2x.
 Future<void> _shot(WidgetTester tester, String name) async {
+  await tester.runAsync(() async {
+    for (final e in find.byType(Image).evaluate()) {
+      await precacheImage((e.widget as Image).image, e);
+    }
+  });
   await tester.pump(const Duration(milliseconds: 100));
   RenderRepaintBoundary? best;
   var bestArea = 0.0;
@@ -57,7 +68,7 @@ Future<void> _shot(WidgetTester tester, String name) async {
     final ro = e.renderObject;
     if (ro is RenderRepaintBoundary && ro.hasSize) {
       final area = ro.size.width * ro.size.height;
-      if (area > bestArea) {
+      if (area >= bestArea) {
         best = ro;
         bestArea = area;
       }
@@ -91,15 +102,106 @@ void main() {
     await initDateFormatting();
   });
 
-  testWidgets('home S-10', (tester) async {
+  Future<void> homeShot(
+    WidgetTester tester,
+    String name, {
+    required TargetPlatform platform,
+    bool dark = false,
+    Locale locale = const Locale('ar', 'EG'),
+    bool review = true,
+    bool mascot = true,
+    bool scanning = false,
+  }) async {
+    final en = locale.languageCode == 'en';
+    final base = home.model(review: review ? 3 : 0, scanning: scanning);
+    final m = HomeModel(
+      cycle: base.cycle,
+      today: base.today,
+      daysRemaining: 7,
+      currencies: base.currencies,
+      recent: [
+        for (final (i, e) in [
+          (
+            en ? 'Carrefour Maadi' : 'كارفور المعادي',
+            'groceries',
+            450,
+            TxnDirection.expense,
+          ),
+          (en ? 'Talabat' : 'طلبات', 'dining', 285, TxnDirection.expense),
+          (en ? 'Salary' : 'المرتب', 'salary', 32000, TxnDirection.income),
+        ].indexed)
+          HomeFeedItem(
+            record: home.rec(
+              't$i',
+              merchant: e.$1,
+              amount: e.$3,
+              dir: e.$4,
+              categoryId: e.$2,
+            ),
+            excludedFromTotals: false,
+          ),
+      ],
+      reviewCount: base.reviewCount,
+      scanInProgress: base.scanInProgress,
+      cardFilter: const {},
+    );
     await home.pumpHome(
       tester,
-      locale: _ar.locale,
-      platform: TargetPlatform.android,
-      value: home.model(review: 3),
+      locale: locale,
+      platform: platform,
+      value: m,
+      dark: dark,
+      withShell: true,
+      extraOverrides: [
+        homeNowProvider.overrideWithValue(DateTime(2026, 11, 14, 9)),
+      ],
+      accounts: [home.account('a1', en ? 'NBE' : 'الأهلي', '4567')],
+      actions: mascot
+          ? HomeActions(
+              openTransactions: () {},
+              mascotSlot: ZMascotBubble(
+                message: en
+                    ? 'Right on track! You saved EGP 2,200 more than last month \u{1F44F}'
+                    : 'ماشي بالمسطرة يا صاحبي! وفرت ٢٬٢٠٠ ج.م زيادة عن الشهر اللي فات \u{1F44F}',
+              ),
+            )
+          : HomeActions(openTransactions: () {}),
     );
     await _phone(tester);
-    await _shot(tester, 'home');
+    await _shot(tester, name);
+  }
+
+  testWidgets('home S-10', (tester) async {
+    await homeShot(tester, 'home', platform: TargetPlatform.iOS);
+  }, skip: _skip != null);
+
+  testWidgets('home android', (tester) async {
+    await homeShot(
+      tester,
+      'home-android',
+      platform: TargetPlatform.android,
+      review: false,
+      mascot: false,
+      scanning: true,
+    );
+  }, skip: _skip != null);
+
+  testWidgets('home dark', (tester) async {
+    await homeShot(
+      tester,
+      'home-dark',
+      platform: TargetPlatform.iOS,
+      dark: true,
+    );
+  }, skip: _skip != null);
+
+  testWidgets('home en', (tester) async {
+    await homeShot(
+      tester,
+      'home-en',
+      platform: TargetPlatform.iOS,
+      locale: const Locale('en'),
+    );
   }, skip: _skip != null);
 
   testWidgets('money S-40', (tester) async {
@@ -269,21 +371,20 @@ void main() {
   testWidgets('add sheet S-30', (tester) async {
     await tester.binding.setSurfaceSize(const Size(390, 844));
     addTearDown(() => tester.binding.setSurfaceSize(null));
-    await tester.pumpWidget(
-      ProviderScope(
-        child: MaterialApp(
-          debugShowCheckedModeBanner: false,
-          theme: ZaghlolTheme.light,
-          locale: _ar.locale,
-          localizationsDelegates: AppLocalizations.localizationsDelegates,
-          supportedLocales: AppLocalizations.supportedLocales,
-          home: const Scaffold(
-            body: Align(
-              alignment: AlignmentDirectional.bottomCenter,
-              child: AddSheet(),
-            ),
-          ),
-        ),
+    await home.pumpHome(
+      tester,
+      locale: _ar.locale,
+      platform: TargetPlatform.iOS,
+      value: home.model(review: 3),
+      withShell: true,
+    );
+    final ctx = tester.element(find.byType(HomeScreen));
+    unawaited(
+      showModalBottomSheet<void>(
+        context: ctx,
+        isScrollControlled: true,
+        useSafeArea: true,
+        builder: (_) => const AddSheet(voiceLeft: (13, 15)),
       ),
     );
     await tester.pumpAndSettle();

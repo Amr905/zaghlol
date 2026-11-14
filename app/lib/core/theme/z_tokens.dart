@@ -38,7 +38,7 @@ abstract final class ZMotion {
 /// Font family bundled by the app. Falls back to the system font when the
 /// family is not available (see [kZFontFallback]).
 const String kZFontFamily = 'IBMPlexSansArabic';
-const List<String> kZFontFallback = ['Roboto', 'sans-serif'];
+const List<String> kZFontFallback = ['Roboto', 'NotoColorEmoji', 'sans-serif'];
 
 /// Type scale (04-design-system 2.2). Sizes are in logical px (scaled by the
 /// OS text scale); line height is given as a multiple of the size.
@@ -94,6 +94,10 @@ class ZColors extends ThemeExtension<ZColors> {
     required this.dangerBg,
     required this.heroNumber,
     required this.shadow,
+    required this.heroFrom,
+    required this.heroTo,
+    required this.progressFrom,
+    required this.progressTo,
   });
 
   final Brightness brightness;
@@ -121,6 +125,13 @@ class ZColors extends ThemeExtension<ZColors> {
   final Color heroNumber;
   final Color shadow;
 
+  /// Hero card gradient: [heroFrom] at the top end, [heroTo] at the bottom
+  /// start (mockups 03 / 21), and the progress bar gradient.
+  final Color heroFrom;
+  final Color heroTo;
+  final Color progressFrom;
+  final Color progressTo;
+
   /// Mint Fresh (light).
   static const ZColors light = ZColors(
     brightness: Brightness.light,
@@ -147,6 +158,10 @@ class ZColors extends ThemeExtension<ZColors> {
     dangerBg: Color(0xFFF8E6DF),
     heroNumber: Color(0xFF0F5E43),
     shadow: Color(0x0D000000),
+    heroFrom: Color(0xFFB9EBD3),
+    heroTo: Color(0xFFE4F8D8),
+    progressFrom: Color(0xFF0F7A55),
+    progressTo: Color(0xFF34B284),
   );
 
   /// Jade Night (dark).
@@ -175,6 +190,10 @@ class ZColors extends ThemeExtension<ZColors> {
     dangerBg: Color(0xFF3B1F1A),
     heroNumber: Color(0xFF6EE7B7),
     shadow: Color(0x33000000),
+    heroFrom: Color(0xFF1F7A5F),
+    heroTo: Color(0xFF0B2018),
+    progressFrom: Color(0xFF34D399),
+    progressTo: Color(0xFFA7F3D0),
   );
 
   /// The tokens of the nearest [Theme]. Throws in debug if the theme was not
@@ -211,6 +230,10 @@ class ZColors extends ThemeExtension<ZColors> {
     dangerBg: dangerBg,
     heroNumber: heroNumber,
     shadow: shadow,
+    heroFrom: heroFrom,
+    heroTo: heroTo,
+    progressFrom: progressFrom,
+    progressTo: progressTo,
   );
 
   @override
