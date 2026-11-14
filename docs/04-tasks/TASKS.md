@@ -79,7 +79,7 @@ Every task file has: ID, description, technical details, dependencies, affected 
 | [T-034](tasks/T-034.md) | Merchant cleaning and normalized merchant key | US-07-1 | Medium | Sonnet | parsing-engine-engineer | T-013 | F | 4 | DONE |
 | [T-035](tasks/T-035.md) | Capture Guard rules in Dart, shared golden cases and config generator | US-03-1 | High* | Opus | parsing-engine-engineer | T-032 | F | 5 | DONE |
 | [T-036](tasks/T-036.md) | Templates + fixtures: NBE, CIB, Banque Misr, QNB | US-05-1 | Medium | Sonnet | parsing-engine-engineer | T-033 | F | 6 | TODO |
-| [T-037](tasks/T-037.md) | Templates + fixtures: InstaPay scenarios and mobile wallets | US-05-1 | Medium | Sonnet | parsing-engine-engineer | T-033 | F | 6 | TODO |
+| [T-037](tasks/T-037.md) | Templates + fixtures: InstaPay scenarios and mobile wallets | US-05-1 | Medium | Sonnet | parsing-engine-engineer | T-033 | F | 6 | DONE |
 | [T-038](tasks/T-038.md) | Android Capture Guard (Kotlin) with config reader | US-03-1 | High* | Opus | native-platform-engineer | T-035, T-008 | D | 6 | DONE |
 | [T-039](tasks/T-039.md) | Android encrypted spool + spool host API | US-03-1 | High* | Opus | native-platform-engineer | T-004, T-008 | D | 4 | DONE |
 | [T-040](tasks/T-040.md) | SMS receiver (multipart, Guard, spool, enqueue) in prodSms flavor | US-03-1 | High* | Opus | native-platform-engineer | T-038, T-039 | D | 7 | DONE |
@@ -115,8 +115,8 @@ Every task file has: ID, description, technical details, dependencies, affected 
 | [T-065](tasks/T-065.md) | iOS Share Extension (text, image, PDF) | US-04-2 | High* | Opus | native-platform-engineer | T-062 | E | 5 | DONE |
 | [T-066](tasks/T-066.md) | Capture module iOS integration (drain, BG refresh, checker state) | US-04-1 | High | Sonnet | flutter-core-engineer | T-047, T-062, T-064 | A | 9 | DONE |
 | [T-067](tasks/T-067.md) | iOS capture setup S-03 (add Shortcut, check setup, first expense) | US-10-1 | Medium | Sonnet | flutter-ui-engineer | T-055, T-066 | G | 10 | DONE |
-| [T-068](tasks/T-068.md) | Templates + fixtures: Egyptian banks batch 1 | US-05-1 | Medium | Sonnet | parsing-engine-engineer | T-033 | F | 6 | TODO |
-| [T-069](tasks/T-069.md) | Templates + fixtures: Egyptian banks batch 2 | US-05-1 | Medium | Sonnet | parsing-engine-engineer | T-033 | F | 6 | TODO |
+| [T-068](tasks/T-068.md) | Templates + fixtures: Egyptian banks batch 1 | US-05-1 | Medium | Sonnet | parsing-engine-engineer | T-033 | F | 6 | DONE |
+| [T-069](tasks/T-069.md) | Templates + fixtures: Egyptian banks batch 2 | US-05-1 | Medium | Sonnet | parsing-engine-engineer | T-033 | F | 6 | DONE |
 | [T-070](tasks/T-070.md) | Templates + fixtures: BNPL (valU, Sympl, Souhoola, Shahry, Aman, Forsa, Contact) | US-05-1 | Medium | Sonnet | parsing-engine-engineer | T-033 | F | 6 | TODO |
 | [T-071](tasks/T-071.md) | Templates + fixtures: Wise, Revolut, Monzo, bunq, N26, Payoneer | US-05-1 | High | Sonnet | parsing-engine-engineer | T-033 | F | 6 | TODO |
 | [T-072](tasks/T-072.md) | Templates + fixtures: HDFC, Paytm, Al Rajhi, Emirates NBD/Liv, GCC (S rows) | US-05-1 | Medium | Sonnet | parsing-engine-engineer | T-033 | F | 6 | TODO |
