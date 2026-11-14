@@ -1,5 +1,1530 @@
 ﻿== SUMMARY ==
-RUNNING sha=24817175bbbd15ddfeaf4a91b6933c76a9b462c0
+FAIL sha=24817175bbbd15ddfeaf4a91b6933c76a9b462c0 pipeline=quick-app pub-get=0 format=0 analyze=0 lints=0 app-test=1 dart-test-zaghlol_catalog=0 dart-test-zaghlol_domain=0 dart-test-zaghlol_parsing=0 apk-devNoSms=0 apk-perms=0 android-unit=0 android-lint=0
+pub-get                      PASS  exit=0  15s
+format                       PASS  exit=0  23s
+analyze                      PASS  exit=0  153s
+lints                        PASS  exit=0  33s
+app-test                     FAIL  exit=1  200s
+dart-test-zaghlol_catalog    PASS  exit=0  2s
+dart-test-zaghlol_domain     PASS  exit=0  3s
+dart-test-zaghlol_parsing    PASS  exit=0  8s
+apk-devNoSms                 PASS  exit=0  325s
+apk-perms                    PASS  exit=0  1s
+android-unit                 PASS  exit=0  179s
+android-lint                 PASS  exit=0  224s
+
+== ERRORS: app-test ==
+02:29 +3607 ~1 -1: /work/app/test/features/share_cards/share_studio_test.dart: golden share studio ar_light [E]
+  Test failed. See exception logs above.
+  The test description was: share studio ar_light
+  
+02:30 +3608 ~1 -1: /work/app/test/features/settings/settings_goldens_test.dart: about ar light
+02:30 +3609 ~1 -1: /work/app/test/features/settings/settings_goldens_test.dart: about ar light
+02:30 +3610 ~1 -1: /work/app/test/features/transactions/application/refund_matching_test.dart: matching rules no original: refund stays income, nothing linked
+02:30 +3611 ~1 -1: /work/app/test/features/transactions/application/bulk_edit_test.dart: AC2 one Undo restores all 10 AC2 delete undo restores exactly
+02:30 +3612 ~1 -1: /work/app/test/features/transactions/application/bulk_edit_test.dart: AC2 one Undo restores all 10 AC2 delete undo restores exactly
+02:30 +3613 ~1 -1: /work/app/test/features/share_cards/share_studio_test.dart: golden share studio ar_dark
+02:30 +3614 ~1 -1: /work/app/test/features/settings/privacy_delete_test.dart: a wipe that fails closes the progress and says so (ar)
+
 
 == FULL LOG (last 1500 lines) ==
-auto task/SMS-templates 24817175bbbd15ddfeaf4a91b6933c76a9b462c0 2026-11-14T18:19:19.9528658+02:00
+00:00 +721: test/chat/ask_parser_test.dart: budget: under 10 ms per question with a full entity list
+00:00 +722: test/chat/ask_parser_test.dart: budget: under 10 ms per question with a full entity list
+00:00 +723: test/chat/ask_parser_test.dart: budget: under 10 ms per question with a full entity list
+00:00 +724: test/chat/ask_parser_test.dart: budget: under 10 ms per question with a full entity list
+00:00 +725: test/chat/ask_parser_test.dart: budget: under 10 ms per question with a full entity list
+00:00 +726: test/chat/ask_parser_test.dart: budget: under 10 ms per question with a full entity list
+00:00 +727: test/chat/ask_parser_test.dart: budget: under 10 ms per question with a full entity list
+00:00 +728: test/chat/ask_parser_test.dart: budget: under 10 ms per question with a full entity list
+00:00 +729: test/chat/ask_parser_test.dart: budget: under 10 ms per question with a full entity list
+00:00 +730: test/chat/ask_parser_test.dart: budget: under 10 ms per question with a full entity list
+00:00 +731: test/chat/ask_parser_test.dart: budget: under 10 ms per question with a full entity list
+00:00 +732: test/chat/ask_parser_test.dart: budget: under 10 ms per question with a full entity list
+00:00 +733: test/chat/ask_parser_test.dart: budget: under 10 ms per question with a full entity list
+00:00 +734: test/chat/ask_parser_test.dart: budget: under 10 ms per question with a full entity list
+00:00 +735: test/chat/ask_parser_test.dart: budget: under 10 ms per question with a full entity list
+00:00 +736: test/chat/ask_parser_test.dart: budget: under 10 ms per question with a full entity list
+00:00 +737: test/chat/ask_parser_test.dart: budget: under 10 ms per question with a full entity list
+00:00 +738: test/chat/ask_parser_test.dart: budget: under 10 ms per question with a full entity list
+00:00 +739: test/chat/ask_parser_test.dart: budget: under 10 ms per question with a full entity list
+00:00 +740: test/chat/ask_parser_test.dart: budget: under 10 ms per question with a full entity list
+00:00 +741: test/chat/ask_parser_test.dart: budget: under 10 ms per question with a full entity list
+00:00 +742: test/chat/ask_parser_test.dart: budget: under 10 ms per question with a full entity list
+00:00 +743: test/chat/ask_parser_test.dart: budget: under 10 ms per question with a full entity list
+00:00 +744: test/chat/ask_parser_test.dart: budget: under 10 ms per question with a full entity list
+00:00 +745: test/chat/ask_parser_test.dart: budget: under 10 ms per question with a full entity list
+00:00 +746: test/chat/ask_parser_test.dart: budget: under 10 ms per question with a full entity list
+00:00 +747: test/chat/ask_parser_test.dart: budget: under 10 ms per question with a full entity list
+00:00 +748: test/chat/ask_parser_test.dart: budget: under 10 ms per question with a full entity list
+00:00 +749: test/chat/ask_parser_test.dart: budget: under 10 ms per question with a full entity list
+00:00 +750: test/chat/ask_parser_test.dart: budget: under 10 ms per question with a full entity list
+00:00 +751: test/chat/ask_parser_test.dart: budget: under 10 ms per question with a full entity list
+00:00 +752: test/chat/ask_parser_test.dart: budget: under 10 ms per question with a full entity list
+00:00 +753: test/chat/ask_parser_test.dart: budget: under 10 ms per question with a full entity list
+00:00 +754: test/chat/ask_parser_test.dart: budget: under 10 ms per question with a full entity list
+00:00 +755: test/chat/ask_parser_test.dart: budget: under 10 ms per question with a full entity list
+00:00 +756: test/chat/ask_parser_test.dart: budget: under 10 ms per question with a full entity list
+00:00 +757: test/chat/ask_parser_test.dart: budget: under 10 ms per question with a full entity list
+00:00 +758: test/chat/ask_parser_test.dart: budget: under 10 ms per question with a full entity list
+00:00 +759: test/chat/ask_parser_test.dart: budget: under 10 ms per question with a full entity list
+00:00 +760: test/chat/ask_parser_test.dart: budget: under 10 ms per question with a full entity list
+00:00 +761: test/chat/ask_parser_test.dart: budget: under 10 ms per question with a full entity list
+00:00 +762: test/chat/ask_parser_test.dart: budget: under 10 ms per question with a full entity list
+00:00 +763: test/chat/ask_parser_test.dart: budget: under 10 ms per question with a full entity list
+00:00 +764: test/chat/ask_parser_test.dart: budget: under 10 ms per question with a full entity list
+00:00 +765: test/chat/ask_parser_test.dart: budget: under 10 ms per question with a full entity list
+00:00 +766: test/chat/ask_parser_test.dart: budget: under 10 ms per question with a full entity list
+00:00 +767: test/chat/ask_parser_test.dart: budget: under 10 ms per question with a full entity list
+00:00 +768: test/chat/ask_parser_test.dart: budget: under 10 ms per question with a full entity list
+00:00 +769: test/chat/ask_parser_test.dart: budget: under 10 ms per question with a full entity list
+00:00 +770: test/chat/ask_parser_test.dart: budget: under 10 ms per question with a full entity list
+00:00 +771: test/chat/ask_parser_test.dart: budget: under 10 ms per question with a full entity list
+00:00 +772: test/chat/ask_parser_test.dart: budget: under 10 ms per question with a full entity list
+00:00 +773: test/chat/ask_parser_test.dart: budget: under 10 ms per question with a full entity list
+00:00 +774: test/chat/ask_parser_test.dart: budget: under 10 ms per question with a full entity list
+00:00 +775: test/chat/ask_parser_test.dart: budget: under 10 ms per question with a full entity list
+00:00 +776: test/chat/ask_parser_test.dart: budget: under 10 ms per question with a full entity list
+00:00 +777: test/chat/ask_parser_test.dart: budget: under 10 ms per question with a full entity list
+00:00 +778: test/chat/ask_parser_test.dart: budget: under 10 ms per question with a full entity list
+00:00 +779: test/chat/ask_parser_test.dart: budget: under 10 ms per question with a full entity list
+00:00 +780: test/chat/ask_parser_test.dart: budget: under 10 ms per question with a full entity list
+00:00 +781: test/chat/ask_parser_test.dart: budget: under 10 ms per question with a full entity list
+00:00 +782: test/chat/ask_parser_test.dart: budget: under 10 ms per question with a full entity list
+00:00 +783: test/chat/ask_parser_test.dart: budget: under 10 ms per question with a full entity list
+00:00 +784: test/chat/ask_parser_test.dart: budget: under 10 ms per question with a full entity list
+00:00 +785: test/chat/ask_parser_test.dart: budget: under 10 ms per question with a full entity list
+00:00 +786: test/chat/ask_parser_test.dart: budget: under 10 ms per question with a full entity list
+00:00 +787: test/chat/ask_parser_test.dart: budget: under 10 ms per question with a full entity list
+00:00 +788: test/chat/ask_parser_test.dart: budget: under 10 ms per question with a full entity list
+00:00 +789: test/chat/ask_parser_test.dart: budget: under 10 ms per question with a full entity list
+00:00 +790: test/chat/ask_parser_test.dart: budget: under 10 ms per question with a full entity list
+00:00 +791: test/chat/ask_parser_test.dart: budget: under 10 ms per question with a full entity list
+00:00 +792: test/chat/ask_parser_test.dart: budget: under 10 ms per question with a full entity list
+00:00 +793: test/chat/ask_parser_test.dart: budget: under 10 ms per question with a full entity list
+00:00 +794: test/chat/ask_parser_test.dart: budget: under 10 ms per question with a full entity list
+00:00 +795: test/chat/ask_parser_test.dart: budget: under 10 ms per question with a full entity list
+00:00 +796: test/chat/ask_parser_test.dart: budget: under 10 ms per question with a full entity list
+00:00 +797: test/chat/ask_parser_test.dart: budget: under 10 ms per question with a full entity list
+00:00 +798: test/chat/ask_parser_test.dart: budget: under 10 ms per question with a full entity list
+00:00 +799: test/chat/ask_parser_test.dart: budget: under 10 ms per question with a full entity list
+00:00 +800: test/chat/ask_parser_test.dart: budget: under 10 ms per question with a full entity list
+00:00 +801: test/chat/ask_parser_test.dart: budget: under 10 ms per question with a full entity list
+00:00 +802: test/chat/ask_parser_test.dart: budget: under 10 ms per question with a full entity list
+00:00 +803: test/chat/ask_parser_test.dart: budget: under 10 ms per question with a full entity list
+00:00 +804: test/chat/ask_parser_test.dart: budget: under 10 ms per question with a full entity list
+00:00 +805: test/chat/ask_parser_test.dart: budget: under 10 ms per question with a full entity list
+00:00 +806: test/chat/ask_parser_test.dart: budget: under 10 ms per question with a full entity list
+00:00 +807: test/chat/ask_parser_test.dart: budget: under 10 ms per question with a full entity list
+00:00 +808: test/chat/ask_parser_test.dart: budget: under 10 ms per question with a full entity list
+00:00 +809: test/chat/ask_parser_test.dart: budget: under 10 ms per question with a full entity list
+00:00 +810: test/chat/ask_parser_test.dart: budget: under 10 ms per question with a full entity list
+00:00 +811: test/chat/ask_parser_test.dart: budget: under 10 ms per question with a full entity list
+00:00 +812: test/chat/ask_parser_test.dart: budget: under 10 ms per question with a full entity list
+00:00 +813: test/chat/ask_parser_test.dart: budget: under 10 ms per question with a full entity list
+00:00 +814: test/chat/ask_parser_test.dart: budget: under 10 ms per question with a full entity list
+00:00 +815: test/chat/ask_parser_test.dart: budget: under 10 ms per question with a full entity list
+00:00 +816: test/chat/ask_parser_test.dart: budget: under 10 ms per question with a full entity list
+00:00 +817: test/chat/ask_parser_test.dart: budget: under 10 ms per question with a full entity list
+00:00 +818: test/chat/ask_parser_test.dart: budget: under 10 ms per question with a full entity list
+00:00 +819: test/chat/ask_parser_test.dart: budget: under 10 ms per question with a full entity list
+00:00 +820: test/chat/ask_parser_test.dart: budget: under 10 ms per question with a full entity list
+00:00 +821: test/chat/ask_parser_test.dart: budget: under 10 ms per question with a full entity list
+00:00 +822: test/chat/ask_parser_test.dart: budget: under 10 ms per question with a full entity list
+00:00 +823: test/chat/ask_parser_test.dart: budget: under 10 ms per question with a full entity list
+00:00 +824: test/chat/ask_parser_test.dart: budget: under 10 ms per question with a full entity list
+00:00 +825: test/chat/ask_parser_test.dart: budget: under 10 ms per question with a full entity list
+00:00 +826: test/chat/ask_parser_test.dart: budget: under 10 ms per question with a full entity list
+00:00 +827: test/chat/ask_parser_test.dart: budget: under 10 ms per question with a full entity list
+00:00 +828: test/chat/ask_parser_test.dart: budget: under 10 ms per question with a full entity list
+00:00 +829: test/chat/ask_parser_test.dart: budget: under 10 ms per question with a full entity list
+00:00 +830: test/chat/ask_parser_test.dart: budget: under 10 ms per question with a full entity list
+00:00 +831: test/chat/ask_parser_test.dart: budget: under 10 ms per question with a full entity list
+00:00 +832: test/chat/ask_parser_test.dart: budget: under 10 ms per question with a full entity list
+00:00 +833: test/chat/ask_parser_test.dart: budget: under 10 ms per question with a full entity list
+00:00 +834: test/chat/ask_parser_test.dart: budget: under 10 ms per question with a full entity list
+00:00 +835: test/chat/ask_parser_test.dart: budget: under 10 ms per question with a full entity list
+00:00 +836: test/chat/ask_parser_test.dart: budget: under 10 ms per question with a full entity list
+00:00 +837: test/chat/ask_parser_test.dart: budget: under 10 ms per question with a full entity list
+00:00 +838: test/chat/ask_parser_test.dart: budget: under 10 ms per question with a full entity list
+00:00 +839: test/chat/ask_parser_test.dart: budget: under 10 ms per question with a full entity list
+00:00 +840: test/chat/ask_parser_test.dart: budget: under 10 ms per question with a full entity list
+00:00 +841: test/chat/ask_parser_test.dart: budget: under 10 ms per question with a full entity list
+00:00 +842: test/chat/ask_parser_test.dart: budget: under 10 ms per question with a full entity list
+00:00 +843: test/chat/ask_parser_test.dart: budget: under 10 ms per question with a full entity list
+00:00 +844: test/chat/ask_parser_test.dart: budget: under 10 ms per question with a full entity list
+00:00 +845: test/chat/ask_parser_test.dart: budget: under 10 ms per question with a full entity list
+00:00 +846: test/chat/ask_parser_test.dart: budget: under 10 ms per question with a full entity list
+00:00 +847: test/chat/ask_parser_test.dart: budget: under 10 ms per question with a full entity list
+00:00 +848: test/chat/ask_parser_test.dart: budget: under 10 ms per question with a full entity list
+00:00 +849: test/chat/ask_parser_test.dart: budget: under 10 ms per question with a full entity list
+00:00 +850: test/chat/ask_parser_test.dart: budget: under 10 ms per question with a full entity list
+00:00 +851: test/chat/ask_parser_test.dart: budget: under 10 ms per question with a full entity list
+00:00 +852: test/chat/ask_parser_test.dart: budget: under 10 ms per question with a full entity list
+00:00 +853: test/chat/ask_parser_test.dart: budget: under 10 ms per question with a full entity list
+00:00 +854: test/chat/ask_parser_test.dart: budget: under 10 ms per question with a full entity list
+00:00 +855: test/chat/ask_parser_test.dart: budget: under 10 ms per question with a full entity list
+00:00 +856: test/chat/ask_parser_test.dart: budget: under 10 ms per question with a full entity list
+00:00 +857: test/chat/ask_parser_test.dart: budget: under 10 ms per question with a full entity list
+00:00 +858: test/chat/ask_parser_test.dart: budget: under 10 ms per question with a full entity list
+00:00 +859: test/chat/ask_parser_test.dart: budget: under 10 ms per question with a full entity list
+00:00 +860: test/chat/ask_parser_test.dart: budget: under 10 ms per question with a full entity list
+00:00 +861: test/chat/ask_parser_test.dart: budget: under 10 ms per question with a full entity list
+00:00 +862: test/chat/ask_parser_test.dart: budget: under 10 ms per question with a full entity list
+00:00 +863: test/chat/ask_parser_test.dart: budget: under 10 ms per question with a full entity list
+00:00 +864: test/chat/ask_parser_test.dart: budget: under 10 ms per question with a full entity list
+00:00 +865: test/chat/ask_parser_test.dart: budget: under 10 ms per question with a full entity list
+00:00 +866: test/chat/ask_parser_test.dart: budget: under 10 ms per question with a full entity list
+00:00 +867: test/chat/ask_parser_test.dart: budget: under 10 ms per question with a full entity list
+00:00 +868: test/chat/ask_parser_test.dart: budget: under 10 ms per question with a full entity list
+00:00 +869: test/chat/ask_parser_test.dart: budget: under 10 ms per question with a full entity list
+00:00 +870: test/chat/ask_parser_test.dart: budget: under 10 ms per question with a full entity list
+00:00 +871: test/chat/ask_parser_test.dart: budget: under 10 ms per question with a full entity list
+00:00 +872: test/chat/ask_parser_test.dart: budget: under 10 ms per question with a full entity list
+00:00 +873: test/chat/ask_parser_test.dart: budget: under 10 ms per question with a full entity list
+00:00 +874: test/chat/ask_parser_test.dart: budget: under 10 ms per question with a full entity list
+00:00 +875: test/chat/ask_parser_test.dart: budget: under 10 ms per question with a full entity list
+00:00 +876: test/chat/ask_parser_test.dart: budget: under 10 ms per question with a full entity list
+00:00 +877: test/chat/ask_parser_test.dart: budget: under 10 ms per question with a full entity list
+00:00 +878: test/chat/ask_parser_test.dart: budget: under 10 ms per question with a full entity list
+00:00 +879: test/chat/ask_parser_test.dart: budget: under 10 ms per question with a full entity list
+00:00 +880: test/chat/ask_parser_test.dart: budget: under 10 ms per question with a full entity list
+00:00 +881: test/chat/ask_parser_test.dart: budget: under 10 ms per question with a full entity list
+00:00 +882: test/chat/ask_parser_test.dart: budget: under 10 ms per question with a full entity list
+00:00 +883: test/chat/ask_parser_test.dart: budget: under 10 ms per question with a full entity list
+00:00 +884: test/chat/ask_parser_test.dart: budget: under 10 ms per question with a full entity list
+00:00 +885: test/chat/ask_parser_test.dart: budget: under 10 ms per question with a full entity list
+00:00 +886: test/chat/ask_parser_test.dart: budget: under 10 ms per question with a full entity list
+00:00 +887: test/chat/ask_parser_test.dart: budget: under 10 ms per question with a full entity list
+00:00 +888: test/chat/ask_parser_test.dart: budget: under 10 ms per question with a full entity list
+00:00 +889: test/chat/ask_parser_test.dart: budget: under 10 ms per question with a full entity list
+00:00 +890: test/chat/ask_parser_test.dart: budget: under 10 ms per question with a full entity list
+00:00 +891: test/chat/ask_parser_test.dart: budget: under 10 ms per question with a full entity list
+00:00 +892: test/chat/ask_parser_test.dart: budget: under 10 ms per question with a full entity list
+00:00 +893: test/chat/ask_parser_test.dart: budget: under 10 ms per question with a full entity list
+00:00 +894: test/chat/ask_parser_test.dart: budget: under 10 ms per question with a full entity list
+00:00 +895: test/chat/ask_parser_test.dart: budget: under 10 ms per question with a full entity list
+00:00 +896: test/chat/ask_parser_test.dart: budget: under 10 ms per question with a full entity list
+00:00 +897: test/chat/ask_parser_test.dart: budget: under 10 ms per question with a full entity list
+00:00 +898: test/chat/ask_parser_test.dart: budget: under 10 ms per question with a full entity list
+00:00 +899: test/chat/ask_parser_test.dart: budget: under 10 ms per question with a full entity list
+00:00 +900: test/chat/ask_parser_test.dart: budget: under 10 ms per question with a full entity list
+00:00 +901: test/chat/ask_parser_test.dart: budget: under 10 ms per question with a full entity list
+00:00 +902: test/chat/ask_parser_test.dart: budget: under 10 ms per question with a full entity list
+00:00 +903: test/chat/ask_parser_test.dart: budget: under 10 ms per question with a full entity list
+00:00 +904: test/chat/ask_parser_test.dart: budget: under 10 ms per question with a full entity list
+00:00 +905: test/chat/ask_parser_test.dart: budget: under 10 ms per question with a full entity list
+00:00 +906: test/chat/ask_parser_test.dart: budget: under 10 ms per question with a full entity list
+00:00 +907: test/chat/ask_parser_test.dart: budget: under 10 ms per question with a full entity list
+00:00 +908: test/chat/ask_parser_test.dart: budget: under 10 ms per question with a full entity list
+00:00 +909: test/chat/ask_parser_test.dart: budget: under 10 ms per question with a full entity list
+00:00 +910: test/chat/ask_parser_test.dart: budget: under 10 ms per question with a full entity list
+00:00 +911: test/chat/ask_parser_test.dart: budget: under 10 ms per question with a full entity list
+00:00 +912: test/chat/ask_parser_test.dart: budget: under 10 ms per question with a full entity list
+00:00 +913: test/chat/ask_parser_test.dart: budget: under 10 ms per question with a full entity list
+00:00 +914: test/chat/ask_parser_test.dart: budget: under 10 ms per question with a full entity list
+00:00 +915: test/chat/ask_parser_test.dart: budget: under 10 ms per question with a full entity list
+00:00 +916: test/chat/ask_parser_test.dart: budget: under 10 ms per question with a full entity list
+00:00 +917: test/chat/ask_parser_test.dart: budget: under 10 ms per question with a full entity list
+00:00 +918: test/chat/ask_parser_test.dart: budget: under 10 ms per question with a full entity list
+00:00 +919: test/chat/ask_parser_test.dart: budget: under 10 ms per question with a full entity list
+00:00 +920: test/chat/ask_parser_test.dart: budget: under 10 ms per question with a full entity list
+00:00 +921: test/chat/ask_parser_test.dart: budget: under 10 ms per question with a full entity list
+00:00 +922: test/chat/ask_parser_test.dart: budget: under 10 ms per question with a full entity list
+00:00 +923: test/chat/ask_parser_test.dart: budget: under 10 ms per question with a full entity list
+00:00 +924: test/chat/ask_parser_test.dart: budget: under 10 ms per question with a full entity list
+00:00 +925: test/chat/ask_parser_test.dart: budget: under 10 ms per question with a full entity list
+00:00 +926: test/chat/ask_parser_test.dart: budget: under 10 ms per question with a full entity list
+00:00 +927: test/chat/ask_parser_test.dart: budget: under 10 ms per question with a full entity list
+00:00 +928: test/chat/ask_parser_test.dart: budget: under 10 ms per question with a full entity list
+00:00 +929: test/chat/ask_parser_test.dart: budget: under 10 ms per question with a full entity list
+00:00 +930: test/chat/ask_parser_test.dart: budget: under 10 ms per question with a full entity list
+00:00 +931: test/chat/ask_parser_test.dart: budget: under 10 ms per question with a full entity list
+00:00 +932: test/chat/ask_parser_test.dart: budget: under 10 ms per question with a full entity list
+00:00 +933: test/chat/ask_parser_test.dart: budget: under 10 ms per question with a full entity list
+00:00 +934: test/chat/ask_parser_test.dart: budget: under 10 ms per question with a full entity list
+00:00 +935: test/chat/ask_parser_test.dart: budget: under 10 ms per question with a full entity list
+00:00 +936: test/chat/ask_parser_test.dart: budget: under 10 ms per question with a full entity list
+00:00 +937: test/chat/ask_parser_test.dart: budget: under 10 ms per question with a full entity list
+00:00 +938: test/chat/ask_parser_test.dart: budget: under 10 ms per question with a full entity list
+00:00 +939: test/chat/ask_parser_test.dart: budget: under 10 ms per question with a full entity list
+00:00 +940: test/chat/ask_parser_test.dart: budget: under 10 ms per question with a full entity list
+00:00 +941: test/chat/ask_parser_test.dart: budget: under 10 ms per question with a full entity list
+00:00 +942: test/chat/ask_parser_test.dart: budget: under 10 ms per question with a full entity list
+00:00 +943: test/chat/ask_parser_test.dart: budget: under 10 ms per question with a full entity list
+00:00 +944: test/chat/ask_parser_test.dart: budget: under 10 ms per question with a full entity list
+00:00 +945: test/guard/capture_guard_test.dart: config reader a malformed user part never yields invalid (mutation fuzz)
+00:00 +946: test/guard/capture_guard_test.dart: config reader a malformed user part never yields invalid (mutation fuzz)
+00:00 +947: test/guard/capture_guard_test.dart: config reader a malformed user part never yields invalid (mutation fuzz)
+00:00 +948: test/guard/capture_guard_test.dart: config reader a malformed user part never yields invalid (mutation fuzz)
+00:00 +949: test/guard/capture_guard_test.dart: config reader a malformed user part never yields invalid (mutation fuzz)
+00:00 +950: test/guard/capture_guard_test.dart: config reader a malformed user part never yields invalid (mutation fuzz)
+00:00 +951: test/guard/capture_guard_test.dart: config reader a malformed user part never yields invalid (mutation fuzz)
+00:00 +952: test/guard/capture_guard_test.dart: config reader a malformed user part never yields invalid (mutation fuzz)
+00:00 +953: test/guard/capture_guard_test.dart: config reader a malformed user part never yields invalid (mutation fuzz)
+00:00 +954: test/guard/capture_guard_test.dart: config reader a malformed user part never yields invalid (mutation fuzz)
+00:00 +955: test/guard/capture_guard_test.dart: config reader a malformed user part never yields invalid (mutation fuzz)
+00:00 +956: test/guard/capture_guard_test.dart: config reader a malformed user part never yields invalid (mutation fuzz)
+00:00 +957: test/guard/capture_guard_test.dart: config reader a malformed user part never yields invalid (mutation fuzz)
+00:00 +958: test/guard/capture_guard_test.dart: config reader a malformed user part never yields invalid (mutation fuzz)
+00:00 +959: test/guard/capture_guard_test.dart: config reader a malformed user part never yields invalid (mutation fuzz)
+00:00 +960: test/guard/capture_guard_test.dart: config reader a malformed user part never yields invalid (mutation fuzz)
+00:00 +961: test/generic/generic_parser_test.dart: safety benchmark: mean generic parse time (printed)
+00:00 +962: test/generic/generic_parser_test.dart: safety benchmark: mean generic parse time (printed)
+00:00 +963: test/generic/generic_parser_test.dart: safety benchmark: mean generic parse time (printed)
+00:00 +964: test/generic/generic_parser_test.dart: safety benchmark: mean generic parse time (printed)
+00:00 +965: test/generic/generic_parser_test.dart: safety benchmark: mean generic parse time (printed)
+00:00 +966: test/generic/generic_parser_test.dart: safety benchmark: mean generic parse time (printed)
+00:00 +967: test/generic/generic_parser_test.dart: safety benchmark: mean generic parse time (printed)
+00:00 +968: test/generic/generic_parser_test.dart: safety benchmark: mean generic parse time (printed)
+00:00 +969: test/generic/generic_parser_test.dart: safety benchmark: mean generic parse time (printed)
+00:00 +970: test/generic/generic_parser_test.dart: safety benchmark: mean generic parse time (printed)
+00:00 +971: test/generic/generic_parser_test.dart: safety benchmark: mean generic parse time (printed)
+00:00 +972: test/generic/generic_parser_test.dart: safety benchmark: mean generic parse time (printed)
+00:00 +973: test/generic/generic_parser_test.dart: safety benchmark: mean generic parse time (printed)
+00:00 +974: test/generic/generic_parser_test.dart: safety benchmark: mean generic parse time (printed)
+00:00 +975: test/generic/generic_parser_test.dart: safety benchmark: mean generic parse time (printed)
+00:00 +976: test/generic/generic_parser_test.dart: safety benchmark: mean generic parse time (printed)
+00:00 +977: test/generic/generic_parser_test.dart: safety benchmark: mean generic parse time (printed)
+00:00 +978: test/generic/generic_parser_test.dart: safety benchmark: mean generic parse time (printed)
+00:00 +979: test/generic/generic_parser_test.dart: safety benchmark: mean generic parse time (printed)
+00:00 +980: test/generic/generic_parser_test.dart: safety benchmark: mean generic parse time (printed)
+00:00 +981: test/generic/generic_parser_test.dart: safety benchmark: mean generic parse time (printed)
+00:00 +982: test/generic/generic_parser_test.dart: safety benchmark: mean generic parse time (printed)
+00:00 +983: test/generic/generic_parser_test.dart: safety benchmark: mean generic parse time (printed)
+00:00 +984: test/generic/generic_parser_test.dart: safety benchmark: mean generic parse time (printed)
+00:00 +985: test/generic/generic_parser_test.dart: safety benchmark: mean generic parse time (printed)
+00:00 +986: test/generic/generic_parser_test.dart: safety benchmark: mean generic parse time (printed)
+00:00 +987: test/generic/generic_parser_test.dart: safety benchmark: mean generic parse time (printed)
+00:00 +988: test/generic/generic_parser_test.dart: safety benchmark: mean generic parse time (printed)
+00:00 +989: test/generic/generic_parser_test.dart: safety benchmark: mean generic parse time (printed)
+00:00 +990: test/generic/generic_parser_test.dart: safety benchmark: mean generic parse time (printed)
+00:00 +991: test/generic/generic_parser_test.dart: safety benchmark: mean generic parse time (printed)
+00:00 +992: test/generic/generic_parser_test.dart: safety benchmark: mean generic parse time (printed)
+00:00 +993: test/generic/generic_parser_test.dart: safety benchmark: mean generic parse time (printed)
+00:00 +994: test/generic/generic_parser_test.dart: safety benchmark: mean generic parse time (printed)
+00:00 +995: test/generic/generic_parser_test.dart: safety benchmark: mean generic parse time (printed)
+00:00 +996: test/generic/generic_parser_test.dart: safety benchmark: mean generic parse time (printed)
+00:00 +997: test/generic/generic_parser_test.dart: safety benchmark: mean generic parse time (printed)
+00:00 +998: test/generic/generic_parser_test.dart: safety benchmark: mean generic parse time (printed)
+00:00 +999: test/generic/generic_parser_test.dart: safety benchmark: mean generic parse time (printed)
+00:00 +1000: test/generic/generic_parser_test.dart: safety benchmark: mean generic parse time (printed)
+00:00 +1001: test/generic/generic_parser_test.dart: safety benchmark: mean generic parse time (printed)
+00:00 +1002: test/generic/generic_parser_test.dart: safety benchmark: mean generic parse time (printed)
+00:00 +1003: test/generic/generic_parser_test.dart: safety benchmark: mean generic parse time (printed)
+00:00 +1004: test/generic/generic_parser_test.dart: safety benchmark: mean generic parse time (printed)
+00:00 +1005: test/generic/generic_parser_test.dart: safety benchmark: mean generic parse time (printed)
+00:00 +1006: test/generic/generic_parser_test.dart: safety benchmark: mean generic parse time (printed)
+00:00 +1007: test/generic/generic_parser_test.dart: safety benchmark: mean generic parse time (printed)
+00:00 +1008: test/generic/generic_parser_test.dart: safety benchmark: mean generic parse time (printed)
+00:00 +1009: test/generic/generic_parser_test.dart: safety benchmark: mean generic parse time (printed)
+00:00 +1010: test/generic/generic_parser_test.dart: safety benchmark: mean generic parse time (printed)
+00:00 +1011: test/generic/generic_parser_test.dart: safety benchmark: mean generic parse time (printed)
+00:00 +1012: test/generic/generic_parser_test.dart: safety benchmark: mean generic parse time (printed)
+00:00 +1013: test/generic/generic_parser_test.dart: safety benchmark: mean generic parse time (printed)
+00:00 +1014: test/generic/generic_parser_test.dart: safety benchmark: mean generic parse time (printed)
+00:00 +1015: test/generic/generic_parser_test.dart: safety benchmark: mean generic parse time (printed)
+generic parse mean: 54 us over 4000 runs
+00:00 +1016: test/guard/capture_guard_test.dart: performance (loose CI bounds; natives measure on device) 1,000 adversarial 4,000-char decisions take under 2 s
+00:00 +1017: test/guard/capture_guard_test.dart: performance (loose CI bounds; natives measure on device) 1,000 adversarial 4,000-char decisions take under 2 s
+00:00 +1018: test/guard/capture_guard_test.dart: performance (loose CI bounds; natives measure on device) 1,000 adversarial 4,000-char decisions take under 2 s
+00:00 +1019: test/guard/capture_guard_test.dart: performance (loose CI bounds; natives measure on device) 1,000 adversarial 4,000-char decisions take under 2 s
+00:00 +1020: test/guard/capture_guard_test.dart: performance (loose CI bounds; natives measure on device) 1,000 adversarial 4,000-char decisions take under 2 s
+00:00 +1021: test/guard/capture_guard_test.dart: performance (loose CI bounds; natives measure on device) 1,000 adversarial 4,000-char decisions take under 2 s
+00:00 +1022: test/guard/capture_guard_test.dart: performance (loose CI bounds; natives measure on device) 1,000 adversarial 4,000-char decisions take under 2 s
+00:01 +1023: test/guard/capture_guard_test.dart: performance (loose CI bounds; natives measure on device) 1,000 adversarial 4,000-char decisions take under 2 s
+00:01 +1024: test/guard/capture_guard_test.dart: performance (loose CI bounds; natives measure on device) 1,000 adversarial 4,000-char decisions take under 2 s
+00:01 +1025: test/guard/capture_guard_test.dart: performance (loose CI bounds; natives measure on device) 1,000 adversarial 4,000-char decisions take under 2 s
+00:01 +1026: test/guard/capture_guard_test.dart: performance (loose CI bounds; natives measure on device) 1,000 adversarial 4,000-char decisions take under 2 s
+00:01 +1027: test/guard/capture_guard_test.dart: performance (loose CI bounds; natives measure on device) 1,000 adversarial 4,000-char decisions take under 2 s
+00:01 +1028: test/guard/capture_guard_test.dart: performance (loose CI bounds; natives measure on device) 1,000 adversarial 4,000-char decisions take under 2 s
+00:01 +1029: test/guard/capture_guard_test.dart: performance (loose CI bounds; natives measure on device) 1,000 adversarial 4,000-char decisions take under 2 s
+00:01 +1030: test/guard/capture_guard_test.dart: performance (loose CI bounds; natives measure on device) 1,000 adversarial 4,000-char decisions take under 2 s
+00:01 +1031: test/guard/capture_guard_test.dart: performance (loose CI bounds; natives measure on device) 1,000 adversarial 4,000-char decisions take under 2 s
+00:01 +1032: test/guard/capture_guard_test.dart: performance (loose CI bounds; natives measure on device) 1,000 adversarial 4,000-char decisions take under 2 s
+00:01 +1033: test/guard/capture_guard_test.dart: performance (loose CI bounds; natives measure on device) 1,000 adversarial 4,000-char decisions take under 2 s
+00:01 +1034: test/guard/capture_guard_test.dart: performance (loose CI bounds; natives measure on device) 1,000 adversarial 4,000-char decisions take under 2 s
+00:01 +1035: test/guard/capture_guard_test.dart: performance (loose CI bounds; natives measure on device) 1,000 adversarial 4,000-char decisions take under 2 s
+00:01 +1036: test/guard/capture_guard_test.dart: performance (loose CI bounds; natives measure on device) 1,000 adversarial 4,000-char decisions take under 2 s
+00:01 +1037: test/guard/capture_guard_test.dart: performance (loose CI bounds; natives measure on device) 1,000 adversarial 4,000-char decisions take under 2 s
+00:01 +1038: test/guard/capture_guard_test.dart: performance (loose CI bounds; natives measure on device) 1,000 adversarial 4,000-char decisions take under 2 s
+00:01 +1039: test/guard/capture_guard_test.dart: performance (loose CI bounds; natives measure on device) 1,000 adversarial 4,000-char decisions take under 2 s
+00:01 +1040: test/guard/capture_guard_test.dart: performance (loose CI bounds; natives measure on device) 1,000 adversarial 4,000-char decisions take under 2 s
+00:01 +1041: test/guard/capture_guard_test.dart: performance (loose CI bounds; natives measure on device) 1,000 adversarial 4,000-char decisions take under 2 s
+00:01 +1042: test/guard/capture_guard_test.dart: performance (loose CI bounds; natives measure on device) 1,000 adversarial 4,000-char decisions take under 2 s
+00:01 +1043: test/guard/capture_guard_test.dart: performance (loose CI bounds; natives measure on device) 1,000 adversarial 4,000-char decisions take under 2 s
+00:01 +1044: test/guard/capture_guard_test.dart: performance (loose CI bounds; natives measure on device) 1,000 adversarial 4,000-char decisions take under 2 s
+00:01 +1045: test/guard/capture_guard_test.dart: performance (loose CI bounds; natives measure on device) 1,000 adversarial 4,000-char decisions take under 2 s
+00:01 +1046: test/guard/capture_guard_test.dart: performance (loose CI bounds; natives measure on device) 1,000 adversarial 4,000-char decisions take under 2 s
+00:01 +1047: test/guard/capture_guard_test.dart: performance (loose CI bounds; natives measure on device) 1,000 adversarial 4,000-char decisions take under 2 s
+00:01 +1048: test/guard/capture_guard_test.dart: performance (loose CI bounds; natives measure on device) 1,000 adversarial 4,000-char decisions take under 2 s
+00:01 +1049: test/guard/capture_guard_test.dart: performance (loose CI bounds; natives measure on device) 1,000 adversarial 4,000-char decisions take under 2 s
+00:01 +1050: test/guard/capture_guard_test.dart: performance (loose CI bounds; natives measure on device) 1,000 adversarial 4,000-char decisions take under 2 s
+00:01 +1051: test/guard/capture_guard_test.dart: performance (loose CI bounds; natives measure on device) 1,000 adversarial 4,000-char decisions take under 2 s
+00:01 +1052: test/guard/capture_guard_test.dart: performance (loose CI bounds; natives measure on device) 1,000 adversarial 4,000-char decisions take under 2 s
+00:01 +1053: test/guard/capture_guard_test.dart: performance (loose CI bounds; natives measure on device) 1,000 adversarial 4,000-char decisions take under 2 s
+00:01 +1054: test/guard/capture_guard_test.dart: performance (loose CI bounds; natives measure on device) 1,000 adversarial 4,000-char decisions take under 2 s
+00:01 +1055: test/guard/capture_guard_test.dart: performance (loose CI bounds; natives measure on device) 1,000 adversarial 4,000-char decisions take under 2 s
+00:01 +1056: test/guard/capture_guard_test.dart: performance (loose CI bounds; natives measure on device) 1,000 adversarial 4,000-char decisions take under 2 s
+00:01 +1057: test/guard/capture_guard_test.dart: performance (loose CI bounds; natives measure on device) 1,000 adversarial 4,000-char decisions take under 2 s
+00:01 +1058: test/guard/capture_guard_test.dart: performance (loose CI bounds; natives measure on device) 1,000 adversarial 4,000-char decisions take under 2 s
+00:01 +1059: test/guard/capture_guard_test.dart: performance (loose CI bounds; natives measure on device) 1,000 adversarial 4,000-char decisions take under 2 s
+00:01 +1060: test/guard/capture_guard_test.dart: performance (loose CI bounds; natives measure on device) 1,000 adversarial 4,000-char decisions take under 2 s
+00:01 +1061: test/guard/capture_guard_test.dart: performance (loose CI bounds; natives measure on device) 1,000 adversarial 4,000-char decisions take under 2 s
+00:01 +1062: test/guard/capture_guard_test.dart: performance (loose CI bounds; natives measure on device) 1,000 adversarial 4,000-char decisions take under 2 s
+00:01 +1063: test/guard/capture_guard_test.dart: performance (loose CI bounds; natives measure on device) 1,000 adversarial 4,000-char decisions take under 2 s
+00:01 +1064: test/guard/capture_guard_test.dart: performance (loose CI bounds; natives measure on device) 1,000 adversarial 4,000-char decisions take under 2 s
+00:01 +1065: test/guard/capture_guard_test.dart: performance (loose CI bounds; natives measure on device) 1,000 adversarial 4,000-char decisions take under 2 s
+00:01 +1066: test/guard/capture_guard_test.dart: performance (loose CI bounds; natives measure on device) 1,000 adversarial 4,000-char decisions take under 2 s
+00:01 +1067: test/guard/capture_guard_test.dart: performance (loose CI bounds; natives measure on device) 1,000 adversarial 4,000-char decisions take under 2 s
+00:01 +1068: test/guard/capture_guard_test.dart: performance (loose CI bounds; natives measure on device) 1,000 adversarial 4,000-char decisions take under 2 s
+00:01 +1069: test/guard/capture_guard_test.dart: performance (loose CI bounds; natives measure on device) 1,000 adversarial 4,000-char decisions take under 2 s
+00:01 +1070: test/guard/capture_guard_test.dart: performance (loose CI bounds; natives measure on device) 1,000 adversarial 4,000-char decisions take under 2 s
+00:01 +1071: test/guard/capture_guard_test.dart: performance (loose CI bounds; natives measure on device) 1,000 adversarial 4,000-char decisions take under 2 s
+00:01 +1072: test/guard/capture_guard_test.dart: performance (loose CI bounds; natives measure on device) 1,000 adversarial 4,000-char decisions take under 2 s
+00:01 +1073: test/guard/capture_guard_test.dart: performance (loose CI bounds; natives measure on device) 1,000 adversarial 4,000-char decisions take under 2 s
+00:01 +1074: test/guard/capture_guard_test.dart: performance (loose CI bounds; natives measure on device) 1,000 adversarial 4,000-char decisions take under 2 s
+00:01 +1075: test/guard/capture_guard_test.dart: performance (loose CI bounds; natives measure on device) 1,000 adversarial 4,000-char decisions take under 2 s
+00:01 +1076: test/guard/capture_guard_test.dart: performance (loose CI bounds; natives measure on device) 1,000 adversarial 4,000-char decisions take under 2 s
+00:01 +1077: test/guard/capture_guard_test.dart: performance (loose CI bounds; natives measure on device) 1,000 adversarial 4,000-char decisions take under 2 s
+00:01 +1078: test/guard/capture_guard_test.dart: performance (loose CI bounds; natives measure on device) 1,000 adversarial 4,000-char decisions take under 2 s
+00:01 +1079: test/guard/capture_guard_test.dart: performance (loose CI bounds; natives measure on device) 1,000 adversarial 4,000-char decisions take under 2 s
+00:01 +1080: test/guard/capture_guard_test.dart: performance (loose CI bounds; natives measure on device) 1,000 adversarial 4,000-char decisions take under 2 s
+00:01 +1081: test/guard/capture_guard_test.dart: performance (loose CI bounds; natives measure on device) 1,000 adversarial 4,000-char decisions take under 2 s
+00:01 +1082: test/guard/capture_guard_test.dart: performance (loose CI bounds; natives measure on device) 1,000 adversarial 4,000-char decisions take under 2 s
+00:01 +1083: test/guard/capture_guard_test.dart: performance (loose CI bounds; natives measure on device) 1,000 adversarial 4,000-char decisions take under 2 s
+00:01 +1084: test/guard/capture_guard_test.dart: performance (loose CI bounds; natives measure on device) 1,000 adversarial 4,000-char decisions take under 2 s
+00:01 +1085: test/guard/capture_guard_test.dart: performance (loose CI bounds; natives measure on device) 1,000 adversarial 4,000-char decisions take under 2 s
+00:01 +1086: test/guard/capture_guard_test.dart: performance (loose CI bounds; natives measure on device) 1,000 adversarial 4,000-char decisions take under 2 s
+00:01 +1087: test/guard/capture_guard_test.dart: performance (loose CI bounds; natives measure on device) 1,000 adversarial 4,000-char decisions take under 2 s
+00:01 +1088: test/guard/capture_guard_test.dart: performance (loose CI bounds; natives measure on device) 1,000 adversarial 4,000-char decisions take under 2 s
+00:01 +1089: test/guard/capture_guard_test.dart: performance (loose CI bounds; natives measure on device) 1,000 adversarial 4,000-char decisions take under 2 s
+00:01 +1090: test/guard/capture_guard_test.dart: performance (loose CI bounds; natives measure on device) 1,000 adversarial 4,000-char decisions take under 2 s
+00:01 +1091: test/guard/capture_guard_test.dart: performance (loose CI bounds; natives measure on device) 1,000 adversarial 4,000-char decisions take under 2 s
+00:01 +1092: test/guard/capture_guard_test.dart: performance (loose CI bounds; natives measure on device) 1,000 adversarial 4,000-char decisions take under 2 s
+00:01 +1093: test/guard/capture_guard_test.dart: performance (loose CI bounds; natives measure on device) 1,000 adversarial 4,000-char decisions take under 2 s
+00:01 +1094: test/guard/capture_guard_test.dart: performance (loose CI bounds; natives measure on device) 1,000 adversarial 4,000-char decisions take under 2 s
+00:01 +1095: test/guard/capture_guard_test.dart: performance (loose CI bounds; natives measure on device) 1,000 adversarial 4,000-char decisions take under 2 s
+00:01 +1096: test/guard/capture_guard_test.dart: performance (loose CI bounds; natives measure on device) 1,000 adversarial 4,000-char decisions take under 2 s
+00:01 +1097: test/guard/capture_guard_test.dart: performance (loose CI bounds; natives measure on device) 1,000 adversarial 4,000-char decisions take under 2 s
+00:01 +1098: test/guard/capture_guard_test.dart: performance (loose CI bounds; natives measure on device) 1,000 adversarial 4,000-char decisions take under 2 s
+00:01 +1099: test/guard/capture_guard_test.dart: performance (loose CI bounds; natives measure on device) 1,000 adversarial 4,000-char decisions take under 2 s
+00:01 +1100: test/guard/capture_guard_test.dart: performance (loose CI bounds; natives measure on device) 1,000 adversarial 4,000-char decisions take under 2 s
+00:01 +1101: test/guard/capture_guard_test.dart: performance (loose CI bounds; natives measure on device) 1,000 adversarial 4,000-char decisions take under 2 s
+00:01 +1102: test/guard/capture_guard_test.dart: performance (loose CI bounds; natives measure on device) 1,000 adversarial 4,000-char decisions take under 2 s
+00:01 +1103: test/guard/capture_guard_test.dart: performance (loose CI bounds; natives measure on device) 1,000 adversarial 4,000-char decisions take under 2 s
+00:01 +1104: test/guard/capture_guard_test.dart: performance (loose CI bounds; natives measure on device) 1,000 adversarial 4,000-char decisions take under 2 s
+00:01 +1105: test/guard/capture_guard_test.dart: performance (loose CI bounds; natives measure on device) 1,000 adversarial 4,000-char decisions take under 2 s
+00:01 +1106: test/guard/capture_guard_test.dart: performance (loose CI bounds; natives measure on device) 1,000 adversarial 4,000-char decisions take under 2 s
+00:01 +1107: test/guard/capture_guard_test.dart: performance (loose CI bounds; natives measure on device) 1,000 adversarial 4,000-char decisions take under 2 s
+00:01 +1108: test/guard/capture_guard_test.dart: performance (loose CI bounds; natives measure on device) 1,000 adversarial 4,000-char decisions take under 2 s
+00:01 +1109: test/guard/capture_guard_test.dart: performance (loose CI bounds; natives measure on device) 1,000 adversarial 4,000-char decisions take under 2 s
+00:01 +1110: test/guard/capture_guard_test.dart: performance (loose CI bounds; natives measure on device) 1,000 adversarial 4,000-char decisions take under 2 s
+00:01 +1111: test/guard/capture_guard_test.dart: performance (loose CI bounds; natives measure on device) 1,000 adversarial 4,000-char decisions take under 2 s
+00:01 +1112: test/guard/capture_guard_test.dart: performance (loose CI bounds; natives measure on device) 1,000 adversarial 4,000-char decisions take under 2 s
+00:01 +1113: test/guard/capture_guard_test.dart: performance (loose CI bounds; natives measure on device) 1,000 adversarial 4,000-char decisions take under 2 s
+00:01 +1114: test/guard/capture_guard_test.dart: performance (loose CI bounds; natives measure on device) 1,000 adversarial 4,000-char decisions take under 2 s
+00:01 +1115: test/guard/capture_guard_test.dart: performance (loose CI bounds; natives measure on device) 1,000 adversarial 4,000-char decisions take under 2 s
+00:01 +1116: test/guard/capture_guard_test.dart: performance (loose CI bounds; natives measure on device) 1,000 adversarial 4,000-char decisions take under 2 s
+00:01 +1117: test/guard/capture_guard_test.dart: performance (loose CI bounds; natives measure on device) 1,000 adversarial 4,000-char decisions take under 2 s
+00:01 +1117: test/voice/voice_parser_test.dart: phrase fixtures (FR-VOI-02/05, EC-30, EC-31) item accuracy is at least 95% and every phrase is reported
+voice fixtures: 424/424 items (100.0%), 254 phrases; failures: []
+00:01 +1118: test/guard/capture_guard_test.dart: performance (loose CI bounds; natives measure on device) 1,000 adversarial 4,000-char decisions take under 2 s
+00:01 +1119: test/guard/capture_guard_test.dart: performance (loose CI bounds; natives measure on device) 1,000 adversarial 4,000-char decisions take under 2 s
+00:01 +1120: test/guard/capture_guard_test.dart: performance (loose CI bounds; natives measure on device) 1,000 adversarial 4,000-char decisions take under 2 s
+00:01 +1121: test/guard/capture_guard_test.dart: performance (loose CI bounds; natives measure on device) 1,000 adversarial 4,000-char decisions take under 2 s
+00:01 +1122: test/guard/capture_guard_test.dart: performance (loose CI bounds; natives measure on device) 1,000 adversarial 4,000-char decisions take under 2 s
+00:01 +1123: test/guard/capture_guard_test.dart: performance (loose CI bounds; natives measure on device) 1,000 adversarial 4,000-char decisions take under 2 s
+00:01 +1124: test/guard/capture_guard_test.dart: performance (loose CI bounds; natives measure on device) 1,000 adversarial 4,000-char decisions take under 2 s
+00:01 +1125: test/guard/capture_guard_test.dart: performance (loose CI bounds; natives measure on device) 1,000 adversarial 4,000-char decisions take under 2 s
+00:01 +1126: test/guard/capture_guard_test.dart: performance (loose CI bounds; natives measure on device) 1,000 adversarial 4,000-char decisions take under 2 s
+00:01 +1127: test/guard/capture_guard_test.dart: performance (loose CI bounds; natives measure on device) 1,000 adversarial 4,000-char decisions take under 2 s
+00:01 +1128: test/guard/capture_guard_test.dart: performance (loose CI bounds; natives measure on device) 1,000 adversarial 4,000-char decisions take under 2 s
+00:01 +1129: test/guard/capture_guard_test.dart: performance (loose CI bounds; natives measure on device) 1,000 adversarial 4,000-char decisions take under 2 s
+00:01 +1130: test/guard/capture_guard_test.dart: performance (loose CI bounds; natives measure on device) 1,000 adversarial 4,000-char decisions take under 2 s
+00:01 +1131: test/guard/capture_guard_test.dart: performance (loose CI bounds; natives measure on device) 1,000 adversarial 4,000-char decisions take under 2 s
+00:01 +1132: test/guard/capture_guard_test.dart: performance (loose CI bounds; natives measure on device) 1,000 adversarial 4,000-char decisions take under 2 s
+00:01 +1133: test/guard/capture_guard_test.dart: performance (loose CI bounds; natives measure on device) 1,000 adversarial 4,000-char decisions take under 2 s
+00:01 +1134: test/guard/capture_guard_test.dart: performance (loose CI bounds; natives measure on device) 1,000 adversarial 4,000-char decisions take under 2 s
+00:01 +1135: test/guard/capture_guard_test.dart: performance (loose CI bounds; natives measure on device) 1,000 adversarial 4,000-char decisions take under 2 s
+00:01 +1136: test/guard/capture_guard_test.dart: performance (loose CI bounds; natives measure on device) 1,000 adversarial 4,000-char decisions take under 2 s
+00:01 +1137: test/guard/capture_guard_test.dart: performance (loose CI bounds; natives measure on device) 1,000 adversarial 4,000-char decisions take under 2 s
+00:01 +1138: test/guard/capture_guard_test.dart: performance (loose CI bounds; natives measure on device) 1,000 adversarial 4,000-char decisions take under 2 s
+00:01 +1139: test/guard/capture_guard_test.dart: performance (loose CI bounds; natives measure on device) 1,000 adversarial 4,000-char decisions take under 2 s
+00:01 +1140: test/guard/capture_guard_test.dart: performance (loose CI bounds; natives measure on device) 1,000 adversarial 4,000-char decisions take under 2 s
+00:01 +1141: test/guard/capture_guard_test.dart: performance (loose CI bounds; natives measure on device) 1,000 adversarial 4,000-char decisions take under 2 s
+00:01 +1142: test/guard/capture_guard_test.dart: performance (loose CI bounds; natives measure on device) 1,000 adversarial 4,000-char decisions take under 2 s
+00:01 +1143: test/guard/capture_guard_test.dart: performance (loose CI bounds; natives measure on device) 1,000 adversarial 4,000-char decisions take under 2 s
+00:01 +1144: test/guard/capture_guard_test.dart: performance (loose CI bounds; natives measure on device) 1,000 adversarial 4,000-char decisions take under 2 s
+00:01 +1145: test/guard/capture_guard_test.dart: performance (loose CI bounds; natives measure on device) 1,000 adversarial 4,000-char decisions take under 2 s
+00:01 +1146: test/guard/capture_guard_test.dart: performance (loose CI bounds; natives measure on device) 1,000 adversarial 4,000-char decisions take under 2 s
+00:01 +1147: test/guard/capture_guard_test.dart: performance (loose CI bounds; natives measure on device) 1,000 adversarial 4,000-char decisions take under 2 s
+00:01 +1148: test/guard/capture_guard_test.dart: performance (loose CI bounds; natives measure on device) 1,000 adversarial 4,000-char decisions take under 2 s
+00:01 +1149: test/guard/capture_guard_test.dart: performance (loose CI bounds; natives measure on device) 1,000 adversarial 4,000-char decisions take under 2 s
+00:01 +1150: test/guard/capture_guard_test.dart: performance (loose CI bounds; natives measure on device) 1,000 adversarial 4,000-char decisions take under 2 s
+00:01 +1151: test/guard/capture_guard_test.dart: performance (loose CI bounds; natives measure on device) 1,000 adversarial 4,000-char decisions take under 2 s
+00:01 +1152: test/guard/capture_guard_test.dart: performance (loose CI bounds; natives measure on device) 1,000 adversarial 4,000-char decisions take under 2 s
+00:01 +1153: test/guard/capture_guard_test.dart: performance (loose CI bounds; natives measure on device) 1,000 adversarial 4,000-char decisions take under 2 s
+00:01 +1154: test/guard/capture_guard_test.dart: performance (loose CI bounds; natives measure on device) 1,000 adversarial 4,000-char decisions take under 2 s
+00:01 +1155: test/guard/capture_guard_test.dart: performance (loose CI bounds; natives measure on device) 1,000 adversarial 4,000-char decisions take under 2 s
+00:01 +1156: test/guard/capture_guard_test.dart: performance (loose CI bounds; natives measure on device) 1,000 adversarial 4,000-char decisions take under 2 s
+00:01 +1157: test/guard/capture_guard_test.dart: performance (loose CI bounds; natives measure on device) 1,000 adversarial 4,000-char decisions take under 2 s
+00:01 +1158: test/guard/capture_guard_test.dart: performance (loose CI bounds; natives measure on device) 1,000 adversarial 4,000-char decisions take under 2 s
+00:01 +1159: test/guard/capture_guard_test.dart: performance (loose CI bounds; natives measure on device) 1,000 adversarial 4,000-char decisions take under 2 s
+00:01 +1160: test/guard/capture_guard_test.dart: performance (loose CI bounds; natives measure on device) 1,000 adversarial 4,000-char decisions take under 2 s
+00:01 +1161: test/guard/capture_guard_test.dart: performance (loose CI bounds; natives measure on device) 1,000 adversarial 4,000-char decisions take under 2 s
+00:01 +1162: test/guard/capture_guard_test.dart: performance (loose CI bounds; natives measure on device) 1,000 adversarial 4,000-char decisions take under 2 s
+00:01 +1163: test/guard/capture_guard_test.dart: performance (loose CI bounds; natives measure on device) 1,000 adversarial 4,000-char decisions take under 2 s
+00:01 +1164: test/guard/capture_guard_test.dart: performance (loose CI bounds; natives measure on device) 1,000 adversarial 4,000-char decisions take under 2 s
+00:01 +1165: test/guard/capture_guard_test.dart: performance (loose CI bounds; natives measure on device) 1,000 adversarial 4,000-char decisions take under 2 s
+00:01 +1166: test/guard/capture_guard_test.dart: performance (loose CI bounds; natives measure on device) 1,000 adversarial 4,000-char decisions take under 2 s
+00:01 +1167: test/guard/capture_guard_test.dart: performance (loose CI bounds; natives measure on device) 1,000 adversarial 4,000-char decisions take under 2 s
+00:01 +1168: test/guard/capture_guard_test.dart: performance (loose CI bounds; natives measure on device) 1,000 adversarial 4,000-char decisions take under 2 s
+00:01 +1169: test/guard/capture_guard_test.dart: performance (loose CI bounds; natives measure on device) 1,000 adversarial 4,000-char decisions take under 2 s
+00:01 +1170: test/guard/capture_guard_test.dart: performance (loose CI bounds; natives measure on device) 1,000 adversarial 4,000-char decisions take under 2 s
+00:01 +1171: test/guard/capture_guard_test.dart: performance (loose CI bounds; natives measure on device) 1,000 adversarial 4,000-char decisions take under 2 s
+00:01 +1172: test/guard/capture_guard_test.dart: performance (loose CI bounds; natives measure on device) 1,000 adversarial 4,000-char decisions take under 2 s
+00:01 +1173: test/guard/capture_guard_test.dart: performance (loose CI bounds; natives measure on device) 1,000 adversarial 4,000-char decisions take under 2 s
+00:01 +1174: test/guard/capture_guard_test.dart: performance (loose CI bounds; natives measure on device) 1,000 adversarial 4,000-char decisions take under 2 s
+00:01 +1175: test/guard/capture_guard_test.dart: performance (loose CI bounds; natives measure on device) 1,000 adversarial 4,000-char decisions take under 2 s
+00:01 +1176: test/guard/capture_guard_test.dart: performance (loose CI bounds; natives measure on device) 1,000 adversarial 4,000-char decisions take under 2 s
+00:01 +1177: test/guard/capture_guard_test.dart: performance (loose CI bounds; natives measure on device) 1,000 adversarial 4,000-char decisions take under 2 s
+00:01 +1178: test/guard/capture_guard_test.dart: performance (loose CI bounds; natives measure on device) 1,000 adversarial 4,000-char decisions take under 2 s
+00:01 +1179: test/guard/capture_guard_test.dart: performance (loose CI bounds; natives measure on device) 1,000 adversarial 4,000-char decisions take under 2 s
+00:01 +1180: test/guard/capture_guard_test.dart: performance (loose CI bounds; natives measure on device) 1,000 adversarial 4,000-char decisions take under 2 s
+00:01 +1181: test/guard/capture_guard_test.dart: performance (loose CI bounds; natives measure on device) 1,000 adversarial 4,000-char decisions take under 2 s
+00:01 +1182: test/guard/capture_guard_test.dart: performance (loose CI bounds; natives measure on device) 1,000 adversarial 4,000-char decisions take under 2 s
+00:01 +1182: test/pipeline/parsing_pipeline_test.dart: benchmark: mean parse time is under 2 ms (AC 3)
+pipeline parse mean: 50 us over 4000 runs
+00:01 +1183: test/guard/capture_guard_test.dart: performance (loose CI bounds; natives measure on device) 1,000 adversarial 4,000-char decisions take under 2 s
+00:01 +1184: test/guard/capture_guard_test.dart: performance (loose CI bounds; natives measure on device) 1,000 adversarial 4,000-char decisions take under 2 s
+00:01 +1185: test/guard/capture_guard_test.dart: performance (loose CI bounds; natives measure on device) 1,000 adversarial 4,000-char decisions take under 2 s
+00:01 +1186: test/guard/capture_guard_test.dart: performance (loose CI bounds; natives measure on device) 1,000 adversarial 4,000-char decisions take under 2 s
+00:01 +1187: test/guard/capture_guard_test.dart: performance (loose CI bounds; natives measure on device) 1,000 adversarial 4,000-char decisions take under 2 s
+00:01 +1188: test/guard/capture_guard_test.dart: performance (loose CI bounds; natives measure on device) 1,000 adversarial 4,000-char decisions take under 2 s
+00:01 +1189: test/guard/capture_guard_test.dart: performance (loose CI bounds; natives measure on device) 1,000 adversarial 4,000-char decisions take under 2 s
+00:01 +1190: test/guard/capture_guard_test.dart: performance (loose CI bounds; natives measure on device) 1,000 adversarial 4,000-char decisions take under 2 s
+00:01 +1191: test/guard/capture_guard_test.dart: performance (loose CI bounds; natives measure on device) 1,000 adversarial 4,000-char decisions take under 2 s
+00:01 +1192: test/guard/capture_guard_test.dart: performance (loose CI bounds; natives measure on device) 1,000 adversarial 4,000-char decisions take under 2 s
+00:01 +1193: test/guard/capture_guard_test.dart: performance (loose CI bounds; natives measure on device) 1,000 adversarial 4,000-char decisions take under 2 s
+00:01 +1194: test/guard/capture_guard_test.dart: performance (loose CI bounds; natives measure on device) 1,000 adversarial 4,000-char decisions take under 2 s
+00:01 +1195: test/guard/capture_guard_test.dart: performance (loose CI bounds; natives measure on device) 1,000 adversarial 4,000-char decisions take under 2 s
+00:01 +1196: test/guard/capture_guard_test.dart: performance (loose CI bounds; natives measure on device) 1,000 adversarial 4,000-char decisions take under 2 s
+00:01 +1197: test/guard/capture_guard_test.dart: performance (loose CI bounds; natives measure on device) 1,000 adversarial 4,000-char decisions take under 2 s
+00:01 +1198: test/guard/capture_guard_test.dart: performance (loose CI bounds; natives measure on device) 1,000 adversarial 4,000-char decisions take under 2 s
+00:01 +1199: test/guard/capture_guard_test.dart: performance (loose CI bounds; natives measure on device) 1,000 adversarial 4,000-char decisions take under 2 s
+00:01 +1200: test/guard/capture_guard_test.dart: performance (loose CI bounds; natives measure on device) 1,000 adversarial 4,000-char decisions take under 2 s
+00:01 +1201: test/guard/capture_guard_test.dart: performance (loose CI bounds; natives measure on device) 1,000 adversarial 4,000-char decisions take under 2 s
+00:01 +1202: test/guard/capture_guard_test.dart: performance (loose CI bounds; natives measure on device) 1,000 adversarial 4,000-char decisions take under 2 s
+00:01 +1203: test/guard/capture_guard_test.dart: performance (loose CI bounds; natives measure on device) 1,000 adversarial 4,000-char decisions take under 2 s
+00:01 +1204: test/guard/capture_guard_test.dart: performance (loose CI bounds; natives measure on device) 1,000 adversarial 4,000-char decisions take under 2 s
+00:01 +1205: test/registry/registry_lint_test.dart: per-message time budget matching every fixture body 50 times stays far below 10 ms each
+00:01 +1206: test/guard/capture_guard_test.dart: performance (loose CI bounds; natives measure on device) config parse and compile is fast
+00:01 +1207: test/registry/registry_lint_test.dart: runtime guard (slow templates) the slow pattern is accepted by the static heuristic
+00:01 +1208: test/guard/capture_guard_test.dart: describeDecision covers both decision kinds
+00:01 +1209: test/registry/registry_lint_test.dart: runtime guard (slow templates) a template slower than the limit on an adversarial body fails
+00:02 +1210: test/registry/registry_lint_test.dart: runtime guard (slow templates) a slow drop, last4 or global pattern fails the probe (M-2)
+00:04 +1211: test/registry/registry_lint_test.dart: runtime guard (slow templates) the per-fixture timer reports the template id only
+00:04 +1212: test/registry/registry_lint_test.dart: runtime guard (slow templates) the real test registries are not flagged at the default limit
+00:04 +1213: test/registry/registry_lint_test.dart: pipeline keys in fixtures a wrong `confidence` fails the fixture
+00:04 +1214: test/registry/registry_lint_test.dart: pipeline keys in fixtures a wrong `needsReview` fails the fixture
+00:04 +1215: test/registry/registry_lint_test.dart: pipeline keys in fixtures a wrong `occurredAt` fails the fixture
+00:04 +1216: test/registry/registry_lint_test.dart: pipeline keys in fixtures a wrong `language` fails the fixture
+00:04 +1217: test/registry/registry_lint_test.dart: pipeline keys in fixtures a wrong `counterpartyKind` fails the fixture
+00:04 +1218: test/registry/registry_lint_test.dart: pipeline keys in fixtures wrong reasons fail the fixture
+00:04 +1219: test/registry/registry_lint_test.dart: Guard-bound patterns (T-035) a non-portable drop pattern fails the lint
+00:04 +1220: test/registry/registry_lint_test.dart: Guard-bound patterns (T-035) a last-4 the Guard can not see fails the lint (parity)
+00:04 +1221: test/registry/registry_lint_test.dart: Guard-bound patterns (T-035) a last-4 pattern quadratic on mask runs is flagged slow
+00:04 +1222: test/registry/registry_lint_test.dart: Guard-bound patterns (T-035) sender regexes are compiled on the folded key
+00:04 +1223: All tests passed!
+
+[18:26:44] === RESULT dart-test-zaghlol_parsing exit=0 (8s)
+[18:26:44] === STEP apk-devNoSms (docker zaghlol-flutter-android:3.47.9, /work/app)
+Resolving dependencies in `/work`...
+Downloading packages...
+  _fe_analyzer_shared 91.0.0 (111.0.0 available)
+  analyzer 8.4.0 (14.7.0 available)
+  built_collection 5.1.2 (6.0.0 available)
+  coverage 1.15.1 (1.16.0 available)
+  dart_style 3.1.3 (3.1.14 available)
+  drift 2.35.3 (2.35.4 available)
+  hashlib 2.4.2 (2.4.3 available)
+  material_color_utilities 0.13.0 (0.13.1 available)
+  objective_c 9.6.3 (9.6.4 available)
+  package_config 2.2.0 (3.0.0 available)
+  pigeon 26.3.2 (30.0.2 available)
+  test 1.31.1 (1.33.0 available)
+  test_api 0.7.12 (0.7.15 available)
+  test_core 0.6.18 (0.6.21 available)
+Got dependencies in `/work`!
+14 packages have newer versions incompatible with dependency constraints.
+Try `flutter pub outdated` for more information.
+Running Gradle task 'assembleDevNoSmsDebug'...                  
+WARNING: Your app uses the following plugins that apply Kotlin Gradle Plugin (KGP): cryptography_flutter
+Future versions of Flutter will fail to build if your app uses plugins that apply KGP.
+
+Please check the changelogs of these plugins and upgrade to a version that supports Built-in Kotlin.
+If no such version exists, report the issue to the plugin. If necessary, here is a guide on filing
+an issue against a plugin: https://docs.flutter.dev/release/breaking-changes/migrate-to-built-in-kotlin/for-app-developers#report-incompatible-kotlin-gradle-plugin-usage-to-plugin-authors
+
+If you are a plugin author, please migrate your plugin to Built-in Kotlin using this guide: https://docs.flutter.dev/release/breaking-changes/migrate-to-built-in-kotlin/for-plugin-authors
+Warning: SDK processing. This version only understands SDK XML versions up to 3 but an SDK XML file of version 4 was encountered. This can happen if you use versions of Android Studio and the command-line tools that were released at different times.
+Checking the license for package Android SDK Platform 35 in /opt/android-sdk/licenses
+License for package Android SDK Platform 35 accepted.
+Preparing "Install Android SDK Platform 35 (revision 2)".
+"Install Android SDK Platform 35 (revision 2)" ready.
+Installing Android SDK Platform 35 in /opt/android-sdk/platforms/android-35
+"Install Android SDK Platform 35 (revision 2)" complete.
+"Install Android SDK Platform 35 (revision 2)" finished.
+[=========                              ] 25%                                   
+Checking the license for package CMake 3.22.1 in /opt/android-sdk/licenses
+License for package CMake 3.22.1 accepted.
+Preparing "Install CMake 3.22.1 v.3.22.1".
+"Install CMake 3.22.1 v.3.22.1" ready.
+Installing CMake 3.22.1 in /opt/android-sdk/cmake/3.22.1
+"Install CMake 3.22.1 v.3.22.1" complete.
+"Install CMake 3.22.1 v.3.22.1" finished.
+Running Gradle task 'assembleDevNoSmsDebug'...                    319.9s
+✓ Built build/app/outputs/flutter-apk/app-devnosms-debug.apk
+
+[18:32:09] === RESULT apk-devNoSms exit=0 (325s)
+[18:32:09] === STEP apk-perms (docker zaghlol-flutter-android:3.47.9, /work/app)
+package: app.zaghlol.dev
+uses-permission: name='android.permission.INTERNET'
+uses-permission: name='android.permission.POST_NOTIFICATIONS'
+uses-permission: name='android.permission.WAKE_LOCK'
+uses-permission: name='android.permission.ACCESS_NETWORK_STATE'
+uses-permission: name='android.permission.RECEIVE_BOOT_COMPLETED'
+uses-permission: name='android.permission.FOREGROUND_SERVICE'
+uses-permission: name='android.permission.USE_BIOMETRIC'
+uses-permission: name='android.permission.USE_FINGERPRINT'
+uses-permission: name='com.android.vending.BILLING'
+permission: app.zaghlol.dev.DYNAMIC_RECEIVER_NOT_EXPORTED_PERMISSION
+uses-permission: name='app.zaghlol.dev.DYNAMIC_RECEIVER_NOT_EXPORTED_PERMISSION'
+
+[18:32:10] === RESULT apk-perms exit=0 (1s)
+[18:32:10] === STEP android-unit (docker zaghlol-flutter-android:3.47.9, /work/app)
+To honour the JVM settings for this build a single-use Daemon process will be forked. For more on this, please refer to https://docs.gradle.org/9.3.1/userguide/gradle_daemon.html#sec:disabling_the_daemon in the Gradle documentation.
+Daemon will be stopped at the end of the build 
+> Task :gradle:checkKotlinGradlePluginConfigurationErrors SKIPPED
+> Task :gradle:pluginDescriptors
+> Task :gradle:processResources
+
+> Task :gradle:compileKotlin
+w: file:///opt/flutter/packages/flutter_tools/gradle/src/main/kotlin/Deeplink.kt:13:5 This annotation is currently applied to the value parameter only, but in the future it will also be applied to property.
+- To opt in to applying to both value parameter and property, add '-Xannotation-default-target=param-property' to your compiler arguments.
+- To keep applying to the value parameter only, use the '@param:' annotation target.
+
+See https://youtrack.jetbrains.com/issue/KT-73255 for more details.
+w: file:///opt/flutter/packages/flutter_tools/gradle/src/main/kotlin/Deeplink.kt:15:5 This annotation is currently applied to the value parameter only, but in the future it will also be applied to property.
+- To opt in to applying to both value parameter and property, add '-Xannotation-default-target=param-property' to your compiler arguments.
+- To keep applying to the value parameter only, use the '@param:' annotation target.
+
+See https://youtrack.jetbrains.com/issue/KT-73255 for more details.
+w: file:///opt/flutter/packages/flutter_tools/gradle/src/main/kotlin/Deeplink.kt:17:5 This annotation is currently applied to the value parameter only, but in the future it will also be applied to property.
+- To opt in to applying to both value parameter and property, add '-Xannotation-default-target=param-property' to your compiler arguments.
+- To keep applying to the value parameter only, use the '@param:' annotation target.
+
+See https://youtrack.jetbrains.com/issue/KT-73255 for more details.
+w: file:///opt/flutter/packages/flutter_tools/gradle/src/main/kotlin/Deeplink.kt:19:5 This annotation is currently applied to the value parameter only, but in the future it will also be applied to property.
+- To opt in to applying to both value parameter and property, add '-Xannotation-default-target=param-property' to your compiler arguments.
+- To keep applying to the value parameter only, use the '@param:' annotation target.
+
+See https://youtrack.jetbrains.com/issue/KT-73255 for more details.
+w: file:///opt/flutter/packages/flutter_tools/gradle/src/main/kotlin/FlutterPlugin.kt:12:8 'interface ApkVariant : Any, BaseVariant, InstallableVariant, AndroidArtifactVariant, InternalBaseVariant' is deprecated. Deprecated in Java.
+w: file:///opt/flutter/packages/flutter_tools/gradle/src/main/kotlin/FlutterPlugin.kt:664:69 'interface ApkVariant : Any, BaseVariant, InstallableVariant, AndroidArtifactVariant, InternalBaseVariant' is deprecated. Deprecated in Java.
+w: file:///opt/flutter/packages/flutter_tools/gradle/src/main/kotlin/FlutterPluginUtils.kt:766:29 Condition is always 'true'.
+w: file:///opt/flutter/packages/flutter_tools/gradle/src/main/kotlin/plugins/PluginHandler.kt:168:70 Unchecked cast of 'NamedDomainObjectContainer<out BuildType>' to 'NamedDomainObjectContainer<BuildType>'.
+w: file:///opt/flutter/packages/flutter_tools/gradle/src/main/kotlin/plugins/PluginHandler.kt:169:75 Unchecked cast of 'NamedDomainObjectContainer<out BuildType>' to 'NamedDomainObjectContainer<BuildType>'.
+
+> Task :gradle:compileJava NO-SOURCE
+> Task :gradle:compileGroovy NO-SOURCE
+> Task :gradle:classes
+> Task :gradle:jar
+
+> Configure project :app
+WARNING: The option setting 'android.builtInKotlin=false' is deprecated.
+The current default is 'true'.
+It will be removed in version 10.0 of the Android Gradle plugin.
+WARNING: The option setting 'android.newDsl=false' is deprecated.
+The current default is 'true'.
+It will be removed in version 10.0 of the Android Gradle plugin.
+w: ?? Deprecated 'org.jetbrains.kotlin.android' plugin usage
+The 'org.jetbrains.kotlin.android' plugin in project ':app' is no longer required for Kotlin support since AGP 9.0.
+Solution: Remove both `android.builtInKotlin=true` and `android.newDsl=false` from `gradle.properties`, then migrate to built-in Kotlin.
+See https://kotl.in/gradle/agp-built-in-kotlin for more details.
+
+
+> Configure project :cryptography_flutter
+w: ?? Deprecated 'org.jetbrains.kotlin.android' plugin usage
+The 'org.jetbrains.kotlin.android' plugin in project ':cryptography_flutter' is no longer required for Kotlin support since AGP 9.0.
+Solution: Remove both `android.builtInKotlin=true` and `android.newDsl=false` from `gradle.properties`, then migrate to built-in Kotlin.
+See https://kotl.in/gradle/agp-built-in-kotlin for more details.
+
+
+> Configure project :google_sign_in_android
+w: ?? Deprecated 'org.jetbrains.kotlin.android' plugin usage
+The 'org.jetbrains.kotlin.android' plugin in project ':google_sign_in_android' is no longer required for Kotlin support since AGP 9.0.
+Solution: Remove both `android.builtInKotlin=true` and `android.newDsl=false` from `gradle.properties`, then migrate to built-in Kotlin.
+See https://kotl.in/gradle/agp-built-in-kotlin for more details.
+
+
+> Configure project :in_app_purchase_android
+w: ?? Deprecated 'org.jetbrains.kotlin.android' plugin usage
+The 'org.jetbrains.kotlin.android' plugin in project ':in_app_purchase_android' is no longer required for Kotlin support since AGP 9.0.
+Solution: Remove both `android.builtInKotlin=true` and `android.newDsl=false` from `gradle.properties`, then migrate to built-in Kotlin.
+See https://kotl.in/gradle/agp-built-in-kotlin for more details.
+
+
+> Configure project :integration_test
+w: ?? Deprecated 'org.jetbrains.kotlin.android' plugin usage
+The 'org.jetbrains.kotlin.android' plugin in project ':integration_test' is no longer required for Kotlin support since AGP 9.0.
+Solution: Remove both `android.builtInKotlin=true` and `android.newDsl=false` from `gradle.properties`, then migrate to built-in Kotlin.
+See https://kotl.in/gradle/agp-built-in-kotlin for more details.
+
+
+> Configure project :jni
+w: ?? Deprecated 'org.jetbrains.kotlin.android' plugin usage
+The 'org.jetbrains.kotlin.android' plugin in project ':jni' is no longer required for Kotlin support since AGP 9.0.
+Solution: Remove both `android.builtInKotlin=true` and `android.newDsl=false` from `gradle.properties`, then migrate to built-in Kotlin.
+See https://kotl.in/gradle/agp-built-in-kotlin for more details.
+
+
+> Configure project :jni_flutter
+w: ?? Deprecated 'org.jetbrains.kotlin.android' plugin usage
+The 'org.jetbrains.kotlin.android' plugin in project ':jni_flutter' is no longer required for Kotlin support since AGP 9.0.
+Solution: Remove both `android.builtInKotlin=true` and `android.newDsl=false` from `gradle.properties`, then migrate to built-in Kotlin.
+See https://kotl.in/gradle/agp-built-in-kotlin for more details.
+
+
+> Configure project :sign_in_with_apple
+w: ?? Deprecated 'org.jetbrains.kotlin.android' plugin usage
+The 'org.jetbrains.kotlin.android' plugin in project ':sign_in_with_apple' is no longer required for Kotlin support since AGP 9.0.
+Solution: Remove both `android.builtInKotlin=true` and `android.newDsl=false` from `gradle.properties`, then migrate to built-in Kotlin.
+See https://kotl.in/gradle/agp-built-in-kotlin for more details.
+
+
+> Configure project :url_launcher_android
+w: ?? Deprecated 'org.jetbrains.kotlin.android' plugin usage
+The 'org.jetbrains.kotlin.android' plugin in project ':url_launcher_android' is no longer required for Kotlin support since AGP 9.0.
+Solution: Remove both `android.builtInKotlin=true` and `android.newDsl=false` from `gradle.properties`, then migrate to built-in Kotlin.
+See https://kotl.in/gradle/agp-built-in-kotlin for more details.
+
+WARNING: Your app uses the following plugins that apply Kotlin Gradle Plugin (KGP): cryptography_flutter
+Future versions of Flutter will fail to build if your app uses plugins that apply KGP.
+
+Please check the changelogs of these plugins and upgrade to a version that supports Built-in Kotlin.
+If no such version exists, report the issue to the plugin. If necessary, here is a guide on filing
+an issue against a plugin: https://docs.flutter.dev/release/breaking-changes/migrate-to-built-in-kotlin/for-app-developers#report-incompatible-kotlin-gradle-plugin-usage-to-plugin-authors
+
+If you are a plugin author, please migrate your plugin to Built-in Kotlin using this guide: https://docs.flutter.dev/release/breaking-changes/migrate-to-built-in-kotlin/for-plugin-authors
+Warning: SDK processing. This version only understands SDK XML versions up to 3 but an SDK XML file of version 4 was encountered. This can happen if you use versions of Android Studio and the command-line tools that were released at different times.
+Checking the license for package Android SDK Platform 35 in /opt/android-sdk/licenses
+License for package Android SDK Platform 35 accepted.
+Preparing "Install Android SDK Platform 35 (revision 2)".
+"Install Android SDK Platform 35 (revision 2)" ready.
+Installing Android SDK Platform 35 in /opt/android-sdk/platforms/android-35
+"Install Android SDK Platform 35 (revision 2)" complete.
+"Install Android SDK Platform 35 (revision 2)" finished.
+[=========                              ] 25%                                   
+> Task :app:checkKotlinGradlePluginConfigurationErrors SKIPPED
+> Task :app:validateCompileSdkVersion
+> Task :app:preBuild
+> Task :app:preDevNoSmsDebugBuild
+> Task :app:generateDevNoSmsDebugBuildConfig UP-TO-DATE
+> Task :app:cleanMergeDevNoSmsDebugAssets
+> Task :app:compileFlutterBuildDevNoSmsDebug
+> Task :app:generateDevNoSmsDebugAssets UP-TO-DATE
+> Task :cryptography_flutter:generateDebugAssets UP-TO-DATE
+> Task :cryptography_flutter:preBuild UP-TO-DATE
+> Task :cryptography_flutter:preDebugBuild UP-TO-DATE
+> Task :cryptography_flutter:mergeDebugAssets UP-TO-DATE
+> Task :google_sign_in_android:generateDebugAssets UP-TO-DATE
+> Task :google_sign_in_android:preBuild UP-TO-DATE
+> Task :google_sign_in_android:preDebugBuild UP-TO-DATE
+> Task :google_sign_in_android:mergeDebugAssets UP-TO-DATE
+> Task :in_app_purchase_android:generateDebugAssets UP-TO-DATE
+> Task :in_app_purchase_android:preBuild UP-TO-DATE
+> Task :in_app_purchase_android:preDebugBuild UP-TO-DATE
+> Task :in_app_purchase_android:mergeDebugAssets UP-TO-DATE
+> Task :integration_test:generateDebugAssets UP-TO-DATE
+> Task :integration_test:preBuild UP-TO-DATE
+> Task :integration_test:preDebugBuild UP-TO-DATE
+> Task :integration_test:mergeDebugAssets UP-TO-DATE
+> Task :jni:generateDebugAssets UP-TO-DATE
+> Task :jni:preBuild UP-TO-DATE
+> Task :jni:preDebugBuild UP-TO-DATE
+> Task :jni:mergeDebugAssets UP-TO-DATE
+> Task :jni_flutter:generateDebugAssets UP-TO-DATE
+> Task :jni_flutter:preBuild UP-TO-DATE
+> Task :jni_flutter:preDebugBuild UP-TO-DATE
+> Task :jni_flutter:mergeDebugAssets UP-TO-DATE
+> Task :sign_in_with_apple:generateDebugAssets UP-TO-DATE
+> Task :sign_in_with_apple:preBuild UP-TO-DATE
+> Task :sign_in_with_apple:preDebugBuild UP-TO-DATE
+> Task :sign_in_with_apple:mergeDebugAssets UP-TO-DATE
+> Task :url_launcher_android:generateDebugAssets UP-TO-DATE
+> Task :url_launcher_android:preBuild UP-TO-DATE
+> Task :url_launcher_android:preDebugBuild UP-TO-DATE
+> Task :url_launcher_android:mergeDebugAssets UP-TO-DATE
+> Task :app:mergeDevNoSmsDebugAssets
+> Task :app:copyFlutterAssetsDevNoSmsDebug
+> Task :app:generateDevNoSmsDebugResValues UP-TO-DATE
+> Task :app:generateDevNoSmsDebugResources UP-TO-DATE
+> Task :app:packageDevNoSmsDebugResources UP-TO-DATE
+> Task :cryptography_flutter:processDebugNavigationResources UP-TO-DATE
+> Task :google_sign_in_android:processDebugNavigationResources UP-TO-DATE
+> Task :in_app_purchase_android:processDebugNavigationResources UP-TO-DATE
+> Task :integration_test:processDebugNavigationResources UP-TO-DATE
+> Task :jni:processDebugNavigationResources UP-TO-DATE
+> Task :jni_flutter:processDebugNavigationResources UP-TO-DATE
+> Task :sign_in_with_apple:processDebugNavigationResources UP-TO-DATE
+> Task :url_launcher_android:processDebugNavigationResources UP-TO-DATE
+> Task :app:processDevNoSmsDebugNavigationResources UP-TO-DATE
+> Task :app:parseDevNoSmsDebugLocalResources UP-TO-DATE
+> Task :app:generateDevNoSmsDebugRFile UP-TO-DATE
+> Task :cryptography_flutter:checkKotlinGradlePluginConfigurationErrors SKIPPED
+> Task :cryptography_flutter:generateDebugResources UP-TO-DATE
+> Task :cryptography_flutter:packageDebugResources UP-TO-DATE
+> Task :cryptography_flutter:parseDebugLocalResources UP-TO-DATE
+> Task :cryptography_flutter:generateDebugRFile UP-TO-DATE
+> Task :cryptography_flutter:compileDebugKotlin UP-TO-DATE
+> Task :cryptography_flutter:javaPreCompileDebug UP-TO-DATE
+> Task :cryptography_flutter:compileDebugJavaWithJavac NO-SOURCE
+> Task :cryptography_flutter:bundleLibCompileToJarDebug UP-TO-DATE
+> Task :google_sign_in_android:checkKotlinGradlePluginConfigurationErrors SKIPPED
+> Task :google_sign_in_android:generateDebugResources UP-TO-DATE
+> Task :google_sign_in_android:packageDebugResources UP-TO-DATE
+> Task :google_sign_in_android:parseDebugLocalResources UP-TO-DATE
+> Task :google_sign_in_android:generateDebugRFile UP-TO-DATE
+> Task :google_sign_in_android:compileDebugKotlin UP-TO-DATE
+> Task :google_sign_in_android:javaPreCompileDebug UP-TO-DATE
+> Task :google_sign_in_android:compileDebugJavaWithJavac NO-SOURCE
+> Task :google_sign_in_android:bundleLibCompileToJarDebug UP-TO-DATE
+> Task :in_app_purchase_android:checkKotlinGradlePluginConfigurationErrors SKIPPED
+> Task :in_app_purchase_android:generateDebugBuildConfig UP-TO-DATE
+> Task :in_app_purchase_android:generateDebugResources UP-TO-DATE
+> Task :in_app_purchase_android:packageDebugResources UP-TO-DATE
+> Task :in_app_purchase_android:parseDebugLocalResources UP-TO-DATE
+> Task :in_app_purchase_android:generateDebugRFile UP-TO-DATE
+> Task :in_app_purchase_android:compileDebugKotlin UP-TO-DATE
+> Task :in_app_purchase_android:javaPreCompileDebug UP-TO-DATE
+> Task :in_app_purchase_android:compileDebugJavaWithJavac UP-TO-DATE
+> Task :in_app_purchase_android:bundleLibCompileToJarDebug UP-TO-DATE
+> Task :integration_test:checkKotlinGradlePluginConfigurationErrors SKIPPED
+> Task :integration_test:generateDebugResources UP-TO-DATE
+> Task :integration_test:packageDebugResources UP-TO-DATE
+> Task :integration_test:parseDebugLocalResources UP-TO-DATE
+> Task :integration_test:generateDebugRFile UP-TO-DATE
+> Task :integration_test:compileDebugKotlin NO-SOURCE
+> Task :integration_test:javaPreCompileDebug UP-TO-DATE
+> Task :integration_test:compileDebugJavaWithJavac UP-TO-DATE
+> Task :integration_test:bundleLibCompileToJarDebug UP-TO-DATE
+> Task :jni:checkKotlinGradlePluginConfigurationErrors SKIPPED
+> Task :jni:generateDebugResources UP-TO-DATE
+> Task :jni:packageDebugResources UP-TO-DATE
+> Task :jni:parseDebugLocalResources UP-TO-DATE
+> Task :jni:generateDebugRFile UP-TO-DATE
+> Task :jni:compileDebugKotlin NO-SOURCE
+> Task :jni:javaPreCompileDebug UP-TO-DATE
+> Task :jni:compileDebugJavaWithJavac UP-TO-DATE
+> Task :jni:bundleLibCompileToJarDebug UP-TO-DATE
+> Task :jni_flutter:checkKotlinGradlePluginConfigurationErrors SKIPPED
+> Task :jni_flutter:generateDebugResources UP-TO-DATE
+> Task :jni_flutter:packageDebugResources UP-TO-DATE
+> Task :jni_flutter:parseDebugLocalResources UP-TO-DATE
+> Task :jni_flutter:generateDebugRFile UP-TO-DATE
+> Task :jni_flutter:compileDebugKotlin NO-SOURCE
+> Task :jni_flutter:javaPreCompileDebug UP-TO-DATE
+> Task :jni_flutter:compileDebugJavaWithJavac UP-TO-DATE
+> Task :jni_flutter:bundleLibCompileToJarDebug UP-TO-DATE
+> Task :sign_in_with_apple:checkKotlinGradlePluginConfigurationErrors SKIPPED
+> Task :sign_in_with_apple:generateDebugResources UP-TO-DATE
+> Task :sign_in_with_apple:packageDebugResources UP-TO-DATE
+> Task :sign_in_with_apple:parseDebugLocalResources UP-TO-DATE
+> Task :sign_in_with_apple:generateDebugRFile UP-TO-DATE
+> Task :sign_in_with_apple:compileDebugKotlin UP-TO-DATE
+> Task :sign_in_with_apple:javaPreCompileDebug UP-TO-DATE
+> Task :sign_in_with_apple:compileDebugJavaWithJavac NO-SOURCE
+> Task :sign_in_with_apple:bundleLibCompileToJarDebug UP-TO-DATE
+> Task :url_launcher_android:checkKotlinGradlePluginConfigurationErrors SKIPPED
+> Task :url_launcher_android:generateDebugBuildConfig UP-TO-DATE
+> Task :url_launcher_android:generateDebugResources UP-TO-DATE
+> Task :url_launcher_android:packageDebugResources UP-TO-DATE
+> Task :url_launcher_android:parseDebugLocalResources UP-TO-DATE
+> Task :url_launcher_android:generateDebugRFile UP-TO-DATE
+> Task :url_launcher_android:compileDebugKotlin UP-TO-DATE
+> Task :url_launcher_android:javaPreCompileDebug UP-TO-DATE
+> Task :url_launcher_android:compileDebugJavaWithJavac UP-TO-DATE
+> Task :url_launcher_android:bundleLibCompileToJarDebug UP-TO-DATE
+> Task :app:compileDevNoSmsDebugKotlin UP-TO-DATE
+> Task :app:javaPreCompileDevNoSmsDebug UP-TO-DATE
+> Task :app:compileDevNoSmsDebugJavaWithJavac UP-TO-DATE
+> Task :cryptography_flutter:writeDebugAarMetadata UP-TO-DATE
+> Task :google_sign_in_android:writeDebugAarMetadata UP-TO-DATE
+> Task :in_app_purchase_android:writeDebugAarMetadata UP-TO-DATE
+> Task :integration_test:writeDebugAarMetadata UP-TO-DATE
+> Task :jni:writeDebugAarMetadata UP-TO-DATE
+> Task :jni_flutter:writeDebugAarMetadata UP-TO-DATE
+> Task :sign_in_with_apple:writeDebugAarMetadata UP-TO-DATE
+> Task :url_launcher_android:writeDebugAarMetadata UP-TO-DATE
+> Task :app:checkDevNoSmsDebugAarMetadata UP-TO-DATE
+> Task :app:mapDevNoSmsDebugSourceSetPaths UP-TO-DATE
+> Task :app:compileDevNoSmsDebugNavigationResources UP-TO-DATE
+> Task :app:mergeDevNoSmsDebugResources UP-TO-DATE
+> Task :app:createDevNoSmsDebugCompatibleScreenManifests UP-TO-DATE
+> Task :app:extractDeepLinksDevNoSmsDebug UP-TO-DATE
+> Task :cryptography_flutter:extractDeepLinksDebug UP-TO-DATE
+> Task :cryptography_flutter:processDebugManifest UP-TO-DATE
+> Task :google_sign_in_android:extractDeepLinksDebug UP-TO-DATE
+> Task :google_sign_in_android:processDebugManifest UP-TO-DATE
+> Task :in_app_purchase_android:extractDeepLinksDebug UP-TO-DATE
+> Task :in_app_purchase_android:processDebugManifest UP-TO-DATE
+> Task :integration_test:extractDeepLinksDebug UP-TO-DATE
+> Task :integration_test:processDebugManifest UP-TO-DATE
+> Task :jni:extractDeepLinksDebug UP-TO-DATE
+> Task :jni:processDebugManifest UP-TO-DATE
+> Task :jni_flutter:extractDeepLinksDebug UP-TO-DATE
+> Task :jni_flutter:processDebugManifest UP-TO-DATE
+> Task :sign_in_with_apple:extractDeepLinksDebug UP-TO-DATE
+> Task :sign_in_with_apple:processDebugManifest UP-TO-DATE
+> Task :url_launcher_android:extractDeepLinksDebug UP-TO-DATE
+> Task :url_launcher_android:processDebugManifest UP-TO-DATE
+> Task :app:processDevNoSmsDebugMainManifest UP-TO-DATE
+> Task :app:outputDevNoSmsDebugAppLinkSettings UP-TO-DATE
+> Task :app:processDevNoSmsDebugManifest UP-TO-DATE
+> Task :app:processDevNoSmsDebugManifestForPackage UP-TO-DATE
+> Task :cryptography_flutter:mapDebugSourceSetPaths UP-TO-DATE
+> Task :cryptography_flutter:compileDebugLibraryResources UP-TO-DATE
+> Task :google_sign_in_android:mapDebugSourceSetPaths UP-TO-DATE
+> Task :google_sign_in_android:compileDebugLibraryResources UP-TO-DATE
+> Task :in_app_purchase_android:mapDebugSourceSetPaths UP-TO-DATE
+> Task :in_app_purchase_android:compileDebugLibraryResources UP-TO-DATE
+> Task :integration_test:mapDebugSourceSetPaths UP-TO-DATE
+> Task :integration_test:compileDebugLibraryResources UP-TO-DATE
+> Task :jni:mapDebugSourceSetPaths UP-TO-DATE
+> Task :jni:compileDebugLibraryResources UP-TO-DATE
+> Task :jni_flutter:mapDebugSourceSetPaths UP-TO-DATE
+> Task :jni_flutter:compileDebugLibraryResources UP-TO-DATE
+> Task :sign_in_with_apple:mapDebugSourceSetPaths UP-TO-DATE
+> Task :sign_in_with_apple:compileDebugLibraryResources UP-TO-DATE
+> Task :url_launcher_android:mapDebugSourceSetPaths UP-TO-DATE
+> Task :url_launcher_android:compileDebugLibraryResources UP-TO-DATE
+> Task :app:processDevNoSmsDebugResources UP-TO-DATE
+> Task :app:preDevNoSmsDebugUnitTestBuild
+> Task :app:javaPreCompileDevNoSmsDebugUnitTest
+> Task :app:processDevNoSmsDebugJavaRes UP-TO-DATE
+> Task :cryptography_flutter:bundleLibRuntimeToJarDebug UP-TO-DATE
+> Task :cryptography_flutter:processDebugJavaRes UP-TO-DATE
+> Task :google_sign_in_android:bundleLibRuntimeToJarDebug UP-TO-DATE
+> Task :google_sign_in_android:processDebugJavaRes UP-TO-DATE
+> Task :in_app_purchase_android:bundleLibRuntimeToJarDebug UP-TO-DATE
+> Task :in_app_purchase_android:processDebugJavaRes UP-TO-DATE
+> Task :integration_test:bundleLibRuntimeToJarDebug UP-TO-DATE
+> Task :integration_test:processDebugJavaRes NO-SOURCE
+> Task :jni:bundleLibRuntimeToJarDebug UP-TO-DATE
+> Task :jni:processDebugJavaRes NO-SOURCE
+> Task :jni_flutter:bundleLibRuntimeToJarDebug UP-TO-DATE
+> Task :jni_flutter:processDebugJavaRes NO-SOURCE
+> Task :sign_in_with_apple:bundleLibRuntimeToJarDebug UP-TO-DATE
+> Task :sign_in_with_apple:processDebugJavaRes UP-TO-DATE
+> Task :url_launcher_android:bundleLibRuntimeToJarDebug UP-TO-DATE
+> Task :url_launcher_android:processDebugJavaRes UP-TO-DATE
+> Task :app:bundleDevNoSmsDebugClassesToRuntimeJar
+> Task :app:bundleDevNoSmsDebugClassesToCompileJar
+> Task :app:compileDevNoSmsDebugUnitTestKotlin
+w: file:///work/app/android/app/src/test/kotlin/app/zaghlol/platform/guard/GuardConfigReaderTest.kt:89:65 Unchecked cast of 'Any?' to 'MutableMap<String, Any?>'.
+w: file:///work/app/android/app/src/test/kotlin/app/zaghlol/platform/guard/GuardConfigReaderTest.kt:101:92 Unchecked cast of 'Any?' to 'MutableMap<String, Any?>'.
+w: file:///work/app/android/app/src/test/kotlin/app/zaghlol/platform/guard/GuardConfigReaderTest.kt:102:97 Unchecked cast of 'Any?' to 'MutableMap<String, Any?>'.
+w: file:///work/app/android/app/src/test/kotlin/app/zaghlol/platform/spool/CaptureStatusStoreTest.kt:83:35 Only safe (?.) or non-null asserted (!!.) calls are allowed on a nullable receiver of type 'File?'.
+w: file:///work/app/android/app/src/test/kotlin/app/zaghlol/platform/spool/CaptureStatusStoreTest.kt:128:27 Only safe (?.) or non-null asserted (!!.) calls are allowed on a nullable receiver of type 'File?'.
+
+> Task :app:compileDevNoSmsDebugUnitTestJavaWithJavac NO-SOURCE
+> Task :app:processDevNoSmsDebugUnitTestJavaRes
+> Task :app:testDevNoSmsDebugUnitTest
+
+[Incubating] Problems report is available at: file:///work/app/build/reports/problems/problems-report.html
+
+Deprecated Gradle features were used in this build, making it incompatible with Gradle 10.
+
+You can use '--warning-mode all' to show the individual deprecation warnings and determine if they come from your own scripts or plugins.
+
+For more on this, please refer to https://docs.gradle.org/9.3.1/userguide/command_line_interface.html#sec:command_line_warnings in the Gradle documentation.
+
+BUILD SUCCESSFUL in 2m 57s
+166 actionable tasks: 15 executed, 151 up-to-date
+kotlin testcases: 594
+
+[18:35:09] === RESULT android-unit exit=0 (179s)
+[18:35:09] === STEP android-lint (docker zaghlol-flutter-android:3.47.9, /work/app)
+To honour the JVM settings for this build a single-use Daemon process will be forked. For more on this, please refer to https://docs.gradle.org/9.3.1/userguide/gradle_daemon.html#sec:disabling_the_daemon in the Gradle documentation.
+Daemon will be stopped at the end of the build 
+> Task :gradle:checkKotlinGradlePluginConfigurationErrors SKIPPED
+> Task :gradle:pluginDescriptors
+> Task :gradle:processResources
+
+> Task :gradle:compileKotlin
+w: file:///opt/flutter/packages/flutter_tools/gradle/src/main/kotlin/Deeplink.kt:13:5 This annotation is currently applied to the value parameter only, but in the future it will also be applied to property.
+- To opt in to applying to both value parameter and property, add '-Xannotation-default-target=param-property' to your compiler arguments.
+- To keep applying to the value parameter only, use the '@param:' annotation target.
+
+See https://youtrack.jetbrains.com/issue/KT-73255 for more details.
+w: file:///opt/flutter/packages/flutter_tools/gradle/src/main/kotlin/Deeplink.kt:15:5 This annotation is currently applied to the value parameter only, but in the future it will also be applied to property.
+- To opt in to applying to both value parameter and property, add '-Xannotation-default-target=param-property' to your compiler arguments.
+- To keep applying to the value parameter only, use the '@param:' annotation target.
+
+See https://youtrack.jetbrains.com/issue/KT-73255 for more details.
+w: file:///opt/flutter/packages/flutter_tools/gradle/src/main/kotlin/Deeplink.kt:17:5 This annotation is currently applied to the value parameter only, but in the future it will also be applied to property.
+- To opt in to applying to both value parameter and property, add '-Xannotation-default-target=param-property' to your compiler arguments.
+- To keep applying to the value parameter only, use the '@param:' annotation target.
+
+See https://youtrack.jetbrains.com/issue/KT-73255 for more details.
+w: file:///opt/flutter/packages/flutter_tools/gradle/src/main/kotlin/Deeplink.kt:19:5 This annotation is currently applied to the value parameter only, but in the future it will also be applied to property.
+- To opt in to applying to both value parameter and property, add '-Xannotation-default-target=param-property' to your compiler arguments.
+- To keep applying to the value parameter only, use the '@param:' annotation target.
+
+See https://youtrack.jetbrains.com/issue/KT-73255 for more details.
+w: file:///opt/flutter/packages/flutter_tools/gradle/src/main/kotlin/FlutterPlugin.kt:12:8 'interface ApkVariant : Any, BaseVariant, InstallableVariant, AndroidArtifactVariant, InternalBaseVariant' is deprecated. Deprecated in Java.
+w: file:///opt/flutter/packages/flutter_tools/gradle/src/main/kotlin/FlutterPlugin.kt:664:69 'interface ApkVariant : Any, BaseVariant, InstallableVariant, AndroidArtifactVariant, InternalBaseVariant' is deprecated. Deprecated in Java.
+w: file:///opt/flutter/packages/flutter_tools/gradle/src/main/kotlin/FlutterPluginUtils.kt:766:29 Condition is always 'true'.
+w: file:///opt/flutter/packages/flutter_tools/gradle/src/main/kotlin/plugins/PluginHandler.kt:168:70 Unchecked cast of 'NamedDomainObjectContainer<out BuildType>' to 'NamedDomainObjectContainer<BuildType>'.
+w: file:///opt/flutter/packages/flutter_tools/gradle/src/main/kotlin/plugins/PluginHandler.kt:169:75 Unchecked cast of 'NamedDomainObjectContainer<out BuildType>' to 'NamedDomainObjectContainer<BuildType>'.
+
+> Task :gradle:compileJava NO-SOURCE
+> Task :gradle:compileGroovy NO-SOURCE
+> Task :gradle:classes
+> Task :gradle:jar
+
+> Configure project :app
+WARNING: The option setting 'android.builtInKotlin=false' is deprecated.
+The current default is 'true'.
+It will be removed in version 10.0 of the Android Gradle plugin.
+WARNING: The option setting 'android.newDsl=false' is deprecated.
+The current default is 'true'.
+It will be removed in version 10.0 of the Android Gradle plugin.
+w: ?? Deprecated 'org.jetbrains.kotlin.android' plugin usage
+The 'org.jetbrains.kotlin.android' plugin in project ':app' is no longer required for Kotlin support since AGP 9.0.
+Solution: Remove both `android.builtInKotlin=true` and `android.newDsl=false` from `gradle.properties`, then migrate to built-in Kotlin.
+See https://kotl.in/gradle/agp-built-in-kotlin for more details.
+
+
+> Configure project :cryptography_flutter
+w: ?? Deprecated 'org.jetbrains.kotlin.android' plugin usage
+The 'org.jetbrains.kotlin.android' plugin in project ':cryptography_flutter' is no longer required for Kotlin support since AGP 9.0.
+Solution: Remove both `android.builtInKotlin=true` and `android.newDsl=false` from `gradle.properties`, then migrate to built-in Kotlin.
+See https://kotl.in/gradle/agp-built-in-kotlin for more details.
+
+
+> Configure project :google_sign_in_android
+w: ?? Deprecated 'org.jetbrains.kotlin.android' plugin usage
+The 'org.jetbrains.kotlin.android' plugin in project ':google_sign_in_android' is no longer required for Kotlin support since AGP 9.0.
+Solution: Remove both `android.builtInKotlin=true` and `android.newDsl=false` from `gradle.properties`, then migrate to built-in Kotlin.
+See https://kotl.in/gradle/agp-built-in-kotlin for more details.
+
+
+> Configure project :in_app_purchase_android
+w: ?? Deprecated 'org.jetbrains.kotlin.android' plugin usage
+The 'org.jetbrains.kotlin.android' plugin in project ':in_app_purchase_android' is no longer required for Kotlin support since AGP 9.0.
+Solution: Remove both `android.builtInKotlin=true` and `android.newDsl=false` from `gradle.properties`, then migrate to built-in Kotlin.
+See https://kotl.in/gradle/agp-built-in-kotlin for more details.
+
+
+> Configure project :integration_test
+w: ?? Deprecated 'org.jetbrains.kotlin.android' plugin usage
+The 'org.jetbrains.kotlin.android' plugin in project ':integration_test' is no longer required for Kotlin support since AGP 9.0.
+Solution: Remove both `android.builtInKotlin=true` and `android.newDsl=false` from `gradle.properties`, then migrate to built-in Kotlin.
+See https://kotl.in/gradle/agp-built-in-kotlin for more details.
+
+
+> Configure project :jni
+w: ?? Deprecated 'org.jetbrains.kotlin.android' plugin usage
+The 'org.jetbrains.kotlin.android' plugin in project ':jni' is no longer required for Kotlin support since AGP 9.0.
+Solution: Remove both `android.builtInKotlin=true` and `android.newDsl=false` from `gradle.properties`, then migrate to built-in Kotlin.
+See https://kotl.in/gradle/agp-built-in-kotlin for more details.
+
+
+> Configure project :jni_flutter
+w: ?? Deprecated 'org.jetbrains.kotlin.android' plugin usage
+The 'org.jetbrains.kotlin.android' plugin in project ':jni_flutter' is no longer required for Kotlin support since AGP 9.0.
+Solution: Remove both `android.builtInKotlin=true` and `android.newDsl=false` from `gradle.properties`, then migrate to built-in Kotlin.
+See https://kotl.in/gradle/agp-built-in-kotlin for more details.
+
+
+> Configure project :sign_in_with_apple
+w: ?? Deprecated 'org.jetbrains.kotlin.android' plugin usage
+The 'org.jetbrains.kotlin.android' plugin in project ':sign_in_with_apple' is no longer required for Kotlin support since AGP 9.0.
+Solution: Remove both `android.builtInKotlin=true` and `android.newDsl=false` from `gradle.properties`, then migrate to built-in Kotlin.
+See https://kotl.in/gradle/agp-built-in-kotlin for more details.
+
+
+> Configure project :url_launcher_android
+w: ?? Deprecated 'org.jetbrains.kotlin.android' plugin usage
+The 'org.jetbrains.kotlin.android' plugin in project ':url_launcher_android' is no longer required for Kotlin support since AGP 9.0.
+Solution: Remove both `android.builtInKotlin=true` and `android.newDsl=false` from `gradle.properties`, then migrate to built-in Kotlin.
+See https://kotl.in/gradle/agp-built-in-kotlin for more details.
+
+WARNING: Your app uses the following plugins that apply Kotlin Gradle Plugin (KGP): cryptography_flutter
+Future versions of Flutter will fail to build if your app uses plugins that apply KGP.
+
+Please check the changelogs of these plugins and upgrade to a version that supports Built-in Kotlin.
+If no such version exists, report the issue to the plugin. If necessary, here is a guide on filing
+an issue against a plugin: https://docs.flutter.dev/release/breaking-changes/migrate-to-built-in-kotlin/for-app-developers#report-incompatible-kotlin-gradle-plugin-usage-to-plugin-authors
+
+If you are a plugin author, please migrate your plugin to Built-in Kotlin using this guide: https://docs.flutter.dev/release/breaking-changes/migrate-to-built-in-kotlin/for-plugin-authors
+Warning: SDK processing. This version only understands SDK XML versions up to 3 but an SDK XML file of version 4 was encountered. This can happen if you use versions of Android Studio and the command-line tools that were released at different times.
+Checking the license for package Android SDK Platform 35 in /opt/android-sdk/licenses
+License for package Android SDK Platform 35 accepted.
+Preparing "Install Android SDK Platform 35 (revision 2)".
+"Install Android SDK Platform 35 (revision 2)" ready.
+Installing Android SDK Platform 35 in /opt/android-sdk/platforms/android-35
+"Install Android SDK Platform 35 (revision 2)" complete.
+"Install Android SDK Platform 35 (revision 2)" finished.
+[=========                              ] 25%                                   
+> Task :cryptography_flutter:preBuild UP-TO-DATE
+> Task :cryptography_flutter:preDebugBuild UP-TO-DATE
+> Task :cryptography_flutter:checkDebugAarMetadata
+> Task :cryptography_flutter:mergeDebugJniLibFolders UP-TO-DATE
+> Task :cryptography_flutter:mergeDebugNativeLibs NO-SOURCE
+> Task :cryptography_flutter:stripDebugDebugSymbols NO-SOURCE
+> Task :cryptography_flutter:checkKotlinGradlePluginConfigurationErrors SKIPPED
+> Task :cryptography_flutter:generateDebugResources UP-TO-DATE
+> Task :cryptography_flutter:copyDebugJniLibsProjectAndLocalJars
+> Task :cryptography_flutter:packageDebugResources UP-TO-DATE
+> Task :cryptography_flutter:processDebugNavigationResources UP-TO-DATE
+> Task :cryptography_flutter:parseDebugLocalResources UP-TO-DATE
+> Task :cryptography_flutter:generateDebugRFile UP-TO-DATE
+> Task :cryptography_flutter:compileDebugKotlin UP-TO-DATE
+> Task :cryptography_flutter:extractDebugAnnotations
+> Task :cryptography_flutter:extractDeepLinksForAarDebug
+> Task :cryptography_flutter:generateDebugAssets UP-TO-DATE
+> Task :cryptography_flutter:mergeDebugAssets UP-TO-DATE
+> Task :cryptography_flutter:javaPreCompileDebug UP-TO-DATE
+> Task :cryptography_flutter:compileDebugJavaWithJavac NO-SOURCE
+> Task :cryptography_flutter:mergeDebugGeneratedProguardFiles
+> Task :cryptography_flutter:mergeDebugConsumerProguardFiles
+> Task :cryptography_flutter:prepareDebugArtProfile
+> Task :cryptography_flutter:prepareLintJarForPublish
+> Task :cryptography_flutter:processDebugManifest UP-TO-DATE
+> Task :cryptography_flutter:processDebugJavaRes UP-TO-DATE
+> Task :cryptography_flutter:writeDebugAarMetadata UP-TO-DATE
+> Task :google_sign_in_android:preBuild UP-TO-DATE
+> Task :google_sign_in_android:preDebugBuild UP-TO-DATE
+> Task :google_sign_in_android:checkDebugAarMetadata
+> Task :google_sign_in_android:mergeDebugJniLibFolders UP-TO-DATE
+> Task :google_sign_in_android:mergeDebugNativeLibs NO-SOURCE
+> Task :google_sign_in_android:stripDebugDebugSymbols NO-SOURCE
+> Task :google_sign_in_android:checkKotlinGradlePluginConfigurationErrors SKIPPED
+> Task :google_sign_in_android:copyDebugJniLibsProjectAndLocalJars
+> Task :google_sign_in_android:generateDebugResources UP-TO-DATE
+> Task :cryptography_flutter:mergeDebugJavaResource
+> Task :google_sign_in_android:packageDebugResources UP-TO-DATE
+> Task :cryptography_flutter:syncDebugLibJars
+> Task :cryptography_flutter:bundleDebugLocalLintAar
+> Task :google_sign_in_android:processDebugNavigationResources UP-TO-DATE
+> Task :google_sign_in_android:parseDebugLocalResources UP-TO-DATE
+> Task :google_sign_in_android:generateDebugRFile UP-TO-DATE
+> Task :google_sign_in_android:compileDebugKotlin UP-TO-DATE
+> Task :google_sign_in_android:extractDebugAnnotations
+> Task :google_sign_in_android:extractDeepLinksForAarDebug
+> Task :google_sign_in_android:generateDebugAssets UP-TO-DATE
+> Task :google_sign_in_android:mergeDebugAssets UP-TO-DATE
+> Task :google_sign_in_android:javaPreCompileDebug UP-TO-DATE
+> Task :google_sign_in_android:compileDebugJavaWithJavac NO-SOURCE
+> Task :google_sign_in_android:mergeDebugGeneratedProguardFiles
+> Task :google_sign_in_android:mergeDebugConsumerProguardFiles
+> Task :google_sign_in_android:prepareDebugArtProfile
+> Task :google_sign_in_android:prepareLintJarForPublish
+> Task :google_sign_in_android:processDebugManifest UP-TO-DATE
+> Task :google_sign_in_android:processDebugJavaRes UP-TO-DATE
+> Task :google_sign_in_android:writeDebugAarMetadata UP-TO-DATE
+> Task :in_app_purchase_android:preBuild UP-TO-DATE
+> Task :in_app_purchase_android:preDebugBuild UP-TO-DATE
+> Task :in_app_purchase_android:checkDebugAarMetadata
+> Task :in_app_purchase_android:mergeDebugJniLibFolders UP-TO-DATE
+> Task :in_app_purchase_android:mergeDebugNativeLibs NO-SOURCE
+> Task :in_app_purchase_android:stripDebugDebugSymbols NO-SOURCE
+> Task :in_app_purchase_android:checkKotlinGradlePluginConfigurationErrors SKIPPED
+> Task :in_app_purchase_android:copyDebugJniLibsProjectAndLocalJars
+> Task :google_sign_in_android:mergeDebugJavaResource
+> Task :in_app_purchase_android:generateDebugBuildConfig UP-TO-DATE
+> Task :google_sign_in_android:syncDebugLibJars
+> Task :google_sign_in_android:bundleDebugLocalLintAar
+> Task :in_app_purchase_android:generateDebugResources UP-TO-DATE
+> Task :in_app_purchase_android:packageDebugResources UP-TO-DATE
+> Task :in_app_purchase_android:processDebugNavigationResources UP-TO-DATE
+> Task :in_app_purchase_android:parseDebugLocalResources UP-TO-DATE
+> Task :in_app_purchase_android:generateDebugRFile UP-TO-DATE
+> Task :in_app_purchase_android:compileDebugKotlin UP-TO-DATE
+> Task :in_app_purchase_android:extractDebugAnnotations
+> Task :in_app_purchase_android:extractDeepLinksForAarDebug
+> Task :in_app_purchase_android:generateDebugAssets UP-TO-DATE
+> Task :in_app_purchase_android:mergeDebugAssets UP-TO-DATE
+> Task :in_app_purchase_android:javaPreCompileDebug UP-TO-DATE
+> Task :in_app_purchase_android:compileDebugJavaWithJavac UP-TO-DATE
+> Task :in_app_purchase_android:mergeDebugGeneratedProguardFiles
+> Task :in_app_purchase_android:mergeDebugConsumerProguardFiles
+> Task :in_app_purchase_android:prepareDebugArtProfile
+> Task :in_app_purchase_android:prepareLintJarForPublish
+> Task :in_app_purchase_android:processDebugManifest UP-TO-DATE
+> Task :in_app_purchase_android:processDebugJavaRes UP-TO-DATE
+> Task :in_app_purchase_android:writeDebugAarMetadata UP-TO-DATE
+> Task :integration_test:preBuild UP-TO-DATE
+> Task :integration_test:preDebugBuild UP-TO-DATE
+> Task :integration_test:checkDebugAarMetadata
+> Task :integration_test:mergeDebugJniLibFolders UP-TO-DATE
+> Task :integration_test:mergeDebugNativeLibs NO-SOURCE
+> Task :integration_test:stripDebugDebugSymbols NO-SOURCE
+> Task :integration_test:checkKotlinGradlePluginConfigurationErrors SKIPPED
+> Task :in_app_purchase_android:mergeDebugJavaResource
+> Task :integration_test:copyDebugJniLibsProjectAndLocalJars
+> Task :integration_test:generateDebugResources UP-TO-DATE
+> Task :in_app_purchase_android:syncDebugLibJars
+> Task :in_app_purchase_android:bundleDebugLocalLintAar
+> Task :integration_test:packageDebugResources UP-TO-DATE
+> Task :integration_test:processDebugNavigationResources UP-TO-DATE
+> Task :integration_test:parseDebugLocalResources UP-TO-DATE
+> Task :integration_test:generateDebugRFile UP-TO-DATE
+> Task :integration_test:compileDebugKotlin NO-SOURCE
+> Task :integration_test:extractDebugAnnotations
+> Task :integration_test:extractDeepLinksForAarDebug
+> Task :integration_test:generateDebugAssets UP-TO-DATE
+> Task :integration_test:mergeDebugAssets UP-TO-DATE
+> Task :integration_test:javaPreCompileDebug UP-TO-DATE
+> Task :integration_test:compileDebugJavaWithJavac UP-TO-DATE
+> Task :integration_test:mergeDebugGeneratedProguardFiles
+> Task :integration_test:mergeDebugConsumerProguardFiles
+> Task :integration_test:prepareDebugArtProfile
+> Task :integration_test:prepareLintJarForPublish
+> Task :integration_test:processDebugManifest UP-TO-DATE
+> Task :integration_test:processDebugJavaRes NO-SOURCE
+> Task :integration_test:writeDebugAarMetadata UP-TO-DATE
+> Task :jni:preBuild UP-TO-DATE
+> Task :jni:preDebugBuild UP-TO-DATE
+> Task :jni:preProfileBuild UP-TO-DATE
+> Task :integration_test:mergeDebugJavaResource
+> Task :jni:checkDebugAarMetadata
+
+> Task :jni:configureCMakeDebug[arm64-v8a]
+Checking the license for package CMake 3.22.1 in /opt/android-sdk/licenses
+License for package CMake 3.22.1 accepted.
+Preparing "Install CMake 3.22.1 v.3.22.1".
+"Install CMake 3.22.1 v.3.22.1" ready.
+Installing CMake 3.22.1 in /opt/android-sdk/cmake/3.22.1
+"Install CMake 3.22.1 v.3.22.1" complete.
+"Install CMake 3.22.1 v.3.22.1" finished.
+
+> Task :integration_test:syncDebugLibJars
+> Task :integration_test:bundleDebugLocalLintAar
+> Task :jni:buildCMakeDebug[arm64-v8a]
+> Task :jni:configureCMakeDebug[armeabi-v7a]
+> Task :jni:buildCMakeDebug[armeabi-v7a]
+> Task :jni:configureCMakeDebug[x86]
+> Task :jni:buildCMakeDebug[x86]
+> Task :jni:configureCMakeDebug[x86_64]
+> Task :jni:buildCMakeDebug[x86_64]
+> Task :jni:mergeDebugJniLibFolders UP-TO-DATE
+> Task :jni:mergeDebugNativeLibs UP-TO-DATE
+> Task :jni:checkKotlinGradlePluginConfigurationErrors SKIPPED
+> Task :jni:generateDebugResources UP-TO-DATE
+> Task :jni:stripDebugDebugSymbols
+> Task :jni:packageDebugResources UP-TO-DATE
+> Task :jni:processDebugNavigationResources UP-TO-DATE
+> Task :jni:parseDebugLocalResources UP-TO-DATE
+> Task :jni:generateDebugRFile UP-TO-DATE
+> Task :jni:compileDebugKotlin NO-SOURCE
+> Task :jni:extractDebugAnnotations
+> Task :jni:extractDeepLinksForAarDebug
+> Task :jni:generateDebugAssets UP-TO-DATE
+> Task :jni:mergeDebugAssets UP-TO-DATE
+> Task :jni:javaPreCompileDebug UP-TO-DATE
+> Task :jni:copyDebugJniLibsProjectAndLocalJars
+> Task :jni:compileDebugJavaWithJavac UP-TO-DATE
+> Task :jni:mergeDebugGeneratedProguardFiles
+> Task :jni:mergeDebugConsumerProguardFiles
+> Task :jni:prepareDebugArtProfile
+> Task :jni:prepareLintJarForPublish
+> Task :jni:processDebugManifest UP-TO-DATE
+> Task :jni:processDebugJavaRes NO-SOURCE
+> Task :jni:writeDebugAarMetadata UP-TO-DATE
+> Task :jni_flutter:preBuild UP-TO-DATE
+> Task :jni_flutter:preDebugBuild UP-TO-DATE
+> Task :jni:mergeDebugJavaResource
+> Task :jni_flutter:checkDebugAarMetadata
+> Task :jni_flutter:mergeDebugJniLibFolders UP-TO-DATE
+> Task :jni:syncDebugLibJars
+> Task :jni:bundleDebugLocalLintAar
+> Task :jni_flutter:mergeDebugNativeLibs NO-SOURCE
+> Task :jni_flutter:stripDebugDebugSymbols NO-SOURCE
+> Task :jni:bundleLibCompileToJarDebug UP-TO-DATE
+> Task :jni_flutter:checkKotlinGradlePluginConfigurationErrors SKIPPED
+> Task :jni_flutter:copyDebugJniLibsProjectAndLocalJars
+> Task :jni_flutter:generateDebugResources UP-TO-DATE
+> Task :jni_flutter:packageDebugResources UP-TO-DATE
+> Task :jni_flutter:processDebugNavigationResources UP-TO-DATE
+> Task :jni_flutter:parseDebugLocalResources UP-TO-DATE
+> Task :jni_flutter:generateDebugRFile UP-TO-DATE
+> Task :jni_flutter:compileDebugKotlin NO-SOURCE
+> Task :jni_flutter:extractDebugAnnotations
+> Task :jni_flutter:extractDeepLinksForAarDebug
+> Task :jni_flutter:generateDebugAssets UP-TO-DATE
+> Task :jni_flutter:mergeDebugAssets UP-TO-DATE
+> Task :jni_flutter:javaPreCompileDebug UP-TO-DATE
+> Task :jni_flutter:compileDebugJavaWithJavac UP-TO-DATE
+> Task :jni_flutter:mergeDebugGeneratedProguardFiles
+> Task :jni_flutter:mergeDebugConsumerProguardFiles
+> Task :jni_flutter:prepareDebugArtProfile
+> Task :jni_flutter:prepareLintJarForPublish
+> Task :jni_flutter:processDebugManifest UP-TO-DATE
+> Task :jni_flutter:processDebugJavaRes NO-SOURCE
+> Task :jni_flutter:writeDebugAarMetadata UP-TO-DATE
+> Task :sign_in_with_apple:preBuild UP-TO-DATE
+> Task :sign_in_with_apple:preDebugBuild UP-TO-DATE
+> Task :jni_flutter:mergeDebugJavaResource
+> Task :sign_in_with_apple:checkDebugAarMetadata
+> Task :jni_flutter:syncDebugLibJars
+> Task :jni_flutter:bundleDebugLocalLintAar
+> Task :sign_in_with_apple:mergeDebugJniLibFolders UP-TO-DATE
+> Task :sign_in_with_apple:mergeDebugNativeLibs NO-SOURCE
+> Task :sign_in_with_apple:stripDebugDebugSymbols NO-SOURCE
+> Task :sign_in_with_apple:checkKotlinGradlePluginConfigurationErrors SKIPPED
+> Task :sign_in_with_apple:generateDebugResources UP-TO-DATE
+> Task :sign_in_with_apple:copyDebugJniLibsProjectAndLocalJars
+> Task :sign_in_with_apple:packageDebugResources UP-TO-DATE
+> Task :sign_in_with_apple:processDebugNavigationResources UP-TO-DATE
+> Task :sign_in_with_apple:parseDebugLocalResources UP-TO-DATE
+> Task :sign_in_with_apple:generateDebugRFile UP-TO-DATE
+> Task :sign_in_with_apple:compileDebugKotlin UP-TO-DATE
+> Task :sign_in_with_apple:extractDebugAnnotations
+> Task :sign_in_with_apple:extractDeepLinksForAarDebug
+> Task :sign_in_with_apple:generateDebugAssets UP-TO-DATE
+> Task :sign_in_with_apple:mergeDebugAssets UP-TO-DATE
+> Task :sign_in_with_apple:javaPreCompileDebug UP-TO-DATE
+> Task :sign_in_with_apple:compileDebugJavaWithJavac NO-SOURCE
+> Task :sign_in_with_apple:mergeDebugGeneratedProguardFiles
+> Task :sign_in_with_apple:mergeDebugConsumerProguardFiles
+> Task :sign_in_with_apple:prepareDebugArtProfile
+> Task :sign_in_with_apple:prepareLintJarForPublish
+> Task :sign_in_with_apple:processDebugManifest UP-TO-DATE
+> Task :sign_in_with_apple:processDebugJavaRes UP-TO-DATE
+> Task :sign_in_with_apple:writeDebugAarMetadata UP-TO-DATE
+> Task :url_launcher_android:preBuild UP-TO-DATE
+> Task :url_launcher_android:preDebugBuild UP-TO-DATE
+> Task :url_launcher_android:checkDebugAarMetadata
+> Task :url_launcher_android:mergeDebugJniLibFolders UP-TO-DATE
+> Task :url_launcher_android:mergeDebugNativeLibs NO-SOURCE
+> Task :url_launcher_android:stripDebugDebugSymbols NO-SOURCE
+> Task :url_launcher_android:checkKotlinGradlePluginConfigurationErrors SKIPPED
+> Task :sign_in_with_apple:mergeDebugJavaResource
+> Task :url_launcher_android:copyDebugJniLibsProjectAndLocalJars
+> Task :url_launcher_android:generateDebugBuildConfig UP-TO-DATE
+> Task :sign_in_with_apple:syncDebugLibJars
+> Task :sign_in_with_apple:bundleDebugLocalLintAar
+> Task :url_launcher_android:generateDebugResources UP-TO-DATE
+> Task :url_launcher_android:packageDebugResources UP-TO-DATE
+> Task :url_launcher_android:processDebugNavigationResources UP-TO-DATE
+> Task :url_launcher_android:parseDebugLocalResources UP-TO-DATE
+> Task :url_launcher_android:generateDebugRFile UP-TO-DATE
+> Task :url_launcher_android:compileDebugKotlin UP-TO-DATE
+> Task :url_launcher_android:extractDebugAnnotations
+> Task :url_launcher_android:extractDeepLinksForAarDebug
+> Task :url_launcher_android:generateDebugAssets UP-TO-DATE
+> Task :url_launcher_android:mergeDebugAssets UP-TO-DATE
+> Task :url_launcher_android:javaPreCompileDebug UP-TO-DATE
+> Task :url_launcher_android:compileDebugJavaWithJavac UP-TO-DATE
+> Task :url_launcher_android:mergeDebugGeneratedProguardFiles
+> Task :url_launcher_android:mergeDebugConsumerProguardFiles
+> Task :url_launcher_android:prepareDebugArtProfile
+> Task :url_launcher_android:prepareLintJarForPublish
+> Task :url_launcher_android:processDebugManifest UP-TO-DATE
+> Task :url_launcher_android:processDebugJavaRes UP-TO-DATE
+> Task :url_launcher_android:writeDebugAarMetadata UP-TO-DATE
+> Task :app:checkKotlinGradlePluginConfigurationErrors SKIPPED
+> Task :app:validateCompileSdkVersion
+> Task :app:preBuild
+> Task :app:preDevNoSmsDebugBuild
+> Task :app:generateDevNoSmsDebugBuildConfig UP-TO-DATE
+> Task :url_launcher_android:mergeDebugJavaResource
+> Task :app:cleanMergeDevNoSmsDebugAssets
+> Task :url_launcher_android:syncDebugLibJars
+> Task :url_launcher_android:bundleDebugLocalLintAar
+> Task :app:compileFlutterBuildDevNoSmsDebug UP-TO-DATE
+> Task :app:generateDevNoSmsDebugAssets UP-TO-DATE
+> Task :app:mergeDevNoSmsDebugAssets
+> Task :app:copyFlutterAssetsDevNoSmsDebug
+> Task :app:generateDevNoSmsDebugResValues UP-TO-DATE
+> Task :app:generateDevNoSmsDebugResources UP-TO-DATE
+> Task :app:packageDevNoSmsDebugResources UP-TO-DATE
+> Task :app:processDevNoSmsDebugNavigationResources UP-TO-DATE
+> Task :app:parseDevNoSmsDebugLocalResources UP-TO-DATE
+> Task :app:generateDevNoSmsDebugRFile UP-TO-DATE
+> Task :cryptography_flutter:bundleLibCompileToJarDebug UP-TO-DATE
+> Task :google_sign_in_android:bundleLibCompileToJarDebug UP-TO-DATE
+> Task :in_app_purchase_android:bundleLibCompileToJarDebug UP-TO-DATE
+> Task :integration_test:bundleLibCompileToJarDebug UP-TO-DATE
+> Task :jni_flutter:bundleLibCompileToJarDebug UP-TO-DATE
+> Task :sign_in_with_apple:bundleLibCompileToJarDebug UP-TO-DATE
+> Task :url_launcher_android:bundleLibCompileToJarDebug UP-TO-DATE
+> Task :app:compileDevNoSmsDebugKotlin UP-TO-DATE
+> Task :app:javaPreCompileDevNoSmsDebug UP-TO-DATE
+> Task :app:compileDevNoSmsDebugJavaWithJavac UP-TO-DATE
+> Task :app:checkDevNoSmsDebugAarMetadata UP-TO-DATE
+> Task :app:mapDevNoSmsDebugSourceSetPaths UP-TO-DATE
+> Task :app:compileDevNoSmsDebugNavigationResources UP-TO-DATE
+> Task :app:mergeDevNoSmsDebugResources UP-TO-DATE
+> Task :app:createDevNoSmsDebugCompatibleScreenManifests UP-TO-DATE
+> Task :app:extractDeepLinksDevNoSmsDebug UP-TO-DATE
+> Task :cryptography_flutter:extractDeepLinksDebug UP-TO-DATE
+> Task :google_sign_in_android:extractDeepLinksDebug UP-TO-DATE
+> Task :in_app_purchase_android:extractDeepLinksDebug UP-TO-DATE
+> Task :integration_test:extractDeepLinksDebug UP-TO-DATE
+> Task :jni:extractDeepLinksDebug UP-TO-DATE
+> Task :jni_flutter:extractDeepLinksDebug UP-TO-DATE
+> Task :sign_in_with_apple:extractDeepLinksDebug UP-TO-DATE
+> Task :url_launcher_android:extractDeepLinksDebug UP-TO-DATE
+> Task :app:processDevNoSmsDebugMainManifest UP-TO-DATE
+> Task :app:outputDevNoSmsDebugAppLinkSettings UP-TO-DATE
+> Task :app:processDevNoSmsDebugManifest UP-TO-DATE
+> Task :app:processDevNoSmsDebugManifestForPackage UP-TO-DATE
+> Task :cryptography_flutter:mapDebugSourceSetPaths UP-TO-DATE
+> Task :cryptography_flutter:compileDebugLibraryResources UP-TO-DATE
+> Task :google_sign_in_android:mapDebugSourceSetPaths UP-TO-DATE
+> Task :google_sign_in_android:compileDebugLibraryResources UP-TO-DATE
+> Task :in_app_purchase_android:mapDebugSourceSetPaths UP-TO-DATE
+> Task :in_app_purchase_android:compileDebugLibraryResources UP-TO-DATE
+> Task :integration_test:mapDebugSourceSetPaths UP-TO-DATE
+> Task :integration_test:compileDebugLibraryResources UP-TO-DATE
+> Task :jni:mapDebugSourceSetPaths UP-TO-DATE
+> Task :jni:compileDebugLibraryResources UP-TO-DATE
+> Task :jni_flutter:mapDebugSourceSetPaths UP-TO-DATE
+> Task :jni_flutter:compileDebugLibraryResources UP-TO-DATE
+> Task :sign_in_with_apple:mapDebugSourceSetPaths UP-TO-DATE
+> Task :sign_in_with_apple:compileDebugLibraryResources UP-TO-DATE
+> Task :url_launcher_android:mapDebugSourceSetPaths UP-TO-DATE
+> Task :url_launcher_android:compileDebugLibraryResources UP-TO-DATE
+> Task :app:processDevNoSmsDebugResources UP-TO-DATE
+> Task :app:bundleDevNoSmsDebugClassesToCompileJar UP-TO-DATE
+> Task :app:preDevNoSmsDebugAndroidTestBuild SKIPPED
+> Task :app:generateDevNoSmsDebugAndroidTestResValues
+> Task :cryptography_flutter:bundleLibRuntimeToJarDebug UP-TO-DATE
+> Task :cryptography_flutter:createFullJarDebug
+> Task :cryptography_flutter:writeDebugLintModelMetadata
+> Task :google_sign_in_android:bundleLibRuntimeToJarDebug UP-TO-DATE
+> Task :google_sign_in_android:createFullJarDebug
+> Task :google_sign_in_android:writeDebugLintModelMetadata
+> Task :in_app_purchase_android:bundleLibRuntimeToJarDebug UP-TO-DATE
+> Task :in_app_purchase_android:createFullJarDebug
+> Task :in_app_purchase_android:writeDebugLintModelMetadata
+> Task :integration_test:bundleLibRuntimeToJarDebug UP-TO-DATE
+> Task :integration_test:createFullJarDebug
+> Task :integration_test:writeDebugLintModelMetadata
+> Task :jni:bundleLibRuntimeToJarDebug UP-TO-DATE
+> Task :jni:createFullJarDebug
+> Task :jni:writeDebugLintModelMetadata
+> Task :jni_flutter:bundleLibRuntimeToJarDebug UP-TO-DATE
+> Task :jni_flutter:createFullJarDebug
+> Task :jni_flutter:writeDebugLintModelMetadata
+> Task :sign_in_with_apple:bundleLibRuntimeToJarDebug UP-TO-DATE
+> Task :sign_in_with_apple:createFullJarDebug
+> Task :sign_in_with_apple:writeDebugLintModelMetadata
+> Task :url_launcher_android:bundleLibRuntimeToJarDebug UP-TO-DATE
+> Task :url_launcher_android:createFullJarDebug
+> Task :url_launcher_android:writeDebugLintModelMetadata
+> Task :app:generateDevNoSmsDebugAndroidTestLintModel
+> Task :app:extractProguardFiles
+> Task :cryptography_flutter:extractProguardFiles
+> Task :cryptography_flutter:generateDebugLintModel
+> Task :google_sign_in_android:extractProguardFiles
+> Task :google_sign_in_android:generateDebugLintModel
+> Task :in_app_purchase_android:extractProguardFiles
+> Task :in_app_purchase_android:generateDebugLintModel
+> Task :integration_test:extractProguardFiles
+> Task :integration_test:generateDebugLintModel
+> Task :jni:extractProguardFiles
+> Task :jni:generateDebugLintModel
+> Task :jni_flutter:extractProguardFiles
+> Task :jni_flutter:generateDebugLintModel
+> Task :sign_in_with_apple:extractProguardFiles
+> Task :sign_in_with_apple:generateDebugLintModel
+> Task :url_launcher_android:extractProguardFiles
+> Task :url_launcher_android:generateDebugLintModel
+> Task :app:generateDevNoSmsDebugLintReportModel
+> Task :app:preDevNoSmsDebugUnitTestBuild
+> Task :app:generateDevNoSmsDebugUnitTestLintModel
+> Task :cryptography_flutter:preDebugAndroidTestBuild UP-TO-DATE
+> Task :cryptography_flutter:generateDebugAndroidTestLintModel
+> Task :cryptography_flutter:preDebugUnitTestBuild UP-TO-DATE
+> Task :cryptography_flutter:generateDebugUnitTestLintModel
+> Task :google_sign_in_android:preDebugAndroidTestBuild UP-TO-DATE
+> Task :google_sign_in_android:generateDebugAndroidTestLintModel
+> Task :google_sign_in_android:preDebugUnitTestBuild UP-TO-DATE
+> Task :google_sign_in_android:generateDebugUnitTestLintModel
+> Task :cryptography_flutter:lintAnalyzeDebugUnitTest
+> Task :in_app_purchase_android:preDebugAndroidTestBuild UP-TO-DATE
+> Task :cryptography_flutter:lintAnalyzeDebugAndroidTest
+> Task :google_sign_in_android:lintAnalyzeDebugAndroidTest
+> Task :in_app_purchase_android:generateDebugAndroidTestLintModel
+> Task :in_app_purchase_android:preDebugUnitTestBuild UP-TO-DATE
+> Task :in_app_purchase_android:generateDebugUnitTestLintModel
+> Task :integration_test:preDebugAndroidTestBuild UP-TO-DATE
+> Task :in_app_purchase_android:lintAnalyzeDebugAndroidTest
+> Task :integration_test:generateDebugAndroidTestLintModel
+> Task :integration_test:preDebugUnitTestBuild UP-TO-DATE
+> Task :integration_test:generateDebugUnitTestLintModel
+> Task :jni:preDebugAndroidTestBuild UP-TO-DATE
+> Task :integration_test:lintAnalyzeDebugAndroidTest
+> Task :jni:generateDebugAndroidTestLintModel
+> Task :jni:lintAnalyzeDebug
+> Task :integration_test:lintAnalyzeDebug
+> Task :google_sign_in_android:lintAnalyzeDebugUnitTest
+> Task :integration_test:lintAnalyzeDebugUnitTest
+> Task :in_app_purchase_android:lintAnalyzeDebugUnitTest
+> Task :jni:preDebugUnitTestBuild UP-TO-DATE
+> Task :jni:generateDebugUnitTestLintModel
+> Task :sign_in_with_apple:lintAnalyzeDebug
+> Task :jni:lintAnalyzeDebugAndroidTest
+> Task :jni_flutter:preDebugAndroidTestBuild UP-TO-DATE
+> Task :cryptography_flutter:lintAnalyzeDebug
+> Task :jni:lintAnalyzeDebugUnitTest
+> Task :jni_flutter:generateDebugAndroidTestLintModel
+> Task :jni_flutter:preDebugUnitTestBuild UP-TO-DATE
+> Task :jni_flutter:lintAnalyzeDebug
+> Task :jni_flutter:generateDebugUnitTestLintModel
+> Task :jni_flutter:lintAnalyzeDebugAndroidTest
+> Task :sign_in_with_apple:preDebugAndroidTestBuild UP-TO-DATE
+> Task :jni_flutter:lintAnalyzeDebugUnitTest
+> Task :sign_in_with_apple:generateDebugAndroidTestLintModel
+> Task :sign_in_with_apple:preDebugUnitTestBuild UP-TO-DATE
+> Task :sign_in_with_apple:generateDebugUnitTestLintModel
+> Task :url_launcher_android:preDebugAndroidTestBuild UP-TO-DATE
+> Task :sign_in_with_apple:lintAnalyzeDebugAndroidTest
+> Task :sign_in_with_apple:lintAnalyzeDebugUnitTest
+> Task :url_launcher_android:generateDebugAndroidTestLintModel
+> Task :url_launcher_android:preDebugUnitTestBuild UP-TO-DATE
+> Task :google_sign_in_android:lintAnalyzeDebug
+> Task :in_app_purchase_android:lintAnalyzeDebug
+> Task :url_launcher_android:lintAnalyzeDebug
+> Task :app:lintAnalyzeDevNoSmsDebugAndroidTest
+> Task :app:lintAnalyzeDevNoSmsDebugUnitTest
+> Task :url_launcher_android:generateDebugUnitTestLintModel
+> Task :url_launcher_android:lintAnalyzeDebugAndroidTest
+> Task :url_launcher_android:lintAnalyzeDebugUnitTest
+> Task :app:lintAnalyzeDevNoSmsDebug
+
+> Task :app:lintReportDevNoSmsDebug
+Wrote HTML report to file:///work/app/build/app/reports/lint-results-devNoSmsDebug.html
+
+> Task :app:lintDevNoSmsDebug
+
+[Incubating] Problems report is available at: file:///work/app/build/reports/problems/problems-report.html
+
+Deprecated Gradle features were used in this build, making it incompatible with Gradle 10.
+
+You can use '--warning-mode all' to show the individual deprecation warnings and determine if they come from your own scripts or plugins.
+
+For more on this, please refer to https://docs.gradle.org/9.3.1/userguide/command_line_interface.html#sec:command_line_warnings in the Gradle documentation.
+
+BUILD SUCCESSFUL in 3m 42s
+348 actionable tasks: 187 executed, 161 up-to-date
+Consider enabling configuration cache to speed up this build: https://docs.gradle.org/9.3.1/userguide/configuration_cache_enabling.html
+
+[18:38:53] === RESULT android-lint exit=0 (224s)
+[18:38:53] SUMMARY FAIL sha=24817175bbbd15ddfeaf4a91b6933c76a9b462c0 pipeline=quick-app pub-get=0 format=0 analyze=0 lints=0 app-test=1 dart-test-zaghlol_catalog=0 dart-test-zaghlol_domain=0 dart-test-zaghlol_parsing=0 apk-devNoSms=0 apk-perms=0 android-unit=0 android-lint=0
