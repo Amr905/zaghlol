@@ -1636,7 +1636,7 @@ class AppLocalizationsAr extends AppLocalizations {
   String get transactionsDetailNoteHint => 'اكتب ملاحظة…';
 
   @override
-  String get transactionsDetailSplit => 'تقسيم / فلوس راجعة';
+  String get transactionsDetailSplit => 'تقسيم / فلوس راجعة من صحابك';
 
   @override
   String get transactionsDetailLinkTransfer => 'دي تحويلة لنفسي';
@@ -7175,4 +7175,10 @@ class AppLocalizationsAr extends AppLocalizations {
 
   @override
   String get iosSetupNudgeSnoozeA11y => 'فكّرني بعد ٧ أيام';
+
+  @override
+  String get chatMainTitle => 'اسأل زغلول';
+
+  @override
+  String get chatMainRoastTag => 'قصف جبهة';
 }

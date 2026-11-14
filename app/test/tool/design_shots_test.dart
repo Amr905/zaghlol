@@ -52,6 +52,10 @@ import 'package:zaghlol/features/onboarding/presentation/scan_results.dart';
 import '../features/recurring/presentation/bills_screen_test.dart' as bills;
 import '../features/settings/settings_harness.dart' as settings;
 import '../features/transactions/presentation/detail_edit_harness.dart' as txn;
+import '../features/transfers/presentation/transfers_harness.dart' as xfer;
+
+import 'package:zaghlol/features/transfers/presentation/split_sheet.dart';
+
 import '../features/transactions/presentation/list/list_harness.dart' as list;
 import '../support/golden_matrix.dart';
 import '../support/real_fonts.dart';
@@ -372,6 +376,28 @@ void main() {
       locale: _ar.locale,
     );
     await _shot(tester, 'transaction_detail');
+  }, skip: _skip != null);
+
+  testWidgets('split sheet S-15', (tester) async {
+    await xfer.pumpSheet(
+      tester,
+      port: xfer.FakePort(split: xfer.sampleSplit()),
+      open: (c) => showSplitSheet(c, 'x1'),
+      locale: _ar.locale,
+      dark: false,
+    );
+    await _shot(tester, 'split_sheet');
+  }, skip: _skip != null);
+
+  testWidgets('transactions list S-11', (tester) async {
+    await list.pumpList(
+      tester,
+      list.Harness(
+        list.FakeRepo([list.txnRec('a'), list.txnRec('b'), list.txnRec('c')]),
+      ),
+      locale: _ar.locale,
+    );
+    await _shot(tester, 'transactions_list');
   }, skip: _skip != null);
 
   testWidgets('review queue', (tester) async {
