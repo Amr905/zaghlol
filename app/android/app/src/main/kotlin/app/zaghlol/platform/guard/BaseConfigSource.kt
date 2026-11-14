@@ -33,9 +33,10 @@ object BaseConfigSource {
     const val DEV_SPIKE_ASSET_PATH = "guard/spike_guard_base.json"
 
     /**
-     * The base this build decides with: the devSms spike base when this APK
-     * has it (only the devSms flavour does, and its Dart side parses with the
-     * spike registry, so both must agree); otherwise the bundled registry base
+     * The base this build decides with: the devSms base when this APK has it
+     * (only the devSms flavour does: the real registry base plus the spike
+     * sender, exported from the same registry its Dart side parses with, so
+     * both agree; test/ingestion/spike_guard_base_test.dart pins it); otherwise the bundled registry base
      * ([ASSET_PATH], generated from `assets/registry` by registry_lint). Throws
      * when neither exists (mode `invalid`: every message is dropped, fail
      * closed).

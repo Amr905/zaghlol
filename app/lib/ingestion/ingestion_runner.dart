@@ -27,17 +27,18 @@ import 'spike_registry.dart';
 import 'spool_port.dart';
 import 'ulid.dart';
 
-/// The registry a build parses with: the synthetic spike registry in devSms
-/// only (a compile-time constant, so AOT drops it from every other build);
-/// elsewhere the bundled registry (`assets/registry/`), which must have been
-/// preloaded in this isolate ([ensureDefaultRegistry]; before that the call
-/// throws `INGEST_REGISTRY_MISSING` and the cycle ends `INGEST_SETUP_FAILED`).
-Registry Function() get defaultRegistryLoader =>
-    kIsSpikeBuild ? loadSpikeRegistry : bundledRegistrySync;
+/// The registry a build parses with: the bundled registry (`assets/registry/`)
+/// in every build, preloaded in this isolate ([ensureDefaultRegistry]; before
+/// that the call throws `INGEST_REGISTRY_MISSING` and the cycle ends
+/// `INGEST_SETUP_FAILED`). devSms only (a compile-time constant, so AOT drops
+/// it elsewhere) adds the synthetic spike institution on top.
+Registry Function() get defaultRegistryLoader => kIsSpikeBuild
+    ? () => spikeOnTopOf(bundledRegistrySync())
+    : bundledRegistrySync;
 
-/// Makes [defaultRegistryLoader] ready (no-op for the spike build).
+/// Makes [defaultRegistryLoader] ready.
 Future<void> ensureDefaultRegistry() async {
-  if (!kIsSpikeBuild) await preloadBundledRegistry();
+  await preloadBundledRegistry();
 }
 
 final class IngestionRunner {
