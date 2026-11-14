@@ -836,7 +836,7 @@ void main() {
     // ignore: avoid_print
     print('pipeline parse mean: ${meanMicros.round()} us over $runs runs');
     expect(meanMicros, lessThan(2000), reason: 'mean ${meanMicros.round()} us');
-  });
+  }, tags: 'benchmark');
 }
 
 Registry _registryOf(RegistryFiles f) => RegistryLoader.load(

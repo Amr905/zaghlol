@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:go_router/go_router.dart';
 import 'package:zaghlol/core/l10n/generated/app_localizations.dart';
@@ -52,20 +53,23 @@ class ShellApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return MaterialApp.router(
-      debugShowCheckedModeBanner: false,
-      locale: locale,
-      localizationsDelegates: AppLocalizations.localizationsDelegates,
-      supportedLocales: AppLocalizations.supportedLocales,
-      theme: ZaghlolTheme.light.copyWith(platform: platform),
-      darkTheme: ZaghlolTheme.dark.copyWith(platform: platform),
-      themeMode: dark ? ThemeMode.dark : ThemeMode.light,
-      builder: (context, child) => MediaQuery(
-        data: MediaQuery.of(context)
-            .copyWith(textScaler: TextScaler.linear(textScale)),
-        child: child!,
+    // The Add sheet reads the entitlement (T-082).
+    return ProviderScope(
+      child: MaterialApp.router(
+        debugShowCheckedModeBanner: false,
+        locale: locale,
+        localizationsDelegates: AppLocalizations.localizationsDelegates,
+        supportedLocales: AppLocalizations.supportedLocales,
+        theme: ZaghlolTheme.light.copyWith(platform: platform),
+        darkTheme: ZaghlolTheme.dark.copyWith(platform: platform),
+        themeMode: dark ? ThemeMode.dark : ThemeMode.light,
+        builder: (context, child) => MediaQuery(
+          data: MediaQuery.of(context)
+              .copyWith(textScaler: TextScaler.linear(textScale)),
+          child: child!,
+        ),
+        routerConfig: router,
       ),
-      routerConfig: router,
     );
   }
 }

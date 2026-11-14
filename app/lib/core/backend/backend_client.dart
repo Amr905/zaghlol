@@ -281,8 +281,17 @@ final class BackendClient {
     return _decode(r, SignInResponse.fromJson);
   }
 
-  Future<EntitlementResponse> signOut({TimeNonce? timeNonce}) async {
-    final r = await _call(ApiOperations.signOut, timeNonce: timeNonce);
+  /// [accountToken]: the caller already dropped the stored token (D-61(c)),
+  /// so it passes the one it read beforehand.
+  Future<EntitlementResponse> signOut({
+    TimeNonce? timeNonce,
+    String? accountToken,
+  }) async {
+    final r = await _call(
+      ApiOperations.signOut,
+      timeNonce: timeNonce,
+      accountToken: accountToken,
+    );
     final out = _decode(r, EntitlementResponse.fromJson);
     await _rotate(r, out.rotateInstallToken);
     return out;
@@ -320,6 +329,9 @@ final class BackendClient {
     if (_identity.platform != only) throw _clientBug();
   }
 
+  static String? _decodeOrNull(Uint8List? b) =>
+      b == null ? null : utf8.decode(b);
+
   BackendFailure _clientBug() => BackendFailure(BackendFailureKind.clientBug);
 
   Future<_Answer> _call(
@@ -328,6 +340,7 @@ final class BackendClient {
     Map<String, String> pathParams = const {},
     IdempotencyKey? idempotencyKey,
     TimeNonce? timeNonce,
+    String? accountToken,
   }) async {
     if (op.anchoring) {
       assert(
@@ -360,9 +373,11 @@ final class BackendClient {
       headers['zaghlol-install'] = install.id;
       if (op.auth == ApiAuth.installAndAccount ||
           op.auth == ApiAuth.installWithOptionalAccount) {
-        final acct = await _store.read(BackendStateKeys.accountToken);
+        final acct =
+            accountToken ??
+            _decodeOrNull(await _store.read(BackendStateKeys.accountToken));
         if (acct != null) {
-          sentAccount = utf8.decode(acct);
+          sentAccount = acct;
           headers['zaghlol-account'] = sentAccount;
         } else if (op.auth == ApiAuth.installAndAccount) {
           throw BackendFailure(BackendFailureKind.notSignedIn);

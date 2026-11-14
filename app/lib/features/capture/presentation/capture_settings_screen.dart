@@ -27,14 +27,15 @@ import '../../accounts/presentation/edit_card/edit_card_providers.dart'
     show InstitutionOption, institutionOptionsProvider;
 import '../application/capture_providers.dart';
 import '../application/ignore_rules.dart';
+import '../application/ios_setup_providers.dart';
 import '../domain/capture_health.dart';
 import '../domain/scan_plan.dart';
 import 'capture_controls.dart';
 
 /// iOS setup checker result (FR-ING-I-07): true = passes, false = failed,
-/// null = cannot tell. Wired by the iOS setup task; unknown until then.
+/// null = cannot tell. From the silence check (T-066, `iosSetupStatusProvider`).
 final iosSetupCheckProvider = Provider<bool?>(
-  (ref) => null,
+  (ref) => ref.watch(iosSetupStatusProvider).passes,
   name: 'iosSetupCheckProvider',
 );
 

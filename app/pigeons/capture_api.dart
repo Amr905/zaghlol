@@ -15,6 +15,8 @@
 // pass-through) and getSpoolStatus / clearSpoolAlerts; writeGuardConfig takes
 // the plaintext user part (renamed from encryptedConfig, FU-097 L-2). T-041
 // adds holdSpool and SpoolStatus.held (FU-105, platform-channels.md 1.3). Every
+// FU-194 adds holdDrain / isHeadlessDrainActive / releaseDrainHold on both
+// hosts (the restore's drain hold, platform-channels.md 1.4). Every
 // other method answers NOT_AVAILABLE until its owner task (T-040 receiver,
 // permission and Guard wiring, T-042 inbox, T-043 notifications).
 import 'package:pigeon/pigeon.dart';
@@ -137,6 +139,16 @@ class SpoolStatus {
   int held;
 }
 
+/// T-064 (FR-ING-I-07): when each Shortcuts automation last ran, whatever the
+/// Guard decided (wall-clock epoch ms; null = never). Times only, never
+/// content, sender or keywords.
+class ShortcutSetupStatus {
+  ShortcutSetupStatus({this.lastMessageIntentAtMs, this.lastWalletIntentAtMs});
+
+  int? lastMessageIntentAtMs;
+  int? lastWalletIntentAtMs;
+}
+
 class CaptureCapabilities {
   CaptureCapabilities({
     required this.smsGranted,
@@ -199,15 +211,49 @@ abstract class AndroidCaptureHostApi {
   /// engine drained; moved to spool/held/ (platform-channels.md 1.3). IO_ERROR.
   @TaskQueue(type: TaskQueueType.serialBackgroundThread)
   void holdSpool(List<String> ids);
+
+  /// T-166 "Delete everything", UI engine only, after Dart closed the
+  /// database and deleted its key slots: cancels all WorkManager work and
+  /// every notification, forgets the Guard user part, deletes every
+  /// AndroidKeyStore alias of the app and clears the contents of filesDir,
+  /// noBackupFilesDir and cacheDir. Idempotent; IO_ERROR when something
+  /// could not be deleted (the other parts still ran).
+  @TaskQueue(type: TaskQueueType.serialBackgroundThread)
+  void wipeLocalData();
+
+  /// FU-194: the restore's drain hold (platform-channels.md 1.4), UI engine
+  /// only (the headless host answers NOT_AVAILABLE). Persists a hold for
+  /// [ttlMs] (native caps it at 10 min; call again to renew); while it holds
+  /// no headless engine is started or reused, capture still writes to the
+  /// spool. Returns true while a headless engine is still active (it was
+  /// asked to shut down; poll isHeadlessDrainActive). IO_ERROR: no hold set.
+  @TaskQueue(type: TaskQueueType.serialBackgroundThread)
+  bool holdDrain(int ttlMs);
+
+  /// FU-194: true while a headless engine exists (it may hold the database open).
+  @TaskQueue(type: TaskQueueType.serialBackgroundThread)
+  bool isHeadlessDrainActive();
+
+  /// FU-194: clears the hold (idempotent). IO_ERROR when the file stays (the
+  /// hold then still expires on its own).
+  @TaskQueue(type: TaskQueueType.serialBackgroundThread)
+  void releaseDrainHold();
 }
 
 /// iOS host (T-062): the encrypted spool in the App Group container and the
 /// background refresh. Same drain / ack / hold / status semantics as
 /// AndroidCaptureHostApi (platform-channels.md 1.3), so the Dart drain is
 /// shared. Errors: IO_ERROR | NOT_AVAILABLE (no App Group container).
-/// T-061 adds writeGuardConfig and the Shortcut-setup methods (section 3).
+/// T-063 adds writeGuardConfig (section 3); T-064 adds getShortcutSetupStatus (the install link is Dart-side, AppLinks.shortcutInstall).
 @HostApi()
 abstract class IosCaptureHostApi {
+  /// T-063: the plaintext user part of the Guard config (platform-channels.md
+  /// 1.1); native validates, encrypts with the shared spool key and writes it
+  /// to the App Group, where the App Intents' Guard reads it.
+  /// CONFIG_INVALID | IO_ERROR | NOT_AVAILABLE.
+  @TaskQueue(type: TaskQueueType.serialBackgroundThread)
+  void writeGuardConfig(Uint8List userConfigJson);
+
   /// Returns decrypted entries (in memory only), oldest first.
   @TaskQueue(type: TaskQueueType.serialBackgroundThread)
   List<SpoolEntry> drainSpool(int max);
@@ -227,10 +273,40 @@ abstract class IosCaptureHostApi {
   @TaskQueue(type: TaskQueueType.serialBackgroundThread)
   void clearSpoolAlerts(int seq);
 
+  /// T-064: the per-intent last-run times (the setup checker's input). Null
+  /// times when an intent never ran or the record can't be read yet.
+  /// NOT_AVAILABLE: no App Group container.
+  @TaskQueue(type: TaskQueueType.serialBackgroundThread)
+  ShortcutSetupStatus getShortcutSetupStatus();
+
   /// Submits the BGAppRefreshTask 'app.zaghlol.ingest' (the launch handler is
   /// registered natively at launch). A best-effort nudge: the system decides
   /// when it runs; the foreground drain is the guarantee.
   void registerBackgroundRefresh();
+
+  /// T-166 "Delete everything", UI engine only, after Dart closed the
+  /// database and deleted its key slots: cancels every BGTask request,
+  /// removes pending and delivered notifications, deletes every Keychain item
+  /// of the app except the seat keys (service `app.zaghlol.seatkey`, D-55),
+  /// clears the contents (never the roots) of the sandbox and App Group
+  /// directories and applies the backup exclusions again (T-165 F4).
+  /// Idempotent; IO_ERROR when something could not be deleted.
+  @TaskQueue(type: TaskQueueType.serialBackgroundThread)
+  void wipeLocalData();
+
+  /// FU-194: same as AndroidCaptureHostApi.holdDrain. While held, the
+  /// headless run (App Intent, BGAppRefreshTask) starts no engine; the spool
+  /// write before it still happens. IO_ERROR: no hold set.
+  @TaskQueue(type: TaskQueueType.serialBackgroundThread)
+  bool holdDrain(int ttlMs);
+
+  /// FU-194: true while a headless run is in progress.
+  @TaskQueue(type: TaskQueueType.serialBackgroundThread)
+  bool isHeadlessDrainActive();
+
+  /// FU-194: clears the hold (idempotent).
+  @TaskQueue(type: TaskQueueType.serialBackgroundThread)
+  void releaseDrainHold();
 }
 
 @FlutterApi()

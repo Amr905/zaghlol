@@ -136,11 +136,23 @@ final class SuggestionCardModel extends ReviewCardModel {
     required this.ambiguousRefund,
     this.amount,
     this.merchant,
+    this.candidates = const [],
+    this.isIncome = false,
   }) : super(itemId);
   final String kind;
   final bool ambiguousRefund;
   final Money? amount;
   final String? merchant;
+
+  /// Pair suggestions (T-092): the expenses the user can link. Nothing is
+  /// linked until the user picks one (or confirms the only one shown).
+  final List<ReviewTransferOption> candidates;
+  final bool isIncome;
+
+  /// A reimbursement or FX-pair suggestion: accepted only via a candidate.
+  bool get isPair =>
+      !ambiguousRefund &&
+      (kind == 'reimbursement_suggestion' || kind == 'fx_pair_suggestion');
 
   @override
   ReviewFilter get filter => ReviewFilter.all;

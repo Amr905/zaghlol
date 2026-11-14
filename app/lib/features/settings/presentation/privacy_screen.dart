@@ -3,6 +3,8 @@
 // rooted-phone note and Delete everything (FR-ONB-08, FR-CAT-09, NFR-PRIV,
 // BR-SYNC-03).
 
+import 'dart:async';
+
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -12,6 +14,7 @@ import '../../../core/l10n/generated/app_localizations.dart';
 import '../../../core/settings/settings_providers.dart';
 import '../../../core/theme/z_tokens.dart';
 import '../../categorization/application/contributions.dart';
+import '../../gold/application/restore.dart' show DeleteEverythingWarning;
 import 'preferences_screen.dart';
 import 'server_allow_list.dart';
 import 'settings_ports.dart';
@@ -156,15 +159,76 @@ class PrivacyScreen extends ConsumerWidget {
                   .format(last),
             ),
           );
+    // EC-69 (D-55): on Android, while this install holds a seat, warn that
+    // bringing Gold back counts as this month's move (with the date during a
+    // cooldown). iOS keeps the seat keys, so no warning there.
+    String? seatText;
+    if (plat == 'android') {
+      DeleteEverythingWarning? w;
+      try {
+        w = await ref.read(deleteSeatWarningProvider.future);
+      } on Object {
+        w = null;
+      }
+      if (!context.mounted) return;
+      if (w != null && w.holdsSeat) {
+        final next = w.nextMoveAt;
+        final cooldown = next != null && next.isAfter(DateTime.now());
+        seatText = t.goldSeatDeleteWarning(
+          cooldown ? 'cooldown' : 'other',
+          cooldown
+              ? localDigits(
+                  ref,
+                  context,
+                  DateFormat.yMMMd(Localizations.localeOf(context).toString())
+                      .format(next.toLocal()),
+                )
+              : '',
+        );
+      }
+    }
     final confirmed = await showDialog<bool>(
       context: context,
-      builder: (ctx) => _DeleteDialog(lastBackupText: lastText, platform: plat),
+      builder: (ctx) => _DeleteDialog(
+        lastBackupText: lastText,
+        platform: plat,
+        seatWarningText: seatText,
+      ),
     );
+    // Cancel, a dismissed dialog or a wrong word: nothing is deleted.
     if (confirmed != true || !context.mounted) return;
     final wipe = ref.read(wipeEverythingProvider);
     if (wipe == null) return;
-    showSettingsMessage(context, t.privacyDeleteWorking);
-    await wipe();
+    // A blocking progress dialog; the restart into first-launch state
+    // replaces the whole tree.
+    unawaited(
+      showDialog<void>(
+        context: context,
+        barrierDismissible: false,
+        builder: (ctx) => PopScope(
+          canPop: false,
+          child: AlertDialog(
+            content: Row(
+              children: [
+                const CircularProgressIndicator(),
+                const SizedBox(width: ZSpacing.lg),
+                Expanded(child: Text(t.privacyDeleteWorking)),
+              ],
+            ),
+          ),
+        ),
+      ),
+    );
+    try {
+      await wipe();
+    } on Object {
+      // T-166: the wipe did not finish; the marker stays and the next launch
+      // completes it. Close the progress dialog and say so.
+      if (!context.mounted) return;
+      Navigator.of(context, rootNavigator: true).pop();
+      ScaffoldMessenger.of(context)
+          .showSnackBar(SnackBar(content: Text(t.privacyDeleteFailed)));
+    }
   }
 }
 
@@ -267,10 +331,17 @@ class ServerKnowsSection extends StatelessWidget {
 
 /// C-18 type-to-confirm. The word is "DELETE" or "احذف" (either language).
 class _DeleteDialog extends StatefulWidget {
-  const _DeleteDialog({required this.lastBackupText, required this.platform});
+  const _DeleteDialog({
+    required this.lastBackupText,
+    required this.platform,
+    this.seatWarningText,
+  });
 
   final String lastBackupText;
   final String platform;
+
+  /// EC-69: the Android seat warning; null: none.
+  final String? seatWarningText;
 
   @override
   State<_DeleteDialog> createState() => _DeleteDialogState();
@@ -304,6 +375,12 @@ class _DeleteDialogState extends State<_DeleteDialog> {
             Text(t.privacyDeleteBody),
             const SizedBox(height: ZSpacing.sm),
             Text(widget.lastBackupText),
+            const SizedBox(height: ZSpacing.sm),
+            Text(t.privacyDeleteBackupsKept),
+            if (widget.seatWarningText case final seat?) ...[
+              const SizedBox(height: ZSpacing.sm),
+              Text(seat, key: const ValueKey('privacyDeleteSeatWarning')),
+            ],
             if (widget.platform == 'ios') ...[
               const SizedBox(height: ZSpacing.sm),
               Text(t.privacyDeleteIosKeys),

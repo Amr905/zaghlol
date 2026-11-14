@@ -26,6 +26,7 @@ final class CaptureHooks {
     this.attachShareIntake,
     this.pollShareIntake,
     this.purgeExpired,
+    this.foreground,
   });
 
   /// `ShareIntakeService.attach()`.
@@ -37,6 +38,11 @@ final class CaptureHooks {
   /// `TransactionRepository.purgeExpired()`: once per start, after the first
   /// drain.
   final Future<void> Function()? purgeExpired;
+
+  /// T-066 (iOS): at start and on every resume, after the spool was drained.
+  /// Asks for the next background refresh and re-evaluates the setup checker.
+  /// Best effort; a failure is ignored.
+  final Future<void> Function()? foreground;
 }
 
 final class CaptureCoordinator implements CaptureEventsApi {
@@ -54,7 +60,16 @@ final class CaptureCoordinator implements CaptureEventsApi {
       sms: true,
       notifications: true,
     ),
+    this.ios = false,
   }) : _toggles = initialToggles,
+       _caps = ios
+           ? const CaptureCaps(
+               smsFlavor: false,
+               smsGranted: false,
+               notificationAccess: false,
+               ios: true,
+             )
+           : CaptureCaps.none,
        catchUp = catchUp ?? RecordingCatchUpScheduler(),
        _nowMs = nowMs ?? (() => DateTime.now().toUtc().millisecondsSinceEpoch) {
     orchestrator = SpoolOrchestrator(
@@ -72,13 +87,16 @@ final class CaptureCoordinator implements CaptureEventsApi {
   final AlertStore alerts;
   final CatchUpScheduler catchUp;
   final CaptureHooks hooks;
+
+  /// T-066: the iOS path (no SMS or notification capabilities to read).
+  final bool ios;
   late final SpoolOrchestrator orchestrator;
   final int Function() _nowMs;
   StreamSubscription<GuardWriteStatus>? _writeSub;
 
   final StreamController<CaptureHealth> _health =
       StreamController<CaptureHealth>.broadcast();
-  CaptureCaps _caps = CaptureCaps.none;
+  late CaptureCaps _caps;
   CaptureToggles _toggles;
   PersistedAlerts _persisted = PersistedAlerts.empty;
   LastCycle _lastCycle = LastCycle.none;
@@ -110,6 +128,7 @@ final class CaptureCoordinator implements CaptureEventsApi {
       await writer.flush();
     }
     await orchestrator.drainNow(); // _afterCycle: status, absorb, clear
+    await _safe(hooks.foreground);
     if (!_purged) {
       _purged = true;
       await _safe(hooks.purgeExpired);
@@ -127,6 +146,7 @@ final class CaptureCoordinator implements CaptureEventsApi {
       await writer.flushAndVerify(_rereadGuardState);
     }
     await orchestrator.onResumed();
+    await _safe(hooks.foreground);
   }
 
   /// Called by the writer of a rule (T-078, T-049, the picker) right after
@@ -192,10 +212,11 @@ final class CaptureCoordinator implements CaptureEventsApi {
     _emit();
   }
 
-  static CaptureCaps _capsOf(CaptureCapabilities c) => CaptureCaps(
+  CaptureCaps _capsOf(CaptureCapabilities c) => CaptureCaps(
     smsFlavor: c.smsFlavor,
     smsGranted: c.smsGranted,
     notificationAccess: c.notificationAccess,
+    ios: ios,
   );
 
   static GuardFileState _stateOf(GuardConfigState s) => switch (s) {

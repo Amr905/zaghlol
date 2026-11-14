@@ -6046,6 +6046,18 @@
   "@privacyDeleteServerCopy": {
     "description": "N · shown if the server delete failed; the local wipe is never blocked (NFR-PRIV-06)"
   },
+  "widgetOpenZaghlol": "Open Zaghlol",
+  "@widgetOpenZaghlol": {
+    "description": "W · home-screen widget line when there is no data yet"
+  },
+  "privacyDeleteBackupsKept": "Your backups on Google Drive or iCloud stay there. Delete them from there if you want.",
+  "@privacyDeleteBackupsKept": {
+    "description": "N · delete-everything confirm: backups in the user's own cloud are not touched"
+  },
+  "privacyDeleteFailed": "Couldn't delete everything. Open the app again and we'll finish.",
+  "@privacyDeleteFailed": {
+    "description": "N · shown when the local wipe did not finish; the next launch resumes it"
+  },
   "settingsPrefsTitle": "Preferences",
   "@settingsPrefsTitle": {
     "description": "T"
@@ -6603,5 +6615,25 @@
         "type": "int"
       }
     }
+  },
+  "iosSetupNudgeSilent": "{count, plural, =1{No bank text or Apple Pay payment has reached me for 1 day. Your Shortcuts may have switched off.} other{No bank text or Apple Pay payment has reached me for {n} days. Your Shortcuts may have switched off.}}",
+  "@iosSetupNudgeSilent": {
+    "description": "L · count:int, n:String · T-066 EC-14, iOS only, Home and Settings nudge after 7+ days of silence",
+    "placeholders": {
+      "count": {
+        "type": "int"
+      },
+      "n": {
+        "type": "String"
+      }
+    }
+  },
+  "iosSetupNudgeCheck": "Check my Shortcuts",
+  "@iosSetupNudgeCheck": {
+    "description": "B · opens the Capture screen"
+  },
+  "iosSetupNudgeSnoozeA11y": "Remind me in 7 days",
+  "@iosSetupNudgeSnoozeA11y": {
+    "description": "A · dismiss button of the nudge; hides it for 7 days"
   }
 }

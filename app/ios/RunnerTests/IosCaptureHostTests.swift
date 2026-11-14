@@ -23,7 +23,8 @@ final class IosCaptureHostTests: XCTestCase {
   override func tearDownWithError() throws { try? FileManager.default.removeItem(at: root) }
 
   private func host(refresh: @escaping () throws -> Void = {}) -> IosCaptureHost {
-    IosCaptureHost(runtime: { self.runtime }, claim: claim, scheduleRefresh: refresh)
+    IosCaptureHost(
+      runtime: { self.runtime }, claim: claim, scheduleRefresh: refresh, guardRuntime: { nil })
   }
 
   @discardableResult
@@ -131,6 +132,31 @@ final class IosCaptureHostTests: XCTestCase {
     }
     XCTAssertThrowsError(try h.getSpoolStatus())
     XCTAssertThrowsError(try h.ackSpool(ids: []))
+  }
+
+  // T-064: the checker's input is the recorded times, nothing else.
+  func testShortcutSetupStatusReturnsTheRecordedTimes() throws {
+    let log = IntentRunLog(
+      file: root.appendingPathComponent("capture/intent_runs.bin"), cipher: TestCipher())
+    let h = IosCaptureHost(
+      runtime: { self.runtime }, claim: claim, guardRuntime: { nil }, intentRuns: { log })
+    var s = try h.getShortcutSetupStatus()
+    XCTAssertNil(s.lastMessageIntentAtMs)
+    XCTAssertNil(s.lastWalletIntentAtMs)
+    log.record(.message, atMs: 1_700_000_000_000)
+    s = try h.getShortcutSetupStatus()
+    XCTAssertEqual(s.lastMessageIntentAtMs, 1_700_000_000_000)
+    XCTAssertNil(s.lastWalletIntentAtMs, "a never-run automation stays null")
+    log.record(.wallet, atMs: 1_700_000_500_000)
+    XCTAssertEqual(try h.getShortcutSetupStatus().lastWalletIntentAtMs, 1_700_000_500_000)
+  }
+
+  func testShortcutSetupStatusWithoutAContainerIsNotAvailable() {
+    let h = IosCaptureHost(runtime: { nil }, claim: SpoolClaim(), intentRuns: { nil })
+    XCTAssertThrowsError(try h.getShortcutSetupStatus()) {
+      XCTAssertEqual(($0 as? CaptureApiError)?.code, "NOT_AVAILABLE")
+      XCTAssertNil(($0 as? CaptureApiError)?.message)
+    }
   }
 
   func testRegisterBackgroundRefreshSchedulesAndFailureIsCodeOnly() throws {

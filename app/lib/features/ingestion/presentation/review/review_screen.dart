@@ -184,7 +184,9 @@ class _ReviewScreenState extends ConsumerState<ReviewScreen> {
     final l10n = AppLocalizations.of(context);
     final canAccept =
         (card is MessageCardModel && !card.unreadable) ||
-        (card is SuggestionCardModel && !card.ambiguousRefund) ||
+        (card is SuggestionCardModel &&
+            !card.ambiguousRefund &&
+            !card.isPair) ||
         card is SubscriptionCardModel;
     return Dismissible(
       key: ValueKey(card.itemId),
@@ -265,11 +267,17 @@ class _ReviewScreenState extends ConsumerState<ReviewScreen> {
       onConfirm: () => _now(() => _actions.confirmSubscription(card)),
       onDismiss: () => _dismissCard(card),
     ),
+    SuggestionCardModel(isPair: true) => _PairCard(
+      card: card,
+      onConfirm: (o) =>
+          _now(() => _actions.acceptCandidate(card.itemId, o.txnId)),
+      onDismiss: () => _dismiss(card.itemId),
+    ),
     SuggestionCardModel() => _SuggestionShell(
       body: _amountLine(
         context,
         card.amount,
-        isIncome: false,
+        isIncome: card.isIncome,
         merchant: card.merchant,
       ),
       onConfirm: card.ambiguousRefund
@@ -594,6 +602,87 @@ class _TransferCardState extends State<_TransferCard> {
       title: Text(label, style: ZType.body),
     ),
   );
+}
+
+/// Reimbursement / FX pair suggestion: lists the candidate expenses; a link is
+/// made only for the one the user picked (the only one is pre-selected).
+class _PairCard extends StatefulWidget {
+  const _PairCard({
+    required this.card,
+    required this.onConfirm,
+    required this.onDismiss,
+  });
+  final SuggestionCardModel card;
+  final void Function(ReviewTransferOption option) onConfirm;
+  final VoidCallback onDismiss;
+
+  @override
+  State<_PairCard> createState() => _PairCardState();
+}
+
+class _PairCardState extends State<_PairCard> {
+  int? _choice;
+
+  @override
+  Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
+    final card = widget.card;
+    final opts = card.candidates;
+    final choice = opts.length == 1 ? 0 : _choice;
+    return ZCard(
+      child: RadioGroup<int>(
+        groupValue: choice,
+        onChanged: (v) => setState(() => _choice = v),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            _amountLine(
+              context,
+              card.amount,
+              isIncome: card.isIncome,
+              merchant: card.merchant,
+            ),
+            for (var i = 0; i < opts.length; i++)
+              ConstrainedBox(
+                constraints: const BoxConstraints(
+                  minHeight: ZSpacing.minTarget,
+                ),
+                child: RadioListTile<int>(
+                  value: i,
+                  contentPadding: EdgeInsetsDirectional.zero,
+                  title: Text(
+                    l10n.ingestionReviewXferOption(
+                      _money(context, opts[i].amount),
+                      _iso(opts[i].accountLabel),
+                      _time(context, opts[i].occurredAt),
+                    ),
+                    style: ZType.body,
+                  ),
+                ),
+              ),
+            const SizedBox(height: ZSpacing.sm),
+            Wrap(
+              spacing: ZSpacing.sm,
+              runSpacing: ZSpacing.sm,
+              children: [
+                ZButton(
+                  label: l10n.commonActionConfirm,
+                  onPressed: choice == null
+                      ? null
+                      : () => widget.onConfirm(opts[choice]),
+                ),
+                ZButton(
+                  label: l10n.commonActionDismiss,
+                  variant: ZButtonVariant.text,
+                  onPressed: widget.onDismiss,
+                ),
+              ],
+            ),
+          ],
+        ),
+      ),
+    );
+  }
 }
 
 class _SuggestionShell extends StatelessWidget {

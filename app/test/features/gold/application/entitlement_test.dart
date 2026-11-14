@@ -519,6 +519,22 @@ void main() {
       expect(h.sink.last, EntitlementPhase.paused);
     });
 
+    test('sign-out sends the backend the account token read before the local '
+        'delete (D-61(c))', () async {
+      final h = Harness(boot: 1);
+      await h.online(h.token(entClaims(iatMs: t0, acct: 'acct-1')));
+      final acct = h.token(acctClaims(sub: 'acct-1', iatMs: t0));
+      h.store.values[BackendStateKeys.accountToken] = Uint8List.fromList(
+        utf8.encode(acct),
+      );
+      h.backend.onSignOut = (n) async {
+        expect(h.store.values[BackendStateKeys.accountToken], isNull);
+        throw BackendFailure(BackendFailureKind.offline);
+      };
+      await expectLater(h.service.signOut(), throwsA(isA<BackendFailure>()));
+      expect(h.backend.signOutTokens, [acct]);
+    });
+
     test('supportNotice survives a restart, is shown until dismissed, a repeat '
         'after dismissal is ignored, and a cleared notice resets', () async {
       final h = Harness(boot: 1);

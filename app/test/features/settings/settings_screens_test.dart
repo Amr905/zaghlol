@@ -417,8 +417,11 @@ void main() {
       expect(wiped, 0);
       await tester.enterText(find.byType(TextField), 'DELETE');
       await tester.tap(_confirm(t.privacyDeleteConfirm));
-      await settle(tester);
+      // T-166: a blocking progress dialog (spinner) stays until the restart.
+      await tester.pump();
+      await tester.pump();
       expect(wiped, 1);
+      expect(find.text(t.privacyDeleteWorking), findsOneWidget);
     });
 
     testWidgets('Arabic confirmation word works', (tester) async {
@@ -441,7 +444,8 @@ void main() {
       await settle(tester);
       await tester.enterText(find.byType(TextField), 'احذف');
       await tester.tap(_confirm(t.privacyDeleteConfirm));
-      await settle(tester);
+      await tester.pump();
+      await tester.pump();
       expect(wiped, 1);
     });
 

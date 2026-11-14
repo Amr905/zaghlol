@@ -9631,6 +9631,24 @@ abstract class AppLocalizations {
   /// **'النسخة اللي على السيرفر هتنتهي لوحدها.'**
   String get privacyDeleteServerCopy;
 
+  /// W · home-screen widget line when there is no data yet
+  ///
+  /// In ar, this message translates to:
+  /// **'افتح زغلول'**
+  String get widgetOpenZaghlol;
+
+  /// N · delete-everything confirm: backups in the user's own cloud are not touched
+  ///
+  /// In ar, this message translates to:
+  /// **'النسخ الاحتياطية اللي على Google Drive أو iCloud هتفضل زي ما هي. لو عايز تمسحها، امسحها من هناك.'**
+  String get privacyDeleteBackupsKept;
+
+  /// N · shown when the local wipe did not finish; the next launch resumes it
+  ///
+  /// In ar, this message translates to:
+  /// **'مقدرناش نمسح كل حاجة. افتح الأبلكيشن تاني وهنكمّل.'**
+  String get privacyDeleteFailed;
+
   /// T
   ///
   /// In ar, this message translates to:
@@ -10338,6 +10356,24 @@ abstract class AppLocalizations {
   /// In ar, this message translates to:
   /// **'{count, plural, =1{مبلغ واحد اتفكّ لأن المصروف قلّ} other{{count} مبالغ اتفكّت لأن المصروف قلّ}}'**
   String transactionsReimbUnassigned(int count);
+
+  /// L · count:int, n:String · T-066 EC-14, iOS only, Home and Settings nudge after 7+ days of silence
+  ///
+  /// In ar, this message translates to:
+  /// **'{count, plural, =1{بقالي يوم ما وصلتنيش رسالة بنك ولا دفع بـ Apple Pay. يمكن الاختصارات اتقفلت.} =2{بقالي يومين ما وصلتنيش رسالة بنك ولا دفع بـ Apple Pay. يمكن الاختصارات اتقفلت.} few{بقالي {n} أيام ما وصلتنيش رسالة بنك ولا دفع بـ Apple Pay. يمكن الاختصارات اتقفلت.} many{بقالي {n} يوم ما وصلتنيش رسالة بنك ولا دفع بـ Apple Pay. يمكن الاختصارات اتقفلت.} other{بقالي {n} يوم ما وصلتنيش رسالة بنك ولا دفع بـ Apple Pay. يمكن الاختصارات اتقفلت.}}'**
+  String iosSetupNudgeSilent(int count, String n);
+
+  /// B · opens the Capture screen
+  ///
+  /// In ar, this message translates to:
+  /// **'راجع الاختصارات'**
+  String get iosSetupNudgeCheck;
+
+  /// A · dismiss button of the nudge; hides it for 7 days
+  ///
+  /// In ar, this message translates to:
+  /// **'فكّرني بعد ٧ أيام'**
+  String get iosSetupNudgeSnoozeA11y;
 }
 
 class _AppLocalizationsDelegate

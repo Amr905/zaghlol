@@ -195,18 +195,3 @@ interface DeviceSecurityHostApi {
     }
   }
 }
-/** Generated interface from Pigeon that represents a handler of messages from Flutter. */
-interface WidgetBridgeHostApi {
-
-  companion object {
-    /** The codec used by WidgetBridgeHostApi. */
-    val codec: MessageCodec<Any?> by lazy {
-      DeviceApiPigeonCodec()
-    }
-    /** Sets up an instance of `WidgetBridgeHostApi` to handle messages through the `binaryMessenger`. */
-    @JvmOverloads
-    fun setUp(binaryMessenger: BinaryMessenger, api: WidgetBridgeHostApi?, messageChannelSuffix: String = "") {
-      val separatedMessageChannelSuffix = if (messageChannelSuffix.isNotEmpty()) ".$messageChannelSuffix" else ""
-    }
-  }
-}

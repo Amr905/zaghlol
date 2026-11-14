@@ -41,10 +41,29 @@ protocol SpoolFileKeyProvider {
   func spoolKey() -> Data?
 }
 
-/// No iOS spool key is provisioned yet (the Share Extension owner adds it), so
-/// the default provider reports NOT_AVAILABLE rather than guessing a key.
+/// The test default: no key, so NOT_AVAILABLE.
 struct UnprovisionedSpoolKeyProvider: SpoolFileKeyProvider {
   func spoolKey() -> Data? { nil }
+}
+
+/// T-065 (FU-198): the shared spool key (`SpoolKeychain`, shared access group),
+/// the key the Share Extension encrypts with. Any failure is NOT_AVAILABLE
+/// (nothing is deleted); a share cannot exist without its key.
+struct SharedSpoolKeyProvider: SpoolFileKeyProvider {
+  func spoolKey() -> Data? {
+    guard let loaded = try? SpoolKeychain().loadOrCreate(), loaded.key.count == 32 else { return nil }
+    return loaded.key
+  }
+}
+
+enum OcrRoots {
+  /// The only directory OCR reads and deletes in: `spool/files/` of the App
+  /// Group. Without the container the root is a path that holds nothing, so
+  /// every path is refused.
+  static func filesDirectory() -> URL {
+    if let c = SpoolLocation.containerURL() { return SpoolLocation.filesDirectory(in: c) }
+    return URL(fileURLWithPath: "/nonexistent-zaghlol-spool-files", isDirectory: true)
+  }
 }
 
 /// Vision cannot be used for this request. Code only.
@@ -151,7 +170,7 @@ struct SpoolFileImageSource: OcrImageSource {
   let keys: SpoolFileKeyProvider
   let home: URL
 
-  init(keys: SpoolFileKeyProvider = UnprovisionedSpoolKeyProvider(), home: URL = URL(fileURLWithPath: NSHomeDirectory())) {
+  init(keys: SpoolFileKeyProvider = SharedSpoolKeyProvider(), home: URL = OcrRoots.filesDirectory()) {
     self.keys = keys
     self.home = home
   }
@@ -219,7 +238,7 @@ final class OcrHost: OcrHostApi {
     recognizer: TextRecognizing = VisionTextRecognizer(),
     source: OcrImageSource = SpoolFileImageSource(),
     fileManager: FileManager = .default,
-    home: URL = URL(fileURLWithPath: NSHomeDirectory())
+    home: URL = OcrRoots.filesDirectory()
   ) {
     self.home = home
     self.recognizer = recognizer
@@ -233,7 +252,7 @@ final class OcrHost: OcrHostApi {
 
   /// Synchronous core, used by `recognize` and by tests.
   func recognizeNow(path: String, languages: [String]) throws -> OcrResult {
-    // Only files inside this app's container are touched, never deleted.
+    // Only files inside the App Group's spool/files/ are read or deleted.
     guard OcrPaths.isInside(path: path, home: home) else { throw Self.error(.ioError) }
     var keyMissing = false
     // No spool key: nothing was processed, so the file stays for a retry.

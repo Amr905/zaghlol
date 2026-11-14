@@ -49,6 +49,15 @@ class DrainLoopTest {
 
     private fun run(env: Env) = runBlocking { DrainLoop(env).run() }
 
+    /** FU-194: a restore holds the drain; the retry work drains after it. */
+    @Test
+    fun heldIsARetry() {
+        val env = Env(pending = 2, reports = ArrayDeque(listOf(CycleReport(CycleOutcome.HELD))))
+        assertEquals(RunResult.RETRY, run(env))
+        assertEquals(1, env.cycles)
+        assertEquals(2, env.pending)
+    }
+
     @Test
     fun emptySpoolEndsEmptyWithoutAnEngine() {
         val env = Env(pending = 0)

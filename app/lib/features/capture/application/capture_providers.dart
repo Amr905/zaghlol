@@ -11,6 +11,10 @@ import 'dart:async';
 import 'package:flutter/foundation.dart' show TargetPlatform;
 import 'package:flutter/foundation.dart' as f show defaultTargetPlatform;
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+
+import '../../notifications/application/notification_providers.dart'
+    show duplicateCheckProvider;
+
 import 'package:zaghlol_parsing/zaghlol_parsing.dart'
     show ParsingPipeline, Registry;
 
@@ -34,6 +38,8 @@ import '../../ingestion/data/ingest_factory.dart';
 import '../../transactions/data/drift_transaction_repository.dart';
 import '../data/alert_store.dart';
 import '../data/capture_host_port.dart';
+import '../data/ios_capture_host_port.dart';
+import 'ios_setup_providers.dart';
 import '../../ingestion/data/custom_institutions.dart';
 import '../data/catch_up_scheduler.dart';
 import '../data/guard_inputs_reader.dart';
@@ -52,8 +58,12 @@ final ingestionPauseGateProvider = Provider<IngestionPauseGate>(
   name: 'ingestionPauseGateProvider',
 );
 
+/// The platform's capture host (T-063: the iOS one writes the Guard config
+/// the App Intents read; T-066 starts the coordinator on iOS).
 final captureHostPortProvider = Provider<CaptureHostPort>(
-  (ref) => PigeonCaptureHostPort(),
+  (ref) => ref.watch(captureIosProvider)
+      ? IosCaptureHostPort()
+      : PigeonCaptureHostPort(),
   name: 'captureHostPortProvider',
 );
 
@@ -96,7 +106,8 @@ final captureShareIntakeProvider = Provider<ShareIntakeService>((ref) {
   return service;
 }, name: 'captureShareIntakeProvider');
 
-/// Where capture runs: Android now (iOS hooks: T-066).
+/// Android capture (live SMS and notifications). iOS is [captureIosProvider]
+/// (T-066): Home's "waiting for SMS" copy stays Android-only.
 final captureSupportedProvider = Provider<bool>(
   (ref) => f.defaultTargetPlatform == TargetPlatform.android,
   name: 'captureSupportedProvider',
@@ -112,7 +123,8 @@ final captureNotificationsEnabledProvider = settingProvider<bool>(
 final captureCoordinatorProvider = FutureProvider<CaptureCoordinator?>((
   ref,
 ) async {
-  if (!ref.watch(captureSupportedProvider)) return null;
+  final ios = ref.watch(captureIosProvider);
+  if (!ios && !ref.watch(captureSupportedProvider)) return null;
   final Registry registry;
   try {
     registry = ref.watch(captureRegistryLoaderProvider)();
@@ -144,6 +156,8 @@ final captureCoordinatorProvider = FutureProvider<CaptureCoordinator?>((
       build: build,
       gate: gate,
       rebuildPerBatch: true,
+      // T-100: duplicate-charge alerts after each committed batch.
+      afterBatch: ref.read(duplicateCheckProvider),
     ),
   );
   final share = ref.watch(captureShareIntakeProvider);
@@ -161,7 +175,16 @@ final captureCoordinatorProvider = FutureProvider<CaptureCoordinator?>((
       pollShareIntake: share.pollPending,
       purgeExpired: () =>
           DriftTransactionRepository(TransactionsDao(db)).purgeExpired(),
+      foreground: ios
+          ? () async {
+              // T-062 minor 3: nothing else starts the refresh chain; a
+              // submit with the same identifier replaces the pending one.
+              await _safeHost(host.scheduleIngestionNow);
+              ref.invalidate(iosSetupStatusProvider);
+            }
+          : null,
     ),
+    ios: ios,
     onTablesUpdated: () => markIngestionTablesUpdated(db),
     initialToggles: CaptureToggles(
       sms: ref.read(captureSmsEnabledProvider).value ?? true,
@@ -193,6 +216,14 @@ final captureCoordinatorProvider = FutureProvider<CaptureCoordinator?>((
   return coordinator;
 }, name: 'captureCoordinatorProvider');
 
+Future<void> _safeHost(Future<void> Function() call) async {
+  try {
+    await call();
+  } on Object {
+    // Best effort: the foreground drain is the guarantee.
+  }
+}
+
 InboxScanService _buildScanService(
   Ref ref,
   AppDatabase db,
@@ -208,6 +239,7 @@ InboxScanService _buildScanService(
       ref.container,
       gate: gate,
       rebuildPerBatch: true,
+      afterBatch: ref.read(duplicateCheckProvider),
       build: (d) async => buildIngestRawMessages(
         d,
         pipeline: ParsingPipeline(

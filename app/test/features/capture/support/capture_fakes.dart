@@ -64,6 +64,7 @@ final class FakeHost implements CaptureHostPort {
   String? clearFails;
   final List<int> clears = [];
   int scheduleNowCalls = 0;
+  bool scheduleFails = false;
   Object? statusFails;
 
   /// Called after each successful write (native state transitions).
@@ -136,6 +137,7 @@ final class FakeHost implements CaptureHostPort {
   Future<void> scheduleIngestionNow() async {
     log.add('scheduleNow');
     scheduleNowCalls++;
+    if (scheduleFails) throw StateError('schedule failed');
   }
 
   /// T-048: replace to serve inbox pages.

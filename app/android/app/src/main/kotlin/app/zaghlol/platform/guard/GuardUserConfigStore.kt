@@ -180,6 +180,16 @@ class GuardUserConfigStore(
         ops.syncDir(dir)
     }
 
+    /**
+     * T-166 "Delete everything": removes the user file and any tmp. The one
+     * exception to "never deletes the user file". True when both are gone.
+     */
+    fun deleteForWipe(): Boolean {
+        ops.delete(tmp)
+        ops.delete(file)
+        return !file.exists() && !tmp.exists()
+    }
+
     override fun toString(): String = "GuardUserConfigStore"
 
     companion object {

@@ -98,6 +98,14 @@ abstract final class Settings {
     byDefault: true,
   );
 
+  /// T-100 wiring: when the weekly summary last ran (epoch ms UTC); null:
+  /// never. The summary runs on app start/resume when 7 days have passed.
+  static final notifWeeklyLastRun = SettingKey.optionalInteger(
+    'notif.weekly_summary_last_run',
+    min: 0,
+    max: 999999999999999,
+  );
+
   // FR-NTF-02, A-27: 23:00–08:00, as minutes after local midnight.
   static final quietHoursEnabled = SettingKey.boolean(
     'quiet_hours.enabled',
@@ -193,6 +201,14 @@ abstract final class Settings {
   /// When the paywall was last shown: epoch milliseconds UTC; null: never.
   static final paywallLastShown = SettingKey.optionalInteger(
     'paywall_last_shown',
+    min: 0,
+    max: 999999999999999,
+  );
+
+  /// T-066 (EC-14): the iOS "your Shortcuts went quiet" nudge is hidden until
+  /// this time (epoch ms UTC) after the user dismissed it; null: not snoozed.
+  static final iosNudgeSnoozedUntil = SettingKey.optionalInteger(
+    'ios_nudge_snoozed_until',
     min: 0,
     max: 999999999999999,
   );

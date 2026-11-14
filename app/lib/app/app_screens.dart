@@ -6,6 +6,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:zaghlol_domain/zaghlol_domain.dart' show Cycle;
 
+import '../features/account/presentation/account_screen.dart';
 import '../features/accounts/domain/account.dart';
 import '../features/accounts/presentation/card_detail/card_navigation.dart';
 import '../features/accounts/presentation/edit_card/add_card_flow.dart';
@@ -22,6 +23,7 @@ import '../features/ingestion/presentation/review/review_screen.dart';
 import '../features/onboarding/presentation/android_setup.dart';
 import '../features/onboarding/presentation/scan_results.dart';
 import '../features/settings/presentation/privacy_screen.dart';
+import '../features/share_cards/presentation/share_studio_screen.dart';
 import '../features/settings/presentation/settings_main_screen.dart';
 import '../features/transactions/presentation/detail/transaction_detail_screen.dart';
 import '../features/transactions/presentation/list/transactions_list_screen.dart';
@@ -45,6 +47,8 @@ final class AppScreens {
     this.editCard = _editCard,
     this.cardCaptureSheet = _cardCaptureSheet,
     this.addAsset = _addAsset,
+    this.shareStudio = _shareStudio,
+    this.account = _account,
     this.prices = _prices,
     this.paywall = _paywall,
     this.settings = _settings,
@@ -91,6 +95,8 @@ final class AppScreens {
   final Future<void> Function(BuildContext context, Account account)
   cardCaptureSheet;
   final Future<void> Function(BuildContext context) addAsset;
+  final Future<void> Function(BuildContext context) shareStudio;
+  final Future<void> Function(BuildContext context) account;
   final Future<void> Function(BuildContext context) prices;
   final Future<void> Function(BuildContext context) paywall;
   final Future<void> Function(BuildContext context, SettingsDestinations d)
@@ -209,6 +215,15 @@ Future<void> _cardCaptureSheet(BuildContext c, Account a) =>
 
 Future<void> _addAsset(BuildContext c) =>
     pushScreen<void>(c, (_) => const AddAssetScreen());
+
+Future<void> _shareStudio(BuildContext c) => pushScreen<void>(
+  c,
+  (_) => const ShareStudioScreen(),
+  fullscreenDialog: true,
+);
+
+Future<void> _account(BuildContext c) =>
+    pushScreen<void>(c, (_) => const AccountScreen());
 
 Future<void> _prices(BuildContext c) =>
     pushScreen<void>(c, (_) => const PricesScreen());

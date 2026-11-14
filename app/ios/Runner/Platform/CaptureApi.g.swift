@@ -478,6 +478,46 @@ struct SpoolStatus: Hashable {
   }
 }
 
+/// T-064 (FR-ING-I-07): when each Shortcuts automation last ran, whatever the
+/// Guard decided (wall-clock epoch ms; null = never). Times only, never
+/// content, sender or keywords.
+///
+/// Generated class from Pigeon that represents data sent in messages.
+struct ShortcutSetupStatus: Hashable {
+  var lastMessageIntentAtMs: Int64? = nil
+  var lastWalletIntentAtMs: Int64? = nil
+
+
+  // swift-format-ignore: AlwaysUseLowerCamelCase
+  static func fromList(_ pigeonVar_list: [Any?]) -> ShortcutSetupStatus? {
+    let lastMessageIntentAtMs: Int64? = nilOrValue(pigeonVar_list[0])
+    let lastWalletIntentAtMs: Int64? = nilOrValue(pigeonVar_list[1])
+
+    return ShortcutSetupStatus(
+      lastMessageIntentAtMs: lastMessageIntentAtMs,
+      lastWalletIntentAtMs: lastWalletIntentAtMs
+    )
+  }
+  func toList() -> [Any?] {
+    return [
+      lastMessageIntentAtMs,
+      lastWalletIntentAtMs,
+    ]
+  }
+  static func == (lhs: ShortcutSetupStatus, rhs: ShortcutSetupStatus) -> Bool {
+    if Swift.type(of: lhs) != Swift.type(of: rhs) {
+      return false
+    }
+    return deepEqualsCaptureApi(lhs.lastMessageIntentAtMs, rhs.lastMessageIntentAtMs) && deepEqualsCaptureApi(lhs.lastWalletIntentAtMs, rhs.lastWalletIntentAtMs)
+  }
+
+  func hash(into hasher: inout Hasher) {
+    hasher.combine("ShortcutSetupStatus")
+    deepHashCaptureApi(value: lastMessageIntentAtMs, hasher: &hasher)
+    deepHashCaptureApi(value: lastWalletIntentAtMs, hasher: &hasher)
+  }
+}
+
 /// Generated class from Pigeon that represents data sent in messages.
 struct CaptureCapabilities: Hashable {
   var smsGranted: Bool
@@ -549,6 +589,8 @@ private class CaptureApiPigeonCodecReader: FlutterStandardReader {
     case 134:
       return SpoolStatus.fromList(self.readValue() as! [Any?])
     case 135:
+      return ShortcutSetupStatus.fromList(self.readValue() as! [Any?])
+    case 136:
       return CaptureCapabilities.fromList(self.readValue() as! [Any?])
     default:
       return super.readValue(ofType: type)
@@ -576,8 +618,11 @@ private class CaptureApiPigeonCodecWriter: FlutterStandardWriter {
     } else if let value = value as? SpoolStatus {
       super.writeByte(134)
       super.writeValue(value.toList())
-    } else if let value = value as? CaptureCapabilities {
+    } else if let value = value as? ShortcutSetupStatus {
       super.writeByte(135)
+      super.writeValue(value.toList())
+    } else if let value = value as? CaptureCapabilities {
+      super.writeByte(136)
       super.writeValue(value.toList())
     } else {
       super.writeValue(value)
@@ -626,6 +671,25 @@ protocol AndroidCaptureHostApi {
   /// (IngestBatchResult.kept), called after the ack of the rest. Only ids this
   /// engine drained; moved to spool/held/ (platform-channels.md 1.3). IO_ERROR.
   func holdSpool(ids: [String]) throws
+  /// T-166 "Delete everything", UI engine only, after Dart closed the
+  /// database and deleted its key slots: cancels all WorkManager work and
+  /// every notification, forgets the Guard user part, deletes every
+  /// AndroidKeyStore alias of the app and clears the contents of filesDir,
+  /// noBackupFilesDir and cacheDir. Idempotent; IO_ERROR when something
+  /// could not be deleted (the other parts still ran).
+  func wipeLocalData() throws
+  /// FU-194: the restore's drain hold (platform-channels.md 1.4), UI engine
+  /// only (the headless host answers NOT_AVAILABLE). Persists a hold for
+  /// [ttlMs] (native caps it at 10 min; call again to renew); while it holds
+  /// no headless engine is started or reused, capture still writes to the
+  /// spool. Returns true while a headless engine is still active (it was
+  /// asked to shut down; poll isHeadlessDrainActive). IO_ERROR: no hold set.
+  func holdDrain(ttlMs: Int64) throws -> Bool
+  /// FU-194: true while a headless engine exists (it may hold the database open).
+  func isHeadlessDrainActive() throws -> Bool
+  /// FU-194: clears the hold (idempotent). IO_ERROR when the file stays (the
+  /// hold then still expires on its own).
+  func releaseDrainHold() throws
 }
 
 /// Generated setup class from Pigeon to handle messages through the `binaryMessenger`.
@@ -847,16 +911,98 @@ class AndroidCaptureHostApiSetup {
     } else {
       holdSpoolChannel.setMessageHandler(nil)
     }
+    /// T-166 "Delete everything", UI engine only, after Dart closed the
+    /// database and deleted its key slots: cancels all WorkManager work and
+    /// every notification, forgets the Guard user part, deletes every
+    /// AndroidKeyStore alias of the app and clears the contents of filesDir,
+    /// noBackupFilesDir and cacheDir. Idempotent; IO_ERROR when something
+    /// could not be deleted (the other parts still ran).
+    let wipeLocalDataChannel = taskQueue == nil
+      ? FlutterBasicMessageChannel(name: "dev.flutter.pigeon.zaghlol.AndroidCaptureHostApi.wipeLocalData\(channelSuffix)", binaryMessenger: binaryMessenger, codec: codec)
+      : FlutterBasicMessageChannel(name: "dev.flutter.pigeon.zaghlol.AndroidCaptureHostApi.wipeLocalData\(channelSuffix)", binaryMessenger: binaryMessenger, codec: codec, taskQueue: taskQueue)
+    if let api = api {
+      wipeLocalDataChannel.setMessageHandler { _, reply in
+        do {
+          try api.wipeLocalData()
+          reply(wrapResult(nil))
+        } catch {
+          reply(wrapError(error))
+        }
+      }
+    } else {
+      wipeLocalDataChannel.setMessageHandler(nil)
+    }
+    /// FU-194: the restore's drain hold (platform-channels.md 1.4), UI engine
+    /// only (the headless host answers NOT_AVAILABLE). Persists a hold for
+    /// [ttlMs] (native caps it at 10 min; call again to renew); while it holds
+    /// no headless engine is started or reused, capture still writes to the
+    /// spool. Returns true while a headless engine is still active (it was
+    /// asked to shut down; poll isHeadlessDrainActive). IO_ERROR: no hold set.
+    let holdDrainChannel = taskQueue == nil
+      ? FlutterBasicMessageChannel(name: "dev.flutter.pigeon.zaghlol.AndroidCaptureHostApi.holdDrain\(channelSuffix)", binaryMessenger: binaryMessenger, codec: codec)
+      : FlutterBasicMessageChannel(name: "dev.flutter.pigeon.zaghlol.AndroidCaptureHostApi.holdDrain\(channelSuffix)", binaryMessenger: binaryMessenger, codec: codec, taskQueue: taskQueue)
+    if let api = api {
+      holdDrainChannel.setMessageHandler { message, reply in
+        let args = message as! [Any?]
+        let ttlMsArg = args[0] as! Int64
+        do {
+          let result = try api.holdDrain(ttlMs: ttlMsArg)
+          reply(wrapResult(result))
+        } catch {
+          reply(wrapError(error))
+        }
+      }
+    } else {
+      holdDrainChannel.setMessageHandler(nil)
+    }
+    /// FU-194: true while a headless engine exists (it may hold the database open).
+    let isHeadlessDrainActiveChannel = taskQueue == nil
+      ? FlutterBasicMessageChannel(name: "dev.flutter.pigeon.zaghlol.AndroidCaptureHostApi.isHeadlessDrainActive\(channelSuffix)", binaryMessenger: binaryMessenger, codec: codec)
+      : FlutterBasicMessageChannel(name: "dev.flutter.pigeon.zaghlol.AndroidCaptureHostApi.isHeadlessDrainActive\(channelSuffix)", binaryMessenger: binaryMessenger, codec: codec, taskQueue: taskQueue)
+    if let api = api {
+      isHeadlessDrainActiveChannel.setMessageHandler { _, reply in
+        do {
+          let result = try api.isHeadlessDrainActive()
+          reply(wrapResult(result))
+        } catch {
+          reply(wrapError(error))
+        }
+      }
+    } else {
+      isHeadlessDrainActiveChannel.setMessageHandler(nil)
+    }
+    /// FU-194: clears the hold (idempotent). IO_ERROR when the file stays (the
+    /// hold then still expires on its own).
+    let releaseDrainHoldChannel = taskQueue == nil
+      ? FlutterBasicMessageChannel(name: "dev.flutter.pigeon.zaghlol.AndroidCaptureHostApi.releaseDrainHold\(channelSuffix)", binaryMessenger: binaryMessenger, codec: codec)
+      : FlutterBasicMessageChannel(name: "dev.flutter.pigeon.zaghlol.AndroidCaptureHostApi.releaseDrainHold\(channelSuffix)", binaryMessenger: binaryMessenger, codec: codec, taskQueue: taskQueue)
+    if let api = api {
+      releaseDrainHoldChannel.setMessageHandler { _, reply in
+        do {
+          try api.releaseDrainHold()
+          reply(wrapResult(nil))
+        } catch {
+          reply(wrapError(error))
+        }
+      }
+    } else {
+      releaseDrainHoldChannel.setMessageHandler(nil)
+    }
   }
 }
 /// iOS host (T-062): the encrypted spool in the App Group container and the
 /// background refresh. Same drain / ack / hold / status semantics as
 /// AndroidCaptureHostApi (platform-channels.md 1.3), so the Dart drain is
 /// shared. Errors: IO_ERROR | NOT_AVAILABLE (no App Group container).
-/// T-061 adds writeGuardConfig and the Shortcut-setup methods (section 3).
+/// T-063 adds writeGuardConfig (section 3); T-064 adds getShortcutSetupStatus (the install link is Dart-side, AppLinks.shortcutInstall).
 ///
 /// Generated protocol from Pigeon that represents a handler of messages from Flutter.
 protocol IosCaptureHostApi {
+  /// T-063: the plaintext user part of the Guard config (platform-channels.md
+  /// 1.1); native validates, encrypts with the shared spool key and writes it
+  /// to the App Group, where the App Intents' Guard reads it.
+  /// CONFIG_INVALID | IO_ERROR | NOT_AVAILABLE.
+  func writeGuardConfig(userConfigJson: FlutterStandardTypedData) throws
   /// Returns decrypted entries (in memory only), oldest first.
   func drainSpool(max: Int64) throws -> [SpoolEntry]
   /// Only ids this engine drained.
@@ -866,10 +1012,30 @@ protocol IosCaptureHostApi {
   func getSpoolStatus() throws -> SpoolStatus
   /// Zeroes the alert counters if [seq] still matches getSpoolStatus().seq.
   func clearSpoolAlerts(seq: Int64) throws
+  /// T-064: the per-intent last-run times (the setup checker's input). Null
+  /// times when an intent never ran or the record can't be read yet.
+  /// NOT_AVAILABLE: no App Group container.
+  func getShortcutSetupStatus() throws -> ShortcutSetupStatus
   /// Submits the BGAppRefreshTask 'app.zaghlol.ingest' (the launch handler is
   /// registered natively at launch). A best-effort nudge: the system decides
   /// when it runs; the foreground drain is the guarantee.
   func registerBackgroundRefresh() throws
+  /// T-166 "Delete everything", UI engine only, after Dart closed the
+  /// database and deleted its key slots: cancels every BGTask request,
+  /// removes pending and delivered notifications, deletes every Keychain item
+  /// of the app except the seat keys (service `app.zaghlol.seatkey`, D-55),
+  /// clears the contents (never the roots) of the sandbox and App Group
+  /// directories and applies the backup exclusions again (T-165 F4).
+  /// Idempotent; IO_ERROR when something could not be deleted.
+  func wipeLocalData() throws
+  /// FU-194: same as AndroidCaptureHostApi.holdDrain. While held, the
+  /// headless run (App Intent, BGAppRefreshTask) starts no engine; the spool
+  /// write before it still happens. IO_ERROR: no hold set.
+  func holdDrain(ttlMs: Int64) throws -> Bool
+  /// FU-194: true while a headless run is in progress.
+  func isHeadlessDrainActive() throws -> Bool
+  /// FU-194: clears the hold (idempotent).
+  func releaseDrainHold() throws
 }
 
 /// Generated setup class from Pigeon to handle messages through the `binaryMessenger`.
@@ -883,6 +1049,27 @@ class IosCaptureHostApiSetup {
     #else
       let taskQueue: FlutterTaskQueue? = nil
     #endif
+    /// T-063: the plaintext user part of the Guard config (platform-channels.md
+    /// 1.1); native validates, encrypts with the shared spool key and writes it
+    /// to the App Group, where the App Intents' Guard reads it.
+    /// CONFIG_INVALID | IO_ERROR | NOT_AVAILABLE.
+    let writeGuardConfigChannel = taskQueue == nil
+      ? FlutterBasicMessageChannel(name: "dev.flutter.pigeon.zaghlol.IosCaptureHostApi.writeGuardConfig\(channelSuffix)", binaryMessenger: binaryMessenger, codec: codec)
+      : FlutterBasicMessageChannel(name: "dev.flutter.pigeon.zaghlol.IosCaptureHostApi.writeGuardConfig\(channelSuffix)", binaryMessenger: binaryMessenger, codec: codec, taskQueue: taskQueue)
+    if let api = api {
+      writeGuardConfigChannel.setMessageHandler { message, reply in
+        let args = message as! [Any?]
+        let userConfigJsonArg = args[0] as! FlutterStandardTypedData
+        do {
+          try api.writeGuardConfig(userConfigJson: userConfigJsonArg)
+          reply(wrapResult(nil))
+        } catch {
+          reply(wrapError(error))
+        }
+      }
+    } else {
+      writeGuardConfigChannel.setMessageHandler(nil)
+    }
     /// Returns decrypted entries (in memory only), oldest first.
     let drainSpoolChannel = taskQueue == nil
       ? FlutterBasicMessageChannel(name: "dev.flutter.pigeon.zaghlol.IosCaptureHostApi.drainSpool\(channelSuffix)", binaryMessenger: binaryMessenger, codec: codec)
@@ -970,6 +1157,24 @@ class IosCaptureHostApiSetup {
     } else {
       clearSpoolAlertsChannel.setMessageHandler(nil)
     }
+    /// T-064: the per-intent last-run times (the setup checker's input). Null
+    /// times when an intent never ran or the record can't be read yet.
+    /// NOT_AVAILABLE: no App Group container.
+    let getShortcutSetupStatusChannel = taskQueue == nil
+      ? FlutterBasicMessageChannel(name: "dev.flutter.pigeon.zaghlol.IosCaptureHostApi.getShortcutSetupStatus\(channelSuffix)", binaryMessenger: binaryMessenger, codec: codec)
+      : FlutterBasicMessageChannel(name: "dev.flutter.pigeon.zaghlol.IosCaptureHostApi.getShortcutSetupStatus\(channelSuffix)", binaryMessenger: binaryMessenger, codec: codec, taskQueue: taskQueue)
+    if let api = api {
+      getShortcutSetupStatusChannel.setMessageHandler { _, reply in
+        do {
+          let result = try api.getShortcutSetupStatus()
+          reply(wrapResult(result))
+        } catch {
+          reply(wrapError(error))
+        }
+      }
+    } else {
+      getShortcutSetupStatusChannel.setMessageHandler(nil)
+    }
     /// Submits the BGAppRefreshTask 'app.zaghlol.ingest' (the launch handler is
     /// registered natively at launch). A best-effort nudge: the system decides
     /// when it runs; the foreground drain is the guarantee.
@@ -985,6 +1190,80 @@ class IosCaptureHostApiSetup {
       }
     } else {
       registerBackgroundRefreshChannel.setMessageHandler(nil)
+    }
+    /// T-166 "Delete everything", UI engine only, after Dart closed the
+    /// database and deleted its key slots: cancels every BGTask request,
+    /// removes pending and delivered notifications, deletes every Keychain item
+    /// of the app except the seat keys (service `app.zaghlol.seatkey`, D-55),
+    /// clears the contents (never the roots) of the sandbox and App Group
+    /// directories and applies the backup exclusions again (T-165 F4).
+    /// Idempotent; IO_ERROR when something could not be deleted.
+    let wipeLocalDataChannel = taskQueue == nil
+      ? FlutterBasicMessageChannel(name: "dev.flutter.pigeon.zaghlol.IosCaptureHostApi.wipeLocalData\(channelSuffix)", binaryMessenger: binaryMessenger, codec: codec)
+      : FlutterBasicMessageChannel(name: "dev.flutter.pigeon.zaghlol.IosCaptureHostApi.wipeLocalData\(channelSuffix)", binaryMessenger: binaryMessenger, codec: codec, taskQueue: taskQueue)
+    if let api = api {
+      wipeLocalDataChannel.setMessageHandler { _, reply in
+        do {
+          try api.wipeLocalData()
+          reply(wrapResult(nil))
+        } catch {
+          reply(wrapError(error))
+        }
+      }
+    } else {
+      wipeLocalDataChannel.setMessageHandler(nil)
+    }
+    /// FU-194: same as AndroidCaptureHostApi.holdDrain. While held, the
+    /// headless run (App Intent, BGAppRefreshTask) starts no engine; the spool
+    /// write before it still happens. IO_ERROR: no hold set.
+    let holdDrainChannel = taskQueue == nil
+      ? FlutterBasicMessageChannel(name: "dev.flutter.pigeon.zaghlol.IosCaptureHostApi.holdDrain\(channelSuffix)", binaryMessenger: binaryMessenger, codec: codec)
+      : FlutterBasicMessageChannel(name: "dev.flutter.pigeon.zaghlol.IosCaptureHostApi.holdDrain\(channelSuffix)", binaryMessenger: binaryMessenger, codec: codec, taskQueue: taskQueue)
+    if let api = api {
+      holdDrainChannel.setMessageHandler { message, reply in
+        let args = message as! [Any?]
+        let ttlMsArg = args[0] as! Int64
+        do {
+          let result = try api.holdDrain(ttlMs: ttlMsArg)
+          reply(wrapResult(result))
+        } catch {
+          reply(wrapError(error))
+        }
+      }
+    } else {
+      holdDrainChannel.setMessageHandler(nil)
+    }
+    /// FU-194: true while a headless run is in progress.
+    let isHeadlessDrainActiveChannel = taskQueue == nil
+      ? FlutterBasicMessageChannel(name: "dev.flutter.pigeon.zaghlol.IosCaptureHostApi.isHeadlessDrainActive\(channelSuffix)", binaryMessenger: binaryMessenger, codec: codec)
+      : FlutterBasicMessageChannel(name: "dev.flutter.pigeon.zaghlol.IosCaptureHostApi.isHeadlessDrainActive\(channelSuffix)", binaryMessenger: binaryMessenger, codec: codec, taskQueue: taskQueue)
+    if let api = api {
+      isHeadlessDrainActiveChannel.setMessageHandler { _, reply in
+        do {
+          let result = try api.isHeadlessDrainActive()
+          reply(wrapResult(result))
+        } catch {
+          reply(wrapError(error))
+        }
+      }
+    } else {
+      isHeadlessDrainActiveChannel.setMessageHandler(nil)
+    }
+    /// FU-194: clears the hold (idempotent).
+    let releaseDrainHoldChannel = taskQueue == nil
+      ? FlutterBasicMessageChannel(name: "dev.flutter.pigeon.zaghlol.IosCaptureHostApi.releaseDrainHold\(channelSuffix)", binaryMessenger: binaryMessenger, codec: codec)
+      : FlutterBasicMessageChannel(name: "dev.flutter.pigeon.zaghlol.IosCaptureHostApi.releaseDrainHold\(channelSuffix)", binaryMessenger: binaryMessenger, codec: codec, taskQueue: taskQueue)
+    if let api = api {
+      releaseDrainHoldChannel.setMessageHandler { _, reply in
+        do {
+          try api.releaseDrainHold()
+          reply(wrapResult(nil))
+        } catch {
+          reply(wrapError(error))
+        }
+      }
+    } else {
+      releaseDrainHoldChannel.setMessageHandler(nil)
     }
   }
 }

@@ -7,6 +7,7 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		5A7117000000000000000001 /* ShareImageHost.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5A7117000000000000000002 /* ShareImageHost.swift */; };
 		5A1600000000000000000A01 /* OcrApi.g.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5A1600000000000000000A02 /* OcrApi.g.swift */; };
 		5A1600000000000000000A03 /* OcrHost.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5A1600000000000000000A04 /* OcrHost.swift */; };
 		5A1600000000000000000A05 /* OcrTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5A1600000000000000000A06 /* OcrTests.swift */; };
@@ -14,8 +15,6 @@
 		5A1510000000000000000F03 /* ICloudBackupFiles.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5A1510000000000000000F04 /* ICloudBackupFiles.swift */; };
 		5A1510000000000000000F05 /* ICloudBackupHost.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5A1510000000000000000F06 /* ICloudBackupHost.swift */; };
 		5A1510000000000000000F08 /* ICloudBackupTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5A1510000000000000000F09 /* ICloudBackupTests.swift */; };
-		5A9A00000000000000000A01 /* IosIntentSpike.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5A9A00000000000000000A02 /* IosIntentSpike.swift */; };
-		5A9A00000000000000000A04 /* IosIntentSpikeTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5A9A00000000000000000A05 /* IosIntentSpikeTests.swift */; };
 		1498D2341E8E89220040F4C2 /* GeneratedPluginRegistrant.m in Sources */ = {isa = PBXBuildFile; fileRef = 1498D2331E8E89220040F4C2 /* GeneratedPluginRegistrant.m */; };
 		331C808B294A63AB00263BE5 /* RunnerTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 331C807B294A618700263BE5 /* RunnerTests.swift */; };
 		3B3967161E833CAA004F5970 /* AppFrameworkInfo.plist in Resources */ = {isa = PBXBuildFile; fileRef = 3B3967151E833CAA004F5970 /* AppFrameworkInfo.plist */; };
@@ -36,6 +35,8 @@
 		5A1480000000000000000C03 /* TextNormalizationHost.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5A1480000000000000000C04 /* TextNormalizationHost.swift */; };
 		5A1480000000000000000C05 /* TextNormalizationTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5A1480000000000000000C06 /* TextNormalizationTests.swift */; };
 		5A1800000000000000000D01 /* ClockApi.g.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5A1800000000000000000D02 /* ClockApi.g.swift */; };
+		5A1900000000000000000E01 /* NotificationsApi.g.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5A1900000000000000000E02 /* NotificationsApi.g.swift */; };
+		5A1900000000000000000E03 /* NotificationsHost.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5A1900000000000000000E04 /* NotificationsHost.swift */; };
 		5A1800000000000000000D03 /* TrustedClockHost.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5A1800000000000000000D04 /* TrustedClockHost.swift */; };
 		5A1030000000000000000E01 /* DeviceApi.g.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5A1030000000000000000E02 /* DeviceApi.g.swift */; };
 		5A1030000000000000000E03 /* DeviceSecurityHost.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5A1030000000000000000E04 /* DeviceSecurityHost.swift */; };
@@ -81,6 +82,45 @@
 		5A6200000000000000000112 /* CaptureStatusStoreTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5A6200000000000000000012 /* CaptureStatusStoreTests.swift */; };
 		5A6200000000000000000113 /* HeadlessIngestionTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5A6200000000000000000013 /* HeadlessIngestionTests.swift */; };
 		5A6200000000000000000114 /* SpoolTestSupport.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5A6200000000000000000014 /* SpoolTestSupport.swift */; };
+		5A6300000000000000000101 /* CaptureGuardRuntime.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5A6300000000000000000001 /* CaptureGuardRuntime.swift */; };
+		5A6300000000000000000102 /* IntentRunLog.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5A6300000000000000000002 /* IntentRunLog.swift */; };
+		5A6300000000000000000103 /* IntentCapture.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5A6300000000000000000003 /* IntentCapture.swift */; };
+		5A6300000000000000000104 /* CaptureIntents.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5A6300000000000000000004 /* CaptureIntents.swift */; };
+		5A6300000000000000000105 /* Localizable.xcstrings in Resources */ = {isa = PBXBuildFile; fileRef = 5A6300000000000000000005 /* Localizable.xcstrings */; };
+		5A6300000000000000000106 /* AppShortcuts.xcstrings in Resources */ = {isa = PBXBuildFile; fileRef = 5A6300000000000000000006 /* AppShortcuts.xcstrings */; };
+		5A6300000000000000000107 /* IntentCaptureTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5A6300000000000000000007 /* IntentCaptureTests.swift */; };
+		5A650000000000000000000E /* BackupExclusion.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5A1650000000000000000A02 /* BackupExclusion.swift */; };
+		5A650000000000000000000F /* SpoolUlid.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5A6200000000000000000001 /* SpoolUlid.swift */; };
+		5A6500000000000000000010 /* SpoolRecord.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5A6200000000000000000002 /* SpoolRecord.swift */; };
+		5A6500000000000000000011 /* SharedGroups.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5A6200000000000000000003 /* SharedGroups.swift */; };
+		5A6500000000000000000012 /* SpoolKeychain.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5A6200000000000000000004 /* SpoolKeychain.swift */; };
+		5A6500000000000000000013 /* SpoolCipher.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5A6200000000000000000005 /* SpoolCipher.swift */; };
+		5A6500000000000000000014 /* SpoolStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5A6200000000000000000006 /* SpoolStore.swift */; };
+		5A6500000000000000000015 /* CaptureStatusStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5A6200000000000000000007 /* CaptureStatusStore.swift */; };
+		5A6500000000000000000016 /* SpoolLocation.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5A6200000000000000000008 /* SpoolLocation.swift */; };
+		5A6500000000000000000017 /* ShareStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5A6500000000000000000001 /* ShareStore.swift */; };
+		5A6500000000000000000018 /* ShareStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5A6500000000000000000001 /* ShareStore.swift */; };
+		5A6500000000000000000019 /* ShareIntake.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5A6500000000000000000002 /* ShareIntake.swift */; };
+		5A650000000000000000001A /* ShareIntake.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5A6500000000000000000002 /* ShareIntake.swift */; };
+		5A650000000000000000001B /* ShareViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5A6500000000000000000007 /* ShareViewController.swift */; };
+		5A650000000000000000001C /* ShareIntakeHost.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5A6500000000000000000003 /* ShareIntakeHost.swift */; };
+		5A650000000000000000001D /* ShareIntakeApi.g.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5A6500000000000000000004 /* ShareIntakeApi.g.swift */; };
+		5A650000000000000000001E /* ShareStoreTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5A6500000000000000000005 /* ShareStoreTests.swift */; };
+		5A650000000000000000001F /* ShareIntakeTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5A6500000000000000000006 /* ShareIntakeTests.swift */; };
+		5A6500000000000000000020 /* PrivacyInfo.xcprivacy in Resources */ = {isa = PBXBuildFile; fileRef = 5A650000000000000000000A /* PrivacyInfo.xcprivacy */; };
+		5A6500000000000000000021 /* ShareExtension.appex in Embed Foundation Extensions */ = {isa = PBXBuildFile; fileRef = 5A650000000000000000000B /* ShareExtension.appex */; settings = {ATTRIBUTES = (RemoveHeadersOnCopy, ); }; };
+		5A1180000000000000000020 /* ZaghlolWidget.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5A1180000000000000000002 /* ZaghlolWidget.swift */; };
+		5A1180000000000000000021 /* SharedGroups.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5A6200000000000000000003 /* SharedGroups.swift */; };
+		5A1180000000000000000022 /* BackupExclusion.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5A1650000000000000000A02 /* BackupExclusion.swift */; };
+		5A1180000000000000000023 /* SpoolKeychain.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5A6200000000000000000004 /* SpoolKeychain.swift */; };
+		5A1180000000000000000024 /* SpoolCipher.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5A6200000000000000000005 /* SpoolCipher.swift */; };
+		5A1180000000000000000025 /* WidgetSnapshotStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5A1180000000000000000005 /* WidgetSnapshotStore.swift */; };
+		5A1180000000000000000026 /* WidgetSnapshotStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5A1180000000000000000005 /* WidgetSnapshotStore.swift */; };
+		5A1180000000000000000027 /* WidgetBridgeApi.g.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5A1180000000000000000007 /* WidgetBridgeApi.g.swift */; };
+		5A1180000000000000000028 /* WidgetBridgeHost.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5A1180000000000000000006 /* WidgetBridgeHost.swift */; };
+		5A118000000000000000002A /* WidgetSnapshotStoreTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5A1180000000000000000008 /* WidgetSnapshotStoreTests.swift */; };
+		5A118000000000000000002B /* Localizable.strings in Resources */ = {isa = PBXBuildFile; fileRef = 5A1180000000000000000009 /* Localizable.strings */; };
+		5A1180000000000000000029 /* ZaghlolWidget.appex in Embed Foundation Extensions */ = {isa = PBXBuildFile; fileRef = 5A1180000000000000000001 /* ZaghlolWidget.appex */; settings = {ATTRIBUTES = (RemoveHeadersOnCopy, ); }; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -90,6 +130,20 @@
 			proxyType = 1;
 			remoteGlobalIDString = 97C146ED1CF9000F007C117D;
 			remoteInfo = Runner;
+		};
+		5A6500000000000000000026 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 97C146E61CF9000F007C117D /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = 5A6500000000000000000028;
+			remoteInfo = ShareExtension;
+		};
+		5A1180000000000000000041 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 97C146E61CF9000F007C117D /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = 5A1180000000000000000040;
+			remoteInfo = ZaghlolWidget;
 		};
 /* End PBXContainerItemProxy section */
 
@@ -104,9 +158,32 @@
 			name = "Embed Frameworks";
 			runOnlyForDeploymentPostprocessing = 0;
 		};
+		5A6500000000000000000025 /* Embed Foundation Extensions */ = {
+			isa = PBXCopyFilesBuildPhase;
+			buildActionMask = 2147483647;
+			dstPath = "";
+			dstSubfolderSpec = 13;
+			files = (
+				5A6500000000000000000021 /* ShareExtension.appex in Embed Foundation Extensions */,
+			);
+			name = "Embed Foundation Extensions";
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		5A1180000000000000000033 /* Embed Foundation Extensions */ = {
+			isa = PBXCopyFilesBuildPhase;
+			buildActionMask = 2147483647;
+			dstPath = "";
+			dstSubfolderSpec = 13;
+			files = (
+				5A1180000000000000000029 /* ZaghlolWidget.appex in Embed Foundation Extensions */,
+			);
+			name = "Embed Foundation Extensions";
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 /* End PBXCopyFilesBuildPhase section */
 
 /* Begin PBXFileReference section */
+		5A7117000000000000000002 /* ShareImageHost.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ShareImageHost.swift; sourceTree = "<group>"; };
 		5A1600000000000000000A02 /* OcrApi.g.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OcrApi.g.swift; sourceTree = "<group>"; };
 		5A1600000000000000000A04 /* OcrHost.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OcrHost.swift; sourceTree = "<group>"; };
 		5A1600000000000000000A06 /* OcrTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OcrTests.swift; sourceTree = "<group>"; };
@@ -115,8 +192,6 @@
 		5A1510000000000000000F06 /* ICloudBackupHost.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ICloudBackupHost.swift; sourceTree = "<group>"; };
 		5A1510000000000000000F09 /* ICloudBackupTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ICloudBackupTests.swift; sourceTree = "<group>"; };
 		5A1510000000000000000F0A /* Runner.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = Runner.entitlements; sourceTree = "<group>"; };
-		5A9A00000000000000000A02 /* IosIntentSpike.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = IosIntentSpike.swift; sourceTree = "<group>"; };
-		5A9A00000000000000000A05 /* IosIntentSpikeTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = IosIntentSpikeTests.swift; sourceTree = "<group>"; };
 		1498D2321E8E86230040F4C2 /* GeneratedPluginRegistrant.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = GeneratedPluginRegistrant.h; sourceTree = "<group>"; };
 		1498D2331E8E89220040F4C2 /* GeneratedPluginRegistrant.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = GeneratedPluginRegistrant.m; sourceTree = "<group>"; };
 		331C807B294A618700263BE5 /* RunnerTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RunnerTests.swift; sourceTree = "<group>"; };
@@ -144,6 +219,8 @@
 		5A1480000000000000000C02 /* TextNormalizationApi.g.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TextNormalizationApi.g.swift; sourceTree = "<group>"; };
 		5A1480000000000000000C04 /* TextNormalizationHost.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TextNormalizationHost.swift; sourceTree = "<group>"; };
 		5A1480000000000000000C06 /* TextNormalizationTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TextNormalizationTests.swift; sourceTree = "<group>"; };
+		5A1900000000000000000E02 /* NotificationsApi.g.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NotificationsApi.g.swift; sourceTree = "<group>"; };
+		5A1900000000000000000E04 /* NotificationsHost.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NotificationsHost.swift; sourceTree = "<group>"; };
 		5A1800000000000000000D02 /* ClockApi.g.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ClockApi.g.swift; sourceTree = "<group>"; };
 		5A1800000000000000000D04 /* TrustedClockHost.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TrustedClockHost.swift; sourceTree = "<group>"; };
 		5A1030000000000000000E02 /* DeviceApi.g.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DeviceApi.g.swift; sourceTree = "<group>"; };
@@ -190,6 +267,34 @@
 		5A6200000000000000000012 /* CaptureStatusStoreTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CaptureStatusStoreTests.swift; sourceTree = "<group>"; };
 		5A6200000000000000000013 /* HeadlessIngestionTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HeadlessIngestionTests.swift; sourceTree = "<group>"; };
 		5A6200000000000000000014 /* SpoolTestSupport.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SpoolTestSupport.swift; sourceTree = "<group>"; };
+		5A6300000000000000000001 /* CaptureGuardRuntime.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CaptureGuardRuntime.swift; sourceTree = "<group>"; };
+		5A6300000000000000000002 /* IntentRunLog.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = IntentRunLog.swift; sourceTree = "<group>"; };
+		5A6300000000000000000003 /* IntentCapture.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = IntentCapture.swift; sourceTree = "<group>"; };
+		5A6300000000000000000004 /* CaptureIntents.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CaptureIntents.swift; sourceTree = "<group>"; };
+		5A6300000000000000000005 /* Localizable.xcstrings */ = {isa = PBXFileReference; lastKnownFileType = text.json.xcstrings; path = Localizable.xcstrings; sourceTree = "<group>"; };
+		5A6300000000000000000006 /* AppShortcuts.xcstrings */ = {isa = PBXFileReference; lastKnownFileType = text.json.xcstrings; path = AppShortcuts.xcstrings; sourceTree = "<group>"; };
+		5A6300000000000000000007 /* IntentCaptureTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = IntentCaptureTests.swift; sourceTree = "<group>"; };
+		5A6500000000000000000001 /* ShareStore.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ShareStore.swift; sourceTree = "<group>"; };
+		5A6500000000000000000002 /* ShareIntake.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ShareIntake.swift; sourceTree = "<group>"; };
+		5A6500000000000000000003 /* ShareIntakeHost.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ShareIntakeHost.swift; sourceTree = "<group>"; };
+		5A6500000000000000000004 /* ShareIntakeApi.g.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ShareIntakeApi.g.swift; sourceTree = "<group>"; };
+		5A6500000000000000000005 /* ShareStoreTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ShareStoreTests.swift; sourceTree = "<group>"; };
+		5A6500000000000000000006 /* ShareIntakeTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ShareIntakeTests.swift; sourceTree = "<group>"; };
+		5A6500000000000000000007 /* ShareViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ShareViewController.swift; sourceTree = "<group>"; };
+		5A6500000000000000000008 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
+		5A6500000000000000000009 /* ShareExtension.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = ShareExtension.entitlements; sourceTree = "<group>"; };
+		5A650000000000000000000A /* PrivacyInfo.xcprivacy */ = {isa = PBXFileReference; lastKnownFileType = text.xml; path = PrivacyInfo.xcprivacy; sourceTree = "<group>"; };
+		5A650000000000000000000B /* ShareExtension.appex */ = {isa = PBXFileReference; explicitFileType = "wrapper.app-extension"; includeInIndex = 0; path = ShareExtension.appex; sourceTree = BUILT_PRODUCTS_DIR; };
+		5A1180000000000000000001 /* ZaghlolWidget.appex */ = {isa = PBXFileReference; explicitFileType = "wrapper.app-extension"; includeInIndex = 0; path = ZaghlolWidget.appex; sourceTree = BUILT_PRODUCTS_DIR; };
+		5A1180000000000000000002 /* ZaghlolWidget.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ZaghlolWidget.swift; sourceTree = "<group>"; };
+		5A1180000000000000000003 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
+		5A1180000000000000000004 /* ZaghlolWidget.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = ZaghlolWidget.entitlements; sourceTree = "<group>"; };
+		5A1180000000000000000005 /* WidgetSnapshotStore.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WidgetSnapshotStore.swift; sourceTree = "<group>"; };
+		5A1180000000000000000006 /* WidgetBridgeHost.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WidgetBridgeHost.swift; sourceTree = "<group>"; };
+		5A1180000000000000000007 /* WidgetBridgeApi.g.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WidgetBridgeApi.g.swift; sourceTree = "<group>"; };
+		5A1180000000000000000008 /* WidgetSnapshotStoreTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WidgetSnapshotStoreTests.swift; sourceTree = "<group>"; };
+		5A118000000000000000000A /* en */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = en; path = en.lproj/Localizable.strings; sourceTree = "<group>"; };
+		5A118000000000000000000B /* ar */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = ar; path = ar.lproj/Localizable.strings; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -201,9 +306,42 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
+		5A6500000000000000000023 /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		5A1180000000000000000031 /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 /* End PBXFrameworksBuildPhase section */
 
 /* Begin PBXGroup section */
+		5A7117000000000000000003 /* ShareSheet */ = {
+			isa = PBXGroup;
+			children = (
+				5A7117000000000000000002 /* ShareImageHost.swift */,
+			);
+			path = ShareSheet;
+			sourceTree = "<group>";
+		};
+		5A6300000000000000000200 /* Capture */ = {
+			isa = PBXGroup;
+			children = (
+				5A6300000000000000000001 /* CaptureGuardRuntime.swift */,
+				5A6300000000000000000002 /* IntentRunLog.swift */,
+				5A6300000000000000000003 /* IntentCapture.swift */,
+				5A6300000000000000000004 /* CaptureIntents.swift */,
+			);
+			path = Capture;
+			sourceTree = "<group>";
+		};
 		5A6100000000000000001C01 /* Guard */ = {
 			isa = PBXGroup;
 			children = (
@@ -232,17 +370,11 @@
 			path = Capture;
 			sourceTree = "<group>";
 		};
-		5A9A00000000000000000A03 /* Spike */ = {
-			isa = PBXGroup;
-			children = (
-				5A9A00000000000000000A02 /* IosIntentSpike.swift */,
-			);
-			path = Spike;
-			sourceTree = "<group>";
-		};
 		331C8082294A63A400263BE5 /* RunnerTests */ = {
 			isa = PBXGroup;
 			children = (
+				5A6500000000000000000005 /* ShareStoreTests.swift */,
+				5A6500000000000000000006 /* ShareIntakeTests.swift */,
 				331C807B294A618700263BE5 /* RunnerTests.swift */,
 				5A1650000000000000000A05 /* BackupExclusionTests.swift */,
 				5A0150000000000000000B0A /* SecretStoreTests.swift */,
@@ -253,7 +385,6 @@
 				5A1780000000000000000F06 /* AttestationTests.swift */,
 				5A1790000000000000000F08 /* SeatKeyTests.swift */,
 				5A1510000000000000000F09 /* ICloudBackupTests.swift */,
-				5A9A00000000000000000A05 /* IosIntentSpikeTests.swift */,
 				5A6100000000000000001F0A /* GuardGoldenTests.swift */,
 				5A6100000000000000001F0B /* GuardRuntimeTests.swift */,
 				5A620000000000000000000F /* SpoolStoreTests.swift */,
@@ -262,6 +393,8 @@
 				5A6200000000000000000013 /* HeadlessIngestionTests.swift */,
 				5A6200000000000000000014 /* SpoolTestSupport.swift */,
 				5A6200000000000000000012 /* CaptureStatusStoreTests.swift */,
+				5A1180000000000000000008 /* WidgetSnapshotStoreTests.swift */,
+				5A6300000000000000000007 /* IntentCaptureTests.swift */,
 			);
 			path = RunnerTests;
 			sourceTree = "<group>";
@@ -269,6 +402,8 @@
 		5A1650000000000000000A03 /* Shared */ = {
 			isa = PBXGroup;
 			children = (
+				5A6500000000000000000001 /* ShareStore.swift */,
+				5A6500000000000000000002 /* ShareIntake.swift */,
 				5A1650000000000000000A02 /* BackupExclusion.swift */,
 				5A6200000000000000000001 /* SpoolUlid.swift */,
 				5A6200000000000000000002 /* SpoolRecord.swift */,
@@ -278,6 +413,7 @@
 				5A6200000000000000000006 /* SpoolStore.swift */,
 				5A6200000000000000000007 /* CaptureStatusStore.swift */,
 				5A6200000000000000000008 /* SpoolLocation.swift */,
+				5A1180000000000000000005 /* WidgetSnapshotStore.swift */,
 			);
 			path = Shared;
 			sourceTree = "<group>";
@@ -297,9 +433,11 @@
 		97C146E51CF9000F007C117D = {
 			isa = PBXGroup;
 			children = (
+				5A650000000000000000000C /* ShareExtension */,
 				9740EEB11CF90186004384FC /* Flutter */,
 				97C146F01CF9000F007C117D /* Runner */,
 				5A1650000000000000000A03 /* Shared */,
+				5A1180000000000000000010 /* ZaghlolWidget */,
 				97C146EF1CF9000F007C117D /* Products */,
 				331C8082294A63A400263BE5 /* RunnerTests */,
 			);
@@ -308,8 +446,10 @@
 		97C146EF1CF9000F007C117D /* Products */ = {
 			isa = PBXGroup;
 			children = (
+				5A650000000000000000000B /* ShareExtension.appex */,
 				97C146EE1CF9000F007C117D /* Runner.app */,
 				331C8081294A63A400263BE5 /* RunnerTests.xctest */,
+				5A1180000000000000000001 /* ZaghlolWidget.appex */,
 			);
 			name = Products;
 			sourceTree = "<group>";
@@ -327,8 +467,10 @@
 				7884E8672EC3CC0400C636F2 /* SceneDelegate.swift */,
 				74858FAD1ED2DC5600515810 /* Runner-Bridging-Header.h */,
 				5A0150000000000000000B0B /* Platform */,
-				5A9A00000000000000000A03 /* Spike */,
 				5A6100000000000000001C01 /* Guard */,
+				5A6300000000000000000200 /* Capture */,
+				5A6300000000000000000005 /* Localizable.xcstrings */,
+				5A6300000000000000000006 /* AppShortcuts.xcstrings */,
 				5A1800000000000000000D05 /* Clock */,
 				5A1800000000000000000D09 /* PrivacyInfo.xcprivacy */,
 				5A1510000000000000000F0A /* Runner.entitlements */,
@@ -339,13 +481,20 @@
 		5A0150000000000000000B0B /* Platform */ = {
 			isa = PBXGroup;
 			children = (
+				5A6500000000000000000004 /* ShareIntakeApi.g.swift */,
+				5A650000000000000000000D /* Share */,
 				5A0150000000000000000B02 /* SecretStoreApi.g.swift */,
 				5A0150000000000000000B0C /* Keys */,
 				5A1480000000000000000C02 /* TextNormalizationApi.g.swift */,
 				5A1480000000000000000C07 /* Text */,
+				5A7117000000000000000003 /* ShareSheet */,
+				5A1180000000000000000007 /* WidgetBridgeApi.g.swift */,
+				5A1180000000000000000006 /* WidgetBridgeHost.swift */,
 				5A1600000000000000000A02 /* OcrApi.g.swift */,
 				5A1600000000000000000A07 /* OCR */,
 				5A1800000000000000000D02 /* ClockApi.g.swift */,
+				5A1900000000000000000E02 /* NotificationsApi.g.swift */,
+				5A1900000000000000000E04 /* NotificationsHost.swift */,
 				5A1030000000000000000E02 /* DeviceApi.g.swift */,
 				5A1030000000000000000E04 /* DeviceSecurityHost.swift */,
 				5A1780000000000000000F02 /* AttestationApi.g.swift */,
@@ -413,6 +562,36 @@
 			path = ICloud;
 			sourceTree = "<group>";
 		};
+		5A650000000000000000000C /* ShareExtension */ = {
+			isa = PBXGroup;
+			children = (
+				5A6500000000000000000007 /* ShareViewController.swift */,
+				5A6500000000000000000008 /* Info.plist */,
+				5A6500000000000000000009 /* ShareExtension.entitlements */,
+				5A650000000000000000000A /* PrivacyInfo.xcprivacy */,
+			);
+			path = ShareExtension;
+			sourceTree = "<group>";
+		};
+		5A650000000000000000000D /* Share */ = {
+			isa = PBXGroup;
+			children = (
+				5A6500000000000000000003 /* ShareIntakeHost.swift */,
+			);
+			path = Share;
+			sourceTree = "<group>";
+		};
+		5A1180000000000000000010 /* ZaghlolWidget */ = {
+			isa = PBXGroup;
+			children = (
+				5A1180000000000000000002 /* ZaghlolWidget.swift */,
+				5A1180000000000000000009 /* Localizable.strings */,
+				5A1180000000000000000003 /* Info.plist */,
+				5A1180000000000000000004 /* ZaghlolWidget.entitlements */,
+			);
+			path = ZaghlolWidget;
+			sourceTree = "<group>";
+		};
 /* End PBXGroup section */
 
 /* Begin PBXNativeTarget section */
@@ -442,11 +621,15 @@
 				97C146EB1CF9000F007C117D /* Frameworks */,
 				97C146EC1CF9000F007C117D /* Resources */,
 				9705A1C41CF9048500538489 /* Embed Frameworks */,
+				5A1180000000000000000033 /* Embed Foundation Extensions */,
+				5A6500000000000000000025 /* Embed Foundation Extensions */,
 				3B06AD1E1E4923F5004D2608 /* Thin Binary */,
 			);
 			buildRules = (
 			);
 			dependencies = (
+				5A1180000000000000000042 /* PBXTargetDependency */,
+				5A6500000000000000000027 /* PBXTargetDependency */,
 			);
 			name = Runner;
 			packageProductDependencies = (
@@ -455,6 +638,40 @@
 			productName = Runner;
 			productReference = 97C146EE1CF9000F007C117D /* Runner.app */;
 			productType = "com.apple.product-type.application";
+		};
+		5A6500000000000000000028 /* ShareExtension */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = 5A6500000000000000000029 /* Build configuration list for PBXNativeTarget "ShareExtension" */;
+			buildPhases = (
+				5A6500000000000000000022 /* Sources */,
+				5A6500000000000000000023 /* Frameworks */,
+				5A6500000000000000000024 /* Resources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+			);
+			name = ShareExtension;
+			productName = ShareExtension;
+			productReference = 5A650000000000000000000B /* ShareExtension.appex */;
+			productType = "com.apple.product-type.app-extension";
+		};
+		5A1180000000000000000040 /* ZaghlolWidget */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = 5A1180000000000000000043 /* Build configuration list for PBXNativeTarget "ZaghlolWidget" */;
+			buildPhases = (
+				5A1180000000000000000030 /* Sources */,
+				5A1180000000000000000031 /* Frameworks */,
+				5A1180000000000000000032 /* Resources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+			);
+			name = ZaghlolWidget;
+			productName = ZaghlolWidget;
+			productReference = 5A1180000000000000000001 /* ZaghlolWidget.appex */;
+			productType = "com.apple.product-type.app-extension";
 		};
 /* End PBXNativeTarget section */
 
@@ -470,6 +687,12 @@
 						CreatedOnToolsVersion = 14.0;
 						TestTargetID = 97C146ED1CF9000F007C117D;
 					};
+					5A1180000000000000000040 = {
+						CreatedOnToolsVersion = 15.0;
+					};
+					5A6500000000000000000028 = {
+						CreatedOnToolsVersion = 16.0;
+					};
 					97C146ED1CF9000F007C117D = {
 						CreatedOnToolsVersion = 7.3.1;
 						LastSwiftMigration = 1100;
@@ -482,6 +705,7 @@
 			hasScannedForEncodings = 0;
 			knownRegions = (
 				en,
+				ar,
 				Base,
 			);
 			mainGroup = 97C146E51CF9000F007C117D;
@@ -494,6 +718,8 @@
 			targets = (
 				97C146ED1CF9000F007C117D /* Runner */,
 				331C8080294A63A400263BE5 /* RunnerTests */,
+				5A1180000000000000000040 /* ZaghlolWidget */,
+				5A6500000000000000000028 /* ShareExtension */,
 			);
 		};
 /* End PBXProject section */
@@ -515,6 +741,24 @@
 				97C146FE1CF9000F007C117D /* Assets.xcassets in Resources */,
 				97C146FC1CF9000F007C117D /* Main.storyboard in Resources */,
 				5A1800000000000000000D08 /* PrivacyInfo.xcprivacy in Resources */,
+				5A6300000000000000000105 /* Localizable.xcstrings in Resources */,
+				5A6300000000000000000106 /* AppShortcuts.xcstrings in Resources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		5A6500000000000000000024 /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				5A6500000000000000000020 /* PrivacyInfo.xcprivacy in Resources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		5A1180000000000000000032 /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				5A118000000000000000002B /* Localizable.strings in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -560,6 +804,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				331C808B294A63AB00263BE5 /* RunnerTests.swift in Sources */,
+				5A118000000000000000002A /* WidgetSnapshotStoreTests.swift in Sources */,
 				5A1650000000000000000A04 /* BackupExclusionTests.swift in Sources */,
 				5A0150000000000000000B09 /* SecretStoreTests.swift in Sources */,
 				5A1480000000000000000C05 /* TextNormalizationTests.swift in Sources */,
@@ -569,7 +814,6 @@
 				5A1780000000000000000F05 /* AttestationTests.swift in Sources */,
 				5A1790000000000000000F07 /* SeatKeyTests.swift in Sources */,
 				5A1510000000000000000F08 /* ICloudBackupTests.swift in Sources */,
-				5A9A00000000000000000A04 /* IosIntentSpikeTests.swift in Sources */,
 				5A6100000000000000001B0A /* GuardGoldenTests.swift in Sources */,
 				5A6100000000000000001B0B /* GuardRuntimeTests.swift in Sources */,
 				5A620000000000000000010F /* SpoolStoreTests.swift in Sources */,
@@ -578,6 +822,9 @@
 				5A6200000000000000000113 /* HeadlessIngestionTests.swift in Sources */,
 				5A6200000000000000000114 /* SpoolTestSupport.swift in Sources */,
 				5A6200000000000000000112 /* CaptureStatusStoreTests.swift in Sources */,
+				5A6300000000000000000107 /* IntentCaptureTests.swift in Sources */,
+				5A650000000000000000001E /* x in Sources */,
+				5A650000000000000000001F /* x in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -595,9 +842,12 @@
 				5A0150000000000000000B07 /* SecretStoreHost.swift in Sources */,
 				5A1480000000000000000C01 /* TextNormalizationApi.g.swift in Sources */,
 				5A1480000000000000000C03 /* TextNormalizationHost.swift in Sources */,
+				5A7117000000000000000001 /* ShareImageHost.swift in Sources */,
 				5A1600000000000000000A01 /* OcrApi.g.swift in Sources */,
 				5A1600000000000000000A03 /* OcrHost.swift in Sources */,
 				5A1800000000000000000D01 /* ClockApi.g.swift in Sources */,
+				5A1900000000000000000E01 /* NotificationsApi.g.swift in Sources */,
+				5A1900000000000000000E03 /* NotificationsHost.swift in Sources */,
 				5A1800000000000000000D03 /* TrustedClockHost.swift in Sources */,
 				5A1030000000000000000E01 /* DeviceApi.g.swift in Sources */,
 				5A1030000000000000000E03 /* DeviceSecurityHost.swift in Sources */,
@@ -609,7 +859,6 @@
 				5A1510000000000000000F01 /* IcloudApi.g.swift in Sources */,
 				5A1510000000000000000F03 /* ICloudBackupFiles.swift in Sources */,
 				5A1510000000000000000F05 /* ICloudBackupHost.swift in Sources */,
-				5A9A00000000000000000A01 /* IosIntentSpike.swift in Sources */,
 				5A6100000000000000001B00 /* GuardTypes.swift in Sources */,
 				5A6100000000000000001B01 /* TextFold.swift in Sources */,
 				5A6100000000000000001B02 /* StrictJson.swift in Sources */,
@@ -628,12 +877,55 @@
 				5A6200000000000000000106 /* SpoolStore.swift in Sources */,
 				5A6200000000000000000107 /* CaptureStatusStore.swift in Sources */,
 				5A6200000000000000000108 /* SpoolLocation.swift in Sources */,
+				5A1180000000000000000026 /* WidgetSnapshotStore.swift in Sources */,
+				5A1180000000000000000027 /* WidgetBridgeApi.g.swift in Sources */,
+				5A1180000000000000000028 /* WidgetBridgeHost.swift in Sources */,
 				5A6200000000000000000109 /* CaptureApi.g.swift in Sources */,
 				5A620000000000000000010A /* IngestionApi.g.swift in Sources */,
 				5A620000000000000000010B /* SpoolClaim.swift in Sources */,
 				5A620000000000000000010C /* IosCaptureHost.swift in Sources */,
 				5A620000000000000000010D /* HeadlessIngestion.swift in Sources */,
 				5A620000000000000000010E /* IngestBackgroundRefresh.swift in Sources */,
+				5A6300000000000000000101 /* CaptureGuardRuntime.swift in Sources */,
+				5A6300000000000000000102 /* IntentRunLog.swift in Sources */,
+				5A6300000000000000000103 /* IntentCapture.swift in Sources */,
+				5A6300000000000000000104 /* CaptureIntents.swift in Sources */,
+				5A6500000000000000000018 /* x in Sources */,
+				5A650000000000000000001A /* x in Sources */,
+				5A650000000000000000001C /* x in Sources */,
+				5A650000000000000000001D /* x in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		5A6500000000000000000022 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				5A650000000000000000000E /* x in Sources */,
+				5A650000000000000000000F /* x in Sources */,
+				5A6500000000000000000010 /* x in Sources */,
+				5A6500000000000000000011 /* x in Sources */,
+				5A6500000000000000000012 /* x in Sources */,
+				5A6500000000000000000013 /* x in Sources */,
+				5A6500000000000000000014 /* x in Sources */,
+				5A6500000000000000000015 /* x in Sources */,
+				5A6500000000000000000016 /* x in Sources */,
+				5A6500000000000000000017 /* x in Sources */,
+				5A6500000000000000000019 /* x in Sources */,
+				5A650000000000000000001B /* x in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		5A1180000000000000000030 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				5A1180000000000000000020 /* ZaghlolWidget.swift in Sources */,
+				5A1180000000000000000021 /* SharedGroups.swift in Sources */,
+				5A1180000000000000000022 /* BackupExclusion.swift in Sources */,
+				5A1180000000000000000023 /* SpoolKeychain.swift in Sources */,
+				5A1180000000000000000024 /* SpoolCipher.swift in Sources */,
+				5A1180000000000000000025 /* WidgetSnapshotStore.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -644,6 +936,16 @@
 			isa = PBXTargetDependency;
 			target = 97C146ED1CF9000F007C117D /* Runner */;
 			targetProxy = 331C8085294A63A400263BE5 /* PBXContainerItemProxy */;
+		};
+		5A6500000000000000000027 /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = 5A6500000000000000000028 /* ShareExtension */;
+			targetProxy = 5A6500000000000000000026 /* PBXContainerItemProxy */;
+		};
+		5A1180000000000000000042 /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = 5A1180000000000000000040 /* ZaghlolWidget */;
+			targetProxy = 5A1180000000000000000041 /* PBXContainerItemProxy */;
 		};
 /* End PBXTargetDependency section */
 
@@ -662,6 +964,15 @@
 				97C147001CF9000F007C117D /* Base */,
 			);
 			name = LaunchScreen.storyboard;
+			sourceTree = "<group>";
+		};
+		5A1180000000000000000009 /* Localizable.strings */ = {
+			isa = PBXVariantGroup;
+			children = (
+				5A118000000000000000000A /* en */,
+				5A118000000000000000000B /* ar */,
+			);
+			name = Localizable.strings;
 			sourceTree = "<group>";
 		};
 /* End PBXVariantGroup section */
@@ -1522,6 +1833,447 @@
 			};
 			name = "Release-prod";
 		};
+		5A650000000000000000002A /* Debug-dev */ = {
+			isa = XCBuildConfiguration;
+			baseConfigurationReference = 9740EEB21CF90195004384FC /* Debug.xcconfig */;
+			buildSettings = {
+				CLANG_ENABLE_MODULES = YES;
+				CURRENT_PROJECT_VERSION = "$(FLUTTER_BUILD_NUMBER)";
+				ENABLE_BITCODE = NO;
+				CODE_SIGN_ENTITLEMENTS = ShareExtension/ShareExtension.entitlements;
+				INFOPLIST_FILE = ShareExtension/Info.plist;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+					"@executable_path/../../Frameworks",
+				);
+				APP_DISPLAY_NAME = "Zaghlol Dev";
+				PRODUCT_BUNDLE_IDENTIFIER = app.zaghlol.dev.ShareExtension;
+				ZAGHLOL_APP_BUNDLE_ID = app.zaghlol.dev;
+				APPLICATION_EXTENSION_API_ONLY = YES;
+				SKIP_INSTALL = YES;
+				TARGETED_DEVICE_FAMILY = "1,2";
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
+				SWIFT_VERSION = 5.0;
+				VERSIONING_SYSTEM = "apple-generic";
+			};
+			name = "Debug-dev";
+		};
+		5A650000000000000000002B /* Debug-staging */ = {
+			isa = XCBuildConfiguration;
+			baseConfigurationReference = 9740EEB21CF90195004384FC /* Debug.xcconfig */;
+			buildSettings = {
+				CLANG_ENABLE_MODULES = YES;
+				CURRENT_PROJECT_VERSION = "$(FLUTTER_BUILD_NUMBER)";
+				ENABLE_BITCODE = NO;
+				CODE_SIGN_ENTITLEMENTS = ShareExtension/ShareExtension.entitlements;
+				INFOPLIST_FILE = ShareExtension/Info.plist;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+					"@executable_path/../../Frameworks",
+				);
+				APP_DISPLAY_NAME = "Zaghlol Staging";
+				PRODUCT_BUNDLE_IDENTIFIER = app.zaghlol.staging.ShareExtension;
+				ZAGHLOL_APP_BUNDLE_ID = app.zaghlol.staging;
+				APPLICATION_EXTENSION_API_ONLY = YES;
+				SKIP_INSTALL = YES;
+				TARGETED_DEVICE_FAMILY = "1,2";
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
+				SWIFT_VERSION = 5.0;
+				VERSIONING_SYSTEM = "apple-generic";
+			};
+			name = "Debug-staging";
+		};
+		5A650000000000000000002C /* Debug-prod */ = {
+			isa = XCBuildConfiguration;
+			baseConfigurationReference = 9740EEB21CF90195004384FC /* Debug.xcconfig */;
+			buildSettings = {
+				CLANG_ENABLE_MODULES = YES;
+				CURRENT_PROJECT_VERSION = "$(FLUTTER_BUILD_NUMBER)";
+				ENABLE_BITCODE = NO;
+				CODE_SIGN_ENTITLEMENTS = ShareExtension/ShareExtension.entitlements;
+				INFOPLIST_FILE = ShareExtension/Info.plist;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+					"@executable_path/../../Frameworks",
+				);
+				APP_DISPLAY_NAME = "Zaghlol";
+				PRODUCT_BUNDLE_IDENTIFIER = app.zaghlol.ShareExtension;
+				ZAGHLOL_APP_BUNDLE_ID = app.zaghlol;
+				APPLICATION_EXTENSION_API_ONLY = YES;
+				SKIP_INSTALL = YES;
+				TARGETED_DEVICE_FAMILY = "1,2";
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
+				SWIFT_ACTIVE_COMPILATION_CONDITIONS = "$(inherited) ZAGHLOL_PROD";
+				SWIFT_VERSION = 5.0;
+				VERSIONING_SYSTEM = "apple-generic";
+			};
+			name = "Debug-prod";
+		};
+		5A650000000000000000002D /* Release-dev */ = {
+			isa = XCBuildConfiguration;
+			baseConfigurationReference = 7AFA3C8E1D35360C0083082E /* Release.xcconfig */;
+			buildSettings = {
+				CLANG_ENABLE_MODULES = YES;
+				CURRENT_PROJECT_VERSION = "$(FLUTTER_BUILD_NUMBER)";
+				ENABLE_BITCODE = NO;
+				CODE_SIGN_ENTITLEMENTS = ShareExtension/ShareExtension.entitlements;
+				INFOPLIST_FILE = ShareExtension/Info.plist;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+					"@executable_path/../../Frameworks",
+				);
+				APP_DISPLAY_NAME = "Zaghlol Dev";
+				PRODUCT_BUNDLE_IDENTIFIER = app.zaghlol.dev.ShareExtension;
+				ZAGHLOL_APP_BUNDLE_ID = app.zaghlol.dev;
+				APPLICATION_EXTENSION_API_ONLY = YES;
+				SKIP_INSTALL = YES;
+				TARGETED_DEVICE_FAMILY = "1,2";
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SWIFT_VERSION = 5.0;
+				VERSIONING_SYSTEM = "apple-generic";
+			};
+			name = "Release-dev";
+		};
+		5A650000000000000000002E /* Release-staging */ = {
+			isa = XCBuildConfiguration;
+			baseConfigurationReference = 7AFA3C8E1D35360C0083082E /* Release.xcconfig */;
+			buildSettings = {
+				CLANG_ENABLE_MODULES = YES;
+				CURRENT_PROJECT_VERSION = "$(FLUTTER_BUILD_NUMBER)";
+				ENABLE_BITCODE = NO;
+				CODE_SIGN_ENTITLEMENTS = ShareExtension/ShareExtension.entitlements;
+				INFOPLIST_FILE = ShareExtension/Info.plist;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+					"@executable_path/../../Frameworks",
+				);
+				APP_DISPLAY_NAME = "Zaghlol Staging";
+				PRODUCT_BUNDLE_IDENTIFIER = app.zaghlol.staging.ShareExtension;
+				ZAGHLOL_APP_BUNDLE_ID = app.zaghlol.staging;
+				APPLICATION_EXTENSION_API_ONLY = YES;
+				SKIP_INSTALL = YES;
+				TARGETED_DEVICE_FAMILY = "1,2";
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SWIFT_VERSION = 5.0;
+				VERSIONING_SYSTEM = "apple-generic";
+			};
+			name = "Release-staging";
+		};
+		5A650000000000000000002F /* Release-prod */ = {
+			isa = XCBuildConfiguration;
+			baseConfigurationReference = 7AFA3C8E1D35360C0083082E /* Release.xcconfig */;
+			buildSettings = {
+				CLANG_ENABLE_MODULES = YES;
+				CURRENT_PROJECT_VERSION = "$(FLUTTER_BUILD_NUMBER)";
+				ENABLE_BITCODE = NO;
+				CODE_SIGN_ENTITLEMENTS = ShareExtension/ShareExtension.entitlements;
+				INFOPLIST_FILE = ShareExtension/Info.plist;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+					"@executable_path/../../Frameworks",
+				);
+				APP_DISPLAY_NAME = "Zaghlol";
+				PRODUCT_BUNDLE_IDENTIFIER = app.zaghlol.ShareExtension;
+				ZAGHLOL_APP_BUNDLE_ID = app.zaghlol;
+				APPLICATION_EXTENSION_API_ONLY = YES;
+				SKIP_INSTALL = YES;
+				TARGETED_DEVICE_FAMILY = "1,2";
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SWIFT_ACTIVE_COMPILATION_CONDITIONS = "$(inherited) ZAGHLOL_PROD";
+				SWIFT_VERSION = 5.0;
+				VERSIONING_SYSTEM = "apple-generic";
+			};
+			name = "Release-prod";
+		};
+		5A6500000000000000000030 /* Profile-dev */ = {
+			isa = XCBuildConfiguration;
+			baseConfigurationReference = 7AFA3C8E1D35360C0083082E /* Release.xcconfig */;
+			buildSettings = {
+				CLANG_ENABLE_MODULES = YES;
+				CURRENT_PROJECT_VERSION = "$(FLUTTER_BUILD_NUMBER)";
+				ENABLE_BITCODE = NO;
+				CODE_SIGN_ENTITLEMENTS = ShareExtension/ShareExtension.entitlements;
+				INFOPLIST_FILE = ShareExtension/Info.plist;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+					"@executable_path/../../Frameworks",
+				);
+				APP_DISPLAY_NAME = "Zaghlol Dev";
+				PRODUCT_BUNDLE_IDENTIFIER = app.zaghlol.dev.ShareExtension;
+				ZAGHLOL_APP_BUNDLE_ID = app.zaghlol.dev;
+				APPLICATION_EXTENSION_API_ONLY = YES;
+				SKIP_INSTALL = YES;
+				TARGETED_DEVICE_FAMILY = "1,2";
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SWIFT_VERSION = 5.0;
+				VERSIONING_SYSTEM = "apple-generic";
+			};
+			name = "Profile-dev";
+		};
+		5A6500000000000000000031 /* Profile-staging */ = {
+			isa = XCBuildConfiguration;
+			baseConfigurationReference = 7AFA3C8E1D35360C0083082E /* Release.xcconfig */;
+			buildSettings = {
+				CLANG_ENABLE_MODULES = YES;
+				CURRENT_PROJECT_VERSION = "$(FLUTTER_BUILD_NUMBER)";
+				ENABLE_BITCODE = NO;
+				CODE_SIGN_ENTITLEMENTS = ShareExtension/ShareExtension.entitlements;
+				INFOPLIST_FILE = ShareExtension/Info.plist;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+					"@executable_path/../../Frameworks",
+				);
+				APP_DISPLAY_NAME = "Zaghlol Staging";
+				PRODUCT_BUNDLE_IDENTIFIER = app.zaghlol.staging.ShareExtension;
+				ZAGHLOL_APP_BUNDLE_ID = app.zaghlol.staging;
+				APPLICATION_EXTENSION_API_ONLY = YES;
+				SKIP_INSTALL = YES;
+				TARGETED_DEVICE_FAMILY = "1,2";
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SWIFT_VERSION = 5.0;
+				VERSIONING_SYSTEM = "apple-generic";
+			};
+			name = "Profile-staging";
+		};
+		5A6500000000000000000032 /* Profile-prod */ = {
+			isa = XCBuildConfiguration;
+			baseConfigurationReference = 7AFA3C8E1D35360C0083082E /* Release.xcconfig */;
+			buildSettings = {
+				CLANG_ENABLE_MODULES = YES;
+				CURRENT_PROJECT_VERSION = "$(FLUTTER_BUILD_NUMBER)";
+				ENABLE_BITCODE = NO;
+				CODE_SIGN_ENTITLEMENTS = ShareExtension/ShareExtension.entitlements;
+				INFOPLIST_FILE = ShareExtension/Info.plist;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+					"@executable_path/../../Frameworks",
+				);
+				APP_DISPLAY_NAME = "Zaghlol";
+				PRODUCT_BUNDLE_IDENTIFIER = app.zaghlol.ShareExtension;
+				ZAGHLOL_APP_BUNDLE_ID = app.zaghlol;
+				APPLICATION_EXTENSION_API_ONLY = YES;
+				SKIP_INSTALL = YES;
+				TARGETED_DEVICE_FAMILY = "1,2";
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SWIFT_ACTIVE_COMPILATION_CONDITIONS = "$(inherited) ZAGHLOL_PROD";
+				SWIFT_VERSION = 5.0;
+				VERSIONING_SYSTEM = "apple-generic";
+			};
+			name = "Profile-prod";
+		};
+		5A1180000000000000000050 /* Debug-dev */ = {
+			isa = XCBuildConfiguration;
+			baseConfigurationReference = 9740EEB21CF90195004384FC /* Debug.xcconfig */;
+			buildSettings = {
+				APP_DISPLAY_NAME = "Zaghlol Dev";
+				CLANG_ENABLE_MODULES = YES;
+				CODE_SIGN_ENTITLEMENTS = ZaghlolWidget/ZaghlolWidget.entitlements;
+				CURRENT_PROJECT_VERSION = "$(FLUTTER_BUILD_NUMBER)";
+				INFOPLIST_FILE = ZaghlolWidget/Info.plist;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+					"@executable_path/../../Frameworks",
+				);
+				PRODUCT_BUNDLE_IDENTIFIER = "$(ZAGHLOL_APP_BUNDLE_ID).widget";
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SKIP_INSTALL = YES;
+				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
+				SWIFT_VERSION = 5.0;
+				ZAGHLOL_APP_BUNDLE_ID = app.zaghlol.dev;
+			};
+			name = "Debug-dev";
+		};
+		5A1180000000000000000051 /* Debug-staging */ = {
+			isa = XCBuildConfiguration;
+			baseConfigurationReference = 9740EEB21CF90195004384FC /* Debug.xcconfig */;
+			buildSettings = {
+				APP_DISPLAY_NAME = "Zaghlol Staging";
+				CLANG_ENABLE_MODULES = YES;
+				CODE_SIGN_ENTITLEMENTS = ZaghlolWidget/ZaghlolWidget.entitlements;
+				CURRENT_PROJECT_VERSION = "$(FLUTTER_BUILD_NUMBER)";
+				INFOPLIST_FILE = ZaghlolWidget/Info.plist;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+					"@executable_path/../../Frameworks",
+				);
+				PRODUCT_BUNDLE_IDENTIFIER = "$(ZAGHLOL_APP_BUNDLE_ID).widget";
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SKIP_INSTALL = YES;
+				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
+				SWIFT_VERSION = 5.0;
+				ZAGHLOL_APP_BUNDLE_ID = app.zaghlol.staging;
+			};
+			name = "Debug-staging";
+		};
+		5A1180000000000000000052 /* Debug-prod */ = {
+			isa = XCBuildConfiguration;
+			baseConfigurationReference = 9740EEB21CF90195004384FC /* Debug.xcconfig */;
+			buildSettings = {
+				APP_DISPLAY_NAME = "Zaghlol";
+				CLANG_ENABLE_MODULES = YES;
+				CODE_SIGN_ENTITLEMENTS = ZaghlolWidget/ZaghlolWidget.entitlements;
+				CURRENT_PROJECT_VERSION = "$(FLUTTER_BUILD_NUMBER)";
+				INFOPLIST_FILE = ZaghlolWidget/Info.plist;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+					"@executable_path/../../Frameworks",
+				);
+				PRODUCT_BUNDLE_IDENTIFIER = "$(ZAGHLOL_APP_BUNDLE_ID).widget";
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SKIP_INSTALL = YES;
+				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
+				SWIFT_VERSION = 5.0;
+				ZAGHLOL_APP_BUNDLE_ID = app.zaghlol;
+			};
+			name = "Debug-prod";
+		};
+		5A1180000000000000000053 /* Release-dev */ = {
+			isa = XCBuildConfiguration;
+			baseConfigurationReference = 7AFA3C8E1D35360C0083082E /* Release.xcconfig */;
+			buildSettings = {
+				APP_DISPLAY_NAME = "Zaghlol Dev";
+				CLANG_ENABLE_MODULES = YES;
+				CODE_SIGN_ENTITLEMENTS = ZaghlolWidget/ZaghlolWidget.entitlements;
+				CURRENT_PROJECT_VERSION = "$(FLUTTER_BUILD_NUMBER)";
+				INFOPLIST_FILE = ZaghlolWidget/Info.plist;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+					"@executable_path/../../Frameworks",
+				);
+				PRODUCT_BUNDLE_IDENTIFIER = "$(ZAGHLOL_APP_BUNDLE_ID).widget";
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SKIP_INSTALL = YES;
+				SWIFT_VERSION = 5.0;
+				ZAGHLOL_APP_BUNDLE_ID = app.zaghlol.dev;
+			};
+			name = "Release-dev";
+		};
+		5A1180000000000000000054 /* Release-staging */ = {
+			isa = XCBuildConfiguration;
+			baseConfigurationReference = 7AFA3C8E1D35360C0083082E /* Release.xcconfig */;
+			buildSettings = {
+				APP_DISPLAY_NAME = "Zaghlol Staging";
+				CLANG_ENABLE_MODULES = YES;
+				CODE_SIGN_ENTITLEMENTS = ZaghlolWidget/ZaghlolWidget.entitlements;
+				CURRENT_PROJECT_VERSION = "$(FLUTTER_BUILD_NUMBER)";
+				INFOPLIST_FILE = ZaghlolWidget/Info.plist;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+					"@executable_path/../../Frameworks",
+				);
+				PRODUCT_BUNDLE_IDENTIFIER = "$(ZAGHLOL_APP_BUNDLE_ID).widget";
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SKIP_INSTALL = YES;
+				SWIFT_VERSION = 5.0;
+				ZAGHLOL_APP_BUNDLE_ID = app.zaghlol.staging;
+			};
+			name = "Release-staging";
+		};
+		5A1180000000000000000055 /* Release-prod */ = {
+			isa = XCBuildConfiguration;
+			baseConfigurationReference = 7AFA3C8E1D35360C0083082E /* Release.xcconfig */;
+			buildSettings = {
+				APP_DISPLAY_NAME = "Zaghlol";
+				CLANG_ENABLE_MODULES = YES;
+				CODE_SIGN_ENTITLEMENTS = ZaghlolWidget/ZaghlolWidget.entitlements;
+				CURRENT_PROJECT_VERSION = "$(FLUTTER_BUILD_NUMBER)";
+				INFOPLIST_FILE = ZaghlolWidget/Info.plist;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+					"@executable_path/../../Frameworks",
+				);
+				PRODUCT_BUNDLE_IDENTIFIER = "$(ZAGHLOL_APP_BUNDLE_ID).widget";
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SKIP_INSTALL = YES;
+				SWIFT_VERSION = 5.0;
+				ZAGHLOL_APP_BUNDLE_ID = app.zaghlol;
+			};
+			name = "Release-prod";
+		};
+		5A1180000000000000000056 /* Profile-dev */ = {
+			isa = XCBuildConfiguration;
+			baseConfigurationReference = 7AFA3C8E1D35360C0083082E /* Release.xcconfig */;
+			buildSettings = {
+				APP_DISPLAY_NAME = "Zaghlol Dev";
+				CLANG_ENABLE_MODULES = YES;
+				CODE_SIGN_ENTITLEMENTS = ZaghlolWidget/ZaghlolWidget.entitlements;
+				CURRENT_PROJECT_VERSION = "$(FLUTTER_BUILD_NUMBER)";
+				INFOPLIST_FILE = ZaghlolWidget/Info.plist;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+					"@executable_path/../../Frameworks",
+				);
+				PRODUCT_BUNDLE_IDENTIFIER = "$(ZAGHLOL_APP_BUNDLE_ID).widget";
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SKIP_INSTALL = YES;
+				SWIFT_VERSION = 5.0;
+				ZAGHLOL_APP_BUNDLE_ID = app.zaghlol.dev;
+			};
+			name = "Profile-dev";
+		};
+		5A1180000000000000000057 /* Profile-staging */ = {
+			isa = XCBuildConfiguration;
+			baseConfigurationReference = 7AFA3C8E1D35360C0083082E /* Release.xcconfig */;
+			buildSettings = {
+				APP_DISPLAY_NAME = "Zaghlol Staging";
+				CLANG_ENABLE_MODULES = YES;
+				CODE_SIGN_ENTITLEMENTS = ZaghlolWidget/ZaghlolWidget.entitlements;
+				CURRENT_PROJECT_VERSION = "$(FLUTTER_BUILD_NUMBER)";
+				INFOPLIST_FILE = ZaghlolWidget/Info.plist;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+					"@executable_path/../../Frameworks",
+				);
+				PRODUCT_BUNDLE_IDENTIFIER = "$(ZAGHLOL_APP_BUNDLE_ID).widget";
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SKIP_INSTALL = YES;
+				SWIFT_VERSION = 5.0;
+				ZAGHLOL_APP_BUNDLE_ID = app.zaghlol.staging;
+			};
+			name = "Profile-staging";
+		};
+		5A1180000000000000000058 /* Profile-prod */ = {
+			isa = XCBuildConfiguration;
+			baseConfigurationReference = 7AFA3C8E1D35360C0083082E /* Release.xcconfig */;
+			buildSettings = {
+				APP_DISPLAY_NAME = "Zaghlol";
+				CLANG_ENABLE_MODULES = YES;
+				CODE_SIGN_ENTITLEMENTS = ZaghlolWidget/ZaghlolWidget.entitlements;
+				CURRENT_PROJECT_VERSION = "$(FLUTTER_BUILD_NUMBER)";
+				INFOPLIST_FILE = ZaghlolWidget/Info.plist;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+					"@executable_path/../../Frameworks",
+				);
+				PRODUCT_BUNDLE_IDENTIFIER = "$(ZAGHLOL_APP_BUNDLE_ID).widget";
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SKIP_INSTALL = YES;
+				SWIFT_VERSION = 5.0;
+				ZAGHLOL_APP_BUNDLE_ID = app.zaghlol;
+			};
+			name = "Profile-prod";
+		};
 /* End XCBuildConfiguration section */
 
 /* Begin XCConfigurationList section */
@@ -1569,6 +2321,38 @@
 				5A9F00040000005A67C0DE04 /* Profile-dev */,
 				5A9F00050000005A67C0DE05 /* Profile-staging */,
 				5A9F00060000005A67C0DE06 /* Profile-prod */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = "Release-prod";
+		};
+		5A6500000000000000000029 /* Build configuration list for PBXNativeTarget "ShareExtension" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				5A650000000000000000002A /* Debug-dev */,
+				5A650000000000000000002B /* Debug-staging */,
+				5A650000000000000000002C /* Debug-prod */,
+				5A650000000000000000002D /* Release-dev */,
+				5A650000000000000000002E /* Release-staging */,
+				5A650000000000000000002F /* Release-prod */,
+				5A6500000000000000000030 /* Profile-dev */,
+				5A6500000000000000000031 /* Profile-staging */,
+				5A6500000000000000000032 /* Profile-prod */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = "Release-prod";
+		};
+		5A1180000000000000000043 /* Build configuration list for PBXNativeTarget "ZaghlolWidget" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				5A1180000000000000000050 /* Debug-dev */,
+				5A1180000000000000000051 /* Debug-staging */,
+				5A1180000000000000000052 /* Debug-prod */,
+				5A1180000000000000000053 /* Release-dev */,
+				5A1180000000000000000054 /* Release-staging */,
+				5A1180000000000000000055 /* Release-prod */,
+				5A1180000000000000000056 /* Profile-dev */,
+				5A1180000000000000000057 /* Profile-staging */,
+				5A1180000000000000000058 /* Profile-prod */,
 			);
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = "Release-prod";

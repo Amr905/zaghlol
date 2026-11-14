@@ -154,7 +154,27 @@ void main() {
       expect(why('x' * 1001), VoiceUnrecognizedReason.tooLong);
     });
 
-    test('hostile text does not throw or hang', () {
+    test('hostile text does not throw', () {
+      for (final s in [
+        '${'ميت و' * 100}خمسين',
+        '9' * 500,
+        '${'٩' * 40} جنيه',
+        List.filled(200, 'و').join(' '),
+        '\u200f\u202e١٥٠\u0640جنيه',
+        '1,2,3,4,5,6',
+        '،،،',
+        '\u{1F600} 5',
+        'جنيه ' * 100,
+        'ألف ' * 100,
+      ]) {
+        expect(
+          () => parseVoicePhrase(s, defaultCurrency: egp),
+          returnsNormally,
+        );
+      }
+    });
+
+    test('hostile text parses within 2 s (benchmark)', () {
       final sw = Stopwatch()..start();
       for (final s in [
         '${'ميت و' * 100}خمسين',
@@ -174,7 +194,7 @@ void main() {
         );
       }
       expect(sw.elapsedMilliseconds, lessThan(2000));
-    });
+    }, tags: 'benchmark');
 
     test('toString never carries the phrase', () {
       final items = parse('دفعت 150 جنيه سر');
@@ -297,7 +317,7 @@ void main() {
     }
     // 200 parses: far under 10 ms each even on a slow CI box.
     expect(sw.elapsedMilliseconds, lessThan(2000));
-  });
+  }, tags: 'benchmark');
 }
 
 bool _matches(CategorizedVoiceItem got, Map<String, Object?> e) {

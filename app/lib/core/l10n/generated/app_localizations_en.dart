@@ -6572,6 +6572,17 @@ class AppLocalizationsEn extends AppLocalizations {
       'The copy on the server will expire on its own.';
 
   @override
+  String get widgetOpenZaghlol => 'Open Zaghlol';
+
+  @override
+  String get privacyDeleteBackupsKept =>
+      'Your backups on Google Drive or iCloud stay there. Delete them from there if you want.';
+
+  @override
+  String get privacyDeleteFailed =>
+      'Couldn\'t delete everything. Open the app again and we\'ll finish.';
+
+  @override
   String get settingsPrefsTitle => 'Preferences';
 
   @override
@@ -7016,4 +7027,22 @@ class AppLocalizationsEn extends AppLocalizations {
     );
     return '$_temp0';
   }
+
+  @override
+  String iosSetupNudgeSilent(int count, String n) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other:
+          'No bank text or Apple Pay payment has reached me for $n days. Your Shortcuts may have switched off.',
+      one: 'No bank text or Apple Pay payment has reached me for 1 day. Your Shortcuts may have switched off.',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get iosSetupNudgeCheck => 'Check my Shortcuts';
+
+  @override
+  String get iosSetupNudgeSnoozeA11y => 'Remind me in 7 days';
 }

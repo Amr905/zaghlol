@@ -1,6 +1,8 @@
 // T-047: the Dart interface over AndroidCaptureHostApi that the capture
 // module uses (fakes in tests). Errors become code-only exceptions; a code
 // that is not UPPER_SNAKE becomes PLATFORM_UNKNOWN (FU-034).
+// T-063/T-066: IosCaptureHostPort (ios_capture_host_port.dart) is the same interface over IosCaptureHostApi
+// (Guard config, spool status); the Android-only calls answer NOT_AVAILABLE.
 
 import 'package:flutter/services.dart';
 import 'package:zaghlol_domain/zaghlol_domain.dart';
@@ -92,13 +94,15 @@ final class PigeonCaptureHostPort implements CaptureHostPort {
   Future<InboxPage> queryInbox(InboxQuery query) =>
       _guard(() => _api.queryInbox(query));
 
-  static Future<T> _guard<T>(Future<T> Function() call) async {
-    try {
-      return await call();
-    } on PlatformException catch (e) {
-      throw CaptureHostException(PlatformFailure.fromChannel(e.code));
-    } on Exception {
-      throw CaptureHostException(PlatformFailure.fromChannel(null));
-    }
+  static Future<T> _guard<T>(Future<T> Function() call) => _guardCapture(call);
+}
+
+Future<T> _guardCapture<T>(Future<T> Function() call) async {
+  try {
+    return await call();
+  } on PlatformException catch (e) {
+    throw CaptureHostException(PlatformFailure.fromChannel(e.code));
+  } on Exception {
+    throw CaptureHostException(PlatformFailure.fromChannel(null));
   }
 }

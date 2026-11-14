@@ -159,4 +159,36 @@ final class BackupExclusionTests: XCTestCase {
     XCTAssertEqual(
       ZaghlolDirectories.appGroupDirectories(appGroupIdentifier: "group.app.zaghlol.t165.none"), [])
   }
+
+  // T-166 (T-165 F4): "Delete everything" clears the contents of the roots,
+  // never the roots, and the roots are excluded again before the
+  // first-launch database is created.
+  func testDeleteEverythingKeepsRootsExcluded() throws {
+    let a = scratch.appendingPathComponent("support", isDirectory: true)
+    let b = scratch.appendingPathComponent("group-spool", isDirectory: true)
+    try ZaghlolDirectories.ensureExcluded(a)
+    try ZaghlolDirectories.ensureExcluded(b)
+    let nested = a.appendingPathComponent("db", isDirectory: true)
+    try FileManager.default.createDirectory(at: nested, withIntermediateDirectories: true)
+    try Data([1, 2, 3]).write(to: nested.appendingPathComponent("zaghlol.db"))
+    try Data([4]).write(to: b.appendingPathComponent("01HX.bin"))
+
+    XCTAssertTrue(LocalDataWiper.wipeFiles(roots: [a, b]))
+
+    for root in [a, b] {
+      var isDirectory: ObjCBool = false
+      XCTAssertTrue(FileManager.default.fileExists(atPath: root.path, isDirectory: &isDirectory))
+      XCTAssertTrue(isDirectory.boolValue)
+      XCTAssertEqual(try FileManager.default.contentsOfDirectory(atPath: root.path), [])
+      XCTAssertTrue(try isExcluded(root), "\(root.lastPathComponent) lost its exclusion")
+    }
+  }
+
+  // T-166: the seat keys are the only Keychain service the wipe keeps (D-55).
+  func testDeleteEverythingKeepsOnlyTheSeatKeyService() {
+    XCTAssertFalse(LocalDataWiper.shouldDelete(service: SeatKeyStore.service))
+    XCTAssertTrue(LocalDataWiper.shouldDelete(service: "app.zaghlol.attest"))
+    XCTAssertTrue(LocalDataWiper.shouldDelete(service: "app.zaghlol.spool"))
+    XCTAssertTrue(LocalDataWiper.shouldDelete(service: nil))
+  }
 }

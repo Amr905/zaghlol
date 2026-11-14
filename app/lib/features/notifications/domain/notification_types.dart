@@ -76,6 +76,7 @@ final class PlatformNotification {
     required this.body,
     this.payload,
     this.at,
+    this.type,
   });
 
   /// Stable per dedupe key.
@@ -86,11 +87,33 @@ final class PlatformNotification {
 
   /// Null: show now. Otherwise the UTC instant to show at.
   final DateTime? at;
+
+  /// Picks the Android channel; null falls back to the budget channel.
+  final NotificationType? type;
 }
 
-/// The platform port (flutter_local_notifications adapter lands with the
-/// device wiring; tests use a fake).
+/// The platform port (NOTIF-GW: the Pigeon host adapter; tests use a fake).
 abstract interface class NotificationGateway {
   Future<void> show(PlatformNotification n);
   Future<void> schedule(PlatformNotification n);
+}
+
+/// The notification permission (POST_NOTIFICATIONS on Android 13+, the iOS
+/// authorization). Asked after onboarding and when the user first turns an
+/// alert type on; never from a background path.
+abstract interface class NotificationPermissionPort {
+  /// True when alerts can be shown.
+  Future<bool> isAllowed();
+
+  /// Shows the system prompt when the answer is still open. True when alerts
+  /// can be shown afterwards. Never throws.
+  Future<bool> request();
+}
+
+/// Where taps on notifications come from: the route id of the notification
+/// that launched the app (once), and the taps while the app runs.
+abstract interface class NotificationTapSource {
+  Future<String?> takeLaunchRoute();
+
+  Stream<String> get taps;
 }

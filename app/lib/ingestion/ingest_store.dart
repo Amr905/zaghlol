@@ -52,7 +52,12 @@ final class ProviderIngestStore implements IngestStore {
     required this.build,
     this.gate,
     this.rebuildPerBatch = false,
+    this.afterBatch,
   });
+
+  /// Runs after a batch committed (UI engine: duplicate-charge alerts, T-100).
+  /// Best effort: its failure never fails the batch, which is already stored.
+  final Future<void> Function()? afterBatch;
 
   /// May be async: custom templates are read from the open database.
   final FutureOr<IngestRawMessages> Function(AppDatabase db) build;
@@ -126,7 +131,16 @@ final class ProviderIngestStore implements IngestStore {
       final use = rebuildPerBatch
           ? await build(db)
           : (_ingest ??= await build(db));
-      return use.call(batch);
+      final result = await use.call(batch);
+      final after = afterBatch;
+      if (after != null) {
+        try {
+          await after();
+        } on Object {
+          // The batch is committed; an alert is never worth failing the ack.
+        }
+      }
+      return result;
     }
 
     final g = gate;

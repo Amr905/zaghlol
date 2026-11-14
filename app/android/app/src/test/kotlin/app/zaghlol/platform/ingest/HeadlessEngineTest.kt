@@ -133,6 +133,27 @@ class HeadlessEngineTest {
         assertTrue(engine.isIdle())
     }
 
+    /** FU-194: while a restore holds the drain, no engine is started (or reused). */
+    @Test
+    fun aHoldPreventsTheStartAndAnAdmittedEngineIsActiveUntilItsTeardown() = runBlocking {
+        val hold = DrainHold(java.nio.file.Files.createTempDirectory("fu194").toFile().resolve("h")) { 1_000L }
+        val held = HeadlessEngine(starter, main, hold = hold)
+        hold.hold(60_000)
+        assertEquals(CycleOutcome.HELD, held.runCycle(10_000) { false }.outcome)
+        assertEquals("no engine started", 0, starter.handles.size)
+        hold.release()
+        val cycle = async(Dispatchers.Default) { held.runCycle(10_000) { false } }
+        await { starter.handles.size == 1 && starter.handles[0].drains.size == 1 }
+        starter.handles[0].answerDrain()
+        cycle.await()
+        assertTrue("an engine is alive", hold.hold(60_000))
+        assertEquals("a lingering engine is not reused", CycleOutcome.HELD, held.runCycle(10_000) { false }.outcome)
+        main.onMain { held.shutdown() }
+        starter.handles[0].answerClose()
+        assertFalse(hold.headlessActive())
+        assertEquals(1, starter.handles.size)
+    }
+
     @Test
     fun theUiCheckRunsOnTheMainThread() = runBlocking {
         var thread: String? = null

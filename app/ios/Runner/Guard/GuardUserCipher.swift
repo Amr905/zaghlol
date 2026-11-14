@@ -40,48 +40,36 @@ protocol GuardKeyProvider {
   func keyCreatingIfNeeded() throws -> SymmetricKey
 }
 
-/// The spool key, Keychain item `spool_key_v1` (32 random bytes,
-/// `kSecAttrAccessibleAfterFirstUnlockThisDeviceOnly`; platform-channels
-/// section 1.3). Built on the K_db slot store with another account, so the
-/// attributes, retries and no-overwrite rules are the same ones T-015 tests.
+/// The spool key, Keychain item `spool_key_v1` (platform-channels sections
+/// 1.1 and 1.3): the **same** item the spool uses (`SpoolKeychain`: service
+/// `app.zaghlol.spool`, shared access group, 32 random bytes,
+/// `kSecAttrAccessibleAfterFirstUnlockThisDeviceOnly`, never synchronizable).
+/// T-063 (FU-196 / 061-1): before, the Guard had its own item in the app's
+/// own group, which an extension can't read; nothing wrote it in production.
 ///
-/// T-062 owns the spool and the shared access group: it passes the group
-/// through `slot` once the App Group / keychain-access-groups entitlement
-/// exists. Until then the item lives in the app's own group.
+/// Reads never create (`SpoolKeychain.existing()`); only the writer creates,
+/// through the spool's own `loadOrCreate` policy.
 final class KeychainSpoolKeyProvider: GuardKeyProvider {
-  static let account = "spool_key_v1"
+  static let account = SpoolKeychain.account
 
-  private let slot: SecretSlotStore
+  let keychain: SpoolKeychain
 
-  init(slot: SecretSlotStore = DbKeyKeychain(account: KeychainSpoolKeyProvider.account)) {
-    self.slot = slot
+  init(keychain: SpoolKeychain = SpoolKeychain()) {
+    self.keychain = keychain
   }
 
   func existingKey() -> GuardKeyLookup {
-    let r = slot.read()
-    switch r.status {
-    case .found:
-      guard let value = r.value else { return .unavailable }
-      return .found(SymmetricKey(data: value))
-    case .notFound:
-      return .missing
-    case .unusable, .unavailable:
-      // Never a reason to wipe or to recreate here: T-062 owns that policy.
-      return .unavailable
+    switch keychain.existing() {
+    case .found(let loaded): return .found(SymmetricKey(data: loaded.key))
+    case .notFound: return .missing
+    case .unavailable: return .unavailable
     }
   }
 
   func keyCreatingIfNeeded() throws -> SymmetricKey {
-    switch existingKey() {
-    case .found(let key):
-      return key
-    case .missing:
-      var bytes = [UInt8](repeating: 0, count: DbKeyKeychain.keyLength)
-      let status = SecRandomCopyBytes(kSecRandomDefault, bytes.count, &bytes)
-      guard status == errSecSuccess else { throw GuardCipherError.unavailable }
-      let stored = try slot.createIfAbsent(Data(bytes))
-      return SymmetricKey(data: stored)
-    case .unavailable:
+    do {
+      return SymmetricKey(data: try keychain.loadOrCreate().key)
+    } catch {
       throw GuardCipherError.unavailable
     }
   }

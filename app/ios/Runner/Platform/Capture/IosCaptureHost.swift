@@ -1,5 +1,8 @@
+import BackgroundTasks
 import Flutter
 import Foundation
+import Security
+import UserNotifications
 
 /// T-062: the Pigeon `IosCaptureHostApi` over the encrypted App Group spool
 /// (platform-channels.md 1.3 and section 3). One host per engine (the UI
@@ -12,6 +15,7 @@ final class IosCaptureHost: IosCaptureHostApi {
   static let drainScanBudgetMs: Int64 = 5_000
   static let notAvailable = "NOT_AVAILABLE"
   static let ioError = "IO_ERROR"
+  static let configInvalid = "CONFIG_INVALID"
 
   private static let nextEngine = NSLock()
   private static var engineCounter: Int64 = 0
@@ -27,7 +31,11 @@ final class IosCaptureHost: IosCaptureHostApi {
   private let claim: SpoolClaim
   private let monoClockMs: () -> Int64
   private let scheduleRefresh: () throws -> Void
-  private let guardState: () -> GuardConfigState
+  private let guardRuntime: () -> GuardRuntime?
+  private let wipe: () throws -> Void
+  private let drainHold: DrainHold
+  private let stopHeadless: () -> Void
+  private let intentRuns: () -> IntentRunLog?
   private let drainedLock = NSLock()
   private var drained = Set<String>()
 
@@ -36,14 +44,22 @@ final class IosCaptureHost: IosCaptureHostApi {
     claim: SpoolClaim = .process,
     monoClockMs: @escaping () -> Int64 = { Int64(ProcessInfo.processInfo.systemUptime * 1000) },
     scheduleRefresh: @escaping () throws -> Void = { try IngestBackgroundRefresh.schedule() },
-    guardState: @escaping () -> GuardConfigState = { .unknown }
+    guardRuntime: @escaping () -> GuardRuntime? = { CaptureGuardRuntime.shared },
+    wipe: @escaping () throws -> Void = { try LocalDataWiper.wipeAll() },
+    drainHold: DrainHold = .shared,
+    stopHeadless: @escaping () -> Void = { Task { @MainActor in HeadlessIngestion.requestStop() } },
+    intentRuns: @escaping () -> IntentRunLog? = { IntentCapture.productionRuns }
   ) {
     self.engineId = IosCaptureHost.newEngineId()
     self.runtime = runtime
     self.claim = claim
     self.monoClockMs = monoClockMs
     self.scheduleRefresh = scheduleRefresh
-    self.guardState = guardState
+    self.guardRuntime = guardRuntime
+    self.wipe = wipe
+    self.drainHold = drainHold
+    self.stopHeadless = stopHeadless
+    self.intentRuns = intentRuns
   }
 
   private func need() throws -> SpoolRuntime {
@@ -53,6 +69,20 @@ final class IosCaptureHost: IosCaptureHostApi {
 
   private func fail(_ code: String = IosCaptureHost.ioError) -> CaptureApiError {
     CaptureApiError(code: code, message: nil, details: nil)
+  }
+
+  /// T-063: replaces the Guard user part the App Intents use (same runtime
+  /// instance, so the next intent in this process sees it; later processes
+  /// read the file). Code-only errors; the bytes are never logged or kept.
+  func writeGuardConfig(userConfigJson: FlutterStandardTypedData) throws {
+    guard let g = guardRuntime() else { throw fail(Self.notAvailable) }
+    do {
+      try g.writeUser(userConfigJson.data)
+    } catch let e as GuardConfigWriteError {
+      throw fail(e.code == .configInvalid ? Self.configInvalid : Self.ioError)
+    } catch {
+      throw fail()
+    }
   }
 
   func drainSpool(max: Int64) throws -> [SpoolEntry] {
@@ -143,7 +173,7 @@ final class IosCaptureHost: IosCaptureHostApi {
       firstMissedSmsAtMs: s.firstMissedSmsAtMs >= 0 ? s.firstMissedSmsAtMs : nil,
       decryptDeleted: Int64(s.decryptDeleted),
       keyInvalidatedAtMs: s.keyInvalidatedAtMs >= 0 ? s.keyInvalidatedAtMs : nil,
-      guardState: guardState(), held: Int64(r.store.heldCount()))
+      guardState: CaptureGuardRuntime.state(of: guardRuntime()), held: Int64(r.store.heldCount()))
   }
 
   func clearSpoolAlerts(seq: Int64) throws {
@@ -152,8 +182,41 @@ final class IosCaptureHost: IosCaptureHostApi {
     do { _ = try r.status.clear(seq: UInt32(seq)) } catch { throw fail() }
   }
 
+  /// T-064: the per-intent last-run times the App Intents recorded. Times
+  /// only; null = never (or not readable before the first unlock).
+  func getShortcutSetupStatus() throws -> ShortcutSetupStatus {
+    guard let log = intentRuns() else { throw fail(Self.notAvailable) }
+    let r = log.read()
+    return ShortcutSetupStatus(lastMessageIntentAtMs: r.messageAtMs, lastWalletIntentAtMs: r.walletAtMs)
+  }
+
   func registerBackgroundRefresh() throws {
     do { try scheduleRefresh() } catch { throw fail() }
+  }
+
+  /// T-166 "Delete everything" (see `LocalDataWiper`). Any failure is a
+  /// code-only `IO_ERROR`; the other parts still ran.
+  func wipeLocalData() throws {
+    drainedLock.lock()
+    drained.removeAll()
+    drainedLock.unlock()
+    do { try wipe() } catch { throw fail() }
+  }
+
+  /// FU-194: sets or renews the restore's drain hold. A headless run still in
+  /// progress is asked to stop (it closes the database before teardown);
+  /// returns true while it is active. Does not need the spool.
+  func holdDrain(ttlMs: Int64) throws -> Bool {
+    let active: Bool
+    do { active = try drainHold.hold(ttlMs: ttlMs) } catch { throw fail() }
+    if active { stopHeadless() }
+    return active
+  }
+
+  func isHeadlessDrainActive() throws -> Bool { drainHold.headlessActive() }
+
+  func releaseDrainHold() throws {
+    do { try drainHold.release() } catch { throw fail() }
   }
 
   /// The engine is going away: drop its claim (entries stay for the next drain).
@@ -192,5 +255,112 @@ enum IosCaptureRegistration {
     DispatchQueue.global(qos: .utility).async {
       _ = SpoolRuntime.shared?.cipher.keyCreatedAtMs()
     }
+  }
+}
+
+/// T-166 "Delete everything", native part (design note in T-166.md, step 8).
+/// Runs after Dart closed the database and deleted its key slots. Every part
+/// runs even when an earlier one failed; `wipeAll` throws at the end if any
+/// failed, so Dart keeps its resume marker. Directory roots are kept (only
+/// their contents go) and their backup exclusion is applied again (T-165
+/// F4). The seat keys (service `SeatKeyStore.service`) are never deleted
+/// (D-55, R4-8). Nothing here logs.
+enum LocalDataWiper {
+  struct Incomplete: Error {}
+
+  /// The Keychain service that survives the wipe.
+  static let keptService = SeatKeyStore.service
+
+  static func wipeAll() throws {
+    var ok = true
+    BGTaskScheduler.shared.cancelAllTaskRequests()
+    let center = UNUserNotificationCenter.current()
+    center.removeAllPendingNotificationRequests()
+    center.removeAllDeliveredNotifications()
+    ok = deleteKeychainItems() && ok
+    let roots =
+      ZaghlolDirectories.appContainerDirectories() + ZaghlolDirectories.appGroupDirectories()
+    ok = wipeFiles(roots: roots) && ok
+    // The spool key and the Guard rules cached in memory went with the
+    // Keychain and the App Group: drop them so nothing reuses them.
+    SpoolRuntime.shared?.cipher.reset()
+    CaptureGuardRuntime.shared?.reset()
+    if !ok { throw Incomplete() }
+  }
+
+  /// Clears the contents of every root, then re-applies the backup exclusion
+  /// to every root (they must exist and stay excluded before the first-launch
+  /// database is created). True when everything went.
+  @discardableResult
+  static func wipeFiles(roots: [URL], fileManager: FileManager = .default) -> Bool {
+    var ok = true
+    for root in roots {
+      ok = clearContents(of: root, fileManager: fileManager) && ok
+    }
+    ok = ZaghlolDirectories.exclude(roots) && ok
+    return ok
+  }
+
+  /// Deletes every entry inside `dir`, never `dir` itself. A symlink is
+  /// removed as a link (its target is not followed). True when nothing is
+  /// left or `dir` does not exist.
+  static func clearContents(of dir: URL, fileManager: FileManager = .default) -> Bool {
+    guard fileManager.fileExists(atPath: dir.path) else { return true }
+    guard
+      let entries = try? fileManager.contentsOfDirectory(
+        at: dir, includingPropertiesForKeys: nil, options: [])
+    else { return false }
+    var ok = true
+    for entry in entries {
+      do {
+        try fileManager.removeItem(at: entry)
+      } catch {
+        if fileManager.fileExists(atPath: entry.path) { ok = false }
+      }
+    }
+    return ok
+  }
+
+  /// Whether a generic-password item with this service goes in the wipe.
+  static func shouldDelete(service: String?) -> Bool { service != keptService }
+
+  /// Deletes every Keychain item of the app's access groups except the seat
+  /// keys. Generic passwords are deleted one by one by persistent reference,
+  /// so a query can never widen to a seat-key item.
+  static func deleteKeychainItems() -> Bool {
+    var ok = true
+    for cls in [kSecClassInternetPassword, kSecClassCertificate, kSecClassKey, kSecClassIdentity] {
+      let status = SecItemDelete(
+        [
+          kSecClass as String: cls,
+          kSecAttrSynchronizable as String: kSecAttrSynchronizableAny,
+        ] as CFDictionary)
+      if status != errSecSuccess && status != errSecItemNotFound { ok = false }
+    }
+    var result: CFTypeRef?
+    let status = SecItemCopyMatching(
+      [
+        kSecClass as String: kSecClassGenericPassword,
+        kSecAttrSynchronizable as String: kSecAttrSynchronizableAny,
+        kSecMatchLimit as String: kSecMatchLimitAll,
+        kSecReturnAttributes as String: true,
+        kSecReturnPersistentRef as String: true,
+      ] as CFDictionary, &result)
+    if status == errSecItemNotFound { return ok }
+    guard status == errSecSuccess, let items = result as? [[String: Any]] else { return false }
+    for item in items {
+      if !shouldDelete(service: item[kSecAttrService as String] as? String) { continue }
+      guard let ref = item[kSecValuePersistentRef as String] as? Data else {
+        ok = false
+        continue
+      }
+      let deleted = SecItemDelete(
+        [
+          kSecClass as String: kSecClassGenericPassword,
+          kSecValuePersistentRef as String: ref,
+        ] as CFDictionary)
+      if deleted != errSecSuccess && deleted != errSecItemNotFound { ok = false }
+    }
+    return ok
   }
 }
