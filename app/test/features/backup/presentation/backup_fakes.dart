@@ -128,7 +128,9 @@ List<Override> baseOverrides({
   FakeEffects? effects,
   FakeActions? actions,
   DateTime? last,
+  bool holdsLocalData = false,
 }) => [
+  restoreReplacesLocalDataProvider.overrideWith((ref) async => holdsLocalData),
   languageProviderOverride(lang),
   digitsProvider.overrideWith((ref) => Stream.value(DigitsPref.auto)),
   backupScheduleModeProvider.overrideWith(
