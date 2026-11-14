@@ -607,6 +607,13 @@ final homeNowProvider = Provider<DateTime>(
   name: 'homeNowProvider',
 );
 
+/// ICU select key for [AppLocalizations.homeGreetingByTime].
+String greetingPart(int hour) => hour >= 5 && hour < 12
+    ? 'morning'
+    : hour >= 12 && hour < 18
+    ? 'afternoon'
+    : 'evening';
+
 /// Time-of-day greeting headline ("صباح الفل يا كبير ☀️").
 class HomeGreeting extends ConsumerWidget {
   const HomeGreeting({super.key, this.fontSize});
@@ -618,11 +625,7 @@ class HomeGreeting extends ConsumerWidget {
     final l = AppLocalizations.of(context);
     final c = ZColors.of(context);
     final h = ref.watch(homeNowProvider).hour;
-    final part = h >= 5 && h < 12
-        ? 'morning'
-        : h >= 12 && h < 18
-        ? 'afternoon'
-        : 'evening';
+    final part = greetingPart(h);
     return Semantics(
       header: true,
       child: Text(

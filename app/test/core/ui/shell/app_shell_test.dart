@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:zaghlol/core/routing/app_routes.dart';
 import 'package:zaghlol/core/ui/shell/add_sheet.dart';
+import 'package:zaghlol/core/ui/shell/app_shell.dart';
 
 import 'shell_harness.dart';
 
@@ -18,8 +19,8 @@ void main() {
     ) async {
       await pumpShell(tester);
       expect(find.byType(NavigationBar), findsOneWidget);
-      expect(find.byType(FloatingActionButton), findsOneWidget);
-      final fab = tester.getCenter(find.byType(FloatingActionButton));
+      expect(find.byType(ZAddButton), findsOneWidget);
+      final fab = tester.getCenter(find.byType(ZAddButton));
       final size = tester.view.physicalSize / tester.view.devicePixelRatio;
       expect(fab.dx, greaterThan(size.width / 2));
     });
@@ -30,7 +31,7 @@ void main() {
       await pumpShell(tester, locale: _ar);
       final size = tester.view.physicalSize / tester.view.devicePixelRatio;
       expect(
-        tester.getCenter(find.byType(FloatingActionButton)).dx,
+        tester.getCenter(find.byType(ZAddButton)).dx,
         lessThan(size.width / 2),
       );
       expect(find.text('الرئيسية'), findsOneWidget);
@@ -47,7 +48,7 @@ void main() {
         await pumpShell(tester, locale: locale, platform: TargetPlatform.iOS);
         expect(find.byType(NavigationBar), findsNothing);
         expect(find.byType(FloatingActionButton), findsNothing);
-        final add = tester.getCenter(find.byIcon(Icons.add_rounded));
+        final add = tester.getCenter(find.byIcon(Icons.add));
         final home = tester.getCenter(find.byIcon(Icons.home_rounded));
         final rtl = locale == _ar;
         // Add sits at the trailing end: left in Arabic, right in English.
@@ -127,7 +128,7 @@ void main() {
         await tester.tap(find.bySemanticsLabel('سجّل بسرعة'));
         await tester.pumpAndSettle();
         expect(find.byType(AddSheet), findsOneWidget);
-        expect(find.text('عايز تسجل إيه؟'), findsOneWidget);
+        expect(find.text('تحب تسجل إيه؟'), findsOneWidget);
 
         // Back closes the sheet and returns to the same tab.
         await tester.binding.handlePopRoute();
@@ -141,7 +142,7 @@ void main() {
       tester,
     ) async {
       await pumpShell(tester);
-      await tester.tap(find.byType(FloatingActionButton));
+      await tester.tap(find.byType(ZAddButton));
       await tester.pumpAndSettle();
       for (final label in ['Say', 'Type', 'Scan', 'Asset']) {
         final size = tester.getSize(
