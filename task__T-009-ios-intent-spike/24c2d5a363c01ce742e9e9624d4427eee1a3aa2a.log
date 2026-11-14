@@ -1,5 +1,8 @@
 ﻿== SUMMARY ==
-RUNNING sha=24c2d5a363c01ce742e9e9624d4427eee1a3aa2a
+SKIP sha=24c2d5a363c01ce742e9e9624d4427eee1a3aa2a no app/packages/backend changes
 
 == FULL LOG (last 1500 lines) ==
 auto task/T-009-ios-intent-spike 24c2d5a363c01ce742e9e9624d4427eee1a3aa2a 2026-11-14T11:04:17.9084650+02:00
+
+
+
