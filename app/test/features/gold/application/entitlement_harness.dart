@@ -113,6 +113,7 @@ final class FakeBackend implements EntitlementBackend {
   Future<EntitlementResponse> Function(TimeNonce)? onGet;
   Future<EntitlementResponse> Function(TimeNonce)? onSignOut;
   int gets = 0;
+  final List<String?> signOutTokens = [];
 
   @override
   Future<String?> installId() async => id;
@@ -126,8 +127,9 @@ final class FakeBackend implements EntitlementBackend {
   }
 
   @override
-  Future<EntitlementResponse> signOut(TimeNonce n) {
+  Future<EntitlementResponse> signOut(TimeNonce n, {String? accountToken}) {
     nonces.add(n.value);
+    signOutTokens.add(accountToken);
     return onSignOut!(n);
   }
 }
