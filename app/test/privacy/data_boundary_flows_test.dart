@@ -378,6 +378,7 @@ void main() {
         // covers its allow-list.
         'DELETE /v1/accounts/me',
         'DELETE /v1/installs/me',
+        'POST /v1/accounts/signout',
       });
       expect(
         classes,
