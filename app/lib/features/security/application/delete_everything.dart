@@ -42,14 +42,21 @@ abstract interface class NativeWipe {
 /// What the resume marker records: the local parts still unfinished and how
 /// many resumes ran. Step ids and a count only, no data.
 final class WipeMarkerState {
-  WipeMarkerState({required Iterable<String> pending, this.attempts = 0})
-    : pending = Set.unmodifiable(pending);
+  WipeMarkerState({
+    required Iterable<String> pending,
+    this.attempts = 0,
+    this.torn = false,
+  }) : pending = Set.unmodifiable(pending);
 
   /// Every part a fresh run must do.
   factory WipeMarkerState.all() => WipeMarkerState(pending: WipeSteps.parts);
 
   final Set<String> pending;
   final int attempts;
+
+  /// True when the marker was empty or not valid JSON: which parts finished
+  /// is unknown, so a resume still checks for data newer than the marker.
+  final bool torn;
 
   bool has(String part) => pending.contains(part);
 
@@ -69,8 +76,9 @@ final class WipeMarkerState {
     } on FormatException {
       // Below.
     }
-    // An empty (pre-fix) or unreadable marker: every part, no resume yet.
-    return WipeMarkerState.all();
+    // An empty (torn) or garbled marker: every part, no resume yet, but the
+    // resume still keeps data newer than the marker (batch-20a D-1).
+    return WipeMarkerState(pending: WipeSteps.parts, torn: true);
   }
 
   List<int> encode() => utf8.encode(
@@ -112,12 +120,37 @@ final class WipeMarker {
     }
   }
 
+  /// Written atomically (temp file in the same directory, flush, rename):
+  /// an interrupted write never leaves an empty marker (batch-20a D-1).
   Future<void> set([WipeMarkerState? state]) async {
     await file.parent.create(recursive: true);
-    await file.writeAsBytes(
+    final tmp = File('${file.path}.tmp');
+    await tmp.writeAsBytes(
       (state ?? WipeMarkerState.all()).encode(),
       flush: true,
     );
+    await tmp.rename(file.path);
+    await _deleteQuietly(_reads);
+  }
+
+  /// Counts reads that failed with an I/O error (batch-20a D-2).
+  File get _reads => File('${file.path}.reads');
+
+  /// Records one failed read; returns the count so far.
+  Future<int> countFailedRead() async {
+    var n = 0;
+    try {
+      n = int.tryParse(await _reads.readAsString()) ?? 0;
+    } on FileSystemException {
+      n = 0;
+    }
+    n++;
+    try {
+      await _reads.writeAsString('$n', flush: true);
+    } on FileSystemException {
+      // Counted in memory only; the next launch counts again.
+    }
+    return n;
   }
 
   Future<void> clear() async {
@@ -125,6 +158,19 @@ final class WipeMarker {
       await file.delete();
     } on PathNotFoundException {
       // Already gone.
+    } on FileSystemException {
+      // Not a plain file (unreadable marker): remove whatever holds the name.
+      await Directory(file.path).delete(recursive: true);
+    }
+    await _deleteQuietly(File('${file.path}.tmp'));
+    await _deleteQuietly(_reads);
+  }
+
+  static Future<void> _deleteQuietly(File f) async {
+    try {
+      await f.delete();
+    } on FileSystemException {
+      // Absent or not removable; harmless.
     }
   }
 }
@@ -234,7 +280,15 @@ final class DeleteEverything {
       try {
         found = await _marker.read();
       } on Object {
-        // Unreadable: leave it; the next launch tries again.
+        // Unreadable: deletes nothing; counts as a resume and is dropped at
+        // the limit (batch-20a D-2).
+        try {
+          if (await _marker.countFailedRead() >= maxResumes) {
+            await _marker.clear();
+          }
+        } on Object {
+          // Reported below.
+        }
         return _report([WipeSteps.marker], null);
       }
       if (found == null) return _report(const [], null);
@@ -369,6 +423,23 @@ final class DeleteEverything {
   /// Whether a key or database exists that a finished part already deleted,
   /// i.e. one created after the wipe.
   Future<_Newer> _newerData(WipeMarkerState s) async {
+    if (s.torn) {
+      // Which parts finished is unknown: never delete a database file newer
+      // than the marker itself.
+      final DateTime since;
+      try {
+        since = await _marker.file.lastModified();
+      } on FileSystemException {
+        return _Newer.unknown;
+      }
+      for (final f in _files.files) {
+        try {
+          if ((await f.lastModified()).isAfter(since)) return _Newer.yes;
+        } on FileSystemException {
+          // Absent.
+        }
+      }
+    }
     if (!s.has(WipeSteps.keySlots)) {
       for (final slot in SecretSlot.values) {
         final r = await _secrets.read(slot);

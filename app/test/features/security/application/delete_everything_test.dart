@@ -346,6 +346,53 @@ void main() {
     });
   });
 
+  group('torn and unreadable markers (batch-20a D-1, D-2)', () {
+    test('an interrupted write (temp file only) deletes nothing', () async {
+      final w = await _World.open();
+      addTearDown(w.dispose);
+      await w.db.close();
+      final key = w.store.stored;
+      await File('${w.marker.file.path}.tmp').writeAsBytes(const []);
+      expect(await w.marker.exists(), isFalse);
+      final r = await w.wipe().resume();
+      expect(r.complete, isTrue);
+      expect(w.store.stored, key);
+      expect(await w.world.files.anyExists(), isTrue);
+    });
+
+    test('an empty marker with a newer database keeps it', () async {
+      final w = await _World.open();
+      addTearDown(w.dispose);
+      await w.db.close();
+      await w.marker.file.writeAsBytes(const []);
+      await w.marker.file.setLastModified(DateTime(2020));
+      final r = await w.wipe().resume();
+      expect(r.complete, isTrue);
+      expect(await w.world.files.anyExists(), isTrue);
+      expect(w.native.calls, 0);
+      expect(await w.marker.exists(), isFalse);
+    });
+
+    test('an unreadable marker is cleared after maxResumes reads', () async {
+      final w = await _World.open();
+      addTearDown(w.dispose);
+      await w.db.close();
+      await Directory(w.marker.file.path).create();
+      for (var i = 1; i <= DeleteEverything.maxResumes; i++) {
+        final r = await w.wipe().resume();
+        expect(r.failed, [WipeSteps.marker]);
+        expect(
+          await FileSystemEntity.type(w.marker.file.path) ==
+              FileSystemEntityType.notFound,
+          i == DeleteEverything.maxResumes,
+          reason: 'resume $i',
+        );
+      }
+      expect(w.native.calls, 0);
+      expect(await w.world.files.anyExists(), isTrue);
+    });
+  });
+
   group('deleteInstallBestEffort', () {
     final creds = InstallCredentials(
       installId: _installId,
