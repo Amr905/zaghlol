@@ -40,5 +40,7 @@ import UIKit
     OcrRegistration.register(with: engineBridge.pluginRegistry)
     // T-062: encrypted spool drain / ack and the background refresh.
     IosCaptureRegistration.register(with: engineBridge.pluginRegistry)
+    // T-065: shares from the Share Extension.
+    ShareIntakeRegistration.register(with: engineBridge.pluginRegistry)
   }
 }

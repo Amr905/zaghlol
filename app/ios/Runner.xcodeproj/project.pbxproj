@@ -86,6 +86,26 @@
 		5A6300000000000000000105 /* Localizable.xcstrings in Resources */ = {isa = PBXBuildFile; fileRef = 5A6300000000000000000005 /* Localizable.xcstrings */; };
 		5A6300000000000000000106 /* AppShortcuts.xcstrings in Resources */ = {isa = PBXBuildFile; fileRef = 5A6300000000000000000006 /* AppShortcuts.xcstrings */; };
 		5A6300000000000000000107 /* IntentCaptureTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5A6300000000000000000007 /* IntentCaptureTests.swift */; };
+		5A650000000000000000000E /* BackupExclusion.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5A1650000000000000000A02 /* BackupExclusion.swift */; };
+		5A650000000000000000000F /* SpoolUlid.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5A6200000000000000000001 /* SpoolUlid.swift */; };
+		5A6500000000000000000010 /* SpoolRecord.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5A6200000000000000000002 /* SpoolRecord.swift */; };
+		5A6500000000000000000011 /* SharedGroups.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5A6200000000000000000003 /* SharedGroups.swift */; };
+		5A6500000000000000000012 /* SpoolKeychain.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5A6200000000000000000004 /* SpoolKeychain.swift */; };
+		5A6500000000000000000013 /* SpoolCipher.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5A6200000000000000000005 /* SpoolCipher.swift */; };
+		5A6500000000000000000014 /* SpoolStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5A6200000000000000000006 /* SpoolStore.swift */; };
+		5A6500000000000000000015 /* CaptureStatusStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5A6200000000000000000007 /* CaptureStatusStore.swift */; };
+		5A6500000000000000000016 /* SpoolLocation.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5A6200000000000000000008 /* SpoolLocation.swift */; };
+		5A6500000000000000000017 /* ShareStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5A6500000000000000000001 /* ShareStore.swift */; };
+		5A6500000000000000000018 /* ShareStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5A6500000000000000000001 /* ShareStore.swift */; };
+		5A6500000000000000000019 /* ShareIntake.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5A6500000000000000000002 /* ShareIntake.swift */; };
+		5A650000000000000000001A /* ShareIntake.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5A6500000000000000000002 /* ShareIntake.swift */; };
+		5A650000000000000000001B /* ShareViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5A6500000000000000000007 /* ShareViewController.swift */; };
+		5A650000000000000000001C /* ShareIntakeHost.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5A6500000000000000000003 /* ShareIntakeHost.swift */; };
+		5A650000000000000000001D /* ShareIntakeApi.g.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5A6500000000000000000004 /* ShareIntakeApi.g.swift */; };
+		5A650000000000000000001E /* ShareStoreTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5A6500000000000000000005 /* ShareStoreTests.swift */; };
+		5A650000000000000000001F /* ShareIntakeTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5A6500000000000000000006 /* ShareIntakeTests.swift */; };
+		5A6500000000000000000020 /* PrivacyInfo.xcprivacy in Resources */ = {isa = PBXBuildFile; fileRef = 5A650000000000000000000A /* PrivacyInfo.xcprivacy */; };
+		5A6500000000000000000021 /* ShareExtension.appex in Embed Foundation Extensions */ = {isa = PBXBuildFile; fileRef = 5A650000000000000000000B /* ShareExtension.appex */; settings = {ATTRIBUTES = (RemoveHeadersOnCopy, ); }; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -95,6 +115,13 @@
 			proxyType = 1;
 			remoteGlobalIDString = 97C146ED1CF9000F007C117D;
 			remoteInfo = Runner;
+		};
+		5A6500000000000000000026 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 97C146E61CF9000F007C117D /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = 5A6500000000000000000028;
+			remoteInfo = ShareExtension;
 		};
 /* End PBXContainerItemProxy section */
 
@@ -107,6 +134,17 @@
 			files = (
 			);
 			name = "Embed Frameworks";
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		5A6500000000000000000025 /* Embed Foundation Extensions */ = {
+			isa = PBXCopyFilesBuildPhase;
+			buildActionMask = 2147483647;
+			dstPath = "";
+			dstSubfolderSpec = 13;
+			files = (
+				5A6500000000000000000021 /* ShareExtension.appex in Embed Foundation Extensions */,
+			);
+			name = "Embed Foundation Extensions";
 			runOnlyForDeploymentPostprocessing = 0;
 		};
 /* End PBXCopyFilesBuildPhase section */
@@ -200,6 +238,17 @@
 		5A6300000000000000000005 /* Localizable.xcstrings */ = {isa = PBXFileReference; lastKnownFileType = text.json.xcstrings; path = Localizable.xcstrings; sourceTree = "<group>"; };
 		5A6300000000000000000006 /* AppShortcuts.xcstrings */ = {isa = PBXFileReference; lastKnownFileType = text.json.xcstrings; path = AppShortcuts.xcstrings; sourceTree = "<group>"; };
 		5A6300000000000000000007 /* IntentCaptureTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = IntentCaptureTests.swift; sourceTree = "<group>"; };
+		5A6500000000000000000001 /* ShareStore.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ShareStore.swift; sourceTree = "<group>"; };
+		5A6500000000000000000002 /* ShareIntake.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ShareIntake.swift; sourceTree = "<group>"; };
+		5A6500000000000000000003 /* ShareIntakeHost.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ShareIntakeHost.swift; sourceTree = "<group>"; };
+		5A6500000000000000000004 /* ShareIntakeApi.g.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ShareIntakeApi.g.swift; sourceTree = "<group>"; };
+		5A6500000000000000000005 /* ShareStoreTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ShareStoreTests.swift; sourceTree = "<group>"; };
+		5A6500000000000000000006 /* ShareIntakeTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ShareIntakeTests.swift; sourceTree = "<group>"; };
+		5A6500000000000000000007 /* ShareViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ShareViewController.swift; sourceTree = "<group>"; };
+		5A6500000000000000000008 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
+		5A6500000000000000000009 /* ShareExtension.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = ShareExtension.entitlements; sourceTree = "<group>"; };
+		5A650000000000000000000A /* PrivacyInfo.xcprivacy */ = {isa = PBXFileReference; lastKnownFileType = text.xml; path = PrivacyInfo.xcprivacy; sourceTree = "<group>"; };
+		5A650000000000000000000B /* ShareExtension.appex */ = {isa = PBXFileReference; explicitFileType = "wrapper.app-extension"; includeInIndex = 0; path = ShareExtension.appex; sourceTree = BUILT_PRODUCTS_DIR; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -208,6 +257,13 @@
 			buildActionMask = 2147483647;
 			files = (
 				78A318202AECB46A00862997 /* FlutterGeneratedPluginSwiftPackage in Frameworks */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		5A6500000000000000000023 /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -256,6 +312,8 @@
 		331C8082294A63A400263BE5 /* RunnerTests */ = {
 			isa = PBXGroup;
 			children = (
+				5A6500000000000000000005 /* ShareStoreTests.swift */,
+				5A6500000000000000000006 /* ShareIntakeTests.swift */,
 				331C807B294A618700263BE5 /* RunnerTests.swift */,
 				5A1650000000000000000A05 /* BackupExclusionTests.swift */,
 				5A0150000000000000000B0A /* SecretStoreTests.swift */,
@@ -282,6 +340,8 @@
 		5A1650000000000000000A03 /* Shared */ = {
 			isa = PBXGroup;
 			children = (
+				5A6500000000000000000001 /* ShareStore.swift */,
+				5A6500000000000000000002 /* ShareIntake.swift */,
 				5A1650000000000000000A02 /* BackupExclusion.swift */,
 				5A6200000000000000000001 /* SpoolUlid.swift */,
 				5A6200000000000000000002 /* SpoolRecord.swift */,
@@ -310,6 +370,7 @@
 		97C146E51CF9000F007C117D = {
 			isa = PBXGroup;
 			children = (
+				5A650000000000000000000C /* ShareExtension */,
 				9740EEB11CF90186004384FC /* Flutter */,
 				97C146F01CF9000F007C117D /* Runner */,
 				5A1650000000000000000A03 /* Shared */,
@@ -321,6 +382,7 @@
 		97C146EF1CF9000F007C117D /* Products */ = {
 			isa = PBXGroup;
 			children = (
+				5A650000000000000000000B /* ShareExtension.appex */,
 				97C146EE1CF9000F007C117D /* Runner.app */,
 				331C8081294A63A400263BE5 /* RunnerTests.xctest */,
 			);
@@ -354,6 +416,8 @@
 		5A0150000000000000000B0B /* Platform */ = {
 			isa = PBXGroup;
 			children = (
+				5A6500000000000000000004 /* ShareIntakeApi.g.swift */,
+				5A650000000000000000000D /* Share */,
 				5A0150000000000000000B02 /* SecretStoreApi.g.swift */,
 				5A0150000000000000000B0C /* Keys */,
 				5A1480000000000000000C02 /* TextNormalizationApi.g.swift */,
@@ -428,6 +492,25 @@
 			path = ICloud;
 			sourceTree = "<group>";
 		};
+		5A650000000000000000000C /* ShareExtension */ = {
+			isa = PBXGroup;
+			children = (
+				5A6500000000000000000007 /* ShareViewController.swift */,
+				5A6500000000000000000008 /* Info.plist */,
+				5A6500000000000000000009 /* ShareExtension.entitlements */,
+				5A650000000000000000000A /* PrivacyInfo.xcprivacy */,
+			);
+			path = ShareExtension;
+			sourceTree = "<group>";
+		};
+		5A650000000000000000000D /* Share */ = {
+			isa = PBXGroup;
+			children = (
+				5A6500000000000000000003 /* ShareIntakeHost.swift */,
+			);
+			path = Share;
+			sourceTree = "<group>";
+		};
 /* End PBXGroup section */
 
 /* Begin PBXNativeTarget section */
@@ -457,11 +540,13 @@
 				97C146EB1CF9000F007C117D /* Frameworks */,
 				97C146EC1CF9000F007C117D /* Resources */,
 				9705A1C41CF9048500538489 /* Embed Frameworks */,
+				5A6500000000000000000025 /* Embed Foundation Extensions */,
 				3B06AD1E1E4923F5004D2608 /* Thin Binary */,
 			);
 			buildRules = (
 			);
 			dependencies = (
+				5A6500000000000000000027 /* PBXTargetDependency */,
 			);
 			name = Runner;
 			packageProductDependencies = (
@@ -470,6 +555,23 @@
 			productName = Runner;
 			productReference = 97C146EE1CF9000F007C117D /* Runner.app */;
 			productType = "com.apple.product-type.application";
+		};
+		5A6500000000000000000028 /* ShareExtension */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = 5A6500000000000000000029 /* Build configuration list for PBXNativeTarget "ShareExtension" */;
+			buildPhases = (
+				5A6500000000000000000022 /* Sources */,
+				5A6500000000000000000023 /* Frameworks */,
+				5A6500000000000000000024 /* Resources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+			);
+			name = ShareExtension;
+			productName = ShareExtension;
+			productReference = 5A650000000000000000000B /* ShareExtension.appex */;
+			productType = "com.apple.product-type.app-extension";
 		};
 /* End PBXNativeTarget section */
 
@@ -484,6 +586,9 @@
 					331C8080294A63A400263BE5 = {
 						CreatedOnToolsVersion = 14.0;
 						TestTargetID = 97C146ED1CF9000F007C117D;
+					};
+					5A6500000000000000000028 = {
+						CreatedOnToolsVersion = 16.0;
 					};
 					97C146ED1CF9000F007C117D = {
 						CreatedOnToolsVersion = 7.3.1;
@@ -510,6 +615,7 @@
 			targets = (
 				97C146ED1CF9000F007C117D /* Runner */,
 				331C8080294A63A400263BE5 /* RunnerTests */,
+				5A6500000000000000000028 /* ShareExtension */,
 			);
 		};
 /* End PBXProject section */
@@ -533,6 +639,14 @@
 				5A1800000000000000000D08 /* PrivacyInfo.xcprivacy in Resources */,
 				5A6300000000000000000105 /* Localizable.xcstrings in Resources */,
 				5A6300000000000000000106 /* AppShortcuts.xcstrings in Resources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		5A6500000000000000000024 /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				5A6500000000000000000020 /* PrivacyInfo.xcprivacy in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -596,6 +710,8 @@
 				5A6200000000000000000114 /* SpoolTestSupport.swift in Sources */,
 				5A6200000000000000000112 /* CaptureStatusStoreTests.swift in Sources */,
 				5A6300000000000000000107 /* IntentCaptureTests.swift in Sources */,
+				5A650000000000000000001E /* x in Sources */,
+				5A650000000000000000001F /* x in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -655,6 +771,29 @@
 				5A6300000000000000000102 /* IntentRunLog.swift in Sources */,
 				5A6300000000000000000103 /* IntentCapture.swift in Sources */,
 				5A6300000000000000000104 /* CaptureIntents.swift in Sources */,
+				5A6500000000000000000018 /* x in Sources */,
+				5A650000000000000000001A /* x in Sources */,
+				5A650000000000000000001C /* x in Sources */,
+				5A650000000000000000001D /* x in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		5A6500000000000000000022 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				5A650000000000000000000E /* x in Sources */,
+				5A650000000000000000000F /* x in Sources */,
+				5A6500000000000000000010 /* x in Sources */,
+				5A6500000000000000000011 /* x in Sources */,
+				5A6500000000000000000012 /* x in Sources */,
+				5A6500000000000000000013 /* x in Sources */,
+				5A6500000000000000000014 /* x in Sources */,
+				5A6500000000000000000015 /* x in Sources */,
+				5A6500000000000000000016 /* x in Sources */,
+				5A6500000000000000000017 /* x in Sources */,
+				5A6500000000000000000019 /* x in Sources */,
+				5A650000000000000000001B /* x in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -665,6 +804,11 @@
 			isa = PBXTargetDependency;
 			target = 97C146ED1CF9000F007C117D /* Runner */;
 			targetProxy = 331C8085294A63A400263BE5 /* PBXContainerItemProxy */;
+		};
+		5A6500000000000000000027 /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = 5A6500000000000000000028 /* ShareExtension */;
+			targetProxy = 5A6500000000000000000026 /* PBXContainerItemProxy */;
 		};
 /* End PBXTargetDependency section */
 
@@ -1543,6 +1687,246 @@
 			};
 			name = "Release-prod";
 		};
+		5A650000000000000000002A /* Debug-dev */ = {
+			isa = XCBuildConfiguration;
+			baseConfigurationReference = 9740EEB21CF90195004384FC /* Debug.xcconfig */;
+			buildSettings = {
+				CLANG_ENABLE_MODULES = YES;
+				CURRENT_PROJECT_VERSION = "$(FLUTTER_BUILD_NUMBER)";
+				ENABLE_BITCODE = NO;
+				CODE_SIGN_ENTITLEMENTS = ShareExtension/ShareExtension.entitlements;
+				INFOPLIST_FILE = ShareExtension/Info.plist;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+					"@executable_path/../../Frameworks",
+				);
+				APP_DISPLAY_NAME = "Zaghlol Dev";
+				PRODUCT_BUNDLE_IDENTIFIER = app.zaghlol.dev.ShareExtension;
+				ZAGHLOL_APP_BUNDLE_ID = app.zaghlol.dev;
+				APPLICATION_EXTENSION_API_ONLY = YES;
+				SKIP_INSTALL = YES;
+				TARGETED_DEVICE_FAMILY = "1,2";
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
+				SWIFT_VERSION = 5.0;
+				VERSIONING_SYSTEM = "apple-generic";
+			};
+			name = "Debug-dev";
+		};
+		5A650000000000000000002B /* Debug-staging */ = {
+			isa = XCBuildConfiguration;
+			baseConfigurationReference = 9740EEB21CF90195004384FC /* Debug.xcconfig */;
+			buildSettings = {
+				CLANG_ENABLE_MODULES = YES;
+				CURRENT_PROJECT_VERSION = "$(FLUTTER_BUILD_NUMBER)";
+				ENABLE_BITCODE = NO;
+				CODE_SIGN_ENTITLEMENTS = ShareExtension/ShareExtension.entitlements;
+				INFOPLIST_FILE = ShareExtension/Info.plist;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+					"@executable_path/../../Frameworks",
+				);
+				APP_DISPLAY_NAME = "Zaghlol Staging";
+				PRODUCT_BUNDLE_IDENTIFIER = app.zaghlol.staging.ShareExtension;
+				ZAGHLOL_APP_BUNDLE_ID = app.zaghlol.staging;
+				APPLICATION_EXTENSION_API_ONLY = YES;
+				SKIP_INSTALL = YES;
+				TARGETED_DEVICE_FAMILY = "1,2";
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
+				SWIFT_VERSION = 5.0;
+				VERSIONING_SYSTEM = "apple-generic";
+			};
+			name = "Debug-staging";
+		};
+		5A650000000000000000002C /* Debug-prod */ = {
+			isa = XCBuildConfiguration;
+			baseConfigurationReference = 9740EEB21CF90195004384FC /* Debug.xcconfig */;
+			buildSettings = {
+				CLANG_ENABLE_MODULES = YES;
+				CURRENT_PROJECT_VERSION = "$(FLUTTER_BUILD_NUMBER)";
+				ENABLE_BITCODE = NO;
+				CODE_SIGN_ENTITLEMENTS = ShareExtension/ShareExtension.entitlements;
+				INFOPLIST_FILE = ShareExtension/Info.plist;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+					"@executable_path/../../Frameworks",
+				);
+				APP_DISPLAY_NAME = "Zaghlol";
+				PRODUCT_BUNDLE_IDENTIFIER = app.zaghlol.ShareExtension;
+				ZAGHLOL_APP_BUNDLE_ID = app.zaghlol;
+				APPLICATION_EXTENSION_API_ONLY = YES;
+				SKIP_INSTALL = YES;
+				TARGETED_DEVICE_FAMILY = "1,2";
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
+				SWIFT_ACTIVE_COMPILATION_CONDITIONS = "$(inherited) ZAGHLOL_PROD";
+				SWIFT_VERSION = 5.0;
+				VERSIONING_SYSTEM = "apple-generic";
+			};
+			name = "Debug-prod";
+		};
+		5A650000000000000000002D /* Release-dev */ = {
+			isa = XCBuildConfiguration;
+			baseConfigurationReference = 7AFA3C8E1D35360C0083082E /* Release.xcconfig */;
+			buildSettings = {
+				CLANG_ENABLE_MODULES = YES;
+				CURRENT_PROJECT_VERSION = "$(FLUTTER_BUILD_NUMBER)";
+				ENABLE_BITCODE = NO;
+				CODE_SIGN_ENTITLEMENTS = ShareExtension/ShareExtension.entitlements;
+				INFOPLIST_FILE = ShareExtension/Info.plist;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+					"@executable_path/../../Frameworks",
+				);
+				APP_DISPLAY_NAME = "Zaghlol Dev";
+				PRODUCT_BUNDLE_IDENTIFIER = app.zaghlol.dev.ShareExtension;
+				ZAGHLOL_APP_BUNDLE_ID = app.zaghlol.dev;
+				APPLICATION_EXTENSION_API_ONLY = YES;
+				SKIP_INSTALL = YES;
+				TARGETED_DEVICE_FAMILY = "1,2";
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SWIFT_VERSION = 5.0;
+				VERSIONING_SYSTEM = "apple-generic";
+			};
+			name = "Release-dev";
+		};
+		5A650000000000000000002E /* Release-staging */ = {
+			isa = XCBuildConfiguration;
+			baseConfigurationReference = 7AFA3C8E1D35360C0083082E /* Release.xcconfig */;
+			buildSettings = {
+				CLANG_ENABLE_MODULES = YES;
+				CURRENT_PROJECT_VERSION = "$(FLUTTER_BUILD_NUMBER)";
+				ENABLE_BITCODE = NO;
+				CODE_SIGN_ENTITLEMENTS = ShareExtension/ShareExtension.entitlements;
+				INFOPLIST_FILE = ShareExtension/Info.plist;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+					"@executable_path/../../Frameworks",
+				);
+				APP_DISPLAY_NAME = "Zaghlol Staging";
+				PRODUCT_BUNDLE_IDENTIFIER = app.zaghlol.staging.ShareExtension;
+				ZAGHLOL_APP_BUNDLE_ID = app.zaghlol.staging;
+				APPLICATION_EXTENSION_API_ONLY = YES;
+				SKIP_INSTALL = YES;
+				TARGETED_DEVICE_FAMILY = "1,2";
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SWIFT_VERSION = 5.0;
+				VERSIONING_SYSTEM = "apple-generic";
+			};
+			name = "Release-staging";
+		};
+		5A650000000000000000002F /* Release-prod */ = {
+			isa = XCBuildConfiguration;
+			baseConfigurationReference = 7AFA3C8E1D35360C0083082E /* Release.xcconfig */;
+			buildSettings = {
+				CLANG_ENABLE_MODULES = YES;
+				CURRENT_PROJECT_VERSION = "$(FLUTTER_BUILD_NUMBER)";
+				ENABLE_BITCODE = NO;
+				CODE_SIGN_ENTITLEMENTS = ShareExtension/ShareExtension.entitlements;
+				INFOPLIST_FILE = ShareExtension/Info.plist;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+					"@executable_path/../../Frameworks",
+				);
+				APP_DISPLAY_NAME = "Zaghlol";
+				PRODUCT_BUNDLE_IDENTIFIER = app.zaghlol.ShareExtension;
+				ZAGHLOL_APP_BUNDLE_ID = app.zaghlol;
+				APPLICATION_EXTENSION_API_ONLY = YES;
+				SKIP_INSTALL = YES;
+				TARGETED_DEVICE_FAMILY = "1,2";
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SWIFT_ACTIVE_COMPILATION_CONDITIONS = "$(inherited) ZAGHLOL_PROD";
+				SWIFT_VERSION = 5.0;
+				VERSIONING_SYSTEM = "apple-generic";
+			};
+			name = "Release-prod";
+		};
+		5A6500000000000000000030 /* Profile-dev */ = {
+			isa = XCBuildConfiguration;
+			baseConfigurationReference = 7AFA3C8E1D35360C0083082E /* Release.xcconfig */;
+			buildSettings = {
+				CLANG_ENABLE_MODULES = YES;
+				CURRENT_PROJECT_VERSION = "$(FLUTTER_BUILD_NUMBER)";
+				ENABLE_BITCODE = NO;
+				CODE_SIGN_ENTITLEMENTS = ShareExtension/ShareExtension.entitlements;
+				INFOPLIST_FILE = ShareExtension/Info.plist;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+					"@executable_path/../../Frameworks",
+				);
+				APP_DISPLAY_NAME = "Zaghlol Dev";
+				PRODUCT_BUNDLE_IDENTIFIER = app.zaghlol.dev.ShareExtension;
+				ZAGHLOL_APP_BUNDLE_ID = app.zaghlol.dev;
+				APPLICATION_EXTENSION_API_ONLY = YES;
+				SKIP_INSTALL = YES;
+				TARGETED_DEVICE_FAMILY = "1,2";
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SWIFT_VERSION = 5.0;
+				VERSIONING_SYSTEM = "apple-generic";
+			};
+			name = "Profile-dev";
+		};
+		5A6500000000000000000031 /* Profile-staging */ = {
+			isa = XCBuildConfiguration;
+			baseConfigurationReference = 7AFA3C8E1D35360C0083082E /* Release.xcconfig */;
+			buildSettings = {
+				CLANG_ENABLE_MODULES = YES;
+				CURRENT_PROJECT_VERSION = "$(FLUTTER_BUILD_NUMBER)";
+				ENABLE_BITCODE = NO;
+				CODE_SIGN_ENTITLEMENTS = ShareExtension/ShareExtension.entitlements;
+				INFOPLIST_FILE = ShareExtension/Info.plist;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+					"@executable_path/../../Frameworks",
+				);
+				APP_DISPLAY_NAME = "Zaghlol Staging";
+				PRODUCT_BUNDLE_IDENTIFIER = app.zaghlol.staging.ShareExtension;
+				ZAGHLOL_APP_BUNDLE_ID = app.zaghlol.staging;
+				APPLICATION_EXTENSION_API_ONLY = YES;
+				SKIP_INSTALL = YES;
+				TARGETED_DEVICE_FAMILY = "1,2";
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SWIFT_VERSION = 5.0;
+				VERSIONING_SYSTEM = "apple-generic";
+			};
+			name = "Profile-staging";
+		};
+		5A6500000000000000000032 /* Profile-prod */ = {
+			isa = XCBuildConfiguration;
+			baseConfigurationReference = 7AFA3C8E1D35360C0083082E /* Release.xcconfig */;
+			buildSettings = {
+				CLANG_ENABLE_MODULES = YES;
+				CURRENT_PROJECT_VERSION = "$(FLUTTER_BUILD_NUMBER)";
+				ENABLE_BITCODE = NO;
+				CODE_SIGN_ENTITLEMENTS = ShareExtension/ShareExtension.entitlements;
+				INFOPLIST_FILE = ShareExtension/Info.plist;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+					"@executable_path/../../Frameworks",
+				);
+				APP_DISPLAY_NAME = "Zaghlol";
+				PRODUCT_BUNDLE_IDENTIFIER = app.zaghlol.ShareExtension;
+				ZAGHLOL_APP_BUNDLE_ID = app.zaghlol;
+				APPLICATION_EXTENSION_API_ONLY = YES;
+				SKIP_INSTALL = YES;
+				TARGETED_DEVICE_FAMILY = "1,2";
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SWIFT_ACTIVE_COMPILATION_CONDITIONS = "$(inherited) ZAGHLOL_PROD";
+				SWIFT_VERSION = 5.0;
+				VERSIONING_SYSTEM = "apple-generic";
+			};
+			name = "Profile-prod";
+		};
 /* End XCBuildConfiguration section */
 
 /* Begin XCConfigurationList section */
@@ -1590,6 +1974,22 @@
 				5A9F00040000005A67C0DE04 /* Profile-dev */,
 				5A9F00050000005A67C0DE05 /* Profile-staging */,
 				5A9F00060000005A67C0DE06 /* Profile-prod */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = "Release-prod";
+		};
+		5A6500000000000000000029 /* Build configuration list for PBXNativeTarget "ShareExtension" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				5A650000000000000000002A /* Debug-dev */,
+				5A650000000000000000002B /* Debug-staging */,
+				5A650000000000000000002C /* Debug-prod */,
+				5A650000000000000000002D /* Release-dev */,
+				5A650000000000000000002E /* Release-staging */,
+				5A650000000000000000002F /* Release-prod */,
+				5A6500000000000000000030 /* Profile-dev */,
+				5A6500000000000000000031 /* Profile-staging */,
+				5A6500000000000000000032 /* Profile-prod */,
 			);
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = "Release-prod";
