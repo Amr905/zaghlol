@@ -153,7 +153,6 @@ class SettingsRow extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final c = ZColors.of(context);
-    final rtl = Directionality.of(context) == TextDirection.rtl;
     return InkWell(
       onTap: onTap,
       child: ConstrainedBox(
@@ -195,10 +194,7 @@ class SettingsRow extends StatelessWidget {
               ),
               ?trailing,
               if (onTap != null && trailing == null)
-                Icon(
-                  rtl ? Icons.chevron_left : Icons.chevron_right,
-                  color: c.textMuted,
-                ),
+                Icon(Icons.chevron_right, color: c.textMuted),
             ],
           ),
         ),

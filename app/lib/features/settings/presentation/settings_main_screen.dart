@@ -148,12 +148,7 @@ class SettingsMainScreen extends ConsumerWidget {
                             ],
                           ),
                         ),
-                        Icon(
-                          Directionality.of(context) == TextDirection.rtl
-                              ? Icons.chevron_left
-                              : Icons.chevron_right,
-                          color: c.warningText,
-                        ),
+                        Icon(Icons.chevron_right, color: c.warningText),
                       ],
                     ),
                   ),

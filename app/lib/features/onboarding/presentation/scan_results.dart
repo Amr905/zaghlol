@@ -671,11 +671,7 @@ class _CardRow extends StatelessWidget {
                 ],
                 const SizedBox(width: ZSpacing.xs),
                 Icon(
-                  confirmed
-                      ? Icons.check_circle
-                      : (Directionality.of(context) == TextDirection.rtl
-                            ? Icons.chevron_left
-                            : Icons.chevron_right),
+                  confirmed ? Icons.check_circle : (Icons.chevron_right),
                   color: confirmed ? c.primary : c.textMuted,
                 ),
               ],

@@ -683,12 +683,7 @@ class _IosSetupState extends ConsumerState<IosSetupScreen>
         tileFg: tileFg,
         subLead: subLead,
         trailing: ExcludeSemantics(
-          child: Icon(
-            Directionality.of(context) == TextDirection.rtl
-                ? Icons.chevron_left
-                : Icons.chevron_right,
-            color: c.textMuted,
-          ),
+          child: Icon(Icons.chevron_right, color: c.textMuted),
         ),
         c: c,
       ),

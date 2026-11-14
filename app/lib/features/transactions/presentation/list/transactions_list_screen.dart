@@ -494,18 +494,18 @@ class _FilterBar extends ConsumerWidget {
             : l.commonDateRange(
                 ZDateFormat.date(
                   DateTime(
-                    f.customFrom!.year,
-                    f.customFrom!.month,
-                    f.customFrom!.day,
+                    f.customTo!.year,
+                    f.customTo!.month,
+                    f.customTo!.day,
                   ),
                   fmt.lang,
                   fmt.digits,
                 ),
                 ZDateFormat.date(
                   DateTime(
-                    f.customTo!.year,
-                    f.customTo!.month,
-                    f.customTo!.day,
+                    f.customFrom!.year,
+                    f.customFrom!.month,
+                    f.customFrom!.day,
                   ),
                   fmt.lang,
                   fmt.digits,

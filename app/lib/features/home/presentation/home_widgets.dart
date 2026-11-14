@@ -321,12 +321,7 @@ class HomeReviewPill extends StatelessWidget {
                       style: ZType.titleSmall.copyWith(color: c.warningText),
                     ),
                   ),
-                  Icon(
-                    Directionality.of(context) == TextDirection.rtl
-                        ? Icons.chevron_left
-                        : Icons.chevron_right,
-                    color: c.warningText,
-                  ),
+                  Icon(Icons.chevron_right, color: c.warningText),
                 ],
               ),
             ),

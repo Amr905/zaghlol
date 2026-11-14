@@ -124,12 +124,7 @@ class ZListRow extends StatelessWidget {
             ],
             if (showChevron) ...[
               const SizedBox(width: ZSpacing.xs),
-              Icon(
-                Directionality.of(context) == TextDirection.rtl
-                    ? Icons.chevron_left
-                    : Icons.chevron_right,
-                color: c.textMuted,
-              ),
+              Icon(Icons.chevron_right, color: c.textMuted),
             ],
           ],
         ),
@@ -243,7 +238,7 @@ class ZHeroCard extends StatelessWidget {
         ),
       ),
     );
-    return onTap == null ? card : MergeSemantics(child: card);
+    return card;
   }
 }
 

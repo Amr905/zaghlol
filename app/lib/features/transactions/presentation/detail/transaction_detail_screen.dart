@@ -755,7 +755,6 @@ class _FieldRow extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final c = ZColors.of(context);
-    final rtl = Directionality.of(context) == TextDirection.rtl;
     final valueStyle = action
         ? ZType.titleSmall.copyWith(color: c.primary)
         : ZType.titleSmall.copyWith(color: c.text, fontWeight: FontWeight.w500);
@@ -780,11 +779,7 @@ class _FieldRow extends StatelessWidget {
             ),
             if (chevron) ...[
               const SizedBox(width: ZSpacing.xs),
-              Icon(
-                rtl ? Icons.chevron_left : Icons.chevron_right,
-                size: 20,
-                color: c.textMuted,
-              ),
+              Icon(Icons.chevron_right, size: 20, color: c.textMuted),
             ],
           ],
         ),
@@ -833,7 +828,6 @@ class _ActionRow extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final c = ZColors.of(context);
-    final rtl = Directionality.of(context) == TextDirection.rtl;
     return Semantics(
       container: true,
       button: true,
@@ -874,11 +868,7 @@ class _ActionRow extends StatelessWidget {
                         style: ZType.body.copyWith(color: c.text),
                       ),
                     ),
-                    Icon(
-                      rtl ? Icons.chevron_left : Icons.chevron_right,
-                      size: 20,
-                      color: c.textMuted,
-                    ),
+                    Icon(Icons.chevron_right, size: 20, color: c.textMuted),
                   ],
                 ),
               ),

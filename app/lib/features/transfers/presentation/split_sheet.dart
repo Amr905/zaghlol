@@ -442,6 +442,7 @@ class _SplitSheetState extends ConsumerState<SplitSheet> {
       enabledBorder: InputBorder.none,
       focusedBorder: InputBorder.none,
       isDense: true,
+      constraints: BoxConstraints(minHeight: ZSpacing.minTarget),
       contentPadding: EdgeInsetsDirectional.symmetric(vertical: ZSpacing.sm),
     );
     return Column(

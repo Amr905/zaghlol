@@ -181,12 +181,7 @@ class _Code extends StatelessWidget {
         code,
         style: ZType.label.copyWith(color: ZColors.of(context).textMuted),
       ),
-      Icon(
-        Directionality.of(context) == TextDirection.rtl
-            ? Icons.chevron_left
-            : Icons.chevron_right,
-        color: ZColors.of(context).textMuted,
-      ),
+      Icon(Icons.chevron_right, color: ZColors.of(context).textMuted),
     ],
   );
 }
@@ -227,12 +222,7 @@ class _PaydayRow extends ConsumerWidget {
             label,
             style: ZType.label.copyWith(color: ZColors.of(context).textMuted),
           ),
-          Icon(
-            Directionality.of(context) == TextDirection.rtl
-                ? Icons.chevron_left
-                : Icons.chevron_right,
-            color: ZColors.of(context).textMuted,
-          ),
+          Icon(Icons.chevron_right, color: ZColors.of(context).textMuted),
         ],
       ),
       onTap: () async {

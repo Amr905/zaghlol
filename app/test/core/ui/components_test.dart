@@ -315,16 +315,22 @@ void main() {
       );
     });
 
-    testWidgets('disclosure chevron mirrors in RTL', (tester) async {
-      await tester.pumpWidget(
-        _app(ZListRow(title: 'A', showChevron: true, onTap: () {})),
-      );
-      expect(find.byIcon(Icons.chevron_right), findsOneWidget);
-      await tester.pumpWidget(
-        _app(ZListRow(title: 'A', showChevron: true, onTap: () {}), rtl: true),
-      );
-      expect(find.byIcon(Icons.chevron_left), findsOneWidget);
-    });
+    testWidgets(
+      'disclosure chevron is chevron_right in both directions (Flutter mirrors it)',
+      (tester) async {
+        await tester.pumpWidget(
+          _app(ZListRow(title: 'A', showChevron: true, onTap: () {})),
+        );
+        expect(find.byIcon(Icons.chevron_right), findsOneWidget);
+        await tester.pumpWidget(
+          _app(
+            ZListRow(title: 'A', showChevron: true, onTap: () {}),
+            rtl: true,
+          ),
+        );
+        expect(find.byIcon(Icons.chevron_right), findsOneWidget);
+      },
+    );
 
     testWidgets('disabled row ignores taps', (tester) async {
       var taps = 0;
