@@ -1,5 +1,8 @@
 ﻿== SUMMARY ==
-RUNNING sha=099ae17751c4e70cc1eff3f15deb13f099b771b5
+SKIP sha=099ae17751c4e70cc1eff3f15deb13f099b771b5 no app/packages/backend changes
 
 == FULL LOG (last 1500 lines) ==
 auto task/T-171-privacy-suite 099ae17751c4e70cc1eff3f15deb13f099b771b5 2026-11-14T11:11:20.7670158+02:00
+
+
+
