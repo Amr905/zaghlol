@@ -15,6 +15,8 @@ import '../../../core/l10n/locale_providers.dart';
 import '../../../core/theme/z_tokens.dart';
 import '../../../core/ui/z_banner.dart';
 import '../../../core/ui/z_button.dart';
+import '../../../core/ui/z_card.dart';
+import 'onboarding_parts.dart';
 import '../../capture/application/capture_providers.dart';
 import '../../capture/application/inbox_scan_service.dart';
 import '../../capture/domain/scan_plan.dart';
@@ -195,57 +197,32 @@ class _AndroidSetupState extends ConsumerState<AndroidSetupScreen>
       _Step.degraded => _degradedStep(l, c),
     };
     final stepNo = _step == _Step.notif ? 2 : 1;
+    final canSkip = _step != _Step.loading && _step != _Step.degraded;
     return Scaffold(
       body: SafeArea(
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
-            Padding(
-              padding: const EdgeInsetsDirectional.fromSTEB(
-                ZSpacing.screen,
-                ZSpacing.sm,
-                ZSpacing.sm,
-                0,
+            OnbTopBar(
+              step: stepNo,
+              total: 2,
+              stepLabel: l.onboardingAndroidSetupStep(
+                _digits('$stepNo'),
+                _digits('2'),
               ),
-              child: Row(
-                children: [
-                  Expanded(
-                    child: Text(
-                      l.onboardingAndroidSetupStep(
-                        _digits('$stepNo'),
-                        _digits('2'),
-                      ),
-                      style: ZType.label.copyWith(color: c.textMuted),
-                    ),
-                  ),
-                  if (_step != _Step.loading && _step != _Step.degraded)
-                    ConstrainedBox(
-                      constraints: const BoxConstraints(
-                        minHeight: ZSpacing.minTarget,
-                        minWidth: ZSpacing.minTarget,
-                      ),
-                      child: TextButton(
-                        key: const ValueKey('setup-skip'),
-                        onPressed: () {
-                          widget.onSkipped?.call(
-                            _step == _Step.sms
-                                ? kSetupStepSms
-                                : kSetupStepNotifications,
-                          );
-                          if (widget.onSkipped == null) widget.onDone();
-                        },
-                        child: Text(l.commonActionSkip),
-                      ),
-                    ),
-                ],
-              ),
+              skipLabel: canSkip ? l.commonActionSkip : null,
+              onSkip: canSkip
+                  ? () {
+                      widget.onSkipped?.call(
+                        _step == _Step.sms
+                            ? kSetupStepSms
+                            : kSetupStepNotifications,
+                      );
+                      if (widget.onSkipped == null) widget.onDone();
+                    }
+                  : null,
             ),
-            Expanded(
-              child: SingleChildScrollView(
-                padding: const EdgeInsetsDirectional.all(ZSpacing.screen),
-                child: body,
-              ),
-            ),
+            Expanded(child: body),
           ],
         ),
       ),
@@ -258,12 +235,12 @@ class _AndroidSetupState extends ConsumerState<AndroidSetupScreen>
   }
 
   Widget _bullet(String text, ZColors c) => Padding(
-    padding: const EdgeInsetsDirectional.only(bottom: ZSpacing.sm),
+    padding: const EdgeInsetsDirectional.only(bottom: ZSpacing.md),
     child: Row(
-      crossAxisAlignment: CrossAxisAlignment.start,
+      crossAxisAlignment: CrossAxisAlignment.center,
       children: [
-        Icon(Icons.check_circle_outline, color: c.primary, size: 20),
-        const SizedBox(width: ZSpacing.sm),
+        const OnbCheckDot(size: 24),
+        const SizedBox(width: ZSpacing.md),
         Expanded(
           child: Text(text, style: ZType.body.copyWith(color: c.text)),
         ),
@@ -271,38 +248,46 @@ class _AndroidSetupState extends ConsumerState<AndroidSetupScreen>
     ),
   );
 
-  Widget _mascot(ZaghlolMoment m) => Center(
-    child: ExcludeSemantics(child: ZaghlolAvatar(moment: m, size: 120)),
+  Widget _scroll(List<Widget> children, {Key? key}) => SingleChildScrollView(
+    key: key,
+    padding: const EdgeInsetsDirectional.all(ZSpacing.screen),
+    child: Column(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      children: children,
+    ),
   );
 
-  Widget _smsStep(AppLocalizations l, ZColors c) => Column(
+  Widget _smsStep(AppLocalizations l, ZColors c) => KeyedSubtree(
     key: const ValueKey('setup-sms'),
-    crossAxisAlignment: CrossAxisAlignment.stretch,
-    children: [
-      _mascot(ZaghlolMoment.tourGuide),
-      const SizedBox(height: ZSpacing.lg),
-      Text(
-        l.onboardingAndroidSetupSmsTitle,
-        style: ZType.headline.copyWith(color: c.text),
-      ),
-      const SizedBox(height: ZSpacing.sm),
-      Text(
-        l.onboardingAndroidSetupSmsSubtitle,
-        style: ZType.body.copyWith(color: c.textMuted),
-      ),
-      const SizedBox(height: ZSpacing.lg),
-      _bullet(l.onboardingAndroidSetupSmsPointSenders, c),
-      _bullet(l.onboardingAndroidSetupSmsPointPersonal, c),
-      _bullet(l.onboardingAndroidSetupSmsPointOnPhone, c),
-      const SizedBox(height: ZSpacing.lg),
-      ZButton(
-        key: const ValueKey('setup-sms-allow'),
-        label: l.onboardingAndroidSetupSmsAllow,
-        loading: _busy,
-        expand: true,
-        onPressed: _allowSms,
-      ),
-    ],
+    child: OnbPage(
+      content: [
+        const SizedBox(height: ZSpacing.lg),
+        const OnbMascot(size: 190),
+        const SizedBox(height: ZSpacing.xl),
+        Text(
+          l.onboardingAndroidSetupSmsTitle,
+          style: ZType.headline.copyWith(color: c.text),
+        ),
+        const SizedBox(height: ZSpacing.xs),
+        Text(
+          l.onboardingAndroidSetupSmsSubtitle,
+          style: ZType.body.copyWith(color: c.textMuted),
+        ),
+        const SizedBox(height: ZSpacing.lg),
+        _bullet(l.onboardingAndroidSetupSmsPointSenders, c),
+        _bullet(l.onboardingAndroidSetupSmsPointPersonal, c),
+        _bullet(l.onboardingAndroidSetupSmsPointOnPhone, c),
+      ],
+      actions: [
+        ZButton(
+          key: const ValueKey('setup-sms-allow'),
+          label: l.onboardingAndroidSetupSmsAllow,
+          loading: _busy,
+          expand: true,
+          onPressed: _allowSms,
+        ),
+      ],
+    ),
   );
 
   Widget _scanCard(AppLocalizations l, ZColors c) {
@@ -315,121 +300,144 @@ class _AndroidSetupState extends ConsumerState<AndroidSetupScreen>
     return Semantics(
       liveRegion: true,
       container: true,
-      child: Container(
+      child: ZCard(
         key: const ValueKey('setup-scan'),
-        padding: const EdgeInsetsDirectional.all(ZSpacing.lg),
-        decoration: BoxDecoration(
-          color: c.primaryContainer,
-          borderRadius: BorderRadius.circular(ZRadius.card),
-        ),
         child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
+          crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
             Row(
               children: [
-                Icon(Icons.check_circle, color: c.primary, size: 20),
-                const SizedBox(width: ZSpacing.sm),
+                ExcludeSemantics(
+                  child: SizedBox.square(
+                    dimension: 28,
+                    child: running
+                        ? CircularProgressIndicator(
+                            strokeWidth: 3,
+                            color: c.primary,
+                            backgroundColor: c.primaryContainer,
+                          )
+                        : Icon(Icons.check_circle, color: c.primary, size: 28),
+                  ),
+                ),
+                const SizedBox(width: ZSpacing.md),
                 Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        running
+                            ? l.onboardingAndroidSetupScanTitle
+                            : l.onboardingAndroidSetupSmsGranted,
+                        style: ZType.titleSmall.copyWith(color: c.text),
+                      ),
+                      Text(
+                        l.onboardingAndroidSetupScanDepth(
+                          l.commonPeriodLastMonths(months, _digits('$months')),
+                        ),
+                        style: ZType.bodySmall.copyWith(color: c.textMuted),
+                      ),
+                    ],
+                  ),
+                ),
+                const SizedBox(width: ZSpacing.sm),
+                Semantics(
+                  label: summary,
+                  excludeSemantics: true,
                   child: Text(
-                    l.onboardingAndroidSetupSmsGranted,
-                    style: ZType.label.copyWith(color: c.onPrimaryContainer),
+                    _digits('$count'),
+                    style: ZType.title.copyWith(color: c.primary),
                   ),
                 ),
               ],
             ),
-            const SizedBox(height: ZSpacing.sm),
-            Text(
-              l.onboardingAndroidSetupScanTitle,
-              style: ZType.label.copyWith(color: c.onPrimaryContainer),
+            const SizedBox(height: ZSpacing.md),
+            ClipRRect(
+              borderRadius: BorderRadius.circular(ZRadius.pill),
+              child: LinearProgressIndicator(
+                // Indeterminate while running: the total is unknown.
+                value: running ? null : 1,
+                minHeight: 8,
+                color: c.primary,
+                backgroundColor: c.primaryContainer,
+              ),
             ),
-            if (running) ...[
-              const SizedBox(height: ZSpacing.sm),
-              const LinearProgressIndicator(),
-            ],
-            const SizedBox(height: ZSpacing.sm),
-            Text(
-              summary,
-              style: ZType.body.copyWith(color: c.onPrimaryContainer),
-            ),
-            if (_progress.institutions > 0)
+            if (_progress.institutions > 0) ...[
+              const SizedBox(height: ZSpacing.md),
               Text(
                 '${l.onboardingAndroidSetupScanBanks} '
                 '${_digits('${_progress.institutions}')}',
-                style: ZType.body.copyWith(color: c.onPrimaryContainer),
+                style: ZType.bodySmall.copyWith(color: c.textMuted),
               ),
-            Text(
-              l.onboardingAndroidSetupScanDepth(
-                l.commonPeriodLastMonths(months, _digits('$months')),
-              ),
-              style: ZType.caption.copyWith(color: c.onPrimaryContainer),
-            ),
+            ],
           ],
         ),
       ),
     );
   }
 
-  Widget _notifStep(AppLocalizations l, ZColors c) => Column(
+  Widget _notifStep(AppLocalizations l, ZColors c) => KeyedSubtree(
     key: const ValueKey('setup-notif'),
-    crossAxisAlignment: CrossAxisAlignment.stretch,
-    children: [
-      _scanCard(l, c),
-      const SizedBox(height: ZSpacing.xl),
-      Text(
-        l.onboardingAndroidSetupNotifTitle,
-        style: ZType.headline.copyWith(color: c.text),
-      ),
-      const SizedBox(height: ZSpacing.sm),
-      Text(
-        l.onboardingAndroidSetupNotifBody,
-        style: ZType.body.copyWith(color: c.textMuted),
-      ),
-      const SizedBox(height: ZSpacing.md),
-      // Prominent disclosure, shown before the system screen.
-      Text(
-        l.onboardingAndroidSetupNotifPrivacy,
-        style: ZType.body.copyWith(color: c.text),
-      ),
-      const SizedBox(height: ZSpacing.sm),
-      Text(
-        l.onboardingAndroidSetupNotifOsHint,
-        style: ZType.caption.copyWith(color: c.textMuted),
-      ),
-      const SizedBox(height: ZSpacing.lg),
-      if (_notifOn)
-        Semantics(
-          liveRegion: true,
-          child: Text(
-            l.onboardingAndroidSetupNotifGranted,
-            key: const ValueKey('setup-notif-granted'),
-            style: ZType.label.copyWith(color: c.primary),
-          ),
-        )
-      else ...[
-        ZButton(
-          key: const ValueKey('setup-notif-turn-on'),
-          label: l.onboardingAndroidSetupNotifTurnOn,
-          expand: true,
-          onPressed: _openNotif,
+    child: OnbPage(
+      content: [
+        const SizedBox(height: ZSpacing.sm),
+        _scanCard(l, c),
+        const SizedBox(height: ZSpacing.lg),
+        const OnbMascot(size: 130),
+        const SizedBox(height: ZSpacing.lg),
+        Text(
+          l.onboardingAndroidSetupNotifTitle,
+          style: ZType.headline.copyWith(color: c.text),
         ),
-        if (_openedNotif)
-          Padding(
-            padding: const EdgeInsetsDirectional.only(top: ZSpacing.sm),
-            child: Text(
-              l.onboardingAndroidSetupNotifStillOff,
-              style: ZType.caption.copyWith(color: c.textMuted),
-            ),
-          ),
+        const SizedBox(height: ZSpacing.sm),
+        Text(
+          l.onboardingAndroidSetupNotifBody,
+          style: ZType.body.copyWith(color: c.textMuted),
+        ),
+        const SizedBox(height: ZSpacing.lg),
+        // Prominent disclosure, shown before the system screen.
+        OnbMintNote(text: l.onboardingAndroidSetupNotifPrivacy),
       ],
-      const SizedBox(height: ZSpacing.sm),
-      ZButton(
-        key: const ValueKey('setup-notif-done'),
-        label: _notifOn ? l.commonActionContinue : l.commonActionNotNow,
-        variant: ZButtonVariant.secondary,
-        expand: true,
-        onPressed: widget.onDone,
-      ),
-    ],
+      actions: [
+        if (_notifOn)
+          Semantics(
+            liveRegion: true,
+            child: Padding(
+              padding: const EdgeInsetsDirectional.only(bottom: ZSpacing.sm),
+              child: Text(
+                l.onboardingAndroidSetupNotifGranted,
+                key: const ValueKey('setup-notif-granted'),
+                textAlign: TextAlign.center,
+                style: ZType.label.copyWith(color: c.primary),
+              ),
+            ),
+          )
+        else ...[
+          ZButton(
+            key: const ValueKey('setup-notif-turn-on'),
+            label: l.onboardingAndroidSetupNotifTurnOn,
+            expand: true,
+            onPressed: _openNotif,
+          ),
+          if (_openedNotif)
+            Padding(
+              padding: const EdgeInsetsDirectional.only(top: ZSpacing.sm),
+              child: Text(
+                l.onboardingAndroidSetupNotifStillOff,
+                textAlign: TextAlign.center,
+                style: ZType.caption.copyWith(color: c.textMuted),
+              ),
+            ),
+        ],
+        const SizedBox(height: ZSpacing.sm),
+        ZButton(
+          key: const ValueKey('setup-notif-done'),
+          label: _notifOn ? l.commonActionContinue : l.commonActionNotNow,
+          variant: _notifOn ? ZButtonVariant.primary : ZButtonVariant.text,
+          expand: true,
+          onPressed: widget.onDone,
+        ),
+      ],
+    ),
   );
 
   Widget _degradedRow(String label, ZColors c, {Widget? action}) => Padding(
@@ -447,85 +455,85 @@ class _AndroidSetupState extends ConsumerState<AndroidSetupScreen>
     ),
   );
 
-  Widget _degradedStep(AppLocalizations l, ZColors c) => Column(
-    key: const ValueKey('setup-degraded'),
-    crossAxisAlignment: CrossAxisAlignment.stretch,
-    children: [
-      _mascot(ZaghlolMoment.oops),
-      const SizedBox(height: ZSpacing.lg),
-      ZBanner(
-        tone: ZBannerTone.warning,
-        message: _noSms
-            ? l.onboardingAndroidSetupPlayUnavailable
-            : l.onboardingAndroidSetupDegradedTitle,
-      ),
-      const SizedBox(height: ZSpacing.md),
-      Text(
-        l.onboardingAndroidSetupDegradedBody,
-        style: ZType.body.copyWith(color: c.textMuted),
-      ),
-      const SizedBox(height: ZSpacing.sm),
-      _degradedRow(
-        l.onboardingAndroidSetupDegradedNotif,
-        c,
-        action: _notifOn
-            ? Text(
-                l.onboardingAndroidSetupNotifGranted,
-                style: ZType.label.copyWith(color: c.primary),
-              )
-            : TextButton(
-                key: const ValueKey('setup-degraded-notif'),
-                onPressed: _openNotif,
-                child: Text(l.onboardingAndroidSetupDegradedNotifOn),
-              ),
-      ),
-      if (!_notifOn)
-        Padding(
-          padding: const EdgeInsetsDirectional.only(bottom: ZSpacing.sm),
-          child: Text(
-            l.onboardingAndroidSetupNotifPrivacy,
-            style: ZType.caption.copyWith(color: c.textMuted),
-          ),
-        ),
-      _degradedRow(
-        l.onboardingAndroidSetupDegradedShare,
-        c,
-        action: widget.onShareHow == null
-            ? null
-            : TextButton(
-                key: const ValueKey('setup-degraded-share'),
-                onPressed: widget.onShareHow,
-                child: Text(l.onboardingAndroidSetupDegradedShareHow),
-              ),
-      ),
-      _degradedRow(l.onboardingAndroidSetupDegradedManual, c),
-      if (_denied && !_noSms) ...[
-        Text(
-          l.onboardingAndroidSetupDegradedSettingsHint,
+  Widget _degradedStep(AppLocalizations l, ZColors c) => _scroll([
+    KeyedSubtree(
+      key: const ValueKey('setup-degraded'),
+      child: const SizedBox.shrink(),
+    ),
+    const OnbMascot(moment: ZaghlolMoment.oops, size: 140),
+    const SizedBox(height: ZSpacing.lg),
+    ZBanner(
+      tone: ZBannerTone.warning,
+      message: _noSms
+          ? l.onboardingAndroidSetupPlayUnavailable
+          : l.onboardingAndroidSetupDegradedTitle,
+    ),
+    const SizedBox(height: ZSpacing.md),
+    Text(
+      l.onboardingAndroidSetupDegradedBody,
+      style: ZType.body.copyWith(color: c.textMuted),
+    ),
+    const SizedBox(height: ZSpacing.sm),
+    _degradedRow(
+      l.onboardingAndroidSetupDegradedNotif,
+      c,
+      action: _notifOn
+          ? Text(
+              l.onboardingAndroidSetupNotifGranted,
+              style: ZType.label.copyWith(color: c.primary),
+            )
+          : TextButton(
+              key: const ValueKey('setup-degraded-notif'),
+              onPressed: _openNotif,
+              child: Text(l.onboardingAndroidSetupDegradedNotifOn),
+            ),
+    ),
+    if (!_notifOn)
+      Padding(
+        padding: const EdgeInsetsDirectional.only(bottom: ZSpacing.sm),
+        child: Text(
+          l.onboardingAndroidSetupNotifPrivacy,
           style: ZType.caption.copyWith(color: c.textMuted),
         ),
-        const SizedBox(height: ZSpacing.sm),
-        ZButton(
-          key: const ValueKey('setup-degraded-retry'),
-          label: l.onboardingAndroidSetupDegradedRetry,
-          variant: ZButtonVariant.secondary,
-          expand: true,
-          onPressed: () => setState(() {
-            _step = _Step.sms;
-          }),
-        ),
-        const SizedBox(height: ZSpacing.sm),
-      ],
-      const SizedBox(height: ZSpacing.md),
-      ZButton(
-        key: const ValueKey('setup-degraded-continue'),
-        label: l.commonActionContinue,
-        expand: true,
-        onPressed: () {
-          widget.onSkipped?.call(kSetupStepSms);
-          widget.onDone();
-        },
       ),
+    _degradedRow(
+      l.onboardingAndroidSetupDegradedShare,
+      c,
+      action: widget.onShareHow == null
+          ? null
+          : TextButton(
+              key: const ValueKey('setup-degraded-share'),
+              onPressed: widget.onShareHow,
+              child: Text(l.onboardingAndroidSetupDegradedShareHow),
+            ),
+    ),
+    _degradedRow(l.onboardingAndroidSetupDegradedManual, c),
+    if (_denied && !_noSms) ...[
+      Text(
+        l.onboardingAndroidSetupDegradedSettingsHint,
+        style: ZType.caption.copyWith(color: c.textMuted),
+      ),
+      const SizedBox(height: ZSpacing.sm),
+      ZButton(
+        key: const ValueKey('setup-degraded-retry'),
+        label: l.onboardingAndroidSetupDegradedRetry,
+        variant: ZButtonVariant.secondary,
+        expand: true,
+        onPressed: () => setState(() {
+          _step = _Step.sms;
+        }),
+      ),
+      const SizedBox(height: ZSpacing.sm),
     ],
-  );
+    const SizedBox(height: ZSpacing.md),
+    ZButton(
+      key: const ValueKey('setup-degraded-continue'),
+      label: l.commonActionContinue,
+      expand: true,
+      onPressed: () {
+        widget.onSkipped?.call(kSetupStepSms);
+        widget.onDone();
+      },
+    ),
+  ]);
 }

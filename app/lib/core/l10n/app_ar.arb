@@ -88,7 +88,7 @@
   "@commonActionTryAgain": {
     "description": "B"
   },
-  "commonActionSkip": "تخطّي",
+  "commonActionSkip": "تخطي",
   "@commonActionSkip": {
     "description": "B · stepper header"
   },
@@ -772,7 +772,7 @@
   "@onboardingAndroidSetupSmsSubtitle": {
     "description": "S"
   },
-  "onboardingAndroidSetupSmsPointSenders": "بقرا رسايل البنوك والمحافظ وإنستاباي بس",
+  "onboardingAndroidSetupSmsPointSenders": "بنقرا رسايل البنوك والمحافظ وإنستاباي بس",
   "@onboardingAndroidSetupSmsPointSenders": {
     "description": "S · what is read (FR-ING-A-02)"
   },
@@ -780,11 +780,11 @@
   "@onboardingAndroidSetupSmsPointPersonal": {
     "description": "S"
   },
-  "onboardingAndroidSetupSmsPointOnPhone": "بيانات فلوسك بتفضل على الموبايل ده",
+  "onboardingAndroidSetupSmsPointOnPhone": "كل حاجة بتفضل على الموبايل ده",
   "@onboardingAndroidSetupSmsPointOnPhone": {
     "description": "S · claim limited to financial data (tone gate 4, R-11, BR-SYNC-03)"
   },
-  "onboardingAndroidSetupSmsAllow": "اسمح بقراية الرسايل",
+  "onboardingAndroidSetupSmsAllow": "اسمح بقراءة رسايل البنك",
   "@onboardingAndroidSetupSmsAllow": {
     "description": "B · primary, opens the system SMS dialog"
   },
@@ -901,7 +901,7 @@
       }
     }
   },
-  "onboardingIosSetupShortcutTitle": "هنستخدم الاختصارات",
+  "onboardingIosSetupShortcutTitle": "الآيفون مش بيسمح للتطبيقات تقرا الرسايل… فهنستخدم الاختصارات",
   "@onboardingIosSetupShortcutTitle": {
     "description": "T · M · Rive tourGuide"
   },
@@ -937,7 +937,7 @@
   "@onboardingIosSetupShortcutAdd": {
     "description": "B · primary, opens the Shortcuts import"
   },
-  "onboardingIosSetupHowItWorks": "إزاي بيشتغل؟ (نص دقيقة)",
+  "onboardingIosSetupHowItWorks": "إزاي بيشتغل؟ (٣٠ ثانية)",
   "@onboardingIosSetupHowItWorks": {
     "description": "L · text button, expands the steps below"
   },
@@ -1012,7 +1012,7 @@
   "@onboardingIosSetupFixTitle": {
     "description": "L"
   },
-  "onboardingIosSetupFixStep1": "افتح Shortcuts وبعدين Automation",
+  "onboardingIosSetupFixStep1": "افتح Shortcuts ← Automation",
   "@onboardingIosSetupFixStep1": {
     "description": "S"
   },
@@ -1053,7 +1053,7 @@
   "@onboardingIosSetupFirstSay": {
     "description": "B · opens S-31"
   },
-  "onboardingIosSetupFirstSayHint": "«دفعت خمسة وأربعين قهوة»",
+  "onboardingIosSetupFirstSayHint": "«دفعت ٤٥ قهوة»",
   "@onboardingIosSetupFirstSayHint": {
     "description": "L · spoken example. AR uses number words (§0.3)"
   },
@@ -1061,7 +1061,7 @@
   "@onboardingIosSetupFirstType": {
     "description": "B · opens S-13"
   },
-  "onboardingIosSetupFirstTypeHint": "المبلغ والتصنيف",
+  "onboardingIosSetupFirstTypeHint": "المبلغ والفئة",
   "@onboardingIosSetupFirstTypeHint": {
     "description": "L"
   },
@@ -1069,7 +1069,7 @@
   "@onboardingIosSetupFirstOnlineBanks": {
     "description": "S · opens S-61 supported banks (FR-ING-I-08)"
   },
-  "onboardingIosSetupFirstOnlineBanksSub": "شوف إزاي تتابعهم على الآيفون",
+  "onboardingIosSetupFirstOnlineBanksSub": "شوف إزاي تسجلهم على الآيفون",
   "@onboardingIosSetupFirstOnlineBanksSub": {
     "description": "S"
   },
@@ -1077,7 +1077,7 @@
   "@onboardingIosSetupFirstStatement": {
     "description": "L · the common_gold_badge must show on this row (FR-EXP-04/06); Free opens S-68"
   },
-  "onboardingIosSetupFirstStatementSub": "ضيف شهور فاتت مرة واحدة مع جولد",
+  "onboardingIosSetupFirstStatementSub": "ضيف شهور فاتت مرة واحدة",
   "@onboardingIosSetupFirstStatementSub": {
     "description": "S · says Gold in the text too, so Free users aren't promised it (F-8)"
   },

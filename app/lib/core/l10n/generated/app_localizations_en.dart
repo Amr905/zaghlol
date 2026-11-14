@@ -744,7 +744,8 @@ class AppLocalizationsEn extends AppLocalizations {
   }
 
   @override
-  String get onboardingIosSetupShortcutTitle => 'We\'ll use Shortcuts';
+  String get onboardingIosSetupShortcutTitle =>
+      'iPhone does not let apps read texts… so we use Shortcuts';
 
   @override
   String get onboardingIosSetupShortcutWhy =>

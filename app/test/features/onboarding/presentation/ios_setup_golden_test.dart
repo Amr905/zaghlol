@@ -30,10 +30,16 @@ void main() {
         );
         await t.pumpAndSettle();
         if (step != 'add') {
+          await t.ensureVisible(
+            find.byKey(const ValueKey('ios-setup-to-check')),
+          );
           await t.tap(find.byKey(const ValueKey('ios-setup-to-check')));
           await t.pumpAndSettle();
         }
         if (step == 'first') {
+          await t.ensureVisible(
+            find.byKey(const ValueKey('ios-setup-to-first')),
+          );
           await t.tap(find.byKey(const ValueKey('ios-setup-to-first')));
           await t.pumpAndSettle();
         }

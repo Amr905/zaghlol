@@ -20,10 +20,14 @@ import '../../../core/ui/z_button.dart';
 import '../../../core/ui/z_card.dart';
 import '../../capture/application/ios_shortcut_providers.dart';
 import '../../capture/domain/ios_shortcut_checker.dart';
-import '../../mascot/presentation/zaghlol_avatar.dart';
+import 'onboarding_parts.dart';
 
 /// Setup step slug recorded when the user skips (FR-ONB-11).
 const String kSetupStepIosShortcuts = 'ios_shortcuts';
+
+/// Latin names of the automations the Shortcut creates (not translated).
+const String _kWalletAutomation = 'Zaghlol – Wallet';
+const String _kMessageAutomation = 'Zaghlol – Message';
 
 enum _Step { add, check, first }
 
@@ -37,6 +41,7 @@ class IosSetupScreen extends ConsumerStatefulWidget {
     this.onSay,
     this.onType,
     this.onOnlineBanks,
+    this.onStatement,
   });
 
   /// Setup finished -> Home.
@@ -52,6 +57,9 @@ class IosSetupScreen extends ConsumerStatefulWidget {
 
   /// "Use Wise, Revolut or Payoneer?" -> per-bank help (S-61).
   final VoidCallback? onOnlineBanks;
+
+  /// "Have a statement?" (Gold import); the row is hidden while null.
+  final VoidCallback? onStatement;
 
   @override
   ConsumerState<IosSetupScreen> createState() => _IosSetupState();
@@ -132,136 +140,169 @@ class _IosSetupState extends ConsumerState<IosSetupScreen>
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
-            Padding(
-              padding: const EdgeInsetsDirectional.fromSTEB(
-                ZSpacing.screen,
-                ZSpacing.sm,
-                ZSpacing.sm,
-                0,
+            OnbTopBar(
+              step: stepNo,
+              total: 3,
+              stepLabel: l.onboardingIosSetupStep(
+                _digits('$stepNo'),
+                _digits('3'),
               ),
-              child: Row(
-                children: [
-                  Expanded(
-                    child: Text(
-                      l.onboardingIosSetupStep(
-                        _digits('$stepNo'),
-                        _digits('3'),
-                      ),
-                      style: ZType.label.copyWith(color: c.textMuted),
-                    ),
-                  ),
-                  ConstrainedBox(
-                    constraints: const BoxConstraints(
-                      minHeight: ZSpacing.minTarget,
-                      minWidth: ZSpacing.minTarget,
-                    ),
-                    child: TextButton(
-                      key: const ValueKey('ios-setup-skip'),
-                      onPressed: _skip,
-                      child: Text(l.commonActionSkip),
-                    ),
-                  ),
-                ],
-              ),
+              skipLabel: l.commonActionSkip,
+              skipKey: const ValueKey('ios-setup-skip'),
+              onSkip: _skip,
             ),
-            Expanded(
-              child: SingleChildScrollView(
-                padding: const EdgeInsetsDirectional.all(ZSpacing.screen),
-                child: body,
-              ),
-            ),
+            Expanded(child: body),
           ],
         ),
       ),
     );
   }
 
-  Widget _mascot(ZaghlolMoment m) => Center(
-    child: ExcludeSemantics(child: ZaghlolAvatar(moment: m, size: 120)),
-  );
-
-  Widget _bullet(String title, String sub, ZColors c) => Padding(
-    padding: const EdgeInsetsDirectional.only(bottom: ZSpacing.md),
-    child: Row(
-      crossAxisAlignment: CrossAxisAlignment.start,
+  /// One row of a white list card: tile, title + sub, trailing, divider.
+  Widget _listCard(List<Widget> rows, ZColors c) => ZCard(
+    padding: const EdgeInsetsDirectional.symmetric(vertical: ZSpacing.xs),
+    child: Column(
       children: [
-        ExcludeSemantics(
-          child: Icon(Icons.check_circle_outline, color: c.primary, size: 20),
-        ),
-        const SizedBox(width: ZSpacing.sm),
-        Expanded(
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Text(title, style: ZType.label.copyWith(color: c.text)),
-              Text(sub, style: ZType.bodySmall.copyWith(color: c.textMuted)),
-            ],
-          ),
-        ),
+        for (final (i, r) in rows.indexed) ...[
+          if (i > 0)
+            Divider(
+              height: 1,
+              thickness: 1,
+              color: c.outline,
+              indent: ZSpacing.lg,
+              endIndent: ZSpacing.lg,
+            ),
+          r,
+        ],
       ],
     ),
   );
 
-  Widget _addStep(AppLocalizations l, ZColors c) => Column(
-    key: const ValueKey('ios-setup-add'),
-    crossAxisAlignment: CrossAxisAlignment.stretch,
-    children: [
-      _mascot(ZaghlolMoment.tourGuide),
-      const SizedBox(height: ZSpacing.lg),
-      Text(
-        l.onboardingIosSetupShortcutTitle,
-        style: ZType.headline.copyWith(color: c.text),
-      ),
-      const SizedBox(height: ZSpacing.sm),
-      Text(
-        l.onboardingIosSetupShortcutWhy,
-        style: ZType.body.copyWith(color: c.textMuted),
-      ),
-      const SizedBox(height: ZSpacing.lg),
-      Text(
-        l.onboardingIosSetupShortcutLead,
-        style: ZType.label.copyWith(color: c.text),
-      ),
-      const SizedBox(height: ZSpacing.sm),
-      _bullet(
-        l.onboardingIosSetupShortcutSmsTitle,
-        l.onboardingIosSetupShortcutSmsSub,
-        c,
-      ),
-      _bullet(
-        l.onboardingIosSetupShortcutApplePayTitle,
-        l.onboardingIosSetupShortcutApplePaySub,
-        c,
-      ),
-      Text(
-        l.onboardingIosSetupShortcutOnce,
-        style: ZType.bodySmall.copyWith(color: c.textMuted),
-      ),
-      const SizedBox(height: ZSpacing.lg),
-      if (_installFailed) ...[
-        ZBanner(
-          key: const ValueKey('ios-setup-install-failed'),
-          message: l.onboardingIosSetupShortcutsMissing,
-          tone: ZBannerTone.warning,
+  Widget _listRow({
+    Key? key,
+    required IconData icon,
+    required String title,
+    String? sub,
+    Widget? subLead,
+    Widget? trailing,
+    Color? tileBg,
+    Color? tileFg,
+    required ZColors c,
+  }) => Padding(
+    key: key,
+    padding: const EdgeInsetsDirectional.symmetric(
+      horizontal: ZSpacing.lg,
+      vertical: ZSpacing.md,
+    ),
+    child: Row(
+      children: [
+        OnbIconTile(
+          icon: icon,
+          size: 40,
+          radius: ZRadius.md,
+          background: tileBg ?? c.primary,
+          foreground: tileFg ?? c.onPrimary,
         ),
-        const SizedBox(height: ZSpacing.md),
+        const SizedBox(width: ZSpacing.md),
+        Expanded(
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                title,
+                style: ZType.label.copyWith(
+                  color: c.text,
+                  fontWeight: FontWeight.w600,
+                ),
+              ),
+              if (sub != null)
+                Row(
+                  children: [
+                    ?subLead,
+                    Flexible(
+                      child: Text(
+                        sub,
+                        style: ZType.caption.copyWith(color: c.textMuted),
+                      ),
+                    ),
+                  ],
+                ),
+            ],
+          ),
+        ),
+        if (trailing != null) ...[const SizedBox(width: ZSpacing.md), trailing],
       ],
-      ZButton(
-        key: const ValueKey('ios-setup-install'),
-        label: l.onboardingIosSetupShortcutAdd,
-        expand: true,
-        onPressed: () => unawaited(_install()),
-      ),
-      const SizedBox(height: ZSpacing.sm),
-      _howItWorks(l, c),
-      ZButton(
-        key: const ValueKey('ios-setup-to-check'),
-        label: l.commonActionContinue,
-        variant: ZButtonVariant.text,
-        expand: true,
-        onPressed: _goCheck,
-      ),
-    ],
+    ),
+  );
+
+  Widget _addStep(AppLocalizations l, ZColors c) => KeyedSubtree(
+    key: const ValueKey('ios-setup-add'),
+    child: OnbPage(
+      content: [
+        const OnbMascot(size: 150),
+        const SizedBox(height: ZSpacing.xl),
+        Text(
+          l.onboardingIosSetupShortcutTitle,
+          textAlign: TextAlign.center,
+          style: ZType.headline.copyWith(color: c.text),
+        ),
+        const SizedBox(height: ZSpacing.sm),
+        Text(
+          l.onboardingIosSetupShortcutLead,
+          textAlign: TextAlign.center,
+          style: ZType.body.copyWith(color: c.textMuted),
+        ),
+        const SizedBox(height: ZSpacing.lg),
+        _listCard([
+          _listRow(
+            icon: Icons.chat_bubble_outline,
+            title: l.onboardingIosSetupShortcutSmsTitle,
+            sub: l.onboardingIosSetupShortcutSmsSub,
+            trailing: const OnbCheckDot(size: 24),
+            c: c,
+          ),
+          _listRow(
+            icon: Icons.credit_card,
+            title: l.onboardingIosSetupShortcutApplePayTitle,
+            sub: l.onboardingIosSetupShortcutApplePaySub,
+            trailing: const OnbCheckDot(size: 24),
+            c: c,
+          ),
+        ], c),
+        const SizedBox(height: ZSpacing.md),
+        Text(
+          l.onboardingIosSetupShortcutOnce,
+          textAlign: TextAlign.center,
+          style: ZType.bodySmall.copyWith(color: c.textMuted),
+        ),
+        if (_installFailed) ...[
+          const SizedBox(height: ZSpacing.md),
+          ZBanner(
+            key: const ValueKey('ios-setup-install-failed'),
+            message: l.onboardingIosSetupShortcutsMissing,
+            tone: ZBannerTone.warning,
+          ),
+        ],
+      ],
+      actions: [
+        ZButton(
+          key: const ValueKey('ios-setup-install'),
+          label: l.onboardingIosSetupShortcutAdd,
+          icon: Icons.add,
+          expand: true,
+          onPressed: () => unawaited(_install()),
+        ),
+        const SizedBox(height: ZSpacing.sm),
+        _howItWorks(l, c),
+        ZButton(
+          key: const ValueKey('ios-setup-to-check'),
+          label: l.commonActionContinue,
+          variant: ZButtonVariant.text,
+          expand: true,
+          onPressed: _goCheck,
+        ),
+      ],
+    ),
   );
 
   Widget _howItWorks(AppLocalizations l, ZColors c) => Column(
@@ -275,21 +316,12 @@ class _IosSetupState extends ConsumerState<IosSetupScreen>
           child: InkWell(
             key: const ValueKey('ios-setup-how'),
             onTap: () => setState(() => _howOpen = !_howOpen),
-            child: Row(
-              children: [
-                Expanded(
-                  child: Text(
-                    l.onboardingIosSetupHowItWorks,
-                    style: ZType.label.copyWith(color: c.primary),
-                  ),
-                ),
-                ExcludeSemantics(
-                  child: Icon(
-                    _howOpen ? Icons.expand_less : Icons.expand_more,
-                    color: c.primary,
-                  ),
-                ),
-              ],
+            child: Center(
+              child: Text(
+                l.onboardingIosSetupHowItWorks,
+                textAlign: TextAlign.center,
+                style: ZType.titleSmall.copyWith(color: c.primary),
+              ),
             ),
           ),
         ),
@@ -331,66 +363,70 @@ class _IosSetupState extends ConsumerState<IosSetupScreen>
 
   Widget _checkStep(AppLocalizations l, ZColors c) {
     final report = ref.watch(shortcutSetupReportProvider);
-    return Column(
+    final rep = report.value;
+    final loading = report.isLoading;
+    return KeyedSubtree(
       key: const ValueKey('ios-setup-check'),
-      crossAxisAlignment: CrossAxisAlignment.stretch,
-      children: [
-        _mascot(ZaghlolMoment.detective),
-        const SizedBox(height: ZSpacing.lg),
-        Text(
-          l.onboardingIosSetupCheckTitle,
-          style: ZType.headline.copyWith(color: c.text),
-        ),
-        const SizedBox(height: ZSpacing.sm),
-        Text(
-          l.onboardingIosSetupCheckSubtitle,
-          style: ZType.body.copyWith(color: c.textMuted),
-        ),
-        const SizedBox(height: ZSpacing.lg),
-        if (report.isLoading)
-          Semantics(
-            liveRegion: true,
-            child: Column(
-              key: const ValueKey('ios-setup-checking'),
-              children: [
-                const LinearProgressIndicator(),
-                const SizedBox(height: ZSpacing.sm),
-                Text(
-                  l.onboardingIosSetupChecking,
-                  style: ZType.bodySmall.copyWith(color: c.textMuted),
-                ),
-              ],
-            ),
-          )
-        else if (report.value == null)
-          // Cannot tell: never shown as a failure.
-          ZBanner(
-            key: const ValueKey('ios-setup-unknown'),
-            message: l.onboardingIosSetupCheckUnknown,
-            tone: ZBannerTone.info,
-          )
-        else
-          ..._rows(l, c, report.value!),
-        const SizedBox(height: ZSpacing.lg),
-        if (!report.isLoading)
-          ZButton(
-            key: const ValueKey('ios-setup-recheck'),
-            label: l.onboardingIosSetupCheckAgain,
-            variant: ZButtonVariant.secondary,
-            expand: true,
-            onPressed: () {
-              setState(() => _fixing = null);
-              ref.invalidate(shortcutSetupReportProvider);
-            },
+      child: OnbPage(
+        content: [
+          const SizedBox(height: ZSpacing.lg),
+          Text(
+            l.onboardingIosSetupCheckTitle,
+            style: ZType.headline.copyWith(color: c.text),
           ),
-        const SizedBox(height: ZSpacing.sm),
-        ZButton(
-          key: const ValueKey('ios-setup-to-first'),
-          label: l.commonActionContinue,
-          expand: true,
-          onPressed: () => setState(() => _step = _Step.first),
-        ),
-      ],
+          const SizedBox(height: ZSpacing.xs),
+          Text(
+            l.onboardingIosSetupCheckSubtitle,
+            style: ZType.body.copyWith(color: c.textMuted),
+          ),
+          const SizedBox(height: ZSpacing.lg),
+          if (loading)
+            Semantics(
+              liveRegion: true,
+              child: Column(
+                key: const ValueKey('ios-setup-checking'),
+                children: [
+                  const LinearProgressIndicator(),
+                  const SizedBox(height: ZSpacing.sm),
+                  Text(
+                    l.onboardingIosSetupChecking,
+                    style: ZType.bodySmall.copyWith(color: c.textMuted),
+                  ),
+                ],
+              ),
+            )
+          else if (rep == null)
+            // Cannot tell: never shown as a failure.
+            ZBanner(
+              key: const ValueKey('ios-setup-unknown'),
+              message: l.onboardingIosSetupCheckUnknown,
+              tone: ZBannerTone.info,
+            )
+          else
+            ..._rows(l, c, rep),
+        ],
+        actions: [
+          if (!loading)
+            ZButton(
+              key: const ValueKey('ios-setup-recheck'),
+              label: l.onboardingIosSetupCheckAgain,
+              icon: Icons.refresh,
+              expand: true,
+              onPressed: () {
+                setState(() => _fixing = null);
+                ref.invalidate(shortcutSetupReportProvider);
+              },
+            ),
+          const SizedBox(height: ZSpacing.sm),
+          ZButton(
+            key: const ValueKey('ios-setup-to-first'),
+            label: l.commonActionContinue,
+            variant: ZButtonVariant.text,
+            expand: true,
+            onPressed: () => setState(() => _step = _Step.first),
+          ),
+        ],
+      ),
     );
   }
 
@@ -401,28 +437,81 @@ class _IosSetupState extends ConsumerState<IosSetupScreen>
       _Row.applePay: l.onboardingIosSetupCheckApplePay,
     };
     final done = _Row.values.where((r) => _rowOk(r, rep)).length;
+    final fixRow = _Row.values.where((r) => _fixing == r && !_rowOk(r, rep));
     return [
       Semantics(
         liveRegion: true,
-        child: Text(
-          rep.allOk
-              ? l.onboardingIosSetupCheckAllGood
-              : l.onboardingIosSetupCheckCount(
-                  _Row.values.length,
-                  _digits('$done'),
-                  _digits('${_Row.values.length}'),
-                ),
-          key: const ValueKey('ios-setup-count'),
-          style: ZType.label.copyWith(color: c.text),
+        child: Padding(
+          padding: const EdgeInsetsDirectional.only(bottom: ZSpacing.md),
+          child: Text(
+            rep.allOk
+                ? l.onboardingIosSetupCheckAllGood
+                : l.onboardingIosSetupCheckCount(
+                    _Row.values.length,
+                    _digits('$done'),
+                    _digits('${_Row.values.length}'),
+                  ),
+            key: const ValueKey('ios-setup-count'),
+            style: ZType.label.copyWith(color: c.text),
+          ),
         ),
       ),
-      const SizedBox(height: ZSpacing.sm),
-      for (final r in _Row.values) ...[
-        _rowTile(l, c, r, names[r]!, ok: _rowOk(r, rep)),
-        const SizedBox(height: ZSpacing.sm),
+      _listCard([
+        for (final r in _Row.values)
+          _rowTile(l, c, r, names[r]!, ok: _rowOk(r, rep)),
+      ], c),
+      if (fixRow.isNotEmpty) ...[
+        const SizedBox(height: ZSpacing.md),
+        _fixPanel(
+          l,
+          c,
+          fixRow.first == _Row.applePay
+              ? _kWalletAutomation
+              : _kMessageAutomation,
+        ),
+      ],
+      if (!rep.allOk) ...[
+        const SizedBox(height: ZSpacing.lg),
+        Text(
+          l.onboardingIosSetupCheckUnknown,
+          textAlign: TextAlign.center,
+          style: ZType.bodySmall.copyWith(color: c.textMuted),
+        ),
       ],
     ];
   }
+
+  Widget _fixPanel(AppLocalizations l, ZColors c, String automation) =>
+      Container(
+        key: const ValueKey('ios-setup-fix-panel'),
+        padding: const EdgeInsetsDirectional.all(ZSpacing.lg),
+        decoration: BoxDecoration(
+          color: c.zaghlolBg,
+          borderRadius: BorderRadius.circular(ZRadius.card),
+        ),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(
+              l.onboardingIosSetupFixTitle,
+              style: ZType.titleSmall.copyWith(color: c.warningText),
+            ),
+            const SizedBox(height: ZSpacing.sm),
+            for (final (i, t) in [
+              l.onboardingIosSetupFixStep1,
+              l.onboardingIosSetupFixStep2(automation),
+              l.onboardingIosSetupFixStep3,
+            ].indexed)
+              Padding(
+                padding: const EdgeInsetsDirectional.only(bottom: ZSpacing.xs),
+                child: Text(
+                  '${_digits('${i + 1}')}. $t',
+                  style: ZType.body.copyWith(color: c.text),
+                ),
+              ),
+          ],
+        ),
+      );
 
   Widget _rowTile(
     AppLocalizations l,
@@ -432,142 +521,178 @@ class _IosSetupState extends ConsumerState<IosSetupScreen>
     required bool ok,
   }) {
     final fixing = _fixing == r && !ok;
-    return ZCard(
+    return _listRow(
       key: ValueKey('ios-setup-row-${r.name}'),
-      padding: const EdgeInsetsDirectional.all(ZSpacing.md),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.stretch,
-        children: [
-          Row(
-            children: [
-              Semantics(
-                label: ok
-                    ? l.onboardingIosSetupCheckOkA11y
-                    : l.onboardingIosSetupCheckMissingA11y,
-                excludeSemantics: true,
-                child: Icon(
-                  ok ? Icons.check_circle : Icons.error_outline,
-                  color: ok ? c.primary : c.text,
-                ),
-              ),
-              const SizedBox(width: ZSpacing.sm),
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(name, style: ZType.label.copyWith(color: c.text)),
-                    if (!ok)
-                      Text(
-                        l.onboardingIosSetupCheckNeedsRun,
-                        style: ZType.bodySmall.copyWith(color: c.textMuted),
-                      ),
-                  ],
-                ),
-              ),
-              if (!ok)
-                ZButton(
+      icon: r == _Row.applePay ? Icons.credit_card : Icons.chat_bubble_outline,
+      title: name,
+      sub: ok ? null : l.onboardingIosSetupCheckNeedsRun,
+      tileBg: ok ? c.primary : c.accent,
+      tileFg: ok ? c.onPrimary : c.onAccent,
+      trailing: ok
+          ? Semantics(
+              label: l.onboardingIosSetupCheckOkA11y,
+              excludeSemantics: true,
+              child: const OnbCheckDot(size: 24),
+            )
+          : ConstrainedBox(
+              constraints: const BoxConstraints(minHeight: ZSpacing.minTarget),
+              child: Material(
+                color: c.zaghlolBg,
+                borderRadius: BorderRadius.circular(ZRadius.pill),
+                child: InkWell(
                   key: ValueKey('ios-setup-fix-${r.name}'),
-                  label: l.commonActionFix,
-                  variant: ZButtonVariant.text,
-                  onPressed: () => setState(() => _fixing = fixing ? null : r),
+                  borderRadius: BorderRadius.circular(ZRadius.pill),
+                  onTap: () => setState(() => _fixing = fixing ? null : r),
+                  child: Padding(
+                    padding: const EdgeInsetsDirectional.symmetric(
+                      horizontal: ZSpacing.lg,
+                      vertical: ZSpacing.md,
+                    ),
+                    child: Text(
+                      l.commonActionFix,
+                      style: ZType.titleSmall.copyWith(color: c.warningText),
+                    ),
+                  ),
                 ),
-            ],
-          ),
-          if (fixing) ...[
-            const SizedBox(height: ZSpacing.sm),
-            Text(
-              l.onboardingIosSetupFixTitle,
-              style: ZType.label.copyWith(color: c.text),
-            ),
-            for (final (i, t) in [
-              l.onboardingIosSetupFixStep1,
-              l.onboardingIosSetupFixStep2(name),
-              l.onboardingIosSetupFixStep3,
-            ].indexed)
-              Text(
-                '${_digits('${i + 1}')}. $t',
-                style: ZType.bodySmall.copyWith(color: c.text),
               ),
-          ],
-        ],
-      ),
+            ),
+      c: c,
     );
   }
 
-  Widget _firstStep(AppLocalizations l, ZColors c) => Column(
+  Widget _firstStep(AppLocalizations l, ZColors c) => KeyedSubtree(
     key: const ValueKey('ios-setup-first'),
-    crossAxisAlignment: CrossAxisAlignment.stretch,
-    children: [
-      _mascot(ZaghlolMoment.listening),
-      const SizedBox(height: ZSpacing.lg),
-      Text(
-        l.onboardingIosSetupFirstTitle,
-        style: ZType.headline.copyWith(color: c.text),
-      ),
-      const SizedBox(height: ZSpacing.sm),
-      Text(
-        l.onboardingIosSetupFirstBody,
-        style: ZType.body.copyWith(color: c.textMuted),
-      ),
-      const SizedBox(height: ZSpacing.lg),
-      if (widget.onSay != null)
-        _entry(
-          const ValueKey('ios-setup-say'),
-          Icons.mic_none,
-          l.onboardingIosSetupFirstSay,
-          l.onboardingIosSetupFirstSayHint,
-          widget.onSay!,
-          c,
+    child: OnbPage(
+      content: [
+        const OnbMascot(size: 170),
+        const SizedBox(height: ZSpacing.lg),
+        Text(
+          l.onboardingIosSetupFirstTitle,
+          textAlign: TextAlign.center,
+          style: ZType.headline.copyWith(color: c.text),
         ),
-      if (widget.onType != null)
-        _entry(
-          const ValueKey('ios-setup-type'),
-          Icons.edit_outlined,
-          l.onboardingIosSetupFirstType,
-          l.onboardingIosSetupFirstTypeHint,
-          widget.onType!,
-          c,
+        const SizedBox(height: ZSpacing.sm),
+        Text(
+          l.onboardingIosSetupFirstBody,
+          textAlign: TextAlign.center,
+          style: ZType.body.copyWith(color: c.textMuted),
         ),
-      if (widget.onOnlineBanks != null)
-        ZCard(
-          key: const ValueKey('ios-setup-online-banks'),
-          onTap: widget.onOnlineBanks,
-          child: Row(
-            children: [
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      l.onboardingIosSetupFirstOnlineBanks,
-                      style: ZType.label.copyWith(color: c.text),
+        const SizedBox(height: ZSpacing.lg),
+        if (widget.onSay != null || widget.onType != null)
+          IntrinsicHeight(
+            child: Row(
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: [
+                if (widget.onSay != null)
+                  Expanded(
+                    child: _entry(
+                      const ValueKey('ios-setup-say'),
+                      Icons.mic_none,
+                      l.onboardingIosSetupFirstSay,
+                      l.onboardingIosSetupFirstSayHint,
+                      widget.onSay!,
+                      c,
+                      filled: true,
                     ),
-                    Text(
-                      l.onboardingIosSetupFirstOnlineBanksSub,
-                      style: ZType.bodySmall.copyWith(color: c.textMuted),
+                  ),
+                if (widget.onSay != null && widget.onType != null)
+                  const SizedBox(width: ZSpacing.md),
+                if (widget.onType != null)
+                  Expanded(
+                    child: _entry(
+                      const ValueKey('ios-setup-type'),
+                      Icons.keyboard_alt_outlined,
+                      l.onboardingIosSetupFirstType,
+                      l.onboardingIosSetupFirstTypeHint,
+                      widget.onType!,
+                      c,
+                      filled: false,
                     ),
-                  ],
+                  ),
+              ],
+            ),
+          ),
+        if (widget.onOnlineBanks != null || widget.onStatement != null) ...[
+          const SizedBox(height: ZSpacing.md),
+          _listCard([
+            if (widget.onOnlineBanks != null)
+              _linkRow(
+                const ValueKey('ios-setup-online-banks'),
+                Icons.public,
+                l.onboardingIosSetupFirstOnlineBanks,
+                l.onboardingIosSetupFirstOnlineBanksSub,
+                widget.onOnlineBanks!,
+                c,
+                tileBg: c.primaryContainer,
+                tileFg: c.primary,
+              ),
+            if (widget.onStatement != null)
+              _linkRow(
+                const ValueKey('ios-setup-statement'),
+                Icons.description_outlined,
+                l.onboardingIosSetupFirstStatement,
+                l.onboardingIosSetupFirstStatementSub,
+                widget.onStatement!,
+                c,
+                subLead: Padding(
+                  padding: const EdgeInsetsDirectional.only(end: ZSpacing.xs),
+                  child: ExcludeSemantics(
+                    child: Icon(
+                      Icons.workspace_premium,
+                      size: 14,
+                      color: c.accentDark,
+                    ),
+                  ),
                 ),
               ),
-              ExcludeSemantics(
-                child: Icon(
-                  Directionality.of(context) == TextDirection.rtl
-                      ? Icons.chevron_left
-                      : Icons.chevron_right,
-                  color: c.textMuted,
-                ),
-              ),
-            ],
+          ], c),
+        ],
+      ],
+      actions: [
+        ZButton(
+          key: const ValueKey('ios-setup-done'),
+          label: l.commonActionDone,
+          expand: true,
+          onPressed: widget.onDone,
+        ),
+      ],
+    ),
+  );
+
+  Widget _linkRow(
+    Key key,
+    IconData icon,
+    String title,
+    String sub,
+    VoidCallback onTap,
+    ZColors c, {
+    Color? tileBg,
+    Color? tileFg,
+    Widget? subLead,
+  }) => InkWell(
+    key: key,
+    onTap: onTap,
+    child: Semantics(
+      button: true,
+      container: true,
+      child: _listRow(
+        icon: icon,
+        title: title,
+        sub: sub,
+        tileBg: tileBg,
+        tileFg: tileFg,
+        subLead: subLead,
+        trailing: ExcludeSemantics(
+          child: Icon(
+            Directionality.of(context) == TextDirection.rtl
+                ? Icons.chevron_left
+                : Icons.chevron_right,
+            color: c.textMuted,
           ),
         ),
-      const SizedBox(height: ZSpacing.lg),
-      ZButton(
-        key: const ValueKey('ios-setup-done'),
-        label: l.commonActionDone,
-        expand: true,
-        onPressed: widget.onDone,
+        c: c,
       ),
-    ],
+    ),
   );
 
   Widget _entry(
@@ -576,27 +701,35 @@ class _IosSetupState extends ConsumerState<IosSetupScreen>
     String title,
     String hint,
     VoidCallback onTap,
-    ZColors c,
-  ) => Padding(
-    padding: const EdgeInsetsDirectional.only(bottom: ZSpacing.sm),
-    child: ZCard(
-      key: key,
-      onTap: onTap,
-      child: Row(
-        children: [
-          ExcludeSemantics(child: Icon(icon, color: c.primary)),
-          const SizedBox(width: ZSpacing.md),
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(title, style: ZType.label.copyWith(color: c.text)),
-                Text(hint, style: ZType.bodySmall.copyWith(color: c.textMuted)),
-              ],
-            ),
-          ),
-        ],
-      ),
+    ZColors c, {
+    required bool filled,
+  }) => ZCard(
+    key: key,
+    onTap: onTap,
+    padding: const EdgeInsetsDirectional.symmetric(
+      horizontal: ZSpacing.md,
+      vertical: ZSpacing.xl,
+    ),
+    child: Column(
+      children: [
+        OnbIconTile(
+          icon: icon,
+          size: 52,
+          background: filled ? c.primary : c.primaryContainer,
+          foreground: filled ? c.onPrimary : c.primary,
+        ),
+        const SizedBox(height: ZSpacing.md),
+        Text(
+          title,
+          textAlign: TextAlign.center,
+          style: ZType.titleSmall.copyWith(color: c.text),
+        ),
+        Text(
+          hint,
+          textAlign: TextAlign.center,
+          style: ZType.bodySmall.copyWith(color: c.textMuted),
+        ),
+      ],
     ),
   );
 }
