@@ -1,5 +1,8 @@
 ﻿== SUMMARY ==
-RUNNING sha=cc4266be7d6e64065bc50d1c41e443b31b92400f
+SKIP sha=cc4266be7d6e64065bc50d1c41e443b31b92400f no app/packages/backend changes
 
 == FULL LOG (last 1500 lines) ==
 auto task/T-101-insights-budget cc4266be7d6e64065bc50d1c41e443b31b92400f 2026-11-14T11:07:27.7401136+02:00
+
+
+
