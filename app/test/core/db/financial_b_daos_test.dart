@@ -435,6 +435,41 @@ void main() {
               createdAt: t0,
             ).withAmount(egpMinor(9900));
 
+        test(
+          'FU-075: a currency change without an amount is refused',
+          () async {
+            final dao = RecurringDao(db);
+            await dao.insertItem(item('a'));
+            await expectLater(
+              dao.updateItem(
+                'a',
+                const RecurringItemsCompanion(currency: Value('USD')),
+              ),
+              throwsA(isA<CurrencyMismatch>()),
+            );
+            final row = (await dao.itemById('a'))!;
+            expect(row.currency, 'EGP');
+            expect(row.amountMinor, 9900);
+            // Same currency, or currency with its amount, still works.
+            expect(
+              await dao.updateItem(
+                'a',
+                const RecurringItemsCompanion(currency: Value('EGP')),
+              ),
+              1,
+            );
+            expect(
+              await dao.updateItem(
+                'a',
+                const RecurringItemsCompanion().withAmount(
+                  Money(Currency.of('USD'), 500),
+                ),
+              ),
+              1,
+            );
+          },
+        );
+
         test('items with Money, due list, occurrences, cascade', () async {
           final dao = RecurringDao(db);
           await dao.insertItem(item('a', due: '2026-12-01'));

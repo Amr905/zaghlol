@@ -1,5 +1,6 @@
 import 'package:fl_chart/fl_chart.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart' show ProviderScope;
 import 'package:flutter_riverpod/misc.dart' show Override;
 import 'package:zaghlol_domain/zaghlol_domain.dart' show Currency;
 import 'package:flutter_test/flutter_test.dart';
@@ -146,6 +147,22 @@ void main() {
           en.data.barGroups.last.barRods[1].toY,
       isTrue,
     );
+  });
+
+  testWidgets('period chip: this cycle by default, picks last cycle', (
+    tester,
+  ) async {
+    await _pump(tester);
+    expect(find.text('This cycle'), findsOneWidget);
+    await tester.tap(find.byKey(const Key('charts-period')));
+    await tester.pumpAndSettle();
+    await tester.tap(find.text('Last cycle'));
+    await tester.pumpAndSettle();
+    final container = ProviderScope.containerOf(
+      tester.element(find.byType(ChartsScreen)),
+    );
+    expect(container.read(chartsPeriodProvider), isTrue);
+    expect(find.text('Last cycle'), findsOneWidget);
   });
 
   testWidgets('currency chips switch currency', (tester) async {

@@ -164,3 +164,21 @@ bool _verifyP1363(ResponseKey key, Uint8List message, List<int> raw) {
     return false;
   }
 }
+
+/// Parses `kid:x:y,kid:x:y` (base64url JWK members, as printed by the dev
+/// backend's `GET /dev/v1/app-keys`) into keys. Dev builds only: the caller
+/// passes nothing in release mode, and [ResponseSignatureVerifier] refuses dev
+/// kids (`s0000x`) there anyway. Only dev kids are accepted, so this can never
+/// pin a production key. Empty text gives no keys; anything malformed throws.
+List<ResponseKey> parseDevBackendKeys(String text) {
+  if (text.trim().isEmpty) return const <ResponseKey>[];
+  final keys = <ResponseKey>[];
+  for (final item in text.split(',')) {
+    final parts = item.trim().split(':');
+    if (parts.length != 3 || !RegExp(r'^[se]0000[a-z]$').hasMatch(parts[0])) {
+      throw ArgumentError('bad dev key list');
+    }
+    keys.add(ResponseKey.fromJwk(kid: parts[0], x: parts[1], y: parts[2]));
+  }
+  return List.unmodifiable(keys);
+}

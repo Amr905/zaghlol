@@ -376,9 +376,9 @@ class _BankCell extends StatelessWidget {
       c.primary,
       c.dangerText,
       c.warningText,
-      const Color(0xFF3A6BC4),
-      const Color(0xFF7A3A94),
-      const Color(0xFF3F8C86),
+      c.tintBlue,
+      c.tintViolet,
+      c.tintTeal,
     ];
     final tone =
         palette[seed.codeUnits.fold<int>(0, (a, b) => a + b) % palette.length];

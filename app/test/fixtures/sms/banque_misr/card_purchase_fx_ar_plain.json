@@ -1,0 +1,16 @@
+{
+  "sender": "BanqueMisr",
+  "body": "بنك مصر: عملية شراء بمبلغ 1000.00 دولار لدى NETFLIX.COM باستخدام بطاقة *1234. الرصيد 5000.00 جم",
+  "receivedAt": "2026-10-23T11:14:00+03:00",
+  "expect": {
+    "template": "banque_misr.card_purchase_fx.ar",
+    "event": "card_purchase_fx",
+    "direction": "expense",
+    "currency": "USD",
+    "amount": "1000.00",
+    "last4": "1234",
+    "balance": null,
+    "available": null,
+    "merchantClean": "Netflix.com"
+  }
+}

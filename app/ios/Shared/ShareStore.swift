@@ -190,7 +190,7 @@ final class ShareStore {
     for name in names().sorted() where name.hasSuffix(Self.metaSuffix) {
       let id = String(name.dropLast(Self.metaSuffix.count))
       guard Self.isValidId(id) else { continue }
-      switch readMeta(id) {
+      switch readMetaConfirmed(id) {
       case .success(let m):
         if now - m.receivedAtMs > Self.staleAgeMs || !fm.fileExists(atPath: body(id).path) {
           removeAll(id)
@@ -218,7 +218,7 @@ final class ShareStore {
   func read(_ id: String) throws -> (meta: ShareMeta, payload: Data) {
     guard Self.isValidId(id) else { throw ShareStoreError.notFound }
     let info: ShareMeta
-    switch readMeta(id) {
+    switch readMetaConfirmed(id) {
     case .success(let m): info = m
     case .failure(.notAuthentic):
       removeAll(id)
@@ -229,10 +229,30 @@ final class ShareStore {
     do {
       return (info, try cipher.decrypt(sealed, aad: Self.bodyAad(id)))
     } catch SpoolCipherError.notAuthentic {
+      // 065-2: another process may have replaced the key; re-read it once.
+      switch cipher.reloadKey() {
+      case .unavailable: throw ShareStoreError.unavailable
+      case .changed:
+        if let plain = try? cipher.decrypt(sealed, aad: Self.bodyAad(id)) { return (info, plain) }
+      case .unchanged: break
+      }
       removeAll(id)
       throw ShareStoreError.notAuthentic
     } catch {
       throw ShareStoreError.unavailable
+    }
+  }
+
+  /// 065-2: `readMeta`, but a "not authentic" answer is only final when the
+  /// Keychain still holds the key this process used (as `SpoolStore` does,
+  /// 062-1). A key that can't be confirmed keeps the share.
+  private func readMetaConfirmed(_ id: String) -> Result<ShareMeta, ShareStoreError> {
+    let first = readMeta(id)
+    guard case .failure(.notAuthentic) = first else { return first }
+    switch cipher.reloadKey() {
+    case .unchanged: return first
+    case .unavailable: return .failure(.unavailable)
+    case .changed: return readMeta(id)
     }
   }
 

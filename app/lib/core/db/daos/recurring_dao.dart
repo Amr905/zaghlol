@@ -3,6 +3,7 @@
 // through guardWrite; nothing here logs.
 
 import 'package:drift/drift.dart';
+import 'package:zaghlol_domain/zaghlol_domain.dart';
 
 import '../app_database.dart';
 import 'write_errors.dart';
@@ -16,10 +17,24 @@ class RecurringDao {
   Future<void> insertItem(RecurringItemsCompanion row) =>
       guardWrite(() => _db.into(_db.recurringItems).insert(row));
 
+  /// A currency change without a new amount would silently re-denominate the
+  /// stored amount: it is refused with [CurrencyMismatch] and nothing changes
+  /// (like `BudgetsDao.updateLimit`). Set both together with `withAmount`.
   Future<int> updateItem(String id, RecurringItemsCompanion row) => guardWrite(
-    () => (_db.update(
-      _db.recurringItems,
-    )..where((r) => r.id.equals(id))).write(row),
+    () => _db.transaction(() async {
+      if (row.currency.present && !row.amountMinor.present) {
+        final current = await itemById(id);
+        if (current != null && current.currency != row.currency.value) {
+          throw CurrencyMismatch(
+            Currency.of(row.currency.value),
+            Currency.of(current.currency),
+          );
+        }
+      }
+      return (_db.update(
+        _db.recurringItems,
+      )..where((r) => r.id.equals(id))).write(row);
+    }),
   );
 
   Future<RecurringItemRow?> itemById(String id) => (_db.select(

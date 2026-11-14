@@ -39,6 +39,7 @@ import '../features/transfers/presentation/link_transfer_sheet.dart';
 import '../features/transfers/presentation/split_sheet.dart';
 import 'app_config.dart';
 import 'app_screens.dart';
+import 'home_mascot_slot.dart';
 
 ProviderContainer _container(BuildContext context) =>
     ProviderScope.containerOf(context);
@@ -116,7 +117,24 @@ List<Override> navigationWiringOverrides(
 
 // ---------------------------------------------------------------- Home
 
-HomeActions _homeActions(BuildContext context) => HomeActions(
+HomeActions _homeActions(BuildContext context) {
+  final base = _homeActionsBase(context);
+  return HomeActions(
+    openSettings: base.openSettings,
+    openBudget: base.openBudget,
+    openSetBudget: base.openSetBudget,
+    openTransactions: base.openTransactions,
+    openSpentTransactions: base.openSpentTransactions,
+    openTransaction: base.openTransaction,
+    openBackup: base.openBackup,
+    openFinishSetup: base.openFinishSetup,
+    openCaptureSettings: base.openCaptureSettings,
+    openShare: base.openShare,
+    mascotSlot: HomeMascotSlot(actions: base),
+  );
+}
+
+HomeActions _homeActionsBase(BuildContext context) => HomeActions(
   openSettings: () => unawaited(openSettings(context)),
   openBudget: () => unawaited(openBudget(context)),
   openSetBudget: () => unawaited(openBudget(context)),
@@ -188,7 +206,7 @@ Widget _moneyTab(BuildContext context) => MoneyTab(
   onAdd: () => unawaited(
     _screens(context).startAddCard(
       context,
-      onSaved: (a) => unawaited(openCardDetailFor(context, a)),
+      onSaved: (a) => unawaited(openCardDetailFor(context, a, justAdded: true)),
       onOpenExisting: (a) => unawaited(openCardDetailFor(context, a)),
     ),
   ),
@@ -204,19 +222,26 @@ Widget _moneyTab(BuildContext context) => MoneyTab(
   onOpenPrices: () => unawaited(_screens(context).prices(context)),
 );
 
-Future<void> openCardDetailFor(BuildContext context, Account account) =>
-    _screens(context).cardDetail(
-      context,
-      account,
-      onOpenTransactions: () {
-        // S-41 "All card transactions": show only this card.
-        _container(context)
-            .read(cardFilterProvider.notifier)
-            .selectOnly(account.id);
-        unawaited(context.push(AppRoutes.transactions));
-      },
-      onOpenTransaction: (id) => unawaited(openTransactionDetail(context, id)),
-    );
+Future<void> openCardDetailFor(
+  BuildContext context,
+  Account account, {
+  bool justAdded = false,
+}) => _screens(context).cardDetail(
+  context,
+  account,
+  justAdded: justAdded,
+  // Manual entry opens the quick-add sheet; no statement-import screen
+  // exists yet, so that row stays hidden (onImportStatement null).
+  onAddTransaction: () => unawaited(context.push(AppRoutes.add)),
+  onOpenTransactions: () {
+    // S-41 "All card transactions": show only this card.
+    _container(context)
+        .read(cardFilterProvider.notifier)
+        .selectOnly(account.id);
+    unawaited(context.push(AppRoutes.transactions));
+  },
+  onOpenTransaction: (id) => unawaited(openTransactionDetail(context, id)),
+);
 
 /// The chart's card rows only know the id.
 Future<void> openCardDetailById(BuildContext context, String accountId) async {

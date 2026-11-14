@@ -19,7 +19,7 @@
 | Milestone | Total | DONE | IN_PROGRESS | BLOCKED |
 |---|---|---|---|---|
 | M0 | 28 | 25 | 1 | 0 |
-| M1 | 29 | 27 | 0 | 1 |
+| M1 | 29 | 28 | 0 | 1 |
 | M2 | 29 | 24 | 0 | 0 |
 | M3 | 18 | 16 | 0 | 0 |
 | M4 | 17 | 16 | 0 | 0 |
@@ -65,7 +65,7 @@
 | T-033 | Parsing pipeline stages 1–7 and ParseResult | M1 | C3 | Sonnet | parsing-engine-engineer | T-032, T-012 | DONE | local PASS (489 parsing tests); batch/2026-11-11-2 CI; review [T-033](05-reviews/T-033.md) APPROVED | Batch 3. T-032 minors M-1..M-4 taken |
 | T-034 | Merchant cleaning and normalized merchant key | M1 | C2 | Sonnet | parsing-engine-engineer | T-013 | DONE | PC runner PASS @fd7eea6; batch/2026-11-10-1 CI; review [T-034](05-reviews/T-034.md) APPROVED after key-rule fix (delta) | Batch 1. Canonical merchant key rule (parsing-engine §5); shared vectors file |
 | T-035 | Capture Guard rules in Dart, shared golden cases and config generator | M1 | C4 | Opus | parsing-engine-engineer | T-032 | DONE | batch 5 local: app 1167 tests, zaghlol_parsing 1029, all packages/tools green, analyze/format clean; batch CI (`batch/2026-11-11-4`); reviews [T-035](05-reviews/T-035.md) APPROVED after two delta rounds + [security](05-reviews/T-035-security.md) APPROVED (M-1/M-2 fixed) | Batch 5. Q1–Q6 provisional defaults (PO to confirm). FU-097 |
-| T-036 | Templates + fixtures: NBE, CIB, Banque Misr, QNB | M1 | C2 | Sonnet | parsing-engine-engineer | T-033 | TODO | — |  |
+| T-036 | Templates + fixtures: NBE, CIB, Banque Misr, QNB | M1 | C2 | Sonnet | parsing-engine-engineer | T-033 | DONE | batch 23 review [batch-23a](05-reviews/batch-23a.md), [batch-23b](05-reviews/batch-23b.md) | Batch 23. FU-226 |
 | T-037 | Templates + fixtures: InstaPay scenarios and mobile wallets | M1 | C2 | Sonnet | parsing-engine-engineer | T-033 | DONE | batch 22 review [batch-22a](05-reviews/batch-22a.md), [batch-22b](05-reviews/batch-22b.md) | Batch 22. FU-220 |
 | T-038 | Android Capture Guard (Kotlin) with config reader | M1 | C4 | Opus | native-platform-engineer | T-035, T-008 | DONE | instrumented golden suite green on API 26/30/34/36 (sms-spike 43016241777, after the FU-101 ICU fix; timings in the task file); app-ci 42996490126; reviews [T-038](05-reviews/T-038.md) + [security](05-reviews/T-038-security.md) APPROVED | Batch 6 merged, closed in batch 7. FU-101 M-1 closed; FU-101 L-1 (Android entry point SMS + notification only) still before T-040 |
 | T-039 | Android encrypted spool + spool host API | M1 | C4 | Opus | native-platform-engineer | T-004, T-008 | DONE | app-ci 43016241671 + sms-spike 43016241777 on `ci/T-039` (spool 3/3, kill test, guard golden on API 26/30/34/36); batch 7 local: every app-ci step green, backend Release build 0 warnings, format clean, no vulnerable packages; batch CI (`batch/2026-11-11-6`); reviews [T-039](05-reviews/T-039.md) APPROVED after shared per-path lock fix (delta) + Lead delta check of FU-101, [security](05-reviews/T-039-security.md) APPROVED | Batch 7. Pigeon `encryptedConfig` rename done. Manual device steps: clean install first (key test deletes `zaghlol_spool_v1`). PO Q1–Q2 provisional. FU-104 |
@@ -465,6 +465,11 @@
 - **FU-225** (design): refresh the tracked golden PNGs after any later restyle (they were regenerated in batch 22).
 - Done in batch 22: FU-044 (IBM Plex Sans Arabic bundled, OFL in LicenseRegistry); PO instruction: light theme + Arabic by default.
 
+- **FU-226** (T-036, batch 23): the minors, nits and open questions for T-036 in [batch-23a](05-reviews/batch-23a.md), [batch-23b](05-reviews/batch-23b.md), plus the "left undone" items in its task file.
+- **FU-227** (SMS-TEMPLATES-2): the ATM, salary, declined and foreign-currency templates for NBE, CIB, Banque Misr and QNB are synthetic (`"source": "synthetic-unverified"`); replace with real wording when samples arrive.
+- **FU-228** (batch-23a/23b minors): FU-backend 4 and FU-core 4 minors in docs/05-reviews/batch-23a.md; FU-ui minors in batch-23b.md (displaced doc comments, hard-coded "—" in the card waiting header, period chip hidden while loading, edit sheet with duplicate labels).
+- Done in batch 23: FU-075, FU-079 N-1, FU-095, FU-096 m-1, FU-106, FU-119, FU-122 049-2, FU-127, FU-131 (partial), FU-132, FU-045, FU-046 (partial), FU-125 (partial), FU-193, FU-219 (banner), FU-224 (mockup 31, scan chips, edit link, period chip, category emoji, tints, settings keys, Home mascot message), 062-2, 063-1, 065-1, 065-2, 166-2, 166-3; local phone-test backend (docs/workflow/run-backend-locally.md).
+
 ## Log
 | Date | Event |
 |---|---|
@@ -541,3 +546,4 @@
 | 2026-11-14 | Batch 20 (`batch/2026-11-14-20`): T-063, T-065, T-066, T-166, T-092, T-100, T-117, T-118, T-064, T-171, T-173, T-082 DONE. FU-199…FU-210. Progress 149/186. |
 | 2026-11-14 | Batch 21 (`batch/2026-11-14-21`): T-067, T-174 DONE. FU-216…FU-217. Progress 151/186. |
 | 2026-11-14 | Batch 22 (`batch/2026-11-14-22`): T-037, T-068, T-069 DONE. FU-220…FU-222. Progress 154/186. |
+| 2026-11-14 | Batch 23 (`batch/2026-11-15-23`): T-036 DONE. FU-226…FU-226. Progress 155/186. |

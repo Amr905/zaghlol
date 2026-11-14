@@ -26,6 +26,7 @@ import '../../../transactions/presentation/list/txn_row.dart';
 import '../../data/accounts_providers.dart';
 import '../../domain/account.dart';
 import '../edit_card/add_card_flow.dart';
+import '../edit_card/edit_card_providers.dart' show institutionOptionsProvider;
 import '../edit_card/merge_flow.dart';
 import 'card_detail_providers.dart';
 
@@ -39,9 +40,23 @@ class CardDetailScreen extends ConsumerStatefulWidget {
     required this.accountId,
     this.onSeeAll,
     this.onOpenTransaction,
+    this.justAdded = false,
+    this.onAddTransaction,
+    this.onImportStatement,
   });
 
   final String accountId;
+
+  /// S-41 right after the add-card flow (mockup 31): shows the "card added"
+  /// banner and, with no activity yet, the waiting state with two actions.
+  final bool justAdded;
+
+  /// "Add a transaction on this card" (the manual-entry editor).
+  final VoidCallback? onAddTransaction;
+
+  /// "Import this card's statement"; the row is hidden while no import entry
+  /// exists (null).
+  final VoidCallback? onImportStatement;
 
   /// "All card transactions": the card filter is already set; the shell
   /// opens S-11.
@@ -134,6 +149,15 @@ class _State extends ConsumerState<CardDetailScreen> {
                       style: ZType.headline.copyWith(color: c.text),
                     ),
                   ),
+                  if (data.value?.nextDue == null &&
+                      widget.justAdded &&
+                      account.statementDueDay != null)
+                    Text(
+                      l.accountsAddedDueDay(
+                        digits.render('${account.statementDueDay}'),
+                      ),
+                      style: ZType.body.copyWith(color: c.textMuted),
+                    ),
                   if (data.value?.nextDue case final due?)
                     Text(
                       l.accountsDetailDue(
@@ -165,8 +189,17 @@ class _State extends ConsumerState<CardDetailScreen> {
           ),
         ],
         const SizedBox(height: ZSpacing.md),
+        if (widget.justAdded) ...[
+          ZBanner(
+            key: const Key('card-detail-added'),
+            message: l.accountsAddedTitle,
+            tone: ZBannerTone.success,
+          ),
+          const SizedBox(height: ZSpacing.md),
+        ],
         _IgnoredBanner(account: account),
         _Header(
+          waiting: widget.justAdded,
           account: account,
           balance: a.balances
               .where((b) => b.currency == cur)
@@ -184,12 +217,79 @@ class _State extends ConsumerState<CardDetailScreen> {
               tone: ZBannerTone.warning,
             ),
           ],
-          data: (d) => _sections(context, d, lookups, fmt, account),
+          data: (d) => widget.justAdded && d.donut is! ChartReady<CategoryDonut>
+              ? _addedEmpty(context, account, fmt)
+              : _sections(context, d, lookups, fmt, account),
         ),
         const SizedBox(height: ZSpacing.lg),
         _CaptureRow(account: account, name: name, onSeeAll: widget.onSeeAll),
       ],
     );
+  }
+
+  List<Widget> _addedEmpty(BuildContext context, Account account, TxnFmt fmt) {
+    final l = AppLocalizations.of(context);
+    final c = ZColors.of(context);
+    var bank = account.label;
+    for (final o in ref.watch(institutionOptionsProvider)) {
+      if (o.code == account.institutionCode) bank = o.name(fmt.lang);
+    }
+    final last4 = account.last4 == null
+        ? ''
+        : '•${fmt.digits.render(account.last4!)}';
+    return [
+      Column(
+        key: const Key('card-detail-added-empty'),
+        children: [
+          // Decorative; it ignores pointers, so it never blocks the screen.
+          const ExcludeSemantics(
+            child: ZaghlolAvatar(moment: ZaghlolMoment.detective, size: 160),
+          ),
+          const SizedBox(height: ZSpacing.md),
+          Semantics(
+            header: true,
+            child: Text(
+              l.homeEmptyTitle,
+              textAlign: TextAlign.center,
+              style: ZType.headline.copyWith(color: c.text),
+            ),
+          ),
+          const SizedBox(height: ZSpacing.sm),
+          Text(
+            l.accountsAddedEmptyBody(bank, last4),
+            textAlign: TextAlign.center,
+            style: ZType.body.copyWith(color: c.textMuted),
+          ),
+        ],
+      ),
+      const SizedBox(height: ZSpacing.lg),
+      ZCard(
+        padding: EdgeInsets.zero,
+        child: Column(
+          children: [
+            if (widget.onImportStatement != null) ...[
+              _NavRow(
+                key: const Key('card-added-import'),
+                icon: Icons.description_outlined,
+                tint: c.primary,
+                title: l.accountsAddedImport,
+                subtitle: l.accountsAddedImportSub,
+                onTap: widget.onImportStatement,
+              ),
+              Divider(height: 1, thickness: 1, color: c.outline),
+            ],
+            _NavRow(
+              key: const Key('card-added-manual'),
+              icon: Icons.add_rounded,
+              tint: c.textMuted,
+              title: l.accountsAddedManual,
+              subtitle: l.accountsAddedManualSub,
+              onTap: widget.onAddTransaction,
+            ),
+          ],
+        ),
+      ),
+    ];
   }
 
   List<Widget> _sections(
@@ -339,12 +439,14 @@ class _State extends ConsumerState<CardDetailScreen> {
 
 class _Header extends StatelessWidget {
   const _Header({
+    this.waiting = false,
     required this.account,
     required this.balance,
     required this.cur,
     required this.fmt,
   });
 
+  final bool waiting;
   final Account account;
   final AccountBalance? balance;
   final Currency cur;
@@ -360,7 +462,46 @@ class _Header extends StatelessWidget {
         : null;
     final available = balance?.available;
     final lines = <Widget>[];
-    if (limit != null && available != null) {
+    if (waiting && limit != null && available == null) {
+      lines
+        ..add(
+          Row(
+            children: [
+              Text(
+                l.accountsDetailAvailable,
+                style: ZType.body.copyWith(color: c.textMuted),
+              ),
+              const SizedBox(width: ZSpacing.md),
+              Expanded(
+                child: Text(
+                  l.accountsDetailAvailableOf('—', fmt.money(limit)),
+                  textAlign: TextAlign.end,
+                  style: ZType.titleSmall.copyWith(color: c.text),
+                ),
+              ),
+            ],
+          ),
+        )
+        ..add(const SizedBox(height: ZSpacing.md))
+        ..add(
+          ClipRRect(
+            borderRadius: BorderRadius.circular(ZRadius.pill),
+            child: LinearProgressIndicator(
+              value: 0,
+              minHeight: 10,
+              color: c.primary,
+              backgroundColor: c.surfaceAlt,
+            ),
+          ),
+        )
+        ..add(const SizedBox(height: ZSpacing.sm))
+        ..add(
+          Text(
+            l.accountsAddedWaitingBalance,
+            style: ZType.bodySmall.copyWith(color: c.textMuted),
+          ),
+        );
+    } else if (limit != null && available != null) {
       final usedMinor = (limit.minor - available.minor).clamp(0, limit.minor);
       final pct = limit.minor == 0
           ? 0
@@ -647,12 +788,14 @@ class _NavRow extends StatelessWidget {
     required this.icon,
     required this.tint,
     required this.title,
+    this.subtitle,
     this.trailing,
     this.onTap,
   });
   final IconData icon;
   final Color tint;
   final String title;
+  final String? subtitle;
   final String? trailing;
   final VoidCallback? onTap;
 
@@ -681,7 +824,17 @@ class _NavRow extends StatelessWidget {
               ),
               const SizedBox(width: ZSpacing.md),
               Expanded(
-                child: Text(title, style: ZType.body.copyWith(color: c.text)),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(title, style: ZType.body.copyWith(color: c.text)),
+                    if (subtitle != null)
+                      Text(
+                        subtitle!,
+                        style: ZType.bodySmall.copyWith(color: c.textMuted),
+                      ),
+                  ],
+                ),
               ),
               if (trailing != null)
                 Flexible(

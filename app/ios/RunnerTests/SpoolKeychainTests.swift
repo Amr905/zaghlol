@@ -67,6 +67,17 @@ final class SpoolKeychainTests: XCTestCase {
     XCTAssertEqual((add[kSecValueData as String] as? Data)?.count, 32)
   }
 
+  /// 063-1: with no key cached yet there is nothing to retry; a later swap is `.changed`.
+  func testReloadKeyIsUnchangedWhenNothingWasCachedThenChangedOnSwap() throws {
+    let fake = FakeKeychain()
+    fake.item = [kSecValueData as String: Data(repeating: 1, count: 32), kSecAttrCreationDate as String: Date()]
+    let cipher = KeychainSpoolCipher(keychain: keychain(fake))
+    XCTAssertEqual(cipher.reloadKey(), .unchanged)
+    XCTAssertEqual(cipher.reloadKey(), .unchanged)
+    fake.item = [kSecValueData as String: Data(repeating: 2, count: 32), kSecAttrCreationDate as String: Date()]
+    XCTAssertEqual(cipher.reloadKey(), .changed)
+  }
+
   func testExistingKeyIsReadNotReplaced() throws {
     let fake = FakeKeychain()
     let first = try keychain(fake).loadOrCreate()

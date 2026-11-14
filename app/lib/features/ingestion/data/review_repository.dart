@@ -101,7 +101,9 @@ class ReviewRepository {
     if (!await _resolve(item, ReviewResolution.dismissed)) {
       return const ReviewOutcome(applied: false);
     }
-    await _setRawStatus(item.rawMessageId, 'dismissed');
+    // FU-122: an item that backs a stored transaction only drops the flag; its
+    // raw message stays as parsed.
+    if (item.txnId == null) await _setRawStatus(item.rawMessageId, 'dismissed');
     return const ReviewOutcome(applied: true);
   });
 

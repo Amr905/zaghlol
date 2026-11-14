@@ -20,13 +20,13 @@ void main() {
     );
     expect(code, 0, reason: '$out$err');
     expect('$out', contains('findings: 0'));
-    expect('$out', contains('47 institutions'));
+    expect('$out', contains('48 institutions'));
   });
 
   test('every institution has an Arabic and an English template', () {
     final dir = Directory('$_registry/institutions');
     final files = dir.listSync().whereType<File>().toList();
-    expect(files.length, greaterThanOrEqualTo(47));
+    expect(files.length, greaterThanOrEqualTo(48));
     for (final f in files) {
       final text = f.readAsStringSync();
       expect(text, contains('"lang": "ar"'), reason: f.path);

@@ -47,9 +47,7 @@ String normalizeDigits(String input) {
       out.writeCharCode(unit - 0x06F0 + 0x30);
     } else if (unit == 0x066B) {
       out.write('.');
-    } else if (unit == 0x066C ||
-        unit == 0x060C ||
-        unit == 0x20 ||
+    } else if (unit == 0x20 ||
         unit == 0xA0 ||
         unit == 0x200B ||
         unit == 0x200C ||
@@ -63,5 +61,16 @@ String normalizeDigits(String input) {
       out.writeCharCode(unit);
     }
   }
-  return out.toString();
+  // FU-119: an Arabic thousands separator or comma is dropped only between
+  // proper groups (1-3 digits, then groups of exactly 3); any other one
+  // stays, so the caller's strict parser rejects `1٬2` instead of reading 12.
+  return out.toString().replaceAllMapped(
+    _groupedRun,
+    (m) => m[0]!.replaceAll(_arabicGroupSeparator, ''),
+  );
 }
+
+final RegExp _groupedRun = RegExp(
+  r'(?<![0-9٬،])[0-9]{1,3}(?:[٬،][0-9]{3})+(?![0-9])',
+);
+final RegExp _arabicGroupSeparator = RegExp('[٬،]');

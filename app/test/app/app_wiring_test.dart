@@ -79,8 +79,15 @@ AppScreens _stubs(_Rec r) {
   }
 
   return AppScreens(
-    cardDetail: (c, a, {onOpenTransactions, onOpenTransaction}) =>
-        page(c, 'cardDetail'),
+    cardDetail: (
+      c,
+      a, {
+      onOpenTransactions,
+      onOpenTransaction,
+      justAdded = false,
+      onAddTransaction,
+      onImportStatement,
+    }) => page(c, 'cardDetail'),
     compareCards: (c, {onOpenTransactions}) => page(c, 'compare'),
     startAddCard: (c, {onSaved, onOpenExisting}) {
       r.onSaved = onSaved;

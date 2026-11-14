@@ -60,6 +60,200 @@
         "format": "d/M",
         "yearPolicy": "nearest_past"
       }
+    },
+    {
+      "id": "qnb.atm_withdrawal.en",
+      "version": 1,
+      "lang": "en",
+      "channel": [
+        "sms"
+      ],
+      "event": "atm_withdrawal",
+      "direction": "expense",
+      "baseConfidence": 0.9,
+      "source": "synthetic-unverified",
+      "pattern": "cash withdrawal of (?<cur>egp) (?<amount>[\\d,.]+) with card \\*{1,4}(?<last4>\\d{4}) at atm(?: .+?)?(?:\\. |\\.?$)(?:(?:avl|available)\\.? limit\\D{0,8}(?<available>[\\d,.]+)|(?:(?:avl|available) )?bal(?:ance)?\\D{0,16}(?<balance>[\\d,.]+))?",
+      "currencyMap": {
+        "جم": "EGP",
+        "جنيه": "EGP",
+        "egp": "EGP"
+      }
+    },
+    {
+      "id": "qnb.atm_withdrawal.ar",
+      "version": 1,
+      "lang": "ar",
+      "channel": [
+        "sms"
+      ],
+      "event": "atm_withdrawal",
+      "direction": "expense",
+      "baseConfidence": 0.9,
+      "source": "synthetic-unverified",
+      "pattern": "سحب نقدي (?:بمبلغ )?(?<amount>[\\d,.]+) (?<cur>جم|جنيه|egp) ببطاقه \\*{1,4}(?<last4>\\d{4}) من ماكينه .+?(?:\\. |\\.?$)(?:(?:الرصيد|رصيدك)\\D{0,12}(?<balance>[\\d,.]+)|الحد(?: المتاح)?\\D{0,12}(?<available>[\\d,.]+))?",
+      "currencyMap": {
+        "جم": "EGP",
+        "جنيه": "EGP",
+        "egp": "EGP"
+      }
+    },
+    {
+      "id": "qnb.salary.en",
+      "version": 1,
+      "lang": "en",
+      "channel": [
+        "sms"
+      ],
+      "event": "salary",
+      "direction": "income",
+      "baseConfidence": 0.9,
+      "source": "synthetic-unverified",
+      "pattern": "salary of (?<cur>egp) (?<amount>[\\d,.]+) credited to (?:a/c|account) \\*{1,4}(?<last4>\\d{4})(?:\\. |\\.?$)(?:(?:avl|available)\\.? limit\\D{0,8}(?<available>[\\d,.]+)|(?:(?:avl|available) )?bal(?:ance)?\\D{0,16}(?<balance>[\\d,.]+))?",
+      "currencyMap": {
+        "جم": "EGP",
+        "جنيه": "EGP",
+        "egp": "EGP"
+      }
+    },
+    {
+      "id": "qnb.salary.ar",
+      "version": 1,
+      "lang": "ar",
+      "channel": [
+        "sms"
+      ],
+      "event": "salary",
+      "direction": "income",
+      "baseConfidence": 0.9,
+      "source": "synthetic-unverified",
+      "pattern": "اضافه راتب (?:بمبلغ )?(?<amount>[\\d,.]+) (?<cur>جم|جنيه|egp) الي حساب(?: رقم)? \\*{1,4}(?<last4>\\d{4})(?:\\. |\\.?$)(?:(?:الرصيد|رصيدك)\\D{0,12}(?<balance>[\\d,.]+)|الحد(?: المتاح)?\\D{0,12}(?<available>[\\d,.]+))?",
+      "currencyMap": {
+        "جم": "EGP",
+        "جنيه": "EGP",
+        "egp": "EGP"
+      }
+    },
+    {
+      "id": "qnb.declined.en",
+      "version": 1,
+      "lang": "en",
+      "channel": [
+        "sms"
+      ],
+      "event": "declined",
+      "direction": "neutral",
+      "baseConfidence": 0.95,
+      "source": "synthetic-unverified",
+      "pattern": "transaction of (?<cur>egp) (?<amount>[\\d,.]+) at (?<merchant>.+?) with card \\*{1,4}(?<last4>\\d{4}) was declined",
+      "currencyMap": {
+        "جم": "EGP",
+        "جنيه": "EGP",
+        "egp": "EGP"
+      }
+    },
+    {
+      "id": "qnb.declined.ar",
+      "version": 1,
+      "lang": "ar",
+      "channel": [
+        "sms"
+      ],
+      "event": "declined",
+      "direction": "neutral",
+      "baseConfidence": 0.95,
+      "source": "synthetic-unverified",
+      "pattern": "رفض عمليه (?:شراء )?(?:بمبلغ )?(?<amount>[\\d,.]+) (?<cur>جم|جنيه|egp) لدي (?<merchant>.+?) ببطاقه \\*{1,4}(?<last4>\\d{4})",
+      "currencyMap": {
+        "جم": "EGP",
+        "جنيه": "EGP",
+        "egp": "EGP"
+      }
+    },
+    {
+      "id": "qnb.card_purchase_fx.en",
+      "version": 1,
+      "lang": "en",
+      "channel": [
+        "sms"
+      ],
+      "event": "card_purchase_fx",
+      "direction": "expense",
+      "baseConfidence": 0.9,
+      "source": "synthetic-unverified",
+      "pattern": "purchase of (?<cur>usd|eur|gbp) (?<amount>[\\d,.]+) at (?<merchant>.+?) with card \\*{1,4}(?<last4>\\d{4})(?:\\. |\\.?$)(?:(?:avl|available)\\.? limit\\D{0,8}(?:[\\d,.]+)|(?:(?:avl|available) )?bal(?:ance)?\\D{0,16}(?:[\\d,.]+))?",
+      "currencyMap": {
+        "دولار": "USD",
+        "يورو": "EUR",
+        "usd": "USD",
+        "eur": "EUR",
+        "gbp": "GBP"
+      }
+    },
+    {
+      "id": "qnb.card_purchase_fx_charged.en",
+      "version": 1,
+      "lang": "en",
+      "channel": [
+        "sms"
+      ],
+      "event": "card_purchase_fx",
+      "direction": "expense",
+      "baseConfidence": 0.9,
+      "source": "synthetic-unverified",
+      "pattern": "purchase of (?<ocur>usd|eur|gbp) (?<oamount>[\\d,.]+) at (?<merchant>.+?) with card \\*{1,4}(?<last4>\\d{4}) \\((?<cur>egp) (?<amount>[\\d,.]+)\\)(?:\\. |\\.?$)(?:(?:avl|available)\\.? limit\\D{0,8}(?<available>[\\d,.]+)|(?:(?:avl|available) )?bal(?:ance)?\\D{0,16}(?<balance>[\\d,.]+))?",
+      "currencyMap": {
+        "دولار": "USD",
+        "يورو": "EUR",
+        "usd": "USD",
+        "eur": "EUR",
+        "gbp": "GBP",
+        "جم": "EGP",
+        "جنيه": "EGP",
+        "egp": "EGP"
+      }
+    },
+    {
+      "id": "qnb.card_purchase_fx.ar",
+      "version": 1,
+      "lang": "ar",
+      "channel": [
+        "sms"
+      ],
+      "event": "card_purchase_fx",
+      "direction": "expense",
+      "baseConfidence": 0.9,
+      "source": "synthetic-unverified",
+      "pattern": "شراء (?:بمبلغ )?(?<amount>[\\d,.]+) (?<cur>usd|eur|gbp|دولار|يورو) لدي (?<merchant>.+?) ببطاقه \\*{1,4}(?<last4>\\d{4})(?:\\. |\\.?$)(?:(?:الرصيد|رصيدك)\\D{0,12}(?:[\\d,.]+)|الحد(?: المتاح)?\\D{0,12}(?:[\\d,.]+))?",
+      "currencyMap": {
+        "دولار": "USD",
+        "يورو": "EUR",
+        "usd": "USD",
+        "eur": "EUR",
+        "gbp": "GBP"
+      }
+    },
+    {
+      "id": "qnb.card_purchase_fx_charged.ar",
+      "version": 1,
+      "lang": "ar",
+      "channel": [
+        "sms"
+      ],
+      "event": "card_purchase_fx",
+      "direction": "expense",
+      "baseConfidence": 0.9,
+      "source": "synthetic-unverified",
+      "pattern": "شراء (?:بمبلغ )?(?<oamount>[\\d,.]+) (?<ocur>usd|eur|gbp|دولار|يورو) لدي (?<merchant>.+?) ببطاقه \\*{1,4}(?<last4>\\d{4}) \\((?<amount>[\\d,.]+) (?<cur>جم|جنيه)\\)(?:\\. |\\.?$)(?:(?:الرصيد|رصيدك)\\D{0,12}(?<balance>[\\d,.]+)|الحد(?: المتاح)?\\D{0,12}(?<available>[\\d,.]+))?",
+      "currencyMap": {
+        "دولار": "USD",
+        "يورو": "EUR",
+        "usd": "USD",
+        "eur": "EUR",
+        "gbp": "GBP",
+        "جم": "EGP",
+        "جنيه": "EGP",
+        "egp": "EGP"
+      }
     }
   ]
 }

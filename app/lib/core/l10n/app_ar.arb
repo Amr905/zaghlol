@@ -7398,8 +7398,8 @@
       }
     }
   },
-  "settingsMainGoldFree": "زغلول جولد",
-  "@settingsMainGoldFree": {
+  "settingsMainGoldCardTitle": "زغلول جولد",
+  "@settingsMainGoldCardTitle": {
     "description": "L · Gold row title for Free"
   },
   "settingsMainGoldActive": "{plan, select, monthly{جولد · شهري} yearly{جولد · سنوي} lifetime{جولد · مدى الحياة} other{جولد}}",
@@ -7411,8 +7411,8 @@
       }
     }
   },
-  "settingsMainSeeGold": "إنت على الباقة المجانية",
-  "@settingsMainSeeGold": {
+  "settingsMainFreePlanNote": "إنت على الباقة المجانية",
+  "@settingsMainFreePlanNote": {
     "description": "L · opens S-68"
   },
   "settingsMainSectionGeneral": "عام",

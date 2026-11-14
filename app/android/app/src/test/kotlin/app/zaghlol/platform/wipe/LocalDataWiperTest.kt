@@ -50,6 +50,25 @@ class LocalDataWiperTest {
     }
 
     @Test
+    fun afterFilesStepsRunAfterTheClearAndNeverFailTheWipe() {
+        val a = tempDir()
+        File(a, "widget").mkdirs()
+        File(a, "widget/snap.bin").writeBytes(byteArrayOf(1))
+        var filesLeftWhenRun = -1
+        var later = false
+        LocalDataWiper(
+            listOf(a),
+            emptyList(),
+            afterFiles = listOf({
+                filesLeftWhenRun = a.listFiles()!!.size
+                throw IllegalStateException("no widget placed")
+            }, { later = true }),
+        ).wipe()
+        assertEquals(0, filesLeftWhenRun)
+        assertTrue(later)
+    }
+
+    @Test
     fun aMissingRootIsAlreadyClear() {
         val gone = File(tempDir(), "never")
         assertTrue(LocalDataWiper.clearContents(gone))

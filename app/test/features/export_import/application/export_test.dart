@@ -27,6 +27,23 @@ class _Repo implements TransactionRepository {
   dynamic noSuchMethod(Invocation i) => throw UnimplementedError();
 }
 
+/// Inserts a row at the front after the first page, as a capture running
+/// during the export would.
+class _ShiftingRepo extends _Repo {
+  _ShiftingRepo(super.rows);
+  int calls = 0;
+  @override
+  Future<List<TransactionRecord>> query({
+    TransactionFilter filter = const TransactionFilter(),
+    String? text,
+    PageRequest page = const PageRequest(),
+  }) async {
+    final r = await super.query(filter: filter, text: text, page: page);
+    if (++calls == 1) rows.insert(0, _t(9999));
+    return r;
+  }
+}
+
 class _Dest implements ExportDestination {
   String? name;
   Uint8List? bytes;
@@ -159,5 +176,20 @@ void main() {
     );
     expect((out as ExportWritten).rowCount, 600);
     expect(d.name, 'zaghlol-export-20260304.xlsx');
+  });
+
+  test('FU-131: a row inserted mid-export never makes a duplicate', () async {
+    final repo = _ShiftingRepo([for (var i = 0; i < 600; i++) _t(i)]);
+    final d = _Dest();
+    final out = await ExportService(repo).export(
+      entitlement: goldForTest(),
+      filter: const TransactionFilter(),
+      format: ExportFormat.csv,
+      destination: d,
+      warningAcknowledged: true,
+    );
+    expect((out as ExportWritten).rowCount, 600);
+    final text = utf8.decode(d.bytes!);
+    expect(RegExp('t499,').allMatches(text).length, 1);
   });
 }

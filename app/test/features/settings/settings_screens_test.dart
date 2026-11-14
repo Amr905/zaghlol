@@ -96,7 +96,7 @@ void main() {
       await settle(tester);
       final t = _t(tester, SettingsMainScreen);
       for (final s in [
-        t.settingsMainGoldFree,
+        t.settingsMainGoldCardTitle,
         t.settingsMainPreferences,
         t.settingsMainNotifications,
         t.settingsMainCapture,
@@ -108,7 +108,7 @@ void main() {
       ]) {
         expect(find.text(s), findsOneWidget, reason: s);
       }
-      expect(find.textContaining(t.settingsMainSeeGold), findsOneWidget);
+      expect(find.textContaining(t.settingsMainFreePlanNote), findsOneWidget);
     });
 
     testWidgets('finish-setup banner and Gold plan', (tester) async {

@@ -74,6 +74,9 @@ GoRouter buildAppRouter(TabRoots roots, {String initialLocation = '/home'}) {
     initialLocation: initialLocation,
     // N-01..N-02: deep links arrive as full URIs; map them to locations.
     redirect: (context, state) => resolveDeepLink(state.uri),
+    // FU-125: an unknown location falls back to Home. The location is never
+    // shown or printed (links can carry user text).
+    errorBuilder: (context, state) => roots.home(context),
     routes: [
       GoRoute(
         path: AppRoutes.add,

@@ -314,13 +314,16 @@ class ExportService {
     int max,
   ) async {
     final all = <TransactionRecord>[];
+    final seen = <String>{};
     var offset = 0;
     while (all.length < max) {
       final page = await _repo.query(
         filter: filter,
         page: PageRequest(limit: 500, offset: offset),
       );
-      all.addAll(page);
+      // FU-131: a row added while paging shifts the offsets; never write
+      // the same transaction twice.
+      all.addAll(page.where((r) => seen.add(r.id)));
       if (page.length < 500) break;
       offset += 500;
     }

@@ -1,0 +1,101 @@
+# DEV ONLY - phone/emulator test stack: backend + Postgres, migrations applied, throwaway signing keys generated inside a
+# docker volume (never in the repo), and FAKE store verification so Gold can be tested without Google Play.
+#
+#   cd backend && docker compose -f docker-compose.phone-test.yml up --build -d
+#
+# See docs/workflow/run-backend-locally.md. This file is NOT a deployment: Dev__FakeStores=true makes
+# POST /dev/v1/grant-gold hand out Gold with no purchase, and the API refuses that flag outside Development.
+name: zaghlol-phone-test
+
+x-backend-image: &backend-image
+  build:
+    context: .
+    dockerfile: Dockerfile
+  image: zaghlol-backend:local
+
+services:
+  postgres:
+    image: postgres:17
+    command: ["postgres", "-c", "log_error_verbosity=terse"]
+    environment:
+      POSTGRES_DB: zaghlol
+      POSTGRES_USER: zaghlol
+      POSTGRES_PASSWORD: zaghlol_dev_only
+    # Not published: only the api, worker-less migrate job and this network reach it.
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+      - ./deploy/db/bootstrap-roles.sql:/docker-entrypoint-initdb.d/10-bootstrap-roles.sql:ro
+      - ./deploy/db/dev-passwords.sql:/docker-entrypoint-initdb.d/20-dev-passwords.sql:ro
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U zaghlol -d zaghlol"]
+      interval: 5s
+      timeout: 3s
+      retries: 10
+      start_period: 5s
+
+  # Generates the throwaway keys once (a no-op when they exist) into the `devkeys` volume. They stay on this PC.
+  dev-keys:
+    image: alpine:3.21
+    entrypoint: ["sh", "-c", "apk add --no-cache openssl >/dev/null && sh /work/dev-keys.sh"]
+    environment:
+      DEV_KEYS_DIR: /keys
+    volumes:
+      - ./tools/dev-keys.sh:/work/dev-keys.sh:ro
+      - devkeys:/keys
+    restart: "no"
+
+  migrate:
+    <<: *backend-image
+    entrypoint: ["dotnet", "/app/worker/Zaghlol.Workers.dll", "--migrate"]
+    depends_on:
+      postgres:
+        condition: service_healthy
+    environment:
+      ConnectionStrings__Migrator: Host=postgres;Port=5432;Database=zaghlol;Username=migrator;Password=migrator_dev_only
+    read_only: true
+    tmpfs:
+      - /tmp
+    restart: "no"
+
+  api:
+    <<: *backend-image
+    depends_on:
+      migrate:
+        condition: service_completed_successfully
+      dev-keys:
+        condition: service_completed_successfully
+    environment:
+      ASPNETCORE_ENVIRONMENT: Development
+      ASPNETCORE_URLS: http://+:8080
+      ConnectionStrings__App: Host=postgres;Port=5432;Database=zaghlol;Username=zaghlol_api;Password=api_dev_only
+      ConnectionStrings__Admin: Host=postgres;Port=5432;Database=zaghlol;Username=zaghlol_admin;Password=admin_dev_only
+      # Key ring (Kms__*, Signing__Keys__*) is read from this file, written by the dev-keys service.
+      Dev__KeyEnvFile: /run/zaghlol-dev-keys/kms.env
+      # DEV ONLY: fake Play verification + POST /dev/v1/grant-gold.
+      Dev__FakeStores: "true"
+      Purchases__Google__PackageName: app.zaghlol.dev
+      Purchases__Google__CredentialSource: None
+      Purchases__Google__Products__zaghlol_gold_monthly__Kind: subscription
+      Purchases__Google__Products__zaghlol_gold_monthly__Plan: monthly
+      Purchases__Google__Products__zaghlol_gold_yearly__Kind: subscription
+      Purchases__Google__Products__zaghlol_gold_yearly__Plan: yearly
+      Purchases__Google__Products__zaghlol_gold_lifetime__Kind: onetime
+      Purchases__Google__Products__zaghlol_gold_lifetime__Plan: lifetime
+    volumes:
+      - devkeys:/run/zaghlol-dev-keys:ro
+    # Reachable from the phone over Wi-Fi: published on all interfaces (the Windows firewall decides who may connect).
+    ports:
+      - "${API_PORT:-8080}:8080"
+    read_only: true
+    tmpfs:
+      - /tmp
+    healthcheck:
+      test: ["CMD", "dotnet", "/app/api/Zaghlol.Api.dll", "--healthcheck"]
+      interval: 10s
+      timeout: 10s
+      retries: 5
+      start_period: 15s
+
+volumes:
+  pgdata:
+  devkeys:

@@ -24,7 +24,8 @@ class NotificationsSettingsScreen extends ConsumerStatefulWidget {
 }
 
 class _NotificationsSettingsScreenState
-    extends ConsumerState<NotificationsSettingsScreen> {
+    extends ConsumerState<NotificationsSettingsScreen>
+    with WidgetsBindingObserver {
   final Map<SettingKey<bool>, bool> _bools = {};
   int _start = 23 * 60;
   int _end = 8 * 60;
@@ -36,7 +37,39 @@ class _NotificationsSettingsScreenState
   @override
   void initState() {
     super.initState();
+    WidgetsBinding.instance.addObserver(this);
     _load();
+  }
+
+  @override
+  void dispose() {
+    WidgetsBinding.instance.removeObserver(this);
+    super.dispose();
+  }
+
+  /// FU-219: coming back from the system settings re-checks the permission,
+  /// so the "off in system settings" banner goes away once it is allowed.
+  @override
+  void didChangeAppLifecycleState(AppLifecycleState state) {
+    if (state == AppLifecycleState.resumed && _loaded && !_failed) {
+      _recheckOs();
+    }
+  }
+
+  Future<void> _recheckOs() async {
+    try {
+      final allowed = await ref
+          .read(notificationPermissionProvider)
+          .isAllowed();
+      if (!mounted) return;
+      setState(
+        () => _osOff =
+            !allowed &&
+            NotificationType.values.any((t) => _bools[t.toggle] ?? true),
+      );
+    } on Object {
+      // Keep what is shown; the next resume tries again.
+    }
   }
 
   Future<void> _load() async {

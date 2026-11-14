@@ -7,7 +7,11 @@ import Foundation
 let spoolCanary = "ZG_CANARY_7731"
 
 final class TestCipher: SpoolCipher {
-  let key: SymmetricKey
+  var key: SymmetricKey
+  /// What `reloadKey()` answers; `.changed` also swaps in `keyAfterReload`.
+  var reloadResult: SpoolKeyReload = .unchanged
+  var keyAfterReload: SymmetricKey?
+  private(set) var reloads = 0
   var createdAtMs: Int64?
   var failWith: SpoolCipherError?
   init(seed: UInt8 = 7, createdAtMs: Int64? = nil) {
@@ -15,6 +19,11 @@ final class TestCipher: SpoolCipher {
     self.createdAtMs = createdAtMs
   }
   func keyCreatedAtMs() -> Int64? { createdAtMs }
+  func reloadKey() -> SpoolKeyReload {
+    reloads += 1
+    if reloadResult == .changed, let k = keyAfterReload { key = k }
+    return reloadResult
+  }
   func encrypt(_ plain: Data, aad: Data) throws -> Data {
     if let e = failWith { throw e }
     return try AES.GCM.seal(plain, using: key, authenticating: aad).combined!

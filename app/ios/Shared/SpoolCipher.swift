@@ -56,8 +56,9 @@ final class KeychainSpoolCipher: SpoolCipher {
     defer { lock.unlock() }
     let before = cached
     cached = fresh
-    if let b = before, b.key == fresh.key { return .unchanged }
-    return .changed
+    // 063-1: nothing cached means no attempt used a key yet; nothing to retry.
+    guard let b = before else { return .unchanged }
+    return b.key == fresh.key ? .unchanged : .changed
   }
 
   private func loaded() throws -> SpoolKeychain.Loaded {

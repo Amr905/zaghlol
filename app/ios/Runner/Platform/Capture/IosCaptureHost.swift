@@ -2,6 +2,7 @@ import BackgroundTasks
 import Flutter
 import Foundation
 import Security
+import WidgetKit
 import UserNotifications
 
 /// T-062: the Pigeon `IosCaptureHostApi` over the encrypted App Group spool
@@ -285,6 +286,8 @@ enum LocalDataWiper {
     // Keychain and the App Group: drop them so nothing reuses them.
     SpoolRuntime.shared?.cipher.reset()
     CaptureGuardRuntime.shared?.reset()
+    // 166-3: the widget must not keep showing the wiped snapshot.
+    WidgetCenter.shared.reloadAllTimelines()
     if !ok { throw Incomplete() }
   }
 

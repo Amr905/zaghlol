@@ -365,6 +365,8 @@ WallTime? parseWallTime(String raw) {
 /// More than 3 days ahead of, or 2 years before, the day of receipt.
 bool _outOfRange(DateTime date, DateTime receivedAt) {
   final day = DateTime.utc(receivedAt.year, receivedAt.month, receivedAt.day);
-  return date.isAfter(day.add(const Duration(days: 3))) ||
-      date.isBefore(DateTime.utc(day.year - 2, day.month, day.day));
+  // 29 Feb has no counterpart two years back: use 28 Feb, not 1 March.
+  final leapDay = day.month == 2 && day.day == 29;
+  final floor = DateTime.utc(day.year - 2, day.month, leapDay ? 28 : day.day);
+  return date.isAfter(day.add(const Duration(days: 3))) || date.isBefore(floor);
 }

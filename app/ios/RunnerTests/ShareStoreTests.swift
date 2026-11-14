@@ -60,6 +60,34 @@ final class ShareStoreTests: XCTestCase {
     XCTAssertNoThrow(try store.read(mb.id))
   }
 
+  /// 065-2: a key replaced by another process must not delete a genuine share.
+  func testShareIsKeptWhenTheKeyWasReplacedByAnotherProcess() throws {
+    let cipher = TestCipher(seed: 1)
+    let store = makeStore(cipher: cipher)
+    var p = Data("hello".utf8)
+    let m = try store.add(kind: .text, mimeType: "text/plain", payload: &p)
+    // Another process re-keyed the item: this process still holds the old key.
+    let fresh = TestCipher(seed: 1).key
+    cipher.key = TestCipher(seed: 99).key
+    cipher.reloadResult = .changed
+    cipher.keyAfterReload = fresh
+    XCTAssertEqual(store.list(), [m])
+    XCTAssertEqual(try store.read(m.id).payload, Data("hello".utf8))
+    XCTAssertEqual(listing().count, 2)
+  }
+
+  func testShareIsKeptWhenTheKeyCannotBeReread() throws {
+    let cipher = TestCipher(seed: 1)
+    let store = makeStore(cipher: cipher)
+    var p = Data("hello".utf8)
+    let m = try store.add(kind: .text, mimeType: "text/plain", payload: &p)
+    cipher.key = TestCipher(seed: 99).key
+    cipher.reloadResult = .unavailable
+    XCTAssertEqual(store.list(), [])
+    XCTAssertThrowsError(try store.read(m.id)) { XCTAssertEqual($0 as? ShareStoreError, .unavailable) }
+    XCTAssertEqual(listing().count, 2)
+  }
+
   func testCipherFailureKeepsTheShare() throws {
     let cipher = TestCipher()
     let store = makeStore(cipher: cipher)

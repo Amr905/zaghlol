@@ -480,9 +480,12 @@ void main() {
       await db.customStatement(
         'UPDATE transactions SET deleted_at = 1 WHERE id = \'o\'',
       );
+      seen.clear();
       await uc.onPersisted('i');
       expect(await pairCount(), 0);
       expect((await internal())['i'], 0);
+      // FU-127: the freed leg counts again, so the cycle cache is told.
+      expect(seen.whereType<TransactionsChanged>(), hasLength(1));
     });
 
     test('onPersisted after unlink does not re-pair', () async {

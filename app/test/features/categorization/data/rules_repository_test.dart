@@ -330,6 +330,8 @@ void main() {
             );
             expect(await repo.applyToPast(r.id, transactionIds: {'other'}), 0);
             expect(await repo.applyToPast(r.id, transactionIds: {}), 0);
+            // FU-095: nothing changed, so the rule is not stamped applied.
+            expect((await repo.list()).single.lastAppliedAt, isNull);
             expect(await state('other'), (null, 'none'));
             expect(await state('t1'), (null, 'none'));
             expect(

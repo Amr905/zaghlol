@@ -5186,7 +5186,7 @@ class AppLocalizationsEn extends AppLocalizations {
   }
 
   @override
-  String get settingsMainGoldFree => 'Zaghlol Gold';
+  String get settingsMainGoldCardTitle => 'Zaghlol Gold';
 
   @override
   String settingsMainGoldActive(String plan) {
@@ -5200,7 +5200,7 @@ class AppLocalizationsEn extends AppLocalizations {
   }
 
   @override
-  String get settingsMainSeeGold => 'You\'re on the free plan';
+  String get settingsMainFreePlanNote => 'You\'re on the free plan';
 
   @override
   String get settingsMainSectionGeneral => 'General';

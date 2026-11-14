@@ -108,7 +108,7 @@ void main() {
       final manifest = jsonDecode(
         File('assets/registry/registry_manifest.json').readAsStringSync(),
       ) as Map<String, Object?>;
-      expect((manifest['institutions']! as List<Object?>).length, 47);
+      expect((manifest['institutions']! as List<Object?>).length, 48);
       for (final c in _cases) {
         expect(
           registry.resolveSource(c.sender, RegistryChannel.sms),
@@ -156,6 +156,28 @@ void main() {
       },
     );
   }
+
+  test(
+    'a foreign-only NBE message stores a USD expense and no balance',
+    () async {
+      const body =
+          'NBE: Purchase of USD 1000.00 at NETFLIX.COM with NBE Visa **4567. '
+          'Avl Bal EGP 5000.00';
+      final registry = await preloadBundledRegistry();
+      final w = await IngestWorld.open();
+      addTearDown(w.close);
+      final result = await w.useCase(
+        registry: registry,
+        guardBase: BytesGuardBase(base),
+      )([sms('fx1', body, source: 'NBE')]);
+      expect(result.outcomes['fx1'], isA<IngestInserted>());
+      final t = (await w.txns()).single;
+      expect(t['direction'], 'expense');
+      expect(t['amount_minor'], 100000);
+      expect(t['currency'], 'USD');
+      expect(t['balance_after_minor'], isNull);
+    },
+  );
 
   test(
     'an unknown sender with a non-financial text is dropped by the Guard',
