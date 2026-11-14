@@ -145,6 +145,23 @@ void main() {
     expect(perm.requests, 0);
   });
 
+  testWidgets('FU-219: allowing it in system settings clears the banner on '
+      'resume', (tester) async {
+    final (_, perm, _) = await _pump(
+      tester,
+      perm: PermStub(allowed: false, grant: false),
+    );
+    final t = AppLocalizations.of(
+      tester.element(find.byType(NotificationsSettingsScreen)),
+    );
+    expect(find.text(t.notificationsSettingsOsOffTitle), findsOneWidget);
+    perm.allowed = true;
+    tester.binding.handleAppLifecycleStateChanged(AppLifecycleState.paused);
+    tester.binding.handleAppLifecycleStateChanged(AppLifecycleState.resumed);
+    await tester.pumpAndSettle();
+    expect(find.text(t.notificationsSettingsOsOffTitle), findsNothing);
+  });
+
   testWidgets('turning a type on while the OS is off asks and keeps banner', (
     tester,
   ) async {
