@@ -1,0 +1,17 @@
+{
+  "sender": "ALEXBANK",
+  "body": "بنك الإسكندرية: تم دفع 120.00 جم لدى ستاربكس في 22/10 باستخدام بطاقة ينتهي رقمها بـ 7788. الرصيد 1500.00 جم",
+  "receivedAt": "2026-10-23T11:14:00+03:00",
+  "expect": {
+    "template": "alexbank.card_purchase.ar",
+    "event": "card_purchase",
+    "direction": "expense",
+    "currency": "EGP",
+    "amount": "120.00",
+    "last4": "7788",
+    "balance": "1500.00",
+    "available": null,
+    "merchantClean": "ستاربكس",
+    "date": "2026-10-22"
+  }
+}

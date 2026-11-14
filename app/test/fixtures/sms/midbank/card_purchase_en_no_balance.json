@@ -1,0 +1,16 @@
+{
+  "sender": "MIDBANK",
+  "body": "MIDBANK: Purchase of EGP 210.00 at TOTAL ENERGIES with Card ****4018.",
+  "receivedAt": "2026-10-23T11:14:00+03:00",
+  "expect": {
+    "template": "midbank.card_purchase.en",
+    "event": "card_purchase",
+    "direction": "expense",
+    "currency": "EGP",
+    "amount": "210.00",
+    "last4": "4018",
+    "balance": null,
+    "available": null,
+    "merchantClean": "Total Energies"
+  }
+}

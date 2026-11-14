@@ -1,0 +1,16 @@
+{
+  "sender": "InstaPay",
+  "body": "إنستاباي: تم تحويل 4000.00 جم إلى بطاقة *5555 لدى HSBC. المرجع: IPNCC77129",
+  "receivedAt": "2026-10-23T11:14:00+03:00",
+  "expect": {
+    "template": "instapay.cc_payment.ar",
+    "event": "cc_payment",
+    "direction": "expense",
+    "currency": "EGP",
+    "amount": "4000.00",
+    "last4": "5555",
+    "ref": "IPNCC77129",
+    "counterparty": "HSBC",
+    "counterpartyKind": "name"
+  }
+}

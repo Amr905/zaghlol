@@ -1,0 +1,61 @@
+{
+  "code": "credit_agricole",
+  "names": {
+    "ar": "بنك كريدي أجريكول مصر",
+    "en": "CAE"
+  },
+  "country": "EG",
+  "defaultCurrency": "EGP",
+  "senders": [
+    {
+      "match": "exact",
+      "value": "CAE"
+    }
+  ],
+  "packages": [],
+  "walletCardNames": [
+    "Credit Agricole"
+  ],
+  "last4": [],
+  "drop": [],
+  "templates": [
+    {
+      "id": "credit_agricole.card_purchase.ar",
+      "version": 1,
+      "lang": "ar",
+      "channel": [
+        "sms"
+      ],
+      "event": "card_purchase",
+      "direction": "expense",
+      "baseConfidence": 0.95,
+      "pattern": "تم خصم (?<amount>[\\d,.]+) (?<cur>جم|جنيه|egp) لدى (?<merchant>.+?)(?: في (?<date>\\d+/\\d+))? باستخدام بطاقة \\*{1,4}(?<last4>\\d{4})(?:\\. |\\.?$)(?:(?:الرصيد|رصيدك)\\D{0,12}(?<balance>[\\d,.]+))?",
+      "currencyMap": {
+        "جم": "EGP",
+        "جنيه": "EGP",
+        "egp": "EGP"
+      },
+      "date": {
+        "format": "d/M",
+        "yearPolicy": "nearest_past"
+      }
+    },
+    {
+      "id": "credit_agricole.card_purchase.en",
+      "version": 1,
+      "lang": "en",
+      "channel": [
+        "sms"
+      ],
+      "event": "card_purchase",
+      "direction": "expense",
+      "baseConfidence": 0.95,
+      "pattern": "(?<cur>egp) (?<amount>[\\d,.]+) purchased at (?<merchant>.+?) using Card \\*{1,4}(?<last4>\\d{4})(?:\\. |\\.?$)(?:(?:avl|available|bal)\\D{0,16}(?<balance>[\\d,.]+))?",
+      "currencyMap": {
+        "جم": "EGP",
+        "جنيه": "EGP",
+        "egp": "EGP"
+      }
+    }
+  ]
+}

@@ -1,0 +1,61 @@
+{
+  "code": "saib",
+  "names": {
+    "ar": "بنك الشركة المصرفية العربية",
+    "en": "saib"
+  },
+  "country": "EG",
+  "defaultCurrency": "EGP",
+  "senders": [
+    {
+      "match": "exact",
+      "value": "SAIB"
+    }
+  ],
+  "packages": [],
+  "walletCardNames": [
+    "saib"
+  ],
+  "last4": [],
+  "drop": [],
+  "templates": [
+    {
+      "id": "saib.card_purchase.ar",
+      "version": 1,
+      "lang": "ar",
+      "channel": [
+        "sms"
+      ],
+      "event": "card_purchase",
+      "direction": "expense",
+      "baseConfidence": 0.95,
+      "pattern": "تم استخدام بطاقة \\*{1,4}(?<last4>\\d{4}) للشراء بمبلغ (?<amount>[\\d,.]+) (?<cur>جم|جنيه|egp) لدى (?<merchant>.+?)(?: في (?<date>\\d+/\\d+))?(?:\\. |\\.?$)(?:(?:الرصيد|رصيدك)\\D{0,12}(?<balance>[\\d,.]+))?",
+      "currencyMap": {
+        "جم": "EGP",
+        "جنيه": "EGP",
+        "egp": "EGP"
+      },
+      "date": {
+        "format": "d/M",
+        "yearPolicy": "nearest_past"
+      }
+    },
+    {
+      "id": "saib.card_purchase.en",
+      "version": 1,
+      "lang": "en",
+      "channel": [
+        "sms"
+      ],
+      "event": "card_purchase",
+      "direction": "expense",
+      "baseConfidence": 0.95,
+      "pattern": "Card \\*{1,4}(?<last4>\\d{4}) used for purchase of (?<cur>egp) (?<amount>[\\d,.]+) at (?<merchant>.+?)(?:\\. |\\.?$)(?:(?:avl|available|bal)\\D{0,16}(?<balance>[\\d,.]+))?",
+      "currencyMap": {
+        "جم": "EGP",
+        "جنيه": "EGP",
+        "egp": "EGP"
+      }
+    }
+  ]
+}

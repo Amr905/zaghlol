@@ -1,0 +1,16 @@
+{
+  "sender": "AlBaraka",
+  "body": "بنك البركة: تم خصم مبلغ 12,345.67 جم من بطاقة **2045 لدى كازيون. الرصيد المتاح 5190.00 جم",
+  "receivedAt": "2026-10-23T11:14:00+03:00",
+  "expect": {
+    "template": "al_baraka.card_purchase.ar",
+    "event": "card_purchase",
+    "direction": "expense",
+    "currency": "EGP",
+    "amount": "12345.67",
+    "last4": "2045",
+    "balance": "5190.00",
+    "available": null,
+    "merchantClean": "كازيون"
+  }
+}

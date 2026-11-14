@@ -1,0 +1,16 @@
+{
+  "sender": "EALB",
+  "body": "البنك العقاري المصري العربي: تم خصم 12,345.67 جم من بطاقة **7741 لدى صيدلية سيف. الرصيد 2410.00 جم",
+  "receivedAt": "2026-10-23T11:14:00+03:00",
+  "expect": {
+    "template": "ealb.card_purchase.ar",
+    "event": "card_purchase",
+    "direction": "expense",
+    "currency": "EGP",
+    "amount": "12345.67",
+    "last4": "7741",
+    "balance": "2410.00",
+    "available": null,
+    "merchantClean": "صيدلية سيف"
+  }
+}

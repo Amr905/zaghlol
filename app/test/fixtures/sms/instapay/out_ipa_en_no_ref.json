@@ -1,0 +1,16 @@
+{
+  "sender": "InstaPay",
+  "body": "InstaPay: You transferred EGP 1,250.00 to ahmed.ali@instapay from A/C *4567.",
+  "receivedAt": "2026-10-23T11:14:00+03:00",
+  "expect": {
+    "template": "instapay.out_ipa.en",
+    "event": "instapay_out",
+    "direction": "expense",
+    "currency": "EGP",
+    "amount": "1250.00",
+    "last4": "4567",
+    "ref": null,
+    "ipa": "ahmed.ali@instapay",
+    "counterpartyKind": "ipaAddress"
+  }
+}

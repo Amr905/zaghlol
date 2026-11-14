@@ -1,0 +1,17 @@
+{
+  "sender": "QNB",
+  "body": "QNB: تم تنفيذ عملية شراء بقيمة 300.00 جم ببطاقة ****4321 لدى MCDONALDS في 22/10. الرصيد المتاح 8100.00 جم",
+  "receivedAt": "2026-10-23T11:14:00+03:00",
+  "expect": {
+    "template": "qnb.card_purchase.ar",
+    "event": "card_purchase",
+    "direction": "expense",
+    "currency": "EGP",
+    "amount": "300.00",
+    "last4": "4321",
+    "balance": "8100.00",
+    "available": null,
+    "merchantClean": "Mcdonalds",
+    "date": "2026-10-22"
+  }
+}

@@ -1,0 +1,227 @@
+{
+  "code": "instapay",
+  "names": {
+    "ar": "إنستاباي",
+    "en": "InstaPay"
+  },
+  "country": "EG",
+  "defaultCurrency": "EGP",
+  "senders": [
+    {
+      "match": "exact",
+      "value": "InstaPay"
+    }
+  ],
+  "packages": [],
+  "walletCardNames": [
+    "InstaPay"
+  ],
+  "last4": [],
+  "drop": [],
+  "templates": [
+    {
+      "id": "instapay.out_ipa.ar",
+      "version": 1,
+      "lang": "ar",
+      "channel": [
+        "sms"
+      ],
+      "event": "instapay_out",
+      "direction": "expense",
+      "baseConfidence": 0.95,
+      "pattern": "تم تحويل (?:مبلغ )?(?<amount>[\\d,.]+) (?<cur>جم|جنيه|egp) (?:بنجاح )?الي (?<ipa>[a-z0-9._-]+@[a-z0-9._-]+) من (?:حسابكم|بطاقة) \\*{1,4}(?<last4>\\d{4})(?:\\. |\\.?$)(?:المرجع:? (?<ref>[a-z0-9]{6,24}))?",
+      "currencyMap": {
+        "جم": "EGP",
+        "جنيه": "EGP",
+        "egp": "EGP"
+      }
+    },
+    {
+      "id": "instapay.out_ipa.en",
+      "version": 1,
+      "lang": "en",
+      "channel": [
+        "sms"
+      ],
+      "event": "instapay_out",
+      "direction": "expense",
+      "baseConfidence": 0.95,
+      "pattern": "(?:you )?transferred (?<cur>جم|جنيه|egp) (?<amount>[\\d,.]+) to (?<ipa>[a-z0-9._-]+@[a-z0-9._-]+) from (?:a/c|card) \\*{1,4}(?<last4>\\d{4})(?:\\. |\\.?$)(?:ref:? (?<ref>[a-z0-9]{6,24}))?",
+      "currencyMap": {
+        "جم": "EGP",
+        "جنيه": "EGP",
+        "egp": "EGP"
+      }
+    },
+    {
+      "id": "instapay.out_phone.ar",
+      "version": 1,
+      "lang": "ar",
+      "channel": [
+        "sms"
+      ],
+      "event": "instapay_out",
+      "direction": "expense",
+      "baseConfidence": 0.95,
+      "pattern": "تم تحويل (?:مبلغ )?(?<amount>[\\d,.]+) (?<cur>جم|جنيه|egp) (?:بنجاح )?الي (?<phone>01\\d{9}) من (?:حسابكم|بطاقة) \\*{1,4}(?<last4>\\d{4})(?:\\. |\\.?$)(?:المرجع:? (?<ref>[a-z0-9]{6,24}))?",
+      "currencyMap": {
+        "جم": "EGP",
+        "جنيه": "EGP",
+        "egp": "EGP"
+      }
+    },
+    {
+      "id": "instapay.out_phone.en",
+      "version": 1,
+      "lang": "en",
+      "channel": [
+        "sms"
+      ],
+      "event": "instapay_out",
+      "direction": "expense",
+      "baseConfidence": 0.95,
+      "pattern": "(?<cur>جم|جنيه|egp) (?<amount>[\\d,.]+) transferred to (?<phone>01\\d{9}) from (?:a/c|card) \\*{1,4}(?<last4>\\d{4})(?:\\. |\\.?$)(?:ref:? (?<ref>[a-z0-9]{6,24}))?",
+      "currencyMap": {
+        "جم": "EGP",
+        "جنيه": "EGP",
+        "egp": "EGP"
+      }
+    },
+    {
+      "id": "instapay.in.ar",
+      "version": 1,
+      "lang": "ar",
+      "channel": [
+        "sms"
+      ],
+      "event": "instapay_in",
+      "direction": "income",
+      "baseConfidence": 0.95,
+      "pattern": "تم اضافه تحويل لحظي بمبلغ (?<amount>[\\d,.]+) (?<cur>جم|جنيه|egp) الي حسابكم \\*{1,4}(?<last4>\\d{4}) من (?<counterparty>.+?)(?:\\. |\\.?$)(?:المرجع:? (?<ref>[a-z0-9]{6,24}))?",
+      "currencyMap": {
+        "جم": "EGP",
+        "جنيه": "EGP",
+        "egp": "EGP"
+      }
+    },
+    {
+      "id": "instapay.in.en",
+      "version": 1,
+      "lang": "en",
+      "channel": [
+        "sms"
+      ],
+      "event": "instapay_in",
+      "direction": "income",
+      "baseConfidence": 0.95,
+      "pattern": "you received (?<cur>جم|جنيه|egp) (?<amount>[\\d,.]+) from (?<counterparty>.+?) into (?:a/c|card) \\*{1,4}(?<last4>\\d{4})(?:\\. |\\.?$)(?:ref:? (?<ref>[a-z0-9]{6,24}))?",
+      "currencyMap": {
+        "جم": "EGP",
+        "جنيه": "EGP",
+        "egp": "EGP"
+      }
+    },
+    {
+      "id": "instapay.bill.ar",
+      "version": 1,
+      "lang": "ar",
+      "channel": [
+        "sms"
+      ],
+      "event": "card_purchase",
+      "direction": "expense",
+      "baseConfidence": 0.95,
+      "pattern": "تم دفع (?<amount>[\\d,.]+) (?<cur>جم|جنيه|egp) لدى (?<merchant>.+?) ببطاقة \\*{1,4}(?<last4>\\d{4})(?:\\. |\\.?$)(?:المرجع:? (?<ref>[a-z0-9]{6,24}))?",
+      "currencyMap": {
+        "جم": "EGP",
+        "جنيه": "EGP",
+        "egp": "EGP"
+      }
+    },
+    {
+      "id": "instapay.bill.en",
+      "version": 1,
+      "lang": "en",
+      "channel": [
+        "sms"
+      ],
+      "event": "card_purchase",
+      "direction": "expense",
+      "baseConfidence": 0.95,
+      "pattern": "you paid (?<cur>جم|جنيه|egp) (?<amount>[\\d,.]+) at (?<merchant>.+?) using card \\*{1,4}(?<last4>\\d{4})(?:\\. |\\.?$)(?:ref:? (?<ref>[a-z0-9]{6,24}))?",
+      "currencyMap": {
+        "جم": "EGP",
+        "جنيه": "EGP",
+        "egp": "EGP"
+      }
+    },
+    {
+      "id": "instapay.cc_payment.ar",
+      "version": 1,
+      "lang": "ar",
+      "channel": [
+        "sms"
+      ],
+      "event": "cc_payment",
+      "direction": "expense",
+      "baseConfidence": 0.95,
+      "pattern": "تم تحويل (?<amount>[\\d,.]+) (?<cur>جم|جنيه|egp) الي بطاقه \\*{1,4}(?<last4>\\d{4}) لدى (?<counterparty>.+?)(?:\\. |\\.?$)(?:المرجع:? (?<ref>[a-z0-9]{6,24}))?",
+      "currencyMap": {
+        "جم": "EGP",
+        "جنيه": "EGP",
+        "egp": "EGP"
+      }
+    },
+    {
+      "id": "instapay.cc_payment.en",
+      "version": 1,
+      "lang": "en",
+      "channel": [
+        "sms"
+      ],
+      "event": "cc_payment",
+      "direction": "expense",
+      "baseConfidence": 0.95,
+      "pattern": "(?<cur>جم|جنيه|egp) (?<amount>[\\d,.]+) transferred to card \\*{1,4}(?<last4>\\d{4}) at (?<counterparty>.+?)(?:\\. |\\.?$)(?:ref:? (?<ref>[a-z0-9]{6,24}))?",
+      "currencyMap": {
+        "جم": "EGP",
+        "جنيه": "EGP",
+        "egp": "EGP"
+      }
+    },
+    {
+      "id": "instapay.refund.ar",
+      "version": 1,
+      "lang": "ar",
+      "channel": [
+        "sms"
+      ],
+      "event": "refund",
+      "direction": "income",
+      "baseConfidence": 0.95,
+      "pattern": "تم رد (?<amount>[\\d,.]+) (?<cur>جم|جنيه|egp) لحسابكم \\*{1,4}(?<last4>\\d{4})(?:\\. |\\.?$)(?:الرصيد(?: المتاح)? (?<balance>[\\d,.]+)(?: (?:جم|جنيه|egp))?)?",
+      "currencyMap": {
+        "جم": "EGP",
+        "جنيه": "EGP",
+        "egp": "EGP"
+      }
+    },
+    {
+      "id": "instapay.refund.en",
+      "version": 1,
+      "lang": "en",
+      "channel": [
+        "sms"
+      ],
+      "event": "refund",
+      "direction": "income",
+      "baseConfidence": 0.95,
+      "pattern": "(?<cur>جم|جنيه|egp) (?<amount>[\\d,.]+) refunded to (?:a/c|card) \\*{1,4}(?<last4>\\d{4})(?:\\. |\\.?$)(?:(?:(?:avl|available) )?bal(?:ance)?:? (?:جم|جنيه|egp) (?<balance>[\\d,.]+))?",
+      "currencyMap": {
+        "جم": "EGP",
+        "جنيه": "EGP",
+        "egp": "EGP"
+      }
+    }
+  ]
+}

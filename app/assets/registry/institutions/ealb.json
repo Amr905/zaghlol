@@ -1,0 +1,61 @@
+{
+  "code": "ealb",
+  "names": {
+    "ar": "البنك العقاري المصري العربي",
+    "en": "EALB"
+  },
+  "country": "EG",
+  "defaultCurrency": "EGP",
+  "senders": [
+    {
+      "match": "exact",
+      "value": "EALB"
+    }
+  ],
+  "packages": [],
+  "walletCardNames": [
+    "EALB"
+  ],
+  "last4": [],
+  "drop": [],
+  "templates": [
+    {
+      "id": "ealb.card_purchase.ar",
+      "version": 1,
+      "lang": "ar",
+      "channel": [
+        "sms"
+      ],
+      "event": "card_purchase",
+      "direction": "expense",
+      "baseConfidence": 0.95,
+      "pattern": "تم خصم (?<amount>[\\d,.]+) (?<cur>جم|جنيه|egp) من بطاقة \\*{1,4}(?<last4>\\d{4}) لدى (?<merchant>.+?)(?: في (?<date>\\d+/\\d+))?(?:\\. |\\.?$)(?:(?:الرصيد|رصيدك)\\D{0,12}(?<balance>[\\d,.]+))?",
+      "currencyMap": {
+        "جم": "EGP",
+        "جنيه": "EGP",
+        "egp": "EGP"
+      },
+      "date": {
+        "format": "d/M",
+        "yearPolicy": "nearest_past"
+      }
+    },
+    {
+      "id": "ealb.card_purchase.en",
+      "version": 1,
+      "lang": "en",
+      "channel": [
+        "sms"
+      ],
+      "event": "card_purchase",
+      "direction": "expense",
+      "baseConfidence": 0.95,
+      "pattern": "(?<cur>egp) (?<amount>[\\d,.]+) debited from Card \\*{1,4}(?<last4>\\d{4}) at (?<merchant>.+?)(?:\\. |\\.?$)(?:(?:avl|available|bal)\\D{0,16}(?<balance>[\\d,.]+))?",
+      "currencyMap": {
+        "جم": "EGP",
+        "جنيه": "EGP",
+        "egp": "EGP"
+      }
+    }
+  ]
+}

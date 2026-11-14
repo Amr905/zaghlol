@@ -82,3 +82,13 @@ final class RegistryGuardBase implements GuardConfigSource {
     return json == null ? const [] : utf8.encode(json);
   }
 }
+
+/// devSms: the bundled registry with the synthetic spike institution added
+/// on top (the bundled registry always loads; its institutions come first
+/// and win, spike sender 5550100 is the only addition). The devSms Guard
+/// base asset is the export of this registry (spike_guard_base_test).
+Registry spikeOnTopOf(Registry bundled) {
+  final spike = loadSpikeRegistry().byCode('spike');
+  if (spike == null) throw StateError('SPIKE_REGISTRY_INVALID');
+  return bundled.withExtra([spike]);
+}

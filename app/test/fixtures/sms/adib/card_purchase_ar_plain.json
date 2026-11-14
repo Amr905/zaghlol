@@ -1,0 +1,16 @@
+{
+  "sender": "ADIB",
+  "body": "مصرف أبوظبي الإسلامي: تم خصم 600.00 جم من بطاقتك المنتهية بـ 1122 لدى كارفور. الرصيد 4000 جم",
+  "receivedAt": "2026-10-23T11:14:00+03:00",
+  "expect": {
+    "template": "adib.card_purchase.ar",
+    "event": "card_purchase",
+    "direction": "expense",
+    "currency": "EGP",
+    "amount": "600.00",
+    "last4": "1122",
+    "balance": "4000.00",
+    "available": null,
+    "merchantClean": "كارفور"
+  }
+}

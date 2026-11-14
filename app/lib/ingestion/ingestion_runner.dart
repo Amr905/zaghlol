@@ -22,20 +22,24 @@ import '../features/ingestion/data/ingest_factory.dart';
 import 'ingest_store.dart';
 import 'ingestion_config.dart';
 import 'ingestion_cycle.dart';
+import 'bundled_registry.dart';
 import 'spike_registry.dart';
 import 'spool_port.dart';
 import 'ulid.dart';
 
-/// The registry a build parses with: the synthetic spike registry in devSms
-/// only (a compile-time constant, so AOT drops it from every other build);
-/// elsewhere T-036's bundled registry, which does not exist yet (the cycle
-/// then ends `INGEST_SETUP_FAILED`; unreachable in practice: without
-/// `guard_base.json` the native Guard keeps nothing).
-Registry Function() get defaultRegistryLoader =>
-    kIsSpikeBuild ? loadSpikeRegistry : _bundledRegistryMissing;
+/// The registry a build parses with: the bundled registry (`assets/registry/`)
+/// in every build, preloaded in this isolate ([ensureDefaultRegistry]; before
+/// that the call throws `INGEST_REGISTRY_MISSING` and the cycle ends
+/// `INGEST_SETUP_FAILED`). devSms only (a compile-time constant, so AOT drops
+/// it elsewhere) adds the synthetic spike institution on top.
+Registry Function() get defaultRegistryLoader => kIsSpikeBuild
+    ? () => spikeOnTopOf(bundledRegistrySync())
+    : bundledRegistrySync;
 
-Registry _bundledRegistryMissing() =>
-    throw StateError('INGEST_REGISTRY_MISSING');
+/// Makes [defaultRegistryLoader] ready.
+Future<void> ensureDefaultRegistry() async {
+  await preloadBundledRegistry();
+}
 
 final class IngestionRunner {
   IngestionRunner({
@@ -52,7 +56,8 @@ final class IngestionRunner {
   }) : _spool = spool ?? platformSpoolPort(),
        _storeFactory = store ?? (headless ? _headlessStore : _uiStore),
        _dbDirectory = dbDirectory ?? resolveDbDirectory,
-       _registry = registry ?? defaultRegistryLoader;
+       _registry = registry ?? defaultRegistryLoader,
+       _loadsDefaultRegistry = registry == null;
 
   final CycleMarks marks;
   final bool headless;
@@ -68,6 +73,7 @@ final class IngestionRunner {
   /// engines).
   Future<Directory> Function() get dbDirectoryResolver => _dbDirectory;
   final Registry Function() _registry;
+  final bool _loadsDefaultRegistry;
 
   IngestionCycle? _cycle;
   Future<CycleResult>? _running;
@@ -163,6 +169,7 @@ final class IngestionRunner {
   }
 
   Future<IngestionCycle> _build() async {
+    if (_loadsDefaultRegistry) await ensureDefaultRegistry();
     final registry = _registry();
     final guardBase = RegistryGuardBase(registry);
     final ids = UlidGenerator();

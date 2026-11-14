@@ -1,0 +1,17 @@
+{
+  "sender": "EGBANK",
+  "body": "EGBANK: Card **6789 used for EGP 190.00 at TALABAT EG on 23/10. Avl Bal: EGP 3,410.00",
+  "receivedAt": "2026-01-05T09:00:00+02:00",
+  "expect": {
+    "template": "egbank.card_purchase.en",
+    "event": "card_purchase",
+    "direction": "expense",
+    "currency": "EGP",
+    "amount": "190.00",
+    "last4": "6789",
+    "balance": "3410.00",
+    "available": null,
+    "merchantClean": "Talabat",
+    "date": "2025-10-23"
+  }
+}
