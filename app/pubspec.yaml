@@ -80,3 +80,15 @@ flutter:
     - assets/catalog/
     # T-053: static Captain Zaghlol still (fallback until zaghlol.riv, T-088).
     - assets/mascot/
+  fonts:
+    # FU-044: IBM Plex Sans Arabic (SIL OFL 1.1, assets/fonts/OFL.txt); covers
+    # Arabic and Latin. Family name = kZFontFamily.
+    - family: IBMPlexSansArabic
+      fonts:
+        - asset: assets/fonts/IBMPlexSansArabic-Regular.ttf
+        - asset: assets/fonts/IBMPlexSansArabic-Medium.ttf
+          weight: 500
+        - asset: assets/fonts/IBMPlexSansArabic-SemiBold.ttf
+          weight: 600
+        - asset: assets/fonts/IBMPlexSansArabic-Bold.ttf
+          weight: 700
