@@ -200,10 +200,10 @@ void main() {
               id: 'z2',
               lotStartHijri: '1446-10-01',
               dueOn: '2026-03-20',
-              unit: 'EGP',
-              amountMinor: 250000,
+              unit: 'XXX',
+              amountMinor: 0,
               status: ZakahStatus.pending,
-            ),
+            ).withAmount(Money(egp, 250000)),
           );
           expect(await zakah.recordPaid('z1', 1000), 1);
           expect((await zakah.byId('z1'))!.status, ZakahStatus.partial);
@@ -214,6 +214,18 @@ void main() {
           expect((await zakah.byId('z1'))!.paidMinor, 1000);
           expect(await zakah.recordPaid('z1', 2125), 1);
           expect((await zakah.byId('z1'))!.status, ZakahStatus.paid);
+          // FU-096: Money entry point checks the lot's currency.
+          expect(
+            () => zakah.recordPaidMoney('z2', Money(Currency.of('USD'), 1)),
+            throwsA(isA<CurrencyMismatch>()),
+          );
+          expect(
+            () => zakah.recordPaidMoney('z1', Money(egp, 1)),
+            throwsArgumentError,
+          );
+          expect(await zakah.recordPaidMoney('z2', Money(egp, 100000)), 1);
+          expect((await zakah.byId('z2'))!.status, ZakahStatus.partial);
+          expect(await zakah.recordPaidMoney('nope', Money(egp, 1)), 0);
           expect(await zakah.recordPaid('z2', 0), 1);
           expect((await zakah.byId('z2'))!.status, ZakahStatus.pending);
           expect([for (final z in await zakah.open()) z.id], ['z2']);

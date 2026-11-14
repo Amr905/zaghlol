@@ -14,10 +14,30 @@ import 'package:zaghlol_domain/zaghlol_domain.dart';
 
 import '../../../core/db/financial_fixtures.dart';
 
+class _FlakyPairing extends TransferPairingUseCase {
+  _FlakyPairing(
+    super.db, {
+    required super.loadSchedule,
+    super.clock,
+    super.newId,
+  });
+
+  final Set<String> failFor = {};
+  final List<String> removed = [];
+
+  @override
+  Future<TransactionsChanged?> onRemoved(String txnId) async {
+    removed.add(txnId);
+    if (failFor.contains(txnId)) throw StateError('boom');
+    return super.onRemoved(txnId);
+  }
+}
+
 void main() {
   late EncryptedDb edb;
   late AppDatabase db;
   late BulkActions actions;
+  late _FlakyPairing flaky;
   var nextId = 0;
   DateTime clock() =>
       DateTime.fromMillisecondsSinceEpoch(t0 + 1000, isUtc: true);
@@ -55,7 +75,7 @@ void main() {
       bucket: 'needs',
       sort: 1,
     );
-    final pairing = TransferPairingUseCase(
+    final pairing = flaky = _FlakyPairing(
       db,
       loadSchedule: schedule,
       clock: clock,
@@ -108,6 +128,23 @@ void main() {
       expect((await TransactionsDao(db).byId('o'))!.deletedAt, isNull);
     },
   );
+
+  test('one failing removal hook neither skips the rest nor loses Undo '
+      '(FU-132)', () async {
+    flaky.failFor.add('o');
+    await expectLater(actions.delete({'o', 'i'}), throwsStateError);
+    expect(flaky.removed.toSet(), {'o', 'i'});
+    // The batch id was kept: Undo still restores both rows.
+    final batch =
+        (await db
+                .customSelect('SELECT id FROM undo_batches LIMIT 1')
+                .getSingleOrNull())
+            ?.read<String>('id');
+    expect(batch, isNotNull);
+    await actions.undo(batch!);
+    expect((await TransactionsDao(db).byId('o'))!.deletedAt, isNull);
+    expect((await TransactionsDao(db).byId('i'))!.deletedAt, isNull);
+  });
 
   test('Undo of a bulk delete re-pairs the legs; spend unchanged', () async {
     Future<int> internal() async =>

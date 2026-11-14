@@ -39,6 +39,7 @@ import '../features/transfers/presentation/link_transfer_sheet.dart';
 import '../features/transfers/presentation/split_sheet.dart';
 import 'app_config.dart';
 import 'app_screens.dart';
+import 'home_mascot_slot.dart';
 
 ProviderContainer _container(BuildContext context) =>
     ProviderScope.containerOf(context);
@@ -116,7 +117,24 @@ List<Override> navigationWiringOverrides(
 
 // ---------------------------------------------------------------- Home
 
-HomeActions _homeActions(BuildContext context) => HomeActions(
+HomeActions _homeActions(BuildContext context) {
+  final base = _homeActionsBase(context);
+  return HomeActions(
+    openSettings: base.openSettings,
+    openBudget: base.openBudget,
+    openSetBudget: base.openSetBudget,
+    openTransactions: base.openTransactions,
+    openSpentTransactions: base.openSpentTransactions,
+    openTransaction: base.openTransaction,
+    openBackup: base.openBackup,
+    openFinishSetup: base.openFinishSetup,
+    openCaptureSettings: base.openCaptureSettings,
+    openShare: base.openShare,
+    mascotSlot: HomeMascotSlot(actions: base),
+  );
+}
+
+HomeActions _homeActionsBase(BuildContext context) => HomeActions(
   openSettings: () => unawaited(openSettings(context)),
   openBudget: () => unawaited(openBudget(context)),
   openSetBudget: () => unawaited(openBudget(context)),

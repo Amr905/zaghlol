@@ -58,11 +58,22 @@ class BulkActions implements TxnBulkActions {
   Future<BulkEditResult> delete(Set<String> ids) async {
     final result = await _bulk.apply(ids, const DeleteTransactions());
     // After the soft delete: free pairs and links of every removed row.
-    for (final id in ids) {
-      await _pairing.onRemoved(id);
-      await _refunds.onRemoved(id);
-    }
+    // FU-132: remember the batch first and give every id its turn, so one
+    // failing hook neither loses the Undo ids nor skips the other rows. The
+    // first failure is rethrown at the end.
     _deleted[result.batchId] = {...ids};
+    Object? failure;
+    StackTrace? trace;
+    for (final id in ids) {
+      try {
+        await _pairing.onRemoved(id);
+        await _refunds.onRemoved(id);
+      } on Object catch (e, st) {
+        failure ??= e;
+        trace ??= st;
+      }
+    }
+    if (failure != null) Error.throwWithStackTrace(failure, trace!);
     return result;
   }
 

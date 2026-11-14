@@ -147,7 +147,21 @@ class TransferPairingUseCase {
     final now = _nowMs();
     PairingResult result;
     try {
-      result = await _txns.inTransaction(() => _evaluate(txnId, schedule, now));
+      result = await _txns.inTransaction(() async {
+        final healed = <String>[];
+        final r = await _evaluate(txnId, schedule, now, healed);
+        if (healed.isEmpty || r.event != null) return r;
+        // FU-127: a leg freed from a dead pair counts in totals again even
+        // when nothing re-pairs, so cached cycles must hear about it.
+        final row = await _legRow(txnId, anyStatus: true);
+        if (row == null) return r;
+        return PairingResult(
+          r.status,
+          pairId: r.pairId,
+          pairKind: r.pairKind,
+          event: await _event(schedule, [row]),
+        );
+      });
     } on _Lost {
       return const PairingResult(PairingStatus.skipped);
     } on DbWriteException catch (e) {
@@ -337,6 +351,7 @@ class TransferPairingUseCase {
     String txnId,
     PaydaySchedule schedule,
     int now,
+    List<String> healed,
   ) async {
     const skipped = PairingResult(PairingStatus.skipped);
     final row = await _txns.byId(txnId);
@@ -359,6 +374,7 @@ class TransferPairingUseCase {
       if (other == null || other.deletedAt != null) {
         await _pairs.deleteById(existing.id);
         await _freeLeg(txnId, now);
+        healed.add(txnId);
         existing = null;
       }
     }

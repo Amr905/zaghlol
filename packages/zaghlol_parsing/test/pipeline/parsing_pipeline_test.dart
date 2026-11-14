@@ -453,6 +453,14 @@ void main() {
       expect(salary('22/10/2024').reasons, [ParseReason.dateOutOfRange]);
     });
 
+    test('FU-079: received on 29 Feb, the window starts on 28 Feb', () {
+      final at = DateTime.utc(2028, 2, 29, 9);
+      expect(salary('28/02/2026', at: at).reasons, isEmpty);
+      expect(salary('27/02/2026', at: at).reasons, [
+        ParseReason.dateOutOfRange,
+      ]);
+    });
+
     test('a calendar-invalid date is a reason, the field stays null', () {
       final r = salary('31/02/2026');
       expect(r.fields.date, isNull);

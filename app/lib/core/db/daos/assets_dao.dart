@@ -216,6 +216,21 @@ class ZakahLedgerDao {
     ),
   );
 
+  /// [recordPaid] with a [Money] (FU-096): the lot must be in [paid]'s
+  /// currency, else [CurrencyMismatch] and nothing changes; a gold lot (a
+  /// milligram unit) is refused with an [ArgumentError]. Returns the rows
+  /// changed (0 when [id] doesn't exist).
+  Future<int> recordPaidMoney(String id, Money paid) async {
+    final lot = await byId(id);
+    if (lot == null) return 0;
+    final unit = Currency.tryOf(lot.unit);
+    if (unit == null) {
+      throw ArgumentError('lot is not in a currency', 'id');
+    }
+    if (unit != paid.currency) throw CurrencyMismatch(paid.currency, unit);
+    return recordPaid(id, paid.toStorage().minor);
+  }
+
   Future<int> deleteById(String id) => guardWrite(
     () => (_db.delete(_db.zakahLedger)..where((z) => z.id.equals(id))).go(),
   );
