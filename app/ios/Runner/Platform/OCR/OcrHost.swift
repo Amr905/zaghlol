@@ -50,8 +50,13 @@ struct UnprovisionedSpoolKeyProvider: SpoolFileKeyProvider {
 /// the key the Share Extension encrypts with. Any failure is NOT_AVAILABLE
 /// (nothing is deleted); a share cannot exist without its key.
 struct SharedSpoolKeyProvider: SpoolFileKeyProvider {
+  var keychain: SpoolKeychain = SpoolKeychain()
+
   func spoolKey() -> Data? {
-    guard let loaded = try? SpoolKeychain().loadOrCreate(), loaded.key.count == 32 else { return nil }
+    // Reads never create (FU-196, 065-1): an unusable item must not be replaced here.
+    guard case .found(let loaded) = keychain.existing(), loaded.key.count == 32 else {
+      return nil
+    }
     return loaded.key
   }
 }

@@ -166,6 +166,24 @@ final class OcrTests: XCTestCase {
     XCTAssertTrue(FileManager.default.fileExists(atPath: path))
   }
 
+  /// 065-1: the OCR read path never mints a key (it would orphan the spool).
+  func testSharedKeyProviderNeverCreatesAKey() {
+    final class EmptyKeychain: SpoolKeychainClient {
+      var adds = 0
+      func copyMatching(_ query: [String: Any]) -> (OSStatus, [String: Any]?) { (errSecItemNotFound, nil) }
+      func add(_ attributes: [String: Any]) -> OSStatus {
+        adds += 1
+        return errSecSuccess
+      }
+      func delete(_ query: [String: Any]) -> OSStatus { errSecSuccess }
+    }
+    let fake = EmptyKeychain()
+    let keychain = SpoolKeychain(
+      client: fake, accessGroup: nil, retryDelaysMs: [1], sleeper: { _ in })
+    XCTAssertNil(SharedSpoolKeyProvider(keychain: keychain).spoolKey())
+    XCTAssertEqual(fake.adds, 0)
+  }
+
   func testSpoolFileRoundTripAndAadBinding() throws {
     let keyBytes = Data((0..<32).map { UInt8($0 &* 5 &+ 1) })
     let key = SymmetricKey(data: keyBytes)
