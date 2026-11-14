@@ -38,7 +38,9 @@ final class ShareIntakeTests: XCTestCase {
   }
 
   private func png() -> Data {
-    UIGraphicsImageRenderer(size: CGSize(width: 8, height: 8)).pngData { ctx in
+    let format = UIGraphicsImageRendererFormat()
+    format.scale = 1  // 8 x 8 pixels whatever the device scale
+    return UIGraphicsImageRenderer(size: CGSize(width: 8, height: 8), format: format).pngData { ctx in
       UIColor.red.setFill()
       ctx.fill(CGRect(x: 0, y: 0, width: 4, height: 4))
     }
