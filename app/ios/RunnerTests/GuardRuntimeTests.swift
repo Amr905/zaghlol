@@ -1,4 +1,5 @@
 import CryptoKit
+import Security
 import XCTest
 
 @testable import Runner
@@ -346,39 +347,52 @@ final class GuardRuntimeTests: XCTestCase {
 
   // MARK: Spool key provider
 
-  private final class FakeSlot: SecretSlotStore {
-    var status: SecretStatusMsg = .notFound
-    var value: Data?
-    var created = 0
-    func read() -> SlotRead { SlotRead(status: status, value: status == .found ? value : nil, attempts: 1) }
-    func createIfAbsent(_ candidate: Data) throws -> Data {
-      if status != .notFound { throw KeyStoreFailure() }
-      created += 1
-      status = .found
-      value = candidate
-      return candidate
+  /// One Keychain item behind the `SpoolKeychain` seam (T-063: the Guard uses
+  /// the shared spool key).
+  private final class FakeClient: SpoolKeychainClient {
+    var item: [String: Any]?
+    var status: OSStatus?
+    var adds = 0
+    var deletes = 0
+    func copyMatching(_ query: [String: Any]) -> (OSStatus, [String: Any]?) {
+      if let s = status { return (s, nil) }
+      guard let item = item else { return (errSecItemNotFound, nil) }
+      return (errSecSuccess, item)
     }
-    func delete() throws { status = .notFound; value = nil }
+    func add(_ attributes: [String: Any]) -> OSStatus {
+      adds += 1
+      item = [kSecValueData as String: attributes[kSecValueData as String] as Any]
+      return errSecSuccess
+    }
+    func delete(_ query: [String: Any]) -> OSStatus {
+      deletes += 1
+      item = nil
+      return errSecSuccess
+    }
   }
 
   func testSpoolKeyProviderMapsSlotStatesAndCreatesOnlyWhenMissing() throws {
-    let slot = FakeSlot()
-    let provider = KeychainSpoolKeyProvider(slot: slot)
-    if case .missing = provider.existingKey() {} else { XCTFail("a new slot must be missing") }
-    XCTAssertEqual(slot.created, 0, "a read never creates")
-    let first = try provider.keyCreatingIfNeeded()
-    let second = try provider.keyCreatingIfNeeded()
-    XCTAssertEqual(slot.created, 1)
-    XCTAssertEqual(first.withUnsafeBytes { Data($0) }, second.withUnsafeBytes { Data($0) })
-    XCTAssertEqual(slot.value?.count, 32)
-    for status in [SecretStatusMsg.unusable, .unavailable] {
-      let bad = FakeSlot()
-      bad.status = status
-      let p = KeychainSpoolKeyProvider(slot: bad)
-      if case .unavailable = p.existingKey() {} else { XCTFail("must not be treated as missing") }
-      XCTAssertThrowsError(try p.keyCreatingIfNeeded())
-      XCTAssertEqual(bad.created, 0, "an unusable or unknown key is never overwritten")
+    func provider(_ c: FakeClient) -> KeychainSpoolKeyProvider {
+      KeychainSpoolKeyProvider(
+        keychain: SpoolKeychain(client: c, accessGroup: "G", retryDelaysMs: [1, 1, 1], sleeper: { _ in }))
     }
+    let client = FakeClient()
+    let p = provider(client)
+    if case .missing = p.existingKey() {} else { XCTFail("a new item must be missing") }
+    XCTAssertEqual(client.adds, 0, "a read never creates")
+    let first = try p.keyCreatingIfNeeded()
+    let second = try p.keyCreatingIfNeeded()
+    XCTAssertEqual(client.adds, 1)
+    XCTAssertEqual(first.withUnsafeBytes { Data($0) }, second.withUnsafeBytes { Data($0) })
+    // A locked Keychain, or an unusable item, is never "missing" on a read.
+    let locked = FakeClient()
+    locked.status = errSecInteractionNotAllowed
+    if case .unavailable = provider(locked).existingKey() {} else { XCTFail("locked") }
+    XCTAssertThrowsError(try provider(locked).keyCreatingIfNeeded())
+    let short = FakeClient()
+    short.item = [kSecValueData as String: Data(count: 5)]
+    if case .unavailable = provider(short).existingKey() {} else { XCTFail("unusable") }
+    XCTAssertEqual(locked.adds + short.adds + short.deletes, 0, "a read creates or deletes nothing")
     XCTAssertEqual(KeychainSpoolKeyProvider.account, "spool_key_v1")
   }
 
