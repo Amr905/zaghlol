@@ -1,0 +1,15 @@
+{
+  "sender": "NBE",
+  "body": "البنك الأهلي المصري: تم إضافة راتب ١٠٠٠٫٠٠ جم إلى حساب *١٢٣٤. الرصيد ٥٠٠٠٫٠٠ جم",
+  "receivedAt": "2026-10-23T11:14:00+03:00",
+  "expect": {
+    "template": "nbe.salary.ar",
+    "event": "salary",
+    "direction": "income",
+    "currency": "EGP",
+    "amount": "1000.00",
+    "last4": "1234",
+    "balance": "5000.00",
+    "available": null
+  }
+}

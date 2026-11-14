@@ -1,0 +1,16 @@
+{
+  "sender": "CIB",
+  "body": "Purchase of USD 12,345.67 at NETFLIX.COM with Card ending 1234 (EGP 1,250.00). Avl Bal EGP 25,000.50",
+  "receivedAt": "2026-10-23T11:14:00+03:00",
+  "expect": {
+    "template": "cib.card_purchase_fx.en",
+    "event": "card_purchase_fx",
+    "direction": "expense",
+    "currency": "USD",
+    "amount": "12345.67",
+    "last4": "1234",
+    "balance": "25000.50",
+    "available": null,
+    "merchantClean": "Netflix.com"
+  }
+}
