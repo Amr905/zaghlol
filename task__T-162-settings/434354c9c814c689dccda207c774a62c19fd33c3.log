@@ -1,5 +1,8 @@
 ﻿== SUMMARY ==
-RUNNING sha=434354c9c814c689dccda207c774a62c19fd33c3
+SKIP sha=434354c9c814c689dccda207c774a62c19fd33c3 no app/packages/backend changes
 
 == FULL LOG (last 1500 lines) ==
 auto task/T-162-settings 434354c9c814c689dccda207c774a62c19fd33c3 2026-11-14T11:10:44.8618387+02:00
+
+
+
