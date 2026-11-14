@@ -401,7 +401,7 @@
   "transactionsDetailFieldNote": "Note",
   "transactionsDetailNoteAdd": "Add a note",
   "transactionsDetailNoteHint": "Write a note…",
-  "transactionsDetailSplit": "Split / money back",
+  "transactionsDetailSplit": "Split / money back from friends",
   "transactionsDetailLinkTransfer": "This is my own transfer",
   "transactionsDetailMoneyBackFor": "This is money back for…",
   "transactionsDetailLinkedWith": "Linked with {amount} on {card}",
@@ -6635,5 +6635,13 @@
   "iosSetupNudgeSnoozeA11y": "Remind me in 7 days",
   "@iosSetupNudgeSnoozeA11y": {
     "description": "A · dismiss button of the nudge; hides it for 7 days"
+  },
+  "chatMainTitle": "Ask Zaghlol",
+  "@chatMainTitle": {
+    "description": "S-50 design pass"
+  },
+  "chatMainRoastTag": "Roast",
+  "@chatMainRoastTag": {
+    "description": "S-50 design pass"
   }
 }

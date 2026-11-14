@@ -137,46 +137,96 @@ class _ReviewScreenState extends ConsumerState<ReviewScreen> {
     final l10n = AppLocalizations.of(context);
     final queue = ref.watch(reviewQueueProvider);
     return Scaffold(
-      appBar: AppBar(title: Text(l10n.ingestionReviewTitle)),
-      body: queue.when(
-        loading: () => const _Skeleton(),
-        error: (_, _) => Padding(
-          padding: const EdgeInsetsDirectional.all(ZSpacing.screen),
-          child: ZBanner(
-            message: l10n.commonErrorLoadFailed,
-            tone: ZBannerTone.error,
-            actionLabel: l10n.commonActionTryAgain,
-            onAction: () => ref.invalidate(reviewQueueProvider),
-          ),
-        ),
-        data: (all) {
-          final visible = all
-              .where((c) => !_hidden.contains(c.itemId))
-              .toList();
-          final shown = visible
-              .where((c) => _filter == ReviewFilter.all || c.filter == _filter)
-              .toList();
-          if (visible.isEmpty) return const _Empty();
-          return Column(
-            children: [
-              _Filters(
-                selected: _filter,
-                total: visible.length,
-                onSelect: (f) => setState(() => _filter = f),
-              ),
-              Expanded(
-                child: ListView.separated(
-                  padding: const EdgeInsetsDirectional.all(ZSpacing.screen),
-                  itemCount: shown.length,
-                  separatorBuilder: (_, _) =>
-                      const SizedBox(height: ZSpacing.md),
-                  itemBuilder: (context, i) => _swipeable(shown[i]),
+      appBar: AppBar(
+        backgroundColor: Colors.transparent,
+        scrolledUnderElevation: 0,
+        toolbarHeight: 64,
+        leadingWidth: 64,
+        automaticallyImplyLeading: false,
+        leading: Navigator.canPop(context)
+            ? Center(
+                child: BackButton(
+                  style: IconButton.styleFrom(
+                    fixedSize: const Size(40, 40),
+                    minimumSize: const Size(40, 40),
+                    padding: EdgeInsetsDirectional.zero,
+                    tapTargetSize: MaterialTapTargetSize.padded,
+                    backgroundColor: ZColors.of(context).surface,
+                    foregroundColor: ZColors.of(context).text,
+                    elevation: 3,
+                    shadowColor: ZColors.of(context).shadow,
+                  ),
+                ),
+              )
+            : null,
+      ),
+      body: Column(
+        children: [
+          Padding(
+            padding: const EdgeInsetsDirectional.fromSTEB(
+              ZSpacing.screen,
+              0,
+              ZSpacing.screen,
+              ZSpacing.md,
+            ),
+            child: Align(
+              alignment: AlignmentDirectional.centerStart,
+              child: Semantics(
+                header: true,
+                child: Text(
+                  l10n.ingestionReviewTitle,
+                  style: ZType.display.copyWith(
+                    color: ZColors.of(context).text,
+                  ),
                 ),
               ),
-            ],
-          );
-        },
+            ),
+          ),
+          Expanded(child: _content(queue, l10n)),
+        ],
       ),
+    );
+  }
+
+  Widget _content(
+    AsyncValue<List<ReviewCardModel>> queue,
+    AppLocalizations l10n,
+  ) {
+    return queue.when(
+      loading: () => const _Skeleton(),
+      error: (_, _) => Padding(
+        padding: const EdgeInsetsDirectional.all(ZSpacing.screen),
+        child: ZBanner(
+          message: l10n.commonErrorLoadFailed,
+          tone: ZBannerTone.error,
+          actionLabel: l10n.commonActionTryAgain,
+          onAction: () => ref.invalidate(reviewQueueProvider),
+        ),
+      ),
+      data: (all) {
+        final visible = all.where((c) => !_hidden.contains(c.itemId)).toList();
+        final shown = visible
+            .where((c) => _filter == ReviewFilter.all || c.filter == _filter)
+            .toList();
+        if (visible.isEmpty) return const _Empty();
+        return Column(
+          children: [
+            _Filters(
+              selected: _filter,
+              total: visible.length,
+              onSelect: (f) => setState(() => _filter = f),
+            ),
+            Expanded(
+              child: ListView.separated(
+                padding: const EdgeInsetsDirectional.all(ZSpacing.screen),
+                itemCount: shown.length,
+                separatorBuilder: (_, _) => const SizedBox(height: ZSpacing.md),
+                itemBuilder: (context, i) => _swipeable(shown[i]),
+              ),
+            ),
+          ],
+        );
+      },
     );
   }
 
@@ -364,7 +414,7 @@ class _Filters extends StatelessWidget {
             Padding(
               padding: const EdgeInsetsDirectional.only(end: ZSpacing.sm),
               child: Center(
-                child: ZChip(
+                child: _FilterPill(
                   label: labels[f]!,
                   selected: f == selected,
                   onTap: () => onSelect(f),
@@ -372,6 +422,72 @@ class _Filters extends StatelessWidget {
               ),
             ),
         ],
+      ),
+    );
+  }
+}
+
+/// Filter / answer pill: white with a soft shadow, mint when selected
+/// (05-review-queue mockup). 48 dp target, 40 dp visual.
+class _FilterPill extends StatelessWidget {
+  const _FilterPill({
+    required this.label,
+    required this.onTap,
+    this.selected = false,
+  });
+  final String label;
+  final VoidCallback onTap;
+  final bool selected;
+
+  @override
+  Widget build(BuildContext context) {
+    final c = ZColors.of(context);
+    final shape = BorderRadius.circular(ZRadius.pill);
+    return Semantics(
+      button: true,
+      selected: selected,
+      label: label,
+      excludeSemantics: true,
+      child: ConstrainedBox(
+        constraints: const BoxConstraints(minHeight: ZSpacing.minTarget),
+        child: Center(
+          widthFactor: 1,
+          child: DecoratedBox(
+            decoration: BoxDecoration(
+              color: selected ? c.primaryContainer : c.surface,
+              borderRadius: shape,
+              boxShadow: selected
+                  ? null
+                  : [
+                      BoxShadow(
+                        color: c.shadow,
+                        blurRadius: 10,
+                        offset: const Offset(0, 3),
+                      ),
+                    ],
+            ),
+            child: Material(
+              color: Colors.transparent,
+              child: InkWell(
+                borderRadius: shape,
+                onTap: onTap,
+                child: Padding(
+                  padding: const EdgeInsetsDirectional.symmetric(
+                    horizontal: ZSpacing.lg,
+                    vertical: ZSpacing.sm,
+                  ),
+                  child: Text(
+                    label,
+                    style: ZType.titleSmall.copyWith(
+                      color: selected ? c.primary : c.text,
+                      fontWeight: FontWeight.w500,
+                    ),
+                  ),
+                ),
+              ),
+            ),
+          ),
+        ),
       ),
     );
   }
@@ -425,19 +541,40 @@ class _CategoryCard extends ConsumerWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Text(_iso(title), style: ZType.titleSmall.copyWith(color: c.text)),
-          const SizedBox(height: ZSpacing.xs),
+          Row(
+            children: [
+              ExcludeSemantics(
+                child: Container(
+                  width: 44,
+                  height: 44,
+                  decoration: BoxDecoration(
+                    shape: BoxShape.circle,
+                    color: c.surfaceAlt,
+                  ),
+                  child: Icon(Icons.person, color: c.textMuted),
+                ),
+              ),
+              const SizedBox(width: ZSpacing.md),
+              Expanded(
+                child: Text(
+                  _iso(title),
+                  style: ZType.titleSmall.copyWith(color: c.text),
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: ZSpacing.lg),
           Text(
             l10n.ingestionReviewCatQuestion,
-            style: ZType.bodySmall.copyWith(color: c.textMuted),
+            style: ZType.title.copyWith(color: c.text),
           ),
           const SizedBox(height: ZSpacing.sm),
           Wrap(
             spacing: ZSpacing.sm,
-            runSpacing: ZSpacing.sm,
+            runSpacing: ZSpacing.xs,
             children: [
               for (final cat in cats)
-                ZChip(
+                _FilterPill(
                   label: ar ? cat.nameAr : cat.nameEn,
                   onTap: () => onPick(cat.id, ar ? cat.nameAr : cat.nameEn),
                 ),
@@ -478,48 +615,68 @@ class _MessageCard extends StatelessWidget {
           ? l10n.ingestionReviewGenGuessNoMerchant(a)
           : l10n.ingestionReviewGenGuessOut(a, m);
     }
+    final actions = <Widget>[
+      if (!card.unreadable)
+        ZButton(
+          label: l10n.commonActionConfirm,
+          expand: true,
+          onPressed: onConfirm,
+        ),
+      ZButton(
+        label: card.unreadable
+            ? l10n.ingestionReviewUnreadEnter
+            : l10n.commonActionEdit,
+        variant: ZButtonVariant.secondary,
+        expand: true,
+        onPressed: onEdit,
+      ),
+      ZButton(
+        label: l10n.commonActionDismiss,
+        variant: card.unreadable
+            ? ZButtonVariant.text
+            : ZButtonVariant.secondary,
+        expand: true,
+        onPressed: onDismiss,
+      ),
+    ];
     return ZCard(
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          if (card.isNewSender)
-            Padding(
-              padding: const EdgeInsetsDirectional.only(bottom: ZSpacing.sm),
-              child: ZPill(label: l10n.ingestionReviewNewBank),
-            ),
-          Text(
-            card.unreadable
-                ? l10n.ingestionReviewUnreadTitle(_iso(card.sender))
-                : l10n.ingestionReviewGenFrom(_iso(card.sender)),
-            style: ZType.titleSmall.copyWith(color: c.text),
+          Row(
+            children: [
+              Expanded(
+                child: Text(
+                  card.unreadable
+                      ? l10n.ingestionReviewUnreadTitle(_iso(card.sender))
+                      : l10n.ingestionReviewGenFrom(_iso(card.sender)),
+                  style: ZType.body.copyWith(color: c.textMuted),
+                ),
+              ),
+              if (card.isNewSender) ...[
+                const SizedBox(width: ZSpacing.sm),
+                ZPill(
+                  label: l10n.ingestionReviewNewBank,
+                  tone: ZPillTone.warning,
+                ),
+              ],
+            ],
           ),
           if (guess != null) ...[
-            const SizedBox(height: ZSpacing.xs),
-            Text(guess, style: ZType.body.copyWith(color: c.text)),
+            const SizedBox(height: ZSpacing.sm),
+            Text(guess, style: ZType.title.copyWith(color: c.text)),
             Text(
               l10n.ingestionReviewGenLowConfidence,
-              style: ZType.bodySmall.copyWith(color: c.textMuted),
+              style: ZType.body.copyWith(color: c.textMuted),
             ),
           ],
-          const SizedBox(height: ZSpacing.md),
-          Wrap(
-            spacing: ZSpacing.sm,
-            runSpacing: ZSpacing.sm,
+          const SizedBox(height: ZSpacing.lg),
+          Row(
             children: [
-              if (!card.unreadable)
-                ZButton(label: l10n.commonActionConfirm, onPressed: onConfirm),
-              ZButton(
-                label: card.unreadable
-                    ? l10n.ingestionReviewUnreadEnter
-                    : l10n.commonActionEdit,
-                variant: ZButtonVariant.secondary,
-                onPressed: onEdit,
-              ),
-              ZButton(
-                label: l10n.commonActionDismiss,
-                variant: ZButtonVariant.text,
-                onPressed: onDismiss,
-              ),
+              for (var i = 0; i < actions.length; i++) ...[
+                if (i > 0) const SizedBox(width: ZSpacing.sm),
+                Expanded(child: actions[i]),
+              ],
             ],
           ),
           if (card.sender.isNotEmpty)

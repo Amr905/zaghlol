@@ -89,17 +89,50 @@ class _DetailState extends ConsumerState<TransactionDetailScreen> {
     final lookups = ref.watch(txnLookupsProvider);
     final fmt = _fmt(context);
     final d = detail.value;
+    final c = ZColors.of(context);
     return Scaffold(
       appBar: AppBar(
-        leading: BackButton(onPressed: () => Navigator.of(context).maybePop()),
+        backgroundColor: Colors.transparent,
+        scrolledUnderElevation: 0,
+        toolbarHeight: 64,
+        leadingWidth: 64,
+        leading: Padding(
+          padding: const EdgeInsetsDirectional.only(start: ZSpacing.md),
+          child: Center(
+            child: BackButton(
+              onPressed: () => Navigator.of(context).maybePop(),
+              style: IconButton.styleFrom(
+                fixedSize: const Size(40, 40),
+                minimumSize: const Size(40, 40),
+                padding: EdgeInsetsDirectional.zero,
+                tapTargetSize: MaterialTapTargetSize.padded,
+                backgroundColor: c.surface,
+                foregroundColor: c.text,
+                elevation: 3,
+                shadowColor: c.shadow,
+              ),
+            ),
+          ),
+        ),
         actions: [
           if (d != null) ...[
             IconButton(
               tooltip: l.commonActionEdit,
               icon: const Icon(Icons.edit_outlined),
+              style: IconButton.styleFrom(
+                fixedSize: const Size(40, 40),
+                minimumSize: const Size(40, 40),
+                padding: EdgeInsetsDirectional.zero,
+                tapTargetSize: MaterialTapTargetSize.padded,
+                backgroundColor: c.surface,
+                foregroundColor: c.text,
+                elevation: 3,
+                shadowColor: c.shadow,
+              ),
               onPressed: () =>
                   showTransactionEditor(context, existing: d.record),
             ),
+            const SizedBox(width: ZSpacing.sm),
             PopupMenuButton<_Menu>(
               tooltip: l.commonActionMoreA11y,
               onSelected: (_) => _delete(d.record),
@@ -109,7 +142,15 @@ class _DetailState extends ConsumerState<TransactionDetailScreen> {
                   child: Text(l.commonActionDelete),
                 ),
               ],
+              child: SizedBox(
+                width: ZSpacing.minTarget,
+                height: ZSpacing.minTarget,
+                child: Center(
+                  child: _CircleDisc(child: const Icon(Icons.more_horiz)),
+                ),
+              ),
             ),
+            const SizedBox(width: ZSpacing.md),
           ],
         ],
       ),
@@ -399,6 +440,37 @@ class _NoteFormState extends State<_NoteForm> {
   }
 }
 
+/// White 40 dp disc behind a top-bar action (04-transaction-detail mockup).
+class _CircleDisc extends StatelessWidget {
+  const _CircleDisc({required this.child});
+  final Widget child;
+
+  @override
+  Widget build(BuildContext context) {
+    final c = ZColors.of(context);
+    return Container(
+      width: 40,
+      height: 40,
+      alignment: AlignmentDirectional.center,
+      decoration: BoxDecoration(
+        shape: BoxShape.circle,
+        color: c.surface,
+        boxShadow: [
+          BoxShadow(
+            color: c.shadow,
+            blurRadius: 12,
+            offset: const Offset(0, 3),
+          ),
+        ],
+      ),
+      child: IconTheme(
+        data: IconThemeData(color: c.text, size: 20),
+        child: child,
+      ),
+    );
+  }
+}
+
 class _Skeleton extends StatelessWidget {
   const _Skeleton();
 
@@ -479,20 +551,35 @@ class _Body extends StatelessWidget {
         ? null
         : lookups.account(counterpart.accountId);
 
-    Widget field(String label, String value, {VoidCallback? onTap}) => ZListRow(
-      title: label,
-      trailing: Flexible(
-        child: Text(
-          value,
-          textAlign: TextAlign.end,
-          style: ZType.body.copyWith(color: c.textMuted),
-        ),
-      ),
-      onTap: onTap,
-    );
+    var firstField = true;
+    Widget field(
+      String label,
+      String value, {
+      VoidCallback? onTap,
+      Widget? valueWidget,
+      bool action = false,
+      bool chevron = false,
+    }) {
+      final divider = !firstField;
+      firstField = false;
+      return _FieldRow(
+        label: label,
+        value: value,
+        valueWidget: valueWidget,
+        onTap: onTap,
+        action: action,
+        chevron: chevron,
+        divider: divider,
+      );
+    }
 
     return ListView(
-      padding: const EdgeInsetsDirectional.all(ZSpacing.lg),
+      padding: const EdgeInsetsDirectional.fromSTEB(
+        ZSpacing.lg,
+        0,
+        ZSpacing.lg,
+        ZSpacing.xl,
+      ),
       children: [
         if (t.status == TxnStatus.declined)
           Padding(
@@ -517,10 +604,14 @@ class _Body extends StatelessWidget {
         Column(
           children: [
             ZCategoryTile(
+              size: 64,
               color: _parseColor(cat?.color ?? '', c.primary),
-              child: Text(cat?.icon ?? '•', style: ZType.title),
+              child: Text(
+                cat?.icon ?? '•',
+                style: ZType.display.copyWith(fontSize: 30, height: 1.2),
+              ),
             ),
-            const SizedBox(height: ZSpacing.md),
+            const SizedBox(height: ZSpacing.lg),
             ZMoneyText(
               text: amountText,
               kind: moneyKindOf(t),
@@ -561,6 +652,7 @@ class _Body extends StatelessWidget {
               field(
                 l.transactionsDetailFieldCard,
                 acc == null ? '—' : accountName(acc, fmt),
+                chevron: acc != null,
               ),
               field(
                 l.transactionsDetailFieldDate,
@@ -571,7 +663,15 @@ class _Body extends StatelessWidget {
                   l.transactionsDetailFieldBalance,
                   fmt.money(detail.balanceAfter!),
                 ),
-              field(l.transactionsDetailFieldSource, sourceLabel(l, t.source)),
+              field(
+                l.transactionsDetailFieldSource,
+                sourceLabel(l, t.source),
+                valueWidget: ZPill(
+                  label: sourceLabel(l, t.source),
+                  tone: ZPillTone.info,
+                  icon: Icons.chat_bubble_outline,
+                ),
+              ),
               field(
                 l.transactionsDetailFieldReference,
                 detail.referenceNo == null
@@ -584,6 +684,7 @@ class _Body extends StatelessWidget {
                     ? l.transactionsDetailNoteAdd
                     : t.note!,
                 onTap: onNote,
+                action: t.note == null || t.note!.isEmpty,
               ),
             ],
           ),
@@ -597,24 +698,26 @@ class _Body extends StatelessWidget {
             child: Column(
               children: [
                 if (isExpense && onSplit != null)
-                  ZListRow(
+                  _ActionRow(
                     title: l.transactionsDetailSplit,
-                    leading: const Icon(Icons.call_split),
-                    showChevron: true,
+                    icon: Icons.group_outlined,
+                    tint: c.primary,
                     onTap: () => onSplit!(t.id),
                   ),
                 if (!t.isInternal && onLinkTransfer != null)
-                  ZListRow(
+                  _ActionRow(
                     title: l.transactionsDetailLinkTransfer,
-                    leading: const Icon(Icons.swap_horiz),
-                    showChevron: true,
+                    icon: Icons.swap_horiz,
+                    tint: c.textMuted,
+                    divider: isExpense && onSplit != null,
                     onTap: () => onLinkTransfer!(t.id),
                   ),
                 if (isIncoming && onMoneyBackFor != null)
-                  ZListRow(
+                  _ActionRow(
                     title: l.transactionsDetailMoneyBackFor,
-                    leading: const Icon(Icons.undo),
-                    showChevron: true,
+                    icon: Icons.undo,
+                    tint: c.primary,
+                    divider: !t.isInternal && onLinkTransfer != null,
                     onTap: () => onMoneyBackFor!(t.id),
                   ),
               ],
@@ -624,6 +727,165 @@ class _Body extends StatelessWidget {
         const SizedBox(height: ZSpacing.lg),
         _HowRead(detail: detail, fmt: fmt),
       ],
+    );
+  }
+}
+
+/// One label/value line of the facts card: label on the start side (muted),
+/// value on the end side (ink), thin inset divider above all but the first.
+class _FieldRow extends StatelessWidget {
+  const _FieldRow({
+    required this.label,
+    required this.value,
+    required this.divider,
+    this.valueWidget,
+    this.onTap,
+    this.action = false,
+    this.chevron = false,
+  });
+
+  final String label;
+  final String value;
+  final Widget? valueWidget;
+  final VoidCallback? onTap;
+  final bool action;
+  final bool chevron;
+  final bool divider;
+
+  @override
+  Widget build(BuildContext context) {
+    final c = ZColors.of(context);
+    final rtl = Directionality.of(context) == TextDirection.rtl;
+    final valueStyle = action
+        ? ZType.titleSmall.copyWith(color: c.primary)
+        : ZType.titleSmall.copyWith(color: c.text, fontWeight: FontWeight.w500);
+    final row = Padding(
+      padding: const EdgeInsetsDirectional.symmetric(
+        horizontal: ZSpacing.lg,
+        vertical: ZSpacing.md,
+      ),
+      child: ConstrainedBox(
+        constraints: const BoxConstraints(minHeight: 32),
+        child: Row(
+          children: [
+            Text(label, style: ZType.body.copyWith(color: c.textMuted)),
+            const SizedBox(width: ZSpacing.md),
+            Expanded(
+              child: Align(
+                alignment: AlignmentDirectional.centerEnd,
+                child:
+                    valueWidget ??
+                    Text(value, textAlign: TextAlign.end, style: valueStyle),
+              ),
+            ),
+            if (chevron) ...[
+              const SizedBox(width: ZSpacing.xs),
+              Icon(
+                rtl ? Icons.chevron_left : Icons.chevron_right,
+                size: 20,
+                color: c.textMuted,
+              ),
+            ],
+          ],
+        ),
+      ),
+    );
+    return Semantics(
+      container: true,
+      button: onTap != null,
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          if (divider)
+            Padding(
+              padding: const EdgeInsetsDirectional.only(start: ZSpacing.lg),
+              child: Divider(height: 1, thickness: 1, color: c.outline),
+            ),
+          InkWell(
+            onTap: onTap,
+            child: ConstrainedBox(
+              constraints: const BoxConstraints(minHeight: ZSpacing.minTarget),
+              child: row,
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+/// Entry-point row with a tinted 44 dp tile (split, link transfer, ...).
+class _ActionRow extends StatelessWidget {
+  const _ActionRow({
+    required this.title,
+    required this.icon,
+    required this.tint,
+    required this.onTap,
+    this.divider = false,
+  });
+
+  final String title;
+  final IconData icon;
+  final Color tint;
+  final VoidCallback onTap;
+  final bool divider;
+
+  @override
+  Widget build(BuildContext context) {
+    final c = ZColors.of(context);
+    final rtl = Directionality.of(context) == TextDirection.rtl;
+    return Semantics(
+      container: true,
+      button: true,
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          if (divider)
+            Padding(
+              padding: const EdgeInsetsDirectional.only(start: ZSpacing.lg),
+              child: Divider(height: 1, thickness: 1, color: c.outline),
+            ),
+          InkWell(
+            onTap: onTap,
+            child: ConstrainedBox(
+              constraints: const BoxConstraints(minHeight: 64),
+              child: Padding(
+                padding: const EdgeInsetsDirectional.symmetric(
+                  horizontal: ZSpacing.lg,
+                  vertical: ZSpacing.sm,
+                ),
+                child: Row(
+                  children: [
+                    ExcludeSemantics(
+                      child: Container(
+                        width: 44,
+                        height: 44,
+                        decoration: BoxDecoration(
+                          color: tint.withValues(alpha: 0.5),
+                          borderRadius: BorderRadius.circular(ZRadius.md),
+                        ),
+                        child: Icon(icon, color: c.surface, size: 24),
+                      ),
+                    ),
+                    const SizedBox(width: ZSpacing.md),
+                    Expanded(
+                      child: Text(
+                        title,
+                        style: ZType.body.copyWith(color: c.text),
+                      ),
+                    ),
+                    Icon(
+                      rtl ? Icons.chevron_left : Icons.chevron_right,
+                      size: 20,
+                      color: c.textMuted,
+                    ),
+                  ],
+                ),
+              ),
+            ),
+          ),
+        ],
+      ),
     );
   }
 }
@@ -648,6 +910,9 @@ class _HowRead extends StatelessWidget {
       child: Theme(
         data: Theme.of(context).copyWith(dividerColor: Colors.transparent),
         child: ExpansionTile(
+          leading: Icon(Icons.search, color: c.text),
+          iconColor: c.textMuted,
+          collapsedIconColor: c.textMuted,
           title: Text(
             l.transactionsDetailHowTitle,
             style: ZType.titleSmall.copyWith(color: c.text),
@@ -669,15 +934,12 @@ class _HowRead extends StatelessWidget {
                   width: double.infinity,
                   padding: const EdgeInsetsDirectional.all(ZSpacing.md),
                   decoration: BoxDecoration(
-                    color: c.surfaceAlt,
-                    borderRadius: BorderRadius.circular(ZRadius.md),
+                    color: c.primaryContainer.withValues(alpha: 0.55),
+                    borderRadius: BorderRadius.circular(ZRadius.lg),
                   ),
                   child: SelectableText(
                     raw,
-                    style: ZType.bodySmall.copyWith(
-                      color: c.text,
-                      fontFamily: 'monospace',
-                    ),
+                    style: ZType.bodySmall.copyWith(color: c.textMuted),
                   ),
                 ),
               ),

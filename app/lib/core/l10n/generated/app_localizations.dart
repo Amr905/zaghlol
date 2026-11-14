@@ -2491,7 +2491,7 @@ abstract class AppLocalizations {
   /// L · expenses, opens S-15 Mode A
   ///
   /// In ar, this message translates to:
-  /// **'تقسيم / فلوس راجعة'**
+  /// **'تقسيم / فلوس راجعة من صحابك'**
   String get transactionsDetailSplit;
 
   /// L · opens S-16
@@ -10374,6 +10374,18 @@ abstract class AppLocalizations {
   /// In ar, this message translates to:
   /// **'فكّرني بعد ٧ أيام'**
   String get iosSetupNudgeSnoozeA11y;
+
+  /// S-50 design pass
+  ///
+  /// In ar, this message translates to:
+  /// **'اسأل زغلول'**
+  String get chatMainTitle;
+
+  /// S-50 design pass
+  ///
+  /// In ar, this message translates to:
+  /// **'قصف جبهة'**
+  String get chatMainRoastTag;
 }
 
 class _AppLocalizationsDelegate

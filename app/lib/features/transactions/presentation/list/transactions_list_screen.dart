@@ -112,6 +112,13 @@ class _State extends ConsumerState<TransactionsListScreen> {
       },
       child: Scaffold(
         appBar: AppBar(
+          backgroundColor: Colors.transparent,
+          scrolledUnderElevation: 0,
+          toolbarHeight: 72,
+          centerTitle: false,
+          titleTextStyle: (sel.active ? ZType.title : ZType.display).copyWith(
+            color: ZColors.of(context).text,
+          ),
           leading: sel.active
               ? IconButton(
                   tooltip: l.commonActionCancel,
@@ -218,28 +225,15 @@ class _State extends ConsumerState<TransactionsListScreen> {
     CivilDate today,
   ) {
     final l = AppLocalizations.of(context);
-    final entries = <Object>[];
-    CivilDate? day;
-    var dayRows = <TransactionRecord>[];
-    void flush() {
-      if (day == null) return;
-      entries.insert(entries.length - dayRows.length, (day, dayRows));
-    }
-
+    final groups = <(CivilDate, List<TransactionRecord>)>[];
     for (final t in state.items) {
       final d = CivilDate.fromLocalMs(
         t.occurredAt.millisecondsSinceEpoch,
         t.occurredTzOffsetMin,
       );
-      if (d != day) {
-        flush();
-        day = d;
-        dayRows = [];
-      }
-      dayRows.add(t);
-      entries.add(t);
+      if (groups.isEmpty || groups.last.$1 != d) groups.add((d, []));
+      groups.last.$2.add(t);
     }
-    flush();
 
     String dayLabel(CivilDate d) {
       if (d == today) return l.commonDateToday;
@@ -254,29 +248,49 @@ class _State extends ConsumerState<TransactionsListScreen> {
     final notifier = ref.read(txnSelectionProvider.notifier);
     return ListView.builder(
       controller: _scroll,
-      itemCount: entries.length,
+      padding: const EdgeInsetsDirectional.only(bottom: ZSpacing.xl),
+      itemCount: groups.length,
       itemBuilder: (context, i) {
-        final e = entries[i];
-        if (e is (CivilDate, List<TransactionRecord>)) {
-          return TxnDayHeader(
-            label: dayLabel(e.$1),
-            totals: dayTotals(e.$2),
-            fmt: fmt,
-          );
-        }
-        final t = e as TransactionRecord;
-        return TxnRow(
-          key: ValueKey(t.id),
-          txn: t,
-          lookups: lookups,
-          fmt: fmt,
-          selecting: sel.active,
-          selected: sel.ids.contains(t.id),
-          onTap: () => sel.active
-              ? notifier.toggle(t.id)
-              : (widget.onOpenTransaction ?? _openDetail)(t.id),
-          onLongPress: () =>
-              sel.active ? notifier.toggle(t.id) : notifier.enter(t.id),
+        final (day, rows) = groups[i];
+        return Column(
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+            TxnDayHeader(
+              label: dayLabel(day),
+              totals: dayTotals(rows),
+              fmt: fmt,
+            ),
+            Padding(
+              padding: const EdgeInsetsDirectional.symmetric(
+                horizontal: ZSpacing.lg,
+              ),
+              child: ZCard(
+                padding: EdgeInsetsDirectional.zero,
+                child: Column(
+                  children: [
+                    for (var j = 0; j < rows.length; j++)
+                      TxnRow(
+                        key: ValueKey(rows[j].id),
+                        txn: rows[j],
+                        lookups: lookups,
+                        fmt: fmt,
+                        divider: j > 0,
+                        selecting: sel.active,
+                        selected: sel.ids.contains(rows[j].id),
+                        onTap: () => sel.active
+                            ? notifier.toggle(rows[j].id)
+                            : (widget.onOpenTransaction ?? _openDetail)(
+                                rows[j].id,
+                              ),
+                        onLongPress: () => sel.active
+                            ? notifier.toggle(rows[j].id)
+                            : notifier.enter(rows[j].id),
+                      ),
+                  ],
+                ),
+              ),
+            ),
+          ],
         );
       },
     );
@@ -424,6 +438,20 @@ class _SearchField extends StatelessWidget {
         onChanged: onChanged,
         textInputAction: TextInputAction.search,
         decoration: InputDecoration(
+          filled: true,
+          fillColor: ZColors.of(context).surface,
+          border: OutlineInputBorder(
+            borderRadius: BorderRadius.circular(ZRadius.pill),
+            borderSide: BorderSide.none,
+          ),
+          enabledBorder: OutlineInputBorder(
+            borderRadius: BorderRadius.circular(ZRadius.pill),
+            borderSide: BorderSide.none,
+          ),
+          focusedBorder: OutlineInputBorder(
+            borderRadius: BorderRadius.circular(ZRadius.pill),
+            borderSide: BorderSide(color: ZColors.of(context).primary),
+          ),
           hintText: l.transactionsListSearchHint,
           prefixIcon: const Icon(Icons.search),
           suffixIcon: controller.text.isEmpty

@@ -81,8 +81,11 @@ class TxnRow extends StatelessWidget {
     required this.selected,
     required this.onTap,
     required this.onLongPress,
+    this.divider = false,
   });
 
+  /// Thin inset line above the row (inside a day card).
+  final bool divider;
   final TransactionRecord txn;
   final TxnLookups lookups;
   final TxnFmt fmt;
@@ -113,6 +116,7 @@ class TxnRow extends StatelessWidget {
             size: 40,
           )
         : ZCategoryTile(
+            size: 44,
             color: _parseColor(cat?.color ?? '', c.primary),
             child: Text(cat?.icon ?? '•', style: ZType.title),
           );
@@ -132,16 +136,26 @@ class TxnRow extends StatelessWidget {
       child: GestureDetector(
         behavior: HitTestBehavior.opaque,
         onLongPress: onLongPress,
-        child: ZListRow(
-          title: title,
-          subtitle: subtitle,
-          leading: leading,
-          trailing: ZMoneyText(
-            text: amountText,
-            kind: moneyKindOf(txn),
-            size: ZMoneySize.body,
-          ),
-          onTap: onTap,
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            if (divider)
+              Padding(
+                padding: const EdgeInsetsDirectional.only(start: 72),
+                child: Divider(height: 1, thickness: 1, color: c.outline),
+              ),
+            ZListRow(
+              title: title,
+              subtitle: subtitle,
+              leading: leading,
+              trailing: ZMoneyText(
+                text: amountText,
+                kind: moneyKindOf(txn),
+                size: ZMoneySize.body,
+              ),
+              onTap: onTap,
+            ),
+          ],
         ),
       ),
     );

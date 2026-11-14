@@ -1575,7 +1575,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get transactionsDetailNoteHint => 'Write a note…';
 
   @override
-  String get transactionsDetailSplit => 'Split / money back';
+  String get transactionsDetailSplit => 'Split / money back from friends';
 
   @override
   String get transactionsDetailLinkTransfer => 'This is my own transfer';
@@ -7045,4 +7045,10 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get iosSetupNudgeSnoozeA11y => 'Remind me in 7 days';
+
+  @override
+  String get chatMainTitle => 'Ask Zaghlol';
+
+  @override
+  String get chatMainRoastTag => 'Roast';
 }
