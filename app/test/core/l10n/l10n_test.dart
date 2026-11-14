@@ -46,6 +46,18 @@ void main() {
       expect(normalizeDigits('‏١ ٢‎'), '12');
       expect(normalizeDigits('-٠٫٠٥'), '-0.05');
     });
+    test(
+      'FU-119: Arabic separators are dropped only between proper groups',
+      () {
+        expect(normalizeDigits('١٬٢٣٤٬٥٦٧'), '1234567');
+        expect(normalizeDigits('١٢٣،٤٥٦'), '123456');
+        // Mis-grouped: the separator stays, the strict parser rejects it.
+        expect(normalizeDigits('١٬٢'), '1٬2');
+        expect(normalizeDigits('١٬٢٣٤٥'), '1٬2345');
+        expect(normalizeDigits('٬١٢٣'), '٬123');
+        expect(normalizeDigits('١٢٣٤٬٥٦٧'), '1234٬567');
+      },
+    );
     test('garbage passes through for the strict parser', () {
       expect(normalizeDigits('12a'), '12a');
     });
