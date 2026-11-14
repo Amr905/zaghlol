@@ -92,11 +92,12 @@ class LocalDataWiper(
             val app = context.applicationContext
             return LocalDataWiper(
                 roots = listOf(app.filesDir, app.noBackupFilesDir, app.cacheDir),
-                parts = listOf(
+                parts = listOf<() -> Unit>(
                     {
                         val wm = WorkManager.getInstance(app)
                         wm.cancelAllWork().result.get()
-                        wm.pruneWork()
+                        wm.pruneWork().result.get()
+                        Unit
                     },
                     {
                         (app.getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager).cancelAll()
