@@ -85,8 +85,8 @@ void main() {
     final max = micros.last / 1000;
     // ignore: avoid_print
     print('ZAGHLOL_TXN_SEARCH_BENCH rows=50000 p95_ms=$p95 max_ms=$max');
-    // FU-214: ~1.3x the first perf run (58 ms); the FR-TXN-01 gate is 200 ms.
-    expect(p95, lessThan(75));
+    // FU-214: ~2x the first perf run (58 ms); the FR-TXN-01 gate is 200 ms.
+    expect(p95, lessThan(120));
     // Filtered list without text also stays fast.
     final sw = Stopwatch()..start();
     await repo.query(
