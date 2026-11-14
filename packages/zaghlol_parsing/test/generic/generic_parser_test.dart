@@ -476,7 +476,8 @@ void main() {
       // ignore: avoid_print
       print('generic parse mean: ${meanMicros.round()} us over $runs runs');
       expect(suggested, greaterThan(runs ~/ 2));
-      expect(meanMicros, lessThan(10000), reason: 'budget is 10 ms');
+      // FU-214: ~1.3x the first perf run (69 us).
+      expect(meanMicros, lessThan(90), reason: 'budget is 90 us');
     }, tags: 'benchmark');
   });
 }

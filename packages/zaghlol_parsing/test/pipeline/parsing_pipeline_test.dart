@@ -835,7 +835,8 @@ void main() {
     expect(parsed, greaterThan(runs ~/ 2));
     // ignore: avoid_print
     print('pipeline parse mean: ${meanMicros.round()} us over $runs runs');
-    expect(meanMicros, lessThan(2000), reason: 'mean ${meanMicros.round()} us');
+    // FU-214: ~1.3x the first perf run (83 us).
+    expect(meanMicros, lessThan(110), reason: 'mean ${meanMicros.round()} us');
   }, tags: 'benchmark');
 }
 

@@ -198,6 +198,7 @@ void main() {
         );
         expect(sw.elapsedMilliseconds, lessThan(50));
       },
+      tags: 'benchmark', // FU-214: timing assertion, runs in the perf job.
     );
   });
 }
