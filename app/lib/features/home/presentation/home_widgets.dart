@@ -626,13 +626,18 @@ class HomeGreeting extends ConsumerWidget {
     final part = greetingPart(h);
     return Semantics(
       header: true,
-      child: Text(
-        l.homeGreetingByTime(part),
-        key: const ValueKey('home-greeting'),
-        style: ZType.display.copyWith(
-          fontSize: fontSize ?? 34,
-          height: 1.3,
-          color: c.text,
+      child: FittedBox(
+        fit: BoxFit.scaleDown,
+        alignment: AlignmentDirectional.centerStart,
+        child: Text(
+          l.homeGreetingByTime(part),
+          key: const ValueKey('home-greeting'),
+          maxLines: 1,
+          style: ZType.display.copyWith(
+            fontSize: fontSize ?? 34,
+            height: 1.3,
+            color: c.text,
+          ),
         ),
       ),
     );

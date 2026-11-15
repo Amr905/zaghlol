@@ -257,21 +257,27 @@ class _AddOption extends StatelessWidget {
                       ),
                       child: Icon(icon, color: c.primary),
                     ),
-                    const Spacer(),
+                    if (goldBadge != null) const Spacer(),
                     if (goldBadge != null)
-                      DecoratedBox(
-                        decoration: BoxDecoration(
-                          color: c.warningBg,
-                          borderRadius: BorderRadius.circular(ZRadius.pill),
-                        ),
-                        child: Padding(
-                          padding: const EdgeInsetsDirectional.symmetric(
-                            horizontal: ZSpacing.md,
-                            vertical: ZSpacing.xs,
+                      Flexible(
+                        child: DecoratedBox(
+                          decoration: BoxDecoration(
+                            color: c.warningBg,
+                            borderRadius: BorderRadius.circular(ZRadius.pill),
                           ),
-                          child: Text(
-                            goldBadge!,
-                            style: ZType.caption.copyWith(color: c.warningText),
+                          child: Padding(
+                            padding: const EdgeInsetsDirectional.symmetric(
+                              horizontal: ZSpacing.md,
+                              vertical: ZSpacing.xs,
+                            ),
+                            child: Text(
+                              goldBadge!,
+                              maxLines: 1,
+                              overflow: TextOverflow.ellipsis,
+                              style: ZType.caption.copyWith(
+                                color: c.warningText,
+                              ),
+                            ),
                           ),
                         ),
                       ),
