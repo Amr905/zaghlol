@@ -27,7 +27,15 @@
       "direction": "expense",
       "baseConfidence": 0.9,
       "source": "synthetic-unverified",
-      "pattern": "you spent (?<cur>[£€$])(?<amount>[\\d,.]+) at (?<merchant>.+?)(?:\\. |\\.?$)(?:\\.? ?(?:available )?balance:? ?[£€$]?(?<balance>[\\d,.]+))?"
+      "pattern": "you spent (?<cur>(?:[a-z]{1,2})?[£€$])(?<amount>[\\d,.]+) at (?<merchant>.+?)(?:\\. |\\.?$)(?:\\.? ?(?:available )?balance:? ?[£€$]?(?<balance>[\\d,.]+))?",
+      "currencyMap": {
+        "a$": "AUD",
+        "ca$": "CAD",
+        "s$": "SGD",
+        "us$": "USD",
+        "nz$": "NZD",
+        "hk$": "HKD"
+      }
     },
     {
       "id": "monzo.transfer_in.en",
@@ -40,7 +48,15 @@
       "direction": "income",
       "baseConfidence": 0.9,
       "source": "synthetic-unverified",
-      "pattern": "you received (?<cur>[£€$])(?<amount>[\\d,.]+) from (?<counterparty>.+?)(?:\\. |\\.?$)(?:\\.? ?(?:available )?balance:? ?[£€$]?(?<balance>[\\d,.]+))?"
+      "pattern": "you received (?<cur>(?:[a-z]{1,2})?[£€$])(?<amount>[\\d,.]+) from (?<counterparty>.+?)(?:\\. |\\.?$)(?:\\.? ?(?:available )?balance:? ?[£€$]?(?<balance>[\\d,.]+))?",
+      "currencyMap": {
+        "a$": "AUD",
+        "ca$": "CAD",
+        "s$": "SGD",
+        "us$": "USD",
+        "nz$": "NZD",
+        "hk$": "HKD"
+      }
     },
     {
       "id": "monzo.refund.en",
@@ -53,7 +69,15 @@
       "direction": "income",
       "baseConfidence": 0.9,
       "source": "synthetic-unverified",
-      "pattern": "you were refunded (?<cur>[£€$])(?<amount>[\\d,.]+) by (?<merchant>.+?)(?:\\. |\\.?$)"
+      "pattern": "you were refunded (?<cur>(?:[a-z]{1,2})?[£€$])(?<amount>[\\d,.]+) by (?<merchant>.+?)(?:\\. |\\.?$)",
+      "currencyMap": {
+        "a$": "AUD",
+        "ca$": "CAD",
+        "s$": "SGD",
+        "us$": "USD",
+        "nz$": "NZD",
+        "hk$": "HKD"
+      }
     },
     {
       "id": "monzo.declined.en",
@@ -66,7 +90,15 @@
       "direction": "neutral",
       "baseConfidence": 0.9,
       "source": "synthetic-unverified",
-      "pattern": "your (?<cur>[£€$])(?<amount>[\\d,.]+) payment at (?<merchant>.+?) was declined(?:\\. |\\.?$)"
+      "pattern": "your (?<cur>(?:[a-z]{1,2})?[£€$])(?<amount>[\\d,.]+) payment at (?<merchant>.+?) was declined(?:\\. |\\.?$)",
+      "currencyMap": {
+        "a$": "AUD",
+        "ca$": "CAD",
+        "s$": "SGD",
+        "us$": "USD",
+        "nz$": "NZD",
+        "hk$": "HKD"
+      }
     }
   ]
 }

@@ -4754,7 +4754,7 @@ class AppLocalizationsAr extends AppLocalizations {
 
   @override
   String get zakahMainHowDebts =>
-      'الديون اللي ميعادها جه بتتخصم من الكاش قبل الحساب.';
+      'الديون لسه مش بتتخصم. لو عليك ديون حل ميعادها، اسأل عالم شرعي هتأثر على زكاتك إزاي.';
 
   @override
   String zakahMainLotA11y(String lot, String status, String dueNative) {

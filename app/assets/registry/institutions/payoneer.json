@@ -27,7 +27,15 @@
       "direction": "income",
       "baseConfidence": 0.9,
       "source": "synthetic-unverified",
-      "pattern": "you received (?<cur>[£€$])(?<amount>[\\d,.]+) from (?<counterparty>.+?)(?:\\. |\\.?$)"
+      "pattern": "you received (?<cur>(?:[a-z]{1,2})?[£€$])(?<amount>[\\d,.]+) from (?<counterparty>.+?)(?:\\. |\\.?$)",
+      "currencyMap": {
+        "a$": "AUD",
+        "ca$": "CAD",
+        "s$": "SGD",
+        "us$": "USD",
+        "nz$": "NZD",
+        "hk$": "HKD"
+      }
     },
     {
       "id": "payoneer.transfer_out.en",
@@ -40,7 +48,15 @@
       "direction": "expense",
       "baseConfidence": 0.9,
       "source": "synthetic-unverified",
-      "pattern": "withdrawal of (?<cur>[£€$])(?<amount>[\\d,.]+) to (?<counterparty>.+?) (?:was initiated|is on its way|has been completed)(?:\\. |\\.?$)"
+      "pattern": "withdrawal of (?<cur>(?:[a-z]{1,2})?[£€$])(?<amount>[\\d,.]+) to (?<counterparty>.+?) (?:was initiated|is on its way|has been completed)(?:\\. |\\.?$)",
+      "currencyMap": {
+        "a$": "AUD",
+        "ca$": "CAD",
+        "s$": "SGD",
+        "us$": "USD",
+        "nz$": "NZD",
+        "hk$": "HKD"
+      }
     },
     {
       "id": "payoneer.card_purchase.en",
@@ -53,7 +69,15 @@
       "direction": "expense",
       "baseConfidence": 0.9,
       "source": "synthetic-unverified",
-      "pattern": "card purchase of (?<cur>[£€$])(?<amount>[\\d,.]+) at (?<merchant>.+?)(?: (?:with|on) (?:your )?(?:debit |credit )?card ending (?<last4>\\d{4}))?(?:\\. |\\.?$)"
+      "pattern": "card purchase of (?<cur>(?:[a-z]{1,2})?[£€$])(?<amount>[\\d,.]+) at (?<merchant>.+?)(?: (?:with|on) (?:your )?(?:debit |credit )?card ending (?<last4>\\d{4}))?(?:\\. |\\.?$)",
+      "currencyMap": {
+        "a$": "AUD",
+        "ca$": "CAD",
+        "s$": "SGD",
+        "us$": "USD",
+        "nz$": "NZD",
+        "hk$": "HKD"
+      }
     }
   ]
 }

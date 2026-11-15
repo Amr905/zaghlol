@@ -27,7 +27,15 @@
       "direction": "expense",
       "baseConfidence": 0.9,
       "source": "synthetic-unverified",
-      "pattern": "card payment of (?<cur>[£€$])(?<amount>[\\d,.]+) at (?<merchant>.+?)(?:\\. |\\.?$)(?:\\.? ?(?:available )?balance:? ?[£€$]?(?<balance>[\\d,.]+))?"
+      "pattern": "card payment of (?<cur>(?:[a-z]{1,2})?[£€$])(?<amount>[\\d,.]+) at (?<merchant>.+?)(?:\\. |\\.?$)(?:\\.? ?(?:available )?balance:? ?[£€$]?(?<balance>[\\d,.]+))?",
+      "currencyMap": {
+        "a$": "AUD",
+        "ca$": "CAD",
+        "s$": "SGD",
+        "us$": "USD",
+        "nz$": "NZD",
+        "hk$": "HKD"
+      }
     },
     {
       "id": "n26.transfer_in.en",
@@ -40,7 +48,15 @@
       "direction": "income",
       "baseConfidence": 0.9,
       "source": "synthetic-unverified",
-      "pattern": "money received: (?<cur>[£€$])(?<amount>[\\d,.]+) from (?<counterparty>.+?)(?:\\. |\\.?$)"
+      "pattern": "money received: (?<cur>(?:[a-z]{1,2})?[£€$])(?<amount>[\\d,.]+) from (?<counterparty>.+?)(?:\\. |\\.?$)",
+      "currencyMap": {
+        "a$": "AUD",
+        "ca$": "CAD",
+        "s$": "SGD",
+        "us$": "USD",
+        "nz$": "NZD",
+        "hk$": "HKD"
+      }
     },
     {
       "id": "n26.refund.en",
@@ -53,7 +69,15 @@
       "direction": "income",
       "baseConfidence": 0.9,
       "source": "synthetic-unverified",
-      "pattern": "(?<cur>[£€$])(?<amount>[\\d,.]+) refunded by (?<merchant>.+?)(?:\\. |\\.?$)"
+      "pattern": "(?<cur>(?:[a-z]{1,2})?[£€$])(?<amount>[\\d,.]+) refunded by (?<merchant>.+?)(?:\\. |\\.?$)",
+      "currencyMap": {
+        "a$": "AUD",
+        "ca$": "CAD",
+        "s$": "SGD",
+        "us$": "USD",
+        "nz$": "NZD",
+        "hk$": "HKD"
+      }
     },
     {
       "id": "n26.declined.en",
@@ -66,7 +90,15 @@
       "direction": "neutral",
       "baseConfidence": 0.9,
       "source": "synthetic-unverified",
-      "pattern": "your card was declined for (?<cur>[£€$])(?<amount>[\\d,.]+) at (?<merchant>.+?)(?:\\. |\\.?$)"
+      "pattern": "your card was declined for (?<cur>(?:[a-z]{1,2})?[£€$])(?<amount>[\\d,.]+) at (?<merchant>.+?)(?:\\. |\\.?$)",
+      "currencyMap": {
+        "a$": "AUD",
+        "ca$": "CAD",
+        "s$": "SGD",
+        "us$": "USD",
+        "nz$": "NZD",
+        "hk$": "HKD"
+      }
     }
   ]
 }

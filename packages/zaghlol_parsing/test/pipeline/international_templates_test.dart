@@ -45,6 +45,69 @@ ParseParsed _parse(
 void main() {
   final p = _pipeline();
 
+  group('dollar-prefix currencies are never silently USD', () {
+    final p = _pipeline();
+    ParseParsed rev(String b) => _parse(
+      p,
+      'com.revolut.revolut',
+      b,
+      channel: RegistryChannel.notification,
+    );
+    for (final c in const [
+      ['A\$12.00', 'AUD'],
+      ['CA\$12.00', 'CAD'],
+      ['S\$12.00', 'SGD'],
+      ['US\$12.00', 'USD'],
+      ['NZ\$12.00', 'NZD'],
+      ['HK\$12.00', 'HKD'],
+      ['\$12.00', 'USD'],
+    ]) {
+      test('Revolut ${c[0]} -> ${c[1]}', () {
+        final r = rev('Card payment\n${c[0]} paid to SHELL FUEL');
+        expect(r.fields.amount!.currency.code, c[1]);
+        expect(r.fields.amount!.minor, 1200);
+      });
+    }
+    test('Monzo A\$5.00 -> AUD', () {
+      final r = _parse(
+        p,
+        'co.uk.getmondo',
+        'You spent A\$5.00 at SHELL',
+        channel: RegistryChannel.notification,
+      );
+      expect(r.fields.amount!.currency.code, 'AUD');
+    });
+    test('N26 CA\$5.00 -> CAD', () {
+      final r = _parse(
+        p,
+        'de.number26.android',
+        'Card payment of CA\$5.00 at SHELL',
+        channel: RegistryChannel.notification,
+      );
+      expect(r.fields.amount!.currency.code, 'CAD');
+    });
+    test('bunq \$5.00 -> USD and A\$5.00 -> AUD', () {
+      for (final e in const {'\$': 'USD', 'A\$': 'AUD'}.entries) {
+        final r = _parse(
+          p,
+          'com.bunq.android',
+          'You paid ${e.key}5.00 at SHELL',
+          channel: RegistryChannel.notification,
+        );
+        expect(r.fields.amount!.currency.code, e.value);
+      }
+    });
+    test('Payoneer S\$5.00 -> SGD', () {
+      final r = _parse(
+        p,
+        'com.payoneer.android',
+        'You received S\$5.00 from ACME',
+        channel: RegistryChannel.notification,
+      );
+      expect(r.fields.amount!.currency.code, 'SGD');
+    });
+  });
+
   test('Wise USD to EGP conversion gives fx_conversion with two legs', () {
     final r = _parse(
       p,

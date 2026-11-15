@@ -4654,7 +4654,7 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get zakahMainHowDebts =>
-      'Debts that are due now are deducted from cash first.';
+      'Debts are not deducted yet. If you owe money that is due now, ask a scholar how it changes your Zakah.';
 
   @override
   String zakahMainLotA11y(String lot, String status, String dueNative) {
