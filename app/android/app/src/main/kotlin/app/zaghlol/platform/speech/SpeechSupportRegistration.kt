@@ -69,11 +69,11 @@ object SpeechSupportRegistration {
     private fun probeS(context: Context, tag: String, main: Handler, done: (Boolean) -> Unit) {
         val sdk = Build.VERSION.SDK_INT
         val available = SpeechRecognizer.isOnDeviceRecognitionAvailable(context)
-        if (sdk < Build.VERSION_CODES.TIRAMISU || !available) {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU && available) {
+            probeT(context, tag, main, done)
+        } else {
             done(decide(sdk, available, null, tag))
-            return
         }
-        probeT(context, tag, main, done)
     }
 
     @RequiresApi(Build.VERSION_CODES.TIRAMISU)
