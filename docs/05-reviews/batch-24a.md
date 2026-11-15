@@ -91,3 +91,33 @@ Findings (all minor, follow-ups):
 | T-120 | `voice_controller.dart:125`, `speech_to_text_port.dart:41` (+ small Android host method) | Confirm on-device support (API ≥ 31 and `isOnDeviceRecognitionAvailable`, plus locale support on API ≥ 33) before the first listen; if unconfirmed, go to the consent sheet without starting the recognizer | Controller test: a port reporting no on-device support → `needConsent` and `start` is never called; Allow → exactly one `start(onDevice: false)` |
 | T-120 | `voice_controller.dart:301-313`, `voice_logger_screen.dart:558` | Show the account each item will actually be stored on (and let the user change it), or block Save until it is chosen; never redirect without showing it | Widget test: EGP chip plus a USD item shows the USD account on the row before Save; the saved leg uses the account that was shown |
 | T-161 | `transaction_edit_screen.dart:161` | `_accountId = e?.accountId ?? pre?.accountId` (keep the prefilled last-4 account) | S-32 test with the last-4 account ≠ default Cash: the saved leg uses it, and an existing transaction on that account opens the duplicate dialog |
+
+## Delta re-review (T-120, T-161 fixes)
+
+Scope: `808ee0e0`, `b467e186`, `d416d323` (T-120, fix24v) and `b6c498ec` (T-161, fix24o), each read against its parent. Kotlin/Swift read; CI for native ran on `ci/fix24v`. `flutter test test/features/voice test/features/transactions/presentation --exclude-tags benchmark,golden`: 89 passed.
+
+### T-120 — F1 (privacy major): resolved
+- Every path into `start` is gated. `begin` resets state (`online=false`) and goes to `_startFirst`. `retry` goes to `_startFirst` unless the user already tapped Allow. Only `allowOnline` calls `_listen(onDevice: false)`. `_startFirst` treats a throw or `false` as unsupported and sets `needConsent` without calling `start` (`voice_controller.dart:136-151`).
+- Dart port: if `invokeMethod` returns null, or throws (including `MissingPluginException`), the result is `false` (`speech_to_text_port.dart`).
+- Android `SpeechSupportRegistration.kt`: below API 31 the result is `false`. On 31–32 it is `isOnDeviceRecognitionAvailable`. This is the same check the plugin's `createRecognizer` uses to choose `createOnDeviceSpeechRecognizer`, so a `true` here means the plugin builds the on-device recognizer. On 33+ the locale must also be in `installedOnDeviceLanguages`. `onError` and the 3 s timeout give `false`, and an exact tag match only produces false negatives, which are safe. The port does not set `intentLookup`, so the plugin's default-service branch can't be reached.
+- iOS: the host returns `SFSpeechRecognizer.supportsOnDeviceRecognition`, and nil becomes false. With `onDevice: true` the plugin sets `requiresOnDeviceRecognition = true` (plugin `SpeechToTextPlugin.swift` ~L557).
+- Tests: unsupported means no `start` call, supported means exactly `[true]`, and Allow means exactly one `[false]`.
+
+| # | Severity | File:line | Issue | Required change |
+|---|---|---|---|---|
+| R1 | minor | `SpeechSupportRegistration.kt` `probeT` / `probe` catch | If `checkRecognitionSupport` throws synchronously after `postDelayed` is armed, the `catch` calls `done(false)`. The timeout then calls `finish(false)`, and `finished` is still false at that point, so `result.success` runs a second time. That throws "Reply already submitted" on the main looper and crashes the app. Unlikely, but possible. Also, the timeout is never removed after a normal finish. This is harmless because of the guard. | Route the catch through `finish` (or set `finished` and remove the callback). Follow-up. |
+
+### T-120 — F2 (money major): resolved
+- When `accountFor` differs from the chip, `_rowAccount` shows the account the item is actually stored on, as a tappable pill on the row (`voice-acct-<key>`). The picker lists only accounts in the same currency. `setItemAccount` stores the pick, and `accountFor` uses it only when its currency still matches the amount. Save calls the same `accountFor` (`voice_controller.dart:~383`), so the saved account is the one on screen. The test covers an EGP chip with a USD item: the row shows the USD account, and the saved leg is `usd`.
+
+| # | Severity | File:line | Issue | Required change |
+|---|---|---|---|---|
+| R2 | minor | `voice_logger_test.dart` | No test picks a *different* account from the row picker and checks that the save uses it. | Add one with two USD accounts. Follow-up. |
+| R3 | nit | `voice_logger_screen.dart` `accountLabel`, `kNoValueDash` | The localized "Cash" label and the dash constant were not part of the review findings. They are small, so they are accepted. | None. |
+
+### T-161 — F7 (money/data major): resolved
+- `_accountId = e?.accountId ?? pre?.accountId` (`transaction_edit_screen.dart:161`). New tests use a last-4 account (`acc2`, USD) that is not the default Cash account. Save writes `acc2`, and an existing transaction on `acc2` opens the duplicate dialog. The `kNoValueDash` change in the detail screen is a 2-line nit fix and is accepted.
+
+### Verdicts
+- **T-120: APPROVED** (R1, R2 are follow-ups).
+- **T-161: APPROVED**.
