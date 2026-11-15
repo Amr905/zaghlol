@@ -27,7 +27,15 @@
       "direction": "expense",
       "baseConfidence": 0.9,
       "source": "synthetic-unverified",
-      "pattern": "(?<cur>[£€$])(?<amount>[\\d,.]+) paid to (?<merchant>.+?)(?: (?:with|on) (?:your )?(?:debit |credit )?card ending (?<last4>\\d{4}))?(?:\\. |\\.?$)(?:\\.? ?(?:available )?balance:? ?[£€$]?(?<balance>[\\d,.]+))?"
+      "pattern": "(?<cur>(?:[a-z]{1,2})?[£€$])(?<amount>[\\d,.]+) paid to (?<merchant>.+?)(?: (?:with|on) (?:your )?(?:debit |credit )?card ending (?<last4>\\d{4}))?(?:\\. |\\.?$)(?:\\.? ?(?:available )?balance:? ?[£€$]?(?<balance>[\\d,.]+))?",
+      "currencyMap": {
+        "a$": "AUD",
+        "ca$": "CAD",
+        "s$": "SGD",
+        "us$": "USD",
+        "nz$": "NZD",
+        "hk$": "HKD"
+      }
     },
     {
       "id": "revolut.pending_auth.en",
@@ -40,7 +48,15 @@
       "direction": "expense",
       "baseConfidence": 0.9,
       "source": "synthetic-unverified",
-      "pattern": "(?<cur>[£€$])(?<amount>[\\d,.]+) pending at (?<merchant>.+?)(?: (?:with|on) (?:your )?(?:debit |credit )?card ending (?<last4>\\d{4}))?(?:\\. |\\.?$)"
+      "pattern": "(?<cur>(?:[a-z]{1,2})?[£€$])(?<amount>[\\d,.]+) pending at (?<merchant>.+?)(?: (?:with|on) (?:your )?(?:debit |credit )?card ending (?<last4>\\d{4}))?(?:\\. |\\.?$)",
+      "currencyMap": {
+        "a$": "AUD",
+        "ca$": "CAD",
+        "s$": "SGD",
+        "us$": "USD",
+        "nz$": "NZD",
+        "hk$": "HKD"
+      }
     },
     {
       "id": "revolut.settled.en",
@@ -53,7 +69,15 @@
       "direction": "expense",
       "baseConfidence": 0.9,
       "source": "synthetic-unverified",
-      "pattern": "(?<cur>[£€$])(?<amount>[\\d,.]+) completed at (?<merchant>.+?)(?: (?:with|on) (?:your )?(?:debit |credit )?card ending (?<last4>\\d{4}))?(?:\\. |\\.?$)"
+      "pattern": "(?<cur>(?:[a-z]{1,2})?[£€$])(?<amount>[\\d,.]+) completed at (?<merchant>.+?)(?: (?:with|on) (?:your )?(?:debit |credit )?card ending (?<last4>\\d{4}))?(?:\\. |\\.?$)",
+      "currencyMap": {
+        "a$": "AUD",
+        "ca$": "CAD",
+        "s$": "SGD",
+        "us$": "USD",
+        "nz$": "NZD",
+        "hk$": "HKD"
+      }
     },
     {
       "id": "revolut.fx_conversion.en",
@@ -66,7 +90,15 @@
       "direction": "neutral",
       "baseConfidence": 0.97,
       "source": "synthetic-unverified",
-      "pattern": "you exchanged (?<cur>[£€$])(?<amount>[\\d,.]+) to (?<ocur>[£€$])(?<oamount>[\\d,.]+)"
+      "pattern": "you exchanged (?<cur>(?:[a-z]{1,2})?[£€$])(?<amount>[\\d,.]+) to (?<ocur>(?:[a-z]{1,2})?[£€$])(?<oamount>[\\d,.]+)",
+      "currencyMap": {
+        "a$": "AUD",
+        "ca$": "CAD",
+        "s$": "SGD",
+        "us$": "USD",
+        "nz$": "NZD",
+        "hk$": "HKD"
+      }
     },
     {
       "id": "revolut.wallet_topup.en",
@@ -79,7 +111,15 @@
       "direction": "income",
       "baseConfidence": 0.9,
       "source": "synthetic-unverified",
-      "pattern": "(?<cur>[£€$])(?<amount>[\\d,.]+) added to your (?:revolut )?account(?: from (?:your )?card ending (?<last4>\\d{4}))?(?:\\. |\\.?$)"
+      "pattern": "(?<cur>(?:[a-z]{1,2})?[£€$])(?<amount>[\\d,.]+) added to your (?:revolut )?account(?: from (?:your )?card ending (?<last4>\\d{4}))?(?:\\. |\\.?$)",
+      "currencyMap": {
+        "a$": "AUD",
+        "ca$": "CAD",
+        "s$": "SGD",
+        "us$": "USD",
+        "nz$": "NZD",
+        "hk$": "HKD"
+      }
     },
     {
       "id": "revolut.refund.en",
@@ -92,7 +132,15 @@
       "direction": "income",
       "baseConfidence": 0.9,
       "source": "synthetic-unverified",
-      "pattern": "(?<cur>[£€$])(?<amount>[\\d,.]+) refunded from (?<merchant>.+?)(?:\\. |\\.?$)"
+      "pattern": "(?<cur>(?:[a-z]{1,2})?[£€$])(?<amount>[\\d,.]+) refunded from (?<merchant>.+?)(?:\\. |\\.?$)",
+      "currencyMap": {
+        "a$": "AUD",
+        "ca$": "CAD",
+        "s$": "SGD",
+        "us$": "USD",
+        "nz$": "NZD",
+        "hk$": "HKD"
+      }
     },
     {
       "id": "revolut.declined.en",
@@ -105,7 +153,15 @@
       "direction": "neutral",
       "baseConfidence": 0.9,
       "source": "synthetic-unverified",
-      "pattern": "your (?<cur>[£€$])(?<amount>[\\d,.]+) payment at (?<merchant>.+?) was declined(?:\\. |\\.?$)"
+      "pattern": "your (?<cur>(?:[a-z]{1,2})?[£€$])(?<amount>[\\d,.]+) payment at (?<merchant>.+?) was declined(?:\\. |\\.?$)",
+      "currencyMap": {
+        "a$": "AUD",
+        "ca$": "CAD",
+        "s$": "SGD",
+        "us$": "USD",
+        "nz$": "NZD",
+        "hk$": "HKD"
+      }
     }
   ]
 }

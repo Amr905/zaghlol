@@ -3412,7 +3412,7 @@
       }
     }
   },
-  "zakahMainHowDebts": "Debts that are due now are deducted from cash first.",
+  "zakahMainHowDebts": "Debts are not deducted yet. If you owe money that is due now, ask a scholar how it changes your Zakah.",
   "@zakahMainHowDebts": {
     "description": "S"
   },

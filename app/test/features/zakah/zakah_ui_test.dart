@@ -284,6 +284,24 @@ void main() {
         // The 18K ring is still in its hawl.
         expect(find.textContaining(RegExp(r'[0-9٠-٩]+')), findsWidgets);
         expect(find.text(l10n.zakahMainHawlDone), findsWidgets);
+        // Debts are not read, so the screen must not claim they are deducted.
+        expect(
+          find.text(l10n.zakahMainHowDebts, skipOffstage: false),
+          findsOneWidget,
+        );
+        expect(
+          find.text(
+            loc.languageCode == 'ar'
+                ? 'الديون اللي ميعادها جه بتتخصم من الكاش قبل الحساب.'
+                : 'Debts that are due now are deducted from cash first.',
+            skipOffstage: false,
+          ),
+          findsNothing,
+        );
+        expect(
+          l10n.zakahMainHowDebts,
+          contains(loc.languageCode == 'ar' ? 'مش بتتخصم' : 'not deducted'),
+        );
 
         // Mark the 24K bars paid.
         final pending = find.text(

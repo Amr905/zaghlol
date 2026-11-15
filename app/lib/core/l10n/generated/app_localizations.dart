@@ -6817,7 +6817,7 @@ abstract class AppLocalizations {
   /// S
   ///
   /// In ar, this message translates to:
-  /// **'الديون اللي ميعادها جه بتتخصم من الكاش قبل الحساب.'**
+  /// **'الديون لسه مش بتتخصم. لو عليك ديون حل ميعادها، اسأل عالم شرعي هتأثر على زكاتك إزاي.'**
   String get zakahMainHowDebts;
 
   /// A · status = zakah_main_status*
