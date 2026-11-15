@@ -14,6 +14,7 @@ import '../../notifications/application/notification_providers.dart'
     show duplicateCheckProvider;
 import '../../transfers/application/suggestion_hook.dart';
 import '../application/reimbursements.dart';
+import '../application/transactions_changed_event.dart';
 import 'alerting_transaction_repository.dart';
 import '../domain/transaction_repository.dart';
 import 'drift_transaction_repository.dart';
@@ -70,6 +71,20 @@ final transactionRepositoryProvider = FutureProvider<TransactionRepository>((
         ),
       );
       await dupCheck();
+    },
+    // FIX-device-flows: Home, budgets and the cycle cache listen for this.
+    onChanged: (rows) async {
+      final schedule = await ref.read(paydayScheduleProvider.future);
+      final event = await transactionsChangedFor(db, schedule, [
+        for (final r in rows)
+          (
+            id: r.id,
+            accountId: r.accountId,
+            occurredAt: r.occurredAt.millisecondsSinceEpoch,
+            offsetMin: r.occurredTzOffsetMin,
+          ),
+      ]);
+      ref.read(domainEventBusProvider).publish(event);
     },
   );
 }, name: 'transactionRepositoryProvider');

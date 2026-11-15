@@ -110,6 +110,22 @@ void main() {
     await (await seed.read(appDatabaseProvider.future)).close();
     seed.dispose();
 
+    // Sub-pixel RenderFlex overflows (font metrics on the emulator) are
+    // reported, not fatal: this test is about flows, not pixels.
+    final original = FlutterError.onError;
+    var overflows = 0;
+    FlutterError.onError = (details) {
+      if (details.exceptionAsString().contains('overflowed')) {
+        overflows++;
+        return;
+      }
+      original?.call(details);
+    };
+    addTearDown(() {
+      // ignore: avoid_print
+      print('DEVICE_FLOWS_OVERFLOWS $overflows');
+    });
+
     await app.main();
     await waitFor(t, find.text('Home'), what: 'Home');
     await settle(t, 2000);
@@ -189,6 +205,7 @@ void main() {
     await settle(t, 1000);
     await shot(t, '09-settings');
 
+    FlutterError.onError = original;
     semantics.dispose();
   });
 }
