@@ -391,6 +391,10 @@ CREATE TABLE daily_active_counts (day date NOT NULL, platform text NOT NULL, app
 -- Operators & audit (FR-BE-08)
 CREATE TABLE operators (id uuid PRIMARY KEY, oidc_subject text NOT NULL UNIQUE, display_name text NOT NULL,
   roles text[] NOT NULL, disabled_at timestamptz);
+-- T-135: an Apple refresh token (sealed) whose revocation failed at account deletion. No account, install or subject column.
+CREATE TABLE pending_apple_revocations (id uuid PRIMARY KEY, sealed_blob bytea NOT NULL, attempts integer NOT NULL DEFAULT 0,
+  created_at timestamptz NOT NULL, next_attempt_at timestamptz NOT NULL, expires_at timestamptz NOT NULL,
+  CHECK (attempts >= 0), CHECK (expires_at > created_at));
 CREATE TABLE audit_log (id bigint GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
   operator_id uuid NOT NULL REFERENCES operators(id),   -- operators are disabled, never deleted
   action text NOT NULL, target text NOT NULL, details jsonb NOT NULL, at timestamptz NOT NULL DEFAULT now(),

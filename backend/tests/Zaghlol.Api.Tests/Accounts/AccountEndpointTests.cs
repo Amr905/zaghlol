@@ -217,7 +217,7 @@ public class AccountEndpointTests(AccountsHostFixture f) : IClassFixture<Account
         Assert.Equal(before + 1, await f.CountAsync("SELECT count(*) FROM zaghlol.pending_apple_revocations"));
         // Sealed: the plaintext refresh token is nowhere in the row, and the row has no reference to the account.
         Assert.Equal(0, await f.CountAsync("SELECT count(*) FROM zaghlol.pending_apple_revocations WHERE position('refresh-for-'::bytea in sealed_blob) > 0"));
-        Assert.Equal(7, await f.CountAsync("SELECT count(*) FROM information_schema.columns WHERE table_schema = 'zaghlol' AND table_name = 'pending_apple_revocations'"));
+        Assert.Equal(6, await f.CountAsync("SELECT count(*) FROM information_schema.columns WHERE table_schema = 'zaghlol' AND table_name = 'pending_apple_revocations'"));
     }
 
     [Fact]

@@ -101,6 +101,11 @@ services:
       DOTNET_ENVIRONMENT: Development
       ConnectionStrings__Worker: Host=postgres;Port=5432;Database=zaghlol;Username=zaghlol_worker;Password=worker_dev_only
       Worker__HeartbeatFile: /tmp/zaghlol-worker.heartbeat
+    # The Apple revocation retry (T-135) opens sealed tokens, so the worker needs the same Kms:* ring as the api.
+    env_file:
+      - ./.dev-keys/kms.env
+    volumes:
+      - ./.dev-keys:/run/zaghlol-dev-keys:ro
     read_only: true
     tmpfs:
       - /tmp
