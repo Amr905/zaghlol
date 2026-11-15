@@ -112,3 +112,62 @@ Probe and tests: `Rs.1,23,456.78` parses as INR 12345678 and `Avl bal Rs 5,00,00
 | T-168 | `app/lib/features/zakah/presentation/zakah_screen.dart:558`; `app/lib/core/l10n/app_en.arb:3415`, `app_ar.arb` `zakahMainHowDebts` | Stop claiming debts are deducted: write true copy (debts not deducted yet, ask a scholar) or remove the line. | Widget test (`ar` + `en`): the populated Zakah screen shows the new debts line and not the old claim. |
 | T-167 / T-168 | `docs/04-tasks/tasks/T-167.md` "For the scholar" (+ OQ-10 in `open-questions.md`) | Add an "as shipped" block: no debts read; every asset zakatable with no opt-out for personal jewelry; account hawl starts on the day the account was added; last parsed balance used; asset hawl from `acquired_at` or else the day added; certificates at principal, funds at manual value; excluded asset types. Mark items 5 and 10 as engine-only. | None (docs). |
 | T-071 | `app/assets/registry/institutions/revolut.json` (every `[£€$]` capture, lines 30, 43, 56 and the fx/topup/refund/declined patterns) | Add a left boundary `(?<![a-z])` before the symbol, or capture and map `a$`/`ca$`/`s$`/`us$` explicitly. | `international_templates_test.dart`: `A$12.00 paid to X` and `CA$5.00 paid to X` never give USD auto-accepted; `$12.00 paid to X` stays USD 1200. |
+
+---
+
+## Delta re-review (fix round)
+
+Scope: `origin/review/batch-25a..origin/batch/2026-11-15-25`, non-merge commits `55e03545` (fix25b), `3eee0fb9` (fix25a), `18b9f84e` + `de931e0d` + `0aa8b197` (fix25k, T-135). Reviewer: Opus, delta only. Covers the blocking items of this report and of `batch-25b.md`.
+
+**Runs on the batch tip `0aa8b197`:** `packages/zaghlol_parsing` `dart test --exclude-tags benchmark`: 1282 passed. `app/` `flutter test test/features/export_import test/features/roi test/features/zakah --exclude-tags golden,benchmark`: 97 passed. Backend `Zaghlol.Application.Tests` 1039 passed, `Zaghlol.Workers.Tests` 30 passed. `Zaghlol.Api.Tests`: only the Testcontainers tests fail here (no Docker), including the new `Delete_WhileAppleIsDown_StillDeletesAtOnce_AndQueuesOnlyTheSealedToken` and `Delete_WhenAppleSaysInvalidGrant_QueuesNothing`. `HostStartupTests` failed once under the full parallel run and passed 3/3 alone; that flake is older than this delta. The DB-backed tests (`AccountPurchaseLockOrderTests`, grant, schema and check tests) and the migration snapshot check are gated on GitHub. The Lead reports backend-ci green on `ci/fix25k`.
+
+### T-071: R1 resolved, **APPROVED**
+- Every currency capture in the 25 templates of Revolut (7), Monzo (4), N26 (4), bunq (4) and Payoneer (3) is now `(?<cur>(?:[a-z]{1,2})?[£€$])`, and Revolut `fx_conversion`'s `ocur` has it too. Each of those templates has `currencyMap` `a$/ca$/s$/us$/nz$/hk$`. I scanned every other registry file: no other template captures `$`.
+- An unknown prefix can't become USD. `template_extractor.dart` `resolve` checks `currencyMap` first, then `resolveCurrencyMarker`. That function knows only bare symbols, plus a 3-letter ISO code through `Currency.tryOf`, so `c$`, `r$`, `z$`, `e£`, `mx$` and `xn$` (from `MXN$`) all resolve to null. A null `cur` is a `currency` problem, not a fallback (`template_extractor.dart:206`). Out-of-tree probe on the 5 institutions × `C$ MX$ R$ E£ MXN$ NT$ Z$`: every case gives `ParseUnrecognized`, never USD. Bare `$` stays USD (test). The fix also covers `E£`, which used to match its `£` and parse as GBP.
+- Tests: `international_templates_test.dart` group "dollar-prefix currencies are never silently USD" checks A$, CA$, S$, US$, NZ$, HK$ and bare $ on Revolut, plus one case each on Monzo, N26, bunq and Payoneer.
+
+### T-168 Z1 and T-167 Z2: resolved, **APPROVED** (T-167 and T-168)
+- `zakahMainHowDebts` in en and ar now says debts are not deducted and tells the user to ask a scholar. The Arabic is Egyptian colloquial. The widget test (ar and en) checks the new line is shown, the old claim is gone, and the text contains "not deducted" / "مش بتتخصم".
+- `T-167.md` has the "As shipped in T-168" block with every item I asked for, and items 5 and 10 are marked engine only. OQ-10 points to it.
+
+### T-158 blocker 1: resolved, **APPROVED**
+- `importRunnerProvider` now passes `onImported: importPostPersistHook(pairing, refunds)`. For each new id after the commit (`import_csv.dart:259-264`), the hook runs `TransferPairingUseCase.onPersisted` and then `RefundMatching.onPersisted`, each in its own try/catch, so a hook failure never fails an import that is already saved. The order matches `bulk_actions.dart` and `transaction_editor.dart`.
+- Test `import_hooks_test.dart`: real in-memory DB, both legs imported, one `transfer_pairs` row. A re-import gives `imported 0`, and the pair count stays 1.
+
+### T-169/T-170 minor 5: resolved (still **APPROVED**)
+- In `roi_providers.dart`, the `transport` case is gone, so `commuteMonthly` stays null and rule 5 is silent. A test covers this. The rule-2 erratum (22,200) is recorded in `requirements.md`.
+
+### T-135 follow-ups 1–4 and the PO queue proposal: done, **APPROVED**, security part included
+- **Deletion is never blocked.** `AccountLifecycleKind.Unavailable` and the 503 are removed from the service, the endpoint and the OpenAPI. If revoke throws (except on cancel) or returns anything other than `Revoked`, the token is re-sealed and queued. If re-sealing fails, or the stored blob doesn't open, the account is still deleted and a fixed warning is logged. The warning carries only the exception type name: no token, subject or message. Finding 4 is resolved. Finding 3 is resolved too: `AppleAccountClient.RevokeAsync` now also catches `CryptographicException` and `InvalidOperationException`.
+- **The queue holds only what revoke needs.** Its columns are `id`, `sealed_blob`, `attempts`, `created_at`, `next_attempt_at` and `expires_at`. There is no account, install or subject column. The token is re-sealed under the constant vault context `pending-apple-revocation`, so the blob doesn't name its subject either. It is inserted in the same transaction as the account delete, so the queue row and the account deletion are both saved or both lost together. `PendingAppleRevocation.ToString()` is `***`. The worker logs counts only.
+- **Retention is bounded.** `expires_at = now + 30 d`, with `CHECK (expires_at > created_at)`. Each pass first deletes expired rows, and `ListDue` also filters on `expires_at > now`. A row is deleted on `Revoked`, which includes `invalid_grant`, and an unreadable blob is dropped. Back-off runs 15 min ×2ⁿ up to a 24 h cap. The table is listed in `backend-schema.md` §4.
+- **The worker can't resurrect an account.** `AppleRevocationRetryJob` and `PendingAppleRevocationStore` touch only `pending_apple_revocations`, on the Worker login. The worker's grants on that table are SELECT, DELETE, and UPDATE of `(attempts, next_attempt_at)` only. The worker has no new grant on `accounts` or `purchases`.
+- **The migration is safe.** It is plain SQL outside the EF model: the class says so, and the Designer is the unchanged target model, which the Lead reports the backend-ci snapshot check passed. Grants come from the frozen `GrantMatrix.PendingAppleRevocations`. The API gets INSERT only, so it can't read the blob back, and no operator role gets any grant. `Current` merges the new grants. Down runs `DROP TABLE`, which also drops the indexes and grants.
+- **Lock order is consistent.**
+  - Sign-in locks install, then the account (upsert), then links, then `LockPurchasesAsync`. That call locks, in one ascending-uuid statement, the union of this install's unlinked purchases and the account's linked purchases. Attach and seats come after.
+  - Delete locks the account row, then the account's purchases in ascending ID order, then runs the `UPDATE`.
+  - Restore already locked in ascending ID order (as checked in the original review).
+  - Accounts are always locked before purchases, and purchases always in ascending order, so finding 1 is resolved. A Docker test asserts the union lock.
+
+### New findings (none blocking)
+
+| # | Severity | File:line | Issue | Required change |
+|---|----------|-----------|-------|-----------------|
+| D1 | minor (FU, before go-live) | `backend/src/Zaghlol.Workers/Program.cs:64-68`; `docs/03-technical/deployment.md` (worker section) | The worker now calls `AddZaghlolKms` and builds `AppleAccountClient` through `AccountsOptions.Read`. In Production, that throws without all of `Accounts:*`, including `Google:ClientIds` and `AndroidPackage`, which the worker never uses. The whole worker would then fail at startup, and with it the Play/Apple notification processors, the ack sweeper and retention. It fails fast and loudly, but `deployment.md` doesn't say the worker now needs `Kms:*` and `Accounts:*`. Only `docker-compose.yml` was updated. | Add the worker's new `Kms:*` / `Accounts:Apple:*` needs to `deployment.md`. Better still, give the revocation worker an Apple-only options read, so a missing Google client ID can't stop billing processing. |
+| D2 | minor | `docs/01-requirements/open-questions.md:17-19` | The OQ-10 "as shipped" paragraph is inserted between the OQ-10 and OQ-11 table rows. That ends the table, so OQ-11 and OQ-12 render as loose pipe text. | Move the paragraph below the table. |
+| D3 | nit | `backend/src/Zaghlol.Infrastructure/Accounts/PendingAppleRevocationStore.cs:14-18` | `ListDue` doesn't use `FOR UPDATE SKIP LOCKED` and takes no advisory lock, so two worker replicas could revoke the same token twice. This is harmless, because a second revoke returns `invalid_grant`, which counts as `Revoked`. `deployment.md` already says to run one worker replica. | None now. Add an advisory lock if the worker ever scales out. |
+| D4 | nit | `app/lib/features/export_import/presentation/import_ports.dart:21` | It imports `transferPairingUseCaseProvider` and `refundMatchingProvider` from `transactions/presentation/list/txn_list_providers.dart`, so one feature's presentation layer depends on another's. This is an existing placement of those providers. | FU: move the two providers to `transactions/application` or `data` when that file is next touched. |
+
+### Delta verdicts
+
+| Task | Verdict |
+|------|---------|
+| T-071 | **APPROVED** |
+| T-072 | APPROVED (unchanged) |
+| T-135 | **APPROVED** (security: pass; D1 and D3 are follow-ups) |
+| T-167 | **APPROVED** |
+| T-168 | **APPROVED** |
+| T-158 (batch-25b) | **APPROVED** |
+| T-169 / T-170 (batch-25b) | APPROVED (minor 5 resolved) |
+
+None of the new findings is a blocker or a money/security/privacy/data major. D1 and D2 are follow-ups. The batch can merge once the GitHub run is green, including the Testcontainers tests named above.
