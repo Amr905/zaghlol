@@ -2,6 +2,8 @@
 // its tiles a context inside the root Navigator, close itself and then open
 // the destination. Before the fix every tile threw and did nothing on device.
 
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:zaghlol/core/routing/app_router.dart';
@@ -34,7 +36,7 @@ void main() {
       tester,
     ) async {
       final router = await pumpShell(tester, roots: roots());
-      router.push(AppRoutes.addOverHome);
+      unawaited(router.push<void>(AppRoutes.addOverHome));
       await tester.pumpAndSettle();
       expect(find.byType(AddSheet), findsOneWidget);
 
