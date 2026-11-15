@@ -42,17 +42,17 @@ DONE: T-001…T-007, T-012…T-024, T-025…T-028, T-030, T-032…T-035, T-038�
 
 The PO asked for this progress table in every update.
 
-**Merged batches:** #28, #29, #32–#36 (batch 7), #37 batch 8 (T-041 + T-042, T-051), batch 9 (`batch/2026-11-11-9`: T-021, T-040, T-047, T-077, T-182, T-184 + the batch-review workflow), batch 10 (`batch/2026-11-13-10`: T-023, T-043, T-109, T-132, T-141; first under the cost rules), batch 11 (`batch/2026-11-13-11`: T-048, T-049, T-052, T-119, T-181, T-183), batch 12 (`batch/2026-11-13-12`: T-024, T-052, T-089, T-180, T-185), batch 13 (`batch/2026-11-13-13`: T-078, T-094, T-115, T-154; T-103 pulled out), batch 14 (`batch/2026-11-13-14`: T-076, T-095, T-103, T-144, T-149), batch 15 (`batch/2026-11-13-15`: T-090, T-096, T-097, T-142, T-150, iOS CI retry), batches 16–18 in one PR (#50, `batch/2026-11-14-18`: 38 tasks, sprint mode), batch 19 (#51), batch 20 (#52), batch 21 (#53), batch 22 (#54), batch 23 (#55), batch 24 (#56). Next free follow-up number: **FU-242**.
+**Merged batches:** #28, #29, #32–#36 (batch 7), #37 batch 8 (T-041 + T-042, T-051), batch 9 (`batch/2026-11-11-9`: T-021, T-040, T-047, T-077, T-182, T-184 + the batch-review workflow), batch 10 (`batch/2026-11-13-10`: T-023, T-043, T-109, T-132, T-141; first under the cost rules), batch 11 (`batch/2026-11-13-11`: T-048, T-049, T-052, T-119, T-181, T-183), batch 12 (`batch/2026-11-13-12`: T-024, T-052, T-089, T-180, T-185), batch 13 (`batch/2026-11-13-13`: T-078, T-094, T-115, T-154; T-103 pulled out), batch 14 (`batch/2026-11-13-14`: T-076, T-095, T-103, T-144, T-149), batch 15 (`batch/2026-11-13-15`: T-090, T-096, T-097, T-142, T-150, iOS CI retry), batches 16–18 in one PR (#50, `batch/2026-11-14-18`: 38 tasks, sprint mode), batch 19 (#51), batch 20 (#52), batch 21 (#53), batch 22 (#54), batch 23 (#55), batch 24 (#56), batch 25 (#57). Next free follow-up number: **FU-244**.
 
 **Lessons:** never chain `git commit` after `git merge` in one script without checking for conflicts. Server/cloud restarts happen often: brief agents to commit early and push often; on restart, check worktrees for live processes (`ps`, `/proc/<pid>/cwd`) before relaunching.
 
 ## In flight (2026-11-13 Cairo)
 
-1. **Batch 25** (PR open): T-135 backend accounts, T-167/T-168 Zakah engine + screen (flag off), T-169/T-170 Smart ROI (flag off), T-071/T-072 international templates (synthetic), T-158 import flow (CSV). Remaining: tasks blocked on PO inputs (PO_DECISIONS Part 2).
+1. **Batch 26** (PR open): fixes from the PO's first real-phone test (Add sheet tiles dead, no Cash/categories on fresh install, Home refresh, real HSBC SMS, generic fallback) + device-flows emulator test of the real app. Next: FU-243 drop rules + design pass against real-app screenshots (device-shots branch).
 2. **T-159 Android OCR:** waiting for the PO's `tesseract4android-4.9.0.aar` (`/home/claude/wt-T159-fix`, unpushed).
 3. **PC runner** silent since 2026-11-11 22:29; optional now (cost rules).
 
-Next free follow-up number: **FU-242**.
+Next free follow-up number: **FU-244**.
 
 ## Ready next (dependencies done)
 

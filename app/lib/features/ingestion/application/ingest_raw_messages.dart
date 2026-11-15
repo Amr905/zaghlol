@@ -1349,7 +1349,11 @@ final class IngestRawMessages {
         p.m.origin.isBackground &&
         kGenericAutoSaveAccount == GenericAutoSaveAccount.senderAccount;
     if (!autoSave) {
-      final rawId = await _insertRaw(p, status: RawStatus.review);
+      final rawId = await _insertRaw(
+        p,
+        status: RawStatus.review,
+        institution: g.institutionCode,
+      );
       await _review(
         kind: ReviewKind.newSender,
         rawId: rawId,

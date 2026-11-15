@@ -26,6 +26,7 @@ ParseResult parseGeneric({
   required String language,
   List<CompiledPattern> globalLast4 = const [],
   MerchantCleaningConfig cleaning = MerchantCleaningConfig.defaults,
+  String? institutionCode,
 }) {
   final t = folded.text;
   if (_hits(t, declineKeywords, null).isNotEmpty) {
@@ -102,9 +103,48 @@ ParseResult parseGeneric({
     direction: direction,
     last4: last4,
     merchant: merchant,
-    occurredAt: receivedAt,
+    occurredAt: _messageDate(t, receivedAt) ?? receivedAt,
+    institutionCode: institutionCode,
     confidencePermille: confidence.clamp(0, kGenericMaxConfidencePermille),
     reasons: ordered,
+  );
+}
+
+final RegExp _fullDate = RegExp(
+  r'(?<![0-9/.-])([0-9]{1,2})/([0-9]{1,2})(?:/(20[0-9]{2}))?(?![0-9/])',
+);
+
+/// A `d/M/yyyy` or `d/M` date in the message (the first one), at the receipt's
+/// time of day. Null when there is none, it is not a calendar date, it is
+/// after the receipt day or more than a year before it.
+DateTime? _messageDate(String t, DateTime receivedAt) {
+  final m = _fullDate.firstMatch(t);
+  if (m == null) {
+    return null;
+  }
+  final day = int.parse(m.group(1)!);
+  final month = int.parse(m.group(2)!);
+  final today = DateTime.utc(receivedAt.year, receivedAt.month, receivedAt.day);
+  var year = m.group(3) == null ? today.year : int.parse(m.group(3)!);
+  var d = DateTime.utc(year, month, day);
+  if (m.group(3) == null && d.isAfter(today)) {
+    // No year: the nearest past occurrence.
+    year -= 1;
+    d = DateTime.utc(year, month, day);
+  }
+  if (month < 1 || month > 12 || d.month != month || d.day != day) {
+    return null;
+  }
+  if (d.isAfter(today) || today.difference(d).inDays > 366) {
+    return null;
+  }
+  return DateTime.utc(
+    year,
+    month,
+    day,
+    receivedAt.hour,
+    receivedAt.minute,
+    receivedAt.second,
   );
 }
 
@@ -385,7 +425,7 @@ List<_Candidate> _candidates(String t) {
 }
 
 final RegExp _last4Marked = RegExp(
-  r'(?:\*{1,8}|\bx{2,8}|ending(?: in| with)?|(?:card|account|acct)(?: (?:no|number))?|(?:ال)?[مي]نتهي ب|رقم (?:ال)?(?:بطاقه|حساب)|بطاقه|حساب)[ :.#x-]{0,4}([0-9]{4})(?![0-9])(?![.,][0-9])',
+  r'(?:\*{1,8}|\bx{2,8}|ending(?: in| with)?|(?:card|account|acct)(?: (?:no|number))?|(?:ال)?[مي]نتهيه? (?:ب ?(?:رقم )?|برقم )|رقم (?:ال)?(?:بطاقه|حساب)|بطاقه|حساب)[ :.#x-]{0,4}([0-9]{4})(?![0-9])(?![.,][0-9])',
 );
 
 String? _last4(String t, List<CompiledPattern> declared) {

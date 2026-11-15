@@ -1,0 +1,18 @@
+{
+  "sender": "HSBC",
+  "body": "Your Credit Card ending with * 4417 has been used for USD 38.50 on 09/11/2026 at ANTHROPIC* CLAUDE SUB. Your available limit is EGP 98765.43",
+  "receivedAt": "2026-11-11T10:00:00+02:00",
+  "expect": {
+    "template": "hsbc.card_used_limit.en",
+    "event": "card_purchase",
+    "direction": "expense",
+    "currency": "USD",
+    "amount": "38.50",
+    "last4": "4417",
+    "balance": null,
+    "available": "98765.43",
+    "availableCurrency": "EGP",
+    "merchantClean": "Anthropic Claude Sub",
+    "date": "2026-11-09"
+  }
+}

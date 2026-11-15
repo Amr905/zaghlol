@@ -1,0 +1,18 @@
+{
+  "sender": "HSBC",
+  "body": "Your Credit Card ending with * 2290 has been used for EGP 12,345.60 on 07/11/2026 at NOON ONLINE. Your available limit is EGP 110,095.29",
+  "receivedAt": "2026-11-11T10:00:00+02:00",
+  "expect": {
+    "template": "hsbc.card_used_limit.en",
+    "event": "card_purchase",
+    "direction": "expense",
+    "currency": "EGP",
+    "amount": "12345.60",
+    "last4": "2290",
+    "balance": null,
+    "available": "110095.29",
+    "availableCurrency": "EGP",
+    "merchantClean": "Noon",
+    "date": "2026-11-07"
+  }
+}

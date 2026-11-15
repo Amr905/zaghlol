@@ -1,0 +1,88 @@
+name: device-flows
+
+# FIX-device-flows: the real app (main(), real providers, real encrypted
+# database, real plugins) on an Android emulator: Add -> Type -> Save shows
+# the row on Home; Say and Scan show a clear state. Uploads screenshots of
+# Home, the Add sheet, Money, Insights and Settings. Not a merge gate.
+on:
+  workflow_dispatch:
+  push:
+    branches:
+      - 'ci/**'
+    paths:
+      - 'app/integration_test/device_flows*'
+      - '.github/workflows/device-flows.yml'
+      - '.github/scripts/device-flows.sh'
+
+permissions:
+  contents: write # publish the screenshots to the device-shots branch
+
+concurrency:
+  group: device-flows-${{ github.ref }}
+  cancel-in-progress: true
+
+env:
+  FLUTTER_VERSION: '3.47.9'
+
+jobs:
+  android-emulator:
+    name: android emulator API 34 (device flows, devSms)
+    runs-on: ubuntu-latest
+    timeout-minutes: 60
+    env:
+      DEVICE: emulator-5554
+    steps:
+      - uses: actions/checkout@fbc6f3992d24b796d5a048ff273f7fcc4a7b6c09 # v5.1.0
+        with:
+          persist-credentials: false
+      - uses: actions/setup-java@b6effb05e454b25005698d916606bdc6ffcbf961 # v5.7.0
+        with:
+          distribution: temurin
+          java-version: '17'
+      - uses: subosito/flutter-action@1a449444c387b1966244ae4d4f8c696479add0b2 # v2.23.0
+        with:
+          flutter-version: ${{ env.FLUTTER_VERSION }}
+          channel: stable
+          cache: true
+      - name: Resolve workspace (lockfile must be up to date)
+        run: flutter pub get --enforce-lockfile
+      - name: Enable KVM
+        run: |
+          echo 'KERNEL=="kvm", GROUP="kvm", MODE="0666", OPTIONS+="static_node=kvm"' | sudo tee /etc/udev/rules.d/99-kvm4all.rules
+          sudo udevadm control --reload-rules
+          sudo udevadm trigger --name-match=kvm
+      - name: Run on the emulator
+        uses: reactivecircus/android-emulator-runner@a421e43855164a8197daf9d8d40fe71c6996bb0d # v2.38.0
+        with:
+          api-level: 34
+          arch: x86_64
+          target: google_apis
+          disable-animations: true
+          emulator-options: -no-window -gpu swiftshader_indirect -noaudio -no-boot-anim -camera-back none
+          script: bash .github/scripts/device-flows.sh
+      - uses: actions/upload-artifact@b7c566a772e6b6bfb58ed0dc250532a479d7789f # v6.0.0
+        if: always()
+        with:
+          name: device-flows-android-api34
+          path: ${{ runner.temp }}/device-flows
+          if-no-files-found: warn
+          retention-days: 14
+      # The Lead's workspace cannot download artifacts (blob storage is blocked),
+      # so the screenshots are also committed to the `device-shots` branch.
+      - name: Publish screenshots to the device-shots branch
+        if: always()
+        env:
+          SHOTS: ${{ runner.temp }}/device-flows
+        run: |
+          set -eu
+          ls "$SHOTS"/screens/*.png >/dev/null 2>&1 || { echo "no screenshots"; exit 0; }
+          dir=$(mktemp -d)
+          cd "$dir"
+          git init -q
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          mkdir -p "$GITHUB_SHA"
+          cp "$SHOTS"/screens/*.png "$GITHUB_SHA"/
+          git add -A
+          git commit -qm "device-flows screenshots for $GITHUB_SHA ($GITHUB_REF_NAME)"
+          git push -q --force "https://x-access-token:${{ github.token }}@github.com/${{ github.repository }}.git" HEAD:refs/heads/device-shots

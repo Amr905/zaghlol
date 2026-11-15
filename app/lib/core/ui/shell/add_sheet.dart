@@ -13,6 +13,35 @@ import '../z_sheet.dart';
 
 enum AddAction { say, type, scan, asset }
 
+/// Closes the Quick add sheet that owns [sheetContext], then calls [open]
+/// with the root navigator's context once the sheet is gone.
+///
+/// FIX-device-flows: the destination used to be pushed while the sheet was
+/// still the top route (a go_router page). `maybePop` then saw a new top
+/// route and kept the sheet, and the pushed route could be dropped with the
+/// sheet's page. Waiting for the sheet to finish closing avoids both. When
+/// [sheetContext] is not inside a sheet (a popup route), [open] runs at once.
+void closeAddSheetThen(
+  BuildContext sheetContext,
+  void Function(BuildContext context) open,
+) {
+  final route = ModalRoute.of(sheetContext);
+  if (route is! PopupRoute || !route.isActive || route.navigator == null) {
+    open(sheetContext);
+    return;
+  }
+  final nav = Navigator.of(sheetContext, rootNavigator: true);
+  final owner = route.navigator!;
+  if (route.isCurrent) {
+    owner.pop();
+  } else {
+    owner.removeRoute(route);
+  }
+  route.completed.then<void>((_) {
+    if (nav.mounted) open(nav.context);
+  });
+}
+
 /// A go_router page that shows its child as a modal bottom sheet (drag
 /// handle, back and swipe-down close it, the tab underneath stays put).
 class ModalSheetPage<T> extends Page<T> {
