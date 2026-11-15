@@ -4,8 +4,6 @@ import 'dart:io';
 import 'package:test/test.dart';
 import 'package:zaghlol_parsing/zaghlol_parsing.dart';
 
-import '../support/registry_files.dart';
-
 // T-161: OCR text through ParsingPipeline.parseOcr. The bundled registry's
 // `ocr` fixtures (app/test/fixtures/sms/<institution>/ocr_*.json) must give
 // the same template, amount, currency and counterparty through the pipeline
@@ -134,7 +132,7 @@ void main() {
       '   \n  ',
       'hello world',
       'x' * 5000,
-      '\u0000‮ total ' * 50,
+      '\u0000\u202E total ' * 50,
       'Total ' * 400,
     ]) {
       test('never throws (${body.length} chars)', () {
