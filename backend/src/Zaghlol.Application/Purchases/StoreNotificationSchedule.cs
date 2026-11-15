@@ -9,6 +9,15 @@ namespace Zaghlol.Application.Purchases;
 /// </summary>
 public static class StoreNotificationSchedule
 {
+    /// <summary>FU-107: a dead letter waits this long before the expiry sweep revives it (a day-long store outage has ended by then).</summary>
+    public static readonly TimeSpan ReviveAfter = TimeSpan.FromHours(6);
+
+    /// <summary>FU-107: rows received longer ago than this are never revived, so a poisoned row costs a bounded number of attempts.</summary>
+    public static readonly TimeSpan ReviveWindow = TimeSpan.FromDays(7);
+
+    /// <summary>FU-107: rows revived per sweep run.</summary>
+    public const int ReviveBatch = 100;
+
     /// <summary>The 10th counted failure dead-letters the row (about 30 h after the first).</summary>
     public const int MaxAttempts = 10;
 

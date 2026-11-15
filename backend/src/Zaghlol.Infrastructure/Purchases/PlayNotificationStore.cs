@@ -51,6 +51,20 @@ internal sealed class PlayNotificationStore(IZaghlolDbContextFactory contexts) :
         WHERE id = @id AND processed_at IS NULL
         """;
 
+
+    // FU-107: the dead letter (FailSql with @dead) is the only row with processed_at set, next_attempt_at NULL and attempts > 0.
+    private const string ReviveSql = """
+        UPDATE zaghlol.store_notifications
+        SET attempts = 0, processed_at = NULL, last_error = NULL, next_attempt_at = NULL
+        WHERE id IN (
+            SELECT id FROM zaghlol.store_notifications
+            WHERE store = 'google_play' AND processed_at IS NOT NULL AND next_attempt_at IS NULL AND attempts > 0
+              AND processed_at <= @dead_before AND received_at >= @oldest
+            ORDER BY received_at
+            LIMIT @limit
+            FOR UPDATE SKIP LOCKED)
+        """;
+
     private const string DeferSql = "UPDATE zaghlol.store_notifications SET next_attempt_at = @next WHERE id = @id AND processed_at IS NULL";
 
     private const string BacklogSql = """
@@ -266,6 +280,16 @@ internal sealed class PlayNotificationStore(IZaghlolDbContextFactory contexts) :
         await using var command = await CommandAsync(db, RtdnVoidedSql, cancellationToken);
         command.Parameters.AddWithValue("key", storeKey.Reveal() ?? string.Empty);
         return await command.ExecuteScalarAsync(cancellationToken) is true;
+    }
+
+    public async Task<int> ReviveDeadLetteredAsync(DateTimeOffset now, TimeSpan deadFor, TimeSpan maxAge, int limit, CancellationToken cancellationToken)
+    {
+        await using var db = contexts.CreateDbContext(DatabaseRole.Worker);
+        await using var command = await CommandAsync(db, ReviveSql, cancellationToken);
+        command.Parameters.AddWithValue("dead_before", now.ToUniversalTime() - deadFor);
+        command.Parameters.AddWithValue("oldest", now.ToUniversalTime() - maxAge);
+        command.Parameters.AddWithValue("limit", limit);
+        return await command.ExecuteNonQueryAsync(cancellationToken);
     }
 
     private static async Task<NpgsqlCommand> CommandAsync(ZaghlolDbContext db, string sql, CancellationToken cancellationToken)

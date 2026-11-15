@@ -4,6 +4,7 @@ using System.Net.Sockets;
 namespace Zaghlol.Api.Tests;
 
 /// <summary>FU-017: the container healthcheck is liveness only; a database outage (503) must not make it fail.</summary>
+[Collection(ApiHostGroup.Name)]
 public class HealthProbeTests
 {
     [Theory]

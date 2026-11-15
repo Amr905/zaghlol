@@ -3,6 +3,7 @@ using System.Diagnostics;
 namespace Zaghlol.Api.Tests.Dev;
 
 /// <summary>Batch-23a B2: <c>tools/dev-keys.sh</c> never empties a folder it didn't create.</summary>
+[Collection(ApiHostGroup.Name)]
 public sealed class DevKeysScriptTests
 {
     private static string Script()

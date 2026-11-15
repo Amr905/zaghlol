@@ -148,6 +148,43 @@ public class AppleReconciliationJobTests
     private AppleNotificationIngest Ingest(bool allowSandbox = true) =>
         new(apple.Jws, AppleScript.Catalog(allowSandbox), inbox, purchaseTelemetry, telemetry, clock);
 
+    [Fact]
+    public async Task TheExpirySweepSkipsSandboxRowsWhileAllowSandboxIsOff()
+    {
+        // FU-098 security L-1.
+        var sandbox = store.AddPurchase(AppleScript.NewId(), AppleScript.Yearly, GoldPlan.Yearly, StoredPurchaseState.Active, PurchaseEnvironment.Sandbox);
+        store.Expired.Add(FakeNotificationStore.Row(sandbox));
+        var job = new AppleExpirySweepJob(
+            store,
+            new AppleStateRefresher(new AppleSubscriptionReader(apple.Jws, apple.Api, AppleScript.Catalog(allowSandbox: false), purchaseTelemetry), AppleScript.Catalog(allowSandbox: false)),
+            telemetry,
+            clock);
+
+        await job.RunOnceAsync(CancellationToken.None);
+
+        Assert.Empty(apple.Api.Calls);
+        Assert.Equal(StoredPurchaseState.Active, sandbox.State);
+        Assert.Empty(store.Events);
+    }
+
+    [Fact]
+    public async Task TheSweepRevivesAnAppleDeadLetterOnceItIsSixHoursOldButNotAYoungOneOrAnOldOne()
+    {
+        // FU-107 (security M-1), Apple side.
+        var due = store.Add("EXPIRED", AppleScript.NewId(), attempts: 10);
+        due.ProcessedAt = AppleScript.Now.AddHours(-7);
+        due.LastError = "STORE_ERROR";
+        var young = store.Add("EXPIRED", AppleScript.NewId(), attempts: 10);
+        young.ProcessedAt = AppleScript.Now.AddHours(-1);
+        young.LastError = "STORE_ERROR";
+
+        await Sweep().RunOnceAsync(CancellationToken.None);
+
+        Assert.Null(due.ProcessedAt);
+        Assert.Equal(0, due.Attempts);
+        Assert.NotNull(young.ProcessedAt);
+    }
+
     private AppleNotificationHistoryJob History(bool allowSandbox, AppleNotificationIngest? ingest = null) =>
         new(store, apple.Api, ingest ?? Ingest(allowSandbox), AppleScript.Catalog(allowSandbox), telemetry, clock);
 
