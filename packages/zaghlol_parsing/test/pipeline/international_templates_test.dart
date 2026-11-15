@@ -19,7 +19,7 @@ ParsingPipeline _pipeline() {
     institutions: institutions,
   );
   if (load.issues.isNotEmpty) {
-    throw StateError("registry failed to load");
+    throw StateError('registry failed to load');
   }
   return ParsingPipeline(load.registry!);
 }
