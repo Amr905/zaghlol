@@ -62,6 +62,15 @@ struct SharedSpoolKeyProvider: SpoolFileKeyProvider {
 }
 
 enum OcrRoots {
+  /// Where a picked image may sit before sealing: the app's temp and caches.
+  static func plainImageRoots() -> [URL] {
+    var roots = [FileManager.default.temporaryDirectory]
+    if let c = FileManager.default.urls(for: .cachesDirectory, in: .userDomainMask).first {
+      roots.append(c)
+    }
+    return roots
+  }
+
   /// The only directory OCR reads and deletes in: `spool/files/` of the App
   /// Group. Without the container the root is a path that holds nothing, so
   /// every path is refused.
@@ -237,14 +246,20 @@ final class OcrHost: OcrHostApi {
   private let source: OcrImageSource
   private let fileManager: FileManager
   private let home: URL
+  private let keys: SpoolFileKeyProvider
+  private let plainRoots: [URL]
   private let queue = DispatchQueue(label: "app.zaghlol.ocr", qos: .userInitiated)
 
   init(
     recognizer: TextRecognizing = VisionTextRecognizer(),
     source: OcrImageSource = SpoolFileImageSource(),
     fileManager: FileManager = .default,
-    home: URL = OcrRoots.filesDirectory()
+    home: URL = OcrRoots.filesDirectory(),
+    keys: SpoolFileKeyProvider = SharedSpoolKeyProvider(),
+    plainRoots: [URL] = OcrRoots.plainImageRoots()
   ) {
+    self.keys = keys
+    self.plainRoots = plainRoots
     self.home = home
     self.recognizer = recognizer
     self.source = source
@@ -291,6 +306,43 @@ final class OcrHost: OcrHostApi {
         completion(.failure(error))
       }
     }
+  }
+
+  /// T-161: seals a picked plain image into `spool/files/<ulid>.bin` (the
+  /// layout `SpoolFileImageSource` reads). The plain file is always deleted.
+  func sealImageNow(plainPath: String) throws -> String {
+    guard plainRoots.contains(where: { OcrPaths.isInside(path: plainPath, home: $0) }) else {
+      throw Self.error(.ioError)  // never touch (or delete) a file outside temp/cache
+    }
+    // Read once, then delete the plain file at once, whatever follows.
+    let url = URL(fileURLWithPath: plainPath).standardizedFileURL
+    let size = (try? url.resourceValues(forKeys: [.fileSizeKey]))?.fileSize
+    var loaded: Data?
+    if let size = size, size > 0, size <= SpoolFileImageSource.maxBytes - 28 {
+      loaded = try? Data(contentsOf: url)
+    }
+    try? fileManager.removeItem(at: url)
+    guard var plain = loaded else { throw Self.error(.ioError) }
+    defer { plain.resetBytes(in: 0..<plain.count) }
+    guard let keyBytes = keys.spoolKey(), keyBytes.count == 32 else {
+      throw Self.error(.notAvailable)
+    }
+    do {
+      try fileManager.createDirectory(at: home, withIntermediateDirectories: true)
+      let name = SpoolUlidGenerator().next() + ".bin"
+      let aad = Data("zaghlol.spool.v1|file|\(name)".utf8)
+      let box = try AES.GCM.seal(plain, using: SymmetricKey(data: keyBytes), authenticating: aad)
+      guard let combined = box.combined else { throw Self.error(.ioError) }
+      let target = home.appendingPathComponent(name)
+      try combined.write(to: target, options: .atomic)
+      return target.path
+    } catch {
+      throw Self.error(.ioError)
+    }
+  }
+
+  func sealImage(plainImagePath: String) throws -> String {
+    try sealImageNow(plainPath: plainImagePath)
   }
 
   func supportedLanguages() throws -> [String] {

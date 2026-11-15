@@ -4330,6 +4330,26 @@ class AppLocalizationsAr extends AppLocalizations {
   String get captureScanUnsupported => 'الملف ده مش صورة أقدر أقراها';
 
   @override
+  String get captureScanUnavailableTitle =>
+      'قراية الصور لسه مش شغالة على موبايلك';
+
+  @override
+  String get captureScanUnavailableBody =>
+      'شغال عليها. دلوقتي اكتب العملية بإيدك وأنا هسجلها.';
+
+  @override
+  String get captureShareRefusedTooLarge => 'الملف ده كبير عليا أوي';
+
+  @override
+  String get captureShareRefusedUnsupported => 'الملف ده مش نوع أقدر أقراه';
+
+  @override
+  String get captureShareRefusedUnreadable => 'معرفتش أفتح اللي بعتّه';
+
+  @override
+  String get captureShareRefusedEmpty => 'اللي بعتّه كان فاضي';
+
+  @override
   String get captureScanPhotoTitle => 'محتاج أشوف صورك';
 
   @override

@@ -1,0 +1,11 @@
+{
+  "body": "FRESH MART MAADI\nReceipt\nMilk 2 x 25.00 50.00\nBread 10.50\nSubtotal 60.50\nVAT 14% 8.47\nTotal EGP 68.97\n23/10/2026 17:42",
+  "receivedAt": "2026-10-23T18:00:00",
+  "expect": {
+    "amount": "68.97",
+    "currency": "EGP",
+    "merchant": "Fresh Mart",
+    "date": "2026-10-23",
+    "time": "17:42"
+  }
+}

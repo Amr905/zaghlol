@@ -1,0 +1,18 @@
+{
+  "sender": "InstaPay",
+  "channel": "ocr",
+  "body": "Transfer successful\nEGP 1,250.00\nTo: ahmed.ali@instapay\nFrom account: **** 4567\nDate: 23/10/2026 11:14\nReference: 62910482112",
+  "receivedAt": "2026-10-23T11:14:00+03:00",
+  "expect": {
+    "template": "instapay.ocr_sent.en",
+    "event": "instapay_out",
+    "direction": "expense",
+    "currency": "EGP",
+    "amount": "1250.00",
+    "last4": "4567",
+    "ref": "62910482112",
+    "ipa": "ahmed.ali@instapay",
+    "date": "2026-10-23",
+    "counterpartyKind": "ipaAddress"
+  }
+}

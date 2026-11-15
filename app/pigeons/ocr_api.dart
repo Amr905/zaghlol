@@ -34,6 +34,14 @@ abstract class OcrHostApi {
   @TaskQueue(type: TaskQueueType.serialBackgroundThread)
   OcrResult recognize(String encryptedImagePath, List<String> languages);
 
+  /// T-161: encrypts a plain image the user picked (a file in the app's temp
+  /// or cache directory) into the OCR spool and returns the path to pass to
+  /// [recognize]. The plain file is deleted whatever happens (FR-SEC-03).
+  /// Throws `IO_ERROR` (path outside temp/cache, unreadable, empty or over
+  /// 25 MiB) or `NOT_AVAILABLE` (no spool key or no host on this platform).
+  @TaskQueue(type: TaskQueueType.serialBackgroundThread)
+  String sealImage(String plainImagePath);
+
   /// ISO 639-1 codes the engine can recognize on this device, at runtime.
   List<String> supportedLanguages();
 }

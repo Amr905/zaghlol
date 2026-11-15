@@ -296,6 +296,12 @@ protocol OcrHostApi {
   /// does not support at runtime is dropped (Arabic is used only when
   /// supported); when none is left the host uses Latin-only recognition.
   func recognize(encryptedImagePath: String, languages: [String], completion: @escaping (Result<OcrResult, Error>) -> Void)
+  /// T-161: encrypts a plain image the user picked (a file in the app's temp
+  /// or cache directory) into the OCR spool and returns the path to pass to
+  /// [recognize]. The plain file is deleted whatever happens (FR-SEC-03).
+  /// Throws `IO_ERROR` (path outside temp/cache, unreadable, empty or over
+  /// 25 MiB) or `NOT_AVAILABLE` (no spool key or no host on this platform).
+  func sealImage(plainImagePath: String) throws -> String
   /// ISO 639-1 codes the engine can recognize on this device, at runtime.
   func supportedLanguages() throws -> [String]
 }
@@ -333,6 +339,28 @@ class OcrHostApiSetup {
       }
     } else {
       recognizeChannel.setMessageHandler(nil)
+    }
+    /// T-161: encrypts a plain image the user picked (a file in the app's temp
+    /// or cache directory) into the OCR spool and returns the path to pass to
+    /// [recognize]. The plain file is deleted whatever happens (FR-SEC-03).
+    /// Throws `IO_ERROR` (path outside temp/cache, unreadable, empty or over
+    /// 25 MiB) or `NOT_AVAILABLE` (no spool key or no host on this platform).
+    let sealImageChannel = taskQueue == nil
+      ? FlutterBasicMessageChannel(name: "dev.flutter.pigeon.zaghlol.OcrHostApi.sealImage\(channelSuffix)", binaryMessenger: binaryMessenger, codec: codec)
+      : FlutterBasicMessageChannel(name: "dev.flutter.pigeon.zaghlol.OcrHostApi.sealImage\(channelSuffix)", binaryMessenger: binaryMessenger, codec: codec, taskQueue: taskQueue)
+    if let api = api {
+      sealImageChannel.setMessageHandler { message, reply in
+        let args = message as! [Any?]
+        let plainImagePathArg = args[0] as! String
+        do {
+          let result = try api.sealImage(plainImagePath: plainImagePathArg)
+          reply(wrapResult(result))
+        } catch {
+          reply(wrapError(error))
+        }
+      }
+    } else {
+      sealImageChannel.setMessageHandler(nil)
     }
     /// ISO 639-1 codes the engine can recognize on this device, at runtime.
     let supportedLanguagesChannel = FlutterBasicMessageChannel(name: "dev.flutter.pigeon.zaghlol.OcrHostApi.supportedLanguages\(channelSuffix)", binaryMessenger: binaryMessenger, codec: codec)

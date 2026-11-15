@@ -24,6 +24,7 @@ import 'features/budget/application/cycle_app_wiring.dart';
 import 'features/capture/presentation/capture_controls.dart'
     show captureCardPortProvider;
 import 'features/capture/presentation/capture_lifecycle.dart';
+import 'features/capture/presentation/shared_items_lifecycle.dart';
 import 'features/gold/application/gold_providers.dart';
 import 'features/catalog_sync/application/sync_providers.dart';
 import 'features/catalog_sync/presentation/sync_lifecycle.dart';
@@ -83,8 +84,11 @@ Future<void> main() async {
           ),
         ],
         child: const CaptureLifecycle(
-          child: SyncLifecycle(
-            child: NotificationTapLifecycle(child: _LocalizedApp()),
+          // T-161 / FU-211: shared text and images open S-32.
+          child: SharedItemsLifecycle(
+            child: SyncLifecycle(
+              child: NotificationTapLifecycle(child: _LocalizedApp()),
+            ),
           ),
         ),
       ),

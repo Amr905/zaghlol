@@ -44,6 +44,17 @@ final class PigeonOcrEngine implements OcrEngine {
   }
 
   @override
+  Future<String> sealImage(String plainImagePath) async {
+    try {
+      return await _api.sealImage(plainImagePath);
+    } on PlatformException catch (e) {
+      throw OcrException(OcrFailureCode.fromWire(e.code));
+    } on Object {
+      throw const OcrException(OcrFailureCode.ioError);
+    }
+  }
+
+  @override
   Future<List<String>> supportedLanguages() async {
     try {
       return List.unmodifiable(await _api.supportedLanguages());

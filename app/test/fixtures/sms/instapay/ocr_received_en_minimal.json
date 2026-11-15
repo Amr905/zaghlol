@@ -1,0 +1,17 @@
+{
+  "sender": "InstaPay",
+  "channel": "ocr",
+  "body": "Money received\nEGP 45.25\nFrom: Hany Adel",
+  "receivedAt": "2026-10-23T11:14:00+03:00",
+  "expect": {
+    "template": "instapay.ocr_received.en",
+    "event": "instapay_in",
+    "direction": "income",
+    "currency": "EGP",
+    "amount": "45.25",
+    "last4": null,
+    "ref": null,
+    "counterparty": "Hany Adel",
+    "date": null
+  }
+}

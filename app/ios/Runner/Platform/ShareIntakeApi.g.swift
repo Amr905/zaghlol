@@ -201,6 +201,10 @@ struct ShareDescriptor: Hashable {
   var mimeType: String
   var sizeBytes: Int64
   var receivedAtMs: Int64
+  /// T-161 (FU-211): iOS image shares only. The path of the encrypted share
+  /// body in the App Group spool, which the OCR host reads and deletes (the
+  /// same layout as its own spool files). Null on Android and for other kinds.
+  var ocrPath: String? = nil
 
 
   // swift-format-ignore: AlwaysUseLowerCamelCase
@@ -210,13 +214,15 @@ struct ShareDescriptor: Hashable {
     let mimeType = pigeonVar_list[2] as! String
     let sizeBytes = pigeonVar_list[3] as! Int64
     let receivedAtMs = pigeonVar_list[4] as! Int64
+    let ocrPath: String? = nilOrValue(pigeonVar_list[5])
 
     return ShareDescriptor(
       id: id,
       kind: kind,
       mimeType: mimeType,
       sizeBytes: sizeBytes,
-      receivedAtMs: receivedAtMs
+      receivedAtMs: receivedAtMs,
+      ocrPath: ocrPath
     )
   }
   func toList() -> [Any?] {
@@ -226,13 +232,14 @@ struct ShareDescriptor: Hashable {
       mimeType,
       sizeBytes,
       receivedAtMs,
+      ocrPath,
     ]
   }
   static func == (lhs: ShareDescriptor, rhs: ShareDescriptor) -> Bool {
     if Swift.type(of: lhs) != Swift.type(of: rhs) {
       return false
     }
-    return deepEqualsShareIntakeApi(lhs.id, rhs.id) && deepEqualsShareIntakeApi(lhs.kind, rhs.kind) && deepEqualsShareIntakeApi(lhs.mimeType, rhs.mimeType) && deepEqualsShareIntakeApi(lhs.sizeBytes, rhs.sizeBytes) && deepEqualsShareIntakeApi(lhs.receivedAtMs, rhs.receivedAtMs)
+    return deepEqualsShareIntakeApi(lhs.id, rhs.id) && deepEqualsShareIntakeApi(lhs.kind, rhs.kind) && deepEqualsShareIntakeApi(lhs.mimeType, rhs.mimeType) && deepEqualsShareIntakeApi(lhs.sizeBytes, rhs.sizeBytes) && deepEqualsShareIntakeApi(lhs.receivedAtMs, rhs.receivedAtMs) && deepEqualsShareIntakeApi(lhs.ocrPath, rhs.ocrPath)
   }
 
   func hash(into hasher: inout Hasher) {
@@ -242,6 +249,7 @@ struct ShareDescriptor: Hashable {
     deepHashShareIntakeApi(value: mimeType, hasher: &hasher)
     deepHashShareIntakeApi(value: sizeBytes, hasher: &hasher)
     deepHashShareIntakeApi(value: receivedAtMs, hasher: &hasher)
+    deepHashShareIntakeApi(value: ocrPath, hasher: &hasher)
   }
 }
 

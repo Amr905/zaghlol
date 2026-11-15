@@ -59,6 +59,9 @@ dependencies:
   # browser / store (WIRE-NAV externalUrlOpenerProvider). Exact pin.
   url_launcher: 6.3.3
   speech_to_text: ^7.5.0
+  # T-161: the Scan tile's photo picker (flutter.dev, no analytics; Android 13+
+  # uses the system Photo Picker, iOS PHPicker; neither needs a permission).
+  image_picker: 1.2.4
 
 dev_dependencies:
   flutter_test:

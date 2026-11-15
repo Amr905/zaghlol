@@ -231,4 +231,58 @@ final class OcrTests: XCTestCase {
       imageData: png, languages: OcrLanguages.resolve(requested: ["en"], supported: supported))
     XCTAssertTrue(lines.contains { $0.text.uppercased().contains("TOTAL") })
   }
+
+  // MARK: sealImage (T-161)
+
+  private func sealHost(key: Data?, home: URL, plain: URL) -> OcrHost {
+    OcrHost(
+      recognizer: FakeRecognizer(), source: SpoolFileImageSource(keys: FixedKey(key: key), home: home),
+      home: home, keys: FixedKey(key: key), plainRoots: [plain])
+  }
+
+  func testSealImageRoundTripsAndDeletesThePlainFile() throws {
+    let fm = FileManager.default
+    let base = fm.temporaryDirectory.appendingPathComponent(UUID().uuidString, isDirectory: true)
+    let plainDir = base.appendingPathComponent("plain", isDirectory: true)
+    let home = base.appendingPathComponent("files", isDirectory: true)
+    try fm.createDirectory(at: plainDir, withIntermediateDirectories: true)
+    defer { try? fm.removeItem(at: base) }
+    let file = plainDir.appendingPathComponent("pick.jpg")
+    let bytes = Data((0..<64).map { UInt8($0) })
+    try bytes.write(to: file)
+    let key = Data(repeating: 7, count: 32)
+    let host = sealHost(key: key, home: home, plain: plainDir)
+    let sealed = try host.sealImageNow(plainPath: file.path)
+    XCTAssertFalse(fm.fileExists(atPath: file.path))
+    XCTAssertTrue(sealed.hasSuffix(".bin"))
+    let back = try SpoolFileImageSource(keys: FixedKey(key: key), home: home).readImage(atPath: sealed)
+    XCTAssertEqual(back, bytes)
+  }
+
+  func testSealImageWithoutKeyIsNotAvailableAndStillDeletesThePlainFile() throws {
+    let fm = FileManager.default
+    let base = fm.temporaryDirectory.appendingPathComponent(UUID().uuidString, isDirectory: true)
+    try fm.createDirectory(at: base, withIntermediateDirectories: true)
+    defer { try? fm.removeItem(at: base) }
+    let file = base.appendingPathComponent("pick.jpg")
+    try Data(repeating: 1, count: 40).write(to: file)
+    let host = sealHost(key: nil, home: base.appendingPathComponent("files"), plain: base)
+    XCTAssertThrowsError(try host.sealImageNow(plainPath: file.path))
+    XCTAssertFalse(fm.fileExists(atPath: file.path))
+  }
+
+  func testSealImageRefusesAPathOutsideTempAndCache() throws {
+    let fm = FileManager.default
+    let base = fm.temporaryDirectory.appendingPathComponent(UUID().uuidString, isDirectory: true)
+    let other = base.appendingPathComponent("other", isDirectory: true)
+    let allowed = base.appendingPathComponent("allowed", isDirectory: true)
+    try fm.createDirectory(at: other, withIntermediateDirectories: true)
+    try fm.createDirectory(at: allowed, withIntermediateDirectories: true)
+    defer { try? fm.removeItem(at: base) }
+    let file = other.appendingPathComponent("x.jpg")
+    try Data(repeating: 1, count: 40).write(to: file)
+    let host = sealHost(key: Data(repeating: 7, count: 32), home: base.appendingPathComponent("f"), plain: allowed)
+    XCTAssertThrowsError(try host.sealImageNow(plainPath: file.path))
+    XCTAssertTrue(fm.fileExists(atPath: file.path), "a file outside the roots is never deleted")
+  }
 }

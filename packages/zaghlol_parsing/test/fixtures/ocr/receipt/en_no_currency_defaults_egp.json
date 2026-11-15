@@ -1,0 +1,11 @@
+{
+  "body": "Corner Pharmacy\nTotal 120.00",
+  "receivedAt": "2026-10-23T18:00:00",
+  "expect": {
+    "amount": "120.00",
+    "currency": "EGP",
+    "merchant": "Corner Pharmacy",
+    "date": null,
+    "time": null
+  }
+}

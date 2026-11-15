@@ -1,0 +1,16 @@
+{
+  "sender": "VodafoneCash",
+  "channel": "ocr",
+  "body": "تمت عملية الدفع بنجاح\nالمبلغ: 90.00 جم\nالى: صيدلية الامل\nالتاريخ: 23/10/2026",
+  "receivedAt": "2026-10-23T11:14:00+03:00",
+  "expect": {
+    "template": "vodafone_cash.ocr_payment.ar",
+    "event": "card_purchase",
+    "direction": "expense",
+    "currency": "EGP",
+    "amount": "90.00",
+    "merchantClean": "صيدلية الامل",
+    "ref": null,
+    "date": "2026-10-23"
+  }
+}

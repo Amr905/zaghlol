@@ -250,6 +250,46 @@
         "جنيه": "EGP",
         "egp": "EGP"
       }
+    },
+    {
+      "date": {
+        "format": "d/M/yyyy"
+      },
+      "id": "cib.ocr_purchase.en",
+      "version": 1,
+      "lang": "en",
+      "channel": [
+        "ocr"
+      ],
+      "event": "card_purchase",
+      "direction": "expense",
+      "baseConfidence": 0.9,
+      "pattern": "card purchase (?<cur>egp|جم|جنيه) ?(?<amount>[\\d,.]+) merchant:? (?<merchant>[a-z0-9ء-ي &.\\'*-]{2,50}?) card ending (?:in )?(?<last4>\\d{4}) (?<date>\\d{1,2}/\\d{1,2}/\\d{4})(?: (?<time>\\d{1,2}:\\d{2}(?: ?[ap]m)?))?(?: available balance (?:egp )?(?<balance>[\\d,.]+))?",
+      "currencyMap": {
+        "جم": "EGP",
+        "جنيه": "EGP",
+        "egp": "EGP"
+      }
+    },
+    {
+      "date": {
+        "format": "d/M/yyyy"
+      },
+      "id": "cib.ocr_purchase.ar",
+      "version": 1,
+      "lang": "ar",
+      "channel": [
+        "ocr"
+      ],
+      "event": "card_purchase",
+      "direction": "expense",
+      "baseConfidence": 0.9,
+      "pattern": "عملية شراء بالبطاقة (?<amount>[\\d,.]+) (?<cur>egp|جم|جنيه) التاجر:? (?<merchant>[a-z0-9ء-ي &.\\'*-]{2,50}?) بطاقة تنتهي ب ?(?<last4>\\d{4}) (?<date>\\d{1,2}/\\d{1,2}/\\d{4})(?: (?<time>\\d{1,2}:\\d{2}(?: ?[ap]m)?))?(?: الرصيد المتاح (?<balance>[\\d,.]+) (?:جم|جنيه|egp))?",
+      "currencyMap": {
+        "جم": "EGP",
+        "جنيه": "EGP",
+        "egp": "EGP"
+      }
     }
   ]
 }

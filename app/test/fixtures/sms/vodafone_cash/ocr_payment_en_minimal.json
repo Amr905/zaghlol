@@ -1,0 +1,16 @@
+{
+  "sender": "VodafoneCash",
+  "channel": "ocr",
+  "body": "Payment successful\nAmount: EGP 20.00\nPaid to: Corner Kiosk",
+  "receivedAt": "2026-10-23T11:14:00+03:00",
+  "expect": {
+    "template": "vodafone_cash.ocr_payment.en",
+    "event": "card_purchase",
+    "direction": "expense",
+    "currency": "EGP",
+    "amount": "20.00",
+    "merchantClean": "Corner Kiosk",
+    "ref": null,
+    "date": null
+  }
+}

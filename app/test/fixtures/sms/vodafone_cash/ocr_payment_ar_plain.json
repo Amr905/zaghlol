@@ -1,0 +1,16 @@
+{
+  "sender": "VodafoneCash",
+  "channel": "ocr",
+  "body": "تمت عملية الدفع بنجاح\nالمبلغ: 350.00 جم\nالى: فريش ماركت\nالتاريخ: 23/10/2026 14:05\nرقم العملية: VC2610231405",
+  "receivedAt": "2026-10-23T11:14:00+03:00",
+  "expect": {
+    "template": "vodafone_cash.ocr_payment.ar",
+    "event": "card_purchase",
+    "direction": "expense",
+    "currency": "EGP",
+    "amount": "350.00",
+    "merchantClean": "فريش ماركت",
+    "ref": "VC2610231405",
+    "date": "2026-10-23"
+  }
+}

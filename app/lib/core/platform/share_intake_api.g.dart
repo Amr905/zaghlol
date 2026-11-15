@@ -123,6 +123,7 @@ class ShareDescriptor {
     required this.mimeType,
     required this.sizeBytes,
     required this.receivedAtMs,
+    this.ocrPath,
   });
 
   String id;
@@ -135,8 +136,13 @@ class ShareDescriptor {
 
   int receivedAtMs;
 
+  /// T-161 (FU-211): iOS image shares only. The path of the encrypted share
+  /// body in the App Group spool, which the OCR host reads and deletes (the
+  /// same layout as its own spool files). Null on Android and for other kinds.
+  String? ocrPath;
+
   List<Object?> _toList() {
-    return <Object?>[id, kind, mimeType, sizeBytes, receivedAtMs];
+    return <Object?>[id, kind, mimeType, sizeBytes, receivedAtMs, ocrPath];
   }
 
   Object encode() {
@@ -151,6 +157,7 @@ class ShareDescriptor {
       mimeType: result[2]! as String,
       sizeBytes: result[3]! as int,
       receivedAtMs: result[4]! as int,
+      ocrPath: result[5] as String?,
     );
   }
 
@@ -167,7 +174,8 @@ class ShareDescriptor {
         _deepEquals(kind, other.kind) &&
         _deepEquals(mimeType, other.mimeType) &&
         _deepEquals(sizeBytes, other.sizeBytes) &&
-        _deepEquals(receivedAtMs, other.receivedAtMs);
+        _deepEquals(receivedAtMs, other.receivedAtMs) &&
+        _deepEquals(ocrPath, other.ocrPath);
   }
 
   @override

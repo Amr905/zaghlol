@@ -81,6 +81,12 @@ abstract interface class OcrEngine {
     List<String> languages = const ['ar', 'en'],
   });
 
+  /// T-161: moves a picked plain image (a file in the app's temp or cache
+  /// directory) into the encrypted OCR spool and returns the path for
+  /// [recognize]. The plain file is deleted by the host whatever happens.
+  /// Throws [OcrException] (IO_ERROR, NOT_AVAILABLE).
+  Future<String> sealImage(String plainImagePath);
+
   /// ISO 639-1 codes the engine can read on this device.
   Future<List<String>> supportedLanguages();
 }

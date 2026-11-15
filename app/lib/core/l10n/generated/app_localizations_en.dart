@@ -4234,6 +4234,28 @@ class AppLocalizationsEn extends AppLocalizations {
   String get captureScanUnsupported => 'I can\'t read this kind of file';
 
   @override
+  String get captureScanUnavailableTitle =>
+      'Reading images isn\'t ready on this phone yet';
+
+  @override
+  String get captureScanUnavailableBody =>
+      'I\'m working on it. For now, type the transaction and I\'ll save it.';
+
+  @override
+  String get captureShareRefusedTooLarge => 'That file is too big for me';
+
+  @override
+  String get captureShareRefusedUnsupported =>
+      'I can\'t read this kind of file';
+
+  @override
+  String get captureShareRefusedUnreadable =>
+      'I couldn\'t open what you shared';
+
+  @override
+  String get captureShareRefusedEmpty => 'What you shared was empty';
+
+  @override
   String get captureScanPhotoTitle => 'I need access to your photos';
 
   @override

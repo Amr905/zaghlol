@@ -19,6 +19,8 @@ import '../../../../core/ui/shell/add_sheet.dart' show AddAction;
 import '../../../budget/application/budget_providers.dart';
 import '../../data/transactions_providers.dart';
 import '../../domain/transaction.dart';
+import '../../application/duplicate_finder.dart';
+import '../detail/transaction_detail_screen.dart';
 import '../detail/txn_detail_providers.dart';
 import '../list/txn_list_providers.dart';
 import '../list/txn_row.dart';
@@ -48,17 +50,59 @@ Future<bool?> showTransactionEditor(
   );
 }
 
+/// T-161: what S-32 read from an image or shared text, to confirm in the
+/// editor. Nothing is saved until the user taps Save.
+final class TxnPrefill {
+  const TxnPrefill({
+    required this.type,
+    this.amountText,
+    this.currency,
+    this.merchant,
+    this.accountId,
+    this.date,
+    this.source = TxnSource.manual,
+    this.checkDuplicate = false,
+  });
+
+  final TxnEditType type;
+
+  /// Canonical decimal text (`1250.00`), never a double.
+  final String? amountText;
+  final Currency? currency;
+  final String? merchant;
+  final String? accountId;
+  final CivilDate? date;
+
+  /// Stored on the new transaction (`ocr` for scanned images).
+  final TxnSource source;
+
+  /// Look for the same transaction already saved before saving this one.
+  final bool checkDuplicate;
+}
+
 class TransactionEditScreen extends ConsumerStatefulWidget {
   const TransactionEditScreen({
     super.key,
     this.existing,
     this.rawText,
     this.initialType = TxnEditType.expense,
+    this.prefill,
+    this.bannerText,
+    this.title,
   });
 
   final TransactionRecord? existing;
   final String? rawText;
   final TxnEditType initialType;
+
+  /// T-161 (S-32): values read from an image or shared text.
+  final TxnPrefill? prefill;
+
+  /// Replaces the "from shared" banner (e.g. the scan banner of S-32).
+  final String? bannerText;
+
+  /// Replaces the app bar title.
+  final String? title;
 
   @override
   ConsumerState<TransactionEditScreen> createState() => _EditState();
@@ -92,15 +136,26 @@ class _EditState extends ConsumerState<TransactionEditScreen> {
   void initState() {
     super.initState();
     final e = _existing;
-    _type = e == null ? widget.initialType : _typeOf(e.direction);
-    _currency = e?.amount.currency ?? Currency.of('EGP');
-    _currencyTouched = e != null;
+    final pre = widget.prefill;
+    _type = e == null
+        ? (pre?.type ?? widget.initialType)
+        : _typeOf(e.direction);
+    _currency = e?.amount.currency ?? pre?.currency ?? Currency.of('EGP');
+    _currencyTouched = e != null || pre?.currency != null;
     _amount = TextEditingController(
-      text: e == null ? '' : e.amount.abs().toCanonicalString(),
+      text: e == null
+          ? (pre?.amountText ?? '')
+          : e.amount.abs().toCanonicalString(),
     );
     _merchant = TextEditingController(
-      text: e == null ? '' : (e.merchantNorm ?? e.merchantRaw ?? ''),
+      text: e == null
+          ? (pre?.merchant ?? '')
+          : (e.merchantNorm ?? e.merchantRaw ?? ''),
     );
+    if (e == null && pre != null) {
+      _accountId = pre.accountId;
+      _date = pre.date;
+    }
     _note = TextEditingController(text: e?.note ?? '');
     _categoryId = e?.categoryId;
     _accountId = e?.accountId;
@@ -249,6 +304,7 @@ class _EditState extends ConsumerState<TransactionEditScreen> {
             categoryId: isTransfer ? null : _categoryId,
             merchant: merchant.isEmpty ? null : merchant,
             note: note.isEmpty ? null : note,
+            source: widget.prefill?.source ?? TxnSource.manual,
           ),
           // The incoming leg only when both accounts hold the same currency;
           // otherwise the out leg waits for its match (nothing is converted).
@@ -268,6 +324,13 @@ class _EditState extends ConsumerState<TransactionEditScreen> {
               note: note.isEmpty ? null : note,
             ),
         ];
+        if (widget.prefill?.checkDuplicate ?? false) {
+          final proceed = await _confirmNotDuplicate(legs.first);
+          if (!proceed) {
+            if (mounted) setState(() => _saving = false);
+            return;
+          }
+        }
         await editor.add(legs);
       }
       ref.invalidate(txnListProvider);
@@ -288,6 +351,54 @@ class _EditState extends ConsumerState<TransactionEditScreen> {
         });
       }
     }
+  }
+
+  /// S-32: when the same transaction is already saved, show it and let the
+  /// user view it or save anyway. False = do not save now.
+  Future<bool> _confirmNotDuplicate(NewTransaction leg) async {
+    final TransactionRecord? dup;
+    try {
+      final repo = await ref.read(transactionRepositoryProvider.future);
+      dup = await findDuplicate(repo, leg);
+    } on Object {
+      return true; // the check is a courtesy; never block saving on it
+    }
+    if (dup == null || !mounted) return true;
+    final l = AppLocalizations.of(context);
+    final lang = Localizations.localeOf(context).languageCode;
+    final fmt = TxnFmt(lang, ref.read(digitsModeProvider(lang)));
+    final existing = dup;
+    final choice = await showDialog<bool>(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        title: Text(l.captureScanDuplicateTitle),
+        content: Text(
+          '${existing.merchantNorm ?? existing.merchantRaw ?? ''}\n'
+          '${fmt.money(existing.amount.abs())} · '
+          '${ZDateFormat.date(existing.occurredAt, lang, fmt.digits)}',
+        ),
+        actions: [
+          TextButton(
+            key: const Key('scan-duplicate-view'),
+            onPressed: () => Navigator.of(ctx).pop(false),
+            child: Text(l.captureScanDuplicateView),
+          ),
+          TextButton(
+            key: const Key('scan-duplicate-save'),
+            onPressed: () => Navigator.of(ctx).pop(true),
+            child: Text(l.captureScanDuplicateSave),
+          ),
+        ],
+      ),
+    );
+    if (choice == false && mounted) {
+      await Navigator.of(context).push<void>(
+        MaterialPageRoute<void>(
+          builder: (_) => TransactionDetailScreen(transactionId: existing.id),
+        ),
+      );
+    }
+    return choice ?? false;
   }
 
   Future<bool> _confirmDiscard() async {
@@ -405,7 +516,7 @@ class _EditState extends ConsumerState<TransactionEditScreen> {
       if (id != null) {
         _accountId = id;
         final cur = Currency.tryOf(lk.account(id)?.currencyCode ?? '');
-        if (cur != null) _currency = cur;
+        if (cur != null && !_currencyTouched) _currency = cur;
       }
     }
     final date = _date ?? _today();
@@ -419,7 +530,9 @@ class _EditState extends ConsumerState<TransactionEditScreen> {
             lang,
             fmt.digits,
           );
-    final title = _isEdit
+    final title = widget.title != null
+        ? widget.title!
+        : _isEdit
         ? l.transactionsEditTitleEdit
         : l.transactionsEditTitleAdd(_type.name);
     String? err(TxnField k) =>
@@ -476,6 +589,10 @@ class _EditState extends ConsumerState<TransactionEditScreen> {
                         tone: ZBannerTone.error,
                       ),
                     ),
+                  if (widget.bannerText != null) ...[
+                    ZBanner(message: widget.bannerText!),
+                    const SizedBox(height: ZSpacing.lg),
+                  ],
                   if (widget.rawText != null) ...[
                     ZBanner(message: l.transactionsEditFromShared),
                     const SizedBox(height: ZSpacing.sm),

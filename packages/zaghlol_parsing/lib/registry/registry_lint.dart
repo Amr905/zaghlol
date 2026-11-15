@@ -88,7 +88,8 @@ LintReport lintRegistry({
           samples.putIfAbsent(id, () => body);
           final last4 = _fixtureExpectLast4(fixtures[path]!);
           final slash = path.indexOf('/');
-          if (last4 != null && slash > 0) {
+          // OCR text never goes through the Guard (T-161): no parity to hold.
+          if (last4 != null && slash > 0 && !_isOcrFixture(fixtures[path]!)) {
             last4Checks.add((path, path.substring(0, slash), body, last4));
           }
         }
@@ -206,6 +207,16 @@ LintReport lintRegistry({
 /// The ladder ends at the pipeline's body cap (4000), so quadratic headroom
 /// on a maximum-size message is measured, not assumed.
 const List<int> adversarialBodyLengths = [64, 128, 256, 512, 1600, 4000];
+
+/// True when the fixture declares `"channel": "ocr"`.
+bool _isOcrFixture(String text) {
+  try {
+    final map = jsonDecode(text);
+    return map is Map<String, Object?> && map['channel'] == 'ocr';
+  } on FormatException {
+    return false;
+  }
+}
 
 /// The fixture's `expect.last4`, when it is a string.
 String? _fixtureExpectLast4(String text) {

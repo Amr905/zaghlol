@@ -1,0 +1,17 @@
+{
+  "sender": "CIB",
+  "channel": "ocr",
+  "body": "تفاصيل العملية\nعملية شراء بالبطاقة\n250.00 جم\nالتاجر: مطعم الشبراوي\nبطاقة تنتهي بـ 1234\n20/10/2026 13:02\nالرصيد المتاح 800.00 جم",
+  "receivedAt": "2026-10-23T11:14:00+03:00",
+  "expect": {
+    "template": "cib.ocr_purchase.ar",
+    "event": "card_purchase",
+    "direction": "expense",
+    "currency": "EGP",
+    "amount": "250.00",
+    "last4": "1234",
+    "merchantClean": "مطعم الشبراوي",
+    "balance": "800.00",
+    "date": "2026-10-20"
+  }
+}

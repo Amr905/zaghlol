@@ -79,6 +79,7 @@ Widget _app(
   required Locale locale,
   required double textScale,
   required bool dark,
+  GlobalKey<NavigatorState>? navigatorKey,
 }) => ProviderScope(
   overrides: [
     txnLookupsProvider.overrideWith((ref) async => lookups),
@@ -96,6 +97,7 @@ Widget _app(
     ...overrides,
   ],
   child: MaterialApp(
+    navigatorKey: navigatorKey,
     debugShowCheckedModeBanner: false,
     locale: locale,
     localizationsDelegates: AppLocalizations.localizationsDelegates,
@@ -202,3 +204,21 @@ Future<void> pumpEditor(
   await tester.tap(find.text('open'));
   await tester.pumpAndSettle();
 }
+
+/// T-161: the shared app harness (providers, locale, text scale) for other
+/// screens that embed the editor (S-32).
+Widget harnessApp(
+  List<Override> overrides,
+  Widget home, {
+  Locale locale = const Locale('en'),
+  double textScale = 1.0,
+  bool dark = false,
+  GlobalKey<NavigatorState>? navigatorKey,
+}) => _app(
+  overrides,
+  home,
+  locale: locale,
+  textScale: textScale,
+  dark: dark,
+  navigatorKey: navigatorKey,
+);

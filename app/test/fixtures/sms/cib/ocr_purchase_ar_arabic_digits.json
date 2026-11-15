@@ -1,0 +1,17 @@
+{
+  "sender": "CIB",
+  "channel": "ocr",
+  "body": "تفاصيل العملية\nعملية شراء بالبطاقة\n٤٨٠٫٠٠ جم\nالتاجر: CARREFOUR MAADI EG 041\nبطاقة تنتهي بـ ١٢٣٤\n٢٣/١٠/٢٠٢٦ ١١:١٤\nالرصيد المتاح ٥٬٠٠٠٫٠٠ جم",
+  "receivedAt": "2026-10-23T11:14:00+03:00",
+  "expect": {
+    "template": "cib.ocr_purchase.ar",
+    "event": "card_purchase",
+    "direction": "expense",
+    "currency": "EGP",
+    "amount": "480.00",
+    "last4": "1234",
+    "merchantClean": "Carrefour",
+    "balance": "5000.00",
+    "date": "2026-10-23"
+  }
+}
