@@ -9847,5 +9847,207 @@
         "type": "String"
       }
     }
+  },
+  "importFlowTitle": "ضيف كشف حساب",
+  "@importFlowTitle": {
+    "description": "S-67 import source screen title"
+  },
+  "importFlowSub": "ضيف شهور فاتت مرة واحدة. الملف بيتقرا على موبايلك بس، ومش بيتبعت لأي حد.",
+  "@importFlowSub": {
+    "description": "S-67 import source screen intro"
+  },
+  "importFlowGroupEgypt": "بنوك مصر",
+  "@importFlowGroupEgypt": {
+    "description": "S-67 group title"
+  },
+  "importFlowGroupOnline": "بنوك أونلاين",
+  "@importFlowGroupOnline": {
+    "description": "S-67 group title"
+  },
+  "importFlowHowTo": "إزاي أنزّل الكشف؟",
+  "@importFlowHowTo": {
+    "description": "S-67 link next to a group title"
+  },
+  "importFlowHowToBody": "افتح تطبيق البنك أو موقعه، دوّر على صفحة الكشوف، اختار الشهور اللي عايزها ونزّل الملف. وبعدين ارجع هنا واختاره.",
+  "@importFlowHowToBody": {
+    "description": "S-67 how-to sheet body (generic until bank guides ship)"
+  },
+  "importFlowBankCib": "CIB",
+  "@importFlowBankCib": {
+    "description": "S-67 source name"
+  },
+  "importFlowBankNbe": "البنك الأهلي",
+  "@importFlowBankNbe": {
+    "description": "S-67 source name"
+  },
+  "importFlowBankMisr": "بنك مصر",
+  "@importFlowBankMisr": {
+    "description": "S-67 source name"
+  },
+  "importFlowBankQnb": "QNB",
+  "@importFlowBankQnb": {
+    "description": "S-67 source name"
+  },
+  "importFlowBankWise": "Wise",
+  "@importFlowBankWise": {
+    "description": "S-67 source name"
+  },
+  "importFlowBankRevolut": "Revolut",
+  "@importFlowBankRevolut": {
+    "description": "S-67 source name"
+  },
+  "importFlowBankPayoneer": "Payoneer",
+  "@importFlowBankPayoneer": {
+    "description": "S-67 source name"
+  },
+  "importFlowBadgeNbe": "NBE",
+  "@importFlowBadgeNbe": {
+    "description": "S-67 logo tile text"
+  },
+  "importFlowBadgeMisr": "BM",
+  "@importFlowBadgeMisr": {
+    "description": "S-67 logo tile text"
+  },
+  "importFlowSubCib": "PDF من الموبايل أو الإيميل",
+  "@importFlowSubCib": {
+    "description": "S-67 source sub-line"
+  },
+  "importFlowFmtPdf": "PDF",
+  "@importFlowFmtPdf": {
+    "description": "S-67 file type"
+  },
+  "importFlowFmtCsv": "CSV",
+  "@importFlowFmtCsv": {
+    "description": "S-67 file type"
+  },
+  "importFlowFmtCsvAllCurrencies": "كل العملات · CSV",
+  "@importFlowFmtCsvAllCurrencies": {
+    "description": "S-67 file type for a multi-currency source"
+  },
+  "importFlowZaghlolSub": "نسخة إنت صدرتها قبل كده",
+  "@importFlowZaghlolSub": {
+    "description": "S-67 Zaghlol CSV sub-line"
+  },
+  "importFlowSoon": "قريب",
+  "@importFlowSoon": {
+    "description": "S-67 badge on a source that is not available yet"
+  },
+  "importFlowSummaryRange": "{start} – {end}",
+  "@importFlowSummaryRange": {
+    "description": "S-67 summary sheet date range",
+    "placeholders": {
+      "start": {
+        "type": "String"
+      },
+      "end": {
+        "type": "String"
+      }
+    }
+  },
+  "importFlowRowFound": "حركات في الكشف",
+  "@importFlowRowFound": {
+    "description": "S-67 summary row"
+  },
+  "importFlowRowDup": "موجودة قبل كده من الرسايل",
+  "@importFlowRowDup": {
+    "description": "S-67 summary row"
+  },
+  "importFlowRowUntracked": "كروت مش بتتابعها",
+  "@importFlowRowUntracked": {
+    "description": "S-67 summary row"
+  },
+  "importFlowRowUnreadable": "صفوف معرفتش أقراها",
+  "@importFlowRowUnreadable": {
+    "description": "S-67 summary row"
+  },
+  "importFlowRowNew": "حركات جديدة هتتضاف",
+  "@importFlowRowNew": {
+    "description": "S-67 summary highlighted row"
+  },
+  "importFlowSkipped": "{n} — هنتخطاها",
+  "@importFlowSkipped": {
+    "description": "S-67 summary row value",
+    "placeholders": {
+      "n": {
+        "type": "String"
+      }
+    }
+  },
+  "importFlowTarget": "على {card}",
+  "@importFlowTarget": {
+    "description": "S-67 target card row",
+    "placeholders": {
+      "card": {
+        "type": "String"
+      }
+    }
+  },
+  "importFlowTargetChange": "غيّر",
+  "@importFlowTargetChange": {
+    "description": "S-67 target card action"
+  },
+  "importFlowConfirm": "{count, plural, =1{ضيف حركة} =2{ضيف حركتين} few{ضيف {n} حركات} many{ضيف {n} حركة} other{ضيف {n} حركة}}",
+  "@importFlowConfirm": {
+    "description": "S-67 confirm button",
+    "placeholders": {
+      "count": {
+        "type": "int"
+      },
+      "n": {
+        "type": "String"
+      }
+    }
+  },
+  "importFlowDoneTitle": "{count, plural, =1{ضفت حركة 🎉} =2{ضفت حركتين 🎉} few{ضفت {n} حركات 🎉} many{ضفت {n} حركة 🎉} other{ضفت {n} حركة 🎉}}",
+  "@importFlowDoneTitle": {
+    "description": "S-67 done headline",
+    "placeholders": {
+      "count": {
+        "type": "int"
+      },
+      "n": {
+        "type": "String"
+      }
+    }
+  },
+  "importFlowDoneFromFile": "من ملف زغلول بتاعك",
+  "@importFlowDoneFromFile": {
+    "description": "S-67 done sub-line when no card is known"
+  },
+  "importFlowDoneAuto": "اتصنفوا لوحدهم",
+  "@importFlowDoneAuto": {
+    "description": "S-67 done stat"
+  },
+  "importFlowDoneReview": "مستنيين رأيك",
+  "@importFlowDoneReview": {
+    "description": "S-67 done stat"
+  },
+  "importFlowDoneTop": "أكتر حاجات صرفت عليها",
+  "@importFlowDoneTop": {
+    "description": "S-67 done section title"
+  },
+  "importFlowDoneBubble": "الشارتات والميزانية اتحدثوا بالشهور دي. دلوقتي أقدر أقارنلك بينهم.",
+  "@importFlowDoneBubble": {
+    "description": "S-67 done mascot line"
+  },
+  "importFlowDoneReviewButton": "{count, plural, =1{راجع الحركة} =2{راجع الحركتين} few{راجع الـ {n}} many{راجع الـ {n}} other{راجع الـ {n}}}",
+  "@importFlowDoneReviewButton": {
+    "description": "S-67 done primary button",
+    "placeholders": {
+      "count": {
+        "type": "int"
+      },
+      "n": {
+        "type": "String"
+      }
+    }
+  },
+  "importFlowDoneOpenCard": "افتح الكارت",
+  "@importFlowDoneOpenCard": {
+    "description": "S-67 done secondary button"
+  },
+  "importFlowUnavailable": "المصدر ده لسه مش جاهز",
+  "@importFlowUnavailable": {
+    "description": "S-67 hint for a coming-soon source"
   }
 }

@@ -238,9 +238,10 @@ Future<void> openCardDetailFor(
   context,
   account,
   justAdded: justAdded,
-  // Manual entry opens the quick-add sheet; no statement-import screen
-  // exists yet, so that row stays hidden (onImportStatement null).
   onAddTransaction: () => unawaited(context.push(AppRoutes.add)),
+  // T-158: the card's own entry into the import flow (S-67).
+  onImportStatement: () =>
+      unawaited(openImportFlow(context, cardName: account.label)),
   onOpenTransactions: () {
     // S-41 "All card transactions": show only this card.
     _container(context)
@@ -286,6 +287,7 @@ SettingsDestinations settingsDestinations(BuildContext context) =>
       onCapture: () => unawaited(openCaptureSettings(context)),
       onCategories: () => unawaited(_screens(context).categories(context)),
       onBackup: () => unawaited(openBackup(context)),
+      onExports: () => unawaited(openImportFlow(context)),
       onAccount: () => unawaited(_screens(context).account(context)),
       onNotifications: () =>
           unawaited(_screens(context).notificationsSettings(context)),
@@ -303,6 +305,14 @@ Future<void> openCaptureSettings(BuildContext context) =>
         }
         unawaited(_screens(context).templateBuilder(context));
       },
+    );
+
+/// S-67 import flow. From a card, [cardName] names the target.
+Future<void> openImportFlow(BuildContext context, {String? cardName}) =>
+    _screens(context).importFlow(
+      context,
+      cardName: cardName,
+      onReview: () => unawaited(context.push(AppRoutes.review)),
     );
 
 Future<void> openBackup(BuildContext context) => _screens(context).backup(

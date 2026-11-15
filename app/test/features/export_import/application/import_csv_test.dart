@@ -155,6 +155,21 @@ void main() {
       expect(store.rows.length, 3);
     });
 
+    test(
+      'T-158 dry run counts without writing and reports the range',
+      () async {
+        final bytes = csvOf([rec(1), rec(2, minor: 500)]);
+        final dry = await uc.run(bytes, dryRun: true);
+        expect(dry.imported, 2);
+        expect(store.rows, isEmpty);
+        expect(dry.earliest, isNotNull);
+        expect(dry.latest!.isBefore(dry.earliest!), isFalse);
+        final real = await uc.run(bytes);
+        expect(real.imported, 2);
+        expect(store.rows.length, 2);
+      },
+    );
+
     test('duplicate key uses storage terms: 10.5 vs 10.50 vs 010.5', () async {
       await uc.run(raw(hdr() + line(amount: '10.5')));
       final s = await uc.run(

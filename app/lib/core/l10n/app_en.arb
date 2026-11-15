@@ -6762,5 +6762,207 @@
         "type": "String"
       }
     }
+  },
+  "importFlowTitle": "Add a statement",
+  "@importFlowTitle": {
+    "description": "S-67 import source screen title"
+  },
+  "importFlowSub": "Add past months in one go. The file is read on your phone only and isn't sent to anyone.",
+  "@importFlowSub": {
+    "description": "S-67 import source screen intro"
+  },
+  "importFlowGroupEgypt": "Banks in Egypt",
+  "@importFlowGroupEgypt": {
+    "description": "S-67 group title"
+  },
+  "importFlowGroupOnline": "Online banks",
+  "@importFlowGroupOnline": {
+    "description": "S-67 group title"
+  },
+  "importFlowHowTo": "How do I download the statement?",
+  "@importFlowHowTo": {
+    "description": "S-67 link next to a group title"
+  },
+  "importFlowHowToBody": "Open your bank's app or website, find the statements page, pick the months you want and download the file. Then come back here and choose it.",
+  "@importFlowHowToBody": {
+    "description": "S-67 how-to sheet body (generic until bank guides ship)"
+  },
+  "importFlowBankCib": "CIB",
+  "@importFlowBankCib": {
+    "description": "S-67 source name"
+  },
+  "importFlowBankNbe": "National Bank of Egypt",
+  "@importFlowBankNbe": {
+    "description": "S-67 source name"
+  },
+  "importFlowBankMisr": "Banque Misr",
+  "@importFlowBankMisr": {
+    "description": "S-67 source name"
+  },
+  "importFlowBankQnb": "QNB",
+  "@importFlowBankQnb": {
+    "description": "S-67 source name"
+  },
+  "importFlowBankWise": "Wise",
+  "@importFlowBankWise": {
+    "description": "S-67 source name"
+  },
+  "importFlowBankRevolut": "Revolut",
+  "@importFlowBankRevolut": {
+    "description": "S-67 source name"
+  },
+  "importFlowBankPayoneer": "Payoneer",
+  "@importFlowBankPayoneer": {
+    "description": "S-67 source name"
+  },
+  "importFlowBadgeNbe": "NBE",
+  "@importFlowBadgeNbe": {
+    "description": "S-67 logo tile text"
+  },
+  "importFlowBadgeMisr": "BM",
+  "@importFlowBadgeMisr": {
+    "description": "S-67 logo tile text"
+  },
+  "importFlowSubCib": "PDF from the app or email",
+  "@importFlowSubCib": {
+    "description": "S-67 source sub-line"
+  },
+  "importFlowFmtPdf": "PDF",
+  "@importFlowFmtPdf": {
+    "description": "S-67 file type"
+  },
+  "importFlowFmtCsv": "CSV",
+  "@importFlowFmtCsv": {
+    "description": "S-67 file type"
+  },
+  "importFlowFmtCsvAllCurrencies": "All currencies · CSV",
+  "@importFlowFmtCsvAllCurrencies": {
+    "description": "S-67 file type for a multi-currency source"
+  },
+  "importFlowZaghlolSub": "A copy you exported before",
+  "@importFlowZaghlolSub": {
+    "description": "S-67 Zaghlol CSV sub-line"
+  },
+  "importFlowSoon": "Coming soon",
+  "@importFlowSoon": {
+    "description": "S-67 badge on a source that is not available yet"
+  },
+  "importFlowSummaryRange": "{start} – {end}",
+  "@importFlowSummaryRange": {
+    "description": "S-67 summary sheet date range",
+    "placeholders": {
+      "start": {
+        "type": "String"
+      },
+      "end": {
+        "type": "String"
+      }
+    }
+  },
+  "importFlowRowFound": "Transactions in the statement",
+  "@importFlowRowFound": {
+    "description": "S-67 summary row"
+  },
+  "importFlowRowDup": "Already in Zaghlol",
+  "@importFlowRowDup": {
+    "description": "S-67 summary row"
+  },
+  "importFlowRowUntracked": "Cards you don't track",
+  "@importFlowRowUntracked": {
+    "description": "S-67 summary row"
+  },
+  "importFlowRowUnreadable": "Rows we couldn't read",
+  "@importFlowRowUnreadable": {
+    "description": "S-67 summary row"
+  },
+  "importFlowRowNew": "New transactions to add",
+  "@importFlowRowNew": {
+    "description": "S-67 summary highlighted row"
+  },
+  "importFlowSkipped": "{n} — skipped",
+  "@importFlowSkipped": {
+    "description": "S-67 summary row value",
+    "placeholders": {
+      "n": {
+        "type": "String"
+      }
+    }
+  },
+  "importFlowTarget": "On {card}",
+  "@importFlowTarget": {
+    "description": "S-67 target card row",
+    "placeholders": {
+      "card": {
+        "type": "String"
+      }
+    }
+  },
+  "importFlowTargetChange": "Change",
+  "@importFlowTargetChange": {
+    "description": "S-67 target card action"
+  },
+  "importFlowConfirm": "{count, plural, =1{Add 1 transaction} other{Add {n} transactions}}",
+  "@importFlowConfirm": {
+    "description": "S-67 confirm button",
+    "placeholders": {
+      "count": {
+        "type": "int"
+      },
+      "n": {
+        "type": "String"
+      }
+    }
+  },
+  "importFlowDoneTitle": "{count, plural, =1{Added 1 transaction 🎉} other{Added {n} transactions 🎉}}",
+  "@importFlowDoneTitle": {
+    "description": "S-67 done headline",
+    "placeholders": {
+      "count": {
+        "type": "int"
+      },
+      "n": {
+        "type": "String"
+      }
+    }
+  },
+  "importFlowDoneFromFile": "From your Zaghlol file",
+  "@importFlowDoneFromFile": {
+    "description": "S-67 done sub-line when no card is known"
+  },
+  "importFlowDoneAuto": "Sorted on their own",
+  "@importFlowDoneAuto": {
+    "description": "S-67 done stat"
+  },
+  "importFlowDoneReview": "Waiting for you",
+  "@importFlowDoneReview": {
+    "description": "S-67 done stat"
+  },
+  "importFlowDoneTop": "What you spent most on",
+  "@importFlowDoneTop": {
+    "description": "S-67 done section title"
+  },
+  "importFlowDoneBubble": "The charts and budget are updated with these months. Now I can compare them for you.",
+  "@importFlowDoneBubble": {
+    "description": "S-67 done mascot line"
+  },
+  "importFlowDoneReviewButton": "{count, plural, =1{Review 1} other{Review {n}}}",
+  "@importFlowDoneReviewButton": {
+    "description": "S-67 done primary button",
+    "placeholders": {
+      "count": {
+        "type": "int"
+      },
+      "n": {
+        "type": "String"
+      }
+    }
+  },
+  "importFlowDoneOpenCard": "Open the card",
+  "@importFlowDoneOpenCard": {
+    "description": "S-67 done secondary button"
+  },
+  "importFlowUnavailable": "This source isn't ready yet",
+  "@importFlowUnavailable": {
+    "description": "S-67 hint for a coming-soon source"
   }
 }

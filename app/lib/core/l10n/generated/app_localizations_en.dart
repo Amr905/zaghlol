@@ -7145,4 +7145,157 @@ class AppLocalizationsEn extends AppLocalizations {
   String recurringBillsGameyaMonth(String index, String total) {
     return 'Month $index of $total';
   }
+
+  @override
+  String get importFlowTitle => 'Add a statement';
+
+  @override
+  String get importFlowSub =>
+      'Add past months in one go. The file is read on your phone only and isn\'t sent to anyone.';
+
+  @override
+  String get importFlowGroupEgypt => 'Banks in Egypt';
+
+  @override
+  String get importFlowGroupOnline => 'Online banks';
+
+  @override
+  String get importFlowHowTo => 'How do I download the statement?';
+
+  @override
+  String get importFlowHowToBody =>
+      'Open your bank\'s app or website, find the statements page, pick the months you want and download the file. Then come back here and choose it.';
+
+  @override
+  String get importFlowBankCib => 'CIB';
+
+  @override
+  String get importFlowBankNbe => 'National Bank of Egypt';
+
+  @override
+  String get importFlowBankMisr => 'Banque Misr';
+
+  @override
+  String get importFlowBankQnb => 'QNB';
+
+  @override
+  String get importFlowBankWise => 'Wise';
+
+  @override
+  String get importFlowBankRevolut => 'Revolut';
+
+  @override
+  String get importFlowBankPayoneer => 'Payoneer';
+
+  @override
+  String get importFlowBadgeNbe => 'NBE';
+
+  @override
+  String get importFlowBadgeMisr => 'BM';
+
+  @override
+  String get importFlowSubCib => 'PDF from the app or email';
+
+  @override
+  String get importFlowFmtPdf => 'PDF';
+
+  @override
+  String get importFlowFmtCsv => 'CSV';
+
+  @override
+  String get importFlowFmtCsvAllCurrencies => 'All currencies · CSV';
+
+  @override
+  String get importFlowZaghlolSub => 'A copy you exported before';
+
+  @override
+  String get importFlowSoon => 'Coming soon';
+
+  @override
+  String importFlowSummaryRange(String start, String end) {
+    return '$start – $end';
+  }
+
+  @override
+  String get importFlowRowFound => 'Transactions in the statement';
+
+  @override
+  String get importFlowRowDup => 'Already in Zaghlol';
+
+  @override
+  String get importFlowRowUntracked => 'Cards you don\'t track';
+
+  @override
+  String get importFlowRowUnreadable => 'Rows we couldn\'t read';
+
+  @override
+  String get importFlowRowNew => 'New transactions to add';
+
+  @override
+  String importFlowSkipped(String n) {
+    return '$n — skipped';
+  }
+
+  @override
+  String importFlowTarget(String card) {
+    return 'On $card';
+  }
+
+  @override
+  String get importFlowTargetChange => 'Change';
+
+  @override
+  String importFlowConfirm(int count, String n) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: 'Add $n transactions',
+      one: 'Add 1 transaction',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String importFlowDoneTitle(int count, String n) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: 'Added $n transactions 🎉',
+      one: 'Added 1 transaction 🎉',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get importFlowDoneFromFile => 'From your Zaghlol file';
+
+  @override
+  String get importFlowDoneAuto => 'Sorted on their own';
+
+  @override
+  String get importFlowDoneReview => 'Waiting for you';
+
+  @override
+  String get importFlowDoneTop => 'What you spent most on';
+
+  @override
+  String get importFlowDoneBubble =>
+      'The charts and budget are updated with these months. Now I can compare them for you.';
+
+  @override
+  String importFlowDoneReviewButton(int count, String n) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: 'Review $n',
+      one: 'Review 1',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get importFlowDoneOpenCard => 'Open the card';
+
+  @override
+  String get importFlowUnavailable => 'This source isn\'t ready yet';
 }
