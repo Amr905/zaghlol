@@ -5,6 +5,9 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:zaghlol/core/flags/feature_flags.dart';
 import 'package:zaghlol/core/flags/flags_providers.dart';
+import 'package:zaghlol/features/accounts/data/accounts_providers.dart';
+import 'package:zaghlol/features/accounts/domain/account.dart';
+import 'package:zaghlol/features/accounts/domain/accounts_repository.dart';
 import 'package:zaghlol/features/insights/data/chart_providers.dart';
 import 'package:zaghlol/features/insights/data/chart_repository.dart';
 import 'package:zaghlol/features/insights/domain/chart_models.dart';
@@ -59,9 +62,37 @@ class FakeCharts implements ChartRepository {
   dynamic noSuchMethod(Invocation invocation) => super.noSuchMethod(invocation);
 }
 
+class FakeAccounts implements AccountsRepository {
+  FakeAccounts([this.rows = const []]);
+  final List<AccountWithBalances> rows;
+
+  @override
+  Future<List<AccountWithBalances>> listWithBalances({
+    bool includeHidden = false,
+  }) async => rows;
+
+  @override
+  dynamic noSuchMethod(Invocation invocation) => super.noSuchMethod(invocation);
+}
+
+final _t0 = DateTime(2026, 11, 1);
+
+Account acct(AccountKind kind, {Money? limit}) => Account(
+  id: 'a-${kind.code}',
+  kind: kind,
+  label: 'x',
+  defaultCurrency: egp,
+  isHidden: false,
+  isDefaultCash: false,
+  createdAt: _t0,
+  updatedAt: _t0,
+  creditLimit: limit,
+);
+
 ProviderContainer container(FakeCharts charts, {required bool flag}) {
   final c = ProviderContainer(
     overrides: [
+      accountsRepositoryProvider.overrideWith((ref) async => FakeAccounts()),
       featureFlagProvider.overrideWith(
         (ref, f) => flag && f == FeatureFlag.smartRoi,
       ),
@@ -110,6 +141,7 @@ void main() {
     final charts = FakeCharts();
     final c = ProviderContainer(
       overrides: [
+        accountsRepositoryProvider.overrideWith((ref) async => FakeAccounts()),
         featureFlagProvider.overrideWith((ref, f) => true),
         chartRepositoryProvider.overrideWith((ref) async => charts),
         clockProvider.overrideWithValue(() => DateTime(2027, 1, 5)),
@@ -120,4 +152,87 @@ void main() {
     expect(charts.lastPeriod!.from, CivilDate(2026, 10, 1));
     expect(charts.lastPeriod!.to, CivilDate(2026, 12, 31));
   });
+
+  test('category ids are catalog ids (sys:groceries)', () {
+    expect(roiCategoryCode('sys:groceries'), 'groceries');
+    expect(roiCategoryCode('groceries'), 'groceries');
+    expect(roiCategoryCode(null), '');
+  });
+
+  test(
+    'signals: categories, idle cash and card balance, per currency',
+    () async {
+      final charts = _CatCharts();
+      final s = await roiSignalsFrom(
+        charts,
+        egp,
+        DateTime(2026, 11, 15),
+        accounts: [
+          AccountWithBalances(acct(AccountKind.cash), [
+            AccountBalance(
+              accountId: 'a-cash',
+              currency: egp,
+              asOf: DateTime(2026, 10, 10),
+              balance: Money(egp, 8000000),
+            ),
+            // Another currency never mixes in.
+            AccountBalance(
+              accountId: 'a-cash',
+              currency: usd,
+              asOf: DateTime(2026, 10, 10),
+              balance: Money(usd, 999900),
+            ),
+          ]),
+          AccountWithBalances(
+            acct(AccountKind.credit, limit: Money(egp, 5000000)),
+            [
+              AccountBalance(
+                accountId: 'a-credit',
+                currency: egp,
+                asOf: DateTime(2026, 11, 1),
+                available: Money(egp, 4200000),
+              ),
+            ],
+          ),
+        ],
+      );
+      // 3-month totals: dining 9,000 -> 3,000/mo, transport 6,000 -> 2,000/mo.
+      expect(s.deliveryMonthly, Money(egp, 300000));
+      expect(s.commuteMonthly, Money(egp, 200000));
+      expect(s.coffeeMonthly, isNull);
+      expect(s.waterMonthly, isNull);
+      // Cash 80,000; all spend 15,000 -> 5,000/mo; surplus 75,000.
+      expect(s.cashOnHand, Money(egp, 8000000));
+      expect(s.idleSurplus, Money(egp, 7500000));
+      expect(s.idleDays, 36);
+      // Owed = limit 50,000 - available 42,000.
+      expect(s.cardBalance, Money(egp, 800000));
+    },
+  );
+}
+
+class _CatCharts extends FakeCharts {
+  @override
+  Future<ChartResult<CategoryDonut>> categoryDonut(
+    ChartPeriod p,
+    ChartFilter f,
+  ) async => ChartReady(
+    CategoryDonut(
+      total: Money(f.currency, 1500000),
+      slices: [
+        CategorySlice(
+          categoryId: 'sys:dining',
+          amount: Money(f.currency, 900000),
+          shareBp: 6000,
+          count: 30,
+        ),
+        CategorySlice(
+          categoryId: 'sys:transport',
+          amount: Money(f.currency, 600000),
+          shareBp: 4000,
+          count: 20,
+        ),
+      ],
+    ),
+  );
 }
