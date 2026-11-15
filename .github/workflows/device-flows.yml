@@ -3,7 +3,9 @@ name: device-flows
 # FIX-device-flows: the real app (main(), real providers, real encrypted
 # database, real plugins) on an Android emulator: Add -> Type -> Save shows
 # the row on Home; Say and Scan show a clear state. Uploads screenshots of
-# Home, the Add sheet, Money, Insights and Settings. Not a merge gate.
+# Home, the Add sheet, Money, Insights and Settings. Then the explorer
+# (app_explorer_test.dart) taps every control of every screen in Arabic and
+# publishes a screenshot per screen plus explorer-report.md. Not a merge gate.
 on:
   workflow_dispatch:
   push:
@@ -11,6 +13,8 @@ on:
       - 'ci/**'
     paths:
       - 'app/integration_test/device_flows*'
+      - 'app/integration_test/app_explorer*'
+      - 'app/integration_test/support/**'
       - '.github/workflows/device-flows.yml'
       - '.github/scripts/device-flows.sh'
 
@@ -28,7 +32,7 @@ jobs:
   android-emulator:
     name: android emulator API 34 (device flows, devSms)
     runs-on: ubuntu-latest
-    timeout-minutes: 60
+    timeout-minutes: 90
     env:
       DEVICE: emulator-5554
     steps:
@@ -83,6 +87,8 @@ jobs:
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
           mkdir -p "$GITHUB_SHA"
           cp "$SHOTS"/screens/*.png "$GITHUB_SHA"/
+          cp "$SHOTS"/screens/*.md "$GITHUB_SHA"/ 2>/dev/null || true
+          cp "$SHOTS"/*.log "$GITHUB_SHA"/ 2>/dev/null || true
           git add -A
           git commit -qm "device-flows screenshots for $GITHUB_SHA ($GITHUB_REF_NAME)"
           git push -q --force "https://x-access-token:${{ github.token }}@github.com/${{ github.repository }}.git" HEAD:refs/heads/device-shots
