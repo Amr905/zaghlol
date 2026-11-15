@@ -5,6 +5,9 @@ import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:zaghlol/core/l10n/date_format.dart';
 import 'package:zaghlol/features/transactions/domain/transaction.dart';
+import 'package:zaghlol/features/transactions/presentation/edit/transaction_edit_screen.dart';
+import 'package:zaghlol/features/transactions/presentation/edit/txn_form.dart';
+import 'package:zaghlol_domain/zaghlol_domain.dart';
 
 import '../detail_edit_harness.dart';
 import '../list/list_harness.dart';
@@ -173,6 +176,53 @@ void main() {
     await tester.pumpAndSettle();
     expect(find.text('Discard changes?'), findsNothing);
     expect(find.text('open'), findsOneWidget);
+  });
+
+  testWidgets('prefill account (receipt last-4) is kept, not the default', (
+    tester,
+  ) async {
+    final ed = FakeEditor();
+    await pumpEditor(
+      tester,
+      ed,
+      prefill: TxnPrefill(
+        type: TxnEditType.expense,
+        amountText: '450.00',
+        currency: Currency.of('USD'),
+        accountId: 'acc2',
+      ),
+    );
+    expect(find.textContaining('Wallet'), findsWidgets);
+    await chooseCategory(tester, 'Food');
+    await tester.tap(find.text('Save'));
+    await tester.pumpAndSettle();
+    expect(ed.added.single.single.accountId, 'acc2');
+  });
+
+  testWidgets('prefill account: a saved transaction there opens the dialog', (
+    tester,
+  ) async {
+    final ed = FakeEditor();
+    await pumpEditor(
+      tester,
+      ed,
+      repo: FakeRepo([
+        txnRec('dup', account: 'acc2', currency: Currency.of('USD')),
+      ]),
+      prefill: TxnPrefill(
+        type: TxnEditType.expense,
+        amountText: '450.00',
+        currency: Currency.of('USD'),
+        accountId: 'acc2',
+        checkDuplicate: true,
+      ),
+    );
+    await chooseCategory(tester, 'Food');
+    await tester.tap(find.text('Save'));
+    await tester.pump(const Duration(milliseconds: 500));
+    await tester.pump(const Duration(milliseconds: 500));
+    expect(find.byKey(const Key('scan-duplicate-save')), findsOneWidget);
+    expect(ed.added, isEmpty);
   });
 
   testWidgets('shared message text is shown for review', (tester) async {

@@ -651,7 +651,7 @@ class _Body extends StatelessWidget {
             children: [
               field(
                 l.transactionsDetailFieldCard,
-                acc == null ? '—' : accountName(acc, fmt),
+                acc == null ? kNoValueDash : accountName(acc, fmt),
                 chevron: acc != null,
               ),
               field(
@@ -675,7 +675,7 @@ class _Body extends StatelessWidget {
               field(
                 l.transactionsDetailFieldReference,
                 detail.referenceNo == null
-                    ? '—'
+                    ? kNoValueDash
                     : fmt.digits.render(detail.referenceNo!),
               ),
               field(

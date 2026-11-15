@@ -170,6 +170,8 @@ Future<void> pumpEditor(
   FakeEditor editor, {
   TransactionRecord? existing,
   String? rawText,
+  TxnPrefill? prefill,
+  FakeRepo? repo,
   Locale locale = const Locale('en'),
   double textScale = 1.0,
   bool dark = false,
@@ -178,7 +180,11 @@ Future<void> pumpEditor(
   addTearDown(() => tester.binding.setSurfaceSize(null));
   await tester.pumpWidget(
     _app(
-      [transactionEditorProvider.overrideWith((ref) async => editor)],
+      [
+        transactionEditorProvider.overrideWith((ref) async => editor),
+        if (repo != null)
+          transactionRepositoryProvider.overrideWith((ref) async => repo),
+      ],
       Builder(
         builder: (context) => Scaffold(
           body: Center(
@@ -188,6 +194,7 @@ Future<void> pumpEditor(
                   builder: (_) => TransactionEditScreen(
                     existing: existing,
                     rawText: rawText,
+                    prefill: prefill,
                   ),
                 ),
               ),
