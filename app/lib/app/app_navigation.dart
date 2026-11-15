@@ -27,6 +27,8 @@ import '../features/home/presentation/home_screen.dart';
 import '../features/insights/presentation/charts/charts_providers.dart';
 import '../features/insights/presentation/insights_screen.dart';
 import '../features/onboarding/application/setup_steps.dart';
+import '../features/capture/presentation/scan_confirm_screen.dart'
+    show showScanScreen;
 import '../features/onboarding/presentation/android_setup.dart';
 import '../features/onboarding/presentation/ios_setup.dart'
     show kSetupStepIosShortcuts;
@@ -65,9 +67,15 @@ final TabRoots wiredTabRoots = TabRoots(
   addSelected: wiredAddSelected,
 );
 
-/// S-30 entries: Type opens S-13; Asset opens S-44 for Gold and the paywall
+/// S-30 entries: Type opens S-13; Scan opens S-32 (T-161); Asset opens S-44 for Gold and the paywall
 /// (S-68) for Free (T-082); the rest only close the sheet.
 void wiredAddSelected(BuildContext context, AddAction action) {
+  if (action == AddAction.scan) {
+    // T-161: Scan opens S-32 over the closed sheet.
+    Navigator.of(context, rootNavigator: true).maybePop();
+    unawaited(showScanScreen(context));
+    return;
+  }
   if (action != AddAction.asset) {
     quickAddSelected(context, action);
     return;

@@ -15,7 +15,7 @@ final class ShareIntakeHost: ShareIntakeHostApi {
     ShareIntakeApiError(code: code, message: nil, details: nil)
   }
 
-  private static func descriptor(_ m: ShareMeta) -> ShareDescriptor {
+  private func descriptor(_ m: ShareMeta) -> ShareDescriptor {
     let kind: ShareKind
     switch m.kind {
     case .text: kind = .text
@@ -24,11 +24,12 @@ final class ShareIntakeHost: ShareIntakeHostApi {
     }
     return ShareDescriptor(
       id: m.id, kind: kind, mimeType: m.mimeType, sizeBytes: m.sizeBytes,
-      receivedAtMs: m.receivedAtMs)
+      receivedAtMs: m.receivedAtMs,
+      ocrPath: m.kind == .image ? store?.bodyPath(m.id) : nil)
   }
 
   func listPendingShares() throws -> [ShareDescriptor] {
-    (store?.list() ?? []).map(Self.descriptor)
+    (store?.list() ?? []).map(descriptor)
   }
 
   func readShare(id: String) throws -> ShareContent {
@@ -36,7 +37,7 @@ final class ShareIntakeHost: ShareIntakeHostApi {
     do {
       var read = try store.read(id)
       defer { read.payload.resetBytes(in: 0..<read.payload.count) }
-      let d = Self.descriptor(read.meta)
+      let d = descriptor(read.meta)
       if read.meta.kind == .text {
         return ShareContent(descriptor: d, text: String(decoding: read.payload, as: UTF8.self), bytes: nil)
       }

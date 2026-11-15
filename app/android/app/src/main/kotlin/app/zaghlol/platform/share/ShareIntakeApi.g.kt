@@ -231,7 +231,13 @@ data class ShareDescriptor (
   val kind: ShareKind,
   val mimeType: String,
   val sizeBytes: Long,
-  val receivedAtMs: Long
+  val receivedAtMs: Long,
+  /**
+   * T-161 (FU-211): iOS image shares only. The path of the encrypted share
+   * body in the App Group spool, which the OCR host reads and deletes (the
+   * same layout as its own spool files). Null on Android and for other kinds.
+   */
+  val ocrPath: String? = null
 )
  {
   companion object {
@@ -241,7 +247,8 @@ data class ShareDescriptor (
       val mimeType = pigeonVar_list[2] as String
       val sizeBytes = pigeonVar_list[3] as Long
       val receivedAtMs = pigeonVar_list[4] as Long
-      return ShareDescriptor(id, kind, mimeType, sizeBytes, receivedAtMs)
+      val ocrPath = pigeonVar_list[5] as String?
+      return ShareDescriptor(id, kind, mimeType, sizeBytes, receivedAtMs, ocrPath)
     }
   }
   fun toList(): List<Any?> {
@@ -251,6 +258,7 @@ data class ShareDescriptor (
       mimeType,
       sizeBytes,
       receivedAtMs,
+      ocrPath,
     )
   }
   override fun equals(other: Any?): Boolean {
@@ -261,7 +269,7 @@ data class ShareDescriptor (
       return true
     }
     val other = other as ShareDescriptor
-    return ShareIntakeApiPigeonUtils.deepEquals(this.id, other.id) && ShareIntakeApiPigeonUtils.deepEquals(this.kind, other.kind) && ShareIntakeApiPigeonUtils.deepEquals(this.mimeType, other.mimeType) && ShareIntakeApiPigeonUtils.deepEquals(this.sizeBytes, other.sizeBytes) && ShareIntakeApiPigeonUtils.deepEquals(this.receivedAtMs, other.receivedAtMs)
+    return ShareIntakeApiPigeonUtils.deepEquals(this.id, other.id) && ShareIntakeApiPigeonUtils.deepEquals(this.kind, other.kind) && ShareIntakeApiPigeonUtils.deepEquals(this.mimeType, other.mimeType) && ShareIntakeApiPigeonUtils.deepEquals(this.sizeBytes, other.sizeBytes) && ShareIntakeApiPigeonUtils.deepEquals(this.receivedAtMs, other.receivedAtMs) && ShareIntakeApiPigeonUtils.deepEquals(this.ocrPath, other.ocrPath)
   }
 
   override fun hashCode(): Int {
@@ -271,6 +279,7 @@ data class ShareDescriptor (
     result = 31 * result + ShareIntakeApiPigeonUtils.deepHash(this.mimeType)
     result = 31 * result + ShareIntakeApiPigeonUtils.deepHash(this.sizeBytes)
     result = 31 * result + ShareIntakeApiPigeonUtils.deepHash(this.receivedAtMs)
+    result = 31 * result + ShareIntakeApiPigeonUtils.deepHash(this.ocrPath)
     return result
   }
 }
