@@ -233,6 +233,11 @@ void main() {
       await repo.set(Settings.theme, ThemePref.dark);
       await pumpEventQueue();
       await repo.reset(Settings.paydayDay);
+      // Drift delivers table updates asynchronously; on a loaded CI runner one
+      // event-queue turn is not always enough, so wait (bounded) for the reset.
+      for (var i = 0; i < 100 && seen.length < 3; i++) {
+        await Future<void>.delayed(const Duration(milliseconds: 20));
+      }
       await pumpEventQueue();
       expect(seen, [1, 15, 1]);
     },
