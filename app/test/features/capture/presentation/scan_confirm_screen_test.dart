@@ -11,12 +11,14 @@ import 'package:zaghlol/core/ocr/unavailable_ocr_engine.dart';
 import 'package:zaghlol/features/capture/application/capture_providers.dart';
 import 'package:zaghlol/features/capture/application/scan_providers.dart';
 import 'package:zaghlol/features/capture/presentation/scan_confirm_screen.dart';
+import 'package:zaghlol/features/transactions/data/transactions_providers.dart';
 import 'package:zaghlol/features/transactions/domain/transaction.dart';
 import 'package:zaghlol/features/transactions/presentation/edit/txn_edit_providers.dart';
 import 'package:zaghlol_domain/zaghlol_domain.dart';
-import 'package:zaghlol_parsing/zaghlol_parsing.dart';
+import 'package:zaghlol_parsing/zaghlol_parsing.dart' hide CategorySource;
 
 import '../../transactions/presentation/detail_edit_harness.dart';
+import '../../transactions/presentation/list/list_harness.dart' show FakeRepo;
 
 const String _enReceipt =
     'Transfer successful\nEGP 1,250.00\nTo: ahmed.ali@instapay\n'
@@ -64,6 +66,14 @@ class FakeOcr implements OcrEngine {
     ]);
   }
 
+  final List<String> sealed = [];
+
+  @override
+  Future<String> sealImage(String plainImagePath) async {
+    sealed.add(plainImagePath);
+    return '/spool/files/sealed.bin';
+  }
+
   @override
   Future<List<String>> supportedLanguages() async => const ['ar', 'en'];
 }
@@ -102,6 +112,27 @@ Future<void> pumpScan(
   );
   await tester.pumpAndSettle();
 }
+
+final DateTime _nowUtc = DateTime.utc(2026, 10, 23, 9, 14);
+
+TransactionRecord _existing({int minor = 125000, String account = 'acc1'}) =>
+    TransactionRecord(
+      id: 'dup1',
+      accountId: account,
+      source: TxnSource.sms,
+      direction: TxnDirection.expense,
+      status: TxnStatus.posted,
+      amount: Money(Currency.of('EGP'), minor),
+      occurredAt: _nowUtc,
+      occurredTzOffsetMin: 120,
+      merchantNorm: 'Ahmed Ali',
+      categoryId: 'food',
+      categorySource: CategorySource.catalog,
+      isUserVerified: false,
+      isInternal: false,
+      createdAt: _nowUtc,
+      updatedAt: _nowUtc,
+    );
 
 void main() {
   testWidgets('choose -> read -> confirm; nothing saved before Save', (
@@ -270,7 +301,10 @@ void main() {
       const ScanPick(),
       picker: () async => '/never',
     );
-    expect(find.text("I can't read this kind of file"), findsOneWidget);
+    expect(
+      find.text("Reading images isn't ready on this phone yet"),
+      findsOneWidget,
+    );
     expect(find.byKey(const Key('scan-choose')), findsNothing);
     expect(find.byKey(const Key('scan-type')), findsOneWidget);
   });
@@ -284,7 +318,10 @@ void main() {
       FakeOcr(_enReceipt),
       const ScanImagePath(null),
     );
-    expect(find.text("I can't read this kind of file"), findsOneWidget);
+    expect(
+      find.text("Reading images isn't ready on this phone yet"),
+      findsOneWidget,
+    );
   });
 
   testWidgets('no picker wired: choosing explains it is not available', (
@@ -293,7 +330,10 @@ void main() {
     await pumpScan(tester, FakeEditor(), FakeOcr(_enReceipt), const ScanPick());
     await tester.tap(find.byKey(const Key('scan-choose')));
     await tester.pumpAndSettle();
-    expect(find.text("I can't read this kind of file"), findsOneWidget);
+    expect(
+      find.text("Reading images isn't ready on this phone yet"),
+      findsOneWidget,
+    );
   });
 
   testWidgets('shared text is parsed like a pasted message', (tester) async {
@@ -320,6 +360,92 @@ void main() {
     );
     expect(
       find.text("I couldn't find a payment in this image"),
+      findsOneWidget,
+    );
+  });
+
+  group('duplicate check before saving', () {
+    Future<FakeEditor> pumpWithExisting(
+      WidgetTester tester,
+      List<TransactionRecord> rows,
+    ) async {
+      final ed = FakeEditor();
+      await tester.binding.setSurfaceSize(const Size(390, 844));
+      addTearDown(() => tester.binding.setSurfaceSize(null));
+      await tester.pumpWidget(
+        harnessApp([
+          ...scanOverrides(ed, FakeOcr(_enReceipt)),
+          transactionRepositoryProvider.overrideWith(
+            (ref) async => FakeRepo(rows),
+          ),
+        ], const ScanConfirmScreen(request: ScanImagePath('/p'))),
+      );
+      await tester.pumpAndSettle();
+      await tester.tap(find.text('Choose').first);
+      await tester.pumpAndSettle();
+      await tester.tap(find.text('Food'));
+      await tester.pumpAndSettle();
+      await tester.tap(find.text('Save'));
+      // The Save button spins while the dialog is open: no settle.
+      await tester.pump(const Duration(milliseconds: 400));
+      return ed;
+    }
+
+    testWidgets('a matching saved transaction is shown; Save anyway saves', (
+      tester,
+    ) async {
+      final ed = await pumpWithExisting(tester, [_existing()]);
+      expect(find.text('Already captured from a bank message'), findsOneWidget);
+      expect(ed.added, isEmpty);
+      await tester.tap(find.byKey(const Key('scan-duplicate-save')));
+      await tester.pump(const Duration(milliseconds: 400));
+      await tester.pumpAndSettle();
+      expect(ed.added.single.single.source, TxnSource.ocr);
+    });
+
+    testWidgets('dismissing the dialog saves nothing', (tester) async {
+      final ed = await pumpWithExisting(tester, [_existing()]);
+      await tester.tapAt(const Offset(5, 5));
+      await tester.pump(const Duration(milliseconds: 400));
+      await tester.pumpAndSettle();
+      expect(ed.added, isEmpty);
+    });
+
+    testWidgets('a different amount is not a duplicate', (tester) async {
+      final ed = await pumpWithExisting(tester, [_existing(minor: 99900)]);
+      expect(find.text('Already captured from a bank message'), findsNothing);
+      expect(ed.added, hasLength(1));
+    });
+  });
+
+  testWidgets('the photo picker result goes straight to OCR', (tester) async {
+    final ocr = FakeOcr(_enReceipt);
+    await pumpScan(
+      tester,
+      FakeEditor(),
+      ocr,
+      const ScanPick(),
+      picker: () => ocr.sealImage('/tmp/pick.jpg'),
+    );
+    await tester.tap(find.byKey(const Key('scan-choose')));
+    await tester.pumpAndSettle();
+    expect(ocr.sealed, ['/tmp/pick.jpg']);
+    expect(ocr.paths, ['/spool/files/sealed.bin']);
+    expect(find.text('1250.00'), findsOneWidget);
+  });
+
+  testWidgets('a picker that cannot seal shows not available', (tester) async {
+    await pumpScan(
+      tester,
+      FakeEditor(),
+      FakeOcr(_enReceipt),
+      const ScanPick(),
+      picker: () => throw const OcrException(OcrFailureCode.notAvailable),
+    );
+    await tester.tap(find.byKey(const Key('scan-choose')));
+    await tester.pumpAndSettle();
+    expect(
+      find.text("Reading images isn't ready on this phone yet"),
       findsOneWidget,
     );
   });

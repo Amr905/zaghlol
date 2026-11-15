@@ -81,9 +81,12 @@ class _SharedItemsState extends ConsumerState<SharedItemsLifecycle> {
     final ctx = _nav.currentContext;
     if (ctx == null) return;
     final l = AppLocalizations.of(ctx);
-    final text = reason == ShareRejectReason.unsupportedType
-        ? l.captureScanUnsupported
-        : l.captureScanEmptyTitle;
+    final text = switch (reason) {
+      ShareRejectReason.tooLarge => l.captureShareRefusedTooLarge,
+      ShareRejectReason.unsupportedType => l.captureShareRefusedUnsupported,
+      ShareRejectReason.unreadable => l.captureShareRefusedUnreadable,
+      ShareRejectReason.empty => l.captureShareRefusedEmpty,
+    };
     ScaffoldMessenger.maybeOf(ctx)?.showSnackBar(SnackBar(content: Text(text)));
   }
 

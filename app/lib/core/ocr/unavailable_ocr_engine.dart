@@ -15,5 +15,9 @@ final class UnavailableOcrEngine implements OcrEngine {
       Future<OcrOutcome>.error(const OcrException(OcrFailureCode.notAvailable));
 
   @override
+  Future<String> sealImage(String plainImagePath) =>
+      Future<String>.error(const OcrException(OcrFailureCode.notAvailable));
+
+  @override
   Future<List<String>> supportedLanguages() async => const <String>[];
 }

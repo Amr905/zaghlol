@@ -15,7 +15,7 @@ void main() {
     (
       'phone without OCR',
       const UnavailableOcrEngine(),
-      "I can't read this kind of file",
+      "Reading images isn't ready on this phone yet",
     ),
   ]) {
     testWidgets('Scan tile opens S-32 on a $name', (tester) async {

@@ -12,6 +12,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../core/l10n/generated/app_localizations.dart';
+import '../../../core/ocr/ocr_port.dart' show OcrException, OcrFailureCode;
 import '../../../core/theme/z_tokens.dart';
 import '../../../core/ui/z_components.dart';
 import '../../transactions/domain/transaction.dart';
@@ -115,6 +116,13 @@ class _ScanState extends ConsumerState<ScanConfirmScreen> {
     final String? path;
     try {
       path = await picker();
+    } on OcrException catch (e) {
+      _set(
+        e.code == OcrFailureCode.notAvailable
+            ? _Phase.unavailable
+            : _Phase.empty,
+      );
+      return;
     } on Object {
       _set(_Phase.empty);
       return;
@@ -166,6 +174,7 @@ class _ScanState extends ConsumerState<ScanConfirmScreen> {
       accountId: accountId,
       date: d.date,
       source: d.origin == ScanOrigin.image ? TxnSource.ocr : TxnSource.share,
+      checkDuplicate: true,
     );
   }
 
@@ -287,11 +296,10 @@ class _ScanState extends ConsumerState<ScanConfirmScreen> {
         return Column(
           mainAxisSize: MainAxisSize.min,
           children: [
-            // Placeholder copy until T-087 adds captureScanUnavailable*.
             message(
               Icons.block_flipped,
-              l.captureScanUnsupported,
-              l.captureScanEmptyBody,
+              l.captureScanUnavailableTitle,
+              l.captureScanUnavailableBody,
             ),
             const SizedBox(height: ZSpacing.lg),
             ZButton(

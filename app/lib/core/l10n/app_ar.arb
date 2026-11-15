@@ -5853,6 +5853,30 @@
   "@captureScanUnsupported": {
     "description": "S"
   },
+  "captureScanUnavailableTitle": "قراية الصور لسه مش شغالة على موبايلك",
+  "@captureScanUnavailableTitle": {
+    "description": "S"
+  },
+  "captureScanUnavailableBody": "شغال عليها. دلوقتي اكتب العملية بإيدك وأنا هسجلها.",
+  "@captureScanUnavailableBody": {
+    "description": "S"
+  },
+  "captureShareRefusedTooLarge": "الملف ده كبير عليا أوي",
+  "@captureShareRefusedTooLarge": {
+    "description": "S"
+  },
+  "captureShareRefusedUnsupported": "الملف ده مش نوع أقدر أقراه",
+  "@captureShareRefusedUnsupported": {
+    "description": "S"
+  },
+  "captureShareRefusedUnreadable": "معرفتش أفتح اللي بعتّه",
+  "@captureShareRefusedUnreadable": {
+    "description": "S"
+  },
+  "captureShareRefusedEmpty": "اللي بعتّه كان فاضي",
+  "@captureShareRefusedEmpty": {
+    "description": "S"
+  },
   "captureScanPhotoTitle": "محتاج أشوف صورك",
   "@captureScanPhotoTitle": {
     "description": "T"

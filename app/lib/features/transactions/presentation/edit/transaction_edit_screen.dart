@@ -19,6 +19,8 @@ import '../../../../core/ui/shell/add_sheet.dart' show AddAction;
 import '../../../budget/application/budget_providers.dart';
 import '../../data/transactions_providers.dart';
 import '../../domain/transaction.dart';
+import '../../application/duplicate_finder.dart';
+import '../detail/transaction_detail_screen.dart';
 import '../detail/txn_detail_providers.dart';
 import '../list/txn_list_providers.dart';
 import '../list/txn_row.dart';
@@ -58,6 +60,7 @@ final class TxnPrefill {
     this.accountId,
     this.date,
     this.source = TxnSource.manual,
+    this.checkDuplicate = false,
   });
 
   final TxnEditType type;
@@ -71,6 +74,9 @@ final class TxnPrefill {
 
   /// Stored on the new transaction (`ocr` for scanned images).
   final TxnSource source;
+
+  /// Look for the same transaction already saved before saving this one.
+  final bool checkDuplicate;
 }
 
 class TransactionEditScreen extends ConsumerStatefulWidget {
@@ -317,6 +323,13 @@ class _EditState extends ConsumerState<TransactionEditScreen> {
               note: note.isEmpty ? null : note,
             ),
         ];
+        if (widget.prefill?.checkDuplicate ?? false) {
+          final proceed = await _confirmNotDuplicate(legs.first);
+          if (!proceed) {
+            if (mounted) setState(() => _saving = false);
+            return;
+          }
+        }
         await editor.add(legs);
       }
       ref.invalidate(txnListProvider);
@@ -337,6 +350,54 @@ class _EditState extends ConsumerState<TransactionEditScreen> {
         });
       }
     }
+  }
+
+  /// S-32: when the same transaction is already saved, show it and let the
+  /// user view it or save anyway. False = do not save now.
+  Future<bool> _confirmNotDuplicate(NewTransaction leg) async {
+    final TransactionRecord? dup;
+    try {
+      final repo = await ref.read(transactionRepositoryProvider.future);
+      dup = await findDuplicate(repo, leg);
+    } on Object {
+      return true; // the check is a courtesy; never block saving on it
+    }
+    if (dup == null || !mounted) return true;
+    final l = AppLocalizations.of(context);
+    final lang = Localizations.localeOf(context).languageCode;
+    final fmt = TxnFmt(lang, ref.read(digitsModeProvider(lang)));
+    final existing = dup;
+    final choice = await showDialog<bool>(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        title: Text(l.captureScanDuplicateTitle),
+        content: Text(
+          '${existing.merchantNorm ?? existing.merchantRaw ?? ''}\n'
+          '${fmt.money(existing.amount.abs())} · '
+          '${ZDateFormat.date(existing.occurredAt, lang, fmt.digits)}',
+        ),
+        actions: [
+          TextButton(
+            key: const Key('scan-duplicate-view'),
+            onPressed: () => Navigator.of(ctx).pop(false),
+            child: Text(l.captureScanDuplicateView),
+          ),
+          TextButton(
+            key: const Key('scan-duplicate-save'),
+            onPressed: () => Navigator.of(ctx).pop(true),
+            child: Text(l.captureScanDuplicateSave),
+          ),
+        ],
+      ),
+    );
+    if (choice == false && mounted) {
+      await Navigator.of(context).push<void>(
+        MaterialPageRoute<void>(
+          builder: (_) => TransactionDetailScreen(transactionId: existing.id),
+        ),
+      );
+    }
+    return choice ?? false;
   }
 
   Future<bool> _confirmDiscard() async {

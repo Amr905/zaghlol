@@ -254,6 +254,32 @@ class OcrHostApi {
     return pigeonVar_replyValue! as OcrResult;
   }
 
+  /// T-161: encrypts a plain image the user picked (a file in the app's temp
+  /// or cache directory) into the OCR spool and returns the path to pass to
+  /// [recognize]. The plain file is deleted whatever happens (FR-SEC-03).
+  /// Throws `IO_ERROR` (path outside temp/cache, unreadable, empty or over
+  /// 25 MiB) or `NOT_AVAILABLE` (no spool key or no host on this platform).
+  Future<String> sealImage(String plainImagePath) async {
+    final pigeonVar_channelName =
+        'dev.flutter.pigeon.zaghlol.OcrHostApi.sealImage$pigeonVar_messageChannelSuffix';
+    final pigeonVar_channel = BasicMessageChannel<Object?>(
+      pigeonVar_channelName,
+      pigeonChannelCodec,
+      binaryMessenger: pigeonVar_binaryMessenger,
+    );
+    final Future<Object?> pigeonVar_sendFuture = pigeonVar_channel.send(
+      <Object?>[plainImagePath],
+    );
+    final pigeonVar_replyList = await pigeonVar_sendFuture as List<Object?>?;
+
+    final Object? pigeonVar_replyValue = _extractReplyValueOrThrow(
+      pigeonVar_replyList,
+      pigeonVar_channelName,
+      isNullValid: false,
+    );
+    return pigeonVar_replyValue! as String;
+  }
+
   /// ISO 639-1 codes the engine can recognize on this device, at runtime.
   Future<List<String>> supportedLanguages() async {
     final pigeonVar_channelName =

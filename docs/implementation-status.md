@@ -444,7 +444,7 @@
 - **FU-208** (T-171, batch 20): the minors, nits and open questions for T-171 in [batch-20a](05-reviews/batch-20a.md), [batch-20b](05-reviews/batch-20b.md), [batch-20c](05-reviews/batch-20c.md), plus the "left undone" items in its task file.
 - **FU-209** (T-173, batch 20): the minors, nits and open questions for T-173 in [batch-20a](05-reviews/batch-20a.md), [batch-20b](05-reviews/batch-20b.md), [batch-20c](05-reviews/batch-20c.md), plus the "left undone" items in its task file.
 - **FU-210** (T-082, batch 20): the minors, nits and open questions for T-082 in [batch-20a](05-reviews/batch-20a.md), [batch-20b](05-reviews/batch-20b.md), [batch-20c](05-reviews/batch-20c.md), plus the "left undone" items in its task file.
-- **FU-211** (T-065/T-161, batch 20; picked up in T-161 batch 24, open: image picker, PDF OCR, Android ocrPath): no app screen picked up shared items, so a shared screenshot never reaches OCR confirmation (S-32 is T-161, deferred on the tesseract aar).
+- **FU-211** (T-065/T-161, batch 20; picked up in T-161 batch 24, open: PDF OCR, Android ocrPath): no app screen picked up shared items, so a shared screenshot never reaches OCR confirmation (S-32 is T-161, deferred on the tesseract aar).
 - **FU-212** (T-064, before release, PO input): author and sign Zaghlol.shortcut, replace `AppLinks.shortcutInstall`, add the install-guide images and the nudge copy.
 - **FU-213** (NOTIF-GW): the notification settings screen with per-type toggles (calls `ensureNotificationPermission` on first enable); no XCTest for the Swift host yet.
 - **FU-214** (T-173): tighten the benchmark budgets to about 1.3× the first `perf` run; tag the timing assertion in `passphrase_test.dart`.

@@ -1,8 +1,11 @@
 // T-161: providers behind S-32 and the shared-item pickup (FU-211).
 
+import 'dart:io' show File;
+
 import 'package:flutter/foundation.dart' as f show defaultTargetPlatform;
 import 'package:flutter/foundation.dart' show TargetPlatform;
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:image_picker/image_picker.dart';
 import 'package:zaghlol_parsing/zaghlol_parsing.dart';
 
 import '../../../core/ocr/ocr_port.dart';
@@ -25,14 +28,38 @@ final ocrEngineProvider = Provider<OcrEngine>(
 
 /// Lets the user pick an image from the photo library and returns the path of
 /// its encrypted copy in the OCR host's spool, or null when the user
-/// cancelled. No picker is wired yet (see the T-161 task file); until then the
-/// Scan entry explains that choosing an image is not available.
+/// cancelled. Throws [OcrException] when sealing is not available.
 typedef ScanImagePicker = Future<String?> Function();
 
-final scanImagePickerProvider = Provider<ScanImagePicker?>(
-  (ref) => null,
-  name: 'scanImagePickerProvider',
-);
+final scanImagePickerProvider = Provider<ScanImagePicker?>((ref) {
+  final engine = ref.watch(ocrEngineProvider);
+  return () async {
+    // Gallery only: the system Photo Picker (Android 13+) or PHPicker (iOS),
+    // so the app never holds a photo-library permission.
+    final XFile? picked;
+    try {
+      picked = await ImagePicker().pickImage(
+        source: ImageSource.gallery,
+        requestFullMetadata: false,
+      );
+    } on Object {
+      return null;
+    }
+    if (picked == null) return null;
+    try {
+      // The host seals it into the encrypted spool and deletes the plain file.
+      return await engine.sealImage(picked.path);
+    } finally {
+      // Also when sealing failed or no host exists: no plain copy stays.
+      try {
+        final f = File(picked.path);
+        if (f.existsSync()) f.deleteSync();
+      } on Object {
+        // Best effort; the OS clears the cache directory.
+      }
+    }
+  };
+}, name: 'scanImagePickerProvider');
 
 final scanServiceProvider = Provider<ScanService>((ref) {
   final registry = ref.watch(captureRegistryLoaderProvider)();

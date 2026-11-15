@@ -136,7 +136,10 @@ void main() {
     lock.open();
     await service.pollPending();
     await tester.pumpAndSettle();
-    expect(find.text("I can't read this kind of file"), findsOneWidget);
+    expect(
+      find.text("Reading images isn't ready on this phone yet"),
+      findsOneWidget,
+    );
     await tester.tap(find.byTooltip('Close'));
     await tester.pumpAndSettle();
     expect(host.discarded, ['i2']);
@@ -150,7 +153,10 @@ void main() {
     lock.open();
     await service.pollPending();
     await tester.pumpAndSettle();
-    expect(find.text("I can't read this kind of file"), findsOneWidget);
+    expect(
+      find.text("I can't read this kind of file"),
+      findsOneWidget,
+    );
     expect(find.text('home'), findsOneWidget);
   });
 
