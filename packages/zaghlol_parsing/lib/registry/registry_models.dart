@@ -10,7 +10,12 @@ enum RegistryChannel {
   notification('notification'),
   share('share'),
   shortcutMessage('shortcut_message'),
-  applePay('apple_pay');
+  applePay('apple_pay'),
+
+  /// T-161: text read from a screenshot or receipt image on the phone. There
+  /// is no sender: templates of every institution that declare this channel
+  /// are tried (`ParsingPipeline.parseOcr`).
+  ocr('ocr');
 
   const RegistryChannel(this.wire);
   final String wire;

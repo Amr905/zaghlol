@@ -1,0 +1,17 @@
+{
+  "sender": "InstaPay",
+  "channel": "ocr",
+  "body": "Money received\nEGP ٣٬٠٠٠٫٠٠\nFrom: Mona Samir\nTo account: **** ٤٥٦٧\nDate: ٢٢/١٠/٢٠٢٦ ١٨:٣٠\nReference: 73100284519",
+  "receivedAt": "2026-10-23T11:14:00+03:00",
+  "expect": {
+    "template": "instapay.ocr_received.en",
+    "event": "instapay_in",
+    "direction": "income",
+    "currency": "EGP",
+    "amount": "3000.00",
+    "last4": "4567",
+    "ref": "73100284519",
+    "counterparty": "Mona Samir",
+    "date": "2026-10-22"
+  }
+}

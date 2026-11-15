@@ -1,4 +1,5 @@
 import '../generic/generic_parser.dart';
+import '../ocr/receipt_parser.dart';
 import '../generic/generic_policy.dart';
 import '../normalize/text_normalizer.dart';
 import '../registry/registry_loader.dart';
@@ -24,6 +25,77 @@ final class ParsingPipeline {
       // of crashing the ingest loop. Nothing from the input is kept.
       return const ParseUnrecognized(UnrecognizedReason.internalError);
     }
+  }
+
+  /// Parses text read from an image (T-161): no sender, so every
+  /// institution's `ocr` templates are tried (message language first), then
+  /// the generic receipt reader. Total like [parse]; nothing from [text] is
+  /// kept in the result beyond typed fields.
+  ParseResult parseOcr(String text, DateTime receivedAt) {
+    try {
+      return _parseOcr(text, receivedAt);
+    } on Object catch (_) {
+      return const ParseUnrecognized(UnrecognizedReason.internalError);
+    }
+  }
+
+  ParseResult _parseOcr(String text, DateTime r) {
+    final receivedAt = DateTime.utc(r.year, r.month, r.day, r.hour, r.minute);
+    if (text.length > maxParseBodyLength) {
+      return const ParseUnrecognized(UnrecognizedReason.bodyTooLong);
+    }
+    final folded = foldKeyIndexed(text);
+    if (folded.text.isEmpty) {
+      return const ParseUnrecognized(UnrecognizedReason.emptyBody);
+    }
+    final lines = foldKeyLines(text);
+    if (registry.shared.globalDrop.any((p) => p.regex.hasMatch(lines))) {
+      return const ParseDropped(DropReason.globalPattern, null);
+    }
+    final language = detectLanguage(folded.text);
+    ParseUnrecognized? firstFatal;
+    for (final preferred in [true, false]) {
+      for (final institution in registry.institutions) {
+        if (institution.drop.any((p) => p.regex.hasMatch(folded.text))) {
+          continue;
+        }
+        for (final template in institution.templates) {
+          if (!template.channels.contains(RegistryChannel.ocr) ||
+              (template.lang == language.name) != preferred) {
+            continue;
+          }
+          final groups = matchTemplateOriginal(template, folded, text);
+          if (groups == null) {
+            continue;
+          }
+          final fields = extractFields(
+            institution,
+            template,
+            groups,
+            receivedAt,
+            cleaning: registry.shared.merchantCleaning,
+            foldedBody: folded.text,
+            globalLast4: registry.shared.globalLast4,
+          );
+          final fatal = _fatal(institution, template, fields.problems);
+          if (fatal != null) {
+            firstFatal ??= fatal;
+            continue;
+          }
+          return _finish(institution, template, fields, receivedAt, language);
+        }
+      }
+    }
+    if (firstFatal != null) {
+      return firstFatal;
+    }
+    return parseReceiptText(
+      text: text,
+      folded: folded.text,
+      receivedAt: receivedAt,
+      language: language.name,
+      cleaning: registry.shared.merchantCleaning,
+    );
   }
 
   ParseResult _parse(ParseRequest request) {
