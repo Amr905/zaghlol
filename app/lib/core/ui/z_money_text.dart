@@ -9,13 +9,16 @@ enum ZMoneyKind { expense, income, neutral }
 
 enum ZMoneySize { hero, display, title, body, caption }
 
-/// C-04 Money text. Takes an already formatted string (the shared money
-/// formatter in core produces sign, digits and currency); never a number.
-/// The text is isolated for bidi so `-450 EGP` never reorders in RTL.
 /// Shown instead of the amount in hide-amounts mode when no [ZMoneyText.maskedText]
 /// is given.
 const String kMaskedAmountFallback = '•••';
 
+/// Placeholder glyph for a figure that is not known yet.
+const String kNoValueDash = '\u2014';
+
+/// C-04 Money text. Takes an already formatted string (the shared money
+/// formatter in core produces sign, digits and currency); never a number.
+/// The text is isolated for bidi so `-450 EGP` never reorders in RTL.
 class ZMoneyText extends StatelessWidget {
   const ZMoneyText({
     super.key,

@@ -8,7 +8,7 @@ import '../../../../support/golden_matrix.dart';
 import 'cards_harness.dart';
 
 void main() {
-  for (final v in goldenVariants) {
+  for (final v in [...goldenVariants, ...goldenVariantsScaled]) {
     testWidgets('home cards golden ${v.name}', (tester) async {
       await pumpCards(
         tester,

@@ -72,6 +72,7 @@ class ChartsScreen extends ConsumerWidget {
       loading: () => ListView(
         padding: _padding,
         children: [
+          const _PeriodChip(),
           ChartSkeleton(title: l.insightsChartTitleCashFlow),
           ChartSkeleton(title: l.insightsChartTitleCategories),
         ],
@@ -79,6 +80,7 @@ class ChartsScreen extends ConsumerWidget {
       error: (_, _) => ListView(
         padding: _padding,
         children: [
+          const _PeriodChip(),
           ChartError(
             title: l.insightsTabsCharts,
             onRetry: () => ref.invalidate(chartsCurrenciesProvider),

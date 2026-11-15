@@ -10,7 +10,7 @@ import '../../settings/settings_harness.dart';
 import 'notifications_settings_screen_test.dart' show PermStub;
 
 void main() {
-  for (final v in goldenVariants) {
+  for (final v in [...goldenVariants, ...goldenVariantsScaled]) {
     testWidgets('notifications settings ${v.name}', (tester) async {
       final h = SettingsHarness();
       addTearDown(h.db.close);
