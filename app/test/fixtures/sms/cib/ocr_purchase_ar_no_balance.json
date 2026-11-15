@@ -1,0 +1,16 @@
+{
+  "sender": "CIB",
+  "channel": "ocr",
+  "body": "تفاصيل العملية\nعملية شراء بالبطاقة\n99.99 جم\nالتاجر: TALABAT EG\nبطاقة تنتهي بـ 1234\n22/10/2026 20:41",
+  "receivedAt": "2026-10-23T11:14:00+03:00",
+  "expect": {
+    "template": "cib.ocr_purchase.ar",
+    "event": "card_purchase",
+    "direction": "expense",
+    "currency": "EGP",
+    "amount": "99.99",
+    "last4": "1234",
+    "balance": null,
+    "date": "2026-10-22"
+  }
+}

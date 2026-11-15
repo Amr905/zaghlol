@@ -6184,6 +6184,42 @@ abstract class AppLocalizations {
   /// **'الملف ده مش صورة أقدر أقراها'**
   String get captureScanUnsupported;
 
+  /// S
+  ///
+  /// In ar, this message translates to:
+  /// **'قراية الصور لسه مش شغالة على موبايلك'**
+  String get captureScanUnavailableTitle;
+
+  /// S
+  ///
+  /// In ar, this message translates to:
+  /// **'شغال عليها. دلوقتي اكتب العملية بإيدك وأنا هسجلها.'**
+  String get captureScanUnavailableBody;
+
+  /// S
+  ///
+  /// In ar, this message translates to:
+  /// **'الملف ده كبير عليا أوي'**
+  String get captureShareRefusedTooLarge;
+
+  /// S
+  ///
+  /// In ar, this message translates to:
+  /// **'الملف ده مش نوع أقدر أقراه'**
+  String get captureShareRefusedUnsupported;
+
+  /// S
+  ///
+  /// In ar, this message translates to:
+  /// **'معرفتش أفتح اللي بعتّه'**
+  String get captureShareRefusedUnreadable;
+
+  /// S
+  ///
+  /// In ar, this message translates to:
+  /// **'اللي بعتّه كان فاضي'**
+  String get captureShareRefusedEmpty;
+
   /// T
   ///
   /// In ar, this message translates to:

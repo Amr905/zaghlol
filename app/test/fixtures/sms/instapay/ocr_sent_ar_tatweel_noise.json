@@ -1,0 +1,17 @@
+{
+  "sender": "InstaPay",
+  "channel": "ocr",
+  "body": "تـم التحويل بنجاح\n2,000.00 جم\nإلى: nour.k@instapay\nمن حساب: **** 4567\nالتاريخ: 05/10/2026\nرقم المرجع: 51200098123",
+  "receivedAt": "2026-10-23T11:14:00+03:00",
+  "expect": {
+    "template": "instapay.ocr_sent.ar",
+    "event": "instapay_out",
+    "direction": "expense",
+    "currency": "EGP",
+    "amount": "2000.00",
+    "last4": "4567",
+    "ref": "51200098123",
+    "ipa": "nour.k@instapay",
+    "date": "2026-10-05"
+  }
+}

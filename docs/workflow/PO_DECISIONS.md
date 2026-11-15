@@ -100,14 +100,19 @@ T-035 Q1–Q6 (keep with bundled rules; drop OTP+transaction messages, as the re
 
 | ID | What's needed | Blocks |
 |---|---|---|
-| OQ-04 / OQ-18 | SMS, notification and PDF samples per bank, with real numbers changed (we only need the shape). | T-031, bank templates, T-156, T-157 |
+| OQ-04 / OQ-18 | **PARTIAL** (round 1 received 2026-11-14: 38 banks/InstaPay/wallets/BNPL purchase shapes). Still needed: real ATM/salary/declined/FX wording, Shahry/Aman/Forsa/Contact, BNPL due/paid, statement PDFs/CSVs, notification formats. | T-031, bank templates, T-156, T-157 |
 | T-159 | `tesseract4android-4.9.0.aar` in `C:\Projects\Zaghlol\`. | T-159 |
-| FU-044 | The four IBM Plex Sans Arabic TTF files. | T-024 |
+| FU-044 | **DONE**: fonts bundled by the Lead (OFL). | T-024 |
 | T-088 | `zaghlol.riv` mascot file. | T-099 |
 | T-148 Q2, T-007, T-008 Q1 | Name a reference low-end Android phone (and an iPhone 12), plus a Samsung A-series and a Xiaomi/Redmi with a second SIM for SPK-01. | release timings, SPK-01 |
 | T-180 | Run the trusted-clock device checks in `docs/05-reviews/T-180-device.md` (sleep, Doze, reboot) on one Android phone and one iPhone, before T-144 ships. | T-144 |
 | T-103 | Try the app lock on one Android phone and one iPhone: Face ID / fingerprint, then the passcode fallback. | T-103 sign-off |
 | T-165, T-015, T-060 | Run the device checklists (backup exclusion; StrongBox phone; iPhone reboot and read before unlock; FU-067 steps). | closing those tasks |
+| FU-223 | Confirm the guessed SMS sender IDs per bank. | bank templates |
+| FU-195 | The real Terms, Privacy and support URLs (placeholders in `app/lib/app/app_config.dart`). | launch |
+| FU-212 | The Shortcut file and the guide images. | iOS setup guide |
+| Apple portal | Register the App Group and shared Keychain group for the app and its Share/Widget extensions. | iOS extensions |
+| iOS builds | A Mac or a TestFlight path for iOS builds. | iOS release |
 
 ### Housekeeping
 

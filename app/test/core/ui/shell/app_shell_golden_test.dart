@@ -10,7 +10,7 @@ import 'shell_harness.dart';
 void main() {
   for (final platform in [TargetPlatform.android, TargetPlatform.iOS]) {
     final p = platform == TargetPlatform.iOS ? 'ios' : 'android';
-    for (final v in goldenVariants) {
+    for (final v in [...goldenVariants, ...goldenVariantsScaled]) {
       testWidgets('app shell golden ${p}_${v.name}', (tester) async {
         await tester.binding.setSurfaceSize(const Size(390, 640));
         addTearDown(() => tester.binding.setSurfaceSize(null));

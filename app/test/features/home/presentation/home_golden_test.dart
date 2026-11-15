@@ -10,7 +10,7 @@ import 'home_harness.dart';
 void main() {
   for (final platform in [TargetPlatform.iOS, TargetPlatform.android]) {
     final p = platform == TargetPlatform.iOS ? 'ios' : 'android';
-    for (final v in goldenVariants) {
+    for (final v in [...goldenVariants, ...goldenVariantsScaled]) {
       testWidgets('home golden ${p}_${v.name}', (tester) async {
         await pumpHome(
           tester,

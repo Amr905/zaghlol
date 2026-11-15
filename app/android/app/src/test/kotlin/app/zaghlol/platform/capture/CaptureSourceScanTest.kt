@@ -110,9 +110,10 @@ class CaptureSourceScanTest {
         assertEquals("android.service.notification.NotificationListenerService", (actions.item(0) as Element).getAttributeNS(android, "name"))
         // The app declares no permission for notification access (the user grants it in settings).
         // The main-manifest permissions are INTERNET (T-141, backend calls) and
-        // POST_NOTIFICATIONS (NOTIF-GW, the app's own local alerts).
+        // POST_NOTIFICATIONS (NOTIF-GW, the app's own local alerts) and
+        // RECORD_AUDIO (T-120, the voice logger; asked at first use).
         val perms = Regex("""<uses-permission[^>]*android:name="([^"]+)"""").findAll(File(src, "main/AndroidManifest.xml").readText()).map { it.groupValues[1] }.toList()
-        assertEquals(listOf("android.permission.INTERNET", "android.permission.POST_NOTIFICATIONS"), perms)
+        assertEquals(listOf("android.permission.INTERNET", "android.permission.POST_NOTIFICATIONS", "android.permission.RECORD_AUDIO"), perms)
     }
 
     @Test

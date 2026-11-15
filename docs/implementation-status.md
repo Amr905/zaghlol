@@ -22,9 +22,9 @@
 | M1 | 29 | 28 | 0 | 1 |
 | M2 | 29 | 24 | 0 | 0 |
 | M3 | 18 | 16 | 0 | 0 |
-| M4 | 17 | 16 | 0 | 0 |
+| M4 | 17 | 17 | 0 | 0 |
 | M5 | 35 | 30 | 1 | 1 |
-| M6 | 19 | 13 | 1 | 2 |
+| M6 | 19 | 14 | 1 | 2 |
 | M7 | 11 | 3 | 0 | 0 |
 
 ## Tasks
@@ -149,7 +149,7 @@
 | T-117 | Achievement share cards with hidden amounts by default | M4 | C2 | Sonnet | flutter-ui-engineer | T-105, T-022 | DONE | batch 20 review [batch-20a](05-reviews/batch-20a.md), [batch-20b](05-reviews/batch-20b.md), [batch-20c](05-reviews/batch-20c.md) | Batch 20. FU-205 |
 | T-118 | Home-screen widgets (Android Glance, iOS WidgetKit) | M4 | C3 | Sonnet | native-platform-engineer | T-051, T-004 | DONE | batch 20 review [batch-20a](05-reviews/batch-20a.md), [batch-20b](05-reviews/batch-20b.md), [batch-20c](05-reviews/batch-20c.md) | Batch 20. FU-206 |
 | T-119 | Gold gate matrix and entitlement state (local) | M4 | C2 | Sonnet | flutter-core-engineer | T-025, T-020 | DONE | batch 11 review [batch-11](05-reviews/batch-11.md) APPROVED after fix 119-1/119-2 | Batch 11. FU-123 |
-| T-120 | Voice logger S-31 with on-device-first recognition and monthly limit | M4 | C3 | Sonnet | flutter-ui-engineer | T-109, T-119, T-011 | TODO | — |  |
+| T-120 | Voice logger S-31 with on-device-first recognition and monthly limit | M4 | C3 | Sonnet | flutter-ui-engineer | T-109, T-119, T-011 | DONE | batch 24 review [batch-24a](05-reviews/batch-24a.md), [batch-24b](05-reviews/batch-24b.md) | Batch 24. FU-229 |
 | T-121 | Money tab assets, Add asset S-44 and Prices S-45 | M4 | C2 | Sonnet | flutter-ui-engineer | T-113, T-083, T-119 | DONE | batch 18 review [batch-18a](05-reviews/batch-18a.md), [batch-18b](05-reviews/batch-18b.md), [batch-18c](05-reviews/batch-18c.md), [batch-18d](05-reviews/batch-18d.md) | Batch 18. FU-175 |
 | T-122 | EF Core model and initial migration for all backend tables + DB roles | M5 | C4 | Opus | backend-engineer | T-005 | DONE | backend-ci 42407789072 (5/5, 391 tests) @ d5943be; PR #2 squash-merged | All three C4 reviews APPROVED (round 2). Follow-ups FU-015 to FU-026; FU-020 before T-184 |
 | T-123 | Signing service (ES256 via KMS abstraction) and response-signature middleware | M5 | C4 | Opus | backend-engineer | T-005 | DONE | backend-ci 42502737300 (5/5) @ 1a8d165; PR #8 squash-merged; [T-123](05-reviews/T-123.md) APPROVED (code r2, security, tests) | Closes FU-019, 022, 023, 026, FU-025 code part. FU-048 |
@@ -190,7 +190,7 @@
 | T-158 | Import flow S-67 (source, summary, done) | M6 | C2 | Sonnet | flutter-ui-engineer | T-156, T-157, T-155, T-119 | TODO | — |  |
 | T-159 | Android OCR host (ML Kit Latin + Tesseract Arabic) | M6 | C3 | Sonnet | native-platform-engineer | T-010, T-004 | TODO | — |  |
 | T-160 | iOS OCR host (Vision) | M6 | C3 | Sonnet | native-platform-engineer | T-010, T-004 | DONE | batch 19 review [batch-19a](05-reviews/batch-19a.md), [batch-19b](05-reviews/batch-19b.md), [batch-19c](05-reviews/batch-19c.md) | Batch 19. FU-191 |
-| T-161 | Receipt/screen OCR templates and confirmation screen S-32 | M6 | C2 | Sonnet | parsing-engine-engineer | T-159, T-160, T-033 | TODO | — |  |
+| T-161 | Receipt/screen OCR templates and confirmation screen S-32 | M6 | C2 | Sonnet | parsing-engine-engineer | T-159, T-160, T-033 | DONE | batch 24 review [batch-24a](05-reviews/batch-24a.md), [batch-24b](05-reviews/batch-24b.md) | Batch 24. FU-230 |
 | T-162 | Settings S-60 incl. privacy info and About | M6 | C2 | Sonnet | flutter-ui-engineer | T-020, T-087, T-115 | DONE | batch 17 review [batch-17a](05-reviews/batch-17a.md), [batch-17b](05-reviews/batch-17b.md) | Batch 17. FU-160 |
 | T-163 | Categories & rules S-63/S-64 incl. custom categories (Gold) | M6 | C2 | Sonnet | flutter-ui-engineer | T-074, T-119 | DONE | batch 18 review [batch-18a](05-reviews/batch-18a.md), [batch-18b](05-reviews/batch-18b.md), [batch-18c](05-reviews/batch-18c.md), [batch-18d](05-reviews/batch-18d.md) | Batch 18. FU-179 |
 | T-164 | Custom message template builder engine and screen S-65 (Gold) | M6 | C3 | Sonnet | parsing-engine-engineer | T-033, T-119 | DONE | batch 19 review [batch-19a](05-reviews/batch-19a.md), [batch-19b](05-reviews/batch-19b.md), [batch-19c](05-reviews/batch-19c.md) | Batch 19. FU-190 |
@@ -444,7 +444,7 @@
 - **FU-208** (T-171, batch 20): the minors, nits and open questions for T-171 in [batch-20a](05-reviews/batch-20a.md), [batch-20b](05-reviews/batch-20b.md), [batch-20c](05-reviews/batch-20c.md), plus the "left undone" items in its task file.
 - **FU-209** (T-173, batch 20): the minors, nits and open questions for T-173 in [batch-20a](05-reviews/batch-20a.md), [batch-20b](05-reviews/batch-20b.md), [batch-20c](05-reviews/batch-20c.md), plus the "left undone" items in its task file.
 - **FU-210** (T-082, batch 20): the minors, nits and open questions for T-082 in [batch-20a](05-reviews/batch-20a.md), [batch-20b](05-reviews/batch-20b.md), [batch-20c](05-reviews/batch-20c.md), plus the "left undone" items in its task file.
-- **FU-211** (T-065/T-161, batch 20): no app screen picks up shared items yet, so a shared screenshot never reaches OCR confirmation (S-32 is T-161, deferred on the tesseract aar).
+- **FU-211** (T-065/T-161, batch 20; picked up in T-161 batch 24, open: PDF OCR, Android ocrPath): no app screen picked up shared items, so a shared screenshot never reaches OCR confirmation (S-32 is T-161, deferred on the tesseract aar).
 - **FU-212** (T-064, before release, PO input): author and sign Zaghlol.shortcut, replace `AppLinks.shortcutInstall`, add the install-guide images and the nudge copy.
 - **FU-213** (NOTIF-GW): the notification settings screen with per-type toggles (calls `ensureNotificationPermission` on first enable); no XCTest for the Swift host yet.
 - **FU-214** (T-173): tighten the benchmark budgets to about 1.3× the first `perf` run; tag the timing assertion in `passphrase_test.dart`.
@@ -469,6 +469,12 @@
 - **FU-227** (SMS-TEMPLATES-2): the ATM, salary, declined and foreign-currency templates for NBE, CIB, Banque Misr and QNB are synthetic (`"source": "synthetic-unverified"`); replace with real wording when samples arrive.
 - **FU-228** (batch-23a/23b minors): FU-backend 4 and FU-core 4 minors in docs/05-reviews/batch-23a.md; FU-ui minors in batch-23b.md (displaced doc comments, hard-coded "—" in the card waiting header, period chip hidden while loading, edit sheet with duplicate labels).
 - Done in batch 23: FU-075, FU-079 N-1, FU-095, FU-096 m-1, FU-106, FU-119, FU-122 049-2, FU-127, FU-131 (partial), FU-132, FU-045, FU-046 (partial), FU-125 (partial), FU-193, FU-219 (banner), FU-224 (mockup 31, scan chips, edit link, period chip, category emoji, tints, settings keys, Home mascot message), 062-2, 063-1, 065-1, 065-2, 166-2, 166-3; local phone-test backend (docs/workflow/run-backend-locally.md).
+
+- **FU-229** (T-120, batch 24): the minors, nits and open questions for T-120 in [batch-24a](05-reviews/batch-24a.md), [batch-24b](05-reviews/batch-24b.md), plus the "left undone" items in its task file.
+- **FU-230** (T-161, batch 24): the minors, nits and open questions for T-161 in [batch-24a](05-reviews/batch-24a.md), [batch-24b](05-reviews/batch-24b.md), plus the "left undone" items in its task file.
+- **FU-231** (T-120/T-161, batch 24): device checks for voice (on-device recognition on API 31+/33+ and iOS, consent fallback, quota) and OCR on iOS; Android OCR waits on T-159 (Tesseract aar); PDF OCR not built; the voice mic-permission Arabic strings need copy review; consent is asked every session (not remembered) pending a PO call.
+- **FU-232** (batch-24a/24b minors): FU-backend-2 minors in docs/05-reviews/batch-24a.md; period-chip error-state test; voice logger subtitle copy (`voiceLoggerParsedSubtitle`) missing.
+- Done in batch 24: FU-211 (shared items → parse / OCR → S-32), FU-218 (1.3× goldens for 14 screens), FU-020, FU-017, FU-004 (#4, #7, #12, #13), FU-107 (revive), FU-098 L-1, FU-116 (sync header test), batch-23 minors.
 
 ## Log
 | Date | Event |
@@ -547,3 +553,4 @@
 | 2026-11-14 | Batch 21 (`batch/2026-11-14-21`): T-067, T-174 DONE. FU-216…FU-217. Progress 151/186. |
 | 2026-11-14 | Batch 22 (`batch/2026-11-14-22`): T-037, T-068, T-069 DONE. FU-220…FU-222. Progress 154/186. |
 | 2026-11-14 | Batch 23 (`batch/2026-11-15-23`): T-036 DONE. FU-226…FU-226. Progress 155/186. |
+| 2026-11-14 | Batch 24 (`batch/2026-11-15-24`): T-120, T-161 DONE. FU-229…FU-230. Progress 157/186. |

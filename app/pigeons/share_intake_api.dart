@@ -32,6 +32,7 @@ class ShareDescriptor {
     required this.mimeType,
     required this.sizeBytes,
     required this.receivedAtMs,
+    this.ocrPath,
   });
 
   String id;
@@ -39,6 +40,11 @@ class ShareDescriptor {
   String mimeType;
   int sizeBytes;
   int receivedAtMs;
+
+  /// T-161 (FU-211): iOS image shares only. The path of the encrypted share
+  /// body in the App Group spool, which the OCR host reads and deletes (the
+  /// same layout as its own spool files). Null on Android and for other kinds.
+  String? ocrPath;
 }
 
 /// Decrypted content, in memory only. `text` is set for [ShareKind.text],

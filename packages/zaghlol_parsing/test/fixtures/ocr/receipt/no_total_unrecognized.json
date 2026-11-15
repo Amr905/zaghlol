@@ -1,0 +1,7 @@
+{
+  "body": "Daily Bakery\nBread 10.00\nThank you",
+  "receivedAt": "2026-10-23T18:00:00",
+  "expect": {
+    "unrecognized": true
+  }
+}

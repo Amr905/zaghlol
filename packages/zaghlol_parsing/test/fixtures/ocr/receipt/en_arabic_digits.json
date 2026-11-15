@@ -1,0 +1,11 @@
+{
+  "body": "Green Grocer\nTotal: ١٬٢٥٠٫٧٥ EGP\n٢٣/١٠/٢٠٢٦",
+  "receivedAt": "2026-10-23T18:00:00",
+  "expect": {
+    "amount": "1250.75",
+    "currency": "EGP",
+    "merchant": "Green Grocer",
+    "date": "2026-10-23",
+    "time": null
+  }
+}

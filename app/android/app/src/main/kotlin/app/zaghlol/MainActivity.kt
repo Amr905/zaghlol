@@ -26,6 +26,7 @@ import app.zaghlol.platform.share.ShareIntakeState
 import app.zaghlol.platform.share.ShareStore
 import app.zaghlol.platform.share.ShareStores
 import app.zaghlol.platform.sharesheet.ShareImageRegistration
+import app.zaghlol.platform.speech.SpeechSupportRegistration
 import app.zaghlol.platform.text.TextNormalizationHostApi
 import app.zaghlol.platform.text.TextNormalizationRegistration
 import app.zaghlol.platform.widget.WidgetBridgeRegistration
@@ -65,6 +66,8 @@ class MainActivity : FlutterFragmentActivity() {
         AttestationRegistration.register(messenger, this)
         // T-117: system chooser for the share-studio PNG (UI engine only).
         ShareImageRegistration.register(messenger, this)
+        // T-120: on-device speech support check (UI engine only).
+        SpeechSupportRegistration.register(messenger, this)
         // NOTIF-GW: local alerts, channels, POST_NOTIFICATIONS (UI engine only).
         val notifHost = NotificationsHost(
             applicationContext,
@@ -119,6 +122,7 @@ class MainActivity : FlutterFragmentActivity() {
         AttestationRegistration.unregister(flutterEngine.dartExecutor.binaryMessenger)
         ShareImageRegistration.unregister(flutterEngine.dartExecutor.binaryMessenger)
         ShareImageRegistration.sweepAll(this)
+        SpeechSupportRegistration.unregister(flutterEngine.dartExecutor.binaryMessenger)
         NotificationsRegistration.unregister(flutterEngine.dartExecutor.binaryMessenger)
         notificationsHost = null
         notificationEvents = null

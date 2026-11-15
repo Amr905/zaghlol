@@ -14,15 +14,22 @@ here=$(CDPATH= cd -- "$(dirname -- "$0")" && pwd)
 dir="${DEV_KEYS_DIR:-$here/../.dev-keys}"
 
 if [ -f "$dir/kms.env" ] && [ "${1:-}" != "--force" ]; then
-  echo "dev keys already exist in backend/.dev-keys (use --force to replace them)"
+  echo "dev keys already exist in $dir (use --force to replace them)"
   exit 0
 fi
 
 command -v openssl >/dev/null 2>&1 || { echo "openssl is required" >&2; exit 1; }
 
-# Empty the directory, not remove it: it may be a mount point.
-rm -rf "$dir"/* 2>/dev/null || true
+# FU (batch-23a B2): never empty a directory this script didn't create. A directory that has files but no kms.env is refused
+# (a wrong DEV_KEYS_DIR such as $HOME would otherwise be wiped), and only the files this script writes are removed.
+if [ -d "$dir" ] && [ ! -f "$dir/kms.env" ] && [ -n "$(ls -A "$dir" 2>/dev/null)" ]; then
+  echo "refusing to use $dir: it is not empty and holds no kms.env (set DEV_KEYS_DIR to an empty or dev-keys folder)" >&2
+  exit 1
+fi
+
+# Remove only our own files, not the directory: it may be a mount point.
 mkdir -p "$dir"
+rm -f "$dir"/*.pem "$dir"/*.key "$dir"/kms.env
 
 b64url() { base64 | tr '+/' '-_' | tr -d '=\n'; }
 
@@ -71,4 +78,4 @@ jwk() {
 } > "$dir/kms.env"
 chmod 644 "$dir/kms.env"
 
-echo "dev keys written to backend/.dev-keys (public JWKs in kms.env)"
+echo "dev keys written to $dir (public JWKs in kms.env)"

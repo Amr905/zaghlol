@@ -183,6 +183,19 @@ void main() {
         expect(edited, 'a1');
       });
 
+      testWidgets('edit sheet shows last-4 under each card', (tester) async {
+        await tester.binding.setSurfaceSize(const Size(390, 1500));
+        addTearDown(() => tester.binding.setSurfaceSize(null));
+        await tester.pumpWidget(
+          host(const AsyncData(sample), lang, onEdit: (_) {}),
+        );
+        await tester.pumpAndSettle();
+        await tester.tap(find.byKey(const ValueKey('scan-edit-cards')));
+        await tester.pumpAndSettle();
+        expect(find.text('•••• 1234'), findsOneWidget);
+        expect(find.text('•••• 9876'), findsOneWidget);
+      });
+
       testWidgets('header Edit link picks a card and opens its editor', (
         tester,
       ) async {

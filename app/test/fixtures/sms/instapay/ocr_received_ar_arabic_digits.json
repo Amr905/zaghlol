@@ -1,0 +1,17 @@
+{
+  "sender": "InstaPay",
+  "channel": "ocr",
+  "body": "تم استلام مبلغ\n٣٬٠٠٠٫٠٠ جم\nمن: منى سمير\nالى حساب: **** ٤٥٦٧\nالتاريخ: ٢٢/١٠/٢٠٢٦ ١٨:٣٠\nرقم المرجع: ٧٣١٠٠٢٨٤٥١٩",
+  "receivedAt": "2026-10-23T11:14:00+03:00",
+  "expect": {
+    "template": "instapay.ocr_received.ar",
+    "event": "instapay_in",
+    "direction": "income",
+    "currency": "EGP",
+    "amount": "3000.00",
+    "last4": "4567",
+    "ref": "73100284519",
+    "counterparty": "منى سمير",
+    "date": "2026-10-22"
+  }
+}

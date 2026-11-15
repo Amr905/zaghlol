@@ -222,6 +222,86 @@
         "جنيه": "EGP",
         "egp": "EGP"
       }
+    },
+    {
+      "date": {
+        "format": "d/M/yyyy"
+      },
+      "id": "instapay.ocr_sent.en",
+      "version": 1,
+      "lang": "en",
+      "channel": [
+        "ocr"
+      ],
+      "event": "instapay_out",
+      "direction": "expense",
+      "baseConfidence": 0.9,
+      "pattern": "transfer (?:successful|completed) (?<cur>egp|جم|جنيه) ?(?<amount>[\\d,.]+) to:? (?:(?<ipa>[a-z0-9._-]+@[a-z0-9._-]+)|(?<phone>01\\d{9}))(?: from (?:account|a/c|card):? ?[*x•.]{1,4} ?(?<last4>\\d{4}))?(?: date:? (?<date>\\d{1,2}/\\d{1,2}/\\d{4})(?: (?<time>\\d{1,2}:\\d{2}(?: ?[ap]m)?))?)?(?: ref(?:erence)?(?: (?:no|number))?\\.?:? (?<ref>[a-z0-9]{6,24}))?",
+      "currencyMap": {
+        "جم": "EGP",
+        "جنيه": "EGP",
+        "egp": "EGP"
+      }
+    },
+    {
+      "date": {
+        "format": "d/M/yyyy"
+      },
+      "id": "instapay.ocr_sent.ar",
+      "version": 1,
+      "lang": "ar",
+      "channel": [
+        "ocr"
+      ],
+      "event": "instapay_out",
+      "direction": "expense",
+      "baseConfidence": 0.9,
+      "pattern": "تم التحويل (?:بنجاح )?(?<amount>[\\d,.]+) (?<cur>egp|جم|جنيه) الى:? (?:(?<ipa>[a-z0-9._-]+@[a-z0-9._-]+)|(?<phone>01\\d{9}))(?: من حساب:? ?[*x•.]{1,4} ?(?<last4>\\d{4}))?(?: التاريخ:? (?<date>\\d{1,2}/\\d{1,2}/\\d{4})(?: (?<time>\\d{1,2}:\\d{2}(?: ?[ap]m)?))?)?(?: (?:رقم )?المرجع:? (?<ref>[a-z0-9]{6,24}))?",
+      "currencyMap": {
+        "جم": "EGP",
+        "جنيه": "EGP",
+        "egp": "EGP"
+      }
+    },
+    {
+      "date": {
+        "format": "d/M/yyyy"
+      },
+      "id": "instapay.ocr_received.en",
+      "version": 1,
+      "lang": "en",
+      "channel": [
+        "ocr"
+      ],
+      "event": "instapay_in",
+      "direction": "income",
+      "baseConfidence": 0.9,
+      "pattern": "money received (?<cur>egp|جم|جنيه) ?(?<amount>[\\d,.]+) from:? (?:(?<ipa>[a-z0-9._-]+@[a-z0-9._-]+)|(?<counterparty>[a-zء-ي .'-]{2,40}?))(?: to (?:account|a/c|card):? ?[*x•.]{1,4} ?(?<last4>\\d{4}))?(?: date:? (?<date>\\d{1,2}/\\d{1,2}/\\d{4})(?: (?<time>\\d{1,2}:\\d{2}(?: ?[ap]m)?))?)?(?: ref(?:erence)?(?: (?:no|number))?\\.?:? (?<ref>[a-z0-9]{6,24}))?$",
+      "currencyMap": {
+        "جم": "EGP",
+        "جنيه": "EGP",
+        "egp": "EGP"
+      }
+    },
+    {
+      "date": {
+        "format": "d/M/yyyy"
+      },
+      "id": "instapay.ocr_received.ar",
+      "version": 1,
+      "lang": "ar",
+      "channel": [
+        "ocr"
+      ],
+      "event": "instapay_in",
+      "direction": "income",
+      "baseConfidence": 0.9,
+      "pattern": "تم استلام (?:مبلغ )?(?<amount>[\\d,.]+) (?<cur>egp|جم|جنيه) من:? (?:(?<ipa>[a-z0-9._-]+@[a-z0-9._-]+)|(?<counterparty>[a-zء-ي .'-]{2,40}?))(?: الى حساب:? ?[*x•.]{1,4} ?(?<last4>\\d{4}))?(?: التاريخ:? (?<date>\\d{1,2}/\\d{1,2}/\\d{4})(?: (?<time>\\d{1,2}:\\d{2}(?: ?[ap]m)?))?)?(?: (?:رقم )?المرجع:? (?<ref>[a-z0-9]{6,24}))?$",
+      "currencyMap": {
+        "جم": "EGP",
+        "جنيه": "EGP",
+        "egp": "EGP"
+      }
     }
   ]
 }

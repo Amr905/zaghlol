@@ -1,0 +1,11 @@
+{
+  "body": "Cairo Coffee House\nLatte 4.50\nSubtotal 4.50\nGrand Total USD 5.13\n2026-10-20",
+  "receivedAt": "2026-10-23T18:00:00",
+  "expect": {
+    "amount": "5.13",
+    "currency": "USD",
+    "merchant": "Cairo Coffee House",
+    "date": "2026-10-20",
+    "time": null
+  }
+}

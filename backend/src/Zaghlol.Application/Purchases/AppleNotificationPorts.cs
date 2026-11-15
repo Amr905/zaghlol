@@ -135,6 +135,15 @@ public interface IAppleNotificationStore
     /// 10 minutes ago without a newer read (<c>last_verified_at &lt; expires_at</c>), oldest expiry first (T-134 §4).
     /// </summary>
     Task<IReadOnlyList<ApplePurchaseRow>> ListExpiredSubscriptionsAsync(DateTimeOffset now, int limit, CancellationToken cancellationToken);
+
+    /// <summary>
+    /// FU-107 (security M-1): moves dead-lettered rows (<c>processed_at</c> set, <c>next_attempt_at</c> NULL, <c>attempts &gt; 0</c>) that
+    /// died at least <paramref name="deadFor"/> ago and were received within <paramref name="maxAge"/> back to the queue
+    /// (<c>attempts = 0</c>, <c>processed_at</c> and <c>last_error</c> cleared), at most <paramref name="limit"/>, oldest first, so an
+    /// outage on the store's side can't leave an expired or refunded purchase entitled forever. Bounded: a row older than
+    /// <paramref name="maxAge"/> is never revived. Returns the number revived.
+    /// </summary>
+    Task<int> ReviveDeadLetteredAsync(DateTimeOffset now, TimeSpan deadFor, TimeSpan maxAge, int limit, CancellationToken cancellationToken);
 }
 
 /// <summary>Metric tag values of the ASSN V2 instruments (T-134 design note §7; fixed sets).</summary>

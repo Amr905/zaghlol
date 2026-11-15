@@ -177,7 +177,7 @@ Every task file has: ID, description, technical details, dependencies, affected 
 | [T-117](tasks/T-117.md) | Achievement share cards with hidden amounts by default | US-11-4 | Medium | Sonnet | flutter-ui-engineer | T-105, T-022 | G | 12 | DONE |
 | [T-118](tasks/T-118.md) | Home-screen widgets (Android Glance, iOS WidgetKit) | US-11-4 | High | Sonnet | native-platform-engineer | T-051, T-004 | E | 8 | DONE |
 | [T-119](tasks/T-119.md) | Gold gate matrix and entitlement state (local) | US-14-1 | Medium | Sonnet | flutter-core-engineer | T-025, T-020 | A | 7 | DONE |
-| [T-120](tasks/T-120.md) | Voice logger S-31 with on-device-first recognition and monthly limit | US-11-3 | High | Sonnet | flutter-ui-engineer | T-109, T-119, T-011 | G | 10 | TODO |
+| [T-120](tasks/T-120.md) | Voice logger S-31 with on-device-first recognition and monthly limit | US-11-3 | High | Sonnet | flutter-ui-engineer | T-109, T-119, T-011 | G | 10 | DONE |
 | [T-121](tasks/T-121.md) | Money tab assets, Add asset S-44 and Prices S-45 | US-12-1 | Medium | Sonnet | flutter-ui-engineer | T-113, T-083, T-119 | G | 11 | DONE |
 
 ## M5 — Backend services & Zaghlol Gold
@@ -237,7 +237,7 @@ Every task file has: ID, description, technical details, dependencies, affected 
 | [T-158](tasks/T-158.md) | Import flow S-67 (source, summary, done) | US-17-1 | Medium | Sonnet | flutter-ui-engineer | T-156, T-157, T-155, T-119 | G | 11 | TODO |
 | [T-159](tasks/T-159.md) | Android OCR host (ML Kit Latin + Tesseract Arabic) | US-17-2 | High | Sonnet | native-platform-engineer | T-010, T-004 | D | 3 | TODO |
 | [T-160](tasks/T-160.md) | iOS OCR host (Vision) | US-17-2 | High | Sonnet | native-platform-engineer | T-010, T-004 | E | 3 | DONE |
-| [T-161](tasks/T-161.md) | Receipt/screen OCR templates and confirmation screen S-32 | US-17-2 | Medium | Sonnet | parsing-engine-engineer | T-159, T-160, T-033 | F | 6 | TODO |
+| [T-161](tasks/T-161.md) | Receipt/screen OCR templates and confirmation screen S-32 | US-17-2 | Medium | Sonnet | parsing-engine-engineer | T-159, T-160, T-033 | F | 6 | DONE |
 | [T-162](tasks/T-162.md) | Settings S-60 incl. privacy info and About | US-18-1 | Medium | Sonnet | flutter-ui-engineer | T-020, T-087, T-115 | G | 10 | DONE |
 | [T-163](tasks/T-163.md) | Categories & rules S-63/S-64 incl. custom categories (Gold) | US-18-1 | Medium | Sonnet | flutter-ui-engineer | T-074, T-119 | G | 8 | DONE |
 | [T-164](tasks/T-164.md) | Custom message template builder engine and screen S-65 (Gold) | US-05-3 | High | Sonnet | parsing-engine-engineer | T-033, T-119 | F | 8 | DONE |

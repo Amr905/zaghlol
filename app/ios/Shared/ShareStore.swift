@@ -114,6 +114,9 @@ final class ShareStore {
     }
   }
 
+  /// Path of the encrypted body, for the OCR host (T-161).
+  func bodyPath(_ id: String) -> String { body(id).path }
+
   private func body(_ id: String) -> URL { dir.appendingPathComponent(id + Self.bodySuffix) }
   private func meta(_ id: String) -> URL { dir.appendingPathComponent(id + Self.metaSuffix) }
   private func tmp(_ url: URL) -> URL { url.appendingPathExtension("tmp") }

@@ -106,4 +106,34 @@ public class ApiTests(ApiFixture fixture) : IClassFixture<ApiFixture>
         Assert.Contains(fixture.LogSink.Entries, ThisRequest);
         Assert.DoesNotContain(fixture.LogSink.Entries, e => e.Contains("super-secret-body-value", StringComparison.Ordinal));
     }
+
+    [Theory]
+    [InlineData("{\"installId\":\"0193f2c4-7a10-4c52-9d3e-5b1f8a2c6e77\",\"platform\":\"android\",\"appVersion\":\"1.0.0\",\"smsBody\":\"body-secret-q7\"}")]
+    [InlineData("{\"body-secret-q7\":1}")]
+    [InlineData("{\"installId\":\"body-secret-q7\",\"platform\":\"android\",\"appVersion\":\"1.0.0\"}")]
+    public async Task ABodyThatIsReadAndRejectedIsNeverLogged(string body)
+    {
+        // FU-004 #4: the endpoint really reads and parses this body (400), unlike the 405 case above; neither the
+        // unexpected field names nor the values may reach any log entry.
+        using var request = new HttpRequestMessage(HttpMethod.Post, "/v1/installs");
+        request.Content = new StringContent(body, Encoding.UTF8, "application/json");
+        request.Headers.Add("Idempotency-Key", "01HZX3Q9V6T8B2M5N7P4R1S0AB");
+
+        using var response = await fixture.Client.SendAsync(request);
+
+        Assert.Equal(HttpStatusCode.BadRequest, response.StatusCode);
+        static bool ThisRequest(string e) =>
+            e.StartsWith("request completed", StringComparison.Ordinal)
+            && e.Contains("Method=\"POST\"", StringComparison.Ordinal)
+            && e.Contains("Status=400", StringComparison.Ordinal);
+        var deadline = DateTime.UtcNow.AddSeconds(5);
+        while (!fixture.LogSink.Entries.Any(ThisRequest) && DateTime.UtcNow < deadline)
+        {
+            await Task.Delay(50);
+        }
+
+        Assert.Contains(fixture.LogSink.Entries, ThisRequest);
+        Assert.DoesNotContain(fixture.LogSink.Entries, e => e.Contains("body-secret-q7", StringComparison.Ordinal));
+        Assert.DoesNotContain(await response.Content.ReadAsStringAsync(), "body-secret-q7", StringComparison.Ordinal);
+    }
 }

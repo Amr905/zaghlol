@@ -1,3 +1,6 @@
+using Microsoft.AspNetCore.Builder;
+using Microsoft.AspNetCore.Hosting;
+using Microsoft.AspNetCore.TestHost;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
@@ -75,6 +78,57 @@ public sealed class DevFakeStoresTests
             ["Signing:Keys:1:PublicJwk:Y"] = "y2",
         }).Build();
         Assert.Equal("s0000d:xx:yy,e0000d:x2:y2", DevFakeStores.AppKeys(configuration));
+    }
+
+    private static WebApplication Build(string environment, string? flag)
+    {
+        var builder = WebApplication.CreateBuilder(new WebApplicationOptions { EnvironmentName = environment });
+        builder.WebHost.UseTestServer();
+        if (flag is not null)
+        {
+            builder.Configuration.AddInMemoryCollection(new Dictionary<string, string?> { [DevFakeStores.ConfigKey] = flag });
+        }
+
+        return builder.Build();
+    }
+
+    [Theory]
+    [InlineData("Production")]
+    [InlineData("Staging")]
+    [InlineData("Testing")]
+    public async Task MapRefusesToStartOutsideDevelopmentWhenTheFlagIsOn(string environment)
+    {
+        await using var app = Build(environment, "true");
+        Assert.Throws<InvalidOperationException>(() => app.MapDevFakeStores());
+    }
+
+    [Theory]
+    [InlineData("Development", null)]
+    [InlineData("Development", "false")]
+    [InlineData("Production", null)]
+    public async Task WithoutTheFlagTheDevRoutesAreNotThere(string environment, string? flag)
+    {
+        await using var app = Build(environment, flag);
+        app.MapDevFakeStores();
+        await app.StartAsync();
+        using var client = app.GetTestClient();
+
+        using var keys = await client.GetAsync(new Uri("/dev/v1/app-keys", UriKind.Relative));
+        Assert.Equal(System.Net.HttpStatusCode.NotFound, keys.StatusCode);
+        using var grant = await client.PostAsync(new Uri("/dev/v1/grant-gold", UriKind.Relative), content: null);
+        Assert.Equal(System.Net.HttpStatusCode.NotFound, grant.StatusCode);
+    }
+
+    [Fact]
+    public async Task WithTheFlagInDevelopmentTheDevRoutesAreMapped()
+    {
+        await using var app = Build("Development", "true");
+        app.MapDevFakeStores();
+        await app.StartAsync();
+        using var client = app.GetTestClient();
+
+        using var keys = await client.GetAsync(new Uri("/dev/v1/app-keys", UriKind.Relative));
+        Assert.Equal(System.Net.HttpStatusCode.OK, keys.StatusCode);
     }
 
     [Fact]

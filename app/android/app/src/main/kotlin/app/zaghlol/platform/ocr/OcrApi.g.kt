@@ -309,6 +309,14 @@ interface OcrHostApi {
    * supported); when none is left the host uses Latin-only recognition.
    */
   fun recognize(encryptedImagePath: String, languages: List<String>, callback: (Result<OcrResult>) -> Unit)
+  /**
+   * T-161: encrypts a plain image the user picked (a file in the app's temp
+   * or cache directory) into the OCR spool and returns the path to pass to
+   * [recognize]. The plain file is deleted whatever happens (FR-SEC-03).
+   * Throws `IO_ERROR` (path outside temp/cache, unreadable, empty or over
+   * 25 MiB) or `NOT_AVAILABLE` (no spool key or no host on this platform).
+   */
+  fun sealImage(plainImagePath: String): String
   /** ISO 639-1 codes the engine can recognize on this device, at runtime. */
   fun supportedLanguages(): List<String>
 
@@ -338,6 +346,23 @@ interface OcrHostApi {
                 reply.reply(OcrApiPigeonUtils.wrapResult(data))
               }
             }
+          }
+        } else {
+          channel.setMessageHandler(null)
+        }
+      }
+      run {
+        val channel = BasicMessageChannel<Any?>(binaryMessenger, "dev.flutter.pigeon.zaghlol.OcrHostApi.sealImage$separatedMessageChannelSuffix", codec, taskQueue)
+        if (api != null) {
+          channel.setMessageHandler { message, reply ->
+            val args = message as List<Any?>
+            val plainImagePathArg = args[0] as String
+            val wrapped: List<Any?> = try {
+              listOf(api.sealImage(plainImagePathArg))
+            } catch (exception: Throwable) {
+              OcrApiPigeonUtils.wrapError(exception)
+            }
+            reply.reply(wrapped)
           }
         } else {
           channel.setMessageHandler(null)

@@ -88,6 +88,20 @@ internal sealed class AppleNotificationStore(IZaghlolDbContextFactory contexts) 
         WHERE id = @id AND processed_at IS NULL
         """;
 
+
+    // FU-107: the dead letter (FailSql with @dead) is the only row with processed_at set, next_attempt_at NULL and attempts > 0.
+    private const string ReviveSql = """
+        UPDATE zaghlol.store_notifications
+        SET attempts = 0, processed_at = NULL, last_error = NULL, next_attempt_at = NULL
+        WHERE id IN (
+            SELECT id FROM zaghlol.store_notifications
+            WHERE store = 'app_store' AND processed_at IS NOT NULL AND next_attempt_at IS NULL AND attempts > 0
+              AND processed_at <= @dead_before AND received_at >= @oldest
+            ORDER BY received_at
+            LIMIT @limit
+            FOR UPDATE SKIP LOCKED)
+        """;
+
     private const string DeferSql = "UPDATE zaghlol.store_notifications SET next_attempt_at = @next WHERE id = @id AND processed_at IS NULL";
 
     private const string BacklogSql = """
@@ -249,6 +263,17 @@ internal sealed class AppleNotificationStore(IZaghlolDbContextFactory contexts) 
         command.Parameters.AddWithValue("id", notificationId);
         command.Parameters.AddWithValue("next", nextAttemptAt.ToUniversalTime());
         await command.ExecuteNonQueryAsync(cancellationToken);
+    }
+
+    public async Task<int> ReviveDeadLetteredAsync(DateTimeOffset now, TimeSpan deadFor, TimeSpan maxAge, int limit, CancellationToken cancellationToken)
+    {
+        await using var db = contexts.CreateDbContext(DatabaseRole.Worker);
+        await db.Database.OpenConnectionAsync(cancellationToken);
+        await using var command = new NpgsqlCommand(ReviveSql, (NpgsqlConnection)db.Database.GetDbConnection());
+        command.Parameters.AddWithValue("dead_before", now.ToUniversalTime() - deadFor);
+        command.Parameters.AddWithValue("oldest", now.ToUniversalTime() - maxAge);
+        command.Parameters.AddWithValue("limit", limit);
+        return await command.ExecuteNonQueryAsync(cancellationToken);
     }
 
     public async Task<(long LessThan1h, long AtLeast1h)> BacklogAsync(DateTimeOffset now, CancellationToken cancellationToken)

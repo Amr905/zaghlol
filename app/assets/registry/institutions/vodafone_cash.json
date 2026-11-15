@@ -52,6 +52,46 @@
         "جنيه": "EGP",
         "egp": "EGP"
       }
+    },
+    {
+      "date": {
+        "format": "d/M/yyyy"
+      },
+      "id": "vodafone_cash.ocr_payment.en",
+      "version": 1,
+      "lang": "en",
+      "channel": [
+        "ocr"
+      ],
+      "event": "card_purchase",
+      "direction": "expense",
+      "baseConfidence": 0.9,
+      "pattern": "payment successful amount:? (?<cur>egp|جم|جنيه) ?(?<amount>[\\d,.]+) paid to:? (?<merchant>[a-z0-9ء-ي &.'-]{2,40}?)(?: date:? (?<date>\\d{1,2}/\\d{1,2}/\\d{4})(?: (?<time>\\d{1,2}:\\d{2}(?: ?[ap]m)?))?)?(?: transaction id:? (?<ref>[a-z0-9]{6,24}))?$",
+      "currencyMap": {
+        "جم": "EGP",
+        "جنيه": "EGP",
+        "egp": "EGP"
+      }
+    },
+    {
+      "date": {
+        "format": "d/M/yyyy"
+      },
+      "id": "vodafone_cash.ocr_payment.ar",
+      "version": 1,
+      "lang": "ar",
+      "channel": [
+        "ocr"
+      ],
+      "event": "card_purchase",
+      "direction": "expense",
+      "baseConfidence": 0.9,
+      "pattern": "تمت عملية الدفع بنجاح المبلغ:? (?<amount>[\\d,.]+) (?<cur>egp|جم|جنيه) الى:? (?<merchant>[a-z0-9ء-ي &.'-]{2,40}?)(?: التاريخ:? (?<date>\\d{1,2}/\\d{1,2}/\\d{4})(?: (?<time>\\d{1,2}:\\d{2}(?: ?[ap]m)?))?)?(?: رقم العملية:? (?<ref>[a-z0-9]{6,24}))?$",
+      "currencyMap": {
+        "جم": "EGP",
+        "جنيه": "EGP",
+        "egp": "EGP"
+      }
     }
   ]
 }

@@ -1,0 +1,16 @@
+{
+  "sender": "CIB",
+  "channel": "ocr",
+  "body": "Transaction details\nCard purchase\nEGP 1,100.00\nMerchant: SPINNEYS NEW CAIRO EG\nCard ending 1234\n21/10/2026 7:15 pm\nAvailable balance EGP 12,400.75",
+  "receivedAt": "2026-10-23T11:14:00+03:00",
+  "expect": {
+    "template": "cib.ocr_purchase.en",
+    "event": "card_purchase",
+    "direction": "expense",
+    "currency": "EGP",
+    "amount": "1100.00",
+    "last4": "1234",
+    "balance": "12400.75",
+    "date": "2026-10-21"
+  }
+}

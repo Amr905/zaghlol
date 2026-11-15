@@ -2768,6 +2768,30 @@
   "@captureScanUnsupported": {
     "description": "S"
   },
+  "captureScanUnavailableTitle": "Reading images isn't ready on this phone yet",
+  "@captureScanUnavailableTitle": {
+    "description": "S"
+  },
+  "captureScanUnavailableBody": "I'm working on it. For now, type the transaction and I'll save it.",
+  "@captureScanUnavailableBody": {
+    "description": "S"
+  },
+  "captureShareRefusedTooLarge": "That file is too big for me",
+  "@captureShareRefusedTooLarge": {
+    "description": "S"
+  },
+  "captureShareRefusedUnsupported": "I can't read this kind of file",
+  "@captureShareRefusedUnsupported": {
+    "description": "S"
+  },
+  "captureShareRefusedUnreadable": "I couldn't open what you shared",
+  "@captureShareRefusedUnreadable": {
+    "description": "S"
+  },
+  "captureShareRefusedEmpty": "What you shared was empty",
+  "@captureShareRefusedEmpty": {
+    "description": "S"
+  },
   "captureScanPhotoTitle": "I need access to your photos",
   "@captureScanPhotoTitle": {
     "description": "T"

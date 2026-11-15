@@ -10,7 +10,7 @@ import '../../../support/golden_matrix.dart';
 import 'assets_ui_test.dart' as base;
 
 void main() {
-  for (final v in goldenVariants) {
+  for (final v in [...goldenVariants, ...goldenVariantsScaled]) {
     for (final screen in const ['assets', 'add_asset', 'prices']) {
       testWidgets('$screen golden ${v.name}', (tester) async {
         await base.pumpScreenForGolden(tester, screen, v);

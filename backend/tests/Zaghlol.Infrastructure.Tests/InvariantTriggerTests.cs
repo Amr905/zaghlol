@@ -33,6 +33,38 @@ public class InvariantTriggerTests(SchemaFixture fixture)
     }
 
     [Fact]
+    public async Task TheTombstoneCannotSwapTheSeatKeyHashForAnotherValue()
+    {
+        var database = fixture.Database;
+        var install = await Rows.InsertAsync(database, "installs", new Dictionary<string, object?> { ["seat_key_hash"] = Rows.Bytes() });
+
+        // FU-020: tombstoning in the same statement may clear the hash but never replace it.
+        var swapped = await Assert.ThrowsAsync<PostgresException>(() => Db.ExecuteAsync(
+            database.Worker, "UPDATE zaghlol.installs SET deleted_at = now(), seat_key_hash = $1 WHERE id = $2", Rows.Bytes(), install["id"]));
+        AssertInvariant(swapped, "installs_seat_key_hash_set_once");
+    }
+
+    [Fact]
+    public async Task ATombstonedInstallCannotGainASeatKeyHashAndDeletedAtIsOneWay()
+    {
+        var database = fixture.Database;
+        var install = await Rows.InsertAsync(database, "installs");
+        Assert.Equal(1, await Db.ExecuteAsync(database.Worker, "UPDATE zaghlol.installs SET deleted_at = now() WHERE id = $1", install["id"]));
+
+        var gained = await Assert.ThrowsAsync<PostgresException>(() => Db.ExecuteAsync(
+            database.Api, "UPDATE zaghlol.installs SET seat_key_hash = $1 WHERE id = $2", Rows.Bytes(), install["id"]));
+        AssertInvariant(gained, "installs_seat_key_hash_set_once");
+
+        var revived = await Assert.ThrowsAsync<PostgresException>(() => Db.ExecuteAsync(
+            database.Worker, "UPDATE zaghlol.installs SET deleted_at = NULL WHERE id = $1", install["id"]));
+        AssertInvariant(revived, "installs_deleted_at_one_way");
+
+        var moved = await Assert.ThrowsAsync<PostgresException>(() => Db.ExecuteAsync(
+            database.Worker, "UPDATE zaghlol.installs SET deleted_at = now() + interval '40 days' WHERE id = $1", install["id"]));
+        AssertInvariant(moved, "installs_deleted_at_one_way");
+    }
+
+    [Fact]
     public async Task ASeatKeyHashCanBeSetTheFirstTime()
     {
         var install = await Rows.InsertAsync(fixture.Database, "installs");
