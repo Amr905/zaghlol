@@ -23,7 +23,8 @@ public class AccountLifecycleServiceTests
             apple,
             new IdentityVault(),
             new EntitlementService(entitlements ?? new FakeEntitlementStore(), new FakeEntitlementSigner(), new FakeAccountValidator(null), clock),
-            clock);
+            clock,
+            Microsoft.Extensions.Logging.Abstractions.NullLogger<AccountLifecycleService>.Instance);
     }
 
     private static ValidatedAccountToken Valid => new(Account, EntitlementTestKit.Now.AddDays(1));
@@ -79,15 +80,41 @@ public class AccountLifecycleServiceTests
     }
 
     [Fact]
-    public async Task AFailedRevocationKeepsTheAccountSoTheAppRetries()
+    public async Task AFailedRevocationStillDeletesTheAccount_AndQueuesOnlyTheResealedToken()
     {
         store.ForDelete = new AccountForDelete(AccountProvider.Apple, "s", System.Text.Encoding.UTF8.GetBytes("services.id\nrefresh-1"));
         apple.Outcome = AppleRevokeOutcome.Unavailable;
 
         var kind = await Service(Valid).DeleteAsync(Install, Header, default);
 
-        Assert.Equal(AccountLifecycleKind.Unavailable, kind);
-        Assert.Empty(store.Deleted);
+        Assert.Equal(AccountLifecycleKind.Completed, kind);
+        Assert.Equal([Account], store.Deleted);
+        var queued = Assert.Single(store.Queued);
+        Assert.Equal("services.id\nrefresh-1", System.Text.Encoding.UTF8.GetString(queued!));
+    }
+
+    [Fact]
+    public async Task AClientThatThrowsIsTreatedAsUnavailable_AndStillDeletes()
+    {
+        store.ForDelete = new AccountForDelete(AccountProvider.Apple, "s", System.Text.Encoding.UTF8.GetBytes("services.id\nrefresh-1"));
+        apple.Throw = true;
+
+        var kind = await Service(Valid).DeleteAsync(Install, Header, default);
+
+        Assert.Equal(AccountLifecycleKind.Completed, kind);
+        Assert.NotNull(Assert.Single(store.Queued));
+    }
+
+    [Fact]
+    public async Task ARevokedOrAlreadyRevokedTokenQueuesNothing()
+    {
+        // invalid_grant is mapped to Revoked by the client (AppleAccountClientTests): the same outcome as a plain success here.
+        store.ForDelete = new AccountForDelete(AccountProvider.Apple, "s", System.Text.Encoding.UTF8.GetBytes("services.id\nrefresh-1"));
+
+        var kind = await Service(Valid).DeleteAsync(Install, Header, default);
+
+        Assert.Equal(AccountLifecycleKind.Completed, kind);
+        Assert.Null(Assert.Single(store.Queued));
     }
 
     [Theory]

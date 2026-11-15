@@ -208,6 +208,7 @@ public sealed class SignInService(
             }
 
             await accounts.LinkAsync(accountId, install.Value, now, cancellationToken).ConfigureAwait(false);
+            await accounts.LockPurchasesAsync(install.Value, accountId, cancellationToken).ConfigureAwait(false);
             var attached = (await accounts.AttachBuyingPurchasesAsync(install.Value, accountId, cancellationToken).ConfigureAwait(false)).ToHashSet();
 
             foreach (var purchaseId in await accounts.ListEntitlingPurchasesAsync(accountId, cancellationToken).ConfigureAwait(false))

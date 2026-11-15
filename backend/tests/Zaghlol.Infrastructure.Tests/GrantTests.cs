@@ -81,6 +81,16 @@ public class GrantTests(SchemaFixture fixture)
         { "zaghlol_api", "UPDATE zaghlol.store_notifications SET next_attempt_at = now() WHERE false" },
         { "zaghlol_ops_ro", "SELECT next_attempt_at FROM zaghlol.store_notifications" },
 
+        // T-135 pending Apple revocations: the sealed blob is write-only for the API, never readable by it or by ops, and the
+        // worker can only move the retry columns.
+        { "zaghlol_api", "SELECT * FROM zaghlol.pending_apple_revocations" },
+        { "zaghlol_api", "UPDATE zaghlol.pending_apple_revocations SET attempts = 0 WHERE false" },
+        { "zaghlol_api", "DELETE FROM zaghlol.pending_apple_revocations WHERE false" },
+        { "zaghlol_ops_ro", "SELECT sealed_blob FROM zaghlol.pending_apple_revocations" },
+        { "zaghlol_admin", "SELECT sealed_blob FROM zaghlol.pending_apple_revocations" },
+        { "zaghlol_worker", "UPDATE zaghlol.pending_apple_revocations SET sealed_blob = NULL WHERE false" },
+        { "zaghlol_worker", "INSERT INTO zaghlol.pending_apple_revocations (id) SELECT gen_random_uuid() WHERE false" },
+
         // T-133: no new grant. The Google worker statement never needs more; the worker still can't touch verify-only columns or
         // seats, or insert purchases.
         { "zaghlol_worker", "UPDATE zaghlol.purchases SET install_id = NULL WHERE false" },

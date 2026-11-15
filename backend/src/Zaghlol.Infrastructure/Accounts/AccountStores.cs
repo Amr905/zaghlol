@@ -66,6 +66,12 @@ internal sealed class NpgsqlAccountTxStore(NpgsqlConnection connection, NpgsqlTr
         RETURNING p.id
         """;
 
+    private const string LockUnionSql = """
+        SELECT id FROM zaghlol.purchases
+        WHERE (install_id = @install AND account_id IS NULL) OR account_id = @account
+        ORDER BY id FOR UPDATE
+        """;
+
     private const string EntitlingSql = """
         SELECT id FROM zaghlol.purchases
         WHERE account_id = @account AND state IN ('active', 'in_grace', 'canceled_active') ORDER BY id
@@ -121,6 +127,14 @@ internal sealed class NpgsqlAccountTxStore(NpgsqlConnection connection, NpgsqlTr
         return (int)(long)(await command.ExecuteScalarAsync(cancellationToken).ConfigureAwait(false))!;
     }
 
+    public async Task LockPurchasesAsync(Guid installId, Guid accountId, CancellationToken cancellationToken)
+    {
+        await using var command = Command(LockUnionSql);
+        command.Parameters.Add(new("install", NpgsqlDbType.Uuid) { Value = installId });
+        command.Parameters.Add(new("account", NpgsqlDbType.Uuid) { Value = accountId });
+        await ReadIdsAsync(command, cancellationToken).ConfigureAwait(false);
+    }
+
     public async Task<IReadOnlyList<Guid>> AttachBuyingPurchasesAsync(Guid installId, Guid accountId, CancellationToken cancellationToken)
     {
         await using var command = Command(AttachSql);
@@ -170,9 +184,17 @@ internal sealed class NpgsqlAccountStore(IServiceProvider services) : IAccountSt
         UPDATE zaghlol.purchases SET account_id = NULL, account_linked_by = NULL WHERE account_id = @id
         """;
 
+    private const string LockPurchasesSql = "SELECT id FROM zaghlol.purchases WHERE account_id = @id ORDER BY id FOR UPDATE";
+
     private const string DeleteIdempotencySql = "DELETE FROM zaghlol.idempotency_records WHERE account_id = @id";
 
     private const string DeleteAccountSql = "DELETE FROM zaghlol.accounts WHERE id = @id";
+
+    // Only the sealed blob and the times: no account, install or subject reference (Lead decision, T-135).
+    private const string QueueRevocationSql = """
+        INSERT INTO zaghlol.pending_apple_revocations (id, sealed_blob, created_at, next_attempt_at, expires_at)
+        VALUES (@pid, @blob, @now, @next, @expires)
+        """;
 
     private NpgsqlDataSource Source => services.GetRequiredKeyedService<NpgsqlDataSource>(DatabaseRole.App);
 
@@ -207,15 +229,39 @@ internal sealed class NpgsqlAccountStore(IServiceProvider services) : IAccountSt
             reader.IsDBNull(2) ? null : reader.GetFieldValue<byte[]>(2));
     }
 
-    public async Task DeleteAccountAsync(Guid accountId, CancellationToken cancellationToken)
+    public async Task DeleteAccountAsync(Guid accountId, byte[]? pendingRevocationSealed, DateTimeOffset now, CancellationToken cancellationToken)
     {
         await using var connection = await Source.OpenConnectionAsync(cancellationToken).ConfigureAwait(false);
         await using var transaction = await connection.BeginTransactionAsync(IsolationLevel.ReadCommitted, cancellationToken).ConfigureAwait(false);
-        foreach (var sql in new[] { LockSql, ClearPurchasesSql, DeleteIdempotencySql, DeleteAccountSql })
+        await using (var lockCommand = new NpgsqlCommand(LockSql, connection, transaction))
+        {
+            lockCommand.Parameters.Add(new("id", NpgsqlDbType.Uuid) { Value = accountId });
+            await lockCommand.ExecuteNonQueryAsync(cancellationToken).ConfigureAwait(false);
+        }
+
+        // Same global order as sign-in and restore: every purchase of the account locked in ascending ID before the UPDATE.
+        await using (var orderCommand = new NpgsqlCommand(LockPurchasesSql, connection, transaction))
+        {
+            orderCommand.Parameters.Add(new("id", NpgsqlDbType.Uuid) { Value = accountId });
+            await orderCommand.ExecuteNonQueryAsync(cancellationToken).ConfigureAwait(false);
+        }
+
+        foreach (var sql in new[] { ClearPurchasesSql, DeleteIdempotencySql, DeleteAccountSql })
         {
             await using var command = new NpgsqlCommand(sql, connection, transaction);
             command.Parameters.Add(new("id", NpgsqlDbType.Uuid) { Value = accountId });
             await command.ExecuteNonQueryAsync(cancellationToken).ConfigureAwait(false);
+        }
+
+        if (pendingRevocationSealed is not null)
+        {
+            await using var queue = new NpgsqlCommand(QueueRevocationSql, connection, transaction);
+            queue.Parameters.Add(new("pid", NpgsqlDbType.Uuid) { Value = Guid.NewGuid() });
+            queue.Parameters.Add(new("blob", NpgsqlDbType.Bytea) { Value = pendingRevocationSealed });
+            queue.Parameters.Add(new("now", NpgsqlDbType.TimestampTz) { Value = now.ToUniversalTime() });
+            queue.Parameters.Add(new("next", NpgsqlDbType.TimestampTz) { Value = (now + PendingAppleRevocationPolicy.FirstDelay).ToUniversalTime() });
+            queue.Parameters.Add(new("expires", NpgsqlDbType.TimestampTz) { Value = (now + PendingAppleRevocationPolicy.Window).ToUniversalTime() });
+            await queue.ExecuteNonQueryAsync(cancellationToken).ConfigureAwait(false);
         }
 
         await transaction.CommitAsync(cancellationToken).ConfigureAwait(false);

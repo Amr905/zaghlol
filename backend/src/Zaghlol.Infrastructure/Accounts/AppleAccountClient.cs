@@ -107,7 +107,7 @@ internal sealed partial class AppleAccountClient(
             LogRevokeFailed(logger, (int)response.StatusCode);
             return AppleRevokeOutcome.Unavailable;
         }
-        catch (Exception ex) when (ex is HttpRequestException or TaskCanceledException)
+        catch (Exception ex) when (ex is HttpRequestException or TaskCanceledException or CryptographicException or InvalidOperationException)
         {
             if (cancellationToken.IsCancellationRequested)
             {

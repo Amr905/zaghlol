@@ -13,6 +13,7 @@ Compiled 2026-11-13. On 2026-11-13 the PO delegated every decision with a sound 
 | FU-112 Q2 | A verify on a vacant seat with no new payment **leaves it vacant** (as built); the owner gets it back through restore. | Restore is the intended recovery path; no silent grants. |
 | R6-1 (T-186) | Unfreeze is **enforced server-side**: a different operator than the one who froze, after a 24 h lock. If only one operator exists, the unfreeze needs the break-glass procedure in the runbook. | Server rule can't be bypassed by role mistakes. |
 | DESIGN-0 (FR-ONB-03) | *(PO, 2026-11-14)* A fresh install opens in **Arabic** and the **light** theme, whatever the device language or theme; an explicit choice (including System) wins. | PO instruction; amends FR-ONB-03 ("device language until chosen"). |
+| T-135 delete (batch-25a review) | The user's right to delete is **never blocked by Apple**. `DELETE /v1/accounts/me` always deletes the account and its links in the same request (204). If the Apple token revoke fails for any reason, only the re-sealed (encrypted) refresh token goes into `pending_apple_revocations` (no account, install or subject column) in that same transaction; a worker retries with exponential back-off (15 min, doubling, capped at 24 h) for **30 days**, then drops it. `invalid_grant` (already revoked) queues nothing. Nothing else about the account is kept. |
 
 ### Defaults confirmed as built
 

@@ -194,6 +194,48 @@ public class AccountEndpointTests(AccountsHostFixture f) : IClassFixture<Account
     }
 
     [Fact]
+    public async Task Delete_WhileAppleIsDown_StillDeletesAtOnce_AndQueuesOnlyTheSealedToken()
+    {
+        var (a, tokenA) = await f.NewInstallOfAsync("ios");
+        var (_, accountToken, accountId) = await SignedInAsync(tokenA, "apple", NewSubject(), code: "code-" + Guid.NewGuid().ToString("N"));
+        var before = await f.CountAsync("SELECT count(*) FROM zaghlol.pending_apple_revocations");
+
+        f.Apple.RevokeOutcome = AppleRevokeOutcome.Unavailable;
+        try
+        {
+            using var deleted = await f.AccountCallAsync(HttpMethod.Delete, "/v1/accounts/me", tokenA, accountToken);
+
+            Assert.Equal(HttpStatusCode.NoContent, deleted.StatusCode);
+        }
+        finally
+        {
+            f.Apple.RevokeOutcome = AppleRevokeOutcome.Revoked;
+        }
+
+        Assert.Equal(0, await f.CountAsync("SELECT count(*) FROM zaghlol.accounts WHERE id = @a", ("a", accountId)));
+        Assert.Equal(0, await f.CountAsync("SELECT count(*) FROM zaghlol.account_installs WHERE install_id = @i", ("i", a)));
+        Assert.Equal(before + 1, await f.CountAsync("SELECT count(*) FROM zaghlol.pending_apple_revocations"));
+        // Sealed: the plaintext refresh token is nowhere in the row, and the row has no reference to the account.
+        Assert.Equal(0, await f.CountAsync("SELECT count(*) FROM zaghlol.pending_apple_revocations WHERE position('refresh-for-'::bytea in sealed_blob) > 0"));
+        Assert.Equal(7, await f.CountAsync("SELECT count(*) FROM information_schema.columns WHERE table_schema = 'zaghlol' AND table_name = 'pending_apple_revocations'"));
+    }
+
+    [Fact]
+    public async Task Delete_WhenAppleSaysInvalidGrant_QueuesNothing()
+    {
+        var (_, tokenA) = await f.NewInstallOfAsync("ios");
+        var (_, accountToken, accountId) = await SignedInAsync(tokenA, "apple", NewSubject(), code: "code-" + Guid.NewGuid().ToString("N"));
+        var before = await f.CountAsync("SELECT count(*) FROM zaghlol.pending_apple_revocations");
+
+        // The real client maps invalid_grant to Revoked (AppleAccountClientTests); the fake's Revoked outcome is that path.
+        using var deleted = await f.AccountCallAsync(HttpMethod.Delete, "/v1/accounts/me", tokenA, accountToken);
+
+        Assert.Equal(HttpStatusCode.NoContent, deleted.StatusCode);
+        Assert.Equal(0, await f.CountAsync("SELECT count(*) FROM zaghlol.accounts WHERE id = @a", ("a", accountId)));
+        Assert.Equal(before, await f.CountAsync("SELECT count(*) FROM zaghlol.pending_apple_revocations"));
+    }
+
+    [Fact]
     public async Task Delete_RevokesTheAppleToken_RemovesTheAccountLinksAndItsIdempotencyRows_AndTheTokenIsThen401BeforeItsExpiry()
     {
         var (a, tokenA) = await f.NewInstallOfAsync("ios");
@@ -203,14 +245,6 @@ public class AccountEndpointTests(AccountsHostFixture f) : IClassFixture<Account
         Assert.Equal(1, await f.CountAsync("SELECT count(*) FROM zaghlol.idempotency_records WHERE account_id = @a", ("a", accountId)));
         Assert.Equal(accountId, (await f.PurchaseLinkAsync(purchase)).Account);
 
-        // Apple can't revoke now: nothing is deleted, the app retries (503 with Retry-After).
-        f.Apple.RevokeOutcome = AppleRevokeOutcome.Unavailable;
-        using var unavailable = await f.AccountCallAsync(HttpMethod.Delete, "/v1/accounts/me", tokenA, accountToken);
-        await ProblemAssert.AssertAsync(unavailable, HttpStatusCode.ServiceUnavailable, "UPSTREAM_UNAVAILABLE");
-        Assert.NotNull(unavailable.Headers.RetryAfter);
-        Assert.Equal(1, await f.CountAsync("SELECT count(*) FROM zaghlol.accounts WHERE id = @a", ("a", accountId)));
-
-        f.Apple.RevokeOutcome = AppleRevokeOutcome.Revoked;
         using var deleted = await f.AccountCallAsync(HttpMethod.Delete, "/v1/accounts/me", tokenA, accountToken);
 
         Assert.Equal(HttpStatusCode.NoContent, deleted.StatusCode);

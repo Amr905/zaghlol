@@ -144,7 +144,6 @@ internal static partial class AccountEndpoints
         return await service.DeleteAsync(install, SyncEndpoints.AccountHeader(context), cancellationToken) switch
         {
             AccountLifecycleKind.Completed => TypedResults.NoContent(),
-            AccountLifecycleKind.Unavailable => Unavailable(context),
             _ => ApiProblems.Of(StatusCodes.Status401Unauthorized, ErrorCodes.AccountTokenExpired),
         };
     }

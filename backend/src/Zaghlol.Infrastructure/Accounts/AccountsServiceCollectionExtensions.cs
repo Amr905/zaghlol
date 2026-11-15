@@ -33,15 +33,38 @@ public static class AccountsServiceCollectionExtensions
         services.TryAddSingleton<IAppleAccountClient, AppleAccountClient>();
         services.TryAddSingleton<SignInService>();
         services.TryAddSingleton<AccountLifecycleService>();
+        AddAppleHttpClient(services);
+        services.TryAddEnumerable(ServiceDescriptor.Singleton<IHostedService, AccountsStartupCheck>());
+        return services;
+    }
+
+    /// <summary>
+    /// The Worker's Apple revocation retry (T-135, Lead decision): the pending-revocation store (Worker login), the vault, the Apple
+    /// client and <see cref="AppleRevocationRetryJob"/>. Call after <c>AddZaghlolKms</c> and <c>AddZaghlolDatabase</c> with the Worker role.
+    /// </summary>
+    public static IServiceCollection AddZaghlolAppleRevocationWorker(this IServiceCollection services)
+    {
+        ArgumentNullException.ThrowIfNull(services);
+
+        services.TryAddSingleton(TimeProvider.System);
+        services.TryAddSingleton(provider => AccountsOptions.Read(
+            provider.GetRequiredService<IConfiguration>(),
+            provider.GetRequiredService<IHostEnvironment>()));
+        services.TryAddSingleton<IPendingAppleRevocationStore, PendingAppleRevocationStore>();
+        services.TryAddSingleton<IAppleTokenVault, AppleTokenVault>();
+        services.TryAddSingleton<IAppleAccountClient, AppleAccountClient>();
+        services.TryAddSingleton<AppleRevocationRetryJob>();
+        AddAppleHttpClient(services);
+        return services;
+    }
+
+    private static void AddAppleHttpClient(IServiceCollection services) =>
         services.AddHttpClient(AppleAccountClient.HttpClientName, client =>
             {
                 client.Timeout = AppleTimeout;
                 client.MaxResponseContentBufferSize = 64 * 1024;
             })
             .RemoveAllLoggers();
-        services.TryAddEnumerable(ServiceDescriptor.Singleton<IHostedService, AccountsStartupCheck>());
-        return services;
-    }
 }
 
 /// <summary>Reads <see cref="AccountsOptions"/> at startup, so a misconfigured Production host stops instead of failing the first sign-in.</summary>

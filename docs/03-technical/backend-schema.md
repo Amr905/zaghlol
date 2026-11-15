@@ -436,6 +436,7 @@ CREATE TABLE audit_log (id bigint GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
 | `installs` inactive (no sync) | 12 months, then deleted (cascades links; purchases keep `install_id = NULL` for store reconciliation) | `RetentionPurger` daily |
 | Deleted installs | Tombstone (`deleted_at`) 30 days, then hard delete | same |
 | Deleted accounts | No tombstone: `DELETE /v1/accounts/me` hard-deletes the row at once (cascading `account_installs`; the trigger clears the purchase links). Audit rows naming the account keep their own retention (below) | API (T-135) |
+| `pending_apple_revocations` | A sealed Apple refresh token (no account, install or subject) queued when revocation failed at account deletion; retried with back-off, dropped on success or `invalid_grant`, and at 30 days at the latest | `AppleRevocationRetryService` (worker) |
 | `store_notifications` | 90 days | same |
 | `merchant_contributions` raw rows | Deleted when the aggregate is promoted/rejected, or after 180 days | same |
 | `bank_requests` | 24 months (aggregate counts kept) | same |

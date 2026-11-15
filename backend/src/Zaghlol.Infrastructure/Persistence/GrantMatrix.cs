@@ -270,9 +270,20 @@ public static class GrantMatrix
         new(WorkerRw, "store_notifications", I),
     ];
 
+    /// <summary>
+    /// The grants of the PendingAppleRevocations migration (T-135, Lead decision). Frozen: never edit after it ships. The API only
+    /// inserts the sealed blob (no SELECT: it can't read it back); the worker reads, deletes and moves the two retry columns. No
+    /// operator role has any grant on the table (it holds a sealed bearer secret).
+    /// </summary>
+    public static IReadOnlyList<TableGrant> PendingAppleRevocations { get; } =
+    [
+        new(AppRw, "pending_apple_revocations", I),
+        new(WorkerRw, "pending_apple_revocations", SD, UpdateColumns: ["attempts", "next_attempt_at"]),
+    ];
+
     /// <summary>What the database must hold after all migrations: one merged row per role and table.</summary>
     public static IReadOnlyList<TableGrant> Current { get; } =
-        Merge([.. InitialCreate, .. CatalogDrafts, .. PurchaseAckNextAttempt, .. PurchaseLastPaymentAt, .. AppleNotifications]);
+        Merge([.. InitialCreate, .. CatalogDrafts, .. PurchaseAckNextAttempt, .. PurchaseLastPaymentAt, .. AppleNotifications, .. PendingAppleRevocations]);
 
     /// <summary>
     /// Folds the grants of several migrations into one row per role and table (privileges and column lists united, in order),

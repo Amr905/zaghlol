@@ -217,15 +217,13 @@ public class AccountsLiveContractTests(AccountsContractFixture fixture) : IClass
         using var noInstall = await SendAsync(HttpMethod.Post, "/v1/accounts/signout", null);
         await Declared(signOut, noInstall, HttpStatusCode.Unauthorized, Problem);
 
-        // A fresh sign-in, then delete: 503 while Apple can't revoke, 204 after, 401 once the account is gone.
+        // A fresh sign-in, then delete: 204 even while Apple can't revoke (the token is queued), 401 once the account is gone.
         var again = fixture.Accounts.Mint("contract-" + Guid.NewGuid().ToString("N"));
         using var second = await SendAsync(HttpMethod.Post, "/v1/accounts/signin", token, SignInBody("apple", again.IdToken, again.Raw, "code2"), key: true);
         var secondToken = (await Declared(signIn, second, HttpStatusCode.OK, Json))!["accountToken"]!.GetValue<string>();
         fixture.Accounts.Revoke = AppleRevokeOutcome.Unavailable;
-        using var unavailable = await SendAsync(HttpMethod.Delete, "/v1/accounts/me", token, accountToken: secondToken);
-        fixture.Accounts.Revoke = AppleRevokeOutcome.Revoked;
-        Assert.Equal("UPSTREAM_UNAVAILABLE", (await Declared(delete, unavailable, HttpStatusCode.ServiceUnavailable, Problem))!["code"]!.GetValue<string>());
         using var deleted = await SendAsync(HttpMethod.Delete, "/v1/accounts/me", token, accountToken: secondToken);
+        fixture.Accounts.Revoke = AppleRevokeOutcome.Revoked;
         await Declared(delete, deleted, HttpStatusCode.NoContent, null);
         using var gone = await SendAsync(HttpMethod.Delete, "/v1/accounts/me", token, accountToken: secondToken);
         Assert.Equal("ACCOUNT_TOKEN_EXPIRED", (await Declared(delete, gone, HttpStatusCode.Unauthorized, Problem))!["code"]!.GetValue<string>());

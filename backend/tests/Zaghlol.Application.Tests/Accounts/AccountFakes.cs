@@ -14,6 +14,9 @@ internal sealed class FakeAccountStore : IAccountStore
 
     public List<Guid> Deleted { get; } = [];
 
+    /// <summary>The sealed blob queued with each delete (null when none).</summary>
+    public List<byte[]?> Queued { get; } = [];
+
     public Task<string?> ReadInstallPlatformAsync(Guid installId, CancellationToken cancellationToken) => Task.FromResult(Platform);
 
     public Task UnlinkInstallAsync(Guid accountId, Guid installId, CancellationToken cancellationToken)
@@ -24,9 +27,10 @@ internal sealed class FakeAccountStore : IAccountStore
 
     public Task<AccountForDelete?> ReadForDeleteAsync(Guid accountId, CancellationToken cancellationToken) => Task.FromResult(ForDelete);
 
-    public Task DeleteAccountAsync(Guid accountId, CancellationToken cancellationToken)
+    public Task DeleteAccountAsync(Guid accountId, byte[]? pendingRevocationSealed, DateTimeOffset now, CancellationToken cancellationToken)
     {
         Deleted.Add(accountId);
+        Queued.Add(pendingRevocationSealed);
         return Task.CompletedTask;
     }
 }
@@ -64,8 +68,15 @@ internal sealed class RecordingApple : IAppleAccountClient
         return Task.FromResult<AppleRefreshToken?>(new AppleRefreshToken(clientId, new Sensitive<string>("rt")));
     }
 
+    public bool Throw { get; set; }
+
     public Task<AppleRevokeOutcome> RevokeAsync(AppleRefreshToken token, CancellationToken cancellationToken)
     {
+        if (Throw)
+        {
+            throw new InvalidOperationException("boom");
+        }
+
         if (Outcome == AppleRevokeOutcome.Revoked)
         {
             Revoked.Add(token);

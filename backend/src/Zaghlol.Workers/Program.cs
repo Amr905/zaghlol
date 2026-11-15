@@ -1,6 +1,8 @@
 using Serilog;
 using Zaghlol.Infrastructure;
+using Zaghlol.Infrastructure.Accounts;
 using Zaghlol.Infrastructure.Contributions;
+using Zaghlol.Infrastructure.Kms;
 using Zaghlol.Infrastructure.Logging;
 using Zaghlol.Infrastructure.Observability;
 using Zaghlol.Infrastructure.Persistence;
@@ -58,6 +60,12 @@ builder.Services.AddZaghlolPlayNotificationWorker();
 builder.Services.AddHostedService<PlayNotificationProcessorService>();
 builder.Services.AddHostedService<PlayVoidedReconcileService>();
 builder.Services.AddHostedService<PlayExpirySweepService>();
+
+// Apple revocation retry (T-135): token revocations that failed at account deletion, every 15 min for up to 30 days. Needs the Kms:*
+// ring (to open the sealed refresh token) and Accounts:Apple:* (the Sign in with Apple key), like the API.
+builder.Services.AddZaghlolKms();
+builder.Services.AddZaghlolAppleRevocationWorker();
+builder.Services.AddHostedService<AppleRevocationRetryService>();
 
 using var host = builder.Build();
 await host.RunAsync();

@@ -115,6 +115,13 @@ public interface IAccountTxStore
     Task<int> CountLinkedInstallsAsync(Guid accountId, CancellationToken cancellationToken);
 
     /// <summary>
+    /// Locks, in ascending ID order and in one statement, every purchase sign-in is about to touch: the unlinked purchases bought by
+    /// <paramref name="installId"/> and every purchase already linked to <paramref name="accountId"/>. Called before the attach, so
+    /// sign-in, delete and restore all lock purchases in the one global (uuid) order and can't deadlock.
+    /// </summary>
+    Task LockPurchasesAsync(Guid installId, Guid accountId, CancellationToken cancellationToken);
+
+    /// <summary>
     /// D-54 attach: sets <c>account_id</c> and <c>account_linked_by = 'signin'</c> on the purchases with no account whose buying
     /// install (<c>purchases.install_id</c>) is <paramref name="installId"/>, locked in ascending ID order. Returns their IDs.
     /// </summary>
@@ -158,7 +165,54 @@ public interface IAccountStore
 
     /// <summary>
     /// One transaction: clears <c>account_id</c> and <c>account_linked_by</c> of the account's purchases (<c>attach_reclaim_used_at</c>
-    /// stays, D-58), deletes the <c>idempotency_records</c> rows of the account (R3-6), then the account (links cascade).
+    /// stays, D-58), deletes the <c>idempotency_records</c> rows of the account (R3-6), then the account (links cascade). When
+    /// <paramref name="pendingRevocationSealed"/> is set, the same transaction inserts one <c>pending_apple_revocations</c> row for it
+    /// (sealed blob and times only, no account reference; kept <see cref="PendingAppleRevocationPolicy.Window"/>).
     /// </summary>
-    Task DeleteAccountAsync(Guid accountId, CancellationToken cancellationToken);
+    Task DeleteAccountAsync(Guid accountId, byte[]? pendingRevocationSealed, DateTimeOffset now, CancellationToken cancellationToken);
+}
+
+/// <summary>A sealed Apple refresh token waiting for a successful revocation. Never logged.</summary>
+public sealed record PendingAppleRevocation(Guid Id, byte[] SealedToken, int Attempts)
+{
+    public override string ToString() => "***";
+}
+
+/// <summary>The retry rules of <c>pending_apple_revocations</c> (Lead decision: deletion is never blocked by Apple).</summary>
+public static class PendingAppleRevocationPolicy
+{
+    /// <summary>How long a failed revocation is retried before the sealed token is dropped.</summary>
+    public static readonly TimeSpan Window = TimeSpan.FromDays(30);
+
+    /// <summary>
+    /// The vault context of a pending blob. The account (and its provider subject) is gone, so the token is re-sealed under this
+    /// constant instead of the subject.
+    /// </summary>
+    public const string VaultSubject = "pending-apple-revocation";
+
+    public static readonly TimeSpan FirstDelay = TimeSpan.FromMinutes(15);
+
+    public static readonly TimeSpan MaxDelay = TimeSpan.FromHours(24);
+
+    /// <summary>Exponential back-off from <see cref="FirstDelay"/> (15 min, 30 min, 1 h, ...) capped at <see cref="MaxDelay"/>.</summary>
+    public static TimeSpan DelayAfter(int attempts)
+    {
+        var doublings = Math.Clamp(attempts, 0, 12);
+        var delay = TimeSpan.FromTicks(FirstDelay.Ticks << doublings);
+        return delay > MaxDelay ? MaxDelay : delay;
+    }
+}
+
+/// <summary>The Worker login's access to <c>pending_apple_revocations</c>.</summary>
+public interface IPendingAppleRevocationStore
+{
+    /// <summary>Deletes rows past their window (the retry gave up); returns how many.</summary>
+    Task<int> DeleteExpiredAsync(DateTimeOffset now, CancellationToken cancellationToken);
+
+    /// <summary>Rows whose next attempt is due, oldest first.</summary>
+    Task<IReadOnlyList<PendingAppleRevocation>> ListDueAsync(DateTimeOffset now, int limit, CancellationToken cancellationToken);
+
+    Task DeleteAsync(Guid id, CancellationToken cancellationToken);
+
+    Task DeferAsync(Guid id, int attempts, DateTimeOffset nextAttemptAt, CancellationToken cancellationToken);
 }

@@ -245,7 +245,7 @@ public partial class ModelTests
         Assert.Null(worker.SelectColumns);
         Assert.Equal(["state", "acknowledged", "ack_next_attempt_at"], worker.UpdateColumns);
         Assert.Equal(
-            GrantMatrix.Flatten(GrantMatrix.InitialCreate.Concat(GrantMatrix.CatalogDrafts).Concat(GrantMatrix.PurchaseAckNextAttempt).Concat(GrantMatrix.PurchaseLastPaymentAt).Concat(GrantMatrix.AppleNotifications)),
+            GrantMatrix.Flatten(GrantMatrix.InitialCreate.Concat(GrantMatrix.CatalogDrafts).Concat(GrantMatrix.PurchaseAckNextAttempt).Concat(GrantMatrix.PurchaseLastPaymentAt).Concat(GrantMatrix.AppleNotifications).Concat(GrantMatrix.PendingAppleRevocations)),
             GrantMatrix.Flatten(GrantMatrix.Current));
         Assert.Equal(GrantMatrix.Current.Count, GrantMatrix.Current.Select(g => (g.Role, g.Table)).Distinct().Count());
     }
