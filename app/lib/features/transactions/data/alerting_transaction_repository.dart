@@ -1,15 +1,48 @@
 // WIRE-2: runs a callback after a manual add commits (duplicate-charge alert,
 // T-100; reimbursement suggestion, T-092). Everything else is the wrapped
 // repository. The callback is best effort: its failure never fails the add.
+// FIX-device-flows: [onChanged] reports the rows a manual add, edit, delete
+// or restore touched (before and after), so the app can publish
+// `TransactionsChanged` and Home/budgets recompute. Before, a typed or voice
+// expense was saved but nothing on screen refreshed.
 
 import '../domain/transaction.dart';
 import '../domain/transaction_repository.dart';
 
 final class AlertingTransactionRepository implements TransactionRepository {
-  AlertingTransactionRepository(this._inner, {required this.afterAdd});
+  AlertingTransactionRepository(
+    this._inner, {
+    required this.afterAdd,
+    this.onChanged,
+  });
 
   final TransactionRepository _inner;
   final Future<void> Function(TransactionRecord added) afterAdd;
+
+  /// Best effort, after the write committed: the rows it touched.
+  final Future<void> Function(List<TransactionRecord> rows)? onChanged;
+
+  Future<void> _changed(List<TransactionRecord?> rows) async {
+    final cb = onChanged;
+    final live = [for (final r in rows) ?r];
+    if (cb == null || live.isEmpty) return;
+    try {
+      await cb(live);
+    } on Object {
+      // Stored; screens refresh on the next change or resume.
+    }
+  }
+
+  Future<List<TransactionRecord?>> _read(Iterable<String> ids) async {
+    if (onChanged == null) return const [];
+    try {
+      return [
+        for (final id in ids) await _inner.byId(id, includeDeleted: true),
+      ];
+    } on Object {
+      return const [];
+    }
+  }
 
   @override
   Future<TransactionRecord> add(NewTransaction txn) async {
@@ -19,6 +52,7 @@ final class AlertingTransactionRepository implements TransactionRepository {
     } on Object {
       // The transaction is stored; alerts and suggestions can wait.
     }
+    await _changed([added]);
     return added;
   }
 
@@ -40,14 +74,27 @@ final class AlertingTransactionRepository implements TransactionRepository {
       _inner.byId(id, includeDeleted: includeDeleted);
 
   @override
-  Future<TransactionRecord> edit(String id, TransactionEdit edit) =>
-      _inner.edit(id, edit);
+  Future<TransactionRecord> edit(String id, TransactionEdit edit) async {
+    final before = await _read([id]);
+    final after = await _inner.edit(id, edit);
+    await _changed([...before, after]);
+    return after;
+  }
 
   @override
-  Future<void> softDelete(Iterable<String> ids) => _inner.softDelete(ids);
+  Future<void> softDelete(Iterable<String> ids) async {
+    final list = ids.toList();
+    final rows = await _read(list);
+    await _inner.softDelete(list);
+    await _changed(rows);
+  }
 
   @override
-  Future<void> restore(Iterable<String> ids) => _inner.restore(ids);
+  Future<void> restore(Iterable<String> ids) async {
+    final list = ids.toList();
+    await _inner.restore(list);
+    await _changed(await _read(list));
+  }
 
   @override
   Future<int> purgeExpired() => _inner.purgeExpired();

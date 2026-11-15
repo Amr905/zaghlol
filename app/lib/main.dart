@@ -9,6 +9,7 @@ import 'app/app_restart.dart';
 import 'app/notification_taps.dart';
 import 'app/onboarding_gate.dart';
 import 'app/url_launcher_opener.dart';
+import 'core/catalog/catalog_providers.dart';
 import 'core/db/db_directory.dart';
 import 'core/db/db_key_providers.dart';
 import 'core/l10n/date_format.dart';
@@ -33,6 +34,8 @@ import 'features/security/application/delete_everything_providers.dart';
 import 'features/widgets_bridge/application/widget_bridge.dart'
     show widgetBridgeWiringProvider;
 import 'features/security/presentation/app_lock_gate.dart';
+import 'features/transactions/presentation/list/txn_list_providers.dart'
+    show txnLookupsProvider;
 import 'ingestion/ingestion_runner.dart' show ensureDefaultRegistry;
 import 'ingestion/ingestion_main.dart';
 
@@ -188,6 +191,13 @@ class _LocalizedAppState extends ConsumerState<_LocalizedApp>
 
   @override
   Widget build(BuildContext context) {
+    // FIX-device-flows: the bundled catalog seed (system categories,
+    // merchants) loads on first launch. Nothing started it before, so a
+    // fresh install had no categories and S-13 could never save. The
+    // editor's lists are re-read once it is in.
+    ref.listen(catalogSeedProvider, (_, next) {
+      if (next.hasValue) ref.invalidate(txnLookupsProvider);
+    });
     ref.watch(cycleAppWiringProvider);
     // T-118: the home-screen widget follows the cycle overview.
     ref.watch(widgetBridgeWiringProvider);

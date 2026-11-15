@@ -11,6 +11,8 @@ import 'package:zaghlol/core/db/daos/categories_dao.dart';
 import 'package:zaghlol/core/db/daos/offset_links_dao.dart';
 import 'package:zaghlol/core/db/daos/transactions_dao.dart';
 import 'package:zaghlol/core/db/db_errors.dart';
+import 'package:zaghlol/features/budget/application/budget_providers.dart'
+    show transactionsChangedProvider;
 import 'package:zaghlol/features/transactions/data/drift_transaction_repository.dart';
 import 'package:zaghlol/features/transactions/data/transactions_providers.dart';
 import 'package:zaghlol/features/transactions/domain/transaction.dart';
@@ -634,6 +636,37 @@ void main() {
     addTearDown(container.dispose);
     final r = await container.read(transactionRepositoryProvider.future);
     expect((await r.add(_new())).id, 'p1');
+  });
+
+  test('FIX-device-flows: manual add, edit and delete publish '
+      'TransactionsChanged (Home and budgets refresh)', () async {
+    final container = ProviderContainer(
+      overrides: [
+        appDatabaseProvider.overrideWith((ref) async => edb.db),
+        clockProvider.overrideWithValue(() => at(clockMs)),
+        idGeneratorProvider.overrideWithValue(() => 'p1'),
+      ],
+    );
+    addTearDown(container.dispose);
+    final events = <TransactionsChanged>[];
+    final sub = container.read(transactionsChangedProvider).listen(events.add);
+    addTearDown(sub.cancel);
+    final r = await container.read(transactionRepositoryProvider.future);
+
+    await r.add(_new());
+    await pumpEventQueue();
+    expect(events, hasLength(1));
+    expect(events.single.accountIds, {'acc1'});
+    expect(events.single.cycleKeys, isNotEmpty);
+
+    await r.edit('p1', TransactionEdit(note: const Maybe('x')));
+    await pumpEventQueue();
+    expect(events, hasLength(2));
+
+    await r.softDelete(['p1']);
+    await pumpEventQueue();
+    expect(events, hasLength(3));
+    expect(events.last.accountIds, {'acc1'});
   });
 
   test('newUuidV4 has the v4 shape and is not repeated', () {
