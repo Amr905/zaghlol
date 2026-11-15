@@ -1,5 +1,1718 @@
 ﻿== SUMMARY ==
-RUNNING sha=b6c31c172b3fbea23ea51bca23d4d3500d0e46cc
+FAIL sha=b6c31c172b3fbea23ea51bca23d4d3500d0e46cc pipeline=quick-app pub-get=0 format=0 analyze=0 lints=0 app-test=1 dart-test-zaghlol_catalog=0 dart-test-zaghlol_domain=0 dart-test-zaghlol_parsing=0 apk-devNoSms=0 apk-perms=0 android-unit=0 android-lint=0
+pub-get                      PASS  exit=0  3s
+format                       PASS  exit=0  24s
+analyze                      PASS  exit=0  208s
+lints                        PASS  exit=0  36s
+app-test                     FAIL  exit=1  225s
+dart-test-zaghlol_catalog    PASS  exit=0  3s
+dart-test-zaghlol_domain     PASS  exit=0  4s
+dart-test-zaghlol_parsing    PASS  exit=0  10s
+apk-devNoSms                 PASS  exit=0  317s
+apk-perms                    PASS  exit=0  1s
+android-unit                 PASS  exit=0  198s
+android-lint                 PASS  exit=0  193s
+
+== ERRORS: app-test ==
+02:00 +3020 ~1 -1: /work/app/test/features/home/presentation/home_golden_test.dart: home golden ios_ar_light [E]
+  Test failed. See exception logs above.
+  The test description was: home golden ios_ar_light
+  
+02:00 +3021 ~1 -1: /work/app/test/features/ingestion/application/ingest_benchmark_test.dart: 500 messages over 20k transactions in ≤ 10 s
+02:00 +3022 ~1 -1: /work/app/test/features/ingestion/application/ingest_benchmark_test.dart: 500 messages over 20k transactions in ≤ 10 s
+02:00 +3023 ~1 -1: /work/app/test/features/ingestion/application/ingest_benchmark_test.dart: 500 messages over 20k transactions in ≤ 10 s
+02:00 +3024 ~1 -1: /work/app/test/features/ingestion/application/ingest_benchmark_test.dart: 500 messages over 20k transactions in ≤ 10 s
+02:00 +3025 ~1 -1: /work/app/test/features/ingestion/application/ingest_benchmark_test.dart: 500 messages over 20k transactions in ≤ 10 s
+02:00 +3026 ~1 -1: /work/app/test/features/ingestion/application/ingest_benchmark_test.dart: 500 messages over 20k transactions in ≤ 10 s
+02:00 +3027 ~1 -1: /work/app/test/features/ingestion/application/ingest_benchmark_test.dart: 500 messages over 20k transactions in ≤ 10 s
+
+02:01 +3043 ~1 -2: /work/app/test/features/home/presentation/home_golden_test.dart: home empty golden ios_ar_light [E]
+  Test failed. See exception logs above.
+  The test description was: home empty golden ios_ar_light
+  
+02:01 +3044 ~1 -2: /work/app/test/features/ingestion/application/ingest_benchmark_test.dart: 500 messages over 20k transactions in ≤ 10 s
+02:01 +3045 ~1 -2: /work/app/test/features/ingestion/application/ingest_benchmark_test.dart: 500 messages over 20k transactions in ≤ 10 s
+02:01 +3046 ~1 -2: /work/app/test/features/ingestion/application/ingest_benchmark_test.dart: 500 messages over 20k transactions in ≤ 10 s
+02:01 +3047 ~1 -2: /work/app/test/features/ingestion/application/ingest_benchmark_test.dart: 500 messages over 20k transactions in ≤ 10 s
+02:01 +3048 ~1 -2: /work/app/test/features/ingestion/application/ingest_benchmark_test.dart: 500 messages over 20k transactions in ≤ 10 s
+02:01 +3049 ~1 -2: /work/app/test/features/ingestion/application/ingest_benchmark_test.dart: 500 messages over 20k transactions in ≤ 10 s
+02:01 +3050 ~1 -2: /work/app/test/features/ingestion/application/ingest_benchmark_test.dart: 500 messages over 20k transactions in ≤ 10 s
+
+02:04 +3074 ~1 -3: /work/app/test/features/home/presentation/home_golden_test.dart: home golden ios_ar_dark [E]
+  Test failed. See exception logs above.
+  The test description was: home golden ios_ar_dark
+  
+02:04 +3075 ~1 -3: /work/app/test/features/ingestion/application/ingest_benchmark_test.dart: 500 messages over 20k transactions in ≤ 10 s
+02:04 +3076 ~1 -3: /work/app/test/features/ingestion/application/ingest_benchmark_test.dart: 500 messages over 20k transactions in ≤ 10 s
+02:04 +3077 ~1 -3: /work/app/test/features/ingestion/application/ingest_benchmark_test.dart: 500 messages over 20k transactions in ≤ 10 s
+02:04 +3078 ~1 -3: /work/app/test/features/ingestion/application/ingest_benchmark_test.dart: 500 messages over 20k transactions in ≤ 10 s
+02:04 +3079 ~1 -3: /work/app/test/features/ingestion/application/ingest_benchmark_test.dart: 500 messages over 20k transactions in ≤ 10 s
+02:04 +3080 ~1 -3: /work/app/test/features/ingestion/application/ingest_benchmark_test.dart: 500 messages over 20k transactions in ≤ 10 s
+02:04 +3081 ~1 -3: /work/app/test/features/ingestion/application/ingest_benchmark_test.dart: 500 messages over 20k transactions in ≤ 10 s
+
+02:05 +3085 ~1 -4: /work/app/test/features/home/presentation/home_golden_test.dart: home empty golden ios_ar_dark [E]
+  Test failed. See exception logs above.
+  The test description was: home empty golden ios_ar_dark
+  
+02:05 +3086 ~1 -4: /work/app/test/features/ingestion/application/ingest_benchmark_test.dart: 500 messages over 20k transactions in ≤ 10 s
+02:05 +3087 ~1 -4: /work/app/test/features/ingestion/application/ingest_benchmark_test.dart: 500 messages over 20k transactions in ≤ 10 s
+02:05 +3088 ~1 -4: /work/app/test/features/ingestion/application/ingest_benchmark_test.dart: 500 messages over 20k transactions in ≤ 10 s
+02:05 +3089 ~1 -4: /work/app/test/features/ingestion/application/ingest_benchmark_test.dart: 500 messages over 20k transactions in ≤ 10 s
+02:05 +3090 ~1 -4: /work/app/test/features/ingestion/application/ingest_benchmark_test.dart: 500 messages over 20k transactions in ≤ 10 s
+02:05 +3091 ~1 -4: /work/app/test/features/ingestion/application/ingest_benchmark_test.dart: 500 messages over 20k transactions in ≤ 10 s
+02:05 +3092 ~1 -4: /work/app/test/features/ingestion/application/ingest_benchmark_test.dart: 500 messages over 20k transactions in ≤ 10 s
+
+02:07 +3140 ~1 -5: /work/app/test/features/home/presentation/home_golden_test.dart: home golden ios_en_light [E]
+  Test failed. See exception logs above.
+  The test description was: home golden ios_en_light
+  
+02:07 +3141 ~1 -5: /work/app/test/features/ingestion/application/ingest_benchmark_test.dart: 500 messages over 20k transactions in ≤ 10 s
+02:07 +3142 ~1 -5: /work/app/test/features/ingestion/application/ingest_benchmark_test.dart: 500 messages over 20k transactions in ≤ 10 s
+02:07 +3143 ~1 -5: /work/app/test/features/ingestion/application/ingest_benchmark_test.dart: 500 messages over 20k transactions in ≤ 10 s
+02:07 +3144 ~1 -5: /work/app/test/features/ingestion/application/ingest_benchmark_test.dart: 500 messages over 20k transactions in ≤ 10 s
+02:07 +3145 ~1 -5: /work/app/test/features/ingestion/application/ingest_benchmark_test.dart: 500 messages over 20k transactions in ≤ 10 s
+02:07 +3146 ~1 -5: /work/app/test/features/ingestion/application/ingest_benchmark_test.dart: 500 messages over 20k transactions in ≤ 10 s
+02:07 +3147 ~1 -5: /work/app/test/features/ingestion/application/ingest_benchmark_test.dart: 500 messages over 20k transactions in ≤ 10 s
+
+02:08 +3153 ~1 -6: /work/app/test/features/home/presentation/home_golden_test.dart: home empty golden ios_en_light [E]
+  Test failed. See exception logs above.
+  The test description was: home empty golden ios_en_light
+  
+02:08 +3154 ~1 -6: /work/app/test/features/ingestion/application/ingest_benchmark_test.dart: 500 messages over 20k transactions in ≤ 10 s
+02:08 +3155 ~1 -6: /work/app/test/features/ingestion/application/ingest_benchmark_test.dart: 500 messages over 20k transactions in ≤ 10 s
+02:08 +3156 ~1 -6: /work/app/test/features/ingestion/application/ingest_benchmark_test.dart: 500 messages over 20k transactions in ≤ 10 s
+02:08 +3157 ~1 -6: /work/app/test/features/ingestion/application/ingest_benchmark_test.dart: 500 messages over 20k transactions in ≤ 10 s
+02:08 +3158 ~1 -6: /work/app/test/features/ingestion/application/ingest_benchmark_test.dart: 500 messages over 20k transactions in ≤ 10 s
+02:08 +3159 ~1 -6: /work/app/test/features/ingestion/application/ingest_benchmark_test.dart: 500 messages over 20k transactions in ≤ 10 s
+02:08 +3160 ~1 -6: /work/app/test/features/ingestion/application/ingest_benchmark_test.dart: 500 messages over 20k transactions in ≤ 10 s
+
+02:10 +3176 ~1 -7: /work/app/test/features/home/presentation/home_golden_test.dart: home golden ios_en_dark [E]
+  Test failed. See exception logs above.
+  The test description was: home golden ios_en_dark
+  
+02:10 +3177 ~1 -7: /work/app/test/features/ingestion/application/ingest_benchmark_test.dart: 500 messages over 20k transactions in ≤ 10 s
+02:10 +3178 ~1 -7: /work/app/test/features/ingestion/application/ingest_benchmark_test.dart: 500 messages over 20k transactions in ≤ 10 s
+02:10 +3179 ~1 -7: /work/app/test/features/ingestion/application/ingest_benchmark_test.dart: 500 messages over 20k transactions in ≤ 10 s
+02:10 +3180 ~1 -7: /work/app/test/features/ingestion/application/ingest_benchmark_test.dart: 500 messages over 20k transactions in ≤ 10 s
+02:10 +3181 ~1 -7: /work/app/test/features/ingestion/application/ingest_benchmark_test.dart: 500 messages over 20k transactions in ≤ 10 s
+02:10 +3182 ~1 -7: /work/app/test/features/ingestion/application/ingest_benchmark_test.dart: 500 messages over 20k transactions in ≤ 10 s
+02:10 +3183 ~1 -7: /work/app/test/features/ingestion/application/ingest_benchmark_test.dart: 500 messages over 20k transactions in ≤ 10 s
+
+02:11 +3186 ~1 -8: /work/app/test/features/home/presentation/home_golden_test.dart: home empty golden ios_en_dark [E]
+  Test failed. See exception logs above.
+  The test description was: home empty golden ios_en_dark
+  
+02:11 +3187 ~1 -8: /work/app/test/features/ingestion/application/ingest_benchmark_test.dart: 500 messages over 20k transactions in ≤ 10 s
+02:11 +3188 ~1 -8: /work/app/test/features/ingestion/application/ingest_benchmark_test.dart: 500 messages over 20k transactions in ≤ 10 s
+02:11 +3189 ~1 -8: /work/app/test/features/ingestion/application/ingest_benchmark_test.dart: 500 messages over 20k transactions in ≤ 10 s
+02:11 +3190 ~1 -8: /work/app/test/features/ingestion/application/ingest_benchmark_test.dart: 500 messages over 20k transactions in ≤ 10 s
+02:11 +3191 ~1 -8: /work/app/test/features/ingestion/application/ingest_benchmark_test.dart: 500 messages over 20k transactions in ≤ 10 s
+02:11 +3192 ~1 -8: /work/app/test/features/ingestion/application/ingest_benchmark_test.dart: 500 messages over 20k transactions in ≤ 10 s
+02:11 +3193 ~1 -8: /work/app/test/features/ingestion/application/ingest_benchmark_test.dart: 500 messages over 20k transactions in ≤ 10 s
+
+02:13 +3214 ~1 -9: /work/app/test/features/home/presentation/home_golden_test.dart: home golden ios_ar_light_x1.3 [E]
+  Test failed. See exception logs above.
+  The test description was: home golden ios_ar_light_x1.3
+  
+02:13 +3215 ~1 -9: /work/app/test/features/ingestion/application/ingest_benchmark_test.dart: 500 messages over 20k transactions in ≤ 10 s
+02:13 +3216 ~1 -9: /work/app/test/features/ingestion/application/ingest_benchmark_test.dart: 500 messages over 20k transactions in ≤ 10 s
+02:13 +3217 ~1 -9: /work/app/test/features/ingestion/application/ingest_benchmark_test.dart: 500 messages over 20k transactions in ≤ 10 s
+02:13 +3218 ~1 -9: /work/app/test/features/ingestion/application/ingest_benchmark_test.dart: 500 messages over 20k transactions in ≤ 10 s
+02:13 +3218 ~1 -9: /work/app/test/features/insights/data/chart_benchmark_test.dart: AC1: each chart < 100 ms on 10k transactions (2 years)
+BENCH cashFlow (12 cycles): median 15 ms, p85 15 ms, max 17 ms
+BENCH categoryDonut (cycle): median 2 ms, p85 2 ms, max 3 ms
+
+02:14 +3253 ~1 -10: /work/app/test/features/home/presentation/home_golden_test.dart: home empty golden ios_ar_light_x1.3 [E]
+  Test failed. See exception logs above.
+  The test description was: home empty golden ios_ar_light_x1.3
+  
+02:14 +3254 ~1 -10: /work/app/test/features/ingestion/application/ingest_benchmark_test.dart: 500 messages over 20k transactions in ≤ 10 s
+02:14 +3255 ~1 -10: /work/app/test/features/ingestion/application/ingest_benchmark_test.dart: 500 messages over 20k transactions in ≤ 10 s
+02:14 +3256 ~1 -10: /work/app/test/features/ingestion/application/ingest_benchmark_test.dart: 500 messages over 20k transactions in ≤ 10 s
+02:15 +3257 ~1 -10: /work/app/test/features/ingestion/application/ingest_benchmark_test.dart: 500 messages over 20k transactions in ≤ 10 s
+02:15 +3258 ~1 -10: /work/app/test/features/ingestion/application/ingest_benchmark_test.dart: 500 messages over 20k transactions in ≤ 10 s
+02:15 +3259 ~1 -10: /work/app/test/features/ingestion/application/ingest_benchmark_test.dart: 500 messages over 20k transactions in ≤ 10 s
+02:15 +3260 ~1 -10: /work/app/test/features/ingestion/application/ingest_benchmark_test.dart: 500 messages over 20k transactions in ≤ 10 s
+
+02:17 +3337 ~1 -11: /work/app/test/features/home/presentation/home_golden_test.dart: home golden ios_ar_dark_x1.3 [E]
+  Test failed. See exception logs above.
+  The test description was: home golden ios_ar_dark_x1.3
+  
+02:17 +3338 ~1 -11: /work/app/test/features/insights/insights_shell_golden_test.dart: insights shell golden charts_ar_light
+02:17 +3339 ~1 -11: /work/app/test/features/insights/presentation/charts/charts_golden_test.dart: charts golden ar_light
+02:17 +3340 ~1 -11: /work/app/test/features/insights/presentation/charts/charts_golden_test.dart: charts golden ar_light
+02:17 +3341 ~1 -11: /work/app/test/features/insights/presentation/charts/charts_golden_test.dart: charts golden ar_light
+02:17 +3342 ~1 -11: /work/app/test/features/insights/presentation/charts/charts_golden_test.dart: charts golden ar_light
+02:17 +3343 ~1 -11: /work/app/test/features/insights/presentation/charts/charts_golden_test.dart: charts golden ar_light
+02:17 +3344 ~1 -11: /work/app/test/features/insights/presentation/charts/charts_screen_test.dart: en: four free charts render, nine locked previews
+
+02:18 +3349 ~1 -12: /work/app/test/features/home/presentation/home_golden_test.dart: home empty golden ios_ar_dark_x1.3 [E]
+  Test failed. See exception logs above.
+  The test description was: home empty golden ios_ar_dark_x1.3
+  
+02:18 +3350 ~1 -12: /work/app/test/features/insights/presentation/charts/charts_screen_test.dart: en: four free charts render, nine locked previews
+02:18 +3351 ~1 -12: /work/app/test/features/insights/presentation/charts/charts_screen_test.dart: en: four free charts render, nine locked previews
+02:18 +3352 ~1 -12: /work/app/test/features/insights/presentation/charts/charts_screen_test.dart: en: four free charts render, nine locked previews
+02:18 +3353 ~1 -12: /work/app/test/features/insights/presentation/charts/gold_charts_golden_test.dart: gold charts golden ar_light
+02:18 +3354 ~1 -12: /work/app/test/features/insights/presentation/charts/gold_charts_golden_test.dart: gold charts golden ar_light
+02:18 +3355 ~1 -12: /work/app/test/features/insights/presentation/charts/gold_charts_golden_test.dart: gold charts golden ar_light
+02:18 +3356 ~1 -12: /work/app/test/features/insights/presentation/charts/gold_charts_golden_test.dart: gold charts golden ar_light
+
+02:20 +3390 ~1 -13: /work/app/test/features/home/presentation/home_golden_test.dart: home golden ios_en_light_x1.3 [E]
+  Test failed. See exception logs above.
+  The test description was: home golden ios_en_light_x1.3
+  
+02:20 +3391 ~1 -13: /work/app/test/features/insights/presentation/charts/gold_charts_test.dart: en: Gold sees nine real charts, no locked previews
+02:20 +3392 ~1 -13: /work/app/test/features/insights/presentation/charts/gold_charts_test.dart: en: Gold sees nine real charts, no locked previews
+02:20 +3393 ~1 -13: /work/app/test/features/insights/presentation/chart_detail_golden_test.dart: chart detail golden ar_light
+02:20 +3394 ~1 -13: /work/app/test/features/insights/presentation/chart_detail_golden_test.dart: chart detail golden ar_light
+02:20 +3395 ~1 -13: /work/app/test/features/insights/presentation/chart_detail_golden_test.dart: chart detail golden ar_light
+02:20 +3396 ~1 -13: /work/app/test/features/insights/presentation/chart_detail_golden_test.dart: chart detail golden ar_light
+02:20 +3397 ~1 -13: /work/app/test/features/insights/presentation/chart_detail_golden_test.dart: chart detail golden ar_light
+
+02:21 +3406 ~1 -14: /work/app/test/features/home/presentation/home_golden_test.dart: home empty golden ios_en_light_x1.3 [E]
+  Test failed. See exception logs above.
+  The test description was: home empty golden ios_en_light_x1.3
+  
+02:21 +3407 ~1 -14: /work/app/test/features/insights/presentation/charts/gold_charts_test.dart: en: empty and error states per chart
+02:21 +3408 ~1 -14: /work/app/test/features/insights/presentation/charts/gold_charts_test.dart: en: empty and error states per chart
+02:21 +3409 ~1 -14: /work/app/test/features/insights/presentation/charts/gold_charts_test.dart: en: empty and error states per chart
+02:21 +3410 ~1 -14: /work/app/test/features/insights/presentation/chart_detail_test.dart: en: closed explainer shows the button, not the text
+02:21 +3411 ~1 -14: /work/app/test/features/insights/presentation/chart_detail_test.dart: en: closed explainer shows the button, not the text
+02:21 +3412 ~1 -14: /work/app/test/features/insights/presentation/chart_detail_test.dart: en: closed explainer shows the button, not the text
+02:21 +3413 ~1 -14: /work/app/test/features/insights/presentation/chart_detail_test.dart: en: closed explainer shows the button, not the text
+
+02:23 +3450 ~1 -15: /work/app/test/features/home/presentation/home_golden_test.dart: home golden ios_en_dark_x1.3 [E]
+  Test failed. See exception logs above.
+  The test description was: home golden ios_en_dark_x1.3
+  
+02:23 +3451 ~1 -15: /work/app/test/features/money/money_tab_golden_test.dart: money tab golden ar_light
+02:23 +3452 ~1 -15: /work/app/test/features/money/money_tab_golden_test.dart: money tab golden ar_light
+02:24 +3453 ~1 -15: /work/app/test/features/money/money_tab_golden_test.dart: money tab golden ar_light
+02:24 +3454 ~1 -15: /work/app/test/features/money/money_tab_golden_test.dart: money tab golden ar_light
+02:24 +3455 ~1 -15: /work/app/test/features/money/money_tab_golden_test.dart: money tab golden ar_light
+02:24 +3456 ~1 -15: /work/app/test/features/money/money_tab_golden_test.dart: money tab golden ar_light
+02:24 +3457 ~1 -15: /work/app/test/features/money/money_tab_golden_test.dart: money tab golden ar_light
+
+02:24 +3487 ~1 -16: /work/app/test/features/home/presentation/home_golden_test.dart: home empty golden ios_en_dark_x1.3 [E]
+  Test failed. See exception logs above.
+  The test description was: home empty golden ios_en_dark_x1.3
+  
+02:24 +3488 ~1 -16: /work/app/test/features/money/money_tab_golden_test.dart: money tab golden ar_light
+02:24 +3489 ~1 -16: /work/app/test/features/money/money_tab_golden_test.dart: money tab golden ar_light
+02:25 +3490 ~1 -16: /work/app/test/features/money/money_tab_golden_test.dart: money tab golden ar_light
+02:25 +3491 ~1 -16: /work/app/test/features/money/money_tab_golden_test.dart: money tab golden ar_light
+02:25 +3492 ~1 -16: /work/app/test/features/money/money_tab_golden_test.dart: money tab golden ar_light
+02:25 +3493 ~1 -16: /work/app/test/features/money/money_tab_golden_test.dart: money tab golden ar_light
+02:25 +3494 ~1 -16: /work/app/test/features/money/money_tab_golden_test.dart: money tab golden ar_light
+
+02:25 +3508 ~1 -17: /work/app/test/features/money/money_tab_golden_test.dart: money tab golden ar_light [E]
+  Test failed. See exception logs above.
+  The test description was: money tab golden ar_light
+  
+02:25 +3509 ~1 -17: /work/app/test/features/home/presentation/home_golden_test.dart: home golden android_ar_light
+02:25 +3510 ~1 -17: /work/app/test/features/home/presentation/home_golden_test.dart: home golden android_ar_light
+02:25 +3511 ~1 -17: /work/app/test/features/home/presentation/home_golden_test.dart: home golden android_ar_light
+02:25 +3512 ~1 -17: /work/app/test/features/home/presentation/home_golden_test.dart: home golden android_ar_light
 
 == FULL LOG (last 1500 lines) ==
-auto task/DESIGN-polish b6c31c172b3fbea23ea51bca23d4d3500d0e46cc 2026-11-16T01:21:21.2843612+02:00
+00:02 +1142: test/guard/capture_guard_test.dart: performance (loose CI bounds; natives measure on device) 1,000 adversarial 4,000-char decisions take under 2 s
+00:02 +1143: test/guard/capture_guard_test.dart: performance (loose CI bounds; natives measure on device) 1,000 adversarial 4,000-char decisions take under 2 s
+00:02 +1144: test/guard/capture_guard_test.dart: performance (loose CI bounds; natives measure on device) 1,000 adversarial 4,000-char decisions take under 2 s
+00:02 +1145: test/guard/capture_guard_test.dart: performance (loose CI bounds; natives measure on device) 1,000 adversarial 4,000-char decisions take under 2 s
+00:02 +1146: test/guard/capture_guard_test.dart: performance (loose CI bounds; natives measure on device) 1,000 adversarial 4,000-char decisions take under 2 s
+00:02 +1147: test/guard/capture_guard_test.dart: performance (loose CI bounds; natives measure on device) 1,000 adversarial 4,000-char decisions take under 2 s
+00:02 +1148: test/guard/capture_guard_test.dart: performance (loose CI bounds; natives measure on device) 1,000 adversarial 4,000-char decisions take under 2 s
+00:02 +1149: test/guard/capture_guard_test.dart: performance (loose CI bounds; natives measure on device) 1,000 adversarial 4,000-char decisions take under 2 s
+00:02 +1150: test/guard/capture_guard_test.dart: performance (loose CI bounds; natives measure on device) 1,000 adversarial 4,000-char decisions take under 2 s
+00:02 +1151: test/guard/capture_guard_test.dart: performance (loose CI bounds; natives measure on device) 1,000 adversarial 4,000-char decisions take under 2 s
+00:02 +1152: test/guard/capture_guard_test.dart: performance (loose CI bounds; natives measure on device) 1,000 adversarial 4,000-char decisions take under 2 s
+00:02 +1153: test/guard/capture_guard_test.dart: performance (loose CI bounds; natives measure on device) 1,000 adversarial 4,000-char decisions take under 2 s
+00:02 +1154: test/guard/capture_guard_test.dart: performance (loose CI bounds; natives measure on device) 1,000 adversarial 4,000-char decisions take under 2 s
+00:02 +1155: test/guard/capture_guard_test.dart: performance (loose CI bounds; natives measure on device) 1,000 adversarial 4,000-char decisions take under 2 s
+00:02 +1156: test/guard/capture_guard_test.dart: performance (loose CI bounds; natives measure on device) 1,000 adversarial 4,000-char decisions take under 2 s
+00:02 +1157: test/guard/capture_guard_test.dart: performance (loose CI bounds; natives measure on device) 1,000 adversarial 4,000-char decisions take under 2 s
+00:02 +1158: test/guard/capture_guard_test.dart: performance (loose CI bounds; natives measure on device) 1,000 adversarial 4,000-char decisions take under 2 s
+00:02 +1159: test/guard/capture_guard_test.dart: performance (loose CI bounds; natives measure on device) 1,000 adversarial 4,000-char decisions take under 2 s
+00:02 +1160: test/guard/capture_guard_test.dart: performance (loose CI bounds; natives measure on device) 1,000 adversarial 4,000-char decisions take under 2 s
+00:02 +1161: test/guard/capture_guard_test.dart: performance (loose CI bounds; natives measure on device) 1,000 adversarial 4,000-char decisions take under 2 s
+00:02 +1162: test/guard/capture_guard_test.dart: performance (loose CI bounds; natives measure on device) 1,000 adversarial 4,000-char decisions take under 2 s
+00:02 +1163: test/guard/capture_guard_test.dart: performance (loose CI bounds; natives measure on device) 1,000 adversarial 4,000-char decisions take under 2 s
+00:02 +1164: test/guard/capture_guard_test.dart: performance (loose CI bounds; natives measure on device) 1,000 adversarial 4,000-char decisions take under 2 s
+00:02 +1165: test/guard/capture_guard_test.dart: performance (loose CI bounds; natives measure on device) 1,000 adversarial 4,000-char decisions take under 2 s
+00:02 +1166: test/guard/capture_guard_test.dart: performance (loose CI bounds; natives measure on device) 1,000 adversarial 4,000-char decisions take under 2 s
+00:02 +1167: test/guard/capture_guard_test.dart: performance (loose CI bounds; natives measure on device) 1,000 adversarial 4,000-char decisions take under 2 s
+00:02 +1168: test/guard/capture_guard_test.dart: performance (loose CI bounds; natives measure on device) 1,000 adversarial 4,000-char decisions take under 2 s
+00:02 +1169: test/guard/capture_guard_test.dart: performance (loose CI bounds; natives measure on device) 1,000 adversarial 4,000-char decisions take under 2 s
+00:02 +1170: test/guard/capture_guard_test.dart: performance (loose CI bounds; natives measure on device) 1,000 adversarial 4,000-char decisions take under 2 s
+00:02 +1171: test/guard/capture_guard_test.dart: performance (loose CI bounds; natives measure on device) 1,000 adversarial 4,000-char decisions take under 2 s
+00:02 +1172: test/guard/capture_guard_test.dart: performance (loose CI bounds; natives measure on device) 1,000 adversarial 4,000-char decisions take under 2 s
+00:02 +1173: test/guard/capture_guard_test.dart: performance (loose CI bounds; natives measure on device) 1,000 adversarial 4,000-char decisions take under 2 s
+00:02 +1174: test/guard/capture_guard_test.dart: performance (loose CI bounds; natives measure on device) 1,000 adversarial 4,000-char decisions take under 2 s
+00:02 +1175: test/guard/capture_guard_test.dart: performance (loose CI bounds; natives measure on device) 1,000 adversarial 4,000-char decisions take under 2 s
+00:02 +1176: test/guard/capture_guard_test.dart: performance (loose CI bounds; natives measure on device) 1,000 adversarial 4,000-char decisions take under 2 s
+00:02 +1177: test/guard/capture_guard_test.dart: performance (loose CI bounds; natives measure on device) 1,000 adversarial 4,000-char decisions take under 2 s
+00:02 +1178: test/guard/capture_guard_test.dart: performance (loose CI bounds; natives measure on device) 1,000 adversarial 4,000-char decisions take under 2 s
+00:02 +1179: test/guard/capture_guard_test.dart: performance (loose CI bounds; natives measure on device) 1,000 adversarial 4,000-char decisions take under 2 s
+00:02 +1180: test/guard/capture_guard_test.dart: performance (loose CI bounds; natives measure on device) 1,000 adversarial 4,000-char decisions take under 2 s
+00:02 +1181: test/guard/capture_guard_test.dart: performance (loose CI bounds; natives measure on device) 1,000 adversarial 4,000-char decisions take under 2 s
+00:02 +1182: test/guard/capture_guard_test.dart: performance (loose CI bounds; natives measure on device) 1,000 adversarial 4,000-char decisions take under 2 s
+00:02 +1183: test/guard/capture_guard_test.dart: performance (loose CI bounds; natives measure on device) 1,000 adversarial 4,000-char decisions take under 2 s
+00:02 +1184: test/guard/capture_guard_test.dart: performance (loose CI bounds; natives measure on device) 1,000 adversarial 4,000-char decisions take under 2 s
+00:02 +1185: test/guard/capture_guard_test.dart: performance (loose CI bounds; natives measure on device) 1,000 adversarial 4,000-char decisions take under 2 s
+00:02 +1186: test/guard/capture_guard_test.dart: performance (loose CI bounds; natives measure on device) 1,000 adversarial 4,000-char decisions take under 2 s
+00:02 +1187: test/guard/capture_guard_test.dart: performance (loose CI bounds; natives measure on device) 1,000 adversarial 4,000-char decisions take under 2 s
+00:02 +1188: test/guard/capture_guard_test.dart: performance (loose CI bounds; natives measure on device) 1,000 adversarial 4,000-char decisions take under 2 s
+00:02 +1189: test/guard/capture_guard_test.dart: performance (loose CI bounds; natives measure on device) 1,000 adversarial 4,000-char decisions take under 2 s
+00:02 +1190: test/guard/capture_guard_test.dart: performance (loose CI bounds; natives measure on device) 1,000 adversarial 4,000-char decisions take under 2 s
+00:02 +1191: test/guard/capture_guard_test.dart: performance (loose CI bounds; natives measure on device) 1,000 adversarial 4,000-char decisions take under 2 s
+00:02 +1192: test/guard/capture_guard_test.dart: performance (loose CI bounds; natives measure on device) 1,000 adversarial 4,000-char decisions take under 2 s
+00:02 +1193: test/guard/capture_guard_test.dart: performance (loose CI bounds; natives measure on device) 1,000 adversarial 4,000-char decisions take under 2 s
+00:02 +1194: test/guard/capture_guard_test.dart: performance (loose CI bounds; natives measure on device) 1,000 adversarial 4,000-char decisions take under 2 s
+00:02 +1195: test/guard/capture_guard_test.dart: performance (loose CI bounds; natives measure on device) 1,000 adversarial 4,000-char decisions take under 2 s
+00:02 +1196: test/guard/capture_guard_test.dart: performance (loose CI bounds; natives measure on device) 1,000 adversarial 4,000-char decisions take under 2 s
+00:02 +1197: test/guard/capture_guard_test.dart: performance (loose CI bounds; natives measure on device) 1,000 adversarial 4,000-char decisions take under 2 s
+00:02 +1198: test/guard/capture_guard_test.dart: performance (loose CI bounds; natives measure on device) 1,000 adversarial 4,000-char decisions take under 2 s
+00:02 +1199: test/guard/capture_guard_test.dart: performance (loose CI bounds; natives measure on device) 1,000 adversarial 4,000-char decisions take under 2 s
+00:02 +1200: test/guard/capture_guard_test.dart: performance (loose CI bounds; natives measure on device) 1,000 adversarial 4,000-char decisions take under 2 s
+00:02 +1201: test/guard/capture_guard_test.dart: performance (loose CI bounds; natives measure on device) 1,000 adversarial 4,000-char decisions take under 2 s
+00:02 +1202: test/guard/capture_guard_test.dart: performance (loose CI bounds; natives measure on device) 1,000 adversarial 4,000-char decisions take under 2 s
+00:02 +1203: test/guard/capture_guard_test.dart: performance (loose CI bounds; natives measure on device) 1,000 adversarial 4,000-char decisions take under 2 s
+00:02 +1203: test/voice/voice_parser_test.dart: phrase fixtures (FR-VOI-02/05, EC-30, EC-31) item accuracy is at least 95% and every phrase is reported
+voice fixtures: 424/424 items (100.0%), 254 phrases; failures: []
+00:02 +1204: test/guard/capture_guard_test.dart: performance (loose CI bounds; natives measure on device) 1,000 adversarial 4,000-char decisions take under 2 s
+00:02 +1205: test/guard/capture_guard_test.dart: performance (loose CI bounds; natives measure on device) 1,000 adversarial 4,000-char decisions take under 2 s
+00:02 +1206: test/guard/capture_guard_test.dart: performance (loose CI bounds; natives measure on device) 1,000 adversarial 4,000-char decisions take under 2 s
+00:02 +1207: test/guard/capture_guard_test.dart: performance (loose CI bounds; natives measure on device) 1,000 adversarial 4,000-char decisions take under 2 s
+00:02 +1208: test/guard/capture_guard_test.dart: performance (loose CI bounds; natives measure on device) 1,000 adversarial 4,000-char decisions take under 2 s
+00:02 +1209: test/guard/capture_guard_test.dart: performance (loose CI bounds; natives measure on device) 1,000 adversarial 4,000-char decisions take under 2 s
+00:02 +1210: test/guard/capture_guard_test.dart: performance (loose CI bounds; natives measure on device) 1,000 adversarial 4,000-char decisions take under 2 s
+00:02 +1211: test/guard/capture_guard_test.dart: performance (loose CI bounds; natives measure on device) 1,000 adversarial 4,000-char decisions take under 2 s
+00:02 +1212: test/guard/capture_guard_test.dart: performance (loose CI bounds; natives measure on device) 1,000 adversarial 4,000-char decisions take under 2 s
+00:02 +1213: test/guard/capture_guard_test.dart: performance (loose CI bounds; natives measure on device) 1,000 adversarial 4,000-char decisions take under 2 s
+00:02 +1214: test/guard/capture_guard_test.dart: performance (loose CI bounds; natives measure on device) 1,000 adversarial 4,000-char decisions take under 2 s
+00:02 +1215: test/guard/capture_guard_test.dart: performance (loose CI bounds; natives measure on device) 1,000 adversarial 4,000-char decisions take under 2 s
+00:02 +1216: test/guard/capture_guard_test.dart: performance (loose CI bounds; natives measure on device) 1,000 adversarial 4,000-char decisions take under 2 s
+00:02 +1217: test/guard/capture_guard_test.dart: performance (loose CI bounds; natives measure on device) 1,000 adversarial 4,000-char decisions take under 2 s
+00:02 +1218: test/guard/capture_guard_test.dart: performance (loose CI bounds; natives measure on device) 1,000 adversarial 4,000-char decisions take under 2 s
+00:02 +1219: test/guard/capture_guard_test.dart: performance (loose CI bounds; natives measure on device) 1,000 adversarial 4,000-char decisions take under 2 s
+00:02 +1220: test/guard/capture_guard_test.dart: performance (loose CI bounds; natives measure on device) 1,000 adversarial 4,000-char decisions take under 2 s
+00:02 +1221: test/guard/capture_guard_test.dart: performance (loose CI bounds; natives measure on device) 1,000 adversarial 4,000-char decisions take under 2 s
+00:02 +1222: test/guard/capture_guard_test.dart: performance (loose CI bounds; natives measure on device) 1,000 adversarial 4,000-char decisions take under 2 s
+00:02 +1223: test/guard/capture_guard_test.dart: performance (loose CI bounds; natives measure on device) 1,000 adversarial 4,000-char decisions take under 2 s
+00:02 +1224: test/guard/capture_guard_test.dart: performance (loose CI bounds; natives measure on device) 1,000 adversarial 4,000-char decisions take under 2 s
+00:02 +1225: test/guard/capture_guard_test.dart: performance (loose CI bounds; natives measure on device) 1,000 adversarial 4,000-char decisions take under 2 s
+00:02 +1226: test/guard/capture_guard_test.dart: performance (loose CI bounds; natives measure on device) 1,000 adversarial 4,000-char decisions take under 2 s
+00:02 +1227: test/guard/capture_guard_test.dart: performance (loose CI bounds; natives measure on device) 1,000 adversarial 4,000-char decisions take under 2 s
+00:02 +1228: test/guard/capture_guard_test.dart: performance (loose CI bounds; natives measure on device) 1,000 adversarial 4,000-char decisions take under 2 s
+00:02 +1229: test/guard/capture_guard_test.dart: performance (loose CI bounds; natives measure on device) 1,000 adversarial 4,000-char decisions take under 2 s
+00:02 +1230: test/guard/capture_guard_test.dart: performance (loose CI bounds; natives measure on device) 1,000 adversarial 4,000-char decisions take under 2 s
+00:02 +1231: test/guard/capture_guard_test.dart: performance (loose CI bounds; natives measure on device) 1,000 adversarial 4,000-char decisions take under 2 s
+00:02 +1232: test/guard/capture_guard_test.dart: performance (loose CI bounds; natives measure on device) 1,000 adversarial 4,000-char decisions take under 2 s
+00:02 +1233: test/guard/capture_guard_test.dart: performance (loose CI bounds; natives measure on device) 1,000 adversarial 4,000-char decisions take under 2 s
+00:02 +1234: test/guard/capture_guard_test.dart: performance (loose CI bounds; natives measure on device) 1,000 adversarial 4,000-char decisions take under 2 s
+00:02 +1235: test/guard/capture_guard_test.dart: performance (loose CI bounds; natives measure on device) 1,000 adversarial 4,000-char decisions take under 2 s
+00:02 +1236: test/guard/capture_guard_test.dart: performance (loose CI bounds; natives measure on device) 1,000 adversarial 4,000-char decisions take under 2 s
+00:02 +1237: test/guard/capture_guard_test.dart: performance (loose CI bounds; natives measure on device) 1,000 adversarial 4,000-char decisions take under 2 s
+00:02 +1238: test/guard/capture_guard_test.dart: performance (loose CI bounds; natives measure on device) 1,000 adversarial 4,000-char decisions take under 2 s
+00:02 +1239: test/guard/capture_guard_test.dart: performance (loose CI bounds; natives measure on device) 1,000 adversarial 4,000-char decisions take under 2 s
+00:02 +1240: test/guard/capture_guard_test.dart: performance (loose CI bounds; natives measure on device) 1,000 adversarial 4,000-char decisions take under 2 s
+00:02 +1241: test/guard/capture_guard_test.dart: performance (loose CI bounds; natives measure on device) 1,000 adversarial 4,000-char decisions take under 2 s
+00:02 +1242: test/guard/capture_guard_test.dart: performance (loose CI bounds; natives measure on device) 1,000 adversarial 4,000-char decisions take under 2 s
+00:02 +1243: test/guard/capture_guard_test.dart: performance (loose CI bounds; natives measure on device) 1,000 adversarial 4,000-char decisions take under 2 s
+00:02 +1244: test/guard/capture_guard_test.dart: performance (loose CI bounds; natives measure on device) 1,000 adversarial 4,000-char decisions take under 2 s
+00:02 +1245: test/guard/capture_guard_test.dart: performance (loose CI bounds; natives measure on device) 1,000 adversarial 4,000-char decisions take under 2 s
+00:02 +1246: test/guard/capture_guard_test.dart: performance (loose CI bounds; natives measure on device) 1,000 adversarial 4,000-char decisions take under 2 s
+00:02 +1247: test/guard/capture_guard_test.dart: performance (loose CI bounds; natives measure on device) 1,000 adversarial 4,000-char decisions take under 2 s
+00:02 +1248: test/guard/capture_guard_test.dart: performance (loose CI bounds; natives measure on device) 1,000 adversarial 4,000-char decisions take under 2 s
+00:02 +1249: test/guard/capture_guard_test.dart: performance (loose CI bounds; natives measure on device) 1,000 adversarial 4,000-char decisions take under 2 s
+00:02 +1250: test/guard/capture_guard_test.dart: performance (loose CI bounds; natives measure on device) 1,000 adversarial 4,000-char decisions take under 2 s
+00:02 +1251: test/guard/capture_guard_test.dart: performance (loose CI bounds; natives measure on device) 1,000 adversarial 4,000-char decisions take under 2 s
+00:02 +1252: test/guard/capture_guard_test.dart: performance (loose CI bounds; natives measure on device) 1,000 adversarial 4,000-char decisions take under 2 s
+00:02 +1253: test/guard/capture_guard_test.dart: performance (loose CI bounds; natives measure on device) 1,000 adversarial 4,000-char decisions take under 2 s
+00:02 +1254: test/guard/capture_guard_test.dart: performance (loose CI bounds; natives measure on device) 1,000 adversarial 4,000-char decisions take under 2 s
+00:02 +1255: test/guard/capture_guard_test.dart: performance (loose CI bounds; natives measure on device) 1,000 adversarial 4,000-char decisions take under 2 s
+00:02 +1256: test/guard/capture_guard_test.dart: performance (loose CI bounds; natives measure on device) 1,000 adversarial 4,000-char decisions take under 2 s
+00:02 +1257: test/guard/capture_guard_test.dart: performance (loose CI bounds; natives measure on device) 1,000 adversarial 4,000-char decisions take under 2 s
+00:02 +1258: test/guard/capture_guard_test.dart: performance (loose CI bounds; natives measure on device) 1,000 adversarial 4,000-char decisions take under 2 s
+00:02 +1259: test/guard/capture_guard_test.dart: performance (loose CI bounds; natives measure on device) 1,000 adversarial 4,000-char decisions take under 2 s
+00:02 +1260: test/guard/capture_guard_test.dart: performance (loose CI bounds; natives measure on device) 1,000 adversarial 4,000-char decisions take under 2 s
+00:02 +1261: test/guard/capture_guard_test.dart: performance (loose CI bounds; natives measure on device) 1,000 adversarial 4,000-char decisions take under 2 s
+00:02 +1262: test/guard/capture_guard_test.dart: performance (loose CI bounds; natives measure on device) 1,000 adversarial 4,000-char decisions take under 2 s
+00:02 +1263: test/guard/capture_guard_test.dart: performance (loose CI bounds; natives measure on device) 1,000 adversarial 4,000-char decisions take under 2 s
+00:02 +1264: test/guard/capture_guard_test.dart: performance (loose CI bounds; natives measure on device) 1,000 adversarial 4,000-char decisions take under 2 s
+00:02 +1265: test/guard/capture_guard_test.dart: performance (loose CI bounds; natives measure on device) 1,000 adversarial 4,000-char decisions take under 2 s
+00:02 +1266: test/guard/capture_guard_test.dart: performance (loose CI bounds; natives measure on device) 1,000 adversarial 4,000-char decisions take under 2 s
+00:02 +1267: test/guard/capture_guard_test.dart: performance (loose CI bounds; natives measure on device) 1,000 adversarial 4,000-char decisions take under 2 s
+00:02 +1268: test/guard/capture_guard_test.dart: performance (loose CI bounds; natives measure on device) 1,000 adversarial 4,000-char decisions take under 2 s
+00:02 +1269: test/guard/capture_guard_test.dart: performance (loose CI bounds; natives measure on device) 1,000 adversarial 4,000-char decisions take under 2 s
+00:02 +1270: test/guard/capture_guard_test.dart: performance (loose CI bounds; natives measure on device) 1,000 adversarial 4,000-char decisions take under 2 s
+00:02 +1271: test/guard/capture_guard_test.dart: performance (loose CI bounds; natives measure on device) 1,000 adversarial 4,000-char decisions take under 2 s
+00:02 +1272: test/guard/capture_guard_test.dart: performance (loose CI bounds; natives measure on device) 1,000 adversarial 4,000-char decisions take under 2 s
+00:02 +1273: test/guard/capture_guard_test.dart: performance (loose CI bounds; natives measure on device) 1,000 adversarial 4,000-char decisions take under 2 s
+00:02 +1274: test/guard/capture_guard_test.dart: performance (loose CI bounds; natives measure on device) 1,000 adversarial 4,000-char decisions take under 2 s
+00:02 +1275: test/guard/capture_guard_test.dart: performance (loose CI bounds; natives measure on device) 1,000 adversarial 4,000-char decisions take under 2 s
+00:02 +1276: test/guard/capture_guard_test.dart: performance (loose CI bounds; natives measure on device) 1,000 adversarial 4,000-char decisions take under 2 s
+00:02 +1277: test/guard/capture_guard_test.dart: performance (loose CI bounds; natives measure on device) 1,000 adversarial 4,000-char decisions take under 2 s
+00:02 +1277: test/pipeline/parsing_pipeline_test.dart: benchmark: mean parse time is under 2 ms (AC 3)
+pipeline parse mean: 90 us over 4000 runs
+00:02 +1278: test/guard/capture_guard_test.dart: performance (loose CI bounds; natives measure on device) 1,000 adversarial 4,000-char decisions take under 2 s
+00:02 +1279: test/guard/capture_guard_test.dart: performance (loose CI bounds; natives measure on device) 1,000 adversarial 4,000-char decisions take under 2 s
+00:02 +1280: test/registry/registry_lint_test.dart: fixture file validation missing body
+00:02 +1281: test/registry/registry_lint_test.dart: fixture file validation missing body
+00:02 +1282: test/registry/registry_lint_test.dart: fixture file validation missing body
+00:02 +1283: test/registry/registry_lint_test.dart: fixture file validation missing expect
+00:02 +1284: test/registry/registry_lint_test.dart: fixture file validation bad received at
+00:02 +1285: test/registry/registry_lint_test.dart: fixture file validation bad channel
+00:02 +1286: test/registry/registry_lint_test.dart: fixture file validation sender and package
+00:03 +1287: test/registry/registry_lint_test.dart: fixture file validation non-string expect value
+00:03 +1288: test/registry/registry_lint_test.dart: fixture file validation body too long
+00:03 +1289: test/registry/registry_lint_test.dart: fixture file validation fixture in an unknown institution directory
+00:03 +1290: test/registry/registry_lint_test.dart: fixture file validation non-JSON fixture
+00:03 +1291: test/registry/registry_lint_test.dart: fixture file validation lint output never contains message text or amounts
+00:03 +1292: test/registry/registry_lint_test.dart: cross-match detection a second template that also matches a fixture is reported
+00:03 +1293: test/registry/registry_lint_test.dart: cross-match detection templates outside the fixture channel do not count
+00:03 +1294: test/registry/registry_lint_test.dart: guard config export has the platform-channels §1.1 shape
+00:03 +1295: test/registry/registry_lint_test.dart: guard config export senders and packages carry the institution
+00:03 +1296: test/registry/registry_lint_test.dart: guard config export drop, last4 and generic hints come from shared and institutions
+00:03 +1297: test/registry/registry_lint_test.dart: guard config export is deterministic and under the size cap
+00:03 +1298: test/registry/registry_lint_test.dart: guard config export every exported regex compiles in Dart
+00:03 +1299: test/registry/registry_lint_test.dart: guard config export over the size cap is an error and no config
+00:03 +1300: test/registry/registry_lint_test.dart: per-message time budget matching every fixture body 50 times stays far below 10 ms each
+00:03 +1301: test/registry/registry_lint_test.dart: runtime guard (slow templates) the slow pattern is accepted by the static heuristic
+00:03 +1302: test/registry/registry_lint_test.dart: runtime guard (slow templates) a template slower than the limit on an adversarial body fails
+00:03 +1303: test/registry/registry_lint_test.dart: runtime guard (slow templates) a slow drop, last4 or global pattern fails the probe (M-2)
+00:06 +1304: test/registry/registry_lint_test.dart: runtime guard (slow templates) the per-fixture timer reports the template id only
+00:06 +1305: test/registry/registry_lint_test.dart: runtime guard (slow templates) the real test registries are not flagged at the default limit
+00:06 +1306: test/registry/registry_lint_test.dart: pipeline keys in fixtures a wrong `confidence` fails the fixture
+00:06 +1307: test/registry/registry_lint_test.dart: pipeline keys in fixtures a wrong `needsReview` fails the fixture
+00:06 +1308: test/registry/registry_lint_test.dart: pipeline keys in fixtures a wrong `occurredAt` fails the fixture
+00:06 +1309: test/registry/registry_lint_test.dart: pipeline keys in fixtures a wrong `language` fails the fixture
+00:06 +1310: test/registry/registry_lint_test.dart: pipeline keys in fixtures a wrong `counterpartyKind` fails the fixture
+00:06 +1311: test/registry/registry_lint_test.dart: pipeline keys in fixtures wrong reasons fail the fixture
+00:06 +1312: test/registry/registry_lint_test.dart: Guard-bound patterns (T-035) a non-portable drop pattern fails the lint
+00:06 +1313: test/registry/registry_lint_test.dart: Guard-bound patterns (T-035) a last-4 the Guard can not see fails the lint (parity)
+00:06 +1314: test/registry/registry_lint_test.dart: Guard-bound patterns (T-035) a last-4 pattern quadratic on mask runs is flagged slow
+00:06 +1315: test/registry/registry_lint_test.dart: Guard-bound patterns (T-035) sender regexes are compiled on the folded key
+00:06 +1316: All tests passed!
+
+[01:30:00] === RESULT dart-test-zaghlol_parsing exit=0 (10s)
+[01:30:00] === STEP apk-devNoSms (docker zaghlol-flutter-android:3.47.9, /work/app)
+Resolving dependencies in `/work`...
+Downloading packages...
+  _fe_analyzer_shared 91.0.0 (111.0.0 available)
+  analyzer 8.4.0 (14.7.0 available)
+  built_collection 5.1.2 (6.0.0 available)
+  coverage 1.15.1 (1.16.0 available)
+  cross_file 0.3.5+5 (0.4.0 available)
+  dart_style 3.1.3 (3.1.14 available)
+  drift 2.35.3 (2.35.4 available)
+  hashlib 2.4.2 (2.4.3 available)
+  material_color_utilities 0.13.0 (0.13.1 available)
+  objective_c 9.6.3 (9.6.4 available)
+  package_config 2.2.0 (3.0.0 available)
+  pigeon 26.3.2 (30.0.2 available)
+  test 1.31.1 (1.33.0 available)
+  test_api 0.7.12 (0.7.15 available)
+  test_core 0.6.18 (0.6.21 available)
+Got dependencies in `/work`!
+15 packages have newer versions incompatible with dependency constraints.
+Try `flutter pub outdated` for more information.
+Running Gradle task 'assembleDevNoSmsDebug'...                  
+WARNING: Your app uses the following plugins that apply Kotlin Gradle Plugin (KGP): cryptography_flutter
+Future versions of Flutter will fail to build if your app uses plugins that apply KGP.
+
+Please check the changelogs of these plugins and upgrade to a version that supports Built-in Kotlin.
+If no such version exists, report the issue to the plugin. If necessary, here is a guide on filing
+an issue against a plugin: https://docs.flutter.dev/release/breaking-changes/migrate-to-built-in-kotlin/for-app-developers#report-incompatible-kotlin-gradle-plugin-usage-to-plugin-authors
+
+If you are a plugin author, please migrate your plugin to Built-in Kotlin using this guide: https://docs.flutter.dev/release/breaking-changes/migrate-to-built-in-kotlin/for-plugin-authors
+Warning: SDK processing. This version only understands SDK XML versions up to 3 but an SDK XML file of version 4 was encountered. This can happen if you use versions of Android Studio and the command-line tools that were released at different times.
+Checking the license for package Android SDK Platform 35 in /opt/android-sdk/licenses
+License for package Android SDK Platform 35 accepted.
+Preparing "Install Android SDK Platform 35 (revision 2)".
+"Install Android SDK Platform 35 (revision 2)" ready.
+Installing Android SDK Platform 35 in /opt/android-sdk/platforms/android-35
+"Install Android SDK Platform 35 (revision 2)" complete.
+"Install Android SDK Platform 35 (revision 2)" finished.
+[=========                              ] 25%                                   
+Checking the license for package CMake 3.22.1 in /opt/android-sdk/licenses
+License for package CMake 3.22.1 accepted.
+Preparing "Install CMake 3.22.1 v.3.22.1".
+"Install CMake 3.22.1 v.3.22.1" ready.
+Installing CMake 3.22.1 in /opt/android-sdk/cmake/3.22.1
+"Install CMake 3.22.1 v.3.22.1" complete.
+"Install CMake 3.22.1 v.3.22.1" finished.
+Running Gradle task 'assembleDevNoSmsDebug'...                    311.6s
+✓ Built build/app/outputs/flutter-apk/app-devnosms-debug.apk
+
+[01:35:16] === RESULT apk-devNoSms exit=0 (317s)
+[01:35:16] === STEP apk-perms (docker zaghlol-flutter-android:3.47.9, /work/app)
+package: app.zaghlol.dev
+uses-permission: name='android.permission.INTERNET'
+uses-permission: name='android.permission.POST_NOTIFICATIONS'
+uses-permission: name='android.permission.RECORD_AUDIO'
+uses-permission: name='android.permission.WAKE_LOCK'
+uses-permission: name='android.permission.ACCESS_NETWORK_STATE'
+uses-permission: name='android.permission.RECEIVE_BOOT_COMPLETED'
+uses-permission: name='android.permission.FOREGROUND_SERVICE'
+uses-permission: name='android.permission.USE_BIOMETRIC'
+uses-permission: name='android.permission.USE_FINGERPRINT'
+uses-permission: name='com.android.vending.BILLING'
+permission: app.zaghlol.dev.DYNAMIC_RECEIVER_NOT_EXPORTED_PERMISSION
+uses-permission: name='app.zaghlol.dev.DYNAMIC_RECEIVER_NOT_EXPORTED_PERMISSION'
+
+[01:35:18] === RESULT apk-perms exit=0 (1s)
+[01:35:18] === STEP android-unit (docker zaghlol-flutter-android:3.47.9, /work/app)
+To honour the JVM settings for this build a single-use Daemon process will be forked. For more on this, please refer to https://docs.gradle.org/9.3.1/userguide/gradle_daemon.html#sec:disabling_the_daemon in the Gradle documentation.
+Daemon will be stopped at the end of the build 
+> Task :gradle:checkKotlinGradlePluginConfigurationErrors SKIPPED
+> Task :gradle:pluginDescriptors
+> Task :gradle:processResources
+
+> Task :gradle:compileKotlin
+w: file:///opt/flutter/packages/flutter_tools/gradle/src/main/kotlin/Deeplink.kt:13:5 This annotation is currently applied to the value parameter only, but in the future it will also be applied to property.
+- To opt in to applying to both value parameter and property, add '-Xannotation-default-target=param-property' to your compiler arguments.
+- To keep applying to the value parameter only, use the '@param:' annotation target.
+
+See https://youtrack.jetbrains.com/issue/KT-73255 for more details.
+w: file:///opt/flutter/packages/flutter_tools/gradle/src/main/kotlin/Deeplink.kt:15:5 This annotation is currently applied to the value parameter only, but in the future it will also be applied to property.
+- To opt in to applying to both value parameter and property, add '-Xannotation-default-target=param-property' to your compiler arguments.
+- To keep applying to the value parameter only, use the '@param:' annotation target.
+
+See https://youtrack.jetbrains.com/issue/KT-73255 for more details.
+w: file:///opt/flutter/packages/flutter_tools/gradle/src/main/kotlin/Deeplink.kt:17:5 This annotation is currently applied to the value parameter only, but in the future it will also be applied to property.
+- To opt in to applying to both value parameter and property, add '-Xannotation-default-target=param-property' to your compiler arguments.
+- To keep applying to the value parameter only, use the '@param:' annotation target.
+
+See https://youtrack.jetbrains.com/issue/KT-73255 for more details.
+w: file:///opt/flutter/packages/flutter_tools/gradle/src/main/kotlin/Deeplink.kt:19:5 This annotation is currently applied to the value parameter only, but in the future it will also be applied to property.
+- To opt in to applying to both value parameter and property, add '-Xannotation-default-target=param-property' to your compiler arguments.
+- To keep applying to the value parameter only, use the '@param:' annotation target.
+
+See https://youtrack.jetbrains.com/issue/KT-73255 for more details.
+w: file:///opt/flutter/packages/flutter_tools/gradle/src/main/kotlin/FlutterPlugin.kt:12:8 'interface ApkVariant : Any, BaseVariant, InstallableVariant, AndroidArtifactVariant, InternalBaseVariant' is deprecated. Deprecated in Java.
+w: file:///opt/flutter/packages/flutter_tools/gradle/src/main/kotlin/FlutterPlugin.kt:664:69 'interface ApkVariant : Any, BaseVariant, InstallableVariant, AndroidArtifactVariant, InternalBaseVariant' is deprecated. Deprecated in Java.
+w: file:///opt/flutter/packages/flutter_tools/gradle/src/main/kotlin/FlutterPluginUtils.kt:766:29 Condition is always 'true'.
+w: file:///opt/flutter/packages/flutter_tools/gradle/src/main/kotlin/plugins/PluginHandler.kt:168:70 Unchecked cast of 'NamedDomainObjectContainer<out BuildType>' to 'NamedDomainObjectContainer<BuildType>'.
+w: file:///opt/flutter/packages/flutter_tools/gradle/src/main/kotlin/plugins/PluginHandler.kt:169:75 Unchecked cast of 'NamedDomainObjectContainer<out BuildType>' to 'NamedDomainObjectContainer<BuildType>'.
+
+> Task :gradle:compileJava NO-SOURCE
+> Task :gradle:compileGroovy NO-SOURCE
+> Task :gradle:classes
+> Task :gradle:jar
+
+> Configure project :app
+WARNING: The option setting 'android.builtInKotlin=false' is deprecated.
+The current default is 'true'.
+It will be removed in version 10.0 of the Android Gradle plugin.
+WARNING: The option setting 'android.newDsl=false' is deprecated.
+The current default is 'true'.
+It will be removed in version 10.0 of the Android Gradle plugin.
+w: ?? Deprecated 'org.jetbrains.kotlin.android' plugin usage
+The 'org.jetbrains.kotlin.android' plugin in project ':app' is no longer required for Kotlin support since AGP 9.0.
+Solution: Remove both `android.builtInKotlin=true` and `android.newDsl=false` from `gradle.properties`, then migrate to built-in Kotlin.
+See https://kotl.in/gradle/agp-built-in-kotlin for more details.
+
+
+> Configure project :android_file_picker
+w: ?? Deprecated 'org.jetbrains.kotlin.android' plugin usage
+The 'org.jetbrains.kotlin.android' plugin in project ':android_file_picker' is no longer required for Kotlin support since AGP 9.0.
+Solution: Remove both `android.builtInKotlin=true` and `android.newDsl=false` from `gradle.properties`, then migrate to built-in Kotlin.
+See https://kotl.in/gradle/agp-built-in-kotlin for more details.
+
+
+> Configure project :cryptography_flutter
+w: ?? Deprecated 'org.jetbrains.kotlin.android' plugin usage
+The 'org.jetbrains.kotlin.android' plugin in project ':cryptography_flutter' is no longer required for Kotlin support since AGP 9.0.
+Solution: Remove both `android.builtInKotlin=true` and `android.newDsl=false` from `gradle.properties`, then migrate to built-in Kotlin.
+See https://kotl.in/gradle/agp-built-in-kotlin for more details.
+
+
+> Configure project :flutter_plugin_android_lifecycle
+w: ?? Deprecated 'org.jetbrains.kotlin.android' plugin usage
+The 'org.jetbrains.kotlin.android' plugin in project ':flutter_plugin_android_lifecycle' is no longer required for Kotlin support since AGP 9.0.
+Solution: Remove both `android.builtInKotlin=true` and `android.newDsl=false` from `gradle.properties`, then migrate to built-in Kotlin.
+See https://kotl.in/gradle/agp-built-in-kotlin for more details.
+
+
+> Configure project :google_sign_in_android
+w: ?? Deprecated 'org.jetbrains.kotlin.android' plugin usage
+The 'org.jetbrains.kotlin.android' plugin in project ':google_sign_in_android' is no longer required for Kotlin support since AGP 9.0.
+Solution: Remove both `android.builtInKotlin=true` and `android.newDsl=false` from `gradle.properties`, then migrate to built-in Kotlin.
+See https://kotl.in/gradle/agp-built-in-kotlin for more details.
+
+
+> Configure project :image_picker_android
+w: ?? Deprecated 'org.jetbrains.kotlin.android' plugin usage
+The 'org.jetbrains.kotlin.android' plugin in project ':image_picker_android' is no longer required for Kotlin support since AGP 9.0.
+Solution: Remove both `android.builtInKotlin=true` and `android.newDsl=false` from `gradle.properties`, then migrate to built-in Kotlin.
+See https://kotl.in/gradle/agp-built-in-kotlin for more details.
+
+
+> Configure project :in_app_purchase_android
+w: ?? Deprecated 'org.jetbrains.kotlin.android' plugin usage
+The 'org.jetbrains.kotlin.android' plugin in project ':in_app_purchase_android' is no longer required for Kotlin support since AGP 9.0.
+Solution: Remove both `android.builtInKotlin=true` and `android.newDsl=false` from `gradle.properties`, then migrate to built-in Kotlin.
+See https://kotl.in/gradle/agp-built-in-kotlin for more details.
+
+
+> Configure project :integration_test
+w: ?? Deprecated 'org.jetbrains.kotlin.android' plugin usage
+The 'org.jetbrains.kotlin.android' plugin in project ':integration_test' is no longer required for Kotlin support since AGP 9.0.
+Solution: Remove both `android.builtInKotlin=true` and `android.newDsl=false` from `gradle.properties`, then migrate to built-in Kotlin.
+See https://kotl.in/gradle/agp-built-in-kotlin for more details.
+
+
+> Configure project :jni
+w: ?? Deprecated 'org.jetbrains.kotlin.android' plugin usage
+The 'org.jetbrains.kotlin.android' plugin in project ':jni' is no longer required for Kotlin support since AGP 9.0.
+Solution: Remove both `android.builtInKotlin=true` and `android.newDsl=false` from `gradle.properties`, then migrate to built-in Kotlin.
+See https://kotl.in/gradle/agp-built-in-kotlin for more details.
+
+
+> Configure project :jni_flutter
+w: ?? Deprecated 'org.jetbrains.kotlin.android' plugin usage
+The 'org.jetbrains.kotlin.android' plugin in project ':jni_flutter' is no longer required for Kotlin support since AGP 9.0.
+Solution: Remove both `android.builtInKotlin=true` and `android.newDsl=false` from `gradle.properties`, then migrate to built-in Kotlin.
+See https://kotl.in/gradle/agp-built-in-kotlin for more details.
+
+
+> Configure project :sign_in_with_apple
+w: ?? Deprecated 'org.jetbrains.kotlin.android' plugin usage
+The 'org.jetbrains.kotlin.android' plugin in project ':sign_in_with_apple' is no longer required for Kotlin support since AGP 9.0.
+Solution: Remove both `android.builtInKotlin=true` and `android.newDsl=false` from `gradle.properties`, then migrate to built-in Kotlin.
+See https://kotl.in/gradle/agp-built-in-kotlin for more details.
+
+
+> Configure project :speech_to_text
+w: ?? Deprecated 'org.jetbrains.kotlin.android' plugin usage
+The 'org.jetbrains.kotlin.android' plugin in project ':speech_to_text' is no longer required for Kotlin support since AGP 9.0.
+Solution: Remove both `android.builtInKotlin=true` and `android.newDsl=false` from `gradle.properties`, then migrate to built-in Kotlin.
+See https://kotl.in/gradle/agp-built-in-kotlin for more details.
+
+
+> Configure project :url_launcher_android
+w: ?? Deprecated 'org.jetbrains.kotlin.android' plugin usage
+The 'org.jetbrains.kotlin.android' plugin in project ':url_launcher_android' is no longer required for Kotlin support since AGP 9.0.
+Solution: Remove both `android.builtInKotlin=true` and `android.newDsl=false` from `gradle.properties`, then migrate to built-in Kotlin.
+See https://kotl.in/gradle/agp-built-in-kotlin for more details.
+
+WARNING: Your app uses the following plugins that apply Kotlin Gradle Plugin (KGP): cryptography_flutter
+Future versions of Flutter will fail to build if your app uses plugins that apply KGP.
+
+Please check the changelogs of these plugins and upgrade to a version that supports Built-in Kotlin.
+If no such version exists, report the issue to the plugin. If necessary, here is a guide on filing
+an issue against a plugin: https://docs.flutter.dev/release/breaking-changes/migrate-to-built-in-kotlin/for-app-developers#report-incompatible-kotlin-gradle-plugin-usage-to-plugin-authors
+
+If you are a plugin author, please migrate your plugin to Built-in Kotlin using this guide: https://docs.flutter.dev/release/breaking-changes/migrate-to-built-in-kotlin/for-plugin-authors
+Warning: SDK processing. This version only understands SDK XML versions up to 3 but an SDK XML file of version 4 was encountered. This can happen if you use versions of Android Studio and the command-line tools that were released at different times.
+Checking the license for package Android SDK Platform 35 in /opt/android-sdk/licenses
+License for package Android SDK Platform 35 accepted.
+Preparing "Install Android SDK Platform 35 (revision 2)".
+"Install Android SDK Platform 35 (revision 2)" ready.
+Installing Android SDK Platform 35 in /opt/android-sdk/platforms/android-35
+"Install Android SDK Platform 35 (revision 2)" complete.
+"Install Android SDK Platform 35 (revision 2)" finished.
+[=========                              ] 25%                                   
+> Task :android_file_picker:checkKotlinGradlePluginConfigurationErrors SKIPPED
+> Task :android_file_picker:preBuild UP-TO-DATE
+> Task :android_file_picker:preDebugBuild UP-TO-DATE
+> Task :android_file_picker:generateDebugResources UP-TO-DATE
+> Task :android_file_picker:packageDebugResources UP-TO-DATE
+> Task :android_file_picker:processDebugNavigationResources UP-TO-DATE
+> Task :android_file_picker:parseDebugLocalResources UP-TO-DATE
+> Task :android_file_picker:generateDebugRFile UP-TO-DATE
+> Task :android_file_picker:compileDebugKotlin UP-TO-DATE
+> Task :android_file_picker:javaPreCompileDebug UP-TO-DATE
+> Task :android_file_picker:compileDebugJavaWithJavac NO-SOURCE
+> Task :android_file_picker:bundleLibRuntimeToJarDebug UP-TO-DATE
+> Task :android_file_picker:processDebugJavaRes UP-TO-DATE
+> Task :android_file_picker:bundleLibCompileToJarDebug UP-TO-DATE
+> Task :app:checkKotlinGradlePluginConfigurationErrors SKIPPED
+> Task :app:validateCompileSdkVersion
+> Task :app:preBuild
+> Task :app:preDevNoSmsDebugBuild
+> Task :app:generateDevNoSmsDebugBuildConfig UP-TO-DATE
+> Task :app:cleanMergeDevNoSmsDebugAssets
+> Task :app:compileFlutterBuildDevNoSmsDebug
+> Task :android_file_picker:generateDebugAssets UP-TO-DATE
+> Task :android_file_picker:mergeDebugAssets UP-TO-DATE
+> Task :app:generateDevNoSmsDebugAssets UP-TO-DATE
+> Task :cryptography_flutter:generateDebugAssets UP-TO-DATE
+> Task :cryptography_flutter:preBuild UP-TO-DATE
+> Task :cryptography_flutter:preDebugBuild UP-TO-DATE
+> Task :cryptography_flutter:mergeDebugAssets UP-TO-DATE
+> Task :flutter_plugin_android_lifecycle:generateDebugAssets UP-TO-DATE
+> Task :flutter_plugin_android_lifecycle:preBuild UP-TO-DATE
+> Task :flutter_plugin_android_lifecycle:preDebugBuild UP-TO-DATE
+> Task :flutter_plugin_android_lifecycle:mergeDebugAssets UP-TO-DATE
+> Task :google_sign_in_android:generateDebugAssets UP-TO-DATE
+> Task :google_sign_in_android:preBuild UP-TO-DATE
+> Task :google_sign_in_android:preDebugBuild UP-TO-DATE
+> Task :google_sign_in_android:mergeDebugAssets UP-TO-DATE
+> Task :image_picker_android:generateDebugAssets UP-TO-DATE
+> Task :image_picker_android:preBuild UP-TO-DATE
+> Task :image_picker_android:preDebugBuild UP-TO-DATE
+> Task :image_picker_android:mergeDebugAssets UP-TO-DATE
+> Task :in_app_purchase_android:generateDebugAssets UP-TO-DATE
+> Task :in_app_purchase_android:preBuild UP-TO-DATE
+> Task :in_app_purchase_android:preDebugBuild UP-TO-DATE
+> Task :in_app_purchase_android:mergeDebugAssets UP-TO-DATE
+> Task :integration_test:generateDebugAssets UP-TO-DATE
+> Task :integration_test:preBuild UP-TO-DATE
+> Task :integration_test:preDebugBuild UP-TO-DATE
+> Task :integration_test:mergeDebugAssets UP-TO-DATE
+> Task :jni:generateDebugAssets UP-TO-DATE
+> Task :jni:preBuild UP-TO-DATE
+> Task :jni:preDebugBuild UP-TO-DATE
+> Task :jni:mergeDebugAssets UP-TO-DATE
+> Task :jni_flutter:generateDebugAssets UP-TO-DATE
+> Task :jni_flutter:preBuild UP-TO-DATE
+> Task :jni_flutter:preDebugBuild UP-TO-DATE
+> Task :jni_flutter:mergeDebugAssets UP-TO-DATE
+> Task :sign_in_with_apple:generateDebugAssets UP-TO-DATE
+> Task :sign_in_with_apple:preBuild UP-TO-DATE
+> Task :sign_in_with_apple:preDebugBuild UP-TO-DATE
+> Task :sign_in_with_apple:mergeDebugAssets UP-TO-DATE
+> Task :speech_to_text:generateDebugAssets UP-TO-DATE
+> Task :speech_to_text:preBuild UP-TO-DATE
+> Task :speech_to_text:preDebugBuild UP-TO-DATE
+> Task :speech_to_text:mergeDebugAssets UP-TO-DATE
+> Task :url_launcher_android:generateDebugAssets UP-TO-DATE
+> Task :url_launcher_android:preBuild UP-TO-DATE
+> Task :url_launcher_android:preDebugBuild UP-TO-DATE
+> Task :url_launcher_android:mergeDebugAssets UP-TO-DATE
+> Task :app:mergeDevNoSmsDebugAssets
+> Task :app:copyFlutterAssetsDevNoSmsDebug
+> Task :app:generateDevNoSmsDebugResValues UP-TO-DATE
+> Task :app:generateDevNoSmsDebugResources UP-TO-DATE
+> Task :app:packageDevNoSmsDebugResources UP-TO-DATE
+> Task :cryptography_flutter:processDebugNavigationResources UP-TO-DATE
+> Task :flutter_plugin_android_lifecycle:processDebugNavigationResources UP-TO-DATE
+> Task :google_sign_in_android:processDebugNavigationResources UP-TO-DATE
+> Task :image_picker_android:processDebugNavigationResources UP-TO-DATE
+> Task :in_app_purchase_android:processDebugNavigationResources UP-TO-DATE
+> Task :integration_test:processDebugNavigationResources UP-TO-DATE
+> Task :jni:processDebugNavigationResources UP-TO-DATE
+> Task :jni_flutter:processDebugNavigationResources UP-TO-DATE
+> Task :sign_in_with_apple:processDebugNavigationResources UP-TO-DATE
+> Task :speech_to_text:processDebugNavigationResources UP-TO-DATE
+> Task :url_launcher_android:processDebugNavigationResources UP-TO-DATE
+> Task :app:processDevNoSmsDebugNavigationResources UP-TO-DATE
+> Task :app:parseDevNoSmsDebugLocalResources UP-TO-DATE
+> Task :app:generateDevNoSmsDebugRFile UP-TO-DATE
+> Task :cryptography_flutter:checkKotlinGradlePluginConfigurationErrors SKIPPED
+> Task :cryptography_flutter:generateDebugResources UP-TO-DATE
+> Task :cryptography_flutter:packageDebugResources UP-TO-DATE
+> Task :cryptography_flutter:parseDebugLocalResources UP-TO-DATE
+> Task :cryptography_flutter:generateDebugRFile UP-TO-DATE
+> Task :cryptography_flutter:compileDebugKotlin UP-TO-DATE
+> Task :cryptography_flutter:javaPreCompileDebug UP-TO-DATE
+> Task :cryptography_flutter:compileDebugJavaWithJavac NO-SOURCE
+> Task :cryptography_flutter:bundleLibCompileToJarDebug UP-TO-DATE
+> Task :flutter_plugin_android_lifecycle:checkKotlinGradlePluginConfigurationErrors SKIPPED
+> Task :flutter_plugin_android_lifecycle:generateDebugResources UP-TO-DATE
+> Task :flutter_plugin_android_lifecycle:packageDebugResources UP-TO-DATE
+> Task :flutter_plugin_android_lifecycle:parseDebugLocalResources UP-TO-DATE
+> Task :flutter_plugin_android_lifecycle:generateDebugRFile UP-TO-DATE
+> Task :flutter_plugin_android_lifecycle:compileDebugKotlin NO-SOURCE
+> Task :flutter_plugin_android_lifecycle:javaPreCompileDebug UP-TO-DATE
+> Task :flutter_plugin_android_lifecycle:compileDebugJavaWithJavac UP-TO-DATE
+> Task :flutter_plugin_android_lifecycle:bundleLibCompileToJarDebug UP-TO-DATE
+> Task :google_sign_in_android:checkKotlinGradlePluginConfigurationErrors SKIPPED
+> Task :google_sign_in_android:generateDebugResources UP-TO-DATE
+> Task :google_sign_in_android:packageDebugResources UP-TO-DATE
+> Task :google_sign_in_android:parseDebugLocalResources UP-TO-DATE
+> Task :google_sign_in_android:generateDebugRFile UP-TO-DATE
+> Task :google_sign_in_android:compileDebugKotlin UP-TO-DATE
+> Task :google_sign_in_android:javaPreCompileDebug UP-TO-DATE
+> Task :google_sign_in_android:compileDebugJavaWithJavac NO-SOURCE
+> Task :google_sign_in_android:bundleLibCompileToJarDebug UP-TO-DATE
+> Task :image_picker_android:checkKotlinGradlePluginConfigurationErrors SKIPPED
+> Task :image_picker_android:generateDebugResources UP-TO-DATE
+> Task :image_picker_android:packageDebugResources UP-TO-DATE
+> Task :image_picker_android:parseDebugLocalResources UP-TO-DATE
+> Task :image_picker_android:generateDebugRFile UP-TO-DATE
+> Task :image_picker_android:compileDebugKotlin UP-TO-DATE
+> Task :image_picker_android:javaPreCompileDebug UP-TO-DATE
+> Task :image_picker_android:compileDebugJavaWithJavac UP-TO-DATE
+> Task :image_picker_android:bundleLibCompileToJarDebug UP-TO-DATE
+> Task :in_app_purchase_android:checkKotlinGradlePluginConfigurationErrors SKIPPED
+> Task :in_app_purchase_android:generateDebugBuildConfig UP-TO-DATE
+> Task :in_app_purchase_android:generateDebugResources UP-TO-DATE
+> Task :in_app_purchase_android:packageDebugResources UP-TO-DATE
+> Task :in_app_purchase_android:parseDebugLocalResources UP-TO-DATE
+> Task :in_app_purchase_android:generateDebugRFile UP-TO-DATE
+> Task :in_app_purchase_android:compileDebugKotlin UP-TO-DATE
+> Task :in_app_purchase_android:javaPreCompileDebug UP-TO-DATE
+> Task :in_app_purchase_android:compileDebugJavaWithJavac UP-TO-DATE
+> Task :in_app_purchase_android:bundleLibCompileToJarDebug UP-TO-DATE
+> Task :integration_test:checkKotlinGradlePluginConfigurationErrors SKIPPED
+> Task :integration_test:generateDebugResources UP-TO-DATE
+> Task :integration_test:packageDebugResources UP-TO-DATE
+> Task :integration_test:parseDebugLocalResources UP-TO-DATE
+> Task :integration_test:generateDebugRFile UP-TO-DATE
+> Task :integration_test:compileDebugKotlin NO-SOURCE
+> Task :integration_test:javaPreCompileDebug UP-TO-DATE
+> Task :integration_test:compileDebugJavaWithJavac UP-TO-DATE
+> Task :integration_test:bundleLibCompileToJarDebug UP-TO-DATE
+> Task :jni:checkKotlinGradlePluginConfigurationErrors SKIPPED
+> Task :jni:generateDebugResources UP-TO-DATE
+> Task :jni:packageDebugResources UP-TO-DATE
+> Task :jni:parseDebugLocalResources UP-TO-DATE
+> Task :jni:generateDebugRFile UP-TO-DATE
+> Task :jni:compileDebugKotlin NO-SOURCE
+> Task :jni:javaPreCompileDebug UP-TO-DATE
+> Task :jni:compileDebugJavaWithJavac UP-TO-DATE
+> Task :jni:bundleLibCompileToJarDebug UP-TO-DATE
+> Task :jni_flutter:checkKotlinGradlePluginConfigurationErrors SKIPPED
+> Task :jni_flutter:generateDebugResources UP-TO-DATE
+> Task :jni_flutter:packageDebugResources UP-TO-DATE
+> Task :jni_flutter:parseDebugLocalResources UP-TO-DATE
+> Task :jni_flutter:generateDebugRFile UP-TO-DATE
+> Task :jni_flutter:compileDebugKotlin NO-SOURCE
+> Task :jni_flutter:javaPreCompileDebug UP-TO-DATE
+> Task :jni_flutter:compileDebugJavaWithJavac UP-TO-DATE
+> Task :jni_flutter:bundleLibCompileToJarDebug UP-TO-DATE
+> Task :sign_in_with_apple:checkKotlinGradlePluginConfigurationErrors SKIPPED
+> Task :sign_in_with_apple:generateDebugResources UP-TO-DATE
+> Task :sign_in_with_apple:packageDebugResources UP-TO-DATE
+> Task :sign_in_with_apple:parseDebugLocalResources UP-TO-DATE
+> Task :sign_in_with_apple:generateDebugRFile UP-TO-DATE
+> Task :sign_in_with_apple:compileDebugKotlin UP-TO-DATE
+> Task :sign_in_with_apple:javaPreCompileDebug UP-TO-DATE
+> Task :sign_in_with_apple:compileDebugJavaWithJavac NO-SOURCE
+> Task :sign_in_with_apple:bundleLibCompileToJarDebug UP-TO-DATE
+> Task :speech_to_text:checkKotlinGradlePluginConfigurationErrors SKIPPED
+> Task :speech_to_text:generateDebugResources UP-TO-DATE
+> Task :speech_to_text:packageDebugResources UP-TO-DATE
+> Task :speech_to_text:parseDebugLocalResources UP-TO-DATE
+> Task :speech_to_text:generateDebugRFile UP-TO-DATE
+> Task :speech_to_text:compileDebugKotlin UP-TO-DATE
+> Task :speech_to_text:javaPreCompileDebug UP-TO-DATE
+> Task :speech_to_text:compileDebugJavaWithJavac NO-SOURCE
+> Task :speech_to_text:bundleLibCompileToJarDebug UP-TO-DATE
+> Task :url_launcher_android:checkKotlinGradlePluginConfigurationErrors SKIPPED
+> Task :url_launcher_android:generateDebugBuildConfig UP-TO-DATE
+> Task :url_launcher_android:generateDebugResources UP-TO-DATE
+> Task :url_launcher_android:packageDebugResources UP-TO-DATE
+> Task :url_launcher_android:parseDebugLocalResources UP-TO-DATE
+> Task :url_launcher_android:generateDebugRFile UP-TO-DATE
+> Task :url_launcher_android:compileDebugKotlin UP-TO-DATE
+> Task :url_launcher_android:javaPreCompileDebug UP-TO-DATE
+> Task :url_launcher_android:compileDebugJavaWithJavac UP-TO-DATE
+> Task :url_launcher_android:bundleLibCompileToJarDebug UP-TO-DATE
+> Task :app:compileDevNoSmsDebugKotlin UP-TO-DATE
+> Task :app:javaPreCompileDevNoSmsDebug UP-TO-DATE
+> Task :app:compileDevNoSmsDebugJavaWithJavac UP-TO-DATE
+> Task :android_file_picker:mapDebugSourceSetPaths UP-TO-DATE
+> Task :android_file_picker:compileDebugLibraryResources UP-TO-DATE
+> Task :android_file_picker:writeDebugAarMetadata UP-TO-DATE
+> Task :cryptography_flutter:writeDebugAarMetadata UP-TO-DATE
+> Task :flutter_plugin_android_lifecycle:writeDebugAarMetadata UP-TO-DATE
+> Task :google_sign_in_android:writeDebugAarMetadata UP-TO-DATE
+> Task :image_picker_android:writeDebugAarMetadata UP-TO-DATE
+> Task :in_app_purchase_android:writeDebugAarMetadata UP-TO-DATE
+> Task :integration_test:writeDebugAarMetadata UP-TO-DATE
+> Task :jni:writeDebugAarMetadata UP-TO-DATE
+> Task :jni_flutter:writeDebugAarMetadata UP-TO-DATE
+> Task :sign_in_with_apple:writeDebugAarMetadata UP-TO-DATE
+> Task :speech_to_text:writeDebugAarMetadata UP-TO-DATE
+> Task :url_launcher_android:writeDebugAarMetadata UP-TO-DATE
+> Task :app:checkDevNoSmsDebugAarMetadata UP-TO-DATE
+> Task :app:mapDevNoSmsDebugSourceSetPaths UP-TO-DATE
+> Task :app:compileDevNoSmsDebugNavigationResources UP-TO-DATE
+> Task :app:mergeDevNoSmsDebugResources UP-TO-DATE
+> Task :app:createDevNoSmsDebugCompatibleScreenManifests UP-TO-DATE
+> Task :android_file_picker:extractDeepLinksDebug UP-TO-DATE
+> Task :android_file_picker:processDebugManifest UP-TO-DATE
+> Task :app:extractDeepLinksDevNoSmsDebug UP-TO-DATE
+> Task :cryptography_flutter:extractDeepLinksDebug UP-TO-DATE
+> Task :cryptography_flutter:processDebugManifest UP-TO-DATE
+> Task :flutter_plugin_android_lifecycle:extractDeepLinksDebug UP-TO-DATE
+> Task :flutter_plugin_android_lifecycle:processDebugManifest UP-TO-DATE
+> Task :google_sign_in_android:extractDeepLinksDebug UP-TO-DATE
+> Task :google_sign_in_android:processDebugManifest UP-TO-DATE
+> Task :image_picker_android:extractDeepLinksDebug UP-TO-DATE
+> Task :image_picker_android:processDebugManifest UP-TO-DATE
+> Task :in_app_purchase_android:extractDeepLinksDebug UP-TO-DATE
+> Task :in_app_purchase_android:processDebugManifest UP-TO-DATE
+> Task :integration_test:extractDeepLinksDebug UP-TO-DATE
+> Task :integration_test:processDebugManifest UP-TO-DATE
+> Task :jni:extractDeepLinksDebug UP-TO-DATE
+> Task :jni:processDebugManifest UP-TO-DATE
+> Task :jni_flutter:extractDeepLinksDebug UP-TO-DATE
+> Task :jni_flutter:processDebugManifest UP-TO-DATE
+> Task :sign_in_with_apple:extractDeepLinksDebug UP-TO-DATE
+> Task :sign_in_with_apple:processDebugManifest UP-TO-DATE
+> Task :speech_to_text:extractDeepLinksDebug UP-TO-DATE
+> Task :speech_to_text:processDebugManifest UP-TO-DATE
+> Task :url_launcher_android:extractDeepLinksDebug UP-TO-DATE
+> Task :url_launcher_android:processDebugManifest UP-TO-DATE
+> Task :app:processDevNoSmsDebugMainManifest UP-TO-DATE
+> Task :app:outputDevNoSmsDebugAppLinkSettings UP-TO-DATE
+> Task :app:processDevNoSmsDebugManifest UP-TO-DATE
+> Task :app:processDevNoSmsDebugManifestForPackage UP-TO-DATE
+> Task :cryptography_flutter:mapDebugSourceSetPaths UP-TO-DATE
+> Task :cryptography_flutter:compileDebugLibraryResources UP-TO-DATE
+> Task :flutter_plugin_android_lifecycle:mapDebugSourceSetPaths UP-TO-DATE
+> Task :flutter_plugin_android_lifecycle:compileDebugLibraryResources UP-TO-DATE
+> Task :google_sign_in_android:mapDebugSourceSetPaths UP-TO-DATE
+> Task :google_sign_in_android:compileDebugLibraryResources UP-TO-DATE
+> Task :image_picker_android:mapDebugSourceSetPaths UP-TO-DATE
+> Task :image_picker_android:compileDebugLibraryResources UP-TO-DATE
+> Task :in_app_purchase_android:mapDebugSourceSetPaths UP-TO-DATE
+> Task :in_app_purchase_android:compileDebugLibraryResources UP-TO-DATE
+> Task :integration_test:mapDebugSourceSetPaths UP-TO-DATE
+> Task :integration_test:compileDebugLibraryResources UP-TO-DATE
+> Task :jni:mapDebugSourceSetPaths UP-TO-DATE
+> Task :jni:compileDebugLibraryResources UP-TO-DATE
+> Task :jni_flutter:mapDebugSourceSetPaths UP-TO-DATE
+> Task :jni_flutter:compileDebugLibraryResources UP-TO-DATE
+> Task :sign_in_with_apple:mapDebugSourceSetPaths UP-TO-DATE
+> Task :sign_in_with_apple:compileDebugLibraryResources UP-TO-DATE
+> Task :speech_to_text:mapDebugSourceSetPaths UP-TO-DATE
+> Task :speech_to_text:compileDebugLibraryResources UP-TO-DATE
+> Task :url_launcher_android:mapDebugSourceSetPaths UP-TO-DATE
+> Task :url_launcher_android:compileDebugLibraryResources UP-TO-DATE
+> Task :app:processDevNoSmsDebugResources UP-TO-DATE
+> Task :app:preDevNoSmsDebugUnitTestBuild
+> Task :app:javaPreCompileDevNoSmsDebugUnitTest
+> Task :app:processDevNoSmsDebugJavaRes UP-TO-DATE
+> Task :cryptography_flutter:bundleLibRuntimeToJarDebug UP-TO-DATE
+> Task :cryptography_flutter:processDebugJavaRes UP-TO-DATE
+> Task :flutter_plugin_android_lifecycle:bundleLibRuntimeToJarDebug UP-TO-DATE
+> Task :flutter_plugin_android_lifecycle:processDebugJavaRes NO-SOURCE
+> Task :google_sign_in_android:bundleLibRuntimeToJarDebug UP-TO-DATE
+> Task :google_sign_in_android:processDebugJavaRes UP-TO-DATE
+> Task :image_picker_android:bundleLibRuntimeToJarDebug UP-TO-DATE
+> Task :image_picker_android:processDebugJavaRes UP-TO-DATE
+> Task :in_app_purchase_android:bundleLibRuntimeToJarDebug UP-TO-DATE
+> Task :in_app_purchase_android:processDebugJavaRes UP-TO-DATE
+> Task :integration_test:bundleLibRuntimeToJarDebug UP-TO-DATE
+> Task :integration_test:processDebugJavaRes NO-SOURCE
+> Task :jni:bundleLibRuntimeToJarDebug UP-TO-DATE
+> Task :jni:processDebugJavaRes NO-SOURCE
+> Task :jni_flutter:bundleLibRuntimeToJarDebug UP-TO-DATE
+> Task :jni_flutter:processDebugJavaRes NO-SOURCE
+> Task :sign_in_with_apple:bundleLibRuntimeToJarDebug UP-TO-DATE
+> Task :sign_in_with_apple:processDebugJavaRes UP-TO-DATE
+> Task :speech_to_text:bundleLibRuntimeToJarDebug UP-TO-DATE
+> Task :speech_to_text:processDebugJavaRes UP-TO-DATE
+> Task :url_launcher_android:bundleLibRuntimeToJarDebug UP-TO-DATE
+> Task :url_launcher_android:processDebugJavaRes UP-TO-DATE
+> Task :app:bundleDevNoSmsDebugClassesToCompileJar
+> Task :app:bundleDevNoSmsDebugClassesToRuntimeJar
+> Task :app:compileDevNoSmsDebugUnitTestKotlin
+w: file:///work/app/android/app/src/test/kotlin/app/zaghlol/platform/guard/GuardConfigReaderTest.kt:89:65 Unchecked cast of 'Any?' to 'MutableMap<String, Any?>'.
+w: file:///work/app/android/app/src/test/kotlin/app/zaghlol/platform/guard/GuardConfigReaderTest.kt:101:92 Unchecked cast of 'Any?' to 'MutableMap<String, Any?>'.
+w: file:///work/app/android/app/src/test/kotlin/app/zaghlol/platform/guard/GuardConfigReaderTest.kt:102:97 Unchecked cast of 'Any?' to 'MutableMap<String, Any?>'.
+w: file:///work/app/android/app/src/test/kotlin/app/zaghlol/platform/spool/CaptureStatusStoreTest.kt:83:35 Only safe (?.) or non-null asserted (!!.) calls are allowed on a nullable receiver of type 'File?'.
+w: file:///work/app/android/app/src/test/kotlin/app/zaghlol/platform/spool/CaptureStatusStoreTest.kt:128:27 Only safe (?.) or non-null asserted (!!.) calls are allowed on a nullable receiver of type 'File?'.
+
+> Task :app:compileDevNoSmsDebugUnitTestJavaWithJavac NO-SOURCE
+> Task :app:processDevNoSmsDebugUnitTestJavaRes
+> Task :app:testDevNoSmsDebugUnitTest
+
+[Incubating] Problems report is available at: file:///work/app/build/reports/problems/problems-report.html
+
+Deprecated Gradle features were used in this build, making it incompatible with Gradle 10.
+
+You can use '--warning-mode all' to show the individual deprecation warnings and determine if they come from your own scripts or plugins.
+
+For more on this, please refer to https://docs.gradle.org/9.3.1/userguide/command_line_interface.html#sec:command_line_warnings in the Gradle documentation.
+
+BUILD SUCCESSFUL in 3m 16s
+230 actionable tasks: 15 executed, 215 up-to-date
+kotlin testcases: 599
+
+[01:38:35] === RESULT android-unit exit=0 (198s)
+[01:38:35] === STEP android-lint (docker zaghlol-flutter-android:3.47.9, /work/app)
+To honour the JVM settings for this build a single-use Daemon process will be forked. For more on this, please refer to https://docs.gradle.org/9.3.1/userguide/gradle_daemon.html#sec:disabling_the_daemon in the Gradle documentation.
+Daemon will be stopped at the end of the build 
+> Task :gradle:checkKotlinGradlePluginConfigurationErrors SKIPPED
+> Task :gradle:pluginDescriptors
+> Task :gradle:processResources
+
+> Task :gradle:compileKotlin
+w: file:///opt/flutter/packages/flutter_tools/gradle/src/main/kotlin/Deeplink.kt:13:5 This annotation is currently applied to the value parameter only, but in the future it will also be applied to property.
+- To opt in to applying to both value parameter and property, add '-Xannotation-default-target=param-property' to your compiler arguments.
+- To keep applying to the value parameter only, use the '@param:' annotation target.
+
+See https://youtrack.jetbrains.com/issue/KT-73255 for more details.
+w: file:///opt/flutter/packages/flutter_tools/gradle/src/main/kotlin/Deeplink.kt:15:5 This annotation is currently applied to the value parameter only, but in the future it will also be applied to property.
+- To opt in to applying to both value parameter and property, add '-Xannotation-default-target=param-property' to your compiler arguments.
+- To keep applying to the value parameter only, use the '@param:' annotation target.
+
+See https://youtrack.jetbrains.com/issue/KT-73255 for more details.
+w: file:///opt/flutter/packages/flutter_tools/gradle/src/main/kotlin/Deeplink.kt:17:5 This annotation is currently applied to the value parameter only, but in the future it will also be applied to property.
+- To opt in to applying to both value parameter and property, add '-Xannotation-default-target=param-property' to your compiler arguments.
+- To keep applying to the value parameter only, use the '@param:' annotation target.
+
+See https://youtrack.jetbrains.com/issue/KT-73255 for more details.
+w: file:///opt/flutter/packages/flutter_tools/gradle/src/main/kotlin/Deeplink.kt:19:5 This annotation is currently applied to the value parameter only, but in the future it will also be applied to property.
+- To opt in to applying to both value parameter and property, add '-Xannotation-default-target=param-property' to your compiler arguments.
+- To keep applying to the value parameter only, use the '@param:' annotation target.
+
+See https://youtrack.jetbrains.com/issue/KT-73255 for more details.
+w: file:///opt/flutter/packages/flutter_tools/gradle/src/main/kotlin/FlutterPlugin.kt:12:8 'interface ApkVariant : Any, BaseVariant, InstallableVariant, AndroidArtifactVariant, InternalBaseVariant' is deprecated. Deprecated in Java.
+w: file:///opt/flutter/packages/flutter_tools/gradle/src/main/kotlin/FlutterPlugin.kt:664:69 'interface ApkVariant : Any, BaseVariant, InstallableVariant, AndroidArtifactVariant, InternalBaseVariant' is deprecated. Deprecated in Java.
+w: file:///opt/flutter/packages/flutter_tools/gradle/src/main/kotlin/FlutterPluginUtils.kt:766:29 Condition is always 'true'.
+w: file:///opt/flutter/packages/flutter_tools/gradle/src/main/kotlin/plugins/PluginHandler.kt:168:70 Unchecked cast of 'NamedDomainObjectContainer<out BuildType>' to 'NamedDomainObjectContainer<BuildType>'.
+w: file:///opt/flutter/packages/flutter_tools/gradle/src/main/kotlin/plugins/PluginHandler.kt:169:75 Unchecked cast of 'NamedDomainObjectContainer<out BuildType>' to 'NamedDomainObjectContainer<BuildType>'.
+
+> Task :gradle:compileJava NO-SOURCE
+> Task :gradle:compileGroovy NO-SOURCE
+> Task :gradle:classes
+> Task :gradle:jar
+
+> Configure project :app
+WARNING: The option setting 'android.builtInKotlin=false' is deprecated.
+The current default is 'true'.
+It will be removed in version 10.0 of the Android Gradle plugin.
+WARNING: The option setting 'android.newDsl=false' is deprecated.
+The current default is 'true'.
+It will be removed in version 10.0 of the Android Gradle plugin.
+w: ?? Deprecated 'org.jetbrains.kotlin.android' plugin usage
+The 'org.jetbrains.kotlin.android' plugin in project ':app' is no longer required for Kotlin support since AGP 9.0.
+Solution: Remove both `android.builtInKotlin=true` and `android.newDsl=false` from `gradle.properties`, then migrate to built-in Kotlin.
+See https://kotl.in/gradle/agp-built-in-kotlin for more details.
+
+
+> Configure project :android_file_picker
+w: ?? Deprecated 'org.jetbrains.kotlin.android' plugin usage
+The 'org.jetbrains.kotlin.android' plugin in project ':android_file_picker' is no longer required for Kotlin support since AGP 9.0.
+Solution: Remove both `android.builtInKotlin=true` and `android.newDsl=false` from `gradle.properties`, then migrate to built-in Kotlin.
+See https://kotl.in/gradle/agp-built-in-kotlin for more details.
+
+
+> Configure project :cryptography_flutter
+w: ?? Deprecated 'org.jetbrains.kotlin.android' plugin usage
+The 'org.jetbrains.kotlin.android' plugin in project ':cryptography_flutter' is no longer required for Kotlin support since AGP 9.0.
+Solution: Remove both `android.builtInKotlin=true` and `android.newDsl=false` from `gradle.properties`, then migrate to built-in Kotlin.
+See https://kotl.in/gradle/agp-built-in-kotlin for more details.
+
+
+> Configure project :flutter_plugin_android_lifecycle
+w: ?? Deprecated 'org.jetbrains.kotlin.android' plugin usage
+The 'org.jetbrains.kotlin.android' plugin in project ':flutter_plugin_android_lifecycle' is no longer required for Kotlin support since AGP 9.0.
+Solution: Remove both `android.builtInKotlin=true` and `android.newDsl=false` from `gradle.properties`, then migrate to built-in Kotlin.
+See https://kotl.in/gradle/agp-built-in-kotlin for more details.
+
+
+> Configure project :google_sign_in_android
+w: ?? Deprecated 'org.jetbrains.kotlin.android' plugin usage
+The 'org.jetbrains.kotlin.android' plugin in project ':google_sign_in_android' is no longer required for Kotlin support since AGP 9.0.
+Solution: Remove both `android.builtInKotlin=true` and `android.newDsl=false` from `gradle.properties`, then migrate to built-in Kotlin.
+See https://kotl.in/gradle/agp-built-in-kotlin for more details.
+
+
+> Configure project :image_picker_android
+w: ?? Deprecated 'org.jetbrains.kotlin.android' plugin usage
+The 'org.jetbrains.kotlin.android' plugin in project ':image_picker_android' is no longer required for Kotlin support since AGP 9.0.
+Solution: Remove both `android.builtInKotlin=true` and `android.newDsl=false` from `gradle.properties`, then migrate to built-in Kotlin.
+See https://kotl.in/gradle/agp-built-in-kotlin for more details.
+
+
+> Configure project :in_app_purchase_android
+w: ?? Deprecated 'org.jetbrains.kotlin.android' plugin usage
+The 'org.jetbrains.kotlin.android' plugin in project ':in_app_purchase_android' is no longer required for Kotlin support since AGP 9.0.
+Solution: Remove both `android.builtInKotlin=true` and `android.newDsl=false` from `gradle.properties`, then migrate to built-in Kotlin.
+See https://kotl.in/gradle/agp-built-in-kotlin for more details.
+
+
+> Configure project :integration_test
+w: ?? Deprecated 'org.jetbrains.kotlin.android' plugin usage
+The 'org.jetbrains.kotlin.android' plugin in project ':integration_test' is no longer required for Kotlin support since AGP 9.0.
+Solution: Remove both `android.builtInKotlin=true` and `android.newDsl=false` from `gradle.properties`, then migrate to built-in Kotlin.
+See https://kotl.in/gradle/agp-built-in-kotlin for more details.
+
+
+> Configure project :jni
+w: ?? Deprecated 'org.jetbrains.kotlin.android' plugin usage
+The 'org.jetbrains.kotlin.android' plugin in project ':jni' is no longer required for Kotlin support since AGP 9.0.
+Solution: Remove both `android.builtInKotlin=true` and `android.newDsl=false` from `gradle.properties`, then migrate to built-in Kotlin.
+See https://kotl.in/gradle/agp-built-in-kotlin for more details.
+
+
+> Configure project :jni_flutter
+w: ?? Deprecated 'org.jetbrains.kotlin.android' plugin usage
+The 'org.jetbrains.kotlin.android' plugin in project ':jni_flutter' is no longer required for Kotlin support since AGP 9.0.
+Solution: Remove both `android.builtInKotlin=true` and `android.newDsl=false` from `gradle.properties`, then migrate to built-in Kotlin.
+See https://kotl.in/gradle/agp-built-in-kotlin for more details.
+
+
+> Configure project :sign_in_with_apple
+w: ?? Deprecated 'org.jetbrains.kotlin.android' plugin usage
+The 'org.jetbrains.kotlin.android' plugin in project ':sign_in_with_apple' is no longer required for Kotlin support since AGP 9.0.
+Solution: Remove both `android.builtInKotlin=true` and `android.newDsl=false` from `gradle.properties`, then migrate to built-in Kotlin.
+See https://kotl.in/gradle/agp-built-in-kotlin for more details.
+
+
+> Configure project :speech_to_text
+w: ?? Deprecated 'org.jetbrains.kotlin.android' plugin usage
+The 'org.jetbrains.kotlin.android' plugin in project ':speech_to_text' is no longer required for Kotlin support since AGP 9.0.
+Solution: Remove both `android.builtInKotlin=true` and `android.newDsl=false` from `gradle.properties`, then migrate to built-in Kotlin.
+See https://kotl.in/gradle/agp-built-in-kotlin for more details.
+
+
+> Configure project :url_launcher_android
+w: ?? Deprecated 'org.jetbrains.kotlin.android' plugin usage
+The 'org.jetbrains.kotlin.android' plugin in project ':url_launcher_android' is no longer required for Kotlin support since AGP 9.0.
+Solution: Remove both `android.builtInKotlin=true` and `android.newDsl=false` from `gradle.properties`, then migrate to built-in Kotlin.
+See https://kotl.in/gradle/agp-built-in-kotlin for more details.
+
+WARNING: Your app uses the following plugins that apply Kotlin Gradle Plugin (KGP): cryptography_flutter
+Future versions of Flutter will fail to build if your app uses plugins that apply KGP.
+
+Please check the changelogs of these plugins and upgrade to a version that supports Built-in Kotlin.
+If no such version exists, report the issue to the plugin. If necessary, here is a guide on filing
+an issue against a plugin: https://docs.flutter.dev/release/breaking-changes/migrate-to-built-in-kotlin/for-app-developers#report-incompatible-kotlin-gradle-plugin-usage-to-plugin-authors
+
+If you are a plugin author, please migrate your plugin to Built-in Kotlin using this guide: https://docs.flutter.dev/release/breaking-changes/migrate-to-built-in-kotlin/for-plugin-authors
+Warning: SDK processing. This version only understands SDK XML versions up to 3 but an SDK XML file of version 4 was encountered. This can happen if you use versions of Android Studio and the command-line tools that were released at different times.
+Checking the license for package Android SDK Platform 35 in /opt/android-sdk/licenses
+License for package Android SDK Platform 35 accepted.
+Preparing "Install Android SDK Platform 35 (revision 2)".
+"Install Android SDK Platform 35 (revision 2)" ready.
+Installing Android SDK Platform 35 in /opt/android-sdk/platforms/android-35
+"Install Android SDK Platform 35 (revision 2)" complete.
+"Install Android SDK Platform 35 (revision 2)" finished.
+[=========                              ] 25%                                   
+> Task :android_file_picker:preBuild UP-TO-DATE
+> Task :android_file_picker:preDebugBuild UP-TO-DATE
+> Task :android_file_picker:checkDebugAarMetadata
+> Task :android_file_picker:mergeDebugJniLibFolders UP-TO-DATE
+> Task :android_file_picker:mergeDebugNativeLibs NO-SOURCE
+> Task :android_file_picker:stripDebugDebugSymbols NO-SOURCE
+> Task :android_file_picker:checkKotlinGradlePluginConfigurationErrors SKIPPED
+> Task :android_file_picker:generateDebugResources UP-TO-DATE
+> Task :android_file_picker:copyDebugJniLibsProjectAndLocalJars
+> Task :android_file_picker:packageDebugResources UP-TO-DATE
+> Task :android_file_picker:processDebugNavigationResources UP-TO-DATE
+> Task :android_file_picker:parseDebugLocalResources UP-TO-DATE
+> Task :android_file_picker:generateDebugRFile UP-TO-DATE
+> Task :android_file_picker:compileDebugKotlin UP-TO-DATE
+> Task :android_file_picker:extractDebugAnnotations
+> Task :android_file_picker:extractDeepLinksForAarDebug
+> Task :android_file_picker:generateDebugAssets UP-TO-DATE
+> Task :android_file_picker:mergeDebugAssets UP-TO-DATE
+> Task :android_file_picker:javaPreCompileDebug UP-TO-DATE
+> Task :android_file_picker:compileDebugJavaWithJavac NO-SOURCE
+> Task :android_file_picker:mergeDebugGeneratedProguardFiles
+> Task :android_file_picker:mergeDebugConsumerProguardFiles
+> Task :android_file_picker:prepareDebugArtProfile
+> Task :android_file_picker:prepareLintJarForPublish
+> Task :android_file_picker:processDebugManifest UP-TO-DATE
+> Task :android_file_picker:processDebugJavaRes UP-TO-DATE
+> Task :android_file_picker:writeDebugAarMetadata UP-TO-DATE
+> Task :android_file_picker:bundleLibRuntimeToJarDebug UP-TO-DATE
+> Task :android_file_picker:createFullJarDebug
+> Task :android_file_picker:preDebugAndroidTestBuild UP-TO-DATE
+> Task :android_file_picker:writeDebugLintModelMetadata
+> Task :android_file_picker:mergeDebugJavaResource
+> Task :android_file_picker:extractProguardFiles
+> Task :android_file_picker:syncDebugLibJars
+> Task :android_file_picker:bundleDebugLocalLintAar
+> Task :android_file_picker:generateDebugLintModel
+> Task :android_file_picker:generateDebugAndroidTestLintModel
+> Task :android_file_picker:preDebugUnitTestBuild UP-TO-DATE
+> Task :android_file_picker:generateDebugUnitTestLintModel
+> Task :cryptography_flutter:preBuild UP-TO-DATE
+> Task :cryptography_flutter:preDebugBuild UP-TO-DATE
+> Task :cryptography_flutter:checkDebugAarMetadata
+> Task :cryptography_flutter:mergeDebugJniLibFolders UP-TO-DATE
+> Task :cryptography_flutter:mergeDebugNativeLibs NO-SOURCE
+> Task :cryptography_flutter:stripDebugDebugSymbols NO-SOURCE
+> Task :cryptography_flutter:checkKotlinGradlePluginConfigurationErrors SKIPPED
+> Task :cryptography_flutter:generateDebugResources UP-TO-DATE
+> Task :cryptography_flutter:copyDebugJniLibsProjectAndLocalJars
+> Task :cryptography_flutter:packageDebugResources UP-TO-DATE
+> Task :cryptography_flutter:processDebugNavigationResources UP-TO-DATE
+> Task :cryptography_flutter:parseDebugLocalResources UP-TO-DATE
+> Task :cryptography_flutter:generateDebugRFile UP-TO-DATE
+> Task :cryptography_flutter:compileDebugKotlin UP-TO-DATE
+> Task :cryptography_flutter:extractDebugAnnotations
+> Task :cryptography_flutter:extractDeepLinksForAarDebug
+> Task :cryptography_flutter:generateDebugAssets UP-TO-DATE
+> Task :cryptography_flutter:mergeDebugAssets UP-TO-DATE
+> Task :cryptography_flutter:javaPreCompileDebug UP-TO-DATE
+> Task :cryptography_flutter:compileDebugJavaWithJavac NO-SOURCE
+> Task :cryptography_flutter:mergeDebugGeneratedProguardFiles
+> Task :cryptography_flutter:mergeDebugConsumerProguardFiles
+> Task :cryptography_flutter:prepareDebugArtProfile
+> Task :cryptography_flutter:prepareLintJarForPublish
+> Task :cryptography_flutter:processDebugManifest UP-TO-DATE
+> Task :cryptography_flutter:processDebugJavaRes UP-TO-DATE
+> Task :cryptography_flutter:writeDebugAarMetadata UP-TO-DATE
+> Task :flutter_plugin_android_lifecycle:preBuild UP-TO-DATE
+> Task :flutter_plugin_android_lifecycle:preDebugBuild UP-TO-DATE
+> Task :flutter_plugin_android_lifecycle:checkDebugAarMetadata
+> Task :flutter_plugin_android_lifecycle:mergeDebugJniLibFolders UP-TO-DATE
+> Task :flutter_plugin_android_lifecycle:mergeDebugNativeLibs NO-SOURCE
+> Task :flutter_plugin_android_lifecycle:stripDebugDebugSymbols NO-SOURCE
+> Task :cryptography_flutter:mergeDebugJavaResource
+> Task :flutter_plugin_android_lifecycle:copyDebugJniLibsProjectAndLocalJars
+> Task :cryptography_flutter:syncDebugLibJars
+> Task :cryptography_flutter:bundleDebugLocalLintAar
+> Task :flutter_plugin_android_lifecycle:checkKotlinGradlePluginConfigurationErrors SKIPPED
+> Task :flutter_plugin_android_lifecycle:generateDebugResources UP-TO-DATE
+> Task :flutter_plugin_android_lifecycle:packageDebugResources UP-TO-DATE
+> Task :flutter_plugin_android_lifecycle:processDebugNavigationResources UP-TO-DATE
+> Task :flutter_plugin_android_lifecycle:parseDebugLocalResources UP-TO-DATE
+> Task :flutter_plugin_android_lifecycle:generateDebugRFile UP-TO-DATE
+> Task :flutter_plugin_android_lifecycle:compileDebugKotlin NO-SOURCE
+> Task :flutter_plugin_android_lifecycle:extractDebugAnnotations
+> Task :flutter_plugin_android_lifecycle:extractDeepLinksForAarDebug
+> Task :flutter_plugin_android_lifecycle:generateDebugAssets UP-TO-DATE
+> Task :flutter_plugin_android_lifecycle:mergeDebugAssets UP-TO-DATE
+> Task :flutter_plugin_android_lifecycle:javaPreCompileDebug UP-TO-DATE
+> Task :flutter_plugin_android_lifecycle:compileDebugJavaWithJavac UP-TO-DATE
+> Task :flutter_plugin_android_lifecycle:mergeDebugGeneratedProguardFiles
+> Task :flutter_plugin_android_lifecycle:mergeDebugConsumerProguardFiles
+> Task :flutter_plugin_android_lifecycle:prepareDebugArtProfile
+> Task :flutter_plugin_android_lifecycle:prepareLintJarForPublish
+> Task :flutter_plugin_android_lifecycle:processDebugManifest UP-TO-DATE
+> Task :android_file_picker:lintAnalyzeDebugAndroidTest
+> Task :flutter_plugin_android_lifecycle:processDebugJavaRes NO-SOURCE
+> Task :flutter_plugin_android_lifecycle:writeDebugAarMetadata UP-TO-DATE
+> Task :google_sign_in_android:preBuild UP-TO-DATE
+> Task :google_sign_in_android:preDebugBuild UP-TO-DATE
+> Task :flutter_plugin_android_lifecycle:mergeDebugJavaResource
+> Task :google_sign_in_android:checkDebugAarMetadata
+> Task :flutter_plugin_android_lifecycle:syncDebugLibJars
+> Task :flutter_plugin_android_lifecycle:bundleDebugLocalLintAar
+> Task :google_sign_in_android:mergeDebugJniLibFolders UP-TO-DATE
+> Task :google_sign_in_android:mergeDebugNativeLibs NO-SOURCE
+> Task :google_sign_in_android:stripDebugDebugSymbols NO-SOURCE
+> Task :google_sign_in_android:checkKotlinGradlePluginConfigurationErrors SKIPPED
+> Task :google_sign_in_android:copyDebugJniLibsProjectAndLocalJars
+> Task :google_sign_in_android:generateDebugResources UP-TO-DATE
+> Task :google_sign_in_android:packageDebugResources UP-TO-DATE
+> Task :google_sign_in_android:processDebugNavigationResources UP-TO-DATE
+> Task :google_sign_in_android:parseDebugLocalResources UP-TO-DATE
+> Task :google_sign_in_android:generateDebugRFile UP-TO-DATE
+> Task :google_sign_in_android:compileDebugKotlin UP-TO-DATE
+> Task :google_sign_in_android:extractDebugAnnotations
+> Task :google_sign_in_android:extractDeepLinksForAarDebug
+> Task :google_sign_in_android:generateDebugAssets UP-TO-DATE
+> Task :google_sign_in_android:mergeDebugAssets UP-TO-DATE
+> Task :google_sign_in_android:javaPreCompileDebug UP-TO-DATE
+> Task :google_sign_in_android:compileDebugJavaWithJavac NO-SOURCE
+> Task :google_sign_in_android:mergeDebugGeneratedProguardFiles
+> Task :google_sign_in_android:mergeDebugConsumerProguardFiles
+> Task :google_sign_in_android:prepareDebugArtProfile
+> Task :google_sign_in_android:prepareLintJarForPublish
+> Task :google_sign_in_android:processDebugManifest UP-TO-DATE
+> Task :google_sign_in_android:processDebugJavaRes UP-TO-DATE
+> Task :google_sign_in_android:writeDebugAarMetadata UP-TO-DATE
+> Task :image_picker_android:preBuild UP-TO-DATE
+> Task :image_picker_android:preDebugBuild UP-TO-DATE
+> Task :image_picker_android:checkDebugAarMetadata
+> Task :image_picker_android:mergeDebugJniLibFolders UP-TO-DATE
+> Task :image_picker_android:mergeDebugNativeLibs NO-SOURCE
+> Task :image_picker_android:stripDebugDebugSymbols NO-SOURCE
+> Task :image_picker_android:copyDebugJniLibsProjectAndLocalJars
+> Task :flutter_plugin_android_lifecycle:bundleLibCompileToJarDebug UP-TO-DATE
+> Task :image_picker_android:checkKotlinGradlePluginConfigurationErrors SKIPPED
+> Task :google_sign_in_android:mergeDebugJavaResource
+> Task :image_picker_android:generateDebugResources UP-TO-DATE
+> Task :google_sign_in_android:syncDebugLibJars
+> Task :google_sign_in_android:bundleDebugLocalLintAar
+> Task :image_picker_android:packageDebugResources UP-TO-DATE
+> Task :image_picker_android:processDebugNavigationResources UP-TO-DATE
+> Task :image_picker_android:parseDebugLocalResources UP-TO-DATE
+> Task :image_picker_android:generateDebugRFile UP-TO-DATE
+> Task :image_picker_android:compileDebugKotlin UP-TO-DATE
+> Task :image_picker_android:extractDebugAnnotations
+> Task :image_picker_android:extractDeepLinksForAarDebug
+> Task :image_picker_android:generateDebugAssets UP-TO-DATE
+> Task :image_picker_android:mergeDebugAssets UP-TO-DATE
+> Task :image_picker_android:javaPreCompileDebug UP-TO-DATE
+> Task :image_picker_android:compileDebugJavaWithJavac UP-TO-DATE
+> Task :image_picker_android:mergeDebugGeneratedProguardFiles
+> Task :image_picker_android:mergeDebugConsumerProguardFiles
+> Task :image_picker_android:prepareDebugArtProfile
+> Task :image_picker_android:prepareLintJarForPublish
+> Task :image_picker_android:processDebugManifest UP-TO-DATE
+> Task :image_picker_android:processDebugJavaRes UP-TO-DATE
+> Task :image_picker_android:writeDebugAarMetadata UP-TO-DATE
+> Task :in_app_purchase_android:preBuild UP-TO-DATE
+> Task :in_app_purchase_android:preDebugBuild UP-TO-DATE
+> Task :in_app_purchase_android:checkDebugAarMetadata
+> Task :in_app_purchase_android:mergeDebugJniLibFolders UP-TO-DATE
+> Task :in_app_purchase_android:mergeDebugNativeLibs NO-SOURCE
+> Task :in_app_purchase_android:stripDebugDebugSymbols NO-SOURCE
+> Task :in_app_purchase_android:checkKotlinGradlePluginConfigurationErrors SKIPPED
+> Task :in_app_purchase_android:copyDebugJniLibsProjectAndLocalJars
+> Task :image_picker_android:mergeDebugJavaResource
+> Task :in_app_purchase_android:generateDebugBuildConfig UP-TO-DATE
+> Task :android_file_picker:lintAnalyzeDebugUnitTest
+> Task :image_picker_android:syncDebugLibJars
+> Task :image_picker_android:bundleDebugLocalLintAar
+> Task :in_app_purchase_android:generateDebugResources UP-TO-DATE
+> Task :in_app_purchase_android:packageDebugResources UP-TO-DATE
+> Task :in_app_purchase_android:processDebugNavigationResources UP-TO-DATE
+> Task :in_app_purchase_android:parseDebugLocalResources UP-TO-DATE
+> Task :in_app_purchase_android:generateDebugRFile UP-TO-DATE
+> Task :in_app_purchase_android:compileDebugKotlin UP-TO-DATE
+> Task :in_app_purchase_android:extractDebugAnnotations
+> Task :in_app_purchase_android:extractDeepLinksForAarDebug
+> Task :in_app_purchase_android:generateDebugAssets UP-TO-DATE
+> Task :in_app_purchase_android:mergeDebugAssets UP-TO-DATE
+> Task :in_app_purchase_android:javaPreCompileDebug UP-TO-DATE
+> Task :in_app_purchase_android:compileDebugJavaWithJavac UP-TO-DATE
+> Task :in_app_purchase_android:mergeDebugGeneratedProguardFiles
+> Task :in_app_purchase_android:mergeDebugConsumerProguardFiles
+> Task :in_app_purchase_android:prepareDebugArtProfile
+> Task :in_app_purchase_android:prepareLintJarForPublish
+> Task :in_app_purchase_android:processDebugManifest UP-TO-DATE
+> Task :in_app_purchase_android:processDebugJavaRes UP-TO-DATE
+> Task :in_app_purchase_android:writeDebugAarMetadata UP-TO-DATE
+> Task :integration_test:preBuild UP-TO-DATE
+> Task :integration_test:preDebugBuild UP-TO-DATE
+> Task :integration_test:checkDebugAarMetadata
+> Task :integration_test:mergeDebugJniLibFolders UP-TO-DATE
+> Task :integration_test:mergeDebugNativeLibs NO-SOURCE
+> Task :integration_test:stripDebugDebugSymbols NO-SOURCE
+> Task :in_app_purchase_android:mergeDebugJavaResource
+> Task :integration_test:copyDebugJniLibsProjectAndLocalJars
+> Task :in_app_purchase_android:syncDebugLibJars
+> Task :in_app_purchase_android:bundleDebugLocalLintAar
+> Task :integration_test:checkKotlinGradlePluginConfigurationErrors SKIPPED
+> Task :integration_test:generateDebugResources UP-TO-DATE
+> Task :integration_test:packageDebugResources UP-TO-DATE
+> Task :integration_test:processDebugNavigationResources UP-TO-DATE
+> Task :integration_test:parseDebugLocalResources UP-TO-DATE
+> Task :integration_test:generateDebugRFile UP-TO-DATE
+> Task :integration_test:compileDebugKotlin NO-SOURCE
+> Task :integration_test:extractDebugAnnotations
+> Task :integration_test:extractDeepLinksForAarDebug
+> Task :integration_test:generateDebugAssets UP-TO-DATE
+> Task :integration_test:mergeDebugAssets UP-TO-DATE
+> Task :integration_test:javaPreCompileDebug UP-TO-DATE
+> Task :integration_test:compileDebugJavaWithJavac UP-TO-DATE
+> Task :integration_test:mergeDebugGeneratedProguardFiles
+> Task :integration_test:mergeDebugConsumerProguardFiles
+> Task :integration_test:prepareDebugArtProfile
+> Task :integration_test:prepareLintJarForPublish
+> Task :integration_test:processDebugManifest UP-TO-DATE
+> Task :integration_test:processDebugJavaRes NO-SOURCE
+> Task :integration_test:writeDebugAarMetadata UP-TO-DATE
+> Task :jni:preBuild UP-TO-DATE
+> Task :jni:preDebugBuild UP-TO-DATE
+> Task :integration_test:mergeDebugJavaResource
+> Task :jni:checkDebugAarMetadata
+> Task :integration_test:syncDebugLibJars
+> Task :integration_test:bundleDebugLocalLintAar
+> Task :jni:preProfileBuild UP-TO-DATE
+
+> Task :jni:configureCMakeDebug[arm64-v8a]
+Checking the license for package CMake 3.22.1 in /opt/android-sdk/licenses
+License for package CMake 3.22.1 accepted.
+Preparing "Install CMake 3.22.1 v.3.22.1".
+
+> Task :android_file_picker:lintAnalyzeDebug
+
+> Task :jni:configureCMakeDebug[arm64-v8a]
+"Install CMake 3.22.1 v.3.22.1" ready.
+Installing CMake 3.22.1 in /opt/android-sdk/cmake/3.22.1
+"Install CMake 3.22.1 v.3.22.1" complete.
+"Install CMake 3.22.1 v.3.22.1" finished.
+
+> Task :jni:buildCMakeDebug[arm64-v8a]
+> Task :jni:configureCMakeDebug[armeabi-v7a]
+> Task :jni:buildCMakeDebug[armeabi-v7a]
+> Task :jni:configureCMakeDebug[x86]
+> Task :jni:buildCMakeDebug[x86]
+> Task :jni:configureCMakeDebug[x86_64]
+> Task :jni:buildCMakeDebug[x86_64]
+> Task :jni:mergeDebugJniLibFolders UP-TO-DATE
+> Task :jni:mergeDebugNativeLibs UP-TO-DATE
+> Task :jni:checkKotlinGradlePluginConfigurationErrors SKIPPED
+> Task :jni:generateDebugResources UP-TO-DATE
+> Task :jni:packageDebugResources UP-TO-DATE
+> Task :jni:stripDebugDebugSymbols
+> Task :jni:processDebugNavigationResources UP-TO-DATE
+> Task :jni:parseDebugLocalResources UP-TO-DATE
+> Task :jni:generateDebugRFile UP-TO-DATE
+> Task :jni:compileDebugKotlin NO-SOURCE
+> Task :jni:extractDebugAnnotations
+> Task :jni:extractDeepLinksForAarDebug
+> Task :jni:generateDebugAssets UP-TO-DATE
+> Task :jni:mergeDebugAssets UP-TO-DATE
+> Task :jni:javaPreCompileDebug UP-TO-DATE
+> Task :jni:copyDebugJniLibsProjectAndLocalJars
+> Task :jni:compileDebugJavaWithJavac UP-TO-DATE
+> Task :jni:mergeDebugGeneratedProguardFiles
+> Task :jni:mergeDebugConsumerProguardFiles
+> Task :jni:prepareDebugArtProfile
+> Task :jni:prepareLintJarForPublish
+> Task :jni:processDebugManifest UP-TO-DATE
+> Task :jni:processDebugJavaRes NO-SOURCE
+> Task :jni:writeDebugAarMetadata UP-TO-DATE
+> Task :jni_flutter:preBuild UP-TO-DATE
+> Task :jni_flutter:preDebugBuild UP-TO-DATE
+> Task :jni:mergeDebugJavaResource
+> Task :jni_flutter:checkDebugAarMetadata
+> Task :jni_flutter:mergeDebugJniLibFolders UP-TO-DATE
+> Task :jni:syncDebugLibJars
+> Task :jni:bundleDebugLocalLintAar
+> Task :jni_flutter:mergeDebugNativeLibs NO-SOURCE
+> Task :jni_flutter:stripDebugDebugSymbols NO-SOURCE
+> Task :jni:bundleLibCompileToJarDebug UP-TO-DATE
+> Task :jni_flutter:checkKotlinGradlePluginConfigurationErrors SKIPPED
+> Task :jni_flutter:copyDebugJniLibsProjectAndLocalJars
+> Task :jni_flutter:generateDebugResources UP-TO-DATE
+> Task :jni_flutter:packageDebugResources UP-TO-DATE
+> Task :jni_flutter:processDebugNavigationResources UP-TO-DATE
+> Task :jni_flutter:parseDebugLocalResources UP-TO-DATE
+> Task :jni_flutter:generateDebugRFile UP-TO-DATE
+> Task :jni_flutter:compileDebugKotlin NO-SOURCE
+> Task :jni_flutter:extractDebugAnnotations
+> Task :jni_flutter:extractDeepLinksForAarDebug
+> Task :jni_flutter:generateDebugAssets UP-TO-DATE
+> Task :jni_flutter:mergeDebugAssets UP-TO-DATE
+> Task :jni_flutter:javaPreCompileDebug UP-TO-DATE
+> Task :jni_flutter:compileDebugJavaWithJavac UP-TO-DATE
+> Task :jni_flutter:mergeDebugGeneratedProguardFiles
+> Task :jni_flutter:mergeDebugConsumerProguardFiles
+> Task :jni_flutter:prepareDebugArtProfile
+> Task :jni_flutter:prepareLintJarForPublish
+> Task :jni_flutter:processDebugManifest UP-TO-DATE
+> Task :jni_flutter:processDebugJavaRes NO-SOURCE
+> Task :jni_flutter:writeDebugAarMetadata UP-TO-DATE
+> Task :sign_in_with_apple:preBuild UP-TO-DATE
+> Task :sign_in_with_apple:preDebugBuild UP-TO-DATE
+> Task :jni_flutter:mergeDebugJavaResource
+> Task :sign_in_with_apple:checkDebugAarMetadata
+> Task :jni_flutter:syncDebugLibJars
+> Task :jni_flutter:bundleDebugLocalLintAar
+> Task :sign_in_with_apple:mergeDebugJniLibFolders UP-TO-DATE
+> Task :sign_in_with_apple:mergeDebugNativeLibs NO-SOURCE
+> Task :sign_in_with_apple:stripDebugDebugSymbols NO-SOURCE
+> Task :sign_in_with_apple:checkKotlinGradlePluginConfigurationErrors SKIPPED
+> Task :sign_in_with_apple:generateDebugResources UP-TO-DATE
+> Task :sign_in_with_apple:copyDebugJniLibsProjectAndLocalJars
+> Task :sign_in_with_apple:packageDebugResources UP-TO-DATE
+> Task :sign_in_with_apple:processDebugNavigationResources UP-TO-DATE
+> Task :sign_in_with_apple:parseDebugLocalResources UP-TO-DATE
+> Task :sign_in_with_apple:generateDebugRFile UP-TO-DATE
+> Task :sign_in_with_apple:compileDebugKotlin UP-TO-DATE
+> Task :sign_in_with_apple:extractDebugAnnotations
+> Task :sign_in_with_apple:extractDeepLinksForAarDebug
+> Task :sign_in_with_apple:generateDebugAssets UP-TO-DATE
+> Task :sign_in_with_apple:mergeDebugAssets UP-TO-DATE
+> Task :sign_in_with_apple:javaPreCompileDebug UP-TO-DATE
+> Task :sign_in_with_apple:compileDebugJavaWithJavac NO-SOURCE
+> Task :sign_in_with_apple:mergeDebugGeneratedProguardFiles
+> Task :sign_in_with_apple:mergeDebugConsumerProguardFiles
+> Task :sign_in_with_apple:prepareDebugArtProfile
+> Task :sign_in_with_apple:prepareLintJarForPublish
+> Task :sign_in_with_apple:processDebugManifest UP-TO-DATE
+> Task :sign_in_with_apple:processDebugJavaRes UP-TO-DATE
+> Task :sign_in_with_apple:writeDebugAarMetadata UP-TO-DATE
+> Task :speech_to_text:preBuild UP-TO-DATE
+> Task :speech_to_text:preDebugBuild UP-TO-DATE
+> Task :speech_to_text:checkDebugAarMetadata
+> Task :speech_to_text:mergeDebugJniLibFolders UP-TO-DATE
+> Task :speech_to_text:mergeDebugNativeLibs NO-SOURCE
+> Task :speech_to_text:stripDebugDebugSymbols NO-SOURCE
+> Task :speech_to_text:checkKotlinGradlePluginConfigurationErrors SKIPPED
+> Task :speech_to_text:generateDebugResources UP-TO-DATE
+> Task :speech_to_text:copyDebugJniLibsProjectAndLocalJars
+> Task :sign_in_with_apple:mergeDebugJavaResource
+> Task :speech_to_text:packageDebugResources UP-TO-DATE
+> Task :sign_in_with_apple:syncDebugLibJars
+> Task :sign_in_with_apple:bundleDebugLocalLintAar
+> Task :speech_to_text:processDebugNavigationResources UP-TO-DATE
+> Task :speech_to_text:parseDebugLocalResources UP-TO-DATE
+> Task :speech_to_text:generateDebugRFile UP-TO-DATE
+> Task :speech_to_text:compileDebugKotlin UP-TO-DATE
+> Task :speech_to_text:extractDebugAnnotations
+> Task :speech_to_text:extractDeepLinksForAarDebug
+> Task :speech_to_text:generateDebugAssets UP-TO-DATE
+> Task :speech_to_text:mergeDebugAssets UP-TO-DATE
+> Task :speech_to_text:javaPreCompileDebug UP-TO-DATE
+> Task :speech_to_text:compileDebugJavaWithJavac NO-SOURCE
+> Task :speech_to_text:mergeDebugGeneratedProguardFiles
+> Task :speech_to_text:mergeDebugConsumerProguardFiles
+> Task :speech_to_text:prepareDebugArtProfile
+> Task :speech_to_text:prepareLintJarForPublish
+> Task :speech_to_text:processDebugManifest UP-TO-DATE
+> Task :speech_to_text:processDebugJavaRes UP-TO-DATE
+> Task :speech_to_text:writeDebugAarMetadata UP-TO-DATE
+> Task :url_launcher_android:preBuild UP-TO-DATE
+> Task :url_launcher_android:preDebugBuild UP-TO-DATE
+> Task :url_launcher_android:checkDebugAarMetadata
+> Task :speech_to_text:mergeDebugJavaResource
+> Task :url_launcher_android:mergeDebugJniLibFolders UP-TO-DATE
+> Task :speech_to_text:syncDebugLibJars
+> Task :speech_to_text:bundleDebugLocalLintAar
+> Task :url_launcher_android:mergeDebugNativeLibs NO-SOURCE
+> Task :url_launcher_android:stripDebugDebugSymbols NO-SOURCE
+> Task :url_launcher_android:checkKotlinGradlePluginConfigurationErrors SKIPPED
+> Task :url_launcher_android:copyDebugJniLibsProjectAndLocalJars
+> Task :url_launcher_android:generateDebugBuildConfig UP-TO-DATE
+> Task :url_launcher_android:generateDebugResources UP-TO-DATE
+> Task :url_launcher_android:packageDebugResources UP-TO-DATE
+> Task :url_launcher_android:processDebugNavigationResources UP-TO-DATE
+> Task :url_launcher_android:parseDebugLocalResources UP-TO-DATE
+> Task :url_launcher_android:generateDebugRFile UP-TO-DATE
+> Task :url_launcher_android:compileDebugKotlin UP-TO-DATE
+> Task :url_launcher_android:extractDebugAnnotations
+> Task :url_launcher_android:extractDeepLinksForAarDebug
+> Task :url_launcher_android:generateDebugAssets UP-TO-DATE
+> Task :url_launcher_android:mergeDebugAssets UP-TO-DATE
+> Task :url_launcher_android:javaPreCompileDebug UP-TO-DATE
+> Task :url_launcher_android:compileDebugJavaWithJavac UP-TO-DATE
+> Task :url_launcher_android:mergeDebugGeneratedProguardFiles
+> Task :url_launcher_android:mergeDebugConsumerProguardFiles
+> Task :url_launcher_android:prepareDebugArtProfile
+> Task :url_launcher_android:prepareLintJarForPublish
+> Task :url_launcher_android:processDebugManifest UP-TO-DATE
+> Task :url_launcher_android:processDebugJavaRes UP-TO-DATE
+> Task :url_launcher_android:writeDebugAarMetadata UP-TO-DATE
+> Task :android_file_picker:bundleLibCompileToJarDebug UP-TO-DATE
+> Task :app:checkKotlinGradlePluginConfigurationErrors SKIPPED
+> Task :app:validateCompileSdkVersion
+> Task :app:preBuild
+> Task :app:preDevNoSmsDebugBuild
+> Task :app:generateDevNoSmsDebugBuildConfig UP-TO-DATE
+> Task :url_launcher_android:mergeDebugJavaResource
+> Task :app:cleanMergeDevNoSmsDebugAssets
+> Task :url_launcher_android:syncDebugLibJars
+> Task :url_launcher_android:bundleDebugLocalLintAar
+> Task :app:compileFlutterBuildDevNoSmsDebug UP-TO-DATE
+> Task :app:generateDevNoSmsDebugAssets UP-TO-DATE
+> Task :app:mergeDevNoSmsDebugAssets
+> Task :app:copyFlutterAssetsDevNoSmsDebug
+> Task :app:generateDevNoSmsDebugResValues UP-TO-DATE
+> Task :app:generateDevNoSmsDebugResources UP-TO-DATE
+> Task :app:packageDevNoSmsDebugResources UP-TO-DATE
+> Task :app:processDevNoSmsDebugNavigationResources UP-TO-DATE
+> Task :app:parseDevNoSmsDebugLocalResources UP-TO-DATE
+> Task :app:generateDevNoSmsDebugRFile UP-TO-DATE
+> Task :cryptography_flutter:bundleLibCompileToJarDebug UP-TO-DATE
+> Task :google_sign_in_android:bundleLibCompileToJarDebug UP-TO-DATE
+> Task :image_picker_android:bundleLibCompileToJarDebug UP-TO-DATE
+> Task :in_app_purchase_android:bundleLibCompileToJarDebug UP-TO-DATE
+> Task :integration_test:bundleLibCompileToJarDebug UP-TO-DATE
+> Task :jni_flutter:bundleLibCompileToJarDebug UP-TO-DATE
+> Task :sign_in_with_apple:bundleLibCompileToJarDebug UP-TO-DATE
+> Task :speech_to_text:bundleLibCompileToJarDebug UP-TO-DATE
+> Task :url_launcher_android:bundleLibCompileToJarDebug UP-TO-DATE
+> Task :app:compileDevNoSmsDebugKotlin UP-TO-DATE
+> Task :app:javaPreCompileDevNoSmsDebug UP-TO-DATE
+> Task :app:compileDevNoSmsDebugJavaWithJavac UP-TO-DATE
+> Task :android_file_picker:mapDebugSourceSetPaths UP-TO-DATE
+> Task :android_file_picker:compileDebugLibraryResources UP-TO-DATE
+> Task :app:checkDevNoSmsDebugAarMetadata UP-TO-DATE
+> Task :app:mapDevNoSmsDebugSourceSetPaths UP-TO-DATE
+> Task :app:compileDevNoSmsDebugNavigationResources UP-TO-DATE
+> Task :app:mergeDevNoSmsDebugResources UP-TO-DATE
+> Task :app:createDevNoSmsDebugCompatibleScreenManifests UP-TO-DATE
+> Task :android_file_picker:extractDeepLinksDebug UP-TO-DATE
+> Task :app:extractDeepLinksDevNoSmsDebug UP-TO-DATE
+> Task :cryptography_flutter:extractDeepLinksDebug UP-TO-DATE
+> Task :flutter_plugin_android_lifecycle:extractDeepLinksDebug UP-TO-DATE
+> Task :google_sign_in_android:extractDeepLinksDebug UP-TO-DATE
+> Task :image_picker_android:extractDeepLinksDebug UP-TO-DATE
+> Task :in_app_purchase_android:extractDeepLinksDebug UP-TO-DATE
+> Task :integration_test:extractDeepLinksDebug UP-TO-DATE
+> Task :jni:extractDeepLinksDebug UP-TO-DATE
+> Task :jni_flutter:extractDeepLinksDebug UP-TO-DATE
+> Task :sign_in_with_apple:extractDeepLinksDebug UP-TO-DATE
+> Task :speech_to_text:extractDeepLinksDebug UP-TO-DATE
+> Task :url_launcher_android:extractDeepLinksDebug UP-TO-DATE
+> Task :app:processDevNoSmsDebugMainManifest UP-TO-DATE
+> Task :app:outputDevNoSmsDebugAppLinkSettings UP-TO-DATE
+> Task :app:processDevNoSmsDebugManifest UP-TO-DATE
+> Task :app:processDevNoSmsDebugManifestForPackage UP-TO-DATE
+> Task :cryptography_flutter:mapDebugSourceSetPaths UP-TO-DATE
+> Task :cryptography_flutter:compileDebugLibraryResources UP-TO-DATE
+> Task :flutter_plugin_android_lifecycle:mapDebugSourceSetPaths UP-TO-DATE
+> Task :flutter_plugin_android_lifecycle:compileDebugLibraryResources UP-TO-DATE
+> Task :google_sign_in_android:mapDebugSourceSetPaths UP-TO-DATE
+> Task :google_sign_in_android:compileDebugLibraryResources UP-TO-DATE
+> Task :image_picker_android:mapDebugSourceSetPaths UP-TO-DATE
+> Task :image_picker_android:compileDebugLibraryResources UP-TO-DATE
+> Task :in_app_purchase_android:mapDebugSourceSetPaths UP-TO-DATE
+> Task :in_app_purchase_android:compileDebugLibraryResources UP-TO-DATE
+> Task :integration_test:mapDebugSourceSetPaths UP-TO-DATE
+> Task :integration_test:compileDebugLibraryResources UP-TO-DATE
+> Task :jni:mapDebugSourceSetPaths UP-TO-DATE
+> Task :jni:compileDebugLibraryResources UP-TO-DATE
+> Task :jni_flutter:mapDebugSourceSetPaths UP-TO-DATE
+> Task :jni_flutter:compileDebugLibraryResources UP-TO-DATE
+> Task :sign_in_with_apple:mapDebugSourceSetPaths UP-TO-DATE
+> Task :sign_in_with_apple:compileDebugLibraryResources UP-TO-DATE
+> Task :speech_to_text:mapDebugSourceSetPaths UP-TO-DATE
+> Task :speech_to_text:compileDebugLibraryResources UP-TO-DATE
+> Task :url_launcher_android:mapDebugSourceSetPaths UP-TO-DATE
+> Task :url_launcher_android:compileDebugLibraryResources UP-TO-DATE
+> Task :app:processDevNoSmsDebugResources UP-TO-DATE
+> Task :app:bundleDevNoSmsDebugClassesToCompileJar UP-TO-DATE
+> Task :app:preDevNoSmsDebugAndroidTestBuild SKIPPED
+> Task :app:generateDevNoSmsDebugAndroidTestResValues
+> Task :cryptography_flutter:bundleLibRuntimeToJarDebug UP-TO-DATE
+> Task :cryptography_flutter:createFullJarDebug
+> Task :cryptography_flutter:writeDebugLintModelMetadata
+> Task :flutter_plugin_android_lifecycle:bundleLibRuntimeToJarDebug UP-TO-DATE
+> Task :flutter_plugin_android_lifecycle:createFullJarDebug
+> Task :flutter_plugin_android_lifecycle:writeDebugLintModelMetadata
+> Task :google_sign_in_android:bundleLibRuntimeToJarDebug UP-TO-DATE
+> Task :google_sign_in_android:createFullJarDebug
+> Task :google_sign_in_android:writeDebugLintModelMetadata
+> Task :image_picker_android:bundleLibRuntimeToJarDebug UP-TO-DATE
+> Task :image_picker_android:createFullJarDebug
+> Task :image_picker_android:writeDebugLintModelMetadata
+> Task :in_app_purchase_android:bundleLibRuntimeToJarDebug UP-TO-DATE
+> Task :in_app_purchase_android:createFullJarDebug
+> Task :in_app_purchase_android:writeDebugLintModelMetadata
+> Task :integration_test:bundleLibRuntimeToJarDebug UP-TO-DATE
+> Task :integration_test:createFullJarDebug
+> Task :integration_test:writeDebugLintModelMetadata
+> Task :jni:bundleLibRuntimeToJarDebug UP-TO-DATE
+> Task :jni:createFullJarDebug
+> Task :jni:writeDebugLintModelMetadata
+> Task :jni_flutter:bundleLibRuntimeToJarDebug UP-TO-DATE
+> Task :jni_flutter:createFullJarDebug
+> Task :jni_flutter:writeDebugLintModelMetadata
+> Task :sign_in_with_apple:bundleLibRuntimeToJarDebug UP-TO-DATE
+> Task :sign_in_with_apple:createFullJarDebug
+> Task :sign_in_with_apple:writeDebugLintModelMetadata
+> Task :speech_to_text:bundleLibRuntimeToJarDebug UP-TO-DATE
+> Task :speech_to_text:createFullJarDebug
+> Task :speech_to_text:writeDebugLintModelMetadata
+> Task :url_launcher_android:bundleLibRuntimeToJarDebug UP-TO-DATE
+> Task :url_launcher_android:createFullJarDebug
+> Task :url_launcher_android:writeDebugLintModelMetadata
+> Task :app:generateDevNoSmsDebugAndroidTestLintModel
+> Task :app:extractProguardFiles
+> Task :cryptography_flutter:extractProguardFiles
+> Task :cryptography_flutter:generateDebugLintModel
+> Task :flutter_plugin_android_lifecycle:extractProguardFiles
+> Task :flutter_plugin_android_lifecycle:generateDebugLintModel
+> Task :google_sign_in_android:extractProguardFiles
+> Task :google_sign_in_android:generateDebugLintModel
+> Task :image_picker_android:extractProguardFiles
+> Task :image_picker_android:generateDebugLintModel
+> Task :in_app_purchase_android:extractProguardFiles
+> Task :in_app_purchase_android:generateDebugLintModel
+> Task :integration_test:extractProguardFiles
+> Task :integration_test:generateDebugLintModel
+> Task :jni:extractProguardFiles
+> Task :jni:generateDebugLintModel
+> Task :jni_flutter:extractProguardFiles
+> Task :jni_flutter:generateDebugLintModel
+> Task :sign_in_with_apple:extractProguardFiles
+> Task :sign_in_with_apple:generateDebugLintModel
+> Task :speech_to_text:extractProguardFiles
+> Task :speech_to_text:generateDebugLintModel
+> Task :url_launcher_android:extractProguardFiles
+> Task :url_launcher_android:generateDebugLintModel
+> Task :app:generateDevNoSmsDebugLintReportModel
+> Task :app:preDevNoSmsDebugUnitTestBuild
+> Task :app:generateDevNoSmsDebugUnitTestLintModel
+> Task :cryptography_flutter:preDebugAndroidTestBuild UP-TO-DATE
+> Task :cryptography_flutter:generateDebugAndroidTestLintModel
+> Task :cryptography_flutter:preDebugUnitTestBuild UP-TO-DATE
+> Task :cryptography_flutter:lintAnalyzeDebug
+> Task :cryptography_flutter:generateDebugUnitTestLintModel
+> Task :flutter_plugin_android_lifecycle:lintAnalyzeDebug
+> Task :integration_test:lintAnalyzeDebug
+> Task :cryptography_flutter:lintAnalyzeDebugAndroidTest
+> Task :sign_in_with_apple:lintAnalyzeDebug
+> Task :cryptography_flutter:lintAnalyzeDebugUnitTest
+> Task :jni:lintAnalyzeDebug
+> Task :flutter_plugin_android_lifecycle:preDebugAndroidTestBuild UP-TO-DATE
+> Task :flutter_plugin_android_lifecycle:generateDebugAndroidTestLintModel
+> Task :flutter_plugin_android_lifecycle:preDebugUnitTestBuild UP-TO-DATE
+> Task :flutter_plugin_android_lifecycle:generateDebugUnitTestLintModel
+> Task :jni_flutter:lintAnalyzeDebug
+> Task :flutter_plugin_android_lifecycle:lintAnalyzeDebugAndroidTest
+> Task :google_sign_in_android:preDebugAndroidTestBuild UP-TO-DATE
+> Task :google_sign_in_android:generateDebugAndroidTestLintModel
+> Task :google_sign_in_android:preDebugUnitTestBuild UP-TO-DATE
+> Task :speech_to_text:lintAnalyzeDebug
+> Task :flutter_plugin_android_lifecycle:lintAnalyzeDebugUnitTest
+> Task :google_sign_in_android:generateDebugUnitTestLintModel
+> Task :google_sign_in_android:lintAnalyzeDebugAndroidTest
+> Task :image_picker_android:preDebugAndroidTestBuild UP-TO-DATE
+> Task :image_picker_android:generateDebugAndroidTestLintModel
+> Task :image_picker_android:preDebugUnitTestBuild UP-TO-DATE
+> Task :image_picker_android:generateDebugUnitTestLintModel
+> Task :image_picker_android:lintAnalyzeDebugAndroidTest
+> Task :in_app_purchase_android:preDebugAndroidTestBuild UP-TO-DATE
+> Task :in_app_purchase_android:generateDebugAndroidTestLintModel
+> Task :in_app_purchase_android:preDebugUnitTestBuild UP-TO-DATE
+> Task :google_sign_in_android:lintAnalyzeDebugUnitTest
+> Task :in_app_purchase_android:generateDebugUnitTestLintModel
+> Task :integration_test:preDebugAndroidTestBuild UP-TO-DATE
+> Task :in_app_purchase_android:lintAnalyzeDebugAndroidTest
+> Task :integration_test:generateDebugAndroidTestLintModel
+> Task :integration_test:preDebugUnitTestBuild UP-TO-DATE
+> Task :integration_test:generateDebugUnitTestLintModel
+> Task :url_launcher_android:lintAnalyzeDebug
+> Task :integration_test:lintAnalyzeDebugAndroidTest
+> Task :image_picker_android:lintAnalyzeDebugUnitTest
+> Task :jni:preDebugAndroidTestBuild UP-TO-DATE
+> Task :integration_test:lintAnalyzeDebugUnitTest
+> Task :jni:generateDebugAndroidTestLintModel
+> Task :jni:preDebugUnitTestBuild UP-TO-DATE
+> Task :jni:generateDebugUnitTestLintModel
+> Task :in_app_purchase_android:lintAnalyzeDebugUnitTest
+> Task :jni:lintAnalyzeDebugAndroidTest
+> Task :jni_flutter:preDebugAndroidTestBuild UP-TO-DATE
+> Task :jni:lintAnalyzeDebugUnitTest
+> Task :jni_flutter:generateDebugAndroidTestLintModel
+> Task :jni_flutter:preDebugUnitTestBuild UP-TO-DATE
+> Task :jni_flutter:generateDebugUnitTestLintModel
+> Task :jni_flutter:lintAnalyzeDebugAndroidTest
+> Task :sign_in_with_apple:preDebugAndroidTestBuild UP-TO-DATE
+> Task :jni_flutter:lintAnalyzeDebugUnitTest
+> Task :sign_in_with_apple:generateDebugAndroidTestLintModel
+> Task :sign_in_with_apple:preDebugUnitTestBuild UP-TO-DATE
+> Task :sign_in_with_apple:generateDebugUnitTestLintModel
+> Task :google_sign_in_android:lintAnalyzeDebug
+> Task :sign_in_with_apple:lintAnalyzeDebugAndroidTest
+> Task :speech_to_text:preDebugAndroidTestBuild UP-TO-DATE
+> Task :sign_in_with_apple:lintAnalyzeDebugUnitTest
+> Task :speech_to_text:generateDebugAndroidTestLintModel
+> Task :speech_to_text:preDebugUnitTestBuild UP-TO-DATE
+> Task :speech_to_text:generateDebugUnitTestLintModel
+> Task :speech_to_text:lintAnalyzeDebugAndroidTest
+> Task :url_launcher_android:preDebugAndroidTestBuild UP-TO-DATE
+> Task :speech_to_text:lintAnalyzeDebugUnitTest
+> Task :url_launcher_android:generateDebugAndroidTestLintModel
+> Task :url_launcher_android:preDebugUnitTestBuild UP-TO-DATE
+> Task :url_launcher_android:generateDebugUnitTestLintModel
+> Task :url_launcher_android:lintAnalyzeDebugAndroidTest
+> Task :url_launcher_android:lintAnalyzeDebugUnitTest
+> Task :app:lintAnalyzeDevNoSmsDebugAndroidTest
+> Task :image_picker_android:lintAnalyzeDebug
+> Task :in_app_purchase_android:lintAnalyzeDebug
+> Task :app:lintAnalyzeDevNoSmsDebugUnitTest
+> Task :app:lintAnalyzeDevNoSmsDebug
+
+> Task :app:lintReportDevNoSmsDebug
+Wrote HTML report to file:///work/app/build/app/reports/lint-results-devNoSmsDebug.html
+
+> Task :app:lintDevNoSmsDebug
+
+[Incubating] Problems report is available at: file:///work/app/build/reports/problems/problems-report.html
+
+Deprecated Gradle features were used in this build, making it incompatible with Gradle 10.
+
+You can use '--warning-mode all' to show the individual deprecation warnings and determine if they come from your own scripts or plugins.
+
+For more on this, please refer to https://docs.gradle.org/9.3.1/userguide/command_line_interface.html#sec:command_line_warnings in the Gradle documentation.
+
+BUILD SUCCESSFUL in 3m 11s
+496 actionable tasks: 267 executed, 229 up-to-date
+Consider enabling configuration cache to speed up this build: https://docs.gradle.org/9.3.1/userguide/configuration_cache_enabling.html
+
+[01:41:48] === RESULT android-lint exit=0 (193s)
+[01:41:48] SUMMARY FAIL sha=b6c31c172b3fbea23ea51bca23d4d3500d0e46cc pipeline=quick-app pub-get=0 format=0 analyze=0 lints=0 app-test=1 dart-test-zaghlol_catalog=0 dart-test-zaghlol_domain=0 dart-test-zaghlol_parsing=0 apk-devNoSms=0 apk-perms=0 android-unit=0 android-lint=0
