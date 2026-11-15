@@ -53,7 +53,15 @@ object SpeechSupportRegistration {
         return installed.orEmpty().any { it.replace('_', '-').lowercase() == wanted }
     }
 
-    private fun probe(context: Context, tag: String, done: (Boolean) -> Unit) {
+    private fun probe(context: Context, tag: String, reply: (Boolean) -> Unit) {
+        // A platform call may be answered only once: a late error after an answer is dropped.
+        var answered = false
+        val done: (Boolean) -> Unit = { ok ->
+            if (!answered) {
+                answered = true
+                reply(ok)
+            }
+        }
         if (Build.VERSION.SDK_INT < Build.VERSION_CODES.S) return done(false)
         val main = Handler(Looper.getMainLooper())
         main.post {
@@ -83,8 +91,12 @@ object SpeechSupportRegistration {
         fun finish(ok: Boolean) {
             if (finished) return
             finished = true
-            recognizer.destroy()
             done(ok)
+            try {
+                recognizer.destroy()
+            } catch (_: Exception) {
+                // Cleanup only; the answer is already sent.
+            }
         }
         val intent = Intent(RecognizerIntent.ACTION_RECOGNIZE_SPEECH)
             .putExtra(RecognizerIntent.EXTRA_LANGUAGE_MODEL, RecognizerIntent.LANGUAGE_MODEL_FREE_FORM)
