@@ -133,6 +133,8 @@ final class ImportSummary {
     required this.invalid,
     required this.invalidByProblem,
     required this.invalidRows,
+    this.earliest,
+    this.latest,
   });
 
   /// Data rows in the file (header excluded).
@@ -146,6 +148,11 @@ final class ImportSummary {
 
   /// 1-based data row numbers of the first invalid rows (capped).
   final List<int> invalidRows;
+
+  /// Dates of the first and last valid row (new or duplicate), for the
+  /// summary sheet (T-158); null when no row is valid.
+  final DateTime? earliest;
+  final DateTime? latest;
 }
 
 class ImportCsvUseCase {
@@ -156,7 +163,9 @@ class ImportCsvUseCase {
   final CsvImportStore _store;
   final Future<void> Function(String id)? onImported;
 
-  Future<ImportSummary> run(Uint8List bytes) async {
+  /// With [dryRun] nothing is written: the summary says what a real run
+  /// would do (T-158 summary sheet).
+  Future<ImportSummary> run(Uint8List bytes, {bool dryRun = false}) async {
     final table = parseCsv(bytes);
     final header = table.first;
     if (header.length != exportHeader.length) {
@@ -222,11 +231,23 @@ class ImportCsvUseCase {
         if (nth <= have) {
           duplicates++;
         } else {
-          newIds.add(await _store.insert(v));
+          if (!dryRun) newIds.add(await _store.insert(v));
           imported++;
         }
       }
+      DateTime? earliest;
+      DateTime? latest;
+      for (final v in valid) {
+        if (earliest == null || v.occurredAt.isBefore(earliest)) {
+          earliest = v.occurredAt;
+        }
+        if (latest == null || v.occurredAt.isAfter(latest)) {
+          latest = v.occurredAt;
+        }
+      }
       return ImportSummary(
+        earliest: earliest,
+        latest: latest,
         totalRows: dataRows,
         imported: imported,
         duplicates: duplicates,

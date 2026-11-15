@@ -7264,4 +7264,166 @@ class AppLocalizationsAr extends AppLocalizations {
   String recurringBillsGameyaMonth(String index, String total) {
     return 'الشهر $index من $total';
   }
+
+  @override
+  String get importFlowTitle => 'ضيف كشف حساب';
+
+  @override
+  String get importFlowSub =>
+      'ضيف شهور فاتت مرة واحدة. الملف بيتقرا على موبايلك بس، ومش بيتبعت لأي حد.';
+
+  @override
+  String get importFlowGroupEgypt => 'بنوك مصر';
+
+  @override
+  String get importFlowGroupOnline => 'بنوك أونلاين';
+
+  @override
+  String get importFlowHowTo => 'إزاي أنزّل الكشف؟';
+
+  @override
+  String get importFlowHowToBody =>
+      'افتح تطبيق البنك أو موقعه، دوّر على صفحة الكشوف، اختار الشهور اللي عايزها ونزّل الملف. وبعدين ارجع هنا واختاره.';
+
+  @override
+  String get importFlowBankCib => 'CIB';
+
+  @override
+  String get importFlowBankNbe => 'البنك الأهلي';
+
+  @override
+  String get importFlowBankMisr => 'بنك مصر';
+
+  @override
+  String get importFlowBankQnb => 'QNB';
+
+  @override
+  String get importFlowBankWise => 'Wise';
+
+  @override
+  String get importFlowBankRevolut => 'Revolut';
+
+  @override
+  String get importFlowBankPayoneer => 'Payoneer';
+
+  @override
+  String get importFlowBadgeNbe => 'NBE';
+
+  @override
+  String get importFlowBadgeMisr => 'BM';
+
+  @override
+  String get importFlowSubCib => 'PDF من الموبايل أو الإيميل';
+
+  @override
+  String get importFlowFmtPdf => 'PDF';
+
+  @override
+  String get importFlowFmtCsv => 'CSV';
+
+  @override
+  String get importFlowFmtCsvAllCurrencies => 'كل العملات · CSV';
+
+  @override
+  String get importFlowZaghlolSub => 'نسخة إنت صدرتها قبل كده';
+
+  @override
+  String get importFlowSoon => 'قريب';
+
+  @override
+  String importFlowSummaryRange(String start, String end) {
+    return '$start – $end';
+  }
+
+  @override
+  String get importFlowRowFound => 'حركات في الكشف';
+
+  @override
+  String get importFlowRowDup => 'موجودة قبل كده من الرسايل';
+
+  @override
+  String get importFlowRowUntracked => 'كروت مش بتتابعها';
+
+  @override
+  String get importFlowRowUnreadable => 'صفوف معرفتش أقراها';
+
+  @override
+  String get importFlowRowNew => 'حركات جديدة هتتضاف';
+
+  @override
+  String importFlowSkipped(String n) {
+    return '$n — هنتخطاها';
+  }
+
+  @override
+  String importFlowTarget(String card) {
+    return 'على $card';
+  }
+
+  @override
+  String get importFlowTargetChange => 'غيّر';
+
+  @override
+  String importFlowConfirm(int count, String n) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: 'ضيف $n حركة',
+      many: 'ضيف $n حركة',
+      few: 'ضيف $n حركات',
+      two: 'ضيف حركتين',
+      one: 'ضيف حركة',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String importFlowDoneTitle(int count, String n) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: 'ضفت $n حركة 🎉',
+      many: 'ضفت $n حركة 🎉',
+      few: 'ضفت $n حركات 🎉',
+      two: 'ضفت حركتين 🎉',
+      one: 'ضفت حركة 🎉',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get importFlowDoneFromFile => 'من ملف زغلول بتاعك';
+
+  @override
+  String get importFlowDoneAuto => 'اتصنفوا لوحدهم';
+
+  @override
+  String get importFlowDoneReview => 'مستنيين رأيك';
+
+  @override
+  String get importFlowDoneTop => 'أكتر حاجات صرفت عليها';
+
+  @override
+  String get importFlowDoneBubble =>
+      'الشارتات والميزانية اتحدثوا بالشهور دي. دلوقتي أقدر أقارنلك بينهم.';
+
+  @override
+  String importFlowDoneReviewButton(int count, String n) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: 'راجع الـ $n',
+      many: 'راجع الـ $n',
+      few: 'راجع الـ $n',
+      two: 'راجع الحركتين',
+      one: 'راجع الحركة',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get importFlowDoneOpenCard => 'افتح الكارت';
+
+  @override
+  String get importFlowUnavailable => 'المصدر ده لسه مش جاهز';
 }
