@@ -2,6 +2,8 @@
 // the real screens; widget tests override [appScreensProvider] with markers so
 // they can tap through the shell without building every screen's data.
 
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:zaghlol_domain/zaghlol_domain.dart' show Cycle;
@@ -31,6 +33,7 @@ import '../features/transactions/presentation/detail/transaction_detail_screen.d
 import '../features/transactions/presentation/list/transactions_list_screen.dart';
 import '../features/wealth/presentation/add_asset_screen.dart';
 import '../features/wealth/presentation/prices_screen.dart';
+import '../features/zakah/presentation/zakah_screen.dart';
 
 /// A screen opener: pushes [builder]'s screen on the nearest navigator.
 Future<T?> pushScreen<T>(
@@ -52,6 +55,7 @@ final class AppScreens {
     this.shareStudio = _shareStudio,
     this.account = _account,
     this.prices = _prices,
+    this.zakah = _zakah,
     this.paywall = _paywall,
     this.settings = _settings,
     this.backup = _backup,
@@ -105,6 +109,7 @@ final class AppScreens {
   final Future<void> Function(BuildContext context) shareStudio;
   final Future<void> Function(BuildContext context) account;
   final Future<void> Function(BuildContext context) prices;
+  final Future<void> Function(BuildContext context) zakah;
   final Future<void> Function(BuildContext context) paywall;
   final Future<void> Function(BuildContext context, SettingsDestinations d)
   settings;
@@ -251,6 +256,15 @@ Future<void> _account(BuildContext c) =>
 
 Future<void> _prices(BuildContext c) =>
     pushScreen<void>(c, (_) => const PricesScreen());
+
+Future<void> _zakah(BuildContext c) => pushScreen<void>(
+  c,
+  (ctx) => ZakahScreen(
+    onAddAsset: () => unawaited(_addAsset(ctx)),
+    onOpenPrices: () => unawaited(_prices(ctx)),
+    onOpenPaywall: () => unawaited(_paywall(ctx)),
+  ),
+);
 
 Future<void> _paywall(BuildContext c) =>
     pushScreen<bool>(c, (_) => const PaywallScreen(), fullscreenDialog: true);

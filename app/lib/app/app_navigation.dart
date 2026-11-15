@@ -228,6 +228,7 @@ Widget _moneyTab(BuildContext context) => MoneyTab(
   onOpenAssetsPaywall: () => unawaited(_screens(context).paywall(context)),
   onAddAsset: () => unawaited(_screens(context).addAsset(context)),
   onOpenPrices: () => unawaited(_screens(context).prices(context)),
+  onOpenZakah: () => unawaited(_screens(context).zakah(context)),
 );
 
 Future<void> openCardDetailFor(
