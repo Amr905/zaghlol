@@ -256,6 +256,31 @@ void main() {
       expect(unknown.institutionCode, isNull);
     });
 
+    test('FU-243: reminders and promos from a known bank are dropped', () {
+      const dropped = [
+        'Your OTP for online payment of EGP 150.00 is 5g8h2k',
+        'Credit card payment due EGP 1,250.00 by 25 Nov',
+        'Minimum amount due EGP 300.00 for card ending 1234',
+        'Your credit card statement is ready. Total EGP 4,000.00',
+        'المبلغ مستحق السداد ١٢٥٠ جنيه قبل ٢٥ نوفمبر',
+        'تم إصدار كشف حساب بطاقتك بمبلغ ٤٠٠٠ جنيه',
+        'Get 10% cashback on purchases this week. EGP 500 minimum',
+        'Special offer: pay EGP 1,000 in installments',
+        'عرض خاص: استرداد نقدي حتى ٥٠٠ جنيه',
+      ];
+      for (final body in dropped) {
+        final r = pipeline.parse(_req(body));
+        expect(r, isA<ParseDropped>(), reason: body.length.toString());
+      }
+    });
+
+    test('FU-243: a credited cashback is not dropped', () {
+      final r = pipeline.parse(
+        _req('Cashback credited to your account EGP 50.00'),
+      );
+      expect(r, isNot(isA<ParseDropped>()));
+    });
+
     test('unknown source is unrecognized, ready for the generic parser', () {
       expect(
         _why(pipeline.parse(_req('تم خصم 200.00 جم', source: 'NOBODY'))),

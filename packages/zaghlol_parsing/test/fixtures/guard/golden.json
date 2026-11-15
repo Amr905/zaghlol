@@ -2,7 +2,7 @@
  "format": 1,
  "synthetic": true,
  "note": "Synthetic data only (CLAUDE.md 2.6). Shared by the Dart, Kotlin (T-038) and Swift (T-061) Guards: never copy. count = fold + cases + rate + modes. fold: out = foldKey(in); lines (when present, else out) = foldKeyLines(in), the Guard's fold for the global drop patterns.",
- "count": 240,
+ "count": 256,
  "configs": {
   "t1": {
    "base": "configs/t1_base.json",
@@ -707,20 +707,6 @@
    }
   },
   {
-   "id": "otp.ar.one_time_password",
-   "tags": [
-    "otp_drop"
-   ],
-   "config": "t1",
-   "channel": "sms",
-   "source": "NBE",
-   "body": "كلمة السر لمرة واحدة 9921 صالحة لمدة 5 دقائق",
-   "expect": {
-    "decision": "drop",
-    "reason": "otp_or_promo_global"
-   }
-  },
-  {
    "id": "otp.ar.temporary_password",
    "tags": [
     "otp_drop"
@@ -919,19 +905,17 @@
    }
   },
   {
-   "id": "promo.no_inst_pattern_kept",
+   "id": "promo.no_inst_pattern_dropped",
    "tags": [
-    "negative"
+    "promo_drop"
    ],
    "config": "t1",
    "channel": "sms",
    "source": "CIB",
    "body": "Exclusive offer: 20% cashback this weekend",
    "expect": {
-    "decision": "keep",
-    "kind": "registry",
-    "inst": "cib",
-    "last4": null
+    "decision": "drop",
+    "reason": "otp_or_promo_global"
    }
   },
   {
@@ -1535,7 +1519,7 @@
    }
   },
   {
-   "id": "residual.newline_code_after_gap_kept",
+   "id": "residual.newline_code_after_gap_dropped",
    "tags": [
     "residual"
    ],
@@ -1544,26 +1528,22 @@
    "source": "NBE",
    "body": "Your OTP for login\n482913",
    "expect": {
-    "decision": "keep",
-    "kind": "registry",
-    "inst": "nbe",
-    "last4": null
+    "decision": "drop",
+    "reason": "otp_or_promo_global"
    }
   },
   {
-   "id": "residual.newline_after_lead_in_kept",
+   "id": "residual.newline_after_lead_in_dropped",
    "tags": [
-    "residual"
+    "otp_drop"
    ],
    "config": "t1",
    "channel": "sms",
    "source": "NBE",
    "body": "Your OTP for login is\n482913",
    "expect": {
-    "decision": "keep",
-    "kind": "registry",
-    "inst": "nbe",
-    "last4": null
+    "decision": "drop",
+    "reason": "otp_or_promo_global"
    }
   },
   {
@@ -2930,6 +2910,256 @@
    "channel": "sms",
    "source": "NBE",
    "body": ", 1234 , 1234 , 1234 , 1234 , 1234 , 1234 , 1234 , 1234 , 1234 , 1234 , 1234 , 1234 , 1234 , 1234 , 1234 , 1234 , 1234 , 1234 , 1234 , 1234 , 1234 , 1234 , 1234 , 1234 , 1234 , 1234 , 1234 , 1234 , 1234 , 1234 , 1234 , 1234 , 1234 , 1234 , 1234 , 1234 , 1234 , 1234 , 1234 , 1234 , 1234 , 1234 , 1234 , 1234 , 1234 , 1234 , 1234 , 1234 , 1234 , 1234 , 1234 , 1234 , 1234 , 1234 , 1234 , 1234 , 1234 , 1234 , 1234 , 1234 , 1234 , 1234 , 1234 , 1234 , 1234 , 1234 , 1234 , 1234 , 1234 , 1234 , 1234 , 1234 , 1234 , 1234 , 1234 , 1234 , 1234 , 1234 , 1234 , 1234 , 1234 , 1234 , 1234 , 1234 , 1234 , 1234 , 1234 , 1234 , 1234 , 1234 , 1234 , 1234 , 1234 , 1234 , 1234 , 1234 , 1234 , 1234 , 1234 , 1234 , 1234 , 1234 , 1234 , 1234 , 1234 , 1234 , 1234 , 1234 , 1234 , 1234 , 1234 , 1234 , 1234 , 1234 , 1234 , 1234 , 1234 , 1234 , 1234 , 1234 , 1234 , 1234 , 1234 , 1234 , 1234 , 1234 , 1234 , 1234 , 1234 , 1234 , 1234 , 1234 , 1234 , 1234 , 1234 , 1234 , 1234 , 1234 , 1234 , 1234 , 1234 , 1234 , 1234 , 1234 , 1234 , 1234 , 1234 , 1234 , 1234 , 1234 , 1234 , 1234 , 1234 , 1234 , 1234 , 1234 , 1234 , 1234 , 1234 , 1234 , 1234 , 1234 , 1234 , 1234 , 1234 , 1234 , 1234 , 1234 , 1234 , 1234 , 1234 , 1234 , 1234 , 1234 , 1234 , 1234 , 1234 , 1234 , 1234 , 1234 , 1234 , 1234 , 1234 , 1234 , 1234 , 1234 , 1234 , 1234 , 1234 , 1234 , 1234 , 1234 , 1234 , 1234 , 1234 , 1234 , 1234 , 1234 , 1234 , 1234 , 1234 , 1234 , 1234 , 1234 , 1234 , 1234 , 1234 , 1234 , 1234 , 1234 , 1234 , 1234 , 1234 , 1234 , 1234 , 1234 , 1234 , 1234 , 1234 , 1234 , 1234 , 1234 , 1234 , 1234 , 1234 , 1234 , 1234 , 1234 , 1234 , 1234 , 1234 , 1234 , 1234 , 1234 , 1234 , 1234 , 1234 , 1234 , 1234 , 1234 , 1234 , 1234 , 1234 , 1234 , 1234 , 1234 , 1234 , 1234 , 1234 , 1234 , 1234 , 1234 , 1234 , 1234 , 1234 , 1234 , 1234 , 1234 , 1234 , 1234 , 1234 , 1234 , 1234 , 1234 , 1234 , 1234 , 1234 , 1234 , 1234 , 1234 , 1234 , 1234 , 1234 , 1234 , 1234 , 1234 , 1234 , 1234 , 1234 , 1234 , 1234 , 1234 , 1234 , 1234 , 1234 , 1234 , 1234 , 1234 , 1234 , 1234 , 1234 , 1234 , 1234 , 1234 , 1234 , 1234 , 1234 , 1234 , 1234 , 1234 , 1234 , 1234 , 1234 , 1234 , 1234 , 1234 , 1234 , 1234 , 1234 , 1234 , 1234 , 1234 , 1234 , 1234 , 1234 , 1234 , 1234 , 1234 , 1234 , 1234 , 1234 , 1234 , 1234 , 1234 , 1234 , 1234 , 1234 , 1234 , 1234 , 1234 , 1234 , 1234 , 1234 , 1234 , 1234 , 1234 , 1234 , 1234 , 1234 , 1234 , 1234 , 1234 , 1234 , 1234 , 1234 , 1234 , 1234 , 1234 , 1234 , 1234 , 1234 , 1234 , 1234 , 1234 , 1234 , 1234 , 1234 , 1234 , 1234 , 1234 , 1234 , 1234 , 1234 , 1234 , 1234 , 1234 , 1234 , 1234 , 1234 , 1234 , 1234 , 1234 , 1234 , 1234 , 1234 , 1234 , 1234 , 1234 , 1234 , 1234 , 1234 , 1234 , 1234 , 1234 , 1234 , 1234 , 1234 , 1234 , 1234 , 1234 , 1234 , 1234 , 1234 , 1234 , 1234 , 1234 , 1234 , 1234 , 1234 , 1234 , 1234 , 1234 , 1234 , 1234 , 1234 , 1234 , 1234 , 1234 , 1234 , 1234 , 1234 , 1234 , 1234 , 1234 , 1234 , 1234 , 1234 , 1234 , 1234 , 1234 , 1234 , 1234 , 1234 , 1234 , 1234 , 1234 , 1234 , 1234 , 1234 , 1234 , 1234 , 1234 , 1234 , 1234 , 1234 , 1234 , 1234 , 1234 , 1234 , 1234 , 1234 , 1234 , 1234 , 1234 , 1234 , 1234 , 1234 , 1234 , 1234 , 1234 , 1234 , 1234 , 1234 , 1234 , 1234 , 1234 , 1234 , 1234 , 1234 , 1234 , 1234 , 1234 , 1234 , 1234 , 1234 , 1234 , 1234 , 1234 , 1234 , 1234 , 1234 , 1234 , 1234 , 1234 , 1234 , 1234 , 1234 , 1234 , 1234 , 1234 , 1234 , 1234 , 1234 , 1234 , 1234 , 1234 , 1234 , 1234 , 1234 , 1234 , 1234 , 1234 , 1234 , 1234 , 1234 , 1234 , 1234 , 1234 , 1234 , 1234 , 1234 , 1234 , 1234 , 1234 , 1234 , 1234 , 1234 , 1234 , 1234 , 1234 , 1234 , 1234 , 1234 , 1234 , 1234 , 1234 , 1234 , 1234 , 1234 , 1234 , 1234 , 1234 , 1234 , 1234 , 1234 , 1234 , 1234 , 1234 , 1234 , 1234 , 1234 , 1234 , 1234 , 1234 , 1234 , 1234 , 1234 , 1234 , 1234 , 1234 , 1234 , 1234 , 1234 , 1234 , 1234 , 1234 , 1234 , 1234 , 1234 , 1234 , 1234 , 1234 , 1234 , 1234 , 1234 , 1234 , 1234 , 1234 , 1234 , 1234 , 1234 , 1234 , 1234 , 1234 , 1234 , 1234 , 1234 , 1234 , 1234 , 1234 , 1234 , 1",
+   "expect": {
+    "decision": "keep",
+    "kind": "registry",
+    "inst": "nbe",
+    "last4": null
+   }
+  },
+  {
+   "id": "sender.hsbc.space",
+   "tags": [
+    "sender",
+    "registry_keep"
+   ],
+   "config": "t1",
+   "channel": "sms",
+   "source": "HSBC EG",
+   "body": "Purchase of EGP 100.00 at TESTSHOP.",
+   "expect": {
+    "decision": "keep",
+    "kind": "registry",
+    "inst": "hsbc",
+    "last4": null
+   }
+  },
+  {
+   "id": "sender.hsbc.dash",
+   "tags": [
+    "sender",
+    "registry_keep"
+   ],
+   "config": "t1",
+   "channel": "sms",
+   "source": "HSBC-EG",
+   "body": "Purchase of EGP 100.00 at TESTSHOP.",
+   "expect": {
+    "decision": "keep",
+    "kind": "registry",
+    "inst": "hsbc",
+    "last4": null
+   }
+  },
+  {
+   "id": "sender.hsbcx.drop",
+   "tags": [
+    "sender",
+    "non_financial"
+   ],
+   "config": "t1",
+   "channel": "sms",
+   "source": "HSBCX",
+   "body": "Purchase of EGP 100.00 at TESTSHOP.",
+   "expect": {
+    "decision": "drop",
+    "reason": "not_financial"
+   }
+  },
+  {
+   "id": "sender.myhsbc.drop",
+   "tags": [
+    "sender",
+    "non_financial"
+   ],
+   "config": "t1",
+   "channel": "sms",
+   "source": "MYHSBC",
+   "body": "Purchase of EGP 100.00 at TESTSHOP.",
+   "expect": {
+    "decision": "drop",
+    "reason": "not_financial"
+   }
+  },
+  {
+   "id": "otp.en.otp_for",
+   "tags": [
+    "otp_drop"
+   ],
+   "config": "t1",
+   "channel": "sms",
+   "source": "NBE",
+   "body": "Use OTP for your online payment of EGP 150.00 at TESTSHOP: 5g8h2k",
+   "expect": {
+    "decision": "drop",
+    "reason": "otp_or_promo_global"
+   }
+  },
+  {
+   "id": "reminder.en.payment_due",
+   "tags": [
+    "promo_drop"
+   ],
+   "config": "t1",
+   "channel": "sms",
+   "source": "NBE",
+   "body": "Your credit card payment due is EGP 1,250.00 by 25 Nov",
+   "expect": {
+    "decision": "drop",
+    "reason": "otp_or_promo_global"
+   }
+  },
+  {
+   "id": "reminder.en.minimum_due",
+   "tags": [
+    "promo_drop"
+   ],
+   "config": "t1",
+   "channel": "sms",
+   "source": "CIB",
+   "body": "Minimum amount due EGP 300.00 for card ending 1234",
+   "expect": {
+    "decision": "drop",
+    "reason": "otp_or_promo_global"
+   }
+  },
+  {
+   "id": "reminder.en.statement",
+   "tags": [
+    "promo_drop"
+   ],
+   "config": "t1",
+   "channel": "sms",
+   "source": "CIB",
+   "body": "Your credit card statement is ready. Total EGP 4,000.00",
+   "expect": {
+    "decision": "drop",
+    "reason": "otp_or_promo_global"
+   }
+  },
+  {
+   "id": "reminder.ar.due",
+   "tags": [
+    "promo_drop"
+   ],
+   "config": "t1",
+   "channel": "sms",
+   "source": "NBE",
+   "body": "المبلغ مستحق السداد ١٢٥٠ جنيه قبل ٢٥ نوفمبر",
+   "expect": {
+    "decision": "drop",
+    "reason": "otp_or_promo_global"
+   }
+  },
+  {
+   "id": "reminder.ar.statement",
+   "tags": [
+    "promo_drop"
+   ],
+   "config": "t1",
+   "channel": "sms",
+   "source": "NBE",
+   "body": "تم إصدار كشف حساب بطاقتك الائتمانية بمبلغ ٤٠٠٠ جنيه",
+   "expect": {
+    "decision": "drop",
+    "reason": "otp_or_promo_global"
+   }
+  },
+  {
+   "id": "promo.en.cashback_offer",
+   "tags": [
+    "promo_drop"
+   ],
+   "config": "t1",
+   "channel": "sms",
+   "source": "CIB",
+   "body": "Get 10% cashback on all purchases this week at TESTSHOP. EGP 500 minimum",
+   "expect": {
+    "decision": "drop",
+    "reason": "otp_or_promo_global"
+   }
+  },
+  {
+   "id": "promo.en.offer",
+   "tags": [
+    "promo_drop"
+   ],
+   "config": "t1",
+   "channel": "sms",
+   "source": "CIB",
+   "body": "Special offer: pay EGP 1,000 in installments with zero interest",
+   "expect": {
+    "decision": "drop",
+    "reason": "otp_or_promo_global"
+   }
+  },
+  {
+   "id": "promo.en.win",
+   "tags": [
+    "promo_drop"
+   ],
+   "config": "t1",
+   "channel": "sms",
+   "source": "CIB",
+   "body": "Spend EGP 500 and win a prize! Congratulations",
+   "expect": {
+    "decision": "drop",
+    "reason": "otp_or_promo_global"
+   }
+  },
+  {
+   "id": "promo.ar.offer",
+   "tags": [
+    "promo_drop"
+   ],
+   "config": "t1",
+   "channel": "sms",
+   "source": "CIB",
+   "body": "عرض خاص: استرداد نقدي حتى ٥٠٠ جنيه على مشترياتك",
+   "expect": {
+    "decision": "drop",
+    "reason": "otp_or_promo_global"
+   }
+  },
+  {
+   "id": "promo.ar.cashback",
+   "tags": [
+    "promo_drop"
+   ],
+   "config": "t1",
+   "channel": "sms",
+   "source": "NBE",
+   "body": "احصل على استرداد نقدي ١٠٪ على مشتريات بقيمة ٥٠٠ جنيه",
+   "expect": {
+    "decision": "drop",
+    "reason": "otp_or_promo_global"
+   }
+  },
+  {
+   "id": "promo.kept.cashback_credited.en",
+   "tags": [
+    "registry_keep"
+   ],
+   "config": "t1",
+   "channel": "sms",
+   "source": "CIB",
+   "body": "Cashback credited to your account ending 1234: EGP 50.00",
+   "expect": {
+    "decision": "keep",
+    "kind": "registry",
+    "inst": "cib",
+    "last4": "1234"
+   }
+  },
+  {
+   "id": "promo.kept.cashback_credited.ar",
+   "tags": [
+    "registry_keep"
+   ],
+   "config": "t1",
+   "channel": "sms",
+   "source": "NBE",
+   "body": "تم إضافة استرداد نقدي ٥٠ جنيه إلى حسابك",
    "expect": {
     "decision": "keep",
     "kind": "registry",

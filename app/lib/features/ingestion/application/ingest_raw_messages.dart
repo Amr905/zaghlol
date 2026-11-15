@@ -1354,11 +1354,16 @@ final class IngestRawMessages {
         status: RawStatus.review,
         institution: g.institutionCode,
       );
+      // FU-243: a generic result from a known bank is filed under that
+      // bank (an unrecognized message of the bank), not as a new sender.
+      final known = g.institutionCode != null;
+      final kind = known ? ReviewKind.unrecognized : ReviewKind.newSender;
       await _review(
-        kind: ReviewKind.newSender,
+        kind: kind,
         rawId: rawId,
         payload: {
           'generic': true,
+          'institutionCode': ?g.institutionCode,
           'amount': g.amount.toJson(),
           'direction': ?direction?.code,
           'hasLast4': g.last4 != null,
@@ -1366,15 +1371,21 @@ final class IngestRawMessages {
           'reasons': [for (final x in g.reasons) x.name],
         },
       );
-      return IngestReview(rawId, ReviewKind.newSender);
+      return IngestReview(rawId, kind);
     }
     final (occurredMs, offsetMin) = _occurred(g.occurredAt);
     final account = await _resolve(
       local,
-      institution: _genericInstitution(p.senderKey),
+      // FU-243: a known bank's generic result uses that bank's account
+      // (last-4 matched within the institution), never a generic one.
+      institution: g.institutionCode ?? _genericInstitution(p.senderKey),
       last4: g.last4,
       currency: g.amount.currency,
-      label: p.m.source.trim().isEmpty ? p.senderKey : p.m.source.trim(),
+      label: g.institutionCode != null
+          ? b.labels.institutionLabel(_pipeline.registry, g.institutionCode!)
+          : p.m.source.trim().isEmpty
+          ? p.senderKey
+          : p.m.source.trim(),
       kind: inferAccountKind(hasLast4: g.last4 != null),
     );
     final merchantNorm = _nonEmpty(g.merchant?.key);

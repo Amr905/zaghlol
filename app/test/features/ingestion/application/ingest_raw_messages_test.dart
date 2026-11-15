@@ -592,6 +592,46 @@ void main() {
       expect(payload['amount'], {'minor': 5000, 'currency': 'EGP'});
     });
 
+    test('FU-243: a generic result from a known bank is filed under that '
+        'bank, not as a new sender', () async {
+      final r = await w.run([
+        sms('k', 'ZBANK: You paid EGP 50.00 at Synth Cafe', source: zbankSms),
+      ]);
+      expect(r.outcomes['k'], isA<IngestReview>());
+      expect((r.outcomes['k']! as IngestReview).reviewKind, 'unrecognized');
+      final payload =
+          jsonDecode((await w.reviews()).single['payload']! as String) as Map;
+      expect(payload['generic'], isTrue);
+      expect(payload['institutionCode'], 'zbank');
+      expect(await txnCount(), 0);
+    });
+
+    test('FU-243: a known bank generic auto-save uses that bank\'s card, '
+        'never a generic account', () async {
+      final dao = CaptureControlsDao(w.db);
+      await dao.setAlwaysCapture(
+        sender: zbankSms,
+        channel: 'sms',
+        always: true,
+        at: t0,
+      );
+      for (var i = 0; i < 3; i++) {
+        await dao.recordConfirmation(sender: zbankSms, channel: 'sms', at: t0);
+      }
+      final r = await w.run([
+        sms(
+          'k2',
+          'ZBANK: You paid EGP 51.00 at Synth Cafe card *4321',
+          source: zbankSms,
+        ),
+      ]);
+      expect(r.outcomes['k2'], isA<IngestInserted>());
+      final t = (await w.txns()).single;
+      expect(t['acc_inst'], 'zbank');
+      expect(t['acc_inst'], isNot(startsWith('g_')));
+      expect(t['acc_last4'], '4321');
+    });
+
     test('always capture with 2 confirmations → still review; with 3 → '
         'auto-saved with a low_confidence item; confirmed_count '
         'unchanged', () async {
