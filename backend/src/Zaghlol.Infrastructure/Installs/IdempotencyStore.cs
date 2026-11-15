@@ -51,7 +51,8 @@ public interface IIdempotencyStore
 
     /// <summary>
     /// Transaction 2: replaces this request's claim with the final row (the same install guard). False when the lease was lost
-    /// (taken over after expiry, or the install was deleted): nothing is stored.
+    /// (taken over after expiry, or the install was deleted), or when <paramref name="accountId"/> (sign-in: the account whose token
+    /// the body holds, deleted by <c>DELETE /v1/accounts/me</c>, R3-6) no longer exists: nothing is stored.
     /// </summary>
     Task<bool> CompleteAsync(
         InstallId installId,
@@ -62,7 +63,8 @@ public interface IIdempotencyStore
         int status,
         ReadOnlyMemory<byte> responseBodyEnc,
         DateTimeOffset expiresAt,
-        CancellationToken cancellationToken);
+        CancellationToken cancellationToken,
+        Guid? accountId = null);
 
     /// <summary>Deletes this request's claim (429, 5xx, an exception), so a retry runs at once. Best effort: the lease backs it up.</summary>
     Task ReleaseAsync(InstallId installId, IdempotentOperation operation, string idempotencyKey, Guid claimId, CancellationToken cancellationToken);
@@ -89,9 +91,10 @@ internal sealed class IdempotencyStore(IAppDbContextFactory contexts) : IIdempot
     // waits for this insert and then removes it, or this insert waits for the delete and then sees deleted_at set (S-4).
     private const string InsertSql = """
         INSERT INTO zaghlol.idempotency_records
-            (install_id, operation_id, idempotency_key, body_sha256, status, response_body_enc, claim_id, expires_at)
-        SELECT @install, @operation, @key, @hash, @status, @body, @claim, @expires
+            (install_id, operation_id, idempotency_key, body_sha256, status, response_body_enc, claim_id, account_id, expires_at)
+        SELECT @install, @operation, @key, @hash, @status, @body, @claim, @account, @expires
         WHERE EXISTS (SELECT 1 FROM zaghlol.installs WHERE id = @install AND deleted_at IS NULL FOR SHARE)
+          AND (@account IS NULL OR EXISTS (SELECT 1 FROM zaghlol.accounts WHERE id = @account FOR SHARE))
         ON CONFLICT DO NOTHING
         """;
 
@@ -141,6 +144,7 @@ internal sealed class IdempotencyStore(IAppDbContextFactory contexts) : IIdempot
             insert.Parameters.AddWithValue("status", 0);
             insert.Parameters.AddWithValue("body", Array.Empty<byte>());
             insert.Parameters.AddWithValue("claim", NpgsqlDbType.Uuid, claimId);
+            insert.Parameters.AddWithValue("account", NpgsqlDbType.Uuid, DBNull.Value);
             insert.Parameters.AddWithValue("expires", at + Lease);
             if (await insert.ExecuteNonQueryAsync(cancellationToken) == 1)
             {
@@ -195,7 +199,8 @@ internal sealed class IdempotencyStore(IAppDbContextFactory contexts) : IIdempot
         int status,
         ReadOnlyMemory<byte> responseBodyEnc,
         DateTimeOffset expiresAt,
-        CancellationToken cancellationToken)
+        CancellationToken cancellationToken,
+        Guid? accountId = null)
     {
         ArgumentNullException.ThrowIfNull(idempotencyKey);
         ArgumentOutOfRangeException.ThrowIfZero(status);
@@ -221,6 +226,7 @@ internal sealed class IdempotencyStore(IAppDbContextFactory contexts) : IIdempot
             insert.Parameters.AddWithValue("status", status);
             insert.Parameters.AddWithValue("body", responseBodyEnc.ToArray());
             insert.Parameters.AddWithValue("claim", NpgsqlDbType.Uuid, DBNull.Value);
+            insert.Parameters.AddWithValue("account", NpgsqlDbType.Uuid, (object?)accountId ?? DBNull.Value);
             insert.Parameters.AddWithValue("expires", expiresAt.ToUniversalTime());
             if (await insert.ExecuteNonQueryAsync(cancellationToken) != 1)
             {

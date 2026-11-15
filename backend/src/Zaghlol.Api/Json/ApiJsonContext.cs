@@ -25,6 +25,8 @@ namespace Zaghlol.Api.Json;
 [JsonSerializable(typeof(PurchaseVerifyResponse))]
 [JsonSerializable(typeof(EntitlementResponse))]
 [JsonSerializable(typeof(PurchaseRestoreResponse))]
+[JsonSerializable(typeof(SignInRequestDto))]
+[JsonSerializable(typeof(SignInResponse))]
 [JsonSerializable(typeof(MerchantDraftRequest))]
 [JsonSerializable(typeof(AliasDraftRequest))]
 [JsonSerializable(typeof(KeywordDraftRequest))]

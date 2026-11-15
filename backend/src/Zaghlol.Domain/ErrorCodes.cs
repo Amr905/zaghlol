@@ -36,5 +36,14 @@ public static class ErrorCodes
 
     /// <summary>400 (restore, T-185): element 0 of <c>seatKeys</c> isn't this install's registered key.</summary>
     public const string SeatKeyMismatch = "SEAT_KEY_MISMATCH";
+
+    /// <summary>422 (sign-in, T-135): the ID token, its nonce or its age failed verification, or the token was already used.</summary>
+    public const string IdTokenInvalid = "ID_TOKEN_INVALID";
+
+    /// <summary>401 (account endpoints, T-135): the account token is missing, expired, or its account or install link is gone (R3-6).</summary>
+    public const string AccountTokenExpired = "ACCOUNT_TOKEN_EXPIRED";
+
+    /// <summary>409 (sign-in, T-135): the install is linked to another account; resend with <c>replaceLink: true</c> (EC-46).</summary>
+    public const string InstallLinkedToOtherAccount = "INSTALL_LINKED_TO_OTHER_ACCOUNT";
     public const string Internal = "INTERNAL";
 }
