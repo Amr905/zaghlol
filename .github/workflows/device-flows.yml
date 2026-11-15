@@ -15,7 +15,7 @@ on:
       - '.github/scripts/device-flows.sh'
 
 permissions:
-  contents: read
+  contents: write # publish the screenshots to the device-shots branch
 
 concurrency:
   group: device-flows-${{ github.ref }}
@@ -67,3 +67,22 @@ jobs:
           path: ${{ runner.temp }}/device-flows
           if-no-files-found: warn
           retention-days: 14
+      # The Lead's workspace cannot download artifacts (blob storage is blocked),
+      # so the screenshots are also committed to the `device-shots` branch.
+      - name: Publish screenshots to the device-shots branch
+        if: always()
+        env:
+          SHOTS: ${{ runner.temp }}/device-flows
+        run: |
+          set -eu
+          [ -d "$SHOTS" ] && ls "$SHOTS"/*.png >/dev/null 2>&1 || { echo "no screenshots"; exit 0; }
+          dir=$(mktemp -d)
+          cd "$dir"
+          git init -q
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          mkdir -p "$GITHUB_SHA"
+          cp "$SHOTS"/*.png "$GITHUB_SHA"/
+          git add -A
+          git commit -qm "device-flows screenshots for $GITHUB_SHA ($GITHUB_REF_NAME)"
+          git push -q --force "https://x-access-token:${{ github.token }}@github.com/${{ github.repository }}.git" HEAD:refs/heads/device-shots
