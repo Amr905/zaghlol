@@ -100,6 +100,11 @@
 	<!-- T-103 / FR-SEC-02: shown by iOS the first time the app lock asks for Face ID. -->
 	<key>ZaghlolICloudContainer</key>
 	<string>iCloud.$(PRODUCT_BUNDLE_IDENTIFIER)</string>
+	<!-- T-120 (FR-VOI-01): voice logger. Localised in InfoPlist.xcstrings. The recording is never stored; recognition is on-device unless the user agrees (D-42). -->
+	<key>NSMicrophoneUsageDescription</key>
+	<string>Zaghlol listens so you can tell it what you spent. It does not keep a recording of your voice.</string>
+	<key>NSSpeechRecognitionUsageDescription</key>
+	<string>Zaghlol turns your speech into text on your phone to log expenses. If your phone cannot do Arabic offline, your voice is sent to Apple's speech service only if you agree.</string>
 	<key>NSFaceIDUsageDescription</key>
 	<string>Zaghlol uses Face ID to unlock the app and keep your money data private.</string>
 </dict>

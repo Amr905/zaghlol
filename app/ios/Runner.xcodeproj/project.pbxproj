@@ -88,6 +88,7 @@
 		5A6300000000000000000104 /* CaptureIntents.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5A6300000000000000000004 /* CaptureIntents.swift */; };
 		5A6300000000000000000105 /* Localizable.xcstrings in Resources */ = {isa = PBXBuildFile; fileRef = 5A6300000000000000000005 /* Localizable.xcstrings */; };
 		5A6300000000000000000106 /* AppShortcuts.xcstrings in Resources */ = {isa = PBXBuildFile; fileRef = 5A6300000000000000000006 /* AppShortcuts.xcstrings */; };
+		5A6300000000000000000120 /* InfoPlist.xcstrings in Resources */ = {isa = PBXBuildFile; fileRef = 5A6300000000000000000020 /* InfoPlist.xcstrings */; };
 		5A6300000000000000000107 /* IntentCaptureTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5A6300000000000000000007 /* IntentCaptureTests.swift */; };
 		5A650000000000000000000E /* BackupExclusion.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5A1650000000000000000A02 /* BackupExclusion.swift */; };
 		5A650000000000000000000F /* SpoolUlid.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5A6200000000000000000001 /* SpoolUlid.swift */; };
@@ -273,6 +274,7 @@
 		5A6300000000000000000004 /* CaptureIntents.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CaptureIntents.swift; sourceTree = "<group>"; };
 		5A6300000000000000000005 /* Localizable.xcstrings */ = {isa = PBXFileReference; lastKnownFileType = text.json.xcstrings; path = Localizable.xcstrings; sourceTree = "<group>"; };
 		5A6300000000000000000006 /* AppShortcuts.xcstrings */ = {isa = PBXFileReference; lastKnownFileType = text.json.xcstrings; path = AppShortcuts.xcstrings; sourceTree = "<group>"; };
+		5A6300000000000000000020 /* InfoPlist.xcstrings */ = {isa = PBXFileReference; lastKnownFileType = text.json.xcstrings; path = InfoPlist.xcstrings; sourceTree = "<group>"; };
 		5A6300000000000000000007 /* IntentCaptureTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = IntentCaptureTests.swift; sourceTree = "<group>"; };
 		5A6500000000000000000001 /* ShareStore.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ShareStore.swift; sourceTree = "<group>"; };
 		5A6500000000000000000002 /* ShareIntake.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ShareIntake.swift; sourceTree = "<group>"; };
@@ -471,6 +473,7 @@
 				5A6300000000000000000200 /* Capture */,
 				5A6300000000000000000005 /* Localizable.xcstrings */,
 				5A6300000000000000000006 /* AppShortcuts.xcstrings */,
+				5A6300000000000000000020 /* InfoPlist.xcstrings */,
 				5A1800000000000000000D05 /* Clock */,
 				5A1800000000000000000D09 /* PrivacyInfo.xcprivacy */,
 				5A1510000000000000000F0A /* Runner.entitlements */,
@@ -743,6 +746,7 @@
 				5A1800000000000000000D08 /* PrivacyInfo.xcprivacy in Resources */,
 				5A6300000000000000000105 /* Localizable.xcstrings in Resources */,
 				5A6300000000000000000106 /* AppShortcuts.xcstrings in Resources */,
+				5A6300000000000000000120 /* InfoPlist.xcstrings in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

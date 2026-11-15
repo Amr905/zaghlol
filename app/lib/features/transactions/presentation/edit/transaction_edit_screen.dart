@@ -22,6 +22,7 @@ import '../../domain/transaction.dart';
 import '../detail/txn_detail_providers.dart';
 import '../list/txn_list_providers.dart';
 import '../list/txn_row.dart';
+import '../../../voice/presentation/voice_logger_screen.dart';
 import 'txn_edit_providers.dart';
 import 'txn_form.dart';
 
@@ -739,11 +740,12 @@ class _CurrencyListState extends State<_CurrencyList> {
   }
 }
 
-/// The Quick add sheet's handler for "Type it" (S-30 -> S-13); other entries
-/// are not this screen's business and only close the sheet. Pass it as
-/// `TabRoots.addSelected`.
+/// The Quick add sheet's handler for "Type it" (S-30 -> S-13) and "Say it"
+/// (S-30 -> S-31, T-120); other entries are not this screen's business and
+/// only close the sheet. Pass it as `TabRoots.addSelected`.
 void quickAddSelected(BuildContext context, AddAction action) {
   final nav = Navigator.of(context, rootNavigator: true);
   nav.maybePop();
   if (action == AddAction.type) showTransactionEditor(context);
+  if (action == AddAction.say) showVoiceLogger(context);
 }

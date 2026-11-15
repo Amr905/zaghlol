@@ -6,6 +6,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../features/gold/application/gating.dart';
+import '../../../features/voice/application/voice_providers.dart';
 import '../../l10n/generated/app_localizations.dart';
 import '../../theme/z_tokens.dart';
 import '../z_sheet.dart';
@@ -42,8 +43,8 @@ class AddSheet extends ConsumerWidget {
   /// Called with the chosen entry point; the default just closes the sheet.
   final ValueChanged<AddAction>? onSelected;
 
-  /// Free-tier voice quota (remaining, max) shown under the grid; null hides
-  /// the line (Gold, or not wired yet).
+  /// Free-tier voice quota (remaining, max) shown under the grid; null reads
+  /// it from [voiceLeftProvider] (T-120; Gold and unknown hide the line).
   final (int, int)? voiceLeft;
 
   void _select(BuildContext context, AddAction action) {
@@ -59,6 +60,7 @@ class AddSheet extends ConsumerWidget {
     final l10n = AppLocalizations.of(context);
     final c = ZColors.of(context);
     final gold = ref.watch(entitlementStateProvider).isGold;
+    final voiceLeft = this.voiceLeft ?? ref.watch(voiceLeftProvider).value;
     final options = <(AddAction, IconData, String, String, String, bool)>[
       (
         AddAction.say,
@@ -158,8 +160,8 @@ class AddSheet extends ConsumerWidget {
                 Flexible(
                   child: Text(
                     l10n.homeQuickAddVoiceLeft(
-                      digits(voiceLeft!.$1),
-                      digits(voiceLeft!.$2),
+                      digits(voiceLeft.$1),
+                      digits(voiceLeft.$2),
                     ),
                     style: ZType.bodySmall.copyWith(color: c.textMuted),
                   ),
