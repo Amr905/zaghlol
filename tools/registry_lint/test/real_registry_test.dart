@@ -20,16 +20,30 @@ void main() {
     );
     expect(code, 0, reason: '$out$err');
     expect('$out', contains('findings: 0'));
-    expect('$out', contains('48 institutions'));
+    expect('$out', contains('60 institutions'));
   });
 
   test('every institution has an Arabic and an English template', () {
     final dir = Directory('$_registry/institutions');
     final files = dir.listSync().whereType<File>().toList();
-    expect(files.length, greaterThanOrEqualTo(48));
+    expect(files.length, greaterThanOrEqualTo(60));
+    // T-071/T-072: international institutions whose messages are English only.
+    const englishOnly = {
+      'wise',
+      'revolut',
+      'monzo',
+      'bunq',
+      'n26',
+      'payoneer',
+      'hdfc',
+      'paytm',
+    };
     for (final f in files) {
       final text = f.readAsStringSync();
-      expect(text, contains('"lang": "ar"'), reason: f.path);
+      final code = f.uri.pathSegments.last.replaceAll('.json', '');
+      if (!englishOnly.contains(code)) {
+        expect(text, contains('"lang": "ar"'), reason: f.path);
+      }
       expect(text, contains('"lang": "en"'), reason: f.path);
     }
   });

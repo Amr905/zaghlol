@@ -1,0 +1,87 @@
+{
+  "code": "liv",
+  "names": {
+    "ar": "ليف",
+    "en": "Liv"
+  },
+  "country": "AE",
+  "defaultCurrency": "AED",
+  "senders": [
+    {
+      "match": "exact",
+      "value": "Liv"
+    }
+  ],
+  "packages": [],
+  "walletCardNames": [
+    "Liv"
+  ],
+  "last4": [],
+  "drop": [],
+  "templates": [
+    {
+      "id": "liv.card_purchase.en",
+      "version": 1,
+      "lang": "en",
+      "channel": [
+        "sms"
+      ],
+      "event": "card_purchase",
+      "direction": "expense",
+      "baseConfidence": 0.9,
+      "source": "synthetic-unverified",
+      "pattern": "(?<cur>[a-z]{3}|د\\.ا) ?(?<amount>[\\d,.]+) spent at (?<merchant>.+?) using card ending (?<last4>\\d{4})(?:\\. |\\.?$)(?:(?:avl|available)\\.? (?:cr )?(?:limit|lmt)\\D{0,16}(?<available>[\\d,.]+)|(?:(?:avl|available) )?bal(?:ance)?\\D{0,16}(?<balance>[\\d,.]+))?",
+      "currencyMap": {
+        "د.ا": "AED"
+      }
+    },
+    {
+      "id": "liv.card_purchase.ar",
+      "version": 1,
+      "lang": "ar",
+      "channel": [
+        "sms"
+      ],
+      "event": "card_purchase",
+      "direction": "expense",
+      "baseConfidence": 0.9,
+      "source": "synthetic-unverified",
+      "pattern": "صرفت (?<cur>[a-z]{3}|د\\.ا) ?(?<amount>[\\d,.]+) لدي (?<merchant>.+?) باستخدام بطاقه تنتهي ب ?(?<last4>\\d{4})(?:\\. |\\.?$)(?:(?:الرصيد|رصيدك)\\D{0,12}(?<balance>[\\d,.]+)|الحد(?: المتاح)?\\D{0,12}(?<available>[\\d,.]+))?",
+      "currencyMap": {
+        "د.ا": "AED"
+      }
+    },
+    {
+      "id": "liv.transfer_in.en",
+      "version": 1,
+      "lang": "en",
+      "channel": [
+        "sms"
+      ],
+      "event": "transfer_in",
+      "direction": "income",
+      "baseConfidence": 0.9,
+      "source": "synthetic-unverified",
+      "pattern": "you received (?<cur>[a-z]{3}|د\\.ا) ?(?<amount>[\\d,.]+) from (?<counterparty>.+?)(?:\\. |\\.?$)(?:(?:avl|available)\\.? (?:cr )?(?:limit|lmt)\\D{0,16}(?<available>[\\d,.]+)|(?:(?:avl|available) )?bal(?:ance)?\\D{0,16}(?<balance>[\\d,.]+))?",
+      "currencyMap": {
+        "د.ا": "AED"
+      }
+    },
+    {
+      "id": "liv.refund.en",
+      "version": 1,
+      "lang": "en",
+      "channel": [
+        "sms"
+      ],
+      "event": "refund",
+      "direction": "income",
+      "baseConfidence": 0.9,
+      "source": "synthetic-unverified",
+      "pattern": "refund of (?<cur>[a-z]{3}|د\\.ا) ?(?<amount>[\\d,.]+) from (?<merchant>.+?)(?:\\. |\\.?$)(?:(?:avl|available)\\.? (?:cr )?(?:limit|lmt)\\D{0,16}(?<available>[\\d,.]+)|(?:(?:avl|available) )?bal(?:ance)?\\D{0,16}(?<balance>[\\d,.]+))?",
+      "currencyMap": {
+        "د.ا": "AED"
+      }
+    }
+  ]
+}

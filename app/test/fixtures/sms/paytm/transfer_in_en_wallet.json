@@ -1,0 +1,13 @@
+{
+  "sender": "PAYTMB",
+  "body": "Paytm: ₹60.00 received from FRIEND SAMPLE in your Paytm wallet",
+  "receivedAt": "2026-10-23T11:14:00+03:00",
+  "expect": {
+    "template": "paytm.transfer_in.en",
+    "event": "transfer_in",
+    "direction": "income",
+    "currency": "INR",
+    "amount": "60.00",
+    "counterparty": "FRIEND SAMPLE"
+  }
+}

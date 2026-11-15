@@ -1,0 +1,13 @@
+{
+  "sender": "Warba",
+  "body": "وربة: شراء بمبلغ 20 د.ك لدى لولو بطاقة **4242",
+  "receivedAt": "2026-10-23T11:14:00+03:00",
+  "expect": {
+    "template": "warba.card_purchase.ar",
+    "event": "card_purchase",
+    "direction": "expense",
+    "currency": "KWD",
+    "amount": "20.000",
+    "last4": "4242"
+  }
+}

@@ -1,0 +1,14 @@
+{
+  "sender": "Liv",
+  "body": "Liv: Refund of AED 1,250.00 from APPLE STORE. Balance AED 4,706.75",
+  "receivedAt": "2026-10-23T11:14:00+03:00",
+  "expect": {
+    "template": "liv.refund.en",
+    "event": "refund",
+    "direction": "income",
+    "currency": "AED",
+    "amount": "1250.00",
+    "balance": "4706.75",
+    "balanceCurrency": "AED"
+  }
+}

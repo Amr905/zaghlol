@@ -1,0 +1,15 @@
+{
+  "package": "com.transferwise.android",
+  "channel": "notification",
+  "body": "Card payment\nYou spent 1,200.00 EUR at BOOKING.COM (charged 1,015.45 GBP)",
+  "receivedAt": "2026-10-23T11:14:00+03:00",
+  "expect": {
+    "template": "wise.card_purchase_fx.en",
+    "event": "card_purchase_fx",
+    "direction": "expense",
+    "currency": "GBP",
+    "amount": "1015.45",
+    "originalAmount": "1200.00",
+    "originalCurrency": "EUR"
+  }
+}

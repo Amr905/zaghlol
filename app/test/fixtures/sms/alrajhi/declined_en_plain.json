@@ -1,0 +1,13 @@
+{
+  "sender": "AlRajhiBank",
+  "body": "POS Purchase Declined\nBy: 4242;mada\nAmount: SAR 25.50\nAt: TESCO",
+  "receivedAt": "2026-10-23T11:14:00+03:00",
+  "expect": {
+    "template": "alrajhi.declined.en",
+    "event": "declined",
+    "direction": "neutral",
+    "currency": "SAR",
+    "amount": "25.50",
+    "last4": "4242"
+  }
+}

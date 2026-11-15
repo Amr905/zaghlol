@@ -1,0 +1,18 @@
+{
+  "sender": "HDFCBK",
+  "body": "HDFC Bank: Sent Rs.5,000 From HDFC Bank A/C **4242 To RAHUL TEST On 21/10/26 Ref 323456789012. Avl Bal Rs.45,200.75",
+  "receivedAt": "2026-10-23T11:14:00+03:00",
+  "expect": {
+    "template": "hdfc.transfer_out.en",
+    "event": "transfer_out",
+    "direction": "expense",
+    "currency": "INR",
+    "amount": "5000.00",
+    "last4": "4242",
+    "date": "2026-10-21",
+    "counterparty": "RAHUL TEST",
+    "balance": "45200.75",
+    "ref": "323456789012",
+    "balanceCurrency": "INR"
+  }
+}

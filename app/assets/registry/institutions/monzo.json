@@ -1,0 +1,72 @@
+{
+  "code": "monzo",
+  "names": {
+    "ar": "مونزو",
+    "en": "Monzo"
+  },
+  "country": "GB",
+  "defaultCurrency": "GBP",
+  "senders": [],
+  "packages": [
+    "co.uk.getmondo"
+  ],
+  "walletCardNames": [
+    "Monzo"
+  ],
+  "last4": [],
+  "drop": [],
+  "templates": [
+    {
+      "id": "monzo.card_purchase.en",
+      "version": 1,
+      "lang": "en",
+      "channel": [
+        "notification"
+      ],
+      "event": "card_purchase",
+      "direction": "expense",
+      "baseConfidence": 0.9,
+      "source": "synthetic-unverified",
+      "pattern": "you spent (?<cur>[£€$])(?<amount>[\\d,.]+) at (?<merchant>.+?)(?:\\. |\\.?$)(?:\\.? ?(?:available )?balance:? ?[£€$]?(?<balance>[\\d,.]+))?"
+    },
+    {
+      "id": "monzo.transfer_in.en",
+      "version": 1,
+      "lang": "en",
+      "channel": [
+        "notification"
+      ],
+      "event": "transfer_in",
+      "direction": "income",
+      "baseConfidence": 0.9,
+      "source": "synthetic-unverified",
+      "pattern": "you received (?<cur>[£€$])(?<amount>[\\d,.]+) from (?<counterparty>.+?)(?:\\. |\\.?$)(?:\\.? ?(?:available )?balance:? ?[£€$]?(?<balance>[\\d,.]+))?"
+    },
+    {
+      "id": "monzo.refund.en",
+      "version": 1,
+      "lang": "en",
+      "channel": [
+        "notification"
+      ],
+      "event": "refund",
+      "direction": "income",
+      "baseConfidence": 0.9,
+      "source": "synthetic-unverified",
+      "pattern": "you were refunded (?<cur>[£€$])(?<amount>[\\d,.]+) by (?<merchant>.+?)(?:\\. |\\.?$)"
+    },
+    {
+      "id": "monzo.declined.en",
+      "version": 1,
+      "lang": "en",
+      "channel": [
+        "notification"
+      ],
+      "event": "declined",
+      "direction": "neutral",
+      "baseConfidence": 0.9,
+      "source": "synthetic-unverified",
+      "pattern": "your (?<cur>[£€$])(?<amount>[\\d,.]+) payment at (?<merchant>.+?) was declined(?:\\. |\\.?$)"
+    }
+  ]
+}

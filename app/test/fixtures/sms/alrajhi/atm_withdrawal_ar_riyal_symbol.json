@@ -1,0 +1,13 @@
+{
+  "sender": "AlRajhiBank",
+  "body": "سحب صراف آلي\nبواسطة: 4242;فيزا\nالمبلغ: ر.س 100.00",
+  "receivedAt": "2026-10-23T11:14:00+03:00",
+  "expect": {
+    "template": "alrajhi.atm_withdrawal.ar",
+    "event": "atm_withdrawal",
+    "direction": "expense",
+    "currency": "SAR",
+    "amount": "100.00",
+    "last4": "4242"
+  }
+}

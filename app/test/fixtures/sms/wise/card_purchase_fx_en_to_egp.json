@@ -1,0 +1,15 @@
+{
+  "package": "com.transferwise.android",
+  "channel": "notification",
+  "body": "Card payment\nYou spent 15.00 USD at NETFLIX (charged 745.50 EGP)",
+  "receivedAt": "2026-10-23T11:14:00+03:00",
+  "expect": {
+    "template": "wise.card_purchase_fx.en",
+    "event": "card_purchase_fx",
+    "direction": "expense",
+    "currency": "EGP",
+    "amount": "745.50",
+    "originalAmount": "15.00",
+    "originalCurrency": "USD"
+  }
+}

@@ -1,0 +1,13 @@
+{
+  "package": "com.bunq.android",
+  "channel": "notification",
+  "body": "Card payment\nYou paid $20.00 at UBER TRIP",
+  "receivedAt": "2026-10-23T11:14:00+03:00",
+  "expect": {
+    "template": "bunq.card_purchase.en",
+    "event": "card_purchase",
+    "direction": "expense",
+    "currency": "USD",
+    "amount": "20.00"
+  }
+}

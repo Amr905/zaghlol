@@ -1,0 +1,15 @@
+{
+  "sender": "Warba",
+  "body": "Warba: You received KWD 1,500.000 from ACME PAYROLL. Balance KWD 2,734.567",
+  "receivedAt": "2026-10-23T11:14:00+03:00",
+  "expect": {
+    "template": "warba.transfer_in.en",
+    "event": "transfer_in",
+    "direction": "income",
+    "currency": "KWD",
+    "amount": "1500.000",
+    "counterparty": "ACME PAYROLL",
+    "balance": "2734.567",
+    "balanceCurrency": "KWD"
+  }
+}

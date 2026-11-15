@@ -1,0 +1,13 @@
+{
+  "package": "com.revolut.revolut",
+  "channel": "notification",
+  "body": "Card payment\n£٤٥٫٣٠ paid to PRET A MANGER",
+  "receivedAt": "2026-10-23T11:14:00+03:00",
+  "expect": {
+    "template": "revolut.card_purchase.en",
+    "event": "card_purchase",
+    "direction": "expense",
+    "currency": "GBP",
+    "amount": "45.30"
+  }
+}

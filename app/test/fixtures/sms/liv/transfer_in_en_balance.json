@@ -1,0 +1,15 @@
+{
+  "sender": "Liv",
+  "body": "Liv: You received AED 12,000.00 from ACME PAYROLL. Balance AED 15,456.75",
+  "receivedAt": "2026-10-23T11:14:00+03:00",
+  "expect": {
+    "template": "liv.transfer_in.en",
+    "event": "transfer_in",
+    "direction": "income",
+    "currency": "AED",
+    "amount": "12000.00",
+    "counterparty": "ACME PAYROLL",
+    "balance": "15456.75",
+    "balanceCurrency": "AED"
+  }
+}

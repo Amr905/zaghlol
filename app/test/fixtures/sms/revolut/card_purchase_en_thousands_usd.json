@@ -1,0 +1,14 @@
+{
+  "package": "com.revolut.revolut",
+  "channel": "notification",
+  "body": "Card payment\n$1,250.00 paid to APPLE STORE on your card ending 4242",
+  "receivedAt": "2026-10-23T11:14:00+03:00",
+  "expect": {
+    "template": "revolut.card_purchase.en",
+    "event": "card_purchase",
+    "direction": "expense",
+    "currency": "USD",
+    "amount": "1250.00",
+    "last4": "4242"
+  }
+}

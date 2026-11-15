@@ -1,0 +1,13 @@
+{
+  "sender": "Liv",
+  "body": "Liv: You received AED 1.00 from BANK TEST",
+  "receivedAt": "2026-10-23T11:14:00+03:00",
+  "expect": {
+    "template": "liv.transfer_in.en",
+    "event": "transfer_in",
+    "direction": "income",
+    "currency": "AED",
+    "amount": "1.00",
+    "counterparty": "BANK TEST"
+  }
+}

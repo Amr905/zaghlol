@@ -1,0 +1,15 @@
+{
+  "sender": "HDFCBK",
+  "body": "HDFC Bank: Rs.1,00,000.00 withdrawn from HDFC Bank Card 4242 at ATM CONNAUGHT PLACE. Avl Bal Rs.2,50,000.00",
+  "receivedAt": "2026-10-23T11:14:00+03:00",
+  "expect": {
+    "template": "hdfc.atm_withdrawal.en",
+    "event": "atm_withdrawal",
+    "direction": "expense",
+    "currency": "INR",
+    "amount": "100000.00",
+    "last4": "4242",
+    "balance": "250000.00",
+    "balanceCurrency": "INR"
+  }
+}
