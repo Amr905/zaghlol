@@ -93,7 +93,7 @@
   "expect": {
    "amount": "1200.00",
    "currency": "AED",
-   "direction": null,
+   "direction": "expense",
    "merchant": "Sara Ahmed"
   }
  },
