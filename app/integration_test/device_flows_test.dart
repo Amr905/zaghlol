@@ -78,11 +78,12 @@ void main() {
     await settle(t);
   }
 
-  final quickAdd = find.bySemanticsLabel('Quick add');
+  // Built lazily: the semantics finder needs ensureSemantics() first.
+  Finder quickAdd() => find.bySemanticsLabel('Quick add');
 
   Future<void> openAdd(WidgetTester t) async {
-    await waitFor(t, quickAdd, what: 'the Add button');
-    await t.tap(quickAdd.first);
+    await waitFor(t, quickAdd(), what: 'the Add button');
+    await t.tap(quickAdd().first);
     await waitFor(t, find.text('Type'), what: 'the Add sheet');
     await settle(t);
   }
@@ -158,7 +159,7 @@ void main() {
     await waitFor(t, find.text('Add expense'), what: 'S-13 after consent no');
     await closeTop(t);
     // A "discard changes?" prompt never appears for an untouched form.
-    await waitFor(t, quickAdd, what: 'back on Home after Say');
+    await waitFor(t, quickAdd(), what: 'back on Home after Say');
 
     // ---- Scan: Android has no OCR host yet; the screen says so clearly
     // and offers typing instead.
@@ -172,7 +173,7 @@ void main() {
     expect(find.byKey(const Key('scan-type')), findsOneWidget);
     await shot(t, '06-scan-unavailable');
     await closeTop(t);
-    await waitFor(t, quickAdd, what: 'back on Home after Scan');
+    await waitFor(t, quickAdd(), what: 'back on Home after Scan');
 
     // ---- Screenshots of the other tabs and Settings.
     await t.tap(find.text('Money').first);
