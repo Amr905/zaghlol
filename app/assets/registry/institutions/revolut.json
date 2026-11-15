@@ -1,0 +1,111 @@
+{
+  "code": "revolut",
+  "names": {
+    "ar": "ريفوليت",
+    "en": "Revolut"
+  },
+  "country": "GB",
+  "defaultCurrency": "GBP",
+  "senders": [],
+  "packages": [
+    "com.revolut.revolut"
+  ],
+  "walletCardNames": [
+    "Revolut"
+  ],
+  "last4": [],
+  "drop": [],
+  "templates": [
+    {
+      "id": "revolut.card_purchase.en",
+      "version": 1,
+      "lang": "en",
+      "channel": [
+        "notification"
+      ],
+      "event": "card_purchase",
+      "direction": "expense",
+      "baseConfidence": 0.9,
+      "source": "synthetic-unverified",
+      "pattern": "(?<cur>[£€$])(?<amount>[\\d,.]+) paid to (?<merchant>.+?)(?: (?:with|on) (?:your )?(?:debit |credit )?card ending (?<last4>\\d{4}))?(?:\\. |\\.?$)(?:\\.? ?(?:available )?balance:? ?[£€$]?(?<balance>[\\d,.]+))?"
+    },
+    {
+      "id": "revolut.pending_auth.en",
+      "version": 1,
+      "lang": "en",
+      "channel": [
+        "notification"
+      ],
+      "event": "pending_auth",
+      "direction": "expense",
+      "baseConfidence": 0.9,
+      "source": "synthetic-unverified",
+      "pattern": "(?<cur>[£€$])(?<amount>[\\d,.]+) pending at (?<merchant>.+?)(?: (?:with|on) (?:your )?(?:debit |credit )?card ending (?<last4>\\d{4}))?(?:\\. |\\.?$)"
+    },
+    {
+      "id": "revolut.settled.en",
+      "version": 1,
+      "lang": "en",
+      "channel": [
+        "notification"
+      ],
+      "event": "settled",
+      "direction": "expense",
+      "baseConfidence": 0.9,
+      "source": "synthetic-unverified",
+      "pattern": "(?<cur>[£€$])(?<amount>[\\d,.]+) completed at (?<merchant>.+?)(?: (?:with|on) (?:your )?(?:debit |credit )?card ending (?<last4>\\d{4}))?(?:\\. |\\.?$)"
+    },
+    {
+      "id": "revolut.fx_conversion.en",
+      "version": 1,
+      "lang": "en",
+      "channel": [
+        "notification"
+      ],
+      "event": "fx_conversion",
+      "direction": "neutral",
+      "baseConfidence": 0.97,
+      "source": "synthetic-unverified",
+      "pattern": "you exchanged (?<cur>[£€$])(?<amount>[\\d,.]+) to (?<ocur>[£€$])(?<oamount>[\\d,.]+)"
+    },
+    {
+      "id": "revolut.wallet_topup.en",
+      "version": 1,
+      "lang": "en",
+      "channel": [
+        "notification"
+      ],
+      "event": "wallet_topup",
+      "direction": "income",
+      "baseConfidence": 0.9,
+      "source": "synthetic-unverified",
+      "pattern": "(?<cur>[£€$])(?<amount>[\\d,.]+) added to your (?:revolut )?account(?: from (?:your )?card ending (?<last4>\\d{4}))?(?:\\. |\\.?$)"
+    },
+    {
+      "id": "revolut.refund.en",
+      "version": 1,
+      "lang": "en",
+      "channel": [
+        "notification"
+      ],
+      "event": "refund",
+      "direction": "income",
+      "baseConfidence": 0.9,
+      "source": "synthetic-unverified",
+      "pattern": "(?<cur>[£€$])(?<amount>[\\d,.]+) refunded from (?<merchant>.+?)(?:\\. |\\.?$)"
+    },
+    {
+      "id": "revolut.declined.en",
+      "version": 1,
+      "lang": "en",
+      "channel": [
+        "notification"
+      ],
+      "event": "declined",
+      "direction": "neutral",
+      "baseConfidence": 0.9,
+      "source": "synthetic-unverified",
+      "pattern": "your (?<cur>[£€$])(?<amount>[\\d,.]+) payment at (?<merchant>.+?) was declined(?:\\. |\\.?$)"
+    }
+  ]
+}

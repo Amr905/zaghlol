@@ -1,0 +1,111 @@
+{
+  "code": "wise",
+  "names": {
+    "ar": "وايز",
+    "en": "Wise"
+  },
+  "country": "GB",
+  "defaultCurrency": "USD",
+  "senders": [],
+  "packages": [
+    "com.transferwise.android"
+  ],
+  "walletCardNames": [
+    "Wise"
+  ],
+  "last4": [],
+  "drop": [],
+  "templates": [
+    {
+      "id": "wise.card_purchase.en",
+      "version": 1,
+      "lang": "en",
+      "channel": [
+        "notification"
+      ],
+      "event": "card_purchase",
+      "direction": "expense",
+      "baseConfidence": 0.9,
+      "source": "synthetic-unverified",
+      "pattern": "you spent (?<amount>[\\d,.]+) (?<cur>[a-z]{3}) at (?<merchant>[^(]+?)(?: (?:with|on) (?:your )?(?:debit |credit )?card ending (?<last4>\\d{4}))?(?:\\. |\\.?$)"
+    },
+    {
+      "id": "wise.card_purchase_fx.en",
+      "version": 1,
+      "lang": "en",
+      "channel": [
+        "notification"
+      ],
+      "event": "card_purchase_fx",
+      "direction": "expense",
+      "baseConfidence": 0.9,
+      "source": "synthetic-unverified",
+      "pattern": "you spent (?<oamount>[\\d,.]+) (?<ocur>[a-z]{3}) at (?<merchant>.+?) \\(charged (?<amount>[\\d,.]+) (?<cur>[a-z]{3})\\)(?:\\. |\\.?$)"
+    },
+    {
+      "id": "wise.fx_conversion.en",
+      "version": 1,
+      "lang": "en",
+      "channel": [
+        "notification"
+      ],
+      "event": "fx_conversion",
+      "direction": "neutral",
+      "baseConfidence": 0.97,
+      "source": "synthetic-unverified",
+      "pattern": "you converted (?<amount>[\\d,.]+) (?<cur>[a-z]{3}) to (?<oamount>[\\d,.]+) (?<ocur>[a-z]{3})"
+    },
+    {
+      "id": "wise.transfer_in.en",
+      "version": 1,
+      "lang": "en",
+      "channel": [
+        "notification"
+      ],
+      "event": "transfer_in",
+      "direction": "income",
+      "baseConfidence": 0.9,
+      "source": "synthetic-unverified",
+      "pattern": "you received (?<amount>[\\d,.]+) (?<cur>[a-z]{3}) from (?<counterparty>.+?)(?:\\. |\\.?$)"
+    },
+    {
+      "id": "wise.transfer_out.en",
+      "version": 1,
+      "lang": "en",
+      "channel": [
+        "notification"
+      ],
+      "event": "transfer_out",
+      "direction": "expense",
+      "baseConfidence": 0.9,
+      "source": "synthetic-unverified",
+      "pattern": "your transfer of (?<amount>[\\d,.]+) (?<cur>[a-z]{3}) to (?<counterparty>.+?) (?:is on its way|has been sent|is complete)(?:\\. |\\.?$)"
+    },
+    {
+      "id": "wise.refund.en",
+      "version": 1,
+      "lang": "en",
+      "channel": [
+        "notification"
+      ],
+      "event": "refund",
+      "direction": "income",
+      "baseConfidence": 0.9,
+      "source": "synthetic-unverified",
+      "pattern": "you got a refund of (?<amount>[\\d,.]+) (?<cur>[a-z]{3}) from (?<merchant>.+?)(?:\\. |\\.?$)"
+    },
+    {
+      "id": "wise.declined.en",
+      "version": 1,
+      "lang": "en",
+      "channel": [
+        "notification"
+      ],
+      "event": "declined",
+      "direction": "neutral",
+      "baseConfidence": 0.9,
+      "source": "synthetic-unverified",
+      "pattern": "your card payment of (?<amount>[\\d,.]+) (?<cur>[a-z]{3}) at (?<merchant>.+?) was declined(?:\\. |\\.?$)"
+    }
+  ]
+}

@@ -1,0 +1,13 @@
+{
+  "package": "de.number26.android",
+  "channel": "notification",
+  "body": "N26\nCard payment of €12.50 at REWE MARKT",
+  "receivedAt": "2026-10-23T11:14:00+03:00",
+  "expect": {
+    "template": "n26.card_purchase.en",
+    "event": "card_purchase",
+    "direction": "expense",
+    "currency": "EUR",
+    "amount": "12.50"
+  }
+}

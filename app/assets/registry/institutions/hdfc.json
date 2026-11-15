@@ -1,0 +1,113 @@
+{
+  "code": "hdfc",
+  "names": {
+    "ar": "إتش دي إف سي",
+    "en": "HDFC Bank"
+  },
+  "country": "IN",
+  "defaultCurrency": "INR",
+  "senders": [
+    {
+      "match": "exact",
+      "value": "HDFCBK"
+    }
+  ],
+  "packages": [],
+  "walletCardNames": [
+    "HDFC Bank"
+  ],
+  "last4": [
+    "card x{1,2}([0-9]{4})"
+  ],
+  "drop": [],
+  "templates": [
+    {
+      "id": "hdfc.card_purchase.en",
+      "version": 1,
+      "lang": "en",
+      "channel": [
+        "sms"
+      ],
+      "event": "card_purchase",
+      "direction": "expense",
+      "baseConfidence": 0.9,
+      "source": "synthetic-unverified",
+      "pattern": "spent (?<cur>rs\\.?|inr|₹) ?(?<amount>[\\d,.]+) on hdfc bank (?:credit |debit )?card (?:x{1,2})?(?<last4>\\d{4}) at (?<merchant>.+?)(?: on (?<date>\\d{4}-\\d{2}-\\d{2})(?::\\d{2}:\\d{2}:\\d{2})?\\.? ?|\\. |\\.?$)(?:(?: ?avl|available)\\.? (?:cr )?(?:limit|lmt)\\D{0,16}(?<available>[\\d,.]+)|(?: ?(?:avl|available) )?bal(?:ance)?\\D{0,16}(?<balance>[\\d,.]+))?",
+      "date": {
+        "format": "yyyy-M-d",
+        "yearPolicy": "nearest_past"
+      },
+      "currencyMap": {
+        "rs.": "INR",
+        "rs": "INR",
+        "inr": "INR",
+        "₹": "INR"
+      }
+    },
+    {
+      "id": "hdfc.transfer_out.en",
+      "version": 1,
+      "lang": "en",
+      "channel": [
+        "sms"
+      ],
+      "event": "transfer_out",
+      "direction": "expense",
+      "baseConfidence": 0.9,
+      "source": "synthetic-unverified",
+      "pattern": "sent (?<cur>rs\\.?|inr|₹) ?(?<amount>[\\d,.]+) from hdfc bank a/c \\*{1,2}(?<last4>\\d{4}) to (?<counterparty>.+?) on (?<date>\\d{2}/\\d{2}/\\d{2}) ref (?<ref>\\d+)\\.?(?:(?: ?avl|available)\\.? (?:cr )?(?:limit|lmt)\\D{0,16}(?<available>[\\d,.]+)|(?: ?(?:avl|available) )?bal(?:ance)?\\D{0,16}(?<balance>[\\d,.]+))?",
+      "date": {
+        "format": "dd/MM/yy",
+        "yearPolicy": "nearest_past"
+      },
+      "currencyMap": {
+        "rs.": "INR",
+        "rs": "INR",
+        "inr": "INR",
+        "₹": "INR"
+      }
+    },
+    {
+      "id": "hdfc.transfer_in.en",
+      "version": 1,
+      "lang": "en",
+      "channel": [
+        "sms"
+      ],
+      "event": "transfer_in",
+      "direction": "income",
+      "baseConfidence": 0.9,
+      "source": "synthetic-unverified",
+      "pattern": "(?<cur>rs\\.?|inr|₹) ?(?<amount>[\\d,.]+) credited to hdfc bank a/c \\*{1,2}(?<last4>\\d{4}) on (?<date>\\d{2}/\\d{2}/\\d{2}) (?:by|from) (?<counterparty>.+?)(?: ref (?<ref>\\d+))?(?:\\. |\\.?$)(?:(?: ?avl|available)\\.? (?:cr )?(?:limit|lmt)\\D{0,16}(?<available>[\\d,.]+)|(?: ?(?:avl|available) )?bal(?:ance)?\\D{0,16}(?<balance>[\\d,.]+))?",
+      "date": {
+        "format": "dd/MM/yy",
+        "yearPolicy": "nearest_past"
+      },
+      "currencyMap": {
+        "rs.": "INR",
+        "rs": "INR",
+        "inr": "INR",
+        "₹": "INR"
+      }
+    },
+    {
+      "id": "hdfc.atm_withdrawal.en",
+      "version": 1,
+      "lang": "en",
+      "channel": [
+        "sms"
+      ],
+      "event": "atm_withdrawal",
+      "direction": "expense",
+      "baseConfidence": 0.9,
+      "source": "synthetic-unverified",
+      "pattern": "(?<cur>rs\\.?|inr|₹) ?(?<amount>[\\d,.]+) withdrawn from hdfc bank (?:debit )?card (?:x{1,2})?(?<last4>\\d{4}) at atm(?: .+?)?(?:\\. |\\.?$)(?:(?: ?avl|available)\\.? (?:cr )?(?:limit|lmt)\\D{0,16}(?<available>[\\d,.]+)|(?: ?(?:avl|available) )?bal(?:ance)?\\D{0,16}(?<balance>[\\d,.]+))?",
+      "currencyMap": {
+        "rs.": "INR",
+        "rs": "INR",
+        "inr": "INR",
+        "₹": "INR"
+      }
+    }
+  ]
+}

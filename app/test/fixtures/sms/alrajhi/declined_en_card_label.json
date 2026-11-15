@@ -1,0 +1,13 @@
+{
+  "sender": "AlRajhiBank",
+  "body": "POS Purchase Declined\nCard: 4242\nAmount: SAR 7.00\nAt: BAKERY SAMPLE",
+  "receivedAt": "2026-10-23T11:14:00+03:00",
+  "expect": {
+    "template": "alrajhi.declined.en",
+    "event": "declined",
+    "direction": "neutral",
+    "currency": "SAR",
+    "amount": "7.00",
+    "last4": "4242"
+  }
+}

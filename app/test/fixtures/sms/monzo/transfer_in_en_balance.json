@@ -1,0 +1,16 @@
+{
+  "package": "co.uk.getmondo",
+  "channel": "notification",
+  "body": "Money in\nYou received £2,450.00 from ACME LTD. Balance £2,790.20",
+  "receivedAt": "2026-10-23T11:14:00+03:00",
+  "expect": {
+    "template": "monzo.transfer_in.en",
+    "event": "transfer_in",
+    "direction": "income",
+    "currency": "GBP",
+    "amount": "2450.00",
+    "counterparty": "ACME LTD",
+    "balance": "2790.20",
+    "balanceCurrency": "GBP"
+  }
+}

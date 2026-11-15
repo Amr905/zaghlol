@@ -1,0 +1,13 @@
+{
+  "package": "com.transferwise.android",
+  "channel": "notification",
+  "body": "Payment declined\nYour card payment of 3,400.00 USD at BEST BUY was declined.",
+  "receivedAt": "2026-10-23T11:14:00+03:00",
+  "expect": {
+    "template": "wise.declined.en",
+    "event": "declined",
+    "direction": "neutral",
+    "currency": "USD",
+    "amount": "3400.00"
+  }
+}

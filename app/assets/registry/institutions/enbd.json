@@ -1,0 +1,103 @@
+{
+  "code": "enbd",
+  "names": {
+    "ar": "بنك الإمارات دبي الوطني (الإمارات)",
+    "en": "Emirates NBD (UAE)"
+  },
+  "country": "AE",
+  "defaultCurrency": "AED",
+  "senders": [
+    {
+      "match": "exact",
+      "value": "ENBD"
+    }
+  ],
+  "packages": [],
+  "walletCardNames": [
+    "Emirates NBD UAE"
+  ],
+  "last4": [],
+  "drop": [],
+  "templates": [
+    {
+      "id": "enbd.card_purchase.en",
+      "version": 1,
+      "lang": "en",
+      "channel": [
+        "sms"
+      ],
+      "event": "card_purchase",
+      "direction": "expense",
+      "baseConfidence": 0.9,
+      "source": "synthetic-unverified",
+      "pattern": "purchase of (?<cur>[a-z]{3}|د\\.ا) ?(?<amount>[\\d,.]+) at (?<merchant>.+?) with card ending (?<last4>\\d{4})(?:\\. |\\.?$)(?:(?:avl|available)\\.? (?:cr )?(?:limit|lmt)\\D{0,16}(?<available>[\\d,.]+)|(?:(?:avl|available) )?bal(?:ance)?\\D{0,16}(?<balance>[\\d,.]+))?",
+      "currencyMap": {
+        "د.ا": "AED"
+      }
+    },
+    {
+      "id": "enbd.card_purchase.ar",
+      "version": 1,
+      "lang": "en",
+      "channel": [
+        "sms"
+      ],
+      "event": "card_purchase",
+      "direction": "expense",
+      "baseConfidence": 0.9,
+      "source": "synthetic-unverified",
+      "pattern": "عمليه شراء بمبلغ (?<cur>[a-z]{3}|د\\.ا) ?(?<amount>[\\d,.]+) لدي (?<merchant>.+?) بالبطاقه المنتهيه ب ?(?<last4>\\d{4})(?:\\. |\\.?$)(?:(?:الرصيد|رصيدك)\\D{0,12}(?<balance>[\\d,.]+)|الحد(?: المتاح)?\\D{0,12}(?<available>[\\d,.]+))?",
+      "currencyMap": {
+        "د.ا": "AED"
+      }
+    },
+    {
+      "id": "enbd.atm_withdrawal.en",
+      "version": 1,
+      "lang": "en",
+      "channel": [
+        "sms"
+      ],
+      "event": "atm_withdrawal",
+      "direction": "expense",
+      "baseConfidence": 0.9,
+      "source": "synthetic-unverified",
+      "pattern": "cash withdrawal of (?<cur>[a-z]{3}|د\\.ا) ?(?<amount>[\\d,.]+) with card ending (?<last4>\\d{4})(?: at atm .+?)?(?:\\. |\\.?$)(?:(?:avl|available)\\.? (?:cr )?(?:limit|lmt)\\D{0,16}(?<available>[\\d,.]+)|(?:(?:avl|available) )?bal(?:ance)?\\D{0,16}(?<balance>[\\d,.]+))?",
+      "currencyMap": {
+        "د.ا": "AED"
+      }
+    },
+    {
+      "id": "enbd.salary.en",
+      "version": 1,
+      "lang": "en",
+      "channel": [
+        "sms"
+      ],
+      "event": "salary",
+      "direction": "income",
+      "baseConfidence": 0.9,
+      "source": "synthetic-unverified",
+      "pattern": "salary of (?<cur>[a-z]{3}|د\\.ا) ?(?<amount>[\\d,.]+) credited to (?:a/c|account) (?:\\*{1,4}|ending )(?<last4>\\d{4})(?:\\. |\\.?$)(?:(?:avl|available)\\.? (?:cr )?(?:limit|lmt)\\D{0,16}(?<available>[\\d,.]+)|(?:(?:avl|available) )?bal(?:ance)?\\D{0,16}(?<balance>[\\d,.]+))?",
+      "currencyMap": {
+        "د.ا": "AED"
+      }
+    },
+    {
+      "id": "enbd.declined.en",
+      "version": 1,
+      "lang": "en",
+      "channel": [
+        "sms"
+      ],
+      "event": "declined",
+      "direction": "neutral",
+      "baseConfidence": 0.9,
+      "source": "synthetic-unverified",
+      "pattern": "your transaction of (?<cur>[a-z]{3}|د\\.ا) ?(?<amount>[\\d,.]+) at (?<merchant>.+?) was declined(?: on card ending (?<last4>\\d{4}))?(?:\\. |\\.?$)",
+      "currencyMap": {
+        "د.ا": "AED"
+      }
+    }
+  ]
+}

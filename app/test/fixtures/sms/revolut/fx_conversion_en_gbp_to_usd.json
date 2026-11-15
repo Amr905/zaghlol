@@ -1,0 +1,15 @@
+{
+  "package": "com.revolut.revolut",
+  "channel": "notification",
+  "body": "Exchange complete\nYou exchanged £250.00 to $318.75",
+  "receivedAt": "2026-10-23T11:14:00+03:00",
+  "expect": {
+    "template": "revolut.fx_conversion.en",
+    "event": "fx_conversion",
+    "direction": "neutral",
+    "currency": "GBP",
+    "amount": "250.00",
+    "originalAmount": "318.75",
+    "originalCurrency": "USD"
+  }
+}

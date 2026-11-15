@@ -1,0 +1,15 @@
+{
+  "sender": "AlRajhiBank",
+  "body": "ATM Withdrawal\nBy: 4242;mada\nAmount: SAR 2,000.00\nBalance: SAR 6,340.25",
+  "receivedAt": "2026-10-23T11:14:00+03:00",
+  "expect": {
+    "template": "alrajhi.atm_withdrawal.en",
+    "event": "atm_withdrawal",
+    "direction": "expense",
+    "currency": "SAR",
+    "amount": "2000.00",
+    "last4": "4242",
+    "balance": "6340.25",
+    "balanceCurrency": "SAR"
+  }
+}

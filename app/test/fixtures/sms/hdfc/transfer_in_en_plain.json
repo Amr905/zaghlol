@@ -1,0 +1,16 @@
+{
+  "sender": "HDFCBK",
+  "body": "HDFC Bank: Rs.500.00 credited to HDFC Bank A/C *4242 on 23/10/26 from RAHUL TEST Ref 123456789012",
+  "receivedAt": "2026-10-23T11:14:00+03:00",
+  "expect": {
+    "template": "hdfc.transfer_in.en",
+    "event": "transfer_in",
+    "direction": "income",
+    "currency": "INR",
+    "amount": "500.00",
+    "last4": "4242",
+    "date": "2026-10-23",
+    "counterparty": "RAHUL TEST",
+    "ref": "123456789012"
+  }
+}

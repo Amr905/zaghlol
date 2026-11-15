@@ -1,0 +1,13 @@
+{
+  "sender": "Liv",
+  "body": "ليف: صرفت د.إ 4.00 لدى مقهى العينة باستخدام بطاقة تنتهي بـ 4242",
+  "receivedAt": "2026-10-23T11:14:00+03:00",
+  "expect": {
+    "template": "liv.card_purchase.ar",
+    "event": "card_purchase",
+    "direction": "expense",
+    "currency": "AED",
+    "amount": "4.00",
+    "last4": "4242"
+  }
+}

@@ -1,0 +1,15 @@
+{
+  "package": "com.revolut.revolut",
+  "channel": "notification",
+  "body": "Exchange complete\nYou exchanged $١٠٠٫٠٠ to €٩٢٫١٠",
+  "receivedAt": "2026-10-23T11:14:00+03:00",
+  "expect": {
+    "template": "revolut.fx_conversion.en",
+    "event": "fx_conversion",
+    "direction": "neutral",
+    "currency": "USD",
+    "amount": "100.00",
+    "originalAmount": "92.10",
+    "originalCurrency": "EUR"
+  }
+}

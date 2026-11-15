@@ -1,0 +1,59 @@
+{
+  "code": "payoneer",
+  "names": {
+    "ar": "بايونير",
+    "en": "Payoneer"
+  },
+  "country": "US",
+  "defaultCurrency": "USD",
+  "senders": [],
+  "packages": [
+    "com.payoneer.android"
+  ],
+  "walletCardNames": [
+    "Payoneer"
+  ],
+  "last4": [],
+  "drop": [],
+  "templates": [
+    {
+      "id": "payoneer.transfer_in.en",
+      "version": 1,
+      "lang": "en",
+      "channel": [
+        "notification"
+      ],
+      "event": "transfer_in",
+      "direction": "income",
+      "baseConfidence": 0.9,
+      "source": "synthetic-unverified",
+      "pattern": "you received (?<cur>[£€$])(?<amount>[\\d,.]+) from (?<counterparty>.+?)(?:\\. |\\.?$)"
+    },
+    {
+      "id": "payoneer.transfer_out.en",
+      "version": 1,
+      "lang": "en",
+      "channel": [
+        "notification"
+      ],
+      "event": "transfer_out",
+      "direction": "expense",
+      "baseConfidence": 0.9,
+      "source": "synthetic-unverified",
+      "pattern": "withdrawal of (?<cur>[£€$])(?<amount>[\\d,.]+) to (?<counterparty>.+?) (?:was initiated|is on its way|has been completed)(?:\\. |\\.?$)"
+    },
+    {
+      "id": "payoneer.card_purchase.en",
+      "version": 1,
+      "lang": "en",
+      "channel": [
+        "notification"
+      ],
+      "event": "card_purchase",
+      "direction": "expense",
+      "baseConfidence": 0.9,
+      "source": "synthetic-unverified",
+      "pattern": "card purchase of (?<cur>[£€$])(?<amount>[\\d,.]+) at (?<merchant>.+?)(?: (?:with|on) (?:your )?(?:debit |credit )?card ending (?<last4>\\d{4}))?(?:\\. |\\.?$)"
+    }
+  ]
+}

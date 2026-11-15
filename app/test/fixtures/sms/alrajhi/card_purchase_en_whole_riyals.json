@@ -1,0 +1,15 @@
+{
+  "sender": "AlRajhiBank",
+  "body": "POS Purchase\nBy: 4242;visa\nAmount: SAR 300\nAt: PANDA HYPERMARKET\nBalance: SAR 1,000.00",
+  "receivedAt": "2026-10-23T11:14:00+03:00",
+  "expect": {
+    "template": "alrajhi.card_purchase.en",
+    "event": "card_purchase",
+    "direction": "expense",
+    "currency": "SAR",
+    "amount": "300.00",
+    "last4": "4242",
+    "balance": "1000.00",
+    "balanceCurrency": "SAR"
+  }
+}

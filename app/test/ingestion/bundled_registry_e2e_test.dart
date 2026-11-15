@@ -108,7 +108,7 @@ void main() {
       final manifest = jsonDecode(
         File('assets/registry/registry_manifest.json').readAsStringSync(),
       ) as Map<String, Object?>;
-      expect((manifest['institutions']! as List<Object?>).length, 48);
+      expect((manifest['institutions']! as List<Object?>).length, 60);
       for (final c in _cases) {
         expect(
           registry.resolveSource(c.sender, RegistryChannel.sms),
