@@ -158,7 +158,7 @@ class _EditState extends ConsumerState<TransactionEditScreen> {
     }
     _note = TextEditingController(text: e?.note ?? '');
     _categoryId = e?.categoryId;
-    _accountId = e?.accountId;
+    _accountId = e?.accountId ?? pre?.accountId;
   }
 
   @override
