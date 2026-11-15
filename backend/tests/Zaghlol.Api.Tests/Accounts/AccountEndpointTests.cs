@@ -306,9 +306,9 @@ public class AccountEndpointTests(AccountsHostFixture f) : IClassFixture<Account
         var claimHash = SHA256.HashData(Encoding.ASCII.GetBytes(FakeIdTokenVerifier.Hashed(raw2)));
         Assert.Equal(1, await f.CountAsync("SELECT count(*) FROM zaghlol.replay_guard WHERE key_hash = @h", ("h", claimHash)));
 
-        // The retry without seatKeys, with a fresh token and nonce, links.
+        // The retry without seatKeys, with a fresh token and nonce, links (replacing the first account, EC-46).
         var (raw3, id3) = f.Credential(subject);
-        using var retry = await f.SignInAsync(token, AccountsHostFixture.SignInBody("google", id3, raw3));
+        using var retry = await f.SignInAsync(token, AccountsHostFixture.SignInBody("google", id3, raw3, replaceLink: true));
         Assert.Equal(HttpStatusCode.OK, retry.StatusCode);
         Assert.Equal(1, await f.CountAsync("SELECT count(*) FROM zaghlol.accounts WHERE provider_subject = @s", ("s", subject)));
     }
