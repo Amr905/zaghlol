@@ -234,11 +234,17 @@ void main() {
       expect(r, isA<ParseDropped>());
     });
 
-    test('a known institution never falls back to generic', () {
+    test('a known institution falls back to generic, tagged with it', () {
       final r = pipeline.parse(
         _req('nothing the NBE templates know about EGP 100', source: 'NBE'),
       );
-      expect(r, isNot(isA<ParseGeneric>()));
+      expect(r, isA<ParseGeneric>());
+      expect((r as ParseGeneric).institutionCode, 'nbe');
+    });
+
+    test('a known institution with no readable amount stays unrecognized', () {
+      final r = pipeline.parse(_req('nothing at all', source: 'NBE'));
+      expect(r, isA<ParseUnrecognized>());
     });
   });
 

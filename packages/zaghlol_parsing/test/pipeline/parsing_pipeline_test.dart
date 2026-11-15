@@ -294,7 +294,8 @@ void main() {
           channel: RegistryChannel.notification,
         ),
       );
-      expect(_why(r), UnrecognizedReason.noTemplateMatched);
+      // No SMS template runs on a notification; the generic reader may.
+      expect(r, isNot(isA<ParseParsed>()));
     });
 
     test('alternate sender id resolves to the same institution', () {

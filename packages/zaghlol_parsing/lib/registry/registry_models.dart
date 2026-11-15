@@ -89,6 +89,7 @@ const Set<String> templateGroupNames = {
   'cur',
   'oamount',
   'ocur',
+  'acur',
   'last4',
   'merchant',
   'counterparty',
