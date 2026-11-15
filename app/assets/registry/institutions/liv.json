@@ -38,7 +38,7 @@
     {
       "id": "liv.card_purchase.ar",
       "version": 1,
-      "lang": "en",
+      "lang": "ar",
       "channel": [
         "sms"
       ],

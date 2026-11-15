@@ -44,7 +44,7 @@
     {
       "id": "alrajhi.card_purchase.ar",
       "version": 1,
-      "lang": "en",
+      "lang": "ar",
       "channel": [
         "sms"
       ],
@@ -80,7 +80,7 @@
     {
       "id": "alrajhi.transfer_in.ar",
       "version": 1,
-      "lang": "en",
+      "lang": "ar",
       "channel": [
         "sms"
       ],
@@ -112,7 +112,7 @@
     {
       "id": "alrajhi.atm_withdrawal.ar",
       "version": 1,
-      "lang": "en",
+      "lang": "ar",
       "channel": [
         "sms"
       ],
