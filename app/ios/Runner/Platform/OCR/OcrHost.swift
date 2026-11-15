@@ -314,15 +314,15 @@ final class OcrHost: OcrHostApi {
     guard plainRoots.contains(where: { OcrPaths.isInside(path: plainPath, home: $0) }) else {
       throw Self.error(.ioError)  // never touch (or delete) a file outside temp/cache
     }
-    defer { try? fileManager.removeItem(atPath: plainPath) }
+    // Read once, then delete the plain file at once, whatever follows.
     let url = URL(fileURLWithPath: plainPath).standardizedFileURL
     let size = (try? url.resourceValues(forKeys: [.fileSizeKey]))?.fileSize
-    guard let size = size, size > 0, size <= SpoolFileImageSource.maxBytes - 28 else {
-      throw Self.error(.ioError)
+    var loaded: Data?
+    if let size = size, size > 0, size <= SpoolFileImageSource.maxBytes - 28 {
+      loaded = try? Data(contentsOf: url)
     }
-    guard var plain = try? Data(contentsOf: url, options: .mappedIfSafe) else {
-      throw Self.error(.ioError)
-    }
+    try? fileManager.removeItem(at: url)
+    guard var plain = loaded else { throw Self.error(.ioError) }
     defer { plain.resetBytes(in: 0..<plain.count) }
     guard let keyBytes = keys.spoolKey(), keyBytes.count == 32 else {
       throw Self.error(.notAvailable)
