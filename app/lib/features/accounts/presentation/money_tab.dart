@@ -31,6 +31,7 @@ class MoneyTab extends ConsumerWidget {
     this.onOpenAssetsPaywall,
     this.onAddAsset,
     this.onOpenPrices,
+    this.onOpenZakah,
   });
 
   /// Add account (S-43).
@@ -45,6 +46,9 @@ class MoneyTab extends ConsumerWidget {
 
   /// Prices (S-45), Gold users.
   final VoidCallback? onOpenPrices;
+
+  /// Zakah (S-46); shown only when the flag is on.
+  final VoidCallback? onOpenZakah;
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -115,6 +119,7 @@ class MoneyTab extends ConsumerWidget {
               onAddAsset: onAddAsset,
               onOpenPrices: onOpenPrices,
               onOpenPaywall: onOpenAssetsPaywall,
+              onOpenZakah: onOpenZakah,
             ),
           ],
         ),

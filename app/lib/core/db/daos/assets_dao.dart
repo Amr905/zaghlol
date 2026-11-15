@@ -231,6 +231,42 @@ class ZakahLedgerDao {
     return recordPaid(id, paid.toStorage().minor);
   }
 
+  /// T-168: creates the ledger row of one hawl cycle, or sets its amount and
+  /// paid together (one statement, so the `paid <= amount` check holds), and
+  /// derives the status. [unit] is a currency code or gold symbol; amounts
+  /// are native (minor units, or milligrams for gold).
+  Future<void> upsertCycle({
+    required String id,
+    String? assetId,
+    required String startHijri,
+    required String dueOn,
+    required String unit,
+    required int amount,
+    required int paid,
+  }) => guardWrite(
+    () => _db.customInsert(
+      'INSERT INTO zakah_ledger (id, asset_id, lot_start_hijri, due_on, unit, '
+      'amount_minor, status, paid_minor) VALUES (?1, ?2, ?3, ?4, ?5, ?6, '
+      "CASE WHEN ?7 = 0 THEN 'pending' WHEN ?7 < ?6 THEN 'partial' "
+      "ELSE 'paid' END, ?7) ON CONFLICT(id) DO UPDATE SET "
+      'amount_minor = excluded.amount_minor, '
+      'paid_minor = excluded.paid_minor, status = excluded.status',
+      variables: [
+        Variable.withString(id),
+        Variable<String>(assetId),
+        Variable.withString(startHijri),
+        Variable.withString(dueOn),
+        Variable.withString(unit),
+        Variable.withInt(amount),
+        Variable.withInt(paid),
+      ],
+      updates: {_db.zakahLedger},
+    ),
+  );
+
+  /// All ledger rows (the Zakah screen matches them to lots by id).
+  Future<List<ZakahLedgerRow>> all() => _db.select(_db.zakahLedger).get();
+
   Future<int> deleteById(String id) => guardWrite(
     () => (_db.delete(_db.zakahLedger)..where((z) => z.id.equals(id))).go(),
   );

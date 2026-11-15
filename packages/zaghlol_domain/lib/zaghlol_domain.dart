@@ -22,6 +22,8 @@ export 'transfers/offsets.dart';
 export 'transfers/splits.dart';
 export 'transfers/transfer_matching.dart';
 export 'wealth/net_worth.dart';
+export 'zakah/hijri.dart';
+export 'zakah/zakah_engine.dart';
 
 /// Placeholder so the package has a stable, testable entry point.
 /// Real content arrives in later tasks.

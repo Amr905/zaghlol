@@ -7,6 +7,8 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:zaghlol_domain/zaghlol_domain.dart';
 
 import '../../../core/db/daos/assets_dao.dart';
+import '../../../core/flags/feature_flags.dart';
+import '../../../core/flags/flags_providers.dart';
 import '../../../core/l10n/date_format.dart';
 import '../../../core/l10n/generated/app_localizations.dart';
 import '../../../core/l10n/locale_providers.dart';
@@ -23,11 +25,15 @@ class AssetsSection extends ConsumerWidget {
     this.onAddAsset,
     this.onOpenPrices,
     this.onOpenPaywall,
+    this.onOpenZakah,
   });
 
   final VoidCallback? onAddAsset;
   final VoidCallback? onOpenPrices;
   final VoidCallback? onOpenPaywall;
+
+  /// Zakah (S-46): the entry shows only when the `zakah` flag is on.
+  final VoidCallback? onOpenZakah;
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -90,7 +96,45 @@ class AssetsSection extends ConsumerWidget {
           )
         else
           _GoldBody(onAddAsset: onAddAsset),
+        if (onOpenZakah != null) _ZakahEntry(onOpen: onOpenZakah!),
       ],
+    );
+  }
+}
+
+/// The Zakah row: absent unless the remote flag is on.
+class _ZakahEntry extends ConsumerWidget {
+  const _ZakahEntry({required this.onOpen});
+  final VoidCallback onOpen;
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    if (!ref.watch(featureFlagProvider(FeatureFlag.zakah))) {
+      return const SizedBox.shrink();
+    }
+    final l10n = AppLocalizations.of(context);
+    final c = ZColors.of(context);
+    return Padding(
+      padding: const EdgeInsetsDirectional.only(top: ZSpacing.sm),
+      child: ZCard(
+        key: const Key('zakah-entry'),
+        onTap: onOpen,
+        child: Row(
+          children: [
+            Expanded(
+              child: Text(
+                l10n.accountsOverviewZakah,
+                style: ZType.titleSmall.copyWith(color: c.text),
+              ),
+            ),
+            Icon(
+              Icons.chevron_right_rounded,
+              color: c.textMuted,
+              textDirection: Directionality.of(context),
+            ),
+          ],
+        ),
+      ),
     );
   }
 }
