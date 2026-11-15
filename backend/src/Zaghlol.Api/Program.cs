@@ -9,6 +9,7 @@ using Zaghlol.Api.Endpoints.V1;
 using Zaghlol.Api.Observability;
 using Zaghlol.Application;
 using Zaghlol.Infrastructure;
+using Zaghlol.Infrastructure.Accounts;
 using Zaghlol.Infrastructure.Attestation;
 using Zaghlol.Infrastructure.Catalog;
 using Zaghlol.Infrastructure.Contributions;
@@ -98,6 +99,11 @@ builder.Services.AddZaghlolAppleNotificationIngest();
 // start without Purchases:Google:Rtdn:Audience and PushServiceAccount.
 builder.Services.AddZaghlolGoogleNotifications();
 
+// Accounts (T-135): Google / Apple ID-token sign-in, link, sign-out, delete. The verifier's JWKS caches come from the Api; Accounts:* is
+// validated at startup (Production refuses to start without the client IDs, the Services ID and the Sign in with Apple key).
+builder.Services.AddZaghlolIdTokenVerification();
+builder.Services.AddZaghlolAccounts();
+
 // Operator OIDC + MFA, the operator directory and the startup check (T-136); the audited support lookup on the Admin login.
 builder.Services.AddZaghlolOperatorAuth();
 builder.Services.AddZaghlolSupport();
@@ -110,6 +116,7 @@ app.MapInstalls();
 app.MapSync();
 app.MapPurchases();
 app.MapEntitlement();
+app.MapAccounts();
 app.MapAppleNotifications();
 app.MapGoogleNotifications();
 app.MapCatalog();
