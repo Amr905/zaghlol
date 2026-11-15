@@ -474,7 +474,7 @@ class _Header extends StatelessWidget {
               const SizedBox(width: ZSpacing.md),
               Expanded(
                 child: Text(
-                  l.accountsDetailAvailableOf('—', fmt.money(limit)),
+                  l.accountsDetailAvailableOf(kNoValueDash, fmt.money(limit)),
                   textAlign: TextAlign.end,
                   style: ZType.titleSmall.copyWith(color: c.text),
                 ),

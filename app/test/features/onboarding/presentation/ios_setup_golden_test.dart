@@ -8,7 +8,7 @@ import '../../../support/golden_matrix.dart';
 import '../../../support/ios_setup_host.dart';
 
 void main() {
-  for (final v in goldenVariants) {
+  for (final v in [...goldenVariants, ...goldenVariantsScaled]) {
     for (final step in ['add', 'check', 'check_fix', 'first']) {
       testWidgets('ios setup $step golden ${v.name}', (t) async {
         await t.binding.setSurfaceSize(const Size(390, 780));

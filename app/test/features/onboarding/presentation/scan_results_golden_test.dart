@@ -10,7 +10,7 @@ import 'scan_results_test.dart' show host, sample;
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 void main() {
-  for (final v in goldenVariants) {
+  for (final v in [...goldenVariants, ...goldenVariantsScaled]) {
     testWidgets('scan results golden ${v.name}', (tester) async {
       await tester.binding.setSurfaceSize(const Size(390, 1500));
       addTearDown(() => tester.binding.setSurfaceSize(null));

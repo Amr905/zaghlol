@@ -8,7 +8,7 @@ import '../../../../support/golden_matrix.dart';
 import 'review_harness.dart';
 
 void main() {
-  for (final v in goldenVariants) {
+  for (final v in [...goldenVariants, ...goldenVariantsScaled]) {
     testWidgets('review queue golden ${v.name}', (tester) async {
       await pumpReview(
         tester,

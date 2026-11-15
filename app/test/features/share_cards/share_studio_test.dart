@@ -173,7 +173,7 @@ void main() {
   });
 
   group('golden', () {
-    for (final v in goldenVariants) {
+    for (final v in [...goldenVariants, ...goldenVariantsScaled]) {
       testWidgets('share studio ${v.name}', (t) async {
         await pumpStudio(t, locale: v.locale, dark: v.dark);
         await expectLater(

@@ -14,7 +14,7 @@ void main() {
     'nosms': FakeHost(flavor: false),
   };
   for (final e in cases.entries) {
-    for (final v in goldenVariants) {
+    for (final v in [...goldenVariants, ...goldenVariantsScaled]) {
       testWidgets('android setup ${e.key} golden ${v.name}', (tester) async {
         await tester.binding.setSurfaceSize(const Size(390, 780));
         addTearDown(() => tester.binding.setSurfaceSize(null));

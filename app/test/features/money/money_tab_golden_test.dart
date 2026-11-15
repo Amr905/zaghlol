@@ -11,7 +11,7 @@ import '../../support/golden_matrix.dart';
 import 'money_tab_test.dart' as base;
 
 void main() {
-  for (final v in goldenVariants) {
+  for (final v in [...goldenVariants, ...goldenVariantsScaled]) {
     testWidgets('money tab golden ${v.name}', (tester) async {
       await base.pumpForGolden(tester, v);
       await expectLater(

@@ -225,7 +225,6 @@ List<List<String>> chunkAddresses(List<String> addresses) => [
 
 enum ScanPhase { idle, running, done, failed, cancelled }
 
-/// What the progress UI (T-056, T-173) shows: counts and codes only.
 bool _sameCodes(List<String> a, List<String> b) {
   if (a.length != b.length) return false;
   for (var i = 0; i < a.length; i++) {
@@ -234,6 +233,7 @@ bool _sameCodes(List<String> a, List<String> b) {
   return true;
 }
 
+/// What the progress UI (T-056, T-173) shows: counts and codes only.
 final class ScanProgress {
   const ScanProgress({
     this.phase = ScanPhase.idle,

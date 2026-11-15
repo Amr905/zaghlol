@@ -296,6 +296,12 @@ class _BodyState extends ConsumerState<ScanResultsBody> {
               key: ValueKey('scan-edit-${i.accountId}'),
               minVerticalPadding: ZSpacing.md,
               title: Text(i.label),
+              subtitle: (i.last4 == null || i.last4!.isEmpty)
+                  ? null
+                  : Directionality(
+                      textDirection: TextDirection.ltr,
+                      child: Text('•••• ${i.last4}'),
+                    ),
               onTap: () => Navigator.of(ctx).pop(i.accountId),
             ),
         ],

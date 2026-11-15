@@ -232,6 +232,7 @@ void main() {
     );
     await tester.pump();
     expect(find.byType(ChartSkeleton), findsWidgets);
+    expect(find.byKey(const Key('charts-period')), findsOneWidget);
     expect(
       tester.getSemantics(find.byType(ChartSkeleton).first).label,
       contains('Loading charts'),
