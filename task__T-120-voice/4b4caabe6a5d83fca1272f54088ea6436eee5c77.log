@@ -1,5 +1,8 @@
 ﻿== SUMMARY ==
-RUNNING sha=4b4caabe6a5d83fca1272f54088ea6436eee5c77
+SKIP sha=4b4caabe6a5d83fca1272f54088ea6436eee5c77 no app/packages/backend changes
 
 == FULL LOG (last 1500 lines) ==
 auto task/T-120-voice 4b4caabe6a5d83fca1272f54088ea6436eee5c77 2026-11-15T16:40:54.7626850+02:00
+
+
+
