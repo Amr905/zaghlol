@@ -9,8 +9,9 @@
 // - delivery (rule 2): the `dining` category. GUESS: the catalog has one
 //   category for cafes, restaurants and delivery, so this overstates pure
 //   delivery;
-// - ride-hailing (rule 5): the `transport` category. GUESS: it also holds
-//   fuel, tolls and public transport, so this overstates ride-hailing;
+// - ride-hailing (rule 5): no catalog category exists (`transport` also holds
+//   fuel, tolls and public transport and would overstate it), so it stays
+//   null (rule silent, Lead decision 2026-11-15) until merchant groups exist;
 // - cafes (rule 1) and bottled water (rule 3): no catalog category exists,
 //   and `dining` already feeds rule 2, so both stay null (rules silent)
 //   until merchant groups exist;
@@ -88,8 +89,6 @@ Future<RoiSignals> roiSignalsFrom(
           staplesRuns = (slice.count / roiWindowMonths).round();
         case 'dining':
           deliveryMonthly = monthly(slice.amount);
-        case 'transport':
-          commuteMonthly = monthly(slice.amount);
       }
     }
   }

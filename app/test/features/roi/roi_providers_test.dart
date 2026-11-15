@@ -104,7 +104,33 @@ ProviderContainer container(FakeCharts charts, {required bool flag}) {
   return c;
 }
 
+class TransportCharts extends FakeCharts {
+  @override
+  Future<ChartResult<CategoryDonut>> categoryDonut(
+    ChartPeriod p,
+    ChartFilter f,
+  ) async => ChartReady(
+    CategoryDonut(
+      total: Money(f.currency, 3000000),
+      slices: [
+        CategorySlice(
+          categoryId: 'sys:transport',
+          amount: Money(f.currency, 3000000),
+          shareBp: 10000,
+          count: 40,
+        ),
+      ],
+    ),
+  );
+}
+
 void main() {
+  test('ride-hailing rule stays silent on transport spend', () async {
+    final c = container(TransportCharts(), flag: true);
+    final r = await c.read(roiSuggestionsProvider(egp).future);
+    expect(r.map((s) => s.rule), isNot(contains(RoiRule.regularRides)));
+  });
+
   test('flag off: nothing is queried and the list is empty', () async {
     final charts = FakeCharts();
     final c = container(charts, flag: false);
@@ -198,7 +224,7 @@ void main() {
       );
       // 3-month totals: dining 9,000 -> 3,000/mo, transport 6,000 -> 2,000/mo.
       expect(s.deliveryMonthly, Money(egp, 300000));
-      expect(s.commuteMonthly, Money(egp, 200000));
+      expect(s.commuteMonthly, isNull); // rule 5 silent (Lead 2026-11-15)
       expect(s.coffeeMonthly, isNull);
       expect(s.waterMonthly, isNull);
       // Cash 80,000; all spend 15,000 -> 5,000/mo; surplus 75,000.

@@ -16,6 +16,9 @@ import '../../../core/db/app_database_providers.dart';
 import '../../../core/db/daos/accounts_dao.dart';
 import '../../../core/db/daos/transactions_dao.dart';
 import '../../gold/application/gating.dart';
+import '../../transactions/application/refund_matching.dart';
+import '../../transactions/application/transfer_pairing.dart';
+import '../../transactions/presentation/list/txn_list_providers.dart';
 import '../application/import_csv.dart';
 import '../data/drift_csv_import_store.dart';
 
@@ -298,11 +301,34 @@ final class CsvImportRunner implements ImportRunner {
   }
 }
 
+/// Post-commit hooks for every inserted row: transfer pairing, then refund
+/// matching. A failure never fails the import (the rows are already saved).
+Future<void> Function(String) importPostPersistHook(
+  TransferPairingUseCase pairing,
+  RefundMatching refunds,
+) {
+  return (id) async {
+    try {
+      await pairing.onPersisted(id);
+    } on Object {
+      // Best effort: the row stays; pairing can be redone from suggestions.
+    }
+    try {
+      await refunds.onPersisted(id);
+    } on Object {
+      // Best effort.
+    }
+  };
+}
+
 final importRunnerProvider = FutureProvider<ImportRunner>((ref) async {
   final db = await ref.watch(appDatabaseProvider.future);
+  final pairing = await ref.watch(transferPairingUseCaseProvider.future);
+  final refunds = await ref.watch(refundMatchingProvider.future);
   return CsvImportRunner(
     ImportCsvUseCase(
       DriftCsvImportStore(db, TransactionsDao(db), AccountsDao(db)),
+      onImported: importPostPersistHook(pairing, refunds),
     ),
   );
 }, name: 'importRunnerProvider');
