@@ -41,6 +41,12 @@ class SpeechSink {
 }
 
 abstract interface class SpeechPort {
+  /// True only when the OS confirms recognition for [localeId] runs on the
+  /// device without the network (Android API 31+ with the language installed
+  /// on 33+; iOS `supportsOnDeviceRecognition`). Unknown means false: the
+  /// plugin's `onDevice` flag alone can fall back to the network on Android.
+  Future<bool> supportsOnDevice(String localeId);
+
   /// Starts listening with locale [localeId] (`ar_EG`, `en_US`).
   ///
   /// With [onDevice] true the recognizer must not use the network: if it

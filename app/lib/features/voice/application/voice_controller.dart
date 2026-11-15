@@ -40,6 +40,7 @@ final class VoiceState {
     this.online = false,
     this.saveFailed = false,
     this.savedIds = const [],
+    this.itemAccounts = const {},
   });
 
   final VoicePhase phase;
@@ -58,6 +59,9 @@ final class VoiceState {
   final bool saveFailed;
   final List<String> savedIds;
 
+  /// Per-item account the user picked on a row (draft key -> account id).
+  final Map<int, String> itemAccounts;
+
   bool get canSave => drafts.isNotEmpty && drafts.every((d) => d.ready);
 
   VoiceState copyWith({
@@ -71,6 +75,7 @@ final class VoiceState {
     bool? online,
     bool? saveFailed,
     List<String>? savedIds,
+    Map<int, String>? itemAccounts,
   }) => VoiceState(
     phase: phase ?? this.phase,
     transcript: transcript ?? this.transcript,
@@ -81,6 +86,7 @@ final class VoiceState {
     online: online ?? this.online,
     saveFailed: saveFailed ?? this.saveFailed,
     savedIds: savedIds ?? this.savedIds,
+    itemAccounts: itemAccounts ?? this.itemAccounts,
   );
 }
 
@@ -122,7 +128,26 @@ class VoiceController extends Notifier<VoiceState> {
         return;
       }
     }
-    await _listen(onDevice: true);
+    await _startFirst();
+  }
+
+  /// On-device only when the OS confirms it (D-42): otherwise the consent
+  /// sheet comes first and the recognizer is never started before "Allow".
+  Future<void> _startFirst() async {
+    var supported = false;
+    try {
+      supported = await ref
+          .read(speechPortProvider)
+          .supportsOnDevice(_localeId);
+    } on Object {
+      supported = false;
+    }
+    if (_disposed) return;
+    if (supported) {
+      await _listen(onDevice: true);
+    } else {
+      _set(state.copyWith(phase: VoicePhase.needConsent));
+    }
   }
 
   Future<void> _listen({required bool onDevice}) async {
@@ -133,6 +158,7 @@ class VoiceController extends Notifier<VoiceState> {
         transcript: '',
         level: 0,
         drafts: const [],
+        itemAccounts: const {},
       ),
     );
     final err = await ref
@@ -211,7 +237,11 @@ class VoiceController extends Notifier<VoiceState> {
     _session++;
     await ref.read(speechPortProvider).cancel();
     _savedKeys.clear();
-    await _listen(onDevice: !state.online);
+    if (state.online) {
+      await _listen(onDevice: false);
+    } else {
+      await _startFirst();
+    }
   }
 
   Future<void> _finish() async {
@@ -291,16 +321,26 @@ class VoiceController extends Notifier<VoiceState> {
 
   void setAccount(String id) => _set(state.copyWith(accountId: id));
 
+  /// The user picked the account for one item (its currency must match).
+  void setItemAccount(int key, String id) =>
+      _set(state.copyWith(itemAccounts: {...state.itemAccounts, key: id}));
+
   void setDate(CivilDate? date) => _set(
     date == null ? state.copyWith(clearDate: true) : state.copyWith(date: date),
   );
 
-  /// The account an item is stored on: the chosen one when its currency
-  /// matches the spoken amount's, else the first live account in that
-  /// currency; null when there is none (nothing is converted, D-28).
+  /// The account an item is stored on: the one picked on its row, else the
+  /// chip's when its currency matches the spoken amount's, else the first
+  /// live account in that currency; null when there is none (nothing is
+  /// converted, D-28). The row shows it whenever it differs from the chip.
   String? accountFor(VoiceDraft d, TxnLookups lookups) {
     final amount = d.amount;
     if (amount == null) return state.accountId;
+    final picked = state.itemAccounts[d.key];
+    if (picked != null &&
+        lookups.account(picked)?.currencyCode == amount.currency.code) {
+      return picked;
+    }
     final chosen = state.accountId == null
         ? null
         : lookups.account(state.accountId!);

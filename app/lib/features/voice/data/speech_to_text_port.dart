@@ -3,6 +3,7 @@
 // stays inside the OS recognizer; this app never records to a file. Transcripts
 // are handed to the sink and never logged.
 
+import 'package:flutter/services.dart';
 import 'package:speech_to_text/speech_recognition_error.dart';
 import 'package:speech_to_text/speech_recognition_result.dart';
 import 'package:speech_to_text/speech_to_text.dart';
@@ -10,7 +11,23 @@ import 'package:speech_to_text/speech_to_text.dart';
 import '../application/speech_port.dart';
 
 class SpeechToTextPort implements SpeechPort {
-  SpeechToTextPort([SpeechToText? engine]) : _stt = engine ?? SpeechToText();
+  SpeechToTextPort([SpeechToText? engine, MethodChannel? host])
+    : _stt = engine ?? SpeechToText(),
+      _host = host ?? const MethodChannel('zaghlol/speech');
+
+  final MethodChannel _host;
+
+  @override
+  Future<bool> supportsOnDevice(String localeId) async {
+    try {
+      return await _host.invokeMethod<bool>('onDeviceSupport', {
+            'locale': localeId,
+          }) ??
+          false;
+    } on Object {
+      return false;
+    }
+  }
 
   final SpeechToText _stt;
   SpeechSink? _sink;

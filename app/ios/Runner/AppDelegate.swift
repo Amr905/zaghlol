@@ -76,6 +76,8 @@ import UserNotifications
     ShareIntakeRegistration.register(with: engineBridge.pluginRegistry)
     // T-117: the system share sheet for the share-studio PNG.
     ShareImageRegistration.register(with: engineBridge.pluginRegistry)
+    // T-120: on-device speech support check (no network fallback without consent).
+    SpeechSupportRegistration.register(with: engineBridge.pluginRegistry)
     // NOTIF-GW: local notifications and the permission prompt.
     NotificationsRegistration.register(with: engineBridge.pluginRegistry)
   }

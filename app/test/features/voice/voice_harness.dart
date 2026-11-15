@@ -57,7 +57,13 @@ const voiceLookups = TxnLookups(
 /// A scripted recognizer: [start] returns [startError] or begins a session
 /// the test drives with [say] / [end] / [fail].
 class FakeSpeech implements SpeechPort {
-  FakeSpeech({this.startError});
+  FakeSpeech({this.startError, this.onDeviceSupported = true});
+
+  /// What the host reports for on-device recognition.
+  bool onDeviceSupported;
+
+  @override
+  Future<bool> supportsOnDevice(String localeId) async => onDeviceSupported;
 
   /// Per-call outcome of `start` (first element used for the first call).
   final List<SpeechError?> startErrors = [];

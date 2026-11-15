@@ -233,12 +233,13 @@ void main() {
   testWidgets('no on-device Arabic: consent first; Deny sends nothing', (
     t,
   ) async {
-    final r = VoiceRig(speech: FakeSpeech(startError: SpeechError.unavailable));
+    final r = VoiceRig(speech: FakeSpeech(onDeviceSupported: false));
     await r.pump(t);
     expect(find.text('Use online speech recognition?'), findsOneWidget);
+    expect(r.speech.onDeviceCalls, isEmpty, reason: 'start never called');
     await t.tap(find.byKey(const ValueKey('voice-consent-deny')));
     await t.pumpAndSettle();
-    expect(r.speech.onDeviceCalls, [true], reason: 'no online attempt');
+    expect(r.speech.onDeviceCalls, isEmpty, reason: 'no attempt at all');
     expect(find.text('Tell me what you paid'), findsNothing);
     expect(find.byType(TransactionEditScreen), findsOneWidget);
   });
@@ -246,19 +247,61 @@ void main() {
   testWidgets('consent Allow starts the online recognizer (once, explicitly)', (
     t,
   ) async {
-    final speech = FakeSpeech()
-      ..startErrors.addAll([SpeechError.unavailable, null]);
+    final speech = FakeSpeech(onDeviceSupported: false);
     final r = VoiceRig(speech: speech);
     await r.pump(t);
+    expect(speech.onDeviceCalls, isEmpty);
     await t.tap(find.byKey(const ValueKey('voice-consent-allow')));
     await t.pumpAndSettle();
-    expect(speech.onDeviceCalls, [true, false]);
+    expect(speech.onDeviceCalls, [false], reason: 'exactly one online start');
     expect(find.text('Tell me what you paid'), findsOneWidget);
   });
 
+  testWidgets('on-device supported: starts on-device without consent', (
+    t,
+  ) async {
+    final r = VoiceRig();
+    await r.pump(t);
+    expect(find.text('Use online speech recognition?'), findsNothing);
+    expect(r.speech.onDeviceCalls, [true]);
+  });
+
+  testWidgets('EGP chip + USD item: the USD account shows on the row, and '
+      'the saved leg uses it', (t) async {
+    final r = VoiceRig();
+    await r.pump(t);
+    await speakAndStop(t, r, 'coffee 20 dollars');
+    expect(find.byKey(const ValueKey('voice-acct-0')), findsOneWidget);
+    expect(
+      find.descendant(
+        of: find.byKey(const ValueKey('voice-acct-0')),
+        matching: find.text('Dollar'),
+      ),
+      findsOneWidget,
+    );
+    await t.tap(find.byKey(const ValueKey('voice-save')));
+    await t.pumpAndSettle();
+    expect(r.editor.added.single.single.accountId, 'usd');
+  });
+
+  testWidgets('same-currency item shows no per-row account', (t) async {
+    final r = VoiceRig();
+    await r.pump(t);
+    await speakAndStop(t, r, 'coffee 20 pounds');
+    expect(find.byKey(const ValueKey('voice-acct-0')), findsNothing);
+  });
+
+  testWidgets('Arabic: the cash account shows as "كاش"', (t) async {
+    final r = VoiceRig();
+    await r.pump(t, locale: const Locale('ar'));
+    await speakAndStop(t, r, 'قهوة ٢٠ جنيه');
+    expect(find.textContaining('كاش'), findsWidgets);
+    expect(find.text('Cash'), findsNothing);
+  });
+
   testWidgets('online also fails: unavailable explainer', (t) async {
-    final speech = FakeSpeech()
-      ..startErrors.addAll([SpeechError.unavailable, SpeechError.unavailable]);
+    final speech = FakeSpeech(onDeviceSupported: false)
+      ..startErrors.add(SpeechError.unavailable);
     final r = VoiceRig(speech: speech);
     await r.pump(t);
     await t.tap(find.byKey(const ValueKey('voice-consent-allow')));

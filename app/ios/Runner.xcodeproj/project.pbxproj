@@ -7,6 +7,8 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		5A7120000000000000000001 /* SpeechSupportHost.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5A7120000000000000000002 /* SpeechSupportHost.swift */; };
+		5A7120000000000000000004 /* SpeechSupportTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5A7120000000000000000005 /* SpeechSupportTests.swift */; };
 		5A7117000000000000000001 /* ShareImageHost.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5A7117000000000000000002 /* ShareImageHost.swift */; };
 		5A1600000000000000000A01 /* OcrApi.g.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5A1600000000000000000A02 /* OcrApi.g.swift */; };
 		5A1600000000000000000A03 /* OcrHost.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5A1600000000000000000A04 /* OcrHost.swift */; };
@@ -184,6 +186,8 @@
 /* End PBXCopyFilesBuildPhase section */
 
 /* Begin PBXFileReference section */
+		5A7120000000000000000002 /* SpeechSupportHost.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SpeechSupportHost.swift; sourceTree = "<group>"; };
+		5A7120000000000000000005 /* SpeechSupportTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SpeechSupportTests.swift; sourceTree = "<group>"; };
 		5A7117000000000000000002 /* ShareImageHost.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ShareImageHost.swift; sourceTree = "<group>"; };
 		5A1600000000000000000A02 /* OcrApi.g.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OcrApi.g.swift; sourceTree = "<group>"; };
 		5A1600000000000000000A04 /* OcrHost.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OcrHost.swift; sourceTree = "<group>"; };
@@ -325,6 +329,14 @@
 /* End PBXFrameworksBuildPhase section */
 
 /* Begin PBXGroup section */
+		5A7120000000000000000003 /* Speech */ = {
+			isa = PBXGroup;
+			children = (
+				5A7120000000000000000002 /* SpeechSupportHost.swift */,
+			);
+			path = Speech;
+			sourceTree = "<group>";
+		};
 		5A7117000000000000000003 /* ShareSheet */ = {
 			isa = PBXGroup;
 			children = (
@@ -384,6 +396,7 @@
 				5A1600000000000000000A06 /* OcrTests.swift */,
 				5A1800000000000000000D07 /* TrustedClockTests.swift */,
 				5A1030000000000000000E06 /* DeviceSecurityTests.swift */,
+				5A7120000000000000000005 /* SpeechSupportTests.swift */,
 				5A1780000000000000000F06 /* AttestationTests.swift */,
 				5A1790000000000000000F08 /* SeatKeyTests.swift */,
 				5A1510000000000000000F09 /* ICloudBackupTests.swift */,
@@ -491,6 +504,7 @@
 				5A1480000000000000000C02 /* TextNormalizationApi.g.swift */,
 				5A1480000000000000000C07 /* Text */,
 				5A7117000000000000000003 /* ShareSheet */,
+				5A7120000000000000000003 /* Speech */,
 				5A1180000000000000000007 /* WidgetBridgeApi.g.swift */,
 				5A1180000000000000000006 /* WidgetBridgeHost.swift */,
 				5A1600000000000000000A02 /* OcrApi.g.swift */,
@@ -815,6 +829,7 @@
 				5A1600000000000000000A05 /* OcrTests.swift in Sources */,
 				5A1800000000000000000D06 /* TrustedClockTests.swift in Sources */,
 				5A1030000000000000000E05 /* DeviceSecurityTests.swift in Sources */,
+				5A7120000000000000000004 /* SpeechSupportTests.swift in Sources */,
 				5A1780000000000000000F05 /* AttestationTests.swift in Sources */,
 				5A1790000000000000000F07 /* SeatKeyTests.swift in Sources */,
 				5A1510000000000000000F08 /* ICloudBackupTests.swift in Sources */,
@@ -847,6 +862,7 @@
 				5A1480000000000000000C01 /* TextNormalizationApi.g.swift in Sources */,
 				5A1480000000000000000C03 /* TextNormalizationHost.swift in Sources */,
 				5A7117000000000000000001 /* ShareImageHost.swift in Sources */,
+				5A7120000000000000000001 /* SpeechSupportHost.swift in Sources */,
 				5A1600000000000000000A01 /* OcrApi.g.swift in Sources */,
 				5A1600000000000000000A03 /* OcrHost.swift in Sources */,
 				5A1800000000000000000D01 /* ClockApi.g.swift in Sources */,

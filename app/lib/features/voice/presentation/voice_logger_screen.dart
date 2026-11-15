@@ -20,6 +20,7 @@ import '../../gold/application/gating.dart';
 import '../../mascot/presentation/zaghlol_avatar.dart';
 import '../../transactions/data/transactions_providers.dart';
 import '../../transactions/presentation/edit/transaction_edit_screen.dart';
+import '../../transactions/presentation/edit/txn_edit_providers.dart';
 import '../../transactions/presentation/edit/txn_form.dart';
 import '../../transactions/presentation/list/txn_list_providers.dart';
 import '../../transactions/presentation/list/txn_row.dart';
@@ -508,6 +509,7 @@ class _Parsed extends ConsumerWidget {
     final account = state.accountId == null
         ? null
         : lookups?.account(state.accountId!);
+    final cashId = ref.watch(defaultCashAccountIdProvider).value;
 
     return Column(
       children: [
@@ -563,6 +565,13 @@ class _Parsed extends ConsumerWidget {
                         noAccount:
                             lookups != null &&
                             ctrl.accountFor(state.drafts[i], lookups) == null,
+                        itemAccount: _rowAccount(
+                          ctrl,
+                          state,
+                          lookups,
+                          state.drafts[i],
+                        ),
+                        cashId: cashId,
                       ),
                     ],
                   ],
@@ -577,10 +586,11 @@ class _Parsed extends ConsumerWidget {
                     key: const ValueKey('voice-account'),
                     icon: Icons.account_balance_wallet_outlined,
                     label:
-                        '${l.voiceLoggerAccount}: ${account == null ? '…' : accountName(account, fmt)}',
+                        '${l.voiceLoggerAccount}: ${account == null ? '…' : accountLabel(l, account, fmt, cashId)}',
                     onTap: saving || lookups == null
                         ? null
-                        : () => _pickAccount(context, ref, lookups, fmt),
+                        : () =>
+                              _pickAccount(context, ref, lookups, fmt, cashId),
                   ),
                   ZChip(
                     key: const ValueKey('voice-date'),
@@ -646,6 +656,7 @@ class _Parsed extends ConsumerWidget {
     WidgetRef ref,
     TxnLookups lookups,
     TxnFmt fmt,
+    String? cashId,
   ) async {
     final l = AppLocalizations.of(context);
     final id = await showZSheet<String>(
@@ -657,7 +668,7 @@ class _Parsed extends ConsumerWidget {
           for (final a in lookups.accounts)
             ListTile(
               minTileHeight: ZSpacing.minTarget,
-              title: Text(accountName(a, fmt)),
+              title: Text(accountLabel(l, a, fmt, cashId)),
               trailing: a.id == state.accountId
                   ? const Icon(Icons.check)
                   : null,
@@ -688,6 +699,29 @@ class _Parsed extends ConsumerWidget {
   }
 }
 
+/// The account name as the user knows it: the default cash account shows the
+/// localized "Cash" (its stored label is not translated).
+String accountLabel(
+  AppLocalizations l,
+  TxnAccount a,
+  TxnFmt fmt,
+  String? cashId,
+) => a.id == cashId ? l.commonAccountTypeCash : accountName(a, fmt);
+
+/// The account to show on a row: only when the item is not stored on the
+/// chip's account (a different currency or a row-level pick).
+TxnAccount? _rowAccount(
+  VoiceController ctrl,
+  VoiceState state,
+  TxnLookups? lookups,
+  VoiceDraft d,
+) {
+  if (lookups == null || d.amount == null) return null;
+  final id = ctrl.accountFor(d, lookups);
+  if (id == null || id == state.accountId) return null;
+  return lookups.account(id);
+}
+
 class _ItemRow extends ConsumerWidget {
   const _ItemRow({
     required this.draft,
@@ -695,6 +729,8 @@ class _ItemRow extends ConsumerWidget {
     required this.fmt,
     required this.enabled,
     required this.noAccount,
+    required this.itemAccount,
+    required this.cashId,
   });
 
   final VoiceDraft draft;
@@ -702,6 +738,11 @@ class _ItemRow extends ConsumerWidget {
   final TxnFmt fmt;
   final bool enabled;
   final bool noAccount;
+
+  /// The account this item is stored on when it differs from the chip
+  /// (a spoken currency that is not the chip's); null when it is the chip's.
+  final TxnAccount? itemAccount;
+  final String? cashId;
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -749,7 +790,7 @@ class _ItemRow extends ConsumerWidget {
                           button: true,
                           excludeSemantics: true,
                           child: Text(
-                            draft.text.isEmpty ? '—' : draft.text,
+                            draft.text.isEmpty ? kNoValueDash : draft.text,
                             style: ZType.titleSmall.copyWith(color: c.text),
                           ),
                         ),
@@ -767,6 +808,18 @@ class _ItemRow extends ConsumerWidget {
                           : null,
                     ),
                   ),
+                  if (itemAccount != null && lookups != null)
+                    Align(
+                      alignment: AlignmentDirectional.centerStart,
+                      child: _CategoryPill(
+                        key: ValueKey('voice-acct-${draft.key}'),
+                        label: accountLabel(l, itemAccount!, fmt, cashId),
+                        missing: false,
+                        onTap: enabled
+                            ? () => _pickItemAccount(context, ref)
+                            : null,
+                      ),
+                    ),
                   if (noAccount)
                     Text(
                       l.commonValidationAccountRequired,
@@ -837,6 +890,33 @@ class _ItemRow extends ConsumerWidget {
       ref
           .read(voiceControllerProvider.notifier)
           .update(draft.key, categoryId: id);
+    }
+  }
+
+  Future<void> _pickItemAccount(BuildContext context, WidgetRef ref) async {
+    final l = AppLocalizations.of(context);
+    final code = draft.amount?.currency.code;
+    final current = itemAccount?.id;
+    final id = await showZSheet<String>(
+      context: context,
+      title: l.voiceLoggerAccount,
+      builder: (ctx) => Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          for (final a in lookups!.accounts)
+            if (a.currencyCode == code)
+              ListTile(
+                minTileHeight: ZSpacing.minTarget,
+                title: Text(accountLabel(l, a, fmt, cashId)),
+                trailing: a.id == current ? const Icon(Icons.check) : null,
+                onTap: () => Navigator.of(ctx).pop(a.id),
+              ),
+          const SizedBox(height: ZSpacing.lg),
+        ],
+      ),
+    );
+    if (id != null) {
+      ref.read(voiceControllerProvider.notifier).setItemAccount(draft.key, id);
     }
   }
 
