@@ -153,10 +153,7 @@ void main() {
     lock.open();
     await service.pollPending();
     await tester.pumpAndSettle();
-    expect(
-      find.text("I can't read this kind of file"),
-      findsOneWidget,
-    );
+    expect(find.text("I can't read this kind of file"), findsOneWidget);
     expect(find.text('home'), findsOneWidget);
   });
 

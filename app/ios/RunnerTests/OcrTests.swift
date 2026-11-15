@@ -78,7 +78,7 @@ final class OcrTests: XCTestCase {
     func readImage(atPath path: String) throws -> Data { try result.get() }
   }
 
-  private struct FixedKey: SpoolFileKeyProvider {
+  private struct SealKey: SpoolFileKeyProvider {
     var key: Data?
     func spoolKey() -> Data? { key }
   }
@@ -159,7 +159,7 @@ final class OcrTests: XCTestCase {
 
   func testMissingSpoolKeyReportsNotAvailableAndKeepsFile() {
     let path = makeFile(bytes: Data(repeating: 3, count: 100))
-    let source = SpoolFileImageSource(keys: FixedKey(key: nil), home: home)
+    let source = SpoolFileImageSource(keys: SealKey(key: nil), home: home)
     XCTAssertEqual(
       code { try host(FakeRecognizer(), source: source).recognizeNow(path: path, languages: ["en"]) },
       "NOT_AVAILABLE")
@@ -192,7 +192,7 @@ final class OcrTests: XCTestCase {
     let aad = Data("zaghlol.spool.v1|file|\(name)".utf8)
     let sealed = try AES.GCM.seal(plain, using: key, authenticating: aad).combined!
     let path = makeFile(name, bytes: sealed)
-    let source = SpoolFileImageSource(keys: FixedKey(key: keyBytes), home: home)
+    let source = SpoolFileImageSource(keys: SealKey(key: keyBytes), home: home)
     XCTAssertEqual(try source.readImage(atPath: path), plain)
 
     // The same bytes under another file name fail (renamed or swapped file).
@@ -234,15 +234,15 @@ final class OcrTests: XCTestCase {
 
   // MARK: sealImage (T-161)
 
-  private struct FixedKey: SpoolFileKeyProvider {
+  private struct SealKey: SpoolFileKeyProvider {
     var key: Data?
     func spoolKey() -> Data? { key }
   }
 
   private func sealHost(key: Data?, home: URL, plain: URL) -> OcrHost {
     OcrHost(
-      recognizer: FakeRecognizer(), source: SpoolFileImageSource(keys: FixedKey(key: key), home: home),
-      home: home, keys: FixedKey(key: key), plainRoots: [plain])
+      recognizer: FakeRecognizer(), source: SpoolFileImageSource(keys: SealKey(key: key), home: home),
+      home: home, keys: SealKey(key: key), plainRoots: [plain])
   }
 
   func testSealImageRoundTripsAndDeletesThePlainFile() throws {
@@ -260,7 +260,7 @@ final class OcrTests: XCTestCase {
     let sealed = try host.sealImageNow(plainPath: file.path)
     XCTAssertFalse(fm.fileExists(atPath: file.path))
     XCTAssertTrue(sealed.hasSuffix(".bin"))
-    let back = try SpoolFileImageSource(keys: FixedKey(key: key), home: home).readImage(atPath: sealed)
+    let back = try SpoolFileImageSource(keys: SealKey(key: key), home: home).readImage(atPath: sealed)
     XCTAssertEqual(back, bytes)
   }
 
