@@ -1,0 +1,14 @@
+{
+  "package": "com.transferwise.android",
+  "channel": "notification",
+  "body": "Card payment\nYou spent 1,250.00 USD at APPLE STORE on your debit card ending 4242",
+  "receivedAt": "2026-10-23T11:14:00+03:00",
+  "expect": {
+    "template": "wise.card_purchase.en",
+    "event": "card_purchase",
+    "direction": "expense",
+    "currency": "USD",
+    "amount": "1250.00",
+    "last4": "4242"
+  }
+}

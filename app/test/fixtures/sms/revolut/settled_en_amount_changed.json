@@ -1,0 +1,14 @@
+{
+  "package": "com.revolut.revolut",
+  "channel": "notification",
+  "body": "Payment completed\n€62.35 completed at SHELL FUEL with your card ending 4242",
+  "receivedAt": "2026-10-23T11:14:00+03:00",
+  "expect": {
+    "template": "revolut.settled.en",
+    "event": "settled",
+    "direction": "expense",
+    "currency": "EUR",
+    "amount": "62.35",
+    "last4": "4242"
+  }
+}

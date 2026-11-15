@@ -1,0 +1,13 @@
+{
+  "package": "co.uk.getmondo",
+  "channel": "notification",
+  "body": "Refund\nYou were refunded £12.50 by TESCO",
+  "receivedAt": "2026-10-23T11:14:00+03:00",
+  "expect": {
+    "template": "monzo.refund.en",
+    "event": "refund",
+    "direction": "income",
+    "currency": "GBP",
+    "amount": "12.50"
+  }
+}

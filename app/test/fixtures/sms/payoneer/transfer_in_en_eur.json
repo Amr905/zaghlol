@@ -1,0 +1,14 @@
+{
+  "package": "com.payoneer.android",
+  "channel": "notification",
+  "body": "Payment received\nYou received €480.75 from BETA GMBH.",
+  "receivedAt": "2026-10-23T11:14:00+03:00",
+  "expect": {
+    "template": "payoneer.transfer_in.en",
+    "event": "transfer_in",
+    "direction": "income",
+    "currency": "EUR",
+    "amount": "480.75",
+    "counterparty": "BETA GMBH"
+  }
+}

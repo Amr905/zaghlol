@@ -1,0 +1,15 @@
+{
+  "sender": "AlRajhiBank",
+  "body": "Incoming Transfer\nAmount: SAR 20,000.00\nFrom: ACME PAYROLL\nBalance: SAR 31,250.75",
+  "receivedAt": "2026-10-23T11:14:00+03:00",
+  "expect": {
+    "template": "alrajhi.transfer_in.en",
+    "event": "transfer_in",
+    "direction": "income",
+    "currency": "SAR",
+    "amount": "20000.00",
+    "counterparty": "ACME PAYROLL",
+    "balance": "31250.75",
+    "balanceCurrency": "SAR"
+  }
+}

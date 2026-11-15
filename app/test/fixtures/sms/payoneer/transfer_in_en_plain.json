@@ -1,0 +1,14 @@
+{
+  "package": "com.payoneer.android",
+  "channel": "notification",
+  "body": "Payment received\nYou received $250.00 from ACME CORP",
+  "receivedAt": "2026-10-23T11:14:00+03:00",
+  "expect": {
+    "template": "payoneer.transfer_in.en",
+    "event": "transfer_in",
+    "direction": "income",
+    "currency": "USD",
+    "amount": "250.00",
+    "counterparty": "ACME CORP"
+  }
+}

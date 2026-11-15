@@ -1,0 +1,14 @@
+{
+  "sender": "PAYTMB",
+  "body": "Paytm: Sent ₹45.00 to CHAI POINT from Paytm Payments Bank a/c **4242",
+  "receivedAt": "2026-10-23T11:14:00+03:00",
+  "expect": {
+    "template": "paytm.transfer_out.en",
+    "event": "transfer_out",
+    "direction": "expense",
+    "currency": "INR",
+    "amount": "45.00",
+    "last4": "4242",
+    "counterparty": "CHAI POINT"
+  }
+}

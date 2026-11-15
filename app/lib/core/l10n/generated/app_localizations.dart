@@ -6817,7 +6817,7 @@ abstract class AppLocalizations {
   /// S
   ///
   /// In ar, this message translates to:
-  /// **'الديون اللي ميعادها جه بتتخصم من الكاش قبل الحساب.'**
+  /// **'الديون لسه مش بتتخصم. لو عليك ديون حل ميعادها، اسأل عالم شرعي هتأثر على زكاتك إزاي.'**
   String get zakahMainHowDebts;
 
   /// A · status = zakah_main_status*
@@ -10511,6 +10511,246 @@ abstract class AppLocalizations {
   /// In ar, this message translates to:
   /// **'الشهر {index} من {total}'**
   String recurringBillsGameyaMonth(String index, String total);
+
+  /// S-67 import source screen title
+  ///
+  /// In ar, this message translates to:
+  /// **'ضيف كشف حساب'**
+  String get importFlowTitle;
+
+  /// S-67 import source screen intro
+  ///
+  /// In ar, this message translates to:
+  /// **'ضيف شهور فاتت مرة واحدة. الملف بيتقرا على موبايلك بس، ومش بيتبعت لأي حد.'**
+  String get importFlowSub;
+
+  /// S-67 group title
+  ///
+  /// In ar, this message translates to:
+  /// **'بنوك مصر'**
+  String get importFlowGroupEgypt;
+
+  /// S-67 group title
+  ///
+  /// In ar, this message translates to:
+  /// **'بنوك أونلاين'**
+  String get importFlowGroupOnline;
+
+  /// S-67 link next to a group title
+  ///
+  /// In ar, this message translates to:
+  /// **'إزاي أنزّل الكشف؟'**
+  String get importFlowHowTo;
+
+  /// S-67 how-to sheet body (generic until bank guides ship)
+  ///
+  /// In ar, this message translates to:
+  /// **'افتح تطبيق البنك أو موقعه، دوّر على صفحة الكشوف، اختار الشهور اللي عايزها ونزّل الملف. وبعدين ارجع هنا واختاره.'**
+  String get importFlowHowToBody;
+
+  /// S-67 source name
+  ///
+  /// In ar, this message translates to:
+  /// **'CIB'**
+  String get importFlowBankCib;
+
+  /// S-67 source name
+  ///
+  /// In ar, this message translates to:
+  /// **'البنك الأهلي'**
+  String get importFlowBankNbe;
+
+  /// S-67 source name
+  ///
+  /// In ar, this message translates to:
+  /// **'بنك مصر'**
+  String get importFlowBankMisr;
+
+  /// S-67 source name
+  ///
+  /// In ar, this message translates to:
+  /// **'QNB'**
+  String get importFlowBankQnb;
+
+  /// S-67 source name
+  ///
+  /// In ar, this message translates to:
+  /// **'Wise'**
+  String get importFlowBankWise;
+
+  /// S-67 source name
+  ///
+  /// In ar, this message translates to:
+  /// **'Revolut'**
+  String get importFlowBankRevolut;
+
+  /// S-67 source name
+  ///
+  /// In ar, this message translates to:
+  /// **'Payoneer'**
+  String get importFlowBankPayoneer;
+
+  /// S-67 logo tile text
+  ///
+  /// In ar, this message translates to:
+  /// **'NBE'**
+  String get importFlowBadgeNbe;
+
+  /// S-67 logo tile text
+  ///
+  /// In ar, this message translates to:
+  /// **'BM'**
+  String get importFlowBadgeMisr;
+
+  /// S-67 source sub-line
+  ///
+  /// In ar, this message translates to:
+  /// **'PDF من الموبايل أو الإيميل'**
+  String get importFlowSubCib;
+
+  /// S-67 file type
+  ///
+  /// In ar, this message translates to:
+  /// **'PDF'**
+  String get importFlowFmtPdf;
+
+  /// S-67 file type
+  ///
+  /// In ar, this message translates to:
+  /// **'CSV'**
+  String get importFlowFmtCsv;
+
+  /// S-67 file type for a multi-currency source
+  ///
+  /// In ar, this message translates to:
+  /// **'كل العملات · CSV'**
+  String get importFlowFmtCsvAllCurrencies;
+
+  /// S-67 Zaghlol CSV sub-line
+  ///
+  /// In ar, this message translates to:
+  /// **'نسخة إنت صدرتها قبل كده'**
+  String get importFlowZaghlolSub;
+
+  /// S-67 badge on a source that is not available yet
+  ///
+  /// In ar, this message translates to:
+  /// **'قريب'**
+  String get importFlowSoon;
+
+  /// S-67 summary sheet date range
+  ///
+  /// In ar, this message translates to:
+  /// **'{start} – {end}'**
+  String importFlowSummaryRange(String start, String end);
+
+  /// S-67 summary row
+  ///
+  /// In ar, this message translates to:
+  /// **'حركات في الكشف'**
+  String get importFlowRowFound;
+
+  /// S-67 summary row
+  ///
+  /// In ar, this message translates to:
+  /// **'موجودة قبل كده من الرسايل'**
+  String get importFlowRowDup;
+
+  /// S-67 summary row
+  ///
+  /// In ar, this message translates to:
+  /// **'كروت مش بتتابعها'**
+  String get importFlowRowUntracked;
+
+  /// S-67 summary row
+  ///
+  /// In ar, this message translates to:
+  /// **'صفوف معرفتش أقراها'**
+  String get importFlowRowUnreadable;
+
+  /// S-67 summary highlighted row
+  ///
+  /// In ar, this message translates to:
+  /// **'حركات جديدة هتتضاف'**
+  String get importFlowRowNew;
+
+  /// S-67 summary row value
+  ///
+  /// In ar, this message translates to:
+  /// **'{n} — هنتخطاها'**
+  String importFlowSkipped(String n);
+
+  /// S-67 target card row
+  ///
+  /// In ar, this message translates to:
+  /// **'على {card}'**
+  String importFlowTarget(String card);
+
+  /// S-67 target card action
+  ///
+  /// In ar, this message translates to:
+  /// **'غيّر'**
+  String get importFlowTargetChange;
+
+  /// S-67 confirm button
+  ///
+  /// In ar, this message translates to:
+  /// **'{count, plural, =1{ضيف حركة} =2{ضيف حركتين} few{ضيف {n} حركات} many{ضيف {n} حركة} other{ضيف {n} حركة}}'**
+  String importFlowConfirm(int count, String n);
+
+  /// S-67 done headline
+  ///
+  /// In ar, this message translates to:
+  /// **'{count, plural, =1{ضفت حركة 🎉} =2{ضفت حركتين 🎉} few{ضفت {n} حركات 🎉} many{ضفت {n} حركة 🎉} other{ضفت {n} حركة 🎉}}'**
+  String importFlowDoneTitle(int count, String n);
+
+  /// S-67 done sub-line when no card is known
+  ///
+  /// In ar, this message translates to:
+  /// **'من ملف زغلول بتاعك'**
+  String get importFlowDoneFromFile;
+
+  /// S-67 done stat
+  ///
+  /// In ar, this message translates to:
+  /// **'اتصنفوا لوحدهم'**
+  String get importFlowDoneAuto;
+
+  /// S-67 done stat
+  ///
+  /// In ar, this message translates to:
+  /// **'مستنيين رأيك'**
+  String get importFlowDoneReview;
+
+  /// S-67 done section title
+  ///
+  /// In ar, this message translates to:
+  /// **'أكتر حاجات صرفت عليها'**
+  String get importFlowDoneTop;
+
+  /// S-67 done mascot line
+  ///
+  /// In ar, this message translates to:
+  /// **'الشارتات والميزانية اتحدثوا بالشهور دي. دلوقتي أقدر أقارنلك بينهم.'**
+  String get importFlowDoneBubble;
+
+  /// S-67 done primary button
+  ///
+  /// In ar, this message translates to:
+  /// **'{count, plural, =1{راجع الحركة} =2{راجع الحركتين} few{راجع الـ {n}} many{راجع الـ {n}} other{راجع الـ {n}}}'**
+  String importFlowDoneReviewButton(int count, String n);
+
+  /// S-67 done secondary button
+  ///
+  /// In ar, this message translates to:
+  /// **'افتح الكارت'**
+  String get importFlowDoneOpenCard;
+
+  /// S-67 hint for a coming-soon source
+  ///
+  /// In ar, this message translates to:
+  /// **'المصدر ده لسه مش جاهز'**
+  String get importFlowUnavailable;
 }
 
 class _AppLocalizationsDelegate

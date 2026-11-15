@@ -1,0 +1,14 @@
+{
+  "sender": "PAYTMB",
+  "body": "Paytm: Paid ₹89.50 to LOCAL KIRANA from Paytm Wallet. Wallet Balance: Rs.410.50",
+  "receivedAt": "2026-10-23T11:14:00+03:00",
+  "expect": {
+    "template": "paytm.card_purchase.en",
+    "event": "card_purchase",
+    "direction": "expense",
+    "currency": "INR",
+    "amount": "89.50",
+    "balance": "410.50",
+    "balanceCurrency": "INR"
+  }
+}

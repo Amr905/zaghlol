@@ -1,0 +1,104 @@
+{
+  "code": "bunq",
+  "names": {
+    "ar": "بانك",
+    "en": "bunq"
+  },
+  "country": "NL",
+  "defaultCurrency": "EUR",
+  "senders": [],
+  "packages": [
+    "com.bunq.android"
+  ],
+  "walletCardNames": [
+    "bunq"
+  ],
+  "last4": [],
+  "drop": [],
+  "templates": [
+    {
+      "id": "bunq.card_purchase.en",
+      "version": 1,
+      "lang": "en",
+      "channel": [
+        "notification"
+      ],
+      "event": "card_purchase",
+      "direction": "expense",
+      "baseConfidence": 0.9,
+      "source": "synthetic-unverified",
+      "pattern": "you paid (?<cur>(?:[a-z]{1,2})?[£€$])(?<amount>[\\d,.]+) at (?<merchant>.+?)(?: (?:with|on) (?:your )?(?:debit |credit )?card ending (?<last4>\\d{4}))?(?:\\. |\\.?$)",
+      "currencyMap": {
+        "a$": "AUD",
+        "ca$": "CAD",
+        "s$": "SGD",
+        "us$": "USD",
+        "nz$": "NZD",
+        "hk$": "HKD"
+      }
+    },
+    {
+      "id": "bunq.transfer_in.en",
+      "version": 1,
+      "lang": "en",
+      "channel": [
+        "notification"
+      ],
+      "event": "transfer_in",
+      "direction": "income",
+      "baseConfidence": 0.9,
+      "source": "synthetic-unverified",
+      "pattern": "you received (?<cur>(?:[a-z]{1,2})?[£€$])(?<amount>[\\d,.]+) from (?<counterparty>.+?)(?:\\. |\\.?$)",
+      "currencyMap": {
+        "a$": "AUD",
+        "ca$": "CAD",
+        "s$": "SGD",
+        "us$": "USD",
+        "nz$": "NZD",
+        "hk$": "HKD"
+      }
+    },
+    {
+      "id": "bunq.transfer_out.en",
+      "version": 1,
+      "lang": "en",
+      "channel": [
+        "notification"
+      ],
+      "event": "transfer_out",
+      "direction": "expense",
+      "baseConfidence": 0.9,
+      "source": "synthetic-unverified",
+      "pattern": "you sent (?<cur>(?:[a-z]{1,2})?[£€$])(?<amount>[\\d,.]+) to (?<counterparty>.+?)(?:\\. |\\.?$)",
+      "currencyMap": {
+        "a$": "AUD",
+        "ca$": "CAD",
+        "s$": "SGD",
+        "us$": "USD",
+        "nz$": "NZD",
+        "hk$": "HKD"
+      }
+    },
+    {
+      "id": "bunq.declined.en",
+      "version": 1,
+      "lang": "en",
+      "channel": [
+        "notification"
+      ],
+      "event": "declined",
+      "direction": "neutral",
+      "baseConfidence": 0.9,
+      "source": "synthetic-unverified",
+      "pattern": "your payment of (?<cur>(?:[a-z]{1,2})?[£€$])(?<amount>[\\d,.]+) at (?<merchant>.+?) was declined(?:\\. |\\.?$)",
+      "currencyMap": {
+        "a$": "AUD",
+        "ca$": "CAD",
+        "s$": "SGD",
+        "us$": "USD",
+        "nz$": "NZD",
+        "hk$": "HKD"
+      }
+    }
+  ]
+}

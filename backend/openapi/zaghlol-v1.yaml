@@ -662,9 +662,12 @@ paths:
       operationId: deleteAccount
       summary: Delete the account and its links
       description: |
-        Revokes the stored Apple token if any, and deletes the stored sign-in idempotency results that hold this
-        account's token. Purchases keep their seats and their used free reclaim (D-58); their account link is
-        removed. Account tokens for the deleted account are rejected from then on.
+        Always deletes the account in this request; Apple can never block it. The stored Apple token is revoked
+        first. If Apple cannot revoke it now, only the re-sealed (encrypted) refresh token is queued for a worker
+        to retry for at most 30 days, then dropped; nothing else about the account is kept. Also deletes the
+        stored sign-in idempotency results that hold this account's token. Purchases keep their seats and their
+        used free reclaim (D-58); their account link is removed. Account tokens for the deleted account are
+        rejected from then on.
       security:
         - installToken: []
           accountToken: []
@@ -680,8 +683,6 @@ paths:
           $ref: '#/components/responses/RateLimited'
         '500':
           $ref: '#/components/responses/InternalError'
-        '503':
-          $ref: '#/components/responses/UpstreamUnavailable'
 
   /v1/apple/android-callback:
     post:

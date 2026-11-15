@@ -1,0 +1,12 @@
+{
+  "sender": "Liv",
+  "body": "Liv: Refund of AED 12,345.50 from JEWELLERS SAMPLE.",
+  "receivedAt": "2026-10-23T11:14:00+03:00",
+  "expect": {
+    "template": "liv.refund.en",
+    "event": "refund",
+    "direction": "income",
+    "currency": "AED",
+    "amount": "12345.50"
+  }
+}

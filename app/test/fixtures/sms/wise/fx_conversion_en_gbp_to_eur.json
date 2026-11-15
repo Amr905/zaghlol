@@ -1,0 +1,15 @@
+{
+  "package": "com.transferwise.android",
+  "channel": "notification",
+  "body": "Conversion complete\nYou converted 250.00 GBP to 291.35 EUR",
+  "receivedAt": "2026-10-23T11:14:00+03:00",
+  "expect": {
+    "template": "wise.fx_conversion.en",
+    "event": "fx_conversion",
+    "direction": "neutral",
+    "currency": "GBP",
+    "amount": "250.00",
+    "originalAmount": "291.35",
+    "originalCurrency": "EUR"
+  }
+}

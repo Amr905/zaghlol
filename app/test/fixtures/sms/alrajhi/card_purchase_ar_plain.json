@@ -1,0 +1,13 @@
+{
+  "sender": "AlRajhiBank",
+  "body": "شراء نقاط البيع\nبطاقة: 4242;مدى\nالمبلغ: SAR 25.50\nلدى: TESCO",
+  "receivedAt": "2026-10-23T11:14:00+03:00",
+  "expect": {
+    "template": "alrajhi.card_purchase.ar",
+    "event": "card_purchase",
+    "direction": "expense",
+    "currency": "SAR",
+    "amount": "25.50",
+    "last4": "4242"
+  }
+}

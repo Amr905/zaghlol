@@ -33,7 +33,15 @@ import 'package:zaghlol/features/settings/presentation/settings_main_screen.dart
 import 'package:zaghlol/features/settings/presentation/settings_ports.dart';
 
 import 'package:zaghlol/features/accounts/presentation/card_detail/card_detail.dart';
-import 'package:zaghlol_domain/zaghlol_domain.dart' show Currency;
+import 'package:zaghlol_domain/zaghlol_domain.dart' show Currency, Money;
+import 'package:zaghlol/features/export_import/presentation/import_done_screen.dart';
+import 'package:zaghlol/features/export_import/presentation/import_ports.dart';
+import 'package:zaghlol/features/export_import/presentation/import_source_screen.dart';
+import 'package:zaghlol/features/export_import/presentation/import_summary_sheet.dart';
+import 'package:zaghlol/features/gold/application/gating.dart';
+
+import '../features/export_import/presentation/import_flow_support.dart' as imp;
+
 import 'package:zaghlol/features/accounts/presentation/edit_card/add_card_steps.dart';
 import 'package:zaghlol/features/accounts/presentation/edit_card/card_details_screen.dart';
 import 'package:zaghlol/features/accounts/presentation/edit_card/edit_card_providers.dart'
@@ -723,5 +731,84 @@ void main() {
     r.speech.say('دفعت ١٥٠ جنيه خضار و ٤٥ قهوة');
     await tester.pump();
     await _shot(tester, 'voice_logger_listening', topmost: true);
+  }, skip: _skip != null);
+
+  Future<ProviderContainer> importShotHost(
+    WidgetTester tester,
+    Widget screen,
+  ) async {
+    await tester.binding.setSurfaceSize(const Size(390, 844));
+    addTearDown(() => tester.binding.setSurfaceSize(null));
+    final container = ProviderContainer(
+      overrides: imp.importOverrides(
+        'ar',
+        picker: imp.FakePicker(null),
+        runner: imp.FakeRunner(),
+      ),
+    );
+    addTearDown(container.dispose);
+    container
+        .read(entitlementStateProvider.notifier)
+        .applyVerified(verified: true, status: 'active');
+    await tester.pumpWidget(
+      UncontrolledProviderScope(
+        container: container,
+        child: imp.host(screen, lang: 'ar'),
+      ),
+    );
+    await tester.pumpAndSettle();
+    return container;
+  }
+
+  testWidgets('import source S-67 (32)', (tester) async {
+    await importShotHost(tester, const ImportSourceScreen());
+    await _shot(tester, 'import_source');
+  }, skip: _skip != null);
+
+  testWidgets('import summary S-67 (33)', (tester) async {
+    await importShotHost(tester, const ImportSourceScreen());
+    unawaited(
+      showImportSummarySheet(
+        tester.element(find.byType(ImportSourceScreen)),
+        preview: imp.samplePreview(card: 'CIB'),
+      ),
+    );
+    await tester.pumpAndSettle();
+    await _shot(tester, 'import_summary', topmost: true);
+  }, skip: _skip != null);
+
+  testWidgets('import done S-67 (34)', (tester) async {
+    await importShotHost(
+      tester,
+      ImportDoneScreen(
+        cardName: 'CIB',
+        onReview: () {},
+        outcome: ImportOutcome(
+          imported: 143,
+          earliest: DateTime.utc(2026, 8, 5),
+          latest: DateTime.utc(2026, 10, 25),
+          autoCategorised: 131,
+          needReview: 11,
+          topCategories: [
+            ImportTopCategory(
+              categoryId: 'sys:dining',
+              name: 'أكل بره',
+              total: Money(Currency.of('EGP'), 342000),
+            ),
+            ImportTopCategory(
+              categoryId: 'sys:groceries',
+              name: 'خزين البيت',
+              total: Money(Currency.of('EGP'), 288000),
+            ),
+            ImportTopCategory(
+              categoryId: 'sys:transport',
+              name: 'سفر',
+              total: Money(Currency.of('EGP'), 215000),
+            ),
+          ],
+        ),
+      ),
+    );
+    await _shot(tester, 'import_done');
   }, skip: _skip != null);
 }

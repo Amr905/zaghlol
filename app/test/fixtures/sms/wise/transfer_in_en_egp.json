@@ -1,0 +1,14 @@
+{
+  "package": "com.transferwise.android",
+  "channel": "notification",
+  "body": "Money received\nYou received 15,000.00 EGP from OMAR TEST",
+  "receivedAt": "2026-10-23T11:14:00+03:00",
+  "expect": {
+    "template": "wise.transfer_in.en",
+    "event": "transfer_in",
+    "direction": "income",
+    "currency": "EGP",
+    "amount": "15000.00",
+    "counterparty": "OMAR TEST"
+  }
+}

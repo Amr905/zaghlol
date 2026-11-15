@@ -160,6 +160,10 @@ public class CheckConstraintTests(SchemaFixture fixture)
             ["store_notifications: google messageId with a colon"] = ("store_notifications", Set("external_id", "abc:def"), "ck_store_notifications_google_shape"),
             ["purchases: store_key over 512 characters"] = ("purchases", Set("store_key", new string('k', 513)), "ck_purchases_store_key_length"),
 
+            // pending_apple_revocations (T-135)
+            ["pending_apple_revocations: negative attempts"] = ("pending_apple_revocations", Set("attempts", -1), "ck_pending_apple_revocations_attempts"),
+            ["pending_apple_revocations: expires before it was created"] = ("pending_apple_revocations", Set("expires_at", Rows.Now().AddDays(-1)), "ck_pending_apple_revocations_window"),
+
             // audit_log (SEC F3): any depth, any letter case, values with "@", and the target
             ["audit_log: details with email"] = ("audit_log", Set("details", new Jsonb("{\"email\": \"x\"}")), "ck_audit_log_details_no_identifiers"),
             ["audit_log: details with order_id"] = ("audit_log", Set("details", new Jsonb("{\"order_id\": \"GPA.0000-0000-0000-00000\"}")), "ck_audit_log_details_no_identifiers"),
@@ -221,8 +225,9 @@ public class CheckConstraintTests(SchemaFixture fixture)
         var tested = Cases.Values.Select(c => c.Constraint).ToHashSet(StringComparer.Ordinal);
 
         // 23 documented + 24 hardening (octet/char lengths, cause regex, audit, codes, formats) + 1 catalog_drafts (T-125) + 2 price_quotes (T-127)
-        // + 2 idempotency_records claim checks (T-130) + ck_store_notifications_google_shape (T-133).
-        Assert.Equal(55, inSchema.Count);
+        // + 2 idempotency_records claim checks (T-130) + ck_store_notifications_google_shape (T-133)
+        // + 2 pending_apple_revocations (T-135).
+        Assert.Equal(57, inSchema.Count);
         Assert.Empty(inSchema.Except(tested));
         Assert.Empty(tested.Except(inSchema));
     }

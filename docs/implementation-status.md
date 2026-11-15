@@ -20,12 +20,12 @@
 |---|---|---|---|---|
 | M0 | 28 | 25 | 1 | 0 |
 | M1 | 29 | 28 | 0 | 1 |
-| M2 | 29 | 24 | 0 | 0 |
+| M2 | 29 | 26 | 0 | 0 |
 | M3 | 18 | 16 | 0 | 0 |
 | M4 | 17 | 17 | 0 | 0 |
-| M5 | 35 | 30 | 1 | 1 |
-| M6 | 19 | 14 | 1 | 2 |
-| M7 | 11 | 3 | 0 | 0 |
+| M5 | 35 | 31 | 1 | 1 |
+| M6 | 19 | 15 | 1 | 2 |
+| M7 | 11 | 7 | 0 | 0 |
 
 ## Tasks
 | ID | Title | MS | Class | Model | Agent | Depends on | Status | Verification evidence | Notes |
@@ -100,8 +100,8 @@
 | T-068 | Templates + fixtures: Egyptian banks batch 1 | M2 | C2 | Sonnet | parsing-engine-engineer | T-033 | DONE | batch 22 review [batch-22a](05-reviews/batch-22a.md), [batch-22b](05-reviews/batch-22b.md) | Batch 22. FU-221 |
 | T-069 | Templates + fixtures: Egyptian banks batch 2 | M2 | C2 | Sonnet | parsing-engine-engineer | T-033 | DONE | batch 22 review [batch-22a](05-reviews/batch-22a.md), [batch-22b](05-reviews/batch-22b.md) | Batch 22. FU-222 |
 | T-070 | Templates + fixtures: BNPL (valU, Sympl, Souhoola, Shahry, Aman, Forsa, Contact) | M2 | C2 | Sonnet | parsing-engine-engineer | T-033 | TODO | — |  |
-| T-071 | Templates + fixtures: Wise, Revolut, Monzo, bunq, N26, Payoneer | M2 | C3 | Sonnet | parsing-engine-engineer | T-033 | TODO | — |  |
-| T-072 | Templates + fixtures: HDFC, Paytm, Al Rajhi, Emirates NBD/Liv, GCC (S rows) | M2 | C2 | Sonnet | parsing-engine-engineer | T-033 | TODO | — |  |
+| T-071 | Templates + fixtures: Wise, Revolut, Monzo, bunq, N26, Payoneer | M2 | C3 | Sonnet | parsing-engine-engineer | T-033 | DONE | batch 25 review [batch-25a](05-reviews/batch-25a.md), [batch-25b](05-reviews/batch-25b.md) | Batch 25. FU-238 |
+| T-072 | Templates + fixtures: HDFC, Paytm, Al Rajhi, Emirates NBD/Liv, GCC (S rows) | M2 | C2 | Sonnet | parsing-engine-engineer | T-033 | DONE | batch 25 review [batch-25a](05-reviews/batch-25a.md), [batch-25b](05-reviews/batch-25b.md) | Batch 25. FU-239 |
 | T-073 | Generic parser for unknown financial senders | M2 | C3 | Sonnet | parsing-engine-engineer | T-033, T-034 | DONE | batch 4 local: app 873 tests, packages 901, analyze/format clean; batch CI (`batch/2026-11-11-3`); review [T-073](05-reviews/T-073.md) APPROVED after flaky-probe fix (delta) | Batch 4. FU-078 (signed balance), FU-080 (ingest routing, owner T-046) |
 | T-074 | Merchant rules repository and apply-to-past | M2 | C2 | Sonnet | flutter-core-engineer | T-018, T-050 | DONE | batch 5 local: app 1167 tests, zaghlol_parsing 1029, all packages/tools green, analyze/format clean; batch CI (`batch/2026-11-11-4`); review [T-074](05-reviews/T-074.md) APPROVED | Batch 5. Precedence counterparty → merchant_norm → catalog merchant is an assumption for T-075; rule re-point leaves rule-set rows (T-077 copy). FU-095 |
 | T-075 | Categorizer with fuzzy merchant matching | M2 | C3 | Sonnet | parsing-engine-engineer | T-034, T-018, T-074, T-030 | DONE | batch 6 local: every app-ci step green (app tests, packages, lints, Pigeon/drift stale checks, no-logging grep), backend Release build 0 warnings, format clean, no vulnerable packages; batch CI (`batch/2026-11-11-5`); review [T-075](05-reviews/T-075.md) APPROVED (FU-095 harness negative proof re-run) | Batch 6. Takes FU-095. PO-1…PO-4 provisional (Arabic El Ezaby aliases need native review with T-059). FU-100 |
@@ -164,7 +164,7 @@
 | T-132 | Entitlement tokens, GET /v1/entitlement, seat at verify and sync entitlement block | M5 | C4 | Opus | backend-engineer | T-128, T-130, T-131, T-184 | DONE | batch 10 review [batch-10](05-reviews/batch-10.md) APPROVED; backend-ci incl. Testcontainers green | Plan v1.1: split; seat service → T-184, restore → T-185 Batch 10. FU-116 |
 | T-133 | Google RTDN push endpoint, processing worker and voided reconciliation | M5 | C4 | Opus | backend-engineer | T-130 | DONE | backend-ci 43017903978 on `ci/T-133` (all jobs, Docker suites); batch 7 local: every app-ci step green, backend Release build 0 warnings, format clean, no vulnerable packages; batch CI (`batch/2026-11-11-6`); reviews [T-133](05-reviews/T-133.md) + [security](05-reviews/T-133-security.md) APPROVED | Batch 7. Closes FU-092 item 9, FU-098 codes 2–4, nits 5–7, I-2 (code 3 Google only), FU-077 M-2. **Go-live:** security M-1. PO Q1–Q6 provisional. FU-107 |
 | T-134 | App Store Server Notifications V2 endpoint and reconciliation | M5 | C4 | Opus | backend-engineer | T-131 | DONE | backend-ci 42985900739 on `ci/T-134` (all jobs green, Testcontainers incl. grant tests); batch 6 local: every app-ci step green (app tests, packages, lints, Pigeon/drift stale checks, no-logging grep), backend Release build 0 warnings, format clean, no vulnerable packages; batch CI (`batch/2026-11-11-5`); reviews [T-134](05-reviews/T-134.md) APPROVED (Lead delta check after 2 CHECK negative cases) + [security](05-reviews/T-134-security.md) APPROVED | Batch 6. Resolves FU-092 items 1, 2, 3, 8. PO Q1–Q4 provisional. FU-098 |
-| T-135 | Accounts: Google/Apple ID token sign-in, linking, sign-out, delete, Android Apple callback | M5 | C4 | Opus | backend-engineer | T-132, T-182, T-184 | TODO | — | Plan v1.1: R5-3(a) note |
+| T-135 | Accounts: Google/Apple ID token sign-in, linking, sign-out, delete, Android Apple callback | M5 | C4 | Opus | backend-engineer | T-132, T-182, T-184 | DONE | batch 25 review [batch-25a](05-reviews/batch-25a.md), [batch-25b](05-reviews/batch-25b.md) | Plan v1.1: R5-3(a) note Batch 25. FU-233 |
 | T-136 | Operator auth (OIDC + MFA), roles, audit log and support lookup | M5 | C4 | Opus | backend-engineer | T-122 | IN_REVIEW | backend-ci 42794656371 + PR head green; reviews [T-136](05-reviews/T-136.md) APPROVED, [security](05-reviews/T-136-security.md) APPROVED after S-1 fix (delta) | PR #23 squash-merged. AC3 (R4-6) and AC4 (R3-9) IdP evidence pending: PO chose "decide later" on the IdP. Advisory acrs default; Profile=Google refused at startup |
 | T-137 | zaghlol-ops CLI for catalog, flags, prices, contributions and support, plus support runbook | M5 | C3 | Sonnet | backend-engineer | T-136, T-186, T-125, T-126, T-127, T-129 | TODO | — | Plan v1.1: C2→C3 (order IDs, operator login) |
 | T-138 | Backend observability: OpenTelemetry, metrics, dashboards, alert rules | M5 | C3 | Sonnet | backend-engineer | T-005 | DONE | backend-ci 42528633775 (6/6) @ 4020b9e; mutation runs 42528095105, 42528424746; PR #11 squash-merged; [T-138](05-reviews/T-138.md) APPROVED (r3) | Closes FU-002, FU-008. FU-049 |
@@ -187,7 +187,7 @@
 | T-155 | Zaghlol CSV import with duplicate detection | M6 | C3 | Sonnet | flutter-core-engineer | T-046, T-154 | DONE | batch 16 review [batch-16a](05-reviews/batch-16a.md), [batch-16b](05-reviews/batch-16b.md) | Batch 16. FU-154 |
 | T-156 | Bank PDF statement import (CIB, NBE, QNB, Banque Misr) | M6 | C3 | Sonnet | parsing-engine-engineer | T-033, T-031 | BLOCKED | — | Needs sample statements (OQ-04) |
 | T-157 | Online-bank statement import (Wise, Revolut, Monzo, bunq, N26) | M6 | C3 | Sonnet | parsing-engine-engineer | T-155, T-071 | BLOCKED | — | Needs sample statements (OQ-04) |
-| T-158 | Import flow S-67 (source, summary, done) | M6 | C2 | Sonnet | flutter-ui-engineer | T-156, T-157, T-155, T-119 | TODO | — |  |
+| T-158 | Import flow S-67 (source, summary, done) | M6 | C2 | Sonnet | flutter-ui-engineer | T-156, T-157, T-155, T-119 | DONE | batch 25 review [batch-25a](05-reviews/batch-25a.md), [batch-25b](05-reviews/batch-25b.md) | Batch 25. FU-240 |
 | T-159 | Android OCR host (ML Kit Latin + Tesseract Arabic) | M6 | C3 | Sonnet | native-platform-engineer | T-010, T-004 | TODO | — |  |
 | T-160 | iOS OCR host (Vision) | M6 | C3 | Sonnet | native-platform-engineer | T-010, T-004 | DONE | batch 19 review [batch-19a](05-reviews/batch-19a.md), [batch-19b](05-reviews/batch-19b.md), [batch-19c](05-reviews/batch-19c.md) | Batch 19. FU-191 |
 | T-161 | Receipt/screen OCR templates and confirmation screen S-32 | M6 | C2 | Sonnet | parsing-engine-engineer | T-159, T-160, T-033 | DONE | batch 24 review [batch-24a](05-reviews/batch-24a.md), [batch-24b](05-reviews/batch-24b.md) | Batch 24. FU-230 |
@@ -196,10 +196,10 @@
 | T-164 | Custom message template builder engine and screen S-65 (Gold) | M6 | C3 | Sonnet | parsing-engine-engineer | T-033, T-119 | DONE | batch 19 review [batch-19a](05-reviews/batch-19a.md), [batch-19b](05-reviews/batch-19b.md), [batch-19c](05-reviews/batch-19c.md) | Batch 19. FU-190 |
 | T-165 | Exclude app data from OS backups and device transfer | M6 | C4 | Opus | native-platform-engineer | T-001 | IN_REVIEW | app-ci 42352212541 (13/13 green) @ eebeaa0, merged as 189acf7; negative proofs 42316160887, 42352248954 | MERGED, device run pending. Code APPROVED, tests SUFFICIENT, security APPROVED (r2). Done only when docs/05-reviews/T-165-device.md passes on a release candidate (F3); F9: add iOS canaries and finish onboarding before steps 5a/5c |
 | T-166 | Delete everything (local wipe + backend install delete) | M6 | C4 | Opus | flutter-core-engineer | T-015, T-141, T-152, T-145, T-179 | DONE | batch 20 review [batch-20a](05-reviews/batch-20a.md), [batch-20b](05-reviews/batch-20b.md), [batch-20c](05-reviews/batch-20c.md) | Batch 20. FU-202 |
-| T-167 | Zakah engine (hawl, nisab, native-unit dues) | M7 | C4 | Opus | flutter-core-engineer | T-113 | TODO | — |  |
-| T-168 | Zakah screen S-46 behind flag with disclaimer | M7 | C2 | Sonnet | flutter-ui-engineer | T-167, T-025, T-087 | TODO | — |  |
-| T-169 | Smart ROI general-advice rules with no-names check | M7 | C3 | Sonnet | flutter-core-engineer | T-105 | TODO | — |  |
-| T-170 | Smart ROI screen S-51 behind flag | M7 | C2 | Sonnet | flutter-ui-engineer | T-169, T-025, T-087 | TODO | — |  |
+| T-167 | Zakah engine (hawl, nisab, native-unit dues) | M7 | C4 | Opus | flutter-core-engineer | T-113 | DONE | batch 25 review [batch-25a](05-reviews/batch-25a.md), [batch-25b](05-reviews/batch-25b.md) | Batch 25. FU-234 |
+| T-168 | Zakah screen S-46 behind flag with disclaimer | M7 | C2 | Sonnet | flutter-ui-engineer | T-167, T-025, T-087 | DONE | batch 25 review [batch-25a](05-reviews/batch-25a.md), [batch-25b](05-reviews/batch-25b.md) | Batch 25. FU-235 |
+| T-169 | Smart ROI general-advice rules with no-names check | M7 | C3 | Sonnet | flutter-core-engineer | T-105 | DONE | batch 25 review [batch-25a](05-reviews/batch-25a.md), [batch-25b](05-reviews/batch-25b.md) | Batch 25. FU-236 |
+| T-170 | Smart ROI screen S-51 behind flag | M7 | C2 | Sonnet | flutter-ui-engineer | T-169, T-025, T-087 | DONE | batch 25 review [batch-25a](05-reviews/batch-25a.md), [batch-25b](05-reviews/batch-25b.md) | Batch 25. FU-237 |
 | T-171 | Privacy verification suite (sandbox scan, data-boundary proxy, ignore no-trace) | M7 | C4 | Opus | test-engineer | T-166, T-143, T-078, T-149, T-165 | DONE | batch 20 review [batch-20a](05-reviews/batch-20a.md), [batch-20b](05-reviews/batch-20b.md), [batch-20c](05-reviews/batch-20c.md) | Batch 20. FU-208 |
 | T-172 | Device end-to-end suites (Android killed-app capture, iOS intents, backup, purchases) | M7 | C3 | Sonnet | test-engineer | T-056, T-067, T-153, T-145, T-147 | TODO | — |  |
 | T-173 | Performance benchmarks and CI budgets | M7 | C2 | Sonnet | test-engineer | T-033, T-050, T-105, T-048 | DONE | batch 20 review [batch-20a](05-reviews/batch-20a.md), [batch-20b](05-reviews/batch-20b.md), [batch-20c](05-reviews/batch-20c.md) | Batch 20. FU-209 |
@@ -476,6 +476,17 @@
 - **FU-232** (batch-24a/24b minors): FU-backend-2 minors in docs/05-reviews/batch-24a.md; period-chip error-state test; voice logger subtitle copy (`voiceLoggerParsedSubtitle`) missing.
 - Done in batch 24: FU-211 (shared items → parse / OCR → S-32), FU-218 (1.3× goldens for 14 screens), FU-020, FU-017, FU-004 (#4, #7, #12, #13), FU-107 (revive), FU-098 L-1, FU-116 (sync header test), batch-23 minors.
 
+- **FU-233** (T-135, batch 25): the minors, nits and open questions for T-135 in [batch-25a](05-reviews/batch-25a.md), [batch-25b](05-reviews/batch-25b.md), plus the "left undone" items in its task file.
+- **FU-234** (T-167, batch 25): the minors, nits and open questions for T-167 in [batch-25a](05-reviews/batch-25a.md), [batch-25b](05-reviews/batch-25b.md), plus the "left undone" items in its task file.
+- **FU-235** (T-168, batch 25): the minors, nits and open questions for T-168 in [batch-25a](05-reviews/batch-25a.md), [batch-25b](05-reviews/batch-25b.md), plus the "left undone" items in its task file.
+- **FU-236** (T-169, batch 25): the minors, nits and open questions for T-169 in [batch-25a](05-reviews/batch-25a.md), [batch-25b](05-reviews/batch-25b.md), plus the "left undone" items in its task file.
+- **FU-237** (T-170, batch 25): the minors, nits and open questions for T-170 in [batch-25a](05-reviews/batch-25a.md), [batch-25b](05-reviews/batch-25b.md), plus the "left undone" items in its task file.
+- **FU-238** (T-071, batch 25): the minors, nits and open questions for T-071 in [batch-25a](05-reviews/batch-25a.md), [batch-25b](05-reviews/batch-25b.md), plus the "left undone" items in its task file.
+- **FU-239** (T-072, batch 25): the minors, nits and open questions for T-072 in [batch-25a](05-reviews/batch-25a.md), [batch-25b](05-reviews/batch-25b.md), plus the "left undone" items in its task file.
+- **FU-240** (T-158, batch 25): the minors, nits and open questions for T-158 in [batch-25a](05-reviews/batch-25a.md), [batch-25b](05-reviews/batch-25b.md), plus the "left undone" items in its task file.
+- **FU-241** (batch 25): T-071/T-072 templates are synthetic-unverified (notifications/SMS of Wise, Revolut, Monzo, bunq, N26, Payoneer, HDFC, Paytm, Al Rajhi, ENBD, Liv, Warba); unknown $-prefixes (C$, MX$, E£) don't parse yet. Reimbursement-suggestion hook is not run after CSV import (only pairing and refunds). Zakah: no debts source, no zakatable/jewelry exemption flag, partial payments can't be entered (scholar list in T-167.md). Smart ROI: cafés, water and ride-hailing tips silent until those categories/merchant groups exist; disclaimer and example rates need legal sign-off (Q-23). T-135: PO supplies Google client IDs and Apple Services ID/Bundle/Team/Key IDs and the .p8 key.
+- Done in batch 25: FU-015 (SQL deletes), FU-024 (as applicable), T-135 lock order; account delete never blocked by Apple (Lead decision).
+
 ## Log
 | Date | Event |
 |---|---|
@@ -554,3 +565,4 @@
 | 2026-11-14 | Batch 22 (`batch/2026-11-14-22`): T-037, T-068, T-069 DONE. FU-220…FU-222. Progress 154/186. |
 | 2026-11-14 | Batch 23 (`batch/2026-11-15-23`): T-036 DONE. FU-226…FU-226. Progress 155/186. |
 | 2026-11-14 | Batch 24 (`batch/2026-11-15-24`): T-120, T-161 DONE. FU-229…FU-230. Progress 157/186. |
+| 2026-11-14 | Batch 25 (`batch/2026-11-15-25`): T-135, T-167, T-168, T-169, T-170, T-071, T-072, T-158 DONE. FU-233…FU-240. Progress 165/186. |

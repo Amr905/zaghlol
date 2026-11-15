@@ -62,6 +62,7 @@ dependencies:
   # T-161: the Scan tile's photo picker (flutter.dev, no analytics; Android 13+
   # uses the system Photo Picker, iOS PHPicker; neither needs a permission).
   image_picker: 1.2.4
+  file_picker: 13.3.3
 
 dev_dependencies:
   flutter_test:

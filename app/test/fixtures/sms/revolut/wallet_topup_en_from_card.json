@@ -1,0 +1,14 @@
+{
+  "package": "com.revolut.revolut",
+  "channel": "notification",
+  "body": "Top-up complete\n£200.00 added to your Revolut account from your card ending 4242",
+  "receivedAt": "2026-10-23T11:14:00+03:00",
+  "expect": {
+    "template": "revolut.wallet_topup.en",
+    "event": "wallet_topup",
+    "direction": "income",
+    "currency": "GBP",
+    "amount": "200.00",
+    "last4": "4242"
+  }
+}

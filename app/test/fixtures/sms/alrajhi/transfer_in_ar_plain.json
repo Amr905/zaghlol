@@ -1,0 +1,13 @@
+{
+  "sender": "AlRajhiBank",
+  "body": "حوالة واردة\nالمبلغ: SAR 1,500.00\nمن: AHMED TEST",
+  "receivedAt": "2026-10-23T11:14:00+03:00",
+  "expect": {
+    "template": "alrajhi.transfer_in.ar",
+    "event": "transfer_in",
+    "direction": "income",
+    "currency": "SAR",
+    "amount": "1500.00",
+    "counterparty": "AHMED TEST"
+  }
+}

@@ -1,0 +1,104 @@
+{
+  "code": "n26",
+  "names": {
+    "ar": "إن 26",
+    "en": "N26"
+  },
+  "country": "DE",
+  "defaultCurrency": "EUR",
+  "senders": [],
+  "packages": [
+    "de.number26.android"
+  ],
+  "walletCardNames": [
+    "N26"
+  ],
+  "last4": [],
+  "drop": [],
+  "templates": [
+    {
+      "id": "n26.card_purchase.en",
+      "version": 1,
+      "lang": "en",
+      "channel": [
+        "notification"
+      ],
+      "event": "card_purchase",
+      "direction": "expense",
+      "baseConfidence": 0.9,
+      "source": "synthetic-unverified",
+      "pattern": "card payment of (?<cur>(?:[a-z]{1,2})?[£€$])(?<amount>[\\d,.]+) at (?<merchant>.+?)(?:\\. |\\.?$)(?:\\.? ?(?:available )?balance:? ?[£€$]?(?<balance>[\\d,.]+))?",
+      "currencyMap": {
+        "a$": "AUD",
+        "ca$": "CAD",
+        "s$": "SGD",
+        "us$": "USD",
+        "nz$": "NZD",
+        "hk$": "HKD"
+      }
+    },
+    {
+      "id": "n26.transfer_in.en",
+      "version": 1,
+      "lang": "en",
+      "channel": [
+        "notification"
+      ],
+      "event": "transfer_in",
+      "direction": "income",
+      "baseConfidence": 0.9,
+      "source": "synthetic-unverified",
+      "pattern": "money received: (?<cur>(?:[a-z]{1,2})?[£€$])(?<amount>[\\d,.]+) from (?<counterparty>.+?)(?:\\. |\\.?$)",
+      "currencyMap": {
+        "a$": "AUD",
+        "ca$": "CAD",
+        "s$": "SGD",
+        "us$": "USD",
+        "nz$": "NZD",
+        "hk$": "HKD"
+      }
+    },
+    {
+      "id": "n26.refund.en",
+      "version": 1,
+      "lang": "en",
+      "channel": [
+        "notification"
+      ],
+      "event": "refund",
+      "direction": "income",
+      "baseConfidence": 0.9,
+      "source": "synthetic-unverified",
+      "pattern": "(?<cur>(?:[a-z]{1,2})?[£€$])(?<amount>[\\d,.]+) refunded by (?<merchant>.+?)(?:\\. |\\.?$)",
+      "currencyMap": {
+        "a$": "AUD",
+        "ca$": "CAD",
+        "s$": "SGD",
+        "us$": "USD",
+        "nz$": "NZD",
+        "hk$": "HKD"
+      }
+    },
+    {
+      "id": "n26.declined.en",
+      "version": 1,
+      "lang": "en",
+      "channel": [
+        "notification"
+      ],
+      "event": "declined",
+      "direction": "neutral",
+      "baseConfidence": 0.9,
+      "source": "synthetic-unverified",
+      "pattern": "your card was declined for (?<cur>(?:[a-z]{1,2})?[£€$])(?<amount>[\\d,.]+) at (?<merchant>.+?)(?:\\. |\\.?$)",
+      "currencyMap": {
+        "a$": "AUD",
+        "ca$": "CAD",
+        "s$": "SGD",
+        "us$": "USD",
+        "nz$": "NZD",
+        "hk$": "HKD"
+      }
+    }
+  ]
+}

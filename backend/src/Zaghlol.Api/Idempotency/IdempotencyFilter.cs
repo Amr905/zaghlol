@@ -43,6 +43,12 @@ internal sealed partial class IdempotencyFilter(IdempotentOperation operation) :
     /// <summary><c>Retry-After</c> of the 503 answered when the handler hit <see cref="HandlerTimeout"/>.</summary>
     public const int TimeoutRetryAfterSeconds = 5;
 
+    /// <summary>
+    /// <c>HttpContext.Items</c> key under which sign-in leaves the account ID of the token its 2xx body holds, so the stored record
+    /// carries <c>account_id</c> and <c>DELETE /v1/accounts/me</c> can delete it (R3-6).
+    /// </summary>
+    public const string AccountItem = "zaghlol.idempotency.account";
+
     public IdempotentOperation Operation { get; } = operation;
 
     /// <summary>The envelope context that binds a stored body to its install, operation and key (S-6).</summary>
@@ -164,7 +170,8 @@ internal sealed partial class IdempotencyFilter(IdempotentOperation operation) :
         {
             var encrypted = await cipher.EncryptAsync(captured.Body, envelopeContext, CancellationToken.None);
             completed = await store.CompleteAsync(
-                installId, Operation, key, claim.ClaimId, bodyHash, captured.StatusCode, encrypted, clock.GetUtcNow() + Ttl, CancellationToken.None);
+                installId, Operation, key, claim.ClaimId, bodyHash, captured.StatusCode, encrypted, clock.GetUtcNow() + Ttl, CancellationToken.None,
+                captured.StatusCode is >= 200 and < 300 && http.Items.TryGetValue(AccountItem, out var account) && account is Guid accountId ? accountId : null);
         }
         catch
         {

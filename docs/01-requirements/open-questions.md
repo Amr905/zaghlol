@@ -17,5 +17,7 @@ Seeded by the Lead during setup from a read of spec v4. The `requirements-analys
 | OQ-11 | Backup scope | `drive.appdata` scope hides backups from the user's visible Drive; spec says "directly to user's Google Drive". | Confirm appdata (private) vs visible folder. | OPEN |
 | OQ-12 | Voice | On-device `ar-EG` speech recognition availability varies by device/OS; free tier limited to 15 voice logs/month. | Confirm offline requirement for voice and fallback behaviour. | OPEN |
 
+**OQ-10 Zakah scholar sign-off: as shipped in T-168** (full list in `docs/04-tasks/tasks/T-167.md` "For the scholar"): no debts are read or deducted; every asset is zakatable, no jewelry opt-out; account hawl starts the day the account was added; last parsed balance; asset hawl from `acquired_at` or the day added; certificates at principal, funds at manual value; real estate, cars and others excluded; items 5 and 10 are engine only.
+
 ### OQ (2026-11-11, from T-112 review): manual FX override
 FR-WLT-03 allows a manual price override; it is unclear whether the user may also override an FX rate. `fx_rates` has no source column, so a manual rate would be wiped by the next sync. Launch behaviour: price-only override; the "≈" view is labelled approximate and stale. A manual FX override needs a schema change and a new task. **PO to decide.**

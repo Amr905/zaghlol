@@ -118,8 +118,8 @@ Every task file has: ID, description, technical details, dependencies, affected 
 | [T-068](tasks/T-068.md) | Templates + fixtures: Egyptian banks batch 1 | US-05-1 | Medium | Sonnet | parsing-engine-engineer | T-033 | F | 6 | DONE |
 | [T-069](tasks/T-069.md) | Templates + fixtures: Egyptian banks batch 2 | US-05-1 | Medium | Sonnet | parsing-engine-engineer | T-033 | F | 6 | DONE |
 | [T-070](tasks/T-070.md) | Templates + fixtures: BNPL (valU, Sympl, Souhoola, Shahry, Aman, Forsa, Contact) | US-05-1 | Medium | Sonnet | parsing-engine-engineer | T-033 | F | 6 | TODO |
-| [T-071](tasks/T-071.md) | Templates + fixtures: Wise, Revolut, Monzo, bunq, N26, Payoneer | US-05-1 | High | Sonnet | parsing-engine-engineer | T-033 | F | 6 | TODO |
-| [T-072](tasks/T-072.md) | Templates + fixtures: HDFC, Paytm, Al Rajhi, Emirates NBD/Liv, GCC (S rows) | US-05-1 | Medium | Sonnet | parsing-engine-engineer | T-033 | F | 6 | TODO |
+| [T-071](tasks/T-071.md) | Templates + fixtures: Wise, Revolut, Monzo, bunq, N26, Payoneer | US-05-1 | High | Sonnet | parsing-engine-engineer | T-033 | F | 6 | DONE |
+| [T-072](tasks/T-072.md) | Templates + fixtures: HDFC, Paytm, Al Rajhi, Emirates NBD/Liv, GCC (S rows) | US-05-1 | Medium | Sonnet | parsing-engine-engineer | T-033 | F | 6 | DONE |
 | [T-073](tasks/T-073.md) | Generic parser for unknown financial senders | US-05-2 | High | Sonnet | parsing-engine-engineer | T-033, T-034 | F | 6 | DONE |
 | [T-074](tasks/T-074.md) | Merchant rules repository and apply-to-past | US-07-1 | Medium | Sonnet | flutter-core-engineer | T-018, T-050 | A | 7 | DONE |
 | [T-075](tasks/T-075.md) | Categorizer with fuzzy merchant matching | US-07-1 | High | Sonnet | parsing-engine-engineer | T-034, T-018, T-074, T-030 | F | 8 | DONE |
@@ -197,7 +197,7 @@ Every task file has: ID, description, technical details, dependencies, affected 
 | [T-132](tasks/T-132.md) | Entitlement tokens, GET /v1/entitlement, seat at verify and sync entitlement block | US-14-1 | High* | Opus | backend-engineer | T-128, T-130, T-131, T-184 | B | 5 | DONE |
 | [T-133](tasks/T-133.md) | Google RTDN push endpoint, processing worker and voided reconciliation | US-14-1 | High* | Opus | backend-engineer | T-130 | B | 5 | DONE |
 | [T-134](tasks/T-134.md) | App Store Server Notifications V2 endpoint and reconciliation | US-14-1 | High* | Opus | backend-engineer | T-131 | B | 5 | DONE |
-| [T-135](tasks/T-135.md) | Accounts: Google/Apple ID token sign-in, linking, sign-out, delete, Android Apple callback | US-15-1 | High* | Opus | backend-engineer | T-132, T-182, T-184 | B | 6 | TODO |
+| [T-135](tasks/T-135.md) | Accounts: Google/Apple ID token sign-in, linking, sign-out, delete, Android Apple callback | US-15-1 | High* | Opus | backend-engineer | T-132, T-182, T-184 | B | 6 | DONE |
 | [T-136](tasks/T-136.md) | Operator auth (OIDC + MFA), roles, audit log and support lookup | US-13-2 | High* | Opus | backend-engineer | T-122 | B | 3 | IN_REVIEW |
 | [T-137](tasks/T-137.md) | zaghlol-ops CLI for catalog, flags, prices, contributions and support, plus support runbook | US-13-2 | High | Sonnet | backend-engineer | T-136, T-186, T-125, T-126, T-127, T-129 | B | 7 | TODO |
 | [T-138](tasks/T-138.md) | Backend observability: OpenTelemetry, metrics, dashboards, alert rules | US-21-1 | High | Sonnet | backend-engineer | T-005 | B | 2 | DONE |
@@ -234,7 +234,7 @@ Every task file has: ID, description, technical details, dependencies, affected 
 | [T-155](tasks/T-155.md) | Zaghlol CSV import with duplicate detection | US-17-1 | High | Sonnet | flutter-core-engineer | T-046, T-154 | A | 9 | DONE |
 | [T-156](tasks/T-156.md) | Bank PDF statement import (CIB, NBE, QNB, Banque Misr) | US-17-1 | High | Sonnet | parsing-engine-engineer | T-033, T-031 | F | 6 | BLOCKED |
 | [T-157](tasks/T-157.md) | Online-bank statement import (Wise, Revolut, Monzo, bunq, N26) | US-17-1 | High | Sonnet | parsing-engine-engineer | T-155, T-071 | F | 10 | BLOCKED |
-| [T-158](tasks/T-158.md) | Import flow S-67 (source, summary, done) | US-17-1 | Medium | Sonnet | flutter-ui-engineer | T-156, T-157, T-155, T-119 | G | 11 | TODO |
+| [T-158](tasks/T-158.md) | Import flow S-67 (source, summary, done) | US-17-1 | Medium | Sonnet | flutter-ui-engineer | T-156, T-157, T-155, T-119 | G | 11 | DONE |
 | [T-159](tasks/T-159.md) | Android OCR host (ML Kit Latin + Tesseract Arabic) | US-17-2 | High | Sonnet | native-platform-engineer | T-010, T-004 | D | 3 | TODO |
 | [T-160](tasks/T-160.md) | iOS OCR host (Vision) | US-17-2 | High | Sonnet | native-platform-engineer | T-010, T-004 | E | 3 | DONE |
 | [T-161](tasks/T-161.md) | Receipt/screen OCR templates and confirmation screen S-32 | US-17-2 | Medium | Sonnet | parsing-engine-engineer | T-159, T-160, T-033 | F | 6 | DONE |
@@ -248,10 +248,10 @@ Every task file has: ID, description, technical details, dependencies, affected 
 
 | ID | Title | Story | Cx | Model | Agent | Depends on | Lane | Wave | Status |
 |---|---|---|---|---|---|---|---|---|---|
-| [T-167](tasks/T-167.md) | Zakah engine (hawl, nisab, native-unit dues) | US-19-1 | High* | Opus | flutter-core-engineer | T-113 | A | 10 | TODO |
-| [T-168](tasks/T-168.md) | Zakah screen S-46 behind flag with disclaimer | US-19-1 | Medium | Sonnet | flutter-ui-engineer | T-167, T-025, T-087 | G | 11 | TODO |
-| [T-169](tasks/T-169.md) | Smart ROI general-advice rules with no-names check | US-19-2 | High | Sonnet | flutter-core-engineer | T-105 | A | 12 | TODO |
-| [T-170](tasks/T-170.md) | Smart ROI screen S-51 behind flag | US-19-2 | Medium | Sonnet | flutter-ui-engineer | T-169, T-025, T-087 | G | 13 | TODO |
+| [T-167](tasks/T-167.md) | Zakah engine (hawl, nisab, native-unit dues) | US-19-1 | High* | Opus | flutter-core-engineer | T-113 | A | 10 | DONE |
+| [T-168](tasks/T-168.md) | Zakah screen S-46 behind flag with disclaimer | US-19-1 | Medium | Sonnet | flutter-ui-engineer | T-167, T-025, T-087 | G | 11 | DONE |
+| [T-169](tasks/T-169.md) | Smart ROI general-advice rules with no-names check | US-19-2 | High | Sonnet | flutter-core-engineer | T-105 | A | 12 | DONE |
+| [T-170](tasks/T-170.md) | Smart ROI screen S-51 behind flag | US-19-2 | Medium | Sonnet | flutter-ui-engineer | T-169, T-025, T-087 | G | 13 | DONE |
 | [T-171](tasks/T-171.md) | Privacy verification suite (sandbox scan, data-boundary proxy, ignore no-trace) | US-21-1 | High* | Opus | test-engineer | T-166, T-143, T-078, T-149, T-165 | A | 11 | DONE |
 | [T-172](tasks/T-172.md) | Device end-to-end suites (Android killed-app capture, iOS intents, backup, purchases) | US-21-1 | High | Sonnet | test-engineer | T-056, T-067, T-153, T-145, T-147 | A | 11 | TODO |
 | [T-173](tasks/T-173.md) | Performance benchmarks and CI budgets | US-21-1 | Medium | Sonnet | test-engineer | T-033, T-050, T-105, T-048 | A | 12 | DONE |

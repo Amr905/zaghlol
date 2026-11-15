@@ -391,6 +391,10 @@ CREATE TABLE daily_active_counts (day date NOT NULL, platform text NOT NULL, app
 -- Operators & audit (FR-BE-08)
 CREATE TABLE operators (id uuid PRIMARY KEY, oidc_subject text NOT NULL UNIQUE, display_name text NOT NULL,
   roles text[] NOT NULL, disabled_at timestamptz);
+-- T-135: an Apple refresh token (sealed) whose revocation failed at account deletion. No account, install or subject column.
+CREATE TABLE pending_apple_revocations (id uuid PRIMARY KEY, sealed_blob bytea NOT NULL, attempts integer NOT NULL DEFAULT 0,
+  created_at timestamptz NOT NULL, next_attempt_at timestamptz NOT NULL, expires_at timestamptz NOT NULL,
+  CHECK (attempts >= 0), CHECK (expires_at > created_at));
 CREATE TABLE audit_log (id bigint GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
   operator_id uuid NOT NULL REFERENCES operators(id),   -- operators are disabled, never deleted
   action text NOT NULL, target text NOT NULL, details jsonb NOT NULL, at timestamptz NOT NULL DEFAULT now(),
@@ -436,6 +440,7 @@ CREATE TABLE audit_log (id bigint GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
 | `installs` inactive (no sync) | 12 months, then deleted (cascades links; purchases keep `install_id = NULL` for store reconciliation) | `RetentionPurger` daily |
 | Deleted installs | Tombstone (`deleted_at`) 30 days, then hard delete | same |
 | Deleted accounts | No tombstone: `DELETE /v1/accounts/me` hard-deletes the row at once (cascading `account_installs`; the trigger clears the purchase links). Audit rows naming the account keep their own retention (below) | API (T-135) |
+| `pending_apple_revocations` | A sealed Apple refresh token (no account, install or subject) queued when revocation failed at account deletion; retried with back-off, dropped on success or `invalid_grant`, and at 30 days at the latest | `AppleRevocationRetryService` (worker) |
 | `store_notifications` | 90 days | same |
 | `merchant_contributions` raw rows | Deleted when the aggregate is promoted/rejected, or after 180 days | same |
 | `bank_requests` | 24 months (aggregate counts kept) | same |

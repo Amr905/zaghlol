@@ -1,0 +1,14 @@
+{
+  "package": "com.bunq.android",
+  "channel": "notification",
+  "body": "Payment sent\nYou sent €١٠٠٫٠٠ to JANE ROE",
+  "receivedAt": "2026-10-23T11:14:00+03:00",
+  "expect": {
+    "template": "bunq.transfer_out.en",
+    "event": "transfer_out",
+    "direction": "expense",
+    "currency": "EUR",
+    "amount": "100.00",
+    "counterparty": "JANE ROE"
+  }
+}

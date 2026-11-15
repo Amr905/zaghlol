@@ -1,0 +1,101 @@
+{
+  "code": "paytm",
+  "names": {
+    "ar": "باي تي إم",
+    "en": "Paytm"
+  },
+  "country": "IN",
+  "defaultCurrency": "INR",
+  "senders": [
+    {
+      "match": "exact",
+      "value": "PAYTMB"
+    }
+  ],
+  "packages": [],
+  "walletCardNames": [
+    "Paytm"
+  ],
+  "last4": [
+    "a/c ?\\*{0,2}([0-9]{4})"
+  ],
+  "drop": [],
+  "templates": [
+    {
+      "id": "paytm.card_purchase.en",
+      "version": 1,
+      "lang": "en",
+      "channel": [
+        "sms"
+      ],
+      "event": "card_purchase",
+      "direction": "expense",
+      "baseConfidence": 0.9,
+      "source": "synthetic-unverified",
+      "pattern": "paid (?<cur>rs\\.?|inr|₹) ?(?<amount>[\\d,.]+) to (?<merchant>.+?) from paytm (?:wallet|balance|payments bank)(?:\\.|$| )(?:\\.? ?(?:updated |available )?(?:paytm )?(?:wallet )?bal(?:ance)?:? ?(?:rs\\.?|inr|₹) ?(?<balance>[\\d,.]+))?",
+      "currencyMap": {
+        "rs.": "INR",
+        "rs": "INR",
+        "inr": "INR",
+        "₹": "INR"
+      }
+    },
+    {
+      "id": "paytm.wallet_topup.en",
+      "version": 1,
+      "lang": "en",
+      "channel": [
+        "sms"
+      ],
+      "event": "wallet_topup",
+      "direction": "income",
+      "baseConfidence": 0.9,
+      "source": "synthetic-unverified",
+      "pattern": "(?<cur>rs\\.?|inr|₹) ?(?<amount>[\\d,.]+) added to (?:your )?paytm wallet(?:\\.? ?(?:updated |available )?(?:paytm )?(?:wallet )?bal(?:ance)?:? ?(?:rs\\.?|inr|₹) ?(?<balance>[\\d,.]+))?",
+      "currencyMap": {
+        "rs.": "INR",
+        "rs": "INR",
+        "inr": "INR",
+        "₹": "INR"
+      }
+    },
+    {
+      "id": "paytm.transfer_in.en",
+      "version": 1,
+      "lang": "en",
+      "channel": [
+        "sms"
+      ],
+      "event": "transfer_in",
+      "direction": "income",
+      "baseConfidence": 0.9,
+      "source": "synthetic-unverified",
+      "pattern": "(?<cur>rs\\.?|inr|₹) ?(?<amount>[\\d,.]+) received from (?<counterparty>.+?) in your paytm (?:payments bank )?(?:a/c|account|wallet)(?:\\.? ?(?:updated |available )?(?:paytm )?(?:wallet )?bal(?:ance)?:? ?(?:rs\\.?|inr|₹) ?(?<balance>[\\d,.]+))?",
+      "currencyMap": {
+        "rs.": "INR",
+        "rs": "INR",
+        "inr": "INR",
+        "₹": "INR"
+      }
+    },
+    {
+      "id": "paytm.transfer_out.en",
+      "version": 1,
+      "lang": "en",
+      "channel": [
+        "sms"
+      ],
+      "event": "transfer_out",
+      "direction": "expense",
+      "baseConfidence": 0.9,
+      "source": "synthetic-unverified",
+      "pattern": "sent (?<cur>rs\\.?|inr|₹) ?(?<amount>[\\d,.]+) to (?<counterparty>.+?) from paytm payments bank a/c (?:\\*{1,2})?(?<last4>\\d{4})(?:\\.? ?(?:updated |available )?(?:paytm )?(?:wallet )?bal(?:ance)?:? ?(?:rs\\.?|inr|₹) ?(?<balance>[\\d,.]+))?",
+      "currencyMap": {
+        "rs.": "INR",
+        "rs": "INR",
+        "inr": "INR",
+        "₹": "INR"
+      }
+    }
+  ]
+}

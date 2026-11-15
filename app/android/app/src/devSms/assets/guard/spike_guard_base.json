@@ -49,6 +49,11 @@
   },
   {
    "match": "exact",
+   "value": "alrajhibank",
+   "inst": "alrajhi"
+  },
+  {
+   "match": "exact",
    "value": "arabbank",
    "inst": "arab_bank"
   },
@@ -119,6 +124,11 @@
   },
   {
    "match": "exact",
+   "value": "enbd",
+   "inst": "enbd"
+  },
+  {
+   "match": "exact",
    "value": "e&money",
    "inst": "etisalat_cash"
   },
@@ -139,6 +149,11 @@
   },
   {
    "match": "exact",
+   "value": "hdfcbk",
+   "inst": "hdfc"
+  },
+  {
+   "match": "exact",
    "value": "hsbc",
    "inst": "hsbc"
   },
@@ -156,6 +171,11 @@
    "match": "exact",
    "value": "kfh",
    "inst": "kfh"
+  },
+  {
+   "match": "exact",
+   "value": "liv",
+   "inst": "liv"
   },
   {
    "match": "exact",
@@ -191,6 +211,11 @@
    "match": "exact",
    "value": "orangecash",
    "inst": "orange_cash"
+  },
+  {
+   "match": "exact",
+   "value": "paytmb",
+   "inst": "paytm"
   },
   {
    "match": "exact",
@@ -239,6 +264,11 @@
   },
   {
    "match": "exact",
+   "value": "warba",
+   "inst": "warba"
+  },
+  {
+   "match": "exact",
    "value": "wepay",
    "inst": "we_pay"
   },
@@ -248,7 +278,32 @@
    "inst": "spike"
   }
  ],
- "packages": [],
+ "packages": [
+  {
+   "value": "com.bunq.android",
+   "inst": "bunq"
+  },
+  {
+   "value": "co.uk.getmondo",
+   "inst": "monzo"
+  },
+  {
+   "value": "de.number26.android",
+   "inst": "n26"
+  },
+  {
+   "value": "com.payoneer.android",
+   "inst": "payoneer"
+  },
+  {
+   "value": "com.revolut.revolut",
+   "inst": "revolut"
+  },
+  {
+   "value": "com.transferwise.android",
+   "inst": "wise"
+  }
+ ],
  "wallet": [
   {
    "name": "aaib",
@@ -287,6 +342,10 @@
    "inst": "alexbank"
   },
   {
+   "name": "al rajhi",
+   "inst": "alrajhi"
+  },
+  {
    "name": "arab bank",
    "inst": "arab_bank"
   },
@@ -313,6 +372,10 @@
   {
    "name": "blom",
    "inst": "blom"
+  },
+  {
+   "name": "bunq",
+   "inst": "bunq"
   },
   {
    "name": "cib",
@@ -343,6 +406,10 @@
    "inst": "emirates_nbd"
   },
   {
+   "name": "emirates nbd uae",
+   "inst": "enbd"
+  },
+  {
    "name": "e& money",
    "inst": "etisalat_cash"
   },
@@ -357,6 +424,10 @@
   {
    "name": "hdb",
    "inst": "hdb"
+  },
+  {
+   "name": "hdfc bank",
+   "inst": "hdfc"
   },
   {
    "name": "hsbc",
@@ -375,6 +446,10 @@
    "inst": "kfh"
   },
   {
+   "name": "liv",
+   "inst": "liv"
+  },
+  {
    "name": "mashreq",
    "inst": "mashreq"
   },
@@ -383,8 +458,16 @@
    "inst": "midbank"
   },
   {
+   "name": "monzo",
+   "inst": "monzo"
+  },
+  {
    "name": "myfawry",
    "inst": "myfawry"
+  },
+  {
+   "name": "n26",
+   "inst": "n26"
   },
   {
    "name": "nbe",
@@ -407,8 +490,20 @@
    "inst": "orange_cash"
   },
   {
+   "name": "payoneer",
+   "inst": "payoneer"
+  },
+  {
+   "name": "paytm",
+   "inst": "paytm"
+  },
+  {
    "name": "qnb",
    "inst": "qnb"
+  },
+  {
+   "name": "revolut",
+   "inst": "revolut"
   },
   {
    "name": "saib",
@@ -443,8 +538,16 @@
    "inst": "vodafone_cash"
   },
   {
+   "name": "warba",
+   "inst": "warba"
+  },
+  {
    "name": "we pay",
    "inst": "we_pay"
+  },
+  {
+   "name": "wise",
+   "inst": "wise"
   }
  ],
  "drop": {
@@ -457,6 +560,15 @@
   "byInst": {}
  },
  "last4": {
+  "alrajhi": [
+   "(?:by|card|بطاقه|بواسطه):? ?([0-9]{4})"
+  ],
+  "hdfc": [
+   "card x{1,2}([0-9]{4})"
+  ],
+  "paytm": [
+   "a/c ?\\*{0,2}([0-9]{4})"
+  ],
   "*": [
    "\\*{1,4}([0-9]{4})",
    "(?:ending(?: in)?|ينتهي(?: رقمها)?|المنتهيه|تنتهي) (?:ب )?([0-9]{4})",

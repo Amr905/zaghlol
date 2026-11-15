@@ -89,6 +89,14 @@ public static class Rows
             ["sign_count"] = 0L,
             ["environment"] = "production",
         },
+        "pending_apple_revocations" => new(StringComparer.Ordinal)
+        {
+            ["id"] = Guid.CreateVersion7(),
+            ["sealed_blob"] = Bytes(48),
+            ["created_at"] = Now(),
+            ["next_attempt_at"] = Now().AddMinutes(15),
+            ["expires_at"] = Now().AddDays(30),
+        },
         "replay_guard" => new(StringComparer.Ordinal)
         {
             ["key_hash"] = Bytes(),

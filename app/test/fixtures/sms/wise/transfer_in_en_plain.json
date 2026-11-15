@@ -1,0 +1,14 @@
+{
+  "package": "com.transferwise.android",
+  "channel": "notification",
+  "body": "Money received\nYou received 250.00 EUR from ACME GMBH",
+  "receivedAt": "2026-10-23T11:14:00+03:00",
+  "expect": {
+    "template": "wise.transfer_in.en",
+    "event": "transfer_in",
+    "direction": "income",
+    "currency": "EUR",
+    "amount": "250.00",
+    "counterparty": "ACME GMBH"
+  }
+}

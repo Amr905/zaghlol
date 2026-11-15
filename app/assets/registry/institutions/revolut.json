@@ -1,0 +1,167 @@
+{
+  "code": "revolut",
+  "names": {
+    "ar": "ريفوليت",
+    "en": "Revolut"
+  },
+  "country": "GB",
+  "defaultCurrency": "GBP",
+  "senders": [],
+  "packages": [
+    "com.revolut.revolut"
+  ],
+  "walletCardNames": [
+    "Revolut"
+  ],
+  "last4": [],
+  "drop": [],
+  "templates": [
+    {
+      "id": "revolut.card_purchase.en",
+      "version": 1,
+      "lang": "en",
+      "channel": [
+        "notification"
+      ],
+      "event": "card_purchase",
+      "direction": "expense",
+      "baseConfidence": 0.9,
+      "source": "synthetic-unverified",
+      "pattern": "(?<cur>(?:[a-z]{1,2})?[£€$])(?<amount>[\\d,.]+) paid to (?<merchant>.+?)(?: (?:with|on) (?:your )?(?:debit |credit )?card ending (?<last4>\\d{4}))?(?:\\. |\\.?$)(?:\\.? ?(?:available )?balance:? ?[£€$]?(?<balance>[\\d,.]+))?",
+      "currencyMap": {
+        "a$": "AUD",
+        "ca$": "CAD",
+        "s$": "SGD",
+        "us$": "USD",
+        "nz$": "NZD",
+        "hk$": "HKD"
+      }
+    },
+    {
+      "id": "revolut.pending_auth.en",
+      "version": 1,
+      "lang": "en",
+      "channel": [
+        "notification"
+      ],
+      "event": "pending_auth",
+      "direction": "expense",
+      "baseConfidence": 0.9,
+      "source": "synthetic-unverified",
+      "pattern": "(?<cur>(?:[a-z]{1,2})?[£€$])(?<amount>[\\d,.]+) pending at (?<merchant>.+?)(?: (?:with|on) (?:your )?(?:debit |credit )?card ending (?<last4>\\d{4}))?(?:\\. |\\.?$)",
+      "currencyMap": {
+        "a$": "AUD",
+        "ca$": "CAD",
+        "s$": "SGD",
+        "us$": "USD",
+        "nz$": "NZD",
+        "hk$": "HKD"
+      }
+    },
+    {
+      "id": "revolut.settled.en",
+      "version": 1,
+      "lang": "en",
+      "channel": [
+        "notification"
+      ],
+      "event": "settled",
+      "direction": "expense",
+      "baseConfidence": 0.9,
+      "source": "synthetic-unverified",
+      "pattern": "(?<cur>(?:[a-z]{1,2})?[£€$])(?<amount>[\\d,.]+) completed at (?<merchant>.+?)(?: (?:with|on) (?:your )?(?:debit |credit )?card ending (?<last4>\\d{4}))?(?:\\. |\\.?$)",
+      "currencyMap": {
+        "a$": "AUD",
+        "ca$": "CAD",
+        "s$": "SGD",
+        "us$": "USD",
+        "nz$": "NZD",
+        "hk$": "HKD"
+      }
+    },
+    {
+      "id": "revolut.fx_conversion.en",
+      "version": 1,
+      "lang": "en",
+      "channel": [
+        "notification"
+      ],
+      "event": "fx_conversion",
+      "direction": "neutral",
+      "baseConfidence": 0.97,
+      "source": "synthetic-unverified",
+      "pattern": "you exchanged (?<cur>(?:[a-z]{1,2})?[£€$])(?<amount>[\\d,.]+) to (?<ocur>(?:[a-z]{1,2})?[£€$])(?<oamount>[\\d,.]+)",
+      "currencyMap": {
+        "a$": "AUD",
+        "ca$": "CAD",
+        "s$": "SGD",
+        "us$": "USD",
+        "nz$": "NZD",
+        "hk$": "HKD"
+      }
+    },
+    {
+      "id": "revolut.wallet_topup.en",
+      "version": 1,
+      "lang": "en",
+      "channel": [
+        "notification"
+      ],
+      "event": "wallet_topup",
+      "direction": "income",
+      "baseConfidence": 0.9,
+      "source": "synthetic-unverified",
+      "pattern": "(?<cur>(?:[a-z]{1,2})?[£€$])(?<amount>[\\d,.]+) added to your (?:revolut )?account(?: from (?:your )?card ending (?<last4>\\d{4}))?(?:\\. |\\.?$)",
+      "currencyMap": {
+        "a$": "AUD",
+        "ca$": "CAD",
+        "s$": "SGD",
+        "us$": "USD",
+        "nz$": "NZD",
+        "hk$": "HKD"
+      }
+    },
+    {
+      "id": "revolut.refund.en",
+      "version": 1,
+      "lang": "en",
+      "channel": [
+        "notification"
+      ],
+      "event": "refund",
+      "direction": "income",
+      "baseConfidence": 0.9,
+      "source": "synthetic-unverified",
+      "pattern": "(?<cur>(?:[a-z]{1,2})?[£€$])(?<amount>[\\d,.]+) refunded from (?<merchant>.+?)(?:\\. |\\.?$)",
+      "currencyMap": {
+        "a$": "AUD",
+        "ca$": "CAD",
+        "s$": "SGD",
+        "us$": "USD",
+        "nz$": "NZD",
+        "hk$": "HKD"
+      }
+    },
+    {
+      "id": "revolut.declined.en",
+      "version": 1,
+      "lang": "en",
+      "channel": [
+        "notification"
+      ],
+      "event": "declined",
+      "direction": "neutral",
+      "baseConfidence": 0.9,
+      "source": "synthetic-unverified",
+      "pattern": "your (?<cur>(?:[a-z]{1,2})?[£€$])(?<amount>[\\d,.]+) payment at (?<merchant>.+?) was declined(?:\\. |\\.?$)",
+      "currencyMap": {
+        "a$": "AUD",
+        "ca$": "CAD",
+        "s$": "SGD",
+        "us$": "USD",
+        "nz$": "NZD",
+        "hk$": "HKD"
+      }
+    }
+  ]
+}

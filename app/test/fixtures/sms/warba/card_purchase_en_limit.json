@@ -1,0 +1,14 @@
+{
+  "sender": "Warba",
+  "body": "Warba: Purchase KWD 105.250 at XCITE ELECTRONICS using card *4242. Avl Limit KWD 2,000.000",
+  "receivedAt": "2026-10-23T11:14:00+03:00",
+  "expect": {
+    "template": "warba.card_purchase.en",
+    "event": "card_purchase",
+    "direction": "expense",
+    "currency": "KWD",
+    "amount": "105.250",
+    "last4": "4242",
+    "available": "2000.000"
+  }
+}

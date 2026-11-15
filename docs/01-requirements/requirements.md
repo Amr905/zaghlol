@@ -454,6 +454,8 @@ Canonical screen set: the spec's §13 16-screen set, with §5 content mapped ont
 | FR-ROI-04 | Hidden unless the remote feature flag is on (same mechanism as FR-ZAK-06). | M | — | — |
 | FR-ROI-05 | **General advice only at first** (D-38): suggestions name kinds of products (savings certificate, gold, money-market fund) and use clearly labelled example rates; no bank, fund or brand names. Named products are a later option behind a separate flag. | M | — | No suggestion text contains an institution or product name. |
 
+> **Lead correction 2026-11-15 (spec §12 rule 2 erratum):** the spec prints a 19,500 saving for rule 2, but its own inputs give **22,200**. Tests use 22,200.
+
 ### 7.19 Zaghlol Gold & purchases (GOLD)
 | ID | Requirement | Pri | Tier | Acceptance criteria |
 |----|-------------|-----|------|---------------------|
