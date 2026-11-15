@@ -291,7 +291,13 @@ final class ParseGeneric extends ParseResult {
     required this.occurredAt,
     required this.confidencePermille,
     required this.reasons,
+    this.institutionCode,
   });
+
+  /// The institution the sender resolved to when a registry template did not
+  /// match (the generic parser then read the message); null for an unknown
+  /// sender.
+  final String? institutionCode;
 
   /// Detected language of the message, `ar` or `en`.
   final String language;

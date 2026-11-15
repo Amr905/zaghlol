@@ -8,8 +8,8 @@
   "defaultCurrency": "EGP",
   "senders": [
     {
-      "match": "exact",
-      "value": "HSBC"
+      "match": "regex",
+      "value": "^hsbc(?:[ ._-]?(?:eg|egy|egypt|bank))?$"
     }
   ],
   "packages": [],
@@ -19,6 +19,30 @@
   "last4": [],
   "drop": [],
   "templates": [
+    {
+      "id": "hsbc.card_used_limit.en",
+      "pattern": "^(?:your )?(?:credit |debit )?card ending (?:with |in )?[*x]{0,8} ?(?<last4>\\d{4}) has been used for (?<cur>[a-z]{3}) (?<amount>[\\d,.]+) on (?<date>\\d{1,2}/\\d{1,2}/\\d{4}) at (?<merchant>.+?)\\. your available limit is (?<acur>[a-z]{3}) (?<available>[\\d,.]+)\\.?$",
+      "date": {
+        "format": "d/M/yyyy"
+      },
+      "version": 1,
+      "lang": "en",
+      "channel": [
+        "sms"
+      ],
+      "event": "card_purchase",
+      "direction": "expense",
+      "baseConfidence": 0.95,
+      "currencyMap": {
+        "egp": "EGP",
+        "usd": "USD",
+        "eur": "EUR",
+        "gbp": "GBP"
+      },
+      "flags": {
+        "isAvailableLimit": true
+      }
+    },
     {
       "id": "hsbc.card_purchase_limit.ar",
       "version": 1,

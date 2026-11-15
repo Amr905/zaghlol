@@ -179,11 +179,27 @@ final class ParsingPipeline {
       }
       return _finish(institution, template, fields, receivedAt, language);
     }
-    return firstFatal ??
-        ParseUnrecognized(
-          UnrecognizedReason.noTemplateMatched,
-          institutionCode: institution.code,
-        );
+    if (firstFatal != null) {
+      return firstFatal;
+    }
+    // A known sender whose wording no template covers: read it generically
+    // (never auto-accepted) so the review item carries the fields. A message
+    // the generic parser cannot read stays `noTemplateMatched`.
+    final generic = parseGeneric(
+      body: body,
+      folded: folded,
+      receivedAt: receivedAt,
+      language: language.name,
+      globalLast4: registry.shared.globalLast4,
+      cleaning: registry.shared.merchantCleaning,
+      institutionCode: institution.code,
+    );
+    return generic is ParseGeneric
+        ? generic
+        : ParseUnrecognized(
+            UnrecognizedReason.noTemplateMatched,
+            institutionCode: institution.code,
+          );
   }
 
   Iterable<Template> _candidates(
@@ -238,7 +254,7 @@ final class ParsingPipeline {
       final reason = switch (problem) {
         'originalAmount' ||
         'originalCurrency' => ParseReason.originalAmountInvalid,
-        'balance' => ParseReason.balanceInvalid,
+        'balance' || 'balanceCurrency' => ParseReason.balanceInvalid,
         'available' => ParseReason.availableInvalid,
         'last4' => ParseReason.last4Invalid,
         'merchant' => ParseReason.merchantEmpty,

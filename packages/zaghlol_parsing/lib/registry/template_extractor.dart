@@ -214,8 +214,18 @@ ExtractedFields extractFields(
       !problems.contains('amount')) {
     problems.add('amount');
   }
-  final balance = money('balance', currency, 'balance');
-  final available = money('available', currency, 'available');
+  // `acur`: the currency of the balance / available limit when it differs
+  // from the charge (`used for USD 114.00 ... available limit is EGP ...`).
+  // Absent, they share the amount's currency. Never converted.
+  Currency? balanceCurrency = currency;
+  if (groups['acur'] != null) {
+    balanceCurrency = resolve(groups['acur']);
+    if (balanceCurrency == null) {
+      problems.add('balanceCurrency');
+    }
+  }
+  final balance = money('balance', balanceCurrency, 'balance');
+  final available = money('available', balanceCurrency, 'available');
   Money? original;
   if (groups.containsKey('oamount')) {
     final ocur = groups['ocur'] == null ? null : resolve(groups['ocur']);

@@ -1,0 +1,18 @@
+{
+  "sender": "HSBC",
+  "body": "Your Credit Card ending with * ٦٣٠٢ has been used for EGP ٤١٠٫٠٠ on ١٠/١١/٢٠٢٦ at NETFLIX.COM. Your available limit is EGP ١٥٠٠٠٫٠٠",
+  "receivedAt": "2026-11-11T10:00:00+02:00",
+  "expect": {
+    "template": "hsbc.card_used_limit.en",
+    "event": "card_purchase",
+    "direction": "expense",
+    "currency": "EGP",
+    "amount": "410.00",
+    "last4": "6302",
+    "balance": null,
+    "available": "15000.00",
+    "availableCurrency": "EGP",
+    "merchantClean": "Netflix.com",
+    "date": "2026-11-10"
+  }
+}

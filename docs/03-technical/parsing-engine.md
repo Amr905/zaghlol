@@ -69,7 +69,7 @@ Precision follows the currency exponent: `KWD 12.345` → 12345 minor (EC-36), a
 ```
 
 **Template semantics:**
-- **Named groups:** `amount`, `cur`, `oamount`/`ocur` (original currency, FR-TXN-04), `last4`, `merchant`, `counterparty`, `ipa`, `phone`, `balance`, `available`, `ref`, `date`, `time`.
+- **Named groups:** `amount`, `cur`, `oamount`/`ocur` (original currency, FR-TXN-04), `last4`, `merchant`, `counterparty`, `ipa`, `phone`, `balance`, `available`, `acur` (currency of balance/available when it differs from `cur`), `ref`, `date`, `time`.
 - **Event:** `event` drives later stages. Values: `card_purchase`, `card_purchase_fx`, `atm_withdrawal`, `transfer_out`, `transfer_in`, `instapay_out`, `instapay_in`, `salary`, `refund`, `reversal`, `declined`, `fee`, `cc_payment`, `fx_conversion`, `pending_auth`, `settled`, `wallet_topup`, `bnpl_installment`, `balance_only`.
 - **Version:** `version` is bumped on any change. `registry_manifest.json` holds `registryVersion`, the max over all templates, used for re-parse.
 - **Lint:** the `tools/registry_lint` CLI validates schema, compiles regexes, rejects catastrophic-backtracking patterns, runs all fixtures and fails CI on any regression. It also generates the native Guard config subset.
