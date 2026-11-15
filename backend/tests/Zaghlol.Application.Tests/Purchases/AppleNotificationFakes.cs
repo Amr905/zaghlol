@@ -239,6 +239,23 @@ internal sealed class FakeNotificationStore : IAppleNotificationStore
         return Task.CompletedTask;
     }
 
+    public Task<int> ReviveDeadLetteredAsync(DateTimeOffset now, TimeSpan deadFor, TimeSpan maxAge, int limit, CancellationToken cancellationToken)
+    {
+        var dead = Notifications
+            .Where(n => n.ProcessedAt is { } at && n.NextAttemptAt is null && n.Attempts > 0 && at <= now - deadFor && n.ReceivedAt >= now - maxAge)
+            .OrderBy(n => n.ReceivedAt)
+            .Take(limit)
+            .ToList();
+        foreach (var n in dead)
+        {
+            n.Attempts = 0;
+            n.ProcessedAt = null;
+            n.LastError = null;
+        }
+
+        return Task.FromResult(dead.Count);
+    }
+
     public Task<(long LessThan1h, long AtLeast1h)> BacklogAsync(DateTimeOffset now, CancellationToken cancellationToken)
     {
         var open = Notifications.Where(n => n.ProcessedAt is null).ToList();

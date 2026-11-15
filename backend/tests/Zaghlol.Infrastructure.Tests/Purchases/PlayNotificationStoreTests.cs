@@ -259,6 +259,40 @@ public class PlayNotificationStoreTests(PlayNotificationStoreFixture fixture) : 
     }
 
     [Fact]
+    public async Task OnlyAnOldEnoughRecentDeadLetterIsRevived()
+    {
+        // FU-107: the dead letter is processed_at set, next_attempt_at NULL, attempts > 0.
+        var superuser = fixture.Database.Superuser;
+        async Task<Guid> DeadAsync(string deadAgo, string receivedAgo, int attempts)
+        {
+            var id = await InsertAsync(Record("SUBSCRIPTION_EXPIRED", Token()));
+            await Db.ExecuteAsync(
+                superuser,
+                $"UPDATE zaghlol.store_notifications SET attempts = {attempts}, last_error = 'STORE_ERROR', processed_at = now() - interval '{deadAgo}', received_at = now() - interval '{receivedAgo}' WHERE id = '{id}'");
+            return id;
+        }
+
+        var due = await DeadAsync("7 hours", "2 days", 10);
+        var young = await DeadAsync("1 hour", "2 days", 10);
+        var old = await DeadAsync("8 days", "9 days", 10);
+        var completed = await DeadAsync("7 hours", "2 days", 0);
+
+        var revived = await Store.ReviveDeadLetteredAsync(DateTimeOffset.UtcNow, TimeSpan.FromHours(6), TimeSpan.FromDays(7), 1000, CancellationToken.None);
+
+        Assert.True(revived >= 1);
+        async Task<object?[]> RowAsync(Guid id) =>
+            (await Db.QueryAsync(superuser, $"SELECT processed_at, attempts, last_error FROM zaghlol.store_notifications WHERE id = '{id}'")).Single();
+        var revivedRow = await RowAsync(due);
+        Assert.Null(revivedRow[0]);
+        Assert.Equal(0, revivedRow[1]);
+        Assert.Null(revivedRow[2]);
+        Assert.NotNull((await RowAsync(young))[0]);
+        Assert.NotNull((await RowAsync(old))[0]);
+        Assert.NotNull((await RowAsync(completed))[0]);
+        Assert.Contains(await Store.ListDueAsync(DateTimeOffset.UtcNow, 1000, CancellationToken.None), r => r.Id == due);
+    }
+
+    [Fact]
     public async Task OnlyAnRtdnVoidedRowCountsAsDelivered()
     {
         var token = Token();

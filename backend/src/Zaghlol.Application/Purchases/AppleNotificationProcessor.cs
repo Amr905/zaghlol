@@ -28,6 +28,9 @@ public static class AppleNotificationSchedule
     public const string NoPurchase = "NO_PURCHASE";
     public const string EnvMismatch = "ENV_MISMATCH";
 
+    /// <summary>A sandbox purchase while <c>AllowSandbox</c> is off (FU-098 security L-1): never read from Apple, never written.</summary>
+    public const string SandboxOff = "SANDBOX_OFF";
+
     public static TimeSpan BaseDelay => StoreNotificationSchedule.BaseDelay;
 
     public static TimeSpan MaxDelay => StoreNotificationSchedule.MaxDelay;
@@ -65,6 +68,9 @@ public readonly record struct AppleRefreshFailure(string Code, bool Counted, Tim
 /// </summary>
 public sealed class AppleStateRefresher(AppleSubscriptionReader reader, AppStoreCatalog catalog)
 {
+    /// <summary>False when sandbox purchases must not be reconciled (the processor and the expiry sweep skip them; FU-098 L-1).</summary>
+    public bool AllowSandbox => catalog.AllowSandbox;
+
     public async Task<AppleStoreRead> ReadAsync(ApplePurchaseRow purchase, DateTimeOffset readAt, CancellationToken cancellationToken)
     {
         ArgumentNullException.ThrowIfNull(purchase);
@@ -220,6 +226,13 @@ public sealed class AppleNotificationProcessor(
         {
             await CompleteAsync(row, AppleNotificationSchedule.EnvMismatch, cancellationToken);
             return AssnTags.EnvMismatch;
+        }
+
+        // 2b. FU-098 security L-1: with AllowSandbox off a sandbox row costs no Apple call and is never written.
+        if (purchase.Environment == PurchaseEnvironment.Sandbox && !refresher.AllowSandbox)
+        {
+            await CompleteAsync(row, AppleNotificationSchedule.SandboxOff, cancellationToken);
+            return AssnTags.Ignored;
         }
 
         // 3. Apple's current answer; readAt first, so a slower read never overwrites a newer one.

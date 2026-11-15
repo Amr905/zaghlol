@@ -8,6 +8,26 @@ public class HeartbeatTests
     private static string NewTempPath() => Path.Combine(Path.GetTempPath(), $"{Guid.NewGuid():N}.heartbeat");
 
     [Fact]
+    public void AStaleHeartbeatIsNotFreshAndATouchedOneIs()
+    {
+        // FU-004 #12: a worker that stopped beating must fail the container health check.
+        var path = NewTempPath();
+        try
+        {
+            File.WriteAllText(path, string.Empty);
+            File.SetLastWriteTimeUtc(path, DateTime.UtcNow.AddSeconds(-120));
+            Assert.False(HeartbeatFile.IsFresh(path, DateTimeOffset.UtcNow, TimeSpan.FromSeconds(45)));
+
+            File.SetLastWriteTimeUtc(path, DateTime.UtcNow);
+            Assert.True(HeartbeatFile.IsFresh(path, DateTimeOffset.UtcNow, TimeSpan.FromSeconds(45)));
+        }
+        finally
+        {
+            File.Delete(path);
+        }
+    }
+
+    [Fact]
     public void MissingFileIsNotFresh()
     {
         Assert.False(HeartbeatFile.IsFresh(NewTempPath(), DateTimeOffset.UtcNow, TimeSpan.FromSeconds(30)));

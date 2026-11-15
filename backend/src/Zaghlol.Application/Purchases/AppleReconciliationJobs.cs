@@ -135,10 +135,17 @@ public sealed class AppleExpirySweepJob(
 
         await using (held)
         {
+            await store.ReviveDeadLetteredAsync(
+                clock.GetUtcNow(), StoreNotificationSchedule.ReviveAfter, StoreNotificationSchedule.ReviveWindow, StoreNotificationSchedule.ReviveBatch, cancellationToken);
             var rows = await store.ListExpiredSubscriptionsAsync(clock.GetUtcNow(), BatchSize, cancellationToken);
             int written = 0, failed = 0;
             foreach (var row in rows)
             {
+                if (row.Environment == PurchaseEnvironment.Sandbox && !refresher.AllowSandbox)
+                {
+                    continue; // FU-098 security L-1
+                }
+
                 var readAt = clock.GetUtcNow();
                 AppleStoreRead read;
                 try

@@ -183,6 +183,8 @@ public sealed class PlayExpirySweepJob(
 
         await using (held)
         {
+            await store.ReviveDeadLetteredAsync(
+                clock.GetUtcNow(), StoreNotificationSchedule.ReviveAfter, StoreNotificationSchedule.ReviveWindow, StoreNotificationSchedule.ReviveBatch, cancellationToken);
             var rows = await store.ListExpiredSubscriptionsAsync(clock.GetUtcNow(), BatchSize, cancellationToken);
             var inserted = 0;
             foreach (var row in rows)

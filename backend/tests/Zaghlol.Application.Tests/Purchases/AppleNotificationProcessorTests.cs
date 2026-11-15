@@ -169,6 +169,27 @@ public class AppleNotificationProcessorTests
         Assert.Contains(("refund", AssnTags.EnvMismatch), telemetry.Processed);
     }
 
+    [Fact]
+    public async Task ASandboxPurchaseIsNeitherReadNorWrittenWhileAllowSandboxIsOff()
+    {
+        // FU-098 security L-1.
+        var purchase = Subscription(StoredPurchaseState.Active, environment: PurchaseEnvironment.Sandbox);
+        var row = store.Add("EXPIRED", purchase.StoreKey, PurchaseEnvironment.Sandbox);
+        var processor = new AppleNotificationProcessor(
+            store,
+            new AppleStateRefresher(new AppleSubscriptionReader(apple.Jws, apple.Api, AppleScript.Catalog(allowSandbox: false), purchaseTelemetry), AppleScript.Catalog(allowSandbox: false)),
+            telemetry,
+            clock,
+            () => 0.5);
+
+        await processor.RunOnceAsync(CancellationToken.None);
+
+        Assert.Equal(AppleNotificationSchedule.SandboxOff, row.LastError);
+        Assert.NotNull(row.ProcessedAt);
+        Assert.Equal(StoredPurchaseState.Active, purchase.State);
+        Assert.Empty(apple.Api.Calls);
+    }
+
     // §3 retries and the dead letter.
 
     [Fact]
@@ -489,6 +510,9 @@ internal sealed class ThrowingFind(FakeNotificationStore inner, string key) : IA
         inner.FailAsync(notificationId, attempts, nextAttemptAt, code, cancellationToken);
 
     public Task DeferAsync(Guid notificationId, DateTimeOffset nextAttemptAt, CancellationToken cancellationToken) => inner.DeferAsync(notificationId, nextAttemptAt, cancellationToken);
+
+    public Task<int> ReviveDeadLetteredAsync(DateTimeOffset now, TimeSpan deadFor, TimeSpan maxAge, int limit, CancellationToken cancellationToken) =>
+        inner.ReviveDeadLetteredAsync(now, deadFor, maxAge, limit, cancellationToken);
 
     public Task<(long LessThan1h, long AtLeast1h)> BacklogAsync(DateTimeOffset now, CancellationToken cancellationToken) => inner.BacklogAsync(now, cancellationToken);
 

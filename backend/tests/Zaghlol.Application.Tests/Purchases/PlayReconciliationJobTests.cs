@@ -169,6 +169,36 @@ public class PlayReconciliationJobTests
     }
 
     [Fact]
+    public async Task TheSweepRevivesDeadLettersOnceTheyAreSixHoursOldAndLeavesTheRestAlone()
+    {
+        // FU-107 (security M-1): a dead-lettered row after a long store outage must get another go, or an expired or refunded purchase keeps Gold.
+        FakePlayNotificationStore.Notification Dead(TimeSpan deadAgo, TimeSpan receivedAgo, int attempts = 10, DateTimeOffset? next = null)
+        {
+            var row = store.Add("EXPIRY_SWEEP", Play.NewToken(), attempts: attempts, receivedAt: Play.Now - receivedAgo);
+            row.NextAttemptAt = next;
+            row.ProcessedAt = Play.Now - deadAgo;
+            row.LastError = "STORE_ERROR";
+            return row;
+        }
+
+        var due = Dead(TimeSpan.FromHours(7), TimeSpan.FromDays(2));
+        var tooYoung = Dead(TimeSpan.FromHours(1), TimeSpan.FromDays(2));
+        var tooOld = Dead(TimeSpan.FromDays(7), TimeSpan.FromDays(8));
+        var completed = Dead(TimeSpan.FromHours(7), TimeSpan.FromDays(2), attempts: 0);
+        var retried = Dead(TimeSpan.FromHours(7), TimeSpan.FromDays(2), attempts: 3, next: Play.Now.AddHours(-8));
+
+        await Sweep.RunOnceAsync(CancellationToken.None);
+
+        Assert.Null(due.ProcessedAt);
+        Assert.Equal(0, due.Attempts);
+        Assert.Null(due.LastError);
+        Assert.NotNull(tooYoung.ProcessedAt);
+        Assert.NotNull(tooOld.ProcessedAt);
+        Assert.NotNull(completed.ProcessedAt);
+        Assert.NotNull(retried.ProcessedAt);
+    }
+
+    [Fact]
     public void TheSweepKeyRoundTrips()
     {
         var id = Guid.CreateVersion7();
