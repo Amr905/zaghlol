@@ -66,7 +66,13 @@ GoRouter buildAppRouter(TabRoots roots, {String initialLocation = '/home'}) {
   Page<void> addPage(BuildContext context, GoRouterState state) =>
       ModalSheetPage<void>(
         key: state.pageKey,
-        child: AddSheet(onSelected: (a) => roots.addSelected(context, a)),
+        // FIX-device-flows: the page builder's context sits above the root
+        // Navigator, so `Navigator.of(context)` threw and every tile did
+        // nothing. The sheet's own context is inside the Navigator.
+        child: Builder(
+          builder: (sheetContext) =>
+              AddSheet(onSelected: (a) => roots.addSelected(sheetContext, a)),
+        ),
       );
 
   return GoRouter(

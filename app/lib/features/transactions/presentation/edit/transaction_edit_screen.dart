@@ -6,6 +6,8 @@
 // the screen never touches the database. Raw message text passed in is shown
 // only on screen, never logged.
 
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:zaghlol_domain/zaghlol_domain.dart';
@@ -15,7 +17,8 @@ import '../../../../core/l10n/locale_providers.dart';
 import '../../../../core/l10n/generated/app_localizations.dart';
 import '../../../../core/theme/z_tokens.dart';
 import '../../../../core/ui/z_components.dart';
-import '../../../../core/ui/shell/add_sheet.dart' show AddAction;
+import '../../../../core/ui/shell/add_sheet.dart'
+    show AddAction, closeAddSheetThen;
 import '../../../budget/application/budget_providers.dart';
 import '../../data/transactions_providers.dart';
 import '../../domain/transaction.dart';
@@ -861,8 +864,8 @@ class _CurrencyListState extends State<_CurrencyList> {
 /// (S-30 -> S-31, T-120); other entries are not this screen's business and
 /// only close the sheet. Pass it as `TabRoots.addSelected`.
 void quickAddSelected(BuildContext context, AddAction action) {
-  final nav = Navigator.of(context, rootNavigator: true);
-  nav.maybePop();
-  if (action == AddAction.type) showTransactionEditor(context);
-  if (action == AddAction.say) showVoiceLogger(context);
+  closeAddSheetThen(context, (root) {
+    if (action == AddAction.type) unawaited(showTransactionEditor(root));
+    if (action == AddAction.say) unawaited(showVoiceLogger(root));
+  });
 }

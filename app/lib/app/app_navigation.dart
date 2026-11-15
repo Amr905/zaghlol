@@ -12,7 +12,7 @@ import 'package:go_router/go_router.dart';
 
 import '../core/routing/app_router.dart';
 import '../core/routing/app_routes.dart';
-import '../core/ui/shell/add_sheet.dart' show AddAction;
+import '../core/ui/shell/add_sheet.dart' show AddAction, closeAddSheetThen;
 import '../core/settings/settings_keys.dart';
 import '../core/settings/settings_providers.dart';
 import '../features/account/presentation/account_launcher.dart';
@@ -72,8 +72,7 @@ final TabRoots wiredTabRoots = TabRoots(
 void wiredAddSelected(BuildContext context, AddAction action) {
   if (action == AddAction.scan) {
     // T-161: Scan opens S-32 over the closed sheet.
-    Navigator.of(context, rootNavigator: true).maybePop();
-    unawaited(showScanScreen(context));
+    closeAddSheetThen(context, (root) => unawaited(showScanScreen(root)));
     return;
   }
   if (action != AddAction.asset) {
@@ -82,8 +81,10 @@ void wiredAddSelected(BuildContext context, AddAction action) {
   }
   final gold = _container(context).read(entitlementStateProvider).isGold;
   final screens = _screens(context);
-  Navigator.of(context, rootNavigator: true).maybePop();
-  unawaited(gold ? screens.addAsset(context) : screens.paywall(context));
+  closeAddSheetThen(
+    context,
+    (root) => unawaited(gold ? screens.addAsset(root) : screens.paywall(root)),
+  );
 }
 
 /// Root-scope overrides of the navigation seams other features expose as
