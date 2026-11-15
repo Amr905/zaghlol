@@ -1,5 +1,8 @@
 ﻿== SUMMARY ==
-RUNNING sha=480db39a5357d49d52c65f19a9fbc5df88561418
+SKIP sha=480db39a5357d49d52c65f19a9fbc5df88561418 no app/packages/backend changes
 
 == FULL LOG (last 1500 lines) ==
 auto task/T-170-roi-screen 480db39a5357d49d52c65f19a9fbc5df88561418 2026-11-15T22:19:32.5898237+02:00
+
+
+
