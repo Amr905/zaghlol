@@ -9,6 +9,11 @@
          never at install. Local notifications only: no FCM, no
          RECEIVE_BOOT_COMPLETED, no SCHEDULE_EXACT_ALARM. -->
     <uses-permission android:name="android.permission.POST_NOTIFICATIONS"/>
+    <!-- T-120 (FR-VOI-01): the voice logger listens only while its screen is
+         open, asked at first use (never at install). Audio is handled by the
+         OS recognizer and never stored by the app; on-device recognition is
+         tried first, the online recognizer only after consent (D-42). -->
+    <uses-permission android:name="android.permission.RECORD_AUDIO"/>
     <!-- FR-SEC-05 / T-165: no OS mechanism may copy app data off the phone.
          allowBackup=false stops Auto Backup, key/value backup and adb backup
          (API 26-30) and cloud backup (API 31+). On API 31+ only
@@ -162,6 +167,10 @@
 
          In particular, this is used by the Flutter engine in io.flutter.plugin.text.ProcessTextPlugin. -->
     <queries>
+        <!-- T-120: speech_to_text looks up the device's speech recognizer. -->
+        <intent>
+            <action android:name="android.speech.RecognitionService"/>
+        </intent>
         <intent>
             <action android:name="android.intent.action.PROCESS_TEXT"/>
             <data android:mimeType="text/plain"/>

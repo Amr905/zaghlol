@@ -66,6 +66,7 @@ import 'package:zaghlol/features/onboarding/presentation/scan_results.dart';
 import '../features/settings/settings_harness.dart' as settings;
 import '../features/transactions/presentation/detail_edit_harness.dart' as txn;
 import '../features/transfers/presentation/transfers_harness.dart' as xfer;
+import '../features/voice/voice_harness.dart' as voice;
 
 import 'package:zaghlol/features/transfers/presentation/split_sheet.dart';
 
@@ -704,5 +705,23 @@ void main() {
       height: 844,
     );
     await _shot(tester, 'paywall');
+  }, skip: _skip != null);
+
+  testWidgets('voice logger S-31 parsed', (tester) async {
+    final r = voice.VoiceRig();
+    await r.pump(tester, locale: _ar.locale);
+    r.speech.say('دفعت ١٥٠ جنيه خضار وفاكهة و ٤٥ جنيه قهوة و ٣٠ جنيه تاكسي');
+    await tester.pump();
+    await tester.tap(find.byKey(const ValueKey('voice-done')));
+    await tester.pumpAndSettle();
+    await _shot(tester, 'voice_logger_parsed', topmost: true);
+  }, skip: _skip != null);
+
+  testWidgets('voice logger S-31 listening', (tester) async {
+    final r = voice.VoiceRig();
+    await r.pump(tester, locale: _ar.locale);
+    r.speech.say('دفعت ١٥٠ جنيه خضار و ٤٥ قهوة');
+    await tester.pump();
+    await _shot(tester, 'voice_logger_listening', topmost: true);
   }, skip: _skip != null);
 }

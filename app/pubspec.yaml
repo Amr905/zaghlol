@@ -58,6 +58,7 @@ dependencies:
   # FU-195: Terms, Privacy, Manage subscription and Update app open in the
   # browser / store (WIRE-NAV externalUrlOpenerProvider). Exact pin.
   url_launcher: 6.3.3
+  speech_to_text: ^7.5.0
 
 dev_dependencies:
   flutter_test:
