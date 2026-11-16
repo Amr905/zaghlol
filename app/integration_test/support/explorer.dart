@@ -434,6 +434,14 @@ class Explorer {
       }
       if (!seen.add(line)) continue;
       final overflow = text.contains('overflowed');
+      // Our own frames (package:zaghlol) show where an exception came from.
+      final frames = (d.stack?.toString() ?? '')
+          .split('\n')
+          .where((f) => f.contains('package:zaghlol'))
+          .take(4)
+          .map((f) => f.trim())
+          .join(' | ');
+      if (frames.isNotEmpty) log('EXPLORER_STACK $frames');
       rec.issues.add(
         ExplorerIssue(overflow ? 'overflow' : 'exception', where, line),
       );

@@ -283,7 +283,11 @@ void main() {
     final hard = [
       for (final s in ex.screens)
         for (final i in s.issues)
-          if (i.kind != 'dead-tap' && i.kind != 'restore')
+          // The emulator has no backend: an offline failure is expected,
+          // but it still shows in the report (an open finding).
+          if (i.kind != 'dead-tap' &&
+              i.kind != 'restore' &&
+              !i.detail.startsWith('BackendFailure(offline)'))
             '${s.title}: ${i.kind} ${i.where}',
     ];
     expect(
