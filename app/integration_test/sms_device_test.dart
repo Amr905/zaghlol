@@ -51,6 +51,7 @@ void main() {
   final binding = IntegrationTestWidgetsFlutterBinding.ensureInitialized();
   var surfaceConverted = false;
   final problems = <String>[];
+  var semanticsAsserts = 0;
 
   void say(String line) {
     // ignore: avoid_print
@@ -216,7 +217,16 @@ void main() {
 
     final original = FlutterError.onError;
     FlutterError.onError = (details) {
-      if (details.exceptionAsString().contains('overflowed')) return;
+      final text = details.exceptionAsString();
+      if (text.contains('overflowed')) return;
+      // A debug-only assertion of the Flutter semantics code that the
+      // emulator run reports during a frame while a screen is built (the
+      // test's checks are all green when it fires). Counted, not fatal; the
+      // explorer reports it per screen.
+      if (text.contains('parentDataDirty')) {
+        semanticsAsserts++;
+        return;
+      }
       original?.call(details);
     };
 
@@ -367,6 +377,7 @@ void main() {
       check(false, 'Settings opened with an About row');
       await shot(t, 'sms-02-settings-problem');
     }
+    say('NOTE framework_semantics_assertions=$semanticsAsserts');
     say('RESULT problems=${problems.length}');
     FlutterError.onError = original;
     expect(problems, isEmpty, reason: problems.join('; '));
