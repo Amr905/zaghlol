@@ -35,3 +35,14 @@ I ran adversarial synthetic bodies through the real pipeline (bundled registry, 
 |---|---|---|---|
 | SMS-auto | `packages/zaghlol_parsing/lib/generic/generic_parser.dart:122,230-243` | The settlement result must not override a contradicting expense, purchase, "was used" or reversal cue; add `directionConflict` instead; tighten the `payment` + verb fallback | e2e: the first 3 bodies above (sender NBE) go to review with no txn |
 | SMS-auto | `packages/zaghlol_parsing/lib/generic/generic_policy.dart:68` | Require a completed-transaction cue (or settlement phrase) for auto-save | e2e: the cashback promo body goes to review with no txn |
+
+## Delta re-review (fix round)
+
+Commit 5b7dce57. Tests: `packages/zaghlol_parsing` 1469 passed (benchmark excluded); app `test/ingestion test/features/ingestion` 311 passed.
+
+**task/SMS-auto: APPROVED.** I ran 14 adversarial synthetic bodies through `parseGeneric` (sender NBE) and checked `genericAutoSaveEligible`.
+- Bodies 2 and 3 from the original table (purchase + "thank you for your payment", payment "was reversed and credited") now give `directionConflict`: review, no txn. Also in review: "Reversal of purchase ... credited", "payment ... to NOON was reversed", and "Payment received ... Purchase limit" (conservative, acceptable).
+- Cashback promos ("Pay EGP 500 ... cashback", "cashback credited") are income with no event, so `auto=false`: review.
+- Real settlement phrasing still auto-saves as `ccPayment` income (a transfer into the card): "Payment of EGP 5,000 received on your credit card", "we received your payment of ...". Refund/"رد مبلغ" auto-saves as refund income, never an expense. Arabic settlement "تم استلام سداد" goes to review (`sparseFields`): safe.
+- Body 1 ("was used for a payment of EGP 500 at VODAFONE") now auto-saves as an **expense** (purchase event). Amount, currency, direction and merchant are all explicit, and "was used" is a spend cue, so I judge it safe. It is not a settlement.
+- minor: the new tests guard with `if (r is ParseGeneric)` and assert only negatives. They would pass if the parser returned something else. Follow-up: assert `directionConflict` / null direction explicitly. No blocker.
