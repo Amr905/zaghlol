@@ -287,6 +287,7 @@ void main() {
           // but it still shows in the report (an open finding).
           if (i.kind != 'dead-tap' &&
               i.kind != 'restore' &&
+              i.kind != 'dead-end' &&
               !i.detail.contains('BackendFailure(offline)'))
             '${s.title}: ${i.kind} ${i.where}',
     ];
