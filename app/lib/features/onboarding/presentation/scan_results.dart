@@ -12,6 +12,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../core/l10n/generated/app_localizations.dart';
 import '../../../core/l10n/locale_providers.dart';
 import '../../../core/theme/z_tokens.dart';
+import '../../../core/ui/institution_avatar.dart';
 import '../../../core/ui/z_button.dart';
 import '../../../core/ui/z_card.dart';
 import '../../../core/ui/z_sheet.dart';
@@ -662,22 +663,11 @@ class _CardRow extends StatelessWidget {
             ),
             child: Row(
               children: [
-                Container(
-                  width: 44,
-                  height: 44,
-                  alignment: Alignment.center,
-                  decoration: BoxDecoration(
-                    color: tileBg,
-                    shape: BoxShape.circle,
-                  ),
-                  child: Text(
-                    _initials,
-                    maxLines: 1,
-                    style: ZType.caption.copyWith(
-                      color: tileFg,
-                      fontWeight: FontWeight.w700,
-                    ),
-                  ),
+                ZInstitutionAvatar(
+                  institutionCode: item.institutionCode,
+                  initials: _initials,
+                  neutralBg: tileBg,
+                  neutralFg: tileFg,
                 ),
                 const SizedBox(width: ZSpacing.md),
                 Expanded(
