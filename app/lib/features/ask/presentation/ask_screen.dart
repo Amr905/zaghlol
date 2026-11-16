@@ -562,7 +562,7 @@ class _InputRow extends ConsumerWidget {
           padding: const EdgeInsetsDirectional.fromSTEB(
             ZSpacing.screen,
             ZSpacing.sm,
-            ZSpacing.fabClearance,
+            ZSpacing.screen,
             ZSpacing.sm,
           ),
           child: Column(

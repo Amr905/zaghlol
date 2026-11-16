@@ -118,38 +118,59 @@ class ShellScaffold extends StatelessWidget {
     final c = ZColors.of(context);
     return Scaffold(
       body: body,
-      floatingActionButtonLocation: FloatingActionButtonLocation.endFloat,
-      floatingActionButton: ZAddButton(label: addLabel, onTap: onAdd),
-      bottomNavigationBar: NavigationBarTheme(
-        data: NavigationBarThemeData(
-          backgroundColor: Color.alphaBlend(
-            c.primaryContainer.withValues(alpha: 0.35),
-            c.bg,
-          ),
-          surfaceTintColor: Colors.transparent,
-          elevation: 0,
-          indicatorColor: c.primaryContainer,
-          labelTextStyle: WidgetStatePropertyAll(
-            ZType.label.copyWith(color: c.text),
-          ),
-          iconTheme: WidgetStateProperty.resolveWith(
-            (states) => IconThemeData(
-              color: states.contains(WidgetState.selected) ? c.primary : c.text,
-            ),
-          ),
+      // FU-246: the Add button is docked at the end of the bar, not floating
+      // over the body, so it never hides content or the Ask input.
+      bottomNavigationBar: ColoredBox(
+        color: Color.alphaBlend(
+          c.primaryContainer.withValues(alpha: 0.35),
+          c.bg,
         ),
-        child: NavigationBar(
-          selectedIndex: selected,
-          onDestinationSelected: onSelect,
-          destinations: [
-            for (var i = 0; i < _destinations.length; i++)
-              NavigationDestination(
-                icon: Icon(_destinations[i].icon),
-                selectedIcon: Icon(_destinations[i].selectedIcon),
-                label: labels[i],
+        child: SafeArea(
+          top: false,
+          child: Row(
+            children: [
+              Expanded(child: _androidBar(c)),
+              Padding(
+                padding: const EdgeInsetsDirectional.only(
+                  end: ZSpacing.lg,
+                  start: ZSpacing.sm,
+                ),
+                child: ZAddButton(label: addLabel, onTap: onAdd),
               ),
-          ],
+            ],
+          ),
         ),
+      ),
+    );
+  }
+
+  Widget _androidBar(ZColors c) {
+    return NavigationBarTheme(
+      data: NavigationBarThemeData(
+        backgroundColor: Colors.transparent,
+        surfaceTintColor: Colors.transparent,
+        elevation: 0,
+        indicatorColor: c.primaryContainer,
+        labelTextStyle: WidgetStatePropertyAll(
+          ZType.label.copyWith(color: c.text),
+        ),
+        iconTheme: WidgetStateProperty.resolveWith(
+          (states) => IconThemeData(
+            color: states.contains(WidgetState.selected) ? c.primary : c.text,
+          ),
+        ),
+      ),
+      child: NavigationBar(
+        selectedIndex: selected,
+        onDestinationSelected: onSelect,
+        destinations: [
+          for (var i = 0; i < _destinations.length; i++)
+            NavigationDestination(
+              icon: Icon(_destinations[i].icon),
+              selectedIcon: Icon(_destinations[i].selectedIcon),
+              label: labels[i],
+            ),
+        ],
       ),
     );
   }
