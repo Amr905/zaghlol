@@ -5,19 +5,31 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:zaghlol/core/db/app_database.dart' show IgnoreRuleRow;
 import 'package:zaghlol/core/l10n/generated/app_localizations.dart';
 import 'package:zaghlol/core/theme/app_theme.dart';
+import 'package:zaghlol/features/accounts/data/accounts_providers.dart'
+    show accountsRepositoryProvider;
+import 'package:zaghlol/features/accounts/domain/accounts_repository.dart';
 import 'package:zaghlol/features/accounts/domain/account.dart';
 import 'package:zaghlol/features/accounts/presentation/card_detail/card_detail.dart';
 import 'package:zaghlol/features/accounts/presentation/card_detail/card_detail_providers.dart';
 import 'package:zaghlol/features/accounts/presentation/card_detail/compare.dart';
 import 'package:zaghlol/features/capture/application/ignore_rules.dart';
 import 'package:zaghlol/features/capture/presentation/capture_controls.dart';
+import 'package:zaghlol/features/capture/presentation/card_capture_sheet.dart';
 import 'package:zaghlol/features/home/application/card_filter.dart';
 import 'package:zaghlol/features/accounts/presentation/edit_card/edit_card_providers.dart'
-    show institutionOptionsProvider;
+    show accountTxnCountProvider, institutionOptionsProvider;
 import 'package:zaghlol/features/insights/domain/chart_models.dart';
 import 'package:zaghlol/features/transactions/domain/transaction.dart';
 import 'package:zaghlol/features/transactions/presentation/list/txn_list_providers.dart';
 import 'package:zaghlol_domain/zaghlol_domain.dart';
+
+// Nothing on the edit screen touches the repository until Save.
+class _NoRepo implements AccountsRepository {
+  @override
+  Future<List<Account>> list({bool includeHidden = false}) async => const [];
+  @override
+  dynamic noSuchMethod(Invocation i) => super.noSuchMethod(i);
+}
 
 final egp = Currency.of('EGP');
 final usd = Currency.of('USD');
@@ -215,6 +227,26 @@ void main() {
       find.text('SMS ✓ · Notifications ✓', skipOffstage: false),
       findsOneWidget,
     );
+  });
+
+  testWidgets('edit screen: "what Zaghlol reads" row opens the capture sheet '
+      '(explorer: it did nothing)', (t) async {
+    await pumpDetail(
+      t,
+      overrides: [
+        ...detailOverrides(),
+        institutionOptionsProvider.overrideWithValue(const []),
+        accountTxnCountProvider.overrideWith((ref, id) async => 3),
+        accountsRepositoryProvider.overrideWith((ref) async => _NoRepo()),
+      ],
+    );
+    await t.tap(find.byKey(const Key('card-detail-edit')));
+    await t.pumpAndSettle();
+    final row = find.byKey(const Key('card-capture-link'));
+    await t.ensureVisible(row);
+    await t.tap(row);
+    await t.pumpAndSettle();
+    expect(find.byType(CardCaptureControls), findsOneWidget);
   });
 
   testWidgets('arabic RTL populated, text scale 1.3 does not overflow', (
