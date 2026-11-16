@@ -220,7 +220,6 @@ void main() {
       if (details.exceptionAsString().contains('overflowed')) return;
       original?.call(details);
     };
-    addTearDown(() => FlutterError.onError = original);
 
     await app.main();
     final end = DateTime.now().add(const Duration(seconds: 40));
@@ -360,6 +359,7 @@ void main() {
       await shot(t, 'sms-02-settings-problem');
     }
     say('RESULT problems=${problems.length}');
+    FlutterError.onError = original;
     semantics.dispose();
     expect(problems, isEmpty, reason: problems.join('; '));
   });

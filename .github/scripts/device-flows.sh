@@ -29,11 +29,9 @@ adb -s "$DEVICE" logcat -c || true
 # SMS before the first launch (historical inbox scan) and while the app runs
 # (live receiver), then the real app must have saved them. The emulator console
 # (`adb emu sms send`) is tried first for every sender, alphanumeric ones
-# included. If the console refuses a sender id, the fallbacks are: for the
-# historical part `content insert` into the system inbox (the emulator image
-# allows adb root); for the live part the devSms-only DebugSmsInjectReceiver,
-# which enters production code at SmsIntake (what the real receiver calls
-# after reading the PDUs).
+# included (the current emulator accepts letters). If the console ever refuses
+# a sender id, the historical part falls back to `content insert` into the
+# system inbox (the emulator image allows adb root).
 # Logs hold sender ids and counts, never a message body.
 HSBC_USD_H='Your Credit Card ending with * 5076 has been used for USD 115.00 on 09/11/2026 at ANTHROPIC* CLAUDE SUB. Your available limit is EGP 110096.30'
 HSBC_EGP_H='Your Credit Card ending with * 9376 has been used for EGP 1959.40 on 08/11/2026 at UDEMY SUBSCRIPTION. Your available limit is EGP 27623.16'
@@ -57,11 +55,8 @@ sms_inbox_insert() { # sender body: a row in the system inbox (fallback when the
   out=$(adb -s "$DEVICE" shell "content insert --uri content://sms/inbox --bind address:s:'$1' --bind body:s:'$2' --bind date:l:$(date +%s)000 --bind read:i:0 --bind type:i:1" 2>&1 | tr -d '\r' | head -3 | tr '\n' ' ')
   echo "  insert[$1]: ${out:-ok}"
 }
-sms_inject() { # sender body: the devSms debug receiver (production intake), fallback for the live part
-  adb -s "$DEVICE" shell "am broadcast -n $PKG/app.zaghlol.spike.sms.DebugSmsInjectReceiver -a app.zaghlol.dev.INJECT_SMS --es sender '$1' --es body '$2'" 2>&1 | tr -d '\r' | grep -E "result=|Error|Exception" | head -2 | sed "s/^/  inject[$1]: /"
-}
 sms_hist() { sms_emu "$1" "$2" || sms_inbox_insert "$1" "$2"; }
-sms_live() { sms_emu "$1" "$2" || sms_inject "$1" "$2"; }
+sms_live() { sms_emu "$1" "$2"; }
 inbox_rows() { # counts per sender in the system inbox (needs root); no bodies
   adb -s "$DEVICE" shell "content query --uri content://sms/inbox --projection address:date" 2>&1 | tr -d '\r' | sed -n 's/^Row: [0-9]* address=\(.*\), date=.*/\1/p' | sort | uniq -c | sed 's/^/  inbox: /'
 }
@@ -123,6 +118,7 @@ run_sms_device() {
   r=$?
   echo "sms device test exit: $r"
   grep -E "SMS_DEVICE|^[0-9:]+ [+-][0-9]+.*(SMS|Some tests|All tests)" "$OUT/sms-device-test.log" | cut -c1-240
+  if [ "$r" -ne 0 ]; then echo "---- test log tail (no message text is printed by the test)"; tail -60 "$OUT/sms-device-test.log" | cut -c1-220; fi
   adb -s "$DEVICE" logcat -d -b crash 2> /dev/null | tail -20
   adb -s "$DEVICE" logcat -d 2> /dev/null | grep -E "FATAL|ANR in|Process $PKG.*died" | cut -c1-200 | tail -10
   return "$r"
