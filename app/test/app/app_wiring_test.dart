@@ -8,7 +8,8 @@ import 'package:flutter/foundation.dart'
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:zaghlol_domain/zaghlol_domain.dart' show Currency;
+import 'package:zaghlol_domain/zaghlol_domain.dart'
+    show CivilDate, Currency, Cycle;
 import 'package:zaghlol/app/app_config.dart';
 import 'package:zaghlol/app/app_navigation.dart';
 import 'package:zaghlol/app/app_screens.dart';
@@ -127,7 +128,12 @@ AppScreens _stubs(_Rec r) {
     templateBuilder: (c) => page(c, 'templateBuilder'),
     categories: (c) => page(c, 'categories'),
     privacy: (c) => page(c, 'privacy'),
-    budget: (c, {required onCategoryTap}) => page(c, 'budget'),
+    budget: (c, {required onCategoryTap}) => page(c, 'budget', {
+      'category': () => onCategoryTap(
+        'cat-1',
+        Cycle(start: CivilDate(2026, 11, 1), end: CivilDate(2026, 11, 30)),
+      ),
+    }),
     ask: (c) => _marker('ask'),
     review: (c) => _marker('review'),
     transactions: (c, {required onOpenTransaction}) =>
@@ -294,6 +300,18 @@ void main() {
         // Android: S-02 (the default test platform).
         await t.pumpAndSettle();
         expect(find.text('stub:androidSetup'), findsOneWidget);
+      });
+
+      testWidgets('Budget category row opens the filtered list without a '
+          'provider-modified-during-build error', (t) async {
+        late HomeScreen home;
+        await host(t, build: (c) => home = wiredTabRoots.home(c) as HomeScreen);
+        home.actions!.openBudget!();
+        await expectOpened(t, 'budget');
+        await t.tap(find.byKey(const ValueKey('budget__category')));
+        await t.pumpAndSettle();
+        expect(t.takeException(), isNull);
+        expect(find.text('stub:transactions'), findsOneWidget);
       });
 
       testWidgets('Home share icon opens S-73; capture nudge opens S-61', (
