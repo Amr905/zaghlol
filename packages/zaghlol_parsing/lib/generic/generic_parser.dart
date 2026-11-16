@@ -505,6 +505,13 @@ final RegExp _referenceCue = RegExp(
 /// about the reader's own direction.
 bool _addressedToReader(String t, _Hit h) {
   final word = t.substring(h.start, h.end);
+  // `received an instant transfer of EGP 5`: the reader is the receiver.
+  if (word == 'transfer of') {
+    final from = h.start > 24 ? h.start - 24 : 0;
+    if (t.substring(from, h.start).contains('received')) {
+      return true;
+    }
+  }
   final suffixes = addressedToReaderSuffixes[word];
   if (suffixes == null) {
     return false;
