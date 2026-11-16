@@ -1,5 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:zaghlol/core/l10n/generated/app_localizations.dart';
+import 'package:zaghlol/features/ingestion/presentation/review/review_models.dart';
+import 'package:zaghlol/features/ingestion/presentation/review/review_screen.dart';
 
 import 'review_harness.dart';
 
@@ -185,6 +188,76 @@ void main() {
         reviewApp(actions: FakeActions(), queue: sampleCards),
       );
       expect(find.textContaining('Your balance'), findsNothing);
+    });
+
+    group('SMS-fuzzy generic suggestions', () {
+      final oneTap = MessageCardModel(
+        itemId: 'g1',
+        sender: 'HSBC',
+        isNewSender: false,
+        amount: egp(84550),
+        merchant: 'Spinneys',
+        last4: '6612',
+        rawMessageId: 'raw1',
+        oneTap: true,
+      );
+      final partial = MessageCardModel(
+        itemId: 'g2',
+        sender: 'HSBC',
+        isNewSender: false,
+        amount: egp(1000),
+        rawMessageId: 'raw2',
+      );
+
+      for (final locale in const [Locale('en'), Locale('ar')]) {
+        testWidgets(
+          'prefilled guess and one-tap confirm (${locale.languageCode})',
+          (tester) async {
+            final actions = FakeActions();
+            await pumpReview(
+              tester,
+              reviewApp(actions: actions, queue: [oneTap], locale: locale),
+            );
+            expect(find.textContaining('Spinneys'), findsOneWidget);
+            final l = AppLocalizations.of(
+              tester.element(find.byType(ReviewScreen)),
+            );
+            await tester.tap(find.text(l.commonActionConfirm));
+            await tester.pump();
+            expect(actions.calls, ['generic:g1']);
+            // The learn offer: make a template from this message.
+            await tester.pump(const Duration(milliseconds: 800));
+            expect(find.text(l.templatesBuilderTitle), findsOneWidget);
+            await tester.tap(find.text(l.templatesBuilderTitle));
+            await tester.pump();
+            expect(actions.calls, ['generic:g1', 'sample:raw1']);
+            expect(tester.takeException(), isNull);
+          },
+        );
+      }
+
+      testWidgets('an incomplete suggestion shows the guess but no confirm', (
+        tester,
+      ) async {
+        final actions = FakeActions();
+        await pumpReview(tester, reviewApp(actions: actions, queue: [partial]));
+        final l = AppLocalizations.of(
+          tester.element(find.byType(ReviewScreen)),
+        );
+        expect(find.text(l.commonActionConfirm), findsNothing);
+        expect(find.text(l.ingestionReviewUnreadEnter), findsOneWidget);
+        expect(find.text(l.ingestionReviewGenLowConfidence), findsOneWidget);
+      });
+
+      testWidgets('a swipe on an incomplete suggestion saves nothing', (
+        tester,
+      ) async {
+        final actions = FakeActions();
+        await pumpReview(tester, reviewApp(actions: actions, queue: [partial]));
+        await tester.drag(find.byType(Dismissible), const Offset(500, 0));
+        await tester.pumpAndSettle();
+        expect(actions.calls, isEmpty);
+      });
     });
   });
 }

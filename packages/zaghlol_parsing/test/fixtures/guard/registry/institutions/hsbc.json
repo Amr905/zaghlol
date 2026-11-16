@@ -1,0 +1,36 @@
+{
+  "code": "hsbc",
+  "names": {
+    "ar": "إتش إس بي سي",
+    "en": "HSBC (synthetic Guard test copy)"
+  },
+  "country": "EG",
+  "defaultCurrency": "EGP",
+  "senders": [
+    {
+      "match": "regex",
+      "value": "^hsbc(?:[ ._-]?(?:eg|egy|egypt|bank))?$"
+    }
+  ],
+  "packages": [],
+  "walletCardNames": [],
+  "last4": [],
+  "drop": [],
+  "templates": [
+    {
+      "id": "hsbc.card_purchase.en",
+      "version": 1,
+      "lang": "en",
+      "channel": [
+        "sms"
+      ],
+      "event": "card_purchase",
+      "direction": "expense",
+      "baseConfidence": 0.9,
+      "pattern": "purchase of (?<cur>EGP) (?<amount>[\\d,.]+) at (?<merchant>.+?)(?:\\.|$)",
+      "currencyMap": {
+        "EGP": "EGP"
+      }
+    }
+  ]
+}

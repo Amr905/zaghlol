@@ -1,0 +1,1254 @@
+[
+ {
+  "id": "hsbc_used_for_usd",
+  "body": "Your Credit Card ending with * 3307 has been used for USD 12.99 on 10/11/2026 at NETFLIX* MONTHLY. Your available limit is EGP 45210.00",
+  "expect": {
+   "amount": "12.99",
+   "currency": "USD",
+   "direction": "expense",
+   "event": "purchase",
+   "last4": "3307",
+   "merchant": "NETFLIX* MONTHLY",
+   "date": "2026-11-10",
+   "ref": null
+  }
+ },
+ {
+  "id": "hsbc_reordered",
+  "body": "At SPINNEYS ZAYED your card ending 6612 was used for EGP 845.50 on 12/11/2026. Available limit EGP 30,100.00",
+  "expect": {
+   "amount": "845.50",
+   "currency": "EGP",
+   "direction": "expense",
+   "event": "purchase",
+   "last4": "6612",
+   "merchant": "SPINNEYS ZAYED",
+   "date": "2026-11-12",
+   "ref": null
+  }
+ },
+ {
+  "id": "hsbc_no_date",
+  "body": "Your Debit Card ending with *9021 has been used for EGP 1,999.00 at IKEA CFC. Your available balance is EGP 12,000.00",
+  "expect": {
+   "amount": "1999.00",
+   "currency": "EGP",
+   "direction": "expense",
+   "event": "purchase",
+   "last4": "9021",
+   "merchant": "IKEA CFC",
+   "date": null,
+   "ref": null
+  }
+ },
+ {
+  "id": "hsbc_named_date",
+  "body": "Your card xx4410 was charged EGP 320.00 at UBER TRIP on 09 Nov. Avl limit EGP 9,800.00",
+  "expect": {
+   "amount": "320.00",
+   "currency": "EGP",
+   "direction": "expense",
+   "event": "purchase",
+   "last4": "4410",
+   "merchant": "UBER TRIP",
+   "date": "2026-11-09",
+   "ref": null
+  }
+ },
+ {
+  "id": "hsbc_eur",
+  "body": "Card ending 7730 used for EUR 45.00 at BOOKING.COM on 2026-11-08. Available limit: EGP 51,000.00",
+  "expect": {
+   "amount": "45.00",
+   "currency": "EUR",
+   "direction": "expense",
+   "event": "purchase",
+   "last4": "7730",
+   "merchant": "BOOKING.COM",
+   "date": "2026-11-08",
+   "ref": null
+  }
+ },
+ {
+  "id": "hsbc_gbp_symbol",
+  "body": "Your card **2208 was used for £18.40 at AMAZON UK on 07/11/2026",
+  "expect": {
+   "amount": "18.40",
+   "currency": "GBP",
+   "direction": "expense",
+   "event": "purchase",
+   "last4": "2208",
+   "merchant": "AMAZON UK",
+   "date": "2026-11-07",
+   "ref": null
+  }
+ },
+ {
+  "id": "hsbc_usd_symbol_after",
+  "body": "Purchase of 29.99$ at APPLE.COM/BILL with card ending 5531 on 11/11",
+  "expect": {
+   "amount": "29.99",
+   "currency": "USD",
+   "direction": "expense",
+   "event": "purchase",
+   "last4": "5531",
+   "merchant": "APPLE.COM/BILL",
+   "date": "2026-11-11",
+   "ref": null
+  }
+ },
+ {
+  "id": "hsbc_refund",
+  "body": "A refund of EGP 450.00 from ZARA CITYSTARS was credited to your card ending 6612 on 13/11/2026",
+  "expect": {
+   "amount": "450.00",
+   "currency": "EGP",
+   "direction": "income",
+   "event": "refund",
+   "last4": "6612",
+   "merchant": "ZARA CITYSTARS",
+   "date": "2026-11-13",
+   "ref": null
+  }
+ },
+ {
+  "id": "hsbc_atm",
+  "body": "Cash withdrawal of EGP 2,000.00 from ATM using card ending 1180 on 12/11/2026. Avl Bal EGP 7,450.25",
+  "expect": {
+   "amount": "2000.00",
+   "currency": "EGP",
+   "direction": "expense",
+   "event": "withdrawal",
+   "last4": "1180",
+   "merchant": null,
+   "date": "2026-11-12",
+   "ref": null
+  }
+ },
+ {
+  "id": "hsbc_kwd",
+  "body": "Your card ending 4471 has been used for KWD 12.750 at ALSHAYA KUWAIT on 05/11/2026",
+  "expect": {
+   "amount": "12.750",
+   "currency": "KWD",
+   "direction": "expense",
+   "event": "purchase",
+   "last4": "4471",
+   "merchant": "ALSHAYA KUWAIT",
+   "date": "2026-11-05",
+   "ref": null
+  }
+ },
+ {
+  "id": "hsbc_aud_prefix",
+  "body": "Card ending 3390 charged A$25.00 at WOOLWORTHS on 06/11/2026",
+  "expect": {
+   "amount": "25.00",
+   "currency": "AUD",
+   "direction": "expense",
+   "event": "purchase",
+   "last4": "3390",
+   "merchant": "WOOLWORTHS",
+   "date": "2026-11-06",
+   "ref": null
+  }
+ },
+ {
+  "id": "hsbc_ref",
+  "body": "EGP 1,250.00 debited from your account ending 8120 for transfer to MOHAMED SAMIR. Ref: TRX88213409",
+  "expect": {
+   "amount": "1250.00",
+   "currency": "EGP",
+   "direction": "expense",
+   "event": "transfer",
+   "last4": "8120",
+   "merchant": "MOHAMED SAMIR",
+   "date": null,
+   "ref": "TRX88213409"
+  }
+ },
+ {
+  "id": "bm_en",
+  "body": "BM: Purchase of EGP 75.00 with card ****1093 at GOURMET EGYPT. Avl Bal EGP 15,120.50",
+  "expect": {
+   "amount": "75.00",
+   "currency": "EGP",
+   "direction": "expense",
+   "event": "purchase",
+   "last4": "1093",
+   "merchant": "GOURMET EGYPT",
+   "date": null,
+   "ref": null
+  }
+ },
+ {
+  "id": "cib_en",
+  "body": "Purchase of EGP 610.00 at UBER EG with Card ending 7741. Avl Bal: EGP 4,102.20.",
+  "expect": {
+   "amount": "610.00",
+   "currency": "EGP",
+   "direction": "expense",
+   "event": "purchase",
+   "last4": "7741",
+   "merchant": "UBER EG",
+   "date": null,
+   "ref": null
+  }
+ },
+ {
+  "id": "qnb_en",
+  "body": "QNB: Purchase of EGP 280.00 made on 12/11 with Card ****6620 at KFC NASR CITY. Avl Bal EGP 8,000.00",
+  "expect": {
+   "amount": "280.00",
+   "currency": "EGP",
+   "direction": "expense",
+   "event": "purchase",
+   "last4": "6620",
+   "merchant": "KFC NASR CITY",
+   "date": "2026-11-12",
+   "ref": null
+  }
+ },
+ {
+  "id": "bdc_en",
+  "body": "BDC: Purchase of EGP 133.50 at CARREFOUR MAADI EG 041 on 11/11 using card *2281. Avl Bal: EGP 1,000.00",
+  "expect": {
+   "amount": "133.50",
+   "currency": "EGP",
+   "direction": "expense",
+   "event": "purchase",
+   "last4": "2281",
+   "merchant": "CARREFOUR MAADI EG 041",
+   "date": "2026-11-11",
+   "ref": null
+  }
+ },
+ {
+  "id": "alex_en",
+  "body": "AlexBank: You paid EGP 95.00 at STARBUCKS using Card ending in 6190. Avl Bal EGP 1500.00",
+  "expect": {
+   "amount": "95.00",
+   "currency": "EGP",
+   "direction": "expense",
+   "event": "purchase",
+   "last4": "6190",
+   "merchant": "STARBUCKS",
+   "date": null,
+   "ref": null
+  }
+ },
+ {
+  "id": "aaib_en",
+  "body": "AAIB: A purchase of EGP 640.00 was made with Card ****3018 at SPINNEYS. Avl Bal: EGP 5000.00",
+  "expect": {
+   "amount": "640.00",
+   "currency": "EGP",
+   "direction": "expense",
+   "event": "purchase",
+   "last4": "3018",
+   "merchant": "SPINNEYS",
+   "date": null,
+   "ref": null
+  }
+ },
+ {
+  "id": "cae_en",
+  "body": "Credit Agricole: EGP 88.00 purchased at METRO MARKET using Card ****5521. Avl Bal EGP 5400.00",
+  "expect": {
+   "amount": "88.00",
+   "currency": "EGP",
+   "direction": "expense",
+   "event": "purchase",
+   "last4": "5521",
+   "merchant": "METRO MARKET",
+   "date": null,
+   "ref": null
+  }
+ },
+ {
+  "id": "adib_en",
+  "body": "ADIB: EGP 615.00 has been charged to your card ending 2210 at CARREFOUR. Avl bal EGP 4000.",
+  "expect": {
+   "amount": "615.00",
+   "currency": "EGP",
+   "direction": "expense",
+   "event": "purchase",
+   "last4": "2210",
+   "merchant": "CARREFOUR",
+   "date": null,
+   "ref": null
+  }
+ },
+ {
+  "id": "egbank_en",
+  "body": "EGBANK: Card **3047 used for EGP 205.00 at TALABAT EG on 12/11. Avl Bal: EGP 3,410.00",
+  "expect": {
+   "amount": "205.00",
+   "currency": "EGP",
+   "direction": "expense",
+   "event": "purchase",
+   "last4": "3047",
+   "merchant": "TALABAT EG",
+   "date": "2026-11-12",
+   "ref": null
+  }
+ },
+ {
+  "id": "aibk_en",
+  "body": "AIBK: Card ****7105 debited EGP 560.00 at RAYA MEGA STORE. Avl Bal: EGP 8,450.00",
+  "expect": {
+   "amount": "560.00",
+   "currency": "EGP",
+   "direction": "expense",
+   "event": null,
+   "last4": "7105",
+   "merchant": "RAYA MEGA STORE",
+   "date": null,
+   "ref": null
+  }
+ },
+ {
+  "id": "mashreq_en",
+  "body": "Mashreq: EGP 140.00 spent on Card ending 6033 at CAREEM EGYPT. Avl Bal: EGP 4,865.00",
+  "expect": {
+   "amount": "140.00",
+   "currency": "EGP",
+   "direction": "expense",
+   "event": "purchase",
+   "last4": "6033",
+   "merchant": "CAREEM EGYPT",
+   "date": null,
+   "ref": null
+  }
+ },
+ {
+  "id": "citi_en",
+  "body": "Citi Alert: Card ending 9188 charged EGP 1,480.00 at BOOKING.COM on 10/11. Avl Limit EGP 25,000.00",
+  "expect": {
+   "amount": "1480.00",
+   "currency": "EGP",
+   "direction": "expense",
+   "event": "purchase",
+   "last4": "9188",
+   "merchant": "BOOKING.COM",
+   "date": "2026-11-10",
+   "ref": null
+  }
+ },
+ {
+  "id": "blom_en",
+  "body": "BLOM: Purchase of EGP 230.00 on Card **2077 at VOX CINEMAS. Avl Bal EGP 3,775.00",
+  "expect": {
+   "amount": "230.00",
+   "currency": "EGP",
+   "direction": "expense",
+   "event": "purchase",
+   "last4": "2077",
+   "merchant": "VOX CINEMAS",
+   "date": null,
+   "ref": null
+  }
+ },
+ {
+  "id": "yalla_en",
+  "body": "Yalla: EGP 165.00 paid at FAWRY E-PAYMENT using Card *8814. Avl Bal EGP 1,340.00",
+  "expect": {
+   "amount": "165.00",
+   "currency": "EGP",
+   "direction": "expense",
+   "event": "purchase",
+   "last4": "8814",
+   "merchant": "FAWRY E-PAYMENT",
+   "date": null,
+   "ref": null
+  }
+ },
+ {
+  "id": "ipa_out_en",
+  "body": "InstaPay: You transferred EGP 1,300.00 to someone.fake@instapay from A/C *6305. Ref: 71820394455",
+  "expect": {
+   "amount": "1300.00",
+   "currency": "EGP",
+   "direction": "expense",
+   "event": "transfer",
+   "last4": "6305",
+   "merchant": null,
+   "date": null,
+   "ref": "71820394455"
+  }
+ },
+ {
+  "id": "ipa_mobile_en",
+  "body": "InstaPay: EGP 520.00 transferred to 01000000017 from Card *2290. Ref: IPN55501234",
+  "expect": {
+   "amount": "520.00",
+   "currency": "EGP",
+   "direction": "expense",
+   "event": "transfer",
+   "last4": "2290",
+   "merchant": null,
+   "date": null,
+   "ref": "IPN55501234"
+  }
+ },
+ {
+  "id": "ipa_in_en",
+  "body": "InstaPay: You received EGP 3,600.00 from NOUR HASSAN into A/C *2290. Ref: 71820399001",
+  "expect": {
+   "amount": "3600.00",
+   "currency": "EGP",
+   "direction": "income",
+   "event": "transfer",
+   "last4": "2290",
+   "merchant": "NOUR HASSAN",
+   "date": null,
+   "ref": "71820399001"
+  }
+ },
+ {
+  "id": "ipa_refund_en",
+  "body": "InstaPay: EGP 810.00 refunded to A/C *6305. Avl Bal EGP 5,200.00",
+  "expect": {
+   "amount": "810.00",
+   "currency": "EGP",
+   "direction": "income",
+   "event": "refund",
+   "last4": "6305",
+   "merchant": null,
+   "date": null,
+   "ref": null
+  }
+ },
+ {
+  "id": "vf_en",
+  "body": "Vodafone Cash: EGP 510.00 transferred to 01000000023. Avl Bal: EGP 1,240.00",
+  "expect": {
+   "amount": "510.00",
+   "currency": "EGP",
+   "direction": "expense",
+   "event": "transfer",
+   "last4": null,
+   "merchant": null,
+   "date": null,
+   "ref": null
+  }
+ },
+ {
+  "id": "valu_en",
+  "body": "valU: You paid EGP 1,250.00 at TRADELINE. Avl limit: EGP 20,000.00",
+  "expect": {
+   "amount": "1250.00",
+   "currency": "EGP",
+   "direction": "expense",
+   "event": null,
+   "last4": null,
+   "merchant": "TRADELINE",
+   "date": null,
+   "ref": null
+  }
+ },
+ {
+  "id": "souhoola_en",
+  "body": "Souhoola: Purchase of EGP 870.00 at B.TECH. Avl limit EGP 15,000.00",
+  "expect": {
+   "amount": "870.00",
+   "currency": "EGP",
+   "direction": "expense",
+   "event": "purchase",
+   "last4": null,
+   "merchant": "B.TECH",
+   "date": null,
+   "ref": null
+  }
+ },
+ {
+  "id": "salary_en",
+  "body": "Your account ending 4402 has been credited with EGP 18,500.00 SALARY on 01/11/2026. Avl Bal EGP 22,300.00",
+  "expect": {
+   "amount": "18500.00",
+   "currency": "EGP",
+   "direction": "income",
+   "event": null,
+   "last4": "4402",
+   "merchant": null,
+   "date": "2026-11-01",
+   "ref": null
+  }
+ },
+ {
+  "id": "le_after",
+  "body": "You have withdrawn 1,500 LE from ATM 12 Dokki using card 7712",
+  "expect": {
+   "amount": "1500.00",
+   "currency": "EGP",
+   "direction": "expense",
+   "event": "withdrawal",
+   "last4": "7712",
+   "merchant": null,
+   "date": null,
+   "ref": null
+  }
+ },
+ {
+  "id": "usd_word",
+  "body": "Your card ending 2290 was charged 15 dollars at SPOTIFY on 03/11/2026",
+  "expect": {
+   "amount": "15.00",
+   "currency": "USD",
+   "direction": "expense",
+   "event": "purchase",
+   "last4": "2290",
+   "merchant": "SPOTIFY",
+   "date": "2026-11-03",
+   "ref": null
+  }
+ },
+ {
+  "id": "sar_en",
+  "body": "Card xx8812 purchase SAR 230.00 at JARIR BOOKSTORE RIYADH on 04/11/2026",
+  "expect": {
+   "amount": "230.00",
+   "currency": "SAR",
+   "direction": "expense",
+   "event": "purchase",
+   "last4": "8812",
+   "merchant": "JARIR BOOKSTORE RIYADH",
+   "date": "2026-11-04",
+   "ref": null
+  }
+ },
+ {
+  "id": "aed_en",
+  "body": "Purchase AED 99.00 at NOON.COM with card ending 3109, 2026-11-02",
+  "expect": {
+   "amount": "99.00",
+   "currency": "AED",
+   "direction": "expense",
+   "event": "purchase",
+   "last4": "3109",
+   "merchant": "NOON.COM",
+   "date": "2026-11-02",
+   "ref": null
+  }
+ },
+ {
+  "id": "missing_last4_en",
+  "body": "EGP 60.00 was debited at SHELL OUT 22 on 13/11/2026",
+  "expect": {
+   "amount": "60.00",
+   "currency": "EGP",
+   "direction": "expense",
+   "event": null,
+   "last4": null,
+   "merchant": "SHELL OUT",
+   "date": "2026-11-13",
+   "ref": null
+  }
+ },
+ {
+  "id": "missing_merchant_en",
+  "body": "Your card ending 5590 was debited EGP 420.00 on 13/11/2026",
+  "expect": {
+   "amount": "420.00",
+   "currency": "EGP",
+   "direction": "expense",
+   "event": null,
+   "last4": "5590",
+   "merchant": null,
+   "date": "2026-11-13",
+   "ref": null
+  }
+ },
+ {
+  "id": "no_direction_en",
+  "body": "Card **4010 EGP 75.00 SEOUDI MARKET 13/11/2026",
+  "expect": {
+   "amount": "75.00",
+   "currency": "EGP",
+   "direction": null,
+   "event": null,
+   "last4": "4010",
+   "merchant": null,
+   "date": "2026-11-13",
+   "ref": null
+  }
+ },
+ {
+  "id": "bm_ar",
+  "body": "بنك مصر: عملية شراء بمبلغ 55.00 جم باستخدام بطاقة ****1093 لدى GOURMET. الرصيد المتاح 15200.50 جم",
+  "expect": {
+   "amount": "55.00",
+   "currency": "EGP",
+   "direction": "expense",
+   "event": "purchase",
+   "last4": "1093",
+   "merchant": "GOURMET",
+   "date": null,
+   "ref": null
+  }
+ },
+ {
+  "id": "cib_ar",
+  "body": "عملية شراء بمبلغ 460.00 جم لدى UBER EG ببطاقة ينتهي رقمها بـ 7741. الرصيد 4500.20 جم",
+  "expect": {
+   "amount": "460.00",
+   "currency": "EGP",
+   "direction": "expense",
+   "event": "purchase",
+   "last4": "7741",
+   "merchant": "UBER EG",
+   "date": null,
+   "ref": null
+  }
+ },
+ {
+  "id": "qnb_ar",
+  "body": "QNB: تم تنفيذ عملية شراء بقيمة 310.00 جم ببطاقة ****6620 لدى MCDONALDS. الرصيد المتاح 8100.00 جم",
+  "expect": {
+   "amount": "310.00",
+   "currency": "EGP",
+   "direction": "expense",
+   "event": "purchase",
+   "last4": "6620",
+   "merchant": "MCDONALDS",
+   "date": null,
+   "ref": null
+  }
+ },
+ {
+  "id": "bdc_ar",
+  "body": "بنك القاهرة: تم خصم 155.00 جم لعملية شراء لدى كارفور ببطاقة *2281. الرصيد المتاح 1000.00 جم",
+  "expect": {
+   "amount": "155.00",
+   "currency": "EGP",
+   "direction": "expense",
+   "event": "purchase",
+   "last4": "2281",
+   "merchant": "كارفور",
+   "date": null,
+   "ref": null
+  }
+ },
+ {
+  "id": "alex_ar",
+  "body": "تم دفع 125.00 جم لدى ستاربكس باستخدام بطاقة ينتهي رقمها بـ 6190. الرصيد 1500.00 جم",
+  "expect": {
+   "amount": "125.00",
+   "currency": "EGP",
+   "direction": "expense",
+   "event": "purchase",
+   "last4": "6190",
+   "merchant": "ستاربكس",
+   "date": null,
+   "ref": null
+  }
+ },
+ {
+  "id": "adib_ar",
+  "body": "تم خصم 605.00 جم من بطاقتك المنتهية بـ 2210 لدى كارفور. الرصيد 4000 جم",
+  "expect": {
+   "amount": "605.00",
+   "currency": "EGP",
+   "direction": "expense",
+   "event": null,
+   "last4": "2210",
+   "merchant": "كارفور",
+   "date": null,
+   "ref": null
+  }
+ },
+ {
+  "id": "hdb_ar",
+  "body": "تم خصم 325.00 جم ببطاقة **4012 لدى سعودي ماركت. الرصيد المتاح 6200.00 جم",
+  "expect": {
+   "amount": "325.00",
+   "currency": "EGP",
+   "direction": "expense",
+   "event": null,
+   "last4": "4012",
+   "merchant": "سعودي ماركت",
+   "date": null,
+   "ref": null
+  }
+ },
+ {
+  "id": "egbank_ar",
+  "body": "تم استخدام بطاقة **3047 بمبلغ 195.00 جم لدى TALABAT EG. الرصيد المتاح 3410.00 جم",
+  "expect": {
+   "amount": "195.00",
+   "currency": "EGP",
+   "direction": "expense",
+   "event": "purchase",
+   "last4": "3047",
+   "merchant": "TALABAT EG",
+   "date": null,
+   "ref": null
+  }
+ },
+ {
+  "id": "mashreq_ar",
+  "body": "تم خصم 135.00 جم ببطاقة تنتهي بـ 6033 لدى CAREEM EGYPT. الرصيد المتاح 4865.00 جم",
+  "expect": {
+   "amount": "135.00",
+   "currency": "EGP",
+   "direction": "expense",
+   "event": null,
+   "last4": "6033",
+   "merchant": "CAREEM EGYPT",
+   "date": null,
+   "ref": null
+  }
+ },
+ {
+  "id": "hsbc_ar",
+  "body": "إتش إس بي سي: عملية شراء بمبلغ 855.00 جم لدى زارا ببطاقة 5581. الحد المتاح 10000.00 جم",
+  "expect": {
+   "amount": "855.00",
+   "currency": "EGP",
+   "direction": "expense",
+   "event": "purchase",
+   "last4": "5581",
+   "merchant": "زارا",
+   "date": null,
+   "ref": null
+  }
+ },
+ {
+  "id": "ar_digits",
+  "body": "تم خصم ٢٬٤٥٠٫٧٥ جنيه من بطاقتك المنتهية برقم ٧٧٨٨ لدى بي تك بتاريخ ١٢/١١/٢٠٢٦",
+  "expect": {
+   "amount": "2450.75",
+   "currency": "EGP",
+   "direction": "expense",
+   "event": null,
+   "last4": "7788",
+   "merchant": "بي تك",
+   "date": "2026-11-12",
+   "ref": null
+  }
+ },
+ {
+  "id": "ar_digits_no_balance",
+  "body": "شراء بمبلغ ٩٩٫٥٠ ج.م لدى طلبات ببطاقة ٣٣٤٤",
+  "expect": {
+   "amount": "99.50",
+   "currency": "EGP",
+   "direction": "expense",
+   "event": "purchase",
+   "last4": "3344",
+   "merchant": "طلبات",
+   "date": null,
+   "ref": null
+  }
+ },
+ {
+  "id": "ar_in_salary",
+  "body": "تم ايداع راتب بمبلغ 15000.00 جم في حسابك رقم 4402 بتاريخ 01/11/2026",
+  "expect": {
+   "amount": "15000.00",
+   "currency": "EGP",
+   "direction": "income",
+   "event": null,
+   "last4": "4402",
+   "merchant": null,
+   "date": "2026-11-01",
+   "ref": null
+  }
+ },
+ {
+  "id": "ar_ipa_out",
+  "body": "إنستاباي: تم تحويل مبلغ 1300.00 جم بنجاح إلى someone.fake@instapay من حسابكم *6305. المرجع: 71820394455",
+  "expect": {
+   "amount": "1300.00",
+   "currency": "EGP",
+   "direction": "expense",
+   "event": "transfer",
+   "last4": "6305",
+   "merchant": null,
+   "date": null,
+   "ref": "71820394455"
+  }
+ },
+ {
+  "id": "ar_ipa_in",
+  "body": "إنستاباي: تم إضافة تحويل لحظي بمبلغ 3600.00 جم إلى حسابكم *2290 من نور حسن. المرجع: 71820399001",
+  "expect": {
+   "amount": "3600.00",
+   "currency": "EGP",
+   "direction": "income",
+   "event": "transfer",
+   "last4": "2290",
+   "merchant": "نور حسن",
+   "date": null,
+   "ref": "71820399001"
+  }
+ },
+ {
+  "id": "ar_ipa_refund",
+  "body": "إنستاباي: تم رد 810.00 جم لحسابكم *6305. الرصيد المتاح 5200.00 جم",
+  "expect": {
+   "amount": "810.00",
+   "currency": "EGP",
+   "direction": "income",
+   "event": "refund",
+   "last4": "6305",
+   "merchant": null,
+   "date": null,
+   "ref": null
+  }
+ },
+ {
+  "id": "ar_vf",
+  "body": "فودافون كاش: تم تحويل 510.00 جنيه إلى 01000000023. رصيدك الحالي 1240.00 جنيه",
+  "expect": {
+   "amount": "510.00",
+   "currency": "EGP",
+   "direction": "expense",
+   "event": "transfer",
+   "last4": null,
+   "merchant": null,
+   "date": null,
+   "ref": null
+  }
+ },
+ {
+  "id": "ar_orange",
+  "body": "أورنج كاش: تم دفع 185.00 جنيه لدى FAWRY. الرصيد المتاح 820.00 جنيه",
+  "expect": {
+   "amount": "185.00",
+   "currency": "EGP",
+   "direction": "expense",
+   "event": null,
+   "last4": null,
+   "merchant": "FAWRY",
+   "date": null,
+   "ref": null
+  }
+ },
+ {
+  "id": "ar_atm",
+  "body": "تم سحب 1000 جم من ماكينة الصراف بالبطاقة رقم 1180 في 12/11/2026",
+  "expect": {
+   "amount": "1000.00",
+   "currency": "EGP",
+   "direction": "expense",
+   "event": "withdrawal",
+   "last4": "1180",
+   "merchant": null,
+   "date": "2026-11-12",
+   "ref": null
+  }
+ },
+ {
+  "id": "ar_usd",
+  "body": "تم خصم 20.00 دولار من بطاقتك **2290 لدى SPOTIFY",
+  "expect": {
+   "amount": "20.00",
+   "currency": "USD",
+   "direction": "expense",
+   "event": null,
+   "last4": "2290",
+   "merchant": "SPOTIFY",
+   "date": null,
+   "ref": null
+  }
+ },
+ {
+  "id": "ar_reordered",
+  "body": "لدى كازيون تم شراء بقيمة 115.00 جم ببطاقة *9910",
+  "expect": {
+   "amount": "115.00",
+   "currency": "EGP",
+   "direction": "expense",
+   "event": "purchase",
+   "last4": "9910",
+   "merchant": "كازيون",
+   "date": null,
+   "ref": null
+  }
+ },
+ {
+  "id": "ar_tatweel",
+  "body": "تـم خـصـم 240.00 جـم لدى ماي فوري ببطاقة *2019",
+  "expect": {
+   "amount": "240.00",
+   "currency": "EGP",
+   "direction": "expense",
+   "event": null,
+   "last4": "2019",
+   "merchant": "ماي فوري",
+   "date": null,
+   "ref": null
+  }
+ },
+ {
+  "id": "ar_currency_before",
+  "body": "تم خصم جم 70.00 لدى اوبر ببطاقة رقم 3355",
+  "expect": {
+   "amount": "70.00",
+   "currency": "EGP",
+   "direction": "expense",
+   "event": null,
+   "last4": "3355",
+   "merchant": "اوبر",
+   "date": null,
+   "ref": null
+  }
+ },
+ {
+  "id": "ar_no_merchant",
+  "body": "تم خصم 300.00 جم من حسابك رقم 8120 بتاريخ 13/11/2026",
+  "expect": {
+   "amount": "300.00",
+   "currency": "EGP",
+   "direction": "expense",
+   "event": null,
+   "last4": "8120",
+   "merchant": null,
+   "date": "2026-11-13",
+   "ref": null
+  }
+ },
+ {
+  "id": "ar_in_from",
+  "body": "استلمت 750 جنيه من احمد سمير على محفظتك",
+  "expect": {
+   "amount": "750.00",
+   "currency": "EGP",
+   "direction": "income",
+   "event": null,
+   "last4": null,
+   "merchant": "احمد سمير",
+   "date": null,
+   "ref": null
+  }
+ },
+ {
+  "id": "ar_named_month",
+  "body": "تم خصم 99 جم لدى نتفليكس ببطاقة 4410 يوم 9 نوفمبر",
+  "expect": {
+   "amount": "99.00",
+   "currency": "EGP",
+   "direction": "expense",
+   "event": null,
+   "last4": "4410",
+   "merchant": "نتفليكس",
+   "date": "2026-11-09",
+   "ref": null
+  }
+ },
+ {
+  "id": "ar_short_year",
+  "body": "تم شراء بمبلغ 45.00 جم لدى كوستا ببطاقة 3344 بتاريخ 08/11/26",
+  "expect": {
+   "amount": "45.00",
+   "currency": "EGP",
+   "direction": "expense",
+   "event": "purchase",
+   "last4": "3344",
+   "merchant": "كوستا",
+   "date": "2026-11-08",
+   "ref": null
+  }
+ },
+ {
+  "id": "ho_dear_customer",
+  "split": "holdout",
+  "body": "Dear Customer, your credit card no. xxxx-1278 was used to pay EGP 2,340.00 to VODAFONE EGYPT on 10-11-2026 at 14:22.",
+  "expect": {
+   "amount": "2340.00",
+   "currency": "EGP",
+   "direction": "expense",
+   "event": null,
+   "last4": "1278",
+   "merchant": "VODAFONE EGYPT",
+   "date": "2026-11-10",
+   "ref": null
+  }
+ },
+ {
+  "id": "ho_txn_alert",
+  "split": "holdout",
+  "body": "Txn Alert: EGP 89.90 POS purchase at SHELL OUT 12 GIZA, card 5544, 11/11/2026 09:15. Bal EGP 1,020.10",
+  "expect": {
+   "amount": "89.90",
+   "currency": "EGP",
+   "direction": "expense",
+   "event": "purchase",
+   "last4": "5544",
+   "merchant": "SHELL OUT",
+   "date": "2026-11-11",
+   "ref": null
+  }
+ },
+ {
+  "id": "ho_debit_acct",
+  "split": "holdout",
+  "body": "Acct XX9302 debited by EGP 500.00 on 12-Nov-2026 for bill payment. Avl bal EGP 2,431.77",
+  "expect": {
+   "amount": "500.00",
+   "currency": "EGP",
+   "direction": "expense",
+   "event": null,
+   "last4": "9302",
+   "merchant": null,
+   "date": "2026-11-12",
+   "ref": null
+  }
+ },
+ {
+  "id": "ho_credit_acct",
+  "split": "holdout",
+  "body": "Acct XX9302 credited by EGP 7,250.00 on 01-Nov-2026. Info: TRANSFER FROM OMAR KHALED",
+  "expect": {
+   "amount": "7250.00",
+   "currency": "EGP",
+   "direction": "income",
+   "event": "transfer",
+   "last4": "9302",
+   "merchant": "OMAR KHALED",
+   "date": "2026-11-01",
+   "ref": null
+  }
+ },
+ {
+  "id": "ho_usd_online",
+  "split": "holdout",
+  "body": "USD 4.99 charged on card ending 0912 at GOOGLE *YOUTUBE PREMIUM 08/11",
+  "expect": {
+   "amount": "4.99",
+   "currency": "USD",
+   "direction": "expense",
+   "event": "purchase",
+   "last4": "0912",
+   "merchant": "GOOGLE *YOUTUBE PREMIUM",
+   "date": "2026-11-08",
+   "ref": null
+  }
+ },
+ {
+  "id": "ho_ar_wallet_pay",
+  "split": "holdout",
+  "body": "تم دفع مبلغ 45 جنيه لشركة فوري بنجاح. رصيدك 312.50 جنيه",
+  "expect": {
+   "amount": "45.00",
+   "currency": "EGP",
+   "direction": "expense",
+   "event": null,
+   "last4": null,
+   "merchant": null,
+   "date": null,
+   "ref": null
+  }
+ },
+ {
+  "id": "ho_ar_purchase_order",
+  "split": "holdout",
+  "body": "بطاقتك رقم 6721 تم استخدامها في شراء بقيمة 1,150.00 ج.م من نون بتاريخ 07/11/2026",
+  "expect": {
+   "amount": "1150.00",
+   "currency": "EGP",
+   "direction": "expense",
+   "event": "purchase",
+   "last4": "6721",
+   "merchant": "نون",
+   "date": "2026-11-07",
+   "ref": null
+  }
+ },
+ {
+  "id": "ho_ar_transfer_in",
+  "split": "holdout",
+  "body": "تم استلام تحويل بمبلغ 2000 جم من محمد علي على حسابك المنتهي بـ 3390",
+  "expect": {
+   "amount": "2000.00",
+   "currency": "EGP",
+   "direction": "income",
+   "event": "transfer",
+   "last4": "3390",
+   "merchant": "محمد علي",
+   "date": null,
+   "ref": null
+  }
+ },
+ {
+  "id": "ho_ar_atm_digits",
+  "split": "holdout",
+  "body": "سحب نقدي ٣٠٠٠ جم من ماكينة الصراف ببطاقة **٥٥٤١ يوم ١٠/١١",
+  "expect": {
+   "amount": "3000.00",
+   "currency": "EGP",
+   "direction": "expense",
+   "event": "withdrawal",
+   "last4": "5541",
+   "merchant": null,
+   "date": "2026-11-10",
+   "ref": null
+  }
+ },
+ {
+  "id": "ho_en_refund_reversal",
+  "split": "holdout",
+  "body": "Reversal: EGP 120.00 credited back to your card ending 2203 from TALABAT on 12/11/2026",
+  "expect": {
+   "amount": "120.00",
+   "currency": "EGP",
+   "direction": "income",
+   "event": "refund",
+   "last4": "2203",
+   "merchant": "TALABAT",
+   "date": "2026-11-12",
+   "ref": null
+  }
+ },
+ {
+  "id": "ho_eur_symbol",
+  "split": "holdout",
+  "body": "€12.50 spent at LIDL BERLIN with card *7743 on 3 Nov 2026",
+  "expect": {
+   "amount": "12.50",
+   "currency": "EUR",
+   "direction": "expense",
+   "event": "purchase",
+   "last4": "7743",
+   "merchant": "LIDL BERLIN",
+   "date": "2026-11-03",
+   "ref": null
+  }
+ },
+ {
+  "id": "ho_sar_after",
+  "split": "holdout",
+  "body": "Your Mada card 4455 purchase 85.00 SAR at PANDA on 2026-11-06",
+  "expect": {
+   "amount": "85.00",
+   "currency": "SAR",
+   "direction": "expense",
+   "event": "purchase",
+   "last4": "4455",
+   "merchant": "PANDA",
+   "date": "2026-11-06",
+   "ref": null
+  }
+ },
+ {
+  "id": "ho_le_word",
+  "split": "holdout",
+  "body": "Paid 250 LE to CAREEM via card 8890",
+  "expect": {
+   "amount": "250.00",
+   "currency": "EGP",
+   "direction": "expense",
+   "event": null,
+   "last4": "8890",
+   "merchant": "CAREEM",
+   "date": null,
+   "ref": null
+  }
+ },
+ {
+  "id": "ho_bill_ref",
+  "split": "holdout",
+  "body": "Bill payment of EGP 410.00 to WE INTERNET from account 1199 succeeded. Ref No. 99812004",
+  "expect": {
+   "amount": "410.00",
+   "currency": "EGP",
+   "direction": "expense",
+   "event": null,
+   "last4": "1199",
+   "merchant": "WE INTERNET",
+   "date": null,
+   "ref": "99812004"
+  }
+ },
+ {
+  "id": "ho_no_last4_no_merchant",
+  "split": "holdout",
+  "body": "EGP 1,000.00 has been withdrawn from your account",
+  "expect": {
+   "amount": "1000.00",
+   "currency": "EGP",
+   "direction": "expense",
+   "event": "withdrawal",
+   "last4": null,
+   "merchant": null,
+   "date": null,
+   "ref": null
+  }
+ },
+ {
+  "id": "ho_two_amounts_fee",
+  "split": "holdout",
+  "body": "Transfer of EGP 3,000.00 to account 4410 completed. Fee EGP 5.00",
+  "expect": {
+   "amount": "3000.00",
+   "currency": "EGP",
+   "direction": "expense",
+   "event": "transfer",
+   "last4": "4410",
+   "merchant": null,
+   "date": null,
+   "ref": null
+  }
+ },
+ {
+  "id": "ho_ar_mixed_lang",
+  "split": "holdout",
+  "body": "تم خصم EGP 64.00 من كارت 2217 لدى UBER",
+  "expect": {
+   "amount": "64.00",
+   "currency": "EGP",
+   "direction": "expense",
+   "event": null,
+   "last4": "2217",
+   "merchant": "UBER",
+   "date": null,
+   "ref": null
+  }
+ },
+ {
+  "id": "ho_bnpl",
+  "split": "holdout",
+  "body": "Sympl: installment of EGP 650.00 paid for ZARA order. Remaining limit EGP 9,350.00",
+  "expect": {
+   "amount": "650.00",
+   "currency": "EGP",
+   "direction": "expense",
+   "event": null,
+   "last4": null,
+   "merchant": null,
+   "date": null,
+   "ref": null
+  }
+ },
+ {
+  "id": "ho_hsbc_jod",
+  "split": "holdout",
+  "body": "Your Credit Card ending with * 6604 has been used for JOD 7.250 on 05/11/2026 at CARREFOUR AMMAN. Your available limit is EGP 40000.00",
+  "expect": {
+   "amount": "7.250",
+   "currency": "JOD",
+   "direction": "expense",
+   "event": "purchase",
+   "last4": "6604",
+   "merchant": "CARREFOUR AMMAN",
+   "date": "2026-11-05",
+   "ref": null
+  }
+ },
+ {
+  "id": "ho_salary_ar",
+  "split": "holdout",
+  "body": "تم إيداع مرتب شهر نوفمبر بمبلغ 21,500.00 جم في حسابك 7781",
+  "expect": {
+   "amount": "21500.00",
+   "currency": "EGP",
+   "direction": "income",
+   "event": null,
+   "last4": "7781",
+   "merchant": null,
+   "date": null,
+   "ref": null
+  }
+ }
+]

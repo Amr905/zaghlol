@@ -46,6 +46,11 @@ final class ManualTxnInput {
     required this.tzOffsetMin,
     this.merchant,
     this.categoryId,
+    this.source = 'manual',
+    this.categorySource,
+    this.merchantNorm,
+    this.catalogMerchantId,
+    this.allowForeignCurrency = false,
   });
 
   final String accountId;
@@ -59,6 +64,21 @@ final class ManualTxnInput {
   final int tzOffsetMin;
   final String? merchant;
   final String? categoryId;
+
+  /// Stored `transactions.source`: `manual` for typed input; the message's
+  /// channel (`sms`, `notification`, ...) when the user confirmed a
+  /// prefilled generic suggestion as read.
+  final String source;
+
+  /// Stored category source; null means `user` with a category, else `none`.
+  final String? categorySource;
+  final String? merchantNorm;
+  final int? catalogMerchantId;
+
+  /// A message read in a currency other than the card's (a USD purchase on
+  /// an EGP card) is stored as read, like ingest does; typed input keeps
+  /// the account's currency.
+  final bool allowForeignCurrency;
 }
 
 /// Outcome of a resolve call. [applied] is false when another actor had
@@ -128,7 +148,9 @@ class ReviewRepository {
       final acc = await (_db.select(
         _db.accounts,
       )..where((a) => a.id.equals(input.accountId))).getSingleOrNull();
-      if (acc == null || acc.defaultCurrency != input.amount.currency.code) {
+      if (acc == null ||
+          (!input.allowForeignCurrency &&
+              acc.defaultCurrency != input.amount.currency.code)) {
         // Rolls the resolve back: the transaction wrapper sees the throw.
         throw ReviewException(ReviewException.invalid);
       }
@@ -142,15 +164,19 @@ class ReviewRepository {
               id: id,
               accountId: input.accountId,
               rawMessageId: Value(item.rawMessageId),
-              source: 'manual',
+              source: input.source,
               direction: input.direction,
               amountMinor: stored.minor,
               currency: stored.currency,
               occurredAt: input.occurredAt.toUtc().millisecondsSinceEpoch,
               occurredTzOffsetMin: input.tzOffsetMin,
               merchantRaw: Value(input.merchant),
+              merchantNorm: Value(input.merchantNorm),
+              catalogMerchantId: Value(input.catalogMerchantId),
               categoryId: Value(input.categoryId),
-              categorySource: input.categoryId == null ? 'none' : 'user',
+              categorySource:
+                  input.categorySource ??
+                  (input.categoryId == null ? 'none' : 'user'),
               isUserVerified: const Value(1),
               createdAt: now,
               updatedAt: now,

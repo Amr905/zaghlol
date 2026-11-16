@@ -1,4 +1,5 @@
 import '../normalize/text_normalizer.dart';
+import '../pipeline/parse_result.dart' show GenericEvent;
 
 /// Keyword dictionaries of the generic parser (parsing-engine §7).
 ///
@@ -26,6 +27,12 @@ final List<String> expenseKeywords = _fold(const [
   'pos',
   'used for',
   'has been used',
+  'was used',
+  'withdrew',
+  'deducted',
+  'you transferred',
+  'transferred to',
+  'cash withdrawal',
   'خصم',
   'مخصوم',
   'سحب',
@@ -40,6 +47,8 @@ final List<String> expenseKeywords = _fold(const [
   'خصمنا',
   'قمت بارسال',
   'ارسلت الي',
+  'تم تحويل',
+  'سداد',
 ]);
 
 /// Expense keywords that flip meaning when the object is the reader
@@ -52,6 +61,7 @@ final Map<String, List<String>> addressedToReaderSuffixes = {
     'paid': [' you', ' لك', ' اليك'],
     'charged': [' you'],
     'sent to': [' you'],
+    'transferred to': [' you', ' your'],
     'دفع': [' لك', ' اليك'],
     'ارسلت الي': ['ك'],
   }.entries)
@@ -81,6 +91,93 @@ final List<String> incomeKeywords = _fold(const [
   'استرداد',
   'مرتجع',
   'كاش باك',
+  'transferred to your',
+  'credited to your',
+  'returned',
+  'تم رد',
+  'رد مبلغ',
+  'الى حسابك',
+  'لحسابك',
+]);
+
+/// Words that name the kind of transaction (FR-PAR-13 event hint). Checked
+/// in this order; the first kind with a keyword within [genericEventWindow]
+/// characters of the amount wins. A hint only, never a direction.
+final List<(GenericEvent, List<String>)> eventKeywords = [
+  (
+    GenericEvent.refund,
+    _fold(const [
+      'refund',
+      'refunded',
+      'reversal',
+      'reversed',
+      'returned',
+      'استرداد',
+      'مرتجع',
+      'تم رد',
+      'رد مبلغ',
+    ]),
+  ),
+  (
+    GenericEvent.withdrawal,
+    _fold(const [
+      'withdrawal',
+      'withdrawn',
+      'withdrew',
+      'atm',
+      'cash withdrawal',
+      'سحب',
+      'صراف',
+    ]),
+  ),
+  (
+    GenericEvent.transfer,
+    _fold(const [
+      'transfer',
+      'transferred',
+      'you sent',
+      'sent to',
+      'instapay',
+      'ipn',
+      'تحويل',
+      'قمت بارسال',
+      'ارسلت الي',
+      'انستاباي',
+    ]),
+  ),
+  (
+    GenericEvent.purchase,
+    _fold(const [
+      'purchase',
+      'purchased',
+      'pos',
+      'spent',
+      'used for',
+      'has been used',
+      'was used',
+      'charged',
+      'paid at',
+      'شراء',
+      'مشتريات',
+      'استخدام',
+    ]),
+  ),
+];
+
+/// Characters around the amount searched for an event keyword.
+const int genericEventWindow = 48;
+
+/// Words that point at the transaction amount without naming a direction
+/// (`transfer of`, `بمبلغ`): they help pick the amount among several.
+final List<String> amountCueKeywords = _fold(const [
+  'transfer',
+  'transferred',
+  'amount',
+  'تحويل',
+  'بمبلغ',
+  'بقيمه',
+  'مبلغ',
+  'قيمه',
 ]);
 
 /// Words that mean the attempt failed: a failed attempt is not spend.
@@ -103,14 +200,43 @@ final List<String> balanceKeywords = _fold(const [
   'balance',
   'avail',
   'limit',
+  'outstanding',
   'رصيد',
   'متاح',
   'الحد',
+  'المستحق',
+]);
+
+/// Short balance words matched only as whole words (`Avl Bal: EGP 10`), so
+/// `global` or `total due` elsewhere does not hit.
+final List<String> balanceWholeWords = _fold(const [
+  'bal',
+  'avl',
+  'bln',
+  'due',
+  'minimum',
 ]);
 
 /// Words that introduce the merchant or the other party.
 final Set<String> merchantMarkers = Set.unmodifiable(
-  _fold(const ['at', 'to', 'from', 'لدى', 'عند', 'الى', 'من']),
+  _fold(const [
+    'at',
+    'to',
+    'from',
+    'merchant',
+    'لدى',
+    'عند',
+    'الى',
+    'من',
+    'في',
+    'التاجر',
+  ]),
+);
+
+/// Markers that name a merchant rather than any other party: a span after
+/// one of them scores higher.
+final Set<String> strongMerchantMarkers = Set.unmodifiable(
+  _fold(const ['at', 'merchant', 'لدى', 'عند', 'التاجر']),
 );
 
 /// Words that end a merchant span (and never start one).
@@ -189,6 +315,33 @@ final Set<String> merchantStopWords = Set.unmodifiable({
     'تم',
     'علي',
     'على',
+    'into',
+    'a/c',
+    'avl',
+    'bal',
+    'limit',
+    'made',
+    'via',
+    'المرجع',
+    'مرجع',
+    'التاريخ',
+    'لحسابك',
+    'لحسابكم',
+    'حسابكم',
+    'بطاقتكم',
+    'الحالي',
+    'كارت',
+    'بكارت',
+    'البطاقه',
+    'ref',
+    'ref.',
+    'reference',
+    'رصيدك',
+    'ماكينه',
+    'الصراف',
+    'صراف',
+    'بالبطاقه',
+    'بالكارت',
   ]),
 });
 
@@ -202,18 +355,26 @@ final Map<String, String> currencyWords = Map.unmodifiable({
     'le': 'EGP',
     'l.e': 'EGP',
     'جنيه مصري': 'EGP',
+    'جنيه استرليني': 'GBP',
+    'استرليني': 'GBP',
+    'pound sterling': 'GBP',
+    'جنيهات': 'EGP',
     'جنيها': 'EGP',
+    'ج م': 'EGP',
     'جنيه': 'EGP',
     'ج.م': 'EGP',
     'جم': 'EGP',
     'dollar': 'USD',
     'dollars': 'USD',
+    'دولار امريكي': 'USD',
     'دولار': 'USD',
     'euro': 'EUR',
     'euros': 'EUR',
     'يورو': 'EUR',
     'ريال سعودي': 'SAR',
     'ر.س': 'SAR',
+    'ريال قطري': 'QAR',
+    'دينار اردني': 'JOD',
     'درهم اماراتي': 'AED',
     'درهم': 'AED',
     'د.ا': 'AED',
@@ -222,3 +383,19 @@ final Map<String, String> currencyWords = Map.unmodifiable({
   }.entries)
     foldKey(e.key): e.value,
 });
+
+/// Letter prefixes before `$` or `£` (folded, lowercase) and the currency
+/// they make (batch 25: `A$` is never USD). A letter prefix not listed here
+/// makes the symbol unreadable, so no currency is guessed.
+const Map<String, String> prefixedSymbols = {
+  r'us$': 'USD',
+  r'a$': 'AUD',
+  r'au$': 'AUD',
+  r'c$': 'CAD',
+  r'ca$': 'CAD',
+  r's$': 'SGD',
+  r'nz$': 'NZD',
+  r'hk$': 'HKD',
+  'e£': 'EGP',
+  'le£': 'EGP',
+};
