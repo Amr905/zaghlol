@@ -2,7 +2,8 @@
 # FIX-device-flows + TEST-explorer (device-flows.yml): runs
 # integration_test/device_flows_test.dart (the real app composition), then
 # integration_test/app_explorer_test.dart (taps every control of every screen,
-# in Arabic, with synthetic data) on the Android emulator, and pulls the
+# in Arabic, then English, dark, text scale 1.3, the paywall and onboarding;
+# synthetic data) on the Android emulator, and pulls the
 # screenshots and the explorer report the tests wrote to the app's private
 # dir. Called as one line because android-emulator-runner runs its `script`
 # input line by line. Inputs: DEVICE (emulator-5554), RUNNER_TEMP.
@@ -79,21 +80,36 @@ done
 ) &
 keeper=$!
 rc2=0
-for part in 0 1 2 3 4; do
-  echo "==== explorer part $part"
+# One app process per run. EXPLORER_PLAN: "base" (Arabic, light: the four tabs
+# and the Add sheet as parts 0-4), "variants" (FU-245: English, dark, text
+# scale 1.3, paywall, onboarding in both languages; two levels deep) or "all".
+runs=""
+case "${EXPLORER_PLAN:-all}" in base | all) runs="ar:0 ar:1 ar:2 ar:3 ar:4" ;; esac
+case "${EXPLORER_PLAN:-all}" in variants | all) runs="$runs en:-1 dark:-1 scale:-1 paywall:-1 onboarding:-1 onboarding_en:-1" ;; esac
+for run in $runs; do
+  mode=${run%%:*}
+  part=${run##*:}
+  echo "==== explorer mode $mode part $part"
   adb -s "$DEVICE" shell pm clear "$PKG" || true
   for p in POST_NOTIFICATIONS RECORD_AUDIO READ_SMS RECEIVE_SMS; do
     adb -s "$DEVICE" shell pm grant "$PKG" "android.permission.$p" 2>/dev/null || true
   done
+  # Text scale 1.3 is a system setting: set for the scale run only.
+  if [ "$mode" = scale ]; then
+    adb -s "$DEVICE" shell settings put system font_scale 1.3 || true
+  else
+    adb -s "$DEVICE" shell settings put system font_scale 1.0 || true
+  fi
   perl -e 'alarm shift; exec @ARGV' 900 \
     flutter test integration_test/app_explorer_test.dart \
     --flavor devSms -d "$DEVICE" --no-uninstall --reporter expanded \
-    --dart-define=EXPLORER_PART=$part \
-    2>&1 | tee "$OUT/explorer-p$part.log"
+    --dart-define=EXPLORER_PART=$part --dart-define=EXPLORER_MODE=$mode \
+    2>&1 | tee "$OUT/explorer-$mode-p$part.log"
   r=${PIPESTATUS[0]}
   [ "$r" -ne 0 ] && rc2=$r
   pull_files
 done
+adb -s "$DEVICE" shell settings put system font_scale 1.0 || true
 kill "$keeper" 2>/dev/null || true
 kill "$keeper" 2>/dev/null || true
 # Why did the app go away (if it did)? Crash, low-memory kill, ANR.
