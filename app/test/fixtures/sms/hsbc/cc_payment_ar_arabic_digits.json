@@ -1,0 +1,15 @@
+{
+  "sender": "HSBC",
+  "body": "إتش إس بي سي: تم استلام سداد بمبلغ ٣٠٠٠٫٠٠ جم على بطاقة الائتمان المنتهية بـ ٥٠٧٥٫ الحد المتاح ٤٥٠٠٠٫٠٠ جم",
+  "receivedAt": "2026-11-11T10:00:00+02:00",
+  "expect": {
+    "template": "hsbc.cc_payment.ar",
+    "event": "cc_payment",
+    "direction": "income",
+    "currency": "EGP",
+    "amount": "3000.00",
+    "last4": "5075",
+    "balance": null,
+    "available": "45000.00"
+  }
+}

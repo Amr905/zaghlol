@@ -5,7 +5,11 @@
 import 'dart:async';
 
 import 'package:flutter_test/flutter_test.dart';
+import 'package:zaghlol/core/db/daos/review_items_dao.dart';
+import 'package:zaghlol/features/ingestion/application/ingest_raw_messages.dart';
 import 'package:zaghlol/features/ingestion/application/reparse.dart';
+import 'package:zaghlol/features/ingestion/domain/body_hash.dart';
+import 'package:zaghlol/features/ingestion/domain/ingest_records.dart';
 import 'package:zaghlol/features/ingestion/data/drift_ingest_store.dart';
 import 'package:zaghlol/features/ingestion/domain/ingest_types.dart';
 import 'package:zaghlol_parsing/zaghlol_parsing.dart' show Registry;
@@ -69,7 +73,37 @@ void main() {
   }
 
   Future<void> ingestOld(String id, String body, {Registry? reg}) async {
-    await w.useCase(registry: reg ?? oldReg)([sms(id, body)]);
+    if (reg != null) {
+      await w.useCase(registry: reg)([sms(id, body)]);
+      return;
+    }
+    // SMS-AUTO: a known bank's clear message is now saved by the generic
+    // reader on arrival, so the review row an older build stored (no
+    // template matched, registry version 1) is written directly.
+    final store = DriftIngestStore(w.db);
+    await store.insertRaw(
+      RawInsert(
+        id: 'raw$id',
+        channel: 'sms',
+        sender: zbankSms,
+        body: body,
+        bodyHash: bodyHashV1(
+          senderKey: senderKeyOf('sms', zbankSms),
+          body: body,
+        ),
+        receivedAtMs: t0,
+        parseStatus: RawStatus.review,
+        registryVersion: 1,
+        createdAtMs: t0,
+      ),
+    );
+    await store.insertReview(
+      id: 'rv$id',
+      kind: ReviewKind.unrecognized,
+      createdAtMs: t0,
+      rawMessageId: 'raw$id',
+      payload: {'reason': 'noTemplate'},
+    );
   }
 
   group('AC1: review item → transaction', () {

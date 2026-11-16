@@ -745,7 +745,8 @@ class _MessageCard extends StatelessWidget {
               style: ZType.body.copyWith(color: c.textMuted),
             ),
           ],
-          if (card.originalText != null) _OriginalText(text: card.originalText!),
+          if (card.originalText != null)
+            _OriginalText(text: card.originalText!),
           const SizedBox(height: ZSpacing.lg),
           Row(
             children: [

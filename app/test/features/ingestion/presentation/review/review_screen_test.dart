@@ -194,6 +194,59 @@ void main() {
       expect(find.textContaining('Your balance'), findsNothing);
     });
 
+    group('SMS-AUTO original message text', () {
+      const body =
+          'Your Credit Card ending with * 5075 has been used for USD 114.00';
+      final withText = MessageCardModel(
+        itemId: 'o1',
+        sender: 'HSBC',
+        isNewSender: false,
+        amount: egp(11400),
+        rawMessageId: 'rawO',
+        originalText: body,
+      );
+
+      for (final locale in const [Locale('en'), Locale('ar')]) {
+        testWidgets('collapsed by default, shows the text on tap '
+            '(${locale.languageCode}, text scale 1.3)', (tester) async {
+          await pumpReview(
+            tester,
+            reviewApp(
+              actions: FakeActions(),
+              queue: [withText],
+              locale: locale,
+            ),
+          );
+          // The body widget is built only when the tile is expanded.
+          expect(
+            find.byKey(const ValueKey('reviewOriginalBody')),
+            findsNothing,
+          );
+          await tester.tap(find.byKey(const ValueKey('reviewOriginalText')));
+          await tester.pumpAndSettle();
+          expect(find.text(body), findsOneWidget);
+        });
+      }
+
+      testWidgets('no text, no tile', (tester) async {
+        await pumpReview(
+          tester,
+          reviewApp(
+            actions: FakeActions(),
+            queue: [
+              MessageCardModel(
+                itemId: 'o2',
+                sender: 'HSBC',
+                isNewSender: false,
+                amount: egp(100),
+              ),
+            ],
+          ),
+        );
+        expect(find.byKey(const ValueKey('reviewOriginalText')), findsNothing);
+      });
+    });
+
     group('SMS-fuzzy generic suggestions', () {
       final oneTap = MessageCardModel(
         itemId: 'g1',

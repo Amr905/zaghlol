@@ -200,25 +200,27 @@ void main() {
         currency: 'EGP',
       ),
     ]) {
-      test('HSBC "$sender" ${c.currency} card use is saved, not reviewed',
-          () async {
-        expect(
-          guard.decide(channel: 'sms', source: sender, body: c.body),
-          isA<GuardKeep>(),
-        );
-        final registry = await preloadBundledRegistry();
-        final w = await IngestWorld.open();
-        addTearDown(w.close);
-        final result = await w.useCase(
-          registry: registry,
-          guardBase: BytesGuardBase(base),
-        )([sms('h1', c.body, source: sender)]);
-        expect(result.outcomes['h1'], isA<IngestInserted>());
-        final t = (await w.txns()).single;
-        expect(t['direction'], 'expense');
-        expect(t['amount_minor'], c.minor);
-        expect(t['currency'], c.currency);
-      });
+      test(
+        'HSBC "$sender" ${c.currency} card use is saved, not reviewed',
+        () async {
+          expect(
+            guard.decide(channel: 'sms', source: sender, body: c.body),
+            isA<GuardKeep>(),
+          );
+          final registry = await preloadBundledRegistry();
+          final w = await IngestWorld.open();
+          addTearDown(w.close);
+          final result = await w.useCase(
+            registry: registry,
+            guardBase: BytesGuardBase(base),
+          )([sms('h1', c.body, source: sender)]);
+          expect(result.outcomes['h1'], isA<IngestInserted>());
+          final t = (await w.txns()).single;
+          expect(t['direction'], 'expense');
+          expect(t['amount_minor'], c.minor);
+          expect(t['currency'], c.currency);
+        },
+      );
     }
   }
 

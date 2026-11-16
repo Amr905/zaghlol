@@ -1,0 +1,15 @@
+{
+  "sender": "QNB",
+  "body": "QNB: Payment of EGP 5000.00 has been received on your Credit Card ending with * 4321. Your available limit is EGP 110095.29",
+  "receivedAt": "2026-11-11T10:00:00+02:00",
+  "expect": {
+    "template": "qnb.cc_payment.en",
+    "event": "cc_payment",
+    "direction": "income",
+    "currency": "EGP",
+    "amount": "5000.00",
+    "last4": "4321",
+    "balance": null,
+    "available": "110095.29"
+  }
+}
