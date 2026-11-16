@@ -55,6 +55,9 @@ public class SupportWriteLiveContractTests(SupportContractFixture fixture) : ICl
         // The correcting operator can't unfreeze; another lead can.
         var sameOperatorLead = await fixture.OperatorTokenAsync("support_lead");
         var unfreezeBody = UnfreezeBody(purchase);
+        using var early = await SendAsync(Unfreeze, lead, unfreezeBody);
+        Assert.Equal("ADMIN_CONFLICT", (await AssertDeclared("adminUnfreezePurchase", early, HttpStatusCode.Conflict, Problem))!["code"]!.GetValue<string>());
+        await ZaghlolTestDatabase.ExecuteAsync(fixture.Database.Migrator, $"UPDATE zaghlol.audit_log SET at = now() - interval '25 hours' WHERE target = '{purchase}'");
         using var unfrozen = await SendAsync(Unfreeze, lead, unfreezeBody);
         var unfrozenBody = await AssertDeclared("adminUnfreezePurchase", unfrozen, HttpStatusCode.OK, Json, unfreezeBody);
         Assert.True(unfrozenBody!["unfrozen"]!.GetValue<bool>());
@@ -163,9 +166,9 @@ public class SupportWriteLiveContractTests(SupportContractFixture fixture) : ICl
                 CultureInfo.InvariantCulture,
                 $$"""
                 INSERT INTO zaghlol.operators (id, oidc_subject, display_name, roles) VALUES ('{{other}}', 'sub-{{other}}', 'Freezer', ARRAY['support_agent']);
-                INSERT INTO zaghlol.audit_log (operator_id, action, target, details)
+                INSERT INTO zaghlol.audit_log (operator_id, action, target, details, at)
                 VALUES ('{{other}}', 'support_seat_move', '{{purchase}}',
-                        '{"to_install":"{{holder}}","reason_code":"correction","ticket_ref":"ZG-9","corrects_audit_id":1,"ownership_check":"order_id","ownership_outcome":"pass","outcome":"moved"}');
+                        '{"to_install":"{{holder}}","reason_code":"correction","ticket_ref":"ZG-9","corrects_audit_id":1,"ownership_check":"order_id","ownership_outcome":"pass","outcome":"moved"}', now() - interval '25 hours');
                 """));
     }
 

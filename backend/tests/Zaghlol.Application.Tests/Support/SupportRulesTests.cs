@@ -44,6 +44,14 @@ public class SupportRulesTests
         Assert.False(SupportRules.UnfreezeOperatorAllowed(Lead, null, null));
     }
 
+    [Fact]
+    public void AnUnfreezeWaitsTwentyFourHoursFromTheFreezeRow()
+    {
+        Assert.False(SupportRules.FreezeLockElapsed(Row(age: TimeSpan.FromHours(23)), Now));
+        Assert.True(SupportRules.FreezeLockElapsed(Row(age: TimeSpan.FromHours(24)), Now));
+        Assert.False(SupportRules.FreezeLockElapsed(null, Now));
+    }
+
     [Theory]
     [InlineData(false, true, true, true)]
     [InlineData(true, true, true, false)]

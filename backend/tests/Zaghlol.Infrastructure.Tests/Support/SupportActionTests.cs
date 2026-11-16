@@ -356,7 +356,7 @@ public sealed class SupportActionTests(SupportActionFixture fixture) : IClassFix
     }
 
     [Fact]
-    public async Task ANegativeProofACorrectionAimedAtAnInstallThatIsNotTheSourceIsRefusedAndMovesNothing()
+    public async Task ACorrectionAimedAtAnInstallThatIsNotTheSourceIsRefusedAndMovesNothing()
     {
         var (agent, p, holder, claimant) = await ScenarioAsync();
         var first = await Service.MoveSeatAsync(Move(agent, p, claimant, SupportReason.Other), None);
@@ -422,6 +422,26 @@ public sealed class SupportActionTests(SupportActionFixture fixture) : IClassFix
     }
 
     [Fact]
+    public async Task ANegativeProofUnfreezeBefore24HoursByADifferentOperatorIs409WithNoStoreCall()
+    {
+        var (agent, p, holder, claimant) = await ScenarioAsync();
+        var first = await Service.MoveSeatAsync(Move(agent, p, claimant, SupportReason.Other), None);
+        await Service.MoveSeatAsync(Correction(agent, p, holder, first.Value!.AuditId), None);
+        var lead = await fixture.OperatorAsync("support_lead");
+        var calls = store.Calls;
+
+        var early = await Service.UnfreezeAsync(Unfreeze(lead, p), None);
+
+        Assert.Equal(SupportActionStatus.Conflict, early.Status);
+        Assert.Equal(calls, store.Calls);
+        Assert.NotNull((await PurchaseAsync(p)).FrozenUntil);
+        Assert.Equal(("refused", "not_run"), ((await AuditAsync(p)).Last().Outcome, (await AuditAsync(p)).Last().OwnershipOutcome));
+
+        await AgeFreezeAsync(p);
+        Assert.True((await Service.UnfreezeAsync(Unfreeze(lead, p), None)).Value!.Unfrozen);
+    }
+
+    [Fact]
     public async Task AnotherLeadWithAPassingCheckEndsTheFreezeAndMovesNothing()
     {
         var (agent, p, holder, claimant) = await ScenarioAsync();
@@ -429,6 +449,7 @@ public sealed class SupportActionTests(SupportActionFixture fixture) : IClassFix
         await Service.MoveSeatAsync(Correction(agent, p, holder, first.Value!.AuditId), None);
         await ClaimAsync(p, claimant, DateTimeOffset.UtcNow.AddHours(-2));
         var lead = await fixture.OperatorAsync("support_lead");
+        await AgeFreezeAsync(p);
         var seat = await Db.ReadSeatAsync(p);
         var purchaseBefore = await PurchaseAsync(p);
         var claimantsBefore = await Db.ClaimantsAsync(p);
@@ -485,6 +506,7 @@ public sealed class SupportActionTests(SupportActionFixture fixture) : IClassFix
         await Service.MoveSeatAsync(Correction(agent, p, holder, first.Value!.AuditId), None);
         var leadAgent = await fixture.OperatorAsync("support_lead", "support_agent");
         var otherAgent = await fixture.OperatorAsync("support_agent");
+        await AgeFreezeAsync(p);
         Assert.True((await Service.UnfreezeAsync(Unfreeze(leadAgent, p), None)).Value!.Unfrozen);
         await ClaimAsync(p, claimant, DateTimeOffset.UtcNow.AddHours(-1));
         var calls = store.Calls;
@@ -507,6 +529,7 @@ public sealed class SupportActionTests(SupportActionFixture fixture) : IClassFix
         var first = await Service.MoveSeatAsync(Move(agent, p, claimant, SupportReason.Other), None);
         await Service.MoveSeatAsync(Correction(agent, p, holder, first.Value!.AuditId), None);
         var leadAgent = await fixture.OperatorAsync("support_lead", "support_agent");
+        await AgeFreezeAsync(p);
         await Service.UnfreezeAsync(Unfreeze(leadAgent, p), None);
         await fixture.ExecAsync("UPDATE zaghlol.audit_log SET at = now() - interval '25 hours' WHERE action = 'support_unfreeze' AND target = @a", p.ToString("D"));
         await ClaimAsync(p, claimant, DateTimeOffset.UtcNow.AddHours(-1));
@@ -629,6 +652,11 @@ public sealed class SupportActionTests(SupportActionFixture fixture) : IClassFix
         install.Value,
         RandomNumberGenerator.GetBytes(32),
         trusted);
+
+    /// <summary>Moves the correction rows 25 h into the past, so the R6-1 24 h wait is over.</summary>
+    private Task AgeFreezeAsync(Guid purchase) => fixture.ExecAsync(
+        "UPDATE zaghlol.audit_log SET at = now() - interval '25 hours' WHERE target = @a AND action IN ('support_seat_move', 'support_detach')",
+        purchase.ToString("D"));
 
     private Task SilenceBuyerAsync(Guid purchase) => fixture.ExecAsync(
         "UPDATE zaghlol.installs SET last_seen_at = now() - interval '40 days' WHERE id = (SELECT install_id FROM zaghlol.purchases WHERE id = @a)",

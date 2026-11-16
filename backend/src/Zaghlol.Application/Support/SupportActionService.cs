@@ -31,6 +31,10 @@ public static class SupportRules
     public static bool UnfreezeOperatorAllowed(Guid caller, SupportAuditRow? freezeStart, SupportAuditRow? reversed) =>
         freezeStart is not null && freezeStart.OperatorId != caller && (reversed is null || reversed.OperatorId != caller);
 
+    /// <summary>R6-1 (PO): an unfreeze is allowed only once <see cref="UnfreezeLock"/> has passed since the correction that started the freeze (the freeze row's server time).</summary>
+    public static bool FreezeLockElapsed(SupportAuditRow? freezeStart, DateTimeOffset now) =>
+        freezeStart is { } row && now - row.At >= UnfreezeLock;
+
     /// <summary>D-57(d): no account on the purchase, a target linked to an account, and a gone or silent buying install.</summary>
     public static bool AttachGate(Guid? purchaseAccount, Guid? targetAccount, bool buyingInstallSilent) =>
         purchaseAccount is null && targetAccount is not null && buyingInstallSilent;
@@ -390,7 +394,7 @@ public sealed class SupportActionService(
             reversed = await tx.ReadAuditAsync(command.PurchaseId, corrected, cancellationToken).ConfigureAwait(false);
         }
 
-        return SupportRules.UnfreezeOperatorAllowed(command.OperatorId, freeze, reversed)
+        return SupportRules.UnfreezeOperatorAllowed(command.OperatorId, freeze, reversed) && SupportRules.FreezeLockElapsed(freeze, now)
             ? (null, freeze!.Id)
             : (SupportOutcomes.Refused, freeze?.Id);
     }
