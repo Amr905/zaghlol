@@ -46,24 +46,31 @@ done
 # If a tap sends the app to the background (a link, the share sheet, a system
 # screen), press Back and bring it forward again.
 (
+  misses=0
   while true; do
     sleep 15
     if adb -s "$DEVICE" shell pidof "$PKG" >/dev/null 2>&1; then
       focus=$(adb -s "$DEVICE" shell dumpsys window 2>/dev/null | grep -m1 mCurrentFocus || true)
       case "$focus" in
-        *"$PKG"*) ;;
+        # No focused window yet (the app is starting) or ours: all fine.
+        *"$PKG"* | *"=null"*) misses=0 ;;
         *)
-          echo "KEEPER: app not focused ($focus)"
-          adb -s "$DEVICE" shell input keyevent 4 || true
-          sleep 1
-          adb -s "$DEVICE" shell monkey -p "$PKG" -c android.intent.category.LAUNCHER 1 >/dev/null 2>&1 || true
+          misses=$((misses + 1))
+          # Two looks in a row: another window really is in front.
+          if [ "$misses" -ge 2 ]; then
+            echo "KEEPER: app not focused ($focus)"
+            adb -s "$DEVICE" shell input keyevent 4 || true
+            sleep 1
+            adb -s "$DEVICE" shell monkey -p "$PKG" -c android.intent.category.LAUNCHER 1 >/dev/null 2>&1 || true
+            misses=0
+          fi
           ;;
       esac
     fi
   done
 ) &
 keeper=$!
-perl -e 'alarm shift; exec @ARGV' 2400 \
+perl -e 'alarm shift; exec @ARGV' 2100 \
   flutter test integration_test/app_explorer_test.dart \
   --flavor devSms -d "$DEVICE" --no-uninstall --reporter expanded \
   2>&1 | tee "$OUT/explorer.log"
