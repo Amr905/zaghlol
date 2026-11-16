@@ -249,29 +249,37 @@ class _AddOption extends StatelessWidget {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Container(
-                      width: 48,
-                      height: 48,
+                      width: 40,
+                      height: 40,
                       decoration: BoxDecoration(
                         shape: BoxShape.circle,
                         color: c.primaryContainer,
                       ),
                       child: Icon(icon, color: c.primary),
                     ),
-                    const Spacer(),
                     if (goldBadge != null)
-                      DecoratedBox(
-                        decoration: BoxDecoration(
-                          color: c.warningBg,
-                          borderRadius: BorderRadius.circular(ZRadius.pill),
-                        ),
-                        child: Padding(
-                          padding: const EdgeInsetsDirectional.symmetric(
-                            horizontal: ZSpacing.md,
-                            vertical: ZSpacing.xs,
-                          ),
-                          child: Text(
-                            goldBadge!,
-                            style: ZType.caption.copyWith(color: c.warningText),
+                      Expanded(
+                        child: Align(
+                          alignment: AlignmentDirectional.centerEnd,
+                          child: DecoratedBox(
+                            decoration: BoxDecoration(
+                              color: c.warningBg,
+                              borderRadius: BorderRadius.circular(ZRadius.pill),
+                            ),
+                            child: Padding(
+                              padding: const EdgeInsetsDirectional.symmetric(
+                                horizontal: ZSpacing.md,
+                                vertical: ZSpacing.xs,
+                              ),
+                              child: Text(
+                                goldBadge!,
+                                maxLines: 1,
+                                overflow: TextOverflow.ellipsis,
+                                style: ZType.caption.copyWith(
+                                  color: c.warningText,
+                                ),
+                              ),
+                            ),
                           ),
                         ),
                       ),
