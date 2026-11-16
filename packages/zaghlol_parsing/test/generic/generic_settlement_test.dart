@@ -1,6 +1,4 @@
 import 'package:test/test.dart';
-import 'package:zaghlol_parsing/generic/generic_parser.dart';
-import 'package:zaghlol_parsing/normalize/text_normalizer.dart';
 import 'package:zaghlol_parsing/zaghlol_parsing.dart';
 
 // SMS-AUTO: credit-card settlement cues and the auto-save eligibility rule.
