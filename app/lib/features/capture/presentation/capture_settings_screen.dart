@@ -31,6 +31,7 @@ import '../application/ios_setup_providers.dart';
 import '../domain/capture_health.dart';
 import '../domain/scan_plan.dart';
 import 'capture_controls.dart';
+import '../../../core/ui/z_haptics.dart';
 
 /// iOS setup checker result (FR-ING-I-07): true = passes, false = failed,
 /// null = cannot tell. From the silence check (T-066, `iosSetupStatusProvider`).
@@ -665,6 +666,7 @@ class _AddIgnoreFormState extends ConsumerState<AddIgnoreForm> {
         action: SnackBarAction(
           label: l10n.commonActionUndo,
           onPressed: () async {
+            ZHaptics.light();
             for (final id in created) {
               try {
                 await widget.controls.remove(id);

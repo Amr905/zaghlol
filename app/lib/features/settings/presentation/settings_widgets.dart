@@ -7,6 +7,7 @@ import '../../../core/l10n/generated/app_localizations.dart';
 import '../../../core/l10n/locale_providers.dart';
 import '../../../core/theme/z_tokens.dart';
 import '../../../core/ui/z_components.dart';
+import '../../../core/ui/z_haptics.dart';
 
 /// Renders digits in the user's digits mode for the language shown.
 String localDigits(WidgetRef ref, BuildContext context, String text) {
@@ -233,7 +234,7 @@ class SettingsSwitchRow extends StatelessWidget {
                 style: ZType.bodySmall.copyWith(color: c.textMuted),
               ),
         value: value,
-        onChanged: onChanged,
+        onChanged: ZHaptics.onToggle(onChanged),
       ),
     );
   }

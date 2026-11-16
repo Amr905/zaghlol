@@ -13,6 +13,7 @@ import 'transfers_format.dart';
 import 'transfers_parts.dart';
 import 'transfers_port.dart';
 import 'transfers_providers.dart';
+import '../../../core/ui/z_haptics.dart';
 
 /// Opens S-15 Mode B for the incoming transfer [sourceId].
 Future<bool?> showAssignSheet(BuildContext context, String sourceId) =>
@@ -147,6 +148,7 @@ class _AssignSheetState extends ConsumerState<AssignSheet> {
           ? null
           : ZButton(
               label: l.commonActionSave,
+              haptic: ZHaptic.medium,
               expand: true,
               loading: _busy,
               onPressed: data.candidates.isEmpty ? null : () => _save(data, f),

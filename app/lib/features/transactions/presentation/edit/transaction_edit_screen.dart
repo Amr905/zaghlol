@@ -32,6 +32,7 @@ import '../list/txn_row.dart';
 import '../../../voice/presentation/voice_logger_screen.dart';
 import 'txn_edit_providers.dart';
 import 'txn_form.dart';
+import '../../../../core/ui/z_haptics.dart';
 
 const int _msPerDay = 86400000;
 
@@ -575,6 +576,7 @@ class _EditState extends ConsumerState<TransactionEditScreen> {
               padding: const EdgeInsetsDirectional.only(end: ZSpacing.sm),
               child: ZButton(
                 label: l.commonActionSave,
+                haptic: ZHaptic.medium,
                 size: ZButtonSize.small,
                 variant: ZButtonVariant.text,
                 loading: _saving,
