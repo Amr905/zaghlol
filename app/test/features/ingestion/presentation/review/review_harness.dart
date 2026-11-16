@@ -56,7 +56,10 @@ class FakeActions implements ReviewActions {
     required String channel,
   }) => _rec('bank:$itemId:$name:$country:$channel');
   @override
-  Future<bool> confirmGeneric(MessageCardModel card) async {
+  Future<bool> confirmGeneric(
+    MessageCardModel card, {
+    bool keep = false,
+  }) async {
     await _rec('generic:${card.itemId}');
     return true;
   }

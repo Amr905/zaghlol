@@ -9,6 +9,7 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import '../../../core/l10n/card_number.dart';
 import '../../../core/l10n/generated/app_localizations.dart';
 import '../../../core/l10n/locale_providers.dart';
 import '../../../core/theme/z_tokens.dart';
@@ -301,7 +302,7 @@ class _BodyState extends ConsumerState<ScanResultsBody> {
                   ? null
                   : Directionality(
                       textDirection: TextDirection.ltr,
-                      child: Text('•••• ${i.last4}'),
+                      child: Text(formatCardTail(i.last4!)),
                     ),
               onTap: () => Navigator.of(ctx).pop(i.accountId),
             ),

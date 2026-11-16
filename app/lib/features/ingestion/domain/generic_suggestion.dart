@@ -66,6 +66,16 @@ final class GenericSuggestion {
       source != null &&
       amount.isPositive;
 
+  /// "Keep" saves the suggestion exactly as shown even when [oneTap] is
+  /// false (PO 2026-11-16): it still needs a bank, a kind the card can name
+  /// and a channel to record; a missing merchant or last-4 is fine.
+  bool get keepable =>
+      direction != null &&
+      direction != TxnDirection.fee &&
+      institutionCode != null &&
+      source != null &&
+      amount.isPositive;
+
   /// Null unless [payload] is a generic item with a readable amount.
   static GenericSuggestion? fromPayload(Map<String, Object?> payload) {
     if (payload['generic'] != true) return null;

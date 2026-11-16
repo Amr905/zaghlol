@@ -10,6 +10,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:zaghlol_domain/zaghlol_domain.dart';
 
+import '../../../../core/ui/bank_name_text.dart';
+import '../../../../core/l10n/card_number.dart';
 import '../../../../core/db/app_database.dart' show IgnoreRuleRow;
 import '../../../../core/db/daos/capture_controls_dao.dart' show IgnoreChannel;
 import '../../../../core/l10n/date_format.dart';
@@ -107,9 +109,7 @@ class _State extends ConsumerState<CardDetailScreen> {
     final lang = Localizations.localeOf(context).languageCode;
     final digits = ref.watch(digitsModeProvider(lang));
     final fmt = TxnFmt(lang, digits);
-    final name = account.last4 == null
-        ? account.label
-        : '${account.label} •${digits.render(account.last4!)}';
+    final name = formatAccountWithCard(account.label, account.last4);
     final data = ref.watch(
       cardDetailDataProvider((accountId: account.id, currency: cur.code)),
     );
@@ -162,8 +162,11 @@ class _State extends ConsumerState<CardDetailScreen> {
                 children: [
                   Semantics(
                     header: true,
-                    child: Text(
-                      name,
+                    child: BankNameText(
+                      name: account.label,
+                      institutionCode: account.institutionCode,
+                      last4: account.last4,
+                      maxLines: 2,
                       style: ZType.headline.copyWith(color: c.text),
                     ),
                   ),
@@ -252,9 +255,7 @@ class _State extends ConsumerState<CardDetailScreen> {
     for (final o in ref.watch(institutionOptionsProvider)) {
       if (o.code == account.institutionCode) bank = o.name(fmt.lang);
     }
-    final last4 = account.last4 == null
-        ? ''
-        : '•${fmt.digits.render(account.last4!)}';
+    final last4 = account.last4 == null ? '' : formatCardTail(account.last4!);
     return [
       Column(
         key: const Key('card-detail-added-empty'),

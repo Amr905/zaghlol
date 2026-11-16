@@ -8,6 +8,7 @@ import 'package:drift/drift.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:zaghlol_domain/zaghlol_domain.dart';
 
+import '../../../../core/l10n/card_number.dart';
 import '../../../../core/db/app_database.dart';
 import '../../../../core/db/app_database_providers.dart';
 import '../../../../core/db/daos/review_items_dao.dart';
@@ -54,7 +55,9 @@ abstract interface class ReviewActions {
   /// SMS-fuzzy: saves a complete generic suggestion ([MessageCardModel.oneTap])
   /// as read, user-verified, under the bank's card account. False when it
   /// is not complete any more or another actor resolved it.
-  Future<bool> confirmGeneric(MessageCardModel card);
+  ///
+  /// [keep] also allows a suggestion that is not one-tap but [MessageCardModel.keepable].
+  Future<bool> confirmGeneric(MessageCardModel card, {bool keep = false});
 
   /// The message behind [rawMessageId] as a template-builder sample, read
   /// only when the user asks to make a template from it. Never logged.
@@ -170,14 +173,17 @@ final class _LiveActions implements ReviewActions {
   }
 
   @override
-  Future<bool> confirmGeneric(MessageCardModel card) async {
+  Future<bool> confirmGeneric(
+    MessageCardModel card, {
+    bool keep = false,
+  }) async {
     final db = await _ref.read(appDatabaseProvider.future);
     final row = await ReviewItemsDao(db).byId(card.itemId);
     if (row == null || row.resolvedAt != null || row.txnId != null) {
       return false;
     }
     final g = GenericSuggestion.fromPayload(_payload(row));
-    if (g == null || !g.oneTap) return false;
+    if (g == null || !(g.oneTap || (keep && g.keepable))) return false;
     final accounts = await _ref.read(accountsRepositoryProvider.future);
     final resolved = await accounts.resolve(
       AccountHint(
@@ -361,6 +367,8 @@ Future<ReviewCardModel?> _toCard(
             last4: g.last4,
             rawMessageId: item.rawMessageId,
             oneTap: g.oneTap,
+            keepable: g.keepable,
+            institutionCode: g.institutionCode,
             direction: g.direction,
             occurredAt: DateTime.fromMillisecondsSinceEpoch(
               g.occurredAtMs,
@@ -462,5 +470,5 @@ Future<String> _accountLabel(AppDatabase db, String accountId) async {
     db.accounts,
   )..where((x) => x.id.equals(accountId))).getSingleOrNull();
   if (a == null) return '';
-  return a.last4 == null ? a.label : '${a.label} •${a.last4}';
+  return formatAccountWithCard(a.label, a.last4);
 }

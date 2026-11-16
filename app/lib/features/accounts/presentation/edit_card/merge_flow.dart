@@ -5,6 +5,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import '../../../../core/l10n/card_number.dart';
 import '../../../../core/l10n/generated/app_localizations.dart';
 import '../../../../core/l10n/locale_providers.dart';
 import '../../../../core/theme/z_tokens.dart';
@@ -92,7 +93,7 @@ class MergePicker extends StatelessWidget {
                   ZListRow(
                     key: Key('merge-target-${a.id}'),
                     title: a.label,
-                    subtitle: a.last4 == null ? null : '•••• ${a.last4}',
+                    subtitle: a.last4 == null ? null : formatCardTail(a.last4!),
                     showChevron: true,
                     onTap: () => Navigator.of(context).pop(a),
                   ),
@@ -130,8 +131,7 @@ class _MergeConfirm extends ConsumerWidget {
     final n = count.value;
     final differ =
         checkMerge(source, target) == MergeCheck.differentInstitution;
-    String name(Account a) =>
-        a.last4 == null ? a.label : '${a.label} •${digits.render(a.last4!)}';
+    String name(Account a) => formatAccountWithCard(a.label, a.last4);
     return AlertDialog(
       key: const Key('merge-confirm'),
       title: Text(

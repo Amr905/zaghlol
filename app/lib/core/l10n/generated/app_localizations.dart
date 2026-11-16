@@ -2944,6 +2944,36 @@ abstract class AppLocalizations {
   /// **'شوف الرسالة'**
   String get ingestionReviewUnreadShow;
 
+  /// B · expands the original SMS text on the review card
+  ///
+  /// In ar, this message translates to:
+  /// **'شوف الرسالة الأصلية'**
+  String get ingestionReviewShowOriginal;
+
+  /// B · collapses the original SMS text
+  ///
+  /// In ar, this message translates to:
+  /// **'اخفي الرسالة الأصلية'**
+  String get ingestionReviewHideOriginal;
+
+  /// B · saves a doubtful suggestion exactly as shown, one tap
+  ///
+  /// In ar, this message translates to:
+  /// **'احفظها'**
+  String get ingestionReviewKeep;
+
+  /// B · reason Keep is disabled (no amount read)
+  ///
+  /// In ar, this message translates to:
+  /// **'مش هينفع أحفظها: مفيش مبلغ'**
+  String get ingestionReviewKeepNoAmount;
+
+  /// B · reason Keep is disabled (bank, kind or channel unknown)
+  ///
+  /// In ar, this message translates to:
+  /// **'مش هينفع أحفظها: البنك أو النوع مش واضح'**
+  String get ingestionReviewKeepMissing;
+
   /// B · opens S-13 with transactions_edit_rawTitle
   ///
   /// In ar, this message translates to:
@@ -8618,7 +8648,7 @@ abstract class AppLocalizations {
   /// S
   ///
   /// In ar, this message translates to:
-  /// **'كل الشارتات الاتناشر مع تحليل أعمق'**
+  /// **'تحليل أعمق للشارتات: قارن بالدورة اللي فاتت واعرف هتخلص فين'**
   String get goldPaywallBenefitCharts;
 
   /// L

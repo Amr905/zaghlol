@@ -86,6 +86,8 @@ final class MessageCardModel extends ReviewCardModel {
     this.occurredAt,
     this.bankLabel,
     this.originalText,
+    this.keepable = false,
+    this.institutionCode,
   }) : super(itemId);
   final String sender;
   final bool isNewSender;
@@ -113,6 +115,13 @@ final class MessageCardModel extends ReviewCardModel {
   /// SMS-AUTO: the original message text from the stored raw row, so the
   /// user can decide. Shown on screen only (collapsed); never logged.
   final String? originalText;
+
+  /// Keep (PO 2026-11-16) can save this suggestion as shown: the bank, kind
+  /// and channel are known (see `GenericSuggestion.keepable`).
+  final bool keepable;
+
+  /// The registry code of the known bank (for its acronym), if any.
+  final String? institutionCode;
 
   /// Nothing was read: the user types the details.
   bool get unreadable => txnId == null && amount == null;

@@ -6,13 +6,16 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 /// Brand data for one registry institution (BRAND-logos). Both fields are
 /// optional: no colour means the neutral style, no logo means initials.
 class InstitutionBrand {
-  const InstitutionBrand({this.colorValue, this.logoAsset});
+  const InstitutionBrand({this.colorValue, this.logoAsset, this.acronym});
 
   /// Opaque ARGB value of the brand colour, or null.
   final int? colorValue;
 
   /// Path under `assets/brand/logos/`, or null.
   final String? logoAsset;
+
+  /// Latin short name (NBE, CIB...) shown when the full name does not fit.
+  final String? acronym;
 }
 
 /// Parses `institutions_brand.json`; unknown or malformed rows are skipped.
@@ -32,6 +35,9 @@ Map<String, InstitutionBrand> parseInstitutionBrands(String json) {
     out[k] = InstitutionBrand(
       colorValue: color,
       logoAsset: logo is String && logo.isNotEmpty ? logo : null,
+      acronym: v['acronym'] is String && (v['acronym'] as String).isNotEmpty
+          ? v['acronym'] as String
+          : null,
     );
   });
   return out;
