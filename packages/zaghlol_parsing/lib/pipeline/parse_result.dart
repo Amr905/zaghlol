@@ -332,6 +332,7 @@ final class ParseGeneric extends ParseResult {
     required this.confidencePermille,
     required this.reasons,
     this.institutionCode,
+    this.originalAmount,
     this.event,
     this.reference,
     this.dateRead = false,
@@ -349,6 +350,10 @@ final class ParseGeneric extends ParseResult {
 
   /// Positive amount in the currency the message names next to it.
   final Money amount;
+
+  /// Foreign amount shown beside the charge (`EGP 3,400.00 (EUR 100.00)`);
+  /// [amount] stays the charged account-currency amount.
+  final Money? originalAmount;
 
   /// `expense` or `income`; null when the message gives no clear keyword.
   final TemplateDirection? direction;

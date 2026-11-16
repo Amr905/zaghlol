@@ -269,8 +269,7 @@
    "amount": "3400.00",
    "currency": "EGP",
    "direction": "expense"
-  },
-  "knownMiss": true
+  }
  },
  {
   "id": "en_upi_masked_phone",
