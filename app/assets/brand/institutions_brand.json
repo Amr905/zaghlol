@@ -1,0 +1,261 @@
+{
+  "version": 1,
+  "institutions": {
+    "aaib": {
+      "brandColor": "#00539B",
+      "logoAsset": null
+    },
+    "abe": {
+      "brandColor": null,
+      "logoAsset": null
+    },
+    "abk": {
+      "brandColor": null,
+      "logoAsset": null
+    },
+    "adcb": {
+      "brandColor": "#D3202F",
+      "logoAsset": null
+    },
+    "adib": {
+      "brandColor": "#00573F",
+      "logoAsset": null
+    },
+    "aib": {
+      "brandColor": null,
+      "logoAsset": null
+    },
+    "aibk": {
+      "brandColor": null,
+      "logoAsset": null
+    },
+    "al_baraka": {
+      "brandColor": null,
+      "logoAsset": null
+    },
+    "alexbank": {
+      "brandColor": "#E30613",
+      "logoAsset": null
+    },
+    "alrajhi": {
+      "brandColor": null,
+      "logoAsset": null
+    },
+    "aman": {
+      "brandColor": null,
+      "logoAsset": null
+    },
+    "arab_bank": {
+      "brandColor": null,
+      "logoAsset": null
+    },
+    "attijariwafa": {
+      "brandColor": null,
+      "logoAsset": null
+    },
+    "bank_abc": {
+      "brandColor": null,
+      "logoAsset": null
+    },
+    "bank_nxt": {
+      "brandColor": null,
+      "logoAsset": null
+    },
+    "banque_du_caire": {
+      "brandColor": null,
+      "logoAsset": null
+    },
+    "banque_misr": {
+      "brandColor": "#8B1E3F",
+      "logoAsset": null
+    },
+    "blom": {
+      "brandColor": null,
+      "logoAsset": null
+    },
+    "bunq": {
+      "brandColor": null,
+      "logoAsset": null
+    },
+    "cib": {
+      "brandColor": "#0B3C8C",
+      "logoAsset": null
+    },
+    "citibank": {
+      "brandColor": "#056DAE",
+      "logoAsset": null
+    },
+    "contact": {
+      "brandColor": "#E31E24",
+      "logoAsset": null
+    },
+    "credit_agricole": {
+      "brandColor": null,
+      "logoAsset": null
+    },
+    "ealb": {
+      "brandColor": null,
+      "logoAsset": null
+    },
+    "ebank": {
+      "brandColor": null,
+      "logoAsset": null
+    },
+    "egbank": {
+      "brandColor": null,
+      "logoAsset": null
+    },
+    "emirates_nbd": {
+      "brandColor": "#E31B23",
+      "logoAsset": null
+    },
+    "enbd": {
+      "brandColor": "#E31B23",
+      "logoAsset": null
+    },
+    "etisalat_cash": {
+      "brandColor": "#6BB43F",
+      "logoAsset": null
+    },
+    "fabmisr": {
+      "brandColor": null,
+      "logoAsset": null
+    },
+    "faisal_bank": {
+      "brandColor": "#00796B",
+      "logoAsset": null
+    },
+    "forsa": {
+      "brandColor": null,
+      "logoAsset": null
+    },
+    "hdb": {
+      "brandColor": "#1B5E9E",
+      "logoAsset": null
+    },
+    "hdfc": {
+      "brandColor": null,
+      "logoAsset": null
+    },
+    "hsbc": {
+      "brandColor": "#DB0011",
+      "logoAsset": null
+    },
+    "idb": {
+      "brandColor": null,
+      "logoAsset": null
+    },
+    "instapay": {
+      "brandColor": "#6C2C91",
+      "logoAsset": null
+    },
+    "kfh": {
+      "brandColor": "#00704A",
+      "logoAsset": null
+    },
+    "liv": {
+      "brandColor": null,
+      "logoAsset": null
+    },
+    "mashreq": {
+      "brandColor": "#F26B21",
+      "logoAsset": null
+    },
+    "midbank": {
+      "brandColor": null,
+      "logoAsset": null
+    },
+    "monzo": {
+      "brandColor": "#EB4E5F",
+      "logoAsset": null
+    },
+    "myfawry": {
+      "brandColor": null,
+      "logoAsset": null
+    },
+    "n26": {
+      "brandColor": "#36A18B",
+      "logoAsset": null
+    },
+    "nbe": {
+      "brandColor": "#006A4E",
+      "logoAsset": null
+    },
+    "nbk": {
+      "brandColor": "#00539B",
+      "logoAsset": null
+    },
+    "onebank_yalla": {
+      "brandColor": null,
+      "logoAsset": null
+    },
+    "orange_cash": {
+      "brandColor": "#FF7900",
+      "logoAsset": null
+    },
+    "payoneer": {
+      "brandColor": null,
+      "logoAsset": null
+    },
+    "paytm": {
+      "brandColor": null,
+      "logoAsset": null
+    },
+    "qnb": {
+      "brandColor": "#8A1538",
+      "logoAsset": null
+    },
+    "revolut": {
+      "brandColor": "#0666EB",
+      "logoAsset": null
+    },
+    "saib": {
+      "brandColor": null,
+      "logoAsset": null
+    },
+    "shahry": {
+      "brandColor": null,
+      "logoAsset": null
+    },
+    "souhoola": {
+      "brandColor": "#00A3E0",
+      "logoAsset": null
+    },
+    "suez_canal_bank": {
+      "brandColor": null,
+      "logoAsset": null
+    },
+    "sympl": {
+      "brandColor": null,
+      "logoAsset": null
+    },
+    "telda": {
+      "brandColor": "#1D1D1F",
+      "logoAsset": null
+    },
+    "united_bank": {
+      "brandColor": null,
+      "logoAsset": null
+    },
+    "valu": {
+      "brandColor": "#F26522",
+      "logoAsset": null
+    },
+    "vodafone_cash": {
+      "brandColor": "#E60000",
+      "logoAsset": null
+    },
+    "warba": {
+      "brandColor": null,
+      "logoAsset": null
+    },
+    "we_pay": {
+      "brandColor": "#5E2A84",
+      "logoAsset": null
+    },
+    "wise": {
+      "brandColor": "#2F6F4F",
+      "logoAsset": null
+    }
+  }
+}
