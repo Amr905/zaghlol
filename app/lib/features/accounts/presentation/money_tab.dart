@@ -59,7 +59,12 @@ class MoneyTab extends ConsumerWidget {
       backgroundColor: c.bg,
       body: SafeArea(
         child: ListView(
-          padding: const EdgeInsetsDirectional.all(ZSpacing.screen),
+          padding: const EdgeInsetsDirectional.fromSTEB(
+            ZSpacing.screen,
+            ZSpacing.screen,
+            ZSpacing.screen,
+            ZSpacing.fabClearance,
+          ),
           children: [
             Align(
               alignment: AlignmentDirectional.centerStart,

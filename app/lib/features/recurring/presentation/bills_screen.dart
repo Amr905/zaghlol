@@ -112,7 +112,12 @@ class _Body extends ConsumerWidget {
     final c = ZColors.of(context);
     if (data.isEmpty) {
       return ListView(
-        padding: const EdgeInsetsDirectional.all(ZSpacing.screen),
+        padding: const EdgeInsetsDirectional.fromSTEB(
+          ZSpacing.screen,
+          ZSpacing.screen,
+          ZSpacing.screen,
+          ZSpacing.fabClearance,
+        ),
         children: [
           const SizedBox(height: ZSpacing.xl),
           Text(
@@ -137,7 +142,12 @@ class _Body extends ConsumerWidget {
     }
     final subsYearly = [for (final t in data.subTotals) t.yearly];
     return ListView(
-      padding: const EdgeInsetsDirectional.all(ZSpacing.screen),
+      padding: const EdgeInsetsDirectional.fromSTEB(
+        ZSpacing.screen,
+        ZSpacing.screen,
+        ZSpacing.screen,
+        ZSpacing.fabClearance,
+      ),
       children: [
         IntrinsicHeight(
           child: Row(

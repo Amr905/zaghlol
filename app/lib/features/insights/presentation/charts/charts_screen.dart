@@ -149,7 +149,7 @@ const _padding = EdgeInsetsDirectional.fromSTEB(
   ZSpacing.screen,
   ZSpacing.sm,
   ZSpacing.screen,
-  ZSpacing.xxl,
+  ZSpacing.fabClearance,
 );
 
 String _emptyText(AppLocalizations l, ChartNotEnoughData<Object?> r) =>
