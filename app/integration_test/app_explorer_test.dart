@@ -253,7 +253,7 @@ void main() {
         },
         (e, s) {
           uncaught.add(e);
-          ex.recordUncaught(e);
+          ex.recordUncaught(e, s);
         },
       ),
     );
@@ -287,7 +287,7 @@ void main() {
           // but it still shows in the report (an open finding).
           if (i.kind != 'dead-tap' &&
               i.kind != 'restore' &&
-              !i.detail.startsWith('BackendFailure(offline)'))
+              !i.detail.contains('BackendFailure(offline)'))
             '${s.title}: ${i.kind} ${i.where}',
     ];
     expect(

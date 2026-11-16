@@ -828,7 +828,14 @@ class Explorer {
 
   /// An error that reached the zone (async code in a tap handler) instead of
   /// FlutterError.onError; the test's zone guard hands it here.
-  void recordUncaught(Object error) {
+  void recordUncaught(Object error, [StackTrace? stack]) {
+    final frames = (stack?.toString() ?? '')
+        .split('\n')
+        .where((f) => f.contains('package:zaghlol'))
+        .take(4)
+        .map((f) => f.trim())
+        .join(' | ');
+    if (frames.isNotEmpty) log('EXPLORER_STACK $frames');
     final rec = _cur ?? (screens.isEmpty ? null : screens.last);
     if (rec == null) return;
     final text = error.toString().split('\n').first;
