@@ -606,6 +606,32 @@ void main() {
       expect(await txnCount(), 0);
     });
 
+    test('SMS-fuzzy: the review item carries every field read, prefilled '
+        'for one tap, and nothing is saved', () async {
+      await w.run([
+        sms(
+          'f',
+          'ZBANK: Card ending 4321 was used for EGP 75.50 at SYNTH CAFE on '
+              '01/01. Avl Bal EGP 900.00',
+          source: zbankSms,
+        ),
+      ]);
+      expect(await txnCount(), 0);
+      final payload =
+          jsonDecode((await w.reviews()).single['payload']! as String) as Map;
+      expect(payload['amount'], {'minor': 7550, 'currency': 'EGP'});
+      expect(payload['direction'], 'expense');
+      expect(payload['last4'], '4321');
+      expect(payload['merchant'], isNotEmpty);
+      expect(payload['source'], 'sms');
+      expect(payload['prefillComplete'], isTrue);
+      expect(payload['occurredAtMs'], isA<int>());
+      expect(payload['dateRead'], isTrue);
+      expect((payload['fieldConfidence'] as Map)['amount'], greaterThan(0));
+      // Fields only: no message text in the payload.
+      expect(jsonEncode(payload), isNot(contains('Avl Bal')));
+    });
+
     test('FU-243: a known bank generic auto-save uses that bank\'s card, '
         'never a generic account', () async {
       final dao = CaptureControlsDao(w.db);

@@ -1338,11 +1338,7 @@ final class IngestRawMessages {
       confirmedCount: row?.confirmedCount ?? 0,
       alwaysCapture: row?.alwaysCapture ?? false,
     );
-    final direction = switch (g.direction) {
-      TemplateDirection.expense => TxnDirection.expense,
-      TemplateDirection.income => TxnDirection.income,
-      _ => null,
-    };
+    final direction = genericTxnDirection(g);
     final autoSave =
         disposition == GenericDisposition.autoSaveLowConfidence &&
         direction != null &&
@@ -1358,6 +1354,11 @@ final class IngestRawMessages {
       // bank (an unrecognized message of the bank), not as a new sender.
       final known = g.institutionCode != null;
       final kind = known ? ReviewKind.unrecognized : ReviewKind.newSender;
+      // SMS-fuzzy: every field the generic reader found goes into the item
+      // so the card is prefilled and, when complete, one tap confirms it
+      // (FR-PAR-13: still a review item, never saved without the user).
+      // Fields only, never message text.
+      final (occurredMs, offsetMin) = _occurred(g.occurredAt);
       await _review(
         kind: kind,
         rawId: rawId,
@@ -1367,6 +1368,18 @@ final class IngestRawMessages {
           'amount': g.amount.toJson(),
           'direction': ?direction?.code,
           'hasLast4': g.last4 != null,
+          'last4': ?g.last4,
+          'merchant': ?_nonEmpty(g.merchant?.display),
+          'merchantKey': ?_nonEmpty(g.merchant?.key),
+          'event': ?g.event?.name,
+          'occurredAtMs': occurredMs,
+          'tzOffsetMin': offsetMin,
+          'dateRead': g.dateRead,
+          'source': ?p.txnSource?.code,
+          'prefillComplete': g.prefillComplete,
+          'fieldConfidence': {
+            for (final e in g.fieldConfidence.entries) e.key.name: e.value,
+          },
           'confidencePermille': g.confidencePermille,
           'reasons': [for (final x in g.reasons) x.name],
         },
@@ -1848,3 +1861,19 @@ final class _UtcZone implements LocalZone {
   @override
   int offsetAtWallClock(DateTime wallClock) => 0;
 }
+
+/// The stored direction of a generic suggestion: its keyword direction,
+/// refined by the event hint (a refund, a transfer out or in). Null when the
+/// message names no direction (never guessed).
+TxnDirection? genericTxnDirection(ParseGeneric g) => switch (g.direction) {
+  TemplateDirection.expense =>
+    g.event == GenericEvent.transfer
+        ? TxnDirection.transferOut
+        : TxnDirection.expense,
+  TemplateDirection.income => switch (g.event) {
+    GenericEvent.refund => TxnDirection.refund,
+    GenericEvent.transfer => TxnDirection.transferIn,
+    _ => TxnDirection.income,
+  },
+  _ => null,
+};

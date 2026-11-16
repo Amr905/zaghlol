@@ -143,12 +143,17 @@ class TemplateBuilderController extends Notifier<TemplateBuilderState> {
   @override
   TemplateBuilderState build() => const TemplateBuilderState();
 
-  /// A fresh sample clears the tags (their offsets belong to the old text).
+  /// A fresh sample clears the tags (their offsets belong to the old text)
+  /// and pre-tags what the generic reader finds in it (SMS-fuzzy: amount,
+  /// currency, last-4, merchant, date), so the user checks instead of
+  /// tagging from scratch. Every tag stays editable.
   void setSample(String sample, {String? sender, String? channel}) {
+    final suggestion = suggestTemplateTags(sample, receivedAt: DateTime.now());
     state = TemplateBuilderState(
       sample: sample,
       tokens: tokenizeSample(sample),
-      direction: state.direction,
+      spans: {for (final t in suggestion?.tags ?? const <TagSpan>[]) t.tag: t},
+      direction: suggestion?.direction ?? state.direction,
       sender: sender ?? state.sender,
       channel: channel ?? state.channel,
       history: state.history,

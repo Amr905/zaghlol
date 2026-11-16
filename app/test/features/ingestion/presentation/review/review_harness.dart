@@ -8,6 +8,8 @@ import 'package:zaghlol/core/l10n/digits_mode.dart';
 import 'package:zaghlol/core/l10n/generated/app_localizations.dart';
 import 'package:zaghlol/core/l10n/locale_providers.dart';
 import 'package:zaghlol/core/theme/app_theme.dart';
+import 'package:zaghlol/features/capture/application/template_builder.dart'
+    show TemplateSample;
 import 'package:zaghlol/features/ingestion/presentation/review/review_models.dart';
 import 'package:zaghlol/features/ingestion/presentation/review/review_providers.dart';
 import 'package:zaghlol/features/ingestion/presentation/review/review_screen.dart';
@@ -53,6 +55,17 @@ class FakeActions implements ReviewActions {
     required String country,
     required String channel,
   }) => _rec('bank:$itemId:$name:$country:$channel');
+  @override
+  Future<bool> confirmGeneric(MessageCardModel card) async {
+    await _rec('generic:${card.itemId}');
+    return true;
+  }
+
+  @override
+  Future<TemplateSample?> templateSample(String rawMessageId) async {
+    calls.add('sample:$rawMessageId');
+    return null;
+  }
 }
 
 final sampleCards = <ReviewCardModel>[

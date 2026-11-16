@@ -25,6 +25,7 @@ import '../../../../core/ui/z_button.dart';
 import '../../../../core/ui/z_card.dart';
 import '../../../../core/ui/z_chip.dart';
 import '../../../../core/ui/z_sheet.dart';
+import '../../../capture/presentation/template_builder_screen.dart';
 import 'review_models.dart';
 import 'review_providers.dart';
 
@@ -233,7 +234,7 @@ class _ReviewScreenState extends ConsumerState<ReviewScreen> {
   Widget _swipeable(ReviewCardModel card) {
     final l10n = AppLocalizations.of(context);
     final canAccept =
-        (card is MessageCardModel && !card.unreadable) ||
+        (card is MessageCardModel && card.canConfirm) ||
         (card is SuggestionCardModel &&
             !card.ambiguousRefund &&
             !card.isPair) ||
@@ -272,8 +273,44 @@ class _ReviewScreenState extends ConsumerState<ReviewScreen> {
 
   Future<void> _accept(ReviewCardModel card) => switch (card) {
     SubscriptionCardModel() => _actions.confirmSubscription(card),
+    // A suggestion with no stored transaction: only a complete one is saved
+    // by a swipe; anything else would be lost, so the swipe does nothing.
+    MessageCardModel(txnId: null) =>
+      card.oneTap ? _confirmGeneric(card) : Future<void>.value(),
     _ => _actions.accept(card.itemId),
   };
+
+  /// SMS-fuzzy: one tap saves a complete generic suggestion, then offers to
+  /// teach Zaghlol this message shape (custom template, T-164).
+  Future<void> _confirmGeneric(MessageCardModel card) async {
+    final saved = await _actions.confirmGeneric(card);
+    final rawId = card.rawMessageId;
+    if (!saved || !mounted) return;
+    final l10n = AppLocalizations.of(context);
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        // TODO(SMS-fuzzy): copy-deck keys ingestionReviewGenSaved and
+        // ingestionReviewGenMakeTemplate (T-087 branch); interim reuse.
+        content: Text(l10n.accountsEditSaved),
+        action: rawId == null
+            ? null
+            : SnackBarAction(
+                label: l10n.templatesBuilderTitle,
+                onPressed: () => unawaited(_learn(rawId)),
+              ),
+      ),
+    );
+  }
+
+  Future<void> _learn(String rawMessageId) async {
+    final sample = await _actions.templateSample(rawMessageId);
+    if (sample == null || !mounted) return;
+    await Navigator.of(context).push<void>(
+      MaterialPageRoute<void>(
+        builder: (_) => TemplateBuilderScreen(initialSample: sample),
+      ),
+    );
+  }
 
   void _dismissCard(ReviewCardModel card) {
     if (card is SubscriptionCardModel) {
@@ -298,7 +335,11 @@ class _ReviewScreenState extends ConsumerState<ReviewScreen> {
     ),
     MessageCardModel() => _MessageCard(
       card: card,
-      onConfirm: () => _now(() => _actions.accept(card.itemId)),
+      onConfirm: () => _now(
+        () => card.txnId == null
+            ? _confirmGeneric(card)
+            : _actions.accept(card.itemId),
+      ),
       onEdit: () => context.push(AppRoutes.add),
       onDismiss: () => _dismiss(card.itemId),
       onRequestBank: () => _requestBank(card),
@@ -613,19 +654,19 @@ class _MessageCard extends StatelessWidget {
           ? l10n.ingestionReviewGenGuessIn(a)
           : (m == null || m.isEmpty)
           ? l10n.ingestionReviewGenGuessNoMerchant(a)
-          : l10n.ingestionReviewGenGuessOut(a, m);
+          : l10n.ingestionReviewGenGuessOut(a, _iso(m));
     }
     final actions = <Widget>[
-      if (!card.unreadable)
+      if (card.canConfirm)
         ZButton(
           label: l10n.commonActionConfirm,
           expand: true,
           onPressed: onConfirm,
         ),
       ZButton(
-        label: card.unreadable
-            ? l10n.ingestionReviewUnreadEnter
-            : l10n.commonActionEdit,
+        label: card.canConfirm
+            ? l10n.commonActionEdit
+            : l10n.ingestionReviewUnreadEnter,
         variant: ZButtonVariant.secondary,
         expand: true,
         onPressed: onEdit,

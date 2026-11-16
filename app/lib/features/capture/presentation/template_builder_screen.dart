@@ -3,6 +3,8 @@
 // history, save. The message stays on the phone (copy says so) and is held
 // in memory only while this screen is open.
 
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:zaghlol_parsing/zaghlol_parsing.dart';
@@ -17,7 +19,11 @@ import '../application/template_builder.dart';
 const int _maxSampleField = 1000;
 
 class TemplateBuilderScreen extends ConsumerStatefulWidget {
-  const TemplateBuilderScreen({super.key});
+  const TemplateBuilderScreen({super.key, this.initialSample});
+
+  /// A message to start from (the review queue's "make a template" offer,
+  /// SMS-fuzzy); its parts come pre-tagged. Never logged.
+  final TemplateSample? initialSample;
 
   @override
   ConsumerState<TemplateBuilderScreen> createState() => _State();
@@ -26,6 +32,23 @@ class TemplateBuilderScreen extends ConsumerStatefulWidget {
 class _State extends ConsumerState<TemplateBuilderScreen> {
   final _paste = TextEditingController();
   final _sender = TextEditingController();
+
+  @override
+  void initState() {
+    super.initState();
+    final initial = widget.initialSample;
+    if (initial != null) {
+      _paste.text = initial.body;
+      _sender.text = initial.sender;
+      // After the first frame: providers can't change during build.
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        if (!mounted) return;
+        unawaited(
+          ref.read(templateBuilderProvider.notifier).useReviewSample(initial),
+        );
+      });
+    }
+  }
 
   @override
   void dispose() {
