@@ -60,7 +60,7 @@ class FakeActions implements ReviewActions {
     MessageCardModel card, {
     bool keep = false,
   }) async {
-    await _rec('generic:${card.itemId}');
+    await _rec(keep ? 'keep:${card.itemId}' : 'generic:${card.itemId}');
     return true;
   }
 

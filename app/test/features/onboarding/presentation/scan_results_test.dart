@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:zaghlol/core/l10n/card_number.dart';
 import 'package:zaghlol/core/l10n/generated/app_localizations.dart';
 import 'package:zaghlol/core/settings/settings_keys.dart';
 import 'package:zaghlol/core/settings/settings_providers.dart';
@@ -192,8 +193,8 @@ void main() {
         await tester.pumpAndSettle();
         await tester.tap(find.byKey(const ValueKey('scan-edit-cards')));
         await tester.pumpAndSettle();
-        expect(find.text('•••• 1234'), findsOneWidget);
-        expect(find.text('•••• 9876'), findsOneWidget);
+        expect(find.text(formatCardTail('1234')), findsOneWidget);
+        expect(find.text(formatCardTail('9876')), findsOneWidget);
       });
 
       testWidgets('header Edit link picks a card and opens its editor', (

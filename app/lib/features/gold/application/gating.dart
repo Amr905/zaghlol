@@ -140,7 +140,7 @@ abstract final class GoldGate {
 
   /// PO 2026-11-16: all charts are open in Free for now. Flip to `false` to
   /// restore the Gold gate (Free then sees only the core charts).
-  static const bool chartsOpenToFree = true;
+  static bool chartsOpenToFree = true;
 
   /// Charts: while [chartsOpenToFree] every chart is open; otherwise Free
   /// sees [FreeLimits.coreCharts] (core indexes 0..3 of the ordered chart

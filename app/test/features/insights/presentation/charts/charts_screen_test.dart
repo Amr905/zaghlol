@@ -41,6 +41,10 @@ AppLocalizations _l(WidgetTester t) =>
     AppLocalizations.of(t.element(find.byType(ChartsScreen)));
 
 void main() {
+  // CHARTS-FREE: these tests cover the Gold gate itself, so close it.
+  setUp(() => GoldGate.chartsOpenToFree = false);
+  tearDown(() => GoldGate.chartsOpenToFree = true);
+
   for (final locale in const [_en, _ar]) {
     final tag = locale.languageCode;
     testWidgets('$tag: four free charts render, nine locked previews', (

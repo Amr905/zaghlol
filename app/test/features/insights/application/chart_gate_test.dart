@@ -20,19 +20,20 @@ void main() {
     return c.read(entitlementStateProvider);
   }();
 
-  test('Free opens cash flow, donut, top merchants and budget bars only', () {
-    final open = [
-      for (final id in ChartId.values)
-        if (decideChart(free, id).allowed) id,
-    ];
-    expect(open, [
-      ChartId.cashFlow,
-      ChartId.categoryDonut,
-      ChartId.topMerchants,
-      ChartId.budgetProgress,
-    ]);
+  test('CHARTS-FREE: Free opens all 12 charts through the one switch', () {
+    expect(GoldGate.chartsOpenToFree, isTrue);
     for (final id in ChartId.values) {
-      if (!open.contains(id)) expect(decideChart(free, id).paywall, isTrue);
+      expect(decideChart(free, id).allowed, isTrue, reason: '$id');
+      expect(decideChart(free, id).paywall, isFalse, reason: '$id');
+    }
+  });
+
+  test('the core-four matrix is intact for when the switch flips back', () {
+    GoldGate.chartsOpenToFree = false;
+    addTearDown(() => GoldGate.chartsOpenToFree = true);
+    for (final id in ChartId.values) {
+      final core = chartGateIndex(id) < FreeLimits.coreCharts;
+      expect(GoldGate.chart(free, chartGateIndex(id)).allowed, core);
     }
   });
 

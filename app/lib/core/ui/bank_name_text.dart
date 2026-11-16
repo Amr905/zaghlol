@@ -18,6 +18,7 @@ class BankNameText extends ConsumerWidget {
     this.textAlign,
     this.compose,
     this.maxLines = 1,
+    this.textKey,
     super.key,
   });
 
@@ -38,6 +39,9 @@ class BankNameText extends ConsumerWidget {
   final String Function(String name)? compose;
   final int maxLines;
 
+  /// Key of the inner [Text] (tests).
+  final Key? textKey;
+
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final short =
@@ -57,6 +61,7 @@ class BankNameText extends ConsumerWidget {
     if (short == null) {
       return Text(
         full,
+        key: textKey,
         style: style,
         maxLines: maxLines,
         overflow: TextOverflow.ellipsis,
@@ -76,6 +81,7 @@ class BankNameText extends ConsumerWidget {
         final shown = fits ? full : line(short);
         final text = Text(
           shown,
+          key: textKey,
           style: style,
           maxLines: maxLines,
           overflow: TextOverflow.ellipsis,

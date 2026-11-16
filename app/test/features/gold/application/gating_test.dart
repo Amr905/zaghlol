@@ -3,6 +3,10 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:zaghlol/features/gold/application/gating.dart';
 
 void main() {
+  // CHARTS-FREE: these tests cover the Gold gate itself, so close it.
+  setUp(() => GoldGate.chartsOpenToFree = false);
+  tearDown(() => GoldGate.chartsOpenToFree = true);
+
   const free = EntitlementState.free;
   final gold = () {
     final c = ProviderContainer();

@@ -767,7 +767,7 @@ class _MessageCard extends StatelessWidget {
             Text(guess, style: ZType.title.copyWith(color: c.text)),
             if (card.oneTap || card.keepable)
               BankNameText(
-                key: const ValueKey('reviewOneTapDetails'),
+                textKey: const ValueKey('reviewOneTapDetails'),
                 name: card.bankLabel ?? card.sender,
                 institutionCode: card.institutionCode,
                 maxLines: 3,
@@ -793,14 +793,35 @@ class _MessageCard extends StatelessWidget {
           if (card.originalText != null)
             _OriginalText(text: card.originalText!),
           const SizedBox(height: ZSpacing.lg),
-          Row(
-            children: [
-              for (var i = 0; i < actions.length; i++) ...[
-                if (i > 0) const SizedBox(width: ZSpacing.sm),
-                Expanded(child: actions[i]),
+          if (actions.length > 2) ...[
+            // Three actions never fit side by side at large text: the main
+            // one takes the full width, the other two share the next line
+            // (or stack when the text is scaled up).
+            actions.first,
+            const SizedBox(height: ZSpacing.sm),
+            if (MediaQuery.textScalerOf(context).scale(16) > 18)
+              for (var i = 1; i < actions.length; i++) ...[
+                if (i > 1) const SizedBox(height: ZSpacing.sm),
+                actions[i],
+              ]
+            else
+              Row(
+                children: [
+                  for (var i = 1; i < actions.length; i++) ...[
+                    if (i > 1) const SizedBox(width: ZSpacing.sm),
+                    Expanded(child: actions[i]),
+                  ],
+                ],
+              ),
+          ] else
+            Row(
+              children: [
+                for (var i = 0; i < actions.length; i++) ...[
+                  if (i > 0) const SizedBox(width: ZSpacing.sm),
+                  Expanded(child: actions[i]),
+                ],
               ],
-            ],
-          ),
+            ),
           if (card.sender.isNotEmpty)
             Align(
               alignment: AlignmentDirectional.centerStart,

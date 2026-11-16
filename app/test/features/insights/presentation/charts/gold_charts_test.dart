@@ -53,6 +53,9 @@ AppLocalizations _l(WidgetTester t, Type root) =>
     AppLocalizations.of(t.element(find.byType(root)));
 
 void main() {
+  setUp(() => GoldGate.chartsOpenToFree = false);
+  tearDown(() => GoldGate.chartsOpenToFree = true);
+
   for (final locale in const [_en, _ar]) {
     final tag = locale.languageCode;
 
