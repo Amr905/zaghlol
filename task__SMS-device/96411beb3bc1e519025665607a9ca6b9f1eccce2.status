@@ -1,1 +1,1 @@
-﻿RUNNING sha=96411beb3bc1e519025665607a9ca6b9f1eccce2
+﻿FAIL sha=96411beb3bc1e519025665607a9ca6b9f1eccce2 pipeline=quick-app pub-get=0 format=0 analyze=0 lints=0 app-test=1 dart-test-zaghlol_catalog=0 dart-test-zaghlol_domain=0 dart-test-zaghlol_parsing=1 apk-devNoSms=0 apk-perms=0 android-unit=1 android-lint=0
