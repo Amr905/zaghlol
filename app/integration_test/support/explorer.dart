@@ -65,6 +65,14 @@ final class _Snapshot {
   Set<int> get ids => {for (final r in routes) r.id};
 }
 
+/// A screen being explored: its routes when it is showing, and how to bring
+/// it back after a tap closed it.
+final class _Ctx {
+  _Ctx(this.base, this.reopen);
+  _Snapshot base;
+  final Future<void> Function()? reopen;
+}
+
 final class _Cand {
   _Cand(this.element, this.kind, this.label, this.center, this.key);
   final Element element;
@@ -163,6 +171,7 @@ class Explorer {
     bool force = false,
   }) async {
     final snap = _snapshot();
+    final ctx = _Ctx(snap, reopen);
     final top = snap.routes.isEmpty ? null : snap.routes.last;
     final title = force ? name : _titleOf(top) ?? name;
     final key = '${top?.kind}|$title';
@@ -199,7 +208,7 @@ class Explorer {
         final c = next.first;
         done.add(c.key);
         progressed = true;
-        final ok = await _tap(rec, c, snap, depth, reopen, tabIndex);
+        final ok = await _tap(rec, c, ctx, depth, tabIndex);
         if (!ok) return;
       }
       if (rec.capped || timedOut) break;
@@ -217,9 +226,8 @@ class Explorer {
   Future<bool> _tap(
     ScreenRecord rec,
     _Cand c,
-    _Snapshot baseline,
+    _Ctx ctx,
     int depth,
-    Future<void> Function()? reopen,
     int tabIndex,
   ) async {
     final pre = _snapshot();
@@ -229,7 +237,7 @@ class Explorer {
     rec.taps.add(record);
     await tester.tapAt(c.center);
     await _settle();
-    final post = _snapshot();
+    var post = _snapshot();
     // Exceptions first: they matter even when the tap did something.
     final threw = _flushErrors(rec, '${c.kind} "${c.label}"');
     final state = WidgetsBinding.instance.lifecycleState;
@@ -244,6 +252,13 @@ class Explorer {
       record.outcome = 'left the app';
       await _waitForeground();
     }
+    bool sameRoutes(_Snapshot x) =>
+        x.ids.length == pre.ids.length && x.ids.containsAll(pre.ids);
+    if (sameRoutes(post) && post.fingerprint == pre.fingerprint) {
+      // Give slow work (a database read, a page sliding away) one more look.
+      await _pump(const Duration(milliseconds: 700));
+      post = _snapshot();
+    }
     final newRoutes = post.routes
         .where((r) => !pre.ids.contains(r.id))
         .toList();
@@ -252,11 +267,9 @@ class Explorer {
         .toList();
     if (newRoutes.isEmpty && goneRoutes.isEmpty) {
       if (post.fingerprint == pre.fingerprint) {
-        // Give slow work (a database read, a sheet animating) one more look.
-        await _pump(const Duration(milliseconds: 700));
-        final late = _snapshot();
-        if (late.fingerprint == pre.fingerprint &&
-            late.ids.length == pre.ids.length) {
+        if (threw) {
+          record.outcome = 'threw';
+        } else {
           _dead++;
           if (record.outcome.isEmpty) record.outcome = 'NOTHING HAPPENED';
           rec.issues.add(
@@ -266,13 +279,10 @@ class Explorer {
               'no route, text or state change after the tap',
             ),
           );
-        } else if (record.outcome.isEmpty) {
-          record.outcome = 'changed (late)';
         }
       } else if (record.outcome.isEmpty) {
         record.outcome = 'changed the screen';
       }
-      if (threw && record.outcome.isEmpty) record.outcome = 'threw';
       return true;
     }
     if (newRoutes.isNotEmpty) {
@@ -287,7 +297,9 @@ class Explorer {
             : 'opens "$childTitle" (seen)';
         if (fresh && depth < maxDepth && !_stopped && !timedOut) {
           Future<void> again() async {
-            await _restore(rec, baseline, reopen, tabIndex);
+            final got = await _restore(rec, ctx.base, ctx.reopen, tabIndex);
+            if (got == null) return;
+            ctx.base = got;
             await _tapByKey(c.key);
           }
 
@@ -297,12 +309,18 @@ class Explorer {
     } else {
       record.outcome = 'closed ${goneRoutes.last.kind}';
     }
-    return _restore(rec, pre, reopen, tabIndex);
+    final got = await _restore(rec, pre, ctx.reopen, tabIndex);
+    if (got == null) return false;
+    // Reopening makes new route objects: the screen's baseline moves.
+    if (got.ids.length != pre.ids.length || !got.ids.containsAll(pre.ids)) {
+      ctx.base = got;
+    }
+    return true;
   }
 
-  /// Gets back to [target]'s routes. False when it could not (the caller
-  /// stops exploring this screen).
-  Future<bool> _restore(
+  /// Gets back to [target]'s routes (or an equal-sized set after a
+  /// [reopen]). Null when it could not; the caller stops exploring.
+  Future<_Snapshot?> _restore(
     ScreenRecord rec,
     _Snapshot target,
     Future<void> Function()? reopen,
@@ -313,7 +331,9 @@ class Explorer {
       final now = _snapshot();
       final want = target.ids;
       final have = now.ids;
-      if (have.length == want.length && have.containsAll(want)) return true;
+      if (have.length == want.length && have.containsAll(want)) return now;
+      // After a reopen the routes are new objects of the same shape.
+      if (reopened && have.length == want.length) return now;
       final extra = now.routes.where((r) => !want.contains(r.id)).toList();
       if (extra.isNotEmpty) {
         final top = extra.last;
@@ -339,8 +359,8 @@ class Explorer {
     }
     final now = _snapshot();
     if (now.ids.length == target.ids.length &&
-        now.ids.containsAll(target.ids)) {
-      return true;
+        (reopened || now.ids.containsAll(target.ids))) {
+      return now;
     }
     rec.issues.add(
       ExplorerIssue(
@@ -351,7 +371,7 @@ class Explorer {
     );
     await goHome();
     await _settle(minMs: 300);
-    return false;
+    return null;
   }
 
   Future<void> _tapByKey(String key) async {
@@ -584,7 +604,7 @@ class Explorer {
       if (!_hits(center, ro)) continue;
       final label = _labelOf(e);
       if (deny.any((d) => d.isNotEmpty && label.contains(d))) continue;
-      if (kind != 'button' && navLabels.contains(label)) continue;
+      if (navLabels.contains(label)) continue;
       // Digits are dropped from the key: counters and clocks change a
       // label between two looks at the same widget.
       final stable = label.replaceAll(

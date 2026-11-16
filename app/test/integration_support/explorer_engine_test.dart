@@ -68,8 +68,15 @@ class _Detail extends StatelessWidget {
   @override
   Widget build(BuildContext context) => Scaffold(
     appBar: AppBar(title: const Text('Detail page')),
-    body: Center(
-      child: ElevatedButton(onPressed: () {}, child: const Text('Detail dead')),
+    body: Column(
+      children: [
+        ElevatedButton(onPressed: () {}, child: const Text('Detail dead')),
+        ElevatedButton(
+          onPressed: () => Navigator.of(context).pop(),
+          child: const Text('Done'),
+        ),
+        ElevatedButton(onPressed: () {}, child: const Text('Detail dead 2')),
+      ],
     ),
   );
 }
@@ -96,6 +103,15 @@ void main() {
       containsAll(['button "Dead button"', 'button "Detail dead"']),
     );
     expect(issues.where((i) => i.kind == 'exception'), isNotEmpty);
+    // The screen that closes itself is reopened and the rest still tapped.
+    expect(issues.where((i) => i.kind == 'dead-end'), isEmpty);
+    expect(
+      ex.screens
+          .firstWhere((s) => s.title == 'Detail page')
+          .taps
+          .map((t) => t.label),
+      contains('Detail dead 2'),
+    );
     expect(
       ex.screens.map((s) => s.title),
       containsAll(['Home', 'Detail page', 'Sure?']),

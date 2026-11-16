@@ -158,6 +158,9 @@ void main() {
     }
 
     Future<void> goHome() async {
+      // Screens pushed on the root navigator (Settings, ...) hide the shell.
+      rootNavigatorKey.currentState?.popUntil((r) => r.isFirst);
+      await t.pump(const Duration(milliseconds: 500));
       GoRouter.of(rootNavigatorKey.currentContext!).go(AppRoutes.home);
       await t.pump(const Duration(milliseconds: 600));
       await selectTab(0);
