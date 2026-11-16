@@ -172,7 +172,6 @@ void main() {
   testWidgets('SMS: historical inbox scan, then live receiver, then saved', (
     t,
   ) async {
-    final semantics = t.ensureSemantics();
     final dir = await resolveDbDirectory();
     final seed = ProviderContainer(
       overrides: [dbDirectoryProvider.overrideWithValue(dir)],
@@ -360,7 +359,6 @@ void main() {
     }
     say('RESULT problems=${problems.length}');
     FlutterError.onError = original;
-    semantics.dispose();
     expect(problems, isEmpty, reason: problems.join('; '));
   });
 }

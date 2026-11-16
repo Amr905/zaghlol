@@ -43,6 +43,9 @@ CIB_L='يرجى العلم انه تم تنفيذ تحويل لحظي بمبلغ
 NBE_L='Dear customer, EGP 252.00 was debited from your account *4569 at SPINNEYS ZAMALEK on 10/11/2026'
 NODIGIT='Thank you for banking with HSBC'
 PERSONAL='hello from a friend 5'
+# Live copies differ from the historical ones: telephony drops an identical repeat.
+NODIGIT_L='Thank you for banking with HSBC again'
+PERSONAL_L='hello from a friend 6'
 
 sms_emu() { # sender body: the emulator modem (real telephony, the real SmsReceiver when the app runs)
   local out
@@ -109,8 +112,8 @@ run_sms_device() {
     sms_live 'HSBC EG' "$HSBC_EGP_L"
     sms_live CIB "$CIB_L"
     sms_live NBE "$NBE_L"
-    sms_live HSBC "$NODIGIT"
-    sms_live 5550199 "$PERSONAL"
+    sms_live HSBC "$NODIGIT_L"
+    sms_live 5550199 "$PERSONAL_L"
   else
     echo "the test never reached the live part"
   fi
