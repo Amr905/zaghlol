@@ -1548,7 +1548,9 @@ paths:
         section 5.3). Clears the purchase's dispute freeze so that an ordinary support move can follow, for an
         owner who lost the phone during the freeze. It moves no seat, links no account and leaves the 30-day
         window as it is. The caller must be a different operator from the agent of the correction that started
-        the current freeze; otherwise `409 ADMIN_CONFLICT`, checked before the ownership check and audited.
+        the current freeze and from the operator of the row that correction reversed (R6-1); otherwise
+        `409 ADMIN_CONFLICT`, checked before the ownership check and audited. After an unfreeze, the unfreezing
+        operator can't make the next ordinary `seat:move` on that purchase for 24 hours.
         Checks `ownershipCheck` live like `adminMoveSeat` (`422 OWNERSHIP_CHECK_FAILED`, `503` on an outage).
         A purchase with no running freeze changes nothing and is audited as `noop`. Every call writes one
         `support_unfreeze` audit row (purchase, ticket reference, the correction row that started the freeze,

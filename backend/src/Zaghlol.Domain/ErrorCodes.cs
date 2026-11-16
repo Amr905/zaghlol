@@ -45,5 +45,8 @@ public static class ErrorCodes
 
     /// <summary>409 (sign-in, T-135): the install is linked to another account; resend with <c>replaceLink: true</c> (EC-46).</summary>
     public const string InstallLinkedToOtherAccount = "INSTALL_LINKED_TO_OTHER_ACCOUNT";
+
+    /// <summary>422 (operator API only, T-186): the store order ID didn't match this purchase live at Google Play or the App Store, or the order is refunded or cancelled.</summary>
+    public const string OwnershipCheckFailed = "OWNERSHIP_CHECK_FAILED";
     public const string Internal = "INTERNAL";
 }

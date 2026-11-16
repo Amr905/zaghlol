@@ -27,6 +27,9 @@ public class OperatorEndpointTests(OperatorHostFixture fixture) : IClassFixture<
 {
     private const string Lookup = "/admin/v1/support/entitlement:lookup";
     private const string LookupKey = "POST " + Lookup;
+    private const string MoveKey = "POST /admin/v1/support/seat:move";
+    private const string DetachKey = "POST /admin/v1/support/purchase:detach";
+    private const string UnfreezeKey = "POST /admin/v1/support/purchase:unfreeze";
     private const string PutDraft = "PUT /admin/v1/catalog/draft/{entity}/{id}";
     private const string CreateDraft = "POST /admin/v1/catalog/draft/{entity}";
     private const string DeleteDraft = "DELETE /admin/v1/catalog/draft/{entity}/{id}";
@@ -37,10 +40,10 @@ public class OperatorEndpointTests(OperatorHostFixture fixture) : IClassFixture<
     private const string RejectContribution = "POST /admin/v1/contributions:reject";
 
     private static readonly string[] AllOperatorRoles =
-        [OperatorRoles.CatalogEditor, OperatorRoles.FlagsAdmin, OperatorRoles.PricesAdmin, OperatorRoles.SupportViewer];
+        [OperatorRoles.CatalogEditor, OperatorRoles.FlagsAdmin, OperatorRoles.PricesAdmin, OperatorRoles.SupportViewer, OperatorRoles.SupportAgent, OperatorRoles.SupportLead];
 
     /// <summary>Every admin operation that changes state or is audited, with a valid call. A new one fails the test below.</summary>
-    private static readonly string[] AuditedOperations = [PutDraft, CreateDraft, DeleteDraft, Publish, PutFlag, PutPriceOverride, PromoteContribution, RejectContribution, LookupKey];
+    private static readonly string[] AuditedOperations = [PutDraft, CreateDraft, DeleteDraft, Publish, PutFlag, PutPriceOverride, PromoteContribution, RejectContribution, LookupKey, MoveKey, DetachKey, UnfreezeKey];
 
     [Fact]
     public async Task AValidMfaTokenWithTheRoleIsServed()
@@ -334,6 +337,27 @@ public class OperatorEndpointTests(OperatorHostFixture fixture) : IClassFixture<
         Assert.All(admin, e => Assert.True(e.Roles.Count == 1 && OperatorRoles.IsKnown(e.Roles[0]), e.Key));
     }
 
+    /// <summary>A purchase held by one install, in cooldown, with one fresh pending claimant (the support writes' starting point).</summary>
+    private async Task<(Guid Purchase, Guid Claimant)> SeedMovableAsync()
+    {
+        var holder = Guid.NewGuid();
+        var claimant = Guid.NewGuid();
+        var purchase = Guid.NewGuid();
+        await fixture.ExecuteAsync(
+            $$"""
+            INSERT INTO zaghlol.installs (id, token_hash, platform, app_version)
+              VALUES ('{{holder}}', decode(md5('{{holder}}') || md5('{{purchase}}'), 'hex'), 'android', '1.2.0'),
+                     ('{{claimant}}', decode(md5('{{claimant}}') || md5('{{purchase}}'), 'hex'), 'android', '1.2.0');
+            INSERT INTO zaghlol.purchases (id, store, product_id, plan, store_key, state, environment, last_verified_at, install_id)
+              VALUES ('{{purchase}}', 'google_play', 'zaghlol_gold_monthly', 'monthly', 'k-{{purchase}}', 'active', 'production', now(), '{{holder}}');
+            INSERT INTO zaghlol.purchase_seats (purchase_id, install_id, proof, bound_at, last_moved_at, next_move_at)
+              VALUES ('{{purchase}}', '{{holder}}', 'attested', now(), date_trunc('hour', now()) - interval '20 days', date_trunc('hour', now()) + interval '10 days');
+            INSERT INTO zaghlol.seat_claimants (purchase_id, install_id, claimed_at, channel)
+              VALUES ('{{purchase}}', '{{claimant}}', now() - interval '1 hour', 'restore');
+            """);
+        return (purchase, claimant);
+    }
+
     private static string InstallBody(Guid installId) => "{\"installId\":\"" + installId.ToString("D") + "\"}";
 
     private static string NewCode() => "t136_" + Guid.NewGuid().ToString("N")[..10];
@@ -455,6 +479,27 @@ public class OperatorEndpointTests(OperatorHostFixture fixture) : IClassFixture<
 
             case LookupKey:
                 return (await fixture.AuditCountAsync(operatorId), await fixture.SendAsync(HttpMethod.Post, Lookup, Token(), InstallBody(Guid.NewGuid())));
+            case MoveKey:
+                {
+                    var (purchase, claimant) = await SeedMovableAsync();
+                    var body = $$"""{"purchaseId":"{{purchase}}","toInstallId":"{{claimant}}","reasonCode":"other","ticketRef":"ZG-1","ownershipCheck":"GPA.1234-5678-9012"}""";
+                    return (await fixture.AuditCountAsync(operatorId), await fixture.SendAsync(HttpMethod.Post, "/admin/v1/support/seat:move", Token(), body));
+                }
+
+            case DetachKey:
+                {
+                    var (purchase, _) = await SeedMovableAsync();
+                    var body = $$"""{"purchaseId":"{{purchase}}","reasonCode":"correction","ticketRef":"ZG-1","ownershipCheck":"GPA.1234-5678-9012","correctsAuditId":1}""";
+                    return (await fixture.AuditCountAsync(operatorId), await fixture.SendAsync(HttpMethod.Post, "/admin/v1/support/purchase:detach", Token(), body));
+                }
+
+            case UnfreezeKey:
+                {
+                    var (purchase, _) = await SeedMovableAsync();
+                    var body = $$"""{"purchaseId":"{{purchase}}","ticketRef":"ZG-1","ownershipCheck":"GPA.1234-5678-9012"}""";
+                    return (await fixture.AuditCountAsync(operatorId), await fixture.SendAsync(HttpMethod.Post, "/admin/v1/support/purchase:unfreeze", Token(), body));
+                }
+
             default:
                 throw new InvalidOperationException("No audited call for " + operation + ": add one here.");
         }
