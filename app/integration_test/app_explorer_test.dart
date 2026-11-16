@@ -13,6 +13,7 @@
 // Run: flutter test integration_test/app_explorer_test.dart --flavor devSms
 //      -d <device> --no-uninstall
 
+import 'dart:async';
 import 'dart:io';
 
 import 'package:flutter/material.dart';
@@ -135,6 +136,9 @@ void main() {
       l10n.aboutDiagShare,
       l10n.commonActionOpenSettings,
       l10n.commonActionSignOut,
+      // Changing the language would turn the Arabic run into an English one.
+      l10n.settingsPrefsLanguageAr,
+      l10n.settingsPrefsLanguageEn,
       l10n.privacyDeleteConfirm,
       l10n.goldAccountDeleteConfirm,
     };
@@ -191,23 +195,42 @@ void main() {
       l10n.commonNavMoney,
       l10n.commonNavZaghlol,
     ];
+    // Errors thrown asynchronously by tap handlers reach the zone, not
+    // FlutterError.onError; without this guard the first one ends the test.
+    final done = Completer<void>();
+    final uncaught = <Object>[];
+    unawaited(
+      runZonedGuarded(
+        () async {
+          try {
+            for (var i = 0; i < 4 && !ex.timedOut; i++) {
+              await selectTab(i);
+              await ex.exploreCurrent(
+                names[i],
+                tabIndex: i,
+                reopen: () => selectTab(i),
+              );
+              await goHome();
+            }
+            if (!ex.timedOut) {
+              await selectTab(0);
+              await openAdd();
+              await ex.exploreCurrent(l10n.commonNavAddA11y, reopen: openAdd);
+              await rootNavigatorKey.currentState?.maybePop();
+              await goHome();
+            }
+          } finally {
+            done.complete();
+          }
+        },
+        (e, s) {
+          uncaught.add(e);
+          ex.recordUncaught(e);
+        },
+      ),
+    );
     try {
-      for (var i = 0; i < 4 && !ex.timedOut; i++) {
-        await selectTab(i);
-        await ex.exploreCurrent(
-          names[i],
-          tabIndex: i,
-          reopen: () => selectTab(i),
-        );
-        await goHome();
-      }
-      if (!ex.timedOut) {
-        await selectTab(0);
-        await openAdd();
-        await ex.exploreCurrent(l10n.commonNavAddA11y, reopen: openAdd);
-        await rootNavigatorKey.currentState?.maybePop();
-        await goHome();
-      }
+      await done.future;
     } finally {
       ex.uninstall();
       final md = ex.markdown(
@@ -232,7 +255,8 @@ void main() {
     final hard = [
       for (final s in ex.screens)
         for (final i in s.issues)
-          if (i.kind != 'dead-tap') '${s.title}: ${i.kind} ${i.where}',
+          if (i.kind != 'dead-tap' && i.kind != 'restore')
+            '${s.title}: ${i.kind} ${i.where}',
     ];
     expect(ex.screens.length, greaterThan(8), reason: 'explored real screens');
     expect(hard, isEmpty, reason: hard.join('\n'));

@@ -228,6 +228,9 @@ class _DetailState extends ConsumerState<TransactionDetailScreen> {
       if (answer == null || !mounted) return;
       always = answer;
     }
+    // The Undo action outlives this screen: it must not use `ref` (explorer
+    // finding: tapping Undo after leaving threw "ref ... unmounted").
+    final container = ProviderScope.containerOf(context);
     await _run(() async {
       final actions = await ref.read(txnBulkActionsProvider.future);
       final r = await actions.setCategory(
@@ -247,8 +250,8 @@ class _DetailState extends ConsumerState<TransactionDetailScreen> {
           onPressed: () async {
             await _run(() async {
               await actions.undo(r.batchId);
-              ref.invalidate(txnDetailProvider(t.id));
-              ref.invalidate(txnListProvider);
+              container.invalidate(txnDetailProvider(t.id));
+              container.invalidate(txnListProvider);
             });
           },
         ),

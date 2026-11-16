@@ -131,6 +131,8 @@ class Explorer {
   final Set<String> _seen = {};
   final List<FlutterErrorDetails> _errors = [];
   FlutterExceptionHandler? _previousOnError;
+  ScreenRecord? _cur;
+  String _curWhere = '';
   int _taps = 0;
   int _dead = 0;
   bool _stopped = false;
@@ -234,6 +236,8 @@ class Explorer {
     _errors.clear();
     _taps++;
     final record = TapRecord(c.kind, c.label, '');
+    _cur = rec;
+    _curWhere = '${c.kind} "${c.label}"';
     rec.taps.add(record);
     await tester.tapAt(c.center);
     await _settle();
@@ -362,12 +366,24 @@ class Explorer {
         (reopened || now.ids.containsAll(target.ids))) {
       return now;
     }
+    final stuck = now.routes
+        .where((r) => !target.ids.contains(r.id))
+        .isNotEmpty;
     rec.issues.add(
-      ExplorerIssue(
-        'dead-end',
-        rec.title,
-        'could not get back to this screen; went Home',
-      ),
+      stuck
+          // A screen that cannot be left: a real navigation dead end.
+          ? ExplorerIssue(
+              'dead-end',
+              rec.title,
+              'a screen stayed open after going back; went Home',
+            )
+          // The tap changed what the screen shows (a chosen category, say),
+          // so the control that opened it is gone: not a bug.
+          : ExplorerIssue(
+              'restore',
+              rec.title,
+              'the screen could not be reopened after its state changed',
+            ),
     );
     await goHome();
     await _settle(minMs: 300);
@@ -393,7 +409,14 @@ class Explorer {
     final seen = <String>{};
     for (final d in _errors) {
       final text = d.exceptionAsString().split('\n').first;
-      final line = text.length > 160 ? '${text.substring(0, 160)}...' : text;
+      var line = text.length > 160 ? '${text.substring(0, 160)}...' : text;
+      // Where it happened: the widget (and file:line) Flutter names.
+      final where2 = RegExp(r'error-causing widget was:\s*\n\s*(.+)')
+          .firstMatch(d.toString());
+      if (where2 != null) {
+        final w = where2.group(1)!;
+        line = '$line @ ${w.length > 140 ? w.substring(w.length - 140) : w}';
+      }
       if (!seen.add(line)) continue;
       final overflow = text.contains('overflowed');
       rec.issues.add(
@@ -684,6 +707,7 @@ class Explorer {
         'Issues: ${issues.length} '
         '(exceptions ${count('exception')}, overflows ${count('overflow')}, '
         'dead taps ${count('dead-tap')}, dead ends ${count('dead-end')}, '
+        'not reopened ${count('restore')}, '
         'left app ${count('left-app')}).',
       )
       ..writeln();
@@ -725,6 +749,17 @@ class Explorer {
   }
 
   String _c(String s) => s.replaceAll('|', '/').replaceAll('\n', ' ');
+
+  /// An error that reached the zone (async code in a tap handler) instead of
+  /// FlutterError.onError; the test's zone guard hands it here.
+  void recordUncaught(Object error) {
+    final rec = _cur ?? (screens.isEmpty ? null : screens.last);
+    if (rec == null) return;
+    final text = error.toString().split('\n').first;
+    final line = text.length > 160 ? '${text.substring(0, 160)}...' : text;
+    rec.issues.add(ExplorerIssue('exception', _curWhere, 'uncaught: $line'));
+    log('EXPLORER_ISSUE exception ${rec.title} / $_curWhere / uncaught: $line');
+  }
 
   /// Stops the run at the next safe point.
   void stop() => _stopped = true;

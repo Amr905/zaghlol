@@ -49,6 +49,38 @@ class _HomeState extends State<_Home> {
             child: const Text('Open dialog'),
           ),
           TextButton(
+            onPressed: () => showModalBottomSheet<void>(
+              context: context,
+              builder: (sheet) => Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  const Text('Pick sheet'),
+                  TextButton(
+                    onPressed: () => showDialog<void>(
+                      context: sheet,
+                      builder: (dlg) => AlertDialog(
+                        title: const Text('Always?'),
+                        actions: [
+                          TextButton(
+                            // Closes the dialog and the sheet under it.
+                            onPressed: () {
+                              Navigator.of(dlg).pop();
+                              Navigator.of(sheet).pop();
+                            },
+                            child: const Text('Always'),
+                          ),
+                        ],
+                      ),
+                    ),
+                    child: const Text('Pick one'),
+                  ),
+                  TextButton(onPressed: () {}, child: const Text('Sheet dead')),
+                ],
+              ),
+            ),
+            child: const Text('Open sheet'),
+          ),
+          TextButton(
             onPressed: () => throw StateError('boom'),
             child: const Text('Throws'),
           ),
@@ -97,6 +129,7 @@ void main() {
     await ex.exploreCurrent('Home');
     ex.uninstall();
     final md = ex.markdown();
+    debugPrint(md);
     final issues = [for (final s in ex.screens) ...s.issues];
     expect(
       issues.where((i) => i.kind == 'dead-tap').map((i) => i.where),
@@ -114,7 +147,15 @@ void main() {
     );
     expect(
       ex.screens.map((s) => s.title),
-      containsAll(['Home', 'Detail page', 'Sure?']),
+      containsAll(['Home', 'Detail page', 'Sure?', 'Pick sheet', 'Always?']),
+    );
+    // The sheet that closed itself with its dialog was reopened to go on.
+    expect(
+      ex.screens
+          .firstWhere((s) => s.title == 'Pick sheet')
+          .taps
+          .map((t) => t.label),
+      contains('Sheet dead'),
     );
     // Back on the first screen after everything.
     expect(find.text('Home page'), findsOneWidget);
