@@ -74,7 +74,15 @@ final class _Ctx {
 }
 
 final class _Cand {
-  _Cand(this.element, this.kind, this.label, this.center, this.key);
+  _Cand(
+    this.element,
+    this.kind,
+    this.label,
+    this.center,
+    this.key, {
+    this.selected = false,
+  });
+  final bool selected;
   final Element element;
   final String kind;
   final String label;
@@ -239,6 +247,7 @@ class Explorer {
     _cur = rec;
     _curWhere = '${c.kind} "${c.label}"';
     rec.taps.add(record);
+    log('EXPLORER_TAP ${rec.index} ${rec.title} / ${c.kind} "${c.label}"');
     await tester.tapAt(c.center);
     await _settle();
     var post = _snapshot();
@@ -273,6 +282,8 @@ class Explorer {
       if (post.fingerprint == pre.fingerprint) {
         if (threw) {
           record.outcome = 'threw';
+        } else if (c.selected) {
+          record.outcome = 'no change (already selected)';
         } else {
           _dead++;
           if (record.outcome.isEmpty) record.outcome = 'NOTHING HAPPENED';
@@ -292,7 +303,7 @@ class Explorer {
     if (newRoutes.isNotEmpty) {
       final top = newRoutes.last;
       final childTitle = _titleOf(top) ?? '?';
-      if (top.route.isFirst && selectTab != null) {
+      if (selectTab != null && _tabIndex() != null && _tabIndex() != tabIndex) {
         record.outcome = 'switched tab';
       } else {
         final fresh = !_seen.contains('${top.kind}|$childTitle');
@@ -338,16 +349,20 @@ class Explorer {
       if (have.length == want.length && have.containsAll(want)) return now;
       // After a reopen the routes are new objects of the same shape.
       if (reopened && have.length == want.length) return now;
+      // The shell's tab changed (a link to another tab): go back to it.
+      if (selectTab != null && _tabIndex() != null && _tabIndex() != tabIndex) {
+        await selectTab!(tabIndex);
+        await _settle(minMs: 500);
+        _errors.clear();
+        continue;
+      }
       final extra = now.routes.where((r) => !want.contains(r.id)).toList();
       if (extra.isNotEmpty) {
-        final top = extra.last;
-        if (top.route.isFirst && selectTab != null) {
-          await selectTab!(tabIndex);
-        } else if (top.route.navigator == null) {
-          break;
-        } else {
-          top.route.navigator!.pop();
-        }
+        // The first route of a nested Navigator cannot be popped; it goes
+        // with its parent.
+        final poppable = extra.where((r) => !r.route.isFirst).toList();
+        if (poppable.isEmpty || poppable.last.route.navigator == null) break;
+        poppable.last.route.navigator!.pop();
         await _settle(minMs: 500);
         _errors.clear();
         continue;
@@ -464,6 +479,22 @@ class Explorer {
 
   // ------------------------------------------------------------ tree
 
+  /// The selected tab of the shell's NavigationBar, or null without one.
+  int? _tabIndex() {
+    final root = WidgetsBinding.instance.rootElement;
+    if (root == null) return null;
+    int? idx;
+    _walk(root, (e) {
+      final w = e.widget;
+      if (w is NavigationBar) {
+        idx = w.selectedIndex;
+        return false;
+      }
+      return idx == null;
+    });
+    return idx;
+  }
+
   void _walk(Element root, bool Function(Element) visit) {
     void go(Element e) {
       final w = e.widget;
@@ -495,6 +526,13 @@ class Explorer {
         sb.write('H${w.selected}\u0001');
       } else if (w is FilterChip) {
         sb.write('F${w.selected}\u0001');
+      } else if (w is Semantics) {
+        // Custom controls (segments, tiles) show their state through
+        // semantics, not through text.
+        final p = w.properties;
+        if (p.selected != null || p.checked != null || p.toggled != null) {
+          sb.write('M${p.selected}${p.checked}${p.toggled}\u0001');
+        }
       } else if (w is Icon) {
         sb.write('I${w.icon?.codePoint}\u0001');
       } else if (w is EditableText) {
@@ -639,9 +677,37 @@ class Explorer {
         (v) => v + 1,
         ifAbsent: () => 0,
       );
-      out.add(_Cand(e, kind, label, center, '$kind|$stable|$n'));
+      out.add(
+        _Cand(
+          e,
+          kind,
+          label,
+          center,
+          '$kind|$stable|$n',
+          selected: _isSelected(e),
+        ),
+      );
     }
     return out;
+  }
+
+  /// A segment or chip that is already the selected one: tapping it again
+  /// legitimately does nothing.
+  bool _isSelected(Element e) {
+    final w = e.widget;
+    if (w is ChoiceChip && w.selected) return true;
+    if (w is FilterChip && w.selected) return true;
+    var sel = false;
+    e.visitAncestorElements((a) {
+      final aw = a.widget;
+      if (aw is Semantics && aw.properties.selected == true) {
+        sel = true;
+        return false;
+      }
+      // Only the control itself, not a whole list.
+      return aw is! Scrollable && aw is! Scaffold;
+    });
+    return sel;
   }
 
   bool _isShellAdd(Element e) {

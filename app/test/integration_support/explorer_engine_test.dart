@@ -84,6 +84,7 @@ class _HomeState extends State<_Home> {
             onPressed: () => throw StateError('boom'),
             child: const Text('Throws'),
           ),
+          _Seg(),
           Switch(value: on, onChanged: (v) => setState(() => on = v)),
           const SizedBox(
             width: 40,
@@ -93,6 +94,29 @@ class _HomeState extends State<_Home> {
       ),
     );
   }
+}
+
+/// A custom segmented control whose selection shows only in semantics.
+class _Seg extends StatefulWidget {
+  @override
+  State<_Seg> createState() => _SegState();
+}
+
+class _SegState extends State<_Seg> {
+  int sel = 0;
+  @override
+  Widget build(BuildContext context) => Row(
+    children: [
+      for (var i = 0; i < 2; i++)
+        Semantics(
+          selected: sel == i,
+          child: InkWell(
+            onTap: () => setState(() => sel = i),
+            child: SizedBox(width: 60, height: 40, child: Text('Seg$i')),
+          ),
+        ),
+    ],
+  );
 }
 
 class _Detail extends StatelessWidget {
@@ -135,6 +159,8 @@ void main() {
       containsAll(['button "Dead button"', 'button "Detail dead"']),
     );
     expect(issues.where((i) => i.kind == 'exception'), isNotEmpty);
+    // A segment that only changes its selected state is not a dead tap.
+    expect(issues.where((i) => i.where.contains('Seg')), isEmpty);
     // The screen that closes itself is reopened and the rest still tapped.
     expect(issues.where((i) => i.kind == 'dead-end'), isEmpty);
     expect(
