@@ -8,6 +8,11 @@ name: device-flows
 # publishes a screenshot per screen plus explorer-report.md. Not a merge gate.
 on:
   workflow_dispatch:
+    inputs:
+      explorer_only:
+        description: 'Skip the device flows test and run only the explorer'
+        type: boolean
+        default: false
   push:
     branches:
       - 'ci/**'
@@ -35,6 +40,7 @@ jobs:
     timeout-minutes: 90
     env:
       DEVICE: emulator-5554
+      EXPLORER_ONLY: ${{ inputs.explorer_only && '1' || '' }}
     steps:
       - uses: actions/checkout@fbc6f3992d24b796d5a048ff273f7fcc4a7b6c09 # v5.1.0
         with:

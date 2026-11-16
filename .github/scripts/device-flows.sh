@@ -25,13 +25,16 @@ flutter devices
 adb -s "$DEVICE" logcat -c || true
 
 # ---- 1. device flows (English, empty database)
-perl -e 'alarm shift; exec @ARGV' 1800 \
-  flutter test integration_test/device_flows_test.dart \
-  --flavor devSms -d "$DEVICE" --no-uninstall --reporter expanded \
-  2>&1 | tee "$OUT/test.log"
-rc=${PIPESTATUS[0]}
-pull_files
-adb -s "$DEVICE" exec-out screencap -p > "$OUT/screens/zz-final-screen.png" || true
+rc=0
+if [ -z "${EXPLORER_ONLY:-}" ]; then
+  perl -e 'alarm shift; exec @ARGV' 1800 \
+    flutter test integration_test/device_flows_test.dart \
+    --flavor devSms -d "$DEVICE" --no-uninstall --reporter expanded \
+    2>&1 | tee "$OUT/test.log"
+  rc=${PIPESTATUS[0]}
+  pull_files
+  adb -s "$DEVICE" exec-out screencap -p > "$OUT/screens/zz-final-screen.png" || true
+fi
 
 # ---- 2. explorer (Arabic, seeded database)
 # A clean app: no leftovers from step 1. Notification and microphone

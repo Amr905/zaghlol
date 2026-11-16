@@ -22,7 +22,6 @@ import 'package:go_router/go_router.dart';
 import 'package:integration_test/integration_test.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:zaghlol/core/catalog/catalog_providers.dart';
-import 'package:zaghlol/core/db/app_database_providers.dart';
 import 'package:zaghlol/core/db/db_directory.dart';
 import 'package:zaghlol/core/db/db_key_providers.dart';
 import 'package:zaghlol/core/l10n/generated/app_localizations.dart';
@@ -87,21 +86,35 @@ void main() {
     } on Object {
       // Categories stay empty; the run still explores.
     }
-    final seeded = await seedExplorerData(seed);
+    // ignore: avoid_print
+    print('EXPLORER_STAGE catalog ready');
+    final seeded = await seedExplorerData(seed).timeout(
+      const Duration(minutes: 2),
+      onTimeout: () => throw StateError('seeding timed out'),
+    );
     // ignore: avoid_print
     print(
       'EXPLORER_SEEDED accounts=${seeded.accountIds.length} '
       'txns=${seeded.transactions} reviews=${seeded.reviewItems}',
     );
-    await (await seed.read(appDatabaseProvider.future)).close();
+    // ignore: avoid_print
+    print('EXPLORER_STAGE seeded; closing the seed database');
+    await Future<void>.delayed(const Duration(seconds: 1));
     seed.dispose();
+    await Future<void>.delayed(const Duration(seconds: 1));
+    // ignore: avoid_print
+    print('EXPLORER_STAGE starting the app');
 
     await app.main();
+    // ignore: avoid_print
+    print('EXPLORER_STAGE main() returned');
     final bar = find.byType(NavigationBar);
     final end = DateTime.now().add(const Duration(seconds: 40));
     while (DateTime.now().isBefore(end) && bar.evaluate().isEmpty) {
       await t.pump(const Duration(milliseconds: 250));
     }
+    // ignore: avoid_print
+    print('EXPLORER_STAGE shell shown: ${bar.evaluate().isNotEmpty}');
     expect(bar, findsOneWidget, reason: 'the shell shows');
     for (var i = 0; i < 20; i++) {
       await t.pump(const Duration(milliseconds: 150));
