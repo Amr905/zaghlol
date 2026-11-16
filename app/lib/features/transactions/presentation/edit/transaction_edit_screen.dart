@@ -28,6 +28,8 @@ import '../detail/txn_detail_providers.dart';
 import '../list/txn_list_providers.dart';
 import '../list/txn_row.dart';
 import '../../../voice/presentation/voice_logger_screen.dart';
+import '../../../categorization/presentation/category_visuals.dart'
+    show categoryGlyph;
 import 'txn_edit_providers.dart';
 import 'txn_form.dart';
 
@@ -455,7 +457,7 @@ class _EditState extends ConsumerState<TransactionEditScreen> {
           for (final c in lk.categories)
             ZListRow(
               title: categoryName(c, lang),
-              leading: Text(c.icon, style: ZType.title),
+              leading: categoryGlyph(c.icon, size: 24, textStyle: ZType.title),
               onTap: () => Navigator.of(ctx).pop(c.id),
             ),
         ],

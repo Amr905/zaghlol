@@ -22,6 +22,21 @@ const Map<String, IconData> categoryIcons = {
 /// Fallback for system icon keys that are not in [categoryIcons].
 IconData iconFor(String key) => categoryIcons[key] ?? Icons.category_outlined;
 
+/// A category's glyph where only an emoji or a key may be stored: a catalog
+/// icon key (`shopping_bag`) draws as an icon, anything else (an emoji) as
+/// text. Without this a key showed up as its own letters (explorer finding).
+Widget categoryGlyph(
+  String icon, {
+  required double size,
+  Color? color,
+  TextStyle? textStyle,
+}) {
+  if (RegExp(r'^[a-z][a-z0-9_]*$').hasMatch(icon)) {
+    return Icon(iconFor(icon), size: size, color: color);
+  }
+  return Text(icon, style: textStyle);
+}
+
 /// The approved colour set (deep tones that keep contrast on both themes).
 const List<String> categoryPalette = [
   '#174C4F',

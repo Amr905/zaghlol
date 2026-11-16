@@ -7,6 +7,8 @@ import '../../../../core/l10n/generated/app_localizations.dart';
 import '../../../../core/theme/z_tokens.dart';
 import '../../../../core/ui/z_components.dart';
 import '../../domain/transaction.dart';
+import '../../../categorization/presentation/category_visuals.dart'
+    show categoryGlyph;
 import 'txn_list_providers.dart';
 import 'txn_row.dart';
 
@@ -117,7 +119,7 @@ Future<Set<String>?> showCategoriesSheet(
               ctx,
               title: categoryName(c, lang),
               on: picked.contains(c.id),
-              leading: Text(c.icon, style: ZType.title),
+              leading: categoryGlyph(c.icon, size: 24, textStyle: ZType.title),
               onTap: () => setState(() {
                 picked = picked.contains(c.id)
                     ? ({...picked}..remove(c.id))
@@ -279,7 +281,7 @@ Future<({String id, bool always})?> showBulkCategorySheet(
           for (final c in categories)
             ZListRow(
               title: categoryName(c, lang),
-              leading: Text(c.icon, style: ZType.title),
+              leading: categoryGlyph(c.icon, size: 24, textStyle: ZType.title),
               onTap: () => Navigator.of(ctx).pop((id: c.id, always: always)),
             ),
         ],

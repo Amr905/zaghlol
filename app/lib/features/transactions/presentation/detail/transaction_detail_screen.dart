@@ -16,6 +16,8 @@ import '../../../../core/l10n/locale_providers.dart';
 import '../../../../core/l10n/generated/app_localizations.dart';
 import '../../../../core/theme/z_tokens.dart';
 import '../../../../core/ui/z_components.dart';
+import '../../../categorization/presentation/category_visuals.dart'
+    show categoryGlyph;
 import '../../data/transaction_detail_reader.dart';
 import '../../data/transactions_providers.dart';
 import '../../domain/transaction.dart';
@@ -207,7 +209,7 @@ class _DetailState extends ConsumerState<TransactionDetailScreen> {
           for (final c in lk.categories)
             ZListRow(
               title: categoryName(c, fmt.lang),
-              leading: Text(c.icon, style: ZType.title),
+              leading: categoryGlyph(c.icon, size: 24, textStyle: ZType.title),
               trailing: c.id == t.categoryId
                   ? Icon(Icons.check, color: ZColors.of(ctx).primary)
                   : null,
@@ -609,9 +611,11 @@ class _Body extends StatelessWidget {
             ZCategoryTile(
               size: 64,
               color: _parseColor(cat?.color ?? '', c.primary),
-              child: Text(
+              child: categoryGlyph(
                 cat?.icon ?? '•',
-                style: ZType.display.copyWith(fontSize: 30, height: 1.2),
+                size: 30,
+                color: _parseColor(cat?.color ?? '', c.primary),
+                textStyle: ZType.display.copyWith(fontSize: 30, height: 1.2),
               ),
             ),
             const SizedBox(height: ZSpacing.lg),

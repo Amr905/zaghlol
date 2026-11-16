@@ -11,6 +11,8 @@ import '../../../../core/l10n/money_format.dart';
 import '../../../../core/theme/z_tokens.dart';
 import '../../../../core/ui/z_components.dart';
 import '../../domain/transaction.dart';
+import '../../../categorization/presentation/category_visuals.dart'
+    show categoryGlyph;
 import 'txn_list_providers.dart';
 
 /// Locale-aware formatting shared by the rows and headers.
@@ -118,7 +120,11 @@ class TxnRow extends StatelessWidget {
         : ZCategoryTile(
             size: 44,
             color: _parseColor(cat?.color ?? '', c.primary),
-            child: Text(cat?.icon ?? '•', style: ZType.title),
+            child: categoryGlyph(
+              cat?.icon ?? '•',
+              size: 22,
+              textStyle: ZType.title,
+            ),
           );
     return Semantics(
       container: true,
