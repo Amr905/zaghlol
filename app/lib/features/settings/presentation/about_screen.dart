@@ -10,6 +10,8 @@ import '../../../core/l10n/generated/app_localizations.dart';
 import '../../../core/theme/z_tokens.dart';
 import '../../gold/presentation/gold_ui_ports.dart'
     show GoldLink, goldLinkOpenerProvider;
+import '../debug/debug_sms_diagnostics.dart' show smsDiagnosticsEnabledProvider;
+import '../debug/debug_sms_diagnostics_screen.dart';
 import 'disclaimers_screen.dart';
 import 'settings_ports.dart';
 import 'settings_widgets.dart';
@@ -94,6 +96,21 @@ class AboutScreen extends ConsumerWidget {
             ),
           ],
         ),
+        // SMS-device: debug-only counters (dev flavours; hidden elsewhere).
+        if (ref.watch(smsDiagnosticsEnabledProvider))
+          SettingsSection(
+            children: [
+              SettingsRow(
+                title: kDiagTitle,
+                subtitle: kDiagRowSubtitle,
+                onTap: () => Navigator.of(context).push<void>(
+                  MaterialPageRoute<void>(
+                    builder: (_) => const DebugSmsDiagnosticsScreen(),
+                  ),
+                ),
+              ),
+            ],
+          ),
         if (diag != null && share != null)
           SettingsSection(
             title: t.aboutDiagTitle,
