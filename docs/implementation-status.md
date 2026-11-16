@@ -490,6 +490,8 @@
 - Done in batch 26 (PO real-phone test 2026-11-15): Add sheet tiles did nothing; no Cash account or categories on a fresh install; Home not refreshing after manual add; real HSBC "has been used for … available limit" SMS; generic-parser fallback for known senders; HSBC sender variants; real-app emulator test (device-flows).
 - Done in batch 25: FU-015 (SQL deletes), FU-024 (as applicable), T-135 lock order; account delete never blocked by Apple (Lead decision).
 
+- **FU-244** (batch 27): the minors and nits in [batch-27](05-reviews/batch-27.md) (SMS-fuzzy and FU-243 sections); generic hold-out misses `ho_two_amounts_fee` (direction/event) and `en_fx_two_currencies`.
+
 ## Log
 | Date | Event |
 |---|---|
@@ -569,3 +571,4 @@
 | 2026-11-14 | Batch 23 (`batch/2026-11-15-23`): T-036 DONE. FU-226…FU-226. Progress 155/186. |
 | 2026-11-14 | Batch 24 (`batch/2026-11-15-24`): T-120, T-161 DONE. FU-229…FU-230. Progress 157/186. |
 | 2026-11-14 | Batch 25 (`batch/2026-11-15-25`): T-135, T-167, T-168, T-169, T-170, T-071, T-072, T-158 DONE. FU-233…FU-240. Progress 165/186. |
+| 2026-11-16 | Batch 27 (`batch/2026-11-16-27`): SMS-fuzzy generic extractor (prefilled review, one-tap confirm), FU-243 drop rules (OTP global only; promo/due per bank), category picker icons, design polish. FU-244. Progress 165/186. |
