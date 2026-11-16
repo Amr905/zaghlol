@@ -40,8 +40,10 @@ final class _Backend implements AccountBackend {
   Future<void> Function()? onDelete;
   int deletes = 0;
 
+  Object? ensureError;
   @override
-  Future<String> ensureInstalled() async => installA;
+  Future<String> ensureInstalled() async =>
+      ensureError != null ? throw ensureError! : installA;
   @override
   Future<SignInResponse> signIn(SignInRequest r, TimeNonce n) {
     requests.add(r);
@@ -292,6 +294,13 @@ void main() {
       expect(r.backend.requests, hasLength(2));
       expect(r.seats.unusableMarked, isFalse);
     });
+  });
+
+  test('isSignedIn is false, not an exception, while the backend cannot be '
+      'reached to register this install', () async {
+    final r = _Rig();
+    r.backend.ensureError = BackendFailure(BackendFailureKind.offline);
+    expect(await r.service.isSignedIn(), isFalse);
   });
 
   group('negative proofs', () {

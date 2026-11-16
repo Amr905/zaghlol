@@ -1,28 +1,111 @@
 #!/usr/bin/env bash
-# FIX-device-flows (device-flows.yml): runs integration_test/device_flows_test.dart
-# (the real app composition) on the Android emulator, then pulls the
-# screenshots the test wrote to the app's private dir. Called as one line
-# because android-emulator-runner runs its `script` input line by line.
-# Inputs: DEVICE (emulator-5554), RUNNER_TEMP. Synthetic data only.
+# FIX-device-flows + TEST-explorer (device-flows.yml): runs
+# integration_test/device_flows_test.dart (the real app composition), then
+# integration_test/app_explorer_test.dart (taps every control of every screen,
+# in Arabic, with synthetic data) on the Android emulator, and pulls the
+# screenshots and the explorer report the tests wrote to the app's private
+# dir. Called as one line because android-emulator-runner runs its `script`
+# input line by line. Inputs: DEVICE (emulator-5554), RUNNER_TEMP.
+# Synthetic data only.
 set -uo pipefail
 : "${DEVICE:?}" "${RUNNER_TEMP:?}"
 PKG=app.zaghlol.dev
 OUT="$RUNNER_TEMP/device-flows"
 mkdir -p "$OUT/screens"
 cd "$(dirname "$0")/../../app"
+
+pull_files() {
+  for f in $(adb -s "$DEVICE" shell run-as "$PKG" ls app_flutter/ci_screens 2>/dev/null | tr -d '\r'); do
+    case "$f" in *.png | *.md) ;; *) continue ;; esac
+    adb -s "$DEVICE" exec-out run-as "$PKG" cat "app_flutter/ci_screens/$f" > "$OUT/screens/$f" || true
+  done
+}
+
 flutter devices
 adb -s "$DEVICE" logcat -c || true
-perl -e 'alarm shift; exec @ARGV' 1800 \
-  flutter test integration_test/device_flows_test.dart \
-  --flavor devSms -d "$DEVICE" --no-uninstall --reporter expanded \
-  2>&1 | tee "$OUT/test.log"
-rc=${PIPESTATUS[0]}
-for f in $(adb -s "$DEVICE" shell run-as "$PKG" ls app_flutter/ci_screens 2>/dev/null | tr -d '\r'); do
-  case "$f" in *.png) ;; *) continue ;; esac
-  adb -s "$DEVICE" exec-out run-as "$PKG" cat "app_flutter/ci_screens/$f" > "$OUT/screens/$f" || true
+
+# ---- 1. device flows (English, empty database)
+rc=0
+if [ -z "${EXPLORER_ONLY:-}" ]; then
+  perl -e 'alarm shift; exec @ARGV' 1800 \
+    flutter test integration_test/device_flows_test.dart \
+    --flavor devSms -d "$DEVICE" --no-uninstall --reporter expanded \
+    2>&1 | tee "$OUT/test.log"
+  rc=${PIPESTATUS[0]}
+  pull_files
+  adb -s "$DEVICE" exec-out screencap -p > "$OUT/screens/zz-final-screen.png" || true
+fi
+
+# ---- 2. explorer (Arabic, seeded database)
+# A clean app: no leftovers from step 1. Notification and microphone
+# permissions are granted up front so no system dialog covers the app.
+adb -s "$DEVICE" shell pm clear "$PKG" || true
+for p in POST_NOTIFICATIONS RECORD_AUDIO READ_SMS RECEIVE_SMS; do
+  adb -s "$DEVICE" shell pm grant "$PKG" "android.permission.$p" 2>/dev/null || true
 done
-adb -s "$DEVICE" exec-out screencap -p > "$OUT/screens/zz-final-screen.png" || true
-# Flutter's own log lines only (Dart errors, the test's prints).
+# If a tap sends the app to the background (a link, the share sheet, a system
+# screen), press Back and bring it forward again.
+(
+  misses=0
+  while true; do
+    sleep 10
+    if [ $((SECONDS % 60)) -lt 10 ]; then
+      adb -s "$DEVICE" shell dumpsys meminfo "$PKG" 2>/dev/null | grep -E "TOTAL PSS|Graphics:|Java Heap:|Native Heap:" | tr -s ' ' | tr '\n' ';' | sed 's/^/MEM: /'; echo
+    fi
+    if adb -s "$DEVICE" shell pidof "$PKG" >/dev/null 2>&1; then
+      # The app is installed by now: grant what its screens ask for, so no
+      # system permission dialog covers it.
+      for p in POST_NOTIFICATIONS RECORD_AUDIO READ_SMS RECEIVE_SMS; do
+        adb -s "$DEVICE" shell pm grant "$PKG" "android.permission.$p" >/dev/null 2>&1 || true
+      done
+      focus=$(adb -s "$DEVICE" shell dumpsys window 2>/dev/null | grep -m1 mCurrentFocus || true)
+      case "$focus" in
+        # No focused window yet (the app is starting) or ours: all fine.
+        *"$PKG"* | *"=null"*) misses=0 ;;
+        *)
+          misses=$((misses + 1))
+          # Two looks in a row: another window really is in front.
+          if [ "$misses" -ge 2 ]; then
+            echo "KEEPER: app not focused ($focus)"
+            adb -s "$DEVICE" shell input keyevent 4 || true
+            sleep 1
+            adb -s "$DEVICE" shell monkey -p "$PKG" -c android.intent.category.LAUNCHER 1 >/dev/null 2>&1 || true
+            misses=0
+          fi
+          ;;
+      esac
+    fi
+  done
+) &
+keeper=$!
+rc2=0
+for part in 0 1 2 3 4; do
+  echo "==== explorer part $part"
+  adb -s "$DEVICE" shell pm clear "$PKG" || true
+  for p in POST_NOTIFICATIONS RECORD_AUDIO READ_SMS RECEIVE_SMS; do
+    adb -s "$DEVICE" shell pm grant "$PKG" "android.permission.$p" 2>/dev/null || true
+  done
+  perl -e 'alarm shift; exec @ARGV' 900 \
+    flutter test integration_test/app_explorer_test.dart \
+    --flavor devSms -d "$DEVICE" --no-uninstall --reporter expanded \
+    --dart-define=EXPLORER_PART=$part \
+    2>&1 | tee "$OUT/explorer-p$part.log"
+  r=${PIPESTATUS[0]}
+  [ "$r" -ne 0 ] && rc2=$r
+  pull_files
+done
+kill "$keeper" 2>/dev/null || true
+kill "$keeper" 2>/dev/null || true
+# Why did the app go away (if it did)? Crash, low-memory kill, ANR.
+echo "---- logcat: crashes and kills ----"
+adb -s "$DEVICE" logcat -d -b crash 2>/dev/null | tail -40 || true
+adb -s "$DEVICE" logcat -d 2>/dev/null | grep -E "FATAL|am_proc_died|am_kill|lowmemorykiller|lmkd|ANR in|Process $PKG|has died|signal [0-9]+ \(SIG" | tail -30 || true
+echo "---- end logcat ----"
+pull_files
+adb -s "$DEVICE" exec-out screencap -p > "$OUT/screens/zz-final-explorer.png" || true
+
+# Flutter's own log lines only (Dart errors, the tests' prints).
 adb -s "$DEVICE" logcat -d -s flutter:V > "$OUT/flutter-logcat.txt" 2>/dev/null || true
 ls -la "$OUT/screens"
-exit "$rc"
+if [ "$rc" -ne 0 ]; then exit "$rc"; fi
+exit "$rc2"

@@ -1,0 +1,192 @@
+// TEST-explorer: the tap-everything engine finds a dead button, a thrown
+// exception and an overflow, follows a pushed screen and a dialog, and goes
+// back after each tap.
+
+import 'package:flutter/material.dart';
+import 'package:flutter_test/flutter_test.dart';
+
+import '../../integration_test/support/explorer.dart';
+
+class _Home extends StatefulWidget {
+  const _Home();
+  @override
+  State<_Home> createState() => _HomeState();
+}
+
+class _HomeState extends State<_Home> {
+  bool on = false;
+  int n = 0;
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(title: const Text('Home page')),
+      body: ListView(
+        children: [
+          TextButton(onPressed: () {}, child: const Text('Dead button')),
+          TextButton(
+            onPressed: () => setState(() => n++),
+            child: Text('Count $n'),
+          ),
+          TextButton(
+            onPressed: () => Navigator.of(context)
+                .push(MaterialPageRoute<void>(builder: (_) => const _Detail())),
+            child: const Text('Open detail'),
+          ),
+          TextButton(
+            onPressed: () => showDialog<void>(
+              context: context,
+              builder: (_) => AlertDialog(
+                title: const Text('Sure?'),
+                actions: [
+                  TextButton(
+                    onPressed: () => Navigator.of(context).pop(),
+                    child: const Text('Cancel'),
+                  ),
+                ],
+              ),
+            ),
+            child: const Text('Open dialog'),
+          ),
+          TextButton(
+            onPressed: () => showModalBottomSheet<void>(
+              context: context,
+              builder: (sheet) => Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  const Text('Pick sheet'),
+                  TextButton(
+                    onPressed: () => showDialog<void>(
+                      context: sheet,
+                      builder: (dlg) => AlertDialog(
+                        title: const Text('Always?'),
+                        actions: [
+                          TextButton(
+                            // Closes the dialog and the sheet under it.
+                            onPressed: () {
+                              Navigator.of(dlg).pop();
+                              Navigator.of(sheet).pop();
+                            },
+                            child: const Text('Always'),
+                          ),
+                        ],
+                      ),
+                    ),
+                    child: const Text('Pick one'),
+                  ),
+                  TextButton(onPressed: () {}, child: const Text('Sheet dead')),
+                ],
+              ),
+            ),
+            child: const Text('Open sheet'),
+          ),
+          TextButton(
+            onPressed: () => throw StateError('boom'),
+            child: const Text('Throws'),
+          ),
+          _Seg(),
+          Switch(value: on, onChanged: (v) => setState(() => on = v)),
+          const SizedBox(
+            width: 40,
+            child: Row(children: [SizedBox(width: 80, height: 10)]),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+/// A custom segmented control whose selection shows only in semantics.
+class _Seg extends StatefulWidget {
+  @override
+  State<_Seg> createState() => _SegState();
+}
+
+class _SegState extends State<_Seg> {
+  int sel = 0;
+  @override
+  Widget build(BuildContext context) => Row(
+    children: [
+      for (var i = 0; i < 2; i++)
+        Semantics(
+          selected: sel == i,
+          child: InkWell(
+            onTap: () => setState(() => sel = i),
+            child: SizedBox(width: 60, height: 40, child: Text('Seg$i')),
+          ),
+        ),
+    ],
+  );
+}
+
+class _Detail extends StatelessWidget {
+  const _Detail();
+  @override
+  Widget build(BuildContext context) => Scaffold(
+    appBar: AppBar(title: const Text('Detail page')),
+    body: Column(
+      children: [
+        ElevatedButton(onPressed: () {}, child: const Text('Detail dead')),
+        ElevatedButton(
+          onPressed: () => Navigator.of(context).pop(),
+          child: const Text('Done'),
+        ),
+        ElevatedButton(onPressed: () {}, child: const Text('Detail dead 2')),
+      ],
+    ),
+  );
+}
+
+void main() {
+  testWidgets('finds dead taps, exceptions and overflows; walks screens', (
+    t,
+  ) async {
+    await t.pumpWidget(const MaterialApp(home: _Home()));
+    final shots = <String>[];
+    final ex = Explorer(
+      tester: t,
+      shot: (n) async => shots.add(n),
+      deadline: DateTime.now().add(const Duration(minutes: 2)),
+      goHome: () async {},
+      log: (_) {},
+    )..install();
+    await ex.exploreCurrent('Home');
+    ex.uninstall();
+    final md = ex.markdown();
+    final issues = [for (final s in ex.screens) ...s.issues];
+    expect(
+      issues.where((i) => i.kind == 'dead-tap').map((i) => i.where),
+      containsAll(['button "Dead button"', 'button "Detail dead"']),
+    );
+    expect(issues.where((i) => i.kind == 'exception'), isNotEmpty);
+    // A segment that only changes its selected state is not a dead tap.
+    expect(issues.where((i) => i.where.contains('Seg')), isEmpty);
+    // The screen that closes itself is reopened and the rest still tapped.
+    expect(issues.where((i) => i.kind == 'dead-end'), isEmpty);
+    expect(
+      ex.screens
+          .firstWhere((s) => s.title == 'Detail page')
+          .taps
+          .map((t) => t.label),
+      contains('Detail dead 2'),
+    );
+    expect(
+      ex.screens.map((s) => s.title),
+      containsAll(['Home', 'Detail page', 'Sure?', 'Pick sheet', 'Always?']),
+    );
+    // The sheet that closed itself with its dialog was reopened to go on.
+    expect(
+      ex.screens
+          .firstWhere((s) => s.title == 'Pick sheet')
+          .taps
+          .map((t) => t.label),
+      contains('Sheet dead'),
+    );
+    // Back on the first screen after everything.
+    expect(find.text('Home page'), findsOneWidget);
+    expect(find.text('Detail page'), findsNothing);
+    expect(find.text('Sure?'), findsNothing);
+    expect(shots.length, ex.screens.length);
+    expect(md, contains('## Issues'));
+  });
+}

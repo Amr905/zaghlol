@@ -81,7 +81,14 @@ final class AccountService {
 
   /// True while a valid account token for this install is cached.
   Future<bool> isSignedIn() async {
-    final installId = await _backend.ensureInstalled();
+    final String installId;
+    try {
+      installId = await _backend.ensureInstalled();
+    } on BackendFailure {
+      // This phone has no registered install yet (and no network to make
+      // one): there is no account bound to it. Explorer: this threw to the UI.
+      return false;
+    }
     final a = await _entitlement.cachedAccount();
     return a != null && a.iid == installId;
   }

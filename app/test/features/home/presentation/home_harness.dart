@@ -140,6 +140,9 @@ Widget homeApp({
       homePaydaySetProvider.overrideWith((ref) => true),
       captureSmsEnabledProvider.overrideWith((ref) => Stream.value(smsWaiting)),
       captureSupportedProvider.overrideWith((ref) => smsWaiting),
+      // Pinned so the time-of-day greeting (and the goldens) don't depend on
+      // when CI runs.
+      homeNowProvider.overrideWithValue(DateTime(2026, 11, 14, 9)),
       ...extraOverrides,
       if (filter.isNotEmpty)
         cardFilterProvider.overrideWith(() => _Filter(filter)),

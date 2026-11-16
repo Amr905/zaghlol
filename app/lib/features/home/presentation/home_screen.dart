@@ -169,7 +169,9 @@ class HomeScreen extends ConsumerWidget {
                   child: _HomeBody(model: m, actions: a),
                 ),
               ),
-              const SliverToBoxAdapter(child: SizedBox(height: 120)),
+              const SliverToBoxAdapter(
+                child: SizedBox(height: ZSpacing.fabClearance + ZSpacing.xl),
+              ),
             ],
           ),
         ),

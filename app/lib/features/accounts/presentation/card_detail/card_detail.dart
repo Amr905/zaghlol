@@ -4,6 +4,8 @@
 // multi-currency account switches every section with currency chips
 // (FR-ACC-06). All numbers are per currency; amounts are ink, never red.
 
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:zaghlol_domain/zaghlol_domain.dart';
@@ -128,7 +130,23 @@ class _State extends ConsumerState<CardDetailScreen> {
             _RoundBtn(
               key: const Key('card-detail-edit'),
               tooltip: l.accountsEditTitleEdit,
-              onPressed: () => openEditCard(context, account),
+              onPressed: () => openEditCard(
+                context,
+                account,
+                // The "what Zaghlol reads" row on S-43 did nothing from here.
+                onOpenCapture: (a) {
+                  final code = a.institutionCode;
+                  if (code == null) return;
+                  unawaited(
+                    showCardCaptureSheet(
+                      context,
+                      institutionCode: code,
+                      last4: a.last4,
+                      cardName: name,
+                    ),
+                  );
+                },
+              ),
               child: const Icon(Icons.edit_outlined),
             ),
           ],

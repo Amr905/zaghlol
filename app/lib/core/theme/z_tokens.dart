@@ -12,6 +12,10 @@ abstract final class ZSpacing {
   /// Screen side padding.
   static const double screen = 16;
 
+  /// Bottom space a tab scroller keeps so its last item clears the floating
+  /// Add button (60 button + 16 margin + 20 breathing room).
+  static const double fabClearance = 96;
+
   /// Minimum interactive target (WCAG / Material).
   static const double minTarget = 48;
 }

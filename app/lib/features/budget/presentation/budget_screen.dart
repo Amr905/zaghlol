@@ -71,7 +71,7 @@ class _BudgetScreenState extends ConsumerState<BudgetScreen> {
             ZSpacing.screen,
             ZSpacing.sm,
             ZSpacing.screen,
-            ZSpacing.xxl,
+            ZSpacing.fabClearance,
           ),
           children: [
             if (views.length > 1) ...[
