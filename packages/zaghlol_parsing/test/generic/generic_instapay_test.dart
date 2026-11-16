@@ -1,5 +1,4 @@
 import 'package:test/test.dart';
-import 'package:zaghlol_domain/zaghlol_domain.dart';
 import 'package:zaghlol_parsing/zaghlol_parsing.dart';
 
 // SMS-improve: the generic reader on instant-transfer wording (CIB shape).
