@@ -1250,5 +1250,47 @@
    "date": null,
    "ref": null
   }
+ },
+ {
+  "id": "tune_fx_original",
+  "body": "Card purchase EGP 1,520.00 at AMAZON, original USD 30.00, debited",
+  "expect": {
+   "amount": "1520.00",
+   "currency": "EGP",
+   "direction": "expense",
+   "event": "purchase",
+   "last4": null,
+   "merchant": "AMAZON",
+   "date": null,
+   "ref": null
+  }
+ },
+ {
+  "id": "tune_fx_bracket_ar",
+  "body": "تم خصم 850.00 جنيه (USD 17.00) شراء عبر نقطة بيع",
+  "expect": {
+   "amount": "850.00",
+   "currency": "EGP",
+   "direction": "expense",
+   "event": "purchase",
+   "last4": null,
+   "merchant": null,
+   "date": null,
+   "ref": null
+  }
+ },
+ {
+  "id": "tune_transfer_of_fee",
+  "body": "Transfer of EGP 750.00 to account 5521 completed. Fee EGP 2.50",
+  "expect": {
+   "amount": "750.00",
+   "currency": "EGP",
+   "direction": "expense",
+   "event": "transfer",
+   "last4": "5521",
+   "merchant": null,
+   "date": null,
+   "ref": null
+  }
  }
 ]

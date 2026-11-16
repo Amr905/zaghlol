@@ -62,7 +62,13 @@ ParseResult parseGeneric({
     ..._hits(t, incomeKeywords, TemplateDirection.income),
   ];
   final hits = [...directional, ..._hits(t, amountCueKeywords, null)];
-  final candidates = _candidates(t, hits);
+  final allCandidates = _candidates(t, hits);
+  // A foreign amount shown beside the charge (`EGP 3,400.00 (EUR 100.00)`,
+  // `Original USD 20.00`) is the original amount, never the charge: it leaves
+  // the amount ranking and is reported as `originalAmount` (registry FX rule).
+  final foreign = allCandidates.where((c) => _isForeignCue(t, c)).toList();
+  final charged = allCandidates.where((c) => !_isForeignCue(t, c)).toList();
+  final candidates = charged.isEmpty ? allCandidates : charged;
   if (candidates.isEmpty) {
     return const ParseUnrecognized(UnrecognizedReason.genericNoAmount);
   }
@@ -88,6 +94,15 @@ ParseResult parseGeneric({
   // Two currencies in one message and no way to tell which is the charge
   // (a foreign amount in brackets, `Original USD 20.00`): never silently
   // pick one (D-28), flag it and lower the confidence.
+  Money? originalAmount;
+  if (charged.isNotEmpty) {
+    for (final f in foreign) {
+      if (f.money.currency != best.money.currency) {
+        originalAmount = f.money;
+        break;
+      }
+    }
+  }
   if (ranked.any((r) => r.$1.money.currency != best.money.currency)) {
     reasons.add(GenericReason.currencyAmbiguous);
   }
@@ -165,6 +180,7 @@ ParseResult parseGeneric({
   return ParseGeneric(
     language: language,
     amount: best.money,
+    originalAmount: originalAmount,
     direction: direction,
     last4: last4?.$1,
     merchant: merchant?.$1,
@@ -178,6 +194,18 @@ ParseResult parseGeneric({
     fieldConfidence: Map.unmodifiable(scores),
     spans: Map.unmodifiable(spans),
   );
+}
+
+final RegExp _foreignLead = RegExp(
+  r'(?:[(\[]\s*|\b(?:original|foreign|equivalent|equiv|approx)\w*[:\s]*|'
+  r'(?:الاصلي|يعادل|ما يعادل)[:\s]*)$',
+);
+
+/// True when [c] is written as a foreign amount: in brackets or after a cue
+/// such as `Original` / `equivalent`.
+bool _isForeignCue(String t, _Candidate c) {
+  final from = c.start < 24 ? 0 : c.start - 24;
+  return _foreignLead.hasMatch(t.substring(from, c.start));
 }
 
 /// A cue this close (characters) to the amount counts as adjacent.

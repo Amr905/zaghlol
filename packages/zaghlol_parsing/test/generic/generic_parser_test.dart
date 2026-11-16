@@ -293,11 +293,18 @@ void main() {
     });
 
     test('two currencies with no separating keyword are flagged', () {
-      final r = g('Total EGP 3,400.00 (EUR 100.00) debited via POS');
+      final r = g('Total EGP 3,400.00 and EUR 100.00 debited via POS');
       expect(r.reasons, contains(GenericReason.currencyAmbiguous));
       expect(r.confidencePermille, lessThan(500));
       final one = g('Total EGP 3,400.00 debited via POS');
       expect(one.reasons, isNot(contains(GenericReason.currencyAmbiguous)));
+    });
+
+    test('a bracketed foreign amount is originalAmount, charge stays', () {
+      final r = g('Total EGP 3,400.00 (EUR 100.00) debited via POS');
+      expect(r.reasons, isNot(contains(GenericReason.currencyAmbiguous)));
+      expect(r.amount.currency.code, 'EGP');
+      expect(r.originalAmount?.currency.code, 'EUR');
     });
 
     test('two different amounts and no keyword is flagged ambiguous', () {
