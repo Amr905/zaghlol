@@ -595,7 +595,15 @@ void main() {
     test('FU-243: a generic result from a known bank is filed under that '
         'bank, not as a new sender', () async {
       final r = await w.run([
-        sms('k', 'ZBANK: You paid EGP 50.00 at Synth Cafe', source: zbankSms),
+        // SMS-AUTO: shared/pasted text always goes to the user; a background
+        // message of a known bank with these fields is saved (see the
+        // SMS-AUTO tests below).
+        sms(
+          'k',
+          'ZBANK: You paid EGP 50.00 at Synth Cafe',
+          source: zbankSms,
+          origin: MessageOrigin.userConfirmed,
+        ),
       ]);
       expect(r.outcomes['k'], isA<IngestReview>());
       expect((r.outcomes['k']! as IngestReview).reviewKind, 'unrecognized');
@@ -614,6 +622,7 @@ void main() {
           'ZBANK: Card ending 4321 was used for EGP 75.50 at SYNTH CAFE on '
               '01/01. Avl Bal EGP 900.00',
           source: zbankSms,
+          origin: MessageOrigin.userConfirmed,
         ),
       ]);
       expect(await txnCount(), 0);
@@ -666,6 +675,7 @@ void main() {
           'ZBANK: Purchase EGP 1,500.00 original USD 30.00 at SYNTH CAFE '
               'card *4321',
           source: zbankSms,
+          origin: MessageOrigin.userConfirmed,
         ),
       ]);
       final payload =

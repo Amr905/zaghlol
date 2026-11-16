@@ -1,0 +1,15 @@
+{
+  "sender": "BanqueMisr",
+  "body": "BM: Payment of EGP 12,500.50 has been received on your Credit Card ending with * 8901. Your available limit is EGP 98,000.00",
+  "receivedAt": "2026-11-11T10:00:00+02:00",
+  "expect": {
+    "template": "banque_misr.cc_payment.en",
+    "event": "cc_payment",
+    "direction": "income",
+    "currency": "EGP",
+    "amount": "12500.50",
+    "last4": "8901",
+    "balance": null,
+    "available": "98000.00"
+  }
+}

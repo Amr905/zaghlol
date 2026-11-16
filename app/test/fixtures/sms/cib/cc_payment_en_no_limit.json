@@ -1,0 +1,15 @@
+{
+  "sender": "CIB",
+  "body": "CIB: Payment of EGP 750.00 has been received on your Credit Card ending with * 1234.",
+  "receivedAt": "2026-11-11T10:00:00+02:00",
+  "expect": {
+    "template": "cib.cc_payment.en",
+    "event": "cc_payment",
+    "direction": "income",
+    "currency": "EGP",
+    "amount": "750.00",
+    "last4": "1234",
+    "balance": null,
+    "available": null
+  }
+}

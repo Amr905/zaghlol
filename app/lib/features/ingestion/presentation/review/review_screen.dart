@@ -745,6 +745,8 @@ class _MessageCard extends StatelessWidget {
               style: ZType.body.copyWith(color: c.textMuted),
             ),
           ],
+          if (card.originalText != null)
+            _OriginalText(text: card.originalText!),
           const SizedBox(height: ZSpacing.lg),
           Row(
             children: [
@@ -763,6 +765,41 @@ class _MessageCard extends StatelessWidget {
                 onPressed: onRequestBank,
               ),
             ),
+        ],
+      ),
+    );
+  }
+}
+
+/// SMS-AUTO: the original message, collapsed. The text stays on screen only
+/// (selectable; the text's own script decides its direction).
+class _OriginalText extends StatelessWidget {
+  const _OriginalText({required this.text});
+  final String text;
+
+  @override
+  Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
+    final c = ZColors.of(context);
+    return Theme(
+      data: Theme.of(context).copyWith(dividerColor: Colors.transparent),
+      child: ExpansionTile(
+        key: const ValueKey('reviewOriginalText'),
+        tilePadding: EdgeInsets.zero,
+        childrenPadding: EdgeInsets.zero,
+        expandedCrossAxisAlignment: CrossAxisAlignment.start,
+        // TODO(SMS-AUTO): own copy-deck keys (show/hide original message);
+        // interim reuse of the existing "Show message" label.
+        title: Text(
+          l10n.ingestionReviewUnreadShow,
+          style: ZType.body.copyWith(color: c.textMuted),
+        ),
+        children: [
+          SelectableText(
+            text,
+            key: const ValueKey('reviewOriginalBody'),
+            style: ZType.bodySmall.copyWith(color: c.text),
+          ),
         ],
       ),
     );

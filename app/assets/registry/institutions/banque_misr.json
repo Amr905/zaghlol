@@ -250,6 +250,42 @@
         "جنيه": "EGP",
         "egp": "EGP"
       }
+    },
+    {
+      "id": "banque_misr.cc_payment.en",
+      "version": 1,
+      "lang": "en",
+      "channel": [
+        "sms"
+      ],
+      "event": "cc_payment",
+      "direction": "income",
+      "baseConfidence": 0.9,
+      "source": "synthetic-unverified",
+      "pattern": "payment of (?<cur>egp) (?<amount>[\\d,.]+) (?:has been )?received on your (?:credit )?card ending (?:with |in )?[*x]{0,8} ?(?<last4>\\d{4})(?:\\. |\\.?$)(?:(?:your )?(?:avl|available)\\.? limit(?: is)? (?:egp )?(?<available>[\\d,.]+))?",
+      "currencyMap": {
+        "جم": "EGP",
+        "جنيه": "EGP",
+        "egp": "EGP"
+      }
+    },
+    {
+      "id": "banque_misr.cc_payment.ar",
+      "version": 1,
+      "lang": "ar",
+      "channel": [
+        "sms"
+      ],
+      "event": "cc_payment",
+      "direction": "income",
+      "baseConfidence": 0.9,
+      "source": "synthetic-unverified",
+      "pattern": "تم استلام سداد بمبلغ (?<amount>[\\d,.]+) (?<cur>جم|جنيه|egp) (?:علي|الي|ل) (?:بطاقه|بطاقتك)\\D{0,30}?(?<last4>\\d{4})(?:\\. |\\.?$)(?:الحد\\D{0,12}(?<available>[\\d,.]+))?",
+      "currencyMap": {
+        "جم": "EGP",
+        "جنيه": "EGP",
+        "egp": "EGP"
+      }
     }
   ]
 }

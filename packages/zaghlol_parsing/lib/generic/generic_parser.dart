@@ -108,6 +108,10 @@ ParseResult parseGeneric({
   }
 
   // Direction: the nearest keyword; opposite keywords close together cancel.
+  // A credit-card settlement (SMS-AUTO) names its own side and is a transfer
+  // between the user's accounts, so the "payment"/"received" keywords that
+  // would cancel each other do not decide it.
+  final settlement = _settlement(t);
   final expenseDistance = _nearest(
     best,
     directional,
@@ -115,7 +119,9 @@ ParseResult parseGeneric({
   );
   final incomeDistance = _nearest(best, directional, TemplateDirection.income);
   TemplateDirection? direction;
-  if (expenseDistance == _far && incomeDistance == _far) {
+  if (settlement != null) {
+    direction = settlement;
+  } else if (expenseDistance == _far && incomeDistance == _far) {
     reasons.add(GenericReason.directionUnknown);
   } else if (expenseDistance != _far &&
       incomeDistance != _far &&
@@ -126,7 +132,11 @@ ParseResult parseGeneric({
         ? TemplateDirection.expense
         : TemplateDirection.income;
   }
-  final event = direction == null ? null : _event(t, best, direction);
+  final event = direction == null
+      ? null
+      : settlement != null
+      ? GenericEvent.ccPayment
+      : _event(t, best, direction);
 
   final last4 = _last4(t, globalLast4);
   final merchant = _merchant(folded, body, cleaning);
@@ -213,6 +223,25 @@ const int _closeChars = 24;
 
 /// The event whose keyword sits nearest the amount, within the window.
 /// Refund only for income, purchase and withdrawal only for expense.
+/// SMS-AUTO: the side of a credit-card settlement the message describes, or
+/// null when it is not one (or names both sides). A card word is required;
+/// the received side needs a "payment received/credited/posted" cue and no
+/// debit word, the paying side a "card payment/bill" cue and a debit word.
+TemplateDirection? _settlement(String t) {
+  if (_hits(t, cardWords, null).isEmpty) return null;
+  final debit = _hits(t, cardSettlementDebitWords, null).isNotEmpty;
+  final received =
+      !debit &&
+      (_hits(t, cardSettlementReceivedCues, null).isNotEmpty ||
+          (_hits(t, _paymentWords, null).isNotEmpty &&
+              _hits(t, cardSettlementReceivedVerbs, null).isNotEmpty));
+  final paid = debit && _hits(t, cardSettlementPaidCues, null).isNotEmpty;
+  if (received == paid) return null;
+  return received ? TemplateDirection.income : TemplateDirection.expense;
+}
+
+final List<String> _paymentWords = ['payment', 'repayment', 'سداد', 'دفعه'];
+
 GenericEvent? _event(String t, _Candidate c, TemplateDirection direction) {
   GenericEvent? best;
   var bestDistance = genericEventWindow + 1;

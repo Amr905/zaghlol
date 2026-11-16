@@ -170,6 +170,17 @@ void main() {
     expect(a['label'], shown.bankLabel);
   });
 
+  test(
+    'SMS-AUTO: the card carries the stored message text for display',
+    () async {
+      await seed('g5', payload());
+      final shown = (await c.read(reviewQueueProvider.future))
+          .whereType<MessageCardModel>()
+          .single;
+      expect(shown.originalText, 'SYNTHETIC body raw1');
+    },
+  );
+
   test('an incomplete suggestion is never saved by confirm', () async {
     await seed('g3', payload(complete: false));
     expect(

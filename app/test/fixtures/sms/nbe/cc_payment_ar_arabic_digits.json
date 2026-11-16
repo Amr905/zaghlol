@@ -1,0 +1,15 @@
+{
+  "sender": "NBE",
+  "body": "البنك الأهلي: تم استلام سداد بمبلغ ٣٠٠٠٫٠٠ جم على بطاقة الائتمان المنتهية بـ ٤٥٦٧٫ الحد المتاح ٤٥٠٠٠٫٠٠ جم",
+  "receivedAt": "2026-11-11T10:00:00+02:00",
+  "expect": {
+    "template": "nbe.cc_payment.ar",
+    "event": "cc_payment",
+    "direction": "income",
+    "currency": "EGP",
+    "amount": "3000.00",
+    "last4": "4567",
+    "balance": null,
+    "available": "45000.00"
+  }
+}

@@ -1,0 +1,15 @@
+{
+  "sender": "QNB",
+  "body": "بنك قطر الوطني: تم استلام سداد بمبلغ 750.00 جم على بطاقة الائتمان المنتهية بـ 4321.",
+  "receivedAt": "2026-11-11T10:00:00+02:00",
+  "expect": {
+    "template": "qnb.cc_payment.ar",
+    "event": "cc_payment",
+    "direction": "income",
+    "currency": "EGP",
+    "amount": "750.00",
+    "last4": "4321",
+    "balance": null,
+    "available": null
+  }
+}
