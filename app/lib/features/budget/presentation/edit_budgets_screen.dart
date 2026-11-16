@@ -21,6 +21,7 @@ import 'budget_view.dart' show defaultBudgetCurrency;
 import 'budget_edit_draft.dart';
 import 'budget_providers_ui.dart';
 import 'budget_saver.dart';
+import '../../../core/ui/z_haptics.dart';
 
 class EditBudgetsScreen extends ConsumerStatefulWidget {
   const EditBudgetsScreen({
@@ -416,10 +417,12 @@ class _FormState extends ConsumerState<_Form> {
           title: Text(l.budgetEditRollover),
           subtitle: Text(l.budgetEditRolloverHint),
           value: _rollover,
-          onChanged: (v) => setState(() {
-            _rollover = v;
-            widget.onDirty();
-          }),
+          onChanged: ZHaptics.onToggle(
+            (v) => setState(() {
+              _rollover = v;
+              widget.onDirty();
+            }),
+          ),
         ),
         if (widget.onAnnual != null)
           ListTile(
@@ -451,6 +454,7 @@ class _FormState extends ConsumerState<_Form> {
           ),
         ZButton(
           label: l.commonActionSave,
+          haptic: ZHaptic.medium,
           loading: _saving,
           onPressed: _saving ? null : _save,
         ),

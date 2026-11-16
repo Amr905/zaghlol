@@ -23,6 +23,7 @@ import '../../mascot/presentation/zaghlol_avatar.dart';
 import '../../transactions/presentation/list/txn_row.dart' show TxnFmt;
 import '../data/roi_providers.dart' show roiSuggestionsProvider;
 import 'roi_tips_providers.dart';
+import '../../../core/ui/z_haptics.dart';
 
 /// The `years` select value of `roiTipsProjection` (year 1 and year 2).
 const String _twoYears = 'two';
@@ -260,7 +261,10 @@ class RoiTipCard extends ConsumerWidget {
           content: Text(l.roiTipsDismissed),
           action: SnackBarAction(
             label: l.commonActionUndo,
-            onPressed: () => notifier.restore(tip),
+            onPressed: () {
+              ZHaptics.light();
+              notifier.restore(tip);
+            },
           ),
         ),
       );

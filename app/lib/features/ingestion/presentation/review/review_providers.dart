@@ -305,6 +305,17 @@ Future<String> _sender(AppDatabase db, String? rawId) async {
   return row?.sender ?? '';
 }
 
+/// SMS-AUTO: the stored message text behind a review item (the raw row is
+/// kept encrypted with the rest of the database). Returned to the card only.
+Future<String?> _rawBody(AppDatabase db, String? rawId) async {
+  if (rawId == null) return null;
+  final row = await (db.select(
+    db.rawMessages,
+  )..where((m) => m.id.equals(rawId))).getSingleOrNull();
+  final body = row?.body;
+  return body == null || body.trim().isEmpty ? null : body;
+}
+
 Future<ReviewCardModel?> _toCard(
   AppDatabase db,
   TransactionRepository txns,
@@ -356,6 +367,7 @@ Future<ReviewCardModel?> _toCard(
               isUtc: true,
             ),
             bankLabel: g.institutionLabel ?? sender,
+            originalText: await _rawBody(db, item.rawMessageId),
           );
         }
       }
@@ -368,6 +380,7 @@ Future<ReviewCardModel?> _toCard(
         isIncome: txn != null && income(txn),
         merchant: txn?.merchantRaw,
         rawMessageId: item.rawMessageId,
+        originalText: await _rawBody(db, item.rawMessageId),
       );
     case ReviewKind.transferAmbiguous:
       if (txn == null) return null;

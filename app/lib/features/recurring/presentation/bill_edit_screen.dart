@@ -19,6 +19,7 @@ import '../../../core/ui/z_chip.dart';
 import '../../budget/application/budget_providers.dart' show todayProvider;
 import '../data/recurring_repository.dart';
 import 'bills_providers.dart';
+import '../../../core/ui/z_haptics.dart';
 
 const int maxBillName = 30;
 const int maxBillTotal = 120;
@@ -408,6 +409,7 @@ class _BillFormState extends ConsumerState<BillForm> {
         const SizedBox(height: ZSpacing.xl),
         ZButton(
           label: l.commonActionSave,
+          haptic: ZHaptic.medium,
           expand: true,
           loading: _saving,
           onPressed: _save,

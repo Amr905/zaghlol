@@ -25,6 +25,7 @@ import '../edit/transaction_edit_screen.dart';
 import '../list/txn_list_providers.dart';
 import '../list/txn_row.dart';
 import 'txn_detail_providers.dart';
+import '../../../../core/ui/z_haptics.dart';
 
 /// Longest note, in characters (S-12 validation).
 const int detailNoteMaxChars = 200;
@@ -254,6 +255,7 @@ class _DetailState extends ConsumerState<TransactionDetailScreen> {
         action: SnackBarAction(
           label: l.commonActionUndo,
           onPressed: () async {
+            ZHaptics.light();
             await _run(() async {
               await actions.undo(r.batchId);
               container.invalidate(txnDetailProvider(t.id));
@@ -370,6 +372,7 @@ class _DetailState extends ConsumerState<TransactionDetailScreen> {
             action: SnackBarAction(
               label: l.commonActionUndo,
               onPressed: () async {
+                ZHaptics.light();
                 try {
                   await actions.undo(r.batchId);
                 } on SafeException {
@@ -442,6 +445,7 @@ class _NoteFormState extends State<_NoteForm> {
         const SizedBox(height: ZSpacing.md),
         ZButton(
           label: l.commonActionSave,
+          haptic: ZHaptic.medium,
           onPressed: tooLong ? null : () => Navigator.of(context).pop(_c.text),
         ),
       ],

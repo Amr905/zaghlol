@@ -85,6 +85,7 @@ final class MessageCardModel extends ReviewCardModel {
     this.direction,
     this.occurredAt,
     this.bankLabel,
+    this.originalText,
   }) : super(itemId);
   final String sender;
   final bool isNewSender;
@@ -108,6 +109,10 @@ final class MessageCardModel extends ReviewCardModel {
   final TxnDirection? direction;
   final DateTime? occurredAt;
   final String? bankLabel;
+
+  /// SMS-AUTO: the original message text from the stored raw row, so the
+  /// user can decide. Shown on screen only (collapsed); never logged.
+  final String? originalText;
 
   /// Nothing was read: the user types the details.
   bool get unreadable => txnId == null && amount == null;

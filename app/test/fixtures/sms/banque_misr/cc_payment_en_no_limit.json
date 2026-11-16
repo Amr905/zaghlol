@@ -1,0 +1,15 @@
+{
+  "sender": "BanqueMisr",
+  "body": "BM: Payment of EGP 750.00 has been received on your Credit Card ending with * 8901.",
+  "receivedAt": "2026-11-11T10:00:00+02:00",
+  "expect": {
+    "template": "banque_misr.cc_payment.en",
+    "event": "cc_payment",
+    "direction": "income",
+    "currency": "EGP",
+    "amount": "750.00",
+    "last4": "8901",
+    "balance": null,
+    "available": null
+  }
+}

@@ -179,6 +179,51 @@ void main() {
     },
   );
 
+  // SMS-AUTO: the PO's real-phone HSBC messages (synthetic digits, same
+  // wording) must reach a stored transaction for every sender spelling.
+  for (final sender in ['HSBC', 'HSBC EG', 'HSBC-EG', 'HSBC_EGY']) {
+    for (final c in const [
+      (
+        body:
+            'Your Credit Card ending with * 5075 has been used for USD 114.00 '
+            'on 09/11/2026 at ANTHROPIC* CLAUDE SUB. Your available limit is '
+            'EGP 110095.29',
+        minor: 11400,
+        currency: 'USD',
+      ),
+      (
+        body:
+            'Your Credit Card ending with * 9375 has been used for EGP 1958.40 '
+            'on 08/11/2026 at UDEMY SUBSCRIPTION. Your available limit is '
+            'EGP 27622.16',
+        minor: 195840,
+        currency: 'EGP',
+      ),
+    ]) {
+      test(
+        'HSBC "$sender" ${c.currency} card use is saved, not reviewed',
+        () async {
+          expect(
+            guard.decide(channel: 'sms', source: sender, body: c.body),
+            isA<GuardKeep>(),
+          );
+          final registry = await preloadBundledRegistry();
+          final w = await IngestWorld.open();
+          addTearDown(w.close);
+          final result = await w.useCase(
+            registry: registry,
+            guardBase: BytesGuardBase(base),
+          )([sms('h1', c.body, source: sender)]);
+          expect(result.outcomes['h1'], isA<IngestInserted>());
+          final t = (await w.txns()).single;
+          expect(t['direction'], 'expense');
+          expect(t['amount_minor'], c.minor);
+          expect(t['currency'], c.currency);
+        },
+      );
+    }
+  }
+
   test(
     'an unknown sender with a non-financial text is dropped by the Guard',
     () {

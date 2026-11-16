@@ -27,6 +27,7 @@ import '../../transactions/presentation/list/txn_row.dart';
 import '../application/voice_controller.dart';
 import '../application/voice_models.dart';
 import '../application/voice_providers.dart';
+import '../../../core/ui/z_haptics.dart';
 
 /// Opens S-31 full screen over the current route.
 Future<void> showVoiceLogger(BuildContext context) =>
@@ -86,7 +87,10 @@ class _VoiceLoggerState extends ConsumerState<VoiceLoggerScreen> {
         content: Text(l.voiceLoggerSaved(s.drafts.length, n)),
         action: SnackBarAction(
           label: l.commonActionUndo,
-          onPressed: () => unawaited(_undo(container, ids)),
+          onPressed: () {
+            ZHaptics.light();
+            unawaited(_undo(container, ids));
+          },
         ),
       ),
     );

@@ -29,6 +29,7 @@ import '../../../capture/presentation/template_builder_screen.dart';
 import '../../../transactions/domain/transaction.dart' show TxnDirection;
 import 'review_models.dart';
 import 'review_providers.dart';
+import '../../../../core/ui/z_haptics.dart';
 
 class ReviewScreen extends ConsumerStatefulWidget {
   const ReviewScreen({super.key});
@@ -78,6 +79,7 @@ class _ReviewScreenState extends ConsumerState<ReviewScreen> {
             action: SnackBarAction(
               label: l10n.commonActionUndo,
               onPressed: () {
+                ZHaptics.light();
                 _pending.remove(itemId);
                 if (mounted) setState(() => _hidden.remove(itemId));
               },
@@ -248,6 +250,7 @@ class _ReviewScreenState extends ConsumerState<ReviewScreen> {
       background: const _SwipeBg(accept: true),
       secondaryBackground: const _SwipeBg(accept: false),
       confirmDismiss: (dir) async {
+        ZHaptics.light();
         if (dir == DismissDirection.startToEnd) {
           await _now(() => _accept(card));
         } else {
@@ -297,7 +300,10 @@ class _ReviewScreenState extends ConsumerState<ReviewScreen> {
             ? null
             : SnackBarAction(
                 label: l10n.templatesBuilderTitle,
-                onPressed: () => unawaited(_learn(rawId)),
+                onPressed: () {
+                  ZHaptics.light();
+                  unawaited(_learn(rawId));
+                },
               ),
       ),
     );
@@ -688,6 +694,7 @@ class _MessageCard extends StatelessWidget {
       if (card.canConfirm)
         ZButton(
           label: l10n.commonActionConfirm,
+          haptic: ZHaptic.medium,
           expand: true,
           onPressed: onConfirm,
         ),
@@ -745,6 +752,8 @@ class _MessageCard extends StatelessWidget {
               style: ZType.body.copyWith(color: c.textMuted),
             ),
           ],
+          if (card.originalText != null)
+            _OriginalText(text: card.originalText!),
           const SizedBox(height: ZSpacing.lg),
           Row(
             children: [
@@ -763,6 +772,41 @@ class _MessageCard extends StatelessWidget {
                 onPressed: onRequestBank,
               ),
             ),
+        ],
+      ),
+    );
+  }
+}
+
+/// SMS-AUTO: the original message, collapsed. The text stays on screen only
+/// (selectable; the text's own script decides its direction).
+class _OriginalText extends StatelessWidget {
+  const _OriginalText({required this.text});
+  final String text;
+
+  @override
+  Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
+    final c = ZColors.of(context);
+    return Theme(
+      data: Theme.of(context).copyWith(dividerColor: Colors.transparent),
+      child: ExpansionTile(
+        key: const ValueKey('reviewOriginalText'),
+        tilePadding: EdgeInsets.zero,
+        childrenPadding: EdgeInsets.zero,
+        expandedCrossAxisAlignment: CrossAxisAlignment.start,
+        // TODO(SMS-AUTO): own copy-deck keys (show/hide original message);
+        // interim reuse of the existing "Show message" label.
+        title: Text(
+          l10n.ingestionReviewUnreadShow,
+          style: ZType.body.copyWith(color: c.textMuted),
+        ),
+        children: [
+          SelectableText(
+            text,
+            key: const ValueKey('reviewOriginalBody'),
+            style: ZType.bodySmall.copyWith(color: c.text),
+          ),
         ],
       ),
     );
@@ -814,6 +858,7 @@ class _TransferCardState extends State<_TransferCard> {
             const SizedBox(height: ZSpacing.sm),
             ZButton(
               label: l10n.commonActionConfirm,
+              haptic: ZHaptic.medium,
               onPressed: _choice == null
                   ? null
                   : () => widget.onConfirm(
@@ -905,6 +950,7 @@ class _PairCardState extends State<_PairCard> {
               children: [
                 ZButton(
                   label: l10n.commonActionConfirm,
+                  haptic: ZHaptic.medium,
                   onPressed: choice == null
                       ? null
                       : () => widget.onConfirm(opts[choice]),
@@ -947,7 +993,11 @@ class _SuggestionShell extends StatelessWidget {
             runSpacing: ZSpacing.sm,
             children: [
               if (onConfirm != null)
-                ZButton(label: l10n.commonActionConfirm, onPressed: onConfirm),
+                ZButton(
+                  label: l10n.commonActionConfirm,
+                  haptic: ZHaptic.medium,
+                  onPressed: onConfirm,
+                ),
               ZButton(
                 label: l10n.commonActionDismiss,
                 variant: ZButtonVariant.text,

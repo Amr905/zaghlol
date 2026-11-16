@@ -17,6 +17,7 @@ import '../../../onboarding/application/contextual.dart';
 import '../../../security/domain/app_lock_controller.dart';
 import '../../application/home_cards.dart';
 import '../home_format.dart';
+import '../../../../core/ui/z_haptics.dart';
 
 /// ICU select key; no biometric type API yet, so the generic phone-lock copy.
 const String _lockMethod = 'other';
@@ -236,7 +237,7 @@ class _AppLockOfferCardState extends ConsumerState<AppLockOfferCard> {
                 child: Switch(
                   key: const ValueKey('app-lock-switch'),
                   value: false,
-                  onChanged: _busy ? null : _toggle,
+                  onChanged: ZHaptics.onToggle(_busy ? null : _toggle),
                 ),
               ),
             ],

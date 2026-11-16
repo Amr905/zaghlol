@@ -1,0 +1,15 @@
+{
+  "sender": "BanqueMisr",
+  "body": "بنك مصر: تم استلام سداد بمبلغ 750.00 جم على بطاقة الائتمان المنتهية بـ 8901.",
+  "receivedAt": "2026-11-11T10:00:00+02:00",
+  "expect": {
+    "template": "banque_misr.cc_payment.ar",
+    "event": "cc_payment",
+    "direction": "income",
+    "currency": "EGP",
+    "amount": "750.00",
+    "last4": "8901",
+    "balance": null,
+    "available": null
+  }
+}

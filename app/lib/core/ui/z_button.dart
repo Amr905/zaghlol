@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 
 import '../theme/z_tokens.dart';
+import 'z_haptics.dart';
 
 enum ZButtonVariant { primary, gold, secondary, text, destructive }
 
@@ -28,6 +29,7 @@ class ZButton extends StatelessWidget {
     this.icon,
     this.expand = false,
     this.semanticsLabel,
+    this.haptic = ZHaptic.light,
   });
 
   final String label;
@@ -43,7 +45,17 @@ class ZButton extends StatelessWidget {
   /// Overrides the spoken label (already localised by the caller).
   final String? semanticsLabel;
 
+  /// Tick on tap; pass [ZHaptic.medium] for save / confirm buttons.
+  final ZHaptic haptic;
+
   bool get _enabled => onPressed != null && !loading;
+
+  VoidCallback? get _tap => !_enabled
+      ? null
+      : () {
+          ZHaptics.fire(haptic);
+          onPressed!();
+        };
 
   @override
   Widget build(BuildContext context) {
@@ -117,7 +129,7 @@ class ZButton extends StatelessWidget {
           ),
           child: InkWell(
             borderRadius: shape,
-            onTap: _enabled ? onPressed : null,
+            onTap: _tap,
             child: ConstrainedBox(
               constraints: BoxConstraints(minHeight: size.height),
               child: Padding(

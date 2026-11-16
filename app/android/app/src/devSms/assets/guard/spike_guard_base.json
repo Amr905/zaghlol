@@ -1,6 +1,6 @@
 {
  "v": 4,
- "registryVersion": 1,
+ "registryVersion": 2,
  "senders": [
   {
    "match": "exact",

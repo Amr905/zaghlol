@@ -19,6 +19,7 @@ import '../../domain/account.dart';
 import 'card_form_logic.dart';
 import 'edit_card_providers.dart';
 import 'merge_flow.dart';
+import '../../../../core/ui/z_haptics.dart';
 
 /// Maps Arabic-Indic digits to ASCII as the user types (CLAUDE.md §2.5).
 class NormalizeDigitsFormatter extends TextInputFormatter {
@@ -507,11 +508,13 @@ class _CardDetailsState extends ConsumerState<CardDetailsScreen> {
                           ),
                           title: Text(channels[i].$2),
                           value: !_off.contains(channels[i].$1),
-                          onChanged: (on) => setState(() {
-                            on
-                                ? _off.remove(channels[i].$1)
-                                : _off.add(channels[i].$1);
-                          }),
+                          onChanged: ZHaptics.onToggle(
+                            (on) => setState(() {
+                              on
+                                  ? _off.remove(channels[i].$1)
+                                  : _off.add(channels[i].$1);
+                            }),
+                          ),
                         ),
                       ],
                     ],
@@ -535,7 +538,9 @@ class _CardDetailsState extends ConsumerState<CardDetailsScreen> {
                 title: Text(l10n.accountsEditHide),
                 subtitle: Text(l10n.accountsEditHideHint),
                 value: _hidden,
-                onChanged: _acc!.isDefaultCash ? null : _toggleHidden,
+                onChanged: ZHaptics.onToggle(
+                  _acc!.isDefaultCash ? null : _toggleHidden,
+                ),
               ),
               ZListRow(
                 key: const Key('card-capture-link'),

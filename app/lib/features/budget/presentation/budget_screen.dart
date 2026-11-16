@@ -22,6 +22,26 @@ import '../../mascot/presentation/zaghlol_avatar.dart';
 import 'budget_providers_ui.dart';
 import 'budget_view.dart';
 import 'edit_budgets_screen.dart';
+import '../../../core/ui/z_haptics.dart';
+
+/// Hosts [BudgetScreen] as a pushed route (Home hero tap). The screen itself is
+/// a tab body with no Scaffold, so on its own it renders without Material
+/// (black background, yellow-underlined text).
+class BudgetRouteScaffold extends StatelessWidget {
+  const BudgetRouteScaffold({super.key, required this.child});
+  final Widget child;
+
+  @override
+  Widget build(BuildContext context) {
+    final l = AppLocalizations.of(context);
+    final c = ZColors.of(context);
+    return Scaffold(
+      backgroundColor: c.bg,
+      appBar: AppBar(backgroundColor: c.bg, title: Text(l.insightsTabsBudget)),
+      body: child,
+    );
+  }
+}
 
 class BudgetScreen extends ConsumerStatefulWidget {
   const BudgetScreen({super.key, this.onCategoryTap, this.onSetPayday});
@@ -270,7 +290,11 @@ class _EmptyBudget extends StatelessWidget {
             style: ZType.bodySmall.copyWith(color: c.textMuted),
           ),
           const SizedBox(height: ZSpacing.md),
-          ZButton(label: l.budgetOverviewEmptyAction, onPressed: onSet),
+          ZButton(
+            label: l.budgetOverviewEmptyAction,
+            haptic: ZHaptic.medium,
+            onPressed: onSet,
+          ),
         ],
       ),
     );

@@ -108,6 +108,10 @@ ParseResult parseGeneric({
   }
 
   // Direction: the nearest keyword; opposite keywords close together cancel.
+  // A credit-card settlement (SMS-AUTO) names its own side and is a transfer
+  // between the user's accounts, so the "payment"/"received" keywords that
+  // would cancel each other do not decide it.
+  final settlement = _settlement(t);
   final expenseDistance = _nearest(
     best,
     directional,
@@ -115,18 +119,31 @@ ParseResult parseGeneric({
   );
   final incomeDistance = _nearest(best, directional, TemplateDirection.income);
   TemplateDirection? direction;
-  if (expenseDistance == _far && incomeDistance == _far) {
+  if (settlement != null && _hits(t, _spendOrReversalCues, null).isNotEmpty) {
+    // A settlement phrase beside a purchase or reversal cue: never guess.
+    reasons.add(GenericReason.directionConflict);
+  } else if (settlement != null) {
+    direction = settlement;
+  } else if (expenseDistance == _far && incomeDistance == _far) {
     reasons.add(GenericReason.directionUnknown);
   } else if (expenseDistance != _far &&
       incomeDistance != _far &&
       (expenseDistance - incomeDistance).abs() <= _conflictChars) {
+    reasons.add(GenericReason.directionConflict);
+  } else if (expenseDistance < incomeDistance &&
+      _hits(t, _reversalCues, null).isNotEmpty) {
+    // `payment ... was reversed`: a spend word beside a reversal is unclear.
     reasons.add(GenericReason.directionConflict);
   } else {
     direction = expenseDistance < incomeDistance
         ? TemplateDirection.expense
         : TemplateDirection.income;
   }
-  final event = direction == null ? null : _event(t, best, direction);
+  final event = direction == null
+      ? null
+      : settlement != null
+      ? GenericEvent.ccPayment
+      : _event(t, best, direction);
 
   final last4 = _last4(t, globalLast4);
   final merchant = _merchant(folded, body, cleaning);
@@ -213,6 +230,58 @@ const int _closeChars = 24;
 
 /// The event whose keyword sits nearest the amount, within the window.
 /// Refund only for income, purchase and withdrawal only for expense.
+/// SMS-AUTO: the side of a credit-card settlement the message describes, or
+/// null when it is not one (or names both sides). A card word is required;
+/// the received side needs a "payment received/credited/posted" cue and no
+/// debit word, the paying side a "card payment/bill" cue and a debit word.
+TemplateDirection? _settlement(String t) {
+  if (_hits(t, cardWords, null).isEmpty) return null;
+  final debit = _hits(t, cardSettlementDebitWords, null).isNotEmpty;
+  final received =
+      !debit &&
+      (_hits(t, cardSettlementReceivedCues, null).isNotEmpty ||
+          _paymentNearReceivedVerb(t));
+  final paid = debit && _hits(t, cardSettlementPaidCues, null).isNotEmpty;
+  if (received == paid) return null;
+  return received ? TemplateDirection.income : TemplateDirection.expense;
+}
+
+/// `Payment of EGP 5,000 received on your card`: a payment word with a
+/// received/credited/posted verb right after it (no thanks-only wording).
+bool _paymentNearReceivedVerb(String t) {
+  final verbs = _hits(t, cardSettlementReceivedVerbs, null).where(
+    (v) => !t.startsWith('thank', v.start) && !t.startsWith('شكرا', v.start),
+  );
+  for (final p in _hits(t, _paymentWords, null)) {
+    if (verbs.any((v) => v.start >= p.end && v.start - p.end <= 40)) {
+      return true;
+    }
+  }
+  return false;
+}
+
+final List<String> _paymentWords = ['payment', 'repayment', 'سداد', 'دفعه'];
+
+final List<String> _reversalCues = ['reversed', 'reversal'];
+
+final List<String> _spendOrReversalCues = const [
+  'purchase',
+  'purchased',
+  'was used',
+  'has been used',
+  'used for',
+  'spent',
+  'withdrawal',
+  'reversed',
+  'reversal',
+  'refund',
+  'refunded',
+  'شراء',
+  'مشتريات',
+  'استرداد',
+  'مرتجع',
+].map(foldKey).toList();
+
 GenericEvent? _event(String t, _Candidate c, TemplateDirection direction) {
   GenericEvent? best;
   var bestDistance = genericEventWindow + 1;
