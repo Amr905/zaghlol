@@ -13,6 +13,7 @@ import '../../gold/application/gating.dart';
 import '../data/categories_admin.dart';
 import 'categories_providers.dart';
 import 'category_visuals.dart';
+import '../../../core/ui/z_haptics.dart';
 
 const int maxCategoryNameLength = 30;
 
@@ -198,6 +199,7 @@ class _State extends ConsumerState<CategoryEditScreen> {
             padding: const EdgeInsetsDirectional.only(end: ZSpacing.sm),
             child: ZButton(
               label: t.commonActionSave,
+              haptic: ZHaptic.medium,
               size: ZButtonSize.small,
               loading: _saving,
               onPressed: gold && _nameOk ? () => _save(gold) : null,

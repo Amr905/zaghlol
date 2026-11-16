@@ -13,6 +13,7 @@ import 'transfers_format.dart';
 import 'transfers_parts.dart';
 import 'transfers_port.dart';
 import 'transfers_providers.dart';
+import '../../../core/ui/z_haptics.dart';
 
 /// Longest person name (S-15 validation).
 const int splitNameMaxChars = 30;
@@ -170,6 +171,7 @@ class _SplitSheetState extends ConsumerState<SplitSheet> {
             action: SnackBarAction(
               label: l.commonActionUndo,
               onPressed: () async {
+                ZHaptics.light();
                 await port.assign(r.sourceId, [
                   AssignLine(
                     expenseId: d.expenseId,
@@ -310,6 +312,7 @@ class _SplitSheetState extends ConsumerState<SplitSheet> {
           const SizedBox(height: ZSpacing.lg),
           ZButton(
             label: l.commonActionSave,
+            haptic: ZHaptic.medium,
             expand: true,
             loading: _busy,
             onPressed: () => _save(d, f),

@@ -354,7 +354,9 @@ Future<void> _budget(
   required void Function(String categoryId, Cycle cycle) onCategoryTap,
 }) => pushScreen<void>(
   c,
-  (_) => BudgetScreen(onCategoryTap: (id, cycle) => onCategoryTap(id, cycle)),
+  (_) => BudgetRouteScaffold(
+    child: BudgetScreen(onCategoryTap: (id, cycle) => onCategoryTap(id, cycle)),
+  ),
 );
 
 Widget _ask(BuildContext c) => const AskScreen();

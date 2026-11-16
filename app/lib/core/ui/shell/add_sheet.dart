@@ -9,6 +9,7 @@ import '../../../features/gold/application/gating.dart';
 import '../../../features/voice/application/voice_providers.dart';
 import '../../l10n/generated/app_localizations.dart';
 import '../../theme/z_tokens.dart';
+import '../z_haptics.dart';
 import '../z_sheet.dart';
 
 enum AddAction { say, type, scan, asset }
@@ -238,7 +239,10 @@ class _AddOption extends StatelessWidget {
         ),
         child: InkWell(
           borderRadius: radius,
-          onTap: onTap,
+          onTap: () {
+            ZHaptics.light();
+            onTap();
+          },
           child: Padding(
             padding: const EdgeInsetsDirectional.all(ZSpacing.lg),
             child: Column(

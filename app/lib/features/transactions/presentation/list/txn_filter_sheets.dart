@@ -11,6 +11,7 @@ import '../../../../core/ui/z_components.dart';
 import '../../domain/transaction.dart';
 import 'txn_list_providers.dart';
 import 'txn_row.dart';
+import '../../../../core/ui/z_haptics.dart';
 
 Widget _check(BuildContext context, bool on) => Icon(
   on ? Icons.check_circle : Icons.radio_button_unchecked,
@@ -280,7 +281,7 @@ Future<({String id, bool always})?> showBulkCategorySheet(
             ),
             title: Text(l.transactionsListBulkRule),
             value: always,
-            onChanged: (v) => setState(() => always = v),
+            onChanged: ZHaptics.onToggle((v) => setState(() => always = v)),
           ),
           for (final c in categories)
             ZListRow(

@@ -12,6 +12,7 @@ import 'transfers_format.dart';
 import 'transfers_parts.dart';
 import 'transfers_port.dart';
 import 'transfers_providers.dart';
+import '../../../core/ui/z_haptics.dart';
 
 /// Opens S-16 for [txnId]. Resolves to true when linked.
 Future<bool?> showLinkTransferSheet(BuildContext context, String txnId) =>
@@ -65,7 +66,10 @@ class _LinkTransferSheetState extends ConsumerState<LinkTransferSheet> {
           content: Text(l.transfersLinkLinked),
           action: SnackBarAction(
             label: l.commonActionUndo,
-            onPressed: () => port.unlink(d.id),
+            onPressed: () {
+              ZHaptics.light();
+              port.unlink(d.id);
+            },
           ),
         ),
       );

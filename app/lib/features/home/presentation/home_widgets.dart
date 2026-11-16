@@ -18,6 +18,7 @@ import '../../transactions/domain/transaction.dart';
 import '../application/card_filter.dart';
 import '../application/home_read_model.dart';
 import 'home_format.dart';
+import '../../../core/ui/z_haptics.dart';
 
 /// Accounts for the card filter sheet and the filter chip label.
 final homeAccountsProvider = FutureProvider<List<Account>>((ref) async {
@@ -114,6 +115,7 @@ class HomeHero extends StatelessWidget {
               const SizedBox(height: ZSpacing.sm),
               ZButton(
                 label: l.homeHeroSetBudget,
+                haptic: ZHaptic.medium,
                 onPressed: onSetBudget,
                 size: ZButtonSize.small,
               ),

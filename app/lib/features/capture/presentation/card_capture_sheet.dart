@@ -18,6 +18,7 @@ import '../../../core/theme/z_tokens.dart';
 import '../../../core/ui/z_components.dart';
 import '../application/ignore_rules.dart';
 import 'capture_controls.dart';
+import '../../../core/ui/z_haptics.dart';
 
 /// Opens S-62 as a sheet. [cardName] is the label shown in the copy.
 Future<void> showCardCaptureSheet(
@@ -172,6 +173,7 @@ class _State extends ConsumerState<CardCaptureControls> {
         action: SnackBarAction(
           label: l10n.commonActionUndo,
           onPressed: () async {
+            ZHaptics.light();
             for (final id in created) {
               try {
                 await controls.remove(id);
@@ -298,12 +300,13 @@ class _State extends ConsumerState<CardCaptureControls> {
                               ),
                             ),
                       value: _isOn(rules, channels[i]),
-                      onChanged:
-                          _busy ||
-                              (_instOff(rules, channels[i]) &&
-                                  _cardRule(rules, channels[i]) == null)
-                          ? null
-                          : (v) => _toggle(channels[i], v, rules, channels),
+                      onChanged: ZHaptics.onToggle(
+                        _busy ||
+                                (_instOff(rules, channels[i]) &&
+                                    _cardRule(rules, channels[i]) == null)
+                            ? null
+                            : (v) => _toggle(channels[i], v, rules, channels),
+                      ),
                     ),
                   ],
                 ],

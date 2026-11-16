@@ -17,6 +17,7 @@ import '../../insights/presentation/charts/charts_providers.dart';
 import '../application/share_providers.dart';
 import '../domain/share_figures.dart';
 import 'share_card.dart';
+import '../../../core/ui/z_haptics.dart';
 
 class ShareStudioScreen extends ConsumerStatefulWidget {
   const ShareStudioScreen({super.key});
@@ -160,7 +161,9 @@ class _ShareStudioScreenState extends ConsumerState<ShareStudioScreen> {
               title: Text(l.shareStudioShowAmounts),
               subtitle: Text(l.shareStudioShowAmountsHint),
               value: _showAmounts,
-              onChanged: (v) => setState(() => _showAmounts = v),
+              onChanged: ZHaptics.onToggle(
+                (v) => setState(() => _showAmounts = v),
+              ),
             ),
             ZBanner(
               message: l.shareStudioUnencrypted,

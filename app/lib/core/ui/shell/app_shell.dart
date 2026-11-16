@@ -6,12 +6,12 @@
 import 'dart:ui' show ImageFilter;
 
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
 import 'package:go_router/go_router.dart';
 
 import '../../l10n/generated/app_localizations.dart';
 import '../../routing/app_routes.dart';
 import '../../theme/z_tokens.dart';
+import '../z_haptics.dart';
 
 /// Which bar the current platform gets.
 bool usesGlassBar(BuildContext context) => switch (Theme.of(context).platform) {
@@ -50,7 +50,6 @@ class AppShell extends StatelessWidget {
   }
 
   void _openAdd(BuildContext context) {
-    HapticFeedback.mediumImpact();
     context.push(AppRoutes.add);
   }
 
@@ -102,6 +101,16 @@ class ShellScaffold extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    void select(int i) {
+      ZHaptics.selection();
+      onSelect(i);
+    }
+
+    void add() {
+      ZHaptics.medium();
+      onAdd();
+    }
+
     if (glass) {
       return Scaffold(
         extendBody: true,
@@ -110,8 +119,8 @@ class ShellScaffold extends StatelessWidget {
           labels: labels,
           addLabel: addLabel,
           selected: selected,
-          onSelect: onSelect,
-          onAdd: onAdd,
+          onSelect: select,
+          onAdd: add,
         ),
       );
     }
@@ -129,13 +138,13 @@ class ShellScaffold extends StatelessWidget {
           top: false,
           child: Row(
             children: [
-              Expanded(child: _androidBar(c)),
+              Expanded(child: _androidBar(c, select)),
               Padding(
                 padding: const EdgeInsetsDirectional.only(
                   end: ZSpacing.lg,
                   start: ZSpacing.sm,
                 ),
-                child: ZAddButton(label: addLabel, onTap: onAdd),
+                child: ZAddButton(label: addLabel, onTap: add),
               ),
             ],
           ),
@@ -144,7 +153,7 @@ class ShellScaffold extends StatelessWidget {
     );
   }
 
-  Widget _androidBar(ZColors c) {
+  Widget _androidBar(ZColors c, ValueChanged<int> onSelect) {
     return NavigationBarTheme(
       data: NavigationBarThemeData(
         backgroundColor: Colors.transparent,

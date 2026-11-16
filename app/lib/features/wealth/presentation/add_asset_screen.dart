@@ -17,6 +17,7 @@ import '../data/net_worth_providers.dart';
 import '../data/prices_providers.dart';
 import 'asset_form.dart';
 import 'assets_providers.dart';
+import '../../../core/ui/z_haptics.dart';
 
 class AddAssetScreen extends ConsumerStatefulWidget {
   const AddAssetScreen({super.key, this.onSaved});
@@ -168,6 +169,7 @@ class _AddAssetScreenState extends ConsumerState<AddAssetScreen> {
               child: Center(
                 child: ZButton(
                   label: l10n.commonActionSave,
+                  haptic: ZHaptic.medium,
                   onPressed: _saving ? null : _save,
                   variant: ZButtonVariant.text,
                 ),

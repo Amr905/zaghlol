@@ -29,6 +29,7 @@ import '../../domain/transaction.dart';
 import 'txn_filter_sheets.dart';
 import 'txn_list_providers.dart';
 import 'txn_row.dart';
+import '../../../../core/ui/z_haptics.dart';
 
 /// How long the search field waits after the last keystroke.
 const Duration txnSearchDebounce = Duration(milliseconds: 250);
@@ -381,6 +382,7 @@ class _State extends ConsumerState<TransactionsListScreen> {
             action: SnackBarAction(
               label: l.commonActionUndo,
               onPressed: () async {
+                ZHaptics.light();
                 try {
                   await actions.undo(result.batchId);
                 } on SafeException {

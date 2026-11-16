@@ -20,6 +20,7 @@ import '../domain/merchant_rule.dart';
 import 'categories_providers.dart';
 import 'category_edit_screen.dart';
 import 'category_visuals.dart';
+import '../../../core/ui/z_haptics.dart';
 
 enum _Tab { categories, rules }
 
@@ -150,6 +151,7 @@ class _State extends ConsumerState<CategoriesRulesScreen> {
         action: SnackBarAction(
           label: t.commonActionUndo,
           onPressed: () async {
+            ZHaptics.light();
             await repo.save(
               kind: r.kind,
               value: r.value,
