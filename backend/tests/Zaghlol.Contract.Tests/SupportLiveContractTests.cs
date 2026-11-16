@@ -9,6 +9,9 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.DependencyInjection.Extensions;
 using Npgsql;
 using Zaghlol.Api.Auth;
+using Zaghlol.Application.Purchases;
+using Zaghlol.Application.Support;
+using Zaghlol.Domain;
 using Zaghlol.Testing;
 
 namespace Zaghlol.Contract.Tests;
@@ -22,6 +25,9 @@ public sealed class SupportContractFixture : IAsyncLifetime
 
     public ZaghlolTestDatabase Database { get; private set; } = null!;
 
+    /// <summary>The store order lookups are a fake here (T-186): the outcome the next write call will see.</summary>
+    internal ContractOwnership Ownership { get; } = new();
+
     public HttpClient Client { get; private set; } = null!;
 
     public async Task InitializeAsync()
@@ -31,6 +37,9 @@ public sealed class SupportContractFixture : IAsyncLifetime
         {
             builder.UseSetting("ConnectionStrings:App", Database.Api);
             builder.UseSetting("ConnectionStrings:Admin", Database.Admin);
+            builder.UseSetting("RateLimits:PerToken:TokenLimit", "1000");
+            builder.UseSetting("RateLimits:PerToken:TokensPerPeriod", "1000");
+            builder.UseSetting("RateLimits:PerToken:PeriodSeconds", "60");
             builder.UseSetting("RateLimits:SupportLookup:TokenLimit", "1000");
             builder.UseSetting("RateLimits:SupportLookup:TokensPerPeriod", "1000");
             builder.UseSetting("RateLimits:SupportLookup:PeriodSeconds", "60");
@@ -44,6 +53,8 @@ public sealed class SupportContractFixture : IAsyncLifetime
                 kms.Use(services);
                 services.RemoveAll<IOperatorTokenValidator>();
                 services.AddSingleton<IOperatorTokenValidator>(operators);
+                services.RemoveAll<ISupportOwnershipCheck>();
+                services.AddSingleton<ISupportOwnershipCheck>(Ownership);
             });
         });
         Client = factory.CreateClient();
@@ -74,6 +85,41 @@ public sealed class SupportContractFixture : IAsyncLifetime
                 CultureInfo.InvariantCulture,
                 $"INSERT INTO zaghlol.operators (id, oidc_subject, display_name, roles) VALUES ('{id}', 'sub-{id}', 'Contract test', ARRAY['{string.Join("','", roles)}'])"));
         return operators.Issue(id, roles);
+    }
+
+    /// <summary>A purchase held by one install, in cooldown, with one fresh pending claimant and no account link (T-186).</summary>
+    internal async Task<(Guid Purchase, Guid Holder, Guid Claimant)> SeedMovableAsync(bool signInLinked = false)
+    {
+        var holder = Guid.NewGuid();
+        var claimant = Guid.NewGuid();
+        var purchase = Guid.NewGuid();
+        var account = Guid.NewGuid();
+        await using var connection = new NpgsqlConnection(Database.Superuser);
+        await connection.OpenAsync();
+        await using var command = new NpgsqlCommand(
+            """
+            INSERT INTO zaghlol.installs (id, token_hash, platform, app_version) VALUES (@holder, @h1, 'android', '1.2.0'), (@claimant, @h2, 'android', '1.2.0');
+            INSERT INTO zaghlol.accounts (id, provider, provider_subject) VALUES (@account, 'google', @subject);
+            INSERT INTO zaghlol.purchases (id, store, product_id, plan, store_key, state, environment, last_verified_at, install_id, account_id, account_linked_by)
+              VALUES (@purchase, 'google_play', 'zaghlol_gold_monthly', 'monthly', @key, 'active', 'production', now(), @holder,
+                      CASE WHEN @linked THEN @account END::uuid, CASE WHEN @linked THEN 'signin' END);
+            INSERT INTO zaghlol.purchase_seats (purchase_id, install_id, proof, bound_at, last_moved_at, next_move_at)
+              VALUES (@purchase, @holder, 'attested', now(), date_trunc('hour', now()) + interval '10 days' - interval '30 days', date_trunc('hour', now()) + interval '10 days');
+            INSERT INTO zaghlol.seat_claimants (purchase_id, install_id, claimed_at, channel) VALUES (@purchase, @claimant, now() - interval '1 hour', 'restore');
+            INSERT INTO zaghlol.account_installs (account_id, install_id) SELECT @account, @claimant WHERE @linked;
+            """,
+            connection);
+        command.Parameters.AddWithValue("holder", holder);
+        command.Parameters.AddWithValue("claimant", claimant);
+        command.Parameters.AddWithValue("h1", System.Security.Cryptography.RandomNumberGenerator.GetBytes(32));
+        command.Parameters.AddWithValue("h2", System.Security.Cryptography.RandomNumberGenerator.GetBytes(32));
+        command.Parameters.AddWithValue("account", account);
+        command.Parameters.AddWithValue("subject", Guid.NewGuid().ToString("N"));
+        command.Parameters.AddWithValue("purchase", purchase);
+        command.Parameters.AddWithValue("key", "contract-" + Guid.NewGuid().ToString("N"));
+        command.Parameters.AddWithValue("linked", signInLinked);
+        await command.ExecuteNonQueryAsync();
+        return (purchase, holder, claimant);
     }
 
     /// <summary>An install holding the seat of an account-linked, in-grace purchase with a running dispute freeze.</summary>
@@ -191,5 +237,19 @@ public class SupportLiveContractTests(SupportContractFixture fixture) : IClassFi
         request.Content = new StringContent(body, Encoding.UTF8);
         request.Content.Headers.ContentType = new MediaTypeHeaderValue(mediaType);
         return await fixture.Client.SendAsync(request);
+    }
+}
+
+/// <summary>The store order check as a fake: it answers <see cref="Next"/> and counts calls.</summary>
+internal sealed class ContractOwnership : ISupportOwnershipCheck
+{
+    public OwnershipOutcome Next { get; set; } = OwnershipOutcome.Pass;
+
+    public int Calls { get; private set; }
+
+    public Task<OwnershipOutcome> CheckAsync(SupportPurchase purchase, Sensitive<string> orderId, CancellationToken cancellationToken)
+    {
+        Calls++;
+        return Task.FromResult(Next);
     }
 }

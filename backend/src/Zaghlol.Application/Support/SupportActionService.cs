@@ -72,6 +72,7 @@ public sealed class SupportActionService(
     public async Task<SupportActionResult<SupportSeatMoveOutcome>> MoveSeatAsync(SupportSeatMoveCommand command, CancellationToken cancellationToken)
     {
         ArgumentNullException.ThrowIfNull(command);
+        _ = SupportTicketRef.Require(command.TicketRef);
         var correction = command.Reason == SupportReason.Correction;
         if (correction != command.CorrectsAuditId.HasValue || (correction && command.Attach))
         {
@@ -245,6 +246,7 @@ public sealed class SupportActionService(
     public async Task<SupportActionResult<SupportDetachOutcome>> DetachAsync(SupportDetachCommand command, CancellationToken cancellationToken)
     {
         ArgumentNullException.ThrowIfNull(command);
+        _ = SupportTicketRef.Require(command.TicketRef);
 
         SupportPurchase gated;
         await using (var tx = await store.BeginAsync(cancellationToken).ConfigureAwait(false))
@@ -317,6 +319,7 @@ public sealed class SupportActionService(
     public async Task<SupportActionResult<SupportUnfreezeOutcome>> UnfreezeAsync(SupportUnfreezeCommand command, CancellationToken cancellationToken)
     {
         ArgumentNullException.ThrowIfNull(command);
+        _ = SupportTicketRef.Require(command.TicketRef);
 
         SupportPurchase gated;
         await using (var tx = await store.BeginAsync(cancellationToken).ConfigureAwait(false))

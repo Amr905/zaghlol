@@ -16,6 +16,9 @@ using Serilog.Core;
 using Zaghlol.Api.Auth;
 using Zaghlol.Api.Tests.Flags;
 using Zaghlol.Application.Flags;
+using Zaghlol.Application.Purchases;
+using Zaghlol.Application.Support;
+using Zaghlol.Domain;
 using Zaghlol.Testing;
 
 namespace Zaghlol.Api.Tests.Operators;
@@ -170,6 +173,8 @@ public sealed class OperatorHostFixture : IAsyncLifetime
                 services.AddHttpClient(OidcKeyCache.HttpClientName).ConfigurePrimaryHttpMessageHandler(() => Issuer.CreateHandler());
                 services.RemoveAll<IOpsNotifier>();
                 services.AddSingleton<IOpsNotifier>(new RecordingOpsNotifier());
+                services.RemoveAll<ISupportOwnershipCheck>();
+                services.AddSingleton<ISupportOwnershipCheck>(new PassingOwnership());
             });
         });
         Client = factory.CreateClient();
@@ -306,4 +311,11 @@ public sealed class OperatorHostFixture : IAsyncLifetime
             _ => "?",
         }))));
     }
+}
+
+/// <summary>The store order lookups as a fake that always passes (T-186 audit coverage).</summary>
+internal sealed class PassingOwnership : ISupportOwnershipCheck
+{
+    public Task<OwnershipOutcome> CheckAsync(SupportPurchase purchase, Sensitive<string> orderId, CancellationToken cancellationToken) =>
+        Task.FromResult(OwnershipOutcome.Pass);
 }
