@@ -2,6 +2,7 @@ import 'dart:async';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:flutter_riverpod/misc.dart' show Override;
 import 'package:zaghlol/core/db/app_database.dart' show IgnoreRuleRow;
 import 'package:zaghlol/core/l10n/generated/app_localizations.dart';
 import 'package:zaghlol/core/theme/app_theme.dart';
@@ -185,6 +186,7 @@ Widget host(
   CaptureHealth? healthState,
   Object? controlsError,
   bool loading = false,
+  List<Override> extraOverrides = const [],
 }) {
   final themed = dark ? ZaghlolTheme.dark : ZaghlolTheme.light;
   return ProviderScope(
@@ -198,6 +200,7 @@ Widget host(
       captureHealthProvider.overrideWith(
         () => FakeHealth(healthState ?? health()),
       ),
+      ...extraOverrides,
     ],
     child: MaterialApp(
       debugShowCheckedModeBanner: false,

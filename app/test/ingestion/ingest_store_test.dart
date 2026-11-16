@@ -93,7 +93,10 @@ void main() {
     expect(dbDir.listSync().whereType<File>(), isNotEmpty);
 
     final log = <String>[];
-    final spool = FakeSpool([entry(sid(1)), entry(sid(2), body: 'other')], log);
+    final spool = FakeSpool([
+      entry(sid(1)),
+      entry(sid(2), body: 'other 2'),
+    ], log);
     final headless = headlessStore();
     addTearDown(headless.close);
     final first = await cycleOver(headless, spool).run();
@@ -146,7 +149,7 @@ void main() {
     await headless.close();
     expect(dbFds(), 0, reason: 'no connection left when close returns');
 
-    spool.pending.add(entry(sid(2), body: 'other'));
+    spool.pending.add(entry(sid(2), body: 'other 2'));
     final again = await headless.drain();
     expect(again.outcome, CycleOutcome.ok);
     expect(again.inserted, 1, reason: 'a new store reopened the database');

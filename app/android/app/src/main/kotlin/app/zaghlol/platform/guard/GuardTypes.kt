@@ -64,6 +64,7 @@ internal fun guardIgnoreChannel(channel: GuardChannel): GuardIgnoreChannel? = wh
 enum class GuardDropReason(val wire: String) {
     UNKNOWN_CHANNEL("unknown_channel"),
     EMPTY_BODY("empty_body"),
+    NO_DIGIT("no_digit"),
     TOO_LONG("too_long"),
     NOT_FINANCIAL("not_financial"),
     OTP_OR_PROMO_INST("otp_or_promo_inst"),

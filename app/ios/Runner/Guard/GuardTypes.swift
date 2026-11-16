@@ -57,6 +57,7 @@ func guardIgnoreChannel(_ channel: GuardChannel) -> GuardIgnoreChannel? {
 enum GuardDropReason: String {
   case unknownChannel = "unknown_channel"
   case emptyBody = "empty_body"
+  case noDigit = "no_digit"
   case tooLong = "too_long"
   case notFinancial = "not_financial"
   case otpOrPromoInst = "otp_or_promo_inst"

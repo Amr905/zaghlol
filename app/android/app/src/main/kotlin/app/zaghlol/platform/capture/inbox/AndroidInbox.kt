@@ -9,6 +9,7 @@ import android.database.Cursor
 import android.os.Build
 import android.provider.Telephony
 import app.zaghlol.platform.capture.SimSlot
+import app.zaghlol.platform.diag.SmsDiag
 import app.zaghlol.platform.guard.GuardRuntime
 
 /** `Telephony.Sms.Inbox` (inbox rows only; never `content://sms`, which holds sent messages and drafts). */
@@ -49,6 +50,7 @@ object InboxReaders {
             guard = { GuardRuntime.get(app).current().guard },
             simSlot = SimSlot::of,
             nowMs = System::currentTimeMillis,
+            diag = SmsDiag.forDir(app.noBackupFilesDir),
         )
     }
 }

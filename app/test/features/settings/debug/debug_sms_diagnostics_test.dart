@@ -1,0 +1,89 @@
+// SMS-device: the debug-only diagnostics screen shows counts and sender
+// names, nothing else, and exists in dev builds only.
+import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:flutter_test/flutter_test.dart';
+import 'package:zaghlol/features/settings/debug/debug_sms_diagnostics.dart';
+import 'package:zaghlol/features/settings/debug/debug_sms_diagnostics_screen.dart';
+import 'package:zaghlol/features/settings/presentation/about_screen.dart';
+
+import '../settings_harness.dart';
+
+class _Fake implements SmsDiagnosticsSource {
+  int resets = 0;
+  @override
+  Future<SmsDiagSnapshot> read() async => const SmsDiagSnapshot(
+    guardMode: 'base_only',
+    userState: 'OK',
+    pending: 2,
+    senders: {
+      'HSBC': {
+        'received': 3,
+        'kept:registry': 2,
+        'drop:no_digit': 1,
+        'saved': 2,
+      },
+      'CIB': {'inbox_kept': 1, 'review:unrecognized': 1},
+    },
+  );
+
+  @override
+  Future<void> reset() async => resets++;
+}
+
+void main() {
+  test('a phone number is never named', () {
+    expect(diagSenderLabel('+20 100 123 4567'), '(number)');
+    expect(diagSenderLabel('01001234567'), '(number)');
+    expect(diagSenderLabel(null), '(none)');
+    expect(diagSenderLabel('HSBC EG'), 'HSBC EG');
+  });
+
+  testWidgets('shows counts per sender and stage, and resets', (t) async {
+    final fake = _Fake();
+    await t.pumpWidget(
+      ProviderScope(
+        overrides: [
+          smsDiagnosticsSourceProvider.overrideWith((ref) async => fake),
+        ],
+        child: const MaterialApp(home: DebugSmsDiagnosticsScreen()),
+      ),
+    );
+    await t.pumpAndSettle();
+    expect(find.byKey(const Key('sms-diag-sender-HSBC')), findsOneWidget);
+    expect(find.text('drop:no_digit: 1'), findsOneWidget);
+    expect(find.text('saved: 2'), findsOneWidget);
+    expect(find.text('review:unrecognized: 1'), findsOneWidget);
+    expect(find.textContaining('base_only'), findsOneWidget);
+    await t.tap(find.byKey(const Key('sms-diag-reset')));
+    await t.pumpAndSettle();
+    expect(fake.resets, 1);
+  });
+
+  testWidgets('About shows the row only when the dev switch is on', (t) async {
+    final h = SettingsHarness();
+    addTearDown(h.db.close);
+    Future<void> pumpAbout(bool on) async {
+      await t.pumpWidget(
+        h.app(
+          const AboutScreen(),
+          overrides: [smsDiagnosticsEnabledProvider.overrideWithValue(on)],
+        ),
+      );
+      for (var i = 0; i < 10; i++) {
+        await t.pump(const Duration(milliseconds: 100));
+      }
+    }
+
+    await pumpAbout(false);
+    expect(find.text(kDiagTitle), findsNothing);
+    await pumpAbout(true);
+    expect(find.text(kDiagTitle), findsOneWidget);
+  });
+
+  test('the switch is off in a plain test (no dev flavour)', () {
+    final c = ProviderContainer();
+    addTearDown(c.dispose);
+    expect(c.read(smsDiagnosticsEnabledProvider), isFalse);
+  });
+}

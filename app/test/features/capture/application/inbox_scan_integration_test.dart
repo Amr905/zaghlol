@@ -2,7 +2,12 @@
 // encrypted database. Synthetic data; the inbox is a fake of the native
 // reader (its SQL filtering is T-042's instrumented test).
 
+import 'dart:convert';
+import 'dart:io';
+
 import 'package:flutter_test/flutter_test.dart';
+import 'package:zaghlol_parsing/zaghlol_parsing.dart'
+    show Registry, RegistryLoader;
 import 'package:zaghlol/core/db/daos/capture_controls_dao.dart';
 import 'package:zaghlol/core/platform/capture_api.g.dart';
 import 'package:zaghlol/features/capture/application/inbox_scan_service.dart';
@@ -282,6 +287,33 @@ void main() {
       });
     },
   );
+
+  test('DriftScanSenderSource: the bundled registry\'s regex sender (HSBC) is '
+      'scanned through its concrete addresses (SMS-device)', () async {
+    final dir = Directory('assets/registry');
+    final manifestText = File('${dir.path}/registry_manifest.json')
+        .readAsStringSync();
+    final codes =
+        (jsonDecode(manifestText) as Map<String, Object?>)['institutions']!
+            as List<Object?>;
+    final loaded = RegistryLoader.load(
+      manifest: manifestText,
+      shared: File('${dir.path}/shared.json').readAsStringSync(),
+      institutions: {
+        for (final c in codes)
+          '$c.json': File('${dir.path}/institutions/$c.json')
+              .readAsStringSync(),
+      },
+    );
+    final Registry registry = loaded.registry!;
+    final list = await DriftScanSenderSource(w.db, () => registry).read();
+    final hsbc = {
+      for (final s in list)
+        if (s.institutionCode == 'hsbc') s.address,
+    };
+    expect(hsbc, containsAll(['hsbc', 'Hsbc', 'hsbc eg', 'hsbc egypt']));
+    expect(list.any((s) => s.address.toLowerCase() == 'cib'), isTrue);
+  });
 
   test('DriftAlertStore.clearCatchUp removes the request only while it equals '
       'the one that was served', () async {

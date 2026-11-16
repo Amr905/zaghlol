@@ -69,6 +69,7 @@ input: channel, source, body           output: KEEP(kind registry|user|generic, 
    channel ∉ {sms, notification, shortcut_message, apple_pay, share} → DROP unknown_channel
    body > 4,000 or source > 256 UTF-16 units            → DROP too_long   (before any regex)
    foldKey(body) empty                                  → DROP empty_body
+   foldKey(body) has no digit 0-9 (SMS-NODIGIT, PO 2026-11-16)  → DROP no_digit
 1. key = trim(source) for notification, else foldKey(source)
    inst = notification: packages[key]
           sms, shortcut_message: exact senders[key], else first sender regex matching key

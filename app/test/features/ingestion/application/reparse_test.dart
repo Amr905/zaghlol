@@ -141,7 +141,7 @@ void main() {
     test(
       'still unrecognized: no new review item, stamped, not retried',
       () async {
-        await w.useCase(registry: oldReg)([sms('a', 'ZBANK: something new')]);
+        await w.useCase(registry: oldReg)([sms('a', 'ZBANK: something new 2')]);
         final s = await job().run();
         expect(s.unchanged, 1);
         expect(await w.count('review_items'), 1);

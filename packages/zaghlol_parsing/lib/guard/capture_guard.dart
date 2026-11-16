@@ -21,6 +21,14 @@ const int kGuardMaxSourceLength = 256;
 /// dashes or brackets. Same pattern as Kotlin `PHONE_NUMBER_SHAPE`.
 final RegExp _phoneNumberShape = RegExp(r'^\+?[0-9][0-9 ()-]{5,}$');
 
+bool _hasAsciiDigit(String s) {
+  for (var i = 0; i < s.length; i++) {
+    final c = s.codeUnitAt(i);
+    if (c >= 0x30 && c <= 0x39) return true;
+  }
+  return false;
+}
+
 final class CaptureGuard {
   /// A Guard over a loaded config; a null [config] (mode `invalid`) drops
   /// everything as `config_invalid`.
@@ -68,6 +76,12 @@ final class CaptureGuard {
     final folded = lines.contains('\n') ? lines.replaceAll('\n', ' ') : lines;
     if (folded.isEmpty) {
       return const GuardDrop(GuardDropReason.emptyBody);
+    }
+    // SMS-NODIGIT (PO 2026-11-16): a message with no digit (Western or
+    // Arabic-Indic; the fold made them all ASCII) has no amount, no card and
+    // no date: drop it before any regex runs.
+    if (!_hasAsciiDigit(folded)) {
+      return const GuardDrop(GuardDropReason.noDigit);
     }
 
     // Step 1: resolve the source.

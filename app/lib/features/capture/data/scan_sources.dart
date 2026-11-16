@@ -9,9 +9,10 @@ import '../../../core/db/app_database.dart';
 import '../../../core/db/daos/write_errors.dart';
 import '../application/scan.dart';
 import '../domain/scan_plan.dart';
+import '../domain/sender_expansion.dart';
 
-/// Registry exact senders (regex-only senders are not scannable: SQL cannot
-/// run the regex; T-036 exports the concrete ids, Lead decision 6) plus the
+/// Registry exact senders, plus the concrete addresses of the registry's regex
+/// senders ([expandSenderRegex]; SQL cannot run a regex), plus the
 /// user's SMS senders (always-capture rows and custom-template senders),
 /// classified by [classifyUserSender].
 final class DriftScanSenderSource implements ScanSenderSource {
@@ -33,6 +34,15 @@ final class DriftScanSenderSource implements ScanSenderSource {
               institutionCode: i.code,
             ),
           );
+        } else {
+          // SMS-device: a regex sender (HSBC) is scanned through the finite
+          // list of addresses it matches; a pattern that cannot be listed is
+          // captured live only.
+          for (final a in expandSenderRegex(s.value) ?? const <String>[]) {
+            out.add(
+              ScanSender(a, ScanSenderKind.registry, institutionCode: i.code),
+            );
+          }
         }
       }
     }

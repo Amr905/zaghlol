@@ -249,6 +249,42 @@ class CaptureIntakeTest {
         assertEquals(0, afterWrites)
     }
 
+    /** SMS-device: every stage is counted per sender (names and stages only; the body never reaches the sink). */
+    @Test
+    fun theDiagSinkSeesStagesAndSendersOnly() {
+        val seen = ArrayList<String>()
+        val sink = object : app.zaghlol.platform.diag.SmsDiagSink {
+            override fun record(sender: String, stage: String) {
+                seen += "$sender|$stage"
+            }
+        }
+        val i = CaptureIntake(
+            channel = AndroidGuardChannel.SMS,
+            decide = guard::decide,
+            store = storeIn(spoolDir, status = status),
+            status = status,
+            afterWrite = {},
+            diag = sink,
+        )
+        i.process(
+            listOf(
+                msg("NBE", "Purchase EGP 10.00 card **4321 at SYNTH MART"),
+                msg("NBE", "Thank you for banking with us"),
+                msg("PROMOX", "Big sale 50% off"),
+            ),
+            stamp,
+        )
+        assertEquals(
+            listOf(
+                "NBE|received", "NBE|kept:registry", "NBE|spooled",
+                "NBE|received", "NBE|drop:no_digit",
+                "PROMOX|received", "PROMOX|drop:not_financial",
+            ),
+            seen,
+        )
+        assertTrue(seen.none { it.contains("Purchase") || it.contains("SYNTH") })
+    }
+
     @Test
     fun theIntakeDecidesOnItsOwnChannelOnly() {
         val seen = ArrayList<AndroidGuardChannel>()

@@ -2,8 +2,10 @@ name: device-flows
 
 # FIX-device-flows: the real app (main(), real providers, real encrypted
 # database, real plugins) on an Android emulator: Add -> Type -> Save shows
-# the row on Home; Say and Scan show a clear state. Uploads screenshots of
-# Home, the Add sheet, Money, Insights and Settings. Then the explorer
+# the row on Home; Say and Scan show a clear state. First, the SMS device test
+# (SMS-device): synthetic SMS from HSBC, HSBC EG, CIB and NBE before the first
+# launch (inbox scan) and while the app runs (receiver), all must be saved.
+# Uploads screenshots of Home, the Add sheet, Money, Insights and Settings. Then the explorer
 # (app_explorer_test.dart) taps every control of every screen in Arabic and
 # publishes a screenshot per screen plus explorer-report.md. Not a merge gate.
 on:
@@ -11,6 +13,10 @@ on:
     inputs:
       explorer_only:
         description: 'Skip the device flows test and run only the explorer'
+        type: boolean
+        default: false
+      sms_only:
+        description: 'Run only the SMS device test (SMS-device)'
         type: boolean
         default: false
       explorer_plan:
@@ -24,6 +30,7 @@ on:
     paths:
       - 'app/integration_test/device_flows*'
       - 'app/integration_test/app_explorer*'
+      - 'app/integration_test/sms_device*'
       - 'app/integration_test/support/**'
       - '.github/workflows/device-flows.yml'
       - '.github/scripts/device-flows.sh'
@@ -47,6 +54,8 @@ jobs:
       DEVICE: emulator-5554
       EXPLORER_ONLY: ${{ inputs.explorer_only && '1' || '' }}
       EXPLORER_PLAN: ${{ inputs.explorer_plan || 'all' }}
+      # SMS-device: the ci/SMS-device branch runs the SMS part only.
+      SMS_ONLY: ${{ (github.ref_name == 'ci/SMS-device' || inputs.sms_only) && '1' || '' }}
     steps:
       - uses: actions/checkout@fbc6f3992d24b796d5a048ff273f7fcc4a7b6c09 # v5.1.0
         with:
@@ -91,14 +100,14 @@ jobs:
           SHOTS: ${{ runner.temp }}/device-flows
         run: |
           set -eu
-          ls "$SHOTS"/screens/*.png >/dev/null 2>&1 || { echo "no screenshots"; exit 0; }
+          ls "$SHOTS"/screens/*.png >/dev/null 2>&1 || ls "$SHOTS"/*.log >/dev/null 2>&1 || { echo "no screenshots or logs"; exit 0; }
           dir=$(mktemp -d)
           cd "$dir"
           git init -q
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
           mkdir -p "$GITHUB_SHA"
-          cp "$SHOTS"/screens/*.png "$GITHUB_SHA"/
+          cp "$SHOTS"/screens/*.png "$GITHUB_SHA"/ 2>/dev/null || true
           cp "$SHOTS"/screens/*.md "$GITHUB_SHA"/ 2>/dev/null || true
           cp "$SHOTS"/*.log "$GITHUB_SHA"/ 2>/dev/null || true
           git add -A
