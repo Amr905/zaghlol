@@ -398,4 +398,27 @@ void main() {
       );
     });
   });
+
+  group('batch-27 delta: OTP guard in the generic parser', () {
+    final registry = _registry();
+    test('a purchase with an OTP footer and a colon balance still parses', () {
+      for (final body in const [
+        'Purchase of EGP 250.00 at TESTMART card *4321. '
+            'Never share your OTP. Balance: 15000 EGP',
+        'EGP 1,200.00 debited from card *9876. OTP: never asked by bank. '
+            'Ref: 55512345',
+      ]) {
+        expect(_generic(body, registry), isA<ParseGeneric>());
+      }
+    });
+    test('an OTP message with a code is not a spend', () {
+      expect(
+        _generic(
+          'Your OTP for the purchase of EGP 1,250.00 at TESTSHOP is 483920',
+          registry,
+        ),
+        isNot(isA<ParseGeneric>()),
+      );
+    });
+  });
 }

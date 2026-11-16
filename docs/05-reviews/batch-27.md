@@ -140,3 +140,12 @@ The `widget golden tests` job fails on 44 goldens: `review_queue_en_*` (4, 248 p
 - FU-243: **CHANGES_REQUESTED**. One blocker left (the OTP footer pattern). It is small enough for a Lead delta check.
 - SMS-fuzzy: **CHANGES_REQUESTED**, only because it includes FU-243. Its own major (one-tap card) is resolved.
 - FIX-category-icons, DESIGN-polish: APPROVED (unchanged).
+
+## Lead delta check (OTP blocker, 2026-11-16)
+
+- `shared.json` `drop.global`: the code-less FU-243 OTP pattern is removed from every copy (registry, `guard_base.json`, spike base, test configs). A narrow replacement drops only an OTP cue followed by a 4–8 digit code on its own next line, which keeps the two newline-code drop goldens.
+- New golden keep cases: `otp.en.otp_for_with_amount_kept`, `txn_kept.otp_footer.1/2`. `count` is 287.
+- Generic parser: the OTP guard now requires the code in the **same sentence** as the OTP cue. The first version matched any "is/: NNNN" in the message, so "Balance: 15000 EGP" next to an OTP footer would have hidden a real purchase. Tests: `batch-27 delta: OTP guard in the generic parser` (two footer transactions parse; an OTP-with-code does not).
+- `dart test` (parsing, benchmark excluded) 1453 passed; analyze clean.
+
+Verdict: blocker resolved. **APPROVED** for batch 27.
