@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:zaghlol/features/gold/presentation/gold_ui_ports.dart'
+    show GoldLink, goldLinkOpenerProvider;
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/misc.dart' show Override;
 import 'package:flutter_test/flutter_test.dart';
@@ -500,6 +502,28 @@ void main() {
       await tester.pump();
       expect(clip, 'abc-123');
       expect(find.text(t.commonSupportCodeCopied), findsOneWidget);
+    });
+
+    testWidgets('Terms, Privacy and Licenses rows do something', (
+      tester,
+    ) async {
+      final h = SettingsHarness();
+      addTearDown(h.db.close);
+      final opened = <GoldLink>[];
+      await tester.pumpWidget(
+        h.app(
+          const AboutScreen(),
+          overrides: [goldLinkOpenerProvider.overrideWithValue(opened.add)],
+        ),
+      );
+      await settle(tester);
+      final t = _t(tester, AboutScreen);
+      await tester.tap(find.text(t.aboutMainTerms));
+      await tester.tap(find.text(t.aboutMainPrivacy));
+      expect(opened, [GoldLink.terms, GoldLink.privacy]);
+      await tester.tap(find.text(t.aboutMainLicenses));
+      await tester.pumpAndSettle();
+      expect(find.byType(LicensePage), findsOneWidget);
     });
 
     testWidgets('synced dates; diagnostics hidden without exporter', (

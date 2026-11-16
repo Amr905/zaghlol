@@ -182,15 +182,20 @@ class _FilteredTransactionsState extends ConsumerState<_FilteredTransactions> {
   void initState() {
     super.initState();
     ref.listenManual(txnListFilterProvider, (_, _) {});
-    final f = ref.read(txnListFilterProvider);
-    ref
-        .read(txnListFilterProvider.notifier)
-        .set(
-          f.copyWith(
-            period: TxnPeriod.thisCycle,
-            categoryIds: {widget.categoryId},
-          ),
-        );
+    // A provider can't change while the tree is building (explorer finding:
+    // tapping a category row on Budget threw). Set it right after this frame.
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (!mounted) return;
+      final f = ref.read(txnListFilterProvider);
+      ref
+          .read(txnListFilterProvider.notifier)
+          .set(
+            f.copyWith(
+              period: TxnPeriod.thisCycle,
+              categoryIds: {widget.categoryId},
+            ),
+          );
+    });
   }
 
   @override

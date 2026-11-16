@@ -5,6 +5,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:zaghlol/core/backend/backend_client.dart'
     show SignInRequestProvider;
+import 'package:zaghlol/core/backend/backend_failure.dart';
 import 'package:zaghlol/core/l10n/date_format.dart';
 import 'package:zaghlol/core/l10n/generated/app_localizations.dart';
 import 'package:zaghlol/features/account/application/account_providers.dart';
@@ -22,6 +23,7 @@ final class FakeAccountActions implements AccountActions {
   bool signedIn = false;
   bool linkedGold = false;
   bool protect = false;
+  bool offline = false;
   SignInOutcome signInResult = const SignedIn();
   final List<bool> replaceFlags = [];
   int restores = 0;
@@ -30,10 +32,12 @@ final class FakeAccountActions implements AccountActions {
   final List<SignInOutcome> queue = [];
 
   @override
-  Future<AccountStatus> status() async =>
-      AccountStatus(signedIn: signedIn, linkedGold: linkedGold);
+  Future<AccountStatus> status() async => offline
+      ? throw BackendFailure(BackendFailureKind.offline)
+      : AccountStatus(signedIn: signedIn, linkedGold: linkedGold);
   @override
-  Future<bool> protectPending() async => protect;
+  Future<bool> protectPending() async =>
+      offline ? throw BackendFailure(BackendFailureKind.offline) : protect;
   @override
   Future<void> dismissProtect() async => protect = false;
   @override
