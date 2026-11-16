@@ -53,3 +53,13 @@ The integration test and the CI script use synthetic data only, and `font_scale`
 |---|---|---|---|
 | FU-244 | packages/zaghlol_parsing/lib/generic/generic_parser.dart:199-201 | Only an explicit `original/foreign/الاصلي` cue may resolve two currencies. Brackets and `equivalent/approx/يعادل` keep `currencyAmbiguous` and the confidence cut. | Parser tests: `USD 20.00 … equivalent EGP 1,000.00`, `USD 20.00 (EGP 1,000.00)` and `20.00 USD يعادل 1000.00 EGP` each expect `currencyAmbiguous`. `… original USD 30.00` expects charge EGP and `originalAmount` USD. |
 | FU-244 | app/lib/features/ingestion/application/ingest_raw_messages.dart:1374,1427 | Carry `originalAmount` into the generic review payload, the prefill/confirm path and the auto-save `TxnInsert` (minor units plus currency, never summed). | Ingest tests: a generic FX message gives a review payload with `originalAmount`, and an always-capture auto-save stores `original_amount_minor` and its currency. |
+
+## Lead delta check (FU-244 fix round, 2026-11-16)
+
+Commit 4a7be14e: about 35 production lines plus tests.
+- **Major 1:** `_foreignLead` now matches only `original` / `foreign` / `الاصلي`. Brackets and `equivalent` / `approx` / `يعادل` keep `currencyAmbiguous`. Parser tests cover each phrasing and the `original` case. `en_fx_two_currencies` is back to `knownMiss` (ambiguous by design); add fresh hold-out FX items as a follow-up.
+- **Major 2:** `originalAmount` is carried as `Money` (its own currency, integer minor units, never summed) into the review payload, `GenericSuggestion.fromPayload` (dropped unless positive), the one-tap confirm (`ManualTxnInput` → `originalAmountMinor` / `originalCurrency`) and the generic insert. Two ingest tests cover them.
+- Parsing 1455 and ingestion + transactions 410 pass; analyze, format and lints are clean.
+
+Verdict: FU-244 **APPROVED**. All five tasks approved.
+- **FU-247:** batch-29 minors: T-186 (two), T-070 (`registryVersion` not bumped), and fresh hold-out FX cases for the generic parser.
