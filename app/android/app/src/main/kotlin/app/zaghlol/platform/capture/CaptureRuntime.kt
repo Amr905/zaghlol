@@ -10,6 +10,7 @@ import android.os.SystemClock
 import android.provider.Settings
 import app.zaghlol.platform.capture.inbox.InboxReader
 import app.zaghlol.platform.capture.inbox.InboxReaders
+import app.zaghlol.platform.diag.SmsDiag
 import app.zaghlol.platform.guard.AndroidGuardChannel
 import app.zaghlol.platform.guard.GuardRuntime
 import app.zaghlol.platform.ingest.DrainEnvironment
@@ -133,6 +134,7 @@ class CaptureRuntime internal constructor(seams: CaptureSeams) {
                 status = status,
                 afterWrite = ::afterSpoolWrite,
                 trace = { trace },
+                diag = SmsDiag.forDir(seams.noBackupDir),
             ),
             bootCount = seams.bootCount,
             trace = { trace },

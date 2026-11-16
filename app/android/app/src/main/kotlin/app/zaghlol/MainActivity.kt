@@ -9,6 +9,7 @@ import app.zaghlol.platform.capture.ActivityPermissions
 import app.zaghlol.platform.capture.CaptureRuntime
 import app.zaghlol.platform.clock.TrustedClockRegistration
 import app.zaghlol.platform.device.AndroidDeviceEnv
+import app.zaghlol.platform.diag.SmsDiagChannel
 import app.zaghlol.platform.device.DeviceSecurityRegistration
 import app.zaghlol.platform.device.SecureWindowState
 import app.zaghlol.platform.keys.SecretStoreRegistration
@@ -101,6 +102,8 @@ class MainActivity : FlutterFragmentActivity() {
         }
         capturePermissions = perms
         rt.attachUi(flutterEngine, perms)
+        // SMS-device: debug-only counters screen (dev flavours; no-op elsewhere).
+        SmsDiagChannel.register(messenger, applicationContext)
     }
 
     override fun onRequestPermissionsResult(requestCode: Int, permissions: Array<out String>, grantResults: IntArray) {
@@ -113,6 +116,7 @@ class MainActivity : FlutterFragmentActivity() {
     }
 
     override fun cleanUpFlutterEngine(flutterEngine: FlutterEngine) {
+        SmsDiagChannel.unregister(flutterEngine.dartExecutor.binaryMessenger)
         CaptureRuntime.get(applicationContext).detachUi(flutterEngine)
         ShareIntakeHostApi.setUp(flutterEngine.dartExecutor.binaryMessenger, null)
         TextNormalizationHostApi.setUp(flutterEngine.dartExecutor.binaryMessenger, null)
