@@ -1,0 +1,17 @@
+{
+  "sender": "ALEXBANK",
+  "body": "بنك الإسكندرية: تم استلام تحويل لحظي بمبلغ ٥٠٠٫٠٠ جم في حسابك المنتهي بـ ****٧٣١٦ من احمد علي برقم مرجعي c4d8b2a6 بتاريخ ١٠-١١-٢٠٢٦ ١٠:٠٥",
+  "receivedAt": "2026-11-16T22:40:00+02:00",
+  "expect": {
+    "template": "alexbank.instapay_in.ar",
+    "event": "instapay_in",
+    "direction": "income",
+    "currency": "EGP",
+    "amount": "500.00",
+    "last4": "7316",
+    "ref": "c4d8b2a6",
+    "date": "2026-11-10",
+    "time": "10:05",
+    "counterparty": "احمد علي"
+  }
+}

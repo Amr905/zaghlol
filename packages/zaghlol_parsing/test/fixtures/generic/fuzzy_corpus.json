@@ -1292,5 +1292,103 @@
    "date": null,
    "ref": null
   }
+ },
+ {
+  "id": "imp_ipa_cib_out_ar",
+  "body": "يرجى العلم انه تم تنفيذ تحويل لحظي بمبلغ 500.00 جم من حسابك المنتهي بـ ****7316 برقم مرجعي e7a3c9f1 بتاريخ 10-11-2026 22:32 للمزيد، برجاء الاتصال بـ 19666",
+  "expect": {
+   "amount": "500.00",
+   "currency": "EGP",
+   "direction": "expense",
+   "event": "transfer",
+   "last4": "7316",
+   "merchant": null,
+   "date": "2026-11-10",
+   "ref": "e7a3c9f1"
+  }
+ },
+ {
+  "id": "imp_ipa_out_ar_digits",
+  "body": "تم تنفيذ تحويل لحظي بمبلغ ١٬٢٥٠٫٥٠ جم من حسابك المنتهي بـ ٤٤٨١ برقم مرجعي a9f31c07 بتاريخ ٠٩-١١-٢٠٢٦ ٠٨:١٥ للاستفسار اتصل على 16990",
+  "expect": {
+   "amount": "1250.50",
+   "currency": "EGP",
+   "direction": "expense",
+   "event": "transfer",
+   "last4": "4481",
+   "merchant": null,
+   "date": "2026-11-09",
+   "ref": "a9f31c07"
+  }
+ },
+ {
+  "id": "imp_ipa_out_en",
+  "body": "An instant transfer of EGP 320.00 was made from your account ending 2210, ref d41e88b2 on 08-11-2026 14:05. For more info call 19666",
+  "expect": {
+   "amount": "320.00",
+   "currency": "EGP",
+   "direction": "expense",
+   "event": "transfer",
+   "last4": "2210",
+   "merchant": null,
+   "date": "2026-11-08",
+   "ref": "d41e88b2"
+  }
+ },
+ {
+  "id": "imp_ipa_in_ar",
+  "body": "تم استلام تحويل لحظي بمبلغ 750.00 جم في حسابك المنتهي بـ ****7316 من سارة محمود برقم مرجعي c4d8b2a6 بتاريخ 10-11-2026 10:05",
+  "expect": {
+   "amount": "750.00",
+   "currency": "EGP",
+   "direction": "income",
+   "event": "transfer",
+   "last4": "7316",
+   "merchant": "سارة محمود",
+   "date": "2026-11-10",
+   "ref": "c4d8b2a6"
+  }
+ },
+ {
+  "id": "imp_ipa_in_en",
+  "body": "You received an instant transfer of EGP 1,200.00 from Omar Said into your account ending 5530, ref 77b0e3a1 on 07-11-2026 09:40.",
+  "expect": {
+   "amount": "1200.00",
+   "currency": "EGP",
+   "direction": "income",
+   "event": "transfer",
+   "last4": "5530",
+   "merchant": "Omar Said",
+   "date": "2026-11-07",
+   "ref": "77b0e3a1"
+  }
+ },
+ {
+  "id": "imp_ipa_out_no_ref_ar",
+  "body": "تم تنفيذ تحويل لحظي بمبلغ 90.00 جم من حسابك المنتهي بـ 1904",
+  "expect": {
+   "amount": "90.00",
+   "currency": "EGP",
+   "direction": "expense",
+   "event": "transfer",
+   "last4": "1904",
+   "merchant": null,
+   "date": null,
+   "ref": null
+  }
+ },
+ {
+  "id": "imp_hotline_not_amount",
+  "body": "Your payment of EGP 45.00 at TALABAT was approved on card ending 8821. For help call 19666 or 16999",
+  "expect": {
+   "amount": "45.00",
+   "currency": "EGP",
+   "direction": "expense",
+   "event": null,
+   "last4": "8821",
+   "merchant": "TALABAT",
+   "date": null,
+   "ref": null
+  }
  }
 ]

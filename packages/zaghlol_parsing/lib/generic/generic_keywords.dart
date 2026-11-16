@@ -50,6 +50,14 @@ final List<String> expenseKeywords = _fold(const [
   'ارسلت الي',
   'تم تحويل',
   'سداد',
+  // InstaPay / CIB wording: `تم تنفيذ تحويل لحظي ... من حسابك`, `from your
+  // account ending`. A transfer out names the reader's own account as the
+  // source.
+  'تنفيذ تحويل',
+  'من حسابك',
+  'من حسابكم',
+  'from your account',
+  'made from your',
 ]);
 
 /// Expense keywords that flip meaning when the object is the reader
@@ -291,6 +299,10 @@ final Set<String> merchantStopWords = Set.unmodifiable({
   ..._fold(const [
     'on',
     'ببطاقه',
+    'برقم',
+    'بالرقم',
+    'للمزيد',
+    'for more',
     'ببطاقتك',
     'بكارت',
     'بتاريخ',

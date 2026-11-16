@@ -1,0 +1,13 @@
+{
+  "sender": "QNB",
+  "body": "QNB Egypt: You received an instant transfer of EGP 75.00 into your account ending ****7316.",
+  "receivedAt": "2026-11-16T22:40:00+02:00",
+  "expect": {
+    "template": "qnb.instapay_in.en",
+    "event": "instapay_in",
+    "direction": "income",
+    "currency": "EGP",
+    "amount": "75.00",
+    "last4": "7316"
+  }
+}

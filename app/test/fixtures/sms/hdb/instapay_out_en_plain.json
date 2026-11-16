@@ -1,0 +1,16 @@
+{
+  "sender": "HDB",
+  "body": "HDB: An instant transfer of EGP 500.00 was made from your account ending ****7316, ref e7a3c9f1 on 10-11-2026 22:32. For more info call 19666.",
+  "receivedAt": "2026-11-16T22:40:00+02:00",
+  "expect": {
+    "template": "hdb.instapay_out.en",
+    "event": "instapay_out",
+    "direction": "expense",
+    "currency": "EGP",
+    "amount": "500.00",
+    "last4": "7316",
+    "ref": "e7a3c9f1",
+    "date": "2026-11-10",
+    "time": "22:32"
+  }
+}

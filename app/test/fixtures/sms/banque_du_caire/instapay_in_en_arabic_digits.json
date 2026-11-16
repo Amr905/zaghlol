@@ -1,0 +1,17 @@
+{
+  "sender": "BDC",
+  "body": "Banque du Caire: You received an instant transfer of EGP ٥٠٠٫٠٠ from Ahmed Ali into your account ending ****٧٣١٦, ref c4d8b2a6 on ١٠-١١-٢٠٢٦ ١٠:٠٥.",
+  "receivedAt": "2026-11-16T22:40:00+02:00",
+  "expect": {
+    "template": "banque_du_caire.instapay_in.en",
+    "event": "instapay_in",
+    "direction": "income",
+    "currency": "EGP",
+    "amount": "500.00",
+    "last4": "7316",
+    "ref": "c4d8b2a6",
+    "date": "2026-11-10",
+    "time": "10:05",
+    "counterparty": "Ahmed Ali"
+  }
+}

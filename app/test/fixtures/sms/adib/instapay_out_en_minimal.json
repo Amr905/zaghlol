@@ -1,0 +1,13 @@
+{
+  "sender": "ADIB",
+  "body": "ADIB: An instant transfer of EGP 75.00 was made from your account ending ****7316. For more info call 19666.",
+  "receivedAt": "2026-11-16T22:40:00+02:00",
+  "expect": {
+    "template": "adib.instapay_out.en",
+    "event": "instapay_out",
+    "direction": "expense",
+    "currency": "EGP",
+    "amount": "75.00",
+    "last4": "7316"
+  }
+}
