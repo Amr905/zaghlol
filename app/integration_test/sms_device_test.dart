@@ -284,6 +284,12 @@ void main() {
       final c2 = await dbCounts(db);
       return c2['all']![0] >= 9;
     }, timeout: const Duration(seconds: 150));
+    // The last two live SMS (no digit, personal) store nothing: wait for the
+    // native counters to see them.
+    await waitUntil(t, () async {
+      final n = await NativeAndDbSmsDiagnostics(db).read();
+      return n.total('received') >= 6;
+    }, timeout: const Duration(seconds: 60));
     c = await dbCounts(db);
     printCounts('FINAL', c);
     await printNative(db);
@@ -305,14 +311,18 @@ void main() {
     );
     say('REVIEW_COUNT ${c['all']![2]}');
     check(
-      native.total('received') >= 5,
-      'the native receiver saw the 5 live SMS (received=${native.total('received')})',
+      native.total('received') >= 6,
+      'the native receiver saw the 6 live SMS (received=${native.total('received')})',
     );
     check(
       native.total('drop:no_digit') >= 1,
       'the no-digit SMS was dropped by the Guard as no_digit',
     );
     check(native.total('inbox_kept') >= 4, 'the inbox scan kept 4 SMS');
+    check(
+      (native.senders['(number)']?['drop:not_financial'] ?? 0) >= 1,
+      'the personal SMS was dropped by the Guard as not_financial',
+    );
     check(native.pending == 0, 'the spool is empty at the end');
     check(native.guardMode != 'invalid', 'the native Guard base loaded');
 
