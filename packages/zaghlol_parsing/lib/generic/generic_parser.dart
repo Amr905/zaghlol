@@ -119,13 +119,20 @@ ParseResult parseGeneric({
   );
   final incomeDistance = _nearest(best, directional, TemplateDirection.income);
   TemplateDirection? direction;
-  if (settlement != null) {
+  if (settlement != null && _hits(t, _spendOrReversalCues, null).isNotEmpty) {
+    // A settlement phrase beside a purchase or reversal cue: never guess.
+    reasons.add(GenericReason.directionConflict);
+  } else if (settlement != null) {
     direction = settlement;
   } else if (expenseDistance == _far && incomeDistance == _far) {
     reasons.add(GenericReason.directionUnknown);
   } else if (expenseDistance != _far &&
       incomeDistance != _far &&
       (expenseDistance - incomeDistance).abs() <= _conflictChars) {
+    reasons.add(GenericReason.directionConflict);
+  } else if (expenseDistance < incomeDistance &&
+      _hits(t, _reversalCues, null).isNotEmpty) {
+    // `payment ... was reversed`: a spend word beside a reversal is unclear.
     reasons.add(GenericReason.directionConflict);
   } else {
     direction = expenseDistance < incomeDistance
@@ -233,14 +240,47 @@ TemplateDirection? _settlement(String t) {
   final received =
       !debit &&
       (_hits(t, cardSettlementReceivedCues, null).isNotEmpty ||
-          (_hits(t, _paymentWords, null).isNotEmpty &&
-              _hits(t, cardSettlementReceivedVerbs, null).isNotEmpty));
+          _paymentNearReceivedVerb(t));
   final paid = debit && _hits(t, cardSettlementPaidCues, null).isNotEmpty;
   if (received == paid) return null;
   return received ? TemplateDirection.income : TemplateDirection.expense;
 }
 
+/// `Payment of EGP 5,000 received on your card`: a payment word with a
+/// received/credited/posted verb right after it (no thanks-only wording).
+bool _paymentNearReceivedVerb(String t) {
+  final verbs = _hits(t, cardSettlementReceivedVerbs, null).where(
+    (v) => !t.startsWith('thank', v.start) && !t.startsWith('شكرا', v.start),
+  );
+  for (final p in _hits(t, _paymentWords, null)) {
+    if (verbs.any((v) => v.start >= p.end && v.start - p.end <= 40)) {
+      return true;
+    }
+  }
+  return false;
+}
+
 final List<String> _paymentWords = ['payment', 'repayment', 'سداد', 'دفعه'];
+
+final List<String> _reversalCues = ['reversed', 'reversal'];
+
+final List<String> _spendOrReversalCues = const [
+  'purchase',
+  'purchased',
+  'was used',
+  'has been used',
+  'used for',
+  'spent',
+  'withdrawal',
+  'reversed',
+  'reversal',
+  'refund',
+  'refunded',
+  'شراء',
+  'مشتريات',
+  'استرداد',
+  'مرتجع',
+].map(foldKey).toList();
 
 GenericEvent? _event(String t, _Candidate c, TemplateDirection direction) {
   GenericEvent? best;

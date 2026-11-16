@@ -14,6 +14,7 @@ ParseResult _read(String body, {String? inst = 'bank_x'}) => parseGeneric(
 );
 
 void main() {
+  _fixMajors();
   group('settlement', () {
     final received = <String>[
       'Payment of EGP 5,000.00 received on your credit card ending 1234',
@@ -85,6 +86,30 @@ void main() {
       expect(r.reasons, isNot(contains(GenericReason.currencyAmbiguous)));
       expect(r.amount.currency.code, 'USD');
       expect(genericAutoSaveEligible(r), isTrue);
+    });
+  });
+}
+
+void _fixMajors() {
+  group('SMS-AUTO review fixes', () {
+    for (final b in [
+      'Your card ending 1234 was used for a payment of EGP 500.00 at VODAFONE. Thank you for banking with NBE',
+      'Purchase of EGP 750.00 at AMAZON on your card ending 1234. Thank you for your payment',
+      'Payment of EGP 900.00 at CARREFOUR with your card ending 1234 was reversed and credited',
+    ]) {
+      test('no auto-save: ${b.substring(0, 30)}', () {
+        final r = _read(b);
+        if (r is ParseGeneric) {
+          expect(r.event, isNot(GenericEvent.ccPayment));
+          expect(r.direction, isNot(TemplateDirection.income));
+        }
+      });
+    }
+    test('cashback promo is not auto-saved', () {
+      final r = _read(
+        'Get 10% cashback! Pay EGP 500 with your card ending 1234 at NOON before 30/11',
+      );
+      expect(r is ParseGeneric && genericAutoSaveEligible(r), isFalse);
     });
   });
 }

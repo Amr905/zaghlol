@@ -68,6 +68,9 @@ bool isGenericCandidate({
 bool genericAutoSaveEligible(ParseGeneric g) {
   if (g.institutionCode == null || g.direction == null) return false;
   if (!g.amount.isPositive) return false;
+  // Money in needs a named event (refund, deposit, settlement ...): promos
+  // such as cashback offers read as income but name none, so they go to review.
+  if (g.direction == TemplateDirection.income && g.event == null) return false;
   for (final r in const [
     GenericReason.amountAmbiguous,
     GenericReason.currencyAmbiguous,
