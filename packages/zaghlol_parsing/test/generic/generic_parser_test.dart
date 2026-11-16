@@ -293,11 +293,41 @@ void main() {
     });
 
     test('two currencies with no separating keyword are flagged', () {
-      final r = g('Total EGP 3,400.00 (EUR 100.00) debited via POS');
+      final r = g('Total EGP 3,400.00 and EUR 100.00 debited via POS');
       expect(r.reasons, contains(GenericReason.currencyAmbiguous));
       expect(r.confidencePermille, lessThan(500));
       final one = g('Total EGP 3,400.00 debited via POS');
       expect(one.reasons, isNot(contains(GenericReason.currencyAmbiguous)));
+    });
+
+    test('an explicit original cue makes the other amount originalAmount', () {
+      for (final body in [
+        'Purchase EGP 3,400.00 original USD 30.00 debited via POS',
+        'Purchase EGP 3,400.00 foreign USD 30.00 debited via POS',
+      ]) {
+        final r = g(body);
+        expect(r.reasons, isNot(contains(GenericReason.currencyAmbiguous)));
+        expect(r.amount.currency.code, 'EGP', reason: body);
+        expect(r.originalAmount?.currency.code, 'USD', reason: body);
+      }
+    });
+
+    test('brackets and equivalent/approx/يعادل stay currencyAmbiguous', () {
+      for (final body in [
+        'Total EGP 3,400.00 (EUR 100.00) debited via POS',
+        'Purchase of USD 20.00 at AMAZON, equivalent EGP 1,000.00 debited',
+        'charged USD 20.00 (EGP 1,000.00) debited',
+        'Purchase USD 20.00 approx EGP 1,000.00 debited',
+        'خصم 20.00 USD يعادل 1000.00 EGP',
+      ]) {
+        final r = g(body);
+        expect(
+          r.reasons,
+          contains(GenericReason.currencyAmbiguous),
+          reason: body,
+        );
+        expect(r.originalAmount, isNull, reason: body);
+      }
     });
 
     test('two different amounts and no keyword is flagged ambiguous', () {

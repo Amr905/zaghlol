@@ -658,6 +658,50 @@ void main() {
       expect(t['acc_last4'], '4321');
     });
 
+    test('an original-amount cue: the review payload carries originalAmount '
+        'in its own currency', () async {
+      await w.run([
+        sms(
+          'fx',
+          'ZBANK: Purchase EGP 1,500.00 original USD 30.00 at SYNTH CAFE '
+              'card *4321',
+          source: zbankSms,
+        ),
+      ]);
+      final payload =
+          jsonDecode((await w.reviews()).single['payload']! as String) as Map;
+      expect(payload['amount'], {'minor': 150000, 'currency': 'EGP'});
+      expect(payload['originalAmount'], {'minor': 3000, 'currency': 'USD'});
+      expect(await txnCount(), 0);
+    });
+
+    test('an always-capture auto-save stores original_amount_minor and its '
+        'currency', () async {
+      final dao = CaptureControlsDao(w.db);
+      await dao.setAlwaysCapture(
+        sender: zbankSms,
+        channel: 'sms',
+        always: true,
+        at: t0,
+      );
+      for (var i = 0; i < 3; i++) {
+        await dao.recordConfirmation(sender: zbankSms, channel: 'sms', at: t0);
+      }
+      await w.run([
+        sms(
+          'fx2',
+          'ZBANK: Purchase EGP 1,500.00 original USD 30.00 at SYNTH CAFE '
+              'card *4321',
+          source: zbankSms,
+        ),
+      ]);
+      final t = (await w.txns()).single;
+      expect(t['amount_minor'], 150000);
+      expect(t['currency'], 'EGP');
+      expect(t['original_amount_minor'], 3000);
+      expect(t['original_currency'], 'USD');
+    });
+
     test('always capture with 2 confirmations → still review; with 3 → '
         'auto-saved with a low_confidence item; confirmed_count '
         'unchanged', () async {

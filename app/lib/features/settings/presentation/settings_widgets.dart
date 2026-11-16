@@ -160,19 +160,19 @@ class SettingsRow extends StatelessWidget {
         child: Padding(
           padding: const EdgeInsetsDirectional.symmetric(
             horizontal: ZSpacing.lg,
-            vertical: ZSpacing.md,
+            vertical: ZSpacing.sm,
           ),
           child: Row(
             children: [
               if (icon != null) ...[
                 Container(
-                  width: 48,
-                  height: 48,
+                  width: 34,
+                  height: 34,
                   decoration: BoxDecoration(
                     color: tint ?? c.primary,
-                    borderRadius: BorderRadius.circular(ZRadius.lg),
+                    borderRadius: BorderRadius.circular(ZRadius.md),
                   ),
-                  child: Icon(icon, color: c.surface),
+                  child: Icon(icon, size: 20, color: c.surface),
                 ),
                 const SizedBox(width: ZSpacing.md),
               ] else if (leading != null) ...[

@@ -30,6 +30,8 @@ import 'package:zaghlol/core/routing/app_router.dart' show rootNavigatorKey;
 import 'package:zaghlol/core/routing/app_routes.dart';
 import 'package:zaghlol/core/settings/settings_keys.dart';
 import 'package:zaghlol/core/settings/settings_providers.dart';
+import 'package:zaghlol/core/ui/z_button.dart' show ZButton;
+import 'package:zaghlol/features/gold/presentation/paywall_screen.dart';
 import 'package:zaghlol/core/ui/shell/app_shell.dart' show ZAddButton;
 import 'package:zaghlol/main.dart' as app;
 import 'package:zaghlol_domain/zaghlol_domain.dart';
@@ -40,6 +42,15 @@ import 'support/explorer_seed.dart';
 // One part per run (a fresh app process each): 0-3 = the four tabs, 4 = the
 // Add sheet, -1 = all. A single long run exhausted the app's Java heap.
 const _part = int.fromEnvironment('EXPLORER_PART', defaultValue: -1);
+
+// FU-245: which variant of the run. `ar` (default) is the original Arabic
+// light run; `en` English; `dark` the dark theme (Arabic); `scale` Arabic at
+// the system text scale 1.3 (device-flows.sh sets `font_scale` first);
+// `onboarding` / `onboarding_en` a fresh install walked through the
+// first-run flow; `paywall` the Gold paywall (S-68). The variants explore
+// two levels deep so that one app process stays within the heap.
+const _mode = String.fromEnvironment('EXPLORER_MODE', defaultValue: 'ar');
+const _fresh = _mode == 'onboarding' || _mode == 'onboarding_en';
 
 void main() {
   final binding = IntegrationTestWidgetsFlutterBinding.ensureInitialized();
@@ -60,8 +71,8 @@ void main() {
         surfaceConverted = true;
       }
       await t.pump(const Duration(milliseconds: 300));
-      final bytes = await binding.takeScreenshot('p$_part-$name');
-      await File('${(await outDir()).path}/p$_part-$name.png')
+      final bytes = await binding.takeScreenshot('$_mode-p$_part-$name');
+      await File('${(await outDir()).path}/$_mode-p$_part-$name.png')
           .writeAsBytes(bytes);
     } on Object catch (e) {
       // A screenshot is evidence, not the test: report the type only.
@@ -70,7 +81,7 @@ void main() {
     }
   }
 
-  testWidgets('explorer: taps every control of every screen, in Arabic', (
+  testWidgets('explorer[$_mode]: taps every control of every screen', (
     t,
   ) async {
     final started = DateTime.now();
@@ -82,11 +93,19 @@ void main() {
     );
     final settings = await seed.read(settingsRepositoryProvider.future);
     final now = DateTime.now();
+    if (!_fresh) {
+      await settings.set(
+        Settings.setupInstalledOn,
+        CivilDate(now.year, now.month, now.day).epochDay,
+      );
+    }
     await settings.set(
-      Settings.setupInstalledOn,
-      CivilDate(now.year, now.month, now.day).epochDay,
+      Settings.language,
+      _mode == 'en' || _mode == 'onboarding_en'
+          ? LanguagePref.en
+          : LanguagePref.ar,
     );
-    await settings.set(Settings.language, LanguagePref.ar);
+    if (_mode == 'dark') await settings.set(Settings.theme, ThemePref.dark);
     try {
       await seed.read(catalogSeedProvider.future);
     } on Object {
@@ -94,10 +113,16 @@ void main() {
     }
     // ignore: avoid_print
     print('EXPLORER_STAGE catalog ready');
-    final seeded = await seedExplorerData(seed).timeout(
-      const Duration(minutes: 2),
-      onTimeout: () => throw StateError('seeding timed out'),
-    );
+    final seeded = _fresh
+        ? const ExplorerSeedResult(
+            accountIds: [],
+            transactions: 0,
+            reviewItems: 0,
+          )
+        : await seedExplorerData(seed).timeout(
+            const Duration(minutes: 2),
+            onTimeout: () => throw StateError('seeding timed out'),
+          );
     // ignore: avoid_print
     print(
       'EXPLORER_SEEDED accounts=${seeded.accountIds.length} '
@@ -115,12 +140,29 @@ void main() {
     // ignore: avoid_print
     print('EXPLORER_STAGE main() returned');
     final bar = find.byType(NavigationBar);
+    final welcome = find.byType(ZButton);
     final end = DateTime.now().add(const Duration(seconds: 40));
-    while (DateTime.now().isBefore(end) && bar.evaluate().isEmpty) {
+    while (DateTime.now().isBefore(end) &&
+        bar.evaluate().isEmpty &&
+        !(_fresh && welcome.evaluate().isNotEmpty)) {
       await t.pump(const Duration(milliseconds: 250));
     }
     // ignore: avoid_print
-    print('EXPLORER_STAGE shell shown: ${bar.evaluate().isNotEmpty}');
+    print(
+      'EXPLORER_STAGE mode=$_mode textScale='
+      '${t.platformDispatcher.textScaleFactor} '
+      'shell shown: ${bar.evaluate().isNotEmpty}',
+    );
+    if (_mode == 'scale') {
+      expect(t.platformDispatcher.textScaleFactor, greaterThan(1.2));
+    }
+    if (_fresh) {
+      await _walkOnboarding(t, bar, (n) => shot(t, n));
+      if (_mode == 'onboarding' || _mode == 'onboarding_en') {
+        expect(bar, findsOneWidget, reason: 'onboarding ends on the shell');
+        return;
+      }
+    }
     expect(bar, findsOneWidget, reason: 'the shell shows');
     for (var i = 0; i < 20; i++) {
       await t.pump(const Duration(milliseconds: 150));
@@ -156,6 +198,7 @@ void main() {
       // ... or the digits or the theme under the rest of the run.
       ...both((l) => l.settingsPrefsDigitsWestern),
       ...both((l) => l.settingsPrefsThemeDark),
+      ...both((l) => l.settingsPrefsThemeLight),
       ...both((l) => l.settingsPrefsThemeSystem),
     };
 
@@ -212,7 +255,7 @@ void main() {
         ...both((l) => l.commonActionBackA11y),
         ...both((l) => l.commonActionClose),
       },
-      maxDepth: 4,
+      maxDepth: _mode == 'ar' ? 4 : 1,
       onUpdate: (md) => report.writeAsStringSync(md),
     )..install();
 
@@ -230,7 +273,27 @@ void main() {
       runZonedGuarded(
         () async {
           try {
-            for (var i = 0; i < 4 && !ex.timedOut; i++) {
+            if (_mode == 'paywall') {
+              Future<void> openPaywall() async {
+                unawaited(
+                  rootNavigatorKey.currentState?.push<bool>(
+                    MaterialPageRoute<bool>(
+                      fullscreenDialog: true,
+                      builder: (_) => const PaywallScreen(),
+                    ),
+                  ),
+                );
+                await t.pump(const Duration(milliseconds: 900));
+              }
+
+              await openPaywall();
+              await ex.exploreCurrent(
+                l10n.goldPaywallTitle,
+                reopen: openPaywall,
+              );
+              await goHome();
+            }
+            for (var i = 0; i < 4 && !ex.timedOut && _mode != 'paywall'; i++) {
               if (_part >= 0 && _part != i) continue;
               await selectTab(i);
               await ex.exploreCurrent(
@@ -240,7 +303,9 @@ void main() {
               );
               await goHome();
             }
-            if (!ex.timedOut && (_part < 0 || _part == 4)) {
+            if (!ex.timedOut &&
+                _mode != 'paywall' &&
+                (_part < 0 || _part == 4)) {
               await selectTab(0);
               await openAdd();
               await ex.exploreCurrent(l10n.commonNavAddA11y, reopen: openAdd);
@@ -264,7 +329,7 @@ void main() {
       final md = ex.markdown(
         title:
             'Explorer run ${now.toIso8601String().substring(0, 10)} '
-            '(Android emulator, Arabic, synthetic data)',
+            '(Android emulator, mode $_mode, synthetic data)',
       );
       report.writeAsStringSync(md);
       // ignore: avoid_print
@@ -293,9 +358,64 @@ void main() {
     ];
     expect(
       ex.screens.length,
-      greaterThan(_part < 0 ? 8 : 0),
+      greaterThan(_part < 0 && _mode == 'ar' ? 8 : 0),
       reason: 'explored real screens',
     );
     expect(hard, isEmpty, reason: hard.join('\n'));
   }, timeout: const Timeout(Duration(minutes: 40)));
+}
+
+/// A fresh install: shots of the welcome screen in both languages, then
+/// Start, the setup screens (taps "allow SMS" first where it is offered, then
+/// the last button, which moves on) until the shell shows.
+Future<void> _walkOnboarding(
+  WidgetTester t,
+  Finder bar,
+  Future<void> Function(String name) shot,
+) async {
+  Future<void> settle() async {
+    for (var i = 0; i < 8; i++) {
+      await t.pump(const Duration(milliseconds: 150));
+    }
+  }
+
+  await settle();
+  await shot('onb-0-welcome');
+  final l10n = {
+    for (final c in const ['ar', 'en'])
+      c: await AppLocalizations.delegate.load(Locale(c)),
+  };
+  final toggle = find.byKey(const ValueKey('welcome-language-toggle'));
+  if (toggle.evaluate().isNotEmpty) {
+    await t.tap(toggle.first);
+    await settle();
+    await shot('onb-0b-welcome-other-language');
+    await t.tap(toggle.first);
+    await settle();
+  }
+  final skip = {
+    for (final l in l10n.values) ...{
+      l.onboardingWelcomeRestore,
+      l.onboardingWelcomePrivacyLink,
+      l.commonActionOpenSettings,
+    },
+  };
+  final buttons = find.byWidgetPredicate(
+    (w) => w is ZButton && w.onPressed != null && !skip.contains(w.label),
+  );
+  for (var step = 1; step <= 10 && bar.evaluate().isEmpty; step++) {
+    if (buttons.evaluate().isEmpty) break;
+    // The first screen has Start first; the later ones end with "continue".
+    final target = step == 1 ? buttons.first : buttons.last;
+    // The primary button can sit below the fold on a small phone.
+    await t.ensureVisible(target);
+    await settle();
+    await t.tap(target);
+    await settle();
+    await shot('onb-$step');
+  }
+  for (var i = 0; i < 40 && bar.evaluate().isEmpty; i++) {
+    await t.pump(const Duration(milliseconds: 250));
+  }
+  await shot('onb-end');
 }

@@ -8,6 +8,7 @@ import 'package:zaghlol/core/l10n/generated/app_localizations.dart';
 import 'package:zaghlol/core/settings/settings_keys.dart';
 import 'package:zaghlol/features/security/domain/app_lock_controller.dart';
 import 'package:zaghlol/features/settings/presentation/about_screen.dart';
+import 'package:zaghlol/features/settings/presentation/disclaimers_screen.dart';
 import 'package:zaghlol/features/settings/presentation/preferences_screen.dart';
 import 'package:zaghlol/features/settings/presentation/privacy_screen.dart';
 import 'package:zaghlol/features/settings/presentation/server_allow_list.dart';
@@ -40,6 +41,7 @@ const _screens = <String, Widget>{
   'prefs': PreferencesScreen(),
   'privacy': PrivacyScreen(platform: 'ios'),
   'about': AboutScreen(),
+  'disclaimers': DisclaimersScreen(),
 };
 
 List<Override> _reads() => [
@@ -504,6 +506,20 @@ void main() {
       expect(find.text(t.commonSupportCodeCopied), findsOneWidget);
     });
 
+    testWidgets('Disclaimers row opens the notices screen (FU-245)', (
+      tester,
+    ) async {
+      final h = SettingsHarness();
+      addTearDown(h.db.close);
+      await tester.pumpWidget(h.app(const AboutScreen()));
+      await settle(tester);
+      final t = _t(tester, AboutScreen);
+      await tester.tap(find.text(t.aboutMainDisclaimers));
+      await settle(tester);
+      expect(find.byType(DisclaimersScreen), findsOneWidget);
+      expect(find.text(t.legalDisclaimerCoaching), findsOneWidget);
+    });
+
     testWidgets('Terms, Privacy and Licenses rows do something', (
       tester,
     ) async {
@@ -525,6 +541,27 @@ void main() {
       await tester.pumpAndSettle();
       expect(find.byType(LicensePage), findsOneWidget);
     });
+
+    for (final locale in const [Locale('ar'), Locale('en')]) {
+      testWidgets(
+        'Important notices opens the list and Back returns (${locale.languageCode})',
+        (tester) async {
+          final h = SettingsHarness();
+          addTearDown(h.db.close);
+          await tester.pumpWidget(h.app(const AboutScreen(), locale: locale));
+          await settle(tester);
+          final t = _t(tester, AboutScreen);
+          await tester.tap(find.text(t.aboutMainDisclaimers));
+          await tester.pumpAndSettle();
+          expect(find.byType(DisclaimersScreen), findsOneWidget);
+          expect(find.text(t.legalDisclaimerCoaching), findsOneWidget);
+          await tester.tap(find.byType(IconButton).first);
+          await tester.pumpAndSettle();
+          expect(find.byType(DisclaimersScreen), findsNothing);
+          expect(find.byType(AboutScreen), findsOneWidget);
+        },
+      );
+    }
 
     testWidgets('synced dates; diagnostics hidden without exporter', (
       tester,

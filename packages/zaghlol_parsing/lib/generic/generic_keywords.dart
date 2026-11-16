@@ -32,6 +32,7 @@ final List<String> expenseKeywords = _fold(const [
   'deducted',
   'you transferred',
   'transferred to',
+  'transfer of',
   'cash withdrawal',
   'خصم',
   'مخصوم',

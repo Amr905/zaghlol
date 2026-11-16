@@ -223,14 +223,19 @@ class _Kpi extends StatelessWidget {
               maxLines: 1,
               overflow: TextOverflow.ellipsis,
             ),
-            FittedBox(
-              fit: BoxFit.scaleDown,
-              alignment: AlignmentDirectional.centerStart,
-              child: Text(
-                text,
-                style: ZType.titleSmall.copyWith(
-                  color: c.text,
-                  fontWeight: FontWeight.w700,
+            // The gap keeps two long figures from reading as one number
+            // (explorer finding, Arabic at 320 dp and at text scale 1.3).
+            Padding(
+              padding: const EdgeInsetsDirectional.only(end: ZSpacing.sm),
+              child: FittedBox(
+                fit: BoxFit.scaleDown,
+                alignment: AlignmentDirectional.centerStart,
+                child: Text(
+                  text,
+                  style: ZType.titleSmall.copyWith(
+                    color: c.text,
+                    fontWeight: FontWeight.w700,
+                  ),
                 ),
               ),
             ),

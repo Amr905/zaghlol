@@ -20,10 +20,10 @@
 |---|---|---|---|---|
 | M0 | 28 | 25 | 1 | 0 |
 | M1 | 29 | 28 | 0 | 1 |
-| M2 | 29 | 26 | 0 | 0 |
+| M2 | 29 | 27 | 0 | 0 |
 | M3 | 18 | 16 | 0 | 0 |
 | M4 | 17 | 17 | 0 | 0 |
-| M5 | 35 | 31 | 1 | 1 |
+| M5 | 35 | 32 | 1 | 1 |
 | M6 | 19 | 15 | 1 | 2 |
 | M7 | 11 | 7 | 0 | 0 |
 
@@ -99,7 +99,7 @@
 | T-067 | iOS capture setup S-03 (add Shortcut, check setup, first expense) | M2 | C2 | Sonnet | flutter-ui-engineer | T-055, T-066 | DONE | batch 21 review [batch-21](05-reviews/batch-21.md) | Batch 21. FU-216 |
 | T-068 | Templates + fixtures: Egyptian banks batch 1 | M2 | C2 | Sonnet | parsing-engine-engineer | T-033 | DONE | batch 22 review [batch-22a](05-reviews/batch-22a.md), [batch-22b](05-reviews/batch-22b.md) | Batch 22. FU-221 |
 | T-069 | Templates + fixtures: Egyptian banks batch 2 | M2 | C2 | Sonnet | parsing-engine-engineer | T-033 | DONE | batch 22 review [batch-22a](05-reviews/batch-22a.md), [batch-22b](05-reviews/batch-22b.md) | Batch 22. FU-222 |
-| T-070 | Templates + fixtures: BNPL (valU, Sympl, Souhoola, Shahry, Aman, Forsa, Contact) | M2 | C2 | Sonnet | parsing-engine-engineer | T-033 | TODO | — |  |
+| T-070 | Templates + fixtures: BNPL (valU, Sympl, Souhoola, Shahry, Aman, Forsa, Contact) | M2 | C2 | Sonnet | parsing-engine-engineer | T-033 | DONE | batch 29 review [batch-29](05-reviews/batch-29.md) | Batch 29. FU-248 |
 | T-071 | Templates + fixtures: Wise, Revolut, Monzo, bunq, N26, Payoneer | M2 | C3 | Sonnet | parsing-engine-engineer | T-033 | DONE | batch 25 review [batch-25a](05-reviews/batch-25a.md), [batch-25b](05-reviews/batch-25b.md) | Batch 25. FU-238 |
 | T-072 | Templates + fixtures: HDFC, Paytm, Al Rajhi, Emirates NBD/Liv, GCC (S rows) | M2 | C2 | Sonnet | parsing-engine-engineer | T-033 | DONE | batch 25 review [batch-25a](05-reviews/batch-25a.md), [batch-25b](05-reviews/batch-25b.md) | Batch 25. FU-239 |
 | T-073 | Generic parser for unknown financial senders | M2 | C3 | Sonnet | parsing-engine-engineer | T-033, T-034 | DONE | batch 4 local: app 873 tests, packages 901, analyze/format clean; batch CI (`batch/2026-11-11-3`); review [T-073](05-reviews/T-073.md) APPROVED after flaky-probe fix (delta) | Batch 4. FU-078 (signed balance), FU-080 (ingest routing, owner T-046) |
@@ -215,7 +215,7 @@
 | T-183 | Dart request-binding library: JCS, strict JSON parser, restore and seat-key hashes over shared vectors | M5 | C4 | Opus | flutter-core-engineer | T-001, T-014 | DONE | batch 11 review [batch-11](05-reviews/batch-11.md) APPROVED (183-1 tightened) | Plan v1.1 (new) Batch 11. FU-124 |
 | T-184 | Seat service: bind, move, same-iPhone rebind with cap, claimants, reclaim and support-move primitive | M5 | C4 | Opus | backend-engineer | T-122, T-182 | DONE | batch 9 review [batch-9](05-reviews/batch-9.md) + [security](05-reviews/batch-9-security.md) APPROVED; backend-ci incl. Testcontainers green | Plan v1.1 (new, from T-132) Batch 9. FU-112 |
 | T-185 | POST /v1/purchases/restore: strict parse, install binding, attestation, seat outcomes and limits | M5 | C4 | Opus | backend-engineer | T-132, T-181, T-182, T-184 | DONE | batch 12 review [batch-12](05-reviews/batch-12.md) APPROVED; backend-ci incl. Testcontainers green on ci/T-185 | Plan v1.1 (new, from T-132) Batch 12. FU-129 |
-| T-186 | Support seat:move, purchase:detach and purchase:unfreeze endpoints with dispute freeze | M5 | C4 | Opus | backend-engineer | T-136, T-184, T-130, T-131, T-132 | TODO | — | Plan v1.1 (new, from T-136); R6-1 |
+| T-186 | Support seat:move, purchase:detach and purchase:unfreeze endpoints with dispute freeze | M5 | C4 | Opus | backend-engineer | T-136, T-184, T-130, T-131, T-132 | DONE | batch 29 review [batch-29](05-reviews/batch-29.md) | Plan v1.1 (new, from T-136); R6-1 Batch 29. FU-249 |
 
 ## Follow-ups (from reviews)
 | ID | From | Item | Owner / target | Status |
@@ -495,6 +495,11 @@
 - **FU-245** (batch 28, TEST-explorer): About Disclaimers row has an empty `onTap`; About "dead end after Back" needs a hand check; explorer lacks English, dark, text scale 1.3, onboarding and paywall coverage.
 - **FU-246** (batch 28, DESIGN-pass2): Home lock card sits under the Add button at rest; Ask input row loses width at the end.
 
+- **FU-248** (T-070, batch 29): the minors, nits and open questions for T-070 in [batch-29](05-reviews/batch-29.md), plus the "left undone" items in its task file.
+- **FU-249** (T-186, batch 29): the minors, nits and open questions for T-186 in [batch-29](05-reviews/batch-29.md), plus the "left undone" items in its task file.
+
+- **FU-247** (batch 29): minors in [batch-29](05-reviews/batch-29.md): T-186 (two), T-070 `registryVersion` not bumped, fresh hold-out FX cases for the generic parser; explorer open items (small-screen Start button, paywall offline state, red chart bars).
+
 ## Log
 | Date | Event |
 |---|---|
@@ -576,3 +581,4 @@
 | 2026-11-14 | Batch 25 (`batch/2026-11-15-25`): T-135, T-167, T-168, T-169, T-170, T-071, T-072, T-158 DONE. FU-233…FU-240. Progress 165/186. |
 | 2026-11-16 | Batch 27 (`batch/2026-11-16-27`): SMS-fuzzy generic extractor (prefilled review, one-tap confirm), FU-243 drop rules (OTP global only; promo/due per bank), category picker icons, design polish. FU-244. Progress 165/186. |
 | 2026-11-16 | Batch 28 (`batch/2026-11-16-28`): app explorer (108 screens, ~600 taps on the emulator) and its fixes (edit-card row, offline account status, Undo after unmount), FAB clearance on all tabs. FU-245…FU-246. Progress 165/186. |
+| 2026-11-16 | Batch 29 (`batch/2026-11-16-29`): T-070, T-186 DONE; FU-244, DESIGN-pass3 (FU-245/246), TEST-explorer2. FU-247…FU-249. Progress 167/186. |

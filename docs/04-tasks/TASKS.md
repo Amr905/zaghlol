@@ -117,7 +117,7 @@ Every task file has: ID, description, technical details, dependencies, affected 
 | [T-067](tasks/T-067.md) | iOS capture setup S-03 (add Shortcut, check setup, first expense) | US-10-1 | Medium | Sonnet | flutter-ui-engineer | T-055, T-066 | G | 10 | DONE |
 | [T-068](tasks/T-068.md) | Templates + fixtures: Egyptian banks batch 1 | US-05-1 | Medium | Sonnet | parsing-engine-engineer | T-033 | F | 6 | DONE |
 | [T-069](tasks/T-069.md) | Templates + fixtures: Egyptian banks batch 2 | US-05-1 | Medium | Sonnet | parsing-engine-engineer | T-033 | F | 6 | DONE |
-| [T-070](tasks/T-070.md) | Templates + fixtures: BNPL (valU, Sympl, Souhoola, Shahry, Aman, Forsa, Contact) | US-05-1 | Medium | Sonnet | parsing-engine-engineer | T-033 | F | 6 | TODO |
+| [T-070](tasks/T-070.md) | Templates + fixtures: BNPL (valU, Sympl, Souhoola, Shahry, Aman, Forsa, Contact) | US-05-1 | Medium | Sonnet | parsing-engine-engineer | T-033 | F | 6 | DONE |
 | [T-071](tasks/T-071.md) | Templates + fixtures: Wise, Revolut, Monzo, bunq, N26, Payoneer | US-05-1 | High | Sonnet | parsing-engine-engineer | T-033 | F | 6 | DONE |
 | [T-072](tasks/T-072.md) | Templates + fixtures: HDFC, Paytm, Al Rajhi, Emirates NBD/Liv, GCC (S rows) | US-05-1 | Medium | Sonnet | parsing-engine-engineer | T-033 | F | 6 | DONE |
 | [T-073](tasks/T-073.md) | Generic parser for unknown financial senders | US-05-2 | High | Sonnet | parsing-engine-engineer | T-033, T-034 | F | 6 | DONE |
@@ -218,7 +218,7 @@ Every task file has: ID, description, technical details, dependencies, affected 
 | [T-183](tasks/T-183.md) | Dart request-binding library: JCS, strict JSON parser, restore and seat-key hashes over shared vectors | US-14-1 | High* | Opus | flutter-core-engineer | T-001, T-014 | A | 3 | DONE |
 | [T-184](tasks/T-184.md) | Seat service: bind, move, same-iPhone rebind with cap, claimants, reclaim and support-move primitive | US-14-1 | High* | Opus | backend-engineer | T-122, T-182 | B | 4 | DONE |
 | [T-185](tasks/T-185.md) | POST /v1/purchases/restore: strict parse, install binding, attestation, seat outcomes and limits | US-14-1 | High* | Opus | backend-engineer | T-132, T-181, T-182, T-184 | B | 6 | DONE |
-| [T-186](tasks/T-186.md) | Support seat:move, purchase:detach and purchase:unfreeze endpoints with dispute freeze | US-13-2 | High* | Opus | backend-engineer | T-136, T-184, T-130, T-131, T-132 | B | 6 | TODO |
+| [T-186](tasks/T-186.md) | Support seat:move, purchase:detach and purchase:unfreeze endpoints with dispute freeze | US-13-2 | High* | Opus | backend-engineer | T-136, T-184, T-130, T-131, T-132 | B | 6 | DONE |
 
 ## M6 — Backup, import/export, OCR, settings & security
 

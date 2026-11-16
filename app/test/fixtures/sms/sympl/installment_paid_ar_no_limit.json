@@ -1,0 +1,16 @@
+{
+  "sender": "Sympl",
+  "body": "سيمبل: تم سداد القسط 350.50 جم لخطة تريدلاين",
+  "receivedAt": "2026-10-23T11:14:00+03:00",
+  "expect": {
+    "template": "sympl.installment_paid.ar",
+    "event": "bnpl_installment",
+    "direction": "expense",
+    "currency": "EGP",
+    "amount": "350.50",
+    "last4": null,
+    "balance": null,
+    "available": null,
+    "merchantClean": "تريدلاين"
+  }
+}

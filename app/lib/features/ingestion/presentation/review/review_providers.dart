@@ -200,6 +200,7 @@ final class _LiveActions implements ReviewActions {
         accountId: resolved.account.id,
         direction: g.direction!.code,
         amount: g.amount,
+        originalAmount: g.originalAmount,
         occurredAt: DateTime.fromMillisecondsSinceEpoch(
           g.occurredAtMs,
           isUtc: true,

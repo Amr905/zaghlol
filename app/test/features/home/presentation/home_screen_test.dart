@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:zaghlol/core/ui/z_banner.dart';
 import 'package:zaghlol/features/home/presentation/home_screen.dart';
+import 'package:zaghlol/features/home/presentation/home_widgets.dart'
+    show HomeKpis;
 
 import 'home_harness.dart';
 
@@ -108,6 +110,60 @@ void main() {
     await tester.pumpAndSettle();
     expect(find.textContaining('USD'), findsWidgets);
   });
+
+  for (final locale in const [_en, Locale('ar')]) {
+    testWidgets('no-budget second currency fits the pager on a small phone '
+        '(${locale.languageCode})', (tester) async {
+      tester.view.physicalSize = const Size(320, 640);
+      tester.view.devicePixelRatio = 1;
+      addTearDown(tester.view.reset);
+      await pumpHome(
+        tester,
+        locale: locale,
+        platform: TargetPlatform.android,
+        value: model(
+          currencies: [
+            figs(egp),
+            figs(usd, income: 500, spend: 120, safe: null),
+          ],
+        ),
+      );
+      await tester.drag(
+        find.byKey(const ValueKey('home-pager')),
+        const Offset(-300, 0),
+      );
+      await tester.pumpAndSettle();
+      expect(tester.takeException(), isNull);
+    });
+  }
+
+  for (final locale in const [_en, Locale('ar')]) {
+    testWidgets(
+      'KPI figures keep a gap on a small phone (${locale.languageCode})',
+      (tester) async {
+        tester.view.physicalSize = const Size(320, 640);
+        tester.view.devicePixelRatio = 1;
+        addTearDown(tester.view.reset);
+        await pumpHome(
+          tester,
+          locale: locale,
+          platform: TargetPlatform.android,
+          value: model(
+            currencies: [figs(egp, income: 3209900, spend: 2833390, safe: 1)],
+          ),
+        );
+        final boxes = find.descendant(
+          of: find.byType(HomeKpis),
+          matching: find.byType(FittedBox),
+        );
+        expect(boxes, findsNWidgets(3));
+        final rects = [for (var i = 0; i < 3; i++) tester.getRect(boxes.at(i))]
+          ..sort((a, b) => a.left.compareTo(b.left));
+        expect(rects[1].left - rects[0].right, greaterThanOrEqualTo(8));
+        expect(rects[2].left - rects[1].right, greaterThanOrEqualTo(8));
+      },
+    );
+  }
 
   testWidgets('one currency: no pager', (tester) async {
     await pumpHome(
