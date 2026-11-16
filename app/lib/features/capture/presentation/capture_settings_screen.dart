@@ -25,6 +25,7 @@ import '../../../core/theme/z_tokens.dart';
 import '../../../core/ui/z_components.dart';
 import '../../accounts/presentation/edit_card/edit_card_providers.dart'
     show InstitutionOption, institutionOptionsProvider;
+import '../application/capture_permission_fix.dart';
 import '../application/capture_providers.dart';
 import '../application/ignore_rules.dart';
 import '../application/ios_setup_providers.dart';
@@ -107,7 +108,7 @@ class CaptureSettingsScreen extends ConsumerWidget {
         banks: banks,
         ios: ios,
         goldActive: goldActive,
-        onFix: onFix,
+        onFix: onFix ?? (ch) => unawaited(fixCapturePermission(ref, ch)),
         onCheckSetup: onCheckSetup,
         onRequestBank: onRequestBank,
         onOpenTemplates: onOpenTemplates,

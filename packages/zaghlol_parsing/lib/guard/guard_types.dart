@@ -68,6 +68,8 @@ GuardIgnoreChannel? guardIgnoreChannel(GuardChannel channel) =>
 enum GuardDropReason {
   unknownChannel('unknown_channel'),
   emptyBody('empty_body'),
+  // SMS-NODIGIT (PO 2026-11-16): no digit at all after the fold.
+  noDigit('no_digit'),
   tooLong('too_long'),
   notFinancial('not_financial'),
   otpOrPromoInst('otp_or_promo_inst'),
