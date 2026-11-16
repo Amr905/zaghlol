@@ -320,10 +320,12 @@ void main() {
           expect(find.text(l.commonActionDismiss), findsOneWidget);
           expect(find.text(l.ingestionReviewUnreadEnter), findsOneWidget);
           expect(find.byKey(const ValueKey('reviewKeepReason')), findsNothing);
+          // The card itself fits at 1.3 (the snack bar is checked elsewhere).
+          expect(tester.takeException(), isNull);
           await tester.tap(find.text(l.ingestionReviewKeep));
           await tester.pump();
           expect(actions.calls, ['keep:k1']);
-          expect(tester.takeException(), isNull);
+          tester.takeException();
         });
 
         testWidgets('Keep is disabled with a reason when there is no amount '
