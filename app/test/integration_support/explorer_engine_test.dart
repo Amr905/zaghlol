@@ -129,7 +129,6 @@ void main() {
     await ex.exploreCurrent('Home');
     ex.uninstall();
     final md = ex.markdown();
-    debugPrint(md);
     final issues = [for (final s in ex.screens) ...s.issues];
     expect(
       issues.where((i) => i.kind == 'dead-tap').map((i) => i.where),

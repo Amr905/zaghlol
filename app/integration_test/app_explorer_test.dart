@@ -121,26 +121,37 @@ void main() {
       await t.pump(const Duration(milliseconds: 150));
     }
 
-    final l10n = AppLocalizations.of(rootNavigatorKey.currentContext!);
+    // Both languages: the setting loads a moment after the first frame, so
+    // the context's own locale is not reliable here.
+    final l10n = await AppLocalizations.delegate.load(const Locale('ar'));
+    final l10nEn = await AppLocalizations.delegate.load(const Locale('en'));
     // Labels that would leave the app (links, share sheet, system settings),
-    // sign the user out or delete data: never tapped.
+    // sign the user out, delete data or change the language: never tapped.
+    Set<String> both(String Function(AppLocalizations) f) => {
+      f(l10n),
+      f(l10nEn),
+    };
     final deny = <String>{
-      l10n.goldPaywallTerms,
-      l10n.goldPaywallPrivacy,
-      l10n.aboutMainTerms,
-      l10n.aboutMainPrivacy,
-      l10n.legalTermsOpen,
-      l10n.onboardingWelcomePrivacyLink,
-      l10n.goldAccountManage,
-      l10n.shareStudioShare,
-      l10n.aboutDiagShare,
-      l10n.commonActionOpenSettings,
-      l10n.commonActionSignOut,
+      ...both((l) => l.goldPaywallTerms),
+      ...both((l) => l.goldPaywallPrivacy),
+      ...both((l) => l.aboutMainTerms),
+      ...both((l) => l.aboutMainPrivacy),
+      ...both((l) => l.legalTermsOpen),
+      ...both((l) => l.onboardingWelcomePrivacyLink),
+      ...both((l) => l.goldAccountManage),
+      ...both((l) => l.shareStudioShare),
+      ...both((l) => l.aboutDiagShare),
+      ...both((l) => l.commonActionOpenSettings),
+      ...both((l) => l.commonActionSignOut),
+      ...both((l) => l.privacyDeleteConfirm),
+      ...both((l) => l.goldAccountDeleteConfirm),
       // Changing the language would turn the Arabic run into an English one.
-      l10n.settingsPrefsLanguageAr,
-      l10n.settingsPrefsLanguageEn,
-      l10n.privacyDeleteConfirm,
-      l10n.goldAccountDeleteConfirm,
+      ...both((l) => l.settingsPrefsLanguageAr),
+      ...both((l) => l.settingsPrefsLanguageEn),
+      // ... or the digits or the theme under the rest of the run.
+      ...both((l) => l.settingsPrefsDigitsWestern),
+      ...both((l) => l.settingsPrefsThemeDark),
+      ...both((l) => l.settingsPrefsThemeSystem),
     };
 
     Future<void> selectTab(int i) async {
@@ -184,7 +195,10 @@ void main() {
       goHome: goHome,
       selectTab: selectTab,
       deny: deny,
-      navLabels: {l10n.commonActionBackA11y, l10n.commonActionClose},
+      navLabels: {
+        ...both((l) => l.commonActionBackA11y),
+        ...both((l) => l.commonActionClose),
+      },
       maxDepth: 4,
       onUpdate: (md) => report.writeAsStringSync(md),
     )..install();

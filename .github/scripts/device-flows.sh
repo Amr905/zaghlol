@@ -48,8 +48,13 @@ done
 (
   misses=0
   while true; do
-    sleep 15
+    sleep 10
     if adb -s "$DEVICE" shell pidof "$PKG" >/dev/null 2>&1; then
+      # The app is installed by now: grant what its screens ask for, so no
+      # system permission dialog covers it.
+      for p in POST_NOTIFICATIONS RECORD_AUDIO READ_SMS RECEIVE_SMS; do
+        adb -s "$DEVICE" shell pm grant "$PKG" "android.permission.$p" >/dev/null 2>&1 || true
+      done
       focus=$(adb -s "$DEVICE" shell dumpsys window 2>/dev/null | grep -m1 mCurrentFocus || true)
       case "$focus" in
         # No focused window yet (the app is starting) or ours: all fine.

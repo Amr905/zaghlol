@@ -8,6 +8,8 @@ import 'package:intl/intl.dart' show DateFormat;
 
 import '../../../core/l10n/generated/app_localizations.dart';
 import '../../../core/theme/z_tokens.dart';
+import '../../gold/presentation/gold_ui_ports.dart'
+    show GoldLink, goldLinkOpenerProvider;
 import 'settings_ports.dart';
 import 'settings_widgets.dart';
 
@@ -56,9 +58,20 @@ class AboutScreen extends ConsumerWidget {
         ),
         SettingsSection(
           children: [
-            SettingsRow(title: t.aboutMainTerms, onTap: () {}),
-            SettingsRow(title: t.aboutMainPrivacy, onTap: () {}),
-            SettingsRow(title: t.aboutMainLicenses, onTap: () {}),
+            // Explorer finding: these rows had empty handlers. The links open
+            // through the same opener the paywall footer uses.
+            SettingsRow(
+              title: t.aboutMainTerms,
+              onTap: () => ref.read(goldLinkOpenerProvider)(GoldLink.terms),
+            ),
+            SettingsRow(
+              title: t.aboutMainPrivacy,
+              onTap: () => ref.read(goldLinkOpenerProvider)(GoldLink.privacy),
+            ),
+            SettingsRow(
+              title: t.aboutMainLicenses,
+              onTap: () => showLicensePage(context: context),
+            ),
             SettingsRow(title: t.aboutMainDisclaimers, onTap: () {}),
           ],
         ),
