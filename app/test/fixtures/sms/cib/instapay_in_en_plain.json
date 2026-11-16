@@ -1,0 +1,17 @@
+{
+  "sender": "CIB",
+  "body": "CIB: You received an instant transfer of EGP 500.00 from Ahmed Ali into your account ending ****7316, ref c4d8b2a6 on 10-11-2026 10:05.",
+  "receivedAt": "2026-11-16T22:40:00+02:00",
+  "expect": {
+    "template": "cib.instapay_in.en",
+    "event": "instapay_in",
+    "direction": "income",
+    "currency": "EGP",
+    "amount": "500.00",
+    "last4": "7316",
+    "ref": "c4d8b2a6",
+    "date": "2026-11-10",
+    "time": "10:05",
+    "counterparty": "Ahmed Ali"
+  }
+}

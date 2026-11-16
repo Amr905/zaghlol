@@ -1,0 +1,13 @@
+{
+  "sender": "ADIB",
+  "body": "مصرف أبوظبي الإسلامي: تم استلام تحويل لحظي بمبلغ 75.00 جم في حسابك المنتهي بـ ****7316",
+  "receivedAt": "2026-11-16T22:40:00+02:00",
+  "expect": {
+    "template": "adib.instapay_in.ar",
+    "event": "instapay_in",
+    "direction": "income",
+    "currency": "EGP",
+    "amount": "75.00",
+    "last4": "7316"
+  }
+}
