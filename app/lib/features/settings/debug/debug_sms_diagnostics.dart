@@ -93,7 +93,7 @@ final class NativeAndDbSmsDiagnostics implements SmsDiagnosticsSource {
 
     final status = await _db
         .customSelect(
-          "SELECT sender, parse_status, COUNT(*) AS n FROM raw_messages "
+          'SELECT sender, parse_status, COUNT(*) AS n FROM raw_messages '
           "WHERE channel = 'sms' GROUP BY sender, parse_status",
           readsFrom: {_db.rawMessages},
         )

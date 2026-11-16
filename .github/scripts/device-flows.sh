@@ -25,6 +25,110 @@ pull_files() {
 flutter devices
 adb -s "$DEVICE" logcat -c || true
 
+# ---- 0. SMS on the device (SMS-device): permissions by `pm grant`, synthetic
+# SMS before the first launch (historical inbox scan) and while the app runs
+# (live receiver), then the real app must have saved them. The emulator console
+# (`adb emu sms send`) only takes numeric sender ids (its sms.c rejects
+# letters), so the alphanumeric senders (HSBC, HSBC EG, CIB, NBE) are put in
+# the system inbox with `content insert` (the emulator image allows adb root)
+# and, for the live part, handed to the production intake by the devSms-only
+# DebugSmsInjectReceiver (same code path as the receiver from SmsIntake on).
+# One numeric sender goes through the emulator modem and the real receiver.
+# Logs hold sender ids and counts, never a message body.
+HSBC_USD_H='Your Credit Card ending with * 5076 has been used for USD 115.00 on 09/11/2026 at ANTHROPIC* CLAUDE SUB. Your available limit is EGP 110096.30'
+HSBC_EGP_H='Your Credit Card ending with * 9376 has been used for EGP 1959.40 on 08/11/2026 at UDEMY SUBSCRIPTION. Your available limit is EGP 27623.16'
+CIB_H='يرجى العلم انه تم تنفيذ تحويل لحظي بمبلغ 510.00 جم من حسابك المنتهي بـ ****0939 برقم مرجعي b25d10dd بتاريخ 17-05-2026 22:32 للمزيد، برجاء الاتصال بـ 19666'
+NBE_H='Dear customer, EGP 251.00 was debited from your account *4568 at CARREFOUR MAADI on 09/11/2026'
+HSBC_USD_L='Your Credit Card ending with * 5077 has been used for USD 116.00 on 10/11/2026 at ANTHROPIC* CLAUDE SUB. Your available limit is EGP 110097.31'
+HSBC_EGP_L='Your Credit Card ending with * 9377 has been used for EGP 1960.40 on 09/11/2026 at UDEMY SUBSCRIPTION. Your available limit is EGP 27624.17'
+CIB_L='يرجى العلم انه تم تنفيذ تحويل لحظي بمبلغ 520.00 جم من حسابك المنتهي بـ ****0940 برقم مرجعي b25d10de بتاريخ 18-05-2026 22:33 للمزيد، برجاء الاتصال بـ 19666'
+NBE_L='Dear customer, EGP 252.00 was debited from your account *4569 at SPINNEYS ZAMALEK on 10/11/2026'
+NODIGIT='Thank you for banking with HSBC'
+PERSONAL='hello from a friend 5'
+
+sms_inbox_insert() { # sender body: a row in the system inbox (what the carrier would have written)
+  adb -s "$DEVICE" shell "content insert --uri content://sms/inbox --bind address:s:'$1' --bind body:s:'$2' --bind date:l:$(date +%s)000 --bind read:i:0 --bind type:i:1" 2>&1 | tr -d '\r' | head -2 | sed "s/^/  insert[$1]: /"
+}
+sms_inject() { # sender body: the devSms debug receiver (production intake)
+  adb -s "$DEVICE" shell "am broadcast -n $PKG/app.zaghlol.spike.sms.DebugSmsInjectReceiver -a app.zaghlol.dev.INJECT_SMS --es sender '$1' --es body '$2'" 2>&1 | tr -d '\r' | grep -E "result=|Error|Exception" | head -2 | sed "s/^/  inject[$1]: /"
+}
+
+run_sms_device() {
+  echo "==== SMS device"
+  adb -s "$DEVICE" uninstall "$PKG" > /dev/null 2>&1 || true
+  flutter build apk --debug --flavor devSms 2>&1 | tail -3
+  apk=$(ls build/app/outputs/flutter-apk/*.apk 2> /dev/null | grep -i devsms | head -1)
+  echo "apk: ${apk:-none}"
+  [ -n "$apk" ] || return 1
+  adb -s "$DEVICE" install -r "$apk" || return 1
+  for p in READ_SMS RECEIVE_SMS POST_NOTIFICATIONS; do
+    adb -s "$DEVICE" shell pm grant "$PKG" "android.permission.$p" || echo "grant $p failed"
+  done
+  adb -s "$DEVICE" shell dumpsys package "$PKG" | grep -E "android.permission.(READ|RECEIVE)_SMS: granted" | sed 's/^ */  /'
+  adb -s "$DEVICE" shell am force-stop "$PKG"
+  # The emulator console: numeric sender only. Show what it says to a letter id.
+  echo "console, alphanumeric sender: $(adb -s "$DEVICE" emu sms send HSBC 'probe' 2>&1 | tr -d '\r' | tr '\n' ' ' | cut -c1-120)"
+  adb -s "$DEVICE" root > /dev/null 2>&1 || true
+  adb -s "$DEVICE" wait-for-device
+  echo "adb id: $(adb -s "$DEVICE" shell id -un | tr -d '\r')"
+  # ---- historical: in the inbox before the app's first launch
+  sms_inbox_insert HSBC "$HSBC_USD_H"
+  sms_inbox_insert 'HSBC EG' "$HSBC_EGP_H"
+  sms_inbox_insert CIB "$CIB_H"
+  sms_inbox_insert NBE "$NBE_H"
+  sms_inbox_insert HSBC "$NODIGIT"
+  sms_inbox_insert 5550199 "$PERSONAL"
+  echo "inbox rows by sender (counts only):"
+  adb -s "$DEVICE" shell "content query --uri content://sms/inbox --projection address" 2>&1 | tr -d '\r' | sed -n 's/.*address=//p' | sort | uniq -c | sed 's/^/  /'
+  adb -s "$DEVICE" unroot > /dev/null 2>&1 || true
+  adb -s "$DEVICE" wait-for-device
+  sleep 3
+  adb -s "$DEVICE" shell am force-stop "$PKG"
+
+  adb -s "$DEVICE" logcat -c || true
+  timeout 1500 flutter test integration_test/sms_device_test.dart \
+    --flavor devSms -d "$DEVICE" --no-uninstall --reporter expanded \
+    > "$OUT/sms-device-test.log" 2>&1 &
+  tpid=$!
+  # ---- live: when the test says the historical part is done
+  for _ in $(seq 1 300); do
+    grep -q "SMS_DEVICE READY_FOR_LIVE" "$OUT/sms-device-test.log" && break
+    kill -0 "$tpid" 2> /dev/null || break
+    sleep 3
+  done
+  if grep -q "SMS_DEVICE READY_FOR_LIVE" "$OUT/sms-device-test.log"; then
+    echo "---- live"
+    sms_inject HSBC "$HSBC_USD_L"
+    sms_inject 'HSBC EG' "$HSBC_EGP_L"
+    sms_inject CIB "$CIB_L"
+    sms_inject NBE "$NBE_L"
+    sms_inject HSBC "$NODIGIT"
+    # Through the emulator modem and the real SmsReceiver (numeric sender, so
+    # not a bank: the Guard drops it, the counters see it).
+    echo "console, numeric sender: $(adb -s "$DEVICE" emu sms send 5550199 "$PERSONAL" 2>&1 | tr -d '\r' | tr '\n' ' ' | cut -c1-120)"
+  else
+    echo "the test never reached the live part"
+  fi
+  wait "$tpid"
+  r=$?
+  echo "sms device test exit: $r"
+  grep -E "SMS_DEVICE|^[0-9:]+ [+-][0-9]+.*(SMS|Some tests|All tests)" "$OUT/sms-device-test.log" | cut -c1-240
+  adb -s "$DEVICE" logcat -d -b crash 2> /dev/null | tail -20
+  adb -s "$DEVICE" logcat -d 2> /dev/null | grep -E "FATAL|ANR in|Process $PKG.*died" | cut -c1-200 | tail -10
+  return "$r"
+}
+
+sms_rc=0
+run_sms_device 2>&1 | tee "$OUT/sms-device-script.log"
+sms_rc=${PIPESTATUS[0]}
+pull_files
+adb -s "$DEVICE" exec-out screencap -p > "$OUT/screens/zz-final-sms.png" || true
+if [ -n "${SMS_ONLY:-}" ]; then
+  ls -la "$OUT/screens"
+  exit "$sms_rc"
+fi
+
+
 # ---- 1. device flows (English, empty database)
 rc=0
 if [ -z "${EXPLORER_ONLY:-}" ]; then
@@ -123,5 +227,6 @@ adb -s "$DEVICE" exec-out screencap -p > "$OUT/screens/zz-final-explorer.png" ||
 # Flutter's own log lines only (Dart errors, the tests' prints).
 adb -s "$DEVICE" logcat -d -s flutter:V > "$OUT/flutter-logcat.txt" 2>/dev/null || true
 ls -la "$OUT/screens"
+if [ "$sms_rc" -ne 0 ]; then exit "$sms_rc"; fi
 if [ "$rc" -ne 0 ]; then exit "$rc"; fi
 exit "$rc2"

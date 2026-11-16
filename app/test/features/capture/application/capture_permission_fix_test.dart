@@ -2,7 +2,6 @@
 // Fails without the fix: CaptureSettingsScreen had no default onFix, so the
 // button was not even shown.
 import 'package:flutter/material.dart';
-import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:zaghlol/core/l10n/generated/app_localizations.dart';
 import 'package:zaghlol/features/capture/application/capture_providers.dart';

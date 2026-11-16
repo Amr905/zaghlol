@@ -46,7 +46,7 @@ class SmsDiagStore(private val file: File) : SmsDiagSink {
     /** sender -> stage -> count. */
     fun snapshot(): Map<String, Map<String, Int>> = synchronized(lock) {
         val out = LinkedHashMap<String, MutableMap<String, Int>>()
-        for ((k, n) in loaded().toSortedMap(compareBy({ it.first }, { it.second }))) {
+        for ((k, n) in loaded().toSortedMap(compareBy<Pair<String, String>>({ it.first }, { it.second }))) {
             out.getOrPut(k.first) { LinkedHashMap() }[k.second] = n
         }
         out

@@ -11,6 +11,7 @@ import android.provider.Settings
 import app.zaghlol.platform.capture.inbox.InboxReader
 import app.zaghlol.platform.capture.inbox.InboxReaders
 import app.zaghlol.platform.diag.SmsDiag
+import app.zaghlol.platform.diag.SmsDiagSink
 import app.zaghlol.platform.guard.AndroidGuardChannel
 import app.zaghlol.platform.guard.GuardRuntime
 import app.zaghlol.platform.ingest.DrainEnvironment
@@ -78,6 +79,8 @@ class CaptureSeams(
     val wipe: (() -> Unit)? = null,
     /** FU-194: wall clock for the drain hold's expiry. */
     val wallClockMs: () -> Long = System::currentTimeMillis,
+    /** SMS-device: dev-build counters ([SmsDiag.forDir]); [SmsDiagSink.NONE] in tests and outside dev builds. */
+    val diag: SmsDiagSink = SmsDiagSink.NONE,
 )
 
 /**
@@ -134,7 +137,7 @@ class CaptureRuntime internal constructor(seams: CaptureSeams) {
                 status = status,
                 afterWrite = ::afterSpoolWrite,
                 trace = { trace },
-                diag = SmsDiag.forDir(seams.noBackupDir),
+                diag = seams.diag,
             ),
             bootCount = seams.bootCount,
             trace = { trace },
@@ -395,6 +398,7 @@ class CaptureRuntime internal constructor(seams: CaptureSeams) {
                 guard = { GuardRuntime.get(app) },
                 uiInbox = { InboxReaders.forUiEngine(app) },
                 bootCount = { bootCount(app) },
+                diag = SmsDiag.forDir(app.noBackupFilesDir),
                 wipe = { LocalDataWiper.production(app) { GuardRuntime.get(app).forgetUser() }.wipe() },
                 headlessStarter = { newHost ->
                     FlutterHeadlessStarter(app, handler, newHost) { ref.get()?.trace ?: IngestTrace.NONE }
