@@ -15,6 +15,7 @@ import 'package:zaghlol/features/ingestion/domain/body_hash.dart';
 import 'package:zaghlol/features/ingestion/domain/ingest_records.dart';
 import 'package:zaghlol/features/ingestion/domain/ingest_types.dart';
 import 'package:zaghlol/ingestion/bundled_registry.dart';
+import 'package:zaghlol_parsing/zaghlol_parsing.dart' show Registry;
 
 import '../features/ingestion/support/ingest_harness.dart';
 
@@ -32,7 +33,7 @@ void main() {
   TestWidgetsFlutterBinding.ensureInitialized();
   final base = File('assets/guard/guard_base.json').readAsBytesSync();
 
-  Future<(IngestWorld, dynamic)> open() async {
+  Future<(IngestWorld, Registry)> open() async {
     final registry = await preloadBundledRegistry();
     final w = await IngestWorld.open();
     addTearDown(w.close);

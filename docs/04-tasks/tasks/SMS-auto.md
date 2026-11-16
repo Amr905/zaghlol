@@ -23,4 +23,11 @@ Otherwise it goes to review as before. The A-66 path (3 confirmations + "always 
 **Registry templates.** Settlement templates for HSBC, CIB, NBE, Banque Misr, QNB (EN + AR), `source: synthetic-unverified`.
 
 ## Missing l10n keys
-(see end of file)
+- `ingestionReviewOriginalShow` / `ingestionReviewOriginalHide` ("Show original message" / "Hide original message"). Interim: the card reuses `ingestionReviewUnreadShow` ("Show message"); the expand arrow shows state.
+- Home/review copy for "saved automatically" is not added.
+
+## Done / results
+- Parsing tests, registry_lint (64 institutions, 1159 fixtures, 0 findings), analyze, format, repo lints clean. App: `test/ingestion`, `test/features/ingestion`, `test/features/transactions` pass except the `golden`-tagged review goldens (no PNGs committed).
+- Settlement templates: HSBC, CIB, NBE, Banque Misr, QNB x EN/AR (`*.cc_payment.*`, synthetic-unverified, 40 fixtures). Generic cue covers every other bank.
+- Not handled: settlement wording of the other banks (generic cue only), the paying-side leg as a template, settlement in a currency other than EGP via template, a user-confirmed (share/paste) generic result still goes to the user.
+- Re-evaluation: runs through the existing T-076 job because `hsbc.card_used_limit.en` is now version 2 (registry version 2). Idempotent: one raw row maps to at most one transaction; a likely duplicate of a stored payment stays in review.
