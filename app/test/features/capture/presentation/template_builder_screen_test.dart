@@ -174,6 +174,32 @@ void main() {
     }
   }
 
+  testWidgets('a pasted sample comes pre-tagged by the generic reader', (
+    t,
+  ) async {
+    bigScreen(t);
+    final h = SettingsHarness();
+    addTearDown(h.db.close);
+    final store = FakeStore();
+    await t.pumpWidget(host(h, store));
+    await t.pumpAndSettle();
+    setGold(t, true);
+    await t.pump();
+    await t.enterText(find.byType(TextField).first, sampleEn);
+    await t.pump();
+    final c = ProviderScope.containerOf(
+      t.element(find.byType(TemplateBuilderScreen)),
+    );
+    final st = c.read(templateBuilderProvider);
+    expect(st.spans.keys, containsAll([CustomTag.amount, CustomTag.currency]));
+    String tagged(CustomTag tag) =>
+        sampleEn.substring(st.spans[tag]!.start, st.spans[tag]!.end);
+    expect(tagged(CustomTag.amount), '220.00');
+    expect(tagged(CustomTag.currency), 'USD');
+    expect(tagged(CustomTag.merchant), 'AMAZON');
+    expect(st.direction, TemplateDirection.expense);
+  });
+
   testWidgets('range selection: two taps tag a multi-word merchant', (t) async {
     bigScreen(t);
     final h = SettingsHarness();
@@ -219,13 +245,16 @@ void main() {
     final l = AppLocalizations.of(
       t.element(find.byType(TemplateBuilderScreen)),
     );
-    await t.enterText(find.byType(TextField).first, sampleEn);
+    // No currency next to the number: nothing is pre-tagged.
+    await t.enterText(find.byType(TextField).first, 'XYZ: You paid 220.00');
     await t.pump();
     await t.ensureVisible(find.text(l.templatesBuilderSave));
     await t.tap(find.text(l.templatesBuilderSave));
     await t.pump();
     expect(find.text(l.templatesBuilderErrorAmount), findsOneWidget);
 
+    await t.enterText(find.byType(TextField).first, sampleEn);
+    await t.pump();
     await t.tap(find.byKey(const ValueKey('token_3')));
     await tapChip(t, 'amount');
     await t.ensureVisible(find.text(l.templatesBuilderSave));

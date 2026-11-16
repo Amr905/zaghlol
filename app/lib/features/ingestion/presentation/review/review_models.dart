@@ -4,6 +4,8 @@
 
 import 'package:zaghlol_domain/zaghlol_domain.dart';
 
+import '../../../transactions/domain/transaction.dart' show TxnDirection;
+
 /// The filter chips (S-14).
 enum ReviewFilter { all, category, messages, transfers }
 
@@ -77,6 +79,12 @@ final class MessageCardModel extends ReviewCardModel {
     this.amount,
     this.isIncome = false,
     this.merchant,
+    this.last4,
+    this.rawMessageId,
+    this.oneTap = false,
+    this.direction,
+    this.occurredAt,
+    this.bankLabel,
   }) : super(itemId);
   final String sender;
   final bool isNewSender;
@@ -85,7 +93,31 @@ final class MessageCardModel extends ReviewCardModel {
   final bool isIncome;
   final String? merchant;
 
-  bool get unreadable => txnId == null;
+  /// Card last-4 the generic reader found (SMS-fuzzy), for the guess line.
+  final String? last4;
+
+  /// The message behind the item; used only to offer a custom template.
+  final String? rawMessageId;
+
+  /// A generic suggestion from a known bank with every field read (amount,
+  /// currency, direction and a last-4 or merchant): Confirm saves it as read.
+  final bool oneTap;
+
+  /// One-tap suggestions only (batch-27): the kind, date and bank Confirm
+  /// stores, shown on the card so the tap saves only what the user saw.
+  final TxnDirection? direction;
+  final DateTime? occurredAt;
+  final String? bankLabel;
+
+  /// Nothing was read: the user types the details.
+  bool get unreadable => txnId == null && amount == null;
+
+  /// Confirm applies: a stored transaction to verify, or a complete
+  /// generic suggestion to save as read.
+  bool get canConfirm => txnId != null || oneTap;
+
+  /// A generic suggestion with no stored transaction (prefilled guess).
+  bool get isSuggestion => txnId == null && amount != null;
 
   @override
   ReviewFilter get filter => ReviewFilter.messages;

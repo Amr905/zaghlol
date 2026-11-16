@@ -69,16 +69,32 @@ class MoneyTab extends ConsumerWidget {
                 excludeSemantics: true,
                 child: Material(
                   color: c.surface,
-                  shape: const CircleBorder(),
+                  shape: const StadiumBorder(),
                   elevation: 1,
                   shadowColor: c.shadow,
                   child: InkWell(
-                    customBorder: const CircleBorder(),
+                    customBorder: const StadiumBorder(),
                     onTap: onAdd,
-                    child: SizedBox(
-                      width: ZSpacing.minTarget,
-                      height: ZSpacing.minTarget,
-                      child: Icon(Icons.add_rounded, color: c.text),
+                    child: ConstrainedBox(
+                      constraints: const BoxConstraints(
+                        minHeight: ZSpacing.minTarget,
+                      ),
+                      child: Padding(
+                        padding: const EdgeInsetsDirectional.symmetric(
+                          horizontal: ZSpacing.md,
+                        ),
+                        child: Row(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            Icon(Icons.add_rounded, color: c.primary),
+                            const SizedBox(width: ZSpacing.xs),
+                            Text(
+                              l10n.accountsOverviewAdd,
+                              style: ZType.label.copyWith(color: c.text),
+                            ),
+                          ],
+                        ),
+                      ),
                     ),
                   ),
                 ),

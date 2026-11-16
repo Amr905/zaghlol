@@ -1,0 +1,41 @@
+{
+  "code": "hsbc",
+  "names": {
+    "ar": "إتش إس بي سي",
+    "en": "HSBC (synthetic Guard test copy)"
+  },
+  "country": "EG",
+  "defaultCurrency": "EGP",
+  "senders": [
+    {
+      "match": "regex",
+      "value": "^hsbc(?:[ ._-]?(?:eg|egy|egypt|bank))?$"
+    }
+  ],
+  "packages": [],
+  "walletCardNames": [],
+  "last4": [],
+  "drop": [
+    "^your credit card payment due is |^minimum amount due |^your credit card statement is ready",
+    "^المبلغ مستحق السداد|^تم إصدار كشف حساب بطاقتك",
+    "^get [0-9]+% cashback on |^(?:special|exclusive) offer: |^spend [^.!?]{0,30} and win a prize",
+    "^عرض خاص: |^احصل على استرداد نقدي"
+  ],
+  "templates": [
+    {
+      "id": "hsbc.card_purchase.en",
+      "version": 1,
+      "lang": "en",
+      "channel": [
+        "sms"
+      ],
+      "event": "card_purchase",
+      "direction": "expense",
+      "baseConfidence": 0.9,
+      "pattern": "purchase of (?<cur>EGP) (?<amount>[\\d,.]+) at (?<merchant>.+?)(?:\\.|$)",
+      "currencyMap": {
+        "EGP": "EGP"
+      }
+    }
+  ]
+}

@@ -18,7 +18,13 @@ import '../../../transfers/application/suggestion_providers.dart';
 import '../../../transactions/data/transactions_providers.dart';
 import '../../../transactions/domain/transaction.dart';
 import '../../../transactions/domain/transaction_repository.dart';
+import '../../../accounts/data/accounts_providers.dart';
+import '../../../accounts/domain/account.dart';
+import '../../../capture/application/template_builder.dart' show TemplateSample;
+import '../../../categorization/data/categorizer_providers.dart';
+import '../../../categorization/domain/categorize_input.dart';
 import '../../data/review_repository.dart';
+import '../../domain/generic_suggestion.dart';
 import 'review_models.dart';
 
 /// What the screen can do. A port, so widget tests use a fake.
@@ -44,6 +50,15 @@ abstract interface class ReviewActions {
     required String country,
     required String channel,
   });
+
+  /// SMS-fuzzy: saves a complete generic suggestion ([MessageCardModel.oneTap])
+  /// as read, user-verified, under the bank's card account. False when it
+  /// is not complete any more or another actor resolved it.
+  Future<bool> confirmGeneric(MessageCardModel card);
+
+  /// The message behind [rawMessageId] as a template-builder sample, read
+  /// only when the user asks to make a template from it. Never logged.
+  Future<TemplateSample?> templateSample(String rawMessageId);
 }
 
 final class _LiveActions implements ReviewActions {
@@ -155,6 +170,68 @@ final class _LiveActions implements ReviewActions {
   }
 
   @override
+  Future<bool> confirmGeneric(MessageCardModel card) async {
+    final db = await _ref.read(appDatabaseProvider.future);
+    final row = await ReviewItemsDao(db).byId(card.itemId);
+    if (row == null || row.resolvedAt != null || row.txnId != null) {
+      return false;
+    }
+    final g = GenericSuggestion.fromPayload(_payload(row));
+    if (g == null || !g.oneTap) return false;
+    final accounts = await _ref.read(accountsRepositoryProvider.future);
+    final resolved = await accounts.resolve(
+      AccountHint(
+        institutionCode: g.institutionCode!,
+        last4: g.last4,
+        currency: g.amount.currency,
+        // The bank name the card showed; the same label ingest gives a new
+        // account for this bank (batch-27).
+        label: g.institutionLabel ?? g.institutionCode!,
+        kind: inferAccountKind(hasLast4: g.last4 != null),
+      ),
+    );
+    final categorizer = await _ref.read(categorizerProvider.future);
+    final decision = await categorizer.categorize(
+      categorizeInputFor(merchantRaw: g.merchant, merchantNorm: g.merchantKey),
+    );
+    final outcome = await (await _reviews).resolveManually(
+      card.itemId,
+      ManualTxnInput(
+        accountId: resolved.account.id,
+        direction: g.direction!.code,
+        amount: g.amount,
+        occurredAt: DateTime.fromMillisecondsSinceEpoch(
+          g.occurredAtMs,
+          isUtc: true,
+        ),
+        tzOffsetMin: g.tzOffsetMin,
+        merchant: g.merchant,
+        merchantNorm: g.merchantKey,
+        catalogMerchantId: decision.catalogMerchantId,
+        categoryId: decision.categoryId,
+        categorySource: decision.categoryId == null
+            ? 'none'
+            : decision.source.code,
+        source: g.source!,
+        allowForeignCurrency: true,
+      ),
+    );
+    _refresh();
+    return outcome.applied;
+  }
+
+  @override
+  Future<TemplateSample?> templateSample(String rawMessageId) async {
+    final db = await _ref.read(appDatabaseProvider.future);
+    final row = await (db.select(
+      db.rawMessages,
+    )..where((m) => m.id.equals(rawMessageId))).getSingleOrNull();
+    final sender = row?.sender;
+    if (row == null || sender == null || sender.trim().isEmpty) return null;
+    return TemplateSample(sender: sender, channel: row.channel, body: row.body);
+  }
+
+  @override
   Future<void> requestBank(
     String itemId, {
     required String name,
@@ -258,14 +335,38 @@ Future<ReviewCardModel?> _toCard(
     case ReviewKind.lowConfidence:
     case ReviewKind.newSender:
     case ReviewKind.unrecognized:
+      final sender = await _sender(db, item.rawMessageId);
+      if (txn == null) {
+        final g = GenericSuggestion.fromPayload(payload);
+        if (g != null) {
+          return MessageCardModel(
+            itemId: item.id,
+            sender: sender,
+            isNewSender: item.kind == ReviewKind.newSender,
+            amount: g.amount,
+            isIncome: g.isIncome,
+            merchant: g.merchant,
+            last4: g.last4,
+            rawMessageId: item.rawMessageId,
+            oneTap: g.oneTap,
+            direction: g.direction,
+            occurredAt: DateTime.fromMillisecondsSinceEpoch(
+              g.occurredAtMs,
+              isUtc: true,
+            ),
+            bankLabel: g.institutionLabel ?? sender,
+          );
+        }
+      }
       return MessageCardModel(
         itemId: item.id,
-        sender: await _sender(db, item.rawMessageId),
+        sender: sender,
         isNewSender: item.kind == ReviewKind.newSender,
         txnId: txn?.id,
         amount: txn?.amount,
         isIncome: txn != null && income(txn),
         merchant: txn?.merchantRaw,
+        rawMessageId: item.rawMessageId,
       );
     case ReviewKind.transferAmbiguous:
       if (txn == null) return null;

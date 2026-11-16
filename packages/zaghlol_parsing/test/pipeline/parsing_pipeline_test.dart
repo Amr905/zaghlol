@@ -256,6 +256,56 @@ void main() {
       expect(unknown.institutionCode, isNull);
     });
 
+    test('batch-27 delta: an OTP mention without a numeric code is never '
+        'dropped globally (it may carry a real transaction)', () {
+      for (final body in const [
+        'Your OTP for online payment of EGP 150.00 is 5g8h2k',
+        'Purchase of EGP 250.00 at TESTMART with card ending 4321. '
+            'Do not share OTP for security.',
+      ]) {
+        expect(pipeline.parse(_req(body)), isNot(isA<ParseDropped>()));
+      }
+    });
+
+    test('batch-27: reminders and promos are never dropped globally '
+        '(PO T-035 Q6) and never become a transaction', () {
+      const kept = [
+        'Credit card payment due EGP 1,250.00 by 25 Nov',
+        'Minimum amount due EGP 300.00 for card ending 1234',
+        'Your credit card statement is ready. Total EGP 4,000.00',
+        'Get 10% cashback on purchases this week. EGP 500 minimum',
+        'Congratulations! You could win EGP 10,000 this month',
+      ];
+      for (final body in kept) {
+        final r = pipeline.parse(_req(body, source: 'CIB'));
+        expect(r, isNot(isA<ParseDropped>()), reason: body.length.toString());
+        expect(r, isNot(isA<ParseParsed>()), reason: body.length.toString());
+      }
+    });
+
+    test('batch-27: transactions with promo or reminder words are kept', () {
+      const kept = [
+        'Purchase of EGP 100.00 at OFFER MART. Available limit EGP 9,000',
+        'Transfer of EGP 500.00 to WIN TRADING completed',
+        'Your account 1234 debited EGP 2,000.00 for credit card payment. '
+            'Next due date 25/11',
+        'EGP 25.00 debited from account 1234 for e-statement fee',
+        'Congratulations! EGP 500.00 has been credited to your account 1234',
+        'تم خصم ٥٠ جنيه رسوم كشف حساب من حسابك ١٢٣٤',
+      ];
+      for (final body in kept) {
+        final r = pipeline.parse(_req(body, source: 'CIB'));
+        expect(r, isNot(isA<ParseDropped>()), reason: body.length.toString());
+      }
+    });
+
+    test('FU-243: a credited cashback is not dropped', () {
+      final r = pipeline.parse(
+        _req('Cashback credited to your account EGP 50.00'),
+      );
+      expect(r, isNot(isA<ParseDropped>()));
+    });
+
     test('unknown source is unrecognized, ready for the generic parser', () {
       expect(
         _why(pipeline.parse(_req('تم خصم 200.00 جم', source: 'NOBODY'))),

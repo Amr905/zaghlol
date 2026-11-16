@@ -1338,11 +1338,7 @@ final class IngestRawMessages {
       confirmedCount: row?.confirmedCount ?? 0,
       alwaysCapture: row?.alwaysCapture ?? false,
     );
-    final direction = switch (g.direction) {
-      TemplateDirection.expense => TxnDirection.expense,
-      TemplateDirection.income => TxnDirection.income,
-      _ => null,
-    };
+    final direction = genericTxnDirection(g);
     final autoSave =
         disposition == GenericDisposition.autoSaveLowConfidence &&
         direction != null &&
@@ -1354,27 +1350,61 @@ final class IngestRawMessages {
         status: RawStatus.review,
         institution: g.institutionCode,
       );
+      // FU-243: a generic result from a known bank is filed under that
+      // bank (an unrecognized message of the bank), not as a new sender.
+      final known = g.institutionCode != null;
+      final kind = known ? ReviewKind.unrecognized : ReviewKind.newSender;
+      // SMS-fuzzy: every field the generic reader found goes into the item
+      // so the card is prefilled and, when complete, one tap confirms it
+      // (FR-PAR-13: still a review item, never saved without the user).
+      // Fields only, never message text.
+      final (occurredMs, offsetMin) = _occurred(g.occurredAt);
       await _review(
-        kind: ReviewKind.newSender,
+        kind: kind,
         rawId: rawId,
         payload: {
           'generic': true,
+          'institutionCode': ?g.institutionCode,
+          'institutionLabel': ?(g.institutionCode == null
+              ? null
+              : b.labels.institutionLabel(
+                  _pipeline.registry,
+                  g.institutionCode!,
+                )),
           'amount': g.amount.toJson(),
           'direction': ?direction?.code,
           'hasLast4': g.last4 != null,
+          'last4': ?g.last4,
+          'merchant': ?_nonEmpty(g.merchant?.display),
+          'merchantKey': ?_nonEmpty(g.merchant?.key),
+          'event': ?g.event?.name,
+          'occurredAtMs': occurredMs,
+          'tzOffsetMin': offsetMin,
+          'dateRead': g.dateRead,
+          'source': ?p.txnSource?.code,
+          'prefillComplete': g.prefillComplete,
+          'fieldConfidence': {
+            for (final e in g.fieldConfidence.entries) e.key.name: e.value,
+          },
           'confidencePermille': g.confidencePermille,
           'reasons': [for (final x in g.reasons) x.name],
         },
       );
-      return IngestReview(rawId, ReviewKind.newSender);
+      return IngestReview(rawId, kind);
     }
     final (occurredMs, offsetMin) = _occurred(g.occurredAt);
     final account = await _resolve(
       local,
-      institution: _genericInstitution(p.senderKey),
+      // FU-243: a known bank's generic result uses that bank's account
+      // (last-4 matched within the institution), never a generic one.
+      institution: g.institutionCode ?? _genericInstitution(p.senderKey),
       last4: g.last4,
       currency: g.amount.currency,
-      label: p.m.source.trim().isEmpty ? p.senderKey : p.m.source.trim(),
+      label: g.institutionCode != null
+          ? b.labels.institutionLabel(_pipeline.registry, g.institutionCode!)
+          : p.m.source.trim().isEmpty
+          ? p.senderKey
+          : p.m.source.trim(),
       kind: inferAccountKind(hasLast4: g.last4 != null),
     );
     final merchantNorm = _nonEmpty(g.merchant?.key);
@@ -1837,3 +1867,19 @@ final class _UtcZone implements LocalZone {
   @override
   int offsetAtWallClock(DateTime wallClock) => 0;
 }
+
+/// The stored direction of a generic suggestion: its keyword direction,
+/// refined by the event hint (a refund, a transfer out or in). Null when the
+/// message names no direction (never guessed).
+TxnDirection? genericTxnDirection(ParseGeneric g) => switch (g.direction) {
+  TemplateDirection.expense =>
+    g.event == GenericEvent.transfer
+        ? TxnDirection.transferOut
+        : TxnDirection.expense,
+  TemplateDirection.income => switch (g.event) {
+    GenericEvent.refund => TxnDirection.refund,
+    GenericEvent.transfer => TxnDirection.transferIn,
+    _ => TxnDirection.income,
+  },
+  _ => null,
+};

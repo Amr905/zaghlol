@@ -2,7 +2,7 @@
  "format": 1,
  "synthetic": true,
  "note": "Synthetic data only (CLAUDE.md 2.6). Shared by the Dart, Kotlin (T-038) and Swift (T-061) Guards: never copy. count = fold + cases + rate + modes. fold: out = foldKey(in); lines (when present, else out) = foldKeyLines(in), the Guard's fold for the global drop patterns.",
- "count": 240,
+ "count": 287,
  "configs": {
   "t1": {
    "base": "configs/t1_base.json",
@@ -1535,7 +1535,7 @@
    }
   },
   {
-   "id": "residual.newline_code_after_gap_kept",
+   "id": "residual.newline_code_after_gap_dropped",
    "tags": [
     "residual"
    ],
@@ -1544,26 +1544,22 @@
    "source": "NBE",
    "body": "Your OTP for login\n482913",
    "expect": {
-    "decision": "keep",
-    "kind": "registry",
-    "inst": "nbe",
-    "last4": null
+    "decision": "drop",
+    "reason": "otp_or_promo_global"
    }
   },
   {
-   "id": "residual.newline_after_lead_in_kept",
+   "id": "residual.newline_after_lead_in_dropped",
    "tags": [
-    "residual"
+    "otp_drop"
    ],
    "config": "t1",
    "channel": "sms",
    "source": "NBE",
    "body": "Your OTP for login is\n482913",
    "expect": {
-    "decision": "keep",
-    "kind": "registry",
-    "inst": "nbe",
-    "last4": null
+    "decision": "drop",
+    "reason": "otp_or_promo_global"
    }
   },
   {
@@ -2930,6 +2926,779 @@
    "channel": "sms",
    "source": "NBE",
    "body": ", 1234 , 1234 , 1234 , 1234 , 1234 , 1234 , 1234 , 1234 , 1234 , 1234 , 1234 , 1234 , 1234 , 1234 , 1234 , 1234 , 1234 , 1234 , 1234 , 1234 , 1234 , 1234 , 1234 , 1234 , 1234 , 1234 , 1234 , 1234 , 1234 , 1234 , 1234 , 1234 , 1234 , 1234 , 1234 , 1234 , 1234 , 1234 , 1234 , 1234 , 1234 , 1234 , 1234 , 1234 , 1234 , 1234 , 1234 , 1234 , 1234 , 1234 , 1234 , 1234 , 1234 , 1234 , 1234 , 1234 , 1234 , 1234 , 1234 , 1234 , 1234 , 1234 , 1234 , 1234 , 1234 , 1234 , 1234 , 1234 , 1234 , 1234 , 1234 , 1234 , 1234 , 1234 , 1234 , 1234 , 1234 , 1234 , 1234 , 1234 , 1234 , 1234 , 1234 , 1234 , 1234 , 1234 , 1234 , 1234 , 1234 , 1234 , 1234 , 1234 , 1234 , 1234 , 1234 , 1234 , 1234 , 1234 , 1234 , 1234 , 1234 , 1234 , 1234 , 1234 , 1234 , 1234 , 1234 , 1234 , 1234 , 1234 , 1234 , 1234 , 1234 , 1234 , 1234 , 1234 , 1234 , 1234 , 1234 , 1234 , 1234 , 1234 , 1234 , 1234 , 1234 , 1234 , 1234 , 1234 , 1234 , 1234 , 1234 , 1234 , 1234 , 1234 , 1234 , 1234 , 1234 , 1234 , 1234 , 1234 , 1234 , 1234 , 1234 , 1234 , 1234 , 1234 , 1234 , 1234 , 1234 , 1234 , 1234 , 1234 , 1234 , 1234 , 1234 , 1234 , 1234 , 1234 , 1234 , 1234 , 1234 , 1234 , 1234 , 1234 , 1234 , 1234 , 1234 , 1234 , 1234 , 1234 , 1234 , 1234 , 1234 , 1234 , 1234 , 1234 , 1234 , 1234 , 1234 , 1234 , 1234 , 1234 , 1234 , 1234 , 1234 , 1234 , 1234 , 1234 , 1234 , 1234 , 1234 , 1234 , 1234 , 1234 , 1234 , 1234 , 1234 , 1234 , 1234 , 1234 , 1234 , 1234 , 1234 , 1234 , 1234 , 1234 , 1234 , 1234 , 1234 , 1234 , 1234 , 1234 , 1234 , 1234 , 1234 , 1234 , 1234 , 1234 , 1234 , 1234 , 1234 , 1234 , 1234 , 1234 , 1234 , 1234 , 1234 , 1234 , 1234 , 1234 , 1234 , 1234 , 1234 , 1234 , 1234 , 1234 , 1234 , 1234 , 1234 , 1234 , 1234 , 1234 , 1234 , 1234 , 1234 , 1234 , 1234 , 1234 , 1234 , 1234 , 1234 , 1234 , 1234 , 1234 , 1234 , 1234 , 1234 , 1234 , 1234 , 1234 , 1234 , 1234 , 1234 , 1234 , 1234 , 1234 , 1234 , 1234 , 1234 , 1234 , 1234 , 1234 , 1234 , 1234 , 1234 , 1234 , 1234 , 1234 , 1234 , 1234 , 1234 , 1234 , 1234 , 1234 , 1234 , 1234 , 1234 , 1234 , 1234 , 1234 , 1234 , 1234 , 1234 , 1234 , 1234 , 1234 , 1234 , 1234 , 1234 , 1234 , 1234 , 1234 , 1234 , 1234 , 1234 , 1234 , 1234 , 1234 , 1234 , 1234 , 1234 , 1234 , 1234 , 1234 , 1234 , 1234 , 1234 , 1234 , 1234 , 1234 , 1234 , 1234 , 1234 , 1234 , 1234 , 1234 , 1234 , 1234 , 1234 , 1234 , 1234 , 1234 , 1234 , 1234 , 1234 , 1234 , 1234 , 1234 , 1234 , 1234 , 1234 , 1234 , 1234 , 1234 , 1234 , 1234 , 1234 , 1234 , 1234 , 1234 , 1234 , 1234 , 1234 , 1234 , 1234 , 1234 , 1234 , 1234 , 1234 , 1234 , 1234 , 1234 , 1234 , 1234 , 1234 , 1234 , 1234 , 1234 , 1234 , 1234 , 1234 , 1234 , 1234 , 1234 , 1234 , 1234 , 1234 , 1234 , 1234 , 1234 , 1234 , 1234 , 1234 , 1234 , 1234 , 1234 , 1234 , 1234 , 1234 , 1234 , 1234 , 1234 , 1234 , 1234 , 1234 , 1234 , 1234 , 1234 , 1234 , 1234 , 1234 , 1234 , 1234 , 1234 , 1234 , 1234 , 1234 , 1234 , 1234 , 1234 , 1234 , 1234 , 1234 , 1234 , 1234 , 1234 , 1234 , 1234 , 1234 , 1234 , 1234 , 1234 , 1234 , 1234 , 1234 , 1234 , 1234 , 1234 , 1234 , 1234 , 1234 , 1234 , 1234 , 1234 , 1234 , 1234 , 1234 , 1234 , 1234 , 1234 , 1234 , 1234 , 1234 , 1234 , 1234 , 1234 , 1234 , 1234 , 1234 , 1234 , 1234 , 1234 , 1234 , 1234 , 1234 , 1234 , 1234 , 1234 , 1234 , 1234 , 1234 , 1234 , 1234 , 1234 , 1234 , 1234 , 1234 , 1234 , 1234 , 1234 , 1234 , 1234 , 1234 , 1234 , 1234 , 1234 , 1234 , 1234 , 1234 , 1234 , 1234 , 1234 , 1234 , 1234 , 1234 , 1234 , 1234 , 1234 , 1234 , 1234 , 1234 , 1234 , 1234 , 1234 , 1234 , 1234 , 1234 , 1234 , 1234 , 1234 , 1234 , 1234 , 1234 , 1234 , 1234 , 1234 , 1234 , 1234 , 1234 , 1234 , 1234 , 1234 , 1234 , 1234 , 1234 , 1234 , 1234 , 1234 , 1234 , 1234 , 1234 , 1234 , 1234 , 1234 , 1234 , 1234 , 1234 , 1234 , 1234 , 1234 , 1234 , 1234 , 1234 , 1234 , 1234 , 1234 , 1234 , 1234 , 1234 , 1234 , 1234 , 1234 , 1234 , 1234 , 1234 , 1234 , 1234 , 1234 , 1234 , 1234 , 1234 , 1234 , 1234 , 1234 , 1234 , 1234 , 1234 , 1234 , 1234 , 1234 , 1234 , 1234 , 1234 , 1234 , 1234 , 1234 , 1234 , 1234 , 1234 , 1234 , 1234 , 1",
+   "expect": {
+    "decision": "keep",
+    "kind": "registry",
+    "inst": "nbe",
+    "last4": null
+   }
+  },
+  {
+   "id": "sender.hsbc.space",
+   "tags": [
+    "sender",
+    "registry_keep"
+   ],
+   "config": "t1",
+   "channel": "sms",
+   "source": "HSBC EG",
+   "body": "Purchase of EGP 100.00 at TESTSHOP.",
+   "expect": {
+    "decision": "keep",
+    "kind": "registry",
+    "inst": "hsbc",
+    "last4": null
+   }
+  },
+  {
+   "id": "sender.hsbc.dash",
+   "tags": [
+    "sender",
+    "registry_keep"
+   ],
+   "config": "t1",
+   "channel": "sms",
+   "source": "HSBC-EG",
+   "body": "Purchase of EGP 100.00 at TESTSHOP.",
+   "expect": {
+    "decision": "keep",
+    "kind": "registry",
+    "inst": "hsbc",
+    "last4": null
+   }
+  },
+  {
+   "id": "sender.hsbcx.drop",
+   "tags": [
+    "sender",
+    "non_financial"
+   ],
+   "config": "t1",
+   "channel": "sms",
+   "source": "HSBCX",
+   "body": "Purchase of EGP 100.00 at TESTSHOP.",
+   "expect": {
+    "decision": "drop",
+    "reason": "not_financial"
+   }
+  },
+  {
+   "id": "sender.myhsbc.drop",
+   "tags": [
+    "sender",
+    "non_financial"
+   ],
+   "config": "t1",
+   "channel": "sms",
+   "source": "MYHSBC",
+   "body": "Purchase of EGP 100.00 at TESTSHOP.",
+   "expect": {
+    "decision": "drop",
+    "reason": "not_financial"
+   }
+  },
+  {
+   "id": "otp.en.otp_for_with_amount_kept",
+   "tags": [
+    "registry_keep",
+    "batch27_delta"
+   ],
+   "config": "t1",
+   "channel": "sms",
+   "source": "NBE",
+   "body": "Use OTP for your online payment of EGP 150.00 at TESTSHOP: 5g8h2k",
+   "expect": {
+    "decision": "keep",
+    "kind": "registry",
+    "inst": "nbe",
+    "last4": null
+   }
+  },
+  {
+   "id": "reminder.en.payment_due",
+   "tags": [
+    "promo_drop",
+    "per_inst"
+   ],
+   "config": "t1",
+   "channel": "sms",
+   "source": "HSBC EG",
+   "body": "Your credit card payment due is EGP 1,250.00 by 25 Nov",
+   "expect": {
+    "decision": "drop",
+    "reason": "otp_or_promo_inst"
+   }
+  },
+  {
+   "id": "reminder.en.minimum_due",
+   "tags": [
+    "promo_drop",
+    "per_inst"
+   ],
+   "config": "t1",
+   "channel": "sms",
+   "source": "HSBC EG",
+   "body": "Minimum amount due EGP 300.00 for card ending 1234",
+   "expect": {
+    "decision": "drop",
+    "reason": "otp_or_promo_inst"
+   }
+  },
+  {
+   "id": "reminder.en.statement",
+   "tags": [
+    "promo_drop",
+    "per_inst"
+   ],
+   "config": "t1",
+   "channel": "sms",
+   "source": "HSBC EG",
+   "body": "Your credit card statement is ready. Total EGP 4,000.00",
+   "expect": {
+    "decision": "drop",
+    "reason": "otp_or_promo_inst"
+   }
+  },
+  {
+   "id": "reminder.ar.due",
+   "tags": [
+    "promo_drop",
+    "per_inst"
+   ],
+   "config": "t1",
+   "channel": "sms",
+   "source": "HSBC EG",
+   "body": "المبلغ مستحق السداد ١٢٥٠ جنيه قبل ٢٥ نوفمبر",
+   "expect": {
+    "decision": "drop",
+    "reason": "otp_or_promo_inst"
+   }
+  },
+  {
+   "id": "reminder.ar.statement",
+   "tags": [
+    "promo_drop",
+    "per_inst"
+   ],
+   "config": "t1",
+   "channel": "sms",
+   "source": "HSBC EG",
+   "body": "تم إصدار كشف حساب بطاقتك الائتمانية بمبلغ ٤٠٠٠ جنيه",
+   "expect": {
+    "decision": "drop",
+    "reason": "otp_or_promo_inst"
+   }
+  },
+  {
+   "id": "promo.en.cashback_offer",
+   "tags": [
+    "promo_drop",
+    "per_inst"
+   ],
+   "config": "t1",
+   "channel": "sms",
+   "source": "HSBC EG",
+   "body": "Get 10% cashback on all purchases this week at TESTSHOP. EGP 500 minimum",
+   "expect": {
+    "decision": "drop",
+    "reason": "otp_or_promo_inst"
+   }
+  },
+  {
+   "id": "promo.en.offer",
+   "tags": [
+    "promo_drop",
+    "per_inst"
+   ],
+   "config": "t1",
+   "channel": "sms",
+   "source": "HSBC EG",
+   "body": "Special offer: pay EGP 1,000 in installments with zero interest",
+   "expect": {
+    "decision": "drop",
+    "reason": "otp_or_promo_inst"
+   }
+  },
+  {
+   "id": "promo.en.win",
+   "tags": [
+    "promo_drop",
+    "per_inst"
+   ],
+   "config": "t1",
+   "channel": "sms",
+   "source": "HSBC EG",
+   "body": "Spend EGP 500 and win a prize! Congratulations",
+   "expect": {
+    "decision": "drop",
+    "reason": "otp_or_promo_inst"
+   }
+  },
+  {
+   "id": "promo.ar.offer",
+   "tags": [
+    "promo_drop",
+    "per_inst"
+   ],
+   "config": "t1",
+   "channel": "sms",
+   "source": "HSBC EG",
+   "body": "عرض خاص: استرداد نقدي حتى ٥٠٠ جنيه على مشترياتك",
+   "expect": {
+    "decision": "drop",
+    "reason": "otp_or_promo_inst"
+   }
+  },
+  {
+   "id": "promo.ar.cashback",
+   "tags": [
+    "promo_drop",
+    "per_inst"
+   ],
+   "config": "t1",
+   "channel": "sms",
+   "source": "HSBC EG",
+   "body": "احصل على استرداد نقدي ١٠٪ على مشتريات بقيمة ٥٠٠ جنيه",
+   "expect": {
+    "decision": "drop",
+    "reason": "otp_or_promo_inst"
+   }
+  },
+  {
+   "id": "promo.kept.cashback_credited.en",
+   "tags": [
+    "registry_keep"
+   ],
+   "config": "t1",
+   "channel": "sms",
+   "source": "CIB",
+   "body": "Cashback credited to your account ending 1234: EGP 50.00",
+   "expect": {
+    "decision": "keep",
+    "kind": "registry",
+    "inst": "cib",
+    "last4": "1234"
+   }
+  },
+  {
+   "id": "promo.kept.cashback_credited.ar",
+   "tags": [
+    "registry_keep"
+   ],
+   "config": "t1",
+   "channel": "sms",
+   "source": "NBE",
+   "body": "تم إضافة استرداد نقدي ٥٠ جنيه إلى حسابك",
+   "expect": {
+    "decision": "keep",
+    "kind": "registry",
+    "inst": "nbe",
+    "last4": null
+   }
+  },
+  {
+   "id": "txn_kept.offer_mart.hsbc",
+   "tags": [
+    "registry_keep",
+    "txn_never_dropped"
+   ],
+   "config": "t1",
+   "channel": "sms",
+   "source": "HSBC EG",
+   "body": "Purchase of EGP 100.00 at OFFER MART. Available limit EGP 9,000",
+   "expect": {
+    "decision": "keep",
+    "kind": "registry",
+    "inst": "hsbc",
+    "last4": null
+   }
+  },
+  {
+   "id": "txn_kept.offer_mart.nbe",
+   "tags": [
+    "registry_keep",
+    "txn_never_dropped"
+   ],
+   "config": "t1",
+   "channel": "sms",
+   "source": "NBE",
+   "body": "Purchase of EGP 100.00 at OFFER MART. Available limit EGP 9,000",
+   "expect": {
+    "decision": "keep",
+    "kind": "registry",
+    "inst": "nbe",
+    "last4": null
+   }
+  },
+  {
+   "id": "txn_kept.best_offers.hsbc",
+   "tags": [
+    "registry_keep",
+    "txn_never_dropped"
+   ],
+   "config": "t1",
+   "channel": "sms",
+   "source": "HSBC EG",
+   "body": "Your card *1234 was charged EGP 250.00 at BEST OFFERS STORE",
+   "expect": {
+    "decision": "keep",
+    "kind": "registry",
+    "inst": "hsbc",
+    "last4": "1234"
+   }
+  },
+  {
+   "id": "txn_kept.best_offers.nbe",
+   "tags": [
+    "registry_keep",
+    "txn_never_dropped"
+   ],
+   "config": "t1",
+   "channel": "sms",
+   "source": "NBE",
+   "body": "Your card *1234 was charged EGP 250.00 at BEST OFFERS STORE",
+   "expect": {
+    "decision": "keep",
+    "kind": "registry",
+    "inst": "nbe",
+    "last4": "1234"
+   }
+  },
+  {
+   "id": "txn_kept.win_trading.hsbc",
+   "tags": [
+    "registry_keep",
+    "txn_never_dropped"
+   ],
+   "config": "t1",
+   "channel": "sms",
+   "source": "HSBC EG",
+   "body": "Transfer of EGP 500.00 to WIN TRADING completed",
+   "expect": {
+    "decision": "keep",
+    "kind": "registry",
+    "inst": "hsbc",
+    "last4": null
+   }
+  },
+  {
+   "id": "txn_kept.win_trading.nbe",
+   "tags": [
+    "registry_keep",
+    "txn_never_dropped"
+   ],
+   "config": "t1",
+   "channel": "sms",
+   "source": "NBE",
+   "body": "Transfer of EGP 500.00 to WIN TRADING completed",
+   "expect": {
+    "decision": "keep",
+    "kind": "registry",
+    "inst": "nbe",
+    "last4": null
+   }
+  },
+  {
+   "id": "txn_kept.win_big.hsbc",
+   "tags": [
+    "registry_keep",
+    "txn_never_dropped"
+   ],
+   "config": "t1",
+   "channel": "sms",
+   "source": "HSBC EG",
+   "body": "Card 1234 purchase EGP 300 at WIN BIG MARKET",
+   "expect": {
+    "decision": "keep",
+    "kind": "registry",
+    "inst": "hsbc",
+    "last4": null
+   }
+  },
+  {
+   "id": "txn_kept.win_big.nbe",
+   "tags": [
+    "registry_keep",
+    "txn_never_dropped"
+   ],
+   "config": "t1",
+   "channel": "sms",
+   "source": "NBE",
+   "body": "Card 1234 purchase EGP 300 at WIN BIG MARKET",
+   "expect": {
+    "decision": "keep",
+    "kind": "registry",
+    "inst": "nbe",
+    "last4": null
+   }
+  },
+  {
+   "id": "txn_kept.cc_payment_due_date.hsbc",
+   "tags": [
+    "registry_keep",
+    "txn_never_dropped"
+   ],
+   "config": "t1",
+   "channel": "sms",
+   "source": "HSBC EG",
+   "body": "Your account 1234 debited EGP 2,000.00 for credit card payment. Next due date 25/11",
+   "expect": {
+    "decision": "keep",
+    "kind": "registry",
+    "inst": "hsbc",
+    "last4": null
+   }
+  },
+  {
+   "id": "txn_kept.cc_payment_due_date.nbe",
+   "tags": [
+    "registry_keep",
+    "txn_never_dropped"
+   ],
+   "config": "t1",
+   "channel": "sms",
+   "source": "NBE",
+   "body": "Your account 1234 debited EGP 2,000.00 for credit card payment. Next due date 25/11",
+   "expect": {
+    "decision": "keep",
+    "kind": "registry",
+    "inst": "nbe",
+    "last4": null
+   }
+  },
+  {
+   "id": "txn_kept.cc_payment_min_due.hsbc",
+   "tags": [
+    "registry_keep",
+    "txn_never_dropped"
+   ],
+   "config": "t1",
+   "channel": "sms",
+   "source": "HSBC EG",
+   "body": "Payment of EGP 1,250.00 received for your credit card. Thank you. Minimum due now EGP 0",
+   "expect": {
+    "decision": "keep",
+    "kind": "registry",
+    "inst": "hsbc",
+    "last4": null
+   }
+  },
+  {
+   "id": "txn_kept.cc_payment_min_due.nbe",
+   "tags": [
+    "registry_keep",
+    "txn_never_dropped"
+   ],
+   "config": "t1",
+   "channel": "sms",
+   "source": "NBE",
+   "body": "Payment of EGP 1,250.00 received for your credit card. Thank you. Minimum due now EGP 0",
+   "expect": {
+    "decision": "keep",
+    "kind": "registry",
+    "inst": "nbe",
+    "last4": null
+   }
+  },
+  {
+   "id": "txn_kept.estatement_fee.hsbc",
+   "tags": [
+    "registry_keep",
+    "txn_never_dropped"
+   ],
+   "config": "t1",
+   "channel": "sms",
+   "source": "HSBC EG",
+   "body": "EGP 25.00 debited from account 1234 for e-statement fee",
+   "expect": {
+    "decision": "keep",
+    "kind": "registry",
+    "inst": "hsbc",
+    "last4": null
+   }
+  },
+  {
+   "id": "txn_kept.estatement_fee.nbe",
+   "tags": [
+    "registry_keep",
+    "txn_never_dropped"
+   ],
+   "config": "t1",
+   "channel": "sms",
+   "source": "NBE",
+   "body": "EGP 25.00 debited from account 1234 for e-statement fee",
+   "expect": {
+    "decision": "keep",
+    "kind": "registry",
+    "inst": "nbe",
+    "last4": null
+   }
+  },
+  {
+   "id": "txn_kept.cashback_earned.hsbc",
+   "tags": [
+    "registry_keep",
+    "txn_never_dropped"
+   ],
+   "config": "t1",
+   "channel": "sms",
+   "source": "HSBC EG",
+   "body": "Purchase EGP 1,000 at Noon. You earned 5% cashback EGP 50",
+   "expect": {
+    "decision": "keep",
+    "kind": "registry",
+    "inst": "hsbc",
+    "last4": null
+   }
+  },
+  {
+   "id": "txn_kept.cashback_earned.nbe",
+   "tags": [
+    "registry_keep",
+    "txn_never_dropped"
+   ],
+   "config": "t1",
+   "channel": "sms",
+   "source": "NBE",
+   "body": "Purchase EGP 1,000 at Noon. You earned 5% cashback EGP 50",
+   "expect": {
+    "decision": "keep",
+    "kind": "registry",
+    "inst": "nbe",
+    "last4": null
+   }
+  },
+  {
+   "id": "txn_kept.congrats_credited.hsbc",
+   "tags": [
+    "registry_keep",
+    "txn_never_dropped"
+   ],
+   "config": "t1",
+   "channel": "sms",
+   "source": "HSBC EG",
+   "body": "Congratulations! EGP 500.00 has been credited to your account 1234",
+   "expect": {
+    "decision": "keep",
+    "kind": "registry",
+    "inst": "hsbc",
+    "last4": null
+   }
+  },
+  {
+   "id": "txn_kept.congrats_credited.nbe",
+   "tags": [
+    "registry_keep",
+    "txn_never_dropped"
+   ],
+   "config": "t1",
+   "channel": "sms",
+   "source": "NBE",
+   "body": "Congratulations! EGP 500.00 has been credited to your account 1234",
+   "expect": {
+    "decision": "keep",
+    "kind": "registry",
+    "inst": "nbe",
+    "last4": null
+   }
+  },
+  {
+   "id": "txn_kept.ar_offers_merchant.hsbc",
+   "tags": [
+    "registry_keep",
+    "txn_never_dropped"
+   ],
+   "config": "t1",
+   "channel": "sms",
+   "source": "HSBC EG",
+   "body": "تم خصم ٢٠٠ جنيه من حسابك ١٢٣٤ لدى عروض مصر",
+   "expect": {
+    "decision": "keep",
+    "kind": "registry",
+    "inst": "hsbc",
+    "last4": null
+   }
+  },
+  {
+   "id": "txn_kept.ar_offers_merchant.nbe",
+   "tags": [
+    "registry_keep",
+    "txn_never_dropped"
+   ],
+   "config": "t1",
+   "channel": "sms",
+   "source": "NBE",
+   "body": "تم خصم ٢٠٠ جنيه من حسابك ١٢٣٤ لدى عروض مصر",
+   "expect": {
+    "decision": "keep",
+    "kind": "registry",
+    "inst": "nbe",
+    "last4": null
+   }
+  },
+  {
+   "id": "txn_kept.ar_statement_fee.hsbc",
+   "tags": [
+    "registry_keep",
+    "txn_never_dropped"
+   ],
+   "config": "t1",
+   "channel": "sms",
+   "source": "HSBC EG",
+   "body": "تم خصم ٥٠ جنيه رسوم كشف حساب من حسابك ١٢٣٤",
+   "expect": {
+    "decision": "keep",
+    "kind": "registry",
+    "inst": "hsbc",
+    "last4": null
+   }
+  },
+  {
+   "id": "txn_kept.ar_statement_fee.nbe",
+   "tags": [
+    "registry_keep",
+    "txn_never_dropped"
+   ],
+   "config": "t1",
+   "channel": "sms",
+   "source": "NBE",
+   "body": "تم خصم ٥٠ جنيه رسوم كشف حساب من حسابك ١٢٣٤",
+   "expect": {
+    "decision": "keep",
+    "kind": "registry",
+    "inst": "nbe",
+    "last4": null
+   }
+  },
+  {
+   "id": "txn_kept.otp_footer.hsbc",
+   "tags": [
+    "registry_keep",
+    "txn_never_dropped"
+   ],
+   "config": "t1",
+   "channel": "sms",
+   "source": "HSBC EG",
+   "body": "Purchase of EGP 100.00 at TESTSHOP. Never share your OTP with anyone",
+   "expect": {
+    "decision": "keep",
+    "kind": "registry",
+    "inst": "hsbc",
+    "last4": null
+   }
+  },
+  {
+   "id": "txn_kept.otp_footer.nbe",
+   "tags": [
+    "registry_keep",
+    "txn_never_dropped"
+   ],
+   "config": "t1",
+   "channel": "sms",
+   "source": "NBE",
+   "body": "Purchase of EGP 100.00 at TESTSHOP. Never share your OTP with anyone",
+   "expect": {
+    "decision": "keep",
+    "kind": "registry",
+    "inst": "nbe",
+    "last4": null
+   }
+  },
+  {
+   "id": "txn_kept.otp_footer_is.hsbc",
+   "tags": [
+    "registry_keep",
+    "txn_never_dropped"
+   ],
+   "config": "t1",
+   "channel": "sms",
+   "source": "HSBC EG",
+   "body": "Purchase of EGP 100.00 at TESTSHOP. Your OTP is confidential",
+   "expect": {
+    "decision": "keep",
+    "kind": "registry",
+    "inst": "hsbc",
+    "last4": null
+   }
+  },
+  {
+   "id": "txn_kept.otp_footer_is.nbe",
+   "tags": [
+    "registry_keep",
+    "txn_never_dropped"
+   ],
+   "config": "t1",
+   "channel": "sms",
+   "source": "NBE",
+   "body": "Purchase of EGP 100.00 at TESTSHOP. Your OTP is confidential",
+   "expect": {
+    "decision": "keep",
+    "kind": "registry",
+    "inst": "nbe",
+    "last4": null
+   }
+  },
+  {
+   "id": "txn_kept.otp_footer_to.hsbc",
+   "tags": [
+    "registry_keep",
+    "txn_never_dropped"
+   ],
+   "config": "t1",
+   "channel": "sms",
+   "source": "HSBC EG",
+   "body": "Purchase of EGP 100.00 at TESTSHOP. Do not give your OTP to anyone",
+   "expect": {
+    "decision": "keep",
+    "kind": "registry",
+    "inst": "hsbc",
+    "last4": null
+   }
+  },
+  {
+   "id": "txn_kept.otp_footer_to.nbe",
+   "tags": [
+    "registry_keep",
+    "txn_never_dropped"
+   ],
+   "config": "t1",
+   "channel": "sms",
+   "source": "NBE",
+   "body": "Purchase of EGP 100.00 at TESTSHOP. Do not give your OTP to anyone",
+   "expect": {
+    "decision": "keep",
+    "kind": "registry",
+    "inst": "nbe",
+    "last4": null
+   }
+  },
+  {
+   "id": "txn_kept.otp_footer.1",
+   "tags": [
+    "registry_keep",
+    "batch27_delta"
+   ],
+   "config": "t1",
+   "channel": "sms",
+   "source": "NBE",
+   "body": "Purchase of EGP 250.00 at TESTMART with card ending 4321. Do not share OTP for security.",
+   "expect": {
+    "decision": "keep",
+    "kind": "registry",
+    "inst": "nbe",
+    "last4": "4321"
+   }
+  },
+  {
+   "id": "txn_kept.otp_footer.2",
+   "tags": [
+    "registry_keep",
+    "batch27_delta"
+   ],
+   "config": "t1",
+   "channel": "sms",
+   "source": "NBE",
+   "body": "EGP 1,200.00 debited from A/C *9876. OTP sent to this number is never requested by the bank.",
    "expect": {
     "decision": "keep",
     "kind": "registry",

@@ -6,6 +6,8 @@
 // the screen never touches the database. Raw message text passed in is shown
 // only on screen, never logged.
 
+import '../../../categorization/presentation/category_visuals.dart';
+
 import 'dart:async';
 
 import 'package:flutter/material.dart';
@@ -455,7 +457,11 @@ class _EditState extends ConsumerState<TransactionEditScreen> {
           for (final c in lk.categories)
             ZListRow(
               title: categoryName(c, lang),
-              leading: Text(c.icon, style: ZType.title),
+              leading: categoryGlyph(
+                id: c.id,
+                iconKey: c.icon,
+                style: ZType.title,
+              ),
               onTap: () => Navigator.of(ctx).pop(c.id),
             ),
         ],

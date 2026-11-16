@@ -45,10 +45,16 @@ const bool kCaptureCustomTemplateSendersWithoutGold = true;
 /// `guardIgnoreChannel`.
 const bool kShortcutMessageUsesSmsToggle = true;
 
-/// Marker only, not read by code. PO Q6 (provisional): promotional
-/// messages are dropped only by an institution's own `drop` patterns; there
-/// is no global promo list (generic promo words collide with transaction
-/// words: `خصم` is "debit"). This is a data rule for registry authors (a lint
-/// can not tell a promo pattern from an OTP one); the golden case
-/// `promo.no_inst_pattern_kept` pins it.
+/// Marker only, not read by code. PO Q6 (T-035; PO_DECISIONS Part 1):
+/// promotional, payment-due and statement messages are dropped only by an
+/// institution's own `drop` patterns; the global list holds OTP patterns
+/// only. Generic promo and reminder words collide with real transactions
+/// (`خصم` is "debit", `OFFER MART` is a merchant, a card payment mentions
+/// its next due date), and the Guard drops before storage, so a global
+/// promo rule would lose money for good (batch-27 review). Promo wording
+/// without a transaction cue is handled after storage by the generic
+/// parser (`genericPromotion`, a review item, never a transaction). This
+/// is a data rule for registry authors (a lint can not tell a promo pattern
+/// from an OTP one); the golden cases `promo.no_inst_pattern_kept` and
+/// `txn_kept.*` pin it.
 const bool kGuardPromoDropPerInstitutionOnly = true;

@@ -236,6 +236,10 @@ enum UnrecognizedReason {
   /// Generic parser: the message says the attempt failed or was declined,
   /// which is not a transaction.
   genericDeclined,
+
+  /// Generic parser: promotion wording (offer, win, `عرض خاص`) and no word
+  /// saying money moved. Not a transaction; still a review item.
+  genericPromotion,
 }
 
 /// Nothing could be parsed. The caller keeps the raw message as an
@@ -277,6 +281,42 @@ enum GenericReason {
 /// below [kAutoAcceptThresholdPermille] by construction.
 const int kGenericMaxConfidencePermille = 700;
 
+/// The kind of transaction a generic message names, when a keyword says so.
+/// A hint for the review card and the stored direction; never a direction
+/// by itself.
+enum GenericEvent { purchase, withdrawal, transfer, refund }
+
+/// A field the generic parser reads.
+enum GenericField {
+  amount,
+  currency,
+  direction,
+  last4,
+  merchant,
+  date,
+  reference,
+}
+
+/// A span of the original message text, in code units: where a generic field
+/// was read. Offsets only, never text (the custom-template builder tags the
+/// same spans so a confirmed suggestion can become a template).
+final class GenericSpan {
+  const GenericSpan(this.start, this.end);
+
+  final int start;
+  final int end;
+
+  @override
+  bool operator ==(Object other) =>
+      other is GenericSpan && other.start == start && other.end == end;
+
+  @override
+  int get hashCode => Object.hash(start, end);
+
+  @override
+  String toString() => 'GenericSpan($start, $end)';
+}
+
 /// A best-effort suggestion for a message from a source with no template
 /// (FR-PAR-13). It always needs review: the amount is a suggestion the user
 /// confirms or edits. A field the message does not carry is null (never
@@ -292,6 +332,11 @@ final class ParseGeneric extends ParseResult {
     required this.confidencePermille,
     required this.reasons,
     this.institutionCode,
+    this.event,
+    this.reference,
+    this.dateRead = false,
+    this.fieldConfidence = const {},
+    this.spans = const {},
   });
 
   /// The institution the sender resolved to when a registry template did not
@@ -310,13 +355,46 @@ final class ParseGeneric extends ParseResult {
   final String? last4;
   final CleanedMerchant? merchant;
 
-  /// The receipt time: the generic parser reads no dates.
+  /// The message's own date (at the receipt's time of day) when [dateRead],
+  /// otherwise the receipt time.
   final DateTime occurredAt;
+
+  /// True when [occurredAt] carries a date read from the message.
+  final bool dateRead;
+
+  /// Purchase, withdrawal, transfer or refund, when a keyword names it.
+  final GenericEvent? event;
+
+  /// A reference or transaction id after a `Ref`/`المرجع` cue, as written.
+  final String? reference;
 
   /// 0..[kGenericMaxConfidencePermille].
   final int confidencePermille;
   final List<GenericReason> reasons;
 
+  /// How sure the parser is of each field it read, in thousandths. A field
+  /// it did not read is absent (never 0-with-a-value).
+  final Map<GenericField, int> fieldConfidence;
+
+  /// Where each field was read in the original text (offsets only).
+  final Map<GenericField, GenericSpan> spans;
+
   /// Always true: a generic result is never accepted without the user.
   bool get needsReview => true;
+
+  /// Every field the review card needs is filled and unambiguous: amount and
+  /// currency with no competing reading, a direction, and a last-4 or a
+  /// merchant. The card can then offer a one-tap confirm; the result still
+  /// goes to review (FR-PAR-13, A-66), it is never saved by this flag.
+  bool get prefillComplete =>
+      direction != null &&
+      (last4 != null || merchant != null) &&
+      !reasons.contains(GenericReason.amountAmbiguous) &&
+      !reasons.contains(GenericReason.currencyAmbiguous) &&
+      !reasons.contains(GenericReason.directionConflict);
+
+  @override
+  String toString() =>
+      'ParseGeneric(${amount.currency.code}, ${direction?.name}, '
+      'confidence: $confidencePermille)';
 }

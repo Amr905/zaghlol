@@ -1,5 +1,7 @@
 // T-079: the sheets behind the filter chips and the bulk actions of S-11.
 
+import '../../../categorization/presentation/category_visuals.dart';
+
 import 'package:flutter/material.dart';
 import 'package:zaghlol_domain/zaghlol_domain.dart';
 
@@ -117,7 +119,11 @@ Future<Set<String>?> showCategoriesSheet(
               ctx,
               title: categoryName(c, lang),
               on: picked.contains(c.id),
-              leading: Text(c.icon, style: ZType.title),
+              leading: categoryGlyph(
+                id: c.id,
+                iconKey: c.icon,
+                style: ZType.title,
+              ),
               onTap: () => setState(() {
                 picked = picked.contains(c.id)
                     ? ({...picked}..remove(c.id))
@@ -279,7 +285,11 @@ Future<({String id, bool always})?> showBulkCategorySheet(
           for (final c in categories)
             ZListRow(
               title: categoryName(c, lang),
-              leading: Text(c.icon, style: ZType.title),
+              leading: categoryGlyph(
+                id: c.id,
+                iconKey: c.icon,
+                style: ZType.title,
+              ),
               onTap: () => Navigator.of(ctx).pop((id: c.id, always: always)),
             ),
         ],
