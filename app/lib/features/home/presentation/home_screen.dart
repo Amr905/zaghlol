@@ -289,7 +289,11 @@ class _HomeBodyState extends ConsumerState<_HomeBody> {
             const SizedBox(height: ZSpacing.sm),
             SizedBox(
               key: const ValueKey('home-pager'),
-              height: scale.scale(330),
+              // A page without a budget also shows the hint and its button
+              // (explorer finding: 36 px overflow on a 320 dp phone).
+              height: scale.scale(
+                figures.any((f) => f.safeToSpend == null) ? 440 : 330,
+              ),
               child: PageView(
                 controller: _pager,
                 onPageChanged: (i) => setState(() => _page = i),
