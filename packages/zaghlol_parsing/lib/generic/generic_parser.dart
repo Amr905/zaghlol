@@ -46,6 +46,13 @@ ParseResult parseGeneric({
       _hits(t, completedTransactionCues, null).isEmpty) {
     return const ParseUnrecognized(UnrecognizedReason.genericPromotion);
   }
+  // An OTP message that also carries an amount ("Your OTP for the purchase of
+  // EGP 1,250.00 at X is 483920"): the code, not a spend. Needs both the cue
+  // and a code that follows "is"/":" (not a reference), so a transaction with
+  // an "OTP" footer and no code still parses.
+  if (_otpCue.hasMatch(t) && _otpCode.hasMatch(t)) {
+    return const ParseUnrecognized(UnrecognizedReason.genericPromotion);
+  }
   final directional = [
     ..._hits(
       t,
@@ -211,6 +218,12 @@ const Map<String, int> _months = {
 };
 
 // `d/M[/yyyy|/yy]` (also `-` and `.` with a year), and `yyyy-MM-dd`.
+final RegExp _otpCue = RegExp(
+  r'(?:^|[^a-z])(?:[o0]tp|one[- ]?time[- ]?(?:pass(?:word|code)|pin|code))(?:[^a-z]|$)',
+);
+final RegExp _otpCode = RegExp(
+  r'(?<!ref |reference |ref no |no |number )(?:\bis|[:=#]) ?[0-9]{4,8}(?:$|[^0-9.,]|[.,]$|[.,][^0-9])',
+);
 final RegExp _numericDate = RegExp(
   r'(?<![0-9/.:-])(?:(20[0-9]{2})-([0-9]{1,2})-([0-9]{1,2})|([0-9]{1,2})/([0-9]{1,2})(?:/(20[0-9]{2}|[0-9]{2}))?|([0-9]{1,2})([.-])([0-9]{1,2})\8(20[0-9]{2}))(?![0-9/:])',
 );

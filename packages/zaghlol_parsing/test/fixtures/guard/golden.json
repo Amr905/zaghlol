@@ -2,7 +2,7 @@
  "format": 1,
  "synthetic": true,
  "note": "Synthetic data only (CLAUDE.md 2.6). Shared by the Dart, Kotlin (T-038) and Swift (T-061) Guards: never copy. count = fold + cases + rate + modes. fold: out = foldKey(in); lines (when present, else out) = foldKeyLines(in), the Guard's fold for the global drop patterns.",
- "count": 285,
+ "count": 287,
  "configs": {
   "t1": {
    "base": "configs/t1_base.json",
@@ -2998,17 +2998,20 @@
    }
   },
   {
-   "id": "otp.en.otp_for",
+   "id": "otp.en.otp_for_with_amount_kept",
    "tags": [
-    "otp_drop"
+    "registry_keep",
+    "batch27_delta"
    ],
    "config": "t1",
    "channel": "sms",
    "source": "NBE",
    "body": "Use OTP for your online payment of EGP 150.00 at TESTSHOP: 5g8h2k",
    "expect": {
-    "decision": "drop",
-    "reason": "otp_or_promo_global"
+    "decision": "keep",
+    "kind": "registry",
+    "inst": "nbe",
+    "last4": null
    }
   },
   {
@@ -3662,6 +3665,40 @@
    "channel": "sms",
    "source": "NBE",
    "body": "Purchase of EGP 100.00 at TESTSHOP. Do not give your OTP to anyone",
+   "expect": {
+    "decision": "keep",
+    "kind": "registry",
+    "inst": "nbe",
+    "last4": null
+   }
+  },
+  {
+   "id": "txn_kept.otp_footer.1",
+   "tags": [
+    "registry_keep",
+    "batch27_delta"
+   ],
+   "config": "t1",
+   "channel": "sms",
+   "source": "NBE",
+   "body": "Purchase of EGP 250.00 at TESTMART with card ending 4321. Do not share OTP for security.",
+   "expect": {
+    "decision": "keep",
+    "kind": "registry",
+    "inst": "nbe",
+    "last4": "4321"
+   }
+  },
+  {
+   "id": "txn_kept.otp_footer.2",
+   "tags": [
+    "registry_keep",
+    "batch27_delta"
+   ],
+   "config": "t1",
+   "channel": "sms",
+   "source": "NBE",
+   "body": "EGP 1,200.00 debited from A/C *9876. OTP sent to this number is never requested by the bank.",
    "expect": {
     "decision": "keep",
     "kind": "registry",

@@ -256,11 +256,15 @@ void main() {
       expect(unknown.institutionCode, isNull);
     });
 
-    test('FU-243: a bank OTP is dropped globally', () {
-      final r = pipeline.parse(
-        _req('Your OTP for online payment of EGP 150.00 is 5g8h2k'),
-      );
-      expect(r, isA<ParseDropped>());
+    test('batch-27 delta: an OTP mention without a numeric code is never '
+        'dropped globally (it may carry a real transaction)', () {
+      for (final body in const [
+        'Your OTP for online payment of EGP 150.00 is 5g8h2k',
+        'Purchase of EGP 250.00 at TESTMART with card ending 4321. '
+            'Do not share OTP for security.',
+      ]) {
+        expect(pipeline.parse(_req(body)), isNot(isA<ParseDropped>()));
+      }
     });
 
     test('batch-27: reminders and promos are never dropped globally '
