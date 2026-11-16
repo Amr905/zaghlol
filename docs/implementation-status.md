@@ -502,6 +502,8 @@
 
 - **FU-250** (batch 30): minors in [batch-30](05-reviews/batch-30.md); SMS-auto tests that only assert negatives under `if (r is ParseGeneric)`; dedicated l10n keys for show/hide original message; brand colours are guesses (PO to check); official bank logos need permission or a licensed source (docs/02-design/brand/LOGOS.md); account rows on Money don't use `ZInstitutionAvatar` yet.
 
+- **FU-251** (batch 31): see the batch-31 Lead delta check. Re-parse skips the restore pause gate; InstaPay template confidence; broad catalog keywords; home feed-row acronym; Transfers/Cash categories need a PO decision.
+
 ## Log
 | Date | Event |
 |---|---|
@@ -585,3 +587,4 @@
 | 2026-11-16 | Batch 28 (`batch/2026-11-16-28`): app explorer (108 screens, ~600 taps on the emulator) and its fixes (edit-card row, offline account status, Undo after unmount), FAB clearance on all tabs. FU-245…FU-246. Progress 165/186. |
 | 2026-11-16 | Batch 29 (`batch/2026-11-16-29`): T-070, T-186 DONE; FU-244, DESIGN-pass3 (FU-245/246), TEST-explorer2. FU-247…FU-249. Progress 167/186. |
 | 2026-11-16 | Batch 30 (`batch/2026-11-16-30`): SMS-auto (PO SMS-AUTO: confident bank SMS auto-save; suspicious ones show the original text), budget route fix, haptics, brand avatars. FU-250. Progress 167/186. |
+| 2026-11-17 | Batch 31 (`batch/2026-11-16-31`): SMS-device (on-device SMS e2e green; three root causes fixed), SMS-improve (InstaPay, categorization), UI-po31 (acronyms, card digits, Keep, charts free). FU-251. Progress 167/186. |
