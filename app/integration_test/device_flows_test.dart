@@ -205,6 +205,40 @@ void main() {
     await settle(t, 1000);
     await shot(t, '09-settings');
 
+    // ---- Arabic (RTL) pass: switch the language through the app's own
+    // providers, then re-take the main screens. Evidence only: a failure
+    // here is reported, never fatal.
+    await closeTop(t);
+    try {
+      final container = ProviderScope.containerOf(
+        rootNavigatorKey.currentContext!,
+      );
+      final repo = await container.read(settingsRepositoryProvider.future);
+      await repo.set(Settings.language, LanguagePref.ar);
+      await settle(t, 2000);
+      await t.tap(find.text('الرئيسية').first);
+      await settle(t, 1500);
+      await shot(t, 'ar-01-home');
+      await t.tap(find.bySemanticsLabel('سجّل بسرعة').first);
+      await settle(t, 1500);
+      await shot(t, 'ar-02-add-sheet');
+      await closeTop(t);
+      await t.tap(find.text('فلوسي').first);
+      await settle(t, 1500);
+      await shot(t, 'ar-03-money');
+      await t.tap(find.text('الحسبة').first);
+      await settle(t, 1500);
+      await shot(t, 'ar-04-insights');
+      await t.tap(find.text('الرئيسية').first);
+      await settle(t, 800);
+      unawaited(openSettings(rootNavigatorKey.currentContext!));
+      await settle(t, 2000);
+      await shot(t, 'ar-05-settings');
+    } on Object catch (e) {
+      // ignore: avoid_print
+      print('DEVICE_FLOWS_AR_FAILED ${e.runtimeType}');
+    }
+
     FlutterError.onError = original;
     semantics.dispose();
   });

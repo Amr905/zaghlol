@@ -3,6 +3,8 @@
 
 import 'package:flutter/material.dart';
 
+import '../../../core/ui/category_glyph.dart';
+
 /// Icon keys offered in the editor, in display order.
 const Map<String, IconData> categoryIcons = {
   'cart': Icons.shopping_cart_outlined,
@@ -22,21 +24,6 @@ const Map<String, IconData> categoryIcons = {
 /// Fallback for system icon keys that are not in [categoryIcons].
 IconData iconFor(String key) => categoryIcons[key] ?? Icons.category_outlined;
 
-/// A category's glyph where only an emoji or a key may be stored: a catalog
-/// icon key (`shopping_bag`) draws as an icon, anything else (an emoji) as
-/// text. Without this a key showed up as its own letters (explorer finding).
-Widget categoryGlyph(
-  String icon, {
-  required double size,
-  Color? color,
-  TextStyle? textStyle,
-}) {
-  if (RegExp(r'^[a-z][a-z0-9_]*$').hasMatch(icon)) {
-    return Icon(iconFor(icon), size: size, color: color);
-  }
-  return Text(icon, style: textStyle);
-}
-
 /// The approved colour set (deep tones that keep contrast on both themes).
 const List<String> categoryPalette = [
   '#174C4F',
@@ -54,4 +41,20 @@ Color? parseHexColor(String hex) {
   final m = RegExp(r'^#([0-9a-fA-F]{6})$').firstMatch(hex);
   if (m == null) return null;
   return Color(0xFF000000 | int.parse(m.group(1)!, radix: 16));
+}
+
+/// The glyph for a category on transaction screens: a custom category shows
+/// the icon the user chose ([categoryIcons]); a system category, or a key
+/// this build does not know, keeps its emoji ([ZCategoryGlyph.glyphFor]).
+Widget categoryGlyph({
+  required String id,
+  required String iconKey,
+  required TextStyle style,
+}) {
+  final system = ZCategoryGlyph.isSystemId(id);
+  final icon = categoryIcons[iconKey];
+  if (!system && icon != null) {
+    return Icon(icon, size: style.fontSize, color: style.color);
+  }
+  return Text(ZCategoryGlyph.glyphFor(id), style: style);
 }

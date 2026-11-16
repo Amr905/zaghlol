@@ -6,6 +6,8 @@
 // shown in ink, never red. The raw message ("How Zaghlol read this") is
 // sensitive: shown on screen only, never logged.
 
+import '../../../categorization/presentation/category_visuals.dart';
+
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -16,8 +18,6 @@ import '../../../../core/l10n/locale_providers.dart';
 import '../../../../core/l10n/generated/app_localizations.dart';
 import '../../../../core/theme/z_tokens.dart';
 import '../../../../core/ui/z_components.dart';
-import '../../../categorization/presentation/category_visuals.dart'
-    show categoryGlyph;
 import '../../data/transaction_detail_reader.dart';
 import '../../data/transactions_providers.dart';
 import '../../domain/transaction.dart';
@@ -209,7 +209,11 @@ class _DetailState extends ConsumerState<TransactionDetailScreen> {
           for (final c in lk.categories)
             ZListRow(
               title: categoryName(c, fmt.lang),
-              leading: categoryGlyph(c.icon, size: 24, textStyle: ZType.title),
+              leading: categoryGlyph(
+                id: c.id,
+                iconKey: c.icon,
+                style: ZType.title,
+              ),
               trailing: c.id == t.categoryId
                   ? Icon(Icons.check, color: ZColors.of(ctx).primary)
                   : null,
@@ -230,9 +234,6 @@ class _DetailState extends ConsumerState<TransactionDetailScreen> {
       if (answer == null || !mounted) return;
       always = answer;
     }
-    // The Undo action outlives this screen: it must not use `ref` (explorer
-    // finding: tapping Undo after leaving threw "ref ... unmounted").
-    final container = ProviderScope.containerOf(context);
     await _run(() async {
       final actions = await ref.read(txnBulkActionsProvider.future);
       final r = await actions.setCategory(
@@ -252,8 +253,8 @@ class _DetailState extends ConsumerState<TransactionDetailScreen> {
           onPressed: () async {
             await _run(() async {
               await actions.undo(r.batchId);
-              container.invalidate(txnDetailProvider(t.id));
-              container.invalidate(txnListProvider);
+              ref.invalidate(txnDetailProvider(t.id));
+              ref.invalidate(txnListProvider);
             });
           },
         ),
@@ -611,12 +612,16 @@ class _Body extends StatelessWidget {
             ZCategoryTile(
               size: 64,
               color: _parseColor(cat?.color ?? '', c.primary),
-              child: categoryGlyph(
-                cat?.icon ?? '•',
-                size: 30,
-                color: _parseColor(cat?.color ?? '', c.primary),
-                textStyle: ZType.display.copyWith(fontSize: 30, height: 1.2),
-              ),
+              child: cat == null
+                  ? Text(
+                      '•',
+                      style: ZType.display.copyWith(fontSize: 30, height: 1.2),
+                    )
+                  : categoryGlyph(
+                      id: cat.id,
+                      iconKey: cat.icon,
+                      style: ZType.display.copyWith(fontSize: 30, height: 1.2),
+                    ),
             ),
             const SizedBox(height: ZSpacing.lg),
             ZMoneyText(

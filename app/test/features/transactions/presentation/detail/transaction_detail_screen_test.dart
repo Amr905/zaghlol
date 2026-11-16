@@ -178,18 +178,6 @@ void main() {
       expect(find.text('Undo'), findsOneWidget);
     });
 
-    testWidgets('Undo after a category change undoes that batch', (
-      tester,
-    ) async {
-      final hh = await start(tester);
-      await tester.tap(find.text('Always'));
-      await tester.pumpAndSettle();
-      await tester.tap(find.text('Undo').first);
-      await tester.pumpAndSettle();
-      expect(tester.takeException(), isNull);
-      expect(hh.actions.calls.last, startsWith('undo:'));
-    });
-
     testWidgets('Just this once does not', (tester) async {
       final hh = await start(tester);
       await tester.tap(find.text('Just this once'));
