@@ -236,6 +236,10 @@ enum UnrecognizedReason {
   /// Generic parser: the message says the attempt failed or was declined,
   /// which is not a transaction.
   genericDeclined,
+
+  /// Generic parser: promotion wording (offer, win, `عرض خاص`) and no word
+  /// saying money moved. Not a transaction; still a review item.
+  genericPromotion,
 }
 
 /// Nothing could be parsed. The caller keeps the raw message as an

@@ -180,6 +180,52 @@ final List<String> amountCueKeywords = _fold(const [
   'قيمه',
 ]);
 
+/// Promotion wording (batch-27 fix). A message with one of these and no
+/// [completedTransactionCues] hit is an offer, not a transaction: the generic
+/// parser returns unrecognized (it still goes to review; the Guard never
+/// drops on promo words globally, PO T-035 Q6).
+final List<String> promoKeywords = _fold(const [
+  'offer',
+  'offers',
+  'win',
+  'enjoy',
+  'chance to',
+  'عرض خاص',
+  'عروض',
+  'اربح',
+  'احصل على',
+  'استمتع',
+]);
+
+/// Words that say money already moved. Any hit overrides [promoKeywords],
+/// so `Purchase of EGP 100 at OFFER MART` or `Congratulations! EGP 500 has
+/// been credited` stay transactions.
+final List<String> completedTransactionCues = _fold(const [
+  'debited',
+  'debit',
+  'charged',
+  'credited',
+  'paid',
+  'received',
+  'transferred',
+  'purchase',
+  'withdrawn',
+  'deducted',
+  'was used',
+  'has been used',
+  'transfer of',
+  'payment of',
+  'تم خصم',
+  'خصم من',
+  'تم تحويل',
+  'تم سداد',
+  'تم ايداع',
+  'تم إضافة',
+  'تم شراء',
+  'تم استلام',
+  'تم صرف',
+]);
+
 /// Words that mean the attempt failed: a failed attempt is not spend.
 final List<String> declineKeywords = _fold(const [
   'declined',

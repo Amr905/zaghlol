@@ -42,6 +42,10 @@ ParseResult parseGeneric({
   if (_hits(t, declineKeywords, null).isNotEmpty) {
     return const ParseUnrecognized(UnrecognizedReason.genericDeclined);
   }
+  if (_hits(t, promoKeywords, null).isNotEmpty &&
+      _hits(t, completedTransactionCues, null).isEmpty) {
+    return const ParseUnrecognized(UnrecognizedReason.genericPromotion);
+  }
   final directional = [
     ..._hits(
       t,

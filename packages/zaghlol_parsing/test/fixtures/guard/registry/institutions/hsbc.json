@@ -15,7 +15,12 @@
   "packages": [],
   "walletCardNames": [],
   "last4": [],
-  "drop": [],
+  "drop": [
+    "^your credit card payment due is |^minimum amount due |^your credit card statement is ready",
+    "^المبلغ مستحق السداد|^تم إصدار كشف حساب بطاقتك",
+    "^get [0-9]+% cashback on |^(?:special|exclusive) offer: |^spend [^.!?]{0,30} and win a prize",
+    "^عرض خاص: |^احصل على استرداد نقدي"
+  ],
   "templates": [
     {
       "id": "hsbc.card_purchase.en",

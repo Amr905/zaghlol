@@ -75,20 +75,21 @@
    "^(?:code|(?:ال)?كود)(?: is| هو)?[ \\n:=#-]{0,3}[0-9]{4,8}(?:$|[^0-9.,]|[.,]$|[.,][^0-9])|(?:^|[.!?;؟؛:,=\\n] ?|(?:use|enter|customer|استخدم|ادخل|عميلنا) )[0-9]{4,8}(?: (?:is|as|هو|هي)(?: your| the)?)?[ :=-]{0,3}(?:(?:[o0]tp|one[- ]?time[- ]?(?:pass(?:word|code)|pin|code)|(?:verification|verify|security|secure|activation|login|confirmation|your) code|pass(?:code|word)|pin)(?:$|[^a-z])|(?:رمز|كود) ?(?:التحقق|التفعيل|الدخول|الامان)|كلمه السر لمره واحده|كلمه (?:السر|المرور)(?: المؤقته)?|الرقم السري(?: المؤقت)?|كودك|رمزك)",
    "(?:(?:رمز|كود) ?(?:التحقق|التفعيل|الدخول|الامان)|كلمه السر لمره واحده|كلمه (?:السر|المرور)(?: المؤقته)?|الرقم السري(?: المؤقت)?|كودك|رمزك)(?:(?: (?:is|هو|هي))?[ \\n:=#-]{0,3}|[^a-z0-9.!?;؟؛:=\\n][^.!?;؟؛:=\\n]{0,24}(?:\\.[^ .!?;؟؛\\n][^.!?;؟؛:=\\n]{0,24}){0,2}(?: (?:is|هو|هي)|[=:])[ :]{0,2})(?:[0-9]{4}|[0-9]{6,8}|(?:1[0-8]|[02-9][0-9])[0-9]{3}|[0-9]{3}[ -][0-9]{3}|[0-9]{2} [0-9]{2} [0-9]{2})(?:$|[.,]$|[.,][^0-9]|[^0-9., \\n]|[ \\n][^euج]|[ \\n]e[^g]|[ \\n]u[^s]|[ \\n]ج[^.من])",
    "(?:[^a-z]code|كود)(?: is| هو)?[ \\n:=#-]{0,3}(?:[0-9]{4}|[0-9]{6,8}|(?:1[0-8]|[02-9][0-9])[0-9]{3}|[0-9]{3}[ -][0-9]{3}|[0-9]{2} [0-9]{2} [0-9]{2})[^0-9.!?;؟؛\\n]{0,12}(?:to (?:confirm|complete|verify|activate|authori[sz]e|log ?in)|لتاكيد|للتاكيد|لاتمام|لتفعيل)",
-   "(?:^|[^a-z])(?:[o0]tp|one[- ]?time[- ]?(?:pass(?:word|code)|pin|code))(?: (?:for|is|to|no|number|code|was|has been|sent))(?:[^a-z]|$)",
-   "payment (?:is )?due|(?:minimum|min\\.?) (?:amount |payment )?due|(?:amount|payment) due (?:on|by|date)|due date|e-?statement|(?:credit card|account|monthly) statement|statement (?:is|for|date|balance|ready|available|has)",
-   "مستحق(?:ه)? (?:السداد|الدفع)|(?:الحد الادني|الحد الادني) (?:للسداد|المستحق)|كشف (?:ال)?حساب|موعد (?:ال)?(?:سداد|استحقاق)",
-   "(?:^|[^a-z])offers?(?:[^a-z]|$)|(?:chance|opportunity) to win|(?:you|to) (?:could |can )?win(?:[^a-z]|$)|win (?:a|an|up|big|prizes?|gifts?)|congratulations",
-   "(?:get|earn|enjoy|receive|avail) (?:up to )?[^.!?\\n]{0,30}(?:cashback|% off|discount)|(?:cashback|cash back) (?:up to|offer|on (?:all|every|your)|campaign|promo)|[0-9]%[ ]?(?:cashback|cash back)|(?:cashback|cash back)[ ]?(?:of )?(?:up to )?[0-9.]+%",
-   "عرض (?:خاص|حصري|حصري|لفتره|جديد|جديده|مميز)|(?:^|[ :.])(?:ال)?عروض|(?:احصل|استمتع|اربح|وفر|تربح) [^.!?\\n]{0,30}(?:استرداد نقدي|كاش ?باك|خصم)|(?:استرداد نقدي|كاش ?باك) (?:يصل|حتي|حتي|بنسبه)|(?:اربح|تربح) "
+   "(?:^|[^a-z])(?:[o0]tp|one[- ]?time[- ]?(?:pass(?:word|code)|pin|code))(?: (?:for|no|number|code|was|has been|sent))(?:[^a-z]|$)"
   ],
   "byInst": {
    "bm": [
     "تقسيط بدون فوائد"
    ],
+   "hsbc": [
+    "^your credit card payment due is |^minimum amount due |^your credit card statement is ready",
+    "^المبلغ مستحق السداد|^تم اصدار كشف حساب بطاقتك",
+    "^get [0-9]+% cashback on |^(?:special|exclusive) offer: |^spend [^.!?]{0,30} and win a prize",
+    "^عرض خاص: |^احصل علي استرداد نقدي"
+   ],
    "nbe": [
-    "(?:^|[^a-z])offer(?:$|[^a-z])",
-    "عرض خاص"
+    "^(?:special |exclusive )?offer(?:$|[^a-z])",
+    "^عرض خاص"
    ]
   }
  },
