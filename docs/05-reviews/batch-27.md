@@ -94,3 +94,49 @@ Findings:
 |---|---|---|---|
 | FU-243 (and SMS-fuzzy) | `app/assets/guard/guard_base.json:555-559`, `app/assets/registry/shared.json:10-14`, plus the spike and fixture copies | Promo/reminder drop patterns must not drop real transactions. Move them per institution (PO T-035 Q6), or require promo context and skip any body with a completed-transaction cue; never match `offer`/`win`/`عروض` inside a merchant span; don't drop payment confirmations or fee debits that mention `due date`/`statement`/`كشف حساب`; keep credited `Congratulations!` messages. Update `guard_policy.dart:51-58`, or record a PO change in PO_DECISIONS. | Golden `keep` cases for the 11 bodies in the FU-243 probe table (shared Dart/Kotlin/Swift golden); restore `otp.ar.one_time_password`. |
 | SMS-fuzzy | `app/lib/features/ingestion/presentation/review/review_screen.dart:645-700`, `review_providers.dart` `confirmGeneric` | The one-tap card must show every field confirm stores as user-verified: account (bank + last-4), message date when read, and transfer/refund kind. Otherwise confirm writes only the shown fields. | Widget test (ar + en): the one-tap card shows last-4, date and kind. Repository test: the confirmed row's `account_id`, `occurred_at` and `direction` equal what the card showed. |
+
+## Delta re-review (fix round)
+
+Reviewer: code-reviewer (Opus), delta only: `7e85a9cb` (Guard) and `5b7195fb` (one-tap card), head `5b7195fb`.
+Tests run: `dart test --exclude-tags benchmark` in `packages/zaghlol_parsing`, 1447 pass. `flutter test --exclude-tags golden,benchmark` on `test/features/{ingestion,transactions}` and `test/core/ui`, 480 pass. GitHub `app-ci` on `ci/fix27` (same SHA): Kotlin unit tests and Swift unit tests pass, so the native Guards pass the shared golden. Widget goldens fail (see below).
+Probe (not committed): the Guard over `app/assets/guard/guard_base.json` and the pipeline over `app/assets/registry`, senders HSBC, NBE and CIB, 30 synthetic bodies, plus the same bodies against `main`'s `guard_base.json`.
+
+### Blocker 1 (global promo/reminder drops): partly resolved, still BLOCKER
+
+Resolved:
+- The global list no longer has any promo, due or statement pattern. `byInst` in production is empty, and no production institution has a `drop` list, so per-bank promo drops exist only in the test fixtures (`t1_base.json`, `hsbc.json`, `nbe.json`), anchored with `^`. This matches PO T-035 Q6. `guard_policy.dart` marker updated; `promo.no_inst_pattern_kept` is back to `keep`.
+- All 11 bodies from the first-round probe table are kept for HSBC, NBE and CIB. Each becomes `ParseGeneric` with the right amount. Golden `txn_kept.*` cases pin them for Dart, Kotlin and Swift.
+- More bodies kept: `Cashback of EGP 50.00 credited`, `Bonus of EGP 300.00 added … Congratulations!`, `EGP 15.00 annual statement fee charged`, `تم شراء … من عروض الخير`, `اربح مع كل عملية: تم خصم …`, `تم سداد … موعد الاستحقاق القادم`.
+- OTP is still dropped: `Your OTP for online payment … is 5g8h2k`, `OTP is 482913 …`, `482913 is your OTP`, `Use OTP code 482913 to confirm`. `otp.ar.one_time_password` is restored and drops.
+
+Still failing:
+- **BLOCKER (data loss), `app/assets/guard/guard_base.json:555` (and the same pattern in `registry/shared.json`, `spike_guard_base.json` and the three fixture copies):** the new global OTP pattern `(?:^|[^a-z])(?:[o0]tp|one[- ]?time…)(?: (?:for|no|number|code|was|has been|sent))(?:[^a-z]|$)` needs no code. It is not on `main`; `main` keeps all three bodies below. The fix removed `is|to` for the footer cases in the golden, but `for`, `sent`, `no` and `number` still match security footers on real transactions. Probe, dropped for all three senders:
+
+  | synthetic body | main | fix |
+  |---|---|---|
+  | `You paid EGP 60 to Offerz Store. Do not share OTP for security` | keep | drop `otp_or_promo_global` |
+  | `Card 1234: EGP 900 at Carrefour. Never share your OTP for any reason` | keep | drop |
+  | `Purchase EGP 200 at Amazon, card 1234. OTP sent to this number will never be requested by the bank` | keep | drop |
+
+  **Required change:** make the pattern need a code. For example, `otp for [^.!?\n]{0,40} is [a-z0-9]*[0-9][a-z0-9]*`, which still drops the `5g8h2k` case. Or remove the pattern and let the existing digit patterns accept an alphanumeric code. Add the three bodies as golden `keep` cases (HSBC and NBE), so Kotlin and Swift are held to them too. This is a small fix, so a Lead delta check is enough.
+
+Minor (follow-ups, not blocking):
+- minor, `generic_keywords.dart` `promoKeywords`/`completedTransactionCues`: the promo-only body `Get 10% cashback on purchases this week. EGP 500 minimum` (known bank) gives `ParseGeneric(EGP 500, income)`, a one-tap "received EGP 500" suggestion. The cause: `purchase` matches inside `purchases`, and `get`/`cashback` are not promo words. The pipeline test lists this body but only asserts `isNot(ParseParsed)`, so it passes. Tighten the test to `isA<ParseUnrecognized>()` and match the cue on word boundaries. Nothing is lost here: the user has to tap Confirm.
+- minor, same file: `You spent EGP 120.00 at Enjoy Cafe…`, `EGP 75.00 spent at Win Win Pharmacy…` and `…used for EGP 400.00 at Special Offer Outlet` now give `ParseUnrecognized` (promo word, and `spent`/`used for` are not cues). The raw message is kept as a review item, so nothing is lost, but the prefilled suggestion is gone. Add `spent`, `used for` and `withdrawal` to `completedTransactionCues`.
+
+### Blocker 2 (one-tap card vs confirm, was MAJOR): RESOLVED
+
+- `_MessageCard` shows `_oneTapDetails` when `oneTap`: kind (expense/income/transfer/refund through existing `commonTxnType*` keys), the message date (`ZDateFormat.date`, local zone, the same as the transaction screens) and the account (`bankLabel •last4`, or `bankLabel · Account`). `fee` is removed from `oneTap`, so every one-tap kind has a label.
+- `confirmGeneric` labels a new account with `institutionLabel`, the same label ingest gives it. This also closes the first-round minor about different labels.
+- Tests: an ar+en widget test checks kind, date, bank and last-4, and the transfer/no-last-4 variant. A repository test checks that the stored `direction`, `occurred_at`, `last4` and `institution_code` equal the card model, and that the no-last-4 account label equals `bankLabel`. Both pass.
+- nit: `_oneTapDetails` reads `digitsModeProvider` through `ProviderScope.containerOf`, the same way the file's existing `_money`/`_time` helpers do. Fine.
+
+### CI note (not a finding on this delta)
+
+The `widget golden tests` job fails on 44 goldens: `review_queue_en_*` (4, 248 px), `money_tab_*` (8) and `home_*`/`home_empty_*` (32). These match the intended changes from DESIGN-polish and the one-tap card. Regenerate them (app-regen) and check the new images before the batch run.
+
+### Verdicts after the fix round
+
+- FU-243: **CHANGES_REQUESTED**. One blocker left (the OTP footer pattern). It is small enough for a Lead delta check.
+- SMS-fuzzy: **CHANGES_REQUESTED**, only because it includes FU-243. Its own major (one-tap card) is resolved.
+- FIX-category-icons, DESIGN-polish: APPROVED (unchanged).
