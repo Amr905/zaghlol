@@ -16,6 +16,7 @@ final class GenericSuggestion {
     this.merchantKey,
     this.last4,
     this.institutionCode,
+    this.institutionLabel,
     this.source,
     this.prefillComplete = false,
   });
@@ -29,6 +30,11 @@ final class GenericSuggestion {
   /// The known bank the sender resolved to (FU-243); null for an unknown
   /// sender.
   final String? institutionCode;
+
+  /// The bank's name as ingest would label a new account for it (the
+  /// registry name in the app language at ingest time). The card shows it
+  /// and the one-tap confirm uses it, so both name the same account.
+  final String? institutionLabel;
 
   /// Stored `transactions.source` code of the message's channel.
   final String? source;
@@ -49,6 +55,8 @@ final class GenericSuggestion {
   bool get oneTap =>
       prefillComplete &&
       direction != null &&
+      // Every kind the card can name (`fee` has no card label).
+      direction != TxnDirection.fee &&
       institutionCode != null &&
       source != null &&
       amount.isPositive;
@@ -71,6 +79,7 @@ final class GenericSuggestion {
         merchantKey: _text(payload['merchantKey']),
         last4: _last4(payload['last4']),
         institutionCode: _text(payload['institutionCode']),
+        institutionLabel: _text(payload['institutionLabel']),
         source: _source(payload['source']),
         occurredAtMs: when is int ? when : 0,
         tzOffsetMin: tz is int ? tz : 0,

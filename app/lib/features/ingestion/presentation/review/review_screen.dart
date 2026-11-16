@@ -26,6 +26,7 @@ import '../../../../core/ui/z_card.dart';
 import '../../../../core/ui/z_chip.dart';
 import '../../../../core/ui/z_sheet.dart';
 import '../../../capture/presentation/template_builder_screen.dart';
+import '../../../transactions/domain/transaction.dart' show TxnDirection;
 import 'review_models.dart';
 import 'review_providers.dart';
 
@@ -412,6 +413,33 @@ String _money(BuildContext context, Money m) {
   return MoneyFormat.format(m, languageCode: lang, digits: digits);
 }
 
+/// Everything a one-tap Confirm stores beyond the guess line: the kind,
+/// the date and the account (bank + last-4, or the bank's account).
+String _oneTapDetails(BuildContext context, MessageCardModel card) {
+  final l10n = AppLocalizations.of(context);
+  final lang = Localizations.localeOf(context).languageCode;
+  final DigitsMode digits = ProviderScope.containerOf(context)
+      .read(digitsModeProvider(lang));
+  final kind = switch (card.direction) {
+    TxnDirection.income => l10n.commonTxnTypeIncome,
+    TxnDirection.transferOut ||
+    TxnDirection.transferIn => l10n.commonTxnTypeTransfer,
+    TxnDirection.refund => l10n.commonTxnTypeRefund,
+    _ => l10n.commonTxnTypeExpense,
+  };
+  final when = card.occurredAt;
+  final bank = _iso(card.bankLabel ?? card.sender);
+  final last4 = card.last4;
+  final account = last4 == null
+      ? '$bank · ${l10n.commonAccountTypeAccount}'
+      : '$bank •${digits.render(last4)}';
+  return [
+    kind,
+    if (when != null) ZDateFormat.date(when, lang, digits),
+    account,
+  ].join(' · ');
+}
+
 String _time(BuildContext context, DateTime t) {
   final lang = Localizations.localeOf(context).languageCode;
   final DigitsMode digits = ProviderScope.containerOf(context)
@@ -706,6 +734,12 @@ class _MessageCard extends StatelessWidget {
           if (guess != null) ...[
             const SizedBox(height: ZSpacing.sm),
             Text(guess, style: ZType.title.copyWith(color: c.text)),
+            if (card.oneTap)
+              Text(
+                _oneTapDetails(context, card),
+                key: const ValueKey('reviewOneTapDetails'),
+                style: ZType.body.copyWith(color: c.text),
+              ),
             Text(
               l10n.ingestionReviewGenLowConfidence,
               style: ZType.body.copyWith(color: c.textMuted),

@@ -1,6 +1,8 @@
 // T-079: one transaction row and the day header of S-11. Spending is shown
 // in ink, never red; the sign is part of the text (05-theme-2026 section 3).
 
+import '../../../categorization/presentation/category_visuals.dart';
+
 import 'package:flutter/material.dart';
 import 'package:zaghlol_domain/zaghlol_domain.dart';
 
@@ -118,10 +120,13 @@ class TxnRow extends StatelessWidget {
         : ZCategoryTile(
             size: 44,
             color: _parseColor(cat?.color ?? '', c.primary),
-            child: Text(
-              cat == null ? '•' : ZCategoryGlyph.glyphFor(cat.id),
-              style: ZType.title,
-            ),
+            child: cat == null
+                ? Text('•', style: ZType.title)
+                : categoryGlyph(
+                    id: cat.id,
+                    iconKey: cat.icon,
+                    style: ZType.title,
+                  ),
           );
     return Semantics(
       container: true,

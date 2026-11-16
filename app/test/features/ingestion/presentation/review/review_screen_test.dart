@@ -1,8 +1,12 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:zaghlol/core/l10n/date_format.dart';
 import 'package:zaghlol/core/l10n/generated/app_localizations.dart';
+import 'package:zaghlol/core/l10n/locale_providers.dart';
 import 'package:zaghlol/features/ingestion/presentation/review/review_models.dart';
 import 'package:zaghlol/features/ingestion/presentation/review/review_screen.dart';
+import 'package:zaghlol/features/transactions/domain/transaction.dart';
 
 import 'review_harness.dart';
 
@@ -200,6 +204,21 @@ void main() {
         last4: '6612',
         rawMessageId: 'raw1',
         oneTap: true,
+        direction: TxnDirection.expense,
+        occurredAt: DateTime.utc(2026, 11, 5, 10),
+        bankLabel: 'HSBC Egypt',
+      );
+      final oneTapTransfer = MessageCardModel(
+        itemId: 'g3',
+        sender: 'HSBC',
+        isNewSender: false,
+        amount: egp(200000),
+        merchant: 'Ahmed',
+        rawMessageId: 'raw3',
+        oneTap: true,
+        direction: TxnDirection.transferOut,
+        occurredAt: DateTime.utc(2026, 11, 5, 10),
+        bankLabel: 'HSBC Egypt',
       );
       final partial = MessageCardModel(
         itemId: 'g2',
@@ -234,6 +253,46 @@ void main() {
             expect(tester.takeException(), isNull);
           },
         );
+      }
+
+      for (final locale in const [Locale('en'), Locale('ar')]) {
+        testWidgets('one-tap card shows kind, date and account '
+            '(${locale.languageCode})', (tester) async {
+          await pumpReview(
+            tester,
+            reviewApp(
+              actions: FakeActions(),
+              queue: [oneTap, oneTapTransfer],
+              locale: locale,
+            ),
+          );
+          final ctx = tester.element(find.byType(ReviewScreen));
+          final l = AppLocalizations.of(ctx);
+          final lang = locale.languageCode;
+          final digits = ProviderScope.containerOf(ctx)
+              .read(digitsModeProvider(lang));
+          final details = tester
+              .widgetList<Text>(
+                find.byKey(const ValueKey('reviewOneTapDetails')),
+              )
+              .map((t) => t.data!)
+              .toList();
+          expect(details, hasLength(2));
+          final date = ZDateFormat.date(
+            DateTime.utc(2026, 11, 5, 10),
+            lang,
+            digits,
+          );
+          // Card with last-4: expense, the message date, bank + last-4.
+          expect(details[0], contains(l.commonTxnTypeExpense));
+          expect(details[0], contains(date));
+          expect(details[0], contains('HSBC Egypt'));
+          expect(details[0], contains(digits.render('6612')));
+          // No last-4: transfer, the bank's account.
+          expect(details[1], contains(l.commonTxnTypeTransfer));
+          expect(details[1], contains(l.commonAccountTypeAccount));
+          expect(tester.takeException(), isNull);
+        });
       }
 
       testWidgets('an incomplete suggestion shows the guess but no confirm', (

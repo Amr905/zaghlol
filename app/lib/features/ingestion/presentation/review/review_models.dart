@@ -4,6 +4,8 @@
 
 import 'package:zaghlol_domain/zaghlol_domain.dart';
 
+import '../../../transactions/domain/transaction.dart' show TxnDirection;
+
 /// The filter chips (S-14).
 enum ReviewFilter { all, category, messages, transfers }
 
@@ -80,6 +82,9 @@ final class MessageCardModel extends ReviewCardModel {
     this.last4,
     this.rawMessageId,
     this.oneTap = false,
+    this.direction,
+    this.occurredAt,
+    this.bankLabel,
   }) : super(itemId);
   final String sender;
   final bool isNewSender;
@@ -97,6 +102,12 @@ final class MessageCardModel extends ReviewCardModel {
   /// A generic suggestion from a known bank with every field read (amount,
   /// currency, direction and a last-4 or merchant): Confirm saves it as read.
   final bool oneTap;
+
+  /// One-tap suggestions only (batch-27): the kind, date and bank Confirm
+  /// stores, shown on the card so the tap saves only what the user saw.
+  final TxnDirection? direction;
+  final DateTime? occurredAt;
+  final String? bankLabel;
 
   /// Nothing was read: the user types the details.
   bool get unreadable => txnId == null && amount == null;

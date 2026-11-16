@@ -3,6 +3,8 @@
 
 import 'package:flutter/material.dart';
 
+import '../../../core/ui/category_glyph.dart';
+
 /// Icon keys offered in the editor, in display order.
 const Map<String, IconData> categoryIcons = {
   'cart': Icons.shopping_cart_outlined,
@@ -39,4 +41,20 @@ Color? parseHexColor(String hex) {
   final m = RegExp(r'^#([0-9a-fA-F]{6})$').firstMatch(hex);
   if (m == null) return null;
   return Color(0xFF000000 | int.parse(m.group(1)!, radix: 16));
+}
+
+/// The glyph for a category on transaction screens: a custom category shows
+/// the icon the user chose ([categoryIcons]); a system category, or a key
+/// this build does not know, keeps its emoji ([ZCategoryGlyph.glyphFor]).
+Widget categoryGlyph({
+  required String id,
+  required String iconKey,
+  required TextStyle style,
+}) {
+  final system = ZCategoryGlyph.isSystemId(id);
+  final icon = categoryIcons[iconKey];
+  if (!system && icon != null) {
+    return Icon(icon, size: style.fontSize, color: style.color);
+  }
+  return Text(ZCategoryGlyph.glyphFor(id), style: style);
 }

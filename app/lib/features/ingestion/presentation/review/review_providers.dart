@@ -184,9 +184,9 @@ final class _LiveActions implements ReviewActions {
         institutionCode: g.institutionCode!,
         last4: g.last4,
         currency: g.amount.currency,
-        label: card.sender.trim().isEmpty
-            ? g.institutionCode!
-            : card.sender.trim(),
+        // The bank name the card showed; the same label ingest gives a new
+        // account for this bank (batch-27).
+        label: g.institutionLabel ?? g.institutionCode!,
         kind: inferAccountKind(hasLast4: g.last4 != null),
       ),
     );
@@ -349,6 +349,12 @@ Future<ReviewCardModel?> _toCard(
             last4: g.last4,
             rawMessageId: item.rawMessageId,
             oneTap: g.oneTap,
+            direction: g.direction,
+            occurredAt: DateTime.fromMillisecondsSinceEpoch(
+              g.occurredAtMs,
+              isUtc: true,
+            ),
+            bankLabel: g.institutionLabel ?? sender,
           );
         }
       }

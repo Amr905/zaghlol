@@ -55,6 +55,14 @@ class ZCategoryGlyph extends StatelessWidget {
     (['gift'], '\u{1F381}'),
   ];
 
+  /// True for a catalog (system) category id, bare or `sys:`-prefixed.
+  static bool isSystemId(String id) {
+    final key = id.toLowerCase();
+    return systemEmoji.containsKey(
+      key.startsWith('sys:') ? key.substring(4) : key,
+    );
+  }
+
   static String glyphFor(String? id, {bool income = false}) {
     if (income) return '\u{1F4BC}';
     final key = (id ?? '').toLowerCase();

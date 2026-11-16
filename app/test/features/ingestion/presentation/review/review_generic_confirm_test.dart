@@ -19,15 +19,19 @@ void main() {
   Map<String, Object?> payload({
     bool complete = true,
     String currency = 'EGP',
+    String direction = 'expense',
+    String? last4 = '1234',
+    int occurredAtMs = t0,
   }) => {
     'generic': true,
     'institutionCode': 'BNK',
+    'institutionLabel': 'Synthetic Bank',
     'amount': {'minor': 84550, 'currency': currency},
-    'direction': 'expense',
-    'last4': '1234',
+    'direction': direction,
+    'last4': ?last4,
     'merchant': 'Synth Market',
     'merchantKey': 'synth market',
-    'occurredAtMs': t0,
+    'occurredAtMs': occurredAtMs,
     'tzOffsetMin': 120,
     'source': 'sms',
     'prefillComplete': complete,
@@ -116,6 +120,55 @@ void main() {
       expect(t['amount_minor'], 84550);
     },
   );
+
+  test('confirm saves exactly the account, date and kind the card shows '
+      '(batch-27)', () async {
+    // A message date before the receipt, and a transfer (not "spent at").
+    const read = t0 - 3 * 86400000;
+    await seed('g4', payload(direction: 'transfer_out', occurredAtMs: read));
+    final shown = (await c.read(reviewQueueProvider.future))
+        .whereType<MessageCardModel>()
+        .single;
+    expect(shown.oneTap, isTrue);
+    expect(shown.direction?.code, 'transfer_out');
+    expect(shown.occurredAt?.millisecondsSinceEpoch, read);
+    expect(shown.last4, '1234');
+    expect(shown.bankLabel, 'Synthetic Bank');
+    expect(await c.read(reviewActionsProvider).confirmGeneric(shown), isTrue);
+    final t =
+        (await db
+                .customSelect(
+                  'SELECT t.direction, t.occurred_at, a.last4, '
+                  'a.institution_code FROM transactions t '
+                  'JOIN accounts a ON a.id = t.account_id',
+                )
+                .getSingle())
+            .data;
+    expect(t['direction'], shown.direction!.code);
+    expect(t['occurred_at'], shown.occurredAt!.millisecondsSinceEpoch);
+    expect(t['last4'], shown.last4);
+    expect(t['institution_code'], 'BNK');
+  });
+
+  test('without a last-4 the new account carries the bank label the card '
+      'showed', () async {
+    await seed('g5', payload(last4: null));
+    final shown = (await c.read(reviewQueueProvider.future))
+        .whereType<MessageCardModel>()
+        .single;
+    expect(shown.last4, isNull);
+    expect(await c.read(reviewActionsProvider).confirmGeneric(shown), isTrue);
+    final a =
+        (await db
+                .customSelect(
+                  'SELECT a.label, a.last4 FROM transactions t '
+                  'JOIN accounts a ON a.id = t.account_id',
+                )
+                .getSingle())
+            .data;
+    expect(a['last4'], isNull);
+    expect(a['label'], shown.bankLabel);
+  });
 
   test('an incomplete suggestion is never saved by confirm', () async {
     await seed('g3', payload(complete: false));

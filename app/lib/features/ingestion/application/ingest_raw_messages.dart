@@ -1365,6 +1365,12 @@ final class IngestRawMessages {
         payload: {
           'generic': true,
           'institutionCode': ?g.institutionCode,
+          'institutionLabel': ?(g.institutionCode == null
+              ? null
+              : b.labels.institutionLabel(
+                  _pipeline.registry,
+                  g.institutionCode!,
+                )),
           'amount': g.amount.toJson(),
           'direction': ?direction?.code,
           'hasLast4': g.last4 != null,
