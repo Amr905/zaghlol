@@ -67,6 +67,8 @@ class CaptureGuard(val config: GuardConfig?) {
         val lines = TextFold.foldKeyLines(body)
         val folded = if (lines.indexOf('\n') >= 0) lines.replace('\n', ' ') else lines
         if (folded.isEmpty()) return GuardDecision.Drop(GuardDropReason.EMPTY_BODY)
+        // SMS-NODIGIT (PO 2026-11-16): no digit after the fold (it made Arabic-Indic digits ASCII).
+        if (folded.none { it in '0'..'9' }) return GuardDecision.Drop(GuardDropReason.NO_DIGIT)
 
         // Step 1: resolve the source.
         val sourceKey = GuardConfig.sourceKey(channel, source)

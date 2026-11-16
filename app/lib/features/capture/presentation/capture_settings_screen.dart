@@ -16,6 +16,7 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import '../../../core/l10n/card_number.dart';
 import '../../../core/db/app_database.dart' show IgnoreRuleRow;
 import '../../../core/db/daos/capture_controls_dao.dart' show IgnoreChannel;
 import '../../../core/l10n/digits_mode.dart' show normalizeDigits;
@@ -25,6 +26,7 @@ import '../../../core/theme/z_tokens.dart';
 import '../../../core/ui/z_components.dart';
 import '../../accounts/presentation/edit_card/edit_card_providers.dart'
     show InstitutionOption, institutionOptionsProvider;
+import '../application/capture_permission_fix.dart';
 import '../application/capture_providers.dart';
 import '../application/ignore_rules.dart';
 import '../application/ios_setup_providers.dart';
@@ -107,7 +109,7 @@ class CaptureSettingsScreen extends ConsumerWidget {
         banks: banks,
         ios: ios,
         goldActive: goldActive,
-        onFix: onFix,
+        onFix: onFix ?? (ch) => unawaited(fixCapturePermission(ref, ch)),
         onCheckSetup: onCheckSetup,
         onRequestBank: onRequestBank,
         onOpenTemplates: onOpenTemplates,
@@ -510,7 +512,7 @@ class _IgnoredRow extends ConsumerWidget {
 
   String _title(String Function(String) render) {
     final bank = _bankName(banks, group.institutionCode, lang);
-    return group.last4 == null ? bank : '$bank •${render(group.last4!)}';
+    return formatAccountWithCard(bank, group.last4);
   }
 
   @override

@@ -132,11 +132,13 @@ final class TxnAccount {
     required this.id,
     required this.label,
     this.last4,
+    this.institutionCode,
     required this.currencyCode,
   });
   final String id;
   final String label;
   final String? last4;
+  final String? institutionCode;
   final String currencyCode;
 }
 
@@ -181,6 +183,7 @@ final txnLookupsProvider = FutureProvider.autoDispose<TxnLookups>((ref) async {
           id: a.id,
           label: a.label,
           last4: a.last4,
+          institutionCode: a.institutionCode,
           currencyCode: a.defaultCurrency,
         ),
     ],

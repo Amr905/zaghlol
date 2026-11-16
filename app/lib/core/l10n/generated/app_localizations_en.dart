@@ -1882,6 +1882,22 @@ class AppLocalizationsEn extends AppLocalizations {
   String get ingestionReviewUnreadShow => 'Show message';
 
   @override
+  String get ingestionReviewShowOriginal => 'Show original message';
+
+  @override
+  String get ingestionReviewHideOriginal => 'Hide original message';
+
+  @override
+  String get ingestionReviewKeep => 'Keep';
+
+  @override
+  String get ingestionReviewKeepNoAmount => 'Can\'t keep: no amount found';
+
+  @override
+  String get ingestionReviewKeepMissing =>
+      'Can\'t keep: bank or type not clear';
+
+  @override
   String get ingestionReviewUnreadEnter => 'Enter details';
 
   @override
@@ -5875,7 +5891,7 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get goldPaywallBenefitCharts =>
-      'All twelve charts with deeper insight';
+      'Deeper chart insight: compare with last cycle and see where it ends';
 
   @override
   String get goldPaywallBenefitVoice => 'Unlimited voice logging';

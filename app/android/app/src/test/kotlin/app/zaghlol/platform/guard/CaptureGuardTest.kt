@@ -26,7 +26,20 @@ class CaptureGuardTest {
         assertEquals(wires("GuardIgnoreChannel"), GuardIgnoreChannel.entries.map { it.wire })
         assertEquals(wires("GuardDropReason"), GuardDropReason.entries.map { it.wire })
         assertEquals(wires("GuardKeepKind"), GuardKeepKind.entries.map { it.wire })
-        assertEquals(10, GuardDropReason.entries.size)
+        assertEquals(11, GuardDropReason.entries.size)
+    }
+
+    /** SMS-NODIGIT (PO 2026-11-16): no digit at all (Western or Arabic-Indic) is dropped before anything else. */
+    @Test
+    fun aMessageWithNoDigitIsDroppedAsNoDigit() {
+        val drop = mapOf("decision" to "drop", "reason" to "no_digit")
+        assertEquals(drop, decision(t1.decide("sms", "NBE", "Thank you for banking with us")))
+        assertEquals(drop, decision(t1.decide("sms", "NBE", "شكرا لاستخدامك البنك الأهلي")))
+        assertEquals(drop, decision(t1.decide("share", "", "just words")))
+        assertEquals(mapOf("decision" to "drop", "reason" to "empty_body"), decision(t1.decide("sms", "NBE", "")))
+        // One digit of either kind is enough to go on to the normal rules.
+        assertTrue(t1.decide("sms", "NBE", "paid 50 EGP") is GuardDecision.Keep)
+        assertTrue(t1.decide("sms", "NBE", "تم خصم ٥٠ جنيه") is GuardDecision.Keep)
     }
 
     @Test
@@ -81,7 +94,7 @@ class CaptureGuardTest {
     @Test
     fun stackOverflowInARegexIsConfigInvalid() {
         val guard = guardWith({ obj("drop").put("global", listOf("(?:a|b)*c")) })
-        val body = "ab".repeat(1999)
+        val body = "1" + "ab".repeat(1999) // a digit first: SMS-NODIGIT would drop it before any regex runs
         var result: GuardDecision? = null
         val t = Thread(null, { result = guard.decide("sms", "NBE", body) }, "small-stack", 32 * 1024)
         t.start()

@@ -1931,6 +1931,22 @@ class AppLocalizationsAr extends AppLocalizations {
   String get ingestionReviewUnreadShow => 'شوف الرسالة';
 
   @override
+  String get ingestionReviewShowOriginal => 'شوف الرسالة الأصلية';
+
+  @override
+  String get ingestionReviewHideOriginal => 'اخفي الرسالة الأصلية';
+
+  @override
+  String get ingestionReviewKeep => 'احفظها';
+
+  @override
+  String get ingestionReviewKeepNoAmount => 'مش هينفع أحفظها: مفيش مبلغ';
+
+  @override
+  String get ingestionReviewKeepMissing =>
+      'مش هينفع أحفظها: البنك أو النوع مش واضح';
+
+  @override
   String get ingestionReviewUnreadEnter => 'اكتب التفاصيل';
 
   @override
@@ -6005,7 +6021,8 @@ class AppLocalizationsAr extends AppLocalizations {
   String get goldPaywallHeadline => 'كل أدواتك في مكان واحد';
 
   @override
-  String get goldPaywallBenefitCharts => 'كل الشارتات الاتناشر مع تحليل أعمق';
+  String get goldPaywallBenefitCharts =>
+      'تحليل أعمق للشارتات: قارن بالدورة اللي فاتت واعرف هتخلص فين';
 
   @override
   String get goldPaywallBenefitVoice => 'تسجيل بالصوت من غير حدود';

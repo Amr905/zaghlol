@@ -477,6 +477,11 @@
   "ingestionReviewRequestBank": "Ask us to support this bank",
   "ingestionReviewUnreadTitle": "A message from {sender} I couldn't read",
   "ingestionReviewUnreadShow": "Show message",
+  "ingestionReviewShowOriginal": "Show original message",
+  "ingestionReviewHideOriginal": "Hide original message",
+  "ingestionReviewKeep": "Keep",
+  "ingestionReviewKeepNoAmount": "Can't keep: no amount found",
+  "ingestionReviewKeepMissing": "Can't keep: bank or type not clear",
   "ingestionReviewUnreadEnter": "Enter details",
   "ingestionReviewXferTitle": "{amount} into {card} — which transfer was it?",
   "ingestionReviewXferOption": "{amount} from {card} · {time}",
@@ -5186,7 +5191,7 @@
   "@goldPaywallHeadline": {
     "description": "T"
   },
-  "goldPaywallBenefitCharts": "All twelve charts with deeper insight",
+  "goldPaywallBenefitCharts": "Deeper chart insight: compare with last cycle and see where it ends",
   "@goldPaywallBenefitCharts": {
     "description": "S"
   },

@@ -150,7 +150,7 @@ ParseResult parseGeneric({
   if (last4 == null && merchant == null) {
     reasons.add(GenericReason.sparseFields);
   }
-  final date = _messageDate(t, receivedAt);
+  final date = _withClock(t, _messageDate(t, receivedAt));
   final reference = _reference(folded, body);
 
   final ordered = reasons.toList()..sort((a, b) => a.index.compareTo(b.index));
@@ -421,6 +421,35 @@ final RegExp _namedDate = RegExp(
   return best;
 }
 
+final RegExp _clockAfterDate = RegExp(
+  r'^[ ,]{1,2}([01]?[0-9]|2[0-3]):([0-5][0-9])(?::([0-5][0-9]))?(?![0-9])',
+);
+
+/// A time of day written right after the date (`17-05-2026 22:32`) replaces
+/// the receipt's time of day; otherwise the date stays as it is.
+(DateTime, bool, int, int)? _withClock(
+  String t,
+  (DateTime, bool, int, int)? date,
+) {
+  if (date == null) {
+    return null;
+  }
+  final m = _clockAfterDate.firstMatch(t.substring(date.$4));
+  if (m == null) {
+    return date;
+  }
+  final d = date.$1;
+  final withClock = DateTime.utc(
+    d.year,
+    d.month,
+    d.day,
+    int.parse(m.group(1)!),
+    int.parse(m.group(2)!),
+    m.group(3) == null ? 0 : int.parse(m.group(3)!),
+  );
+  return (withClock, date.$2, date.$3, date.$4);
+}
+
 /// [year] 0 means "nearest past occurrence".
 DateTime? _calendar(int day, int month, int year, DateTime receivedAt) {
   if (month < 1 || month > 12 || day < 1 || day > 31) {
@@ -453,7 +482,7 @@ DateTime? _calendar(int day, int month, int year, DateTime receivedAt) {
 // Reference.
 
 final RegExp _referenceCue = RegExp(
-  r'(?:(?<![a-z])(?:ref(?:erence)?|trx|txn|transaction|auth(?:ori[sz]ation)?)(?![a-z])(?: ?(?:no|number|id|code|#)(?![a-z]))?\.?|(?:رقم )?المرجع|مرجع|رقم العمليه|رقم المعامله)[ :#.-]{0,3}([a-z0-9][a-z0-9-]{3,29})(?![a-z0-9-])',
+  r'(?:(?<![a-z])(?:ref(?:erence)?|trx|txn|transaction|auth(?:ori[sz]ation)?)(?![a-z])(?: ?(?:no|number|id|code|#)(?![a-z]))?\.?|(?:(?:رقم )?المرجع|مرجعي?)|رقم العمليه|رقم المعامله)[ :#.-]{0,3}([a-z0-9][a-z0-9-]{3,29})(?![a-z0-9-])',
 );
 
 /// A reference after a cue, as written in [original], with its span. It
@@ -476,6 +505,13 @@ final RegExp _referenceCue = RegExp(
 /// about the reader's own direction.
 bool _addressedToReader(String t, _Hit h) {
   final word = t.substring(h.start, h.end);
+  // `received an instant transfer of EGP 5`: the reader is the receiver.
+  if (word == 'transfer of') {
+    final from = h.start > 24 ? h.start - 24 : 0;
+    if (t.substring(from, h.start).contains('received')) {
+      return true;
+    }
+  }
   final suffixes = addressedToReaderSuffixes[word];
   if (suffixes == null) {
     return false;

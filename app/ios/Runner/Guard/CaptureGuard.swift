@@ -35,6 +35,8 @@ final class CaptureGuard {
     let linesUnits = TextFold.foldKeyLines(TextFold.units(body))
     let foldedUnits = linesUnits.map { $0 == 0x0A ? 0x20 : $0 }
     if foldedUnits.isEmpty { return .drop(.emptyBody) }
+    // SMS-NODIGIT (PO 2026-11-16): no digit after the fold (it made Arabic-Indic digits ASCII).
+    if !foldedUnits.contains(where: { $0 >= 0x30 && $0 <= 0x39 }) { return .drop(.noDigit) }
     let lines = GuardSubject(units: linesUnits)
     let folded = GuardSubject(units: foldedUnits)
 

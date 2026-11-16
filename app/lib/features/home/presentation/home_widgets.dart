@@ -5,6 +5,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:zaghlol_domain/zaghlol_domain.dart';
 
+import '../../../core/l10n/card_number.dart';
 import '../../../core/l10n/generated/app_localizations.dart';
 import '../../../core/theme/z_tokens.dart';
 import '../../../core/ui/z_button.dart';
@@ -654,8 +655,7 @@ class HomeGreeting extends ConsumerWidget {
 /// Display names of the filtered accounts.
 List<String> homeFilterNames(List<Account> accounts, Set<String> filter) => [
   for (final a in accounts)
-    if (filter.contains(a.id))
-      a.last4 == null ? a.label : '${a.label} •${a.last4}',
+    if (filter.contains(a.id)) formatAccountWithCard(a.label, a.last4),
 ];
 
 class HomeCardFilterSheet extends ConsumerWidget {
@@ -677,7 +677,7 @@ class HomeCardFilterSheet extends ConsumerWidget {
         for (final a in accounts)
           CheckboxListTile(
             value: filter.contains(a.id),
-            title: Text(a.last4 == null ? a.label : '${a.label} •${a.last4}'),
+            title: Text(formatAccountWithCard(a.label, a.last4)),
             onChanged: (_) =>
                 ref.read(cardFilterProvider.notifier).toggle(a.id),
           ),

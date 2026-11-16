@@ -6,6 +6,9 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:zaghlol_domain/zaghlol_domain.dart';
 
+import '../../../core/ui/institution_avatar.dart';
+import '../../../core/ui/bank_name_text.dart';
+import '../../../core/l10n/card_number.dart';
 import '../../../core/l10n/date_format.dart';
 import '../../../core/l10n/generated/app_localizations.dart';
 import '../../../core/l10n/locale_providers.dart';
@@ -393,9 +396,7 @@ class _AccountRow extends ConsumerWidget {
       }
     }
     final extra = item.balances.length - 1;
-    final label = account.last4 == null
-        ? account.label
-        : '${account.label} •${account.last4}';
+    final label = formatAccountWithCard(account.label, account.last4);
     final semantics = [label, ?primary, ?sub].join(', ');
     return Semantics(
       container: true,
@@ -420,8 +421,10 @@ class _AccountRow extends ConsumerWidget {
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      Text(
-                        label,
+                      BankNameText(
+                        name: account.label,
+                        institutionCode: account.institutionCode,
+                        last4: account.last4,
                         style: ZType.titleSmall.copyWith(color: c.text),
                       ),
                       if (account.kind == AccountKind.cash)
@@ -483,23 +486,24 @@ class _Tile extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final c = ZColors.of(context);
-    final isCash = account.kind == AccountKind.cash;
+    if (account.kind == AccountKind.cash) {
+      return Container(
+        width: 48,
+        height: 48,
+        alignment: AlignmentDirectional.center,
+        decoration: BoxDecoration(color: c.surfaceAlt, shape: BoxShape.circle),
+        child: Icon(Icons.payments_rounded, color: c.primary),
+      );
+    }
     final word = account.label.trim().split(RegExp(r'\s+')).first;
     final short = word.length > 4 ? word.substring(0, 1) : word;
-    return Container(
-      width: 48,
-      height: 48,
-      alignment: Alignment.center,
-      decoration: BoxDecoration(color: c.surfaceAlt, shape: BoxShape.circle),
-      child: isCash
-          ? Icon(Icons.payments_rounded, color: c.primary)
-          : Text(
-              short.toUpperCase(),
-              style: ZType.label.copyWith(
-                color: c.primary,
-                fontWeight: FontWeight.w700,
-              ),
-            ),
+    // FU-250: the shared avatar (logo, brand colour or neutral initials).
+    return ZInstitutionAvatar(
+      institutionCode: account.institutionCode,
+      initials: short.toUpperCase(),
+      neutralBg: c.surfaceAlt,
+      neutralFg: c.primary,
+      size: 48,
     );
   }
 }

@@ -5,6 +5,7 @@ import app.zaghlol.platform.capture.CaptureApiError
 import app.zaghlol.platform.capture.InboxPage
 import app.zaghlol.platform.capture.InboxQuery
 import app.zaghlol.platform.capture.RawInboxMessage
+import app.zaghlol.platform.diag.SmsDiagSink
 import app.zaghlol.platform.guard.CaptureGuard
 import app.zaghlol.platform.guard.GuardDecision
 import java.time.Instant
@@ -44,6 +45,8 @@ class InboxReader(
     private val simSlot: (Int) -> Long?,
     /** Wall clock in ms (the inbox `date` column is wall-clock time). */
     private val nowMs: () -> Long,
+    /** SMS-device: dev-build counters (sender + stage only, never a body). */
+    private val diag: SmsDiagSink = SmsDiagSink.NONE,
 ) {
     fun query(query: InboxQuery): InboxPage = try {
         queryUnsafe(query)
@@ -138,7 +141,12 @@ class InboxReader(
                 val date = c.getLong(iDate)
                 if (date <= since) continue
                 val body = c.getString(iBody) ?: continue
-                if (g.decide(SMS, address, body) !is GuardDecision.Keep) continue
+                val decision = g.decide(SMS, address, body)
+                if (decision !is GuardDecision.Keep) {
+                    if (decision is GuardDecision.Drop) diag.record(address, "inbox_drop:" + decision.reason.wire)
+                    continue
+                }
+                diag.record(address, "inbox_kept")
                 val slot = if (c.isNull(iSub)) null else c.getInt(iSub).takeIf { it >= 0 }?.let(simSlot)
                 out += RawInboxMessage(address, body, date, slot, id.toString())
             }

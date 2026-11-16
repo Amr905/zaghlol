@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:zaghlol/core/l10n/card_number.dart';
 import 'package:zaghlol/core/ui/z_banner.dart';
 import 'package:zaghlol/features/home/presentation/home_screen.dart';
 import 'package:zaghlol/features/home/presentation/home_widgets.dart'
@@ -242,7 +243,10 @@ void main() {
       accounts: [account('a1', 'CIB', '1234')],
     );
     await tester.pump();
-    expect(find.textContaining('CIB •1234 this cycle'), findsOneWidget);
+    expect(
+      find.textContaining('${formatAccountWithCard('CIB', '1234')} this cycle'),
+      findsOneWidget,
+    );
     expect(find.text('Clear filter'), findsWidgets);
   });
 

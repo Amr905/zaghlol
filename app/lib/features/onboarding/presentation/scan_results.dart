@@ -9,6 +9,7 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import '../../../core/l10n/card_number.dart';
 import '../../../core/l10n/generated/app_localizations.dart';
 import '../../../core/l10n/locale_providers.dart';
 import '../../../core/theme/z_tokens.dart';
@@ -301,7 +302,7 @@ class _BodyState extends ConsumerState<ScanResultsBody> {
                   ? null
                   : Directionality(
                       textDirection: TextDirection.ltr,
-                      child: Text('•••• ${i.last4}'),
+                      child: Text(formatCardTail(i.last4!)),
                     ),
               onTap: () => Navigator.of(ctx).pop(i.accountId),
             ),
@@ -368,201 +369,216 @@ class _BodyState extends ConsumerState<ScanResultsBody> {
         ? null
         : cards.where((i) => i.looksCredit).firstOrNull;
     final period = l.commonPeriodInLastMonths(d.months, _digits(d.months));
-    return Column(
-      children: [
-        Expanded(
-          child: ListView(
-            padding: const EdgeInsetsDirectional.all(ZSpacing.screen),
-            children: [
-              const SizedBox(height: ZSpacing.md),
-              Row(
+    // Full-screen (bounded): the list scrolls above a pinned button. Embedded
+    // in a scroll view (unbounded): shrink-wrap and let the parent scroll.
+    return LayoutBuilder(
+      builder: (context, box) {
+        final bounded = box.hasBoundedHeight;
+        Widget fit(Widget w) => bounded ? Expanded(child: w) : w;
+        return Column(
+          mainAxisSize: bounded ? MainAxisSize.max : MainAxisSize.min,
+          children: [
+            fit(
+              ListView(
+                shrinkWrap: !bounded,
+                physics: bounded ? null : const NeverScrollableScrollPhysics(),
+                padding: const EdgeInsetsDirectional.all(ZSpacing.screen),
                 children: [
-                  Expanded(
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text(
-                          l.onboardingScanResultsTitle,
-                          style: ZType.headline.copyWith(color: c.text),
-                        ),
-                        const SizedBox(height: ZSpacing.xs),
-                        Text(
-                          l.onboardingScanResultsFound(
-                            d.found,
-                            _digits(d.found),
-                            period,
-                          ),
-                          style: ZType.body.copyWith(color: c.textMuted),
-                        ),
-                      ],
-                    ),
-                  ),
-                  const SizedBox(width: ZSpacing.md),
-                  const OnbMascot(moment: ZaghlolMoment.proud, size: 96),
-                ],
-              ),
-              const SizedBox(height: ZSpacing.lg),
-              IntrinsicHeight(
-                child: Row(
-                  crossAxisAlignment: CrossAxisAlignment.stretch,
-                  children: [
-                    Expanded(
-                      child: _Stat(
-                        key: const ValueKey('stat-auto'),
-                        value: _digits(d.auto),
-                        label: l.onboardingScanResultsStatAuto,
-                        valueColor: c.primary,
-                      ),
-                    ),
-                    const SizedBox(width: ZSpacing.md),
-                    Expanded(
-                      child: _Stat(
-                        key: const ValueKey('stat-review'),
-                        value: _digits(d.review),
-                        label: l.onboardingScanResultsStatReview,
-                        valueColor: c.warningText,
-                        onTap: d.review > 0 ? widget.onOpenReview : null,
-                      ),
-                    ),
-                    const SizedBox(width: ZSpacing.md),
-                    Expanded(
-                      child: _Stat(
-                        key: const ValueKey('stat-cards'),
-                        value: _digits(cards.length),
-                        label: l.onboardingScanResultsStatCards,
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-              const SizedBox(height: ZSpacing.lg),
-              if (cards.isNotEmpty) ...[
-                Row(
-                  children: [
-                    Expanded(
-                      child: Text(
-                        l.onboardingScanResultsCardsTitle,
-                        style: ZType.title.copyWith(color: c.text),
-                      ),
-                    ),
-                    if (widget.onEditCard != null)
-                      ZButton(
-                        key: const ValueKey('scan-edit-cards'),
-                        label: l.commonActionEdit,
-                        variant: ZButtonVariant.text,
-                        size: ZButtonSize.small,
-                        onPressed: () => unawaited(_pickToEdit(cards)),
-                      ),
-                  ],
-                ),
-                const SizedBox(height: ZSpacing.md),
-                ZCard(
-                  padding: const EdgeInsetsDirectional.symmetric(
-                    vertical: ZSpacing.xs,
-                  ),
-                  child: Column(
-                    children: [
-                      for (final (n, i) in cards.indexed) ...[
-                        if (n > 0)
-                          Divider(
-                            height: 1,
-                            thickness: 1,
-                            color: c.outline,
-                            indent: ZSpacing.lg,
-                            endIndent: ZSpacing.lg,
-                          ),
-                        _CardRow(
-                          item: i,
-                          tone: n,
-                          subtitle: l.onboardingScanResultsCardSubtitle(
-                            i.txnCount,
-                            _digits(i.txnCount),
-                            _typeName(l, i),
-                          ),
-                          badge: i.looksCredit
-                              ? l.onboardingScanResultsCreditBadge
-                              : _kindBadge(l, i.kind),
-                          badgeWarn: i.looksCredit,
-                          confirmed: _confirmed.contains(i.accountId),
-                          onTap: () => _openCard(i),
-                        ),
-                      ],
-                    ],
-                  ),
-                ),
-              ],
-              if (credit != null) ...[
-                const SizedBox(height: ZSpacing.md),
-                ZCard(
-                  key: const ValueKey('scan-credit-prompt'),
-                  color: c.zaghlolBg,
-                  child: Row(
-                    crossAxisAlignment: CrossAxisAlignment.start,
+                  const SizedBox(height: ZSpacing.md),
+                  Row(
                     children: [
                       Expanded(
                         child: Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
                             Text(
-                              l.onboardingScanResultsCreditPrompt(credit.label),
-                              style: ZType.bodySmall.copyWith(color: c.text),
+                              l.onboardingScanResultsTitle,
+                              style: ZType.headline.copyWith(color: c.text),
                             ),
-                            const SizedBox(height: ZSpacing.md),
-                            Wrap(
-                              spacing: ZSpacing.sm,
-                              runSpacing: ZSpacing.xs,
-                              children: [
-                                ZButton(
-                                  size: ZButtonSize.small,
-                                  key: const ValueKey('scan-credit-yes'),
-                                  label: l.onboardingScanResultsCreditYes,
-                                  onPressed: () => widget.onSetupCredit?.call(
-                                    credit.accountId,
-                                  ),
-                                ),
-                                ZButton(
-                                  size: ZButtonSize.small,
-                                  key: const ValueKey('scan-credit-later'),
-                                  label: l.commonActionLater,
-                                  variant: ZButtonVariant.secondary,
-                                  onPressed: () =>
-                                      setState(() => _creditDismissed = true),
-                                ),
-                              ],
+                            const SizedBox(height: ZSpacing.xs),
+                            Text(
+                              l.onboardingScanResultsFound(
+                                d.found,
+                                _digits(d.found),
+                                period,
+                              ),
+                              style: ZType.body.copyWith(color: c.textMuted),
                             ),
                           ],
                         ),
                       ),
-                      const SizedBox(width: ZSpacing.sm),
-                      const OnbMascot(
-                        moment: ZaghlolMoment.detective,
-                        size: 64,
-                      ),
+                      const SizedBox(width: ZSpacing.md),
+                      const OnbMascot(moment: ZaghlolMoment.proud, size: 96),
                     ],
                   ),
-                ),
-              ],
-              if (cards.isNotEmpty) ...[
-                const SizedBox(height: ZSpacing.md),
-                Text(
-                  l.onboardingScanResultsNotMineHint,
-                  textAlign: TextAlign.center,
-                  style: ZType.bodySmall.copyWith(color: c.textMuted),
-                ),
-              ],
-            ],
-          ),
-        ),
-        Padding(
-          padding: const EdgeInsetsDirectional.all(ZSpacing.screen),
-          child: ZButton(
-            key: const ValueKey('scan-show-me'),
-            label: l.onboardingScanResultsShowMe,
-            expand: true,
-            onPressed: widget.onDone,
-          ),
-        ),
-      ],
+                  const SizedBox(height: ZSpacing.lg),
+                  IntrinsicHeight(
+                    child: Row(
+                      crossAxisAlignment: CrossAxisAlignment.stretch,
+                      children: [
+                        Expanded(
+                          child: _Stat(
+                            key: const ValueKey('stat-auto'),
+                            value: _digits(d.auto),
+                            label: l.onboardingScanResultsStatAuto,
+                            valueColor: c.primary,
+                          ),
+                        ),
+                        const SizedBox(width: ZSpacing.md),
+                        Expanded(
+                          child: _Stat(
+                            key: const ValueKey('stat-review'),
+                            value: _digits(d.review),
+                            label: l.onboardingScanResultsStatReview,
+                            valueColor: c.warningText,
+                            onTap: d.review > 0 ? widget.onOpenReview : null,
+                          ),
+                        ),
+                        const SizedBox(width: ZSpacing.md),
+                        Expanded(
+                          child: _Stat(
+                            key: const ValueKey('stat-cards'),
+                            value: _digits(cards.length),
+                            label: l.onboardingScanResultsStatCards,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                  const SizedBox(height: ZSpacing.lg),
+                  if (cards.isNotEmpty) ...[
+                    Row(
+                      children: [
+                        Expanded(
+                          child: Text(
+                            l.onboardingScanResultsCardsTitle,
+                            style: ZType.title.copyWith(color: c.text),
+                          ),
+                        ),
+                        if (widget.onEditCard != null)
+                          ZButton(
+                            key: const ValueKey('scan-edit-cards'),
+                            label: l.commonActionEdit,
+                            variant: ZButtonVariant.text,
+                            size: ZButtonSize.small,
+                            onPressed: () => unawaited(_pickToEdit(cards)),
+                          ),
+                      ],
+                    ),
+                    const SizedBox(height: ZSpacing.md),
+                    ZCard(
+                      padding: const EdgeInsetsDirectional.symmetric(
+                        vertical: ZSpacing.xs,
+                      ),
+                      child: Column(
+                        children: [
+                          for (final (n, i) in cards.indexed) ...[
+                            if (n > 0)
+                              Divider(
+                                height: 1,
+                                thickness: 1,
+                                color: c.outline,
+                                indent: ZSpacing.lg,
+                                endIndent: ZSpacing.lg,
+                              ),
+                            _CardRow(
+                              item: i,
+                              tone: n,
+                              subtitle: l.onboardingScanResultsCardSubtitle(
+                                i.txnCount,
+                                _digits(i.txnCount),
+                                _typeName(l, i),
+                              ),
+                              badge: i.looksCredit
+                                  ? l.onboardingScanResultsCreditBadge
+                                  : _kindBadge(l, i.kind),
+                              badgeWarn: i.looksCredit,
+                              confirmed: _confirmed.contains(i.accountId),
+                              onTap: () => _openCard(i),
+                            ),
+                          ],
+                        ],
+                      ),
+                    ),
+                  ],
+                  if (credit != null) ...[
+                    const SizedBox(height: ZSpacing.md),
+                    ZCard(
+                      key: const ValueKey('scan-credit-prompt'),
+                      color: c.zaghlolBg,
+                      child: Row(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Expanded(
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Text(
+                                  l.onboardingScanResultsCreditPrompt(
+                                    credit.label,
+                                  ),
+                                  style: ZType.bodySmall.copyWith(
+                                    color: c.text,
+                                  ),
+                                ),
+                                const SizedBox(height: ZSpacing.md),
+                                Wrap(
+                                  spacing: ZSpacing.sm,
+                                  runSpacing: ZSpacing.xs,
+                                  children: [
+                                    ZButton(
+                                      size: ZButtonSize.small,
+                                      key: const ValueKey('scan-credit-yes'),
+                                      label: l.onboardingScanResultsCreditYes,
+                                      onPressed: () => widget.onSetupCredit
+                                          ?.call(credit.accountId),
+                                    ),
+                                    ZButton(
+                                      size: ZButtonSize.small,
+                                      key: const ValueKey('scan-credit-later'),
+                                      label: l.commonActionLater,
+                                      variant: ZButtonVariant.secondary,
+                                      onPressed: () => setState(
+                                        () => _creditDismissed = true,
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                              ],
+                            ),
+                          ),
+                          const SizedBox(width: ZSpacing.sm),
+                          const OnbMascot(
+                            moment: ZaghlolMoment.detective,
+                            size: 64,
+                          ),
+                        ],
+                      ),
+                    ),
+                  ],
+                  if (cards.isNotEmpty) ...[
+                    const SizedBox(height: ZSpacing.md),
+                    Text(
+                      l.onboardingScanResultsNotMineHint,
+                      textAlign: TextAlign.center,
+                      style: ZType.bodySmall.copyWith(color: c.textMuted),
+                    ),
+                  ],
+                ],
+              ),
+            ),
+            Padding(
+              padding: const EdgeInsetsDirectional.all(ZSpacing.screen),
+              child: ZButton(
+                key: const ValueKey('scan-show-me'),
+                label: l.onboardingScanResultsShowMe,
+                expand: true,
+                onPressed: widget.onDone,
+              ),
+            ),
+          ],
+        );
+      },
     );
   }
 }

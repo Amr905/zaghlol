@@ -4,6 +4,7 @@ import app.zaghlol.platform.guard.AndroidGuardChannel
 import app.zaghlol.platform.guard.GuardDecision
 import app.zaghlol.platform.guard.GuardDropReason
 import app.zaghlol.platform.guard.GuardKeepKind
+import app.zaghlol.platform.diag.SmsDiagSink
 import app.zaghlol.platform.ingest.IngestTrace
 import app.zaghlol.platform.ingest.safely
 import app.zaghlol.platform.spool.AdmissionClass
@@ -61,6 +62,8 @@ class CaptureIntake(
     private val status: CaptureStatusStore,
     private val afterWrite: () -> Unit,
     private val trace: () -> IngestTrace = { IngestTrace.NONE },
+    /** SMS-device: dev-build counters (sender + stage only, never a body); [SmsDiagSink.NONE] elsewhere. */
+    private val diag: SmsDiagSink = SmsDiagSink.NONE,
 ) {
     fun process(messages: List<CapturedMessage>, stamp: ReceiveStamp): IntakeResult {
         val written = ArrayList<String>(messages.size)
@@ -68,12 +71,15 @@ class CaptureIntake(
         var dropped = 0
         var failed = 0
         for (m in messages) {
+            diag.record(m.source, "received")
             when (val d = decideSafely(m)) {
                 is GuardDecision.Drop -> {
+                    diag.record(m.source, "drop:" + d.reason.wire)
                     dropped++
                     if (d.reason == GuardDropReason.RATE_LIMITED) status.recordRateLimited(channel.wire, stamp.wallMs)
                 }
                 is GuardDecision.Keep -> {
+                    diag.record(m.source, "kept:" + d.kind.wire)
                     val record = SpoolRecord(
                         channel = channel.wire,
                         source = m.source,
@@ -93,11 +99,18 @@ class CaptureIntake(
                     }
                     when (result) {
                         is SpoolStore.WriteResult.Written -> {
+                            diag.record(m.source, "spooled")
                             written += result.id
                             trace().safely { spooled(result.id, stamp.elapsedNs, stamp.wallMs) }
                         }
-                        is SpoolStore.WriteResult.Refused -> refused++ // recorded in the status by the store
-                        null -> failed++
+                        is SpoolStore.WriteResult.Refused -> {
+                            diag.record(m.source, "refused")
+                            refused++ // recorded in the status by the store
+                        }
+                        null -> {
+                            diag.record(m.source, "write_failed")
+                            failed++
+                        }
                     }
                 }
             }

@@ -1,6 +1,8 @@
 // T-079: one transaction row and the day header of S-11. Spending is shown
 // in ink, never red; the sign is part of the text (05-theme-2026 section 3).
 
+import '../../../../core/ui/bank_name_text.dart';
+import '../../../../core/l10n/card_number.dart';
 import '../../../categorization/presentation/category_visuals.dart';
 
 import 'package:flutter/material.dart';
@@ -71,7 +73,7 @@ String categoryName(TxnCategory c, String lang) =>
     lang == 'ar' ? c.nameAr : c.nameEn;
 
 String accountName(TxnAccount a, TxnFmt f) =>
-    a.last4 == null ? a.label : '${a.label} •${f.digits.render(a.last4!)}';
+    formatAccountWithCard(a.label, a.last4);
 
 class TxnRow extends StatelessWidget {
   const TxnRow({
@@ -155,6 +157,20 @@ class TxnRow extends StatelessWidget {
             ZListRow(
               title: title,
               subtitle: subtitle,
+              subtitleWidget: acc == null || txn.status == TxnStatus.declined
+                  ? null
+                  : BankNameText(
+                      name: acc.label,
+                      institutionCode: acc.institutionCode,
+                      last4: acc.last4,
+                      maxLines: 2,
+                      compose: (n) => l.transactionsRowSubtitle(
+                        n,
+                        sourceLabel(l, txn.source),
+                        time,
+                      ),
+                      style: ZType.bodySmall.copyWith(color: c.textMuted),
+                    ),
               leading: leading,
               trailing: ZMoneyText(
                 text: amountText,

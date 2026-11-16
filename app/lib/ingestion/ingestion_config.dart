@@ -32,3 +32,8 @@ const String kSpikeFlavor = 'devSms';
 /// spike registry and the spike marks from every other build (CI greps the
 /// prod `libapp.so` for the synthetic sender).
 const bool kIsSpikeBuild = appFlavor == kSpikeFlavor;
+
+/// True in the dev flavours (`devSms`, `devNoSms`): the debug-only "SMS
+/// diagnostics" screen (counts and sender names, never a body) exists only
+/// there. A compile-time constant, so AOT drops it from staging and prod.
+const bool kIsDevBuild = appFlavor == 'devSms' || appFlavor == 'devNoSms';

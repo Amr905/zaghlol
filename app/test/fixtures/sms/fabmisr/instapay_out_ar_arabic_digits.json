@@ -1,0 +1,16 @@
+{
+  "sender": "FABMISR",
+  "body": "بنك أبوظبي الأول مصر: يرجى العلم انه تم تنفيذ تحويل لحظي بمبلغ ٥٠٠٫٠٠ جم من حسابك المنتهي بـ ****٧٣١٦ برقم مرجعي e7a3c9f1 بتاريخ ١٠-١١-٢٠٢٦ ٢٢:٣٢ للمزيد، برجاء الاتصال بـ ١٩٦٦٦",
+  "receivedAt": "2026-11-16T22:40:00+02:00",
+  "expect": {
+    "template": "fabmisr.instapay_out.ar",
+    "event": "instapay_out",
+    "direction": "expense",
+    "currency": "EGP",
+    "amount": "500.00",
+    "last4": "7316",
+    "ref": "e7a3c9f1",
+    "date": "2026-11-10",
+    "time": "22:32"
+  }
+}

@@ -1,0 +1,13 @@
+{
+  "sender": "CIB",
+  "body": "يرجى العلم انه تم تنفيذ تحويل لحظي بمبلغ 75.00 جم من حسابك المنتهي بـ ****7316 للمزيد، برجاء الاتصال بـ 19666",
+  "receivedAt": "2026-11-16T22:40:00+02:00",
+  "expect": {
+    "template": "cib.instapay_out.ar",
+    "event": "instapay_out",
+    "direction": "expense",
+    "currency": "EGP",
+    "amount": "75.00",
+    "last4": "7316"
+  }
+}

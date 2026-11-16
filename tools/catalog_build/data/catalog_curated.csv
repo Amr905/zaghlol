@@ -118,7 +118,7 @@ merchant,,ألفا سكان,,,,,,Alfa Scan,health,,prefix,,,
 merchant,,المختبر,,,,,,Mokhtabar,health,,prefix,,,
 merchant,,جولدز جيم,,,,,,Gold's Gym,health,,prefix,,,
 merchant,,هيرز جيم,,,,,,Hers Gym,health,,prefix,,,
-merchant,,يوديمي,,,,,,Udemy,education,,prefix,,,
+merchant,,يوديمي,,,,,,Udemy,subscriptions,,prefix,,,
 merchant,,كورسيرا,,,,,,Coursera,education,,prefix,,,
 merchant,,المجلس الثقافي البريطاني,,,,,,British Council,education,,prefix,,,
 merchant,,الجامعة الأمريكية بالقاهرة,,,,,,AUC,education,,exact,,,
@@ -369,3 +369,33 @@ keyword,,,,,,,,,income,,,عائد,ar,60
 keyword,,,,,,,,,income,,,استرداد,ar,60
 keyword,,,,,,,,,income,,,كاش باك,ar,60
 keyword,,,,,,,,,income,,,فري لانس,ar,60
+merchant,,أنثروبيك,,,,,,Anthropic,subscriptions,,prefix,,,
+alias,,,,,,,,Anthropic,,CLAUDE,prefix,,,
+alias,,,,,,,,Anthropic,,CLAUDE AI,prefix,,,
+alias,,,,,,,,Anthropic,,كلود,prefix,,,
+merchant,,شات جي بي تي,,,,,,ChatGPT,subscriptions,,prefix,,,
+merchant,,ديزني بلس,,,,,,Disney Plus,subscriptions,,prefix,,,
+merchant,,كانفا,,,,,,Canva,subscriptions,,prefix,,,
+merchant,,أدوبي,,,,,,Adobe,subscriptions,,prefix,,,
+merchant,,مايكروسوفت,,,,,,Microsoft,subscriptions,,prefix,,,
+merchant,,جيت هاب,,,,,,GitHub,subscriptions,,prefix,,,
+merchant,,كيرسر,,,,,,Cursor,subscriptions,,prefix,,,
+merchant,,نوشن,,,,,,Notion,subscriptions,,prefix,,,
+merchant,,دولينجو,,,,,,Duolingo,subscriptions,,prefix,,,
+merchant,,آي كلاود,,,,,,iCloud,subscriptions,,prefix,,,
+merchant,,مصر للبترول,,,,,,Misr Petroleum,transport,,prefix,,,
+keyword,,,,,,,,,transport,,,وقود,ar,60
+keyword,,,,,,,,,transport,,,محطة,ar,60
+keyword,,,,,,,,,transport,,,diesel,en,60
+keyword,,,,,,,,,bills,,,telecom,en,60
+keyword,,,,,,,,,bills,,,top up,en,60
+keyword,,,,,,,,,bills,,,mobile data,en,60
+keyword,,,,,,,,,bills,,,تليفون,ar,60
+keyword,,,,,,,,,bills,,,باقة,ar,60
+keyword,,,,,,,,,groceries,,,hypermarket,en,60
+keyword,,,,,,,,,groceries,,,هايبر,ar,60
+keyword,,,,,,,,,dining,,,talabat,en,60
+keyword,,,,,,,,,dining,,,food,en,60
+keyword,,,,,,,,,subscriptions,,,premium,en,60
+keyword,,,,,,,,,subscriptions,,,membership,en,60
+keyword,,,,,,,,,subscriptions,,,تجديد اشتراك,ar,60

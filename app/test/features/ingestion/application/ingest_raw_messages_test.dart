@@ -239,7 +239,7 @@ void main() {
       final batch = [
         sms('s', purchase),
         notif('n', purchaseNotif, rx: t0 + 1000),
-        sms('u', 'ZBANK: something unknown'),
+        sms('u', 'ZBANK: something unknown 3'),
         sms('b', 'ZBANK: Balance EGP 50.00 acct *1111'),
       ];
       var step = 1;

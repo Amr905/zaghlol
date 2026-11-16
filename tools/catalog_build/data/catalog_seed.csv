@@ -118,7 +118,7 @@ merchant,,ألفا سكان,,,,,,Alfa Scan,health,,,,,
 merchant,,المختبر,,,,,,Mokhtabar,health,,,,,
 merchant,,جولدز جيم,,,,,,Gold's Gym,health,,,,,
 merchant,,هيرز جيم,,,,,,Hers Gym,health,,,,,
-merchant,,يوديمي,,,,,,Udemy,education,,,,,
+merchant,,يوديمي,,,,,,Udemy,subscriptions,,,,,
 merchant,,كورسيرا,,,,,,Coursera,education,,,,,
 merchant,,المجلس الثقافي البريطاني,,,,,,British Council,education,,,,,
 merchant,,الجامعة الأمريكية بالقاهرة,,,,,,AUC,education,,,,,
@@ -150,6 +150,18 @@ merchant,,أزيموت,,,,,,Azimut,savings,,,,,
 merchant,,بي تي سي جولد,,,,,,BTC Gold,savings,,,,,
 merchant,,سام جولد,,,,,,SAM Gold,savings,,,,,
 merchant,,سليمة جولد,,,,,,Selema Gold,savings,,,,,
+merchant,,أنثروبيك,,,,,,Anthropic,subscriptions,,,,,
+merchant,,شات جي بي تي,,,,,,ChatGPT,subscriptions,,,,,
+merchant,,ديزني بلس,,,,,,Disney Plus,subscriptions,,,,,
+merchant,,كانفا,,,,,,Canva,subscriptions,,,,,
+merchant,,أدوبي,,,,,,Adobe,subscriptions,,,,,
+merchant,,مايكروسوفت,,,,,,Microsoft,subscriptions,,,,,
+merchant,,جيت هاب,,,,,,GitHub,subscriptions,,,,,
+merchant,,كيرسر,,,,,,Cursor,subscriptions,,,,,
+merchant,,نوشن,,,,,,Notion,subscriptions,,,,,
+merchant,,دولينجو,,,,,,Duolingo,subscriptions,,,,,
+merchant,,آي كلاود,,,,,,iCloud,subscriptions,,,,,
+merchant,,مصر للبترول,,,,,,Misr Petroleum,transport,,,,,
 alias,,,,,,,,Carrefour,,carrefour,prefix,,,
 alias,,,,,,,,Spinneys,,spinneys,prefix,,,
 alias,,,,,,,,Seoudi Market,,seoudi,prefix,,,
@@ -317,6 +329,21 @@ alias,,,,,,,,Azimut,,azimut,prefix,,,
 alias,,,,,,,,BTC Gold,,btc gold,prefix,,,
 alias,,,,,,,,SAM Gold,,sam gold,prefix,,,
 alias,,,,,,,,Selema Gold,,selema gold,prefix,,,
+alias,,,,,,,,Anthropic,,anthropic,prefix,,,
+alias,,,,,,,,Anthropic,,claude,prefix,,,
+alias,,,,,,,,Anthropic,,claude ai,prefix,,,
+alias,,,,,,,,Anthropic,,klwd,prefix,,,
+alias,,,,,,,,ChatGPT,,chatgpt,prefix,,,
+alias,,,,,,,,Disney Plus,,disney plus,prefix,,,
+alias,,,,,,,,Canva,,canva,prefix,,,
+alias,,,,,,,,Adobe,,adobe,prefix,,,
+alias,,,,,,,,Microsoft,,microsoft,prefix,,,
+alias,,,,,,,,GitHub,,github,prefix,,,
+alias,,,,,,,,Cursor,,cursor,prefix,,,
+alias,,,,,,,,Notion,,notion,prefix,,,
+alias,,,,,,,,Duolingo,,duolingo,prefix,,,
+alias,,,,,,,,iCloud,,icloud,prefix,,,
+alias,,,,,,,,Misr Petroleum,,misr petroleum,prefix,,,
 keyword,,,,,,,,,housing,,,اثاث,ar,60
 keyword,,,,,,,,,housing,,,اجهزه,ar,60
 keyword,,,,,,,,,savings,,,استثمار,ar,60
@@ -332,14 +359,17 @@ keyword,,,,,,,,,shopping,,,الكترونيات,ar,60
 keyword,,,,,,,,,bills,,,انترنت,ar,60
 keyword,,,,,,,,,transport,,,اوبر,ar,60
 keyword,,,,,,,,,housing,,,ايجار,ar,60
+keyword,,,,,,,,,bills,,,باقه,ar,60
 keyword,,,,,,,,,groceries,,,بقاله,ar,60
 keyword,,,,,,,,,family_giving,,,بقشيش,ar,60
 keyword,,,,,,,,,transport,,,بنزين,ar,60
 keyword,,,,,,,,,dining,,,بيتزا,ar,60
 keyword,,,,,,,,,transport,,,تاكسي,ar,60
 keyword,,,,,,,,,family_giving,,,تبرع,ar,60
+keyword,,,,,,,,,subscriptions,,,تجديد اشتراك,ar,60
 keyword,,,,,,,,,health,,,تحاليل,ar,60
 keyword,,,,,,,,,savings,,,تحويش,ar,60
+keyword,,,,,,,,,bills,,,تليفون,ar,60
 keyword,,,,,,,,,housing,,,تنضيف,ar,60
 keyword,,,,,,,,,education,,,جامعه,ar,60
 keyword,,,,,,,,,groceries,,,جزار,ar,60
@@ -397,6 +427,7 @@ keyword,,,,,,,,,bills,,,كهرباء,ar,60
 keyword,,,,,,,,,education,,,كورس,ar,60
 keyword,,,,,,,,,shopping,,,لبس,ar,60
 keyword,,,,,,,,,groceries,,,لحوم,ar,60
+keyword,,,,,,,,,transport,,,محطه,ar,60
 keyword,,,,,,,,,groceries,,,مخبوزات,ar,60
 keyword,,,,,,,,,education,,,مدرسه,ar,60
 keyword,,,,,,,,,income,,,مرتب,ar,60
@@ -410,7 +441,9 @@ keyword,,,,,,,,,transport,,,موقف,ar,60
 keyword,,,,,,,,,bills,,,مياه,ar,60
 keyword,,,,,,,,,entertainment,,,نادي,ar,60
 keyword,,,,,,,,,family_giving,,,نقطه,ar,60
+keyword,,,,,,,,,groceries,,,هايبر,ar,60
 keyword,,,,,,,,,family_giving,,,هديه,ar,60
+keyword,,,,,,,,,transport,,,وقود,ar,60
 keyword,,,,,,,,,housing,,,appliances,en,60
 keyword,,,,,,,,,groceries,,,bakery,en,60
 keyword,,,,,,,,,debt,,,bnpl,en,60
@@ -435,6 +468,7 @@ keyword,,,,,,,,,debt,,,credit card payment,en,60
 keyword,,,,,,,,,groceries,,,dairy,en,60
 keyword,,,,,,,,,dining,,,delivery,en,60
 keyword,,,,,,,,,health,,,dental,en,60
+keyword,,,,,,,,,transport,,,diesel,en,60
 keyword,,,,,,,,,income,,,dividend,en,60
 keyword,,,,,,,,,health,,,doctor,en,60
 keyword,,,,,,,,,family_giving,,,donation,en,60
@@ -444,6 +478,7 @@ keyword,,,,,,,,,savings,,,emergency fund,en,60
 keyword,,,,,,,,,family_giving,,,family allowance,en,60
 keyword,,,,,,,,,dining,,,fast food,en,60
 keyword,,,,,,,,,entertainment,,,flight,en,60
+keyword,,,,,,,,,dining,,,food,en,60
 keyword,,,,,,,,,income,,,freelance,en,60
 keyword,,,,,,,,,groceries,,,fruit,en,60
 keyword,,,,,,,,,transport,,,fuel,en,60
@@ -458,6 +493,7 @@ keyword,,,,,,,,,groceries,,,groceries,en,60
 keyword,,,,,,,,,groceries,,,grocery,en,60
 keyword,,,,,,,,,health,,,gym,en,60
 keyword,,,,,,,,,entertainment,,,hotel,en,60
+keyword,,,,,,,,,groceries,,,hypermarket,en,60
 keyword,,,,,,,,,debt,,,installment,en,60
 keyword,,,,,,,,,income,,,interest credit,en,60
 keyword,,,,,,,,,bills,,,internet,en,60
@@ -467,7 +503,9 @@ keyword,,,,,,,,,debt,,,loan,en,60
 keyword,,,,,,,,,debt,,,loan installment,en,60
 keyword,,,,,,,,,housing,,,maintenance,en,60
 keyword,,,,,,,,,health,,,medicine,en,60
+keyword,,,,,,,,,subscriptions,,,membership,en,60
 keyword,,,,,,,,,bills,,,mobile bill,en,60
+keyword,,,,,,,,,bills,,,mobile data,en,60
 keyword,,,,,,,,,shopping,,,mobile phone,en,60
 keyword,,,,,,,,,savings,,,mutual fund,en,60
 keyword,,,,,,,,,education,,,nursery,en,60
@@ -477,6 +515,7 @@ keyword,,,,,,,,,income,,,payroll,en,60
 keyword,,,,,,,,,transport,,,petrol,en,60
 keyword,,,,,,,,,health,,,pharmacy,en,60
 keyword,,,,,,,,,dining,,,pizza,en,60
+keyword,,,,,,,,,subscriptions,,,premium,en,60
 keyword,,,,,,,,,bills,,,recharge,en,60
 keyword,,,,,,,,,income,,,refund,en,60
 keyword,,,,,,,,,housing,,,rent,en,60
@@ -494,9 +533,12 @@ keyword,,,,,,,,,savings,,,stocks,en,60
 keyword,,,,,,,,,subscriptions,,,streaming,en,60
 keyword,,,,,,,,,subscriptions,,,subscription,en,60
 keyword,,,,,,,,,groceries,,,supermarket,en,60
+keyword,,,,,,,,,dining,,,talabat,en,60
 keyword,,,,,,,,,transport,,,taxi,en,60
+keyword,,,,,,,,,bills,,,telecom,en,60
 keyword,,,,,,,,,family_giving,,,tips,en,60
 keyword,,,,,,,,,transport,,,toll,en,60
+keyword,,,,,,,,,bills,,,top up,en,60
 keyword,,,,,,,,,entertainment,,,travel,en,60
 keyword,,,,,,,,,education,,,tuition,en,60
 keyword,,,,,,,,,education,,,university,en,60

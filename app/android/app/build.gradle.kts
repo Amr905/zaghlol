@@ -53,15 +53,19 @@ android {
             dimension = "env"
             applicationIdSuffix = ".dev"
             resValue("string", "app_name", "Zaghlol Dev")
+            // SMS-device: the debug-only "SMS diagnostics" counters exist in dev builds only.
+            buildConfigField("boolean", "SMS_DIAG", "true")
         }
         create("staging") {
             dimension = "env"
             applicationIdSuffix = ".staging"
             resValue("string", "app_name", "Zaghlol Staging")
+            buildConfigField("boolean", "SMS_DIAG", "false")
         }
         create("prod") {
             dimension = "env"
             resValue("string", "app_name", "Zaghlol")
+            buildConfigField("boolean", "SMS_DIAG", "false")
         }
         // ADR-004: READ_SMS / RECEIVE_SMS live only in src/sms/AndroidManifest.xml.
         create("sms") {

@@ -7,6 +7,7 @@ import 'package:flutter/cupertino.dart' show CupertinoIcons;
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
+import '../../../core/l10n/card_number.dart';
 import '../../../core/l10n/generated/app_localizations.dart';
 import '../../../core/routing/app_routes.dart';
 import '../../../core/theme/z_tokens.dart';
@@ -245,9 +246,7 @@ class _HomeBodyState extends ConsumerState<_HomeBody> {
     final accountLabels = <String, String>{
       for (final acc
           in ref.watch(homeAccountsProvider).value ?? const <Account>[])
-        acc.id: acc.last4 == null
-            ? acc.label
-            : '${acc.label} •${format.digits.render(acc.last4!)}',
+        acc.id: formatAccountWithCard(acc.label, acc.last4),
     };
 
     return Padding(
