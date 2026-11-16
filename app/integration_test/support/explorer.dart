@@ -84,9 +84,10 @@ class Explorer {
     required this.goHome,
     this.selectTab,
     this.deny = const {},
+    this.navLabels = const {},
     this.maxDepth = 3,
-    this.maxTapsPerScreen = 40,
-    this.maxTapsPerDialog = 12,
+    this.maxTapsPerScreen = 60,
+    this.maxTapsPerDialog = 15,
     this.onUpdate,
     this.log = _print,
   });
@@ -103,6 +104,10 @@ class Explorer {
 
   /// Labels that are never tapped (destructive or leaving the app).
   final Set<String> deny;
+
+  /// Labels of icon-only back/close buttons: leaving a screen is covered by
+  /// the pop after each tap, so they are not tapped as controls.
+  final Set<String> navLabels;
   final int maxDepth;
   final int maxTapsPerScreen;
   final int maxTapsPerDialog;
@@ -350,14 +355,16 @@ class Explorer {
   }
 
   Future<void> _tapByKey(String key) async {
-    for (var i = 0; i < 3; i++) {
+    for (var i = 0; i < 4; i++) {
+      // A page that just slid back in is not hit-testable for a moment.
+      await _settle(minMs: 500);
       final hit = _candidates().where((c) => c.key == key).toList();
       if (hit.isNotEmpty) {
         await tester.tapAt(hit.first.center);
-        await _settle();
+        await _settle(minMs: 500);
         return;
       }
-      if (!await _scrollDown()) return;
+      if (i > 0 && !await _scrollDown()) return;
     }
   }
 
@@ -577,6 +584,7 @@ class Explorer {
       if (!_hits(center, ro)) continue;
       final label = _labelOf(e);
       if (deny.any((d) => d.isNotEmpty && label.contains(d))) continue;
+      if (kind != 'button' && navLabels.contains(label)) continue;
       // Digits are dropped from the key: counters and clocks change a
       // label between two looks at the same widget.
       final stable = label.replaceAll(

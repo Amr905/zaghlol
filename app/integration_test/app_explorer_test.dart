@@ -140,11 +140,20 @@ void main() {
     };
 
     Future<void> selectTab(int i) async {
-      await t.tap(
-        find
-            .descendant(of: bar, matching: find.byType(NavigationDestination))
-            .at(i),
+      final dest = find.descendant(
+        of: bar,
+        matching: find.byType(NavigationDestination),
       );
+      final end = DateTime.now().add(const Duration(seconds: 8));
+      while (DateTime.now().isBefore(end) && dest.evaluate().length <= i) {
+        await t.pump(const Duration(milliseconds: 250));
+      }
+      if (dest.evaluate().length <= i) {
+        // ignore: avoid_print
+        print('EXPLORER_STAGE no tab bar to select tab $i');
+        return;
+      }
+      await t.tap(dest.at(i));
       await t.pump(const Duration(milliseconds: 600));
     }
 
@@ -168,6 +177,7 @@ void main() {
       goHome: goHome,
       selectTab: selectTab,
       deny: deny,
+      navLabels: {l10n.commonActionBackA11y, l10n.commonActionClose},
       maxDepth: 4,
       onUpdate: (md) => report.writeAsStringSync(md),
     )..install();
