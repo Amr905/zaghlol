@@ -492,6 +492,9 @@
 
 - **FU-244** (batch 27): the minors and nits in [batch-27](05-reviews/batch-27.md) (SMS-fuzzy and FU-243 sections); generic hold-out misses `ho_two_amounts_fee` (direction/event) and `en_fx_two_currencies`.
 
+- **FU-245** (batch 28, TEST-explorer): About Disclaimers row has an empty `onTap`; About "dead end after Back" needs a hand check; explorer lacks English, dark, text scale 1.3, onboarding and paywall coverage.
+- **FU-246** (batch 28, DESIGN-pass2): Home lock card sits under the Add button at rest; Ask input row loses width at the end.
+
 ## Log
 | Date | Event |
 |---|---|
@@ -572,3 +575,4 @@
 | 2026-11-14 | Batch 24 (`batch/2026-11-15-24`): T-120, T-161 DONE. FU-229…FU-230. Progress 157/186. |
 | 2026-11-14 | Batch 25 (`batch/2026-11-15-25`): T-135, T-167, T-168, T-169, T-170, T-071, T-072, T-158 DONE. FU-233…FU-240. Progress 165/186. |
 | 2026-11-16 | Batch 27 (`batch/2026-11-16-27`): SMS-fuzzy generic extractor (prefilled review, one-tap confirm), FU-243 drop rules (OTP global only; promo/due per bank), category picker icons, design polish. FU-244. Progress 165/186. |
+| 2026-11-16 | Batch 28 (`batch/2026-11-16-28`): app explorer (108 screens, ~600 taps on the emulator) and its fixes (edit-card row, offline account status, Undo after unmount), FAB clearance on all tabs. FU-245…FU-246. Progress 165/186. |
