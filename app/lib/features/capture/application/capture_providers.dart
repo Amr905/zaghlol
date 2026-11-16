@@ -50,6 +50,7 @@ import 'capture_scheduler.dart';
 import 'guard_config_writer.dart';
 import 'inbox_scan_service.dart';
 import 'scan.dart';
+import 'startup_reparse.dart';
 
 /// The gate the restore flow closes (WIRE-SVC): ingestion writes (drain,
 /// inbox scan) stop and the running one is awaited. One per app.
@@ -213,6 +214,8 @@ final captureCoordinatorProvider = FutureProvider<CaptureCoordinator?>((
     (_, _) => _pushToggles(ref, coordinator),
   );
   unawaited(coordinator.start());
+  // SMS-device: review rows stored under an older registry are read again.
+  unawaited(reparseOnStart(db, registry));
   return coordinator;
 }, name: 'captureCoordinatorProvider');
 

@@ -33,9 +33,19 @@ import 'package:zaghlol/core/routing/app_router.dart' show rootNavigatorKey;
 import 'package:zaghlol/core/settings/settings_keys.dart';
 import 'package:zaghlol/core/settings/settings_providers.dart';
 import 'package:zaghlol/features/capture/application/capture_providers.dart';
+import 'package:zaghlol/core/db/daos/review_items_dao.dart' show ReviewKind;
+import 'package:zaghlol/features/ingestion/application/ingest_raw_messages.dart'
+    show RawStatus;
+import 'package:zaghlol/features/ingestion/data/drift_ingest_store.dart';
+import 'package:zaghlol/features/ingestion/domain/body_hash.dart';
+import 'package:zaghlol/features/ingestion/domain/ingest_records.dart';
 import 'package:zaghlol/features/settings/debug/debug_sms_diagnostics.dart';
 import 'package:zaghlol/main.dart' as app;
 import 'package:zaghlol_domain/zaghlol_domain.dart';
+
+const String _hsbcStale =
+    'Your Credit Card ending with * 5078 has been used for USD 117.00 on '
+    '08/11/2026 at ANTHROPIC* CLAUDE SUB. Your available limit is EGP 110098.32';
 
 void main() {
   final binding = IntegrationTestWidgetsFlutterBinding.ensureInitialized();
@@ -174,7 +184,35 @@ void main() {
       CivilDate(now.year, now.month, now.day).epochDay,
     );
     await settings.set(Settings.language, LanguagePref.en);
-    await (await seed.read(appDatabaseProvider.future)).close();
+    // A phone that ran an older build: one HSBC SMS sits in review, stored
+    // under registry version 1. The app must read it again at start.
+    final seedDb = await seed.read(appDatabaseProvider.future);
+    final seedStore = DriftIngestStore(seedDb);
+    final staleAt = DateTime.now().millisecondsSinceEpoch - 60000;
+    await seedStore.insertRaw(
+      RawInsert(
+        id: 'stale0',
+        channel: 'sms',
+        sender: 'HSBC',
+        body: _hsbcStale,
+        bodyHash: bodyHashV1(
+          senderKey: senderKeyOf('sms', 'HSBC'),
+          body: _hsbcStale,
+        ),
+        receivedAtMs: staleAt,
+        parseStatus: RawStatus.review,
+        registryVersion: 1,
+        createdAtMs: staleAt,
+      ),
+    );
+    await seedStore.insertReview(
+      id: 'rvstale0',
+      kind: ReviewKind.unrecognized,
+      createdAtMs: staleAt,
+      rawMessageId: 'stale0',
+      payload: {'reason': 'noTemplate'},
+    );
+    await seedDb.close();
     seed.dispose();
 
     final original = FlutterError.onError;
@@ -218,14 +256,23 @@ void main() {
     }
     final historical = await waitUntil(t, () async {
       final c = await dbCounts(db);
-      return c['all']![0] >= 4;
+      return c['all']![0] >= 5 && c['all']![1] >= 3;
     }, timeout: const Duration(seconds: 60));
     var c = await dbCounts(db);
     printCounts('HISTORICAL', c);
     await printNative(db);
-    check(historical, 'all 4 historical SMS (HSBC, HSBC EG, CIB, NBE) stored');
-    check(c['hsbc']![0] == 2, 'both historical HSBC SMS stored');
-    check(c['hsbc']![1] == 2, 'both historical HSBC SMS saved as transactions');
+    check(
+      historical,
+      'the 4 historical SMS (HSBC, HSBC EG, CIB, NBE) and the stale review row are stored',
+    );
+    check(
+      c['hsbc']![0] == 3,
+      'both historical HSBC SMS and the stale row are stored',
+    );
+    check(
+      c['hsbc']![1] == 3,
+      'both historical HSBC SMS saved, and the stale review row re-read at start',
+    );
     check(c['cib']![0] == 1, 'the historical CIB SMS stored');
     check(
       c['nbe']![0] == 1 && c['nbe']![1] == 1,
@@ -237,7 +284,7 @@ void main() {
     say('READY_FOR_LIVE');
     final live = await waitUntil(t, () async {
       final c2 = await dbCounts(db);
-      return c2['all']![0] >= 8;
+      return c2['all']![0] >= 9;
     }, timeout: const Duration(seconds: 150));
     c = await dbCounts(db);
     printCounts('FINAL', c);
@@ -245,13 +292,13 @@ void main() {
     final native = await NativeAndDbSmsDiagnostics(db).read();
     check(live, 'all 4 live SMS stored');
     check(
-      c['all']![0] == 8,
-      'exactly 8 SMS stored (the no-digit SMS and the '
-      'personal one leave nothing)',
+      c['all']![0] == 9,
+      'exactly 9 SMS stored (4 historical, 4 live, 1 stale; the no-digit SMS '
+      'and the personal one leave nothing)',
     );
     check(
-      c['hsbc']![0] == 4 && c['hsbc']![1] == 4,
-      'all 4 HSBC card SMS saved',
+      c['hsbc']![0] == 5 && c['hsbc']![1] == 5,
+      'all 5 HSBC card SMS saved',
     );
     check(c['nbe']![0] == 2 && c['nbe']![1] == 2, 'both NBE SMS saved');
     check(

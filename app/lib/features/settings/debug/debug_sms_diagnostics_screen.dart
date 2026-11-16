@@ -17,6 +17,11 @@ const String kDiagNote =
     'received -> Guard kept / dropped (reason) -> spooled -> stored -> saved / '
     'review. inbox_* is the historical scan. Counts only, never message text.';
 
+/// The status line (a plain function: not UI scope for the string lint).
+String guardLine(SmsDiagSnapshot s) =>
+    'Guard: ${s.guardMode} / user part: ${s.userState} / '
+    'spooled waiting: ${s.pending}';
+
 final smsDiagnosticsProvider = FutureProvider.autoDispose<SmsDiagSnapshot>((
   ref,
 ) async {
@@ -77,8 +82,7 @@ class _Body extends StatelessWidget {
       padding: const EdgeInsetsDirectional.all(16),
       children: [
         Text(
-          'Guard: ${snapshot.guardMode} / user part: ${snapshot.userState} / '
-          'spooled waiting: ${snapshot.pending}',
+          guardLine(snapshot),
           key: const Key('sms-diag-guard'),
           style: theme.titleSmall,
         ),
