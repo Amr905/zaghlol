@@ -515,8 +515,10 @@ class Explorer {
     _walk(root, (e) {
       final w = e.widget;
       if (w is Text) {
+        // The style colour too: a selected option often only changes colour.
         sb
           ..write(w.data ?? w.textSpan?.toPlainText() ?? '')
+          ..write('|${w.style?.color?.toARGB32()}|${w.style?.fontWeight}')
           ..write('\u0001');
       } else if (w is Switch) {
         sb.write('S${w.value}\u0001');
@@ -534,7 +536,7 @@ class Explorer {
           sb.write('M${p.selected}${p.checked}${p.toggled}\u0001');
         }
       } else if (w is Icon) {
-        sb.write('I${w.icon?.codePoint}\u0001');
+        sb.write('I${w.icon?.codePoint}|${w.color?.toARGB32()}\u0001');
       } else if (w is EditableText) {
         sb.write('E${w.controller.text}\u0001');
       }

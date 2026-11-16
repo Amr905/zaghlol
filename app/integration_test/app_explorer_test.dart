@@ -195,6 +195,14 @@ void main() {
       goHome: goHome,
       selectTab: selectTab,
       deny: deny,
+      log: (line) {
+        // ignore: avoid_print
+        print(
+          line.startsWith('EXPLORER_SCREEN')
+              ? '$line rssMB=${ProcessInfo.currentRss ~/ 1048576}'
+              : line,
+        );
+      },
       navLabels: {
         ...both((l) => l.commonActionBackA11y),
         ...both((l) => l.commonActionClose),

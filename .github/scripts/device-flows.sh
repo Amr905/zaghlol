@@ -49,6 +49,9 @@ done
   misses=0
   while true; do
     sleep 10
+    if [ $((SECONDS % 60)) -lt 10 ]; then
+      adb -s "$DEVICE" shell dumpsys meminfo "$PKG" 2>/dev/null | grep -E "TOTAL PSS|Graphics:|Java Heap:|Native Heap:" | tr -s ' ' | tr '\n' ';' | sed 's/^/MEM: /'; echo
+    fi
     if adb -s "$DEVICE" shell pidof "$PKG" >/dev/null 2>&1; then
       # The app is installed by now: grant what its screens ask for, so no
       # system permission dialog covers it.
@@ -81,6 +84,11 @@ perl -e 'alarm shift; exec @ARGV' 2100 \
   2>&1 | tee "$OUT/explorer.log"
 rc2=${PIPESTATUS[0]}
 kill "$keeper" 2>/dev/null || true
+# Why did the app go away (if it did)? Crash, low-memory kill, ANR.
+echo "---- logcat: crashes and kills ----"
+adb -s "$DEVICE" logcat -d -b crash 2>/dev/null | tail -40 || true
+adb -s "$DEVICE" logcat -d 2>/dev/null | grep -E "FATAL|am_proc_died|am_kill|lowmemorykiller|lmkd|ANR in|Process $PKG|has died|signal [0-9]+ \(SIG" | tail -30 || true
+echo "---- end logcat ----"
 pull_files
 adb -s "$DEVICE" exec-out screencap -p > "$OUT/screens/zz-final-explorer.png" || true
 
