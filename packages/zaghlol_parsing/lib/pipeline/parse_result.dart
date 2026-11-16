@@ -284,7 +284,12 @@ const int kGenericMaxConfidencePermille = 700;
 /// The kind of transaction a generic message names, when a keyword says so.
 /// A hint for the review card and the stored direction; never a direction
 /// by itself.
-enum GenericEvent { purchase, withdrawal, transfer, refund }
+///
+/// [ccPayment] (SMS-AUTO) is a credit-card settlement: a payment towards the
+/// card. It is a transfer between the user's own accounts, never an expense
+/// or income; the ingest layer stores it as a transfer into the card account
+/// (income side) or out of the paying account (expense side).
+enum GenericEvent { purchase, withdrawal, transfer, refund, ccPayment }
 
 /// A field the generic parser reads.
 enum GenericField {

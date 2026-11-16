@@ -215,7 +215,6 @@ final List<String> completedTransactionCues = _fold(const [
   'was used',
   'has been used',
   'transfer of',
-  'payment of',
   'تم خصم',
   'خصم من',
   'تم تحويل',
@@ -446,3 +445,104 @@ const Map<String, String> prefixedSymbols = {
   'e£': 'EGP',
   'le£': 'EGP',
 };
+
+/// SMS-AUTO: a credit-card word. A settlement cue counts only next to one,
+/// so "we received your payment" from a shop is not a card settlement.
+final List<String> cardWords = _fold(const [
+  'credit card',
+  'creditcard',
+  'card ending',
+  'your card',
+  'بطاقه ائتمان',
+  'بطاقه الائتمان',
+  'بطاقتك',
+  'بطاقه',
+  'كريديت',
+  'كارد',
+]);
+
+/// SMS-AUTO: the card account received a payment (the settlement leg that
+/// lands on the card): stored as a transfer in. Synthetic-unverified wording.
+final List<String> cardSettlementReceivedCues = _fold(const [
+  'payment received',
+  'payment has been received',
+  'payment was received',
+  'received your payment',
+  'we have received your payment',
+  'payment credited',
+  'payment has been credited',
+  'payment posted',
+  'payment was posted',
+  'thank you for your payment',
+  'thanks for your payment',
+  'repayment received',
+  'تم استلام سداد',
+  'تم استلام دفعه',
+  'تم استلام مبلغ',
+  'تم استلام دفعتك',
+  'استلمنا دفعتك',
+  'استلمنا سداد',
+  'تم تسجيل سداد',
+  'تم قيد سداد',
+  'شكرا لسدادك',
+  'شكرا علي سدادك',
+]);
+
+/// Only the unambiguous received-side wording of [cardSettlementReceivedCues]
+/// counts without a "received/credited/posted" word next to "payment of";
+/// "payment of" needs one of these in the same message.
+final List<String> cardSettlementReceivedVerbs = _fold(const [
+  'received',
+  'credited',
+  'posted',
+  'thank you',
+  'thanks',
+  'استلام',
+  'استلمنا',
+  'تسجيل',
+  'قيد',
+  'شكرا',
+]);
+
+/// SMS-AUTO: money left the paying account towards a credit card (the
+/// settlement leg that leaves an account): stored as a transfer out. Needs a
+/// debit word as well, so the side is never guessed.
+final List<String> cardSettlementPaidCues = _fold(const [
+  'credit card payment',
+  'card payment',
+  'payment to your credit card',
+  'payment towards your',
+  'payment to credit card',
+  'paid your credit card',
+  'pay your credit card',
+  'credit card bill',
+  'card bill',
+  'card repayment',
+  'transferred to your credit card',
+  'transfer to your credit card',
+  'سداد بطاقه',
+  'سداد فاتوره بطاقه',
+  'سداد مستحقات بطاقه',
+  'سداد البطاقه',
+  'سداد بطاقتك',
+  'دفع فاتوره بطاقه',
+  'تسديد بطاقه',
+  'تسديد البطاقه',
+  'تحويل الي بطاقه',
+  'تحويل الى بطاقه',
+]);
+
+final List<String> cardSettlementDebitWords = _fold(const [
+  'debited',
+  'deducted',
+  'withdrawn',
+  'you paid',
+  'you transferred',
+  'from your account',
+  'from account',
+  'from a/c',
+  'خصم',
+  'تم خصم',
+  'تم سحب',
+  'من حسابك',
+]);

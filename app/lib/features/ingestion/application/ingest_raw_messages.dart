@@ -365,6 +365,17 @@ final class IngestRawMessages {
     // pending row is retried next time.
     final CreateTxn? create;
     final bool balanceOnly;
+    if (result is ParseGeneric &&
+        row.parseStatus == RawStatus.review &&
+        p.txnSource != null &&
+        genericAutoSaveEligible(result) &&
+        genericTxnDirection(result) != null) {
+      // SMS-AUTO: a stored review message that the new rules save as read.
+      // Same raw row, one transaction; open review items resolve with the
+      // promotion (a second run finds the row `parsed` and does nothing).
+      await _persist(p, b, local, result);
+      return ReparseOutcome.converted;
+    }
     if (result is ParseParsed && p.txnSource != null) {
       final d = dispositionOf(result.event, result.direction);
       create = d is CreateTxn && result.fields.amount != null ? d : null;
@@ -1339,11 +1350,43 @@ final class IngestRawMessages {
       alwaysCapture: row?.alwaysCapture ?? false,
     );
     final direction = genericTxnDirection(g);
-    final autoSave =
-        disposition == GenericDisposition.autoSaveLowConfidence &&
+    // SMS-AUTO: a known bank's clear, unambiguous message is saved without
+    // review (no review item); the A-66 path (3 confirmations + "always
+    // capture") still saves other senders' messages, flagged low-confidence.
+    final backgroundOrigin =
+        p.m.origin.isBackground || p.m.origin == MessageOrigin.reparse;
+    var confident =
         direction != null &&
-        p.m.origin.isBackground &&
+        backgroundOrigin &&
+        genericAutoSaveEligible(g) &&
         kGenericAutoSaveAccount == GenericAutoSaveAccount.senderAccount;
+    if (confident) {
+      // Never a second copy of a payment already stored (another channel,
+      // an earlier copy of the same text): a likely duplicate goes to review.
+      final (atMs, _) = _occurred(g.occurredAt);
+      final found = await _store.crossChannelCandidates(
+        dedupeKey: dedupeKeyOf(g.institutionCode!, direction, g.amount),
+        fromMs: atMs - kCrossChannelFetchMs,
+        toMs: atMs + kCrossChannelFetchMs,
+      );
+      confident = !found.any(
+        (c) =>
+            !c.isDeleted &&
+            last4Compatible(g.last4, c.accountLast4) &&
+            withinCrossChannelWindow(
+              occurredA: atMs,
+              occurredB: c.occurredAtMs,
+              receivedA: p.m.receivedAtMs,
+              receivedB: c.rawReceivedAtMs,
+            ),
+      );
+    }
+    final autoSave =
+        confident ||
+        (disposition == GenericDisposition.autoSaveLowConfidence &&
+            direction != null &&
+            p.m.origin.isBackground &&
+            kGenericAutoSaveAccount == GenericAutoSaveAccount.senderAccount);
     if (!autoSave) {
       final rawId = await _insertRaw(
         p,
@@ -1423,7 +1466,7 @@ final class IngestRawMessages {
         accountId: account.id,
         rawMessageId: rawId,
         source: p.txnSource!,
-        direction: direction,
+        direction: direction!,
         status: TxnStatus.posted,
         amount: g.amount,
         originalAmount: g.originalAmount,
@@ -1436,21 +1479,26 @@ final class IngestRawMessages {
         categorySource: category.source,
         isUserVerified: false,
         parseConfidencePermille: g.confidencePermille,
+        dedupeKey: g.institutionCode == null
+            ? null
+            : dedupeKeyOf(g.institutionCode!, direction, g.amount),
         createdAtMs: _nowMs(),
       ),
     );
     local.txn(txnId, account.id, occurredMs, offsetMin);
-    await _review(
-      kind: ReviewKind.lowConfidence,
-      rawId: rawId,
-      txnId: txnId,
-      payload: {
-        'reason': 'generic',
-        'generic': true,
-        'confidencePermille': g.confidencePermille,
-        'reasons': [for (final x in g.reasons) x.name],
-      },
-    );
+    if (!confident) {
+      await _review(
+        kind: ReviewKind.lowConfidence,
+        rawId: rawId,
+        txnId: txnId,
+        payload: {
+          'reason': 'generic',
+          'generic': true,
+          'confidencePermille': g.confidencePermille,
+          'reasons': [for (final x in g.reasons) x.name],
+        },
+      );
+    }
     await _runHooks(txnId, account.id, inserted: true);
     return IngestInserted(txnId);
   }
@@ -1875,12 +1923,12 @@ final class _UtcZone implements LocalZone {
 /// message names no direction (never guessed).
 TxnDirection? genericTxnDirection(ParseGeneric g) => switch (g.direction) {
   TemplateDirection.expense =>
-    g.event == GenericEvent.transfer
+    g.event == GenericEvent.transfer || g.event == GenericEvent.ccPayment
         ? TxnDirection.transferOut
         : TxnDirection.expense,
   TemplateDirection.income => switch (g.event) {
     GenericEvent.refund => TxnDirection.refund,
-    GenericEvent.transfer => TxnDirection.transferIn,
+    GenericEvent.transfer || GenericEvent.ccPayment => TxnDirection.transferIn,
     _ => TxnDirection.income,
   },
   _ => null,

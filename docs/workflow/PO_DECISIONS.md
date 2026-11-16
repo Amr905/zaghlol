@@ -23,6 +23,7 @@ T-035 Q1–Q6 (keep with bundled rules; drop OTP+transaction messages, as the re
 
 | ID | Decision |
 |---|---|
+| SMS-AUTO (PO, 2026-11-16) | Bank SMS are read and **saved automatically**; this replaces the old rule that generic (no-template) results never auto-save. A result auto-saves when the sender resolves to a registry bank, the amount and currency are read with no competing reading, the direction or event is clear (including a credit-card settlement, which is a transfer into the card account, never an expense or income) and a card last-4 or a merchant is present. Anything with currency or amount ambiguity (D-28), a missing or conflicting direction, an unknown sender or a promo/OTP cue goes to review. The review card shows the original message text (collapsible, on screen only, never logged). Stored review rows are re-evaluated once under the new rules after the registry version bump (re-parse job; never duplicates a saved transaction). |
 | T-047 Q4 | One banner at a time, by priority: data at risk (backup/key problems) > capture off > notifications missed > info. The others wait in capture settings. |
 | T-130 Q3 / T-131 Q4 | Sandbox and license-tester purchases in production grant Gold, recorded as sandbox (as built). **No public TestFlight link**: invite-only testers. |
 | T-131 Q5 | Family Sharing **off** for Gold products. Apple doesn't let you turn it off again once on, so off is the reversible choice. |
