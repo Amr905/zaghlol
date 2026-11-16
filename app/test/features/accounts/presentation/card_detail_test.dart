@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_riverpod/misc.dart' show Override;
 import 'package:flutter_test/flutter_test.dart';
+import 'package:zaghlol/core/l10n/card_number.dart';
 import 'package:zaghlol/core/db/app_database.dart' show IgnoreRuleRow;
 import 'package:zaghlol/core/l10n/generated/app_localizations.dart';
 import 'package:zaghlol/core/theme/app_theme.dart';
@@ -211,7 +212,10 @@ void main() {
     t,
   ) async {
     await pumpDetail(t, overrides: detailOverrides());
-    expect(find.text('CIB Credit •1234'), findsOneWidget);
+    expect(
+      find.text(formatAccountWithCard('CIB Credit', '1234')),
+      findsOneWidget,
+    );
     expect(find.textContaining('of'), findsWidgets);
     expect(find.text('Statement due Nov 15, 2026'), findsOneWidget);
     expect(find.text('Top merchants'), findsOneWidget);

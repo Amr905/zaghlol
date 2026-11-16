@@ -16,6 +16,7 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import '../../../core/l10n/card_number.dart';
 import '../../../core/db/app_database.dart' show IgnoreRuleRow;
 import '../../../core/db/daos/capture_controls_dao.dart' show IgnoreChannel;
 import '../../../core/l10n/digits_mode.dart' show normalizeDigits;
@@ -511,7 +512,7 @@ class _IgnoredRow extends ConsumerWidget {
 
   String _title(String Function(String) render) {
     final bank = _bankName(banks, group.institutionCode, lang);
-    return group.last4 == null ? bank : '$bank •${render(group.last4!)}';
+    return formatAccountWithCard(bank, group.last4);
   }
 
   @override

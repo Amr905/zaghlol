@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:zaghlol/core/l10n/card_number.dart';
 import 'package:zaghlol/core/l10n/generated/app_localizations.dart';
 import 'package:zaghlol/features/capture/domain/capture_health.dart';
 import 'package:zaghlol/features/capture/domain/scan_plan.dart';
@@ -122,7 +123,7 @@ void main() {
       ],
     );
     await pump(t, c);
-    expect(find.text('CIB •9910'), findsOneWidget);
+    expect(find.text(formatAccountWithCard('CIB', '9910')), findsOneWidget);
     expect(find.text('Revolut'), findsOneWidget);
     expect(find.text('SMS, Notifications off'), findsOneWidget);
     expect(find.text('Notifications off'), findsOneWidget);
@@ -313,7 +314,7 @@ void main() {
       ),
     );
     expect(t.takeException(), isNull);
-    expect(find.textContaining('٩٩١٠'), findsOneWidget);
+    expect(find.textContaining('9910'), findsOneWidget);
     expect(
       Directionality.of(t.element(find.byKey(const Key('capture-sms')))),
       TextDirection.rtl,

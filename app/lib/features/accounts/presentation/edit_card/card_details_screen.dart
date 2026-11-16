@@ -676,7 +676,7 @@ class _Preview extends StatelessWidget {
   Widget build(BuildContext context) {
     final c = ZColors.of(context);
     final fg = c.onPrimary;
-    final tail = last4.isEmpty ? '' : digits.render(last4);
+    final tail = last4.isEmpty ? '' : normalizeDigits(last4);
     return Container(
       key: const Key('card-preview'),
       padding: const EdgeInsetsDirectional.all(ZSpacing.xl),

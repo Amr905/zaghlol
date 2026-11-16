@@ -13,6 +13,8 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:zaghlol_domain/zaghlol_domain.dart';
 
+import '../../../../core/ui/bank_name_text.dart';
+import '../../../../core/l10n/card_number.dart';
 import '../../../../core/l10n/digits_mode.dart';
 import '../../../../core/l10n/generated/app_localizations.dart';
 import '../../../../core/l10n/locale_providers.dart';
@@ -286,8 +288,11 @@ class _ReviewScreenState extends ConsumerState<ReviewScreen> {
 
   /// SMS-fuzzy: one tap saves a complete generic suggestion, then offers to
   /// teach Zaghlol this message shape (custom template, T-164).
-  Future<void> _confirmGeneric(MessageCardModel card) async {
-    final saved = await _actions.confirmGeneric(card);
+  Future<void> _confirmGeneric(
+    MessageCardModel card, {
+    bool keep = false,
+  }) async {
+    final saved = await _actions.confirmGeneric(card, keep: keep);
     final rawId = card.rawMessageId;
     if (!saved || !mounted) return;
     final l10n = AppLocalizations.of(context);
@@ -347,6 +352,7 @@ class _ReviewScreenState extends ConsumerState<ReviewScreen> {
             ? _confirmGeneric(card)
             : _actions.accept(card.itemId),
       ),
+      onKeep: () => _now(() => _confirmGeneric(card, keep: true)),
       onEdit: () => context.push(AppRoutes.add),
       onDismiss: () => _dismiss(card.itemId),
       onRequestBank: () => _requestBank(card),
@@ -421,7 +427,11 @@ String _money(BuildContext context, Money m) {
 
 /// Everything a one-tap Confirm stores beyond the guess line: the kind,
 /// the date and the account (bank + last-4, or the bank's account).
-String _oneTapDetails(BuildContext context, MessageCardModel card) {
+String _oneTapDetails(
+  BuildContext context,
+  MessageCardModel card, {
+  String? bankName,
+}) {
   final l10n = AppLocalizations.of(context);
   final lang = Localizations.localeOf(context).languageCode;
   final DigitsMode digits = ProviderScope.containerOf(context)
@@ -434,11 +444,11 @@ String _oneTapDetails(BuildContext context, MessageCardModel card) {
     _ => l10n.commonTxnTypeExpense,
   };
   final when = card.occurredAt;
-  final bank = _iso(card.bankLabel ?? card.sender);
+  final bank = _iso(bankName ?? card.bankLabel ?? card.sender);
   final last4 = card.last4;
   final account = last4 == null
       ? '$bank · ${l10n.commonAccountTypeAccount}'
-      : '$bank •${digits.render(last4)}';
+      : formatAccountWithCard(bank, last4);
   return [
     kind,
     if (when != null) ZDateFormat.date(when, lang, digits),
@@ -665,12 +675,14 @@ class _MessageCard extends StatelessWidget {
   const _MessageCard({
     required this.card,
     required this.onConfirm,
+    required this.onKeep,
     required this.onEdit,
     required this.onDismiss,
     required this.onRequestBank,
   });
   final MessageCardModel card;
   final VoidCallback onConfirm;
+  final VoidCallback onKeep;
   final VoidCallback onEdit;
   final VoidCallback onDismiss;
   final VoidCallback onRequestBank;
@@ -698,6 +710,15 @@ class _MessageCard extends StatelessWidget {
           expand: true,
           onPressed: onConfirm,
         ),
+      // PO 2026-11-16: a doubtful message can be saved as shown in one tap.
+      if (card.txnId == null && !card.oneTap)
+        ZButton(
+          key: const ValueKey('reviewKeep'),
+          label: l10n.ingestionReviewKeep,
+          haptic: ZHaptic.medium,
+          expand: true,
+          onPressed: card.amount != null && card.keepable ? onKeep : null,
+        ),
       ZButton(
         label: card.canConfirm
             ? l10n.commonActionEdit
@@ -722,10 +743,13 @@ class _MessageCard extends StatelessWidget {
           Row(
             children: [
               Expanded(
-                child: Text(
-                  card.unreadable
-                      ? l10n.ingestionReviewUnreadTitle(_iso(card.sender))
-                      : l10n.ingestionReviewGenFrom(_iso(card.sender)),
+                child: BankNameText(
+                  name: card.sender,
+                  institutionCode: card.institutionCode,
+                  maxLines: 2,
+                  compose: (n) => card.unreadable
+                      ? l10n.ingestionReviewUnreadTitle(_iso(n))
+                      : l10n.ingestionReviewGenFrom(_iso(n)),
                   style: ZType.body.copyWith(color: c.textMuted),
                 ),
               ),
@@ -741,10 +765,13 @@ class _MessageCard extends StatelessWidget {
           if (guess != null) ...[
             const SizedBox(height: ZSpacing.sm),
             Text(guess, style: ZType.title.copyWith(color: c.text)),
-            if (card.oneTap)
-              Text(
-                _oneTapDetails(context, card),
-                key: const ValueKey('reviewOneTapDetails'),
+            if (card.oneTap || card.keepable)
+              BankNameText(
+                textKey: const ValueKey('reviewOneTapDetails'),
+                name: card.bankLabel ?? card.sender,
+                institutionCode: card.institutionCode,
+                maxLines: 3,
+                compose: (n) => _oneTapDetails(context, card, bankName: n),
                 style: ZType.body.copyWith(color: c.text),
               ),
             Text(
@@ -752,17 +779,49 @@ class _MessageCard extends StatelessWidget {
               style: ZType.body.copyWith(color: c.textMuted),
             ),
           ],
+          if (card.txnId == null && !card.oneTap && !card.keepable)
+            Padding(
+              padding: const EdgeInsetsDirectional.only(top: ZSpacing.sm),
+              child: Text(
+                key: const ValueKey('reviewKeepReason'),
+                card.amount == null
+                    ? l10n.ingestionReviewKeepNoAmount
+                    : l10n.ingestionReviewKeepMissing,
+                style: ZType.bodySmall.copyWith(color: c.textMuted),
+              ),
+            ),
           if (card.originalText != null)
             _OriginalText(text: card.originalText!),
           const SizedBox(height: ZSpacing.lg),
-          Row(
-            children: [
-              for (var i = 0; i < actions.length; i++) ...[
-                if (i > 0) const SizedBox(width: ZSpacing.sm),
-                Expanded(child: actions[i]),
+          if (actions.length > 2) ...[
+            // Three actions never fit side by side at large text: the main
+            // one takes the full width, the other two share the next line
+            // (or stack when the text is scaled up).
+            actions.first,
+            const SizedBox(height: ZSpacing.sm),
+            if (MediaQuery.textScalerOf(context).scale(16) > 18)
+              for (var i = 1; i < actions.length; i++) ...[
+                if (i > 1) const SizedBox(height: ZSpacing.sm),
+                actions[i],
+              ]
+            else
+              Row(
+                children: [
+                  for (var i = 1; i < actions.length; i++) ...[
+                    if (i > 1) const SizedBox(width: ZSpacing.sm),
+                    Expanded(child: actions[i]),
+                  ],
+                ],
+              ),
+          ] else
+            Row(
+              children: [
+                for (var i = 0; i < actions.length; i++) ...[
+                  if (i > 0) const SizedBox(width: ZSpacing.sm),
+                  Expanded(child: actions[i]),
+                ],
               ],
-            ],
-          ),
+            ),
           if (card.sender.isNotEmpty)
             Align(
               alignment: AlignmentDirectional.centerStart,
@@ -780,9 +839,16 @@ class _MessageCard extends StatelessWidget {
 
 /// SMS-AUTO: the original message, collapsed. The text stays on screen only
 /// (selectable; the text's own script decides its direction).
-class _OriginalText extends StatelessWidget {
+class _OriginalText extends StatefulWidget {
   const _OriginalText({required this.text});
   final String text;
+
+  @override
+  State<_OriginalText> createState() => _OriginalTextState();
+}
+
+class _OriginalTextState extends State<_OriginalText> {
+  bool _open = false;
 
   @override
   Widget build(BuildContext context) {
@@ -795,15 +861,16 @@ class _OriginalText extends StatelessWidget {
         tilePadding: EdgeInsets.zero,
         childrenPadding: EdgeInsets.zero,
         expandedCrossAxisAlignment: CrossAxisAlignment.start,
-        // TODO(SMS-AUTO): own copy-deck keys (show/hide original message);
-        // interim reuse of the existing "Show message" label.
+        onExpansionChanged: (v) => setState(() => _open = v),
         title: Text(
-          l10n.ingestionReviewUnreadShow,
+          _open
+              ? l10n.ingestionReviewHideOriginal
+              : l10n.ingestionReviewShowOriginal,
           style: ZType.body.copyWith(color: c.textMuted),
         ),
         children: [
           SelectableText(
-            text,
+            widget.text,
             key: const ValueKey('reviewOriginalBody'),
             style: ZType.bodySmall.copyWith(color: c.text),
           ),

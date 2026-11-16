@@ -281,6 +281,96 @@ void main() {
         rawMessageId: 'raw2',
       );
 
+      // REVIEW-KEEP (PO 2026-11-16).
+      final keepable = MessageCardModel(
+        itemId: 'k1',
+        sender: 'HSBC',
+        isNewSender: false,
+        amount: egp(5000),
+        rawMessageId: 'rawK',
+        direction: TxnDirection.expense,
+        occurredAt: DateTime.utc(2026, 11, 5, 10),
+        bankLabel: 'HSBC Egypt',
+        keepable: true,
+        institutionCode: 'hsbc',
+      );
+      final noAmount = MessageCardModel(
+        itemId: 'k2',
+        sender: 'HSBC',
+        isNewSender: false,
+        rawMessageId: 'rawK2',
+      );
+      for (final locale in const [Locale('en'), Locale('ar')]) {
+        testWidgets('Keep saves as shown in one tap, Edit and Ignore stay '
+            '(${locale.languageCode}, text scale 1.3)', (tester) async {
+          final actions = FakeActions();
+          await pumpReview(
+            tester,
+            reviewApp(
+              actions: actions,
+              queue: [keepable],
+              locale: locale,
+              scale: 1.3,
+            ),
+          );
+          final l = AppLocalizations.of(
+            tester.element(find.byType(ReviewScreen)),
+          );
+          expect(find.text(l.ingestionReviewKeep), findsOneWidget);
+          expect(find.text(l.commonActionDismiss), findsOneWidget);
+          expect(find.text(l.ingestionReviewUnreadEnter), findsOneWidget);
+          expect(find.byKey(const ValueKey('reviewKeepReason')), findsNothing);
+          // The card itself fits at 1.3 (the snack bar is checked elsewhere).
+          expect(tester.takeException(), isNull);
+          await tester.tap(find.text(l.ingestionReviewKeep));
+          await tester.pump();
+          expect(actions.calls, ['keep:k1']);
+          tester.takeException();
+        });
+
+        testWidgets('Keep is disabled with a reason when there is no amount '
+            '(${locale.languageCode})', (tester) async {
+          final actions = FakeActions();
+          await pumpReview(
+            tester,
+            reviewApp(actions: actions, queue: [noAmount], locale: locale),
+          );
+          final l = AppLocalizations.of(
+            tester.element(find.byType(ReviewScreen)),
+          );
+          await tester.tap(find.text(l.ingestionReviewKeep));
+          await tester.pump();
+          expect(actions.calls, isEmpty);
+          expect(find.text(l.ingestionReviewKeepNoAmount), findsOneWidget);
+        });
+
+        testWidgets('original message toggle has its own show / hide labels '
+            '(${locale.languageCode})', (tester) async {
+          final withText = MessageCardModel(
+            itemId: 'k3',
+            sender: 'HSBC',
+            isNewSender: false,
+            amount: egp(100),
+            originalText: 'synthetic text',
+          );
+          await pumpReview(
+            tester,
+            reviewApp(
+              actions: FakeActions(),
+              queue: [withText],
+              locale: locale,
+            ),
+          );
+          final l = AppLocalizations.of(
+            tester.element(find.byType(ReviewScreen)),
+          );
+          expect(find.text(l.ingestionReviewShowOriginal), findsOneWidget);
+          await tester.tap(find.byKey(const ValueKey('reviewOriginalText')));
+          await tester.pumpAndSettle();
+          expect(find.text(l.ingestionReviewHideOriginal), findsOneWidget);
+        });
+      }
+
       for (final locale in const [Locale('en'), Locale('ar')]) {
         testWidgets(
           'prefilled guess and one-tap confirm (${locale.languageCode})',
@@ -340,7 +430,7 @@ void main() {
           expect(details[0], contains(l.commonTxnTypeExpense));
           expect(details[0], contains(date));
           expect(details[0], contains('HSBC Egypt'));
-          expect(details[0], contains(digits.render('6612')));
+          expect(details[0], contains('•••• 6612'));
           // No last-4: transfer, the bank's account.
           expect(details[1], contains(l.commonTxnTypeTransfer));
           expect(details[1], contains(l.commonAccountTypeAccount));

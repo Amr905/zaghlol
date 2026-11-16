@@ -2488,6 +2488,26 @@
   "@ingestionReviewUnreadShow": {
     "description": "B · raw text on screen only"
   },
+  "ingestionReviewShowOriginal": "شوف الرسالة الأصلية",
+  "@ingestionReviewShowOriginal": {
+    "description": "B · expands the original SMS text on the review card"
+  },
+  "ingestionReviewHideOriginal": "اخفي الرسالة الأصلية",
+  "@ingestionReviewHideOriginal": {
+    "description": "B · collapses the original SMS text"
+  },
+  "ingestionReviewKeep": "احفظها",
+  "@ingestionReviewKeep": {
+    "description": "B · saves a doubtful suggestion exactly as shown, one tap"
+  },
+  "ingestionReviewKeepNoAmount": "مش هينفع أحفظها: مفيش مبلغ",
+  "@ingestionReviewKeepNoAmount": {
+    "description": "B · reason Keep is disabled (no amount read)"
+  },
+  "ingestionReviewKeepMissing": "مش هينفع أحفظها: البنك أو النوع مش واضح",
+  "@ingestionReviewKeepMissing": {
+    "description": "B · reason Keep is disabled (bank, kind or channel unknown)"
+  },
   "ingestionReviewUnreadEnter": "اكتب التفاصيل",
   "@ingestionReviewUnreadEnter": {
     "description": "B · opens S-13 with transactions_edit_rawTitle"
@@ -8271,7 +8291,7 @@
   "@goldPaywallHeadline": {
     "description": "T"
   },
-  "goldPaywallBenefitCharts": "كل الشارتات الاتناشر مع تحليل أعمق",
+  "goldPaywallBenefitCharts": "تحليل أعمق للشارتات: قارن بالدورة اللي فاتت واعرف هتخلص فين",
   "@goldPaywallBenefitCharts": {
     "description": "S"
   },

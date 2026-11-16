@@ -59,6 +59,7 @@ class ZListRow extends StatelessWidget {
     super.key,
     required this.title,
     this.subtitle,
+    this.subtitleWidget,
     this.leading,
     this.trailing,
     this.onTap,
@@ -69,6 +70,10 @@ class ZListRow extends StatelessWidget {
 
   final String title;
   final String? subtitle;
+
+  /// Replaces [subtitle] when the caller builds its own line (it should be
+  /// muted [ZType.bodySmall]); [subtitle] is still the semantics text.
+  final Widget? subtitleWidget;
   final Widget? leading;
   final Widget? trailing;
   final VoidCallback? onTap;
@@ -85,7 +90,9 @@ class ZListRow extends StatelessWidget {
   Widget build(BuildContext context) {
     final c = ZColors.of(context);
     final row = ConstrainedBox(
-      constraints: BoxConstraints(minHeight: subtitle == null ? 56 : 72),
+      constraints: BoxConstraints(
+        minHeight: subtitle == null && subtitleWidget == null ? 56 : 72,
+      ),
       child: Padding(
         padding: const EdgeInsetsDirectional.symmetric(
           horizontal: ZSpacing.lg,
@@ -108,7 +115,9 @@ class ZListRow extends StatelessWidget {
                     maxLines: 2,
                     overflow: TextOverflow.ellipsis,
                   ),
-                  if (subtitle != null)
+                  if (subtitleWidget != null)
+                    subtitleWidget!
+                  else if (subtitle != null)
                     Text(
                       subtitle!,
                       style: ZType.bodySmall.copyWith(color: c.textMuted),

@@ -3,43 +3,53 @@
   "institutions": {
     "aaib": {
       "brandColor": "#00539B",
-      "logoAsset": null
+      "logoAsset": null,
+      "acronym": "AAIB"
     },
     "abe": {
       "brandColor": null,
-      "logoAsset": null
+      "logoAsset": null,
+      "acronym": "ABE"
     },
     "abk": {
       "brandColor": null,
-      "logoAsset": null
+      "logoAsset": null,
+      "acronym": "ABK"
     },
     "adcb": {
       "brandColor": "#D3202F",
-      "logoAsset": null
+      "logoAsset": null,
+      "acronym": "ADCB"
     },
     "adib": {
       "brandColor": "#00573F",
-      "logoAsset": null
+      "logoAsset": null,
+      "acronym": "ADIB"
     },
     "aib": {
       "brandColor": null,
-      "logoAsset": null
+      "logoAsset": null,
+      "acronym": "AIB"
     },
     "aibk": {
       "brandColor": null,
-      "logoAsset": null
+      "logoAsset": null,
+      "acronym": "AIBK"
     },
     "al_baraka": {
       "brandColor": null,
-      "logoAsset": null
+      "logoAsset": null,
+      "acronym": "ALBARAKA"
     },
     "alexbank": {
       "brandColor": "#E30613",
-      "logoAsset": null
+      "logoAsset": null,
+      "acronym": "ALEXBANK"
     },
     "alrajhi": {
       "brandColor": null,
-      "logoAsset": null
+      "logoAsset": null,
+      "acronym": "RJHI"
     },
     "aman": {
       "brandColor": null,
@@ -47,31 +57,38 @@
     },
     "arab_bank": {
       "brandColor": null,
-      "logoAsset": null
+      "logoAsset": null,
+      "acronym": "AB"
     },
     "attijariwafa": {
       "brandColor": null,
-      "logoAsset": null
+      "logoAsset": null,
+      "acronym": "AWB"
     },
     "bank_abc": {
       "brandColor": null,
-      "logoAsset": null
+      "logoAsset": null,
+      "acronym": "ABC"
     },
     "bank_nxt": {
       "brandColor": null,
-      "logoAsset": null
+      "logoAsset": null,
+      "acronym": "NXT"
     },
     "banque_du_caire": {
       "brandColor": null,
-      "logoAsset": null
+      "logoAsset": null,
+      "acronym": "BDC"
     },
     "banque_misr": {
       "brandColor": "#8B1E3F",
-      "logoAsset": null
+      "logoAsset": null,
+      "acronym": "BM"
     },
     "blom": {
       "brandColor": null,
-      "logoAsset": null
+      "logoAsset": null,
+      "acronym": "BLOM"
     },
     "bunq": {
       "brandColor": null,
@@ -79,11 +96,13 @@
     },
     "cib": {
       "brandColor": "#0B3C8C",
-      "logoAsset": null
+      "logoAsset": null,
+      "acronym": "CIB"
     },
     "citibank": {
       "brandColor": "#056DAE",
-      "logoAsset": null
+      "logoAsset": null,
+      "acronym": "CITI"
     },
     "contact": {
       "brandColor": "#E31E24",
@@ -91,27 +110,33 @@
     },
     "credit_agricole": {
       "brandColor": null,
-      "logoAsset": null
+      "logoAsset": null,
+      "acronym": "CAE"
     },
     "ealb": {
       "brandColor": null,
-      "logoAsset": null
+      "logoAsset": null,
+      "acronym": "EALB"
     },
     "ebank": {
       "brandColor": null,
-      "logoAsset": null
+      "logoAsset": null,
+      "acronym": "EBank"
     },
     "egbank": {
       "brandColor": null,
-      "logoAsset": null
+      "logoAsset": null,
+      "acronym": "EGB"
     },
     "emirates_nbd": {
       "brandColor": "#E31B23",
-      "logoAsset": null
+      "logoAsset": null,
+      "acronym": "ENBD"
     },
     "enbd": {
       "brandColor": "#E31B23",
-      "logoAsset": null
+      "logoAsset": null,
+      "acronym": "ENBD"
     },
     "etisalat_cash": {
       "brandColor": "#6BB43F",
@@ -119,11 +144,13 @@
     },
     "fabmisr": {
       "brandColor": null,
-      "logoAsset": null
+      "logoAsset": null,
+      "acronym": "FAB"
     },
     "faisal_bank": {
       "brandColor": "#00796B",
-      "logoAsset": null
+      "logoAsset": null,
+      "acronym": "FIB"
     },
     "forsa": {
       "brandColor": null,
@@ -131,19 +158,23 @@
     },
     "hdb": {
       "brandColor": "#1B5E9E",
-      "logoAsset": null
+      "logoAsset": null,
+      "acronym": "HDB"
     },
     "hdfc": {
       "brandColor": null,
-      "logoAsset": null
+      "logoAsset": null,
+      "acronym": "HDFC"
     },
     "hsbc": {
       "brandColor": "#DB0011",
-      "logoAsset": null
+      "logoAsset": null,
+      "acronym": "HSBC"
     },
     "idb": {
       "brandColor": null,
-      "logoAsset": null
+      "logoAsset": null,
+      "acronym": "IDB"
     },
     "instapay": {
       "brandColor": "#6C2C91",
@@ -151,7 +182,8 @@
     },
     "kfh": {
       "brandColor": "#00704A",
-      "logoAsset": null
+      "logoAsset": null,
+      "acronym": "KFH"
     },
     "liv": {
       "brandColor": null,
@@ -159,11 +191,13 @@
     },
     "mashreq": {
       "brandColor": "#F26B21",
-      "logoAsset": null
+      "logoAsset": null,
+      "acronym": "MASH"
     },
     "midbank": {
       "brandColor": null,
-      "logoAsset": null
+      "logoAsset": null,
+      "acronym": "MIDBANK"
     },
     "monzo": {
       "brandColor": "#EB4E5F",
@@ -179,11 +213,13 @@
     },
     "nbe": {
       "brandColor": "#006A4E",
-      "logoAsset": null
+      "logoAsset": null,
+      "acronym": "NBE"
     },
     "nbk": {
       "brandColor": "#00539B",
-      "logoAsset": null
+      "logoAsset": null,
+      "acronym": "NBK"
     },
     "onebank_yalla": {
       "brandColor": null,
@@ -203,7 +239,8 @@
     },
     "qnb": {
       "brandColor": "#8A1538",
-      "logoAsset": null
+      "logoAsset": null,
+      "acronym": "QNB"
     },
     "revolut": {
       "brandColor": "#0666EB",
@@ -211,7 +248,8 @@
     },
     "saib": {
       "brandColor": null,
-      "logoAsset": null
+      "logoAsset": null,
+      "acronym": "SAIB"
     },
     "shahry": {
       "brandColor": null,
@@ -223,7 +261,8 @@
     },
     "suez_canal_bank": {
       "brandColor": null,
-      "logoAsset": null
+      "logoAsset": null,
+      "acronym": "SCB"
     },
     "sympl": {
       "brandColor": null,
@@ -235,7 +274,8 @@
     },
     "united_bank": {
       "brandColor": null,
-      "logoAsset": null
+      "logoAsset": null,
+      "acronym": "UB"
     },
     "valu": {
       "brandColor": "#F26522",
@@ -247,7 +287,8 @@
     },
     "warba": {
       "brandColor": null,
-      "logoAsset": null
+      "logoAsset": null,
+      "acronym": "WARBA"
     },
     "we_pay": {
       "brandColor": "#5E2A84",

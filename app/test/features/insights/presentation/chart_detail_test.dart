@@ -98,6 +98,10 @@ Future<void> _typed(WidgetTester t) async {
 }
 
 void main() {
+  // CHARTS-FREE: these tests cover the Gold gate itself, so close it.
+  setUp(() => GoldGate.chartsOpenToFree = false);
+  tearDown(() => GoldGate.chartsOpenToFree = true);
+
   for (final locale in const [_en, _ar]) {
     final tag = locale.languageCode;
 
