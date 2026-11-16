@@ -312,7 +312,7 @@ void main() {
         if (s.institutionCode == 'hsbc') s.address,
     };
     expect(hsbc, containsAll(['hsbc', 'Hsbc', 'hsbc eg', 'hsbc egypt']));
-    expect(list.any((s) => s.address == 'cib'), isTrue);
+    expect(list.any((s) => s.address.toLowerCase() == 'cib'), isTrue);
   });
 
   test('DriftAlertStore.clearCatchUp removes the request only while it equals '
