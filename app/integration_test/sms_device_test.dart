@@ -65,6 +65,16 @@ void main() {
     }
   }
 
+  /// Evaluates a finder only between frames; a tree walk can hit a viewport
+  /// whose children are mid-layout and throw, which counts as "not yet".
+  bool safeFound(Finder f) {
+    try {
+      return f.evaluate().isNotEmpty;
+    } on TypeError {
+      return false;
+    }
+  }
+
   Future<void> settle(WidgetTester t, [int ms = 800]) async {
     for (var i = 0; i < ms ~/ 100; i++) {
       await t.pump(const Duration(milliseconds: 100));
@@ -232,8 +242,7 @@ void main() {
 
     await app.main();
     final end = DateTime.now().add(const Duration(seconds: 40));
-    while (find.text('Home').evaluate().isEmpty &&
-        DateTime.now().isBefore(end)) {
+    while (!safeFound(find.text('Home')) && DateTime.now().isBefore(end)) {
       await t.pump(const Duration(milliseconds: 200));
     }
     await settle(t, 1500);
@@ -341,18 +350,20 @@ void main() {
     var found = false;
     for (var i = 0; i < 50 && !found; i++) {
       await t.pump(const Duration(milliseconds: 200));
-      found = find.text('Settings').evaluate().isNotEmpty;
+      await t.pump();
+      found = safeFound(find.text('Settings'));
     }
     await settle(t, 800);
     Future<bool> reveal(String text) async {
       for (var i = 0; i < 12; i++) {
-        if (find.text(text).evaluate().isNotEmpty) {
+        await settle(t, 200);
+        if (safeFound(find.text(text))) {
           await t.ensureVisible(find.text(text).first);
           await settle(t, 300);
           return true;
         }
         final scrollables = find.byType(Scrollable);
-        if (scrollables.evaluate().isEmpty) break;
+        if (!safeFound(scrollables)) break;
         await t.drag(scrollables.first, const Offset(0, -300));
         await settle(t, 300);
       }
@@ -368,7 +379,7 @@ void main() {
         await t.tap(find.text('SMS diagnostics').first);
         await settle(t, 1500);
         check(
-          find.byKey(const Key('sms-diag-sender-HSBC')).evaluate().isNotEmpty,
+          safeFound(find.byKey(const Key('sms-diag-sender-HSBC'))),
           'the diagnostics screen lists HSBC',
         );
         await shot(t, 'sms-02-diagnostics');

@@ -325,7 +325,8 @@ void main() {
           await tester.tap(find.text(l.ingestionReviewKeep));
           await tester.pump();
           expect(actions.calls, ['keep:k1']);
-          tester.takeException();
+          await tester.pump(const Duration(milliseconds: 300));
+          expect(tester.takeException(), isNull);
         });
 
         testWidgets('Keep is disabled with a reason when there is no amount '

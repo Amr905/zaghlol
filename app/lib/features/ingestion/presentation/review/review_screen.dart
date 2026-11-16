@@ -300,16 +300,27 @@ class _ReviewScreenState extends ConsumerState<ReviewScreen> {
       SnackBar(
         // TODO(SMS-fuzzy): copy-deck keys ingestionReviewGenSaved and
         // ingestionReviewGenMakeTemplate (T-087 branch); interim reuse.
-        content: Text(l10n.accountsEditSaved),
-        action: rawId == null
-            ? null
-            : SnackBarAction(
-                label: l10n.templatesBuilderTitle,
-                onPressed: () {
-                  ZHaptics.light();
-                  unawaited(_learn(rawId));
-                },
+        // The teach button lives in the content (its label wraps) instead of
+        // a SnackBarAction, whose label overflowed at 1.3x in English.
+        content: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(l10n.accountsEditSaved),
+            if (rawId != null)
+              Align(
+                alignment: AlignmentDirectional.centerStart,
+                child: TextButton(
+                  onPressed: () {
+                    ZHaptics.light();
+                    ScaffoldMessenger.of(context).hideCurrentSnackBar();
+                    unawaited(_learn(rawId));
+                  },
+                  child: Text(l10n.templatesBuilderTitle),
+                ),
               ),
+          ],
+        ),
       ),
     );
   }

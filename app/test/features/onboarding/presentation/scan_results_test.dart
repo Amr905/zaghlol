@@ -103,6 +103,36 @@ Widget host(
 );
 
 void main() {
+  testWidgets('embedded in a scroll view: no layout exception', (t) async {
+    await t.pumpWidget(
+      ProviderScope(
+        overrides: [
+          scanResultsProvider.overrideWith((ref) async => sample),
+          languageProvider.overrideWith((ref) => Stream.value(LanguagePref.ar)),
+          digitsProvider.overrideWith((ref) => Stream.value(DigitsPref.auto)),
+        ],
+        child: MaterialApp(
+          theme: ZaghlolTheme.light,
+          locale: const Locale('ar'),
+          localizationsDelegates: AppLocalizations.localizationsDelegates,
+          supportedLocales: AppLocalizations.supportedLocales,
+          home: Scaffold(
+            body: SingleChildScrollView(
+              child: Padding(
+                padding: const EdgeInsets.all(8),
+                child: ScanResultsScreen(asSheet: true, onDone: () {}),
+              ),
+            ),
+          ),
+        ),
+      ),
+    );
+    await t.pump();
+    await t.pump(const Duration(milliseconds: 300));
+    expect(t.takeException(), isNull);
+    expect(find.byKey(const ValueKey('scan-show-me')), findsOneWidget);
+  });
+
   for (final lang in ['ar', 'en']) {
     group(lang, () {
       testWidgets('populated at 1.3x: stats, cards, credit prompt', (
