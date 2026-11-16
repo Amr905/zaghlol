@@ -27,3 +27,12 @@ public sealed record SupportPurchaseDto(
     bool? IsBuyingInstall,
     DateTimeOffset? DisputeFrozenUntil,
     int RebindsLast30Days);
+
+/// <summary>OpenAPI <c>SupportSeatMoveResult</c> (T-186). <c>nextMoveAt</c> is written as <c>null</c> when no cooldown runs.</summary>
+public sealed record SupportSeatMoveResultDto(Guid PurchaseId, bool Moved, bool Attached, DateTimeOffset? NextMoveAt, long AuditId);
+
+/// <summary>OpenAPI <c>SupportDetachResult</c> (T-186).</summary>
+public sealed record SupportDetachResultDto(Guid PurchaseId, bool Detached, long AuditId);
+
+/// <summary>OpenAPI <c>SupportUnfreezeResult</c> (T-186).</summary>
+public sealed record SupportUnfreezeResultDto(Guid PurchaseId, bool Unfrozen, long AuditId);

@@ -229,3 +229,153 @@ public sealed record ContributionDecisionAudit(
         }
     }
 }
+
+/// <summary>The ownership-check outcomes an audit row can name (backend-api 5.3 <c>ownership_outcome</c>).</summary>
+public static class SupportOwnershipOutcomes
+{
+    public const string Pass = "pass";
+    public const string Fail = "fail";
+    public const string Unavailable = "unavailable";
+    public const string NotRun = "not_run";
+}
+
+/// <summary>The <c>outcome</c> values of the three support audit rows (backend-api 5.3).</summary>
+public static class SupportOutcomes
+{
+    public const string Moved = "moved";
+    public const string Attached = "attached";
+    public const string MovedAndAttached = "moved_and_attached";
+    public const string Detached = "detached";
+    public const string Unfrozen = "unfrozen";
+    public const string Noop = "noop";
+    public const string Refused = "refused";
+    public const string DisputeFrozen = "dispute_frozen";
+    public const string OwnershipFailed = "ownership_failed";
+    public const string UpstreamUnavailable = "upstream_unavailable";
+}
+
+/// <summary>The support ticket number: never free text, so no personal data can enter an audit row.</summary>
+public static partial class SupportTicketRef
+{
+    public static bool IsValid(string? value) => value is not null && Pattern().IsMatch(value);
+
+    internal static string Require(string value) =>
+        IsValid(value) ? value : throw new ArgumentException("The ticket reference is not a ticket number.", nameof(value));
+
+    [System.Text.RegularExpressions.GeneratedRegex(@"^[A-Za-z0-9_-]{1,32}\z")]
+    private static partial System.Text.RegularExpressions.Regex Pattern();
+}
+
+/// <summary>
+/// <c>support_seat_move</c> (backend-api 5.3): one row per call, successful or refused. Install IDs and the account ID are pseudonymous;
+/// the order ID has no member here, only the ownership-check outcome.
+/// </summary>
+public sealed record SupportSeatMoveAudit(
+    Guid PurchaseId,
+    Guid? FromInstall,
+    Guid ToInstall,
+    string ReasonCode,
+    string TicketRef,
+    Guid? AttachedAccountId,
+    long? CorrectsAuditId,
+    string OwnershipOutcome,
+    string Outcome) : AuditEntry
+{
+    public override string Action => "support_seat_move";
+
+    public override string Target => PurchaseId.ToString("D");
+
+    private protected override void WriteDetails(Utf8JsonWriter writer)
+    {
+        if (FromInstall is { } from)
+        {
+            writer.WriteString("from_install", from);
+        }
+
+        writer.WriteString("to_install", ToInstall);
+        writer.WriteString("reason_code", ReasonCode);
+        writer.WriteString("ticket_ref", SupportTicketRef.Require(TicketRef));
+        if (AttachedAccountId is { } account)
+        {
+            writer.WriteString("attached_account_id", account);
+        }
+
+        if (CorrectsAuditId is { } corrects)
+        {
+            writer.WriteNumber("corrects_audit_id", corrects);
+        }
+
+        writer.WriteString("ownership_check", "order_id");
+        writer.WriteString("ownership_outcome", OwnershipOutcome);
+        writer.WriteString("outcome", Outcome);
+    }
+}
+
+/// <summary><c>support_detach</c> (backend-api 5.3): the correction that removes a support link.</summary>
+public sealed record SupportDetachAudit(
+    Guid PurchaseId,
+    Guid? DetachedAccountId,
+    string TicketRef,
+    long CorrectsAuditId,
+    string OwnershipOutcome,
+    string Outcome) : AuditEntry
+{
+    public override string Action => "support_detach";
+
+    public override string Target => PurchaseId.ToString("D");
+
+    private protected override void WriteDetails(Utf8JsonWriter writer)
+    {
+        writer.WriteString("reason_code", "correction");
+        writer.WriteString("ticket_ref", SupportTicketRef.Require(TicketRef));
+        if (DetachedAccountId is { } account)
+        {
+            writer.WriteString("detached_account_id", account);
+        }
+
+        writer.WriteNumber("corrects_audit_id", CorrectsAuditId);
+        writer.WriteString("ownership_check", "order_id");
+        writer.WriteString("ownership_outcome", OwnershipOutcome);
+        writer.WriteString("outcome", Outcome);
+    }
+}
+
+/// <summary><c>support_unfreeze</c> (backend-api 5.3, R5-5(b)): the correction row that started the freeze and the value that was cleared.</summary>
+public sealed record SupportUnfreezeAudit(
+    Guid PurchaseId,
+    string TicketRef,
+    long? FreezeAuditId,
+    DateTimeOffset? FrozenUntil,
+    string OwnershipOutcome,
+    string Outcome) : AuditEntry
+{
+    public override string Action => "support_unfreeze";
+
+    public override string Target => PurchaseId.ToString("D");
+
+    private protected override void WriteDetails(Utf8JsonWriter writer)
+    {
+        writer.WriteString("ticket_ref", SupportTicketRef.Require(TicketRef));
+        if (FreezeAuditId is { } id)
+        {
+            writer.WriteNumber("freeze_audit_id", id);
+        }
+        else
+        {
+            writer.WriteNull("freeze_audit_id");
+        }
+
+        if (FrozenUntil is { } until)
+        {
+            writer.WriteString("frozen_until", until.UtcDateTime.ToString("yyyy-MM-dd'T'HH:mm:ss.FFFFFFF'Z'", CultureInfo.InvariantCulture));
+        }
+        else
+        {
+            writer.WriteNull("frozen_until");
+        }
+
+        writer.WriteString("ownership_check", "order_id");
+        writer.WriteString("ownership_outcome", OwnershipOutcome);
+        writer.WriteString("outcome", Outcome);
+    }
+}

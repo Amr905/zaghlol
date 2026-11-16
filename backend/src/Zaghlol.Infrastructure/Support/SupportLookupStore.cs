@@ -9,6 +9,7 @@ using Zaghlol.Application.Support;
 using Zaghlol.Domain;
 using Zaghlol.Infrastructure.Audit;
 using Zaghlol.Infrastructure.Kms;
+using Zaghlol.Infrastructure.Observability;
 using Zaghlol.Infrastructure.Persistence;
 
 namespace Zaghlol.Infrastructure.Support;
@@ -173,8 +174,17 @@ public static class SupportServiceCollectionExtensions
         ArgumentNullException.ThrowIfNull(services);
 
         services.TryAddSingleton(TimeProvider.System);
+        services.TryAddSingleton<ZaghlolMetrics>();
+        services.TryAddSingleton<IAlertSignal, AlertSignal>();
         services.AddZaghlolAudit();
         services.TryAddSingleton<ISupportLookupStore, SupportLookupStore>();
+
+        // The audited writes (T-186). Needs AddZaghlolSeats, AddZaghlolSeatKeys and AddZaghlolPurchaseVerification (the order lookups).
+        services.TryAddSingleton<ISupportActionStore, SupportActionStore>();
+        services.TryAddSingleton<ISupportAlerts, SupportAlerts>();
+        // Transient: they hold the order lookups, which hold typed store HttpClients.
+        services.TryAddTransient<ISupportOwnershipCheck, SupportOwnershipCheck>();
+        services.TryAddTransient<SupportActionService>();
         return services;
     }
 }
