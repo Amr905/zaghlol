@@ -323,26 +323,41 @@ void main() {
     var found = false;
     for (var i = 0; i < 50 && !found; i++) {
       await t.pump(const Duration(milliseconds: 200));
-      found = find.text('About').evaluate().isNotEmpty;
+      found = find.text('Settings').evaluate().isNotEmpty;
     }
-    if (found) {
-      await t.ensureVisible(find.text('About').first);
+    await settle(t, 800);
+    Future<bool> reveal(String text) async {
+      for (var i = 0; i < 12; i++) {
+        if (find.text(text).evaluate().isNotEmpty) {
+          await t.ensureVisible(find.text(text).first);
+          await settle(t, 300);
+          return true;
+        }
+        final scrollables = find.byType(Scrollable);
+        if (scrollables.evaluate().isEmpty) break;
+        await t.drag(scrollables.first, const Offset(0, -300));
+        await settle(t, 300);
+      }
+      return false;
+    }
+
+    if (found && await reveal('About')) {
       await t.tap(find.text('About').first);
       await settle(t, 1200);
-      await t.ensureVisible(find.text('SMS diagnostics').first);
-      check(
-        find.text('SMS diagnostics').evaluate().isNotEmpty,
-        'About shows SMS diagnostics in the dev flavour',
-      );
-      await t.tap(find.text('SMS diagnostics').first);
-      await settle(t, 1500);
-      check(
-        find.byKey(const Key('sms-diag-sender-HSBC')).evaluate().isNotEmpty,
-        'the diagnostics screen lists HSBC',
-      );
-      await shot(t, 'sms-02-diagnostics');
+      final row = await reveal('SMS diagnostics');
+      check(row, 'About shows SMS diagnostics in the dev flavour');
+      if (row) {
+        await t.tap(find.text('SMS diagnostics').first);
+        await settle(t, 1500);
+        check(
+          find.byKey(const Key('sms-diag-sender-HSBC')).evaluate().isNotEmpty,
+          'the diagnostics screen lists HSBC',
+        );
+        await shot(t, 'sms-02-diagnostics');
+      }
     } else {
-      check(false, 'Settings opened');
+      check(false, 'Settings opened with an About row');
+      await shot(t, 'sms-02-settings-problem');
     }
     say('RESULT problems=${problems.length}');
     semantics.dispose();

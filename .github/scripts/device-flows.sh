@@ -28,12 +28,12 @@ adb -s "$DEVICE" logcat -c || true
 # ---- 0. SMS on the device (SMS-device): permissions by `pm grant`, synthetic
 # SMS before the first launch (historical inbox scan) and while the app runs
 # (live receiver), then the real app must have saved them. The emulator console
-# (`adb emu sms send`) only takes numeric sender ids (its sms.c rejects
-# letters), so the alphanumeric senders (HSBC, HSBC EG, CIB, NBE) are put in
-# the system inbox with `content insert` (the emulator image allows adb root)
-# and, for the live part, handed to the production intake by the devSms-only
-# DebugSmsInjectReceiver (same code path as the receiver from SmsIntake on).
-# One numeric sender goes through the emulator modem and the real receiver.
+# (`adb emu sms send`) is tried first for every sender, alphanumeric ones
+# included. If the console refuses a sender id, the fallbacks are: for the
+# historical part `content insert` into the system inbox (the emulator image
+# allows adb root); for the live part the devSms-only DebugSmsInjectReceiver,
+# which enters production code at SmsIntake (what the real receiver calls
+# after reading the PDUs).
 # Logs hold sender ids and counts, never a message body.
 HSBC_USD_H='Your Credit Card ending with * 5076 has been used for USD 115.00 on 09/11/2026 at ANTHROPIC* CLAUDE SUB. Your available limit is EGP 110096.30'
 HSBC_EGP_H='Your Credit Card ending with * 9376 has been used for EGP 1959.40 on 08/11/2026 at UDEMY SUBSCRIPTION. Your available limit is EGP 27623.16'
@@ -46,11 +46,24 @@ NBE_L='Dear customer, EGP 252.00 was debited from your account *4569 at SPINNEYS
 NODIGIT='Thank you for banking with HSBC'
 PERSONAL='hello from a friend 5'
 
-sms_inbox_insert() { # sender body: a row in the system inbox (what the carrier would have written)
-  adb -s "$DEVICE" shell "content insert --uri content://sms/inbox --bind address:s:'$1' --bind body:s:'$2' --bind date:l:$(date +%s)000 --bind read:i:0 --bind type:i:1" 2>&1 | tr -d '\r' | head -2 | sed "s/^/  insert[$1]: /"
+sms_emu() { # sender body: the emulator modem (real telephony, the real SmsReceiver when the app runs)
+  local out
+  out=$(adb -s "$DEVICE" emu sms send "$1" "$2" 2>&1 | tr -d '\r' | tr '\n' ' ')
+  echo "  emu[$1]: ${out:0:40}"
+  case "$out" in OK*) return 0 ;; *) return 1 ;; esac
 }
-sms_inject() { # sender body: the devSms debug receiver (production intake)
+sms_inbox_insert() { # sender body: a row in the system inbox (fallback when the console refuses the sender)
+  local out
+  out=$(adb -s "$DEVICE" shell "content insert --uri content://sms/inbox --bind address:s:'$1' --bind body:s:'$2' --bind date:l:$(date +%s)000 --bind read:i:0 --bind type:i:1" 2>&1 | tr -d '\r' | head -3 | tr '\n' ' ')
+  echo "  insert[$1]: ${out:-ok}"
+}
+sms_inject() { # sender body: the devSms debug receiver (production intake), fallback for the live part
   adb -s "$DEVICE" shell "am broadcast -n $PKG/app.zaghlol.spike.sms.DebugSmsInjectReceiver -a app.zaghlol.dev.INJECT_SMS --es sender '$1' --es body '$2'" 2>&1 | tr -d '\r' | grep -E "result=|Error|Exception" | head -2 | sed "s/^/  inject[$1]: /"
+}
+sms_hist() { sms_emu "$1" "$2" || sms_inbox_insert "$1" "$2"; }
+sms_live() { sms_emu "$1" "$2" || sms_inject "$1" "$2"; }
+inbox_rows() { # counts per sender in the system inbox (needs root); no bodies
+  adb -s "$DEVICE" shell "content query --uri content://sms/inbox --projection address:date" 2>&1 | tr -d '\r' | sed -n 's/^Row: [0-9]* address=\(.*\), date=.*/\1/p' | sort | uniq -c | sed 's/^/  inbox: /'
 }
 
 run_sms_device() {
@@ -66,20 +79,19 @@ run_sms_device() {
   done
   adb -s "$DEVICE" shell dumpsys package "$PKG" | grep -E "android.permission.(READ|RECEIVE)_SMS: granted" | sed 's/^ */  /'
   adb -s "$DEVICE" shell am force-stop "$PKG"
-  # The emulator console: numeric sender only. Show what it says to a letter id.
-  echo "console, alphanumeric sender: $(adb -s "$DEVICE" emu sms send HSBC 'probe' 2>&1 | tr -d '\r' | tr '\n' ' ' | cut -c1-120)"
   adb -s "$DEVICE" root > /dev/null 2>&1 || true
   adb -s "$DEVICE" wait-for-device
   echo "adb id: $(adb -s "$DEVICE" shell id -un | tr -d '\r')"
+  echo "inbox before:"; inbox_rows
   # ---- historical: in the inbox before the app's first launch
-  sms_inbox_insert HSBC "$HSBC_USD_H"
-  sms_inbox_insert 'HSBC EG' "$HSBC_EGP_H"
-  sms_inbox_insert CIB "$CIB_H"
-  sms_inbox_insert NBE "$NBE_H"
-  sms_inbox_insert HSBC "$NODIGIT"
-  sms_inbox_insert 5550199 "$PERSONAL"
-  echo "inbox rows by sender (counts only):"
-  adb -s "$DEVICE" shell "content query --uri content://sms/inbox --projection address" 2>&1 | tr -d '\r' | sed -n 's/.*address=//p' | sort | uniq -c | sed 's/^/  /'
+  sms_hist HSBC "$HSBC_USD_H"
+  sms_hist 'HSBC EG' "$HSBC_EGP_H"
+  sms_hist CIB "$CIB_H"
+  sms_hist NBE "$NBE_H"
+  sms_hist HSBC "$NODIGIT"
+  sms_hist 5550199 "$PERSONAL"
+  sleep 5
+  echo "inbox after:"; inbox_rows
   adb -s "$DEVICE" unroot > /dev/null 2>&1 || true
   adb -s "$DEVICE" wait-for-device
   sleep 3
@@ -98,14 +110,12 @@ run_sms_device() {
   done
   if grep -q "SMS_DEVICE READY_FOR_LIVE" "$OUT/sms-device-test.log"; then
     echo "---- live"
-    sms_inject HSBC "$HSBC_USD_L"
-    sms_inject 'HSBC EG' "$HSBC_EGP_L"
-    sms_inject CIB "$CIB_L"
-    sms_inject NBE "$NBE_L"
-    sms_inject HSBC "$NODIGIT"
-    # Through the emulator modem and the real SmsReceiver (numeric sender, so
-    # not a bank: the Guard drops it, the counters see it).
-    echo "console, numeric sender: $(adb -s "$DEVICE" emu sms send 5550199 "$PERSONAL" 2>&1 | tr -d '\r' | tr '\n' ' ' | cut -c1-120)"
+    sms_live HSBC "$HSBC_USD_L"
+    sms_live 'HSBC EG' "$HSBC_EGP_L"
+    sms_live CIB "$CIB_L"
+    sms_live NBE "$NBE_L"
+    sms_live HSBC "$NODIGIT"
+    sms_live 5550199 "$PERSONAL"
   else
     echo "the test never reached the live part"
   fi

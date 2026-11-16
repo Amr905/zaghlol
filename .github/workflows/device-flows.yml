@@ -100,14 +100,14 @@ jobs:
           SHOTS: ${{ runner.temp }}/device-flows
         run: |
           set -eu
-          ls "$SHOTS"/screens/*.png >/dev/null 2>&1 || { echo "no screenshots"; exit 0; }
+          ls "$SHOTS"/screens/*.png >/dev/null 2>&1 || ls "$SHOTS"/*.log >/dev/null 2>&1 || { echo "no screenshots or logs"; exit 0; }
           dir=$(mktemp -d)
           cd "$dir"
           git init -q
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
           mkdir -p "$GITHUB_SHA"
-          cp "$SHOTS"/screens/*.png "$GITHUB_SHA"/
+          cp "$SHOTS"/screens/*.png "$GITHUB_SHA"/ 2>/dev/null || true
           cp "$SHOTS"/screens/*.md "$GITHUB_SHA"/ 2>/dev/null || true
           cp "$SHOTS"/*.log "$GITHUB_SHA"/ 2>/dev/null || true
           git add -A
