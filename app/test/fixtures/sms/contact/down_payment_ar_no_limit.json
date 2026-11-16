@@ -1,0 +1,16 @@
+{
+  "sender": "Contact",
+  "body": "كونتكت: تم دفع المقدم 350.50 جم لدى تريدلاين",
+  "receivedAt": "2026-10-23T11:14:00+03:00",
+  "expect": {
+    "template": "contact.down_payment.ar",
+    "event": "bnpl_installment",
+    "direction": "expense",
+    "currency": "EGP",
+    "amount": "350.50",
+    "last4": null,
+    "balance": null,
+    "available": null,
+    "merchantClean": "تريدلاين"
+  }
+}

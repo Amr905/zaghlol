@@ -20,7 +20,7 @@ void main() {
     );
     expect(code, 0, reason: '$out$err');
     expect('$out', contains('findings: 0'));
-    expect('$out', contains('60 institutions'));
+    expect('$out', contains('64 institutions'));
   });
 
   test('every institution has an Arabic and an English template', () {

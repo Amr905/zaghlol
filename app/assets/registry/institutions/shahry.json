@@ -1,0 +1,152 @@
+{
+  "code": "shahry",
+  "names": {
+    "ar": "شهري للتقسيط",
+    "en": "Shahry BNPL"
+  },
+  "country": "EG",
+  "defaultCurrency": "EGP",
+  "senders": [
+    {
+      "match": "exact",
+      "value": "Shahry"
+    }
+  ],
+  "packages": [],
+  "walletCardNames": [
+    "Shahry"
+  ],
+  "last4": [],
+  "drop": [
+    "(?:موعد|استحقاق) (?:ال)?قسط|قسطك (?:المستحق|القادم)|تذكير (?:ب)?(?:سداد|موعد)",
+    "installment (?:is )?due|due (?:on|date)|payment reminder|upcoming installment"
+  ],
+  "templates": [
+    {
+      "id": "shahry.installment_new.ar",
+      "version": 1,
+      "lang": "ar",
+      "channel": [
+        "sms"
+      ],
+      "event": "bnpl_installment",
+      "direction": "expense",
+      "baseConfidence": 0.9,
+      "source": "synthetic-unverified",
+      "pattern": "عملية تقسيط جديدة بمبلغ (?<amount>[\\d,.]+) (?<cur>جم|جنيه|egp) لدى (?<merchant>.+?)(?:\\. |\\.?$)(?:الحد(?: المتاح)?\\D{0,12}(?<available>[\\d,.]+))?",
+      "currencyMap": {
+        "جم": "EGP",
+        "جنيه": "EGP",
+        "egp": "EGP"
+      },
+      "flags": {
+        "isAvailableLimit": true
+      }
+    },
+    {
+      "id": "shahry.installment_new.en",
+      "version": 1,
+      "lang": "en",
+      "channel": [
+        "sms"
+      ],
+      "event": "bnpl_installment",
+      "direction": "expense",
+      "baseConfidence": 0.9,
+      "source": "synthetic-unverified",
+      "pattern": "new installment purchase of (?<cur>egp) (?<amount>[\\d,.]+) at (?<merchant>.+?)(?:\\. |\\.?$)(?:(?:avl|available) limit\\D{0,8}(?<available>[\\d,.]+))?",
+      "currencyMap": {
+        "جم": "EGP",
+        "جنيه": "EGP",
+        "egp": "EGP"
+      },
+      "flags": {
+        "isAvailableLimit": true
+      }
+    },
+    {
+      "id": "shahry.down_payment.ar",
+      "version": 1,
+      "lang": "ar",
+      "channel": [
+        "sms"
+      ],
+      "event": "bnpl_installment",
+      "direction": "expense",
+      "baseConfidence": 0.9,
+      "source": "synthetic-unverified",
+      "pattern": "تم دفع المقدم (?<amount>[\\d,.]+) (?<cur>جم|جنيه|egp) لدى (?<merchant>.+?)(?:\\. |\\.?$)(?:الحد(?: المتاح)?\\D{0,12}(?<available>[\\d,.]+))?",
+      "currencyMap": {
+        "جم": "EGP",
+        "جنيه": "EGP",
+        "egp": "EGP"
+      },
+      "flags": {
+        "isAvailableLimit": true
+      }
+    },
+    {
+      "id": "shahry.down_payment.en",
+      "version": 1,
+      "lang": "en",
+      "channel": [
+        "sms"
+      ],
+      "event": "bnpl_installment",
+      "direction": "expense",
+      "baseConfidence": 0.9,
+      "source": "synthetic-unverified",
+      "pattern": "down payment of (?<cur>egp) (?<amount>[\\d,.]+) at (?<merchant>.+?) received(?:\\. |\\.?$)(?:(?:avl|available) limit\\D{0,8}(?<available>[\\d,.]+))?",
+      "currencyMap": {
+        "جم": "EGP",
+        "جنيه": "EGP",
+        "egp": "EGP"
+      },
+      "flags": {
+        "isAvailableLimit": true
+      }
+    },
+    {
+      "id": "shahry.installment_paid.ar",
+      "version": 1,
+      "lang": "ar",
+      "channel": [
+        "sms"
+      ],
+      "event": "bnpl_installment",
+      "direction": "expense",
+      "baseConfidence": 0.9,
+      "source": "synthetic-unverified",
+      "pattern": "تم سداد القسط (?<amount>[\\d,.]+) (?<cur>جم|جنيه|egp) لخطة (?<merchant>.+?)(?:\\. |\\.?$)(?:الحد(?: المتاح)?\\D{0,12}(?<available>[\\d,.]+))?",
+      "currencyMap": {
+        "جم": "EGP",
+        "جنيه": "EGP",
+        "egp": "EGP"
+      },
+      "flags": {
+        "isAvailableLimit": true
+      }
+    },
+    {
+      "id": "shahry.installment_paid.en",
+      "version": 1,
+      "lang": "en",
+      "channel": [
+        "sms"
+      ],
+      "event": "bnpl_installment",
+      "direction": "expense",
+      "baseConfidence": 0.9,
+      "source": "synthetic-unverified",
+      "pattern": "installment of (?<cur>egp) (?<amount>[\\d,.]+) for (?<merchant>.+?) paid(?:\\. |\\.?$)(?:(?:avl|available) limit\\D{0,8}(?<available>[\\d,.]+))?",
+      "currencyMap": {
+        "جم": "EGP",
+        "جنيه": "EGP",
+        "egp": "EGP"
+      },
+      "flags": {
+        "isAvailableLimit": true
+      }
+    }
+  ]
+}
