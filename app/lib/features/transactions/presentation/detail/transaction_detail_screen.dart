@@ -207,7 +207,7 @@ class _DetailState extends ConsumerState<TransactionDetailScreen> {
           for (final c in lk.categories)
             ZListRow(
               title: categoryName(c, fmt.lang),
-              leading: Text(c.icon, style: ZType.title),
+              leading: Text(ZCategoryGlyph.glyphFor(c.id), style: ZType.title),
               trailing: c.id == t.categoryId
                   ? Icon(Icons.check, color: ZColors.of(ctx).primary)
                   : null,
@@ -607,7 +607,7 @@ class _Body extends StatelessWidget {
               size: 64,
               color: _parseColor(cat?.color ?? '', c.primary),
               child: Text(
-                cat?.icon ?? '•',
+                cat == null ? '•' : ZCategoryGlyph.glyphFor(cat.id),
                 style: ZType.display.copyWith(fontSize: 30, height: 1.2),
               ),
             ),

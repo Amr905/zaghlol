@@ -15,6 +15,29 @@ import '../list/list_harness.dart';
 void main() {
   setUpAll(initDateFormatting);
 
+  for (final loc in const [Locale('en'), Locale('ar')]) {
+    testWidgets(
+      'category picker never shows icon names (${loc.languageCode})',
+      (tester) async {
+        await pumpEditor(tester, FakeEditor(), locale: loc);
+        final choose = find.byWidgetPredicate(
+          (w) => w is Text && (w.data == 'Choose' || w.data == 'اختار'),
+        );
+        if (choose.evaluate().isNotEmpty) {
+          await tester.tap(choose.first);
+          await tester.pumpAndSettle();
+        }
+        final texts = tester
+            .widgetList<Text>(find.byType(Text))
+            .map((t) => t.data ?? '')
+            .join('|');
+        for (final n in const ['restaurant', 'receipt_long', 'shopping_cart']) {
+          expect(texts, isNot(contains(n)));
+        }
+      },
+    );
+  }
+
   Future<void> chooseCategory(WidgetTester tester, String name) async {
     await tester.tap(find.text('Choose').first);
     await tester.pumpAndSettle();

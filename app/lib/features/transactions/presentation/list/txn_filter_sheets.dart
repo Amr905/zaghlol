@@ -117,7 +117,7 @@ Future<Set<String>?> showCategoriesSheet(
               ctx,
               title: categoryName(c, lang),
               on: picked.contains(c.id),
-              leading: Text(c.icon, style: ZType.title),
+              leading: Text(ZCategoryGlyph.glyphFor(c.id), style: ZType.title),
               onTap: () => setState(() {
                 picked = picked.contains(c.id)
                     ? ({...picked}..remove(c.id))
@@ -279,7 +279,7 @@ Future<({String id, bool always})?> showBulkCategorySheet(
           for (final c in categories)
             ZListRow(
               title: categoryName(c, lang),
-              leading: Text(c.icon, style: ZType.title),
+              leading: Text(ZCategoryGlyph.glyphFor(c.id), style: ZType.title),
               onTap: () => Navigator.of(ctx).pop((id: c.id, always: always)),
             ),
         ],

@@ -118,7 +118,10 @@ class TxnRow extends StatelessWidget {
         : ZCategoryTile(
             size: 44,
             color: _parseColor(cat?.color ?? '', c.primary),
-            child: Text(cat?.icon ?? '•', style: ZType.title),
+            child: Text(
+              cat == null ? '•' : ZCategoryGlyph.glyphFor(cat.id),
+              style: ZType.title,
+            ),
           );
     return Semantics(
       container: true,

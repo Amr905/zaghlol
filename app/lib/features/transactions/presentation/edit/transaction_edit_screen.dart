@@ -455,7 +455,7 @@ class _EditState extends ConsumerState<TransactionEditScreen> {
           for (final c in lk.categories)
             ZListRow(
               title: categoryName(c, lang),
-              leading: Text(c.icon, style: ZType.title),
+              leading: Text(ZCategoryGlyph.glyphFor(c.id), style: ZType.title),
               onTap: () => Navigator.of(ctx).pop(c.id),
             ),
         ],
