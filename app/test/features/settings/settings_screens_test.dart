@@ -40,6 +40,7 @@ const _screens = <String, Widget>{
   'prefs': PreferencesScreen(),
   'privacy': PrivacyScreen(platform: 'ios'),
   'about': AboutScreen(),
+  'disclaimers': DisclaimersScreen(),
 };
 
 List<Override> _reads() => [
@@ -502,6 +503,20 @@ void main() {
       await tester.pump();
       expect(clip, 'abc-123');
       expect(find.text(t.commonSupportCodeCopied), findsOneWidget);
+    });
+
+    testWidgets('Disclaimers row opens the notices screen (FU-245)', (
+      tester,
+    ) async {
+      final h = SettingsHarness();
+      addTearDown(h.db.close);
+      await tester.pumpWidget(h.app(const AboutScreen()));
+      await settle(tester);
+      final t = _t(tester, AboutScreen);
+      await tester.tap(find.text(t.aboutMainDisclaimers));
+      await settle(tester);
+      expect(find.byType(DisclaimersScreen), findsOneWidget);
+      expect(find.text(t.legalDisclaimerCoaching), findsOneWidget);
     });
 
     testWidgets('Terms, Privacy and Licenses rows do something', (

@@ -203,9 +203,6 @@ void main() {
       value: m,
       dark: dark,
       withShell: true,
-      extraOverrides: [
-        homeNowProvider.overrideWithValue(DateTime(2026, 11, 14, 9)),
-      ],
       accounts: [home.account('a1', en ? 'NBE' : 'الأهلي', '4567')],
       actions: mascot
           ? HomeActions(
@@ -501,7 +498,7 @@ void main() {
       ),
     );
     await tester.pumpAndSettle();
-    await _shot(tester, 'add_sheet');
+    await _shot(tester, 'add_sheet', topmost: true);
   }, skip: _skip != null);
 
   testWidgets('android setup notif (scan progress)', (tester) async {

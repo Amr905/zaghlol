@@ -155,6 +155,7 @@ String _fmt(BuildContext context, WidgetRef ref, Money m) {
     m,
     languageCode: lang,
     digits: ref.watch(digitsModeProvider(lang)),
+    dropZeroFraction: true,
   );
 }
 
@@ -169,6 +170,7 @@ class _Hero extends ConsumerWidget {
     final currencies = totals.currencies;
     final firstCur = currencies.isEmpty ? _zeroEgp.currency : currencies.first;
     final approx = ref.watch(approxViewProvider(totals)).value;
+    final lang = Localizations.localeOf(context).languageCode;
     return Container(
       padding: const EdgeInsetsDirectional.all(ZSpacing.xl),
       decoration: BoxDecoration(
@@ -196,14 +198,20 @@ class _Hero extends ConsumerWidget {
             child: FittedBox(
               fit: BoxFit.scaleDown,
               alignment: AlignmentDirectional.centerStart,
-              child: Text(
-                '\u2068${_fmt(context, ref, totals[firstCur])}\u2069',
-                maxLines: 1,
-                style: ZType.display.copyWith(
-                  fontSize: 44,
-                  height: 1.2,
-                  color: c.heroNumber,
+              child: ZMoneyText(
+                text: MoneyFormat.format(
+                  totals[firstCur],
+                  languageCode: lang,
+                  digits: ref.watch(digitsModeProvider(lang)),
+                  withCurrency: false,
+                  dropZeroFraction: true,
                 ),
+                unit: MoneyFormat.currencyLabel(
+                  totals[firstCur].currency,
+                  languageCode: lang,
+                ),
+                kind: ZMoneyKind.expense,
+                size: ZMoneySize.hero,
               ),
             ),
           ),
@@ -408,6 +416,7 @@ class _AccountRow extends ConsumerWidget {
                 _Tile(account: account),
                 const SizedBox(width: ZSpacing.md),
                 Expanded(
+                  flex: 3,
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
@@ -430,6 +439,7 @@ class _AccountRow extends ConsumerWidget {
                 ),
                 const SizedBox(width: ZSpacing.sm),
                 Flexible(
+                  flex: 2,
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.end,
                     children: [
