@@ -74,3 +74,14 @@ No blocking findings. Non-blocking item requested by the Lead:
 | Task | File:line | Required change | Test to add |
 |---|---|---|---|
 | UI-po31 (minor) | `app/lib/features/ingestion/presentation/review/review_screen.dart:298-311` | Avoid the 72 px overflow at 1.3x in English. Shorten the action label (e.g. a "Teach" key), or move "make a template" out of the `SnackBarAction` (`behavior: floating` with the action on its own line, or a separate button). | In the Keep 1.3x test, after the tap and `pump`, `expect(tester.takeException(), isNull)` in en and ar |
+
+## Lead delta check (device-flows fix round, 2026-11-17)
+
+Commit 252eda9e:
+- `ScanResultsBody` is wrapped in a `LayoutBuilder`. It keeps the old layout in a bounded parent and shrink-wraps without scrolling in an unbounded one; the widget content is unchanged (re-indented). A new test embeds it in a `SingleChildScrollView` with no exception.
+- The Keep snackbar's teach button moved into the content so its label wraps. The test asserts no exception at 1.3x in en and ar.
+- `sms_device_test.dart` no longer evaluates finders mid-frame. All assertions are kept.
+- device-flows run 43959213872 is **green** on the emulator: historical inbox scan, live receiver, saves, review count, no-digit and personal drops, re-parse, and the explorer in ar.
+
+Verdict: all three tasks **APPROVED**.
+- **FU-251:** batch-31 minors. The start-up re-parse skips the restore pause gate (`capture_providers.dart:218`). The unverified InstaPay templates use confidence 0.95 instead of 0.9. Some catalog keywords are too broad. The home feed-row account line has no acronym fallback. There are no Transfers/Cash categories (InstaPay and ATM stay uncategorized transfers); this needs a PO decision.
