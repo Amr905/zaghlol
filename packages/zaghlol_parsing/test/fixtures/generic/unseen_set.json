@@ -264,6 +264,7 @@
   "id": "en_fx_two_currencies",
   "lang": "en",
   "outcome": "suggest",
+  "knownMiss": true,
   "body": "Total EGP 3,400.00 (EUR 100.00) debited via POS",
   "expect": {
    "amount": "3400.00",

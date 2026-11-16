@@ -42,6 +42,7 @@ final class ManualTxnInput {
     required this.accountId,
     required this.direction,
     required this.amount,
+    this.originalAmount,
     required this.occurredAt,
     required this.tzOffsetMin,
     this.merchant,
@@ -60,6 +61,9 @@ final class ManualTxnInput {
 
   /// Positive; integer minor units in an explicit currency.
   final Money amount;
+
+  /// A foreign amount read with the charge: its own currency, never summed.
+  final Money? originalAmount;
   final DateTime occurredAt;
   final int tzOffsetMin;
   final String? merchant;
@@ -155,6 +159,7 @@ class ReviewRepository {
         throw ReviewException(ReviewException.invalid);
       }
       final stored = input.amount.toStorage();
+      final original = input.originalAmount?.toStorage();
       final id = _newId();
       final now = _now;
       await _db
@@ -168,6 +173,8 @@ class ReviewRepository {
               direction: input.direction,
               amountMinor: stored.minor,
               currency: stored.currency,
+              originalAmountMinor: Value(original?.minor),
+              originalCurrency: Value(original?.currency),
               occurredAt: input.occurredAt.toUtc().millisecondsSinceEpoch,
               occurredTzOffsetMin: input.tzOffsetMin,
               merchantRaw: Value(input.merchant),

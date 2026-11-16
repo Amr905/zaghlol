@@ -11,6 +11,7 @@ final class GenericSuggestion {
     required this.amount,
     required this.occurredAtMs,
     required this.tzOffsetMin,
+    this.originalAmount,
     this.direction,
     this.merchant,
     this.merchantKey,
@@ -22,6 +23,10 @@ final class GenericSuggestion {
   });
 
   final Money amount;
+
+  /// The foreign amount read beside the charge, in its own currency; never
+  /// summed or converted.
+  final Money? originalAmount;
   final TxnDirection? direction;
   final String? merchant;
   final String? merchantKey;
@@ -69,11 +74,18 @@ final class GenericSuggestion {
       if (rawAmount is! Map) return null;
       final amount = Money.fromJson(rawAmount.cast<String, Object?>());
       if (!amount.isPositive) return null;
+      final rawOriginal = payload['originalAmount'];
+      final original = rawOriginal is Map
+          ? Money.fromJson(rawOriginal.cast<String, Object?>())
+          : null;
       final dir = payload['direction'];
       final when = payload['occurredAtMs'];
       final tz = payload['tzOffsetMin'];
       return GenericSuggestion(
         amount: amount,
+        originalAmount: original != null && original.isPositive
+            ? original
+            : null,
         direction: dir is String ? TxnDirection.fromCode(dir) : null,
         merchant: _text(payload['merchant']),
         merchantKey: _text(payload['merchantKey']),

@@ -197,12 +197,12 @@ ParseResult parseGeneric({
 }
 
 final RegExp _foreignLead = RegExp(
-  r'(?:[(\[]\s*|\b(?:original|foreign|equivalent|equiv|approx)\w*[:\s]*|'
-  r'(?:الاصلي|يعادل|ما يعادل)[:\s]*)$',
+  r'(?:\b(?:original|foreign)\w*[:\s]*|الاصلي[:\s]*)$',
 );
 
-/// True when [c] is written as a foreign amount: in brackets or after a cue
-/// such as `Original` / `equivalent`.
+/// True only after an explicit `original` / `foreign` / `الاصلي` cue. Brackets
+/// and `equivalent` / `approx` / `يعادل` often mark the converted amount, so
+/// they stay ambiguous (D-28).
 bool _isForeignCue(String t, _Candidate c) {
   final from = c.start < 24 ? 0 : c.start - 24;
   return _foreignLead.hasMatch(t.substring(from, c.start));
