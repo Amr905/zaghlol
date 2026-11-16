@@ -37,6 +37,10 @@ import 'package:zaghlol_domain/zaghlol_domain.dart';
 import 'support/explorer.dart';
 import 'support/explorer_seed.dart';
 
+// One part per run (a fresh app process each): 0-3 = the four tabs, 4 = the
+// Add sheet, -1 = all. A single long run exhausted the app's Java heap.
+const _part = int.fromEnvironment('EXPLORER_PART', defaultValue: -1);
+
 void main() {
   final binding = IntegrationTestWidgetsFlutterBinding.ensureInitialized();
   var surfaceConverted = false;
@@ -56,8 +60,9 @@ void main() {
         surfaceConverted = true;
       }
       await t.pump(const Duration(milliseconds: 300));
-      final bytes = await binding.takeScreenshot(name);
-      await File('${(await outDir()).path}/$name.png').writeAsBytes(bytes);
+      final bytes = await binding.takeScreenshot('p$_part-$name');
+      await File('${(await outDir()).path}/p$_part-$name.png')
+          .writeAsBytes(bytes);
     } on Object catch (e) {
       // A screenshot is evidence, not the test: report the type only.
       // ignore: avoid_print
@@ -186,12 +191,12 @@ void main() {
       await t.pump(const Duration(milliseconds: 700));
     }
 
-    final report = File('${(await outDir()).path}/explorer-report.md');
+    final report = File('${(await outDir()).path}/explorer-report-p$_part.md');
     late final Explorer ex;
     ex = Explorer(
       tester: t,
       shot: (n) => shot(t, n),
-      deadline: started.add(const Duration(minutes: 24)),
+      deadline: started.add(const Duration(minutes: 12)),
       goHome: goHome,
       selectTab: selectTab,
       deny: deny,
@@ -226,6 +231,7 @@ void main() {
         () async {
           try {
             for (var i = 0; i < 4 && !ex.timedOut; i++) {
+              if (_part >= 0 && _part != i) continue;
               await selectTab(i);
               await ex.exploreCurrent(
                 names[i],
@@ -234,7 +240,7 @@ void main() {
               );
               await goHome();
             }
-            if (!ex.timedOut) {
+            if (!ex.timedOut && (_part < 0 || _part == 4)) {
               await selectTab(0);
               await openAdd();
               await ex.exploreCurrent(l10n.commonNavAddA11y, reopen: openAdd);
@@ -280,7 +286,11 @@ void main() {
           if (i.kind != 'dead-tap' && i.kind != 'restore')
             '${s.title}: ${i.kind} ${i.where}',
     ];
-    expect(ex.screens.length, greaterThan(8), reason: 'explored real screens');
+    expect(
+      ex.screens.length,
+      greaterThan(_part < 0 ? 8 : 0),
+      reason: 'explored real screens',
+    );
     expect(hard, isEmpty, reason: hard.join('\n'));
   }, timeout: const Timeout(Duration(minutes: 40)));
 }

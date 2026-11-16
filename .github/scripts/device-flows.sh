@@ -78,11 +78,23 @@ done
   done
 ) &
 keeper=$!
-perl -e 'alarm shift; exec @ARGV' 2100 \
-  flutter test integration_test/app_explorer_test.dart \
-  --flavor devSms -d "$DEVICE" --no-uninstall --reporter expanded \
-  2>&1 | tee "$OUT/explorer.log"
-rc2=${PIPESTATUS[0]}
+rc2=0
+for part in 0 1 2 3 4; do
+  echo "==== explorer part $part"
+  adb -s "$DEVICE" shell pm clear "$PKG" || true
+  for p in POST_NOTIFICATIONS RECORD_AUDIO READ_SMS RECEIVE_SMS; do
+    adb -s "$DEVICE" shell pm grant "$PKG" "android.permission.$p" 2>/dev/null || true
+  done
+  perl -e 'alarm shift; exec @ARGV' 900 \
+    flutter test integration_test/app_explorer_test.dart \
+    --flavor devSms -d "$DEVICE" --no-uninstall --reporter expanded \
+    --dart-define=EXPLORER_PART=$part \
+    2>&1 | tee "$OUT/explorer-p$part.log"
+  r=${PIPESTATUS[0]}
+  [ "$r" -ne 0 ] && rc2=$r
+  pull_files
+done
+kill "$keeper" 2>/dev/null || true
 kill "$keeper" 2>/dev/null || true
 # Why did the app go away (if it did)? Crash, low-memory kill, ANR.
 echo "---- logcat: crashes and kills ----"
