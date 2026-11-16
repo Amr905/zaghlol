@@ -10,6 +10,7 @@ import '../../../core/l10n/generated/app_localizations.dart';
 import '../../../core/theme/z_tokens.dart';
 import '../../gold/presentation/gold_ui_ports.dart'
     show GoldLink, goldLinkOpenerProvider;
+import 'disclaimers_screen.dart';
 import 'settings_ports.dart';
 import 'settings_widgets.dart';
 
@@ -72,7 +73,14 @@ class AboutScreen extends ConsumerWidget {
               title: t.aboutMainLicenses,
               onTap: () => showLicensePage(context: context),
             ),
-            SettingsRow(title: t.aboutMainDisclaimers, onTap: () {}),
+            SettingsRow(
+              title: t.aboutMainDisclaimers,
+              onTap: () => Navigator.of(context).push<void>(
+                MaterialPageRoute<void>(
+                  builder: (_) => const DisclaimersScreen(),
+                ),
+              ),
+            ),
           ],
         ),
         SettingsSection(
