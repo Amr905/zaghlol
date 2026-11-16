@@ -109,6 +109,32 @@ void main() {
     expect(find.textContaining('USD'), findsWidgets);
   });
 
+  for (final locale in const [_en, Locale('ar')]) {
+    testWidgets('no-budget second currency fits the pager on a small phone '
+        '(${locale.languageCode})', (tester) async {
+      tester.view.physicalSize = const Size(320, 640);
+      tester.view.devicePixelRatio = 1;
+      addTearDown(tester.view.reset);
+      await pumpHome(
+        tester,
+        locale: locale,
+        platform: TargetPlatform.android,
+        value: model(
+          currencies: [
+            figs(egp),
+            figs(usd, income: 500, spend: 120, safe: null),
+          ],
+        ),
+      );
+      await tester.drag(
+        find.byKey(const ValueKey('home-pager')),
+        const Offset(-300, 0),
+      );
+      await tester.pumpAndSettle();
+      expect(tester.takeException(), isNull);
+    });
+  }
+
   testWidgets('one currency: no pager', (tester) async {
     await pumpHome(
       tester,

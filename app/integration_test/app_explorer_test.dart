@@ -407,6 +407,9 @@ Future<void> _walkOnboarding(
     if (buttons.evaluate().isEmpty) break;
     // The first screen has Start first; the later ones end with "continue".
     final target = step == 1 ? buttons.first : buttons.last;
+    // The primary button can sit below the fold on a small phone.
+    await t.ensureVisible(target);
+    await settle();
     await t.tap(target);
     await settle();
     await shot('onb-$step');
