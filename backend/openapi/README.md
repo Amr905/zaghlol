@@ -21,7 +21,7 @@
 ```sh
 # Lint (same command as CI, job "OpenAPI lint (Spectral)"; warnings fail too)
 cd backend/openapi
-npx --yes @stoplight/spectral-cli@6.15.0 lint zaghlol-v1.yaml --ruleset .spectral.yaml --fail-severity=warn
+npm ci --ignore-scripts && npm run lint
 
 # Contract tests (spec structure, live responses, docs consistency)
 cd backend

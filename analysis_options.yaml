@@ -1,6 +1,13 @@
 # Shared analysis options for the whole workspace (app + packages).
 # The zaghlol_lints rules (T-002) run via tools/lints/bin/zaghlol_lints.dart.
-include: package:lints/recommended.yaml
+include: package:flutter_lints/flutter.yaml
+
+# FU-029: riverpod_lint 3.x is an analyzer plugin (not custom_lint). Analyzer
+# plugins are only read from the workspace root and are resolved by the analysis
+# server itself, so riverpod_lint is not (and cannot be) in a pubspec: pigeon
+# and zaghlol_lints pin analyzer <13. Results appear in `flutter analyze`.
+plugins:
+  riverpod_lint: ^3.2.0
 
 analyzer:
   language:

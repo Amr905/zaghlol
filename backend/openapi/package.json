@@ -1,0 +1,12 @@
+{
+  "name": "zaghlol-openapi-lint",
+  "private": true,
+  "version": "0.0.0",
+  "description": "Pinned Spectral toolchain for the OpenAPI lint (FU-010). Node version is in .nvmrc.",
+  "scripts": {
+    "lint": "spectral lint zaghlol-v1.yaml --ruleset .spectral.yaml --fail-severity=warn"
+  },
+  "devDependencies": {
+    "@stoplight/spectral-cli": "6.15.0"
+  }
+}
