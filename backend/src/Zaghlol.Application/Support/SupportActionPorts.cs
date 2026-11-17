@@ -142,6 +142,9 @@ public interface ISupportActionTransaction : IAsyncDisposable
     /// <summary>The newest <c>support_unfreeze</c> row of the purchase whose outcome is <c>unfrozen</c>.</summary>
     Task<SupportAuditRow?> NewestUnfreezeAsync(Guid purchaseId, CancellationToken cancellationToken);
 
+    /// <summary>The database's <c>now()</c> (the clock of <c>audit_log.at</c>), for the R6-1 24 h edges.</summary>
+    Task<DateTimeOffset> DatabaseNowAsync(CancellationToken cancellationToken);
+
     /// <summary>The install exists and isn't tombstoned.</summary>
     Task<bool> InstallLiveAsync(Guid installId, CancellationToken cancellationToken);
 
