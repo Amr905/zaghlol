@@ -524,6 +524,26 @@ Future<void> _visitCharts(
   }
 }
 
+/// The list builds only the cards near the screen: scroll the vertical list
+/// (top first, then down) until [f] is built. False if it never is.
+Future<bool> _reveal(WidgetTester t, Finder f) async {
+  final list = find.byWidgetPredicate(
+    (w) => w is Scrollable && w.axis == Axis.vertical,
+  );
+  if (f.evaluate().isNotEmpty) return true;
+  if (list.evaluate().isEmpty) return false;
+  for (var i = 0; i < 6; i++) {
+    await t.drag(list.first, const Offset(0, 600));
+    await _settleFor(t, 150);
+  }
+  for (var i = 0; i < 16; i++) {
+    if (f.evaluate().isNotEmpty) return true;
+    await t.drag(list.first, const Offset(0, -350));
+    await _settleFor(t, 300);
+  }
+  return f.evaluate().isNotEmpty;
+}
+
 Finder _zbutton(String label) =>
     find.byWidgetPredicate((w) => w is ZButton && w.label == label);
 
@@ -575,6 +595,7 @@ Future<void> _reviewFlow(
   await _settleFor(t, 500);
   await shot('review-0-list');
   final originals = find.byKey(const ValueKey('reviewOriginalText'));
+  await _reveal(t, originals);
   final before = originals.evaluate().length;
   _say('REVIEW cards with original text: $before');
   _check(
@@ -611,6 +632,7 @@ Future<void> _reviewFlow(
         w.key == const ValueKey('reviewKeep') &&
         w.onPressed != null,
   );
+  await _reveal(t, keeps);
   _say('REVIEW enabled Keep buttons: ${keeps.evaluate().length}');
   _check(keeps.evaluate().isNotEmpty, 'no card offers an enabled Keep');
   if (keeps.evaluate().isNotEmpty) {
@@ -634,7 +656,7 @@ Future<void> _reviewFlow(
             w.label == l.ingestionReviewUnreadEnter) &&
         w.onPressed != null,
   );
-  if (edit.evaluate().isNotEmpty) {
+  if (await _reveal(t, edit)) {
     await t.ensureVisible(edit.first);
     await t.tap(edit.first);
     await _settleFor(t, 1500);
@@ -647,7 +669,7 @@ Future<void> _reviewFlow(
 
   // Ignore (Dismiss).
   final dismiss = _zbutton(l.commonActionDismiss);
-  if (dismiss.evaluate().isNotEmpty) {
+  if (await _reveal(t, dismiss)) {
     final open = await scalar(
       'SELECT COUNT(*) FROM review_items WHERE resolved_at IS NULL',
     );
