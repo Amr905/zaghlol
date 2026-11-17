@@ -23,7 +23,7 @@
   "templates": [
     {
       "id": "alrajhi.card_purchase.en",
-      "version": 1,
+      "version": 5,
       "lang": "en",
       "channel": [
         "sms"
@@ -32,7 +32,7 @@
       "direction": "expense",
       "baseConfidence": 0.9,
       "source": "synthetic-unverified",
-      "pattern": "pos purchase\\s(?:by|card):? ?(?<last4>\\d{4}).*? amount:? ?(?<cur>sar|ر\\.س) ?(?<amount>[\\d,.]+)\\sat:? ?(?<merchant>.+?)(?: date:? ?(?<date>\\d{2}/\\d{2}/\\d{2})(?: \\d{2}:\\d{2})?)?(?: (?:balance|الرصيد):? ?(?:sar|ر\\.س) ?(?<balance>[\\d,.]+))?$",
+      "pattern": "pos purchase\\s(?:by|card):? ?(?<last4>\\d{4}).{0,60}? amount:? ?(?<cur>sar|ر\\.س) ?(?<amount>[\\d,.]+)\\sat:? ?(?<merchant>.+?)(?: date:? ?(?<date>\\d{2}/\\d{2}/\\d{2})(?: \\d{2}:\\d{2})?)?(?: (?:balance|الرصيد):? ?(?:sar|ر\\.س) ?(?<balance>[\\d,.]+))?$",
       "date": {
         "format": "dd/MM/yy",
         "yearPolicy": "nearest_past"
@@ -43,7 +43,7 @@
     },
     {
       "id": "alrajhi.card_purchase.ar",
-      "version": 1,
+      "version": 5,
       "lang": "ar",
       "channel": [
         "sms"
@@ -52,7 +52,7 @@
       "direction": "expense",
       "baseConfidence": 0.9,
       "source": "synthetic-unverified",
-      "pattern": "شراء نقاط البيع\\s(?:بطاقه|بواسطه):? ?(?<last4>\\d{4}).*? المبلغ:? ?(?<cur>sar|ر\\.س) ?(?<amount>[\\d,.]+)\\sلدي:? ?(?<merchant>.+?)(?: التاريخ:? ?(?<date>\\d{2}/\\d{2}/\\d{2})(?: \\d{2}:\\d{2})?)?(?: (?:balance|الرصيد):? ?(?:sar|ر\\.س) ?(?<balance>[\\d,.]+))?$",
+      "pattern": "شراء نقاط البيع\\s(?:بطاقه|بواسطه):? ?(?<last4>\\d{4}).{0,60}? المبلغ:? ?(?<cur>sar|ر\\.س) ?(?<amount>[\\d,.]+)\\sلدي:? ?(?<merchant>.+?)(?: التاريخ:? ?(?<date>\\d{2}/\\d{2}/\\d{2})(?: \\d{2}:\\d{2})?)?(?: (?:balance|الرصيد):? ?(?:sar|ر\\.س) ?(?<balance>[\\d,.]+))?$",
       "date": {
         "format": "dd/MM/yy",
         "yearPolicy": "nearest_past"
@@ -95,7 +95,7 @@
     },
     {
       "id": "alrajhi.atm_withdrawal.en",
-      "version": 1,
+      "version": 5,
       "lang": "en",
       "channel": [
         "sms"
@@ -104,14 +104,14 @@
       "direction": "expense",
       "baseConfidence": 0.9,
       "source": "synthetic-unverified",
-      "pattern": "atm withdrawal\\s(?:by|card):? ?(?<last4>\\d{4}).*? amount:? ?(?<cur>sar|ر\\.س) ?(?<amount>[\\d,.]+)(?: (?:balance|الرصيد):? ?(?:sar|ر\\.س) ?(?<balance>[\\d,.]+))?$",
+      "pattern": "atm withdrawal\\s(?:by|card):? ?(?<last4>\\d{4}).{0,60}? amount:? ?(?<cur>sar|ر\\.س) ?(?<amount>[\\d,.]+)(?: (?:balance|الرصيد):? ?(?:sar|ر\\.س) ?(?<balance>[\\d,.]+))?$",
       "currencyMap": {
         "ر.س": "SAR"
       }
     },
     {
       "id": "alrajhi.atm_withdrawal.ar",
-      "version": 1,
+      "version": 5,
       "lang": "ar",
       "channel": [
         "sms"
@@ -120,14 +120,14 @@
       "direction": "expense",
       "baseConfidence": 0.9,
       "source": "synthetic-unverified",
-      "pattern": "سحب صراف الي\\s(?:بطاقه|بواسطه):? ?(?<last4>\\d{4}).*? المبلغ:? ?(?<cur>sar|ر\\.س) ?(?<amount>[\\d,.]+)(?: (?:balance|الرصيد):? ?(?:sar|ر\\.س) ?(?<balance>[\\d,.]+))?$",
+      "pattern": "سحب صراف الي\\s(?:بطاقه|بواسطه):? ?(?<last4>\\d{4}).{0,60}? المبلغ:? ?(?<cur>sar|ر\\.س) ?(?<amount>[\\d,.]+)(?: (?:balance|الرصيد):? ?(?:sar|ر\\.س) ?(?<balance>[\\d,.]+))?$",
       "currencyMap": {
         "ر.س": "SAR"
       }
     },
     {
       "id": "alrajhi.declined.en",
-      "version": 1,
+      "version": 5,
       "lang": "en",
       "channel": [
         "sms"
@@ -136,7 +136,7 @@
       "direction": "neutral",
       "baseConfidence": 0.9,
       "source": "synthetic-unverified",
-      "pattern": "pos purchase declined\\s(?:by|card):? ?(?<last4>\\d{4}).*? amount:? ?(?<cur>sar|ر\\.س) ?(?<amount>[\\d,.]+)\\sat:? ?(?<merchant>.+?)$",
+      "pattern": "pos purchase declined\\s(?:by|card):? ?(?<last4>\\d{4}).{0,60}? amount:? ?(?<cur>sar|ر\\.س) ?(?<amount>[\\d,.]+)\\sat:? ?(?<merchant>.+?)$",
       "currencyMap": {
         "ر.س": "SAR"
       }
