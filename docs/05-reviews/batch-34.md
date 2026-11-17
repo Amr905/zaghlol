@@ -34,3 +34,11 @@ Findings:
 |---|---|---|---|
 | CAT-cash | `cash_cover_sql.dart:21`, `cycle_totals.dart:149-154`, `chart_repository.dart:49-50` | Use the same amount for pool consumption and for the cover: cover = min(pool, gross); spend = net − cover, so offsets still reduce spend | Domain and SQL: withdraw 1000, pay 300 cash with a 200 split link, pay 800 cash → spend 900; donut total, cycle spend and category sum agree |
 | FAB-mockup | `app_shell.dart:132` | Hide the FAB on the Zaghlol/Ask tab, or add clearance so it never covers `ask-send` | Widget test in ar and en: the `ask-send` rect does not intersect the `ZAddButton` rect, and tapping Send sends |
+
+## Lead delta check (fix round, 2026-11-17)
+
+- **CAT-cash (4f491310, 15 production lines):** one cover definition everywhere, `cover = min(pool, gross)`; `spend = net − cover`. A split or refund link on a covered cash payment now still lowers spend. The SQL already matched. The review case (withdraw 1000, pay 300 cash with 200 split back, pay 800 cash) gives **900** in the domain, cycle totals, the donut and cash flow (new DAO test). Per-category floors are unchanged.
+- **FAB-mockup (16eae50e):** the Ask mockup (15) shows the Add button, so it stays. On Android the input row keeps `fabSize + 2·lg` clear at the end. ar + en test at 1.3×: Send and Add don't overlap, and tapping Send sends.
+
+Verdict: both tasks **APPROVED**.
+- **FU-254:** batch-34 minors; rows saved before CAT-cash keep their old category; manual entry has no InstaPay method.

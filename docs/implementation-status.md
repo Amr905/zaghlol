@@ -508,6 +508,8 @@
 
 - **FU-253** (batch 33): minors in [batch-33](05-reviews/batch-33.md): waiting alerts lose redaction after a restart; bulk categorize reads row by row; annual budget alerts and `BudgetAlertService.run` after ingest not wired; FU-142 left: start-up sweep for pairs pointing at a deleted leg, voice logger undo frees no links; FU-143 left: overdue reminders (PO copy), wiring detect/auto-mark/due reminders into ingest and the daily job; FU-130 left: Arabic Face ID string, cold-start FLAG_SECURE (device). FU-194, FU-195, FU-196, FU-198, FU-213, FU-214, FU-183 were already done on main (closed).
 
+- **FU-254** (batch 34): minors in [batch-34](05-reviews/batch-34.md); rows saved before CAT-cash keep their category; manual entry has no InstaPay method.
+
 ## Log
 | Date | Event |
 |---|---|
@@ -594,3 +596,4 @@
 | 2026-11-17 | Batch 31 (`batch/2026-11-16-31`): SMS-device (on-device SMS e2e green; three root causes fixed), SMS-improve (InstaPay, categorization), UI-po31 (acronyms, card digits, Keep, charts free). FU-251. Progress 167/186. |
 | 2026-11-17 | Batch 32 (`batch/2026-11-17-32`): follow-up sweep in five lanes (FU-247/250/251 and batch-29 minors), explorer3 on the emulator, Review Keep tap fix. FU-252. Progress 167/186. |
 | 2026-11-17 | Batch 33 (`batch/2026-11-17-33`): follow-up sweep 2 (privacy/data, ledger, due-days setting, DB-clock freezes). FU-253. Progress 167/186. |
+| 2026-11-17 | Batch 34 (`batch/2026-11-17-34`): CAT-cash (PO CAT-INSTAPAY, CAT-CASH), FAB-mockup (PO FAB-MOCKUP). FU-254. Progress 167/186. |
