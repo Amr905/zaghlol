@@ -58,11 +58,13 @@ String neutralizeFormula(String s) {
 /// One export row as strings, in [exportHeader] order.
 List<String> exportRow(TransactionRecord t) {
   final orig = t.originalAmount;
+  // FU-131: ids are free-form text in the database (a restored or imported
+  // row may carry any id), so they are neutralised too.
   return [
-    t.id,
+    neutralizeFormula(t.id),
     t.occurredAt.toUtc().toIso8601String(),
     '${t.occurredTzOffsetMin}',
-    t.accountId,
+    neutralizeFormula(t.accountId),
     t.direction.code,
     t.status.code,
     t.amount.toCanonicalString(),
@@ -70,7 +72,7 @@ List<String> exportRow(TransactionRecord t) {
     orig?.toCanonicalString() ?? '',
     orig?.currency.code ?? '',
     neutralizeFormula(t.merchantRaw ?? ''),
-    t.categoryId ?? '',
+    neutralizeFormula(t.categoryId ?? ''),
     t.source.code,
     neutralizeFormula(t.note ?? ''),
   ];
@@ -315,17 +317,18 @@ class ExportService {
   ) async {
     final all = <TransactionRecord>[];
     final seen = <String>{};
-    var offset = 0;
+    PageCursor? after;
     while (all.length < max) {
+      // FU-131: keyset paging. A row added or deleted while paging does not
+      // shift later pages, so no row is skipped; [seen] still guards
+      // against an edited row (new date) showing up twice.
       final page = await _repo.query(
         filter: filter,
-        page: PageRequest(limit: 500, offset: offset),
+        page: PageRequest(limit: 500, after: after),
       );
-      // FU-131: a row added while paging shifts the offsets; never write
-      // the same transaction twice.
       all.addAll(page.where((r) => seen.add(r.id)));
       if (page.length < 500) break;
-      offset += 500;
+      after = PageCursor.of(page.last);
     }
     return all;
   }

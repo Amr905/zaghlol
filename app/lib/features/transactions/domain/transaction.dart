@@ -163,9 +163,25 @@ final class TransactionFilter {
 
 /// A page request. [limit] is capped by the repository (500).
 final class PageRequest {
-  const PageRequest({this.limit = 50, this.offset = 0});
+  const PageRequest({this.limit = 50, this.offset = 0, this.after});
   final int limit;
   final int offset;
+
+  /// Keyset paging (FU-131): only rows strictly after this one in list
+  /// order (newest first, then id). Rows added or removed while paging
+  /// then neither shift nor repeat the following pages. Used with
+  /// [offset] 0.
+  final PageCursor? after;
+}
+
+/// The position of a row in list order: its UTC time and id.
+final class PageCursor {
+  const PageCursor(this.occurredAt, this.id);
+
+  PageCursor.of(TransactionRecord r) : this(r.occurredAt, r.id);
+
+  final DateTime occurredAt;
+  final String id;
 }
 
 /// A new transaction entered by the user (FR-TXN-02). It is stored as
