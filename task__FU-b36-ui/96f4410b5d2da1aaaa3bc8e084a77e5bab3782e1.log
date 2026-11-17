@@ -1,5 +1,8 @@
 ﻿== SUMMARY ==
-RUNNING sha=96f4410b5d2da1aaaa3bc8e084a77e5bab3782e1
+SKIP sha=96f4410b5d2da1aaaa3bc8e084a77e5bab3782e1 no app/packages/backend changes
 
 == FULL LOG (last 1500 lines) ==
 auto task/FU-b36-ui 96f4410b5d2da1aaaa3bc8e084a77e5bab3782e1 2026-11-18T00:24:58.0790311+02:00
+
+
+
