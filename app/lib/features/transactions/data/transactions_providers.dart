@@ -3,6 +3,7 @@
 // them.
 
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:zaghlol_domain/zaghlol_domain.dart' show PaydaySchedule;
 
 import '../../../core/db/app_database_providers.dart';
 import '../../../core/db/daos/transactions_dao.dart';
@@ -10,10 +11,12 @@ import '../../budget/application/budget_providers.dart';
 import '../../budget/application/cycle_app_wiring.dart'
     show domainEventBusProvider;
 import '../../ingestion/domain/ingest_ports.dart' show PersistedTxn;
-import '../../notifications/application/notification_providers.dart'
-    show duplicateCheckProvider;
+import '../../notifications/application/housekeeping_providers.dart'
+    show afterIngestProvider;
 import '../../transfers/application/suggestion_hook.dart';
+import '../application/refund_matching.dart';
 import '../application/reimbursements.dart';
+import '../application/transfer_pairing.dart';
 import '../application/transactions_changed_event.dart';
 import 'alerting_transaction_repository.dart';
 import '../domain/transaction_repository.dart';
@@ -59,7 +62,15 @@ final transactionRepositoryProvider = FutureProvider<TransactionRepository>((
     db,
     clock: ref.watch(clockProvider),
   );
-  final dupCheck = ref.read(duplicateCheckProvider);
+  final dupCheck = ref.read(afterIngestProvider);
+  Future<PaydaySchedule> schedule() => ref.read(paydayScheduleProvider.future);
+  final bus = ref.watch(domainEventBusProvider);
+  final pairing = TransferPairingUseCase(
+    db,
+    loadSchedule: schedule,
+    events: bus,
+  );
+  final refunds = RefundMatching(db, loadSchedule: schedule, events: bus);
   return AlertingTransactionRepository(
     inner,
     afterAdd: (added) async {
@@ -71,6 +82,15 @@ final transactionRepositoryProvider = FutureProvider<TransactionRepository>((
         ),
       );
       await dupCheck();
+    },
+    // FU-253: a delete (the voice logger's Undo) frees pairs and links like
+    // every other delete path.
+    afterRemove: (id) async {
+      try {
+        await pairing.onRemoved(id);
+      } finally {
+        await refunds.onRemoved(id);
+      }
     },
     // FIX-device-flows: Home, budgets and the cycle cache listen for this.
     onChanged: (rows) async {

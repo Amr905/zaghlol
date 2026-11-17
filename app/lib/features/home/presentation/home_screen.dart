@@ -2,8 +2,6 @@
 // title; Android a Material 3 collapsing app bar. Contextual cards (T-104)
 // are in the banner slot (T-104); the currency switcher (T-116) is not here.
 
-import 'dart:math' show max;
-
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/cupertino.dart' show CupertinoIcons;
@@ -212,6 +210,18 @@ class _FilterRow extends StatelessWidget {
   );
 }
 
+/// Tallest measured page among the first [pageCount] pages; heights of pages
+/// that no longer exist (currency count dropped) are ignored. [fallback] is
+/// used until a live page has reported.
+@visibleForTesting
+double pagerHeight(Map<int, double> heights, int pageCount, double fallback) {
+  var tallest = 0.0;
+  for (final e in heights.entries) {
+    if (e.key < pageCount && e.value > tallest) tallest = e.value;
+  }
+  return tallest == 0 ? fallback : tallest;
+}
+
 class _HomeBody extends ConsumerStatefulWidget {
   const _HomeBody({required this.model, required this.actions});
 
@@ -256,6 +266,7 @@ class _HomeBodyState extends ConsumerState<_HomeBody> {
     final figures = m.currencies;
     final page = figures.isEmpty ? 0 : _page.clamp(0, figures.length - 1);
     final scale = MediaQuery.textScalerOf(context);
+    _pageHeights.removeWhere((i, _) => i >= figures.length);
     final accounts = <String, Account>{
       for (final acc
           in ref.watch(homeAccountsProvider).value ?? const <Account>[])
@@ -295,9 +306,11 @@ class _HomeBodyState extends ConsumerState<_HomeBody> {
               key: const ValueKey('home-pager'),
               // Sized to the tallest measured page (batch-29 minor): a page
               // without a budget also shows the hint and its button.
-              height: _pageHeights.isEmpty
-                  ? scale.scale(_firstFrameHeight)
-                  : _pageHeights.values.reduce(max),
+              height: pagerHeight(
+                _pageHeights,
+                figures.length,
+                scale.scale(_firstFrameHeight),
+              ),
               child: PageView(
                 controller: _pager,
                 allowImplicitScrolling: true,

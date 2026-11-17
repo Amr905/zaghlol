@@ -644,6 +644,10 @@
   "@commonErrorSaveFailed": {
     "description": "S · the form is kept"
   },
+  "reviewErrorSaveFailed": "مقدرتش أحفظ الحركة دي. جرّب تاني، وهتفضل في المراجعة.",
+  "@reviewErrorSaveFailed": {
+    "description": "S · review: saving a card failed; the card stays in the list"
+  },
   "commonErrorNetwork": "مش قادر أوصل للسيرفر دلوقتي. فلوسك في أمان على موبايلك، جرّب تاني كمان شوية.",
   "@commonErrorNetwork": {
     "description": "S · 06-voice-and-tone.md §2"

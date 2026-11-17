@@ -177,12 +177,17 @@ public class AppleReconciliationJobTests
         var young = store.Add("EXPIRED", AppleScript.NewId(), attempts: 10);
         young.ProcessedAt = AppleScript.Now.AddHours(-1);
         young.LastError = "STORE_ERROR";
+        var old = store.Add("EXPIRED", AppleScript.NewId(), attempts: 10);
+        old.ReceivedAt = AppleScript.Now.AddDays(-8);
+        old.ProcessedAt = AppleScript.Now.AddDays(-7);
+        old.LastError = "STORE_ERROR";
 
         await Sweep().RunOnceAsync(CancellationToken.None);
 
         Assert.Null(due.ProcessedAt);
         Assert.Equal(0, due.Attempts);
         Assert.NotNull(young.ProcessedAt);
+        Assert.NotNull(old.ProcessedAt);
     }
 
     private AppleNotificationHistoryJob History(bool allowSandbox, AppleNotificationIngest? ingest = null) =>

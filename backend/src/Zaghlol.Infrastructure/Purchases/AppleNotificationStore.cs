@@ -115,6 +115,7 @@ internal sealed class AppleNotificationStore(IZaghlolDbContextFactory contexts) 
         FROM zaghlol.purchases
         WHERE store = 'app_store' AND plan <> 'lifetime' AND state IN ('active', 'in_grace', 'canceled_active')
           AND expires_at BETWEEN @from AND @to AND last_verified_at < expires_at
+          AND (@include_sandbox OR environment <> 'sandbox')
         ORDER BY expires_at
         LIMIT @limit
         """;
@@ -287,7 +288,7 @@ internal sealed class AppleNotificationStore(IZaghlolDbContextFactory contexts) 
         return (reader.GetInt64(0), reader.GetInt64(1));
     }
 
-    public async Task<IReadOnlyList<ApplePurchaseRow>> ListExpiredSubscriptionsAsync(DateTimeOffset now, int limit, CancellationToken cancellationToken)
+    public async Task<IReadOnlyList<ApplePurchaseRow>> ListExpiredSubscriptionsAsync(DateTimeOffset now, int limit, bool includeSandbox, CancellationToken cancellationToken)
     {
         await using var db = contexts.CreateDbContext(DatabaseRole.Worker);
         await db.Database.OpenConnectionAsync(cancellationToken);
@@ -295,6 +296,7 @@ internal sealed class AppleNotificationStore(IZaghlolDbContextFactory contexts) 
         command.Parameters.AddWithValue("from", now.ToUniversalTime() - TimeSpan.FromDays(7));
         command.Parameters.AddWithValue("to", now.ToUniversalTime() - TimeSpan.FromMinutes(10));
         command.Parameters.AddWithValue("limit", limit);
+        command.Parameters.AddWithValue("include_sandbox", includeSandbox);
         await using var reader = await command.ExecuteReaderAsync(cancellationToken);
         var rows = new List<ApplePurchaseRow>();
         while (await reader.ReadAsync(cancellationToken))

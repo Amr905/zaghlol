@@ -104,7 +104,7 @@ class _ReviewScreenState extends ConsumerState<ReviewScreen> {
       if (!mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
-          content: Text(AppLocalizations.of(context).commonErrorSaveFailed),
+          content: Text(AppLocalizations.of(context).reviewErrorSaveFailed),
         ),
       );
     }
@@ -307,7 +307,7 @@ class _ReviewScreenState extends ConsumerState<ReviewScreen> {
       // leaving the card as if nothing was tapped.
       ScaffoldMessenger.of(context)
         ..hideCurrentSnackBar()
-        ..showSnackBar(SnackBar(content: Text(l10n.commonErrorSaveFailed)));
+        ..showSnackBar(SnackBar(content: Text(l10n.reviewErrorSaveFailed)));
       return;
     }
     ScaffoldMessenger.of(context).showSnackBar(

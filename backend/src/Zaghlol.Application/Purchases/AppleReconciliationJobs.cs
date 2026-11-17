@@ -137,7 +137,7 @@ public sealed class AppleExpirySweepJob(
         {
             await store.ReviveDeadLetteredAsync(
                 clock.GetUtcNow(), StoreNotificationSchedule.ReviveAfter, StoreNotificationSchedule.ReviveWindow, StoreNotificationSchedule.ReviveBatch, cancellationToken);
-            var rows = await store.ListExpiredSubscriptionsAsync(clock.GetUtcNow(), BatchSize, cancellationToken);
+            var rows = await store.ListExpiredSubscriptionsAsync(clock.GetUtcNow(), BatchSize, refresher.AllowSandbox, cancellationToken);
             int written = 0, failed = 0;
             foreach (var row in rows)
             {

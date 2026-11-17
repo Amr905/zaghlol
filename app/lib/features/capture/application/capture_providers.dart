@@ -12,8 +12,9 @@ import 'package:flutter/foundation.dart' show TargetPlatform;
 import 'package:flutter/foundation.dart' as f show defaultTargetPlatform;
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-import '../../notifications/application/notification_providers.dart'
-    show duplicateCheckProvider;
+import '../../categorization/data/event_category_backfill.dart';
+import '../../notifications/application/housekeeping_providers.dart'
+    show afterIngestProvider;
 
 import 'package:zaghlol_parsing/zaghlol_parsing.dart'
     show ParsingPipeline, Registry;
@@ -158,7 +159,7 @@ final captureCoordinatorProvider = FutureProvider<CaptureCoordinator?>((
       gate: gate,
       rebuildPerBatch: true,
       // T-100: duplicate-charge alerts after each committed batch.
-      afterBatch: ref.read(duplicateCheckProvider),
+      afterBatch: ref.read(afterIngestProvider),
     ),
   );
   final share = ref.watch(captureShareIntakeProvider);
@@ -216,6 +217,15 @@ final captureCoordinatorProvider = FutureProvider<CaptureCoordinator?>((
   unawaited(coordinator.start());
   // SMS-device: review rows stored under an older registry are read again.
   unawaited(reparseOnStart(db, registry, gate: gate));
+  // FU-254: rows saved before the Cash / InstaPay categories get them once.
+  unawaited(
+    backfillEventCategories(
+      db,
+      registry,
+      at: DateTime.now().toUtc().millisecondsSinceEpoch,
+      gate: gate,
+    ),
+  );
   return coordinator;
 }, name: 'captureCoordinatorProvider');
 
@@ -242,7 +252,7 @@ InboxScanService _buildScanService(
       ref.container,
       gate: gate,
       rebuildPerBatch: true,
-      afterBatch: ref.read(duplicateCheckProvider),
+      afterBatch: ref.read(afterIngestProvider),
       build: (d) async => buildIngestRawMessages(
         d,
         pipeline: ParsingPipeline(
