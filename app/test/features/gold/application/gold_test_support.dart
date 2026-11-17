@@ -207,6 +207,7 @@ final class FakeSeatProver implements SeatProver {
   final List<String> calls = [];
   final List<Uint8List> challenges = [];
   bool unusableMarked = false;
+  bool throwOnProve = false;
   List<String>? order;
 
   static Uint8List pk(int seed) =>
@@ -221,6 +222,7 @@ final class FakeSeatProver implements SeatProver {
 
   @override
   Future<List<SeatSignature>> prove(SeatOp op, Uint8List challenge) async {
+    if (throwOnProve) throw PlatformException(code: 'SEAT_DOWN');
     calls.add(op.name);
     order?.add('seat:${op.name}');
     challenges.add(challenge);

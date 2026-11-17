@@ -16,6 +16,8 @@ class FakeStore implements CsvImportStore {
   final List<ImportedTxn> rows = [];
   int txCalls = 0;
   bool failOnInsertN = false;
+  bool exceptionOnInsert = false;
+  String? existingMerchant;
 
   @override
   Future<T> inWriteTransaction<T>(Future<T> Function() body) async {
@@ -37,6 +39,12 @@ class FakeStore implements CsvImportStore {
   Future<Set<String>> categoryIds() async => categories;
   @override
   Future<List<ExistingTxnKey>> existingAt(String a, int ms) async => [
+    if (existingMerchant != null)
+      ExistingTxnKey(
+        direction: TxnDirection.expense,
+        amount: Money(Currency.of('EGP'), 1050),
+        merchant: existingMerchant,
+      ),
     for (final r in rows)
       if (r.accountId == a && r.occurredAt.millisecondsSinceEpoch == ms)
         ExistingTxnKey(
@@ -47,6 +55,7 @@ class FakeStore implements CsvImportStore {
   ];
   @override
   Future<String> insert(ImportedTxn row) async {
+    if (exceptionOnInsert) throw const FormatException('constraint');
     if (failOnInsertN && rows.length == 1) throw StateError('boom');
     rows.add(row);
     return 'id${rows.length}';
@@ -419,5 +428,25 @@ void main() {
       expect(store.rows.first, same(before.first));
       expect(store.rows.length, 2);
     });
+  });
+
+  group('FU-154', () {
+    test('154b a store failure surfaces as an import code', () async {
+      store.exceptionOnInsert = true;
+      expect(
+        await code(uc.run(raw(hdr() + line()))),
+        ImportCsvException.storeFailed,
+      );
+    });
+
+    test(
+      '154a existing unsanitised merchant still counts as duplicate',
+      () async {
+        store.existingMerchant = '  Shop\u0007 ';
+        final s = await uc.run(raw(hdr() + line()));
+        expect(s.duplicates, 1);
+        expect(s.imported, 0);
+      },
+    );
   });
 }

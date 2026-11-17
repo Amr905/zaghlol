@@ -155,4 +155,15 @@ void main() {
     expect(hooked.length, 3);
     expect(await totals(dst.db), original);
   });
+
+  test('FU-154a existingAt reads past one page of rows', () async {
+    final dao = TransactionsDao(edb.db);
+    for (var i = 0; i < 520; i++) {
+      await dao.insert(
+        txn('p$i', accountId: 'acc1', amountMinor: 100 + i, occurredAt: t0),
+      );
+    }
+    final store = DriftCsvImportStore(edb.db, dao, AccountsDao(edb.db));
+    expect(await store.existingAt('acc1', t0), hasLength(520));
+  });
 }

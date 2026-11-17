@@ -495,4 +495,27 @@ void main() {
       },
     );
   });
+
+  group('FU-151', () {
+    test('151a repair event names the counterpart account too', () async {
+      await add('bill');
+      await add('a', direction: 'transfer_in', minor: 40000, account: 'acc2');
+      await uc.assign('a', [
+        const AssignRequest(expenseId: 'bill', amountMinor: 40000),
+      ]);
+      final r = await uc.repairForNewAmount('bill', 0);
+      expect(r.event!.accountIds, containsAll(['acc1', 'acc2']));
+    });
+
+    test('151b removeParticipant refuses a deleted expense', () async {
+      await add('bill');
+      final p = await uc.addParticipant('bill', 'A', 100);
+      await TransactionsDao(db).softDelete('bill', at: t0);
+      await expectLater(
+        uc.removeParticipant(p),
+        throwsA(isA<ReimbursementException>()),
+      );
+      expect(await uc.unsettled('bill').then((m) => m.length), 1);
+    });
+  });
 }

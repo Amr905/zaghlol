@@ -77,6 +77,8 @@ typedef BackupAlertSink = Future<void> Function(
 
 // ---------------------------------------------------------------- policy --
 
+const Duration _clockSkewTolerance = Duration(minutes: 5);
+
 /// Whether a scheduled run is due (local calendar, user's zone): daily, a new
 /// local day since the last success; weekly, 7 calendar days; monthly, the
 /// same day next month (clamped to the month's length). Never backed up: due.
@@ -87,6 +89,12 @@ bool isScheduleDue({
 }) {
   if (mode == BackupScheduleMode.off) return false;
   if (lastSuccessMs == null) return true;
+  // A last success in the future (clock moved back): the record is not
+  // trustworthy, so the backup is due rather than never due.
+  if (lastSuccessMs >
+      now.toUtc().millisecondsSinceEpoch + _clockSkewTolerance.inMilliseconds) {
+    return true;
+  }
   final last = DateTime.fromMillisecondsSinceEpoch(
     lastSuccessMs,
     isUtc: true,

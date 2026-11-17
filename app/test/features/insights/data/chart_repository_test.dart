@@ -885,6 +885,20 @@ void main() {
       expect(third.single.spend.minor, 300);
     });
 
+    test('FU-152a a category or account edit drops the memo', () async {
+      final sub = repo.watchEdits();
+      addTearDown(sub.cancel);
+      await add('a', amount: 100);
+      await repo.cashFlow([period], fEgp);
+      expect(repo.memoSize, greaterThan(0));
+      await db.customUpdate(
+        'UPDATE accounts SET label = label',
+        updates: {db.accounts},
+      );
+      await Future<void>.delayed(Duration.zero);
+      expect(repo.memoSize, 0);
+    });
+
     test('key includes currency, period and accounts', () async {
       await add('a', amount: 100);
       await add('b', amount: 100, currency: 'GBP');

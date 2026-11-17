@@ -330,6 +330,37 @@ void main() {
     expect(r2.backend.verifies, hasLength(1));
   });
 
+  test('FU-165b a failing store completion on replay does not throw', () async {
+    final r = _Rig();
+    await r.started();
+    r.store.failComplete = true;
+    await r.store.deliver(paid(_tokenSentinel));
+    await r.store.deliver(paid(_tokenSentinel)); // replay, still failing
+    await r.settle();
+    expect((await r.outbox.load()).single.stage, OutboxStage.verified);
+  });
+
+  test('FU-165b a failing seat prover queues a retry, no crash', () async {
+    final r = _Rig(platform: ClientPlatform.ios);
+    await r.started();
+    r.seats.throwOnProve = true;
+    await r.store.deliver(paid(_jws));
+    await r.settle();
+    expect(r.last, isA<PurchaseQueued>());
+    expect(r.backend.verifies, isEmpty);
+  });
+
+  test('FU-165e a verified entry the store never replays ages out', () async {
+    final r = _Rig();
+    await r.started();
+    r.store.failComplete = true;
+    await r.store.deliver(paid(_tokenSentinel));
+    expect(await r.outbox.load(), hasLength(1));
+    r.h.clock.wall += 15 * day;
+    await r.service.retryDue();
+    expect(await r.outbox.load(), isEmpty);
+  });
+
   group('iOS seat keys on verify (R4-1, T-179)', () {
     test('element 0 only, challenge = SHA-256(signedTransaction), signed once '
         'and resent byte-identical', () async {
