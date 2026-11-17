@@ -10,6 +10,7 @@ import 'dart:math';
 import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:zaghlol/core/backend/backend_client.dart';
+import 'package:zaghlol/core/backend/backend_state.dart';
 import 'package:zaghlol/core/platform/seat_key_api.g.dart';
 import 'package:zaghlol/features/gold/application/seat_keys.dart';
 import 'package:zaghlol/features/gold/domain/binding/request_binding.dart';
@@ -116,7 +117,39 @@ Map<String, dynamic> _vectors() {
 String _hex(List<int> b) =>
     b.map((e) => e.toRadixString(16).padLeft(2, '0')).join();
 
+final class _ThrowingStore implements BackendStateStore {
+  @override
+  Future<Uint8List?> read(String key) async =>
+      throw const FormatException('store');
+  @override
+  Future<void> write(String key, Uint8List value) async =>
+      throw const FormatException('store');
+  @override
+  Future<bool> compareAndSet(
+    String key, {
+    required Uint8List? expected,
+    required Uint8List next,
+  }) async => throw const FormatException('store');
+  @override
+  Future<void> delete(String key) async => throw const FormatException('store');
+  @override
+  Future<bool> deleteIfEquals(String key, Uint8List expected) async =>
+      throw const FormatException('store');
+}
+
 void main() {
+  test('FU-163b: a failing state store yields no keys, not an error', () async {
+    final s = Setup();
+    final svc = SeatKeyService(
+      platform: ClientPlatform.ios,
+      store: _ThrowingStore(),
+      installId: () async => _idA,
+      host: s.native,
+    );
+    expect(await svc.publicKeys(), isEmpty);
+    expect(await svc.prove(SeatOp.verify, _challenge()), isEmpty);
+  });
+
   group('install binding (element 0, R4-1(1))', () {
     test('element 0 is the same across launches of one install', () async {
       final s = Setup();

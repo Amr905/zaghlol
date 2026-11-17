@@ -184,10 +184,11 @@ final class IosCaptureHost: IosCaptureHostApi {
   }
 
   /// T-064: the per-intent last-run times the App Intents recorded. Times
-  /// only; null = never (or not readable before the first unlock).
+  /// only; null = never; an unreadable log is NOT_AVAILABLE.
   func getShortcutSetupStatus() throws -> ShortcutSetupStatus {
     guard let log = intentRuns() else { throw fail(Self.notAvailable) }
-    let r = log.read()
+    // An unreadable log is "cannot tell" (Dart shows no verdict), never "never ran".
+    guard let r = log.readIfReadable() else { throw fail(Self.notAvailable) }
     return ShortcutSetupStatus(lastMessageIntentAtMs: r.messageAtMs, lastWalletIntentAtMs: r.walletAtMs)
   }
 

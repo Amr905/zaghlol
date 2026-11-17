@@ -177,6 +177,16 @@ void main() {
     expect(await uploadDir(a).exists(), isFalse);
   });
 
+  test('FU-167a: an old file stuck on quota behind a newer good backup does '
+      'not block the next backup', () async {
+    final first = await backupA(keep: 5);
+    final second = await backupA(keep: 5);
+    cloud.files[first.entry.name]!.quota = true;
+    final third = await backupA(keep: 5);
+    expect(third.uploaded, isTrue);
+    expect(second.uploaded, isTrue);
+  });
+
   test(
     'stored bytes differ → uploadUnverified, previous kept, no prune',
     () async {

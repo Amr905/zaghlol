@@ -151,6 +151,20 @@ final class IosCaptureHostTests: XCTestCase {
     XCTAssertEqual(try h.getShortcutSetupStatus().lastWalletIntentAtMs, 1_700_000_500_000)
   }
 
+  // FU-207b: a log that exists but can't be read is "cannot tell", not "never ran".
+  func testShortcutSetupStatusUnreadableLogIsNotAvailable() throws {
+    let file = root.appendingPathComponent("capture/intent_runs.bin")
+    try FileManager.default.createDirectory(
+      at: file.deletingLastPathComponent(), withIntermediateDirectories: true)
+    try Data("not a sealed log".utf8).write(to: file)
+    let log = IntentRunLog(file: file, cipher: TestCipher())
+    let h = IosCaptureHost(
+      runtime: { self.runtime }, claim: claim, guardRuntime: { nil }, intentRuns: { log })
+    XCTAssertThrowsError(try h.getShortcutSetupStatus()) {
+      XCTAssertEqual(($0 as? CaptureApiError)?.code, "NOT_AVAILABLE")
+    }
+  }
+
   func testShortcutSetupStatusWithoutAContainerIsNotAvailable() {
     let h = IosCaptureHost(runtime: { nil }, claim: SpoolClaim(), intentRuns: { nil })
     XCTAssertThrowsError(try h.getShortcutSetupStatus()) {

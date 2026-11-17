@@ -56,6 +56,8 @@ class ActivityPermissions(
     override fun openNotificationAccessSettings() = openSettings()
 
     override fun detach() {
+        // FU-164b: callbacks of a prompt still open are dropped without an
+        // answer: their engine is gone, so there is no Dart caller to reply to.
         pending.clear()
     }
 
