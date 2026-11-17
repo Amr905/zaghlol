@@ -972,6 +972,12 @@ abstract class AppLocalizations {
   /// **'محصلش حفظ. جرّب تاني، واللي كتبته لسه موجود.'**
   String get commonErrorSaveFailed;
 
+  /// S · review: saving a card failed; the card stays in the list
+  ///
+  /// In ar, this message translates to:
+  /// **'مقدرتش أحفظ الحركة دي. جرّب تاني، وهتفضل في المراجعة.'**
+  String get reviewErrorSaveFailed;
+
   /// S · 06-voice-and-tone.md §2
   ///
   /// In ar, this message translates to:

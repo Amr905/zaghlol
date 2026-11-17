@@ -561,6 +561,10 @@ class AppLocalizationsAr extends AppLocalizations {
       'محصلش حفظ. جرّب تاني، واللي كتبته لسه موجود.';
 
   @override
+  String get reviewErrorSaveFailed =>
+      'مقدرتش أحفظ الحركة دي. جرّب تاني، وهتفضل في المراجعة.';
+
+  @override
   String get commonErrorNetwork =>
       'مش قادر أوصل للسيرفر دلوقتي. فلوسك في أمان على موبايلك، جرّب تاني كمان شوية.';
 

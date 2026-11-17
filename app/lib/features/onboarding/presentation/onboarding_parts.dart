@@ -211,34 +211,41 @@ class OnbPage extends StatelessWidget {
   /// button is never below the fold on a small screen (explorer finding 15).
   @override
   Widget build(BuildContext context) {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.stretch,
-      children: [
-        Expanded(
-          child: SingleChildScrollView(
-            padding: const EdgeInsetsDirectional.symmetric(
-              horizontal: ZSpacing.screen,
-              vertical: ZSpacing.sm,
+    return LayoutBuilder(
+      builder: (context, box) => Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          Expanded(
+            child: SingleChildScrollView(
+              padding: const EdgeInsetsDirectional.symmetric(
+                horizontal: ZSpacing.screen,
+                vertical: ZSpacing.sm,
+              ),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.stretch,
+                children: content,
+              ),
             ),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.stretch,
-              children: content,
+          ),
+          // Capped at half the page and scrollable, so very tall actions at a
+          // large text scale can't overflow (batch-32 minor).
+          ConstrainedBox(
+            constraints: BoxConstraints(maxHeight: box.maxHeight / 2),
+            child: SingleChildScrollView(
+              padding: const EdgeInsetsDirectional.fromSTEB(
+                ZSpacing.screen,
+                ZSpacing.sm,
+                ZSpacing.screen,
+                ZSpacing.sm,
+              ),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.stretch,
+                children: actions,
+              ),
             ),
           ),
-        ),
-        Padding(
-          padding: const EdgeInsetsDirectional.fromSTEB(
-            ZSpacing.screen,
-            ZSpacing.sm,
-            ZSpacing.screen,
-            ZSpacing.sm,
-          ),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.stretch,
-            children: actions,
-          ),
-        ),
-      ],
+        ],
+      ),
     );
   }
 }
