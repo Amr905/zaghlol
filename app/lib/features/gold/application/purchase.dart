@@ -111,6 +111,13 @@ final class PurchaseService {
     final entries = await _outbox.load();
     final nowMs = _now().millisecondsSinceEpoch;
     for (final e in entries) {
+      // A verified entry the store never replays (refunded, consumed
+      // elsewhere) must not sit in the outbox forever.
+      if (e.stage == OutboxStage.verified &&
+          nowMs - e.firstAtMs > outboxMaxAge.inMilliseconds) {
+        await _remove(e);
+        continue;
+      }
       if ((e.stage == OutboxStage.queued ||
               e.stage == OutboxStage.pendingServer) &&
           e.nextAtMs <= nowMs) {
@@ -160,7 +167,11 @@ final class PurchaseService {
         return;
       case OutboxStage.verified:
         // Verified earlier; only the store completion was missing.
-        if (await _store.complete(p)) await _remove(existing);
+        try {
+          if (await _store.complete(p)) await _remove(existing);
+        } on PlatformException {
+          // Stays `verified`; completed at a later replay.
+        }
       case OutboxStage.queued || OutboxStage.pendingServer:
         if (existing.nextAtMs <= _now().millisecondsSinceEpoch) {
           await _attempt(existing, live: p);
@@ -181,6 +192,10 @@ final class PurchaseService {
     } on ApiModelException {
       await _reject(e);
       _emit(const PurchaseInvalid());
+      return;
+    } on PlatformException {
+      // The seat-key prover (native) failed: nothing was sent; try again.
+      await _retryLater(e, null);
       return;
     }
 
