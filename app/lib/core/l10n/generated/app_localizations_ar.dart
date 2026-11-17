@@ -3091,6 +3091,11 @@ class AppLocalizationsAr extends AppLocalizations {
   String get insightsChartsOtherSlice => 'حاجات تانية';
 
   @override
+  String insightsCoveredEarlier(String amount) {
+    return 'اتدفع من كاش اتسحب قبل كده: $amount';
+  }
+
+  @override
   String get insightsChartTitleCashFlow => 'الداخل والخارج';
 
   @override

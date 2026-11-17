@@ -2999,6 +2999,11 @@ class AppLocalizationsEn extends AppLocalizations {
   String get insightsChartsOtherSlice => 'Other';
 
   @override
+  String insightsCoveredEarlier(String amount) {
+    return 'Paid from cash withdrawn earlier: $amount';
+  }
+
+  @override
   String get insightsChartTitleCashFlow => 'Cash flow';
 
   @override

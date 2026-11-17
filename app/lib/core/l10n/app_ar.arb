@@ -4012,6 +4012,11 @@
   "@insightsChartsOtherSlice": {
     "description": "C · donut remainder slice"
   },
+  "insightsCoveredEarlier": "اتدفع من كاش اتسحب قبل كده: {amount}",
+  "@insightsCoveredEarlier": {
+    "description": "Muted note under the category donut: cash payments covered by an earlier withdrawal (not a slice, not in the total)",
+    "placeholders": { "amount": { "type": "String" } }
+  },
   "insightsChartTitleCashFlow": "الداخل والخارج",
   "@insightsChartTitleCashFlow": {
     "description": "T · chart 1 (Free)"
