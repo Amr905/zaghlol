@@ -24,7 +24,17 @@ import 'package:integration_test/integration_test.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:zaghlol/core/catalog/catalog_providers.dart';
 import 'package:zaghlol/core/db/db_directory.dart';
+import 'package:zaghlol/core/db/app_database_providers.dart';
 import 'package:zaghlol/core/db/db_key_providers.dart';
+import 'package:zaghlol/features/capture/application/capture_providers.dart';
+import 'package:zaghlol/features/insights/domain/chart_models.dart'
+    show ChartId;
+import 'package:zaghlol/features/insights/presentation/chart_detail.dart'
+    show ChartDetailScreen, chartDetailTitle;
+import 'package:zaghlol/features/insights/presentation/charts/locked_chart_card.dart'
+    show LockedChartCard;
+import 'package:zaghlol/features/settings/debug/debug_sms_diagnostics_screen.dart'
+    show DebugSmsDiagnosticsScreen;
 import 'package:zaghlol/core/l10n/generated/app_localizations.dart';
 import 'package:zaghlol/core/routing/app_router.dart' show rootNavigatorKey;
 import 'package:zaghlol/core/routing/app_routes.dart';
@@ -43,6 +53,12 @@ import 'support/explorer_seed.dart';
 // Add sheet, -1 = all. A single long run exhausted the app's Java heap.
 const _part = int.fromEnvironment('EXPLORER_PART', defaultValue: -1);
 
+// TEST-explorer3: `review` (Arabic) seeds doubtful SMS through the emulator
+// modem (device-flows.sh sends them before the run), opens the Review screen
+// and taps Keep, Edit, Ignore and show/hide original, then opens the SMS
+// diagnostics; `charts` (English) visits all 12 charts (plus the budget bars)
+// as a free user.
+//
 // FU-245: which variant of the run. `ar` (default) is the original Arabic
 // light run; `en` English; `dark` the dark theme (Arabic); `scale` Arabic at
 // the system text scale 1.3 (device-flows.sh sets `font_scale` first);
@@ -51,6 +67,21 @@ const _part = int.fromEnvironment('EXPLORER_PART', defaultValue: -1);
 // two levels deep so that one app process stays within the heap.
 const _mode = String.fromEnvironment('EXPLORER_MODE', defaultValue: 'ar');
 const _fresh = _mode == 'onboarding' || _mode == 'onboarding_en';
+
+/// Problems found by the TEST-explorer3 flows (charts, review).
+final List<String> flowProblems = [];
+
+void _say(String line) {
+  // ignore: avoid_print
+  print('EXPLORER3 $line');
+}
+
+void _check(bool ok, String what) {
+  if (!ok) {
+    flowProblems.add(what);
+    _say('PROBLEM $what');
+  }
+}
 
 void main() {
   final binding = IntegrationTestWidgetsFlutterBinding.ensureInitialized();
@@ -101,7 +132,7 @@ void main() {
     }
     await settings.set(
       Settings.language,
-      _mode == 'en' || _mode == 'onboarding_en'
+      _mode == 'en' || _mode == 'onboarding_en' || _mode == 'charts'
           ? LanguagePref.en
           : LanguagePref.ar,
     );
@@ -273,7 +304,17 @@ void main() {
       runZonedGuarded(
         () async {
           try {
-            if (_mode == 'paywall') {
+            if (_mode == 'charts') {
+              await _visitCharts(
+                t,
+                l10nEn,
+                (n) => shot(t, n),
+                selectTab,
+                goHome,
+              );
+            } else if (_mode == 'review') {
+              await _reviewFlow(t, l10n, (n) => shot(t, n), goHome);
+            } else if (_mode == 'paywall') {
               Future<void> openPaywall() async {
                 unawaited(
                   rootNavigatorKey.currentState?.push<bool>(
@@ -293,7 +334,12 @@ void main() {
               );
               await goHome();
             }
-            for (var i = 0; i < 4 && !ex.timedOut && _mode != 'paywall'; i++) {
+            final special = _mode == 'charts' || _mode == 'review';
+            for (
+              var i = 0;
+              i < 4 && !ex.timedOut && _mode != 'paywall' && !special;
+              i++
+            ) {
               if (_part >= 0 && _part != i) continue;
               await selectTab(i);
               await ex.exploreCurrent(
@@ -305,6 +351,7 @@ void main() {
             }
             if (!ex.timedOut &&
                 _mode != 'paywall' &&
+                !special &&
                 (_part < 0 || _part == 4)) {
               await selectTab(0);
               await openAdd();
@@ -357,11 +404,12 @@ void main() {
             '${s.title}: ${i.kind} ${i.where}',
     ];
     expect(
-      ex.screens.length,
+      ex.screens.length + (_mode == 'charts' || _mode == 'review' ? 1 : 0),
       greaterThan(_part < 0 && _mode == 'ar' ? 8 : 0),
       reason: 'explored real screens',
     );
     expect(hard, isEmpty, reason: hard.join('\n'));
+    expect(flowProblems, isEmpty, reason: flowProblems.join('\n'));
   }, timeout: const Timeout(Duration(minutes: 40)));
 }
 
@@ -418,4 +466,215 @@ Future<void> _walkOnboarding(
     await t.pump(const Duration(milliseconds: 250));
   }
   await shot('onb-end');
+}
+
+Future<void> _settleFor(WidgetTester t, [int ms = 600]) async {
+  for (var i = 0; i < ms ~/ 100; i++) {
+    await t.pump(const Duration(milliseconds: 100));
+  }
+}
+
+/// All 12 charts (and the budget bars) as a free user: first the Charts list
+/// must hold no locked card, then every chart's detail screen opens with its
+/// title, without the locked preview.
+Future<void> _visitCharts(
+  WidgetTester t,
+  AppLocalizations l,
+  Future<void> Function(String) shot,
+  Future<void> Function(int) selectTab,
+  Future<void> Function() goHome,
+) async {
+  await selectTab(1);
+  await _settleFor(t, 1500);
+  await shot('charts-list-0');
+  var locked = 0;
+  for (var i = 0; i < 14; i++) {
+    locked += find.byType(LockedChartCard).evaluate().length;
+    final sc = find.byType(Scrollable);
+    if (sc.evaluate().isEmpty) break;
+    await t.drag(sc.last, const Offset(0, -500));
+    await _settleFor(t, 400);
+    if (i == 3 || i == 7 || i == 11) await shot('charts-list-$i');
+  }
+  _check(locked == 0, 'free user sees $locked locked chart cards in the list');
+  await goHome();
+  final nav = rootNavigatorKey.currentState!;
+  for (final id in ChartId.values) {
+    unawaited(
+      nav.push<void>(
+        MaterialPageRoute<void>(
+          builder: (_) => ChartDetailScreen(chart: id, code: 'EGP'),
+        ),
+      ),
+    );
+    await _settleFor(t, 1800);
+    final title = chartDetailTitle(l, id);
+    _check(
+      find.text(title).evaluate().isNotEmpty,
+      'chart ${id.name}: title missing',
+    );
+    _check(
+      find.text(l.insightsChartDetailLockedTitle).evaluate().isEmpty,
+      'chart ${id.name}: locked preview shown to a free user',
+    );
+    _say('CHART ${id.name} opened');
+    await shot('chart-${id.index.toString().padLeft(2, '0')}-${id.name}');
+    nav.pop();
+    await _settleFor(t, 500);
+  }
+}
+
+Finder _zbutton(String label) =>
+    find.byWidgetPredicate((w) => w is ZButton && w.label == label);
+
+/// Doubtful SMS (sent through the emulator modem before the run) on the
+/// Review screen: show/hide original, Keep, Edit, Ignore; then the SMS
+/// diagnostics screen.
+Future<void> _reviewFlow(
+  WidgetTester t,
+  AppLocalizations l,
+  Future<void> Function(String) shot,
+  Future<void> Function() goHome,
+) async {
+  final ctx = rootNavigatorKey.currentContext!;
+  final container = ProviderScope.containerOf(ctx);
+  final db = await container.read(appDatabaseProvider.future);
+  Future<int> scalar(String sql) async =>
+      (await db.customSelect(sql).getSingle()).data.values.first! as int;
+
+  // The SMS sat in the inbox / spool before the app started: read it like
+  // the first-run scan does, then give the ingest a moment.
+  try {
+    final scan = await container.read(inboxScanServiceProvider.future);
+    final p = await scan?.startFirstRun();
+    _say('SCAN imported=${p?.imported} scanned=${p?.scanned}');
+  } on Object catch (e) {
+    _say('SCAN_FAILED ${e.runtimeType}');
+  }
+  for (var i = 0; i < 40; i++) {
+    final n = await scalar(
+      "SELECT COUNT(*) FROM raw_messages WHERE channel = 'sms'",
+    );
+    if (n >= 4) break;
+    await _settleFor(t, 1000);
+  }
+  _say(
+    'SMS stored=${await scalar("SELECT COUNT(*) FROM raw_messages WHERE channel = 'sms'")} '
+    'txns=${await scalar('SELECT COUNT(*) FROM transactions')} '
+    'openReview=${await scalar('SELECT COUNT(*) FROM review_items WHERE resolved_at IS NULL')}',
+  );
+
+  GoRouter.of(ctx).go(AppRoutes.review);
+  await _settleFor(t, 2500);
+  await shot('review-0-list');
+  final originals = find.byKey(const ValueKey('reviewOriginalText'));
+  final before = originals.evaluate().length;
+  _say('REVIEW cards with original text: $before');
+  _check(
+    before >= 3,
+    'Review shows $before cards with original text (want 3+)',
+  );
+
+  // Show / hide original.
+  if (before > 0) {
+    await t.ensureVisible(originals.first);
+    await t.tap(originals.first);
+    await _settleFor(t, 800);
+    _check(
+      find.byKey(const ValueKey('reviewOriginalBody')).evaluate().isNotEmpty,
+      'Show original did not reveal the text',
+    );
+    _check(
+      find.text(l.ingestionReviewHideOriginal).evaluate().isNotEmpty,
+      'the toggle did not change to Hide original',
+    );
+    await shot('review-1-original-shown');
+    await t.tap(originals.first);
+    await _settleFor(t, 800);
+    _check(
+      find.byKey(const ValueKey('reviewOriginalBody')).evaluate().isEmpty,
+      'Hide original left the text visible',
+    );
+  }
+
+  // Keep: the first card whose Keep is enabled.
+  final keeps = find.byWidgetPredicate(
+    (w) =>
+        w is ZButton &&
+        w.key == const ValueKey('reviewKeep') &&
+        w.onPressed != null,
+  );
+  _say('REVIEW enabled Keep buttons: ${keeps.evaluate().length}');
+  _check(keeps.evaluate().isNotEmpty, 'no card offers an enabled Keep');
+  if (keeps.evaluate().isNotEmpty) {
+    final txns = await scalar('SELECT COUNT(*) FROM transactions');
+    await t.ensureVisible(keeps.first);
+    await t.tap(keeps.first);
+    await _settleFor(t, 1500);
+    final after = await scalar('SELECT COUNT(*) FROM transactions');
+    _check(
+      after == txns + 1,
+      'Keep saved ${after - txns} transactions (want 1)',
+    );
+    await shot('review-2-after-keep');
+  }
+
+  // Edit: opens the Add screen; Back returns to Review.
+  final edit = find.byWidgetPredicate(
+    (w) =>
+        w is ZButton &&
+        (w.label == l.commonActionEdit ||
+            w.label == l.ingestionReviewUnreadEnter) &&
+        w.onPressed != null,
+  );
+  if (edit.evaluate().isNotEmpty) {
+    await t.ensureVisible(edit.first);
+    await t.tap(edit.first);
+    await _settleFor(t, 1500);
+    await shot('review-3-edit-add-screen');
+    GoRouter.of(rootNavigatorKey.currentContext!).go(AppRoutes.review);
+    await _settleFor(t, 1500);
+  } else {
+    _check(false, 'no Edit button on the Review screen');
+  }
+
+  // Ignore (Dismiss).
+  final dismiss = _zbutton(l.commonActionDismiss);
+  if (dismiss.evaluate().isNotEmpty) {
+    final open = await scalar(
+      'SELECT COUNT(*) FROM review_items WHERE resolved_at IS NULL',
+    );
+    await t.ensureVisible(dismiss.first);
+    await t.tap(dismiss.first);
+    await _settleFor(t, 1500);
+    final after = await scalar(
+      'SELECT COUNT(*) FROM review_items WHERE resolved_at IS NULL',
+    );
+    _check(after == open - 1, 'Ignore resolved ${open - after} items (want 1)');
+    await shot('review-4-after-ignore');
+  } else {
+    _check(false, 'no Ignore button on the Review screen');
+  }
+
+  // SMS diagnostics (dev build).
+  unawaited(
+    rootNavigatorKey.currentState!.push<void>(
+      MaterialPageRoute<void>(
+        builder: (_) => const DebugSmsDiagnosticsScreen(),
+      ),
+    ),
+  );
+  await _settleFor(t, 2000);
+  _check(
+    find.byKey(const Key('sms-diag-list')).evaluate().isNotEmpty,
+    'SMS diagnostics list not shown',
+  );
+  final refresh = find.byKey(const Key('sms-diag-refresh'));
+  if (refresh.evaluate().isNotEmpty) {
+    await t.tap(refresh.first);
+    await _settleFor(t, 1000);
+  }
+  await shot('review-5-sms-diagnostics');
+  rootNavigatorKey.currentState!.pop();
+  await goHome();
 }
