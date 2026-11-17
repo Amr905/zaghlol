@@ -10,7 +10,7 @@
 import '../../../ingestion/ingestion_pause_gate.dart';
 
 import 'package:flutter/foundation.dart'
-    show TargetPlatform, defaultTargetPlatform, kReleaseMode;
+    show TargetPlatform, defaultTargetPlatform, kDebugMode, kReleaseMode;
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_riverpod/misc.dart' show Override;
 import 'package:zaghlol_parsing/zaghlol_parsing.dart';
@@ -91,9 +91,9 @@ final backendConfigProvider = Provider<BackendConfig>(
     verifier: ResponseSignatureVerifier([
       ...releaseResponseKeys,
       ...devBackendKeys.where((k) => k.kid[0] == 's'),
-    ], allowDevKeys: !kReleaseMode),
-    allowInsecureLocalhost: !kReleaseMode,
-    allowPrivateLan: !kReleaseMode,
+    ], allowDevKeys: kDebugMode),
+    allowInsecureLocalhost: kDebugMode,
+    allowPrivateLan: kDebugMode,
   ),
   name: 'backendConfigProvider',
 );
@@ -135,7 +135,7 @@ final Override entitlementServiceOverride = entitlementServiceProvider
         keys: ResponseSignatureVerifier([
           ...releaseEntitlementKeys,
           ...devBackendKeys.where((k) => k.kid[0] == 'e'),
-        ], allowDevKeys: !kReleaseMode),
+        ], allowDevKeys: kDebugMode),
         sink: NotifierEntitlementSink(
           ref.read(entitlementStateProvider.notifier),
         ),
