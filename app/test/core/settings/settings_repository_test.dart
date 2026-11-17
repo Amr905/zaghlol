@@ -79,6 +79,7 @@ allKeys = [
     byDefault: BackupDestinationPref.none,
     other: BackupDestinationPref.drive,
   ),
+  (key: Settings.lastForegroundMs, byDefault: null, other: 1760000000000),
   (key: Settings.backupLastSuccess, byDefault: null, other: 1760000000000),
   (key: Settings.backupLastFailure, byDefault: null, other: 1760000000000),
   (key: Settings.backupReminderAt, byDefault: null, other: 1760000000000),

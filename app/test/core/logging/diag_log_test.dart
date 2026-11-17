@@ -360,11 +360,39 @@ import 'package:zaghlol/core/logging/diag_field.dart';
         DiagCodes.catalogUpdated,
         DiagCodes.dbMigrated,
         DiagCodes.backupExclusionFailed,
+        DiagCodes.resumeFailed,
       ]) {
         expect(DiagCode.fromRegistry(c.value), c);
         expect(DiagCodes.all, contains(c));
       }
       expect(DiagCodes.backupExclusionFailed.value, 'BACKUP_EXCLUSION_FAILED');
+    });
+
+    test('FU-113: DiagCodes.all lists every registered constant', () {
+      final source = File('lib/core/logging/diag_code.dart').readAsStringSync();
+      final declared = RegExp(
+        r"static const DiagCode \w+ = DiagCode\._\(\s*'([A-Z0-9_]+)'",
+      ).allMatches(source).map((m) => m.group(1)!).toSet();
+      expect(declared, isNotEmpty);
+      expect({for (final c in DiagCodes.all) c.value}, declared);
+    });
+
+    test('FU-113 21-4: a debug build keeps its own error output', () {
+      final prevOnError = PlatformDispatcher.instance.onError;
+      final prevFlutter = FlutterError.onError;
+      final prevPrint = debugPrint;
+      addTearDown(() {
+        PlatformDispatcher.instance.onError = prevOnError;
+        FlutterError.onError = prevFlutter;
+        debugPrint = prevPrint;
+      });
+      installDiagErrorHandlers(logger, debugPassThrough: true);
+      expect(debugPrint, same(prevPrint)); // not muted
+      // false: the engine still reports the error.
+      expect(
+        PlatformDispatcher.instance.onError!(_Boom(), StackTrace.empty),
+        false,
+      );
     });
 
     test('toString of a rejected field does not carry the value', () {

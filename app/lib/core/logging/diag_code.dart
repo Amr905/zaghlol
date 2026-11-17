@@ -67,6 +67,7 @@ abstract final class DiagCodes {
     installReregistered,
     entitlementSubMismatch,
     accountIidMismatch,
+    resumeFailed,
   ];
 
   static const DiagCode flutterError = DiagCode._('FLUTTER_ERROR');
@@ -110,4 +111,7 @@ abstract final class DiagCodes {
 
   /// T-144 (R5-1): a signed account token named another install; ignored.
   static const DiagCode accountIidMismatch = DiagCode._('ACCOUNT_IID_MISMATCH');
+
+  /// FU-126: a foreground-resume job failed (cycle sweep). Code only.
+  static const DiagCode resumeFailed = DiagCode._('RESUME_FAILED');
 }
