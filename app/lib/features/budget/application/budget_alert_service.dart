@@ -39,22 +39,34 @@ final class BudgetAlertService {
 
   /// Evaluates [specs] against [totals] for [cycle]; returns the outcomes of
   /// the alerts raised. [carries]: rollover per budget id.
+  ///
+  /// FU-136: annual budgets (FR-BUD-06) are judged against [year] (the
+  /// calendar-year totals and their period key, e.g. `2026`), never the
+  /// cycle's; without [year] they are skipped rather than alerting once a
+  /// month on monthly totals. Their dedupe key is the year key.
   Future<List<AlertOutcome>> run(
     Cycle cycle,
     List<BudgetSpec> specs,
     Map<Currency, CycleTotals> totals, {
     Map<String, Money> carries = const {},
+    ({Map<Currency, CycleTotals> totals, String key})? year,
   }) async {
     final out = <AlertOutcome>[];
     for (final spec in specs) {
-      final p = evaluateBudget(spec, totals, carry: carries[spec.id]);
+      if (spec.annual && year == null) continue;
+      final periodKey = spec.annual ? year!.key : cycle.key;
+      final p = evaluateBudget(
+        spec,
+        spec.annual ? year!.totals : totals,
+        carry: spec.annual ? null : carries[spec.id],
+      );
       if (p.crossed.isEmpty) continue; // also the zero-budget case (EC-24)
       final top = p.crossed.last;
       for (final lower in p.crossed.take(p.crossed.length - 1)) {
         await markFired(
           kind: NotificationType.budgetThreshold.kind,
           subjectId: spec.id,
-          periodKey: cycle.key,
+          periodKey: periodKey,
           threshold: lower,
           at: nowMs(),
         );
@@ -65,7 +77,7 @@ final class BudgetAlertService {
           AlertRequest(
             type: NotificationType.budgetThreshold,
             subjectId: spec.id,
-            periodKey: cycle.key,
+            periodKey: periodKey,
             threshold: top,
             title: t.title,
             body: t.body,

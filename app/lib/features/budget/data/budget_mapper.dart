@@ -14,3 +14,23 @@ BudgetSpec budgetSpecOf(BudgetRow row) => BudgetSpec(
   rollover: row.rollover != 0,
   annual: row.period == BudgetPeriod.annual,
 );
+
+/// FU-136: like [budgetSpecOf] but null for a corrupt row (unknown currency,
+/// out-of-range amount, unreadable thresholds), so one bad budget never
+/// stops the alert run or the screen.
+BudgetSpec? tryBudgetSpecOf(BudgetRow row) {
+  final limit = Money.tryFromStorage(row.limitMinor, row.currency);
+  if (limit == null) return null;
+  try {
+    return BudgetSpec(
+      id: row.id,
+      categoryId: row.categoryId,
+      limit: limit,
+      thresholds: budgetThresholdsOf(row),
+      rollover: row.rollover != 0,
+      annual: row.period == BudgetPeriod.annual,
+    );
+  } on FormatException {
+    return null;
+  }
+}
