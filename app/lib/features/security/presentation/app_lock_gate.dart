@@ -3,7 +3,7 @@
 // current route survive, so a deep link lands after unlock, FU-125) but is
 // not painted, hit-tested or exposed to accessibility, and the lock screen
 // covers it. It also keeps the native secure window in step with the setting
-// and shows the rooted-device warning once per process (FR-SEC-07).
+// and shows the rooted-device warning once per install (FR-SEC-07, FU-130).
 
 import 'dart:async';
 
@@ -14,10 +14,12 @@ import '../../../core/l10n/generated/app_localizations.dart';
 import '../../../core/routing/app_router.dart';
 import '../../../core/settings/settings_providers.dart';
 import '../data/device_security_providers.dart';
+import '../data/rooted_warning_memo.dart';
 import '../domain/app_lock_controller.dart';
 import 'lock_screen.dart';
 
-/// The warning is shown once per process; a test resets it.
+/// The warning is shown at most once per process (and, through
+/// [rootedWarningMemoProvider], once per install); a test resets it.
 @visibleForTesting
 bool rootedWarningShown = false;
 
@@ -95,11 +97,25 @@ class _AppLockGateState extends ConsumerState<AppLockGate>
   Future<void> _maybeWarnRooted() async {
     final rooted = await ref.read(deviceRootedProvider.future);
     if (!rooted || rootedWarningShown || !mounted) return;
+    final memo = ref.read(rootedWarningMemoProvider);
+    try {
+      if (await memo.seen()) return;
+    } on Object {
+      // Unreadable: warn again rather than never.
+    }
+    if (!mounted) return;
     // Wait until the router has a navigator to show the dialog on.
     for (var i = 0; i < 100; i++) {
       final ctx = rootNavigatorKey.currentContext;
       if (ctx != null && ctx.mounted) {
         rootedWarningShown = true;
+        unawaited(
+          memo.markSeen().then<void>(
+            (_) {},
+            // Not recorded: the next launch warns once more.
+            onError: (Object _) {},
+          ),
+        );
         final l10n = AppLocalizations.of(ctx);
         await showDialog<void>(
           context: ctx,
