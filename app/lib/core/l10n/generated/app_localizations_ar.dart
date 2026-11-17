@@ -6761,7 +6761,7 @@ class AppLocalizationsAr extends AppLocalizations {
 
   @override
   String get privacyDeleteStoreAccountKept =>
-      'شراءك من المتجر وحسابك مش هيتأثروا. الجولد فاضل بتاعك.';
+      'شراءك من المتجر وحسابك مش هيتأثروا.';
 
   @override
   String get privacyDeleteFailed =>

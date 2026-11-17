@@ -9745,10 +9745,10 @@ abstract class AppLocalizations {
   /// **'النسخ الاحتياطية اللي على Google Drive أو iCloud هتفضل زي ما هي. لو عايز تمسحها، امسحها من هناك.'**
   String get privacyDeleteBackupsKept;
 
-  /// No description provided for @privacyDeleteStoreAccountKept.
+  /// N · delete-everything confirm: the store purchase and the account are not affected
   ///
   /// In ar, this message translates to:
-  /// **'شراءك من المتجر وحسابك مش هيتأثروا. الجولد فاضل بتاعك.'**
+  /// **'شراءك من المتجر وحسابك مش هيتأثروا.'**
   String get privacyDeleteStoreAccountKept;
 
   /// N · shown when the local wipe did not finish; the next launch resumes it

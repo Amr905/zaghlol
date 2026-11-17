@@ -6093,7 +6093,7 @@
   "@privacyDeleteBackupsKept": {
     "description": "N · delete-everything confirm: backups in the user's own cloud are not touched"
   },
-  "privacyDeleteStoreAccountKept": "Your store purchase and your account aren't touched. Gold stays yours.",
+  "privacyDeleteStoreAccountKept": "Your store purchase and your account aren't touched.",
   "@privacyDeleteStoreAccountKept": {
     "description": "N · delete-everything confirm: the store purchase and the account are not affected"
   },

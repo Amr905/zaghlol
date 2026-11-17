@@ -6640,7 +6640,7 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get privacyDeleteStoreAccountKept =>
-      'Your store purchase and your account aren\'t touched. Gold stays yours.';
+      'Your store purchase and your account aren\'t touched.';
 
   @override
   String get privacyDeleteFailed =>

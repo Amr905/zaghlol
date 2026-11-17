@@ -9196,7 +9196,10 @@
   "@privacyDeleteBackupsKept": {
     "description": "N · delete-everything confirm: backups in the user's own cloud are not touched"
   },
-  "privacyDeleteStoreAccountKept": "شراءك من المتجر وحسابك مش هيتأثروا. الجولد فاضل بتاعك.",
+  "privacyDeleteStoreAccountKept": "شراءك من المتجر وحسابك مش هيتأثروا.",
+  "@privacyDeleteStoreAccountKept": {
+    "description": "N · delete-everything confirm: the store purchase and the account are not affected"
+  },
   "privacyDeleteFailed": "مقدرناش نمسح كل حاجة. افتح الأبلكيشن تاني وهنكمّل.",
   "@privacyDeleteFailed": {
     "description": "N · shown when the local wipe did not finish; the next launch resumes it"

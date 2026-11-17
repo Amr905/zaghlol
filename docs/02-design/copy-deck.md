@@ -2578,6 +2578,7 @@ Serious and exact. No jokes, no emoji. The dialog is a type-to-confirm (C-18).
 | `privacy_delete_row` | امسح كل حاجة | Delete everything | L · destructive |
 | `privacy_delete_title` | تمسح كل حاجة من على الموبايل ده؟ | Delete everything from this phone? | T |
 | `privacy_delete_body` | هنمسح كل حركاتك وإعداداتك ومفاتيح الحماية من على الموبايل ده. مفيش رجوع. | We'll delete all your transactions, settings and security keys from this phone. There's no undo. | S |
+| `privacy_delete_storeAccountKept` | شراءك من المتجر وحسابك مش هيتأثروا. | Your store purchase and your account aren't touched. | S · no promise about Gold on this phone (Android delete is a new install and spends the seat move; see the seat warning) |
 | `privacy_delete_lastBackup` | آخر نسخة احتياطية: {date} | Last backup: {date} | S |
 | `privacy_delete_noBackup` | مفيش نسخة احتياطية. اللي هتمسحه مش هيرجع. | You have no backup. What you delete can't come back. | S |
 | `privacy_delete_iosKeys` | على الآيفون، مفاتيح تعريف الموبايل بتفضل عليه عشان الجولد يرجع من غير نقلة، ومفيهاش أي بيانات مالية. مسح الآيفون كله بيشيلها. | On iPhone, the phone's identity keys stay so Gold can return without a move. They hold no financial data. Erasing the iPhone removes them. | E · FR-ONB-08 iOS exception (D-62); iOS only |
