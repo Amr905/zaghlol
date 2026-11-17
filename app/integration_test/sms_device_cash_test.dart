@@ -207,7 +207,10 @@ void main() {
       () async => (await CategoriesDao(db).active()).isNotEmpty,
     );
     final cats = await CategoriesDao(db).active();
-    final own = cats.where((x) => !x.id.startsWith('sys:')).first.id;
+    final own = cats
+        .where((x) => x.id != 'sys:cash' && x.id != 'sys:instapay')
+        .first
+        .id;
     final accounts = await c.read(accountsRepositoryProvider.future);
     final cash = await accounts.ensureDefaultCash(
       currency: Currency.of('EGP'),
