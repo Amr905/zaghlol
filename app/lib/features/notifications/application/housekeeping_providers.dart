@@ -141,7 +141,9 @@ final housekeepingProvider = Provider<Housekeeping>((ref) {
       (
         name: 'recurring_detect',
         run: () async {
-          await (await recurring()).detectAndSuggest();
+          await (await recurring()).detectAndSuggest(
+            shouldStop: restoreWaiting,
+          );
         },
       ),
       (
@@ -212,6 +214,7 @@ final housekeepingProvider = Provider<Housekeeping>((ref) {
             cycle: schedule.cycleOn(cycles.today),
             schedule: schedule,
             service: await _budgetAlertService(ref, d),
+            shouldStop: restoreWaiting,
           );
         },
       ),

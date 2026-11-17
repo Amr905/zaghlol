@@ -477,10 +477,12 @@ final class EntitlementService {
   /// (or unreadable), or trusted time is `tampered` (only a fresh echo clears
   /// it). Throws [BackendFailure] when the call fails.
   Future<bool> refreshIfDue() async {
-    final ts = await _time.advance();
-    final has =
-        await _store.read(BackendStateKeys.entitlementToken) != null ||
-        await _store.read(signedOutPausedStateKey) != null;
+    final hasToken =
+        await _store.read(BackendStateKeys.entitlementToken) != null;
+    // FU-256: like [evaluate], a cached token with no trusted-time record is
+    // not a fresh install; the record starts `tampered`.
+    final ts = await _time.advance(null, hasToken);
+    final has = hasToken || await _store.read(signedOutPausedStateKey) != null;
     if (!has && !ts.tampered) return false;
     final c = await _cachedClaims();
     final due =

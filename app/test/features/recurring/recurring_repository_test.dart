@@ -60,6 +60,20 @@ void main() {
 
   group('detection', () {
     test(
+      'FU-256: a restore waiting stops detection before it writes',
+      () async {
+        await charge('t1', 2026, 8, 5, 19900);
+        await charge('t2', 2026, 9, 5, 19900);
+        await charge('t3', 2026, 10, 5, 19900);
+        expect(await repo.detectAndSuggest(shouldStop: () => true), isEmpty);
+        expect(
+          await repo.detectAndSuggest(),
+          hasLength(1),
+        ); // next run finds it
+      },
+    );
+
+    test(
       'Netflix-like history yields one suggestion and one review item',
       () async {
         await charge('t1', 2026, 8, 5, 19900);

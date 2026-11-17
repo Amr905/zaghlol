@@ -32,6 +32,7 @@ Future<List<AlertOutcome>> runBudgetAlerts({
   required Cycle cycle,
   required PaydaySchedule schedule,
   required BudgetAlertService service,
+  bool Function()? shouldStop,
 }) async {
   final rows = await (db.select(
     db.budgets,
@@ -56,5 +57,12 @@ Future<List<AlertOutcome>> runBudgetAlerts({
     cycle: cycle,
     specs: specs,
   );
-  return service.run(cycle, specs, totals, carries: carries, year: year);
+  return service.run(
+    cycle,
+    specs,
+    totals,
+    carries: carries,
+    year: year,
+    shouldStop: shouldStop,
+  );
 }

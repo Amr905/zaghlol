@@ -28,6 +28,9 @@ class CycleRepository {
   final int Function() _nowUtcMs;
   final LocalZone _zone;
 
+  /// The device zone the cycles are computed in.
+  LocalZone get zone => _zone;
+
   CivilDate get today => localToday(_nowUtcMs(), _zone);
 
   /// Totals of [cycle] per currency. [accounts]: empty is all accounts

@@ -25,13 +25,18 @@ Future<Map<String, Money>> rolloverCarries({
   final prev = schedule.cycleOn(cycle.start.plusDays(-1));
   final prevTotals = await cycles.totals(prev);
   // A budget made after the previous cycle began did not exist for all of it,
-  // so nothing was left unused (FR-BUD-05). UTC midnight approximates the
-  // local day start. The carry uses the current limit if it has changed.
-  final prevStartMs = DateTime.utc(
+  // so nothing was left unused (FR-BUD-05). The cut is the local start of the
+  // previous cycle's first day in the cycle schedule's zone (FU-256), not UTC
+  // midnight. The carry uses the current limit if it has changed.
+  final wallMidnight = DateTime.utc(
     prev.start.year,
     prev.start.month,
     prev.start.day,
-  ).millisecondsSinceEpoch;
+  );
+  final prevStartMs =
+      wallMidnight.millisecondsSinceEpoch -
+      cycles.zone.offsetAtWallClock(wallMidnight) *
+          Duration.millisecondsPerMinute;
   return {
     for (final s in rolling)
       s.id: s.createdAtMs > prevStartMs
