@@ -95,6 +95,7 @@ BudgetScreenData buildBudgetScreenData({
   required Map<Currency, CycleTotals> totals,
   required Map<Currency, Money> basis,
   required List<BudgetInput> budgets,
+  Map<String, Money> carries = const {},
   required bool calendarMonth,
   required bool hasPrevious,
 }) {
@@ -115,7 +116,7 @@ BudgetScreenData buildBudgetScreenData({
     for (final b in budgets) {
       final s = b.spec;
       if (s.categoryId == null || s.limit.currency != c || s.annual) continue;
-      final p = evaluateBudget(s, totals);
+      final p = evaluateBudget(s, totals, carry: carries[s.id]);
       budgetedSpend += p.spent.minor;
       rows.add(
         BudgetRowView(
