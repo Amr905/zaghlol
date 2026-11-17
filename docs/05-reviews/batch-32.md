@@ -62,3 +62,14 @@ The task changes only integration tests and CI wiring. The emulator SMS are synt
 ## Fix list
 
 None. No blocker or major finding touches money, security, privacy or data loss. The minors above go to a follow-up.
+
+## Lead delta check (Review Keep, 2026-11-17)
+
+The explorer reported "Keep saved 0 transactions" on the emulator (run 44058472071). Commit 0f660cba fixes it:
+- **Root cause:** the explorer tapped Keep right after `ensureVisible` without pumping, so the tap didn't reach the button. It fails without the change in `review_keep_explorer_test.dart`, which runs the same seeded body through ingest, the review card and Keep.
+- **One keep rule:** `GenericSuggestion.canSave` is used by both the provider and the card (`offersKeep`). The button is enabled only when the save would be accepted.
+- **Refused save:** a refused or failed save now shows a snackbar (`commonErrorSaveFailed`) instead of doing nothing.
+- device-flows run 44068563035 is **green**, including explorer[review]: Keep saves one transaction.
+
+Verdict: all five tasks plus the fix **APPROVED**.
+- **FU-252:** the batch-32 minors listed above (detach `frozen_until` is fixed in batch 33). A dedicated "couldn't save" string for review saves instead of the generic one.
