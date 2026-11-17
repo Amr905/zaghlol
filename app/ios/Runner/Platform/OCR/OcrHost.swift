@@ -311,13 +311,26 @@ final class OcrHost: OcrHostApi {
   /// T-161: seals a picked plain image into `spool/files/<ulid>.bin` (the
   /// layout `SpoolFileImageSource` reads). The plain file is always deleted.
   func sealImageNow(plainPath: String) throws -> String {
-    guard plainRoots.contains(where: { OcrPaths.isInside(path: plainPath, home: $0) }) else {
-      throw Self.error(.ioError)  // never touch (or delete) a file outside temp/cache
+    // Resolve the path once, resolve the roots the same way (/private/var vs
+    // /var), and check containment on the RESOLVED target. A link whose target
+    // is outside the roots never deletes the target; only a link that itself
+    // sits inside the roots is removed.
+    let url = URL(fileURLWithPath: plainPath).resolvingSymlinksInPath().standardizedFileURL
+    let inside = { (u: URL) -> Bool in
+      self.plainRoots.contains { root in
+        u.path.hasPrefix(root.resolvingSymlinksInPath().standardizedFileURL.path + "/")
+      }
+    }
+    guard inside(url) else {
+      let raw = URL(fileURLWithPath: plainPath)
+      let linkHome = raw.deletingLastPathComponent().resolvingSymlinksInPath()
+        .appendingPathComponent(raw.lastPathComponent).standardizedFileURL
+      let isLink =
+        (try? linkHome.resourceValues(forKeys: [.isSymbolicLinkKey]))?.isSymbolicLink == true
+      if isLink && inside(linkHome) { try? fileManager.removeItem(at: linkHome) }
+      throw Self.error(.ioError)
     }
     // Read once, then delete the plain file at once, whatever follows.
-    // Resolve symlinks too (FU-230d): removing a link alone would leave the
-    // plain image it points to on disk.
-    let url = URL(fileURLWithPath: plainPath).resolvingSymlinksInPath().standardizedFileURL
     let size = (try? url.resourceValues(forKeys: [.fileSizeKey]))?.fileSize
     var loaded: Data?
     if let size = size, size > 0, size <= SpoolFileImageSource.maxBytes - 28 {
