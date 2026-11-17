@@ -151,6 +151,7 @@
   "commonValidationChoiceRequired": "Pick one",
   "commonErrorLoadFailed": "Couldn't load this right now. Your data is safe on this phone.",
   "commonErrorSaveFailed": "Couldn't save. Try again — what you entered is still here.",
+  "reviewErrorSaveFailed": "Couldn't save this one. Try again — it stays in your review list.",
   "commonErrorNetwork": "Can't reach the server right now. Your money data is safe on this phone — try again in a bit.",
   "commonGoldBadge": "Gold",
   "commonGoldUnlock": "Unlock with Gold",

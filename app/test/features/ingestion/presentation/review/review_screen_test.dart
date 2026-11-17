@@ -342,7 +342,7 @@ void main() {
           await tester.tap(find.text(l.ingestionReviewKeep));
           await tester.pump();
           await tester.pump(const Duration(milliseconds: 300));
-          expect(find.text(l.commonErrorSaveFailed), findsOneWidget);
+          expect(find.text(l.reviewErrorSaveFailed), findsOneWidget);
           expect(find.text(l.ingestionReviewKeep), findsOneWidget);
         });
 

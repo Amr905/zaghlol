@@ -539,6 +539,10 @@ class AppLocalizationsEn extends AppLocalizations {
       'Couldn\'t save. Try again — what you entered is still here.';
 
   @override
+  String get reviewErrorSaveFailed =>
+      'Couldn\'t save this one. Try again — it stays in your review list.';
+
+  @override
   String get commonErrorNetwork =>
       'Can\'t reach the server right now. Your money data is safe on this phone — try again in a bit.';
 

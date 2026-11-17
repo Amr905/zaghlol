@@ -60,12 +60,19 @@ const goldStoreTimeout = Duration(seconds: 8);
 Future<T> withStoreTimeout<T>(Future<T> query) =>
     query.timeout(goldStoreTimeout);
 
+/// The store query behind [goldOffersProvider]; a seam so tests can fake it.
+final goldProductQueryProvider =
+    Provider<Future<ProductDetailsResponse> Function(Set<String>)>(
+      (ref) => InAppPurchase.instance.queryProductDetails,
+      name: 'goldProductQueryProvider',
+    );
+
 /// The offers from the store. Throws when the store has none (prices failed).
 final goldOffersProvider = FutureProvider.autoDispose<List<GoldPlanOffer>>((
   ref,
 ) async {
   final r = await withStoreTimeout(
-    InAppPurchase.instance.queryProductDetails(GoldProducts.all),
+    ref.read(goldProductQueryProvider)(GoldProducts.all),
   );
   if (r.error != null) throw StateError('store');
   final out = <GoldPlanOffer>[];
