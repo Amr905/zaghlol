@@ -564,8 +564,15 @@ Future<void> _reviewFlow(
     'openReview=${await scalar('SELECT COUNT(*) FROM review_items WHERE resolved_at IS NULL')}',
   );
 
+  // The scan above opens the "your cards" results sheet over Home (the
+  // app's own behaviour): close it before looking at the Review screen.
+  await shot('review-00-after-scan');
+  rootNavigatorKey.currentState?.popUntil((r) => r.isFirst);
+  await _settleFor(t, 800);
   GoRouter.of(ctx).go(AppRoutes.review);
   await _settleFor(t, 2500);
+  rootNavigatorKey.currentState?.popUntil((r) => r.isFirst);
+  await _settleFor(t, 500);
   await shot('review-0-list');
   final originals = find.byKey(const ValueKey('reviewOriginalText'));
   final before = originals.evaluate().length;
