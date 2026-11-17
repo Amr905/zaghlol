@@ -1,6 +1,7 @@
 import 'dart:async';
 import 'dart:io';
 
+import 'package:flutter/foundation.dart' show kDebugMode;
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
@@ -13,6 +14,9 @@ import 'core/catalog/catalog_providers.dart';
 import 'core/db/db_directory.dart';
 import 'core/db/db_key_providers.dart';
 import 'core/l10n/date_format.dart';
+import 'core/logging/diag_code.dart';
+import 'core/logging/diag_error_handlers.dart';
+import 'core/logging/diag_logger.dart';
 import 'core/l10n/font_licenses.dart';
 import 'core/l10n/generated/app_localizations.dart';
 import 'core/l10n/locale_providers.dart';
@@ -168,6 +172,15 @@ class _LocalizedAppState extends ConsumerState<_LocalizedApp>
     // T-100: the weekly summary (when 7 days have passed) and the duplicate
     // check at start; again on every resume.
     unawaited(ref.read(resumeJobsProvider)(coldStart: true));
+    // FU-113: errors reach the diag log as codes once the database is open.
+    unawaited(
+      ref
+          .read(diagLoggerProvider.future)
+          .then<void>((logger) {
+            installDiagErrorHandlers(logger, debugPassThrough: kDebugMode);
+          })
+          .catchError((Object _) {}),
+    );
   }
 
   @override
@@ -184,8 +197,14 @@ class _LocalizedAppState extends ConsumerState<_LocalizedApp>
         ref
             .read(cycleResumeHandlerProvider)
             .onResume()
-            .then<Object?>((_) => null)
-            .catchError((Object _) => null),
+            .catchError((Object error) async {
+              // FU-126: a failed sweep leaves a code, never the error text.
+              final logger = await ref.read(diagLoggerProvider.future);
+              await logger.record(
+                diagEventForError(DiagCodes.resumeFailed, error),
+              );
+            })
+            .catchError((Object _) {}),
       );
     }
   }

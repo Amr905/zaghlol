@@ -113,7 +113,9 @@ class RecurringRepository {
   /// a merchant/account/currency that already has any subscription item, in
   /// any status (so a dismissed one stays dismissed), is skipped. Returns the
   /// ids of the items it created.
-  Future<List<String>> detectAndSuggest() => guardWrite(
+  Future<List<String>> detectAndSuggest({
+    bool Function()? shouldStop,
+  }) => guardWrite(
     () => _db.transaction(() async {
       final since = _now - detectionLookbackDays * Duration.millisecondsPerDay;
       final rows =
@@ -156,6 +158,9 @@ class RecurringRepository {
       };
       final created = <String>[];
       for (final s in detectSubscriptions(charges, exclude: exclude)) {
+        // FU-256: a restore asked for the gate; the rest is found next run
+        // (detection is idempotent).
+        if (shouldStop?.call() ?? false) break;
         final id = _newId();
         await _recurring.insertItem(
           RecurringItemsCompanion.insert(

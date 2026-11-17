@@ -192,6 +192,47 @@ void main() {
     },
   );
 
+  test('the carry cut is the local day start, not UTC midnight', () async {
+    // Previous cycle starts 25 Sep local (+2h) = 24 Sep 22:00 UTC. A budget
+    // made at 23:00 UTC that day is 01:00 local on the 25th: inside it.
+    await rollover(
+      createdAt: DateTime.utc(2026, 9, 24, 23).millisecondsSinceEpoch,
+    );
+    final specs = [
+      for (final r in await db.select(db.budgets).get()) budgetSpecOf(r),
+    ];
+    final carries = await rolloverCarries(
+      cycles: cycles,
+      schedule: schedule,
+      cycle: schedule.cycleOn(cycles.today),
+      specs: specs,
+    );
+    expect(carries['r'], Money(egp, 0));
+  });
+
+  test('a restore waiting stops the budget alerts between budgets', () async {
+    for (final cat in ['sys:food', null]) {
+      await BudgetsDao(db).insert(
+        id: 'b-${cat ?? 'all'}',
+        categoryId: cat,
+        limit: Money(egp, 10000),
+        period: BudgetPeriod.cycle,
+        createdAt: 0,
+      );
+    }
+    await spend('t1', 8500, at(2026, 11, 5));
+    var polls = 0;
+    final outcomes = await runBudgetAlerts(
+      db: db,
+      cycles: cycles,
+      cycle: schedule.cycleOn(cycles.today),
+      schedule: schedule,
+      service: svc,
+      shouldStop: () => polls++ > 0, // the restore arrives after one budget
+    );
+    expect(outcomes, hasLength(1));
+  });
+
   test('the screen and the alert use the same effective limit', () async {
     await rollover();
     await spend('p1', 4000, at(2026, 10, 1));
