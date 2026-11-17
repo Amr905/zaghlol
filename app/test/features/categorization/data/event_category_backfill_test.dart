@@ -2,7 +2,7 @@
 // InstaPay category. Fails without it: old ATM and InstaPay rows stayed
 // uncategorized. Synthetic data only.
 
-import 'package:drift/drift.dart' show Value;
+import 'package:drift/drift.dart' show Value, Variable;
 import 'package:flutter_test/flutter_test.dart';
 import 'package:zaghlol/core/db/daos/accounts_dao.dart';
 import 'package:zaghlol/core/db/daos/categories_dao.dart';
@@ -135,6 +135,30 @@ void main() {
       await backfillEventCategories(edb.db, registry, at: t0, gate: gate),
       1,
     );
+  });
+
+  test('FU-255: the done-marker is written inside the gate', () async {
+    // No row needs a change, so the only write is the marker. The restore
+    // closes the gate while the scan runs: no marker, and a rerun marks it.
+    final gate = IngestionPauseGate();
+    final run = backfillEventCategories(edb.db, registry, at: t0, gate: gate);
+    await gate.pause();
+    expect(await run, isNull);
+    Future<int> markers() async =>
+        (await edb.db
+                .customSelect(
+                  'SELECT 1 FROM db_meta WHERE key = ?1',
+                  variables: [Variable.withString(eventCategoryBackfillKey)],
+                )
+                .get())
+            .length;
+    expect(await markers(), 0);
+    gate.resume();
+    expect(
+      await backfillEventCategories(edb.db, registry, at: t0, gate: gate),
+      0,
+    );
+    expect(await markers(), 1);
   });
 
   test('a missing category leaves it unmarked for the next start', () async {

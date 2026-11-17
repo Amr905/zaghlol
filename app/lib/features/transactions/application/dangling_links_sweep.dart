@@ -49,9 +49,11 @@ Future<int> sweepDanglingLinks(
   AppDatabase db, {
   required Future<void> Function(String txnId) onPairRemoved,
   required Future<void> Function(String txnId) onOffsetRemoved,
+  bool Function()? shouldStop,
 }) async {
   var handled = 0;
   for (final id in await deletedPairLegs(db)) {
+    if (shouldStop?.call() ?? false) return handled;
     try {
       await onPairRemoved(id);
       handled++;
@@ -60,6 +62,7 @@ Future<int> sweepDanglingLinks(
     }
   }
   for (final id in await deletedOffsetLegs(db)) {
+    if (shouldStop?.call() ?? false) return handled;
     try {
       await onOffsetRemoved(id);
       handled++;

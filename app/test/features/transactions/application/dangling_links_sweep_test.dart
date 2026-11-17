@@ -97,6 +97,27 @@ void main() {
     expect(await sweep(), 0);
   });
 
+  test('FU-255: stops when a restore asked for the gate; link stays', () async {
+    await add('e', 'nbe', 'expense', 0);
+    await add('r', 'nbe', 'refund', 60000);
+    await db.customStatement(
+      'INSERT INTO offset_links (id, kind, expense_txn_id, source_txn_id, '
+      "amount_minor, created_at) VALUES ('l', 'refund', 'e', 'r', 1000, $t0)",
+    );
+    await TransactionsDao(db).softDelete('e', at: t0 + 120000);
+    final stopped = await sweepDanglingLinks(
+      db,
+      onPairRemoved: (id) async {},
+      onOffsetRemoved: (id) async {
+        await refunds.onRemoved(id);
+      },
+      shouldStop: () => true,
+    );
+    expect(stopped, 0);
+    expect(await count('SELECT id FROM offset_links'), 1);
+    expect(await sweep(), 1); // the next run finishes it
+  });
+
   test('live legs are left alone', () async {
     await add('o', 'nbe', 'transfer_out', 0);
     await add('i', 'cib', 'transfer_in', 60000);

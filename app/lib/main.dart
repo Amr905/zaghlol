@@ -167,7 +167,7 @@ class _LocalizedAppState extends ConsumerState<_LocalizedApp>
     WidgetsBinding.instance.addObserver(this);
     // T-100: the weekly summary (when 7 days have passed) and the duplicate
     // check at start; again on every resume.
-    unawaited(ref.read(resumeJobsProvider)());
+    unawaited(ref.read(resumeJobsProvider)(coldStart: true));
   }
 
   @override
