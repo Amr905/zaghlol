@@ -134,7 +134,7 @@ public interface IAppleNotificationStore
     /// Up to <paramref name="limit"/> App Store subscriptions in an entitling state whose <c>expires_at</c> passed between 7 days and
     /// 10 minutes ago without a newer read (<c>last_verified_at &lt; expires_at</c>), oldest expiry first (T-134 §4).
     /// </summary>
-    Task<IReadOnlyList<ApplePurchaseRow>> ListExpiredSubscriptionsAsync(DateTimeOffset now, int limit, CancellationToken cancellationToken);
+    Task<IReadOnlyList<ApplePurchaseRow>> ListExpiredSubscriptionsAsync(DateTimeOffset now, int limit, bool includeSandbox, CancellationToken cancellationToken);
 
     /// <summary>
     /// FU-107 (security M-1): moves dead-lettered rows (<c>processed_at</c> set, <c>next_attempt_at</c> NULL, <c>attempts &gt; 0</c>) that

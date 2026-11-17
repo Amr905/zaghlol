@@ -78,7 +78,7 @@ internal sealed class FakeNotificationStore : IAppleNotificationStore
 
         public PurchaseEnvironment? Environment { get; init; }
 
-        public DateTimeOffset ReceivedAt { get; init; }
+        public DateTimeOffset ReceivedAt { get; set; }
 
         public int Attempts { get; set; }
 
@@ -262,8 +262,8 @@ internal sealed class FakeNotificationStore : IAppleNotificationStore
         return Task.FromResult(((long)open.Count(n => n.ReceivedAt > now.AddHours(-1)), (long)open.Count(n => n.ReceivedAt <= now.AddHours(-1))));
     }
 
-    public Task<IReadOnlyList<ApplePurchaseRow>> ListExpiredSubscriptionsAsync(DateTimeOffset now, int limit, CancellationToken cancellationToken) =>
-        Task.FromResult<IReadOnlyList<ApplePurchaseRow>>([.. Expired.Take(limit)]);
+    public Task<IReadOnlyList<ApplePurchaseRow>> ListExpiredSubscriptionsAsync(DateTimeOffset now, int limit, bool includeSandbox, CancellationToken cancellationToken) =>
+        Task.FromResult<IReadOnlyList<ApplePurchaseRow>>([.. Expired.Where(p => includeSandbox || p.Environment != PurchaseEnvironment.Sandbox).Take(limit)]);
 
     public static ApplePurchaseRow Row(Purchase p) => new(p.Id, new Sensitive<string>(p.StoreKey), p.ProductId, p.Plan, p.Environment, p.State);
 

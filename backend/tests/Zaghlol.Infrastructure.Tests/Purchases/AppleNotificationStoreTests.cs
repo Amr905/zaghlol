@@ -273,6 +273,22 @@ public class AppleNotificationStoreTests(AppleNotificationStoreFixture fixture) 
     }
 
     [Fact]
+    public async Task SandboxRowsAreLeftOutOfTheSweepListWhenSandboxIsOffSoTheyCannotCrowdOutProduction()
+    {
+        // FU-232 F12: the filter is in SQL, so LIMIT counts only rows the job will actually read.
+        var now = DateTimeOffset.UtcNow;
+        var sandbox = await PurchaseAsync("active", "yearly", now.AddDays(-3), lastVerified: now.AddDays(-20), environment: "sandbox");
+        var production = await PurchaseAsync("active", "yearly", now.AddHours(-2), lastVerified: now.AddDays(-20));
+
+        var off = (await Store.ListExpiredSubscriptionsAsync(now, 1000, false, CancellationToken.None)).Select(r => r.Id).ToList();
+        var on = (await Store.ListExpiredSubscriptionsAsync(now, 1000, true, CancellationToken.None)).Select(r => r.Id).ToList();
+
+        Assert.Contains(production, off);
+        Assert.DoesNotContain(sandbox, off);
+        Assert.Contains(sandbox, on);
+    }
+
+    [Fact]
     public async Task TheSweepListsExactlyTheEntitlingSubscriptionsWhoseExpiryPassedWithoutANewerRead()
     {
         var now = DateTimeOffset.UtcNow;
@@ -284,7 +300,7 @@ public class AppleNotificationStoreTests(AppleNotificationStoreFixture fixture) 
         var lifetime = await PurchaseAsync("active", "lifetime", now.AddHours(-2), lastVerified: now.AddDays(-20));
         var expired = await PurchaseAsync("expired", "yearly", now.AddHours(-2), lastVerified: now.AddDays(-20));
 
-        var rows = (await Store.ListExpiredSubscriptionsAsync(now, 1000, CancellationToken.None)).Select(r => r.Id).ToList();
+        var rows = (await Store.ListExpiredSubscriptionsAsync(now, 1000, true, CancellationToken.None)).Select(r => r.Id).ToList();
 
         Assert.Contains(qualifying, rows);
         Assert.Contains(grace, rows);
@@ -294,7 +310,7 @@ public class AppleNotificationStoreTests(AppleNotificationStoreFixture fixture) 
         Assert.DoesNotContain(lifetime, rows);
         Assert.DoesNotContain(expired, rows);
         Assert.True(rows.IndexOf(grace) < rows.IndexOf(qualifying));
-        Assert.Single(await Store.ListExpiredSubscriptionsAsync(now, 1, CancellationToken.None));
+        Assert.Single(await Store.ListExpiredSubscriptionsAsync(now, 1, true, CancellationToken.None));
     }
 
     [Fact]
@@ -363,14 +379,14 @@ public class AppleNotificationStoreTests(AppleNotificationStoreFixture fixture) 
             "verify",
             CancellationToken.None)).PurchaseId;
 
-    private async Task<Guid> PurchaseAsync(string state, string plan, DateTimeOffset expires, DateTimeOffset lastVerified)
+    private async Task<Guid> PurchaseAsync(string state, string plan, DateTimeOffset expires, DateTimeOffset lastVerified, string environment = "production")
     {
         var id = Guid.CreateVersion7();
         await using var connection = new NpgsqlConnection(fixture.Database.Superuser);
         await connection.OpenAsync();
         await using var command = new NpgsqlCommand(
             "INSERT INTO zaghlol.purchases (id, store, product_id, plan, store_key, state, expires_at, acknowledged, environment, last_verified_at) "
-            + "VALUES (@id, 'app_store', @product, @plan, @key, @state, @expires, true, 'production', @verified)",
+            + "VALUES (@id, 'app_store', @product, @plan, @key, @state, @expires, true, @environment, @verified)",
             connection);
         command.Parameters.AddWithValue("id", id);
         command.Parameters.AddWithValue("product", "zaghlol_gold_" + plan);
@@ -379,6 +395,7 @@ public class AppleNotificationStoreTests(AppleNotificationStoreFixture fixture) 
         command.Parameters.AddWithValue("state", state);
         command.Parameters.AddWithValue("expires", plan == "lifetime" ? DBNull.Value : expires);
         command.Parameters.AddWithValue("verified", lastVerified);
+        command.Parameters.AddWithValue("environment", environment);
         await command.ExecuteNonQueryAsync();
         return id;
     }
