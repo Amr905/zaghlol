@@ -199,6 +199,8 @@ rc2=0
 runs=""
 case "${EXPLORER_PLAN:-all}" in base | all) runs="ar:0 ar:1 ar:2 ar:3 ar:4" ;; esac
 case "${EXPLORER_PLAN:-all}" in variants | all) runs="$runs en:-1 dark:-1 scale:-1 paywall:-1 onboarding:-1 onboarding_en:-1" ;; esac
+# TEST-explorer3: doubtful SMS on the Review screen, SMS diagnostics, all charts as a free user.
+case "${EXPLORER_PLAN:-all}" in new | all) runs="$runs review:-1 charts:-1" ;; esac
 for run in $runs; do
   mode=${run%%:*}
   part=${run##*:}
@@ -207,6 +209,17 @@ for run in $runs; do
   for p in POST_NOTIFICATIONS RECORD_AUDIO READ_SMS RECEIVE_SMS; do
     adb -s "$DEVICE" shell pm grant "$PKG" "android.permission.$p" 2>/dev/null || true
   done
+  # Doubtful SMS (known bank, unfamiliar wording) for the Review screen: sent
+  # through the emulator modem while the app is not running (the receiver
+  # spools them; the test also runs the inbox scan). Synthetic.
+  if [ "$mode" = review ]; then
+    sms_emu NBE 'Dear customer, EGP 311.00 was debited from your account at CARREFOUR MAADI on 12/11/2026' || true
+    sms_emu NBE 'Dear customer, EGP 322.00 was debited from your account at SPINNEYS ZAMALEK on 13/11/2026' || true
+    sms_emu NBE 'Dear customer, EGP 333.00 was credited to your account on 14/11/2026' || true
+    sms_emu NBE 'Dear customer, EGP 344.00 on your account *4567 at SOME SHOP 15/11/2026' || true
+    sms_emu HSBC 'Dear customer, EGP 355.00 was debited from your card at KOSHARY TAHRIR on 16/11/2026' || true
+    sleep 3
+  fi
   # Text scale 1.3 is a system setting: set for the scale run only.
   if [ "$mode" = scale ]; then
     adb -s "$DEVICE" shell settings put system font_scale 1.3 || true

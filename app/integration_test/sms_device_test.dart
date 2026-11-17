@@ -22,6 +22,7 @@ import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:go_router/go_router.dart';
 import 'package:integration_test/integration_test.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:zaghlol/app/app_navigation.dart' show openSettings;
@@ -30,6 +31,7 @@ import 'package:zaghlol/core/db/app_database_providers.dart';
 import 'package:zaghlol/core/db/db_directory.dart';
 import 'package:zaghlol/core/db/db_key_providers.dart';
 import 'package:zaghlol/core/routing/app_router.dart' show rootNavigatorKey;
+import 'package:zaghlol/core/routing/app_routes.dart';
 import 'package:zaghlol/core/settings/settings_keys.dart';
 import 'package:zaghlol/core/settings/settings_providers.dart';
 import 'package:zaghlol/features/capture/application/capture_providers.dart';
@@ -387,6 +389,32 @@ void main() {
     } else {
       check(false, 'Settings opened with an About row');
       await shot(t, 'sms-02-settings-problem');
+    }
+    // ---- TEST-explorer3: the Review screen after the SMS: the open items
+    // (the stale HSBC row and any CIB one) show their original text.
+    rootNavigatorKey.currentState?.popUntil((r) => r.isFirst);
+    await settle(t, 500);
+    GoRouter.of(rootNavigatorKey.currentContext!).go(AppRoutes.review);
+    await settle(t, 2500);
+    final originals = find.byKey(const ValueKey('reviewOriginalText'));
+    final nOpen = c['all']![2];
+    say(
+      'REVIEW_SCREEN cardsWithOriginal=${originals.evaluate().length} open=$nOpen',
+    );
+    check(
+      nOpen == 0 || originals.evaluate().isNotEmpty,
+      'open review items show a "show original" row',
+    );
+    await shot(t, 'sms-03-review');
+    if (originals.evaluate().isNotEmpty) {
+      await t.ensureVisible(originals.first);
+      await t.tap(originals.first);
+      await settle(t, 800);
+      check(
+        safeFound(find.byKey(const ValueKey('reviewOriginalBody'))),
+        'Show original reveals the SMS text',
+      );
+      await shot(t, 'sms-04-review-original');
     }
     say('NOTE framework_semantics_assertions=$semanticsAsserts');
     say('RESULT problems=${problems.length}');
