@@ -506,6 +506,8 @@
 
 - **FU-252** (batch 32): minors in [batch-32](05-reviews/batch-32.md): FX hold-out accepts a flagged wrong pick, re-parse holds the restore gate for the whole job, stale pager heights, paywall timeout untested at the provider, pinned onboarding actions can overflow at large text, a dedicated "couldn't save" string for review.
 
+- **FU-253** (batch 33): minors in [batch-33](05-reviews/batch-33.md): waiting alerts lose redaction after a restart; bulk categorize reads row by row; annual budget alerts and `BudgetAlertService.run` after ingest not wired; FU-142 left: start-up sweep for pairs pointing at a deleted leg, voice logger undo frees no links; FU-143 left: overdue reminders (PO copy), wiring detect/auto-mark/due reminders into ingest and the daily job; FU-130 left: Arabic Face ID string, cold-start FLAG_SECURE (device). FU-194, FU-195, FU-196, FU-198, FU-213, FU-214, FU-183 were already done on main (closed).
+
 ## Log
 | Date | Event |
 |---|---|
@@ -591,3 +593,4 @@
 | 2026-11-16 | Batch 30 (`batch/2026-11-16-30`): SMS-auto (PO SMS-AUTO: confident bank SMS auto-save; suspicious ones show the original text), budget route fix, haptics, brand avatars. FU-250. Progress 167/186. |
 | 2026-11-17 | Batch 31 (`batch/2026-11-16-31`): SMS-device (on-device SMS e2e green; three root causes fixed), SMS-improve (InstaPay, categorization), UI-po31 (acronyms, card digits, Keep, charts free). FU-251. Progress 167/186. |
 | 2026-11-17 | Batch 32 (`batch/2026-11-17-32`): follow-up sweep in five lanes (FU-247/250/251 and batch-29 minors), explorer3 on the emulator, Review Keep tap fix. FU-252. Progress 167/186. |
+| 2026-11-17 | Batch 33 (`batch/2026-11-17-33`): follow-up sweep 2 (privacy/data, ledger, due-days setting, DB-clock freezes). FU-253. Progress 167/186. |
