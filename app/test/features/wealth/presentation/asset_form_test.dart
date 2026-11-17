@@ -124,4 +124,30 @@ void main() {
     expect(v(AssetFormType.property, 'Flat').draft!.type, AssetType.realEstate);
     expect(v(AssetFormType.car, 'Car').draft!.type, AssetType.car);
   });
+
+  test('FU-175a: names over the cap are refused', () {
+    final r = validateAssetForm(
+      AssetFormInput(
+        type: AssetFormType.stocks,
+        name: 'x' * (maxAssetNameLength + 1),
+        amount: '10',
+        currency: _egp,
+      ),
+      today: _today,
+    );
+    expect(r.errors[AssetField.name], AssetFieldError.nameTooLong);
+  });
+
+  test('FU-175b: price paid without currency errors on the price field', () {
+    final r = validateAssetForm(
+      const AssetFormInput(
+        type: AssetFormType.gold,
+        quantity: '10',
+        pricePaid: '500',
+      ),
+      today: _today,
+    );
+    expect(r.errors[AssetField.pricePaid], AssetFieldError.currency);
+    expect(r.errors.containsKey(AssetField.currency), isFalse);
+  });
 }

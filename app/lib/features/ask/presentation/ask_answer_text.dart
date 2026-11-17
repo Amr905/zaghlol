@@ -56,6 +56,9 @@ class AskAnswerTextBuilder {
 
   String _n(int n) => digits.render('$n');
 
+  /// List separator: Arabic comma only in the Arabic locale.
+  String get _sep => languageCode == 'ar' ? '، ' : ', ';
+
   String _date(CivilDate d) =>
       ZDateFormat.date(DateTime(d.year, d.month, d.day), languageCode, digits);
 
@@ -147,7 +150,7 @@ class AskAnswerTextBuilder {
     AskRoastAnswer() => AskBubbleContent([_roast(a)]),
     AskNoDataAnswer(:final reason) => AskBubbleContent([
       reason == AskNoDataReason.noDues
-          ? l.chatAnswerDues(0, l.chatPeriodUntilPayday, '', '', '0')
+          ? l.chatAnswerDues(0, l.chatPeriodUntilPayday, '', '', _n(0))
           : l.chatAnswerNoDataGeneric,
     ]),
     AskFallbackAnswer() => AskBubbleContent([l.chatFallbackText]),
@@ -197,7 +200,7 @@ class AskAnswerTextBuilder {
         code,
         l.chatAnswerTopMerchants(
           _span(a.period),
-          [for (final m in list) '${m.name} ${_money(m.amount)}'].join('، '),
+          [for (final m in list) '${m.name} ${_money(m.amount)}'].join(_sep),
         ),
       ));
       final top = list.first.amount.minor;
@@ -247,7 +250,7 @@ class AskAnswerTextBuilder {
             l.chatAnswerDues(
               f.dues.length,
               span,
-              f.dues.map((d) => d.name).join('، '),
+              f.dues.map((d) => d.name).join(_sep),
               _money(f.total),
               _n(f.dues.length),
             ),

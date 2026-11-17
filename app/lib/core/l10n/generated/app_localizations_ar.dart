@@ -510,6 +510,20 @@ class AppLocalizationsAr extends AppLocalizations {
   String get commonValidationLast4 => 'اكتب آخر أربع أرقام';
 
   @override
+  String commonValidationNameTooLong(int count, String n) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: 'خلّي الاسم $n حرف بس',
+      many: 'خلّي الاسم $n حرف بس',
+      few: 'خلّي الاسم $n حروف بس',
+      two: 'خلّي الاسم حرفين بس',
+      one: 'خلّي الاسم حرف واحد بس',
+    );
+    return '$_temp0';
+  }
+
+  @override
   String get commonValidationNameRequired => 'اكتب اسم';
 
   @override
@@ -4200,7 +4214,7 @@ class AppLocalizationsAr extends AppLocalizations {
       two: 'فهمت حاجتين',
       one: 'فهمت حاجة واحدة',
     );
-    return '$_temp0';
+    return '$_temp0 👌';
   }
 
   @override
@@ -4685,6 +4699,11 @@ class AppLocalizationsAr extends AppLocalizations {
   @override
   String zakahMainLotCertificate(String amount) {
     return 'شهادات بنك: $amount';
+  }
+
+  @override
+  String zakahMainLotCoin(String title, String amount) {
+    return '$title · $amount';
   }
 
   @override

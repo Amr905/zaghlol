@@ -377,7 +377,9 @@ class _LotCard extends ConsumerWidget {
     final amount = nativeText(l10n, l.unit, l.amount, lang, digits);
     switch (l.kind) {
       case ZakahLotKind.gold:
-        if (l.unit == GoldSymbols.coin) return '${lot.info.title} · $amount';
+        if (l.unit == GoldSymbols.coin) {
+          return l10n.zakahMainLotCoin(lot.info.title, amount);
+        }
         return l10n.zakahMainLotGold(
           digits.render('${lot.info.karat ?? ''}'),
           amount,
