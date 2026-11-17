@@ -3,6 +3,7 @@ import '../ocr/receipt_parser.dart';
 import '../generic/generic_policy.dart';
 import '../normalize/text_normalizer.dart';
 import '../registry/registry_loader.dart';
+import '../registry/regex_safety.dart';
 import '../registry/registry_models.dart';
 import '../registry/template_extractor.dart';
 import 'parse_result.dart';
@@ -49,14 +50,18 @@ final class ParsingPipeline {
       return const ParseUnrecognized(UnrecognizedReason.emptyBody);
     }
     final lines = foldKeyLines(text);
-    if (registry.shared.globalDrop.any((p) => p.regex.hasMatch(lines))) {
+    if (registry.shared.globalDrop.any(
+      (p) => budgetedHasMatch(p.regex, lines),
+    )) {
       return const ParseDropped(DropReason.globalPattern, null);
     }
     final language = detectLanguage(folded.text);
     ParseUnrecognized? firstFatal;
     for (final preferred in [true, false]) {
       for (final institution in registry.institutions) {
-        if (institution.drop.any((p) => p.regex.hasMatch(folded.text))) {
+        if (institution.drop.any(
+          (p) => budgetedHasMatch(p.regex, folded.text),
+        )) {
           continue;
         }
         for (final template in institution.templates) {
@@ -124,12 +129,14 @@ final class ParsingPipeline {
 
     // Stage 0: guard re-check (same drop rules as the native Guard).
     if (institution != null &&
-        institution.drop.any((p) => p.regex.hasMatch(folded.text))) {
+        institution.drop.any((p) => budgetedHasMatch(p.regex, folded.text))) {
       return ParseDropped(DropReason.institutionPattern, institution.code);
     }
     // Global drop patterns see line breaks (`foldKeyLines`), as in the Guard.
     final lines = foldKeyLines(body);
-    if (registry.shared.globalDrop.any((p) => p.regex.hasMatch(lines))) {
+    if (registry.shared.globalDrop.any(
+      (p) => budgetedHasMatch(p.regex, lines),
+    )) {
       return ParseDropped(DropReason.globalPattern, institution?.code);
     }
     if (institution == null) {

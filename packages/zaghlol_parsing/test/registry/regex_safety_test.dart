@@ -23,6 +23,11 @@ void main() {
         ['ambiguous_alternation'],
       ),
       ('empty alternative', r'(?:a|)+', ['ambiguous_alternation']),
+      ('word-or-digit overlap', r'(\w|\d)+x', ['ambiguous_alternation']),
+      ('dot-or-space overlap', r'(?:.|\s)*x', ['ambiguous_alternation']),
+      ('class overlap', r'(?:[a-z]|[a-f])+', ['ambiguous_alternation']),
+      ('disjoint single chars', r'(?:a|b|\d)+', []),
+      ('disjoint classes', r'(?:[a-z]|\d)+', []),
       ('lookahead', r'a(?=b)', ['lookaround']),
       ('negative lookbehind', r'(?<!a)b', ['lookaround']),
       ('backreference', r'(a)\1', ['backreference']),
@@ -134,5 +139,33 @@ void main() {
       p.regex.hasMatch(hostile);
       expect(sw.elapsedMilliseconds, lessThan(50));
     }, tags: 'benchmark');
+  });
+
+  group('match budget (FU-074)', () {
+    test('a stalled regex is quarantined after its first overrun', () {
+      final slow = RegExp(r'^(a+)+$');
+      final input = '${'a' * 24}!';
+      expect(isRegexQuarantined(slow), isFalse);
+      expect(
+        budgetedFirstMatch(
+          slow,
+          input,
+          budget: const Duration(milliseconds: 1),
+        ),
+        isNull,
+      );
+      expect(isRegexQuarantined(slow), isTrue);
+      // Later calls return at once, even for input that would match.
+      final w = Stopwatch()..start();
+      expect(budgetedFirstMatch(slow, 'aaa'), isNull);
+      expect(w.elapsedMilliseconds, lessThan(5));
+    });
+
+    test('a fast regex is never quarantined and still matches', () {
+      final r = RegExp(r'(\d+)');
+      expect(budgetedFirstMatch(r, 'x 12')?.group(1), '12');
+      expect(budgetedHasMatch(r, 'none'), isFalse);
+      expect(isRegexQuarantined(r), isFalse);
+    });
   });
 }
