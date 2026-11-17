@@ -7,6 +7,8 @@ import 'package:flutter/foundation.dart' show kReleaseMode;
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:zaghlol_catalog/zaghlol_catalog.dart';
 
+import '../../features/capture/application/capture_providers.dart'
+    show ingestionPauseGateProvider;
 import '../db/app_database_providers.dart';
 import 'catalog_seed_loader.dart';
 
@@ -33,6 +35,8 @@ final catalogSeedProvider = FutureProvider<CatalogSeedResult>(
       trustedKeys: ref.watch(catalogSeedKeysProvider),
       // The dev-signed seed loads only outside release builds (S-1).
       allowDevKeys: !kReleaseMode,
+      // FU-256: the seed upgrade writes behind the restore pause gate.
+      gate: ref.read(ingestionPauseGateProvider),
     ).loadIfNeeded();
   },
   retry: (retryCount, error) => null,

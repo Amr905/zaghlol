@@ -4,6 +4,7 @@ import '../merchant/merchant_cleaner.dart';
 import '../normalize/amount_parser.dart';
 import '../normalize/currency_markers.dart';
 import '../normalize/text_normalizer.dart';
+import 'regex_safety.dart';
 import 'registry_models.dart';
 
 /// Typed fields read from one template match (parsing-engine §4, stage 4).
@@ -60,7 +61,7 @@ String foldBody(String body) => foldKey(body);
 /// Runs [template] against an already folded body. Returns the named
 /// captures, or null when the pattern does not match.
 Map<String, String>? matchTemplate(Template template, String foldedBody) {
-  final m = template.pattern.regex.firstMatch(foldedBody);
+  final m = budgetedFirstMatch(template.pattern.regex, foldedBody);
   if (m == null) {
     return null;
   }
@@ -100,7 +101,7 @@ Map<String, String>? matchTemplateOriginal(
   FoldedText folded,
   String original,
 ) {
-  final m = template.pattern.regex.firstMatch(folded.text);
+  final m = budgetedFirstMatch(template.pattern.regex, folded.text);
   if (m == null) {
     return null;
   }

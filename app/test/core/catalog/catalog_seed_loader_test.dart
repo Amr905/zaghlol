@@ -8,7 +8,9 @@ import 'dart:convert';
 import 'dart:io';
 import 'dart:typed_data';
 
+import 'package:drift/drift.dart' show Value;
 import 'package:flutter_test/flutter_test.dart';
+import 'package:zaghlol/ingestion/ingestion_pause_gate.dart';
 import 'package:zaghlol/core/catalog/catalog_seed_loader.dart';
 import 'package:zaghlol/core/db/app_database.dart';
 import 'package:zaghlol/core/db/daos/catalog_dao.dart';
@@ -216,12 +218,11 @@ void main() {
   });
 
   group('later launches', () {
-    test('a second load reads nothing and changes nothing', () async {
+    test('a second load of the same seed changes nothing', () async {
       await loader(_FileSource()).loadIfNeeded();
       final source = _FileSource();
       final again = await loader(source).loadIfNeeded();
       expect(again.outcome, CatalogSeedOutcome.alreadyPresent);
-      expect(source.reads, 0);
       expect(await _count(db, 'catalog_merchants'), greaterThan(100));
     });
 
@@ -239,13 +240,106 @@ void main() {
       'an install seeded before Cash and InstaPay gets both, once',
       () async {
         await CatalogDao(db)
-            .setMeta(version: 1, appliedAt: t0, signatureKid: 'k');
+            .setMeta(version: 9, appliedAt: t0, signatureKid: 'k');
         await loader(_FileSource()).loadIfNeeded();
         await loader(_FileSource()).loadIfNeeded();
         final cash = await db.select(db.categories).get();
         expect({for (final c in cash) c.id}, {'sys:cash', 'sys:instapay'});
         final c = cash.firstWhere((c) => c.id == 'sys:cash');
         expect((c.nameAr, c.nameEn), ('كاش', 'Cash'));
+      },
+    );
+
+    test('FU-256: a changed seed adds the new rows to an old install and '
+        'leaves user rows, synced rows and the rest alone', () async {
+      // Install with the old seed: the bundled one minus two keywords and a
+      // merchant.
+      final map =
+          jsonDecode(utf8.decode(_bundledJson())) as Map<String, Object?>;
+      final ops = (map['ops'] as List).cast<Map<String, Object?>>();
+      final dropped = ops.lastWhere((o) => o['t'] == 'keyword');
+      final droppedKey = dropped['keyword'] as String;
+      final gone = ops.lastWhere((o) => o['t'] == 'merchant');
+      final goneId = gone['id'] as int;
+      map['ops'] = [
+        for (final o in ops)
+          if (!identical(o, dropped) &&
+              !identical(o, gone) &&
+              !(o['t'] == 'alias' && o['merchantId'] == goneId))
+            o,
+      ];
+      final old = _signed(Uint8List.fromList(utf8.encode(jsonEncode(map))));
+      await loader(old).loadIfNeeded();
+      final dao = CatalogDao(db);
+      expect(
+        (await dao.allKeywords()).any((k) => k.keywordNorm == droppedKey),
+        isFalse,
+      );
+      expect(await dao.merchantById(goneId), isNull);
+
+      // A synced change to an existing seed row, a user category and rule.
+      final first = (await db.select(db.catalogMerchants).get()).first;
+      await dao.upsertMerchant(
+        CatalogMerchantsCompanion(
+          id: Value(first.id),
+          canonical: const Value('Synced Name'),
+          categoryCode: Value(first.categoryCode),
+          version: const Value(1),
+        ),
+      );
+      final userCat = 'user-cat-1';
+      await db.customStatement(
+        'INSERT INTO categories (id, name_ar, name_en, icon, color, bucket, '
+        "sort, is_archived) VALUES ('$userCat', 'س', 'Mine', 'x', '#000000', "
+        "'wants', 99, 0)",
+      );
+      final cats = await _count(db, 'categories');
+
+      final result = await loader(_FileSource()).loadIfNeeded();
+      expect(result.outcome, CatalogSeedOutcome.upgraded);
+      expect(
+        (await dao.allKeywords()).any((k) => k.keywordNorm == droppedKey),
+        isTrue,
+      );
+      expect(await dao.merchantById(goneId), isNotNull);
+      expect(await dao.aliasesEqualTo('carrefour'), isNotEmpty);
+      expect((await dao.merchantById(first.id))!.canonical, 'Synced Name');
+      expect(await _count(db, 'categories'), cats);
+      expect(
+        (await db.select(db.categories).get()).any((c) => c.id == userCat),
+        isTrue,
+      );
+
+      // Idempotent: the hash is recorded, a third load is a no-op.
+      final third = await loader(_FileSource()).loadIfNeeded();
+      expect(third.outcome, CatalogSeedOutcome.alreadyPresent);
+    });
+
+    test(
+      'FU-256: a paused restore gate defers the upgrade, then it runs',
+      () async {
+        await CatalogDao(db)
+            .setMeta(version: 1, appliedAt: t0, signatureKid: 'k');
+        final gate = IngestionPauseGate();
+        CatalogSeedLoader gated() => CatalogSeedLoader(
+          db: db,
+          source: _FileSource(),
+          trustedKeys: bundledSeedKeys(),
+          allowDevKeys: true,
+          gate: gate,
+        );
+        await gate.pause();
+        expect(
+          (await gated().loadIfNeeded()).outcome,
+          CatalogSeedOutcome.alreadyPresent,
+        );
+        expect(await _count(db, 'catalog_keywords'), 0);
+        gate.resume();
+        expect(
+          (await gated().loadIfNeeded()).outcome,
+          CatalogSeedOutcome.upgraded,
+        );
+        expect(await _count(db, 'catalog_keywords'), greaterThan(0));
       },
     );
 

@@ -60,6 +60,34 @@ class CategoriesDao {
         ),
   );
 
+  /// Seed upgrade (FU-256): inserts the system category [code] only when no
+  /// row with its id exists (an archived or renamed one is left alone).
+  Future<void> insertSystemIfMissing({
+    required String code,
+    required String nameAr,
+    required String nameEn,
+    required String icon,
+    required String color,
+    required String bucket,
+    required int sort,
+  }) => guardWrite(
+    () => _db
+        .into(_db.categories)
+        .insert(
+          CategoriesCompanion.insert(
+            id: systemCategoryId(code),
+            systemCode: Value(code),
+            nameAr: nameAr,
+            nameEn: nameEn,
+            icon: icon,
+            color: color,
+            bucket: bucket,
+            sort: sort,
+          ),
+          mode: InsertMode.insertOrIgnore,
+        ),
+  );
+
   Future<CategoryRow?> byId(String id) => (_db.select(
     _db.categories,
   )..where((c) => c.id.equals(id))).getSingleOrNull();
