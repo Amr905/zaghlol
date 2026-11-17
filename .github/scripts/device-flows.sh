@@ -132,8 +132,57 @@ run_sms_device 2>&1 | tee "$OUT/sms-device-script.log"
 sms_rc=${PIPESTATUS[0]}
 pull_files
 adb -s "$DEVICE" exec-out screencap -p > "$OUT/screens/zz-final-sms.png" || true
+# ---- 0b. TEST-explorer4: Cash/InstaPay categories, a cash payment, the Add
+# button (integration_test/sms_device_cash_test.dart), then two quick resumes of
+# the app and a count of its posted notifications (no duplicates). Synthetic.
+notif_count() { adb -s "$DEVICE" shell dumpsys notification --noredact 2> /dev/null | grep -c "pkg=$PKG" || true; }
+run_cash_device() {
+  echo "==== cash device"
+  adb -s "$DEVICE" shell pm clear "$PKG" || true
+  for p in READ_SMS RECEIVE_SMS POST_NOTIFICATIONS; do
+    adb -s "$DEVICE" shell pm grant "$PKG" "android.permission.$p" || true
+  done
+  adb -s "$DEVICE" shell am force-stop "$PKG"
+  adb -s "$DEVICE" root > /dev/null 2>&1 || true
+  adb -s "$DEVICE" wait-for-device
+  adb -s "$DEVICE" shell "content delete --uri content://sms" > /dev/null 2>&1 || true
+  sms_hist CIB 'Cash withdrawal of EGP 1000.00 with Card ending 1234 at ATM CAIRO FESTIVAL. Avl Bal EGP 5000.00'
+  sms_hist CIB 'CIB: An instant transfer of EGP 500.00 was made from your account ending ****7316, ref e7a3c9f1 on 10-11-2026 22:32. For more info call 19666.'
+  sleep 5
+  adb -s "$DEVICE" unroot > /dev/null 2>&1 || true
+  adb -s "$DEVICE" wait-for-device
+  sleep 3
+  adb -s "$DEVICE" shell am force-stop "$PKG"
+  timeout 900 flutter test integration_test/sms_device_cash_test.dart \
+    --flavor devSms -d "$DEVICE" --no-uninstall --reporter expanded \
+    > "$OUT/cash-device-test.log" 2>&1
+  r=$?
+  grep -E "CASH_DEVICE|Some tests|All tests" "$OUT/cash-device-test.log" | cut -c1-240
+  if [ "$r" -ne 0 ]; then tail -40 "$OUT/cash-device-test.log" | cut -c1-220; fi
+  # Two quick resumes: Home, then the app again, twice; the number of the
+  # app's posted notifications must not grow from the second resume to the third.
+  adb -s "$DEVICE" shell am start -n "$PKG/app.zaghlol.MainActivity" > /dev/null 2>&1 || adb -s "$DEVICE" shell monkey -p "$PKG" -c android.intent.category.LAUNCHER 1 > /dev/null 2>&1
+  sleep 6
+  n0=$(notif_count)
+  for i in 1 2; do
+    adb -s "$DEVICE" shell input keyevent 3; sleep 1
+    adb -s "$DEVICE" shell monkey -p "$PKG" -c android.intent.category.LAUNCHER 1 > /dev/null 2>&1; sleep 2
+  done
+  sleep 5
+  n1=$(notif_count)
+  echo "CASH_DEVICE NOTIFICATIONS after launch=$n0 after two resumes=$n1"
+  if [ "$n1" -gt "$n0" ]; then echo "CASH_DEVICE PROBLEM resuming twice posted new notifications"; r=1; fi
+  adb -s "$DEVICE" exec-out screencap -p > "$OUT/screens/zz-final-cash.png" || true
+  return "$r"
+}
+cash_rc=0
+run_cash_device 2>&1 | tee "$OUT/cash-device-script.log"
+cash_rc=${PIPESTATUS[0]}
+pull_files
+
 if [ -n "${SMS_ONLY:-}" ]; then
   ls -la "$OUT/screens"
+  [ "$cash_rc" -ne 0 ] && exit "$cash_rc"
   exit "$sms_rc"
 fi
 
