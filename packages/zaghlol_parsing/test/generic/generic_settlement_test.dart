@@ -90,17 +90,46 @@ void main() {
 
 void _fixMajors() {
   group('SMS-AUTO review fixes', () {
-    for (final b in [
-      'Your card ending 1234 was used for a payment of EGP 500.00 at VODAFONE. Thank you for banking with NBE',
-      'Purchase of EGP 750.00 at AMAZON on your card ending 1234. Thank you for your payment',
-      'Payment of EGP 900.00 at CARREFOUR with your card ending 1234 was reversed and credited',
-    ]) {
-      test('no auto-save: ${b.substring(0, 30)}', () {
-        final r = _read(b);
-        if (r is ParseGeneric) {
-          expect(r.event, isNot(GenericEvent.ccPayment));
-          expect(r.direction, isNot(TemplateDirection.income));
-        }
+    // body, expected minor units, merchant key, event, direction, auto-save.
+    final cases =
+        <(String, int, String, GenericEvent?, TemplateDirection?, bool)>[
+          (
+            'Your card ending 1234 was used for a payment of EGP 500.00 at VODAFONE. Thank you for banking with NBE',
+            50000,
+            'vodafone',
+            GenericEvent.purchase,
+            TemplateDirection.expense,
+            true,
+          ),
+          (
+            'Purchase of EGP 750.00 at AMAZON on your card ending 1234. Thank you for your payment',
+            75000,
+            'amazon',
+            null,
+            null,
+            false,
+          ),
+          (
+            'Payment of EGP 900.00 at CARREFOUR with your card ending 1234 was reversed and credited',
+            90000,
+            'carrefour',
+            null,
+            null,
+            false,
+          ),
+        ];
+    for (final c in cases) {
+      test('reads and gates: ${c.$1.substring(0, 30)}', () {
+        final r = _read(c.$1);
+        expect(r, isA<ParseGeneric>());
+        final g = r as ParseGeneric;
+        expect(g.amount.minor, c.$2);
+        expect(g.amount.currency.code, 'EGP');
+        expect(g.merchant?.key, c.$3);
+        expect(g.last4, '1234');
+        expect(g.event, c.$4);
+        expect(g.direction, c.$5);
+        expect(genericAutoSaveEligible(g), c.$6);
       });
     }
     test('cashback promo is not auto-saved', () {
