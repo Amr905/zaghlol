@@ -57,9 +57,9 @@ const Map<String, String> loggingAllowed = {
 
 final RegExp loggingCall = RegExp(
   r'\b(print|debugPrint|debugPrintStack|log|dump)\s*\(|developer\.log|'
-  r'\b(stdout|stderr)\b|\bLog\.[a-z]+\(|\bprintln\(|\bTimber\b|\bNSLog\b|'
-  r'\bos_log\b|\bOSLog\b|\bLogger\(|\bprintStackTrace\(|\bSystem\.(out|err)\b|'
-  r'\bfputs\(|FileHandle\.standardError|logStatements: *true',
+  r'\b(stdout|stderr)\b|\bLog\.[a-z]+\s*\(|\bprintln\s*\(|\bTimber\b|\bNSLog\b|'
+  r'\bos_log\b|\bOSLog\b|\bLogger\s*\(|\bprintStackTrace\s*\(|\bSystem\.(out|err)\b|'
+  r'\bfputs\s*\(|FileHandle\.standardError|logStatements: *true',
 );
 
 /// F7 storage APIs that keep plaintext outside the encrypted stores, or
@@ -182,6 +182,11 @@ void main() {
       'debugPrint\t(x);',
       'debugPrint(body);',
       'Log.d(TAG, body)',
+      'Log.d (TAG, body)',
+      'println (x)',
+      'Logger ().info(x)',
+      'e.printStackTrace ()',
+      'fputs (x, stderr)',
       'NSLog("%@", body)',
       'os_log("x")',
       'Logger().info(x)',
