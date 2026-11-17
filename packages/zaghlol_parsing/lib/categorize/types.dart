@@ -55,6 +55,10 @@ enum CategorizeTier {
   token,
   fuzzy,
   keyword,
+
+  /// CAT-cash / CAT-INSTAPAY: the event's own category (ATM -> cash,
+  /// InstaPay -> instapay), after user rules.
+  event,
   none,
 }
 
@@ -65,7 +69,13 @@ final class CategorizeInput {
     this.merchantText = '',
     this.counterpartyKind,
     this.counterpartyValue,
+    this.eventCategoryId,
   });
+
+  /// The category the message's event implies (`sys:cash` for an ATM
+  /// withdrawal, `sys:instapay` for an InstaPay transfer), or null. A user
+  /// rule beats it; a live category is required (else it is ignored).
+  final String? eventCategoryId;
 
   /// `merchant_norm`: a canonical key, or empty for "no merchant".
   final String merchantNorm;
@@ -79,7 +89,7 @@ final class CategorizeInput {
 
   /// Memo key for one run (ASCII unit separators; never printed).
   String get memoKey =>
-      '$merchantNorm\u001f$merchantText\u001f${counterpartyKind?.name}\u001f${counterpartyValue ?? ''}';
+      '$merchantNorm\u001f$merchantText\u001f${counterpartyKind?.name}\u001f${counterpartyValue ?? ''}\u001f${eventCategoryId ?? ''}';
 
   @override
   String toString() => 'CategorizeInput(<redacted>)';

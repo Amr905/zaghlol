@@ -12,11 +12,11 @@ public class BundledSeedCsvTests
         CatalogSeedCsv.Parse(File.ReadAllText(Path.Combine(AppContext.BaseDirectory, "catalog", "catalog_seed.csv")));
 
     [Fact]
-    public void TheFileParsesIntoFourteenCategoriesAndTheMerchantList()
+    public void TheFileParsesIntoSixteenCategoriesAndTheMerchantList()
     {
         var seed = Load();
 
-        Assert.Equal(14, seed.Categories.Count);
+        Assert.Equal(16, seed.Categories.Count); // CAT-cash added InstaPay and Cash
         Assert.InRange(seed.Merchants.Count, 120, 200);
         Assert.NotEmpty(seed.Keywords);
         Assert.All(seed.Merchants, m => Assert.NotEmpty(m.Aliases));

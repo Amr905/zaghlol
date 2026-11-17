@@ -25,6 +25,7 @@ import 'package:drift/drift.dart';
 import 'package:zaghlol_domain/zaghlol_domain.dart';
 
 import '../../../core/db/app_database.dart';
+import '../../../core/db/cash_cover_sql.dart';
 import '../../../core/db/daos/write_errors.dart';
 import '../domain/chart_models.dart';
 import '../domain/chart_rules.dart';
@@ -36,12 +37,21 @@ const int _maxOffsetMs = 18 * 3600000;
 const String _localMs = '(t.occurred_at + t.occurred_tz_offset_min * 60000)';
 const String _localDay = '($_localMs / 86400000)';
 
-/// An expense's amount net of its active offset links.
-const String _netSpend =
-    't.amount_minor - coalesce((SELECT sum(l.amount_minor) '
+/// The active offset links of expense `t`.
+final String _linked =
+    'coalesce((SELECT sum(l.amount_minor) '
     'FROM offset_links l JOIN transactions s ON s.id = l.source_txn_id '
     'WHERE l.expense_txn_id = t.id AND s.deleted_at IS NULL '
     "AND s.status IN ('posted', 'pending')), 0)";
+
+/// The part of cash payment `t` its withdrawn-cash pool covers (CAT-cash),
+/// = min(pool, gross amount); the net spend is net - cover (may dip below 0
+/// by the linked amount, so an offset still reduces spend).
+final String _cover = 'coalesce(${cashCoveredOf('t')}, 0)';
+
+/// An expense's amount net of its active offset links, and (cash payments)
+/// of the part already counted when the cash was withdrawn.
+final String _netSpend = '(t.amount_minor - $_linked - $_cover)';
 
 /// An income-side row's amount net of what it funded.
 const String _netIncome =
@@ -140,9 +150,9 @@ class ChartRepository {
   }) => guardRead(
     () => _db
         .customSelect(
-          sql,
+          '$withCashCover$sql',
           variables: args,
-          readsFrom: reads ?? {_db.transactions, _db.offsetLinks},
+          readsFrom: reads ?? {_db.transactions, _db.offsetLinks, _db.accounts},
         )
         .get(),
   );
@@ -295,16 +305,24 @@ class ChartRepository {
   // ------------------------------------------------------ category sums
 
   Future<List<({String? id, String? bucket, int minor, int count})>>
-  _byCategory(ChartPeriod p, ChartFilter f) async {
+  _byCategory(ChartPeriod p, ChartFilter f, {bool withNegative = false}) async {
     final s = _spend(p, f);
+    // Spend rows, plus the cash move of a covered payment: its covered part
+    // joins its own category and leaves `cash` (the total is unchanged).
     final rows = await _select(
-      'SELECT t.category_id AS cid, c.bucket AS bucket, '
-      'sum($_netSpend) AS s, count(*) AS n '
-      'FROM transactions t LEFT JOIN categories c ON c.id = t.category_id '
-      'WHERE ${s.where} GROUP BY t.category_id '
-      'HAVING sum($_netSpend) > 0 ORDER BY s DESC, cid',
-      s.args,
-      reads: {_db.transactions, _db.offsetLinks, _db.categories},
+      'SELECT m.cid AS cid, c.bucket AS bucket, sum(m.v) AS s, '
+      'sum(m.n) AS n FROM ('
+      'SELECT t.category_id AS cid, $_netSpend AS v, 1 AS n '
+      'FROM transactions t WHERE ${s.where} '
+      'UNION ALL SELECT t.category_id, $_cover, 0 FROM transactions t '
+      'WHERE ${s.where} AND ${cashCoveredOf('t')} > 0 '
+      "UNION ALL SELECT 'sys:cash', -$_cover, 0 FROM transactions t "
+      'WHERE ${s.where} AND ${cashCoveredOf('t')} > 0'
+      ') m LEFT JOIN categories c ON c.id = m.cid '
+      'GROUP BY m.cid ${withNegative ? '' : 'HAVING sum(m.v) > 0'} '
+      'ORDER BY s DESC, cid',
+      [...s.args, ...s.args, ...s.args],
+      reads: {_db.transactions, _db.offsetLinks, _db.categories, _db.accounts},
     );
     return [
       for (final r in rows)
@@ -323,7 +341,15 @@ class ChartRepository {
     ChartPeriod p,
     ChartFilter f,
   ) => _memoized(_key('donut', p, f), () async {
-    final rows = await _byCategory(p, f);
+    final all = await _byCategory(p, f, withNegative: true);
+    final rows = [
+      for (final r in all)
+        if (r.minor > 0) r,
+    ];
+    // CAT-cash: cash paid from cash withdrawn in an earlier period leaves a
+    // negative Cash row here. It is shown as one note, never as a slice, and
+    // is not part of the total.
+    final covered = all.fold<int>(0, (a, r) => r.minor < 0 ? a - r.minor : a);
     if (rows.isEmpty) {
       return const ChartNotEnoughData<CategoryDonut>(
         NotEnoughReason.noData,
@@ -335,7 +361,8 @@ class ChartRepository {
     final total = rows.fold<int>(0, (a, r) => a + r.minor);
     return ChartReady(
       CategoryDonut(
-        total: _m(total, f),
+        total: _m(total - covered, f),
+        coveredEarlier: _m(covered, f),
         slices: [
           for (var i = 0; i < rows.length; i++)
             CategorySlice(
@@ -446,7 +473,9 @@ class ChartRepository {
       );
     }
     var needs = 0, wants = 0, savingsSpend = 0, other = 0;
-    for (final r in await _byCategory(p, f)) {
+    final all = await _byCategory(p, f, withNegative: true);
+    final covered = all.fold<int>(0, (a, r) => r.minor < 0 ? a - r.minor : a);
+    for (final r in all.where((r) => r.minor > 0)) {
       switch (r.bucket) {
         case 'needs' || 'obligations':
           needs += r.minor;
@@ -458,6 +487,7 @@ class ChartRepository {
           other += r.minor;
       }
     }
+    wants = wants > covered ? wants - covered : 0;
     final spent = needs + wants + savingsSpend + other;
     final unspent = income > spent ? income - spent : 0;
     return ChartReady(

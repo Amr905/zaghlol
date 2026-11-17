@@ -88,10 +88,47 @@ class CatalogSeedLoader {
   /// Largest compressed seed accepted.
   static const int maxGzipBytes = maxSeedJsonBytes;
 
+  /// CAT-cash / CAT-INSTAPAY: an install seeded before these two system
+  /// categories existed gets them here (the seed itself is first-launch
+  /// only). Idempotent; an existing row (even archived) is left alone.
+  Future<void> _ensureEventCategories() async {
+    final categories = CategoriesDao(_db);
+    for (final c in const [
+      (
+        code: 'cash',
+        ar: 'كاش',
+        en: 'Cash',
+        icon: 'payments',
+        color: '#B45309',
+        sort: 15,
+      ),
+      (
+        code: 'instapay',
+        ar: 'إنستاباي',
+        en: 'InstaPay',
+        icon: 'bolt',
+        color: '#0F7A55',
+        sort: 16,
+      ),
+    ]) {
+      if (await categories.bySystemCode(c.code) != null) continue;
+      await categories.upsertSystem(
+        code: c.code,
+        nameAr: c.ar,
+        nameEn: c.en,
+        icon: c.icon,
+        color: c.color,
+        bucket: 'wants',
+        sort: c.sort,
+      );
+    }
+  }
+
   Future<CatalogSeedResult> loadIfNeeded() async {
     final catalog = CatalogDao(_db);
     final existing = await catalog.meta();
     if (existing != null) {
+      await _ensureEventCategories();
       return CatalogSeedResult(
         CatalogSeedOutcome.alreadyPresent,
         existing.version,

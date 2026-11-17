@@ -15,6 +15,7 @@ abstract final class ZSpacing {
   /// Bottom space a tab scroller keeps so its last item clears the floating
   /// Add button (60 button + 16 margin + 20 breathing room).
   static const double fabClearance = 96;
+  static const double fabSize = 56;
 
   /// Minimum interactive target (WCAG / Material).
   static const double minTarget = 48;

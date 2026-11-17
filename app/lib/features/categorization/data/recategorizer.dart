@@ -17,6 +17,8 @@
 // Failures are code-only; nothing here logs or carries merchant text.
 
 import 'package:drift/drift.dart';
+import 'package:zaghlol_domain/zaghlol_domain.dart'
+    show kCashCategoryId, kInstapayCategoryId;
 import 'package:zaghlol_parsing/zaghlol_parsing.dart';
 
 import '../../../core/db/app_database.dart';
@@ -79,6 +81,13 @@ class Recategorizer {
     final target = decision.categoryId;
     final from = replaceable(decision.source);
     if (target == null || from.isEmpty) return 0;
+    // CAT-cash / CAT-INSTAPAY: a catalog or keyword hit never replaces the
+    // event category; only a user rule does.
+    if (decision.source != CategorySource.userRule &&
+        (oldCategoryId == kCashCategoryId ||
+            oldCategoryId == kInstapayCategoryId)) {
+      return 0;
+    }
     return guardWrite(
       () => _db.customUpdate(
         sqlFor(from.length),

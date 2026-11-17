@@ -13,6 +13,8 @@ category,entertainment,فسح وسفر وخروجات,Entertainment & Travel,loc
 category,family_giving,عيلة وهدايا وصدقات,"Family, Charity & Gifts",volunteer_activism,#A855F7,giving,12,,,,,,,
 category,savings,تحويش ودهب واستثمار,"Savings, Gold & Investing",savings,#60B669,savings,13,,,,,,,
 category,income,مرتب ودخل وكاش باك,"Income, Salary & Refunds",payments,#22C55E,income,14,,,,,,,
+category,cash,كاش,Cash,payments,#B45309,wants,15,,,,,,,
+category,instapay,إنستاباي,InstaPay,bolt,#0F7A55,wants,16,,,,,,,
 merchant,,كارفور,,,,,,Carrefour,groceries,,,,,
 merchant,,سبينيس,,,,,,Spinneys,groceries,,,,,
 merchant,,سعودي ماركت,,,,,,Seoudi Market,groceries,,,,,

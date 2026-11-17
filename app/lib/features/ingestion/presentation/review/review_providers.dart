@@ -198,7 +198,11 @@ final class _LiveActions implements ReviewActions {
     );
     final categorizer = await _ref.read(categorizerProvider.future);
     final decision = await categorizer.categorize(
-      categorizeInputFor(merchantRaw: g.merchant, merchantNorm: g.merchantKey),
+      categorizeInputFor(
+        merchantRaw: g.merchant,
+        merchantNorm: g.merchantKey,
+        eventCategoryId: g.eventCategoryId,
+      ),
     );
     final outcome = await (await _reviews).resolveManually(
       card.itemId,

@@ -270,14 +270,6 @@ class _HomeBodyState extends ConsumerState<_HomeBody> {
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
           const SizedBox(height: ZSpacing.sm),
-          if (m.scanInProgress) ...[
-            ZBanner(
-              key: const ValueKey('home-scan-banner'),
-              icon: Icons.sync,
-              message: l.homeBannerScanning(0, format.count(0)),
-            ),
-            const SizedBox(height: ZSpacing.md),
-          ],
           if (figures.isEmpty)
             _EmptyHero(key: const ValueKey('home-hero-empty'))
           else if (figures.length == 1)
@@ -331,6 +323,14 @@ class _HomeBodyState extends ConsumerState<_HomeBody> {
               ),
             ),
             HomePagerDots(count: figures.length, index: page),
+          ],
+          if (m.scanInProgress) ...[
+            const SizedBox(height: ZSpacing.md),
+            ZBanner(
+              key: const ValueKey('home-scan-banner'),
+              icon: Icons.sync,
+              message: l.homeBannerScanning(0, format.count(0)),
+            ),
           ],
           IosSetupNudge(
             onCheck: a.openCaptureSettings,

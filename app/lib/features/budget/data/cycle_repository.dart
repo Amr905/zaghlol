@@ -9,6 +9,7 @@ import 'package:drift/drift.dart';
 import 'package:zaghlol_domain/zaghlol_domain.dart';
 
 import '../../../core/db/app_database.dart';
+import '../../../core/db/cash_cover_sql.dart';
 import '../../../core/db/daos/cycle_summaries_dao.dart';
 import '../../ingestion/domain/ingest_ports.dart' show LocalZone;
 import 'payday_schedule_store.dart';
@@ -110,8 +111,10 @@ class CycleRepository {
         : ' AND account_id IN (${List.filled(ids.length, '?').join(',')})';
     final rows = await _db
         .customSelect(
+          '$withCashCover'
           'SELECT id, direction, status, amount_minor, currency, category_id, '
-          'is_internal, occurred_at, occurred_tz_offset_min '
+          'is_internal, occurred_at, occurred_tz_offset_min, '
+          'coalesce(${cashCoveredOf('transactions')}, 0) AS cash_covered '
           'FROM transactions WHERE deleted_at IS NULL '
           'AND occurred_at >= ? AND occurred_at < ?$accountSql',
           variables: [
@@ -119,7 +122,7 @@ class CycleRepository {
             Variable.withInt(to),
             for (final a in ids) Variable.withString(a),
           ],
-          readsFrom: {_db.transactions},
+          readsFrom: {_db.transactions, _db.accounts},
         )
         .get();
     final txns = <CycleTxn>[
@@ -138,6 +141,7 @@ class CycleRepository {
           ),
           isInternal: r.read<int>('is_internal') != 0,
           categoryId: r.readNullable<String>('category_id'),
+          cashCoveredMinor: r.read<int>('cash_covered'),
         ),
     ].where((t) => cycle.contains(t.date)).toList();
 

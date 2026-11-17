@@ -109,6 +109,14 @@ class CycleSummariesDao {
     )..where((c) => c.cycleStart.isIn(cycleStarts.toList()))).go(),
   );
 
+  /// Drops every cached cycle that starts on or after [cycleStart] (ISO
+  /// date keys sort as dates). CAT-cash: the cash pool runs across periods.
+  Future<int> deleteFrom(String cycleStart) => guardWrite(
+    () => (_db.delete(
+      _db.cycleSummaries,
+    )..where((c) => c.cycleStart.isBiggerOrEqualValue(cycleStart))).go(),
+  );
+
   /// Drops every cached summary (a full rebuild follows). Returns the rows
   /// deleted.
   Future<int> clear() => guardWrite(() => _db.delete(_db.cycleSummaries).go());

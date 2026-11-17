@@ -203,6 +203,8 @@ buildWorld({int? shuffleSeed, Set<String> archived = const {}}) {
     'transport',
     'subscriptions',
     'fitness',
+    'cash',
+    'instapay',
   ], archived: archived);
   return (
     rules: rules,

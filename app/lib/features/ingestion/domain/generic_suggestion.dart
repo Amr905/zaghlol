@@ -20,6 +20,7 @@ final class GenericSuggestion {
     this.institutionLabel,
     this.source,
     this.prefillComplete = false,
+    this.eventCategoryId,
   });
 
   final Money amount;
@@ -48,6 +49,10 @@ final class GenericSuggestion {
 
   /// The parser's [ParseGeneric.prefillComplete].
   final bool prefillComplete;
+
+  /// CAT-cash: the category the message's event implies (`sys:cash`,
+  /// `sys:instapay`), kept by ingest so the confirm can apply it.
+  final String? eventCategoryId;
 
   bool get isIncome =>
       direction == TxnDirection.income ||
@@ -110,6 +115,7 @@ final class GenericSuggestion {
         source: _source(payload['source']),
         occurredAtMs: when is int ? when : 0,
         tzOffsetMin: tz is int ? tz : 0,
+        eventCategoryId: _eventCategory(payload['eventCategory']),
         prefillComplete:
             payload['prefillComplete'] == true && when is int && tz is int,
       );
@@ -120,6 +126,9 @@ final class GenericSuggestion {
 
   static String? _text(Object? v) =>
       v is String && v.trim().isNotEmpty ? v : null;
+
+  static String? _eventCategory(Object? v) =>
+      v == kCashCategoryId || v == kInstapayCategoryId ? v as String : null;
 
   static String? _last4(Object? v) =>
       v is String && RegExp(r'^[0-9]{4}$').hasMatch(v) ? v : null;
