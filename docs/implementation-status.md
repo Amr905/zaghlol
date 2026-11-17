@@ -689,6 +689,8 @@ Closed entries above are struck through with the commit or file that fixes them.
 | FU-240 | ui | Minors/nits of T-158 in its batch review reports (not itemised) | - |
 | FU-250 | ui | Brand colours, logos licensing | PO |
 
+- **FU-256** (batch 36): see the batch-36 Lead delta check.
+
 ## Log
 | Date | Event |
 |---|---|
@@ -777,3 +779,4 @@ Closed entries above are struck through with the commit or file that fixes them.
 | 2026-11-17 | Batch 33 (`batch/2026-11-17-33`): follow-up sweep 2 (privacy/data, ledger, due-days setting, DB-clock freezes). FU-253. Progress 167/186. |
 | 2026-11-17 | Batch 34 (`batch/2026-11-17-34`): CAT-cash (PO CAT-INSTAPAY, CAT-CASH), FAB-mockup (PO FAB-MOCKUP). FU-254. Progress 167/186. |
 | 2026-11-17 | Batch 35 (`batch/2026-11-17-35`): FU-253/254 wiring and backfill, FU-252 UI, FU-218 overflow sweep, FU-228/232 backend. FU-255. Progress 167/186. |
+| 2026-11-18 | Batch 36 (`batch/2026-11-18-36`): FU triage + seven lanes of follow-ups. FU-256. Progress 167/186. |

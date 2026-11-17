@@ -40,3 +40,11 @@ Each SHA matches the upstream tag: checkout `fbc6f39…` = v5.1.0, setup-dotnet 
 |---|---|---|---|
 | FU-b36-rollover | `app/lib/features/budget/application/rollover_carry.dart:20-27` | Zero carry for a budget that did not exist through the previous cycle (use `budgets.created_at`) | A rollover budget created in the current cycle: carry 0 on the screen and in `runBudgetAlerts` |
 | FU-b36-ui | `app/lib/core/l10n/app_en.arb:6096`, `app_ar.arb:9199` (+ copy-deck §3.10) | Remove or qualify "Gold stays yours" so it does not contradict the Android move or cooldown warning | Delete-dialog widget test with the seat warning shown |
+
+## Lead delta check (fix round, 2026-11-18)
+
+- **rollover (45c06b56, ~20 production lines):** a rollover budget created after the previous cycle began now carries 0. `createdAtMs` comes from `budgets.created_at`, and the shared carry function (used by the screen and alerts) checks it. A runner test covers it (new budget alerts at 80% of its limit), and existing budgets still carry. Minor: the cut uses UTC midnight, so a budget made in the first ~2 h of a Cairo cycle still carries.
+- **ui (3a5e7cc2):** `privacyDeleteStoreAccountKept` now only says the store purchase and account aren't touched. There's no Gold promise to contradict the Android seat warning. Copy deck §3.10 is updated, and the ar + en test runs with the seat warning shown.
+
+Verdict: all seven tasks **APPROVED**.
+- **FU-256:** batch-36 minors: the catalog seed loads only into an empty catalog (existing installs get new keywords only through catalog sync); `refreshIfDue` doesn't pass `hasToken`; rollover cut uses UTC midnight; budget alerts and recurring detection still hold the gate for a whole run; the backend triage items owned by T-130/135/137/140/144.
