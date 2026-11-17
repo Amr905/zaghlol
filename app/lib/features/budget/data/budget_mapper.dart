@@ -13,6 +13,7 @@ BudgetSpec budgetSpecOf(BudgetRow row) => BudgetSpec(
   thresholds: budgetThresholdsOf(row),
   rollover: row.rollover != 0,
   annual: row.period == BudgetPeriod.annual,
+  createdAtMs: row.createdAt,
 );
 
 /// FU-136: like [budgetSpecOf] but null for a corrupt row (unknown currency,
@@ -29,6 +30,7 @@ BudgetSpec? tryBudgetSpecOf(BudgetRow row) {
       thresholds: budgetThresholdsOf(row),
       rollover: row.rollover != 0,
       annual: row.period == BudgetPeriod.annual,
+      createdAtMs: row.createdAt,
     );
   } on FormatException {
     return null;

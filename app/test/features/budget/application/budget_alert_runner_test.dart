@@ -149,13 +149,13 @@ void main() {
     expect(fired.single, contains('|ann|2026|'));
   });
 
-  Future<void> rollover() => BudgetsDao(db).insert(
+  Future<void> rollover({int createdAt = 0}) => BudgetsDao(db).insert(
     id: 'r',
     categoryId: 'sys:food',
     limit: Money(egp, 10000),
     period: BudgetPeriod.cycle,
     rollover: true,
-    createdAt: 0,
+    createdAt: createdAt,
   );
 
   // The previous cycle (25 Sep - 24 Oct) left 6000 of 10000 unused.
@@ -169,6 +169,28 @@ void main() {
     expect(fired.single, endsWith('|80')); // not 100: carry applied
     expect(await run(), [AlertOutcome.duplicate]);
   });
+
+  test(
+    'a budget created this cycle carries nothing, screen or alert',
+    () async {
+      await rollover(createdAt: at(2026, 11, 1)); // after prev cycle started
+      await spend('t1', 9900, at(2026, 11, 5));
+      final cycle = schedule.cycleOn(cycles.today);
+      final specs = [
+        for (final r in await db.select(db.budgets).get()) budgetSpecOf(r),
+      ];
+      final carries = await rolloverCarries(
+        cycles: cycles,
+        schedule: schedule,
+        cycle: cycle,
+        specs: specs,
+      );
+      expect(carries['r'], Money(egp, 0));
+      // 99% of 10000, not 61% of 16000: the 80 threshold fires.
+      expect(await run(), [AlertOutcome.shown]);
+      expect(fired.single, endsWith('|80'));
+    },
+  );
 
   test('the screen and the alert use the same effective limit', () async {
     await rollover();

@@ -14,6 +14,7 @@ final class BudgetSpec {
     required this.thresholds,
     this.rollover = false,
     this.annual = false,
+    this.createdAtMs = 0,
   });
 
   final String id;
@@ -24,6 +25,9 @@ final class BudgetSpec {
   final List<int> thresholds;
   final bool rollover;
   final bool annual;
+
+  /// `budgets.created_at` (UTC ms); rollover carries nothing before a full cycle.
+  final int createdAtMs;
 }
 
 final class BudgetProgress {

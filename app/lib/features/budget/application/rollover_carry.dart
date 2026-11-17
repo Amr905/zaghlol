@@ -24,7 +24,20 @@ Future<Map<String, Money>> rolloverCarries({
   if (rolling.isEmpty) return const {};
   final prev = schedule.cycleOn(cycle.start.plusDays(-1));
   final prevTotals = await cycles.totals(prev);
-  return {for (final s in rolling) s.id: rolloverCarry(s, prevTotals)};
+  // A budget made after the previous cycle began did not exist for all of it,
+  // so nothing was left unused (FR-BUD-05). UTC midnight approximates the
+  // local day start. The carry uses the current limit if it has changed.
+  final prevStartMs = DateTime.utc(
+    prev.start.year,
+    prev.start.month,
+    prev.start.day,
+  ).millisecondsSinceEpoch;
+  return {
+    for (final s in rolling)
+      s.id: s.createdAtMs > prevStartMs
+          ? Money(s.limit.currency, 0)
+          : rolloverCarry(s, prevTotals),
+  };
 }
 
 /// The carry that belongs to the cycle budget basis of [currency]: the
