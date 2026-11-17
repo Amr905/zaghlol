@@ -8,6 +8,7 @@ import 'dart:typed_data';
 import 'package:catalog_build/catalog_build.dart';
 import 'package:test/test.dart';
 import 'package:zaghlol_catalog/zaghlol_catalog.dart';
+import 'package:zaghlol_parsing/zaghlol_parsing.dart' show foldKey;
 
 const String header =
     'entity,code,nameAr,nameEn,icon,color,bucket,sort,canonical,category,alias,match,keyword,lang,weight';
@@ -143,6 +144,17 @@ void main() {
   group('the committed catalog', () {
     final curated = File('data/catalog_curated.csv').readAsStringSync();
     final built = buildCatalog(curated, version: 1);
+
+    test('FU-118: spoken-word keywords are seeded', () {
+      final byWord = {
+        for (final k in built.seed.keywords) k.keyword: k.category,
+      };
+      expect(byWord[foldKey('عيش')], 'groceries');
+      expect(byWord[foldKey('جبنة')], 'groceries');
+      expect(byWord[foldKey('عشا')], 'dining');
+      expect(byWord[foldKey('ميكروباص')], 'transport');
+      expect(byWord[foldKey('ميكروباصات')], 'transport');
+    });
 
     test('16 system categories, AR and EN exactly as spec section 4', () {
       const expected = [

@@ -345,6 +345,7 @@ alias,,,,,,,,Notion,,notion,prefix,,,
 alias,,,,,,,,Duolingo,,duolingo,prefix,,,
 alias,,,,,,,,iCloud,,icloud,prefix,,,
 alias,,,,,,,,Misr Petroleum,,misr petroleum,prefix,,,
+keyword,,,,,,,,,transport,,,اتوبيس,ar,60
 keyword,,,,,,,,,housing,,,اثاث,ar,60
 keyword,,,,,,,,,housing,,,اجهزه,ar,60
 keyword,,,,,,,,,savings,,,استثمار,ar,60
@@ -373,6 +374,8 @@ keyword,,,,,,,,,savings,,,تحويش,ar,60
 keyword,,,,,,,,,bills,,,تليفون,ar,60
 keyword,,,,,,,,,housing,,,تنضيف,ar,60
 keyword,,,,,,,,,education,,,جامعه,ar,60
+keyword,,,,,,,,,groceries,,,جبن,ar,60
+keyword,,,,,,,,,groceries,,,جبنه,ar,60
 keyword,,,,,,,,,groceries,,,جزار,ar,60
 keyword,,,,,,,,,shopping,,,جزم,ar,60
 keyword,,,,,,,,,debt,,,جمعيه,ar,60
@@ -392,6 +395,7 @@ keyword,,,,,,,,,family_giving,,,زكاه,ar,60
 keyword,,,,,,,,,subscriptions,,,ستريمنج,ar,60
 keyword,,,,,,,,,entertainment,,,سفر,ar,60
 keyword,,,,,,,,,education,,,سنتر,ar,60
+keyword,,,,,,,,,dining,,,سندوتش,ar,60
 keyword,,,,,,,,,groceries,,,سوبرماركت,ar,60
 keyword,,,,,,,,,entertainment,,,سينما,ar,60
 keyword,,,,,,,,,bills,,,شحن,ar,60
@@ -405,13 +409,17 @@ keyword,,,,,,,,,savings,,,طوارئ,ar,60
 keyword,,,,,,,,,entertainment,,,طيران,ar,60
 keyword,,,,,,,,,income,,,عائد,ar,60
 keyword,,,,,,,,,transport,,,عربيه,ar,60
+keyword,,,,,,,,,dining,,,عشا,ar,60
 keyword,,,,,,,,,health,,,عياده,ar,60
+keyword,,,,,,,,,groceries,,,عيش,ar,60
 keyword,,,,,,,,,bills,,,غاز,ar,60
+keyword,,,,,,,,,dining,,,غدا,ar,60
 keyword,,,,,,,,,bills,,,فاتوره,ar,60
 keyword,,,,,,,,,dining,,,فاست فود,ar,60
 keyword,,,,,,,,,groceries,,,فاكهه,ar,60
 keyword,,,,,,,,,groceries,,,فراخ,ar,60
 keyword,,,,,,,,,income,,,فري لانس,ar,60
+keyword,,,,,,,,,dining,,,فطار,ar,60
 keyword,,,,,,,,,entertainment,,,فندق,ar,60
 keyword,,,,,,,,,dining,,,فول,ar,60
 keyword,,,,,,,,,debt,,,قرض,ar,60
@@ -428,6 +436,7 @@ keyword,,,,,,,,,bills,,,كهرباء,ar,60
 keyword,,,,,,,,,education,,,كورس,ar,60
 keyword,,,,,,,,,shopping,,,لبس,ar,60
 keyword,,,,,,,,,groceries,,,لحوم,ar,60
+keyword,,,,,,,,,transport,,,مترو,ar,60
 keyword,,,,,,,,,transport,,,محطه وقود,ar,60
 keyword,,,,,,,,,groceries,,,مخبوزات,ar,60
 keyword,,,,,,,,,education,,,مدرسه,ar,60
@@ -440,6 +449,8 @@ keyword,,,,,,,,,shopping,,,مكياج,ar,60
 keyword,,,,,,,,,shopping,,,موبايل,ar,60
 keyword,,,,,,,,,transport,,,موقف,ar,60
 keyword,,,,,,,,,bills,,,مياه,ar,60
+keyword,,,,,,,,,transport,,,ميكروباص,ar,60
+keyword,,,,,,,,,transport,,,ميكروباصات,ar,60
 keyword,,,,,,,,,entertainment,,,نادي,ar,60
 keyword,,,,,,,,,family_giving,,,نقطه,ar,60
 keyword,,,,,,,,,groceries,,,هايبر,ar,60
