@@ -106,14 +106,14 @@ void main() {
   );
 
   group('first launch', () {
-    test('loads the bundled seed: 14 system categories in AR and EN', () async {
+    test('loads the bundled seed: 16 system categories in AR and EN', () async {
       final result = await loader(_FileSource()).loadIfNeeded();
       expect(result.outcome, CatalogSeedOutcome.loaded);
       expect(result.version, 1);
 
       final rows = await CategoriesDao(db).active();
-      expect(rows.length, 14);
-      expect([for (final r in rows) r.sort], [for (var i = 1; i <= 14; i++) i]);
+      expect(rows.length, 16);
+      expect([for (final r in rows) r.sort], [for (var i = 1; i <= 16; i++) i]);
       expect(
         rows.every((r) => !r.isCustom.isOdd && r.systemCode != null),
         isTrue,
@@ -121,10 +121,13 @@ void main() {
       expect(rows.first.id, 'sys:groceries');
       expect(rows.first.nameAr, 'خزين البيت والسوبرماركت');
       expect(rows.first.nameEn, 'Groceries & Supermarkets');
-      expect(rows.last.id, 'sys:income');
-      expect(rows.last.nameAr, 'مرتب ودخل وكاش باك');
-      expect(rows.last.nameEn, 'Income, Salary & Refunds');
-      expect(rows.last.bucket, 'income');
+      expect(rows[13].id, 'sys:income');
+      expect(rows.last.id, 'sys:instapay');
+      expect(rows[13].nameAr, 'مرتب ودخل وكاش باك');
+      expect(rows[13].nameEn, 'Income, Salary & Refunds');
+      expect(rows[13].bucket, 'income');
+      expect(rows[14].nameEn, 'Cash');
+      expect(rows.last.nameAr, 'إنستاباي');
       expect(
         {for (final r in rows) r.bucket},
         {
@@ -232,6 +235,20 @@ void main() {
       expect((await dao.meta())!.signatureKid, 's0001a');
     });
 
+    test(
+      'an install seeded before Cash and InstaPay gets both, once',
+      () async {
+        await CatalogDao(db)
+            .setMeta(version: 1, appliedAt: t0, signatureKid: 'k');
+        await loader(_FileSource()).loadIfNeeded();
+        await loader(_FileSource()).loadIfNeeded();
+        final cash = await db.select(db.categories).get();
+        expect({for (final c in cash) c.id}, {'sys:cash', 'sys:instapay'});
+        final c = cash.firstWhere((c) => c.id == 'sys:cash');
+        expect((c.nameAr, c.nameEn), ('كاش', 'Cash'));
+      },
+    );
+
     test('two loaders at once leave one consistent catalog', () async {
       final results = await Future.wait([
         loader(_FileSource()).loadIfNeeded(),
@@ -241,7 +258,7 @@ void main() {
         results.where((r) => r.outcome == CatalogSeedOutcome.loaded).length,
         greaterThanOrEqualTo(1),
       );
-      expect(await _count(db, 'categories'), 14);
+      expect(await _count(db, 'categories'), 16);
       final merchants = await _count(db, 'catalog_merchants');
       expect(merchants, greaterThan(100));
       await db.customStatement(

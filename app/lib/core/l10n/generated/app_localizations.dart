@@ -4635,6 +4635,12 @@ abstract class AppLocalizations {
   /// **'حاجات تانية'**
   String get insightsChartsOtherSlice;
 
+  /// Muted note under the category donut: cash payments covered by an earlier withdrawal (not a slice, not in the total)
+  ///
+  /// In ar, this message translates to:
+  /// **'اتدفع من كاش اتسحب قبل كده: {amount}'**
+  String insightsCoveredEarlier(String amount);
+
   /// T · chart 1 (Free)
   ///
   /// In ar, this message translates to:

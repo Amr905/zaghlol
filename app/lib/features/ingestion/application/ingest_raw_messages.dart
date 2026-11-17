@@ -1070,6 +1070,7 @@ final class IngestRawMessages {
       merchantNorm: merchantNorm,
       counterpartyKind: counterparty?.$1,
       counterpartyValue: counterparty?.$2,
+      eventCategoryId: eventCategoryOf(r.event),
     );
     // (10) Raw + transaction; raw first (CR-6 backstop).
     final rawId = await _insertRaw(
@@ -1201,6 +1202,7 @@ final class IngestRawMessages {
               ? target.counterpartyKind
               : counterparty?.$1,
           counterpartyValue: target.counterpartyValue ?? counterparty?.$2,
+          eventCategoryId: eventCategoryOf(r.event),
         );
         if (c.source != CategorySource.none) category = c;
       }
@@ -1422,6 +1424,10 @@ final class IngestRawMessages {
           'merchant': ?_nonEmpty(g.merchant?.display),
           'merchantKey': ?_nonEmpty(g.merchant?.key),
           'event': ?g.event?.name,
+          'eventCategory': ?genericEventCategoryOf(
+            g.event,
+            instapay: hasInstapayCue(p.m.body),
+          ),
           'occurredAtMs': occurredMs,
           'tzOffsetMin': offsetMin,
           'dateRead': g.dateRead,
@@ -1457,6 +1463,10 @@ final class IngestRawMessages {
       b.categorizer,
       merchantRaw: merchantRaw,
       merchantNorm: merchantNorm,
+      eventCategoryId: genericEventCategoryOf(
+        g.event,
+        instapay: hasInstapayCue(p.m.body),
+      ),
     );
     final rawId = await _insertRaw(p, status: RawStatus.parsed);
     final txnId = _newId();
@@ -1658,6 +1668,7 @@ final class IngestRawMessages {
     String? merchantNorm,
     String? counterpartyKind,
     String? counterpartyValue,
+    String? eventCategoryId,
   }) async {
     final d = await categorizer.categorize(
       categorizeInputFor(
@@ -1665,6 +1676,7 @@ final class IngestRawMessages {
         merchantNorm: merchantNorm,
         counterpartyKind: counterpartyKind,
         counterpartyValue: counterpartyValue,
+        eventCategoryId: eventCategoryId,
       ),
     );
     return _Category(

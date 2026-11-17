@@ -18,7 +18,29 @@ class CycleCacheInvalidator {
 
   /// `TransactionsChanged`: the listed cycles, every account filter.
   Future<int> onTransactionsChanged(TransactionsChanged e) =>
-      e.cycleKeys.isEmpty ? Future.value(0) : _cache.deleteCycles(e.cycleKeys);
+      _drop(e.cycleKeys);
+
+  /// Drops [keys]; when the book holds cash rows (CAT-cash) also every
+  /// later cycle, because the unspent-cash pool carries over.
+  Future<int> _drop(Iterable<String> keys) async {
+    if (keys.isEmpty) return 0;
+    if (await _hasCashRows()) {
+      final first = keys.reduce((a, b) => a.compareTo(b) <= 0 ? a : b);
+      return _cache.deleteFrom(first);
+    }
+    return _cache.deleteCycles(keys);
+  }
+
+  Future<bool> _hasCashRows() async =>
+      (await _db
+              .customSelect(
+                'SELECT 1 FROM transactions t '
+                'JOIN accounts a ON a.id = t.account_id '
+                "WHERE a.kind = 'cash' OR t.category_id = 'sys:cash' LIMIT 1",
+                readsFrom: {_db.transactions, _db.accounts},
+              )
+              .get())
+          .isNotEmpty;
 
   /// Subscribes to the events; a failed delete is not swallowed silently:
   /// it goes to the zone like any listener error.
@@ -68,6 +90,6 @@ class CycleCacheInvalidator {
         .get();
     add(links, 'eat', 'eoff');
     add(links, 'sat', 'soff');
-    return keys.isEmpty ? 0 : _cache.deleteCycles(keys);
+    return _drop(keys);
   }
 }

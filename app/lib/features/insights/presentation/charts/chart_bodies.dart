@@ -329,6 +329,8 @@ class DonutBody extends ConsumerWidget {
               ],
             ),
           ),
+        if (donut.coveredEarlier != null && donut.coveredEarlier!.minor > 0)
+          _CoveredEarlierNote(amount: donut.coveredEarlier!),
       ],
     );
     // Large text: stack the legend under the ring so nothing is squeezed.
@@ -427,7 +429,29 @@ class DonutRows extends ConsumerWidget {
               ),
             ),
           ],
+          if (donut.coveredEarlier != null && donut.coveredEarlier!.minor > 0)
+            _CoveredEarlierNote(amount: donut.coveredEarlier!),
         ],
+      ),
+    );
+  }
+}
+
+/// Muted legend note: cash payments covered by an earlier withdrawal. Not a
+/// slice and not part of the donut total.
+class _CoveredEarlierNote extends ConsumerWidget {
+  const _CoveredEarlierNote({required this.amount});
+  final Money amount;
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final c = ZColors.of(context);
+    final l = AppLocalizations.of(context);
+    return Padding(
+      padding: const EdgeInsetsDirectional.symmetric(vertical: ZSpacing.sm),
+      child: Text(
+        l.insightsCoveredEarlier(chartMoney(ref, context, amount)),
+        style: ZType.caption.copyWith(color: c.textMuted),
       ),
     );
   }

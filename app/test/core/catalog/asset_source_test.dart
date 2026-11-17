@@ -21,6 +21,6 @@ void main() {
       verifySeedSignature(json, sig, bundledSeedKeys(), allowDevKeys: true),
       's0000a',
     );
-    expect(CatalogSeed.decode(json).categories.length, 14);
+    expect(CatalogSeed.decode(json).categories.length, 16);
   });
 }

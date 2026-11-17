@@ -1,5 +1,6 @@
 import '../money/currency.dart';
 import '../money/money.dart';
+import 'cash_pool.dart';
 import 'civil_date.dart';
 import 'payday_schedule.dart';
 
@@ -20,6 +21,7 @@ final class CycleTxn {
     this.isInternal = false,
     this.isDeleted = false,
     this.categoryId,
+    this.cashCoveredMinor = 0,
   });
 
   final String id;
@@ -30,6 +32,12 @@ final class CycleTxn {
   final Money amount;
   final String? categoryId;
   final CivilDate date;
+
+  /// CAT-cash: the part of this cash payment the pool of withdrawn cash
+  /// covers (minor units of [amount]'s currency; computed by the data layer
+  /// from every period). It is not new spending and moves from the `cash`
+  /// category to [categoryId].
+  final int cashCoveredMinor;
 }
 
 /// A refund / reimbursement link. [isActive]: the source row is live and
@@ -67,10 +75,19 @@ final class CycleTotals {
   final Money pendingSpend;
 
   /// Net spend per category id, `'_none'` for uncategorized; sums to
-  /// [spend].
+  /// [spend] plus [coveredEarlier].
   final Map<String, int> byCategoryMinor;
 
   static const String noCategory = '_none';
+
+  /// CAT-cash: cash payments covered by cash withdrawn in an EARLIER cycle.
+  /// Their categories show the amount, [spend] leaves them out, and the
+  /// `cash` category floors at zero here (never negative). Derived, so a
+  /// cached cycle carries it too.
+  Money get coveredEarlier {
+    final sum = byCategoryMinor.values.fold<int>(0, (a, b) => a + b);
+    return Money(currency, sum > spend.minor ? sum - spend.minor : 0);
+  }
 }
 
 const Set<CycleDirection> _spendDirections = {
@@ -91,9 +108,17 @@ bool _counts(CycleTxn t) =>
 
 /// A spend row with its net amount (offsets deducted).
 final class _NetSpend {
-  _NetSpend(this.txn, this.net);
+  _NetSpend(this.txn, this.net, this.covered);
   final CycleTxn txn;
+
+  /// Net of offsets, before the cash cover.
   final Money net;
+
+  /// The cash cover, clamped to [net]; zero for a non-payment.
+  final Money covered;
+
+  /// What this row adds to the cycle's spend.
+  Money get counted => net - covered;
 }
 
 Map<String, Money> _linkedByExpense(Iterable<CycleOffset> offsets) {
@@ -117,11 +142,16 @@ List<_NetSpend> _netSpend(
       if (cycle.contains(t.date) &&
           _counts(t) &&
           _spendDirections.contains(t.direction))
-        _NetSpend(
-          t,
-          linked[t.id] == null ? t.amount : t.amount - linked[t.id]!,
-        ),
+        _netOf(t, linked[t.id]),
   ];
+}
+
+_NetSpend _netOf(CycleTxn t, Money? linked) {
+  final net = linked == null ? t.amount : t.amount - linked;
+  final cover = t.cashCoveredMinor <= 0
+      ? 0
+      : (t.cashCoveredMinor < net.minor ? t.cashCoveredMinor : net.minor);
+  return _NetSpend(t, net, Money(t.amount.currency, cover < 0 ? 0 : cover));
 }
 
 /// Totals of [cycle] per billed currency (design note §3). [txns] may
@@ -147,13 +177,25 @@ Map<Currency, CycleTotals> aggregateCycle(
   for (final s in _netSpend(cycle, txns, offsets)) {
     final c = s.txn.amount.currency;
     ensure(c);
-    spend[c] = spend[c]! + s.net;
+    spend[c] = spend[c]! + s.counted;
     if (s.txn.status == CycleStatus.pending) {
-      pending[c] = pending[c]! + s.net;
+      pending[c] = pending[c]! + s.counted;
     }
     final k = s.txn.categoryId ?? CycleTotals.noCategory;
     final m = byCat[c]!;
     m[k] = (Money(c, m[k] ?? 0) + s.net).minor;
+    if (s.covered.isPositive) {
+      // The covered part was counted as `cash` when withdrawn.
+      m[kCashCategoryId] =
+          (Money(c, m[kCashCategoryId] ?? 0) - s.covered).minor;
+    }
+  }
+
+  // Cash covered by an earlier cycle's withdrawal: the Cash category never
+  // goes negative (the rest is `coveredEarlier`).
+  for (final m in byCat.values) {
+    final cash = m[kCashCategoryId];
+    if (cash != null && cash < 0) m[kCashCategoryId] = 0;
   }
 
   final fundedBySource = <String, Money>{};
@@ -198,7 +240,7 @@ Map<int, int> netSpendByDay(
   for (final s in _netSpend(cycle, txns, offsets)) {
     if (s.txn.amount.currency != currency) continue;
     final d = cycle.dayNumber(s.txn.date);
-    out[d] = (Money(currency, out[d] ?? 0) + s.net).minor;
+    out[d] = (Money(currency, out[d] ?? 0) + s.counted).minor;
   }
   return out;
 }
