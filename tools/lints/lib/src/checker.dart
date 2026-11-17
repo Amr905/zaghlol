@@ -337,11 +337,41 @@ class _RuleVisitor extends RecursiveAstVisitor<void> {
 
   // Rule 3: no_print_outside_debug.
 
+  // FU-032: also `core.print`, `developer.log`, `stdout.write*` and
+  // tear-offs such as `list.forEach(print)`.
+  static const Set<String> _sinkTargets = {
+    'core',
+    'developer',
+    'dev',
+    'stdout',
+    'stderr',
+  };
+  static const Set<String> _sinkMethods = {
+    'print',
+    'debugPrint',
+    'log',
+    'write',
+    'writeln',
+    'writeAll',
+    'writeCharCode',
+    'add',
+    'addError',
+  };
+
   void _checkPrint(MethodInvocation node) {
+    if (scope.isDebugOnly) return;
     final name = node.methodName.name;
-    if (!scope.isDebugOnly &&
-        node.target == null &&
-        (name == 'print' || name == 'debugPrint')) {
+    final target = node.target;
+    final bare = target == null && (name == 'print' || name == 'debugPrint');
+    final sink =
+        target is SimpleIdentifier &&
+        _sinkTargets.contains(target.name) &&
+        _sinkMethods.contains(name) &&
+        // `core.add`/`dev.add` are not sinks; only stdout/stderr take add.
+        (name != 'add' && name != 'addError' ||
+            target.name == 'stdout' ||
+            target.name == 'stderr');
+    if (bare || sink) {
       _report(
         ruleNoPrintOutsideDebug,
         node.methodName.offset,
@@ -350,7 +380,58 @@ class _RuleVisitor extends RecursiveAstVisitor<void> {
     }
   }
 
+  @override
+  void visitSimpleIdentifier(SimpleIdentifier node) {
+    // A tear-off: `print` / `debugPrint` used as a value (argument,
+    // initializer or assignment), not called and not a declaration.
+    final name = node.name;
+    if (!scope.isDebugOnly && (name == 'print' || name == 'debugPrint')) {
+      final parent = node.parent;
+      final asValue =
+          parent is ArgumentList ||
+          parent is NamedExpression ||
+          parent is VariableDeclaration && parent.initializer == node ||
+          parent is AssignmentExpression && parent.rightHandSide == node;
+      if (asValue) {
+        _report(
+          ruleNoPrintOutsideDebug,
+          node.offset,
+          '$name is only allowed in debug-only files.',
+        );
+      }
+    }
+    super.visitSimpleIdentifier(node);
+  }
+
   // Rule 4: safe_exception_required.
+
+  // FU-033: a direct `throw FormatException(..)` (or any platform exception
+  // type) in the parsing and db layers.
+  @override
+  void visitThrowExpression(ThrowExpression node) {
+    final e = node.expression;
+    // Unresolved parsing yields a MethodInvocation for `Type(..)`.
+    final String? type = switch (e) {
+      InstanceCreationExpression() => stripGenerics(
+        e.constructorName.type.toSource(),
+      ),
+      MethodInvocation(target: null) => e.methodName.name,
+      _ => null,
+    };
+    if (scope.inParsingOrDbLayer && type != null) {
+      // Errors (ArgumentError, StateError, ...) are programmer-error asserts and
+      // carry no stored data; only Exception types are in scope.
+      if (type == 'FormatException' || type == 'Exception') {
+        _report(
+          ruleSafeExceptionRequired,
+          node.offset,
+          'Throw a SafeException subtype in the parsing and db layers, '
+          'not $type.',
+        );
+      }
+    }
+    super.visitThrowExpression(node);
+  }
 
   @override
   void visitClassDeclaration(ClassDeclaration node) {

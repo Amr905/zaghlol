@@ -20,3 +20,9 @@ class GoodIndirectException extends GoodParseException {
 }
 
 class NotAnException {}
+
+void throwsDirectly(int x) {
+  // expect_lint: safe_exception_required
+  if (x == 1) throw FormatException('bad');
+  if (x == 2) throw const GoodParseException();
+}

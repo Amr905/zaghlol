@@ -3270,7 +3270,7 @@ class AppLocalizationsEn extends AppLocalizations {
   ) {
     String _temp0 = intl.Intl.selectLogic(state, {
       'short':
-          'Trim $category by $target next cycle and you\'ll finish in the black.',
+          'Trimming $category by $target next cycle would help close the gap.',
       'other':
           'Move at least $target of this surplus into savings before it gets spent.',
     });
@@ -6592,7 +6592,7 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get privacyDeleteBody =>
-      'We\'ll delete all your transactions, settings and security keys from this phone. There\'s no undo.';
+      'We\'ll delete all your transactions and settings from this phone. There\'s no undo.';
 
   @override
   String privacyDeleteLastBackup(String date) {
@@ -6637,6 +6637,10 @@ class AppLocalizationsEn extends AppLocalizations {
   @override
   String get privacyDeleteBackupsKept =>
       'Your backups on Google Drive or iCloud stay there. Delete them from there if you want.';
+
+  @override
+  String get privacyDeleteStoreAccountKept =>
+      'Your store purchase and your account aren\'t touched.';
 
   @override
   String get privacyDeleteFailed =>

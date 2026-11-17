@@ -9,6 +9,7 @@ import 'dart:convert';
 import 'package:drift/drift.dart';
 
 import '../app_database.dart';
+import '../db_errors.dart';
 import 'write_errors.dart';
 
 /// `review_items.kind` values.
@@ -124,5 +125,5 @@ Map<String, Object?>? reviewPayloadOf(ReviewItemRow row) {
   } on FormatException {
     // fall through
   }
-  throw const FormatException('REVIEW_PAYLOAD_CORRUPT');
+  throw DbCorruptException('REVIEW_PAYLOAD_CORRUPT');
 }

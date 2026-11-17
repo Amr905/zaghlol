@@ -101,8 +101,12 @@ final housekeepingProvider = Provider<Housekeeping>((ref) {
   Future<AppDatabase> db() => ref.read(appDatabaseProvider.future);
   Future<RecurringRepository> recurring() =>
       ref.read(recurringRepositoryProvider.future);
-  return Housekeeping(
-    gate: ref.watch(ingestionPauseGateProvider),
+  // `read`, not `watch`: a gate change must not build a second runner (it
+  // would lose the single-flight and throttle state).
+  final gate = ref.read(ingestionPauseGateProvider);
+  bool restoreWaiting() => gate.paused;
+  final hk = Housekeeping(
+    gate: gate,
     nowMs: () => ref.read(clockProvider)().toUtc().millisecondsSinceEpoch,
     steps: [
       (
@@ -124,6 +128,7 @@ final housekeepingProvider = Provider<Housekeeping>((ref) {
           );
           await sweepDanglingLinks(
             d,
+            shouldStop: restoreWaiting,
             onPairRemoved: (id) async {
               await pairing.onRemoved(id);
             },
@@ -158,6 +163,7 @@ final housekeepingProvider = Provider<Housekeeping>((ref) {
           final today = localToday(now, ref.read(localZoneProvider));
           await sendDueReminders(
             repository: await recurring(),
+            shouldStop: restoreWaiting,
             notifications: await ref.read(notificationServiceProvider.future),
             buildText: (r, base) {
               final days = r.dueDate.difference(today);
@@ -204,12 +210,15 @@ final housekeepingProvider = Provider<Housekeeping>((ref) {
             db: d,
             cycles: cycles,
             cycle: schedule.cycleOn(cycles.today),
+            schedule: schedule,
             service: await _budgetAlertService(ref, d),
           );
         },
       ),
     ],
   );
+  ref.onDispose(hk.dispose);
+  return hk;
 }, name: 'housekeepingProvider');
 
 /// After an ingest batch or a manual add: the duplicate check, then the
@@ -225,13 +234,21 @@ final afterIngestProvider = Provider<Future<void> Function()>((ref) {
   };
 }, name: 'afterIngestProvider');
 
-/// Start and resume (the "daily" trigger): alerts as before, then every
-/// follow-up job, not throttled.
-final resumeJobsProvider = Provider<Future<void> Function()>((ref) {
-  return () async {
+/// Start and resume (the "daily" trigger): alerts as before, then the
+/// follow-up jobs. Cold start forces the run; a resume is throttled (OS
+/// dialogs, the share sheet and biometric prompts all resume the app) and
+/// gets no trailing run.
+const resumeJobsInterval = Duration(minutes: 5);
+
+final resumeJobsProvider = Provider<Future<void> Function({bool coldStart})>((
+  ref,
+) {
+  return ({bool coldStart = false}) async {
     await ref.read(alertsResumeProvider)();
     try {
-      await ref.read(housekeepingProvider).run(force: true);
+      await ref
+          .read(housekeepingProvider)
+          .run(force: coldStart, interval: resumeJobsInterval, trailing: false);
     } on Object {
       // Best effort.
     }

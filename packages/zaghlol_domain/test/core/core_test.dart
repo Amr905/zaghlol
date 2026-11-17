@@ -108,10 +108,10 @@ void main() {
       );
     });
 
-    test('toString shows type and code only', () {
+    test('toString shows the constant code only (no runtimeType)', () {
       expect(
         const DbFailure(DbFailureKind.writeFailed).toString(),
-        'DbFailure(DB_WRITE_FAILED)',
+        'Failure(DB_WRITE_FAILED)',
       );
     });
   });

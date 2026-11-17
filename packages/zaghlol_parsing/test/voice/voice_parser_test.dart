@@ -226,6 +226,11 @@ void main() {
       expect(items.first.amount, isNull);
     });
 
+    test('FU-118: ألف ألف is one million', () {
+      expect(minor('دفعت ألف ألف جنيه'), 100000000);
+      expect(parse('دفعت ألف ألف جنيه').length, 1);
+    });
+
     test('T109-1: fraction before million scales the million', () {
       expect(minor('دفعت نص مليون جنيه عربية'), 50000000);
       expect(minor('اشتريت ربع مليون شقة'), 25000000);

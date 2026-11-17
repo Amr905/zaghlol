@@ -377,6 +377,8 @@ class _DeleteDialogState extends State<_DeleteDialog> {
             Text(widget.lastBackupText),
             const SizedBox(height: ZSpacing.sm),
             Text(t.privacyDeleteBackupsKept),
+            const SizedBox(height: ZSpacing.sm),
+            Text(t.privacyDeleteStoreAccountKept),
             if (widget.seatWarningText case final seat?) ...[
               const SizedBox(height: ZSpacing.sm),
               Text(seat, key: const ValueKey('privacyDeleteSeatWarning')),

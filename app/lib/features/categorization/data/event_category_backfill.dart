@@ -111,12 +111,17 @@ Future<int?> backfillEventCategories(
   } on Object {
     return null;
   }
-  await db
+  Future<void> mark() => db
       .into(db.dbMeta)
       .insert(
         DbMetaCompanion.insert(key: eventCategoryBackfillKey, value: '1'),
         mode: InsertMode.insertOrReplace,
       );
+  try {
+    await (gate == null ? mark() : gate.guard(mark));
+  } on Object {
+    return null; // gate closed: the marker stays unset, a rerun is idempotent
+  }
   return changed;
 }
 

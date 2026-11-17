@@ -14,7 +14,7 @@ sealed class Failure {
   String get code;
 
   @override
-  String toString() => '$runtimeType($code)';
+  String toString() => 'Failure($code)'; // not runtimeType: obfuscated in release (FU-038)
 }
 
 /// Why a message could not be parsed into a transaction.

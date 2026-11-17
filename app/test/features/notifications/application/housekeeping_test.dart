@@ -1,7 +1,10 @@
 // FU-253: the follow-up jobs after ingest / at start. Fails without the
 // orchestrator (nothing ran them) and without the restore-gate check.
+import 'dart:async';
+
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:zaghlol/features/capture/application/capture_providers.dart';
 import 'package:zaghlol/features/notifications/application/housekeeping.dart';
 import 'package:zaghlol/features/notifications/application/housekeeping_providers.dart';
 import 'package:zaghlol/features/notifications/application/notification_providers.dart';
@@ -115,4 +118,112 @@ void main() {
       expect(order, ['dup', 'jobs']);
     },
   );
+
+  group('FU-255', () {
+    test('a throttled call gets one trailing run at the window end', () async {
+      final fired = <void Function()>[];
+      final delays = <Duration>[];
+      final h = Housekeeping(
+        steps: [step('a')],
+        nowMs: () => now,
+        schedule: (d, f) {
+          delays.add(d);
+          fired.add(f);
+          return Timer(const Duration(days: 1), () {});
+        },
+      );
+      await h.run();
+      now += 20000;
+      expect((await h.run()).skipped, 'throttled');
+      expect((await h.run()).skipped, 'throttled'); // still one trailing
+      expect(fired, hasLength(1));
+      expect(delays.single, const Duration(seconds: 40));
+      now += 40000;
+      fired.single();
+      await Future<void>.delayed(Duration.zero);
+      expect(calls, ['a', 'a']);
+    });
+
+    test('a call during a run also gets a trailing run', () async {
+      final fired = <void Function()>[];
+      final h = Housekeeping(
+        steps: [step('a')],
+        nowMs: () => now,
+        schedule: (d, f) {
+          fired.add(f);
+          return Timer(const Duration(days: 1), () {});
+        },
+      );
+      final first = h.run();
+      expect((await h.run()).skipped, 'busy');
+      await first;
+      expect(fired, hasLength(1));
+    });
+
+    test('no trailing run when asked not to, or after dispose', () async {
+      final fired = <void Function()>[];
+      final h = Housekeeping(
+        steps: [step('a')],
+        nowMs: () => now,
+        schedule: (d, f) {
+          fired.add(f);
+          return Timer(const Duration(days: 1), () {});
+        },
+      );
+      await h.run();
+      await h.run(trailing: false);
+      expect(fired, isEmpty);
+      h.dispose();
+      await h.run(); // throttled, but disposed
+      expect(fired, isEmpty);
+    });
+
+    test('a per-call interval throttles a resume for longer', () async {
+      final h = Housekeeping(steps: [step('a')], nowMs: () => now);
+      await h.run();
+      now += 120000; // past 60 s, inside 5 min
+      expect(
+        (await h.run(
+          interval: const Duration(minutes: 5),
+          trailing: false,
+        )).skipped,
+        'throttled',
+      );
+    });
+
+    test('resume is throttled; cold start is forced', () async {
+      var runs = 0;
+      final h = Housekeeping(
+        steps: [(name: 'x', run: () async => runs++)],
+        nowMs: () => now,
+      );
+      final c = ProviderContainer(
+        overrides: [
+          alertsResumeProvider.overrideWithValue(() async {}),
+          housekeepingProvider.overrideWithValue(h),
+        ],
+      );
+      addTearDown(c.dispose);
+      final resume = c.read(resumeJobsProvider);
+      await resume(coldStart: true);
+      for (var i = 0; i < 5; i++) {
+        now += 10000;
+        await resume();
+      }
+      expect(runs, 1);
+      now += resumeJobsInterval.inMilliseconds;
+      await resume();
+      expect(runs, 2);
+      await resume(coldStart: true);
+      expect(runs, 3);
+    });
+
+    test('a gate change does not build a second runner', () async {
+      final c = ProviderContainer();
+      addTearDown(c.dispose);
+      final first = c.read(housekeepingProvider);
+      c.invalidate(ingestionPauseGateProvider);
+      expect(identical(c.read(housekeepingProvider), first), isTrue);
+    });
+  });
 }

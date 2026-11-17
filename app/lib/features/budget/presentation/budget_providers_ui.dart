@@ -8,6 +8,7 @@ import '../../../core/db/app_database_providers.dart';
 import '../../../core/db/daos/budgets_dao.dart';
 import '../application/budget_providers.dart';
 import '../application/cycle_app_wiring.dart';
+import '../application/rollover_carry.dart';
 import '../data/budget_mapper.dart';
 import 'budget_view.dart';
 
@@ -72,11 +73,25 @@ final budgetScreenDataProvider = FutureProvider<BudgetScreenData>((ref) async {
   }
   final totals = await repo.totals(cycle);
   final basis = await repo.cycleBudgets();
+  final specs = [
+    for (final r in rows)
+      if (tryBudgetSpecOf(r) != null) tryBudgetSpecOf(r)!,
+  ];
+  final carries = await rolloverCarries(
+    cycles: repo,
+    schedule: schedule,
+    cycle: cycle,
+    specs: specs,
+  );
   return buildBudgetScreenData(
     cycle: cycle,
     today: today,
     totals: totals,
-    basis: basis,
+    basis: {
+      for (final e in basis.entries)
+        e.key: e.value + basisCarry(e.key, specs, carries),
+    },
+    carries: carries,
     budgets: [
       for (final r in rows)
         if (r.categoryId != null && tryBudgetSpecOf(r) != null)

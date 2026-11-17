@@ -10,6 +10,7 @@ import 'package:drift/drift.dart';
 import 'package:zaghlol_domain/zaghlol_domain.dart';
 
 import '../app_database.dart';
+import '../db_errors.dart';
 import 'write_errors.dart';
 
 class CycleSummariesDao {
@@ -130,11 +131,11 @@ Map<String, Money> cycleSpendByCategoryOf(CycleSummaryRow row) {
   try {
     decoded = jsonDecode(row.byCategory);
   } on FormatException {
-    throw const FormatException('CYCLE_SUMMARY_CORRUPT');
+    throw DbCorruptException('CYCLE_SUMMARY_CORRUPT');
   }
   if (decoded is! Map<String, Object?> ||
       decoded.values.any((v) => v is! int)) {
-    throw const FormatException('CYCLE_SUMMARY_CORRUPT');
+    throw DbCorruptException('CYCLE_SUMMARY_CORRUPT');
   }
   return {
     for (final e in decoded.entries)

@@ -1322,7 +1322,7 @@
       }
     }
   },
-  "insightsExplainCashFlowTip": "{state, select, short{Trim {category} by {target} next cycle and you'll finish in the black.} other{Move at least {target} of this surplus into savings before it gets spent.}}",
+  "insightsExplainCashFlowTip": "{state, select, short{Trimming {category} by {target} next cycle would help close the gap.} other{Move at least {target} of this surplus into savings before it gets spent.}}",
   "@insightsExplainCashFlowTip": {
     "description": "S · state, category = largest category, target",
     "placeholders": {
@@ -6036,7 +6036,7 @@
   "@privacyDeleteTitle": {
     "description": "T"
   },
-  "privacyDeleteBody": "We'll delete all your transactions, settings and security keys from this phone. There's no undo.",
+  "privacyDeleteBody": "We'll delete all your transactions and settings from this phone. There's no undo.",
   "@privacyDeleteBody": {
     "description": "S"
   },
@@ -6092,6 +6092,10 @@
   "privacyDeleteBackupsKept": "Your backups on Google Drive or iCloud stay there. Delete them from there if you want.",
   "@privacyDeleteBackupsKept": {
     "description": "N · delete-everything confirm: backups in the user's own cloud are not touched"
+  },
+  "privacyDeleteStoreAccountKept": "Your store purchase and your account aren't touched.",
+  "@privacyDeleteStoreAccountKept": {
+    "description": "N · delete-everything confirm: the store purchase and the account are not affected"
   },
   "privacyDeleteFailed": "Couldn't delete everything. Open the app again and we'll finish.",
   "@privacyDeleteFailed": {

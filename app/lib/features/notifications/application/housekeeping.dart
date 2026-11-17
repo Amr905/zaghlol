@@ -10,6 +10,8 @@
 // others, and nothing here deletes a user transaction. Every step is
 // idempotent by itself. Nothing here logs.
 
+import 'dart:async';
+
 import '../../../ingestion/ingestion_pause_gate.dart';
 
 /// One named, idempotent job.
@@ -36,6 +38,7 @@ final class Housekeeping {
     required this.nowMs,
     this.gate,
     this.minInterval = const Duration(seconds: 60),
+    this.schedule = Timer.new,
   });
 
   final List<HousekeepingStep> steps;
@@ -43,11 +46,47 @@ final class Housekeeping {
   final IngestionPauseGate? gate;
   final Duration minInterval;
 
-  bool _running = false;
-  int? _lastStartMs;
+  /// Timer factory; a test replaces it to fire the trailing run by hand.
+  final Timer Function(Duration, void Function()) schedule;
 
-  Future<HousekeepingReport> run({bool force = false}) async {
-    if (_running) return const HousekeepingReport(skipped: 'busy');
+  bool _running = false;
+  bool _disposed = false;
+  int? _lastStartMs;
+  Timer? _trailing;
+
+  /// Cancels the trailing run (the provider is going away).
+  void dispose() {
+    _disposed = true;
+    _trailing?.cancel();
+    _trailing = null;
+  }
+
+  // A trigger that was dropped (throttled or busy) gets one more run when
+  // the window ends, so a batch committed inside it is not left waiting for
+  // the next trigger. At most one trailing run is pending.
+  void _scheduleTrailing(Duration window) {
+    if (_disposed || _trailing != null) return;
+    _trailing = schedule(window, () {
+      _trailing = null;
+      if (_disposed) return;
+      unawaited(run(force: true, trailing: false).catchError(_ignore));
+    });
+  }
+
+  static HousekeepingReport _ignore(Object _) => const HousekeepingReport();
+
+  /// [interval] overrides [minInterval] for this call (resume uses a longer
+  /// one). [trailing] false drops a throttled call without a later run.
+  Future<HousekeepingReport> run({
+    bool force = false,
+    Duration? interval,
+    bool trailing = true,
+  }) async {
+    final window = interval ?? minInterval;
+    if (_running) {
+      if (!force && trailing) _scheduleTrailing(minInterval);
+      return const HousekeepingReport(skipped: 'busy');
+    }
     if (gate?.paused ?? false) {
       return const HousekeepingReport(skipped: 'paused');
     }
@@ -56,7 +95,12 @@ final class Housekeeping {
     if (!force &&
         last != null &&
         now - last >= 0 &&
-        now - last < minInterval.inMilliseconds) {
+        now - last < window.inMilliseconds) {
+      if (trailing) {
+        _scheduleTrailing(
+          Duration(milliseconds: window.inMilliseconds - (now - last)),
+        );
+      }
       return const HousekeepingReport(skipped: 'throttled');
     }
     _running = true;

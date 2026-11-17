@@ -69,6 +69,10 @@ void main() {
         );
         expect(find.byKey(_seatKey), findsOneWidget);
         expect(find.text(t.goldSeatDeleteWarning('other', '')), findsOneWidget);
+        // The store/account line must not promise Gold next to the warning.
+        expect(find.text(t.privacyDeleteStoreAccountKept), findsOneWidget);
+        expect(t.privacyDeleteStoreAccountKept, isNot(contains('Gold stays')));
+        expect(t.privacyDeleteStoreAccountKept, isNot(contains('الجولد فاضل')));
         expect(
           Directionality.of(tester.element(find.byKey(_seatKey))),
           locale.languageCode == 'ar' ? TextDirection.rtl : TextDirection.ltr,
