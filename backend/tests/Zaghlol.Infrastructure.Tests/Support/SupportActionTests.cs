@@ -293,6 +293,9 @@ public sealed class SupportActionTests(SupportActionFixture fixture) : IClassFix
 
         Assert.Equal(SupportActionStatus.Conflict, result.Status);
         Assert.Equal(account, (await PurchaseAsync(p)).Account);
+        // FU (batch-29 T-186 minor 1): refused in phase 1, so no store call.
+        Assert.Equal(0, store.Calls);
+        Assert.Equal(("refused", "not_run"), ((await AuditAsync(p)).Last().Outcome, (await AuditAsync(p)).Last().OwnershipOutcome));
     }
 
     [Fact]
@@ -439,6 +442,28 @@ public sealed class SupportActionTests(SupportActionFixture fixture) : IClassFix
 
         await AgeFreezeAsync(p);
         Assert.True((await Service.UnfreezeAsync(Unfreeze(lead, p), None)).Value!.Unfrozen);
+    }
+
+    [Fact]
+    public async Task TheUnfreeze24HourEdgeUsesTheDatabaseClockNotTheAppClock()
+    {
+        var (agent, p, holder, claimant) = await ScenarioAsync();
+        var first = await Service.MoveSeatAsync(Move(agent, p, claimant, SupportReason.Other), None);
+        await Service.MoveSeatAsync(Correction(agent, p, holder, first.Value!.AuditId), None);
+        var lead = await fixture.OperatorAsync("support_lead");
+        var skewed = fixture.Service(store, alerts, new SkewedTime(TimeSpan.FromHours(48)));
+        var calls = store.Calls;
+
+        var result = await skewed.UnfreezeAsync(Unfreeze(lead, p), None);
+
+        Assert.Equal(SupportActionStatus.Conflict, result.Status);
+        Assert.Equal(calls, store.Calls);
+        Assert.NotNull((await PurchaseAsync(p)).FrozenUntil);
+    }
+
+    private sealed class SkewedTime(TimeSpan skew) : TimeProvider
+    {
+        public override DateTimeOffset GetUtcNow() => base.GetUtcNow() + skew;
     }
 
     [Fact]

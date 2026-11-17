@@ -52,11 +52,21 @@ final class GoldPlanOffer {
   final String storePrice;
 }
 
+/// How long the paywall waits for the store before it shows "prices failed"
+/// (explorer finding 16: offline, the plans area stayed on the placeholders).
+const goldStoreTimeout = Duration(seconds: 8);
+
+/// Fails with [TimeoutException] when the store does not answer in time.
+Future<T> withStoreTimeout<T>(Future<T> query) =>
+    query.timeout(goldStoreTimeout);
+
 /// The offers from the store. Throws when the store has none (prices failed).
 final goldOffersProvider = FutureProvider.autoDispose<List<GoldPlanOffer>>((
   ref,
 ) async {
-  final r = await InAppPurchase.instance.queryProductDetails(GoldProducts.all);
+  final r = await withStoreTimeout(
+    InAppPurchase.instance.queryProductDetails(GoldProducts.all),
+  );
   if (r.error != null) throw StateError('store');
   final out = <GoldPlanOffer>[];
   for (final p in GoldPlan.values) {

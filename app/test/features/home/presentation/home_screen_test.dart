@@ -1,10 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:zaghlol/core/brand/institution_brand.dart';
+import 'package:zaghlol/features/accounts/domain/account.dart';
 import 'package:zaghlol/core/l10n/card_number.dart';
 import 'package:zaghlol/core/ui/z_banner.dart';
 import 'package:zaghlol/features/home/presentation/home_screen.dart';
 import 'package:zaghlol/features/home/presentation/home_widgets.dart'
-    show HomeKpis;
+    show HomeHero, HomeKpis;
 
 import 'home_harness.dart';
 
@@ -278,5 +280,56 @@ void main() {
     expect(find.byKey(const ValueKey('home-error')), findsOneWidget);
     expect(find.byType(ZBanner), findsOneWidget);
     expect(find.text('Try again'), findsOneWidget);
+  });
+
+  testWidgets('feed row account line falls back to the bank acronym', (
+    tester,
+  ) async {
+    tester.view.physicalSize = const Size(320, 640);
+    tester.view.devicePixelRatio = 1;
+    addTearDown(tester.view.reset);
+    final long = Account(
+      id: 'a1',
+      kind: AccountKind.values.first,
+      label: 'البنك الأهلي المصري للتجارة والاستثمار',
+      institutionCode: 'nbe',
+      last4: '5075',
+      defaultCurrency: egp,
+      isHidden: false,
+      isDefaultCash: false,
+      createdAt: DateTime.utc(2026),
+      updatedAt: DateTime.utc(2026),
+    );
+    await pumpHome(
+      tester,
+      locale: _ar,
+      platform: TargetPlatform.android,
+      textScale: 1.3,
+      value: model(),
+      accounts: [long],
+      extraOverrides: [
+        institutionBrandsProvider.overrideWith(
+          (ref) async => {'nbe': const InstitutionBrand(acronym: 'NBE')},
+        ),
+      ],
+    );
+    await tester.pumpAndSettle();
+    expect(find.textContaining('NBE'), findsWidgets);
+    expect(find.textContaining('للتجارة'), findsNothing);
+  });
+
+  testWidgets('pager is sized to its content, not a fixed height', (
+    tester,
+  ) async {
+    await pumpHome(
+      tester,
+      locale: _en,
+      platform: TargetPlatform.android,
+      value: model(currencies: [figs(egp), figs(usd)]),
+    );
+    await tester.pumpAndSettle();
+    final pager = tester.getSize(find.byKey(const ValueKey('home-pager')));
+    final hero = tester.getSize(find.byType(HomeHero).first);
+    expect(pager.height, closeTo(hero.height, 0.5));
   });
 }

@@ -330,7 +330,6 @@ alias,,,,,,,,BTC Gold,,btc gold,prefix,,,
 alias,,,,,,,,SAM Gold,,sam gold,prefix,,,
 alias,,,,,,,,Selema Gold,,selema gold,prefix,,,
 alias,,,,,,,,Anthropic,,anthropic,prefix,,,
-alias,,,,,,,,Anthropic,,claude,prefix,,,
 alias,,,,,,,,Anthropic,,claude ai,prefix,,,
 alias,,,,,,,,Anthropic,,klwd,prefix,,,
 alias,,,,,,,,ChatGPT,,chatgpt,prefix,,,
@@ -427,7 +426,7 @@ keyword,,,,,,,,,bills,,,كهرباء,ar,60
 keyword,,,,,,,,,education,,,كورس,ar,60
 keyword,,,,,,,,,shopping,,,لبس,ar,60
 keyword,,,,,,,,,groceries,,,لحوم,ar,60
-keyword,,,,,,,,,transport,,,محطه,ar,60
+keyword,,,,,,,,,transport,,,محطه وقود,ar,60
 keyword,,,,,,,,,groceries,,,مخبوزات,ar,60
 keyword,,,,,,,,,education,,,مدرسه,ar,60
 keyword,,,,,,,,,income,,,مرتب,ar,60
@@ -478,7 +477,7 @@ keyword,,,,,,,,,savings,,,emergency fund,en,60
 keyword,,,,,,,,,family_giving,,,family allowance,en,60
 keyword,,,,,,,,,dining,,,fast food,en,60
 keyword,,,,,,,,,entertainment,,,flight,en,60
-keyword,,,,,,,,,dining,,,food,en,60
+keyword,,,,,,,,,dining,,,food delivery,en,60
 keyword,,,,,,,,,income,,,freelance,en,60
 keyword,,,,,,,,,groceries,,,fruit,en,60
 keyword,,,,,,,,,transport,,,fuel,en,60

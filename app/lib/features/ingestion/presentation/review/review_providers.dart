@@ -183,7 +183,7 @@ final class _LiveActions implements ReviewActions {
       return false;
     }
     final g = GenericSuggestion.fromPayload(_payload(row));
-    if (g == null || !(g.oneTap || (keep && g.keepable))) return false;
+    if (g == null || !g.canSave(keep: keep)) return false;
     final accounts = await _ref.read(accountsRepositoryProvider.future);
     final resolved = await accounts.resolve(
       AccountHint(

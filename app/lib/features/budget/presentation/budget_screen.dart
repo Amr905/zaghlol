@@ -453,7 +453,7 @@ class _CurrencySection extends ConsumerWidget {
 /// Mockup 09: green below the warning line, apricot from it, terracotta at
 /// or over the limit. The number next to the bar always says it in text.
 Color _fillColor(ZColors c, int percent) => percent >= 95
-    ? ZChartColors.spend
+    ? ZChartColors.overLimit
     : percent >= budgetWarnPercent
     ? c.accent
     : c.primary;

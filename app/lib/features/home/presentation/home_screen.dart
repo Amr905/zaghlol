@@ -2,12 +2,14 @@
 // title; Android a Material 3 collapsing app bar. Contextual cards (T-104)
 // are in the banner slot (T-104); the currency switcher (T-116) is not here.
 
+import 'dart:math' show max;
+
 import 'package:flutter/material.dart';
+import 'package:flutter/rendering.dart';
 import 'package:flutter/cupertino.dart' show CupertinoIcons;
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
-import '../../../core/l10n/card_number.dart';
 import '../../../core/l10n/generated/app_localizations.dart';
 import '../../../core/routing/app_routes.dart';
 import '../../../core/theme/z_tokens.dart';
@@ -224,6 +226,17 @@ class _HomeBodyState extends ConsumerState<_HomeBody> {
   int _page = 0;
   final _pager = PageController();
 
+  /// Content height of each pager page, reported after layout.
+  final _pageHeights = <int, double>{};
+
+  /// Used for the first frame only, until a page reports its height.
+  static const _firstFrameHeight = 330.0;
+
+  void _setHeight(int index, double h) {
+    if (_pageHeights[index] == h || !mounted) return;
+    setState(() => _pageHeights[index] = h);
+  }
+
   @override
   void dispose() {
     _pager.dispose();
@@ -243,10 +256,10 @@ class _HomeBodyState extends ConsumerState<_HomeBody> {
     final figures = m.currencies;
     final page = figures.isEmpty ? 0 : _page.clamp(0, figures.length - 1);
     final scale = MediaQuery.textScalerOf(context);
-    final accountLabels = <String, String>{
+    final accounts = <String, Account>{
       for (final acc
           in ref.watch(homeAccountsProvider).value ?? const <Account>[])
-        acc.id: formatAccountWithCard(acc.label, acc.last4),
+        acc.id: acc,
     };
 
     return Padding(
@@ -288,22 +301,31 @@ class _HomeBodyState extends ConsumerState<_HomeBody> {
             const SizedBox(height: ZSpacing.sm),
             SizedBox(
               key: const ValueKey('home-pager'),
-              // A page without a budget also shows the hint and its button
-              // (explorer finding: 36 px overflow on a 320 dp phone).
-              height: scale.scale(
-                figures.any((f) => f.safeToSpend == null) ? 440 : 330,
-              ),
+              // Sized to the tallest measured page (batch-29 minor): a page
+              // without a budget also shows the hint and its button.
+              height: _pageHeights.isEmpty
+                  ? scale.scale(_firstFrameHeight)
+                  : _pageHeights.values.reduce(max),
               child: PageView(
                 controller: _pager,
+                allowImplicitScrolling: true,
                 onPageChanged: (i) => setState(() => _page = i),
                 children: [
-                  for (final f in figures)
-                    _Page(
-                      figures: f,
-                      model: m,
-                      format: format,
-                      paydaySet: paydaySet,
-                      actions: a,
+                  for (var i = 0; i < figures.length; i++)
+                    OverflowBox(
+                      alignment: AlignmentDirectional.topStart,
+                      minHeight: 0,
+                      maxHeight: double.infinity,
+                      child: _MeasureHeight(
+                        onHeight: (h) => _setHeight(i, h),
+                        child: _Page(
+                          figures: figures[i],
+                          model: m,
+                          format: format,
+                          paydaySet: paydaySet,
+                          actions: a,
+                        ),
+                      ),
                     ),
                 ],
               ),
@@ -375,7 +397,7 @@ class _HomeBodyState extends ConsumerState<_HomeBody> {
                       item: m.recent[i],
                       format: format,
                       today: m.today,
-                      accountLabel: accountLabels[m.recent[i].record.accountId],
+                      account: accounts[m.recent[i].record.accountId],
                       showDivider: i < m.recent.length - 1,
                       onTap: a.openTransaction,
                     ),
@@ -534,5 +556,36 @@ class _HomeSkeleton extends StatelessWidget {
         ),
       ),
     );
+  }
+}
+
+/// Reports the height its child lays out at (after the frame).
+class _MeasureHeight extends SingleChildRenderObjectWidget {
+  const _MeasureHeight({required this.onHeight, required super.child});
+
+  final ValueChanged<double> onHeight;
+
+  @override
+  RenderObject createRenderObject(BuildContext context) =>
+      _RenderMeasureHeight(onHeight);
+
+  @override
+  void updateRenderObject(BuildContext context, _RenderMeasureHeight r) =>
+      r.onHeight = onHeight;
+}
+
+class _RenderMeasureHeight extends RenderProxyBox {
+  _RenderMeasureHeight(this.onHeight);
+
+  ValueChanged<double> onHeight;
+  double? _last;
+
+  @override
+  void performLayout() {
+    super.performLayout();
+    final h = size.height;
+    if (h == _last) return;
+    _last = h;
+    WidgetsBinding.instance.addPostFrameCallback((_) => onHeight(h));
   }
 }

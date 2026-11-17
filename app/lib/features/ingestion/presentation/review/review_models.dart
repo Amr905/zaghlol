@@ -130,6 +130,10 @@ final class MessageCardModel extends ReviewCardModel {
   /// generic suggestion to save as read.
   bool get canConfirm => txnId != null || oneTap;
 
+  /// The Keep button is offered and enabled: the single condition the screen
+  /// uses (the provider re-checks the same rule on the stored payload).
+  bool get offersKeep => txnId == null && !oneTap && amount != null && keepable;
+
   /// A generic suggestion with no stored transaction (prefilled guess).
   bool get isSuggestion => txnId == null && amount != null;
 

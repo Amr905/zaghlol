@@ -27,4 +27,25 @@ void main() {
       });
     }
   }
+
+  // batch-29 minor: 4 destinations + Add at 320 dp, text scale 1.3.
+  for (final platform in [TargetPlatform.android, TargetPlatform.iOS]) {
+    final p = platform == TargetPlatform.iOS ? 'ios' : 'android';
+    for (final lang in ['ar', 'en']) {
+      testWidgets('app shell narrow golden ${p}_$lang', (tester) async {
+        await tester.binding.setSurfaceSize(const Size(320, 640));
+        addTearDown(() => tester.binding.setSurfaceSize(null));
+        await pumpShell(
+          tester,
+          locale: Locale(lang),
+          platform: platform,
+          textScale: 1.3,
+        );
+        await expectLater(
+          find.byType(MaterialApp),
+          matchesGoldenFile('../../../goldens/app_shell_narrow_${p}_$lang.png'),
+        );
+      });
+    }
+  }
 }
