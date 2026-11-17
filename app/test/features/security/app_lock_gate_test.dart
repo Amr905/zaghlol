@@ -8,11 +8,20 @@ import 'package:zaghlol/core/settings/settings_providers.dart';
 import 'package:zaghlol/core/theme/app_theme.dart';
 import 'package:zaghlol/features/security/data/device_security_providers.dart';
 import 'package:zaghlol/features/security/domain/app_lock_controller.dart';
+import 'package:zaghlol/features/security/data/rooted_warning_memo.dart';
 import 'package:zaghlol/features/security/presentation/app_lock_gate.dart';
 
 import 'security_fakes.dart';
 
 const _secret = 'SECRET-HOME-CONTENT';
+
+class _Memo implements RootedWarningMemo {
+  bool shown = false;
+  @override
+  Future<bool> seen() async => shown;
+  @override
+  Future<void> markSeen() async => shown = true;
+}
 
 class _Harness {
   _Harness({
@@ -20,7 +29,10 @@ class _Harness {
     required this.platform,
     this.enabled = true,
     this.locale = const Locale('en'),
-  });
+    _Memo? memo,
+  }) : memo = memo ?? _Memo();
+
+  final _Memo memo;
 
   final FakeAuthenticator auth;
   final FakeDevicePlatform platform;
@@ -43,6 +55,7 @@ class _Harness {
     final scope = ProviderScope(
       overrides: [
         appAuthenticatorProvider.overrideWithValue(auth),
+        rootedWarningMemoProvider.overrideWithValue(memo),
         appLockEnabledProvider.overrideWith(
           (ref) => enabledStream ?? Stream.value(enabled),
         ),
@@ -245,6 +258,38 @@ void main() {
     await tester.tap(find.text('OK'));
     await tester.pumpAndSettle();
     expect(find.text(_secret), findsOneWidget);
+  });
+
+  testWidgets('FU-130: the warning is recorded and not shown again on the '
+      'next launch', (tester) async {
+    final memo = _Memo();
+    final first = _Harness(
+      auth: FakeAuthenticator(),
+      platform: FakeDevicePlatform(rooted: true),
+      enabled: false,
+      memo: memo,
+    );
+    await first.pump(tester);
+    await tester.pump(const Duration(milliseconds: 300));
+    await tester.pump();
+    expect(find.text('Weaker protection on this phone'), findsOneWidget);
+    expect(memo.shown, isTrue);
+    await tester.tap(find.text('OK'));
+    await tester.pumpAndSettle();
+
+    // A new process (the per-process flag is reset): the install remembers.
+    rootedWarningShown = false;
+    await tester.pumpWidget(const SizedBox());
+    final second = _Harness(
+      auth: FakeAuthenticator(),
+      platform: FakeDevicePlatform(rooted: true),
+      enabled: false,
+      memo: memo,
+    );
+    await second.pump(tester);
+    await tester.pump(const Duration(milliseconds: 300));
+    await tester.pump();
+    expect(find.text('Weaker protection on this phone'), findsNothing);
   });
 
   testWidgets('not rooted: no warning', (tester) async {

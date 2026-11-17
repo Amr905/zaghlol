@@ -17,7 +17,25 @@ class _Repo implements TransactionRepository {
     TransactionFilter filter = const TransactionFilter(),
     String? text,
     PageRequest page = const PageRequest(),
-  }) async => rows.skip(page.offset).take(page.limit).toList();
+  }) async {
+    // List order: newest first, then id (as the DAO).
+    final sorted = [...rows]
+      ..sort((a, b) {
+        final c = b.occurredAt.compareTo(a.occurredAt);
+        return c != 0 ? c : a.id.compareTo(b.id);
+      });
+    final after = page.after;
+    final live = after == null
+        ? sorted
+        : sorted.where(
+            (r) =>
+                r.occurredAt.isBefore(after.occurredAt) ||
+                (r.occurredAt == after.occurredAt &&
+                    r.id.compareTo(after.id) > 0),
+          );
+    return live.skip(page.offset).take(page.limit).toList();
+  }
+
   @override
   Future<int> count({
     TransactionFilter filter = const TransactionFilter(),
@@ -39,7 +57,24 @@ class _ShiftingRepo extends _Repo {
     PageRequest page = const PageRequest(),
   }) async {
     final r = await super.query(filter: filter, text: text, page: page);
-    if (++calls == 1) rows.insert(0, _t(9999));
+    if (++calls == 1) rows.insert(0, _t(9999, at: DateTime.utc(2027)));
+    return r;
+  }
+}
+
+/// Deletes a row of the first page after it was read, as a delete running
+/// during the export would.
+class _DeletingRepo extends _Repo {
+  _DeletingRepo(super.rows);
+  int calls = 0;
+  @override
+  Future<List<TransactionRecord>> query({
+    TransactionFilter filter = const TransactionFilter(),
+    String? text,
+    PageRequest page = const PageRequest(),
+  }) async {
+    final r = await super.query(filter: filter, text: text, page: page);
+    if (++calls == 1) rows.removeWhere((x) => x.id == r.first.id);
     return r;
   }
 }
@@ -60,6 +95,7 @@ TransactionRecord _t(
   String? note,
   String cur = 'EGP',
   int minor = 12345,
+  DateTime? at,
 }) {
   final c = Currency.of(cur);
   return TransactionRecord(
@@ -69,7 +105,7 @@ TransactionRecord _t(
     direction: TxnDirection.expense,
     status: TxnStatus.posted,
     amount: Money(c, minor),
-    occurredAt: DateTime.utc(2026, 1, 31, 23, 59),
+    occurredAt: at ?? DateTime.utc(2026, 1, 31, 23, 59),
     occurredTzOffsetMin: 120,
     merchantRaw: merchant,
     note: note,
@@ -191,5 +227,50 @@ void main() {
     expect((out as ExportWritten).rowCount, 600);
     final text = utf8.decode(d.bytes!);
     expect(RegExp('t499,').allMatches(text).length, 1);
+  });
+
+  test(
+    'FU-131: a row deleted mid-export never makes another one skipped',
+    () async {
+      final rows = [for (var i = 0; i < 600; i++) _t(i)];
+      final ids = rows.map((r) => r.id).toList()..sort();
+      final repo = _DeletingRepo(rows);
+      final d = _Dest();
+      final out = await ExportService(repo).export(
+        entitlement: goldForTest(),
+        filter: const TransactionFilter(),
+        format: ExportFormat.csv,
+        destination: d,
+        warningAcknowledged: true,
+      );
+      // Offset paging would lose the first row of page two.
+      expect((out as ExportWritten).rowCount, 600);
+      final text = utf8.decode(d.bytes!);
+      expect(text, contains('\r\n${ids[500]},'));
+    },
+  );
+
+  test('FU-131: ids are neutralised like free text', () {
+    final r = exportRow(
+      TransactionRecord(
+        id: '=HYPERLINK("x")',
+        accountId: '+a1',
+        categoryId: '@c',
+        source: TxnSource.manual,
+        direction: TxnDirection.expense,
+        status: TxnStatus.posted,
+        amount: Money(Currency.of('EGP'), 1),
+        occurredAt: DateTime.utc(2026),
+        occurredTzOffsetMin: 0,
+        categorySource: CategorySource.user,
+        isUserVerified: true,
+        isInternal: false,
+        createdAt: DateTime.utc(2026),
+        updatedAt: DateTime.utc(2026),
+      ),
+    );
+    expect(r[0], "'=HYPERLINK(\"x\")");
+    expect(r[3], "'+a1");
+    expect(r[11], "'@c");
   });
 }

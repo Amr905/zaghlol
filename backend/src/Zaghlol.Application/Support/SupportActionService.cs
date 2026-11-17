@@ -217,7 +217,7 @@ public sealed class SupportActionService(
 
         if (correction && moved)
         {
-            await tx.SetDisputeFreezeAsync(command.PurchaseId, now + SupportRules.FreezeLength, cancellationToken).ConfigureAwait(false);
+            await tx.StartDisputeFreezeAsync(command.PurchaseId, SupportRules.FreezeLength, cancellationToken).ConfigureAwait(false);
         }
 
         var outcome = (moved, attachAccount is not null) switch
@@ -310,7 +310,7 @@ public sealed class SupportActionService(
         }
 
         await apply.UnlinkAccountAsync(command.PurchaseId, cancellationToken).ConfigureAwait(false);
-        await apply.SetDisputeFreezeAsync(command.PurchaseId, now + SupportRules.FreezeLength, cancellationToken).ConfigureAwait(false);
+        await apply.StartDisputeFreezeAsync(command.PurchaseId, SupportRules.FreezeLength, cancellationToken).ConfigureAwait(false);
         var entry = new SupportDetachAudit(command.PurchaseId, account, command.TicketRef, command.CorrectsAuditId, outcome, SupportOutcomes.Detached);
         var auditId = await CommitAuditAsync(apply, command.OperatorId, command.PurchaseId, entry, false, cancellationToken).ConfigureAwait(false);
         return new(SupportActionStatus.Ok, new SupportDetachOutcome(command.PurchaseId, true, auditId));

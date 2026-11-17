@@ -181,6 +181,42 @@ void main() {
       // Q-33: redacted keeps the category, no amounts.
       expect(gw.shown.single.title, 'Food budget alert');
     });
+    test('FU-136: an annual budget uses year totals and the year key, and '
+        'is skipped without them', () async {
+      final annual = BudgetSpec(
+        id: 'ann',
+        categoryId: 'food',
+        limit: Money(egp, 100000),
+        thresholds: const [80, 100],
+        annual: true,
+      );
+      // Monthly totals are far above 80% of the limit but must not count.
+      expect(await svc.run(cycle, [annual], at(95000)), isEmpty);
+      final out = await svc.run(
+        cycle,
+        [annual],
+        at(95000),
+        year: (
+          totals: {
+            egp: totals(egp, 50000, cats: {'food': 50000}),
+          },
+          key: '2026',
+        ),
+      );
+      expect(out, isEmpty); // 50% of the year: nothing crossed
+      await svc.run(
+        cycle,
+        [annual],
+        at(1),
+        year: (
+          totals: {
+            egp: totals(egp, 85000, cats: {'food': 85000}),
+          },
+          key: '2026',
+        ),
+      );
+      expect(fired, contains('budget|ann|2026|80'));
+    });
     test('next cycle alerts again', () async {
       await svc.run(cycle, [spec()], at(8100));
       final next = Cycle(

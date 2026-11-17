@@ -147,6 +147,7 @@ List<SubscriptionSuggestion> detectSubscriptions(
     final chain = list.sublist(start);
     if (chain.length < 2) continue;
     final last = chain.last;
+    final anchor = _anchorDay(chain);
     final name = _name(last.displayName, last.merchantNorm);
     out.add(
       SubscriptionSuggestion(
@@ -155,17 +156,33 @@ List<SubscriptionSuggestion> detectSubscriptions(
         name: name,
         amount: last.amount,
         annualCost: last.amount.times(12),
-        dueDay: last.date.day,
+        dueDay: anchor,
         nextDue: advanceDue(
           last.date,
           cadence: RecurrenceCadence.monthly,
-          dueDay: last.date.day,
+          dueDay: anchor,
         ),
         chargeIds: [for (final c in chain) c.id],
       ),
     );
   }
   return out;
+}
+
+/// FU-143: the anchor day of a chain is its most common day of month (ties
+/// go to the later day), so a charge on the 31st that landed on the 28th in
+/// February does not anchor the item to 28 for good.
+int _anchorDay(List<RecurringCharge> chain) {
+  final counts = <int, int>{};
+  for (final c in chain) {
+    counts.update(c.date.day, (n) => n + 1, ifAbsent: () => 1);
+  }
+  var best = chain.last.date.day;
+  for (final e in counts.entries) {
+    final b = counts[best]!;
+    if (e.value > b || (e.value == b && e.key > best)) best = e.key;
+  }
+  return best;
 }
 
 String recurringKey(String merchantNorm, String accountId, String currency) =>

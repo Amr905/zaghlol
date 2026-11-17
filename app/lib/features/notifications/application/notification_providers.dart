@@ -20,6 +20,7 @@ import '../../../core/l10n/locale_providers.dart';
 import '../../../core/l10n/money_format.dart';
 import '../../../core/settings/settings_keys.dart';
 import '../../../core/settings/settings_providers.dart';
+import '../../../core/settings/settings_repository.dart';
 import '../../../core/platform/notifications_api.g.dart'
     show NotificationsHostApi;
 import '../../backup/application/schedule_providers.dart';
@@ -145,12 +146,39 @@ String _money(Ref ref, Money m) {
   );
 }
 
+/// `hide_amounts.notifications` (FU-133: drives [NotificationService.redactScheduled]).
+final hideAmountsNotificationsProvider = settingProvider(
+  Settings.hideAmountsNotifications,
+);
+
 final notificationServiceProvider = FutureProvider<NotificationService>((
   ref,
 ) async {
   final db = await ref.watch(appDatabaseProvider.future);
   final settings = await ref.watch(settingsRepositoryProvider.future);
   final fired = FiredAlertsDao(db);
+  final service = _service(ref, settings, fired);
+  // FU-133: when amounts become hidden (the toggle or app lock), alerts
+  // already waiting for quiet hours to end are re-scheduled redacted.
+  ref.listen(hideAmountsNotificationsProvider, (prev, next) {
+    if (next.value ?? false) {
+      unawaited(
+        service.redactScheduled().then<void>(
+          (_) {},
+          // Best effort: the alert keeps its text; nothing to report.
+          onError: (Object _) {},
+        ),
+      );
+    }
+  });
+  return service;
+}, name: 'notificationServiceProvider');
+
+NotificationService _service(
+  Ref ref,
+  SettingsRepository settings,
+  FiredAlertsDao fired,
+) {
   return NotificationService(
     gateway: ref.watch(notificationGatewayProvider),
     now: ref.watch(clockProvider),
@@ -196,7 +224,7 @@ final notificationServiceProvider = FutureProvider<NotificationService>((
           threshold: threshold,
         ),
   );
-}, name: 'notificationServiceProvider');
+}
 
 /// Binds [backupAlertSinkProvider] (T-152) to the notification service.
 final backupAlertSinkOverride = backupAlertSinkProvider.overrideWith(

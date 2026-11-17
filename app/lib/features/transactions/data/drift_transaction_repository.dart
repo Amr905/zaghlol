@@ -79,6 +79,8 @@ class DriftTransactionRepository implements TransactionRepository {
       _toQuery(filter, text),
       limit: page.limit,
       offset: page.offset,
+      afterOccurredAt: page.after?.occurredAt.toUtc().millisecondsSinceEpoch,
+      afterId: page.after?.id,
     );
     return [for (final r in rows) _toRecord(r)];
   }

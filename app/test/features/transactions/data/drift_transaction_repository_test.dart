@@ -376,6 +376,33 @@ void main() {
       expect(await repo.count(text: 'Alpha'), 1);
     });
 
+    test('FU-131: keyset paging continues after the cursor row, with a '
+        'tie on time broken by id, unaffected by a delete', () async {
+      await dao.insert(txn('a-tie', occurredAt: t0 + 40));
+      // Order: a-tie, e2 (same time), k1, i1, e1.
+      final first = await repo.query(page: const PageRequest(limit: 1));
+      expect(first.single.id, 'a-tie');
+      // The tie: e2 has the same time and a larger id.
+      expect(
+        await ids(page: PageRequest(limit: 2, after: PageCursor.of(first[0]))),
+        ['e2', 'k1'],
+      );
+      // A row before the cursor is deleted: the next page is unchanged.
+      await repo.softDelete(['a-tie']);
+      expect(
+        await ids(page: PageRequest(limit: 2, after: PageCursor.of(first[0]))),
+        ['e2', 'k1'],
+      );
+      // Filters still apply with a cursor.
+      expect(
+        await ids(
+          filter: TransactionFilter(currencies: {egp}),
+          page: PageRequest(limit: 5, after: PageCursor(at(t0 + 40), 'e2')),
+        ),
+        ['i1', 'e1'],
+      );
+    });
+
     test('oversized filter sets and bulk calls are refused', () async {
       final big = {for (var i = 0; i <= maxIdsPerCall; i++) 'x$i'};
       expect(

@@ -17,6 +17,7 @@ import '../../../core/theme/z_tokens.dart';
 import '../../../core/ui/z_button.dart';
 import '../../../core/ui/z_chip.dart';
 import '../../budget/application/budget_providers.dart' show todayProvider;
+import '../../../core/settings/settings_providers.dart';
 import '../data/recurring_repository.dart';
 import 'bills_providers.dart';
 import '../../../core/ui/z_haptics.dart';
@@ -90,6 +91,7 @@ class _BillFormState extends ConsumerState<BillForm> {
   int? _cadenceDays;
   CivilDate? _due;
   late int _remind;
+  bool _remindTouched = false;
   bool _submitted = false;
   bool _saving = false;
   bool _saveFailed = false;
@@ -248,6 +250,12 @@ class _BillFormState extends ConsumerState<BillForm> {
 
   @override
   Widget build(BuildContext context) {
+    // FU-219: a new item starts from the days set in the notification
+    // settings, unless the user already moved the slider.
+    if (!_editing && !_remindTouched) {
+      final days = ref.watch(notifDueDaysBeforeProvider).value;
+      if (days != null) _remind = days;
+    }
     final l = AppLocalizations.of(context);
     final c = ZColors.of(context);
     final lang = Localizations.localeOf(context).languageCode;
@@ -403,7 +411,10 @@ class _BillFormState extends ConsumerState<BillForm> {
             v.round(),
             digits.render('${v.round()}'),
           ),
-          onChanged: (v) => setState(() => _remind = v.round()),
+          onChanged: (v) => setState(() {
+            _remind = v.round();
+            _remindTouched = true;
+          }),
         ),
         if (_saveFailed) error(l.commonErrorSaveFailed),
         const SizedBox(height: ZSpacing.xl),

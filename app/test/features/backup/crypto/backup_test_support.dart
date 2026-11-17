@@ -186,6 +186,10 @@ final class SlotSecretStore implements SecretStore {
   SecretStoreErrorCode? failCreate;
   bool renewFails = false;
 
+  /// FU-139: [releaseBootstrapLease] throws a non-crypto error after
+  /// releasing (the store's own failure type leaking out).
+  bool releaseThrows = false;
+
   int? _held;
   int _next = 1;
   final List<Completer<void>> _waiters = [];
@@ -225,6 +229,7 @@ final class SlotSecretStore implements SecretStore {
       _held = null;
       if (_waiters.isNotEmpty) _waiters.removeAt(0).complete();
     }
+    if (releaseThrows) throw StateError('release');
   }
 
   @override

@@ -5,7 +5,10 @@ import 'dart:convert';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:zaghlol/core/backend/outbound_text_filter.dart';
 import 'package:zaghlol/core/db/app_database.dart' hide Settings;
+import 'package:drift/drift.dart' show Value;
+import 'package:zaghlol/core/db/daos/accounts_dao.dart';
 import 'package:zaghlol/core/db/daos/categories_dao.dart';
+import 'package:zaghlol/core/db/daos/transactions_dao.dart';
 import 'package:zaghlol/core/db/daos/outbox_dao.dart';
 import 'package:zaghlol/core/db/daos/settings_dao.dart';
 import 'package:zaghlol/core/settings/settings_keys.dart';
@@ -212,5 +215,117 @@ void main() {
     } on ContributionException catch (e) {
       expect(e.toString(), isNot(contains('sentinel')));
     }
+  });
+
+  group('FU-141: offerForTransaction (categorize an unknown merchant)', () {
+    setUp(() async {
+      await AccountsDao(db).insert(account('acc1', institution: 'nbe'));
+      await AccountsDao(
+        db,
+      ).insert(account('cash', institution: null, last4: null, kind: 'cash'));
+      await CategoriesDao(db).insert(
+        CategoriesCompanion.insert(
+          id: 'cust1',
+          nameAr: 'خاص',
+          nameEn: 'Mine',
+          icon: 'star',
+          color: '#0F7A55',
+          bucket: 'wants',
+          sort: 9,
+        ),
+      );
+    });
+
+    Future<void> row(
+      String id, {
+      String accountId = 'acc1',
+      String? norm = 'seoudi market',
+      String? raw = 'SEOUDI MARKET',
+      String category = 'sys:groceries',
+      String direction = 'expense',
+      int? catalogId,
+      String? counterpartyKind,
+      bool deleted = false,
+    }) => TransactionsDao(db).insert(
+      txn(
+        id,
+        accountId: accountId,
+        direction: direction,
+        merchant: raw,
+        merchantNorm: norm,
+      ).copyWith(
+        categoryId: Value(category),
+        categorySource: const Value('user'),
+        catalogMerchantId: Value(catalogId),
+        counterpartyKind: Value(counterpartyKind),
+        deletedAt: Value(deleted ? t0 : null),
+      ),
+    );
+
+    Future<List<Object?>> payloads() async => [
+      for (final r in await OutboxDao(db).due(now: 1 << 50))
+        jsonDecode(r.payload),
+    ];
+
+    test('an unknown merchant is queued with only the allow-listed keys; '
+        'the raw text and amount never are', () async {
+      await optIn();
+      await row('t1');
+      expect(
+        await queue.offerForTransaction('t1'),
+        ContributionDecision.queued,
+      );
+      expect(await payloads(), [
+        {
+          'merchantNorm': 'seoudi market',
+          'institutionCode': 'nbe',
+          'categoryCode': 'groceries',
+        },
+      ]);
+    });
+
+    test('NEGATIVE PROOF: opted out, nothing is read into the queue', () async {
+      await row('t1');
+      expect(
+        await queue.offerForTransaction('t1'),
+        ContributionDecision.optedOut,
+      );
+      expect(await queue.queuedCount(), 0);
+    });
+
+    test('known (catalog) merchants, transfers, deleted rows, no merchant '
+        'and no institution are not offered', () async {
+      await optIn();
+      await row('known', catalogId: 7);
+      await row('xfer', direction: 'transfer_out');
+      await row('gone', deleted: true);
+      await row('nomerchant', norm: null, raw: null);
+      await row('cashrow', accountId: 'cash');
+      for (final id in ['known', 'xfer', 'gone', 'nomerchant', 'cashrow']) {
+        expect(await queue.offerForTransaction(id), isNull, reason: id);
+      }
+      expect(await queue.offerForTransaction('missing'), isNull);
+      expect(await queue.queuedCount(), 0);
+    });
+
+    test('person counterparties and custom categories are filtered', () async {
+      await optIn();
+      await row('p2p', counterpartyKind: 'ipa');
+      await row('custom', category: 'cust1');
+      await row('named', norm: 'ahmed mohamed', raw: 'Ahmed Mohamed');
+      expect(
+        await queue.offerForTransaction('p2p'),
+        ContributionDecision.personTransfer,
+      );
+      expect(
+        await queue.offerForTransaction('custom'),
+        ContributionDecision.customCategory,
+      );
+      expect(
+        await queue.offerForTransaction('named'),
+        ContributionDecision.personName,
+      );
+      expect(await queue.queuedCount(), 0);
+    });
   });
 }

@@ -79,9 +79,9 @@ final budgetScreenDataProvider = FutureProvider<BudgetScreenData>((ref) async {
     basis: basis,
     budgets: [
       for (final r in rows)
-        if (r.categoryId != null)
+        if (r.categoryId != null && tryBudgetSpecOf(r) != null)
           BudgetInput(
-            spec: budgetSpecOf(r),
+            spec: tryBudgetSpecOf(r)!,
             nameAr: cats[r.categoryId]?.nameAr ?? r.categoryId!,
             nameEn: cats[r.categoryId]?.nameEn ?? r.categoryId!,
           ),

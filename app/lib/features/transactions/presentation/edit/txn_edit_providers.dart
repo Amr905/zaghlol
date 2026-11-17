@@ -10,6 +10,8 @@ import '../../../../core/l10n/generated/app_localizations.dart';
 import '../../../../core/settings/settings_keys.dart';
 import '../../../../core/settings/settings_providers.dart';
 import '../../../accounts/data/accounts_providers.dart';
+import '../../../categorization/application/contributions.dart'
+    show contributionQueueProvider;
 import '../../application/transaction_editor.dart';
 import '../../data/transactions_providers.dart';
 import '../list/txn_list_providers.dart';
@@ -19,6 +21,12 @@ final transactionEditorProvider = FutureProvider<TxnEditorPort>((ref) async {
     await ref.watch(transactionRepositoryProvider.future),
     await ref.watch(transferPairingUseCaseProvider.future),
     await ref.watch(refundMatchingProvider.future),
+    // FU-141: an unknown merchant the user categorizes is offered as a
+    // contribution (queued only with the opt-in on; filtered on device).
+    onCategorized: (id) async {
+      final queue = await ref.read(contributionQueueProvider.future);
+      await queue.offerForTransaction(id);
+    },
   );
 }, name: 'transactionEditorProvider');
 
