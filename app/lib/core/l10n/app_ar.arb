@@ -4413,7 +4413,7 @@
       }
     }
   },
-  "insightsExplainCashFlowTip": "{state, select, short{قلل {category} بـ {target} الدورة الجاية وهتقفل بفايض.} other{حوّل {target} على الأقل من الفايض ده للادخار قبل ما يتصرف.}}",
+  "insightsExplainCashFlowTip": "{state, select, short{لو قللت {category} بـ {target} الدورة الجاية هيساعدك ده تقفل الفرق.} other{حوّل {target} على الأقل من الفايض ده للادخار قبل ما يتصرف.}}",
   "@insightsExplainCashFlowTip": {
     "description": "S · state, category = largest category, target",
     "placeholders": {
@@ -9139,7 +9139,7 @@
   "@privacyDeleteTitle": {
     "description": "T"
   },
-  "privacyDeleteBody": "هنمسح كل حركاتك وإعداداتك ومفاتيح الحماية من على الموبايل ده. مفيش رجوع.",
+  "privacyDeleteBody": "هنمسح كل حركاتك وإعداداتك من على الموبايل ده. مفيش رجوع.",
   "@privacyDeleteBody": {
     "description": "S"
   },
@@ -9196,6 +9196,7 @@
   "@privacyDeleteBackupsKept": {
     "description": "N · delete-everything confirm: backups in the user's own cloud are not touched"
   },
+  "privacyDeleteStoreAccountKept": "شراءك من المتجر وحسابك مش هيتأثروا. الجولد فاضل بتاعك.",
   "privacyDeleteFailed": "مقدرناش نمسح كل حاجة. افتح الأبلكيشن تاني وهنكمّل.",
   "@privacyDeleteFailed": {
     "description": "N · shown when the local wipe did not finish; the next launch resumes it"

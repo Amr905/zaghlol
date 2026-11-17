@@ -183,3 +183,8 @@ plaintext = contents v1: entry(db.snapshot) ‖ entry(settings.json) ‖ entry(m
   4. Delete the Keystore/Keychain items, **except the iOS seat keys** (D-55: so that restoring on the same iPhone is not a move; they hold no financial or account data, and the "Delete everything" copy says that Gold can come back to this iPhone and that the server keeps a keyed hash with the purchase, §2a item 2).
   5. Call `DELETE /v1/installs/me` (best effort).
   6. Restart in first-launch state.
+
+
+### Sign-in client-data hash (FU-124)
+
+Decision R5-3 (b): the app builds no sign-in client-data hash. The K_seat HMAC hashes (restore and seat-key) stay backend-only; the Dart binding library covers JCS and the shared vectors only.
