@@ -169,4 +169,41 @@ void main() {
     final u = await actions.undo(r.batchId);
     expect(u.restored, 2);
   });
+
+  test(
+    'FU-141: a bulk category change runs the contribution hook for '
+    'every row after the commit; a failing hook does not fail the edit',
+    () async {
+      final seen = <String>[];
+      final hooked = BulkActions(
+        bulk: BulkEditUseCase(
+          db,
+          clock: clock,
+          newId: () => 'h${nextId++}',
+          loadSchedule: schedule,
+        ),
+        pairing: flaky,
+        refunds: RefundMatching(
+          db,
+          loadSchedule: schedule,
+          clock: clock,
+          newId: () => 'hr${nextId++}',
+        ),
+        onCategorized: (id) async {
+          // The category is already stored when the hook runs.
+          final row = await TransactionsDao(db).byId(id);
+          expect(row!.categoryId, 'sys:food');
+          seen.add(id);
+          if (id == 'o') throw StateError('queue full');
+        },
+      );
+      final r = await hooked.setCategory({'o', 'i'}, 'sys:food');
+      expect(r.changed, 2);
+      expect(seen, unorderedEquals(['o', 'i']));
+      // Other bulk changes never run it.
+      seen.clear();
+      await hooked.undo(r.batchId);
+      expect(seen, isEmpty);
+    },
+  );
 }

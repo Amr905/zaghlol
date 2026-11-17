@@ -253,6 +253,53 @@ class ContributionQueue {
     });
   }
 
+  /// FU-141: the "categorize an unknown merchant" hook. Call after the user
+  /// set the category of transaction [txnId]. Offers it only when the
+  /// merchant is unknown (no catalog match), the row is live, not internal
+  /// and not a transfer leg, the account has an institution code and the
+  /// category is a system one. The person checks see the person-type
+  /// counterparty and the raw merchant text (checked, never stored).
+  /// Returns null when the row does not qualify; otherwise [offer]'s
+  /// decision. Reads only; the only write is [offer]'s outbox row.
+  Future<ContributionDecision?> offerForTransaction(String txnId) async {
+    if (!await _settings.get(Settings.contributionOptIn)) {
+      return ContributionDecision.optedOut;
+    }
+    final row = await _db
+        .customSelect(
+          'SELECT t.merchant_norm AS norm, t.merchant_raw AS raw, '
+          't.counterparty_kind AS ck, a.institution_code AS inst, '
+          'c.system_code AS code '
+          'FROM transactions t '
+          'JOIN accounts a ON a.id = t.account_id '
+          'LEFT JOIN categories c ON c.id = t.category_id '
+          'WHERE t.id = ?1 AND t.deleted_at IS NULL '
+          'AND t.catalog_merchant_id IS NULL AND t.is_internal = 0 '
+          "AND t.direction NOT IN ('transfer_out', 'transfer_in') "
+          'AND t.category_id IS NOT NULL',
+          variables: [Variable.withString(txnId)],
+          readsFrom: {_db.transactions, _db.accounts, _db.categories},
+        )
+        .getSingleOrNull();
+    if (row == null) return null;
+    final norm = row.read<String?>('norm');
+    final inst = row.read<String?>('inst');
+    if (norm == null || inst == null) return null;
+    final code = row.read<String?>('code');
+    if (code == null) return ContributionDecision.customCategory;
+    return offer(
+      merchantNorm: norm,
+      institutionCode: inst,
+      categoryCode: code,
+      isPersonTransfer: const {
+        'ipa',
+        'phone',
+        'person',
+      }.contains(row.read<String?>('ck')),
+      displayName: row.read<String?>('raw'),
+    );
+  }
+
   /// Turns the opt-in on or off. Off also deletes every queued contribution
   /// in the same transaction (EC-48). Returns the rows deleted.
   Future<int> setOptIn(bool value) => _db.transaction(() async {
