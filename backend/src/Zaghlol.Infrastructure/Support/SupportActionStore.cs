@@ -137,7 +137,7 @@ internal sealed class SupportActionStore(IServiceProvider services, IAuditWriter
         public async Task<DateTimeOffset> DatabaseNowAsync(CancellationToken cancellationToken)
         {
             await using var command = Command("SELECT now()");
-            return (DateTimeOffset)(await command.ExecuteScalarAsync(cancellationToken))!;
+            return new DateTimeOffset(DateTime.SpecifyKind((DateTime)(await command.ExecuteScalarAsync(cancellationToken))!, DateTimeKind.Utc));
         }
 
         public async Task<bool> InstallLiveAsync(Guid installId, CancellationToken cancellationToken)
