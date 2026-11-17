@@ -1,6 +1,6 @@
 {
  "v": 4,
- "registryVersion": 3,
+ "registryVersion": 4,
  "senders": [
   {
    "match": "exact",
@@ -410,7 +410,11 @@
    "inst": "citibank"
   },
   {
-   "name": "contact",
+   "name": "contact financial",
+   "inst": "contact"
+  },
+  {
+   "name": "contact credit",
    "inst": "contact"
   },
   {
