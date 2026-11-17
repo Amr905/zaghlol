@@ -65,7 +65,9 @@ import 'package:zaghlol/core/logging/diag_event.dart';
 import 'package:zaghlol/core/logging/diag_field.dart';
 ''';
 
-  group('compile-time barrier', () {
+  // FU-029: `dart analyze` now starts the riverpod_lint analyzer plugin, whose
+  // first start compiles it (about a minute on a cold CI cache).
+  group('compile-time barrier', timeout: const Timeout(Duration(minutes: 5)), () {
     test('control: a well-typed event compiles', () async {
       expect(
         await _compiles(
