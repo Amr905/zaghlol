@@ -99,4 +99,23 @@ void main() {
       TextDirection.ltr,
     );
   });
+
+  testWidgets('Start is on screen without scrolling on 320x640 at 1.3x', (
+    tester,
+  ) async {
+    await tester.binding.setSurfaceSize(const Size(320, 640));
+    addTearDown(() => tester.binding.setSurfaceSize(null));
+    await tester.pumpWidget(
+      ProviderScope(
+        overrides: [
+          languageProvider.overrideWith((ref) => Stream.value(LanguagePref.en)),
+        ],
+        child: const _Host(scale: 1.3),
+      ),
+    );
+    await tester.pumpAndSettle();
+    final r = tester.getRect(find.byKey(const ValueKey('welcome-start')));
+    expect(r.bottom, lessThanOrEqualTo(640));
+    expect(r.top, greaterThanOrEqualTo(0));
+  });
 }
