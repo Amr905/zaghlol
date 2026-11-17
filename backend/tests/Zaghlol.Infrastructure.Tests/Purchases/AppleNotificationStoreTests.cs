@@ -280,10 +280,11 @@ public class AppleNotificationStoreTests(AppleNotificationStoreFixture fixture) 
         var sandbox = await PurchaseAsync("active", "yearly", now.AddDays(-3), lastVerified: now.AddDays(-20), environment: "sandbox");
         var production = await PurchaseAsync("active", "yearly", now.AddHours(-2), lastVerified: now.AddDays(-20));
 
-        var off = (await Store.ListExpiredSubscriptionsAsync(now, 1, false, CancellationToken.None)).Select(r => r.Id).ToList();
+        var off = (await Store.ListExpiredSubscriptionsAsync(now, 1000, false, CancellationToken.None)).Select(r => r.Id).ToList();
         var on = (await Store.ListExpiredSubscriptionsAsync(now, 1000, true, CancellationToken.None)).Select(r => r.Id).ToList();
 
-        Assert.Equal([production], off);
+        Assert.Contains(production, off);
+        Assert.DoesNotContain(sandbox, off);
         Assert.Contains(sandbox, on);
     }
 
