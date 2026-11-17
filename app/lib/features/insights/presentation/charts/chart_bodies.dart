@@ -47,6 +47,14 @@ class CashFlowBody extends ConsumerWidget {
     );
   }
 
+  /// Integer percent of [net] over [income], rounded half away from zero
+  /// (no double: money rule).
+  static int savedPercent(int net, int income) {
+    final scaled = net.abs() * 100;
+    final r = (scaled + income ~/ 2) ~/ income;
+    return net < 0 ? -r : r;
+  }
+
   /// "You saved X this month (38%)": the footnote of the latest bucket.
   static String footnote(
     AppLocalizations l,
@@ -56,7 +64,7 @@ class CashFlowBody extends ConsumerWidget {
   ) {
     final last = points.last;
     final pct = last.income.minor > 0
-        ? (last.net.minor * 100 / last.income.minor).round()
+        ? savedPercent(last.net.minor, last.income.minor)
         : null;
     return l.insightsChartsSavedFootnote(
       money(last.net),

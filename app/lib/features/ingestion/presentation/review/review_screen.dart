@@ -92,7 +92,20 @@ class _ReviewScreenState extends ConsumerState<ReviewScreen> {
         .closed
         .then((_) async {
           final job = _pending.remove(itemId);
-          if (job != null) await job();
+          try {
+            if (job != null) await job();
+          } on Object {
+            // The deferred write failed: show the item again with an error.
+            if (mounted) {
+              ScaffoldMessenger.of(context).showSnackBar(
+                SnackBar(
+                  content: Text(
+                    AppLocalizations.of(context).reviewErrorSaveFailed,
+                  ),
+                ),
+              );
+            }
+          }
           if (mounted) setState(() => _hidden.remove(itemId));
         });
   }

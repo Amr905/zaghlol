@@ -44,6 +44,16 @@ Future<Account?> runMergeFlow(
     final merged = await repo.merge(sourceId: source.id, targetId: target.id);
     messenger.showSnackBar(SnackBar(content: Text(l10n.accountsMergeDone)));
     return merged;
+  } on AccountsException catch (e) {
+    messenger.showSnackBar(
+      SnackBar(
+        content: Text(
+          '${l10n.commonErrorSaveFailed} '
+          '${l10n.commonSupportCodeValue(e.code)}',
+        ),
+      ),
+    );
+    return null;
   } on Object {
     messenger.showSnackBar(SnackBar(content: Text(l10n.commonErrorSaveFailed)));
     return null;

@@ -629,6 +629,10 @@ class _InputRow extends ConsumerWidget {
                         minLines: 1,
                         maxLines: 3,
                         textInputAction: TextInputAction.send,
+                        // Money questions stay out of keyboard learning.
+                        enableIMEPersonalizedLearning: false,
+                        enableSuggestions: false,
+                        autocorrect: false,
                         onSubmitted: (_) {
                           if (ok) onSend();
                         },

@@ -918,6 +918,12 @@ abstract class AppLocalizations {
   /// **'اكتب آخر أربع أرقام'**
   String get commonValidationLast4;
 
+  /// Name field is over the length cap.
+  ///
+  /// In ar, this message translates to:
+  /// **'{count, plural, =1{خلّي الاسم حرف واحد بس} =2{خلّي الاسم حرفين بس} few{خلّي الاسم {n} حروف بس} many{خلّي الاسم {n} حرف بس} other{خلّي الاسم {n} حرف بس}}'**
+  String commonValidationNameTooLong(int count, String n);
+
   /// S
   ///
   /// In ar, this message translates to:
@@ -5983,7 +5989,7 @@ abstract class AppLocalizations {
   /// T · count:int, n
   ///
   /// In ar, this message translates to:
-  /// **'{count, plural, =1{فهمت حاجة واحدة} =2{فهمت حاجتين} few{فهمت {n} حاجات} many{فهمت {n} حاجة} other{فهمت {n} حاجة}}'**
+  /// **'{count, plural, =1{فهمت حاجة واحدة} =2{فهمت حاجتين} few{فهمت {n} حاجات} many{فهمت {n} حاجة} other{فهمت {n} حاجة}} 👌'**
   String voiceLoggerParsedTitle(int count, String n);
 
   /// L · applies to all items
@@ -6735,6 +6741,12 @@ abstract class AppLocalizations {
   /// In ar, this message translates to:
   /// **'شهادات بنك: {amount}'**
   String zakahMainLotCertificate(String amount);
+
+  /// Gold coin lot row: title and amount; order follows the locale.
+  ///
+  /// In ar, this message translates to:
+  /// **'{title} · {amount}'**
+  String zakahMainLotCoin(String title, String amount);
 
   /// L · BR-ZAK-04
   ///

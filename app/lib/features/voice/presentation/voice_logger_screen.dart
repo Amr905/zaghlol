@@ -529,13 +529,8 @@ class _Parsed extends ConsumerWidget {
                     child: Semantics(
                       header: true,
                       liveRegion: true,
-                      child: Text.rich(
-                        TextSpan(
-                          children: [
-                            TextSpan(text: l.voiceLoggerParsedTitle(count, n)),
-                            const TextSpan(text: ' 👌'),
-                          ],
-                        ),
+                      child: Text(
+                        l.voiceLoggerParsedTitle(count, n),
                         style: ZType.headline.copyWith(color: c.text),
                       ),
                     ),

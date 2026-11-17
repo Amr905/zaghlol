@@ -502,7 +502,7 @@ class _IgnoredRow extends ConsumerWidget {
       if (yes == true) {
         unawaited(
           controls.rescan(
-            depthMonths: kDefaultScanDepthMonths,
+            depthMonths: null,
             institutionCode: offer.institutionCode,
           ),
         );
