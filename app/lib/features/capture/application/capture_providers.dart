@@ -215,7 +215,7 @@ final captureCoordinatorProvider = FutureProvider<CaptureCoordinator?>((
   );
   unawaited(coordinator.start());
   // SMS-device: review rows stored under an older registry are read again.
-  unawaited(reparseOnStart(db, registry));
+  unawaited(reparseOnStart(db, registry, gate: gate));
   return coordinator;
 }, name: 'captureCoordinatorProvider');
 

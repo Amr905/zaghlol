@@ -10,6 +10,7 @@ import 'package:zaghlol/features/ingestion/data/drift_ingest_store.dart';
 import 'package:zaghlol/features/ingestion/domain/body_hash.dart';
 import 'package:zaghlol/features/ingestion/domain/ingest_records.dart';
 import 'package:zaghlol/ingestion/bundled_registry.dart';
+import 'package:zaghlol/ingestion/ingestion_pause_gate.dart';
 
 import '../../ingestion/support/ingest_harness.dart';
 
@@ -65,4 +66,32 @@ void main() {
       expect(await w.count('transactions'), 1);
     },
   );
+
+  test('FU-251: a closed restore gate stops the start-up re-parse', () async {
+    final registry = await preloadBundledRegistry();
+    final w = await IngestWorld.open();
+    addTearDown(w.close);
+    final store = DriftIngestStore(w.db);
+    final rx = DateTime.utc(2026, 11, 10, 10).millisecondsSinceEpoch;
+    await store.insertRaw(
+      RawInsert(
+        id: 'raw0',
+        channel: 'sms',
+        sender: 'HSBC',
+        body: _usd,
+        bodyHash: bodyHashV1(senderKey: senderKeyOf('sms', 'HSBC'), body: _usd),
+        receivedAtMs: rx,
+        parseStatus: RawStatus.review,
+        registryVersion: 1,
+        createdAtMs: rx,
+      ),
+    );
+    final gate = IngestionPauseGate();
+    await gate.pause();
+    expect(await reparseOnStart(w.db, registry, gate: gate), isNull);
+    expect(await w.count('transactions'), 0);
+    gate.resume();
+    final r = await reparseOnStart(w.db, registry, gate: gate);
+    expect(r!.converted, 1);
+  });
 }
