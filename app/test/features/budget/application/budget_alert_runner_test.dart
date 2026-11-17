@@ -8,7 +8,12 @@ import 'package:zaghlol/core/db/daos/budgets_dao.dart';
 import 'package:zaghlol/core/db/daos/categories_dao.dart';
 import 'package:zaghlol/features/budget/application/budget_alert_runner.dart';
 import 'package:zaghlol/features/budget/application/budget_alert_service.dart';
+import 'package:zaghlol/features/budget/application/rollover_carry.dart';
+import 'package:zaghlol/features/budget/data/budget_mapper.dart';
+import 'package:zaghlol/features/budget/data/cycle_cache_invalidator.dart';
 import 'package:zaghlol/features/budget/data/cycle_repository.dart';
+import 'package:zaghlol/features/budget/domain/budget_progress.dart';
+import 'package:zaghlol/features/budget/presentation/budget_view.dart';
 import 'package:zaghlol/features/ingestion/data/device_local_zone.dart';
 import 'package:zaghlol/features/notifications/data/notification_service.dart';
 import 'package:zaghlol/features/notifications/domain/notification_types.dart';
@@ -56,6 +61,7 @@ void main() {
     db: db,
     cycles: cycles,
     cycle: schedule.cycleOn(cycles.today),
+    schedule: schedule,
     service: svc,
   );
 
@@ -143,16 +149,96 @@ void main() {
     expect(fired.single, contains('|ann|2026|'));
   });
 
-  test('a rollover budget is skipped (no carry computed here)', () async {
-    await BudgetsDao(db).insert(
-      id: 'r',
-      categoryId: 'sys:food',
-      limit: Money(egp, 10000),
-      period: BudgetPeriod.cycle,
-      rollover: true,
-      createdAt: 0,
-    );
-    await spend('t1', 9900, at(2026, 11, 5));
+  Future<void> rollover() => BudgetsDao(db).insert(
+    id: 'r',
+    categoryId: 'sys:food',
+    limit: Money(egp, 10000),
+    period: BudgetPeriod.cycle,
+    rollover: true,
+    createdAt: 0,
+  );
+
+  // The previous cycle (25 Sep - 24 Oct) left 6000 of 10000 unused.
+  test('a rollover budget alerts against limit + carry', () async {
+    await rollover();
+    await spend('p1', 4000, at(2026, 10, 1));
+    await spend('t1', 9900, at(2026, 11, 5)); // 61% of 16000: no alert
     expect(await run(), isEmpty);
+    await spend('t2', 3100, at(2026, 11, 6)); // 13000/16000 = 81%
+    expect(await run(), [AlertOutcome.shown]);
+    expect(fired.single, endsWith('|80')); // not 100: carry applied
+    expect(await run(), [AlertOutcome.duplicate]);
+  });
+
+  test('the screen and the alert use the same effective limit', () async {
+    await rollover();
+    await spend('p1', 4000, at(2026, 10, 1));
+    await spend('t1', 13000, at(2026, 11, 5));
+    final cycle = schedule.cycleOn(cycles.today);
+    final specs = [
+      for (final r in await db.select(db.budgets).get()) budgetSpecOf(r),
+    ];
+    final carries = await rolloverCarries(
+      cycles: cycles,
+      schedule: schedule,
+      cycle: cycle,
+      specs: specs,
+    );
+    expect(carries['r'], Money(egp, 6000));
+    final totals = await cycles.totals(cycle);
+    final data = buildBudgetScreenData(
+      cycle: cycle,
+      today: cycles.today,
+      totals: totals,
+      basis: {egp: Money(egp, 10000) + basisCarry(egp, specs, carries)},
+      carries: carries,
+      budgets: [BudgetInput(spec: specs.single, nameAr: 'أ', nameEn: 'F')],
+      calendarMonth: false,
+      hasPrevious: true,
+    );
+    final screen = data.currencies.single;
+    expect(screen.limit, Money(egp, 16000));
+    final row = screen.rows.single.progress;
+    expect(row.effectiveLimit, Money(egp, 16000));
+
+    BudgetProgress? seen;
+    final probe = BudgetAlertService(
+      notifications: svc.notifications,
+      markFired: svc.markFired,
+      nowMs: () => 0,
+      text: (p, t) {
+        seen = p;
+        return (title: 'T', body: 'b', redactedTitle: 'R', redactedBody: 'r');
+      },
+    );
+    await runBudgetAlerts(
+      db: db,
+      cycles: cycles,
+      cycle: cycle,
+      schedule: schedule,
+      service: probe,
+    );
+    expect(seen!.effectiveLimit, row.effectiveLimit);
+    expect(seen!.percent, row.percent);
+  });
+
+  test('a changing carry never re-alerts a threshold already fired', () async {
+    await rollover();
+    await spend('p1', 4000, at(2026, 10, 1));
+    await spend('t1', 13000, at(2026, 11, 5));
+    expect(await run(), [AlertOutcome.shown]); // 81% -> 80
+    expect(await run(), [AlertOutcome.duplicate]);
+    // A late previous-cycle expense shrinks the carry to 2000: 108% -> 100.
+    await spend('p2', 4000, at(2026, 10, 2));
+    await CycleCacheInvalidator(db).invalidateAll(); // as the app wiring does
+    expect(await run(), [AlertOutcome.shown]);
+    expect(fired.where((k) => k.endsWith('|80')), hasLength(1));
+    expect(fired.where((k) => k.endsWith('|100')), hasLength(1));
+    // Carry changes again (to 0): nothing new, no storm.
+    await spend('p3', 5000, at(2026, 10, 3));
+    await CycleCacheInvalidator(db).invalidateAll();
+    expect(await run(), [AlertOutcome.duplicate]);
+    expect(await run(), [AlertOutcome.duplicate]);
+    expect(fired, hasLength(2));
   });
 }

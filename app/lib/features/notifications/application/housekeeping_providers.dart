@@ -210,6 +210,7 @@ final housekeepingProvider = Provider<Housekeeping>((ref) {
             db: d,
             cycles: cycles,
             cycle: schedule.cycleOn(cycles.today),
+            schedule: schedule,
             service: await _budgetAlertService(ref, d),
           );
         },
