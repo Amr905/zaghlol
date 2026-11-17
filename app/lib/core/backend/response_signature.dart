@@ -170,15 +170,23 @@ bool _verifyP1363(ResponseKey key, Uint8List message, List<int> raw) {
 /// passes nothing in release mode, and [ResponseSignatureVerifier] refuses dev
 /// kids (`s0000x`) there anyway. Only dev kids are accepted, so this can never
 /// pin a production key. Empty text gives no keys; anything malformed throws.
+const String _badDevKeys =
+    'ZAGHLOL_DEV_KEYS is malformed: expected kid:x:y,kid:x:y (dev kids only); '
+    'copy it from GET /dev/v1/app-keys.';
+
 List<ResponseKey> parseDevBackendKeys(String text) {
   if (text.trim().isEmpty) return const <ResponseKey>[];
   final keys = <ResponseKey>[];
   for (final item in text.split(',')) {
     final parts = item.trim().split(':');
     if (parts.length != 3 || !RegExp(r'^[se]0000[a-z]$').hasMatch(parts[0])) {
-      throw ArgumentError('bad dev key list');
+      throw ArgumentError(_badDevKeys);
     }
-    keys.add(ResponseKey.fromJwk(kid: parts[0], x: parts[1], y: parts[2]));
+    try {
+      keys.add(ResponseKey.fromJwk(kid: parts[0], x: parts[1], y: parts[2]));
+    } on Object {
+      throw ArgumentError(_badDevKeys);
+    }
   }
   return List.unmodifiable(keys);
 }

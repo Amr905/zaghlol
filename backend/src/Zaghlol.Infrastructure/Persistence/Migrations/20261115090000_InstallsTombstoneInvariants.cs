@@ -7,7 +7,7 @@ namespace Zaghlol.Infrastructure.Persistence.Migrations
     /// <summary>
     /// FU-020 (T-122 R2-1, tests N1): tightens <c>installs_before_update</c>. (1) The tombstone exemption used to let
     /// <c>seat_key_hash</c> change to any value once <c>deleted_at</c> was set; now the only change allowed on an existing hash is
-    /// to NULL in the same statement that sets <c>deleted_at</c>, and a tombstoned install can never gain a hash. (2)
+    /// to NULL, in the statement that sets <c>deleted_at</c> or later on an already tombstoned row, and a tombstoned install can never gain a hash. (2)
     /// <c>deleted_at</c> is one-way: once set it can't be cleared or changed. Behaviour for live installs is unchanged. Trigger text
     /// only, no schema change (the model snapshot is unchanged). Down restores the InitialCreate function body.
     /// </summary>

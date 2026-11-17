@@ -63,6 +63,11 @@ void main() {
     test('isPrivateLanIpv4 matches RFC 1918 only', () {
       expect(BackendConfig.isPrivateLanIpv4('192.168.0.1'), isTrue);
       expect(BackendConfig.isPrivateLanIpv4('169.254.1.1'), isFalse);
+      // FU-228 B1: leading-zero octets can be octal to a resolver.
+      expect(BackendConfig.isPrivateLanIpv4('010.0.0.1'), isFalse);
+      expect(BackendConfig.isPrivateLanIpv4('192.168.00.1'), isFalse);
+      expect(BackendConfig.isPrivateLanIpv4('10.0.0.1'), isTrue);
+      expect(BackendConfig.isPrivateLanIpv4('192.168.0.1'), isTrue);
       expect(BackendConfig.isPrivateLanIpv4('127.0.0.1'), isFalse);
     });
   });
@@ -87,6 +92,16 @@ void main() {
       final y = k['y']! as String;
       final keys = parseDevBackendKeys('s0000d:$x:$y,e0000d:$x:$y');
       expect(keys.map((e) => e.kid), ['s0000d', 'e0000d']);
+      expect(
+        () => parseDevBackendKeys('s0000d:AAAA:BBBB'),
+        throwsA(
+          isA<ArgumentError>().having(
+            (e) => e.message,
+            'message',
+            contains('ZAGHLOL_DEV_KEYS'),
+          ),
+        ),
+      );
       expect(() => parseDevBackendKeys('s2026a:$x:$y'), throwsArgumentError);
       expect(() => parseDevBackendKeys('s0000d:$x'), throwsArgumentError);
       expect(

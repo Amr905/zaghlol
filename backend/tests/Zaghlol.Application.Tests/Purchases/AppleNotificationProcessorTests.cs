@@ -516,6 +516,6 @@ internal sealed class ThrowingFind(FakeNotificationStore inner, string key) : IA
 
     public Task<(long LessThan1h, long AtLeast1h)> BacklogAsync(DateTimeOffset now, CancellationToken cancellationToken) => inner.BacklogAsync(now, cancellationToken);
 
-    public Task<IReadOnlyList<ApplePurchaseRow>> ListExpiredSubscriptionsAsync(DateTimeOffset now, int limit, CancellationToken cancellationToken) =>
-        inner.ListExpiredSubscriptionsAsync(now, limit, cancellationToken);
+    public Task<IReadOnlyList<ApplePurchaseRow>> ListExpiredSubscriptionsAsync(DateTimeOffset now, int limit, bool includeSandbox, CancellationToken cancellationToken) =>
+        inner.ListExpiredSubscriptionsAsync(now, limit, includeSandbox, cancellationToken);
 }

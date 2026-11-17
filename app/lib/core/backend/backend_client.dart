@@ -106,6 +106,11 @@ final class BackendConfig {
     final m = RegExp(r'^(\d{1,3})\.(\d{1,3})\.(\d{1,3})\.(\d{1,3})$')
         .firstMatch(host);
     if (m == null) return false;
+    // A leading zero may be read as octal by a libc resolver (010 = 8): refuse.
+    if ([for (var i = 1; i <= 4; i++) m.group(i)!]
+        .any((t) => t.length > 1 && t.startsWith('0'))) {
+      return false;
+    }
     final o = [for (var i = 1; i <= 4; i++) int.parse(m.group(i)!)];
     if (o.any((v) => v > 255)) return false;
     return o[0] == 10 ||
