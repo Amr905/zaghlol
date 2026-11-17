@@ -112,6 +112,59 @@ void main() {
       fired = {};
     });
 
+    test('FU-133: hiding amounts after an alert was scheduled for quiet '
+        'hours re-schedules it redacted under the same id', () async {
+      var hide = false;
+      final svc = NotificationService(
+        gateway: gw,
+        now: () => DateTime(2026, 1, 1, 23, 30),
+        loadPrefs: () async => NotificationPrefs(
+          typeEnabled: _all,
+          quietHours: quiet,
+          hideAmounts: hide,
+        ),
+        markFired: ({
+          required kind,
+          required subjectId,
+          required periodKey,
+          required threshold,
+          required at,
+        }) async => fired.add('$kind|$subjectId|$periodKey|$threshold'),
+        unmarkFired: ({
+          required kind,
+          required subjectId,
+          required periodKey,
+          required threshold,
+        }) async {},
+      );
+      expect(await svc.notify(req()), AlertOutcome.scheduled);
+      expect(gw.scheduled.single.title, contains('4,000'));
+      // Still shown: nothing to do.
+      expect(await svc.redactScheduled(), 0);
+      expect(gw.scheduled, hasLength(1));
+
+      hide = true;
+      expect(await svc.redactScheduled(), 1);
+      expect(gw.scheduled, hasLength(2));
+      final again = gw.scheduled.last;
+      expect(again.id, gw.scheduled.first.id);
+      expect(again.at, gw.scheduled.first.at);
+      expect('${again.title} ${again.body}', isNot(contains('4,000')));
+      expect(again.title, 'Food budget alert');
+      // Done once.
+      expect(await svc.redactScheduled(), 0);
+    });
+
+    test(
+      'FU-133: an alert scheduled already redacted is not re-sent',
+      () async {
+        final svc = make(DateTime(2026, 1, 1, 23, 30), hide: true);
+        await svc.notify(req());
+        expect(await svc.redactScheduled(), 0);
+        expect(gw.scheduled, hasLength(1));
+      },
+    );
+
     test('FU-133: a failed gateway call releases the dedupe claim', () async {
       final n = make(DateTime(2026, 11, 13, 12));
       final bad = _ThrowingGateway();
