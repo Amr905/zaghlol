@@ -4,7 +4,7 @@
 
 import 'package:zaghlol_domain/zaghlol_domain.dart';
 import 'package:zaghlol_parsing/zaghlol_parsing.dart'
-    show TemplateDirection, TemplateEvent;
+    show GenericEvent, TemplateDirection, TemplateEvent, foldKey;
 
 import '../../transactions/domain/transaction.dart';
 import 'ingest_policy.dart';
@@ -254,3 +254,31 @@ int paydayDayOf(String? stored) {
 /// Offsets the schema accepts (`occurred_tz_offset_min`, ±18 h).
 int clampTzOffset(int minutes) =>
     minutes < -1080 ? -1080 : (minutes > 1080 ? 1080 : minutes);
+
+/// CAT-cash / CAT-INSTAPAY: the category a template event implies, or null.
+/// The categorizer applies it after user rules (`eventCategoryId`).
+String? eventCategoryOf(TemplateEvent event) => switch (event) {
+  TemplateEvent.atmWithdrawal => kCashCategoryId,
+  TemplateEvent.instapayOut || TemplateEvent.instapayIn => kInstapayCategoryId,
+  _ => null,
+};
+
+final RegExp _instapayLatin = RegExp(r'\b(instapay|insta pay|ipn)\b');
+
+/// True when the message text carries an InstaPay cue (Latin or Arabic).
+/// Used on the body only here; the result, never the text, is kept.
+bool hasInstapayCue(String body) {
+  final t = foldKey(body);
+  return _instapayLatin.hasMatch(t) ||
+      t.contains(foldKey('انستاباي')) ||
+      t.contains(foldKey('إنستاباي'));
+}
+
+/// The category a generic result implies: a withdrawal is Cash, a transfer
+/// with an InstaPay cue is InstaPay.
+String? genericEventCategoryOf(GenericEvent? event, {required bool instapay}) =>
+    switch (event) {
+      GenericEvent.withdrawal => kCashCategoryId,
+      GenericEvent.transfer when instapay => kInstapayCategoryId,
+      _ => null,
+    };

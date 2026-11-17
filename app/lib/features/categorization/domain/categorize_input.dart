@@ -14,6 +14,7 @@ CategorizeInput categorizeInputFor({
   String? merchantNorm,
   String? counterpartyKind,
   String? counterpartyValue,
+  String? eventCategoryId,
 }) {
   final cleaned = cleanMerchant(merchantRaw ?? '').cleaned;
   return CategorizeInput(
@@ -21,5 +22,6 @@ CategorizeInput categorizeInputFor({
     merchantText: foldKey(cleaned),
     counterpartyKind: PartyKind.tryParse(counterpartyKind),
     counterpartyValue: counterpartyValue,
+    eventCategoryId: eventCategoryId,
   );
 }

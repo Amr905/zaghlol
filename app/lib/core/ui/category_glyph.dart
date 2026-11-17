@@ -38,6 +38,8 @@ class ZCategoryGlyph extends StatelessWidget {
     'family_giving': '\u{1F381}',
     'savings': '\u{1F437}',
     'income': '\u{1F4BC}',
+    'cash': '\u{1F4B5}',
+    'instapay': '\u{1F501}',
   };
 
   static const _emoji = <(List<String>, String)>[

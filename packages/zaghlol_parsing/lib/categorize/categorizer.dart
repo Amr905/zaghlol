@@ -81,6 +81,16 @@ final class Categorizer {
         tier: CategorizeTier.internal,
       );
     }
+    // The event's own category (ATM -> Cash, InstaPay -> InstaPay) beats the
+    // catalog and the person-to-person stop, never a user rule.
+    final event = input.eventCategoryId;
+    if (event != null && await _ports.categories.isLive(event)) {
+      return CategoryDecision(
+        categoryId: event,
+        source: CategorySource.heuristic,
+        tier: CategorizeTier.event,
+      );
+    }
     if (kind != null && kind.isP2p) {
       return const CategoryDecision(
         source: CategorySource.none,

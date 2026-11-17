@@ -1,6 +1,7 @@
 /// Public API of the `zaghlol_domain` package.
 library;
 
+export 'budget/cash_pool.dart';
 export 'budget/civil_date.dart';
 export 'budget/cycle_totals.dart';
 export 'budget/payday_schedule.dart';
