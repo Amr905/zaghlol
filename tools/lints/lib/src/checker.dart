@@ -337,17 +337,70 @@ class _RuleVisitor extends RecursiveAstVisitor<void> {
 
   // Rule 3: no_print_outside_debug.
 
+  // FU-032: also `core.print`, `developer.log`, `stdout.write*` and
+  // tear-offs such as `list.forEach(print)`.
+  static const Set<String> _sinkTargets = {
+    'core',
+    'developer',
+    'dev',
+    'stdout',
+    'stderr',
+  };
+  static const Set<String> _sinkMethods = {
+    'print',
+    'debugPrint',
+    'log',
+    'write',
+    'writeln',
+    'writeAll',
+    'writeCharCode',
+    'add',
+    'addError',
+  };
+
   void _checkPrint(MethodInvocation node) {
+    if (scope.isDebugOnly) return;
     final name = node.methodName.name;
-    if (!scope.isDebugOnly &&
-        node.target == null &&
-        (name == 'print' || name == 'debugPrint')) {
+    final target = node.target;
+    final bare = target == null && (name == 'print' || name == 'debugPrint');
+    final sink =
+        target is SimpleIdentifier &&
+        _sinkTargets.contains(target.name) &&
+        _sinkMethods.contains(name) &&
+        // `core.add`/`dev.add` are not sinks; only stdout/stderr take add.
+        (name != 'add' && name != 'addError' ||
+            target.name == 'stdout' ||
+            target.name == 'stderr');
+    if (bare || sink) {
       _report(
         ruleNoPrintOutsideDebug,
         node.methodName.offset,
         '$name is only allowed in debug-only files.',
       );
     }
+  }
+
+  @override
+  void visitSimpleIdentifier(SimpleIdentifier node) {
+    // A tear-off: `print` / `debugPrint` used as a value (argument,
+    // initializer or assignment), not called and not a declaration.
+    final name = node.name;
+    if (!scope.isDebugOnly && (name == 'print' || name == 'debugPrint')) {
+      final parent = node.parent;
+      final asValue =
+          parent is ArgumentList ||
+          parent is NamedExpression ||
+          parent is VariableDeclaration && parent.initializer == node ||
+          parent is AssignmentExpression && parent.rightHandSide == node;
+      if (asValue) {
+        _report(
+          ruleNoPrintOutsideDebug,
+          node.offset,
+          '$name is only allowed in debug-only files.',
+        );
+      }
+    }
+    super.visitSimpleIdentifier(node);
   }
 
   // Rule 4: safe_exception_required.
