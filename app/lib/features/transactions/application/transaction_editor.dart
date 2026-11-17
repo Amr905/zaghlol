@@ -20,12 +20,22 @@ abstract interface class TxnEditorPort {
   Future<EditOutcome> update(String id, TransactionEdit edit);
 }
 
+/// Runs after the user gave a stored transaction a category (FU-141: the
+/// merchant-contribution offer). Best effort.
+typedef CategorizedHook = Future<void> Function(String txnId);
+
 class TransactionEditor implements TxnEditorPort {
-  TransactionEditor(this._repo, this._pairing, this._refunds);
+  TransactionEditor(
+    this._repo,
+    this._pairing,
+    this._refunds, {
+    this.onCategorized,
+  });
 
   final TransactionRepository _repo;
   final TransferPairingUseCase _pairing;
   final RefundMatching _refunds;
+  final CategorizedHook? onCategorized;
 
   @override
   Future<List<String>> add(List<NewTransaction> legs) async {
@@ -34,6 +44,7 @@ class TransactionEditor implements TxnEditorPort {
       ids.add((await _repo.add(leg)).id);
     }
     await _afterSave(ids.first, legs.first.direction);
+    if (legs.first.categoryId != null) await _categorized(ids.first);
     return ids;
   }
 
@@ -44,7 +55,19 @@ class TransactionEditor implements TxnEditorPort {
         ? await r.editWithOutcome(id, edit)
         : EditOutcome(await r.edit(id, edit), const []);
     await _afterSave(id, outcome.record.direction);
+    if (edit.categoryId?.value != null) await _categorized(id);
     return outcome;
+  }
+
+  Future<void> _categorized(String id) async {
+    final hook = onCategorized;
+    if (hook == null) return;
+    try {
+      await hook(id);
+    } on Object {
+      // The save is done; a contribution that could not be queued (queue
+      // full, database busy) is simply not sent.
+    }
   }
 
   Future<void> _afterSave(String id, TxnDirection direction) async {

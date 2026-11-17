@@ -4,6 +4,7 @@ import 'package:zaghlol/features/gold/presentation/gold_ui_ports.dart'
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/misc.dart' show Override;
 import 'package:flutter_test/flutter_test.dart';
+import 'package:zaghlol/core/db/daos/outbox_dao.dart';
 import 'package:zaghlol/core/l10n/generated/app_localizations.dart';
 import 'package:zaghlol/core/settings/settings_keys.dart';
 import 'package:zaghlol/features/security/domain/app_lock_controller.dart';
@@ -394,6 +395,45 @@ void main() {
         find.text(_t(tester, PrivacyScreen).privacyContributeTurnedOn),
         findsOneWidget,
       );
+    });
+
+    testWidgets('FU-141: turning contribution off deletes the queue', (
+      tester,
+    ) async {
+      final h = SettingsHarness();
+      addTearDown(h.db.close);
+      await tester.runAsync(() async {
+        await h.repo.set(Settings.contributionOptIn, true);
+        await OutboxDao(h.db).enqueue(
+          id: 'c1',
+          kind: OutboxKind.contribution,
+          payload: {
+            'merchantNorm': 'corner shop',
+            'institutionCode': 'nbe',
+            'categoryCode': 'food',
+          },
+          createdAt: 1,
+        );
+      });
+      await tester.pumpWidget(
+        h.app(const PrivacyScreen(platform: 'android'), contributing: true),
+      );
+      await settle(tester);
+      final toggle = find.byType(Switch).first;
+      await tester.ensureVisible(toggle);
+      await tester.tap(toggle);
+      await tester.runAsync(
+        () => Future<void>.delayed(const Duration(milliseconds: 100)),
+      );
+      await tester.pump();
+      expect(
+        await tester.runAsync(() => h.repo.get(Settings.contributionOptIn)),
+        isFalse,
+      );
+      final left = await tester.runAsync(
+        () => OutboxDao(h.db).due(now: 1 << 50),
+      );
+      expect(left, isEmpty);
     });
 
     testWidgets('delete needs the typed word; wipe runs once', (tester) async {

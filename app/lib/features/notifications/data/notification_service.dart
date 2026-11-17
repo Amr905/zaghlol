@@ -56,6 +56,10 @@ final class NotificationService {
   unmarkFired;
   final DateTime Function() _now;
 
+  /// FU-133: alerts scheduled for the end of quiet hours with the full text,
+  /// by platform id. Held in memory only (see [redactScheduled]).
+  final Map<int, (AlertRequest, PlatformNotification)> _scheduledVisible = {};
+
   Future<AlertOutcome> notify(AlertRequest r) async {
     final prefs = await loadPrefs();
     if (!prefs.typeEnabled(r.type)) return AlertOutcome.disabled;
@@ -85,6 +89,7 @@ final class NotificationService {
     try {
       if (delayed) {
         await gateway.schedule(n);
+        if (!prefs.hideAmounts) _scheduledVisible[n.id] = (r, n);
         return AlertOutcome.scheduled;
       }
       await gateway.show(n);
@@ -98,6 +103,40 @@ final class NotificationService {
       );
       rethrow;
     }
+  }
+
+  /// FU-133: the redaction choice is made when an alert is scheduled. When
+  /// the user hides amounts later (or turns app lock on) before it fires,
+  /// this re-schedules every alert still waiting with the full text, under
+  /// the same id, with the redacted text (the platform replaces it). Does
+  /// nothing while amounts are shown. Returns how many were replaced.
+  ///
+  /// Residual: the list lives in memory, so an alert scheduled before the
+  /// app process restarted keeps its text.
+  Future<int> redactScheduled() async {
+    if (_scheduledVisible.isEmpty) return 0;
+    final prefs = await loadPrefs();
+    if (!prefs.hideAmounts) return 0;
+    final now = _now().toUtc();
+    var replaced = 0;
+    for (final key in [..._scheduledVisible.keys]) {
+      final (r, n) = _scheduledVisible[key]!;
+      _scheduledVisible.remove(key);
+      final at = n.at;
+      if (at == null || !at.isAfter(now)) continue;
+      await gateway.schedule(
+        PlatformNotification(
+          id: n.id,
+          title: r.redactedTitle,
+          body: r.redactedBody,
+          payload: n.payload,
+          at: at,
+          type: n.type,
+        ),
+      );
+      replaced++;
+    }
+    return replaced;
   }
 
   /// A stable positive 31-bit id (FNV-1a) of the dedupe key.

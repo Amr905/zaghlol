@@ -8,6 +8,7 @@
 
 import 'bulk_edit.dart';
 import 'refund_matching.dart';
+import 'transaction_editor.dart' show CategorizedHook;
 import 'transfer_pairing.dart';
 
 /// The port the list screen uses (faked in widget tests).
@@ -31,11 +32,16 @@ class BulkActions implements TxnBulkActions {
     required this._bulk,
     required this._pairing,
     required this._refunds,
+    this.onCategorized,
   });
 
   final BulkEditUseCase _bulk;
   final TransferPairingUseCase _pairing;
   final RefundMatching _refunds;
+
+  /// FU-141: runs for each re-categorized row after the batch committed
+  /// (the merchant-contribution offer). Best effort.
+  final CategorizedHook? onCategorized;
 
   /// Ids of each delete batch, so an Undo can re-pair and re-link them.
   final Map<String, Set<String>> _deleted = {};
@@ -45,10 +51,23 @@ class BulkActions implements TxnBulkActions {
     Set<String> ids,
     String categoryId, {
     bool alwaysUseForMerchants = false,
-  }) => _bulk.apply(
-    ids,
-    SetCategory(categoryId, alwaysUseForMerchants: alwaysUseForMerchants),
-  );
+  }) async {
+    final result = await _bulk.apply(
+      ids,
+      SetCategory(categoryId, alwaysUseForMerchants: alwaysUseForMerchants),
+    );
+    final hook = onCategorized;
+    if (hook != null) {
+      for (final id in ids) {
+        try {
+          await hook(id);
+        } on Object {
+          // The edit is done; a contribution not queued is not sent.
+        }
+      }
+    }
+    return result;
+  }
 
   @override
   Future<BulkEditResult> setAccount(Set<String> ids, String accountId) =>

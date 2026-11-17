@@ -123,20 +123,32 @@ class TransactionsDao {
       guardWrite(() => _db.transaction(body));
 
   /// Live transactions matching [q], newest first (FR-TXN-01).
+  ///
+  /// With [afterOccurredAt] and [afterId] (both or neither), only rows after
+  /// that one in this order (keyset paging, FU-131).
   Future<List<TransactionRow>> list(
     TxnQuery q, {
     required int limit,
     int offset = 0,
+    int? afterOccurredAt,
+    String? afterId,
   }) async {
     final built = _build(q);
+    final keyset = afterOccurredAt != null && afterId != null;
     final rows = await guardRead(
       () => _db
           .customSelect(
             'SELECT t.* FROM transactions t${built.join} '
             'WHERE ${built.where} '
+            '${keyset ? 'AND (t.occurred_at < ? OR (t.occurred_at = ? AND t.id > ?)) ' : ''}'
             'ORDER BY t.occurred_at DESC, t.id LIMIT ? OFFSET ?',
             variables: [
               ...built.args,
+              if (keyset) ...[
+                Variable.withInt(afterOccurredAt),
+                Variable.withInt(afterOccurredAt),
+                Variable.withString(afterId),
+              ],
               Variable.withInt(limit.clamp(0, maxSearchLimit)),
               Variable.withInt(offset < 0 ? 0 : offset),
             ],

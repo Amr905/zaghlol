@@ -30,6 +30,7 @@ class SettingsHarness {
     int payday = 1,
     bool appLock = false,
     bool approx = false,
+    bool contributing = false,
   }) => [
     appDatabaseProvider.overrideWith((ref) async => db),
     settingsRepositoryProvider.overrideWith((ref) async => repo),
@@ -49,7 +50,7 @@ class SettingsHarness {
     ),
     appLockEnabledProvider.overrideWith((ref) => Stream.value(appLock)),
     appLockTimeoutSProvider.overrideWith((ref) => Stream.value(60)),
-    contributionOptInProvider.overrideWith((ref) => Stream.value(false)),
+    contributionOptInProvider.overrideWith((ref) => Stream.value(contributing)),
     // The real ones read the backup and sync services (WIRE-SVC); a widget
     // test wants fixed values and no timers.
     lastBackupAtProvider.overrideWithValue(null),
@@ -63,11 +64,17 @@ class SettingsHarness {
     int payday = 1,
     bool appLock = false,
     bool approx = false,
+    bool contributing = false,
     List<Override> overrides = const [],
   }) {
     return ProviderScope(
       overrides: [
-        ..._base(payday: payday, appLock: appLock, approx: approx),
+        ..._base(
+          payday: payday,
+          appLock: appLock,
+          approx: approx,
+          contributing: contributing,
+        ),
         ...overrides,
       ],
       child: MaterialApp(

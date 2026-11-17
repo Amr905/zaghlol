@@ -15,6 +15,8 @@ import '../../../../core/db/daos/categories_dao.dart';
 import '../../../budget/application/budget_providers.dart';
 import '../../../budget/application/cycle_app_wiring.dart'
     show domainEventBusProvider;
+import '../../../categorization/application/contributions.dart'
+    show contributionQueueProvider;
 import '../../../home/application/card_filter.dart';
 import '../../application/bulk_actions.dart';
 import '../../application/bulk_edit.dart';
@@ -441,5 +443,11 @@ final txnBulkActionsProvider = FutureProvider<TxnBulkActions>((ref) async {
     bulk: await ref.watch(bulkEditUseCaseProvider.future),
     pairing: await ref.watch(transferPairingUseCaseProvider.future),
     refunds: await ref.watch(refundMatchingProvider.future),
+    // FU-141: unknown merchants the user re-categorizes are offered as
+    // contributions (queued only with the opt-in on).
+    onCategorized: (id) async {
+      final queue = await ref.read(contributionQueueProvider.future);
+      await queue.offerForTransaction(id);
+    },
   );
 }, name: 'txnBulkActionsProvider');
