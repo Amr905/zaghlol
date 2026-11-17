@@ -259,6 +259,21 @@ final class OcrTests: XCTestCase {
     XCTAssertEqual(back, bytes)
   }
 
+  func testSealImageThroughASymlinkDeletesThePlainFileItself() throws {
+    let fm = FileManager.default
+    let base = fm.temporaryDirectory.appendingPathComponent(UUID().uuidString, isDirectory: true)
+    let plainDir = base.appendingPathComponent("plain", isDirectory: true)
+    try fm.createDirectory(at: plainDir, withIntermediateDirectories: true)
+    defer { try? fm.removeItem(at: base) }
+    let real = plainDir.appendingPathComponent("real.jpg")
+    try Data((0..<64).map { UInt8($0) }).write(to: real)
+    let link = plainDir.appendingPathComponent("link.jpg")
+    try fm.createSymbolicLink(at: link, withDestinationURL: real)
+    let host = sealHost(key: Data(repeating: 7, count: 32), home: base.appendingPathComponent("files"), plain: plainDir)
+    _ = try host.sealImageNow(plainPath: link.path)
+    XCTAssertFalse(fm.fileExists(atPath: real.path), "the plain image behind the link is deleted")
+  }
+
   func testSealImageWithoutKeyIsNotAvailableAndStillDeletesThePlainFile() throws {
     let fm = FileManager.default
     let base = fm.temporaryDirectory.appendingPathComponent(UUID().uuidString, isDirectory: true)

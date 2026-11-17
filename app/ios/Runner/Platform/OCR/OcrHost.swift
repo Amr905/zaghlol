@@ -315,7 +315,9 @@ final class OcrHost: OcrHostApi {
       throw Self.error(.ioError)  // never touch (or delete) a file outside temp/cache
     }
     // Read once, then delete the plain file at once, whatever follows.
-    let url = URL(fileURLWithPath: plainPath).standardizedFileURL
+    // Resolve symlinks too (FU-230d): removing a link alone would leave the
+    // plain image it points to on disk.
+    let url = URL(fileURLWithPath: plainPath).resolvingSymlinksInPath().standardizedFileURL
     let size = (try? url.resourceValues(forKeys: [.fileSizeKey]))?.fileSize
     var loaded: Data?
     if let size = size, size > 0, size <= SpoolFileImageSource.maxBytes - 28 {
