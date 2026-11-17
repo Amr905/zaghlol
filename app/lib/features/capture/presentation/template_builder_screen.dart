@@ -203,6 +203,8 @@ class _State extends ConsumerState<TemplateBuilderScreen> {
               maxLines: 6,
               maxLength: _maxSampleField,
               keyboardType: TextInputType.multiline,
+              autocorrect: false,
+              enableSuggestions: false,
               decoration: InputDecoration(
                 labelText: t.templatesBuilderPaste,
                 border: const OutlineInputBorder(),
@@ -286,6 +288,8 @@ class _State extends ConsumerState<TemplateBuilderScreen> {
                 controller: _sender,
                 enabled: gold,
                 maxLength: 128,
+                autocorrect: false,
+                enableSuggestions: false,
                 decoration: InputDecoration(
                   labelText: t.templatesBuilderSender,
                   helperText: t.templatesBuilderSenderHint,

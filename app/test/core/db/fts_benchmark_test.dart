@@ -3,7 +3,7 @@
 // T-016 §8 (FU-069): the hard gate is the real NFR, FR-TXN-01 search
 // p95 < 200 ms; the testing-strategy §5 host figure (50 ms) is a printed soft
 // warning. Each figure is the median of 3 measured passes after one warm-up.
-@Tags(['benchmark'])
+@Tags(['benchmark', 'db-platform'])
 library;
 
 import 'dart:io';

@@ -1,5 +1,6 @@
 // T-102: S-24 / S-25 widget tests, ar + en, RTL, text scale 1.3. Synthetic.
 import 'package:flutter/material.dart';
+import 'package:flutter/semantics.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:zaghlol/core/l10n/date_format.dart';
 import 'package:zaghlol/core/settings/settings_providers.dart';
@@ -147,6 +148,48 @@ void main() {
     await tester.pumpAndSettle();
     expect(fake.calls, ['accept:sug', 'dismiss:sug', 'paid:late']);
     expect(find.text('Marked late as paid ✓'), findsOneWidget);
+  });
+
+  testWidgets('FU-217a: a bill row reads once, the pill stays a button', (
+    tester,
+  ) async {
+    final handle = tester.ensureSemantics();
+    await tester.binding.setSurfaceSize(const Size(390, 2600));
+    addTearDown(() => tester.binding.setSurfaceSize(null));
+    await tester.pumpWidget(
+      harness(
+        const BillsScreen(),
+        locale: const Locale('en'),
+        overrides: [billsDataProvider.overrideWith((ref) async => full())],
+      ),
+    );
+    await tester.pumpAndSettle();
+    final labels = <String>[];
+    void walk(SemanticsNode n) {
+      if (n.label.isNotEmpty) labels.add(n.label);
+      n.visitChildren((c) {
+        walk(c);
+        return true;
+      });
+    }
+
+    walk(tester.getSemantics(find.byType(BillsScreen)));
+    // The row's own sentence names the bill; no separate node repeats the
+    // bill name, the amount or the due month as a bare text node.
+    expect(
+      labels.where((l) => l.contains('gym')),
+      hasLength(1),
+      reason: '$labels',
+    );
+    expect(
+      labels.firstWhere((l) => l.contains('gym')).split('gym'),
+      hasLength(2),
+      reason: 'the name is read once in the row label',
+    );
+    // The visual day/month column would be appended to the row's label.
+    expect(labels.where((l) => l.contains('November')), isEmpty);
+    expect(labels.where((l) => l.contains('Mark paid')), isNotEmpty);
+    handle.dispose();
   });
 
   testWidgets('overdue row says so in words', (tester) async {

@@ -262,6 +262,27 @@ void main() {
       expect(a.toString(), isNot(contains('secret')));
     });
 
+    test('an Error (not an Exception) is "unavailable" too', () async {
+      final e = AskEngine(
+        charts: charts,
+        accounts: () async => accounts,
+        cycleBudgets: () async => budgets,
+        schedule: () async => PaydaySchedule.single(25),
+        entities: () async => throw StateError('boom'),
+        today: () => CivilDate(2026, 11, 10),
+      );
+      expect(await e.ask('صرفت كام'), isA<AskUnavailableAnswer>());
+      final c = AskEngine(
+        charts: charts,
+        accounts: () async => throw StateError('boom'),
+        cycleBudgets: () async => budgets,
+        schedule: () async => PaydaySchedule.single(25),
+        entities: () async => AskEntities.none,
+        today: () => CivilDate(2026, 11, 10),
+      );
+      expect(await c.askChip(AskChip.balance), isA<AskUnavailableAnswer>());
+    });
+
     test('answers print redacted', () async {
       final a = await ask<AskSpendAnswer>('صرفت كام بكارت CIB');
       expect(a.toString(), isNot(contains('150000')));

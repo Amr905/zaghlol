@@ -69,7 +69,8 @@ class AskEngine {
           recentRoasts,
         ),
       };
-    } on Exception {
+    } on Object {
+      // Errors (StateError, TypeError...) too: ask never throws (FU-157a).
       return const AskUnavailableAnswer();
     }
   }
@@ -117,7 +118,8 @@ class AskEngine {
         roastSeed,
         recentRoasts,
       );
-    } on Exception {
+    } on Object {
+      // Errors (StateError, TypeError...) too: ask never throws (FU-157a).
       return const AskUnavailableAnswer();
     }
   }

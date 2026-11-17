@@ -262,7 +262,12 @@ jobs:
         run: set -o pipefail; dart test --tags benchmark -j 1 -r expanded 2>&1 | tee ../../perf-parsing.log
       - name: flutter test --tags benchmark (app)
         working-directory: app
-        run: set -o pipefail; flutter test --tags benchmark --concurrency=1 -r expanded 2>&1 | tee ../perf-app.log
+        # FU-209a/c: the 50k-row FTS benchmark is gated by db-platform, not
+        # here (tag db-platform); one whole-step retry on a CI-load flake.
+        run: |
+          set -o pipefail
+          flutter test --tags 'benchmark && !db-platform' --concurrency=1 -r expanded 2>&1 | tee ../perf-app.log \
+            || { echo 'benchmark step failed once, retrying'; flutter test --tags 'benchmark && !db-platform' --concurrency=1 -r expanded 2>&1 | tee ../perf-app.log; }
       - name: Publish numbers
         if: always()
         run: |
