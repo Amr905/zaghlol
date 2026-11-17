@@ -85,6 +85,17 @@ void main() {
       notifications: service,
       buildText: text,
     );
+    // FU-255: a restore asked for the gate: nothing is sent, nothing is lost.
+    expect(
+      await sendDueReminders(
+        repository: repo,
+        notifications: service,
+        buildText: text,
+        shouldStop: () => true,
+      ),
+      0,
+    );
+    expect(gw.shown, isEmpty);
     expect(await run(), 1);
     expect(await run(), 0);
     expect(gw.shown, hasLength(1));

@@ -17,9 +17,11 @@ Future<int> sendDueReminders({
   required RecurringRepository repository,
   required NotificationService notifications,
   required ReminderTextBuilder buildText,
+  bool Function()? shouldStop,
 }) async {
   var sent = 0;
   for (final r in await repository.dueReminders()) {
+    if (shouldStop?.call() ?? false) break; // a restore asked for the gate
     final base = AlertRequest(
       type: NotificationType.upcomingDue,
       subjectId: r.item.id,
