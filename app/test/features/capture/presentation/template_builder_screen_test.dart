@@ -174,6 +174,24 @@ void main() {
     }
   }
 
+  testWidgets('text fields turn autocorrect and suggestions off', (t) async {
+    bigScreen(t);
+    final h = SettingsHarness();
+    addTearDown(h.db.close);
+    await t.pumpWidget(host(h, FakeStore()));
+    await t.pumpAndSettle();
+    setGold(t, true);
+    await t.pump();
+    for (final f in [
+      find.byType(TextField).first,
+      find.byType(TextField).last,
+    ]) {
+      final w = t.widget<TextField>(f);
+      expect(w.autocorrect, isFalse);
+      expect(w.enableSuggestions, isFalse);
+    }
+  });
+
   testWidgets('a pasted sample comes pre-tagged by the generic reader', (
     t,
   ) async {

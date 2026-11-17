@@ -363,3 +363,10 @@ balance of CIB	accountBalance	-	-	-	-	a_cib_credit,a_cib_debit	-	-	0
 رصيد CIB كام	accountBalance	-	-	-	-	a_cib_credit,a_cib_debit	-	-	0
 رصيد NBE	!unknownTarget
 balance of NBE	!unknownTarget
+رصيدي كام يعني	accountBalance	-	-	-	-	-	-	-	0
+what is my balance now	accountBalance	-	-	-	-	-	-	-	0
+how much money do i have	accountBalance	-	-	-	-	-	-	-	0
+كام رصيدي حاليا	accountBalance	-	-	-	-	-	-	-	0
+tell me my balance right now	accountBalance	-	-	-	-	-	-	-	0
+what is my current balance	accountBalance	-	-	-	-	-	-	-	0
+رصيدي الحالي كام	accountBalance	-	-	-	-	-	-	-	0
