@@ -134,6 +134,12 @@ internal sealed class SupportActionStore(IServiceProvider services, IAuditWriter
         public Task<SupportAuditRow?> NewestUnfreezeAsync(Guid purchaseId, CancellationToken cancellationToken) =>
             ReadAuditRowAsync(UnfreezeSql, purchaseId, null, cancellationToken);
 
+        public async Task<DateTimeOffset> DatabaseNowAsync(CancellationToken cancellationToken)
+        {
+            await using var command = Command("SELECT now()");
+            return new DateTimeOffset(DateTime.SpecifyKind((DateTime)(await command.ExecuteScalarAsync(cancellationToken))!, DateTimeKind.Utc));
+        }
+
         public async Task<bool> InstallLiveAsync(Guid installId, CancellationToken cancellationToken)
         {
             await using var command = Command("SELECT EXISTS (SELECT 1 FROM zaghlol.installs WHERE id = @id AND deleted_at IS NULL)");

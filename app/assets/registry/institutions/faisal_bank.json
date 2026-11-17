@@ -59,14 +59,14 @@
     },
     {
       "id": "faisal_bank.instapay_out.ar",
-      "version": 3,
+      "version": 4,
       "lang": "ar",
       "channel": [
         "sms"
       ],
       "event": "instapay_out",
       "direction": "expense",
-      "baseConfidence": 0.95,
+      "baseConfidence": 0.9,
       "pattern": "تحويل لحظي بمبلغ (?<amount>[\\d,.]+) (?<cur>جم|جنيه|egp) من حساب(?:ك|كم) (?:المنتهي|المنتهى|ينتهي|رقم) ?ب? ?[*x•]{0,4} ?(?<last4>\\d{4})(?: برقم مرجعي (?<ref>[a-z0-9]{6,24}))?(?: بتاريخ (?<date>\\d{1,2}-\\d{1,2}-\\d{4})(?: (?<time>\\d{1,2}:\\d{2}))?)?",
       "currencyMap": {
         "جم": "EGP",
@@ -81,14 +81,14 @@
     },
     {
       "id": "faisal_bank.instapay_out.en",
-      "version": 3,
+      "version": 4,
       "lang": "en",
       "channel": [
         "sms"
       ],
       "event": "instapay_out",
       "direction": "expense",
-      "baseConfidence": 0.95,
+      "baseConfidence": 0.9,
       "pattern": "instant transfer of (?<cur>egp|جم|جنيه) ?(?<amount>[\\d,.]+) (?:was )?(?:made|sent|debited) from your (?:account|a/c) (?:ending|ending in|no\\.?) ?[*x•]{0,4} ?(?<last4>\\d{4})(?:,? ref(?:erence)?:? (?<ref>[a-z0-9]{6,24}))?(?: on (?<date>\\d{1,2}-\\d{1,2}-\\d{4})(?: (?<time>\\d{1,2}:\\d{2}))?)?",
       "currencyMap": {
         "جم": "EGP",
@@ -103,14 +103,14 @@
     },
     {
       "id": "faisal_bank.instapay_in.ar",
-      "version": 3,
+      "version": 4,
       "lang": "ar",
       "channel": [
         "sms"
       ],
       "event": "instapay_in",
       "direction": "income",
-      "baseConfidence": 0.95,
+      "baseConfidence": 0.9,
       "pattern": "تم استلام تحويل لحظي بمبلغ (?<amount>[\\d,.]+) (?<cur>جم|جنيه|egp) (?:في|الي) حساب(?:ك|كم) (?:المنتهي|المنتهى|ينتهي|رقم) ?ب? ?[*x•]{0,4} ?(?<last4>\\d{4})(?: من (?<counterparty>[^\\d.]{2,40}?))?(?: برقم مرجعي (?<ref>[a-z0-9]{6,24}))?(?: بتاريخ (?<date>\\d{1,2}-\\d{1,2}-\\d{4})(?: (?<time>\\d{1,2}:\\d{2}))?)?\\.?$",
       "currencyMap": {
         "جم": "EGP",
@@ -125,14 +125,14 @@
     },
     {
       "id": "faisal_bank.instapay_in.en",
-      "version": 3,
+      "version": 4,
       "lang": "en",
       "channel": [
         "sms"
       ],
       "event": "instapay_in",
       "direction": "income",
-      "baseConfidence": 0.95,
+      "baseConfidence": 0.9,
       "pattern": "received an instant transfer of (?<cur>egp|جم|جنيه) ?(?<amount>[\\d,.]+) (?:from (?<counterparty>[^\\d.]{2,40}?) )?(?:into|in) your (?:account|a/c) (?:ending|ending in|no\\.?) ?[*x•]{0,4} ?(?<last4>\\d{4})(?:,? ref(?:erence)?:? (?<ref>[a-z0-9]{6,24}))?(?: on (?<date>\\d{1,2}-\\d{1,2}-\\d{4})(?: (?<time>\\d{1,2}:\\d{2}))?)?",
       "currencyMap": {
         "جم": "EGP",

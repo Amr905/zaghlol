@@ -22,6 +22,9 @@ class FakeActions implements ReviewActions {
   final List<String> calls = [];
   Object? failWith;
 
+  /// confirmGeneric answers false (the save was refused).
+  bool refuseGeneric = false;
+
   Future<void> _rec(String c) async {
     if (failWith != null) throw failWith!;
     calls.add(c);
@@ -61,7 +64,7 @@ class FakeActions implements ReviewActions {
     bool keep = false,
   }) async {
     await _rec(keep ? 'keep:${card.itemId}' : 'generic:${card.itemId}');
-    return true;
+    return !refuseGeneric;
   }
 
   @override

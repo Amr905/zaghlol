@@ -76,6 +76,11 @@ final class GenericSuggestion {
       source != null &&
       amount.isPositive;
 
+  /// The one rule for saving from a card: a swipe or Confirm needs [oneTap],
+  /// Keep also accepts [keepable]. The screen (`offersKeep`) and the save
+  /// action both go through the same two getters.
+  bool canSave({bool keep = false}) => oneTap || (keep && keepable);
+
   /// Null unless [payload] is a generic item with a readable amount.
   static GenericSuggestion? fromPayload(Map<String, Object?> payload) {
     if (payload['generic'] != true) return null;

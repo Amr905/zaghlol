@@ -141,7 +141,14 @@ public sealed class SupportActionService(
         }
 
         var lastUnfreeze = await tx.NewestUnfreezeAsync(command.PurchaseId, cancellationToken).ConfigureAwait(false);
-        return SupportRules.UnfreezeLockActive(lastUnfreeze, command.OperatorId, now) ? SupportOutcomes.Refused : null;
+        if (lastUnfreeze is null)
+        {
+            return null;
+        }
+
+        // The audit row's `at` is the database's now(): compare the 24 h edge against the database clock, not the app clock.
+        var dbNow = await tx.DatabaseNowAsync(cancellationToken).ConfigureAwait(false);
+        return SupportRules.UnfreezeLockActive(lastUnfreeze, command.OperatorId, dbNow) ? SupportOutcomes.Refused : null;
     }
 
     private async Task<SupportActionResult<SupportSeatMoveOutcome>> ApplyMoveAsync(
@@ -262,6 +269,13 @@ public sealed class SupportActionService(
                     .ConfigureAwait(false);
             }
 
+            if (await DetachRefusedAsync(tx, command, purchase, cancellationToken).ConfigureAwait(false))
+            {
+                // Certain to be refused: no store call.
+                return await RefuseDetachAsync(tx, command, SupportOwnershipOutcomes.NotRun, SupportOutcomes.Refused, SupportActionStatus.Conflict, cancellationToken)
+                    .ConfigureAwait(false);
+            }
+
             gated = purchase;
         }
 
@@ -290,8 +304,7 @@ public sealed class SupportActionService(
         }
 
         // A link the owner made from the buying phone (or by signing in) can't be detached by support (D-57(e)).
-        var source = await apply.ReadAuditAsync(command.PurchaseId, command.CorrectsAuditId, cancellationToken).ConfigureAwait(false);
-        if (!string.Equals(locked.AccountLinkedBy, "support", StringComparison.Ordinal) || !SupportRules.IsAttachSource(source, account))
+        if (await DetachRefusedAsync(apply, command, locked, cancellationToken).ConfigureAwait(false))
         {
             return await RefuseDetachAsync(apply, command, outcome, SupportOutcomes.Refused, SupportActionStatus.Conflict, cancellationToken).ConfigureAwait(false);
         }
@@ -301,6 +314,19 @@ public sealed class SupportActionService(
         var entry = new SupportDetachAudit(command.PurchaseId, account, command.TicketRef, command.CorrectsAuditId, outcome, SupportOutcomes.Detached);
         var auditId = await CommitAuditAsync(apply, command.OperatorId, command.PurchaseId, entry, false, cancellationToken).ConfigureAwait(false);
         return new(SupportActionStatus.Ok, new SupportDetachOutcome(command.PurchaseId, true, auditId));
+    }
+
+    /// <summary>The link and source checks of a detach (no store needed). An unlinked purchase is a no-op, not a refusal.</summary>
+    private static async Task<bool> DetachRefusedAsync(
+        ISupportActionTransaction tx, SupportDetachCommand command, SupportPurchase purchase, CancellationToken cancellationToken)
+    {
+        if (purchase.Seat.AccountId is not { } account)
+        {
+            return false;
+        }
+
+        var source = await tx.ReadAuditAsync(command.PurchaseId, command.CorrectsAuditId, cancellationToken).ConfigureAwait(false);
+        return !string.Equals(purchase.AccountLinkedBy, "support", StringComparison.Ordinal) || !SupportRules.IsAttachSource(source, account);
     }
 
     private async Task<SupportActionResult<SupportDetachOutcome>> RefuseDetachAsync(
@@ -394,7 +420,8 @@ public sealed class SupportActionService(
             reversed = await tx.ReadAuditAsync(command.PurchaseId, corrected, cancellationToken).ConfigureAwait(false);
         }
 
-        return SupportRules.UnfreezeOperatorAllowed(command.OperatorId, freeze, reversed) && SupportRules.FreezeLockElapsed(freeze, now)
+        var dbNow = await tx.DatabaseNowAsync(cancellationToken).ConfigureAwait(false);
+        return SupportRules.UnfreezeOperatorAllowed(command.OperatorId, freeze, reversed) && SupportRules.FreezeLockElapsed(freeze, dbNow)
             ? (null, freeze!.Id)
             : (SupportOutcomes.Refused, freeze?.Id);
     }

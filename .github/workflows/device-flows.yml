@@ -20,9 +20,9 @@ on:
         type: boolean
         default: false
       explorer_plan:
-        description: 'Explorer runs: base (Arabic light), variants (en, dark, 1.3, paywall, onboarding) or all'
+        description: 'Explorer runs: base (Arabic light), variants (en, dark, 1.3, paywall, onboarding), new (review cards, charts) or all'
         type: choice
-        options: [all, base, variants]
+        options: [all, base, variants, new]
         default: all
   push:
     branches:
@@ -52,8 +52,8 @@ jobs:
     timeout-minutes: 90
     env:
       DEVICE: emulator-5554
-      EXPLORER_ONLY: ${{ inputs.explorer_only && '1' || '' }}
-      EXPLORER_PLAN: ${{ inputs.explorer_plan || 'all' }}
+      EXPLORER_ONLY: ${{ (inputs.explorer_only || startsWith(github.ref_name, 'ci/TEST-explorer3')) && '1' || '' }}
+      EXPLORER_PLAN: ${{ inputs.explorer_plan || (startsWith(github.ref_name, 'ci/TEST-explorer3') && 'new' || 'all') }}
       # SMS-device: the ci/SMS-device branch runs the SMS part only.
       SMS_ONLY: ${{ (github.ref_name == 'ci/SMS-device' || inputs.sms_only) && '1' || '' }}
     steps:

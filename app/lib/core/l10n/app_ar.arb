@@ -4012,11 +4012,11 @@
   "@insightsChartsOtherSlice": {
     "description": "C · donut remainder slice"
   },
-  "insightsChartTitleCashFlow": "الداخل والخارج والصافي",
+  "insightsChartTitleCashFlow": "الداخل والخارج",
   "@insightsChartTitleCashFlow": {
     "description": "T · chart 1 (Free)"
   },
-  "insightsChartTitleCategories": "فلوسك رايحة فين؟",
+  "insightsChartTitleCategories": "فلوسك راحت فين؟",
   "@insightsChartTitleCategories": {
     "description": "T · chart 2 (Free)"
   },
@@ -4151,7 +4151,7 @@
       }
     }
   },
-  "insightsChartA11yCategories": "فلوسك رايحة فين: {category} الأكبر بـ {amount}، يعني {percent}",
+  "insightsChartA11yCategories": "فلوسك راحت فين: {category} الأكبر بـ {amount}، يعني {percent}",
   "@insightsChartA11yCategories": {
     "description": "A",
     "placeholders": {

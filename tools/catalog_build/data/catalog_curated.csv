@@ -370,7 +370,6 @@ keyword,,,,,,,,,income,,,استرداد,ar,60
 keyword,,,,,,,,,income,,,كاش باك,ar,60
 keyword,,,,,,,,,income,,,فري لانس,ar,60
 merchant,,أنثروبيك,,,,,,Anthropic,subscriptions,,prefix,,,
-alias,,,,,,,,Anthropic,,CLAUDE,prefix,,,
 alias,,,,,,,,Anthropic,,CLAUDE AI,prefix,,,
 alias,,,,,,,,Anthropic,,كلود,prefix,,,
 merchant,,شات جي بي تي,,,,,,ChatGPT,subscriptions,,prefix,,,
@@ -385,7 +384,7 @@ merchant,,دولينجو,,,,,,Duolingo,subscriptions,,prefix,,,
 merchant,,آي كلاود,,,,,,iCloud,subscriptions,,prefix,,,
 merchant,,مصر للبترول,,,,,,Misr Petroleum,transport,,prefix,,,
 keyword,,,,,,,,,transport,,,وقود,ar,60
-keyword,,,,,,,,,transport,,,محطة,ar,60
+keyword,,,,,,,,,transport,,,محطة وقود,ar,60
 keyword,,,,,,,,,transport,,,diesel,en,60
 keyword,,,,,,,,,bills,,,telecom,en,60
 keyword,,,,,,,,,bills,,,top up,en,60
@@ -395,7 +394,7 @@ keyword,,,,,,,,,bills,,,باقة,ar,60
 keyword,,,,,,,,,groceries,,,hypermarket,en,60
 keyword,,,,,,,,,groceries,,,هايبر,ar,60
 keyword,,,,,,,,,dining,,,talabat,en,60
-keyword,,,,,,,,,dining,,,food,en,60
+keyword,,,,,,,,,dining,,,food delivery,en,60
 keyword,,,,,,,,,subscriptions,,,premium,en,60
 keyword,,,,,,,,,subscriptions,,,membership,en,60
 keyword,,,,,,,,,subscriptions,,,تجديد اشتراك,ar,60

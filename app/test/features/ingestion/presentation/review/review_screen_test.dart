@@ -329,6 +329,23 @@ void main() {
           expect(tester.takeException(), isNull);
         });
 
+        testWidgets('a refused Keep says so instead of failing silently '
+            '(${locale.languageCode})', (tester) async {
+          final actions = FakeActions()..refuseGeneric = true;
+          await pumpReview(
+            tester,
+            reviewApp(actions: actions, queue: [keepable], locale: locale),
+          );
+          final l = AppLocalizations.of(
+            tester.element(find.byType(ReviewScreen)),
+          );
+          await tester.tap(find.text(l.ingestionReviewKeep));
+          await tester.pump();
+          await tester.pump(const Duration(milliseconds: 300));
+          expect(find.text(l.commonErrorSaveFailed), findsOneWidget);
+          expect(find.text(l.ingestionReviewKeep), findsOneWidget);
+        });
+
         testWidgets('Keep is disabled with a reason when there is no amount '
             '(${locale.languageCode})', (tester) async {
           final actions = FakeActions();

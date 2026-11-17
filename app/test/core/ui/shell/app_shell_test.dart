@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/rendering.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:zaghlol/core/routing/app_routes.dart';
 import 'package:zaghlol/core/ui/shell/add_sheet.dart';
@@ -215,4 +216,36 @@ void main() {
       expect(tester.takeException(), isNull);
     }
   });
+
+  for (final platform in [TargetPlatform.android, TargetPlatform.iOS]) {
+    for (final lang in ['ar', 'en']) {
+      testWidgets('tab labels are not truncated at 320 dp, x1.3 '
+          '($lang, $platform)', (tester) async {
+        await tester.binding.setSurfaceSize(const Size(320, 640));
+        addTearDown(() => tester.binding.setSurfaceSize(null));
+        await pumpShell(
+          tester,
+          locale: Locale(lang),
+          platform: platform,
+          textScale: 1.3,
+        );
+        expect(tester.takeException(), isNull);
+        final bar = find.byType(NavigationBar).evaluate().isNotEmpty
+            ? find.byType(NavigationBar)
+            : find.byType(Scaffold).first;
+        final paragraphs = tester
+            .renderObjectList<RenderParagraph>(
+              find.descendant(of: bar, matching: find.byType(RichText)),
+            )
+            .where((p) => p.text.toPlainText().trim().isNotEmpty);
+        for (final p in paragraphs) {
+          expect(
+            p.didExceedMaxLines,
+            isFalse,
+            reason: 'truncated: ${p.text.toPlainText()}',
+          );
+        }
+      });
+    }
+  }
 }

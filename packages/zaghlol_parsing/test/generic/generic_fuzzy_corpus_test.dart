@@ -219,6 +219,9 @@ void main() {
         expect(money, isNotNull, reason: 'no transaction read');
         expect(_decimal(money!), ex['amount']);
         expect(money.currency.code, ex['currency']);
+        // Either the generic reader (review, below the threshold) or a real
+        // template matched; anything else already failed on `money` above.
+        expect(r, anyOf(isA<ParseGeneric>(), isA<ParseParsed>()));
         if (r is ParseGeneric) {
           expect(r.institutionCode, 'hsbc');
           expect(r.needsReview, isTrue);
