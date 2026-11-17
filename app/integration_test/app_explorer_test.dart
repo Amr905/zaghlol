@@ -637,7 +637,11 @@ Future<void> _reviewFlow(
     await t.ensureVisible(keeps.first);
     await t.tap(keeps.first);
     await _settleFor(t, 1500);
-    final after = await scalar('SELECT COUNT(*) FROM transactions');
+    var after = await scalar('SELECT COUNT(*) FROM transactions');
+    for (var i = 0; i < 8 && after == txns; i++) {
+      await _settleFor(t, 1000);
+      after = await scalar('SELECT COUNT(*) FROM transactions');
+    }
     _check(
       after == txns + 1,
       'Keep saved ${after - txns} transactions (want 1)',
@@ -673,9 +677,17 @@ Future<void> _reviewFlow(
     await t.ensureVisible(dismiss.first);
     await t.tap(dismiss.first);
     await _settleFor(t, 1500);
-    final after = await scalar(
+    // The card leaves at once; the database row closes when the Undo
+    // snackbar times out.
+    var after = await scalar(
       'SELECT COUNT(*) FROM review_items WHERE resolved_at IS NULL',
     );
+    for (var i = 0; i < 10 && after == open; i++) {
+      await _settleFor(t, 1000);
+      after = await scalar(
+        'SELECT COUNT(*) FROM review_items WHERE resolved_at IS NULL',
+      );
+    }
     _check(after == open - 1, 'Ignore resolved ${open - after} items (want 1)');
     await shot('review-4-after-ignore');
   } else {
