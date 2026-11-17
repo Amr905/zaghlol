@@ -18,10 +18,12 @@ import 'dart:convert';
 import 'dart:io' show gzip;
 import 'dart:typed_data';
 
-import 'package:drift/drift.dart' show Value;
+import 'package:drift/drift.dart' show InsertMode, Value;
+import 'package:crypto/crypto.dart' show sha256;
 import 'package:flutter/services.dart' show rootBundle;
 import 'package:zaghlol_catalog/zaghlol_catalog.dart';
 
+import '../../ingestion/ingestion_pause_gate.dart';
 import '../db/app_database.dart';
 import '../db/daos/catalog_dao.dart';
 import '../db/daos/categories_dao.dart';
@@ -57,9 +59,17 @@ enum CatalogSeedOutcome {
   /// The seed was verified and applied.
   loaded,
 
-  /// The catalog already had a version; nothing was read or written.
+  /// The catalog already had a version; nothing was written.
   alreadyPresent,
+
+  /// FU-256: the catalog was there, the bundled seed had changed since it was
+  /// last applied, and the rows the catalog lacked were added.
+  upgraded,
 }
+
+/// `db_meta` key holding the sha-256 (hex) of the bundled seed's gzip bytes
+/// last applied or found already applied.
+const String catalogSeedHashKey = 'catalog_seed_hash_v1';
 
 final class CatalogSeedResult {
   const CatalogSeedResult(this.outcome, this.version);
@@ -77,6 +87,7 @@ class CatalogSeedLoader {
     required List<SeedTrustedKey> trustedKeys,
     this._allowDevKeys = false,
     this._clock = DateTime.now,
+    this._gate,
   }) : _keys = List.unmodifiable(trustedKeys);
 
   final AppDatabase _db;
@@ -84,6 +95,10 @@ class CatalogSeedLoader {
   final List<SeedTrustedKey> _keys;
   final bool _allowDevKeys;
   final DateTime Function() _clock;
+
+  /// The restore pause gate; the upgrade's write runs behind it (refused
+  /// while a restore runs: the next start retries).
+  final IngestionPauseGate? _gate;
 
   /// Largest compressed seed accepted.
   static const int maxGzipBytes = maxSeedJsonBytes;
@@ -124,13 +139,101 @@ class CatalogSeedLoader {
     }
   }
 
+  Future<String?> _appliedHash() async {
+    final row = await (_db.select(
+      _db.dbMeta,
+    )..where((t) => t.key.equals(catalogSeedHashKey))).getSingleOrNull();
+    return row?.value;
+  }
+
+  Future<void> _markHash(String hash) => _db
+      .into(_db.dbMeta)
+      .insert(
+        DbMetaCompanion.insert(key: catalogSeedHashKey, value: hash),
+        mode: InsertMode.insertOrReplace,
+      );
+
+  /// FU-256: an install whose catalog predates the bundled seed's current
+  /// content gets the rows it lacks. Insert-only (`INSERT OR IGNORE`): rows
+  /// the sync wrote or changed, archived categories and user rules (their own
+  /// tables) are never touched, and nothing is deleted. Skipped when the sync
+  /// has moved the catalog past the seed's version (the server's catalog is
+  /// the truth then, and a seed row the sync deleted must not return). The
+  /// hash is recorded last, in the same transaction. Fails closed: any
+  /// problem (signature, decode, gate paused) leaves the catalog as it was
+  /// and the hash unset, so the next start retries.
+  Future<bool> _upgrade(int currentVersion) async {
+    try {
+      final compressed = await _source.readGzip();
+      if (compressed.length > maxGzipBytes) return false;
+      final hash = sha256.convert(compressed).toString();
+      if (await _appliedHash() == hash) return false;
+      final header = await _source.readSignature();
+      final json = _inflate(compressed);
+      verifySeedSignature(json, header, _keys, allowDevKeys: _allowDevKeys);
+      final seed = CatalogSeed.decode(json);
+      final catalog = CatalogDao(_db);
+      final categories = CategoriesDao(_db);
+      Future<void> write() => _db.transaction(() async {
+        // Past the seed: the sync owns the catalog now. Record the hash so
+        // this is not re-read every start.
+        if (currentVersion <= seed.version) {
+          for (final c in seed.categories) {
+            await categories.insertSystemIfMissing(
+              code: c.code,
+              nameAr: c.nameAr,
+              nameEn: c.nameEn,
+              icon: c.icon,
+              color: c.color,
+              bucket: c.bucket,
+              sort: c.sort,
+            );
+          }
+          await catalog.insertMissingCatalog(
+            merchants: [
+              for (final m in seed.merchants)
+                CatalogMerchantsCompanion.insert(
+                  id: Value(m.id),
+                  canonical: m.canonical,
+                  nameAr: Value(m.nameAr),
+                  categoryCode: m.category,
+                  version: seed.version,
+                ),
+            ],
+            aliases: [
+              for (final a in seed.aliases)
+                (merchantId: a.merchantId, aliasNorm: a.alias, match: a.match),
+            ],
+            keywords: [
+              for (final k in seed.keywords)
+                CatalogKeywordsCompanion.insert(
+                  keywordNorm: k.keyword,
+                  lang: k.lang,
+                  categoryCode: k.category,
+                  weight: k.weight,
+                ),
+            ],
+          );
+        }
+        await _markHash(hash);
+      });
+      await (_gate == null ? write() : _gate.guard(write));
+      return currentVersion <= seed.version;
+    } on Object {
+      return false;
+    }
+  }
+
   Future<CatalogSeedResult> loadIfNeeded() async {
     final catalog = CatalogDao(_db);
     final existing = await catalog.meta();
     if (existing != null) {
       await _ensureEventCategories();
+      final upgraded = await _upgrade(existing.version);
       return CatalogSeedResult(
-        CatalogSeedOutcome.alreadyPresent,
+        upgraded
+            ? CatalogSeedOutcome.upgraded
+            : CatalogSeedOutcome.alreadyPresent,
         existing.version,
       );
     }
@@ -148,6 +251,7 @@ class CatalogSeedLoader {
       allowDevKeys: _allowDevKeys,
     );
     final seed = CatalogSeed.decode(json);
+    final hash = sha256.convert(compressed).toString();
 
     final categories = CategoriesDao(_db);
     final appliedAt = _clock().toUtc().millisecondsSinceEpoch;
@@ -194,6 +298,7 @@ class CatalogSeedLoader {
         appliedAt: appliedAt,
         signatureKid: kid,
       );
+      await _markHash(hash);
       applied = true;
     });
     return CatalogSeedResult(

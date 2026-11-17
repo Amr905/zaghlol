@@ -134,6 +134,36 @@ class CatalogDao {
         }),
       );
 
+  /// Seed upgrade (FU-256): inserts only the merchants, aliases and keywords
+  /// whose key is absent. `INSERT OR IGNORE`: an existing row (the seed's
+  /// earlier copy, or one the sync wrote or changed) is never touched, and
+  /// nothing is deleted. Alias inserts that are ignored fire no FTS trigger.
+  Future<void> insertMissingCatalog({
+    required List<CatalogMerchantsCompanion> merchants,
+    required List<({int merchantId, String aliasNorm, String match})> aliases,
+    required List<CatalogKeywordsCompanion> keywords,
+  }) => guardWrite(
+    () => _db.batch((b) {
+      for (final m in merchants) {
+        b.insert(_db.catalogMerchants, m, mode: InsertMode.insertOrIgnore);
+      }
+      for (final a in aliases) {
+        b.insert(
+          _db.catalogAliases,
+          CatalogAliasesCompanion.insert(
+            merchantId: a.merchantId,
+            aliasNorm: a.aliasNorm,
+            match: a.match,
+          ),
+          mode: InsertMode.insertOrIgnore,
+        );
+      }
+      for (final k in keywords) {
+        b.insert(_db.catalogKeywords, k, mode: InsertMode.insertOrIgnore);
+      }
+    }),
+  );
+
   /// Deletes one alias. Returns the rows deleted (0 or 1).
   Future<int> deleteAlias({
     required int merchantId,
