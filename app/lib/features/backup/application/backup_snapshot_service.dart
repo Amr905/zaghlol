@@ -303,7 +303,10 @@ final class BackupSnapshotService {
         var keyStored = true;
         try {
           await _cipher.storeRestoredKey(keys);
-        } on BackupCryptoException {
+        } on Object {
+          // FU-139: the swap already committed, so the restore succeeded.
+          // Any failure here (a store or lease error, not only a crypto
+          // one) means only that the key must be re-entered later.
           keyStored = false;
         }
         _step('keyStored');

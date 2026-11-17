@@ -222,6 +222,24 @@ void main() {
     snapCopy!.deleteSync();
   });
 
+  test('FU-139: a non-crypto failure storing the key after the swap is '
+      'keyStored = false, not a failed restore', () async {
+    final source = await dump(a.db, backedUpTables);
+    final file = await backupOfA();
+    final outcome = await b
+        .service(
+          onStep: (s) {
+            // After the swap committed: the lease release throws a plain
+            // StateError (not a BackupCryptoException).
+            if (s == 'swapped') b.store.releaseThrows = true;
+          },
+        )
+        .restore(bytesStream(file), passphrase);
+    b.store.releaseThrows = false;
+    expect(outcome.keyStored, isFalse);
+    expect(await dump(b.db, backedUpTables), source);
+  });
+
   test('older snapshot (schema v3) is migrated on restore', () async {
     final file = await craftBackup(
       a,
