@@ -42,3 +42,4 @@ Findings:
 
 Verdict: both tasks **APPROVED**.
 - **FU-254:** batch-34 minors; rows saved before CAT-cash keep their old category; manual entry has no InstaPay method.
+- **Perf (b551fb53, Lead check):** app-ci's chart benchmark caught the cash-cover CTE being re-evaluated per row (cashFlow 14.8 s, dayHour 14.6 s, burnCurve 1.3 s on 10k rows). The fix marks it `MATERIALIZED`: 16, 12 and 9 ms, same results. This needs SQLite ≥ 3.35; db-platform checks the bundled SQLCipher on the emulator.
