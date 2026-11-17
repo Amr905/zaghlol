@@ -123,3 +123,20 @@ final class DbReadException extends SafeException {
   /// SQLite extended result code, when known.
   final int? sqliteCode;
 }
+
+/// A stored JSON column that no longer has the expected shape (FU-033).
+/// Implements [FormatException] so existing `on FormatException` handlers
+/// keep working; the message is the constant [code], never the stored text.
+final class DbCorruptException extends SafeException
+    implements FormatException {
+  DbCorruptException(super.code);
+
+  @override
+  String get message => code;
+
+  @override
+  dynamic get source => null;
+
+  @override
+  int? get offset => null;
+}

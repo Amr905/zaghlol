@@ -391,9 +391,9 @@ final class EntitlementService {
 
   /// Advances trusted time and decides. Call before every Gold check.
   Future<EntitlementPhase> evaluate() async {
-    final ts = await _time.advance();
-    final installId = await _backend.installId();
     final claims = await _cachedClaims();
+    final ts = await _time.advance(null, claims != null);
+    final installId = await _backend.installId();
     var phase = EntitlementPhase.free;
     MovedBy? movedBy;
     if (claims == null &&

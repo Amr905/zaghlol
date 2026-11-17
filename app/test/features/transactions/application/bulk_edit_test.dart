@@ -129,11 +129,23 @@ void main() {
 
     test('AC1 account change updates 10 rows', () async {
       await seed(10);
+      Future<Map<String, int>> perAccount() async {
+        final out = <String, int>{};
+        for (final r in await db.select(db.transactions).get()) {
+          out[r.accountId] = (out[r.accountId] ?? 0) + r.amountMinor;
+        }
+        return out;
+      }
+
+      final before = await perAccount();
+      expect(before.keys, isNot(contains('acc2')));
       await uc.apply({
         for (var i = 0; i < 10; i++) 't$i',
       }, const SetAccount('acc2'));
       final rows = await db.select(db.transactions).get();
       expect(rows.every((r) => r.accountId == 'acc2'), isTrue);
+      // FU-114 77-2: the whole sum moved across, nothing lost or added.
+      expect(await perAccount(), {'acc2': before.values.single});
     });
 
     test('AC1 delete removes 10 rows from every total', () async {

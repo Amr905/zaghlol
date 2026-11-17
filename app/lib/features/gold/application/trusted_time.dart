@@ -190,11 +190,19 @@ final class TrustedTime {
   Future<ClockReading> sample() => _clock.sample();
 
   /// Advances the record to [reading] (or a fresh sample) and returns it.
-  Future<TrustedTimeState> advance([ClockReading? reading]) =>
-      _serial(() async {
-        final r = reading ?? await _clock.sample();
-        return _update((s) => s == null ? _initial(r) : _advance(s, r));
-      });
+  ///
+  /// [hasToken] (FU-138): a cached token exists, so a missing record cannot be
+  /// a fresh install; it starts `tampered` until a fresh echo.
+  Future<TrustedTimeState> advance([
+    ClockReading? reading,
+    bool hasToken = false,
+  ]) => _serial(() async {
+    final r = reading ?? await _clock.sample();
+    return _update(
+      (s) =>
+          s == null ? _initial(r).copyWith(tampered: hasToken) : _advance(s, r),
+    );
+  });
 
   /// A signed server time that is **not** a fresh echo: raise only.
   Future<TrustedTimeState> raise({

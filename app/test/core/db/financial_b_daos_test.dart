@@ -213,6 +213,36 @@ void main() {
           expect(row.rollover, 0);
         });
 
+        test('FU-033: corrupt thresholds throw a SafeException that is also '
+            'a FormatException, never the stored text', () async {
+          final dao = BudgetsDao(db);
+          await dao.insert(
+            id: 'b1',
+            categoryId: 'sys:food',
+            limit: egpMinor(500000),
+            period: BudgetPeriod.cycle,
+            thresholds: [50],
+            createdAt: t0,
+          );
+          await db.customStatement(
+            'UPDATE budgets SET thresholds = \'["secret-text"]\' WHERE id = \'b1\'',
+          );
+          final row = (await dao.byId('b1'))!;
+          expect(
+            () => budgetThresholdsOf(row),
+            throwsA(
+              isA<DbCorruptException>()
+                  .having((e) => e.code, 'code', 'BUDGET_THRESHOLDS_CORRUPT')
+                  .having(
+                    (e) => e.toString(),
+                    'text',
+                    isNot(contains('secret')),
+                  ),
+            ),
+          );
+          expect(() => budgetThresholdsOf(row), throwsFormatException);
+        });
+
         test('KWD (exponent 3) and the 2^53 − 1 bound', () async {
           final dao = BudgetsDao(db);
           await dao.insert(
