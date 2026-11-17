@@ -287,6 +287,7 @@ public sealed class SupportActionTests(SupportActionFixture fixture) : IClassFix
     {
         var (agent, p, holder, _) = await ScenarioAsync();
         await SilenceBuyerAsync(p);
+        await Db.AccountAsync(holder);
         var attach = await Service.MoveSeatAsync(Move(agent, p, holder, SupportReason.BuyingPhoneGone, attach: true), None);
         var skewed = fixture.Service(store, alerts, new SkewedClock(TimeSpan.FromHours(48)));
 
