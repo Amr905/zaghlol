@@ -40,6 +40,7 @@ T-035 Q1–Q6 (keep with bundled rules; drop OTP+transaction messages, as the re
 | T-148 Q2 (budget) | Key-derivation budget p50 4 s, p95 8 s on the reference phone is accepted. (The phone itself is in Part 2.) |
 | T-059 / OQ-05 | An agent drafts the 600+ merchant list from public sources; an Egyptian reader (T-058) reviews names and aliases including El Ezaby. |
 | Q-17 | Split confirmed: «التنبيهات» for Zaghlol's own alerts, «الإشعارات» for captured apps' notifications. |
+| FAB-MOCKUP (2026-11-17, PO) | The Android Add button is the floating apricot FAB of mockups 03/20 (bottom-end above the bar, 56 dp rounded square, apricot gradient, shadow, plus icon), not docked in the bar. Supersedes the batch-29 docked-FAB deviation (FU-246). Content clears it with `ZSpacing.fabClearance` on every tab. | The PO wants the agreed design; clearance solves the hidden-content problem. |
 | Q-20 | No "not financial advice" line under chart tips (they describe the user's own data). |
 | Q-24 | Idle-cash rule 4 makes no "halal" claim; general wording. Example rates come from the catalog. |
 | Q-25 | Essential categories never roasted: rent, bills, groceries, health, education, fees, debt, work transport (as proposed). |

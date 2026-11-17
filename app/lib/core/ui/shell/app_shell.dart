@@ -125,30 +125,18 @@ class ShellScaffold extends StatelessWidget {
       );
     }
     final c = ZColors.of(context);
+    // FAB-MOCKUP (PO 2026-11-17): floating apricot FAB at bottom-end above the
+    // M3 bar, as in mockups 03 / 20; tabs clear it with ZSpacing.fabClearance.
     return Scaffold(
       body: body,
-      // FU-246: the Add button is docked at the end of the bar, not floating
-      // over the body, so it never hides content or the Ask input.
+      floatingActionButtonLocation: FloatingActionButtonLocation.endFloat,
+      floatingActionButton: ZAddButton(label: addLabel, onTap: add),
       bottomNavigationBar: ColoredBox(
         color: Color.alphaBlend(
           c.primaryContainer.withValues(alpha: 0.35),
           c.bg,
         ),
-        child: SafeArea(
-          top: false,
-          child: Row(
-            children: [
-              Expanded(child: _androidBar(c, select)),
-              Padding(
-                padding: const EdgeInsetsDirectional.only(
-                  end: ZSpacing.lg,
-                  start: ZSpacing.sm,
-                ),
-                child: ZAddButton(label: addLabel, onTap: add),
-              ),
-            ],
-          ),
-        ),
+        child: SafeArea(top: false, child: _androidBar(c, select)),
       ),
     );
   }
@@ -197,10 +185,10 @@ class ZAddButton extends StatelessWidget {
   Widget build(BuildContext context) {
     final c = ZColors.of(context);
     final glass = usesGlassBar(context);
-    final size = glass ? 62.0 : 60.0;
+    final size = glass ? 62.0 : 56.0;
     final shape = glass
         ? const CircleBorder()
-        : RoundedRectangleBorder(borderRadius: BorderRadius.circular(22));
+        : RoundedRectangleBorder(borderRadius: BorderRadius.circular(18));
     return Semantics(
       button: true,
       label: label,

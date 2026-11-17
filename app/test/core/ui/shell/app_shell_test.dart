@@ -36,6 +36,26 @@ void main() {
       expect(fab.dx, greaterThan(size.width / 2));
     });
 
+    for (final (name, locale, leftSide) in [
+      ('en', _en, false),
+      ('ar', _ar, true),
+    ]) {
+      testWidgets('Android ($name): FAB floats above the bar at bottom-end', (
+        tester,
+      ) async {
+        await pumpShell(tester, locale: locale);
+        final size = tester.view.physicalSize / tester.view.devicePixelRatio;
+        final fab = tester.getRect(find.byType(ZAddButton));
+        final bar = tester.getRect(find.byType(NavigationBar));
+        expect(fab.width, closeTo(56, 0.01));
+        expect(fab.height, closeTo(56, 0.01));
+        expect(fab.bottom, lessThanOrEqualTo(bar.top));
+        expect(bar.top - fab.bottom, lessThan(32));
+        expect(fab.center.dx < size.width / 2, leftSide);
+        expect(leftSide ? fab.left : size.width - fab.right, closeTo(16, 0.01));
+      });
+    }
+
     testWidgets('Android RTL: FAB bottom-left, first tab on the right', (
       tester,
     ) async {
