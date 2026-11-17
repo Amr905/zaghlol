@@ -12,6 +12,7 @@ import 'package:flutter/foundation.dart' show TargetPlatform;
 import 'package:flutter/foundation.dart' as f show defaultTargetPlatform;
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import '../../categorization/data/event_category_backfill.dart';
 import '../../notifications/application/notification_providers.dart'
     show duplicateCheckProvider;
 
@@ -216,6 +217,15 @@ final captureCoordinatorProvider = FutureProvider<CaptureCoordinator?>((
   unawaited(coordinator.start());
   // SMS-device: review rows stored under an older registry are read again.
   unawaited(reparseOnStart(db, registry, gate: gate));
+  // FU-254: rows saved before the Cash / InstaPay categories get them once.
+  unawaited(
+    backfillEventCategories(
+      db,
+      registry,
+      at: DateTime.now().toUtc().millisecondsSinceEpoch,
+      gate: gate,
+    ),
+  );
   return coordinator;
 }, name: 'captureCoordinatorProvider');
 
