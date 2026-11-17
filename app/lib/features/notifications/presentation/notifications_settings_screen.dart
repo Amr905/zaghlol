@@ -29,6 +29,7 @@ class _NotificationsSettingsScreenState
   final Map<SettingKey<bool>, bool> _bools = {};
   int _start = 23 * 60;
   int _end = 8 * 60;
+  int _dueDays = Settings.notifDueDaysBefore.defaultValue;
   bool _loaded = false;
   bool _failed = false;
   bool _osOff = false;
@@ -83,6 +84,7 @@ class _NotificationsSettingsScreenState
       final values = {for (final k in keys) k: await repo.get(k)};
       final start = await repo.get(Settings.quietHoursStartMin);
       final end = await repo.get(Settings.quietHoursEndMin);
+      final dueDays = await repo.get(Settings.notifDueDaysBefore);
       final allowed = await ref
           .read(notificationPermissionProvider)
           .isAllowed();
@@ -91,6 +93,7 @@ class _NotificationsSettingsScreenState
         _bools.addAll(values);
         _start = start;
         _end = end;
+        _dueDays = dueDays;
         _osOff = !allowed && values.entries.any((e) => e.value);
         _loaded = true;
       });
@@ -116,6 +119,42 @@ class _NotificationsSettingsScreenState
       final ok = await ensureNotificationPermission(ref);
       if (mounted) setState(() => _osOff = !ok);
     }
+  }
+
+  Future<void> _pickDueDays() async {
+    final picked = await showModalBottomSheet<int>(
+      context: context,
+      showDragHandle: true,
+      isScrollControlled: true,
+      builder: (ctx) {
+        final t = AppLocalizations.of(ctx);
+        return SafeArea(
+          child: ListView(
+            key: const ValueKey('notif-due-days-sheet'),
+            shrinkWrap: true,
+            children: [
+              for (final d in const [0, 1, 2, 3, 5, 7, 14])
+                ListTile(
+                  minTileHeight: ZSpacing.minTarget,
+                  selected: d == _dueDays,
+                  trailing: d == _dueDays ? const Icon(Icons.check) : null,
+                  onTap: () => Navigator.of(ctx).pop(d),
+                  title: Text(
+                    t.notificationsSettingsDueDays(
+                      d,
+                      localDigits(ref, ctx, '$d'),
+                    ),
+                  ),
+                ),
+            ],
+          ),
+        );
+      },
+    );
+    if (picked == null) return;
+    setState(() => _dueDays = picked);
+    final repo = await ref.read(settingsRepositoryProvider.future);
+    await repo.set(Settings.notifDueDaysBefore, picked);
   }
 
   Future<void> _pick(bool start) async {
@@ -247,6 +286,15 @@ class _NotificationsSettingsScreenState
             ),
             row(NotificationType.spendingSpike, t.notificationsSettingsSpikes),
             row(NotificationType.upcomingDue, t.notificationsSettingsDues),
+            if (on(NotificationType.upcomingDue.toggle))
+              SettingsRow(
+                key: const ValueKey('notif-due-days'),
+                title: t.notificationsSettingsDueDays(
+                  _dueDays,
+                  localDigits(ref, context, '$_dueDays'),
+                ),
+                onTap: _pickDueDays,
+              ),
             row(
               NotificationType.duplicateCharge,
               t.notificationsSettingsDuplicates,

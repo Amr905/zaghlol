@@ -82,6 +82,14 @@ abstract final class Settings {
     'notif.upcoming_due',
     byDefault: true,
   );
+  // FU-219: how many days before the due date the bill reminder fires; the
+  // default for new bills and installments (0 = the due day).
+  static final notifDueDaysBefore = SettingKey.integer(
+    'notif.due_days_before',
+    byDefault: 3,
+    min: 0,
+    max: 30,
+  );
   static final notifDuplicateCharge = SettingKey.boolean(
     'notif.duplicate_charge',
     byDefault: true,
