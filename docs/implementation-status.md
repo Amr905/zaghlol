@@ -510,6 +510,8 @@
 
 - **FU-254** (batch 34): minors in [batch-34](05-reviews/batch-34.md); rows saved before CAT-cash keep their category; manual entry has no InstaPay method.
 
+- **FU-255** (batch 35): minors in [batch-35](05-reviews/batch-35.md): resume runs all jobs unthrottled; batches inside the 60 s window wait for the next trigger; long jobs vs the 30 s restore wait; backfill done-marker outside the gate; later rules without "apply to past" don't protect old rows; rollover budget alerts skipped; headless engine runs no housekeeping; overdue reminders need PO copy; manual "paid by" method not in the editor.
+
 ## Log
 | Date | Event |
 |---|---|
@@ -597,3 +599,4 @@
 | 2026-11-17 | Batch 32 (`batch/2026-11-17-32`): follow-up sweep in five lanes (FU-247/250/251 and batch-29 minors), explorer3 on the emulator, Review Keep tap fix. FU-252. Progress 167/186. |
 | 2026-11-17 | Batch 33 (`batch/2026-11-17-33`): follow-up sweep 2 (privacy/data, ledger, due-days setting, DB-clock freezes). FU-253. Progress 167/186. |
 | 2026-11-17 | Batch 34 (`batch/2026-11-17-34`): CAT-cash (PO CAT-INSTAPAY, CAT-CASH), FAB-mockup (PO FAB-MOCKUP). FU-254. Progress 167/186. |
+| 2026-11-17 | Batch 35 (`batch/2026-11-17-35`): FU-253/254 wiring and backfill, FU-252 UI, FU-218 overflow sweep, FU-228/232 backend. FU-255. Progress 167/186. |
