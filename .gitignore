@@ -46,3 +46,4 @@ drift.log
 format.log
 pigeon.log
 tools/lints/lints.log
+node_modules/

@@ -80,10 +80,17 @@ jobs:
     steps:
       - uses: actions/checkout@fbc6f3992d24b796d5a048ff273f7fcc4a7b6c09 # v5.1.0
 
-      # Node is preinstalled on ubuntu-latest, so no extra action is needed. The CLI is pinned to an exact version.
+      # FU-010: Node is pinned (.nvmrc) and Spectral comes from package-lock.json via npm ci, not npx.
+      - uses: actions/setup-node@6044e13b5dc448c55e2357c09f80417699197238 # v6.2.0
+        with:
+          node-version-file: backend/openapi/.nvmrc
+
+      - name: Install Spectral (locked)
+        run: npm ci --ignore-scripts
+
       - name: Lint zaghlol-v1.yaml (errors and warnings fail the job)
         run: |
-          npx --yes @stoplight/spectral-cli@6.15.0 lint zaghlol-v1.yaml --ruleset .spectral.yaml --fail-severity=warn || { echo "::error title=Spectral::OpenAPI lint failed; see the step log."; exit 1; }
+          npm run --silent lint || { echo "::error title=Spectral::OpenAPI lint failed; see the step log."; exit 1; }
 
   alert-rules:
     name: alert rules (promtool)

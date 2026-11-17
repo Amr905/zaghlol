@@ -1,27 +1,13 @@
-# The app uses flutter_lints (T-002, review follow-up F11). A file can have only
-# one `include`, so the shared workspace rules from ../analysis_options.yaml are
-# repeated here; keep both in sync. The generated-file excludes are kept (F13).
-# The zaghlol_lints rules run through tools/lints/bin/zaghlol_lints.dart (see
-# .github/workflows/README.md), not through `flutter analyze`.
-include: package:flutter_lints/flutter.yaml
-
+# T-002 / FU-029: the app takes the shared workspace rules (flutter_lints, the
+# strict analyzer modes, the extra linter rules and the riverpod_lint analyzer
+# plugin) from ../analysis_options.yaml. Analyzer plugins are only read from the
+# workspace root, and a package's own options file only sees them through an
+# `include` of that root file. Do not turn this back into an `include` of
+# flutter_lints. The zaghlol_lints rules run through
+# tools/lints/bin/zaghlol_lints.dart (see .github/workflows/README.md).
 analyzer:
-  language:
-    strict-casts: true
-    strict-inference: true
-    strict-raw-types: true
   exclude:
-    - "**/*.g.dart"
-    - "**/*.freezed.dart"
-    - "**/generated/**"
     - build/**
     - android/**
     - ios/**
-
-linter:
-  rules:
-    - always_declare_return_types
-    - avoid_print
-    - prefer_final_locals
-    - prefer_single_quotes
-    - unawaited_futures
+include: ../analysis_options.yaml
