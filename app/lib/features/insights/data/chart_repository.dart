@@ -45,9 +45,9 @@ final String _linked =
     "AND s.status IN ('posted', 'pending')), 0)";
 
 /// The part of cash payment `t` its withdrawn-cash pool covers (CAT-cash),
-/// clamped to the net amount.
-final String _cover =
-    'min(coalesce(${cashCoveredOf('t')}, 0), t.amount_minor - $_linked)';
+/// = min(pool, gross amount); the net spend is net - cover (may dip below 0
+/// by the linked amount, so an offset still reduces spend).
+final String _cover = 'coalesce(${cashCoveredOf('t')}, 0)';
 
 /// An expense's amount net of its active offset links, and (cash payments)
 /// of the part already counted when the cash was withdrawn.

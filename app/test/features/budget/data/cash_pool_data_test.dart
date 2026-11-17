@@ -218,6 +218,27 @@ void main() {
     final period = ChartPeriod.cycle(cycle);
     final f = ChartFilter(currency: egp);
 
+    test('split link on a covered payment: spend 900 everywhere', () async {
+      await withdraw('w', 1000);
+      await payCash('p', 300);
+      await add('r', 200, account: 'bank', direction: 'refund');
+      await db
+          .into(db.offsetLinks)
+          .insert(link('l1', expense: 'p', source: 'r', amountMinor: 200));
+      await payCash('q', 800, category: 'sys:fun');
+      final t = await totals();
+      expect(t.spend.minor, 900);
+      final d = (await charts.categoryDonut(
+        period,
+        f,
+      ) as ChartReady<CategoryDonut>).data;
+      expect(d.total.minor, 900);
+      final flow = (await charts.cashFlow([
+        period,
+      ], f) as ChartReady<List<CashFlowPoint>>).data;
+      expect(flow.single.spend.minor, 900);
+    });
+
     test('donut and cash flow agree with the cycle totals', () async {
       await withdraw('w', 1000);
       await payCash('p', 300);

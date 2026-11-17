@@ -114,7 +114,7 @@ final class _NetSpend {
   /// Net of offsets, before the cash cover.
   final Money net;
 
-  /// The cash cover, clamped to [net]; zero for a non-payment.
+  /// The cash cover = min(pool, gross); zero for a non-payment.
   final Money covered;
 
   /// What this row adds to the cycle's spend.
@@ -148,10 +148,9 @@ List<_NetSpend> _netSpend(
 
 _NetSpend _netOf(CycleTxn t, Money? linked) {
   final net = linked == null ? t.amount : t.amount - linked;
-  final cover = t.cashCoveredMinor <= 0
-      ? 0
-      : (t.cashCoveredMinor < net.minor ? t.cashCoveredMinor : net.minor);
-  return _NetSpend(t, net, Money(t.amount.currency, cover < 0 ? 0 : cover));
+  // cover = min(pool, gross) (already so); counted = net - cover.
+  final cover = t.cashCoveredMinor <= 0 ? 0 : t.cashCoveredMinor;
+  return _NetSpend(t, net, Money(t.amount.currency, cover));
 }
 
 /// Totals of [cycle] per billed currency (design note §3). [txns] may

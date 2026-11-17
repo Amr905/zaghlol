@@ -137,22 +137,25 @@ void main() {
       expect(r[gbp]!.spend.minor, 300);
     });
 
-    test('cover is clamped to the net amount after a refund link', () {
+    test('withdraw 1000, pay 300 with 200 split back, pay 800: spend 900', () {
       final x = [
         txn('w', 1000, cat: kCashCategoryId),
         txn('p', 300, cat: 'sys:food', covered: 300),
+        txn('q', 800, cat: 'sys:fun', covered: 700),
       ];
       final links = [
         CycleOffset(
           expenseId: 'p',
           sourceId: 'r',
-          amount: Money(egp, 100),
+          amount: Money(egp, 200),
           isActive: true,
         ),
       ];
       final t = aggregateCycle(cycle, x, links)[egp]!;
-      expect(t.spend.minor, 1000); // net 200 fully covered
-      expect(t.byCategoryMinor['sys:food'], 200);
+      expect(t.spend.minor, 900);
+      expect(t.byCategoryMinor['sys:food'], 100);
+      expect(t.byCategoryMinor['sys:fun'], 800);
+      expect(t.byCategoryMinor[kCashCategoryId], 0);
     });
 
     test('a later cycle: spend 0, Food shows it, Cash floors at 0', () {
