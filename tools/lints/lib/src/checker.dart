@@ -405,6 +405,34 @@ class _RuleVisitor extends RecursiveAstVisitor<void> {
 
   // Rule 4: safe_exception_required.
 
+  // FU-033: a direct `throw FormatException(..)` (or any platform exception
+  // type) in the parsing and db layers.
+  @override
+  void visitThrowExpression(ThrowExpression node) {
+    final e = node.expression;
+    // Unresolved parsing yields a MethodInvocation for `Type(..)`.
+    final String? type = switch (e) {
+      InstanceCreationExpression() => stripGenerics(
+        e.constructorName.type.toSource(),
+      ),
+      MethodInvocation(target: null) => e.methodName.name,
+      _ => null,
+    };
+    if (scope.inParsingOrDbLayer && type != null) {
+      // Errors (ArgumentError, StateError, ...) are programmer-error asserts and
+      // carry no stored data; only Exception types are in scope.
+      if (type == 'FormatException' || type == 'Exception') {
+        _report(
+          ruleSafeExceptionRequired,
+          node.offset,
+          'Throw a SafeException subtype in the parsing and db layers, '
+          'not $type.',
+        );
+      }
+    }
+    super.visitThrowExpression(node);
+  }
+
   @override
   void visitClassDeclaration(ClassDeclaration node) {
     // SafeException itself implements Exception, so it is exempt.

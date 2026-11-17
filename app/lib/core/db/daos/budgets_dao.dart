@@ -10,6 +10,7 @@ import 'package:drift/drift.dart';
 import 'package:zaghlol_domain/zaghlol_domain.dart';
 
 import '../app_database.dart';
+import '../db_errors.dart';
 import '../money_columns.dart';
 import 'write_errors.dart';
 
@@ -129,10 +130,10 @@ List<int> budgetThresholdsOf(BudgetRow row) {
   try {
     decoded = jsonDecode(row.thresholds);
   } on FormatException {
-    throw const FormatException('BUDGET_THRESHOLDS_CORRUPT');
+    throw DbCorruptException('BUDGET_THRESHOLDS_CORRUPT');
   }
   if (decoded is! List || decoded.any((e) => e is! int)) {
-    throw const FormatException('BUDGET_THRESHOLDS_CORRUPT');
+    throw DbCorruptException('BUDGET_THRESHOLDS_CORRUPT');
   }
   return [for (final e in decoded) e as int];
 }
