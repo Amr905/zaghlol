@@ -144,7 +144,7 @@ void main() {
     final curated = File('data/catalog_curated.csv').readAsStringSync();
     final built = buildCatalog(curated, version: 1);
 
-    test('14 system categories, AR and EN exactly as spec section 4', () {
+    test('16 system categories, AR and EN exactly as spec section 4', () {
       const expected = [
         (
           'groceries',
@@ -244,6 +244,9 @@ void main() {
           'income',
           '#22C55E',
         ),
+        // CAT-cash / CAT-INSTAPAY (PO 2026-11-17).
+        ('cash', 'كاش', 'Cash', 'wants', '#B45309'),
+        ('instapay', 'إنستاباي', 'InstaPay', 'wants', '#0F7A55'),
       ];
       expect([
         for (final c in built.seed.categories)
@@ -251,7 +254,7 @@ void main() {
       ], expected);
       expect(
         [for (final c in built.seed.categories) c.sort],
-        [for (var i = 1; i <= 14; i++) i],
+        [for (var i = 1; i <= 16; i++) i],
       );
     });
 
