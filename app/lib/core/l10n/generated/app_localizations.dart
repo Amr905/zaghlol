@@ -5013,7 +5013,7 @@ abstract class AppLocalizations {
   /// S · state, category = largest category, target
   ///
   /// In ar, this message translates to:
-  /// **'{state, select, short{قلل {category} بـ {target} الدورة الجاية وهتقفل بفايض.} other{حوّل {target} على الأقل من الفايض ده للادخار قبل ما يتصرف.}}'**
+  /// **'{state, select, short{لو قللت {category} بـ {target} الدورة الجاية هيساعدك ده تقفل الفرق.} other{حوّل {target} على الأقل من الفايض ده للادخار قبل ما يتصرف.}}'**
   String insightsExplainCashFlowTip(
     String state,
     String category,
@@ -9670,7 +9670,7 @@ abstract class AppLocalizations {
   /// S
   ///
   /// In ar, this message translates to:
-  /// **'هنمسح كل حركاتك وإعداداتك ومفاتيح الحماية من على الموبايل ده. مفيش رجوع.'**
+  /// **'هنمسح كل حركاتك وإعداداتك من على الموبايل ده. مفيش رجوع.'**
   String get privacyDeleteBody;
 
   /// S
@@ -9744,6 +9744,12 @@ abstract class AppLocalizations {
   /// In ar, this message translates to:
   /// **'النسخ الاحتياطية اللي على Google Drive أو iCloud هتفضل زي ما هي. لو عايز تمسحها، امسحها من هناك.'**
   String get privacyDeleteBackupsKept;
+
+  /// No description provided for @privacyDeleteStoreAccountKept.
+  ///
+  /// In ar, this message translates to:
+  /// **'شراءك من المتجر وحسابك مش هيتأثروا. الجولد فاضل بتاعك.'**
+  String get privacyDeleteStoreAccountKept;
 
   /// N · shown when the local wipe did not finish; the next launch resumes it
   ///
