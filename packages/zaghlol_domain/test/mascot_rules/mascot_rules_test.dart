@@ -36,6 +36,43 @@ void main() {
     });
   });
 
+  group('FU-180', () {
+    test('180a sys: ids and subcategory-free codes are essential', () {
+      expect(
+        budgetShocked(
+          categoryId: 'sys:groceries',
+          spentMinor: 90,
+          limitMinor: 100,
+          dayOfCycle: 5,
+          cycleId: 'c',
+        ),
+        isNull,
+      );
+    });
+    test('180b spike only for dining or delivery', () {
+      for (final c in ['sys:dining', 'delivery']) {
+        expect(
+          diningSpike(
+            categoryId: c,
+            spentMinor: 99999,
+            previousCyclesMinor: [1, 1, 1],
+            cycleId: 'c',
+          ),
+          isNotNull,
+        );
+      }
+      expect(
+        diningSpike(
+          categoryId: 'sys:shopping',
+          spentMinor: 99999,
+          previousCyclesMinor: [1, 1, 1],
+          cycleId: 'c',
+        ),
+        isNull,
+      );
+    });
+  });
+
   group('diningSpike', () {
     test('> 30% above 3-cycle average', () {
       expect(

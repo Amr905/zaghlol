@@ -35,8 +35,21 @@ const Set<String> defaultEssentialCategoryIds = {
   'education',
   'fees',
   'debt',
+  'utilities',
+  'installments',
   'work_transport',
+  'transport_work',
 };
+
+/// The category code without the `sys:` prefix database ids carry.
+String categoryCode(String id) => id.startsWith('sys:') ? id.substring(4) : id;
+
+bool _isEssential(String categoryId, Set<String> essential) =>
+    essential.contains(categoryId) ||
+    essential.contains(categoryCode(categoryId));
+
+/// Categories the dining-spike roast may target (BR-MAS-01 second clause).
+const Set<String> diningSpikeCategoryCodes = {'dining', 'delivery'};
 
 /// BR-MAS-01: category passed 85% of its limit before day 20 of the cycle.
 /// [dayOfCycle] is 1-based. Essential categories are never roasted.
@@ -48,7 +61,7 @@ MascotCandidate? budgetShocked({
   required String cycleId,
   Set<String> essentialCategoryIds = defaultEssentialCategoryIds,
 }) {
-  if (essentialCategoryIds.contains(categoryId)) return null;
+  if (_isEssential(categoryId, essentialCategoryIds)) return null;
   if (limitMinor <= 0 || spentMinor <= 0) return null;
   if (dayOfCycle >= 20) return null;
   if (spentMinor * 100 <= limitMinor * 85) return null;
@@ -68,7 +81,8 @@ MascotCandidate? diningSpike({
   required String cycleId,
   Set<String> essentialCategoryIds = defaultEssentialCategoryIds,
 }) {
-  if (essentialCategoryIds.contains(categoryId)) return null;
+  if (_isEssential(categoryId, essentialCategoryIds)) return null;
+  if (!diningSpikeCategoryCodes.contains(categoryCode(categoryId))) return null;
   if (previousCyclesMinor.length < 3) return null;
   final last3 = previousCyclesMinor.sublist(previousCyclesMinor.length - 3);
   final sum = last3.fold<int>(0, (a, b) => a + b);
