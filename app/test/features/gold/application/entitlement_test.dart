@@ -9,6 +9,7 @@ import 'package:zaghlol/core/backend/backend_client.dart';
 import 'package:zaghlol/core/backend/backend_state.dart';
 import 'package:zaghlol/core/backend/response_signature.dart';
 import 'package:zaghlol/features/gold/application/entitlement.dart';
+import 'package:zaghlol/features/gold/application/trusted_time.dart';
 import 'package:zaghlol/features/gold/application/gating.dart';
 
 import '../../../core/backend/backend_test_support.dart';
@@ -288,6 +289,18 @@ void main() {
   });
 
   group('R4-2 time anchor', () {
+    test(
+      'FU-138: cached token but no trusted-time record is tampered',
+      () async {
+        final h = Harness(boot: 1);
+        await h.online(h.token(entClaims(iatMs: t0)));
+        h.store.values.remove(trustedTimeStateKey);
+        await h.service.evaluate();
+        expect(h.sink.last, EntitlementPhase.tampered);
+        expect((await h.state()).tampered, isTrue);
+      },
+    );
+
     Future<Harness> tamperedWithToken() async {
       final h = Harness(boot: 1);
       await h.online(h.token(entClaims(iatMs: t0)));
@@ -577,6 +590,7 @@ void main() {
       'start() shows pendingVerification while a cached token is checked',
       () async {
         final h = Harness(boot: 1);
+        await h.time.advance(); // a real token is never cached without one
         h.store.values[_entKey] = Uint8List.fromList(
           utf8.encode(h.token(entClaims(iatMs: t0))),
         );
