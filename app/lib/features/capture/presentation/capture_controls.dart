@@ -21,6 +21,7 @@ import '../../budget/application/budget_providers.dart'
 import '../../budget/application/cycle_app_wiring.dart'
     show domainEventBusProvider;
 import '../../transactions/application/bulk_edit.dart';
+import '../../transactions/application/refund_matching.dart';
 import '../../transactions/application/transfer_pairing.dart';
 import '../application/capture_providers.dart';
 import '../application/ignore_rules.dart';
@@ -127,11 +128,17 @@ final captureControlsProvider = FutureProvider<CaptureControls>((ref) async {
     loadSchedule: schedule,
     events: bus,
   );
+  final refunds = RefundMatching(db, loadSchedule: schedule, events: bus);
   final rules = IgnoreRulesService(
     db,
     bulkEdit: bulk,
+    // FU-142: pairs and refund/offset links of a removed row are freed.
     onRemoved: (id) async {
-      await pairing.onRemoved(id);
+      try {
+        await pairing.onRemoved(id);
+      } finally {
+        await refunds.onRemoved(id);
+      }
     },
     onRuleChanged: coordinator?.onRuleChanged,
     rescanAvailable: scan != null,

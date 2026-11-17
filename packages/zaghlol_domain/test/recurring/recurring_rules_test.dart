@@ -42,6 +42,15 @@ void main() {
       expect(s.dueDay, 5);
     });
 
+    test('FU-143: a 31st charge that landed on the 28th keeps anchor 31', () {
+      final out = detectSubscriptions([
+        ch('c1', CivilDate(2026, 1, 31), 10000),
+        ch('c2', CivilDate(2026, 2, 28), 10000),
+      ]);
+      expect(out.single.dueDay, 31);
+      expect(out.single.nextDue, CivilDate(2026, 3, 31));
+    });
+
     test('one charge is not enough; two are', () {
       expect(
         detectSubscriptions([ch('c1', CivilDate(2026, 9, 5), 100)]),

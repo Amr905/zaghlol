@@ -216,6 +216,28 @@ void main() {
     expect(other.deletedAt, isNull);
   });
 
+  test('FU-132/FU-142: onRemoved runs for every deleted row, one failure '
+      'does not skip the rest and the undo ids are kept', () async {
+    final calls = <String>[];
+    final s = IgnoreRulesService(
+      db,
+      bulkEdit: bulk,
+      onRemoved: (id) async {
+        calls.add(id);
+        if (id == 'a1') throw StateError('boom');
+      },
+      newId: () => 'z${nextId++}',
+    );
+    final r = await s.add(
+      const IgnoreTarget(institutionCode: 'nbe', channel: IgnoreChannel.sms),
+      existing: const DeleteExisting(confirmedIds: {'a1', 'a3'}),
+    );
+    expect(calls, ['a1', 'a3']);
+    expect(r.deleted, 2);
+    expect(r.undoBatchIds, hasLength(1));
+    expect(r.cleanupFailures, 1);
+  });
+
   test('offset links are kept on delete and on un-ignore (EC-63)', () async {
     await add('refund', 'nbe1111', direction: 'refund');
     await OffsetLinksDao(db).insert(

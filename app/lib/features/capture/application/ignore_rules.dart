@@ -93,7 +93,13 @@ final class AddIgnoreResult {
     required this.guard,
     required this.deleted,
     required this.undoBatchIds,
+    this.cleanupFailures = 0,
   });
+
+  /// Rows whose pair/offset-link cleanup failed after the delete (FU-132).
+  /// The rows are deleted and Undo still works; the startup sweep or the
+  /// next edit repairs the links. Never an exception: the batch ids matter.
+  final int cleanupFailures;
 
   /// The id of the rule (the existing one when [created] is false).
   final String ruleId;
@@ -253,6 +259,7 @@ class IgnoreRulesService {
 
     var deleted = 0;
     final batches = <String>[];
+    var cleanupFailures = 0;
     if (existing is DeleteExisting && existing.confirmedIds.isNotEmpty) {
       // Intersection with what still matches: never delete unseen rows.
       final now = (await _matching(t)).toSet();
@@ -265,12 +272,19 @@ class IgnoreRulesService {
           i,
           i + maxIdsPerCall > ids.length ? ids.length : i + maxIdsPerCall,
         );
-        final paired = await _pairedAmong(chunk);
         final r = await _bulk.apply(chunk, const DeleteTransactions());
         batches.add(r.batchId);
         deleted += r.changed;
-        for (final id in paired) {
-          await _onRemoved(id);
+        // FU-132/FU-142: every removed row frees its pair and offset links
+        // (the hook is a no-op for a row with neither). One failure neither
+        // skips the other rows nor loses the Undo batch ids; failures are
+        // counted in the result.
+        for (final id in chunk) {
+          try {
+            await _onRemoved(id);
+          } on Object catch (_) {
+            cleanupFailures++;
+          }
         }
       }
     }
@@ -280,6 +294,7 @@ class IgnoreRulesService {
       guard: guard,
       deleted: deleted,
       undoBatchIds: batches,
+      cleanupFailures: cleanupFailures,
     );
   }
 
@@ -292,17 +307,6 @@ class IgnoreRulesService {
       }
     }
     return null;
-  }
-
-  Future<List<String>> _pairedAmong(List<String> ids) async {
-    final out = <String>[];
-    for (final id in ids) {
-      final row = await (_db.select(
-        _db.transactions,
-      )..where((r) => r.id.equals(id))).getSingleOrNull();
-      if (row?.transferPairId != null) out.add(id);
-    }
-    return out;
   }
 
   /// Removes rule [ruleId] (un-ignore) and rewrites the Guard config. Stored
