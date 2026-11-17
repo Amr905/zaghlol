@@ -305,7 +305,7 @@ class ChartRepository {
   // ------------------------------------------------------ category sums
 
   Future<List<({String? id, String? bucket, int minor, int count})>>
-  _byCategory(ChartPeriod p, ChartFilter f) async {
+  _byCategory(ChartPeriod p, ChartFilter f, {bool withNegative = false}) async {
     final s = _spend(p, f);
     // Spend rows, plus the cash move of a covered payment: its covered part
     // joins its own category and leaves `cash` (the total is unchanged).
@@ -319,7 +319,8 @@ class ChartRepository {
       "UNION ALL SELECT 'sys:cash', -$_cover, 0 FROM transactions t "
       'WHERE ${s.where} AND ${cashCoveredOf('t')} > 0'
       ') m LEFT JOIN categories c ON c.id = m.cid '
-      'GROUP BY m.cid HAVING sum(m.v) > 0 ORDER BY s DESC, cid',
+      'GROUP BY m.cid ${withNegative ? '' : 'HAVING sum(m.v) > 0'} '
+      'ORDER BY s DESC, cid',
       [...s.args, ...s.args, ...s.args],
       reads: {_db.transactions, _db.offsetLinks, _db.categories, _db.accounts},
     );
@@ -340,7 +341,15 @@ class ChartRepository {
     ChartPeriod p,
     ChartFilter f,
   ) => _memoized(_key('donut', p, f), () async {
-    final rows = await _byCategory(p, f);
+    final all = await _byCategory(p, f, withNegative: true);
+    final rows = [
+      for (final r in all)
+        if (r.minor > 0) r,
+    ];
+    // CAT-cash: cash paid from cash withdrawn in an earlier period leaves a
+    // negative Cash row here. It is shown as one note, never as a slice, and
+    // is not part of the total.
+    final covered = all.fold<int>(0, (a, r) => r.minor < 0 ? a - r.minor : a);
     if (rows.isEmpty) {
       return const ChartNotEnoughData<CategoryDonut>(
         NotEnoughReason.noData,
@@ -352,7 +361,8 @@ class ChartRepository {
     final total = rows.fold<int>(0, (a, r) => a + r.minor);
     return ChartReady(
       CategoryDonut(
-        total: _m(total, f),
+        total: _m(total - covered, f),
+        coveredEarlier: _m(covered, f),
         slices: [
           for (var i = 0; i < rows.length; i++)
             CategorySlice(
@@ -463,7 +473,9 @@ class ChartRepository {
       );
     }
     var needs = 0, wants = 0, savingsSpend = 0, other = 0;
-    for (final r in await _byCategory(p, f)) {
+    final all = await _byCategory(p, f, withNegative: true);
+    final covered = all.fold<int>(0, (a, r) => r.minor < 0 ? a - r.minor : a);
+    for (final r in all.where((r) => r.minor > 0)) {
       switch (r.bucket) {
         case 'needs' || 'obligations':
           needs += r.minor;
@@ -475,6 +487,7 @@ class ChartRepository {
           other += r.minor;
       }
     }
+    wants = wants > covered ? wants - covered : 0;
     final spent = needs + wants + savingsSpend + other;
     final unspent = income > spent ? income - spent : 0;
     return ChartReady(

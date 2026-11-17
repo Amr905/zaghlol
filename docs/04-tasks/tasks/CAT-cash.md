@@ -57,3 +57,16 @@ month vs average. Account balances, exports, transaction list: unchanged.
 ## Acceptance
 Pool math (withdraw 1000 / pay 300 -> total 1000, Cash 700, Food 300; pay 1200 -> total 1200, Cash 0, Food 1200;
 two currencies separate; delete payment restores), categorization, user override sticks.
+
+## Lead decision 2026-11-17: never a negative category
+
+Cash covered by a withdrawal of an EARLIER cycle: the payment's category shows its amount (budgets count it), the Cash
+category floors at 0, the cycle's spend excludes the covered part. `CycleTotals.coveredEarlier` (derived: category sum
+minus spend, so cached cycles carry it) and `CategoryDonut.coveredEarlier` hold the amount; it is not a slice and not in
+the donut total. 50/30/20 takes it off "wants".
+
+**Missing l10n keys (UI row/legend not wired; no ARB edits in sprint mode):**
+`insightsCoveredEarlier` ar "اتدفع من كاش اتسحب قبل كده", en "Paid from cash withdrawn earlier" (donut legend item and the
+Home/budget category list row, showing `coveredEarlier` when positive).
+
+**Follow-ups:** rows saved before this change keep their category (no stored event); manual InstaPay has no concept.

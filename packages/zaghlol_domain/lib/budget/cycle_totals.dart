@@ -75,10 +75,19 @@ final class CycleTotals {
   final Money pendingSpend;
 
   /// Net spend per category id, `'_none'` for uncategorized; sums to
-  /// [spend].
+  /// [spend] plus [coveredEarlier].
   final Map<String, int> byCategoryMinor;
 
   static const String noCategory = '_none';
+
+  /// CAT-cash: cash payments covered by cash withdrawn in an EARLIER cycle.
+  /// Their categories show the amount, [spend] leaves them out, and the
+  /// `cash` category floors at zero here (never negative). Derived, so a
+  /// cached cycle carries it too.
+  Money get coveredEarlier {
+    final sum = byCategoryMinor.values.fold<int>(0, (a, b) => a + b);
+    return Money(currency, sum > spend.minor ? sum - spend.minor : 0);
+  }
 }
 
 const Set<CycleDirection> _spendDirections = {
@@ -180,6 +189,13 @@ Map<Currency, CycleTotals> aggregateCycle(
       m[kCashCategoryId] =
           (Money(c, m[kCashCategoryId] ?? 0) - s.covered).minor;
     }
+  }
+
+  // Cash covered by an earlier cycle's withdrawal: the Cash category never
+  // goes negative (the rest is `coveredEarlier`).
+  for (final m in byCat.values) {
+    final cash = m[kCashCategoryId];
+    if (cash != null && cash < 0) m[kCashCategoryId] = 0;
   }
 
   final fundedBySource = <String, Money>{};

@@ -180,8 +180,16 @@ final class CategorySlice {
 }
 
 final class CategoryDonut {
-  const CategoryDonut({required this.total, required this.slices});
+  const CategoryDonut({
+    required this.total,
+    required this.slices,
+    this.coveredEarlier,
+  });
   final Money total;
+
+  /// CAT-cash: payments covered by cash withdrawn in an earlier period.
+  /// Not in [total], not a slice; null or zero when there are none.
+  final Money? coveredEarlier;
   final List<CategorySlice> slices;
 }
 

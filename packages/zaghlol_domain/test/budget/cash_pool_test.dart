@@ -155,13 +155,35 @@ void main() {
       expect(t.byCategoryMinor['sys:food'], 200);
     });
 
-    test('a later cycle: spend 0, Food +x, Cash -x; invariant holds', () {
+    test('a later cycle: spend 0, Food shows it, Cash floors at 0', () {
       final later = [
         txn('p', 300, cat: 'sys:food', covered: 300, date: inCycle),
       ];
       final t = aggregateCycle(cycle, later, const [])[egp]!;
       expect(t.spend.minor, 0);
-      expect(t.byCategoryMinor.values.fold<int>(0, (a, b) => a + b), 0);
+      expect(t.byCategoryMinor['sys:food'], 300);
+      expect(t.byCategoryMinor[kCashCategoryId], 0);
+      expect(t.byCategoryMinor.values.any((v) => v < 0), isFalse);
+      expect(t.coveredEarlier.minor, 300);
+    });
+
+    test('same-cycle cover leaves nothing to explain', () {
+      final x = [
+        txn('w', 1000, cat: kCashCategoryId),
+        txn('p', 300, cat: 'sys:food', covered: 300),
+      ];
+      expect(aggregateCycle(cycle, x, const [])[egp]!.coveredEarlier.minor, 0);
+    });
+
+    test('part this cycle, part earlier', () {
+      final x = [
+        txn('w', 500, cat: kCashCategoryId),
+        txn('p', 800, cat: 'sys:food', covered: 800),
+      ];
+      final t = aggregateCycle(cycle, x, const [])[egp]!;
+      expect(t.spend.minor, 500);
+      expect(t.byCategoryMinor[kCashCategoryId], 0);
+      expect(t.coveredEarlier.minor, 300);
     });
 
     test('netSpendByDay counts the uncovered part only', () {

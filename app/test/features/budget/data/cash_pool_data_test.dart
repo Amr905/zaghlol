@@ -177,7 +177,8 @@ void main() {
       expect(first.spend.minor, 1000);
       expect(second.spend.minor, 0);
       expect(second.byCategoryMinor['sys:food'], 300);
-      expect(second.byCategoryMinor['sys:cash'], -300);
+      expect(second.byCategoryMinor['sys:cash'], 0);
+      expect(second.coveredEarlier.minor, 300);
       // Cache the later cycle, then delete the earlier withdrawal: the
       // later cycle's cached cover is stale and must be dropped with it.
       final cache = CycleCacheInvalidator(db);
@@ -231,6 +232,27 @@ void main() {
         period,
       ], f) as ChartReady<List<CashFlowPoint>>).data;
       expect(flow.single.spend.minor, 1000);
+    });
+
+    test('cross-cycle: no negative slice, covered shown as a note', () async {
+      await withdraw('w', 1000, when: at(2026, 10, 20));
+      await payCash('p', 300, when: at(2026, 11, 3));
+      final d = (await charts.categoryDonut(
+        period,
+        f,
+      ) as ChartReady<CategoryDonut>).data;
+      expect(d.total.minor, 0);
+      expect(d.coveredEarlier!.minor, 300);
+      expect(d.slices.map((s) => s.categoryId), ['sys:food']);
+    });
+
+    test('cross-cycle budgets: Food counts it, Cash is not negative', () async {
+      await withdraw('w', 1000, when: at(2026, 10, 20));
+      await payCash('p', 300, when: at(2026, 11, 3));
+      final t = await totals();
+      expect(t.byCategoryMinor['sys:food'], 300);
+      expect(t.byCategoryMinor['sys:cash'], 0);
+      expect(t.spend.minor, 0);
     });
 
     test('overspend: total 1200', () async {
