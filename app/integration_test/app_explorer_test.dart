@@ -468,6 +468,14 @@ Future<void> _walkOnboarding(
   await shot('onb-end');
 }
 
+/// Scrolls [f] into view and lays the screen out again: `ensureVisible`
+/// alone does not pump, so a following tap would use the old position
+/// (batch-32: Keep, built in the list's cache area, was tapped off-screen).
+Future<void> _scrollTo(WidgetTester t, Finder f) async {
+  await t.ensureVisible(f);
+  await _settleFor(t, 400);
+}
+
 Future<void> _settleFor(WidgetTester t, [int ms = 600]) async {
   for (var i = 0; i < ms ~/ 100; i++) {
     await t.pump(const Duration(milliseconds: 100));
@@ -602,7 +610,7 @@ Future<void> _reviewFlow(
 
   // Show / hide original.
   if (before > 0) {
-    await t.ensureVisible(originals.first);
+    await _scrollTo(t, originals.first);
     await t.tap(originals.first);
     await _settleFor(t, 800);
     _check(
@@ -634,7 +642,7 @@ Future<void> _reviewFlow(
   _check(keeps.evaluate().isNotEmpty, 'no card offers an enabled Keep');
   if (keeps.evaluate().isNotEmpty) {
     final txns = await scalar('SELECT COUNT(*) FROM transactions');
-    await t.ensureVisible(keeps.first);
+    await _scrollTo(t, keeps.first);
     await t.tap(keeps.first);
     await _settleFor(t, 1500);
     var after = await scalar('SELECT COUNT(*) FROM transactions');
@@ -658,7 +666,7 @@ Future<void> _reviewFlow(
         w.onPressed != null,
   );
   if (await _reveal(t, edit)) {
-    await t.ensureVisible(edit.first);
+    await _scrollTo(t, edit.first);
     await t.tap(edit.first);
     await _settleFor(t, 1500);
     await shot('review-3-edit-add-screen');
@@ -674,7 +682,7 @@ Future<void> _reviewFlow(
     final open = await scalar(
       'SELECT COUNT(*) FROM review_items WHERE resolved_at IS NULL',
     );
-    await t.ensureVisible(dismiss.first);
+    await _scrollTo(t, dismiss.first);
     await t.tap(dismiss.first);
     await _settleFor(t, 1500);
     // The card leaves at once; the database row closes when the Undo

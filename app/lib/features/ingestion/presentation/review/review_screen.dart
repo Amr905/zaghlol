@@ -29,6 +29,7 @@ import '../../../../core/ui/z_chip.dart';
 import '../../../../core/ui/z_sheet.dart';
 import '../../../capture/presentation/template_builder_screen.dart';
 import '../../../transactions/domain/transaction.dart' show TxnDirection;
+import '../../data/review_repository.dart' show ReviewException;
 import 'review_models.dart';
 import 'review_providers.dart';
 import '../../../../core/ui/z_haptics.dart';
@@ -292,10 +293,23 @@ class _ReviewScreenState extends ConsumerState<ReviewScreen> {
     MessageCardModel card, {
     bool keep = false,
   }) async {
-    final saved = await _actions.confirmGeneric(card, keep: keep);
+    var saved = false;
+    try {
+      saved = await _actions.confirmGeneric(card, keep: keep);
+    } on ReviewException {
+      saved = false;
+    }
     final rawId = card.rawMessageId;
-    if (!saved || !mounted) return;
+    if (!mounted) return;
     final l10n = AppLocalizations.of(context);
+    if (!saved) {
+      // Refused (already resolved, or no longer complete): say so instead of
+      // leaving the card as if nothing was tapped.
+      ScaffoldMessenger.of(context)
+        ..hideCurrentSnackBar()
+        ..showSnackBar(SnackBar(content: Text(l10n.commonErrorSaveFailed)));
+      return;
+    }
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(
         // TODO(SMS-fuzzy): copy-deck keys ingestionReviewGenSaved and
@@ -728,7 +742,7 @@ class _MessageCard extends StatelessWidget {
           label: l10n.ingestionReviewKeep,
           haptic: ZHaptic.medium,
           expand: true,
-          onPressed: card.amount != null && card.keepable ? onKeep : null,
+          onPressed: card.offersKeep ? onKeep : null,
         ),
       ZButton(
         label: card.canConfirm
