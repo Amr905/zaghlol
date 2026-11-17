@@ -335,6 +335,29 @@ void main() {
       expect((await repo.totals(closed()))[egp]!.spend.minor, 600);
     });
 
+    test('FU-110: resume sweep reaches the linked expense of an edited source', () async {
+      await add('x', amount: 1000, when: at(2026, 10, 3), updatedAt: 1);
+      await add(
+        's',
+        amount: 400,
+        direction: 'transfer_in',
+        when: at(2026, 11, 3),
+        updatedAt: 1,
+      );
+      await db.customStatement(
+        'INSERT INTO offset_links (id, kind, expense_txn_id, source_txn_id, '
+        "amount_minor, created_at) VALUES ('l','reimbursement','x','s',400,2)",
+      );
+      await repo.totals(closed()); // cached with the link applied
+      // The source is edited later (headless engine); only it has a new
+      // updated_at, the link and the expense are old.
+      await db.customStatement(
+        "UPDATE transactions SET updated_at = 500 WHERE id = 's'",
+      );
+      expect(await inv.sweepSince(499, schedule), 1); // only Oct was cached
+      expect(await repo.cachedTotals(closed()), isNull); // the expense cycle
+    });
+
     test('a payday change keeps the keys of closed cycles', () async {
       final s1 = schedule.withChange(day(2026, 11, 10), 1);
       expect(s1.cycleOn(day(2026, 10, 3)).key, closed().key);
@@ -385,7 +408,23 @@ void main() {
           PaydayEra(null, 25),
         ]);
         expect(await settings.get(Settings.paydayDay), 25);
-        expect(invalidated, 1);
+        expect(invalidated, 2); // before and after the writes (FU-110)
+      },
+    );
+
+    test(
+      'FU-110: the last invalidation comes after payday_eras is written',
+      () async {
+        int? dayAtLastInvalidation;
+        final probe = PaydayScheduleStore(
+          settings,
+          nowUtcMs: () => now,
+          zone: const FixedLocalZone(120),
+          invalidateCycles: () async =>
+              dayAtLastInvalidation = await settings.get(Settings.paydayDay),
+        );
+        await probe.setPayday(25);
+        expect(dayAtLastInvalidation, 25);
       },
     );
 
