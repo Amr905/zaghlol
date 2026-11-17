@@ -409,3 +409,8 @@ CREATE TABLE diag_log (id INTEGER PRIMARY KEY, at INTEGER NOT NULL, level TEXT N
 | Catalog | ≈ 5k merchants / 20k aliases (≈ 3 MB) |
 | FTS indexes | ≈ 4 MB |
 | **Total** | **≈ 20 MB**: well within SQLite limits; NFR-PERF-04 queries are bounded by period and indexed |
+
+
+### Purge clock (FU-076)
+
+`purgeExpired()` hard-deletes rows whose `deleted_at` is older than 30 days, measured with the device clock. A backwards clock change delays the purge; a forwards change purges early (Undo lost). It runs once per app start after the first frame (`capture_coordinator`), not on a schedule.

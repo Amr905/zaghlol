@@ -35,6 +35,9 @@ class OffsetLinksDao {
           .get();
 
   /// Σ linked minor units for [expenseTxnId] (0 when none).
+  ///
+  /// WARNING (FU-076): counts links of soft-deleted transactions too. New
+  /// code computing remaining room must use [activeLinkedToExpense].
   Future<int> linkedToExpense(String expenseTxnId) => _sum(
     'SELECT coalesce(sum(amount_minor), 0) AS s FROM offset_links '
     'WHERE expense_txn_id = ?',
@@ -42,6 +45,9 @@ class OffsetLinksDao {
   );
 
   /// Σ linked minor units taken from [sourceTxnId] (0 when none).
+  ///
+  /// WARNING (FU-076): includes soft-deleted counterparts; new code must use
+  /// [activeLinkedFromSource].
   Future<int> linkedFromSource(String sourceTxnId) => _sum(
     'SELECT coalesce(sum(amount_minor), 0) AS s FROM offset_links '
     'WHERE source_txn_id = ?',
