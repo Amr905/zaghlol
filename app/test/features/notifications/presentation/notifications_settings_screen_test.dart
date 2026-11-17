@@ -162,6 +162,23 @@ void main() {
     expect(find.text(t.notificationsSettingsOsOffTitle), findsNothing);
   });
 
+  testWidgets('FU-219: the due-days picker writes the setting key', (
+    tester,
+  ) async {
+    final (h, _, _) = await _pump(tester);
+    expect(find.byKey(const ValueKey('notif-due-days')), findsOneWidget);
+    await tester.tap(find.byKey(const ValueKey('notif-due-days')));
+    await tester.pumpAndSettle();
+    await tester.tap(find.text('7 days before'));
+    await tester.pumpAndSettle();
+    await tester.runAsync(() => Future<void>.delayed(Duration.zero));
+    expect(
+      await tester.runAsync(() => h.repo.get(Settings.notifDueDaysBefore)),
+      7,
+    );
+    expect(find.text('7 days before'), findsOneWidget);
+  });
+
   testWidgets('turning a type on while the OS is off asks and keeps banner', (
     tester,
   ) async {

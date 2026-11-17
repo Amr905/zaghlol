@@ -38,6 +38,7 @@ allKeys = [
   (key: Settings.notifBudgetThreshold, byDefault: true, other: false),
   (key: Settings.notifSpendingSpike, byDefault: true, other: false),
   (key: Settings.notifUpcomingDue, byDefault: true, other: false),
+  (key: Settings.notifDueDaysBefore, byDefault: 3, other: 7),
   (key: Settings.notifDuplicateCharge, byDefault: true, other: false),
   (key: Settings.notifSubscriptionRenewal, byDefault: true, other: false),
   (key: Settings.notifBackupFailure, byDefault: true, other: false),

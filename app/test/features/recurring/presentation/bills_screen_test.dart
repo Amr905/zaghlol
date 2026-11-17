@@ -2,6 +2,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:zaghlol/core/l10n/date_format.dart';
+import 'package:zaghlol/core/settings/settings_providers.dart';
 import 'package:zaghlol/features/recurring/presentation/bill_edit_screen.dart';
 import 'package:zaghlol/features/recurring/presentation/bills_providers.dart';
 import 'package:zaghlol/features/recurring/presentation/bills_screen.dart';
@@ -195,6 +196,25 @@ void main() {
     expect(find.byType(CircularProgressIndicator), findsOneWidget);
     await tester.pumpAndSettle();
     expect(find.text('Try again'), findsOneWidget);
+  });
+
+  testWidgets('FU-219: a new bill starts from the due-days setting', (
+    tester,
+  ) async {
+    await tester.binding.setSurfaceSize(const Size(390, 2600));
+    addTearDown(() => tester.binding.setSurfaceSize(null));
+    await tester.pumpWidget(
+      harness(
+        const BillEditScreen(),
+        locale: const Locale('en'),
+        overrides: [
+          notifDueDaysBeforeProvider.overrideWith((ref) => Stream.value(10)),
+          billsActionsProvider.overrideWithValue(FakeActions()),
+        ],
+      ),
+    );
+    await tester.pumpAndSettle();
+    expect(find.text('Remind me 10 days before'), findsOneWidget);
   });
 
   testWidgets('editor: save disabled until valid, then saves a draft', (

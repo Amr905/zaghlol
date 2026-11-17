@@ -27,6 +27,7 @@ StreamProvider<T> settingProvider<T>(SettingKey<T> key) =>
 final languageProvider = settingProvider(Settings.language);
 final digitsProvider = settingProvider(Settings.digits);
 final themeProvider = settingProvider(Settings.theme);
+final notifDueDaysBeforeProvider = settingProvider(Settings.notifDueDaysBefore);
 final paydayDayProvider = settingProvider(Settings.paydayDay);
 final paydayErasProvider = settingProvider<PaydaySchedule?>(
   Settings.paydayEras,
