@@ -34,7 +34,7 @@ const String cashCoverCte =
     'cash_lag AS (SELECT id, is_pay, p, '
     'coalesce(lag(p) OVER (PARTITION BY cur ORDER BY lms, is_pay, id), 0) '
     'AS before FROM cash_pool), '
-    'cash_cover AS (SELECT id, before - p AS covered FROM cash_lag '
+    'cash_cover AS MATERIALIZED (SELECT id, before - p AS covered FROM cash_lag '
     'WHERE is_pay = 1 AND before - p > 0)';
 
 /// `WITH` + [cashCoverCte], to prefix a statement that reads `cash_cover`.
