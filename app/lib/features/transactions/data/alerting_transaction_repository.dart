@@ -14,6 +14,7 @@ final class AlertingTransactionRepository implements TransactionRepository {
     this._inner, {
     required this.afterAdd,
     this.onChanged,
+    this.afterRemove,
   });
 
   final TransactionRepository _inner;
@@ -21,6 +22,11 @@ final class AlertingTransactionRepository implements TransactionRepository {
 
   /// Best effort, after the write committed: the rows it touched.
   final Future<void> Function(List<TransactionRecord> rows)? onChanged;
+
+  /// FU-253: runs for every soft-deleted id after the delete committed (pair
+  /// and offset links of the row are freed). One failing id never skips the
+  /// others and never fails the delete.
+  final Future<void> Function(String id)? afterRemove;
 
   Future<void> _changed(List<TransactionRecord?> rows) async {
     final cb = onChanged;
@@ -86,6 +92,16 @@ final class AlertingTransactionRepository implements TransactionRepository {
     final list = ids.toList();
     final rows = await _read(list);
     await _inner.softDelete(list);
+    final hook = afterRemove;
+    if (hook != null) {
+      for (final id in list) {
+        try {
+          await hook(id);
+        } on Object {
+          // Deleted; the start-up sweep frees what this missed.
+        }
+      }
+    }
     await _changed(rows);
   }
 

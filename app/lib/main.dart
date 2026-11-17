@@ -29,6 +29,7 @@ import 'features/capture/presentation/shared_items_lifecycle.dart';
 import 'features/gold/application/gold_providers.dart';
 import 'features/catalog_sync/application/sync_providers.dart';
 import 'features/catalog_sync/presentation/sync_lifecycle.dart';
+import 'features/notifications/application/housekeeping_providers.dart';
 import 'features/notifications/application/notification_providers.dart';
 import 'features/security/application/delete_everything_providers.dart';
 import 'features/widgets_bridge/application/widget_bridge.dart'
@@ -166,7 +167,7 @@ class _LocalizedAppState extends ConsumerState<_LocalizedApp>
     WidgetsBinding.instance.addObserver(this);
     // T-100: the weekly summary (when 7 days have passed) and the duplicate
     // check at start; again on every resume.
-    unawaited(ref.read(alertsResumeProvider)());
+    unawaited(ref.read(resumeJobsProvider)());
   }
 
   @override
@@ -178,7 +179,7 @@ class _LocalizedAppState extends ConsumerState<_LocalizedApp>
   @override
   void didChangeAppLifecycleState(AppLifecycleState state) {
     if (state == AppLifecycleState.resumed) {
-      unawaited(ref.read(alertsResumeProvider)());
+      unawaited(ref.read(resumeJobsProvider)());
       unawaited(
         ref
             .read(cycleResumeHandlerProvider)
