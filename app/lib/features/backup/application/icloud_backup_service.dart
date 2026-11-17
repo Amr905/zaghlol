@@ -104,9 +104,10 @@ final class ICloudBackupService {
     Directory? dir;
     try {
       final listed = await _store.list();
-      // A backup iCloud refused for lack of space: don't stack another full
-      // copy in the container until the user frees space.
-      if (listed.any((e) => e.quotaExceeded)) {
+      // The newest backup iCloud refused for lack of space: don't stack
+      // another full copy in the container until the user frees space. An
+      // older stuck file behind a newer good one no longer blocks (FU-167a).
+      if (_newest(listed)?.quotaExceeded ?? false) {
         throw ICloudBackupException(ICloudBackupErrorCode.quotaExceeded);
       }
       final seq = await _nextSeq(listed);
@@ -168,6 +169,14 @@ final class ICloudBackupService {
     } finally {
       _busy = false;
     }
+  }
+
+  static ICloudBackupEntry? _newest(List<ICloudBackupEntry> listed) {
+    ICloudBackupEntry? top;
+    for (final e in listed) {
+      if (top == null || e.labelSeq > top.labelSeq) top = e;
+    }
+    return top;
   }
 
   Future<int> _nextSeq(List<ICloudBackupEntry> listed) async {

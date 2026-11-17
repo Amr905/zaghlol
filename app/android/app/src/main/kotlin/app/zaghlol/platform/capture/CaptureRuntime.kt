@@ -329,7 +329,10 @@ class CaptureRuntime internal constructor(seams: CaptureSeams) {
      * When the capabilities differ from the last ones seen, tells the UI
      * engine (`CaptureEventsApi.onPermissionChanged`). The first look after
      * attach only records the baseline; a revocation that killed the process
-     * is seen by Dart's own `getCapabilities` at start.
+     * is seen by Dart's own `getCapabilities` at start. (FU-164a: revoking
+     * SMS in system settings kills the app process, so for that case
+     * `onPermissionChanged` never fires; the next start's `getCapabilities`
+     * is the only signal.)
      */
     fun checkPermissions() {
         val events = uiEvents ?: return

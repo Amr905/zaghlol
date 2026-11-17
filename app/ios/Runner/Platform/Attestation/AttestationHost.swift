@@ -105,9 +105,18 @@ final class KeychainAttestKeyIdStore: AttestKeyIdStore {
   }
 
   func replace(_ keyId: String) -> Bool {
-    let status = client.delete(Self.itemQuery(accessGroup: accessGroup))
-    guard status == errSecSuccess || status == errSecItemNotFound else { return false }
-    return client.add(Self.addAttributes(keyId: keyId, accessGroup: accessGroup)) == errSecSuccess
+    // FU-162a: update in place, so a failed write never loses the old key ID
+    // (delete-then-add did). Add only when there is no item yet.
+    let status = client.update(
+      Self.itemQuery(accessGroup: accessGroup), [kSecValueData as String: Data(keyId.utf8)])
+    switch status {
+    case errSecSuccess:
+      return true
+    case errSecItemNotFound:
+      return client.add(Self.addAttributes(keyId: keyId, accessGroup: accessGroup)) == errSecSuccess
+    default:
+      return false
+    }
   }
 }
 

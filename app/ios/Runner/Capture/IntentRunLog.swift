@@ -51,6 +51,16 @@ final class IntentRunLog {
     return readLocked() ?? Runs()
   }
 
+  /// FU-207b: like `read()`, but nil when a file exists and can't be read now
+  /// (before the first unlock, corrupt): "cannot tell", not "never ran". No
+  /// file at all is a real "never ran".
+  func readIfReadable() -> Runs? {
+    lock.lock()
+    defer { lock.unlock() }
+    if let runs = readLocked() { return runs }
+    return FileManager.default.fileExists(atPath: file.path) ? nil : Runs()
+  }
+
   /// Records `kind` at `atMs`. Never throws.
   func record(_ kind: CaptureIntentKind, atMs: Int64) {
     lock.lock()

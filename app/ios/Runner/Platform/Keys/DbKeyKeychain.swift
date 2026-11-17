@@ -6,6 +6,15 @@ protocol KeychainClient {
   func copyMatching(_ query: [String: Any]) -> (OSStatus, Data?)
   func add(_ attributes: [String: Any]) -> OSStatus
   func delete(_ query: [String: Any]) -> OSStatus
+  /// `SecItemUpdate`: changes `attributes` on the item matching `query`.
+  func update(_ query: [String: Any], _ attributes: [String: Any]) -> OSStatus
+}
+
+extension KeychainClient {
+  /// Clients that never update in place report it as unsupported.
+  func update(_ query: [String: Any], _ attributes: [String: Any]) -> OSStatus {
+    errSecUnimplemented
+  }
 }
 
 /// The real Keychain.
@@ -22,6 +31,10 @@ struct SystemKeychain: KeychainClient {
 
   func delete(_ query: [String: Any]) -> OSStatus {
     SecItemDelete(query as CFDictionary)
+  }
+
+  func update(_ query: [String: Any], _ attributes: [String: Any]) -> OSStatus {
+    SecItemUpdate(query as CFDictionary, attributes as CFDictionary)
   }
 }
 

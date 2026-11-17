@@ -163,6 +163,17 @@ void main() {
     expect(host.sent.last.primaryText, '•••/day');
   });
 
+  test(
+    'FU-206a: locking publishes the masked snapshot without the debounce',
+    () async {
+      make(locked: true);
+      hide.add(false);
+      lockOn.add(true);
+      await Future<void>.delayed(const Duration(milliseconds: 300));
+      expect(host.sent.last.primaryText, '•••/day');
+    },
+  );
+
   test('identical content is not sent twice', () async {
     final c = make();
     hide.add(false);
