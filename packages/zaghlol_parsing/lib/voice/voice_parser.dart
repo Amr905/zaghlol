@@ -271,6 +271,12 @@ _Num? _wordsNumber(List<_Tok> t, int i) {
   if (x.is_(LexKind.millionDual)) {
     return _addRest(t, 2000000, i + 1, _belowMillion);
   }
+  // FU-118: "ألف ألف" is one million, not two thousands.
+  if (x.is_(LexKind.thousand) &&
+      i + 1 < t.length &&
+      t[i + 1].is_(LexKind.thousand)) {
+    return _addRest(t, 1000000, i + 2, _belowMillion);
+  }
   final p = _belowMillion(t, i);
   if (p != null && p.next < t.length && t[p.next].is_(LexKind.million)) {
     return _addRest(t, p.v * 1000000, p.next + 1, _belowMillion);
