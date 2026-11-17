@@ -283,6 +283,21 @@ public sealed class SupportActionTests(SupportActionFixture fixture) : IClassFix
     }
 
     [Fact]
+    public async Task DetachSetsTheFreezeFromTheDatabaseClockNotTheAppClock()
+    {
+        var (agent, p, holder, _) = await ScenarioAsync();
+        await SilenceBuyerAsync(p);
+        var attach = await Service.MoveSeatAsync(Move(agent, p, holder, SupportReason.BuyingPhoneGone, attach: true), None);
+        var skewed = fixture.Service(store, alerts, new SkewedClock(TimeSpan.FromHours(48)));
+
+        var result = await skewed.DetachAsync(Detach(agent, p, attach.Value!.AuditId), None);
+
+        Assert.True(result.Value!.Detached);
+        var frozen = (await PurchaseAsync(p)).FrozenUntil!.Value;
+        Assert.InRange(frozen - DateTimeOffset.UtcNow, TimeSpan.FromDays(30) - TimeSpan.FromMinutes(5), TimeSpan.FromDays(30) + TimeSpan.FromMinutes(5));
+    }
+
+    [Fact]
     public async Task ASignInLinkCannotBeDetached()
     {
         var (agent, p, holder, _) = await ScenarioAsync();
@@ -675,6 +690,11 @@ public sealed class SupportActionTests(SupportActionFixture fixture) : IClassFix
             purchase);
         var r = rows.Single();
         return new PurchaseState((Guid?)r[0], (string?)r[1], (bool)r[2]!, (DateTimeOffset?)r[3], (DateTimeOffset?)r[4]);
+    }
+
+    private sealed class SkewedClock(TimeSpan skew) : TimeProvider
+    {
+        public override DateTimeOffset GetUtcNow() => base.GetUtcNow() + skew;
     }
 
     private sealed record PurchaseState(Guid? Account, string? LinkedBy, bool NoticePending, DateTimeOffset? NoticeIat, DateTimeOffset? FrozenUntil);

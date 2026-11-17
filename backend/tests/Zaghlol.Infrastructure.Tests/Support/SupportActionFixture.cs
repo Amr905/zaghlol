@@ -50,8 +50,8 @@ public sealed class SupportActionFixture : IAsyncLifetime
         }
     }
 
-    public SupportActionService Service(FakeOwnership ownership, RecordingSupportAlerts alerts) =>
-        new(Store, ownership, new SeatService(new SeatKeyHasher(new FixedSeatMac(), new NullSeatKeyMetrics()), new RecordingSeatTelemetry(), TimeProvider.System), alerts, TimeProvider.System);
+    public SupportActionService Service(FakeOwnership ownership, RecordingSupportAlerts alerts, TimeProvider? clock = null) =>
+        new(Store, ownership, new SeatService(new SeatKeyHasher(new FixedSeatMac(), new NullSeatKeyMetrics()), new RecordingSeatTelemetry(), TimeProvider.System), alerts, clock ?? TimeProvider.System);
 
     /// <summary>An <c>operators</c> row; the audit table's foreign key needs it.</summary>
     public async Task<Guid> OperatorAsync(params string[] roles)

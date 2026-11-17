@@ -176,6 +176,13 @@ internal sealed class SupportActionStore(IServiceProvider services, IAuditWriter
                 cancellationToken,
                 new NpgsqlParameter("until", NpgsqlDbType.TimestampTz) { Value = until is { } value ? value.ToUniversalTime() : DBNull.Value });
 
+        public Task StartDisputeFreezeAsync(Guid purchaseId, TimeSpan length, CancellationToken cancellationToken) =>
+            ExecuteAsync(
+                "UPDATE zaghlol.purchases SET dispute_frozen_until = now() + @len WHERE id = @id",
+                purchaseId,
+                cancellationToken,
+                new NpgsqlParameter("len", NpgsqlDbType.Interval) { Value = length });
+
         public Task<long> WriteAuditAsync(Guid operatorId, AuditEntry entry, CancellationToken cancellationToken) =>
             audit.WriteAsync(connection, transaction, operatorId, entry, cancellationToken);
 

@@ -156,6 +156,9 @@ public interface ISupportActionTransaction : IAsyncDisposable
 
     Task SetDisputeFreezeAsync(Guid purchaseId, DateTimeOffset? until, CancellationToken cancellationToken);
 
+    /// <summary>Sets <c>dispute_frozen_until = now() + length</c> on the database clock, so a skewed app clock cannot change the freeze.</summary>
+    Task StartDisputeFreezeAsync(Guid purchaseId, TimeSpan length, CancellationToken cancellationToken);
+
     /// <summary>Inserts the call's one audit row naming the operator and returns its id.</summary>
     Task<long> WriteAuditAsync(Guid operatorId, AuditEntry entry, CancellationToken cancellationToken);
 
