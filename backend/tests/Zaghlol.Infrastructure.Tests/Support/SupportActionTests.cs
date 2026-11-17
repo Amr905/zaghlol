@@ -351,6 +351,19 @@ public sealed class SupportActionTests(SupportActionFixture fixture) : IClassFix
     }
 
     [Fact]
+    public async Task ACorrectionSetsTheFreezeFromTheDatabaseClockNotTheAppClock()
+    {
+        var (agent, p, holder, claimant) = await ScenarioAsync();
+        var first = await Service.MoveSeatAsync(Move(agent, p, claimant, SupportReason.Other), None);
+        var skewed = fixture.Service(store, alerts, new SkewedClock(TimeSpan.FromHours(48)));
+
+        await skewed.MoveSeatAsync(Correction(agent, p, holder, first.Value!.AuditId), None);
+
+        var frozen = (await PurchaseAsync(p)).FrozenUntil!.Value;
+        Assert.InRange(frozen - DateTimeOffset.UtcNow, TimeSpan.FromDays(30) - TimeSpan.FromMinutes(5), TimeSpan.FromDays(30) + TimeSpan.FromMinutes(5));
+    }
+
+    [Fact]
     public async Task AFurtherCorrectionIsAllowedAndRestartsTheFreeze()
     {
         var (agent, p, holder, claimant) = await ScenarioAsync();

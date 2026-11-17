@@ -210,7 +210,7 @@ public sealed class SupportActionService(
 
         if (correction && moved)
         {
-            await tx.SetDisputeFreezeAsync(command.PurchaseId, now + SupportRules.FreezeLength, cancellationToken).ConfigureAwait(false);
+            await tx.StartDisputeFreezeAsync(command.PurchaseId, SupportRules.FreezeLength, cancellationToken).ConfigureAwait(false);
         }
 
         var outcome = (moved, attachAccount is not null) switch
