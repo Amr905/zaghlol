@@ -30,6 +30,9 @@ final class _Boom extends SafeException {
 Future<bool> _compiles(String source) async {
   final dir = Directory('${Directory.current.path}/.dart_tool/diag_probe')
     ..createSync(recursive: true);
+  // FU-029: a bare options file keeps the riverpod_lint analyzer plugin (slow
+  // to start, irrelevant here) out of these probe runs.
+  File('${dir.path}/analysis_options.yaml').writeAsStringSync('');
   final file = File('${dir.path}/probe_${source.hashCode}.dart')
     ..writeAsStringSync(source);
   try {
@@ -65,9 +68,7 @@ import 'package:zaghlol/core/logging/diag_event.dart';
 import 'package:zaghlol/core/logging/diag_field.dart';
 ''';
 
-  // FU-029: `dart analyze` now starts the riverpod_lint analyzer plugin, whose
-  // first start compiles it (about a minute on a cold CI cache).
-  group('compile-time barrier', timeout: const Timeout(Duration(minutes: 5)), () {
+  group('compile-time barrier', () {
     test('control: a well-typed event compiles', () async {
       expect(
         await _compiles(
