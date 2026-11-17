@@ -1,5 +1,8 @@
 ﻿== SUMMARY ==
-RUNNING sha=8b38a1e5656730132f9c1deab0c5a823beb37f5b
+SKIP sha=8b38a1e5656730132f9c1deab0c5a823beb37f5b no app/packages/backend changes
 
 == FULL LOG (last 1500 lines) ==
 auto task/FU-triage 8b38a1e5656730132f9c1deab0c5a823beb37f5b 2026-11-18T00:25:08.1043722+02:00
+
+
+
