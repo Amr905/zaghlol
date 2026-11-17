@@ -207,29 +207,38 @@ class OnbPage extends StatelessWidget {
   final List<Widget> content;
   final List<Widget> actions;
 
+  /// Content scrolls; the actions stay pinned at the bottom so the primary
+  /// button is never below the fold on a small screen (explorer finding 15).
   @override
   Widget build(BuildContext context) {
-    return LayoutBuilder(
-      builder: (context, box) => SingleChildScrollView(
-        padding: const EdgeInsetsDirectional.symmetric(
-          horizontal: ZSpacing.screen,
-          vertical: ZSpacing.sm,
-        ),
-        child: ConstrainedBox(
-          constraints: BoxConstraints(minHeight: box.maxHeight - 16),
-          child: IntrinsicHeight(
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      children: [
+        Expanded(
+          child: SingleChildScrollView(
+            padding: const EdgeInsetsDirectional.symmetric(
+              horizontal: ZSpacing.screen,
+              vertical: ZSpacing.sm,
+            ),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.stretch,
-              children: [
-                ...content,
-                const SizedBox(height: ZSpacing.xl),
-                const Spacer(),
-                ...actions,
-              ],
+              children: content,
             ),
           ),
         ),
-      ),
+        Padding(
+          padding: const EdgeInsetsDirectional.fromSTEB(
+            ZSpacing.screen,
+            ZSpacing.sm,
+            ZSpacing.screen,
+            ZSpacing.sm,
+          ),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: actions,
+          ),
+        ),
+      ],
     );
   }
 }

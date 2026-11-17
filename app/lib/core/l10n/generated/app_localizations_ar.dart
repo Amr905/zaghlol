@@ -3091,10 +3091,10 @@ class AppLocalizationsAr extends AppLocalizations {
   String get insightsChartsOtherSlice => 'حاجات تانية';
 
   @override
-  String get insightsChartTitleCashFlow => 'الداخل والخارج والصافي';
+  String get insightsChartTitleCashFlow => 'الداخل والخارج';
 
   @override
-  String get insightsChartTitleCategories => 'فلوسك رايحة فين؟';
+  String get insightsChartTitleCategories => 'فلوسك راحت فين؟';
 
   @override
   String get insightsChartTitleBurnRate => 'سرعة الصرف لحد القبض';
@@ -3194,7 +3194,7 @@ class AppLocalizationsAr extends AppLocalizations {
     String amount,
     String percent,
   ) {
-    return 'فلوسك رايحة فين: $category الأكبر بـ $amount، يعني $percent';
+    return 'فلوسك راحت فين: $category الأكبر بـ $amount، يعني $percent';
   }
 
   @override

@@ -4638,13 +4638,13 @@ abstract class AppLocalizations {
   /// T · chart 1 (Free)
   ///
   /// In ar, this message translates to:
-  /// **'الداخل والخارج والصافي'**
+  /// **'الداخل والخارج'**
   String get insightsChartTitleCashFlow;
 
   /// T · chart 2 (Free)
   ///
   /// In ar, this message translates to:
-  /// **'فلوسك رايحة فين؟'**
+  /// **'فلوسك راحت فين؟'**
   String get insightsChartTitleCategories;
 
   /// T · chart 3 (Gold)
@@ -4830,7 +4830,7 @@ abstract class AppLocalizations {
   /// A
   ///
   /// In ar, this message translates to:
-  /// **'فلوسك رايحة فين: {category} الأكبر بـ {amount}، يعني {percent}'**
+  /// **'فلوسك راحت فين: {category} الأكبر بـ {amount}، يعني {percent}'**
   String insightsChartA11yCategories(
     String category,
     String amount,

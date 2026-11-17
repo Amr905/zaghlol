@@ -19,6 +19,7 @@ import '../../transactions/domain/transaction.dart';
 import '../application/card_filter.dart';
 import '../application/home_read_model.dart';
 import 'home_format.dart';
+import '../../../core/ui/bank_name_text.dart';
 import '../../../core/ui/z_haptics.dart';
 
 /// Accounts for the card filter sheet and the filter chip label.
@@ -371,7 +372,7 @@ class HomeFeedRow extends StatelessWidget {
     required this.item,
     required this.format,
     required this.today,
-    this.accountLabel,
+    this.account,
     this.showDivider = false,
     this.onTap,
   });
@@ -380,8 +381,9 @@ class HomeFeedRow extends StatelessWidget {
   final HomeFormat format;
   final CivilDate today;
 
-  /// "Account •1234" for the row's card; null falls back to the source.
-  final String? accountLabel;
+  /// The row's card; its name falls back to the bank acronym when the line
+  /// does not fit. Null falls back to the source label.
+  final Account? account;
   final bool showDivider;
   final ValueChanged<String>? onTap;
 
@@ -395,13 +397,17 @@ class HomeFeedRow extends StatelessWidget {
         local.year == today.year &&
         local.month == today.month &&
         local.day == today.day;
-    final where = accountLabel ?? _sourceLabel(l, r.source);
+    final acc = account;
+    final where = _sourceLabel(l, r.source);
     final when = sameDay
         ? format.time(r.occurredAt)
         : format.dayMonthOf(r.occurredAt);
-    final subtitle = item.excludedFromTotals
-        ? '$where · ${l.homeFeedExcludedFromSpending}'
-        : '$where · $when';
+    String tail(String name) => item.excludedFromTotals
+        ? '$name · ${l.homeFeedExcludedFromSpending}'
+        : '$name · $when';
+    final subtitle = tail(
+      acc == null ? where : formatAccountWithCard(acc.label, acc.last4),
+    );
     final (Money shown, ZMoneyKind kind) = item.excludedFromTotals
         ? (r.amount, ZMoneyKind.neutral)
         : switch (r.direction) {
@@ -414,6 +420,18 @@ class HomeFeedRow extends StatelessWidget {
     return ZListRow(
       title: title,
       subtitle: subtitle,
+      subtitleWidget: acc == null
+          ? null
+          : BankNameText(
+              name: acc.label,
+              institutionCode: acc.institutionCode,
+              last4: acc.last4,
+              maxLines: 2,
+              compose: tail,
+              style: ZType.bodySmall.copyWith(
+                color: ZColors.of(context).textMuted,
+              ),
+            ),
       showDivider: showDivider,
       leading: ZCategoryGlyph(
         categoryId: r.categoryId,
