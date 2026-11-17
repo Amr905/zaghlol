@@ -43,7 +43,15 @@ abstract final class GoldSymbols {
   static String? forKarat(int karat) =>
       const {24, 22, 21, 18}.contains(karat) ? 'XAU${karat}_G' : null;
 
-  static bool isGold(String unit) => unit.startsWith('XAU');
+  static const Set<String> all = {
+    coin,
+    'XAU24_G',
+    'XAU22_G',
+    'XAU21_G',
+    'XAU18_G',
+  };
+
+  static bool isGold(String unit) => all.contains(unit);
 }
 
 /// The price of one gram (or one coin) of a gold symbol, in one currency.
