@@ -82,14 +82,32 @@ const Map<String, Set<String>> storageAllowed = {};
 String code(String src) => src
     .replaceAll(RegExp(r'/\*.*?\*/', dotAll: true), '')
     .split('\n')
-    .map((l) {
-      final i = l.indexOf('//');
-      if (i < 0) return l;
-      // Keep `://` (URLs in strings).
-      if (i > 0 && l[i - 1] == ':') return l;
-      return l.substring(0, i);
-    })
+    .map(_stripLineComment)
     .join('\n');
+
+/// Cuts a `//` comment off a line, but not a `//` inside a "..." or '...'
+/// string (so `"a // b"; print(x)` keeps its `print`) and not `://`.
+String _stripLineComment(String l) {
+  String? quote;
+  for (var i = 0; i < l.length; i++) {
+    final ch = l[i];
+    if (quote != null) {
+      if (ch == r'\') {
+        i++;
+      } else if (ch == quote) {
+        quote = null;
+      }
+    } else if (ch == '"' || ch == "'") {
+      quote = ch;
+    } else if (ch == '/' &&
+        i + 1 < l.length &&
+        l[i + 1] == '/' &&
+        (i == 0 || l[i - 1] != ':')) {
+      return l.substring(0, i);
+    }
+  }
+  return l;
+}
 
 Iterable<File> sources(Directory app) sync* {
   for (final rel in ['lib', ...nativeRoots]) {
@@ -101,6 +119,9 @@ Iterable<File> sources(Directory app) sync* {
           p.endsWith('.kt') ||
           p.endsWith('.java') ||
           p.endsWith('.swift') ||
+          p.endsWith('.m') ||
+          p.endsWith('.mm') ||
+          p.endsWith('.h') ||
           p.endsWith('.drift')) {
         yield f;
       }
@@ -197,6 +218,10 @@ void main() {
       expect(loggingCall.hasMatch(code(bad)), isTrue, reason: bad);
     }
     expect(loggingCall.hasMatch(code('// never print(x) here')), isFalse);
+    // FU-208b: a `//` inside a string does not hide the call after it.
+    expect(loggingCall.hasMatch(code('f("a // b"); print(x);')), isTrue);
+    expect(loggingCall.hasMatch(code("f('//'); NSLog(x)")), isTrue);
+    expect(loggingCall.hasMatch(code('f("a"); // print(x)')), isFalse);
     expect(loggingCall.hasMatch('final l = DiagLogger(store);'), isFalse);
     for (final bad in [
       'UserDefaults.standard.set(1, forKey: "k")',
