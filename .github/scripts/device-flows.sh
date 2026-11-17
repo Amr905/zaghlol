@@ -127,6 +127,11 @@ run_sms_device() {
   return "$r"
 }
 
+sms_rc=0
+run_sms_device 2>&1 | tee "$OUT/sms-device-script.log"
+sms_rc=${PIPESTATUS[0]}
+pull_files
+adb -s "$DEVICE" exec-out screencap -p > "$OUT/screens/zz-final-sms.png" || true
 # ---- 0b. TEST-explorer4: Cash/InstaPay categories, a cash payment, the Add
 # button (integration_test/sms_device_cash_test.dart), then two quick resumes of
 # the app and a count of its posted notifications (no duplicates). Synthetic.
@@ -140,6 +145,7 @@ run_cash_device() {
   adb -s "$DEVICE" shell am force-stop "$PKG"
   adb -s "$DEVICE" root > /dev/null 2>&1 || true
   adb -s "$DEVICE" wait-for-device
+  adb -s "$DEVICE" shell "content delete --uri content://sms" > /dev/null 2>&1 || true
   sms_hist CIB 'Cash withdrawal of EGP 1000.00 with Card ending 1234 at ATM CAIRO FESTIVAL. Avl Bal EGP 5000.00'
   sms_hist CIB 'CIB: An instant transfer of EGP 500.00 was made from your account ending ****7316, ref e7a3c9f1 on 10-11-2026 22:32. For more info call 19666.'
   sleep 5
@@ -174,11 +180,6 @@ run_cash_device 2>&1 | tee "$OUT/cash-device-script.log"
 cash_rc=${PIPESTATUS[0]}
 pull_files
 
-sms_rc=0
-run_sms_device 2>&1 | tee "$OUT/sms-device-script.log"
-sms_rc=${PIPESTATUS[0]}
-pull_files
-adb -s "$DEVICE" exec-out screencap -p > "$OUT/screens/zz-final-sms.png" || true
 if [ -n "${SMS_ONLY:-}" ]; then
   ls -la "$OUT/screens"
   [ "$cash_rc" -ne 0 ] && exit "$cash_rc"

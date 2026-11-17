@@ -202,8 +202,12 @@ void main() {
     // ---- 2. a manual cash expense from the Cash account
     final before = await donut(c);
     say('DONUT before total=${before.total} slices=${before.slices}');
+    await waitUntil(
+      t,
+      () async => (await CategoriesDao(db).active()).isNotEmpty,
+    );
     final cats = await CategoriesDao(db).active();
-    final own = cats.firstWhere((x) => !x.id.startsWith('sys:')).id;
+    final own = cats.where((x) => !x.id.startsWith('sys:')).first.id;
     final accounts = await c.read(accountsRepositoryProvider.future);
     final cash = await accounts.ensureDefaultCash(
       currency: Currency.of('EGP'),
