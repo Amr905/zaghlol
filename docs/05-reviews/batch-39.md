@@ -81,3 +81,12 @@ I checked runs 44308240398 (API 34) and 44310207479 (API 30). Their logs match t
 |------|-----------|-----------------|-------------|
 | T-159 | app/android/build.gradle.kts:8-11 | Gradle dependency verification (sha256) for the JitPack `cz.adaptech.tesseract4android` artifacts | ci/T-159 run green, and red with a corrupted checksum (evidence in task file) |
 | T-159 | app/android/app/build.gradle.kts:139 | Exclude ML Kit datatransport/firelog telemetry backends (or a recorded PO acceptance) | Dependency/classpath check that the release runtime classpath has no `transport-backend-cct`, plus `OcrInstrumentedTest` green |
+
+## Lead delta check: T-159 fix round (2026-11-18)
+
+- **Supply chain (1adcdbd3, 27e38690):** `app/android/gradle/verification-metadata.xml` verifies `cz.adaptech.tesseract4android` (aar and module sha256, generated on CI run 44317027022). Every other group stays trusted through the regex. The temporary trust-all commit (6bcb80c0) is superseded. A CI negative proof corrupts the checksum and expects the build to fail.
+- **Telemetry (1a92d267, 6bb45c05):** `transport-backend-cct` and `firebase-datatransport` are excluded from the app. A no-op `CCTDestination` stub keeps ML Kit linking, so nothing is uploaded. A CI classpath gate fails if the backends reappear in the prod release classpath.
+- **CI:** Android builds and Kotlin tests are green on ci/fix39 (44323861749; `stagingNoSms` was a network flake, passed on rerun).
+
+Verdict: T-159 **APPROVED**. All five tasks approved.
+- **FU-260:** batch-39 minors: risky short merchant aliases, two false passes in the T-165 emulator script, the PO spot-check of the 705 merchants, `ocrPath` not set by Android share intake, the SPK-02 accuracy run, and the known `capture_providers_test` flake under load.
