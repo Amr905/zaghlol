@@ -13,6 +13,10 @@
 //    in an exception, summary or `toString`.
 //  * Money is integer minor units in the statement currency; nothing is
 //    converted.
+//  * Scanned PDFs: the extractor passed in may fall back to on-device OCR
+//    (see ScannedPdfTextExtractor); this class only sees positioned text.
+//  * Where the statement prints a running balance, a row that does not add up
+//    to it is not imported and is counted with the invalid rows.
 //
 // Duplicates: a statement row has a day, not an instant, so a row is a
 // duplicate of an existing transaction of the same account when the local
@@ -88,12 +92,16 @@ class ImportStatementPdfUseCase {
     this._store,
     this._templates, {
     this.onImported,
-  });
+    DateTime Function()? now,
+  }) : _now = now ?? DateTime.now;
 
   final PdfTextExtractor _extractor;
   final CsvImportStore _store;
   final StatementTemplateStore _templates;
   final Future<void> Function(String id)? onImported;
+
+  /// The end of a statement whose dates carry no year.
+  final DateTime Function() _now;
 
   /// Reads [bytes] (zeroed before this returns) and finds the table.
   ///
@@ -122,7 +130,11 @@ class ImportStatementPdfUseCase {
       bytes.fillRange(0, bytes.length, 0);
     }
     final template = await _templates.load(bankKey);
-    final table = buildStatementTable(fragments, template: template);
+    final table = buildStatementTable(
+      fragments,
+      template: template,
+      today: _now(),
+    );
     if (table.rows.every((r) => r.continuation)) {
       throw const StatementImportException(StatementImportFailure.noRows);
     }
@@ -233,6 +245,8 @@ class ImportStatementPdfUseCase {
     }
     final byProblem = <ImportRowProblem, int>{};
     parsed.problems.forEach((p, n) {
+      // A balance mismatch is shown with the amount problems: the amount or
+      // the direction of that row cannot be trusted.
       final mapped = p == StatementRowProblem.badDate
           ? ImportRowProblem.badDate
           : ImportRowProblem.badAmount;

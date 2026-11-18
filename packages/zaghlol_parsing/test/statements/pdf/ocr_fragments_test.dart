@@ -11,10 +11,9 @@ const int pageH = 1100;
 
 OcrLineBox box(String s, num x0, num x1, num y, {num h = 11}) => OcrLineBox(
   text: s,
-  x: x0 / pageW,
-  y: (y - h / 2) / pageH,
-  width: (x1 - x0) / pageW,
-  height: h / pageH,
+  x0: (x0 * 1000 / pageW).round(),
+  x1: (x1 * 1000 / pageW).round(),
+  yCenter: (y * 10000 / pageH).round(),
 );
 
 final DateTime today = DateTime(2026, 11, 18);

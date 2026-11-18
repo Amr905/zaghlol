@@ -12,21 +12,21 @@
 import 'pdf_text_types.dart';
 import 'statement_dates.dart';
 
-/// One recognised line: [x], [y], [width], [height] are 0..1, origin top-left.
+/// One recognised line, in whole numbers: [x0] and [x1] in permille of the
+/// page width (0..1000), [yCenter] in ten-thousandths of the page height
+/// (0..10000), origin top-left.
 final class OcrLineBox {
   const OcrLineBox({
     required this.text,
-    required this.x,
-    required this.y,
-    required this.width,
-    required this.height,
+    required this.x0,
+    required this.x1,
+    required this.yCenter,
   });
 
   final String text;
-  final double x;
-  final double y;
-  final double width;
-  final double height;
+  final int x0;
+  final int x1;
+  final int yCenter;
 
   @override
   String toString() => 'OcrLineBox';
@@ -47,8 +47,8 @@ bool _isDate(String t) =>
     parsePartialStatementDate(t) != null ||
     parsePartialStatementDate(t, dayFirst: false) != null;
 
-/// Converts the lines of one page. [pageHeightPoints] turns the 0..1 vertical
-/// position into the whole points the table detector works in.
+/// Converts the lines of one page. [pageHeightPoints] turns the relative
+/// vertical position into the whole points the table detector works in.
 List<PdfTextFragment> ocrLinesToFragments(
   List<OcrLineBox> lines, {
   required int page,
@@ -61,9 +61,9 @@ List<PdfTextFragment> ocrLinesToFragments(
   for (final l in take) {
     final text = l.text.trim();
     if (text.isEmpty || _noise.hasMatch(text)) continue;
-    final x0 = (l.x * 1000).round().clamp(0, 1000);
-    final x1 = ((l.x + l.width) * 1000).round().clamp(x0, 1000);
-    final y = ((l.y + l.height / 2) * pageHeightPoints).round();
+    final x0 = l.x0.clamp(0, 1000);
+    final x1 = l.x1.clamp(x0, 1000);
+    final y = (l.yCenter * pageHeightPoints + 5000) ~/ 10000;
     PdfTextFragment frag(String t, int a, int b, {bool brk = false}) =>
         PdfTextFragment(
           page: page,
@@ -102,7 +102,8 @@ List<PdfTextFragment> ocrLinesToFragments(
       continue;
     }
     final width = x1 - x0;
-    int at(int offset) => x0 + (width * offset / text.length).round();
+    int at(int offset) =>
+        x0 + (width * offset + text.length ~/ 2) ~/ text.length;
     var first = true;
     void seg(List<(String, int, int)> toks) {
       if (toks.isEmpty) return;
