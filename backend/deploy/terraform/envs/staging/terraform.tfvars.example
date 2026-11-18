@@ -1,0 +1,19 @@
+# Copy to terraform.tfvars (git-ignored) or pass with -var. Nothing here is a secret.
+project_id = "zaghlol-staging-REPLACE"
+hostname   = "api.staging.zaghlol.app"
+# image is passed by the deploy workflow: -var image=europe-west3-docker.pkg.dev/<project>/zaghlol/backend@sha256:<digest>
+# kseat_check_hex = ""   # fill after the first apply with scripts/seat-check.sh
+
+app_settings = {
+  Purchases__Google__PackageName          = "app.zaghlol.staging"
+  Purchases__Apple__BundleId              = "app.zaghlol.staging"
+  Purchases__Apple__AllowSandbox          = "true"
+  Attestation__AppAttest__TeamId          = "REPLACEME1"
+  OperatorAuth__Enabled                   = "true"
+  OperatorAuth__Profile                   = "Entra"
+  OperatorAuth__Issuer                    = "https://login.microsoftonline.com/REPLACE/v2.0"
+  OperatorAuth__Audiences__0              = "REPLACE-zaghlol-ops-client-id"
+  Purchases__Google__Products__zaghlol_gold_monthly__Kind = "subscription"
+  Purchases__Google__Products__zaghlol_gold_monthly__Plan = "monthly"
+  # ... yearly and lifetime products, Purchases__Apple__Products__*, Budget__*; see docs/03-technical/deployment.md section 3.
+}

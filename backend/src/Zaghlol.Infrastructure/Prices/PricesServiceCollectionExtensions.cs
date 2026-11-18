@@ -33,18 +33,30 @@ public static class PricesServiceCollectionExtensions
     {
         ArgumentNullException.ThrowIfNull(services);
 
+        AddPriceHttpClient(services, GoldApiProvider.HttpClientName, "https://www.goldapi.io/");
+        AddPriceHttpClient(services, MetalpriceApiProvider.HttpClientName, "https://api.metalpriceapi.com/");
         services.TryAddSingleton<IPriceFeedStore, PriceFeedStore>();
         services.TryAddSingleton<IPriceMetrics, ZaghlolPriceMetrics>();
         services.TryAddSingleton(provider => new PriceFetchJob(
             PriceProviderFactory.Create(
                 provider.GetRequiredService<IConfiguration>(),
                 provider.GetRequiredService<IHostEnvironment>(),
-                provider.GetRequiredService<TimeProvider>()),
+                provider.GetRequiredService<TimeProvider>(),
+                provider.GetRequiredService<IHttpClientFactory>()),
             provider.GetRequiredService<IPriceFeedStore>(),
             provider.GetRequiredService<IPriceMetrics>(),
             provider.GetRequiredService<TimeProvider>()));
         return services;
     }
+
+    private static void AddPriceHttpClient(IServiceCollection services, string name, string baseAddress) =>
+        services.AddHttpClient(name, client =>
+            {
+                client.BaseAddress = new Uri(baseAddress);
+                client.Timeout = TimeSpan.FromSeconds(20);
+                client.MaxResponseContentBufferSize = 64 * 1024;
+            })
+            .RemoveAllLoggers();
 }
 
 internal sealed class ZaghlolPriceMetrics(ZaghlolMetrics metrics) : IPriceMetrics

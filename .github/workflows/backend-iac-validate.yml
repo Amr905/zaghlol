@@ -1,0 +1,63 @@
+name: backend-iac-validate
+
+# T-140 prep: formats, validates and policy-checks the OpenTofu code in backend/deploy/terraform. Needs no cloud credentials
+# and never plans or applies. Same trigger style as backend-ci (batch CI, PO 2026-11-10).
+on:
+  push:
+    branches: ["batch/**", "ci/**"]
+    paths:
+      - "backend/deploy/terraform/**"
+      - ".github/workflows/backend-iac-validate.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: backend-iac-validate-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    defaults:
+      run:
+        working-directory: backend/deploy/terraform
+    steps:
+      - uses: actions/checkout@fbc6f3992d24b796d5a048ff273f7fcc4a7b6c09 # v5.1.0
+
+      - uses: opentofu/setup-opentofu@a1320f892987e89d278cc92dc5adc984fb93aca4 # v2.0.2
+        with:
+          tofu_version: 1.10.6
+
+      - name: fmt
+        run: tofu fmt -check -recursive
+
+      - name: validate (staging, prod; every module is reached through them)
+        run: |
+          for env in staging prod; do
+            echo "== $env"
+            (cd "envs/$env" && tofu init -backend=false -input=false && tofu validate)
+          done
+
+      - name: policy checks (key custody, no long-lived keys, no secrets)
+        run: |
+          set -u
+          fail=0
+          # No static credentials: workload identity / OIDC only.
+          if grep -rEn 'google_service_account_key|private_key|credentials *=' --include='*.tf' .; then
+            echo "::error::static credential found"; fail=1
+          fi
+          # No role that could read or manage key material, and no broad roles.
+          if grep -rEn 'roles/(owner|editor|cloudkms\.admin|cloudkms\.importer|cloudkms\.cryptoKeyDecrypter|cloudkms\.exportCompat)' --include='*.tf' .; then
+            echo "::error::over-broad KMS or project role"; fail=1
+          fi
+          # Every KMS key must be protected from destroy, and rotation must stay off for HMAC and signing keys.
+          n_keys=$(grep -c 'resource "google_kms_crypto_key"' modules/kms/main.tf)
+          n_protect=$(grep -c 'prevent_destroy = true' modules/kms/main.tf)
+          if [ "$n_keys" != "$n_protect" ]; then echo "::error::prevent_destroy missing on a KMS key"; fail=1; fi
+          if grep -nE '^[^#]*rotation_period' modules/kms/main.tf; then echo "::error::auto-rotation must stay off"; fail=1; fi
+          # LB logging stays off.
+          if grep -A2 'log_config' modules/edge/main.tf | grep -q 'enable = true'; then echo "::error::LB logging enabled"; fail=1; fi
+          exit $fail
