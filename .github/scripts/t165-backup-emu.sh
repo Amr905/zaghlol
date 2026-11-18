@@ -29,12 +29,14 @@ flags=$(S dumpsys package "$PKG" | grep -m1 -E "^ *flags=|pkgFlags=")
 echo "  $flags"
 case "$flags" in *ALLOW_BACKUP*) res manifest FAIL "ALLOW_BACKUP flag present: $flags" ;; *) res manifest PASS "no ALLOW_BACKUP in package flags" ;; esac
 
-plant() { S run-as "$PKG" sh -c 'mkdir -p files databases shared_prefs && echo T165 > files/t165-canary.txt && echo T165 > databases/t165-canary.db && echo "<map/>" > shared_prefs/t165-canary.xml'; }
-canaries() { S run-as "$PKG" ls files/t165-canary.txt databases/t165-canary.db shared_prefs/t165-canary.xml 2>&1 | grep -vc "No such file"; }
+# adb shell joins its arguments, so the remote command is one quoted string.
+rs() { A shell "run-as $PKG sh -c '$1'" < /dev/null 2>&1 | tr -d '\r'; }
+plant() { rs 'mkdir -p files databases shared_prefs; echo T165 > files/t165-canary.txt; echo T165 > databases/t165-canary.db; echo X > shared_prefs/t165-canary.xml'; }
+canaries() { local c=0 f; for f in files/t165-canary.txt databases/t165-canary.db shared_prefs/t165-canary.xml; do [ "$(rs "test -f $f && echo yes")" = yes ] && c=$((c + 1)); done; echo "$c"; }
 plant
 n=$(canaries); echo "canaries planted: $n/3"
 [ "$n" = 3 ] || { res plant FAIL "canaries not planted ($n/3)"; exit 1; }
-echo "data files before (names only):"; S run-as "$PKG" ls files databases shared_prefs no_backup 2>&1 | sed 's/^/  /'
+echo "data files before (names only):"; rs "ls files databases shared_prefs no_backup" | sed 's/^/  /'
 
 echo "---- 1. Auto Backup (local transport)"
 S bmgr enable true
