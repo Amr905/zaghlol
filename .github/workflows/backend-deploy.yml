@@ -1,0 +1,177 @@
+name: backend-deploy
+
+# T-140 (prepared, NOT active). Manual dispatch only; refuses to run until the PO has
+#   1. chosen the provider and region (docs/03-technical/hosting-options.md, ADR-015),
+#   2. created the GitHub environments `staging` and `prod` with required reviewers (environment protection), and
+#   3. set the repository variable BACKEND_DEPLOY_ENABLED=true and, per environment, the variables listed in
+#      backend/deploy/terraform/README.md ("Environment variables").
+# Cloud access is OIDC workload identity federation: no long-lived key or secret is stored in GitHub.
+#
+# Order for one run: auth -> image (build for staging, or copy the staging digest for prod) -> plan -> [apply the migration
+# job only] -> run migrations -> apply everything -> synthetic checks -> traffic rollback if they fail.
+# Migrations are expand/contract and N-1 compatible (deployment section 3), so running them before the new revision is safe.
+on:
+  workflow_dispatch:
+    inputs:
+      environment:
+        description: "Target environment"
+        type: choice
+        options: [staging, prod]
+        required: true
+      image_digest:
+        description: "sha256:... of an image already in the STAGING registry. Required for prod (promotes the same digest). Empty for staging = build this ref."
+        type: string
+        required: false
+        default: ""
+      apply:
+        description: "Apply. Leave off to stop after the plan."
+        type: boolean
+        default: false
+
+permissions:
+  contents: read
+
+concurrency:
+  group: backend-deploy-${{ inputs.environment }}
+  cancel-in-progress: false
+
+env:
+  TF_IN_AUTOMATION: "true"
+  TF_INPUT: "false"
+
+jobs:
+  deploy:
+    name: ${{ inputs.environment }}
+    # Disabled until the PO flips the repository variable.
+    if: ${{ vars.BACKEND_DEPLOY_ENABLED == 'true' }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 60
+    # Environment protection: required reviewers / wait timer are configured on the GitHub environment, not here.
+    environment: ${{ inputs.environment }}
+    permissions:
+      contents: read
+      id-token: write # OIDC token for workload identity federation
+    env:
+      PROJECT_ID: ${{ vars.GCP_PROJECT_ID }}
+      REGION: ${{ vars.GCP_REGION }}
+      HOSTNAME_API: ${{ vars.API_HOSTNAME }}
+      STATE_BUCKET: ${{ vars.TF_STATE_BUCKET }}
+      STAGING_REGISTRY: ${{ vars.STAGING_IMAGE_REGISTRY }}
+      TARGET: ${{ inputs.environment }}
+      DIGEST_INPUT: ${{ inputs.image_digest }}
+    steps:
+      - name: require configuration
+        run: |
+          for v in PROJECT_ID REGION HOSTNAME_API STATE_BUCKET STAGING_REGISTRY; do
+            if [ -z "${!v}" ]; then echo "::error::environment variable for $v is not set (see backend/deploy/terraform/README.md)"; exit 1; fi
+          done
+          if [ "$TARGET" = "prod" ] && ! printf '%s' "$DIGEST_INPUT" | grep -Eq '^sha256:[0-9a-f]{64}$'; then
+            echo "::error::prod promotes an existing digest: pass image_digest=sha256:..."; exit 1
+          fi
+          if [ -n "$DIGEST_INPUT" ] && ! printf '%s' "$DIGEST_INPUT" | grep -Eq '^sha256:[0-9a-f]{64}$'; then
+            echo "::error::image_digest must be sha256:<64 hex>"; exit 1
+          fi
+
+      - uses: actions/checkout@fbc6f3992d24b796d5a048ff273f7fcc4a7b6c09 # v5.1.0
+
+      - name: authenticate to Google Cloud (OIDC)
+        uses: google-github-actions/auth@7c6bc770dae815cd3e89ee6cdf493a5fab2cc093 # v3.0.0
+        with:
+          workload_identity_provider: ${{ vars.GCP_WORKLOAD_IDENTITY_PROVIDER }}
+          service_account: ${{ vars.GCP_DEPLOY_SERVICE_ACCOUNT }}
+
+      - uses: google-github-actions/setup-gcloud@aa5489c8933f4cc7a4f7d45035b3b1440c9c10db # v3.0.1
+
+      - uses: opentofu/setup-opentofu@a1320f892987e89d278cc92dc5adc984fb93aca4 # v2.0.2
+        with:
+          tofu_version: 1.10.6
+
+      - name: settings file present
+        run: |
+          f="backend/deploy/terraform/envs/${TARGET}/settings.auto.tfvars"
+          test -f "$f" || { echo "::error::$f is missing (copy terraform.tfvars.example, fill the non-secret values, commit)"; exit 1; }
+
+      - name: image (staging builds, prod promotes the same digest)
+        id: image
+        run: |
+          set -euo pipefail
+          gcloud auth configure-docker "${REGION}-docker.pkg.dev" --quiet
+          DEST="${REGION}-docker.pkg.dev/${PROJECT_ID}/zaghlol/backend"
+          if [ "$TARGET" = "staging" ] && [ -z "$DIGEST_INPUT" ]; then
+            if [ "${{ inputs.apply }}" != "true" ]; then
+              echo "::error::a plan needs an image: pass image_digest, or tick apply to build and push this ref first"; exit 1
+            fi
+            docker build -t "$DEST:${GITHUB_SHA}" backend
+            docker push "$DEST:${GITHUB_SHA}"
+            digest="$(docker inspect --format='{{index .RepoDigests 0}}' "$DEST:${GITHUB_SHA}" | cut -d@ -f2)"
+          elif [ "$TARGET" = "prod" ]; then
+            # Same digest, new registry: imagetools copies the manifest by digest without rebuilding.
+            docker buildx imagetools create --tag "$DEST:promoted-${GITHUB_SHA}" "${STAGING_REGISTRY}@${DIGEST_INPUT}"
+            digest="$DIGEST_INPUT"
+          else
+            digest="$DIGEST_INPUT"
+          fi
+          echo "image=${DEST}@${digest}" >> "$GITHUB_OUTPUT"
+          echo "Image: ${DEST}@${digest}" >> "$GITHUB_STEP_SUMMARY"
+
+      - name: tofu init
+        working-directory: backend/deploy/terraform/envs/${{ inputs.environment }}
+        run: tofu init -backend-config="bucket=${STATE_BUCKET}"
+
+      - name: tofu plan
+        id: plan
+        if: ${{ steps.image.outputs.image != '' }}
+        working-directory: backend/deploy/terraform/envs/${{ inputs.environment }}
+        env:
+          TF_VAR_image: ${{ steps.image.outputs.image }}
+          TF_VAR_kseat_check_hex: ${{ vars.KSEAT_CHECK_HEX }}
+        run: tofu plan -out=tfplan -lock-timeout=5m
+
+      - name: previous revision (for rollback)
+        if: ${{ inputs.apply }}
+        id: prev
+        run: |
+          set -euo pipefail
+          NAME="zaghlol-${TARGET}-api"
+          prev="$(gcloud run services describe "$NAME" --project "$PROJECT_ID" --region "$REGION" --format='value(status.latestReadyRevisionName)' 2>/dev/null || true)"
+          echo "revision=${prev}" >> "$GITHUB_OUTPUT"
+
+      - name: apply the migration job only
+        if: ${{ inputs.apply && steps.image.outputs.image != '' }}
+        working-directory: backend/deploy/terraform/envs/${{ inputs.environment }}
+        env:
+          TF_VAR_image: ${{ steps.image.outputs.image }}
+          TF_VAR_kseat_check_hex: ${{ vars.KSEAT_CHECK_HEX }}
+        run: tofu apply -auto-approve -lock-timeout=5m -target=module.environment.module.app.google_cloud_run_v2_job.migrate
+
+      - name: run database migrations
+        if: ${{ inputs.apply && steps.image.outputs.image != '' }}
+        run: |
+          gcloud run jobs execute "zaghlol-${TARGET}-migrate" --project "$PROJECT_ID" --region "$REGION" --wait
+
+      - name: apply
+        if: ${{ inputs.apply && steps.image.outputs.image != '' }}
+        working-directory: backend/deploy/terraform/envs/${{ inputs.environment }}
+        env:
+          TF_VAR_image: ${{ steps.image.outputs.image }}
+          TF_VAR_kseat_check_hex: ${{ vars.KSEAT_CHECK_HEX }}
+        run: tofu apply -auto-approve -lock-timeout=5m
+
+      - name: synthetic checks
+        id: smoke
+        if: ${{ inputs.apply && steps.image.outputs.image != '' }}
+        run: |
+          set -euo pipefail
+          for i in $(seq 1 30); do
+            code="$(curl -s -o /dev/null -w '%{http_code}' "https://${HOSTNAME_API}/v1/health" || true)"
+            if [ "$code" = "200" ]; then echo "health ok"; exit 0; fi
+            sleep 10
+          done
+          echo "::error::/v1/health did not return 200"; exit 1
+
+      - name: roll traffic back to the previous revision
+        if: ${{ failure() && steps.smoke.conclusion == 'failure' && steps.prev.outputs.revision != '' }}
+        run: |
+          gcloud run services update-traffic "zaghlol-${TARGET}-api" --project "$PROJECT_ID" --region "$REGION" \
+            --to-revisions "${{ steps.prev.outputs.revision }}=100"
+          echo "Traffic rolled back to ${{ steps.prev.outputs.revision }}. Re-run with the previous digest to reconcile state." >> "$GITHUB_STEP_SUMMARY"
