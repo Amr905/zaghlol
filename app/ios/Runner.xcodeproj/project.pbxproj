@@ -122,6 +122,7 @@
 		5A1180000000000000000027 /* WidgetBridgeApi.g.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5A1180000000000000000007 /* WidgetBridgeApi.g.swift */; };
 		5A1180000000000000000028 /* WidgetBridgeHost.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5A1180000000000000000006 /* WidgetBridgeHost.swift */; };
 		5A118000000000000000002A /* WidgetSnapshotStoreTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5A1180000000000000000008 /* WidgetSnapshotStoreTests.swift */; };
+		5A118000000000000000002D /* PrivacyInfo.xcprivacy in Resources */ = {isa = PBXBuildFile; fileRef = 5A118000000000000000002C /* PrivacyInfo.xcprivacy */; };
 		5A118000000000000000002B /* Localizable.strings in Resources */ = {isa = PBXBuildFile; fileRef = 5A1180000000000000000009 /* Localizable.strings */; };
 		5A1180000000000000000029 /* ZaghlolWidget.appex in Embed Foundation Extensions */ = {isa = PBXBuildFile; fileRef = 5A1180000000000000000001 /* ZaghlolWidget.appex */; settings = {ATTRIBUTES = (RemoveHeadersOnCopy, ); }; };
 /* End PBXBuildFile section */
@@ -292,6 +293,7 @@
 		5A650000000000000000000A /* PrivacyInfo.xcprivacy */ = {isa = PBXFileReference; lastKnownFileType = text.xml; path = PrivacyInfo.xcprivacy; sourceTree = "<group>"; };
 		5A650000000000000000000B /* ShareExtension.appex */ = {isa = PBXFileReference; explicitFileType = "wrapper.app-extension"; includeInIndex = 0; path = ShareExtension.appex; sourceTree = BUILT_PRODUCTS_DIR; };
 		5A1180000000000000000001 /* ZaghlolWidget.appex */ = {isa = PBXFileReference; explicitFileType = "wrapper.app-extension"; includeInIndex = 0; path = ZaghlolWidget.appex; sourceTree = BUILT_PRODUCTS_DIR; };
+		5A118000000000000000002C /* PrivacyInfo.xcprivacy */ = {isa = PBXFileReference; lastKnownFileType = text.xml; path = PrivacyInfo.xcprivacy; sourceTree = "<group>"; };
 		5A1180000000000000000002 /* ZaghlolWidget.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ZaghlolWidget.swift; sourceTree = "<group>"; };
 		5A1180000000000000000003 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		5A1180000000000000000004 /* ZaghlolWidget.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = ZaghlolWidget.entitlements; sourceTree = "<group>"; };
@@ -605,6 +607,7 @@
 				5A1180000000000000000009 /* Localizable.strings */,
 				5A1180000000000000000003 /* Info.plist */,
 				5A1180000000000000000004 /* ZaghlolWidget.entitlements */,
+				5A118000000000000000002C /* PrivacyInfo.xcprivacy */,
 			);
 			path = ZaghlolWidget;
 			sourceTree = "<group>";
@@ -777,6 +780,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				5A118000000000000000002B /* Localizable.strings in Resources */,
+				5A118000000000000000002D /* PrivacyInfo.xcprivacy in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
