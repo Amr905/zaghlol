@@ -142,23 +142,42 @@ void main() {
   });
 
   group('match budget (FU-074)', () {
-    test('a stalled regex is quarantined after its first overrun', () {
+    test('a stalled regex is quarantined after repeated overruns', () {
       final slow = RegExp(r'^(a+)+$');
       final input = '${'a' * 24}!';
       expect(isRegexQuarantined(slow), isFalse);
-      expect(
-        budgetedFirstMatch(
-          slow,
-          input,
-          budget: const Duration(milliseconds: 1),
-        ),
-        isNull,
-      );
+      for (var i = 0; i < quarantineStrikes; i++) {
+        expect(isRegexQuarantined(slow), isFalse);
+        expect(
+          budgetedFirstMatch(
+            slow,
+            input,
+            budget: const Duration(milliseconds: 1),
+          ),
+          isNull,
+        );
+      }
       expect(isRegexQuarantined(slow), isTrue);
       // Later calls return at once, even for input that would match.
       final w = Stopwatch()..start();
       expect(budgetedFirstMatch(slow, 'aaa'), isNull);
       expect(w.elapsedMilliseconds, lessThan(5));
+    });
+
+    test('a single over-budget run does not quarantine', () {
+      final r = RegExp(r'(\d+)');
+      budgetedFirstMatch(r, 'x 12', budget: const Duration(microseconds: -1));
+      expect(isRegexQuarantined(r), isFalse);
+      expect(budgetedFirstMatch(r, 'x 12')?.group(1), '12');
+    });
+
+    test('a quarantined drop pattern counts as a match (fail closed)', () {
+      final r = RegExp('otp');
+      for (var i = 0; i < quarantineStrikes; i++) {
+        budgetedFirstMatch(r, 'x', budget: const Duration(microseconds: -1));
+      }
+      expect(budgetedHasMatch(r, 'hello'), isFalse);
+      expect(budgetedHasMatch(r, 'hello', dropPattern: true), isTrue);
     });
 
     test('a fast regex is never quarantined and still matches', () {

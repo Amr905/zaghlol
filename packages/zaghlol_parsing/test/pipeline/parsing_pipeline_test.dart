@@ -245,6 +245,26 @@ void main() {
       expect(r.institutionCode, 'nbe');
     });
 
+    test('quarantined global OTP drop pattern still drops (fail closed)', () {
+      final p = _pipelineOf(RegistryFiles.load(pipelineRoot));
+      for (final d in p.registry.shared.globalDrop) {
+        for (var i = 0; i < quarantineStrikes; i++) {
+          budgetedFirstMatch(
+            d.regex,
+            'x',
+            budget: const Duration(microseconds: -1),
+          );
+        }
+        expect(isRegexQuarantined(d.regex), isTrue);
+      }
+      final r = p.parse(_req('Your OTP is 123456'));
+      for (final d in p.registry.shared.globalDrop) {
+        resetRegexQuarantineForTesting(d.regex);
+      }
+      expect(r, isA<ParseDropped>());
+      expect((r as ParseDropped).reason, DropReason.globalPattern);
+    });
+
     test('global drop pattern, known and unknown sender', () {
       final known = pipeline.parse(_req('Your OTP is 123456'));
       expect((known as ParseDropped).reason, DropReason.globalPattern);

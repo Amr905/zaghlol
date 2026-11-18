@@ -51,7 +51,7 @@ final class ParsingPipeline {
     }
     final lines = foldKeyLines(text);
     if (registry.shared.globalDrop.any(
-      (p) => budgetedHasMatch(p.regex, lines),
+      (p) => budgetedHasMatch(p.regex, lines, dropPattern: true),
     )) {
       return const ParseDropped(DropReason.globalPattern, null);
     }
@@ -60,7 +60,7 @@ final class ParsingPipeline {
     for (final preferred in [true, false]) {
       for (final institution in registry.institutions) {
         if (institution.drop.any(
-          (p) => budgetedHasMatch(p.regex, folded.text),
+          (p) => budgetedHasMatch(p.regex, folded.text, dropPattern: true),
         )) {
           continue;
         }
@@ -129,13 +129,15 @@ final class ParsingPipeline {
 
     // Stage 0: guard re-check (same drop rules as the native Guard).
     if (institution != null &&
-        institution.drop.any((p) => budgetedHasMatch(p.regex, folded.text))) {
+        institution.drop.any(
+          (p) => budgetedHasMatch(p.regex, folded.text, dropPattern: true),
+        )) {
       return ParseDropped(DropReason.institutionPattern, institution.code);
     }
     // Global drop patterns see line breaks (`foldKeyLines`), as in the Guard.
     final lines = foldKeyLines(body);
     if (registry.shared.globalDrop.any(
-      (p) => budgetedHasMatch(p.regex, lines),
+      (p) => budgetedHasMatch(p.regex, lines, dropPattern: true),
     )) {
       return ParseDropped(DropReason.globalPattern, institution?.code);
     }

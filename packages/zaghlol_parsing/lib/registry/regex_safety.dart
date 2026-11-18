@@ -15,10 +15,21 @@ const int maxBoundedRepeat = 3;
 /// Time one regex match may take before its pattern is quarantined.
 const Duration regexMatchBudget = Duration(milliseconds: 50);
 
+/// Over-budget runs a regex may have before it is quarantined (a single GC
+/// pause must not disable a template).
+const int quarantineStrikes = 3;
+
 final Expando<bool> _slowRegex = Expando<bool>('slowRegex');
+final Expando<int> _slowRuns = Expando<int>('slowRuns');
 
 /// Whether [regex] was quarantined for exceeding [regexMatchBudget].
 bool isRegexQuarantined(RegExp regex) => _slowRegex[regex] ?? false;
+
+/// Clears quarantine state for [regex]; tests only.
+void resetRegexQuarantineForTesting(RegExp regex) {
+  _slowRegex[regex] = false;
+  _slowRuns[regex] = 0;
+}
 
 /// `regex.firstMatch(text)` under a time budget (FU-074, ReDoS). Dart can not
 /// interrupt a running match, so the budget is enforced after the fact: a
@@ -37,16 +48,27 @@ RegExpMatch? budgetedFirstMatch(
   if (isRegexQuarantined(regex)) return null;
   final watch = Stopwatch()..start();
   final m = regex.firstMatch(text);
-  if (watch.elapsed > budget) _slowRegex[regex] = true;
+  if (watch.elapsed > budget) {
+    final n = (_slowRuns[regex] ?? 0) + 1;
+    _slowRuns[regex] = n;
+    if (n >= quarantineStrikes) _slowRegex[regex] = true;
+  }
   return m;
 }
 
 /// [budgetedFirstMatch] as a boolean.
+///
+/// A [dropPattern] that is quarantined counts as a match (fail closed: the
+/// message is dropped, so an OTP can never slip through).
 bool budgetedHasMatch(
   RegExp regex,
   String text, {
   Duration budget = regexMatchBudget,
-}) => budgetedFirstMatch(regex, text, budget: budget) != null;
+  bool dropPattern = false,
+}) {
+  if (dropPattern && isRegexQuarantined(regex)) return true;
+  return budgetedFirstMatch(regex, text, budget: budget) != null;
+}
 
 /// Compiles a registry pattern, or returns null when it is not valid.
 ///
