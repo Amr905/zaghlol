@@ -25,7 +25,9 @@ sleep 20
 
 echo "---- static: what the installed package says"
 S dumpsys package "$PKG" | grep -iE "ALLOW_BACKUP|hasFragileUserData|FRAGILE|dataExtractionRules" | sed 's/^ */  /'
-flags=$(S dumpsys package "$PKG" | grep -m1 -E "^ *flags=|pkgFlags=")
+# pkgFlags=[ NAMES ] is the readable line; a bare flags=0x0 elsewhere in the dump is not.
+flags=$(S dumpsys package "$PKG" | grep -m1 -E "^ *pkgFlags=")
+[ -n "$flags" ] || flags=$(S dumpsys package "$PKG" | grep -m1 -E "^ *flags=")
 echo "  $flags"
 # The flag list must be readable (devSms is debuggable, so DEBUGGABLE has to be
 # in it). An empty or unparsable line (e.g. flags=0x0) proves nothing: UNKNOWN.
@@ -122,8 +124,11 @@ if not body:
 tar = zlib.decompress(body) if lines[2] == b"1" else body
 names = tarfile.open(fileobj=io.BytesIO(tar)).getnames()
 leaks = [n for n in names if n.startswith("apps/") and not n.endswith("/_manifest")]
+for n in leaks[:30]:
+    print("  entry: " + n)
 print("RESULT %s %d entries, %d app data entries" % ("FAIL" if leaks else "PASS", len(names), len(leaks)))
 PY
+grep '^  entry:' "$OUT/adb-backup.txt" | head -30
 r=$(grep -m1 '^RESULT' "$OUT/adb-backup.txt" | awk '{print $2}')
 res adb-backup "${r:-UNKNOWN}" "$(grep -m1 '^RESULT' "$OUT/adb-backup.txt" | cut -d' ' -f3-) (bytes=$sz)"
 
