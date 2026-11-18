@@ -117,7 +117,16 @@ enum SenderMatchKind { exact, regex }
 /// A sender id rule. For [SenderMatchKind.exact], [value] is compared
 /// case-insensitively; for regex, [regex] is set.
 final class SenderRule {
-  const SenderRule(this.kind, this.value, this.regex);
+  const SenderRule(
+    this.kind,
+    this.value,
+    this.regex, {
+    this.templateOnly = false,
+  });
+
+  /// Too generic to trust alone (e.g. `EG`): only a template match files the
+  /// message under the institution; anything else is an unknown sender.
+  final bool templateOnly;
 
   final SenderMatchKind kind;
   final String value;

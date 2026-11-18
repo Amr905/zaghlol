@@ -377,4 +377,192 @@ void main() {
     );
     expect(ids.length, 3);
   });
+
+  group('review step and year confirmation (T-156b fixes)', () {
+    // Row B's balance is off by one: 10,000 - 1,250.50 = 8,749.50.
+    List<PdfTextFragment> mismatching() => [
+      ...statement().take(5),
+      f('05/01/2026', 40, 140, 120),
+      f('CARREFOUR', 170, 330, 120),
+      f('1,250.50', 530, 600, 120),
+      f('8,749.50', 790, 880, 120),
+      f('06/01/2026', 40, 140, 140),
+      f('SALARY', 170, 280, 140),
+      f('15,000.00', 650, 720, 140),
+      f('23,000.00', 790, 880, 140), // should be 23,749.50
+    ];
+
+    // Unsigned single amount column, first row with no opening balance.
+    List<PdfTextFragment> unsigned() => [
+      f('Date', 40, 80, 100),
+      f('Description', 170, 260, 100),
+      f('Amount', 600, 660, 100),
+      f('Balance', 820, 880, 100),
+      f('05/01/2026', 40, 140, 120),
+      f('SHOP A', 170, 240, 120),
+      f('100.00', 600, 660, 120),
+      f('900.00', 790, 880, 120),
+    ];
+    StatementMapping unsignedMapping() => StatementMapping(
+      currency: egp,
+      roles: const [
+        StatementColumnRole.date,
+        StatementColumnRole.description,
+        StatementColumnRole.amount,
+        StatementColumnRole.balance,
+      ],
+    );
+
+    test('a balance mismatch is held for review, never dropped', () async {
+      final uc = make(FakeExtractor(mismatching()));
+      final reading = await uc.open(pdfBytes(), bankKey: 'b');
+      final parsed = uc.parse(reading, mapping());
+      expect(parsed.rows, hasLength(1));
+      expect(parsed.review, hasLength(1));
+      expect(
+        parsed.review.single.review,
+        StatementReviewReason.balanceMismatch,
+      );
+      expect(parsed.review.single.amount.minor, 1500000);
+      // Preview: reported under its own kind, not as a bad amount.
+      final dry = await uc.run(
+        reading,
+        mapping(),
+        accountId: 'a1',
+        dryRun: true,
+      );
+      expect(dry.needsReview, 1);
+      expect(dry.invalidByProblem[ImportRowProblem.balanceMismatch], 1);
+      expect(dry.invalidByProblem[ImportRowProblem.badAmount], isNull);
+      // Not committed until the user decides.
+      await expectLater(
+        uc.run(reading, mapping(), accountId: 'a1'),
+        throwsA(
+          isA<StatementImportException>().having(
+            (e) => e.kind,
+            'kind',
+            StatementImportFailure.reviewRequired,
+          ),
+        ),
+      );
+      expect(store.rows, isEmpty);
+    });
+
+    test('keep, skip and fix-direction decisions are applied', () async {
+      final uc = make(FakeExtractor(mismatching()));
+      final reading = await uc.open(pdfBytes(), bankKey: 'b');
+      final kept = await uc.run(
+        reading,
+        mapping(),
+        accountId: 'a1',
+        decisions: {2: StatementReviewChoice.keep},
+      );
+      expect(kept.imported, 2);
+      expect(store.rows.last.direction, TxnDirection.income);
+
+      store.rows.clear();
+      final flipped = await uc.run(
+        reading,
+        mapping(),
+        accountId: 'a1',
+        decisions: {2: StatementReviewChoice.asExpense},
+      );
+      expect(flipped.imported, 2);
+      expect(store.rows.last.direction, TxnDirection.expense);
+
+      store.rows.clear();
+      final skipped = await uc.run(
+        reading,
+        mapping(),
+        accountId: 'a1',
+        decisions: {2: StatementReviewChoice.skip},
+      );
+      expect(skipped.imported, 1);
+    });
+
+    test('unsigned amount with no derivable direction is not income', () async {
+      final uc = make(FakeExtractor(unsigned()));
+      final reading = await uc.open(pdfBytes(), bankKey: 'u');
+      final parsed = uc.parse(reading, unsignedMapping());
+      expect(parsed.rows, isEmpty);
+      expect(
+        parsed.review.single.review,
+        StatementReviewReason.directionUnknown,
+      );
+      expect(parsed.review.single.directionKnown, isFalse);
+      // "keep" is not a valid answer when the direction is unset.
+      await expectLater(
+        uc.run(
+          reading,
+          unsignedMapping(),
+          accountId: 'a1',
+          decisions: {1: StatementReviewChoice.keep},
+        ),
+        throwsA(isA<StatementImportException>()),
+      );
+      expect(store.rows, isEmpty);
+      final s = await uc.run(
+        reading,
+        unsignedMapping(),
+        accountId: 'a1',
+        decisions: {1: StatementReviewChoice.asExpense},
+      );
+      expect(s.imported, 1);
+      expect(store.rows.single.direction, TxnDirection.expense);
+    });
+
+    List<PdfTextFragment> yearless() => [
+      f('Date', 40, 80, 100),
+      f('Description', 170, 260, 100),
+      f('Debit', 540, 600, 100),
+      f('Credit', 660, 720, 100),
+      f('Balance', 820, 880, 100),
+      f('01/05', 40, 140, 120),
+      f('CARREFOUR', 170, 330, 120),
+      f('100.00', 540, 600, 120),
+      f('900.00', 790, 880, 120),
+    ];
+
+    test(
+      'no printed year: commit refused until the year is confirmed',
+      () async {
+        final uc = ImportStatementPdfUseCase(
+          FakeExtractor(yearless()),
+          store,
+          templates,
+          now: () => DateTime(2026, 11, 18),
+        );
+        final reading = await uc.open(pdfBytes(), bankKey: 'y');
+        expect(ImportStatementPdfUseCase.needsYear(reading), isTrue);
+        expect(reading.table.yearSource, StatementYearSource.today);
+        await expectLater(
+          uc.run(reading, mapping(), accountId: 'a1', decisions: const {}),
+          throwsA(
+            isA<StatementImportException>().having(
+              (e) => e.kind,
+              'kind',
+              StatementImportFailure.yearNotConfirmed,
+            ),
+          ),
+        );
+        expect(store.rows, isEmpty);
+        // The user says the statement is from 2024.
+        final s = await uc.run(
+          reading,
+          mapping(),
+          accountId: 'a1',
+          confirmedYear: 2024,
+          decisions: {1: StatementReviewChoice.asExpense},
+        );
+        expect(s.imported, 1);
+        expect(store.rows.single.occurredAt.toLocal().year, 2024);
+      },
+    );
+
+    test('a statement with printed dates needs no year answer', () async {
+      final uc = make(FakeExtractor(statement()));
+      final reading = await uc.open(pdfBytes(), bankKey: 'cib');
+      expect(ImportStatementPdfUseCase.needsYear(reading), isFalse);
+    });
+  });
 }

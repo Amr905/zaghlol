@@ -1,6 +1,6 @@
 {
  "v": 4,
- "registryVersion": 5,
+ "registryVersion": 6,
  "senders": [
   {
    "match": "exact",
@@ -60,6 +60,31 @@
   {
    "match": "exact",
    "value": "arabbank",
+   "inst": "arab_bank"
+  },
+  {
+   "match": "exact",
+   "value": "arab bank",
+   "inst": "arab_bank"
+  },
+  {
+   "match": "exact",
+   "value": "arabbank",
+   "inst": "arab_bank"
+  },
+  {
+   "match": "exact",
+   "value": "arabbankeg",
+   "inst": "arab_bank"
+  },
+  {
+   "match": "exact",
+   "value": "arab bank eg",
+   "inst": "arab_bank"
+  },
+  {
+   "match": "exact",
+   "value": "eg",
    "inst": "arab_bank"
   },
   {
@@ -199,6 +224,31 @@
   },
   {
    "match": "exact",
+   "value": "mashreq-e&",
+   "inst": "mashreq"
+  },
+  {
+   "match": "exact",
+   "value": "mashreq",
+   "inst": "mashreq"
+  },
+  {
+   "match": "exact",
+   "value": "mashreqneo",
+   "inst": "mashreq"
+  },
+  {
+   "match": "exact",
+   "value": "mashreq neo",
+   "inst": "mashreq"
+  },
+  {
+   "match": "exact",
+   "value": "mashreq e&",
+   "inst": "mashreq"
+  },
+  {
+   "match": "exact",
    "value": "midbank",
    "inst": "midbank"
   },
@@ -280,6 +330,36 @@
   {
    "match": "exact",
    "value": "vodafonecash",
+   "inst": "vodafone_cash"
+  },
+  {
+   "match": "exact",
+   "value": "vf-cash",
+   "inst": "vodafone_cash"
+  },
+  {
+   "match": "exact",
+   "value": "vfcash",
+   "inst": "vodafone_cash"
+  },
+  {
+   "match": "exact",
+   "value": "vf cash",
+   "inst": "vodafone_cash"
+  },
+  {
+   "match": "exact",
+   "value": "vodafone cash",
+   "inst": "vodafone_cash"
+  },
+  {
+   "match": "exact",
+   "value": "vodafone cash",
+   "inst": "vodafone_cash"
+  },
+  {
+   "match": "exact",
+   "value": "vf_cash",
    "inst": "vodafone_cash"
   },
   {
@@ -598,6 +678,9 @@
     "(?:موعد|استحقاق) (?:ال)?قسط|قسطك (?:المستحق|القادم)|تذكير (?:ب)?(?:سداد|موعد)",
     "installment (?:is )?due|due (?:on|date)|payment reminder|upcoming installment"
    ],
+   "cib": [
+    "(?:ترخيص رقم|هذه المسابقه|مسابقه تحت اشراف|دخول السحب|السحب علي (?:كيلو|جوايز|جايزه|جوائز|جائزه)|السحب الجاي|اربط شهاده)"
+   ],
    "contact": [
     "(?:موعد|استحقاق) (?:ال)?قسط|قسطك (?:المستحق|القادم)|تذكير (?:ب)?(?:سداد|موعد)",
     "installment (?:is )?due|due (?:on|date)|payment reminder|upcoming installment"
@@ -630,6 +713,9 @@
   ],
   "hdfc": [
    "card x{1,2}([0-9]{4})"
+  ],
+  "mashreq": [
+   "المنتهيه ب ?([0-9]{4})"
   ],
   "paytm": [
    "a/c ?\\*{0,2}([0-9]{4})"

@@ -1,0 +1,13 @@
+{
+  "sender": "VF-Cash",
+  "body": "تم دفع ٢٥٫٠٠ جنيه الى MINI MARKET بنجاح",
+  "receivedAt": "2026-11-18T10:00:00+02:00",
+  "expect": {
+    "template": "vodafone_cash.payment.ar",
+    "event": "card_purchase",
+    "direction": "expense",
+    "currency": "EGP",
+    "amount": "25.00",
+    "merchantClean": "Mini Market"
+  }
+}

@@ -10,13 +10,35 @@
     {
       "match": "exact",
       "value": "Mashreq"
+    },
+    {
+      "match": "exact",
+      "value": "Mashreq-e&"
+    },
+    {
+      "match": "exact",
+      "value": "MASHREQ"
+    },
+    {
+      "match": "exact",
+      "value": "MashreqNeo"
+    },
+    {
+      "match": "exact",
+      "value": "Mashreq Neo"
+    },
+    {
+      "match": "exact",
+      "value": "Mashreq e&"
     }
   ],
   "packages": [],
   "walletCardNames": [
     "Mashreq"
   ],
-  "last4": [],
+  "last4": [
+    "المنتهيه ب ?([0-9]{4})"
+  ],
   "drop": [],
   "templates": [
     {
@@ -56,6 +78,19 @@
         "جنيه": "EGP",
         "egp": "EGP"
       }
+    },
+    {
+      "id": "mashreq.card_purchase_used.ar",
+      "version": 6,
+      "lang": "ar",
+      "channel": [
+        "sms"
+      ],
+      "event": "card_purchase",
+      "direction": "expense",
+      "baseConfidence": 0.95,
+      "pattern": "تم استخدام بطاقتكم المنتهيه ب ?(?<last4>\\d{4}) في (?:\\d{4,}-)?(?<merchant>.+?) بمبلغ (?<cur>[a-z]{3}) (?<amount>[\\d,.]+)\\.?(?: (?:الرصيد|رصيدك)\\D{0,12}(?<balance>[\\d,.]+))?",
+      "source": "po-sample"
     }
   ]
 }

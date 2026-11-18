@@ -1,0 +1,18 @@
+{
+  "sender": "ArabBank",
+  "body": "تم تنفيذ تحويل لحظي بمبلغ EGP ٣٠٠٫٥٠ بتاريخ ٠٣/١١/٢٠٢٦ ٠٩:٠٥. من حسابك ٤١٩*٥٠٤٤ الى SARA NABIL . رقم مرجعي٨٨٠٠١١٢٢٣٣. الرصيد المتوفر EGP ١٠٢٠٠٫٧٥ للمزيد ١٩١٠٠.",
+  "receivedAt": "2026-11-18T10:00:00+02:00",
+  "expect": {
+    "template": "arab_bank.instapay_out.ar",
+    "event": "instapay_out",
+    "direction": "expense",
+    "currency": "EGP",
+    "amount": "300.50",
+    "last4": "5044",
+    "counterparty": "SARA NABIL",
+    "ref": "8800112233",
+    "balance": "10200.75",
+    "date": "2026-11-03",
+    "time": "09:05"
+  }
+}

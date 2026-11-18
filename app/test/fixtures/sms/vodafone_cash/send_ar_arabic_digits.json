@@ -1,0 +1,14 @@
+{
+  "sender": "VFCash",
+  "body": "تم تحويل ٥٠٠٫٥٠ جنيه بنجاح الى رقم ٠١٠١٢٣٤٥٦٧٨. رصيدك الحالي ١٢٠٫٠٠ جنيه.",
+  "receivedAt": "2026-11-18T10:00:00+02:00",
+  "expect": {
+    "template": "vodafone_cash.send.ar",
+    "event": "transfer_out",
+    "direction": "expense",
+    "currency": "EGP",
+    "amount": "500.50",
+    "phone": "01012345678",
+    "balance": "120.00"
+  }
+}

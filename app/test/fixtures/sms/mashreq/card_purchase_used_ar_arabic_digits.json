@@ -1,0 +1,14 @@
+{
+  "sender": "Mashreq",
+  "body": "تم استخدام بطاقتكم المنتهية ب٩١١٧ في ٥٥٠٠١٢٣-CARREFOUR MAADI بمبلغ EGP ٣٤٥٫٥٠.",
+  "receivedAt": "2026-11-18T10:00:00+02:00",
+  "expect": {
+    "template": "mashreq.card_purchase_used.ar",
+    "event": "card_purchase",
+    "direction": "expense",
+    "currency": "EGP",
+    "amount": "345.50",
+    "last4": "9117",
+    "merchantClean": "Carrefour"
+  }
+}

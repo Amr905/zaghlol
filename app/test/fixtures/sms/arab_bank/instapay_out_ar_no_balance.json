@@ -1,0 +1,18 @@
+{
+  "sender": "Arab Bank",
+  "body": "تم تنفيذ تحويل لحظي بمبلغ EGP 75.00 بتاريخ 15/11/2026 21:40. من حسابك 419*5044 الى KARIM HASSAN . رقم مرجعي66655544433. للمزيد 19100.",
+  "receivedAt": "2026-11-18T10:00:00+02:00",
+  "expect": {
+    "template": "arab_bank.instapay_out.ar",
+    "event": "instapay_out",
+    "direction": "expense",
+    "currency": "EGP",
+    "amount": "75.00",
+    "last4": "5044",
+    "counterparty": "KARIM HASSAN",
+    "ref": "66655544433",
+    "balance": null,
+    "date": "2026-11-15",
+    "time": "21:40"
+  }
+}
