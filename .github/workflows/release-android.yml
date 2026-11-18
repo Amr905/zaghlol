@@ -1,0 +1,291 @@
+name: release-android
+
+# T-176: Android release pipeline (prodSms / prodNoSms App Bundles).
+#
+# Manual dispatch only. The job runs in the protected GitHub environment
+# `android-release` (the PO adds required reviewers and restricts it to main
+# and v* tags in Settings > Environments); the signing and Play secrets live
+# there, not at repository level.
+#
+# Without the upload-key secrets the workflow still builds the prod AAB
+# unsigned (debug-signed, not uploadable), runs every store assertion on it and
+# says so in the step summary: that is the dry run. Signing and the upload to
+# the Play *internal* testing track are gated on the secrets; the upload also
+# needs `upload: true` and main or a v* tag (docs/06-release/README.md).
+#
+# The repository is public, so signed bundles, R8 mappings and Dart symbols are
+# never uploaded as artifacts in the clear. Play receives the mapping and the
+# native symbols inside the AAB. The Dart symbols are kept only as an
+# artifact encrypted with SYMBOLS_PASSPHRASE (skipped when it is absent).
+# No crash-reporting SDK is involved (CLAUDE.md section 2).
+on:
+  workflow_dispatch:
+    inputs:
+      flavor:
+        description: 'Which Android flavor to build'
+        type: choice
+        options: [both, prodSms, prodNoSms]
+        default: both
+      build_number:
+        description: 'Override the build number (default: the run number)'
+        type: string
+        required: false
+      upload:
+        description: 'Upload to the Play internal track (needs secrets; main or v* tag only)'
+        type: boolean
+        default: false
+
+permissions:
+  contents: read
+
+concurrency:
+  group: release-android-${{ github.ref }}
+  cancel-in-progress: false
+
+env:
+  # Keep equal to FLUTTER_VERSION in app-ci.yml.
+  FLUTTER_VERSION: '3.47.9'
+  FASTLANE_VERSION: '2.232.2'
+
+jobs:
+  build:
+    name: ${{ matrix.flavor }} bundle
+    runs-on: ubuntu-latest
+    environment: android-release
+    timeout-minutes: 60
+    strategy:
+      fail-fast: false
+      matrix:
+        flavor: ${{ fromJSON(inputs.flavor == 'both' && '["prodSms","prodNoSms"]' || format('["{0}"]', inputs.flavor)) }}
+    env:
+      FLAVOR: ${{ matrix.flavor }}
+      EXPECT_SMS: ${{ matrix.flavor == 'prodSms' }}
+    steps:
+      - uses: actions/checkout@fbc6f3992d24b796d5a048ff273f7fcc4a7b6c09 # v5.1.0
+        with:
+          persist-credentials: false
+      - uses: actions/setup-java@b6effb05e454b25005698d916606bdc6ffcbf961 # v5.7.0
+        with:
+          distribution: temurin
+          java-version: '17'
+      - uses: subosito/flutter-action@1a449444c387b1966244ae4d4f8c696479add0b2 # v2.23.0
+        with:
+          flutter-version: ${{ env.FLUTTER_VERSION }}
+          channel: stable
+          cache: true
+      - name: Resolve workspace (lockfile must be up to date)
+        run: flutter pub get --enforce-lockfile
+
+      - name: Version numbers
+        id: ver
+        env:
+          RUN_NUMBER: ${{ github.run_number }}
+          BUILD_OVERRIDE: ${{ inputs.build_number }}
+        run: |
+          bash .github/scripts/test-release-version.sh
+          bash .github/scripts/release-version.sh app/pubspec.yaml "$RUN_NUMBER" "$BUILD_OVERRIDE" "$FLAVOR" | tee -a "$GITHUB_OUTPUT"
+
+      - name: Decide signing
+        id: sign
+        env:
+          HAVE_KEYSTORE: ${{ secrets.ANDROID_UPLOAD_KEYSTORE_BASE64 != '' && secrets.ANDROID_UPLOAD_STORE_PASSWORD != '' && secrets.ANDROID_UPLOAD_KEY_ALIAS != '' && secrets.ANDROID_UPLOAD_KEY_PASSWORD != '' }}
+          HAVE_PLAY: ${{ secrets.PLAY_SERVICE_ACCOUNT_JSON != '' }}
+        run: |
+          if [ "$HAVE_KEYSTORE" = "true" ]; then
+            echo "signed=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "signed=false" >> "$GITHUB_OUTPUT"
+            echo "::notice::Upload-key secrets are not set in the android-release environment: building UNSIGNED (debug-signed, not uploadable). This is the dry-run mode."
+          fi
+          if [ "$HAVE_KEYSTORE" = "true" ] && [ "$HAVE_PLAY" = "true" ] && [ "${{ inputs.upload }}" = "true" ] \
+             && { [ "$GITHUB_REF" = "refs/heads/main" ] || [[ "$GITHUB_REF" == refs/tags/v* ]]; }; then
+            echo "upload=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "upload=false" >> "$GITHUB_OUTPUT"
+            echo "::notice::Play upload skipped (needs signed build, PLAY_SERVICE_ACCOUNT_JSON, upload=true and main or a v* tag)."
+          fi
+
+      - name: Install the upload keystore
+        if: steps.sign.outputs.signed == 'true'
+        env:
+          KEYSTORE_B64: ${{ secrets.ANDROID_UPLOAD_KEYSTORE_BASE64 }}
+        run: |
+          umask 077
+          printf '%s' "$KEYSTORE_B64" | base64 -d > "$RUNNER_TEMP/upload.jks"
+          echo "ZAGHLOL_UPLOAD_KEYSTORE_FILE=$RUNNER_TEMP/upload.jks" >> "$GITHUB_ENV"
+          echo "ZAGHLOL_REQUIRE_UPLOAD_KEY=true" >> "$GITHUB_ENV"
+
+      - name: Play Integrity cloud project number (not a secret)
+        env:
+          PROJECT_NUMBER: ${{ vars.PLAY_INTEGRITY_CLOUD_PROJECT_NUMBER }}
+        run: |
+          if [[ "$PROJECT_NUMBER" =~ ^[0-9]{1,19}$ ]]; then
+            mkdir -p ~/.gradle
+            echo "zaghlol.playIntegrityCloudProjectNumber=$PROJECT_NUMBER" >> ~/.gradle/gradle.properties
+          else
+            echo "::notice::PLAY_INTEGRITY_CLOUD_PROJECT_NUMBER is not set: the build ships with attestation failing closed (ATTEST_UNAVAILABLE). Set it before a real release."
+          fi
+
+      - name: Build the App Bundle
+        working-directory: app
+        env:
+          ZAGHLOL_UPLOAD_STORE_PASSWORD: ${{ secrets.ANDROID_UPLOAD_STORE_PASSWORD }}
+          ZAGHLOL_UPLOAD_KEY_ALIAS: ${{ secrets.ANDROID_UPLOAD_KEY_ALIAS }}
+          ZAGHLOL_UPLOAD_KEY_PASSWORD: ${{ secrets.ANDROID_UPLOAD_KEY_PASSWORD }}
+          BUILD_NAME: ${{ steps.ver.outputs.BUILD_NAME }}
+          VERSION_CODE: ${{ steps.ver.outputs.ANDROID_VERSION_CODE }}
+        run: |
+          mkdir -p "$RUNNER_TEMP/symbols/$FLAVOR"
+          if ! flutter build appbundle --release --flavor "$FLAVOR" \
+              --build-name "$BUILD_NAME" --build-number "$VERSION_CODE" \
+              --obfuscate --split-debug-info="$RUNNER_TEMP/symbols/$FLAVOR" > build.log 2>&1; then
+            echo "::error::bundle build failed: $(grep -v -E 'Unzipping|^\[' build.log | grep -A25 -E 'What went wrong|Error|error:' | head -n 40 | tr '\n' '|')"
+            exit 1
+          fi
+          tail -n 5 build.log
+          AAB=$(find build/app/outputs/bundle -name '*.aab' | head -n 1)
+          [ -n "$AAB" ] || { echo "::error::no .aab produced"; exit 1; }
+          echo "AAB=$PWD/$AAB" >> "$GITHUB_ENV"
+          ls -l "$AAB"
+
+      # The follow-up from the T-165 review: Play ships the AAB, not an APK,
+      # so the store assertions run on a universal APK made from the same
+      # bundle pipeline (same manifest, same signing).
+      - name: Universal APK from the bundle (for the assertions)
+        working-directory: app/android
+        env:
+          ZAGHLOL_UPLOAD_STORE_PASSWORD: ${{ secrets.ANDROID_UPLOAD_STORE_PASSWORD }}
+          ZAGHLOL_UPLOAD_KEY_ALIAS: ${{ secrets.ANDROID_UPLOAD_KEY_ALIAS }}
+          ZAGHLOL_UPLOAD_KEY_PASSWORD: ${{ secrets.ANDROID_UPLOAD_KEY_PASSWORD }}
+        run: |
+          task=":app:package${FLAVOR^}ReleaseUniversalApk"
+          if ! ./gradlew --no-daemon "$task" > universal.log 2>&1; then
+            echo "::error::$task failed: $(grep -A25 -E 'What went wrong|Error|error:' universal.log | head -n 40 | tr '\n' '|')"
+            exit 1
+          fi
+          APK=$(find ../build -path '*universal*' -name '*.apk' | head -n 1)
+          [ -n "$APK" ] || { echo "::error::no universal APK found: $(find ../build -name '*.apk' | tr '\n' ' ')"; exit 1; }
+          echo "UAPK=$PWD/$APK" >> "$GITHUB_ENV"
+          ls -l "$APK"
+
+      - name: Assert permissions, ids, SDK levels, no OS backup, placement
+        run: |
+          set -e
+          AAPT2=$(ls -d "$ANDROID_HOME"/build-tools/*/aapt2 | sort -V | tail -n 1)
+          "$AAPT2" dump permissions "$UAPK" | tee perms.txt
+          "$AAPT2" dump badging "$UAPK" > badging.txt
+          grep -iE "^package:|sdkversion" badging.txt
+          RESTRICTED="READ_SMS|RECEIVE_SMS|SEND_SMS|RECEIVE_MMS|RECEIVE_WAP_PUSH|READ_CELL_BROADCASTS"
+          if [ "$EXPECT_SMS" = "false" ]; then
+            if grep -E "android\.permission\.($RESTRICTED)" perms.txt; then
+              echo "::error::$FLAVOR contains restricted SMS permissions"; exit 1
+            fi
+          else
+            for p in READ_SMS RECEIVE_SMS; do
+              grep -q "android.permission.$p" perms.txt || { echo "::error::$FLAVOR is missing $p"; exit 1; }
+            done
+            # Declared set for the Play form is exactly these two (docs/06-release/play-sms-declaration.md).
+            extra=$(grep -oE "android\.permission\.($RESTRICTED)" perms.txt | sort -u | grep -vE "READ_SMS|RECEIVE_SMS" || true)
+            [ -z "$extra" ] || { echo "::error::undeclared restricted permissions: $extra"; exit 1; }
+          fi
+          grep -q "package: name='app.zaghlol' " badging.txt || { echo "::error::applicationId is not app.zaghlol"; exit 1; }
+          grep -qE "minSdkVersion:'26'" badging.txt || { echo "::error::minSdkVersion is not 26"; exit 1; }
+          # Play: new apps and updates must target API 36 from 2026-08-31.
+          grep -qE "targetSdkVersion:'36'" badging.txt || { echo "::error::targetSdkVersion is not 36"; exit 1; }
+          grep -qE "versionCode='${{ steps.ver.outputs.ANDROID_VERSION_CODE }}'" badging.txt || { echo "::error::versionCode mismatch"; exit 1; }
+          bash .github/scripts/check-no-os-backup.sh "$AAPT2" "$UAPK"
+          bash .github/scripts/check-sms-spike-placement.sh "$AAPT2" "$UAPK" "$FLAVOR" release
+          for abi in arm64-v8a armeabi-v7a x86_64; do
+            if unzip -p "$UAPK" "lib/$abi/libapp.so" | grep -aqE "ZAGHLOL_DB_BENCH|5550100"; then
+              echo "::error::benchmark or spike code in lib/$abi/libapp.so"; exit 1
+            fi
+          done
+          ZIPALIGN=$(ls -d "$ANDROID_HOME"/build-tools/*/zipalign | sort -V | tail -n 1)
+          "$ZIPALIGN" -c -P 16 -v 4 "$UAPK" > zipalign.log 2>&1 || { tail -n 20 zipalign.log; echo "::error::not 16 KB aligned"; exit 1; }
+          # T-178 (plan v1.1): the release bundle ships the system-CA-only
+          # network_security_config. Source check plus the manifest reference.
+          if sed '/<debug-overrides>/,/<\/debug-overrides>/d' app/android/app/src/main/res/xml/network_security_config.xml | grep -qE 'src="user"'; then
+            echo "::error::network_security_config trusts user CAs"; exit 1
+          fi
+          "$AAPT2" dump xmltree --file AndroidManifest.xml "$UAPK" | grep -q "networkSecurityConfig" \
+            || { echo "::error::manifest has no networkSecurityConfig"; exit 1; }
+          # Data safety assumes INTERNET (T-001 review F16).
+          grep -q "android.permission.INTERNET" perms.txt || echo "::warning::INTERNET not declared; Data safety assumes it"
+
+      - name: Assert signing state of the bundle
+        env:
+          SIGNED: ${{ steps.sign.outputs.signed }}
+        run: |
+          keytool -printcert -jarfile "$AAB" > cert.txt 2>&1 || true
+          head -n 3 cert.txt | sed -E 's/(SHA|MD5)[^:]*:.*/\1: <hidden>/'
+          if [ "$SIGNED" = "true" ]; then
+            grep -qi "Android Debug" cert.txt && { echo "::error::signed mode but the bundle carries the debug certificate"; exit 1; }
+            grep -q "Owner:" cert.txt || { echo "::error::signed mode but the bundle has no signer"; exit 1; }
+          else
+            grep -qi "Android Debug" cert.txt || echo "::warning::unsigned mode: could not confirm the debug certificate"
+          fi
+
+      - name: Collect symbols (private)
+        id: symbols
+        env:
+          SYMBOLS_PASSPHRASE: ${{ secrets.SYMBOLS_PASSPHRASE }}
+        run: |
+          set -e
+          mapping=$(find app/build/app/outputs/mapping -name mapping.txt 2>/dev/null | head -n 1 || true)
+          echo "R8 mapping.txt: ${mapping:-none (R8 produced none)}; Play also gets it inside the AAB."
+          if [ -z "$SYMBOLS_PASSPHRASE" ]; then
+            echo "symbols=false" >> "$GITHUB_OUTPUT"
+            echo "::notice::SYMBOLS_PASSPHRASE not set: Dart split-debug-info symbols and the R8 mapping are NOT uploaded anywhere (the repo is public, never in the clear)."
+            exit 0
+          fi
+          mkdir -p "$RUNNER_TEMP/symout"
+          tar -C "$RUNNER_TEMP/symbols" -cf "$RUNNER_TEMP/symout/symbols.tar" "$FLAVOR"
+          [ -z "$mapping" ] || cp "$mapping" "$RUNNER_TEMP/symout/mapping.txt"
+          tar -C "$RUNNER_TEMP/symout" -cf - . | openssl enc -aes-256-cbc -pbkdf2 -iter 600000 -salt -pass env:SYMBOLS_PASSPHRASE -out "$RUNNER_TEMP/$FLAVOR-symbols.tar.enc"
+          echo "symbols=true" >> "$GITHUB_OUTPUT"
+      - name: Keep the encrypted symbols (14 days)
+        if: steps.symbols.outputs.symbols == 'true'
+        uses: actions/upload-artifact@b7c566a772e6b6bfb58ed0dc250532a479d7789f # v6.0.0
+        with:
+          name: ${{ matrix.flavor }}-symbols-encrypted
+          path: ${{ runner.temp }}/${{ matrix.flavor }}-symbols.tar.enc
+          if-no-files-found: error
+          retention-days: 14
+
+      # Dry-run output only: an unsigned (debug-signed) bundle is not
+      # uploadable and carries no secret. Signed bundles are never kept.
+      - name: Keep the unsigned bundle (3 days, dry run only)
+        if: steps.sign.outputs.signed != 'true'
+        uses: actions/upload-artifact@b7c566a772e6b6bfb58ed0dc250532a479d7789f # v6.0.0
+        with:
+          name: ${{ matrix.flavor }}-aab-UNSIGNED-dry-run
+          path: ${{ env.AAB }}
+          if-no-files-found: error
+          retention-days: 3
+
+      - name: Upload to the Play internal track (fastlane supply)
+        if: steps.sign.outputs.upload == 'true'
+        working-directory: app
+        env:
+          PLAY_JSON: ${{ secrets.PLAY_SERVICE_ACCOUNT_JSON }}
+        run: |
+          umask 077
+          printf '%s' "$PLAY_JSON" > "$RUNNER_TEMP/play.json"
+          sudo gem install fastlane -v "$FASTLANE_VERSION" --no-document > "$RUNNER_TEMP/gem.log" 2>&1 || { tail -n 20 "$RUNNER_TEMP/gem.log"; exit 1; }
+          AAB="$AAB" PLAY_JSON_KEY_FILE="$RUNNER_TEMP/play.json" fastlane android internal
+      - name: Remove the Play key
+        if: always()
+        run: rm -f "$RUNNER_TEMP/play.json" "$RUNNER_TEMP/upload.jks"
+
+      - name: Summary
+        if: always()
+        env:
+          SIGNED: ${{ steps.sign.outputs.signed }}
+          UPLOAD: ${{ steps.sign.outputs.upload }}
+        run: |
+          {
+            echo "### $FLAVOR"
+            echo "- version: ${{ steps.ver.outputs.BUILD_NAME }} (versionCode ${{ steps.ver.outputs.ANDROID_VERSION_CODE }})"
+            echo "- signed with the upload key: $SIGNED"
+            echo "- uploaded to Play internal: $UPLOAD"
+          } >> "$GITHUB_STEP_SUMMARY"
