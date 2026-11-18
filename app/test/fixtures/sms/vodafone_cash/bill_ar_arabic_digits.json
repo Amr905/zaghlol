@@ -1,0 +1,12 @@
+{
+  "sender": "VF-Cash",
+  "body": "تم سداد فاتورة المياه بمبلغ ٨٥٫٥٠ جنيه",
+  "receivedAt": "2026-11-18T10:00:00+02:00",
+  "expect": {
+    "template": "vodafone_cash.bill.ar",
+    "event": "card_purchase",
+    "direction": "expense",
+    "currency": "EGP",
+    "amount": "85.50"
+  }
+}

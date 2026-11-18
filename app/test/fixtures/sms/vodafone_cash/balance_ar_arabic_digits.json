@@ -1,0 +1,11 @@
+{
+  "sender": "VF-Cash",
+  "body": "رصيدك الحالي ٣٤٠٫٧٥ جنيه",
+  "receivedAt": "2026-11-18T10:00:00+02:00",
+  "expect": {
+    "template": "vodafone_cash.balance.ar",
+    "event": "balance_only",
+    "direction": "neutral",
+    "balance": "340.75"
+  }
+}

@@ -1,0 +1,13 @@
+{
+  "sender": "VF-Cash",
+  "body": "تم إيداع ٣٠٠٫٠٠ جنيه في محفظتك. رصيدك الحالي ٣٥٠٫٠٠ جنيه",
+  "receivedAt": "2026-11-18T10:00:00+02:00",
+  "expect": {
+    "template": "vodafone_cash.cash_in.ar",
+    "event": "wallet_topup",
+    "direction": "income",
+    "currency": "EGP",
+    "amount": "300.00",
+    "balance": "350.00"
+  }
+}

@@ -1,0 +1,14 @@
+{
+  "sender": "VF-Cash",
+  "body": "تم دفع 1,250.00 جنيه الى HOME SHOP بنجاح. رصيدك الحالي 2,000.00 جنيه",
+  "receivedAt": "2026-11-18T10:00:00+02:00",
+  "expect": {
+    "template": "vodafone_cash.payment.ar",
+    "event": "card_purchase",
+    "direction": "expense",
+    "currency": "EGP",
+    "amount": "1250.00",
+    "merchantClean": "Home Shop",
+    "balance": "2000.00"
+  }
+}

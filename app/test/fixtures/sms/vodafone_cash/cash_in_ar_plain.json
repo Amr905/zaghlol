@@ -1,0 +1,14 @@
+{
+  "sender": "VF-Cash",
+  "body": "تم ايداع 500.00 جنيه في محفظتك من وكيل فودافون كاش. رصيدك الحالي 650.00 جنيه. رقم العملية 222000111",
+  "receivedAt": "2026-11-18T10:00:00+02:00",
+  "expect": {
+    "template": "vodafone_cash.cash_in.ar",
+    "event": "wallet_topup",
+    "direction": "income",
+    "currency": "EGP",
+    "amount": "500.00",
+    "balance": "650.00",
+    "ref": "222000111"
+  }
+}

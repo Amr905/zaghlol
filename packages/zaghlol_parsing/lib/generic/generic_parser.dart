@@ -594,11 +594,39 @@ List<_Hit> _hits(String t, List<String> words, TemplateDirection? direction) {
               (end < t.length && _isAlnum(t.codeUnitAt(end))))) {
         continue;
       }
+      if (!latin && _isPrizeDraw(t, i, end)) {
+        continue;
+      }
       out.add(_Hit(i, end, direction));
     }
   }
   return out;
 }
+
+/// `السحب علي / الجاي / القادم` and `دخول السحب`: a prize draw, so the `سحب`
+/// inside is never a withdrawal (PO 2026-11-18). Folded text.
+bool _isPrizeDraw(String t, int start, int end) {
+  if (!t.startsWith(_sahb, start) || start < 2) {
+    return false;
+  }
+  if (t.substring(start - 2, start) != 'ال') {
+    return false;
+  }
+  for (final next in _drawFollowers) {
+    if (t.startsWith(next, end)) {
+      return true;
+    }
+  }
+  return start >= 7 && t.substring(start - 7, start - 2) == foldKey('دخول ');
+}
+
+final String _sahb = foldKey('سحب');
+final List<String> _drawFollowers = [
+  ' علي',
+  ' الجاي',
+  ' القادم',
+  ' الشهري',
+].map(foldKey).toList();
 
 /// Distance in characters from [c] to the nearest keyword of [direction]
 /// (any direction when null), or [_far].

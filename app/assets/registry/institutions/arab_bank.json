@@ -10,6 +10,26 @@
     {
       "match": "exact",
       "value": "ArabBank"
+    },
+    {
+      "match": "exact",
+      "value": "Arab Bank"
+    },
+    {
+      "match": "exact",
+      "value": "ARABBANK"
+    },
+    {
+      "match": "exact",
+      "value": "ArabBankEG"
+    },
+    {
+      "match": "exact",
+      "value": "Arab Bank EG"
+    },
+    {
+      "match": "exact",
+      "value": "EG"
     }
   ],
   "packages": [],
@@ -56,6 +76,40 @@
         "جنيه": "EGP",
         "egp": "EGP"
       }
+    },
+    {
+      "id": "arab_bank.instapay_out.ar",
+      "version": 6,
+      "lang": "ar",
+      "channel": [
+        "sms"
+      ],
+      "event": "instapay_out",
+      "direction": "expense",
+      "baseConfidence": 0.95,
+      "pattern": "تم تنفيذ تحويل لحظي بمبلغ (?<cur>[a-z]{3}) (?<amount>[\\d,.]+) بتاريخ (?<date>\\d{1,2}/\\d{1,2}/\\d{4}) (?<time>\\d{1,2}:\\d{2})\\. من حسابك \\d{0,4}\\*{1,4}(?<last4>\\d{4}) الي (?<counterparty>[^.]+?) ?\\. رقم مرجعي ?(?<ref>[a-z0-9]{6,24})\\.(?: الرصيد المتوفر (?<acur>[a-z]{3}) (?<balance>[\\d,.]+))?",
+      "date": {
+        "format": "d/M/yyyy",
+        "yearPolicy": "nearest_past"
+      },
+      "source": "po-sample"
+    },
+    {
+      "id": "arab_bank.salary.ar",
+      "version": 6,
+      "lang": "ar",
+      "channel": [
+        "sms"
+      ],
+      "event": "salary",
+      "direction": "income",
+      "baseConfidence": 0.95,
+      "pattern": "قيد راتب بمبلغ (?<cur>[a-z]{3}) (?<amount>[\\d,.]+) لحساب \\d{0,4}\\*{1,4}(?<last4>\\d{4}) بتاريخ (?<date>\\d{1,2}/\\d{1,2}/\\d{4})(?: ?\\.)?(?: الرصيد المتوفر (?<acur>[a-z]{3}) (?<balance>[\\d,.]+))?",
+      "date": {
+        "format": "d/M/yyyy",
+        "yearPolicy": "nearest_past"
+      },
+      "source": "po-sample"
     }
   ]
 }

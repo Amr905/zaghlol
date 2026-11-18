@@ -204,6 +204,27 @@ final List<String> promoKeywords = _fold(const [
   'اربح',
   'احصل على',
   'استمتع',
+  // PO 2026-11-18 (CIB gold-certificate draw): competition, certificate and
+  // terms wording. `السحب` here is a prize draw, never a withdrawal.
+  'مسابقه',
+  'مسابقات',
+  'السحب علي',
+  'السحب الجاي',
+  'السحب القادم',
+  'دخول السحب',
+  'فرصتك',
+  'فرصه',
+  'اربط',
+  'شهاده',
+  'ترخيص رقم',
+  'تطبق الشروط',
+  'الشروط والاحكام',
+  'terms and conditions',
+  't&c',
+  'عرض',
+  'discount',
+  'giveaway',
+  'raffle',
 ]);
 
 /// Words that say money already moved. Any hit overrides [promoKeywords],
@@ -232,6 +253,13 @@ final List<String> completedTransactionCues = _fold(const [
   'تم شراء',
   'تم استلام',
   'تم صرف',
+  'تم استخدام',
+  'تم قيد',
+  'قيد راتب',
+  'تم تنفيذ',
+  'تنفيذ تحويل',
+  'تحويل لحظي',
+  'تم ايداع',
 ]);
 
 /// Words that mean the attempt failed: a failed attempt is not spend.

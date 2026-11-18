@@ -224,6 +224,112 @@ void main() {
     }
   }
 
+  // SMS-po42: the PO's real-phone reports of 2026-11-18 (synthetic digits,
+  // same wording).
+  const promo =
+      'بنفكرك إن فاضل 3 أيام على السحب الجاي. اربط شهادة الدهب دلوقتي وحتى آخر '
+      'الشهر من خلال خدمات الإنترنت البنكية، لضمان فرصتك في دخول السحب على '
+      'كيلو دهب أو جنيه من 25 جنيه دهب. شهادة الدهب متاحة لفترة محدودة. هذه '
+      'المسابقة تحت إشراف وزارة التضامن الإجتماعي بترخيص رقم 7 لسنة 2026. '
+      'تطبق الشروط والأحكام. رقم ت.ض: 100200300.';
+
+  test('the CIB gold-certificate promo is dropped by the Guard', () {
+    expect(
+      guard.decide(channel: 'sms', source: 'CIB', body: promo),
+      isA<GuardDrop>(),
+    );
+  });
+
+  for (final c in const [
+    (name: 'full promo', sender: 'CIB', body: promo),
+    (
+      name: 'promo without the drop phrases',
+      sender: 'CIB',
+      body:
+          'اربط شهادة الدهب دلوقتي لضمان فرصتك في السحب على كيلو دهب أو '
+          'جنيه من 25 جنيه دهب.',
+    ),
+  ]) {
+    test('CIB ${c.name}: never a stored transaction', () async {
+      final registry = await preloadBundledRegistry();
+      final w = await IngestWorld.open();
+      addTearDown(w.close);
+      await w.useCase(registry: registry, guardBase: BytesGuardBase(base))([
+        sms('p1', c.body, source: c.sender),
+      ]);
+      expect(await w.txns(), isEmpty);
+      for (final r in await w.reviews()) {
+        expect('${r['payload']}', isNot(contains('"direction"')));
+      }
+    });
+  }
+
+  for (final c in const [
+    (
+      name: 'Arab Bank InstaPay out (sender EG)',
+      sender: 'EG',
+      body:
+          'تم تنفيذ تحويل لحظي بمبلغ EGP 50020.00 بتاريخ 28/10/2026 18:10. '
+          'من حسابك 419*5044 الى AMR MOUSA  . رقم مرجعي77700668421. الرصيد '
+          'المتوفر EGP 12320.23 للمزيد 19100.',
+      direction: 'transfer_out',
+      minor: 5002000,
+      currency: 'EGP',
+      last4: '5044',
+    ),
+    (
+      name: 'Arab Bank salary in USD (sender ArabBankEG)',
+      sender: 'ArabBankEG',
+      body: 'قيد راتب بمبلغ USD 59.66 لحساب 410*5045 بتاريخ 26/10/2026 .',
+      direction: 'income',
+      minor: 5966,
+      currency: 'USD',
+      last4: '5045',
+    ),
+    (
+      name: 'Mashreq card use (sender Mashreq-e&)',
+      sender: 'Mashreq-e&',
+      body:
+          'تم استخدام بطاقتكم المنتهية ب9117  في 8180044-SAUDI GERMAN H '
+          'بمبلغ EGP 2,000.00.',
+      direction: 'expense',
+      minor: 200000,
+      currency: 'EGP',
+      last4: '9117',
+    ),
+    (
+      name: 'Vodafone Cash send (sender VF-Cash)',
+      sender: 'VF-Cash',
+      body:
+          'تم تحويل 100.00 جنيه بنجاح الى رقم 01012345678. رصيدك الحالي '
+          '250.00 جنيه. رقم العملية 987654321',
+      direction: 'transfer_out',
+      minor: 10000,
+      currency: 'EGP',
+      last4: null,
+    ),
+  ]) {
+    test('${c.name}: Guard keeps it, ingest stores it', () async {
+      expect(
+        guard.decide(channel: 'sms', source: c.sender, body: c.body),
+        isA<GuardKeep>(),
+      );
+      final registry = await preloadBundledRegistry();
+      final w = await IngestWorld.open();
+      addTearDown(w.close);
+      final result = await w.useCase(
+        registry: registry,
+        guardBase: BytesGuardBase(base),
+      )([sms('q1', c.body, source: c.sender)]);
+      expect(result.outcomes['q1'], isA<IngestInserted>());
+      final t = (await w.txns()).single;
+      expect(t['direction'], c.direction);
+      expect(t['amount_minor'], c.minor);
+      expect(t['currency'], c.currency);
+      expect(t['acc_last4'], c.last4);
+    });
+  }
+
   test(
     'an unknown sender with a non-financial text is dropped by the Guard',
     () {

@@ -260,6 +260,8 @@ int clampTzOffset(int minutes) =>
 String? eventCategoryOf(TemplateEvent event) => switch (event) {
   TemplateEvent.atmWithdrawal => kCashCategoryId,
   TemplateEvent.instapayOut || TemplateEvent.instapayIn => kInstapayCategoryId,
+  // A salary credit is income (PO 2026-11-18): the seeded Income category.
+  TemplateEvent.salary => 'sys:income',
   _ => null,
 };
 

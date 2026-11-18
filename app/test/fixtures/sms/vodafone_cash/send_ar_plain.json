@@ -1,0 +1,15 @@
+{
+  "sender": "VF-Cash",
+  "body": "تم تحويل 100.00 جنيه بنجاح الى رقم 01012345678. رصيدك الحالي 250.00 جنيه. رقم العملية 987654321",
+  "receivedAt": "2026-11-18T10:00:00+02:00",
+  "expect": {
+    "template": "vodafone_cash.send.ar",
+    "event": "transfer_out",
+    "direction": "expense",
+    "currency": "EGP",
+    "amount": "100.00",
+    "phone": "01012345678",
+    "balance": "250.00",
+    "ref": "987654321"
+  }
+}

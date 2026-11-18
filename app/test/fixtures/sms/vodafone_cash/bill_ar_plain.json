@@ -1,0 +1,14 @@
+{
+  "sender": "VF-Cash",
+  "body": "تم سداد فاتورة الكهرباء بمبلغ 320.00 جنيه بنجاح. رصيدك الحالي 80.00 جنيه. رقم العملية 444000333",
+  "receivedAt": "2026-11-18T10:00:00+02:00",
+  "expect": {
+    "template": "vodafone_cash.bill.ar",
+    "event": "card_purchase",
+    "direction": "expense",
+    "currency": "EGP",
+    "amount": "320.00",
+    "balance": "80.00",
+    "ref": "444000333"
+  }
+}

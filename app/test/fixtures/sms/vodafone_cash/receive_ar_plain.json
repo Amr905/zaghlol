@@ -1,0 +1,15 @@
+{
+  "sender": "VF-Cash",
+  "body": "تم استلام 200.00 جنيه من رقم 01012345678. رصيدك الحالي 450.00 جنيه. رقم العملية 555000111",
+  "receivedAt": "2026-11-18T10:00:00+02:00",
+  "expect": {
+    "template": "vodafone_cash.receive.ar",
+    "event": "transfer_in",
+    "direction": "income",
+    "currency": "EGP",
+    "amount": "200.00",
+    "phone": "01012345678",
+    "balance": "450.00",
+    "ref": "555000111"
+  }
+}
