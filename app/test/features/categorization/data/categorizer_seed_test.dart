@@ -77,6 +77,12 @@ void main() {
       }
     });
 
+    test('SAUDI GERMAN H (Mashreq SMS, truncated) -> health', () async {
+      final d = await run('SAUDI GERMAN H');
+      expect(d.categoryId, 'sys:health');
+      expect(d.source, CategorySource.catalog);
+    });
+
     test('P2P transfer without a rule needs classification', () async {
       for (final kind in ['ipa', 'phone', 'person']) {
         final d = await run('CARREFOUR', kind: kind, value: 'someone');

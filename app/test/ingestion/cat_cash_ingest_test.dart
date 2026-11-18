@@ -39,7 +39,7 @@ void main() {
     final registry = await preloadBundledRegistry();
     final w = await IngestWorld.open();
     addTearDown(w.close);
-    for (final c in ['cash', 'instapay', 'dining']) {
+    for (final c in ['cash', 'instapay', 'dining', 'income']) {
       await w.db
           .into(w.db.categories)
           .insert(
@@ -91,6 +91,24 @@ void main() {
     );
     expect(t.single['direction'], 'transfer_out');
     expect(t.single['category_id'], 'sys:instapay');
+  });
+
+  test('Arab Bank InstaPay is InstaPay, Arab Bank salary is Income', () async {
+    final (_, ingest) = await open();
+    final t = await ingest(
+      'EG',
+      'تم تنفيذ تحويل لحظي بمبلغ EGP 50020.00 بتاريخ 28/10/2026 18:10. من '
+          'حسابك 419*5044 الى AMR MOUSA  . رقم مرجعي77700668421. الرصيد '
+          'المتوفر EGP 12320.23 للمزيد 19100.',
+    );
+    expect(t.single['category_id'], 'sys:instapay');
+    final s = await ingest(
+      'EG',
+      'قيد راتب بمبلغ USD 59.66 لحساب 410*5045 بتاريخ 26/10/2026 .',
+    );
+    final salary = s.firstWhere((r) => r['direction'] == 'income');
+    expect(salary['category_id'], 'sys:income');
+    expect(salary['currency'], 'USD');
   });
 
   test('generic InstaPay cue (Arabic) is InstaPay; no cue is not', () async {
