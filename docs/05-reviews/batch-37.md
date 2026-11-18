@@ -59,3 +59,10 @@ The fix agent's 11c18b2e made a quarantined drop pattern count as a match ("fail
 - Parsing 1515 tests pass; analyze is clean.
 
 Verdict: FU-b37-catalog **APPROVED** after this change.
+
+## Lead delta check: iOS sealImageNow (2026-11-18)
+
+eb2e3b5c (about 20 Swift lines): the path and the allowed roots are resolved the same way (`resolvingSymlinksInPath` + standardized), and containment is checked on the **resolved** target with a `/`-terminated prefix. If the target is outside the roots, the call throws `ioError` and the target stays; only a link that itself sits inside the roots is removed. New XCTest for a link pointing outside the roots; swift unit tests are green (run 44204030759).
+
+Verdict: FU-b37-parse **APPROVED**. All nine tasks approved.
+- **FU-257:** batch-37 minors (see the report), the ~20 not-started FU-b37-ui items, and core2's skipped items 149b, 154c, 165a, 189c, 204c (PO: weekday), 234a.
