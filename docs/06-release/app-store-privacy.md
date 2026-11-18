@@ -6,7 +6,7 @@
 |---|---|---|
 | Runner (app) | present | `NSPrivacyTracking=false`, no tracking domains, no collected data types; required-reason APIs: SystemBootTime **35F9.1** (T-180 trusted clock), FileTimestamp **C617.1** |
 | ShareExtension | present | see file |
-| ZaghlolWidget | **none** | Open item: confirm the widget code uses no required-reason API (it reads the App Group snapshot); if it does, add a manifest. Flagged for the batch reviewer. |
+| ZaghlolWidget | present (`ZaghlolWidget/PrivacyInfo.xcprivacy`) | `NSPrivacyTracking=false`, no collected data, empty required-reason API list (reviewed in batch 40: the widget only reads the App Group snapshot and uses no required-reason API) |
 
 `NSPrivacyCollectedDataTypes` is empty in the app manifest. App Store Connect's App Privacy answers are what Apple shows users; the manifest's collected-data list should be completed to match the table below before submission (a follow-up for the iOS engineer: a manifest that is empty while the nutrition label lists data is inconsistent). No third-party SDK ships its own manifest requirement today (no analytics, ads, crash SDK).
 
@@ -47,7 +47,7 @@ Data collected by Zaghlol's backend:
 
 ## Open points for the iOS engineer or PO
 
-1. `Runner.entitlements` has no `com.apple.developer.applesignin`, yet the app uses `sign_in_with_apple`: confirm the capability and add it before the signed build, and in the app's provisioning profile.
+1. `Runner.entitlements` now carries `com.apple.developer.applesignin` (Default). Enable the Sign in with Apple capability on the App ID so the provisioning profile includes it.
 2. The three provisioning profiles must include App Groups, Keychain sharing and iCloud (CloudDocuments) per the entitlements files.
-3. Widget privacy manifest (above).
+3. Fill `NSPrivacyCollectedDataTypes` in the app manifest to match the label above before submission.
 4. Demo account for review.
