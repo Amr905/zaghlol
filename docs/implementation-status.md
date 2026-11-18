@@ -828,6 +828,8 @@ Replaces the 85 rows above that only pointed at batch review reports or were mar
 
 - **FU-257** (batch 37): see the batch-37 report and Lead delta checks.
 
+- **FU-258** (batch 38): minors in [batch-38](05-reviews/batch-38.md): action via a non-exported trampoline or nonce; a failed mark-paid while locked has no feedback; the weekly summary is skipped if the app isn't opened on Friday; a reminder delayed by quiet hours isn't cancelled after paying.
+
 ## Log
 | Date | Event |
 |---|---|
@@ -918,3 +920,4 @@ Replaces the 85 rows above that only pointed at batch review reports or were mar
 | 2026-11-17 | Batch 35 (`batch/2026-11-17-35`): FU-253/254 wiring and backfill, FU-252 UI, FU-218 overflow sweep, FU-228/232 backend. FU-255. Progress 167/186. |
 | 2026-11-18 | Batch 36 (`batch/2026-11-18-36`): FU triage + seven lanes of follow-ups. FU-256. Progress 167/186. |
 | 2026-11-18 | Batch 37 (`batch/2026-11-18-37`): nine lanes of follow-ups + explorer4. FU-257. Progress 167/186. |
+| 2026-11-18 | Batch 38 (`batch/2026-11-18-38`): PO WEEKLY-FRIDAY, OVERDUE-REMINDERS (+ Mark-as-paid action). FU-258. Progress 167/186. |

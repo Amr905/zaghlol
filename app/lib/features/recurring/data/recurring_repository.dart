@@ -54,9 +54,17 @@ final class RecurringException extends SafeException {
 
 /// An item whose reminder is due now.
 final class DueReminder {
-  const DueReminder({required this.item, required this.dueDate});
+  const DueReminder({
+    required this.item,
+    required this.dueDate,
+    this.overdueDays = 0,
+  });
   final RecurringItemRow item;
   final CivilDate dueDate;
+
+  /// PO OVERDUE-REMINDERS: 0 for an upcoming reminder; 1 or 3 for an overdue
+  /// one (days past the due date).
+  final int overdueDays;
 }
 
 /// A payment that was linked to an occurrence.
@@ -371,7 +379,10 @@ class RecurringRepository {
   /// "Mark paid" by hand: counts the occurrence due on the item's next date
   /// (no linked transaction) and moves the item on, like an auto-mark. False
   /// when the item is not active or is a card due.
-  Future<bool> markPaidManual(String id) => guardWrite(
+  ///
+  /// [expectedDue] (an ISO date): pays only when that is still the item's next
+  /// date, so a stale notification action never pays a later occurrence.
+  Future<bool> markPaidManual(String id, {String? expectedDue}) => guardWrite(
     () => _db.transaction(() async {
       final item = await _recurring.itemById(id);
       if (item == null || item.status != RecurringStatus.active) return false;
@@ -380,6 +391,7 @@ class RecurringRepository {
       final due = CivilDate.tryParse(item.nextDueDate ?? '');
       final cadence = _cadenceOf(item.cadence);
       if (due == null || cadence == null) return false;
+      if (expectedDue != null && due.toIso() != expectedDue) return false;
       final claimed = await _db.customUpdate(
         'INSERT OR IGNORE INTO recurring_occurrences '
         '(item_id, due_date, txn_id, paid_at) VALUES (?1, ?2, NULL, ?3)',
@@ -614,6 +626,28 @@ class RecurringRepository {
         localMinuteOfDay: minute,
       )) {
         out.add(DueReminder(item: item, dueDate: due));
+      }
+    }
+    return out;
+  });
+
+  /// PO OVERDUE-REMINDERS: unpaid, still-active items whose next due date was
+  /// exactly 1 or 3 days ago (from 10:00 local). Paid, skipped (dismissed) and
+  /// deleted items drop out because the item moves on or leaves the active
+  /// list. Card dues are paid only by money arriving, so they get none.
+  Future<List<DueReminder>> overdueReminders() => guardRead(() async {
+    final today = _today;
+    final local = _clock().toLocal();
+    if (local.hour * 60 + local.minute < reminderMinuteOfDay) return [];
+    final items = await _recurring.activeDueBy(today.plusDays(-1).toIso());
+    final out = <DueReminder>[];
+    for (final item in items) {
+      if (item.kind == RecurringKind.cardDue) continue;
+      final due = CivilDate.tryParse(item.nextDueDate ?? '');
+      if (due == null) continue;
+      final days = today.difference(due);
+      if (days == 1 || days == 3) {
+        out.add(DueReminder(item: item, dueDate: due, overdueDays: days));
       }
     }
     return out;

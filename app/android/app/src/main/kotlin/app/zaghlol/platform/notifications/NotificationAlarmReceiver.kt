@@ -21,6 +21,8 @@ class NotificationAlarmReceiver : BroadcastReceiver() {
         NotificationPresenter.K_BODY to intent.getStringExtra(NotificationPresenter.K_BODY),
         NotificationPresenter.K_PUBLIC to intent.getStringExtra(NotificationPresenter.K_PUBLIC),
         NotificationPresenter.K_ROUTE to intent.getStringExtra(NotificationPresenter.K_ROUTE),
+        NotificationPresenter.K_ACTION_TITLE to intent.getStringExtra(NotificationPresenter.K_ACTION_TITLE),
+        NotificationPresenter.K_ACTION_ROUTE to intent.getStringExtra(NotificationPresenter.K_ACTION_ROUTE),
       )
     try {
       val nm = context.getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager

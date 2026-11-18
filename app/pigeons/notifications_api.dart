@@ -37,6 +37,8 @@ class NotifMsg {
     required this.body,
     required this.publicTitle,
     this.route,
+    this.actionTitle,
+    this.actionRoute,
   });
   int id;
   String channelId;
@@ -44,6 +46,13 @@ class NotifMsg {
   String body;
   String publicTitle;
   String? route;
+
+  /// An optional action button (Android notification action, iOS category
+  /// action). [actionTitle] is localized by Dart and carries no amount;
+  /// [actionRoute] is a route id like [route]. The action opens the app
+  /// (foreground); it never runs financial code natively.
+  String? actionTitle;
+  String? actionRoute;
 }
 
 @HostApi()

@@ -6418,6 +6418,36 @@ class AppLocalizationsEn extends AppLocalizations {
       'You have a bill or installment due soon.';
 
   @override
+  String notificationsAlertOverdueTitle(String name) {
+    return '$name is overdue';
+  }
+
+  @override
+  String notificationsAlertOverdue(int count, String n, String amount) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: 'It was due $n days ago ($amount). Did you pay it?',
+      one: 'It was due 1 day ago ($amount). Did you pay it?',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String notificationsAlertOverdueHidden(int count, String n) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: 'It was due $n days ago. Did you pay it?',
+      one: 'It was due 1 day ago. Did you pay it?',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get notificationsAlertOverdueActionPaid => 'Mark as paid';
+
+  @override
   String get notificationsAlertDuplicateTitle =>
       'A charge may have been logged twice';
 

@@ -10,6 +10,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../core/routing/app_router.dart';
 import '../core/routing/app_routes.dart';
 import '../features/notifications/application/notification_providers.dart';
+import '../features/recurring/presentation/bills_providers.dart';
 import '../features/notifications/domain/notification_routes.dart';
 import 'app_navigation.dart';
 
@@ -52,6 +53,14 @@ class _NotificationTapLifecycleState
       target,
       router: ref.read(appRouterProvider).go,
       context: rootNavigatorKey.currentContext,
+      markPaid: (id, due) async {
+        try {
+          await ref.read(billsActionsProvider).markPaid(id, expectedDue: due);
+        } catch (_) {
+          // Locked or unavailable: the app is open on the bills; nothing
+          // else to do. Never echo the error.
+        }
+      },
     );
   }
 
@@ -65,12 +74,17 @@ void openNotificationTarget(
   NotificationTarget target, {
   required void Function(String location) router,
   required BuildContext? context,
+  Future<void> Function(String id, String dueDate)? markPaid,
 }) {
   switch (target) {
     case InsightsTarget():
       router(AppRoutes.insights);
     case TransactionTarget(:final id):
       if (context != null) unawaited(openTransactionDetail(context, id));
+    case MarkPaidTarget(:final id, :final dueDate):
+      // Opens the bills first, then pays: the user sees the row change.
+      router(AppRoutes.insights);
+      if (markPaid != null) unawaited(markPaid(id, dueDate));
     case BackupTarget():
       if (context != null) unawaited(openBackup(context));
   }

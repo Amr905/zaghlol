@@ -235,6 +235,12 @@ struct NotifMsg: Hashable {
   var body: String
   var publicTitle: String
   var route: String? = nil
+  /// An optional action button (Android notification action, iOS category
+  /// action). [actionTitle] is localized by Dart and carries no amount;
+  /// [actionRoute] is a route id like [route]. The action opens the app
+  /// (foreground); it never runs financial code natively.
+  var actionTitle: String? = nil
+  var actionRoute: String? = nil
 
 
   // swift-format-ignore: AlwaysUseLowerCamelCase
@@ -245,6 +251,8 @@ struct NotifMsg: Hashable {
     let body = pigeonVar_list[3] as! String
     let publicTitle = pigeonVar_list[4] as! String
     let route: String? = nilOrValue(pigeonVar_list[5])
+    let actionTitle: String? = nilOrValue(pigeonVar_list[6])
+    let actionRoute: String? = nilOrValue(pigeonVar_list[7])
 
     return NotifMsg(
       id: id,
@@ -252,7 +260,9 @@ struct NotifMsg: Hashable {
       title: title,
       body: body,
       publicTitle: publicTitle,
-      route: route
+      route: route,
+      actionTitle: actionTitle,
+      actionRoute: actionRoute
     )
   }
   func toList() -> [Any?] {
@@ -263,13 +273,15 @@ struct NotifMsg: Hashable {
       body,
       publicTitle,
       route,
+      actionTitle,
+      actionRoute,
     ]
   }
   static func == (lhs: NotifMsg, rhs: NotifMsg) -> Bool {
     if Swift.type(of: lhs) != Swift.type(of: rhs) {
       return false
     }
-    return deepEqualsNotificationsApi(lhs.id, rhs.id) && deepEqualsNotificationsApi(lhs.channelId, rhs.channelId) && deepEqualsNotificationsApi(lhs.title, rhs.title) && deepEqualsNotificationsApi(lhs.body, rhs.body) && deepEqualsNotificationsApi(lhs.publicTitle, rhs.publicTitle) && deepEqualsNotificationsApi(lhs.route, rhs.route)
+    return deepEqualsNotificationsApi(lhs.id, rhs.id) && deepEqualsNotificationsApi(lhs.channelId, rhs.channelId) && deepEqualsNotificationsApi(lhs.title, rhs.title) && deepEqualsNotificationsApi(lhs.body, rhs.body) && deepEqualsNotificationsApi(lhs.publicTitle, rhs.publicTitle) && deepEqualsNotificationsApi(lhs.route, rhs.route) && deepEqualsNotificationsApi(lhs.actionTitle, rhs.actionTitle) && deepEqualsNotificationsApi(lhs.actionRoute, rhs.actionRoute)
   }
 
   func hash(into hasher: inout Hasher) {
@@ -280,6 +292,8 @@ struct NotifMsg: Hashable {
     deepHashNotificationsApi(value: body, hasher: &hasher)
     deepHashNotificationsApi(value: publicTitle, hasher: &hasher)
     deepHashNotificationsApi(value: route, hasher: &hasher)
+    deepHashNotificationsApi(value: actionTitle, hasher: &hasher)
+    deepHashNotificationsApi(value: actionRoute, hasher: &hasher)
   }
 }
 

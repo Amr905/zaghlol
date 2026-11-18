@@ -21,7 +21,7 @@ class FakeActions implements BillsActions {
   @override
   Future<void> dismiss(String id) async => calls.add('dismiss:$id');
   @override
-  Future<bool> markPaid(String id) async {
+  Future<bool> markPaid(String id, {String? expectedDue}) async {
     calls.add('paid:$id');
     return true;
   }

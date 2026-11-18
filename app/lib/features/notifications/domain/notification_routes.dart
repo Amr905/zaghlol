@@ -23,7 +23,17 @@ final class BackupTarget extends NotificationTarget {
   const BackupTarget();
 }
 
+/// The "Mark as paid" action of an overdue reminder. [dueDate] (yyyy-mm-dd) is
+/// the occurrence the reminder was about: a stale action never pays a later
+/// one.
+final class MarkPaidTarget extends NotificationTarget {
+  const MarkPaidTarget(this.id, this.dueDate);
+  final String id;
+  final String dueDate;
+}
+
 final _id = RegExp(r'^[A-Za-z0-9_-]{1,64}$');
+final _date = RegExp(r'^\d{4}-\d{2}-\d{2}$');
 
 /// Null: unknown or malformed; nothing opens.
 NotificationTarget? notificationTargetFor(String? route) {
@@ -39,6 +49,17 @@ NotificationTarget? notificationTargetFor(String? route) {
   if (route.startsWith(prefix)) {
     final id = route.substring(prefix.length);
     if (_id.hasMatch(id)) return TransactionTarget(id);
+  }
+  const rec = '/recurring/';
+  if (route.startsWith(rec)) {
+    final parts = route.substring(rec.length).split('/');
+    if (parts.isNotEmpty && _id.hasMatch(parts[0])) {
+      // Bills live in the Insights tab.
+      if (parts.length == 1) return const InsightsTarget();
+      if (parts.length == 3 && parts[1] == 'paid' && _date.hasMatch(parts[2])) {
+        return MarkPaidTarget(parts[0], parts[2]);
+      }
+    }
   }
   return null;
 }

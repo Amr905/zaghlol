@@ -8,6 +8,21 @@ import UserNotifications
 /// Dart; nothing here logs it. The payload is a route id kept in `userInfo`.
 final class NotificationsHost: NotificationsHostApi {
   static let routeKey = "zaghlol.route"
+  static let actionRouteKey = "zaghlol.actionRoute"
+  /// One category with one foreground action (the title is set by Dart in the
+  /// user's language). The action opens the app; Dart does the work behind
+  /// its own gate.
+  static let actionCategoryId = "zaghlol.action"
+  static let actionId = "zaghlol.action.primary"
+
+  /// The route a response opens: the action route when the action button was
+  /// pressed, otherwise the notification's own route. Both are cleaned.
+  static func routeFor(actionIdentifier: String, userInfo: [AnyHashable: Any]) -> String? {
+    if actionIdentifier == actionId {
+      return cleanRoute(userInfo[actionRouteKey] as? String)
+    }
+    return cleanRoute(userInfo[routeKey] as? String)
+  }
 
   /// A route id is a short in-app path; anything else is dropped.
   static func cleanRoute(_ route: String?) -> String? {
@@ -106,9 +121,21 @@ final class NotificationsHost: NotificationsHostApi {
     content.title = n.title
     content.body = n.body
     content.sound = .default
-    if let r = NotificationsHost.cleanRoute(n.route) {
-      content.userInfo = [NotificationsHost.routeKey: r]
+    var info: [AnyHashable: Any] = [:]
+    if let r = NotificationsHost.cleanRoute(n.route) { info[NotificationsHost.routeKey] = r }
+    if let title = n.actionTitle, !title.trimmingCharacters(in: .whitespaces).isEmpty,
+      let ar = NotificationsHost.cleanRoute(n.actionRoute)
+    {
+      info[NotificationsHost.actionRouteKey] = ar
+      content.categoryIdentifier = NotificationsHost.actionCategoryId
+      let action = UNNotificationAction(
+        identifier: NotificationsHost.actionId, title: title, options: [.foreground])
+      let category = UNNotificationCategory(
+        identifier: NotificationsHost.actionCategoryId, actions: [action],
+        intentIdentifiers: [], options: [])
+      center.setNotificationCategories([category])
     }
+    content.userInfo = info
     return UNNotificationRequest(identifier: String(n.id), content: content, trigger: trigger)
   }
 }

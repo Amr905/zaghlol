@@ -84,6 +84,7 @@ class MainActivity : FlutterFragmentActivity() {
         notificationEvents = NotificationsEventsApi(messenger)
         NotificationsRegistration.register(messenger, notifHost)
         NotificationRoutes.setLaunchRoute(intent?.getStringExtra(NotificationRoutes.EXTRA_ROUTE))
+        intent?.let { dismissActionNotification(it) }
         val store = ShareStores.create(applicationContext)
         shareStore = store
         ShareIntakeHostApi.setUp(messenger, ShareIntakeHost(store))
@@ -136,6 +137,13 @@ class MainActivity : FlutterFragmentActivity() {
         super.cleanUpFlutterEngine(flutterEngine)
     }
 
+    /** An action button does not auto-cancel: dismiss the notification it came from. */
+    private fun dismissActionNotification(intent: Intent) {
+        val id = intent.getIntExtra(NotificationRoutes.EXTRA_CANCEL_ID, Int.MIN_VALUE)
+        if (id == Int.MIN_VALUE) return
+        (getSystemService(NOTIFICATION_SERVICE) as android.app.NotificationManager).cancel(id)
+    }
+
     /**
      * Warm start from the share target. Only an intent carrying the
      * per-process hand-off token may consume the refusal slot (F7): this
@@ -145,6 +153,7 @@ class MainActivity : FlutterFragmentActivity() {
         super.onNewIntent(intent)
         // NOTIF-GW: a tap while running goes to Dart; the route is validated
         // here and again in Dart (allow-list).
+        dismissActionNotification(intent)
         NotificationRoutes.clean(intent.getStringExtra(NotificationRoutes.EXTRA_ROUTE))?.let { r ->
             notificationEvents?.onTap(r) { }
         }

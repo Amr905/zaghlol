@@ -51,6 +51,8 @@ final class AlertRequest {
     required this.redactedTitle,
     required this.redactedBody,
     this.payload,
+    this.actionTitle,
+    this.actionRoute,
   });
 
   final NotificationType type;
@@ -66,6 +68,10 @@ final class AlertRequest {
 
   /// A route, never financial text.
   final String? payload;
+
+  /// Optional action button: a localized label (no amount) and a route id.
+  final String? actionTitle;
+  final String? actionRoute;
 }
 
 /// What the platform is asked to show or schedule. Already redacted.
@@ -77,6 +83,8 @@ final class PlatformNotification {
     this.payload,
     this.at,
     this.type,
+    this.actionTitle,
+    this.actionRoute,
   });
 
   /// Stable per dedupe key.
@@ -90,6 +98,10 @@ final class PlatformNotification {
 
   /// Picks the Android channel; null falls back to the budget channel.
   final NotificationType? type;
+
+  /// See [AlertRequest.actionTitle].
+  final String? actionTitle;
+  final String? actionRoute;
 }
 
 /// The platform port (NOTIF-GW: the Pigeon host adapter; tests use a fake).

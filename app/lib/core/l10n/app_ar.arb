@@ -8939,6 +8939,46 @@
   "@notificationsAlertDueHidden": {
     "description": "N"
   },
+  "notificationsAlertOverdueTitle": "{name} عدّى ميعاده",
+  "@notificationsAlertOverdueTitle": {
+    "description": "T · name",
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "notificationsAlertOverdue": "{count, plural, =1{كان المفروض يتدفع من يوم بـ {amount}. دفعته؟} =2{كان المفروض يتدفع من يومين بـ {amount}. دفعته؟} few{كان المفروض يتدفع من {n} أيام بـ {amount}. دفعته؟} many{كان المفروض يتدفع من {n} يوم بـ {amount}. دفعته؟} other{كان المفروض يتدفع من {n} يوم بـ {amount}. دفعته؟}}",
+  "@notificationsAlertOverdue": {
+    "description": "N · count:int, n, amount · PO OVERDUE-REMINDERS, day 1 and 3",
+    "placeholders": {
+      "count": {
+        "type": "int"
+      },
+      "n": {
+        "type": "String"
+      },
+      "amount": {
+        "type": "String"
+      }
+    }
+  },
+  "notificationsAlertOverdueHidden": "{count, plural, =1{كان المفروض يتدفع من يوم. دفعته؟} =2{كان المفروض يتدفع من يومين. دفعته؟} few{كان المفروض يتدفع من {n} أيام. دفعته؟} many{كان المفروض يتدفع من {n} يوم. دفعته؟} other{كان المفروض يتدفع من {n} يوم. دفعته؟}}",
+  "@notificationsAlertOverdueHidden": {
+    "description": "N · count:int, n · hidden-amount variant",
+    "placeholders": {
+      "count": {
+        "type": "int"
+      },
+      "n": {
+        "type": "String"
+      }
+    }
+  },
+  "notificationsAlertOverdueActionPaid": "أيوه دفعته",
+  "@notificationsAlertOverdueActionPaid": {
+    "description": "B · notification action, marks the item paid"
+  },
   "notificationsAlertDuplicateTitle": "ممكن حركة تكون اتسجلت مرتين",
   "@notificationsAlertDuplicateTitle": {
     "description": "T"
