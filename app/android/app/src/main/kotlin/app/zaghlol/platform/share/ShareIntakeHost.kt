@@ -16,14 +16,23 @@ object ShareIntakeState {
 
 /** Pigeon host implementation. Errors carry codes from platform-channels.md and never any content. */
 class ShareIntakeHost(private val store: ShareStore) : ShareIntakeHostApi {
+    /**
+     * An image share is already sealed in the store at intake (copied from the
+     * content stream, size-capped, never a plain file), so its `ocrPath` is the
+     * share id, which is what `OcrHostApi.recognize` resolves (iOS: the sealed
+     * body path). Dart never sees a plain path.
+     */
+    private fun withOcr(d: ShareDescriptor): ShareDescriptor =
+        if (d.kind == ShareKind.IMAGE) d.copy(ocrPath = d.id) else d
+
     override fun listPendingShares(): List<ShareDescriptor> = try {
-        store.list()
+        store.list().map(::withOcr)
     } catch (_: java.io.IOException) {
         throw ShareIntakeApiError("IO_ERROR", "could not list shares")
     }
 
     override fun readShare(id: String): ShareContent = try {
-        store.read(id)
+        store.read(id).let { it.copy(descriptor = withOcr(it.descriptor)) }
     } catch (_: ShareStore.NotFound) {
         throw ShareIntakeApiError("IO_ERROR", "unknown share")
     } catch (_: ShareStore.Transient) {
