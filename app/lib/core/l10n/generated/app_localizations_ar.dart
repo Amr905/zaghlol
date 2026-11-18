@@ -183,10 +183,10 @@ class AppLocalizationsAr extends AppLocalizations {
   String get commonActionUnlink => 'فك الربط';
 
   @override
-  String get commonActionMore => 'المزيد';
+  String get commonActionMore => 'أكتر';
 
   @override
-  String get commonActionShow => 'اظهر';
+  String get commonActionShow => 'اعرض';
 
   @override
   String get commonActionHide => 'اخفي';
@@ -572,7 +572,7 @@ class AppLocalizationsAr extends AppLocalizations {
 
   @override
   String get commonErrorSaveFailed =>
-      'محصلش حفظ. جرّب تاني، واللي كتبته لسه موجود.';
+      'مقدرتش أحفظ. جرّب تاني، واللي كتبته لسه موجود.';
 
   @override
   String get reviewErrorSaveFailed =>
@@ -674,7 +674,7 @@ class AppLocalizationsAr extends AppLocalizations {
 
   @override
   String get onboardingAndroidSetupSmsPointSenders =>
-      'بنقرا رسايل البنوك والمحافظ وإنستاباي بس';
+      'بقرا رسايل البنوك والمحافظ وإنستاباي بس';
 
   @override
   String get onboardingAndroidSetupSmsPointPersonal =>
@@ -682,10 +682,10 @@ class AppLocalizationsAr extends AppLocalizations {
 
   @override
   String get onboardingAndroidSetupSmsPointOnPhone =>
-      'كل حاجة بتفضل على الموبايل ده';
+      'بيانات فلوسك بتفضل على الموبايل ده';
 
   @override
-  String get onboardingAndroidSetupSmsAllow => 'اسمح بقراءة رسايل البنك';
+  String get onboardingAndroidSetupSmsAllow => 'اسمح بقراية الرسايل';
 
   @override
   String get onboardingAndroidSetupSmsGranted => 'الرسايل اتسمحت ✓';
@@ -783,8 +783,7 @@ class AppLocalizationsAr extends AppLocalizations {
   }
 
   @override
-  String get onboardingIosSetupShortcutTitle =>
-      'الآيفون مش بيسمح للتطبيقات تقرا الرسايل… فهنستخدم الاختصارات';
+  String get onboardingIosSetupShortcutTitle => 'هنستخدم الاختصارات';
 
   @override
   String get onboardingIosSetupShortcutWhy =>
@@ -815,7 +814,7 @@ class AppLocalizationsAr extends AppLocalizations {
   String get onboardingIosSetupShortcutAdd => 'ضيف اختصار زغلول';
 
   @override
-  String get onboardingIosSetupHowItWorks => 'إزاي بيشتغل؟ (٣٠ ثانية)';
+  String get onboardingIosSetupHowItWorks => 'إزاي بيشتغل؟ (نص دقيقة)';
 
   @override
   String get onboardingIosSetupHowStep1 =>
@@ -880,7 +879,7 @@ class AppLocalizationsAr extends AppLocalizations {
   String get onboardingIosSetupFixTitle => 'إزاي تصلحها؟';
 
   @override
-  String get onboardingIosSetupFixStep1 => 'افتح Shortcuts ← Automation';
+  String get onboardingIosSetupFixStep1 => 'افتح Shortcuts وبعدين Automation';
 
   @override
   String onboardingIosSetupFixStep2(String automationName) {
@@ -911,13 +910,13 @@ class AppLocalizationsAr extends AppLocalizations {
   String get onboardingIosSetupFirstSay => 'قولها';
 
   @override
-  String get onboardingIosSetupFirstSayHint => '«دفعت ٤٥ قهوة»';
+  String get onboardingIosSetupFirstSayHint => '«دفعت خمسة وأربعين قهوة»';
 
   @override
   String get onboardingIosSetupFirstType => 'اكتبها';
 
   @override
-  String get onboardingIosSetupFirstTypeHint => 'المبلغ والفئة';
+  String get onboardingIosSetupFirstTypeHint => 'المبلغ والتصنيف';
 
   @override
   String get onboardingIosSetupFirstOnlineBanks =>
@@ -925,13 +924,14 @@ class AppLocalizationsAr extends AppLocalizations {
 
   @override
   String get onboardingIosSetupFirstOnlineBanksSub =>
-      'شوف إزاي تسجلهم على الآيفون';
+      'شوف إزاي تتابعهم على الآيفون';
 
   @override
   String get onboardingIosSetupFirstStatement => 'عندك كشف حساب؟';
 
   @override
-  String get onboardingIosSetupFirstStatementSub => 'ضيف شهور فاتت مرة واحدة';
+  String get onboardingIosSetupFirstStatementSub =>
+      'ضيف شهور فاتت مرة واحدة مع جولد';
 
   @override
   String get backupRestoreTitle => 'استرجاع نسخة';
@@ -1184,11 +1184,11 @@ class AppLocalizationsAr extends AppLocalizations {
     String _temp0 = intl.Intl.pluralLogic(
       count,
       locale: localeName,
-      other: '$n يوم على القبض',
-      many: '$n يوم على القبض',
-      few: '$n أيام على القبض',
-      two: 'يومين على القبض',
-      one: 'يوم على القبض',
+      other: 'فاضل $n يوم على القبض',
+      many: 'فاضل $n يوم على القبض',
+      few: 'فاضل $n أيام على القبض',
+      two: 'فاضل يومين على القبض',
+      one: 'فاضل يوم على القبض',
       zero: 'القبض النهارده',
     );
     return '$_temp0';
@@ -2147,7 +2147,7 @@ class AppLocalizationsAr extends AppLocalizations {
   String get transfersAssignSaved => 'اتوزعت ✓';
 
   @override
-  String get transfersSplitErrorShareZero => 'النصيب لازم يكون أكبر من صفر';
+  String get transfersSplitErrorShareZero => 'كل نصيب لازم يكون أكبر من صفر';
 
   @override
   String get transfersSplitErrorSharesExceed => 'مجموع الأنصبة أكبر من المصروف';
@@ -2338,7 +2338,7 @@ class AppLocalizationsAr extends AppLocalizations {
   }
 
   @override
-  String get accountsOverviewCashSub => 'يدوي وصوت';
+  String get accountsOverviewCashSub => 'بإيدك وبصوتك';
 
   @override
   String get accountsOverviewNotTracked => 'مش متتبع';
@@ -3087,7 +3087,7 @@ class AppLocalizationsAr extends AppLocalizations {
   String get insightsChartsLockedSub => 'شوف الشارت كله مع جولد';
 
   @override
-  String get insightsChartsEmptyCycle => 'بيحيا بعد أول دورة كاملة';
+  String get insightsChartsEmptyCycle => 'هيشتغل بعد أول دورة كاملة';
 
   @override
   String get insightsChartsEmptyNetWorth =>
@@ -3132,7 +3132,7 @@ class AppLocalizationsAr extends AppLocalizations {
   String get insightsChartTitleMerchants => 'أكتر الأماكن اللي بتاخد فلوسك';
 
   @override
-  String get insightsChartTitleVsAverage => 'الدورة دي ضد متوسط تلات دورات';
+  String get insightsChartTitleVsAverage => 'الدورة دي قصاد متوسط تلات دورات';
 
   @override
   String get insightsChartTitleInstallments => 'أقساطك في الستة شهور الجايين';
@@ -3250,7 +3250,7 @@ class AppLocalizationsAr extends AppLocalizations {
 
   @override
   String insightsChartA11yVsAverage(String category, String percent) {
-    return 'الدورة دي ضد متوسطك: أكبر زيادة في $category بـ $percent';
+    return 'الدورة دي قصاد متوسطك: أكبر زيادة في $category بـ $percent';
   }
 
   @override
@@ -3372,8 +3372,8 @@ class AppLocalizationsAr extends AppLocalizations {
   ) {
     String _temp0 = intl.Intl.selectLogic(state, {
       'short':
-          'لو قللت $category بـ $target الدورة الجاية هيساعدك ده تقفل الفرق.',
-      'other': 'حوّل $target على الأقل من الفايض ده للادخار قبل ما يتصرف.',
+          'لو قللت $category بـ $target الدورة الجاية، ده هيساعدك تقفل الفرق.',
+      'other': 'حوّل $target على الأقل من الفايض ده للتحويش قبل ما يتصرف.',
     });
     return '$_temp0';
   }
@@ -3429,7 +3429,7 @@ class AppLocalizationsAr extends AppLocalizations {
     String target,
     String yearly,
   ) {
-    return 'خفّض $category بـ $target كل دورة، يعني $yearly في السنة.';
+    return 'قلّل $category بـ $target كل دورة، يعني $yearly في السنة.';
   }
 
   @override
@@ -3471,7 +3471,7 @@ class AppLocalizationsAr extends AppLocalizations {
 
   @override
   String insightsExplainBurnRateDeepTip(String target) {
-    return 'لو خفضت $target من صرفك اليومي هتفضل تحت الخط لحد القبض.';
+    return 'لو قللت $target من صرفك اليومي هتفضل تحت الخط لحد القبض.';
   }
 
   @override
@@ -3675,7 +3675,7 @@ class AppLocalizationsAr extends AppLocalizations {
 
   @override
   String insightsExplainSubscriptionsTip(String item, String target) {
-    return 'راجع $item، ولو مش بتستخدمه إلغاؤه بيوفر $target في السنة.';
+    return 'راجع $item، ولو مش بتستخدمه الغيه وهتوفر $target في السنة.';
   }
 
   @override
@@ -3768,7 +3768,7 @@ class AppLocalizationsAr extends AppLocalizations {
     String assetType2,
   ) {
     String _temp0 = intl.Intl.selectLogic(trend, {
-      'up': 'نموك الإجمالي $percent، وأكتر حاجة زوّدته $assetType2.',
+      'up': 'اللي حيلتك زاد $percent، وأكتر حاجة زوّدته $assetType2.',
       'down': 'اللي حيلتك نزل $percent، وأكتر حاجة أثرت فيه $assetType2.',
       'other': 'مفيش تغيير كبير في الفترة دي.',
     });
@@ -4173,7 +4173,7 @@ class AppLocalizationsAr extends AppLocalizations {
 
   @override
   String homeQuickAddVoiceLeft(String remaining, String max) {
-    return 'باقيلك $remaining من $max تسجيل صوتي الشهر ده';
+    return 'فاضلك $remaining من $max تسجيل صوتي الشهر ده';
   }
 
   @override
@@ -4309,7 +4309,7 @@ class AppLocalizationsAr extends AppLocalizations {
   }
 
   @override
-  String get captureScanTitle => 'قراءة سكرين شوت';
+  String get captureScanTitle => 'اقرا سكرين شوت';
 
   @override
   String get captureScanChoose => 'اختار صورة';
@@ -4375,7 +4375,7 @@ class AppLocalizationsAr extends AppLocalizations {
 
   @override
   String get captureScanUnavailableBody =>
-      'شغال عليها. دلوقتي اكتب العملية بإيدك وأنا هسجلها.';
+      'شغال عليها. دلوقتي اكتب الحركة بإيدك وأنا هسجلها.';
 
   @override
   String get captureShareRefusedTooLarge => 'الملف ده كبير عليا أوي';
@@ -4842,7 +4842,7 @@ class AppLocalizationsAr extends AppLocalizations {
   }
 
   @override
-  String get chatMainRoast => 'إقصف جبهتي';
+  String get chatMainRoast => 'اقصف جبهتي';
 
   @override
   String get chatMainRoastHint => 'بيغيّر الأسلوب بس، والأرقام زي ما هي.';
@@ -5019,7 +5019,7 @@ class AppLocalizationsAr extends AppLocalizations {
     String available,
     String limit,
   ) {
-    return 'المتاح في $account $available من $limit.';
+    return 'فاضل في $account $available من $limit.';
   }
 
   @override
@@ -5255,7 +5255,7 @@ class AppLocalizationsAr extends AppLocalizations {
 
   @override
   String roiRuleCoffeeBody(String monthly, String alt) {
-    return 'بتصرف $monthly في الشهر في الكافيهات. ماكينة بالتقسيط مع البن والحليب تقريباً $alt في الشهر.';
+    return 'بتصرف $monthly في الشهر في الكافيهات. ماكينة بالتقسيط مع البن واللبن تقريباً $alt في الشهر.';
   }
 
   @override
@@ -5267,11 +5267,11 @@ class AppLocalizationsAr extends AppLocalizations {
   }
 
   @override
-  String get roiRuleWaterTitle => 'فلتر مياه بدل القوارير';
+  String get roiRuleWaterTitle => 'فلتر مية بدل الإزايز';
 
   @override
   String roiRuleWaterBody(String monthly, String alt) {
-    return 'القوارير والجراكن بـ $monthly في الشهر. فلتر مياه بالتقسيط مع تغيير الشمعات تقريباً $alt في الشهر.';
+    return 'إزايز المية والجراكن بـ $monthly في الشهر. فلتر مية بالتقسيط مع تغيير الشمعات تقريباً $alt في الشهر.';
   }
 
   @override
@@ -5514,7 +5514,7 @@ class AppLocalizationsAr extends AppLocalizations {
   String get categoriesEditTitleNew => 'تصنيف جديد';
 
   @override
-  String get categoriesEditTitleEdit => 'تعديل التصنيف';
+  String get categoriesEditTitleEdit => 'عدّل التصنيف';
 
   @override
   String get categoriesEditName => 'اسم التصنيف';
@@ -5529,16 +5529,16 @@ class AppLocalizationsAr extends AppLocalizations {
   String get categoriesEditBucket => 'النوع';
 
   @override
-  String get categoriesEditBucketNeeds => 'ضروريات';
+  String get categoriesEditBucketNeeds => 'أساسيات';
 
   @override
-  String get categoriesEditBucketWants => 'رغبات';
+  String get categoriesEditBucketWants => 'رفاهيات';
 
   @override
   String get categoriesEditBucketObligations => 'التزامات';
 
   @override
-  String get categoriesEditBucketSavings => 'ادخار';
+  String get categoriesEditBucketSavings => 'تحويش';
 
   @override
   String get categoriesEditBucketIncome => 'دخل';
@@ -5706,7 +5706,7 @@ class AppLocalizationsAr extends AppLocalizations {
   String get backupSettingsFreeReplaces => 'النسخة الجديدة بتحل محل القديمة.';
 
   @override
-  String get backupSettingsAuto => 'نسخة تلقائي';
+  String get backupSettingsAuto => 'نسخ تلقائي';
 
   @override
   String get backupSettingsAutoOff => 'مقفول';
@@ -5824,7 +5824,7 @@ class AppLocalizationsAr extends AppLocalizations {
   String get backupPassphraseTooShort => 'استخدم عشرة حروف على الأقل';
 
   @override
-  String get backupPassphraseMismatch => 'كلمتين السر مش زي بعض';
+  String get backupPassphraseMismatch => 'كلمة السر في الخانتين مش زي بعض';
 
   @override
   String get backupPassphraseAckRequired => 'علّم إنك فاهم الأول';
@@ -5977,8 +5977,8 @@ class AppLocalizationsAr extends AppLocalizations {
     String _temp0 = intl.Intl.pluralLogic(
       count,
       locale: localeName,
-      other: '$n كارت مش متتبعة (هتتخطى)',
-      many: '$n كارت مش متتبعة (هتتخطى)',
+      other: '$n كارت مش متتبعين (هيتخطوا)',
+      many: '$n كارت مش متتبعين (هيتخطوا)',
       few: '$n كروت مش متتبعة (هتتخطى)',
       two: 'كارتين مش متتبعين (هيتخطوا)',
       one: 'كارت واحد مش متتبع (هيتخطى)',
@@ -6038,7 +6038,7 @@ class AppLocalizationsAr extends AppLocalizations {
   String get exportsImportFailed => 'معرفتش أقرا الملف. جرّب ملف تاني.';
 
   @override
-  String get exportsImportLockedBody => 'ضيف شهور فاتتة وكشوف البنوك مع جولد';
+  String get exportsImportLockedBody => 'ضيف شهور فاتت وكشوف البنوك مع جولد';
 
   @override
   String get goldPaywallTitle => 'زغلول جولد';
@@ -6097,7 +6097,7 @@ class AppLocalizationsAr extends AppLocalizations {
   String get goldPaywallContinue => 'يلا نشترك';
 
   @override
-  String get goldPaywallPlanRequired => 'اختار خطة الأول';
+  String get goldPaywallPlanRequired => 'اختار باقة الأول';
 
   @override
   String get goldPaywallRestore => 'استرجع مشترياتي';
@@ -6320,7 +6320,7 @@ class AppLocalizationsAr extends AppLocalizations {
 
   @override
   String get goldSeatAccountRequiredBody =>
-      'اعمل تسجيل دخول بالحساب اللي اشتريت بيه.';
+      'سجّل دخول بالحساب اللي اشتريت بيه.';
 
   @override
   String get goldSeatMovedUserTitle => 'الجولد اتنقل لموبايل تاني';
@@ -6341,7 +6341,7 @@ class AppLocalizationsAr extends AppLocalizations {
 
   @override
   String get goldSeatPausedBody =>
-      'اعمل تسجيل دخول عشان تستخدم الجولد على الموبايل ده. مكانك محفوظ ومش هيتحسب نقلة.';
+      'سجّل دخول عشان تستخدم الجولد على الموبايل ده. مكانك محفوظ ومش هيتحسب نقلة.';
 
   @override
   String get goldSeatTamperedTitle => 'اتصل بالنت عشان نتأكد من الجولد';
@@ -6357,7 +6357,7 @@ class AppLocalizationsAr extends AppLocalizations {
 
   @override
   String get goldSeatHeldElsewhereAccount =>
-      'الدفع تم. عشان الجولد ييجي هنا، اعمل تسجيل دخول بالحساب اللي عليه الجولد.';
+      'الدفع تم. عشان الجولد ييجي هنا، سجّل دخول بالحساب اللي عليه الجولد.';
 
   @override
   String get goldSeatSupportNoticeTitle => 'الدعم ربط الجولد بحساب';
@@ -6424,7 +6424,7 @@ class AppLocalizationsAr extends AppLocalizations {
       few: 'قبلها بـ $n أيام',
       two: 'قبلها بيومين',
       one: 'قبلها بيوم',
-      zero: 'يوم الاستحقاق نفسه',
+      zero: 'يوم الميعاد نفسه',
     );
     return '$_temp0';
   }
@@ -6461,7 +6461,7 @@ class AppLocalizationsAr extends AppLocalizations {
 
   @override
   String get notificationsSettingsDaysRange =>
-      'اختار من يوم الاستحقاق لحد تلاتين يوم قبله';
+      'اختار من يوم الميعاد لحد تلاتين يوم قبله';
 
   @override
   String get notificationsSettingsQuietSame =>
@@ -6537,7 +6537,7 @@ class AppLocalizationsAr extends AppLocalizations {
       many: '$item بيستحق بعد $n يوم: $amount',
       few: '$item بيستحق بعد $n أيام: $amount',
       two: '$item بيستحق بعد يومين: $amount',
-      one: '$item بيستحق بكره: $amount',
+      one: '$item بيستحق بكرة: $amount',
       zero: '$item بيستحق النهارده: $amount',
     );
     return '$_temp0';
@@ -6587,7 +6587,7 @@ class AppLocalizationsAr extends AppLocalizations {
 
   @override
   String notificationsAlertDuplicate(String merchant, String amount) {
-    return '$merchant: $amount ظهرت مرتين تقريباً في نفس الوقت. بُص عليها.';
+    return '$merchant: $amount ظهرت مرتين تقريباً في نفس الوقت. بص عليها.';
   }
 
   @override
@@ -6820,7 +6820,7 @@ class AppLocalizationsAr extends AppLocalizations {
 
   @override
   String get privacyDeleteFailed =>
-      'مقدرناش نمسح كل حاجة. افتح الأبلكيشن تاني وهنكمّل.';
+      'مقدرناش نمسح كل حاجة. افتح زغلول تاني وهنكمّل.';
 
   @override
   String get settingsPrefsTitle => 'التفضيلات';
@@ -6947,7 +6947,7 @@ class AppLocalizationsAr extends AppLocalizations {
   String get shareStudioTemplateBudget => 'تحت الميزانية';
 
   @override
-  String get shareStudioShowAmounts => 'اظهر المبالغ';
+  String get shareStudioShowAmounts => 'اعرض المبالغ';
 
   @override
   String get shareStudioShowAmountsHint => 'وإنت مقفلها بتظهر النسب بس.';
@@ -7177,7 +7177,7 @@ class AppLocalizationsAr extends AppLocalizations {
       'رجّعنا بياناتك زي ما كانت. جرّب تاني.';
 
   @override
-  String get errorsStorageIo => 'حصلت مشكلة في قراءة أو حفظ ملف. جرّب تاني.';
+  String get errorsStorageIo => 'حصلت مشكلة في قراية أو حفظ ملف. جرّب تاني.';
 
   @override
   String get errorsCapturePermission =>
@@ -7228,7 +7228,7 @@ class AppLocalizationsAr extends AppLocalizations {
 
   @override
   String get transactionsEditLinksRemoved =>
-      'المبلغ اتغيّر، فالروابط اتشالت: الفلوس الراجعة والتقسيم المرتبطين بالمعاملة دي اتفكّوا.';
+      'المبلغ اتغيّر، فالروابط اتشالت: الفلوس الراجعة والتقسيم المرتبطين بالحركة دي اتفكّوا.';
 
   @override
   String get goldAccountSignedIn => 'مسجّل دخول';
@@ -7239,7 +7239,7 @@ class AppLocalizationsAr extends AppLocalizations {
   }
 
   @override
-  String get homeFeedExcludedFromSpending => 'مش محسوبة في المصروفات';
+  String get homeFeedExcludedFromSpending => 'مش محسوبة في المصاريف';
 
   @override
   String get notificationsAlertBackupReminderTitle => 'وقت النسخة الاحتياطية';
@@ -7253,7 +7253,10 @@ class AppLocalizationsAr extends AppLocalizations {
     String _temp0 = intl.Intl.pluralLogic(
       count,
       locale: localeName,
-      other: '$count مبالغ اتفكّت لأن المصروف قلّ',
+      other: '$count مبلغ اتفكّ لأن المصروف قلّ',
+      many: '$count مبلغ اتفكّ لأن المصروف قلّ',
+      few: '$count مبالغ اتفكّت لأن المصروف قلّ',
+      two: 'مبلغين اتفكّوا لأن المصروف قلّ',
       one: 'مبلغ واحد اتفكّ لأن المصروف قلّ',
     );
     return '$_temp0';

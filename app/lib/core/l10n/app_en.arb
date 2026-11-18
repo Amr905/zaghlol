@@ -221,7 +221,7 @@
   "onboardingAndroidSetupDegradedSettingsHint": "To turn it on, open Settings and allow Zaghlol to read SMS.",
   "onboardingAndroidSetupPlayUnavailable": "This version of Zaghlol can't read SMS, but notifications and sharing work fine.",
   "onboardingIosSetupStep": "Step {step} of {total}",
-  "onboardingIosSetupShortcutTitle": "iPhone does not let apps read texts… so we use Shortcuts",
+  "onboardingIosSetupShortcutTitle": "We'll use Shortcuts",
   "onboardingIosSetupShortcutWhy": "iPhone doesn't let apps read texts, so Shortcuts pass them to me.",
   "onboardingIosSetupShortcutLead": "One tap adds:",
   "onboardingIosSetupShortcutSmsTitle": "Bank texts",
