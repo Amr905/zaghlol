@@ -168,7 +168,7 @@ class OcrHostTest {
     fun expiredDeadlineStopsBeforeTheNextEngine() {
         var now = 0L
         latin.onCall = { now += OcrLimits.TIMEOUT_MS + 1 }
-        val e = failureCode { host { now }.recognizeBlocking("id", listOf("en", "ar")) }
+        val e = failureCode { host(clock = { now }).recognizeBlocking("id", listOf("en", "ar")) }
         assertEquals("OCR_FAILED", e.code)
         assertEquals(0, arabic.calls.get())
     }
