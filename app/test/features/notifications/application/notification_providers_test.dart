@@ -17,6 +17,8 @@ import 'package:zaghlol/core/settings/settings_repository.dart';
 import 'package:zaghlol/features/backup/application/schedule.dart';
 import 'package:zaghlol/features/backup/application/schedule_providers.dart';
 import 'package:zaghlol/features/notifications/application/notification_providers.dart';
+import 'package:zaghlol/features/notifications/application/weekly_summary_alert.dart';
+import 'package:zaghlol_domain/zaghlol_domain.dart';
 import 'package:zaghlol/features/notifications/domain/notification_types.dart';
 import 'package:zaghlol/features/transactions/data/transactions_providers.dart';
 
@@ -34,10 +36,15 @@ void main() {
   late AppDatabase db;
   late _Gw gw;
   late ProviderContainer c;
-  var now = DateTime.utc(2026, 11, 14, 12); // midday: outside quiet hours.
+  var now = DateTime.utc(
+    2026,
+    11,
+    13,
+    12,
+  ); // Friday midday: outside quiet hours.
 
   setUp(() async {
-    now = DateTime.utc(2026, 11, 14, 12);
+    now = DateTime.utc(2026, 11, 13, 12);
     db = AppDatabase(NativeDatabase.memory(), validateSchema: false);
     await AccountsDao(db).insert(account('acc1'));
     gw = _Gw();
@@ -148,22 +155,31 @@ void main() {
     expect(gw.shown.single.payload, '/settings/backup');
   });
 
-  test(
-    'weekly summary: first run is stored, a second within 7 days skips',
-    () async {
-      final run = c.read(weeklySummaryRunProvider);
-      expect(await run(), isTrue);
-      final repo = SettingsRepository(SettingsDao(db));
-      expect(
-        await repo.get(Settings.notifWeeklyLastRun),
-        now.millisecondsSinceEpoch,
-      );
-      now = now.add(const Duration(days: 6));
-      expect(await run(), isFalse);
-      now = now.add(const Duration(days: 1));
-      expect(await run(), isTrue);
-    },
-  );
+  test('WEEKLY-FRIDAY: runs on a Friday only, once per Friday', () async {
+    final run = c.read(weeklySummaryRunProvider);
+    expect(await run(), isTrue);
+    final repo = SettingsRepository(SettingsDao(db));
+    expect(
+      await repo.get(Settings.notifWeeklyLastRun),
+      now.millisecondsSinceEpoch,
+    );
+    now = now.add(const Duration(hours: 3)); // same Friday
+    expect(await run(), isFalse);
+    for (var i = 1; i <= 6; i++) {
+      now = DateTime.utc(2026, 11, 13 + i, 12); // Sat..Thu
+      expect(await run(), isFalse, reason: 'day +$i');
+    }
+    now = DateTime.utc(2026, 11, 20, 12); // next Friday
+    expect(await run(), isTrue);
+  });
+
+  test('weekly summary covers the seven days ending Thursday', () {
+    final p = weeklySummaryPeriod(CivilDate(2026, 11, 13));
+    expect(p.from, CivilDate(2026, 11, 6));
+    expect(p.to, CivilDate(2026, 11, 12));
+    expect(isLocalFriday(CivilDate(2026, 11, 13)), isTrue);
+    expect(isLocalFriday(CivilDate(2026, 11, 12)), isFalse);
+  });
 
   test('weekly summary: spend in the last 7 days raises one alert', () async {
     final at = now.subtract(const Duration(days: 2)).millisecondsSinceEpoch;
@@ -202,7 +218,7 @@ void main() {
       await c.read(weeklySummaryRunProvider)();
       expect(gw.shown.last.body, contains('OldName'));
       await rename('NewName');
-      now = now.add(const Duration(days: 8));
+      now = now.add(const Duration(days: 7));
       await spend('w2', now.subtract(const Duration(days: 1)));
       await c.read(weeklySummaryRunProvider)();
       expect(gw.shown.last.body, contains('NewName'));

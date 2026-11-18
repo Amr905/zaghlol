@@ -9391,6 +9391,30 @@ abstract class AppLocalizations {
   /// **'عندك قسط أو فاتورة بتستحق قريب.'**
   String get notificationsAlertDueHidden;
 
+  /// T · name
+  ///
+  /// In ar, this message translates to:
+  /// **'{name} عدّى ميعاده'**
+  String notificationsAlertOverdueTitle(String name);
+
+  /// N · count:int, n, amount · PO OVERDUE-REMINDERS, day 1 and 3
+  ///
+  /// In ar, this message translates to:
+  /// **'{count, plural, =1{كان المفروض يتدفع من يوم بـ {amount}. دفعته؟} =2{كان المفروض يتدفع من يومين بـ {amount}. دفعته؟} few{كان المفروض يتدفع من {n} أيام بـ {amount}. دفعته؟} many{كان المفروض يتدفع من {n} يوم بـ {amount}. دفعته؟} other{كان المفروض يتدفع من {n} يوم بـ {amount}. دفعته؟}}'**
+  String notificationsAlertOverdue(int count, String n, String amount);
+
+  /// N · count:int, n · hidden-amount variant
+  ///
+  /// In ar, this message translates to:
+  /// **'{count, plural, =1{كان المفروض يتدفع من يوم. دفعته؟} =2{كان المفروض يتدفع من يومين. دفعته؟} few{كان المفروض يتدفع من {n} أيام. دفعته؟} many{كان المفروض يتدفع من {n} يوم. دفعته؟} other{كان المفروض يتدفع من {n} يوم. دفعته؟}}'**
+  String notificationsAlertOverdueHidden(int count, String n);
+
+  /// B · notification action, marks the item paid
+  ///
+  /// In ar, this message translates to:
+  /// **'أيوه دفعته'**
+  String get notificationsAlertOverdueActionPaid;
+
   /// T
   ///
   /// In ar, this message translates to:

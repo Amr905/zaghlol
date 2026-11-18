@@ -20,11 +20,18 @@ Future<int> sendDueReminders({
   bool Function()? shouldStop,
 }) async {
   var sent = 0;
-  for (final r in await repository.dueReminders()) {
+  final all = [
+    ...await repository.dueReminders(),
+    ...await repository.overdueReminders(),
+  ];
+  for (final r in all) {
     if (shouldStop?.call() ?? false) break; // a restore asked for the gate
     final base = AlertRequest(
       type: NotificationType.upcomingDue,
       subjectId: r.item.id,
+      // Overdue reminders use the day count as the threshold, so day 1 and
+      // day 3 are separate once-only alerts (never two on the same day).
+      threshold: r.overdueDays,
       periodKey: r.dueDate.toIso(),
       title: '',
       body: '',

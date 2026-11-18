@@ -54,9 +54,17 @@ final class RecurringException extends SafeException {
 
 /// An item whose reminder is due now.
 final class DueReminder {
-  const DueReminder({required this.item, required this.dueDate});
+  const DueReminder({
+    required this.item,
+    required this.dueDate,
+    this.overdueDays = 0,
+  });
   final RecurringItemRow item;
   final CivilDate dueDate;
+
+  /// PO OVERDUE-REMINDERS: 0 for an upcoming reminder; 1 or 3 for an overdue
+  /// one (days past the due date).
+  final int overdueDays;
 }
 
 /// A payment that was linked to an occurrence.
@@ -614,6 +622,28 @@ class RecurringRepository {
         localMinuteOfDay: minute,
       )) {
         out.add(DueReminder(item: item, dueDate: due));
+      }
+    }
+    return out;
+  });
+
+  /// PO OVERDUE-REMINDERS: unpaid, still-active items whose next due date was
+  /// exactly 1 or 3 days ago (from 10:00 local). Paid, skipped (dismissed) and
+  /// deleted items drop out because the item moves on or leaves the active
+  /// list. Card dues are paid only by money arriving, so they get none.
+  Future<List<DueReminder>> overdueReminders() => guardRead(() async {
+    final today = _today;
+    final local = _clock().toLocal();
+    if (local.hour * 60 + local.minute < reminderMinuteOfDay) return [];
+    final items = await _recurring.activeDueBy(today.plusDays(-1).toIso());
+    final out = <DueReminder>[];
+    for (final item in items) {
+      if (item.kind == RecurringKind.cardDue) continue;
+      final due = CivilDate.tryParse(item.nextDueDate ?? '');
+      if (due == null) continue;
+      final days = today.difference(due);
+      if (days == 1 || days == 3) {
+        out.add(DueReminder(item: item, dueDate: due, overdueDays: days));
       }
     }
     return out;
