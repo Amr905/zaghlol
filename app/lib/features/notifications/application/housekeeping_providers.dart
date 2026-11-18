@@ -198,6 +198,10 @@ final housekeepingProvider = Provider<Housekeeping>((ref) {
                     digits.render('${r.overdueDays}'),
                   ),
                   payload: base.payload,
+                  // The label carries no amount; the route pins the due date.
+                  actionTitle: l.notificationsAlertOverdueActionPaid,
+                  actionRoute:
+                      '/recurring/${base.subjectId}/paid/${base.periodKey}',
                 );
               }
               return AlertRequest(

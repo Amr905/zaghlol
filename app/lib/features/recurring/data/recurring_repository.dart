@@ -379,7 +379,10 @@ class RecurringRepository {
   /// "Mark paid" by hand: counts the occurrence due on the item's next date
   /// (no linked transaction) and moves the item on, like an auto-mark. False
   /// when the item is not active or is a card due.
-  Future<bool> markPaidManual(String id) => guardWrite(
+  ///
+  /// [expectedDue] (an ISO date): pays only when that is still the item's next
+  /// date, so a stale notification action never pays a later occurrence.
+  Future<bool> markPaidManual(String id, {String? expectedDue}) => guardWrite(
     () => _db.transaction(() async {
       final item = await _recurring.itemById(id);
       if (item == null || item.status != RecurringStatus.active) return false;
@@ -388,6 +391,7 @@ class RecurringRepository {
       final due = CivilDate.tryParse(item.nextDueDate ?? '');
       final cadence = _cadenceOf(item.cadence);
       if (due == null || cadence == null) return false;
+      if (expectedDue != null && due.toIso() != expectedDue) return false;
       final claimed = await _db.customUpdate(
         'INSERT OR IGNORE INTO recurring_occurrences '
         '(item_id, due_date, txn_id, paid_at) VALUES (?1, ?2, NULL, ?3)',

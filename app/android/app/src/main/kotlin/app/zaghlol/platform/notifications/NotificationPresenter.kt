@@ -78,6 +78,8 @@ class NotificationPresenter(private val context: Context) {
     const val K_BODY = "body"
     const val K_PUBLIC = "publicTitle"
     const val K_ROUTE = "route"
+    const val K_ACTION_TITLE = "actionTitle"
+    const val K_ACTION_ROUTE = "actionRoute"
 
     private fun Map<String, Any?>.id(): Int = (this[K_ID] as Int)
 
@@ -99,7 +101,9 @@ class NotificationPresenter(private val context: Context) {
           tap,
           PendingIntent.FLAG_IMMUTABLE or PendingIntent.FLAG_UPDATE_CURRENT,
         )
-      return Notification.Builder(context, channel)
+      val builder = Notification.Builder(context, channel)
+      actionFor(context, m)?.let { builder.addAction(it) }
+      return builder
         .setSmallIcon(R.mipmap.ic_launcher)
         .setContentTitle(m[K_TITLE] as? String ?: "")
         .setContentText(m[K_BODY] as? String ?: "")
@@ -109,6 +113,36 @@ class NotificationPresenter(private val context: Context) {
         .setCategory(Notification.CATEGORY_STATUS)
         .setAutoCancel(true)
         .setContentIntent(content)
+        .build()
+    }
+
+    /**
+     * The optional action button ("Mark as paid"). It opens the app on the
+     * action route and the app does the work in Dart behind its own gate: no
+     * database key or financial code is reachable from a notification
+     * broadcast while the app is killed. Null when the title or route is
+     * missing or the route is not a clean in-app path.
+     */
+    fun actionFor(context: Context, m: Map<String, Any?>): Notification.Action? {
+      val (title, route) =
+        NotificationRoutes.cleanAction(m[K_ACTION_TITLE] as? String, m[K_ACTION_ROUTE] as? String) ?: return null
+      val intent =
+        Intent(context, MainActivity::class.java)
+          .setFlags(Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_SINGLE_TOP)
+          .putExtra(NotificationRoutes.EXTRA_ROUTE, route)
+          .putExtra(NotificationRoutes.EXTRA_CANCEL_ID, m[K_ID] as Int)
+      val pi =
+        PendingIntent.getActivity(
+          context,
+          (m[K_ID] as Int) xor 0x5A5A5A5A,
+          intent,
+          PendingIntent.FLAG_IMMUTABLE or PendingIntent.FLAG_UPDATE_CURRENT,
+        )
+      return Notification.Action.Builder(
+          android.graphics.drawable.Icon.createWithResource(context, R.mipmap.ic_launcher),
+          title,
+          pi,
+        )
         .build()
     }
   }

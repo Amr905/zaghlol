@@ -43,6 +43,16 @@ class NotificationChannelsTest {
   }
 
   @Test
+  fun `an action needs a title and a clean route`() {
+    val r = "/recurring/abc/paid/2026-11-10"
+    assertEquals("Mark as paid" to r, NotificationRoutes.cleanAction("Mark as paid", r))
+    assertNull(NotificationRoutes.cleanAction(null, r))
+    assertNull(NotificationRoutes.cleanAction("  ", r))
+    assertNull(NotificationRoutes.cleanAction("Mark as paid", null))
+    assertNull(NotificationRoutes.cleanAction("Mark as paid", "https://evil"))
+  }
+
+  @Test
   fun `the launch route is taken once`() {
     NotificationRoutes.setLaunchRoute("/insights")
     assertEquals("/insights", NotificationRoutes.takeLaunchRoute())

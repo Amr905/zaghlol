@@ -82,6 +82,8 @@ final class NotificationService {
       title: prefs.hideAmounts ? r.redactedTitle : r.title,
       body: prefs.hideAmounts ? r.redactedBody : r.body,
       payload: r.payload,
+      actionTitle: r.actionTitle,
+      actionRoute: r.actionRoute,
       at: delayed ? when.toUtc() : null,
       type: r.type,
     );
@@ -132,6 +134,8 @@ final class NotificationService {
           payload: n.payload,
           at: at,
           type: n.type,
+          actionTitle: n.actionTitle,
+          actionRoute: n.actionRoute,
         ),
       );
       replaced++;

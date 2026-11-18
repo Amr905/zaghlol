@@ -99,7 +99,7 @@ void main() {
     expect(await run(), 1);
     expect(await run(), 0);
     expect(gw.shown, hasLength(1));
-    expect(gw.shown.single.payload, 'recurring/id1');
+    expect(gw.shown.single.payload, '/recurring/id1');
     expect(gw.shown.single.title, 'A payment is due'); // redacted
     expect(NotificationType.upcomingDue.kind, 'due');
   });

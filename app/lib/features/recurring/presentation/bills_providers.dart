@@ -102,8 +102,8 @@ class BillsActions {
     _changed();
   }
 
-  Future<bool> markPaid(String id) async {
-    final ok = await (await _repo).markPaidManual(id);
+  Future<bool> markPaid(String id, {String? expectedDue}) async {
+    final ok = await (await _repo).markPaidManual(id, expectedDue: expectedDue);
     _changed();
     return ok;
   }

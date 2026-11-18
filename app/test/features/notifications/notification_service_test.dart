@@ -112,6 +112,29 @@ void main() {
       fired = {};
     });
 
+    test('the action reaches the platform; hide-amounts redacts the text but '
+        'keeps the amount-free action', () async {
+      final n = make(DateTime(2026, 11, 13, 12), hide: true);
+      await n.notify(
+        const AlertRequest(
+          type: NotificationType.upcomingDue,
+          subjectId: 'r1',
+          periodKey: '2026-11-10',
+          threshold: 1,
+          title: 'Rent is overdue',
+          body: 'Due 1 day ago (5,000 EGP)',
+          redactedTitle: 'Rent is overdue',
+          redactedBody: 'Due 1 day ago',
+          actionTitle: 'Mark as paid',
+          actionRoute: '/recurring/r1/paid/2026-11-10',
+        ),
+      );
+      final shown = gw.shown.single;
+      expect(shown.body, isNot(contains('EGP')));
+      expect(shown.actionTitle, 'Mark as paid');
+      expect(shown.actionRoute, '/recurring/r1/paid/2026-11-10');
+    });
+
     test('FU-133: hiding amounts after an alert was scheduled for quiet '
         'hours re-schedules it redacted under the same id', () async {
       var hide = false;

@@ -61,6 +61,8 @@ final class PigeonNotificationGateway implements NotificationGateway {
       body: n.body,
       publicTitle: _channelName(l10n(), type),
       route: n.payload,
+      actionTitle: n.actionTitle,
+      actionRoute: n.actionRoute,
     );
   }
 

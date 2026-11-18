@@ -37,7 +37,7 @@ Future<int> sendDueReminders({
       body: '',
       redactedTitle: '',
       redactedBody: '',
-      payload: 'recurring/${r.item.id}',
+      payload: '/recurring/${r.item.id}',
     );
     try {
       final out = await notifications.notify(buildText(r, base));
