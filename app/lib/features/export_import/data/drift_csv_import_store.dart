@@ -1,6 +1,6 @@
 // T-155: Drift implementation of [CsvImportStore]. Inserts only (never
 // updates or deletes); the whole import runs in one database transaction.
-// Rows get source `csv`, are user-verified, and keep the exported status.
+// Rows get source `csv` (`pdf` for statements, T-156), are user-verified, and keep the exported status.
 // Nothing here logs.
 
 import 'package:drift/drift.dart' show Value;
@@ -45,9 +45,14 @@ class DriftCsvImportStore implements CsvImportStore {
   };
 
   @override
-  Future<List<ExistingTxnKey>> existingAt(
+  Future<List<ExistingTxnKey>> existingAt(String accountId, int occurredAtMs) =>
+      existingBetween(accountId, occurredAtMs, occurredAtMs + 1);
+
+  @override
+  Future<List<ExistingTxnKey>> existingBetween(
     String accountId,
-    int occurredAtMs,
+    int fromMs,
+    int toMs,
   ) async {
     // Page through every row at this instant (the DAO caps one page).
     final rows = <TransactionRow>[];
@@ -55,11 +60,7 @@ class DriftCsvImportStore implements CsvImportStore {
     String? afterId;
     while (true) {
       final page = await _txns.list(
-        TxnQuery(
-          from: occurredAtMs,
-          to: occurredAtMs + 1,
-          accountIds: {accountId},
-        ),
+        TxnQuery(from: fromMs, to: toMs, accountIds: {accountId}),
         limit: maxSearchLimit,
         afterOccurredAt: afterAt,
         afterId: afterId,
@@ -89,7 +90,7 @@ class DriftCsvImportStore implements CsvImportStore {
       TransactionsCompanion.insert(
         id: id,
         accountId: row.accountId,
-        source: TxnSource.csv.code,
+        source: row.source.code,
         direction: row.direction.code,
         status: Value(row.status.code),
         amountMinor: amount.minor,

@@ -24,9 +24,9 @@ const int maxStatementFragments = 200000;
 final class StatementCell {
   const StatementCell(this.text, this.x0, this.x1);
   final String text;
-  final double x0;
-  final double x1;
-  double get center => (x0 + x1) / 2;
+  final int x0;
+  final int x1;
+  int get center => (x0 + x1) ~/ 2;
 
   @override
   String toString() => 'StatementCell';
@@ -35,7 +35,7 @@ final class StatementCell {
 final class StatementLine {
   const StatementLine(this.page, this.y, this.cells);
   final int page;
-  final double y;
+  final int y;
   final List<StatementCell> cells;
 
   @override
@@ -48,8 +48,8 @@ final RegExp _arabic = RegExp(r'[؀-ۿ]');
 /// permille are one cell (Arabic cells are joined right to left).
 List<StatementLine> groupStatementLines(
   List<PdfTextFragment> fragments, {
-  double yTolerance = 3,
-  double mergeGap = 12,
+  int yTolerance = 3,
+  int mergeGap = 12,
 }) {
   final frags = fragments.length > maxStatementFragments
       ? fragments.sublist(0, maxStatementFragments)
@@ -160,7 +160,7 @@ StatementColumnRole? _headerRole(String text) {
 final class StatementHeader {
   const StatementHeader(this.lineIndex, this.cuts, this.roles, this.texts);
   final int lineIndex;
-  final List<double> cuts;
+  final List<int> cuts;
   final List<StatementColumnRole> roles;
   final List<String> texts;
 }
@@ -188,9 +188,9 @@ StatementHeader? detectStatementHeader(List<StatementLine> lines) {
         seen.contains(StatementColumnRole.debit) ||
         seen.contains(StatementColumnRole.credit);
     if (!hasDate || !hasMoney) continue;
-    final cuts = <double>[
+    final cuts = <int>[
       for (var k = 0; k + 1 < cells.length; k++)
-        (cells[k].x1 + cells[k + 1].x0) / 2,
+        (cells[k].x1 + cells[k + 1].x0) ~/ 2,
     ];
     return StatementHeader(li, cuts, roles, [for (final c in cells) c.text]);
   }
@@ -219,7 +219,7 @@ final class StatementTable {
     this.headerTexts = const [],
   });
 
-  final List<double> cutPoints;
+  final List<int> cutPoints;
   final List<StatementRawRow> rows;
 
   /// A proposal for the mapping step; the user confirms or changes it.
@@ -239,7 +239,7 @@ final class StatementTable {
   String toString() => 'StatementTable';
 }
 
-int _columnOf(List<double> cuts, double x) {
+int _columnOf(List<int> cuts, int x) {
   var i = 0;
   while (i < cuts.length && x >= cuts[i]) {
     i++;
@@ -247,7 +247,7 @@ int _columnOf(List<double> cuts, double x) {
   return i;
 }
 
-List<String> _assign(StatementLine line, List<double> cuts) {
+List<String> _assign(StatementLine line, List<int> cuts) {
   final out = List<String>.filled(cuts.length + 1, '');
   for (final c in line.cells) {
     final k = _columnOf(cuts, c.center);
@@ -268,12 +268,12 @@ bool _looksLikeDataLine(StatementLine l, bool dayFirst) {
 
 /// Column edges from the gaps in the data lines: the union of the cells'
 /// x ranges gives the column bands; edges sit midway between bands.
-List<double> _inferCuts(List<StatementLine> data) {
-  final spans = <(double, double)>[
+List<int> _inferCuts(List<StatementLine> data) {
+  final spans = <(int, int)>[
     for (final l in data)
       for (final c in l.cells) (c.x0, c.x1),
   ]..sort((a, b) => a.$1.compareTo(b.$1));
-  final bands = <(double, double)>[];
+  final bands = <(int, int)>[];
   for (final s in spans) {
     if (bands.isNotEmpty && s.$1 <= bands.last.$2) {
       final last = bands.removeLast();
@@ -284,7 +284,7 @@ List<double> _inferCuts(List<StatementLine> data) {
   }
   return [
     for (var k = 0; k + 1 < bands.length; k++)
-      (bands[k].$2 + bands[k + 1].$1) / 2,
+      (bands[k].$2 + bands[k + 1].$1) ~/ 2,
   ];
 }
 
@@ -302,33 +302,33 @@ List<StatementColumnRole> _suggest(
     StatementColumnRole.ignore,
   );
   if (body.isEmpty) return roles;
-  double frac(int c, bool Function(String) test) {
+  int frac(int c, bool Function(String) test) {
     final cells = [
       for (final r in body)
         if (r[c].isNotEmpty) r[c],
     ];
     if (cells.isEmpty) return 0;
-    return cells.where(test).length / cells.length;
+    return cells.where(test).length * 100 ~/ cells.length;
   }
 
   var dateCol = -1;
   for (var c = 0; c < columns; c++) {
-    if (frac(c, (t) => _isDateCell(t, dayFirst)) >= 0.8) {
+    if (frac(c, (t) => _isDateCell(t, dayFirst)) >= 80) {
       dateCol = c;
       break;
     }
   }
   final numeric = <int>[];
   var descCol = -1;
-  var bestLen = -1.0;
+  var bestLen = -1;
   for (var c = 0; c < columns; c++) {
     if (c == dateCol) continue;
     final nonEmpty = body.where((r) => r[c].isNotEmpty).length;
     if (nonEmpty == 0) continue;
-    if (frac(c, _isNumeric) >= 0.9) {
+    if (frac(c, _isNumeric) >= 90) {
       numeric.add(c);
     } else {
-      final avg = body.fold<int>(0, (a, r) => a + r[c].length) / body.length;
+      final avg = body.fold<int>(0, (a, r) => a + r[c].length) ~/ body.length;
       if (avg > bestLen) {
         bestLen = avg;
         descCol = c;
@@ -361,7 +361,7 @@ StatementTable buildStatementTable(
 }) {
   final lines = groupStatementLines(fragments);
   final dayFirstEff = template?.mapping.dayFirst ?? dayFirst;
-  List<double> cuts;
+  List<int> cuts;
   var confident = false;
   var headerLine = -1;
   var headerTexts = const <String>[];
@@ -417,9 +417,9 @@ StatementTable buildStatementTable(
   }
 
   final rows = <StatementRawRow>[];
-  final pitches = <double>[];
+  final pitches = <int>[];
   StatementLine? prevData;
-  var prevY = 0.0;
+  var prevY = 0;
   for (var li = 0; li < lines.length; li++) {
     if (li <= headerLine) continue;
     final line = lines[li];
@@ -434,8 +434,8 @@ StatementTable buildStatementTable(
     } else if (prevData != null && prevData.page == line.page) {
       final nonEmpty = cells.where((c) => c.isNotEmpty).length;
       final limit = pitches.isEmpty
-          ? 25.0
-          : (([...pitches]..sort())[pitches.length ~/ 2]) * 1.6;
+          ? 25
+          : (([...pitches]..sort())[pitches.length ~/ 2]) * 8 ~/ 5;
       if (nonEmpty == 1 && line.y - prevY <= limit) {
         rows.add(StatementRawRow(cells, continuation: true));
         prevY = line.y;

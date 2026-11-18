@@ -2,7 +2,7 @@ import 'package:test/test.dart';
 import 'package:zaghlol_domain/zaghlol_domain.dart';
 import 'package:zaghlol_parsing/zaghlol_parsing.dart';
 
-PdfTextFragment f(String t, double x0, double x1, double y, {int page = 1}) =>
+PdfTextFragment f(String t, int x0, int x1, int y, {int page = 1}) =>
     PdfTextFragment(page: page, text: t, x0: x0, x1: x1, y: y);
 
 // Column x ranges (permille): date 40-140, desc 170-480, debit 520-600,

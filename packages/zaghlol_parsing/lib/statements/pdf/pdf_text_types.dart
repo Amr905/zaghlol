@@ -6,10 +6,12 @@
 
 import 'dart:typed_data';
 
+import 'package:zaghlol_domain/zaghlol_domain.dart' show SafeException;
+
 /// One run of text on a page, with its position.
 ///
-/// [x0] and [x1] are in permille of the page width (0..1000, left to right);
-/// [y] is in points from the top of the page (larger = lower). Using the page
+/// [x0] and [x1] are in permille of the page width (0..1000, left to right, rounded);
+/// [y] is in whole points from the top of the page (larger = lower). Using the page
 /// width as the unit keeps a saved column template valid across page sizes.
 final class PdfTextFragment {
   const PdfTextFragment({
@@ -22,11 +24,11 @@ final class PdfTextFragment {
 
   final int page;
   final String text;
-  final double x0;
-  final double x1;
-  final double y;
+  final int x0;
+  final int x1;
+  final int y;
 
-  double get center => (x0 + x1) / 2;
+  int get center => (x0 + x1) ~/ 2;
 
   @override
   String toString() => 'PdfTextFragment';
@@ -46,12 +48,10 @@ enum PdfExtractFailureKind {
   noText,
 }
 
-final class PdfExtractException implements Exception {
-  const PdfExtractException(this.kind);
+final class PdfExtractException extends SafeException {
+  PdfExtractException(this.kind)
+    : super('PDF_EXTRACT_${kind.name.toUpperCase()}');
   final PdfExtractFailureKind kind;
-
-  @override
-  String toString() => 'PdfExtractException(${kind.name})';
 }
 
 /// Reads the text of a PDF held in memory. Implementations must not write

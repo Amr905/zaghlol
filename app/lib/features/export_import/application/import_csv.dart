@@ -82,9 +82,11 @@ final class ImportedTxn {
     this.merchant,
     this.categoryId,
     this.note,
+    this.source = TxnSource.csv,
   });
 
   final String accountId;
+  final TxnSource source;
   final TxnDirection direction;
   final TxnStatus status;
   final Money amount;
@@ -121,6 +123,14 @@ abstract interface class CsvImportStore {
 
   /// Live transactions of [accountId] at exactly [occurredAtMs].
   Future<List<ExistingTxnKey>> existingAt(String accountId, int occurredAtMs);
+
+  /// Live transactions of [accountId] with `fromMs <= occurredAt < toMs`
+  /// (T-156: statements carry a day, not an instant).
+  Future<List<ExistingTxnKey>> existingBetween(
+    String accountId,
+    int fromMs,
+    int toMs,
+  );
 
   /// Inserts the row and returns its new id.
   Future<String> insert(ImportedTxn row);

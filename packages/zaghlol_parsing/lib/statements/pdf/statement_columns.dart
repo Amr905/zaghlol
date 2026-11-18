@@ -89,7 +89,7 @@ final class StatementTemplate {
 
   /// Column edges in permille of the page width, ascending; one fewer than
   /// the number of columns.
-  final List<double> cutPoints;
+  final List<int> cutPoints;
   final StatementMapping mapping;
 
   static final RegExp _key = RegExp(r'^[a-z0-9_]{1,32}$');
@@ -129,10 +129,10 @@ final class StatementTemplate {
           cuts.length != roles.length - 1) {
         return null;
       }
-      final cutValues = <double>[];
+      final cutValues = <int>[];
       for (final c in cuts) {
-        if (c is! num) return null;
-        final d = c.toDouble();
+        if (c is! int) return null;
+        final d = c;
         if (d < 0 || d > 1000) return null;
         if (cutValues.isNotEmpty && d <= cutValues.last) return null;
         cutValues.add(d);
