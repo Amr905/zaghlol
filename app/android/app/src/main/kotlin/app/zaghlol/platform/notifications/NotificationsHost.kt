@@ -74,6 +74,8 @@ class NotificationsHost(
       NotificationPresenter.K_BODY to n.body,
       NotificationPresenter.K_PUBLIC to n.publicTitle,
       NotificationPresenter.K_ROUTE to n.route,
+      NotificationPresenter.K_ACTION_TITLE to n.actionTitle,
+      NotificationPresenter.K_ACTION_ROUTE to n.actionRoute,
     )
 
   companion object {

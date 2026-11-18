@@ -46,7 +46,9 @@ import UserNotifications
     withCompletionHandler completionHandler: @escaping () -> Void
   ) {
     NotificationsHost.didTap(
-      route: response.notification.request.content.userInfo[NotificationsHost.routeKey] as? String)
+      route: NotificationsHost.routeFor(
+        actionIdentifier: response.actionIdentifier,
+        userInfo: response.notification.request.content.userInfo))
     completionHandler()
   }
 

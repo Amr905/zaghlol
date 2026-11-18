@@ -39,10 +39,20 @@ interface PendingIdStore {
 /** A route id is a short in-app path; anything else is dropped. */
 object NotificationRoutes {
   const val EXTRA_ROUTE = "app.zaghlol.notification.route"
+
+  /** Set by an action button: the id of the notification to dismiss. */
+  const val EXTRA_CANCEL_ID = "app.zaghlol.notification.cancel_id"
   private const val MAX = 96
 
   fun clean(route: String?): String? =
     route?.takeIf { it.length in 1..MAX && it.startsWith("/") && it.all { c -> c.code in 0x21..0x7E } }
+
+  /** The action button's (title, route), or null unless both are usable. */
+  fun cleanAction(title: String?, route: String?): Pair<String, String>? {
+    val t = title?.takeIf { it.isNotBlank() } ?: return null
+    val r = clean(route) ?: return null
+    return t to r
+  }
 
   @Volatile private var launchRoute: String? = null
 

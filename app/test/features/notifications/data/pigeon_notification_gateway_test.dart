@@ -103,6 +103,27 @@ void main() {
     );
   });
 
+  test('the action label and route reach the platform', () async {
+    final host = _FakeHost();
+    final g = PigeonNotificationGateway(
+      api: host,
+      l10n: () => AppLocalizationsAr(),
+    );
+    await g.show(
+      PlatformNotification(
+        id: 9,
+        title: 't',
+        body: 'b',
+        actionTitle: AppLocalizationsAr().notificationsAlertOverdueActionPaid,
+        actionRoute: '/recurring/a1/paid/2026-11-10',
+      ),
+    );
+    expect(host.shown.single.actionTitle, isNotEmpty);
+    expect(host.shown.single.actionRoute, '/recurring/a1/paid/2026-11-10');
+    await g.show(const PlatformNotification(id: 10, title: 't', body: 'b'));
+    expect(host.shown.last.actionTitle, isNull);
+  });
+
   test('show carries a route id and a public label without amounts', () async {
     final host = _FakeHost();
     final g = PigeonNotificationGateway(

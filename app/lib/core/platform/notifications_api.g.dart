@@ -166,6 +166,8 @@ class NotifMsg {
     required this.body,
     required this.publicTitle,
     this.route,
+    this.actionTitle,
+    this.actionRoute,
   });
 
   int id;
@@ -180,8 +182,25 @@ class NotifMsg {
 
   String? route;
 
+  /// An optional action button (Android notification action, iOS category
+  /// action). [actionTitle] is localized by Dart and carries no amount;
+  /// [actionRoute] is a route id like [route]. The action opens the app
+  /// (foreground); it never runs financial code natively.
+  String? actionTitle;
+
+  String? actionRoute;
+
   List<Object?> _toList() {
-    return <Object?>[id, channelId, title, body, publicTitle, route];
+    return <Object?>[
+      id,
+      channelId,
+      title,
+      body,
+      publicTitle,
+      route,
+      actionTitle,
+      actionRoute,
+    ];
   }
 
   Object encode() {
@@ -197,6 +216,8 @@ class NotifMsg {
       body: result[3]! as String,
       publicTitle: result[4]! as String,
       route: result[5] as String?,
+      actionTitle: result[6] as String?,
+      actionRoute: result[7] as String?,
     );
   }
 
@@ -214,7 +235,9 @@ class NotifMsg {
         _deepEquals(title, other.title) &&
         _deepEquals(body, other.body) &&
         _deepEquals(publicTitle, other.publicTitle) &&
-        _deepEquals(route, other.route);
+        _deepEquals(route, other.route) &&
+        _deepEquals(actionTitle, other.actionTitle) &&
+        _deepEquals(actionRoute, other.actionRoute);
   }
 
   @override

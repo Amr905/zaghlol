@@ -169,9 +169,6 @@ final housekeepingProvider = Provider<Housekeeping>((ref) {
             notifications: await ref.read(notificationServiceProvider.future),
             buildText: (r, base) {
               final days = r.dueDate.difference(today);
-              // Overdue reminders need PO copy: none is sent after the due
-              // date. (The repository already stops at the due date.)
-              if (days < 0) throw StateError('OVERDUE_NO_COPY');
               final money = Money.tryFromStorage(
                 r.item.amountMinor,
                 r.item.currency,
@@ -179,6 +176,34 @@ final housekeepingProvider = Provider<Housekeeping>((ref) {
               if (money == null) throw StateError('ITEM_AMOUNT_INVALID');
               final l = notificationL10n(ref);
               final digits = ref.read(digitsModeProvider(l.localeName));
+              if (r.overdueDays > 0) {
+                return AlertRequest(
+                  type: base.type,
+                  subjectId: base.subjectId,
+                  periodKey: base.periodKey,
+                  threshold: base.threshold,
+                  title: l.notificationsAlertOverdueTitle(r.item.name),
+                  body: l.notificationsAlertOverdue(
+                    r.overdueDays,
+                    digits.render('${r.overdueDays}'),
+                    MoneyFormat.format(
+                      money,
+                      languageCode: l.localeName,
+                      digits: digits,
+                    ),
+                  ),
+                  redactedTitle: l.notificationsAlertOverdueTitle(r.item.name),
+                  redactedBody: l.notificationsAlertOverdueHidden(
+                    r.overdueDays,
+                    digits.render('${r.overdueDays}'),
+                  ),
+                  payload: base.payload,
+                  // The label carries no amount; the route pins the due date.
+                  actionTitle: l.notificationsAlertOverdueActionPaid,
+                  actionRoute:
+                      '/recurring/${base.subjectId}/paid/${base.periodKey}',
+                );
+              }
               return AlertRequest(
                 type: base.type,
                 subjectId: base.subjectId,

@@ -263,7 +263,15 @@ data class NotifMsg (
   val title: String,
   val body: String,
   val publicTitle: String,
-  val route: String? = null
+  val route: String? = null,
+  /**
+   * An optional action button (Android notification action, iOS category
+   * action). [actionTitle] is localized by Dart and carries no amount;
+   * [actionRoute] is a route id like [route]. The action opens the app
+   * (foreground); it never runs financial code natively.
+   */
+  val actionTitle: String? = null,
+  val actionRoute: String? = null
 )
  {
   companion object {
@@ -274,7 +282,9 @@ data class NotifMsg (
       val body = pigeonVar_list[3] as String
       val publicTitle = pigeonVar_list[4] as String
       val route = pigeonVar_list[5] as String?
-      return NotifMsg(id, channelId, title, body, publicTitle, route)
+      val actionTitle = pigeonVar_list[6] as String?
+      val actionRoute = pigeonVar_list[7] as String?
+      return NotifMsg(id, channelId, title, body, publicTitle, route, actionTitle, actionRoute)
     }
   }
   fun toList(): List<Any?> {
@@ -285,6 +295,8 @@ data class NotifMsg (
       body,
       publicTitle,
       route,
+      actionTitle,
+      actionRoute,
     )
   }
   override fun equals(other: Any?): Boolean {
@@ -295,7 +307,7 @@ data class NotifMsg (
       return true
     }
     val other = other as NotifMsg
-    return NotificationsApiPigeonUtils.deepEquals(this.id, other.id) && NotificationsApiPigeonUtils.deepEquals(this.channelId, other.channelId) && NotificationsApiPigeonUtils.deepEquals(this.title, other.title) && NotificationsApiPigeonUtils.deepEquals(this.body, other.body) && NotificationsApiPigeonUtils.deepEquals(this.publicTitle, other.publicTitle) && NotificationsApiPigeonUtils.deepEquals(this.route, other.route)
+    return NotificationsApiPigeonUtils.deepEquals(this.id, other.id) && NotificationsApiPigeonUtils.deepEquals(this.channelId, other.channelId) && NotificationsApiPigeonUtils.deepEquals(this.title, other.title) && NotificationsApiPigeonUtils.deepEquals(this.body, other.body) && NotificationsApiPigeonUtils.deepEquals(this.publicTitle, other.publicTitle) && NotificationsApiPigeonUtils.deepEquals(this.route, other.route) && NotificationsApiPigeonUtils.deepEquals(this.actionTitle, other.actionTitle) && NotificationsApiPigeonUtils.deepEquals(this.actionRoute, other.actionRoute)
   }
 
   override fun hashCode(): Int {
@@ -306,6 +318,8 @@ data class NotifMsg (
     result = 31 * result + NotificationsApiPigeonUtils.deepHash(this.body)
     result = 31 * result + NotificationsApiPigeonUtils.deepHash(this.publicTitle)
     result = 31 * result + NotificationsApiPigeonUtils.deepHash(this.route)
+    result = 31 * result + NotificationsApiPigeonUtils.deepHash(this.actionTitle)
+    result = 31 * result + NotificationsApiPigeonUtils.deepHash(this.actionRoute)
     return result
   }
 }

@@ -78,6 +78,8 @@ T-035 Q1–Q6 (keep with bundled rules; drop OTP+transaction messages, as the re
 | T-092 / WIRE-2 | A reimbursement or cross-currency suggestion links only the candidate the user taps; the card shows each candidate; no swipe-accept for pair suggestions. |
 | NOTIF-GW | Local notifications use a small native host (no plugin, no remote push). Permission is asked after onboarding and on first enabling an alert type. A quiet-hours alert scheduled on Android is lost at reboot (keeps alert text off unencrypted storage). |
 | T-173 | Timing tests run only in the serial `perf` CI job (one retry); budgets get tightened to about 1.3× the first CI numbers. |
+| WEEKLY-FRIDAY (FU-204c) | *(PO, 2026-11-18)* The weekly summary is delivered on **Friday** (local time; quiet hours apply as for other alerts), once per Friday, covering the **seven days ending Thursday** (the design specs name no other window). | PO instruction. |
+| OVERDUE-REMINDERS (FU-143) | *(PO, 2026-11-18)* An unpaid subscription or bill past its due date gets at most **two** reminders: **day+1 and day+3** (from 10:00 local); never more than one per item per day; none once paid, skipped or deleted, and none for card dues. Quiet hours and hide-amounts apply (redacted variant without the amount). Copy: `notifications_alert_overdue*` in the copy deck; the "Mark as paid" action goes through `markPaidManual`. | PO instruction. |
 
 ## Part 2 — Still needs Amr
 

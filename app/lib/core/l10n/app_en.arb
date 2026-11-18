@@ -5836,6 +5836,46 @@
   "@notificationsAlertDueHidden": {
     "description": "N"
   },
+  "notificationsAlertOverdueTitle": "{name} is overdue",
+  "@notificationsAlertOverdueTitle": {
+    "description": "T · name",
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "notificationsAlertOverdue": "{count, plural, =1{It was due 1 day ago ({amount}). Did you pay it?} other{It was due {n} days ago ({amount}). Did you pay it?}}",
+  "@notificationsAlertOverdue": {
+    "description": "N · count:int, n, amount · PO OVERDUE-REMINDERS, day 1 and 3",
+    "placeholders": {
+      "count": {
+        "type": "int"
+      },
+      "n": {
+        "type": "String"
+      },
+      "amount": {
+        "type": "String"
+      }
+    }
+  },
+  "notificationsAlertOverdueHidden": "{count, plural, =1{It was due 1 day ago. Did you pay it?} other{It was due {n} days ago. Did you pay it?}}",
+  "@notificationsAlertOverdueHidden": {
+    "description": "N · count:int, n · hidden-amount variant",
+    "placeholders": {
+      "count": {
+        "type": "int"
+      },
+      "n": {
+        "type": "String"
+      }
+    }
+  },
+  "notificationsAlertOverdueActionPaid": "Mark as paid",
+  "@notificationsAlertOverdueActionPaid": {
+    "description": "B · notification action, marks the item paid"
+  },
   "notificationsAlertDuplicateTitle": "A charge may have been logged twice",
   "@notificationsAlertDuplicateTitle": {
     "description": "T"

@@ -341,29 +341,29 @@ final weeklySummaryAlertProvider = FutureProvider<WeeklySummaryAlert>((
   );
 }, name: 'weeklySummaryAlertProvider');
 
-/// How long between weekly summaries.
-const Duration weeklySummaryInterval = Duration(days: 7);
+/// PO WEEKLY-FRIDAY: the weekly summary goes out on Friday (local), once per
+/// Friday, and covers the seven days ending Thursday.
+bool isLocalFriday(CivilDate d) => (d.epochDay + 3) % 7 == 4; // Mon = 0
 
-/// Runs the weekly summary when [weeklySummaryInterval] has passed since the
-/// last run (stored in settings), then stores the run time. A failure leaves
-/// the stored time alone, so the next start or resume tries again.
+/// Runs the weekly summary on a Friday (local) when it has not run yet that
+/// day, then stores the run time. Quiet hours still apply through the
+/// service. A failure leaves the stored time alone, so the next start or
+/// resume that Friday tries again.
 final weeklySummaryRunProvider = Provider<Future<bool> Function()>((ref) {
   return () async {
     try {
       final settings = await ref.read(settingsRepositoryProvider.future);
       final now = ref.read(clockProvider)().toUtc();
+      final zone = ref.read(localZoneProvider);
+      final today = localToday(now.millisecondsSinceEpoch, zone);
+      if (!isLocalFriday(today)) return false;
       final last = await settings.get(Settings.notifWeeklyLastRun);
-      if (last != null &&
-          now.millisecondsSinceEpoch - last <
-              weeklySummaryInterval.inMilliseconds) {
-        return false;
-      }
+      if (last != null && localToday(last, zone) == today) return false;
       // The category names are read when the alert is built: rebuild it so a
       // rename since the last run shows.
       ref.invalidate(weeklySummaryAlertProvider);
       final alert = await ref.read(weeklySummaryAlertProvider.future);
-      final zone = ref.read(localZoneProvider);
-      await alert.run(localToday(now.millisecondsSinceEpoch, zone));
+      await alert.run(today);
       await settings.set(
         Settings.notifWeeklyLastRun,
         now.millisecondsSinceEpoch,

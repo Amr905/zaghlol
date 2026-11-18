@@ -6547,6 +6547,42 @@ class AppLocalizationsAr extends AppLocalizations {
   String get notificationsAlertDueHidden => 'عندك قسط أو فاتورة بتستحق قريب.';
 
   @override
+  String notificationsAlertOverdueTitle(String name) {
+    return '$name عدّى ميعاده';
+  }
+
+  @override
+  String notificationsAlertOverdue(int count, String n, String amount) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: 'كان المفروض يتدفع من $n يوم بـ $amount. دفعته؟',
+      many: 'كان المفروض يتدفع من $n يوم بـ $amount. دفعته؟',
+      few: 'كان المفروض يتدفع من $n أيام بـ $amount. دفعته؟',
+      two: 'كان المفروض يتدفع من يومين بـ $amount. دفعته؟',
+      one: 'كان المفروض يتدفع من يوم بـ $amount. دفعته؟',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String notificationsAlertOverdueHidden(int count, String n) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: 'كان المفروض يتدفع من $n يوم. دفعته؟',
+      many: 'كان المفروض يتدفع من $n يوم. دفعته؟',
+      few: 'كان المفروض يتدفع من $n أيام. دفعته؟',
+      two: 'كان المفروض يتدفع من يومين. دفعته؟',
+      one: 'كان المفروض يتدفع من يوم. دفعته؟',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get notificationsAlertOverdueActionPaid => 'أيوه دفعته';
+
+  @override
   String get notificationsAlertDuplicateTitle => 'ممكن حركة تكون اتسجلت مرتين';
 
   @override

@@ -48,6 +48,20 @@ void main() {
     expect(await RecurringDao(db).occurrencesOf(id), hasLength(1));
   });
 
+  test('expectedDue pays only the occurrence the action was about', () async {
+    final id = await add(RecurringKind.installment, total: 3);
+    // A stale action for an earlier date pays nothing.
+    expect(await repo.markPaidManual(id, expectedDue: '2026-10-05'), isFalse);
+    expect(await RecurringDao(db).occurrencesOf(id), isEmpty);
+    expect(await repo.markPaidManual(id, expectedDue: '2026-11-05'), isTrue);
+    // The same action again (already paid): idempotent, nothing more paid.
+    expect(await repo.markPaidManual(id, expectedDue: '2026-11-05'), isFalse);
+    expect((await RecurringDao(db).itemById(id))!.paidCount, 1);
+    // Deleted: nothing.
+    await repo.deleteItem(id);
+    expect(await repo.markPaidManual(id, expectedDue: '2026-12-05'), isFalse);
+  });
+
   test('the last manual payment completes the item', () async {
     final id = await add(RecurringKind.installment, total: 1);
     expect(await repo.markPaidManual(id), isTrue);
