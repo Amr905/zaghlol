@@ -830,6 +830,8 @@ Replaces the 85 rows above that only pointed at batch review reports or were mar
 
 - **FU-258** (batch 38): minors in [batch-38](05-reviews/batch-38.md): action via a non-exported trampoline or nonce; a failed mark-paid while locked has no feedback; the weekly summary is skipped if the app isn't opened on Friday; a reminder delayed by quiet hours isn't cancelled after paying.
 
+- **FU-259** (batch 40): minors in [batch-40](05-reviews/batch-40.md): GoldAPI per-karat vs ounce check and a doc link; narrow the deploy SA's IAM-admin role and limit prod deploys to main; the public dry-run AAB includes the R8 mapping; app-store-privacy.md out of date after the iOS fixes; "رفاهيات" for "wants".
+
 ## Log
 | Date | Event |
 |---|---|
@@ -921,3 +923,4 @@ Replaces the 85 rows above that only pointed at batch review reports or were mar
 | 2026-11-18 | Batch 36 (`batch/2026-11-18-36`): FU triage + seven lanes of follow-ups. FU-256. Progress 167/186. |
 | 2026-11-18 | Batch 37 (`batch/2026-11-18-37`): nine lanes of follow-ups + explorer4. FU-257. Progress 167/186. |
 | 2026-11-18 | Batch 38 (`batch/2026-11-18-38`): PO WEEKLY-FRIDAY, OVERDUE-REMINDERS (+ Mark-as-paid action). FU-258. Progress 167/186. |
+| 2026-11-18 | Batch 40 (`batch/2026-11-18-40`): T-127 adapters, T-140 prep, T-176/177 prep + iOS store fixes, T-058 pass 1. FU-259. Board tasks stay open until the PO's inputs (keys, accounts, hosting, human review). |

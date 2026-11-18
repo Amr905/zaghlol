@@ -443,13 +443,13 @@ abstract class AppLocalizations {
   /// C
   ///
   /// In ar, this message translates to:
-  /// **'المزيد'**
+  /// **'أكتر'**
   String get commonActionMore;
 
   /// C · passphrase reveal
   ///
   /// In ar, this message translates to:
-  /// **'اظهر'**
+  /// **'اعرض'**
   String get commonActionShow;
 
   /// C
@@ -975,7 +975,7 @@ abstract class AppLocalizations {
   /// S · the form is kept
   ///
   /// In ar, this message translates to:
-  /// **'محصلش حفظ. جرّب تاني، واللي كتبته لسه موجود.'**
+  /// **'مقدرتش أحفظ. جرّب تاني، واللي كتبته لسه موجود.'**
   String get commonErrorSaveFailed;
 
   /// S · review: saving a card failed; the card stays in the list
@@ -1167,7 +1167,7 @@ abstract class AppLocalizations {
   /// S · what is read (FR-ING-A-02)
   ///
   /// In ar, this message translates to:
-  /// **'بنقرا رسايل البنوك والمحافظ وإنستاباي بس'**
+  /// **'بقرا رسايل البنوك والمحافظ وإنستاباي بس'**
   String get onboardingAndroidSetupSmsPointSenders;
 
   /// S
@@ -1179,13 +1179,13 @@ abstract class AppLocalizations {
   /// S · claim limited to financial data (tone gate 4, R-11, BR-SYNC-03)
   ///
   /// In ar, this message translates to:
-  /// **'كل حاجة بتفضل على الموبايل ده'**
+  /// **'بيانات فلوسك بتفضل على الموبايل ده'**
   String get onboardingAndroidSetupSmsPointOnPhone;
 
   /// B · primary, opens the system SMS dialog
   ///
   /// In ar, this message translates to:
-  /// **'اسمح بقراءة رسايل البنك'**
+  /// **'اسمح بقراية الرسايل'**
   String get onboardingAndroidSetupSmsAllow;
 
   /// N · success
@@ -1329,7 +1329,7 @@ abstract class AppLocalizations {
   /// T · M · Rive tourGuide
   ///
   /// In ar, this message translates to:
-  /// **'الآيفون مش بيسمح للتطبيقات تقرا الرسايل… فهنستخدم الاختصارات'**
+  /// **'هنستخدم الاختصارات'**
   String get onboardingIosSetupShortcutTitle;
 
   /// S · under the title. Split out of the title for length (F-7)
@@ -1383,7 +1383,7 @@ abstract class AppLocalizations {
   /// L · text button, expands the steps below
   ///
   /// In ar, this message translates to:
-  /// **'إزاي بيشتغل؟ (٣٠ ثانية)'**
+  /// **'إزاي بيشتغل؟ (نص دقيقة)'**
   String get onboardingIosSetupHowItWorks;
 
   /// S · list numbers are drawn by the UI, not the copy
@@ -1479,7 +1479,7 @@ abstract class AppLocalizations {
   /// S
   ///
   /// In ar, this message translates to:
-  /// **'افتح Shortcuts ← Automation'**
+  /// **'افتح Shortcuts وبعدين Automation'**
   String get onboardingIosSetupFixStep1;
 
   /// S · automationName is the Latin automation name, e.g. Zaghlol – Wallet
@@ -1533,7 +1533,7 @@ abstract class AppLocalizations {
   /// L · spoken example. AR uses number words (§0.3)
   ///
   /// In ar, this message translates to:
-  /// **'«دفعت ٤٥ قهوة»'**
+  /// **'«دفعت خمسة وأربعين قهوة»'**
   String get onboardingIosSetupFirstSayHint;
 
   /// B · opens S-13
@@ -1545,7 +1545,7 @@ abstract class AppLocalizations {
   /// L
   ///
   /// In ar, this message translates to:
-  /// **'المبلغ والفئة'**
+  /// **'المبلغ والتصنيف'**
   String get onboardingIosSetupFirstTypeHint;
 
   /// S · opens S-61 supported banks (FR-ING-I-08)
@@ -1557,7 +1557,7 @@ abstract class AppLocalizations {
   /// S
   ///
   /// In ar, this message translates to:
-  /// **'شوف إزاي تسجلهم على الآيفون'**
+  /// **'شوف إزاي تتابعهم على الآيفون'**
   String get onboardingIosSetupFirstOnlineBanksSub;
 
   /// L · the common_gold_badge must show on this row (FR-EXP-04/06); Free opens S-68
@@ -1569,7 +1569,7 @@ abstract class AppLocalizations {
   /// S · says Gold in the text too, so Free users aren't promised it (F-8)
   ///
   /// In ar, this message translates to:
-  /// **'ضيف شهور فاتت مرة واحدة'**
+  /// **'ضيف شهور فاتت مرة واحدة مع جولد'**
   String get onboardingIosSetupFirstStatementSub;
 
   /// T
@@ -1917,7 +1917,7 @@ abstract class AppLocalizations {
   /// L · count:int, n · followed by  ·  and common_date_range
   ///
   /// In ar, this message translates to:
-  /// **'{count, plural, =0{القبض النهارده} =1{يوم على القبض} =2{يومين على القبض} few{{n} أيام على القبض} many{{n} يوم على القبض} other{{n} يوم على القبض}}'**
+  /// **'{count, plural, =0{القبض النهارده} =1{فاضل يوم على القبض} =2{فاضل يومين على القبض} few{فاضل {n} أيام على القبض} many{فاضل {n} يوم على القبض} other{فاضل {n} يوم على القبض}}'**
   String homeHeroDaysToPayday(int count, String n);
 
   /// S · A-43, replaces the payday line when no payday is set
@@ -3253,7 +3253,7 @@ abstract class AppLocalizations {
   /// S
   ///
   /// In ar, this message translates to:
-  /// **'النصيب لازم يكون أكبر من صفر'**
+  /// **'كل نصيب لازم يكون أكبر من صفر'**
   String get transfersSplitErrorShareZero;
 
   /// S
@@ -3451,7 +3451,7 @@ abstract class AppLocalizations {
   /// C
   ///
   /// In ar, this message translates to:
-  /// **'يدوي وصوت'**
+  /// **'بإيدك وبصوتك'**
   String get accountsOverviewCashSub;
 
   /// C · ignored card (C-07)
@@ -4608,7 +4608,7 @@ abstract class AppLocalizations {
   /// S · C-13 empty (EC-23)
   ///
   /// In ar, this message translates to:
-  /// **'بيحيا بعد أول دورة كاملة'**
+  /// **'هيشتغل بعد أول دورة كاملة'**
   String get insightsChartsEmptyCycle;
 
   /// S · charts 8 and 11 when they have nothing to show
@@ -4692,7 +4692,7 @@ abstract class AppLocalizations {
   /// T · chart 7 (Gold)
   ///
   /// In ar, this message translates to:
-  /// **'الدورة دي ضد متوسط تلات دورات'**
+  /// **'الدورة دي قصاد متوسط تلات دورات'**
   String get insightsChartTitleVsAverage;
 
   /// T · chart 8 (Gold)
@@ -4890,7 +4890,7 @@ abstract class AppLocalizations {
   /// A
   ///
   /// In ar, this message translates to:
-  /// **'الدورة دي ضد متوسطك: أكبر زيادة في {category} بـ {percent}'**
+  /// **'الدورة دي قصاد متوسطك: أكبر زيادة في {category} بـ {percent}'**
   String insightsChartA11yVsAverage(String category, String percent);
 
   /// A
@@ -5019,7 +5019,7 @@ abstract class AppLocalizations {
   /// S · state, category = largest category, target
   ///
   /// In ar, this message translates to:
-  /// **'{state, select, short{لو قللت {category} بـ {target} الدورة الجاية هيساعدك ده تقفل الفرق.} other{حوّل {target} على الأقل من الفايض ده للادخار قبل ما يتصرف.}}'**
+  /// **'{state, select, short{لو قللت {category} بـ {target} الدورة الجاية، ده هيساعدك تقفل الفرق.} other{حوّل {target} على الأقل من الفايض ده للتحويش قبل ما يتصرف.}}'**
   String insightsExplainCashFlowTip(
     String state,
     String category,
@@ -5069,7 +5069,7 @@ abstract class AppLocalizations {
   /// S · Gold
   ///
   /// In ar, this message translates to:
-  /// **'خفّض {category} بـ {target} كل دورة، يعني {yearly} في السنة.'**
+  /// **'قلّل {category} بـ {target} كل دورة، يعني {yearly} في السنة.'**
   String insightsExplainCategoriesDeepTip(
     String category,
     String target,
@@ -5103,7 +5103,7 @@ abstract class AppLocalizations {
   /// S · Gold
   ///
   /// In ar, this message translates to:
-  /// **'لو خفضت {target} من صرفك اليومي هتفضل تحت الخط لحد القبض.'**
+  /// **'لو قللت {target} من صرفك اليومي هتفضل تحت الخط لحد القبض.'**
   String insightsExplainBurnRateDeepTip(String target);
 
   /// E · state:select(wantsHigh/savingsLow/other). The rule is fifty, thirty, twenty; the chart title carries it
@@ -5283,7 +5283,7 @@ abstract class AppLocalizations {
   /// S
   ///
   /// In ar, this message translates to:
-  /// **'راجع {item}، ولو مش بتستخدمه إلغاؤه بيوفر {target} في السنة.'**
+  /// **'راجع {item}، ولو مش بتستخدمه الغيه وهتوفر {target} في السنة.'**
   String insightsExplainSubscriptionsTip(String item, String target);
 
   /// E · Gold
@@ -5350,7 +5350,7 @@ abstract class AppLocalizations {
   /// E · Gold
   ///
   /// In ar, this message translates to:
-  /// **'{trend, select, up{نموك الإجمالي {percent}، وأكتر حاجة زوّدته {assetType2}.} down{اللي حيلتك نزل {percent}، وأكتر حاجة أثرت فيه {assetType2}.} other{مفيش تغيير كبير في الفترة دي.}}'**
+  /// **'{trend, select, up{اللي حيلتك زاد {percent}، وأكتر حاجة زوّدته {assetType2}.} down{اللي حيلتك نزل {percent}، وأكتر حاجة أثرت فيه {assetType2}.} other{مفيش تغيير كبير في الفترة دي.}}'**
   String insightsExplainNetWorthDeep(
     String trend,
     String percent,
@@ -5935,7 +5935,7 @@ abstract class AppLocalizations {
   /// S · Free only (FR-VOI-04)
   ///
   /// In ar, this message translates to:
-  /// **'باقيلك {remaining} من {max} تسجيل صوتي الشهر ده'**
+  /// **'فاضلك {remaining} من {max} تسجيل صوتي الشهر ده'**
   String homeQuickAddVoiceLeft(String remaining, String max);
 
   /// T
@@ -6115,7 +6115,7 @@ abstract class AppLocalizations {
   /// T
   ///
   /// In ar, this message translates to:
-  /// **'قراءة سكرين شوت'**
+  /// **'اقرا سكرين شوت'**
   String get captureScanTitle;
 
   /// B
@@ -6241,7 +6241,7 @@ abstract class AppLocalizations {
   /// S
   ///
   /// In ar, this message translates to:
-  /// **'شغال عليها. دلوقتي اكتب العملية بإيدك وأنا هسجلها.'**
+  /// **'شغال عليها. دلوقتي اكتب الحركة بإيدك وأنا هسجلها.'**
   String get captureScanUnavailableBody;
 
   /// S
@@ -6925,7 +6925,7 @@ abstract class AppLocalizations {
   /// L · toggle. The 🔥 is an icon, not text
   ///
   /// In ar, this message translates to:
-  /// **'إقصف جبهتي'**
+  /// **'اقصف جبهتي'**
   String get chatMainRoast;
 
   /// S · R9
@@ -7164,7 +7164,7 @@ abstract class AppLocalizations {
   /// E
   ///
   /// In ar, this message translates to:
-  /// **'المتاح في {account} {available} من {limit}.'**
+  /// **'فاضل في {account} {available} من {limit}.'**
   String chatAnswerBalanceCredit(
     String account,
     String available,
@@ -7448,7 +7448,7 @@ abstract class AppLocalizations {
   /// E · alt = installment + running cost
   ///
   /// In ar, this message translates to:
-  /// **'بتصرف {monthly} في الشهر في الكافيهات. ماكينة بالتقسيط مع البن والحليب تقريباً {alt} في الشهر.'**
+  /// **'بتصرف {monthly} في الشهر في الكافيهات. ماكينة بالتقسيط مع البن واللبن تقريباً {alt} في الشهر.'**
   String roiRuleCoffeeBody(String monthly, String alt);
 
   /// T
@@ -7466,13 +7466,13 @@ abstract class AppLocalizations {
   /// T
   ///
   /// In ar, this message translates to:
-  /// **'فلتر مياه بدل القوارير'**
+  /// **'فلتر مية بدل الإزايز'**
   String get roiRuleWaterTitle;
 
   /// E
   ///
   /// In ar, this message translates to:
-  /// **'القوارير والجراكن بـ {monthly} في الشهر. فلتر مياه بالتقسيط مع تغيير الشمعات تقريباً {alt} في الشهر.'**
+  /// **'إزايز المية والجراكن بـ {monthly} في الشهر. فلتر مية بالتقسيط مع تغيير الشمعات تقريباً {alt} في الشهر.'**
   String roiRuleWaterBody(String monthly, String alt);
 
   /// T
@@ -7808,7 +7808,7 @@ abstract class AppLocalizations {
   /// T
   ///
   /// In ar, this message translates to:
-  /// **'تعديل التصنيف'**
+  /// **'عدّل التصنيف'**
   String get categoriesEditTitleEdit;
 
   /// L · 1 to 30 characters, unique (common_validation_nameRequired, …nameLength, …nameTaken)
@@ -7838,13 +7838,13 @@ abstract class AppLocalizations {
   /// C
   ///
   /// In ar, this message translates to:
-  /// **'ضروريات'**
+  /// **'أساسيات'**
   String get categoriesEditBucketNeeds;
 
   /// C
   ///
   /// In ar, this message translates to:
-  /// **'رغبات'**
+  /// **'رفاهيات'**
   String get categoriesEditBucketWants;
 
   /// C
@@ -7856,7 +7856,7 @@ abstract class AppLocalizations {
   /// C
   ///
   /// In ar, this message translates to:
-  /// **'ادخار'**
+  /// **'تحويش'**
   String get categoriesEditBucketSavings;
 
   /// C
@@ -8156,7 +8156,7 @@ abstract class AppLocalizations {
   /// L · + common_gold_badge
   ///
   /// In ar, this message translates to:
-  /// **'نسخة تلقائي'**
+  /// **'نسخ تلقائي'**
   String get backupSettingsAuto;
 
   /// C
@@ -8348,7 +8348,7 @@ abstract class AppLocalizations {
   /// S
   ///
   /// In ar, this message translates to:
-  /// **'كلمتين السر مش زي بعض'**
+  /// **'كلمة السر في الخانتين مش زي بعض'**
   String get backupPassphraseMismatch;
 
   /// S
@@ -8588,7 +8588,7 @@ abstract class AppLocalizations {
   /// L · count:int, n · expandable; row hidden when 0 (FR-CAP-06)
   ///
   /// In ar, this message translates to:
-  /// **'{count, plural, =1{كارت واحد مش متتبع (هيتخطى)} =2{كارتين مش متتبعين (هيتخطوا)} few{{n} كروت مش متتبعة (هتتخطى)} many{{n} كارت مش متتبعة (هتتخطى)} other{{n} كارت مش متتبعة (هتتخطى)}}'**
+  /// **'{count, plural, =1{كارت واحد مش متتبع (هيتخطى)} =2{كارتين مش متتبعين (هيتخطوا)} few{{n} كروت مش متتبعة (هتتخطى)} many{{n} كارت مش متتبعين (هيتخطوا)} other{{n} كارت مش متتبعين (هيتخطوا)}}'**
   String exportsImportUntracked(int count, String n);
 
   /// B · count:int, n · shown only when at least one is new
@@ -8648,7 +8648,7 @@ abstract class AppLocalizations {
   /// S · locked state + common_gold_unlock
   ///
   /// In ar, this message translates to:
-  /// **'ضيف شهور فاتتة وكشوف البنوك مع جولد'**
+  /// **'ضيف شهور فاتت وكشوف البنوك مع جولد'**
   String get exportsImportLockedBody;
 
   /// T
@@ -8732,7 +8732,7 @@ abstract class AppLocalizations {
   /// S
   ///
   /// In ar, this message translates to:
-  /// **'اختار خطة الأول'**
+  /// **'اختار باقة الأول'**
   String get goldPaywallPlanRequired;
 
   /// L · text button
@@ -9080,7 +9080,7 @@ abstract class AppLocalizations {
   /// S · reveals nothing about the account; action common_action_signIn
   ///
   /// In ar, this message translates to:
-  /// **'اعمل تسجيل دخول بالحساب اللي اشتريت بيه.'**
+  /// **'سجّل دخول بالحساب اللي اشتريت بيه.'**
   String get goldSeatAccountRequiredBody;
 
   /// T · entitlement moved, movedBy: user
@@ -9116,7 +9116,7 @@ abstract class AppLocalizations {
   /// S · action common_action_signIn
   ///
   /// In ar, this message translates to:
-  /// **'اعمل تسجيل دخول عشان تستخدم الجولد على الموبايل ده. مكانك محفوظ ومش هيتحسب نقلة.'**
+  /// **'سجّل دخول عشان تستخدم الجولد على الموبايل ده. مكانك محفوظ ومش هيتحسب نقلة.'**
   String get goldSeatPausedBody;
 
   /// T · tampered (D-60, EC-70)
@@ -9140,7 +9140,7 @@ abstract class AppLocalizations {
   /// S · seatHeldElsewhere + accountRequired (R4-4); action common_action_signIn
   ///
   /// In ar, this message translates to:
-  /// **'الدفع تم. عشان الجولد ييجي هنا، اعمل تسجيل دخول بالحساب اللي عليه الجولد.'**
+  /// **'الدفع تم. عشان الجولد ييجي هنا، سجّل دخول بالحساب اللي عليه الجولد.'**
   String get goldSeatHeldElsewhereAccount;
 
   /// T · supportNotice: gold_linked_by_support
@@ -9230,7 +9230,7 @@ abstract class AppLocalizations {
   /// L · count:int, n · FR-SUB-04, 0 to 30
   ///
   /// In ar, this message translates to:
-  /// **'{count, plural, =0{يوم الاستحقاق نفسه} =1{قبلها بيوم} =2{قبلها بيومين} few{قبلها بـ {n} أيام} many{قبلها بـ {n} يوم} other{قبلها بـ {n} يوم}}'**
+  /// **'{count, plural, =0{يوم الميعاد نفسه} =1{قبلها بيوم} =2{قبلها بيومين} few{قبلها بـ {n} أيام} many{قبلها بـ {n} يوم} other{قبلها بـ {n} يوم}}'**
   String notificationsSettingsDueDays(int count, String n);
 
   /// L
@@ -9290,7 +9290,7 @@ abstract class AppLocalizations {
   /// S · validation, 0 to 30
   ///
   /// In ar, this message translates to:
-  /// **'اختار من يوم الاستحقاق لحد تلاتين يوم قبله'**
+  /// **'اختار من يوم الميعاد لحد تلاتين يوم قبله'**
   String get notificationsSettingsDaysRange;
 
   /// S · validation
@@ -9382,7 +9382,7 @@ abstract class AppLocalizations {
   /// N · count:int, n, item, amount · days until the due date
   ///
   /// In ar, this message translates to:
-  /// **'{count, plural, =0{{item} بيستحق النهارده: {amount}} =1{{item} بيستحق بكره: {amount}} =2{{item} بيستحق بعد يومين: {amount}} few{{item} بيستحق بعد {n} أيام: {amount}} many{{item} بيستحق بعد {n} يوم: {amount}} other{{item} بيستحق بعد {n} يوم: {amount}}}'**
+  /// **'{count, plural, =0{{item} بيستحق النهارده: {amount}} =1{{item} بيستحق بكرة: {amount}} =2{{item} بيستحق بعد يومين: {amount}} few{{item} بيستحق بعد {n} أيام: {amount}} many{{item} بيستحق بعد {n} يوم: {amount}} other{{item} بيستحق بعد {n} يوم: {amount}}}'**
   String notificationsAlertDue(int count, String item, String amount, String n);
 
   /// N
@@ -9424,7 +9424,7 @@ abstract class AppLocalizations {
   /// N
   ///
   /// In ar, this message translates to:
-  /// **'{merchant}: {amount} ظهرت مرتين تقريباً في نفس الوقت. بُص عليها.'**
+  /// **'{merchant}: {amount} ظهرت مرتين تقريباً في نفس الوقت. بص عليها.'**
   String notificationsAlertDuplicate(String merchant, String amount);
 
   /// N
@@ -9790,7 +9790,7 @@ abstract class AppLocalizations {
   /// N · shown when the local wipe did not finish; the next launch resumes it
   ///
   /// In ar, this message translates to:
-  /// **'مقدرناش نمسح كل حاجة. افتح الأبلكيشن تاني وهنكمّل.'**
+  /// **'مقدرناش نمسح كل حاجة. افتح زغلول تاني وهنكمّل.'**
   String get privacyDeleteFailed;
 
   /// T
@@ -10000,7 +10000,7 @@ abstract class AppLocalizations {
   /// L · off by default
   ///
   /// In ar, this message translates to:
-  /// **'اظهر المبالغ'**
+  /// **'اعرض المبالغ'**
   String get shareStudioShowAmounts;
 
   /// S
@@ -10378,7 +10378,7 @@ abstract class AppLocalizations {
   /// S · IO_ERROR
   ///
   /// In ar, this message translates to:
-  /// **'حصلت مشكلة في قراءة أو حفظ ملف. جرّب تاني.'**
+  /// **'حصلت مشكلة في قراية أو حفظ ملف. جرّب تاني.'**
   String get errorsStorageIo;
 
   /// S · PERMISSION_DENIED; + common_action_openSettings
@@ -10462,7 +10462,7 @@ abstract class AppLocalizations {
   /// N · EC-40 after an amount edit
   ///
   /// In ar, this message translates to:
-  /// **'المبلغ اتغيّر، فالروابط اتشالت: الفلوس الراجعة والتقسيم المرتبطين بالمعاملة دي اتفكّوا.'**
+  /// **'المبلغ اتغيّر، فالروابط اتشالت: الفلوس الراجعة والتقسيم المرتبطين بالحركة دي اتفكّوا.'**
   String get transactionsEditLinksRemoved;
 
   /// L · account row, no e-mail shown
@@ -10480,7 +10480,7 @@ abstract class AppLocalizations {
   /// L · muted feed-row label
   ///
   /// In ar, this message translates to:
-  /// **'مش محسوبة في المصروفات'**
+  /// **'مش محسوبة في المصاريف'**
   String get homeFeedExcludedFromSpending;
 
   /// T · FR-NTF-01 backup reminder
@@ -10498,7 +10498,7 @@ abstract class AppLocalizations {
   /// N · EC-40 (T-091)
   ///
   /// In ar, this message translates to:
-  /// **'{count, plural, =1{مبلغ واحد اتفكّ لأن المصروف قلّ} other{{count} مبالغ اتفكّت لأن المصروف قلّ}}'**
+  /// **'{count, plural, =1{مبلغ واحد اتفكّ لأن المصروف قلّ} =2{مبلغين اتفكّوا لأن المصروف قلّ} few{{count} مبالغ اتفكّت لأن المصروف قلّ} many{{count} مبلغ اتفكّ لأن المصروف قلّ} other{{count} مبلغ اتفكّ لأن المصروف قلّ}}'**
   String transactionsReimbUnassigned(int count);
 
   /// L · count:int, n:String · T-066 EC-14, iOS only, Home and Settings nudge after 7+ days of silence

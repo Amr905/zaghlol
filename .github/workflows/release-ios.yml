@@ -1,0 +1,274 @@
+name: release-ios
+
+# T-177: iOS release pipeline (prod flavor archive / IPA, TestFlight).
+#
+# Manual dispatch only. The job runs in the protected GitHub environment
+# `ios-release` (the PO adds required reviewers and restricts it to main and v*
+# tags in Settings > Environments); signing and App Store Connect secrets live
+# there, not at repository level.
+#
+# Without the signing secrets the workflow still archives the prod flavor
+# unsigned (`flutter build ipa --no-codesign`), packages an unsigned .ipa for
+# inspection, runs the store assertions (bundle ids, versions, privacy
+# manifests incl. required-reason 35F9.1, extensions) and says so in the step
+# summary: that is the dry run. Signing (distribution certificate and three
+# provisioning profiles, applied by fastlane to Release-prod only) and the
+# TestFlight upload (App Store Connect API key, internal testers only, no
+# review submission) are gated on the secrets; the upload also needs
+# `upload: true` and main or a v* tag.
+#
+# The repository is public: a signed IPA, dSYMs and Dart symbols are never
+# uploaded as artifacts in the clear (dSYMs and Dart symbols are kept only
+# encrypted with SYMBOLS_PASSPHRASE; skipped when it is absent). No crash SDK.
+on:
+  workflow_dispatch:
+    inputs:
+      build_number:
+        description: 'Override the build number (default: the run number)'
+        type: string
+        required: false
+      upload:
+        description: 'Upload to TestFlight internal (needs secrets; main or v* tag only)'
+        type: boolean
+        default: false
+
+permissions:
+  contents: read
+
+concurrency:
+  group: release-ios-${{ github.ref }}
+  cancel-in-progress: false
+
+env:
+  FLUTTER_VERSION: '3.47.9'
+  FASTLANE_VERSION: '2.232.2'
+
+jobs:
+  build:
+    name: prod archive
+    runs-on: macos-15
+    environment: ios-release
+    timeout-minutes: 90
+    steps:
+      - uses: actions/checkout@fbc6f3992d24b796d5a048ff273f7fcc4a7b6c09 # v5.1.0
+        with:
+          persist-credentials: false
+      # Apple requires Xcode 26 / the iOS 26 SDK for App Store Connect uploads
+      # (since 2026-04-28); app-ci still pins 16.4 for the no-codesign legs.
+      - name: Select Xcode 26
+        run: |
+          X=$(ls -d /Applications/Xcode_26*.app 2>/dev/null | sort -V | tail -n 1)
+          [ -n "$X" ] || { echo "::error::no Xcode 26 on this runner image: $(ls -d /Applications/Xcode*)"; exit 1; }
+          sudo xcode-select -s "$X"
+          xcodebuild -version
+          xcrun --sdk iphoneos --show-sdk-version
+      - uses: subosito/flutter-action@1a449444c387b1966244ae4d4f8c696479add0b2 # v2.23.0
+        with:
+          flutter-version: ${{ env.FLUTTER_VERSION }}
+          channel: stable
+          cache: true
+      - name: Resolve workspace (lockfile must be up to date)
+        run: flutter pub get --enforce-lockfile
+
+      - name: Version numbers
+        id: ver
+        env:
+          RUN_NUMBER: ${{ github.run_number }}
+          BUILD_OVERRIDE: ${{ inputs.build_number }}
+        run: |
+          bash .github/scripts/test-release-version.sh
+          bash .github/scripts/release-version.sh app/pubspec.yaml "$RUN_NUMBER" "$BUILD_OVERRIDE" prodSms | tee -a "$GITHUB_OUTPUT"
+
+      - name: Decide signing
+        id: sign
+        env:
+          HAVE_SIGNING: ${{ secrets.IOS_DIST_CERT_P12_BASE64 != '' && secrets.IOS_DIST_CERT_PASSWORD != '' && secrets.IOS_PROFILE_APP_BASE64 != '' && secrets.IOS_PROFILE_SHARE_BASE64 != '' && secrets.IOS_PROFILE_WIDGET_BASE64 != '' && secrets.APPLE_TEAM_ID != '' }}
+          HAVE_ASC: ${{ secrets.ASC_KEY_ID != '' && secrets.ASC_ISSUER_ID != '' && secrets.ASC_KEY_P8_BASE64 != '' }}
+        run: |
+          if [ "$HAVE_SIGNING" = "true" ]; then
+            echo "signed=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "signed=false" >> "$GITHUB_OUTPUT"
+            echo "::notice::Signing secrets are not set in the ios-release environment: archiving UNSIGNED (--no-codesign). This is the dry-run mode."
+          fi
+          if [ "$HAVE_SIGNING" = "true" ] && [ "$HAVE_ASC" = "true" ] && [ "${{ inputs.upload }}" = "true" ] \
+             && { [ "$GITHUB_REF" = "refs/heads/main" ] || [[ "$GITHUB_REF" == refs/tags/v* ]]; }; then
+            echo "upload=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "upload=false" >> "$GITHUB_OUTPUT"
+            echo "::notice::TestFlight upload skipped (needs signed build, the ASC API key, upload=true and main or a v* tag)."
+          fi
+
+      # ---- Unsigned path (dry run) ----
+      - name: Archive without signing
+        if: steps.sign.outputs.signed != 'true'
+        working-directory: app
+        env:
+          BUILD_NAME: ${{ steps.ver.outputs.BUILD_NAME }}
+          BUILD_NUMBER: ${{ steps.ver.outputs.IOS_BUILD_NUMBER }}
+        run: |
+          mkdir -p "$RUNNER_TEMP/symbols/ios"
+          if ! flutter build ipa --release --flavor prod --no-codesign \
+              --build-name "$BUILD_NAME" --build-number "$BUILD_NUMBER" \
+              --obfuscate --split-debug-info="$RUNNER_TEMP/symbols/ios" > build.log 2>&1; then
+            echo "::error::archive failed: $(grep -iE -B2 -A6 'error:|xcodebuild|schemes|configuration' build.log | head -n 40 | tr '\n' '|')"
+            exit 1
+          fi
+          tail -n 8 build.log
+          ARCHIVE=build/ios/archive/Runner.xcarchive
+          [ -d "$ARCHIVE" ] || { echo "::error::no xcarchive at $ARCHIVE"; exit 1; }
+          echo "ARCHIVE=$PWD/$ARCHIVE" >> "$GITHUB_ENV"
+          # A signature-less .ipa for inspection only (App Store Connect rejects it).
+          rm -rf "$RUNNER_TEMP/ipa" && mkdir -p "$RUNNER_TEMP/ipa/Payload"
+          cp -R "$ARCHIVE"/Products/Applications/*.app "$RUNNER_TEMP/ipa/Payload/"
+          (cd "$RUNNER_TEMP/ipa" && zip -qry Zaghlol-UNSIGNED.ipa Payload)
+          ls -l "$RUNNER_TEMP/ipa/Zaghlol-UNSIGNED.ipa"
+
+      # ---- Signed path ----
+      - name: Prepare signing material
+        if: steps.sign.outputs.signed == 'true'
+        env:
+          CERT_B64: ${{ secrets.IOS_DIST_CERT_P12_BASE64 }}
+          PROFILE_APP_B64: ${{ secrets.IOS_PROFILE_APP_BASE64 }}
+          PROFILE_SHARE_B64: ${{ secrets.IOS_PROFILE_SHARE_BASE64 }}
+          PROFILE_WIDGET_B64: ${{ secrets.IOS_PROFILE_WIDGET_BASE64 }}
+        run: |
+          set -e
+          umask 077
+          printf '%s' "$CERT_B64" | base64 --decode > "$RUNNER_TEMP/dist.p12"
+          mkdir -p "$HOME/Library/MobileDevice/Provisioning Profiles"
+          install_profile() { # b64 expected-bundle-id env-name
+            f="$RUNNER_TEMP/$3.mobileprovision"
+            printf '%s' "$1" | base64 --decode > "$f"
+            security cms -D -i "$f" > "$f.plist"
+            uuid=$(/usr/libexec/PlistBuddy -c 'Print :UUID' "$f.plist")
+            name=$(/usr/libexec/PlistBuddy -c 'Print :Name' "$f.plist")
+            appid=$(/usr/libexec/PlistBuddy -c 'Print :Entitlements:application-identifier' "$f.plist")
+            if [ "${appid#*.}" != "$2" ]; then
+              echo "::error::profile for $3 is for '${appid#*.}', expected '$2'"; exit 1
+            fi
+            cp "$f" "$HOME/Library/MobileDevice/Provisioning Profiles/$uuid.mobileprovision"
+            echo "$3=$name" >> "$GITHUB_ENV"
+          }
+          install_profile "$PROFILE_APP_B64"    app.zaghlol                PROFILE_APP
+          install_profile "$PROFILE_SHARE_B64"  app.zaghlol.ShareExtension PROFILE_SHARE
+          install_profile "$PROFILE_WIDGET_B64" app.zaghlol.widget         PROFILE_WIDGET
+          echo "IOS_CERT_P12_PATH=$RUNNER_TEMP/dist.p12" >> "$GITHUB_ENV"
+          sudo gem install fastlane -v "$FASTLANE_VERSION" --no-document > "$RUNNER_TEMP/gem.log" 2>&1 || { tail -n 20 "$RUNNER_TEMP/gem.log"; exit 1; }
+      - name: Flutter config for the signed archive
+        if: steps.sign.outputs.signed == 'true'
+        working-directory: app
+        env:
+          BUILD_NAME: ${{ steps.ver.outputs.BUILD_NAME }}
+          BUILD_NUMBER: ${{ steps.ver.outputs.IOS_BUILD_NUMBER }}
+        run: |
+          mkdir -p "$RUNNER_TEMP/symbols/ios"
+          flutter build ios --config-only --release --flavor prod --no-codesign \
+            --build-name "$BUILD_NAME" --build-number "$BUILD_NUMBER" \
+            --obfuscate --split-debug-info="$RUNNER_TEMP/symbols/ios" > config.log 2>&1 || { tail -n 40 config.log; exit 1; }
+      - name: Archive and sign (fastlane)
+        if: steps.sign.outputs.signed == 'true'
+        working-directory: app
+        env:
+          APPLE_TEAM_ID: ${{ secrets.APPLE_TEAM_ID }}
+          IOS_CERT_PASSWORD: ${{ secrets.IOS_DIST_CERT_PASSWORD }}
+        run: |
+          fastlane ios archive_signed > "$RUNNER_TEMP/gym.log" 2>&1 || { grep -iE "error|failed" "$RUNNER_TEMP/gym.log" | head -n 30; exit 1; }
+          tail -n 5 "$RUNNER_TEMP/gym.log"
+          echo "ARCHIVE=$PWD/build/ios/archive/Zaghlol.xcarchive" >> "$GITHUB_ENV"
+          echo "IPA=$PWD/build/ios/ipa/Zaghlol.ipa" >> "$GITHUB_ENV"
+          [ -f build/ios/ipa/Zaghlol.ipa ] || { echo "::error::no IPA produced"; exit 1; }
+
+      - name: Assert bundle ids, versions, extensions and privacy manifests
+        env:
+          BUILD_NAME: ${{ steps.ver.outputs.BUILD_NAME }}
+          BUILD_NUMBER: ${{ steps.ver.outputs.IOS_BUILD_NUMBER }}
+        run: |
+          set -e
+          APP=$(ls -d "$ARCHIVE"/Products/Applications/*.app | head -n 1)
+          pl() { /usr/libexec/PlistBuddy -c "Print :$2" "$1"; }
+          [ "$(pl "$APP/Info.plist" CFBundleIdentifier)" = "app.zaghlol" ] || { echo "::error::bundle id is not app.zaghlol"; exit 1; }
+          [ "$(pl "$APP/Info.plist" CFBundleShortVersionString)" = "$BUILD_NAME" ] || { echo "::error::version mismatch"; exit 1; }
+          [ "$(pl "$APP/Info.plist" CFBundleVersion)" = "$BUILD_NUMBER" ] || { echo "::error::build number mismatch"; exit 1; }
+          # ATS must stay on (no arbitrary loads).
+          if /usr/libexec/PlistBuddy -c "Print :NSAppTransportSecurity:NSAllowsArbitraryLoads" "$APP/Info.plist" 2>/dev/null | grep -qi true; then
+            echo "::error::NSAllowsArbitraryLoads is true"; exit 1
+          fi
+          # Extensions, each with its own id and version.
+          for ext in "ShareExtension:app.zaghlol.ShareExtension" "ZaghlolWidget:app.zaghlol.widget"; do
+            appex="$APP/PlugIns/${ext%%:*}.appex"
+            [ -d "$appex" ] || { echo "::error::missing extension ${ext%%:*}: $(ls "$APP/PlugIns")"; exit 1; }
+            [ "$(pl "$appex/Info.plist" CFBundleIdentifier)" = "${ext##*:}" ] || { echo "::error::${ext%%:*} bundle id wrong"; exit 1; }
+            [ "$(pl "$appex/Info.plist" CFBundleVersion)" = "$BUILD_NUMBER" ] || { echo "::error::${ext%%:*} build number mismatch"; exit 1; }
+          done
+          # Privacy manifest: no tracking, required-reason APIs declared (T-177 AC).
+          PM="$APP/PrivacyInfo.xcprivacy"
+          [ -f "$PM" ] || { echo "::error::no PrivacyInfo.xcprivacy in the app bundle"; exit 1; }
+          plutil -convert xml1 -o - "$PM" > pm.xml
+          grep -q "35F9.1" pm.xml || { echo "::error::required-reason 35F9.1 (system boot time) is not declared"; exit 1; }
+          [ "$(pl "$PM" NSPrivacyTracking)" = "false" ] || { echo "::error::NSPrivacyTracking is not false"; exit 1; }
+          [ -d "$ARCHIVE/dSYMs" ] || echo "::warning::no dSYMs in the archive"
+          echo "OK: $(pl "$APP/Info.plist" CFBundleIdentifier) $BUILD_NAME ($BUILD_NUMBER)"
+
+      - name: Collect symbols (private)
+        id: symbols
+        env:
+          SYMBOLS_PASSPHRASE: ${{ secrets.SYMBOLS_PASSPHRASE }}
+        run: |
+          set -e
+          if [ -z "$SYMBOLS_PASSPHRASE" ]; then
+            echo "symbols=false" >> "$GITHUB_OUTPUT"
+            echo "::notice::SYMBOLS_PASSPHRASE not set: dSYMs and Dart symbols are NOT kept as artifacts (the repo is public, never in the clear). A signed upload still sends dSYMs to App Store Connect."
+            exit 0
+          fi
+          mkdir -p "$RUNNER_TEMP/symout"
+          tar -C "$RUNNER_TEMP/symbols" -cf "$RUNNER_TEMP/symout/dart-symbols.tar" ios
+          [ ! -d "$ARCHIVE/dSYMs" ] || tar -C "$ARCHIVE" -cf "$RUNNER_TEMP/symout/dsyms.tar" dSYMs
+          tar -C "$RUNNER_TEMP/symout" -cf - . | openssl enc -aes-256-cbc -pbkdf2 -iter 600000 -salt -pass env:SYMBOLS_PASSPHRASE -out "$RUNNER_TEMP/ios-symbols.tar.enc"
+          echo "symbols=true" >> "$GITHUB_OUTPUT"
+      - name: Keep the encrypted symbols (14 days)
+        if: steps.symbols.outputs.symbols == 'true'
+        uses: actions/upload-artifact@b7c566a772e6b6bfb58ed0dc250532a479d7789f # v6.0.0
+        with:
+          name: ios-symbols-encrypted
+          path: ${{ runner.temp }}/ios-symbols.tar.enc
+          if-no-files-found: error
+          retention-days: 14
+
+      # Dry-run output only: no signature, not installable, no secrets.
+      - name: Keep the unsigned archive as an IPA (3 days, dry run only)
+        if: steps.sign.outputs.signed != 'true'
+        uses: actions/upload-artifact@b7c566a772e6b6bfb58ed0dc250532a479d7789f # v6.0.0
+        with:
+          name: ios-ipa-UNSIGNED-dry-run
+          path: ${{ runner.temp }}/ipa/Zaghlol-UNSIGNED.ipa
+          if-no-files-found: error
+          retention-days: 3
+
+      - name: Upload to TestFlight (fastlane pilot, internal only)
+        if: steps.sign.outputs.upload == 'true'
+        working-directory: app
+        env:
+          ASC_KEY_ID: ${{ secrets.ASC_KEY_ID }}
+          ASC_ISSUER_ID: ${{ secrets.ASC_ISSUER_ID }}
+          ASC_KEY_P8_B64: ${{ secrets.ASC_KEY_P8_BASE64 }}
+        run: |
+          umask 077
+          printf '%s' "$ASC_KEY_P8_B64" | base64 --decode > "$RUNNER_TEMP/asc.p8"
+          ASC_KEY_PATH="$RUNNER_TEMP/asc.p8" fastlane ios testflight_internal
+      - name: Remove signing material
+        if: always()
+        run: rm -f "$RUNNER_TEMP/asc.p8" "$RUNNER_TEMP/dist.p12" "$RUNNER_TEMP"/*.mobileprovision* ; rm -f "$HOME"/Library/MobileDevice/Provisioning\ Profiles/*.mobileprovision
+
+      - name: Summary
+        if: always()
+        env:
+          SIGNED: ${{ steps.sign.outputs.signed }}
+          UPLOAD: ${{ steps.sign.outputs.upload }}
+        run: |
+          {
+            echo "### iOS prod"
+            echo "- version: ${{ steps.ver.outputs.BUILD_NAME }} (${{ steps.ver.outputs.IOS_BUILD_NUMBER }})"
+            echo "- signed: $SIGNED"
+            echo "- uploaded to TestFlight: $UPLOAD"
+          } >> "$GITHUB_STEP_SUMMARY"
