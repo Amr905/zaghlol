@@ -1,0 +1,14 @@
+{
+  "sender": "ArabBankEG",
+  "body": "قيد راتب بمبلغ EGP 18500.00 لحساب 410*5046 بتاريخ 27/10/2026 .",
+  "receivedAt": "2026-11-18T10:00:00+02:00",
+  "expect": {
+    "template": "arab_bank.salary.ar",
+    "event": "salary",
+    "direction": "income",
+    "currency": "EGP",
+    "amount": "18500.00",
+    "last4": "5046",
+    "date": "2026-10-27"
+  }
+}

@@ -10,6 +10,30 @@
     {
       "match": "exact",
       "value": "VodafoneCash"
+    },
+    {
+      "match": "exact",
+      "value": "VF-Cash"
+    },
+    {
+      "match": "exact",
+      "value": "VFCash"
+    },
+    {
+      "match": "exact",
+      "value": "VF Cash"
+    },
+    {
+      "match": "exact",
+      "value": "Vodafone Cash"
+    },
+    {
+      "match": "exact",
+      "value": "VODAFONE CASH"
+    },
+    {
+      "match": "exact",
+      "value": "VF_Cash"
     }
   ],
   "packages": [],
@@ -92,6 +116,132 @@
         "جنيه": "EGP",
         "egp": "EGP"
       }
+    },
+    {
+      "id": "vodafone_cash.send.ar",
+      "version": 6,
+      "lang": "ar",
+      "channel": [
+        "sms"
+      ],
+      "event": "transfer_out",
+      "direction": "expense",
+      "baseConfidence": 0.9,
+      "pattern": "تم (?:تحويل|ارسال) (?<amount>[\\d,.]+) (?<cur>جم|جنيه|egp) (?:بنجاح (?:الي|الى) (?:رقم )?|(?:الي|الى) رقم )(?<phone>01\\d{9})(?:\\. |\\.?$)(?:رصيدك (?:الحالي|المتاح)(?: هو)?:? (?<balance>[\\d,.]+) (?:جم|جنيه|egp)(?:\\. |\\.?$))?(?:رقم (?:العمليه|المعامله|المرجع):? ?(?<ref>[a-z0-9]{6,24}))?",
+      "currencyMap": {
+        "جم": "EGP",
+        "جنيه": "EGP",
+        "egp": "EGP"
+      },
+      "source": "synthetic-unverified"
+    },
+    {
+      "id": "vodafone_cash.receive.ar",
+      "version": 6,
+      "lang": "ar",
+      "channel": [
+        "sms"
+      ],
+      "event": "transfer_in",
+      "direction": "income",
+      "baseConfidence": 0.9,
+      "pattern": "تم استلام (?<amount>[\\d,.]+) (?<cur>جم|جنيه|egp) من (?:رقم )?(?<phone>01\\d{9})(?:\\. |\\.?$)(?:رصيدك (?:الحالي|المتاح)(?: هو)?:? (?<balance>[\\d,.]+) (?:جم|جنيه|egp)(?:\\. |\\.?$))?(?:رقم (?:العمليه|المعامله|المرجع):? ?(?<ref>[a-z0-9]{6,24}))?",
+      "currencyMap": {
+        "جم": "EGP",
+        "جنيه": "EGP",
+        "egp": "EGP"
+      },
+      "source": "synthetic-unverified"
+    },
+    {
+      "id": "vodafone_cash.payment.ar",
+      "version": 6,
+      "lang": "ar",
+      "channel": [
+        "sms"
+      ],
+      "event": "card_purchase",
+      "direction": "expense",
+      "baseConfidence": 0.9,
+      "pattern": "تم دفع (?<amount>[\\d,.]+) (?<cur>جم|جنيه|egp) (?:الي|ل|لـ) ?(?<merchant>[^.]+?)(?: بنجاح)?(?:\\. |\\.?$)(?:رصيدك (?:الحالي|المتاح)(?: هو)?:? (?<balance>[\\d,.]+) (?:جم|جنيه|egp)(?:\\. |\\.?$))?(?:رقم (?:العمليه|المعامله|المرجع):? ?(?<ref>[a-z0-9]{6,24}))?",
+      "currencyMap": {
+        "جم": "EGP",
+        "جنيه": "EGP",
+        "egp": "EGP"
+      },
+      "source": "synthetic-unverified"
+    },
+    {
+      "id": "vodafone_cash.bill.ar",
+      "version": 6,
+      "lang": "ar",
+      "channel": [
+        "sms"
+      ],
+      "event": "card_purchase",
+      "direction": "expense",
+      "baseConfidence": 0.9,
+      "pattern": "تم سداد فاتوره (?<merchant>[^.]+?) بمبلغ (?<amount>[\\d,.]+) (?<cur>جم|جنيه|egp)(?: بنجاح)?(?:\\. |\\.?$)(?:رصيدك (?:الحالي|المتاح)(?: هو)?:? (?<balance>[\\d,.]+) (?:جم|جنيه|egp)(?:\\. |\\.?$))?(?:رقم (?:العمليه|المعامله|المرجع):? ?(?<ref>[a-z0-9]{6,24}))?",
+      "currencyMap": {
+        "جم": "EGP",
+        "جنيه": "EGP",
+        "egp": "EGP"
+      },
+      "source": "synthetic-unverified"
+    },
+    {
+      "id": "vodafone_cash.cash_in.ar",
+      "version": 6,
+      "lang": "ar",
+      "channel": [
+        "sms"
+      ],
+      "event": "wallet_topup",
+      "direction": "income",
+      "baseConfidence": 0.9,
+      "pattern": "تم ايداع (?<amount>[\\d,.]+) (?<cur>جم|جنيه|egp) (?:في|الي|علي) محفظتك(?: (?:من|عن طريق) (?<counterparty>[^.]+?))?(?:\\. |\\.?$)(?:رصيدك (?:الحالي|المتاح)(?: هو)?:? (?<balance>[\\d,.]+) (?:جم|جنيه|egp)(?:\\. |\\.?$))?(?:رقم (?:العمليه|المعامله|المرجع):? ?(?<ref>[a-z0-9]{6,24}))?",
+      "currencyMap": {
+        "جم": "EGP",
+        "جنيه": "EGP",
+        "egp": "EGP"
+      },
+      "source": "synthetic-unverified"
+    },
+    {
+      "id": "vodafone_cash.cash_out.ar",
+      "version": 6,
+      "lang": "ar",
+      "channel": [
+        "sms"
+      ],
+      "event": "atm_withdrawal",
+      "direction": "expense",
+      "baseConfidence": 0.9,
+      "pattern": "تم سحب (?<amount>[\\d,.]+) (?<cur>جم|جنيه|egp) من محفظتك(?: (?:من|عن طريق|عبر) (?<merchant>[^.]+?))?(?:\\. |\\.?$)(?:رصيدك (?:الحالي|المتاح)(?: هو)?:? (?<balance>[\\d,.]+) (?:جم|جنيه|egp)(?:\\. |\\.?$))?(?:رقم (?:العمليه|المعامله|المرجع):? ?(?<ref>[a-z0-9]{6,24}))?",
+      "currencyMap": {
+        "جم": "EGP",
+        "جنيه": "EGP",
+        "egp": "EGP"
+      },
+      "source": "synthetic-unverified"
+    },
+    {
+      "id": "vodafone_cash.balance.ar",
+      "version": 6,
+      "lang": "ar",
+      "channel": [
+        "sms"
+      ],
+      "event": "balance_only",
+      "direction": "neutral",
+      "baseConfidence": 0.9,
+      "pattern": "^رصيدك (?:الحالي|المتاح) (?:في محفظه فودافون كاش )?(?:هو )?(?<balance>[\\d,.]+) (?:جم|جنيه|egp)(?:\\.|$)",
+      "currencyMap": {
+        "جم": "EGP",
+        "جنيه": "EGP",
+        "egp": "EGP"
+      },
+      "source": "synthetic-unverified"
     }
   ]
 }

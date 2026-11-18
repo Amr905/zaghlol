@@ -1,0 +1,13 @@
+{
+  "sender": "Vodafone Cash",
+  "body": "تم ارسال 75.00 جنيه الى رقم 01112345678.",
+  "receivedAt": "2026-11-18T10:00:00+02:00",
+  "expect": {
+    "template": "vodafone_cash.send.ar",
+    "event": "transfer_out",
+    "direction": "expense",
+    "currency": "EGP",
+    "amount": "75.00",
+    "phone": "01112345678"
+  }
+}

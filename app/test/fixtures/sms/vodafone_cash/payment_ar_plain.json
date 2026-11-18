@@ -1,0 +1,15 @@
+{
+  "sender": "VF-Cash",
+  "body": "تم دفع 150.00 جنيه الى COFFEE SPOT بنجاح. رصيدك الحالي 300.00 جنيه. رقم العملية 777000222",
+  "receivedAt": "2026-11-18T10:00:00+02:00",
+  "expect": {
+    "template": "vodafone_cash.payment.ar",
+    "event": "card_purchase",
+    "direction": "expense",
+    "currency": "EGP",
+    "amount": "150.00",
+    "merchantClean": "Coffee Spot",
+    "balance": "300.00",
+    "ref": "777000222"
+  }
+}

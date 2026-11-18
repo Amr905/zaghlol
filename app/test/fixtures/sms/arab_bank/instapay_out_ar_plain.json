@@ -1,0 +1,18 @@
+{
+  "sender": "EG",
+  "body": "تم تنفيذ تحويل لحظي بمبلغ EGP 50020.00 بتاريخ 28/10/2026 18:10. من حسابك 419*5044 الى AMR MOUSA  . رقم مرجعي77700668421. الرصيد المتوفر EGP 12320.23 للمزيد 19100.",
+  "receivedAt": "2026-11-18T10:00:00+02:00",
+  "expect": {
+    "template": "arab_bank.instapay_out.ar",
+    "event": "instapay_out",
+    "direction": "expense",
+    "currency": "EGP",
+    "amount": "50020.00",
+    "last4": "5044",
+    "counterparty": "AMR MOUSA",
+    "ref": "77700668421",
+    "balance": "12320.23",
+    "date": "2026-10-28",
+    "time": "18:10"
+  }
+}

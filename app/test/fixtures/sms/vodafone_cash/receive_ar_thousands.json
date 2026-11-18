@@ -1,0 +1,14 @@
+{
+  "sender": "VF-Cash",
+  "body": "تم استلام 12,000.00 جنيه من رقم 01512345678. رصيدك المتاح 15,000.50 جنيه",
+  "receivedAt": "2026-11-18T10:00:00+02:00",
+  "expect": {
+    "template": "vodafone_cash.receive.ar",
+    "event": "transfer_in",
+    "direction": "income",
+    "currency": "EGP",
+    "amount": "12000.00",
+    "phone": "01512345678",
+    "balance": "15000.50"
+  }
+}

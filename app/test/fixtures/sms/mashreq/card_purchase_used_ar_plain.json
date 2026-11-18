@@ -1,0 +1,14 @@
+{
+  "sender": "Mashreq-e&",
+  "body": "تم استخدام بطاقتكم المنتهية ب9117  في 8180044-SAUDI GERMAN H بمبلغ EGP 2,000.00.",
+  "receivedAt": "2026-11-18T10:00:00+02:00",
+  "expect": {
+    "template": "mashreq.card_purchase_used.ar",
+    "event": "card_purchase",
+    "direction": "expense",
+    "currency": "EGP",
+    "amount": "2000.00",
+    "last4": "9117",
+    "merchantClean": "Saudi German H"
+  }
+}

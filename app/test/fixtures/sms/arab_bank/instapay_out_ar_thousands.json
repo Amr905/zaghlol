@@ -1,0 +1,18 @@
+{
+  "sender": "ARABBANK",
+  "body": "تم تنفيذ تحويل لحظي بمبلغ EGP 1,250,000.00 بتاريخ 01/11/2026 12:00. من حسابك 419*5044 الى LAYLA OMAR FAROUK . رقم مرجعي12345678901. الرصيد المتوفر EGP 2,345,678.90 للمزيد 19100.",
+  "receivedAt": "2026-11-18T10:00:00+02:00",
+  "expect": {
+    "template": "arab_bank.instapay_out.ar",
+    "event": "instapay_out",
+    "direction": "expense",
+    "currency": "EGP",
+    "amount": "1250000.00",
+    "last4": "5044",
+    "counterparty": "LAYLA OMAR FAROUK",
+    "ref": "12345678901",
+    "balance": "2345678.90",
+    "date": "2026-11-01",
+    "time": "12:00"
+  }
+}

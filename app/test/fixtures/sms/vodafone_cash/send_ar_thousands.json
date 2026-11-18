@@ -1,0 +1,15 @@
+{
+  "sender": "VodafoneCash",
+  "body": "تم تحويل 1,500.00 جنيه بنجاح إلى 01212345678. رصيدك الحالي 3,250.25 جنيه. رقم العملية 123456789012",
+  "receivedAt": "2026-11-18T10:00:00+02:00",
+  "expect": {
+    "template": "vodafone_cash.send.ar",
+    "event": "transfer_out",
+    "direction": "expense",
+    "currency": "EGP",
+    "amount": "1500.00",
+    "phone": "01212345678",
+    "balance": "3250.25",
+    "ref": "123456789012"
+  }
+}

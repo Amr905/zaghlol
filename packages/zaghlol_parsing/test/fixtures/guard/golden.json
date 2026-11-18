@@ -2,7 +2,7 @@
  "format": 1,
  "synthetic": true,
  "note": "Synthetic data only (CLAUDE.md 2.6). Shared by the Dart, Kotlin (T-038) and Swift (T-061) Guards: never copy. count = fold + cases + rate + modes. fold: out = foldKey(in); lines (when present, else out) = foldKeyLines(in), the Guard's fold for the global drop patterns.",
- "count": 296,
+ "count": 299,
  "configs": {
   "t1": {
    "base": "configs/t1_base.json",
@@ -14,6 +14,21 @@
   }
  },
  "fold": [
+  {
+   "id": "fold.sender.ampersand",
+   "in": "Mashreq-e&",
+   "out": "mashreq-e&"
+  },
+  {
+   "id": "fold.sender.hyphen_case",
+   "in": "VF-Cash",
+   "out": "vf-cash"
+  },
+  {
+   "id": "fold.sender.short_exact",
+   "in": "EG",
+   "out": "eg"
+  },
   {
    "id": "fold.digits.arabic_indic",
    "in": "١٢٣٤٥٦",

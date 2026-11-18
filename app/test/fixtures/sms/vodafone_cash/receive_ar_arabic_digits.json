@@ -1,0 +1,14 @@
+{
+  "sender": "VF-Cash",
+  "body": "تم استلام ٣٥٠٫٧٥ جنيه من ٠١١١٢٣٤٥٦٧٨. رصيدك الحالي ٨٠٠٫٠٠ جنيه",
+  "receivedAt": "2026-11-18T10:00:00+02:00",
+  "expect": {
+    "template": "vodafone_cash.receive.ar",
+    "event": "transfer_in",
+    "direction": "income",
+    "currency": "EGP",
+    "amount": "350.75",
+    "phone": "01112345678",
+    "balance": "800.00"
+  }
+}
