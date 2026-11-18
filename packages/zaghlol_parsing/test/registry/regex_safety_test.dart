@@ -171,14 +171,22 @@ void main() {
       expect(budgetedFirstMatch(r, 'x 12')?.group(1), '12');
     });
 
-    test('a quarantined drop pattern counts as a match (fail closed)', () {
-      final r = RegExp('otp');
-      for (var i = 0; i < quarantineStrikes; i++) {
-        budgetedFirstMatch(r, 'x', budget: const Duration(microseconds: -1));
-      }
-      expect(budgetedHasMatch(r, 'hello'), isFalse);
-      expect(budgetedHasMatch(r, 'hello', dropPattern: true), isTrue);
-    });
+    test(
+      'a drop pattern always runs as a plain match, even if quarantined',
+      () {
+        final r = RegExp('otp');
+        for (var i = 0; i < quarantineStrikes; i++) {
+          budgetedFirstMatch(r, 'x', budget: const Duration(microseconds: -1));
+        }
+        expect(isRegexQuarantined(r), isTrue);
+        expect(
+          budgetedHasMatch(r, 'your otp'),
+          isFalse,
+        ); // template use: skipped
+        expect(budgetedHasMatch(r, 'your otp', dropPattern: true), isTrue);
+        expect(budgetedHasMatch(r, 'hello', dropPattern: true), isFalse);
+      },
+    );
 
     test('a fast regex is never quarantined and still matches', () {
       final r = RegExp(r'(\d+)');

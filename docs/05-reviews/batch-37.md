@@ -49,3 +49,13 @@ Tests run on the merged tree: app `test/features test/core test/a11y` (benchmark
 |---|---|---|---|
 | FU-b37-catalog | `packages/zaghlol_parsing/lib/registry/regex_safety.dart:37`, `lib/pipeline/parsing_pipeline.dart:54,63,132,138` | A quarantined drop pattern counts as a match (fail closed); only templates fail to "no match" | Quarantine the global OTP drop regex, then parse an OTP body and expect `ParseDropped(globalPattern)` |
 | FU-b37-parse | `app/ios/Runner/Platform/OCR/OcrHost.swift:314-326` | Re-check containment on the symlink-resolved path (resolve the roots too); throw `ioError` and delete nothing if the target is outside | XCTest: a symlink in the plain dir pointing to a file outside the roots leaves that file in place and throws `ioError` |
+
+## Lead delta check: quarantined drop patterns (2026-11-18)
+
+The fix agent's 11c18b2e made a quarantined drop pattern count as a match ("fail closed"). That swaps the OTP leak for data loss: once quarantined, a global drop pattern would drop **every** SMS, and an institution drop pattern every SMS from that bank, for the rest of the process. The Lead replaced it in a follow-up commit:
+- **Rule:** drop patterns (`dropPattern: true`) are never quarantined and always run as a plain match. They are short, and registry_lint rejects backtracking-prone patterns. Template patterns keep the 3-strike quarantine.
+- **Pipeline test:** with every global and institution drop pattern struck 3 times, an OTP is still `ParseDropped(globalPattern)` and an NBE purchase is **not** dropped.
+- **Unit test:** a quarantined drop pattern still matches only what it matches.
+- Parsing 1515 tests pass; analyze is clean.
+
+Verdict: FU-b37-catalog **APPROVED** after this change.

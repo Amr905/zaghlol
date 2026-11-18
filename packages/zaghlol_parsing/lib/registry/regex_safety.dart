@@ -58,15 +58,17 @@ RegExpMatch? budgetedFirstMatch(
 
 /// [budgetedFirstMatch] as a boolean.
 ///
-/// A [dropPattern] that is quarantined counts as a match (fail closed: the
-/// message is dropped, so an OTP can never slip through).
+/// A [dropPattern] is never quarantined: it always runs as a plain match.
+/// Skipping it would let OTPs through; treating it as matching would drop
+/// every message. Drop patterns are short and registry_lint rejects
+/// backtracking-prone ones (batch-37 review + Lead delta check).
 bool budgetedHasMatch(
   RegExp regex,
   String text, {
   Duration budget = regexMatchBudget,
   bool dropPattern = false,
 }) {
-  if (dropPattern && isRegexQuarantined(regex)) return true;
+  if (dropPattern) return regex.hasMatch(text);
   return budgetedFirstMatch(regex, text, budget: budget) != null;
 }
 

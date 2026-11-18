@@ -245,9 +245,13 @@ void main() {
       expect(r.institutionCode, 'nbe');
     });
 
-    test('quarantined global OTP drop pattern still drops (fail closed)', () {
+    test('quarantined drop patterns still drop OTPs and keep transactions', () {
       final p = _pipelineOf(RegistryFiles.load(pipelineRoot));
-      for (final d in p.registry.shared.globalDrop) {
+      final drops = [
+        ...p.registry.shared.globalDrop,
+        for (final i in p.registry.institutions) ...i.drop,
+      ];
+      for (final d in drops) {
         for (var i = 0; i < quarantineStrikes; i++) {
           budgetedFirstMatch(
             d.regex,
@@ -255,14 +259,20 @@ void main() {
             budget: const Duration(microseconds: -1),
           );
         }
-        expect(isRegexQuarantined(d.regex), isTrue);
       }
-      final r = p.parse(_req('Your OTP is 123456'));
-      for (final d in p.registry.shared.globalDrop) {
+      final otp = p.parse(_req('Your OTP is 123456'));
+      final txn = p.parse(
+        _req(
+          'NBE: Purchase of EGP 200.00 from NBE Visa **4567 at TESTMART. '
+          'Balance EGP 2000.00',
+        ),
+      );
+      for (final d in drops) {
         resetRegexQuarantineForTesting(d.regex);
       }
-      expect(r, isA<ParseDropped>());
-      expect((r as ParseDropped).reason, DropReason.globalPattern);
+      expect(otp, isA<ParseDropped>());
+      expect((otp as ParseDropped).reason, DropReason.globalPattern);
+      expect(txn, isNot(isA<ParseDropped>()));
     });
 
     test('global drop pattern, known and unknown sender', () {
