@@ -1,3 +1,5 @@
+import java.util.Properties
+
 plugins {
     id("com.android.application")
     // The Flutter Gradle Plugin must be applied after the Android and Kotlin Gradle plugins.
@@ -96,7 +98,7 @@ android {
     // secrets (ZAGHLOL_UPLOAD_* environment variables, written by the release
     // workflow) or from android/key.properties (git-ignored) on a release
     // machine. Never from source.
-    val keyProps = java.util.Properties().apply {
+    val keyProps = Properties().apply {
         val f = rootProject.file("key.properties")
         if (f.exists()) f.inputStream().use { load(it) }
     }
