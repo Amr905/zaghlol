@@ -63,7 +63,31 @@ n=$(canaries)
 
 echo "---- 2. adb backup (backup password empty)"
 plant
-timeout 90 adb -s "$DEVICE" backup -noapk -f "$OUT/z.ab" "$PKG" < /dev/null 2>&1 | head -3 | sed 's/^/  adb backup: /'
+# The confirm screen (com.android.backupconfirm) needs a tap: find the button with uiautomator.
+tap_confirm() {
+  sleep 10
+  for _ in 1 2 3 4; do
+    A shell uiautomator dump /sdcard/ui.xml > /dev/null 2>&1 < /dev/null
+    xy=$(A exec-out cat /sdcard/ui.xml 2> /dev/null | python3 -I -c '
+import re,sys
+x=sys.stdin.read()
+for m in re.finditer(r"<node[^>]*>", x):
+    n=m.group(0)
+    if re.search(r"(?i)back up my data|text=\"(back up|backup)\"", n):
+        b=re.search(r"bounds=\"\[(\d+),(\d+)\]\[(\d+),(\d+)\]", n)
+        if b:
+            a=list(map(int,b.groups())); print((a[0]+a[2])//2,(a[1]+a[3])//2); break
+')
+    if [ -n "$xy" ]; then echo "  confirm button at $xy"; S input tap $xy; return; fi
+    sleep 4
+  done
+  echo "  no confirm button found (UI listing follows, text only)"
+  A exec-out cat /sdcard/ui.xml 2> /dev/null | grep -o 'text="[^"]*"' | grep -v '=""' | head -10
+}
+tap_confirm &
+tp=$!
+timeout 120 adb -s "$DEVICE" backup -noapk -f "$OUT/z.ab" "$PKG" < /dev/null 2>&1 | head -3 | sed 's/^/  adb backup: /'
+wait "$tp" 2> /dev/null
 sz=$(stat -c %s "$OUT/z.ab" 2> /dev/null || echo 0)
 echo "  archive bytes: $sz"
 python3 -I - "$OUT/z.ab" << 'PY' | tee "$OUT/adb-backup.txt"
