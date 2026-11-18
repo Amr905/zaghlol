@@ -191,6 +191,27 @@ final class ParsingPipeline {
     if (firstFatal != null) {
       return firstFatal;
     }
+    if (request.channel != RegistryChannel.notification &&
+        registry.isTemplateOnlySource(institution, request.source)) {
+      // Generic sender id (e.g. `EG`) and no template matched: an unknown
+      // sender, never filed under the institution.
+      if (!isGenericCandidate(
+        shared: registry.shared,
+        source: request.source,
+        channel: request.channel,
+        foldedBody: folded.text,
+      )) {
+        return const ParseUnrecognized(UnrecognizedReason.unknownSource);
+      }
+      return parseGeneric(
+        body: body,
+        folded: folded,
+        receivedAt: receivedAt,
+        language: language.name,
+        globalLast4: registry.shared.globalLast4,
+        cleaning: registry.shared.merchantCleaning,
+      );
+    }
     // A known sender whose wording no template covers: read it generically
     // (never auto-accepted) so the review item carries the fields. A message
     // the generic parser cannot read stays `noTemplateMatched`.

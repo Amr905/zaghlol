@@ -413,16 +413,31 @@ List<SenderRule> _senders(ObjReader r, List<RegistryIssue> out) {
     final o = ObjReader(path, item, out);
     final match = o.string('match', required: true);
     final value = o.string('value', required: true);
+    final templateOnly = o.boolean('templateOnly') ?? false;
     o.finish();
     if (match == null || value == null) {
       continue;
     }
     if (match == 'exact') {
-      rules.add(SenderRule(SenderMatchKind.exact, value.trim(), null));
+      rules.add(
+        SenderRule(
+          SenderMatchKind.exact,
+          value.trim(),
+          null,
+          templateOnly: templateOnly,
+        ),
+      );
     } else if (match == 'regex') {
       final p = _compileChecked('$path.value', value, out, guardBound: true);
       if (p != null) {
-        rules.add(SenderRule(SenderMatchKind.regex, value, p));
+        rules.add(
+          SenderRule(
+            SenderMatchKind.regex,
+            value,
+            p,
+            templateOnly: templateOnly,
+          ),
+        );
       }
     } else {
       out.add(RegistryIssue('$path.match', RegistryIssueCode.badValue));

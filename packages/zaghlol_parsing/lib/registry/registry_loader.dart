@@ -74,6 +74,26 @@ final class Registry {
     return null;
   }
 
+  /// True when every rule of [institution] that matches [source] is
+  /// `templateOnly` (an SMS sender only; packages are never weak).
+  bool isTemplateOnlySource(Institution institution, String source) {
+    final key = foldKey(source);
+    var weak = false;
+    for (final s in institution.senders) {
+      final hit = switch (s.kind) {
+        SenderMatchKind.exact => foldKey(s.value) == key,
+        SenderMatchKind.regex => s.regex!.regex.hasMatch(key),
+      };
+      if (hit) {
+        if (!s.templateOnly) {
+          return false;
+        }
+        weak = true;
+      }
+    }
+    return weak;
+  }
+
   /// Canonical `registry_manifest.json` text for this registry.
   String manifestJson() {
     final map = <String, Object?>{

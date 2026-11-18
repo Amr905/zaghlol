@@ -341,4 +341,44 @@ void main() {
       expect(d, isA<GuardDrop>());
     },
   );
+
+  test('a real CIB purchase with a T&C footer is saved, not dropped', () async {
+    const body =
+        'البنك التجاري الدولي: عملية شراء بمبلغ 450.00 جم لدى UBER EG '
+        'ببطاقة ينتهي رقمها بـ 1234. الرصيد 4500.20 جم. تطبق الشروط والأحكام';
+    expect(
+      guard.decide(channel: 'sms', source: 'CIB', body: body),
+      isA<GuardKeep>(),
+    );
+    final registry = await preloadBundledRegistry();
+    final w = await IngestWorld.open();
+    addTearDown(w.close);
+    final result = await w.useCase(
+      registry: registry,
+      guardBase: BytesGuardBase(base),
+    )([sms('t1', body, source: 'CIB')]);
+    expect(result.outcomes['t1'], isA<IngestInserted>());
+    expect((await w.txns()).single['amount_minor'], 45000);
+  });
+
+  test(
+    'a non-template text from sender EG is a review item, not Arab Bank',
+    () async {
+      const body =
+          'فاتورة الكهرباء المستحقة 350.00 جنيه للعداد المنتهي 5044. '
+          'برجاء السداد';
+      final registry = await preloadBundledRegistry();
+      final w = await IngestWorld.open();
+      addTearDown(w.close);
+      await w.useCase(registry: registry, guardBase: BytesGuardBase(base))([
+        sms('e1', body, source: 'EG'),
+      ]);
+      expect(await w.txns(), isEmpty);
+      final reviews = await w.reviews();
+      expect(reviews, isNotEmpty);
+      for (final r in reviews) {
+        expect('${r['payload']}'.toLowerCase(), isNot(contains('arab_bank')));
+      }
+    },
+  );
 }

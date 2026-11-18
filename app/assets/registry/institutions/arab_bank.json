@@ -29,7 +29,8 @@
     },
     {
       "match": "exact",
-      "value": "EG"
+      "value": "EG",
+      "templateOnly": true
     }
   ],
   "packages": [],
