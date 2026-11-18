@@ -270,8 +270,8 @@ void main() {
       );
     });
 
-    test('about 150 spec merchants, every one with an alias', () {
-      expect(built.seed.merchants.length, inInclusiveRange(120, 200));
+    test('the 600+ merchant seed (T-059), every one with an alias', () {
+      expect(built.seed.merchants.length, greaterThanOrEqualTo(600));
       final withAlias = {for (final a in built.seed.aliases) a.merchantId};
       expect(withAlias.length, built.seed.merchants.length);
     });
@@ -366,6 +366,38 @@ void main() {
       for (final r in aliasRows) {
         expect(key.hasMatch(r['alias']), isTrue, reason: 'line ${r.line}');
         expect(r['alias'].length, lessThanOrEqualTo(64));
+      }
+    });
+  });
+
+  group('Egyptian merchant map (T-059)', () {
+    final csv = File('data/catalog_curated.csv').readAsStringSync();
+    final built = buildCatalog(csv, version: 1);
+
+    test('at least 600 merchants, each with an alias', () {
+      expect(built.seed.merchants.length, greaterThanOrEqualTo(600));
+      final withAlias = {for (final a in built.seed.aliases) a.merchantId};
+      for (final m in built.seed.merchants) {
+        expect(withAlias, contains(m.id), reason: m.canonical);
+      }
+    });
+
+    test('an alias key never belongs to two categories', () {
+      final catOf = {for (final m in built.seed.merchants) m.id: m.category};
+      final owner = <String, String>{};
+      for (final a in built.seed.aliases) {
+        final c = catOf[a.merchantId]!;
+        final prev = owner[a.alias];
+        expect(prev == null || prev == c, isTrue, reason: a.alias);
+        owner[a.alias] = c;
+      }
+    });
+
+    test('every merchant after the T-030 base is in merchant-sources.md', () {
+      final sources = File('../../docs/03-technical/merchant-sources.md')
+          .readAsStringSync();
+      for (final m in built.seed.merchants.skip(149)) {
+        expect(sources, contains('| ${m.canonical} |'), reason: m.canonical);
       }
     });
   });
