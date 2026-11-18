@@ -58,7 +58,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        flavor: ${{ fromJSON(inputs.flavor == 'both' && '["prodSms","prodNoSms"]' || format('["{0}"]', inputs.flavor)) }}
+        flavor: ${{ fromJSON((inputs.flavor == 'both' || inputs.flavor == '') && '["prodSms","prodNoSms"]' || format('["{0}"]', inputs.flavor)) }}
     env:
       FLAVOR: ${{ matrix.flavor }}
       EXPECT_SMS: ${{ matrix.flavor == 'prodSms' }}
