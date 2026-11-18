@@ -9,6 +9,7 @@ import 'package:zaghlol_parsing/zaghlol_parsing.dart';
 import 'package:zaghlol/core/l10n/digits_mode.dart';
 import 'package:zaghlol/core/settings/settings_keys.dart' show DigitsPref;
 import 'package:zaghlol/core/l10n/generated/app_localizations.dart';
+import 'package:zaghlol/features/mascot/presentation/zaghlol_avatar.dart';
 import 'package:zaghlol/core/l10n/locale_providers.dart';
 import 'package:zaghlol/core/theme/app_theme.dart';
 import 'package:zaghlol/features/budget/application/budget_providers.dart';
@@ -193,6 +194,9 @@ class VoiceRig {
     addTearDown(() => tester.binding.setSurfaceSize(null));
     final container = ProviderContainer(overrides: overrides);
     addTearDown(container.dispose);
+    // T-099: the listening mascot loops while the mic is open; these tests
+    // settle, so they run with reduce motion (still pose).
+    container.read(reduceMotionProvider.notifier).set(true);
     if (gold) {
       container
           .read(entitlementStateProvider.notifier)

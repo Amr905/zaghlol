@@ -19,6 +19,14 @@ on:
         description: 'Run only the SMS device test (SMS-device)'
         type: boolean
         default: false
+      t165_only:
+        description: 'Run only the T-165 backup-exclusion check (t165-backup-emu.sh)'
+        type: boolean
+        default: false
+      api:
+        description: 'Emulator API level (T-165 check; the flows use 34)'
+        type: string
+        default: '34'
       explorer_plan:
         description: 'Explorer runs: base (Arabic light), variants (en, dark, 1.3, paywall, onboarding), new (review cards, charts) or all'
         type: choice
@@ -34,6 +42,7 @@ on:
       - 'app/integration_test/support/**'
       - '.github/workflows/device-flows.yml'
       - '.github/scripts/device-flows.sh'
+      - '.github/scripts/t165-backup-emu.sh'
 
 permissions:
   contents: write # publish the screenshots to the device-shots branch
@@ -52,6 +61,8 @@ jobs:
     timeout-minutes: 90
     env:
       DEVICE: emulator-5554
+      T165_ONLY: ${{ inputs.t165_only && '1' || '' }}
+      API: ${{ inputs.api || '34' }}
       EXPLORER_ONLY: ${{ (inputs.explorer_only || startsWith(github.ref_name, 'ci/TEST-explorer3')) && '1' || '' }}
       EXPLORER_PLAN: ${{ inputs.explorer_plan || (startsWith(github.ref_name, 'ci/TEST-explorer3') && 'new' || 'all') }}
       # SMS-device: the ci/SMS-device branch runs the SMS part only.
@@ -79,7 +90,7 @@ jobs:
       - name: Run on the emulator
         uses: reactivecircus/android-emulator-runner@a421e43855164a8197daf9d8d40fe71c6996bb0d # v2.38.0
         with:
-          api-level: 34
+          api-level: ${{ inputs.api || 34 }}
           arch: x86_64
           target: google_apis
           disable-animations: true

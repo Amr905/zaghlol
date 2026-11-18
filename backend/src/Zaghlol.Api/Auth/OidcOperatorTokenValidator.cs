@@ -66,6 +66,12 @@ internal sealed partial class OidcOperatorTokenValidator(
         var roles = new List<string>(row.Roles.Count);
         foreach (var role in row.Roles.Distinct(StringComparer.Ordinal))
         {
+            // With a RoleMap the token may only narrow the row's roles; it never adds one.
+            if (settings.RoleMap.Count > 0 && !token.MappedRoles.Contains(role, StringComparer.Ordinal))
+            {
+                continue;
+            }
+
             if (!Application.Operators.OperatorRoles.IsKnown(role))
             {
                 metrics.OperatorUnknownRole();
@@ -130,7 +136,7 @@ internal sealed partial class OidcOperatorTokenValidator(
         var parameters = new TokenValidationParameters
         {
             ValidateIssuer = true,
-            ValidIssuer = settings.Issuer,
+            ValidIssuers = settings.ValidIssuers(),
             ValidateAudience = true,
             ValidAudiences = settings.Audiences,
             RequireAudience = true,
@@ -164,7 +170,7 @@ internal sealed partial class OidcOperatorTokenValidator(
         }
 
         // Belt and braces: exact (ordinal) issuer and audience, whatever the library's matching rules are.
-        if (!string.Equals(jwt.Issuer, settings.Issuer, StringComparison.Ordinal))
+        if (!settings.ValidIssuers().Contains(jwt.Issuer, StringComparer.Ordinal))
         {
             return Refuse("issuer");
         }
@@ -174,7 +180,7 @@ internal sealed partial class OidcOperatorTokenValidator(
             return Refuse("audience");
         }
 
-        if (!TryReadNumericDates(token, out var exp, out var iat, out var nbf))
+        if (!TryReadNumericDates(token, settings.RequiresNotBefore(), out var exp, out var iat, out var nbf))
         {
             return Refuse("lifetime_claims");
         }
@@ -186,8 +192,21 @@ internal sealed partial class OidcOperatorTokenValidator(
             return Refuse("lifetime");
         }
 
-        var amr = Values(jwt, "amr");
-        if (!amr.Any(a => settings.EffectiveAcceptedAmr().Contains(a, StringComparer.Ordinal)))
+        // Tenant / domain allow-list, deny by default (Entra tid, Google hd; the issuer check alone is not enough).
+        if (settings.Profile == OperatorAuthProfile.Entra
+            && !Values(jwt, "tid").Any(t => settings.AllowedTenants.Contains(t, StringComparer.OrdinalIgnoreCase)))
+        {
+            return Refuse("tenant");
+        }
+
+        if (settings.Profile == OperatorAuthProfile.Google
+            && !Values(jwt, "hd").Any(d => settings.AllowedDomains.Contains(d, StringComparer.OrdinalIgnoreCase)))
+        {
+            return Refuse("domain");
+        }
+
+        if (settings.RequiresMfaClaim()
+            && !Values(jwt, "amr").Any(a => settings.EffectiveAcceptedAmr().Contains(a, StringComparer.Ordinal)))
         {
             return Refuse("mfa");
         }
@@ -198,7 +217,10 @@ internal sealed partial class OidcOperatorTokenValidator(
             return Refuse("subject");
         }
 
-        return new ValidatedToken(subject, Values(jwt, "acrs"));
+        var mapped = settings.RoleMap.Count == 0
+            ? []
+            : Values(jwt, settings.RoleClaim).Where(settings.RoleMap.ContainsKey).Select(v => settings.RoleMap[v]).ToList();
+        return new ValidatedToken(subject, Values(jwt, "acrs"), mapped);
     }
 
     /// <summary>RS256 needs an RSA key and ES256 a P-256 key (no algorithm confusion across key types).</summary>
@@ -213,7 +235,7 @@ internal sealed partial class OidcOperatorTokenValidator(
     /// <c>exp</c>, <c>iat</c> and <c>nbf</c> straight from the signed payload: each must be present once as a JSON integer
     /// (a string, fraction or array is a refusal, whatever the library would coerce).
     /// </summary>
-    private static bool TryReadNumericDates(string token, out long exp, out long iat, out long nbf)
+    private static bool TryReadNumericDates(string token, bool requireNbf, out long exp, out long iat, out long nbf)
     {
         exp = iat = nbf = 0;
         var first = token.IndexOf('.', StringComparison.Ordinal);
@@ -225,12 +247,18 @@ internal sealed partial class OidcOperatorTokenValidator(
             return root.ValueKind == JsonValueKind.Object
                 && TryInteger(root, JwtRegisteredClaimNames.Exp, out exp)
                 && TryInteger(root, JwtRegisteredClaimNames.Iat, out iat)
-                && TryInteger(root, JwtRegisteredClaimNames.Nbf, out nbf);
+                && (!requireNbf && !root.TryGetProperty(JwtRegisteredClaimNames.Nbf, out _) ? SetNbf(out nbf, iat) : TryInteger(root, JwtRegisteredClaimNames.Nbf, out nbf));
         }
         catch (Exception ex) when (ex is JsonException or FormatException)
         {
             return false;
         }
+    }
+
+    private static bool SetNbf(out long nbf, long iat)
+    {
+        nbf = iat;
+        return true;
     }
 
     private static bool TryInteger(JsonElement root, string name, out long value)
@@ -296,4 +324,4 @@ internal sealed partial class OidcOperatorTokenValidator(
 }
 
 /// <summary>What the token proves once every check passed: the subject and the <c>acrs</c> values.</summary>
-internal sealed record ValidatedToken(string Subject, IReadOnlyList<string> Acrs);
+internal sealed record ValidatedToken(string Subject, IReadOnlyList<string> Acrs, IReadOnlyList<string> MappedRoles);

@@ -314,6 +314,35 @@ jobs:
         run: |
           set -o pipefail
           ./gradlew --no-daemon testDevNoSmsDebugUnitTest testDevSmsDebugUnitTest 2>&1 | tee ../gradle-test.log
+      # T-159: privacy gate. ML Kit's datatransport CCT/firelog backend uploads
+      # SDK-usage telemetry to Google; it must stay off every release runtime classpath.
+      - name: Release classpath has no datatransport upload backend
+        working-directory: app/android
+        run: |
+          set -o pipefail
+          for v in prodNoSmsReleaseRuntimeClasspath prodSmsReleaseRuntimeClasspath; do
+            ./gradlew --no-daemon -q :app:dependencies --configuration "$v" > "../cp-$v.txt"
+            if ! grep -q "com.google.mlkit:text-recognition" "../cp-$v.txt"; then
+              echo "::error::$v does not list ML Kit; the check would be vacuous"; exit 1
+            fi
+            if grep -E "transport-backend-cct|firebase-datatransport" "../cp-$v.txt"; then
+              echo "::error::$v contains a datatransport upload backend (BR-SYNC-03)"; exit 1
+            fi
+          done
+      # T-159: negative proof for dependency verification. A corrupted sha256 for the
+      # JitPack Tesseract artifacts must fail resolution.
+      - name: Dependency verification rejects a corrupted checksum
+        working-directory: app/android
+        run: |
+          f=gradle/verification-metadata.xml
+          grep -q 'tesseract4android' "$f" && grep -q '<sha256 value=' "$f"
+          cp "$f" /tmp/vm.good
+          sed -i -E 's/(<sha256 value=")[0-9a-f]/\1X/' "$f"
+          if ./gradlew --no-daemon -q :app:checkProdNoSmsReleaseAarMetadata > /tmp/vm-bad.log 2>&1; then
+            echo "::error::a corrupted checksum did not fail the build"; exit 1
+          fi
+          grep -q "Dependency verification failed" /tmp/vm-bad.log || { cat /tmp/vm-bad.log | head -30; echo "::error::failed for another reason"; exit 1; }
+          cp /tmp/vm.good "$f"
       # Guard against a green run with zero tests (for example an emptied test dir).
       # Flutter redirects Gradle's buildDir to app/build/app/.
       - name: Assert Kotlin tests actually ran
@@ -565,6 +594,7 @@ jobs:
         run: |
           if ! flutter build apk --"$MODE" --flavor "$FLAVOR" > build.log 2>&1; then
             echo "::error::build failed: $(grep -v -E 'Unzipping|^\[' build.log | grep -A25 -E 'What went wrong|Error|error:' | head -n 40 | tr '\n' '|')"
+            grep -E -A3 "Missing class|Caused by|R8:" build.log | head -n 40 || true
             exit 1
           fi
           tail -n 5 build.log

@@ -138,6 +138,7 @@ public sealed class OperatorHostFixture : IAsyncLifetime
                 ["ConnectionStrings:Admin"] = Database.Admin,
                 ["OperatorAuth:Enabled"] = "true",
                 ["OperatorAuth:Profile"] = "Entra",
+                ["OperatorAuth:AllowedTenants:0"] = FakeOidcIssuer.TenantId,
                 ["OperatorAuth:Issuer"] = FakeOidcIssuer.DefaultIssuer,
                 ["OperatorAuth:Audiences:0"] = FakeOidcIssuer.CliAudience,
                 ["OperatorAuth:Audiences:1"] = FakeOidcIssuer.AdminAudience,

@@ -117,7 +117,7 @@ public sealed class OperatorAuthStartupCheckTests : IDisposable
     }
 
     [Fact]
-    public void TheGoogleProfileIsRefusedWithAClearReason()
+    public void TheGoogleProfileNeedsTheGoogleIssuerAndADomainAllowList()
     {
         var settings = new OperatorAuthOptions
         {
@@ -127,15 +127,29 @@ public sealed class OperatorAuthStartupCheckTests : IDisposable
         };
         settings.Audiences.Add(FakeOidcIssuer.CliAudience);
 
-        var problem = settings.Problem();
+        Assert.Contains("AllowedDomains", settings.Problem(), StringComparison.Ordinal);
+        settings.AllowedDomains.Add("zaghlol.example");
+        Assert.Null(settings.Problem());
+        settings.Issuer = "https://evil.example";
+        Assert.Contains("Profile=Google", settings.Problem(), StringComparison.Ordinal);
+    }
 
-        Assert.NotNull(problem);
-        Assert.Contains("Profile=Google", problem, StringComparison.Ordinal);
-        Assert.Contains("amr", problem, StringComparison.Ordinal);
-        Assert.Contains("nbf", problem, StringComparison.Ordinal);
-        Assert.Contains("IdP decision", problem, StringComparison.Ordinal);
+    [Fact]
+    public void TheEntraProfileNeedsTenantGuidsMatchingTheIssuer()
+    {
+        var settings = new OperatorAuthOptions
+        {
+            Enabled = true,
+            Profile = OperatorAuthProfile.Entra,
+            Issuer = "https://login.microsoftonline.com/11111111-1111-1111-1111-111111111111/v2.0",
+        };
+        settings.Audiences.Add(FakeOidcIssuer.CliAudience);
 
-        settings.Profile = OperatorAuthProfile.Entra;
+        Assert.Contains("AllowedTenants", settings.Problem(), StringComparison.Ordinal);
+        settings.AllowedTenants.Add("22222222-2222-2222-2222-222222222222");
+        Assert.Contains("AllowedTenants", settings.Problem(), StringComparison.Ordinal);
+        settings.AllowedTenants.Clear();
+        settings.AllowedTenants.Add("11111111-1111-1111-1111-111111111111");
         Assert.Null(settings.Problem());
     }
 
@@ -143,6 +157,7 @@ public sealed class OperatorAuthStartupCheckTests : IDisposable
     {
         ["OperatorAuth:Enabled"] = "true",
         ["OperatorAuth:Profile"] = "Entra",
+        ["OperatorAuth:AllowedTenants:0"] = FakeOidcIssuer.TenantId,
         ["OperatorAuth:Issuer"] = FakeOidcIssuer.DefaultIssuer,
         ["OperatorAuth:Audiences:0"] = FakeOidcIssuer.CliAudience,
     };

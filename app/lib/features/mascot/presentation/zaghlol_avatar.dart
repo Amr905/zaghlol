@@ -1,6 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import 'interim_mascot.dart';
+import 'rive_mascot.dart';
+import 'zaghlol_mascot.dart';
+
 /// The 15 mascot moments (08-mascot-motion section 1, copy-deck Rive states).
 /// Names match the `ZaghlolAvatar` Rive state machine inputs.
 enum ZaghlolMoment {
@@ -79,15 +83,23 @@ class ZaghlolAvatar extends ConsumerWidget {
         MediaQuery.disableAnimationsOf(context);
     final artboard = ref.watch(zaghlolArtboardProvider);
 
-    final Widget body = (artboard != null && !reduce)
-        ? artboard(context, moment, talk, size)
-        : Image.asset(
+    // Reduce motion: still pose only. Otherwise an explicit artboard override
+    // wins, then the illustrator's Rive file when bundled (T-088), else the
+    // interim Flutter animation of the brand still (T-099).
+    final hasRive = ref.watch(zaghlolRivePresentProvider).value ?? false;
+    final Widget body = reduce
+        ? Image.asset(
             stillAsset,
             width: size,
             height: size,
             fit: BoxFit.contain,
             excludeFromSemantics: true,
-          );
+          )
+        : artboard != null
+        ? artboard(context, moment, talk, size)
+        : hasRive
+        ? RiveMascot(moment: moment, talk: talk, size: size)
+        : InterimMascot(moment: moment, talk: talk, size: size);
 
     return IgnorePointer(
       child: Semantics(

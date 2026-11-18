@@ -81,8 +81,9 @@ internal sealed class ValidatorKit : IDisposable
 {
     public const string ContextId = "c1";
 
-    public ValidatorKit(Action<OperatorAuthOptions>? configure = null)
+    public ValidatorKit(Action<OperatorAuthOptions>? configure = null, FakeOidcIssuer? issuer = null)
     {
+        Issuer = issuer ?? new FakeOidcIssuer();
         var settings = new OperatorAuthOptions
         {
             Enabled = true,
@@ -90,6 +91,7 @@ internal sealed class ValidatorKit : IDisposable
             Issuer = FakeOidcIssuer.DefaultIssuer,
             RequiredAcrs = ContextId,
         };
+        settings.AllowedTenants.Add(FakeOidcIssuer.TenantId);
         settings.Audiences.Add(FakeOidcIssuer.CliAudience);
         settings.Audiences.Add(FakeOidcIssuer.AdminAudience);
         configure?.Invoke(settings);
@@ -98,7 +100,7 @@ internal sealed class ValidatorKit : IDisposable
         Validator = new OidcOperatorTokenValidator(Options, Keys, Directory, Metrics, Clock, NullLogger<OidcOperatorTokenValidator>.Instance);
     }
 
-    public FakeOidcIssuer Issuer { get; } = new();
+    public FakeOidcIssuer Issuer { get; }
 
     public FakeOperatorDirectory Directory { get; } = new();
 

@@ -832,6 +832,8 @@ Replaces the 85 rows above that only pointed at batch review reports or were mar
 
 - **FU-259** (batch 40): minors in [batch-40](05-reviews/batch-40.md): GoldAPI per-karat vs ounce check and a doc link; narrow the deploy SA's IAM-admin role and limit prod deploys to main; the public dry-run AAB includes the R8 mapping; app-store-privacy.md out of date after the iOS fixes; "رفاهيات" for "wants".
 
+- **FU-260** (batch 39): see the batch-39 Lead delta check.
+
 ## Log
 | Date | Event |
 |---|---|
@@ -924,3 +926,4 @@ Replaces the 85 rows above that only pointed at batch review reports or were mar
 | 2026-11-18 | Batch 37 (`batch/2026-11-18-37`): nine lanes of follow-ups + explorer4. FU-257. Progress 167/186. |
 | 2026-11-18 | Batch 38 (`batch/2026-11-18-38`): PO WEEKLY-FRIDAY, OVERDUE-REMINDERS (+ Mark-as-paid action). FU-258. Progress 167/186. |
 | 2026-11-18 | Batch 40 (`batch/2026-11-18-40`): T-127 adapters, T-140 prep, T-176/177 prep + iOS store fixes, T-058 pass 1. FU-259. Board tasks stay open until the PO's inputs (keys, accounts, hosting, human review). |
+| 2026-11-18 | Batch 39 (`batch/2026-11-18-39`): T-136 OIDC, T-059 merchants, T-099 mascot moments, T-159 Android OCR, T-165 emulator evidence. FU-260. |

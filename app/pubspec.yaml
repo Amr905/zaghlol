@@ -63,6 +63,7 @@ dependencies:
   # uses the system Photo Picker, iOS PHPicker; neither needs a permission).
   image_picker: 1.2.4
   file_picker: 13.3.3
+  rive: ^0.14.11
 
 dev_dependencies:
   flutter_test:

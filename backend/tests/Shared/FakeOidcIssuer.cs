@@ -15,6 +15,17 @@ public sealed record OperatorTokenSpec
 
     public IReadOnlyList<string>? Acrs { get; init; }
 
+    /// <summary>Entra <c>tid</c>; defaults to <see cref="FakeOidcIssuer.TenantId"/>, empty string leaves it out.</summary>
+    public string? Tenant { get; init; }
+
+    /// <summary>Google <c>hd</c>; left out when <c>null</c>.</summary>
+    public string? HostedDomain { get; init; }
+
+    /// <summary>Values for the claim named by <see cref="RolesClaim"/>.</summary>
+    public IReadOnlyList<string>? Roles { get; init; }
+
+    public string RolesClaim { get; init; } = "roles";
+
     public string? Audience { get; init; } = FakeOidcIssuer.CliAudience;
 
     public string? Issuer { get; init; }
@@ -55,8 +66,9 @@ public sealed record OperatorTokenSpec
 /// </summary>
 public sealed class FakeOidcIssuer : IDisposable
 {
-    public const string DefaultIssuer = "https://login.zaghlol.test/tenant-1/v2.0";
-    public const string JwksUrl = "https://login.zaghlol.test/tenant-1/discovery/v2.0/keys";
+    public const string TenantId = "11111111-1111-1111-1111-111111111111";
+    public const string DefaultIssuer = "https://login.zaghlol.test/11111111-1111-1111-1111-111111111111/v2.0";
+    public const string JwksUrl = "https://login.zaghlol.test/11111111-1111-1111-1111-111111111111/discovery/v2.0/keys";
     public const string CliAudience = "zaghlol-ops";
     public const string AdminAudience = "zaghlol-admin";
 
@@ -193,6 +205,21 @@ public sealed class FakeOidcIssuer : IDisposable
         if (spec.Amr is not null)
         {
             payload["amr"] = new JsonArray([.. spec.Amr.Select(a => (JsonNode?)JsonValue.Create(a))]);
+        }
+
+        if (spec.Tenant != string.Empty)
+        {
+            payload["tid"] = spec.Tenant ?? TenantId;
+        }
+
+        if (spec.HostedDomain is not null)
+        {
+            payload["hd"] = spec.HostedDomain;
+        }
+
+        if (spec.Roles is not null)
+        {
+            payload[spec.RolesClaim] = new JsonArray([.. spec.Roles.Select(r => (JsonNode?)JsonValue.Create(r))]);
         }
 
         if (spec.Acrs is not null)

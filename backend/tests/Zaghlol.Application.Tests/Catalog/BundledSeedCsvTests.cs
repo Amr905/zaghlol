@@ -17,7 +17,7 @@ public class BundledSeedCsvTests
         var seed = Load();
 
         Assert.Equal(16, seed.Categories.Count); // CAT-cash added InstaPay and Cash
-        Assert.InRange(seed.Merchants.Count, 120, 200);
+        Assert.InRange(seed.Merchants.Count, 600, 1200); // T-059: 854 merchants
         Assert.NotEmpty(seed.Keywords);
         Assert.All(seed.Merchants, m => Assert.NotEmpty(m.Aliases));
     }
