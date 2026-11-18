@@ -98,7 +98,7 @@ List<PdfTextFragment> ocrLinesToFragments(
     }
     final amounts = tokens.length - tail;
     if (tokens.length < 2 || (!hasDate && amounts == 0)) {
-      out.add(frag(text, x0, x1));
+      out.add(frag(tokens.length == 1 ? tokens.single.$1 : text, x0, x1));
       continue;
     }
     final width = x1 - x0;
