@@ -182,7 +182,7 @@ case "$rflags" in
   *"["*"]"*) res release-flags PASS "no DEBUGGABLE, no ALLOW_BACKUP: $rflags" ;;
   *) res release-flags UNKNOWN "flags not readable: $rflags" ;;
 esac
-if S run-as "$RPKG" id 2>&1 | grep -qiE "not debuggable|unknown package"; then
+if A shell "run-as $RPKG id" < /dev/null 2>&1 | grep -qiE "not debuggable|unknown package"; then
   res release-run-as PASS "run-as refused: package is not debuggable"
 else
   res release-run-as FAIL "run-as worked on the release build"
