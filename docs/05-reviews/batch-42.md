@@ -52,3 +52,28 @@ Correct: the ar/en header synonyms ("Payment Type" is ignored, "Date" beats "Tra
 | T-156b | `statement_rows.dart:324,409` | An unsigned amount whose direction can't be derived is flagged for review. It never defaults to income. | First row, no opening balance, unsigned 100.00, gives a flagged row and no income. |
 | T-156b | `statement_table.dart:586` | Year from today is exposed (`yearSource`), and the user confirms the year before commit. | Statement with no printed full date: commit is refused until the year is confirmed. |
 | T-156b | `scan_providers.dart:25` | Android uses `PigeonOcrEngine` (T-159 host). Update the note at `T-156.md:59`. | The provider returns a Pigeon engine on Android. |
+| T-156b | n/a | Branch is empty: build and push it. | n/a |
+
+## Delta re-review (T-156b fix round)
+
+Commit 0f117ed1 (on top of fd8a30b2), merged locally. Tests run: `packages/zaghlol_parsing test/statements` 64 pass; `app test/features/export_import test/features/capture` 449 pass.
+
+1. Balance mismatch: FIXED. Rows move to `StatementParseResult.review` with an amount in integer minor units; `run` throws `reviewRequired` with no decision, and writes nothing. Tests (balance mismatch held, throws, store empty; keep/skip/flip) fail without the fix.
+2. Unknown direction: FIXED. Unsigned and not derived gives `directionUnknown`; `keep` is rejected for those rows. Tests cover the no-balance and first-row cases.
+3. Year: FIXED. `StatementYearSource.today` makes a real import throw `yearNotConfirmed` until `confirmedYear`; a printed period or statement date anchors without asking. Tests cover both paths.
+4. Android OCR: FIXED. `ocrEngineProvider` returns `PigeonOcrEngine` on Android; the Android OCR host exists (`platform/ocr/OcrHosts.kt`). Images are deleted and nothing is uploaded, per the provider doc and T-159.
+
+Findings:
+- minor, statement_rows.dart (`plainIsIncome`): with no balance column and any negative sign in the amount column, unsigned rows are read as income. That is a silent default, a narrow one, and a convention rather than a derivation. Follow-up: flag these rows as unknown, or show the assumption in the preview.
+- nit: `StatementRowProblem.balanceMismatch` is now unused; remove it later.
+- nit: no UI caller of `run(decisions:, confirmedYear:)` was found in this diff. The review and year screens must be wired before the feature ships, or an import will throw. Track it as a follow-up.
+
+**Verdict: APPROVED** (no blocker or major remaining).
+
+## Lead delta check: SMS-po42 fix round (2026-11-18)
+
+- **fa310efc:** `templateOnly` sender rules. For sender `EG` only an Arab Bank template match is filed as Arab Bank; anything else goes through the generic path as an unknown sender, so it lands in review and is never auto-saved. The registry schema and loader carry the flag. e2e test: an electricity-bill text from `EG` becomes a review item with no transaction.
+- **CIB promo drop, Lead follow-up commit:** the bare T&C footer is removed (fa310efc). The Lead also narrowed `السحب على` to draw wording only (`السحب على كيلو/جوايز/جايزه…`, `السحب الجاي`), so a real `تم السحب على حسابكم` withdrawal is kept. Guard bases are regenerated; registry_lint passes 1395/1395 and the ingestion tests pass 117. New e2e test: the withdrawal is kept and the promo is dropped.
+
+Verdict: SMS-po42 **APPROVED**; T-156b **APPROVED** (delta re-review). Batch 42 approved.
+- **FU-262:** batch-42 minors: an unsigned row is read as income when other rows have minus signs; `balanceMismatch` is unused; the statement import UI (review decisions, year confirmation) and its l10n keys are not built yet, so the importer throws until those screens exist (T-156/T-158 wiring); Vodafone Cash templates wait on a real sample.
