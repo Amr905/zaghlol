@@ -20,6 +20,7 @@ final class PdfTextFragment {
     required this.x0,
     required this.x1,
     required this.y,
+    this.breakBefore = false,
   });
 
   final int page;
@@ -27,6 +28,10 @@ final class PdfTextFragment {
   final int x0;
   final int x1;
   final int y;
+
+  /// True when this run starts a new cell even if it sits close to the
+  /// previous run (OCR lines split into date, description and amounts).
+  final bool breakBefore;
 
   int get center => (x0 + x1) ~/ 2;
 
@@ -44,7 +49,7 @@ enum PdfExtractFailureKind {
   /// Not a readable PDF, or too large.
   unreadable,
 
-  /// A PDF with no text layer (a scan). OCR is a different feature.
+  /// A PDF with no text layer (a scan) and no way to read it by OCR.
   noText,
 }
 
