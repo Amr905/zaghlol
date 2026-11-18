@@ -334,6 +334,7 @@ jobs:
         working-directory: app/android
         run: |
           cp gradle/verification-metadata.xml /tmp/vm.keep
+          sed -i '/<trusted-artifacts>/,/<\/trusted-artifacts>/d' gradle/verification-metadata.xml
           ./gradlew --no-daemon -q --write-verification-metadata sha256 :app:dependencies --configuration prodNoSmsReleaseRuntimeClasspath > /dev/null 2>&1 || true
           echo "=====VM====="; grep -B2 -A8 tesseract gradle/verification-metadata.xml; echo "=====END====="
           cp /tmp/vm.keep gradle/verification-metadata.xml
