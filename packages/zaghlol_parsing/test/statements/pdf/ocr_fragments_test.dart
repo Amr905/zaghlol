@@ -144,7 +144,8 @@ void main() {
     final t = read(scan(misplace: true));
     final r = parseStatementRows(t, map(t));
     // The credit of 10/03 sits under Debit: the balance says it was money in.
-    expect(r.problems[StatementRowProblem.balanceMismatch], 1);
+    expect(r.review, hasLength(1));
+    expect(r.review.single.review, StatementReviewReason.balanceMismatch);
     expect(r.rows, hasLength(4));
   });
 

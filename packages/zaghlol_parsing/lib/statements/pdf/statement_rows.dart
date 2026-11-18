@@ -21,9 +21,19 @@ enum StatementRowProblem {
   noAmount,
   bothAmounts,
 
-  /// The running balance does not equal the previous balance plus this
-  /// row's credit minus its debit. The row is not imported.
+  /// Kept for completeness; mismatching rows are not problems any more, they
+  /// are returned as [StatementParseResult.review] rows.
   balanceMismatch,
+}
+
+/// Why a row is held back for the user instead of being imported.
+enum StatementReviewReason {
+  /// The running balance does not equal the previous balance plus this row's
+  /// credit minus its debit.
+  balanceMismatch,
+
+  /// The amount has no sign and no balance tells which way it went.
+  directionUnknown,
 }
 
 final class StatementRow {
@@ -34,7 +44,20 @@ final class StatementRow {
     required this.amount,
     this.balance,
     this.balanceChecked = false,
+    this.review,
+    this.directionKnown = true,
+    this.number = 0,
   });
+
+  /// Set when the row must be confirmed by the user before it is imported.
+  final StatementReviewReason? review;
+
+  /// False when the statement gave no sign and no balance: [isExpense] is a
+  /// placeholder and the user must pick the direction.
+  final bool directionKnown;
+
+  /// 1-based data row number in the table.
+  final int number;
 
   final StatementDate date;
   final String description;
@@ -69,9 +92,15 @@ final class StatementParseResult {
     required this.totalRows,
     this.balanceChecked = 0,
     this.closingMatches,
+    this.review = const [],
   });
 
+  /// Clean rows, ready to import.
   final List<StatementRow> rows;
+
+  /// Rows held back for the user (never dropped): each has a `review`
+  /// reason, its parsed amount and, when known, direction and balance.
+  final List<StatementRow> review;
 
   /// Rows the running balance confirmed.
   final int balanceChecked;
@@ -144,6 +173,7 @@ SignedAmount? parseStatementAmount(
     negative = true;
     t = t.substring(1).trim();
   } else if (t.startsWith('+')) {
+    negative = false;
     t = t.substring(1).trim();
   }
   if (t.endsWith('-')) {
@@ -181,6 +211,9 @@ class _Entry {
 
   /// The amount column carried no sign, so direction may come from balances.
   bool unsigned = false;
+
+  /// The amount carried an explicit sign (`-`, `(..)`, DR).
+  bool negativeSeen = false;
   bool? derivedExpense;
   bool verified = false;
   bool mismatch = false;
@@ -244,10 +277,13 @@ int _chain(List<_Entry> entries, Money? start) {
   return bad;
 }
 
+/// [yearShift] is added to every date's year (the user's confirmed year
+/// minus the suggested one, see [StatementTable.yearSource]).
 StatementParseResult parseStatementRows(
   StatementTable table,
-  StatementMapping mapping,
-) {
+  StatementMapping mapping, {
+  int yearShift = 0,
+}) {
   final problems = <StatementRowProblem, int>{};
   final rows = <StatementRow>[];
   if (!mapping.isValid || mapping.roles.length != table.columnCount) {
@@ -299,7 +335,13 @@ StatementParseResult parseStatementRows(
     entries.add(e);
     if (balanceI >= 0) e.printed = balanceOf(r.cells[balanceI]);
 
-    final date = parseStatementDate(r.cells[dateI], dayFirst: mapping.dayFirst);
+    final parsedDate = parseStatementDate(
+      r.cells[dateI],
+      dayFirst: mapping.dayFirst,
+    );
+    final date = parsedDate == null || yearShift == 0
+        ? parsedDate
+        : _shifted(parsedDate, yearShift);
     if (date == null) {
       e.problem = StatementRowProblem.badDate;
       continue;
@@ -321,7 +363,8 @@ StatementParseResult parseStatementRows(
       }
       amount = a.amount;
       expense = a.negative ?? false;
-      e.unsigned = a.negative == null && balanceI >= 0;
+      e.unsigned = a.negative == null;
+      e.negativeSeen = a.negative ?? false;
     } else {
       Money? debit;
       Money? credit;
@@ -371,6 +414,7 @@ StatementParseResult parseStatementRows(
       isExpense: expense,
       amount: amount.minor < 0 ? -amount : amount,
       balance: e.printed,
+      number: e.number,
     );
   }
 
@@ -393,25 +437,6 @@ StatementParseResult parseStatementRows(
         _chain(entries, opening);
       }
     }
-    for (final e in entries) {
-      final row = e.row;
-      if (row == null) continue;
-      if (e.mismatch) {
-        e.row = null;
-        e.problem = StatementRowProblem.balanceMismatch;
-        continue;
-      }
-      if (e.verified) checkedCount++;
-      final ex = e.derivedExpense;
-      e.row = StatementRow(
-        date: row.date,
-        description: row.description,
-        isExpense: ex ?? row.isExpense,
-        amount: row.amount,
-        balance: row.balance,
-        balanceChecked: e.verified,
-      );
-    }
     final lastPrinted = chrono.reversed
         .map((e) => e.printed)
         .firstWhere((b) => b != null, orElse: () => null);
@@ -420,7 +445,45 @@ StatementParseResult parseStatementRows(
         : balanceOf(table.closingBalance!);
     if (lastPrinted != null && c != null) closing = c == lastPrinted;
   }
+  final signedColumn = amountI >= 0 && entries.any((e) => e.negativeSeen);
+  for (final e in entries) {
+    final row = e.row;
+    if (row == null) continue;
+    if (e.verified) checkedCount++;
+    final ex = e.derivedExpense;
+    // Unsigned and nothing derived it (no balances, or a mismatch): the
+    // direction is not known and the user picks it.
+    // A column that marks money out with a sign and has no balance to
+    // check against reads a plain amount as money in (the usual convention).
+    final plainIsIncome = balanceI < 0 && signedColumn;
+    final unknown = e.unsigned && ex == null && !plainIsIncome;
+    final reason = e.mismatch
+        ? StatementReviewReason.balanceMismatch
+        : unknown
+        ? StatementReviewReason.directionUnknown
+        : null;
+    e.row = StatementRow(
+      date: row.date,
+      description: row.description,
+      isExpense: ex ?? row.isExpense,
+      amount: row.amount,
+      balance: row.balance,
+      balanceChecked: e.verified,
+      review: reason,
+      directionKnown: !unknown,
+      number: e.number,
+    );
+  }
   return _finish(entries, problems, rows, number, checkedCount, closing);
+}
+
+StatementDate _shifted(StatementDate d, int years) {
+  final y = d.year + years;
+  // 29 February in a non-leap year becomes 28 February.
+  final day = d.month == 2 && d.day == 29 && DateTime(y, 2, 29).month != 2
+      ? 28
+      : d.day;
+  return StatementDate(y, d.month, day);
 }
 
 StatementParseResult _finish(
@@ -432,13 +495,14 @@ StatementParseResult _finish(
   bool? closingMatches,
 ) {
   final invalid = <int>[];
+  final review = <StatementRow>[];
   for (final e in entries) {
     final p = e.problem;
     if (p != null) {
       problems.update(p, (c) => c + 1, ifAbsent: () => 1);
       if (invalid.length < maxListedInvalidRows) invalid.add(e.number);
     } else if (e.row != null) {
-      rows.add(e.row!);
+      (e.row!.review == null ? rows : review).add(e.row!);
     }
   }
   return StatementParseResult(
@@ -448,5 +512,6 @@ StatementParseResult _finish(
     totalRows: number > maxStatementRows ? maxStatementRows : number,
     balanceChecked: checked,
     closingMatches: closingMatches,
+    review: review,
   );
 }

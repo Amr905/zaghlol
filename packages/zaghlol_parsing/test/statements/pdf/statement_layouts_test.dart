@@ -417,6 +417,18 @@ void main() {
     test('currency symbol is proposed, never applied silently', () {
       expect(table.suggestedCurrency?.code, 'USD');
     });
+    test(
+      'no printed full date: the year is today\'s and must be confirmed',
+      () {
+        expect(table.yearSource, StatementYearSource.today);
+        expect(table.anchorYear, 2026);
+      },
+    );
+    test('a year shift moves every date', () {
+      final r = parseStatementRows(table, mapOf(table, 'USD'), yearShift: -1);
+      expect(r.rows.first.date, const StatementDate(2025, 10, 2));
+      expect(r.rows.last.date, const StatementDate(2025, 11, 9));
+    });
     test('year from today, 21 rows, no duplicates, chain verified', () {
       final r = parseStatementRows(table, mapOf(table, 'USD'));
       expect(r.rows, hasLength(21));
@@ -440,7 +452,14 @@ void main() {
       final r = parseStatementRows(tb, mapOf(tb, 'USD'));
       // Deposits (4) and withdrawals (4) share columns; the cheque list is
       // a different table and is not added on top.
-      expect(r.rows, hasLength(8));
+      expect(r.rows, isEmpty);
+      expect(r.review, hasLength(8));
+      expect(
+        r.review.every(
+          (x) => x.review == StatementReviewReason.directionUnknown,
+        ),
+        isTrue,
+      );
     });
     test(
       'year of a statement that ends in January rolls back for December',

@@ -287,6 +287,17 @@ final class StatementRawRow {
   String toString() => 'StatementRawRow';
 }
 
+/// Where the year of the row dates came from.
+enum StatementYearSource {
+  /// Every date carried its year, or the statement prints a full date (period,
+  /// statement date) the years were worked out from.
+  printed,
+
+  /// Some dates have no year and the statement prints no full date: the year
+  /// is only a suggestion (today's) and the user must confirm it.
+  today,
+}
+
 final class StatementTable {
   const StatementTable({
     required this.cutPoints,
@@ -298,7 +309,15 @@ final class StatementTable {
     this.closingBalance,
     this.suggestedCurrency,
     this.dayFirst = true,
+    this.yearSource = StatementYearSource.printed,
+    this.anchorYear,
   });
+
+  /// See [StatementYearSource]. With `today`, commit needs the user's year.
+  final StatementYearSource yearSource;
+
+  /// The latest year suggested for the rows when [yearSource] is `today`.
+  final int? anchorYear;
 
   final List<int> cutPoints;
   final List<StatementRawRow> rows;
@@ -561,7 +580,7 @@ final RegExp _fullDateText = RegExp(
 
 /// The latest full date printed anywhere (period, statement date), not far
 /// in the future; else [today].
-StatementDate _anchorDate(
+({StatementDate date, bool printed}) _anchorDate(
   List<StatementLine> lines,
   bool dayFirst,
   DateTime today,
@@ -583,7 +602,12 @@ StatementDate _anchorDate(
       }
     }
   }
-  return best ?? StatementDate(today.year, today.month, today.day);
+  return best == null
+      ? (
+          date: StatementDate(today.year, today.month, today.day),
+          printed: false,
+        )
+      : (date: best, printed: true);
 }
 
 typedef _Layout = ({
@@ -963,6 +987,8 @@ StatementTable buildStatementTable(
           columns,
           dayFirstEff,
         ).indexOf(StatementColumnRole.date);
+  var yearSource = StatementYearSource.printed;
+  int? anchorYear;
   if (dateCol >= 0) {
     final parsed = <Object?>[];
     final idx = <int>[];
@@ -975,10 +1001,14 @@ StatementTable buildStatementTable(
       );
       idx.add(i);
     }
-    final resolved = resolveStatementYears(
-      parsed,
-      anchor: _anchorDate(lines, dayFirstEff, today ?? DateTime.now()),
-    );
+    final anchor = _anchorDate(lines, dayFirstEff, today ?? DateTime.now());
+    anchorYear = anchor.date.year;
+    // The year is a guess only when it is needed (a partial date) and
+    // nothing printed gave it.
+    if (!anchor.printed && parsed.any((d) => d is PartialDate)) {
+      yearSource = StatementYearSource.today;
+    }
+    final resolved = resolveStatementYears(parsed, anchor: anchor.date);
     rows = [...rows];
     for (var k = 0; k < idx.length; k++) {
       final d = resolved[k];
@@ -1027,5 +1057,7 @@ StatementTable buildStatementTable(
     closingBalance: closing,
     suggestedCurrency: _detectCurrency(lines),
     dayFirst: dayFirstEff,
+    yearSource: yearSource,
+    anchorYear: yearSource == StatementYearSource.today ? anchorYear : null,
   );
 }

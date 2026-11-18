@@ -72,9 +72,19 @@ void main() {
       final t = buildStatementTable([...opening, ...table(bad)], today: today);
       final r = parseStatementRows(t, mapping(t));
       // B is off by one; C follows B's printed balance (96 - 20 = 76 != 75).
-      expect(r.problems[StatementRowProblem.balanceMismatch], 2);
+      expect(r.invalid, 0);
       expect(r.rows.map((x) => x.description).toList(), ['A']);
-      expect(r.invalidRows, [2, 3]);
+      // Kept for the user, with their amounts, never dropped.
+      expect(r.review.map((x) => x.description).toList(), ['B', 'C']);
+      expect(
+        r.review.every(
+          (x) => x.review == StatementReviewReason.balanceMismatch,
+        ),
+        isTrue,
+      );
+      expect(r.review.map((x) => x.number).toList(), [2, 3]);
+      expect(r.review.first.amount.minor, 500);
+      expect(r.review.first.balance?.minor, 9600);
     });
 
     test('debit and credit swapped on one row is caught', () {
@@ -88,7 +98,7 @@ void main() {
         ...table(swapped),
       ], today: today);
       final r = parseStatementRows(t, mapping(t));
-      expect(r.problems[StatementRowProblem.balanceMismatch], 1);
+      expect(r.review.map((x) => x.description).toList(), ['B']);
       expect(r.rows.map((x) => x.description).toList(), ['A', 'C']);
     });
 
@@ -158,7 +168,50 @@ void main() {
       final t = buildStatementTable(frags, today: today);
       final r = parseStatementRows(t, mapping(t));
       expect(r.rows.map((x) => x.isExpense).toList(), [true, false]);
-      expect(r.problems[StatementRowProblem.balanceMismatch], 1);
+      expect(r.review, hasLength(1));
+      expect(r.review.single.review, StatementReviewReason.balanceMismatch);
+      // Unsigned and not derivable: the user picks the direction.
+      expect(r.review.single.directionKnown, isFalse);
+    });
+
+    test('first row unsigned, no opening balance: flagged, never income', () {
+      final frags = [
+        f('Date', 40, 80, 100),
+        f('Details', 170, 260, 100),
+        f('Amount', 600, 660, 100),
+        f('Balance', 820, 880, 100),
+        f('03/01/2026', 40, 110, 120),
+        f('SHOP A', 170, 230, 120),
+        f('100.00', 600, 660, 120),
+        f('900.00', 790, 880, 120),
+        f('03/02/2026', 40, 110, 140),
+        f('SHOP B', 170, 230, 140),
+        f('50.00', 600, 660, 140),
+        f('850.00', 790, 880, 140),
+      ];
+      final t = buildStatementTable(frags, today: today);
+      final r = parseStatementRows(t, mapping(t));
+      expect(r.review.map((x) => x.description).toList(), ['SHOP A']);
+      expect(r.review.single.review, StatementReviewReason.directionUnknown);
+      expect(r.review.single.directionKnown, isFalse);
+      // The second row is derived from the first one's balance.
+      expect(r.rows.single.isExpense, isTrue);
+      expect(r.rows.where((x) => !x.isExpense), isEmpty);
+    });
+
+    test('unsigned amounts with no balance column are never income', () {
+      final frags = [
+        f('Date', 40, 80, 100),
+        f('Details', 170, 260, 100),
+        f('Amount', 600, 660, 100),
+        f('03/01/2026', 40, 110, 120),
+        f('SHOP A', 170, 230, 120),
+        f('100.00', 600, 660, 120),
+      ];
+      final t = buildStatementTable(frags, today: today);
+      final r = parseStatementRows(t, mapping(t));
+      expect(r.rows, isEmpty);
+      expect(r.review.single.directionKnown, isFalse);
     });
   });
 

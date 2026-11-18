@@ -207,6 +207,7 @@ void main() {
         dayFirst: reading.table.dayFirst,
       ),
       accountId: 'a1',
+      confirmedYear: 2026, // the scan prints no year
     );
     // Page 2 lists two of the same credits: they are not imported twice.
     expect(s.imported, 5);
@@ -365,8 +366,25 @@ void main() {
         dayFirst: reading.table.dayFirst,
       ),
       accountId: 'a1',
+      confirmedYear: 2026,
+      // Held for review, then skipped by the user.
+      decisions: {
+        for (final r
+            in uc
+                .parse(
+                  reading,
+                  StatementMapping(
+                    roles: reading.table.suggestedRoles,
+                    currency: usd,
+                    dayFirst: reading.table.dayFirst,
+                  ),
+                  confirmedYear: 2026,
+                )
+                .review)
+          r.number: StatementReviewChoice.skip,
+      },
     );
-    expect(s.invalid, 1);
+    expect(s.invalid, 0);
     expect(s.imported, 4);
     expect(store.rows.any((r) => r.amount.minor == 76301), isFalse);
   });
