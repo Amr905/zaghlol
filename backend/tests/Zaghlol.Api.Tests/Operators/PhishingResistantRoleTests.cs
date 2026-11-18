@@ -119,6 +119,7 @@ public sealed class PhishingResistantRoleTests : IDisposable
         {
             ["OperatorAuth:Enabled"] = "true",
             ["OperatorAuth:Profile"] = "Entra",
+            ["OperatorAuth:AllowedTenants:0"] = FakeOidcIssuer.TenantId,
             ["OperatorAuth:Issuer"] = FakeOidcIssuer.DefaultIssuer,
             ["OperatorAuth:Audiences:0"] = FakeOidcIssuer.CliAudience,
             ["OperatorAuth:PhishingResistantMode"] = mode,
