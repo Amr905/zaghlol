@@ -260,6 +260,7 @@ class ImportStatementPdfUseCase {
       accountId,
       start.toUtc().millisecondsSinceEpoch,
       end.toUtc().millisecondsSinceEpoch,
+      settledOnly: true,
     )) {
       counts.update(
         _key(e.direction, e.amount),

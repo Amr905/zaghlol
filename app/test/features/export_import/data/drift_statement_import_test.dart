@@ -96,6 +96,33 @@ void main() {
     expect(await templates.load('nbe'), isNull);
   });
 
+  test('declined/reversed rows do not block a statement row', () async {
+    for (final st in [TxnStatus.declined, TxnStatus.reversed]) {
+      final r = await repo.add(
+        NewTransaction(
+          accountId: 'acc1',
+          direction: TxnDirection.expense,
+          amount: Money.parse('45.00', Currency.of('EGP')),
+          occurredAt: DateTime(2026, 1, 5, 18, 42).toUtc(),
+          occurredTzOffsetMin: DateTime(2026, 1, 5).timeZoneOffset.inMinutes,
+        ),
+      );
+      await repo.edit(r.id, TransactionEdit(status: st));
+    }
+    final reading = await uc.open(Uint8List.fromList([1]), bankKey: 'cib');
+    final mapping = StatementMapping(
+      currency: Currency.of('EGP'),
+      roles: const [
+        StatementColumnRole.date,
+        StatementColumnRole.description,
+        StatementColumnRole.amount,
+      ],
+    );
+    final s = await uc.run(reading, mapping, accountId: 'acc1');
+    expect(s.imported, 2);
+    expect(s.duplicates, 0);
+  });
+
   test('a corrupt stored template is ignored', () async {
     await SettingsDao(edb.db)
         .write(DriftStatementTemplateStore.keyFor('cib'), '{broken', at: 1);

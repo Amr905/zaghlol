@@ -57,8 +57,9 @@ class FakeStore implements CsvImportStore {
   Future<List<ExistingTxnKey>> existingBetween(
     String a,
     int from,
-    int to,
-  ) async => [
+    int to, {
+    bool settledOnly = false,
+  }) async => [
     for (final r in rows)
       if (r.accountId == a &&
           r.occurredAt.millisecondsSinceEpoch >= from &&

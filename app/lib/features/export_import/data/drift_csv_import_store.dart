@@ -52,15 +52,23 @@ class DriftCsvImportStore implements CsvImportStore {
   Future<List<ExistingTxnKey>> existingBetween(
     String accountId,
     int fromMs,
-    int toMs,
-  ) async {
+    int toMs, {
+    bool settledOnly = false,
+  }) async {
     // Page through every row at this instant (the DAO caps one page).
     final rows = <TransactionRow>[];
     int? afterAt;
     String? afterId;
     while (true) {
       final page = await _txns.list(
-        TxnQuery(from: fromMs, to: toMs, accountIds: {accountId}),
+        TxnQuery(
+          from: fromMs,
+          to: toMs,
+          accountIds: {accountId},
+          statuses: settledOnly
+              ? {TxnStatus.posted.code, TxnStatus.pending.code}
+              : const {},
+        ),
         limit: maxSearchLimit,
         afterOccurredAt: afterAt,
         afterId: afterId,
