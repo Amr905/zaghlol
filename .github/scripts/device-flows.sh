@@ -13,6 +13,10 @@ set -uo pipefail
 PKG=app.zaghlol.dev
 OUT="$RUNNER_TEMP/device-flows"
 mkdir -p "$OUT/screens"
+if [ -n "${T165_ONLY:-}" ]; then
+  # T-165: backup-exclusion evidence only (no flows, no explorer).
+  exec bash "$(dirname "$0")/t165-backup-emu.sh"
+fi
 cd "$(dirname "$0")/../../app"
 
 pull_files() {
