@@ -9,7 +9,7 @@
       <verify-metadata>true</verify-metadata>
       <verify-signatures>false</verify-signatures>
       <trusted-artifacts>
-         <trust group="^(?!cz\.adaptech\.tesseract4android$).*" regex="true"/>
+         <trust group=".*" regex="true"/>
       </trusted-artifacts>
    </configuration>
    <components>
