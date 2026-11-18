@@ -108,6 +108,26 @@ T-035 Q1–Q6 (keep with bundled rules; drop OTP+transaction messages, as the re
 | T-133 Q1 (your part) | Paste the Pub/Sub topic into Play Console once T-140 creates it. | T-133 go-live |
 | T-133 Q5, T-134 Q2 | Send one test notification from Play Console and one from App Store Connect, to record the test vectors. | test vectors |
 
+### Store release (T-176, T-177): accounts and secrets
+
+Everything else is prepared (`docs/06-release/README.md`). Create the GitHub environments `android-release` and `ios-release` (Settings > Environments; required reviewer = you; deployment branches = `main` and `v*` tags) and put the secrets **in the environment**, not at repo level. The workflows build unsigned without them.
+
+| ID | What's needed | Blocks |
+|---|---|---|
+| T-176 A1 | Google Play Console developer account (identity-verified) and the app `app.zaghlol` created; enrol in Play App Signing. | T-176 |
+| T-176 A2 | Generate the **upload key** (keytool, RSA 2048+, keep an offline copy). Secrets `ANDROID_UPLOAD_KEYSTORE_BASE64` (base64 of the .jks), `ANDROID_UPLOAD_STORE_PASSWORD`, `ANDROID_UPLOAD_KEY_ALIAS`, `ANDROID_UPLOAD_KEY_PASSWORD`. | signed AAB |
+| T-176 A3 | Play API service account JSON with release permission on the app (Workload Identity is not wired into the workflow; JSON key as secret `PLAY_SERVICE_ACCOUNT_JSON`). Can be the same service account as T-130. | Play upload |
+| T-176 A4 | Variable (not secret) `PLAY_INTEGRITY_CLOUD_PROJECT_NUMBER`: the Google Cloud project linked to Play Integrity (T-178). Without it attestation fails closed. | restore on Android |
+| T-176 A5 | Play Console forms: Data safety (`docs/06-release/play-data-safety.md`), **SMS declaration** and the demo video (`play-sms-declaration.md`; you record or approve it), content rating, target audience, financial-features declaration. Decide the two (confirm) classifications in the Data safety draft with legal. | Play review |
+| T-176 A6 | Real Terms, Privacy and support URLs (FU-195); the Data safety form cannot be completed without a privacy policy URL. | Play and App Store |
+| T-177 B1 | Apple Developer Program membership, App Store Connect record for `app.zaghlol`, Team ID (secret `APPLE_TEAM_ID`). | T-177 |
+| T-177 B2 | Register App IDs `app.zaghlol`, `app.zaghlol.ShareExtension`, `app.zaghlol.widget` with App Groups, Keychain sharing, iCloud (CloudDocuments), and Sign in with Apple (the entitlement is missing in `Runner.entitlements`: iOS engineer to add). Create three App Store distribution provisioning profiles. Secrets `IOS_PROFILE_APP_BASE64`, `IOS_PROFILE_SHARE_BASE64`, `IOS_PROFILE_WIDGET_BASE64`. | signed IPA |
+| T-177 B3 | An Apple Distribution certificate exported as .p12: secrets `IOS_DIST_CERT_P12_BASE64`, `IOS_DIST_CERT_PASSWORD`. (Needs a Mac once to export, or create it through Xcode cloud signing; say if you prefer `fastlane match` and a private certs repo instead.) | signed IPA |
+| T-177 B4 | App Store Connect API key (role App Manager): secrets `ASC_KEY_ID`, `ASC_ISSUER_ID`, `ASC_KEY_P8_BASE64`. | TestFlight upload |
+| T-177 B5 | App Store Connect: App Privacy answers (`docs/06-release/app-store-privacy.md`), review notes, demo Apple ID for the reviewer, export-compliance answer, age rating, internal TestFlight testers. | App Review |
+| T-176/177 C1 | Optional secret `SYMBOLS_PASSPHRASE` (a long random string) so the encrypted Dart symbols, R8 mapping and dSYMs are kept 14 days as workflow artifacts. The repo is public, so without it nothing is kept outside Play / App Store Connect. | crash deobfuscation |
+| T-176/177 C2 | Confirm the store listing copy and screenshots (`store-listing.md` is a skeleton). | store review |
+
 ### Files and devices
 
 | ID | What's needed | Blocks |

@@ -1,3 +1,5 @@
+import java.util.Properties
+
 plugins {
     id("com.android.application")
     // The Flutter Gradle Plugin must be applied after the Android and Kotlin Gradle plugins.
@@ -92,11 +94,53 @@ android {
         getByName("androidTest").assets.srcDir(guardFixtures)
     }
 
+    // T-176: upload-key signing for store builds. The key comes from CI
+    // secrets (ZAGHLOL_UPLOAD_* environment variables, written by the release
+    // workflow) or from android/key.properties (git-ignored) on a release
+    // machine. Never from source.
+    val keyProps = Properties().apply {
+        val f = rootProject.file("key.properties")
+        if (f.exists()) f.inputStream().use { load(it) }
+    }
+    fun uploadSetting(env: String, prop: String): String? =
+        (System.getenv(env) ?: keyProps.getProperty(prop))?.takeIf { it.isNotBlank() }
+    val uploadStoreFile = uploadSetting("ZAGHLOL_UPLOAD_KEYSTORE_FILE", "storeFile")
+    val uploadStorePassword = uploadSetting("ZAGHLOL_UPLOAD_STORE_PASSWORD", "storePassword")
+    val uploadKeyAlias = uploadSetting("ZAGHLOL_UPLOAD_KEY_ALIAS", "keyAlias")
+    val uploadKeyPassword = uploadSetting("ZAGHLOL_UPLOAD_KEY_PASSWORD", "keyPassword")
+    val haveUploadKey = listOf(uploadStoreFile, uploadStorePassword, uploadKeyAlias, uploadKeyPassword)
+        .all { it != null }
+    // The release workflow sets this when it was given the upload key, so a
+    // store build can never fall back to debug signing silently. Ordinary
+    // release builds (CI APK checks, flutter run --release) still work unsigned.
+    val requireUploadKey = System.getenv("ZAGHLOL_REQUIRE_UPLOAD_KEY") == "true"
+    if (requireUploadKey && !haveUploadKey) {
+        throw GradleException(
+            "ZAGHLOL_REQUIRE_UPLOAD_KEY=true but the upload key is not configured " +
+                "(ZAGHLOL_UPLOAD_KEYSTORE_FILE / _STORE_PASSWORD / _KEY_ALIAS / _KEY_PASSWORD or android/key.properties)."
+        )
+    }
+
+    signingConfigs {
+        if (haveUploadKey) {
+            create("upload") {
+                storeFile = file(uploadStoreFile!!)
+                storePassword = uploadStorePassword
+                keyAlias = uploadKeyAlias
+                keyPassword = uploadKeyPassword
+            }
+        }
+    }
+
     buildTypes {
         release {
-            // TODO: Add your own signing config for the release build.
-            // Signing with the debug keys for now, so `flutter run --release` works.
-            signingConfig = signingConfigs.getByName("debug")
+            // Upload key when configured; otherwise the debug key so that
+            // `flutter run --release` and the CI APK checks keep working.
+            // Such a build is not uploadable (the workflow refuses it).
+            signingConfig = if (haveUploadKey) signingConfigs.getByName("upload") else signingConfigs.getByName("debug")
+            // Native debug symbols go inside the AAB; Play keeps them private
+            // and uses them to symbolicate native crashes (no third-party SDK).
+            ndk { debugSymbolLevel = "SYMBOL_TABLE" }
         }
     }
 }
