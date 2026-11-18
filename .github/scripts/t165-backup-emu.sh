@@ -25,9 +25,17 @@ sleep 20
 
 echo "---- static: what the installed package says"
 S dumpsys package "$PKG" | grep -iE "ALLOW_BACKUP|hasFragileUserData|FRAGILE|dataExtractionRules" | sed 's/^ */  /'
-flags=$(S dumpsys package "$PKG" | grep -m1 -E "^ *flags=|pkgFlags=")
+# pkgFlags=[ NAMES ] is the readable line; a bare flags=0x0 elsewhere in the dump is not.
+flags=$(S dumpsys package "$PKG" | grep -m1 -E "^ *pkgFlags=")
+[ -n "$flags" ] || flags=$(S dumpsys package "$PKG" | grep -m1 -E "^ *flags=")
 echo "  $flags"
-case "$flags" in *ALLOW_BACKUP*) res manifest FAIL "ALLOW_BACKUP flag present: $flags" ;; *) res manifest PASS "no ALLOW_BACKUP in package flags" ;; esac
+# The flag list must be readable (devSms is debuggable, so DEBUGGABLE has to be
+# in it). An empty or unparsable line (e.g. flags=0x0) proves nothing: UNKNOWN.
+case "$flags" in
+  *ALLOW_BACKUP*) res manifest FAIL "ALLOW_BACKUP flag present: $flags" ;;
+  *"["*DEBUGGABLE*"]"*) res manifest PASS "flags list read (DEBUGGABLE seen), no ALLOW_BACKUP: $flags" ;;
+  *) res manifest UNKNOWN "package flags not readable, no evidence: $flags" ;;
+esac
 
 # adb shell joins its arguments, so the remote command is one quoted string.
 rs() { A shell "run-as $PKG sh -c '$1'" < /dev/null 2>&1 | tr -d '\r'; }
@@ -64,6 +72,8 @@ n=$(canaries)
 echo "---- 2. adb backup (backup password empty)"
 plant
 # The confirm screen (com.android.backupconfirm) needs a tap: find the button with uiautomator.
+# A tap is logged to $OUT/confirm-tapped; without it the archive proves nothing.
+rm -f "$OUT/confirm-tapped" "$OUT/z.ab"
 tap_confirm() {
   sleep 10
   for _ in 1 2 3 4; do
@@ -78,7 +88,7 @@ for m in re.finditer(r"<node[^>]*>", x):
         if b:
             a=list(map(int,b.groups())); print((a[0]+a[2])//2,(a[1]+a[3])//2); break
 ')
-    if [ -n "$xy" ]; then echo "  confirm button at $xy"; S input tap $xy; return; fi
+    if [ -n "$xy" ]; then echo "  confirm button at $xy"; S input tap $xy; echo "$xy" > "$OUT/confirm-tapped"; return; fi
     sleep 4
   done
   echo "  no confirm button found (UI listing follows, text only)"
@@ -90,11 +100,22 @@ timeout 120 adb -s "$DEVICE" backup -noapk -f "$OUT/z.ab" "$PKG" < /dev/null 2>&
 wait "$tp" 2> /dev/null
 sz=$(stat -c %s "$OUT/z.ab" 2> /dev/null || echo 0)
 echo "  archive bytes: $sz"
-python3 -I - "$OUT/z.ab" << 'PY' | tee "$OUT/adb-backup.txt"
+tapped=no; [ -s "$OUT/confirm-tapped" ] && tapped=yes
+echo "  confirm tapped: $tapped"
+# API 31+: the OS still lets adb back up a DEBUGGABLE app (allowBackup=false is not
+# honoured for it), so leaked entries from this debug build say nothing about release.
+exempt=no; [ "$API" -ge 31 ] && case "$flags" in *DEBUGGABLE*) exempt=yes ;; esac
+python3 -I - "$OUT/z.ab" "$tapped" "$exempt" << 'PY' | tee "$OUT/adb-backup.txt"
 import io, sys, tarfile, zlib
-data = open(sys.argv[1], "rb").read() if len(sys.argv) > 1 else b""
+try:
+    data = open(sys.argv[1], "rb").read()
+except OSError:
+    data = b""
+tapped = sys.argv[2] == "yes"
+if not tapped:
+    print("RESULT UNKNOWN confirm screen was not tapped, the archive proves nothing"); sys.exit(0)
 if not data:
-    print("RESULT PASS empty file, adb refused or nothing to back up"); sys.exit(0)
+    print("RESULT PASS empty file after a confirmed tap, nothing backed up"); sys.exit(0)
 lines = data.split(b"\n", 4)
 if len(lines) < 4 or lines[0] != b"ANDROID BACKUP":
     print("RESULT UNKNOWN not an adb backup archive"); sys.exit(0)
@@ -106,8 +127,13 @@ if not body:
 tar = zlib.decompress(body) if lines[2] == b"1" else body
 names = tarfile.open(fileobj=io.BytesIO(tar)).getnames()
 leaks = [n for n in names if n.startswith("apps/") and not n.endswith("/_manifest")]
+for n in leaks[:30]:
+    print("  entry: " + n)
+if leaks and sys.argv[3] == "yes":
+    print("RESULT UNKNOWN %d app data entries, but this is a debuggable build on API 31+ (debuggable apps are exempt from the adb backup restriction); not evidence for release, verify on a release build" % len(leaks)); sys.exit(0)
 print("RESULT %s %d entries, %d app data entries" % ("FAIL" if leaks else "PASS", len(names), len(leaks)))
 PY
+grep '^  entry:' "$OUT/adb-backup.txt" | head -30
 r=$(grep -m1 '^RESULT' "$OUT/adb-backup.txt" | awk '{print $2}')
 res adb-backup "${r:-UNKNOWN}" "$(grep -m1 '^RESULT' "$OUT/adb-backup.txt" | cut -d' ' -f3-) (bytes=$sz)"
 

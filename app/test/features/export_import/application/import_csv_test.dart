@@ -54,6 +54,23 @@ class FakeStore implements CsvImportStore {
         ),
   ];
   @override
+  Future<List<ExistingTxnKey>> existingBetween(
+    String a,
+    int from,
+    int to, {
+    bool settledOnly = false,
+  }) async => [
+    for (final r in rows)
+      if (r.accountId == a &&
+          r.occurredAt.millisecondsSinceEpoch >= from &&
+          r.occurredAt.millisecondsSinceEpoch < to)
+        ExistingTxnKey(
+          direction: r.direction,
+          amount: r.amount,
+          merchant: r.merchant,
+        ),
+  ];
+  @override
   Future<String> insert(ImportedTxn row) async {
     if (exceptionOnInsert) throw const FormatException('constraint');
     if (failOnInsertN && rows.length == 1) throw StateError('boom');

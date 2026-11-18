@@ -128,6 +128,19 @@ class ShareStoreTest {
     }
 
     @Test
+    fun hostSetsOcrPathForImagesOnly() {
+        val store = newStore()
+        val host = ShareIntakeHost(store)
+        val img = put(store, "pixels", ShareKind.IMAGE)
+        val txt = put(store, "words")
+        val byId = host.listPendingShares().associateBy { it.id }
+        assertEquals(img.id, byId.getValue(img.id).ocrPath)
+        assertEquals(null, byId.getValue(txt.id).ocrPath)
+        assertEquals(img.id, host.readShare(img.id).descriptor.ocrPath)
+        assertEquals(null, host.readShare(txt.id).descriptor.ocrPath)
+    }
+
+    @Test
     fun hostMapsErrorsToContractCodesAndTakesRejectionOnce() {
         val store = newStore()
         val host = ShareIntakeHost(store)

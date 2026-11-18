@@ -14,6 +14,9 @@ public sealed class GoldApiProvider(HttpClient client, string apiKey, PriceBound
 {
     public const string HttpClientName = "zaghlol-price-goldapi";
 
+    /// <summary>Largest accepted relative gap between a vendor per-karat gram price and the ounce-derived value.</summary>
+    public const decimal GramTolerance = 0.05m;
+
     public string Name => PriceProviderNames.GoldApi;
 
     public async Task<ProviderSnapshot> FetchAsync(CancellationToken cancellationToken)
@@ -39,10 +42,18 @@ public sealed class GoldApiProvider(HttpClient client, string apiKey, PriceBound
         var root = document.RootElement;
         var ounce = PriceHttp.Require(root, "price");
         var quotes = new List<GoldQuote>();
-        foreach (var (symbol, field) in new[] { (PriceSymbols.Gold24, "price_gram_24k"), (PriceSymbols.Gold21, "price_gram_21k"), (PriceSymbols.Gold18, "price_gram_18k") })
+        var gram24 = PriceBounds.GramFromOunce(ounce);
+        foreach (var (symbol, field, karat) in new[] { (PriceSymbols.Gold24, "price_gram_24k", 24m), (PriceSymbols.Gold21, "price_gram_21k", 21m), (PriceSymbols.Gold18, "price_gram_18k", 18m) })
         {
             if (PriceHttp.Decimal(root, field) is { } gram && gram > 0)
             {
+                // Consistency check (FU-259): a vendor karat price far from the ounce-derived value is a feed fault.
+                var expected = gram24 * karat / 24m;
+                if (Math.Abs(gram - expected) > expected * GramTolerance)
+                {
+                    throw new PriceProviderException($"GoldAPI {field} for {currency} disagrees with the ounce price by more than {GramTolerance:P0}.");
+                }
+
                 quotes.Add(new GoldQuote(symbol, currency, decimal.Round(gram, PriceNormalizer.GoldDecimals, MidpointRounding.AwayFromZero)));
             }
         }

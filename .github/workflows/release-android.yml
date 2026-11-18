@@ -254,12 +254,24 @@ jobs:
 
       # Dry-run output only: an unsigned (debug-signed) bundle is not
       # uploadable and carries no secret. Signed bundles are never kept.
+      # An AAB carries the R8 mapping (BUNDLE-METADATA/.../proguard.map) and the repo is public, so
+      # the public copy is stripped of BUNDLE-METADATA first (FU-259).
+      - name: Strip the R8 mapping from the dry-run bundle
+        if: steps.sign.outputs.signed != 'true'
+        run: |
+          set -e
+          mkdir -p "$RUNNER_TEMP/aab-public"
+          cp "$AAB" "$RUNNER_TEMP/aab-public/app-dry-run.aab"
+          zip -d "$RUNNER_TEMP/aab-public/app-dry-run.aab" 'BUNDLE-METADATA/*' || true
+          if unzip -l "$RUNNER_TEMP/aab-public/app-dry-run.aab" | grep -Eqi 'proguard\.map|mapping\.txt'; then
+            echo "::error::the public dry-run bundle still contains an R8 mapping"; exit 1
+          fi
       - name: Keep the unsigned bundle (3 days, dry run only)
         if: steps.sign.outputs.signed != 'true'
         uses: actions/upload-artifact@b7c566a772e6b6bfb58ed0dc250532a479d7789f # v6.0.0
         with:
           name: ${{ matrix.flavor }}-aab-UNSIGNED-dry-run
-          path: ${{ env.AAB }}
+          path: ${{ runner.temp }}/aab-public/app-dry-run.aab
           if-no-files-found: error
           retention-days: 3
 

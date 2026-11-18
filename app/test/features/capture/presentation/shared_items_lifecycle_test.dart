@@ -113,6 +113,20 @@ void main() {
     expect(host.discarded, ['t1']);
   });
 
+  testWidgets('an Android image share (ocrPath is the share id) reaches OCR', (
+    tester,
+  ) async {
+    // Android sets ocrPath to the share id; without it the scan has no image.
+    final id = 'a'.padRight(28, 'b');
+    final host = _Host([_d(id, ShareKind.image, ocrPath: id)]);
+    final service = await pump(tester, host);
+    lock.open();
+    await service.pollPending();
+    await tester.pumpAndSettle();
+    expect(find.text('1250.00'), findsOneWidget);
+    expect(host.read, isEmpty);
+  });
+
   testWidgets('a shared image goes to OCR with its spool path', (tester) async {
     final host = _Host([
       _d('i1', ShareKind.image, ocrPath: '/spool/files/i1.bin'),

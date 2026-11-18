@@ -40,7 +40,15 @@ CI does both in `.github/workflows/backend-iac-validate.yml` (also greps for sta
 1. Create the GCP project, a GCS bucket for state (versioned, uniform access), and a workload identity pool + provider that trusts
    this repository for the `staging` / `prod` GitHub environments; create a deploy service account the pool may impersonate.
    Grant it only what the stack needs (project editor-style roles are not needed; scope to the services in
-   `modules/environment` and `roles/iam.serviceAccountAdmin`, `roles/resourcemanager.projectIamAdmin`).
+   `modules/environment` and `roles/iam.serviceAccountAdmin`). Do **not** grant it plain `roles/resourcemanager.projectIamAdmin`
+   (that lets whoever runs the workflow make themselves owner). Instead grant `roles/resourcemanager.projectIamAdmin` with an IAM
+   condition that limits delegable roles, for example
+   `api.getAttribute('iam.googleapis.com/modifiedGrantsByRole', []).hasOnly(['roles/cloudkms.signerVerifier',
+   'roles/cloudkms.cryptoKeyEncrypterDecrypter', 'roles/secretmanager.secretAccessor', 'roles/run.invoker',
+   'roles/pubsub.publisher', 'roles/iam.serviceAccountTokenCreator', 'roles/cloudsql.client'])`
+   (extend the list to the roles `modules/*` actually bind), or bind per resource where possible.
+1a. Prod deploys run only from `main`: the workflow job refuses `prod` on any other ref, and the GitHub `prod` environment must
+   have a deployment branch rule "Selected branches: main" plus required reviewers (set both before the first prod run).
 2. Commit `envs/<env>/settings.auto.tfvars` (copy `terraform.tfvars.example`; non-secret values only).
 3. Bootstrap order (the image registry must exist before the first image): `tofu apply` with
    `-target=module.environment.google_artifact_registry_repository.images`, push the image, then run the workflow.

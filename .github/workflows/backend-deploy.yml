@@ -43,7 +43,8 @@ jobs:
   deploy:
     name: ${{ inputs.environment }}
     # Disabled until the PO flips the repository variable.
-    if: ${{ vars.BACKEND_DEPLOY_ENABLED == 'true' }}
+    # Prod runs only from main (FU-259); the prod environment's deployment-branch rule must say the same.
+    if: ${{ vars.BACKEND_DEPLOY_ENABLED == 'true' && (inputs.environment != 'prod' || github.ref == 'refs/heads/main') }}
     runs-on: ubuntu-latest
     timeout-minutes: 60
     # Environment protection: required reviewers / wait timer are configured on the GitHub environment, not here.

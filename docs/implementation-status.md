@@ -834,6 +834,8 @@ Replaces the 85 rows above that only pointed at batch review reports or were mar
 
 - **FU-260** (batch 39): see the batch-39 Lead delta check.
 
+- **FU-261** (batch 41): see the batch-41 Lead delta check.
+
 ## Log
 | Date | Event |
 |---|---|
@@ -927,3 +929,4 @@ Replaces the 85 rows above that only pointed at batch review reports or were mar
 | 2026-11-18 | Batch 38 (`batch/2026-11-18-38`): PO WEEKLY-FRIDAY, OVERDUE-REMINDERS (+ Mark-as-paid action). FU-258. Progress 167/186. |
 | 2026-11-18 | Batch 40 (`batch/2026-11-18-40`): T-127 adapters, T-140 prep, T-176/177 prep + iOS store fixes, T-058 pass 1. FU-259. Board tasks stay open until the PO's inputs (keys, accounts, hosting, human review). |
 | 2026-11-18 | Batch 39 (`batch/2026-11-18-39`): T-136 OIDC, T-059 merchants, T-099 mascot moments, T-159 Android OCR, T-165 emulator evidence. FU-260. |
+| 2026-11-18 | Batch 41 (`batch/2026-11-18-41`): T-156 PDF import (bank-agnostic), share→OCR, T-165 script, alias lint, FU-259, T-031 search. FU-261. |

@@ -82,9 +82,11 @@ final class ImportedTxn {
     this.merchant,
     this.categoryId,
     this.note,
+    this.source = TxnSource.csv,
   });
 
   final String accountId;
+  final TxnSource source;
   final TxnDirection direction;
   final TxnStatus status;
   final Money amount;
@@ -121,6 +123,17 @@ abstract interface class CsvImportStore {
 
   /// Live transactions of [accountId] at exactly [occurredAtMs].
   Future<List<ExistingTxnKey>> existingAt(String accountId, int occurredAtMs);
+
+  /// Live transactions of [accountId] with `fromMs <= occurredAt < toMs`
+  /// (T-156: statements carry a day, not an instant). With [settledOnly],
+  /// only `posted`/`pending` rows count (declined/reversed ones are not
+  /// real money movements, so they must not block a statement row).
+  Future<List<ExistingTxnKey>> existingBetween(
+    String accountId,
+    int fromMs,
+    int toMs, {
+    bool settledOnly = false,
+  });
 
   /// Inserts the row and returns its new id.
   Future<String> insert(ImportedTxn row);
