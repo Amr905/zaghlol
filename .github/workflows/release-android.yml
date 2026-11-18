@@ -19,6 +19,8 @@ name: release-android
 # artifact encrypted with SYMBOLS_PASSPHRASE (skipped when it is absent).
 # No crash-reporting SDK is involved (CLAUDE.md section 2).
 on:
+  push:
+    branches: ['ci/T-176-177-dryrun']
   workflow_dispatch:
     inputs:
       flavor:

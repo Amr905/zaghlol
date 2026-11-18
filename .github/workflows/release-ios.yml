@@ -21,6 +21,8 @@ name: release-ios
 # uploaded as artifacts in the clear (dSYMs and Dart symbols are kept only
 # encrypted with SYMBOLS_PASSPHRASE; skipped when it is absent). No crash SDK.
 on:
+  push:
+    branches: ['ci/T-176-177-dryrun']
   workflow_dispatch:
     inputs:
       build_number:
