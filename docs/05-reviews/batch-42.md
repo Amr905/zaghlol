@@ -31,3 +31,19 @@ Good: USD salary keeps `USD` (5966 minor, not converted). Hotline 19100 is never
 | SMS-po42 | `app/assets/registry/institutions/cib.json:21` | Narrow the CIB drop to competition-only phrases. Remove the bare `تطبق الشروط والاحكام`. Regenerate the Guard bases and goldens. | CIB card purchase + T&C footer is inserted (pipeline + e2e + Guard golden keep). |
 | SMS-po42 | `app/assets/registry/institutions/arab_bank.json:32` | `EG` sender: template matches only. Generic results go to review, never auto-saved. | `EG` non-template body with an amount and last-4 gives a review item, 0 transactions. |
 | T-156b | n/a | Branch is empty: build and push it. | n/a |
+
+## Delta re-review (T-156b fix round)
+
+Commit 0f117ed1 (on top of fd8a30b2), merged locally. Tests run: `packages/zaghlol_parsing test/statements` 64 pass; `app test/features/export_import test/features/capture` 449 pass.
+
+1. Balance mismatch: FIXED. Rows move to `StatementParseResult.review` with an amount in integer minor units; `run` throws `reviewRequired` with no decision, and writes nothing. Tests (balance mismatch held, throws, store empty; keep/skip/flip) fail without the fix.
+2. Unknown direction: FIXED. Unsigned and not derived gives `directionUnknown`; `keep` is rejected for those rows. Tests cover the no-balance and first-row cases.
+3. Year: FIXED. `StatementYearSource.today` makes a real import throw `yearNotConfirmed` until `confirmedYear`; a printed period or statement date anchors without asking. Tests cover both paths.
+4. Android OCR: FIXED. `ocrEngineProvider` returns `PigeonOcrEngine` on Android; the Android OCR host exists (`platform/ocr/OcrHosts.kt`). Images are deleted and nothing is uploaded, per the provider doc and T-159.
+
+Findings:
+- minor, statement_rows.dart (`plainIsIncome`): with no balance column and any negative sign in the amount column, unsigned rows are read as income. That is a silent default, a narrow one, and a convention rather than a derivation. Follow-up: flag these rows as unknown, or show the assumption in the preview.
+- nit: `StatementRowProblem.balanceMismatch` is now unused; remove it later.
+- nit: no UI caller of `run(decisions:, confirmedYear:)` was found in this diff. The review and year screens must be wired before the feature ships, or an import will throw. Track it as a follow-up.
+
+**Verdict: APPROVED** (no blocker or major remaining).
