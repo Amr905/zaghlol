@@ -108,13 +108,69 @@ Batches 26–37 (PRs #58–#69) were driven by the PO's real-phone tests. All CI
 - Explorer "dead tap" reports were often test timing (`ensureVisible` without a pump).
 - db-platform sometimes fails with "Failed to start Dart Development Service" on the emulator. Rerun failed jobs.
 
+## Session summary, part 2 (2026-11-18, batches 38–42, PRs #70–#76)
+
+The PO asked the Lead to work on the tasks blocked on PO inputs (web research allowed), then sent new phone-test reports and statement samples.
+
+**PO decisions (recorded in `PO_DECISIONS.md` Part 1):**
+- **WEEKLY-FRIDAY:** the weekly summary arrives on Friday and covers the 7 days ending Thursday.
+- **OVERDUE-REMINDERS:** the Lead drafted the copy (PO delegated). Reminders go out on day+1 and day+3 from 10:00, with a redacted variant when amounts are hidden. The "أيوه دفعته / Mark as paid" action opens the app and pays with the due date pinned.
+- **HSBC:** keep the Arabic templates even though HSBC Egypt says it sends English only, since it may be a per-customer setting.
+
+**Batch 38:** reminders and the weekly summary.
+
+**Batch 39 — blocked tasks moved forward:**
+- **T-136:** operator OIDC for Entra or Google, by config.
+- **T-059:** 854 merchants, compiled by an agent and spot-checked online; PO to spot-check.
+- **T-099:** mascot moments using the interim brand art. The Rive file switches in automatically when it lands.
+- **T-159:** Android OCR via JitPack, sha256-verified, with ML Kit telemetry removed.
+- **T-165:** emulator evidence.
+
+**Batch 40:**
+- **T-127:** gold adapters; MetalpriceAPI recommended.
+- **T-140 prep:** GCP Frankfurt recommended. OpenTofu and a manual OIDC deploy are ready but not deployed. Includes a PDPL note, which is not legal advice.
+- **T-176/177:** unsigned store pipelines, store docs in docs/06-release, the Sign in with Apple entitlement, and the widget privacy manifest.
+- **T-058 pass 1:** 54 Arabic fixes; 31 calls left for the human reviewer.
+
+**Batch 41:**
+- **T-156:** bank-agnostic PDF import.
+- **Android share:** now reaches OCR.
+- **Merchant aliases:** a lint for risky aliases.
+- **Infra/release minors:** cleared.
+- **T-031:** web search; no verbatim SMS were found.
+
+**T-165 on a release-type build (PR #75):** a non-debuggable build is refused backup and `adb backup` contains 0 app entries on API 30 and 34. Debuggable builds can be backed up on Android 12+, which is expected per Android's docs.
+
+**Batch 42 (from the PO's 2026-11-18 reports):**
+- **CIB gold-certificate promo saved as a transaction:**
+  - **Root cause:** the generic fallback read "السحب" (draw) as a withdrawal and took a "merchant" from "من …".
+  - **Fixes:** draw/promo cues → `genericPromotion`. A CIB drop limited to draw wording; the Lead narrowed `السحب على` so a real `تم السحب على حسابكم` is kept, and a plain T&C footer is never dropped.
+- **Arab Bank (sender `EG`, now `templateOnly`):**
+  - InstaPay out with account, recipient, ref and balance.
+  - USD salary credit, kept in USD.
+- **Mashreq (Mashreq-e&, Mashreq):** card purchase; the terminal id is stripped from the merchant.
+- **Vodafone Cash (VF-Cash):** synthetic templates; the PO will send a real sample.
+- **registryVersion:** 6.
+- **PDF statements (T-156b) for the PO's 3 sample layouts:**
+  - The layouts: Credit/Debit/Balance with a summary; Paid In/Paid Out with Brought Forward; and a scanned US e-statement with year-less dates and page-2 duplicates.
+  - The running balance validates direction.
+  - Rows that don't reconcile, or whose direction is unknown, go to user review; the year must be confirmed if it isn't printed.
+  - Scanned PDFs use on-device OCR on Android and iOS.
+  - The import UI for those decisions isn't built yet (FU-262).
+- **SPRINT rule 5 (no ARB edits) is superseded:** builders add their own keys.
+
+**Lessons:**
+- **Separate worktrees:** two agents shared the main checkout, so one pushed an empty branch and its commits landed on another branch. Every agent now works in its own worktree; the Lead recovered the commits by cherry-pick.
+- **Builder tools:** the parsing builder has no WebSearch. Use a general-purpose agent for web research, and the Lead verifies a sample.
+- **"Fail closed" and "drop" rules:** check each against real messages that share the wording (T&C footers, "السحب على حسابكم").
+
 ## In flight (2026-11-18 Cairo)
 
-1. **Batch 38** (`batch/2026-11-18-38`): WEEKLY-FRIDAY + OVERDUE-REMINDERS with the Mark-as-paid action (opens the app; due date pinned). FU-258: the minors in docs/05-reviews/batch-38.md (non-exported trampoline or nonce for the action, lost mark-paid while locked, missed Friday if the app isn't opened, quiet-hours-delayed reminder not cancelled after paying).
-2. **T-159 Android OCR:** waiting for the PO's `tesseract4android-4.9.0.aar`.
-3. **Remaining FUs:** pick lanes from the itemised table, about 20 not-started UI items from batch 37 first (FU-257).
+1. **Statement import UI (FU-262):** the review decisions, year confirmation and l10n keys, plus T-158 flow wiring. Then T-156 can go live with real statements.
+2. **PO samples still useful:** a Vodafone Cash SMS, real bank statements, and any SMS the diagnostics screen shows as unread.
+3. **Remaining FUs:** the itemised table; about 20 UI items from batch 37 are not started (FU-257).
 
-Next free follow-up number: **FU-262**.
+Next free follow-up number: **FU-263**.
 
 ## Batch 39 (2026-11-18)
 
@@ -134,12 +190,12 @@ All board tasks left (19) wait on PO inputs or devices; see `PO_DECISIONS.md` Pa
 - T-008, T-011, T-165, T-172 need devices.
 - T-031, T-156, T-157 need real samples.
 - T-058 needs an Egyptian-Arabic reviewer.
-- T-059 needs the merchant list.
-- T-088 and T-099 need the Rive mascot.
-- T-127 needs a gold price provider.
-- T-136 and T-137 need a staff IdP.
-- T-140 needs hosting.
-- T-159 needs the Tesseract aar.
+- T-059: built from public knowledge; PO spot-check.
+- T-088 needs the Rive mascot (T-099 works with interim art).
+- T-127: adapters built; PO picks the provider and adds the key.
+- T-136: OIDC built for both IdPs; PO picks one and registers the app. T-137 follows.
+- T-140: prep done (GCP Frankfurt recommended); PO chooses, plus legal check.
+- T-159: built (JitPack, verified); needs a device accuracy run.
 - T-175, T-176 and T-177 are release work, after hosting and store accounts.
 
 Meanwhile the Lead clears follow-ups in batches of up to 5 lanes, and the explorer and device tests rerun on the emulator after big changes.
