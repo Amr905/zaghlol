@@ -1,1 +1,1 @@
-﻿RUNNING sha=0f117ed12ee83ba3299188a11711ec17e27325fe
+﻿FAIL sha=0f117ed12ee83ba3299188a11711ec17e27325fe pipeline=quick-app pub-get=0 format=0 analyze=0 lints=0 app-test=1 dart-test-zaghlol_catalog=0 dart-test-zaghlol_domain=0 dart-test-zaghlol_parsing=1 apk-devNoSms=1
