@@ -12,12 +12,16 @@ class ZMascotBubble extends StatelessWidget {
     this.moment = ZaghlolMoment.proud,
     this.avatarSize = 64,
     this.onTap,
+    this.avatarKey,
   });
 
   final String message;
   final ZaghlolMoment moment;
   final double avatarSize;
   final VoidCallback? onTap;
+
+  /// Changing it replays a one-off moment (T-099 tap easter egg).
+  final Key? avatarKey;
 
   @override
   Widget build(BuildContext context) {
@@ -49,7 +53,11 @@ class ZMascotBubble extends StatelessWidget {
               ),
               child: Row(
                 children: [
-                  ZaghlolAvatar(moment: moment, size: avatarSize),
+                  ZaghlolAvatar(
+                    key: avatarKey,
+                    moment: moment,
+                    size: avatarSize,
+                  ),
                   const SizedBox(width: ZSpacing.md),
                   Expanded(
                     child: Text(

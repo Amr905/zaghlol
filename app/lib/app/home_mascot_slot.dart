@@ -6,12 +6,12 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../core/l10n/generated/app_localizations.dart';
-import '../core/ui/z_mascot_bubble.dart';
 import '../features/home/application/home_mascot.dart';
 import '../features/home/application/home_read_model.dart';
 import '../features/home/presentation/cards/home_cards_view.dart';
 import '../features/home/presentation/home_format.dart';
 import '../features/home/presentation/home_screen.dart' show HomeActions;
+import '../features/mascot/presentation/mascot_moments.dart';
 import '../features/mascot/presentation/zaghlol_avatar.dart';
 
 class HomeMascotSlot extends ConsumerWidget {
@@ -37,7 +37,7 @@ class HomeMascotSlot extends ConsumerWidget {
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
         if (text != null)
-          ZMascotBubble(
+          ZaghlolTapBubble(
             key: const ValueKey('home-mascot'),
             message: text,
             moment: ZaghlolMoment.proud,
