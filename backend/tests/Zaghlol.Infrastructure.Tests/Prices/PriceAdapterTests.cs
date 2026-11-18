@@ -146,6 +146,17 @@ public class PriceAdapterTests
     }
 
     [Fact]
+    public async Task GoldApiRefusesAKaratGramPriceThatDisagreesWithTheOuncePrice()
+    {
+        var bad = GoldApiUsd.Replace("\"price_gram_21k\":116.46", "\"price_gram_21k\":140.00", StringComparison.Ordinal);
+        var handler = new StubHandler(r => (HttpStatusCode.OK, r.RequestUri!.AbsolutePath.EndsWith("/EGP", StringComparison.Ordinal) ? GoldApiEgp : bad));
+        var provider = new GoldApiProvider(Client(handler, "https://www.goldapi.io/"), "K", PriceBounds.Default, Clock);
+
+        var ex = await Assert.ThrowsAsync<PriceProviderException>(() => provider.FetchAsync(CancellationToken.None));
+        Assert.Contains("price_gram_21k", ex.Message, StringComparison.Ordinal);
+    }
+
+    [Fact]
     public async Task TheTransportErrorBecomesAFixedMessageWithoutTheUrl()
     {
         var provider = new MetalpriceApiProvider(
