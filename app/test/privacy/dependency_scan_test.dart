@@ -134,8 +134,12 @@ const List<String> nativeDenied = [
 bool deniedDart(String name) =>
     dartDenied.any((d) => d.endsWith('_') ? name.startsWith(d) : name == d);
 
+/// Lines that remove a dependency (`exclude(group = "com.google.firebase", …)`,
+/// T-159 keeps ML Kit's telemetry backend out) are not a dependency on it.
+final RegExp _excludeLine = RegExp(r'^\s*exclude\s*\(.*$', multiLine: true);
+
 List<String> nativeHits(String text) {
-  final lower = text.toLowerCase();
+  final lower = text.toLowerCase().replaceAll(_excludeLine, '');
   return [
     for (final d in nativeDenied)
       if (lower.contains(d)) d,
