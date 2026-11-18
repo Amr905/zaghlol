@@ -25,11 +25,13 @@ public static class PriceProviderNames
     public const string LocalGold = "local_gold";
     public const string Fx = "fx";
     public const string SpotGold = "spot_gold";
+    public const string GoldApi = "goldapi";
+    public const string MetalpriceApi = "metalpriceapi";
 
     /// <summary>Metric tag for a run in which no provider is configured.</summary>
     public const string None = "none";
 
-    public static IReadOnlyList<string> Known { get; } = [Fake, LocalGold, Fx, SpotGold];
+    public static IReadOnlyList<string> Known { get; } = [Fake, LocalGold, Fx, SpotGold, GoldApi, MetalpriceApi];
 }
 
 /// <summary>Fetch outcomes, a fixed value set for the metric tag.</summary>
