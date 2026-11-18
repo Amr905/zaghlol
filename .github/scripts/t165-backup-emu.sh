@@ -1,4 +1,6 @@
 #!/usr/bin/env bash
+# Part 4 builds a NON-debuggable stagingSms release APK (Android 12+ lets adb back up
+# debuggable apps, so the debug rows are not release evidence).
 # T-165 on an Android emulator (t165-backup-emu.yml): FR-SEC-05 as far as an
 # emulator can show it. devSms debug build (debuggable, so run-as works),
 # canary files planted in files/, databases/, shared_prefs/, then Auto Backup
@@ -76,14 +78,14 @@ plant
 rm -f "$OUT/confirm-tapped" "$OUT/z.ab"
 tap_confirm() {
   sleep 10
-  for _ in 1 2 3 4; do
+  for _ in $(seq 1 12); do
     A shell uiautomator dump /sdcard/ui.xml > /dev/null 2>&1 < /dev/null
     xy=$(A exec-out cat /sdcard/ui.xml 2> /dev/null | python3 -I -c '
 import re,sys
 x=sys.stdin.read()
 for m in re.finditer(r"<node[^>]*>", x):
     n=m.group(0)
-    if re.search(r"(?i)back up my data|text=\"(back up|backup)\"", n):
+    if re.search(r"(?i)button_allow|back up my data|text=\"(back up|backup)\"", n):
         b=re.search(r"bounds=\"\[(\d+),(\d+)\]\[(\d+),(\d+)\]", n)
         if b:
             a=list(map(int,b.groups())); print((a[0]+a[2])//2,(a[1]+a[3])//2); break
@@ -105,7 +107,7 @@ echo "  confirm tapped: $tapped"
 # API 31+: the OS still lets adb back up a DEBUGGABLE app (allowBackup=false is not
 # honoured for it), so leaked entries from this debug build say nothing about release.
 exempt=no; [ "$API" -ge 31 ] && case "$flags" in *DEBUGGABLE*) exempt=yes ;; esac
-python3 -I - "$OUT/z.ab" "$tapped" "$exempt" << 'PY' | tee "$OUT/adb-backup.txt"
+cat > "$OUT/analyze.py" << 'PY'
 import io, sys, tarfile, zlib
 try:
     data = open(sys.argv[1], "rb").read()
@@ -133,6 +135,7 @@ if leaks and sys.argv[3] == "yes":
     print("RESULT UNKNOWN %d app data entries, but this is a debuggable build on API 31+ (debuggable apps are exempt from the adb backup restriction); not evidence for release, verify on a release build" % len(leaks)); sys.exit(0)
 print("RESULT %s %d entries, %d app data entries" % ("FAIL" if leaks else "PASS", len(names), len(leaks)))
 PY
+python3 -I "$OUT/analyze.py" "$OUT/z.ab" "$tapped" "$exempt" | tee "$OUT/adb-backup.txt"
 grep '^  entry:' "$OUT/adb-backup.txt" | head -30
 r=$(grep -m1 '^RESULT' "$OUT/adb-backup.txt" | awk '{print $2}')
 res adb-backup "${r:-UNKNOWN}" "$(grep -m1 '^RESULT' "$OUT/adb-backup.txt" | cut -d' ' -f3-) (bytes=$sz)"
@@ -158,6 +161,101 @@ if [ "$API" -ge 31 ]; then
     res d2d SKIP "no D2dTransport on this image (real device row stays open)"
   fi
 fi
+echo "---- 4. NON-debuggable release-type build (stagingSms, debug keystore, no secrets)"
+RPKG=app.zaghlol.staging
+flutter build apk --release --flavor stagingSms 2>&1 | tail -3
+rapk=$(ls build/app/outputs/flutter-apk/*.apk 2> /dev/null | grep -i stagingsms | grep -i release | head -1)
+if [ -z "$rapk" ]; then
+  res release-build FAIL "no release apk"
+  echo "T165 api=$API summary: failures=$fails"; exit 1
+fi
+A install -r -g "$rapk" > /dev/null || { res release-install FAIL "install failed"; echo "T165 api=$API summary: failures=$((fails + 1))"; exit 1; }
+S am start -W -n "$RPKG/app.zaghlol.MainActivity" > /dev/null
+sleep 20
+[ -n "$(S pidof "$RPKG")" ] && echo "  release app running" || echo "  release app not running"
+rflags=$(S dumpsys package "$RPKG" | grep -m1 -E "^ *pkgFlags=")
+[ -n "$rflags" ] || rflags=$(S dumpsys package "$RPKG" | grep -m1 -E "^ *flags=")
+echo "  $rflags"
+case "$rflags" in
+  *DEBUGGABLE*) res release-flags FAIL "release build is DEBUGGABLE: $rflags" ;;
+  *ALLOW_BACKUP*) res release-flags FAIL "ALLOW_BACKUP: $rflags" ;;
+  *"["*"]"*) res release-flags PASS "no DEBUGGABLE, no ALLOW_BACKUP: $rflags" ;;
+  *) res release-flags UNKNOWN "flags not readable: $rflags" ;;
+esac
+if S run-as "$RPKG" id 2>&1 | grep -qiE "not debuggable|unknown package"; then
+  res release-run-as PASS "run-as refused: package is not debuggable"
+else
+  res release-run-as FAIL "run-as worked on the release build"
+fi
+
+# Merged manifest and data extraction rules, read from the APK itself.
+AAPT=$(ls "${ANDROID_HOME:-${ANDROID_SDK_ROOT:-/usr/local/lib/android/sdk}}"/build-tools/*/aapt2 2> /dev/null | sort -V | tail -1)
+echo "  aapt2: ${AAPT:-none}"
+if [ -n "$AAPT" ]; then
+  "$AAPT" dump xmltree --file AndroidManifest.xml "$rapk" > "$OUT/manifest.txt" 2>&1
+  grep -E "allowBackup|dataExtractionRules|fullBackupContent|debuggable" "$OUT/manifest.txt" | sed 's/^ */  /'
+  if grep -q 'allowBackup.*=false' "$OUT/manifest.txt"; then res manifest-allowbackup PASS "allowBackup=false in the release manifest"; else res manifest-allowbackup FAIL "allowBackup not false"; fi
+  if grep -q 'dataExtractionRules' "$OUT/manifest.txt"; then res manifest-rules-ref PASS "dataExtractionRules attribute present"; else res manifest-rules-ref FAIL "no dataExtractionRules"; fi
+  if grep -qE 'debuggable.*=true' "$OUT/manifest.txt"; then res manifest-debuggable FAIL "debuggable=true"; else res manifest-debuggable PASS "not debuggable"; fi
+  rf=$("$AAPT" dump resources "$rapk" 2> /dev/null | grep -A4 'xml/data_extraction_rules' | grep -oE 'res/[^ ]+\.xml' | head -1)
+  echo "  rules file in apk: ${rf:-none}"
+  if [ -n "$rf" ]; then
+    "$AAPT" dump xmltree --file "$rf" "$rapk" > "$OUT/rules.txt" 2>&1
+    sed 's/^/    /' "$OUT/rules.txt" | head -50
+    python3 -I - "$OUT/rules.txt" << 'PY' | tee "$OUT/rules-check.txt"
+import re, sys
+want = {"root", "file", "database", "sharedpref", "external", "device_root", "device_file", "device_database", "device_sharedpref"}
+sec = None; got = {}; inc = 0
+for l in open(sys.argv[1]):
+    m = re.search(r"E: (cloud-backup|device-transfer)", l)
+    if m:
+        sec = m.group(1); got[sec] = set(); continue
+    if re.search(r"E: include", l): inc += 1
+    m = re.search(r'domain.*?="([a-z_]+)"', l)
+    if m and sec: got[sec].add(m.group(1))
+ok = inc == 0 and all(got.get(k) == want for k in ("cloud-backup", "device-transfer"))
+print("RESULT %s cloud-backup=%d device-transfer=%d includes=%d domains" % ("PASS" if ok else "FAIL", len(got.get("cloud-backup", ())), len(got.get("device-transfer", ())), inc))
+PY
+    r=$(grep -m1 '^RESULT' "$OUT/rules-check.txt" | awk '{print $2}')
+    res rules-domains "${r:-UNKNOWN}" "$(grep -m1 '^RESULT' "$OUT/rules-check.txt" | cut -d' ' -f3-)"
+  else
+    res rules-domains UNKNOWN "rules file not found in the apk"
+  fi
+else
+  res manifest-apk UNKNOWN "no aapt2 on the runner"
+fi
+
+echo "---- 4a. release: Auto Backup (local transport)"
+S bmgr transport com.android.localtransport/.LocalTransport > /dev/null
+out=$(S bmgr backupnow "$RPKG" 2>&1); echo "$out" | sed 's/^/  backupnow: /' | head -8
+if echo "$out" | grep -qiE "not allowed|not eligible|is not currently|Backup is not allowed"; then
+  res release-auto-backup PASS "backupnow refused"
+elif echo "$out" | grep -qiE "result: Success"; then
+  res release-auto-backup FAIL "backupnow reported Success: $(echo "$out" | head -3 | tr '\n' ' ')"
+else
+  res release-auto-backup UNKNOWN "unexpected output, see log"
+fi
+sets=$(S bmgr list sets 2>&1); echo "$sets" | sed 's/^/  sets: /' | head -5
+S pm clear "$RPKG" > /dev/null
+tok=$(echo "$sets" | grep -oE '^[ ]*[0-9a-f]{6,}' | head -1 | tr -d ' ')
+if [ -n "$tok" ]; then S bmgr restore "$tok" "$RPKG" 2>&1 | sed 's/^/  restore: /' | head -5; else echo "  no restore set"; fi
+# run-as is impossible on a release build, so no canary can be planted or read back.
+# The restore check here is: backupnow was refused (nothing was ever stored for the package).
+S dumpsys backup | grep -c "$RPKG" | sed 's/^/  dumpsys backup lines naming the release package: /'
+
+echo "---- 4b. release: adb backup"
+rm -f "$OUT/confirm-tapped" "$OUT/r.ab"
+tap_confirm &
+tp=$!
+timeout 150 adb -s "$DEVICE" backup -noapk -f "$OUT/r.ab" "$RPKG" < /dev/null 2>&1 | head -3 | sed 's/^/  adb backup: /'
+wait "$tp" 2> /dev/null
+rsz=$(stat -c %s "$OUT/r.ab" 2> /dev/null || echo 0)
+rtapped=no; [ -s "$OUT/confirm-tapped" ] && rtapped=yes
+echo "  release archive bytes: $rsz, confirm tapped: $rtapped"
+python3 -I "$OUT/analyze.py" "$OUT/r.ab" "$rtapped" no | tee "$OUT/adb-backup-release.txt"
+r=$(grep -m1 '^RESULT' "$OUT/adb-backup-release.txt" | awk '{print $2}')
+res release-adb-backup "${r:-UNKNOWN}" "$(grep -m1 '^RESULT' "$OUT/adb-backup-release.txt" | cut -d' ' -f3-) (bytes=$rsz)"
+
 echo "---- logcat: backup lines for the package (no app data)"
 A logcat -d 2> /dev/null | grep -iE "BackupManagerService|BackupAgent|KeyValueBackup|FullBackup" | grep -i zaghlol | cut -c1-200 | tail -10
 echo "T165 api=$API summary: failures=$fails"
