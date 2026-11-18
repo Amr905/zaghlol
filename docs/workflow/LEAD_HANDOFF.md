@@ -1,6 +1,6 @@
 # Lead handoff — read this first
 
-_Last updated: 2026-11-16 (Cairo) by the Lead session. Update it whenever the state below changes._
+_Last updated: 2026-11-18 (Cairo) by the Lead session. Update it whenever the state below changes._
 
 **All state is in the repo.** Agents from earlier sessions can't be messaged; start new ones from their branches. Where this file and the repo disagree, the repo wins.
 
@@ -42,27 +42,95 @@ DONE: T-001…T-007, T-012…T-024, T-025…T-028, T-030, T-032…T-035, T-038�
 
 The PO asked for this progress table in every update.
 
-**Merged batches:** #28, #29, #32–#36 (batch 7), #37 batch 8 (T-041 + T-042, T-051), batch 9 (`batch/2026-11-11-9`: T-021, T-040, T-047, T-077, T-182, T-184 + the batch-review workflow), batch 10 (`batch/2026-11-13-10`: T-023, T-043, T-109, T-132, T-141; first under the cost rules), batch 11 (`batch/2026-11-13-11`: T-048, T-049, T-052, T-119, T-181, T-183), batch 12 (`batch/2026-11-13-12`: T-024, T-052, T-089, T-180, T-185), batch 13 (`batch/2026-11-13-13`: T-078, T-094, T-115, T-154; T-103 pulled out), batch 14 (`batch/2026-11-13-14`: T-076, T-095, T-103, T-144, T-149), batch 15 (`batch/2026-11-13-15`: T-090, T-096, T-097, T-142, T-150, iOS CI retry), batches 16–18 in one PR (#50, `batch/2026-11-14-18`: 38 tasks, sprint mode), batch 19 (#51), batch 20 (#52), batch 21 (#53), batch 22 (#54), batch 23 (#55), batch 24 (#56), batch 25 (#57), batch 26, batch 27 (#59), batch 28 (#60), batch 29 (#61: T-070 BNPL templates, T-186 support endpoints, FU-244 generic FX/fee, design pass 3 with the Android FAB docked, explorer English/dark/x1.3/onboarding/paywall), batch 30 (#62: SMS-auto — confident bank SMS auto-save (PO SMS-AUTO), settlements as transfers, original SMS on review cards, HSBC re-parse via registryVersion bump; budget route black-screen fix; ZHaptics; brand-colour bank avatars), batch 31 (#63: SMS-device — on-device SMS e2e on the emulator (`adb emu sms send`), start-up re-parse of pending rows, regex-sender inbox scan, permission Fix button, SMS-NODIGIT, dev diagnostics; SMS-improve — InstaPay templates for 12 banks, hotline guard, auto-categorization, registryVersion 3; UI-po31 — bank acronyms, Western-digit card numbers, review Keep, charts free), batch 32 (#64: follow-up sweep — backend DB-clock lock + detach checks, registry v4 + parsing minors, re-parse behind the restore gate, UI minors (onboarding pinned actions, paywall timeout, neutral spend colour, Insights copy, narrow shell), explorer3 (review Keep/Edit/Ignore, 12 free charts, diagnostics) and the Keep tap fix), batch 33 (#65: FU-139/131/133/130/141 privacy+data, FU-142/132/136/143 ledger (refund-matching hook, annual budgets), FU-219 due-days setting, dispute freezes from the DB clock, privacy guard regex), batch 34 (#66: CAT-cash — InstaPay and Cash categories, withdrawn-cash pool so cash payments aren't counted twice; FAB-mockup — floating Add button per mockup 20, Home banner order), batch 35 (#67: housekeeping jobs — budget alerts incl. annual, recurring detect/auto-mark/dues/reminders, dangling-links sweep, delete frees links; InstaPay/Cash backfill on old rows; UI minors; 1.3x overflow sweep on every screen; backend FU-228/232 minors), batch 36 (#68: FU triage (81 closed, 4 obsolete, open table by lane), housekeeping throttle/trailing/stop, rollover carry shared by screen and alerts, backend action SHA pins, voice/catalog keywords, copy fixes, FU-138 trusted-time, lint extensions), batch 37 (`batch/2026-11-18-37`: itemised FU triage (213 rows), core/catalog seed upgrade/ReDoS budget (drop patterns never quarantined), riverpod_lint + Spectral npm, native minors, parsing/test/backend minors, core2 17 items, UI 14 items, explorer4 cash/InstaPay e2e). Next free follow-up number: **FU-258**.
+**Merged batches:** #28, #29, #32–#36 (batch 7), #37 batch 8 (T-041 + T-042, T-051), batch 9 (`batch/2026-11-11-9`: T-021, T-040, T-047, T-077, T-182, T-184 + the batch-review workflow), batch 10 (`batch/2026-11-13-10`: T-023, T-043, T-109, T-132, T-141; first under the cost rules), batch 11 (`batch/2026-11-13-11`: T-048, T-049, T-052, T-119, T-181, T-183), batch 12 (`batch/2026-11-13-12`: T-024, T-052, T-089, T-180, T-185), batch 13 (`batch/2026-11-13-13`: T-078, T-094, T-115, T-154; T-103 pulled out), batch 14 (`batch/2026-11-13-14`: T-076, T-095, T-103, T-144, T-149), batch 15 (`batch/2026-11-13-15`: T-090, T-096, T-097, T-142, T-150, iOS CI retry), batches 16–18 in one PR (#50, `batch/2026-11-14-18`: 38 tasks, sprint mode), batch 19 (#51), batch 20 (#52), batch 21 (#53), batch 22 (#54), batch 23 (#55), batch 24 (#56), batch 25 (#57), batch 26, batch 27 (#59), batch 28 (#60), batch 29 (#61: T-070 BNPL templates, T-186 support endpoints, FU-244 generic FX/fee, design pass 3 with the Android FAB docked, explorer English/dark/x1.3/onboarding/paywall), batch 30 (#62: SMS-auto — confident bank SMS auto-save (PO SMS-AUTO), settlements as transfers, original SMS on review cards, HSBC re-parse via registryVersion bump; budget route black-screen fix; ZHaptics; brand-colour bank avatars), batch 31 (#63: SMS-device — on-device SMS e2e on the emulator (`adb emu sms send`), start-up re-parse of pending rows, regex-sender inbox scan, permission Fix button, SMS-NODIGIT, dev diagnostics; SMS-improve — InstaPay templates for 12 banks, hotline guard, auto-categorization, registryVersion 3; UI-po31 — bank acronyms, Western-digit card numbers, review Keep, charts free), batch 32 (#64: follow-up sweep — backend DB-clock lock + detach checks, registry v4 + parsing minors, re-parse behind the restore gate, UI minors (onboarding pinned actions, paywall timeout, neutral spend colour, Insights copy, narrow shell), explorer3 (review Keep/Edit/Ignore, 12 free charts, diagnostics) and the Keep tap fix), batch 33 (#65: FU-139/131/133/130/141 privacy+data, FU-142/132/136/143 ledger (refund-matching hook, annual budgets), FU-219 due-days setting, dispute freezes from the DB clock, privacy guard regex), batch 34 (#66: CAT-cash — InstaPay and Cash categories, withdrawn-cash pool so cash payments aren't counted twice; FAB-mockup — floating Add button per mockup 20, Home banner order), batch 35 (#67: housekeeping jobs — budget alerts incl. annual, recurring detect/auto-mark/dues/reminders, dangling-links sweep, delete frees links; InstaPay/Cash backfill on old rows; UI minors; 1.3x overflow sweep on every screen; backend FU-228/232 minors), batch 36 (#68: FU triage (81 closed, 4 obsolete, open table by lane), housekeeping throttle/trailing/stop, rollover carry shared by screen and alerts, backend action SHA pins, voice/catalog keywords, copy fixes, FU-138 trusted-time, lint extensions), batch 37 (#69: itemised FU triage (213 rows), core/catalog seed upgrade/ReDoS budget (drop patterns never quarantined), riverpod_lint + Spectral npm, native minors, parsing/test/backend minors, core2 17 items, UI 14 items, explorer4 cash/InstaPay e2e). Next free follow-up number: **FU-258**.
 
 **Lessons:** never chain `git commit` after `git merge` in one script without checking for conflicts. Server/cloud restarts happen often: brief agents to commit early and push often; on restart, check worktrees for live processes (`ps`, `/proc/<pid>/cwd`) before relaunching.
 
-## In flight (2026-11-13 Cairo)
+## Session summary (2026-11-15 → 2026-11-18)
 
-1. **Design:** FU-246 done in batch 29 (Android FAB docked in the bottom bar, deviation from mockup 20, PO may prefer floating). Open: Insights copy differs from mockup (ARB edits), small-screen onboarding Start button below the fold, paywall offline state, red chart bars (explorer report). The explorer (`app/integration_test/app_explorer_test.dart`, device-flows workflow) can rerun on any `ci/**` branch.
-2. **T-159 Android OCR:** waiting for the PO's `tesseract4android-4.9.0.aar` (`/home/claude/wt-T159-fix`, unpushed).
-3. **PC runner** silent since 2026-11-11 22:29; optional now (cost rules).
+Batches 26–37 (PRs #58–#69) were driven by the PO's real-phone tests. All CI checks (app-ci, backend-ci, db-platform) were green at each merge. Board progress stayed at 167/186: every remaining board task waits on PO inputs or devices. This session cleared PO feedback and follow-ups.
+
+**PO feedback handled (decisions recorded in `PO_DECISIONS.md` Part 1):**
+- **App defaults:** light theme and Arabic by default. Screens were brought toward the approved mockups in several design passes.
+- **Add button (FAB-MOCKUP):** after a docked-FAB detour in batch 29, it floats as in mockup 20, with tab and Ask-input clearance.
+- **SMS-AUTO:** confident bank SMS auto-save. The rule requires all of these:
+  - a known bank sender;
+  - a clear direction;
+  - an unambiguous amount and currency;
+  - a last-4 or a merchant;
+  - not a duplicate.
+
+  Suspicious messages go to review and show the original text, with a **Keep** button (REVIEW-KEEP). Credit-card settlements are saved as transfers into the card account.
+- **Why the phone read nothing (batch 31):**
+  - Pending rows were never re-parsed at start.
+  - The inbox scan didn't query regex-only senders such as HSBC.
+  - The permission Fix button was dead.
+
+  The on-device SMS e2e (`adb emu sms send` in device-flows) now guards this. The PO can read Settings → About → SMS diagnostics (dev builds only; counts, no bodies).
+- **SMS rules:**
+  - SMS-NODIGIT: messages with no digits are dropped.
+  - OTP drops are global and need a code. Promo, due and statement drops are per bank only.
+  - InstaPay templates exist for 12 banks, from the PO's CIB sample. Hotline numbers (19666) are never amounts.
+  - The generic extractor reads amount, currency, last-4, merchant and date. A foreign amount is taken only after an explicit "original"/"foreign" cue.
+  - Templates guessed without samples are marked `synthetic-unverified`.
+  - registryVersion is now 5; bump it whenever templates change, or pending rows aren't re-parsed.
+- **Categories:**
+  - Auto-categorization covers subscriptions, food delivery, groceries, telecom, fuel and utilities.
+  - CAT-INSTAPAY: InstaPay transfers get the InstaPay category until the user changes it.
+  - CAT-CASH: ATM withdrawals get Cash. Manual cash payments draw from a per-currency withdrawn-cash pool, so they aren't counted twice: cover = min(pool, gross) and spend = net − cover. No category ever shows negative; cover across cycles shows a "paid from cash withdrawn earlier" note.
+  - Old rows were backfilled once, never touching user-set categories.
+- **UI and display:**
+  - BANK-ACRONYM: long Arabic bank names fall back to the English acronym.
+  - CARD-DIGITS: card numbers always use Western digits, LTR.
+  - CHARTS-FREE: all 12 charts are free, behind one switch.
+  - Haptics (`ZHaptics`), brand-colour bank avatars with a logo slot. Real logos need bank permission or a licensed source; see `docs/02-design/brand/LOGOS.md`.
+- **Notifications:**
+  - WEEKLY-FRIDAY: the weekly summary arrives on Friday.
+  - OVERDUE-REMINDERS: the Lead drafted the copy (PO delegated, 2026-11-18). Being built on `task/PO-b38-reminders`.
+
+**Other work:**
+- **Housekeeping jobs:** after ingest and at start/resume. They run:
+  - budget alerts, including annual and rollover with a shared carry;
+  - recurring detect, auto-mark paid, card dues and reminders;
+  - a dangling-links sweep.
+
+  They are throttled, single-flight and yield to the restore gate.
+- **Catalog seed upgrade:** existing installs get new seed rows through INSERT OR IGNORE only.
+- **ReDoS budget:** **drop patterns are never quarantined**. Fail-closed would drop every SMS; skipping them would leak OTPs.
+- **Tooling:** riverpod_lint runs as an analyzer plugin, Spectral via npm ci, backend-ci actions are pinned by SHA, and a 1.3× overflow sweep covers every screen.
+- **FU triage:** `docs/implementation-status.md` has "Open follow-ups by lane" and "Itemised follow-ups (triage 2)". About 100 items need nothing external, mostly UI; the rest need PO, device or hosting.
+
+**Lessons this session:**
+- Check every fix agent's "fail closed" idea against data loss. Batch 37's quarantined drop pattern would have dropped all SMS.
+- Golden tests must pin clocks; the Home greeting depends on the hour.
+- The cash-cover CTE needed `MATERIALIZED`; charts went from 15 s to 15 ms on 10k rows.
+- `adb emu sms send` accepts alphanumeric senders.
+- Explorer "dead tap" reports were often test timing (`ensureVisible` without a pump).
+- db-platform sometimes fails with "Failed to start Dart Development Service" on the emulator. Rerun failed jobs.
+
+## In flight (2026-11-18 Cairo)
+
+1. **`task/PO-b38-reminders`:** weekly summary on Friday and overdue reminders (day+1 and day+3, redacted variant, Mark-as-paid action). Batch 38 after review.
+2. **T-159 Android OCR:** waiting for the PO's `tesseract4android-4.9.0.aar`.
+3. **Remaining FUs:** pick lanes from the itemised table, about 20 not-started UI items from batch 37 first (FU-257).
 
 Next free follow-up number: **FU-258**.
 
-## Ready next (dependencies done)
+## Ready next
 
-- **Ingestion chain (Android):** T-048 catch-up scan (T-043 merged in batch 10) (design note on `task/ingest-notes-combined`; T-043 owns the listener, its intake thread and its manifest entries); T-048 catch-up scan after the PO decides FU-109 M-1 (must restart the scan on `INVALID_ARGUMENT`, implement `CatchUpScheduler`).
-- **App core:** T-052 home read model (needs T-049?), T-079 bulk-edit UI wiring (FU-114), T-113 net worth (needs T-096), T-141 BackendClient (C4), T-142 contribution outbox (C4), T-183 request-binding library (C4), T-149/T-150 backup.
-- **Backend:** T-132 (T-184 done; take FU-112 PO Q1 backfill), T-185 (FU-112 lock order), T-186 (FU-112 184-2); T-181 attestation verifiers (C4); T-140 (hosting); FU-107 M-1 (dead-lettered notification rows never retried → Gold kept) before go-live.
-- **Native/iOS:** T-009 iOS App Intent spike, T-010/T-011 spikes, T-178 / T-180.
-- **Parsing:** bank templates T-036, T-037, T-068–T-072 wait for real SMS samples (OQ-04).
-- **UI:** T-053 ZaghlolAvatar (needs UX dark tokens, FU-047).
-- **Human:** T-058, T-059, T-088.
+All board tasks left (19) wait on PO inputs or devices; see `PO_DECISIONS.md` Part 2:
+- T-008, T-011, T-165, T-172 need devices.
+- T-031, T-156, T-157 need real samples.
+- T-058 needs an Egyptian-Arabic reviewer.
+- T-059 needs the merchant list.
+- T-088 and T-099 need the Rive mascot.
+- T-127 needs a gold price provider.
+- T-136 and T-137 need a staff IdP.
+- T-140 needs hosting.
+- T-159 needs the Tesseract aar.
+- T-175, T-176 and T-177 are release work, after hosting and store accounts.
+
+Meanwhile the Lead clears follow-ups in batches of up to 5 lanes, and the explorer and device tests rerun on the emulator after big changes.
 
 ## Waiting on the PO (Amr)
 
