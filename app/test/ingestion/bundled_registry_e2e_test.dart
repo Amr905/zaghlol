@@ -361,6 +361,24 @@ void main() {
     expect((await w.txns()).single['amount_minor'], 45000);
   });
 
+  test('a CIB withdrawal that says "السحب على" is not dropped as a promo '
+      '(Lead delta check, batch 42)', () {
+    const body =
+        'البنك التجاري الدولي: تم السحب على حسابكم المنتهي بـ 1234 '
+        'بمبلغ 1,500.00 جم من ماكينة الصراف. الرصيد 3000.00 جم';
+    expect(
+      guard.decide(channel: 'sms', source: 'CIB', body: body),
+      isA<GuardKeep>(),
+    );
+    const promo =
+        'بنفكرك إن فاضل 5 أيام على السحب الجاي. اربط شهادة الدهب دلوقتي '
+        'لضمان فرصتك في دخول السحب على كيلو دهب. تطبق الشروط والأحكام.';
+    expect(
+      guard.decide(channel: 'sms', source: 'CIB', body: promo),
+      isA<GuardDrop>(),
+    );
+  });
+
   test(
     'a non-template text from sender EG is a review item, not Arab Bank',
     () async {
