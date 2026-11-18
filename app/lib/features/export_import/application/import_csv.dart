@@ -67,6 +67,12 @@ enum ImportRowProblem {
   badAmount,
   badOriginalAmount,
   unknownAccount,
+
+  /// PDF statements: the running balance does not match (held for review).
+  balanceMismatch,
+
+  /// PDF statements: no sign and no balance says which way the money went.
+  directionUnknown,
 }
 
 /// A validated row ready to store.
@@ -149,7 +155,12 @@ final class ImportSummary {
     required this.invalidRows,
     this.earliest,
     this.latest,
+    this.needsReview = 0,
   });
+
+  /// PDF statements: rows held back for the user to keep, fix or skip. A real
+  /// import refuses to run while a row has no decision.
+  final int needsReview;
 
   /// Data rows in the file (header excluded).
   final int totalRows;

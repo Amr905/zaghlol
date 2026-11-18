@@ -16,13 +16,15 @@ import '../../transactions/data/transactions_providers.dart' show clockProvider;
 import 'capture_providers.dart' show captureRegistryLoaderProvider;
 import 'scan_service.dart';
 
-/// On-device OCR. iOS has the Vision host (T-160); Android answers
-/// NOT_AVAILABLE until its host (T-159) lands, then only this provider
-/// changes.
+/// On-device OCR through the platform host: Vision on iOS (T-160), Tesseract
+/// `ara` plus ML Kit Latin on Android (T-159). Images are sealed in the
+/// host's encrypted spool, deleted after OCR, and nothing is uploaded. Other
+/// platforms (tests, desktop) answer NOT_AVAILABLE.
 final ocrEngineProvider = Provider<OcrEngine>(
-  (ref) => f.defaultTargetPlatform == TargetPlatform.iOS
-      ? PigeonOcrEngine()
-      : const UnavailableOcrEngine(),
+  (ref) => switch (f.defaultTargetPlatform) {
+    TargetPlatform.iOS || TargetPlatform.android => PigeonOcrEngine(),
+    _ => const UnavailableOcrEngine(),
+  },
   name: 'ocrEngineProvider',
 );
 

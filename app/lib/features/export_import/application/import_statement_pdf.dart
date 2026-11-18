@@ -13,6 +13,16 @@
 //    in an exception, summary or `toString`.
 //  * Money is integer minor units in the statement currency; nothing is
 //    converted.
+//  * Scanned PDFs: the extractor passed in may fall back to on-device OCR
+//    (see ScannedPdfTextExtractor); this class only sees positioned text.
+//  * Where the statement prints a running balance, a row that does not add up
+//    to it is never dropped: it is returned for review with the reason, and
+//    the user keeps it, fixes its direction or skips it. The same goes for an
+//    amount with no sign whose direction no balance can tell. A real import
+//    refuses to run while a flagged row has no decision.
+//  * When the statement prints no full date and its dates lack a year, the
+//    year is only a suggestion (today's); a real import needs the user's
+//    confirmed year.
 //
 // Duplicates: a statement row has a day, not an instant, so a row is a
 // duplicate of an existing transaction of the same account when the local
@@ -43,6 +53,21 @@ enum StatementImportFailure {
   badMapping,
   unknownAccount,
   storeFailed,
+
+  /// A flagged row has no valid decision yet.
+  reviewRequired,
+
+  /// The statement has no printed year and the user has not confirmed one.
+  yearNotConfirmed,
+}
+
+/// What the user decided for a flagged row.
+enum StatementReviewChoice {
+  /// Import as parsed. Not allowed when the direction is unknown.
+  keep,
+  asExpense,
+  asIncome,
+  skip,
 }
 
 final class StatementImportException implements Exception {
@@ -88,12 +113,16 @@ class ImportStatementPdfUseCase {
     this._store,
     this._templates, {
     this.onImported,
-  });
+    DateTime Function()? now,
+  }) : _now = now ?? DateTime.now;
 
   final PdfTextExtractor _extractor;
   final CsvImportStore _store;
   final StatementTemplateStore _templates;
   final Future<void> Function(String id)? onImported;
+
+  /// The end of a statement whose dates carry no year.
+  final DateTime Function() _now;
 
   /// Reads [bytes] (zeroed before this returns) and finds the table.
   ///
@@ -122,27 +151,95 @@ class ImportStatementPdfUseCase {
       bytes.fillRange(0, bytes.length, 0);
     }
     final template = await _templates.load(bankKey);
-    final table = buildStatementTable(fragments, template: template);
+    final table = buildStatementTable(
+      fragments,
+      template: template,
+      today: _now(),
+    );
     if (table.rows.every((r) => r.continuation)) {
       throw const StatementImportException(StatementImportFailure.noRows);
     }
     return StatementReading(table: table, template: template, bankKey: bankKey);
   }
 
+  /// True when the user must confirm the year before a real import.
+  static bool needsYear(StatementReading reading) =>
+      reading.table.yearSource == StatementYearSource.today;
+
+  /// Parses the rows for the review step: clean rows, flagged rows (with
+  /// reason) and problems. Nothing is stored. [confirmedYear] is the year of
+  /// the latest dated row when the statement prints none.
+  StatementParseResult parse(
+    StatementReading reading,
+    StatementMapping mapping, {
+    int? confirmedYear,
+  }) {
+    if (!mapping.isValid || mapping.roles.length != reading.table.columnCount) {
+      throw const StatementImportException(StatementImportFailure.badMapping);
+    }
+    final anchor = reading.table.anchorYear;
+    final shift = needsYear(reading) && confirmedYear != null && anchor != null
+        ? confirmedYear - anchor
+        : 0;
+    return parseStatementRows(reading.table, mapping, yearShift: shift);
+  }
+
   /// Parses the rows with [mapping] and stores the new ones on [accountId].
   /// With [dryRun] nothing is written (preview). With [saveTemplate] a
   /// successful real import remembers the layout for this bank.
+  ///
+  /// A real import needs [confirmedYear] when [needsYear] and a decision in
+  /// [decisions] (by row number, see [StatementRow.number]) for every flagged
+  /// row; otherwise it throws `yearNotConfirmed` / `reviewRequired` and
+  /// writes nothing.
   Future<ImportSummary> run(
     StatementReading reading,
     StatementMapping mapping, {
     required String accountId,
     bool dryRun = false,
     bool saveTemplate = true,
+    int? confirmedYear,
+    Map<int, StatementReviewChoice> decisions = const {},
   }) async {
-    if (!mapping.isValid || mapping.roles.length != reading.table.columnCount) {
-      throw const StatementImportException(StatementImportFailure.badMapping);
+    final parsed = parse(reading, mapping, confirmedYear: confirmedYear);
+    if (!dryRun) {
+      if (needsYear(reading) && confirmedYear == null) {
+        throw const StatementImportException(
+          StatementImportFailure.yearNotConfirmed,
+        );
+      }
+      for (final r in parsed.review) {
+        final d = decisions[r.number];
+        if (d == null ||
+            (d == StatementReviewChoice.keep && !r.directionKnown)) {
+          throw const StatementImportException(
+            StatementImportFailure.reviewRequired,
+          );
+        }
+      }
     }
-    final parsed = parseStatementRows(reading.table, mapping);
+    // Decided rows join the clean ones in table order.
+    final accepted = <StatementRow>[...parsed.rows];
+    for (final r in parsed.review) {
+      final d = decisions[r.number];
+      if (d == null || d == StatementReviewChoice.skip) continue;
+      if (d == StatementReviewChoice.keep && !r.directionKnown) continue;
+      accepted.add(
+        StatementRow(
+          date: r.date,
+          description: r.description,
+          isExpense: switch (d) {
+            StatementReviewChoice.asExpense => true,
+            StatementReviewChoice.asIncome => false,
+            _ => r.isExpense,
+          },
+          amount: r.amount,
+          balance: r.balance,
+          number: r.number,
+        ),
+      );
+    }
+    accepted.sort((a, b) => a.number.compareTo(b.number));
     final newIds = <String>[];
     final ImportSummary summary;
     try {
@@ -152,7 +249,7 @@ class ImportStatementPdfUseCase {
             StatementImportFailure.unknownAccount,
           );
         }
-        return _apply(parsed, accountId, dryRun, newIds);
+        return _apply(parsed, accepted, accountId, dryRun, newIds, decisions);
       });
     } on StatementImportException {
       rethrow;
@@ -183,9 +280,11 @@ class ImportStatementPdfUseCase {
 
   Future<ImportSummary> _apply(
     StatementParseResult parsed,
+    List<StatementRow> accepted,
     String accountId,
     bool dryRun,
     List<String> newIds,
+    Map<int, StatementReviewChoice> decisions,
   ) async {
     // Existing rows per local day, read once.
     final existing = <String, Map<String, int>>{};
@@ -194,7 +293,7 @@ class ImportStatementPdfUseCase {
     var duplicates = 0;
     DateTime? earliest;
     DateTime? latest;
-    for (final r in parsed.rows) {
+    for (final r in accepted) {
       final start = DateTime(r.date.year, r.date.month, r.date.day);
       final end = DateTime(r.date.year, r.date.month, r.date.day + 1);
       final noon = DateTime(r.date.year, r.date.month, r.date.day, 12);
@@ -238,6 +337,17 @@ class ImportStatementPdfUseCase {
           : ImportRowProblem.badAmount;
       byProblem.update(mapped, (c) => c + n, ifAbsent: () => n);
     });
+    // Flagged rows without a decision are reported under their own kinds
+    // (a dry run), so the preview can show how many need the user.
+    var pending = 0;
+    for (final r in parsed.review) {
+      if (decisions[r.number] != null) continue;
+      pending++;
+      final kind = r.review == StatementReviewReason.balanceMismatch
+          ? ImportRowProblem.balanceMismatch
+          : ImportRowProblem.directionUnknown;
+      byProblem.update(kind, (c) => c + 1, ifAbsent: () => 1);
+    }
     return ImportSummary(
       totalRows: parsed.totalRows,
       imported: imported,
@@ -247,6 +357,7 @@ class ImportStatementPdfUseCase {
       invalidRows: parsed.invalidRows,
       earliest: earliest,
       latest: latest,
+      needsReview: pending,
     );
   }
 
