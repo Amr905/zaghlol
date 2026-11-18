@@ -47,3 +47,8 @@ Docs only. No wording invented, and the sources are listed. Open point: check wh
 | Task | File:line | Required change | Test to add |
 |---|---|---|---|
 | T-156 | `app/lib/features/export_import/application/import_statement_pdf.dart:253-266` (+ `drift_csv_import_store.dart:52`) | Statement dedupe must ignore `declined`/`reversed` existing rows (count settled statuses only) | Existing declined row with the same day, direction and amount → statement row still imported (`imported == 1, duplicates == 0`) |
+
+## Lead delta check: T-156 dedupe (2026-11-18)
+
+6d180e2d (about 20 production lines): `existingBetween(settledOnly:)` filters `posted`/`pending` through `TxnQuery.statuses`, and only the PDF import turns it on, so CSV import is unchanged. Soft-deleted rows were already excluded by the DAO. New test: declined and reversed rows with the same day, direction and amount → imported 2, duplicates 0; a posted row still blocks. Verdict: T-156 **APPROVED**. All four tasks approved.
+- **FU-261:** batch-41 minors (see the report); T-165 must still be proven on a non-debuggable release-type build (Android 12+ lets adb back up debuggable apps); HSBC's Arabic templates need a decision (HSBC Egypt states its alerts are English only); T-156 waits for real statements, per-bank fixtures and the T-158 flow wiring.
