@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- T-159: dependency verification scoped to the JitPack group (mutable git-tag builds,
+     native code run in-process on decrypted receipt images). Everything else is trusted
+     (Google/Maven Central, covered by their own repository integrity). -->
+<verification-metadata xmlns="https://schema.gradle.org/dependency-verification"
+                       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+                       xsi:schemaLocation="https://schema.gradle.org/dependency-verification https://schema.gradle.org/dependency-verification/dependency-verification-1.3.xsd">
+   <configuration>
+      <verify-metadata>true</verify-metadata>
+      <verify-signatures>false</verify-signatures>
+      <trusted-artifacts>
+         <trust group="^(?!cz\.adaptech\.tesseract4android$).*" regex="true"/>
+      </trusted-artifacts>
+   </configuration>
+   <components>
+   </components>
+</verification-metadata>

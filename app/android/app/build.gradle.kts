@@ -101,6 +101,16 @@ android {
     }
 }
 
+// T-159 (CR-02, BR-SYNC-03): ML Kit pulls in the Google datatransport CCT/firelog
+// backend, which uploads SDK-usage telemetry to Google. Excluded from every
+// configuration. transport-runtime stays (ML Kit's classes link against it);
+// with no backend registered it drops events locally and uploads nothing.
+// app-ci asserts the release runtime classpath stays free of these modules.
+configurations.configureEach {
+    exclude(group = "com.google.android.datatransport", module = "transport-backend-cct")
+    exclude(group = "com.google.firebase", module = "firebase-datatransport")
+}
+
 kotlin {
     compilerOptions {
         jvmTarget = org.jetbrains.kotlin.gradle.dsl.JvmTarget.JVM_17
