@@ -24,10 +24,31 @@ Good: USD salary keeps `USD` (5966 minor, not converted). Hotline 19100 is never
 - Integer minor units and an explicit currency.
 - No re-import of the page-2 by-type/checks tables.
 
+## T-156b (review)
+
+Head `fd8a30b2` (C4: financial import). Production diff read in full. Tests run: `packages/zaghlol_parsing test/statements` 60/60 green, `app test/features/export_import` 96/96 green. PDF sources are still `available: false` in `import_ports.dart`, so no UI can be reached and no strings are hard-coded. The missing l10n keys must be added before the sources are turned on.
+
+**Verdict: CHANGES_REQUESTED**
+
+Correct: the ar/en header synonyms ("Payment Type" is ignored, "Date" beats "Transaction Date"). Total/closing/end-of-transactions lines and undated brought-forward lines are skipped. The Dec→Jan rollover works in both orders. Sections with a different signature (by-type, checks) are dropped, and repeated same-signature sections are dropped at the 80% match. Money is integer `Money`, `parseStatementAmount` strips the currency markers, and `suggestedCurrency` is only a proposal. Scans: text layer first, OCR only on `noText`. The PNG gets a neutral name and is deleted in `finally`. The host seals it and deletes the plain copy. Nothing is logged and there is no network code.
+
+| # | Sev | File:line | Issue | Required change |
+|---|-----|-----------|-------|-----------------|
+| 1 | major (data loss) | `packages/zaghlol_parsing/lib/statements/pdf/statement_rows.dart:401`, `app/lib/features/export_import/application/import_statement_pdf.dart:250` | A row whose balance doesn't reconcile is dropped. It only shows up as an anonymous "bad amount" count. A real transaction is lost without the user noticing. | Keep these rows in the result as flagged rows (`needsReview`, with the parsed amount, direction and printed balance). Pass them to a review step and don't drop them. Give them their own `ImportRowProblem.balanceMismatch` and don't merge it into badAmount. |
+| 2 | major (money direction) | `statement_rows.dart:324,409` | An unsigned amount with no previous balance falls back to `isExpense: false`. This hits the first row when there is no opening balance, and any row after one with no printed balance. Checked: `SHOP A 100.00 / bal 900.00` as the first row is imported as **income** with `balanceChecked=false`. | When `unsigned && derivedExpense == null`, flag the row for review (same path as #1). Never default it to income. |
+| 3 | major (data) | `packages/zaghlol_parsing/lib/statements/pdf/statement_table.dart:586` | If the statement prints no full date anywhere (the scanned sample), the year silently comes from today. An older statement gets the wrong year, and dedupe by day misses the existing rows. Batch-42's first pass already required no silent fallback. | Expose `StatementTable.yearSource` (`printed` / `today`). When it is `today`, the preview asks the user to confirm or change the year before commit, and the use case doesn't commit without that answer. |
+| 4 | major (AC: scans on Android) | `app/lib/features/capture/application/scan_providers.dart:25` | The Android OCR host from T-159 is merged in batch 39, but `ocrEngineProvider` still returns `UnavailableOcrEngine` on Android. Every Android scan fails as `noText`. The note at `T-156.md:59` ("T-159 deferred") is stale. | Return `PigeonOcrEngine()` on Android too (or a platform check that includes Android), and fix the note. Test: the provider gives a Pigeon engine on `TargetPlatform.android`. |
+| 5 | minor | `app/lib/features/export_import/application/statement_pdf_providers.dart` | Production code never uses `statementPdfExtractorProvider` or `ImportStatementPdfUseCase` (there is no `ImportRunner` for PDF). | Wire it up when the PDF sources are turned on (follow-up). |
+| 6 | minor | `statement_table.dart` (group choice) | A no-balance group with more than twice the rows beats the balance table, and then its direction can't be told. | Prefer the balance table whenever it exists, or flag the import (follow-up). |
+| 7 | minor | `app/lib/features/export_import/data/pdfrx_page_rasterizer.dart` | The rendered page is a plain PNG in temp until it is sealed. This matches the existing scan path. | Follow-up: render straight to the sealed spool once the port allows it. |
+
 ## Fix list (blocking)
 
 | Task | File:line | Required change | Test to add |
 |------|-----------|-----------------|-------------|
 | SMS-po42 | `app/assets/registry/institutions/cib.json:21` | Narrow the CIB drop to competition-only phrases. Remove the bare `تطبق الشروط والاحكام`. Regenerate the Guard bases and goldens. | CIB card purchase + T&C footer is inserted (pipeline + e2e + Guard golden keep). |
 | SMS-po42 | `app/assets/registry/institutions/arab_bank.json:32` | `EG` sender: template matches only. Generic results go to review, never auto-saved. | `EG` non-template body with an amount and last-4 gives a review item, 0 transactions. |
-| T-156b | n/a | Branch is empty: build and push it. | n/a |
+| T-156b | `statement_rows.dart:401`, `import_statement_pdf.dart:250` | Balance-mismatch rows go to a review/flag step with their own problem kind. They are never dropped. | Mismatched row is in the result, flagged, and not committed until the user confirms it. |
+| T-156b | `statement_rows.dart:324,409` | An unsigned amount whose direction can't be derived is flagged for review. It never defaults to income. | First row, no opening balance, unsigned 100.00, gives a flagged row and no income. |
+| T-156b | `statement_table.dart:586` | Year from today is exposed (`yearSource`), and the user confirms the year before commit. | Statement with no printed full date: commit is refused until the year is confirmed. |
+| T-156b | `scan_providers.dart:25` | Android uses `PigeonOcrEngine` (T-159 host). Update the note at `T-156.md:59`. | The provider returns a Pigeon engine on Android. |
