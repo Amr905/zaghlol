@@ -27,6 +27,11 @@ internal sealed partial class OperatorAuthStartupCheck(
             LogAdvisory(logger, settings.Profile);
         }
 
+        if (settings.Enabled && problem is null && settings.Profile == OperatorAuthProfile.Google)
+        {
+            LogGoogleMfa(logger);
+        }
+
         if (lenient)
         {
             if (settings.Enabled && problem is not null)
@@ -72,6 +77,11 @@ internal sealed partial class OperatorAuthStartupCheck(
         Level = LogLevel.Warning,
         Message = "Operator auth runs in Advisory mode (profile {Profile}): support_agent and support_lead rely on the IdP's phishing-resistant MFA policy; the API only counts unproven requests (R4-6)")]
     private static partial void LogAdvisory(ILogger logger, OperatorAuthProfile profile);
+
+    [LoggerMessage(
+        Level = LogLevel.Warning,
+        Message = "Operator auth uses the Google profile: ID tokens carry no amr, so MFA is enforced by Google Workspace 2-Step Verification policy only; the API checks the hd domain allow-list")]
+    private static partial void LogGoogleMfa(ILogger logger);
 
     [LoggerMessage(Level = LogLevel.Warning, Message = "Operator auth is enabled but not usable, so every operator call is refused: {Problem}")]
     private static partial void LogDisabled(ILogger logger, string problem);
