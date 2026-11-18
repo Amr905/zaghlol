@@ -1,5 +1,8 @@
 ﻿== SUMMARY ==
-RUNNING sha=55aa1cb11785ea1cdee59c1a0f891d0719995928
+SKIP sha=55aa1cb11785ea1cdee59c1a0f891d0719995928 no app/packages/backend changes
 
 == FULL LOG (last 1500 lines) ==
 auto task/DEVICE-emu 55aa1cb11785ea1cdee59c1a0f891d0719995928 2026-11-18T17:00:28.5874217+02:00
+
+
+
