@@ -39,6 +39,11 @@ export 'chat/ask_types.dart';
 export 'voice/voice_categorizer.dart';
 export 'voice/voice_parser.dart' show parseVoicePhrase;
 export 'voice/voice_types.dart';
+export 'statements/pdf/pdf_text_types.dart';
+export 'statements/pdf/statement_columns.dart';
+export 'statements/pdf/statement_dates.dart';
+export 'statements/pdf/statement_rows.dart';
+export 'statements/pdf/statement_table.dart';
 
 /// Stable, testable package marker.
 const String packageName = 'zaghlol_parsing';
