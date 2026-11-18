@@ -132,7 +132,7 @@ class FakeControls implements CaptureControls {
 
   @override
   Future<ScanProgress>? rescan({
-    required int depthMonths,
+    required int? depthMonths,
     String? institutionCode,
   }) {
     lastDepth = depthMonths;

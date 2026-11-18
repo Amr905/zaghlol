@@ -132,6 +132,15 @@ final class SeatKeyService {
   /// The current install ID when keys may be used; rotates first when the
   /// native own key belongs to another install.
   Future<String?> _prepare() async {
+    // FU-163b: a state-store failure is the same as "no keys".
+    try {
+      return await _prepareUnguarded();
+    } on Exception {
+      return null;
+    }
+  }
+
+  Future<String?> _prepareUnguarded() async {
     if (_platform != ClientPlatform.ios) return null;
     final id = await _installId();
     if (id == null) return null;

@@ -45,6 +45,29 @@ void main() {
 
   group('policy', () {
     final base = DateTime(2026, 3, 10, 9);
+    test('FU-168d a last success in the future is due, not never due', () {
+      final future = base.add(const Duration(days: 30)).millisecondsSinceEpoch;
+      expect(
+        isScheduleDue(
+          mode: BackupScheduleMode.daily,
+          lastSuccessMs: future,
+          now: base,
+        ),
+        isTrue,
+      );
+      // A few seconds of skew is not a clock change.
+      expect(
+        isScheduleDue(
+          mode: BackupScheduleMode.daily,
+          lastSuccessMs: base
+              .add(const Duration(seconds: 5))
+              .millisecondsSinceEpoch,
+          now: base,
+        ),
+        isFalse,
+      );
+    });
+
     test('off is never due; never backed up is due', () {
       expect(
         isScheduleDue(

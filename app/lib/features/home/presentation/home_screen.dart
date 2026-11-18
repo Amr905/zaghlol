@@ -295,11 +295,15 @@ class _HomeBodyState extends ConsumerState<_HomeBody> {
             ZCurrencySwitcher(
               codes: [for (final f in figures) f.currency.code],
               selected: figures[page].currency.code,
-              onSelected: (code) => _pager.animateToPage(
-                figures.indexWhere((f) => f.currency.code == code),
-                duration: ZMotion.standard,
-                curve: ZMotion.curve,
-              ),
+              onSelected: (code) {
+                final i = figures.indexWhere((f) => f.currency.code == code);
+                if (i < 0) return;
+                _pager.animateToPage(
+                  i,
+                  duration: ZMotion.standard,
+                  curve: ZMotion.curve,
+                );
+              },
             ),
             const SizedBox(height: ZSpacing.sm),
             SizedBox(

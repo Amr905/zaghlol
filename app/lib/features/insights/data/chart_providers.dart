@@ -11,5 +11,8 @@ import 'chart_repository.dart';
 final chartRepositoryProvider = FutureProvider<ChartRepository>((ref) async {
   final db = await ref.watch(appDatabaseProvider.future);
   ref.watch(cycleDataVersionProvider);
-  return ChartRepository(db);
+  final repo = ChartRepository(db);
+  final sub = repo.watchEdits();
+  ref.onDispose(sub.cancel);
+  return repo;
 }, name: 'chartRepositoryProvider');

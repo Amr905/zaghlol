@@ -53,6 +53,7 @@ final class ImportCsvException extends SafeException {
   static const String notUtf8 = 'IMPORT_NOT_UTF8';
   static const String malformed = 'IMPORT_MALFORMED_CSV';
   static const String badHeader = 'IMPORT_BAD_HEADER';
+  static const String storeFailed = 'IMPORT_STORE_FAILED';
 }
 
 /// Why a row was not imported.
@@ -181,7 +182,32 @@ class ImportCsvUseCase {
       throw ImportCsvException(ImportCsvException.tooManyRows);
     }
     final newIds = <String>[];
-    final summary = await _store.inWriteTransaction(() async {
+    final ImportSummary summary;
+    try {
+      summary = await _runInTransaction(table, dataRows, dryRun, newIds);
+    } on ImportCsvException {
+      rethrow;
+    } on Exception {
+      // A store or constraint failure: the transaction rolled back; surface
+      // a code only (no row text).
+      throw ImportCsvException(ImportCsvException.storeFailed);
+    }
+    final hook = onImported;
+    if (hook != null) {
+      for (final id in newIds) {
+        await hook(id);
+      }
+    }
+    return summary;
+  }
+
+  Future<ImportSummary> _runInTransaction(
+    List<List<String>> table,
+    int dataRows,
+    bool dryRun,
+    List<String> newIds,
+  ) {
+    return _store.inWriteTransaction(() async {
       final accounts = await _store.accountIds();
       final categories = await _store.categoryIds();
       final problems = <ImportRowProblem, int>{};
@@ -212,7 +238,13 @@ class ImportCsvUseCase {
           _ms(v.occurredAt),
         )) {
           counts.update(
-            _key(e.direction, e.amount, e.merchant),
+            // Stored text may be older or unsanitised: compare as an import
+            // would have stored it.
+            _key(
+              e.direction,
+              e.amount,
+              _text(e.merchant ?? '', importMaxMerchantRunes),
+            ),
             (n) => n + 1,
             ifAbsent: () => 1,
           );
@@ -256,13 +288,6 @@ class ImportCsvUseCase {
         invalidRows: invalidRows,
       );
     });
-    final hook = onImported;
-    if (hook != null) {
-      for (final id in newIds) {
-        await hook(id);
-      }
-    }
-    return summary;
   }
 
   static int _ms(DateTime d) => d.toUtc().millisecondsSinceEpoch;

@@ -51,3 +51,27 @@ Widget topLevelHelper() {
   // expect_lint: no_ui_string_literals
   return const Text('Top level text');
 }
+
+/// FU-031: an allowed `name:` argument must not excuse a widget nested in it.
+class Slot extends StatelessWidget {
+  const Slot({super.key, this.name, this.child});
+
+  final Widget? name;
+  final Widget? child;
+
+  @override
+  Widget build(BuildContext context) => const SizedBox.shrink();
+}
+
+class NestedInAllowedArgument extends StatelessWidget {
+  const NestedInAllowedArgument({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    return const Slot(
+      key: ValueKey('nested'),
+      // expect_lint: no_ui_string_literals
+      name: Text('Nested text'),
+    );
+  }
+}

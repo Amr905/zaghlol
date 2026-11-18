@@ -10,7 +10,13 @@ import 'package:zaghlol/core/backend/backend_failure.dart';
 import 'package:zaghlol/core/backend/generated/api_models.g.dart';
 import 'package:zaghlol/core/backend/ids.dart';
 import 'package:zaghlol/core/db/app_database.dart' hide Settings;
+import 'package:zaghlol/core/db/daos/accounts_dao.dart';
 import 'package:zaghlol/core/db/daos/catalog_dao.dart';
+import 'package:zaghlol/core/db/daos/categories_dao.dart';
+import 'package:zaghlol/core/db/daos/transactions_dao.dart';
+import 'package:zaghlol/features/categorization/data/recategorizer.dart';
+import 'package:zaghlol_parsing/zaghlol_parsing.dart'
+    show CategoryDecision, CategorizeTier, CategorySource;
 import 'package:zaghlol/core/db/daos/outbox_dao.dart';
 import 'package:zaghlol/core/db/daos/settings_dao.dart';
 import 'package:zaghlol/core/flags/feature_flags.dart';
@@ -284,6 +290,81 @@ void main() {
     await make().run();
     expect(backend.requests.single.contributions, isNull);
   });
+
+  test(
+    'FU-161a one contract-breaking row does not drop the good ones',
+    () async {
+      await settings.set(Settings.contributionOptIn, true);
+      await queue('good');
+      await OutboxDao(db).enqueue(
+        id: 'bad',
+        kind: 'contribution',
+        payload: {
+          'merchantNorm': 'x', // too short for the contract
+          'institutionCode': 'nbe',
+          'categoryCode': 'food',
+        },
+        createdAt: base,
+      );
+      backend.script.add(throttled(clock, clock + 5 * hr));
+      await make().run();
+      expect(backend.requests.single.contributions!.length, 1);
+      expect(await outboxCount(), 1); // good kept (throttled), bad dropped
+    },
+  );
+
+  test(
+    'FU-161d a delta recategorization never overrides a user choice',
+    () async {
+      await AccountsDao(db).insert(account('acc1'));
+      for (final (code, sort) in [('food', 1), ('bills', 2)]) {
+        await CategoriesDao(db).upsertSystem(
+          code: code,
+          nameAr: 'ا',
+          nameEn: code,
+          icon: 'i',
+          color: '#0F7A55',
+          bucket: 'needs',
+          sort: sort,
+        );
+      }
+      final dao = TransactionsDao(db);
+      await dao.insert(txn('auto', merchantNorm: 'new'));
+      await dao.insert(
+        txn('mine', merchantNorm: 'new').copyWith(
+          categoryId: const Value('sys:bills'),
+          categorySource: const Value('user'),
+        ),
+      );
+      const decision = CategoryDecision(
+        categoryId: 'sys:food',
+        catalogMerchantId: 1,
+        source: CategorySource.catalog,
+        tier: CategorizeTier.exact,
+      );
+      backend.script.add(
+        effective(serverAt: clock, catalog: delta(1, 2, [merchant(2, 'New')])),
+      );
+      await make(
+        recat: () async {
+          recats++;
+          for (final (id, old) in [('auto', null), ('mine', 'sys:bills')]) {
+            await Recategorizer(db).apply(
+              id: id,
+              oldCategoryId: old,
+              oldCatalogMerchantId: null,
+              decision: decision,
+              at: clock,
+            );
+          }
+        },
+      ).run();
+      expect(recats, 1);
+      expect((await dao.byId('auto'))!.categoryId, 'sys:food');
+      final mine = (await dao.byId('mine'))!;
+      expect((mine.categoryId, mine.categorySource), ('sys:bills', 'user'));
+    },
+  );
 
   test('a malformed queued row is dropped, never sent', () async {
     await settings.set(Settings.contributionOptIn, true);

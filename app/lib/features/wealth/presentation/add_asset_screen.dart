@@ -125,6 +125,10 @@ class _AddAssetScreenState extends ConsumerState<AddAssetScreen> {
     return switch (e) {
       AssetFieldError.type => l10n.wealthAssetErrorType,
       AssetFieldError.name => l10n.commonValidationNameRequired,
+      AssetFieldError.nameTooLong => l10n.commonValidationNameTooLong(
+        maxAssetNameLength,
+        '$maxAssetNameLength',
+      ),
       AssetFieldError.grams => l10n.wealthAssetErrorGrams,
       AssetFieldError.gramsDecimals => l10n.wealthAssetErrorGramsDecimals,
       AssetFieldError.count => l10n.commonValidationAmountRequired,

@@ -36,6 +36,7 @@ enum AssetField {
 enum AssetFieldError {
   type,
   name,
+  nameTooLong,
   grams,
   gramsDecimals,
   count,
@@ -49,6 +50,9 @@ enum AssetFieldError {
 
 /// Highest certificate rate accepted, in percent.
 const int maxRatePercent = 100;
+
+/// Longest asset name accepted, in characters.
+const int maxAssetNameLength = 60;
 
 final class AssetFormInput {
   const AssetFormInput({
@@ -130,9 +134,14 @@ AssetFormResult validateAssetForm(
     });
   }
 
-  Money? money(AssetField field, String text, Currency? currency) {
+  Money? money(
+    AssetField field,
+    String text,
+    Currency? currency, {
+    AssetField currencyField = AssetField.currency,
+  }) {
     if (currency == null) {
-      errors[AssetField.currency] = AssetFieldError.currency;
+      errors[currencyField] = AssetFieldError.currency;
       return null;
     }
     final m = MoneyFormat.parseInput(text, currency);
@@ -178,7 +187,13 @@ AssetFormResult validateAssetForm(
       }
       Money? paid;
       if (f.pricePaid.trim().isNotEmpty) {
-        paid = money(AssetField.pricePaid, f.pricePaid, f.pricePaidCurrency);
+        // The gold form has no currency field: the error goes on the price.
+        paid = money(
+          AssetField.pricePaid,
+          f.pricePaid,
+          f.pricePaidCurrency,
+          currencyField: AssetField.pricePaid,
+        );
       }
       if (errors.isNotEmpty || milli == null) {
         return AssetFormResult.failed(errors);
@@ -196,7 +211,11 @@ AssetFormResult validateAssetForm(
         ),
       );
     case AssetFormType.certificate:
-      if (f.name.trim().isEmpty) errors[AssetField.name] = AssetFieldError.name;
+      if (f.name.trim().isEmpty) {
+        errors[AssetField.name] = AssetFieldError.name;
+      } else if (f.name.trim().length > maxAssetNameLength) {
+        errors[AssetField.name] = AssetFieldError.nameTooLong;
+      }
       final principal = money(AssetField.amount, f.amount, f.currency);
       final bp = parseRateBp(f.rate);
       if (bp == null) errors[AssetField.rate] = AssetFieldError.rate;
@@ -227,6 +246,8 @@ AssetFormResult validateAssetForm(
       final nameMissing = !cash && f.name.trim().isEmpty;
       if (nameMissing) {
         errors[AssetField.name] = AssetFieldError.name;
+      } else if (!cash && f.name.trim().length > maxAssetNameLength) {
+        errors[AssetField.name] = AssetFieldError.nameTooLong;
       }
       final value = money(AssetField.amount, f.amount, f.currency);
       if (errors.isNotEmpty) return AssetFormResult.failed(errors);

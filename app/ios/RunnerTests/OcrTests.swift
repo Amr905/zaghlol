@@ -259,6 +259,21 @@ final class OcrTests: XCTestCase {
     XCTAssertEqual(back, bytes)
   }
 
+  func testSealImageThroughASymlinkDeletesThePlainFileItself() throws {
+    let fm = FileManager.default
+    let base = fm.temporaryDirectory.appendingPathComponent(UUID().uuidString, isDirectory: true)
+    let plainDir = base.appendingPathComponent("plain", isDirectory: true)
+    try fm.createDirectory(at: plainDir, withIntermediateDirectories: true)
+    defer { try? fm.removeItem(at: base) }
+    let real = plainDir.appendingPathComponent("real.jpg")
+    try Data((0..<64).map { UInt8($0) }).write(to: real)
+    let link = plainDir.appendingPathComponent("link.jpg")
+    try fm.createSymbolicLink(at: link, withDestinationURL: real)
+    let host = sealHost(key: Data(repeating: 7, count: 32), home: base.appendingPathComponent("files"), plain: plainDir)
+    _ = try host.sealImageNow(plainPath: link.path)
+    XCTAssertFalse(fm.fileExists(atPath: real.path), "the plain image behind the link is deleted")
+  }
+
   func testSealImageWithoutKeyIsNotAvailableAndStillDeletesThePlainFile() throws {
     let fm = FileManager.default
     let base = fm.temporaryDirectory.appendingPathComponent(UUID().uuidString, isDirectory: true)
@@ -284,5 +299,25 @@ final class OcrTests: XCTestCase {
     let host = sealHost(key: Data(repeating: 7, count: 32), home: base.appendingPathComponent("f"), plain: allowed)
     XCTAssertThrowsError(try host.sealImageNow(plainPath: file.path))
     XCTAssertTrue(fm.fileExists(atPath: file.path), "a file outside the roots is never deleted")
+  }
+
+  func testSealImageSymlinkToOutsideTheRootsKeepsTheTargetAndThrowsIoError() throws {
+    let fm = FileManager.default
+    let base = fm.temporaryDirectory.appendingPathComponent(UUID().uuidString, isDirectory: true)
+    let other = base.appendingPathComponent("other", isDirectory: true)
+    let allowed = base.appendingPathComponent("allowed", isDirectory: true)
+    try fm.createDirectory(at: other, withIntermediateDirectories: true)
+    try fm.createDirectory(at: allowed, withIntermediateDirectories: true)
+    defer { try? fm.removeItem(at: base) }
+    let target = other.appendingPathComponent("db.sqlite")
+    try Data(repeating: 1, count: 40).write(to: target)
+    let link = allowed.appendingPathComponent("link.jpg")
+    try fm.createSymbolicLink(at: link, withDestinationURL: target)
+    let host = sealHost(key: Data(repeating: 7, count: 32), home: base.appendingPathComponent("f"), plain: allowed)
+    XCTAssertThrowsError(try host.sealImageNow(plainPath: link.path)) { error in
+      XCTAssertEqual((error as? OcrApiError)?.code, "IO_ERROR")
+    }
+    XCTAssertTrue(fm.fileExists(atPath: target.path), "the target outside the roots is kept")
+    XCTAssertNil(try? fm.destinationOfSymbolicLink(atPath: link.path), "only the link inside the roots is removed")
   }
 }

@@ -44,9 +44,9 @@ abstract interface class CaptureControls {
 
   /// Re-scans the SMS inbox for [depthMonths] (FR-CAP-07); one institution
   /// when [institutionCode] is given. Null when the inbox cannot be scanned
-  /// on this device.
+  /// on this device. A null [depthMonths] keeps the saved scan depth.
   Future<ScanProgress>? rescan({
-    required int depthMonths,
+    required int? depthMonths,
     String? institutionCode,
   });
 
@@ -97,13 +97,13 @@ final class ServiceCaptureControls implements CaptureControls {
 
   @override
   Future<ScanProgress>? rescan({
-    required int depthMonths,
+    required int? depthMonths,
     String? institutionCode,
   }) {
     final s = scanService;
     if (s == null) return null;
     return () async {
-      await _saveDepth(depthMonths);
+      if (depthMonths != null) await _saveDepth(depthMonths);
       return institutionCode == null
           ? await s.startFirstRun()
           : await s.rescanInstitution(institutionCode);

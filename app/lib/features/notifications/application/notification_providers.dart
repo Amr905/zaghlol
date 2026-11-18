@@ -358,6 +358,9 @@ final weeklySummaryRunProvider = Provider<Future<bool> Function()>((ref) {
               weeklySummaryInterval.inMilliseconds) {
         return false;
       }
+      // The category names are read when the alert is built: rebuild it so a
+      // rename since the last run shows.
+      ref.invalidate(weeklySummaryAlertProvider);
       final alert = await ref.read(weeklySummaryAlertProvider.future);
       final zone = ref.read(localZoneProvider);
       await alert.run(localToday(now.millisecondsSinceEpoch, zone));

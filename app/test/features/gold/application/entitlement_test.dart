@@ -478,6 +478,29 @@ void main() {
       expect(await h.service.refreshIfDue(), isFalse);
     });
 
+    test('FU-256: refresh with a token and no record is tampered', () async {
+      final h = Harness(boot: 1);
+      await h.online(h.token(entClaims(iatMs: t0)));
+      h.store.values.remove(trustedTimeStateKey);
+      h.backend.onGet = (n) async =>
+          throw BackendFailure(BackendFailureKind.offline);
+      // Young token, but tampered: the refresh is due and the call is made.
+      await expectLater(
+        h.service.refreshIfDue(),
+        throwsA(isA<BackendFailure>()),
+      );
+      expect((await h.state()).tampered, isTrue);
+    });
+
+    test(
+      'FU-256: refresh on a fresh install (no token) is not tampered',
+      () async {
+        final h = Harness(boot: 1);
+        expect(await h.service.refreshIfDue(), isFalse);
+        expect((await h.state()).tampered, isFalse);
+      },
+    );
+
     test('tampered state refreshes even when the token is young', () async {
       final h = Harness(boot: 1);
       await h.online(h.token(entClaims(iatMs: t0)));

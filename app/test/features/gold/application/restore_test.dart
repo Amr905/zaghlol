@@ -230,6 +230,17 @@ void main() {
     expect(r.h.sink.phases.where((p) => p == EntitlementPhase.active), isEmpty);
   });
 
+  test(
+    'FU-165c a proof of the wrong kind is attestation help, not a crash',
+    () async {
+      final r = _Rig();
+      r.host.type = 'app_attest'; // Android asked, iOS-shaped proof came back
+      r.ok();
+      expect(await r.service.restore(), isA<RestoreAttestationHelp>());
+      expect(r.backend.restores, isEmpty);
+    },
+  );
+
   group('attestation retries', () {
     test('AC: DEVICE_ATTESTATION_FAILED -> exactly one retry (Android: fresh '
         'token), then help', () async {

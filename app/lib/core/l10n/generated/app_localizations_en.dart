@@ -494,6 +494,17 @@ class AppLocalizationsEn extends AppLocalizations {
   String get commonValidationLast4 => 'Enter the last four digits';
 
   @override
+  String commonValidationNameTooLong(int count, String n) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: 'Keep the name to $n characters',
+      one: 'Keep the name to 1 character',
+    );
+    return '$_temp0';
+  }
+
+  @override
   String get commonValidationNameRequired => 'Enter a name';
 
   @override
@@ -4104,7 +4115,7 @@ class AppLocalizationsEn extends AppLocalizations {
       other: 'I understood $n items',
       one: 'I understood 1 item',
     );
-    return '$_temp0';
+    return '$_temp0 👌';
   }
 
   @override
@@ -4586,6 +4597,11 @@ class AppLocalizationsEn extends AppLocalizations {
   @override
   String zakahMainLotCertificate(String amount) {
     return 'Bank certificates: $amount';
+  }
+
+  @override
+  String zakahMainLotCoin(String title, String amount) {
+    return '$title · $amount';
   }
 
   @override

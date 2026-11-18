@@ -82,7 +82,10 @@ final class IoBackendTransport implements BackendTransport {
   }) : _client = client ?? HttpClient() {
     _client
       ..connectionTimeout = connectTimeout
-      ..autoUncompress = true;
+      ..autoUncompress = true
+      // dart:io would add "User-Agent: Dart/x (dart:io)"; the wire carries
+      // only the headers BR-SYNC-03 lists (FU-208a).
+      ..userAgent = null;
   }
 
   final HttpClient _client;

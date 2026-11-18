@@ -148,7 +148,23 @@ class _AndroidSetupState extends ConsumerState<AndroidSetupScreen>
       if (mounted) setState(() => _progress = p);
     });
     if (start) {
-      unawaited(scan.start().then<void>((_) {}, onError: (Object _) {}));
+      unawaited(
+        scan.start().then<void>(
+          (_) {},
+          onError: (Object _) {
+            // Stop the spinner; the count so far stays.
+            if (mounted) {
+              setState(
+                () => _progress = ScanProgress(
+                  phase: ScanPhase.failed,
+                  imported: _progress.imported,
+                  scanned: _progress.scanned,
+                ),
+              );
+            }
+          },
+        ),
+      );
     }
   }
 
@@ -553,8 +569,9 @@ class _AndroidSetupState extends ConsumerState<AndroidSetupScreen>
       label: l.commonActionContinue,
       expand: true,
       onPressed: () {
+        // Same contract as the header Skip: onSkipped navigates when given.
         widget.onSkipped?.call(kSetupStepSms);
-        widget.onDone();
+        if (widget.onSkipped == null) widget.onDone();
       },
     ),
   ]);

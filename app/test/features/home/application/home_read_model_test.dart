@@ -7,6 +7,8 @@ import 'package:drift/drift.dart' show Value;
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:zaghlol/core/db/app_database.dart' hide Settings;
+import 'package:zaghlol/core/settings/settings_keys.dart';
+import 'package:zaghlol/core/settings/settings_providers.dart';
 import 'package:zaghlol/core/db/app_database_providers.dart';
 import 'package:zaghlol/features/budget/application/budget_providers.dart';
 import 'package:zaghlol/features/budget/application/cycle_app_wiring.dart';
@@ -265,5 +267,29 @@ void main() {
       expect(closedKey, closed.key);
       expect(container.read(todayProvider), CivilDate(2026, 11, 11));
     });
+
+    test(
+      'FU-126: the first resume sweeps from the persisted foreground time',
+      () async {
+        await container.read(cycleAppWiringProvider.future);
+        final settings = await container.read(
+          settingsRepositoryProvider.future,
+        );
+        final closed = (await container.read(paydayScheduleProvider.future))
+            .cycleOn(CivilDate(2026, 10, 10));
+        final repo = await container.read(cycleRepositoryProvider.future);
+        await add('old', amount: 100, when: at(2026, 10, 10), updatedAt: 1000);
+        expect((await repo.totals(closed))[egp]!.spend.minor, 100);
+        await add('mid', amount: 800, when: at(2026, 10, 10), updatedAt: 2000);
+        // The previous process was in the foreground after 'mid' was written.
+        await settings.set(Settings.lastForegroundMs, 3000);
+        await container.read(cycleResumeHandlerProvider).onResume();
+        expect((await repo.totals(closed))[egp]!.spend.minor, 100); // not swept
+        expect(
+          await settings.get(Settings.lastForegroundMs),
+          now.millisecondsSinceEpoch,
+        );
+      },
+    );
   });
 }

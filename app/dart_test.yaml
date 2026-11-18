@@ -10,6 +10,9 @@ tags:
   benchmark:
     # One rerun on a timing miss (CI load), then the budget holds.
     retry: 1
+  # FU-209c: benchmarks that db-platform already gates; app-ci's perf job skips
+  # them (`--tags 'benchmark && !db-platform'`).
+  db-platform:
 # T-173: every timing assertion in app/ and packages/ carries this tag. Normal
 # runs use `--exclude-tags golden,benchmark`; app-ci's `perf` job runs
 # `--tags benchmark` serially.

@@ -1,6 +1,9 @@
 // T-021: writes diagnostic events into the `diag_log` ring buffer (7 days or
 // 2000 rows). Diagnostics must never crash the app, so [record] never throws.
 
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+
+import '../db/app_database_providers.dart';
 import '../db/daos/misc_daos.dart' show DiagLevel, DiagLogDao;
 import 'diag_event.dart';
 
@@ -71,3 +74,9 @@ class DiagLogger {
     }
   }
 }
+
+/// FU-113: the app's diag logger over the encrypted database.
+final diagLoggerProvider = FutureProvider<DiagLogger>((ref) async {
+  final db = await ref.watch(appDatabaseProvider.future);
+  return DiagLogger(DiagLogDaoStore(DiagLogDao(db)));
+}, name: 'diagLoggerProvider');

@@ -90,6 +90,23 @@ class CycleCacheInvalidator {
         .get();
     add(links, 'eat', 'eoff');
     add(links, 'sat', 'soff');
+    // FU-110: an edited (or deleted) row that is already linked moves its
+    // counterpart's cycle too: a refund edited this week changes the cycle
+    // of the expense it offsets (BR-XFR-07).
+    final linked = await _db
+        .customSelect(
+          'SELECT e.occurred_at AS eat, e.occurred_tz_offset_min AS eoff, '
+          's.occurred_at AS sat, s.occurred_tz_offset_min AS soff '
+          'FROM offset_links l '
+          'JOIN transactions e ON e.id = l.expense_txn_id '
+          'JOIN transactions s ON s.id = l.source_txn_id '
+          'WHERE e.updated_at > ? OR s.updated_at > ?',
+          variables: [since, since],
+          readsFrom: {_db.offsetLinks, _db.transactions},
+        )
+        .get();
+    add(linked, 'eat', 'eoff');
+    add(linked, 'sat', 'soff');
     return _drop(keys);
   }
 }

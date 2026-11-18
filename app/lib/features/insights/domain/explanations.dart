@@ -253,21 +253,6 @@ String needsDataFor(ChartId chart, NotEnoughReason reason) {
   };
 }
 
-/// Category codes that tips never target (PO Q-25). The caller may pass its
-/// own set (catalog ids); this is the seed default.
-const Set<String> defaultEssentialCategoryIds = {
-  'rent',
-  'bills',
-  'utilities',
-  'groceries',
-  'health',
-  'education',
-  'fees',
-  'debt',
-  'installments',
-  'transport_work',
-};
-
 /// What the engine needs besides the chart's own result.
 final class ExplainContext {
   ExplainContext({
@@ -296,7 +281,9 @@ final class ExplainContext {
   final Money? totalSpend;
 
   bool isEssential(String? id) =>
-      id != null && essentialCategoryIds.contains(id);
+      id != null &&
+      (essentialCategoryIds.contains(id) ||
+          essentialCategoryIds.contains(categoryCode(id)));
 }
 
 // ------------------------------------------------------------------ inputs

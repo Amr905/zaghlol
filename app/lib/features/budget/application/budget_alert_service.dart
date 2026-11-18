@@ -50,9 +50,13 @@ final class BudgetAlertService {
     Map<Currency, CycleTotals> totals, {
     Map<String, Money> carries = const {},
     ({Map<Currency, CycleTotals> totals, String key})? year,
+    bool Function()? shouldStop,
   }) async {
     final out = <AlertOutcome>[];
     for (final spec in specs) {
+      // FU-256: a restore asked for the gate; the dedupe makes a later run
+      // pick up the rest.
+      if (shouldStop?.call() ?? false) break;
       if (spec.annual && year == null) continue;
       final periodKey = spec.annual ? year!.key : cycle.key;
       final p = evaluateBudget(

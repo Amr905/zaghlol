@@ -385,57 +385,65 @@ class _BillRow extends ConsumerWidget {
               children: [
                 Row(
                   children: [
-                    SizedBox(
-                      width: 56,
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Text(
-                            day,
-                            style: ZType.title.copyWith(
-                              color: overdue ? c.dangerText : c.text,
-                              fontWeight: FontWeight.w700,
+                    // The row's Semantics label says it all (FU-217a): the visual
+                    // pieces stay out of the tree so it reads once.
+                    ExcludeSemantics(
+                      child: SizedBox(
+                        width: 56,
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(
+                              day,
+                              style: ZType.title.copyWith(
+                                color: overdue ? c.dangerText : c.text,
+                                fontWeight: FontWeight.w700,
+                              ),
                             ),
-                          ),
-                          Text(
-                            month,
-                            style: ZType.caption.copyWith(color: c.textMuted),
-                          ),
-                        ],
+                            Text(
+                              month,
+                              style: ZType.caption.copyWith(color: c.textMuted),
+                            ),
+                          ],
+                        ),
                       ),
                     ),
                     Expanded(
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Text(
-                            title,
-                            style: ZType.titleSmall.copyWith(
-                              color: c.text,
-                              fontWeight: FontWeight.w500,
-                            ),
-                          ),
-                          if (sub.isNotEmpty)
+                      child: ExcludeSemantics(
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
                             Text(
-                              sub,
-                              style: ZType.caption.copyWith(
-                                color: overdue ? c.dangerText : c.textMuted,
+                              title,
+                              style: ZType.titleSmall.copyWith(
+                                color: c.text,
+                                fontWeight: FontWeight.w500,
                               ),
                             ),
-                        ],
+                            if (sub.isNotEmpty)
+                              Text(
+                                sub,
+                                style: ZType.caption.copyWith(
+                                  color: overdue ? c.dangerText : c.textMuted,
+                                ),
+                              ),
+                          ],
+                        ),
                       ),
                     ),
                     const SizedBox(width: ZSpacing.sm),
-                    ConstrainedBox(
-                      constraints: const BoxConstraints(maxWidth: 120),
-                      child: FittedBox(
-                        fit: BoxFit.scaleDown,
-                        alignment: AlignmentDirectional.centerEnd,
-                        child: Text(
-                          amount,
-                          style: ZType.titleSmall.copyWith(
-                            color: c.text,
-                            fontWeight: FontWeight.w600,
+                    ExcludeSemantics(
+                      child: ConstrainedBox(
+                        constraints: const BoxConstraints(maxWidth: 120),
+                        child: FittedBox(
+                          fit: BoxFit.scaleDown,
+                          alignment: AlignmentDirectional.centerEnd,
+                          child: Text(
+                            amount,
+                            style: ZType.titleSmall.copyWith(
+                              color: c.text,
+                              fontWeight: FontWeight.w600,
+                            ),
                           ),
                         ),
                       ),

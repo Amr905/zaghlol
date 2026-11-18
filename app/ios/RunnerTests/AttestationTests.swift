@@ -310,6 +310,14 @@ final class AttestationTests: XCTestCase {
     var item: Data?
     var copyStatus: OSStatus?
     var adds: [[String: Any]] = []
+    var updateStatus: OSStatus?
+    var deletes = 0
+    func update(_ query: [String: Any], _ attributes: [String: Any]) -> OSStatus {
+      if let s = updateStatus { return s }
+      guard item != nil else { return errSecItemNotFound }
+      item = attributes[kSecValueData as String] as? Data
+      return errSecSuccess
+    }
     func copyMatching(_ query: [String: Any]) -> (OSStatus, Data?) {
       if let s = copyStatus { return (s, nil) }
       return item.map { (errSecSuccess, $0) } ?? (errSecItemNotFound, nil)
@@ -320,6 +328,7 @@ final class AttestationTests: XCTestCase {
       return errSecSuccess
     }
     func delete(_ query: [String: Any]) -> OSStatus {
+      deletes += 1
       if item == nil { return errSecItemNotFound }
       item = nil
       return errSecSuccess
@@ -354,6 +363,19 @@ final class AttestationTests: XCTestCase {
       kc.copyStatus = s
       XCTAssertEqual(store.read(), .unavailable, "status \(s)")
     }
+  }
+
+  /// FU-162a: a failed in-place update keeps the old key ID and never deletes.
+  func testReplaceNeverDeletesTheOldKeyId() {
+    let kc = FakeKeychain()
+    let store = KeychainAttestKeyIdStore(client: kc, accessGroup: nil)
+    XCTAssertTrue(store.replace("key-a"))
+    kc.updateStatus = errSecInteractionNotAllowed
+    XCTAssertFalse(store.replace("key-b"))
+    kc.updateStatus = nil
+    XCTAssertEqual(store.read(), .found("key-a"))
+    XCTAssertEqual(kc.deletes, 0)
+    XCTAssertEqual(kc.adds.count, 1)
   }
 
   func testRealKeychainItemAttributes() throws {

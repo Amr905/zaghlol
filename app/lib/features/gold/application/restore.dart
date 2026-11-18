@@ -213,7 +213,7 @@ final class RestoreService {
               purchaseToken: p.reference,
             ),
         ],
-        attestation: PlayIntegrityProof(token: proof.token!),
+        attestation: PlayIntegrityProof(token: _need(proof.token)),
       );
       req.toJson(); // validates before anything is sent
       return _Sent(req, hadAttestationObject: false);
@@ -232,8 +232,8 @@ final class RestoreService {
     final req = PurchaseRestoreIosRequest(
       signedTransactions: [for (final p in items) p.reference],
       attestation: AppAttestProof(
-        keyId: proof.keyId!,
-        assertion: proof.assertion!,
+        keyId: _need(proof.keyId),
+        assertion: _need(proof.assertion),
         attestationObject: proof.attestationObject,
         seatKeys: sigs.isEmpty
             ? null
@@ -290,6 +290,15 @@ final class RestoreService {
       case PurchaseStatus.unknown:
         return const RestoreTryLater();
     }
+  }
+
+  /// A proof of the wrong kind for this platform: fail closed, never a
+  /// null-assertion crash.
+  static String _need(String? v) {
+    if (v == null || v.isEmpty) {
+      throw const AttestationException(AttestationFailure.unavailable);
+    }
+    return v;
   }
 
   RestoreOutcome _attestationFailure(AttestationException e) =>

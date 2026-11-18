@@ -82,6 +82,15 @@ class ChartRepository {
 
   int get memoSize => _memo.length;
 
+  /// Drops the memo when categories or accounts are edited (names, buckets,
+  /// archive state): those edits raise no TransactionsChanged. The caller
+  /// cancels the subscription when the repository goes away.
+  StreamSubscription<void> watchEdits() => _db
+      .tableUpdates(
+        TableUpdateQuery.onAllTables([_db.categories, _db.accounts]),
+      )
+      .listen((_) => invalidate());
+
   /// Results that read tables whose changes do not raise
   /// TransactionsChanged (budgets, recurring items, snapshots): cheap
   /// queries, never memoized, so they cannot go stale.

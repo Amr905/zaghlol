@@ -2,6 +2,8 @@
 // toString() of an error are never read, except that a SafeException's
 // constant code is kept (its contract: no user data).
 
+import 'dart:async';
+
 import 'package:flutter/foundation.dart';
 import 'package:zaghlol_domain/zaghlol_domain.dart' show SafeException;
 
@@ -23,14 +25,36 @@ DiagEvent diagEventForError(DiagCode base, Object error) => DiagEvent(
 /// Replaces `FlutterError.onError`, `PlatformDispatcher.onError` and
 /// `debugPrint` so that errors reach the diag log as codes and nothing else
 /// reaches logcat. Call once per isolate, after the logger is ready.
-void installDiagErrorHandlers(DiagLogger logger) {
+///
+/// [debugPassThrough] (FU-113 21-4): in a debug build the framework's own
+/// error report and `debugPrint` stay on, so developers still see errors; the
+/// code is recorded either way. Release builds pass false (the default).
+///
+/// Building the event can never throw out of a handler (21-3): a failure
+/// there drops the record, not the app.
+void installDiagErrorHandlers(
+  DiagLogger logger, {
+  bool debugPassThrough = false,
+}) {
+  void record(DiagCode base, Object error) {
+    try {
+      unawaited(logger.record(diagEventForError(base, error)));
+    } on Object {
+      // A diagnostic must not crash the app; nothing of the error is kept.
+    }
+  }
+
   FlutterError.onError = (details) {
     // The exception object is only inspected for being a SafeException.
-    logger.record(diagEventForError(DiagCodes.flutterError, details.exception));
+    record(DiagCodes.flutterError, details.exception);
+    if (debugPassThrough) FlutterError.dumpErrorToConsole(details);
   };
   PlatformDispatcher.instance.onError = (error, _) {
-    logger.record(diagEventForError(DiagCodes.uncaughtError, error));
-    return true;
+    record(DiagCodes.uncaughtError, error);
+    // false in debug: the engine still reports it.
+    return !debugPassThrough;
   };
-  debugPrint = (String? message, {int? wrapWidth}) {};
+  if (!debugPassThrough) {
+    debugPrint = (String? message, {int? wrapWidth}) {};
+  }
 }

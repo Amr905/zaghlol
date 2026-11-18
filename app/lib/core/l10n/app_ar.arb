@@ -592,6 +592,18 @@
   "@commonValidationLast4": {
     "description": "S"
   },
+  "commonValidationNameTooLong": "{count, plural, =1{خلّي الاسم حرف واحد بس} =2{خلّي الاسم حرفين بس} few{خلّي الاسم {n} حروف بس} many{خلّي الاسم {n} حرف بس} other{خلّي الاسم {n} حرف بس}}",
+  "@commonValidationNameTooLong": {
+    "description": "Name field is over the length cap.",
+    "placeholders": {
+      "count": {
+        "type": "int"
+      },
+      "n": {
+        "type": "String"
+      }
+    }
+  },
   "commonValidationNameRequired": "اكتب اسم",
   "@commonValidationNameRequired": {
     "description": "S"
@@ -5684,7 +5696,7 @@
   "@voiceLoggerUnderstanding": {
     "description": "L · up to 2 s (NFR-PERF-05), Rive thinking"
   },
-  "voiceLoggerParsedTitle": "{count, plural, =1{فهمت حاجة واحدة} =2{فهمت حاجتين} few{فهمت {n} حاجات} many{فهمت {n} حاجة} other{فهمت {n} حاجة}}",
+  "voiceLoggerParsedTitle": "{count, plural, =1{فهمت حاجة واحدة} =2{فهمت حاجتين} few{فهمت {n} حاجات} many{فهمت {n} حاجة} other{فهمت {n} حاجة}} 👌",
   "@voiceLoggerParsedTitle": {
     "description": "T · count:int, n",
     "placeholders": {
@@ -6374,6 +6386,18 @@
   "@zakahMainLotCertificate": {
     "description": "L",
     "placeholders": {
+      "amount": {
+        "type": "String"
+      }
+    }
+  },
+  "zakahMainLotCoin": "{title} · {amount}",
+  "@zakahMainLotCoin": {
+    "description": "Gold coin lot row: title and amount; order follows the locale.",
+    "placeholders": {
+      "title": {
+        "type": "String"
+      },
       "amount": {
         "type": "String"
       }

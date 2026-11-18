@@ -48,6 +48,9 @@ class PaydayScheduleStore {
     final reconciled = stored.withChange(_today, day);
     await _invalidateCycles?.call();
     await _settings.set(Settings.paydayEras, reconciled);
+    // FU-110: a reader woken by the write may have cached rows computed
+    // under the old schedule; drop them again.
+    await _invalidateCycles?.call();
     return reconciled;
   }
 
@@ -68,6 +71,9 @@ class PaydayScheduleStore {
     await _invalidateCycles?.call();
     await _settings.set(Settings.paydayEras, next);
     await _settings.set(Settings.paydayDay, day);
+    // FU-110: a reader woken by the write above may have cached rows computed
+    // under the old schedule between the first invalidation and now.
+    await _invalidateCycles?.call();
     return next;
   }
 }

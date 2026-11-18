@@ -233,6 +233,14 @@ abstract final class Settings {
     BackupDestinationPref.values,
     byDefault: BackupDestinationPref.none,
   );
+
+  /// FU-126: when the app last came to the foreground (epoch ms UTC), so the
+  /// first resume of a process sweeps from there, not from 0.
+  static final lastForegroundMs = SettingKey.optionalInteger(
+    'cycle.last_foreground',
+    min: 0,
+    max: 999999999999999,
+  );
   static final backupLastSuccess = SettingKey.optionalInteger(
     'backup.last_success',
     min: 0,

@@ -115,7 +115,10 @@ final widgetBridgeWiringProvider = Provider<void>((ref) {
   // Read here, not in the timer, so a missing override shows as a provider
   // error instead of an uncaught timer exception.
   final copy = ref.watch(widgetCopyProvider(lang));
-  final timer = Timer(widgetPublishDebounce, () {
+  // FU-206a: the masked snapshot goes out at once when the app locks (the
+  // app may be suspended a moment later); other changes are debounced.
+  final delay = lockOn && locked ? Duration.zero : widgetPublishDebounce;
+  final timer = Timer(delay, () {
     final snapshot = buildWidgetSnapshot(
       WidgetSnapshotInput(
         overview: overview.value,

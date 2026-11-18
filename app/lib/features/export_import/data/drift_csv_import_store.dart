@@ -49,14 +49,26 @@ class DriftCsvImportStore implements CsvImportStore {
     String accountId,
     int occurredAtMs,
   ) async {
-    final rows = await _txns.list(
-      TxnQuery(
-        from: occurredAtMs,
-        to: occurredAtMs + 1,
-        accountIds: {accountId},
-      ),
-      limit: 500,
-    );
+    // Page through every row at this instant (the DAO caps one page).
+    final rows = <TransactionRow>[];
+    int? afterAt;
+    String? afterId;
+    while (true) {
+      final page = await _txns.list(
+        TxnQuery(
+          from: occurredAtMs,
+          to: occurredAtMs + 1,
+          accountIds: {accountId},
+        ),
+        limit: maxSearchLimit,
+        afterOccurredAt: afterAt,
+        afterId: afterId,
+      );
+      rows.addAll(page);
+      if (page.length < maxSearchLimit) break;
+      afterAt = page.last.occurredAt;
+      afterId = page.last.id;
+    }
     return [
       for (final r in rows)
         ExistingTxnKey(

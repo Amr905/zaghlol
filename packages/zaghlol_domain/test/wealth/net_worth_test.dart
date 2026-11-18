@@ -12,6 +12,15 @@ void main() {
       ? GoldPrice(price: Money(egp, 480000), stale: true)
       : null;
 
+  test('FU-149c isGold is an explicit symbol set', () {
+    for (final k in [24, 22, 21, 18]) {
+      expect(GoldSymbols.isGold(GoldSymbols.forKarat(k)!), isTrue);
+    }
+    expect(GoldSymbols.isGold(GoldSymbols.coin), isTrue);
+    expect(GoldSymbols.isGold('XAUUSD'), isFalse);
+    expect(GoldSymbols.isGold('EGP'), isFalse);
+  });
+
   group('gold valuation', () {
     test('AC: 24 g of 21K is valued at the current 21K price', () {
       final w = computeNetWorth(

@@ -1,12 +1,14 @@
 // WIRE-2 (T-100): the notification service, duplicate check, weekly summary
 // and backup sink wired over an in-memory database. Synthetic data only.
 
+import 'package:drift/drift.dart' show Value;
 import 'package:drift/native.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:zaghlol/core/db/app_database.dart' hide Settings;
 import 'package:zaghlol/core/db/app_database_providers.dart';
 import 'package:zaghlol/core/db/daos/accounts_dao.dart';
+import 'package:zaghlol/core/db/daos/categories_dao.dart';
 import 'package:zaghlol/core/db/daos/settings_dao.dart';
 import 'package:zaghlol/core/db/daos/transactions_dao.dart';
 import 'package:zaghlol/core/settings/settings_keys.dart';
@@ -171,4 +173,39 @@ void main() {
     await c.read(weeklySummaryRunProvider)();
     expect(gw.shown.where((n) => n.payload == '/insights'), hasLength(1));
   });
+
+  test(
+    'FU-204d weekly summary shows a category renamed since the last run',
+    () async {
+      Future<void> rename(String name) => db.customStatement(
+        'UPDATE categories SET name_ar = ?, name_en = ? WHERE id = ?',
+        [name, name, 'sys:food'],
+      );
+      await CategoriesDao(db).upsertSystem(
+        code: 'food',
+        nameAr: 'OldName',
+        nameEn: 'OldName',
+        icon: 'i',
+        color: '#0F7A55',
+        bucket: 'needs',
+        sort: 1,
+      );
+      Future<void> spend(String id, DateTime at) => TransactionsDao(db).insert(
+        txn(
+          id,
+          amountMinor: 50000,
+          merchantNorm: 'x',
+          occurredAt: at.millisecondsSinceEpoch,
+        ).copyWith(categoryId: const Value('sys:food')),
+      );
+      await spend('w1', now.subtract(const Duration(days: 2)));
+      await c.read(weeklySummaryRunProvider)();
+      expect(gw.shown.last.body, contains('OldName'));
+      await rename('NewName');
+      now = now.add(const Duration(days: 8));
+      await spend('w2', now.subtract(const Duration(days: 1)));
+      await c.read(weeklySummaryRunProvider)();
+      expect(gw.shown.last.body, contains('NewName'));
+    },
+  );
 }

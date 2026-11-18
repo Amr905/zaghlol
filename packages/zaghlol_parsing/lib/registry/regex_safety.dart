@@ -12,6 +12,66 @@ const int maxUnboundedWildcards = 6;
 /// the pattern is flagged (`(\d+,){1,3}` is fine, `(a+){1,50}` is not).
 const int maxBoundedRepeat = 3;
 
+/// Time one regex match may take before its pattern is quarantined.
+const Duration regexMatchBudget = Duration(milliseconds: 50);
+
+/// Over-budget runs a regex may have before it is quarantined (a single GC
+/// pause must not disable a template).
+const int quarantineStrikes = 3;
+
+final Expando<bool> _slowRegex = Expando<bool>('slowRegex');
+final Expando<int> _slowRuns = Expando<int>('slowRuns');
+
+/// Whether [regex] was quarantined for exceeding [regexMatchBudget].
+bool isRegexQuarantined(RegExp regex) => _slowRegex[regex] ?? false;
+
+/// Clears quarantine state for [regex]; tests only.
+void resetRegexQuarantineForTesting(RegExp regex) {
+  _slowRegex[regex] = false;
+  _slowRuns[regex] = 0;
+}
+
+/// `regex.firstMatch(text)` under a time budget (FU-074, ReDoS). Dart can not
+/// interrupt a running match, so the budget is enforced after the fact: a
+/// match that took longer than [budget] quarantines that regex object, and
+/// every later call returns null at once (the template is skipped, a drop
+/// pattern stops dropping) instead of repeating the stall. The first stall is
+/// bounded only by the body cap (`maxParseBodyLength`), the pattern length
+/// cap and [backtrackingProblems], which the registry lint and the custom
+/// template validation apply. Deterministic for a given pattern and input
+/// class; the clock decides only which call is the first to trip.
+RegExpMatch? budgetedFirstMatch(
+  RegExp regex,
+  String text, {
+  Duration budget = regexMatchBudget,
+}) {
+  if (isRegexQuarantined(regex)) return null;
+  final watch = Stopwatch()..start();
+  final m = regex.firstMatch(text);
+  if (watch.elapsed > budget) {
+    final n = (_slowRuns[regex] ?? 0) + 1;
+    _slowRuns[regex] = n;
+    if (n >= quarantineStrikes) _slowRegex[regex] = true;
+  }
+  return m;
+}
+
+/// [budgetedFirstMatch] as a boolean.
+///
+/// A [dropPattern] is never quarantined: it always runs as a plain match.
+/// Skipping it would let OTPs through; treating it as matching would drop
+/// every message. Drop patterns are short and registry_lint rejects
+/// backtracking-prone ones (batch-37 review + Lead delta check).
+bool budgetedHasMatch(
+  RegExp regex,
+  String text, {
+  Duration budget = regexMatchBudget,
+  bool dropPattern = false,
+}) {
+  if (dropPattern) return regex.hasMatch(text);
+  return budgetedFirstMatch(regex, text, budget: budget) != null;
+}
+
 /// Compiles a registry pattern, or returns null when it is not valid.
 ///
 /// Dart's `RegExp` has no inline flags, so a single leading `(?i)` is
@@ -71,9 +131,11 @@ CompiledPattern? compilePattern(String source, {bool guardBound = false}) {
 /// - `too_many_wildcards`: more than [maxUnboundedWildcards] unbounded `.`;
 /// - `too_long`.
 ///
-/// Overlap that is not a literal prefix (`(\w|\d)+`) is not detected, and
-/// the runtime guard of the fixture runner only measures, it can not stop a
-/// running match.
+/// Overlapping single-character alternatives in a repeating group
+/// (`(\w|\d)+`, `(.|\s)*`, `([a-z]|[a-f])+`) count as
+/// `ambiguous_alternation` too (checked on a character sample). Overlap
+/// between longer alternatives is not detected; at run time
+/// [budgetedFirstMatch] quarantines a pattern that stalls.
 List<String> backtrackingProblems(String source) {
   final problems = <String>{};
   if (source.length > maxPatternLength) {
@@ -280,6 +342,12 @@ final class _Group {
           seen.contains(a.substring(0, a.length - 1))) {
         ambiguousAlternatives = true;
       }
+      // Single-character alternatives that accept a common character.
+      for (final b in texts) {
+        if (a != b && _singleCharsOverlap(a, b)) {
+          ambiguousAlternatives = true;
+        }
+      }
       // One alternative is the start of another (`a|aa`).
       for (final b in texts) {
         if (a.isNotEmpty && b.length > a.length && b.startsWith(a)) {
@@ -287,5 +355,28 @@ final class _Group {
         }
       }
     }
+  }
+}
+
+final RegExp _singleAtom = RegExp(
+  r'^(?:\\[\s\S]|\[(?:\\[\s\S]|[^\]\\])*\]|[^\\\[\](){}*+?|^$])$',
+);
+
+final List<String> _sampleChars = [
+  for (var c = 0x09; c <= 0x7e; c++)
+    if (c >= 0x20 || c == 0x09 || c == 0x0a) String.fromCharCode(c),
+  '\u0627',
+  '\u0661',
+  '\u00e9',
+];
+
+bool _singleCharsOverlap(String a, String b) {
+  if (!_singleAtom.hasMatch(a) || !_singleAtom.hasMatch(b)) return false;
+  try {
+    final ra = RegExp('^(?:$a)\$');
+    final rb = RegExp('^(?:$b)\$');
+    return _sampleChars.any((c) => ra.hasMatch(c) && rb.hasMatch(c));
+  } on FormatException {
+    return false;
   }
 }

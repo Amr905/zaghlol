@@ -393,13 +393,16 @@ class SyncOrchestrator {
           await dao.deleteIds([r.id]); // never sendable
           continue;
         }
-        contributions.add(
-          ContributionInput(
-            merchantNorm: m['merchantNorm']!,
-            institutionCode: m['institutionCode']!,
-            categoryCode: m['categoryCode']!,
-          ),
+        final item = ContributionInput(
+          merchantNorm: m['merchantNorm']!,
+          institutionCode: m['institutionCode']!,
+          categoryCode: m['categoryCode']!,
         );
+        if (!_valid(item.toJson)) {
+          await dao.deleteIds([r.id]); // only this row is bad
+          continue;
+        }
+        contributions.add(item);
         sent.add(_Sent(r.id));
       }
     }
@@ -423,13 +426,16 @@ class SyncOrchestrator {
         await dao.deleteIds([r.id]);
         continue;
       }
-      banks.add(
-        BankRequestInput(
-          institutionName: m['institutionName']!,
-          country: m['country']!,
-          channel: channel,
-        ),
+      final item = BankRequestInput(
+        institutionName: m['institutionName']!,
+        country: m['country']!,
+        channel: channel,
       );
+      if (!_valid(item.toJson)) {
+        await dao.deleteIds([r.id]); // only this row is bad
+        continue;
+      }
+      banks.add(item);
       sent.add(_Sent(r.id));
     }
 
@@ -451,6 +457,15 @@ class SyncOrchestrator {
       throw SyncException(SyncException.badRequest);
     }
     return request;
+  }
+
+  static bool _valid(void Function() check) {
+    try {
+      check();
+      return true;
+    } on SafeException {
+      return false;
+    }
   }
 
   static Map<String, String>? _payload(String json, Set<String> keys) {

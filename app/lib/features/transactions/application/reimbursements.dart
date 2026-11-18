@@ -182,8 +182,13 @@ class Reimbursements {
   /// the name (the schema's `ON DELETE SET NULL`).
   Future<void> removeParticipant(String participantId) async {
     if (participantId.isEmpty) _invalid();
-    final n = await _guard(() => _parts.deleteById(participantId));
-    if (n != 1) _notFound();
+    await _guard(
+      () => _txns.inTransaction(() async {
+        final p = await _participant(participantId);
+        await _expense(p.expenseTxnId);
+        if (await _parts.deleteById(participantId) != 1) _notFound();
+      }),
+    );
   }
 
   /// Per participant: what they still owe (FR-XFR-05), in expense order.
@@ -356,7 +361,8 @@ class Reimbursements {
         if (row == null) _notFound();
         final rows = await _db
             .customSelect(
-              'SELECT id, amount_minor, created_at FROM offset_links '
+              'SELECT id, amount_minor, created_at, expense_txn_id, '
+              'source_txn_id FROM offset_links '
               'WHERE expense_txn_id = ?1 OR source_txn_id = ?1',
               variables: [Variable.withString(txnId)],
               readsFrom: {_db.offsetLinks},
@@ -372,7 +378,16 @@ class Reimbursements {
         ]);
         TransactionsChanged? ev;
         if (drop.isNotEmpty) {
-          ev = await _eventFor(schedule, [txnId]);
+          // Both ends of every dropped link: the counterpart's cycle moves too.
+          final dropped = drop.toSet();
+          ev = await _eventFor(schedule, [
+            txnId,
+            for (final r in rows)
+              if (dropped.contains(r.read<String>('id'))) ...[
+                r.read<String>('expense_txn_id'),
+                r.read<String>('source_txn_id'),
+              ],
+          ]);
           for (final id in drop) {
             if (await _links.deleteById(id) != 1) _notFound();
           }

@@ -10,6 +10,7 @@ import 'dart:async';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:zaghlol_domain/zaghlol_domain.dart';
 
+import '../../../core/settings/settings_keys.dart';
 import '../../../core/settings/settings_providers.dart';
 import '../../transactions/data/transactions_providers.dart' show clockProvider;
 import 'budget_providers.dart';
@@ -70,15 +71,23 @@ class CycleResumeHandler {
   /// App resume: re-reads the local day, then drops every cycle touched
   /// since the last foreground (the headless engine's writes, edits, links)
   /// and tells readers to recompute. The first call of a process has no
-  /// previous foreground time and sweeps from 0 (correct, not cached).
+  /// previous foreground time in memory, so it reads the persisted one
+  /// (FU-126; a restore or a clock set back gives a value in the future,
+  /// which counts as unknown and sweeps from 0, correct if slower).
   Future<void> onResume() async {
     _ref.read(todayProvider.notifier).reevaluate();
     final now = _ref.read(clockProvider)().toUtc().millisecondsSinceEpoch;
-    final since = _lastForegroundMs ?? 0;
+    final settings = await _ref.read(settingsRepositoryProvider.future);
+    var since = _lastForegroundMs;
+    if (since == null) {
+      final saved = await settings.get(Settings.lastForegroundMs);
+      since = saved != null && saved <= now ? saved : 0;
+    }
     final invalidator = await _ref.read(cycleCacheInvalidatorProvider.future);
     final schedule = await _ref.read(paydayScheduleProvider.future);
     await invalidator.sweepSince(since, schedule);
     _lastForegroundMs = now;
+    await settings.set(Settings.lastForegroundMs, now);
     _ref.read(cycleDataVersionProvider.notifier).bump();
   }
 }

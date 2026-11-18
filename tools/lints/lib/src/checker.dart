@@ -299,12 +299,13 @@ class _RuleVisitor extends RecursiveAstVisitor<void> {
           parent is FunctionExpression) {
         return false;
       }
-      if (parent is NamedExpression &&
-          allowedNamedArguments.contains(parent.name.label.name)) {
-        return true;
+      // FU-031: stop at the first argument boundary. A literal nested in
+      // `Text('x')` inside an allowed `name:` argument is still user-facing.
+      if (parent is NamedExpression) {
+        return allowedNamedArguments.contains(parent.name.label.name);
       }
-      if (parent is ArgumentList && allowedCallees.contains(_callee(parent))) {
-        return true;
+      if (parent is ArgumentList) {
+        return allowedCallees.contains(_callee(parent));
       }
       if (parent is ThrowExpression ||
           parent is AssertStatement ||

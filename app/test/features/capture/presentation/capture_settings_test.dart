@@ -155,6 +155,7 @@ void main() {
     await t.tap(find.byKey(const Key('rescan-offer-yes')));
     await t.pumpAndSettle();
     expect(c.lastScanInstitution, 'cib');
+    expect(c.lastDepth, isNull, reason: 'keeps the saved scan depth');
   });
 
   testWidgets('declining the re-scan offer scans nothing', (t) async {

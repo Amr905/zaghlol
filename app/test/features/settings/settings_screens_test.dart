@@ -1,3 +1,4 @@
+// ignore_for_file: avoid_public_notifier_properties (test fakes record calls in public fields)
 import 'package:flutter/material.dart';
 import 'package:zaghlol/features/gold/presentation/gold_ui_ports.dart'
     show GoldLink, goldLinkOpenerProvider;
