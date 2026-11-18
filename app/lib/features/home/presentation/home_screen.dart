@@ -22,6 +22,7 @@ import '../../capture/presentation/ios_setup_nudge.dart';
 import '../../mascot/presentation/zaghlol_avatar.dart';
 import '../application/card_filter.dart';
 import '../application/home_read_model.dart';
+import '../../mascot/presentation/mascot_moments.dart';
 import 'cards/home_cards_view.dart';
 import 'home_format.dart';
 import 'home_widgets.dart';
@@ -135,7 +136,7 @@ class HomeScreen extends ConsumerWidget {
       color: c.bg,
       child: SafeArea(
         bottom: false,
-        child: RefreshIndicator(
+        child: MascotRefresh(
           onRefresh: () async => ref.refresh(homeModelProvider.future),
           child: CustomScrollView(
             key: const ValueKey('home-scroll'),
